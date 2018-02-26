@@ -208,8 +208,9 @@ begin
   try
     try
       Query.SQL.Clear;
-      Query.SQL.Text:='SELECT DISTINCT CONTACT, ESTATEMENTS, TELEPHONE FROM tbl_Addressbook WHERE CUID = :uParam0';
-      Query.Parameters.ParamByName('uParam0').Value:=DataHandler.CUID;
+      Query.SQL.Text:='SELECT DISTINCT CONTACT, ESTATEMENTS, TELEPHONE FROM tbl_Addressbook WHERE CUID = ' + QuotedStr(DataHandler.CUID);
+//      Query.SQL.Text:='SELECT DISTINCT CONTACT, ESTATEMENTS, TELEPHONE FROM tbl_Addressbook WHERE CUID = :uParam0';
+//      Query.Parameters.ParamByName('uParam0').Value:=DataHandler.CUID;
       Query.Open;
       if Query.RecordCount > 0 then
       begin
@@ -222,11 +223,11 @@ begin
     end;
 
     { ---------------------------------------------------------------------------------------------------------------------------------------- DAILY COMMENTS }
-
+(*
     try
       Query.SQL.Clear;
-      Query.SQL.Text:='SELECT AGEDATE, STAMP, FIXCOMMENT FROM tbl_daily WHERE CUID = :uParam0';
-      Query.Parameters.ParamByName('uParam0').Value:=DataHandler.CUID;
+      Query.SQL.Text:='SELECT AGEDATE, STAMP, FIXCOMMENT FROM tbl_daily WHERE CUID = ' + QuotedStr(DataHandler.CUID);
+//      Query.Parameters.ParamByName('uParam0').Value:=DataHandler.CUID;
       Query.Open;
       if Query.RecordCount > 0 then
       begin
@@ -244,9 +245,9 @@ begin
       ActionsForm.HistoryGrid.MSort(2, 0, False);
       Query.Close;
     end;
+*)
 
 
-(*
       DailyComment:=TDaily.Create;
       try
         { PREPARE FOR QUERY }
@@ -267,13 +268,13 @@ begin
         DailyComment.Free;
         //ActionsForm.HistoryGrid.MSort(2, 0, False);
       end;
-*)
+
 
     { --------------------------------------------------------------------------------------------------------------------------------------- GENERAL COMMENT }
     try
       Query.SQL.Clear;
-      Query.SQL.Text:='SELECT FIXCOMMENT FROM tbl_general WHERE CUID = :uParam0';
-      Query.Parameters.ParamByName('uParam0').Value:=DataHandler.CUID;
+      Query.SQL.Text:='SELECT FIXCOMMENT FROM tbl_general WHERE CUID = ' + QuotedStr(DataHandler.CUID);
+//      Query.Parameters.ParamByName('uParam0').Value:=DataHandler.CUID;
       Query.Open;
       { WE SHOULD HAVE ALWAYS ONE FIELD }
       if Query.RecordCount = 1 then ActionsForm.GeneralCom.Text:=MainForm.OleGetStr(Query.Recordset.Fields[0].Value);
@@ -751,10 +752,10 @@ end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------- SHOW DATA WHEN SELECTED }
 procedure TActionsForm.HistoryGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
-//var
-//  DailyComment: TDaily;
+var
+  DailyComment: TDaily;
 begin
-(*
+
   DailyComment:=TDaily.Create;
   try
     DailyComment.idThd  :=MainThreadID;
@@ -767,16 +768,16 @@ begin
   finally
     DailyComment.Free;
   end;
-*)
+
 end;
 
 { --------------------------------------------------------------- ! KEYBOARD EVENTS ! ----------------------------------------------------------------------- }
 
 { ----------------------------------------------------------------------------------------------------------------------------------- SAVE COMMENT ON <ENTER> }
 procedure TActionsForm.DailyComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-//var
-//  DailyComment: TDaily;
-//  MSSQL:        TMSSQL;
+var
+  DailyComment: TDaily;
+  MSSQL:        TMSSQL;
 begin
   { NEW LINE }
   if (Key = VK_RETURN) and (Shift=[ssALT]) then
@@ -786,7 +787,7 @@ begin
   end;
   { SAVE TO DB }
   if (Key = VK_RETURN) then
-(*
+
     if ( (DailyCom.Text <> '') and (DailyCom.Text <> ' ') ) then
     begin
       DailyComment:=TDaily.Create;
@@ -819,13 +820,13 @@ begin
       end;
     end
       else StatusBar.SimpleText:='Cannot save empty comment.';
-*)
+
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------- SAVE COMMENT ON <ENTER> }
 procedure TActionsForm.GeneralComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-//var
-//  GeneralComment: TGeneral;
+var
+  GeneralComment: TGeneral;
 begin
   { NEW LINE }
   if (Key = VK_RETURN) and (Shift=[ssALT]) then
@@ -835,7 +836,7 @@ begin
   end;
   { SAVE TO DB }
   if (Key = VK_RETURN) then
-(*
+
     if ( (GeneralCom.Text <> '') and (GeneralCom.Text <> ' ') ) then
     begin
       GeneralComment:=TGeneral.Create;
@@ -858,7 +859,7 @@ begin
     begin
       StatusBar.SimpleText:='Cannot save empty comment.';
     end;
-*)
+
 end;
 
 { --------------------------------------------------------------------------------------------------------------------- COPY STRING GRID CONTENT TO CLIPBOARD }

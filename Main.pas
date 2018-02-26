@@ -1013,7 +1013,7 @@ begin
       { DEBUG LINE }
       (* DebugMsg(IntToStr(Msg.LParam)); *)
       { LOG TIME IN SECONDS IN DATABASE }
-(*
+
       if Msg.LParam > 0 then
       begin
         DailyComment:=TDaily.Create;
@@ -1032,7 +1032,7 @@ begin
           DailyComment.Free;
         end;
       end;
-*)
+
   end;
   { --------------------------------------------------------------------------------------------------------------- CLOSE UNITY WHEN WINDOWS IS SHUTTING DOWN }
 
@@ -1856,10 +1856,11 @@ begin
   Query:=TADOQuery.Create(nil);
   Query.Connection:=Database.ADOConnect;
   try
-    StrSQL:='SELECT ACCESS_LEVEL, ACCESS_MODE FROM tbl_UAC WHERE USERNAME = :uParam1';
+    //StrSQL:='SELECT ACCESS_LEVEL, ACCESS_MODE FROM tbl_UAC WHERE USERNAME = :uParam1';
+    StrSQL:='SELECT ACCESS_LEVEL, ACCESS_MODE FROM tbl_UAC WHERE USERNAME = ' + QuotedStr(UpperCase(Settings.WinUserName));
     Query.SQL.Clear;
     Query.SQL.Add(StrSQL);
-    Query.Parameters.ParamByName('uParam1').Value:=UpperCase(Settings.WinUserName);
+    //Query.Parameters.ParamByName('uParam1').Value:=UpperCase(Settings.WinUserName);
     Query.Open;
     { TABLE 'TBL_UAC' SHOULD ALWAYS HOLDS DISTINC USERNAMES }
     { THEREFORE WE HAVE ONLY ONE ROW PER USER               }
@@ -2163,28 +2164,30 @@ end;
 { --------------------------------------------------------------------------------------------------------------------- LOG INVOICE WITH INVOICE TRACKER LIST }
 procedure AddInvoiceToList(var CUID: string; InvoiceNumber: string; ReminderNumber: integer);
 var
-  Stamp:   TDateTime;
+  //Stamp:   TDateTime;
+  Stamp:   string;
   Query:   TADOQuery;
   StrSQL:  string;
   Return:  integer;
 begin
     { -------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-    Stamp:=Now;
+    Stamp:=DateTimeToStr(Now);
     Query:=TADOQuery.Create(nil);
     Query.Connection:=Database.ADOConnect;
     try
       { ------------------------------------------------------------------------------------------------------------------------------- LOG TO 'TBL_INVOICES' }
       Query.SQL.Clear;
       StrSQL:='INSERT INTO tbl_invoices (SK, CUID, INVOICENO, INVOICESTATE, STAMP) ' +
-              'VALUES ( (SELECT ID FROM tbl_tracker WHERE CUID = ' + CUID + '), ' + CUID + ', ' + InvoiceNumber + ', ' + IntToStr(ReminderNumber) + ', :uParam )';
+              'VALUES ( (SELECT ID FROM tbl_tracker WHERE CUID = ' + QuotedStr(CUID) + '), ' + QuotedStr(CUID) + ', ' + QuotedStr(InvoiceNumber) + ', ' + QuotedStr(IntToStr(ReminderNumber)) + ', ' + QuotedStr(Stamp) + ' )';
       Query.SQL.Text:=StrSQL;
-      Query.Parameters.ParamByName('uParam').Value:=Stamp;
+      //Query.Parameters.ParamByName('uParam').Value:=Stamp;
       Query.ExecSQL;
       { ---------------------------------------------------------------------------------------------------------------------------------- LOG TO 'TBL_DAILY' }
       Query.SQL.Clear;
-      StrSQL:='SELECT EMAIL FROM tbl_daily WHERE CUID = ' + CUID + ' AND AGEDATE = :uParam';
+      StrSQL:='SELECT EMAIL FROM tbl_daily WHERE CUID = ' + QuotedStr(CUID) + ' AND AGEDATE = ' + QuotedStr(MainForm.GroupListDates.Text);
+      //StrSQL:='SELECT EMAIL FROM tbl_daily WHERE CUID = ' + CUID + ' AND AGEDATE = :uParam';
       Query.SQL.Text:=StrSQL;
-      Query.Parameters.ParamByName('uParam').Value:=StrToDate(MainForm.GroupListDates.Text);
+      //Query.Parameters.ParamByName('uParam').Value:=StrToDate(MainForm.GroupListDates.Text);
       Query.Open;
       { ------------------------------------------------------------------------------------------------------------------------------------- UPDATE EXISTING }
       if Query.RecordCount = 1 then
@@ -2196,12 +2199,12 @@ begin
         Query.Close;
         { MAKE NEW SQL }
         Query.SQL.Clear;
-        StrSQL:='UPDATE tbl_daily SET EMAIL = ' + IntToStr(Return) +
-                ' WHERE CUID = '                + CUID +
-                ' AND GROUP_ID = '              + Database.ArrGroupList[MainForm.GroupListBox.ItemIndex, 0] +
-                ' AND AGEDATE = :uParam';
+        StrSQL:='UPDATE tbl_daily SET EMAIL = ' + QuotedStr(IntToStr(Return)) +
+                ' WHERE CUID = '                + QuotedStr(CUID) +
+                ' AND GROUP_ID = '              + QuotedStr(Database.ArrGroupList[MainForm.GroupListBox.ItemIndex, 0]) +
+                ' AND AGEDATE = '               + QuotedStr(MainForm.GroupListDates.Text);
         Query.SQL.Text:=StrSQL;
-        Query.Parameters.ParamByName('uParam').Value:=StrToDate(MainForm.GroupListDates.Text);
+//        Query.Parameters.ParamByName('uParam').Value:=StrToDate(MainForm.GroupListDates.Text);
         Query.ExecSQL;
       end else
         { -------------------------------------------------------------------------------------------------------------------------------- LOG EMAIL REMINDER }
@@ -2210,15 +2213,22 @@ begin
           Query.Close;
           Query.SQL.Clear;
           { MAKE NEW SQL }
-          StrSQL:='INSERT INTO tbl_daily (GROUP_ID, CUID, AGEDATE, STAMP, USER_ALIAS, EMAIL) VALUES (:uParam1, :uParam2, :uParam3, :uParam4, :uParam5, :uParam6)';
+//          StrSQL:='INSERT INTO tbl_daily (GROUP_ID, CUID, AGEDATE, STAMP, USER_ALIAS, EMAIL) VALUES (:uParam1, :uParam2, :uParam3, :uParam4, :uParam5, :uParam6)';
+          StrSQL:='INSERT INTO tbl_daily (GROUP_ID, CUID, AGEDATE, STAMP, USER_ALIAS, EMAIL) VALUES ('
+                       + QuotedStr(Database.ArrGroupList[MainForm.GroupListBox.ItemIndex, 0]) + ', '
+                       + QuotedStr(CUID) + ', '
+                       + QuotedStr(MainForm.GroupListDates.Text) + ', '
+                       + QuotedStr(Stamp) + ', '
+                       + QuotedStr(UpperCase(Settings.WinUserName)) + ', '
+                       + QuotedStr('1') + ')';
           Query.SQL.Text:=StrSQL;
           { APPLY PARAMETERS }
-          Query.Parameters.ParamByName('uParam1').Value:=Database.ArrGroupList[MainForm.GroupListBox.ItemIndex, 0];
-          Query.Parameters.ParamByName('uParam2').Value:=CUID;
-          Query.Parameters.ParamByName('uParam3').Value:=StrToDate(MainForm.GroupListDates.Text);
-          Query.Parameters.ParamByName('uParam4').Value:=Stamp;
-          Query.Parameters.ParamByName('uParam5').Value:=UpperCase(Settings.WinUserName);
-          Query.Parameters.ParamByName('uParam6').Value:='1';
+//          Query.Parameters.ParamByName('uParam1').Value:=Database.ArrGroupList[MainForm.GroupListBox.ItemIndex, 0];
+//          Query.Parameters.ParamByName('uParam2').Value:=CUID;
+//          Query.Parameters.ParamByName('uParam3').Value:=StrToDate(MainForm.GroupListDates.Text);
+//          Query.Parameters.ParamByName('uParam4').Value:=Stamp;
+//          Query.Parameters.ParamByName('uParam5').Value:=UpperCase(Settings.WinUserName);
+//          Query.Parameters.ParamByName('uParam6').Value:='1';
           Query.ExecSQL;
         end;
     finally
@@ -2236,15 +2246,17 @@ begin
   Result:=False;
   Query:=TADOQuery.Create(nil);
   Query.Connection:=Database.ADOConnect;
-  if SearchState = 0 then StrSQL:='SELECT INVOICESTATE FROM tbl_invoices WHERE INVOICENO = :uParam1'
+  if SearchState = 0 then StrSQL:='SELECT INVOICESTATE FROM tbl_invoices WHERE INVOICENO = ' + QuotedStr(InvNum)
+//  if SearchState = 0 then StrSQL:='SELECT INVOICESTATE FROM tbl_invoices WHERE INVOICENO = :uParam1'
     else
-      StrSQL:='SELECT INVOICESTATE FROM tbl_invoices WHERE INVOICENO = :uParam1 AND INVOICESTATE = :uParam2';
+      StrSQL:='SELECT INVOICESTATE FROM tbl_invoices WHERE INVOICENO = :uParam1 AND INVOICESTATE = ' + QuotedStr(IntToStr(SearchState));
+//      StrSQL:='SELECT INVOICESTATE FROM tbl_invoices WHERE INVOICENO = :uParam1 AND INVOICESTATE = :uParam2';
   try
     { EXCUTE }
     Query.SQL.Clear;
     Query.SQL.Add(StrSQL);
-    Query.Parameters.ParamByName('uParam1').Value:=InvNum;
-    if not SearchState = 0 then Query.Parameters.ParamByName('uParam2').Value:=SearchState;
+//    Query.Parameters.ParamByName('uParam1').Value:=InvNum;
+//    if not SearchState = 0 then Query.Parameters.ParamByName('uParam2').Value:=SearchState;
     Query.Open;
     if Query.RecordCount = 0  then Result:=False;
     if SearchState = 0 then
@@ -2417,7 +2429,8 @@ var
   iCNT:      integer;
   jCNT:      integer;
   { CURRENT DATE/TIME }
-  Stamp:     TDateTime;
+//  Stamp:     TDateTime;
+  Stamp:  string;
   { STRING GRID }
 begin
   { ---------------------------------------------------------------------------------------------------------------------------- DISABLE DRAWING 'STRINGGRID' }
@@ -2426,7 +2439,7 @@ begin
   Query:=TADOQuery.Create(nil);
   Query.Connection:=Database.ADOConnect;
   Query.SQL.Clear;
-  Stamp:=Now;
+  Stamp:=DateTimeToStr(Now);
   SetLength(StrSQL, 2);
   { --------------------------------------------------------------------------------------------------------------------------------------------- CHECK PARAM }
   if not (Param = 'ADD') and not (Param = 'REMOVE') then
@@ -2503,9 +2516,10 @@ begin
     if Param = 'ADD' then
     begin
       { --------------------------------------------------------------------------------------------------- CHECK IF SELECTED CUSTOMER IS ALREADY ON THE LIST }
-      StrSQL[0]:='SELECT user_alias FROM tbl_tracker WHERE CUID = :uParam';
+      StrSQL[0]:='SELECT user_alias FROM tbl_tracker WHERE CUID = ' + QuotedStr(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('CUID', 1, 1), MainForm.sgAgeView.Row]);
+//      StrSQL[0]:='SELECT user_alias FROM tbl_tracker WHERE CUID = :uParam';
       Query.SQL.Add(StrSQL[0]);
-      Query.Parameters.ParamByName('uParam').Value:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('CUID', 1, 1), MainForm.sgAgeView.Row];
+//      Query.Parameters.ParamByName('uParam').Value:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('CUID', 1, 1), MainForm.sgAgeView.Row];
       try
         Query.Open;
         { ALREADY EXISTS }
@@ -2516,10 +2530,19 @@ begin
           { ---------------------------------------------------------------------------------------------------------------------------- BUILD SQL EXPRESSION }
           Query.SQL.Clear;
           Columns:='USER_ALIAS, CUID, CO_CODE, BRANCH, CUSTNAME, LAYOUT, STAMP';
-          Params:=':uParam1, :uParam2, :uParam3, :uParam4, :uParam5, :uParam6, :uParam7';
+//          Params:=':uParam1, :uParam2, :uParam3, :uParam4, :uParam5, :uParam6, :uParam7';
+          Params:=QuotedStr(UpperCase(Settings.WinUserName)) + ', ' +
+                  QuotedStr(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('CUID',   1, 1),  MainForm.sgAgeView.Row]) + ', ' +
+                  QuotedStr(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('CO CODE', 1, 1), MainForm.sgAgeView.Row]) + ',' +
+                  QuotedStr(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('AGENT',   1, 1), MainForm.sgAgeView.Row]) + ', ' +
+                  QuotedStr(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('CUSTOMER NAME', 1, 1), MainForm.sgAgeView.Row]) + ', ' +
+                  QuotedStr(TrackerForm.LayoutList.Text) + ', ' +
+                  QuotedStr(Stamp);
+
           StrSQL[0]:='INSERT INTO tbl_tracker (' + Columns + ') VALUES (' + Params + ')';
           Query.SQL.Add(StrSQL[0]);
           { --------------------------------------------------------------------------------------------------------------------------- ASSIGN ALL PARAMETERS }
+(*
           Query.Parameters.ParamByName('uParam1').Value :=UpperCase(Settings.WinUserName);
           Query.Parameters.ParamByName('uParam2').Value :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('CUID',   1, 1),  MainForm.sgAgeView.Row];
           Query.Parameters.ParamByName('uParam3').Value :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('CO CODE', 1, 1), MainForm.sgAgeView.Row];
@@ -2527,6 +2550,7 @@ begin
           Query.Parameters.ParamByName('uParam5').Value :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('CUSTOMER NAME', 1, 1), MainForm.sgAgeView.Row];
           Query.Parameters.ParamByName('uParam6').Value:=TrackerForm.LayoutList.Text;
           Query.Parameters.ParamByName('uParam7').Value:=Stamp;
+*)
           { ----------------------------------------------------------------------------------------------------------------------------------------- EXECUTE }
           try
             Query.ExecSQL;
@@ -2546,14 +2570,14 @@ begin
     { OTHER WAY. IF THERE IS NO INVOICES ON THE 'TBL_INVOICES' LIST, DELETE STATEMENT RETURNS ONLY '0 ROWS AFFECTED'.                                         }
     if Param = 'REMOVE' then
     begin
-      StrSQL[0]:='DELETE FROM tbl_invoices WHERE CUID = :uParam';
-      StrSQL[1]:='DELETE FROM tbl_tracker WHERE CUID = :uParam';
+      StrSQL[0]:='DELETE FROM tbl_invoices WHERE CUID = ' + QuotedStr(SG.Cells[2, SG.Row]);
+      StrSQL[1]:='DELETE FROM tbl_tracker WHERE CUID = ' + QuotedStr(SG.Cells[2, SG.Row]);
       try
         for iCNT:=0 to 1 do
         begin
           Query.SQL.Clear;
           Query.SQL.Add(StrSQL[iCNT]);
-          Query.Parameters.ParamByName('uParam').Value:=SG.Cells[2, SG.Row];
+//          Query.Parameters.ParamByName('uParam').Value:=SG.Cells[2, SG.Row];
           Query.ExecSQL;
         end;
       finally
@@ -3096,13 +3120,13 @@ begin
           'ON '                                     +
           '  tbl_snapshots.cuid = tbl_general.cuid '+
           'WHERE '                                  +
-            'tbl_snapshots.GROUP_ID = :uParam1 '    +
-            'AND tbl_snapshots.AGE_DATE = :uParam2 '+
+            'tbl_snapshots.GROUP_ID = '             + QuotedStr(GroupID) + ' ' +
+            'AND tbl_snapshots.AGE_DATE =  '        + QuotedStr(DateToStr(AgeDate)) + ' ' +
           'ORDER BY '                               +
             'tbl_snapshots.RISK_CLASS ASC, '        +
             'tbl_snapshots.QUALITY_IDX ASC, '       +
-            'tbl_snapshots.TOTAL DESC;'             ;
-//            'tbl_general.FOLLOWUP DESC;'            ;
+            'tbl_snapshots.TOTAL DESC, '            +
+            'tbl_general.FOLLOWUP ASC;'             ;
   { ----------------------------------------------------------------------------------------------------------------------------------------------- NEW QUERY }
   { QUERY WITH GIVEN SQL EXPRESSION AND PARAMETERS }
   Query:=TADOQuery.Create(nil);
@@ -3110,8 +3134,8 @@ begin
   try
     Query.SQL.Clear;
     Query.SQL.Add(StrSQL);
-    Query.Parameters.ParamByName('uParam1').Value:=GroupID;
-    Query.Parameters.ParamByName('uParam2').Value:=AgeDate;
+//    Query.Parameters.ParamByName('uParam1').Value:=GroupID;
+//    Query.Parameters.ParamByName('uParam2').Value:=AgeDate;
     { EXECUTE SQL }
     Query.Open;
     { CLEAR 'STRINGGRID' }
@@ -3143,7 +3167,7 @@ begin
     AgeView.Range3:=AgeView.Range3 + StrToFloatDef(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('31 - 60',  1, 1), iCNT], 0);
     AgeView.Range4:=AgeView.Range4 + StrToFloatDef(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('61 - 90',  1, 1), iCNT], 0);
     AgeView.Range5:=AgeView.Range5 + StrToFloatDef(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('91 - 120',  1, 1), iCNT], 0);
-    AgeView.Range6:=AgeView.Range6 + StrToFloatDef(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('120 - oo',  1, 1), iCNT], 0);
+    AgeView.Range6:=AgeView.Range6 + StrToFloatDef(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('121 - oo',  1, 1), iCNT], 0);
     { TOTAL AMOUNT | LEDGER BALANCE }
     AgeView.Balance:=AgeView.Balance + StrToFloatDef(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('TOTAL', 1, 1), iCNT], 0);
     { GRANTED LIMITS | SUM OF ALL LIMITS }
@@ -3579,11 +3603,11 @@ begin
              'WHERE '+
                'CO_CODE '+
              'IN '+
-               '(SELECT CO_CODE FROM tbl_snapshots WHERE GROUP_ID = :uParam1 AND AGE_DATE = :uParam2);';
+               '(SELECT CO_CODE FROM tbl_snapshots WHERE GROUP_ID = ' + QuotedStr(GroupID) + ' AND AGE_DATE = ' + QuotedStr(DateToStr(AgeDate)) + ');';
     Query.SQL.Clear;
     Query.SQL.Add(StrSQL);
-    Query.Parameters.ParamByName('uParam1').Value:=GroupID;
-    Query.Parameters.ParamByName('uParam2').Value:=AgeDate;
+//    Query.Parameters.ParamByName('uParam1').Value:=GroupID;
+//    Query.Parameters.ParamByName('uParam2').Value:=AgeDate;
     try
       { --------------------------------------------------------------------------------------------------------------------------------------------- EXECUTE }
       Query.Open;
@@ -3627,19 +3651,19 @@ begin
              'FROM '+
                'tbl_company '+
              'WHERE '+
-               'CO_CODE = :uParam1 '+
+               'CO_CODE = ' + QuotedStr(MainForm.COC1.Text) + ' ' +
              'OR '+
-               'CO_CODE = :uParam2 '+
+               'CO_CODE = ' + QuotedStr(MainForm.COC2.Text) + ' ' +
              'OR '+
-               'CO_CODE = :uParam3 '+
+               'CO_CODE = ' + QuotedStr(MainForm.COC3.Text) + ' ' +
              'OR '+
-               'CO_CODE = :uParam4 ';
+               'CO_CODE = ' + QuotedStr(MainForm.COC4.Text);
     Query.SQL.Clear;
     Query.SQL.Add(StrSQL);
-    Query.Parameters.ParamByName('uParam1').Value:=MainForm.COC1.Text;
-    Query.Parameters.ParamByName('uParam2').Value:=MainForm.COC2.Text;
-    Query.Parameters.ParamByName('uParam3').Value:=MainForm.COC3.Text;
-    Query.Parameters.ParamByName('uParam4').Value:=MainForm.COC4.Text;
+//    Query.Parameters.ParamByName('uParam1').Value:=MainForm.COC1.Text;
+//    Query.Parameters.ParamByName('uParam2').Value:=MainForm.COC2.Text;
+//    Query.Parameters.ParamByName('uParam3').Value:=MainForm.COC3.Text;
+//    Query.Parameters.ParamByName('uParam4').Value:=MainForm.COC4.Text;
     try
       { --------------------------------------------------------------------------------------------------------------------------------------------- EXECUTE }
       Query.Open;
@@ -5248,7 +5272,7 @@ begin
   Col4 :=MainForm.sgAgeView.ReturnColumn('31 - 60',         1, 1);
   Col5 :=MainForm.sgAgeView.ReturnColumn('61 - 90',         1, 1);
   Col6 :=MainForm.sgAgeView.ReturnColumn('91 - 120',        1, 1);
-  Col7 :=MainForm.sgAgeView.ReturnColumn('120 - oo',        1, 1);
+  Col7 :=MainForm.sgAgeView.ReturnColumn('121 - oo',        1, 1);
   Col8 :=MainForm.sgAgeView.ReturnColumn('OVERDUE',         1, 1);
   Col9 :=MainForm.sgAgeView.ReturnColumn('TOTAL',           1, 1);
   Col10:=MainForm.sgAgeView.ReturnColumn('CREDIT LIMIT',    1, 1);

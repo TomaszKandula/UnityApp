@@ -139,7 +139,7 @@ begin
     if LayoutList.Items.Count > 0 then LayoutList.ItemIndex:=0;
   end;
   { ------------------------------------------------------------------------------------------------------------------------------------------------ READ OUT }
-(*
+
   TblTracker:=TTracker.Create;
   try
     { SETUP }
@@ -173,7 +173,7 @@ begin
     if TextStatTo.Text  <> '' then ErrorLegalTo.Visible:=False;
     if not (ErrorLegalTo.Visible) and not (ErrorMailTo.Visible) and not (ErrorStatTo.Visible) then btnOK.Enabled:=True;
   end;
-*)
+
   Screen.Cursor:=crDefault;
 end;
 

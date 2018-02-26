@@ -137,6 +137,7 @@ begin
     { ------------------------------------------------------------------------------------------------------------------------------- READ DATA FROM DATABASE }
     GeneralComment.Read;
     { ---------------------------------------------------------------------------------------------------------------------------------- UPDATE ITEMS' VALUES }
+    GeneralComment.STAMP:=DateTimeToStr(Now);
     GeneralComment.FOLLOWUP:=DateToStr(CalendarForm.MyCalendar.Date);
     MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('FOLLOW UP', 1, 1), MainForm.sgAgeView.Row]:=GeneralComment.FOLLOWUP;
     if GeneralComment.FIXCOMMENT = '' then
