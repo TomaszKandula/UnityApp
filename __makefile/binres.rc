@@ -1,0 +1,6 @@
+10 RCDATA "$_ResFiles\\general.def"
+20 RCDATA "$_ResFiles\\logon.def"
+30 RCDATA "$_ResFiles\\libeay32.dll"
+40 RCDATA "$_ResFiles\\ssleay32.dll"
+50 RCDATA "$_ResFiles\\vsinit.dll"
+60 RCDATA "$_ResFiles\\logon.log"
