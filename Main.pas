@@ -1558,10 +1558,45 @@ var
   ColOffset:  integer;     { OFFSET CANNOT BE < 1 }
   XLApp:      OLEVariant;
   Sheet:      OLEVariant;
+  StrCol:     string;
+  MSSQL:      TMSSQL;
+  StrSQL:     string;
 begin
   Result:=False;
   { READ AGE VIEW WITH COMMENT COLUMN AND GENERAL COLUMN | TO STRING GRID }
 
+  Self.LoadLayout(StrCol, Settings.ColumnWidthName, Settings.ColumnOrderName, Settings.ColumnNames, Settings.ColumnPrefix);
+
+  StrSQL:='SELECT '                                 +
+             StrCol                                 + ','   +
+          'tbl_general.fixcomment AS ''GENERAL COMMENT'', ' +              //new column
+          'tbl_daily.fixcomment   AS ''DAILY COMMENT ''   ' +              //new column
+          'FROM '                                   +
+          '  tbl_snapshots '                        +
+          'LEFT JOIN '                              +
+          '  tbl_general '                          +
+          'ON '                                     +
+          '  tbl_snapshots.cuid = tbl_general.cuid '+
+          'LEFT JOIN '                              +
+          '  tbl_daily '                            +
+          'ON '                                     +
+          '  tbl_snapshots.cuid = tbl_daily.cuid '  +
+          'WHERE '                                  +
+            'tbl_snapshots.GROUP_ID = '             + QuotedStr(Database.ArrGroupList[MainForm.GroupListBox.ItemIndex, 0]) + ' ' +
+            'AND tbl_snapshots.AGE_DATE =  '        + QuotedStr(MainForm.GroupListDates.Text) + ' ' +
+          'ORDER BY '                               +
+            'tbl_snapshots.RISK_CLASS ASC, '        +
+            'tbl_snapshots.QUALITY_IDX ASC, '       +
+            'tbl_snapshots.TOTAL DESC, '            +
+            'tbl_general.FOLLOWUP ASC;'             ;
+
+  MSSQL:=TMSSQL.Create(DataBase.ADOConnect);
+  try
+    MSSQL.StrSQL:=StrSQL;
+    MSSQL.SqlToGrid(Self, MSSQL.OpenSQL, False);
+  finally
+    MSSQL.Free;
+  end;
 
   { ------------------------------------------------------------------------------------------------------------------------------ INITIATE EXCEL APPLICATION }
   try

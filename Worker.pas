@@ -811,6 +811,7 @@ procedure TTExcelExport.Execute;  (* ASYNC *)
 var
   IDThread:  integer;
   FileName:  string;
+  Temp:      TStringGrid;
 begin
   IDThread:=TTCheckServerConnection.CurrentThread.ThreadID;
   ActiveThreads[9]:=True;
@@ -821,7 +822,13 @@ begin
       if MainForm.XLExport.Execute then FileName:=MainForm.XLExport.FileName;
     end);
 
-    MainForm.sgAgeView.ToExcel('Sheet1', FileName, IDThread);
+    //MainForm.sgAgeView.ToExcel('Sheet1', FileName, IDThread);
+    Temp:=TStringGrid.Create(nil);
+    try
+      Temp.ToExcel('Sheet1', FileName, IDThread);
+    finally
+      Temp.Free;
+    end;
 
   finally
     PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Ready.')));

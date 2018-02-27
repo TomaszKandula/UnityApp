@@ -1207,10 +1207,6 @@ object MainForm: TMainForm
     object TabSheet9: TTabSheet
       Caption = 'START'
       ImageIndex = 8
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object WebContainer: TPanel
         AlignWithMargins = True
         Left = 17
@@ -1225,10 +1221,6 @@ object MainForm: TMainForm
         BevelKind = bkFlat
         BevelOuter = bvNone
         TabOrder = 0
-        ExplicitLeft = 75
-        ExplicitTop = 40
-        ExplicitWidth = 551
-        ExplicitHeight = 553
         object WebBrowser: TWebBrowser
           AlignWithMargins = True
           Left = 5
@@ -2593,10 +2585,6 @@ object MainForm: TMainForm
     object TabSheet2: TTabSheet
       Caption = 'VISMA Open Items'
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Header2: TPanel
         Left = 0
         Top = 0
@@ -3737,10 +3725,6 @@ object MainForm: TMainForm
     object TabSheet3: TTabSheet
       Caption = 'Private Address Book'
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Header3: TPanel
         Left = 0
         Top = 0
@@ -4091,10 +4075,6 @@ object MainForm: TMainForm
       Caption = 'Invoice Tracker'
       ImageIndex = 4
       OnShow = TabSheet4Show
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Header4: TPanel
         Left = 0
         Top = 0
@@ -4288,10 +4268,6 @@ object MainForm: TMainForm
       Caption = 'Reporting'
       ImageIndex = 5
       TabVisible = False
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Header5: TPanel
         Left = 0
         Top = 0
@@ -4433,10 +4409,6 @@ object MainForm: TMainForm
       Caption = 'Management View'
       ImageIndex = 7
       TabVisible = False
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Header6: TPanel
         Left = 0
         Top = 0
@@ -4576,10 +4548,6 @@ object MainForm: TMainForm
       ImageIndex = 8
       OnResize = TabSheet7Resize
       OnShow = TabSheet7Show
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Header7: TPanel
         Left = 0
         Top = 0
@@ -5015,10 +4983,6 @@ object MainForm: TMainForm
       Caption = 'Settings Panel'
       ImageIndex = 6
       OnShow = TabSheet8Show
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Header8: TPanel
         Left = 0
         Top = 0
@@ -5825,7 +5789,7 @@ object MainForm: TMainForm
             Left = 375
             Top = 1
             Width = 16
-            Height = 16
+            Height = 18
             Cursor = crHandPoint
             Margins.Left = 0
             Margins.Top = 1
@@ -5855,6 +5819,7 @@ object MainForm: TMainForm
             OnClick = EventReloadClick
             ExplicitLeft = 377
             ExplicitTop = 3
+            ExplicitHeight = 16
           end
           object Cap27: TShape
             AlignWithMargins = True
