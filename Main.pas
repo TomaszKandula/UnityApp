@@ -654,7 +654,6 @@ type                                                            (* GUI | MAIN TH
     sgPmtTerms: TStringGrid;
     Action_AutoColumnSize: TMenuItem;
     Action_INF4: TMenuItem;
-    btnOpenGroup: TSpeedButton;
     EventReload: TImage;
     InnerPanelTop: TPanel;
     SplitLine2: TBevel;
@@ -827,7 +826,6 @@ type                                                            (* GUI | MAIN TH
     procedure sgGroup3DrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
     procedure Action_AutoColumnSizeClick(Sender: TObject);
     procedure Action_INF4Click(Sender: TObject);
-    procedure btnOpenGroupClick(Sender: TObject);
     procedure sgCoCodesKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure sgPaidInfoKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure sgPmtTermsKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -855,6 +853,11 @@ type                                                            (* GUI | MAIN TH
     procedure sgAgeViewColumnMoved(Sender: TObject; FromIndex, ToIndex: Integer);
     procedure Action_SearchBookClick(Sender: TObject);
     procedure Action_OverdueClick(Sender: TObject);
+    procedure GroupListBoxDropDown(Sender: TObject);
+  private
+
+    var LastGroupSelection: integer;
+
   public
     procedure DebugMsg(const Msg: String);
 
@@ -3158,10 +3161,16 @@ begin
             'tbl_snapshots.GROUP_ID = '             + QuotedStr(GroupID) + ' ' +
             'AND tbl_snapshots.AGE_DATE =  '        + QuotedStr(DateToStr(AgeDate)) + ' ' +
           'ORDER BY '                               +
-            'tbl_snapshots.RISK_CLASS ASC, '        +
-            'tbl_snapshots.QUALITY_IDX ASC, '       +
-            'tbl_snapshots.TOTAL DESC, '            +
-            'tbl_general.FOLLOWUP ASC;'             ;
+            '(CASE WHEN tbl_general.FOLLOWUP IS NULL THEN 1 ELSE 0 END) ASC, ' +
+//            'tbl_snapshots.RISK_CLASS ASC, '        +
+            'tbl_snapshots.RANGE6 DESC, ' +
+            'tbl_snapshots.RANGE5 DESC, ' +
+            'tbl_snapshots.RANGE4 DESC, ' +
+            'tbl_snapshots.RANGE3 DESC, ' +
+            'tbl_snapshots.RANGE2 DESC, ' +
+            'tbl_snapshots.RANGE1 DESC; ' ;
+//            'tbl_snapshots.QUALITY_IDX ASC, '       +
+//            'tbl_snapshots.OVERDUE DESC; '          ;
   { ----------------------------------------------------------------------------------------------------------------------------------------------- NEW QUERY }
   { QUERY WITH GIVEN SQL EXPRESSION AND PARAMETERS }
   Query:=TADOQuery.Create(nil);
@@ -3620,145 +3629,85 @@ end;
 { ------------------------------------------------------------------------------------------------------------------------------- RETURN CO CODE AND CUREENCY }
 procedure TAgeView.Details(GroupID: string; AgeDate: TDateTime; idThd: integer);  (* SYNCHRONIZE *)  // REFACTOR !!!!
 var
-  { COUNTER }
-  iCNT:     integer;
-  { SQL }
-  StrSQL:   string;
-  Query:    TADOQuery;
+  MSSQL :  TMSSQL;
+  StrSQL:  string;
+  RS    :  _Recordset;
 begin
-  { --------------------------------------------------------------------------------------------------------------------------------------------------- QUERY }
-  Query:=TADOQuery.Create(nil);
-  Query.Connection:=Database.ADOConnect;
+  StrSQL:='SELECT DISTINCT '             +
+            'tbl_snapshots.CO_CODE,'     +
+            'tbl_snapshots.LEDGER_ISO,'  +
+            'tbl_company.INTEREST_RATE,' +
+            'tbl_company.AGENTS '        +
+          'FROM '                        +
+            'tbl_snapshots '             +
+          'LEFT JOIN '                   +
+            'tbl_company '               +
+          'ON '                          +
+            'tbl_snapshots.CO_CODE = tbl_company.CO_CODE ' +
+          'WHERE'                        +
+            ' GROUP_ID = '               + QuotedStr(GroupID) +
+            ' AND AGE_DATE = '           + QuotedStr(DateToStr(AgeDate));
+  MSSQL:=TMSSQL.Create(DataBase.ADOConnect);
   try
-    { -------------------------------------------------------------------------------------------------------------------- DISTINCT CO CODES & CURRENCY CODES }
-    StrSQL:='SELECT DISTINCT '+
-               'CO_CODE, LEDGER_ISO '+
-             'FROM '+
-               'tbl_snapshots '+
-             'WHERE '+
-               'CO_CODE '+
-             'IN '+
-               '(SELECT CO_CODE FROM tbl_snapshots WHERE GROUP_ID = ' + QuotedStr(GroupID) + ' AND AGE_DATE = ' + QuotedStr(DateToStr(AgeDate)) + ');';
-    Query.SQL.Clear;
-    Query.SQL.Add(StrSQL);
-//    Query.Parameters.ParamByName('uParam1').Value:=GroupID;
-//    Query.Parameters.ParamByName('uParam2').Value:=AgeDate;
-    try
-      { --------------------------------------------------------------------------------------------------------------------------------------------- EXECUTE }
-      Query.Open;
-      { ---------------------------------------------------------------------------------------------------------------------------- READ ALL RETURNED VALUES }
-      iCNT:=1;
-      Query.Recordset.MoveFirst;
-      while not Query.Recordset.EOF do begin
-        { WE SHOULD HAVE ONLY FOUR COMPANIES IN THE GIVEN GROUP }
-        if Query.RecordCount < 5 then begin
-          if iCNT = 1 then begin
-            MainForm.COC1.Text:=Query.Recordset.Fields[0].Value;
-            MainForm.CUR1.Text:=Query.Recordset.Fields[1].Value;
-          end;
-          if iCNT = 2 then begin
-            MainForm.COC2.Text:=Query.Recordset.Fields[0].Value;
-            MainForm.CUR2.Text:=Query.Recordset.Fields[1].Value;
-          end;
-          if iCNT = 3 then begin
-            MainForm.COC3.Text:=Query.Recordset.Fields[0].Value;
-            MainForm.CUR3.Text:=Query.Recordset.Fields[1].Value;
-          end;
-          if iCNT = 4 then begin
-            MainForm.COC4.Text:=Query.Recordset.Fields[0].Value;
-            MainForm.CUR4.Text:=Query.Recordset.Fields[1].Value;
-          end;
-        end;
-        (* DebugMsg(Query.Recordset.Fields[0].Value + ' | ' + Query.Recordset.Fields[1].Value); *)
-        Query.Recordset.MoveNext;
-        inc(iCNT);
+    MSSQL.StrSQL:=StrSQL;
+    RS:=MSSQL.OpenSQL;
+    if (RS.RecordCount > 0) and (RS.RecordCount < 5)  then
+    begin
+      { 1ST SET }
+      RS.MoveFirst;
+      MainForm.COC1.Text:=RS.Fields.Item['CO_CODE'      ].Value;
+      MainForm.CUR1.Text:=RS.Fields.Item['LEDGER_ISO'   ].Value;
+      MainForm.INT1.Text:=RS.Fields.Item['INTEREST_RATE'].Value;
+      MainForm.AGT1.Text:=RS.Fields.Item['AGENTS'       ].Value;
+      { 2ND SET }
+      RS.MoveNext;
+      if (RS.EOF = False) and (RS.BOF = False) then
+      begin
+        MainForm.COC2.Text:=RS.Fields.Item['CO_CODE'      ].Value;
+        MainForm.CUR2.Text:=RS.Fields.Item['LEDGER_ISO'   ].Value;
+        MainForm.INT2.Text:=RS.Fields.Item['INTEREST_RATE'].Value;
+        MainForm.AGT2.Text:=RS.Fields.Item['AGENTS'       ].Value;
+        RS.MoveNext;
       end;
-      Query.Close;
-    except
-      on E: Exception do begin
-        SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PCHAR('Method ''AgeViewDetails'' cannot execute SQL statement. Please contact IT support.')));
-        LogText(Settings.AppDir + Settings.LogFile, 'Thread [' + IntToStr(idThd) + ']: Method ''AgeViewDetails'' cannot execute SQL statement. Error thrown: ' + E.Message);
-        PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Ready.')));
+      { 3RD SET }
+      if (RS.EOF = False) and (RS.BOF = False) then
+      begin
+        MainForm.COC3.Text:=RS.Fields.Item['CO_CODE'      ].Value;
+        MainForm.CUR3.Text:=RS.Fields.Item['LEDGER_ISO'   ].Value;
+        MainForm.INT3.Text:=RS.Fields.Item['INTEREST_RATE'].Value;
+        MainForm.AGT3.Text:=RS.Fields.Item['AGENTS'       ].Value;
+        RS.MoveNext;
       end;
-    end;
-    StrSQL:='SELECT DISTINCT '+
-               ' CO_CODE, INTEREST_RATE, AGENTS '+
-             'FROM '+
-               'tbl_company '+
-             'WHERE '+
-               'CO_CODE = ' + QuotedStr(MainForm.COC1.Text) + ' ' +
-             'OR '+
-               'CO_CODE = ' + QuotedStr(MainForm.COC2.Text) + ' ' +
-             'OR '+
-               'CO_CODE = ' + QuotedStr(MainForm.COC3.Text) + ' ' +
-             'OR '+
-               'CO_CODE = ' + QuotedStr(MainForm.COC4.Text);
-    Query.SQL.Clear;
-    Query.SQL.Add(StrSQL);
-//    Query.Parameters.ParamByName('uParam1').Value:=MainForm.COC1.Text;
-//    Query.Parameters.ParamByName('uParam2').Value:=MainForm.COC2.Text;
-//    Query.Parameters.ParamByName('uParam3').Value:=MainForm.COC3.Text;
-//    Query.Parameters.ParamByName('uParam4').Value:=MainForm.COC4.Text;
-    try
-      { --------------------------------------------------------------------------------------------------------------------------------------------- EXECUTE }
-      Query.Open;
-      { ---------------------------------------------------------------------------------------------------------------------------- READ ALL RETURNED VALUES }
-      iCNT:=1;
-      Query.Recordset.MoveFirst;
-      while not Query.Recordset.EOF do begin
-        { WE SHOULD HAVE ONLY FOUR COMPANIES IN THE GIVEN GROUP }
-        if Query.RecordCount < 5 then begin
-          if iCNT = 1 then begin
-            MainForm.INT1.Text:=Query.Recordset.Fields[1].Value;
-            MainForm.AGT1.Text:=Query.Recordset.Fields[2].Value;
-          end;
-          if iCNT = 2 then begin
-            MainForm.INT2.Text:=Query.Recordset.Fields[1].Value;
-            MainForm.AGT2.Text:=Query.Recordset.Fields[2].Value;
-          end;
-          if iCNT = 3 then begin
-            MainForm.INT3.Text:=Query.Recordset.Fields[1].Value;
-            MainForm.AGT3.Text:=Query.Recordset.Fields[2].Value;
-          end;
-          if iCNT = 4 then begin
-            MainForm.INT4.Text:=Query.Recordset.Fields[1].Value;
-            MainForm.AGT4.Text:=Query.Recordset.Fields[2].Value;
-          end;
-        end;
-        (* DebugMsg(Query.Recordset.Fields[0].Value + ' | ' + Query.Recordset.Fields[1].Value); *)
-        Query.Recordset.MoveNext;
-        inc(iCNT);
-      end;
-      Query.Close;
-    except
-      on E: Exception do begin
-        SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PCHAR('Method ''AgeViewDetails'' cannot execute SQL statement. Please contact IT support.')));
-        LogText(Settings.AppDir + Settings.LogFile, 'Thread [' + IntToStr(idThd) + ']: Method ''AgeViewDetails'' cannot execute SQL statement. Error thrown: ' + E.Message);
-        PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Ready.')));
+      { 4TH SET }
+      if (RS.EOF = False) and (RS.BOF = False) then
+      begin
+        MainForm.COC4.Text:=RS.Fields.Item['CO_CODE'      ].Value;
+        MainForm.CUR4.Text:=RS.Fields.Item['LEDGER_ISO'   ].Value;
+        MainForm.INT4.Text:=RS.Fields.Item['INTEREST_RATE'].Value;
+        MainForm.AGT4.Text:=RS.Fields.Item['AGENTS'       ].Value;
       end;
     end;
   finally
-    Query.Free;
+    RS:=nil;
+    MSSQL.Free;
   end;
   { ---------------------------------------------------------------------------------------------------------------------------- DISPLAY CO CODE AND CURRENCY }
   MainForm.tcCOCODE.Caption   :='';
   MainForm.tcCURRENCY.Caption :='';
   { CO CODE }
-  if MainForm.COC1.Text <> '0' then MainForm.tcCOCODE.Caption:=MainForm.tcCOCODE.Caption + MainForm.COC1.Text + ' | ';
-  if MainForm.COC2.Text <> '0' then MainForm.tcCOCODE.Caption:=MainForm.tcCOCODE.Caption + MainForm.COC2.Text + ' | ';
-  if MainForm.COC3.Text <> '0' then MainForm.tcCOCODE.Caption:=MainForm.tcCOCODE.Caption + MainForm.COC3.Text + ' | ';
-  if MainForm.COC4.Text <> '0' then MainForm.tcCOCODE.Caption:=MainForm.tcCOCODE.Caption + MainForm.COC4.Text + ' | ';
-  MainForm.tcCOCODE.Caption:=MidStr(MainForm.tcCOCODE.Caption, 1, Length(MainForm.tcCOCODE.Caption) - 2);
+  if MainForm.COC1.Text <> '0' then MainForm.tcCOCODE.Caption:=MainForm.tcCOCODE.Caption + MainForm.COC1.Text + ' ';
+  if MainForm.COC2.Text <> '0' then MainForm.tcCOCODE.Caption:=MainForm.tcCOCODE.Caption + MainForm.COC2.Text + ' ';
+  if MainForm.COC3.Text <> '0' then MainForm.tcCOCODE.Caption:=MainForm.tcCOCODE.Caption + MainForm.COC3.Text + ' ';
+  if MainForm.COC4.Text <> '0' then MainForm.tcCOCODE.Caption:=MainForm.tcCOCODE.Caption + MainForm.COC4.Text + ' ';
   { CURRENCY }
-  if MainForm.CUR1.Text <> 'N/A' then MainForm.tcCURRENCY.Caption:=MainForm.tcCURRENCY.Caption + MainForm.CUR1.Text + ' | ';
-  if MainForm.CUR2.Text <> 'N/A' then MainForm.tcCURRENCY.Caption:=MainForm.tcCURRENCY.Caption + MainForm.CUR2.Text + ' | ';
-  if MainForm.CUR3.Text <> 'N/A' then MainForm.tcCURRENCY.Caption:=MainForm.tcCURRENCY.Caption + MainForm.CUR3.Text + ' | ';
-  if MainForm.CUR4.Text <> 'N/A' then MainForm.tcCURRENCY.Caption:=MainForm.tcCURRENCY.Caption + MainForm.CUR4.Text + ' | ';
-  MainForm.tcCURRENCY.Caption:=MidStr(MainForm.tcCURRENCY.Caption, 1, Length(MainForm.tcCURRENCY.Caption) - 2);
+  if MainForm.CUR1.Text <> 'N/A' then MainForm.tcCURRENCY.Caption:=MainForm.tcCURRENCY.Caption + MainForm.CUR1.Text + ' ';
+  if MainForm.CUR2.Text <> 'N/A' then MainForm.tcCURRENCY.Caption:=MainForm.tcCURRENCY.Caption + MainForm.CUR2.Text + ' ';
+  if MainForm.CUR3.Text <> 'N/A' then MainForm.tcCURRENCY.Caption:=MainForm.tcCURRENCY.Caption + MainForm.CUR3.Text + ' ';
+  if MainForm.CUR4.Text <> 'N/A' then MainForm.tcCURRENCY.Caption:=MainForm.tcCURRENCY.Caption + MainForm.CUR4.Text + ' ';
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------- LOOK FOR DATA }
-function TAgeView.MapData(AgeGrid: TStringGrid; WhichCol: string; tblMap: TStringGrid): string;  // REFACTOR!!!
+function TAgeView.MapData(AgeGrid: TStringGrid; WhichCol: string; tblMap: TStringGrid): string;
 var
   iCNT:  integer;
   jCNT:  integer;
@@ -3766,7 +3715,7 @@ begin
   Result:='unassigned';
   { FIND GIVEN COLUMN }
   for jCNT:=1 to AgeGrid.ColCount - 1 do
-    if WhichCol = AgeGrid.Cells[jCNT, 0] then break;
+    if WhichCol = AgeGrid.Cells[jCNT, 0] then Break;
   { FIND DATA }
   for iCNT:=1 to tblMap.RowCount - 1 do
   begin
@@ -4592,6 +4541,9 @@ begin
       end;
     end;
 
+  { ----------------------------------------------------------------------------------------------------------------------------- START WEB PAGE | UNITY INFO }
+  WebBrowser.Navigate(WideString(Settings.TMIG.ReadString(Settings.ApplicationDetails, 'START_PAGE', '')), $02);
+
   { -------------------------------------------------------------------------------------------------------------------------- APPLICATION VERSION & USER SID }
   LogText(Settings.AppDir + Settings.LogFile, 'Thread [' + IntToStr(MainThreadID) + ']: Application version = ' + AppVersion);
   LogText(Settings.AppDir + Settings.LogFile, 'Thread [' + IntToStr(MainThreadID) + ']: User SID = ' + GetCurrentUserSid);
@@ -5038,7 +4990,7 @@ end;
 { ----------------------------------------------------------------------------------------------------------------------------------------- SHOW PAYMENT TERM }
 procedure TMainForm.Action_PaymentTermClick(Sender: TObject);
 begin
-  MsgCall(1, 'Payment term: ' + AgeView.MapData(sgAgeView, 'PAYMENT_TERMS', sgPmtTerms) + '.');
+  MsgCall(1, 'Payment term: ' + AgeView.MapData(sgAgeView, 'PAYMENT TERMS', sgPmtTerms) + '.');
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------------------- SHOW GROUP3 }
@@ -5163,11 +5115,36 @@ end;
 
 { ---------------------------------------------------------- ! COMPONENT EVENTS | LISTBOX ! ----------------------------------------------------------------- }
 
+
+{ ------------------------------------------------------------------------------------------------------------- SAVE CURRENT GROUP NAME BEFORE USER CHANGE IT }
+procedure TMainForm.GroupListBoxDropDown(Sender: TObject);
+begin
+  MainForm.LastGroupSelection:=GroupListBox.ItemIndex;
+end;
+
 { ------------------------------------------------------------------------------------------------------------------------- UAC | LIST BOX | UPDATE AGE DATES }
 procedure TMainForm.GroupListBoxSelect(Sender: TObject);
 begin
   Database.UACAgeDates(Database.ArrGroupList[MainForm.GroupListBox.ItemIndex, 0]);
   GroupListDates.ItemIndex:=GroupListDates.Items.Count - 1;
+  if not (GroupListDates.Text = '') then
+  begin
+    { CALL READ AGE VIEW IF ACCOMPANIED PROCESSES ARE FREED }
+    if (Worker.ActiveThreads[3] = True) or
+       (Worker.ActiveThreads[4] = True) or
+       (Worker.ActiveThreads[7] = True) then
+    begin
+      MsgCall(2, 'Open items are currently being processed by the Unity. Please wait until the process is finished and try again.');
+    end
+      else
+        TTReadAgeView.Create('1');
+  end
+  else
+  begin
+    GroupListBox.ItemIndex:=MainForm.LastGroupSelection;
+    Database.UACAgeDates(Database.ArrGroupList[MainForm.GroupListBox.ItemIndex, 0]);
+    GroupListDates.ItemIndex:=GroupListDates.Items.Count - 1;
+  end;
 end;
 
 { ------------------------------------------------------- ! COMPONENT EVENTS | TABSHEETS ! ------------------------------------------------------------------ }
@@ -6125,6 +6102,7 @@ begin
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------- OPEN SELECTED GROUP }
+(*
 procedure TMainForm.btnOpenGroupClick(Sender: TObject);
 begin
   if GroupListDates.Text = '' then
@@ -6142,6 +6120,7 @@ begin
     else
       TTReadAgeView.Create('1');
 end;
+*)
 
 { ---------------------------------------------------------------------------------------------------------------------------------------------- FORCE RELOAD }
 procedure TMainForm.btnReloadClick(Sender: TObject);

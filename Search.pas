@@ -43,6 +43,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnUnhideClick(Sender: TObject);
+    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
   private
     const WHITESPACE =  #32;
     var   FoundRow   :  integer;
@@ -181,6 +182,12 @@ begin
   SGrid     :=nil;
   SColName  :='';
   SColNumber:='';
+end;
+
+{ ------------------------------------------------------------------------------------------------------------------------------------------- SEARCH ON ENTER }
+procedure TSearchForm.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  if Key = VK_RETURN then btnSearchClick(Self);
 end;
 
 { ----------------------------------------------------------------------------------------------------------------- PERFORM SEARCH BY CUSTOMER NAME OR NUMBER }

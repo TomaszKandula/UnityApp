@@ -341,7 +341,6 @@ begin
           MainForm.valDEFAULTED.Caption :='0';
 
           { ----------------------------------------------------------------------------------------------------------------------------- TURN OFF GIVEN VCL }
-          MainForm.btnOpenGroup.Enabled  :=False;
           MainForm.GroupListBox.Enabled  :=False;
           MainForm.GroupListDates.Enabled:=False;
           MainForm.sgAgeView.Enabled     :=False;
@@ -423,7 +422,6 @@ begin
 
     Synchronize(procedure begin
       { TURN ON COMPONENTS }
-      MainForm.btnOpenGroup.Enabled  :=True;
       MainForm.GroupListBox.Enabled  :=True;
       MainForm.sgAgeView.Enabled     :=True;
       if (MainForm.GroupListDates.Text <> '') and (Database.AccessLevel = 'AD')
@@ -822,7 +820,6 @@ begin
       if MainForm.XLExport.Execute then FileName:=MainForm.XLExport.FileName;
     end);
 
-    //MainForm.sgAgeView.ToExcel('Sheet1', FileName, IDThread);
     Temp:=TStringGrid.Create(nil);
     try
       Temp.ToExcel('Sheet1', FileName, IDThread);
