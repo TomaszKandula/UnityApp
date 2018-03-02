@@ -52,8 +52,7 @@ type
     constructor Create(Connector: TADOConnection);
     procedure   ClearSQL;
     function    CleanStr(Text: string; Quoted: boolean): string;
-    function    OpenSQL: _Recordset;
-    function    ExecSQL: boolean;
+    function    ExecSQL: _Recordset;
     function    GridToSql(Grid: TStringGrid; tblName: string; tblColumns: string; sRow: integer; sCol: integer): string;
     function    SqlToGrid(var Grid: TStringGrid; RS: _Recordset; AutoNoCol: boolean): boolean;
     function    ArrayToSql(Table: TStrArray; tblName: string; tblColumns: string): string;
@@ -88,17 +87,22 @@ begin
   if Quoted then Result:=QuotedStr(Text) else Result:=Text;
 end;
 
-{ ------------------------------------------------------------------------------------------------------- EXECUTE ONLY SELECT STATEMENTS AND RETURN RECORDSET }
-function TMSSQL.OpenSQL: _Recordset;
+{ ------------------------------------------------------------------------------------------------------------------- EXECUTE DML OR DDL AND RETURN RECORDSET }
+
+(* EXECUTE DML, DDL, TCL AND DCL STATEMENTS, MORE HERE: https://www.geeksforgeeks.org/sql-ddl-dml-dcl-tcl-commands/ *)
+
+(* IMPORTANT NOTE: INSERTING RECORDS USING 'VALUES' KEYWORD HAS LIMIT UP TO 1000 RECORDS  *)
+(*                 TO INSERT MORE THAN 1000 RECORDS WITH SINGLE QUERY STATEMENT, WE CAN   *)
+(*                 SPLIT QUERY INTO SMALLER CHUNKS AND EXECUTE "INSERT INTO [] VALUES ()" *)
+(*                 AS MANY TIMEs AS NEEDED. ALTERNATIVELY, INSTEAD OF 'VALUES' KEYWORD WE *)
+(*                 MAY USE 'UNION ALL' AND 'SELECT' STATEMENT.                            *)
+
+function TMSSQL.ExecSQL: _Recordset;
 var
   Query: TADOCommand;
 begin
-  { DEFAULT RETURN VALUE }
   Result:=nil;
-  { ONLY 'SELECT' IS ALLOWED }
   if not (Length(StrSQL)) > 0 then Exit;
-  if not (UpperCase(LeftStr(StrSQL, 6)) = 'SELECT') then Exit;
-  { PROCESS GIVEN EXPRESSION }
   Query:=TADOCommand.Create(nil);
   Query.Connection:=ADOCon;
   try
@@ -107,39 +111,6 @@ begin
       Result:=Query.Execute;
     except
       Result:=nil;
-    end;
-  finally
-    Query.Free;
-  end;
-end;
-
-{ ------------------------------------------------------------------------------------------------------------------------------ EXECUTE NON-SELECT STATEMENT }
-
-(* IMPORTANT NOTE: INSERTING RECORDS USING 'VALUES' KEYWORD HAS LIMIT UP TO 1000 RECORDS  *)
-(*                 TO INSERT MORE THAN 1000 RECORDS WITH SINGLE QUERY STATEMENT, WE CAN   *)
-(*                 SPLIT QUERY INTO SMALLER CHUNKS AND EXECUTE "INSERT INTO [] VALUES ()" *)
-(*                 AS MANY TIMEs AS NEEDED. ALTERNATIVELY, INSTEAD OF 'VALUES' KEYWORD WE *)
-(*                 MAY USE 'UNION ALL' AND 'SELECT' STATEMENT.                            *)
-
-function TMSSQL.ExecSQL: boolean;
-var
-  Query: TADOCommand;
-begin
-  { INITIALIZE }
-  Result:=False;
-  { ONLY 'NON-SELECT' IS ALLOWED }
-  if (Length(StrSQL)) = 0 then Exit;
-  if (UpperCase(LeftStr(StrSQL, 6)) = 'SELECT') then Exit;
-  { PROCESS GIVEN EXPRESSION }
-  Query:=TADOCommand.Create(nil);
-  Query.Connection:=ADOCon;
-  try
-    try
-      Query.CommandText:=StrSQL;
-      Query.Execute;
-      Result:=True;
-    except
-      Result:=False;
     end;
   finally
     Query.Free;

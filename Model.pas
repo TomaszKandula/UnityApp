@@ -235,7 +235,7 @@ begin
       if TableSelect = tbl_company     then MSSQL.StrSQL:='SELECT LEGALTO, REMINDER1, REMINDER2, REMINDER3, LEGALACTION, SEND_NOTE_FROM FROM tbl_company WHERE CO_CODE = ' + QuotedStr(COCODE) + ' AND BRANCH = ' + QuotedStr(Branch);
       if TableSelect = tbl_addressbook then MSSQL.StrSQL:='SELECT EMAILS, ESTATEMENTS FROM tbl_addressbook WHERE CUID = ' + QuotedStr(CUID);
       { EXECUTE }
-      DataSet:=MSSQL.OpenSQL;
+      DataSet:=MSSQL.ExecSQL;
       if DataSet.RecordCount > 0 then Result:=True;
       if DataSet.RecordCount = 1 then
       begin
@@ -323,7 +323,7 @@ begin
                       nCALLDURATION  + ',' +
                       nFIXCOMMENT    +
                       ' FROM tbl_daily WHERE ' + nCUID + ' = ' + QuotedStr(CUID) + Condition;
-        DataSet:=MSSQL.OpenSQL;
+        DataSet:=MSSQL.ExecSQL;
         if DataSet.RecordCount > 0 then Result:=True;
         if DataSet.RecordCount = 1 then
         begin
@@ -417,7 +417,7 @@ begin
                       ')'                                                                                  + #13#10 +
                       'END '                                                                               + #13#10 +
                       'COMMIT TRANSACTION ';
-        Result:=MSSQL.ExecSQL;
+        if not (MSSQL.ExecSQL = nil) then Result:=True;
       end;
     except
       on E: Exception do
@@ -464,7 +464,7 @@ begin
                       nFIXCOMMENT    + ' , ' +
                       nFOLLOWUP      +
                       ' FROM ' + tbl_general + ' WHERE ' + nCUID + ' = ' + QuotedStr(CUID);
-        DataSet:=MSSQL.OpenSQL;
+        DataSet:=MSSQL.ExecSQL;
         if DataSet.RecordCount = 1 then
         begin
           ID        :=VARTOSTR(DataSet.Fields.Item[nID        ].Value);
@@ -534,7 +534,7 @@ begin
                       ') '                                                                               + #13#10 +
                       'END '                                                                             + #13#10 +
                       'COMMIT TRANSACTION';
-        Result:=MSSQL.ExecSQL;
+        if not (MSSQL.ExecSQL = nil) then Result:=True;
       end;
     except
       on E: Exception do

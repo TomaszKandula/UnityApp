@@ -1596,7 +1596,7 @@ begin
   MSSQL:=TMSSQL.Create(DataBase.ADOConnect);
   try
     MSSQL.StrSQL:=StrSQL;
-    MSSQL.SqlToGrid(Self, MSSQL.OpenSQL, False);
+    MSSQL.SqlToGrid(Self, MSSQL.ExecSQL, False);
   finally
     MSSQL.Free;
   end;
@@ -2867,7 +2867,7 @@ begin
   { ------------------------------------------------------------------------------------------------------------------------------------- EXECUTE SQL COMMAND }
   try
     MSSQL.StrSQL:=StrSQL;
-    Result:=MSSQL.SqlToGrid(MainForm.sgAddressBook, MSSQL.OpenSQL, True);
+    Result:=MSSQL.SqlToGrid(MainForm.sgAddressBook, MSSQL.ExecSQL, True);
   finally
     MSSQL.Free;
   end;
@@ -2920,7 +2920,7 @@ begin
     for iCNT:=Start to MainForm.sgAddressBook.RowCount - 1 do
     begin
       MSSQL.StrSQL:='SELECT CUID FROM tbl_AddressBook WHERE CUID = ' + MSSQL.CleanStr(MainForm.sgAddressBook.Cells[2, iCNT], True);
-      RS:=MSSQL.OpenSQL;
+      RS:=MSSQL.ExecSQL;
       if RS.RecordCount > 0 then Inc(TheSame);
     end;
     { ----------------------------------------------------------------------------------------------------------------------------------- PROCESS BUILT QUERY }
@@ -2931,7 +2931,7 @@ begin
         MSSQL.StrSQL:=MSSQL.GridToSql(MainForm.sgAddressBook, 'tbl_AddressBook', Columns, Start, 1);
         { RE-DO LIST POSITION }
         for iCNT:=1 to MainForm.sgAddressBook.RowCount - 1 do MainForm.sgAddressBook.Cells[0, iCNT]:= IntToStr(iCNT);
-        Result:=MSSQL.ExecSQL;
+        if not (MSSQL.ExecSQL = nil) then Result:=True;
       finally
         MSSQL.Free;
         LogText(Settings.AppDir + Settings.LogFile, 'Thread [' + IntToStr(idThd) + ']: New records have beed successfully added to Address Book.');
@@ -3650,7 +3650,7 @@ begin
   MSSQL:=TMSSQL.Create(DataBase.ADOConnect);
   try
     MSSQL.StrSQL:=StrSQL;
-    RS:=MSSQL.OpenSQL;
+    RS:=MSSQL.ExecSQL;
     if (RS.RecordCount > 0) and (RS.RecordCount < 5)  then
     begin
       { 1ST SET }
@@ -4524,11 +4524,11 @@ begin
       { ------------------------------------------------------------------------------------------------------------------------------------------- LOAD MAPS }
       MSSQL:=TMSSQL.Create(Database.ADOConnect);
       try
-        MSSQL.StrSQL:='SELECT * FROM ' + Settings.TMIG.ReadString(Settings.GeneralTables, 'MAP1', ''); MSSQL.SqlToGrid(sgCoCodes,  MSSQL.OpenSQL, False);
-        MSSQL.StrSQL:='SELECT * FROM ' + Settings.TMIG.ReadString(Settings.GeneralTables, 'MAP4', ''); MSSQL.SqlToGrid(sgPmtTerms, MSSQL.OpenSQL, False);
-        MSSQL.StrSQL:='SELECT * FROM ' + Settings.TMIG.ReadString(Settings.GeneralTables, 'MAP5', ''); MSSQL.SqlToGrid(sgPaidInfo, MSSQL.OpenSQL, False);
-        MSSQL.StrSQL:='SELECT * FROM ' + Settings.TMIG.ReadString(Settings.GeneralTables, 'MAP6', ''); MSSQL.SqlToGrid(sgGroup3,   MSSQL.OpenSQL, False);
-        MSSQL.StrSQL:='SELECT * FROM ' + Settings.TMIG.ReadString(Settings.GeneralTables, 'MAP7', ''); MSSQL.SqlToGrid(sgPerson,   MSSQL.OpenSQL, False);
+        MSSQL.StrSQL:='SELECT * FROM ' + Settings.TMIG.ReadString(Settings.GeneralTables, 'MAP1', ''); MSSQL.SqlToGrid(sgCoCodes,  MSSQL.ExecSQL, False);
+        MSSQL.StrSQL:='SELECT * FROM ' + Settings.TMIG.ReadString(Settings.GeneralTables, 'MAP4', ''); MSSQL.SqlToGrid(sgPmtTerms, MSSQL.ExecSQL, False);
+        MSSQL.StrSQL:='SELECT * FROM ' + Settings.TMIG.ReadString(Settings.GeneralTables, 'MAP5', ''); MSSQL.SqlToGrid(sgPaidInfo, MSSQL.ExecSQL, False);
+        MSSQL.StrSQL:='SELECT * FROM ' + Settings.TMIG.ReadString(Settings.GeneralTables, 'MAP6', ''); MSSQL.SqlToGrid(sgGroup3,   MSSQL.ExecSQL, False);
+        MSSQL.StrSQL:='SELECT * FROM ' + Settings.TMIG.ReadString(Settings.GeneralTables, 'MAP7', ''); MSSQL.SqlToGrid(sgPerson,   MSSQL.ExecSQL, False);
       finally
         MSSQL.Free;
       end;
