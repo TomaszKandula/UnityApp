@@ -9,16 +9,6 @@
 { Dependencies:     Ararat Synapse (modified third-party) and own libraries                                                                                   }
 { NET Framework:    Required 4.6 or newer (Lync / Skype calls)                                                                                                }
 { LYNC version:     2013 or newer                                                                                                                             }
-{ Initial:          02-12-2016 (ALPHA)                                                                                                                        }
-{ 1st Release:      27-11-2017 (BETA 1)                                                                                                                       }
-{ 2nd Release:      04-12-2017 (BETA 2)                                                                                                                       }
-{ 3rd Release:      18-12-2017 (BETA 3)                                                                                                                       }
-{ 4th Release:      27-12-2017 (BETA 4)                                                                                                                       }
-{ 5th Release:      05-01-2018 (BETA 5)                                                                                                                       }
-{ 6th Release:      19-01-2018 (BETA 6)                                                                                                                       }
-{ 7th Release:      22-02-2018 (BETA 7)                                                                                                                       }
-{ RC:               __-__-2018                                                                                                                                }
-{ RTM:              __-__-2018                                                                                                                                }
 {                                                                                                                                                             }
 { ----------------------------------------------------------------------------------------------------------------------------------------------------------- }
 unit Worker;
@@ -26,7 +16,7 @@ unit Worker;
 interface
 
 uses
-  Windows, Messages, SysUtils, Classes, Diagnostics, Graphics, ADODB, ComObj, Main;
+  Windows, Messages, SysUtils, Classes, Diagnostics, Graphics, ADODB, ComObj, Main, Settings;
 
 { ----------------------------------------------------------- ! SEPARATE CPU THREADS ! ---------------------------------------------------------------------- }
 type
@@ -187,7 +177,7 @@ begin
       Synchronize
         (procedure begin
           { LIST REFRESH }
-          if DataBase.LastError = 0 then InvoiceTracker.Refresh(MainForm.sgInvoiceTracker, UpperCase(Settings.WinUserName));
+          if DataBase.LastError = 0 then InvoiceTracker.Refresh(MainForm.sgInvoiceTracker, UpperCase(MainForm.CurrentUserName));
         end);
 
       { --------------------------------------------------- ! HEAVY DUTY TASK (RUN ASYNC) ! ----------------------------------------------------------------- }
@@ -199,7 +189,7 @@ begin
       on E: Exception do
       begin
         //PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Ready.')));
-        LogText(Settings.AppDir + Settings.LOGFILE, 'Thread [' + IntToStr(IDThread) + ']: Execution of this tread work has been stopped. Error thrown: ' + E.Message + ' (TInvoiceScanner). Exit Code = ' + IntToStr(ExitCode) + '.');
+        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Execution of this tread work has been stopped. Error thrown: ' + E.Message + ' (TInvoiceScanner). Exit Code = ' + IntToStr(ExitCode) + '.');
       end;
     end;
 
@@ -208,7 +198,7 @@ begin
     ActiveThreads[1]:=False;
     THDMili:=StopWatch.ElapsedMilliseconds;
     THDSec:=THDMili / 1000;
-    LogText(Settings.AppDir + Settings.LOGFILE, 'Thread [' + IntToStr(IDThread) + ']: Scanning invoices and sending reminders (if any) executed within: ' +
+    LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Scanning invoices and sending reminders (if any) executed within: ' +
             FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
   end;
 
@@ -236,18 +226,18 @@ begin
         on E: Exception do
         begin
           SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PCHAR('Cannot scan open items source. Please contact IT support.')));
-          LogText(Settings.AppDir + Settings.LOGFILE, 'Thread [' + IntToStr(IDThread) + ']: Execution of this tread work has been stopped. Error thrown: ' + E.Message + ' (TOIScan).');
+          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Execution of this tread work has been stopped. Error thrown: ' + E.Message + ' (TOIScan).');
           SendMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Ready.')));
         end;
       end;
 
     finally
       ActiveThreads[2]:=False;
-      LogText(Settings.AppDir + Settings.LOGFILE, 'Thread [' + IntToStr(IDThread) + ']: TOIThread method called with paremeter = 1.');
+      LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: TOIThread method called with paremeter = 1.');
     end;
   end
     else
-      LogText(Settings.AppDir + Settings.LOGFILE, 'Thread [' + IntToStr(IDThread) + ']: No changes in open items have been found.');
+      LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: No changes in open items have been found.');
 
   { RELEASE THREAD WHEN DONE }
   FreeOnTerminate:=True;
@@ -414,7 +404,7 @@ begin
       begin
         SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PCHAR('Cannot execute ''TTReadAgeView''. Please contact IT support.')));
         PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Ready.')));
-        LogText(Settings.AppDir + Settings.LOGFILE, 'Thread [' + IntToStr(IDThread) + ']: Execution of this tread work has been stopped. Error thrown: ' + E.Message + ' (TReadFromDB).');
+        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Execution of this tread work has been stopped. Error thrown: ' + E.Message + ' (TReadFromDB).');
       end;
     end;
 
@@ -432,7 +422,7 @@ begin
     ActiveThreads[3]:=False;
     THDMili:=StopWatch.ElapsedMilliseconds;
     THDSec:=THDMili / 1000;
-    LogText(Settings.AppDir + Settings.LOGFILE, 'Thread [' + IntToStr(IDThread) + ']: Thread for selected group "' + Database.ArrGroupList[MainForm.GroupListBox.ItemIndex, 1] + '" has been executed within ' +
+    LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Thread for selected group "' + Database.ArrGroupList[MainForm.GroupListBox.ItemIndex, 1] + '" has been executed within ' +
                      FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
   end;
 
@@ -496,7 +486,7 @@ begin
           finally
             SL.Free;
             PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Ready.')));
-            LogText(Settings.AppDir + Settings.LOGFILE, 'Thread [' + IntToStr(IDThread) + ']: Generating age view... done, saved to CSV file ' + MainForm.CSVExport.FileName + '.');
+            LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Generating age view... done, saved to CSV file ' + MainForm.CSVExport.FileName + '.');
           end;
 
         end;
@@ -504,7 +494,7 @@ begin
         { ------------------------------------------------------------------------------------------------------------------------------------------ SQL UPDATE }
         if not (MainForm.cbDump.Checked) then
         begin
-          LogText(Settings.AppDir + Settings.LOGFILE, 'Thread [' + IntToStr(IDThread) + ']: Generating age view... done, passing to SQL database...');
+          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Generating age view... done, passing to SQL database...');
           PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Performing SQL transaction...')));
 
           AgeView.Write('tbl_snapshots', IDThread);
@@ -524,7 +514,7 @@ begin
         on E: Exception do
         begin
           SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PCHAR('Cannot generate age view properly. Please contact IT support.')));
-          LogText(Settings.AppDir + Settings.LOGFILE, 'Thread [' + IntToStr(IDThread) + ']: Execution of this tread work has been stopped. Error thrown: ' + E.Message + ' (TDBAge).');
+          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Execution of this tread work has been stopped. Error thrown: ' + E.Message + ' (TDBAge).');
           PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Ready.')));
         end;
       end;
@@ -533,7 +523,7 @@ begin
       ActiveThreads[4]:=False;
       THDMili:=StopWatch.ElapsedMilliseconds;
       THDSec:=THDMili / 1000;
-      LogText(Settings.AppDir + Settings.LOGFILE, 'Thread [' + IntToStr(IDThread) + ']: Age View thread has been executed within ' +
+      LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Age View thread has been executed within ' +
                        FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
     end;
   end;
@@ -563,15 +553,15 @@ begin
     try
       if Database.LastError = 0 then InvoiceTracker.Refresh(MainForm.sgInvoiceTracker, pMode)
         else
-          LogText(Settings.AppDir + Settings.LOGFILE, 'Thread [' + IntToStr(IDThread) + ']: Cannot refresh Invoice Tracker list. Database connection has been lost.');
-      LogText(Settings.AppDir + Settings.LOGFILE, 'Thread [' + IntToStr(IDThread) + ']: Refresh Invoice Tracker list with mode = ' + pMode + ' has ended successfully.');
+          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Cannot refresh Invoice Tracker list. Database connection has been lost.');
+      LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Refresh Invoice Tracker list with mode = ' + pMode + ' has ended successfully.');
 
     except
       on E: Exception do
       begin
         SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PCHAR('Cannot refresh Invoice Tracker''s list. Please contact IT support.')));
         PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Ready.')));
-        LogText(Settings.AppDir + Settings.LOGFILE, 'Thread [' + IntToStr(IDThread) + ']: Execution of this tread work has been stopped. Error thrown: ' + E.Message + ' (TInvoiceTracker).');
+        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Execution of this tread work has been stopped. Error thrown: ' + E.Message + ' (TInvoiceTracker).');
       end;
 
     end;
@@ -645,10 +635,11 @@ var
   THDMili:    extended;
   THDSec:     extended;
   StopWatch:  TStopWatch;
+  AppSettings:  TSettings;
 begin
   IDThread:=TTReadOpenItems.CurrentThread.ThreadID;
   ActiveThreads[7]:=True;
-
+  AppSettings:=TSettings.Create(APPNAME);
   try
     StopWatch:=TStopWatch.StartNew;
 
@@ -673,10 +664,8 @@ begin
           MainForm.tcKPIoverdue.Caption    :='0';
           MainForm.tcKPIunallocated.Caption:='0';
           { --------------------------------------------------------------------------------------------------------------------------------------- EVENT LOG }
-          LogText(Settings.AppDir + Settings.LOGFILE, 'Thread [' + IntToStr(IDThread) + ']: Exclude accounts below or equal ' +
-            Settings.TMIG.ReadString(Settings.OpenItemsData, 'HEADER' + IntToStr(Settings.TMIG.ReadInteger(Settings.OpenItemsData, 'NRCUTOFFPOS', 0)), '') + ' number: ' + IntToStr(Settings.TMIG.ReadInteger(Settings.OpenItemsData, 'NRCUTOFFNUM', 0)) + '.');
-          LogText(Settings.AppDir + Settings.LOGFILE, 'Thread [' + IntToStr(IDThread) + ']: Exclude accounts that contains "' + Settings.TMIG.ReadString(Settings.OpenItemsData, 'TXCUTOFFTXT', '') + '" in column ' +
-            Settings.TMIG.ReadString(Settings.OpenItemsData, 'HEADER' + IntToStr(Settings.TMIG.ReadInteger(Settings.OpenItemsData, 'TXCUTOFFPOS', 0)), '') + '.');
+          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Exclude accounts below or equal ' + AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER' + IntToStr(AppSettings.TMIG.ReadInteger(OpenItemsData, 'NRCUTOFFPOS', 0)), '') + ' number: ' + IntToStr(AppSettings.TMIG.ReadInteger(OpenItemsData, 'NRCUTOFFNUM', 0)) + '.');
+          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Exclude accounts that contains "' + AppSettings.TMIG.ReadString(OpenItemsData, 'TXCUTOFFTXT', '') + '" in column ' + AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER' + IntToStr(AppSettings.TMIG.ReadInteger(OpenItemsData, 'TXCUTOFFPOS', 0)), '') + '.');
         end);
 
       { -------------------------------------------------- ! HEAVY DUTY TASK (RUN ASYNC) ! ------------------------------------------------------------------ }
@@ -716,16 +705,17 @@ begin
       on E: Exception do
       begin
         SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PCHAR('Cannot load open items. Please contact IT support.')));
-        LogText(Settings.AppDir + Settings.LOGFILE, 'Thread [' + IntToStr(IDThread) + ']: Execution of this tread work has been stopped. Error thrown: ' + E.Message + ' (TOIThread).');
+        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Execution of this tread work has been stopped. Error thrown: ' + E.Message + ' (TOIThread).');
       end;
     end;
 
   finally
+    AppSettings.Free;
     ActiveThreads[7]:=False;
     PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Ready.')));
     THDMili:=StopWatch.ElapsedMilliseconds;
     THDSec:=THDMili / 1000;
-    LogText(Settings.AppDir + Settings.LOGFILE, 'Thread [' + IntToStr(IDThread) + ']: Open Items loading thread has been executed within ' +
+    LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Open Items loading thread has been executed within ' +
                      FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
   end;
 
@@ -782,7 +772,7 @@ begin
         on E: Exception do
         begin
           SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PCHAR('Read/Write function of Address Book failed. Please contact IT support.')));
-          LogText(Settings.AppDir + Settings.LOGFILE, 'Thread [' + IntToStr(AddressBook.idThd) + ']: Execution of this tread work has been stopped. Error thrown: ' + E.Message + ' (TABThread).');
+          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(AddressBook.idThd) + ']: Execution of this tread work has been stopped. Error thrown: ' + E.Message + ' (TABThread).');
         end;
       end;
 

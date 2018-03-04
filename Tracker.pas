@@ -9,16 +9,6 @@
 { Dependencies:     Ararat Synapse (modified third-party) and own libraries                                                                                   }
 { NET Framework:    Required 4.6 or newer (Lync / Skype calls)                                                                                                }
 { LYNC version:     2013 or newer                                                                                                                             }
-{ Initial:          02-12-2016 (ALPHA)                                                                                                                        }
-{ 1st Release:      27-11-2017 (BETA 1)                                                                                                                       }
-{ 2nd Release:      04-12-2017 (BETA 2)                                                                                                                       }
-{ 3rd Release:      18-12-2017 (BETA 3)                                                                                                                       }
-{ 4th Release:      27-12-2017 (BETA 4)                                                                                                                       }
-{ 5th Release:      05-01-2018 (BETA 5)                                                                                                                       }
-{ 6th Release:      19-01-2018 (BETA 6)                                                                                                                       }
-{ 7th Release:      22-02-2018 (BETA 7)                                                                                                                       }
-{ RC:               __-__-2018                                                                                                                                }
-{ RTM:              __-__-2018                                                                                                                                }
 {                                                                                                                                                             }
 { ----------------------------------------------------------------------------------------------------------------------------------------------------------- }
 unit Tracker;
@@ -75,15 +65,19 @@ var
 implementation
 
 uses
-  Model, SQL, Worker;
+  Model, SQL, Worker, Settings;
 
 {$R *.dfm}
 
 { -------------------------------------------------------------- ! EXECUTE ON CREATE ! ---------------------------------------------------------------------- }
 procedure TTrackerForm.FormCreate(Sender: TObject);
+var
+  AppSettings:  TSettings;
 begin
+  AppSettings:=TSettings.Create(APPNAME);
   { ------------------------------------------------------------------------------------------------------------------------------------------ WINDOW CAPTION }
-  TrackerForm.Caption:=Settings.TMIG.ReadString(Settings.ApplicationDetails, 'WND_TRACKER', Settings.APPNAME);
+  TrackerForm.Caption:=AppSettings.TMIG.ReadString(ApplicationDetails, 'WND_TRACKER', APPNAME);
+  FreeAndNil(AppSettings);
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------------- ON SHOW }
@@ -119,6 +113,7 @@ end;
 { ---------------------------------------------------------------------------------------------------------------------------------- RETRIVE AND DISPLAY DATA }
 procedure TTrackerForm.GetData;
 var
+  AppSettings: TSettings;
   SetKeys:     TStringList;
   TblTracker:  TTracker;
   iCNT:        integer;
@@ -126,15 +121,17 @@ begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   Screen.Cursor:=crHourGlass;
   SetKeys:=TStringList.Create();
+  AppSettings:=TSettings.Create(APPNAME);
   { ----------------------------------------------------------------------------------------------------------------------------------------- LIST OF LAYOUTS }
   try
-    Settings.TMIG.ReadSection(Settings.VariousLayouts, SetKeys);
+    AppSettings.TMIG.ReadSection(VariousLayouts, SetKeys);
     for iCNT:=0 to SetKeys.Count - 1 do
       { ADD TO LIST ONLY THOSE FOR WHICH KEY EQUALS 'TRACKER' }
       if MidStr(SetKeys.Strings[iCNT], 1, 7) = 'TRACKER' then
-        if Settings.TMIG.ReadString(Settings.VariousLayouts, 'TRACKER' + IntToStr(iCNT), '') <> '' then
-          LayoutList.Items.Add(Settings.TMIG.ReadString(Settings.VariousLayouts, 'TRACKER' + IntToStr(iCNT), ''));
+        if AppSettings.TMIG.ReadString(VariousLayouts, 'TRACKER' + IntToStr(iCNT), '') <> '' then
+          LayoutList.Items.Add(AppSettings.TMIG.ReadString(VariousLayouts, 'TRACKER' + IntToStr(iCNT), ''));
   finally
+    AppSettings.Free;
     SetKeys.Free;
     if LayoutList.Items.Count > 0 then LayoutList.ItemIndex:=0;
   end;
@@ -148,14 +145,14 @@ begin
     TblTracker.COCODE:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('CO CODE', 1, 1), MainForm.sgAgeView.Row];
     TblTracker.BRANCH:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('AGENT'  , 1, 1), MainForm.sgAgeView.Row];
     { READ FROM ADDRESS BOOK }
-    TblTracker.TableSelect:=TblTracker.tbl_addressbook;
+    TblTracker.TableSelect:=tbl_addressbook;
     if TblTracker.Read then
     begin
       if TblTracker.EMAILS      <> '' then TextMailTo.Text:=TblTracker.EMAILS;
       if TblTracker.ESTATEMENTS <> '' then TextStatTo.Text:=TblTracker.ESTATEMENTS;
     end;
     { READ FROM COMPANY TABLE }
-    TblTracker.TableSelect:=TblTracker.tbl_company;
+    TblTracker.TableSelect:=tbl_company;
     if TblTracker.Read then
     begin
       if TblTracker.LEGALTO <> '' then TextLegalTo.Text:=TblTracker.LEGALTO;

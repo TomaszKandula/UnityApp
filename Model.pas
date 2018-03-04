@@ -9,16 +9,6 @@
 { Dependencies:     Ararat Synapse (modified third-party) and own libraries                                                                                   }
 { NET Framework:    Required 4.6 or newer (Lync / Skype calls)                                                                                                }
 { LYNC version:     2013 or newer                                                                                                                             }
-{ Initial:          02-12-2016 (ALPHA)                                                                                                                        }
-{ 1st Release:      27-11-2017 (BETA 1)                                                                                                                       }
-{ 2nd Release:      04-12-2017 (BETA 2)                                                                                                                       }
-{ 3rd Release:      18-12-2017 (BETA 3)                                                                                                                       }
-{ 4th Release:      27-12-2017 (BETA 4)                                                                                                                       }
-{ 5th Release:      05-01-2018 (BETA 5)                                                                                                                       }
-{ 6th Release:      19-01-2018 (BETA 6)                                                                                                                       }
-{ 7th Release:      22-02-2018 (BETA 7)                                                                                                                       }
-{ RC:               __-__-2018                                                                                                                                }
-{ RTM:              __-__-2018                                                                                                                                }
 {                                                                                                                                                             }
 { ----------------------------------------------------------------------------------------------------------------------------------------------------------- }
 unit Model;  //REFACTOR!! remove polymorphism, one table one class with properties as columns
@@ -42,28 +32,6 @@ type
     property ManyLines   : boolean    read pManyLines   write pManyLines;
     property TableSelect : string     read pTableSelect write pTableSelect;
     property DataSet     : _Recordset read pDataSet     write pDataSet;
-    { SINGLE }
-    const    tbl_daily       = 'tbl_daily';
-    const    tbl_general     = 'tbl_general';
-    { MANY-TO-MANY }
-    const    tbl_company     = 'tbl_company';
-    const    tbl_managers    = 'tbl_managers';
-    const    tbl_teamleaders = 'tbl_teamleaders';
-    { ONE-TO-MANY }
-    const    tbl_invoices    = 'tbl_invoices';
-    const    tbl_tracker     = 'tbl_tracker';
-    { SINGLE }
-    const    tbl_group3      = 'tbl_group3';
-    const    tbl_paidinfo    = 'tbl_paidinfo';
-    const    tbl_pmtterms    = 'tbl_pmtterms';
-    const    tbl_person      = 'tbl_person';
-    { ONE-TO-MANY }
-    const    tbl_UAC         = 'tbl_UAC';
-    const    tbl_groups      = 'tbl_groups';
-    { SINGLE }
-    const    tbl_addressbook = 'tbl_addressbook';
-    { SINGLE }
-    const    tbl_snapshots   = 'tbl_snapshots';
    published
     function Read   : boolean; virtual; abstract;
     function Write  : boolean; virtual; abstract;
@@ -286,7 +254,7 @@ begin
   pGROUP_ID    :=Database.ArrGroupList[MainForm.GroupListBox.ItemIndex, 0];
   pCUID        :='0';
   pSTAMP       :=DateTimeToStr(Now);
-  pUSER_ALIAS  :=UpperCase(Settings.WinUserName);
+  pUSER_ALIAS  :=UpperCase(MainForm.CurrentUserName);
   pEMAIL       :='0';
   pCALLEVENT   :='0';
   pCALLDURATION:='0';
@@ -343,7 +311,7 @@ begin
       end;
     except
       on E: Exception do
-        LogText(Settings.AppDir + Settings.LogFile, 'Thread [' + IntToStr(idThd) + ']: Cannot read from "' + tbl_daily + '". Error has been thrown: ' + E.Message);
+        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Cannot read from "' + tbl_daily + '". Error has been thrown: ' + E.Message);
     end;
   finally
     MSSQL.Free;
@@ -421,7 +389,7 @@ begin
       end;
     except
       on E: Exception do
-        LogText(Settings.AppDir + Settings.LogFile, 'Thread [' + IntToStr(idThd) + ']: Cannot write to "' + tbl_daily + '". Error has been thrown: ' + E.Message);
+        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Cannot write to "' + tbl_daily + '". Error has been thrown: ' + E.Message);
     end;
   finally
     MSSQL.Free;
@@ -437,7 +405,7 @@ begin
   pidThd     :=0;
   pCUID      :='0';
   pSTAMP     :=DateTimeToStr(Now);
-  pUSER_ALIAS:=UpperCase(Settings.WinUserName);
+  pUSER_ALIAS:=UpperCase(MainForm.CurrentUserName);
   pFIXCOMMENT:=' ';
   pFOLLOWUP  :=' ';
 end;
@@ -479,7 +447,7 @@ begin
       end;
     except
       on E: Exception do
-        LogText(Settings.AppDir + Settings.LogFile, 'Thread [' + IntToStr(idThd) + ']: Cannot read from "' + tbl_general + '". Error has been thrown: ' + E.Message);
+        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Cannot read from "' + tbl_general + '". Error has been thrown: ' + E.Message);
     end;
   finally
     MSSQL.Free;
@@ -538,7 +506,7 @@ begin
       end;
     except
       on E: Exception do
-        LogText(Settings.AppDir + Settings.LogFile, 'Thread [' + IntToStr(idThd) + ']: Cannot read from "' + tbl_general + '". Error has been thrown: ' + E.Message);
+        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Cannot read from "' + tbl_general + '". Error has been thrown: ' + E.Message);
     end;
   finally
     MSSQL.Free;

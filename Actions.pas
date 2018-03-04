@@ -9,16 +9,6 @@
 { Dependencies:     Ararat Synapse (modified third-party) and own libraries                                                                                   }
 { NET Framework:    Required 4.6 or newer (Lync / Skype calls)                                                                                                }
 { LYNC version:     2013 or newer                                                                                                                             }
-{ Initial:          02-12-2016 (ALPHA)                                                                                                                        }
-{ 1st Release:      27-11-2017 (BETA 1)                                                                                                                       }
-{ 2nd Release:      04-12-2017 (BETA 2)                                                                                                                       }
-{ 3rd Release:      18-12-2017 (BETA 3)                                                                                                                       }
-{ 4th Release:      27-12-2017 (BETA 4)                                                                                                                       }
-{ 5th Release:      05-01-2018 (BETA 5)                                                                                                                       }
-{ 6th Release:      19-01-2018 (BETA 6)                                                                                                                       }
-{ 7th Release:      22-02-2018 (BETA 7)                                                                                                                       }
-{ RC:               __-__-2018                                                                                                                                }
-{ RTM:              __-__-2018                                                                                                                                }
 {                                                                                                                                                             }
 { ----------------------------------------------------------------------------------------------------------------------------------------------------------- }
 unit Actions;  // REFCTOR ALL!!!
@@ -130,7 +120,7 @@ var
 implementation
 
 uses
-  Model, SQL, Worker, Calendar;
+  Model, SQL, Worker, Calendar, Settings;
 
 const
   NA:  string = 'Not found!';
@@ -424,6 +414,7 @@ var
   LBUAddress:  string;
   Telephone:   string;
   SL:          TStringList;
+  AppSettings: TSettings;
 { --------------------------------------------------------------------------------------------------------------------------- RETURN EMAILS FROM TRACKER LIST }
 function RetriveEmails(var EmailFr: string; var EmailTo: string; SG: TStringGrid): boolean;
 var
@@ -479,6 +470,7 @@ begin
   Screen.Cursor:=crHourGlass;
   CustName:=DataHandler.CustName;
   SL:=TStringList.Create;
+  AppSettings:=TSettings.Create(APPNAME);
   { -------------------------------------------------------------------------------------------------------- HTML TABLE WITH COLUMNS AND PLACEHOLDER FOR ROWS }
   HTMLTable:='<table class="data">'                   +#13#10+
              '<!-- HEADERS -->'                       +#13#10+
@@ -525,7 +517,7 @@ begin
     { ----------------------------------------------------------------------------------------------------------------------------------- FILL THE STATEMENT  }
     try
       { --------------------------------------------------------------------------------------------------------------------------------------------- PREPARE }
-      SL.LoadFromFile(Settings.LayoutDir + 'all_statement_1.html');
+      SL.LoadFromFile(AppSettings.LayoutDir + 'all_statement_1.html');
       { ----------------------------------------------------------------------------------------------------------------------- SEND AN E-MAIL WITH STATEMENT }
       if RetriveEmails(EmailFr, EmailTo, MainForm.sgInvoiceTracker) then
       begin
@@ -572,6 +564,7 @@ begin
         else
           MainForm.MsgCall(2, 'Cannot send statement from e-mail address: ' + EmailFr + '. Please make sure that this customer is registered on Invoice Tracker list.');
     finally
+      AppSettings.Free;
       SL.Free;
       Screen.Cursor:=crDefault;
     end;
@@ -580,24 +573,31 @@ end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------- MAKE PHONE CALL }
 procedure TDataHandler.MakePhoneCall;
+var
+  AppSettings:  TSettings;
 begin
-  { CHECK FOR 'LYNCCALL.EXE' }
-  if not FileExists(Settings.AppDir + 'lynccall.exe') then
-  begin
-    MainForm.MsgCall(3, Settings.APPNAME + ' cannot find ''lynccall.exe''. Please contact IT support.');
-    Exit;
+  AppSettings:=TSettings.Create(APPNAME);
+  try
+    { CHECK FOR 'LYNCCALL.EXE' }
+    if not FileExists(AppSettings.AppDir + LyncCall) then
+    begin
+      MainForm.MsgCall(3, APPNAME + ' cannot find ''lynccall.exe''. Please contact IT support.');
+      Exit;
+    end;
+    { CHECK IF LYNC/SKYPE IS RUNNING }
+    if not ActionsForm.GetRunningAplications('lync.exe') then
+    begin
+      MainForm.MsgCall(3, APPNAME + ' cannot find running Microsoft Skype/Lync for Business. Please open it and try again.');
+      Exit;
+    end;
+    { RUN LYNC WITH GIVEN PHONE NUMBER }
+    ShellExecute(ActionsForm.Handle, 'open', PChar(AppSettings.AppDir + LyncCall), PChar(ActionsForm.Cust_Phone.Text), nil, SW_SHOWNORMAL);
+    if ActionsForm.DailyCom.Text = '' then ActionsForm.DailyCom.Text:='Called customer today.'
+      else
+        ActionsForm.DailyCom.Text:=ActionsForm.DailyCom.Text + #13#10 + 'Called customer today.';
+  finally
+    AppSettings.Free;
   end;
-  { CHECK IF LYNC/SKYPE IS RUNNING }
-  if not ActionsForm.GetRunningAplications('lync.exe') then
-  begin
-    MainForm.MsgCall(3, Settings.APPNAME + ' cannot find running Microsoft Skype/Lync for Business. Please open it and try again.');
-    Exit;
-  end;
-  { RUN LYNC WITH GIVEN PHONE NUMBER }
-  ShellExecute(ActionsForm.Handle, 'open', PChar(Settings.AppDir + 'lynccall.exe '), PChar(ActionsForm.Cust_Phone.Text), nil, SW_SHOWNORMAL);
-  if ActionsForm.DailyCom.Text = '' then ActionsForm.DailyCom.Text:='Called customer today.'
-    else
-      ActionsForm.DailyCom.Text:=ActionsForm.DailyCom.Text + #13#10 + 'Called customer today.';
 end;
 
 { ----------------------------------------------------------- ! MAIN THREAD METHODS ! ----------------------------------------------------------------------- }
@@ -633,29 +633,33 @@ end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------- ON CREATE }
 procedure TActionsForm.FormCreate(Sender: TObject);
+var
+  AppSettings:  TSettings;
 begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   DataHandler:=TDataHandler.Create;
   DataHandler.IsEdit:=False;
+  AppSettings:=TSettings.Create(APPNAME);
   { ------------------------------------------------------------------------------------------------------------------------------------------ WINDOW CAPTION }
-  ActionsForm.Caption:=Settings.TMIG.ReadString(Settings.ApplicationDetails, 'WND_TRANSACTIONS', Settings.APPNAME);
+  ActionsForm.Caption:=AppSettings.TMIG.ReadString(ApplicationDetails, 'WND_TRANSACTIONS', APPNAME);
   { ---------------------------------------------------------------------------------------------------------------------- SETUP COLUMNS HEADERS | OPEN ITEMS }
   OpenItemsGrid.RowCount:=2;
   OpenItemsGrid.ColCount:=14;
   OpenItemsGrid.Cols[0].Text :='';
-  OpenItemsGrid.Cols[1].Text :=Settings.TMIG.ReadString(Settings.OpenItemsData, 'HEADER11', 'InvoNo');
-  OpenItemsGrid.Cols[2].Text :=Settings.TMIG.ReadString(Settings.OpenItemsData, 'HEADER6',  'OpenAm');
-  OpenItemsGrid.Cols[3].Text :=Settings.TMIG.ReadString(Settings.OpenItemsData, 'HEADER10', 'Am');
-  OpenItemsGrid.Cols[4].Text :=Settings.TMIG.ReadString(Settings.OpenItemsData, 'HEADER5',  'OpenCurAm');
-  OpenItemsGrid.Cols[5].Text :=Settings.TMIG.ReadString(Settings.OpenItemsData, 'HEADER9',  'CurAm');
-  OpenItemsGrid.Cols[6].Text :=Settings.TMIG.ReadString(Settings.OpenItemsData, 'HEADER8',  'ISO');
-  OpenItemsGrid.Cols[7].Text :=Settings.TMIG.ReadString(Settings.OpenItemsData, 'HEADER12', 'DueDt');
-  OpenItemsGrid.Cols[8].Text :=Settings.TMIG.ReadString(Settings.OpenItemsData, 'HEADER4',  'VoDt');
-  OpenItemsGrid.Cols[9].Text :=Settings.TMIG.ReadString(Settings.OpenItemsData, 'HEADER27', 'ValDt');
-  OpenItemsGrid.Cols[10].Text:=Settings.TMIG.ReadString(Settings.OpenItemsData, 'HEADER20', 'Ctrl');
-  OpenItemsGrid.Cols[11].Text:=Settings.TMIG.ReadString(Settings.OpenItemsData, 'HEADER30', 'Txt');
-  OpenItemsGrid.Cols[12].Text:=Settings.TMIG.ReadString(Settings.OpenItemsData, 'HEADER34', 'PmtStat');
-  OpenItemsGrid.Cols[13].Text:=Settings.TMIG.ReadString(Settings.OpenItemsData, 'HEADER33', 'AddTxt');
+  OpenItemsGrid.Cols[1].Text :=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER11', 'InvoNo');
+  OpenItemsGrid.Cols[2].Text :=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER6',  'OpenAm');
+  OpenItemsGrid.Cols[3].Text :=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER10', 'Am');
+  OpenItemsGrid.Cols[4].Text :=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER5',  'OpenCurAm');
+  OpenItemsGrid.Cols[5].Text :=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER9',  'CurAm');
+  OpenItemsGrid.Cols[6].Text :=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER8',  'ISO');
+  OpenItemsGrid.Cols[7].Text :=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER12', 'DueDt');
+  OpenItemsGrid.Cols[8].Text :=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER4',  'VoDt');
+  OpenItemsGrid.Cols[9].Text :=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER27', 'ValDt');
+  OpenItemsGrid.Cols[10].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER20', 'Ctrl');
+  OpenItemsGrid.Cols[11].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER30', 'Txt');
+  OpenItemsGrid.Cols[12].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER34', 'PmtStat');
+  OpenItemsGrid.Cols[13].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER33', 'AddTxt');
+  FreeAndNil(AppSettings);
   { -------------------------------------------------------------------------------------------------------------------- SETUP COLUMNS HEADERS | HISTORY GRID }
   HistoryGrid.RowCount:=2;
   HistoryGrid.ColCount:=11;
@@ -724,7 +728,7 @@ end;
 { ----------------------------------------------------------------------------------------------------------------------------------------- DRAW SELECTED ROW }
 procedure TActionsForm.HistoryGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-  HistoryGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, Settings.SELCOLOR, clBlack, clWhite, True);
+  HistoryGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------- COLOR NUMBERS AND SELECTION }
@@ -734,7 +738,7 @@ begin
   (* CALL SG_DRAWSELECTED BEFORE SG_COLORVALUES *)
 
   { DRAW SELECTED | SKIP HEADERS }
-  OpenItemsGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, Settings.SELCOLOR, clBlack, clWhite, True);
+  OpenItemsGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
 
   { ONLY FOR COLUMNS 2..5 }
   if ( (ACol >= 2) and (ACol <= 5) ) and (ARow > 0) then OpenItemsGrid.ColorValues(ARow, ACol, Rect, clRed, clBlack);
@@ -800,7 +804,7 @@ begin
         DailyComment.Read;
         { UPDATE ITEMS' VALUES }
         DailyComment.STAMP     :=DateTimeToStr(Now);
-        DailyComment.USER_ALIAS:=UpperCase(Settings.WinUserName);
+        DailyComment.USER_ALIAS:=UpperCase(MainForm.CurrentUserName);
         DailyComment.FIXCOMMENT:=DailyCom.Text;
         { WRITE TO DATABASE }
         DailyComment.Write;
@@ -848,7 +852,7 @@ begin
         GeneralComment.Read;
         { UPDATE ITEMS' VALUES }
         GeneralComment.STAMP     :=DateTimeToStr(Now);
-        GeneralComment.USER_ALIAS:=UpperCase(Settings.WinUserName);
+        GeneralComment.USER_ALIAS:=UpperCase(MainForm.CurrentUserName);
         GeneralComment.FIXCOMMENT:=GeneralCom.Text;
         { WRITE TO DATABASE }
         GeneralComment.Write;

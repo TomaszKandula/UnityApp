@@ -9,16 +9,6 @@
 { Dependencies:     Ararat Synapse (modified third-party) and own libraries                                                                                   }
 { NET Framework:    Required 4.6 or newer (Lync / Skype calls)                                                                                                }
 { LYNC version:     2013 or newer                                                                                                                             }
-{ Initial:          02-12-2016 (ALPHA)                                                                                                                        }
-{ 1st Release:      27-11-2017 (BETA 1)                                                                                                                       }
-{ 2nd Release:      04-12-2017 (BETA 2)                                                                                                                       }
-{ 3rd Release:      18-12-2017 (BETA 3)                                                                                                                       }
-{ 4th Release:      27-12-2017 (BETA 4)                                                                                                                       }
-{ 5th Release:      05-01-2018 (BETA 5)                                                                                                                       }
-{ 6th Release:      19-01-2018 (BETA 6)                                                                                                                       }
-{ 7th Release:      22-02-2018 (BETA 7)                                                                                                                       }
-{ RC:               __-__-2018                                                                                                                                }
-{ RTM:              __-__-2018                                                                                                                                }
 {                                                                                                                                                             }
 { ----------------------------------------------------------------------------------------------------------------------------------------------------------- }
 unit SQL;
@@ -35,16 +25,6 @@ type
   private
     var         pStrSQL      : string;
     var         pADOCon      : TADOConnection;
-    const       CRLF         : string = #13#10;
-    const       COMMA        : char   = #44;
-    const       SPACE        : char   = #32;
-    const       TAB          : char   = #9;
-    const       QUOTE        : char   = #39;
-    const       INSERT       : string = 'INSERT INTO';
-    const       SELECT       : string = 'SELECT';
-    const       UPDATE       : string = 'UPDATE';
-    const       _SET         : string = 'SET';
-    const       UNION        : string = 'UNION ALL';
   public
     property    StrSQL  : string         read pStrSQL write pStrSQL;
     property    ADOCon  : TADOConnection read pADOCon write pADOCon;
@@ -54,8 +34,8 @@ type
     function    CleanStr(Text: string; Quoted: boolean): string;
     function    ExecSQL: _Recordset;
     function    GridToSql(Grid: TStringGrid; tblName: string; tblColumns: string; sRow: integer; sCol: integer): string;
-    function    SqlToGrid(var Grid: TStringGrid; RS: _Recordset; AutoNoCol: boolean): boolean;
     function    ArrayToSql(Table: TStrArray; tblName: string; tblColumns: string): string;
+    function    SqlToGrid(var Grid: TStringGrid; RS: _Recordset; AutoNoCol: boolean): boolean;
   end;
 
 { ------------------------------------------------------------- ! IMPLEMENTATION ZONE ! --------------------------------------------------------------------- }
@@ -89,7 +69,7 @@ end;
 
 { ------------------------------------------------------------------------------------------------------------------- EXECUTE DML OR DDL AND RETURN RECORDSET }
 
-(* EXECUTE DML, DDL, TCL AND DCL STATEMENTS, MORE HERE: https://www.geeksforgeeks.org/sql-ddl-dml-dcl-tcl-commands/ *)
+(* EXECUTE DML, DDL, TCL AND DCL STATEMENTS *)
 
 (* IMPORTANT NOTE: INSERTING RECORDS USING 'VALUES' KEYWORD HAS LIMIT UP TO 1000 RECORDS  *)
 (*                 TO INSERT MORE THAN 1000 RECORDS WITH SINGLE QUERY STATEMENT, WE CAN   *)
@@ -140,7 +120,7 @@ begin
   Result:='';
   LEAD:=INSERT + SPACE + tblName + ' ( ' + tblColumns + ' ) ' + CRLF;
   mRows:=High(Table) - 1;
-  mCols:=29;
+  mCols:=High(Table[1]);
   { ------------------------------------------------------------------------------------------------------------------------------------------------ MAKE SQL }
   for iCNT:=0 to mRows do
   begin

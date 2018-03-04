@@ -64,8 +64,6 @@ implementation
 {                                                                                                                                                             }
 { ### EOL --------------------------------------------------------------------------------------------------------------------------------------------------- }
 
-(* MOVE BOTH ENCRYPTION AND DECRYPTION PROCEDURES TO THE SEPARATE DLL *)
-
 { ----------------------------------------------------------------------------------------------------------------------------------- ENCRYPT & COMPUTE CRC32 }
 procedure Encode(filename: string; key: integer; mode: boolean; var error: integer; var MINI: TMemIniFile);
 var

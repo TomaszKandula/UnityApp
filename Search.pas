@@ -9,16 +9,6 @@
 { Dependencies:     Ararat Synapse (modified third-party) and own libraries                                                                                   }
 { NET Framework:    Required 4.6 or newer (Lync / Skype calls)                                                                                                }
 { LYNC version:     2013 or newer                                                                                                                             }
-{ Initial:          02-12-2016 (ALPHA)                                                                                                                        }
-{ 1st Release:      27-11-2017 (BETA 1)                                                                                                                       }
-{ 2nd Release:      04-12-2017 (BETA 2)                                                                                                                       }
-{ 3rd Release:      18-12-2017 (BETA 3)                                                                                                                       }
-{ 4th Release:      27-12-2017 (BETA 4)                                                                                                                       }
-{ 5th Release:      05-01-2018 (BETA 5)                                                                                                                       }
-{ 6th Release:      19-01-2018 (BETA 6)                                                                                                                       }
-{ 7th Release:      22-02-2018 (BETA 7)                                                                                                                       }
-{ RC:               __-__-2018                                                                                                                                }
-{ RTM:              __-__-2018                                                                                                                                }
 {                                                                                                                                                             }
 { ----------------------------------------------------------------------------------------------------------------------------------------------------------- }
 unit Search;
@@ -68,7 +58,7 @@ var
 implementation
 
 uses
-  Filter;
+  Filter, Settings;
 
 {$R *.dfm}
 
@@ -175,9 +165,13 @@ end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------- ON CREATE }
 procedure TSearchForm.FormCreate(Sender: TObject);
+var
+  AppSettings:  TSettings;
 begin
+  AppSettings:=TSettings.Create(APPNAME);
   { ------------------------------------------------------------------------------------------------------------------------------------------ WINDOW CAPTION }
-  SearchForm.Caption:=Settings.TMIG.ReadString(Settings.ApplicationDetails, 'WND_SEARCH', Settings.APPNAME);
+  SearchForm.Caption:=AppSettings.TMIG.ReadString(ApplicationDetails, 'WND_SEARCH', APPNAME);
+  FreeAndNil(AppSettings);
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   SGrid     :=nil;
   SColName  :='';
