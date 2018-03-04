@@ -78,7 +78,7 @@ var
   AppSettings:  TSettings;
 begin
   { ------------------------------------------------------------------------------------------------------------------------------------------ WINDOW CAPTION }
-  AppSettings:=TSettings.Create(APPNAME);
+  AppSettings:=TSettings.Create;
   CalendarForm.Caption:=AppSettings.TMIG.ReadString(ApplicationDetails, 'WND_CALENDAR', APPNAME);
   FreeAndNil(AppSettings);
 end;

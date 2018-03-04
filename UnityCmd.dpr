@@ -1,19 +1,14 @@
 ﻿{ ----------------------------------------------------------------------------------------------------------------------------------------------------------- }
 {                                                                                                                                                             }
-{ Name:             Unity for Debt Management.                                                                                                                }
-{ Version:          1.0                                                                                                                                       }
-{ (C)(R):           Tomasz Kandula.                                                                                                                           }
-{ Originate:        10-07-2016                                                                                                                                }
-{ IDE:              Delphi XE2                                                                                                                                }
-{ Initial:          10-07-2016 (ALPHA)                                                                                                                        }
-{ 1st Release:      27-11-2017 (BETA 1)                                                                                                                       }
-{ 2nd Release:      04-12-2017 (BETA 2)                                                                                                                       }
-{ 3rd Release:      18-12-2017 (BETA 3)                                                                                                                       }
-{ 4th Release:      27-12-2017 (BETA 4)                                                                                                                       }
-{ 5th Release:      05-01-2018 (BETA 5)                                                                                                                       }
-{ 6th Release:      29-01-2018 (BETA 6)                                                                                                                       }
-{ RC:               19-02-2018                                                                                                                                }
-{ RTM:              21-03-2018                                                                                                                                }
+{ Name:             Unity for Debt Management                                                                                                                 }
+{ Version:          0.1                                                                                                                                       }
+{ (C)(R):           Tomasz Kandula                                                                                                                            }
+{ Originate:        10-07-2016 (Concept & GUI)                                                                                                                }
+{ IDE:              Delphi XE2 / Delphi Tokyo                                                                                                                 }
+{ Target:           Microsoft Windows 7 or newer                                                                                                              }
+{ Dependencies:     Ararat Synapse (modified third-party) and own libraries                                                                                   }
+{ NET Framework:    Required 4.6 or newer (Lync / Skype calls)                                                                                                }
+{ LYNC version:     2013 or newer                                                                                                                             }
 {                                                                                                                                                             }
 { ----------------------------------------------------------------------------------------------------------------------------------------------------------- }
 program UnityCmd;

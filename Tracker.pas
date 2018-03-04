@@ -74,7 +74,7 @@ procedure TTrackerForm.FormCreate(Sender: TObject);
 var
   AppSettings:  TSettings;
 begin
-  AppSettings:=TSettings.Create(APPNAME);
+  AppSettings:=TSettings.Create;
   { ------------------------------------------------------------------------------------------------------------------------------------------ WINDOW CAPTION }
   TrackerForm.Caption:=AppSettings.TMIG.ReadString(ApplicationDetails, 'WND_TRACKER', APPNAME);
   FreeAndNil(AppSettings);
@@ -121,7 +121,7 @@ begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   Screen.Cursor:=crHourGlass;
   SetKeys:=TStringList.Create();
-  AppSettings:=TSettings.Create(APPNAME);
+  AppSettings:=TSettings.Create;
   { ----------------------------------------------------------------------------------------------------------------------------------------- LIST OF LAYOUTS }
   try
     AppSettings.TMIG.ReadSection(VariousLayouts, SetKeys);

@@ -67,10 +67,11 @@ const
   SELCOLOR            = $00FFDBB7;
   FONCOLOR            = $006433C9;
 
-  { INDICATORS FOR OBJECTS HOLDING SETTINGS }
+  { SETTINGS FILE ID }
 
   UserConfig          = 1;
   AppConfig           = 2;
+  LicData             = 3;
 
   { SECTION NAMES IN SETTING FILE }
 

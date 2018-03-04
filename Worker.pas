@@ -639,7 +639,7 @@ var
 begin
   IDThread:=TTReadOpenItems.CurrentThread.ThreadID;
   ActiveThreads[7]:=True;
-  AppSettings:=TSettings.Create(APPNAME);
+  AppSettings:=TSettings.Create;
   try
     StopWatch:=TStopWatch.StartNew;
 

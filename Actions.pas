@@ -470,7 +470,7 @@ begin
   Screen.Cursor:=crHourGlass;
   CustName:=DataHandler.CustName;
   SL:=TStringList.Create;
-  AppSettings:=TSettings.Create(APPNAME);
+  AppSettings:=TSettings.Create;
   { -------------------------------------------------------------------------------------------------------- HTML TABLE WITH COLUMNS AND PLACEHOLDER FOR ROWS }
   HTMLTable:='<table class="data">'                   +#13#10+
              '<!-- HEADERS -->'                       +#13#10+
@@ -576,7 +576,7 @@ procedure TDataHandler.MakePhoneCall;
 var
   AppSettings:  TSettings;
 begin
-  AppSettings:=TSettings.Create(APPNAME);
+  AppSettings:=TSettings.Create;
   try
     { CHECK FOR 'LYNCCALL.EXE' }
     if not FileExists(AppSettings.AppDir + LyncCall) then
@@ -639,7 +639,7 @@ begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   DataHandler:=TDataHandler.Create;
   DataHandler.IsEdit:=False;
-  AppSettings:=TSettings.Create(APPNAME);
+  AppSettings:=TSettings.Create;
   { ------------------------------------------------------------------------------------------------------------------------------------------ WINDOW CAPTION }
   ActionsForm.Caption:=AppSettings.TMIG.ReadString(ApplicationDetails, 'WND_TRANSACTIONS', APPNAME);
   { ---------------------------------------------------------------------------------------------------------------------- SETUP COLUMNS HEADERS | OPEN ITEMS }

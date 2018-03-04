@@ -89,6 +89,9 @@ type
     var SqlColumns : TStrArray;
   end;
 
+
+
+
 { --------------------------------------------------------------- ! DATABASE CLASS ! ------------------------------------------------------------------------ }
 type                                                  (* RUN EITHER IN WORKER OR MAIN THREAD *)
   TDataBase = class
@@ -117,6 +120,8 @@ type                                                  (* RUN EITHER IN WORKER OR
     procedure   UACAgeDates(StrGroupID: string);                                     { RUN EITHER IN WORKER OR MAIN THREAD }
     function    UACString(ListPos: integer; CoPos: integer; Mode: integer): string;  { RUN EITHER IN WORKER OR MAIN THREAD }
   end;
+
+
 
 { -------------------------------------------------------------- ! MAILER CLASS ! --------------------------------------------------------------------------- }
 type                                                      (* RUN IN WORKER THREAD ONLY *)
@@ -161,6 +166,8 @@ type                                                       (* RUN IN WORKER THRE
     procedure   Refresh(var SG: TStringGrid; Param: string);
   end;
 
+
+
 { ----------------------------------------------------------- ! ADDRESS BOOK CLASS ! ------------------------------------------------------------------------ }
 type
   TAddressBook = class //refactor!!
@@ -180,6 +187,8 @@ type
     function    ImportCSV: boolean;
     function    ExportCSV: boolean;
   end;
+
+
 
 { ------------------------------------------------------------- ! AGE VIEW CLASS ! -------------------------------------------------------------------------- }
 type                                                   (* RUN EITHER IN WORKER OR MAIN THREAD *)
@@ -214,6 +223,9 @@ type                                                   (* RUN EITHER IN WORKER O
     function    MapData(AgeGrid: TStringGrid; WhichCol: string; tblMap: TStringGrid): string;  //refactor!!
   end;
 
+
+
+
 { ------------------------------------------------------------- ! OPEN ITEMS CLASS ! ------------------------------------------------------------------------ }
 type                                                  (* RUN EITHER IN WORKER OR MAIN THREAD *)
   TOpenItems = class(TObject)
@@ -240,6 +252,10 @@ type                                                  (* RUN EITHER IN WORKER OR
     function    ConvertName(CoNumber: string; Prefix: string; mode: integer): string;  //ok
     function    ReturnKPI(SG: TStringGrid; StrCoCode: string; mode: integer): double;  //refactor!!
   end;
+
+
+
+
 
 { ----------------------------------------------------------------- ! MAIN CLASS ! -------------------------------------------------------------------------- }
 type                                                            (* GUI | MAIN THREAD *)
@@ -1338,7 +1354,7 @@ var
   AppSettings:  TSettings;
   iCNT:         integer;
 begin
-  AppSettings:=TSettings.Create(APPNAME);
+  AppSettings:=TSettings.Create;
   try
     { COLUMN WIDTH }
     for iCNT:=0 to Self.ColCount - 1 do
@@ -1382,7 +1398,7 @@ begin
   ColWidthSec:=TStringList.Create;
   ColOrderSec:=TStringList.Create;
   ColNamesSec:=TStringList.Create;
-  AppSettings:=TSettings.Create(APPNAME);
+  AppSettings:=TSettings.Create;
   try
     AppSettings.TMIP.ReadSection(ColWidthName, ColWidthSec);
     AppSettings.TMIP.ReadSection(ColOrderName, ColOrderSec);
@@ -1605,7 +1621,7 @@ begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   ADOConnect.Connected:=False;
   DataBase.AssignConnString(ErrorShow);
-  AppSettings:=TSettings.Create(APPNAME);
+  AppSettings:=TSettings.Create;
   { --------------------------------------------------------------------------------------------------------------------- SETUP CONNECTION AND TRY TO CONNECT }
   try
     { SETUP CONNESTION STRING AND PROVIDER }
@@ -1656,7 +1672,7 @@ var
   dbConnNoPwd:  string;
 begin
   Result:=True;
-  AppSettings:=TSettings.Create(APPNAME);
+  AppSettings:=TSettings.Create;
   try
     try
       if AppSettings.TMIG.ReadString(DatabaseSetup,'ACTIVE','') = 'MSSQL' then
@@ -1994,7 +2010,7 @@ var
 begin
   BankDetails:=MainForm.sgInvoiceTracker.Cells[24, iCNT];
   SL:=TStringList.Create;
-  AppSettings:=TSettings.Create(APPNAME);
+  AppSettings:=TSettings.Create;
   try
     { -------------------------------------------------------------------------------------------------------------------------------------- READ LAYOUT FORM }
     if ReminderNumber = 4 then SL.LoadFromFile(AppSettings.LayoutDir + 'fm_notify.html')
@@ -2050,7 +2066,7 @@ begin
     Stamp:=DateTimeToStr(Now);
     Query:=TADOQuery.Create(nil);
     Query.Connection:=Database.ADOConnect;
-    AppSettings:=TSettings.Create(APPNAME);
+    AppSettings:=TSettings.Create;
     try
       { ------------------------------------------------------------------------------------------------------------------------------- LOG TO 'TBL_INVOICES' }
       Query.SQL.Clear;
@@ -2307,7 +2323,7 @@ begin
   Query.SQL.Clear;
   Stamp:=DateTimeToStr(Now);
   SetLength(StrSQL, 2);
-  AppSettings:=TSettings.Create(APPNAME);
+  AppSettings:=TSettings.Create;
   { --------------------------------------------------------------------------------------------------------------------------------------------- CHECK PARAM }
   if not (Param = 'ADD') and not (Param = 'REMOVE') then
   begin
@@ -2486,7 +2502,7 @@ begin
   CdoMessage.HTMLBody:=MailBody;
   { ----------------------------------------------------------------------------------------------------------------------------------------------- CONFIGURE }
   Schema:='http://schemas.microsoft.com/cdo/configuration/';
-  AppSettings:=TSettings.Create(APPNAME);
+  AppSettings:=TSettings.Create;
   try
     CdoMessage.Configuration.Fields.item[Schema + 'sendusing'       ].Value:=2; (* SEND THE MESSAGE USING THE NETWORK *)
     CdoMessage.Configuration.Fields.item[Schema + 'smtpserver'      ].Value:=AppSettings.TMIG.ReadString(MailerCDOSYS, 'SMTP', '');
@@ -2530,7 +2546,7 @@ begin
   MailContent:=TStringList.Create;
   Msg        :=TMimeMess.Create;
   Email      :=TSMTPSend.Create;
-  AppSettings:=TSettings.Create(APPNAME);
+  AppSettings:=TSettings.Create;
   try
     try
       { ------------------------------------------------------------------------------------------------------------------------ ADD PRE-PREPARED E-MAIL BODY }
@@ -2631,7 +2647,7 @@ var
   AppSettings: TSettings;
 begin
   Result:=False;
-  AppSettings:=TSettings.Create(APPNAME);
+  AppSettings:=TSettings.Create;
   try
     (* NTLM AUTHENTICATE ONLY *)
     if AppSettings.TMIG.ReadString(MailerSetup, 'ACTIVE', '') = MailerCDOSYS then Result:=SendCDOSYS;
@@ -3242,7 +3258,7 @@ begin
 end;
 { --------------------------------------------------------------- ! MAIN BLOCK ! ---------------------------------------------------------------------------- }
 begin
-  AppSettings:=TSettings.Create(APPNAME);
+  AppSettings:=TSettings.Create;
   { ----------------------------------------------------------------------------------------------------------------------------------------- DISPLAY MESSAGE }
   PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Generating age view...')));
   LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Generating age view...');
@@ -3587,7 +3603,7 @@ var
 begin
   Result:=False;
   tsVAL:=TStringList.Create;
-  AppSettings:=TSettings.Create(APPNAME);
+  AppSettings:=TSettings.Create;
   try
     AppSettings.TMIG.ReadSectionValues(InvoiceTypes, tsVAL);
     for iCNT:=0 to tsVAL.Count - 1 do
@@ -3631,7 +3647,7 @@ begin
   Count :=0;
   Inner :=1;
   OpenItems.FileExist:=True;
-  AppSettings:=TSettings.Create(APPNAME);
+  AppSettings:=TSettings.Create;
   { ------------------------------------------------------------------------------------------------------------- CHECK IF GIVEN COMPANY HAVE AGENT ON OR OFF }
   AgentCol:=-100;
   if (CoPos = 1) and (MainForm.AGT1.Text = 'OFF') then AgentCol:=AppSettings.TMIG.ReadInteger(OpenItemsData, 'AGENTCOLUMN', 0);
@@ -3773,7 +3789,7 @@ begin
 
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
 
-  AppSettings.Create(APPNAME);
+  AppSettings.Create;
 
   (* RESET VARIABLES *)
 
@@ -4134,9 +4150,9 @@ begin
 
   { ------------------------------------------------------------ ! INITIALIZATION ! ------------------------------------------------------------------------- }
 
-  AppSettings:=TSettings.Create(APPNAME);
+  AppSettings:=TSettings.Create;
   CurrentUserName:=AppSettings.WinUserName;
-  EventLogPath   :=AppSettings.FPathLog;
+  EventLogPath   :=AppSettings.FPathEventLog;
   AppVersion     :=GetBuildInfoAsString;
   KeyPreview     :=True;
   AllowClose     :=False;
@@ -4455,7 +4471,7 @@ begin
     else
       { SHUTDOWN APPLICATION }
       begin
-        AppSettings:=TSettings.Create(APPNAME);
+        AppSettings:=TSettings.Create;
         { -------------------------------------------------------------------------------------------------------------------------------- LAST FORM POSITION }
         AppSettings.TMIG.WriteInteger(ApplicationDetails, 'WINDOW_TOP',   MainForm.Top);
         AppSettings.TMIG.WriteInteger(ApplicationDetails, 'WINDOW_LEFT',  MainForm.Left);
@@ -4858,7 +4874,7 @@ var
   iCNT:  integer;
   AppSettings: TSettings;
 begin
-  AppSettings:=TSettings.Create(APPNAME);
+  AppSettings:=TSettings.Create;
   { RE-SET VIEW }
   for iCNT:=0 to MainForm.sgAgeView.ColCount - 2 do
     if AppSettings.TMIG.ReadString(AgingBasic, MainForm.FindKey(AppSettings.TMIG, AgingBasic, iCNT), 'True') = 'False' then
@@ -4879,7 +4895,7 @@ var
   iCNT:  integer;
   AppSettings: TSettings;
 begin
-  AppSettings:=TSettings.Create(APPNAME);
+  AppSettings:=TSettings.Create;
   { RE-SET VIEW }
   for iCNT:=0 to MainForm.sgAgeView.ColCount - 2 do
     if AppSettings.TMIG.ReadString(AgingFull, MainForm.FindKey(AppSettings.TMIG, AgingFull, iCNT), 'True') = 'False' then
@@ -5222,7 +5238,7 @@ begin
   { LIST KEYS AND VALUES }
   tsKEY:=TStringList.Create();
   tsVAL:=TStringList.Create();
-  AppSettings:=TSettings.Create(APPNAME);
+  AppSettings:=TSettings.Create;
   try
     AppSettings.TMIG.ReadSection(sgListSection.Cells[ACol, ARow], tsKEY);
     AppSettings.TMIG.ReadSectionValues(sgListSection.Cells[ACol, ARow], tsVAL);
@@ -6050,7 +6066,7 @@ begin
   if sgListSection.RowCount = 1 then exit;
 
   { DELETE SECTION FROM TMIg }
-  AppSettings:=TSettings.Create(APPNAME);
+  AppSettings:=TSettings.Create;
   try
     AppSettings.TMIG.EraseSection(sgListSection.Cells[1, sgListSection.Row]);
     AppSettings.Encode(AppConfig);
@@ -6114,7 +6130,7 @@ begin
   if sgListValue.RowCount = 1 then exit;
 
   { DELETE SECTION FROM TMIg }
-  AppSettings:=TSettings.Create(APPNAME);
+  AppSettings:=TSettings.Create;
   try
     AppSettings.TMIG.DeleteKey(sgListSection.Cells[1, sgListSection.Row], sgListValue.Cells[1, sgListValue.Row]);
     AppSettings.Encode(AppConfig);
@@ -6148,7 +6164,7 @@ begin
       Exit;
     end;
 
-  AppSettings:=TSettings.Create(APPNAME);
+  AppSettings:=TSettings.Create;
   { SAVE TO SETTINGS FILE }
   try
     { WRITE ALL KEYS AND VALUES INTO TMEMINI }
@@ -6168,7 +6184,7 @@ procedure TMainForm.btnPassUpdateClick(Sender: TObject);
 var
   AppSettings:  TSettings;
 begin
-  AppSettings:=TSettings.Create(APPNAME);
+  AppSettings:=TSettings.Create;
   if (AppSettings.TMIG.ReadString(Password, 'VALUE', '') = Edit_CurrPassWd.Text) then
   begin
     if Edit_NewPassWd.Text=Edit_ConfPassWd.text then
@@ -6201,7 +6217,7 @@ var
   iCNT:         integer;
   inner:        integer;
 begin
-  AppSettings:=TSettings.Create(APPNAME);
+  AppSettings:=TSettings.Create;
   { LOCK / UNLOCK }
   if btnUnlock.Caption = 'Unlock' then
   begin

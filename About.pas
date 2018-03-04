@@ -66,10 +66,6 @@ type
     procedure txt_ITSClick(Sender: TObject);
     procedure txt_WEBClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
-  private
-    var fPath:  string;
-    var Error:  integer;
-    var TMIL :  TMemIniFile;
   protected
     function Is64BitOS: Boolean;
   end;
@@ -96,7 +92,7 @@ var
 implementation
 
 uses
-  Main, Coder, Settings;
+  Main, Settings;
 
 {$R *.dfm}
 
@@ -153,34 +149,25 @@ procedure TAboutForm.FormCreate(Sender: TObject);
 var
   AppSettings: TSettings;
 begin
-  { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-  AppSettings:=TSettings.Create(APPNAME);
-  try
-    AboutForm.Caption:=AppSettings.TMIG.ReadString(ApplicationDetails, 'WND_ABOUT', APPNAME);
-    AboutForm.fPath:=AppSettings.FPathLicence;
-  finally
-    AppSettings.Free;
-  end;
-  { ----------------------------------------------------------------------------------------------------------------------------------- UPLOAD DATA IF EXISTS }
-  if fileexists(AboutForm.fPath)=True then
+  AppSettings:=TSettings.Create;
+  if FileExists(AppSettings.FPathLicence) then
   begin
-    TMIL:=TMemIniFile.Create('');
     try
-      Decode(AboutForm.fPath, FILEKEY, True, AboutForm.Error, AboutForm.TMIL);   { DECODE UNITY.LIC AND PUT INTO TMIL }
-      if error = 0 then
+      AboutForm.Caption:=AppSettings.TMIG.ReadString(ApplicationDetails, 'WND_ABOUT', APPNAME);
+      if AppSettings.Decode(LicData, True) then
       begin
         { WRITE OUTPUT }
         txt_VER.Caption:=GetBuildInfoAsString;
-        txt_EDT.Caption:=TMIL.ReadString('VERSION', 'Edition', 'n/a');
-        txt_LIC.Caption:=TMIL.ReadString('LICENCE', 'Type',    'n/a');
-        txt_STA.Caption:=TMIL.ReadString('LICENCE', 'Status',  'n/a');
-        txt_INQ.Caption:=TMIL.ReadString('DETAILS', 'Email1',  'n/a');
-        txt_ITS.Caption:=TMIL.ReadString('DETAILS', 'Email2',  'n/a');
-        txt_WEB.Caption:=TMIL.ReadString('DETAILS', 'WebAddr', 'n/a');
-        txt_PRO.Caption:=TMIL.ReadString('DETAILS', 'Author',  'n/a');
+        txt_EDT.Caption:=AppSettings.TMIL.ReadString('VERSION', 'Edition', 'n/a');
+        txt_LIC.Caption:=AppSettings.TMIL.ReadString('LICENCE', 'Type',    'n/a');
+        txt_STA.Caption:=AppSettings.TMIL.ReadString('LICENCE', 'Status',  'n/a');
+        txt_INQ.Caption:=AppSettings.TMIL.ReadString('DETAILS', 'Email1',  'n/a');
+        txt_ITS.Caption:=AppSettings.TMIL.ReadString('DETAILS', 'Email2',  'n/a');
+        txt_WEB.Caption:=AppSettings.TMIL.ReadString('DETAILS', 'WebAddr', 'n/a');
+        txt_PRO.Caption:=AppSettings.TMIL.ReadString('DETAILS', 'Author',  'n/a');
       end;
     finally
-      TMIL.Free;
+      AppSettings.Free;
     end;
   end;
 end;

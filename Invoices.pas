@@ -52,7 +52,7 @@ procedure TInvoicesForm.FormCreate(Sender: TObject);
 var
   AppSettings:  TSettings;
 begin
-  AppSettings:=TSettings.Create(APPNAME);
+  AppSettings:=TSettings.Create;
   { ------------------------------------------------------------------------------------------------------------------------------------------ WINDOW CAPTION }
   InvoicesForm.Caption:=AppSettings.TMIG.ReadString(ApplicationDetails, 'WND_INVOICES', APPNAME);
   FreeAndNil(AppSettings);

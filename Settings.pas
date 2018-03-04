@@ -25,29 +25,33 @@ type                                                              (* ANY THREAD 
   private
     var pAppDir                : string;
     var pLayoutDir             : string;
-    var pLogFile               : string;
-    var pLogonFile             : string;
+    var pAppCfg                : string;
+    var pUserCfg               : string;
     var pWinUserName           : string;
     var pLogTextTo             : string;
     var pConfigPath            : string;
-    var pLogonPath             : string;
+    var pUserPath              : string;
     var pLicencePath           : string;
+    var pGetLastError          : integer;
     var pTMIP                  : TMemIniFile;
     var pTMIG                  : TMemIniFile;
+    var pTMIL                  : TMemIniFile;
   public
     property AppDir            : string      read pAppDir;
     property LayoutDir         : string      read pLayoutDir;
-    property LogFile           : string      read pLogFile;
-    property LogonFile         : string      read pLogonFile;
+    property AppCfg            : string      read pAppCfg;
+    property UserCfg           : string      read pUserCfg;
     property WinUserName       : string      read pWinUserName;
-    property FPathLog          : string      read pLogTextTo;
-    property FPathConfig       : string      read pConfigPath;
-    property FPathLogon        : string      read pLogonPath;
+    property FPathEventLog     : string      read pLogTextTo;
+    property FPathAppCfg       : string      read pConfigPath;
+    property FPathUserCfg      : string      read pUserPath;
     property FPathLicence      : string      read pLicencePath;
+    property GetLastError      : integer     read pGetLastError write pGetLastError default 0;
     property TMIP              : TMemIniFile read pTMIP;
     property TMIG              : TMemIniFile read pTMIG;
+    property TMIL              : TMemIniFile read pTMIL;
   published
-    constructor Create(Caption: string);
+    constructor Create;
     destructor  Destroy; override;
     function    Encode(ConfigType: integer): boolean;
     function    Decode(ConfigType: integer; ToMemory: boolean): boolean;
@@ -58,7 +62,7 @@ implementation
 { ############################################################# ! SETTINGS CLASS ! ########################################################################## }
 
 { ----------------------------------------------------------------------------------------------------------------------------------------------- CONSTRUCTOR }
-constructor TSettings.Create(Caption: string);
+constructor TSettings.Create;
 begin
 
   (* INITIALIZATION *)
@@ -68,44 +72,25 @@ begin
   pAppDir     :=ExtractFileDir(Application.ExeName) + '\';
   pWinUserName:=Trim(LowerCase(GetEnvironmentVariable('username')));
 
-  pLogFile    :=UserFolder + '\' + pWinUserName + '.log'; { EVENT LOG   }
-  pLogonFile  :=UserFolder + '\' + pWinUserName + '.cfg'; { USER CONFIG }
+  pAppCfg :=pWinUserName + '.log'; { EVENT LOG   }
+  pUserCfg:=pWinUserName + '.cfg'; { USER CONFIG }
 
-  pConfigPath :=pAppDir + ConfigFile;                     { CONFIG FULL PATH      }
-  pLicencePath:=pAppDir + LicenceFile;                    { LICENCE FULL PATH     }
-  pLogonPath  :=pAppDir + UserFolder + '\' + pLogonFile;  { USER CONFIG FULL PATH }
-  pLogTextTo  :=pAppDir + UserFolder + '\' + pLogFile;    { EVENT LOG FULL PATH   }
+  pConfigPath :=pAppDir + ConfigFile;                   { CONFIG FULL PATH      }
+  pLicencePath:=pAppDir + LicenceFile;                  { LICENCE FULL PATH     }
+  pUserPath   :=pAppDir + UserFolder + '\' + pUserCfg;  { USER CONFIG FULL PATH }
+  pLogTextTo  :=pAppDir + UserFolder + '\' + pAppCfg;   { EVENT LOG FULL PATH   }
 
+  (* READ CONFIG FILES *)
 
-
-  (* CONFIG.CFG *)
-
-  if not (Decode(AppConfig, True)) then
+  if FileExists(pConfigPath) then
   begin
-    LogText(pLogTextTo, 'Cannot read master configuration file. Error code: ' + IntToStr(Error) + '. Application terminated.');
-    Application.MessageBox(PChar('Cannot read master configuration file. Error code: ' + IntToStr(Error) + '. Please contact support.'),
-                           PChar(Caption), MB_OK + MB_ICONSTOP);
-  end;
+    Decode(AppConfig, True);
+    pLayoutDir:=pTMIG.ReadString(VariousLayouts, 'PATH', 'C:\');
+  end
+    else
+      pGetLastError:=104;
 
-  (* [LOGON].CFG *)
-
-  if not (Decode(UserConfig, True)) then
-  begin
-    LogText(pLogTextTo, 'Cannot read user configuration file. Error code: ' + IntToStr(Error) + '. Application terminated.');
-    Application.MessageBox(PChar('Cannot read user configuration file. Error code: ' + IntToStr(Error) + '. Please contact support.'),
-                           PChar(Caption), MB_OK + MB_ICONSTOP);
-  end;
-
-  (* PASSWORD *)
-  if TMIG.ReadString(Password, 'VALUE', '') = '' then
-  begin
-    LogText(pLogTextTo, 'WARNING! Master password is not established.');
-    Application.MessageBox(PChar('Master password is not established. Please contact IT support to reset it.'), PChar(Caption), MB_OK + MB_ICONWARNING);
-  end;
-
-  (* LAYOUTS *)
-  pLayoutDir:=TMIG.ReadString(VariousLayouts, 'PATH', 'C:\');
-
+  if FileExists(pUserPath) then Decode(UserConfig, True) else pGetLastError:=104;
 
 end;
 
@@ -162,8 +147,8 @@ begin
       end;
       { SAVE TO FILE }
       wStream.Position:=0;
-      if ConfigType = UserConfig then wStream.SaveToFile(FPathLogon);
-      if ConfigType = AppConfig  then wStream.SaveToFile(FPathConfig);
+      if ConfigType = UserConfig then wStream.SaveToFile(FPathUserCfg);
+      if ConfigType = AppConfig  then wStream.SaveToFile(FPathAppCfg);
 
       Result:=True;
 
@@ -171,6 +156,7 @@ begin
 
     except
        Result:=False;
+       GetLastError:=IOResult;
     end;
   finally;
     rStream.Free;
@@ -199,48 +185,55 @@ begin
   hString:=TStringList.Create;
   { PROCEED }
   try
-    { LOAD FROM FILE }
-    if ConfigType = UserConfig then rStream.LoadFromFile(FPathLogon);
-    if ConfigType = AppConfig  then rStream.LoadFromFile(FPathConfig);
+    try
+      { LOAD FROM FILE }
+      if ConfigType = UserConfig then rStream.LoadFromFile(FPathUserCfg);
+      if ConfigType = AppConfig  then rStream.LoadFromFile(FPathAppCfg);
+      if ConfigType = LicData    then rStream.LoadFromFile(FPathLicence);
 
-    { DECODE ALL }
-    for iCNT:=0 to rStream.Size - 1 do
-    begin
-      rStream.Read(buffer, 1);
-      buffer:=(buffer xor not (ord(FILEKEY shr iCNT)));
-      wStream.Write(buffer, 1);
+
+      { DECODE ALL }
+      for iCNT:=0 to rStream.Size - 1 do
+      begin
+        rStream.Read(buffer, 1);
+        buffer:=(buffer xor not (ord(FILEKEY shr iCNT)));
+        wStream.Write(buffer, 1);
+      end;
+      wStream.Position:=wStream.Size - 8;
+      { READ LAST 8 BYTES OF EMBEDDED CRC32 CHECKSUM }
+      SetLength(bytes, wStream.Size - (wStream.Size - 8));
+      wStream.Read(bytes[0], wStream.Size - (wStream.Size - 8));
+      sCRC:=TEncoding.UTF8.GetString(bytes);
+
+      (* FOR DEBUG: CRC32 (FROM FILE): sCRC *)
+
+      { COMPUTE CRC32 CHECKSUM (BETWEEN $00000000 and $FFFFFFF) }
+      wStream.Position:=0;
+      wStream.SetSize(wStream.Size - 8);
+      ComputeCRC32(wStream.Memory, wStream.Size, vCRC);
+
+      (* FOR DEBUG: CRC32 (COMPUTED): IntToHex(vCRC, 8) (HEX)  *)
+      (* FOR DEBUG: CRC32 (COMPUTED): IntToStr(vCRC) (DEC)     *)
+      (* FOR DEBUG: wStream.SaveToFile(AppDir + 'decoded.txt') *)
+
+      hString.LoadFromStream(wStream);
+
+      if ToMemory then
+      begin
+        if ConfigType = UserConfig then TMIP.SetStrings(hString);
+        if ConfigType = AppConfig  then TMIG.SetStrings(hString);
+        Result:=True;
+      end
+      else
+      begin
+        if sCRC =  IntToHex(vCRC, 8) then Result:=True;
+        if sCRC <> IntToHex(vCRC, 8) then Result:=False;
+      end;
+    { ON ERROR }
+    except
+      Result:=False;
+      GetLastError:=IOResult;
     end;
-    wStream.Position:=wStream.Size - 8;
-    { READ LAST 8 BYTES OF EMBEDDED CRC32 CHECKSUM }
-    SetLength(bytes, wStream.Size - (wStream.Size - 8));
-    wStream.Read(bytes[0], wStream.Size - (wStream.Size - 8));
-    sCRC:=TEncoding.UTF8.GetString(bytes);
-
-    (* FOR DEBUG: CRC32 (FROM FILE): sCRC *)
-
-    { COMPUTE CRC32 CHECKSUM (BETWEEN $00000000 and $FFFFFFF) }
-    wStream.Position:=0;
-    wStream.SetSize(wStream.Size - 8);
-    ComputeCRC32(wStream.Memory, wStream.Size, vCRC);
-
-    (* FOR DEBUG: CRC32 (COMPUTED): IntToHex(vCRC, 8) (HEX)  *)
-    (* FOR DEBUG: CRC32 (COMPUTED): IntToStr(vCRC) (DEC)     *)
-    (* FOR DEBUG: wStream.SaveToFile(AppDir + 'decoded.txt') *)
-
-    hString.LoadFromStream(wStream);
-
-    if ToMemory then
-    begin
-      if ConfigType = UserConfig then TMIP.SetStrings(hString);
-      if ConfigType = AppConfig  then TMIG.SetStrings(hString);
-      Result:=True;
-    end
-    else
-    begin
-      if sCRC =  IntToHex(vCRC, 8) then Result:=True;
-      if sCRC <> IntToHex(vCRC, 8) then Result:=False;
-    end;
-
   finally
 
     (* FOR DEBUG: IntToStr(wStream.Size) *)

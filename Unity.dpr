@@ -23,7 +23,6 @@ uses
   SysUtils,
   StdCtrls,
   INIFiles,
-  Coder,
   CRC32u,
   Splash in 'Splash.pas',
   Main in 'Main.pas',
@@ -110,7 +109,7 @@ begin
   SplashForm.ProgressText.Caption:=IntToStr(SplashForm.Progress.Progress) + '%';
   SplashForm.Update;
   Sleep(Time);
-  if TextMode = True then LogText(AppSettings.FPathLog, Text);
+  if TextMode = True then LogText(AppSettings.FPathEventLog, Text);
 end;
 
 { ---------------------------------------------------------------- ! MAIN BLOCK ! --------------------------------------------------------------------------- }
@@ -124,12 +123,19 @@ begin
   end;
 
   { READ ALL SETTINGS }
-  AppSettings:=TSettings.Create(APPNAME);
+  AppSettings:=TSettings.Create;
+
+  { -------------------------------------------------------------------------------------------------------------------------------------- CHECK FOR PASSOWRD }
+  if AppSettings.TMIG.ReadString(Password, 'VALUE', '') = '' then
+  begin
+    Application.MessageBox(PCHar('No master password has been found. Program will be terminated. Please contact IT Support.'),
+                           PChar(APPCAPTION), MB_OK + MB_ICONERROR);
+    Exit;
+  end;
 
   { ---------------------------------------------------------------------------------------------------------------------------------- CHECK FOR LICENCE FILE }
   if not FileExists(AppSettings.FPathLicence) then
   begin
-    LogText(AppSettings.FPathLog, 'Cannot find licence file (' + LicenceFile + '). Application terminated.');
     Application.MessageBox(PCHar('Cannot find licence file (' + LicenceFile + '). Program will be closed. Please contact IT Support.'),
                            PChar(APPCAPTION), MB_OK + MB_ICONWARNING);
     Exit;
@@ -137,9 +143,9 @@ begin
   { -------------------------------------------------------------------------------------------------------------- WINDOWS VERSION CHECK - WINDOWS 7 & HIGHER }
   if not StrToInt(GetOSVer(0)) >= 61 then
   begin
-    { SAVE IT INO LOG FILE }
+    { SAVE IT INTO LOG FILE }
     try
-      LogText(AppSettings.FPathLog, 'Program must be run under Windows 7 or higher. Application terminated.');
+      LogText(AppSettings.FPathEventLog, 'Program must be run under Windows 7 or higher. Application terminated.');
     except
       { DO NOTHING, WE SHOW MESSAGE BOX AND QUIT ANYWAY }
     end;
@@ -165,7 +171,7 @@ begin
   begin
     { SAVE IT INO LOG FILE }
     try
-      LogText(AppSettings.FPathLog, 'Areo is not enabled. Application terminated.');
+      LogText(AppSettings.FPathEventLog, 'Areo is not enabled. Application terminated.');
     except
       { DO NOTHING, WE SHOW MESSAGE BOX AND QUIT ANYWAY }
     end;
@@ -187,16 +193,16 @@ begin
 
   { --------------------------------------------------------------------------------------------------------------- CHECK CONFIG FILES & DEPLOY IF NECCESSARY }
   try
-    LogText(AppSettings.FPathLog, 'Start checking resources files and configuration files.');
-    Status(1, AllTasks, DelayStd, 'Checking ' + ExtractFileName(AppSettings.LogFile) + '... OK.', True);
+    LogText(AppSettings.FPathEventLog, 'Start checking resources files and configuration files.');
+    Status(1, AllTasks, DelayStd, 'Checking ' + ExtractFileName(AppSettings.AppCfg) + '... OK.', True);
     { IF WE CANNOT SAVE INTO LOG FILE, THEN SOMETHING IS NOT RIGHT }
   except
     { ---------------------------------------------------------------------------------------------------------------------- EXTRACT DEFAULT FILES IF MISSING }
-    Status(1, AllTasks, DelayErr, 'Checking ' + ExtractFileName(AppSettings.FPathLog) + '... not found! Extracting new log file...', False);
-    if Unpack(60, AppSettings.FPathLog, 0) = True then
+    Status(1, AllTasks, DelayErr, 'Checking ' + ExtractFileName(AppSettings.FPathEventLog) + '... not found! Extracting new log file...', False);
+    if Unpack(60, AppSettings.FPathEventLog, 0) = True then
     begin
       { PUT USER LOGON NAME TO LOG FILE (@ EOF) }
-      FL:=TFileStream.Create(AppSettings.FPathLog, fmOpenWrite);
+      FL:=TFileStream.Create(AppSettings.FPathEventLog, fmOpenWrite);
       try
         StrWrite:=AppSettings.WinUserName + '.' + #13#10 + #13#10;
         { GO TO EOF }
@@ -206,42 +212,42 @@ begin
       finally
         FL.Free;
       end;
-      Status(1, AllTasks, DelayStd, 'Checking ' + ExtractFileName(AppSettings.FPathLog) + '... extracted. OK.', True);
+      Status(1, AllTasks, DelayStd, 'Checking ' + ExtractFileName(AppSettings.FPathEventLog) + '... extracted. OK.', True);
     end
     else
     begin
-      Status(1, AllTasks, DelayErr, 'Cannot extract ' + ExtractFileName(AppSettings.FPathLog) + '..., unexpected error!', False);
+      Status(1, AllTasks, DelayErr, 'Cannot extract ' + ExtractFileName(AppSettings.FPathEventLog) + '..., unexpected error!', False);
       Application.MessageBox(PChar('Cannot create log file. ' + APPCAPTION + ' will be closed.'), PChar(APPCAPTION), MB_OK + MB_ICONWARNING);
       Exit;
     end;
   end;
 
   { ----------------------------------------------------------------------------------------------------------------------------- CHECK IF <LOGON>.CFG EXISTS }
-  Status(2, AllTasks, DelayStd, 'Checking ' + ExtractFileName(AppSettings.FPathLogon) + '...', True);
+  Status(2, AllTasks, DelayStd, 'Checking ' + ExtractFileName(AppSettings.FPathUserCfg) + '...', True);
   { IF EXISTS, READ LAST 8 BYTES (CRC32 CHECKSUM) AND VERIFY IT }
 
-  if FileExists(AppSettings.FPathLogon) then
+  if FileExists(AppSettings.FPathUserCfg) then
   begin
-    Status(2, AllTasks, DelayStd, 'Checking ' + ExtractFileName(AppSettings.FPathLogon) + '... CRC32.', True);
+    Status(2, AllTasks, DelayStd, 'Checking ' + ExtractFileName(AppSettings.FPathUserCfg) + '... CRC32.', True);
     { CRC32 CHECK HERE }
     { IF ERROR, THEN EXTRACT DEFAULT }
     if not (AppSettings.Decode(UserConfig, False)) then
     begin
-      Status(2, AllTasks, DelayErr, 'Checking ' + ExtractFileName(AppSettings.FPathLogon) + '... corrupted! Extracting default file...', True);
-      if Unpack(20, AppSettings.FPathLogon, 1) = False then Status(2, AllTasks, DelayErr, 'Cannot extract ' + ExtractFileName(AppSettings.FPathLogon) + '..., unexpected error!', True);
+      Status(2, AllTasks, DelayErr, 'Checking ' + ExtractFileName(AppSettings.FPathUserCfg) + '... corrupted! Extracting default file...', True);
+      if Unpack(20, AppSettings.FPathUserCfg, 1) = False then Status(2, AllTasks, DelayErr, 'Cannot extract ' + ExtractFileName(AppSettings.FPathUserCfg) + '..., unexpected error!', True);
     end;
   end
   { ------------------------------------------------------------------------------------------------------------------------------- OTHERWISE EXTRACT DEFAULT }
   else
   begin
-    Status(2, AllTasks, DelayErr, 'Checking ' + ExtractFileName(AppSettings.FPathLogon) + '... not found! Extracting default file...', True);
-    if Unpack(20, AppSettings.FPathLogon, 0) = False then Status(2, AllTasks, DelayErr, 'Cannot extract ' + ExtractFileName(AppSettings.FPathLogon) + '..., unexpected error!', True);
+    Status(2, AllTasks, DelayErr, 'Checking ' + ExtractFileName(AppSettings.FPathUserCfg) + '... not found! Extracting default file...', True);
+    if Unpack(20, AppSettings.FPathUserCfg, 0) = False then Status(2, AllTasks, DelayErr, 'Cannot extract ' + ExtractFileName(AppSettings.FPathUserCfg) + '..., unexpected error!', True);
   end;
 
   { ----------------------------------------------------------------------------------------------------------------------------- CHECK IF GENERAL.CFG EXISTS }
   Status(3, AllTasks, DelayStd, 'Checking ' + ConfigFile + '...', True);
   { ---------------------------------------------------------------------------------------------- IF EXIST, READ LAST 8 BYTES (CRC32 CHECKSUM) AND VERIFY IT }
-  if FileExists(AppSettings.FPathConfig) then
+  if FileExists(AppSettings.FPathAppCfg) then
   begin
     Status(3, AllTasks, DelayStd, 'Checking ' + ConfigFile + '... CRC32.', True);
     { CRC32 CHECK HERE }
@@ -249,14 +255,14 @@ begin
     if not (AppSettings.Decode(AppConfig, False)) then
     begin
       Status(3, AllTasks, DelayErr, 'Checking ' + ConfigFile + '... corrupted! Extracting default file...', True);
-      if Unpack(10, AppSettings.FPathConfig, 1) = False then Status(3, AllTasks, DelayErr, 'Cannot extract ' + ConfigFile + '..., unexpected error!', True);
+      if Unpack(10, AppSettings.FPathAppCfg, 1) = False then Status(3, AllTasks, DelayErr, 'Cannot extract ' + ConfigFile + '..., unexpected error!', True);
     end;
   end
   { ------------------------------------------------------------------------------------------------------------------------------- OTHERWISE EXTRACT DEFAULT }
   else
   begin
     Status(3, AllTasks, DelayErr, 'Checking ' + ConfigFile + '... not found! Extracting default file...', True);
-    if Unpack(10, AppSettings.FPathConfig, 0) = False then Status(3, AllTasks, DelayStd, 'Cannot extract ' + ConfigFile + '..., unexpected error!', True);
+    if Unpack(10, AppSettings.FPathAppCfg, 0) = False then Status(3, AllTasks, DelayStd, 'Cannot extract ' + ConfigFile + '..., unexpected error!', True);
   end;
 
   { ------------------------------------------------------------------------------------------------------------------ CHECK DLL FILES & DEPLOY IF NECCESSARY }
@@ -400,8 +406,8 @@ begin
     Exit;
   end;
 
-  LogText(AppSettings.FPathLog, 'End of checking resource files and configuration files.');
-  LogText(AppSettings.FPathLog, 'Create Forms and execute their methods...');
+  LogText(AppSettings.FPathEventLog, 'End of checking resource files and configuration files.');
+  LogText(AppSettings.FPathEventLog, 'Create Forms and execute their methods...');
 
   { ---- END ---- }
 
@@ -417,17 +423,17 @@ begin
 
   { MAIN FORM }
   Application.CreateForm(TMainForm, MainForm);
-  LogText(AppSettings.FPathLog, '[GUI] Initialization methods executed within main thread, ''MainForm'' has been created. Main process thread ID = ' + IntToStr(MainThreadID) + '.');
+  LogText(AppSettings.FPathEventLog, '[GUI] Initialization methods executed within main thread, ''MainForm'' has been created. Main process thread ID = ' + IntToStr(MainThreadID) + '.');
 
   { OTHER WINFORMS }
   Status(14, AllTasks, 400, 'Application initialization... WinForms loading, please wait.', False);
-  Application.CreateForm(TAboutForm,    AboutForm);    LogText(AppSettings.FPathLog, '[GUI] ''AboutForm'' ......... has been created.');
-  Application.CreateForm(TSearchForm,   SearchForm);   LogText(AppSettings.FPathLog, '[GUI] ''SearchForm'' ........ has been created.');
-  Application.CreateForm(TFilterForm,   FilterForm);   LogText(AppSettings.FPathLog, '[GUI] ''FilterForm'' ........ has been created.');
-  Application.CreateForm(TTrackerForm,  TrackerForm);  LogText(AppSettings.FPathLog, '[GUI] ''TrackerForm'' ....... has been created.');
-  Application.CreateForm(TActionsForm,  ActionsForm);  LogText(AppSettings.FPathLog, '[GUI] ''ActionsForm'' ....... has been created.');
-  Application.CreateForm(TCalendarForm, CalendarForm); LogText(AppSettings.FPathLog, '[GUI] ''CalendarForm'' ...... has been created.');
-  Application.CreateForm(TInvoicesForm, InvoicesForm); LogText(AppSettings.FPathLog, '[GUI] ''InvoicesForm'' ...... has been created.');
+  Application.CreateForm(TAboutForm,    AboutForm);    LogText(AppSettings.FPathEventLog, '[GUI] ''AboutForm'' ......... has been created.');
+  Application.CreateForm(TSearchForm,   SearchForm);   LogText(AppSettings.FPathEventLog, '[GUI] ''SearchForm'' ........ has been created.');
+  Application.CreateForm(TFilterForm,   FilterForm);   LogText(AppSettings.FPathEventLog, '[GUI] ''FilterForm'' ........ has been created.');
+  Application.CreateForm(TTrackerForm,  TrackerForm);  LogText(AppSettings.FPathEventLog, '[GUI] ''TrackerForm'' ....... has been created.');
+  Application.CreateForm(TActionsForm,  ActionsForm);  LogText(AppSettings.FPathEventLog, '[GUI] ''ActionsForm'' ....... has been created.');
+  Application.CreateForm(TCalendarForm, CalendarForm); LogText(AppSettings.FPathEventLog, '[GUI] ''CalendarForm'' ...... has been created.');
+  Application.CreateForm(TInvoicesForm, InvoicesForm); LogText(AppSettings.FPathEventLog, '[GUI] ''InvoicesForm'' ...... has been created.');
 
   { SPLASH SCREEN - 100% }
   Status(15, AllTasks, 900, 'Application initialization... done.', False);
@@ -444,7 +450,7 @@ begin
   MainForm.Show;
 
   { ----------------------------------------------------------------------------------------------------------------------------------------------------- RUN }
-  LogText(AppSettings.FPathLog, 'Initialization is completed. Application is running.');
+  LogText(AppSettings.FPathEventLog, 'Initialization is completed. Application is running.');
   FreeAndNil(AppSettings);
   Application.MainFormOnTaskbar:=True;
   Application.Run;
