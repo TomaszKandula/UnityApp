@@ -65,6 +65,7 @@
 			<DCCReference Include="Model.pas"/>
 			<DCCReference Include="Worker.pas"/>
 			<DCCReference Include="Settings.pas"/>
+			<DCCReference Include="Database.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>

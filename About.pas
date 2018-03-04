@@ -150,13 +150,12 @@ var
   AppSettings: TSettings;
 begin
   AppSettings:=TSettings.Create;
-  if FileExists(AppSettings.FPathLicence) then
-  begin
-    try
-      AboutForm.Caption:=AppSettings.TMIG.ReadString(ApplicationDetails, 'WND_ABOUT', APPNAME);
+  try
+    AboutForm.Caption:=AppSettings.TMIG.ReadString(ApplicationDetails, 'WND_ABOUT', APPNAME);
+    if FileExists(AppSettings.FPathLicence) then
+    begin
       if AppSettings.Decode(LicData, True) then
       begin
-        { WRITE OUTPUT }
         txt_VER.Caption:=GetBuildInfoAsString;
         txt_EDT.Caption:=AppSettings.TMIL.ReadString('VERSION', 'Edition', 'n/a');
         txt_LIC.Caption:=AppSettings.TMIL.ReadString('LICENCE', 'Type',    'n/a');
@@ -166,9 +165,9 @@ begin
         txt_WEB.Caption:=AppSettings.TMIL.ReadString('DETAILS', 'WebAddr', 'n/a');
         txt_PRO.Caption:=AppSettings.TMIL.ReadString('DETAILS', 'Author',  'n/a');
       end;
-    finally
-      AppSettings.Free;
     end;
+  finally
+    AppSettings.Free;
   end;
 end;
 

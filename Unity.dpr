@@ -36,7 +36,8 @@ uses
   SQL in 'SQL.pas',
   Model in 'Model.pas',
   Worker in 'Worker.pas',
-  Settings in 'Settings.pas';
+  Settings in 'Settings.pas',
+  Database in 'Database.pas';
 
 type
   DWord = 0..$FFFFFFFF;
@@ -45,8 +46,6 @@ type
 (* NOTE: CONSTANTS ARE DEFINED IN "MAIN" VIA "COMMON.INC" *)
 
 var
-  FileCON:        string;
-  FileLIC:        string;
   StrWrite:       string;
   iCNT:           integer;
   FL:             TFileStream;
@@ -122,7 +121,7 @@ begin
     Exit;
   end;
 
-  { READ ALL SETTINGS }
+  { READ ALL THE SETTINGS }
   AppSettings:=TSettings.Create;
 
   { -------------------------------------------------------------------------------------------------------------------------------------- CHECK FOR PASSOWRD }
@@ -153,9 +152,10 @@ begin
                            PChar(APPCAPTION), MB_OK + MB_ICONWARNING);
     Exit;
   end;
+
   { --------------------------------------------------------------------------------------------------------------------------------- AREO CHECK - MUST BE ON }
   IsAeroEnabled:=False;
-  ModuleHandle :=LoadLibrary('dwmapi.dll');
+  ModuleHandle :=LoadLibrary(PChar(DWMI));
   if ModuleHandle <> 0 then
   begin
     try
@@ -447,11 +447,11 @@ begin
   if AppSettings.TMIG.ReadString(ApplicationDetails,  'WINDOW_STATE', '') = 'wsNormal'    then MainForm.WindowState:=wsNormal;
   if AppSettings.TMIG.ReadString(ApplicationDetails,  'WINDOW_STATE', '') = 'wsMaximized' then MainForm.WindowState:=wsMaximized;
   if AppSettings.TMIG.ReadString(ApplicationDetails,  'WINDOW_STATE', '') = 'wsMinimized' then MainForm.WindowState:=wsMinimized;
-  MainForm.Show;
-
-  { ----------------------------------------------------------------------------------------------------------------------------------------------------- RUN }
   LogText(AppSettings.FPathEventLog, 'Initialization is completed. Application is running.');
   FreeAndNil(AppSettings);
+
+  { ----------------------------------------------------------------------------------------------------------------------------------------------------- RUN }
+  MainForm.Show;
   Application.MainFormOnTaskbar:=True;
   Application.Run;
 

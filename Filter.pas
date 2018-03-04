@@ -65,7 +65,8 @@ var
 
 implementation
 
-uses Settings;
+uses
+  Settings;
 
 {$R *.dfm}
 

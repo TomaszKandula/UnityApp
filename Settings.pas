@@ -47,9 +47,9 @@ type                                                              (* ANY THREAD 
     property FPathUserCfg      : string      read pUserPath;
     property FPathLicence      : string      read pLicencePath;
     property GetLastError      : integer     read pGetLastError write pGetLastError default 0;
-    property TMIP              : TMemIniFile read pTMIP;
-    property TMIG              : TMemIniFile read pTMIG;
-    property TMIL              : TMemIniFile read pTMIL;
+    property TMIP              : TMemIniFile read pTMIP         write pTMIP;
+    property TMIG              : TMemIniFile read pTMIG         write pTMIG;
+    property TMIL              : TMemIniFile read pTMIL         write pTMIL;
   published
     constructor Create;
     destructor  Destroy; override;
@@ -64,34 +64,25 @@ implementation
 { ----------------------------------------------------------------------------------------------------------------------------------------------- CONSTRUCTOR }
 constructor TSettings.Create;
 begin
-
   (* INITIALIZATION *)
   pTMIP:=TMemIniFile.Create('');
   pTMIG:=TMemIniFile.Create('');
-
+  pTMIL:=TMemIniFile.Create('');
   pAppDir     :=ExtractFileDir(Application.ExeName) + '\';
   pWinUserName:=Trim(LowerCase(GetEnvironmentVariable('username')));
-
-  pAppCfg :=pWinUserName + '.log'; { EVENT LOG   }
-  pUserCfg:=pWinUserName + '.cfg'; { USER CONFIG }
-
+  pAppCfg     :=pWinUserName + '.log';                  { EVENT LOG FILE NAME   }
+  pUserCfg    :=pWinUserName + '.cfg';                  { USER CONFIG FILE NAME }
   pConfigPath :=pAppDir + ConfigFile;                   { CONFIG FULL PATH      }
   pLicencePath:=pAppDir + LicenceFile;                  { LICENCE FULL PATH     }
   pUserPath   :=pAppDir + UserFolder + '\' + pUserCfg;  { USER CONFIG FULL PATH }
   pLogTextTo  :=pAppDir + UserFolder + '\' + pAppCfg;   { EVENT LOG FULL PATH   }
-
   (* READ CONFIG FILES *)
-
   if FileExists(pConfigPath) then
   begin
     Decode(AppConfig, True);
     pLayoutDir:=pTMIG.ReadString(VariousLayouts, 'PATH', 'C:\');
-  end
-    else
-      pGetLastError:=104;
-
+  end else pGetLastError:=104;
   if FileExists(pUserPath) then Decode(UserConfig, True) else pGetLastError:=104;
-
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------------- DISPOSE }
@@ -99,6 +90,7 @@ destructor TSettings.Destroy;
 begin
   FreeAndNil(pTMIP);
   FreeAndNil(pTMIG);
+  FreeAndNil(pTMIL);
   inherited;
 end;
 
@@ -113,6 +105,12 @@ var
   vCRC:        dWord;
   sCRC:        string;
 begin
+  { DO NOT ALLOW TO ENCODE LICENCE }
+  if ConfigType = LicData then
+  begin
+    Result:=False;
+    Exit;
+  end;
   { INITIALIZE }
   rStream:=TMemoryStream.Create;
   wStream:=TMemoryStream.Create;
@@ -122,23 +120,18 @@ begin
       { LOAD INI FROM MEMORY }
       if ConfigType = UserConfig then TMIP.GetStrings(hStream);
       if ConfigType = AppConfig  then TMIG.GetStrings(hStream);
-
       hStream.SaveToStream(rStream);
       rStream.Position:=0;
       { COMPUTE CRC32 CHECKSUM (BETWEEN $00000000 and $FFFFFFF) }
       ComputeCRC32(rStream.Memory, rStream.Size, vCRC);
-
       (* FOR DEBUG PURPOSES CRC32 (HEX): IntToHex(vCRC, 8) *)
       (* FOR DEBUG PURPOSES CRC32 (DEC): IntToStr(vCRC)    *)
-
       { SAVE LAST 8 BYTES TO STREAM }
       sCRC:=IntToHex(vCRC, 8);
       rStream.Position:=rStream.Size;
       rStream.WriteBuffer(UTF8String(sCRC)[1], Length(UTF8String(sCRC)));
       rStream.Position:=0;
-
       (*  FOR DEBUG PURPOSES: rStream.SaveToFile(AppDir + 'check.txt'); *)
-
       { ENCODING BYTE BY BYTE }
       for iCNT:=0 to rStream.Size - 1 do begin
         rStream.Read(buffer, 1);
@@ -149,21 +142,17 @@ begin
       wStream.Position:=0;
       if ConfigType = UserConfig then wStream.SaveToFile(FPathUserCfg);
       if ConfigType = AppConfig  then wStream.SaveToFile(FPathAppCfg);
-
       Result:=True;
-
       (* FOR DEBUG: IntToStr(wStream.Size); *)
-
     except
-       Result:=False;
-       GetLastError:=IOResult;
+      Result:=False;
+      GetLastError:=IOResult;
     end;
   finally;
     rStream.Free;
     wStream.Free;
     hStream.Free;
   end;
-
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------- DECRYPT & CHECK CRC32 }
@@ -190,8 +179,6 @@ begin
       if ConfigType = UserConfig then rStream.LoadFromFile(FPathUserCfg);
       if ConfigType = AppConfig  then rStream.LoadFromFile(FPathAppCfg);
       if ConfigType = LicData    then rStream.LoadFromFile(FPathLicence);
-
-
       { DECODE ALL }
       for iCNT:=0 to rStream.Size - 1 do
       begin
@@ -204,24 +191,20 @@ begin
       SetLength(bytes, wStream.Size - (wStream.Size - 8));
       wStream.Read(bytes[0], wStream.Size - (wStream.Size - 8));
       sCRC:=TEncoding.UTF8.GetString(bytes);
-
       (* FOR DEBUG: CRC32 (FROM FILE): sCRC *)
-
       { COMPUTE CRC32 CHECKSUM (BETWEEN $00000000 and $FFFFFFF) }
       wStream.Position:=0;
       wStream.SetSize(wStream.Size - 8);
       ComputeCRC32(wStream.Memory, wStream.Size, vCRC);
-
       (* FOR DEBUG: CRC32 (COMPUTED): IntToHex(vCRC, 8) (HEX)  *)
       (* FOR DEBUG: CRC32 (COMPUTED): IntToStr(vCRC) (DEC)     *)
       (* FOR DEBUG: wStream.SaveToFile(AppDir + 'decoded.txt') *)
-
       hString.LoadFromStream(wStream);
-
       if ToMemory then
       begin
-        if ConfigType = UserConfig then TMIP.SetStrings(hString);
-        if ConfigType = AppConfig  then TMIG.SetStrings(hString);
+        if ConfigType = UserConfig then pTMIP.SetStrings(hString);
+        if ConfigType = AppConfig  then pTMIG.SetStrings(hString);
+        if ConfigType = LicData    then pTMIL.SetStrings(hString);
         Result:=True;
       end
       else
@@ -235,15 +218,12 @@ begin
       GetLastError:=IOResult;
     end;
   finally
-
     (* FOR DEBUG: IntToStr(wStream.Size) *)
-
     { RELEASE }
     rStream.Free;
     wStream.Free;
     hString.Free;
   end;
-
 end;
 
 end.

@@ -636,10 +636,19 @@ var
   THDSec:     extended;
   StopWatch:  TStopWatch;
   AppSettings:  TSettings;
+
+procedure test;
+begin
+  AppSettings:=TSettings.Create;
+  AppSettings.Free;
+end;
+
 begin
   IDThread:=TTReadOpenItems.CurrentThread.ThreadID;
   ActiveThreads[7]:=True;
-  AppSettings:=TSettings.Create;
+
+  test;
+
   try
     StopWatch:=TStopWatch.StartNew;
 
@@ -664,13 +673,13 @@ begin
           MainForm.tcKPIoverdue.Caption    :='0';
           MainForm.tcKPIunallocated.Caption:='0';
           { --------------------------------------------------------------------------------------------------------------------------------------- EVENT LOG }
-          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Exclude accounts below or equal ' + AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER' + IntToStr(AppSettings.TMIG.ReadInteger(OpenItemsData, 'NRCUTOFFPOS', 0)), '') + ' number: ' + IntToStr(AppSettings.TMIG.ReadInteger(OpenItemsData, 'NRCUTOFFNUM', 0)) + '.');
-          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Exclude accounts that contains "' + AppSettings.TMIG.ReadString(OpenItemsData, 'TXCUTOFFTXT', '') + '" in column ' + AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER' + IntToStr(AppSettings.TMIG.ReadInteger(OpenItemsData, 'TXCUTOFFPOS', 0)), '') + '.');
+//          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Exclude accounts above or equal ' + AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER' + IntToStr(AppSettings.TMIG.ReadInteger(OpenItemsData, 'NRCUTOFFPOS', 0)), '') + ' number: ' + IntToStr(AppSettings.TMIG.ReadInteger(OpenItemsData, 'NRCUTOFFNUM', 0)) + '.');
+//          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Exclude accounts that contains "' + AppSettings.TMIG.ReadString(OpenItemsData, 'TXCUTOFFTXT', '') + '" in column ' + AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER' + IntToStr(AppSettings.TMIG.ReadInteger(OpenItemsData, 'TXCUTOFFPOS', 0)), '') + '.');
         end);
 
       { -------------------------------------------------- ! HEAVY DUTY TASK (RUN ASYNC) ! ------------------------------------------------------------------ }
-      OpenItems.Load(IDThread);
-
+//      OpenItems.Load(IDThread);
+(*
       { ------------------------------------------------------- ! POST | GUI UPDATE ! ----------------------------------------------------------------------- }
       Synchronize
         (procedure begin
@@ -700,7 +709,7 @@ begin
             MainForm.tcKPIunallocated.Caption:=FormatFloat('#,##0.00', OpenItems.KPI_unalloc);
           end;
         end);
-
+*)
     except
       on E: Exception do
       begin
@@ -710,7 +719,6 @@ begin
     end;
 
   finally
-    AppSettings.Free;
     ActiveThreads[7]:=False;
     PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Ready.')));
     THDMili:=StopWatch.ElapsedMilliseconds;
@@ -721,6 +729,7 @@ begin
 
   { RELEASE THREAD WHEN DONE }
   FreeOnTerminate:=True;
+//  FreeAndNil(AppSettings);
 
   { SEND TO SQL SERVER }
   if (pMode = '1') and (OpenItems.FileExist) then

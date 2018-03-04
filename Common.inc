@@ -21,7 +21,7 @@ const
   WM_GETINFO = WM_USER + 120;
   WM_EXTINFO = WM_APP  + 150;
 
-  { APPLICATION EXTERNAL ASSEMBLY }
+  { APPLICATION EXTERNAL ASSEMBLY | STATIC LINKING }
 
   EX_LIBRARY = 'Unitylib.dll';
 
@@ -31,20 +31,24 @@ const
   DelayErr:       integer = 750;              { SLOW DOWN SIGNIFICANTLY FOR USER }
   AllTasks:       integer = 15;               { TOTAL NUMBER OF ALL BASIC TASKS  }
   DecryptKey:     integer = 429496;
-  CRC32DLL1:      DWord   = 3118596872;
-  CRC32DLL2:      DWord   = 3608491174;
-  CRC32DLL3:      DWord   = 4084329229;
   APPCAPTION:     string  = 'Unity';
   LyncCall:       string  = 'LyncCall.exe';
   ConfigFile:     string  = 'config.cfg';
   UserFolder:     string  = 'users';
   LicenceFile:    string  = 'Unity.licx';
 
+  { DESKTOP WINDOW MANAGER API }
+
+  DWMI:           string  = 'dwmapi.dll';
+
   { SYNAPSE ASSEMBLIES }
 
   DLL1:           string  = 'libeay32.dll';
   DLL2:           string  = 'ssleay32.dll';
   DLL3:           string  = 'vsinit.dll';
+  CRC32DLL1:      DWord   = 3118596872;       { CRC32 CHECK }
+  CRC32DLL2:      DWord   = 3608491174;       { CRC32 CHECK }
+  CRC32DLL3:      DWord   = 4084329229;       { CRC32 CHECK }
 
   { MICROSOFT ASSEMBLIES FOR LYNC/SKYPE FOR BUSINESS }
 
