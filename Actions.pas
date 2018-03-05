@@ -4,7 +4,7 @@
 { Version:          0.1                                                                                                                                       }
 { (C)(R):           Tomasz Kandula                                                                                                                            }
 { Originate:        10-07-2016 (Concept & GUI)                                                                                                                }
-{ IDE:              Delphi XE2 / Delphi Tokyo                                                                                                                 }
+{ IDE:              RAD Studio with Delphi XE2 (migrated to Delphi Tokyo)                                                                                     }
 { Target:           Microsoft Windows 7 or newer                                                                                                              }
 { Dependencies:     Ararat Synapse (modified third-party) and own libraries                                                                                   }
 { NET Framework:    Required 4.6 or newer (Lync / Skype calls)                                                                                                }
@@ -109,6 +109,7 @@ type
     procedure Cust_MailClick(Sender: TObject);
     procedure Cust_PhoneClick(Sender: TObject);
   public
+    const NA:  string = 'Not found!';
     function  GetRunningAplications(SearchName: string): boolean;
   end;
 
@@ -120,10 +121,7 @@ var
 implementation
 
 uses
-  Model, SQL, Worker, Calendar, Settings;
-
-const
-  NA:  string = 'Not found!';
+  Model, SQL, Worker, Calendar, Settings, Database;
 
 var
   DataHandler: TDataHandler;
@@ -154,8 +152,8 @@ var
   zCNT:    integer;
   Query:   TADOQuery;
 
-  MSSQL:        TMSSQL;
-  DailyComment: TDaily;
+//  MSSQL:        TMSSQL;
+//  DailyComment: TDaily;
 
 begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
@@ -194,13 +192,11 @@ begin
 
   { ------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE SQL }
   Query:=TADOQuery.Create(nil);
-  Query.Connection:=Database.ADOConnect;
+  Query.Connection:=MainForm.ADOConnect;
   try
     try
       Query.SQL.Clear;
       Query.SQL.Text:='SELECT DISTINCT CONTACT, ESTATEMENTS, TELEPHONE FROM tbl_Addressbook WHERE CUID = ' + QuotedStr(DataHandler.CUID);
-//      Query.SQL.Text:='SELECT DISTINCT CONTACT, ESTATEMENTS, TELEPHONE FROM tbl_Addressbook WHERE CUID = :uParam0';
-//      Query.Parameters.ParamByName('uParam0').Value:=DataHandler.CUID;
       Query.Open;
       if Query.RecordCount > 0 then
       begin
@@ -213,11 +209,10 @@ begin
     end;
 
     { ---------------------------------------------------------------------------------------------------------------------------------------- DAILY COMMENTS }
-(*
+
     try
       Query.SQL.Clear;
       Query.SQL.Text:='SELECT AGEDATE, STAMP, FIXCOMMENT FROM tbl_daily WHERE CUID = ' + QuotedStr(DataHandler.CUID);
-//      Query.Parameters.ParamByName('uParam0').Value:=DataHandler.CUID;
       Query.Open;
       if Query.RecordCount > 0 then
       begin
@@ -235,8 +230,8 @@ begin
       ActionsForm.HistoryGrid.MSort(2, 0, False);
       Query.Close;
     end;
-*)
 
+(*
 
       DailyComment:=TDaily.Create;
       try
@@ -245,7 +240,7 @@ begin
         DailyComment.CUID      :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('CUID', 1, 1), MainForm.sgAgeView.Row];
         DailyComment.AGEDATE   :=MainForm.GroupListDates.Text;
         { RELOAD HISTORY CONTENT }
-        MSSQL:=TMSSQL.Create(DataBase.ADOConnect);
+        MSSQL:=TMSSQL.Create(MainForm.ADOConnect);
         try
           { READ ALL LINES FOR GIVEN CUID }
           DailyComment.ManyLines:=True;
@@ -258,13 +253,12 @@ begin
         DailyComment.Free;
         //ActionsForm.HistoryGrid.MSort(2, 0, False);
       end;
-
+*)
 
     { --------------------------------------------------------------------------------------------------------------------------------------- GENERAL COMMENT }
     try
       Query.SQL.Clear;
       Query.SQL.Text:='SELECT FIXCOMMENT FROM tbl_general WHERE CUID = ' + QuotedStr(DataHandler.CUID);
-//      Query.Parameters.ParamByName('uParam0').Value:=DataHandler.CUID;
       Query.Open;
       { WE SHOULD HAVE ALWAYS ONE FIELD }
       if Query.RecordCount = 1 then ActionsForm.GeneralCom.Text:=MainForm.OleGetStr(Query.Recordset.Fields[0].Value);
@@ -300,7 +294,7 @@ end;
 { ---------------------------------------------------------------- ! MAIN BLOCK ! --------------------------------------------------------------------------- }
 begin
   { IF NOT FOUND THEN QUIT }
-  if (ActionsForm.Cust_Person.Text = NA) and (ActionsForm.Cust_Mail.Text = NA) and (ActionsForm.Cust_Phone.Text = NA) then
+  if (ActionsForm.Cust_Person.Text = ActionsForm.NA) and (ActionsForm.Cust_Mail.Text = ActionsForm.NA) and (ActionsForm.Cust_Phone.Text = ActionsForm.NA) then
   begin
     MainForm.MsgCall(1, 'This customer does not exist in Address Book. Please add to Address Book first.');
     Exit;
@@ -358,7 +352,7 @@ begin
   StrSQL:='SELECT DISTINCT CONTACT, ESTATEMENTS, TELEPHONE FROM tbl_addressbook WHERE CUID = ' + QuotedStr(DataHandler.CUID);
   { ------------------------------------------------------------------------------------------------------------------------------------------------- PROCESS }
   Query:=TADOQUery.Create(nil);
-  Query.Connection:=Database.ADOConnect;
+  Query.Connection:=MainForm.ADOConnect;
   Query.SQL.Clear;
   Query.SQL.Text:=StrSQL;
   try
@@ -371,7 +365,6 @@ begin
         Query.Recordset.Fields['ESTATEMENTS'].Value:=ActionsForm.Cust_Mail.Text;//  + ';' + Query.Recordset.Fields['ESTATEMENTS'].Value;
         Query.Recordset.Fields['TELEPHONE'  ].Value:=ActionsForm.Cust_Phone.Text;
         Query.Recordset.Update(EmptyParam, EmptyParam);
-        //ActionsForm.StatusBar.SimpleText:='Customer details has been updated successfully!';
       end;
     except
       on E: Exception do
@@ -461,7 +454,7 @@ begin
 end;
 { ---------------------------------------------------------------- ! MAIN BLOCK ! --------------------------------------------------------------------------- }
 begin
-  if (ActionsForm.Cust_Mail.Text = '') or (ActionsForm.Cust_Mail.Text = ' ') or (ActionsForm.Cust_Mail.Text = NA) then
+  if (ActionsForm.Cust_Mail.Text = '') or (ActionsForm.Cust_Mail.Text = ' ') or (ActionsForm.Cust_Mail.Text = ActionsForm.NA) then
   begin
     MainForm.MsgCall(2, 'Statement cannot be sent. There is no e-mail provided.');
     Exit;
@@ -663,10 +656,6 @@ begin
   { -------------------------------------------------------------------------------------------------------------------- SETUP COLUMNS HEADERS | HISTORY GRID }
   HistoryGrid.RowCount:=2;
   HistoryGrid.ColCount:=11;
-//  HistoryGrid.Cols[0].Text:='';
-//  HistoryGrid.Cols[1].Text:='Aging date';
-//  HistoryGrid.Cols[2].Text:='Comment created';
-//  HistoryGrid.Cols[3].Text:='Commentary';
   { HIDE THIRD COLUMN FROM USER, IT IS NEEDED ONLY FOR SORTING PURPOSES }
   HistoryGrid.ColWidths[1]:= -1;
   HistoryGrid.ColWidths[2]:= -1;
@@ -702,8 +691,11 @@ end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------------------- ON ACTIVATE }
 procedure TActionsForm.FormActivate(Sender: TObject);
+var
+  DataBase: TDataBase;
 begin
-  if DataBase.LastError = 0 then
+  DataBase:=TDataBase.Create(False);
+  if DataBase.Check = 0 then
   begin
     Sleep(100);
     DataHandler.GetData;
@@ -715,6 +707,7 @@ begin
   end
     else
       StatusBar.SimpleText:='Cannot connect with database. Please contact IT support.';
+  FreeAndNil(DataBase);
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------ ON DESTROY }
@@ -756,10 +749,10 @@ end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------- SHOW DATA WHEN SELECTED }
 procedure TActionsForm.HistoryGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
-var
-  DailyComment: TDaily;
+//var
+// DailyComment: TDaily;
 begin
-
+(*
   DailyComment:=TDaily.Create;
   try
     DailyComment.idThd  :=MainThreadID;
@@ -772,26 +765,26 @@ begin
   finally
     DailyComment.Free;
   end;
-
+*)
 end;
 
 { --------------------------------------------------------------- ! KEYBOARD EVENTS ! ----------------------------------------------------------------------- }
 
 { ----------------------------------------------------------------------------------------------------------------------------------- SAVE COMMENT ON <ENTER> }
 procedure TActionsForm.DailyComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-var
-  DailyComment: TDaily;
-  MSSQL:        TMSSQL;
+//var
+//  DailyComment: TDaily;
+//  MSSQL:        TMSSQL;
 begin
   { NEW LINE }
   if (Key = VK_RETURN) and (Shift=[ssALT]) then
   begin
-    DailyCom.Lines.Add(#13#10);
+    DailyCom.Lines.Add(CRLF);
     Exit;
   end;
   { SAVE TO DB }
   if (Key = VK_RETURN) then
-
+(*
     if ( (DailyCom.Text <> '') and (DailyCom.Text <> ' ') ) then
     begin
       DailyComment:=TDaily.Create;
@@ -809,7 +802,7 @@ begin
         { WRITE TO DATABASE }
         DailyComment.Write;
         { RELOAD HISTORY CONTENT }
-        MSSQL:=TMSSQL.Create(DataBase.ADOConnect);
+        MSSQL:=TMSSQL.Create(MainForm.ADOConnect);
         try
           { READ ALL LINES FOR GIVEN CUID }
           DailyComment.ManyLines:=True;
@@ -824,23 +817,23 @@ begin
       end;
     end
       else StatusBar.SimpleText:='Cannot save empty comment.';
-
+*)
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------- SAVE COMMENT ON <ENTER> }
 procedure TActionsForm.GeneralComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-var
-  GeneralComment: TGeneral;
+//var
+//  GeneralComment: TGeneral;
 begin
   { NEW LINE }
   if (Key = VK_RETURN) and (Shift=[ssALT]) then
   begin
-    GeneralCom.Lines.Add(#13#10);
+    GeneralCom.Lines.Add(CRLF);
     Exit;
   end;
   { SAVE TO DB }
   if (Key = VK_RETURN) then
-
+(*
     if ( (GeneralCom.Text <> '') and (GeneralCom.Text <> ' ') ) then
     begin
       GeneralComment:=TGeneral.Create;
@@ -863,7 +856,7 @@ begin
     begin
       StatusBar.SimpleText:='Cannot save empty comment.';
     end;
-
+*)
 end;
 
 { --------------------------------------------------------------------------------------------------------------------- COPY STRING GRID CONTENT TO CLIPBOARD }
@@ -942,26 +935,34 @@ end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------- SAVE CUSTOMER DETAILS }
 procedure TActionsForm.imgSaveDetailsClick(Sender: TObject);
+var
+  DataBase: TDataBase;
 begin
-  if DataBase.LastError = 0 then
+  DataBase:=TDataBase.Create(False);
+  if DataBase.Check = 0 then
   begin
     Sleep(100);
     DataHandler.SaveDetails;
   end
     else
       StatusBar.SimpleText:='Cannot connect with database. Please contact IT support.';
+  FreeAndNil(DataBase);
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------------- SEND STATEMENT }
 procedure TActionsForm.btnSendStatementClick(Sender: TObject);
+var
+  DataBase: TDataBase;
 begin
-  if DataBase.LastError = 0 then
+  DataBase:=TDataBase.Create(False);
+  if DataBase.Check = 0 then
   begin
     Sleep(100);
     DataHandler.SendStatement;
   end
     else
       StatusBar.SimpleText:='Cannot connect with database. Please contact IT support.';
+  FreeAndNil(DataBase);
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------ SELECT NEXT OVERDUE CUSTOMER }

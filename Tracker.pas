@@ -4,7 +4,7 @@
 { Version:          0.1                                                                                                                                       }
 { (C)(R):           Tomasz Kandula                                                                                                                            }
 { Originate:        10-07-2016 (Concept & GUI)                                                                                                                }
-{ IDE:              Delphi XE2 / Delphi Tokyo                                                                                                                 }
+{ IDE:              RAD Studio with Delphi XE2 (migrated to Delphi Tokyo)                                                                                     }
 { Target:           Microsoft Windows 7 or newer                                                                                                              }
 { Dependencies:     Ararat Synapse (modified third-party) and own libraries                                                                                   }
 { NET Framework:    Required 4.6 or newer (Lync / Skype calls)                                                                                                }
@@ -65,7 +65,7 @@ var
 implementation
 
 uses
-  Model, SQL, Worker, Settings;
+  Model, SQL, Worker, Settings, Database;
 
 {$R *.dfm}
 
@@ -100,14 +100,18 @@ end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------------------- ON ACTIVATE }
 procedure TTrackerForm.FormActivate(Sender: TObject);
+var
+  DataBase: TDataBase;
 begin
-  if DataBase.LastError = 0 then
+  DataBase:=TDataBase.Create(False);
+  if DataBase.Check = 0 then
   begin
     Sleep(100);
     GetData;
   end
     else
       MainForm.MsgCall(2, 'Cannot connect with database. Please contact IT support.');
+  FreeAndNil(DataBase);
 end;
 
 { ---------------------------------------------------------------------------------------------------------------------------------- RETRIVE AND DISPLAY DATA }
@@ -115,7 +119,7 @@ procedure TTrackerForm.GetData;
 var
   AppSettings: TSettings;
   SetKeys:     TStringList;
-  TblTracker:  TTracker;
+//  TblTracker:  TTracker;
   iCNT:        integer;
 begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
@@ -136,7 +140,7 @@ begin
     if LayoutList.Items.Count > 0 then LayoutList.ItemIndex:=0;
   end;
   { ------------------------------------------------------------------------------------------------------------------------------------------------ READ OUT }
-
+(*
   TblTracker:=TTracker.Create;
   try
     { SETUP }
@@ -170,7 +174,7 @@ begin
     if TextStatTo.Text  <> '' then ErrorLegalTo.Visible:=False;
     if not (ErrorLegalTo.Visible) and not (ErrorMailTo.Visible) and not (ErrorStatTo.Visible) then btnOK.Enabled:=True;
   end;
-
+*)
   Screen.Cursor:=crDefault;
 end;
 

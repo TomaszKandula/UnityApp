@@ -4,7 +4,7 @@
 { Version:          0.1                                                                                                                                       }
 { (C)(R):           Tomasz Kandula                                                                                                                            }
 { Originate:        10-07-2016 (Concept & GUI)                                                                                                                }
-{ IDE:              Delphi XE2 / Delphi Tokyo                                                                                                                 }
+{ IDE:              RAD Studio with Delphi XE2 (migrated to Delphi Tokyo)                                                                                     }
 { Target:           Microsoft Windows 7 or newer                                                                                                              }
 { Dependencies:     Ararat Synapse (modified third-party) and own libraries                                                                                   }
 { NET Framework:    Required 4.6 or newer (Lync / Skype calls)                                                                                                }

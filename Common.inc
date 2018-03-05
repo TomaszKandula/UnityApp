@@ -4,7 +4,7 @@
 { Version:          0.1                                                                                                                                       }
 { (C)(R):           Tomasz Kandula                                                                                                                            }
 { Originate:        10-07-2016 (Concept & GUI)                                                                                                                }
-{ IDE:              Delphi XE2 / Delphi Tokyo                                                                                                                 }
+{ IDE:              RAD Studio with Delphi XE2 (migrated to Delphi Tokyo)                                                                                     }
 { Target:           Microsoft Windows 7 or newer                                                                                                              }
 { Dependencies:     Ararat Synapse (modified third-party) and own libraries                                                                                   }
 { NET Framework:    Required 4.6 or newer (Lync / Skype calls)                                                                                                }
@@ -103,11 +103,16 @@ const
   ColumnOrderName     = 'COLUMNORDER';
   ColumnNames         = 'COLUMNNAMES';
 
+  { FIXED MESSAGES }
+
+  ERR_MESSAGE = 'Cannot connect with Microsoft SQL Server. Please re-check your server settings or contact IT support.';
+  ERR_LOGTEXT = 'ADO connection error. Exception thrown: ';
+
   { SPECIAL CHARACTERS }
 
   CRLF         : string = #13#10;
   COMMA        : char   = #44;
-  SPACE        : char   = #32;
+  WHITESPACE   : char   = #32;
   TAB          : char   = #9;
   QUOTE        : char   = #39;
 
@@ -119,36 +124,50 @@ const
   _SET         : string = 'SET';
   UNION        : string = 'UNION ALL';
 
-  { ALL MAPPED TABLES AND COLUMNS IN DATABASE }
+  { MAPPED TABLES FROM DATABASE | WE DO NOT USE ORM, NOR WE CREATE OWN }
 
-  tbl_daily       = 'tbl_daily';
+  TblDaily       = 'tbl_daily';
+  TblGeneral     = 'tbl_general';
+  TblCompany     = 'tbl_company';
+  TblManagers    = 'tbl_managers';
+  TblTeamleaders = 'tbl_teamleaders';
+  TblInvoices    = 'tbl_invoices';
+  TblTracker     = 'tbl_tracker';
+  TblGroup3      = 'tbl_group3';
+  TblPaidinfo    = 'tbl_paidinfo';
+  TblPmtterms    = 'tbl_pmtterms';
+  TblTblPerson   = 'tbl_person';
+  TblTblUAC      = 'tbl_UAC';
+  TblGroups      = 'tbl_groups';
+  TblAddressbook = 'tbl_addressbook';
+  TblOpenitems   = 'tbl_openitems';
+  TblSnapshots   = 'tbl_snapshots';
 
-  tbl_general     = 'tbl_general';
+  { CURSOR TYPE ENUM, MSDN: https://docs.microsoft.com/en-us/sql/ado/reference/ado-api/cursortypeenum }
 
-  tbl_company     = 'tbl_company';
+  adOpenDynamic     = 2;
+  adOpenForwardOnly = 0;
+  adOpenKeyset      = 1;
+  adOpenStatic      = 3;
+  adOpenUnspecified = -1;
 
-  tbl_managers    = 'tbl_managers';
+  { COMMAND TYPE ENUM, MSDN: https://docs.microsoft.com/en-us/sql/ado/reference/ado-api/commandtypeenum }
 
-  tbl_teamleaders = 'tbl_teamleaders';
+  adCmdUnspecified = -1;
+  adCmdText        = 1;
+  adCmdTable       = 2;
+  adCmdStoredProc	 = 4;
+  adCmdUnknown     = 8;
+  adCmdFile        = 256;
+  adCmdTableDirect = 512;
 
-  tbl_invoices    = 'tbl_invoices';
+  { LOCK TYPE ENUM, MSDN: https://docs.microsoft.com/en-us/sql/ado/reference/ado-api/locktypeenum }
 
-  tbl_tracker     = 'tbl_tracker';
+  adLockBatchOptimistic = 4;
+  adLockOptimistic      = 3;
+  adLockPessimistic     = 2;
+  adLockReadOnly        = 1;
+  adLockUnspecified     = -1;
 
-  tbl_group3      = 'tbl_group3';
-
-  tbl_paidinfo    = 'tbl_paidinfo';
-
-  tbl_pmtterms    = 'tbl_pmtterms';
-
-  tbl_person      = 'tbl_person';
-
-  tbl_UAC         = 'tbl_UAC';
-
-  tbl_groups      = 'tbl_groups';
-
-  tbl_addressbook = 'tbl_addressbook';
-
-  tbl_snapshots   = 'tbl_snapshots';
 
 

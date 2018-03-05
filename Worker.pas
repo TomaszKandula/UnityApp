@@ -4,7 +4,7 @@
 { Version:          0.1                                                                                                                                       }
 { (C)(R):           Tomasz Kandula                                                                                                                            }
 { Originate:        10-07-2016 (Concept & GUI)                                                                                                                }
-{ IDE:              Delphi XE2 / Delphi Tokyo                                                                                                                 }
+{ IDE:              RAD Studio with Delphi XE2 (migrated to Delphi Tokyo)                                                                                     }
 { Target:           Microsoft Windows 7 or newer                                                                                                              }
 { Dependencies:     Ararat Synapse (modified third-party) and own libraries                                                                                   }
 { NET Framework:    Required 4.6 or newer (Lync / Skype calls)                                                                                                }
@@ -16,7 +16,7 @@ unit Worker;
 interface
 
 uses
-  Windows, Messages, SysUtils, Classes, Diagnostics, Graphics, ADODB, ComObj, Main, Settings;
+  Windows, Messages, SysUtils, Classes, Diagnostics, Graphics, ADODB, ComObj, Settings;
 
 { ----------------------------------------------------------- ! SEPARATE CPU THREADS ! ---------------------------------------------------------------------- }
 type
@@ -119,6 +119,9 @@ type
       procedure Execute; override;
   end;
 
+
+  ///below array to be removed!!!
+
 { ---------------------------------------------------------------------------------------------------------------------- ACCESSIBLE VARIABLES FOR OTHER UNITS }
 var
   { THREADS ORDER IN ARRAY:        }
@@ -138,6 +141,9 @@ var
 
 implementation
 
+uses
+  Main, DataBase;
+
 { ############################################################ ! SEPARATE CPU THREADS ! ##################################################################### }
 
 { ----------------------------------------------------------------------------------------------------------------------------------- CHECK SERVER CONNECTION }
@@ -147,11 +153,17 @@ implementation
 procedure TTCheckServerConnection.Execute;  (* ASYNC *)
 var
   IDThread:  integer;
+  DataBase:  TDataBase;
 begin
-  IDThread:=TTCheckServerConnection.CurrentThread.ThreadID;
-  ActiveThreads[0]:=True;
-  DataBase.InitializeConnection(IDThread, False);
-  ActiveThreads[0]:=False;
+  DataBase:=TDataBase.Create(False);
+  try
+    IDThread:=TTCheckServerConnection.CurrentThread.ThreadID;
+    ActiveThreads[0]:=True;
+    DataBase.InitializeConnection(IDThread, False, MainForm.ADOConnect);
+    ActiveThreads[0]:=False;
+  finally
+    DataBase.Free;
+  end;
   FreeOnTerminate:=True;
 end;
 
@@ -163,27 +175,24 @@ var
   THDSec:     extended;
   StopWatch:  TStopWatch;
   InvoiceTracker: TInvoiceTracker;
+  DataBase:   TDataBase;
 begin
   IDThread:=TTInvoiceTrackerScanner.CurrentThread.ThreadID;
   InvoiceTracker:=TInvoiceTracker.Create;
   ActiveThreads[1]:=True;
+  DataBase:=TDataBase.Create(False);
   try
     StopWatch:=TStopWatch.StartNew;
     try
-
       { ------------------------------------------------------- ! PRE | GUI UPDATE ! ------------------------------------------------------------------------ }
-
-      { SYNCHRONIZED WITH THE MAIN THREAD }
-      Synchronize
-        (procedure begin
-          { LIST REFRESH }
-          if DataBase.LastError = 0 then InvoiceTracker.Refresh(MainForm.sgInvoiceTracker, UpperCase(MainForm.CurrentUserName));
-        end);
-
-      { --------------------------------------------------- ! HEAVY DUTY TASK (RUN ASYNC) ! ----------------------------------------------------------------- }
-
-      { CHECK CONDITIONS AND SEND E-MAILS }
-      if DataBase.LastError = 0 then InvoiceTracker.Scanner(IDThread);
+      if DataBase.Check = 0 then
+      begin
+        { SYNCHRONIZED WITH THE MAIN THREAD }
+        Synchronize(procedure begin InvoiceTracker.Refresh(MainForm.sgInvoiceTracker, UpperCase(MainForm.CurrentUserName)) end);
+        { ------------------------------------------------- ! HEAVY DUTY TASK (RUN ASYNC) ! ----------------------------------------------------------------- }
+        { CHECK CONDITIONS AND SEND E-MAILS }
+        InvoiceTracker.Scanner(IDThread);
+      end;
 
     except
       on E: Exception do
@@ -192,8 +201,8 @@ begin
         LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Execution of this tread work has been stopped. Error thrown: ' + E.Message + ' (TInvoiceScanner). Exit Code = ' + IntToStr(ExitCode) + '.');
       end;
     end;
-
   finally
+    DataBase.Free;
     InvoiceTracker.Free;
     ActiveThreads[1]:=False;
     THDMili:=StopWatch.ElapsedMilliseconds;
@@ -201,7 +210,6 @@ begin
     LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Scanning invoices and sending reminders (if any) executed within: ' +
             FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
   end;
-
   { RELEASE THREAD WHEN DONE }
   FreeOnTerminate:=True;
 end;
@@ -256,9 +264,12 @@ var
   THDMili:    extended;
   THDSec:     extended;
   StopWatch:  TStopWatch;
+  DataBase: TDataBase;
 begin
   IDThread:=TTReadAgeView.CurrentThread.ThreadID;
   ActiveThreads[3]:=True;
+  DataBase:=TDataBase.Create(False);
+
   try
     StopWatch:=TStopWatch.StartNew;
 
@@ -337,14 +348,14 @@ begin
         end);
 
       { -------------------------------------------------- ! HEAVY DUTY TASK (RUN ASYNC) ! ------------------------------------------------------------------ }
-      AgeView.Read(Database.ArrGroupList[MainForm.GroupListBox.ItemIndex, 0], StrToDate(MainForm.GroupListDates.Text), IDThread);
+      AgeView.Read(MainForm.ArrGroupList[MainForm.GroupListBox.ItemIndex, 0], StrToDate(MainForm.GroupListDates.Text), IDThread);
 
       { ------------------------------------------------------- ! POST | GUI UPDATE ! ----------------------------------------------------------------------- }
       Synchronize
         (procedure begin
 
           { FIND CO CODE, CURRENCY CODE, INTEREST RATE AND AGENT }
-          AgeView.Details(Database.ArrGroupList[MainForm.GroupListBox.ItemIndex, 0], StrToDate(MainForm.GroupListDates.Text), IDThread);
+          AgeView.Details(MainForm.ArrGroupList[MainForm.GroupListBox.ItemIndex, 0], StrToDate(MainForm.GroupListDates.Text), IDThread);
 
           { -------------------------------------------------------------------------------------------------------------------------- TOP | AGE VIEW DETAILS }
           MainForm.tcTOTAL.Caption    :=IntToStr(AgeView.CustAll);
@@ -414,7 +425,7 @@ begin
       { TURN ON COMPONENTS }
       MainForm.GroupListBox.Enabled  :=True;
       MainForm.sgAgeView.Enabled     :=True;
-      if (MainForm.GroupListDates.Text <> '') and (Database.AccessLevel = 'AD')
+      if (MainForm.GroupListDates.Text <> '') and (MainForm.AccessLevel = 'AD')
         then MainForm.GroupListDates.Enabled:=True
           else MainForm.GroupListDates.Enabled:=False;
     end);
@@ -422,12 +433,13 @@ begin
     ActiveThreads[3]:=False;
     THDMili:=StopWatch.ElapsedMilliseconds;
     THDSec:=THDMili / 1000;
-    LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Thread for selected group "' + Database.ArrGroupList[MainForm.GroupListBox.ItemIndex, 1] + '" has been executed within ' +
+    LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Thread for selected group "' + MainForm.ArrGroupList[MainForm.GroupListBox.ItemIndex, 1] + '" has been executed within ' +
                      FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
   end;
 
   { RELEASE THREAD WHEN DONE }
   FreeOnTerminate:=True;
+  DataBase.Free;
 
   { REFRESH OPEN ITEMS WITH ZERO ARGUMENT FOR NO 'AGE-MAKE'   }
   { DO IT ONLY IF USE CLICK RELOAD BUTTON                     }
@@ -448,18 +460,20 @@ var
   iCNT:       integer;
   jCNT:       integer;
   temp:       string;
+  DataBase: TDataBase;
 begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   IDThread:=TTMakeAgeView.CurrentThread.ThreadID;
   ActiveThreads[4]:=True;
+  DataBase:=TDataBase.Create(False);
 
-  if DataBase.LastError = 0 then
+  if DataBase.Check = 0 then
   begin
     try
       StopWatch:=TStopWatch.StartNew;
       try
         { ----------------------------------------------------------------------------------------------------------------------- MAKE AGING REPORT TO AN ARRAY }
-        AgeView.Make(Database.UACstring(MainForm.GroupListBox.ItemIndex, 0, 2), OpenItems.OSamt, IDThread);
+        AgeView.Make(MainForm.UACstring(MainForm.GroupListBox.ItemIndex, 0, 2), OpenItems.OSamt, IDThread);
 
         { ---------------------------------------------------------------------------------------------------------------------------------- SAVE OUTPUT TO CSV }
 
@@ -502,7 +516,7 @@ begin
           { UPDATE THE LIST }
           Synchronize
             (procedure begin
-              Database.UACAgeDates(Database.ArrGroupList[MainForm.GroupListBox.ItemIndex, 0]);
+              MainForm.UACAgeDates(MainForm.ArrGroupList[MainForm.GroupListBox.ItemIndex, 0]);
               MainForm.GroupListDates.ItemIndex:=MainForm.GroupListDates.Items.Count - 1;
             end);
 
@@ -530,6 +544,8 @@ begin
 
   { RELEASE THREAD WHEN DONE }
   FreeOnTerminate:=True;
+  FreeAndNil(DataBase);
+
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------- TRACKER LIST REFRESH }
@@ -543,15 +559,17 @@ procedure TTInvoiceTrackerRefresh.Execute;  (* SYNC *)
 var
   IDThread:  integer;
   InvoiceTracker: TInvoiceTracker;
+  DataBase: TDataBase;
 begin
   IDThread:=TTInvoiceTrackerRefresh.CurrentThread.ThreadID;
   InvoiceTracker:=TInvoiceTracker.Create;
+  DataBase:=TDataBase.Create(False);
 
   try
     ActiveThreads[5]:=True;
 
     try
-      if Database.LastError = 0 then InvoiceTracker.Refresh(MainForm.sgInvoiceTracker, pMode)
+      if Database.Check = 0 then InvoiceTracker.Refresh(MainForm.sgInvoiceTracker, pMode)
         else
           LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Cannot refresh Invoice Tracker list. Database connection has been lost.');
       LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Refresh Invoice Tracker list with mode = ' + pMode + ' has ended successfully.');
@@ -573,6 +591,7 @@ begin
 
   { RELEASE THREAD WHEN DONE }
   FreeOnTerminate:=True;
+  FreeAndNil(DataBase);
 end;
 
 (*
@@ -751,12 +770,13 @@ end;
 procedure TTAddressBook.Execute;  (* ASYNC & SYNC *)
 var
   AddressBook:  TAddressBook;
+  DataBase: TDataBase;
 begin
   AddressBook:=TAddressBook.Create('|', pUser);
   AddressBook.idThd:=TTAddressBook.CurrentThread.ThreadID;
   ActiveThreads[8]:=True;
-
-  if DataBase.LastError = 0 then
+  DataBase:=TDataBase.Create(False);
+  if DataBase.Check = 0 then
   begin
     try
       PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Processing..., please wait.')));
@@ -801,6 +821,7 @@ begin
 
   { RELEASE THREAD WHEN DONE }
   FreeOnTerminate:=True;
+  FreeAndNil(DataBase);
 end;
 
 { ---------------------------------------------------------------------------------------------------------------------------------- EXPORT AGE VIEW TO EXCEL }

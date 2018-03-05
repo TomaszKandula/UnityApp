@@ -4,7 +4,7 @@
 { Version:          0.1                                                                                                                                       }
 { (C)(R):           Tomasz Kandula                                                                                                                            }
 { Originate:        10-07-2016 (Concept & GUI)                                                                                                                }
-{ IDE:              Delphi XE2 / Delphi Tokyo                                                                                                                 }
+{ IDE:              RAD Studio with Delphi XE2 (migrated to Delphi Tokyo)                                                                                     }
 { Target:           Microsoft Windows 7 or newer                                                                                                              }
 { Dependencies:     Ararat Synapse (modified third-party) and own libraries                                                                                   }
 { NET Framework:    Required 4.6 or newer (Lync / Skype calls)                                                                                                }
@@ -41,7 +41,7 @@ var
 implementation
 
 uses
-  SQL, Settings;
+  SQL, Settings, Database;
 
 {$R *.dfm}
 
@@ -59,7 +59,6 @@ begin
   { ----------------------------------------------------------------------------------------------------------------------------- 'STRINGGRID' INITIALIZATION }
   InvoicesGrid.RowCount:=2;
   InvoicesGrid.ColCount:=4;
-  { HIDE UNNECESSARY COLUMNS }
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------------- ON SHOW }
@@ -76,16 +75,18 @@ begin
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------------------- ON ACTIVATE }
-procedure TInvoicesForm.FormActivate(Sender: TObject); // refactor!! make model for tbl_invoices
+procedure TInvoicesForm.FormActivate(Sender: TObject);
 var
   MSSQL:  TMSSQL;
+  DataBase: TDataBase;
   CUID :  string;
 begin
   { CHECK DATABASE CONNECTION AND PROCEED ACCORDINGLY }
-  if DataBase.LastError = 0 then
+  DataBase:=TDataBase.Create(False);
+  if DataBase.Check = 0 then
   begin
     Sleep(100);
-    MSSQL:=TMSSQL.Create(Database.ADOConnect);
+    MSSQL:=TMSSQL.Create(MainForm.ADOConnect);
     try
       { PREPARE FOR QUERY }
       CUID:=MainForm.sgInvoiceTracker.Cells[MainForm.sgInvoiceTracker.ReturnColumn('CUID', 1, 1), MainForm.sgInvoiceTracker.Row];
@@ -102,6 +103,7 @@ begin
   begin
     StatusBar.SimpleText:='Cannot connect with database. Please contact IT support.';
   end;
+  FreeAndNil(DataBase);
 end;
 
 { -------------------------------------------------------- ! COMPONENT EVENTS | GRID ! ---------------------------------------------------------------------- }

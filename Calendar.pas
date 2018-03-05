@@ -4,7 +4,7 @@
 { Version:          0.1                                                                                                                                       }
 { (C)(R):           Tomasz Kandula                                                                                                                            }
 { Originate:        10-07-2016 (Concept & GUI)                                                                                                                }
-{ IDE:              Delphi XE2 / Delphi Tokyo                                                                                                                 }
+{ IDE:              RAD Studio with Delphi XE2 (migrated to Delphi Tokyo)                                                                                     }
 { Target:           Microsoft Windows 7 or newer                                                                                                              }
 { Dependencies:     Ararat Synapse (modified third-party) and own libraries                                                                                   }
 { NET Framework:    Required 4.6 or newer (Lync / Skype calls)                                                                                                }
@@ -120,9 +120,10 @@ end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------- APPROVE SELECTED DATE }
 procedure TCalendarForm.MyCalendarDblClick(Sender: TObject);  (* CAN BE SEPARATE WORKER THREAD *)
-var
-  GeneralComment: TGeneral;
+//var
+//  GeneralComment: TGeneral;
 begin
+(*
   GeneralComment:=TGeneral.Create;
   try
     { ------------------------------------------------------------------------------------------------------------------------------------- PREPARE FOR QUERY }
@@ -144,6 +145,7 @@ begin
     GeneralComment.Free;
   end;
   Close;
+*)
 end;
 
 end.

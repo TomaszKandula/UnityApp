@@ -4,7 +4,7 @@
 { Version:          0.1                                                                                                                                       }
 { (C)(R):           Tomasz Kandula                                                                                                                            }
 { Originate:        10-07-2016 (Concept & GUI)                                                                                                                }
-{ IDE:              Delphi XE2 / Delphi Tokyo                                                                                                                 }
+{ IDE:              RAD Studio with Delphi XE2 (migrated to Delphi Tokyo)                                                                                     }
 { Target:           Microsoft Windows 7 or newer                                                                                                              }
 { Dependencies:     Ararat Synapse (modified third-party) and own libraries                                                                                   }
 { NET Framework:    Required 4.6 or newer (Lync / Skype calls)                                                                                                }
@@ -20,13 +20,12 @@ uses
   DBGrids, AppEvnts, ShellAPI, INIFiles, StrUtils, ValEdit, DateUtils, Clipbrd, DB, ADODB, ActiveX, CDO_TLB, Diagnostics, GIFImg, Math, Wininet, ComObj,
   OleCtrls, SHDocVw, blcksock, smtpsend { MODIFIED FROM ORIGINAL }, pop3send, ssl_openssl, synautil, synacode, mimemess { MODIFIED FROM ORIGINAL };
 
-{ ---------------------------------------------------------- ! REFERENCE TO M.DIM. ARRAY ! ------------------------------------------------------------------ }
+{ REFERENCE TO M.DIM. ARRAY }
 type
   TStrArray = array of array of string;
 
-{ ----------------------------------------------------------- ! 'TSTRINGGRID' REFERENCE ! ------------------------------------------------------------------- }
+{ 'TSTRINGGRID' REFERENCE FOR DELETE OPTION }
 type
-  { WE USE IT TO DELETE SELECTED ROWS FROM STRING GRID COMPONENT }
   TAbstractGrid = class(Grids.TStringGrid);
 
 { ------------------------------------------------------------ ! INTERPOSER CLASSES ! ----------------------------------------------------------------------- }
@@ -738,20 +737,37 @@ type                                                            (* GUI | MAIN TH
     procedure Action_OverdueClick(Sender: TObject);
     procedure GroupListBoxDropDown(Sender: TObject);
   private
-    var LastGroupSelection: integer;
-    var AllowClose      :  boolean;        { SIGNAL FORCE CLOSE WHEN WINDOWS IS SHUTTING DOWN }
-    var cDateTime       :  TDateTime;      { CURRENT DATE AND TIME | REFRESH TIME EACH SECOND }
-    var StartTime       :  TDateTime;      { APPLICATION START TIME }
+    var LastGroupSelection:  integer;    // CURRENTLY SELECTED AGE DATE
+    var AllowClose        :  boolean;    // SIGNAL FORCE CLOSE WHEN WINDOWS IS SHUTTING DOWN
+    var StartTime         :  TTime;      // APPLICATION START TIME
+    var pAccessLevel      :  string;     // RO, RW, AD
+    var pAccessMode       :  string;     // TEMPORARILY UNUSED
   public
-    var CurrentUserName: string;
-    var EventLogPath:    string;
-    var
+
+    { ----------------------------------------------------------------------------------------------------------------------------------------------- HELPERS }
+
+    var CurrentUserName  :  string;
+    var EventLogPath     :  string;
+    var ADOConnect       :  TADOConnection;
+    var ArrGroupList     :  TStrArray;
+
+    property    AccessLevel  : string  read pAccessLevel write pAccessLevel;
+    property    AccessMode   : string  read pAccessMode  write pAccessMode;
+
     procedure DebugMsg(const Msg: String);
     function  OleGetStr(RecordsetField: variant): string;
     function  FindKey(INI: TMemIniFile; OpenedSection: string; KeyPosition: integer): string;
     function  WndCall(WinForm: TForm; Mode: integer): integer;
     function  MsgCall(WndType: integer; WndText: string): integer;
     procedure LockSettingsPanel;
+
+    {}
+
+    function  UACinitialize: boolean;
+    procedure UACGroupReader(UACuser: string);
+    procedure UACAgeDates(StrGroupID: string);
+    function  UACString(ListPos: integer; CoPos: integer; Mode: integer): string;
+
   protected
     procedure WndProc(var msg: Messages.TMessage); override;
   end;
@@ -792,7 +808,7 @@ var
 implementation
 
 uses
-  Filter, Tracker, Invoices, Actions, Calendar, About, Search, Worker, Model, SQL, Setting, Databse;
+  Filter, Tracker, Invoices, Actions, Calendar, About, Search, Worker, Model, SQL, Settings, Database;
 
 {$R *.dfm}
 
@@ -853,8 +869,8 @@ WINDOWS API:
 
 { ----------------------------------------------------------------------------------------------------------------------- MESSAGE RECEIVER FOR WORKER THREADS }
 procedure TMainForm.WndProc(var Msg: Messages.TMessage);
-var
-  DailyComment:  TDaily;
+//var
+//  DailyComment:  TDaily;
 begin
   inherited;
   { ------------------------------------------------------------------------------------------------ INTERNAL MESSAGES BETWEEN WORKER THREADS AND MAIN THREAD }
@@ -894,6 +910,7 @@ begin
 
       if Msg.LParam > 0 then
       begin
+(*
         DailyComment:=TDaily.Create;
         try
           { ASSIGN CALLED CUSTOMER }
@@ -909,6 +926,7 @@ begin
         finally
           DailyComment.Free;
         end;
+*)
       end;
 
   end;
@@ -1437,8 +1455,10 @@ var
   StrCol:     string;
   MSSQL:      TMSSQL;
   StrSQL:     string;
+  Database:   TDataBase;
 begin
   Result:=False;
+  DataBase:=TDataBase.Create(False);
   { READ AGE VIEW WITH COMMENT COLUMN AND GENERAL COLUMN | TO STRING GRID }
 
   Self.LoadLayout(StrCol, ColumnWidthName, ColumnOrderName, ColumnNames, ColumnPrefix);
@@ -1458,7 +1478,7 @@ begin
           'ON '                                     +
           '  tbl_snapshots.cuid = tbl_daily.cuid '  +
           'WHERE '                                  +
-            'tbl_snapshots.GROUP_ID = '             + QuotedStr(Database.ArrGroupList[MainForm.GroupListBox.ItemIndex, 0]) + ' ' +
+            'tbl_snapshots.GROUP_ID = '             + QuotedStr(MainForm.ArrGroupList[MainForm.GroupListBox.ItemIndex, 0]) + ' ' +
             'AND tbl_snapshots.AGE_DATE =  '        + QuotedStr(MainForm.GroupListDates.Text) + ' ' +
           'ORDER BY '                               +
             'tbl_snapshots.RISK_CLASS ASC, '        +
@@ -1466,7 +1486,8 @@ begin
             'tbl_snapshots.TOTAL DESC, '            +
             'tbl_general.FOLLOWUP ASC;'             ;
 
-  MSSQL:=TMSSQL.Create(DataBase.ADOConnect);
+  FreeAndNil(DataBase);
+  MSSQL:=TMSSQL.Create(MainForm.ADOConnect);
   try
     MSSQL.StrSQL:=StrSQL;
     MSSQL.SqlToGrid(Self, MSSQL.ExecSQL, False);
@@ -1677,6 +1698,7 @@ end;
 procedure AddInvoiceToList(var CUID: string; InvoiceNumber: string; ReminderNumber: integer);
 var
   AppSettings:  TSettings;
+  DataBase:     TDataBase;
   Stamp:        string;
   Query:        TADOQuery;
   StrSQL:       string;
@@ -1685,8 +1707,9 @@ begin
     { -------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
     Stamp:=DateTimeToStr(Now);
     Query:=TADOQuery.Create(nil);
-    Query.Connection:=Database.ADOConnect;
+    Query.Connection:=MainForm.ADOConnect;
     AppSettings:=TSettings.Create;
+    DataBase:=TDataBase.Create(False);
     try
       { ------------------------------------------------------------------------------------------------------------------------------- LOG TO 'TBL_INVOICES' }
       Query.SQL.Clear;
@@ -1711,7 +1734,7 @@ begin
         Query.SQL.Clear;
         StrSQL:='UPDATE tbl_daily SET EMAIL = ' + QuotedStr(IntToStr(Return)) +
                 ' WHERE CUID = '                + QuotedStr(CUID) +
-                ' AND GROUP_ID = '              + QuotedStr(Database.ArrGroupList[MainForm.GroupListBox.ItemIndex, 0]) +
+                ' AND GROUP_ID = '              + QuotedStr(MainForm.ArrGroupList[MainForm.GroupListBox.ItemIndex, 0]) +
                 ' AND AGEDATE = '               + QuotedStr(MainForm.GroupListDates.Text);
         Query.SQL.Text:=StrSQL;
         Query.ExecSQL;
@@ -1723,7 +1746,7 @@ begin
           Query.SQL.Clear;
           { MAKE NEW SQL }
           StrSQL:='INSERT INTO tbl_daily (GROUP_ID, CUID, AGEDATE, STAMP, USER_ALIAS, EMAIL) VALUES ('
-                       + QuotedStr(Database.ArrGroupList[MainForm.GroupListBox.ItemIndex, 0]) + ', '
+                       + QuotedStr(MainForm.ArrGroupList[MainForm.GroupListBox.ItemIndex, 0]) + ', '
                        + QuotedStr(CUID) + ', '
                        + QuotedStr(MainForm.GroupListDates.Text) + ', '
                        + QuotedStr(Stamp) + ', '
@@ -1734,6 +1757,7 @@ begin
           Query.ExecSQL;
         end;
     finally
+      DataBase.Free;
       AppSettings.Free;
       Query.Free;
     end;
@@ -1748,18 +1772,14 @@ begin
   { INITIALIZE }
   Result:=False;
   Query:=TADOQuery.Create(nil);
-  Query.Connection:=Database.ADOConnect;
+  Query.Connection:=MainForm.ADOConnect;
   if SearchState = 0 then StrSQL:='SELECT INVOICESTATE FROM tbl_invoices WHERE INVOICENO = ' + QuotedStr(InvNum)
-//  if SearchState = 0 then StrSQL:='SELECT INVOICESTATE FROM tbl_invoices WHERE INVOICENO = :uParam1'
     else
       StrSQL:='SELECT INVOICESTATE FROM tbl_invoices WHERE INVOICENO = :uParam1 AND INVOICESTATE = ' + QuotedStr(IntToStr(SearchState));
-//      StrSQL:='SELECT INVOICESTATE FROM tbl_invoices WHERE INVOICENO = :uParam1 AND INVOICESTATE = :uParam2';
   try
     { EXCUTE }
     Query.SQL.Clear;
     Query.SQL.Add(StrSQL);
-//    Query.Parameters.ParamByName('uParam1').Value:=InvNum;
-//    if not SearchState = 0 then Query.Parameters.ParamByName('uParam2').Value:=SearchState;
     Query.Open;
     if Query.RecordCount = 0  then Result:=False;
     if SearchState = 0 then
@@ -1939,7 +1959,7 @@ begin
   with SG do SendMessage(Handle, WM_SETREDRAW, 0, 0);
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   Query:=TADOQuery.Create(nil);
-  Query.Connection:=Database.ADOConnect;
+  Query.Connection:=MainForm.ADOConnect;
   Query.SQL.Clear;
   Stamp:=DateTimeToStr(Now);
   SetLength(StrSQL, 2);
@@ -2300,7 +2320,7 @@ var
 begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   Result:=False;
-  MSSQL:=TMSSQL.Create(Database.ADOConnect);
+  MSSQL:=TMSSQL.Create(MainForm.ADOConnect);
   { ------------------------------------------------------------------------------------------------------------------------------------------- COLUMNS SETUP }
   Columns:='USER_ALIAS,'     +
            'CUID,'           +
@@ -2345,7 +2365,7 @@ begin
   Result :=False;
   Start  :=0;
   TheSame:=0;
-  MSSQL  :=TMSSQL.Create(Database.ADOConnect);
+  MSSQL  :=TMSSQL.Create(MainForm.ADOConnect);
   { ------------------------------------------------------------------------------------------------------------------------------------------------- COLUMNS }
 
   (* NOTE: COLUMN ORDER MUST BE THE SAME AS IN GIVEN STRING GRID *)
@@ -2569,6 +2589,7 @@ var
   StrSQL:        string;
   StrCol:        string;
   Query:         TADOQuery;
+  DataBase:      TDataBase;
 begin
   { ----------------------------------------------------------------------------------------------------------------------------------------- DISABLE DRAWING }
   MainForm.sgAgeView.Freeze(True);
@@ -2621,7 +2642,7 @@ begin
   { ----------------------------------------------------------------------------------------------------------------------------------------------- NEW QUERY }
   { QUERY WITH GIVEN SQL EXPRESSION AND PARAMETERS }
   Query:=TADOQuery.Create(nil);
-  Query.Connection:=Database.ADOConnect;
+  Query.Connection:=MainForm.ADOConnect;
   try
     Query.SQL.Clear;
     Query.SQL.Add(StrSQL);
@@ -2677,10 +2698,10 @@ begin
     inc(AgeView.CustAll);
   end;
   MainForm.sgAgeView.DefaultRowHeight:=17;
-  { BASIC VIEW }
-  if UpperCase(Database.AccessMode) = 'BASIC' then MainForm.Action_BasicViewClick(self);
-  { FULL VIEW }
-  if UpperCase(Database.AccessMode) = 'FULL' then mainForm.Action_FullViewClick(self);
+  DataBase:=TDataBase.Create(False);
+  if UpperCase(MainForm.AccessMode) = 'BASIC' then MainForm.Action_BasicViewClick(self);
+  if UpperCase(MainForm.AccessMode) = 'FULL'  then MainForm.Action_FullViewClick(self);
+  FreeAndNil(DataBase);
   { ------------------------------------------------------------------------------------------------------------------------------------------ ENABLE DRAWING }
   MainForm.sgAgeView.Freeze(False);
 end;
@@ -3047,7 +3068,7 @@ var
   DeleteData:   string;
 begin
   { INITIALIZE }
-  MSSQL:=TMSSQL.Create(Database.ADOConnect);
+  MSSQL:=TMSSQL.Create(MainForm.ADOConnect);
   DeleteData:='DELETE FROM ' + DestTable + ' WHERE GROUP_ID = ' + QuotedStr(AgeView.ArrAgeView[0, 0]) + ' AND AGE_DATE = ' + QuotedStr(LeftStr(AgeView.ArrAgeView[0, 1], 10));
   try
     { BUILD AND EXECUTE }
@@ -3091,7 +3112,7 @@ begin
           'WHERE'                        +
             ' GROUP_ID = '               + QuotedStr(GroupID) +
             ' AND AGE_DATE = '           + QuotedStr(DateToStr(AgeDate));
-  MSSQL:=TMSSQL.Create(DataBase.ADOConnect);
+  MSSQL:=TMSSQL.Create(MainForm.ADOConnect);
   try
     MSSQL.StrSQL:=StrSQL;
     RS:=MSSQL.ExecSQL;
@@ -3407,6 +3428,8 @@ begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
 
   AppSettings.Create;
+
+
 
   (* RESET VARIABLES *)
 
@@ -3753,29 +3776,201 @@ begin
 
 end;
 
+{ ------------------------------------------------------------------------------------------------------------------------- USER ACCOUNT CONTROL | INITIALIZE }
+function TMainForm.UACinitialize: boolean;
+var
+  Query:       TADOQuery;
+  StrSQL:      string;
+//  iCNT:        integer;
+//  jCNT:        integer;
+begin
+  Result:=False;
+  { ------------------------------------------------------------------------------------------------------------------------ READ ACCESS LEVEL FOR GIVEN USER }
+  Query:=TADOQuery.Create(nil);
+  Query.Connection:=MainForm.ADOConnect;
+  try
+    StrSQL:='SELECT ACCESS_LEVEL, ACCESS_MODE FROM tbl_UAC WHERE USERNAME = ' + QuotedStr(UpperCase(MainForm.CurrentUserName));
+    Query.SQL.Clear;
+    Query.SQL.Add(StrSQL);
+    Query.Open;
+    { TABLE 'TBL_UAC' SHOULD ALWAYS HOLDS DISTINC USERNAMES }
+    { THEREFORE WE HAVE ONLY ONE ROW PER USER               }
+    if Query.RecordCount = 1 then
+    begin
+      AccessLevel:=Query.Recordset.Fields[0].Value;
+      AccessMode :=Query.Recordset.Fields[1].Value;
+      Result:=True;
+    end;
+    { IF USER IS NOT FOUND }
+    if Query.RecordCount = 0 then
+    begin
+      SendMessage(MainForm.Handle, WM_GETINFO, 3, LPARAM(PCHAR('Cannot find user name: ' + UpperCase(MainForm.CurrentUserName) + '. ' + APPNAME + ' will be closed. Please contact IT support.')));
+      LogText(MainForm.EventLogPath, '[UAC READER]: Cannot find user name: ' + UpperCase(MainForm.CurrentUserName) + '. Application terminated.');
+      Application.Terminate;
+    end;
+    { ACCESS LEVEL AND MODE TO EVENT LOG }
+    if AccessLevel = 'RO' then LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: User Access Level = read only given group(s).');
+    if AccessLevel = 'RW' then LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: User Access Level = read and write to given group(s).');
+    if AccessLevel = 'AD' then
+    begin
+      LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: User Access Level = access all areas.');
+    end;
+    if AccessMode <> ''   then LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: User Access Mode = ' + LowerCase(AccessMode) + '.');
+  finally
+    Query.Close;
+    Query.Free;
+  end;
+end;
+
+{ ----------------------------------------------------------------------------------------------------------------------------------------- UAC | READ GROUPS }
+procedure TMainForm.UACGroupReader(UACuser: string);
+{ READ ALL GROUP ID AND GROUP NAME INTO AN ARRAY, GROUP LIS BOX IS POPULATED FROM SUCH ARRAY ONLY WITH GROUP NAME }
+{ CORRESPONDING GROUP ID FOR SELECTED GROUP NAME BY THE USER IS USED TO UPLOAD ALL DISTINCT AGE DATES AND FINALY  }
+{ USED TO UPLOAD PROPER DATA SNAPSHOT RELATED TO GIVEN GROUP NAME.                                                }
+{ THIS METHOD IS NOT CALLED IF USER IS NOT FOUND IN DATABASE.                                                     }
+var
+  StrSQL:       string;
+  Query:        TADOQuery;
+  iCNT:         integer;
+begin
+  { INITIALIZE }
+  MainForm.GroupListBox.Enabled:=False;
+  iCNT:=0;
+  { BUILD SQL QUERY }
+  StrSQL:='SELECT GROUP_ID, GROUP_NAME FROM tbl_groups WHERE FID = (SELECT ID FROM tbl_UAC WHERE USERNAME = ' + QuotedStr(UACuser) + ')';
+  Query:=TADOQuery.Create(nil);
+  Query.Connection:=MainForm.ADOConnect;
+  try
+    { EXECUTE WITH GIVEN SQL AND DATABASE }
+    Query.SQL.Clear;
+    Query.SQL.Add(StrSQL);
+    try
+      Query.Open;
+      SetLength(MainForm.ArrGroupList, 2, 2);
+      if (Query.RecordCount > 0) then
+      begin
+        { MOVE TO AN ARRAY }
+        Query.Recordset.MoveFirst;
+        while not Query.Recordset.EOF do
+        begin
+          { READ FROM AND WRITE TO }
+          MainForm.ArrGroupList[iCNT, 0]:=Query.Recordset.Fields['GROUP_ID'  ].Value;
+          MainForm.ArrGroupList[iCNT, 1]:=Query.Recordset.Fields['GROUP_NAME'].Value;
+          { MOVE COUNTERS }
+          inc(iCNT);
+          Query.Recordset.MoveNext;
+          { EXPAND ARRAY BY ONE ROW }
+          SetLength(MainForm.ArrGroupList, iCNT + 1, 2);
+        end;
+        { POPULATE LIST BOX }
+        MainForm.GroupListBox.Clear;
+        for iCNT:=0 to high(MainForm.ArrGroupList) - 1 do MainForm.GroupListBox.Items.Add(MainForm.ArrGroupList[iCNT, 1]);
+        MainForm.GroupListBox.ItemIndex:=0;
+        MainForm.GroupListBox.Enabled:=True;
+      end;
+    except
+      on E: Exception do
+        LogText(MainForm.EventLogPath, '[UAC READER]: Query error. Exception thrown: ' + E.Message);
+    end;
+  finally
+    { RELEASE FROM MEMORY }
+    Query.Close;
+    Query.Free;
+  end;
+end;
+
+{ ------------------------------------------------------------------------------------------------------------------------- UAC | READ ALL DATES FOR GIVEN ID }
+procedure TMainForm.UACAgeDates(StrGroupID: string);
+var
+  StrSQL:      string;
+  Query:       TADOQuery;
+begin
+  { INITIALIZE }
+  MainForm.GroupListDates.Clear;
+  MainForm.GroupListDates.Enabled:=False;
+  { BUILD SQL QUERY }
+  StrSQL:='SELECT DISTINCT AGE_DATE FROM tbl_snapshots WHERE GROUP_ID = ' + QuotedStr(StrGroupID);
+  Query:=TADOQuery.Create(nil);
+  Query.Connection:=MainForm.ADOConnect;
+  try
+    { EXECUTE WITH GIVEN SQL AND DATABASE }
+    Query.SQL.Clear;
+    Query.SQL.Add(StrSQL);
+    try
+      Query.Open;
+      if (Query.RecordCount > 0) then
+      begin
+        Query.Recordset.MoveFirst;
+        while not Query.Recordset.EOF do
+        begin
+          MainForm.GroupListDates.Items.Add(Query.Recordset.Fields['AGE_DATE'].Value);
+          Query.Recordset.MoveNext;
+        end;
+      end;
+    except
+      on E: Exception do
+        LogText(MainForm.EventLogPath, '[UAC READER]: Query error. Exception thrown: ' + E.Message);
+    end;
+  finally
+    MainForm.GroupListDates.ItemIndex:=MainForm.GroupListDates.Items.Count - 1;
+    if AccessLevel = 'AD' then MainForm.GroupListDates.Enabled:=True;
+    { RELEASE FROM MEMORY }
+    Query.Close;
+    Query.Free;
+  end;
+end;
+
+{ --------------------------------------------------------------------------------------------------------------- UAC | RETURN SPECIFIC 'COCOE' FROM THE LIST }
+function TMainForm.UACString(ListPos: integer; CoPos: integer; Mode: integer): string;
+{ WARNING! GROUP ID FORMAT: SERIES OF 4 GROUPS OF 5 DIGITS, I.E.: '020470034000043' MUST BE READ AS FOLLOWS: }
+{   1. 1ST CO CODE: 02047 (2047)                                                                             }
+{   2. 2ND CO CODE: 00340 (340)                                                                              }
+{   3. 3RD CO CODE: 00043 (43)                                                                               }
+{   4. 4TH CO CODE: 00000 (0)                                                                                }
+{ PARAMETERS:                                                                                                }
+{   1. 'LISTPOS' = POSITION OF THE GROUP HOLING 'COCODES'                                                    }
+{   2. 'COPOS'   = NUMBER OF THE 'COCODE' TO BE RETURNED                                                     }
+{   3. 'MODE'    = 0 (COCODE) OR 1 (GROUP NAME) OR 2 (GROUP ID)                                              }
+begin
+  { VALIDATE INPUT DATA }
+  if ( ListPos > High(ArrGroupList) ) or (CoPos > 4) then Exit;
+  { EXTRACT | 'COCODE' FROM GROUP ID }
+  if Mode = 0 then
+  begin
+    if CoPos = 1 then Result:=IntToStr(StrToInt(MidStr(ArrGroupList[ListPos, Mode], 1,  5)));
+    if CoPos = 2 then Result:=IntToStr(StrToInt(MidStr(ArrGroupList[ListPos, Mode], 6,  5)));
+    if CoPos = 3 then Result:=IntToStr(StrToInt(MidStr(ArrGroupList[ListPos, Mode], 11, 5)));
+    if CoPos = 4 then Result:=IntToStr(StrToInt(MidStr(ArrGroupList[ListPos, Mode], 16, 5)));
+  end;
+  { EXTRACT | GROUP NAME }
+  if Mode = 1 then Result:=ArrGroupList[ListPos, Mode];
+  { EXTRACT | FULL GROUP ID }
+  if Mode = 2 then Result:=ArrGroupList[ListPos, 0];
+end;
+
 { ################################################################## ! EVENTS ! ############################################################################# }
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------- ON CREATE }
 procedure TMainForm.FormCreate(Sender: TObject);
 var
   AppVersion:       string;
-  MSSQL:            TMSSQL;
+//  MSSQL:            TMSSQL;
   AppSettings:      TSettings;
-  InvoiceTracker:   TInvoiceTracker;
+  DataBase:         TDataBase;
+//  InvoiceTracker:   TInvoiceTracker;
   RegionalSettings: TFormatSettings;
+  NowTime: TTime;
 begin
 
   { ------------------------------------------------------------ ! INITIALIZATION ! ------------------------------------------------------------------------- }
-
-  AppSettings:=TSettings.Create;
+  AppSettings    :=TSettings.Create;
   CurrentUserName:=AppSettings.WinUserName;
   EventLogPath   :=AppSettings.FPathEventLog;
   AppVersion     :=GetBuildInfoAsString;
   KeyPreview     :=True;
   AllowClose     :=False;
 
-  //to be removed!!!
-  DataBase   :=TDataBase.Create;
+  //remove!!!
   AgeView    :=TAgeView.Create;
   OpenItems  :=TOpenItems.Create;
 
@@ -3807,17 +4002,17 @@ begin
   { ------------------------------------------------------------- ! DATE & TIME ! --------------------------------------------------------------------------- }
 
   { ------------------------------------------------------------------------------------------------------------------------------------ FORMAT DATE AND TIME }
-  cDateTime:=Now;
+  NowTime  :=Now;
   StartTime:=Now;
 
   { --------------------------------------------------------------------------------------------------------------------------------------- REGIONAL SETTINGS }
-  FormatDateTime('hh:mm:ss', cDateTime);
+  FormatDateTime('hh:mm:ss', NowTime);
   FormatDateTime('hh:mm:ss', StartTime);
 
   { ------------------------------------------------------------- ! STATUS BAR ! ---------------------------------------------------------------------------- }
   StatBar_TXT1.Caption:='Ready.';
   StatBar_TXT2.Caption:=CurrentUserName + '.';
-  StatBar_TXT3.Caption:=DateToStr(cDateTime);
+  StatBar_TXT3.Caption:=DateToStr(Now);
 
   { ----------------------------------------------------------- ! DEFAULT VALUES ! -------------------------------------------------------------------------- }
 
@@ -3973,17 +4168,21 @@ begin
   { ------------------------------------------------------- ! DATABASE INITIALIZATION  ! -------------------------------------------------------------------- }
 
   { ------------------------------------------------------------------------------------------------------ DATABASE CONNECTION AND READ OUT OF GENERAL TABLES }
-  DataBase.InitializeConnection(MainThreadID, True);
-  if Database.ADOConnect.Connected then
+  DataBase  :=TDataBase.Create(True);
+  ADOConnect:=TADOConnection.Create(Self);
+  DataBase.InitializeConnection(MainThreadID, True, ADOConnect);
+(*
+
+  if ADOConnect.Connected then
   begin
     if not (Database.UACinitialize) then Application.Terminate else
     begin
       { --------------------------------------------------------------------------------------------------------- UAC GROUP LIST READ OUT & POPULATE LIST BOX }
       Database.UACGroupReader(UpperCase(MainForm.CurrentUserName));
-      Database.UACAgeDates(Database.ArrGroupList[GroupListBox.ItemIndex, 0]);
+      Database.UACAgeDates(MainForm.ArrGroupList[GroupListBox.ItemIndex, 0]);
       if GroupListDates.Text <> '' then TTReadAgeView.Create('1') else GroupListDates.Enabled:=False;
       { ------------------------------------------------------------------------------------------------------------------------------------------- LOAD MAPS }
-      MSSQL:=TMSSQL.Create(Database.ADOConnect);
+      MSSQL:=TMSSQL.Create(MainForm.ADOConnect);
       try
         MSSQL.StrSQL:='SELECT * FROM ' + AppSettings.TMIG.ReadString(GeneralTables, 'MAP1', ''); MSSQL.SqlToGrid(sgCoCodes,  MSSQL.ExecSQL, False);
         MSSQL.StrSQL:='SELECT * FROM ' + AppSettings.TMIG.ReadString(GeneralTables, 'MAP4', ''); MSSQL.SqlToGrid(sgPmtTerms, MSSQL.ExecSQL, False);
@@ -4002,6 +4201,7 @@ begin
       end;
     end;
   end;
+*)
   { ----------------------------------------------------------------------------------------------------------------------------- START WEB PAGE | UNITY INFO }
   WebBrowser.Navigate(WideString(AppSettings.TMIG.ReadString(ApplicationDetails, 'START_PAGE', '')), $02);
 
@@ -4027,7 +4227,8 @@ begin
   CurrentTime.Enabled      :=True;
   UpTime.Enabled           :=True;
 
-  { DISPOSE SETTINGS OBJECT }
+  { DISPOSE OBJECTS }
+  FreeAndNil(Database);
   FreeAndNil(AppSettings);
 
 end;
@@ -4036,7 +4237,6 @@ end;
 procedure TMainForm.FormDestroy(Sender: TObject);
 begin
   //remove it!!! cause AV errors
-  FreeAndNil(DataBase);
   FreeAndNil(AgeView);
   FreeAndNil(OpenItems);
 end;
@@ -4095,8 +4295,8 @@ begin
     if MainForm.WindowState = wsMaximized then AppSettings.TMIG.WriteString(ApplicationDetails,  'WINDOW_STATE', 'wsMaximized');
     if MainForm.WindowState = wsMinimized then AppSettings.TMIG.WriteString(ApplicationDetails,  'WINDOW_STATE', 'wsMinimized');
     if sgAgeView.RowCount > 2 then sgAgeView.SaveLayout(ColumnWidthName, ColumnOrderName, ColumnNames, ColumnPrefix);
-    if not (AppSettings.Encode(UserConfig)) then Application.MessageBox(PChar('Cannot write user configuration file. Error code: ' + IntToStr(Error) + '. Please contact support.'), PChar(CAPTION), MB_OK + MB_ICONSTOP);
-    if not(AppSettings.Encode(AppConfig)) then Application.MessageBox(PChar('Cannot write master configuration file. Error code: ' + IntToStr(Error) + '. Please contact support.'), PChar(CAPTION), MB_OK + MB_ICONSTOP);
+    if not (AppSettings.Encode(UserConfig)) then Application.MessageBox(PChar('Cannot write user configuration file. Please contact support.'), PChar(CAPTION), MB_OK + MB_ICONSTOP);
+    if not(AppSettings.Encode(AppConfig))   then Application.MessageBox(PChar('Cannot write master configuration file. Please contact support.'), PChar(CAPTION), MB_OK + MB_ICONSTOP);
     LogText(EventLogPath, 'Application closed by the user.');
     { --------------------------------------------------------------------------------------------------------------------------------------- RELEASE & CLOSE }
     FreeAndNil(AppSettings);
@@ -4150,16 +4350,15 @@ end;
 { ----------------------------------------------------------------------------------------------------------------------------------------- SHOW CURRENT TIME }
 procedure TMainForm.CurrentTimeTimer(Sender: TObject);
 begin
-  cDateTime:=Now;
-  StatBar_TXT4.Caption:=TimeToStr(cDateTime);
+  StatBar_TXT4.Caption:=TimeToStr(Now);
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------------------- SHOW UPTIME }
 procedure TMainForm.UpTimeTimer(Sender: TObject);
 var
-  Result: TDateTime;
+  Result: TTime;
 begin
-  Result:=cDateTime - StartTime;
+  Result:=Now - StartTime;
   StatBar_TXT5.Caption:=TimeToStr(Result);
 end;
 
@@ -4213,13 +4412,15 @@ end;
 procedure TMainForm.Action_DelRowClick(Sender: TObject);
 var
   MSSQL:  TMSSQL;
+  DataBase:  TDataBase;
 begin
 
   { ASK BEFORE DELETE }
   if MsgCall(5, 'Are you sure you want to delete this customer?' + #13#10 + 'This operation cannot be reverted.') = IDNO then Exit;
 
   { EXIT IF NO DATABASE CONNECTION }
-  if not (DataBase.LastError = 0) then
+  DataBase:=TDataBase.Create(False);
+  if not (DataBase.Check = 0) then
   begin
     MsgCall(2, 'Cannot connect with database. Please contact IT support.');
     Exit;
@@ -4229,7 +4430,7 @@ begin
       { EXECUTE DELETE QUERY }
       if MainForm.sgAddressBook.Cells[0, MainForm.sgAddressBook.Row] <> '' then
       begin
-        MSSQL:=TMSSQL.Create(Database.ADOConnect);
+        MSSQL:=TMSSQL.Create(MainForm.ADOConnect);
         try
           MSSQL.StrSQL:='DELETE FROM tbl_AddressBook WHERE CUID = ' + MSSQL.CleanStr(MainForm.sgAddressBook.Cells[2, MainForm.sgAddressBook.Row], True);
           MSSQL.ExecSQL;
@@ -4241,7 +4442,7 @@ begin
         else
           sgAddressBook.DeleteRowFrom(1, 1);
     end;
-
+  FreeAndNil(DataBase);
 end;
 
 { ---------------------------------------------------------------------------------------------------------------------------------------- OPEN SEARCH WINDOW }
@@ -4504,20 +4705,20 @@ procedure TMainForm.Action_RemoveClick(Sender: TObject);
 begin
 
   { R/W USER CAN REMOVE ITEM }
-  if (Database.AccessLevel = 'RW') and (UpperCase(MainForm.CurrentUserName) = UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
+  if (MainForm.AccessLevel = 'RW') and (UpperCase(MainForm.CurrentUserName) = UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
     if MsgCall(5, 'Are you sure you want to remove selected customer?') = IDYES then
       TTInvoiceTrackerRefresh.Create('REMOVE');
 
   { R/W USER CANNOT REMOVE OTHER ITEM }
-  if (Database.AccessLevel = 'RW') and (UpperCase(MainForm.CurrentUserName) <> UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
+  if (MainForm.AccessLevel = 'RW') and (UpperCase(MainForm.CurrentUserName) <> UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
     MsgCall(2, 'You cannot remove someone''s else item.');
 
   { ADMINISTRATOR CAN REMOVE ANY ITEM }
-  if (Database.AccessLevel = 'AD') then
+  if (MainForm.AccessLevel = 'AD') then
     if MsgCall(5, 'Are you sure you want to remove selected customer?') = IDYES then TTInvoiceTrackerRefresh.Create('REMOVE');
 
   { READ ONLY USER CANNOT REMOVE ANYTHING }
-  if (Database.AccessLevel = 'RO') then MsgCall(2, 'You don''t have permission to remove items.');
+  if (MainForm.AccessLevel = 'RO') then MsgCall(2, 'You don''t have permission to remove items.');
 
 end;
 
@@ -4559,7 +4760,7 @@ end;
 { ------------------------------------------------------------------------------------------------------------------------- UAC | LIST BOX | UPDATE AGE DATES }
 procedure TMainForm.GroupListBoxSelect(Sender: TObject);
 begin
-  Database.UACAgeDates(Database.ArrGroupList[MainForm.GroupListBox.ItemIndex, 0]);
+  MainForm.UACAgeDates(MainForm.ArrGroupList[MainForm.GroupListBox.ItemIndex, 0]);
   GroupListDates.ItemIndex:=GroupListDates.Items.Count - 1;
   if not (GroupListDates.Text = '') then
   begin
@@ -4576,7 +4777,7 @@ begin
   else
   begin
     GroupListBox.ItemIndex:=MainForm.LastGroupSelection;
-    Database.UACAgeDates(Database.ArrGroupList[MainForm.GroupListBox.ItemIndex, 0]);
+    MainForm.UACAgeDates(MainForm.ArrGroupList[MainForm.GroupListBox.ItemIndex, 0]);
     GroupListDates.ItemIndex:=GroupListDates.Items.Count - 1;
   end;
 end;
@@ -5039,7 +5240,7 @@ begin
     if not (sgAddressBook.Cells[0, sgAddressBook.Row] = '') then
     begin
       { CONNECT AND UPDATE }
-      MSSQL:=TMSSQL.Create(Database.ADOConnect);
+      MSSQL:=TMSSQL.Create(MainForm.ADOConnect);
       try
         Value:=MSSQL.CleanStr(sgAddressBook.Cells[sgAddressBook.Col, sgAddressBook.Row], True);
         MSSQL.StrSQL:='UPDATE tbl_AddressBook SET '                                        +
@@ -5287,9 +5488,7 @@ end;
 procedure TMainForm.btnReloadMouseEnter(Sender: TObject);
 begin
   { CHANGE CURSOR TO HAND POINT }
-  if Database.AccessLevel = 'AD' then btnReload.Cursor:=crHandPoint
-    else
-      btnReload.Cursor:=crNo;
+  if MainForm.AccessLevel = 'AD' then btnReload.Cursor:=crHandPoint else btnReload.Cursor:=crNo;
   Text54L1.Font.Color:=FONCOLOR;
   Text54L2.Font.Color:=FONCOLOR;
 end;
@@ -5306,9 +5505,7 @@ end;
 procedure TMainForm.btnMakeGroupMouseEnter(Sender: TObject);
 begin
   { CHANGE CURSOR TO HAND POINT }
-  if Database.AccessLevel = 'AD' then btnMakeGroup.Cursor:=crHandPoint
-    else
-      btnMakeGroup.Cursor:=crNo;
+  if MainForm.AccessLevel = 'AD' then btnMakeGroup.Cursor:=crHandPoint else btnMakeGroup.Cursor:=crNo;
   Text83L1.Font.Color:=FONCOLOR;
   Text83L2.Font.Color:=FONCOLOR;
 end;
@@ -5543,7 +5740,7 @@ procedure TMainForm.btnReloadClick(Sender: TObject);
 begin
   { ------------------------------------------------------------------------------------------------- CHECK USER PERMISSION | ONLY ADMINISTRATORS ARE ALLOWED }
   StatBar_TXT1.Caption :='Checking...';
-  if Database.AccessLevel = 'AD' then
+  if MainForm.AccessLevel = 'AD' then
   begin
     { START THREAD WITH NO PARAMETERS PASSED TO AN OBJECT }
     TTReadOpenItems.Create('0');
@@ -5561,7 +5758,7 @@ begin
   cbDump.Checked:=False;
   if sgOpenItems.RowCount < 2 then Exit;
   { --------------------------------------------------------------------------------------------- CHECK USER PERMISSION | ONLY ADMINISTRATORS ARE NOT ALLOWED }
-  if Database.AccessLevel = 'AD' then
+  if MainForm.AccessLevel = 'AD' then
     if PanelGroupName.Visible then
     begin
       PanelGroupName.Visible:=False;

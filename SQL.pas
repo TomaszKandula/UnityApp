@@ -4,7 +4,7 @@
 { Version:          0.1                                                                                                                                       }
 { (C)(R):           Tomasz Kandula                                                                                                                            }
 { Originate:        10-07-2016 (Concept & GUI)                                                                                                                }
-{ IDE:              Delphi XE2 / Delphi Tokyo                                                                                                                 }
+{ IDE:              RAD Studio with Delphi XE2 (migrated to Delphi Tokyo)                                                                                     }
 { Target:           Microsoft Windows 7 or newer                                                                                                              }
 { Dependencies:     Ararat Synapse (modified third-party) and own libraries                                                                                   }
 { NET Framework:    Required 4.6 or newer (Lync / Skype calls)                                                                                                }
@@ -30,6 +30,7 @@ type
     property    ADOCon  : TADOConnection read pADOCon write pADOCon;
   published
     constructor Create(Connector: TADOConnection);
+    destructor  Destroy; override;
     procedure   ClearSQL;
     function    CleanStr(Text: string; Quoted: boolean): string;
     function    ExecSQL: _Recordset;
@@ -51,6 +52,14 @@ begin
   pADOCon:=Connector;
 end;
 
+destructor TMSSQL.Destroy;
+begin
+
+  (* EMPTY *)
+
+  inherited;
+end;
+
 { -------------------------------------------------------------------------------------------------------------------------------------- CLEAR SQL EXPRESSION }
 procedure TMSSQL.ClearSQL;
 begin
@@ -61,9 +70,9 @@ end;
 function TMSSQL.CleanStr(Text: string; Quoted: boolean): string;
 begin
   Result:='';
-  Text:=StringReplace(Text, TAB,   SPACE, [rfReplaceAll]);
-  Text:=StringReplace(Text, QUOTE, SPACE, [rfReplaceAll]);
-  Text:=StringReplace(Text, CRLF,  SPACE, [rfReplaceAll]);
+  Text:=StringReplace(Text, TAB,   WHITESPACE, [rfReplaceAll]);
+  Text:=StringReplace(Text, QUOTE, WHITESPACE, [rfReplaceAll]);
+  Text:=StringReplace(Text, CRLF,  WHITESPACE, [rfReplaceAll]);
   if Quoted then Result:=QuotedStr(Text) else Result:=Text;
 end;
 
@@ -118,20 +127,20 @@ var
 begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   Result:='';
-  LEAD:=INSERT + SPACE + tblName + ' ( ' + tblColumns + ' ) ' + CRLF;
+  LEAD:=INSERT + WHITESPACE + tblName + ' ( ' + tblColumns + ' ) ' + CRLF;
   mRows:=High(Table) - 1;
   mCols:=High(Table[1]);
   { ------------------------------------------------------------------------------------------------------------------------------------------------ MAKE SQL }
   for iCNT:=0 to mRows do
   begin
-    LINE:=SELECT + SPACE;
+    LINE:=SELECT + WHITESPACE;
     for jCNT:=0 to mCols do
     begin
       { ------------------------------------------------------------------------------------------- CLEAR DATA FROM CHARACTERS THAT MAY INJURED SQL EXECUTION }
       Clean:=CleanStr(Table[iCNT, jCNT], True);
       { -------------------------------------------------------------------------------------------------------------------------------------------- POPULATE }
       if (jCNT <> mCols) then LINE:=LINE + Clean + COMMA;
-      if (jCNT =  mCols) and (iCNT <> mRows) then LINE:=LINE + QuotedStr(Table[iCNT, jCNT]) + SPACE + UNION + CRLF;
+      if (jCNT =  mCols) and (iCNT <> mRows) then LINE:=LINE + QuotedStr(Table[iCNT, jCNT]) + WHITESPACE + UNION + CRLF;
       if (jCNT =  mCols) and (iCNT =  mRows) then LINE:=LINE + QuotedStr(Table[iCNT, jCNT]) + CRLF;
     end;
     LINES:=LINES + LINE;
@@ -156,20 +165,20 @@ var
 begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   Result:='';
-  LEAD:=INSERT + SPACE + tblName + ' ( ' + tblColumns + ' ) ' + CRLF;
+  LEAD:=INSERT + WHITESPACE + tblName + ' ( ' + tblColumns + ' ) ' + CRLF;
   mRows:=Grid.RowCount - 1;
   mCols:=Grid.ColCount - 1;
   { ------------------------------------------------------------------------------------------------------------------------------------------------ MAKE SQL }
   for iCNT:=sRow to mRows do
   begin
-    LINE:=SELECT + SPACE;
+    LINE:=SELECT + WHITESPACE;
     for jCNT:=sCol to mCols do
     begin
       { ------------------------------------------------------------------------------------------- CLEAR DATA FROM CHARACTERS THAT MAY INJURED SQL EXECUTION }
       Clean:=CleanStr(Grid.Cells[jCNT, iCNT], True);
       { -------------------------------------------------------------------------------------------------------------------------------------------- POPULATE }
       if (jCNT <> mCols) then LINE:=LINE + Clean + COMMA;
-      if (jCNT =  mCols) and (iCNT <> mRows) then LINE:=LINE + QuotedStr(Grid.Cells[jCNT, iCNT]) + SPACE + UNION + CRLF;
+      if (jCNT =  mCols) and (iCNT <> mRows) then LINE:=LINE + QuotedStr(Grid.Cells[jCNT, iCNT]) + WHITESPACE + UNION + CRLF;
       if (jCNT =  mCols) and (iCNT =  mRows) then LINE:=LINE + QuotedStr(Grid.Cells[jCNT, iCNT]) + CRLF;
     end;
     LINES:=LINES + LINE;
