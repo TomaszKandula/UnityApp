@@ -111,10 +111,12 @@ const
   { SPECIAL CHARACTERS }
 
   CRLF         : string = #13#10;
-  COMMA        : char   = #44;
-  WHITESPACE   : char   = #32;
+  CR           : string = '#13';
+  LF           : string = '#10';
   TAB          : char   = #9;
+  WHITESPACE   : char   = #32;
   QUOTE        : char   = #39;
+  COMMA        : char   = #44;
 
   { SQL MODEL CONSTANTS }
 
@@ -123,6 +125,12 @@ const
   UPDATE       : string = 'UPDATE';
   _SET         : string = 'SET';
   UNION        : string = 'UNION ALL';
+  EQUAL        : string = ' = ';
+
+  { SQL MODEL ENUMERATION }
+
+  adAccessLevel = 0;
+  adAccessMode  = 1;
 
   { MAPPED TABLES FROM DATABASE | WE DO NOT USE ORM, NOR WE CREATE OWN }
 
@@ -136,8 +144,8 @@ const
   TblGroup3      = 'tbl_group3';
   TblPaidinfo    = 'tbl_paidinfo';
   TblPmtterms    = 'tbl_pmtterms';
-  TblTblPerson   = 'tbl_person';
-  TblTblUAC      = 'tbl_UAC';
+  TblPerson      = 'tbl_person';
+  TblUAC         = 'tbl_UAC';
   TblGroups      = 'tbl_groups';
   TblAddressbook = 'tbl_addressbook';
   TblOpenitems   = 'tbl_openitems';
@@ -169,5 +177,12 @@ const
   adLockReadOnly        = 1;
   adLockUnspecified     = -1;
 
+  { ADO FILTER ENUM }
+
+  adFilterNone               = 0;
+  adFilterPendingRecords     = 1;
+  adFilterAffectedRecords    = 2;
+  adFilterFetchedRecords     = 3;
+  adFilterConflictingRecords = 5;
 
 

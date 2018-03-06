@@ -188,9 +188,8 @@ type                                                   (* RUN EITHER IN WORKER O
     procedure   Write(DestTable: string; idThd: integer);                                      //refactor!!
     procedure   Details(GroupID: string; AgeDate: TDateTime; idThd: integer);                  //refactor!!
     function    MapData(AgeGrid: TStringGrid; WhichCol: string; tblMap: TStringGrid): string;  //refactor!!
+    function    GetCoCode(ListPos: integer; CoPos: integer; Mode: integer): string;
   end;
-
-
 
 
 { ------------------------------------------------------------- ! OPEN ITEMS CLASS ! ------------------------------------------------------------------------ }
@@ -761,13 +760,6 @@ type                                                            (* GUI | MAIN TH
     function  MsgCall(WndType: integer; WndText: string): integer;
     procedure LockSettingsPanel;
 
-    {}
-
-    function  UACinitialize: boolean;
-    procedure UACGroupReader(UACuser: string);
-    procedure UACAgeDates(StrGroupID: string);
-    function  UACString(ListPos: integer; CoPos: integer; Mode: integer): string;
-
   protected
     procedure WndProc(var msg: Messages.TMessage); override;
   end;
@@ -808,7 +800,7 @@ var
 implementation
 
 uses
-  Filter, Tracker, Invoices, Actions, Calendar, About, Search, Worker, Model, SQL, Settings, Database;
+  Filter, Tracker, Invoices, Actions, Calendar, About, Search, Worker, Model, SQL, Settings, Database, UAC;
 
 {$R *.dfm}
 
@@ -1070,11 +1062,6 @@ procedure TStringGrid.CopyCutPaste(mode: integer);
 {   0 = PASTE DATA TO STRING GRID  }
 {   1 = COPY DATA FROM STRING GRID }
 {   2 = CUT DATA FROM STRING GRID  }
-const
-  kTAB       = #9;
-  kCR        = #13;
-  kLF        = #10;
-  kCRLF      = #13#10;
 var
   Grect:       TGridRect;
   S:           string;
@@ -1097,21 +1084,21 @@ begin
     S    :=ClipBoard.AsText;
     R    :=R - 1;
     { GO 'BREAK_LINE' BY 'BREAK_LINE' }
-    while Pos(kCR, S) > 0 do
+    while Pos(CR, S) > 0 do
     begin
       R :=R + 1;
       C :=L - 1;
-      CS:=Copy(S, 1, Pos(kCR, S));
-      while Pos(kTAB, CS) > 0 do
+      CS:=Copy(S, 1, Pos(CR, S));
+      while Pos(TAB, CS) > 0 do
       begin
         C:=C + 1;
-        if (C <= ColCount - 1) and (R <= RowCount - 1) then Cells[C, R]:=Copy(CS, 1, Pos(kTAB, CS) - 1);
-        F:=Copy(CS, 1, Pos(kTAB, CS) - 1);
-        Delete(CS,  1, Pos(kTAB, CS));
+        if (C <= ColCount - 1) and (R <= RowCount - 1) then Cells[C, R]:=Copy(CS, 1, Pos(TAB, CS) - 1);
+        F:=Copy(CS, 1, Pos(TAB, CS) - 1);
+        Delete(CS,  1, Pos(TAB, CS));
       end;
-      if (C <= ColCount - 1) and (R <= RowCount - 1) then Cells[C + 1, R]:=Copy(CS, 1, Pos(kCR, CS) - 1);
-      Delete(S, 1,Pos(kCR, S));
-      if Copy(S, 1, 1) = kLF then Delete(S, 1, 1);
+      if (C <= ColCount - 1) and (R <= RowCount - 1) then Cells[C + 1, R]:=Copy(CS, 1, Pos(CR, CS) - 1);
+      Delete(S, 1,Pos(CR, S));
+      if Copy(S, 1, 1) = LF then Delete(S, 1, 1);
     end;
   end;
   { ----------------------------------------------------------------------------------------------------------------------- COPY OR CUT DATA FROM STRING GRID }
@@ -1128,13 +1115,13 @@ begin
         begin
           TxtFromSel:=TxtFromSel + Cells[Col, Row];
           if mode = 2 then Cells[Col, Row]:='';  { CUT DATA FROM STRING GRID }
-          if Col < Sel.Right then TxtFromSel:=TxtFromSel + kTAB;
+          if Col < Sel.Right then TxtFromSel:=TxtFromSel + TAB;
         end;
-        if Row < Sel.Bottom then TxtFromSel:=TxtFromSel + kCRLF;
+        if Row < Sel.Bottom then TxtFromSel:=TxtFromSel + CRLF;
       end;
       inc(RowNum);
     end;
-    ClipBoard.AsText:=TxtFromSel + kCRLF;
+    ClipBoard.AsText:=TxtFromSel + CRLF;
   end;
 end;
 
@@ -3192,6 +3179,34 @@ begin
   end;
 end;
 
+{ --------------------------------------------------------------------------------------------------------------- UAC | RETURN SPECIFIC 'COCOE' FROM THE LIST }
+function TAgeView.GetCoCode(ListPos: integer; CoPos: integer; Mode: integer): string;
+{ WARNING! GROUP ID FORMAT: SERIES OF 4 GROUPS OF 5 DIGITS, I.E.: '020470034000043' MUST BE READ AS FOLLOWS: }
+{   1. 1ST CO CODE: 02047 (2047)                                                                             }
+{   2. 2ND CO CODE: 00340 (340)                                                                              }
+{   3. 3RD CO CODE: 00043 (43)                                                                               }
+{   4. 4TH CO CODE: 00000 (0)                                                                                }
+{ PARAMETERS:                                                                                                }
+{   1. 'LISTPOS' = POSITION OF THE GROUP HOLING 'COCODES'                                                    }
+{   2. 'COPOS'   = NUMBER OF THE 'COCODE' TO BE RETURNED                                                     }
+{   3. 'MODE'    = 0 (COCODE) OR 1 (GROUP NAME) OR 2 (GROUP ID)                                              }
+begin
+  { VALIDATE INPUT DATA }
+  if ( ListPos > High(MainForm.ArrGroupList) ) or (CoPos > 4) then Exit;
+  { EXTRACT | 'COCODE' FROM GROUP ID }
+  if Mode = 0 then
+  begin
+    if CoPos = 1 then Result:=IntToStr(StrToInt(MidStr(MainForm.ArrGroupList[ListPos, Mode], 1,  5)));
+    if CoPos = 2 then Result:=IntToStr(StrToInt(MidStr(MainForm.ArrGroupList[ListPos, Mode], 6,  5)));
+    if CoPos = 3 then Result:=IntToStr(StrToInt(MidStr(MainForm.ArrGroupList[ListPos, Mode], 11, 5)));
+    if CoPos = 4 then Result:=IntToStr(StrToInt(MidStr(MainForm.ArrGroupList[ListPos, Mode], 16, 5)));
+  end;
+  { EXTRACT | GROUP NAME }
+  if Mode = 1 then Result:=MainForm.ArrGroupList[ListPos, Mode];
+  { EXTRACT | FULL GROUP ID }
+  if Mode = 2 then Result:=MainForm.ArrGroupList[ListPos, 0];
+end;
+
 { ############################################################## ! OPEN ITEMS CLASS ! ####################################################################### }
 
                                                                       //refactor!!!
@@ -3774,178 +3789,6 @@ begin
   MainForm.btnUnlock.Caption:='Unlock';
   MainForm.Edit_PASSWORD.SetFocus;
 
-end;
-
-{ ------------------------------------------------------------------------------------------------------------------------- USER ACCOUNT CONTROL | INITIALIZE }
-function TMainForm.UACinitialize: boolean;
-var
-  Query:       TADOQuery;
-  StrSQL:      string;
-//  iCNT:        integer;
-//  jCNT:        integer;
-begin
-  Result:=False;
-  { ------------------------------------------------------------------------------------------------------------------------ READ ACCESS LEVEL FOR GIVEN USER }
-  Query:=TADOQuery.Create(nil);
-  Query.Connection:=MainForm.ADOConnect;
-  try
-    StrSQL:='SELECT ACCESS_LEVEL, ACCESS_MODE FROM tbl_UAC WHERE USERNAME = ' + QuotedStr(UpperCase(MainForm.CurrentUserName));
-    Query.SQL.Clear;
-    Query.SQL.Add(StrSQL);
-    Query.Open;
-    { TABLE 'TBL_UAC' SHOULD ALWAYS HOLDS DISTINC USERNAMES }
-    { THEREFORE WE HAVE ONLY ONE ROW PER USER               }
-    if Query.RecordCount = 1 then
-    begin
-      AccessLevel:=Query.Recordset.Fields[0].Value;
-      AccessMode :=Query.Recordset.Fields[1].Value;
-      Result:=True;
-    end;
-    { IF USER IS NOT FOUND }
-    if Query.RecordCount = 0 then
-    begin
-      SendMessage(MainForm.Handle, WM_GETINFO, 3, LPARAM(PCHAR('Cannot find user name: ' + UpperCase(MainForm.CurrentUserName) + '. ' + APPNAME + ' will be closed. Please contact IT support.')));
-      LogText(MainForm.EventLogPath, '[UAC READER]: Cannot find user name: ' + UpperCase(MainForm.CurrentUserName) + '. Application terminated.');
-      Application.Terminate;
-    end;
-    { ACCESS LEVEL AND MODE TO EVENT LOG }
-    if AccessLevel = 'RO' then LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: User Access Level = read only given group(s).');
-    if AccessLevel = 'RW' then LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: User Access Level = read and write to given group(s).');
-    if AccessLevel = 'AD' then
-    begin
-      LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: User Access Level = access all areas.');
-    end;
-    if AccessMode <> ''   then LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: User Access Mode = ' + LowerCase(AccessMode) + '.');
-  finally
-    Query.Close;
-    Query.Free;
-  end;
-end;
-
-{ ----------------------------------------------------------------------------------------------------------------------------------------- UAC | READ GROUPS }
-procedure TMainForm.UACGroupReader(UACuser: string);
-{ READ ALL GROUP ID AND GROUP NAME INTO AN ARRAY, GROUP LIS BOX IS POPULATED FROM SUCH ARRAY ONLY WITH GROUP NAME }
-{ CORRESPONDING GROUP ID FOR SELECTED GROUP NAME BY THE USER IS USED TO UPLOAD ALL DISTINCT AGE DATES AND FINALY  }
-{ USED TO UPLOAD PROPER DATA SNAPSHOT RELATED TO GIVEN GROUP NAME.                                                }
-{ THIS METHOD IS NOT CALLED IF USER IS NOT FOUND IN DATABASE.                                                     }
-var
-  StrSQL:       string;
-  Query:        TADOQuery;
-  iCNT:         integer;
-begin
-  { INITIALIZE }
-  MainForm.GroupListBox.Enabled:=False;
-  iCNT:=0;
-  { BUILD SQL QUERY }
-  StrSQL:='SELECT GROUP_ID, GROUP_NAME FROM tbl_groups WHERE FID = (SELECT ID FROM tbl_UAC WHERE USERNAME = ' + QuotedStr(UACuser) + ')';
-  Query:=TADOQuery.Create(nil);
-  Query.Connection:=MainForm.ADOConnect;
-  try
-    { EXECUTE WITH GIVEN SQL AND DATABASE }
-    Query.SQL.Clear;
-    Query.SQL.Add(StrSQL);
-    try
-      Query.Open;
-      SetLength(MainForm.ArrGroupList, 2, 2);
-      if (Query.RecordCount > 0) then
-      begin
-        { MOVE TO AN ARRAY }
-        Query.Recordset.MoveFirst;
-        while not Query.Recordset.EOF do
-        begin
-          { READ FROM AND WRITE TO }
-          MainForm.ArrGroupList[iCNT, 0]:=Query.Recordset.Fields['GROUP_ID'  ].Value;
-          MainForm.ArrGroupList[iCNT, 1]:=Query.Recordset.Fields['GROUP_NAME'].Value;
-          { MOVE COUNTERS }
-          inc(iCNT);
-          Query.Recordset.MoveNext;
-          { EXPAND ARRAY BY ONE ROW }
-          SetLength(MainForm.ArrGroupList, iCNT + 1, 2);
-        end;
-        { POPULATE LIST BOX }
-        MainForm.GroupListBox.Clear;
-        for iCNT:=0 to high(MainForm.ArrGroupList) - 1 do MainForm.GroupListBox.Items.Add(MainForm.ArrGroupList[iCNT, 1]);
-        MainForm.GroupListBox.ItemIndex:=0;
-        MainForm.GroupListBox.Enabled:=True;
-      end;
-    except
-      on E: Exception do
-        LogText(MainForm.EventLogPath, '[UAC READER]: Query error. Exception thrown: ' + E.Message);
-    end;
-  finally
-    { RELEASE FROM MEMORY }
-    Query.Close;
-    Query.Free;
-  end;
-end;
-
-{ ------------------------------------------------------------------------------------------------------------------------- UAC | READ ALL DATES FOR GIVEN ID }
-procedure TMainForm.UACAgeDates(StrGroupID: string);
-var
-  StrSQL:      string;
-  Query:       TADOQuery;
-begin
-  { INITIALIZE }
-  MainForm.GroupListDates.Clear;
-  MainForm.GroupListDates.Enabled:=False;
-  { BUILD SQL QUERY }
-  StrSQL:='SELECT DISTINCT AGE_DATE FROM tbl_snapshots WHERE GROUP_ID = ' + QuotedStr(StrGroupID);
-  Query:=TADOQuery.Create(nil);
-  Query.Connection:=MainForm.ADOConnect;
-  try
-    { EXECUTE WITH GIVEN SQL AND DATABASE }
-    Query.SQL.Clear;
-    Query.SQL.Add(StrSQL);
-    try
-      Query.Open;
-      if (Query.RecordCount > 0) then
-      begin
-        Query.Recordset.MoveFirst;
-        while not Query.Recordset.EOF do
-        begin
-          MainForm.GroupListDates.Items.Add(Query.Recordset.Fields['AGE_DATE'].Value);
-          Query.Recordset.MoveNext;
-        end;
-      end;
-    except
-      on E: Exception do
-        LogText(MainForm.EventLogPath, '[UAC READER]: Query error. Exception thrown: ' + E.Message);
-    end;
-  finally
-    MainForm.GroupListDates.ItemIndex:=MainForm.GroupListDates.Items.Count - 1;
-    if AccessLevel = 'AD' then MainForm.GroupListDates.Enabled:=True;
-    { RELEASE FROM MEMORY }
-    Query.Close;
-    Query.Free;
-  end;
-end;
-
-{ --------------------------------------------------------------------------------------------------------------- UAC | RETURN SPECIFIC 'COCOE' FROM THE LIST }
-function TMainForm.UACString(ListPos: integer; CoPos: integer; Mode: integer): string;
-{ WARNING! GROUP ID FORMAT: SERIES OF 4 GROUPS OF 5 DIGITS, I.E.: '020470034000043' MUST BE READ AS FOLLOWS: }
-{   1. 1ST CO CODE: 02047 (2047)                                                                             }
-{   2. 2ND CO CODE: 00340 (340)                                                                              }
-{   3. 3RD CO CODE: 00043 (43)                                                                               }
-{   4. 4TH CO CODE: 00000 (0)                                                                                }
-{ PARAMETERS:                                                                                                }
-{   1. 'LISTPOS' = POSITION OF THE GROUP HOLING 'COCODES'                                                    }
-{   2. 'COPOS'   = NUMBER OF THE 'COCODE' TO BE RETURNED                                                     }
-{   3. 'MODE'    = 0 (COCODE) OR 1 (GROUP NAME) OR 2 (GROUP ID)                                              }
-begin
-  { VALIDATE INPUT DATA }
-  if ( ListPos > High(ArrGroupList) ) or (CoPos > 4) then Exit;
-  { EXTRACT | 'COCODE' FROM GROUP ID }
-  if Mode = 0 then
-  begin
-    if CoPos = 1 then Result:=IntToStr(StrToInt(MidStr(ArrGroupList[ListPos, Mode], 1,  5)));
-    if CoPos = 2 then Result:=IntToStr(StrToInt(MidStr(ArrGroupList[ListPos, Mode], 6,  5)));
-    if CoPos = 3 then Result:=IntToStr(StrToInt(MidStr(ArrGroupList[ListPos, Mode], 11, 5)));
-    if CoPos = 4 then Result:=IntToStr(StrToInt(MidStr(ArrGroupList[ListPos, Mode], 16, 5)));
-  end;
-  { EXTRACT | GROUP NAME }
-  if Mode = 1 then Result:=ArrGroupList[ListPos, Mode];
-  { EXTRACT | FULL GROUP ID }
-  if Mode = 2 then Result:=ArrGroupList[ListPos, 0];
 end;
 
 { ################################################################## ! EVENTS ! ############################################################################# }
@@ -4759,26 +4602,33 @@ end;
 
 { ------------------------------------------------------------------------------------------------------------------------- UAC | LIST BOX | UPDATE AGE DATES }
 procedure TMainForm.GroupListBoxSelect(Sender: TObject);
+var
+  UserControl: TUserControl;
 begin
-  MainForm.UACAgeDates(MainForm.ArrGroupList[MainForm.GroupListBox.ItemIndex, 0]);
-  GroupListDates.ItemIndex:=GroupListDates.Items.Count - 1;
-  if not (GroupListDates.Text = '') then
-  begin
-    { CALL READ AGE VIEW IF ACCOMPANIED PROCESSES ARE FREED }
-    if (Worker.ActiveThreads[3] = True) or
-       (Worker.ActiveThreads[4] = True) or
-       (Worker.ActiveThreads[7] = True) then
-    begin
-      MsgCall(2, 'Open items are currently being processed by the Unity. Please wait until the process is finished and try again.');
-    end
-      else
-        TTReadAgeView.Create('1');
-  end
-  else
-  begin
-    GroupListBox.ItemIndex:=MainForm.LastGroupSelection;
-    MainForm.UACAgeDates(MainForm.ArrGroupList[MainForm.GroupListBox.ItemIndex, 0]);
+  UserControl:=TUserControl.Create(MainForm.ADOConnect);
+  try
+    UserControl.UACAgeDates(MainForm.ArrGroupList[MainForm.GroupListBox.ItemIndex, 0]);
     GroupListDates.ItemIndex:=GroupListDates.Items.Count - 1;
+    if not (GroupListDates.Text = '') then
+    begin
+      { CALL READ AGE VIEW IF ACCOMPANIED PROCESSES ARE FREED }
+      if (Worker.ActiveThreads[3] = True) or
+         (Worker.ActiveThreads[4] = True) or
+         (Worker.ActiveThreads[7] = True) then
+      begin
+        MsgCall(2, 'Open items are currently being processed by the Unity. Please wait until the process is finished and try again.');
+      end
+        else
+          TTReadAgeView.Create('1');
+    end
+    else
+    begin
+      GroupListBox.ItemIndex:=MainForm.LastGroupSelection;
+      UserControl.UACAgeDates(MainForm.ArrGroupList[MainForm.GroupListBox.ItemIndex, 0]);
+      GroupListDates.ItemIndex:=GroupListDates.Items.Count - 1;
+    end;
+  finally
+    UserControl.Free;
   end;
 end;
 

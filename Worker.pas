@@ -16,7 +16,7 @@ unit Worker;
 interface
 
 uses
-  Windows, Messages, SysUtils, Classes, Diagnostics, Graphics, ADODB, ComObj, Settings;
+  Windows, Messages, SysUtils, Classes, Diagnostics, Graphics, ADODB, ComObj;
 
 { ----------------------------------------------------------- ! SEPARATE CPU THREADS ! ---------------------------------------------------------------------- }
 type
@@ -142,7 +142,7 @@ var
 implementation
 
 uses
-  Main, DataBase;
+  Main, DataBase, Settings, UAC;
 
 { ############################################################ ! SEPARATE CPU THREADS ! ##################################################################### }
 
@@ -461,6 +461,7 @@ var
   jCNT:       integer;
   temp:       string;
   DataBase: TDataBase;
+  UserControl: TUserControl;
 begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   IDThread:=TTMakeAgeView.CurrentThread.ThreadID;
@@ -473,7 +474,7 @@ begin
       StopWatch:=TStopWatch.StartNew;
       try
         { ----------------------------------------------------------------------------------------------------------------------- MAKE AGING REPORT TO AN ARRAY }
-        AgeView.Make(MainForm.UACstring(MainForm.GroupListBox.ItemIndex, 0, 2), OpenItems.OSamt, IDThread);
+        AgeView.Make(AgeView.GetCoCode(MainForm.GroupListBox.ItemIndex, 0, 2), OpenItems.OSamt, IDThread);
 
         { ---------------------------------------------------------------------------------------------------------------------------------- SAVE OUTPUT TO CSV }
 
@@ -516,7 +517,14 @@ begin
           { UPDATE THE LIST }
           Synchronize
             (procedure begin
-              MainForm.UACAgeDates(MainForm.ArrGroupList[MainForm.GroupListBox.ItemIndex, 0]);
+
+//              UserControl:=TUserControl.Create;
+//              try
+//                UserControl.UACAgeDates(MainForm.ArrGroupList[MainForm.GroupListBox.ItemIndex, 0]);
+//              finally
+//                UserControl.Free;
+//              end;
+
               MainForm.GroupListDates.ItemIndex:=MainForm.GroupListDates.Items.Count - 1;
             end);
 

@@ -37,7 +37,8 @@ uses
   Model in 'Model.pas',
   Worker in 'Worker.pas',
   Settings in 'Settings.pas',
-  Database in 'Database.pas';
+  Database in 'Database.pas',
+  UAC in 'UAC.pas';
 
 type
   DWord = 0..$FFFFFFFF;
