@@ -23,35 +23,22 @@ type
   TDataTables = class(TMSSQL)
   {$TYPEINFO ON}
   private
-    pidThd   :  integer;
-    pDataSet :  _Recordset;
-    pConnStr :  string;
+    pidThd     :  integer;
+    pDataSet   :  _Recordset;
+    pConnStr   :  string;
+    pCustFilter:  string;
   public
-    property idThd   :  integer    read pidThd;
-    property DataSet :  _Recordset read pDataSet;
-    property ConnStr :  string     read pConnStr;
+    property ConnStr   :  string     read pConnStr;
+    property idThd     :  integer    read pidThd      write pidThd;
+    property CustFilter:  string     read pCustFilter write pCustFilter;
+    property DataSet   :  _Recordset read pDataSet    write pDataSet;
   published
     constructor Create(Connector: TADOConnection); overload;
     destructor  Destroy; override;
-    function    Open(TableName: string) :  boolean;
+    function    OpenTable(TableName: string) :  boolean;
   end;
 
-{ ------------------------------------------------------------ ! TBL_ADDRESSBOOK ! -------------------------------------------------------------------------- }
-type
-  TAddressBook1 = class(TDataTables)
-  {$TYPEINFO ON}
-  public
-    const ID         : string = 'ID';  { PRIMARY KEY }
-    const USER_ALIAS : string = 'USER_ALIAS';
-    const CUID       : string = 'CUID';
-    const CUSTNUMBER : string = 'CUSTNUMBER';
-    const CUSTNAME   : string = 'CUSTNAME';
-    const EMAILS     : string = 'EMAILS';
-    const TELEPHONE  : string = 'TELEPHONE';
-    const CONTACT    : string = 'CONTACT';
-    const CUSTADDR   : string = 'CUSTADDR';
-    const ESTATEMENTS: string = 'ESTATEMENTS';
-  end;
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 { -------------------------------------------------------------- ! TBL_COMPANY ! ---------------------------------------------------------------------------- }
 type
@@ -117,6 +104,25 @@ type
     const GeneralLedgerTLs      : string = 'GeneralLedgerTLs';
   end;
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+{ ------------------------------------------------------------ ! TBL_ADDRESSBOOK ! -------------------------------------------------------------------------- }
+type
+  TAddressBook1 = class(TDataTables)
+  {$TYPEINFO ON}
+  public
+    const ID         : string = 'ID';  { PRIMARY KEY }
+    const USER_ALIAS : string = 'USER_ALIAS';
+    const CUID       : string = 'CUID';
+    const CUSTNUMBER : string = 'CUSTNUMBER';
+    const CUSTNAME   : string = 'CUSTNAME';
+    const EMAILS     : string = 'EMAILS';
+    const TELEPHONE  : string = 'TELEPHONE';
+    const CONTACT    : string = 'CONTACT';
+    const CUSTADDR   : string = 'CUSTADDR';
+    const ESTATEMENTS: string = 'ESTATEMENTS';
+  end;
+
 { --------------------------------------------------------------- ! TBL_DAILY ! ----------------------------------------------------------------------------- }
 type
   TDaily = class(TDataTables)
@@ -147,39 +153,7 @@ type
     const FOLLOWUP    : string = 'FOLLOWUP';
   end;
 
-{ --------------------------------------------------------------- ! TBL_GROUP3 ! ---------------------------------------------------------------------------- }
-type
-  TGroup3 = class(TDataTables)
-  {$TYPEINFO ON}
-  public
-    const ID            : string = 'ID';  { PRIMARY KEY }
-    const ERP_CODE      : string = 'ERP_CODE';
-    const SALESMEN_NAME : string = 'SALESMEN_NAME';
-  end;
-
-{ --------------------------------------------------------------- ! TBL_GROUPS ! ---------------------------------------------------------------------------- }
-type
-  TGroups = class(TDataTables)  { ONE-TO-MANY }
-  {$TYPEINFO ON}
-  public
-    const ID            : string = 'ID';   { PRIMARY KEY }
-    const GROUP_ID      : string = 'GROUP_ID';
-    const GROUP_NAME    : string = 'GROUP_NAME';
-    const FID           : string = 'FID';  { FOREIGN KEY -> PRIMARY KEY IN "TBL_UAC" }
-  end;
-
-{ -------------------------------------------------------------- ! TBL_INVOICES ! --------------------------------------------------------------------------- }
-type
-  TInvoices = class(TDataTables)  { ONE-TO-MANY }
-  {$TYPEINFO ON}
-  public
-    const ID           : string = 'ID';   { PRIMARY KEY }
-    const SK           : string = 'SK';   { FOREIGN KEY -> PRIMARY KEY IN "TBL_TRACKER" }
-    const CUID         : string = 'CUID';
-    const INVOICENO    : string = 'INVOICENO';
-    const INVOICESTATE : string = 'INVOICESTATE';
-    const STAMP        : string = 'STAMP';
-  end;
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 { -------------------------------------------------------------- ! TBL_OPENITEMS ! --------------------------------------------------------------------------- }
 type
@@ -223,40 +197,6 @@ type
     const ProcessBatchKey  : string = 'ProcessBatchKey';
   end;
 
-{ -------------------------------------------------------------- ! TBL_PAIDINFO ! --------------------------------------------------------------------------- }
-type
-  TPaidinfo = class(TDataTables)
-  {$TYPEINFO ON}
-  public
-    const ID            : string = 'ID';  { PRIMARY KEY }
-    const ERP_CODE      : string = 'ERP_CODE';
-    const DESCRIPTION   : string = 'DESCRIPTION';
-  end;
-
-{ --------------------------------------------------------------- ! TBL_PERSON ! ---------------------------------------------------------------------------- }
-type
-  TPerson = class(TDataTables)
-  {$TYPEINFO ON}
-  public
-    const ID            : string = 'ID';  { PRIMARY KEY }
-    const ERP_CODE      : string = 'ERP_CODE';
-    const PERSON_NAME   : string = 'PERSON_NAME';
-  end;
-
-{ -------------------------------------------------------------- ! TBL_PMTTERMS ! --------------------------------------------------------------------------- }
-type
-  TPmtterms = class(TDataTables)
-  {$TYPEINFO ON}
-  public
-    const ID         : string = 'ID';  { PRIMARY KEY }
-    const ERP_CODE   : string = 'ERP_CODE';
-    const TEXT_DESC  : string = 'TEXT_DESC';
-    const I_MONTH    : string = 'I_MONTH';
-    const I_DAYS     : string = 'I_DAYS';
-    const I_DAYS_NET : string = 'I_DAYS_NET';
-    const I_USING    : string = 'I_USING';
-  end;
-
 { -------------------------------------------------------------- ! TBL_SNAPSHOTS ! -------------------------------------------------------------------------- }
 type
   TSnapshots = class(TDataTables)
@@ -295,7 +235,55 @@ type
     const CUID            : string = 'CUID';
   end;
 
-{ ---------------------------------------------------------------- ! TBL_TRACKER ! -------------------------------------------------------------------------- }
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+{ -------------------------------------------------------------- ! TBL_PAIDINFO ! --------------------------------------------------------------------------- }
+type
+  TPaidinfo = class(TDataTables)
+  {$TYPEINFO ON}
+  public
+    const ID            : string = 'ID';  { PRIMARY KEY }
+    const ERP_CODE      : string = 'ERP_CODE';
+    const DESCRIPTION   : string = 'DESCRIPTION';
+  end;
+
+{ --------------------------------------------------------------- ! TBL_PERSON ! ---------------------------------------------------------------------------- }
+type
+  TPerson = class(TDataTables)
+  {$TYPEINFO ON}
+  public
+    const ID            : string = 'ID';  { PRIMARY KEY }
+    const ERP_CODE      : string = 'ERP_CODE';
+    const PERSON_NAME   : string = 'PERSON_NAME';
+  end;
+
+{ --------------------------------------------------------------- ! TBL_GROUP3 ! ---------------------------------------------------------------------------- }
+type
+  TGroup3 = class(TDataTables)
+  {$TYPEINFO ON}
+  public
+    const ID            : string = 'ID';  { PRIMARY KEY }
+    const ERP_CODE      : string = 'ERP_CODE';
+    const SALESMEN_NAME : string = 'SALESMEN_NAME';
+  end;
+
+{ -------------------------------------------------------------- ! TBL_PMTTERMS ! --------------------------------------------------------------------------- }
+type
+  TPmtterms = class(TDataTables)
+  {$TYPEINFO ON}
+  public
+    const ID         : string = 'ID';  { PRIMARY KEY }
+    const ERP_CODE   : string = 'ERP_CODE';
+    const TEXT_DESC  : string = 'TEXT_DESC';
+    const I_MONTH    : string = 'I_MONTH';
+    const I_DAYS     : string = 'I_DAYS';
+    const I_DAYS_NET : string = 'I_DAYS_NET';
+    const I_USING    : string = 'I_USING';
+  end;
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+{ --------------------------------------------------------------- ! TBL_TRACKER ! --------------------------------------------------------------------------- }
 type
   TTracker = class(TDataTables)  { ONE-TO-MANY }
   {$TYPEINFO ON}
@@ -313,7 +301,23 @@ type
     const INDV_REM3  : string = 'INDV_REM3';
   end;
 
-{ ------------------------------------------------------------------ ! TBL_UAC ! ---------------------------------------------------------------------------- }
+
+{ -------------------------------------------------------------- ! TBL_INVOICES ! --------------------------------------------------------------------------- }
+type
+  TInvoices = class(TDataTables)  { ONE-TO-MANY }
+  {$TYPEINFO ON}
+  public
+    const ID           : string = 'ID';   { PRIMARY KEY }
+    const SK           : string = 'SK';   { FOREIGN KEY -> PRIMARY KEY IN "TBL_TRACKER" }
+    const CUID         : string = 'CUID';
+    const INVOICENO    : string = 'INVOICENO';
+    const INVOICESTATE : string = 'INVOICESTATE';
+    const STAMP        : string = 'STAMP';
+  end;
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+{ ----------------------------------------------------------------- ! TBL_UAC ! ----------------------------------------------------------------------------- }
 type
   TUAC = class(TDataTables)  { ONE-TO-MANY }
   {$TYPEINFO ON}
@@ -324,6 +328,20 @@ type
     const ACCESS_MODE  : string = 'ACCESS_MODE';
   end;
 
+
+{ ---------------------------------------------------------------- ! TBL_GROUPS ! --------------------------------------------------------------------------- }
+type
+  TGroups = class(TDataTables)  { ONE-TO-MANY }
+  {$TYPEINFO ON}
+  public
+    const ID            : string = 'ID';   { PRIMARY KEY }
+    const GROUP_ID      : string = 'GROUP_ID';
+    const GROUP_NAME    : string = 'GROUP_NAME';
+    const FID           : string = 'FID';  { FOREIGN KEY -> PRIMARY KEY IN "TBL_UAC" }
+  end;
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 { ------------------------------------------------------------- ! IMPLEMENTATION ZONE ! --------------------------------------------------------------------- }
 
 implementation
@@ -333,9 +351,10 @@ implementation
 { ------------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE }
 constructor TDataTables.Create(Connector: TADOConnection);
 begin
-  pidThd  :=0;
-  pConnStr:=Connector.ConnectionString;
-  pDataSet:=nil;
+  pidThd     :=0;
+  pCustFilter:='';
+  pDataSet   :=nil;
+  inherited;
 end;
 
 destructor TDataTables.Destroy;
@@ -344,12 +363,14 @@ begin
   inherited;
 end;
 
-{ ----------------------------------------------------------------------------------------------------------------------------------------- OPEN TO RECORDSET }
-function TDataTables.Open(TableName: string): boolean;
+{ ----------------------------------------------------------------------------------------------------------------------------------- OPEN TABLE TO RECORDSET }
+function TDataTables.OpenTable(TableName: string): boolean;
 begin
   Result:=True;
   try
-    DataSet.Open(TableName, ConnStr, adOpenKeyset, adLockOptimistic, adCmdTable);
+    if pCustFilter =  '' then StrSQL:='SELECT * FROM ' + TableName;
+    if pCustFilter <> '' then StrSQL:='SELECT * FROM ' + TableName + ' WHERE ' + pCustFilter;
+    pDataSet:=ExecSQL;
   except
     Result:=False;
   end;

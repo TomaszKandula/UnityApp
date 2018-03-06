@@ -1680,7 +1680,7 @@ object MainForm: TMainForm
           end
           object GroupListBox: TComboBox
             Left = 725
-            Top = 29
+            Top = 30
             Width = 192
             Height = 22
             AutoComplete = False

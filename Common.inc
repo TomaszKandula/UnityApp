@@ -131,6 +131,13 @@ const
 
   adAccessLevel = 0;
   adAccessMode  = 1;
+  adUserKeyID   = 2;
+
+  { ACCESS LEVELS }
+
+  acADMIN     = 'AD';
+  acReadWrite = 'RW';
+  acReadOnly  = 'RO';
 
   { MAPPED TABLES FROM DATABASE | WE DO NOT USE ORM, NOR WE CREATE OWN }
 

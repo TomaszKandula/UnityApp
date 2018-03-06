@@ -736,7 +736,7 @@ type                                                            (* GUI | MAIN TH
     procedure Action_OverdueClick(Sender: TObject);
     procedure GroupListBoxDropDown(Sender: TObject);
   private
-    var LastGroupSelection:  integer;    // CURRENTLY SELECTED AGE DATE
+    var LastGroupSelection:  integer;    // CURRENTLY SELECTED GROUP
     var AllowClose        :  boolean;    // SIGNAL FORCE CLOSE WHEN WINDOWS IS SHUTTING DOWN
     var StartTime         :  TTime;      // APPLICATION START TIME
     var pAccessLevel      :  string;     // RO, RW, AD
@@ -3803,6 +3803,7 @@ var
 //  InvoiceTracker:   TInvoiceTracker;
   RegionalSettings: TFormatSettings;
   NowTime: TTime;
+  UserControl: TUserControl;
 begin
 
   { ------------------------------------------------------------ ! INITIALIZATION ! ------------------------------------------------------------------------- }
@@ -4011,9 +4012,23 @@ begin
   { ------------------------------------------------------- ! DATABASE INITIALIZATION  ! -------------------------------------------------------------------- }
 
   { ------------------------------------------------------------------------------------------------------ DATABASE CONNECTION AND READ OUT OF GENERAL TABLES }
-  DataBase  :=TDataBase.Create(True);
   ADOConnect:=TADOConnection.Create(Self);
+  DataBase  :=TDataBase.Create(True);
   DataBase.InitializeConnection(MainThreadID, True, ADOConnect);
+
+  UserControl:=TUserControl.Create(ADOConnect);
+  try
+    UserControl.UserName:=MainForm.CurrentUserName;
+    DebugMsg(UserControl.GetAccessData(adAccessLevel));
+    UserControl.GetGroupList(MainForm.ArrGroupList, GroupListBox);
+    UserControl.GetAgeDates(MainForm.GroupListDates, '02047003400004300000');
+  finally
+    UserControl.Free;
+  end;
+
+
+
+
 (*
 
   if ADOConnect.Connected then
@@ -4045,6 +4060,7 @@ begin
     end;
   end;
 *)
+
   { ----------------------------------------------------------------------------------------------------------------------------- START WEB PAGE | UNITY INFO }
   WebBrowser.Navigate(WideString(AppSettings.TMIG.ReadString(ApplicationDetails, 'START_PAGE', '')), $02);
 
@@ -4602,9 +4618,10 @@ end;
 
 { ------------------------------------------------------------------------------------------------------------------------- UAC | LIST BOX | UPDATE AGE DATES }
 procedure TMainForm.GroupListBoxSelect(Sender: TObject);
-var
-  UserControl: TUserControl;
+//var
+//  UserControl: TUserControl;
 begin
+(*
   UserControl:=TUserControl.Create(MainForm.ADOConnect);
   try
     UserControl.UACAgeDates(MainForm.ArrGroupList[MainForm.GroupListBox.ItemIndex, 0]);
@@ -4630,6 +4647,7 @@ begin
   finally
     UserControl.Free;
   end;
+*)
 end;
 
 { ------------------------------------------------------- ! COMPONENT EVENTS | TABSHEETS ! ------------------------------------------------------------------ }
