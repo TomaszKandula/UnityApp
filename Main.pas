@@ -2993,14 +2993,28 @@ end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------------------- SHOW GROUP3 }
 procedure TMainForm.Action_Group3Click(Sender: TObject);
+var
+  AgeView: TAgeView;
 begin
-  MsgCall(1, 'Assigned to Group3: ' + AgeView.MapData(sgAgeView, 'GROUP3', sgGroup3) + '.');
+  AgeView:=TAgeView.Create;
+  try
+    MsgCall(1, 'Assigned to Group3: ' + AgeView.MapData(sgAgeView, 'GROUP3', sgGroup3) + '.');
+  finally
+    AgeView.Free;
+  end;
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------------------- SHOW PERSON }
 procedure TMainForm.Action_PersonClick(Sender: TObject);
+var
+  AgeView: TAgeView;
 begin
-  MsgCall(1, 'Assigned to Person: ' + AgeView.MapData(sgAgeView, 'PERSON', sgPerson) + '.');
+  AgeView:=AgeView.Create;
+  try
+    MsgCall(1, 'Assigned to Person: ' + AgeView.MapData(sgAgeView, 'PERSON', sgPerson) + '.');
+  finally
+    AgeView.Free;
+  end;
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------- SHOW INF4 }

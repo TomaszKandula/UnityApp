@@ -16,11 +16,11 @@ unit AgeView;
 interface
 
 uses
-  Main;
+  Main, ADODB, StrUtils, SysUtils, Variants, Messages, Windows;
 
 { ------------------------------------------------------------- ! AGE VIEW CLASS ! -------------------------------------------------------------------------- }
 type                                                   (* RUN EITHER IN WORKER OR MAIN THREAD *)
-  TAgeView = class(TObject)
+  TAgeView = class
   {$TYPEINFO ON}
   public
     (* VARIABLES UPDATED BY WORKER THREAD AND USED BY MAIN THREAD *)
@@ -53,6 +53,9 @@ type                                                   (* RUN EITHER IN WORKER O
   end;
 
 implementation
+
+uses
+  Database, Settings, SQL;
 
 { ############################################################## ! AGE VIEW CLASS ! ######################################################################### }
 
@@ -112,24 +115,24 @@ begin
   MainForm.sgAgeView.Freeze(True);
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   { TOTALS }
-  AgeView.CustAll    :=0;
-  AgeView.CallsAll   :=0; { <== QUERY SEPARATE TABLE THAT HOLDS EMAILS AND CALLS FOR SPECIFIC DATE AND GROUP NUMBER }
-  AgeView.EmailsAll  :=0; { <== QUERY SEPARATE TABLE THAT HOLDS EMAILS AND CALLS FOR SPECIFIC DATE AND GROUP NUMBER }
+  CustAll    :=0;
+  CallsAll   :=0; { <== QUERY SEPARATE TABLE THAT HOLDS EMAILS AND CALLS FOR SPECIFIC DATE AND GROUP NUMBER }
+  EmailsAll  :=0; { <== QUERY SEPARATE TABLE THAT HOLDS EMAILS AND CALLS FOR SPECIFIC DATE AND GROUP NUMBER }
   { AMOUNTS }
-  AgeView.NotDue     :=0;
-  AgeView.Range1     :=0;
-  AgeView.Range2     :=0;
-  AgeView.Range3     :=0;
-  AgeView.Range4     :=0;
-  AgeView.Range5     :=0;
-  AgeView.Range6     :=0;
-  AgeView.Balance    :=0;
-  AgeView.Limits     :=0;
-  AgeView.Exceeders  :=0;
-  AgeView.TotalExceed:=0;
-  AgeView.RCA        :=0;
-  AgeView.RCB        :=0;
-  AgeView.RCC        :=0;
+  NotDue     :=0;
+  Range1     :=0;
+  Range2     :=0;
+  Range3     :=0;
+  Range4     :=0;
+  Range5     :=0;
+  Range6     :=0;
+  Balance    :=0;
+  Limits     :=0;
+  Exceeders  :=0;
+  TotalExceed:=0;
+  RCA        :=0;
+  RCB        :=0;
+  RCC        :=0;
   { ------------------------------------------------------------------------------------------------------------------------------------ BUILD SQL EXPRESSION }
   { READ GRID LAYOUT, HOLDS COLUMN ORDER TO BE PASSED AS PARAMETER TO SQL EXPRESSION }
   MainForm.sgAgeView.LoadLayout(StrCol, ColumnWidthName, ColumnOrderName, ColumnNames, ColumnPrefix);
@@ -188,31 +191,31 @@ begin
   for iCNT:=1 to MainForm.sgAgeView.RowCount - 1 do
   begin
     { NOT DUE & RANGE1..5 }
-    AgeView.NotDue:=AgeView.NotDue + StrToFloatDef(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('NOT DUE', 1, 1), iCNT], 0);
-    AgeView.Range1:=AgeView.Range1 + StrToFloatDef(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('1 - 7',  1, 1), iCNT], 0);
-    AgeView.Range2:=AgeView.Range2 + StrToFloatDef(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('8 - 30',  1, 1), iCNT], 0);
-    AgeView.Range3:=AgeView.Range3 + StrToFloatDef(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('31 - 60',  1, 1), iCNT], 0);
-    AgeView.Range4:=AgeView.Range4 + StrToFloatDef(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('61 - 90',  1, 1), iCNT], 0);
-    AgeView.Range5:=AgeView.Range5 + StrToFloatDef(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('91 - 120',  1, 1), iCNT], 0);
-    AgeView.Range6:=AgeView.Range6 + StrToFloatDef(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('121 - oo',  1, 1), iCNT], 0);
+    NotDue:=NotDue + StrToFloatDef(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('NOT DUE', 1, 1), iCNT], 0);
+    Range1:=Range1 + StrToFloatDef(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('1 - 7',  1, 1), iCNT], 0);
+    Range2:=Range2 + StrToFloatDef(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('8 - 30',  1, 1), iCNT], 0);
+    Range3:=Range3 + StrToFloatDef(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('31 - 60',  1, 1), iCNT], 0);
+    Range4:=Range4 + StrToFloatDef(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('61 - 90',  1, 1), iCNT], 0);
+    Range5:=Range5 + StrToFloatDef(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('91 - 120',  1, 1), iCNT], 0);
+    Range6:=Range6 + StrToFloatDef(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('121 - oo',  1, 1), iCNT], 0);
     { TOTAL AMOUNT | LEDGER BALANCE }
-    AgeView.Balance:=AgeView.Balance + StrToFloatDef(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('TOTAL', 1, 1), iCNT], 0);
+    Balance:=Balance + StrToFloatDef(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('TOTAL', 1, 1), iCNT], 0);
     { GRANTED LIMITS | SUM OF ALL LIMITS }
-    AgeView.Limits:=AgeView.Limits + StrToFloatDef(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('CREDIT LIMIT', 1, 1), iCNT], 0);
+    Limits:=Limits + StrToFloatDef(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('CREDIT LIMIT', 1, 1), iCNT], 0);
     { EXCEEDERS }
     if StrToFloatDef(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('EXCEEDED AMOUNT', 1, 1), iCNT], 0) < 0 then
     begin
       { COUNT EXCEEDERS }
-      inc(AgeView.Exceeders);
+      inc(Exceeders);
       { SUM ALL EXCEEDERS AMOUNT }
-      AgeView.TotalExceed:=AgeView.TotalExceed + Abs(StrToFloatDef(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('EXCEEDED AMOUNT', 1, 1), iCNT], 0));
+      TotalExceed:=TotalExceed + Abs(StrToFloatDef(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('EXCEEDED AMOUNT', 1, 1), iCNT], 0));
     end;
     { SUM ALL ITEMS FOR RISK CLASSES }
-    if MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('RISK CLASS', 1, 1), iCNT] = 'A' then AgeView.RCA:=AgeView.RCA + StrToFloatDef(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('TOTAL', 1, 1), iCNT], 0);
-    if MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('RISK CLASS', 1, 1), iCNT] = 'B' then AgeView.RCB:=AgeView.RCB + StrToFloatDef(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('TOTAL', 1, 1), iCNT], 0);
-    if MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('RISK CLASS', 1, 1), iCNT] = 'C' then AgeView.RCC:=AgeView.RCC + StrToFloatDef(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('TOTAL', 1, 1), iCNT], 0);
+    if MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('RISK CLASS', 1, 1), iCNT] = 'A' then RCA:=RCA + StrToFloatDef(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('TOTAL', 1, 1), iCNT], 0);
+    if MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('RISK CLASS', 1, 1), iCNT] = 'B' then RCB:=RCB + StrToFloatDef(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('TOTAL', 1, 1), iCNT], 0);
+    if MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('RISK CLASS', 1, 1), iCNT] = 'C' then RCC:=RCC + StrToFloatDef(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('TOTAL', 1, 1), iCNT], 0);
     { COUNT ITEMS }
-    inc(AgeView.CustAll);
+    inc(CustAll);
   end;
   MainForm.sgAgeView.DefaultRowHeight:=17;
   DataBase:=TDataBase.Create(False);
@@ -358,14 +361,14 @@ end;
 { ------------------------------------------------------------------------------------------------------------------------------------ FILL ARRAY WITH ZEROES }
 procedure AgeViewZeroFields(WhatRow: integer);
 begin
-  AgeView.ArrAgeView[WhatRow, rnCol[0]]:='0';  { NOT DUE }
-  AgeView.ArrAgeView[WhatRow, rnCol[1]]:='0';  { RANGE 1 }
-  AgeView.ArrAgeView[WhatRow, rnCol[2]]:='0';  { RANGE 2 }
-  AgeView.ArrAgeView[WhatRow, rnCol[3]]:='0';  { RANGE 3 }
-  AgeView.ArrAgeView[WhatRow, rnCol[4]]:='0';  { RANGE 4 }
-  AgeView.ArrAgeView[WhatRow, rnCol[5]]:='0';  { RANGE 5 }
-  AgeView.ArrAgeView[WhatRow, rnCol[6]]:='0';  { RANGE 6 }
-  AgeView.ArrAgeView[WhatRow, rnCol[7]]:='0';  { OVERDUE }
+  ArrAgeView[WhatRow, rnCol[0]]:='0';  { NOT DUE }
+  ArrAgeView[WhatRow, rnCol[1]]:='0';  { RANGE 1 }
+  ArrAgeView[WhatRow, rnCol[2]]:='0';  { RANGE 2 }
+  ArrAgeView[WhatRow, rnCol[3]]:='0';  { RANGE 3 }
+  ArrAgeView[WhatRow, rnCol[4]]:='0';  { RANGE 4 }
+  ArrAgeView[WhatRow, rnCol[5]]:='0';  { RANGE 5 }
+  ArrAgeView[WhatRow, rnCol[6]]:='0';  { RANGE 6 }
+  ArrAgeView[WhatRow, rnCol[7]]:='0';  { OVERDUE }
 end;
 { ------------------------------------------------------------------------------------------------------------------------------------------------ QUICK SORT }
 procedure QuickSortR(var A: array of double; var L: array of integer; iLo, iHi: integer; ASC: boolean);
@@ -424,7 +427,7 @@ begin
   RcLo :=0;
   RcHi :=0;
   avRow:=0;
-  SetLength(AgeView.ArrAgeView, 1, 30);  { MAKE 1 ROW AND 1..30 COLUMNS }
+  SetLength(ArrAgeView, 1, 30);  { MAKE 1 ROW AND 1..30 COLUMNS }
   { PUT ZERO FIELDS }
   AgeViewZeroFields(0);
   { ------------------------------------------------------------------------------------------------------------------------------------------  DATE AND TIME }
@@ -441,28 +444,28 @@ begin
     if (MainForm.sgOpenItems.Cells[38, iCNT] <> MainForm.sgOpenItems.Cells[38, iCNT + 1]) then
     begin
       { ---------------------------------------------------------------------------------------------------------------------------------- FIXED DATA PER ROW }
-      AgeView.ArrAgeView[avRow, 0]:=GroupID;
-      AgeView.ArrAgeView[avRow, 1]:=DateToStr(CutOff);
-      AgeView.ArrAgeView[avRow, 2]:=DatTim;
+      ArrAgeView[avRow, 0]:=GroupID;
+      ArrAgeView[avRow, 1]:=DateToStr(CutOff);
+      ArrAgeView[avRow, 2]:=DatTim;
       { ------------------------------------------------------------------------------------------------------------------------ RE-WRITE REST OF THE COLUMNS }
-      for jCNT:=0 to high(oiCol) do AgeView.ArrAgeView[avRow, avCol[jCNT]]:=MainForm.sgOpenItems.Cells[oiCol[jCNT], iCNT];
+      for jCNT:=0 to high(oiCol) do ArrAgeView[avRow, avCol[jCNT]]:=MainForm.sgOpenItems.Cells[oiCol[jCNT], iCNT];
       { ---------------------------------------------------------------------------------------------------------------------------------------- ALTERNATIONS }
       { REMOVE 'TAB' CHARACTER IF FOUND IN CUSTOMER NAME }
-      AgeView.ArrAgeView[avRow, 3]:=StringReplace(AgeView.ArrAgeView[avRow, 3], #9, '', [rfReplaceAll]);
+      ArrAgeView[avRow, 3]:=StringReplace(ArrAgeView[avRow, 3], #9, '', [rfReplaceAll]);
       { REPLACE SINGLE QUOTES TO DOUBLE QUOTES }
-      AgeView.ArrAgeView[avRow, 3]:=StringReplace(AgeView.ArrAgeView[avRow, 3], '''', '''''', [rfReplaceAll]);
+      ArrAgeView[avRow, 3]:=StringReplace(ArrAgeView[avRow, 3], '''', '''''', [rfReplaceAll]);
       { REMOVE FROM CO CODE 'F' PREFIX }
-      AgeView.ArrAgeView[avRow, 20]:=OpenItems.ConvertName(MidStr(AgeView.ArrAgeView[avRow, 20], 2, 5), '', 2);
+      ArrAgeView[avRow, 20]:=OpenItems.ConvertName(MidStr(ArrAgeView[avRow, 20], 2, 5), '', 2);
       { LEDGER ISO }
-      if MainForm.COC1.Text = AgeView.ArrAgeView[avRow, 20] then AgeView.ArrAgeView[avRow, 21]:=MainForm.CUR1.Text;
-      if MainForm.COC2.Text = AgeView.ArrAgeView[avRow, 20] then AgeView.ArrAgeView[avRow, 21]:=MainForm.CUR2.Text;
-      if MainForm.COC3.Text = AgeView.ArrAgeView[avRow, 20] then AgeView.ArrAgeView[avRow, 21]:=MainForm.CUR3.Text;
-      if MainForm.COC4.Text = AgeView.ArrAgeView[avRow, 20] then AgeView.ArrAgeView[avRow, 21]:=MainForm.CUR4.Text;
+      if MainForm.COC1.Text = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.CUR1.Text;
+      if MainForm.COC2.Text = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.CUR2.Text;
+      if MainForm.COC3.Text = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.CUR3.Text;
+      if MainForm.COC4.Text = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.CUR4.Text;
       { -------------------------------------------------------------------------------------------------------------------------------------------- COUNTERS }
       { MOVE COUNTER }
       inc(avRow);
       { EXPAND ARRAY BY ONE EMPTY ROW }
-      SetLength(AgeView.ArrAgeView, avRow + 1, 30);
+      SetLength(ArrAgeView, avRow + 1, 30);
       { ZERO FIELDS }
       AgeViewZeroFields(avRow);
     end;
@@ -490,11 +493,11 @@ begin
     for iCNT:=0 to MainForm.sgOpenItems.RowCount - 1 do
     begin
       { COMPARE AND EXECUTE IF THE SAME }
-      if MainForm.sgOpenItems.Cells[38, iCNT] = AgeView.ArrAgeView[exRow, 29] then
+      if MainForm.sgOpenItems.Cells[38, iCNT] = ArrAgeView[exRow, 29] then
       begin
         { SUM ITEMS: NOT DUE, RANGE1..5 }
-        AgeView.ArrAgeView[exRow, bucket(StrToInt(MainForm.sgOpenItems.Cells[34, iCNT]), bias)]:=FloatToStr(
-                                                                           StrToFloat(AgeView.ArrAgeView[exRow, bucket(StrToInt(MainForm.sgOpenItems.Cells[34, iCNT]), bias)]) +
+        ArrAgeView[exRow, bucket(StrToInt(MainForm.sgOpenItems.Cells[34, iCNT]), bias)]:=FloatToStr(
+                                                                           StrToFloat(ArrAgeView[exRow, bucket(StrToInt(MainForm.sgOpenItems.Cells[34, iCNT]), bias)]) +
                                                                            StrToFloat(MainForm.sgOpenItems.Cells[6, iCNT])
                                                                            );
         { SUM ITEMS: DISCOUNTED AMOUNT [35] | TECHNICAL VARIABLE }
@@ -502,30 +505,30 @@ begin
       end;
     end;
     { CALCULATE TOTAL AMOUNT [14] }
-    AgeView.ArrAgeView[exRow, 14]:=FloatToStr(
-                        StrToFloat(AgeView.ArrAgeView[exRow, rnCol[0]]) +
-                        StrToFloat(AgeView.ArrAgeView[exRow, rnCol[1]]) +
-                        StrToFloat(AgeView.ArrAgeView[exRow, rnCol[2]]) +
-                        StrToFloat(AgeView.ArrAgeView[exRow, rnCol[3]]) +
-                        StrToFloat(AgeView.ArrAgeView[exRow, rnCol[4]]) +
-                        StrToFloat(AgeView.ArrAgeView[exRow, rnCol[5]]) +
-                        StrToFloat(AgeView.ArrAgeView[exRow, rnCol[6]])
+    ArrAgeView[exRow, 14]:=FloatToStr(
+                        StrToFloat(ArrAgeView[exRow, rnCol[0]]) +
+                        StrToFloat(ArrAgeView[exRow, rnCol[1]]) +
+                        StrToFloat(ArrAgeView[exRow, rnCol[2]]) +
+                        StrToFloat(ArrAgeView[exRow, rnCol[3]]) +
+                        StrToFloat(ArrAgeView[exRow, rnCol[4]]) +
+                        StrToFloat(ArrAgeView[exRow, rnCol[5]]) +
+                        StrToFloat(ArrAgeView[exRow, rnCol[6]])
                         );
     { TOTAL OVERDUE [13] = TOTAL AMOUNT [14] - NOT DUE [6] }
-    AgeView.ArrAgeView[exRow, 13]:=FloatToStr(
-                        StrToFloat(AgeView.ArrAgeView[exRow, 14]) -
-                        StrToFloat(AgeView.ArrAgeView[exRow,  6])
+    ArrAgeView[exRow, 13]:=FloatToStr(
+                        StrToFloat(ArrAgeView[exRow, 14]) -
+                        StrToFloat(ArrAgeView[exRow,  6])
                         );
     { EXCEEDED AMOUNT [16] = CREDIT LIMIT [15] - TOTAL AMOUNT [14] }
-    AgeView.ArrAgeView[exRow, 16]:=FloatToStr(StrToFloat(AgeView.ArrAgeView[exRow, 15]) - StrToFloat(AgeView.ArrAgeView[exRow, 14]));
+    ArrAgeView[exRow, 16]:=FloatToStr(StrToFloat(ArrAgeView[exRow, 15]) - StrToFloat(ArrAgeView[exRow, 14]));
     { WALLET SHARE [28] | TECHNICAL COLUMN }
-    if OSAmount <> 0 then AgeView.ArrAgeView[exRow, 28]:=FloatToStrF(( (StrToFloat(AgeView.ArrAgeView[exRow, 14]) / OSAmount) * 1), ffFixed, 4, 4)
+    if OSAmount <> 0 then ArrAgeView[exRow, 28]:=FloatToStrF(( (StrToFloat(ArrAgeView[exRow, 14]) / OSAmount) * 1), ffFixed, 4, 4)
       else
-        AgeView.ArrAgeView[exRow, 28]:='0';
+        ArrAgeView[exRow, 28]:='0';
     { CALCULATE QUALITY INDEX [27] }
-    if OSAmount <> 0 then AgeView.ArrAgeView[exRow, 27]:=FloatToStrF(( 1 - (DiscAmnt / OSAmount) ), ffFixed, 6, 6)
+    if OSAmount <> 0 then ArrAgeView[exRow, 27]:=FloatToStrF(( 1 - (DiscAmnt / OSAmount) ), ffFixed, 6, 6)
       else
-        AgeView.ArrAgeView[exRow, 27]:='0';
+        ArrAgeView[exRow, 27]:='0';
   end;
   { --------------------------------------------------------------------------------------------------------------------------------------- RISK CLASS BOUNDS }
   if FormatSettings.DecimalSeparator = ',' then
@@ -550,7 +553,7 @@ begin
   for iCNT:=0 to avRow - 1 do
   begin
     MyList[iCNT]  :=iCNT;                                     { ORIGINAL LP  }
-    MyWallet[iCNT]:=StrToFloat(AgeView.ArrAgeView[iCNT, 28]); { WALLET SHARE }
+    MyWallet[iCNT]:=StrToFloat(ArrAgeView[iCNT, 28]); { WALLET SHARE }
   end;
   { SORT DESCENDING VIA WALLET SHARTE }
   QuickSortR(MyWallet, MyList, Low(MyWallet), High(MyWallet), False);
@@ -559,19 +562,19 @@ begin
   begin
     Count:=Count + MyWallet[iCNT];
     { ASSIGN RISK CLASS 'A' }
-    if Count <= RcLo then   AgeView.ArrAgeView[MyList[iCNT], 26]:='A';
+    if Count <= RcLo then   ArrAgeView[MyList[iCNT], 26]:='A';
     { ASSIGN RISK CLASS 'B' }
     if (Count > RcLo)  and
-       (Count <= RcHi) then AgeView.ArrAgeView[MyList[iCNT], 26]:='B';
+       (Count <= RcHi) then ArrAgeView[MyList[iCNT], 26]:='B';
     { ASSIGN RISK CLASS 'C' }
-    if Count > RcHi then    AgeView.ArrAgeView[MyList[iCNT], 26]:='C';
+    if Count > RcHi then    ArrAgeView[MyList[iCNT], 26]:='C';
   end;
   { --------------------------------------------------------------------------------------------------------------------------------------- DECIMAL SEPARATOR }
   if FormatSettings.DecimalSeparator = ',' then
     for exRow:=0 to avRow - 1 do
       for jCNT:=0 to high(rfCol) do
         { REPLACE ',' TO '.' FOR ALL VALUES [6..14] AND [25..26] }
-        AgeView.ArrAgeView[exRow, rfCol[jCNT]]:=StringReplace(AgeView.ArrAgeView[exRow, rfCol[jCNT]], ',', '.', [rfReplaceAll]);
+        ArrAgeView[exRow, rfCol[jCNT]]:=StringReplace(ArrAgeView[exRow, rfCol[jCNT]], ',', '.', [rfReplaceAll]);
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------- TRANSFER 'AGEVIEW' TO SQL SERVER }
@@ -586,10 +589,10 @@ var
 begin
   { INITIALIZE }
   MSSQL:=TMSSQL.Create(MainForm.ADOConnect);
-  DeleteData:='DELETE FROM ' + DestTable + ' WHERE GROUP_ID = ' + QuotedStr(AgeView.ArrAgeView[0, 0]) + ' AND AGE_DATE = ' + QuotedStr(LeftStr(AgeView.ArrAgeView[0, 1], 10));
+  DeleteData:='DELETE FROM ' + DestTable + ' WHERE GROUP_ID = ' + QuotedStr(ArrAgeView[0, 0]) + ' AND AGE_DATE = ' + QuotedStr(LeftStr(ArrAgeView[0, 1], 10));
   try
     { BUILD AND EXECUTE }
-    Transaction:=MSSQL.ArrayToSql(AgeView.ArrAgeView, DestTable, AllColumns);
+    Transaction:=MSSQL.ArrayToSql(ArrAgeView, DestTable, AllColumns);
     Transaction:='BEGIN TRANSACTION'                                              + #13#10 +
                  'SELECT TOP 1 * FROM ' + DestTable + ' WITH (TABLOCK, HOLDLOCK)' + #13#10 +
                  DeleteData                                                       + #13#10 +
@@ -600,11 +603,11 @@ begin
     try
       MSSQL.ExecSQL;
     except
-      LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Cannot send to server. Error has been thrown: ' + IntToStr(High(AgeView.ArrAgeView)) + '.');
+      LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Cannot send to server. Error has been thrown: ' + IntToStr(High(ArrAgeView)) + '.');
     end;
   finally
     MSSQL.Free;
-    LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Age View transferred to Microsoft SQL Server. Rows affected: ' + IntToStr(High(AgeView.ArrAgeView)) + '.');
+    LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Age View transferred to Microsoft SQL Server. Rows affected: ' + IntToStr(High(ArrAgeView)) + '.');
   end;
 end;
 

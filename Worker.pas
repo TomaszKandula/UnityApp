@@ -265,6 +265,7 @@ var
   THDSec:     extended;
   StopWatch:  TStopWatch;
   DataBase: TDataBase;
+  AgeView:  TAgeView;
 begin
   IDThread:=TTReadAgeView.CurrentThread.ThreadID;
   ActiveThreads[3]:=True;
@@ -348,8 +349,9 @@ begin
         end);
 
       { -------------------------------------------------- ! HEAVY DUTY TASK (RUN ASYNC) ! ------------------------------------------------------------------ }
-      AgeView.Read(MainForm.ArrGroupList[MainForm.GroupListBox.ItemIndex, 0], StrToDate(MainForm.GroupListDates.Text), IDThread);
-
+      AgeView:=TAgeView.Create;
+      try
+        AgeView.Read(MainForm.ArrGroupList[MainForm.GroupListBox.ItemIndex, 0], StrToDate(MainForm.GroupListDates.Text), IDThread);
       { ------------------------------------------------------- ! POST | GUI UPDATE ! ----------------------------------------------------------------------- }
       Synchronize
         (procedure begin
@@ -410,6 +412,10 @@ begin
 
         end);
 
+      finally
+        AgeView.Free;
+      end;
+
     except
       on E: Exception do
       begin
@@ -462,6 +468,7 @@ var
   temp:       string;
   DataBase: TDataBase;
   UserControl: TUserControl;
+  AgeView: TAgeView;
 begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   IDThread:=TTMakeAgeView.CurrentThread.ThreadID;
@@ -474,7 +481,9 @@ begin
       StopWatch:=TStopWatch.StartNew;
       try
         { ----------------------------------------------------------------------------------------------------------------------- MAKE AGING REPORT TO AN ARRAY }
-        AgeView.Make(AgeView.GetCoCode(MainForm.GroupListBox.ItemIndex, 0, 2), OpenItems.OSamt, IDThread);
+        AgeView:=TAgeView.Create;
+        try
+          AgeView.Make(AgeView.GetCoCode(MainForm.GroupListBox.ItemIndex, 0, 2), OpenItems.OSamt, IDThread);
 
         { ---------------------------------------------------------------------------------------------------------------------------------- SAVE OUTPUT TO CSV }
 
@@ -530,6 +539,10 @@ begin
 
           { REFRESH AGE VIEW }
           TTReadAgeView.Create('0');
+        end;
+
+        finally
+          AgeView.Free;
         end;
 
       except
