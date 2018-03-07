@@ -38,7 +38,9 @@ uses
   Worker in 'Worker.pas',
   Settings in 'Settings.pas',
   Database in 'Database.pas',
-  UAC in 'UAC.pas';
+  UAC in 'UAC.pas',
+  Mailer in 'Mailer.pas',
+  AgeView in 'AgeView.pas';
 
 type
   DWord = 0..$FFFFFFFF;

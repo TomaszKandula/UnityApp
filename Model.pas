@@ -157,7 +157,7 @@ type
 
 { -------------------------------------------------------------- ! TBL_OPENITEMS ! --------------------------------------------------------------------------- }
 type
-  TOpenitems1 = class(TDataTables)
+  TOpenitems = class(TDataTables)
   {$TYPEINFO ON}
   public
     const ID               : string = 'ID';  { PRIMARY KEY }

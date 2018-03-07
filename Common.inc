@@ -139,7 +139,7 @@ const
   acReadWrite = 'RW';
   acReadOnly  = 'RO';
 
-  { MAPPED TABLES FROM DATABASE | WE DO NOT USE ORM, NOR WE CREATE OWN }
+  { MAPPED TABLES FROM DATABASE | WE DO NOT USE SEPARATE ORM FRAMEWORK }
 
   TblDaily       = 'tbl_daily';
   TblGeneral     = 'tbl_general';

@@ -121,7 +121,7 @@ var
 implementation
 
 uses
-  Model, SQL, Worker, Calendar, Settings, Database;
+  Model, SQL, Worker, Calendar, Settings, Database, Mailer;
 
 var
   DataHandler: TDataHandler;

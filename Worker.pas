@@ -16,7 +16,7 @@ unit Worker;
 interface
 
 uses
-  Windows, Messages, SysUtils, Classes, Diagnostics, Graphics, ADODB, ComObj;
+  Main, Windows, Messages, SysUtils, Classes, Diagnostics, Graphics, ADODB, ComObj;
 
 { ----------------------------------------------------------- ! SEPARATE CPU THREADS ! ---------------------------------------------------------------------- }
 type
@@ -142,7 +142,7 @@ var
 implementation
 
 uses
-  Main, DataBase, Settings, UAC;
+  DataBase, Settings, UAC, Mailer, AgeView;
 
 { ############################################################ ! SEPARATE CPU THREADS ! ##################################################################### }
 
