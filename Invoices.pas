@@ -86,7 +86,7 @@ begin
   if DataBase.Check = 0 then
   begin
     Sleep(100);
-    MSSQL:=TMSSQL.Create(MainForm.ADOConnect);
+    MSSQL:=TMSSQL.Create(MainForm.FDbConnect);
     try
       { PREPARE FOR QUERY }
       CUID:=MainForm.sgInvoiceTracker.Cells[MainForm.sgInvoiceTracker.ReturnColumn('CUID', 1, 1), MainForm.sgInvoiceTracker.Row];

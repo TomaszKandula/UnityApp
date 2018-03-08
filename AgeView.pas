@@ -24,7 +24,7 @@ type                                                   (* RUN EITHER IN WORKER O
   {$TYPEINFO ON}
   public
     (* VARIABLES UPDATED BY WORKER THREAD AND USED BY MAIN THREAD *)
-    ArrAgeView   : TStrArray;
+    ArrAgeView   : TLists;
     CustAll      : integer;
     CallsAll     : integer;
     EmailsAll    : integer;
@@ -162,7 +162,7 @@ begin
   { ----------------------------------------------------------------------------------------------------------------------------------------------- NEW QUERY }
   { QUERY WITH GIVEN SQL EXPRESSION AND PARAMETERS }
   Query:=TADOQuery.Create(nil);
-  Query.Connection:=MainForm.ADOConnect;
+  Query.Connection:=MainForm.FDbConnect;
   try
     Query.SQL.Clear;
     Query.SQL.Add(StrSQL);
@@ -184,8 +184,8 @@ begin
   finally
     Query.Close;
     Query.Free;
-    LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: SQL statement applied [' + StrSQL + '].');
-    LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: SQL statement parameters [uParam1 = ' + GroupID + '], [uParam2 = ' + DateToStr(AgeDate) + '].');
+    LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(idThd) + ']: SQL statement applied [' + StrSQL + '].');
+    LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(idThd) + ']: SQL statement parameters [uParam1 = ' + GroupID + '], [uParam2 = ' + DateToStr(AgeDate) + '].');
   end;
   { ---------------------------------------------------------------------------------------------------------------------------------------- CALCULATE VALUES }
   for iCNT:=1 to MainForm.sgAgeView.RowCount - 1 do
@@ -422,7 +422,7 @@ begin
   AppSettings:=TSettings.Create;
   { ----------------------------------------------------------------------------------------------------------------------------------------- DISPLAY MESSAGE }
   PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Generating age view...')));
-  LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Generating age view...');
+  LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(idThd) + ']: Generating age view...');
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   RcLo :=0;
   RcHi :=0;
@@ -455,7 +455,7 @@ begin
       { REPLACE SINGLE QUOTES TO DOUBLE QUOTES }
       ArrAgeView[avRow, 3]:=StringReplace(ArrAgeView[avRow, 3], '''', '''''', [rfReplaceAll]);
       { REMOVE FROM CO CODE 'F' PREFIX }
-      ArrAgeView[avRow, 20]:=OpenItems.ConvertName(MidStr(ArrAgeView[avRow, 20], 2, 5), '', 2);
+//      ArrAgeView[avRow, 20]:=ConvertName(MidStr(ArrAgeView[avRow, 20], 2, 5), '', 2);
       { LEDGER ISO }
       if MainForm.COC1.Text = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.CUR1.Text;
       if MainForm.COC2.Text = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.CUR2.Text;
@@ -552,7 +552,7 @@ begin
   { MOVE REQUIRED ITEMS TO ARRAYS }
   for iCNT:=0 to avRow - 1 do
   begin
-    MyList[iCNT]  :=iCNT;                                     { ORIGINAL LP  }
+    MyList[iCNT]  :=iCNT;                             { ORIGINAL LP  }
     MyWallet[iCNT]:=StrToFloat(ArrAgeView[iCNT, 28]); { WALLET SHARE }
   end;
   { SORT DESCENDING VIA WALLET SHARTE }
@@ -588,7 +588,7 @@ var
   DeleteData:   string;
 begin
   { INITIALIZE }
-  MSSQL:=TMSSQL.Create(MainForm.ADOConnect);
+  MSSQL:=TMSSQL.Create(MainForm.FDbConnect);
   DeleteData:='DELETE FROM ' + DestTable + ' WHERE GROUP_ID = ' + QuotedStr(ArrAgeView[0, 0]) + ' AND AGE_DATE = ' + QuotedStr(LeftStr(ArrAgeView[0, 1], 10));
   try
     { BUILD AND EXECUTE }
@@ -603,11 +603,11 @@ begin
     try
       MSSQL.ExecSQL;
     except
-      LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Cannot send to server. Error has been thrown: ' + IntToStr(High(ArrAgeView)) + '.');
+      LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(idThd) + ']: Cannot send to server. Error has been thrown: ' + IntToStr(High(ArrAgeView)) + '.');
     end;
   finally
     MSSQL.Free;
-    LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Age View transferred to Microsoft SQL Server. Rows affected: ' + IntToStr(High(ArrAgeView)) + '.');
+    LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(idThd) + ']: Age View transferred to Microsoft SQL Server. Rows affected: ' + IntToStr(High(ArrAgeView)) + '.');
   end;
 end;
 
@@ -632,7 +632,7 @@ begin
           'WHERE'                        +
             ' GROUP_ID = '               + QuotedStr(GroupID) +
             ' AND AGE_DATE = '           + QuotedStr(DateToStr(AgeDate));
-  MSSQL:=TMSSQL.Create(MainForm.ADOConnect);
+  MSSQL:=TMSSQL.Create(MainForm.FDbConnect);
   try
     MSSQL.StrSQL:=StrSQL;
     RS:=MSSQL.ExecSQL;
@@ -725,19 +725,19 @@ function TAgeView.GetCoCode(ListPos: integer; CoPos: integer; Mode: integer): st
 {   3. 'MODE'    = 0 (COCODE) OR 1 (GROUP NAME) OR 2 (GROUP ID)                                              }
 begin
   { VALIDATE INPUT DATA }
-  if ( ListPos > High(MainForm.ArrGroupList) ) or (CoPos > 4) then Exit;
+  if ( ListPos > High(MainForm.FGroupList) ) or (CoPos > 4) then Exit;
   { EXTRACT | 'COCODE' FROM GROUP ID }
   if Mode = 0 then
   begin
-    if CoPos = 1 then Result:=IntToStr(StrToInt(MidStr(MainForm.ArrGroupList[ListPos, Mode], 1,  5)));
-    if CoPos = 2 then Result:=IntToStr(StrToInt(MidStr(MainForm.ArrGroupList[ListPos, Mode], 6,  5)));
-    if CoPos = 3 then Result:=IntToStr(StrToInt(MidStr(MainForm.ArrGroupList[ListPos, Mode], 11, 5)));
-    if CoPos = 4 then Result:=IntToStr(StrToInt(MidStr(MainForm.ArrGroupList[ListPos, Mode], 16, 5)));
+    if CoPos = 1 then Result:=IntToStr(StrToInt(MidStr(MainForm.FGroupList[ListPos, Mode], 1,  5)));
+    if CoPos = 2 then Result:=IntToStr(StrToInt(MidStr(MainForm.FGroupList[ListPos, Mode], 6,  5)));
+    if CoPos = 3 then Result:=IntToStr(StrToInt(MidStr(MainForm.FGroupList[ListPos, Mode], 11, 5)));
+    if CoPos = 4 then Result:=IntToStr(StrToInt(MidStr(MainForm.FGroupList[ListPos, Mode], 16, 5)));
   end;
   { EXTRACT | GROUP NAME }
-  if Mode = 1 then Result:=MainForm.ArrGroupList[ListPos, Mode];
+  if Mode = 1 then Result:=MainForm.FGroupList[ListPos, Mode];
   { EXTRACT | FULL GROUP ID }
-  if Mode = 2 then Result:=MainForm.ArrGroupList[ListPos, 0];
+  if Mode = 2 then Result:=MainForm.FGroupList[ListPos, 0];
 end;
 
 end.

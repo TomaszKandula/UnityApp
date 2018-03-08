@@ -40,7 +40,8 @@ uses
   Database in 'Database.pas',
   UAC in 'UAC.pas',
   Mailer in 'Mailer.pas',
-  AgeView in 'AgeView.pas';
+  AgeView in 'AgeView.pas',
+  Transactions in 'Transactions.pas';
 
 type
   DWord = 0..$FFFFFFFF;

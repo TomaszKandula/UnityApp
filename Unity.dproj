@@ -69,6 +69,7 @@
 			<DCCReference Include="UAC.pas"/>
 			<DCCReference Include="Mailer.pas"/>
 			<DCCReference Include="AgeView.pas"/>
+			<DCCReference Include="Transactions.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>

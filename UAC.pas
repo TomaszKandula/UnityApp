@@ -26,7 +26,7 @@ type
   public
     property  UserName: string read pUserName write pUserName;
     function  GetAccessData(DataType: integer): string;
-    procedure GetGroupList(var List: TStrArray; GroupListBox: TComboBox);
+    procedure GetGroupList(var List: TLists; GroupListBox: TComboBox);
     procedure GetAgeDates(AgeDatesBox: TComboBox; GroupID: string);
   end;
 
@@ -49,12 +49,12 @@ begin
       DataSet.Filter:=adFilterNone;
     end;
   finally
-    DataSet.Close;
+//    DataSet.Close;
   end;
 end;
 
 { ---------------------------------------------------------------------------------------------------------- READ GROUP ID AND GROUP NAME FOR GIVEN USER NAME }
-procedure TUserControl.GetGroupList(var List: TStrArray; GroupListBox: TComboBox);
+procedure TUserControl.GetGroupList(var List: TLists; GroupListBox: TComboBox);
 var
   iCNT:     integer;
   UserKey:  string;
@@ -85,7 +85,7 @@ begin
       GroupListBox.Enabled:=True;
     end;
   finally
-    DataSet.Close;
+//    DataSet.Close;
   end;
 end;
 
@@ -109,7 +109,7 @@ begin
       if GetAccessData(adAccessLevel) = acADMIN then AgeDatesBox.Enabled:=True;
     end;
   finally
-    DataSet.Close;
+//    DataSet.Close;
   end;
 end;
 

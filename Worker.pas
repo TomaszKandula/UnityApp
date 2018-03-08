@@ -19,56 +19,63 @@ uses
   Main, Windows, Messages, SysUtils, Classes, Diagnostics, Graphics, ADODB, ComObj;
 
 { ----------------------------------------------------------- ! SEPARATE CPU THREADS ! ---------------------------------------------------------------------- }
+
+
+{ ----------------------------------------------------------------------------------------------------------------------------------- CHECK SERVER CONNECTION }
 type
-  { --------------------------------------------------------------------------------------------------------------------------------- CHECK SERVER CONNECTION }
   TTCheckServerConnection = class(TThread)
-    protected
-      procedure Execute; override;
+  protected
+    procedure Execute; override;
   end;
 
-  { --------------------------------------------------------------------------------------------------------------------------------- INVOICE TRACKER SCANNER }
+{ ----------------------------------------------------------------------------------------------------------------------------------- INVOICE TRACKER SCANNER }
+type
   TTInvoiceTrackerScanner = class(TThread)
-    protected
-      procedure Execute; override;
+  protected
+    procedure Execute; override;
   end;
 
-  { -------------------------------------------------------------------------------------------------------------------------------------- OPEN ITEMS SCANNER }
+{ ---------------------------------------------------------------------------------------------------------------------------------------- OPEN ITEMS SCANNER }
+type
   TTOpenItemsScanner = class(TThread)
-    protected
-      procedure Execute; override;
+  protected
+    procedure Execute; override;
   end;
 
-  { ------------------------------------------------------------------------------------------------------------------------------------------- READ AGE VIEW }
+{ --------------------------------------------------------------------------------------------------------------------------------------------- READ AGE VIEW }
+type
   TTReadAgeView = class(TThread)
-    protected
-      procedure Execute; override;    //remove modes!!
-    private
-      pMode: string;
-    public
-      { MODES:                                    }
-      {   '0' = LEAVE OPEN ITEMS AS IT IS         }
-      {   '1' = READ OPEN ITEMS                   }
-      constructor Create(cMode: string);
+  protected
+    procedure Execute; override;    //remove modes!!
+  private
+    pMode: string;
+  public
+    { MODES:                                    }
+    {   '0' = LEAVE OPEN ITEMS AS IT IS         }
+    {   '1' = READ OPEN ITEMS                   }
+    constructor Create(cMode: string);
   end;
 
-  { ------------------------------------------------------------------------------------------------------------------------------------------- MAKE AGE VIEW }
+{ --------------------------------------------------------------------------------------------------------------------------------------------- MAKE AGE VIEW }
+type
   TTMakeAgeView = class(TThread)
-    protected
-      procedure Execute; override;
+  protected
+    procedure Execute; override;
   end;
 
-  { ---------------------------------------------------------------------------------------------------------------------------- INVOICE TRACKER LIST REFRESH }
+{ ------------------------------------------------------------------------------------------------------------------------------ INVOICE TRACKER LIST REFRESH }
+type
   TTInvoiceTrackerRefresh = class(TThread)
-    protected
-      procedure Execute; override;    //remove modes!
-    private
-      pMode: string;
-    public
-      { MODES:                                    }
-      {   'ALL'    = SHOW ALL REGISTERED INVOICES }
-      {   'ADD'    = ADD NEW CUSTOMER             }
-      {   'REMOVE' = REMOVE SELECTED CUSTOMER     }
-      constructor Create(cMode: string);
+  protected
+    procedure Execute; override;    //remove modes!
+  private
+    pMode: string;
+  public
+    { MODES:                                    }
+    {   'ALL'    = SHOW ALL REGISTERED INVOICES }
+    {   'ADD'    = ADD NEW CUSTOMER             }
+    {   'REMOVE' = REMOVE SELECTED CUSTOMER     }
+    constructor Create(cMode: string);
   end;
 
 (*
@@ -89,31 +96,56 @@ type
   end;
 *)
 
-  { ----------------------------------------------------------------------------------------------------------------------------------------- READ OPEN ITEMS }
+{ ------------------------------------------------------------------------------------------------------------------------------------------- READ OPEN ITEMS }
+type
   TTReadOpenItems = class(TThread)
-    protected
-      procedure Execute; override; //remove modes!!
-    private
-      pMode: string;
-    public
-      { MODES:                                    }
-      {   '0' = JUST OPEN ITEMS REFRESH           }
-      {   '1' = START AGEING REPORT               }
-      constructor Create(cMode: string);
+  protected
+    procedure Execute; override; //remove modes!!
+  private
+    pMode: string;
+  public
+    { MODES:                                    }
+    {   '0' = JUST OPEN ITEMS REFRESH           }
+    {   '1' = START AGEING REPORT               }
+    constructor Create(cMode: string);
   end;
 
-  { -------------------------------------------------------------------------------------------------------------------------------------------- ADDRESS BOOK }
+{ ---------------------------------------------------------------------------------------------------------------------------------------------- ADDRESS BOOK }
+
+(*
+type
+  TAddressBook = class //remove!!!
+  {$TYPEINFO ON}
+  private
+    pidThd      : integer;
+    pDelimiter  : string;
+    pUserName   : string;
+  public
+    property    idThd      : integer read pidThd     write pidThd;
+    property    Delimiter  : string  read pDelimiter write pDelimiter;
+    property    UserName   : string  read pUserName  write pUserName;
+  published
+    constructor Create(UseDelimiter: string; UserNameDef: string);
+  end;
+*)
+
+type
   TTAddressBook = class(TThread)
-    protected
-      procedure Execute; override;
-    private
-      pMode:  string;
-      pUser:  string;
-    public
-      constructor Create(cMode: string; cUser: string);
+  protected
+    procedure Execute; override;
+  private
+    pMode:  string;
+    pUser:  string;
+  public
+    constructor Create(cMode: string; cUser: string);
+    function    Read     : boolean;
+    function    Write    : boolean;
+    function    ImportCSV: boolean;
+    function    ExportCSV: boolean;
   end;
 
-  { ----------------------------------------------------------------------------------------------------------------------------------------- EXPORT TO EXCEL }
+{ ------------------------------------------------------------------------------------------------------------------------------------------- EXPORT TO EXCEL }
+type
   TTExcelExport = class(TThread)
     protected
       procedure Execute; override;
@@ -142,7 +174,7 @@ var
 implementation
 
 uses
-  DataBase, Settings, UAC, Mailer, AgeView;
+  DataBase, Settings, UAC, Mailer, AgeView, Transactions;
 
 { ############################################################ ! SEPARATE CPU THREADS ! ##################################################################### }
 
@@ -159,7 +191,7 @@ begin
   try
     IDThread:=TTCheckServerConnection.CurrentThread.ThreadID;
     ActiveThreads[0]:=True;
-    DataBase.InitializeConnection(IDThread, False, MainForm.ADOConnect);
+    DataBase.InitializeConnection(IDThread, False, MainForm.FDbConnect);
     ActiveThreads[0]:=False;
   finally
     DataBase.Free;
@@ -188,7 +220,7 @@ begin
       if DataBase.Check = 0 then
       begin
         { SYNCHRONIZED WITH THE MAIN THREAD }
-        Synchronize(procedure begin InvoiceTracker.Refresh(MainForm.sgInvoiceTracker, UpperCase(MainForm.CurrentUserName)) end);
+        Synchronize(procedure begin InvoiceTracker.Refresh(MainForm.sgInvoiceTracker, UpperCase(MainForm.FUserName)) end);
         { ------------------------------------------------- ! HEAVY DUTY TASK (RUN ASYNC) ! ----------------------------------------------------------------- }
         { CHECK CONDITIONS AND SEND E-MAILS }
         InvoiceTracker.Scanner(IDThread);
@@ -198,7 +230,7 @@ begin
       on E: Exception do
       begin
         //PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Ready.')));
-        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Execution of this tread work has been stopped. Error thrown: ' + E.Message + ' (TInvoiceScanner). Exit Code = ' + IntToStr(ExitCode) + '.');
+        LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Execution of this tread work has been stopped. Error thrown: ' + E.Message + ' (TInvoiceScanner). Exit Code = ' + IntToStr(ExitCode) + '.');
       end;
     end;
   finally
@@ -207,7 +239,7 @@ begin
     ActiveThreads[1]:=False;
     THDMili:=StopWatch.ElapsedMilliseconds;
     THDSec:=THDMili / 1000;
-    LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Scanning invoices and sending reminders (if any) executed within: ' +
+    LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Scanning invoices and sending reminders (if any) executed within: ' +
             FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
   end;
   { RELEASE THREAD WHEN DONE }
@@ -224,6 +256,7 @@ begin
 
   { IF ALL FILES HAS BEEN UPDATED, THEN EXECUTE SEPARATE THREAD FOR OPEN ITEMS LOAD }
 
+(*
   if OpenItems.Scan(1) then
   begin
     try
@@ -241,12 +274,13 @@ begin
 
     finally
       ActiveThreads[2]:=False;
-      LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: TOIThread method called with paremeter = 1.');
+      LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThread) + ']: TOIThread method called with paremeter = 1.');
     end;
   end
     else
-      LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: No changes in open items have been found.');
+      LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThread) + ']: No changes in open items have been found.');
 
+*)
   { RELEASE THREAD WHEN DONE }
   FreeOnTerminate:=True;
 end;
@@ -351,13 +385,13 @@ begin
       { -------------------------------------------------- ! HEAVY DUTY TASK (RUN ASYNC) ! ------------------------------------------------------------------ }
       AgeView:=TAgeView.Create;
       try
-        AgeView.Read(MainForm.ArrGroupList[MainForm.GroupListBox.ItemIndex, 0], StrToDate(MainForm.GroupListDates.Text), IDThread);
+        AgeView.Read(MainForm.FGroupList[MainForm.GroupListBox.ItemIndex, 0], StrToDate(MainForm.GroupListDates.Text), IDThread);
       { ------------------------------------------------------- ! POST | GUI UPDATE ! ----------------------------------------------------------------------- }
       Synchronize
         (procedure begin
 
           { FIND CO CODE, CURRENCY CODE, INTEREST RATE AND AGENT }
-          AgeView.Details(MainForm.ArrGroupList[MainForm.GroupListBox.ItemIndex, 0], StrToDate(MainForm.GroupListDates.Text), IDThread);
+          AgeView.Details(MainForm.FGroupList[MainForm.GroupListBox.ItemIndex, 0], StrToDate(MainForm.GroupListDates.Text), IDThread);
 
           { -------------------------------------------------------------------------------------------------------------------------- TOP | AGE VIEW DETAILS }
           MainForm.tcTOTAL.Caption    :=IntToStr(AgeView.CustAll);
@@ -421,7 +455,7 @@ begin
       begin
         SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PCHAR('Cannot execute ''TTReadAgeView''. Please contact IT support.')));
         PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Ready.')));
-        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Execution of this tread work has been stopped. Error thrown: ' + E.Message + ' (TReadFromDB).');
+        LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Execution of this tread work has been stopped. Error thrown: ' + E.Message + ' (TReadFromDB).');
       end;
     end;
 
@@ -439,7 +473,7 @@ begin
     ActiveThreads[3]:=False;
     THDMili:=StopWatch.ElapsedMilliseconds;
     THDSec:=THDMili / 1000;
-    LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Thread for selected group "' + MainForm.ArrGroupList[MainForm.GroupListBox.ItemIndex, 1] + '" has been executed within ' +
+    LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Thread for selected group "' + MainForm.FGroupList[MainForm.GroupListBox.ItemIndex, 1] + '" has been executed within ' +
                      FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
   end;
 
@@ -483,7 +517,7 @@ begin
         { ----------------------------------------------------------------------------------------------------------------------- MAKE AGING REPORT TO AN ARRAY }
         AgeView:=TAgeView.Create;
         try
-          AgeView.Make(AgeView.GetCoCode(MainForm.GroupListBox.ItemIndex, 0, 2), OpenItems.OSamt, IDThread);
+//          AgeView.Make(AgeView.GetCoCode(MainForm.GroupListBox.ItemIndex, 0, 2), OpenItems.OSamt, IDThread);
 
         { ---------------------------------------------------------------------------------------------------------------------------------- SAVE OUTPUT TO CSV }
 
@@ -510,7 +544,7 @@ begin
           finally
             SL.Free;
             PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Ready.')));
-            LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Generating age view... done, saved to CSV file ' + MainForm.CSVExport.FileName + '.');
+            LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Generating age view... done, saved to CSV file ' + MainForm.CSVExport.FileName + '.');
           end;
 
         end;
@@ -518,7 +552,7 @@ begin
         { ------------------------------------------------------------------------------------------------------------------------------------------ SQL UPDATE }
         if not (MainForm.cbDump.Checked) then
         begin
-          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Generating age view... done, passing to SQL database...');
+          LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Generating age view... done, passing to SQL database...');
           PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Performing SQL transaction...')));
 
           AgeView.Write('tbl_snapshots', IDThread);
@@ -549,7 +583,7 @@ begin
         on E: Exception do
         begin
           SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PCHAR('Cannot generate age view properly. Please contact IT support.')));
-          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Execution of this tread work has been stopped. Error thrown: ' + E.Message + ' (TDBAge).');
+          LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Execution of this tread work has been stopped. Error thrown: ' + E.Message + ' (TDBAge).');
           PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Ready.')));
         end;
       end;
@@ -558,7 +592,7 @@ begin
       ActiveThreads[4]:=False;
       THDMili:=StopWatch.ElapsedMilliseconds;
       THDSec:=THDMili / 1000;
-      LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Age View thread has been executed within ' +
+      LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Age View thread has been executed within ' +
                        FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
     end;
   end;
@@ -592,15 +626,15 @@ begin
     try
       if Database.Check = 0 then InvoiceTracker.Refresh(MainForm.sgInvoiceTracker, pMode)
         else
-          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Cannot refresh Invoice Tracker list. Database connection has been lost.');
-      LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Refresh Invoice Tracker list with mode = ' + pMode + ' has ended successfully.');
+          LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Cannot refresh Invoice Tracker list. Database connection has been lost.');
+      LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Refresh Invoice Tracker list with mode = ' + pMode + ' has ended successfully.');
 
     except
       on E: Exception do
       begin
         SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PCHAR('Cannot refresh Invoice Tracker''s list. Please contact IT support.')));
         PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Ready.')));
-        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Execution of this tread work has been stopped. Error thrown: ' + E.Message + ' (TInvoiceTracker).');
+        LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Execution of this tread work has been stopped. Error thrown: ' + E.Message + ' (TInvoiceTracker).');
       end;
 
     end;
@@ -754,7 +788,7 @@ begin
       on E: Exception do
       begin
         SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PCHAR('Cannot load open items. Please contact IT support.')));
-        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Execution of this tread work has been stopped. Error thrown: ' + E.Message + ' (TOIThread).');
+        LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Execution of this tread work has been stopped. Error thrown: ' + E.Message + ' (TOIThread).');
       end;
     end;
 
@@ -763,7 +797,7 @@ begin
     PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Ready.')));
     THDMili:=StopWatch.ElapsedMilliseconds;
     THDSec:=THDMili / 1000;
-    LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Open Items loading thread has been executed within ' +
+    LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Open Items loading thread has been executed within ' +
                      FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
   end;
 
@@ -772,13 +806,16 @@ begin
 //  FreeAndNil(AppSettings);
 
   { SEND TO SQL SERVER }
+(*
   if (pMode = '1') and (OpenItems.FileExist) then
   begin
     MainForm.cbDump.Checked:=False;
     TTMakeAgeView.Create(False);
   end;
-
+*)
 end;
+
+{ ########################################################## ! ADRESSBOOK MAILER CLASS ! #################################################################### }
 
 { ---------------------------------------------------------------------------------------------------------------------------------------------- ADDRESS BOOK }
 constructor TTAddressBook.Create(cMode: string; cUser: string);
@@ -790,8 +827,7 @@ end;
 
 procedure TTAddressBook.Execute;  (* ASYNC & SYNC *)
 var
-  AddressBook:  TAddressBook;
-  DataBase: TDataBase;
+  DataBase:    TDataBase;
 begin
   AddressBook:=TAddressBook.Create('|', pUser);
   AddressBook.idThd:=TTAddressBook.CurrentThread.ThreadID;
@@ -822,7 +858,7 @@ begin
         on E: Exception do
         begin
           SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PCHAR('Read/Write function of Address Book failed. Please contact IT support.')));
-          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(AddressBook.idThd) + ']: Execution of this tread work has been stopped. Error thrown: ' + E.Message + ' (TABThread).');
+          LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(AddressBook.idThd) + ']: Execution of this tread work has been stopped. Error thrown: ' + E.Message + ' (TABThread).');
         end;
       end;
 
@@ -844,6 +880,245 @@ begin
   FreeOnTerminate:=True;
   FreeAndNil(DataBase);
 end;
+
+{ ----------------------------------------------------------------------------------------------------------------------------------------------- CONSTRUCTOR }
+constructor TAddressBook.Create(UseDelimiter: string; UserNameDef: string);
+begin
+  (* INITIALIZE WITH GIVEN PARAMETERS *)
+  pDelimiter:=UseDelimiter;
+  pUserName :=UserNameDef;
+  pidThd    :=0;
+end;
+
+{ ------------------------------------------------------------------------------------------------------------------------------------------------------ READ }
+function TAddressBook.Read: boolean;
+var
+  Columns:  string;
+  StrSQL:   string;
+  MSSQL:    TMSSQL;
+begin
+  { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
+  Result:=False;
+  MSSQL:=TMSSQL.Create(MainForm.FDbConnect);
+  { ------------------------------------------------------------------------------------------------------------------------------------------- COLUMNS SETUP }
+  Columns:='USER_ALIAS,'     +
+           'CUID,'           +
+           'CUSTNUMBER,'     +
+           'CUSTNAME,'       +
+           'EMAILS      ,'   +
+           'ESTATEMENTS ,'   +
+           'TELEPHONE   ,'   +
+           'CONTACT     ,'   +
+           'CUSTADDR    '    ;
+  { ----------------------------------------------------------------------------------------------------------------------------------------------- SQL QUERY }
+  if UserName = '' then
+    StrSQL:='SELECT ' + Columns + ' FROM tbl_addressbook ORDER BY ID ASC'
+      else
+        StrSQL:='SELECT ' + Columns + ' FROM tbl_addressbook WHERE USER_ALIAS = ' + QuotedStr(UserName) + ' ORDER BY ID ASC';
+  { ------------------------------------------------------------------------------------------------------------------------------------- EXECUTE SQL COMMAND }
+  try
+    MSSQL.StrSQL:=StrSQL;
+    Result:=MSSQL.SqlToGrid(MainForm.sgAddressBook, MSSQL.ExecSQL, True);
+  finally
+    { -------------------------------------------------------------------------------------------------------------------------- EVENT LOG AND MESSAGE WINDOW }
+    if not (Result) then
+    begin
+      LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(idThd) + ']: Unexpected error. Cannot open Address Book.');
+      SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PChar('Cannot open Address Book for user "' + UserName + '". Please contact IT support.')));
+    end;
+    MSSQL.Free;
+  end;
+end;
+
+{ ----------------------------------------------------------------------------------------------------------------------------------------------------- WRITE }
+function TAddressBook.Write: boolean;
+var
+  Columns:  string;
+  MSSQL:    TMSSQL;
+  iCNT:     integer;
+  Start:    integer;
+  RS:       _Recordset;
+  TheSame:  integer;
+begin
+  { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
+  Result :=False;
+  Start  :=0;
+  TheSame:=0;
+  MSSQL  :=TMSSQL.Create(MainForm.FDbConnect);
+  { ------------------------------------------------------------------------------------------------------------------------------------------------- COLUMNS }
+
+  (* NOTE: COLUMN ORDER MUST BE THE SAME AS IN GIVEN STRING GRID *)
+
+  Columns:='USER_ALIAS,' +
+           'CUID,'       +
+           'CUSTNUMBER,' +
+           'CUSTNAME,'   +
+           'EMAILS,'     +
+           'ESTATEMENTS,'+
+           'TELEPHONE,'  +
+           'CONTACT,'    +
+           'CUSTADDR'    ;
+  { ----------------------------------------------------------------------------------------------------------------- PERFORM INSERT ON NEWLY ADDED ROWS ONLY }
+  for iCNT:=1 to MainForm.sgAddressBook.RowCount - 1 do
+    if MainForm.sgAddressBook.Cells[0, iCNT] = '' then
+    begin
+      Start:=iCNT;
+      Break;
+    end;
+  { -------------------------------------------------------------------------------------------------------------------------- MAKE SURE THAT NEW ROWS EXISTS }
+  if not (Start = 0) then begin
+    { ---------------------------------------------------------------------------------------------------------------------------- CHECK IF CUID ALREADY EXISTS }
+    for iCNT:=Start to MainForm.sgAddressBook.RowCount - 1 do
+    begin
+      MSSQL.StrSQL:='SELECT CUID FROM tbl_AddressBook WHERE CUID = ' + MSSQL.CleanStr(MainForm.sgAddressBook.Cells[2, iCNT], True);
+      RS:=MSSQL.ExecSQL;
+      if RS.RecordCount > 0 then Inc(TheSame);
+    end;
+    { ----------------------------------------------------------------------------------------------------------------------------------- PROCESS BUILT QUERY }
+    if TheSame = 0 then
+    begin
+      try
+        MSSQL.ClearSQL;
+        MSSQL.StrSQL:=MSSQL.GridToSql(MainForm.sgAddressBook, 'tbl_AddressBook', Columns, Start, 1);
+        { RE-DO LIST POSITION }
+        for iCNT:=1 to MainForm.sgAddressBook.RowCount - 1 do MainForm.sgAddressBook.Cells[0, iCNT]:= IntToStr(iCNT);
+        if not (MSSQL.ExecSQL = nil) then Result:=True;
+      finally
+        LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(idThd) + ']: New records have beed successfully added to Address Book.');
+        SendMessage(MainForm.Handle, WM_GETINFO, 1, LPARAM(PChar('New records have beed saved successfully!')));
+        MSSQL.Free;
+      end;
+    end
+      else
+        SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PChar('Cannot add already existing customers.' + #13#10 + 'Please re-check and remove doubles before next attempt.')));
+  end
+    else
+      SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PChar('No new records have beed found. Process has been stopped.')));
+end;
+
+{ ---------------------------------------------------------------------------------------------------------------------------------------------------- IMPORT }
+function TAddressBook.ImportCSV: boolean;
+var
+  iCNT:       integer;
+  jCNT:       integer;
+  Count:      integer;
+  Data:       TStringList;
+  Transit:    TStringList;
+  fPath:      string;
+  IsError:    boolean;
+begin
+  { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
+  Result:=False;
+  IsError:=False;
+  Count:=0;
+  { ----------------------------------------------------------------------------------------------------------------------------- GET THE FILE PATH AND PARSE }
+  if MainForm.CSVImport.Execute = True then
+  begin
+    fPath:=MainForm.CSVImport.FileName;
+    Data:=TStringList.Create;
+    Transit:=TStringList.Create;
+    try
+      { LOAD DATA }
+      Data.LoadFromFile(fPath);
+      { COUNT ALL COLUMNS }
+      for iCNT:=0 to Length(Data[0]) do if copy(Data[0], iCNT, 1) = Delimiter then inc(Count);
+      { COUNT ALL ROWS & SETUP OFFSET }
+      MainForm.sgAddressBook.RowCount:=Data.Count + 1;
+      { SETUP TRANSIT THAT WILL HOLD SPLIT LINE }
+      Transit.StrictDelimiter:=True;
+      Transit.Delimiter:=Delimiter[1];
+      { ITERATE THROUGH ALL ROWS }
+      try
+        for iCNT:= 0 to Data.Count - 1 do
+        begin
+          { SPLIT STRING USING GIVEN DELIMITER }
+          Transit.DelimitedText:=Data[iCNT];
+          for jCNT:=1 to Count do MainForm.sgAddressBook.Cells[jCNT, iCNT + 1]:=Transit[jCNT - 1];
+          MainForm.sgAddressBook.Cells[0, iCNT + 1]:=IntToStr((iCNT + 1));
+          Transit.Clear;
+        end;
+        Result:=True;
+      { ---------------------------------------------------------------------------------------------------------------------------------------- ON EXCEPTION }
+      except
+        on E: Exception do
+        begin
+          LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(idThd) + ']: CSV Import faild: ' + ExtractFileName(fPath));
+          SendMessage(MainForm.Handle, WM_GETINFO, 3, LPARAM(PChar('CSV Import faild. Please check the file and try again.')));
+          IsError:=True;
+        end;
+      end;
+    { ----------------------------------------------------------------------------------------------------------------------------------- RELEASE FROM MEMORY }
+    finally
+      PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Ready.')));
+      if not IsError then
+      begin
+        LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(idThd) + ']: Data has been imported successfully!');
+        SendMessage(MainForm.Handle, WM_GETINFO, 1, LPARAM(PChar('Data has been imported successfully!')));
+      end;
+      Data.Free;
+      Transit.Free;
+    end;
+  end;
+end;
+
+{ ---------------------------------------------------------------------------------------------------------------------------------------------------- EXPORT }
+function TAddressBook.ExportCSV: boolean;
+var
+  iCNT:       integer;
+  jCNT:       integer;
+  fPath:      string;
+  CSVData:    TStringList;
+  MyStr:      string;
+  CleanStr:   string;
+  IsError:    boolean;
+begin
+  { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
+  Result:=False;
+  IsError:=False;
+  CSVData:=TStringList.Create;
+  { ------------------------------------------------------------------------------------------------------------------------------------------ WRITE CSV FILE }
+  try
+    { ADD ROWS AND COLUMNS WITH DELIMITER }
+    for iCNT:=1 to MainForm.sgAddressBook.RowCount - 1 do
+    begin
+      for jCNT:= 1 to MainForm.sgAddressBook.ColCount - 1 do
+      begin
+        CleanStr :=MainForm.sgAddressBook.Cells[jCNT, iCNT];
+        CleanStr :=StringReplace(CleanStr, #13#10, ' ', [rfReplaceAll]);
+        MyStr    :=MyStr + CleanStr + Delimiter;
+      end;
+      CSVData.Add(MyStr);
+      MyStr:='';
+    end;
+    { SAVE TO FILE AS PLAIN TEXT }
+    try
+      if MainForm.CSVExport.Execute = True then CSVData.SaveToFile(MainForm.CSVExport.FileName);
+      Result:=True;
+    { ------------------------------------------------------------------------------------------------------------------------------------------ ON EXCEPTION }
+    except
+      on E: Exception do
+      begin
+        LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(idThd) + ']: Cannot saved file: ' + ExtractFileName(fPath));
+        SendMessage(MainForm.Handle, WM_GETINFO, 3, LPARAM(PChar('Cannot save the file in the given location.')));
+        IsError:=True;
+      end;
+    end;
+  { ------------------------------------------------------------------------------------------------------------------------------------- RELEASE FROM MEMORY }
+  finally
+    if not IsError then
+    begin
+      LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(idThd) + ']: Data has been exported successfully!');
+      SendMessage(MainForm.Handle, WM_GETINFO, 1, LPARAM(PChar('Address Book have been exported successfully!')));
+    end;
+    CSVData.Free;
+  end;
+end;
+
+
+
+
+
+
 
 { ---------------------------------------------------------------------------------------------------------------------------------- EXPORT AGE VIEW TO EXCEL }
 procedure TTExcelExport.Execute;  (* ASYNC *)

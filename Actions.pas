@@ -121,7 +121,7 @@ var
 implementation
 
 uses
-  Model, SQL, Worker, Calendar, Settings, Database, Mailer;
+  Model, SQL, Worker, Calendar, Settings, Database, Mailer, Transactions;
 
 var
   DataHandler: TDataHandler;
@@ -192,7 +192,7 @@ begin
 
   { ------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE SQL }
   Query:=TADOQuery.Create(nil);
-  Query.Connection:=MainForm.ADOConnect;
+  Query.Connection:=MainForm.FDbConnect;
   try
     try
       Query.SQL.Clear;
@@ -352,7 +352,7 @@ begin
   StrSQL:='SELECT DISTINCT CONTACT, ESTATEMENTS, TELEPHONE FROM tbl_addressbook WHERE CUID = ' + QuotedStr(DataHandler.CUID);
   { ------------------------------------------------------------------------------------------------------------------------------------------------- PROCESS }
   Query:=TADOQUery.Create(nil);
-  Query.Connection:=MainForm.ADOConnect;
+  Query.Connection:=MainForm.FDbConnect;
   Query.SQL.Clear;
   Query.SQL.Text:=StrSQL;
   try
@@ -686,7 +686,7 @@ begin
   DataHandler.CustName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('CUSTOMER NAME',   1, 1), MainForm.sgAgeView.Row];
   DataHandler.CustNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('CUSTOMER NUMBER', 1, 1), MainForm.sgAgeView.Row];
   { OPEN ITEMS DATE AND TIME }
-  StatusBar.SimpleText:='Open items date and time: ' + OpenItems.ArrOpenItems[1, 1] + ' @ ' + OpenItems.ArrOpenItems[1, 2] + '.';
+//  StatusBar.SimpleText:='Open items date and time: ' + OpenItems.ArrOpenItems[1, 1] + ' @ ' + OpenItems.ArrOpenItems[1, 2] + '.';
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------------------- ON ACTIVATE }

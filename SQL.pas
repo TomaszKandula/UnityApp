@@ -35,7 +35,7 @@ type
     function    CleanStr(Text: string; Quoted: boolean): string;
     function    ExecSQL: _Recordset;
     function    GridToSql(Grid: TStringGrid; tblName: string; tblColumns: string; sRow: integer; sCol: integer): string;
-    function    ArrayToSql(Table: TStrArray; tblName: string; tblColumns: string): string;
+    function    ArrayToSql(Table: TLists; tblName: string; tblColumns: string): string;
     function    SqlToGrid(var Grid: TStringGrid; RS: _Recordset; AutoNoCol: boolean): boolean;
   end;
 
@@ -114,7 +114,7 @@ end;
 
 (* USING MULTI-DIMENSIONAL ARRAY *)
 
-function TMSSQL.ArrayToSql(Table: TStrArray; tblName: string; tblColumns: string): string;
+function TMSSQL.ArrayToSql(Table: TLists; tblName: string; tblColumns: string): string;
 var
   iCNT   : integer;
   jCNT   : integer;

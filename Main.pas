@@ -22,7 +22,7 @@ uses
 
 { REFERENCE TO M.DIM. ARRAY }
 type
-  TStrArray = array of array of string;
+  TLists = array of array of string;
 
 { 'TSTRINGGRID' REFERENCE FOR DELETE OPTION }
 type
@@ -85,63 +85,8 @@ type
     function  ToExcel(ASheetName, AFileName: string; idThd: integer): Boolean;
     procedure Freeze(PaintWnd: boolean);
   public
-    var SqlColumns : TStrArray;
+    var SqlColumns : TLists;
   end;
-
-
-{ ----------------------------------------------------------- ! ADDRESS BOOK CLASS ! ------------------------------------------------------------------------ }
-type
-  TAddressBook = class //remove!!!
-  {$TYPEINFO ON}
-  private
-    pidThd      : integer;
-    pDelimiter  : string;
-    pUserName   : string;
-  public
-    property    idThd      : integer read pidThd     write pidThd;
-    property    Delimiter  : string  read pDelimiter write pDelimiter;
-    property    UserName   : string  read pUserName  write pUserName;
-  published
-    constructor Create(UseDelimiter: string; UserNameDef: string);
-    function    Read     : boolean; //refactor!!
-    function    Write    : boolean; //refactor!!
-    function    ImportCSV: boolean;
-    function    ExportCSV: boolean;
-  end;
-
-
-
-
-{ ------------------------------------------------------------- ! OPEN ITEMS CLASS ! ------------------------------------------------------------------------ }
-type                                                  (* RUN EITHER IN WORKER OR MAIN THREAD *)
-  TTransactions = class(TObject)
-  {$TYPEINFO ON}
-  public
-    (* VARIABLES UPDATED BY WORKER THREAD AND USED BY MAIN THREAD *)
-    OpenItemsDir  : string;                      { PATH TO OPEN ITEMS DIRECTORY                  }
-    OpenItemsFor  : string;                      { FORMAT OF FILE WITH OPEN ITEMS                }
-    FileExist     : boolean;                     { INDICATE IF SOURCE FILE FOR OPEN ITEMS EXISTS }
-    ArrOpenItems  : array of array of string;    { INFORMATION ON SOURCES OF OPEN ITEMS          }        // to settings?
-    nInvoices     : integer;
-    Overdue       : integer;
-    OSamt         : double;
-    UNamt         : double;
-    OverdueAmt    : double;
-    cDiscountedAmt: double;
-    cDecreaseAmt  : double;
-    cRecoveryAmt  : double;
-    KPI_overdue   : double;
-    KPI_unalloc   : double;
-  published
-    procedure   Load(idThd: integer);            { RUN IN WORKER THREAD ONLY }         //refactor!!
-    function    Scan(mode: integer): boolean;                                          //ok <-- obsolete
-    function    ConvertName(CoNumber: string; Prefix: string; mode: integer): string;  //ok
-    function    ReturnKPI(SG: TStringGrid; StrCoCode: string; mode: integer): double;  //refactor!!
-  end;
-
-
-
-
 
 { ----------------------------------------------------------------- ! MAIN CLASS ! -------------------------------------------------------------------------- }
 type                                                            (* GUI | MAIN THREAD *)
@@ -655,33 +600,28 @@ type                                                            (* GUI | MAIN TH
     procedure Action_SearchBookClick(Sender: TObject);
     procedure Action_OverdueClick(Sender: TObject);
     procedure GroupListBoxDropDown(Sender: TObject);
-  private
-    var LastGroupSelection:  integer;    // CURRENTLY SELECTED GROUP
-    var AllowClose        :  boolean;    // SIGNAL FORCE CLOSE WHEN WINDOWS IS SHUTTING DOWN
-    var StartTime         :  TTime;      // APPLICATION START TIME
-    var pAccessLevel      :  string;     // RO, RW, AD
-    var pAccessMode       :  string;     // TEMPORARILY UNUSED
-  public
-
     { ----------------------------------------------------------------------------------------------------------------------------------------------- HELPERS }
-
-    var CurrentUserName  :  string;
-    var EventLogPath     :  string;
-    var ADOConnect       :  TADOConnection;
-    var ArrGroupList     :  TStrArray;
-
-    property    AccessLevel  : string  read pAccessLevel write pAccessLevel;
-    property    AccessMode   : string  read pAccessMode  write pAccessMode;
-
-    procedure DebugMsg(const Msg: String);
-    function  OleGetStr(RecordsetField: variant): string;
-    function  FindKey(INI: TMemIniFile; OpenedSection: string; KeyPosition: integer): string;
-    function  WndCall(WinForm: TForm; Mode: integer): integer;
-    function  MsgCall(WndType: integer; WndText: string): integer;
-    procedure LockSettingsPanel;
-
+  private
+    var GroupNmSel          :  integer;  // CURRENTLY SELECTED GROUP
+    var AllowClose          :  boolean;  // SIGNAL FORCE CLOSE WHEN WINDOWS IS SHUTTING DOWN
+    var StartTime           :  TTime;    // APPLICATION START TIME
+    var FAccessLevel        :  string;   // RO, RW, AD
+    var FAccessMode         :  string;   // TEMPORARILY UNUSED
+  public
+    var FUserName           :  string;
+    var FEventLogPath       :  string;
+    var FDbConnect          :  TADOConnection;
+    var FGroupList          :  TLists;
+    property   AccessLevel  : string  read FAccessLevel write FAccessLevel;
+    property   AccessMode   : string  read FAccessMode  write FAccessMode;
+    procedure  DebugMsg(const Msg: String);
+    function   OleGetStr(RecordsetField: variant): string;
+    function   FindKey(INI: TMemIniFile; OpenedSection: string; KeyPosition: integer): string;
+    function   WndCall(WinForm: TForm; Mode: integer): integer;
+    function   MsgCall(WndType: integer; WndText: string): integer;
+    procedure  LockSettingsPanel;
   protected
-    procedure WndProc(var msg: Messages.TMessage); override;
+    procedure  WndProc(var msg: Messages.TMessage); override;
   end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------- POINTERS TO DLL IMPORTS }
@@ -710,10 +650,7 @@ procedure MergeSort(grid: TStringgrid; var vals: array of integer; sortcol, data
 
 { ----------------------------------------------------------- ! MAIN FORM REFERENCE ! ----------------------------------------------------------------------- }
 var
-  MainForm        : TMainForm;
-
-//  AgeView         : TAgeView;   //remove from here!
-  OpenItems       : TTransactions; //remove from here!
+  MainForm :  TMainForm;
 
 { ------------------------------------------------------------- ! IMPLEMENTATION ZONE ! --------------------------------------------------------------------- }
 
@@ -860,7 +797,7 @@ begin
 
   if Msg.Msg = WM_QUERYENDSESSION then
   begin
-    LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(Msg.Msg) + ' (WM_QUERYENDSESSION). Windows is going to be shut down. Closing ' + APPNAME + '...');
+    LogText(FEventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(Msg.Msg) + ' (WM_QUERYENDSESSION). Windows is going to be shut down. Closing ' + APPNAME + '...');
     AllowClose:=True;
     Msg.Result:=1;
   end;
@@ -869,7 +806,7 @@ begin
 
   if Msg.Msg = WM_ENDSESSION then
   begin
-    LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(Msg.Msg) + ' (WM_ENDSESSION). Windows is shutting down...');
+    LogText(FEventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(Msg.Msg) + ' (WM_ENDSESSION). Windows is shutting down...');
     AllowClose:=True;
   end;
 
@@ -1385,7 +1322,7 @@ begin
           'ON '                                     +
           '  tbl_snapshots.cuid = tbl_daily.cuid '  +
           'WHERE '                                  +
-            'tbl_snapshots.GROUP_ID = '             + QuotedStr(MainForm.ArrGroupList[MainForm.GroupListBox.ItemIndex, 0]) + ' ' +
+            'tbl_snapshots.GROUP_ID = '             + QuotedStr(MainForm.FGroupList[MainForm.GroupListBox.ItemIndex, 0]) + ' ' +
             'AND tbl_snapshots.AGE_DATE =  '        + QuotedStr(MainForm.GroupListDates.Text) + ' ' +
           'ORDER BY '                               +
             'tbl_snapshots.RISK_CLASS ASC, '        +
@@ -1394,7 +1331,7 @@ begin
             'tbl_general.FOLLOWUP ASC;'             ;
 
   FreeAndNil(DataBase);
-  MSSQL:=TMSSQL.Create(MainForm.ADOConnect);
+  MSSQL:=TMSSQL.Create(MainForm.FDbConnect);
   try
     MSSQL.StrSQL:=StrSQL;
     MSSQL.SqlToGrid(Self, MSSQL.ExecSQL, False);
@@ -1433,7 +1370,7 @@ begin
         { ------------------------------------------------------------------------------------------------------------------------------- SUCCESSFULL MESSAGE }
         if Result then
         begin
-          LogText(MainForm.EventLogPath, 'Thread: [' + IntToStr(idThd) + ']: The data has been successfully transferred to Excel.');
+          LogText(MainForm.FEventLogPath, 'Thread: [' + IntToStr(idThd) + ']: The data has been successfully transferred to Excel.');
           SendMessage(MainForm.Handle, WM_GETINFO, 1, LPARAM(PCHAR('The data has been successfully transferred to Excel.')));
         end;
       end;
@@ -1445,12 +1382,12 @@ begin
         if E.Message = xlWARN_MESSAGE then
         { EXCEL NOT FOUND }
         begin
-          LogText(MainForm.EventLogPath, 'Thread: [' + IntToStr(idThd) + ']: The data cannot be exported because Excel cannot be found.');
+          LogText(MainForm.FEventLogPath, 'Thread: [' + IntToStr(idThd) + ']: The data cannot be exported because Excel cannot be found.');
           SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PCHAR('The data cannot be exported because Excel cannot be found.')));
         end else
         { GENERIC MESSAGE }
         begin
-          LogText(MainForm.EventLogPath, 'Thread: [' + IntToStr(idThd) + ']: The data cannot be exported, error message thrown: ' + E.Message + '.');
+          LogText(MainForm.FEventLogPath, 'Thread: [' + IntToStr(idThd) + ']: The data cannot be exported, error message thrown: ' + E.Message + '.');
           SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PCHAR('The data cannot be exported. Please contact IT support.')));
         end;
       end;
@@ -1473,738 +1410,7 @@ begin
   end;
 end;
 
-{ ########################################################## ! ADRESSBOOK MAILER CLASS ! #################################################################### }
-
-                                                                      //refactor!!!
-
-{ ----------------------------------------------------------------------------------------------------------------------------------------------- CONSTRUCTOR }
-constructor TAddressBook.Create(UseDelimiter: string; UserNameDef: string);
-begin
-  (* INITIALIZE WITH GIVEN PARAMETERS *)
-  pDelimiter:=UseDelimiter;
-  pUserName :=UserNameDef;
-  pidThd    :=0;
-end;
-
-{ ------------------------------------------------------------------------------------------------------------------------------------------------------ READ }
-function TAddressBook.Read: boolean;
-var
-  Columns:  string;
-  StrSQL:   string;
-  MSSQL:    TMSSQL;
-begin
-  { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-  Result:=False;
-  MSSQL:=TMSSQL.Create(MainForm.ADOConnect);
-  { ------------------------------------------------------------------------------------------------------------------------------------------- COLUMNS SETUP }
-  Columns:='USER_ALIAS,'     +
-           'CUID,'           +
-           'CUSTNUMBER,'     +
-           'CUSTNAME,'       +
-           'EMAILS      ,'   +
-           'ESTATEMENTS ,'   +
-           'TELEPHONE   ,'   +
-           'CONTACT     ,'   +
-           'CUSTADDR    '    ;
-  { ----------------------------------------------------------------------------------------------------------------------------------------------- SQL QUERY }
-  if UserName = '' then
-    StrSQL:='SELECT ' + Columns + ' FROM tbl_addressbook ORDER BY ID ASC'
-      else
-        StrSQL:='SELECT ' + Columns + ' FROM tbl_addressbook WHERE USER_ALIAS = ' + QuotedStr(UserName) + ' ORDER BY ID ASC';
-  { ------------------------------------------------------------------------------------------------------------------------------------- EXECUTE SQL COMMAND }
-  try
-    MSSQL.StrSQL:=StrSQL;
-    Result:=MSSQL.SqlToGrid(MainForm.sgAddressBook, MSSQL.ExecSQL, True);
-  finally
-    { -------------------------------------------------------------------------------------------------------------------------- EVENT LOG AND MESSAGE WINDOW }
-    if not (Result) then
-    begin
-      LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Unexpected error. Cannot open Address Book.');
-      SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PChar('Cannot open Address Book for user "' + UserName + '". Please contact IT support.')));
-    end;
-    MSSQL.Free;
-  end;
-end;
-
-{ ----------------------------------------------------------------------------------------------------------------------------------------------------- WRITE }
-function TAddressBook.Write: boolean;
-var
-  Columns:  string;
-  MSSQL:    TMSSQL;
-  iCNT:     integer;
-  Start:    integer;
-  RS:       _Recordset;
-  TheSame:  integer;
-begin
-  { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-  Result :=False;
-  Start  :=0;
-  TheSame:=0;
-  MSSQL  :=TMSSQL.Create(MainForm.ADOConnect);
-  { ------------------------------------------------------------------------------------------------------------------------------------------------- COLUMNS }
-
-  (* NOTE: COLUMN ORDER MUST BE THE SAME AS IN GIVEN STRING GRID *)
-
-  Columns:='USER_ALIAS,' +
-           'CUID,'       +
-           'CUSTNUMBER,' +
-           'CUSTNAME,'   +
-           'EMAILS,'     +
-           'ESTATEMENTS,'+
-           'TELEPHONE,'  +
-           'CONTACT,'    +
-           'CUSTADDR'    ;
-  { ----------------------------------------------------------------------------------------------------------------- PERFORM INSERT ON NEWLY ADDED ROWS ONLY }
-  for iCNT:=1 to MainForm.sgAddressBook.RowCount - 1 do
-    if MainForm.sgAddressBook.Cells[0, iCNT] = '' then
-    begin
-      Start:=iCNT;
-      Break;
-    end;
-  { -------------------------------------------------------------------------------------------------------------------------- MAKE SURE THAT NEW ROWS EXISTS }
-  if not (Start = 0) then begin
-    { ---------------------------------------------------------------------------------------------------------------------------- CHECK IF CUID ALREADY EXISTS }
-    for iCNT:=Start to MainForm.sgAddressBook.RowCount - 1 do
-    begin
-      MSSQL.StrSQL:='SELECT CUID FROM tbl_AddressBook WHERE CUID = ' + MSSQL.CleanStr(MainForm.sgAddressBook.Cells[2, iCNT], True);
-      RS:=MSSQL.ExecSQL;
-      if RS.RecordCount > 0 then Inc(TheSame);
-    end;
-    { ----------------------------------------------------------------------------------------------------------------------------------- PROCESS BUILT QUERY }
-    if TheSame = 0 then
-    begin
-      try
-        MSSQL.ClearSQL;
-        MSSQL.StrSQL:=MSSQL.GridToSql(MainForm.sgAddressBook, 'tbl_AddressBook', Columns, Start, 1);
-        { RE-DO LIST POSITION }
-        for iCNT:=1 to MainForm.sgAddressBook.RowCount - 1 do MainForm.sgAddressBook.Cells[0, iCNT]:= IntToStr(iCNT);
-        if not (MSSQL.ExecSQL = nil) then Result:=True;
-      finally
-        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: New records have beed successfully added to Address Book.');
-        SendMessage(MainForm.Handle, WM_GETINFO, 1, LPARAM(PChar('New records have beed saved successfully!')));
-        MSSQL.Free;
-      end;
-    end
-      else
-        SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PChar('Cannot add already existing customers.' + #13#10 + 'Please re-check and remove doubles before next attempt.')));
-  end
-    else
-      SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PChar('No new records have beed found. Process has been stopped.')));
-end;
-
-{ ---------------------------------------------------------------------------------------------------------------------------------------------------- IMPORT }
-function TAddressBook.ImportCSV: boolean;
-var
-  iCNT:       integer;
-  jCNT:       integer;
-  Count:      integer;
-  Data:       TStringList;
-  Transit:    TStringList;
-  fPath:      string;
-  IsError:    boolean;
-begin
-  { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-  Result:=False;
-  IsError:=False;
-  Count:=0;
-  { ----------------------------------------------------------------------------------------------------------------------------- GET THE FILE PATH AND PARSE }
-  if MainForm.CSVImport.Execute = True then
-  begin
-    fPath:=MainForm.CSVImport.FileName;
-    Data:=TStringList.Create;
-    Transit:=TStringList.Create;
-    try
-      { LOAD DATA }
-      Data.LoadFromFile(fPath);
-      { COUNT ALL COLUMNS }
-      for iCNT:=0 to Length(Data[0]) do if copy(Data[0], iCNT, 1) = Delimiter then inc(Count);
-      { COUNT ALL ROWS & SETUP OFFSET }
-      MainForm.sgAddressBook.RowCount:=Data.Count + 1;
-      { SETUP TRANSIT THAT WILL HOLD SPLIT LINE }
-      Transit.StrictDelimiter:=True;
-      Transit.Delimiter:=Delimiter[1];
-      { ITERATE THROUGH ALL ROWS }
-      try
-        for iCNT:= 0 to Data.Count - 1 do
-        begin
-          { SPLIT STRING USING GIVEN DELIMITER }
-          Transit.DelimitedText:=Data[iCNT];
-          for jCNT:=1 to Count do MainForm.sgAddressBook.Cells[jCNT, iCNT + 1]:=Transit[jCNT - 1];
-          MainForm.sgAddressBook.Cells[0, iCNT + 1]:=IntToStr((iCNT + 1));
-          Transit.Clear;
-        end;
-        Result:=True;
-      { ---------------------------------------------------------------------------------------------------------------------------------------- ON EXCEPTION }
-      except
-        on E: Exception do
-        begin
-          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: CSV Import faild: ' + ExtractFileName(fPath));
-          SendMessage(MainForm.Handle, WM_GETINFO, 3, LPARAM(PChar('CSV Import faild. Please check the file and try again.')));
-          IsError:=True;
-        end;
-      end;
-    { ----------------------------------------------------------------------------------------------------------------------------------- RELEASE FROM MEMORY }
-    finally
-      PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Ready.')));
-      if not IsError then
-      begin
-        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Data has been imported successfully!');
-        SendMessage(MainForm.Handle, WM_GETINFO, 1, LPARAM(PChar('Data has been imported successfully!')));
-      end;
-      Data.Free;
-      Transit.Free;
-    end;
-  end;
-end;
-
-{ ---------------------------------------------------------------------------------------------------------------------------------------------------- EXPORT }
-function TAddressBook.ExportCSV: boolean;
-var
-  iCNT:       integer;
-  jCNT:       integer;
-  fPath:      string;
-  CSVData:    TStringList;
-  MyStr:      string;
-  CleanStr:   string;
-  IsError:    boolean;
-begin
-  { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-  Result:=False;
-  IsError:=False;
-  CSVData:=TStringList.Create;
-  { ------------------------------------------------------------------------------------------------------------------------------------------ WRITE CSV FILE }
-  try
-    { ADD ROWS AND COLUMNS WITH DELIMITER }
-    for iCNT:=1 to MainForm.sgAddressBook.RowCount - 1 do
-    begin
-      for jCNT:= 1 to MainForm.sgAddressBook.ColCount - 1 do
-      begin
-        CleanStr :=MainForm.sgAddressBook.Cells[jCNT, iCNT];
-        CleanStr :=StringReplace(CleanStr, #13#10, ' ', [rfReplaceAll]);
-        MyStr    :=MyStr + CleanStr + Delimiter;
-      end;
-      CSVData.Add(MyStr);
-      MyStr:='';
-    end;
-    { SAVE TO FILE AS PLAIN TEXT }
-    try
-      if MainForm.CSVExport.Execute = True then CSVData.SaveToFile(MainForm.CSVExport.FileName);
-      Result:=True;
-    { ------------------------------------------------------------------------------------------------------------------------------------------ ON EXCEPTION }
-    except
-      on E: Exception do
-      begin
-        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Cannot saved file: ' + ExtractFileName(fPath));
-        SendMessage(MainForm.Handle, WM_GETINFO, 3, LPARAM(PChar('Cannot save the file in the given location.')));
-        IsError:=True;
-      end;
-    end;
-  { ------------------------------------------------------------------------------------------------------------------------------------- RELEASE FROM MEMORY }
-  finally
-    if not IsError then
-    begin
-      LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Data has been exported successfully!');
-      SendMessage(MainForm.Handle, WM_GETINFO, 1, LPARAM(PChar('Address Book have been exported successfully!')));
-    end;
-    CSVData.Free;
-  end;
-end;
-
-{ ############################################################## ! OPEN ITEMS CLASS ! ####################################################################### }
-
-                                                                      //refactor!!!
-
-{ ------------------------------------------------------------------------------------------------------------------------------------------- OPEN ITEMS LOAD }
-procedure TTransactions.Load(idThd: integer);  (* ASYNC & SYNC *)
-
-var
-  { SETTINGS ACCESSIBLE FOR INNER AND MAIN BLOCK }
-  AppSettings:  TSettings;
-
-{ --------------------------------------------------------------- ! INNER METHODS ! ------------------------------------------------------------------------- }
-
-{ --------------------------------------------------------------- ! CONVERT DATE ! -------------------------------------------------------------------------- }
-function ConvDate(sDate: string): string;
-{ INPUT FORMAT:  YYYYMMDD   }
-{ OUTPUT FORMAT: YYYY-MM-DD }
-begin
-  Result:=LeftStr(sDate, 4) + '-' + MidStr(sDate, 5, 2) + '-' + RightStr(sDate, 2);
-end;
-
-{ -------------------------------------------------------------- ! CONVERT FLOAT ! -------------------------------------------------------------------------- }
-function IsNumeric(str, mode: string): boolean;
-begin
-  try
-    if mode = UpperCase('float')   then StrToFloat(str);
-    if mode = UpperCase('integer') then StrToInt(str);
-    Result:=True;
-  except
-    Result:=False;
-  end;
-end;
-
-{ -------------------------------------------------------------- ! DAY CALCULATIONS ! ----------------------------------------------------------------------- }
-function HowManyDays(refDate1, refDate2: string): string;
-var
-  diff: extended;
-begin
-  try
-    diff:=StrToDateTime(refDate1) - StrToDateTime(refDate2);
-    Result:=IntToStr(Round(diff));
-  except
-    Result:='N/A';
-  end;
-end;
-
-{ ----------------------------------------------------------- ! LOOK FOR VOUCHER TYPE ! --------------------------------------------------------------------- }
-function IsVoType(VoType: string): boolean;
-var
-  tsVAL:     TStringList;
-  AppSettings: TSettings;
-  iCNT:      integer;
-begin
-  Result:=False;
-  tsVAL:=TStringList.Create;
-  AppSettings:=TSettings.Create;
-  try
-    AppSettings.TMIG.ReadSectionValues(InvoiceTypes, tsVAL);
-    for iCNT:=0 to tsVAL.Count - 1 do
-      if VoType = MidStr(tsVAL.Strings[iCNT], AnsiPos('=', tsVAL.Strings[iCNT]) + 1, 255) then
-      begin
-        Result:=True;
-        break;
-      end;
-  finally
-    AppSettings.Free;
-    tsVAL.Free;
-  end;
-end;
-
-{ ------------------------------------------------------------- ! LOAD DATA FROM DB ! ----------------------------------------------------------------------- }
-function LoadFromDB(COC: string; OffSet: integer; CoPos: integer): integer;
-var
-  { COUNTERS }
-  iCNT:             integer;
-  jCNT:             integer;
-  Count:            integer;
-  Inner:            integer;
-  { CSV DATA AND DELIMITER }
-  Delimiter:        Char;
-  Data:             TStringList;
-  Transit:          TStringList;
-  { FILE }
-  fSource, fPath:   string;
-  { AGENT COLUMN NUMBER }
-  AgentCol:         integer;
-  { CUT-OFF }
-  NrCutOffPos:      integer;             { WHAT COLUMN HOLDS THE VALUE TO BE CHECKED }
-  NrCutOffNum:      integer;             { NUMERIC CONDITION                         }
-  TxCutOffPos:      integer;             { WHAT COLUMN HOLDS THE VALUE TO BE CHECKED }
-  TxCutOffTxt:      string;              { TEXT CONDITION                            }
-begin
-  { ----------------------------------------------------------------------------------------------------------------------------------------------- INITIAIZE }
-  Result:=0;
-  Count :=0;
-  Inner :=1;
-  OpenItems.FileExist:=True;
-  { ------------------------------------------------------------------------------------------------------------- CHECK IF GIVEN COMPANY HAVE AGENT ON OR OFF }
-  AgentCol:=-100;
-  if (CoPos = 1) and (MainForm.AGT1.Text = 'OFF') then AgentCol:=AppSettings.TMIG.ReadInteger(OpenItemsData, 'AGENTCOLUMN', 0);
-  if (CoPos = 2) and (MainForm.AGT2.Text = 'OFF') then AgentCol:=AppSettings.TMIG.ReadInteger(OpenItemsData, 'AGENTCOLUMN', 0);
-  if (CoPos = 3) and (MainForm.AGT3.Text = 'OFF') then AgentCol:=AppSettings.TMIG.ReadInteger(OpenItemsData, 'AGENTCOLUMN', 0);
-  if (CoPos = 4) and (MainForm.AGT4.Text = 'OFF') then AgentCol:=AppSettings.TMIG.ReadInteger(OpenItemsData, 'AGENTCOLUMN', 0);
-  { ----------------------------------------------------------------------------------------------------------------------------- FILE PATH FOR GIVEN CO CODE }
-  fSource:=OpenItems.ConvertName(COC, '', 0);
-  fPath:=OpenItems.OpenItemsDir + OpenItems.OpenItemsFor;
-  fPath:=StringReplace(fPath, '{NUM}', fSource, [rfReplaceAll]);
-  { ----------------------------------------------------------------------------------------------------------------------------- CHECK IF SOURCE FILE EXISTS }
-  if FileExists(fPath) = False then
-  begin
-    LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Cannot find ' + fSource + ' in database. Process halted automatically.');
-    SendMessage(MainForm.Handle, WM_GETINFO, 1, LPARAM(PChar('Cannot find ' + fSource + ' in database. Process halted automatically.')));
-    OpenItems.FileExist:=False;
-  end else
-  begin
-    { -------------------------------------------------------------------------------------------------------------- PROCESS THE SOURCE FILE | PARSE CSV DATA }
-    LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Downloading company number ' + COC + '...');
-    Data   :=TStringList.Create;
-    Transit:=TStringList.Create;
-    try
-      { LOAD DATA }
-      Data.LoadFromFile(fPath);
-      { SETUP DELIMITER }
-      Delimiter:=AppSettings.TMIG.ReadString(OpenItemsData, 'DELIMITER', ';')[1];
-      { COUNT ALL COLUMNS }
-      for iCNT:=0 to Length(Data[0]) do if copy(Data[0], iCNT, 1) = delimiter then inc(Count);
-      Count:=Count + 1;
-      { COUNT ALL ROWS & SETUP OFFSET }
-      MainForm.sgOpenItems.RowCount:=Data.Count + OffSet;
-      { SETUP TRANSIT THAT WILL HOLD SPLIT LINE }
-      Transit.StrictDelimiter:=True;
-      Transit.Delimiter:=Delimiter;
-      { ASSIGN CONDITIONS }
-      NrCutOffPos:=AppSettings.TMIG.ReadInteger(OpenItemsData, 'NRCUTOFFPOS', 0);
-      NrCutOffNum:=AppSettings.TMIG.ReadInteger(OpenItemsData, 'NRCUTOFFNUM', 0);
-      TxCutOffPos:=AppSettings.TMIG.ReadInteger(OpenItemsData, 'TXCUTOFFPOS', 0);
-      TxCutOffTxt:=AppSettings.TMIG.ReadString(OpenItemsData,  'TXCUTOFFTXT', '');
-      { ITERATE VIA ALL ROWS }
-      for iCNT:= 1 to Data.Count - 1 do
-      begin
-        try
-          { SPLIT STRING USING GIVEN DELIMITER }
-          Transit.DelimitedText:=Data[iCNT];
-
-          { CHECK IF THERE IS INVALID DUE DATE VALUE, IF SO PUT DEFAULT DATE 1901-01-01 }
-          if Transit[11]='0' then Transit[11]:='19010101';
-
-          { CONVERT DECIMAL SEPARATOR | COMMA TO POINT }
-          if (AppSettings.TMIG.ReadString(OpenItemsData, 'DECIMAL_SEPARATOR', ',') = ',') and (FormatSettings.DecimalSeparator = '.') then
-          begin
-            Transit[4] :=StringReplace(Transit[4],  ',', '.', [rfReplaceAll]);
-            Transit[5] :=StringReplace(Transit[5],  ',', '.', [rfReplaceAll]);
-            Transit[8] :=StringReplace(Transit[8],  ',', '.', [rfReplaceAll]);
-            Transit[9] :=StringReplace(Transit[9],  ',', '.', [rfReplaceAll]);
-            Transit[14]:=StringReplace(Transit[14], ',', '.', [rfReplaceAll]);
-          end;
-
-          { CONVERT DECIMAL SEPARATOR | POINT TO COMMA }
-          if (AppSettings.TMIG.ReadString(OpenItemsData, 'DECIMAL_SEPARATOR', ',') = '.') and (FormatSettings.DecimalSeparator = ',') then
-          begin
-            Transit[4] :=StringReplace(Transit[4],  '.', ',', [rfReplaceAll]);
-            Transit[5] :=StringReplace(Transit[5],  '.', ',', [rfReplaceAll]);
-            Transit[8] :=StringReplace(Transit[8],  '.', ',', [rfReplaceAll]);
-            Transit[9] :=StringReplace(Transit[9],  '.', ',', [rfReplaceAll]);
-            Transit[14]:=StringReplace(Transit[14], '.', ',', [rfReplaceAll]);
-          end;
-
-          { ALLOW ONLY ROW THAT MEET THE REQUIREMENTS FOUND IN COLUMN INICATED BY CUTOFFPOS }
-          { WE HAVE TWO BUILT-IN CONDITIONS:                   }
-          {   1. NRCUTOFF - NUMERIC CONDITION 'LESS OR EQUAL'  }
-          {   2. TXCUTOFF - TEXT CONDITION    'DIFFERENT THAN' }
-          if (StrToInt(Transit[NrCutOffPos - 1]) <= NrCutOffNum) and (UpperCase(Transit[TxCutOffPos - 1]) <> UpperCase(TxCutOffTxt)) then
-          begin
-            { PUT EACH COLUMN INTO STRING GRID FOR GIVEN ROW }
-            for jCNT:=1 to Count do
-            begin
-              { MAKE AGENT COLUMN EMPTY IF 'AGENTCOL' IS POSITIVE }
-              if AgentCol < 0 then MainForm.sgOpenItems.Cells[jCNT, Inner + OffSet]:=Transit[jCNT - 1];
-              if AgentCol > 0 then
-              begin
-                if jCNT <> AgentCol then MainForm.sgOpenItems.Cells[jCNT, Inner + OffSet]:=Transit[jCNT - 1];
-                if jCNT = AgentCol  then MainForm.sgOpenItems.Cells[jCNT, Inner + OffSet]:='';
-              end;
-            end;
-
-            { UID COLUMN CONTAINS WITH 'CUSTOMER NUMBER' AND 'CO CODE' AND 'AGENT NUMBER'             }
-            { THIS WILL EVENTUALLY LEAD TO LARGE NUMBER, EXTENDED TYPE SHOULD BE USED FOR THIS COLUMN }
-            { IT ALLOWS TO HAVE ABSOLUTE UNIQUE NUMBER FOR GIVEN SNAPSHOT DAY                         }
-            MainForm.sgOpenItems.Cells[38, Inner + OffSet]:=MainForm.sgOpenItems.Cells[2, Inner + OffSet] +
-                                                 MidStr(MainForm.sgOpenItems.Cells[1, Inner + OffSet], 2, 5) +
-                                                 (IntToStr(StrToIntDef(MainForm.sgOpenItems.Cells[19, Inner + OffSet], 0)));
-            { MOVE ON }
-            inc(Inner);
-            { CLEAR IT }
-            Transit.Clear;
-          end;
-        { THERE MAY BE A SITUATION WHEN CSV DATA IS BROKEN AND HAVE INCORRECT NUMBER OF DELIMITER IN SINGLE ROW }
-        Except
-          on E: Exception do
-          begin
-            { LOG ERROR AND THROW MESSAGE ON MAIN TAB }
-            LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: The source file: ' + ExtractFileName(fPath) + ' (line number: ' + IntToStr(iCNT) + ') is broken.');
-          end;
-        end;
-      end;
-    finally
-      LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Downloading company number ' + COC + '..., ' + IntToStr((Data.Count - 1)) + ' row(s) has been processed.');
-      LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Downloading company number ' + COC + '..., ' + IntToStr((Inner - 1)) + ' row(s) has been affected.');
-      Result:=Inner;
-      MainForm.sgOpenItems.RowCount:=Inner + OffSet;
-      Data.Free;
-      Transit.Free;
-    end;
-  end;
-end;
-
-{ ---------------------------------------------------------------- ! MAIN BLOCK ! --------------------------------------------------------------------------- }
-var
-  { COUNTERS }
-  iCNT:             integer;
-  TotalRows:        integer;
-  { TIME DIFFERENCE }
-  TimeDiff:         integer;
-  { REFLECTS TIME VALUE OF MONEY: DISCOUNTED AMOUNT, DECREASE IN AMOUNT AND RECOVERY AMOUNT }
-  DiscountedAmt:    double;
-  DecreaseAmt:      double;
-  RecoveryAmt:      double;
-  { INTEREST RATE FOR GIVEN COMPANY CODE }
-  InterestRate:     double;
-  { AMOUNT OF OUTSTANDING INVOICES ONLY }
-  InvoiceAmt:       double;
-begin
-
-  { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-
-  AppSettings.Create;
-
-
-
-  (* RESET VARIABLES *)
-
-  OpenItems.nInvoices     :=0;
-  OpenItems.Overdue       :=0;
-  OpenItems.OverdueAmt    :=0;
-  OpenItems.OSamt         :=0;
-  OpenItems.UNamt         :=0;
-  OpenItems.cDiscountedAmt:=0;
-  OpenItems.cDecreaseAmt  :=0;
-  OpenItems.cRecoveryAmt  :=0;
-  OpenItems.KPI_overdue   :=0;
-  OpenItems.KPI_unalloc   :=0;
-  InterestRate            :=0;
-  TotalRows               :=0;
-  { ----------------------------------------------------------------------------------------------- STOP IF THERE IS NO COMPANIES SELECTED, OTHERWISE EXECUTE }
-  if StrToInt(MainForm.COC1.Text) + StrToInt(MainForm.COC2.Text) + StrToInt(MainForm.COC3.Text) + StrToInt(MainForm.COC4.Text)  <= 0 then
-  begin
-    LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Incorrect companies combination.');
-    LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Downloading halted automatically.');
-    SendMessage(MainForm.Handle, WM_GETINFO, 1, LPARAM(PChar('Incorrect companies combination. Downloading halted automatically.')));
-  end else
-  begin
-
-    { -------------------------------------------------- ! SETTING-UP AND LOADING OPEN ITEMS ! -------------------------------------------------------------- }
-                                                                    { MAIN BLOCK }
-
-    { ----------------------------------------------------------------------------------------------------------------------------------------- CHANGE STATUS }
-    PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Downloading Open Items...')));
-    { ------------------------------------------------------------------------------------------------------------------------------ DO NOT DRAW 'STRINGGRID' }
-    MainForm.sgOpenItems.Freeze(True);
-    { ------------------------------------------------------------------------------------------------- LOAD ALL OPEN ITEMS INTO 'STRINGGRID'AND SORT VIA UID }
-    if MainForm.COC1.Text > '0' then TotalRows:=LoadFromDB(MainForm.COC1.Text, 0, 1);
-    if MainForm.COC2.Text > '0' then TotalRows:=TotalRows + LoadFromDB(MainForm.COC2.Text, MainForm.sgOpenItems.RowCount - 1, 2);
-    if MainForm.COC3.Text > '0' then TotalRows:=TotalRows + LoadFromDB(MainForm.COC3.Text, MainForm.sgOpenItems.RowCount - 1, 3);
-    if MainForm.COC4.Text > '0' then TotalRows:=TotalRows + LoadFromDB(MainForm.COC4.Text, MainForm.sgOpenItems.RowCount - 1, 4);
-    { --------------------------------------------------------------------------------------------------------------------------- PROCEED IF OPEN ITEMS EXIST }
-    if OpenItems.FileExist then
-    begin
-      { --------------------------------------------------------------------------------------------------------------------------------------------- SORT IT }
-      MainForm.sgOpenItems.MSort(AppSettings.TMIG.ReadInteger(OpenItemsData, 'SORTPOS', 0), 2, True);
-
-      { ---------------------------------------------------------------------------------------------------------------------------------------------- LOG IT }
-      LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Open Items sorted by ''UID'' column (ascending).');
-      LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Open Items downloaded. ' + IntToStr(TotalRows) + ' row(s) have been affected in total.');
-
-      { -------------------------------------------- ! LP, MAPPING, FORMATTING AND RE-CALCULATIONS ! -------------------------------------------------------- }
-                                                            { MAIN LOOP THROUGH 'STRINGGRID' }
-
-      for iCNT:=1 to MainForm.sgOpenItems.RowCount - 1 do
-      begin
-
-        { ------------------------------------------------------------------------------------------------------------------------------------------------ LP }
-        MainForm.sgOpenItems.Cells[0, iCNT]:=IntToStr(iCNT);
-
-        { --------------------------------------------------------------------------------------------- CHECK SEPARATOR AND ADD ZERO BEFORE DECIMAL SEPARATOR }
-        { POSITIVE VALUES }
-        if (LeftStr(MainForm.sgOpenItems.Cells[5,  iCNT], 1) = ',') or (LeftStr(MainForm.sgOpenItems.Cells[5,  iCNT], 1) = '.') then MainForm.sgOpenItems.Cells[5,  iCNT]:= '0' + MainForm.sgOpenItems.Cells[5,  iCNT];
-        if (LeftStr(MainForm.sgOpenItems.Cells[6,  iCNT], 1) = ',') or (LeftStr(MainForm.sgOpenItems.Cells[6,  iCNT], 1) = '.') then MainForm.sgOpenItems.Cells[6,  iCNT]:= '0' + MainForm.sgOpenItems.Cells[6,  iCNT];
-        if (LeftStr(MainForm.sgOpenItems.Cells[9,  iCNT], 1) = ',') or (LeftStr(MainForm.sgOpenItems.Cells[9,  iCNT], 1) = '.') then MainForm.sgOpenItems.Cells[9,  iCNT]:= '0' + MainForm.sgOpenItems.Cells[9,  iCNT];
-        if (LeftStr(MainForm.sgOpenItems.Cells[10, iCNT], 1) = ',') or (LeftStr(MainForm.sgOpenItems.Cells[10, iCNT], 1) = '.') then MainForm.sgOpenItems.Cells[10, iCNT]:= '0' + MainForm.sgOpenItems.Cells[10, iCNT];
-        if (LeftStr(MainForm.sgOpenItems.Cells[15, iCNT], 1) = ',') or (LeftStr(MainForm.sgOpenItems.Cells[15, iCNT], 1) = '.') then MainForm.sgOpenItems.Cells[15, iCNT]:= '0' + MainForm.sgOpenItems.Cells[15, iCNT];
-
-        { NEGATIVE VALUES }
-        if (LeftStr(MainForm.sgOpenItems.Cells[5,  iCNT], 1) = '-,') or (LeftStr(MainForm.sgOpenItems.Cells[5,  iCNT], 1) = '-.') then MainForm.sgOpenItems.Cells[5,  iCNT]:= '-0' + MainForm.sgOpenItems.Cells[5,  iCNT];
-        if (LeftStr(MainForm.sgOpenItems.Cells[6,  iCNT], 1) = '-,') or (LeftStr(MainForm.sgOpenItems.Cells[6,  iCNT], 1) = '-.') then MainForm.sgOpenItems.Cells[6,  iCNT]:= '-0' + MainForm.sgOpenItems.Cells[6,  iCNT];
-        if (LeftStr(MainForm.sgOpenItems.Cells[9,  iCNT], 1) = '-,') or (LeftStr(MainForm.sgOpenItems.Cells[9,  iCNT], 1) = '-.') then MainForm.sgOpenItems.Cells[9,  iCNT]:= '-0' + MainForm.sgOpenItems.Cells[9,  iCNT];
-        if (LeftStr(MainForm.sgOpenItems.Cells[10, iCNT], 1) = '-,') or (LeftStr(MainForm.sgOpenItems.Cells[10, iCNT], 1) = '-.') then MainForm.sgOpenItems.Cells[10, iCNT]:= '-0' + MainForm.sgOpenItems.Cells[10, iCNT];
-        if (LeftStr(MainForm.sgOpenItems.Cells[15, iCNT], 1) = '-,') or (LeftStr(MainForm.sgOpenItems.Cells[15, iCNT], 1) = '-.') then MainForm.sgOpenItems.Cells[15, iCNT]:= '-0' + MainForm.sgOpenItems.Cells[15, iCNT];
-
-        { ----------------------------------------------------------------------------------------------------------- DATE FORMAT FROM YYYYMMDD TO YYYY-MM-DD }
-        MainForm.sgOpenItems.Cells[4,  iCNT]:=ConvDate(MainForm.sgOpenItems.Cells[4,  iCNT]);
-        MainForm.sgOpenItems.Cells[12, iCNT]:=ConvDate(MainForm.sgOpenItems.Cells[12, iCNT]);
-        MainForm.sgOpenItems.Cells[27, iCNT]:=ConvDate(MainForm.sgOpenItems.Cells[27, iCNT]);
-
-        { ----------------------------------------------------------------------------------------------------------------------- PAYMENT STATUS CALCULATIONS }
-        MainForm.sgOpenItems.Cells[34, iCNT]:=HowManyDays(MainForm.sgOpenItems.Cells[12, iCNT], DateTimeToStr(Now));
-        TimeDiff:=StrToInt(HowManyDays(MainForm.sgOpenItems.Cells[12, iCNT], DateTimeToStr(Now)));
-
-        { ------------------------------------------------------------------------ RE-CALCULATIONS FOR: DISCOUNTED AMOUNT, DECREASE IN AMOUNT, RECOVERY VALUE }
-        InvoiceAmt:=StrToFloat(MainForm.sgOpenItems.Cells[6, iCNT]);
-        if MainForm.sgOpenItems.Cells[1, iCNT] = OpenItems.ConvertName(MainForm.COC1.Text, 'F', 0) then InterestRate:=StrToFloat(MainForm.INT1.Text);
-        if MainForm.sgOpenItems.Cells[1, iCNT] = OpenItems.ConvertName(MainForm.COC2.Text, 'F', 0) then InterestRate:=StrToFloat(MainForm.INT2.Text);
-        if MainForm.sgOpenItems.Cells[1, iCNT] = OpenItems.ConvertName(MainForm.COC3.Text, 'F', 0) then InterestRate:=StrToFloat(MainForm.INT3.Text);
-        if MainForm.sgOpenItems.Cells[1, iCNT] = OpenItems.ConvertName(MainForm.COC4.Text, 'F', 0) then InterestRate:=StrToFloat(MainForm.INT4.Text);
-        if (TimeDiff < 0) and (InterestRate > 0) and (InvoiceAmt > 0) and (IsVoType(MainForm.sgOpenItems.Cells[3, iCNT]) = True) then
-        begin
-          DiscountedAmt:=InvoiceAmt / ( 1 + ( (InterestRate / 365) * ABS(TimeDiff)) );
-          DecreaseAmt:=InvoiceAmt - DiscountedAmt;
-          RecoveryAmt:=InvoiceAmt + DecreaseAmt;
-          MainForm.sgOpenItems.Cells[35, iCNT]:=FormatFloat('###0.00', DiscountedAmt);
-          MainForm.sgOpenItems.Cells[36, iCNT]:=FormatFloat('###0.00', DecreaseAmt);
-          MainForm.sgOpenItems.Cells[37, iCNT]:=FormatFloat('###0.00', RecoveryAmt);
-          OpenItems.cDiscountedAmt:=OpenItems.cDiscountedAmt + DiscountedAmt;
-          OpenItems.cDecreaseAmt:=OpenItems.cDecreaseAmt + DecreaseAmt;
-          OpenItems.cRecoveryAmt:=OpenItems.cRecoveryAmt + RecoveryAmt;
-        end else
-        begin
-          MainForm.sgOpenItems.Cells[35, iCNT]:='0';
-          MainForm.sgOpenItems.Cells[36, iCNT]:='0';
-          MainForm.sgOpenItems.Cells[37, iCNT]:='0';
-        end;
-
-        { -------------------------------------------------------------------------------------------------------------------------------- COUNT ALL INVOICES }
-        { DEPENDS ON INVOICE TYPE DEFINED IN THE GENERAL SETTINGS }
-        if IsVoType(MainForm.sgOpenItems.Cells[3, iCNT]) = True then inc(OpenItems.nInvoices);
-
-        { ---------------------------------------------------------------------------------------------------------- COUNT ALL OVERDUE INVOICES AND IT AMOUNT }
-        { CHECK DIFFERENCE BETWEEN CURRENT DATE AND VOUCHER DATE }
-        { VOUCHER TYPE TELLS IF WE HAVE INVOICE OR OTHER ITEM    }
-        { WE COUNT ONLY INVOICES                                 }
-        if (MainForm.sgOpenItems.Cells[34, iCNT] < '0') and (IsVoType(MainForm.sgOpenItems.Cells[3, iCNT]) = True) then
-        begin
-          inc(OpenItems.Overdue);
-          OpenItems.OverdueAmt:=OpenItems.OverdueAmt + StrToFloat(MainForm.sgOpenItems.Cells[6, iCNT])
-        end;
-
-        { ---------------------------------------------------------------------------------------------------------------------------------- COUNT O/S AMOUNT }
-        if IsNumeric(MainForm.sgOpenItems.Cells[6, iCNT], 'float') = True then OpenItems.OSamt:=OpenItems.OSamt + StrToFloat(MainForm.sgOpenItems.Cells[6, iCNT]);
-
-        { ------------------------------------------------------------------------------------------------------------------------------ UNALLOCATED PAYMENTS }
-        { WE TAKE INTO CONSIDERATION NEGATIVE AMOUNTS }
-        { AND VOUCHER THAT INDICATE BANK POSTINGS     }
-        if (MainForm.sgOpenItems.Cells[6, iCNT] < '0') and (MainForm.sgOpenItems.Cells[3, iCNT] = AppSettings.TMIG.ReadString(Unallocated, 'VOUCHER_NUM', '')) then
-          OpenItems.UNamt:=OpenItems.UNamt + StrToFloat(MainForm.sgOpenItems.Cells[6, iCNT]);
-
-      end;
-
-      { ----------------------------------------------- ! REPAINT 'STRINGGRID' AND END PROCESS ! ------------------------------------------------------------ }
-      MainForm.sgOpenItems.Freeze(False);
-      PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Ready.')));
-      FreeAndNil(AppSettings);
-    end;
-  end;
-end;
-
-{ -------------------------------------------------------------------------------------------------------------------------------------- SOURCE FILE SCANNING }
-function TTransactions.Scan(mode: integer): boolean;  (* ASYNC & SYNC *)
-var
-  iCNT:      integer;
-  SR:        TSearchRec;
-  TDate:     TDateTime;
-  TTime1:    TDateTime;
-  TTime2:    TDateTime;
-  CheckSum:  integer;
-begin
-  Result:=False;
-  { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-  if mode = 0 then
-  begin
-    { IT IS ABSOLUTE NECESSARY FOR FILE-TIME SCANNING   }
-    { IF SOURCES FILES ARE UPDATED BY THE SERVER        }
-    { THEN WE WILL COMPARE TIMES AND IF ALL ARE CHANGED }
-    { THEN WE START THREAD FOR OPEN ITEMS LOAD          }
-    if FindFirst(OpenItems.OpenItemsDir + '*.txt', faAnyFile, SR) = 0 then
-    begin
-      iCNT:=0;
-      SetLength(OpenItems.ArrOpenItems, iCNT + 1, 4);
-      repeat
-        if (SR.Attr <> faDirectory) then
-        begin
-          OpenItems.ArrOpenItems[iCNT, 0]:=SR.Name;
-          FileAge(OpenItems.OpenItemsDir + SR.Name, TDate);
-          OpenItems.ArrOpenItems[iCNT, 1]:=LeftStr(DateTimeToStr(TDate), 10);
-          OpenItems.ArrOpenItems[iCNT, 2]:=RightStr(DateTimeToStr(TDate), 8);
-          OpenItems.ArrOpenItems[iCNT, 3]:='0';
-          (* DebugMsg(OpenItemsSources[iCNT, 0] + ' | ' + OpenItemsSources[iCNT, 1] + ' | ' + OpenItemsSources[iCNT, 2] + ' | ' + OpenItemsSources[iCNT, 3]); DEBUG LINE *)
-          inc(iCNT);
-          SetLength(OpenItems.ArrOpenItems, iCNT + 1, 4);
-        end;
-      until FindNext(SR) <> 0;
-      FindClose(SR);
-    end;
-  end;
-  { ---------------------------------------------------------------------------------------------------------------------------------------- SCAN AND COMPARE }
-  if mode = 1 then
-  begin
-    { INITIALIZE }
-    iCNT:=0;
-    CheckSum:=0;
-    { CHECK IF TIME-STAMP HAS CHANGED WITHIN A GIVEN FILE THAT WAS PRE-LOADED AT STARTUP }
-    while iCNT < (High(OpenItems.ArrOpenItems) - 1) do
-    begin
-      FileAge(OpenItems.OpenItemsDir + OpenItems.ArrOpenItems[iCNT, 0], TDate);
-      OpenItems.ArrOpenItems[iCNT, 3]:=RightStr(DateTimeToStr(TDate), 8);
-      TTime1:=StrToTime(OpenItems.ArrOpenItems[iCNT, 2]);
-      TTime2:=StrToTime(OpenItems.ArrOpenItems[iCNT, 3]);
-      if ((TTime1 - TTime2) <> 0) then inc(CheckSum);
-      (* DebugMsg(OpenItemsSources[iCNT, 0] + ' | ' + OpenItemsSources[iCNT, 1] + ' | ' + OpenItemsSources[iCNT, 2] + ' | ' + OpenItemsSources[iCNT, 3]); DEBUG LINE *)
-      inc(iCNT);
-    end;
-    if iCNT = CheckSum then
-    begin
-      for iCNT:=0 to (High(OpenItems.ArrOpenItems) - 1) do OpenItems.ArrOpenItems[iCNT, 2]:=OpenItems.ArrOpenItems[iCNT, 3];
-      Result:=True;
-    end;
-  end;
-end;
-
-{ ----------------------------------------------------------------------------------------------------------------------------------- CO CODE NAME CONVERTION }
-function TTransactions.ConvertName(CoNumber: string; Prefix: string; mode: integer): string;
-var
-  iCNT:  integer;
-begin
-  { INITIALIZE }
-  Result:= '';
-  { ALLOW TO CONVERT '2020' TO 'F2020', ETC. }
-  { USED ONLY FOR OPEN ITEMS AND AGING VIEW  }
-  if mode = 0 then
-  begin
-    if Length(CoNumber) = 4 then Result:=Prefix + CoNumber;
-    if Length(CoNumber) = 3 then Result:=Prefix + '0'  + CoNumber;
-    if Length(CoNumber) = 2 then Result:=Prefix + '00' + CoNumber;
-  end;
-  { CONVERTS FROM                            }
-  {  1. 2020 TO 02020                        }
-  {  2. 340  TO 00340                        }
-  {  3. 43   TO 00043                        }
-  {  4. 0    TO 00000                        }
-  { USED ONLY TO BUILD GROUP_ID              }
-  if mode = 1 then
-  begin
-    if Length(CoNumber) = 4 then Result:='0'   + CoNumber;
-    if Length(CoNumber) = 3 then Result:='00'  + CoNumber;
-    if Length(CoNumber) = 2 then Result:='000' + CoNumber;
-    if Length(CoNumber) = 1 then Result:='00000';
-  end;
-  { CONVERTS FROM 02020 TO 2020              }
-  if mode = 2 then
-  begin
-    for iCNT:= 1 to Length(CoNumber) do
-      if CoNumber[iCNT] <> '0' then
-      begin
-        Result:=Copy(CoNumber, iCNT, MaxInt);
-        Exit;
-      end;
-  end;
-end;
-
-{ ------------------------------------------------------------------------------------------------------------------------------ RETURN KPI FOR GIVEN COMPANY }
-function TTransactions.ReturnKPI(SG: TStringGrid; StrCoCode: string; mode: integer): double;
-{ MODE = 0 ===> KPI | OVERDUE FOR GIVEN CO CODE     }
-{ MODE = 1 ===> KPI | UNALLOCATED FOR GIVEN CO CODE }
-var
-  iCNT:  integer;
-begin
-   { INITIALIZE }
-   Result:=0;
-   { LOOK FOR 'COCODE' AND SUM NUMBERS }
-   for iCNT:=1 to SG.RowCount - 1 do
-   begin
-     if (mode = 0) and (StrCoCode = SG.Cells[1, iCNT]) then Result:=Result + StrToFloat(SG.Cells[15, iCNT]);
-     if (mode = 1) and (StrCoCode = SG.Cells[1, iCNT]) then Result:=Result + StrToFloat(SG.Cells[16, iCNT]);
-   end;
-end;
-
-{ ########################################################### ! MAIN FORM METHODS ! ######################################################################### }
+{ ################################################################## ! HELPERS ! ############################################################################ }
 
 { ----------------------------------------------------------------------------------------------------------------------------------------- CONVERT TO STRING }
 function TMainForm.OleGetStr(RecordsetField: variant): string;
@@ -2299,45 +1505,41 @@ end;
 { ------------------------------------------------------------------------------------------------------------------------------------------------- ON CREATE }
 procedure TMainForm.FormCreate(Sender: TObject);
 var
-  AppVersion:       string;
-//  MSSQL:            TMSSQL;
-  AppSettings:      TSettings;
-  DataBase:         TDataBase;
-//  InvoiceTracker:   TInvoiceTracker;
-  RegionalSettings: TFormatSettings;
-  NowTime: TTime;
-  UserControl: TUserControl;
+  AppVersion:   string;
+  AppSettings:  TSettings;
+  DataBase:     TDataBase;
+  DataTables:   TDataTables;
+  UserControl:  TUserControl;
+  RegSettings:  TFormatSettings;
+  NowTime:      TTime;
+  iCNT:         integer;
 begin
 
   { ------------------------------------------------------------ ! INITIALIZATION ! ------------------------------------------------------------------------- }
-  AppSettings    :=TSettings.Create;
-  CurrentUserName:=AppSettings.WinUserName;
-  EventLogPath   :=AppSettings.FPathEventLog;
-  AppVersion     :=GetBuildInfoAsString;
-  KeyPreview     :=True;
-  AllowClose     :=False;
-
-  //remove!!!
-//  AgeView    :=TAgeView.Create;
-  OpenItems  :=TTransactions.Create;
+  AppSettings  :=TSettings.Create;
+  FUserName    :=AppSettings.WinUserName;
+  FEventLogPath:=AppSettings.FPathEventLog;
+  AppVersion   :=GetBuildInfoAsString;
+  KeyPreview   :=True;
+  AllowClose   :=False;
 
   { --------------------------------------------------------------------------------------------------------------------------------------- REGIONAL SETTINGS }
-  RegionalSettings:=TFormatSettings.Create;
-  RegionalSettings.CurrencyDecimals :=4;
-  RegionalSettings.DateSeparator    :='-';
-  RegionalSettings.ShortDateFormat  :='yyyy-mm-dd';
-  RegionalSettings.LongDateFormat   :='yyyy-mm-dd';
-  RegionalSettings.TimeSeparator    :=':';
-  RegionalSettings.TimeAMString     :='AM';
-  RegionalSettings.TimePMString     :='PM';
-  RegionalSettings.ShortTimeFormat  :='hh:mm:ss';
-  RegionalSettings.LongTimeFormat   :='hh:mm:ss';
-  FormatSettings:=RegionalSettings;
+  RegSettings:=TFormatSettings.Create;
+  RegSettings.CurrencyDecimals    :=4;
+  RegSettings.DateSeparator       :='-';
+  RegSettings.ShortDateFormat     :='yyyy-mm-dd';
+  RegSettings.LongDateFormat      :='yyyy-mm-dd';
+  RegSettings.TimeSeparator       :=':';
+  RegSettings.TimeAMString        :='AM';
+  RegSettings.TimePMString        :='PM';
+  RegSettings.ShortTimeFormat     :='hh:mm:ss';
+  RegSettings.LongTimeFormat      :='hh:mm:ss';
+  FormatSettings                  :=RegSettings;
   Application.UpdateFormatSettings:=False;
 
   { ------------------------------------------------------------------------------------------------------------------------------ APPLICATION NAME | CAPTION }
-  MainForm.Caption  :=AppSettings.TMIG.ReadString(ApplicationDetails, 'VALUE', APPNAME);
-  GroupName.Caption :=AppSettings.TMIG.ReadString(ApplicationDetails, 'GROUP_NAME', 'n/a');
+  MainForm.Caption :=AppSettings.TMIG.ReadString(ApplicationDetails, 'VALUE', APPNAME);
+  GroupName.Caption:=AppSettings.TMIG.ReadString(ApplicationDetails, 'GROUP_NAME', 'n/a');
 
   { --------------------------------------------------------------- ! WINDOW POSITION ! --------------------------------------------------------------------- }
 
@@ -2351,19 +1553,16 @@ begin
   { ------------------------------------------------------------------------------------------------------------------------------------ FORMAT DATE AND TIME }
   NowTime  :=Now;
   StartTime:=Now;
-
-  { --------------------------------------------------------------------------------------------------------------------------------------- REGIONAL SETTINGS }
   FormatDateTime('hh:mm:ss', NowTime);
   FormatDateTime('hh:mm:ss', StartTime);
 
   { ------------------------------------------------------------- ! STATUS BAR ! ---------------------------------------------------------------------------- }
   StatBar_TXT1.Caption:='Ready.';
-  StatBar_TXT2.Caption:=CurrentUserName + '.';
+  StatBar_TXT2.Caption:=FUserName + '.';
   StatBar_TXT3.Caption:=DateToStr(Now);
 
   { ----------------------------------------------------------- ! DEFAULT VALUES ! -------------------------------------------------------------------------- }
 
-  { -------------------------------------------------------------------------------------------------------------------------------------- SET INITIAL VALUES }
   Edit_PASSWORD.Text   :='';
   Edit_CurrPassWd.Text :='';
   Edit_NewPassWd.Text  :='';
@@ -2373,24 +1572,22 @@ begin
 
   { ------------------------------------------------------------ ! RISK CLASSESS ! -------------------------------------------------------------------------- }
 
-  { -------------------------------------------------------------------------------------------------------------------------------------------------- ASSIGN }
   { WE USE COMMA DECIMAL SEPARATOR BY DEFAULT }
   if FormatSettings.DecimalSeparator = ',' then
   begin
-    procRISKA.Caption:=FloatToStr(StrToFloat(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_A_MAX', '0,80')) * 100) + '%';
-    procRISKB.Caption:=FloatToStr(StrToFloat(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_B_MAX', '0,15')) * 100) + '%';
-    procRISKC.Caption:=FloatToStr(StrToFloat(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_C_MAX', '0,5' )) * 100) + '%';
+    procRISKA.Caption:=FloatToStr(StrToFloat(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_A_MAX', RISK_CLASS_A)) * 100) + '%';
+    procRISKB.Caption:=FloatToStr(StrToFloat(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_B_MAX', RISK_CLASS_B)) * 100) + '%';
+    procRISKC.Caption:=FloatToStr(StrToFloat(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_C_MAX', RISK_CLASS_C)) * 100) + '%';
   end;
   { CHANGE COMMA DECIMAL SEPARATOR TO POINT DECIMAL SEPARATOR }
   if FormatSettings.DecimalSeparator = '.' then
   begin
-    procRISKA.Caption:=FloatToStr(StrToFloat(StringReplace(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_A_MAX', '0,80'), ',', '.', [rfReplaceAll])) * 100) + '%';
-    procRISKB.Caption:=FloatToStr(StrToFloat(StringReplace(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_B_MAX', '0,15'), ',', '.', [rfReplaceAll])) * 100) + '%';
-    procRISKC.Caption:=FloatToStr(StrToFloat(StringReplace(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_C_MAX', '0,5' ), ',', '.', [rfReplaceAll])) * 100) + '%';
+    procRISKA.Caption:=FloatToStr(StrToFloat(StringReplace(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_A_MAX', RISK_CLASS_A), ',', '.', [rfReplaceAll])) * 100) + '%';
+    procRISKB.Caption:=FloatToStr(StrToFloat(StringReplace(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_B_MAX', RISK_CLASS_B), ',', '.', [rfReplaceAll])) * 100) + '%';
+    procRISKC.Caption:=FloatToStr(StrToFloat(StringReplace(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_C_MAX', RISK_CLASS_C), ',', '.', [rfReplaceAll])) * 100) + '%';
   end;
   { ------------------------------------------------------------- ! TAB SHEETS ! ---------------------------------------------------------------------------- }
 
-  { --------------------------------------------------------------------------------------------------------------------------------------------------- NAMES }
   TabSheet1.Caption:=AppSettings.TMIG.ReadString(TabSheetsNames, 'TAB1', 'TAB1');
   TabSheet2.Caption:=AppSettings.TMIG.ReadString(TabSheetsNames, 'TAB2', 'TAB2');
   TabSheet3.Caption:=AppSettings.TMIG.ReadString(TabSheetsNames, 'TAB3', 'TAB3');
@@ -2400,60 +1597,17 @@ begin
   TabSheet7.Caption:=AppSettings.TMIG.ReadString(TabSheetsNames, 'TAB7', 'TAB7');
   TabSheet8.Caption:=AppSettings.TMIG.ReadString(TabSheetsNames, 'TAB8', 'TAB8');
 
-  { -------------------------------------------------------------- ! OPEN ITEMS ! --------------------------------------------------------------------------- }
-
-  { ------------------------------------------------------------------------------------------------------------------------------ FOLDERS, FORMAT AND LOADER }
-  OpenItems.OpenItemsDir:=AppSettings.TMIG.ReadString(OpenItemsData, 'FOLDER', '');
-  OpenItems.OpenItemsFor:=AppSettings.TMIG.ReadString(OpenItemsData, 'FORMAT', 'F{NUM}.TXT');
-
   { ------------------------------------------------------- ! ASSIGN PRE-DEFINED HEADERS ! ------------------------------------------------------------------ }
 
   { ----------------------------------------------------------------------------------------------------------------------------------- HEADERS AND FIRST ROW }
   sgOpenItems.RowCount:=2;
   sgOpenItems.Cols[0].Text:= 'Lp';
-  sgOpenItems.Cols[1].Text:= AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER1',  'SourceDBName');
-  sgOpenItems.Cols[2].Text:= AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER2',  'CustNo');
-  sgOpenItems.Cols[3].Text:= AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER3',  'Votp');
-  sgOpenItems.Cols[4].Text:= AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER4',  'VoDt');
-  sgOpenItems.Cols[5].Text:= AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER5',  'OpenCurAm');
-  sgOpenItems.Cols[6].Text:= AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER6',  'OpenAm');
-  sgOpenItems.Cols[7].Text:= AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER7',  'Nm');
-  sgOpenItems.Cols[8].Text:= AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER8',  'ISO');
-  sgOpenItems.Cols[9].Text:= AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER9',  'CurAm');
-  sgOpenItems.Cols[10].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER10', 'Am');
-  sgOpenItems.Cols[11].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER11', 'InvoNo');
-  sgOpenItems.Cols[12].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER12', 'DueDt');
-  sgOpenItems.Cols[13].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER13', 'Inf4');
-  sgOpenItems.Cols[14].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER14', 'Inf7');
-  sgOpenItems.Cols[15].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER15', 'CrLmt');
-  sgOpenItems.Cols[16].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER16', 'Ctry');
-  sgOpenItems.Cols[17].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER17', 'CPmtTrm');
-  sgOpenItems.Cols[18].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER18', 'PdSts');
-  sgOpenItems.Cols[19].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER19', 'Agent');
-  sgOpenItems.Cols[20].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER20', 'Ctrl');
-  sgOpenItems.Cols[21].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER21', 'Ad1');
-  sgOpenItems.Cols[22].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER22', 'Ad2');
-  sgOpenItems.Cols[23].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER23', 'Ad3');
-  sgOpenItems.Cols[24].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER24', 'PNo');
-  sgOpenItems.Cols[25].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER25', 'PArea');
-  sgOpenItems.Cols[26].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER26', 'GenAcNo');
-  sgOpenItems.Cols[27].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER27', 'ValDt');
-  sgOpenItems.Cols[28].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER28', 'R1');
-  sgOpenItems.Cols[29].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER29', 'Gr3');
-  sgOpenItems.Cols[30].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER30', 'Txt');
-  sgOpenItems.Cols[31].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER31', 'R8');
-  sgOpenItems.Cols[32].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER32', 'DirDeb');
-  sgOpenItems.Cols[33].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER33', 'AddTxt');
-  { ---------------------------------------------------------------------------------------------- ADDITIONAL COLUMNS | HOLDS DATA THAT HAVE TO BE CALCULATED }
-  sgOpenItems.Cols[34].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER34', 'PmtStat');
-  sgOpenItems.Cols[35].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER35', 'Discount');
-  sgOpenItems.Cols[36].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER36', 'Decrease');
-  sgOpenItems.Cols[37].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER37', 'Recover');
-  sgOpenItems.Cols[38].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER38', 'HASHCOLUMN');
+  for iCNT:=1 to sgOpenItems.ColCount do
+  begin
+    sgOpenItems.Cols[iCNT].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER' + IntToStr(iCNT),  '(column)');
+  end;
 
   { ------------------------------------------------------- ! CAPTIONS FOR ALL SHAPES ! --------------------------------------------------------------------- }
-
-  { ------------------------------------------------------------------------------------------------------------------------- PRE-DEFINED TEXTS INSIDE SHAPES }
 
   (* AGING REPORT | TABSHEET1 *)
   Cap01.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS1TXT01', 'EMPTY'), [fsBold]);
@@ -2507,69 +1661,50 @@ begin
   Text21.Caption:=AppSettings.TMIG.ReadString(AgingRanges,'RANGE1A','') + ' - ' + AppSettings.TMIG.ReadString(AgingRanges,'RANGE3B','') + ':';
   Text22.Caption:=AppSettings.TMIG.ReadString(AgingRanges,'RANGE4A','') + ' - ' + AppSettings.TMIG.ReadString(AgingRanges,'RANGE6B','') + ':';
 
-  { -------------------------------------------------------- ! OTHER INITIALIZATIONS ! ---------------------------------------------------------------------- }
+  { ------------------------------------------------------ ! DATABASE INITIALIZATION & UAC ! ---------------------------------------------------------------- }
 
-  { ------------------------------------------------------------------------------------------------------------------- SOURCE FILE SCANNING | INITIALIZATION }
-  OpenItems.Scan(0); // to be removed!!!!
-
-  { ------------------------------------------------------- ! DATABASE INITIALIZATION  ! -------------------------------------------------------------------- }
-
-  { ------------------------------------------------------------------------------------------------------ DATABASE CONNECTION AND READ OUT OF GENERAL TABLES }
-  ADOConnect:=TADOConnection.Create(Self);
+  { ESTABLISH ACTIVE CONNECTIVITY }
+  FDbConnect:=TADOConnection.Create(Self);
   DataBase  :=TDataBase.Create(True);
-  DataBase.InitializeConnection(MainThreadID, True, ADOConnect);
-
-  UserControl:=TUserControl.Create(ADOConnect);
   try
-    UserControl.UserName:=MainForm.CurrentUserName;
-    DebugMsg(UserControl.GetAccessData(adAccessLevel));
-    UserControl.GetGroupList(MainForm.ArrGroupList, GroupListBox);
-    UserControl.GetAgeDates(MainForm.GroupListDates, '02047003400004300000');
+    DataBase.InitializeConnection(MainThreadID, True, FDbConnect);
+  finally
+    DataBase.Free;
+  end;
+  { UPLOAD USER DETAILS }
+  UserControl:=TUserControl.Create(FDbConnect);
+  try
+    FEventLogPath:=AppSettings.FPathEventLog;
+    UserControl.UserName:=FUserName;
+    AccessLevel:=UserControl.GetAccessData(adAccessLevel);
+    AccessMode :=UserControl.GetAccessData(adAccessMode);
+    UserControl.GetGroupList(FGroupList, GroupListBox);
+    UserControl.GetAgeDates(GroupListDates, FGroupList[0, 0]);
   finally
     UserControl.Free;
   end;
 
+  { CALL AGE VIEW }
 
+  { ------------------------------------------------------------ ! GENERAL TABLES ! ------------------------------------------------------------------------- }
 
-
-(*
-
-  if ADOConnect.Connected then
-  begin
-    if not (Database.UACinitialize) then Application.Terminate else
-    begin
-      { --------------------------------------------------------------------------------------------------------- UAC GROUP LIST READ OUT & POPULATE LIST BOX }
-      Database.UACGroupReader(UpperCase(MainForm.CurrentUserName));
-      Database.UACAgeDates(MainForm.ArrGroupList[GroupListBox.ItemIndex, 0]);
-      if GroupListDates.Text <> '' then TTReadAgeView.Create('1') else GroupListDates.Enabled:=False;
-      { ------------------------------------------------------------------------------------------------------------------------------------------- LOAD MAPS }
-      MSSQL:=TMSSQL.Create(MainForm.ADOConnect);
-      try
-        MSSQL.StrSQL:='SELECT * FROM ' + AppSettings.TMIG.ReadString(GeneralTables, 'MAP1', ''); MSSQL.SqlToGrid(sgCoCodes,  MSSQL.ExecSQL, False);
-        MSSQL.StrSQL:='SELECT * FROM ' + AppSettings.TMIG.ReadString(GeneralTables, 'MAP4', ''); MSSQL.SqlToGrid(sgPmtTerms, MSSQL.ExecSQL, False);
-        MSSQL.StrSQL:='SELECT * FROM ' + AppSettings.TMIG.ReadString(GeneralTables, 'MAP5', ''); MSSQL.SqlToGrid(sgPaidInfo, MSSQL.ExecSQL, False);
-        MSSQL.StrSQL:='SELECT * FROM ' + AppSettings.TMIG.ReadString(GeneralTables, 'MAP6', ''); MSSQL.SqlToGrid(sgGroup3,   MSSQL.ExecSQL, False);
-        MSSQL.StrSQL:='SELECT * FROM ' + AppSettings.TMIG.ReadString(GeneralTables, 'MAP7', ''); MSSQL.SqlToGrid(sgPerson,   MSSQL.ExecSQL, False);
-      finally
-        MSSQL.Free;
-      end;
-      { --------------------------------------------------------------------------------------------------------------------------- LOAD INVOICE TRACKER LIST }
-      InvoiceTracker:=TInvoiceTracker.Create;
-      try
-        InvoiceTracker.Refresh(MainForm.sgInvoiceTracker, 'ALL');
-      finally
-        InvoiceTracker.Free;
-      end;
-    end;
+  DataTables:=TDataTables.Create(FDbConnect);
+  try
+    DataTables.StrSQL:='SELECT * FROM ' + AppSettings.TMIG.ReadString(GeneralTables, 'MAP1', ''); DataTables.SqlToGrid(sgCoCodes,  DataTables.ExecSQL, False);
+    DataTables.StrSQL:='SELECT * FROM ' + AppSettings.TMIG.ReadString(GeneralTables, 'MAP4', ''); DataTables.SqlToGrid(sgPmtTerms, DataTables.ExecSQL, False);
+    DataTables.StrSQL:='SELECT * FROM ' + AppSettings.TMIG.ReadString(GeneralTables, 'MAP5', ''); DataTables.SqlToGrid(sgPaidInfo, DataTables.ExecSQL, False);
+    DataTables.StrSQL:='SELECT * FROM ' + AppSettings.TMIG.ReadString(GeneralTables, 'MAP6', ''); DataTables.SqlToGrid(sgGroup3,   DataTables.ExecSQL, False);
+    DataTables.StrSQL:='SELECT * FROM ' + AppSettings.TMIG.ReadString(GeneralTables, 'MAP7', ''); DataTables.SqlToGrid(sgPerson,   DataTables.ExecSQL, False);
+  finally
+    DataTables.Free;
   end;
-*)
 
   { ----------------------------------------------------------------------------------------------------------------------------- START WEB PAGE | UNITY INFO }
   WebBrowser.Navigate(WideString(AppSettings.TMIG.ReadString(ApplicationDetails, 'START_PAGE', '')), $02);
 
   { -------------------------------------------------------------------------------------------------------------------------- APPLICATION VERSION & USER SID }
-  LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Application version = ' + AppVersion);
-  LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: User SID = ' + GetCurrentUserSid);
+  LogText(FEventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Application version = ' + AppVersion);
+  LogText(FEventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: User SID = ' + GetCurrentUserSid);
 
   { ---------------------------------------------------------- ! TIMERS INTERVALS ! ------------------------------------------------------------------------- }
 
@@ -2580,27 +1715,27 @@ begin
   UpdaterTimer.Interval    :=AppSettings.TMIG.ReadInteger(TimersSettings, 'UPDATE_CHECKER',  60000);  { DEFAULT VALUE 60000   MILISECONDS = 1  MINUTE  }
   OILoader.Interval        :=AppSettings.TMIG.ReadInteger(TimersSettings, 'OI_LOADER',       300000); { DEFAULT VALUE 3000000 MILISECONDS = 5  MINUTES }
 
+  { DISPOSE OBJECTS }
+  FreeAndNil(AppSettings);
+
+(*
   { START }
   EventLogTimer.Enabled    :=True;
   InvoiceScanTimer.Enabled :=True;
   UpdaterTimer.Enabled     :=True;
   OILoader.Enabled         :=True;
+*)
+
   { TIME AND DATE ON STATUS BAR }
   CurrentTime.Enabled      :=True;
   UpTime.Enabled           :=True;
-
-  { DISPOSE OBJECTS }
-  FreeAndNil(Database);
-  FreeAndNil(AppSettings);
 
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------ ON DESTROY }
 procedure TMainForm.FormDestroy(Sender: TObject);
 begin
-  //remove it!!! cause AV errors
-//  FreeAndNil(AgeView);
-  FreeAndNil(OpenItems);
+  { DO NOTHING }
 end;
 
 { ------------------------------------------------------------- ! MAIN FORM EVENTS ! ------------------------------------------------------------------------ }
@@ -2650,18 +1785,21 @@ begin
   { SHUTDOWN APPLICATION }
   begin
     AppSettings:=TSettings.Create;
-    { ------------------------------------------------------------------------------------------------------------------------------------- SAVE ALL SETTINGS }
-    AppSettings.TMIG.WriteInteger(ApplicationDetails, 'WINDOW_TOP',   MainForm.Top);
-    AppSettings.TMIG.WriteInteger(ApplicationDetails, 'WINDOW_LEFT',  MainForm.Left);
-    if MainForm.WindowState = wsNormal    then AppSettings.TMIG.WriteString(ApplicationDetails,  'WINDOW_STATE', 'wsNormal');
-    if MainForm.WindowState = wsMaximized then AppSettings.TMIG.WriteString(ApplicationDetails,  'WINDOW_STATE', 'wsMaximized');
-    if MainForm.WindowState = wsMinimized then AppSettings.TMIG.WriteString(ApplicationDetails,  'WINDOW_STATE', 'wsMinimized');
-    if sgAgeView.RowCount > 2 then sgAgeView.SaveLayout(ColumnWidthName, ColumnOrderName, ColumnNames, ColumnPrefix);
-    if not (AppSettings.Encode(UserConfig)) then Application.MessageBox(PChar('Cannot write user configuration file. Please contact support.'), PChar(CAPTION), MB_OK + MB_ICONSTOP);
-    if not(AppSettings.Encode(AppConfig))   then Application.MessageBox(PChar('Cannot write master configuration file. Please contact support.'), PChar(CAPTION), MB_OK + MB_ICONSTOP);
-    LogText(EventLogPath, 'Application closed by the user.');
-    { --------------------------------------------------------------------------------------------------------------------------------------- RELEASE & CLOSE }
-    FreeAndNil(AppSettings);
+    try
+      { ----------------------------------------------------------------------------------------------------------------------------------- SAVE ALL SETTINGS }
+      AppSettings.TMIG.WriteInteger(ApplicationDetails, 'WINDOW_TOP',   MainForm.Top);
+      AppSettings.TMIG.WriteInteger(ApplicationDetails, 'WINDOW_LEFT',  MainForm.Left);
+      if MainForm.WindowState = wsNormal    then AppSettings.TMIG.WriteString(ApplicationDetails,  'WINDOW_STATE', 'wsNormal');
+      if MainForm.WindowState = wsMaximized then AppSettings.TMIG.WriteString(ApplicationDetails,  'WINDOW_STATE', 'wsMaximized');
+      if MainForm.WindowState = wsMinimized then AppSettings.TMIG.WriteString(ApplicationDetails,  'WINDOW_STATE', 'wsMinimized');
+      if sgAgeView.RowCount > 2 then sgAgeView.SaveLayout(ColumnWidthName, ColumnOrderName, ColumnNames, ColumnPrefix);
+      if not (AppSettings.Encode(UserConfig)) then Application.MessageBox(PChar('Cannot write user configuration file. Please contact support.'), PChar(CAPTION), MB_OK + MB_ICONSTOP);
+      if not(AppSettings.Encode(AppConfig))   then Application.MessageBox(PChar('Cannot write master configuration file. Please contact support.'), PChar(CAPTION), MB_OK + MB_ICONSTOP);
+      LogText(FEventLogPath, 'Application closed by the user.');
+      { ------------------------------------------------------------------------------------------------------------------------------------- RELEASE & CLOSE }
+    finally
+      FreeAndNil(AppSettings);
+    end;
     CanClose:=True;
   end;
 end;
@@ -2679,7 +1817,7 @@ procedure TMainForm.EventLogTimerTimer(Sender: TObject);
 begin
   try
     try
-      EventLog.Lines.LoadFromFile(EventLogPath);
+      EventLog.Lines.LoadFromFile(FEventLogPath);
     except
       EventLog.Lines.Text:='Exception catch message: cannot load event log file. The file is locked by another process. Please try again later.';
     end;
@@ -2705,7 +1843,7 @@ end;
 { --------------------------------------------------------------------------------------------------------------------------------- AUTOLOADER FOR OPEN ITEMS }
 procedure TMainForm.OILoaderTimer(Sender: TObject);
 begin
-  LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Calling open items scanner...');
+  LogText(FEventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Calling open items scanner...');
   TTOpenItemsScanner.Create(False);
 end;
 
@@ -2731,7 +1869,7 @@ end;
 { --------------------------------------------------------------------------------------------------------------------------------- ADDRESS BOOK CONTEXT MENU }
 procedure TMainForm.BookPopupPopup(Sender: TObject);
 begin
-  Action_ShowMyEntries.Caption:='Show ' + UpperCase(MainForm.CurrentUserName) + ' entries';
+  Action_ShowMyEntries.Caption:='Show ' + UpperCase(MainForm.FUserName) + ' entries';
   { CHECK IF USER SELECT A RANGE }
   if (sgAddressBook.Selection.Bottom - sgAddressBook.Selection.Top) > 0 then
     { WE ALLOW TO DELETE ONLY ONE LINE AT THE TIME }
@@ -2766,7 +1904,7 @@ begin
   sgAddressBook.RowCount:=sgAddressBook.RowCount + 1;
   sgAddressBook.Row:=sgAddressBook.RowCount - 1;
   sgAddressBook.Cells[0, sgAddressBook.RowCount - 1]:='';
-  sgAddressBook.Cells[1, sgAddressBook.RowCount - 1]:=MainForm.CurrentUserName;
+  sgAddressBook.Cells[1, sgAddressBook.RowCount - 1]:=MainForm.FUserName;
   for jCNT:=2 to sgAddressBook.ColCount - 1 do sgAddressBook.Cells[jCNT, sgAddressBook.RowCount - 1]:='';
 end;
 
@@ -2792,7 +1930,7 @@ begin
       { EXECUTE DELETE QUERY }
       if MainForm.sgAddressBook.Cells[0, MainForm.sgAddressBook.Row] <> '' then
       begin
-        MSSQL:=TMSSQL.Create(MainForm.ADOConnect);
+        MSSQL:=TMSSQL.Create(MainForm.FDbConnect);
         try
           MSSQL.StrSQL:='DELETE FROM tbl_AddressBook WHERE CUID = ' + MSSQL.CleanStr(MainForm.sgAddressBook.Cells[2, MainForm.sgAddressBook.Row], True);
           MSSQL.ExecSQL;
@@ -2826,7 +1964,7 @@ end;
 { ------------------------------------------------------------------------------------------------------------------------------------ SHOW USER ENTRIES ONLY }
 procedure TMainForm.Action_ShowMyEntriesClick(Sender: TObject);
 begin
-  TTAddressBook.Create('1', MainForm.CurrentUserName);
+  TTAddressBook.Create('1', MainForm.FUserName);
 end;
 
 { -------------------------------------------------------------- ! MAIN FORM MENU ! ------------------------------------------------------------------------- }
@@ -2927,7 +2065,7 @@ begin
         sgAddressBook.RowCount:=sgAddressBook.RowCount + 1;
         { ----------------------------------------------------------------------------------------------------------------------------------------- MOVE DATA }
         sgAddressBook.Cells[0, sgAddressBook.RowCount - 1 + OffSet]:='';
-        sgAddressBook.Cells[1, sgAddressBook.RowCount - 1 + OffSet]:=MainForm.CurrentUserName;
+        sgAddressBook.Cells[1, sgAddressBook.RowCount - 1 + OffSet]:=MainForm.FUserName;
         sgAddressBook.Cells[2, sgAddressBook.RowCount - 1 + OffSet]:=sgOpenItems.Cells[38, jCNT];
         sgAddressBook.Cells[3, sgAddressBook.RowCount - 1 + OffSet]:=sgOpenItems.Cells[2,  jCNT];
         sgAddressBook.Cells[4, sgAddressBook.RowCount - 1 + OffSet]:=sgOpenItems.Cells[7,  jCNT];
@@ -3088,12 +2226,12 @@ procedure TMainForm.Action_RemoveClick(Sender: TObject);
 begin
 
   { R/W USER CAN REMOVE ITEM }
-  if (MainForm.AccessLevel = 'RW') and (UpperCase(MainForm.CurrentUserName) = UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
+  if (MainForm.AccessLevel = 'RW') and (UpperCase(MainForm.FUserName) = UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
     if MsgCall(5, 'Are you sure you want to remove selected customer?') = IDYES then
       TTInvoiceTrackerRefresh.Create('REMOVE');
 
   { R/W USER CANNOT REMOVE OTHER ITEM }
-  if (MainForm.AccessLevel = 'RW') and (UpperCase(MainForm.CurrentUserName) <> UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
+  if (MainForm.AccessLevel = 'RW') and (UpperCase(MainForm.FUserName) <> UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
     MsgCall(2, 'You cannot remove someone''s else item.');
 
   { ADMINISTRATOR CAN REMOVE ANY ITEM }
@@ -3114,7 +2252,7 @@ end;
 { --------------------------------------------------------------------------------------------------------------------------------------------- SHOW MY ITEMS }
 procedure TMainForm.Action_ShowMyClick(Sender: TObject);
 begin
-  TTInvoiceTrackerRefresh.Create(UpperCase(MainForm.CurrentUserName));
+  TTInvoiceTrackerRefresh.Create(UpperCase(MainForm.FUserName));
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------------- SHOW ALL ITEMS }
@@ -3137,7 +2275,7 @@ end;
 { ------------------------------------------------------------------------------------------------------------- SAVE CURRENT GROUP NAME BEFORE USER CHANGE IT }
 procedure TMainForm.GroupListBoxDropDown(Sender: TObject);
 begin
-  MainForm.LastGroupSelection:=GroupListBox.ItemIndex;
+  MainForm.GroupNmSel:=GroupListBox.ItemIndex;
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------- UAC | LIST BOX | UPDATE AGE DATES }
@@ -3208,7 +2346,7 @@ procedure TMainForm.sgAgeViewColumnMoved(Sender: TObject; FromIndex, ToIndex: In
 var
   iCNT:    integer;
   jCNT:    integer;
-  Temp:    TStrArray;
+  Temp:    TLists;
   SqlRows: integer;
   TmpRows: integer;
 begin
@@ -3632,7 +2770,7 @@ begin
     if not (sgAddressBook.Cells[0, sgAddressBook.Row] = '') then
     begin
       { CONNECT AND UPDATE }
-      MSSQL:=TMSSQL.Create(MainForm.ADOConnect);
+      MSSQL:=TMSSQL.Create(MainForm.FDbConnect);
       try
         Value:=MSSQL.CleanStr(sgAddressBook.Cells[sgAddressBook.Col, sgAddressBook.Row], True);
         MSSQL.StrSQL:='UPDATE tbl_AddressBook SET '                                        +
@@ -4116,7 +3254,7 @@ procedure TMainForm.EventReloadClick(Sender: TObject);
 begin
   try
     try
-      EventLog.Lines.LoadFromFile(EventLogPath);
+      EventLog.Lines.LoadFromFile(FEventLogPath);
     except
       EventLog.Lines.Text:='Exception catch message: cannot load event log file. The file is locked by another process. Please try again later.';
     end;
@@ -4139,7 +3277,7 @@ begin
   end else
   begin
     StatBar_TXT1.Caption:='Insufficient UAC level.';
-    LogText(EventLogPath, '[Open Items]: User have no R/W access, process halted.');
+    LogText(FEventLogPath, '[Open Items]: User have no R/W access, process halted.');
   end;
 end;
 
@@ -4164,7 +3302,7 @@ begin
     end else
     begin
       StatBar_TXT1.Caption:='Insufficient UAC level.';
-      LogText(EventLogPath, '[Make Group]: User have no R/W access, process halted.');
+      LogText(FEventLogPath, '[Make Group]: User have no R/W access, process halted.');
     end;
 end;
 
@@ -4181,6 +3319,20 @@ begin
       MsgCall(2, 'Please enter group name and try again.' + #13#10 + 'If you will use existing one, then it will be overwritten.');
 end;
 
+{ -------------------------------------------------------------------------------------------------------------------------- USER ADDRESS BOOK | OPEN FROM DB }
+procedure TMainForm.btnOpenABClick(Sender: TObject);
+begin
+  { SET 1 = OPEN BUTTON FOR ALL REGISTERED CUSTOMERS }
+  TTAddressBook.Create('1', '');
+end;
+
+{ ---------------------------------------------------------------------------------------------------------------------- USER ADDRESS BOOK | SAVE NEWLY ADDED }
+procedure TMainForm.btnSaveClick(Sender: TObject);
+begin
+  { SET 0 = SAVE BUTTON }
+  TTAddressBook.Create('0', MainForm.FUserName);
+end;
+
 { --------------------------------------------------------------------------------------------------------------------------------- USER ADDRESS BOOK | CLOSE }
 procedure TMainForm.btnCloseClick(Sender: TObject);
 begin
@@ -4189,20 +3341,6 @@ begin
     { CLEAR ALL }
     sgAddressBook.ClearAll(2, 1, 1, True);
   end;
-end;
-
-{ ----------------------------------------------------------------------------------------------------------------- USER ADDRESS BOOK | SAVE CURRENTLY OPENED }
-procedure TMainForm.btnSaveClick(Sender: TObject);
-begin
-  { SET 0 = SAVE BUTTON }
-  TTAddressBook.Create('0', MainForm.CurrentUserName);
-end;
-
-{ -------------------------------------------------------------------------------------------------------------------------- USER ADDRESS BOOK | OPEN FROM DB }
-procedure TMainForm.btnOpenABClick(Sender: TObject);
-begin
-  { SET 1 = OPEN BUTTON FOR ALL REGISTERED CUSTOMERS }
-  TTAddressBook.Create('1', '');
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------- USER ADDRESS BOOK | IMPORT DATA }

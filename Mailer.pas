@@ -123,7 +123,7 @@ begin
       Result:=True;
     except
       on E: Exception do
-        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Could not send an e-mail. Error message thrown: ' + E.Message);
+        LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(idThd) + ']: Could not send an e-mail. Error message thrown: ' + E.Message);
     end;
   finally
     AppSettings.Free;
@@ -234,7 +234,7 @@ begin
       end;
     except
       on E: Exception do
-        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Could not send an e-mail. Error message thrown: ' + E.Message);
+        LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(idThd) + ']: Could not send an e-mail. Error message thrown: ' + E.Message);
     end;
   finally
     MailContent.Free;
@@ -405,7 +405,7 @@ begin
     { -------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
     Stamp:=DateTimeToStr(Now);
     Query:=TADOQuery.Create(nil);
-    Query.Connection:=MainForm.ADOConnect;
+    Query.Connection:=MainForm.FDbConnect;
     AppSettings:=TSettings.Create;
     DataBase:=TDataBase.Create(False);
     try
@@ -432,7 +432,7 @@ begin
         Query.SQL.Clear;
         StrSQL:='UPDATE tbl_daily SET EMAIL = ' + QuotedStr(IntToStr(Return)) +
                 ' WHERE CUID = '                + QuotedStr(CUID) +
-                ' AND GROUP_ID = '              + QuotedStr(MainForm.ArrGroupList[MainForm.GroupListBox.ItemIndex, 0]) +
+                ' AND GROUP_ID = '              + QuotedStr(MainForm.FGroupList[MainForm.GroupListBox.ItemIndex, 0]) +
                 ' AND AGEDATE = '               + QuotedStr(MainForm.GroupListDates.Text);
         Query.SQL.Text:=StrSQL;
         Query.ExecSQL;
@@ -444,11 +444,11 @@ begin
           Query.SQL.Clear;
           { MAKE NEW SQL }
           StrSQL:='INSERT INTO tbl_daily (GROUP_ID, CUID, AGEDATE, STAMP, USER_ALIAS, EMAIL) VALUES ('
-                       + QuotedStr(MainForm.ArrGroupList[MainForm.GroupListBox.ItemIndex, 0]) + ', '
+                       + QuotedStr(MainForm.FGroupList[MainForm.GroupListBox.ItemIndex, 0]) + ', '
                        + QuotedStr(CUID) + ', '
                        + QuotedStr(MainForm.GroupListDates.Text) + ', '
                        + QuotedStr(Stamp) + ', '
-                       + QuotedStr(UpperCase(MainForm.CurrentUserName)) + ', '
+                       + QuotedStr(UpperCase(MainForm.FUserName)) + ', '
                        + QuotedStr('1') + ')';
           Query.SQL.Text:=StrSQL;
           { APPLY PARAMETERS }
@@ -470,7 +470,7 @@ begin
   { INITIALIZE }
   Result:=False;
   Query:=TADOQuery.Create(nil);
-  Query.Connection:=MainForm.ADOConnect;
+  Query.Connection:=MainForm.FDbConnect;
   if SearchState = 0 then StrSQL:='SELECT INVOICESTATE FROM tbl_invoices WHERE INVOICENO = ' + QuotedStr(InvNum)
     else
       StrSQL:='SELECT INVOICESTATE FROM tbl_invoices WHERE INVOICENO = :uParam1 AND INVOICESTATE = ' + QuotedStr(IntToStr(SearchState));
@@ -657,7 +657,7 @@ begin
   with SG do SendMessage(Handle, WM_SETREDRAW, 0, 0);
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   Query:=TADOQuery.Create(nil);
-  Query.Connection:=MainForm.ADOConnect;
+  Query.Connection:=MainForm.FDbConnect;
   Query.SQL.Clear;
   Stamp:=DateTimeToStr(Now);
   SetLength(StrSQL, 2);
@@ -749,7 +749,7 @@ begin
           { ---------------------------------------------------------------------------------------------------------------------------- BUILD SQL EXPRESSION }
           Query.SQL.Clear;
           Columns:='USER_ALIAS, CUID, CO_CODE, BRANCH, CUSTNAME, LAYOUT, STAMP';
-          Params:=QuotedStr(UpperCase(MainForm.CurrentUserName)) + ', ' +
+          Params:=QuotedStr(UpperCase(MainForm.FUserName)) + ', ' +
                   QuotedStr(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('CUID',   1, 1),  MainForm.sgAgeView.Row]) + ', ' +
                   QuotedStr(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('CO CODE', 1, 1), MainForm.sgAgeView.Row]) + ',' +
                   QuotedStr(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('AGENT',   1, 1), MainForm.sgAgeView.Row]) + ', ' +

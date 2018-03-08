@@ -34,7 +34,7 @@ type
     property DataSet   :  _Recordset read pDataSet    write pDataSet;
   published
     constructor Create(Connector: TADOConnection); overload;
-    destructor  Destroy; override;
+    destructor  Destroy; overload;
     function    OpenTable(TableName: string) :  boolean;
   end;
 

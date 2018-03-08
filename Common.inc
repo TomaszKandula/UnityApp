@@ -103,6 +103,12 @@ const
   ColumnOrderName     = 'COLUMNORDER';
   ColumnNames         = 'COLUMNNAMES';
 
+  { RISK CLASS | DEFAULT VALUES }
+
+  RISK_CLASS_A = '0,80';
+  RISK_CLASS_B = '0,15';
+  RISK_CLASS_C = '0,05';
+
   { FIXED MESSAGES }
 
   ERR_MESSAGE = 'Cannot connect with Microsoft SQL Server. Please re-check your server settings or contact IT support.';

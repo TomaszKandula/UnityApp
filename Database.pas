@@ -68,7 +68,7 @@ begin
   finally
     AppSettings.Free;
   end;
-  if ShowConnStr then LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Connection string built [show_no_password] = ' + dbConnNoPwd);
+  if ShowConnStr then LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Connection string built [show_no_password] = ' + dbConnNoPwd);
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------- CONNECT TO DATABASE }
@@ -80,7 +80,7 @@ procedure TDataBase.InitializeConnection(idThd: integer; ErrorShow: boolean; var
 { -------------------------------------------------------------- ! INNER BLOCK ! ---------------------------------------------------------------------------- }
 procedure ErrorHandler(err_class: string; err_msg: string; should_quit: boolean; err_wnd: boolean);
 begin
-  LogText(MainForm.EventLogPath, ERR_LOGTEXT + '[' + err_class + '] ' + err_msg + ' (' + IntToStr(ExitCode) + ').');
+  LogText(MainForm.FEventLogPath, ERR_LOGTEXT + '[' + err_class + '] ' + err_msg + ' (' + IntToStr(ExitCode) + ').');
   if err_wnd     then Application.MessageBox(PChar(ERR_MESSAGE), PChar(MainForm.CAPTION), MB_OK + MB_ICONWARNING);
   if should_quit then Application.Terminate;
 end;
