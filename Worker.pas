@@ -16,7 +16,7 @@ unit Worker;
 interface
 
 uses
-  Main, Windows, Messages, SysUtils, Classes, Diagnostics, Graphics, ADODB, ComObj;
+  Main, Windows, Messages, SysUtils, Classes, Diagnostics, Graphics, ADODB, ComObj, SyncObjs;
 
 { ----------------------------------------------------------- ! SEPARATE CPU THREADS ! ---------------------------------------------------------------------- }
 
@@ -34,6 +34,7 @@ type
   protected
     procedure Execute; override;
   end;
+
 
 { ---------------------------------------------------------------------------------------------------------------------------------------- OPEN ITEMS SCANNER }
 type
@@ -134,10 +135,14 @@ type
   protected
     procedure Execute; override;
   private
-    pMode:  string;
-    pUser:  string;
+    var FLock:   TCriticalSection;
+    var FMode:   integer;
+    var FGrid:   TStringGrid;
+    var FIDThd:  integer;
   public
-    constructor Create(cMode: string; cUser: string);
+    property IDThd:  integer read FIDThd;
+    constructor Create(ActionMode: integer; Grid: TStringGrid);
+    destructor  Destroy; override;
     function    Read     : boolean;
     function    Write    : boolean;
     function    ImportCSV: boolean;
@@ -174,7 +179,7 @@ var
 implementation
 
 uses
-  DataBase, Settings, UAC, Mailer, AgeView, Transactions;
+  Model, DataBase, Settings, UAC, Mailer, AgeView, Transactions;
 
 { ############################################################ ! SEPARATE CPU THREADS ! ##################################################################### }
 
@@ -252,35 +257,9 @@ var
   IDThread:  integer;
 begin
   IDThread:=TTOpenItemsScanner.CurrentThread.ThreadID;
-  ActiveThreads[2]:=True;
 
-  { IF ALL FILES HAS BEEN UPDATED, THEN EXECUTE SEPARATE THREAD FOR OPEN ITEMS LOAD }
+  //...
 
-(*
-  if OpenItems.Scan(1) then
-  begin
-    try
-      try
-        TTReadOpenItems.Create('1');
-
-      except
-        on E: Exception do
-        begin
-          SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PCHAR('Cannot scan open items source. Please contact IT support.')));
-          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Execution of this tread work has been stopped. Error thrown: ' + E.Message + ' (TOIScan).');
-          SendMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Ready.')));
-        end;
-      end;
-
-    finally
-      ActiveThreads[2]:=False;
-      LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThread) + ']: TOIThread method called with paremeter = 1.');
-    end;
-  end
-    else
-      LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThread) + ']: No changes in open items have been found.');
-
-*)
   { RELEASE THREAD WHEN DONE }
   FreeOnTerminate:=True;
 end;
@@ -501,7 +480,7 @@ var
   jCNT:       integer;
   temp:       string;
   DataBase: TDataBase;
-  UserControl: TUserControl;
+//  UserControl: TUserControl;
   AgeView: TAgeView;
 begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
@@ -815,189 +794,158 @@ begin
 *)
 end;
 
-{ ########################################################## ! ADRESSBOOK MAILER CLASS ! #################################################################### }
+{ ############################################################### ! ADRESS BOOK ! ########################################################################### }
 
-{ ---------------------------------------------------------------------------------------------------------------------------------------------- ADDRESS BOOK }
-constructor TTAddressBook.Create(cMode: string; cUser: string);
+{ ------------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE }
+constructor TTAddressBook.Create(ActionMode: integer; Grid: TStringGrid);
 begin
   inherited Create(False);
-  pMode:=cMode;
-  pUser:=cUser;
+  FLock:=TCriticalSection.Create;
+  FMode:=ActionMode;
+  FGrid:=Grid;
+  FIDThd:=0;
 end;
 
-procedure TTAddressBook.Execute;  (* ASYNC & SYNC *)
-var
-  DataBase:    TDataBase;
+{ --------------------------------------------------------------------------------------------------------------------------------------------------- RELEASE }
+destructor TTAddressBook.Destroy;
 begin
-  AddressBook:=TAddressBook.Create('|', pUser);
-  AddressBook.idThd:=TTAddressBook.CurrentThread.ThreadID;
-  ActiveThreads[8]:=True;
-  DataBase:=TDataBase.Create(False);
-  if DataBase.Check = 0 then
-  begin
-    try
-      PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Processing..., please wait.')));
+  FreeAndNil(FLock);
+end;
 
-      (* HEAVY DUTY TASK MUST BE ALWAYS RUN BETWEEN 'PRE-' AND 'POST-' GUI UPDATE *)
-
-      try
-        { -------------------------------------------------------- ! PRE | GUI UPDATE ! ----------------------------------------------------------------------- }
-        Synchronize
-          (procedure begin
-            with MainForm.sgAddressBook do SendMessage(Handle, WM_SETREDRAW, 0, 0);
-          end);
-
-        { --------------------------------------------------- ! HEAVY DUTY TASK (RUN ASYNC) ! ----------------------------------------------------------------- }
-
-        if pMode = '0' then AddressBook.Write;
-        if pMode = '1' then AddressBook.Read;
-        if pMode = '2' then AddressBook.ImportCSV;
-        if pMode = '3' then AddressBook.ExportCSV;
-
-      except
-        on E: Exception do
-        begin
-          SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PCHAR('Read/Write function of Address Book failed. Please contact IT support.')));
-          LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(AddressBook.idThd) + ']: Execution of this tread work has been stopped. Error thrown: ' + E.Message + ' (TABThread).');
-        end;
+{ --------------------------------------------------------------------------------------------------------------------------------------- EXECUTE THREAD WORK }
+procedure TTAddressBook.Execute;
+begin
+  FIDThd:=TTAddressBook.CurrentThread.ThreadID;
+  FLock.Acquire;
+  try
+    SendMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR(stProcessing)));
+    { -------------------------------------------------------------------------------------------------------------------------------------------------- OPEN }
+    if (FMode = adOpenAll) or (FMode = adOpenForUser) then
+    begin
+      if Read then LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Address Book has been opened successfully.')
+      else
+      begin
+        LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot open Address Book.');
+        SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PCHAR('Read function of Address Book has failed. Please contact IT support.')));
       end;
-
-    finally
-      { --------------------------------------------------------- ! POST | GUI UPDATE ! --------------------------------------------------------------------- }
-      Synchronize
-        (procedure begin
-          with MainForm.sgAddressBook do SendMessage(Handle, WM_SETREDRAW, 1, 0);
-          MainForm.sgAddressBook.Repaint;
-          MainForm.sgAddressBook.SetColWidth(30, 25);
-        end);
-      AddressBook.Free;
-      ActiveThreads[8]:=False;
-      PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Ready.')));
     end;
+    { ---------------------------------------------------------------------------------------------------------------------------------------------- SAVE NEW }
+    if FMode = adSaveNew then
+    begin
+      if Write then
+        LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: The Address Book has been saved successfully.')
+          else
+            LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot save to Address Book.');
+    end;
+  { --------------------------------------------------------------------------------------------------------------------------------------------- RELEASE ALL }
+  finally
+    SendMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR(stReady)));
+    FLock.Release;
   end;
-
   { RELEASE THREAD WHEN DONE }
   FreeOnTerminate:=True;
-  FreeAndNil(DataBase);
-end;
-
-{ ----------------------------------------------------------------------------------------------------------------------------------------------- CONSTRUCTOR }
-constructor TAddressBook.Create(UseDelimiter: string; UserNameDef: string);
-begin
-  (* INITIALIZE WITH GIVEN PARAMETERS *)
-  pDelimiter:=UseDelimiter;
-  pUserName :=UserNameDef;
-  pidThd    :=0;
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------------ READ }
-function TAddressBook.Read: boolean;
+function TTAddressBook.Read: boolean;
 var
-  Columns:  string;
-  StrSQL:   string;
-  MSSQL:    TMSSQL;
+  DataTables: TDataTables;
 begin
-  { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-  Result:=False;
-  MSSQL:=TMSSQL.Create(MainForm.FDbConnect);
-  { ------------------------------------------------------------------------------------------------------------------------------------------- COLUMNS SETUP }
-  Columns:='USER_ALIAS,'     +
-           'CUID,'           +
-           'CUSTNUMBER,'     +
-           'CUSTNAME,'       +
-           'EMAILS      ,'   +
-           'ESTATEMENTS ,'   +
-           'TELEPHONE   ,'   +
-           'CONTACT     ,'   +
-           'CUSTADDR    '    ;
-  { ----------------------------------------------------------------------------------------------------------------------------------------------- SQL QUERY }
-  if UserName = '' then
-    StrSQL:='SELECT ' + Columns + ' FROM tbl_addressbook ORDER BY ID ASC'
-      else
-        StrSQL:='SELECT ' + Columns + ' FROM tbl_addressbook WHERE USER_ALIAS = ' + QuotedStr(UserName) + ' ORDER BY ID ASC';
-  { ------------------------------------------------------------------------------------------------------------------------------------- EXECUTE SQL COMMAND }
+  DataTables:=TDataTables.Create(MainForm.FDbConnect);
   try
-    MSSQL.StrSQL:=StrSQL;
-    Result:=MSSQL.SqlToGrid(MainForm.sgAddressBook, MSSQL.ExecSQL, True);
+    { FREEZE STRING GRID }
+    FGrid.Freeze(True);
+    { COLUMN SELECTION }
+    DataTables.Columns.Add(TAddressBook.USER_ALIAS);
+    DataTables.Columns.Add(TAddressBook.CUID);
+    DataTables.Columns.Add(TAddressBook.CUSTNUMBER);
+    DataTables.Columns.Add(TAddressBook.CUSTNAME);
+    DataTables.Columns.Add(TAddressBook.EMAILS);
+    DataTables.Columns.Add(TAddressBook.ESTATEMENTS);
+    DataTables.Columns.Add(TAddressBook.TELEPHONE);
+    DataTables.Columns.Add(TAddressBook.CONTACT);
+    DataTables.Columns.Add(TAddressBook.CUSTADDR);
+    { FILTER BY USER ALIAS IF GIVEN }
+    if FMode = adOpenForUser then DataTables.CustFilter:=TAddressBook.USER_ALIAS + EQUAL + QuotedStr(MainForm.FUserName);
+    DataTables.OpenTable(TblAddressbook);
+    Result:=DataTables.SqlToGrid(FGrid, DataTables.DataSet, True);
   finally
-    { -------------------------------------------------------------------------------------------------------------------------- EVENT LOG AND MESSAGE WINDOW }
-    if not (Result) then
-    begin
-      LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(idThd) + ']: Unexpected error. Cannot open Address Book.');
-      SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PChar('Cannot open Address Book for user "' + UserName + '". Please contact IT support.')));
-    end;
-    MSSQL.Free;
+    FGrid.Freeze(False);
+    DataTables.Free;
   end;
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------------------------- WRITE }
-function TAddressBook.Write: boolean;
+function TTAddressBook.Write: boolean;
 var
-  Columns:  string;
-  MSSQL:    TMSSQL;
-  iCNT:     integer;
-  Start:    integer;
-  RS:       _Recordset;
-  TheSame:  integer;
+  DataTables: TDataTables;
+  iCNT:       integer;
+  Start:      integer;
 begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   Result :=False;
   Start  :=0;
-  TheSame:=0;
-  MSSQL  :=TMSSQL.Create(MainForm.FDbConnect);
-  { ------------------------------------------------------------------------------------------------------------------------------------------------- COLUMNS }
-
-  (* NOTE: COLUMN ORDER MUST BE THE SAME AS IN GIVEN STRING GRID *)
-
-  Columns:='USER_ALIAS,' +
-           'CUID,'       +
-           'CUSTNUMBER,' +
-           'CUSTNAME,'   +
-           'EMAILS,'     +
-           'ESTATEMENTS,'+
-           'TELEPHONE,'  +
-           'CONTACT,'    +
-           'CUSTADDR'    ;
-  { ----------------------------------------------------------------------------------------------------------------- PERFORM INSERT ON NEWLY ADDED ROWS ONLY }
-  for iCNT:=1 to MainForm.sgAddressBook.RowCount - 1 do
-    if MainForm.sgAddressBook.Cells[0, iCNT] = '' then
+  DataTables:=TDataTables.Create(MainForm.FDbConnect);
+  try
+    { FREEZE STRING GRID }
+    FGrid.Freeze(True);
+    { COLUMN SELECTION }
+    DataTables.Columns.Add(TAddressBook.USER_ALIAS);
+    DataTables.Columns.Add(TAddressBook.CUID);  { CONSTRAINT UNIQUE }
+    DataTables.Columns.Add(TAddressBook.CUSTNUMBER);
+    DataTables.Columns.Add(TAddressBook.CUSTNAME);
+    DataTables.Columns.Add(TAddressBook.EMAILS);
+    DataTables.Columns.Add(TAddressBook.ESTATEMENTS);
+    DataTables.Columns.Add(TAddressBook.TELEPHONE);
+    DataTables.Columns.Add(TAddressBook.CONTACT);
+    DataTables.Columns.Add(TAddressBook.CUSTADDR);
+    { PERFORM INSERT ON NEWLY ADDED ROWS ONLY }
+    for iCNT:=1 to FGrid.RowCount - 1 do
     begin
-      Start:=iCNT;
-      Break;
+      if FGrid.Cells[0, iCNT] = '' then
+      begin
+        Start:=iCNT;
+        Break;
+      end;
     end;
-  { -------------------------------------------------------------------------------------------------------------------------- MAKE SURE THAT NEW ROWS EXISTS }
-  if not (Start = 0) then begin
-    { ---------------------------------------------------------------------------------------------------------------------------- CHECK IF CUID ALREADY EXISTS }
-    for iCNT:=Start to MainForm.sgAddressBook.RowCount - 1 do
-    begin
-      MSSQL.StrSQL:='SELECT CUID FROM tbl_AddressBook WHERE CUID = ' + MSSQL.CleanStr(MainForm.sgAddressBook.Cells[2, iCNT], True);
-      RS:=MSSQL.ExecSQL;
-      if RS.RecordCount > 0 then Inc(TheSame);
-    end;
-    { ----------------------------------------------------------------------------------------------------------------------------------- PROCESS BUILT QUERY }
-    if TheSame = 0 then
+    { MAKE SURE THAT NEW ROWS EXISTS }
+    if Start > 0 then
     begin
       try
-        MSSQL.ClearSQL;
-        MSSQL.StrSQL:=MSSQL.GridToSql(MainForm.sgAddressBook, 'tbl_AddressBook', Columns, Start, 1);
-        { RE-DO LIST POSITION }
-        for iCNT:=1 to MainForm.sgAddressBook.RowCount - 1 do MainForm.sgAddressBook.Cells[0, iCNT]:= IntToStr(iCNT);
-        if not (MSSQL.ExecSQL = nil) then Result:=True;
-      finally
-        LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(idThd) + ']: New records have beed successfully added to Address Book.');
-        SendMessage(MainForm.Handle, WM_GETINFO, 1, LPARAM(PChar('New records have beed saved successfully!')));
-        MSSQL.Free;
+        DataTables.ClearSQL;
+        DataTables.StrSQL:=DataTables.GridToSql(FGrid, TblAddressbook, DataTables.ColumnsToList, Start, 1);
+        if not (DataTables.ExecSQL = nil) then
+        begin
+          { RE-DO LIST POSITION }
+          for iCNT:=1 to FGrid.RowCount - 1 do FGrid.Cells[0, iCNT]:= IntToStr(iCNT);
+          Result:=True;
+        end;
+      except
+        on E: Exception do
+        begin
+          LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot add new record(s). Error has been thrown: ' + E.Message + '.');
+          SendMessage(MainForm.Handle, WM_GETINFO, 1, LPARAM(PChar('Cannot add new record(s). Please contact IT support.')));
+        end;
       end;
     end
-      else
-        SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PChar('Cannot add already existing customers.' + #13#10 + 'Please re-check and remove doubles before next attempt.')));
-  end
     else
+    begin
       SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PChar('No new records have beed found. Process has been stopped.')));
+    end;
+  finally
+    FGrid.Freeze(False);
+    DataTables.Free;
+  end;
 end;
 
 { ---------------------------------------------------------------------------------------------------------------------------------------------------- IMPORT }
-function TAddressBook.ImportCSV: boolean;
+function TTAddressBook.ImportCSV: boolean;
+begin
+  Result:=False;
+
+end;
+
+(*
 var
   iCNT:       integer;
   jCNT:       integer;
@@ -1060,9 +1008,16 @@ begin
     end;
   end;
 end;
+*)
 
 { ---------------------------------------------------------------------------------------------------------------------------------------------------- EXPORT }
-function TAddressBook.ExportCSV: boolean;
+function TTAddressBook.ExportCSV: boolean;
+begin
+  Result:=False;
+
+end;
+
+(*
 var
   iCNT:       integer;
   jCNT:       integer;
@@ -1113,12 +1068,9 @@ begin
     CSVData.Free;
   end;
 end;
+*)
 
-
-
-
-
-
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 { ---------------------------------------------------------------------------------------------------------------------------------- EXPORT AGE VIEW TO EXCEL }
 procedure TTExcelExport.Execute;  (* ASYNC *)

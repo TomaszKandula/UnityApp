@@ -1958,13 +1958,13 @@ end;
 { ------------------------------------------------------------------------------------------------------------------------------------------ SHOW ALL ENTRIES }
 procedure TMainForm.Action_ShowAsIsClick(Sender: TObject);
 begin
-  TTAddressBook.Create('1', '');
+  TTAddressBook.Create(adOpenAll, sgAddressBook);
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------ SHOW USER ENTRIES ONLY }
 procedure TMainForm.Action_ShowMyEntriesClick(Sender: TObject);
 begin
-  TTAddressBook.Create('1', MainForm.FUserName);
+  TTAddressBook.Create(adOpenForUser, sgAddressBook);
 end;
 
 { -------------------------------------------------------------- ! MAIN FORM MENU ! ------------------------------------------------------------------------- }
@@ -2147,7 +2147,7 @@ procedure TMainForm.Action_PersonClick(Sender: TObject);
 var
   AgeView: TAgeView;
 begin
-  AgeView:=AgeView.Create;
+  AgeView:=TAgeView.Create;
   try
     MsgCall(1, 'Assigned to Person: ' + AgeView.MapData(sgAgeView, 'PERSON', sgPerson) + '.');
   finally
@@ -3322,39 +3322,31 @@ end;
 { -------------------------------------------------------------------------------------------------------------------------- USER ADDRESS BOOK | OPEN FROM DB }
 procedure TMainForm.btnOpenABClick(Sender: TObject);
 begin
-  { SET 1 = OPEN BUTTON FOR ALL REGISTERED CUSTOMERS }
-  TTAddressBook.Create('1', '');
+  TTAddressBook.Create(adOpenAll, sgAddressBook);
 end;
 
 { ---------------------------------------------------------------------------------------------------------------------- USER ADDRESS BOOK | SAVE NEWLY ADDED }
 procedure TMainForm.btnSaveClick(Sender: TObject);
 begin
-  { SET 0 = SAVE BUTTON }
-  TTAddressBook.Create('0', MainForm.FUserName);
+  TTAddressBook.Create(adSaveNew, sgAddressBook);
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------- USER ADDRESS BOOK | CLOSE }
 procedure TMainForm.btnCloseClick(Sender: TObject);
 begin
-  if MsgCall(5, 'Are you sure you want to close address book?') = IDYES then
-  begin
-    { CLEAR ALL }
-    sgAddressBook.ClearAll(2, 1, 1, True);
-  end;
+  if MsgCall(5, 'Are you sure you want to close address book?') = IDYES then sgAddressBook.ClearAll(2, 1, 1, True);
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------- USER ADDRESS BOOK | IMPORT DATA }
 procedure TMainForm.btnImportClick(Sender: TObject);
 begin
-  { SET 2 = IMPORT BUTTON }
-  TTAddressBook.Create('2', '');
+  TTAddressBook.Create(adImport, sgAddressBook);
 end;
 
 { ---------------------------------------------------------------------------------------------------------------------------- USER ADDRESS BOOK | EXPORT ALL }
 procedure TMainForm.btnExportClick(Sender: TObject);
 begin
-  { SET 3 = EXPORT BUTTON }
-  TTAddressBook.Create('3', '');
+  TTAddressBook.Create(adExport, sgAddressBook);
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------- SECTION LIST | ADD SECTION }

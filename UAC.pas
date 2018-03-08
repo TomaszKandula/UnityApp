@@ -24,10 +24,10 @@ type
   private
     var pUserName: string;
   public
-    property  UserName: string read pUserName write pUserName;
-    function  GetAccessData(DataType: integer): string;
-    procedure GetGroupList(var List: TLists; GroupListBox: TComboBox);
-    procedure GetAgeDates(AgeDatesBox: TComboBox; GroupID: string);
+    property UserName: string read pUserName write pUserName;
+    function GetAccessData(DataType: integer): string;
+    function GetGroupList(var List: TLists; GroupListBox: TComboBox): boolean;
+    function GetAgeDates(AgeDatesBox: TComboBox; GroupID: string): boolean;
   end;
 
 implementation
@@ -48,17 +48,18 @@ begin
       if DataType = adUserKeyID   then Result:=DataSet.Fields.Item[TUAC.ID].Value;
       DataSet.Filter:=adFilterNone;
     end;
-  finally
-//    DataSet.Close;
+  except
+    Result:='';
   end;
 end;
 
 { ---------------------------------------------------------------------------------------------------------- READ GROUP ID AND GROUP NAME FOR GIVEN USER NAME }
-procedure TUserControl.GetGroupList(var List: TLists; GroupListBox: TComboBox);
+function TUserControl.GetGroupList(var List: TLists; GroupListBox: TComboBox): boolean;
 var
   iCNT:     integer;
   UserKey:  string;
 begin
+  Result:=True;
   iCNT  :=0;
   try
     UserKey:=GetAccessData(adUserKeyID);
@@ -84,14 +85,15 @@ begin
       GroupListBox.ItemIndex:=0;
       GroupListBox.Enabled:=True;
     end;
-  finally
-//    DataSet.Close;
+  except
+    Result:=False;
   end;
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------- AGE DATES FOR SELECTED GROUP ID }
-procedure TUserControl.GetAgeDates(AgeDatesBox: TComboBox; GroupID: string);
+function TUserControl.GetAgeDates(AgeDatesBox: TComboBox; GroupID: string): boolean;
 begin
+  Result:=True;
   StrSQL:='SELECT DISTINCT ' + TSnapshots.AGE_DATE + ' FROM ' + TblSnapshots + ' WHERE ' + TSnapshots.GROUP_ID + ' = ' + QuotedStr(GroupID);
   try
     DataSet:=ExecSQL;
@@ -108,8 +110,8 @@ begin
       AgeDatesBox.ItemIndex:=AgeDatesBox.Items.Count - 1;
       if GetAccessData(adAccessLevel) = acADMIN then AgeDatesBox.Enabled:=True;
     end;
-  finally
-//    DataSet.Close;
+  except
+    Result:=False;
   end;
 end;
 

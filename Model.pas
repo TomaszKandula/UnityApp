@@ -23,18 +23,21 @@ type
   TDataTables = class(TMSSQL)
   {$TYPEINFO ON}
   private
-    pidThd     :  integer;
-    pDataSet   :  _Recordset;
-    pConnStr   :  string;
-    pCustFilter:  string;
+    var pidThd     :  integer;
+    var pDataSet   :  _Recordset;
+    var pConnStr   :  string;
+    var pCustFilter:  string;
+    var pColumns   :  TStringList;
   public
     property ConnStr   :  string     read pConnStr;
     property idThd     :  integer    read pidThd      write pidThd;
     property CustFilter:  string     read pCustFilter write pCustFilter;
     property DataSet   :  _Recordset read pDataSet    write pDataSet;
+    property Columns   : TStringList read pColumns    write pColumns;
   published
     constructor Create(Connector: TADOConnection); overload;
-    destructor  Destroy; overload;
+    destructor  Destroy; reintroduce; overload;
+    function    ColumnsToList: string;
     function    OpenTable(TableName: string) :  boolean;
   end;
 
@@ -87,7 +90,7 @@ type
   TManagers = class(TDataTables)  { MANY-TO-MANY }
   {$TYPEINFO ON}
   public
-    const ID        : string = 'ID';   { PRIMARY KEY <- FOREGIN KEY FROM "TBL_COMPANY" }
+    const ID        : string = 'ID';  { PRIMARY KEY <- FOREGIN KEY FROM "TBL_COMPANY" }
     const ManagerAR : string = 'ManagerAR';
     const ManagerAP : string = 'ManagerAP';
     const ManagerGL : string = 'ManagerGL';
@@ -98,7 +101,7 @@ type
   TTeamleaders = class(TDataTables)  { MANY-TO-MANY }
   {$TYPEINFO ON}
   public
-    const ID                    : string = 'ID';   { PRIMARY KEY <- FOREIGN KEY FROM "TBL_COMPANY" }
+    const ID                    : string = 'ID';  { PRIMARY KEY <- FOREIGN KEY FROM "TBL_COMPANY" }
     const AccountsPayableTLs    : string = 'AccountsPayableTLs';
     const AccountsReceivableTLs : string = 'AccountsReceivableTLs';
     const GeneralLedgerTLs      : string = 'GeneralLedgerTLs';
@@ -108,12 +111,12 @@ type
 
 { ------------------------------------------------------------ ! TBL_ADDRESSBOOK ! -------------------------------------------------------------------------- }
 type
-  TAddressBook1 = class(TDataTables)
+  TAddressBook = class(TDataTables)
   {$TYPEINFO ON}
   public
     const ID         : string = 'ID';  { PRIMARY KEY }
     const USER_ALIAS : string = 'USER_ALIAS';
-    const CUID       : string = 'CUID';
+    const CUID       : string = 'CUID';  { CONSTRAINT UNIQUE }
     const CUSTNUMBER : string = 'CUSTNUMBER';
     const CUSTNAME   : string = 'CUSTNAME';
     const EMAILS     : string = 'EMAILS';
@@ -307,8 +310,8 @@ type
   TInvoices = class(TDataTables)  { ONE-TO-MANY }
   {$TYPEINFO ON}
   public
-    const ID           : string = 'ID';   { PRIMARY KEY }
-    const SK           : string = 'SK';   { FOREIGN KEY -> PRIMARY KEY IN "TBL_TRACKER" }
+    const ID           : string = 'ID';  { PRIMARY KEY }
+    const SK           : string = 'SK';  { FOREIGN KEY -> PRIMARY KEY IN "TBL_TRACKER" }
     const CUID         : string = 'CUID';
     const INVOICENO    : string = 'INVOICENO';
     const INVOICESTATE : string = 'INVOICESTATE';
@@ -354,22 +357,42 @@ begin
   pidThd     :=0;
   pCustFilter:='';
   pDataSet   :=nil;
+  pColumns   :=TStringList.Create;
   inherited;
 end;
 
 destructor TDataTables.Destroy;
 begin
   FreeAndNil(pDataSet);
+  FreeAndNil(pColumns);
   inherited;
+end;
+
+{ ---------------------------------------------------------------------------------------------------------------------------------- TRANSPOSE COLUMNS TO ROW }
+function TDataTables.ColumnsToList: string;
+var
+  iCNT:   integer;
+begin
+  Result:=' * ';
+  { SERIALIZATION }
+  if (Columns.Text <> '') and (Columns.Count > 0) then
+  begin
+    Result:='';
+    for iCNT:=0 to Columns.Count - 1 do
+      if Result = '' then Result:=Columns.Strings[iCNT]
+        else
+          Result:=Result + COMMA + Columns.Strings[iCNT];
+  end;
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------- OPEN TABLE TO RECORDSET }
 function TDataTables.OpenTable(TableName: string): boolean;
 begin
   Result:=True;
+  { EXECUTE QUERY }
   try
-    if pCustFilter =  '' then StrSQL:='SELECT * FROM ' + TableName;
-    if pCustFilter <> '' then StrSQL:='SELECT * FROM ' + TableName + ' WHERE ' + pCustFilter;
+    if pCustFilter =  '' then StrSQL:='SELECT ' + ColumnsToList + ' FROM ' + TableName;
+    if pCustFilter <> '' then StrSQL:='SELECT ' + ColumnsToList + ' FROM ' + TableName + ' WHERE ' + QuotedStr(pCustFilter);
     pDataSet:=ExecSQL;
   except
     Result:=False;

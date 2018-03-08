@@ -123,6 +123,7 @@ const
   WHITESPACE   : char   = #32;
   QUOTE        : char   = #39;
   COMMA        : char   = #44;
+  POINT        : char   = #46;
 
   { SQL MODEL CONSTANTS }
 
@@ -144,6 +145,22 @@ const
   acADMIN     = 'AD';
   acReadWrite = 'RW';
   acReadOnly  = 'RO';
+
+  { ADDRESS BOOK ENUMERATION }
+
+  adOpenAll     = 0;
+  adOpenForUser = 1;
+  adSaveNew     = 2;
+  adExport      = 3;
+  adImport      = 4;
+
+  { STATUS MESSAGES }
+
+  stReady      = 'Ready.';
+  stProcessing = 'Processing..., please wait.';
+
+
+
 
   { MAPPED TABLES FROM DATABASE | WE DO NOT USE SEPARATE ORM FRAMEWORK }
 
