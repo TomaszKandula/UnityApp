@@ -31,6 +31,10 @@ type                                                  (* RUN EITHER IN WORKER OR
     FileExist     : boolean;                     { INDICATE IF SOURCE FILE FOR OPEN ITEMS EXISTS }
     ArrOpenItems  : array of array of string;    { INFORMATION ON SOURCES OF OPEN ITEMS          }
 
+
+
+    // OK
+
     nInvoices     : integer;
     Overdue       : integer;
     OSamt         : double;
@@ -51,8 +55,8 @@ type                                                  (* RUN EITHER IN WORKER OR
 
     //new
 
-    function  GetDateTime: TDateTime;
-    function  LoadintoGrid: boolean;
+    function  GetDateTime:  TDateTime;
+    function  LoadToGrid :  boolean;
 
   end;
 
@@ -63,13 +67,54 @@ uses
 
 { ############################################################## ! OPEN ITEMS CLASS ! ####################################################################### }
 
+{ --------------------------------------------------------------------------------------------------------------------------------- GET CURRENT DATE AND TIME }
+function TTransactions.GetDateTime: TDateTime;
+begin
 
+  //
 
+end;
 
+{ ----------------------------------------------------------------------------------------------------------------------------- LOAD OPEN ITEMS FROM DATABASE }
 
+(* ************************************************************************************************************************************************************
 
+  FIXED GRID DEFINITION
+  ---------------------
 
+  DATABASE QUERY:
 
+  COLUMNS:
+    1/ COMPANIES
+    2/ CURRENCY
+    3/ INTEREST
+    4/ AGENT
+  ROWS:
+    1/ VALUE 1 (INTEGER)
+    2/ VALUE 2 (VARCHAR)
+    3/ VALUE 3 (FLOAT)
+    4/ VALUE 4 (VARCHAR)
+
+  STRING GRID (NO FIXED ROWS/COLS) CONTAINS TRANSPOSED DATA:
+
+  ROWS:            COLUMN 0   COLUMN 1    COLUMN 2    COLUMN 3
+    0/ COMPANIES   2047       340         43          0
+    1/ CURRENCY    NOK        NOK         NOK         N/A
+    2/ INTEREST    0,085      0,085       0,085       0
+    3/ AGENT       OFF        OFF         OFF         N/A
+
+    TO LOAD OPEN ITEMS INTO STRING GRID, CALL STORE PROCEDURE:
+
+    "EXEC QueryOpenItems @Date, @CoCode"
+
+************************************************************************************************************************************************************ *)
+
+function TTransactions.LoadToGrid: boolean;
+begin
+
+  //
+
+end;
 
 
 { ------------------------------------------------------------------------------------------------------------------------------------------- OPEN ITEMS LOAD }
@@ -510,9 +555,12 @@ end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------- CO CODE NAME CONVERTION }
 function TTransactions.ConvertName(CoNumber: string; Prefix: string; mode: integer): string;
+(*
 var
   iCNT:  integer;
+*)
 begin
+(*
   { INITIALIZE }
   Result:= '';
   { ALLOW TO CONVERT '2020' TO 'F2020', ETC. }
@@ -546,15 +594,19 @@ begin
         Exit;
       end;
   end;
+*)
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------ RETURN KPI FOR GIVEN COMPANY }
 function TTransactions.ReturnKPI(SG: TStringGrid; StrCoCode: string; mode: integer): double;
+(*
 { MODE = 0 ===> KPI | OVERDUE FOR GIVEN CO CODE     }
 { MODE = 1 ===> KPI | UNALLOCATED FOR GIVEN CO CODE }
 var
   iCNT:  integer;
+*)
 begin
+(*
    { INITIALIZE }
    Result:=0;
    { LOOK FOR 'COCODE' AND SUM NUMBERS }
@@ -563,6 +615,7 @@ begin
      if (mode = 0) and (StrCoCode = SG.Cells[1, iCNT]) then Result:=Result + StrToFloat(SG.Cells[15, iCNT]);
      if (mode = 1) and (StrCoCode = SG.Cells[1, iCNT]) then Result:=Result + StrToFloat(SG.Cells[16, iCNT]);
    end;
+*)
 end;
 
 end.

@@ -235,7 +235,6 @@ type                                                            (* GUI | MAIN TH
     Text66: TLabel;
     Text67: TLabel;
     Text63: TLabel;
-    COC1: TEdit;
     Text55: TLabel;
     Text56: TLabel;
     Text57: TLabel;
@@ -270,9 +269,6 @@ type                                                            (* GUI | MAIN TH
     Cap15: TShape;
     GridFillerTop7: TImage;
     Text54L2: TLabel;
-    COC2: TEdit;
-    COC3: TEdit;
-    COC4: TEdit;
     MainShape2: TPanel;
     MainShape6: TPanel;
     AppFooter: TPanel;
@@ -319,14 +315,6 @@ type                                                            (* GUI | MAIN TH
     Text72: TLabel;
     Text79: TLabel;
     Text73: TLabel;
-    CUR1: TEdit;
-    CUR2: TEdit;
-    CUR3: TEdit;
-    CUR4: TEdit;
-    INT1: TEdit;
-    INT2: TEdit;
-    INT3: TEdit;
-    INT4: TEdit;
     tcOverdueRatio: TLabel;
     OILoader: TTimer;
     Text80: TLabel;
@@ -351,10 +339,6 @@ type                                                            (* GUI | MAIN TH
     Text83L1: TLabel;
     Text83L2: TLabel;
     Label1: TLabel;
-    AGT1: TEdit;
-    AGT2: TEdit;
-    AGT3: TEdit;
-    AGT4: TEdit;
     PanelGroupName: TPanel;
     btnMakeGroupAge: TSpeedButton;
     EditGroupName: TLabeledEdit;
@@ -433,6 +417,7 @@ type                                                            (* GUI | MAIN TH
     TabSheet9: TTabSheet;
     WebBrowser: TWebBrowser;
     WebContainer: TPanel;
+    DetailsGrid: TStringGrid;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -1307,7 +1292,7 @@ begin
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    DataTables.StrSQL:=SELECT                       + WHITESPACE +
+    DataTables.StrSQL:=SELECT                       + SPACE +
                          TSnapshots.CUSTOMER_NAME   + _AS + 'Customer name'      + COMMA +
                          TSnapshots.CUSTOMER_NUMBER + _AS + 'Customer number'    + COMMA +
                          TSnapshots.COUNTRY_CODE    + _AS + 'Country code'       + COMMA +

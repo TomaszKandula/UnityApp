@@ -120,7 +120,7 @@ const
   CR           : string = '#13';
   LF           : string = '#10';
   TAB          : char   = #9;
-  WHITESPACE   : char   = #32;
+  SPACE        : char   = #32;
   QUOTE        : char   = #39;
   COMMA        : char   = #44;
   POINT        : char   = #46;

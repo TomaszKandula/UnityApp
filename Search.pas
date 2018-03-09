@@ -78,7 +78,7 @@ begin
   if (CaseSensitive.Checked)     then SearchString:=EditSearch.Text;
 
   { CANNOT BE EMPTY }
-  if (SearchString = '') or (SearchString = WHITESPACE) then
+  if (SearchString = '') or (SearchString = SPACE) then
   begin
     MainForm.MsgCall(2, 'Cannot search empty string. Please provide with customer name or customer number and try again.');
     Exit;

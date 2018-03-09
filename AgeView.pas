@@ -457,10 +457,10 @@ begin
       { REMOVE FROM CO CODE 'F' PREFIX }
 //      ArrAgeView[avRow, 20]:=ConvertName(MidStr(ArrAgeView[avRow, 20], 2, 5), '', 2);
       { LEDGER ISO }
-      if MainForm.COC1.Text = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.CUR1.Text;
-      if MainForm.COC2.Text = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.CUR2.Text;
-      if MainForm.COC3.Text = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.CUR3.Text;
-      if MainForm.COC4.Text = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.CUR4.Text;
+//      if MainForm.COC1.Text = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.CUR1.Text;
+//      if MainForm.COC2.Text = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.CUR2.Text;
+//      if MainForm.COC3.Text = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.CUR3.Text;
+//      if MainForm.COC4.Text = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.CUR4.Text;
       { -------------------------------------------------------------------------------------------------------------------------------------------- COUNTERS }
       { MOVE COUNTER }
       inc(avRow);
@@ -612,12 +612,15 @@ begin
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------- RETURN CO CODE AND CUREENCY }
-procedure TAgeView.Details(GroupID: string; AgeDate: TDateTime; idThd: integer);  (* SYNCHRONIZE *)  // REFACTOR !!!!
+procedure TAgeView.Details(GroupID: string; AgeDate: TDateTime; idThd: integer);
+(*
 var
   MSSQL :  TMSSQL;
   StrSQL:  string;
   RS    :  _Recordset;
+*)
 begin
+(*
   StrSQL:='SELECT DISTINCT '             +
             'tbl_snapshots.CO_CODE,'     +
             'tbl_snapshots.LEDGER_ISO,'  +
@@ -689,6 +692,7 @@ begin
   if MainForm.CUR2.Text <> 'N/A' then MainForm.tcCURRENCY.Caption:=MainForm.tcCURRENCY.Caption + MainForm.CUR2.Text + ' ';
   if MainForm.CUR3.Text <> 'N/A' then MainForm.tcCURRENCY.Caption:=MainForm.tcCURRENCY.Caption + MainForm.CUR3.Text + ' ';
   if MainForm.CUR4.Text <> 'N/A' then MainForm.tcCURRENCY.Caption:=MainForm.tcCURRENCY.Caption + MainForm.CUR4.Text + ' ';
+*)
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------- LOOK FOR DATA }

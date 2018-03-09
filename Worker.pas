@@ -271,6 +271,7 @@ begin
           { -------------------------------------------------------------------------------------------------------------------------- CLEAR OPEN ITEMS BOXES }
 
           { RESET OPEN ITEMS DETAIS }
+(*
           MainForm.COC1.Text:='0';
           MainForm.COC2.Text:='0';
           MainForm.COC3.Text:='0';
@@ -287,7 +288,7 @@ begin
           MainForm.AGT2.Text:='N/A';
           MainForm.AGT3.Text:='N/A';
           MainForm.AGT4.Text:='N/A';
-
+*)
           { --------------------------------------------------------------------------------------------------------------------------------- DISPLAY MESSAGE }
           MainForm.StatBar_TXT1.Caption :='Loading aging view..., please wait.';
 
