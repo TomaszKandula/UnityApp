@@ -23,11 +23,14 @@ type                                                  (* RUN EITHER IN WORKER OR
   TTransactions = class(TDataTables)
   {$TYPEINFO ON}
   public
-    (* VARIABLES UPDATED BY WORKER THREAD AND USED BY MAIN THREAD *)
+
+    //below to be removed
+
     OpenItemsDir  : string;                      { PATH TO OPEN ITEMS DIRECTORY                  }
     OpenItemsFor  : string;                      { FORMAT OF FILE WITH OPEN ITEMS                }
     FileExist     : boolean;                     { INDICATE IF SOURCE FILE FOR OPEN ITEMS EXISTS }
-    ArrOpenItems  : array of array of string;    { INFORMATION ON SOURCES OF OPEN ITEMS          }        //remove
+    ArrOpenItems  : array of array of string;    { INFORMATION ON SOURCES OF OPEN ITEMS          }
+
     nInvoices     : integer;
     Overdue       : integer;
     OSamt         : double;
@@ -39,9 +42,18 @@ type                                                  (* RUN EITHER IN WORKER OR
     KPI_overdue   : double;
     KPI_unalloc   : double;
   published
-    procedure   Load(idThd: integer);            { RUN IN WORKER THREAD ONLY }         //refactor!!
-    function    ConvertName(CoNumber: string; Prefix: string; mode: integer): string;  //ok
-    function    ReturnKPI(SG: TStringGrid; StrCoCode: string; mode: integer): double;  //refactor!!
+
+    //below to be removed
+    procedure   Load(idThd: integer);            { RUN IN WORKER THREAD ONLY }
+    function    ConvertName(CoNumber: string; Prefix: string; mode: integer): string;
+    function    ReturnKPI(SG: TStringGrid; StrCoCode: string; mode: integer): double;
+
+
+    //new
+
+    function  GetDateTime: TDateTime;
+    function  LoadintoGrid: boolean;
+
   end;
 
 implementation
@@ -51,11 +63,18 @@ uses
 
 { ############################################################## ! OPEN ITEMS CLASS ! ####################################################################### }
 
-                                                                      //refactor!!!
+
+
+
+
+
+
+
+
 
 { ------------------------------------------------------------------------------------------------------------------------------------------- OPEN ITEMS LOAD }
-procedure TTransactions.Load(idThd: integer);  (* ASYNC & SYNC *)
-
+procedure TTransactions.Load(idThd: integer);
+(*
 var
   { SETTINGS ACCESSIBLE FOR INNER AND MAIN BLOCK }
   AppSettings:  TSettings;
@@ -280,15 +299,12 @@ var
   InterestRate:     double;
   { AMOUNT OF OUTSTANDING INVOICES ONLY }
   InvoiceAmt:       double;
+*)
 begin
-
+(*
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
 
   AppSettings.Create;
-
-
-
-  (* RESET VARIABLES *)
 
   nInvoices     :=0;
   Overdue       :=0;
@@ -300,8 +316,8 @@ begin
   cRecoveryAmt  :=0;
   KPI_overdue   :=0;
   KPI_unalloc   :=0;
-  InterestRate            :=0;
-  TotalRows               :=0;
+  InterestRate  :=0;
+  TotalRows     :=0;
   { ----------------------------------------------------------------------------------------------- STOP IF THERE IS NO COMPANIES SELECTED, OTHERWISE EXECUTE }
   if StrToInt(MainForm.COC1.Text) + StrToInt(MainForm.COC2.Text) + StrToInt(MainForm.COC3.Text) + StrToInt(MainForm.COC4.Text)  <= 0 then
   begin
@@ -421,6 +437,8 @@ begin
       FreeAndNil(AppSettings);
     end;
   end;
+
+*)
 end;
 
 (*

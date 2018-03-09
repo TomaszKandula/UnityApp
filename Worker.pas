@@ -16,7 +16,7 @@ unit Worker;
 interface
 
 uses
-  Main, Windows, Messages, SysUtils, Classes, Diagnostics, Graphics, ADODB, ComObj, SyncObjs;
+  Main, Windows, Messages, SysUtils, Classes, Diagnostics, Graphics, ADODB, ComObj, SyncObjs, Dialogs;
 
 { ----------------------------------------------------------- ! SEPARATE CPU THREADS ! ---------------------------------------------------------------------- }
 
@@ -112,24 +112,6 @@ type
   end;
 
 { ---------------------------------------------------------------------------------------------------------------------------------------------- ADDRESS BOOK }
-
-(*
-type
-  TAddressBook = class //remove!!!
-  {$TYPEINFO ON}
-  private
-    pidThd      : integer;
-    pDelimiter  : string;
-    pUserName   : string;
-  public
-    property    idThd      : integer read pidThd     write pidThd;
-    property    Delimiter  : string  read pDelimiter write pDelimiter;
-    property    UserName   : string  read pUserName  write pUserName;
-  published
-    constructor Create(UseDelimiter: string; UserNameDef: string);
-  end;
-*)
-
 type
   TTAddressBook = class(TThread)
   protected
@@ -140,38 +122,30 @@ type
     var FGrid:   TStringGrid;
     var FIDThd:  integer;
   public
-    property IDThd:  integer read FIDThd;
+    property    IDThd:  integer read FIDThd;
     constructor Create(ActionMode: integer; Grid: TStringGrid);
     destructor  Destroy; override;
     function    Read     : boolean;
     function    Write    : boolean;
-    function    ImportCSV: boolean;
-    function    ExportCSV: boolean;
   end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------- EXPORT TO EXCEL }
 type
   TTExcelExport = class(TThread)
-    protected
-      procedure Execute; override;
+  protected
+    procedure Execute; override;
+  private
+    var FLock:   TCriticalSection;
+  public
+    constructor Create;
+    destructor  Destroy; override;
   end;
 
 
-  ///below array to be removed!!!
+///below array to be removed!!!
 
 { ---------------------------------------------------------------------------------------------------------------------- ACCESSIBLE VARIABLES FOR OTHER UNITS }
 var
-  { THREADS ORDER IN ARRAY:        }
-  {   0. CHECK SERVER CONNECTION   }
-  {   1. INVOICE TRACKER SCANNER   }
-  {   2. OPEN ITEMS SCANNER        }
-  {   3. READ AGE VIEW             }
-  {   4. MAKE AGE VIEW             }
-  {   5. TRACKER LIST REFRESH      }
-  {   6. SAVE COMMENTARY           }    //temporary off
-  {   7. READ OPEN ITEMS           }
-  {   8. ADDRESS BOOK              }
-  {   9. EXPORT TO EXCEL           }
   ActiveThreads: array[0..9] of boolean = (False, False, False, False, False, False, False, False, False, False);
 
 { ------------------------------------------------------------- ! IMPLEMENTATION ZONE ! --------------------------------------------------------------------- }
@@ -837,8 +811,20 @@ begin
           else
             LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot save to Address Book.');
     end;
-  { --------------------------------------------------------------------------------------------------------------------------------------------- RELEASE ALL }
+    { ------------------------------------------------------------------------------------------------------------------------------------------------ IMPORT }
+    if FMode = adImport then
+    begin
+      FGrid.OpenThdId:=FIDThd;
+      FGrid.ImportCSV(MainForm.CSVImport, '|');
+    end;
+    { ------------------------------------------------------------------------------------------------------------------------------------------------ EXPORT }
+    if FMode = adExport then
+    begin
+      FGrid.OpenThdId:=FIDThd;
+      FGrid.ExportCSV(MainForm.CSVExport, '|');
+    end;
   finally
+    { ------------------------------------------------------------------------------------------------------------------------------------------- RELEASE ALL }
     SendMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR(stReady)));
     FLock.Release;
   end;
@@ -908,7 +894,7 @@ begin
         Break;
       end;
     end;
-    { MAKE SURE THAT NEW ROWS EXISTS }
+    { IF NEW ROWS EXISTS, THEN SAVE }
     if Start > 0 then
     begin
       try
@@ -924,7 +910,7 @@ begin
         on E: Exception do
         begin
           LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot add new record(s). Error has been thrown: ' + E.Message + '.');
-          SendMessage(MainForm.Handle, WM_GETINFO, 1, LPARAM(PChar('Cannot add new record(s). Please contact IT support.')));
+          SendMessage(MainForm.Handle, WM_GETINFO, 3, LPARAM(PChar('Cannot add new record(s). Please contact IT support.')));
         end;
       end;
     end
@@ -938,167 +924,50 @@ begin
   end;
 end;
 
-{ ---------------------------------------------------------------------------------------------------------------------------------------------------- IMPORT }
-function TTAddressBook.ImportCSV: boolean;
-begin
-  Result:=False;
+{ ############################################################## ! EXPORT TO EXCEL ! ######################################################################## }
 
+{ ------------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE }
+constructor TTExcelExport.Create;
+begin
+  inherited Create(False);
+  FLock:=TCriticalSection.Create;
 end;
 
-(*
-var
-  iCNT:       integer;
-  jCNT:       integer;
-  Count:      integer;
-  Data:       TStringList;
-  Transit:    TStringList;
-  fPath:      string;
-  IsError:    boolean;
+{ --------------------------------------------------------------------------------------------------------------------------------------------------- RELEASE }
+destructor TTExcelExport.Destroy;
 begin
-  { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-  Result:=False;
-  IsError:=False;
-  Count:=0;
-  { ----------------------------------------------------------------------------------------------------------------------------- GET THE FILE PATH AND PARSE }
-  if MainForm.CSVImport.Execute = True then
-  begin
-    fPath:=MainForm.CSVImport.FileName;
-    Data:=TStringList.Create;
-    Transit:=TStringList.Create;
-    try
-      { LOAD DATA }
-      Data.LoadFromFile(fPath);
-      { COUNT ALL COLUMNS }
-      for iCNT:=0 to Length(Data[0]) do if copy(Data[0], iCNT, 1) = Delimiter then inc(Count);
-      { COUNT ALL ROWS & SETUP OFFSET }
-      MainForm.sgAddressBook.RowCount:=Data.Count + 1;
-      { SETUP TRANSIT THAT WILL HOLD SPLIT LINE }
-      Transit.StrictDelimiter:=True;
-      Transit.Delimiter:=Delimiter[1];
-      { ITERATE THROUGH ALL ROWS }
-      try
-        for iCNT:= 0 to Data.Count - 1 do
-        begin
-          { SPLIT STRING USING GIVEN DELIMITER }
-          Transit.DelimitedText:=Data[iCNT];
-          for jCNT:=1 to Count do MainForm.sgAddressBook.Cells[jCNT, iCNT + 1]:=Transit[jCNT - 1];
-          MainForm.sgAddressBook.Cells[0, iCNT + 1]:=IntToStr((iCNT + 1));
-          Transit.Clear;
-        end;
-        Result:=True;
-      { ---------------------------------------------------------------------------------------------------------------------------------------- ON EXCEPTION }
-      except
-        on E: Exception do
-        begin
-          LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(idThd) + ']: CSV Import faild: ' + ExtractFileName(fPath));
-          SendMessage(MainForm.Handle, WM_GETINFO, 3, LPARAM(PChar('CSV Import faild. Please check the file and try again.')));
-          IsError:=True;
-        end;
-      end;
-    { ----------------------------------------------------------------------------------------------------------------------------------- RELEASE FROM MEMORY }
-    finally
-      PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Ready.')));
-      if not IsError then
-      begin
-        LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(idThd) + ']: Data has been imported successfully!');
-        SendMessage(MainForm.Handle, WM_GETINFO, 1, LPARAM(PChar('Data has been imported successfully!')));
-      end;
-      Data.Free;
-      Transit.Free;
-    end;
-  end;
+  FreeAndNil(FLock);
 end;
-*)
-
-{ ---------------------------------------------------------------------------------------------------------------------------------------------------- EXPORT }
-function TTAddressBook.ExportCSV: boolean;
-begin
-  Result:=False;
-
-end;
-
-(*
-var
-  iCNT:       integer;
-  jCNT:       integer;
-  fPath:      string;
-  CSVData:    TStringList;
-  MyStr:      string;
-  CleanStr:   string;
-  IsError:    boolean;
-begin
-  { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-  Result:=False;
-  IsError:=False;
-  CSVData:=TStringList.Create;
-  { ------------------------------------------------------------------------------------------------------------------------------------------ WRITE CSV FILE }
-  try
-    { ADD ROWS AND COLUMNS WITH DELIMITER }
-    for iCNT:=1 to MainForm.sgAddressBook.RowCount - 1 do
-    begin
-      for jCNT:= 1 to MainForm.sgAddressBook.ColCount - 1 do
-      begin
-        CleanStr :=MainForm.sgAddressBook.Cells[jCNT, iCNT];
-        CleanStr :=StringReplace(CleanStr, #13#10, ' ', [rfReplaceAll]);
-        MyStr    :=MyStr + CleanStr + Delimiter;
-      end;
-      CSVData.Add(MyStr);
-      MyStr:='';
-    end;
-    { SAVE TO FILE AS PLAIN TEXT }
-    try
-      if MainForm.CSVExport.Execute = True then CSVData.SaveToFile(MainForm.CSVExport.FileName);
-      Result:=True;
-    { ------------------------------------------------------------------------------------------------------------------------------------------ ON EXCEPTION }
-    except
-      on E: Exception do
-      begin
-        LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(idThd) + ']: Cannot saved file: ' + ExtractFileName(fPath));
-        SendMessage(MainForm.Handle, WM_GETINFO, 3, LPARAM(PChar('Cannot save the file in the given location.')));
-        IsError:=True;
-      end;
-    end;
-  { ------------------------------------------------------------------------------------------------------------------------------------- RELEASE FROM MEMORY }
-  finally
-    if not IsError then
-    begin
-      LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(idThd) + ']: Data has been exported successfully!');
-      SendMessage(MainForm.Handle, WM_GETINFO, 1, LPARAM(PChar('Address Book have been exported successfully!')));
-    end;
-    CSVData.Free;
-  end;
-end;
-*)
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 { ---------------------------------------------------------------------------------------------------------------------------------- EXPORT AGE VIEW TO EXCEL }
-procedure TTExcelExport.Execute;  (* ASYNC *)
+procedure TTExcelExport.Execute;
 var
   IDThread:  integer;
   FileName:  string;
   Temp:      TStringGrid;
 begin
-  IDThread:=TTCheckServerConnection.CurrentThread.ThreadID;
-  ActiveThreads[9]:=True;
+  IDThread:=TTExcelExport.CurrentThread.ThreadID;
   try
-    PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Exporting to Excel..., please wait.')));
-
-    Synchronize(procedure begin
-      if MainForm.XLExport.Execute then FileName:=MainForm.XLExport.FileName;
-    end);
-
+    PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR(stExportXLS)));
+    { SAVE DIALOG BOX }
+    Synchronize(procedure
+                begin
+                  if MainForm.XLExport.Execute then
+                    FileName:=MainForm.XLExport.FileName
+                      else
+                        FileName:='';
+                end);
+    { GENERATE AND SAVE }
     Temp:=TStringGrid.Create(nil);
     try
-      Temp.ToExcel('Sheet1', FileName, IDThread);
+      Temp.OpenThdId:=IDThread;
+      Temp.ToExcel('Age Report', FileName);
     finally
       Temp.Free;
     end;
-
   finally
-    PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Ready.')));
+    PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR(stReady)));
   end;
-  ActiveThreads[9]:=False;
   FreeOnTerminate:=True;
 end;
 

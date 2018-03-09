@@ -125,14 +125,28 @@ const
   COMMA        : char   = #44;
   POINT        : char   = #46;
 
-  { SQL MODEL CONSTANTS }
+  { SQL KEYWORDS }
 
-  INSERT       : string = 'INSERT INTO';
-  SELECT       : string = 'SELECT';
-  UPDATE       : string = 'UPDATE';
-  _SET         : string = 'SET';
-  UNION        : string = 'UNION ALL';
+  INSERT       : string = ' INSERT INTO ';
+  SELECT       : string = ' SELECT ';
+  SELECT_DIS   : string = ' SELECT DISTINCT ';
+  UPDATE       : string = ' UPDATE ';
+  _SET         : string = ' SET ';
+  UNION        : string = ' UNION ALL ';
   EQUAL        : string = ' = ';
+  FROM         : string = ' FROM ';
+  ALL          : string = ' * ';
+  WHERE        : string = ' WHERE ';
+  LEFT_JOIN    : string = ' LEFT JOIN ';
+  RIGHT_JOIN   : string = ' RIGHT JOIN ';
+  INNER_JOIN   : string = ' INNER JOIN ';
+  OUTER_JOIN   : string = ' OUTER JOIN ';
+  _ON          : string = ' ON ';
+  ORDER        : string = ' ORDER BY ';
+  ASC          : string = ' ASC ';
+  DESC         : string = ' DESC ';
+  _AND         : string = ' AND ';
+  _AS          : string = ' AS ';
 
   { SQL MODEL ENUMERATION }
 
@@ -158,9 +172,10 @@ const
 
   stReady      = 'Ready.';
   stProcessing = 'Processing..., please wait.';
-
-
-
+  stExportXLS  = 'Exporting to Excel..., please wait.';
+  stImportXLS  = 'Importing from Excel..., please wait.';
+  stExportCSV  = '';
+  stImportCSV  = '';
 
   { MAPPED TABLES FROM DATABASE | WE DO NOT USE SEPARATE ORM FRAMEWORK }
 
@@ -180,6 +195,10 @@ const
   TblAddressbook = 'tbl_addressbook';
   TblOpenitems   = 'tbl_openitems';
   TblSnapshots   = 'tbl_snapshots';
+
+  { MAPPED VIEW }
+
+  TblTempDailyView = 'TempDailyView';
 
   { CURSOR TYPE ENUM, MSDN: https://docs.microsoft.com/en-us/sql/ado/reference/ado-api/cursortypeenum }
 
@@ -207,7 +226,7 @@ const
   adLockReadOnly        = 1;
   adLockUnspecified     = -1;
 
-  { ADO FILTER ENUM }
+  { ADO FILTER ENUM, MSDN: https://msdn.microsoft.com/en-us/library/ee275540(v=bts.10).aspx }
 
   adFilterNone               = 0;
   adFilterPendingRecords     = 1;

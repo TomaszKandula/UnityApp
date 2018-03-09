@@ -1191,7 +1191,7 @@ object MainForm: TMainForm
     Margins.Top = 10
     Margins.Right = 5
     Margins.Bottom = 0
-    ActivePage = TabSheet3
+    ActivePage = TabSheet2
     Align = alClient
     DoubleBuffered = True
     Font.Charset = DEFAULT_CHARSET
@@ -3430,8 +3430,8 @@ object MainForm: TMainForm
             OnKeyPress = AGT4KeyPress
           end
           object PanelGroupName: TPanel
-            Left = 143
-            Top = 25
+            Left = 415
+            Top = 9
             Width = 321
             Height = 88
             BevelOuter = bvNone

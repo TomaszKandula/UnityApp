@@ -82,10 +82,13 @@ type
     procedure SaveLayout(ColWidthName: string; ColOrderName: string; ColNames: string; ColPrefix: string);
     function  LoadLayout(var StrCol: string; ColWidthName: string; ColOrderName: string; ColNames: string; ColPrefix: string): boolean;
     function  ReturnColumn(ColumnName: string; FixedCol: integer; FixedRow: integer): integer;
-    function  ToExcel(ASheetName, AFileName: string; idThd: integer): Boolean;
+    function  ToExcel(ASheetName, AFileName: string): Boolean;
     procedure Freeze(PaintWnd: boolean);
+    function  ImportCSV(DialogBox: TOpenDialog; Delimiter: string): boolean;
+    function  ExportCSV(DialogBox: TSaveDialog; Delimiter: string): boolean;
   public
-    var SqlColumns : TLists;
+    var OpenThdId:  integer;
+    var SqlColumns: TLists;
   end;
 
 { ----------------------------------------------------------------- ! MAIN CLASS ! -------------------------------------------------------------------------- }
@@ -605,15 +608,15 @@ type                                                            (* GUI | MAIN TH
     var GroupNmSel          :  integer;  // CURRENTLY SELECTED GROUP
     var AllowClose          :  boolean;  // SIGNAL FORCE CLOSE WHEN WINDOWS IS SHUTTING DOWN
     var StartTime           :  TTime;    // APPLICATION START TIME
-    var FAccessLevel        :  string;   // RO, RW, AD
-    var FAccessMode         :  string;   // TEMPORARILY UNUSED
+    var FAccessLevel        :  string;
+    var FAccessMode         :  string;
   public
     var FUserName           :  string;
     var FEventLogPath       :  string;
     var FDbConnect          :  TADOConnection;
     var FGroupList          :  TLists;
-    property   AccessLevel  : string  read FAccessLevel write FAccessLevel;
-    property   AccessMode   : string  read FAccessMode  write FAccessMode;
+    property   AccessLevel  : string  read FAccessLevel write FAccessLevel; // RO, RW, AD
+    property   AccessMode   : string  read FAccessMode  write FAccessMode;  // TEMPORARILY UNUSED
     procedure  DebugMsg(const Msg: String);
     function   OleGetStr(RecordsetField: variant): string;
     function   FindKey(INI: TMemIniFile; OpenedSection: string; KeyPosition: integer): string;
@@ -1285,7 +1288,7 @@ NOTE: THIS METHOD SHOULD BE RUN IN WORKER THREAD.
 
 ************************************************************************************************************************************************************ *)
 
-function TStringGrid.ToExcel(ASheetName: string; AFileName: string; idThd: integer): boolean;
+function TStringGrid.ToExcel(ASheetName: string; AFileName: string): boolean;
 const
   xlWBATWorksheet = -4167;
   xlWARN_MESSAGE  = 'Invalid class string';
@@ -1296,49 +1299,63 @@ var
   ColOffset:  integer;     (* OFFSET CANNOT BE < 1 *)
   XLApp:      OLEVariant;
   Sheet:      OLEVariant;
-  StrCol:     string;
-  MSSQL:      TMSSQL;
-  StrSQL:     string;
-  Database:   TDataBase;
+  DataTables: TDataTables;
 begin
   Result:=False;
-  DataBase:=TDataBase.Create(False);
-  { READ AGE VIEW WITH COMMENT COLUMN AND GENERAL COLUMN | TO STRING GRID }
-
-  Self.LoadLayout(StrCol, ColumnWidthName, ColumnOrderName, ColumnNames, ColumnPrefix);
-
-  StrSQL:='SELECT '                                 +
-             StrCol                                 + ','   +
-          'tbl_general.fixcomment AS ''GENERAL COMMENT'', ' +              //new column
-          'tbl_daily.fixcomment   AS ''DAILY COMMENT ''   ' +              //new column
-          'FROM '                                   +
-          '  tbl_snapshots '                        +
-          'LEFT JOIN '                              +
-          '  tbl_general '                          +
-          'ON '                                     +
-          '  tbl_snapshots.cuid = tbl_general.cuid '+
-          'LEFT JOIN '                              +
-          '  tbl_daily '                            +
-          'ON '                                     +
-          '  tbl_snapshots.cuid = tbl_daily.cuid '  +
-          'WHERE '                                  +
-            'tbl_snapshots.GROUP_ID = '             + QuotedStr(MainForm.FGroupList[MainForm.GroupListBox.ItemIndex, 0]) + ' ' +
-            'AND tbl_snapshots.AGE_DATE =  '        + QuotedStr(MainForm.GroupListDates.Text) + ' ' +
-          'ORDER BY '                               +
-            'tbl_snapshots.RISK_CLASS ASC, '        +
-            'tbl_snapshots.QUALITY_IDX ASC, '       +
-            'tbl_snapshots.TOTAL DESC, '            +
-            'tbl_general.FOLLOWUP ASC;'             ;
-
-  FreeAndNil(DataBase);
-  MSSQL:=TMSSQL.Create(MainForm.FDbConnect);
+  DataTables:=TDataTables.Create(MainForm.FDbConnect);
   try
-    MSSQL.StrSQL:=StrSQL;
-    MSSQL.SqlToGrid(Self, MSSQL.ExecSQL, False);
-  finally
-    MSSQL.Free;
-  end;
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    DataTables.StrSQL:=SELECT                       + WHITESPACE +
+                         TSnapshots.CUSTOMER_NAME   + _AS + 'Customer name'      + COMMA +
+                         TSnapshots.CUSTOMER_NUMBER + _AS + 'Customer number'    + COMMA +
+                         TSnapshots.COUNTRY_CODE    + _AS + 'Country code'       + COMMA +
+                         TSnapshots.NOT_DUE         + _AS + 'Not due'            + COMMA +
+                         TSnapshots.RANGE1          + _AS + 'Bucket 1 - 7'       + COMMA +
+                         TSnapshots.RANGE2          + _AS + 'Bucket 8 - 30'      + COMMA +
+                         TSnapshots.RANGE3          + _AS + 'Bucket 31 - 60'     + COMMA +
+                         TSnapshots.RANGE4          + _AS + 'Bucket 61 - 90'     + COMMA +
+                         TSnapshots.RANGE5          + _AS + 'Bucket 91 - 120'    + COMMA +
+                         TSnapshots.RANGE6          + _AS + 'Bucket 120 - oo'    + COMMA +
+                         TSnapshots.OVERDUE         + _AS + 'Overdue amount'     + COMMA +
+                         TSnapshots.TOTAL           + _AS + 'Total amount'       + COMMA +
+                         TSnapshots.CREDIT_LIMIT    + _AS + 'Credit limit'       + COMMA +
+                         TSnapshots.EXCEEDED_AMOUNT + _AS + 'Exceeded amount'    + COMMA +
+                         TSnapshots.PAYMENT_TERMS   + _AS + 'Payment term'       + COMMA +
+                         TSnapshots.AGENT           + _AS + 'Agent'              + COMMA +
+                         TSnapshots.DIVISION        + _AS + 'Division'           + COMMA +
+                         TSnapshots.CO_CODE         + _AS + 'Co Code'            + COMMA +
+                         TSnapshots.LEDGER_ISO      + _AS + 'Ledger currency'    + COMMA +
+                         TSnapshots.INF7            + _AS + 'INF7'               + COMMA +
+                         TSnapshots.AGE_DATE        + _AS + 'Aging date'         + COMMA +
+                         TGeneral.FIXCOMMENT        + _AS + 'General comment'    + COMMA +
+                         TTempDailyView.AGEDATE     + _AS + 'Comment age date'   + COMMA +
+                         TTempDailyView.FIXCOMMENT  + _AS + 'Daily comment'      +
+                       FROM           +
+                         TblSnapshots +
+                       LEFT_JOIN      +
+                         TblGeneral   +
+                       _ON            +
+                         TSnapshots.CUID  + EQUAL + TGeneral.CUID +
+                       LEFT_JOIN          +
+                         TblTempDailyView +
+                       _ON                +
+                         TSnapshots.CUID  + EQUAL + TTempDailyView.CUID +
+                       WHERE +
+                         TSnapshots.GROUP_ID + EQUAL + QuotedStr(MainForm.FGroupList[MainForm.GroupListBox.ItemIndex, 0]) +
+                       _AND +
+                         TSnapshots.AGE_DATE + EQUAL + QuotedStr(MainForm.GroupListDates.Text) +
+                       ORDER +
+                         TSnapshots.TOTAL + DESC;
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    { QUERY DATA TO SELF AND RELEASE }
+    DataTables.SqlToGrid(Self, DataTables.ExecSQL, False);
+  finally
+    DataTables.Free;
+  end;
   { ------------------------------------------------------------------------------------------------------------------------------ INITIATE EXCEL APPLICATION }
   try
     XLApp:=CreateOleObject('Excel.Application');
@@ -1370,7 +1387,7 @@ begin
         { ------------------------------------------------------------------------------------------------------------------------------- SUCCESSFULL MESSAGE }
         if Result then
         begin
-          LogText(MainForm.FEventLogPath, 'Thread: [' + IntToStr(idThd) + ']: The data has been successfully transferred to Excel.');
+          LogText(MainForm.FEventLogPath, 'Thread: [' + IntToStr(OpenThdId) + ']: The data has been successfully transferred to Excel.');
           SendMessage(MainForm.Handle, WM_GETINFO, 1, LPARAM(PCHAR('The data has been successfully transferred to Excel.')));
         end;
       end;
@@ -1382,12 +1399,12 @@ begin
         if E.Message = xlWARN_MESSAGE then
         { EXCEL NOT FOUND }
         begin
-          LogText(MainForm.FEventLogPath, 'Thread: [' + IntToStr(idThd) + ']: The data cannot be exported because Excel cannot be found.');
+          LogText(MainForm.FEventLogPath, 'Thread: [' + IntToStr(OpenThdId) + ']: The data cannot be exported because Excel cannot be found.');
           SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PCHAR('The data cannot be exported because Excel cannot be found.')));
         end else
         { GENERIC MESSAGE }
         begin
-          LogText(MainForm.FEventLogPath, 'Thread: [' + IntToStr(idThd) + ']: The data cannot be exported, error message thrown: ' + E.Message + '.');
+          LogText(MainForm.FEventLogPath, 'Thread: [' + IntToStr(OpenThdId) + ']: The data cannot be exported, error message thrown: ' + E.Message + '.');
           SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PCHAR('The data cannot be exported. Please contact IT support.')));
         end;
       end;
@@ -1407,6 +1424,124 @@ begin
   begin
     with Self do SendMessage(Handle, WM_SETREDRAW, 1, 0);
     Self.Repaint;
+  end;
+end;
+
+{ --------------------------------------------------------------------------------------------------------------------------------------------- IMPORT TO CSV }
+function TStringGrid.ImportCSV(DialogBox: TOpenDialog; Delimiter: string): boolean;
+var
+  iCNT:       integer;
+  jCNT:       integer;
+  Count:      integer;
+  Data:       TStringList;
+  Transit:    TStringList;
+  fPath:      string;
+  IsError:    boolean;
+begin
+  { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
+  Result :=False;
+  IsError:=False;
+  Count  :=0;
+  { ----------------------------------------------------------------------------------------------------------------------------- GET THE FILE PATH AND PARSE }
+  if DialogBox.Execute = True then
+  begin
+    fPath  :=DialogBox.FileName;
+    Data   :=TStringList.Create;
+    Transit:=TStringList.Create;
+    try
+      { LOAD DATA }
+      Data.LoadFromFile(fPath);
+      { COUNT ALL COLUMNS }
+      for iCNT:=0 to Length(Data[0]) do if copy(Data[0], iCNT, 1) = Delimiter then inc(Count);
+      { COUNT ALL ROWS & SETUP OFFSET }
+      Self.RowCount:=Data.Count + 1;
+      { SETUP TRANSIT THAT WILL HOLD SPLIT LINE }
+      Transit.StrictDelimiter:=True;
+      Transit.Delimiter:=Delimiter[1];
+      { ITERATE THROUGH ALL ROWS }
+      try
+        for iCNT:= 0 to Data.Count - 1 do
+        begin
+          { SPLIT STRING USING GIVEN DELIMITER }
+          Transit.DelimitedText:=Data[iCNT];
+          for jCNT:=1 to Count do Self.Cells[jCNT, iCNT + 1]:=Transit[jCNT - 1];
+          Self.Cells[0, iCNT + 1]:=IntToStr((iCNT + 1));
+          Transit.Clear;
+        end;
+        Result:=True;
+      { ---------------------------------------------------------------------------------------------------------------------------------------- ON EXCEPTION }
+      except
+        on E: Exception do
+        begin
+          LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: CSV Import faild: ' + ExtractFileName(fPath));
+          SendMessage(MainForm.Handle, WM_GETINFO, 3, LPARAM(PChar('CSV Import faild. Please check the file and try again.')));
+          IsError:=True;
+        end;
+      end;
+    { ----------------------------------------------------------------------------------------------------------------------------------- RELEASE FROM MEMORY }
+    finally
+      PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Ready.')));
+      if not IsError then
+      begin
+        LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: Data has been imported successfully!');
+        SendMessage(MainForm.Handle, WM_GETINFO, 1, LPARAM(PChar('Data has been imported successfully!')));
+      end;
+      Data.Free;
+      Transit.Free;
+    end;
+  end;
+end;
+
+{ ---------------------------------------------------------------------------------------------------------------------------------------------------- EXPORT }
+function TStringGrid.ExportCSV(DialogBox: TSaveDialog; Delimiter: string): boolean;
+var
+  iCNT:       integer;
+  jCNT:       integer;
+  fPath:      string;
+  CSVData:    TStringList;
+  MyStr:      string;
+  CleanStr:   string;
+  IsError:    boolean;
+begin
+  { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
+  Result :=False;
+  IsError:=False;
+  CSVData:=TStringList.Create;
+  { ------------------------------------------------------------------------------------------------------------------------------------------ WRITE CSV FILE }
+  try
+    { ADD ROWS AND COLUMNS WITH DELIMITER }
+    for iCNT:=1 to Self.RowCount - 1 do
+    begin
+      for jCNT:= 1 to Self.ColCount - 1 do
+      begin
+        CleanStr :=Self.Cells[jCNT, iCNT];
+        CleanStr :=StringReplace(CleanStr, #13#10, ' ', [rfReplaceAll]);
+        MyStr    :=MyStr + CleanStr + Delimiter;
+      end;
+      CSVData.Add(MyStr);
+      MyStr:='';
+    end;
+    { SAVE TO FILE AS PLAIN TEXT }
+    try
+      if DialogBox.Execute = True then CSVData.SaveToFile(DialogBox.FileName);
+      Result:=True;
+    { ------------------------------------------------------------------------------------------------------------------------------------------ ON EXCEPTION }
+    except
+      on E: Exception do
+      begin
+        LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: Cannot saved file: ' + ExtractFileName(fPath));
+        SendMessage(MainForm.Handle, WM_GETINFO, 3, LPARAM(PChar('Cannot save the file in the given location.')));
+        IsError:=True;
+      end;
+    end;
+  { ------------------------------------------------------------------------------------------------------------------------------------- RELEASE FROM MEMORY }
+  finally
+    if not IsError then
+    begin
+      LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: Data has been exported successfully!');
+      SendMessage(MainForm.Handle, WM_GETINFO, 1, LPARAM(PChar('Address Book have been exported successfully!')));
+    end;
+    CSVData.Free;
   end;
 end;
 

@@ -238,6 +238,16 @@ type
     const CUID            : string = 'CUID';
   end;
 
+{ ----------------------------------------------------------- ! TEMP DAILY VIEW ! --------------------------------------------------------------------------- }
+type
+  TTempDailyView = class(TDataTables)
+  {$TYPEINFO ON}
+  public
+    const CUID       : string = 'CUID';
+    const AGEDATE    : string = 'AGEDATE';
+    const FIXCOMMENT : string = 'FIXCOMMENT';
+  end;
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 { -------------------------------------------------------------- ! TBL_PAIDINFO ! --------------------------------------------------------------------------- }
@@ -373,7 +383,7 @@ function TDataTables.ColumnsToList: string;
 var
   iCNT:   integer;
 begin
-  Result:=' * ';
+  Result:=ALL;
   { SERIALIZATION }
   if (Columns.Text <> '') and (Columns.Count > 0) then
   begin
@@ -391,8 +401,8 @@ begin
   Result:=True;
   { EXECUTE QUERY }
   try
-    if pCustFilter =  '' then StrSQL:='SELECT ' + ColumnsToList + ' FROM ' + TableName;
-    if pCustFilter <> '' then StrSQL:='SELECT ' + ColumnsToList + ' FROM ' + TableName + ' WHERE ' + QuotedStr(pCustFilter);
+    if pCustFilter =  '' then StrSQL:=SELECT + ColumnsToList + FROM + TableName;
+    if pCustFilter <> '' then StrSQL:=SELECT + ColumnsToList + FROM + TableName + WHERE + QuotedStr(pCustFilter);
     pDataSet:=ExecSQL;
   except
     Result:=False;
