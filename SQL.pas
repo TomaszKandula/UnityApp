@@ -16,18 +16,21 @@ unit SQL;
 interface
 
 uses
-  SysUtils, Windows, Classes, ADODB, StrUtils, Variants, Main;
+  SysUtils, Windows, Classes, ADODB, StrUtils, Variants, Main, DB;
 
 { --------------------------------------------------------------- ! MS SQL CLASS ! -------------------------------------------------------------------------- }
 type
   TMSSQL = class                                          (* BASE CLASS FOR SQL HANDLING *)
   {$TYPEINFO ON}
   private
-    var         pStrSQL      : string;
-    var         pADOCon      : TADOConnection;
+    var         pStrSQL    : string;
+    var         pADOCon    : TADOConnection;
+    var         pCmdType   : TCommandType;
   public
-    property    StrSQL  : string         read pStrSQL write pStrSQL;
-    property    ADOCon  : TADOConnection read pADOCon write pADOCon;
+    var         FParamList : TLists;
+    property    StrSQL     : string         read pStrSQL  write pStrSQL;
+    property    ADOCon     : TADOConnection read pADOCon  write pADOCon;
+    property    CmdType    : TCommandType   read pCmdType write pCmdType;
   published
     constructor Create(Connector: TADOConnection);
     destructor  Destroy; override;
@@ -36,7 +39,7 @@ type
     function    ExecSQL: _Recordset;
     function    GridToSql(Grid: TStringGrid; tblName: string; tblColumns: string; sRow: integer; sCol: integer): string;
     function    ArrayToSql(Table: TLists; tblName: string; tblColumns: string): string;
-    function    SqlToGrid(var Grid: TStringGrid; RS: _Recordset; AutoNoCol: boolean): boolean;
+    function    SqlToGrid(var Grid: TStringGrid; RS: _Recordset; AutoNoCol: boolean; Headers: boolean): boolean;
   end;
 
 { ------------------------------------------------------------- ! IMPLEMENTATION ZONE ! --------------------------------------------------------------------- }
@@ -50,6 +53,8 @@ constructor TMSSQL.Create(Connector: TADOConnection);
 begin
   pStrSQL:='';
   pADOCon:=Connector;
+  pCmdType:=cmdText;
+  SetLength(FParamList, 1, 2);
 end;
 
 destructor TMSSQL.Destroy;
@@ -88,7 +93,7 @@ end;
 
 function TMSSQL.ExecSQL: _Recordset;
 var
-  Query: TADOCommand;
+  Query:      TADOCommand;
 begin
   Result:=nil;
   if not (Length(StrSQL)) > 0 then Exit;
@@ -96,6 +101,7 @@ begin
   Query.Connection:=ADOCon;
   try
     try
+      Query.CommandType:=CmdType;
       Query.CommandText:=StrSQL;
       Result:=Query.Execute;
     except
@@ -189,7 +195,7 @@ begin
 end;
 
 { -------------------------------------------------------------------------------------------------------- MOVE RECORDSET CONTENT TO STRING GRID WITH HEADERS }
-function TMSSQL.SqlToGrid(var Grid: TStringGrid; RS: _Recordset; AutoNoCol: boolean): boolean;
+function TMSSQL.SqlToGrid(var Grid: TStringGrid; RS: _Recordset; AutoNoCol: boolean; Headers: boolean): boolean;
 var
   iCNT:  integer;
   jCNT:  integer;
@@ -209,8 +215,10 @@ begin
     begin
       for jCNT:=1 to RS.Fields.Count do
       begin
-        if iCNT = 0 then Grid.Cells[jCNT, iCNT]:=VarToStr(RS.Fields[jCNT - 1].Name); (* HEADERS *)
-        Grid.Cells[jCNT, iCNT + 1]:=VarToStr(RS.Fields[jCNT - 1].Value);             (* DATA    *)
+        (* HEADERS *)
+        if (iCNT = 0) and (Headers) then Grid.Cells[jCNT, iCNT]:=VarToStr(RS.Fields[jCNT - 1].Name);
+        (* DATA    *)
+        Grid.Cells[jCNT, iCNT + 1]:=VarToStr(RS.Fields[jCNT - 1].Value);
       end;
       RS.MoveNext;
       Inc(iCNT);

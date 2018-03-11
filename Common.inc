@@ -147,6 +147,7 @@ const
   DESC         : string = ' DESC ';
   _AND         : string = ' AND ';
   _AS          : string = ' AS ';
+  EXEC         : string = ' EXEC ';
 
   { SQL MODEL ENUMERATION }
 
@@ -174,8 +175,10 @@ const
   stProcessing = 'Processing..., please wait.';
   stExportXLS  = 'Exporting to Excel..., please wait.';
   stImportXLS  = 'Importing from Excel..., please wait.';
-  stExportCSV  = '';
-  stImportCSV  = '';
+  stExportCSV  = 'Exporting to CSV file..., please wait.';
+  stImportCSV  = 'Importing from CSV file..., please wait.';
+  stImportOK   = 'Data has been imported successfully!';
+  stCSVfailed  = 'CSV Import faild. Please check the file and try again.';
 
   { MAPPED TABLES FROM DATABASE | WE DO NOT USE SEPARATE ORM FRAMEWORK }
 
@@ -196,9 +199,9 @@ const
   TblOpenitems   = 'tbl_openitems';
   TblSnapshots   = 'tbl_snapshots';
 
-  { MAPPED VIEW }
+  { STORED PROCEDURES }
 
-  TblTempDailyView = 'TempDailyView';
+  QueryOpenItems = 'QueryOpenItems';
 
   { CURSOR TYPE ENUM, MSDN: https://docs.microsoft.com/en-us/sql/ado/reference/ado-api/cursortypeenum }
 

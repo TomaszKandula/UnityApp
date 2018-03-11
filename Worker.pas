@@ -97,18 +97,21 @@ type
   end;
 *)
 
+
+
 { ------------------------------------------------------------------------------------------------------------------------------------------- READ OPEN ITEMS }
 type
   TTReadOpenItems = class(TThread)
   protected
-    procedure Execute; override; //remove modes!!
+    procedure Execute; override;
   private
-    pMode: string;
+    var FMode:  integer;
+    var FLock:  TCriticalSection;
+    var FIDThd:  integer;
   public
-    { MODES:                                    }
-    {   '0' = JUST OPEN ITEMS REFRESH           }
-    {   '1' = START AGEING REPORT               }
-    constructor Create(cMode: string);
+    property    IDThd:  integer read FIDThd;
+    constructor Create(ActionMode: integer);
+    destructor  Destroy; override;
   end;
 
 { ---------------------------------------------------------------------------------------------------------------------------------------------- ADDRESS BOOK }
@@ -141,13 +144,6 @@ type
     destructor  Destroy; override;
   end;
 
-
-///below array to be removed!!!
-
-{ ---------------------------------------------------------------------------------------------------------------------- ACCESSIBLE VARIABLES FOR OTHER UNITS }
-var
-  ActiveThreads: array[0..9] of boolean = (False, False, False, False, False, False, False, False, False, False);
-
 { ------------------------------------------------------------- ! IMPLEMENTATION ZONE ! --------------------------------------------------------------------- }
 
 implementation
@@ -169,9 +165,7 @@ begin
   DataBase:=TDataBase.Create(False);
   try
     IDThread:=TTCheckServerConnection.CurrentThread.ThreadID;
-    ActiveThreads[0]:=True;
     DataBase.InitializeConnection(IDThread, False, MainForm.FDbConnect);
-    ActiveThreads[0]:=False;
   finally
     DataBase.Free;
   end;
@@ -190,7 +184,6 @@ var
 begin
   IDThread:=TTInvoiceTrackerScanner.CurrentThread.ThreadID;
   InvoiceTracker:=TInvoiceTracker.Create;
-  ActiveThreads[1]:=True;
   DataBase:=TDataBase.Create(False);
   try
     StopWatch:=TStopWatch.StartNew;
@@ -215,7 +208,6 @@ begin
   finally
     DataBase.Free;
     InvoiceTracker.Free;
-    ActiveThreads[1]:=False;
     THDMili:=StopWatch.ElapsedMilliseconds;
     THDSec:=THDMili / 1000;
     LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Scanning invoices and sending reminders (if any) executed within: ' +
@@ -255,7 +247,6 @@ var
   AgeView:  TAgeView;
 begin
   IDThread:=TTReadAgeView.CurrentThread.ThreadID;
-  ActiveThreads[3]:=True;
   DataBase:=TDataBase.Create(False);
 
   try
@@ -424,7 +415,6 @@ begin
           else MainForm.GroupListDates.Enabled:=False;
     end);
 
-    ActiveThreads[3]:=False;
     THDMili:=StopWatch.ElapsedMilliseconds;
     THDSec:=THDMili / 1000;
     LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Thread for selected group "' + MainForm.FGroupList[MainForm.GroupListBox.ItemIndex, 1] + '" has been executed within ' +
@@ -440,7 +430,7 @@ begin
   { PROGRAM REFRESH AGING ONLY IF NEW OPEN ITEMS ARE RELOADED }
   { THEREFORE, NO NEED TO RELOAD OPEN ITEMS AGAIN             }
   { WE WILL REFRESH OPEN ITEMS ONLY WHEN USER CHANGES GROUP   }
-  if pMode = '1' then TTReadOpenItems.Create('0');
+  if pMode = '1' then TTReadOpenItems.Create(0);
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------- MAKE AGE VIEW }
@@ -460,7 +450,6 @@ var
 begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   IDThread:=TTMakeAgeView.CurrentThread.ThreadID;
-  ActiveThreads[4]:=True;
   DataBase:=TDataBase.Create(False);
 
   if DataBase.Check = 0 then
@@ -543,7 +532,6 @@ begin
       end;
 
     finally
-      ActiveThreads[4]:=False;
       THDMili:=StopWatch.ElapsedMilliseconds;
       THDSec:=THDMili / 1000;
       LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Age View thread has been executed within ' +
@@ -575,7 +563,6 @@ begin
   DataBase:=TDataBase.Create(False);
 
   try
-    ActiveThreads[5]:=True;
 
     try
       if Database.Check = 0 then InvoiceTracker.Refresh(MainForm.sgInvoiceTracker, pMode)
@@ -595,7 +582,6 @@ begin
 
   finally
     InvoiceTracker.Free;
-    ActiveThreads[5]:=False;
   end;
 
   { RELEASE THREAD WHEN DONE }
@@ -650,123 +636,59 @@ begin
 end;
 *)
 
-{ ------------------------------------------------------------------------------------------------------------------------------------------- READ OPEN ITEMS }
-constructor TTReadOpenItems.Create(cMode: string);
+{ ################################################################ ! OPEN ITEMS ! ########################################################################### }
+
+{ ------------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE }
+constructor TTReadOpenItems.Create(ActionMode: integer);
 begin
   inherited Create(False);
-  pMode:=cMode;
+  FLock:=TCriticalSection.Create;
+  FMode:=ActionMode;
+  FIDThd:=0;
 end;
 
-procedure TTReadOpenItems.Execute;  (* ASYNC & SYNC *)
+{ --------------------------------------------------------------------------------------------------------------------------------------------------- RELEASE }
+destructor TTReadOpenItems.Destroy;
+begin
+  FreeAndNil(FLock);
+end;
+
+{ --------------------------------------------------------------------------------------------------------------------------------------- EXECUTE THREAD WORK }
+procedure TTReadOpenItems.Execute;
 var
-  IDThread:   integer;
   THDMili:    extended;
   THDSec:     extended;
   StopWatch:  TStopWatch;
-  AppSettings:  TSettings;
-
-procedure test;
+  OpenItems:  TTransactions;
 begin
-  AppSettings:=TSettings.Create;
-  AppSettings.Free;
-end;
-
-begin
-  IDThread:=TTReadOpenItems.CurrentThread.ThreadID;
-  ActiveThreads[7]:=True;
-
-  test;
-
+  FIDThd:=TTReadOpenItems.CurrentThread.ThreadID;
+  FLock.Acquire;
   try
     StopWatch:=TStopWatch.StartNew;
-
-    (* HEAVY DUTY TASK MUST BE ALWAYS RUN BETWEEN 'PRE-' AND 'POST-' GUI UPDATE *)
-
+    OpenItems:=TTransactions.Create(MainForm.FDbConnect);
     try
-      { -------------------------------------------------------- ! PRE | GUI UPDATE ! ----------------------------------------------------------------------- }
-
-      Synchronize
-        (procedure begin
-          { ---------------------------------------------------------------------------------------------------------------------------------- CLEAR CAPTIONS }
-          MainForm.tcOpenItems.Caption     :='0';
-          MainForm.tcOverdue.Caption       :='0';
-          MainForm.tcInvoices.Caption      :='0';
-          MainForm.tcDecAmt.Caption        :='0';
-          MainForm.tcDisAmt.Caption        :='0';
-          MainForm.tcRecovery.Caption      :='0';
-          MainForm.tcOSAmt.Caption         :='0';
-          MainForm.tcUNamt.Caption         :='0';
-          MainForm.tcOvdAmt.Caption        :='0';
-          MainForm.tcOverdueRatio.Caption  :='0';
-          MainForm.tcKPIoverdue.Caption    :='0';
-          MainForm.tcKPIunallocated.Caption:='0';
-          { --------------------------------------------------------------------------------------------------------------------------------------- EVENT LOG }
-//          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Exclude accounts above or equal ' + AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER' + IntToStr(AppSettings.TMIG.ReadInteger(OpenItemsData, 'NRCUTOFFPOS', 0)), '') + ' number: ' + IntToStr(AppSettings.TMIG.ReadInteger(OpenItemsData, 'NRCUTOFFNUM', 0)) + '.');
-//          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Exclude accounts that contains "' + AppSettings.TMIG.ReadString(OpenItemsData, 'TXCUTOFFTXT', '') + '" in column ' + AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER' + IntToStr(AppSettings.TMIG.ReadInteger(OpenItemsData, 'TXCUTOFFPOS', 0)), '') + '.');
-        end);
-
-      { -------------------------------------------------- ! HEAVY DUTY TASK (RUN ASYNC) ! ------------------------------------------------------------------ }
-//      OpenItems.Load(IDThread);
-(*
-      { ------------------------------------------------------- ! POST | GUI UPDATE ! ----------------------------------------------------------------------- }
-      Synchronize
-        (procedure begin
-          if OpenItems.FileExist then
-          begin
-            { ---------------------------------------------------------------------------------------------------------------------------------- KPI READ OUT }
-            if MainForm.COC1.Text <> '0' then OpenItems.KPI_overdue:=OpenItems.KPI_overdue + OpenItems.ReturnKPI(MainForm.sgCoCodes, MainForm.COC1.Text, 0);
-            if MainForm.COC2.Text <> '0' then OpenItems.KPI_overdue:=OpenItems.KPI_overdue + OpenItems.ReturnKPI(MainForm.sgCoCodes, MainForm.COC2.Text, 0);
-            if MainForm.COC3.Text <> '0' then OpenItems.KPI_overdue:=OpenItems.KPI_overdue + OpenItems.ReturnKPI(MainForm.sgCoCodes, MainForm.COC3.Text, 0);
-            if MainForm.COC4.Text <> '0' then OpenItems.KPI_overdue:=OpenItems.KPI_overdue + OpenItems.ReturnKPI(MainForm.sgCoCodes, MainForm.COC4.Text, 0);
-            if MainForm.COC1.Text <> '0' then OpenItems.KPI_unalloc:=OpenItems.KPI_unalloc + OpenItems.ReturnKPI(MainForm.sgCoCodes, MainForm.COC1.Text, 1);
-            if MainForm.COC2.Text <> '0' then OpenItems.KPI_unalloc:=OpenItems.KPI_unalloc + OpenItems.ReturnKPI(MainForm.sgCoCodes, MainForm.COC2.Text, 1);
-            if MainForm.COC3.Text <> '0' then OpenItems.KPI_unalloc:=OpenItems.KPI_unalloc + OpenItems.ReturnKPI(MainForm.sgCoCodes, MainForm.COC3.Text, 1);
-            if MainForm.COC4.Text <> '0' then OpenItems.KPI_unalloc:=OpenItems.KPI_unalloc + OpenItems.ReturnKPI(MainForm.sgCoCodes, MainForm.COC4.Text, 1);
-            { -------------------------------------------------------------------------------------------------------------------------------- DISPLAY VALUES }
-            MainForm.tcOpenItems.Caption     :=FormatFloat('### ###',  MainForm.sgOpenItems.RowCount - 1);
-            MainForm.tcInvoices.Caption      :=FormatFloat('### ###',  OpenItems.nInvoices);
-            MainForm.tcOverdue.Caption       :=FormatFloat('### ###',  OpenItems.Overdue);
-            MainForm.tcOverdueRatio.Caption  :=FormatFloat('0.00',     (( (OpenItems.Overdue / OpenItems.nInvoices) * 100 ))) + '%';
-            MainForm.tcDisAmt.Caption        :=FormatFloat('#,##0.00', OpenItems.cDiscountedAmt);
-            MainForm.tcDecAmt.Caption        :=FormatFloat('#,##0.00', OpenItems.cDecreaseAmt);
-            MainForm.tcRecovery.Caption      :=FormatFloat('#,##0.00', OpenItems.cRecoveryAmt);
-            MainForm.tcOSAmt.Caption         :=FormatFloat('#,##0.00', OpenItems.OSamt);
-            MainForm.tcOvdAmt.Caption        :=FormatFloat('#,##0.00', OpenItems.OverdueAmt);
-            MainForm.tcUNAmt.Caption         :=FormatFloat('#,##0.00', abs(OpenItems.UNamt));
-            MainForm.tcKPIoverdue.Caption    :=FormatFloat('#,##0.00', OpenItems.KPI_overdue);
-            MainForm.tcKPIunallocated.Caption:=FormatFloat('#,##0.00', OpenItems.KPI_unalloc);
-          end;
-        end);
-*)
+      Synchronize(OpenItems.ClearSummary);
+      OpenItems.LoadToGrid(MainForm.sgOpenItems, MainForm.DetailsGrid);
+      Synchronize(OpenItems.UpdateSummary);
     except
       on E: Exception do
-      begin
-        SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PCHAR('Cannot load open items. Please contact IT support.')));
-        LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Execution of this tread work has been stopped. Error thrown: ' + E.Message + ' (TOIThread).');
-      end;
+        LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(FIDThd) + ']: Cannot load open items. Error has been thorwn: ' + E.Message);
     end;
-
   finally
-    ActiveThreads[7]:=False;
-    PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Ready.')));
+    OpenItems.Free;
     THDMili:=StopWatch.ElapsedMilliseconds;
     THDSec:=THDMili / 1000;
-    LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Open Items loading thread has been executed within ' +
-                     FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
+    LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(FIDThd) + ']: Open Items loading thread has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
+    FLock.Release;
   end;
-
   { RELEASE THREAD WHEN DONE }
   FreeOnTerminate:=True;
-//  FreeAndNil(AppSettings);
-
-  { SEND TO SQL SERVER }
-(*
-  if (pMode = '1') and (OpenItems.FileExist) then
+  { MAKE AGE VIEW FROM OPEN ITEMS AND SEND TO SQL SERVER }
+  if FMode = 1 then
   begin
     MainForm.cbDump.Checked:=False;
     TTMakeAgeView.Create(False);
   end;
-*)
 end;
 
 { ############################################################### ! ADRESS BOOK ! ########################################################################### }
@@ -855,7 +777,7 @@ begin
     { FILTER BY USER ALIAS IF GIVEN }
     if FMode = adOpenForUser then DataTables.CustFilter:=TAddressBook.USER_ALIAS + EQUAL + QuotedStr(MainForm.FUserName);
     DataTables.OpenTable(TblAddressbook);
-    Result:=DataTables.SqlToGrid(FGrid, DataTables.DataSet, True);
+    Result:=DataTables.SqlToGrid(FGrid, DataTables.DataSet, True, True);
   finally
     FGrid.Freeze(False);
     DataTables.Free;

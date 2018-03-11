@@ -338,7 +338,7 @@ type                                                            (* GUI | MAIN TH
     btnMakeGroup: TImage;
     Text83L1: TLabel;
     Text83L2: TLabel;
-    Label1: TLabel;
+    Text53: TLabel;
     PanelGroupName: TPanel;
     btnMakeGroupAge: TSpeedButton;
     EditGroupName: TLabeledEdit;
@@ -467,9 +467,6 @@ type                                                            (* GUI | MAIN TH
     procedure sgListValueClick(Sender: TObject);
     procedure sgListSectionClick(Sender: TObject);
     procedure Edit_PASSWORDKeyPress(Sender: TObject; var Key: Char);
-    procedure COC1KeyPress(Sender: TObject; var Key: Char);
-    procedure COC2KeyPress(Sender: TObject; var Key: Char);
-    procedure COC3KeyPress(Sender: TObject; var Key: Char);
     procedure CurrentTimeTimer(Sender: TObject);
     procedure UpTimeTimer(Sender: TObject);
     procedure sgListSectionMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
@@ -484,7 +481,6 @@ type                                                            (* GUI | MAIN TH
     procedure btnOpenABClick(Sender: TObject);
     procedure btnImportClick(Sender: TObject);
     procedure btnExportClick(Sender: TObject);
-    procedure COC4KeyPress(Sender: TObject; var Key: Char);
     procedure TabSheet7Show(Sender: TObject);
     procedure TabSheet7Resize(Sender: TObject);
     procedure sgCoCodesMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
@@ -503,18 +499,6 @@ type                                                            (* GUI | MAIN TH
     procedure btnMakeGroupClick(Sender: TObject);
     procedure btnMakeGroupMouseEnter(Sender: TObject);
     procedure btnMakeGroupMouseLeave(Sender: TObject);
-    procedure CUR1KeyPress(Sender: TObject; var Key: Char);
-    procedure CUR2KeyPress(Sender: TObject; var Key: Char);
-    procedure CUR3KeyPress(Sender: TObject; var Key: Char);
-    procedure CUR4KeyPress(Sender: TObject; var Key: Char);
-    procedure INT1KeyPress(Sender: TObject; var Key: Char);
-    procedure INT2KeyPress(Sender: TObject; var Key: Char);
-    procedure INT3KeyPress(Sender: TObject; var Key: Char);
-    procedure INT4KeyPress(Sender: TObject; var Key: Char);
-    procedure AGT1KeyPress(Sender: TObject; var Key: Char);
-    procedure AGT2KeyPress(Sender: TObject; var Key: Char);
-    procedure AGT3KeyPress(Sender: TObject; var Key: Char);
-    procedure AGT4KeyPress(Sender: TObject; var Key: Char);
     procedure btnMakeGroupAgeClick(Sender: TObject);
     procedure EditGroupNameKeyPress(Sender: TObject; var Key: Char);
     procedure sgAgeViewMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
@@ -588,6 +572,10 @@ type                                                            (* GUI | MAIN TH
     procedure Action_SearchBookClick(Sender: TObject);
     procedure Action_OverdueClick(Sender: TObject);
     procedure GroupListBoxDropDown(Sender: TObject);
+    procedure DetailsGridKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure DetailsGridKeyPress(Sender: TObject; var Key: Char);
+    procedure DetailsGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+    procedure DetailsGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
     { ----------------------------------------------------------------------------------------------------------------------------------------------- HELPERS }
   private
     var GroupNmSel          :  integer;  // CURRENTLY SELECTED GROUP
@@ -603,6 +591,7 @@ type                                                            (* GUI | MAIN TH
     property   AccessLevel  : string  read FAccessLevel write FAccessLevel; // RO, RW, AD
     property   AccessMode   : string  read FAccessMode  write FAccessMode;  // TEMPORARILY UNUSED
     procedure  DebugMsg(const Msg: String);
+    procedure  ExecMessage(IsPostType: boolean; WM_CONST: integer; YOUR_INT: integer; YOUR_TEXT: string);
     function   OleGetStr(RecordsetField: variant): string;
     function   FindKey(INI: TMemIniFile; OpenedSection: string; KeyPosition: integer): string;
     function   WndCall(WinForm: TForm; Mode: integer): integer;
@@ -624,11 +613,11 @@ TGetOSVer             = function(mode: integer): string; stdcall;
 TGetCurrentUserSid    = function: string stdcall;
 TGetBuildInfoAsString = function: string stdcall;
 
-{ ---------------------------------------------------------- ! INCLUDE ALL CONSTANTS ! ---------------------------------------------------------------------- }
+{ ------------------------------------------------------------ ! INCLUDE ALL CONSTANTS ! -------------------------------------------------------------------- }
 
 {$I Common.inc}
 
-{ ------------------------------------------------------------ ! STATIC DLL IMPORTS ! ----------------------------------------------------------------------- }
+{ ------------------------------------------------------------- ! STATIC DLL IMPORTS ! ---------------------------------------------------------------------- }
 
 function  GetCurrentUserSid: string; stdcall; external EX_LIBRARY;
 function  GetOSVer(mode: integer): string; stdcall; external EX_LIBRARY;
@@ -636,7 +625,7 @@ function  GetBuildInfoAsString: string; stdcall; external EX_LIBRARY;
 procedure LogText(filename: string; text: string); stdcall; external EX_LIBRARY;
 procedure MergeSort(grid: TStringgrid; var vals: array of integer; sortcol, datatype: integer; ascending: boolean); stdcall; external EX_LIBRARY;
 
-{ ----------------------------------------------------------- ! MAIN FORM REFERENCE ! ----------------------------------------------------------------------- }
+{ ------------------------------------------------------------- ! MAIN FORM REFERENCE ! --------------------------------------------------------------------- }
 var
   MainForm :  TMainForm;
 
@@ -645,7 +634,7 @@ var
 implementation
 
 uses
-  Filter, Tracker, Invoices, Actions, Calendar, About, Search, Worker, Model, SQL, Settings, Database, UAC, AgeView;
+  Filter, Tracker, Invoices, Actions, Calendar, About, Search, Worker, Model, SQL, Settings, Database, UAC, AgeView, Transactions;
 
 {$R *.dfm}
 
@@ -798,6 +787,13 @@ begin
     AllowClose:=True;
   end;
 
+end;
+
+{ ----------------------------------------------------------------------------------------------------------------------------- WRAPPER FOR SEND/POST MESSAGE }
+procedure TMainForm.ExecMessage(IsPostType: boolean; WM_CONST: Integer; YOUR_INT: Integer; YOUR_TEXT: string);
+begin
+  if IsPostType     then PostMessage(MainForm.Handle, WM_CONST, YOUR_INT, LPARAM(PCHAR(YOUR_TEXT)));
+  if not IsPostType then SendMessage(MainForm.Handle, WM_CONST, YOUR_INT, LPARAM(PCHAR(YOUR_TEXT)));
 end;
 
 { ####################################################### ! EXTENSION OF 'TSHAPE' CLASS ! ################################################################### }
@@ -1043,10 +1039,10 @@ begin
   { HIGHLLIGHT ENTIRE ROW IF CELL IS SELECTED }
   if (State = [gdSelected]) or (State = [gdFocused]) then
   begin
-    Canvas.Font.Color:=FontColorSel;
+    Canvas.Font.Color :=FontColorSel;
     Canvas.Brush.Color:=BrushColorSel
   end else begin
-    Canvas.Font.Color:=FontColor;
+    Canvas.Font.Color :=FontColor;
     Canvas.Brush.Color:=BrushColor;
   end;
   { EXTEND DRAWING ON HEADERS IF FALSE }
@@ -1292,52 +1288,14 @@ begin
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    DataTables.StrSQL:=SELECT                       + SPACE +
-                         TSnapshots.CUSTOMER_NAME   + _AS + 'Customer name'      + COMMA +
-                         TSnapshots.CUSTOMER_NUMBER + _AS + 'Customer number'    + COMMA +
-                         TSnapshots.COUNTRY_CODE    + _AS + 'Country code'       + COMMA +
-                         TSnapshots.NOT_DUE         + _AS + 'Not due'            + COMMA +
-                         TSnapshots.RANGE1          + _AS + 'Bucket 1 - 7'       + COMMA +
-                         TSnapshots.RANGE2          + _AS + 'Bucket 8 - 30'      + COMMA +
-                         TSnapshots.RANGE3          + _AS + 'Bucket 31 - 60'     + COMMA +
-                         TSnapshots.RANGE4          + _AS + 'Bucket 61 - 90'     + COMMA +
-                         TSnapshots.RANGE5          + _AS + 'Bucket 91 - 120'    + COMMA +
-                         TSnapshots.RANGE6          + _AS + 'Bucket 120 - oo'    + COMMA +
-                         TSnapshots.OVERDUE         + _AS + 'Overdue amount'     + COMMA +
-                         TSnapshots.TOTAL           + _AS + 'Total amount'       + COMMA +
-                         TSnapshots.CREDIT_LIMIT    + _AS + 'Credit limit'       + COMMA +
-                         TSnapshots.EXCEEDED_AMOUNT + _AS + 'Exceeded amount'    + COMMA +
-                         TSnapshots.PAYMENT_TERMS   + _AS + 'Payment term'       + COMMA +
-                         TSnapshots.AGENT           + _AS + 'Agent'              + COMMA +
-                         TSnapshots.DIVISION        + _AS + 'Division'           + COMMA +
-                         TSnapshots.CO_CODE         + _AS + 'Co Code'            + COMMA +
-                         TSnapshots.LEDGER_ISO      + _AS + 'Ledger currency'    + COMMA +
-                         TSnapshots.INF7            + _AS + 'INF7'               + COMMA +
-                         TSnapshots.AGE_DATE        + _AS + 'Aging date'         + COMMA +
-                         TGeneral.FIXCOMMENT        + _AS + 'General comment'    + COMMA +
-                         TTempDailyView.AGEDATE     + _AS + 'Comment age date'   + COMMA +
-                         TTempDailyView.FIXCOMMENT  + _AS + 'Daily comment'      +
-                       FROM           +
-                         TblSnapshots +
-                       LEFT_JOIN      +
-                         TblGeneral   +
-                       _ON            +
-                         TSnapshots.CUID  + EQUAL + TGeneral.CUID +
-                       LEFT_JOIN          +
-                         TblTempDailyView +
-                       _ON                +
-                         TSnapshots.CUID  + EQUAL + TTempDailyView.CUID +
-                       WHERE +
-                         TSnapshots.GROUP_ID + EQUAL + QuotedStr(MainForm.FGroupList[MainForm.GroupListBox.ItemIndex, 0]) +
-                       _AND +
-                         TSnapshots.AGE_DATE + EQUAL + QuotedStr(MainForm.GroupListDates.Text) +
-                       ORDER +
-                         TSnapshots.TOTAL + DESC;
+    DataTables.StrSQL:='';
+                         //QuotedStr(MainForm.FGroupList[MainForm.GroupListBox.ItemIndex, 0])
+                         //QuotedStr(MainForm.GroupListDates.Text)
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     { QUERY DATA TO SELF AND RELEASE }
-    DataTables.SqlToGrid(Self, DataTables.ExecSQL, False);
+    DataTables.SqlToGrid(Self, DataTables.ExecSQL, False, True);
   finally
     DataTables.Free;
   end;
@@ -1465,11 +1423,11 @@ begin
       end;
     { ----------------------------------------------------------------------------------------------------------------------------------- RELEASE FROM MEMORY }
     finally
-      PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Ready.')));
+      MainForm.ExecMessage(True, WM_GETINFO, 10, stReady);
       if not IsError then
       begin
         LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: Data has been imported successfully!');
-        SendMessage(MainForm.Handle, WM_GETINFO, 1, LPARAM(PChar('Data has been imported successfully!')));
+        MainForm.ExecMessage(False, WM_GETINFO, 1, 'Data has been imported successfully!');
       end;
       Data.Free;
       Transit.Free;
@@ -1566,15 +1524,12 @@ end;
 function TMainForm.WndCall(WinForm: TForm; Mode: integer): integer;
 begin
   Result:=0;
-
   { SETUP POPUPS }
   WinForm.PopupMode  :=pmAuto;
   WinForm.PopupParent:=MainForm;
-
   { CALL WINDOW }
   if Mode = 0 then Result:=WinForm.ShowModal;
   if Mode = 1 then WinForm.Show;
-
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------- WRAPPER FOR WINDOWS MESSAGE BOX }
@@ -1592,11 +1547,9 @@ end;
 { -------------------------------------------------------------------------------------------------------------------------------------------- RESET SETTINGS }
 procedure TMainForm.LockSettingsPanel;
 begin
-
   { VISIBLE ON }
   MainForm.imgOFF.Visible         :=True;
   MainForm.btnPassUpdate.Enabled  :=False;
-
   { EDIT BOXES }
   MainForm.Edit_CurrPassWd.Enabled:=False;
   MainForm.Edit_NewPassWd.Enabled :=False;
@@ -1605,7 +1558,6 @@ begin
   MainForm.Edit_NewPassWd.Text    :='';
   MainForm.Edit_ConfPassWd.Text   :='';
   MainForm.Edit_PASSWORD.Text     :='';
-
   { STRING GRIDS }
   MainForm.sgListSection.ClearAll(2, 0, 0, False);
   MainForm.sgListValue.ClearAll(2, 0, 0, False);
@@ -1613,11 +1565,9 @@ begin
   MainForm.sgListValue.Row:=1;
   MainForm.sgListSection.Enabled :=False;
   MainForm.sgListValue.Enabled   :=False;
-
   { ENDING }
   MainForm.btnUnlock.Caption:='Unlock';
   MainForm.Edit_PASSWORD.SetFocus;
-
 end;
 
 { ################################################################## ! EVENTS ! ############################################################################# }
@@ -1810,11 +1760,11 @@ begin
 
   DataTables:=TDataTables.Create(FDbConnect);
   try
-    DataTables.StrSQL:='SELECT * FROM ' + AppSettings.TMIG.ReadString(GeneralTables, 'MAP1', ''); DataTables.SqlToGrid(sgCoCodes,  DataTables.ExecSQL, False);
-    DataTables.StrSQL:='SELECT * FROM ' + AppSettings.TMIG.ReadString(GeneralTables, 'MAP4', ''); DataTables.SqlToGrid(sgPmtTerms, DataTables.ExecSQL, False);
-    DataTables.StrSQL:='SELECT * FROM ' + AppSettings.TMIG.ReadString(GeneralTables, 'MAP5', ''); DataTables.SqlToGrid(sgPaidInfo, DataTables.ExecSQL, False);
-    DataTables.StrSQL:='SELECT * FROM ' + AppSettings.TMIG.ReadString(GeneralTables, 'MAP6', ''); DataTables.SqlToGrid(sgGroup3,   DataTables.ExecSQL, False);
-    DataTables.StrSQL:='SELECT * FROM ' + AppSettings.TMIG.ReadString(GeneralTables, 'MAP7', ''); DataTables.SqlToGrid(sgPerson,   DataTables.ExecSQL, False);
+    DataTables.StrSQL:='SELECT * FROM ' + AppSettings.TMIG.ReadString(GeneralTables, 'MAP1', ''); DataTables.SqlToGrid(sgCoCodes,  DataTables.ExecSQL, False, True);
+    DataTables.StrSQL:='SELECT * FROM ' + AppSettings.TMIG.ReadString(GeneralTables, 'MAP4', ''); DataTables.SqlToGrid(sgPmtTerms, DataTables.ExecSQL, False, True);
+    DataTables.StrSQL:='SELECT * FROM ' + AppSettings.TMIG.ReadString(GeneralTables, 'MAP5', ''); DataTables.SqlToGrid(sgPaidInfo, DataTables.ExecSQL, False, True);
+    DataTables.StrSQL:='SELECT * FROM ' + AppSettings.TMIG.ReadString(GeneralTables, 'MAP6', ''); DataTables.SqlToGrid(sgGroup3,   DataTables.ExecSQL, False, True);
+    DataTables.StrSQL:='SELECT * FROM ' + AppSettings.TMIG.ReadString(GeneralTables, 'MAP7', ''); DataTables.SqlToGrid(sgPerson,   DataTables.ExecSQL, False, True);
   finally
     DataTables.Free;
   end;
@@ -2559,27 +2509,27 @@ begin
   (* CALL SG_DRAWSELECTED BEFORE SG_COLORVALUES *)
 
   { DRAW SELECTED ROW | SKIP HEADERS }
-  MainForm.sgAgeView.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
+  sgAgeView.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
 
   { COLUMNS ORDER MAY BE CHANGED BY THE USER  }
   { FIND COLUMN NUMBERS FOR GIVEN COLUMN NAME }
-  Col1 :=MainForm.sgAgeView.ReturnColumn('NOT DUE',         1, 1);
-  Col2 :=MainForm.sgAgeView.ReturnColumn('1 - 7',           1, 1);
-  Col3 :=MainForm.sgAgeView.ReturnColumn('8 - 30',          1, 1);
-  Col4 :=MainForm.sgAgeView.ReturnColumn('31 - 60',         1, 1);
-  Col5 :=MainForm.sgAgeView.ReturnColumn('61 - 90',         1, 1);
-  Col6 :=MainForm.sgAgeView.ReturnColumn('91 - 120',        1, 1);
-  Col7 :=MainForm.sgAgeView.ReturnColumn('121 - oo',        1, 1);
-  Col8 :=MainForm.sgAgeView.ReturnColumn('OVERDUE',         1, 1);
-  Col9 :=MainForm.sgAgeView.ReturnColumn('TOTAL',           1, 1);
-  Col10:=MainForm.sgAgeView.ReturnColumn('CREDIT LIMIT',    1, 1);
-  Col11:=MainForm.sgAgeView.ReturnColumn('EXCEEDED AMOUNT', 1, 1);
+  Col1 :=sgAgeView.ReturnColumn('NOT DUE',         1, 1);
+  Col2 :=sgAgeView.ReturnColumn('1 - 7',           1, 1);
+  Col3 :=sgAgeView.ReturnColumn('8 - 30',          1, 1);
+  Col4 :=sgAgeView.ReturnColumn('31 - 60',         1, 1);
+  Col5 :=sgAgeView.ReturnColumn('61 - 90',         1, 1);
+  Col6 :=sgAgeView.ReturnColumn('91 - 120',        1, 1);
+  Col7 :=sgAgeView.ReturnColumn('121 - oo',        1, 1);
+  Col8 :=sgAgeView.ReturnColumn('OVERDUE',         1, 1);
+  Col9 :=sgAgeView.ReturnColumn('TOTAL',           1, 1);
+  Col10:=sgAgeView.ReturnColumn('CREDIT LIMIT',    1, 1);
+  Col11:=sgAgeView.ReturnColumn('EXCEEDED AMOUNT', 1, 1);
 
   { DRAW ONLY SELECTED COLUMNS }
   if ( (ACol = Col1) or (ACol = Col2) or (ACol = Col3) or (ACol = Col4) or (ACol = Col5) or (ACol = Col6) or (ACol = Col7) or (ACol = Col8) or (ACol = Col9) or (ACol = Col10) or (ACol = Col11) )
     and (ARow > 0) then
       begin
-        MainForm.sgAgeView.ColorValues(ARow, ACol, Rect, clRed, clBlack);
+        sgAgeView.ColorValues(ARow, ACol, Rect, clRed, clBlack);
       end;
 
 end;
@@ -2613,6 +2563,16 @@ begin
         CanSelect:=True;
         sgAddressBook.Options:=sgAddressBook.Options + [goRangeSelect];
       end;
+end;
+
+procedure TMainForm.DetailsGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
+begin
+  DetailsGrid.Selection:=TGridRect(Rect(-1, -1, -1, -1));
+end;
+
+procedure TMainForm.DetailsGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+begin
+  DetailsGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, clCream, clBlack, clCream, False);
 end;
 
 procedure TMainForm.sgAddressBookDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
@@ -2722,88 +2682,50 @@ begin
     end;
 end;
 
-{ ---------------------------------------------------------------------------------------------------------------------------- OPEN ITEMS | COMPANY CODE 1..4 }
-procedure TMainForm.COC1KeyPress(Sender: TObject; var Key: Char);
+{ ------------------------------------------------------------------------------------------------------------------------------------- LOCK ROWS FOR EDITING }
+procedure TMainForm.DetailsGridKeyPress(Sender: TObject; var Key: Char);
 begin
-  if (not (CharInSet(Key, ['0'..'9', #8]))) then Key:=#0;
+  { WE WILL AUTOFILL ROWS 1..3, THUS PREVENT USER FROM MANIPULATING }
+  if (DetailsGrid.Row > 0) and (DetailsGrid.Row < 4) then  Key:=#0;
+  { ALLOW ONLY DIGITS FOR CO CODE CELLS }
+  if (DetailsGrid.Row = 0) and (not (CharInSet(Key, ['0'..'9', #8]))) then Key:=#0;
 end;
 
-procedure TMainForm.COC2KeyPress(Sender: TObject; var Key: Char);
-begin
-  if (not (CharInSet(Key, ['0'..'9', #8]))) then Key:=#0;
-end;
+{ ------------------------------------------------------------------------------------------------------------------------------------------- INVOKE AUTOFILL }
+procedure TMainForm.DetailsGridKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 
-procedure TMainForm.COC3KeyPress(Sender: TObject; var Key: Char);
-begin
-  if (not (CharInSet(Key, ['0'..'9', #8]))) then Key:=#0;
-end;
+  (* NESTED PROCEDURE *)
 
-procedure TMainForm.COC4KeyPress(Sender: TObject; var Key: Char);
-begin
-  if (not (CharInSet(Key, ['0'..'9', #8]))) then Key:=#0;
-end;
+  procedure Find(ColumnNum: integer);
+  var
+    iCNT:  integer;
+  begin
+    for iCNT:=1 to sgCoCodes.RowCount - 1 do
+    begin
+      if DetailsGrid.Cells[ColumnNum, 0] = sgCoCodes.Cells[sgCoCodes.ReturnColumn('CO_CODE', 1, 1), iCNT] then
+      begin
+        DetailsGrid.Cells[ColumnNum, 1]:=sgCoCodes.Cells[sgCoCodes.ReturnColumn('COCURRENCY',    1, 1), iCNT];
+        DetailsGrid.Cells[ColumnNum, 2]:=sgCoCodes.Cells[sgCoCodes.ReturnColumn('INTEREST_RATE', 1, 1), iCNT];
+        DetailsGrid.Cells[ColumnNum, 3]:=sgCoCodes.Cells[sgCoCodes.ReturnColumn('AGENTS',        1, 1), iCNT];
+        Break;
+      end
+      else
+      begin
+        DetailsGrid.Cells[ColumnNum, 1]:='NA';
+        DetailsGrid.Cells[ColumnNum, 2]:='NA';
+        DetailsGrid.Cells[ColumnNum, 3]:='NA';
+      end;
+    end;
+  end;
 
-{ --------------------------------------------------------------------------------------------------------------------------- OPEN ITEMS | CURRENCY CODE 1..4 }
-procedure TMainForm.CUR1KeyPress(Sender: TObject; var Key: Char);
-begin
-  if (not (CharInSet(Key, ['A'..'Z', #8]))) then Key:=#0;
-end;
+  (* MAIN BLOCK *)
 
-procedure TMainForm.CUR2KeyPress(Sender: TObject; var Key: Char);
 begin
-  if (not (CharInSet(Key, ['A'..'Z', #8]))) then Key:=#0;
-end;
-
-procedure TMainForm.CUR3KeyPress(Sender: TObject; var Key: Char);
-begin
-  if (not (CharInSet(Key, ['A'..'Z', #8]))) then Key:=#0;
-end;
-
-procedure TMainForm.CUR4KeyPress(Sender: TObject; var Key: Char);
-begin
-  if (not (CharInSet(Key, ['A'..'Z', #8]))) then Key:=#0;
-end;
-
-{ --------------------------------------------------------------------------------------------------------------------------- OPEN ITEMS | INTEREST RATE 1..4 }
-procedure TMainForm.INT1KeyPress(Sender: TObject; var Key: Char);
-begin
-  if (not (CharInSet(Key, ['0'..'9', #8, ',', '.']))) then Key:=#0;
-end;
-
-procedure TMainForm.INT2KeyPress(Sender: TObject; var Key: Char);
-begin
-  if (not (CharInSet(Key, ['0'..'9', #8, ',', '.']))) then Key:=#0;
-end;
-
-procedure TMainForm.INT3KeyPress(Sender: TObject; var Key: Char);
-begin
-  if (not (CharInSet(Key, ['0'..'9', #8, ',', '.']))) then Key:=#0;
-end;
-
-procedure TMainForm.INT4KeyPress(Sender: TObject; var Key: Char);
-begin
-  if (not (CharInSet(Key, ['0'..'9', #8, ',', '.']))) then Key:=#0;
-end;
-
-{ ---------------------------------------------------------------------------------------------------------------------------------- OPEN ITEMS | AGENTS 1..4 }
-procedure TMainForm.AGT1KeyPress(Sender: TObject; var Key: Char);
-begin
-  if (not (CharInSet(Key, ['O', 'N', 'F', #8]))) then Key:=#0;
-end;
-
-procedure TMainForm.AGT2KeyPress(Sender: TObject; var Key: Char);
-begin
-  if (not (CharInSet(Key, ['O', 'N', 'F', #8]))) then Key:=#0;
-end;
-
-procedure TMainForm.AGT3KeyPress(Sender: TObject; var Key: Char);
-begin
-  if (not (CharInSet(Key, ['O', 'N', 'F', #8]))) then Key:=#0;
-end;
-
-procedure TMainForm.AGT4KeyPress(Sender: TObject; var Key: Char);
-begin
-  if (not (CharInSet(Key, ['O', 'N', 'F', #8]))) then Key:=#0;
+  { FIND GIVEN COMPANY CODE IN GENERAL TABLE AND RETURN ASSIGNED CURRENCY, INTEREST RATE AND AGENT INFO }
+  if DetailsGrid.Col = 0 then Find(DetailsGrid.Col);
+  if DetailsGrid.Col = 1 then Find(DetailsGrid.Col);
+  if DetailsGrid.Col = 2 then Find(DetailsGrid.Col);
+  if DetailsGrid.Col = 3 then Find(DetailsGrid.Col);
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------- OPEN ITEMS | MAKE GROUP }
@@ -3392,8 +3314,7 @@ begin
   StatBar_TXT1.Caption :='Checking...';
   if MainForm.AccessLevel = 'AD' then
   begin
-    { START THREAD WITH NO PARAMETERS PASSED TO AN OBJECT }
-    TTReadOpenItems.Create('0');
+    TTReadOpenItems.Create(0);
   end else
   begin
     StatBar_TXT1.Caption:='Insufficient UAC level.';

@@ -2997,7 +2997,7 @@ object MainForm: TMainForm
             Font.Style = []
             ParentFont = False
           end
-          object Label1: TLabel
+          object Text53: TLabel
             Left = 153
             Top = 90
             Width = 38
@@ -3076,8 +3076,11 @@ object MainForm: TMainForm
           object DetailsGrid: TStringGrid
             Left = 239
             Top = 29
-            Width = 205
+            Width = 207
             Height = 79
+            BevelInner = bvNone
+            BevelKind = bkFlat
+            BevelOuter = bvNone
             Color = clCream
             ColCount = 4
             DefaultColWidth = 50
@@ -3089,9 +3092,13 @@ object MainForm: TMainForm
             FixedRows = 0
             GradientEndColor = clCream
             GradientStartColor = clCream
-            Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goEditing, goTabs, goAlwaysShowEditor]
+            Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goDrawFocusSelected, goEditing, goTabs]
             ScrollBars = ssNone
             TabOrder = 1
+            OnDrawCell = DetailsGridDrawCell
+            OnKeyPress = DetailsGridKeyPress
+            OnKeyUp = DetailsGridKeyUp
+            OnSelectCell = DetailsGridSelectCell
           end
           object PanelGroupName: TPanel
             Left = 143
@@ -3157,7 +3164,7 @@ object MainForm: TMainForm
         DrawingStyle = gdsGradient
         RowCount = 2
         GradientEndColor = 15527148
-        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
+        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goDrawFocusSelected, goColSizing, goThumbTracking]
         ParentShowHint = False
         ShowHint = False
         TabOrder = 0

@@ -93,7 +93,7 @@ begin
       MSSQL.StrSQL:='SELECT INVOICENO, INVOICESTATE, STAMP FROM tbl_invoices WHERE CUID = ' + QuotedStr(CUID);
       InvoicesGrid.Freeze(True);
       { CLEAR, QUERY AND SHOW DATA IN STRING GRID }
-      MSSQL.SqlToGrid(InvoicesGrid, MSSQL.ExecSQL, False);
+      MSSQL.SqlToGrid(InvoicesGrid, MSSQL.ExecSQL, False, True);
       InvoicesGrid.Freeze(False);
     finally
       { DISPOSE }
