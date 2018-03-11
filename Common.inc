@@ -149,11 +149,13 @@ const
   _AS          : string = ' AS ';
   EXEC         : string = ' EXEC ';
 
-  { SQL MODEL ENUMERATION }
+  { UAC ENUMERATION }
 
   adAccessLevel = 0;
   adAccessMode  = 1;
   adUserKeyID   = 2;
+  adAccessFull  = 'FULL';
+  adAccessBasic = 'BASIC';
 
   { ACCESS LEVELS }
 
@@ -171,14 +173,55 @@ const
 
   { STATUS MESSAGES }
 
-  stReady      = 'Ready.';
-  stProcessing = 'Processing..., please wait.';
-  stExportXLS  = 'Exporting to Excel..., please wait.';
-  stImportXLS  = 'Importing from Excel..., please wait.';
-  stExportCSV  = 'Exporting to CSV file..., please wait.';
-  stImportCSV  = 'Importing from CSV file..., please wait.';
-  stImportOK   = 'Data has been imported successfully!';
-  stCSVfailed  = 'CSV Import faild. Please check the file and try again.';
+  stReady       = 'Ready.';
+  stProcessing  = 'Processing...';
+  stExportXLS   = 'Exporting to Excel...';
+  stExportCSV   = 'Exporting to CSV file...';
+  stImportCSV   = 'Importing from CSV file...';
+  stGenerating  = 'Generating age view...';
+  stDownloading = 'Downloading Open Items...';
+  stLoading     = 'Loading aging report...';
+
+  { UNASSIGNED }
+
+  unUnassigned = 'Unassigned item.';
+  unNA         = 'N/A';
+
+  { MICROSOFT EXCEL }
+
+  xlWBATWorksheet = -4167;
+  xlWARN_MESSAGE  = 'Invalid class string';
+
+  { AGE VIEW | "FRIENDLY" COLUMNS NAMES }
+
+  CUSTOMER_NAME   = 'CUSTOMER NAME';
+  CUSTOMER_NUMBER = 'CUSTOMER NUMBER';
+  FOLLOWUP        = 'FOLLOW UP';
+  NOT_DUE         = 'NOT DUE';
+  COUNTRY_CODE    = 'COUNTRY CODE';
+  RANGE1          = '1 - 7';
+  RANGE2          = '8 - 30';
+  RANGE3          = '31 - 60';
+  RANGE4          = '61 - 90';
+  RANGE5          = '91 - 120';
+  RANGE6          = '121 - oo';
+  TOTAL           = 'TOTAL';
+  OVERDUE         = 'OVERDUE';
+  CREDIT_LIMIT    = 'CREDIT LIMIT';
+  EXCEEDED_AMOUNT = 'EXCEEDED AMOUNT';
+  AGENT           = 'AGENT';
+  CO_CODE         = 'CO CODE';
+  PAYMENT_TERMS   = 'PAYMENT TERMS';
+  DIVISION        = 'DIVISION';
+  LEDGER_ISO      = 'LEDGER ISO';
+  INF4            = 'INF4';
+  INF7            = 'INF7';
+  PERSON          = 'PERSON';
+  GROUP3          = 'GROUP3';
+  RISK_CLASS      = 'RISK CLASS';
+  QUALITY_IDX     = 'QUALITY IDX';
+  WALLET_SHARE    = 'WALLET SHARE';
+  CUID            = 'CUID';
 
   { MAPPED TABLES FROM DATABASE | WE DO NOT USE SEPARATE ORM FRAMEWORK }
 
@@ -202,6 +245,9 @@ const
   { STORED PROCEDURES }
 
   QueryOpenItems = 'QueryOpenItems';
+  AgeViewExport  = 'AgeViewExport';
+  AgeViewReport  = 'AgeViewReport';
+  AgeViewDetails = 'AgeViewDetails';
 
   { CURSOR TYPE ENUM, MSDN: https://docs.microsoft.com/en-us/sql/ado/reference/ado-api/cursortypeenum }
 

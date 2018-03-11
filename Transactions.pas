@@ -44,6 +44,7 @@ uses
 { --------------------------------------------------------------------------------------------------------------------------------- GET CURRENT DATE AND TIME }
 function TTransactions.GetDateTime: TDateTime;
 begin
+  Result:=StrToDate('2018-03-11');
   //
 end;
 
@@ -58,48 +59,52 @@ var
   SortPos:     integer;
   iCNT:        integer;
 begin
-   { --------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-   AppSettings:=TSettings.Create;
-   try
-     CutOff :=IntToStr(AppSettings.TMIG.ReadInteger(OpenItemsData, 'NRCUTOFFNUM', 0));
-     INF4   :=AppSettings.TMIG.ReadString(OpenItemsData, 'TXCUTOFFTXT', '');
-     SortPos:=AppSettings.TMIG.ReadInteger(OpenItemsData, 'SORTPOS', 0);
-   finally
-     AppSettings.Free;
-   end;
-   { ------------------------------------------------------------------------------------------------------------------------------------------- AGENT ON/OFF }
+  { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
+  AppSettings:=TSettings.Create;
+  try
+    { PARAMETERS FOR SQL PROCEDURE }
+    CutOff :=IntToStr(AppSettings.TMIG.ReadInteger(OpenItemsData, 'NRCUTOFFNUM', 0));
+    INF4   :=AppSettings.TMIG.ReadString(OpenItemsData, 'TXCUTOFFTXT', '');
+    { FOR STRING GRID SORTING }
+    SortPos:=AppSettings.TMIG.ReadInteger(OpenItemsData, 'SORTPOS', 0);
+  finally
+    AppSettings.Free;
+  end;
+  { -------------------------------------------------------------------------------------------------------------------------------------------- AGENT ON/OFF }
 
-   (* WARNING! "SettingGrid" HAS FIXED DIMENSIONS *)
+  (* WARNING! "SettingGrid" HAS FIXED DIMENSIONS *)
 
-   for iCNT:=0 to 3 do
-   begin
-     if SettingGrid.Cells[iCNT, 3] = 'OFF' then Agents:='N';
-     if SettingGrid.Cells[iCNT, 3] = 'ON'  then Agents:='Y';
-   end;
-   { ------------------------------------------------------------------------------------------------------------------------------------- EXECUTE STORED SQL }
-   DataTables:=TDataTables.Create(MainForm.FDbConnect);
-   try
+  for iCNT:=0 to 3 do
+  begin
+    if SettingGrid.Cells[iCNT, 3] = 'OFF' then Agents:='N';
+    if SettingGrid.Cells[iCNT, 3] = 'ON'  then Agents:='Y';
+  end;
+  { -------------------------------------------------------------------------------------------------------------------------------------- EXECUTE STORED SQL }
+  DataTables:=TDataTables.Create(MainForm.FDbConnect);
+  try
 
-     (* WARNING! O NOT USE "cmdStoredProc" TO EXECUTE STORED PROCEDURE WITH ADODB *)
+    (* WARNING! DO NOT USE "cmdStoredProc" TO EXECUTE STORED PROCEDURE WITH ADODB *)
+    (*          USE ORDINARY "cmdText" WITH "EXEC" STATEMENT JUST LIKE YOU WOULD  *)
+    (*          USE IT IN MICROSOFT MANAGEMENT STUDIO. ALTERNATIVELY, USE FIREDAC *)
+    (*          FROM EMBARCADERO INSTEAD OF ADODB AS IT IS MORE ROBUST LIBRARY    *)
 
-     DataTables.CmdType:=cmdText;
-     DataTables.StrSQL:=EXEC + QueryOpenItems                                   + SPACE +
-                        QuotedStr('2018-03-10')                                 + COMMA +
-                        QuotedStr(ConvertName(SettingGrid.Cells[0, 0], 'F', 0)) + COMMA +
-                        QuotedStr(ConvertName(SettingGrid.Cells[1, 0], 'F', 0)) + COMMA +
-                        QuotedStr(ConvertName(SettingGrid.Cells[2, 0], 'F', 0)) + COMMA +
-                        QuotedStr(ConvertName(SettingGrid.Cells[3, 0], 'F', 0)) + COMMA +
-                        QuotedStr(CutOff)                                       + COMMA +
-                        QuotedStr(Agents)                                       + COMMA +
-                        QuotedStr(INF4);
-     DataTables.ExecSQL;
-     Result:=DataTables.SqlToGrid(DestGrid, DataTables.ExecSQL, True, False);
-     { --------------------------------------------------------------------------------------------------------------------- SORT STRING GRID VIA CUID COLUMN }
-     DestGrid.MSort(SortPos, 2, True);
-   finally
-     MainForm.ExecMessage(True, WM_GETINFO, 1, stReady);
-     DataTables.Free;
-   end;
+    DataTables.CmdType:=cmdText;
+    DataTables.StrSQL:=EXEC + QueryOpenItems                                   + SPACE +
+                       QuotedStr('2018-03-11')                                 + COMMA +
+                       QuotedStr(ConvertName(SettingGrid.Cells[0, 0], 'F', 0)) + COMMA +
+                       QuotedStr(ConvertName(SettingGrid.Cells[1, 0], 'F', 0)) + COMMA +
+                       QuotedStr(ConvertName(SettingGrid.Cells[2, 0], 'F', 0)) + COMMA +
+                       QuotedStr(ConvertName(SettingGrid.Cells[3, 0], 'F', 0)) + COMMA +
+                       QuotedStr(CutOff)                                       + COMMA +
+                       QuotedStr(Agents)                                       + COMMA +
+                       QuotedStr(INF4);
+    DataTables.ExecSQL;
+    Result:=DataTables.SqlToGrid(DestGrid, DataTables.ExecSQL, False, False);
+    { ----------------------------------------------------------------------------------------------------------------------------------------- SORT VIA CUID }
+    DestGrid.MSort(SortPos, 2, True);
+  finally
+    DataTables.Free;
+  end;
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------- CLEAR ALL SUMMARY DETAILS }

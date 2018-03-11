@@ -43,20 +43,6 @@ type
     procedure Execute; override;
   end;
 
-{ --------------------------------------------------------------------------------------------------------------------------------------------- READ AGE VIEW }
-type
-  TTReadAgeView = class(TThread)
-  protected
-    procedure Execute; override;    //remove modes!!
-  private
-    pMode: string;
-  public
-    { MODES:                                    }
-    {   '0' = LEAVE OPEN ITEMS AS IT IS         }
-    {   '1' = READ OPEN ITEMS                   }
-    constructor Create(cMode: string);
-  end;
-
 { --------------------------------------------------------------------------------------------------------------------------------------------- MAKE AGE VIEW }
 type
   TTMakeAgeView = class(TThread)
@@ -99,6 +85,24 @@ type
 
 
 
+
+
+
+{ --------------------------------------------------------------------------------------------------------------------------------------------- READ AGE VIEW }
+type
+  TTReadAgeView = class(TThread)
+  protected
+    procedure Execute; override;
+  private
+    var FMode:  integer;
+    var FLock:  TCriticalSection;
+    var FIDThd:  integer;
+  public
+    property    IDThd:  integer read FIDThd;
+    constructor Create(ActionMode: integer);
+    destructor  Destroy; override;
+  end;
+
 { ------------------------------------------------------------------------------------------------------------------------------------------- READ OPEN ITEMS }
 type
   TTReadOpenItems = class(TThread)
@@ -114,7 +118,7 @@ type
     destructor  Destroy; override;
   end;
 
-{ ---------------------------------------------------------------------------------------------------------------------------------------------- ADDRESS BOOK }
+{ ------------------------------------------------------------------------------------------------------------------------------- ADDRESS BOOK READ AND WRITE }
 type
   TTAddressBook = class(TThread)
   protected
@@ -139,7 +143,9 @@ type
     procedure Execute; override;
   private
     var FLock:   TCriticalSection;
+    var FIDThd:  integer;
   public
+    property    IDThd:  integer read FIDThd;
     constructor Create;
     destructor  Destroy; override;
   end;
@@ -219,10 +225,10 @@ end;
 
 { ---------------------------------------------------------------------------------------------------------------------------------------- OPEN ITEMS SCANNER }
 procedure TTOpenItemsScanner.Execute;  (* ASYNC *)
-var
-  IDThread:  integer;
+//var
+//  IDThread:  integer;
 begin
-  IDThread:=TTOpenItemsScanner.CurrentThread.ThreadID;
+//  IDThread:=TTOpenItemsScanner.CurrentThread.ThreadID;
 
   //...
 
@@ -230,208 +236,6 @@ begin
   FreeOnTerminate:=True;
 end;
 
-{ --------------------------------------------------------------------------------------------------------------------------------------------- READ AGE VIEW }
-constructor TTReadAgeView.Create(cMode: string);
-begin
-  inherited Create(False);
-  pMode:=cMode;
-end;
-
-Procedure TTReadAgeView.Execute;  (* ASYNC & SYNC *)
-var
-  IDThread:   integer;
-  THDMili:    extended;
-  THDSec:     extended;
-  StopWatch:  TStopWatch;
-  DataBase: TDataBase;
-  AgeView:  TAgeView;
-begin
-  IDThread:=TTReadAgeView.CurrentThread.ThreadID;
-  DataBase:=TDataBase.Create(False);
-
-  try
-    StopWatch:=TStopWatch.StartNew;
-
-    (* HEAVY DUTY TASK MUST BE ALWAYS RUN BETWEEN 'PRE-' AND 'POST-' GUI UPDATE *)
-
-    try
-
-      { ------------------------------------------------------- ! PRE | GUI UPDATE ! ------------------------------------------------------------------------ }
-      Synchronize
-        (procedure begin
-          { -------------------------------------------------------------------------------------------------------------------------- CLEAR OPEN ITEMS BOXES }
-
-          { RESET OPEN ITEMS DETAIS }
-(*
-          MainForm.COC1.Text:='0';
-          MainForm.COC2.Text:='0';
-          MainForm.COC3.Text:='0';
-          MainForm.COC4.Text:='0';
-          MainForm.CUR1.Text:='N/A';
-          MainForm.CUR2.Text:='N/A';
-          MainForm.CUR3.Text:='N/A';
-          MainForm.CUR4.Text:='N/A';
-          MainForm.INT1.Text:='0';
-          MainForm.INT2.Text:='0';
-          MainForm.INT3.Text:='0';
-          MainForm.INT4.Text:='0';
-          MainForm.AGT1.Text:='N/A';
-          MainForm.AGT2.Text:='N/A';
-          MainForm.AGT3.Text:='N/A';
-          MainForm.AGT4.Text:='N/A';
-*)
-          { --------------------------------------------------------------------------------------------------------------------------------- DISPLAY MESSAGE }
-          MainForm.StatBar_TXT1.Caption :='Loading aging view..., please wait.';
-
-          { ----------------------------------------------------------------------------------------------------------------------------------- CLEAR DETAILS }
-
-          { TOP }
-          MainForm.tcCOCODE.Caption     :='n/a';
-          MainForm.tcCURRENCY.Caption   :='n/a';
-          MainForm.tcTOTAL.Caption      :='0';
-          MainForm.tcNumCalls.Caption   :='0';
-          MainForm.tcNumEmails.Caption  :='0';
-
-          { TRADE RECEIVABLES SUMMARY }
-          MainForm.valND.Caption        :='0';
-          MainForm.valR1.Caption        :='0';
-          MainForm.valR2.Caption        :='0';
-          MainForm.valR3.Caption        :='0';
-          MainForm.valR4.Caption        :='0';
-          MainForm.valR5.Caption        :='0';
-          MainForm.valR6.Caption        :='0';
-          MainForm.valTAMT.Caption      :='0';
-
-          { PERCENTAGE }
-          MainForm.procND.Caption       :='0';
-          MainForm.procR1.Caption       :='0';
-          MainForm.procR2.Caption       :='0';
-          MainForm.procR3.Caption       :='0';
-          MainForm.procR4.Caption       :='0';
-          MainForm.procR5.Caption       :='0';
-          MainForm.procR6.Caption       :='0';
-
-          { EXCEEDERS }
-          MainForm.valEXCEEDERS.Caption :='0';
-          MainForm.valTEXCEES.Caption   :='0';
-          MainForm.valTLIMITS.Caption   :='0';
-
-          { NOT DUE | PAST DUE | DEFAULTED }
-          MainForm.valTND.Caption       :='0';
-          MainForm.valPASTDUE.Caption   :='0';
-          MainForm.valDEFAULTED.Caption :='0';
-
-          { ----------------------------------------------------------------------------------------------------------------------------- TURN OFF GIVEN VCL }
-          MainForm.GroupListBox.Enabled  :=False;
-          MainForm.GroupListDates.Enabled:=False;
-          MainForm.sgAgeView.Enabled     :=False;
-        end);
-
-      { -------------------------------------------------- ! HEAVY DUTY TASK (RUN ASYNC) ! ------------------------------------------------------------------ }
-      AgeView:=TAgeView.Create;
-      try
-        AgeView.Read(MainForm.FGroupList[MainForm.GroupListBox.ItemIndex, 0], StrToDate(MainForm.GroupListDates.Text), IDThread);
-      { ------------------------------------------------------- ! POST | GUI UPDATE ! ----------------------------------------------------------------------- }
-      Synchronize
-        (procedure begin
-
-          { FIND CO CODE, CURRENCY CODE, INTEREST RATE AND AGENT }
-          AgeView.Details(MainForm.FGroupList[MainForm.GroupListBox.ItemIndex, 0], StrToDate(MainForm.GroupListDates.Text), IDThread);
-
-          { -------------------------------------------------------------------------------------------------------------------------- TOP | AGE VIEW DETAILS }
-          MainForm.tcTOTAL.Caption    :=IntToStr(AgeView.CustAll);
-          MainForm.tcNumCalls.Caption :=IntToStr(AgeView.CallsAll);
-          MainForm.tcNumEmails.Caption:=IntToStr(AgeView.EmailsAll);
-
-          { -------------------------------------------------------------------------------------------------------------- BOTTOM | TRADE RECEIVABLES SUMMARY }
-
-          { VALUES }
-          MainForm.valND.Caption     :=FormatFloat('#,##0.00', AgeView.NotDue);
-          MainForm.valR1.Caption     :=FormatFloat('#,##0.00', AgeView.Range1);
-          MainForm.valR2.Caption     :=FormatFloat('#,##0.00', AgeView.Range2);
-          MainForm.valR3.Caption     :=FormatFloat('#,##0.00', AgeView.Range3);
-          MainForm.valR4.Caption     :=FormatFloat('#,##0.00', AgeView.Range4);
-          MainForm.valR5.Caption     :=FormatFloat('#,##0.00', AgeView.Range5);
-          MainForm.valR6.Caption     :=FormatFloat('#,##0.00', AgeView.Range6);
-          MainForm.valTAMT.Caption   :=FormatFloat('#,##0.00', AgeView.Balance);
-
-          { PERCENTAGE }
-          MainForm.procND.Caption    :=FormatFloat('0.00', ( (AgeView.NotDue / AgeView.Balance) * 100 )) + '%';
-          MainForm.procR1.Caption    :=FormatFloat('0.00', ( (AgeView.Range1 / AgeView.Balance) * 100 )) + '%';
-          MainForm.procR2.Caption    :=FormatFloat('0.00', ( (AgeView.Range2 / AgeView.Balance) * 100 )) + '%';
-          MainForm.procR3.Caption    :=FormatFloat('0.00', ( (AgeView.Range3 / AgeView.Balance) * 100 )) + '%';
-          MainForm.procR4.Caption    :=FormatFloat('0.00', ( (AgeView.Range4 / AgeView.Balance) * 100 )) + '%';
-          MainForm.procR5.Caption    :=FormatFloat('0.00', ( (AgeView.Range5 / AgeView.Balance) * 100 )) + '%';
-          MainForm.procR6.Caption    :=FormatFloat('0.00', ( (AgeView.Range6 / AgeView.Balance) * 100 )) + '%';
-          MainForm.procTAMT.Caption  :=FormatFloat('0.00', ( ( (AgeView.NotDue / AgeView.Balance) +
-                                                               (AgeView.Range1 / AgeView.Balance) +
-                                                               (AgeView.Range2 / AgeView.Balance) +
-                                                               (AgeView.Range3 / AgeView.Balance) +
-                                                               (AgeView.Range4 / AgeView.Balance) +
-                                                               (AgeView.Range5 / AgeView.Balance) +
-                                                               (AgeView.Range6 / AgeView.Balance) ) * 100 ) ) + '%';
-
-          { ------------------------------------------------------------------------------------------------------------------------------------ RICK CLASSES }
-          MainForm.valRISKA.Caption:=FormatFloat('#,##0.00', AgeView.RCA);
-          MainForm.valRISKB.Caption:=FormatFloat('#,##0.00', AgeView.RCB);
-          MainForm.valRISKC.Caption:=FormatFloat('#,##0.00', AgeView.RCC);
-
-          { ------------------------------------------------------------------------------------------------------------------------------ BOTTOM | EXCEEDERS }
-          MainForm.valEXCEEDERS.Caption :=IntToStr(AgeView.Exceeders);
-          MainForm.valTEXCEES.Caption   :=FormatFloat('#,##0.00', AgeView.TotalExceed);
-          MainForm.valTLIMITS.Caption   :=FormatFloat('#,##0.00', AgeView.Limits);
-
-          { --------------------------------------------------------------------------------------------------------- BOTTOM | NOT DUE | PAST DUE | DEFAULTED }
-          MainForm.valTND.Caption       :=MainForm.valND.Caption;
-          MainForm.valPASTDUE.Caption   :=FormatFloat('#,##0.00', (AgeView.Range1 + AgeView.Range2 + AgeView.Range3));
-          MainForm.valDEFAULTED.Caption :=FormatFloat('#,##0.00', (AgeView.Range4 + AgeView.Range5 + AgeView.Range6));
-
-          { ----------------------------------------------------------------------------------------------------------------------------------------- MESSAGE }
-          MainForm.StatBar_TXT1.Caption:='Ready.';
-
-        end);
-
-      finally
-        AgeView.Free;
-      end;
-
-    except
-      on E: Exception do
-      begin
-        SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PCHAR('Cannot execute ''TTReadAgeView''. Please contact IT support.')));
-        PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Ready.')));
-        LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Execution of this tread work has been stopped. Error thrown: ' + E.Message + ' (TReadFromDB).');
-      end;
-    end;
-
-  finally
-
-    Synchronize(procedure begin
-      { TURN ON COMPONENTS }
-      MainForm.GroupListBox.Enabled  :=True;
-      MainForm.sgAgeView.Enabled     :=True;
-      if (MainForm.GroupListDates.Text <> '') and (MainForm.AccessLevel = 'AD')
-        then MainForm.GroupListDates.Enabled:=True
-          else MainForm.GroupListDates.Enabled:=False;
-    end);
-
-    THDMili:=StopWatch.ElapsedMilliseconds;
-    THDSec:=THDMili / 1000;
-    LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Thread for selected group "' + MainForm.FGroupList[MainForm.GroupListBox.ItemIndex, 1] + '" has been executed within ' +
-                     FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
-  end;
-
-  { RELEASE THREAD WHEN DONE }
-  FreeOnTerminate:=True;
-  DataBase.Free;
-
-  { REFRESH OPEN ITEMS WITH ZERO ARGUMENT FOR NO 'AGE-MAKE'   }
-  { DO IT ONLY IF USE CLICK RELOAD BUTTON                     }
-  { PROGRAM REFRESH AGING ONLY IF NEW OPEN ITEMS ARE RELOADED }
-  { THEREFORE, NO NEED TO RELOAD OPEN ITEMS AGAIN             }
-  { WE WILL REFRESH OPEN ITEMS ONLY WHEN USER CHANGES GROUP   }
-  if pMode = '1' then TTReadOpenItems.Create(0);
-end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------- MAKE AGE VIEW }
 procedure TTMakeAgeView.Execute;  (* ASYNC & SYNC *)
@@ -458,7 +262,7 @@ begin
       StopWatch:=TStopWatch.StartNew;
       try
         { ----------------------------------------------------------------------------------------------------------------------- MAKE AGING REPORT TO AN ARRAY }
-        AgeView:=TAgeView.Create;
+        AgeView:=TAgeView.Create(MainForm.FDbConnect);
         try
 //          AgeView.Make(AgeView.GetCoCode(MainForm.GroupListBox.ItemIndex, 0, 2), OpenItems.OSamt, IDThread);
 
@@ -515,7 +319,7 @@ begin
             end);
 
           { REFRESH AGE VIEW }
-          TTReadAgeView.Create('0');
+          TTReadAgeView.Create(0);
         end;
 
         finally
@@ -636,6 +440,72 @@ begin
 end;
 *)
 
+
+
+
+{ ################################################################ ! READ AGE VIEW ! ######################################################################## }
+
+{ ------------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE }
+constructor TTReadAgeView.Create(ActionMode: integer);
+begin
+  inherited Create(False);
+  FLock:=TCriticalSection.Create;
+  FMode:=ActionMode;
+  FIDThd:=0;
+end;
+
+{ --------------------------------------------------------------------------------------------------------------------------------------------------- RELEASE }
+destructor TTReadAgeView.Destroy;
+begin
+  FreeAndNil(FLock);
+end;
+
+{ ------------------------------------------------------------------------------------------------------------------------------------- EXECUTE WORKER THREAD }
+Procedure TTReadAgeView.Execute;
+var
+  THDMili:    extended;
+  THDSec:     extended;
+  StopWatch:  TStopWatch;
+  AgeView:    TAgeView;
+begin
+  FIDThd:=TTReadAgeView.CurrentThread.ThreadID;
+  FLock.Acquire;
+  AgeView:=TAgeView.Create(MainForm.FDbConnect);
+  try
+    StopWatch:=TStopWatch.StartNew;
+    MainForm.ExecMessage(True, WM_GETINFO, 10, stLoading);
+    try
+      { SYNC }
+      Synchronize(AgeView.ClearSummary);
+      { ASYNC }
+      AgeView.idThd  :=IDThd;
+      AgeView.GroupID:=MainForm.GroupNmSel;
+      AgeView.AgeDate:=MainForm.AgeDateSel;
+      AgeView.Read(MainForm.sgAgeView);
+      { SYNC }
+      Synchronize(AgeView.UpdateSummary);
+      Synchronize(procedure
+                  begin
+                    AgeView.Details(MainForm.DetailsGrid);
+                  end);
+    except
+      on E: Exception do
+        LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot execute "TTReadAgeView". Error has been thrown: ' + E.Message);
+    end;
+  finally
+    MainForm.ExecMessage(True, WM_GETINFO, 10, stReady);
+    AgeView.Free;
+    THDMili:=StopWatch.ElapsedMilliseconds;
+    THDSec:=THDMili / 1000;
+    LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Thread for selected group "' + MainForm.FGroupList[MainForm.GroupListBox.ItemIndex, 1] + '" has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
+    FLock.Release;
+  end;
+  { RELEASE THREAD WHEN DONE }
+  FreeOnTerminate:=True;
+  { CALL OPEN ITEMS IF USER SELECT ANOTHER AGE VIEW }
+  if FMode = 1 then TTReadOpenItems.Create(0);
+end;
+
 { ################################################################ ! OPEN ITEMS ! ########################################################################### }
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE }
@@ -663,19 +533,25 @@ var
 begin
   FIDThd:=TTReadOpenItems.CurrentThread.ThreadID;
   FLock.Acquire;
+  OpenItems:=TTransactions.Create(MainForm.FDbConnect);
   try
     StopWatch:=TStopWatch.StartNew;
-    OpenItems:=TTransactions.Create(MainForm.FDbConnect);
+    MainForm.ExecMessage(True, WM_GETINFO, 10, stDownloading);
     try
       Synchronize(OpenItems.ClearSummary);
       OpenItems.LoadToGrid(MainForm.sgOpenItems, MainForm.DetailsGrid);
       Synchronize(OpenItems.UpdateSummary);
+      Synchronize(procedure
+                  begin
+                    MainForm.sgOpenItems.SetColWidth(10, 20);
+                  end);
     except
       on E: Exception do
         LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(FIDThd) + ']: Cannot load open items. Error has been thorwn: ' + E.Message);
     end;
   finally
     OpenItems.Free;
+    MainForm.ExecMessage(True, WM_GETINFO, 10, stReady);
     THDMili:=StopWatch.ElapsedMilliseconds;
     THDSec:=THDMili / 1000;
     LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(FIDThd) + ']: Open Items loading thread has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
@@ -715,7 +591,7 @@ begin
   FIDThd:=TTAddressBook.CurrentThread.ThreadID;
   FLock.Acquire;
   try
-    SendMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR(stProcessing)));
+    MainForm.ExecMessage(True, WM_GETINFO, 10, stProcessing);
     { -------------------------------------------------------------------------------------------------------------------------------------------------- OPEN }
     if (FMode = adOpenAll) or (FMode = adOpenForUser) then
     begin
@@ -737,18 +613,18 @@ begin
     { ------------------------------------------------------------------------------------------------------------------------------------------------ IMPORT }
     if FMode = adImport then
     begin
-      FGrid.OpenThdId:=FIDThd;
+      FGrid.OpenThdId:=IDThd;
       FGrid.ImportCSV(MainForm.CSVImport, '|');
     end;
     { ------------------------------------------------------------------------------------------------------------------------------------------------ EXPORT }
     if FMode = adExport then
     begin
-      FGrid.OpenThdId:=FIDThd;
+      FGrid.OpenThdId:=IDThd;
       FGrid.ExportCSV(MainForm.CSVExport, '|');
     end;
   finally
     { ------------------------------------------------------------------------------------------------------------------------------------------- RELEASE ALL }
-    SendMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR(stReady)));
+    MainForm.ExecMessage(True, WM_GETINFO, 10, stReady);
     FLock.Release;
   end;
   { RELEASE THREAD WHEN DONE }
@@ -854,6 +730,7 @@ constructor TTExcelExport.Create;
 begin
   inherited Create(False);
   FLock:=TCriticalSection.Create;
+  FIDThd:=0;
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------------- RELEASE }
@@ -865,13 +742,13 @@ end;
 { ---------------------------------------------------------------------------------------------------------------------------------- EXPORT AGE VIEW TO EXCEL }
 procedure TTExcelExport.Execute;
 var
-  IDThread:  integer;
   FileName:  string;
   Temp:      TStringGrid;
 begin
-  IDThread:=TTExcelExport.CurrentThread.ThreadID;
+  FIDThd:=TTExcelExport.CurrentThread.ThreadID;
+  FLock.Acquire;
   try
-    PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR(stExportXLS)));
+    MainForm.ExecMessage(True, WM_GETINFO, 10, stExportXLS);
     { SAVE DIALOG BOX }
     Synchronize(procedure
                 begin
@@ -883,13 +760,14 @@ begin
     { GENERATE AND SAVE }
     Temp:=TStringGrid.Create(nil);
     try
-      Temp.OpenThdId:=IDThread;
+      Temp.OpenThdId:=IDThd;
       Temp.ToExcel('Age Report', FileName);
     finally
       Temp.Free;
     end;
   finally
-    PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR(stReady)));
+    FLock.Release;
+    MainForm.ExecMessage(True, WM_GETINFO, 10, stReady);
   end;
   FreeOnTerminate:=True;
 end;

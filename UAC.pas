@@ -69,7 +69,6 @@ begin
     if DataSet.RecordCount > 0 then
     begin
       SetLength(List, 2, 2);
-      GroupListBox.Enabled:=False;
       while not DataSet.EOF do
       begin
         List[iCNT, 0]:=DataSet.Fields[TGroups.GROUP_ID].Value;
@@ -83,7 +82,6 @@ begin
       GroupListBox.Clear;
       for iCNT:=0 to high(List) - 1 do GroupListBox.Items.Add(List[iCNT, 1]);
       GroupListBox.ItemIndex:=0;
-      GroupListBox.Enabled:=True;
     end;
   except
     Result:=False;
@@ -94,13 +92,12 @@ end;
 function TUserControl.GetAgeDates(AgeDatesBox: TComboBox; GroupID: string): boolean;
 begin
   Result:=True;
-  StrSQL:='SELECT DISTINCT ' + TSnapshots.AGE_DATE + ' FROM ' + TblSnapshots + ' WHERE ' + TSnapshots.GROUP_ID + ' = ' + QuotedStr(GroupID);
+  StrSQL:=SELECT_DIS + TSnapshots.AGE_DATE + FROM + TblSnapshots + WHERE + TSnapshots.GROUP_ID + EQUAL + QuotedStr(GroupID);
   try
     DataSet:=ExecSQL;
+    AgeDatesBox.Clear;
     if DataSet.RecordCount > 0 then
     begin
-      AgeDatesBox.Clear;
-      AgeDatesBox.Enabled:=False;
       while not DataSet.EOF do
       begin
         AgeDatesBox.Items.Add(DataSet.Fields[TSnapshots.AGE_DATE].Value);
@@ -108,7 +105,6 @@ begin
       end;
       { DISPLAY LAST DATE FROM THE LIST }
       AgeDatesBox.ItemIndex:=AgeDatesBox.Items.Count - 1;
-      if GetAccessData(adAccessLevel) = acADMIN then AgeDatesBox.Enabled:=True;
     end;
   except
     Result:=False;
