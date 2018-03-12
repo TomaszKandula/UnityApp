@@ -19,8 +19,8 @@ uses
   Main, Forms, Windows, Messages, Settings, ADODB, Classes, SysUtils, ComObj, StrUtils;
 
 { --------------------------------------------------------------- ! DATABASE CLASS ! ------------------------------------------------------------------------ }
-type                                                  (* RUN EITHER IN WORKER OR MAIN THREAD *)
-  TDataBase = class
+type
+  TDataBase = class                                    (* BASE CLASS FOR CONNECTION HANDLING *)
   {$TYPEINFO ON}
   private
     pdbProvider  : string;

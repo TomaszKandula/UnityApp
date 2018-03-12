@@ -38,7 +38,8 @@ type
     constructor Create(Connector: TADOConnection); overload;
     destructor  Destroy; reintroduce; overload;
     function    ColumnsToList: string;
-    function    OpenTable(TableName: string) :  boolean;
+    function    OpenTable(TableName: string): boolean;
+    function    BracketStr(Expression: string; BracketType: integer): string;
   end;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -205,6 +206,9 @@ type
   TSnapshots = class(TDataTables)
   {$TYPEINFO ON}
   public
+
+    (* REFLECTS TABLE COLUMNS IN GIVEN DATABASE *)
+
     const ID              : string = 'ID';
     const GROUP_ID        : string = 'GROUP_ID';
     const AGE_DATE        : string = 'AGE_DATE';
@@ -236,6 +240,39 @@ type
     const QUALITY_IDX     : string = 'QUALITY_IDX';
     const WALLET_SHARE    : string = 'WALLET_SHARE';
     const CUID            : string = 'CUID';
+
+    (* REFLECTS "FRIENDLY" COLUMN NAMES USED IN THE APPLICATION *)
+    (* THE BELOW GIVEN NAMES ARE USED IN BOTH SETTING FILES     *)
+    (* WARNING! THE NAMES ARE CASE SENSITIVE                    *)
+
+    const fCUSTOMER_NAME   = 'CUSTOMER NAME';
+    const fCUSTOMER_NUMBER = 'CUSTOMER NUMBER';
+    const fFOLLOWUP        = 'FOLLOW UP';
+    const fNOT_DUE         = 'NOT DUE';
+    const fCOUNTRY_CODE    = 'COUNTRY CODE';
+    const fRANGE1          = '1 - 7';
+    const fRANGE2          = '8 - 30';
+    const fRANGE3          = '31 - 60';
+    const fRANGE4          = '61 - 90';
+    const fRANGE5          = '91 - 120';
+    const fRANGE6          = '121 - oo';
+    const fTOTAL           = 'TOTAL';
+    const fOVERDUE         = 'OVERDUE';
+    const fCREDIT_LIMIT    = 'CREDIT LIMIT';
+    const fEXCEEDED_AMOUNT = 'EXCEEDED AMOUNT';
+    const fAGENT           = 'AGENT';
+    const fCO_CODE         = 'CO CODE';
+    const fPAYMENT_TERMS   = 'PAYMENT TERMS';
+    const fDIVISION        = 'DIVISION';
+    const fLEDGER_ISO      = 'LEDGER ISO';
+    const fINF4            = 'INF4';
+    const fINF7            = 'INF7';
+    const fPERSON          = 'PERSON';
+    const fGROUP3          = 'GROUP3';
+    const fRISK_CLASS      = 'RISK CLASS';
+    const fQUALITY_IDX     = 'QUALITY IDX';
+    const fWALLET_SHARE    = 'WALLET SHARE';
+    const fCUID            = 'CUID';
   end;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -361,11 +398,21 @@ begin
   inherited;
 end;
 
+{ --------------------------------------------------------------------------------------------------------------------------------------------------- RELEASE }
 destructor TDataTables.Destroy;
 begin
   FreeAndNil(pDataSet);
   FreeAndNil(pColumns);
   inherited;
+end;
+
+{ ------------------------------------------------------------------------------------------------------------ HELPER METHOD TO SURROUND STRING WITH BRACKETS }
+function TDataTables.BracketStr(Expression: string; BracketType: integer): string;
+begin
+  Result:='';
+  if BracketType = brRound  then Result:='(' + Expression + ')';
+  if BracketType = brSquare then Result:='[' + Expression + ']';
+  if BracketType = brCurly  then Result:='{' + Expression + '}';
 end;
 
 { ---------------------------------------------------------------------------------------------------------------------------------- TRANSPOSE COLUMNS TO ROW }

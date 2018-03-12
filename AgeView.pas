@@ -57,8 +57,10 @@ type                                                   (* RUN EITHER IN WORKER O
     function    GetData(Grid: TStringGrid; Source: TStringGrid; WhichCol: string): string;
     procedure   ClearSummary;
     procedure   UpdateSummary;
+    procedure   AgeViewMode(var Grid: TStringGrid; ModeBySection: string);
+    procedure   Make(OSAmount: double);
 
-    procedure   Make(GroupID: string; OSAmount: double; idThd: integer);
+
     procedure   Write(DestTable: string; idThd: integer);
     function    GetCoCode(ListPos: integer; CoPos: integer; Mode: integer): string;
 
@@ -82,7 +84,7 @@ begin
   { --------------------------------------------------------------------------------------------- READ GRID LAYOUT TO BE PASSED AS PARAMETER TO SQL STATEMENT }
   Grid.LoadLayout(StrCol, ColumnWidthName, ColumnOrderName, ColumnNames, ColumnPrefix);
   CmdType:=cmdText;
-  StrSQL :=EXEC + AgeViewReport + SPACE + QuotedStr(StrCol) + COMMA + QuotedStr(GroupID) + COMMA + QuotedStr(AgeDate);
+  StrSQL :=EXECUTE + AgeViewReport + SPACE + QuotedStr(StrCol) + COMMA + QuotedStr(GroupID) + COMMA + QuotedStr(AgeDate);
   SqlToGrid(Grid, ExecSQL, False, False);
   LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(idThd) + ']: SQL statement applied [' + StrSQL + '].');
   LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(idThd) + ']: SQL statement parameters [uParam1 = ' + GroupID + '], [uParam2 = ' + AgeDate + '].');
@@ -90,29 +92,29 @@ begin
   for iCNT:=1 to MainForm.sgAgeView.RowCount - 1 do
   begin
     { NOT DUE & RANGE1..5 }
-    ANotDue:=ANotDue + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(NOT_DUE, 1, 1), iCNT], 0);
-    ARange1:=ARange1 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(RANGE1,  1, 1), iCNT], 0);
-    ARange2:=ARange2 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(RANGE2,  1, 1), iCNT], 0);
-    ARange3:=ARange3 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(RANGE3,  1, 1), iCNT], 0);
-    ARange4:=ARange4 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(RANGE4,  1, 1), iCNT], 0);
-    ARange5:=ARange5 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(RANGE5,  1, 1), iCNT], 0);
-    ARange6:=ARange6 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(RANGE6,  1, 1), iCNT], 0);
+    ANotDue:=ANotDue + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fNOT_DUE, 1, 1), iCNT], 0);
+    ARange1:=ARange1 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRANGE1,  1, 1), iCNT], 0);
+    ARange2:=ARange2 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRANGE2,  1, 1), iCNT], 0);
+    ARange3:=ARange3 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRANGE3,  1, 1), iCNT], 0);
+    ARange4:=ARange4 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRANGE4,  1, 1), iCNT], 0);
+    ARange5:=ARange5 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRANGE5,  1, 1), iCNT], 0);
+    ARange6:=ARange6 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRANGE6,  1, 1), iCNT], 0);
     { TOTAL AMOUNT | LEDGER BALANCE }
-    Balance:=Balance + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TOTAL, 1, 1), iCNT], 0);
+    Balance:=Balance + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fTOTAL, 1, 1), iCNT], 0);
     { GRANTED LIMITS | SUM OF ALL LIMITS }
-    Limits:=Limits + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(CREDIT_LIMIT, 1, 1), iCNT], 0);
+    Limits:=Limits + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCREDIT_LIMIT, 1, 1), iCNT], 0);
     { EXCEEDERS }
-    if StrToFloatDef(Grid.Cells[Grid.ReturnColumn(EXCEEDED_AMOUNT, 1, 1), iCNT], 0) < 0 then
+    if StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fEXCEEDED_AMOUNT, 1, 1), iCNT], 0) < 0 then
     begin
       { COUNT EXCEEDERS }
       inc(Exceeders);
       { SUM ALL EXCEEDERS AMOUNT }
-      TotalExceed:=TotalExceed + Abs(StrToFloatDef(Grid.Cells[Grid.ReturnColumn(EXCEEDED_AMOUNT, 1, 1), iCNT], 0));
+      TotalExceed:=TotalExceed + Abs(StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fEXCEEDED_AMOUNT, 1, 1), iCNT], 0));
     end;
     { SUM ALL ITEMS FOR RISK CLASSES }
-    if Grid.Cells[Grid.ReturnColumn(RISK_CLASS, 1, 1), iCNT] = 'A' then RCA:=RCA + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TOTAL, 1, 1), iCNT], 0);
-    if Grid.Cells[Grid.ReturnColumn(RISK_CLASS, 1, 1), iCNT] = 'B' then RCB:=RCB + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TOTAL, 1, 1), iCNT], 0);
-    if Grid.Cells[Grid.ReturnColumn(RISK_CLASS, 1, 1), iCNT] = 'C' then RCC:=RCC + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TOTAL, 1, 1), iCNT], 0);
+    if Grid.Cells[Grid.ReturnColumn(TSnapshots.fRISK_CLASS, 1, 1), iCNT] = 'A' then RCA:=RCA + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fTOTAL, 1, 1), iCNT], 0);
+    if Grid.Cells[Grid.ReturnColumn(TSnapshots.fRISK_CLASS, 1, 1), iCNT] = 'B' then RCB:=RCB + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fTOTAL, 1, 1), iCNT], 0);
+    if Grid.Cells[Grid.ReturnColumn(TSnapshots.fRISK_CLASS, 1, 1), iCNT] = 'C' then RCC:=RCC + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fTOTAL, 1, 1), iCNT], 0);
     { COUNT ITEMS }
     inc(CustAll);
   end;
@@ -133,7 +135,7 @@ var
 begin
   { EXECUTE STORED PROCEDURE }
   CmdType:=cmdText;
-  StrSQL :=EXEC + AgeViewDetails + SPACE + QuotedStr(GroupID) + COMMA + QuotedStr(AgeDate);
+  StrSQL :=EXECUTE + AgeViewDetails + SPACE + QuotedStr(GroupID) + COMMA + QuotedStr(AgeDate);
   { EXECUTE TO TEMPORARY STRING GRID }
   Temp:=TStringGrid.Create(nil);
   try
@@ -260,6 +262,24 @@ begin
   MainForm.valDEFAULTED.Caption :=FormatFloat('#,##0.00', (ARange4 + ARange5 + ARange6));
 end;
 
+{ --------------------------------------------------------------------------------------------------------------------------- SETUP PROPER COLUMNS VISIBILITY }
+procedure TAgeView.AgeViewMode(var Grid: TStringGrid; ModeBySection: string);
+var
+  AppSettings:  TSettings;
+  iCNT:         integer;
+begin
+  AppSettings:=TSettings.Create;
+  try
+    for iCNT:=0 to Grid.ColCount - 2 do
+      if AppSettings.TMIG.ReadString(ModeBySection, MainForm.FindKey(AppSettings.TMIG, ModeBySection, iCNT), 'True') = 'False' then
+        Grid.ColWidths[Grid.ReturnColumn(MainForm.FindKey(AppSettings.TMIG, ModeBySection, iCNT), 1, 1)]:= -1
+          else
+            Grid.ColWidths[Grid.ReturnColumn(MainForm.FindKey(AppSettings.TMIG, ModeBySection, iCNT), 1, 1)]:= 100;
+  finally
+    AppSettings.Free;
+  end;
+end;
+
 (* ********************************************************* ! PRE-PARE AGE VIEW ! ****************************************************************************
 
 NOTES:
@@ -276,52 +296,51 @@ SUCH REPLACEMENT CAN BE OMITTED IF SOURCE IS ALREADY PRESENTED WITH DECIMAL POIN
 
 OPEN ITEMS OWNLOADED FROM SOURCE FILE | AGE VIEW MADE FROM OPEN ITEMS      | COLUMN     | WORKER ARRAY
 --------------------------------------|------------------------------------|------------|---------------
-COLUMN NUMBER   | FIELD NAME          | COLUMN NUMBER   | FIELD NAME       | ASSIGNMENT | COLUMN NUMBER
+COLUMN NUMBER   | FIELD NAME          | ASSIGN NUMBER   | FIELD NAME       | ASSIGNMENT | COLUMN NUMBER
 ----------------|---------------------|-----------------|------------------|------------|---------------
- 0              | LP                  |  0              | ID               |            | -
- 1            S | Co Code             |  1              | GROUP_ID         |            | 0
- 2            S | Cust. Number        |  2              | AGE_DATE         |            | 1
- 3              | Voucher Type        |  3              | SNAPSHOT_DT      |            | 2
- 4              | Voucher Date        |  4              | CUSTOMER_NAME    | D          | 3
- 5              | O/S in currency     |  5              | CUSTOMER_NUMBER  | D          | 4
- 6              | O/S amount          |  6              | COUNTRY_CODE     | D          | 5
- 7            S | Cust. Name          |  7              | NOT_DUE          | C          | 6
- 8              | Currency            |  8              | RANGE1           | C          | 7
- 9              | Amount in currency  |  9              | RANGE2           | C          | 8
- 10             | Amount              |  10             | RANGE3           | C          | 9
- 11             | Invoice Number      |  11             | RANGE4           | C          | 10
- 12             | Due Date            |  12             | RANGE5           | C          | 11
- 13           S | INF4                |  13             | RANGE6           | C          | 12
- 14           S | INF7                |  14             | OVERDUE          | C          | 13
- 15           S | Credit Limit        |  15             | TOTAL            | C          | 14
- 16           S | Country Code        |  16  NULLABLE   | CREDIT_LIMIT     | D          | 15
- 17           S | Payment Terms       |  17  NULLABLE   | EXCEEDED_AMOUNT  | C          | 16
- 18             | Paid Info           |  18  NULLABLE   | PAYMENT_TERMS    | D          | 17
- 19           S | Agent               |  19             | AGENT            | D          | 18
- 20             | Control Status      |  20             | DIVISION         | D          | 19
- 21             | Address 1           |  21  NULLABLE   | CO_CODE          | D          | 20
- 22             | Address 2           |  22  NULLABLE   | LEDGER_ISO       | C          | 21
- 23             | Address 3           |  23  NULLABLE   | INF4             | D          | 22
- 24             | Postal Number       |  24  NULLABLE   | INF7             | D          | 23
- 25             | Postal Area         |  25             | PERSON           | D          | 24
- 26             | GL Account          |  26             | GROUP3           | D          | 25
- 27             | Value Date          |  27  NULLABLE   | RISK_CLASS       | C          | 26
- 28           S | Division            |  28  NULLABLE   | QUALITY_IDX      | C          | 27
- 29           S | Group 3             |  29             | WALET_SHARE      | C          | 28
- 30             | Text                | -               | CUID             | D          | 29
- 31           S | Persons             | -               | -                |            |
- 32             | Direct Debit        | -               | -                |            |
- 33             | AddTxt              | -               | -                |            |
- 34             | Payment Status      | -               | -                |            |
- 35             | Discounted Amount   | -               | -                |            |
- 36             | Decrease in Value   | -               | -                |            |
- 37             | Recover Value       | -               | -                |            |
- 38           S | CUID                | -               | -                |            |
+ 0              | ID                  | DO NOT USE      | ID               |            | DO NOT USE
+ 1              | SourceDBName        | -               | GROUP_ID         |            | 0
+ 2              | CustNo              | -               | AGE_DATE         |            | 1
+ 3              | VoTp                | -               | SNAPSHOT_DT      |            | 2
+ 4              | OpenCurAm           | 6               | CUSTOMER_NAME    | D          | 3
+ 5              | OpenAm              | 2               | CUSTOMER_NUMBER  | D          | 4
+ 6              | Nm                  | 15              | COUNTRY_CODE     | D          | 5
+ 7              | ISO                 | -               | NOT_DUE          | C          | 6
+ 8              | CurAm               | -               | RANGE1           | C          | 7
+ 9              | Am                  | -               | RANGE2           | C          | 8
+ 10             | InvoNo              | -               | RANGE3           | C          | 9
+ 11             | DueDt               | -               | RANGE4           | C          | 10
+ 12             | Inf4                | -               | RANGE5           | C          | 11
+ 13             | Inf7                | -               | RANGE6           | C          | 12
+ 14             | CrLmt               | -               | OVERDUE          | C          | 13
+ 15             | Ctry                | -               | TOTAL            | C          | 14
+ 16             | CPmtTrm             | 14              | CREDIT_LIMIT     | D          | 15
+ 17             | PdSts               | -               | EXCEEDED_AMOUNT  | C          | 16
+ 18             | Agent               | 16              | PAYMENT_TERMS    | D          | 17
+ 19             | Ctrl                | 18              | AGENT            | D          | 18
+ 20             | Ad1                 | 27              | DIVISION         | D          | 19
+ 21             | Ad2                 | 1               | CO_CODE          | D          | 20
+ 22             | Ad3                 | -               | LEDGER_ISO       | C          | 21
+ 23             | Pno                 | 12              | INF4             | D          | 22
+ 24             | PArea               | 13              | INF7             | D          | 23
+ 25             | GenAcNo             | 30              | PERSON           | D          | 24
+ 26             | ValDt               | 28              | GROUP3           | D          | 25
+ 27             | R1  (division)      | -               | RISK_CLASS       | C          | 26
+ 28             | Gr3                 | -               | QUALITY_IDX      | C          | 27
+ 29             | Txt                 | -               | WALET_SHARE      | C          | 28
+ 30             | R8  (person)        | 37              | CUID             | D          | 29
+ 31             | DirDeb              | -               | -                |            |
+ 32             | AddTxt              | -               | -                |            |
+ 33             | PmtStat             | -               | -                |            |
+ 34             | DiscAmt             | -               | -                |            |
+ 35             | DecVal              | -               | -                |            |
+ 36             | RecVal              | -               | -                |            |
+ 37             | CUID                | -               | -                |            |
 
 ************************************************************************************************************************************************************ *)
 
 { -------------------------------------------------------------------------------------------------------------------------------------------- GENERATE AGING }
-procedure TAgeView.Make(GroupID: string; OSAmount: double; idThd: integer);
+procedure TAgeView.Make(OSAmount: double);
 
 (* COMMON VARIABLES AND CONSTANTS *)
 
@@ -363,9 +382,9 @@ var
   AppSettings: TSettings;
 const
   { WARNING! BELOW MUST BE ALIGNED WITH OPEN ITEMS SOURCE AND DESTINATION TABLE IN DATABASE FOR AGE VIEW }
-  oiCol: array[0..12] of integer = (1,  2, 7, 13, 14, 15, 16, 17, 19, 28, 29, 31, 38);    { DEFINES SOURCE COLUMNS TO BE TRANSFERRED TO AGE VIEW 'AS IS' }
-  avCol: array[0..12] of integer = (20, 4, 3, 22, 23, 15,  5, 17, 18, 19, 25, 24, 29);    { DEFINES DESTINATION COLUMNS IN AGE VIEW ARRAY                }
-  rnCol: array[0..7]  of integer = (6, 7, 8, 9, 10, 11, 12, 13);                          { DEFINES BUCKET COLUMNS: NOT DUE, RANGE1..6, OVERDUE          }
+  oiCol: array[0..12] of integer = (6, 2, 15, 14, 16, 18, 27, 1, 12, 13, 30, 28, 37);     { DEFINES SOURCE COLUMNS TO BE TRANSFERRED TO AGE VIEW 'AS IS' }
+  avCol: array[0..12] of integer = (3, 4, 5, 15, 17, 18, 19, 20, 22, 23, 24, 25, 29);     { DEFINES DESTINATION COLUMNS IN AGE VIEW ARRAY                }
+  rnCol: array[0..7 ] of integer = (6, 7, 8, 9, 10, 11, 12, 13);                          { DEFINES BUCKET COLUMNS: NOT DUE, RANGE1..6, OVERDUE          }
   rfCol: array[0..13] of integer = (6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 26, 27, 28);  { DEFINES ALL COLUMNS WITH VALUES, TO BE REPLACED WITH '.'     }
 
 (* NESTED METHODS *)
@@ -463,20 +482,21 @@ end;
 
 begin
   AppSettings:=TSettings.Create;
-  { ----------------------------------------------------------------------------------------------------------------------------------------- DISPLAY MESSAGE }
-  PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR(stGenerating)));
-  LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(idThd) + ']: Generating age view...');
+
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   RcLo :=0;
   RcHi :=0;
   avRow:=0;
   SetLength(ArrAgeView, 1, 30);  { MAKE 1 ROW AND 1..30 COLUMNS }
+
   { PUT ZERO FIELDS }
   AgeViewZeroFields(0);
+
   { ------------------------------------------------------------------------------------------------------------------------------------------  DATE AND TIME }
   DatTim:=DateToStr(Now) + ' ' + TimeToStr(Now);
   if SysUtils.DayOfWeek(Now) = 2 then bias:=3 else bias:=1;
   CutOff:=Now - bias;
+
   { -------------------------------------------------------------------------------------------------- REMOVE DUPLICATES AND MAKE AGE VIEW WITHOUT AGE VALUES }
   { WARNING! IT REQUIRES OPEN ITEMS 'STRINGGRID' TO BE SORTED BY     }
   {          SUPPORTED COLUMN 'CUID', WE ASSUME THAT IS ALREADY DONE }
@@ -486,24 +506,32 @@ begin
     { GO THROUGH THE ROWS AND POPULATE WHEN FIND THAT THE ROW BELOW IS DIFFERENT THAN CURRENT }
     if (MainForm.sgOpenItems.Cells[38, iCNT] <> MainForm.sgOpenItems.Cells[38, iCNT + 1]) then
     begin
+
       { ---------------------------------------------------------------------------------------------------------------------------------- FIXED DATA PER ROW }
       ArrAgeView[avRow, 0]:=GroupID;
       ArrAgeView[avRow, 1]:=DateToStr(CutOff);
       ArrAgeView[avRow, 2]:=DatTim;
+
       { ------------------------------------------------------------------------------------------------------------------------ RE-WRITE REST OF THE COLUMNS }
       for jCNT:=0 to high(oiCol) do ArrAgeView[avRow, avCol[jCNT]]:=MainForm.sgOpenItems.Cells[oiCol[jCNT], iCNT];
+
       { ---------------------------------------------------------------------------------------------------------------------------------------- ALTERNATIONS }
+
       { REMOVE 'TAB' CHARACTER IF FOUND IN CUSTOMER NAME }
       ArrAgeView[avRow, 3]:=StringReplace(ArrAgeView[avRow, 3], #9, '', [rfReplaceAll]);
+
       { REPLACE SINGLE QUOTES TO DOUBLE QUOTES }
       ArrAgeView[avRow, 3]:=StringReplace(ArrAgeView[avRow, 3], '''', '''''', [rfReplaceAll]);
+
       { REMOVE FROM CO CODE 'F' PREFIX }
 //      ArrAgeView[avRow, 20]:=ConvertName(MidStr(ArrAgeView[avRow, 20], 2, 5), '', 2);
+
       { LEDGER ISO }
 //      if MainForm.COC1.Text = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.CUR1.Text;
 //      if MainForm.COC2.Text = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.CUR2.Text;
 //      if MainForm.COC3.Text = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.CUR3.Text;
 //      if MainForm.COC4.Text = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.CUR4.Text;
+
       { -------------------------------------------------------------------------------------------------------------------------------------------- COUNTERS }
       { MOVE COUNTER }
       inc(avRow);
@@ -512,6 +540,7 @@ begin
       { ZERO FIELDS }
       AgeViewZeroFields(avRow);
     end;
+
   { ------------------------------------------------------------------------------------------------------------------ CALCULATE VALUES FOR GIVEN AGE BUCKETS }
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   { LOWER BOUNDS }
@@ -527,6 +556,7 @@ begin
   R3hi:=AppSettings.TMIG.ReadInteger(AgingRanges, 'RANGE3B', 0);
   R4hi:=AppSettings.TMIG.ReadInteger(AgingRanges, 'RANGE4B', 0);
   R5hi:=AppSettings.TMIG.ReadInteger(AgingRanges, 'RANGE5B', 0);
+
   { ------------------------------------------------------------------------------------------------------------------------------------------------ POPULATE }
   { LOOP VIA CUID COLUMN IN AGE VIEW [29] }
   for exRow:=0 to avRow - 1 do
@@ -573,6 +603,7 @@ begin
       else
         ArrAgeView[exRow, 27]:='0';
   end;
+
   { --------------------------------------------------------------------------------------------------------------------------------------- RISK CLASS BOUNDS }
   if FormatSettings.DecimalSeparator = ',' then
   begin
@@ -586,8 +617,10 @@ begin
     RcHi:=StrToFloat(StringReplace(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_A_MAX', '0,80'), ',', '.', [rfReplaceAll])) +
           StrToFloat(StringReplace(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_B_MAX', '0,15'), ',', '.', [rfReplaceAll]));
   end;
+
   { DISPOSE SETTINGS OBJECT }
   FreeAndNil(AppSettings);
+
   { --------------------------------------------------------------------------------------------------------------------------------- RISK CLASS CALCULATIONS }
   SetLength(MyWallet, avRow);
   SetLength(MyList,   avRow);
@@ -612,12 +645,14 @@ begin
     { ASSIGN RISK CLASS 'C' }
     if Count > RcHi then    ArrAgeView[MyList[iCNT], 26]:='C';
   end;
+
   { --------------------------------------------------------------------------------------------------------------------------------------- DECIMAL SEPARATOR }
   if FormatSettings.DecimalSeparator = ',' then
     for exRow:=0 to avRow - 1 do
       for jCNT:=0 to high(rfCol) do
         { REPLACE ',' TO '.' FOR ALL VALUES [6..14] AND [25..26] }
         ArrAgeView[exRow, rfCol[jCNT]]:=StringReplace(ArrAgeView[exRow, rfCol[jCNT]], ',', '.', [rfReplaceAll]);
+
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------- TRANSFER 'AGEVIEW' TO SQL SERVER }

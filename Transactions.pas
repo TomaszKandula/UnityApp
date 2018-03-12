@@ -16,10 +16,10 @@ unit Transactions;
 interface
 
 uses
-  Main, Model, StrUtils, SysUtils, StdCtrls, Classes, Windows, Messages, ADODB;
+  Main, Model, Variants, SysUtils, StdCtrls, Classes, Windows, Messages, ADODB;
 
 { ------------------------------------------------------------- ! OPEN ITEMS CLASS ! ------------------------------------------------------------------------ }
-type                                                  (* RUN EITHER IN WORKER OR MAIN THREAD *)
+type
   TTransactions = class(TDataTables)
   {$TYPEINFO ON}
   private
@@ -27,7 +27,7 @@ type                                                  (* RUN EITHER IN WORKER OR
   public
     { EMPTY }
   published
-    function  GetDateTime:  TDateTime;
+    function  GetDateTime(Return: integer): string;
     function  LoadToGrid(DestGrid: TStringGrid; SettingGrid: TStringGrid):  boolean;
     function  ConvertName(CoNumber: string; Prefix: string; mode: integer): string;
     procedure ClearSummary;
@@ -42,16 +42,32 @@ uses
 { ############################################################## ! OPEN ITEMS CLASS ! ####################################################################### }
 
 { --------------------------------------------------------------------------------------------------------------------------------- GET CURRENT DATE AND TIME }
-function TTransactions.GetDateTime: TDateTime;
+function TTransactions.GetDateTime(Return: integer): string;
+var
+  Value: string;
 begin
-  Result:=StrToDate('2018-03-11');
-  //
+  { GET LATEST DATE AND TIME }
+  Columns.Add(
+               MAX +
+                 BracketStr(TOpenitems.ExtractDateStamp, brRound) +
+               _AS +
+                 QuotedStr(TOpenitems.ExtractDateStamp)
+             );
+  { OPEN COLUMN WITH FUNCTION APPLIED }
+  OpenTable(TblOpenitems);
+  ExecSQL;
+  if (not (DataSet = nil)) and (DataSet.RecordCount = 1) then
+  begin
+    Value:=VarToStr(DataSet.Fields.Item[TOpenitems.ExtractDateStamp].Value);
+    if Return = gdTimeOnly then Result:=FormatDateTime(gdTimeFormat,     StrToDateTime(Value));
+    if Return = gdDateOnly then Result:=FormatDateTime(gdDateFormat,     StrToDateTime(Value));
+    if Return = gdDateTime then Result:=FormatDateTime(gdDateTimeFormat, StrToDateTime(Value));
+  end;
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------- LOAD OPEN ITEMS FROM DATABASE }
 function TTransactions.LoadToGrid(DestGrid: TStringGrid; SettingGrid: TStringGrid): boolean;
 var
-  DataTables:  TDataTables;
   AppSettings: TSettings;
   CutOff:      string;
   INF4:        string;
@@ -80,31 +96,26 @@ begin
     if SettingGrid.Cells[iCNT, 3] = 'ON'  then Agents:='Y';
   end;
   { -------------------------------------------------------------------------------------------------------------------------------------- EXECUTE STORED SQL }
-  DataTables:=TDataTables.Create(MainForm.FDbConnect);
-  try
 
-    (* WARNING! DO NOT USE "cmdStoredProc" TO EXECUTE STORED PROCEDURE WITH ADODB *)
-    (*          USE ORDINARY "cmdText" WITH "EXEC" STATEMENT JUST LIKE YOU WOULD  *)
-    (*          USE IT IN MICROSOFT MANAGEMENT STUDIO. ALTERNATIVELY, USE FIREDAC *)
-    (*          FROM EMBARCADERO INSTEAD OF ADODB AS IT IS MORE ROBUST LIBRARY    *)
+  (* WARNING! DO NOT USE "cmdStoredProc" TO EXECUTE STORED PROCEDURE WITH ADODB *)
+  (*          USE ORDINARY "cmdText" WITH "EXEC" STATEMENT JUST LIKE YOU WOULD  *)
+  (*          USE IT IN MICROSOFT MANAGEMENT STUDIO. ALTERNATIVELY, USE FIREDAC *)
+  (*          FROM EMBARCADERO INSTEAD OF ADODB AS IT IS MORE ROBUST LIBRARY    *)
 
-    DataTables.CmdType:=cmdText;
-    DataTables.StrSQL:=EXEC + QueryOpenItems                                   + SPACE +
-                       QuotedStr('2018-03-11')                                 + COMMA +
-                       QuotedStr(ConvertName(SettingGrid.Cells[0, 0], 'F', 0)) + COMMA +
-                       QuotedStr(ConvertName(SettingGrid.Cells[1, 0], 'F', 0)) + COMMA +
-                       QuotedStr(ConvertName(SettingGrid.Cells[2, 0], 'F', 0)) + COMMA +
-                       QuotedStr(ConvertName(SettingGrid.Cells[3, 0], 'F', 0)) + COMMA +
-                       QuotedStr(CutOff)                                       + COMMA +
-                       QuotedStr(Agents)                                       + COMMA +
-                       QuotedStr(INF4);
-    DataTables.ExecSQL;
-    Result:=DataTables.SqlToGrid(DestGrid, DataTables.ExecSQL, False, False);
-    { ----------------------------------------------------------------------------------------------------------------------------------------- SORT VIA CUID }
-    DestGrid.MSort(SortPos, 2, True);
-  finally
-    DataTables.Free;
-  end;
+  CmdType:=cmdText;
+  StrSQL:=EXECUTE + QueryOpenItems                                + SPACE +
+          QuotedStr(GetDateTime(gdDateOnly))                      + COMMA +
+          QuotedStr(ConvertName(SettingGrid.Cells[0, 0], 'F', 0)) + COMMA +
+          QuotedStr(ConvertName(SettingGrid.Cells[1, 0], 'F', 0)) + COMMA +
+          QuotedStr(ConvertName(SettingGrid.Cells[2, 0], 'F', 0)) + COMMA +
+          QuotedStr(ConvertName(SettingGrid.Cells[3, 0], 'F', 0)) + COMMA +
+          QuotedStr(CutOff)                                       + COMMA +
+          QuotedStr(Agents)                                       + COMMA +
+          QuotedStr(INF4);
+  ExecSQL;
+  Result:=SqlToGrid(DestGrid, ExecSQL, False, False);
+  { ----------------------------------------------------------------------------------------------------------------------------------------- SORT VIA CUID }
+  DestGrid.MSort(SortPos, 2, True);
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------- CLEAR ALL SUMMARY DETAILS }

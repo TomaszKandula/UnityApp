@@ -19,8 +19,8 @@ uses
   Main, Forms, Windows, Messages, SysUtils, Classes, ShellAPI, CRC32u, INIFiles;
 
 { --------------------------------------------------------- ! APPLICATION SETTING CLASS ! ------------------------------------------------------------------- }
-type                                                              (* ANY THREAD *)
-  TSettings = class
+type
+  TSettings = class                                    (* BASSE CLASS FOR SETTINGS HANDLING *)
   {$TYPEINFO ON}
   private
     var pAppDir                : string;
@@ -61,7 +61,7 @@ implementation
 
 { ############################################################# ! SETTINGS CLASS ! ########################################################################## }
 
-{ ----------------------------------------------------------------------------------------------------------------------------------------------- CONSTRUCTOR }
+{ ------------------------------------------------------------------------------------------------------------------------------------------------ INITIALZIE }
 constructor TSettings.Create;
 begin
   (* INITIALIZATION *)
@@ -85,7 +85,7 @@ begin
   if FileExists(pUserPath) then Decode(UserConfig, True) else pGetLastError:=104;
 end;
 
-{ --------------------------------------------------------------------------------------------------------------------------------------------------- DISPOSE }
+{ --------------------------------------------------------------------------------------------------------------------------------------------------- RELEASE }
 destructor TSettings.Destroy;
 begin
   FreeAndNil(pTMIP);

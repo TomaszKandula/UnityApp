@@ -588,7 +588,8 @@ type                                                            (* GUI | MAIN TH
     var PStartTime          :  TTime;
     var PAccessLevel        :  string;
     var PAccessMode         :  string;
-  public
+    var POpenItemsUpdate    :  string;
+ public
     var FUserName           :  string;
     var FEventLogPath       :  string;
     var FDbConnect          :  TADOConnection;
@@ -598,8 +599,9 @@ type                                                            (* GUI | MAIN TH
 
     { PROPERTIES }
 
-    property   AccessLevel  : string  read PAccessLevel write PAccessLevel;
-    property   AccessMode   : string  read PAccessMode  write PAccessMode;
+    property   AccessLevel    : string  read PAccessLevel     write PAccessLevel;
+    property   AccessMode     : string  read PAccessMode      write PAccessMode;
+    property   OpenItemsUpdate: string  read POpenItemsUpdate write POpenItemsUpdate;
 
     { METHODS }
 
@@ -935,7 +937,7 @@ var
   RowNum:      integer;
 begin
   { ----------------------------------------------------------------------------------------------------------------------------- PASTE DATA INTO STRING GRID }
-  if mode = 0 then
+  if mode = adPaste then
   begin
     GRect:=Selection;
     L    :=GRect.Left;
@@ -961,7 +963,7 @@ begin
     end;
   end;
   { ----------------------------------------------------------------------------------------------------------------------- COPY OR CUT DATA FROM STRING GRID }
-  if (mode = 1) or (mode = 2) then
+  if (mode = adCopy) or (mode = adCut) then
   begin
     Sel:=Selection;
     TxtFromSel:='';
@@ -973,7 +975,7 @@ begin
         for Col:=Sel.Left to Sel.Right do
         begin
           TxtFromSel:=TxtFromSel + Cells[Col, Row];
-          if mode = 2 then Cells[Col, Row]:='';  { CUT DATA FROM STRING GRID }
+          if mode = adCut then Cells[Col, Row]:='';  { CUT DATA FROM STRING GRID }
           if Col < Sel.Right then TxtFromSel:=TxtFromSel + TAB;
         end;
         if Row < Sel.Bottom then TxtFromSel:=TxtFromSel + CRLF;
@@ -1301,7 +1303,7 @@ begin
   DataTables:=TDataTables.Create(MainForm.FDbConnect);
   try
     { EXECUTE STORED PROCEDURE }
-    DataTables.StrSQL:=EXEC + AgeViewExport + SPACE +
+    DataTables.StrSQL:=EXECUTE + AgeViewExport + SPACE +
                        QuotedStr(MainForm.FGroupList[MainForm.GroupListBox.ItemIndex, 0]) + COMMA +
                        QuotedStr(MainForm.GroupListDates.Text);
     { QUERIED DATA TO SELF AND RELEASE }
@@ -1596,6 +1598,7 @@ var
   DataBase:     TDataBase;
   DataTables:   TDataTables;
   UserControl:  TUserControl;
+  Transactions: TTransactions;
   RegSettings:  TFormatSettings;
   NowTime:      TTime;
   iCNT:         integer;
@@ -1789,7 +1792,13 @@ begin
     GroupNmSel:=FGroupList[GroupListBox.ItemIndex, 0];
     AgeDateSel:=GroupListDates.Text;
     sgAgeView.Enabled:=True;
-    TTReadAgeView.Create(1)
+    Transactions:=TTransactions.Create(FDbConnect);
+    try
+      OpenItemsUpdate:=Transactions.GetDateTime(gdDateTime);
+      TTReadAgeView.Create(thCallOpenItems);
+    finally
+      Transactions.Free;
+    end;
   end;
 
   { ------------------------------------------------------------ ! GENERAL TABLES ! ------------------------------------------------------------------------- }
@@ -1829,8 +1838,8 @@ begin
   EventLogTimer.Enabled    :=True;
   InvoiceScanTimer.Enabled :=True;
   UpdaterTimer.Enabled     :=True;
-  OILoader.Enabled         :=True;
 *)
+  OILoader.Enabled         :=True;
 
   { TIME AND DATE ON STATUS BAR }
   CurrentTime.Enabled      :=True;
@@ -1851,11 +1860,14 @@ procedure TMainForm.FormShow(Sender: TObject);
 begin
   FormResize(self);
   (* CustomPanelBorders(Header1, clWhite, clRed, clRed, clRed, clRed); TPANEL TEST LINE *)
-  MainForm.sgCoCodes.SetColWidth (10, 30);
-  MainForm.sgPmtTerms.SetColWidth(10, 30);
-  MainForm.sgPaidInfo.SetColWidth(10, 30);
-  MainForm.sgGroup3.SetColWidth  (10, 30);
-  MainForm.sgPerson.SetColWidth  (10, 30);
+  MainForm.sgCoCodes.SetColWidth       (10, 30);
+  MainForm.sgPmtTerms.SetColWidth      (10, 30);
+  MainForm.sgPaidInfo.SetColWidth      (10, 30);
+  MainForm.sgGroup3.SetColWidth        (10, 30);
+  MainForm.sgPerson.SetColWidth        (10, 30);
+  MainForm.sgOpenItems.SetColWidth     (10, 20);
+  MainForm.sgAddressBook.SetColWidth   (10, 20);
+  MainForm.sgInvoiceTracker.SetColWidth(10, 20);
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------ MAIN FORM RESIZE }
@@ -1950,7 +1962,7 @@ end;
 procedure TMainForm.OILoaderTimer(Sender: TObject);
 begin
   LogText(FEventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Calling open items scanner...');
-  TTOpenItemsScanner.Create(False);
+  TTOpenItemsScanner.Create;
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------------- SHOW CURRENT TIME }
@@ -1987,19 +1999,19 @@ end;
 { ------------------------------------------------------------------------------------------------------------------------------------------------------- CUT }
 procedure TMainForm.Action_CutClick(Sender: TObject);
 begin
-  sgAddressBook.CopyCutPaste(2);
+  sgAddressBook.CopyCutPaste(adCut);
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------------ COPY }
 procedure TMainForm.Action_CopyClick(Sender: TObject);
 begin
-  sgAddressBook.CopyCutPaste(1);
+  sgAddressBook.CopyCutPaste(adCopy);
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------------------------- PASTE }
 procedure TMainForm.Action_PasteClick(Sender: TObject);
 begin
-  sgAddressBook.CopyCutPaste(0);
+  sgAddressBook.CopyCutPaste(adPaste);
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------- ADD EMPTY ROW TO THE ADDRESS BOOK }
@@ -2017,38 +2029,28 @@ end;
 { --------------------------------------------------------------------------------------------------------------------------------- DELETE GIVEN CUID FROM DB }
 procedure TMainForm.Action_DelRowClick(Sender: TObject);
 var
-  MSSQL:  TMSSQL;
-  DataBase:  TDataBase;
+  DataTables: TDataTables;
 begin
-
   { ASK BEFORE DELETE }
   if MsgCall(5, 'Are you sure you want to delete this customer?' + CRLF + 'This operation cannot be reverted.') = IDNO then Exit;
-
-  { EXIT IF NO DATABASE CONNECTION }
-  DataBase:=TDataBase.Create(False);
-  if not (DataBase.Check = 0) then
+  { EXECUTE DELETE QUERY }
+  if sgAddressBook.Cells[0, sgAddressBook.Row] <> '' then
   begin
-    MsgCall(2, 'Cannot connect with database. Please contact IT support.');
-    Exit;
-  end
-    else
-    begin
-      { EXECUTE DELETE QUERY }
-      if sgAddressBook.Cells[0, sgAddressBook.Row] <> '' then
-      begin
-        MSSQL:=TMSSQL.Create(MainForm.FDbConnect);
-        try
-          MSSQL.StrSQL:='DELETE FROM tbl_AddressBook WHERE CUID = ' + MSSQL.CleanStr(sgAddressBook.Cells[2, sgAddressBook.Row], True);
-          MSSQL.ExecSQL;
-        finally
-          MSSQL.Free;
-          sgAddressBook.DeleteRowFrom(1, 1);
-        end;
-      end
-        else
-          sgAddressBook.DeleteRowFrom(1, 1);
+    DataTables:=TDataTables.Create(FDbConnect);
+    try
+      DataTables.StrSQL:=DELETE_FROM         +
+                           TblAddressbook    +
+                         WHERE               +
+                           TAddressBook.CUID +
+                         EQUAL               +
+                           DataTables.CleanStr(sgAddressBook.Cells[2, sgAddressBook.Row], True);
+      DataTables.ExecSQL;
+    finally
+      DataTables.Free;
     end;
-  FreeAndNil(DataBase);
+  end;
+  { REMOVE FROM STRING GRID ANYWAY }
+  sgAddressBook.DeleteRowFrom(1, 1);
 end;
 
 { ---------------------------------------------------------------------------------------------------------------------------------------- OPEN SEARCH WINDOW }
@@ -2170,7 +2172,7 @@ begin
   begin
     for jCNT:=1 to sgOpenItems.RowCount - 1 do
       { ------------------------------------------------------------------------------------------------------------------- ADD DATA TO ADDRESS BOOK IF FOUND }
-      if (sgAgeView.Cells[sgAgeView.ReturnColumn(CUID, 1, 1), iCNT] = sgOpenItems.Cells[38, jCNT]) and (sgAgeView.RowHeights[Row] <> - 1) then
+      if (sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUID, 1, 1), iCNT] = sgOpenItems.Cells[38, jCNT]) and (sgAgeView.RowHeights[Row] <> - 1) then
       begin
         sgAddressBook.RowCount:=sgAddressBook.RowCount + 1;
         { ----------------------------------------------------------------------------------------------------------------------------------------- MOVE DATA }
@@ -2205,7 +2207,7 @@ end;
 { ---------------------------------------------------------------------------------------------------------------------------------------- FILTER INF7 COLUMN }
 procedure TMainForm.Action_FilterINF7Click(Sender: TObject);
 begin
-  FilterForm.FColName:=INF7;
+  FilterForm.FColName:=TSnapshots.fINF7;
   FilterForm.FGrid   :=MainForm.sgAgeView;
   WndCall(FilterForm, 0);
 end;
@@ -2221,8 +2223,8 @@ procedure TMainForm.Action_SearchClick(Sender: TObject);
 begin
   { SETUP AND CALL WINDOW }
   SearchForm.SGrid     :=MainForm.sgAgeView;
-  SearchForm.SColName  :=TSnapshots.CUSTOMER_NAME;
-  SearchForm.SColNumber:=TSnapshots.CUSTOMER_NUMBER;
+  SearchForm.SColName  :=TSnapshots.fCUSTOMER_NAME;
+  SearchForm.SColNumber:=TSnapshots.fCUSTOMER_NUMBER;
   WndCall(SearchForm, 0);
 end;
 
@@ -2233,7 +2235,7 @@ var
 begin
   AgeView:=TAgeView.Create(FDbConnect);
   try
-    MsgCall(1, 'Payment term: ' + AgeView.GetData(sgAgeView, sgPmtTerms, PAYMENT_TERMS));
+    MsgCall(1, 'Payment term: ' + AgeView.GetData(sgAgeView, sgPmtTerms, TSnapshots.fPAYMENT_TERMS));
   finally
     AgeView.Free;
   end;
@@ -2246,7 +2248,7 @@ var
 begin
   AgeView:=TAgeView.Create(FDbConnect);
   try
-    MsgCall(1, 'Assigned to Group3: ' + AgeView.GetData(sgAgeView, sgGroup3, GROUP3));
+    MsgCall(1, 'Assigned to Group3: ' + AgeView.GetData(sgAgeView, sgGroup3, TSnapshots.fGROUP3));
   finally
     AgeView.Free;
   end;
@@ -2259,7 +2261,7 @@ var
 begin
   AgeView:=TAgeView.Create(FDbConnect);
   try
-    MsgCall(1, 'Assigned to Person: ' + AgeView.GetData(sgAgeView, sgPerson, PERSON));
+    MsgCall(1, 'Assigned to Person: ' + AgeView.GetData(sgAgeView, sgPerson, TSnapshots.fPERSON));
   finally
     AgeView.Free;
   end;
@@ -2270,7 +2272,7 @@ procedure TMainForm.Action_INF4Click(Sender: TObject);
 var
   Return:  string;
 begin
-  Return:=sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(INF4, 1, 1) , sgAgeView.Row];
+  Return:=sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fINF4, 1, 1) , sgAgeView.Row];
   if (Return = '') or (Return = ' ') then Return:=unUnassigned;
   MsgCall(1, 'Assigned to INF4: ' + Return);
 end;
@@ -2288,45 +2290,35 @@ begin
 end;
 
 { ------------------------------------------------------------------------------------------------------- SHOW ONLY BASIC VIEW DEFINIED IN CONFIGURATION FILE }
-procedure TMainForm.Action_BasicViewClick(Sender: TObject);   //refactor!!!
+procedure TMainForm.Action_BasicViewClick(Sender: TObject);
 var
-  iCNT:  integer;
-  AppSettings: TSettings;
+  AgeView: TAgeView;
 begin
-  AppSettings:=TSettings.Create;
-  { RE-SET VIEW }
-  for iCNT:=0 to MainForm.sgAgeView.ColCount - 2 do
-    if AppSettings.TMIG.ReadString(AgingBasic, MainForm.FindKey(AppSettings.TMIG, AgingBasic, iCNT), 'True') = 'False' then
-      MainForm.sgAgeView.ColWidths[MainForm.sgAgeView.ReturnColumn(MainForm.FindKey(AppSettings.TMIG, AgingBasic, iCNT), 1, 1)]:= -1
-        else
-          MainForm.sgAgeView.ColWidths[MainForm.sgAgeView.ReturnColumn(MainForm.FindKey(AppSettings.TMIG, AgingBasic, iCNT), 1, 1)]:= 100;
-  AppSettings.Free;
-  { AUTO RESIZE }
-  MainForm.sgAgeView.SetColWidth(10, 20);
+  AgeView:=TAgeView.Create(FDbConnect);
+  try
+    AgeView.AgeViewMode(mainForm.sgAgeView, AgingBasic);
+  finally
+    AgeView.Free;
+  end;
   { TICK }
   Action_BasicView.Checked:=True;
-  Action_FullView.Checked:=False;
+  Action_FullView.Checked :=False;
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------- SHOW ALL AVAILABLE COLUMNS }
-procedure TMainForm.Action_FullViewClick(Sender: TObject);  //refactor!!!
+procedure TMainForm.Action_FullViewClick(Sender: TObject);
 var
-  iCNT:  integer;
-  AppSettings: TSettings;
+  AgeView: TAgeView;
 begin
-  AppSettings:=TSettings.Create;
-  { RE-SET VIEW }
-  for iCNT:=0 to MainForm.sgAgeView.ColCount - 2 do
-    if AppSettings.TMIG.ReadString(AgingFull, MainForm.FindKey(AppSettings.TMIG, AgingFull, iCNT), 'True') = 'False' then
-      MainForm.sgAgeView.ColWidths[MainForm.sgAgeView.ReturnColumn(MainForm.FindKey(AppSettings.TMIG, AgingFull, iCNT), 1, 1)]:= -1
-        else
-          MainForm.sgAgeView.ColWidths[MainForm.sgAgeView.ReturnColumn(MainForm.FindKey(AppSettings.TMIG, AgingBasic, iCNT), 1, 1)]:= 100;
-  AppSettings.Free;
-  { AUTO RESIZE }
-  MainForm.sgAgeView.SetColWidth(10, 20);
+  AgeView:=TAgeView.Create(FDbConnect);
+  try
+    AgeView.AgeViewMode(mainForm.sgAgeView, AgingFull);
+  finally
+    AgeView.Free;
+  end;
   { TICK }
   Action_BasicView.Checked:=False;
-  Action_FullView.Checked:=True;
+  Action_FullView.Checked :=True;
 end;
 
 { -------------------------------------------------------------- ! INVOICE TRACKER ! ------------------------------------------------------------------------ }
@@ -2531,17 +2523,17 @@ begin
 
   { COLUMNS ORDER MAY BE CHANGED BY THE USER  }
   { FIND COLUMN NUMBERS FOR GIVEN COLUMN NAME }
-  Col1 :=sgAgeView.ReturnColumn(NOT_DUE,         1, 1);
-  Col2 :=sgAgeView.ReturnColumn(RANGE1,          1, 1);
-  Col3 :=sgAgeView.ReturnColumn(RANGE2,          1, 1);
-  Col4 :=sgAgeView.ReturnColumn(RANGE3,          1, 1);
-  Col5 :=sgAgeView.ReturnColumn(RANGE4,          1, 1);
-  Col6 :=sgAgeView.ReturnColumn(RANGE5,          1, 1);
-  Col7 :=sgAgeView.ReturnColumn(RANGE6,          1, 1);
-  Col8 :=sgAgeView.ReturnColumn(OVERDUE,         1, 1);
-  Col9 :=sgAgeView.ReturnColumn(TOTAL,           1, 1);
-  Col10:=sgAgeView.ReturnColumn(CREDIT_LIMIT,    1, 1);
-  Col11:=sgAgeView.ReturnColumn(EXCEEDED_AMOUNT, 1, 1);
+  Col1 :=sgAgeView.ReturnColumn(TSnapshots.fNOT_DUE,         1, 1);
+  Col2 :=sgAgeView.ReturnColumn(TSnapshots.fRANGE1,          1, 1);
+  Col3 :=sgAgeView.ReturnColumn(TSnapshots.fRANGE2,          1, 1);
+  Col4 :=sgAgeView.ReturnColumn(TSnapshots.fRANGE3,          1, 1);
+  Col5 :=sgAgeView.ReturnColumn(TSnapshots.fRANGE4,          1, 1);
+  Col6 :=sgAgeView.ReturnColumn(TSnapshots.fRANGE5,          1, 1);
+  Col7 :=sgAgeView.ReturnColumn(TSnapshots.fRANGE6,          1, 1);
+  Col8 :=sgAgeView.ReturnColumn(TSnapshots.fOVERDUE,         1, 1);
+  Col9 :=sgAgeView.ReturnColumn(TSnapshots.fTOTAL,           1, 1);
+  Col10:=sgAgeView.ReturnColumn(TSnapshots.fCREDIT_LIMIT,    1, 1);
+  Col11:=sgAgeView.ReturnColumn(TSnapshots.fEXCEEDED_AMOUNT, 1, 1);
 
   { DRAW ONLY SELECTED COLUMNS }
   if ( (ACol = Col1) or (ACol = Col2) or (ACol = Col3) or (ACol = Col4) or (ACol = Col5) or (ACol = Col6) or (ACol = Col7) or (ACol = Col8) or (ACol = Col9) or (ACol = Col10) or (ACol = Col11) )
@@ -2720,18 +2712,18 @@ procedure TMainForm.DetailsGridKeyUp(Sender: TObject; var Key: Word; Shift: TShi
   begin
     for iCNT:=1 to sgCoCodes.RowCount - 1 do
     begin
-      if DetailsGrid.Cells[ColumnNum, 0] = sgCoCodes.Cells[sgCoCodes.ReturnColumn('CO_CODE', 1, 1), iCNT] then
+      if DetailsGrid.Cells[ColumnNum, 0] = sgCoCodes.Cells[sgCoCodes.ReturnColumn(TCompany.CO_CODE, 1, 1), iCNT] then
       begin
-        DetailsGrid.Cells[ColumnNum, 1]:=sgCoCodes.Cells[sgCoCodes.ReturnColumn('COCURRENCY',    1, 1), iCNT];
-        DetailsGrid.Cells[ColumnNum, 2]:=sgCoCodes.Cells[sgCoCodes.ReturnColumn('INTEREST_RATE', 1, 1), iCNT];
-        DetailsGrid.Cells[ColumnNum, 3]:=sgCoCodes.Cells[sgCoCodes.ReturnColumn('AGENTS',        1, 1), iCNT];
+        DetailsGrid.Cells[ColumnNum, 1]:=sgCoCodes.Cells[sgCoCodes.ReturnColumn(TCompany.COCURRENCY,    1, 1), iCNT];
+        DetailsGrid.Cells[ColumnNum, 2]:=sgCoCodes.Cells[sgCoCodes.ReturnColumn(TCompany.INTEREST_RATE, 1, 1), iCNT];
+        DetailsGrid.Cells[ColumnNum, 3]:=sgCoCodes.Cells[sgCoCodes.ReturnColumn(TCompany.AGENTS,        1, 1), iCNT];
         Break;
       end
       else
       begin
-        DetailsGrid.Cells[ColumnNum, 1]:='NA';
-        DetailsGrid.Cells[ColumnNum, 2]:='NA';
-        DetailsGrid.Cells[ColumnNum, 3]:='NA';
+        DetailsGrid.Cells[ColumnNum, 1]:=unNA;
+        DetailsGrid.Cells[ColumnNum, 2]:=unNA;
+        DetailsGrid.Cells[ColumnNum, 3]:=unNA;
       end;
     end;
   end;
@@ -2797,32 +2789,28 @@ begin
 end;
 
 { --------------------------------------------------------------------------------------------------------------------- PASTE, CUT, COPY TO/FROM ADDRESS BOOK }
-procedure TMainForm.sgAddressBookKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState); //refactor!!!
+procedure TMainForm.sgAddressBookKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 var
-  MSSQL:    TMSSQL;
-  Value:    string;
+  DataTables: TDataTables;
+  Value:      string;
+  Column:     string;
 begin
-
   { FIRST COLUMN ARE NOT EDITABLE }
   if (sgAddressBook.Col = 1) then Exit;
-
   { PASTE | CTRL + V }
   { COPY  | CTRL + C }
   { CUT   | CTRL + X }
   if (Key = 86) and (Shift = [ssCtrl]) then sgAddressBook.CopyCutPaste(0);
   if (Key = 67) and (Shift = [ssCtrl]) then sgAddressBook.CopyCutPaste(1);
   if (Key = 88) and (Shift = [ssCtrl]) then sgAddressBook.CopyCutPaste(2);
-
   { ON DELETE }
   if Key = 46 then sgAddressBook.DelEsc(1, sgAddressBook.Col, sgAddressBook.Row);
-
   { ON ESCAPE }
   if Key = 27 then
   begin
     sgAddressBook.DelEsc(0, sgAddressBook.Col, sgAddressBook.Row);
     sgAddressBook.Options:=sgAddressBook.Options - [goEditing];
   end;
-
   { UPDATE SQL DATABASE TABLE ON ENTER }
   if Key = 13 then
   begin
@@ -2830,32 +2818,36 @@ begin
     if not (sgAddressBook.Cells[0, sgAddressBook.Row] = '') then
     begin
       { CONNECT AND UPDATE }
-      MSSQL:=TMSSQL.Create(MainForm.FDbConnect);
+      DataTables:=TDataTables.Create(FDbConnect);
       try
-        Value:=MSSQL.CleanStr(sgAddressBook.Cells[sgAddressBook.Col, sgAddressBook.Row], True);
-        MSSQL.StrSQL:='UPDATE tbl_AddressBook SET '                                        +
-                      sgAddressBook.Cells[sgAddressBook.Col, 0]                            +     //!!!
-                      ' = '                                                                +
-                      Value                                                                +
-                      ' WHERE CUID = '                                                     +
-                      MSSQL.CleanStr(sgAddressBook.Cells[2, sgAddressBook.Row], True);
-        MSSQL.ExecSQL;
+        { GET USER VALUE AND COLUMN NAME }
+        Value:=DataTables.CleanStr(sgAddressBook.Cells[sgAddressBook.Col, sgAddressBook.Row], True);
+        Column:=sgAddressBook.Cells[sgAddressBook.Col, 0];
+        { PREPARE NON-QUERY }
+        DataTables.StrSQL:=_UPDATE             +
+                             TblAddressbook    +
+                           _SET                +
+                             Column            +
+                           EQUAL               +
+                             Value             +
+                           WHERE               +
+                             TAddressBook.CUID +
+                           EQUAL               +
+                             DataTables.CleanStr(sgAddressBook.Cells[2, sgAddressBook.Row], True);
+        DataTables.ExecSQL;
       finally
-        MSSQL.Free;
+        DataTables.Free;
       end;
     end;
     sgAddressBook.Options:=sgAddressBook.Options - [goEditing];
   end;
-
   { ALLOW EDITING | F2 }
   if Key = VK_F2 then sgAddressBook.Options:=sgAddressBook.Options + [goEditing];
-
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------- UPDATE SECTION VALUE }
 procedure TMainForm.sgListSectionKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-
   { PASTE | CTRL + V }
   { CUT   | CTRL + X }
   if Text50.Font.Style = [fsBold] then
@@ -2863,28 +2855,23 @@ begin
     if (Key = 86) and (Shift = [ssCtrl]) then sgListSection.CopyCutPaste(0);
     if (Key = 88) and (Shift = [ssCtrl]) then sgListSection.CopyCutPaste(2);
   end;
-
   { COPY | CTRL + C }
   if (Key = 67) and (Shift = [ssCtrl]) then sgListSection.CopyCutPaste(1);
-
   { DELETE }
   if (Key = 46) and (Text50.Font.Style = [fsBold]) then sgListSection.DelEsc(1, sgListSection.Col, sgListSection.Row);
-
   { ESCAPE }
   if Key = 27 then sgListSection.DelEsc(0, sgListSection.Col, sgListSection.Row);
-
 end;
 
 procedure TMainForm.sgListSectionKeyPress(Sender: TObject; var Key: Char);
 begin
   { UPDATE IF <ENTER> IS PRESSED }
-  if Key = #13 then sgListSection.Cells[1, sgListSection.Row]:=UpperCase(sgListSection.Cells[1, sgListSection.Row]);
+  if Key = CR then sgListSection.Cells[1, sgListSection.Row]:=UpperCase(sgListSection.Cells[1, sgListSection.Row]);
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------ UPDATE VALUE KEY }
 procedure TMainForm.sgListValueKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-
   { PASTE | CTRL + V }
   { CUT   | CTRL + X }
   if Text50.Font.Style = [fsBold] then
@@ -2892,16 +2879,12 @@ begin
     if (Key = 86) and (Shift = [ssCtrl]) then sgListValue.CopyCutPaste(0);
     if (Key = 88) and (Shift = [ssCtrl]) then sgListValue.CopyCutPaste(2);
   end;
-
   { COPY | CTRL + C }
   if (Key = 67) and (Shift = [ssCtrl]) then sgListValue.CopyCutPaste(1);
-
   { DELETE }
   if (Key = 46) and (Text50.Font.Style = [fsBold]) then sgListValue.DelEsc(1, sgListValue.Col, sgListValue.Row);
-
   { ESCAPE }
   if Key = 27 then sgListValue.DelEsc(0, sgListValue.Col, sgListValue.Row);
-
 end;
 
 procedure TMainForm.sgListValueKeyPress(Sender: TObject; var Key: Char);
@@ -2914,7 +2897,7 @@ end;
 procedure TMainForm.Edit_PASSWORDKeyPress(Sender: TObject; var Key: Char);
 begin
   { ON <ENTER> }
-  if Key = #13 then btnUnlockClick(self);
+  if Key = CR then btnUnlockClick(self);
 end;
 
 { -------------------------------------------------------------- ! MOUSE EVENTS ! --------------------------------------------------------------------------- }
@@ -3333,7 +3316,7 @@ begin
     GroupNmSel:=FGroupList[GroupListBox.ItemIndex, 0];
     AgeDateSel:=GroupListDates.Text;
     { LOAD AGE VIEW FOR SELECTED GROUP }
-    TTReadAgeView.Create(1)
+    TTReadAgeView.Create(thCallOpenItems);
   end
     else
       MsgCall(2, 'Cannot load selected group.');
@@ -3346,7 +3329,7 @@ begin
   StatBar_TXT1.Caption :=stProcessing;
   if MainForm.AccessLevel = acADMIN then
   begin
-    TTReadOpenItems.Create(0);
+    TTReadOpenItems.Create(thNullParameter);
   end else
   begin
     StatBar_TXT1.Caption:=stReady;
@@ -3588,88 +3571,105 @@ end;
 
 { ---------------------------------------------------------------------------------------------------------------------------------------------------- UNLOCK }
 procedure TMainForm.btnUnlockClick(Sender: TObject);
-var
-  AppSettings:  TSettings;
-  tStrings:     TStringList;
-  iCNT:         integer;
-  inner:        integer;
-begin
-  AppSettings:=TSettings.Create;
-  { LOCK / UNLOCK }
-  if btnUnlock.Caption = 'Unlock' then
+
+  (* COMMON VARIABLES *)
+  var
+    AppSettings:  TSettings;
+
+  (* NESTED PROCEDURE *)
+
+  procedure LockAction;
+  var
+    tStrings:     TStringList;
+    iCNT:         integer;
+    inner:        integer;
   begin
-    { IF PASSWORD IS OK, THEN UNLOCK AND LOAD CONFIGURATION SCRIPT FOR EDITING }
-    if (AppSettings.TMIG.ReadString(Password, 'VALUE', '') <> '') and
-       (AppSettings.TMIG.ReadString(Password, 'VALUE', '') = Edit_PASSWORD.Text) then
+
+    if not Assigned(AppSettings) then Exit;
+
+    { LOCK / UNLOCK }
+    if btnUnlock.Caption = 'Unlock' then
     begin
-      sgListSection.Cols[0].Text:='Lp';
-      sgListSection.Cols[1].Text:='Sections';
-      sgListValue.Cols[0].Text  :='Lp';
-      sgListValue.Cols[1].Text  :='Key';
-      sgListValue.Cols[2].Text  :='Value';
-      { CREDENTIALS }
-      btnPassUpdate.Enabled  :=True;
-      Edit_CurrPassWd.Enabled:=True;
-      Edit_NewPassWd.Enabled :=True;
-      Edit_ConfPassWd.Enabled:=True;
-      { STRING GRIDS }
-      sgListSection.Enabled:=True;
-      sgListValue.Enabled:=True;
-      sgListSectionClick(self);
-      sgListSection.Row:=1;
-      sgListValue.Row:=1;
-      { TRANSPARENCY OFF }
-      imgOFF.Visible:=False;
-      { POPULATE STRING GRID }
-      tStrings:=TStringList.Create();
-      try
-        { READ ALL }
-        AppSettings.TMIG.ReadSections(tStrings);
-        { LIST ALL SECTIONS EXCEPT 'PASSWD' SECTION }
-        sgListSection.RowCount:=tStrings.Count;
-        inner:=1;
-        for iCNT:=0 to tStrings.Count - 1 do
-        begin
-          if tStrings.Strings[iCNT] <> Password then
+      { IF PASSWORD IS OK, THEN UNLOCK AND LOAD CONFIGURATION SCRIPT FOR EDITING }
+      if (AppSettings.TMIG.ReadString(Password, 'VALUE', '') <> '') and
+         (AppSettings.TMIG.ReadString(Password, 'VALUE', '') = Edit_PASSWORD.Text) then
+      begin
+        sgListSection.Cols[0].Text:='Lp';
+        sgListSection.Cols[1].Text:='Sections';
+        sgListValue.Cols[0].Text  :='Lp';
+        sgListValue.Cols[1].Text  :='Key';
+        sgListValue.Cols[2].Text  :='Value';
+        { CREDENTIALS }
+        btnPassUpdate.Enabled  :=True;
+        Edit_CurrPassWd.Enabled:=True;
+        Edit_NewPassWd.Enabled :=True;
+        Edit_ConfPassWd.Enabled:=True;
+        { STRING GRIDS }
+        sgListSection.Enabled:=True;
+        sgListValue.Enabled:=True;
+        sgListSectionClick(self);
+        sgListSection.Row:=1;
+        sgListValue.Row:=1;
+        { TRANSPARENCY OFF }
+        imgOFF.Visible:=False;
+        { POPULATE STRING GRID }
+        tStrings:=TStringList.Create();
+        try
+          { READ ALL }
+          AppSettings.TMIG.ReadSections(tStrings);
+          { LIST ALL SECTIONS EXCEPT 'PASSWD' SECTION }
+          sgListSection.RowCount:=tStrings.Count;
+          inner:=1;
+          for iCNT:=0 to tStrings.Count - 1 do
           begin
-            sgListSection.Cells[0, inner]:=IntToStr(inner);
-            sgListSection.Cells[1, inner]:=tStrings.Strings[iCNT];
-            inc(inner);
+            if tStrings.Strings[iCNT] <> Password then
+            begin
+              sgListSection.Cells[0, inner]:=IntToStr(inner);
+              sgListSection.Cells[1, inner]:=tStrings.Strings[iCNT];
+              inc(inner);
+            end;
           end;
+        finally
+          tStrings.Free;
+          btnUnlock.Caption:='Lock';
+          sgListValue.RowCount:=2;
         end;
-      finally
-        tStrings.Free;
-        btnUnlock.Caption:='Lock';
-        sgListValue.RowCount:=2;
       end;
+
+      { STOP IF PASSWORD IS INVALID }
+      if (AppSettings.TMIG.ReadString(Password, 'VALUE', '') <> '') and
+         (AppSettings.TMIG.ReadString(Password, 'VALUE', '') <> Edit_PASSWORD.Text) then
+      begin
+        MsgCall(2, 'Incorrect password, please re-type it and try again.');
+      end;
+
+      { SETUP NEW PASSWORD }
+      if (AppSettings.TMIG.ReadString(Password, 'VALUE', '') = '') then
+      begin
+        Edit_CurrPassWd.Enabled:=True;
+        Edit_NewPassWd.Enabled :=True;
+        Edit_ConfPassWd.Enabled:=True;
+        MsgCall(2, 'Please provide with new password.');
+      end;
+      Edit_PASSWORD.Text:='';
+      Edit_PASSWORD.SetFocus;
+    end else
+    { LOCK TABSHEET }
+    begin
+      MainForm.LockSettingsPanel;
     end;
 
-    { STOP IF PASSWORD IS INVALID }
-    if (AppSettings.TMIG.ReadString(Password, 'VALUE', '') <> '') and
-       (AppSettings.TMIG.ReadString(Password, 'VALUE', '') <> Edit_PASSWORD.Text) then
-    begin
-      MsgCall(2, 'Incorrect password, please re-type it and try again.');
-    end;
-
-    { SETUP NEW PASSWORD }
-    if (AppSettings.TMIG.ReadString(Password, 'VALUE', '') = '') then
-    begin
-      Edit_CurrPassWd.Enabled:=True;
-      Edit_NewPassWd.Enabled :=True;
-      Edit_ConfPassWd.Enabled:=True;
-      MsgCall(2, 'Please provide with new password.');
-    end;
-    Edit_PASSWORD.Text:='';
-    Edit_PASSWORD.SetFocus;
-  end else
-  { LOCK TABSHEET }
-  begin
-    MainForm.LockSettingsPanel;
   end;
 
-  { DISPOSE }
-  FreeAndNil(AppSettings);
+  (* MAIN BLOCK *)
 
+begin
+  AppSettings:=TSettings.Create;
+  try
+    LockAction;
+  finally
+    AppSettings.Free;
+  end;
 end;
 
 end.

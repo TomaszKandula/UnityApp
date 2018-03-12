@@ -125,12 +125,19 @@ const
   COMMA        : char   = #44;
   POINT        : char   = #46;
 
-  { SQL KEYWORDS }
+  { BRACKET ENUMARATIONS }
+
+  brRound      : integer = 0;
+  brSquare     : integer = 1;
+  brCurly      : integer = 2;
+
+  { SQL KEYWORDS | ADD. SPACES FOR EASIER CONCATENATING }
 
   INSERT       : string = ' INSERT INTO ';
   SELECT       : string = ' SELECT ';
   SELECT_DIS   : string = ' SELECT DISTINCT ';
-  UPDATE       : string = ' UPDATE ';
+  _UPDATE      : string = ' UPDATE ';
+  DELETE_FROM  : string = ' DELETE FROM ';
   _SET         : string = ' SET ';
   UNION        : string = ' UNION ALL ';
   EQUAL        : string = ' = ';
@@ -147,7 +154,37 @@ const
   DESC         : string = ' DESC ';
   _AND         : string = ' AND ';
   _AS          : string = ' AS ';
-  EXEC         : string = ' EXEC ';
+  MAX          : string = ' MAX ';
+  EXECUTE      : string = ' EXEC ';
+
+  { "OPEN ITEMS" AND "AGING" WORKERS ENUMERATIONS }
+
+  thNullParameter = 0;
+  thCallOpenItems = 1;
+  thCallMakeAge   = 2;
+
+  { "ADDRESS BOOK" WORKER ENUMERATION }
+
+  adOpenAll     = 0;
+  adOpenForUser = 1;
+  adSaveNew     = 2;
+  adExport      = 3;
+  adImport      = 4;
+  adCopy        = 100;
+  adPaste       = 101;
+  adCut         = 102;
+
+  { RETURN TYPES FOR "GETDATETIME" }
+
+  gdTimeOnly = 0;
+  gdDateOnly = 1;
+  gdDateTime = 2;
+
+  (* NOTE! WE USE ONLY "YYYY-MM-DD" AND "hh:mm:ss" *)
+
+  gdTimeFormat    : string = 'hh:mm:ss';
+  gdDateFormat    : string = 'YYYY-MM-DD';
+  gdDateTimeFormat: string = 'YYYY-MM-DD hh:mm:ss';
 
   { UAC ENUMERATION }
 
@@ -162,14 +199,6 @@ const
   acADMIN     = 'AD';
   acReadWrite = 'RW';
   acReadOnly  = 'RO';
-
-  { ADDRESS BOOK ENUMERATION }
-
-  adOpenAll     = 0;
-  adOpenForUser = 1;
-  adSaveNew     = 2;
-  adExport      = 3;
-  adImport      = 4;
 
   { STATUS MESSAGES }
 
@@ -191,37 +220,6 @@ const
 
   xlWBATWorksheet = -4167;
   xlWARN_MESSAGE  = 'Invalid class string';
-
-  { AGE VIEW | "FRIENDLY" COLUMNS NAMES }
-
-  CUSTOMER_NAME   = 'CUSTOMER NAME';
-  CUSTOMER_NUMBER = 'CUSTOMER NUMBER';
-  FOLLOWUP        = 'FOLLOW UP';
-  NOT_DUE         = 'NOT DUE';
-  COUNTRY_CODE    = 'COUNTRY CODE';
-  RANGE1          = '1 - 7';
-  RANGE2          = '8 - 30';
-  RANGE3          = '31 - 60';
-  RANGE4          = '61 - 90';
-  RANGE5          = '91 - 120';
-  RANGE6          = '121 - oo';
-  TOTAL           = 'TOTAL';
-  OVERDUE         = 'OVERDUE';
-  CREDIT_LIMIT    = 'CREDIT LIMIT';
-  EXCEEDED_AMOUNT = 'EXCEEDED AMOUNT';
-  AGENT           = 'AGENT';
-  CO_CODE         = 'CO CODE';
-  PAYMENT_TERMS   = 'PAYMENT TERMS';
-  DIVISION        = 'DIVISION';
-  LEDGER_ISO      = 'LEDGER ISO';
-  INF4            = 'INF4';
-  INF7            = 'INF7';
-  PERSON          = 'PERSON';
-  GROUP3          = 'GROUP3';
-  RISK_CLASS      = 'RISK CLASS';
-  QUALITY_IDX     = 'QUALITY IDX';
-  WALLET_SHARE    = 'WALLET SHARE';
-  CUID            = 'CUID';
 
   { MAPPED TABLES FROM DATABASE | WE DO NOT USE SEPARATE ORM FRAMEWORK }
 
