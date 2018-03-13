@@ -347,21 +347,26 @@ var
   THDMili:    extended;
   THDSec:     extended;
   StopWatch:  TStopWatch;
+(*
   SL:         TStringList;
   iCNT:       integer;
   jCNT:       integer;
   temp:       string;
+*)
+  AgeView:    TAgeView;
 begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   FIDThd:=TTMakeAgeView.CurrentThread.ThreadID;
   FLock.Acquire;
+  AgeView:=TAgeView.Create(MainForm.FDbConnect);
   try
     StopWatch:=TStopWatch.StartNew;
     MainForm.ExecMessage(True, WM_GETINFO, 10, stGenerating);
     LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Generating age view...');
     try
-
-
+      { ASYNC }
+      AgeView.GroupID:=MainForm.GroupIdSel;
+      AgeView.Make(1);
     except
       on E: Exception do
         LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot execute "TTMakeAgeView". Error has been thrown: ' + E.Message);
@@ -370,11 +375,13 @@ begin
     MainForm.ExecMessage(True, WM_GETINFO, 10, stReady);
     THDMili:=StopWatch.ElapsedMilliseconds;
     THDSec:=THDMili / 1000;
-    LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Age View thread has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
+    LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Age View thread has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
     FLock.Release;
   end;
   { RELEASE THREAD WHEN DONE }
   FreeOnTerminate:=True;
+  { RELOAD AGE VIEW ON MAIN TAB }
+  TTReadAgeView.Create(thNullParameter);
 end;
 
 { ############################################################## ! OPEN ITEMS SCANNER ! ##################################################################### }
@@ -401,8 +408,8 @@ var
 begin
   FIDThd:=TTOpenItemsScanner.CurrentThread.ThreadID;
   FLock.Acquire;
+  Transactions:=TTransactions.Create(MainForm.FDbConnect);
   try
-    Transactions:=TTransactions.Create(MainForm.FDbConnect);
     try
       ReadDateTime:=Transactions.GetDateTime(gdDateTime);
       if StrToDateTime(MainForm.OpenItemsUpdate) < StrToDateTime(ReadDateTime) then
@@ -459,7 +466,7 @@ begin
       Synchronize(AgeView.ClearSummary);
       { ASYNC }
       AgeView.idThd  :=IDThd;
-      AgeView.GroupID:=MainForm.GroupNmSel;
+      AgeView.GroupID:=MainForm.GroupIdSel;
       AgeView.AgeDate:=MainForm.AgeDateSel;
       AgeView.Read(MainForm.sgAgeView);
       { SYNC }
@@ -519,7 +526,9 @@ begin
     MainForm.ExecMessage(True, WM_GETINFO, 10, stDownloading);
     try
       Synchronize(OpenItems.ClearSummary);
-      OpenItems.LoadToGrid(MainForm.sgOpenItems, MainForm.DetailsGrid);
+      OpenItems.DestGrid   :=MainForm.sgOpenItems;
+      OpenItems.SettingGrid:=MainForm.DetailsGrid;
+      OpenItems.LoadToGrid;
       Synchronize(OpenItems.UpdateSummary);
       Synchronize(procedure
                   begin
@@ -543,7 +552,7 @@ begin
   if FMode = thCallMakeAge then
   begin
     MainForm.cbDump.Checked:=False;
-    TTMakeAgeView.Create(False);
+    TTMakeAgeView.Create;
   end;
 end;
 

@@ -117,13 +117,15 @@ const
   { SPECIAL CHARACTERS }
 
   CRLF         : string = #13#10;
-  CR           : string = '#13';
-  LF           : string = '#10';
+  CR           : char   = #13;
+  LF           : char   = #10;
   TAB          : char   = #9;
   SPACE        : char   = #32;
   QUOTE        : char   = #39;
   COMMA        : char   = #44;
   POINT        : char   = #46;
+  SingleQuote  : string = '''';
+  DoubleQuote  : string = '''''';
 
   { BRACKET ENUMARATIONS }
 

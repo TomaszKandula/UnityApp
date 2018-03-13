@@ -60,9 +60,7 @@ type                                                   (* RUN EITHER IN WORKER O
     procedure   AgeViewMode(var Grid: TStringGrid; ModeBySection: string);
     procedure   Make(OSAmount: double);
 
-
     procedure   Write(DestTable: string; idThd: integer);
-    function    GetCoCode(ListPos: integer; CoPos: integer; Mode: integer): string;
 
   end;
 
@@ -380,6 +378,7 @@ var
   Count:     double;                    { SUMS WALLET SHARE            }
   { SETTINGS }
   AppSettings: TSettings;
+
 const
   { WARNING! BELOW MUST BE ALIGNED WITH OPEN ITEMS SOURCE AND DESTINATION TABLE IN DATABASE FOR AGE VIEW }
   oiCol: array[0..12] of integer = (6, 2, 15, 14, 16, 18, 27, 1, 12, 13, 30, 28, 37);     { DEFINES SOURCE COLUMNS TO BE TRANSFERRED TO AGE VIEW 'AS IS' }
@@ -432,8 +431,8 @@ end;
 
 { QUICK SORT }
 procedure QuickSortR(var A: array of double; var L: array of integer; iLo, iHi: integer; ASC: boolean);
-{ 'A' VARIABLE HOLDS NUMERICAL DATA TO BE SORTED. 'L' VARIABLE IS ASSOCIATED COLUMN WITH ORIGINAL LIST POSITION. THE SECOND ASSOCIATED COLUMN FOLLOWS   }
-{ 'A' COLUMN, BUT IT IS NOT SORTED. IT ALLOWS TO ASSIGN SORTED VALUES BACK TO ORIGINAL LIST POSITION AFTER COMPUTATION IS DONE. THIS IS TO BE USED WHEN }
+{ "A" VARIABLE HOLDS NUMERICAL DATA TO BE SORTED. "L" VARIABLE IS "ASSOCIATED" COLUMN WITH ORIGINAL LIST POSITION. THE SECOND ASSOCIATED COLUMN FOLLOWS }
+{ "A" COLUMN, BUT IT IS NOT SORTED. IT ALLOWS TO ASSIGN SORTED VALUES BACK TO ORIGINAL LIST POSITION AFTER COMPUTATION IS DONE. THIS IS TO BE USED WHEN }
 { SORTING IS NECESSARY BEFORE APPLAYING COMPUTATION AND AFTER WHICH WE MUST PUT VALUES BACK TO ITS ORIGINAL POSITIONS.                                  }
 var
   Lo:     integer;
@@ -481,57 +480,44 @@ end;
 (* MAIN BLOCK *)
 
 begin
-  AppSettings:=TSettings.Create;
-
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   RcLo :=0;
   RcHi :=0;
   avRow:=0;
   SetLength(ArrAgeView, 1, 30);  { MAKE 1 ROW AND 1..30 COLUMNS }
-
   { PUT ZERO FIELDS }
   AgeViewZeroFields(0);
-
   { ------------------------------------------------------------------------------------------------------------------------------------------  DATE AND TIME }
   DatTim:=DateToStr(Now) + ' ' + TimeToStr(Now);
   if SysUtils.DayOfWeek(Now) = 2 then bias:=3 else bias:=1;
   CutOff:=Now - bias;
-
   { -------------------------------------------------------------------------------------------------- REMOVE DUPLICATES AND MAKE AGE VIEW WITHOUT AGE VALUES }
-  { WARNING! IT REQUIRES OPEN ITEMS 'STRINGGRID' TO BE SORTED BY     }
-  {          SUPPORTED COLUMN 'CUID', WE ASSUME THAT IS ALREADY DONE }
+  { WARNING! IT REQUIRES OPEN ITEMS "STRING GRID" TO BE SORTED BY    }
+  {          SUPPORTED COLUMN "CUID", WE ASSUME THAT IS ALREADY DONE }
   {          AND WE START WITH "ONE" BECAUSE ZERO POINTS TO HEADERS  }
-  {          IN 'STRINGGRID'                                         }
+  {          IN "STRING GRID"                                        }
   for iCNT:=1 to MainForm.sgOpenItems.RowCount - 1 do
     { GO THROUGH THE ROWS AND POPULATE WHEN FIND THAT THE ROW BELOW IS DIFFERENT THAN CURRENT }
-    if (MainForm.sgOpenItems.Cells[38, iCNT] <> MainForm.sgOpenItems.Cells[38, iCNT + 1]) then
+    if (MainForm.sgOpenItems.Cells[37, iCNT] <> MainForm.sgOpenItems.Cells[37, iCNT + 1]) then
     begin
-
       { ---------------------------------------------------------------------------------------------------------------------------------- FIXED DATA PER ROW }
       ArrAgeView[avRow, 0]:=GroupID;
       ArrAgeView[avRow, 1]:=DateToStr(CutOff);
       ArrAgeView[avRow, 2]:=DatTim;
-
       { ------------------------------------------------------------------------------------------------------------------------ RE-WRITE REST OF THE COLUMNS }
       for jCNT:=0 to high(oiCol) do ArrAgeView[avRow, avCol[jCNT]]:=MainForm.sgOpenItems.Cells[oiCol[jCNT], iCNT];
-
       { ---------------------------------------------------------------------------------------------------------------------------------------- ALTERNATIONS }
-
-      { REMOVE 'TAB' CHARACTER IF FOUND IN CUSTOMER NAME }
-      ArrAgeView[avRow, 3]:=StringReplace(ArrAgeView[avRow, 3], #9, '', [rfReplaceAll]);
-
+      { REMOVE "TAB" CHARACTER IF FOUND IN CUSTOMER NAME }
+      ArrAgeView[avRow, 3]:=StringReplace(ArrAgeView[avRow, 3], TAB, '', [rfReplaceAll]);
       { REPLACE SINGLE QUOTES TO DOUBLE QUOTES }
-      ArrAgeView[avRow, 3]:=StringReplace(ArrAgeView[avRow, 3], '''', '''''', [rfReplaceAll]);
-
-      { REMOVE FROM CO CODE 'F' PREFIX }
-//      ArrAgeView[avRow, 20]:=ConvertName(MidStr(ArrAgeView[avRow, 20], 2, 5), '', 2);
-
+      ArrAgeView[avRow, 3]:=StringReplace(ArrAgeView[avRow, 3], SingleQuote, DoubleQuote, [rfReplaceAll]);
+      { REMOVE FROM CO CODE "F" PREFIX }
+      ArrAgeView[avRow, 20]:=IntToStr((StrToInt(StringReplace(ArrAgeView[avRow, 20], 'F', '0', [rfReplaceAll]))));
       { LEDGER ISO }
-//      if MainForm.COC1.Text = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.CUR1.Text;
-//      if MainForm.COC2.Text = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.CUR2.Text;
-//      if MainForm.COC3.Text = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.CUR3.Text;
-//      if MainForm.COC4.Text = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.CUR4.Text;
-
+      if MainForm.DetailsGrid.Cells[0, 0] = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.DetailsGrid.Cells[0, 0];
+      if MainForm.DetailsGrid.Cells[1, 0] = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.DetailsGrid.Cells[1, 0];
+      if MainForm.DetailsGrid.Cells[2, 0] = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.DetailsGrid.Cells[2, 0];
+      if MainForm.DetailsGrid.Cells[3, 0] = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.DetailsGrid.Cells[3, 0];
       { -------------------------------------------------------------------------------------------------------------------------------------------- COUNTERS }
       { MOVE COUNTER }
       inc(avRow);
@@ -540,41 +526,56 @@ begin
       { ZERO FIELDS }
       AgeViewZeroFields(avRow);
     end;
-
-  { ------------------------------------------------------------------------------------------------------------------ CALCULATE VALUES FOR GIVEN AGE BUCKETS }
-  { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-  { LOWER BOUNDS }
-  R1lo:=AppSettings.TMIG.ReadInteger(AgingRanges, 'RANGE1A', 0);
-  R2lo:=AppSettings.TMIG.ReadInteger(AgingRanges, 'RANGE2A', 0);
-  R3lo:=AppSettings.TMIG.ReadInteger(AgingRanges, 'RANGE3A', 0);
-  R4lo:=AppSettings.TMIG.ReadInteger(AgingRanges, 'RANGE4A', 0);
-  R5lo:=AppSettings.TMIG.ReadInteger(AgingRanges, 'RANGE5A', 0);
-  R6lo:=AppSettings.TMIG.ReadInteger(AgingRanges, 'RANGE6A', 0);
-  { UPPER BOUNDS }
-  R1hi:=AppSettings.TMIG.ReadInteger(AgingRanges, 'RANGE1B', 0);
-  R2hi:=AppSettings.TMIG.ReadInteger(AgingRanges, 'RANGE2B', 0);
-  R3hi:=AppSettings.TMIG.ReadInteger(AgingRanges, 'RANGE3B', 0);
-  R4hi:=AppSettings.TMIG.ReadInteger(AgingRanges, 'RANGE4B', 0);
-  R5hi:=AppSettings.TMIG.ReadInteger(AgingRanges, 'RANGE5B', 0);
-
+  { ---------------------------------------------------------------------------------------------------------------------------- RANGES AND RISK CLASS BOUNDS }
+  AppSettings:=TSettings.Create;
+  try
+    { LOWER BOUNDS }
+    R1lo:=AppSettings.TMIG.ReadInteger(AgingRanges, 'RANGE1A', 0);
+    R2lo:=AppSettings.TMIG.ReadInteger(AgingRanges, 'RANGE2A', 0);
+    R3lo:=AppSettings.TMIG.ReadInteger(AgingRanges, 'RANGE3A', 0);
+    R4lo:=AppSettings.TMIG.ReadInteger(AgingRanges, 'RANGE4A', 0);
+    R5lo:=AppSettings.TMIG.ReadInteger(AgingRanges, 'RANGE5A', 0);
+    R6lo:=AppSettings.TMIG.ReadInteger(AgingRanges, 'RANGE6A', 0);
+    { UPPER BOUNDS }
+    R1hi:=AppSettings.TMIG.ReadInteger(AgingRanges, 'RANGE1B', 0);
+    R2hi:=AppSettings.TMIG.ReadInteger(AgingRanges, 'RANGE2B', 0);
+    R3hi:=AppSettings.TMIG.ReadInteger(AgingRanges, 'RANGE3B', 0);
+    R4hi:=AppSettings.TMIG.ReadInteger(AgingRanges, 'RANGE4B', 0);
+    R5hi:=AppSettings.TMIG.ReadInteger(AgingRanges, 'RANGE5B', 0);
+    { RISK CLASS BOUNDS }
+    if FormatSettings.DecimalSeparator = ',' then
+    begin
+      RcLo:=StrToFloat(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_A_MAX', '0,80'));     { EXAMPLE: 80% }
+      RcHi:=StrToFloat(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_A_MAX', '0,80')) +    { EXAMPLE: 95% }
+            StrToFloat(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_B_MAX', '0,15'));
+    end;
+    if FormatSettings.DecimalSeparator = '.' then
+    begin
+      RcLo:=StrToFloat(StringReplace(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_A_MAX', '0,80'), ',', '.', [rfReplaceAll]));
+      RcHi:=StrToFloat(StringReplace(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_A_MAX', '0,80'), ',', '.', [rfReplaceAll])) +
+            StrToFloat(StringReplace(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_B_MAX', '0,15'), ',', '.', [rfReplaceAll]));
+    end;
+  finally
+    AppSettings.Free;
+  end;
   { ------------------------------------------------------------------------------------------------------------------------------------------------ POPULATE }
   { LOOP VIA CUID COLUMN IN AGE VIEW [29] }
   for exRow:=0 to avRow - 1 do
   begin
     DiscAmnt:=0;
-    { LOOP VIA CUID COLUMN IN OPEN ITEMS [38] }
+    { LOOP VIA CUID COLUMN IN OPEN ITEMS [37] }
     for iCNT:=0 to MainForm.sgOpenItems.RowCount - 1 do
     begin
       { COMPARE AND EXECUTE IF THE SAME }
-      if MainForm.sgOpenItems.Cells[38, iCNT] = ArrAgeView[exRow, 29] then
+      if MainForm.sgOpenItems.Cells[37, iCNT] = ArrAgeView[exRow, 29] then
       begin
-        { SUM ITEMS: NOT DUE, RANGE1..5 }
-        ArrAgeView[exRow, bucket(StrToInt(MainForm.sgOpenItems.Cells[34, iCNT]), bias)]:=FloatToStr(
-                                                                           StrToFloat(ArrAgeView[exRow, bucket(StrToInt(MainForm.sgOpenItems.Cells[34, iCNT]), bias)]) +
-                                                                           StrToFloat(MainForm.sgOpenItems.Cells[6, iCNT])
+        { SUM ITEMS: NOT DUE, RANGE1..6 }
+        ArrAgeView[exRow, bucket(StrToInt(MainForm.sgOpenItems.Cells[33, iCNT]), bias)]:=FloatToStr(
+                                                                           StrToFloat(ArrAgeView[exRow, bucket(StrToInt(MainForm.sgOpenItems.Cells[33, iCNT]), bias)]) +
+                                                                           StrToFloat(MainForm.sgOpenItems.Cells[5, iCNT])
                                                                            );
-        { SUM ITEMS: DISCOUNTED AMOUNT [35] | TECHNICAL VARIABLE }
-        DiscAmnt:=DiscAmnt + StrToFloat(MainForm.sgOpenItems.Cells[35, iCNT]);
+        { SUM ITEMS: DISCOUNTED AMOUNT [34] | TECHNICAL VARIABLE }
+        DiscAmnt:=DiscAmnt + StrToFloat(MainForm.sgOpenItems.Cells[34, iCNT]);
       end;
     end;
     { CALCULATE TOTAL AMOUNT [14] }
@@ -603,24 +604,6 @@ begin
       else
         ArrAgeView[exRow, 27]:='0';
   end;
-
-  { --------------------------------------------------------------------------------------------------------------------------------------- RISK CLASS BOUNDS }
-  if FormatSettings.DecimalSeparator = ',' then
-  begin
-    RcLo:=StrToFloat(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_A_MAX', '0,80'));     { EXAMPLE: 80% }
-    RcHi:=StrToFloat(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_A_MAX', '0,80')) +    { EXAMPLE: 95% }
-          StrToFloat(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_B_MAX', '0,15'));
-  end;
-  if FormatSettings.DecimalSeparator = '.' then
-  begin
-    RcLo:=StrToFloat(StringReplace(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_A_MAX', '0,80'), ',', '.', [rfReplaceAll]));
-    RcHi:=StrToFloat(StringReplace(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_A_MAX', '0,80'), ',', '.', [rfReplaceAll])) +
-          StrToFloat(StringReplace(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_B_MAX', '0,15'), ',', '.', [rfReplaceAll]));
-  end;
-
-  { DISPOSE SETTINGS OBJECT }
-  FreeAndNil(AppSettings);
-
   { --------------------------------------------------------------------------------------------------------------------------------- RISK CLASS CALCULATIONS }
   SetLength(MyWallet, avRow);
   SetLength(MyList,   avRow);
@@ -645,14 +628,12 @@ begin
     { ASSIGN RISK CLASS 'C' }
     if Count > RcHi then    ArrAgeView[MyList[iCNT], 26]:='C';
   end;
-
   { --------------------------------------------------------------------------------------------------------------------------------------- DECIMAL SEPARATOR }
   if FormatSettings.DecimalSeparator = ',' then
     for exRow:=0 to avRow - 1 do
       for jCNT:=0 to high(rfCol) do
         { REPLACE ',' TO '.' FOR ALL VALUES [6..14] AND [25..26] }
         ArrAgeView[exRow, rfCol[jCNT]]:=StringReplace(ArrAgeView[exRow, rfCol[jCNT]], ',', '.', [rfReplaceAll]);
-
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------- TRANSFER 'AGEVIEW' TO SQL SERVER }
@@ -687,34 +668,6 @@ begin
     MSSQL.Free;
     LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(idThd) + ']: Age View transferred to Microsoft SQL Server. Rows affected: ' + IntToStr(High(ArrAgeView)) + '.');
   end;
-end;
-
-{ --------------------------------------------------------------------------------------------------------------- UAC | RETURN SPECIFIC 'COCOE' FROM THE LIST }
-function TAgeView.GetCoCode(ListPos: integer; CoPos: integer; Mode: integer): string;
-{ WARNING! GROUP ID FORMAT: SERIES OF 4 GROUPS OF 5 DIGITS, I.E.: '020470034000043' MUST BE READ AS FOLLOWS: }
-{   1. 1ST CO CODE: 02047 (2047)                                                                             }
-{   2. 2ND CO CODE: 00340 (340)                                                                              }
-{   3. 3RD CO CODE: 00043 (43)                                                                               }
-{   4. 4TH CO CODE: 00000 (0)                                                                                }
-{ PARAMETERS:                                                                                                }
-{   1. 'LISTPOS' = POSITION OF THE GROUP HOLING 'COCODES'                                                    }
-{   2. 'COPOS'   = NUMBER OF THE 'COCODE' TO BE RETURNED                                                     }
-{   3. 'MODE'    = 0 (COCODE) OR 1 (GROUP NAME) OR 2 (GROUP ID)                                              }
-begin
-  { VALIDATE INPUT DATA }
-  if ( ListPos > High(MainForm.FGroupList) ) or (CoPos > 4) then Exit;
-  { EXTRACT | 'COCODE' FROM GROUP ID }
-  if Mode = 0 then
-  begin
-    if CoPos = 1 then Result:=IntToStr(StrToInt(MidStr(MainForm.FGroupList[ListPos, Mode], 1,  5)));
-    if CoPos = 2 then Result:=IntToStr(StrToInt(MidStr(MainForm.FGroupList[ListPos, Mode], 6,  5)));
-    if CoPos = 3 then Result:=IntToStr(StrToInt(MidStr(MainForm.FGroupList[ListPos, Mode], 11, 5)));
-    if CoPos = 4 then Result:=IntToStr(StrToInt(MidStr(MainForm.FGroupList[ListPos, Mode], 16, 5)));
-  end;
-  { EXTRACT | GROUP NAME }
-  if Mode = 1 then Result:=MainForm.FGroupList[ListPos, Mode];
-  { EXTRACT | FULL GROUP ID }
-  if Mode = 2 then Result:=MainForm.FGroupList[ListPos, 0];
 end;
 
 end.

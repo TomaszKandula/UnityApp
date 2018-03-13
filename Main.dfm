@@ -1191,7 +1191,7 @@ object MainForm: TMainForm
     Margins.Top = 10
     Margins.Right = 5
     Margins.Bottom = 0
-    ActivePage = TabSheet1
+    ActivePage = TabSheet2
     Align = alClient
     DoubleBuffered = True
     Font.Charset = DEFAULT_CHARSET
@@ -3327,7 +3327,7 @@ object MainForm: TMainForm
             OnSelectCell = DetailsGridSelectCell
           end
           object PanelGroupName: TPanel
-            Left = 143
+            Left = 144
             Top = 25
             Width = 321
             Height = 88
@@ -3337,8 +3337,8 @@ object MainForm: TMainForm
             TabOrder = 0
             Visible = False
             object btnMakeGroupAge: TSpeedButton
-              Left = 12
-              Top = 57
+              Left = 233
+              Top = 58
               Width = 73
               Height = 25
               Cursor = crHandPoint
@@ -3346,8 +3346,8 @@ object MainForm: TMainForm
               OnClick = btnMakeGroupAgeClick
             end
             object EditGroupName: TLabeledEdit
-              Left = 12
-              Top = 24
+              Left = 14
+              Top = 17
               Width = 133
               Height = 21
               Color = clCream
@@ -3360,8 +3360,8 @@ object MainForm: TMainForm
               OnKeyPress = EditGroupNameKeyPress
             end
             object cbDump: TCheckBox
-              Left = 201
-              Top = 24
+              Left = 202
+              Top = 16
               Width = 104
               Height = 17
               Cursor = crHandPoint
@@ -3369,6 +3369,20 @@ object MainForm: TMainForm
               DoubleBuffered = False
               ParentDoubleBuffered = False
               TabOrder = 1
+            end
+            object EditGroupID: TLabeledEdit
+              Left = 14
+              Top = 60
+              Width = 167
+              Height = 21
+              Color = clCream
+              DoubleBuffered = False
+              EditLabel.Width = 76
+              EditLabel.Height = 13
+              EditLabel.Caption = 'Enter Group ID:'
+              ParentDoubleBuffered = False
+              TabOrder = 2
+              OnKeyPress = EditGroupNameKeyPress
             end
           end
         end

@@ -419,6 +419,7 @@ type                                                            (* GUI | MAIN TH
     WebContainer: TPanel;
     DetailsGrid: TStringGrid;
     btnLoadAgeView: TSpeedButton;
+    EditGroupID: TLabeledEdit;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -594,6 +595,7 @@ type                                                            (* GUI | MAIN TH
     var FEventLogPath       :  string;
     var FDbConnect          :  TADOConnection;
     var FGroupList          :  TLists;
+    var GroupIdSel          :  string;
     var GroupNmSel          :  string;
     var AgeDateSel          :  string;
 
@@ -1789,13 +1791,20 @@ begin
 
   if (GroupListBox.Text <> '') and (GroupListDates.Text <> '') then
   begin
-    GroupNmSel:=FGroupList[GroupListBox.ItemIndex, 0];
+    GroupIdSel:=FGroupList[GroupListBox.ItemIndex, 0];
+    GroupNmSel:=FGroupList[GroupListBox.ItemIndex, 1];
     AgeDateSel:=GroupListDates.Text;
     sgAgeView.Enabled:=True;
     Transactions:=TTransactions.Create(FDbConnect);
     try
       OpenItemsUpdate:=Transactions.GetDateTime(gdDateTime);
-      TTReadAgeView.Create(thCallOpenItems);
+      if OpenItemsUpdate = '' then
+      begin
+        MsgCall(2, 'Cannot find open items in database. Please contact IT support.');
+        TTReadAgeView.Create(thNullParameter);
+      end
+        else
+          TTReadAgeView.Create(thCallOpenItems);
     finally
       Transactions.Free;
     end;
@@ -3313,7 +3322,8 @@ begin
   begin
     { REMEMBER USER'S CHOICE }
     { AUTOMATION WIIL FOLLOW }
-    GroupNmSel:=FGroupList[GroupListBox.ItemIndex, 0];
+    GroupIdSel:=FGroupList[GroupListBox.ItemIndex, 0];
+    GroupNmSel:=FGroupList[GroupListBox.ItemIndex, 1];
     AgeDateSel:=GroupListDates.Text;
     { LOAD AGE VIEW FOR SELECTED GROUP }
     TTReadAgeView.Create(thCallOpenItems);
@@ -3362,12 +3372,12 @@ end;
 { -------------------------------------------------------------------------------------------------------------------------------------- ACTIONS | MAKE GROUP }
 procedure TMainForm.btnMakeGroupAgeClick(Sender: TObject);
 begin
-  if EditGroupName.Text <> '' then
+  if (EditGroupName.Text <> '') and (EditGroupID.Text <> '') then
   begin
     { START THREAD WITH NO PARAMETERS PASSED TO AN OBJECT }
-    TTMakeAgeView.Create(False);
     PanelGroupName.Visible:=False;
-    ReloadCover.Visible:=False;
+    ReloadCover.Visible   :=False;
+    TTMakeAgeView.Create;
   end
     else
       MsgCall(2, 'Please enter group name and try again.' + CRLF + 'If you will use existing one, then it will be overwritten.');
