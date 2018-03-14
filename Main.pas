@@ -616,6 +616,7 @@ type                                                            (* GUI | MAIN TH
     function   MsgCall(WndType: integer; WndText: string): integer;
     procedure  LockSettingsPanel;
     function   ConvertName(CoNumber: string; Prefix: string; mode: integer): string;
+    procedure  SwitchTimers(state: integer);
 
   protected
 
@@ -993,10 +994,8 @@ end;
 { --------------------------------------------------------------------------------------------------------------- DELETE AND ESCAPE BEHAVIOUR FOR STRING GRID }
 procedure TStringGrid.DelEsc(mode: integer; pCol, pRow: integer);
 begin
-  { MODE = 0; ESCAPE, QUIT EDIT MODE }
-  { MODE = 1; DEL, DELETE CELL VALUE }
-  if mode = 0 then EditorMode:=False;
-  if mode = 1 then Cells[pCol, pRow]:='';
+  if mode = adESC then EditorMode:=False;
+  if mode = adDEL then Cells[pCol, pRow]:='';
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------- CLEAR ALL CONTENT OF STRING GRID }
@@ -1639,6 +1638,32 @@ begin
   end;
 end;
 
+{ --------------------------------------------------------------------------------------------------------------------------------- TURN ON OR OFF ALL TIMERS }
+
+(* TURN OFF ALL TIMERS DURING UPDATING CYCLE OF MAKING NEW AGE VIEW BASED ON FRESH DOWNLOAD OF OPEN ITEMS *)
+
+procedure TMainForm.SwitchTimers(state: Integer);
+begin
+  { ALL ON }
+  if state = tmEnabled then
+  begin
+    EventLogTimer.Enabled    :=True;
+    InvoiceScanTimer.Enabled :=True;
+    UpdaterTimer.Enabled     :=True;
+    OILoader.Enabled         :=True;
+    InetTimer.Enabled        :=True;
+  end;
+  { ALL OFF }
+  if state = tmDisabled then
+  begin
+    EventLogTimer.Enabled    :=False;
+    InvoiceScanTimer.Enabled :=False;
+    UpdaterTimer.Enabled     :=False;
+    OILoader.Enabled         :=False;
+    InetTimer.Enabled        :=False;
+  end;
+end;
+
 { ################################################################## ! EVENTS ! ############################################################################# }
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------- ON CREATE }
@@ -1892,12 +1917,10 @@ begin
   { DISPOSE OBJECTS }
   FreeAndNil(AppSettings);
 
-(*
   { START }
   EventLogTimer.Enabled    :=True;
   InvoiceScanTimer.Enabled :=True;
   UpdaterTimer.Enabled     :=True;
-*)
   OILoader.Enabled         :=True;
 
   { TIME AND DATE ON STATUS BAR }
@@ -2800,7 +2823,7 @@ end;
 { ----------------------------------------------------------------------------------------------------------------------------------- OPEN ITEMS | MAKE GROUP }
 procedure TMainForm.EditGroupNameKeyPress(Sender: TObject; var Key: Char);
 begin
-  if (not (CharInSet(Key, ['A'..'Z', '0'..'9', '-', #8]))) then Key:=#0;
+  if (not (CharInSet(Key, ['A'..'Z', 'a'..'z', '0'..'9', '-', #8]))) then Key:=#0;
 end;
 
 { -------------------------------------------------------------- ! COPY PASTE CUT ! ------------------------------------------------------------------------- }
@@ -2809,42 +2832,42 @@ end;
 
 procedure TMainForm.sgCoCodesKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if (Key = 67) and (Shift = [ssCtrl]) then sgCoCodes.CopyCutPaste(1);
+  if (Key = 67) and (Shift = [ssCtrl]) then sgCoCodes.CopyCutPaste(adCopy);
 end;
 
 procedure TMainForm.sgPaidInfoKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if (Key = 67) and (Shift = [ssCtrl]) then sgPaidInfo.CopyCutPaste(1);
+  if (Key = 67) and (Shift = [ssCtrl]) then sgPaidInfo.CopyCutPaste(adCopy);
 end;
 
 procedure TMainForm.sgPmtTermsKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if (Key = 67) and (Shift = [ssCtrl]) then sgPmtTerms.CopyCutPaste(1);
+  if (Key = 67) and (Shift = [ssCtrl]) then sgPmtTerms.CopyCutPaste(adCopy);
 end;
 
 procedure TMainForm.sgPersonKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if (Key = 67) and (Shift = [ssCtrl]) then sgPerson.CopyCutPaste(1);
+  if (Key = 67) and (Shift = [ssCtrl]) then sgPerson.CopyCutPaste(adCopy);
 end;
 
 procedure TMainForm.sgGroup3KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if (Key = 67) and (Shift = [ssCtrl]) then sgGroup3.CopyCutPaste(1);
+  if (Key = 67) and (Shift = [ssCtrl]) then sgGroup3.CopyCutPaste(adCopy);
 end;
 
 procedure TMainForm.sgInvoiceTrackerKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if (Key = 67) and (Shift = [ssCtrl]) then sgInvoiceTracker.CopyCutPaste(1);
+  if (Key = 67) and (Shift = [ssCtrl]) then sgInvoiceTracker.CopyCutPaste(adCopy);
 end;
 
 procedure TMainForm.sgOpenItemsKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if (Key = 67) and (Shift = [ssCtrl]) then sgOpenItems.CopyCutPaste(1);
+  if (Key = 67) and (Shift = [ssCtrl]) then sgOpenItems.CopyCutPaste(adCopy);
 end;
 
 procedure TMainForm.sgAgeViewKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if (Key = 67) and (Shift = [ssCtrl]) then sgAgeView.CopyCutPaste(1);
+  if (Key = 67) and (Shift = [ssCtrl]) then sgAgeView.CopyCutPaste(adCopy);
 end;
 
 { --------------------------------------------------------------------------------------------------------------------- PASTE, CUT, COPY TO/FROM ADDRESS BOOK }
@@ -2856,15 +2879,10 @@ var
 begin
   { FIRST COLUMN ARE NOT EDITABLE }
   if (sgAddressBook.Col = 1) then Exit;
-  { PASTE | CTRL + V }
-  { COPY  | CTRL + C }
-  { CUT   | CTRL + X }
-  if (Key = 86) and (Shift = [ssCtrl]) then sgAddressBook.CopyCutPaste(0);
-  if (Key = 67) and (Shift = [ssCtrl]) then sgAddressBook.CopyCutPaste(1);
-  if (Key = 88) and (Shift = [ssCtrl]) then sgAddressBook.CopyCutPaste(2);
-  { ON DELETE }
+  if (Key = 86) and (Shift = [ssCtrl]) then sgAddressBook.CopyCutPaste(adPaste);
+  if (Key = 67) and (Shift = [ssCtrl]) then sgAddressBook.CopyCutPaste(adCopy);
+  if (Key = 88) and (Shift = [ssCtrl]) then sgAddressBook.CopyCutPaste(adCut);
   if Key = 46 then sgAddressBook.DelEsc(1, sgAddressBook.Col, sgAddressBook.Row);
-  { ON ESCAPE }
   if Key = 27 then
   begin
     sgAddressBook.DelEsc(0, sgAddressBook.Col, sgAddressBook.Row);
@@ -2907,19 +2925,14 @@ end;
 { -------------------------------------------------------------------------------------------------------------------------------------- UPDATE SECTION VALUE }
 procedure TMainForm.sgListSectionKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  { PASTE | CTRL + V }
-  { CUT   | CTRL + X }
   if Text50.Font.Style = [fsBold] then
   begin
-    if (Key = 86) and (Shift = [ssCtrl]) then sgListSection.CopyCutPaste(0);
-    if (Key = 88) and (Shift = [ssCtrl]) then sgListSection.CopyCutPaste(2);
+    if (Key = 86) and (Shift = [ssCtrl]) then sgListSection.CopyCutPaste(adPaste);
+    if (Key = 88) and (Shift = [ssCtrl]) then sgListSection.CopyCutPaste(adCut);
   end;
-  { COPY | CTRL + C }
-  if (Key = 67) and (Shift = [ssCtrl]) then sgListSection.CopyCutPaste(1);
-  { DELETE }
-  if (Key = 46) and (Text50.Font.Style = [fsBold]) then sgListSection.DelEsc(1, sgListSection.Col, sgListSection.Row);
-  { ESCAPE }
-  if Key = 27 then sgListSection.DelEsc(0, sgListSection.Col, sgListSection.Row);
+  if (Key = 67) and (Shift = [ssCtrl]) then sgListSection.CopyCutPaste(adCopy);
+  if (Key = 46) and (Text50.Font.Style = [fsBold]) then sgListSection.DelEsc(adDEL, sgListSection.Col, sgListSection.Row);
+  if Key = 27 then sgListSection.DelEsc(adESC, sgListSection.Col, sgListSection.Row);
 end;
 
 procedure TMainForm.sgListSectionKeyPress(Sender: TObject; var Key: Char);
@@ -2931,19 +2944,14 @@ end;
 { ------------------------------------------------------------------------------------------------------------------------------------------ UPDATE VALUE KEY }
 procedure TMainForm.sgListValueKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  { PASTE | CTRL + V }
-  { CUT   | CTRL + X }
   if Text50.Font.Style = [fsBold] then
   begin
-    if (Key = 86) and (Shift = [ssCtrl]) then sgListValue.CopyCutPaste(0);
-    if (Key = 88) and (Shift = [ssCtrl]) then sgListValue.CopyCutPaste(2);
+    if (Key = 86) and (Shift = [ssCtrl]) then sgListValue.CopyCutPaste(adPaste);
+    if (Key = 88) and (Shift = [ssCtrl]) then sgListValue.CopyCutPaste(adCut);
   end;
-  { COPY | CTRL + C }
-  if (Key = 67) and (Shift = [ssCtrl]) then sgListValue.CopyCutPaste(1);
-  { DELETE }
-  if (Key = 46) and (Text50.Font.Style = [fsBold]) then sgListValue.DelEsc(1, sgListValue.Col, sgListValue.Row);
-  { ESCAPE }
-  if Key = 27 then sgListValue.DelEsc(0, sgListValue.Col, sgListValue.Row);
+  if (Key = 67) and (Shift = [ssCtrl]) then sgListValue.CopyCutPaste(adCopy);
+  if (Key = 46) and (Text50.Font.Style = [fsBold]) then sgListValue.DelEsc(adDEL, sgListValue.Col, sgListValue.Row);
+  if Key = 27 then sgListValue.DelEsc(adESC, sgListValue.Col, sgListValue.Row);
 end;
 
 procedure TMainForm.sgListValueKeyPress(Sender: TObject; var Key: Char);
@@ -3127,7 +3135,6 @@ end;
 procedure TMainForm.btnReloadMouseLeave(Sender: TObject);
 begin
   { CHANGE CURSOR TO DEFAULT (ARROW) }
-  btnReload.Cursor:=crDefault;
   Text54L1.Font.Color:=clBlack;
   Text54L2.Font.Color:=clBlack;
 end;
@@ -3143,7 +3150,6 @@ end;
 procedure TMainForm.btnMakeGroupMouseLeave(Sender: TObject);
 begin
   { CHANGE CURSOR TO DEFAULT (ARROW) }
-  btnMakeGroup.Cursor:=crDefault;
   Text83L1.Font.Color:=clBlack;
   Text83L2.Font.Color:=clBlack;
 end;
@@ -3375,6 +3381,8 @@ begin
     GroupIdSel:=FGroupList[GroupListBox.ItemIndex, 0];
     GroupNmSel:=FGroupList[GroupListBox.ItemIndex, 1];
     AgeDateSel:=GroupListDates.Text;
+    { SWITCH OFF ALL TIMERS }
+    MainForm.SwitchTimers(tmDisabled);
     { LOAD AGE VIEW FOR SELECTED GROUP }
     TTReadAgeView.Create(thCallOpenItems);
   end

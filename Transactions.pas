@@ -248,9 +248,9 @@ begin
   for iCNT:=1 to DestGrid.RowCount - 1 do
   begin
     { GET PAYMENT STATUS }
-    TimeDiff:=StrToInt(DestGrid.Cells[33, iCNT]);
+    TimeDiff:=StrToIntDef(DestGrid.Cells[33, iCNT], 0);
     { GET ACTUAL INVOICE OPEN AMOUNT }
-    InvoiceAmt:=StrToFloat(DestGrid.Cells[5, iCNT]);
+    InvoiceAmt:=StrToFloatDef(DestGrid.Cells[5, iCNT], 0);
     { AGGREGATE INVOICE AMOUNT }
     MainForm.OSAmount:=MainForm.OSAmount + InvoiceAmt;
     { GET INTEREST RATE }
@@ -274,16 +274,16 @@ begin
     { DEPENDS ON INVOICE TYPE DEFINED IN THE GENERAL SETTINGS }
     if IsVoType(DestGrid.Cells[3, iCNT]) = True then inc(nInvoices);
     { ------------------------------------------------------------------------------------------------------------- COUNT ALL OVERDUE INVOICES AND ITS AMOUNT }
-    if (StrToInt(DestGrid.Cells[33, iCNT]) < 0) and (IsVoType(DestGrid.Cells[3, iCNT]) = True) then
+    if (StrToIntDef(DestGrid.Cells[33, iCNT], 0) < 0) and (IsVoType(DestGrid.Cells[3, iCNT]) = True) then
     begin
       inc(Overdue);
-      OverdueAmt:=OverdueAmt + StrToFloat(DestGrid.Cells[5, iCNT])
+      OverdueAmt:=OverdueAmt + StrToFloatDef(DestGrid.Cells[5, iCNT], 0)
     end;
     { ------------------------------------------------------------------------------------------------------------------------------ UNALLOCATED PAYMENTS }
     { WE TAKE INTO CONSIDERATION NEGATIVE AMOUNTS }
     { AND VOUCHER THAT INDICATE BANK POSTINGS     }
     if (StrToFloat(DestGrid.Cells[5, iCNT]) < 0) and (DestGrid.Cells[3, iCNT] = VoucherNumber) then
-      UNamt:=UNamt + StrToFloat(DestGrid.Cells[5, iCNT]);
+      UNamt:=UNamt + StrToFloatDef(DestGrid.Cells[5, iCNT], 0);
   end;
   { -------------------------------------------------------------------------------------------------------------------------------------------- UNINITIALIZE }
   DestGrid.SetColWidth(10, 20);

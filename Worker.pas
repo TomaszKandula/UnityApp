@@ -332,9 +332,9 @@ end;
 constructor TTMakeAgeView.Create(OpenAmount: double);
 begin
   inherited Create(False);
-  FLock :=TCriticalSection.Create;
+  FLock      :=TCriticalSection.Create;
   FOpenAmount:=OpenAmount;
-  FIDThd:=0;
+  FIDThd     :=0;
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------------- RELEASE }
@@ -390,6 +390,7 @@ begin
     THDMili:=StopWatch.ElapsedMilliseconds;
     THDSec:=THDMili / 1000;
     LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Age View thread has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
+    AgeView.Free;
     FLock.Release;
   end;
   { RELEASE THREAD WHEN DONE }
@@ -427,7 +428,7 @@ begin
       if StrToDateTime(MainForm.OpenItemsUpdate) < StrToDateTime(ReadDateTime) then
       begin
         { SWITCH OFF ALL TIMERS }
-
+        MainForm.SwitchTimers(tmDisabled);
         { REFRESH OPEN ITEMS AND MAKE NEW AGING VIEW }
         MainForm.OpenItemsUpdate:=ReadDateTime;
         TTReadOpenItems.Create(thCallMakeAge);
@@ -437,8 +438,8 @@ begin
         LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot execute "TTOpenItemsScanner". Error has been thrown: ' + E.Message);
     end;
   finally
-    FLock.Release;
     Transactions.Free;
+    FLock.Release;
   end;
   { RELEASE THREAD WHEN DONE }
   FreeOnTerminate:=True;
@@ -501,7 +502,7 @@ begin
     AgeView.Free;
     FLock.Release;
     { SWITCH ON ALL TIMERS }
-
+    MainForm.SwitchTimers(tmEnabled);
   end;
   { RELEASE THREAD WHEN DONE }
   FreeOnTerminate:=True;
@@ -553,11 +554,11 @@ begin
         LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(FIDThd) + ']: Cannot execute "TTReadOpenItems". Error has been thorwn: ' + E.Message);
     end;
   finally
-    OpenItems.Free;
     MainForm.ExecMessage(True, WM_GETINFO, 10, stReady);
     THDMili:=StopWatch.ElapsedMilliseconds;
     THDSec:=THDMili / 1000;
     LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(FIDThd) + ']: Open Items loading thread has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
+    OpenItems.Free;
     FLock.Release;
   end;
   { RELEASE THREAD WHEN DONE }

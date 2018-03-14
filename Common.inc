@@ -171,6 +171,8 @@ const
   adCopy        = 100;
   adPaste       = 101;
   adCut         = 102;
+  adESC         = 103;
+  adDEL         = 104;
 
   { RETURN TYPES FOR "GETDATETIME" }
 
@@ -214,6 +216,11 @@ const
 
   unUnassigned = 'Unassigned item.';
   unNA         = 'N/A';
+
+  { TIMERS ENUMS }
+
+  tmEnabled    = 1;
+  tmDisabled   = 0;
 
   { MICROSOFT EXCEL }
 

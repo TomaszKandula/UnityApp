@@ -104,14 +104,20 @@ begin
     ActiveConnection.IsolationLevel   :=ilCursorStability;  (* https://technet.microsoft.com/en-us/library/ms189122(v=sql.105).aspx                    *)
     { CONNECT TO GIVEN SERVER }
     try
+      { ALL OK }
       if Check = 0 then
       begin
+        (* DEBUG LINE *)
+        MainForm.DebugMsg('Can connect.');
         ActiveConnection.Connected       :=True;
         MainForm.InvoiceScanTimer.Enabled:=True;
         MainForm.OILoader.Enabled        :=True;
         SendMessage(MainForm.Handle, WM_GETINFO, 14, LPARAM(PCHAR('NULL')));
       end else
+      { CANNOT CONNECT }
       begin
+        (* DEBUG LINE *)
+        MainForm.DebugMsg('Cannot connect.');
         MainForm.InvoiceScanTimer.Enabled:=False;
         MainForm.OILoader.Enabled        :=False;
         SendMessage(MainForm.Handle, WM_GETINFO, 15, LPARAM(PCHAR('NULL')));
@@ -123,6 +129,8 @@ begin
     { CHECK SERVER CONNECTION ON REGULAR BASIS }
     if not MainForm.InetTimer.Enabled then
     begin
+      (* DEBUG LINE *)
+      MainForm.DebugMsg('INET Timer is enabled with interval ' + IntToStr(Interval) + 'ms.');
       MainForm.InetTimer.Interval:=Interval;
       MainForm.InetTimer.Enabled:=True;
     end;
@@ -163,7 +171,10 @@ begin
       end;
     end;
   finally
-    if ConCheck.Connected then ConCheck.Close;
+    if ConCheck.Connected then
+    begin
+      ConCheck.Close;
+    end;
   end;
 end;
 
