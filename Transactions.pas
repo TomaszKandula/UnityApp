@@ -23,17 +23,14 @@ type
   TTransactions = class(TDataTables)
   {$TYPEINFO ON}
   private
-    var POSAmount: double;
     var PIdThd:    integer;
   public
     var DestGrid:    TStringGrid;
     var SettingGrid: TStringGrid;
     property IdThd:    integer read PIdThd;
-    property OSAmount: double  read POSAmount;
   published
     function  GetDateTime(Return: integer): string;
     function  LoadToGrid: boolean;
-    function  ConvertName(CoNumber: string; Prefix: string; mode: integer): string;
     function  IsVoType(VoType: string): boolean;
     procedure ClearSummary;
     procedure UpdateSummary;
@@ -115,10 +112,10 @@ begin
   CmdType:=cmdText;
   StrSQL:=EXECUTE + QueryOpenItems                                + SPACE +
           QuotedStr(GetDateTime(gdDateOnly))                      + COMMA +
-          QuotedStr(ConvertName(SettingGrid.Cells[0, 0], 'F', 0)) + COMMA +
-          QuotedStr(ConvertName(SettingGrid.Cells[1, 0], 'F', 0)) + COMMA +
-          QuotedStr(ConvertName(SettingGrid.Cells[2, 0], 'F', 0)) + COMMA +
-          QuotedStr(ConvertName(SettingGrid.Cells[3, 0], 'F', 0)) + COMMA +
+          QuotedStr(MainForm.ConvertName(SettingGrid.Cells[0, 0], 'F', 0)) + COMMA +
+          QuotedStr(MainForm.ConvertName(SettingGrid.Cells[1, 0], 'F', 0)) + COMMA +
+          QuotedStr(MainForm.ConvertName(SettingGrid.Cells[2, 0], 'F', 0)) + COMMA +
+          QuotedStr(MainForm.ConvertName(SettingGrid.Cells[3, 0], 'F', 0)) + COMMA +
           QuotedStr(CutOff)                                       + COMMA +
           QuotedStr(Agents)                                       + COMMA +
           QuotedStr(INF4);
@@ -181,7 +178,6 @@ procedure TTransactions.UpdateSummary;
     Overdue         : integer;
     { AMOUNTS }
     OverdueAmt      : double;
-    OSamt           : double;
     UNamt           : double;
     { REFLECTS TIME VALUE OF MONEY: DISCOUNTED AMOUNT, DECREASE IN AMOUNT AND RECOVERY AMOUNT }
     cDiscountedAmt  : double;
@@ -201,14 +197,16 @@ procedure TTransactions.UpdateSummary;
 
   (* NESTED METHODS *)
 
+  { INITIALIZE ALL LOCAL VARIABLES }
   procedure VarInitialize;
   begin
-    nInvoices     :=0; Overdue     :=0; OverdueAmt  :=0; OSamt:=0;
-    cDiscountedAmt:=0; cDecreaseAmt:=0; cRecoveryAmt:=0; UNamt:=0;
+    nInvoices     :=0; Overdue     :=0; OverdueAmt  :=0; UNamt:=0;
+    cDiscountedAmt:=0; cDecreaseAmt:=0; cRecoveryAmt:=0;
     DiscountedAmt :=0; DecreaseAmt :=0; RecoveryAmt :=0;
     InterestRate  :=0; InvoiceAmt  :=0; TimeDiff    :=0;
   end;
 
+  { GET INTEREST RATE FOR GIVEN CO CODE }
   function GetInterestRate(CoCode: string): double;
   var
     iCNT: integer;
@@ -227,6 +225,7 @@ procedure TTransactions.UpdateSummary;
     end;
   end;
 
+  { GET VOUCHER NUMBER FROM SETTINGS }
   function GetVoucherNumber: string;
   var
     AppSettings: TSettings;
@@ -245,32 +244,22 @@ begin
   DestGrid.Freeze(True);
   VarInitialize;
   VoucherNumber:=GetVoucherNumber;
-
   { ------------------------------------------------------------------------------------------------------------------------------------------------- COMPUTE }
   for iCNT:=1 to DestGrid.RowCount - 1 do
   begin
     { GET PAYMENT STATUS }
     TimeDiff:=StrToInt(DestGrid.Cells[33, iCNT]);
-
     { GET ACTUAL INVOICE OPEN AMOUNT }
     InvoiceAmt:=StrToFloat(DestGrid.Cells[5, iCNT]);
-
+    { AGGREGATE INVOICE AMOUNT }
+    MainForm.OSAmount:=MainForm.OSAmount + InvoiceAmt;
     { GET INTEREST RATE }
     InterestRate:=GetInterestRate(DestGrid.Cells[1, iCNT]);
-
-    MainForm.DebugMsg('');
-
     { COMPUTE INVOICE DISCOUNTING }
     if (TimeDiff < 0) and (InterestRate > 0) and (InvoiceAmt > 0) and (IsVoType(DestGrid.Cells[3, iCNT]) = True) then
     begin
       { CALCULATE FOR GIVEN INVOICE }
-
-      MainForm.DebugMsg('');
-
       DiscountedAmt:=InvoiceAmt / ( 1 + ( (InterestRate / 365) * ABS(TimeDiff)) );
-
-      MainForm.DebugMsg('');
-
       DecreaseAmt  :=InvoiceAmt - DiscountedAmt;
       RecoveryAmt  :=InvoiceAmt + DecreaseAmt;
       { WRITE TO STRING GRID }
@@ -282,28 +271,22 @@ begin
       cDecreaseAmt  :=cDecreaseAmt   + DecreaseAmt;
       cRecoveryAmt  :=cRecoveryAmt   + RecoveryAmt;
     end;
-
     { DEPENDS ON INVOICE TYPE DEFINED IN THE GENERAL SETTINGS }
     if IsVoType(DestGrid.Cells[3, iCNT]) = True then inc(nInvoices);
-
     { ------------------------------------------------------------------------------------------------------------- COUNT ALL OVERDUE INVOICES AND ITS AMOUNT }
-    { CHECK DIFFERENCE BETWEEN CURRENT DATE AND VOUCHER DATE }
-    { VOUCHER TYPE TELLS IF WE HAVE INVOICE OR OTHER ITEM    }
-    { WE COUNT ONLY INVOICES                                 }
     if (StrToInt(DestGrid.Cells[33, iCNT]) < 0) and (IsVoType(DestGrid.Cells[3, iCNT]) = True) then
     begin
       inc(Overdue);
       OverdueAmt:=OverdueAmt + StrToFloat(DestGrid.Cells[5, iCNT])
     end;
-
     { ------------------------------------------------------------------------------------------------------------------------------ UNALLOCATED PAYMENTS }
     { WE TAKE INTO CONSIDERATION NEGATIVE AMOUNTS }
     { AND VOUCHER THAT INDICATE BANK POSTINGS     }
-    if (StrToInt(DestGrid.Cells[5, iCNT]) < 0) and (DestGrid.Cells[3, iCNT] = VoucherNumber) then
+    if (StrToFloat(DestGrid.Cells[5, iCNT]) < 0) and (DestGrid.Cells[3, iCNT] = VoucherNumber) then
       UNamt:=UNamt + StrToFloat(DestGrid.Cells[5, iCNT]);
-
   end;
   { -------------------------------------------------------------------------------------------------------------------------------------------- UNINITIALIZE }
+  DestGrid.SetColWidth(10, 20);
   DestGrid.Freeze(False);
   { DISPLAY }
   MainForm.tcOpenItems.Caption     :=FormatFloat('### ###',  DestGrid.RowCount - 1);
@@ -313,56 +296,9 @@ begin
   MainForm.tcDisAmt.Caption        :=FormatFloat('#,##0.00', cDiscountedAmt);
   MainForm.tcDecAmt.Caption        :=FormatFloat('#,##0.00', cDecreaseAmt);
   MainForm.tcRecovery.Caption      :=FormatFloat('#,##0.00', cRecoveryAmt);
-  MainForm.tcOSAmt.Caption         :=FormatFloat('#,##0.00', OSamt);
+  MainForm.tcOSAmt.Caption         :=FormatFloat('#,##0.00', MainForm.OSAmount);
   MainForm.tcOvdAmt.Caption        :=FormatFloat('#,##0.00', OverdueAmt);
   MainForm.tcUNAmt.Caption         :=FormatFloat('#,##0.00', abs(UNamt));
-end;
-
-{ ----------------------------------------------------------------------------------------------------------------------------------- CO CODE NAME CONVERTION }
-function TTransactions.ConvertName(CoNumber: string; Prefix: string; mode: integer): string;
-var
-  iCNT:  integer;
-begin
-  { INITIALIZE }
-  Result:= '';
-
-  (* USED ONLY FOR OPEN ITEMS AND AGING VIEW  *)
-
-  { ALLOW TO CONVERT '2020' TO 'F2020', ETC. }
-  if mode = 0 then
-  begin
-    if Length(CoNumber) = 4 then Result:=Prefix + CoNumber;
-    if Length(CoNumber) = 3 then Result:=Prefix + '0'  + CoNumber;
-    if Length(CoNumber) = 2 then Result:=Prefix + '00' + CoNumber;
-  end;
-
-  (* USED ONLY TO BUILD GROUP_ID *)
-
-  { CONVERTS FROM     }
-  {  1. 2020 TO 02020 }
-  {  2. 340  TO 00340 }
-  {  3. 43   TO 00043 }
-  {  4. 0    TO 00000 }
-  if mode = 1 then
-  begin
-    if Length(CoNumber) = 4 then Result:='0'   + CoNumber;
-    if Length(CoNumber) = 3 then Result:='00'  + CoNumber;
-    if Length(CoNumber) = 2 then Result:='000' + CoNumber;
-    if Length(CoNumber) = 1 then Result:='00000';
-  end;
-
-  { CONVERTS FROM 02020 TO 2020 }
-  if mode = 2 then
-  begin
-    for iCNT:= 1 to Length(CoNumber) do
-    begin
-      if CoNumber[iCNT] <> '0' then
-      begin
-        Result:=Copy(CoNumber, iCNT, MaxInt);
-        Exit;
-      end;
-    end;
-  end;
 end;
 
 end.

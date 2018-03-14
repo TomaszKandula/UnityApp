@@ -16,10 +16,10 @@ unit AgeView;
 interface
 
 uses
-  Main, Model, ADODB, StrUtils, SysUtils, Variants, Messages, Windows;
+  Main, Model, ADODB, StrUtils, SysUtils, Variants, Messages, Windows, Classes;
 
 { ------------------------------------------------------------- ! AGE VIEW CLASS ! -------------------------------------------------------------------------- }
-type                                                   (* RUN EITHER IN WORKER OR MAIN THREAD *)
+type
   TAgeView = class(TDataTables)
   {$TYPEINFO ON}
   public
@@ -50,18 +50,18 @@ type                                                   (* RUN EITHER IN WORKER O
     var PGroupID   : string;
     var PAgeDate   : string;
   published
-    property    GroupID: string read PGroupID write PGroupID;
-    property    AgeDate: string read PAgeDate write PAgeDate;
-    procedure   Read(var Grid: TStringGrid);
-    procedure   Details(var Grid: TStringGrid);
-    function    GetData(Grid: TStringGrid; Source: TStringGrid; WhichCol: string): string;
-    procedure   ClearSummary;
-    procedure   UpdateSummary;
-    procedure   AgeViewMode(var Grid: TStringGrid; ModeBySection: string);
-    procedure   Make(OSAmount: double);
-
-    procedure   Write(DestTable: string; idThd: integer);
-
+    property   GroupID: string read PGroupID write PGroupID;
+    property   AgeDate: string read PAgeDate write PAgeDate;
+    procedure  Read(var Grid: TStringGrid);
+    procedure  Details(var Grid: TStringGrid);
+    function   GetData(Grid: TStringGrid; Source: TStringGrid; WhichCol: string): string;
+    procedure  ClearSummary;
+    procedure  UpdateSummary;
+    procedure  AgeViewMode(var Grid: TStringGrid; ModeBySection: string);
+    procedure  QuickSortExt(var A: array of double; var L: array of integer; iLo, iHi: integer; ASC: boolean);
+    procedure  Make(OSAmount: double);
+    procedure  Write(DestTable: string; SourceArray: TLists);
+    procedure  ExportToCSV(FileName: string; SourceArray: TLists);
   end;
 
 implementation
@@ -131,6 +131,8 @@ var
   iCNT:  integer;
   jCNT:  integer;
 begin
+  { CLEAR GRID }
+  Grid.ClearAll(4, 0, 0, False);
   { EXECUTE STORED PROCEDURE }
   CmdType:=cmdText;
   StrSQL :=EXECUTE + AgeViewDetails + SPACE + QuotedStr(GroupID) + COMMA + QuotedStr(AgeDate);
@@ -278,18 +280,65 @@ begin
   end;
 end;
 
+{ QUICK SORT }
+procedure TAgeView.QuickSortExt(var A: array of double; var L: array of integer; iLo, iHi: integer; ASC: boolean);
+{ "A" VARIABLE HOLDS NUMERICAL DATA TO BE SORTED. "L" VARIABLE IS "ASSOCIATED" COLUMN WITH ORIGINAL LIST POSITION. THE SECOND ASSOCIATED COLUMN FOLLOWS }
+{ "A" COLUMN, BUT IT IS NOT SORTED. IT ALLOWS TO ASSIGN SORTED VALUES BACK TO ORIGINAL LIST POSITION AFTER COMPUTATION IS DONE. THIS IS TO BE USED WHEN }
+{ SORTING IS NECESSARY BEFORE APPLAYING COMPUTATION AND AFTER WHICH WE MUST PUT VALUES BACK TO ITS ORIGINAL POSITIONS.                                  }
+var
+  Lo:     integer;
+  Hi:     integer;
+  Pivot:  double;
+  T1:     double;   { FOR SORTING COLUMN    }
+  T2:     integer;  { FOR ASSOCIATED COLUMN }
+begin
+   Lo:=iLo;
+   Hi:=iHi;
+   Pivot:=A[(Lo + Hi) div 2];
+   repeat
+     { ASCENDING }
+     if ASC then
+     begin
+       while A[Lo] < Pivot do Inc(Lo);
+       while A[Hi] > Pivot do Dec(Hi);
+     end;
+     { DESCENDING }
+     if not ASC then
+     begin
+       while A[Lo] > Pivot do Inc(Lo);
+       while A[Hi] < Pivot do Dec(Hi);
+     end;
+     { MOVING POSITIONS }
+     if Lo <= Hi then
+     begin
+       T1:=A[Lo];
+       T2:=L[Lo];
+       { SORTING COLUMN }
+       A[Lo]:= A[Hi];
+       A[Hi]:= T1;
+       { ASSOCIATED COLUMN }
+       L[Lo]:= L[Hi];
+       L[Hi]:= T2;
+       { MOVE NEXT }
+       Inc(Lo);
+       Dec(Hi);
+     end;
+   until Lo > Hi;
+   if Hi > iLo then QuickSortExt(A, L, iLo, Hi, ASC);
+   if Lo < iHi then QuickSortExt(A, L, Lo, iHi, ASC);
+end;
+
 (* ********************************************************* ! PRE-PARE AGE VIEW ! ****************************************************************************
 
 NOTES:
 ------
 
-S - SOURCE TO BE MOVE 'AS IS'
 D - DESTINATION
 C - CALCULATED 'ON THE FLY'
 
 WARNING!
 
-IF NUMBERS ARE PROVIDED WITH NON-ENGLISH FORMAT '100000,00', THEN WE MUST REPLACE IT BY DOT DECIMAL SEPARATOR TO SENT SQL QUERY.
+IF NUMBERS ARE PROVIDED WITH NON-ENGLISH FORMAT '100000,00', THEN WE MUST REPLACE IT BY POINT DECIMAL SEPARATOR TO SAFELY SEND TO THE SQL SERVER.
 SUCH REPLACEMENT CAN BE OMITTED IF SOURCE IS ALREADY PRESENTED WITH DECIMAL POINT SEPARATOR.
 
 OPEN ITEMS OWNLOADED FROM SOURCE FILE | AGE VIEW MADE FROM OPEN ITEMS      | COLUMN     | WORKER ARRAY
@@ -429,54 +478,6 @@ begin
   ArrAgeView[WhatRow, rnCol[7]]:='0';  { OVERDUE }
 end;
 
-{ QUICK SORT }
-procedure QuickSortR(var A: array of double; var L: array of integer; iLo, iHi: integer; ASC: boolean);
-{ "A" VARIABLE HOLDS NUMERICAL DATA TO BE SORTED. "L" VARIABLE IS "ASSOCIATED" COLUMN WITH ORIGINAL LIST POSITION. THE SECOND ASSOCIATED COLUMN FOLLOWS }
-{ "A" COLUMN, BUT IT IS NOT SORTED. IT ALLOWS TO ASSIGN SORTED VALUES BACK TO ORIGINAL LIST POSITION AFTER COMPUTATION IS DONE. THIS IS TO BE USED WHEN }
-{ SORTING IS NECESSARY BEFORE APPLAYING COMPUTATION AND AFTER WHICH WE MUST PUT VALUES BACK TO ITS ORIGINAL POSITIONS.                                  }
-var
-  Lo:     integer;
-  Hi:     integer;
-  Pivot:  double;
-  T1:     double;   { FOR SORTING COLUMN    }
-  T2:     integer;  { FOR ASSOCIATED COLUMN }
-begin
-   Lo:=iLo;
-   Hi:=iHi;
-   Pivot:=A[(Lo + Hi) div 2];
-   repeat
-     { ASCENDING }
-     if ASC then
-     begin
-       while A[Lo] < Pivot do Inc(Lo);
-       while A[Hi] > Pivot do Dec(Hi);
-     end;
-     { DESCENDING }
-     if not ASC then
-     begin
-       while A[Lo] > Pivot do Inc(Lo);
-       while A[Hi] < Pivot do Dec(Hi);
-     end;
-     { MOVING POSITIONS }
-     if Lo <= Hi then
-     begin
-       T1:=A[Lo];
-       T2:=L[Lo];
-       { SORTING COLUMN }
-       A[Lo]:= A[Hi];
-       A[Hi]:= T1;
-       { ASSOCIATED COLUMN }
-       L[Lo]:= L[Hi];
-       L[Hi]:= T2;
-       { MOVE NEXT }
-       Inc(Lo);
-       Dec(Hi);
-     end;
-   until Lo > Hi;
-   if Hi > iLo then QuickSortR(A, L, iLo, Hi, ASC);
-   if Lo < iHi then QuickSortR(A, L, Lo, iHi, ASC);
-end;
-
 (* MAIN BLOCK *)
 
 begin
@@ -514,10 +515,10 @@ begin
       { REMOVE FROM CO CODE "F" PREFIX }
       ArrAgeView[avRow, 20]:=IntToStr((StrToInt(StringReplace(ArrAgeView[avRow, 20], 'F', '0', [rfReplaceAll]))));
       { LEDGER ISO }
-      if MainForm.DetailsGrid.Cells[0, 0] = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.DetailsGrid.Cells[0, 0];
-      if MainForm.DetailsGrid.Cells[1, 0] = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.DetailsGrid.Cells[1, 0];
-      if MainForm.DetailsGrid.Cells[2, 0] = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.DetailsGrid.Cells[2, 0];
-      if MainForm.DetailsGrid.Cells[3, 0] = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.DetailsGrid.Cells[3, 0];
+      if MainForm.DetailsGrid.Cells[0, 0] = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.DetailsGrid.Cells[0, 1];
+      if MainForm.DetailsGrid.Cells[1, 0] = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.DetailsGrid.Cells[1, 1];
+      if MainForm.DetailsGrid.Cells[2, 0] = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.DetailsGrid.Cells[2, 1];
+      if MainForm.DetailsGrid.Cells[3, 0] = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.DetailsGrid.Cells[3, 1];
       { -------------------------------------------------------------------------------------------------------------------------------------------- COUNTERS }
       { MOVE COUNTER }
       inc(avRow);
@@ -615,7 +616,7 @@ begin
     MyWallet[iCNT]:=StrToFloat(ArrAgeView[iCNT, 28]); { WALLET SHARE }
   end;
   { SORT DESCENDING VIA WALLET SHARTE }
-  QuickSortR(MyWallet, MyList, Low(MyWallet), High(MyWallet), False);
+  QuickSortExt(MyWallet, MyList, Low(MyWallet), High(MyWallet), False);
   { CALCULATE AND ASSIGN }
   for iCNT:=0 to avRow - 1 do
   begin
@@ -637,36 +638,91 @@ begin
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------- TRANSFER 'AGEVIEW' TO SQL SERVER }
-procedure TAgeView.Write(DestTable: string; idThd: integer);  (* ASYNC *)  //refactor!!
-const
-  AllColumns = 'GROUP_ID,AGE_DATE,SNAPSHOT_DT,CUSTOMER_NAME,CUSTOMER_NUMBER,COUNTRY_CODE,NOT_DUE,RANGE1,RANGE2,RANGE3,RANGE4,RANGE5,RANGE6,OVERDUE,TOTAL,'+
-               'CREDIT_LIMIT,EXCEEDED_AMOUNT,PAYMENT_TERMS,AGENT,DIVISION,CO_CODE,LEDGER_ISO,INF4,INF7,PERSON,GROUP3,RISK_CLASS,QUALITY_IDX,WALLET_SHARE,CUID';
+procedure TAgeView.Write(DestTable: string; SourceArray: TLists);
 var
-  MSSQL:        TMSSQL;
   Transaction:  string;
   DeleteData:   string;
 begin
-  { INITIALIZE }
-  MSSQL:=TMSSQL.Create(MainForm.FDbConnect);
-  DeleteData:='DELETE FROM ' + DestTable + ' WHERE GROUP_ID = ' + QuotedStr(ArrAgeView[0, 0]) + ' AND AGE_DATE = ' + QuotedStr(LeftStr(ArrAgeView[0, 1], 10));
+  { ASSIGN COLUMNS | ADD ALL BUT ID COLUMN }
+  Columns.Add(TSnapshots.GROUP_ID);
+  Columns.Add(TSnapshots.AGE_DATE);
+  Columns.Add(TSnapshots.SNAPSHOT_DT);
+  Columns.Add(TSnapshots.CUSTOMER_NAME);
+  Columns.Add(TSnapshots.CUSTOMER_NUMBER);
+  Columns.Add(TSnapshots.COUNTRY_CODE);
+  Columns.Add(TSnapshots.NOT_DUE);
+  Columns.Add(TSnapshots.RANGE1);
+  Columns.Add(TSnapshots.RANGE2);
+  Columns.Add(TSnapshots.RANGE3);
+  Columns.Add(TSnapshots.RANGE4);
+  Columns.Add(TSnapshots.RANGE5);
+  Columns.Add(TSnapshots.RANGE6);
+  Columns.Add(TSnapshots.OVERDUE);
+  Columns.Add(TSnapshots.TOTAL);
+  Columns.Add(TSnapshots.CREDIT_LIMIT);
+  Columns.Add(TSnapshots.EXCEEDED_AMOUNT);
+  Columns.Add(TSnapshots.PAYMENT_TERMS);
+  Columns.Add(TSnapshots.AGENT);
+  Columns.Add(TSnapshots.DIVISION);
+  Columns.Add(TSnapshots.CO_CODE);
+  Columns.Add(TSnapshots.LEDGER_ISO);
+  Columns.Add(TSnapshots.INF4);
+  Columns.Add(TSnapshots.INF7);
+  Columns.Add(TSnapshots.PERSON);
+  Columns.Add(TSnapshots.GROUP3);
+  Columns.Add(TSnapshots.RISK_CLASS);
+  Columns.Add(TSnapshots.QUALITY_IDX);
+  Columns.Add(TSnapshots.WALLET_SHARE);
+  Columns.Add(TSnapshots.CUID);
+  { DELETE STATEMENT | REMOVE OLD DATA }
+  DeleteData:=DELETE_FROM +
+                DestTable +
+              WHERE +
+                TSnapshots.GROUP_ID +
+              EQUAL +
+                QuotedStr(SourceArray[0, 0]) +
+              _AND +
+                TSnapshots.AGE_DATE +
+              EQUAL + QuotedStr(LeftStr(SourceArray[0, 1], 10));
+  { INSERT STATEMENT | INSERT NEW DATA }
+  Transaction:=ArrayToSql(SourceArray, DestTable, ColumnsToList);
+  Transaction:='BEGIN TRANSACTION'                                              + CRLF +
+               'SELECT TOP 1 * FROM ' + DestTable + ' WITH (TABLOCK, HOLDLOCK)' + CRLF +
+               DeleteData                                                       + CRLF +
+               Transaction                                                      + CRLF +
+               'COMMIT TRANSACTION';
+  { EXECUTE }
+  StrSQL:=Transaction;
   try
-    { BUILD AND EXECUTE }
-    Transaction:=MSSQL.ArrayToSql(ArrAgeView, DestTable, AllColumns);
-    Transaction:='BEGIN TRANSACTION'                                              + #13#10 +
-                 'SELECT TOP 1 * FROM ' + DestTable + ' WITH (TABLOCK, HOLDLOCK)' + #13#10 +
-                 DeleteData                                                       + #13#10 +
-                 Transaction                                                      + #13#10 +
-                 'COMMIT TRANSACTION';
-    { ASSIGN AND EXECUTE }
-    MSSQL.StrSQL:=Transaction;
-    try
-      MSSQL.ExecSQL;
-    except
-      LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(idThd) + ']: Cannot send to server. Error has been thrown: ' + IntToStr(High(ArrAgeView)) + '.');
+    MainForm.ExecMessage(False, WM_GETINFO, 10, stSQLupdate);
+    ExecSQL;
+  except
+    on E: Exception do
+      LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(idThd) + ']: Cannot send to server. Error has been thrown: ' + E.Message);
+  end;
+  LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(idThd) + ']: Age View transferred to Microsoft SQL Server. Rows affected: ' + IntToStr(High(SourceArray)) + '.');
+end;
+
+{ ------------------------------------------------------------------------------------------------------------------------------- EXPORT AGE VIEW TO CSV FILE }
+procedure TAgeView.ExportToCSV(FileName: string; SourceArray: TLists);
+var
+  iCNT:    integer;
+  jCNT:    integer;
+  SL:      TStringList;
+  TempStr: string;
+begin
+  SL:=TStringList.Create;
+  SL.Clear;
+  try
+    for iCNT:=0 to High(SourceArray) - 1 do
+    begin
+      for jCNT:=0 to High(SourceArray[1]) do TempStr:=TempStr + SourceArray[iCNT, jCNT] + ';';
+      SL.Add(TempStr);
+      TempStr:='';
     end;
+    SL.SaveToFile(FileName);
   finally
-    MSSQL.Free;
-    LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(idThd) + ']: Age View transferred to Microsoft SQL Server. Rows affected: ' + IntToStr(High(ArrAgeView)) + '.');
+    SL.Free;
   end;
 end;
 

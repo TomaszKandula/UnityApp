@@ -2752,6 +2752,7 @@ object MainForm: TMainForm
             Top = 30
             Width = 24
             Height = 30
+            Cursor = crHandPoint
             Picture.Data = {
               0954506E67496D61676589504E470D0A1A0A0000000D49484452000000180000
               001E0806000000362EDEE5000000017352474200AECE1CE90000000467414D41
@@ -3183,6 +3184,7 @@ object MainForm: TMainForm
             Top = 75
             Width = 24
             Height = 30
+            Cursor = crHandPoint
             Picture.Data = {
               0954506E67496D61676589504E470D0A1A0A0000000D49484452000000180000
               001E0806000000362EDEE5000000017352474200AECE1CE90000000467414D41

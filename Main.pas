@@ -598,6 +598,7 @@ type                                                            (* GUI | MAIN TH
     var GroupIdSel          :  string;
     var GroupNmSel          :  string;
     var AgeDateSel          :  string;
+    var OSAmount            :  double;
 
     { PROPERTIES }
 
@@ -605,7 +606,7 @@ type                                                            (* GUI | MAIN TH
     property   AccessMode     : string  read PAccessMode      write PAccessMode;
     property   OpenItemsUpdate: string  read POpenItemsUpdate write POpenItemsUpdate;
 
-    { METHODS }
+    { HEPER METHODS }
 
     procedure  DebugMsg(const Msg: String);
     procedure  ExecMessage(IsPostType: boolean; WM_CONST: integer; YOUR_INT: integer; YOUR_TEXT: string);
@@ -614,8 +615,11 @@ type                                                            (* GUI | MAIN TH
     function   WndCall(WinForm: TForm; Mode: integer): integer;
     function   MsgCall(WndType: integer; WndText: string): integer;
     procedure  LockSettingsPanel;
+    function   ConvertName(CoNumber: string; Prefix: string; mode: integer): string;
 
   protected
+
+    { WINDOWS MESSAGES }
 
     procedure  WndProc(var msg: Messages.TMessage); override;
 
@@ -635,17 +639,15 @@ TGetOSVer             = function(mode: integer): string; stdcall;
 TGetCurrentUserSid    = function: string stdcall;
 TGetBuildInfoAsString = function: string stdcall;
 
-{ ------------------------------------------------------------ ! INCLUDE ALL CONSTANTS ! -------------------------------------------------------------------- }
+const Assembly = 'Unitylib.dll';
+
+function  GetCurrentUserSid: string; stdcall; external Assembly;
+function  GetOSVer(mode: integer): string; stdcall; external Assembly;
+function  GetBuildInfoAsString: string; stdcall; external Assembly;
+procedure LogText(filename: string; text: string); stdcall; external Assembly;
+procedure MergeSort(grid: TStringgrid; var vals: array of integer; sortcol, datatype: integer; ascending: boolean); stdcall; external Assembly;
 
 {$I Common.inc}
-
-{ ------------------------------------------------------------- ! STATIC DLL IMPORTS ! ---------------------------------------------------------------------- }
-
-function  GetCurrentUserSid: string; stdcall; external EX_LIBRARY;
-function  GetOSVer(mode: integer): string; stdcall; external EX_LIBRARY;
-function  GetBuildInfoAsString: string; stdcall; external EX_LIBRARY;
-procedure LogText(filename: string; text: string); stdcall; external EX_LIBRARY;
-procedure MergeSort(grid: TStringgrid; var vals: array of integer; sortcol, datatype: integer; ascending: boolean); stdcall; external EX_LIBRARY;
 
 { ------------------------------------------------------------- ! MAIN FORM REFERENCE ! --------------------------------------------------------------------- }
 var
@@ -1590,6 +1592,53 @@ begin
   MainForm.Edit_PASSWORD.SetFocus;
 end;
 
+{ ----------------------------------------------------------------------------------------------------------------------------------- CO CODE NAME CONVERTION }
+function TMainForm.ConvertName(CoNumber: string; Prefix: string; mode: integer): string;
+var
+  iCNT:  integer;
+begin
+  { INITIALIZE }
+  Result:= '';
+
+  (* USED ONLY FOR OPEN ITEMS AND AGING VIEW *)
+
+  { ALLOW TO CONVERT '2020' TO 'F2020', ETC. }
+  if mode = 0 then
+  begin
+    if Length(CoNumber) = 4 then Result:=Prefix + CoNumber;
+    if Length(CoNumber) = 3 then Result:=Prefix + '0'  + CoNumber;
+    if Length(CoNumber) = 2 then Result:=Prefix + '00' + CoNumber;
+  end;
+
+  (* USED ONLY TO BUILD GROUP_ID *)
+
+  { CONVERTS FROM     }
+  {  1. 2020 TO 02020 }
+  {  2. 340  TO 00340 }
+  {  3. 43   TO 00043 }
+  {  4. 0    TO 00000 }
+  if mode = 1 then
+  begin
+    if Length(CoNumber) = 4 then Result:='0'   + CoNumber;
+    if Length(CoNumber) = 3 then Result:='00'  + CoNumber;
+    if Length(CoNumber) = 2 then Result:='000' + CoNumber;
+    if Length(CoNumber) = 1 then Result:='00000';
+  end;
+
+  { CONVERTS FROM 02020 TO 2020 }
+  if mode = 2 then
+  begin
+    for iCNT:= 1 to Length(CoNumber) do
+    begin
+      if CoNumber[iCNT] <> '0' then
+      begin
+        Result:=Copy(CoNumber, iCNT, MaxInt);
+        Exit;
+      end;
+    end;
+  end;
+end;
+
 { ################################################################## ! EVENTS ! ############################################################################# }
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------- ON CREATE }
@@ -1787,6 +1836,7 @@ begin
   finally
     UserControl.Free;
   end;
+
   { --------------------------------------------------------- ! READ DEFAULT AGE VIEW ! --------------------------------------------------------------------- }
 
   if (GroupListBox.Text <> '') and (GroupListDates.Text <> '') then
@@ -3360,16 +3410,21 @@ begin
     end else
     begin
       PanelGroupName.Visible:=True;
-      { SUGGEST THE SAME GROUP NAME }
+      { SUGGEST THE SAME GROUP NAME AND GROUP ID }
       EditGroupName.Text:=GroupListBox.Text;
-    end else
+      EditGroupID.Text  :=ConvertName(DetailsGrid.Cells[0, 0], '', 1) +
+                          ConvertName(DetailsGrid.Cells[1, 0], '', 1) +
+                          ConvertName(DetailsGrid.Cells[2, 0], '', 1) +
+                          ConvertName(DetailsGrid.Cells[3, 0], '', 1);
+    end
+    else
     begin
       StatBar_TXT1.Caption:='Insufficient UAC level.';
       LogText(FEventLogPath, '[Make Group]: User have no R/W access, process halted.');
     end;
 end;
 
-{ -------------------------------------------------------------------------------------------------------------------------------------- ACTIONS | MAKE GROUP }
+{ ------------------------------------------------------------------------------------------------------------------------------- ACTIONS | MAKE AGING REPORT }
 procedure TMainForm.btnMakeGroupAgeClick(Sender: TObject);
 begin
   if (EditGroupName.Text <> '') and (EditGroupID.Text <> '') then
@@ -3377,7 +3432,7 @@ begin
     { START THREAD WITH NO PARAMETERS PASSED TO AN OBJECT }
     PanelGroupName.Visible:=False;
     ReloadCover.Visible   :=False;
-    TTMakeAgeView.Create;
+    TTMakeAgeView.Create(MainForm.OSAmount);
   end
     else
       MsgCall(2, 'Please enter group name and try again.' + CRLF + 'If you will use existing one, then it will be overwritten.');

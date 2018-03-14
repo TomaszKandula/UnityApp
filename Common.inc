@@ -21,10 +21,6 @@ const
   WM_GETINFO = WM_USER + 120;
   WM_EXTINFO = WM_APP  + 150;
 
-  { APPLICATION EXTERNAL ASSEMBLY | STATIC LINKING }
-
-  EX_LIBRARY = 'Unitylib.dll';
-
   { INITIALIZATION DETAILS }
 
   DelayStd:       integer = 50;               { SLOW DOWN A BIT TO SHOW MESSAGE  }
@@ -211,7 +207,8 @@ const
   stImportCSV   = 'Importing from CSV file...';
   stGenerating  = 'Generating age view...';
   stDownloading = 'Downloading Open Items...';
-  stLoading     = 'Loading aging report...';
+  stLoading     = 'Loading Aging Report...';
+  stSQLupdate   = 'Sending to SQL Server...';
 
   { UNASSIGNED }
 

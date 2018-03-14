@@ -78,11 +78,12 @@ type
   protected
     procedure Execute; override;
   private
-    var FLock:  TCriticalSection;
-    var FIDThd: integer;
+    var FLock      : TCriticalSection;
+    var FIDThd     : integer;
+    var FOpenAmount: double;
   public
     property    IDThd:  integer read FIDThd;
-    constructor Create;
+    constructor Create(OpenAmount: double);
     destructor  Destroy; override;
   end;
 
@@ -328,10 +329,11 @@ end;
 { ################################################################ ! MAKE AGE VIEW ! ######################################################################## }
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE }
-constructor TTMakeAgeView.Create;
+constructor TTMakeAgeView.Create(OpenAmount: double);
 begin
   inherited Create(False);
   FLock :=TCriticalSection.Create;
+  FOpenAmount:=OpenAmount;
   FIDThd:=0;
 end;
 
@@ -347,12 +349,6 @@ var
   THDMili:    extended;
   THDSec:     extended;
   StopWatch:  TStopWatch;
-(*
-  SL:         TStringList;
-  iCNT:       integer;
-  jCNT:       integer;
-  temp:       string;
-*)
   AgeView:    TAgeView;
 begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
@@ -364,9 +360,27 @@ begin
     MainForm.ExecMessage(True, WM_GETINFO, 10, stGenerating);
     LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Generating age view...');
     try
+      AgeView.idThd:=IDThd;
       { ASYNC }
-      AgeView.GroupID:=MainForm.GroupIdSel;
-      AgeView.Make(1);
+      if MainForm.EditGroupID.Text = MainForm.GroupIdSel then
+        AgeView.GroupID:=MainForm.GroupIdSel
+          else
+            AgeView.GroupID:=MainForm.EditGroupID.Text;
+      { GENERATE AGING }
+      AgeView.Make(MainForm.OSAmount);
+      { CSV OR SERVER? }
+      if MainForm.cbDump.Checked then
+      begin
+        if MainForm.CSVExport.Execute then
+          AgeView.ExportToCSV(MainForm.CSVExport.FileName, AgeView.ArrAgeView);
+      end
+      else
+      { SEND TO SQL SERVER }
+      begin
+        AgeView.Write(TblSnapshots, AgeView.ArrAgeView);
+        { RELOAD AGE VIEW ON MAIN TAB }
+        TTReadAgeView.Create(thNullParameter);
+      end;
     except
       on E: Exception do
         LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot execute "TTMakeAgeView". Error has been thrown: ' + E.Message);
@@ -380,8 +394,6 @@ begin
   end;
   { RELEASE THREAD WHEN DONE }
   FreeOnTerminate:=True;
-  { RELOAD AGE VIEW ON MAIN TAB }
-  TTReadAgeView.Create(thNullParameter);
 end;
 
 { ############################################################## ! OPEN ITEMS SCANNER ! ##################################################################### }
@@ -414,9 +426,11 @@ begin
       ReadDateTime:=Transactions.GetDateTime(gdDateTime);
       if StrToDateTime(MainForm.OpenItemsUpdate) < StrToDateTime(ReadDateTime) then
       begin
-        { REFRESH OPENITEMS AND MAKE NEW AGING VIEW }
+        { SWITCH OFF ALL TIMERS }
+
+        { REFRESH OPEN ITEMS AND MAKE NEW AGING VIEW }
         MainForm.OpenItemsUpdate:=ReadDateTime;
-        // CALL OPEN ITEMS DOWNLOAD WITH MAKE AGE FLAG
+        TTReadOpenItems.Create(thCallMakeAge);
       end;
     except
       on E: Exception do
@@ -481,11 +495,13 @@ begin
     end;
   finally
     MainForm.ExecMessage(True, WM_GETINFO, 10, stReady);
-    AgeView.Free;
     THDMili:=StopWatch.ElapsedMilliseconds;
     THDSec:=THDMili / 1000;
-    LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Thread for selected group "' + MainForm.FGroupList[MainForm.GroupListBox.ItemIndex, 1] + '" has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
+    LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Thread for selected Group Id "' + AgeView.GroupID + '" has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
+    AgeView.Free;
     FLock.Release;
+    { SWITCH ON ALL TIMERS }
+
   end;
   { RELEASE THREAD WHEN DONE }
   FreeOnTerminate:=True;
@@ -525,15 +541,13 @@ begin
     StopWatch:=TStopWatch.StartNew;
     MainForm.ExecMessage(True, WM_GETINFO, 10, stDownloading);
     try
+      { SYNC }
       Synchronize(OpenItems.ClearSummary);
+      { ASYNC }
       OpenItems.DestGrid   :=MainForm.sgOpenItems;
       OpenItems.SettingGrid:=MainForm.DetailsGrid;
       OpenItems.LoadToGrid;
-      Synchronize(OpenItems.UpdateSummary);
-      Synchronize(procedure
-                  begin
-                    MainForm.sgOpenItems.SetColWidth(10, 20);
-                  end);
+      OpenItems.UpdateSummary;
     except
       on E: Exception do
         LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(FIDThd) + ']: Cannot execute "TTReadOpenItems". Error has been thorwn: ' + E.Message);
@@ -552,7 +566,7 @@ begin
   if FMode = thCallMakeAge then
   begin
     MainForm.cbDump.Checked:=False;
-    TTMakeAgeView.Create;
+    TTMakeAgeView.Create(MainForm.OSAmount);
   end;
 end;
 
