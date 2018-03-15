@@ -401,8 +401,7 @@ end;
 { --------------------------------------------------------------------------------------------------------------------------------------------------- RELEASE }
 destructor TDataTables.Destroy;
 begin
-  FreeAndNil(pDataSet);
-  FreeAndNil(pColumns);
+  if pDataSet <> nil then FreeAndNil(pDataSet);
   inherited;
 end;
 

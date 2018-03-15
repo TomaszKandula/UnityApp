@@ -25,9 +25,9 @@ type
   private
     var PIdThd:    integer;
   public
-    var DestGrid:    TStringGrid;
-    var SettingGrid: TStringGrid;
-    property IdThd:    integer read PIdThd;
+    var DestGrid   :  TStringGrid;
+    var SettingGrid:  TStringGrid;
+    property IdThd :  integer read PIdThd;
   published
     function  GetDateTime(Return: integer): string;
     function  LoadToGrid: boolean;
@@ -99,8 +99,11 @@ begin
 
   for iCNT:=0 to 3 do
   begin
-    if SettingGrid.Cells[iCNT, 3] = 'OFF' then Agents:='N';
-    if SettingGrid.Cells[iCNT, 3] = 'ON'  then Agents:='Y';
+    { TO STACK COMPANIES ALL AGENT  }
+    { INFORMATION MUST BE THE SAME  }
+    { THUS SET AGENT PER LAST FOUND }
+    if SettingGrid.Cells[iCNT, 3] = 'OFF' then Agents:='OFF';
+    if SettingGrid.Cells[iCNT, 3] = 'ON'  then Agents:='ON';
   end;
   { -------------------------------------------------------------------------------------------------------------------------------------- EXECUTE STORED SQL }
 

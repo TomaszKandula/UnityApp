@@ -78,32 +78,21 @@ end;
 procedure TInvoicesForm.FormActivate(Sender: TObject);
 var
   MSSQL:  TMSSQL;
-  DataBase: TDataBase;
   CUID :  string;
 begin
   { CHECK DATABASE CONNECTION AND PROCEED ACCORDINGLY }
-  DataBase:=TDataBase.Create(False);
-  if DataBase.Check = 0 then
-  begin
-    Sleep(100);
-    MSSQL:=TMSSQL.Create(MainForm.FDbConnect);
-    try
-      { PREPARE FOR QUERY }
-      CUID:=MainForm.sgInvoiceTracker.Cells[MainForm.sgInvoiceTracker.ReturnColumn('CUID', 1, 1), MainForm.sgInvoiceTracker.Row];
-      MSSQL.StrSQL:='SELECT INVOICENO, INVOICESTATE, STAMP FROM tbl_invoices WHERE CUID = ' + QuotedStr(CUID);
-      InvoicesGrid.Freeze(True);
-      { CLEAR, QUERY AND SHOW DATA IN STRING GRID }
-      MSSQL.SqlToGrid(InvoicesGrid, MSSQL.ExecSQL, False, True);
-      InvoicesGrid.Freeze(False);
-    finally
-      { DISPOSE }
-      MSSQL.Free;
-    end;
-  end else
-  begin
-    StatusBar.SimpleText:='Cannot connect with database. Please contact IT support.';
+  MSSQL:=TMSSQL.Create(MainForm.FDbConnect);
+  try
+    { PREPARE FOR QUERY }
+    CUID:=MainForm.sgInvoiceTracker.Cells[MainForm.sgInvoiceTracker.ReturnColumn('CUID', 1, 1), MainForm.sgInvoiceTracker.Row];
+    MSSQL.StrSQL:='SELECT INVOICENO, INVOICESTATE, STAMP FROM tbl_invoices WHERE CUID = ' + QuotedStr(CUID);
+    InvoicesGrid.Freeze(True);
+    { CLEAR, QUERY AND SHOW DATA IN STRING GRID }
+    MSSQL.SqlToGrid(InvoicesGrid, MSSQL.ExecSQL, False, True);
+    InvoicesGrid.Freeze(False);
+  finally
+    MSSQL.Free;
   end;
-  FreeAndNil(DataBase);
 end;
 
 { -------------------------------------------------------- ! COMPONENT EVENTS | GRID ! ---------------------------------------------------------------------- }

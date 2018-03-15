@@ -578,7 +578,6 @@ type                                                            (* GUI | MAIN TH
     procedure DetailsGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
     procedure DetailsGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
     procedure btnLoadAgeViewClick(Sender: TObject);
-    procedure TabSheet2Show(Sender: TObject);
 
     { ------------------------------------------------------------- ! HELPERS ! ----------------------------------------------------------------------------- }
 
@@ -1765,6 +1764,7 @@ begin
   { ------------------------------------------------------- ! ASSIGN PRE-DEFINED HEADERS ! ------------------------------------------------------------------ }
 
   { ---------------------------------------------------------------------------------------------------------------------------------------------- OPEN ITEMS }
+
   sgOpenItems.RowCount:=2;
   sgOpenItems.Cols[0].Text:= '';
   for iCNT:=1 to sgOpenItems.ColCount do
@@ -1774,7 +1774,7 @@ begin
 
   { ------------------------------------------------------- ! CAPTIONS FOR ALL SHAPES ! --------------------------------------------------------------------- }
 
-  (* AGING REPORT | TABSHEET1 *)
+  { AGING REPORT | TABSHEET1 }
   Cap01.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS1TXT01', 'EMPTY'), [fsBold]);
   Cap02.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS1TXT02', 'EMPTY'), [fsBold]);
   Cap03.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS1TXT03', 'EMPTY'), [fsBold]);
@@ -1782,18 +1782,18 @@ begin
   Cap06.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS1TXT06', 'EMPTY'), [fsBold]);
   Cap07.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS1TXT07', 'EMPTY'), [fsBold]);
 
-  (* OPEN ITEMS | TABSHEET2 *)
+  { OPEN ITEMS | TABSHEET2 }
   Cap10.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS2TXT01', 'EMPTY'), [fsBold]);
   Cap11.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS2TXT02', 'EMPTY'), [fsBold]);
   Cap12.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS2TXT03', 'EMPTY'), [fsBold]);
 
-  (* ADDRESS BOOK | TABSHEET3 *)
+  { ADDRESS BOOK | TABSHEET3 }
   Cap13.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS3TXT01', 'EMPTY'), [fsBold]);
 
-  (* INVOICE TRACKER | TABSHEET4 *)
+  { INVOICE TRACKER | TABSHEET4 }
   Cap43.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS4TXT01', 'EMPTY'), [fsBold]);
 
-  (* GENERAL TABLES  | TABSHEET7 *)
+  { GENERAL TABLES  | TABSHEET7 }
   Cap15.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS7TXT01', 'EMPTY'), [fsBold]);
   Cap16.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS7TXT02', 'EMPTY'), [fsBold]);
   Cap17.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS7TXT03', 'EMPTY'), [fsBold]);
@@ -1801,7 +1801,7 @@ begin
   Cap19.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS7TXT05', 'EMPTY'), [fsBold]);
   Cap20.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS7TXT06', 'EMPTY'), [fsBold]);
 
-  (* SETTINGS | TABSHEET8 *)
+  { SETTINGS | TABSHEET8 }
   Cap21.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS8TXT01', 'EMPTY'), [fsBold]);
   Cap22.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS8TXT02', 'EMPTY'), [fsBold]);
   Cap23.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS8TXT03', 'EMPTY'), [fsBold]);
@@ -1828,7 +1828,7 @@ begin
   { ------------------------------------------------------ ! DATABASE INITIALIZATION & UAC ! ---------------------------------------------------------------- }
 
   { ESTABLISH ACTIVE CONNECTIVITY }
-  FDbConnect:=TADOConnection.Create(Self);
+  FDbConnect:=TADOConnection.Create(Application);
   DataBase  :=TDataBase.Create(True);
   try
     DataBase.InitializeConnection(MainThreadID, True, FDbConnect);
@@ -1915,9 +1915,10 @@ begin
   OILoader.Interval        :=AppSettings.TMIG.ReadInteger(TimersSettings, 'OI_LOADER',       300000); { DEFAULT VALUE 3000000 MILISECONDS = 5  MINUTES }
 
   { DISPOSE OBJECTS }
-  FreeAndNil(AppSettings);
+  AppSettings.Free;
 
   { START }
+
   EventLogTimer.Enabled    :=True;
   InvoiceScanTimer.Enabled :=True;
   UpdaterTimer.Enabled     :=True;
@@ -1931,8 +1932,41 @@ end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------ ON DESTROY }
 procedure TMainForm.FormDestroy(Sender: TObject);
+var
+  AppSettings: TSettings;
 begin
-  { DO NOTHING }
+
+  FDbConnect.Close;
+
+  EventLogTimer.Enabled    :=False;
+  InvoiceScanTimer.Enabled :=False;
+  UpdaterTimer.Enabled     :=False;
+  OILoader.Enabled         :=False;
+  InetTimer.Enabled        :=False;
+  CurrentTime.Enabled      :=False;
+  UpTime.Enabled           :=False;
+
+  Sleep(500);
+
+  AppSettings:=TSettings.Create;
+  try
+    AppSettings.TMIG.WriteInteger(ApplicationDetails, 'WINDOW_TOP',   MainForm.Top);
+    AppSettings.TMIG.WriteInteger(ApplicationDetails, 'WINDOW_LEFT',  MainForm.Left);
+
+    if MainForm.WindowState = wsNormal    then AppSettings.TMIG.WriteString(ApplicationDetails,  'WINDOW_STATE', 'wsNormal');
+    if MainForm.WindowState = wsMaximized then AppSettings.TMIG.WriteString(ApplicationDetails,  'WINDOW_STATE', 'wsMaximized');
+    if MainForm.WindowState = wsMinimized then AppSettings.TMIG.WriteString(ApplicationDetails,  'WINDOW_STATE', 'wsMinimized');
+
+    if sgAgeView.RowCount > 2 then sgAgeView.SaveLayout(ColumnWidthName, ColumnOrderName, ColumnNames, ColumnPrefix);
+
+    AppSettings.Encode(UserConfig);
+    AppSettings.Encode(AppConfig);
+
+    LogText(FEventLogPath, 'Application closed by the user.');
+  finally
+    AppSettings.Free;
+  end;
+
 end;
 
 { ------------------------------------------------------------- ! MAIN FORM EVENTS ! ------------------------------------------------------------------------ }
@@ -1971,8 +2005,6 @@ end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------------- ON CLOSE QUERY }
 procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
-var
-  AppSettings:  TSettings;
 begin
   { GO MINIMIZE AND HIDE FROM TASKBAR | DO NOT CLOSE }
   if not PAllowClose then
@@ -1984,22 +2016,6 @@ begin
   else
   { SHUTDOWN APPLICATION }
   begin
-    AppSettings:=TSettings.Create;
-    try
-      { ----------------------------------------------------------------------------------------------------------------------------------- SAVE ALL SETTINGS }
-      AppSettings.TMIG.WriteInteger(ApplicationDetails, 'WINDOW_TOP',   MainForm.Top);
-      AppSettings.TMIG.WriteInteger(ApplicationDetails, 'WINDOW_LEFT',  MainForm.Left);
-      if MainForm.WindowState = wsNormal    then AppSettings.TMIG.WriteString(ApplicationDetails,  'WINDOW_STATE', 'wsNormal');
-      if MainForm.WindowState = wsMaximized then AppSettings.TMIG.WriteString(ApplicationDetails,  'WINDOW_STATE', 'wsMaximized');
-      if MainForm.WindowState = wsMinimized then AppSettings.TMIG.WriteString(ApplicationDetails,  'WINDOW_STATE', 'wsMinimized');
-      if sgAgeView.RowCount > 2 then sgAgeView.SaveLayout(ColumnWidthName, ColumnOrderName, ColumnNames, ColumnPrefix);
-      if not (AppSettings.Encode(UserConfig)) then Application.MessageBox(PChar('Cannot write user configuration file. Please contact support.'), PChar(CAPTION), MB_OK + MB_ICONSTOP);
-      if not(AppSettings.Encode(AppConfig))   then Application.MessageBox(PChar('Cannot write master configuration file. Please contact support.'), PChar(CAPTION), MB_OK + MB_ICONSTOP);
-      LogText(FEventLogPath, 'Application closed by the user.');
-      { ------------------------------------------------------------------------------------------------------------------------------------- RELEASE & CLOSE }
-    finally
-      AppSettings.Free;
-    end;
     CanClose:=True;
   end;
 end;
@@ -2475,11 +2491,6 @@ end;
 procedure TMainForm.TabSheet7Resize(Sender: TObject);
 begin
   TabSheet7Show(self);
-end;
-
-procedure TMainForm.TabSheet2Show(Sender: TObject);
-begin
-  sgOpenItems.SetColWidth(10, 20);
 end;
 
 { --------------------------------------------------------------------------------------------------------------- REFRESH THE LIST AFTER ADDING/REMOVING ITEM }

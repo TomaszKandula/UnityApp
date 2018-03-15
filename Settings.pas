@@ -88,9 +88,9 @@ end;
 { --------------------------------------------------------------------------------------------------------------------------------------------------- RELEASE }
 destructor TSettings.Destroy;
 begin
-  FreeAndNil(pTMIP);
-  FreeAndNil(pTMIG);
-  FreeAndNil(pTMIL);
+  pTMIP.Free;
+  pTMIG.Free;
+  pTMIL.Free;
   inherited;
 end;
 

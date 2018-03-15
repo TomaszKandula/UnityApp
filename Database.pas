@@ -107,8 +107,6 @@ begin
       { ALL OK }
       if Check = 0 then
       begin
-        (* DEBUG LINE *)
-        MainForm.DebugMsg('Can connect.');
         ActiveConnection.Connected       :=True;
         MainForm.InvoiceScanTimer.Enabled:=True;
         MainForm.OILoader.Enabled        :=True;
@@ -116,8 +114,6 @@ begin
       end else
       { CANNOT CONNECT }
       begin
-        (* DEBUG LINE *)
-        MainForm.DebugMsg('Cannot connect.');
         MainForm.InvoiceScanTimer.Enabled:=False;
         MainForm.OILoader.Enabled        :=False;
         SendMessage(MainForm.Handle, WM_GETINFO, 15, LPARAM(PCHAR('NULL')));
@@ -129,8 +125,6 @@ begin
     { CHECK SERVER CONNECTION ON REGULAR BASIS }
     if not MainForm.InetTimer.Enabled then
     begin
-      (* DEBUG LINE *)
-      MainForm.DebugMsg('INET Timer is enabled with interval ' + IntToStr(Interval) + 'ms.');
       MainForm.InetTimer.Interval:=Interval;
       MainForm.InetTimer.Enabled:=True;
     end;

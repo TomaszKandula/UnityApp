@@ -228,20 +228,13 @@ procedure TTInvoiceTrackerRefresh.Execute;  (* SYNC *)
 var
   IDThread:  integer;
   InvoiceTracker: TInvoiceTracker;
-  DataBase: TDataBase;
 begin
   IDThread:=TTInvoiceTrackerRefresh.CurrentThread.ThreadID;
   InvoiceTracker:=TInvoiceTracker.Create;
-  DataBase:=TDataBase.Create(False);
-
   try
-
     try
-      if Database.Check = 0 then InvoiceTracker.Refresh(MainForm.sgInvoiceTracker, pMode)
-        else
-          LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Cannot refresh Invoice Tracker list. Database connection has been lost.');
+      InvoiceTracker.Refresh(MainForm.sgInvoiceTracker, pMode);
       LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Refresh Invoice Tracker list with mode = ' + pMode + ' has ended successfully.');
-
     except
       on E: Exception do
       begin
@@ -249,16 +242,12 @@ begin
         PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Ready.')));
         LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Execution of this tread work has been stopped. Error thrown: ' + E.Message + ' (TInvoiceTracker).');
       end;
-
     end;
-
   finally
     InvoiceTracker.Free;
   end;
-
   { RELEASE THREAD WHEN DONE }
   FreeOnTerminate:=True;
-  FreeAndNil(DataBase);
 end;
 
 (*
@@ -308,6 +297,16 @@ begin
 end;
 *)
 
+
+
+
+
+
+
+
+
+
+
 { ################################################################ ! NETWORK SCANNER ! ###################################################################### }
 
 { ------------------------------------------------------------------------------------------------------------------------------------- EXECUTE WORKER THREAD }
@@ -319,7 +318,7 @@ begin
   DataBase:=TDataBase.Create(False);
   try
     IDThread:=TTCheckServerConnection.CurrentThread.ThreadID;
-    DataBase.InitializeConnection(IDThread, False, MainForm.FDbConnect);
+    if DataBase.Check <> 0 then DataBase.InitializeConnection(IDThread, False, MainForm.FDbConnect);
   finally
     DataBase.Free;
   end;

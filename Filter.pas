@@ -45,7 +45,6 @@ type
     procedure FilterListClickCheck(Sender: TObject);
     procedure btnCloseClick(Sender: TObject);
   private
-    const WHITESPACE  =  #32;
     var   ListState   :  array of array of string;  { KEEP VALUES AND THEIR STATE }
     var   pFGrid      :  TStringGrid;
     var   pFColName   :  string;
@@ -110,7 +109,7 @@ begin
       for iCNT:=1 to FGrid.RowCount - 1 do
       begin
         { POPULATE AND REMOVE DUPLICATES }
-        if (FGrid.Cells[FColNumber, iCNT] <> WHITESPACE) and
+        if (FGrid.Cells[FColNumber, iCNT] <> SPACE) and
            (FilterList.Items.IndexOf(FGrid.Cells[FColNumber, iCNT]) = -1)
            then
              FilterList.Items.Add(FGrid.Cells[FColNumber, iCNT]);
@@ -147,7 +146,7 @@ var
   jCNT:  integer;
 begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-  FilterList.Items.Strings[1]:=WHITESPACE; { MAKE '(BLANKS)' A WHITESPACE }
+  FilterList.Items.Strings[1]:=SPACE; { MAKE '(BLANKS)' A WHITESPACE }
   Screen.Cursor:=crHourGlass;
   FGrid.Freeze(True);
   { ----------------------------------------------------------------------------------------------------------------------------------- ADD TO THE LIST STATE }

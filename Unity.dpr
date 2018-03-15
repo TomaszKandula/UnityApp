@@ -117,6 +117,9 @@ end;
 
 { ---------------------------------------------------------------- ! MAIN BLOCK ! --------------------------------------------------------------------------- }
 begin
+
+  ReportMemoryLeaksOnShutdown:=DebugHook <> 0;
+
   { ---------------------------------------------------------------------------------------------------------------------------- ONLY ONE COPY RUNNING PER PC }
   Mutex:=CreateMutex(nil, True, 'UnityAppication2018');
   if (Mutex = 0) OR (GetLastError = ERROR_ALREADY_EXISTS) then
@@ -452,7 +455,7 @@ begin
   if AppSettings.TMIG.ReadString(ApplicationDetails,  'WINDOW_STATE', '') = 'wsMaximized' then MainForm.WindowState:=wsMaximized;
   if AppSettings.TMIG.ReadString(ApplicationDetails,  'WINDOW_STATE', '') = 'wsMinimized' then MainForm.WindowState:=wsMinimized;
   LogText(AppSettings.FPathEventLog, 'Initialization is completed. Application is running.');
-  FreeAndNil(AppSettings);
+  AppSettings.Free;
 
   { ----------------------------------------------------------------------------------------------------------------------------------------------------- RUN }
   MainForm.Show;
