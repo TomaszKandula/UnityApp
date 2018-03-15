@@ -155,6 +155,10 @@ type
     const USER_ALIAS  : string = 'USER_ALIAS';
     const FIXCOMMENT  : string = 'FIXCOMMENT';
     const FOLLOWUP    : string = 'FOLLOWUP';
+
+    (* USER FRIENDLY NAME FOR GIVEN COLUMNS *)
+
+    const fFOLLOWUP   : string = 'FOLLOW UP';
   end;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

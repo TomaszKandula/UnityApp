@@ -66,6 +66,7 @@ const
 
   SELCOLOR            = $00FFDBB7;
   FONCOLOR            = $006433C9;
+  TODAYCLR            = $00E5FCB3;
 
   { SETTINGS FILE ID }
 

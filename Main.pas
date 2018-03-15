@@ -18,11 +18,12 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, Menus, ComCtrls, Grids, ExtCtrls, StdCtrls, CheckLst, Buttons, PNGimage,
   DBGrids, AppEvnts, ShellAPI, INIFiles, StrUtils, ValEdit, DateUtils, Clipbrd, DB, ADODB, ActiveX, CDO_TLB, Diagnostics, GIFImg, Math, Wininet, ComObj,
-  OleCtrls, SHDocVw, blcksock, smtpsend { MODIFIED FROM ORIGINAL }, pop3send, ssl_openssl, synautil, synacode, mimemess { MODIFIED FROM ORIGINAL };
+  OleCtrls, SHDocVw, blcksock, smtpsend { MODIFIED FROM ORIGINAL }, pop3send, ssl_openssl, synautil, synacode, mimemess, ImgList { MODIFIED FROM ORIGINAL };
 
 { REFERENCE TO M.DIM. ARRAY }
 type
-  TLists = array of array of string;
+  TLists    = array of array of string;
+  TIntigers = array of integer;
 
 { 'TSTRINGGRID' REFERENCE FOR DELETE OPTION }
 type
@@ -422,6 +423,7 @@ type                                                            (* GUI | MAIN TH
     EditGroupID: TLabeledEdit;
     Action_RowHighlight: TMenuItem;
     N16: TMenuItem;
+    Image1: TImage;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -1828,7 +1830,7 @@ begin
   { ------------------------------------------------------ ! DATABASE INITIALIZATION & UAC ! ---------------------------------------------------------------- }
 
   { ESTABLISH ACTIVE CONNECTIVITY }
-  FDbConnect:=TADOConnection.Create(Application);
+  FDbConnect:=TADOConnection.Create(MainForm);
   DataBase  :=TDataBase.Create(True);
   try
     DataBase.InitializeConnection(MainThreadID, True, FDbConnect);
@@ -2597,8 +2599,7 @@ begin
 end;
 
 { ---------------------------------------------------- ! SHOW NEGATIVE VALUES AND ROW SELECTION ! ----------------------------------------------------------- }
-
-procedure TMainForm.sgAgeViewDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);     //refactor!!!
+procedure TMainForm.sgAgeViewDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 var
   Col1:   integer;
   Col2:   integer;
@@ -2611,7 +2612,15 @@ var
   Col9:   integer;
   Col10:  integer;
   Col11:  integer;
+  Col12:  integer;
+  Col13:  integer;
+  Col14:  integer;
+  GetDate:  string;
+  Width:    integer;
 begin
+
+  { SKIP HEADER }
+  if ARow = 0 then Exit;
 
   (* CALL SG_DRAWSELECTED BEFORE SG_COLORVALUES *)
 
@@ -2631,15 +2640,27 @@ begin
   Col9 :=sgAgeView.ReturnColumn(TSnapshots.fTOTAL,           1, 1);
   Col10:=sgAgeView.ReturnColumn(TSnapshots.fCREDIT_LIMIT,    1, 1);
   Col11:=sgAgeView.ReturnColumn(TSnapshots.fEXCEEDED_AMOUNT, 1, 1);
+  Col12:=sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP,          1, 1);
+  Col13:=sgAgeView.ReturnColumn(TSnapshots.fCUID,             1, 1);
+  Col14:=sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,    1, 1);
+
+  { HIGHLIGHT FOLLOW UP COLUMN }
+  GetDate:=sgAgeView.Cells[Col12, ARow];
+  if (ACol = Col12) and (sgAgeView.Cells[ACol, ARow] = StatBar_TXT3.Caption) then
+  begin
+    sgAgeView.Canvas.Brush.Color:=TODAYCLR;
+    sgAgeView.Canvas.FillRect(Rect);
+    sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
+  end;
+
+  { TEST }
+  Width:=sgAgeView.ColWidths[Col14];
+  if (ACol = Col14) and (ARow = 4) then sgAgeView.Canvas.Draw(Rect.Left + Width - 16, Rect.Top, MainForm.Image1.Picture.Graphic);
 
   { DRAW ONLY SELECTED COLUMNS }
-  if ( (ACol = Col1) or (ACol = Col2) or (ACol = Col3) or (ACol = Col4) or (ACol = Col5) or (ACol = Col6) or (ACol = Col7) or (ACol = Col8) or (ACol = Col9) or (ACol = Col10) or (ACol = Col11) )
-    and (ARow > 0) then
-      begin
-        sgAgeView.ColorValues(ARow, ACol, Rect, clRed, clBlack);
-      end;
-
-  {  }
+  if (ACol = Col1) or (ACol = Col2) or (ACol = Col3) or (ACol = Col4) or (ACol = Col5) or (ACol = Col6) or (ACol = Col7) or (ACol = Col8) or (ACol = Col9) or (ACol = Col10) or (ACol = Col11)
+    then
+      sgAgeView.ColorValues(ARow, ACol, Rect, clRed, clBlack);
 
 end;
 
