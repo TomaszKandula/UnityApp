@@ -169,6 +169,7 @@ begin
     begin
       ConCheck.Close;
     end;
+    ConCheck.Free;
   end;
 end;
 

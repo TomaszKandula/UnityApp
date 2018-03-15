@@ -1199,6 +1199,8 @@ begin
       if iCNT = 0 then AppSettings.TMIP.WriteString(ColNames, ColPrefix + IntToStr(iCNT), '');
       if iCNT > 0 then AppSettings.TMIP.WriteString(ColNames, ColPrefix + IntToStr(iCNT), Self.SqlColumns[iCNT, 1]);
     end;
+    { ENCODE }
+    AppSettings.Encode(UserConfig);
   finally
     AppSettings.Free;
   end;

@@ -36,7 +36,7 @@ type
     property Columns   : TStringList read pColumns    write pColumns;
   published
     constructor Create(Connector: TADOConnection); overload;
-    destructor  Destroy; reintroduce; overload;
+    destructor  Destroy; override;
     function    ColumnsToList: string;
     function    OpenTable(TableName: string): boolean;
     function    BracketStr(Expression: string; BracketType: integer): string;
@@ -401,8 +401,9 @@ end;
 { --------------------------------------------------------------------------------------------------------------------------------------------------- RELEASE }
 destructor TDataTables.Destroy;
 begin
-  if pDataSet <> nil then FreeAndNil(pDataSet);
-  inherited;
+  pColumns.Free;
+  pDataSet:=nil;
+  inherited Destroy;
 end;
 
 { ------------------------------------------------------------------------------------------------------------ HELPER METHOD TO SURROUND STRING WITH BRACKETS }
