@@ -420,6 +420,8 @@ type                                                            (* GUI | MAIN TH
     DetailsGrid: TStringGrid;
     btnLoadAgeView: TSpeedButton;
     EditGroupID: TLabeledEdit;
+    Action_RowHighlight: TMenuItem;
+    N16: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -578,6 +580,7 @@ type                                                            (* GUI | MAIN TH
     procedure DetailsGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
     procedure DetailsGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
     procedure btnLoadAgeViewClick(Sender: TObject);
+    procedure Action_RowHighlightClick(Sender: TObject);
 
     { ------------------------------------------------------------- ! HELPERS ! ----------------------------------------------------------------------------- }
 
@@ -1639,29 +1642,24 @@ begin
   end;
 end;
 
-{ --------------------------------------------------------------------------------------------------------------------------------- TURN ON OR OFF ALL TIMERS }
-
-(* TURN OFF ALL TIMERS DURING UPDATING CYCLE OF MAKING NEW AGE VIEW BASED ON FRESH DOWNLOAD OF OPEN ITEMS *)
-
+{ ------------------------------------------------------------------------------------------------------------------------------------- TURN ON OR OFF TIMERS }
 procedure TMainForm.SwitchTimers(state: Integer);
 begin
-  { ALL ON }
+  { ENABLE ALL CHECKERS }
   if state = tmEnabled then
   begin
     EventLogTimer.Enabled    :=True;
     InvoiceScanTimer.Enabled :=True;
     UpdaterTimer.Enabled     :=True;
     OILoader.Enabled         :=True;
-    InetTimer.Enabled        :=True;
   end;
-  { ALL OFF }
+  { DISABLE ALL CHECKERS }
   if state = tmDisabled then
   begin
     EventLogTimer.Enabled    :=False;
     InvoiceScanTimer.Enabled :=False;
     UpdaterTimer.Enabled     :=False;
     OILoader.Enabled         :=False;
-    InetTimer.Enabled        :=False;
   end;
 end;
 
@@ -1717,7 +1715,7 @@ begin
   { ------------------------------------------------------------- ! DATE & TIME ! --------------------------------------------------------------------------- }
 
   { ------------------------------------------------------------------------------------------------------------------------------------ FORMAT DATE AND TIME }
-  NowTime  :=Now;
+  NowTime   :=Now;
   PStartTime:=Now;
   FormatDateTime('hh:mm:ss', NowTime);
   FormatDateTime('hh:mm:ss', PStartTime);
@@ -1844,6 +1842,8 @@ begin
     UserControl.UserName:=FUserName;
     AccessLevel:=UserControl.GetAccessData(adAccessLevel);
     AccessMode :=UserControl.GetAccessData(adAccessMode);
+    if AccessMode = adAccessFull  then Action_FullView.Checked :=True;
+    if AccessMode = adAccessBasic then Action_BasicView.Checked:=True;
     UserControl.GetGroupList(FGroupList, GroupListBox);
     UserControl.GetAgeDates(GroupListDates, FGroupList[0, 0]);
     { RESTRICTED FOR "ADMINS" }
@@ -1900,7 +1900,7 @@ begin
     DataTables.Free;
   end;
 
-  { ----------------------------------------------------------------------------------------------------------------------------- START WEB PAGE | UNITY INFO }
+  { ----------------------------------------------------------------------------------------------------------------------------- START WEB PAGE | UNITY INFO }//  WebBrowser.Navigate(WideString(AppSettings.TMIG.ReadString(ApplicationDetails, 'START_PAGE', '')), $02);
   WebBrowser.Navigate(WideString(AppSettings.TMIG.ReadString(ApplicationDetails, 'START_PAGE', '')), $02);
 
   { -------------------------------------------------------------------------------------------------------------------------- APPLICATION VERSION & USER SID }
@@ -1919,16 +1919,12 @@ begin
   { DISPOSE OBJECTS }
   AppSettings.Free;
 
-  { START }
+  { START CHECKERS }
+  SwitchTimers(tmEnabled);
 
-  EventLogTimer.Enabled    :=True;
-  InvoiceScanTimer.Enabled :=True;
-  UpdaterTimer.Enabled     :=True;
-  OILoader.Enabled         :=True;
-
-  { TIME AND DATE ON STATUS BAR }
-  CurrentTime.Enabled      :=True;
-  UpTime.Enabled           :=True;
+  { TIME ON STATBAR }
+  UpTime.Enabled     :=True;
+  CurrentTime.Enabled:=True;
 
 end;
 
@@ -1937,38 +1933,25 @@ procedure TMainForm.FormDestroy(Sender: TObject);
 var
   AppSettings: TSettings;
 begin
-
+  { RELEASE WEB BROWSER COMPONENT MANUALLY }
+  WebBrowser.Free;
+  { CLOSE DB CONNECTION }
   FDbConnect.Close;
-
-  EventLogTimer.Enabled    :=False;
-  InvoiceScanTimer.Enabled :=False;
-  UpdaterTimer.Enabled     :=False;
-  OILoader.Enabled         :=False;
-  InetTimer.Enabled        :=False;
-  CurrentTime.Enabled      :=False;
-  UpTime.Enabled           :=False;
-
-  Sleep(500);
-
+  { SAVE AGE VIEW LAYOUT }
+  if sgAgeView.RowCount > 2 then sgAgeView.SaveLayout(ColumnWidthName, ColumnOrderName, ColumnNames, ColumnPrefix);
+  { SAVE OTHER SETTINGS }
   AppSettings:=TSettings.Create;
   try
     AppSettings.TMIG.WriteInteger(ApplicationDetails, 'WINDOW_TOP',   MainForm.Top);
     AppSettings.TMIG.WriteInteger(ApplicationDetails, 'WINDOW_LEFT',  MainForm.Left);
-
     if MainForm.WindowState = wsNormal    then AppSettings.TMIG.WriteString(ApplicationDetails,  'WINDOW_STATE', 'wsNormal');
     if MainForm.WindowState = wsMaximized then AppSettings.TMIG.WriteString(ApplicationDetails,  'WINDOW_STATE', 'wsMaximized');
     if MainForm.WindowState = wsMinimized then AppSettings.TMIG.WriteString(ApplicationDetails,  'WINDOW_STATE', 'wsMinimized');
-
-    if sgAgeView.RowCount > 2 then sgAgeView.SaveLayout(ColumnWidthName, ColumnOrderName, ColumnNames, ColumnPrefix);
-
-    AppSettings.Encode(UserConfig);
     AppSettings.Encode(AppConfig);
-
-    LogText(FEventLogPath, 'Application closed by the user.');
+    LogText(FEventLogPath, 'Application closed.');
   finally
     AppSettings.Free;
   end;
-
 end;
 
 { ------------------------------------------------------------- ! MAIN FORM EVENTS ! ------------------------------------------------------------------------ }
@@ -2400,6 +2383,7 @@ begin
   finally
     AgeView.Free;
   end;
+  Action_AutoColumnSizeClick(Self);
   { TICK }
   Action_BasicView.Checked:=True;
   Action_FullView.Checked :=False;
@@ -2416,9 +2400,27 @@ begin
   finally
     AgeView.Free;
   end;
+  Action_AutoColumnSizeClick(Self);
   { TICK }
   Action_BasicView.Checked:=False;
   Action_FullView.Checked :=True;
+end;
+
+{ --------------------------------------------------------------------------------------------------------------------------------------------- ROW HIGHLIGHT }
+procedure TMainForm.Action_RowHighlightClick(Sender: TObject);
+begin
+  if Action_RowHighlight.Checked then
+  begin
+    sgAgeView.Options:=sgAgeView.Options - [goRowSelect];
+    sgAgeView.Options:=sgAgeView.Options + [goRangeSelect];
+    Action_RowHighlight.Checked:=False;
+  end
+  else
+  begin
+    sgAgeView.Options:=sgAgeView.Options + [goRowSelect];
+    sgAgeView.Options:=sgAgeView.Options - [goRangeSelect];
+    Action_RowHighlight.Checked:=True;
+  end;
 end;
 
 { -------------------------------------------------------------- ! INVOICE TRACKER ! ------------------------------------------------------------------------ }
@@ -2636,6 +2638,8 @@ begin
       begin
         sgAgeView.ColorValues(ARow, ACol, Rect, clRed, clBlack);
       end;
+
+  {  }
 
 end;
 

@@ -79,8 +79,11 @@ var
 begin
   { ------------------------------------------------------------------------------------------------------------------------------------------ WINDOW CAPTION }
   AppSettings:=TSettings.Create;
-  CalendarForm.Caption:=AppSettings.TMIG.ReadString(ApplicationDetails, 'WND_CALENDAR', APPNAME);
-  FreeAndNil(AppSettings);
+  try
+    CalendarForm.Caption:=AppSettings.TMIG.ReadString(ApplicationDetails, 'WND_CALENDAR', APPNAME);
+  finally
+    AppSettings.Free;
+  end;
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------ RESET CHECKBOXES }

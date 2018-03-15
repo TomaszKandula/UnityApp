@@ -1191,7 +1191,7 @@ object MainForm: TMainForm
     Margins.Top = 10
     Margins.Right = 5
     Margins.Bottom = 0
-    ActivePage = TabSheet8
+    ActivePage = TabSheet1
     Align = alClient
     DoubleBuffered = True
     Font.Charset = DEFAULT_CHARSET
@@ -6067,12 +6067,18 @@ object MainForm: TMainForm
     end
     object Action_BasicView: TMenuItem
       Caption = 'Basic view'
-      Checked = True
       OnClick = Action_BasicViewClick
     end
     object Action_FullView: TMenuItem
       Caption = 'Full view'
       OnClick = Action_FullViewClick
+    end
+    object N16: TMenuItem
+      Caption = '-'
+    end
+    object Action_RowHighlight: TMenuItem
+      Caption = 'Row highlight'
+      OnClick = Action_RowHighlightClick
     end
   end
   object TrackerPopup: TPopupMenu

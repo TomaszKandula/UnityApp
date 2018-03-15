@@ -21,8 +21,8 @@ uses
 
 
 { -------------------------------------------------------------- ! MAILER CLASS ! --------------------------------------------------------------------------- }
-type                                                      (* RUN IN WORKER THREAD ONLY *)
-  TMailer = class { BASE CLASS }
+type
+  TMailer = class
   {$TYPEINFO ON}
   private
     pidThd     : integer;
@@ -54,7 +54,7 @@ type                                                      (* RUN IN WORKER THREA
   end;
 
 { ---------------------------------------------------------- ! INVOICE TRACKER CLASS ! ---------------------------------------------------------------------- }
-type                                                       (* RUN IN WORKER THREAD ONLY *)
+type
   TInvoiceTracker = class(TMailer)
   {$TYPEINFO ON}
   published

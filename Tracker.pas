@@ -74,10 +74,13 @@ procedure TTrackerForm.FormCreate(Sender: TObject);
 var
   AppSettings:  TSettings;
 begin
-  AppSettings:=TSettings.Create;
   { ------------------------------------------------------------------------------------------------------------------------------------------ WINDOW CAPTION }
-  TrackerForm.Caption:=AppSettings.TMIG.ReadString(ApplicationDetails, 'WND_TRACKER', APPNAME);
-  FreeAndNil(AppSettings);
+  AppSettings:=TSettings.Create;
+  try
+    TrackerForm.Caption:=AppSettings.TMIG.ReadString(ApplicationDetails, 'WND_TRACKER', APPNAME);
+  finally
+    AppSettings.Free;
+  end;
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------------- ON SHOW }

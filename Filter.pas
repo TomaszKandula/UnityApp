@@ -45,7 +45,7 @@ type
     procedure FilterListClickCheck(Sender: TObject);
     procedure btnCloseClick(Sender: TObject);
   private
-    var   ListState   :  array of array of string;  { KEEP VALUES AND THEIR STATE }
+    var   ListState   :  TLists;      { KEEP VALUES AND THEIR STATE }
     var   pFGrid      :  TStringGrid;
     var   pFColName   :  string;
     var   pFColNumber :  integer;
@@ -181,10 +181,13 @@ procedure TFilterForm.FormCreate(Sender: TObject);
 var
   AppSettings:  TSettings;
 begin
-  AppSettings:=TSettings.Create;
   { ------------------------------------------------------------------------------------------------------------------------------------------ WINDOW CAPTION }
-  FilterForm.Caption:=AppSettings.TMIG.ReadString(ApplicationDetails, 'WND_FILTER', APPNAME);
-  FreeAndNil(AppSettings);
+  AppSettings:=TSettings.Create;
+  try
+    FilterForm.Caption:=AppSettings.TMIG.ReadString(ApplicationDetails, 'WND_FILTER', APPNAME);
+  finally
+    AppSettings.Free;
+  end;
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   SetLength(FilterForm.ListState, 1, 2);
 end;

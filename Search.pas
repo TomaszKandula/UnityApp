@@ -167,12 +167,14 @@ procedure TSearchForm.FormCreate(Sender: TObject);
 var
   AppSettings:  TSettings;
 begin
-  AppSettings:=TSettings.Create;
   { ------------------------------------------------------------------------------------------------------------------------------------------ WINDOW CAPTION }
-  SearchForm.Caption:=AppSettings.TMIG.ReadString(ApplicationDetails, 'WND_SEARCH', APPNAME);
-  FreeAndNil(AppSettings);
+  AppSettings:=TSettings.Create;
+  try
+    SearchForm.Caption:=AppSettings.TMIG.ReadString(ApplicationDetails, 'WND_SEARCH', APPNAME);
+  finally
+    AppSettings.Free;
+  end;
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-  SGrid     :=nil;
   SColName  :='';
   SColNumber:='';
 end;

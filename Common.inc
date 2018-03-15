@@ -221,6 +221,8 @@ const
 
   tmEnabled    = 1;
   tmDisabled   = 0;
+  tmTimersOn   = 2;
+  tmTimersOff  = 3;
 
   { MICROSOFT EXCEL }
 

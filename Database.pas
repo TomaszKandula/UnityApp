@@ -143,8 +143,8 @@ begin
   { ASSIGN PARAMETERS }
   ConCheck.ConnectionString :=dbConnStr;
   ConCheck.Provider         :=dbProvider;
-  ConCheck.ConnectionTimeout:=2;
-  ConCheck.CommandTimeout   :=2;
+  ConCheck.ConnectionTimeout:=ConTimeout;
+  ConCheck.CommandTimeout   :=CmdTimeout;
   ConCheck.KeepConnection   :=False;
   ConCheck.LoginPrompt      :=False;
   ConCheck.Mode             :=cmRead;

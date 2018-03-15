@@ -52,6 +52,7 @@ type
   published
     property   GroupID: string read PGroupID write PGroupID;
     property   AgeDate: string read PAgeDate write PAgeDate;
+    destructor Destroy; override;
     procedure  Read(var Grid: TStringGrid);
     procedure  Details(var Grid: TStringGrid);
     function   GetData(Grid: TStringGrid; Source: TStringGrid; WhichCol: string): string;
@@ -71,6 +72,12 @@ uses
 
 { ############################################################## ! AGE VIEW CLASS ! ######################################################################### }
 
+destructor TAgeView.Destroy;
+begin
+  ArrAgeView:=nil;
+  inherited Destroy;
+end;
+
 { ------------------------------------------------------------------------------------------------------------------------------------------------------ READ }
 procedure TAgeView.Read(var Grid: TStringGrid);
 var
@@ -87,7 +94,7 @@ begin
   LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(idThd) + ']: SQL statement applied [' + StrSQL + '].');
   LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(idThd) + ']: SQL statement parameters [uParam1 = ' + GroupID + '], [uParam2 = ' + AgeDate + '].');
   { ---------------------------------------------------------------------------------------------------------------------------------------- CALCULATE VALUES }
-  for iCNT:=1 to MainForm.sgAgeView.RowCount - 1 do
+  for iCNT:=1 to Grid.RowCount - 1 do
   begin
     { NOT DUE & RANGE1..5 }
     ANotDue:=ANotDue + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fNOT_DUE, 1, 1), iCNT], 0);
@@ -116,11 +123,8 @@ begin
     { COUNT ITEMS }
     inc(CustAll);
   end;
-  { ------------------------------------------------------------------------------------------------------------------------------------------------ FINALIZE }
-  Grid.DefaultRowHeight:=17;
-  if MainForm.AccessMode = adAccessBasic then MainForm.Action_BasicViewClick(self);
-  if MainForm.AccessMode = adAccessFull  then MainForm.Action_FullViewClick(self);
   { -------------------------------------------------------------------------------------------------------------------------------------------- UNINITIALIZE }
+  Grid.DefaultRowHeight:=17;
   Grid.Freeze(False);
 end;
 
