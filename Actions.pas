@@ -11,7 +11,7 @@
 { LYNC version:     2013 or newer                                                                                                                             }
 {                                                                                                                                                             }
 { ----------------------------------------------------------------------------------------------------------------------------------------------------------- }
-unit Actions;  // REFCTOR ALL!!!
+unit Actions;
 
 (* NOTE: DO NOT PLACE 'MAIN' REFERENCE IN THE IMPLEMENTATION SECTION BUT IN THE INTERFACE SECTION. THIS IS NECESSARY DUE TO CLASS EXTENSIONS DEFINED IN MAIN *)
 
@@ -20,28 +20,6 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,  Dialogs, Grids, Buttons, ExtCtrls, ComCtrls, StdCtrls, ADODB, StrUtils, ShellApi,
   TLHelp32, pngimage, ImgList, GIFImg, Clipbrd, Main;
-
-{ ------------------------------------------------------------ ! DATA DISPLAY CLASS ! ----------------------------------------------------------------------- }
-type
-  TDataHandler = class { HELPER INSTANCE }                   //remove this class!
-  {$TYPEINFO ON}
-  private
-    pCUID              :  string;
-    pCustName          :  string;
-    pCustNumber        :  string;
-  public
-    var         IsEdit    :  boolean;
-    property    CUID      :  string read pCUID       write pCUID;
-    property    CustName  :  string read pCustName   write pCustName;
-    property    CustNumber:  string read pCustNumber write pCustNumber;
-  published
-    constructor Create;
-    procedure   GetData;        //part of TActions
-    procedure   EditDetails;    //should be part of addressbook class
-    procedure   SaveDetails;    //should be part of addressbook class
-    procedure   SendStatement;  //separate class from TMailer
-    procedure   MakePhoneCall;  //method belongs to TActions
-  end;
 
 { --------------------------------------------------------------- ! MAIN CLASS ! ---------------------------------------------------------------------------- }
 type
@@ -80,6 +58,7 @@ type
     GeneralPanel: TPanel;
     GeneralTitle: TLabel;
     btnFeedback: TSpeedButton;
+    btnSendEmail: TSpeedButton;
     procedure FormCreate(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure OpenItemsGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
@@ -108,9 +87,26 @@ type
     procedure Cust_PersonClick(Sender: TObject);
     procedure Cust_MailClick(Sender: TObject);
     procedure Cust_PhoneClick(Sender: TObject);
+  private
+    pCUID       :  string;
+    pCustName   :  string;
+    pCustNumber :  string;
   public
-    const NA:  string = 'Not found!';
-    function  GetRunningAplications(SearchName: string): boolean;
+    var         IsEdit    :  boolean;
+    property    CUID      :  string read pCUID       write pCUID;
+    property    CustName  :  string read pCustName   write pCustName;
+    property    CustNumber:  string read pCustNumber write pCustNumber;
+  published
+
+    //procedure   EditDetails; AB
+    //procedure   SaveDetails; AB
+
+    //procedure   SendStatement; IT
+
+    function  GetRunningApps(SearchName: string): boolean;
+    procedure GetData(OpenItemsDest: TStringGrid; HistoryDest: TStringGrid; OpenItemsSrc: TStringGrid);
+    procedure MakePhoneCall;
+
   end;
 
 var
@@ -123,449 +119,148 @@ implementation
 uses
   Model, SQL, Worker, Calendar, Settings, Database, Mailer, Transactions;
 
-var
-  DataHandler: TDataHandler;
-
 {$R *.dfm}
 
-{ ----------------------------------------------------------- ! DATAHANDLER METHODS ! ----------------------------------------------------------------------- }
+{ ------------------------------------------------------------- ! SUPPORTING METHODS ! ---------------------------------------------------------------------- }
 
-{ ---------------------------------------------------------------------------------------------------------------------------------------------------- CREATE }
-constructor TDataHandler.Create;
+{ --------------------------------------------------------------------------------------------------------------------------- CHECK IF APPLICATION IS RUNNING }
+function TActionsForm.GetRunningApps(SearchName: string): boolean;
+var
+  PE:        TProcessEntry32;
+  Snap:      THandle;
+  FileName:  string;
 begin
-  pCUID      :='';
-  pCustName  :='';
-  pCustNumber:='';
+  { INITIALIZE }
+  Result:=False;
+  { TAKE SNAPSHOT OF RUNNING APPLICATION }
+  PE.dwSize:=SizeOf(PE);
+  Snap:=CreateToolHelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+  if Snap <> 0 then begin
+    if Process32First(Snap, PE) then
+    begin
+      FileName:=string(PE.szExeFile);
+      { GO THROUGH ALL THE ITEMS AND STOP IF MATCHED }
+      while Process32Next(Snap, PE) do
+      begin
+        FileName:=string(PE.szExeFile);
+        if LowerCase(FileName) = LowerCase(SearchName) then
+        begin
+          Result:=True;
+          Break;
+        end;
+      end;
+    end;
+    CloseHandle(Snap);
+  end;
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------- READ AND DISPLAY DATA }
-procedure TDataHandler.GetData;
+{ ------------------------------------------------------------------------------------------------------------------------------------- GET ALL RELEVANT DATA }
+procedure TActionsForm.GetData(OpenItemsDest: TStringGrid; HistoryDest: TStringGrid; OpenItemsSrc: TStringGrid);
 const
-  { BELOW ARRAY CONTAINS WITH COLUMN NUMBERS OF 'STRINGGRID' THAT KEEPS OUR     }
-  { SOURCE DATA THAT WILL BE TRANSFERRED TO 'OPENITEMSGRID'. THIS COMPONENT     }
-  { SHOWS SELECTED DETAILS OF ALL REGISTERED OPEN ITEMS FOR GIVEN CUSTOMER      }
-  { THAT WE IDENTIFY BY 'CUID' NUMBER.                                          }
-  SrcColumns:  array[0..12] of integer = (11, 6, 10, 5, 9, 8, 12, 4, 27, 20, 30, 34, 33);
+  { BELOW ARRAY CONTAINS WITH COLUMN NUMBERS OF 'STRINGGRID' THAT KEEPS OUR }
+  { SOURCE DATA THAT WILL BE TRANSFERRED TO 'OPENITEMSGRID'. THIS COMPONENT }
+  { SHOWS SELECTED DETAILS OF ALL REGISTERED OPEN ITEMS FOR GIVEN CUSTOMER  }
+  { THAT WE IDENTIFY BY 'CUID' NUMBER.                                      }
+  SrcColumns:  array[0..11] of integer = (10, 29, 32, 5, 9, 4, 8, 7, 11, 26, 19, 33);
 var
-  iCNT:    integer;
-  jCNT:    integer;
-  zCNT:    integer;
-  Query:   TADOQuery;
-
-//  MSSQL:        TMSSQL;
-//  DailyComment: TDaily;
-
+  iCNT:      integer;
+  jCNT:      integer;
+  zCNT:      integer;
+  DailyText: TDataTables;
+  GenText:   TDataTables;
+  AddrBook:  TDataTables;
 begin
+
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
+  OpenItemsDest.Freeze(True);
+  HistoryDest.Freeze(True);
+  OpenItemsDest.ClearAll(2, 1, 1, False);
+  HistoryDest.ClearAll(2, 1, 1, False);
   Screen.Cursor:=crHourGlass;
   zCNT:=1;
-  with ActionsForm.OpenItemsGrid do SendMessage(Handle, WM_SETREDRAW, 0, 0);
-  with ActionsForm.HistoryGrid   do SendMessage(Handle, WM_SETREDRAW, 0, 0);
-  ActionsForm.OpenItemsGrid.ClearAll(2, 1, 1, False);
-  ActionsForm.HistoryGrid.ClearAll(2, 1, 1, False);
-
-  { ----------------------------------------------------------- ! LIST OF OPEN ITEMS ! ---------------------------------------------------------------------- }
-
-  { ------------------------------------------------------------------------------------------------------------------------- LOAD OPEN ITEMS FROM 'MAINFORM' }
-  if MainForm.sgOpenItems.RowCount > 2 then
-  begin
-    { LOOK FOR THE SAME 'CUID'  }
-    for iCNT:=1 to MainForm.sgOpenItems.RowCount - 1 do
-    begin
-      if MainForm.sgOpenItems.Cells[38, iCNT] = DataHandler.CUID then
-      begin
-        { MOVE DATA FOR SELECTED COLUMNS AND GIVEN ROW ONCE 'CUID' IS FOUND }
-        for jCNT:=low(SrcColumns) to high(SrcColumns) do ActionsForm.OpenItemsGrid.Cells[jCNT + 1, zCNT]:=MainForm.sgOpenItems.Cells[SrcColumns[jCNT], iCNT];
-        { MOVE NEXT }
-        inc(zCNT);
-        ActionsForm.OpenItemsGrid.RowCount:=zCNT;
-      end;
-    end;
-  end;
-  { --------------------------------------------------------------------------------------------------------------------- SORT VIA PAYMENT STATUS | ASCENDING }
-  ActionsForm.OpenItemsGrid.MSort(12, 1, True);
-  { ---------------------------------------------------------------------------------------------------------------------------------- CUSTOMER NAME & NUMBER }
-  ActionsForm.Cust_Name.Caption  :=DataHandler.CustName;
-  ActionsForm.Cust_Number.Caption:=DataHandler.CustNumber;
-
-  { --------------------------------------------------- ! OTHER CUSTOMER DATA AND USER COMMENT ! ------------------------------------------------------------ }
-
-  { ------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE SQL }
-  Query:=TADOQuery.Create(nil);
-  Query.Connection:=MainForm.FDbConnect;
   try
-    try
-      Query.SQL.Clear;
-      Query.SQL.Text:='SELECT DISTINCT CONTACT, ESTATEMENTS, TELEPHONE FROM tbl_Addressbook WHERE CUID = ' + QuotedStr(DataHandler.CUID);
-      Query.Open;
-      if Query.RecordCount > 0 then
-      begin
-        ActionsForm.Cust_Person.Text:=Query.Recordset.Fields[0].Value;
-        ActionsForm.Cust_Mail.Text  :=Query.Recordset.Fields[1].Value;
-        ActionsForm.Cust_Phone.Text :=Query.Recordset.Fields[2].Value;
-      end;
-    finally
-      Query.Close;
-    end;
+    { --------------------------------------------------------- ! LIST OF OPEN ITEMS ! ---------------------------------------------------------------------- }
 
-    { ---------------------------------------------------------------------------------------------------------------------------------------- DAILY COMMENTS }
-
-    try
-      Query.SQL.Clear;
-      Query.SQL.Text:='SELECT AGEDATE, STAMP, FIXCOMMENT FROM tbl_daily WHERE CUID = ' + QuotedStr(DataHandler.CUID);
-      Query.Open;
-      if Query.RecordCount > 0 then
+    { ----------------------------------------------------------------------------------------------------------------------- LOAD OPEN ITEMS FROM "MAINFORM" }
+    if OpenItemsSrc.RowCount > 2 then
+    begin
+      { LOOK FOR THE SAME "CUID" }
+      for iCNT:=1 to OpenItemsSrc.RowCount - 1 do
       begin
-        iCNT:=1;
-        ActionsForm.HistoryGrid.RowCount:=Query.RecordCount + 1;
-        while not Query.Recordset.EOF do
+        if OpenItemsSrc.Cells[37, iCNT] = CUID then
         begin
-          for jCNT:=1 to Query.Recordset.Fields.Count do ActionsForm.HistoryGrid.Cells[jCNT, iCNT]:=MainForm.OleGetStr(Query.Recordset.Fields[jCNT - 1].Value);
-          Query.Recordset.MoveNext;
-          inc(iCNT);
+          { MOVE DATA FOR SELECTED COLUMNS AND GIVEN ROW ONCE "CUID" IS FOUND }
+          for jCNT:=Low(SrcColumns) to High(SrcColumns)
+            do OpenItemsDest.Cells[jCNT + 1, zCNT]:=OpenItemsSrc.Cells[SrcColumns[jCNT], iCNT];
+          { MOVE NEXT }
+          inc(zCNT);
+          OpenItemsDest.RowCount:=zCNT;
         end;
       end;
-    finally
-      { SORT DESCENDING VIA CREATION DATE AND TIME }
-      ActionsForm.HistoryGrid.MSort(2, 0, False);
-      Query.Close;
     end;
+    { ------------------------------------------------------------------------------------------------------------------- SORT VIA PAYMENT STATUS | ASCENDING }
+    OpenItemsDest.MSort(11, 1, True);
+    { -------------------------------------------------------------------------------------------------------------------------------- CUSTOMER NAME & NUMBER }
+    Cust_Name.Caption  :=CustName;
+    Cust_Number.Caption:=CustNumber;
 
-(*
+    { ----------------------------------------------------------- ! CUSTOMER DATA ! ------------------------------------------------------------------------- }
 
-      DailyComment:=TDaily.Create;
-      try
-        { PREPARE FOR QUERY }
-        DailyComment.idThd     :=MainThreadID;
-        DailyComment.CUID      :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('CUID', 1, 1), MainForm.sgAgeView.Row];
-        DailyComment.AGEDATE   :=MainForm.GroupListDates.Text;
-        { RELOAD HISTORY CONTENT }
-        MSSQL:=TMSSQL.Create(MainForm.ADOConnect);
-        try
-          { READ ALL LINES FOR GIVEN CUID }
-          DailyComment.ManyLines:=True;
-          DailyComment.Read;
-          MSSQL.SqlToGrid(ActionsForm.HistoryGrid, DailyComment.DataSet, False);
-        finally
-          MSSQL.Free;
-        end;
-      finally
-        DailyComment.Free;
-        //ActionsForm.HistoryGrid.MSort(2, 0, False);
-      end;
-*)
-
-    { --------------------------------------------------------------------------------------------------------------------------------------- GENERAL COMMENT }
+    AddrBook:=TDataTables.Create(MainForm.FDbConnect);
     try
-      Query.SQL.Clear;
-      Query.SQL.Text:='SELECT FIXCOMMENT FROM tbl_general WHERE CUID = ' + QuotedStr(DataHandler.CUID);
-      Query.Open;
-      { WE SHOULD HAVE ALWAYS ONE FIELD }
-      if Query.RecordCount = 1 then ActionsForm.GeneralCom.Text:=MainForm.OleGetStr(Query.Recordset.Fields[0].Value);
+      AddrBook.Columns.Add(TAddressBook.CONTACT);
+      AddrBook.Columns.Add(TAddressBook.ESTATEMENTS);
+      AddrBook.Columns.Add(TAddressBook.TELEPHONE);
+      AddrBook.CustFilter:=WHERE + TAddressBook.CUID + EQUAL + QuotedStr(CUID);
+      AddrBook.OpenTable(TblAddressbook);
+      if AddrBook.DataSet.RecordCount = 1 then
+      begin
+        Cust_Person.Text:=MainForm.OleGetStr(AddrBook.DataSet.Fields[TAddressBook.CONTACT].Value);
+        Cust_Mail.Text  :=MainForm.OleGetStr(AddrBook.DataSet.Fields[TAddressBook.ESTATEMENTS].Value);
+        Cust_Phone.Text :=MainForm.OleGetStr(AddrBook.DataSet.Fields[TAddressBook.TELEPHONE].Value);
+        Cust_Phone.Text:=StringReplace(Cust_Phone.Text, CRLF, ' ', [rfReplaceAll]);
+      end;
     finally
-      Query.Close;
+      AddrBook.Free;
     end;
 
+    { ------------------------------------------------------ ! HISTORY OF DAILY COMMENTS ! ------------------------------------------------------------------ }
+
+    DailyText:=TDataTables.Create(MainForm.FDbConnect);
+    try
+      DailyText.OpenTable(TblDaily);
+      DailyText.DataSet.Filter:=TDaily.CUID + EQUAL + QuotedStr(CUID);
+      DailyText.DataSet.Sort:=TDaily.STAMP + DESC;
+      if not (DailyText.DataSet.EOF) then DailyText.SqlToGrid(HistoryDest, DailyText.DataSet, False, True);
+    finally
+      DailyText.Free;
+    end;
+
+    { ----------------------------------------------------------- ! GENERAL COMMENTS ! ---------------------------------------------------------------------- }
+
+    GenText:=TDataTables.Create(MainForm.FDbConnect);
+    try
+      GenText.OpenTable(TblGeneral);
+      GenText.DataSet.Filter:=TGeneral.CUID + EQUAL + QuotedStr(CUID);
+      if not (GenText.DataSet.EOF) then GeneralCom.Text:=MainForm.OleGetStr(GenText.DataSet.Fields[TGeneral.FIXCOMMENT].Value);
+    finally
+      GenText.Free;
+    end;
+
+  { -------------------------------------------------------------------------------------------------------------------------------------------- UNINITIALIZE }
   finally
-    Query.Free;
-    { ------------------------------------------------------------------------------------------------------------------------------------------ UNINITIALIZE }
-    with ActionsForm.OpenItemsGrid do SendMessage(Handle, WM_SETREDRAW, 1, 0);
-    with ActionsForm.HistoryGrid   do SendMessage(Handle, WM_SETREDRAW, 1, 0);
-    //if AnsiPos(';', ActionsForm.Cust_Mail.Text) > 0 then ActionsForm.Cust_Mail.Text:=LeftStr((ActionsForm.Cust_Mail.Text), AnsiPos(';', ActionsForm.Cust_Mail.Text) - 1);
-    ActionsForm.Cust_Phone.Text:=StringReplace(ActionsForm.Cust_Phone.Text, #13#10, ' ', [rfReplaceAll]);
-    ActionsForm.OpenItemsGrid.Repaint;
-    ActionsForm.HistoryGrid.Repaint;
-    ActionsForm.OpenItemsGrid.AutoThumbSize;
-    ActionsForm.HistoryGrid.AutoThumbSize;
+    OpenItemsDest.Freeze(False);
+    HistoryDest.Freeze(False);
+    OpenItemsDest.AutoThumbSize;
+    HistoryDest.AutoThumbSize;
+    OpenItemsDest.SetColWidth(10, 20);
+    HistoryDest.SetColWidth(10, 20);
     Screen.Cursor:=crDefault;
   end;
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------- EDIT CUSTOMER DETAILS }
-procedure TDataHandler.EditDetails;
-{ --------------------------------------------------------------- ! INNER BLOCK ! --------------------------------------------------------------------------- }
-procedure PicChange(number: integer);
-begin
-  ActionsForm.imgSaveDetails.Picture.Bitmap.FreeImage;
-  ActionsForm.imgSaveDetails.Picture:=nil;
-  ActionsForm.imgList.GetBitmap(number, ActionsForm.imgSaveDetails.Picture.Bitmap);
-  ActionsForm.imgSaveDetails.Invalidate;
-end;
-{ ---------------------------------------------------------------- ! MAIN BLOCK ! --------------------------------------------------------------------------- }
-begin
-  { IF NOT FOUND THEN QUIT }
-  if (ActionsForm.Cust_Person.Text = ActionsForm.NA) and (ActionsForm.Cust_Mail.Text = ActionsForm.NA) and (ActionsForm.Cust_Phone.Text = ActionsForm.NA) then
-  begin
-    MainForm.MsgCall(1, 'This customer does not exist in Address Book. Please add to Address Book first.');
-    Exit;
-  end;
-  { EDIT ON/OFF }
-  if IsEdit then
-  begin
-    ActionsForm.Cust_Name.Cursor      :=crHandPoint;
-    ActionsForm.Cust_Number.Cursor    :=crHandPoint;
-    ActionsForm.Cust_Person.Cursor    :=crHandPoint;
-    ActionsForm.Cust_Mail.Cursor      :=crHandPoint;
-    ActionsForm.Cust_Phone.Cursor     :=crHandPoint;
-    ActionsForm.Cust_Person.ReadOnly  :=True;
-    ActionsForm.Cust_Mail.ReadOnly    :=True;
-    ActionsForm.Cust_Phone.ReadOnly   :=True;
-    ActionsForm.Cust_Person.Font.Color:=clBlack;
-    ActionsForm.Cust_Mail.Font.Color  :=clBlack;
-    ActionsForm.Cust_Phone.Font.Color :=clBlack;
-    ActionsForm.Cust_Person.Color     :=clWhite;
-    ActionsForm.Cust_Mail.Color       :=clWhite;
-    ActionsForm.Cust_Phone.Color      :=clWhite;
-    ActionsForm.imgSaveDetails.Enabled:=False;
-    IsEdit:=False;
-    PicChange(0);
-  end else
-  begin
-    ActionsForm.Cust_Name.Cursor      :=crIBeam;
-    ActionsForm.Cust_Number.Cursor    :=crIBeam;
-    ActionsForm.Cust_Person.Cursor    :=crIBeam;
-    ActionsForm.Cust_Mail.Cursor      :=crIBeam;
-    ActionsForm.Cust_Phone.Cursor     :=crIBeam;
-    ActionsForm.Cust_Person.ReadOnly  :=False;
-    ActionsForm.Cust_Mail.ReadOnly    :=False;
-    ActionsForm.Cust_Phone.ReadOnly   :=False;
-    ActionsForm.Cust_Person.Font.Color:=clNavy;
-    ActionsForm.Cust_Mail.Font.Color  :=clNavy;
-    ActionsForm.Cust_Phone.Font.Color :=clNavy;
-    ActionsForm.Cust_Person.Color     :=clCream;
-    ActionsForm.Cust_Mail.Color       :=clCream;
-    ActionsForm.Cust_Phone.Color      :=clCream;
-    ActionsForm.imgSaveDetails.Enabled:=True;
-    IsEdit:=True;
-    PicChange(1);
-  end;
-end;
-
-{ ------------------------------------------------------------------------------------------------------------------------------------- SAVE CUSTOMER DETAILS }
-procedure TDataHandler.SaveDetails;
-var
-  Query:   TADOQuery;
-  StrSQL:  string;
-begin
-  { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-  Screen.Cursor:=crHourGlass;
-  StrSQL:='SELECT DISTINCT CONTACT, ESTATEMENTS, TELEPHONE FROM tbl_addressbook WHERE CUID = ' + QuotedStr(DataHandler.CUID);
-  { ------------------------------------------------------------------------------------------------------------------------------------------------- PROCESS }
-  Query:=TADOQUery.Create(nil);
-  Query.Connection:=MainForm.FDbConnect;
-  Query.SQL.Clear;
-  Query.SQL.Text:=StrSQL;
-  try
-    try
-      Query.Open;
-      if Query.RecordCount = 1 then
-      begin
-        Query.Edit;
-        Query.Recordset.Fields['CONTACT'    ].Value:=ActionsForm.Cust_Person.Text;
-        Query.Recordset.Fields['ESTATEMENTS'].Value:=ActionsForm.Cust_Mail.Text;//  + ';' + Query.Recordset.Fields['ESTATEMENTS'].Value;
-        Query.Recordset.Fields['TELEPHONE'  ].Value:=ActionsForm.Cust_Phone.Text;
-        Query.Recordset.Update(EmptyParam, EmptyParam);
-      end;
-    except
-      on E: Exception do
-        MainForm.MsgCall(1, 'Cannot save customer details. Please contact IT support. Error thrown: ' + E.Message + '.');
-    end;
-  finally
-    Query.Close;
-    Query.Free;
-  end;
-  { -------------------------------------------------------------------------------------------------------------------------------------------- UNINITIALIZE }
-  IsEdit:=True;
-  ActionsForm.imgEditDetailsClick(Self);
-  Screen.Cursor:=crDefault;
-end;
-
-{ -------------------------------------------------------------------------------------------------------------------------------------------- SEND STATEMENT }
-procedure TDataHandler.SendStatement;
-{ ------------------------------------------------------------- ! COMMON VARIABLES ! ------------------------------------------------------------------------ }
-var
-  InvoiceTracker: TInvoiceTracker;
-  { COUNTERS }
-  iCNT:        integer;
-  { HTML FOR INVOICE LIST }
-  HTMLTable:   string;
-  HTMLTemp:    string;
-  HTMLRow:     string;
-  HTMLStat:    string;
-  CustAddr:    string;
-  CustName:    string;
-  { FILES AND EMAILS }
-  EmailFr:     string;
-  EmailTo:     string;
-  EmailCc:     string;
-  EmailBc:     string;
-  EmailRt:     string;
-  EmailSub:    string;
-  EmailBody:   string;
-  { REAY EMAIL BODY }
-  BankDetails: string;
-  LBUAddress:  string;
-  Telephone:   string;
-  SL:          TStringList;
-  AppSettings: TSettings;
-{ --------------------------------------------------------------------------------------------------------------------------- RETURN EMAILS FROM TRACKER LIST }
-function RetriveEmails(var EmailFr: string; var EmailTo: string; SG: TStringGrid): boolean;
-var
-  iCNT:  integer;
-begin
-  { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-  Result:=False;
-  EmailFr:='';
-  EmailTo:='';
-  { REFRESH INVOICE TRACKER }
-  InvoiceTracker:=TInvoiceTracker.Create;
-  try
-    InvoiceTracker.Refresh(MainForm.sgInvoiceTracker, 'ALL');
-  finally
-    InvoiceTracker.Free;
-  end;
-  { --------------------------------------------------------------------------------------- LOOK FOR EMAILS AND BANK DETAILS ON THE INVOICE TRACKER COMPONENT }
-  if MainForm.sgInvoiceTracker.RowCount > 1 then
-    for iCNT:=1 to MainForm.sgInvoiceTracker.RowCount - 1 do
-      if DataHandler.CUID = MainForm.sgInvoiceTracker.Cells[2, iCNT] then
-      begin
-        EmailFr    :=MainForm.sgInvoiceTracker.Cells[8,  iCNT];
-        EmailTo    :=MainForm.sgInvoiceTracker.Cells[10, iCNT];
-        BankDetails:=MainForm.sgInvoiceTracker.Cells[24, iCNT];
-        LBUAddress :=MainForm.sgInvoiceTracker.Cells[25, iCNT] + #13#10 + '<br>' +
-                     MainForm.sgInvoiceTracker.Cells[26, iCNT] + #13#10 + '<br>' +
-                     MainForm.sgInvoiceTracker.Cells[27, iCNT];
-        Telephone  :=MainForm.sgInvoiceTracker.Cells[28, iCNT];
-        if (EmailFr <> '') and (EmailTo <> '') then Result:=True;
-        Break;
-      end;
-end;
-{ ------------------------------------------------------------------------------------------------------------------------ MOVE OPEN ITEMS DATA TO HTML TABLE }
-procedure OpenItemsToHtmlTable(var HtmlStatement: string; var SG: TStringGrid; ActualRow: integer);
-begin
-  HTMLTemp:=HTMLRow;
-  HTMLTemp:=StringReplace(HTMLTemp, '{INV_NUM}', SG.Cells[1, ActualRow], [rfReplaceAll]);
-  HTMLTemp:=StringReplace(HTMLTemp, '{INV_DAT}', SG.Cells[8, ActualRow], [rfReplaceAll]);
-  HTMLTemp:=StringReplace(HTMLTemp, '{DUE_DAT}', SG.Cells[7, ActualRow], [rfReplaceAll]);
-  HTMLTemp:=StringReplace(HTMLTemp, '{INV_CUR}', SG.Cells[6, ActualRow], [rfReplaceAll]);
-  HTMLTemp:=StringReplace(HTMLTemp, '{INV_AMT}', SG.Cells[5, ActualRow], [rfReplaceAll]);
-  HTMLTemp:=StringReplace(HTMLTemp, '{INV_OSA}', SG.Cells[4, ActualRow], [rfReplaceAll]);
-  HtmlStatement:=HtmlStatement + HTMLTemp;
-end;
-{ ---------------------------------------------------------------- ! MAIN BLOCK ! --------------------------------------------------------------------------- }
-begin
-  if (ActionsForm.Cust_Mail.Text = '') or (ActionsForm.Cust_Mail.Text = ' ') or (ActionsForm.Cust_Mail.Text = ActionsForm.NA) then
-  begin
-    MainForm.MsgCall(2, 'Statement cannot be sent. There is no e-mail provided.');
-    Exit;
-  end;
-  { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-  Screen.Cursor:=crHourGlass;
-  CustName:=DataHandler.CustName;
-  SL:=TStringList.Create;
-  AppSettings:=TSettings.Create;
-  { -------------------------------------------------------------------------------------------------------- HTML TABLE WITH COLUMNS AND PLACEHOLDER FOR ROWS }
-  HTMLTable:='<table class="data">'                   +#13#10+
-             '<!-- HEADERS -->'                       +#13#10+
-             '<tr>'                                   +#13#10+
-             '  <!-- COLUMNS -->'                     +#13#10+
-             '  <th class="col1">Invoice No.:</th>'   +#13#10+
-             '  <th class="col2">Invoice Date:</th>'  +#13#10+
-             '  <th class="col3">Due date:</th>'      +#13#10+
-             '  <th class="col4">Currency:</th>'      +#13#10+
-             '  <th class="col5">Amount:</th>'        +#13#10+
-             '  <th class="col6">O/S Amount:</th>'    +#13#10+
-             '</tr>'                                  +#13#10+
-             '  <!-- ROWS WITH DATA -->'              +#13#10+
-             '{ROWS}'                                 +#13#10+
-             '</table>';
-  { ------------------------------------------------------------------------------------------- HTML ROW FORM TO BE FILLED WITH DATA AND PUT INTO 'HTMLTABLE' }
-  HTMLRow:='<tr>'                                     +#13#10+
-           '  <td class="col1">{INV_NUM}</td>'        +#13#10+
-           '  <td class="col2">{INV_DAT}</td>'        +#13#10+
-           '  <td class="col3">{DUE_DAT}</td>'        +#13#10+
-           '  <td class="col4">{INV_CUR}</td>'        +#13#10+
-           '  <td class="col5">{INV_AMT}</td>'        +#13#10+
-           '  <td class="col6">{INV_OSA}</td>'        +#13#10+
-           '</tr>'                                    +#13#10;
-  { ---------------------------------------------------------------------------------------------------------------------- PROCEED IF WE HAVE LISTED INVOICES }
-  if ActionsForm.OpenItemsGrid.RowCount > 2 then
-  begin
-    { --------------------------------------------------------------------------------------------------------------------------- SKIP FIRST ROW BEING HEADER }
-    for iCNT:=1 to ActionsForm.OpenItemsGrid.RowCount - 1 do
-      if StrToFloatDef(ActionsForm.OpenItemsGrid.Cells[4, iCNT], 0) <> 0 then
-        OpenItemsToHtmlTable(HTMLStat, ActionsForm.OpenItemsGrid, iCNT);
-    { ---------------------------------------------------------------------------------------------------------------- GET CUID POSITION FROM OPEN ITEMS LIST }
-    for iCNT:=1 to MainForm.sgOpenItems.RowCount - 1 do
-      if MainForm.sgOpenItems.Cells[38, iCNT] = DataHandler.CUID then break;
-    { ------------------------------------------------------------------------------------------------------------------ BUILD HTML CODE FOR CUSTOMER ADDRESS }
-    CustAddr:='<p class="p"><b>' + CustName + '</b><br />' +#13#10;
-    { ------------------------------------------------------------------------------------------------------------------------ ADD ADDRESS FIELD IF NOT EMPTY }
-    if (MainForm.sgOpenItems.Cells[21, iCNT] <> '') and (MainForm.sgOpenItems.Cells[21, iCNT] <> ' ') then CustAddr:=CustAddr + MainForm.sgOpenItems.Cells[21, iCNT] + '<br />' +#13#10;
-    if (MainForm.sgOpenItems.Cells[22, iCNT] <> '') and (MainForm.sgOpenItems.Cells[22, iCNT] <> ' ') then CustAddr:=CustAddr + MainForm.sgOpenItems.Cells[22, iCNT] + '<br />' +#13#10;
-    if (MainForm.sgOpenItems.Cells[23, iCNT] <> '') and (MainForm.sgOpenItems.Cells[23, iCNT] <> ' ') then CustAddr:=CustAddr + MainForm.sgOpenItems.Cells[23, iCNT] + '<br />' +#13#10;
-    if (MainForm.sgOpenItems.Cells[24, iCNT] <> '') and (MainForm.sgOpenItems.Cells[24, iCNT] <> ' ') then CustAddr:=CustAddr + MainForm.sgOpenItems.Cells[24, iCNT] + '<br />' +#13#10;
-    if (MainForm.sgOpenItems.Cells[25, iCNT] <> '') and (MainForm.sgOpenItems.Cells[25, iCNT] <> ' ') then CustAddr:=CustAddr + MainForm.sgOpenItems.Cells[25, iCNT] + '<br />' +#13#10;
-    CustAddr:=CustAddr + '</p>' +#13#10;
-    { ----------------------------------------------------------------------------------------------------------------------------------- FILL THE STATEMENT  }
-    try
-      { --------------------------------------------------------------------------------------------------------------------------------------------- PREPARE }
-      SL.LoadFromFile(AppSettings.LayoutDir + 'all_statement_1.html');
-      { ----------------------------------------------------------------------------------------------------------------------- SEND AN E-MAIL WITH STATEMENT }
-      if RetriveEmails(EmailFr, EmailTo, MainForm.sgInvoiceTracker) then
-      begin
-        { HTML BODY }
-        HTMLTable:=StringReplace(HTMLTable,  '{ROWS}',         HTMLStat,   [rfReplaceAll]);
-        EmailBody:=StringReplace(SL.Text,    '{INVOICE_LIST}', HTMLTable,  [rfReplaceAll]);
-        EmailBody:=StringReplace(EmailBody,  '{ADDR_DATA}',    CustAddr,   [rfReplaceAll]);
-        EmailBody:=StringReplace(EmailBody,  '{BANKS}',        BankDetails,[rfReplaceAll]);
-        EmailBody:=StringReplace(EmailBody,  '{ADDR_LBU}',     LBUAddress, [rfReplaceAll]);
-        EmailBody:=StringReplace(EmailBody,  '{EMAIL}',        EmailFr,    [rfReplaceAll]);
-        EmailBody:=StringReplace(EmailBody,  '{TEL}',          Telephone,  [rfReplaceAll]);
-        { EMAILS }
-        EmailCc :=EmailFr;
-        EmailBc :='';
-        EmailRt :='';
-        EmailSub:='Account Statement (' + CustName + ')';
-        { MAILER SETUP }
-        InvoiceTracker:=TInvoiceTracker.Create;
-        try
-          InvoiceTracker.XMailer    :=EmailFr;
-          InvoiceTracker.MailFrom   :=EmailFr;
-          InvoiceTracker.MailTo     :=EmailTo;
-          InvoiceTracker.MailCc     :=EmailCc;
-          InvoiceTracker.MailBcc    :=EmailBc;
-          InvoiceTracker.MailRt     :=EmailRt;
-          InvoiceTracker.MailSubject:=EmailSub;
-          InvoiceTracker.MailBody   :=EmailBody;
-          InvoiceTracker.idThd      :=MainThreadID;
-          { TRY TO SEND }
-          if InvoiceTracker.SendNow then
-          begin
-            //ActionsForm.DailyCom.Text:=ActionsForm.DailyCom.Text + #13#10 + 'E-mail statement has been sent.';
-            MainForm.MsgCall(1, 'Statement has been sent successfully!')
-          end
-            else
-              MainForm.MsgCall(2, 'Cannot send statement from e-mail address: ' + EmailFr + '. Please contact IT support.');
-        finally
-          InvoiceTracker.Free;
-        end;
-        { ----------------------------------------------------------------------------------------------------------------------- DEBUG LINES | DO NOT DELETE }
-        //SL.Text:=EmailBody;
-        //SL.SaveToFile('G:\test.html');
-      end
-        else
-          MainForm.MsgCall(2, 'Cannot send statement from e-mail address: ' + EmailFr + '. Please make sure that this customer is registered on Invoice Tracker list.');
-    finally
-      AppSettings.Free;
-      SL.Free;
-      Screen.Cursor:=crDefault;
-    end;
-  end;
-end;
-
 { ------------------------------------------------------------------------------------------------------------------------------------------- MAKE PHONE CALL }
-procedure TDataHandler.MakePhoneCall;
+procedure TActionsForm.MakePhoneCall;
 var
   AppSettings:  TSettings;
 begin
@@ -578,7 +273,7 @@ begin
       Exit;
     end;
     { CHECK IF LYNC/SKYPE IS RUNNING }
-    if not ActionsForm.GetRunningAplications('lync.exe') then
+    if not ActionsForm.GetRunningApps('lync.exe') then
     begin
       MainForm.MsgCall(3, APPNAME + ' cannot find running Microsoft Skype/Lync for Business. Please open it and try again.');
       Exit;
@@ -587,7 +282,7 @@ begin
     ShellExecute(ActionsForm.Handle, 'open', PChar(AppSettings.AppDir + LyncCall), PChar(ActionsForm.Cust_Phone.Text), nil, SW_SHOWNORMAL);
     if ActionsForm.DailyCom.Text = '' then ActionsForm.DailyCom.Text:='Called customer today.'
       else
-        ActionsForm.DailyCom.Text:=ActionsForm.DailyCom.Text + #13#10 + 'Called customer today.';
+        ActionsForm.DailyCom.Text:=ActionsForm.DailyCom.Text + CRLF + 'Called customer today.';
   finally
     AppSettings.Free;
   end;
@@ -595,125 +290,75 @@ end;
 
 { ----------------------------------------------------------- ! MAIN THREAD METHODS ! ----------------------------------------------------------------------- }
 
-{ ------------------------------------------------------------ ! SUPPORTING METHODS ! ----------------------------------------------------------------------- }
-{ --------------------------------------------------------------------------------------------------------------------------- CHECK IF APPLICATION IS RUNNING }
-function TActionsForm.GetRunningAplications(SearchName: string): boolean;
-var
-  PE:     TProcessEntry32;
-  Snap:   THandle;
-  fName:  string;
-begin
-  { INITIALIZE }
-  Result:=False;
-  { TAKE SNAPSHOT OF RUNNING APPLICATION }
-  PE.dwSize:=SizeOf(PE);
-  Snap:=CreateToolHelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-  if Snap <> 0 then begin
-    if Process32First(Snap, PE) then begin
-      fName:=string(PE.szExeFile);
-      { GO THROUGH ALL THE ITEMS AND STOP IF MATCHED }
-      while Process32Next(Snap, PE) do begin
-        fName:=string(PE.szExeFile);
-        if LowerCase(fName) = LowerCase(SearchName) then begin
-          Result:=True;
-          Break;
-        end;
-      end;
-    end;
-    CloseHandle(Snap);
-  end;
-end;
-
 { ------------------------------------------------------------------------------------------------------------------------------------------------- ON CREATE }
 procedure TActionsForm.FormCreate(Sender: TObject);
 var
-  AppSettings:  TSettings;
+  AppSettings: TSettings;
 begin
-  { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-  DataHandler:=TDataHandler.Create;
-  DataHandler.IsEdit:=False;
   AppSettings:=TSettings.Create;
-  { ------------------------------------------------------------------------------------------------------------------------------------------ WINDOW CAPTION }
-  ActionsForm.Caption:=AppSettings.TMIG.ReadString(ApplicationDetails, 'WND_TRANSACTIONS', APPNAME);
-  { ---------------------------------------------------------------------------------------------------------------------- SETUP COLUMNS HEADERS | OPEN ITEMS }
-  OpenItemsGrid.RowCount:=2;
-  OpenItemsGrid.ColCount:=14;
-  OpenItemsGrid.Cols[0].Text :='';
-  OpenItemsGrid.Cols[1].Text :=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER11', 'InvoNo');
-  OpenItemsGrid.Cols[2].Text :=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER6',  'OpenAm');
-  OpenItemsGrid.Cols[3].Text :=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER10', 'Am');
-  OpenItemsGrid.Cols[4].Text :=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER5',  'OpenCurAm');
-  OpenItemsGrid.Cols[5].Text :=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER9',  'CurAm');
-  OpenItemsGrid.Cols[6].Text :=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER8',  'ISO');
-  OpenItemsGrid.Cols[7].Text :=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER12', 'DueDt');
-  OpenItemsGrid.Cols[8].Text :=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER4',  'VoDt');
-  OpenItemsGrid.Cols[9].Text :=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER27', 'ValDt');
-  OpenItemsGrid.Cols[10].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER20', 'Ctrl');
-  OpenItemsGrid.Cols[11].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER30', 'Txt');
-  OpenItemsGrid.Cols[12].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER34', 'PmtStat');
-  OpenItemsGrid.Cols[13].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER33', 'AddTxt');
-  FreeAndNil(AppSettings);
-  { -------------------------------------------------------------------------------------------------------------------- SETUP COLUMNS HEADERS | HISTORY GRID }
+  try
+    { ----------------------------------------------------------------------------------------------------------------------------------- LOAD WINDOW CAPTION }
+    ActionsForm.Caption:=AppSettings.TMIG.ReadString(ApplicationDetails, 'WND_TRANSACTIONS', APPNAME);
+    { -------------------------------------------------------------------------------------------------------------------------------- OPEN ITEMS STRING GRID }
+    OpenItemsGrid.RowCount:=2;
+    OpenItemsGrid.ColCount:=13;
+    OpenItemsGrid.Cols[0].Text :='';
+    OpenItemsGrid.Cols[1].Text :=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER10', 'InvoNo');
+    OpenItemsGrid.Cols[2].Text :=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER29', 'Txt');
+    OpenItemsGrid.Cols[3].Text :=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER32', 'AddTxt');
+    OpenItemsGrid.Cols[4].Text :=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER5',  'OpenAm');
+    OpenItemsGrid.Cols[5].Text :=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER9',  'Am');
+    OpenItemsGrid.Cols[6].Text :=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER4',  'OpenCurAm');
+    OpenItemsGrid.Cols[7].Text :=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER8',  'CurAm');
+    OpenItemsGrid.Cols[8].Text :=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER7',  'ISO');
+    OpenItemsGrid.Cols[9].Text :=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER11', 'DueDt');
+    OpenItemsGrid.Cols[10].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER26', 'ValDt');
+    OpenItemsGrid.Cols[11].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER19', 'Ctrl');
+    OpenItemsGrid.Cols[12].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER33', 'PmtStat');
+  finally
+    AppSettings.Free;
+  end;
+  { ------------------------------------------------------------------------------------------------------------------------------------- HISTORY STRING GRID }
   HistoryGrid.RowCount:=2;
   HistoryGrid.ColCount:=11;
-  { HIDE THIRD COLUMN FROM USER, IT IS NEEDED ONLY FOR SORTING PURPOSES }
-  HistoryGrid.ColWidths[1]:= -1;
-  HistoryGrid.ColWidths[2]:= -1;
-  HistoryGrid.ColWidths[3]:= -1;
-  HistoryGrid.ColWidths[7]:= -1;
-  HistoryGrid.ColWidths[8]:= -1;
-  HistoryGrid.ColWidths[9]:= -1;
+  { HIDE IRELEVANT FOR USER COLUMNS }
+  HistoryGrid.ColWidths[1] := -1;
+  HistoryGrid.ColWidths[2] := -1;
+  HistoryGrid.ColWidths[3] := -1;
+  HistoryGrid.ColWidths[7] := -1;
+  HistoryGrid.ColWidths[8] := -1;
+  HistoryGrid.ColWidths[9] := -1;
   HistoryGrid.ColWidths[10]:= -1;
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------------- ON SHOW }
 procedure TActionsForm.FormShow(Sender: TObject);
 begin
-  { ---------------------------------------------------------------------------------------------------------------------------------- RESET CUSTOMER DETAILS }
-  { CAPTIONS AND MEMOS }
-  Cust_Name.Caption   :=NA;
-  Cust_Number.Caption :=NA;
-  Cust_Person.Text    :=NA;
-  Cust_Mail.Text      :=NA;
-  Cust_Phone.Text     :=NA;
+  { CAPTIONS AND MEMO }
+  Cust_Name.Caption   :=unNotFound;
+  Cust_Number.Caption :=unNotFound;
+  Cust_Person.Text    :=unNotFound;
+  Cust_Mail.Text      :=unNotFound;
+  Cust_Phone.Text     :=unNotFound;
   DailyCom.Text       :='';
   GeneralCom.Text     :='';
   StatusBar.SimpleText:='';
-  { DISALLOW EDIT }
-  if DataHandler.IsEdit then imgEditDetailsClick(Self);
-  { ASSIGN: CUID, CUSTOMER NAME AND NUMBER }
-  DataHandler.CUID      :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('CUID', 1, 1), MainForm.sgAgeView.Row];
-  DataHandler.CustName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('CUSTOMER NAME',   1, 1), MainForm.sgAgeView.Row];
-  DataHandler.CustNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('CUSTOMER NUMBER', 1, 1), MainForm.sgAgeView.Row];
-  { OPEN ITEMS DATE AND TIME }
-//  StatusBar.SimpleText:='Open items date and time: ' + OpenItems.ArrOpenItems[1, 1] + ' @ ' + OpenItems.ArrOpenItems[1, 2] + '.';
+  { CUSTOMER KEY INFORMATION }
+  CUID      :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUID,            1, 1), MainForm.sgAgeView.Row];
+  CustName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), MainForm.sgAgeView.Row];
+  CustNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), MainForm.sgAgeView.Row];
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------------------- ON ACTIVATE }
 procedure TActionsForm.FormActivate(Sender: TObject);
-var
-  DataBase: TDataBase;
 begin
-  DataBase:=TDataBase.Create(False);
-  if DataBase.Check = 0 then
-  begin
-    Sleep(100);
-    DataHandler.GetData;
-    { THUMB SIZES }
-    OpenItemsGrid.AutoThumbSize;
-    OpenItemsGrid.SetColWidth(10, 40);
-    HistoryGrid.AutoThumbSize;
-    HistoryGrid.SetColWidth(10, 30);
-  end
-    else
-      StatusBar.SimpleText:='Cannot connect with database. Please contact IT support.';
-  FreeAndNil(DataBase);
+  GetData(OpenItemsGrid, HistoryGrid, MainForm.sgOpenItems);
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------ ON DESTROY }
 procedure TActionsForm.FormDestroy(Sender: TObject);
 begin
-  FreeAndNil(DataHandler);
+  { DO NOTHING }
 end;
 
 { ---------------------------------------------------------- ! COMPONENT EVENTS | EVENTS ! ------------------------------------------------------------------ }
@@ -728,13 +373,13 @@ end;
 procedure TActionsForm.OpenItemsGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
 
-  (* CALL SG_DRAWSELECTED BEFORE SG_COLORVALUES *)
+  (* CALL DRAWSELECTED BEFORE COLORVALUES *)
 
   { DRAW SELECTED | SKIP HEADERS }
   OpenItemsGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
 
   { ONLY FOR COLUMNS 2..5 }
-  if ( (ACol >= 2) and (ACol <= 5) ) and (ARow > 0) then OpenItemsGrid.ColorValues(ARow, ACol, Rect, clRed, clBlack);
+  if ( (ACol >= 3) and (ACol <= 8) and (ARow > 0) ) then OpenItemsGrid.ColorValues(ARow, ACol, Rect, clRed, clBlack);
 
 end;
 
@@ -749,32 +394,19 @@ end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------- SHOW DATA WHEN SELECTED }
 procedure TActionsForm.HistoryGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
-//var
-// DailyComment: TDaily;
 begin
-(*
-  DailyComment:=TDaily.Create;
-  try
-    DailyComment.idThd  :=MainThreadID;
-    DailyComment.CUID   :=DataHandler.CUID;
-    DailyComment.AGEDATE:=HistoryGrid.Cells[4, ARow];
-    if DailyComment.Read then
-    begin
-      DailyCom.Text:=DailyComment.FIXCOMMENT;
-    end;
-  finally
-    DailyComment.Free;
-  end;
-*)
+  DailyCom.Text:=HistoryGrid.Cells[HistoryGrid.ReturnColumn(TDaily.FIXCOMMENT, 1, 1), ARow];
 end;
 
 { --------------------------------------------------------------- ! KEYBOARD EVENTS ! ----------------------------------------------------------------------- }
 
 { ----------------------------------------------------------------------------------------------------------------------------------- SAVE COMMENT ON <ENTER> }
 procedure TActionsForm.DailyComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-//var
-//  DailyComment: TDaily;
-//  MSSQL:        TMSSQL;
+var
+  DailyText: TDataTables;
+  UpdateOK:  boolean;
+  InsertOK:  boolean;
+  Condition: string;
 begin
   { NEW LINE }
   if (Key = VK_RETURN) and (Shift=[ssALT]) then
@@ -784,46 +416,82 @@ begin
   end;
   { SAVE TO DB }
   if (Key = VK_RETURN) then
-(*
-    if ( (DailyCom.Text <> '') and (DailyCom.Text <> ' ') ) then
+  begin
+    if DailyCom.Text <> '' then
     begin
-      DailyComment:=TDaily.Create;
+      UpdateOK:=False;
+      InsertOK:=False;
+      DailyText:=TDataTables.Create(MainForm.FDbConnect);
       try
-        { PREPARE FOR QUERY }
-        DailyComment.idThd     :=MainThreadID;
-        DailyComment.CUID      :=DataHandler.CUID;
-        DailyComment.AGEDATE   :=MainForm.GroupListDates.Text;
-        { READ DATA FROM DATABASE }
-        DailyComment.Read;
-        { UPDATE ITEMS' VALUES }
-        DailyComment.STAMP     :=DateTimeToStr(Now);
-        DailyComment.USER_ALIAS:=UpperCase(MainForm.CurrentUserName);
-        DailyComment.FIXCOMMENT:=DailyCom.Text;
-        { WRITE TO DATABASE }
-        DailyComment.Write;
-        { RELOAD HISTORY CONTENT }
-        MSSQL:=TMSSQL.Create(MainForm.ADOConnect);
-        try
-          { READ ALL LINES FOR GIVEN CUID }
-          DailyComment.ManyLines:=True;
-          DailyComment.Read;
-          MSSQL.SqlToGrid(HistoryGrid, DailyComment.DataSet, True);
-        finally
-          MSSQL.Free;
+        DailyText.OpenTable(TblDaily);
+        Condition:=TDaily.CUID + EQUAL + QuotedStr(CUID) + _AND + TDaily.AGEDATE + EQUAL + QuotedStr(MainForm.AgeDateSel);
+        DailyText.DataSet.Filter:=Condition;
+        { UPDATE EXISTING COMMENT }
+        if not (DailyText.DataSet.RecordCount = 0) then
+        begin
+          { STAMP }
+          UpdateOK:=DailyText.UpdateRecord
+          (
+            TblDaily,
+            TDaily.STAMP,
+            DateTimeToStr(Now),
+            Condition
+          );
+          { USER_ALIAS }
+          UpdateOK:=DailyText.UpdateRecord
+          (
+            TblDaily,
+            TDaily.USER_ALIAS,
+            UpperCase(MainForm.FUserName),
+            Condition
+          );
+          { COMMENT }
+          UpdateOK:=DailyText.UpdateRecord
+          (
+            TblDaily,
+            TDaily.FIXCOMMENT,
+            DailyCom.Text,
+            Condition
+          );
+        end
+        else
+        { INSERT NEW RECORD }
+        begin
+          DailyText.Columns.Clear;
+          DailyText.Values.Clear;
+          { DEFINE COLUMNS AND VALUES }
+          DailyText.Columns.Add(TDaily.GROUP_ID);     DailyText.Values.Add(MainForm.GroupIdSel);
+          DailyText.Columns.Add(TDaily.CUID);         DailyText.Values.Add(CUID);
+          DailyText.Columns.Add(TDaily.AGEDATE);      DailyText.Values.Add(MainForm.AgeDateSel);
+          DailyText.Columns.Add(TDaily.STAMP);        DailyText.Values.Add(DateTimeToStr(Now));
+          DailyText.Columns.Add(TDaily.USER_ALIAS);   DailyText.Values.Add(UpperCase(MainForm.FUserName));
+          DailyText.Columns.Add(TDaily.EMAIL);        DailyText.Values.Add('0');
+          DailyText.Columns.Add(TDaily.CALLEVENT);    DailyText.Values.Add('0');
+          DailyText.Columns.Add(TDaily.CALLDURATION); DailyText.Values.Add('0');
+          DailyText.Columns.Add(TDaily.FIXCOMMENT);   DailyText.Values.Add(DailyCom.Text);
+          { EXECUTE }
+          InsertOK:=DailyText.InsertInto(TblDaily);
+        end;
+        { REFRESH HISTORY GRID }
+        if (InsertOK) or (UpdateOK) then
+        begin
+          DailyText.OpenTable(TblDaily);
+          DailyText.DataSet.Filter:=TDaily.CUID + EQUAL + QuotedStr(CUID);
+          DailyText.DataSet.Sort:=TDaily.STAMP + DESC;
+          DailyText.SqlToGrid(HistoryGrid, DailyText.DataSet, False, True);
         end;
       finally
-        DailyComment.Free;
-        HistoryGrid.SetColWidth(10, 30);
+        DailyText.Free;
       end;
-    end
-      else StatusBar.SimpleText:='Cannot save empty comment.';
-*)
+    end;
+  end;
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------- SAVE COMMENT ON <ENTER> }
 procedure TActionsForm.GeneralComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-//var
-//  GeneralComment: TGeneral;
+var
+  GenText:   TDataTables;
+  Condition: string;
 begin
   { NEW LINE }
   if (Key = VK_RETURN) and (Shift=[ssALT]) then
@@ -833,42 +501,73 @@ begin
   end;
   { SAVE TO DB }
   if (Key = VK_RETURN) then
-(*
-    if ( (GeneralCom.Text <> '') and (GeneralCom.Text <> ' ') ) then
+  begin
+    if GeneralCom.Text <> '' then
     begin
-      GeneralComment:=TGeneral.Create;
+      GenText:=TDataTables.Create(MainForm.FDbConnect);
       try
-        { PREPARE FOR QUERY }
-        GeneralComment.idThd     :=MainThreadID;
-        GeneralComment.CUID      :=DataHandler.CUID;
-        { READ DATA FROM DATABASE }
-        GeneralComment.Read;
-        { UPDATE ITEMS' VALUES }
-        GeneralComment.STAMP     :=DateTimeToStr(Now);
-        GeneralComment.USER_ALIAS:=UpperCase(MainForm.CurrentUserName);
-        GeneralComment.FIXCOMMENT:=GeneralCom.Text;
-        { WRITE TO DATABASE }
-        GeneralComment.Write;
+        GenText.OpenTable(TblGeneral);
+        Condition:=TGeneral.CUID + EQUAL + QuotedStr(CUID);
+        GenText.DataSet.Filter:=Condition;
+        { UPDATE }
+        if not (GenText.DataSet.RecordCount = 0) then
+        begin
+          { STAMP }
+          GenText.UpdateRecord
+          (
+            TblGeneral,
+            TGeneral.STAMP,
+            DateTimeToStr(Now),
+            Condition
+          );
+          { USER_ALIAS }
+          GenText.UpdateRecord
+          (
+            TblGeneral,
+            TGeneral.USER_ALIAS,
+            UpperCase(MainForm.FUserName),
+            Condition
+          );
+          { COMMENT }
+          GenText.UpdateRecord
+          (
+            TblGeneral,
+            TGeneral.FIXCOMMENT,
+            GeneralCom.Text,
+            Condition
+          );
+        end
+        else
+        { INSERT NEW }
+        begin
+          GenText.Columns.Clear;
+          GenText.Values.Clear;
+          { DEFINE COLUMNS AND VALUES }
+          GenText.Columns.Add(TGeneral.CUID);       GenText.Values.Add(CUID);
+          GenText.Columns.Add(TGeneral.STAMP);      GenText.Values.Add(DateTimeToStr(Now));
+          GenText.Columns.Add(TGeneral.USER_ALIAS); GenText.Values.Add(UpperCase(MainForm.FUserName));
+          GenText.Columns.Add(TGeneral.FIXCOMMENT); GenText.Values.Add(GeneralCom.Text);
+          GenText.Columns.Add(TGeneral.FOLLOWUP);   GenText.Values.Add('');
+          { EXECUTE }
+          GenText.InsertInto(TblGeneral);
+        end;
       finally
-        GeneralComment.Free;
+        GenText.Free;
       end;
-    end else
-    begin
-      StatusBar.SimpleText:='Cannot save empty comment.';
     end;
-*)
+  end;
 end;
 
 { --------------------------------------------------------------------------------------------------------------------- COPY STRING GRID CONTENT TO CLIPBOARD }
 procedure TActionsForm.OpenItemsGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if (Key = 67) and (Shift = [ssCtrl]) then OpenItemsGrid.CopyCutPaste(1);
+  if (Key = 67) and (Shift = [ssCtrl]) then OpenItemsGrid.CopyCutPaste(adCopy);
 end;
 
 { --------------------------------------------------------------------------------------------------------------------- COPY STRING GRID CONTENT TO CLIPBOARD }
 procedure TActionsForm.HistoryGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if (Key = 67) and (Shift = [ssCtrl]) then HistoryGrid.CopyCutPaste(1);
+  if (Key = 67) and (Shift = [ssCtrl]) then HistoryGrid.CopyCutPaste(adCopy);
 end;
 
 { ----------------------------------------------------------------- ! MOUSE EVENTS ! ------------------------------------------------------------------------ }
@@ -930,39 +629,19 @@ end;
 { ------------------------------------------------------------------------------------------------------------------------------------------------ ALLOW EDIT }
 procedure TActionsForm.imgEditDetailsClick(Sender: TObject);
 begin
-  DataHandler.EditDetails;
+//
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------- SAVE CUSTOMER DETAILS }
 procedure TActionsForm.imgSaveDetailsClick(Sender: TObject);
-var
-  DataBase: TDataBase;
 begin
-  DataBase:=TDataBase.Create(False);
-  if DataBase.Check = 0 then
-  begin
-    Sleep(100);
-    DataHandler.SaveDetails;
-  end
-    else
-      StatusBar.SimpleText:='Cannot connect with database. Please contact IT support.';
-  FreeAndNil(DataBase);
+//
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------------- SEND STATEMENT }
 procedure TActionsForm.btnSendStatementClick(Sender: TObject);
-var
-  DataBase: TDataBase;
 begin
-  DataBase:=TDataBase.Create(False);
-  if DataBase.Check = 0 then
-  begin
-    Sleep(100);
-    DataHandler.SendStatement;
-  end
-    else
-      StatusBar.SimpleText:='Cannot connect with database. Please contact IT support.';
-  FreeAndNil(DataBase);
+//
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------ SELECT NEXT OVERDUE CUSTOMER }
@@ -973,22 +652,26 @@ begin
   { LOOP TO THE NEAREST UNHIDDEN ROW }
   for iCNT:=(MainForm.sgAgeView.Selection.Top + 1) to MainForm.sgAgeView.RowCount - 1 do
   begin
-    if (MainForm.sgAgeView.RowHeights[iCNT] <> -1) and (MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('OVERDUE', 1, 1), iCNT] <> '0') then
+    if (MainForm.sgAgeView.RowHeights[iCNT] <> -1) and (MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fOVERDUE, 1, 1), iCNT] <> '0') then
     begin
       MainForm.sgAgeView.Row:=iCNT;
       Break;
     end;
   end;
   { ASSIGN DATA FROM NEXT ROW }
-  DataHandler.CUID      :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('CUID', 1, 1),            MainForm.sgAgeView.Row];
-  DataHandler.CustName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('CUSTOMER NAME',   1, 1), MainForm.sgAgeView.Row];
-  DataHandler.CustNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('CUSTOMER NUMBER', 1, 1), MainForm.sgAgeView.Row];
+  CUID      :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUID,            1, 1), MainForm.sgAgeView.Row];
+  CustName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), MainForm.sgAgeView.Row];
+  CustNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), MainForm.sgAgeView.Row];
   { CLEAR ALL }
   DailyCom.Text       :='';
   GeneralCom.Text     :='';
   StatusBar.SimpleText:='';
   { LOAD NEW DATA }
-  ActionsForm.FormActivate(Self);
+  try
+    GetData(OpenItemsGrid, HistoryGrid, MainForm.sgOpenItems);
+  except
+    MainForm.MsgCall(2, 'Unexpected error has occured. Please close the window and try again.');
+  end;
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------- FEEDBACK AFTER CALL }
@@ -1000,13 +683,13 @@ end;
 { ------------------------------------------------------------------------------------------------------------------------------------------------ SEND EMAIL }
 procedure TActionsForm.btnSendEmailClick(Sender: TObject);
 begin
-  // code here...
+  { CODE HERE }
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------- CALL CUSTOMER }
 procedure TActionsForm.btnCallCustomerClick(Sender: TObject);
 begin
-  DataHandler.MakePhoneCall;
+  MakePhoneCall;
 end;
 
 end.

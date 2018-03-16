@@ -29,10 +29,10 @@ const
   DecryptKey:     integer = 429496;
   APPCAPTION:     string  = 'Unity';
   LyncCall:       string  = 'LyncCall.exe';
-  ConfigFile:     string  = 'config.cfg';
-  UserFolder:     string  = 'users';
+  ConfigFile:     string  = 'Config.cfg';
+  UserFolder:     string  = 'Users';
   LicenceFile:    string  = 'Unity.licx';
-  SGImageFile:    string  = 'Unity.img';      { NEED TO BE REGISTERED }
+  SGImageFile:    string  = 'Unity.img';
 
   { DESKTOP WINDOW MANAGER API }
 
@@ -131,9 +131,15 @@ const
   brSquare     : integer = 1;
   brCurly      : integer = 2;
 
+  { "COLUMN TO LIST" METHOD ENUMS }
+
+  enQuotesOn  = 0;
+  enQuotesOff = 1;
+
   { SQL KEYWORDS | ADD. SPACES FOR EASIER CONCATENATING }
 
   INSERT       : string = ' INSERT INTO ';
+  VAL          : string = ' VALUES ';
   SELECT       : string = ' SELECT ';
   SELECT_DIS   : string = ' SELECT DISTINCT ';
   _UPDATE      : string = ' UPDATE ';
@@ -218,6 +224,7 @@ const
 
   unUnassigned = 'Unassigned item.';
   unNA         = 'N/A';
+  unNotFound   = 'Not found!';
 
   { TIMERS ENUMS }
 

@@ -85,12 +85,14 @@ begin
   end;
 
   { CHECK IF USER PROVIDED NUMBER }
+  {$D-}
   IsNumber:=True;
   try
     StrToInt64(EditSearch.Text);
   except
     IsNumber:=False;
   end;
+  {$D+}
 
   { ASSIGN PROPER COLUMN NUMBER FROM AGE VIEW }
   if (IsNumber)     then SearchColumn:=SGrid.ReturnColumn(SColNumber, 1, 1);

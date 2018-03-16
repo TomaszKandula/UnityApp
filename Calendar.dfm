@@ -52,7 +52,7 @@ object CalendarForm: TCalendarForm
       Caption = 'Quick selection:'
     end
     object DaysOne: TRadioButton
-      Left = 8
+      Left = 26
       Top = 40
       Width = 169
       Height = 17
@@ -62,7 +62,7 @@ object CalendarForm: TCalendarForm
       OnClick = DaysOneClick
     end
     object DaysThreen: TRadioButton
-      Left = 8
+      Left = 26
       Top = 63
       Width = 169
       Height = 17
@@ -72,7 +72,7 @@ object CalendarForm: TCalendarForm
       OnClick = DaysThreenClick
     end
     object DaysSeven: TRadioButton
-      Left = 8
+      Left = 26
       Top = 86
       Width = 169
       Height = 17
@@ -91,9 +91,9 @@ object CalendarForm: TCalendarForm
     BevelOuter = bvNone
     TabOrder = 1
     object MyCalendar: TMonthCalendar
-      Left = 8
+      Left = 17
       Top = 8
-      Width = 268
+      Width = 248
       Height = 160
       Hint = 'Double click to select'
       CalColors.BackColor = clWhite
@@ -101,11 +101,12 @@ object CalendarForm: TCalendarForm
       CalColors.TitleBackColor = clSilver
       CalColors.TitleTextColor = clBlack
       CalColors.TrailingTextColor = clMaroon
-      Date = 43147.831705231480000000
+      Date = 43147.541138599540000000
       FirstDayOfWeek = dowMonday
       ParentShowHint = False
       ShowHint = True
       TabOrder = 0
+      WeekNumbers = True
       OnClick = MyCalendarClick
       OnDblClick = MyCalendarDblClick
     end

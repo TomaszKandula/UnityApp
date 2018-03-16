@@ -703,7 +703,7 @@ begin
     begin
       try
         DataTables.ClearSQL;
-        DataTables.StrSQL:=DataTables.GridToSql(FGrid, TblAddressbook, DataTables.ColumnsToList, Start, 1);
+        DataTables.StrSQL:=DataTables.GridToSql(FGrid, TblAddressbook, DataTables.ColumnsToList(DataTables.Columns, enQuotesOff), Start, 1);
         if not (DataTables.ExecSQL = nil) then
         begin
           { RE-DO LIST POSITION }

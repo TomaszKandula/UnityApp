@@ -4,12 +4,12 @@ object ActionsForm: TActionsForm
   ActiveControl = OpenItemsGrid
   BorderIcons = [biSystemMenu]
   Caption = 'Unity'
-  ClientHeight = 668
+  ClientHeight = 629
   ClientWidth = 930
   Color = 15527148
-  Constraints.MaxHeight = 1200
-  Constraints.MaxWidth = 1800
-  Constraints.MinHeight = 706
+  Constraints.MaxHeight = 668
+  Constraints.MaxWidth = 946
+  Constraints.MinHeight = 668
   Constraints.MinWidth = 946
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -26,18 +26,19 @@ object ActionsForm: TActionsForm
   TextHeight = 13
   object StatusBar: TStatusBar
     Left = 0
-    Top = 649
+    Top = 610
     Width = 930
     Height = 19
     Color = 15527148
     Panels = <>
     SimplePanel = True
+    SizeGrip = False
   end
   object PanelMiddle: TPanel
     Left = 0
     Top = 107
     Width = 930
-    Height = 321
+    Height = 282
     Margins.Left = 5
     Margins.Top = 5
     Margins.Right = 5
@@ -47,18 +48,19 @@ object ActionsForm: TActionsForm
     Color = 15527148
     ParentBackground = False
     TabOrder = 1
+    ExplicitHeight = 321
     object OpenItemsGrid: TStringGrid
       AlignWithMargins = True
       Left = 5
       Top = 10
       Width = 920
-      Height = 301
+      Height = 262
       Margins.Left = 5
       Margins.Top = 10
       Margins.Right = 5
       Margins.Bottom = 10
       Align = alClient
-      ColCount = 14
+      ColCount = 13
       DefaultColWidth = 10
       DefaultRowHeight = 17
       DrawingStyle = gdsGradient
@@ -71,6 +73,7 @@ object ActionsForm: TActionsForm
       OnMouseWheelDown = OpenItemsGridMouseWheelDown
       OnMouseWheelUp = OpenItemsGridMouseWheelUp
       OnSelectCell = OpenItemsGridSelectCell
+      ExplicitHeight = 301
       ColWidths = (
         10
         119
@@ -84,13 +87,12 @@ object ActionsForm: TActionsForm
         91
         73
         208
-        113
-        278)
+        113)
     end
   end
   object PanelBottom: TPanel
     Left = 0
-    Top = 428
+    Top = 389
     Width = 930
     Height = 221
     Margins.Left = 5
@@ -102,6 +104,7 @@ object ActionsForm: TActionsForm
     Color = 15527148
     ParentBackground = False
     TabOrder = 2
+    ExplicitTop = 428
     object ButtonPanel: TPanel
       Left = 0
       Top = 180
@@ -188,6 +191,23 @@ object ActionsForm: TActionsForm
         Caption = 'Feedback'
         OnClick = btnFeedbackClick
       end
+      object btnSendEmail: TSpeedButton
+        AlignWithMargins = True
+        Left = 548
+        Top = 7
+        Width = 110
+        Height = 25
+        Cursor = crHandPoint
+        Margins.Left = 0
+        Margins.Top = 0
+        Margins.Right = 0
+        Margins.Bottom = 0
+        Align = alCustom
+        Anchors = [akRight]
+        Caption = 'Send Custom E-mail'
+        Enabled = False
+        OnClick = btnSendEmailClick
+      end
     end
     object HistoryPanel: TPanel
       AlignWithMargins = True
@@ -199,7 +219,7 @@ object ActionsForm: TActionsForm
       Margins.Top = 0
       Margins.Right = 5
       Margins.Bottom = 5
-      Align = alClient
+      Align = alLeft
       BevelOuter = bvNone
       TabOrder = 1
       object HistoryTitle: TLabel
@@ -253,7 +273,7 @@ object ActionsForm: TActionsForm
       Margins.Top = 0
       Margins.Right = 5
       Margins.Bottom = 5
-      Align = alRight
+      Align = alLeft
       BevelOuter = bvNone
       TabOrder = 2
       object DailyTitle: TLabel
@@ -308,7 +328,7 @@ object ActionsForm: TActionsForm
       Margins.Top = 0
       Margins.Right = 5
       Margins.Bottom = 5
-      Align = alRight
+      Align = alLeft
       BevelOuter = bvNone
       TabOrder = 3
       object GeneralTitle: TLabel
@@ -439,10 +459,11 @@ object ActionsForm: TActionsForm
     object Cust_Number: TLabel
       Left = 128
       Top = 54
-      Width = 40
+      Width = 241
       Height = 13
       Cursor = crHandPoint
       Hint = 'Copy to Clipboard'
+      AutoSize = False
       Caption = '{data}'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clWindowText
@@ -626,7 +647,7 @@ object ActionsForm: TActionsForm
     object Cust_Person: TEdit
       Left = 128
       Top = 73
-      Width = 217
+      Width = 241
       Height = 21
       Cursor = crHandPoint
       Hint = 'Copy to Clipboard'
@@ -648,12 +669,10 @@ object ActionsForm: TActionsForm
     object Cust_Mail: TEdit
       Left = 542
       Top = 54
-      Width = 286
+      Width = 267
       Height = 21
       Cursor = crHandPoint
       Hint = 'Copy to Clipboard'
-      Align = alCustom
-      Anchors = [akLeft, akRight]
       BorderStyle = bsNone
       Color = clWhite
       Font.Charset = DEFAULT_CHARSET
@@ -672,7 +691,7 @@ object ActionsForm: TActionsForm
     object Cust_Phone: TEdit
       Left = 542
       Top = 73
-      Width = 217
+      Width = 267
       Height = 21
       Cursor = crHandPoint
       Hint = 'Copy to Clipboard'
@@ -703,7 +722,7 @@ object ActionsForm: TActionsForm
     Left = 24
     Top = 168
     Bitmap = {
-      494C010102003800CC0018001800FFFFFF00FF10FFFFFFFFFFFFFFFF424D3600
+      494C010102003800D00018001800FFFFFF00FF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000600000001800000001002000000000000024
       000000000000000000000000000000000000FFFFFF00FFFFFF00FFFFFF00FFFF
       FF00FFFFFF00FFFFFF00FFFFFF00E9E9E900CDCDCD00A9A9A9008E8E8E008080

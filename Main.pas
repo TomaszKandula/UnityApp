@@ -11,7 +11,7 @@
 { LYNC version:     2013 or newer                                                                                                                             }
 {                                                                                                                                                             }
 { ----------------------------------------------------------------------------------------------------------------------------------------------------------- }
-unit Main;  (* !!! CHANGE ALL 'VARTOSTR' TO 'OLEGETSTR' BEFORE RELEASE !!! *)
+unit Main;
 
 interface
 
@@ -20,7 +20,7 @@ uses
   DBGrids, AppEvnts, ShellAPI, INIFiles, StrUtils, ValEdit, DateUtils, Clipbrd, DB, ADODB, ActiveX, CDO_TLB, Diagnostics, Math, Wininet, ComObj, OleCtrls, SHDocVw,
   blcksock, smtpsend { MODIFIED FROM ORIGINAL }, pop3send, ssl_openssl, synautil, synacode, mimemess { MODIFIED FROM ORIGINAL };
 
-{ REFERENCE TO M.DIM. ARRAY }
+{ REFERENCE TO ARRAYS }
 type
   TLists    = array of array of string;
   TIntigers = array of integer;
@@ -1521,11 +1521,13 @@ end;
 { ----------------------------------------------------------------------------------------------------------------------------------------- CONVERT TO STRING }
 function TMainForm.OleGetStr(RecordsetField: variant): string;
 begin
+  {$D-}
   try
     OleGetStr:=RecordsetField;
   except
     OleGetStr:=VarToStr(RecordsetField);  { CASE OF NULL FIELD }
   end;
+  {$D+}
 end;
 
 { ------------------------------------------------------------------------------------------------------------------ RETURN KEY VALUE FOR GIVEN LIST POSITION }
@@ -1938,7 +1940,7 @@ begin
     DataTables.Free;
   end;
 
-  { ----------------------------------------------------------------------------------------------------------------------------- START WEB PAGE | UNITY INFO }//  WebBrowser.Navigate(WideString(AppSettings.TMIG.ReadString(ApplicationDetails, 'START_PAGE', '')), $02);
+  { ----------------------------------------------------------------------------------------------------------------------------- START WEB PAGE | UNITY INFO }
   WebBrowser.Navigate(WideString(AppSettings.TMIG.ReadString(ApplicationDetails, 'START_PAGE', '')), $02);
 
   { -------------------------------------------------------------------------------------------------------------------------- APPLICATION VERSION & USER SID }

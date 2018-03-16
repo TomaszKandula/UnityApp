@@ -28,18 +28,22 @@ type
     var pConnStr   :  string;
     var pCustFilter:  string;
     var pColumns   :  TStringList;
+    var pValues    :  TStringList;
   public
-    property ConnStr   :  string     read pConnStr;
-    property idThd     :  integer    read pidThd      write pidThd;
-    property CustFilter:  string     read pCustFilter write pCustFilter;
-    property DataSet   :  _Recordset read pDataSet    write pDataSet;
-    property Columns   : TStringList read pColumns    write pColumns;
+    property ConnStr   :  string      read pConnStr;
+    property idThd     :  integer     read pidThd      write pidThd;
+    property CustFilter:  string      read pCustFilter write pCustFilter;
+    property DataSet   :  _Recordset  read pDataSet    write pDataSet;
+    property Columns   :  TStringList read pColumns    write pColumns;
+    property Values    :  TStringList read pValues     write pValues;
   published
     constructor Create(Connector: TADOConnection); overload;
     destructor  Destroy; override;
-    function    ColumnsToList: string;
-    function    OpenTable(TableName: string): boolean;
     function    BracketStr(Expression: string; BracketType: integer): string;
+    function    ColumnsToList(Holder: TStringList; Quoted: integer): string;
+    function    OpenTable(TableName: string): boolean;
+    function    InsertInto(TableName: string): boolean;
+    function    UpdateRecord(TableName: string; ColumnName: string; SetValue: string; Condition: string): boolean;
   end;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -150,7 +154,7 @@ type
   {$TYPEINFO ON}
   public
     const ID          : string = 'ID';  { PRIMARY KEY }
-    const CUID        : string = 'CUID';
+    const CUID        : string = 'CUID';  { CONSTRAINT UNIQUE }
     const STAMP       : string = 'STAMP';
     const USER_ALIAS  : string = 'USER_ALIAS';
     const FIXCOMMENT  : string = 'FIXCOMMENT';
@@ -399,6 +403,7 @@ begin
   pCustFilter:='';
   pDataSet   :=nil;
   pColumns   :=TStringList.Create;
+  pValues    :=TStringList.Create;
   inherited;
 end;
 
@@ -406,6 +411,7 @@ end;
 destructor TDataTables.Destroy;
 begin
   pColumns.Free;
+  pValues.Free;
   pDataSet:=nil;
   inherited Destroy;
 end;
@@ -420,19 +426,26 @@ begin
 end;
 
 { ---------------------------------------------------------------------------------------------------------------------------------- TRANSPOSE COLUMNS TO ROW }
-function TDataTables.ColumnsToList: string;
+function TDataTables.ColumnsToList(Holder: TStringList; Quoted: integer): string;
 var
   iCNT:   integer;
 begin
   Result:=ALL;
-  { SERIALIZATION }
-  if (Columns.Text <> '') and (Columns.Count > 0) then
+  { PERFORM }
+  if (Holder.Text <> '') and (Holder.Count > 0) then
   begin
     Result:='';
-    for iCNT:=0 to Columns.Count - 1 do
-      if Result = '' then Result:=Columns.Strings[iCNT]
-        else
-          Result:=Result + COMMA + Columns.Strings[iCNT];
+    for iCNT:=0 to Holder.Count - 1 do
+      if Result = '' then
+      begin
+        if Quoted = enQuotesOff then Result:=Holder.Strings[iCNT];
+        if Quoted = enQuotesOn  then Result:=QuotedStr(Holder.Strings[iCNT]);
+      end
+      else
+      begin
+        if Quoted = enQuotesOff then Result:=Result + COMMA + Holder.Strings[iCNT];
+        if Quoted = enQuotesOn  then Result:=Result + COMMA + QuotedStr(Holder.Strings[iCNT]);
+      end;
   end;
 end;
 
@@ -442,9 +455,46 @@ begin
   Result:=True;
   { EXECUTE QUERY }
   try
-    if pCustFilter =  '' then StrSQL:=SELECT + ColumnsToList + FROM + TableName;
-    if pCustFilter <> '' then StrSQL:=SELECT + ColumnsToList + FROM + TableName + WHERE + QuotedStr(pCustFilter);
+    if pCustFilter =  '' then StrSQL:=SELECT + ColumnsToList(Columns, enQuotesOff) + FROM + TableName;
+    if pCustFilter <> '' then StrSQL:=SELECT + ColumnsToList(Columns, enQuotesOff) + FROM + TableName + pCustFilter; { WARNING! REQUIRE WHERE CLAUSE }
     pDataSet:=ExecSQL;
+  except
+    Result:=False;
+  end;
+end;
+
+{ ------------------------------------------------------------------------------------------------------------------------------- INSERT SINGE ROW INTO TABLE }
+function TDataTables.InsertInto(TableName: string): boolean;
+begin
+  Result:=True;
+  { BUILD AND EXECUTE }
+  try
+    if (Values.Text <> '') and (Columns.Text <> '') then
+    begin
+      StrSQL:=INSERT +
+                TableName + SPACE + BracketStr(ColumnsToList(Columns, enQuotesOff), brRound) +
+              VAL +
+                BracketStr(ColumnsToList(Values, enQuotesOn), brRound);
+      ExecSQL;
+    end;
+  except
+    Result:=False;
+  end;
+end;
+
+{ ----------------------------------------------------------------------------------------------------------------------------------------- UPDATE SINGLE ROW }
+function TDataTables.UpdateRecord(TableName: string; ColumnName: string; SetValue: string; Condition: string): boolean;
+begin
+  Result:=True;
+  if (TableName = '') or (ColumnName = '') or (Condition = '') then
+  begin
+    Result:=False;
+    Exit;
+  end;
+  { EXECUTE }
+  try
+    StrSQL:=_UPDATE + TableName + _SET + ColumnName + EQUAL + QuotedStr(SetValue) + WHERE + Condition; { WARNING! ALWAYS REQUIRE CONDITION }
+    ExecSQL;
   except
     Result:=False;
   end;

@@ -122,33 +122,67 @@ begin
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------- APPROVE SELECTED DATE }
-procedure TCalendarForm.MyCalendarDblClick(Sender: TObject);  (* CAN BE SEPARATE WORKER THREAD *)
-//var
-//  GeneralComment: TGeneral;
+procedure TCalendarForm.MyCalendarDblClick(Sender: TObject);
+var
+  GenText:    TDataTables;
+  Condition:  string;
+  CUID:       string;
 begin
-(*
-  GeneralComment:=TGeneral.Create;
+  GenText:=TDataTables.Create(MainForm.FDbConnect);
   try
-    { ------------------------------------------------------------------------------------------------------------------------------------- PREPARE FOR QUERY }
-    GeneralComment.idThd:=MainThreadID;
-    GeneralComment.CUID :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('CUID', 1, 1), MainForm.sgAgeView.Row];
-    { ------------------------------------------------------------------------------------------------------------------------------- READ DATA FROM DATABASE }
-    GeneralComment.Read;
-    { ---------------------------------------------------------------------------------------------------------------------------------- UPDATE ITEMS' VALUES }
-    GeneralComment.STAMP:=DateTimeToStr(Now);
-    GeneralComment.FOLLOWUP:=DateToStr(CalendarForm.MyCalendar.Date);
-    MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('FOLLOW UP', 1, 1), MainForm.sgAgeView.Row]:=GeneralComment.FOLLOWUP;
-    if GeneralComment.FIXCOMMENT = '' then
-      GeneralComment.FIXCOMMENT:='Get back to the customer on ' + GeneralComment.FOLLOWUP + '.'
-        else
-          GeneralComment.FIXCOMMENT:=GeneralComment.FIXCOMMENT + #13#10 + 'Get back to the customer on ' + GeneralComment.FOLLOWUP + '.';
-    { ------------------------------------------------------------------------------------------------------------------------------------- WRITE TO DATABASE }
-    GeneralComment.Write;
+    GenText.OpenTable(TblGeneral);
+    CUID:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUID, 1, 1), MainForm.sgAgeView.Row];
+    Condition:=TGeneral.CUID + EQUAL + QuotedStr(CUID);
+    GenText.DataSet.Filter:=Condition;
+    { UPDATE }
+    if not (GenText.DataSet.RecordCount = 0) then
+    begin
+      { STAMP }
+      GenText.UpdateRecord
+      (
+        TblGeneral,
+        TGeneral.STAMP,
+        DateTimeToStr(Now),
+        Condition
+      );
+      { USER_ALIAS }
+      GenText.UpdateRecord
+      (
+        TblGeneral,
+        TGeneral.USER_ALIAS,
+        UpperCase(MainForm.FUserName),
+        Condition
+      );
+      { FOLLOWUP }
+      GenText.UpdateRecord
+      (
+        TblGeneral,
+        TGeneral.FOLLOWUP,
+        DateToStr(CalendarForm.MyCalendar.Date),
+        Condition
+      );
+      { DISPLAY NOW ON STRING GRID }
+      MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fFOLLOWUP, 1, 1), MainForm.sgAgeView.Row]:=DateToStr(CalendarForm.MyCalendar.Date);
+    end
+    else
+    { INSERT NEW }
+    begin
+      GenText.Columns.Clear;
+      GenText.Values.Clear;
+      { DEFINE COLUMNS AND VALUES }
+      GenText.Columns.Add(TGeneral.CUID);       GenText.Values.Add(CUID);
+      GenText.Columns.Add(TGeneral.STAMP);      GenText.Values.Add(DateTimeToStr(Now));
+      GenText.Columns.Add(TGeneral.USER_ALIAS); GenText.Values.Add(UpperCase(MainForm.FUserName));
+      GenText.Columns.Add(TGeneral.FIXCOMMENT); GenText.Values.Add('');
+      GenText.Columns.Add(TGeneral.FOLLOWUP);   GenText.Values.Add(DateToStr(CalendarForm.MyCalendar.Date));
+      { EXECUTE }
+      GenText.InsertInto(TblGeneral);
+      MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fFOLLOWUP, 1, 1), MainForm.sgAgeView.Row]:=DateToStr(CalendarForm.MyCalendar.Date);
+    end;
   finally
-    GeneralComment.Free;
+    GenText.Free;
   end;
   Close;
-*)
 end;
 
 end.

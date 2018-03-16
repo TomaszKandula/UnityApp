@@ -689,7 +689,7 @@ begin
                 TSnapshots.AGE_DATE +
               EQUAL + QuotedStr(LeftStr(SourceArray[0, 1], 10));
   { INSERT STATEMENT | INSERT NEW DATA }
-  Transaction:=ArrayToSql(SourceArray, DestTable, ColumnsToList);
+  Transaction:=ArrayToSql(SourceArray, DestTable, ColumnsToList(Columns, enQuotesOff));
   Transaction:='BEGIN TRANSACTION'                                              + CRLF +
                'SELECT TOP 1 * FROM ' + DestTable + ' WITH (TABLOCK, HOLDLOCK)' + CRLF +
                DeleteData                                                       + CRLF +
