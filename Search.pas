@@ -112,7 +112,7 @@ begin
       begin
         IsNext:=True;
         if SGrid.RowHeights[FoundRow] = -1 then
-          MainForm.MsgCall(1, 'The item has been found (' + SGrid.Cells[SearchColumn, FoundRow] + ') for search pattern "' + SearchString + '". ' +#13#10 +
+          MainForm.MsgCall(1, 'The item has been found (' + SGrid.Cells[SearchColumn, FoundRow] + ') for search pattern "' + SearchString + '". ' + CRLF +
                               'However it is hidden by the filter you have used. Remove the filtering to unhide searched item.');
         Break;
       end;

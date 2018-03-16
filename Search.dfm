@@ -40,6 +40,7 @@ object SearchForm: TSearchForm
     Top = 95
     Width = 73
     Height = 25
+    Cursor = crHandPoint
     Caption = 'Search'
     OnClick = btnSearchClick
   end
@@ -48,6 +49,7 @@ object SearchForm: TSearchForm
     Top = 95
     Width = 73
     Height = 25
+    Cursor = crHandPoint
     Caption = 'Unfold'
     Enabled = False
     OnClick = btnUnhideClick

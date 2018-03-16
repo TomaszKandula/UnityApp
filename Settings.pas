@@ -33,6 +33,7 @@ type
     var pUserPath              : string;
     var pLicencePath           : string;
     var pGetLastError          : integer;
+    var pSGImagePath           : string;
     var pTMIP                  : TMemIniFile;
     var pTMIG                  : TMemIniFile;
     var pTMIL                  : TMemIniFile;
@@ -42,6 +43,7 @@ type
     property AppCfg            : string      read pAppCfg;
     property UserCfg           : string      read pUserCfg;
     property WinUserName       : string      read pWinUserName;
+    property SGImagePath       : string      read pSGImagePath;
     property FPathEventLog     : string      read pLogTextTo;
     property FPathAppCfg       : string      read pConfigPath;
     property FPathUserCfg      : string      read pUserPath;
@@ -70,12 +72,13 @@ begin
   pTMIL:=TMemIniFile.Create('');
   pAppDir     :=ExtractFileDir(Application.ExeName) + '\';
   pWinUserName:=Trim(LowerCase(GetEnvironmentVariable('username')));
-  pAppCfg     :=pWinUserName + '.log';                  { EVENT LOG FILE NAME   }
-  pUserCfg    :=pWinUserName + '.cfg';                  { USER CONFIG FILE NAME }
-  pConfigPath :=pAppDir + ConfigFile;                   { CONFIG FULL PATH      }
-  pLicencePath:=pAppDir + LicenceFile;                  { LICENCE FULL PATH     }
-  pUserPath   :=pAppDir + UserFolder + '\' + pUserCfg;  { USER CONFIG FULL PATH }
-  pLogTextTo  :=pAppDir + UserFolder + '\' + pAppCfg;   { EVENT LOG FULL PATH   }
+  pAppCfg     :=pWinUserName + '.log';                  { EVENT LOG FILE NAME        }
+  pUserCfg    :=pWinUserName + '.cfg';                  { USER CONFIG FILE NAME      }
+  pConfigPath :=pAppDir + ConfigFile;                   { CONFIG FULL PATH           }
+  pLicencePath:=pAppDir + LicenceFile;                  { LICENCE FULL PATH          }
+  pSGImagePath:=pAppDir + SGImageFile;                  { IMAGE FOR STRING GRID CELL }
+  pUserPath   :=pAppDir + UserFolder + '\' + pUserCfg;  { USER CONFIG FULL PATH      }
+  pLogTextTo  :=pAppDir + UserFolder + '\' + pAppCfg;   { EVENT LOG FULL PATH        }
   (* READ CONFIG FILES *)
   if FileExists(pConfigPath) then
   begin

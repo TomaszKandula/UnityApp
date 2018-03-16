@@ -32,6 +32,7 @@ const
   ConfigFile:     string  = 'config.cfg';
   UserFolder:     string  = 'users';
   LicenceFile:    string  = 'Unity.licx';
+  SGImageFile:    string  = 'Unity.img';      { NEED TO BE REGISTERED }
 
   { DESKTOP WINDOW MANAGER API }
 

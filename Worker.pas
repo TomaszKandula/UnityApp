@@ -170,6 +170,7 @@ uses
 
 { ----------------------------------------------------------------------------------------------------------------------------------- INVOICE TRACKER SCANNER }
 procedure TTInvoiceTrackerScanner.Execute;
+(*
 var
   IDThread:   integer;
   THDMili:    extended;
@@ -177,7 +178,9 @@ var
   StopWatch:  TStopWatch;
   InvoiceTracker: TInvoiceTracker;
   DataBase:   TDataBase;
+*)
 begin
+(*
   IDThread:=TTInvoiceTrackerScanner.CurrentThread.ThreadID;
   InvoiceTracker:=TInvoiceTracker.Create;
   DataBase:=TDataBase.Create(False);
@@ -211,6 +214,7 @@ begin
   end;
   { RELEASE THREAD WHEN DONE }
   FreeOnTerminate:=True;
+*)
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------- TRACKER LIST REFRESH }

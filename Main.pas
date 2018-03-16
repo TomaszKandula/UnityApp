@@ -16,9 +16,9 @@ unit Main;  (* !!! CHANGE ALL 'VARTOSTR' TO 'OLEGETSTR' BEFORE RELEASE !!! *)
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, Menus, ComCtrls, Grids, ExtCtrls, StdCtrls, CheckLst, Buttons, PNGimage,
-  DBGrids, AppEvnts, ShellAPI, INIFiles, StrUtils, ValEdit, DateUtils, Clipbrd, DB, ADODB, ActiveX, CDO_TLB, Diagnostics, GIFImg, Math, Wininet, ComObj,
-  OleCtrls, SHDocVw, blcksock, smtpsend { MODIFIED FROM ORIGINAL }, pop3send, ssl_openssl, synautil, synacode, mimemess, ImgList { MODIFIED FROM ORIGINAL };
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, Menus, ComCtrls, Grids, ExtCtrls, StdCtrls, CheckLst, Buttons, PNGImage,
+  DBGrids, AppEvnts, ShellAPI, INIFiles, StrUtils, ValEdit, DateUtils, Clipbrd, DB, ADODB, ActiveX, CDO_TLB, Diagnostics, Math, Wininet, ComObj, OleCtrls, SHDocVw,
+  blcksock, smtpsend { MODIFIED FROM ORIGINAL }, pop3send, ssl_openssl, synautil, synacode, mimemess { MODIFIED FROM ORIGINAL };
 
 { REFERENCE TO M.DIM. ARRAY }
 type
@@ -423,7 +423,6 @@ type                                                            (* GUI | MAIN TH
     EditGroupID: TLabeledEdit;
     Action_RowHighlight: TMenuItem;
     N16: TMenuItem;
-    Image1: TImage;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -603,6 +602,7 @@ type                                                            (* GUI | MAIN TH
     var GroupNmSel          :  string;
     var AgeDateSel          :  string;
     var OSAmount            :  double;
+    var SGImage             :  TImage;
 
     { PROPERTIES }
 
@@ -610,7 +610,7 @@ type                                                            (* GUI | MAIN TH
     property   AccessMode     : string  read PAccessMode      write PAccessMode;
     property   OpenItemsUpdate: string  read POpenItemsUpdate write POpenItemsUpdate;
 
-    { HEPER METHODS }
+    { HELPER METHODS }
 
     procedure  DebugMsg(const Msg: String);
     procedure  ExecMessage(IsPostType: boolean; WM_CONST: integer; YOUR_INT: integer; YOUR_TEXT: string);
@@ -621,6 +621,7 @@ type                                                            (* GUI | MAIN TH
     procedure  LockSettingsPanel;
     function   ConvertName(CoNumber: string; Prefix: string; mode: integer): string;
     procedure  SwitchTimers(state: integer);
+    procedure  LoadImageFromStream(Image: TImage; const FileName: string);
 
   protected
 
@@ -663,7 +664,7 @@ var
 implementation
 
 uses
-  Filter, Tracker, Invoices, Actions, Calendar, About, Search, Worker, Model, SQL, Settings, Database, UAC, AgeView, Transactions;
+  Filter, Tracker, Invoices, Actions, Calendar, About, Search, Worker, Model, SQL, Settings, Database, UAC, AgeView, Transactions, Mailer;
 
 {$R *.dfm}
 
@@ -1645,7 +1646,7 @@ begin
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------- TURN ON OR OFF TIMERS }
-procedure TMainForm.SwitchTimers(state: Integer);
+procedure TMainForm.SwitchTimers(state: integer);
 begin
   { ENABLE ALL CHECKERS }
   if state = tmEnabled then
@@ -1665,29 +1666,55 @@ begin
   end;
 end;
 
+{ --------------------------------------------------------------------------------------------------------------------------- LOAD ANY IMAGE FORMAT TO TIMAGE }
+procedure TMainForm.LoadImageFromStream(Image: TImage; const FileName: string);
+var
+  WIC: TWICImage;
+  FS:  TFileStream;
+begin
+  FS:=TFileStream.Create(FileName, fmOpenRead);
+  FS.Position:=0;
+  WIC:=TWICImage.Create;
+  try
+    WIC.LoadFromStream(FS);
+    Image.Picture.Assign(WIC);
+  finally
+    WIC.Free;
+    FS.Free;
+  end;
+end;
+
 { ################################################################## ! EVENTS ! ############################################################################# }
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------- ON CREATE }
 procedure TMainForm.FormCreate(Sender: TObject);
 var
-  AppVersion:   string;
-  AppSettings:  TSettings;
-  DataBase:     TDataBase;
-  DataTables:   TDataTables;
-  UserControl:  TUserControl;
-  Transactions: TTransactions;
-  RegSettings:  TFormatSettings;
-  NowTime:      TTime;
-  iCNT:         integer;
+  AppVersion:     string;
+  AppSettings:    TSettings;
+  DataBase:       TDataBase;
+  DataTables:     TDataTables;
+  UserControl:    TUserControl;
+  Transactions:   TTransactions;
+  RegSettings:    TFormatSettings;
+  InvoiceTracker: TInvoiceTracker;
+  NowTime:        TTime;
+  iCNT:           integer;
 begin
 
   { ------------------------------------------------------------ ! INITIALIZATION ! ------------------------------------------------------------------------- }
+
   AppSettings  :=TSettings.Create;
   FUserName    :=AppSettings.WinUserName;
   FEventLogPath:=AppSettings.FPathEventLog;
   AppVersion   :=GetBuildInfoAsString;
   KeyPreview   :=True;
   PAllowClose  :=False;
+
+  { ---------------------------------------------------- ! LOAD IMAGE FOR STRING GRID CELLS ! --------------------------------------------------------------- }
+
+  SGImage:=TImage.Create(MainForm);
+  SGImage.SetBounds(0, 0, 16, 16);
+  LoadImageFromStream(SGImage, AppSettings.SGImagePath);
 
   { --------------------------------------------------------------------------------------------------------------------------------------- REGIONAL SETTINGS }
   RegSettings:=TFormatSettings.Create;
@@ -1889,6 +1916,15 @@ begin
     end;
   end;
 
+  { ----------------------------------------------------- ! LOAD INVOICE TRACKER CONTENT ! ------------------------------------------------------------------ }
+
+  InvoiceTracker:=TInvoiceTracker.Create;
+  try
+    InvoiceTracker.Refresh(sgInvoiceTracker, 'ALL');
+  finally
+    InvoiceTracker.Free;
+  end;
+
   { ------------------------------------------------------------ ! GENERAL TABLES ! ------------------------------------------------------------------------- }
 
   DataTables:=TDataTables.Create(FDbConnect);
@@ -2012,7 +2048,9 @@ end;
 { ---------------------------------------------------------------------------------------------------------------------------- CHECK PERIODICALLY FOR UPDATES }
 procedure TMainForm.UpdaterTimerTimer(Sender: TObject);
 begin
+
   { ... CODE HERE ... }
+
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------- MIRROR EVENT LOG FILE IN MEMO FIELD }
@@ -2601,22 +2639,24 @@ end;
 { ---------------------------------------------------- ! SHOW NEGATIVE VALUES AND ROW SELECTION ! ----------------------------------------------------------- }
 procedure TMainForm.sgAgeViewDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 var
-  Col1:   integer;
-  Col2:   integer;
-  Col3:   integer;
-  Col4:   integer;
-  Col5:   integer;
-  Col6:   integer;
-  Col7:   integer;
-  Col8:   integer;
-  Col9:   integer;
-  Col10:  integer;
-  Col11:  integer;
-  Col12:  integer;
-  Col13:  integer;
-  Col14:  integer;
-  GetDate:  string;
-  Width:    integer;
+  Col1:        integer;
+  Col2:        integer;
+  Col3:        integer;
+  Col4:        integer;
+  Col5:        integer;
+  Col6:        integer;
+  Col7:        integer;
+  Col8:        integer;
+  Col9:        integer;
+  Col10:       integer;
+  Col11:       integer;
+  Col12:       integer;
+  Col13:       integer;
+  Col14:       integer;
+  iCNT:        integer;
+  Width:       integer;
+  GetDate:     string;
+  AgeViewCUID: string;
 begin
 
   { SKIP HEADER }
@@ -2641,8 +2681,8 @@ begin
   Col10:=sgAgeView.ReturnColumn(TSnapshots.fCREDIT_LIMIT,    1, 1);
   Col11:=sgAgeView.ReturnColumn(TSnapshots.fEXCEEDED_AMOUNT, 1, 1);
   Col12:=sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP,          1, 1);
-  Col13:=sgAgeView.ReturnColumn(TSnapshots.fCUID,             1, 1);
-  Col14:=sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,    1, 1);
+  Col13:=sgAgeView.ReturnColumn(TSnapshots.fCUID,            1, 1);
+  Col14:=sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1);
 
   { HIGHLIGHT FOLLOW UP COLUMN }
   GetDate:=sgAgeView.Cells[Col12, ARow];
@@ -2653,9 +2693,20 @@ begin
     sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
   end;
 
-  { TEST }
-  Width:=sgAgeView.ColWidths[Col14];
-  if (ACol = Col14) and (ARow = 4) then sgAgeView.Canvas.Draw(Rect.Left + Width - 16, Rect.Top, MainForm.Image1.Picture.Graphic);
+  { MARK CUSTOMER WITH STAR IF IT IS REGISTERED ON INVOICE TRACKER LIST }
+  if ACol = Col14 then
+  begin
+    Width:=sgAgeView.ColWidths[Col14];
+    AgeViewCUID:=sgAgeView.Cells[Col13, ARow];
+    for iCNT:=1 to sgInvoiceTracker.RowCount - 1 do
+    begin
+      if AgeViewCUID = sgInvoiceTracker.Cells[2, iCNT] then
+      begin
+        sgAgeView.Canvas.Draw(Rect.Left + Width - 16, Rect.Top, SGImage.Picture.Graphic);
+        Break;
+      end;
+    end;
+  end;
 
   { DRAW ONLY SELECTED COLUMNS }
   if (ACol = Col1) or (ACol = Col2) or (ACol = Col3) or (ACol = Col4) or (ACol = Col5) or (ACol = Col6) or (ACol = Col7) or (ACol = Col8) or (ACol = Col9) or (ACol = Col10) or (ACol = Col11)
@@ -2908,7 +2959,7 @@ begin
   if (Key = 67) and (Shift = [ssCtrl]) then sgAgeView.CopyCutPaste(adCopy);
 end;
 
-{ --------------------------------------------------------------------------------------------------------------------- PASTE, CUT, COPY TO/FROM ADDRESS BOOK }
+{ --------------------------------------------------------------------------------------------------------------------------- ADDRESS BOOK | PASTE, CUT, COPY }
 procedure TMainForm.sgAddressBookKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 var
   DataTables: TDataTables;
@@ -2995,7 +3046,7 @@ end;
 procedure TMainForm.sgListValueKeyPress(Sender: TObject; var Key: Char);
 begin
   { FORCE CAPITAL CHARACTERS IF <ENTER> IS PRESSED }
-  //if Key = #13 then sgListValue.Cells[1, sgListValue.Row]:=UpperCase(sgListValue.Cells[1, sgListValue.Row]); // OFF
+  (* if Key = #13 then sgListValue.Cells[1, sgListValue.Row]:=UpperCase(sgListValue.Cells[1, sgListValue.Row]); OFF *)
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------- CALL PASSWORD UNLOCK }
@@ -3531,11 +3582,9 @@ var
   AppSettings:  TSettings;
   iCNT:         integer;
 begin
-
   { ASK USER IF HE IS SURE BECAUSE ONCE DONE CANNOT BE UNDONE }
   if MsgCall(5, 'Are you sure you want to delete this section? It cannot be undone.') = IDNO then exit;
   if sgListSection.RowCount = 1 then exit;
-
   { DELETE SECTION FROM TMIg }
   AppSettings:=TSettings.Create;
   try
@@ -3544,14 +3593,11 @@ begin
   finally
     AppSettings.Free;
   end;
-
   { DELETE SELECTED ROW FROM STRING GRID }
   sgListSection.DeleteRowFrom(1, 1);
-
   { RE-NUMBER }
   for iCNT := 1 to sgListSection.RowCount do
     sgListSection.Cells[0, iCNT]:=IntToStr(iCNT);
-
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------- SECTION LIST | ALLOW EDIT }
@@ -3575,16 +3621,13 @@ procedure TMainForm.imgKeyAddClick(Sender: TObject);
 var
   iCNT:  integer;
 begin
-
   { ADD ROW AT THE END OF LIST }
   iCNT:=sgListValue.RowCount + 1;
   sgListValue.RowCount:=iCNT;
-
   { MAKE SURE WE ADD EMPTY ROW }
   sgListValue.Cells[1, iCNT - 1]:='';
   sgListValue.Cells[2, iCNT - 1]:='';
   for iCNT:= 1 to sgListValue.RowCount do sgListValue.Cells[0, iCNT]:=IntToStr(iCNT);
-
 end;
 
 { ---------------------------------------------------------------------------------------------------------------------------------- VALUES LIST | DELETE KEY }
@@ -3593,13 +3636,10 @@ var
   AppSettings:  TSettings;
   iCNT:         integer;
 begin
-
   { ASK USER IF HE IS SURE BECAUSE ONCE DONE CANNOT BE UNDONE }
   if MsgCall(5, 'Are you sure you want to delete this key? It cannot be undone.') = IDNO then Exit;
-
   { CHECK FOR LAST ROW }
   if sgListValue.RowCount = 1 then exit;
-
   { DELETE SECTION FROM TMIg }
   AppSettings:=TSettings.Create;
   try
@@ -3608,13 +3648,10 @@ begin
   finally
     AppSettings.Free;
   end;
-
   { DELETE SELECTED ROW FROM STRING GRID }
   sgListValue.DeleteRowFrom(1, 1);
-
   { RE-NUMBER }
   for iCNT:= 1 to sgListValue.RowCount do sgListValue.Cells[0, iCNT]:=IntToStr(iCNT);
-
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------ VALUES, KEYS & SECTIONS | SAVE ALL }
@@ -3623,10 +3660,8 @@ var
   AppSettings:  TSettings;
   iCNT:         integer;
 begin
-
   { ASK USER IF HE IS SURE BECAUSE ONCE DONE CANNOT BE UNDONE }
   if MsgCall(5, 'Are you sure you want to save all the changes? It cannot be undone.') = IDNO then exit;
-
   { CHECK IF THERE IS NO EMPTY KEYS }
   for iCNT:= 1 to (sgListValue.RowCount - 1) do
     if sgListValue.Cells[1, iCNT] = '' then
@@ -3634,7 +3669,6 @@ begin
       MsgCall(2, 'Cannot save. At least one key has no label.');
       Exit;
     end;
-
   AppSettings:=TSettings.Create;
   { SAVE TO SETTINGS FILE }
   try
@@ -3645,9 +3679,7 @@ begin
   finally
     AppSettings.Free;
   end;
-
   MsgCall(1, 'All Keys and its values has been saved successfully.');
-
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------------- SAVE NEW PASSWORD }
