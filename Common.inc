@@ -136,6 +136,19 @@ const
   enQuotesOn  = 0;
   enQuotesOff = 1;
 
+  { PICTURE COLOR }
+
+  imGreyed    = 0;
+  imColour    = 1;
+
+  { MESSAGE CALL WRAPPER ENUMS }
+
+  mcInfo      = 1;
+  mcWarn      = 2;
+  mcError     = 3;
+  mcQuestion1 = 4;
+  mcQuestion2 = 5;
+
   { SQL KEYWORDS | ADD. SPACES FOR EASIER CONCATENATING }
 
   INSERT       : string = ' INSERT INTO ';

@@ -725,8 +725,11 @@ WINDOWS API:
 
 { ----------------------------------------------------------------------------------------------------------------------- MESSAGE RECEIVER FOR WORKER THREADS }
 procedure TMainForm.WndProc(var Msg: Messages.TMessage);
-//var
-//  DailyComment:  TDaily;
+var
+  DailyText:  TDataTables;
+  CUID:       string;
+  Condition:  string;
+  CallEvent:  cardinal;
 begin
   inherited;
   { ------------------------------------------------------------------------------------------------ INTERNAL MESSAGES BETWEEN WORKER THREADS AND MAIN THREAD }
@@ -734,8 +737,9 @@ begin
   begin
     { DEBUG LINE }
     DebugMsg('WM_GETINFO RECEIVED');
-    { SHOW MESSEGAE WINDOW }
+    { SHOW MESSEGAE WINDOW | CALL FROM WORKER THREAD }
     if ( (Msg.WParam > 0) and (Msg.WParam <= 4) ) and (PChar(Msg.LParam) <> '') then MainForm.MsgCall(Msg.WParam, PChar(Msg.LParam));
+    { POOL OF NUMBER TO BE USED 10..20 FOR OTHER ACTIONS }
     if (Msg.WParam >= 10) and (Msg.WParam <= 20) then
     begin
       { STATUS BAR CHANGES }
@@ -757,34 +761,58 @@ begin
   { --------------------------------------------------------------------------------------------------------------- RECEIVE MESSAGE FROM EXTERNAL APPLICATION }
   if Msg.Msg = WM_EXTINFO then
   begin
+    { DEBUG LINE }
+    DebugMsg('WM_EXTINFO RECEIVED');
     { IF WPARAM EQUALS '14' THEN WE EXPECT LPARAM TO RETURN }
     { PHONE CALL DURATION FROM 'LYNCCALL.EXE' APPLICATION   }
     if Msg.WParam = 14 then
       { DEBUG LINE }
-      (* DebugMsg(IntToStr(Msg.LParam)); *)
+      DebugMsg(IntToStr(Msg.LParam));
       { LOG TIME IN SECONDS IN DATABASE }
-
       if Msg.LParam > 0 then
       begin
-(*
-        DailyComment:=TDaily.Create;
+        DailyText:=TDataTables.Create(FDbConnect);
         try
-          { ASSIGN CALLED CUSTOMER }
-          DailyComment.idThd  :=MainThreadID;
-          DailyComment.CUID   :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('CUID', 1, 1), MainForm.sgAgeView.Row];
-          DailyComment.AGEDATE:=MainForm.GroupListDates.Text;
-          { READ DATA IF ANY }
-          DailyComment.Read;
-          { UPDATE AND SAVE }
-          DailyComment.CALLEVENT   :=IntToStr(StrToInt(DailyComment.CALLEVENT) + 1);
-          DailyComment.CALLDURATION:=IntToStr(Msg.LParam);
-           DailyComment.Write;
+          DailyText.OpenTable(TblDaily);
+          CUID:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUID, 1, 1), MainForm.sgAgeView.Row];
+          Condition:=TDaily.CUID + EQUAL + QuotedStr(CUID) + _AND + TDaily.AGEDATE + EQUAL + QuotedStr(AgeDateSel);
+          DailyText.DataSet.Filter:=Condition;
+          { UPDATE EXISTING COMMENT }
+          if not (DailyText.DataSet.RecordCount = 0) then
+          begin
+            { GET AND SET CALL EVENT }
+            CallEvent:=StrToIntDef(OleGetStr(DailyText.DataSet.Fields[TDaily.CALLEVENT].Value), 0);
+            Inc(CallEvent);
+            DailyText.CleanUp;
+            { DEFINE COLUMNS, VALUES AND CONDITIONS }
+            DailyText.Columns.Add(TDaily.STAMP);         DailyText.Values.Add(DateTimeToStr(Now));             DailyText.Conditions.Add(Condition);
+            DailyText.Columns.Add(TDaily.USER_ALIAS);    DailyText.Values.Add(UpperCase(MainForm.FUserName));  DailyText.Conditions.Add(Condition);
+            DailyText.Columns.Add(TDaily.CALLEVENT);     DailyText.Values.Add(IntToStr(CallEvent));            DailyText.Conditions.Add(Condition);
+            DailyText.Columns.Add(TDaily.CALLDURATION);  DailyText.Values.Add(IntToStr(Msg.LParam));           DailyText.Conditions.Add(Condition);
+            { EXECUTE }
+            DailyText.UpdateRecord(TblDaily);
+          end
+          else
+          { INSERT NEW RECORD }
+          begin
+            DailyText.CleanUp;
+            { DEFINE COLUMNS AND VALUES }
+            DailyText.Columns.Add(TDaily.GROUP_ID);     DailyText.Values.Add(MainForm.GroupIdSel);
+            DailyText.Columns.Add(TDaily.CUID);         DailyText.Values.Add(CUID);
+            DailyText.Columns.Add(TDaily.AGEDATE);      DailyText.Values.Add(MainForm.AgeDateSel);
+            DailyText.Columns.Add(TDaily.STAMP);        DailyText.Values.Add(DateTimeToStr(Now));
+            DailyText.Columns.Add(TDaily.USER_ALIAS);   DailyText.Values.Add(UpperCase(MainForm.FUserName));
+            DailyText.Columns.Add(TDaily.EMAIL);        DailyText.Values.Add('0');
+            DailyText.Columns.Add(TDaily.CALLEVENT);    DailyText.Values.Add('1');
+            DailyText.Columns.Add(TDaily.CALLDURATION); DailyText.Values.Add(IntToStr(Msg.LParam));
+            DailyText.Columns.Add(TDaily.FIXCOMMENT);   DailyText.Values.Add('');
+            { EXECUTE }
+            DailyText.InsertInto(TblDaily);
+          end;
         finally
-          DailyComment.Free;
+          DailyText.Free;
         end;
-*)
       end;
-
   end;
   { --------------------------------------------------------------------------------------------------------------- CLOSE UNITY WHEN WINDOWS IS SHUTTING DOWN }
 
@@ -800,23 +828,19 @@ begin
 
   ********************************************************************************************************************************************************** *)
 
-  (* WINDOWS' QUERY FOR SHUTDOWN *)
-
+  { WINDOWS' QUERY FOR SHUTDOWN }
   if Msg.Msg = WM_QUERYENDSESSION then
   begin
     LogText(FEventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(Msg.Msg) + ' (WM_QUERYENDSESSION). Windows is going to be shut down. Closing ' + APPNAME + '...');
     PAllowClose:=True;
     Msg.Result:=1;
   end;
-
-  (* WINDOWS IS SHUTTING DOWN *)
-
+  { WINDOWS IS SHUTTING DOWN }
   if Msg.Msg = WM_ENDSESSION then
   begin
     LogText(FEventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(Msg.Msg) + ' (WM_ENDSESSION). Windows is shutting down...');
     PAllowClose:=True;
   end;
-
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------- WRAPPER FOR SEND/POST MESSAGE }
@@ -1567,11 +1591,11 @@ function TMainForm.MsgCall(WndType: integer; WndText: string): integer;
 begin
   Result:=0;
   if WndText = '' then Exit;
-  if WndType = 1 { INFO       } then Result:=Application.MessageBox(PChar(WndText), PChar(APPNAME), MB_OK       + MB_ICONINFORMATION);
-  if WndType = 2 { WARNING    } then Result:=Application.MessageBox(PChar(WndText), PChar(APPNAME), MB_OK       + MB_ICONWARNING);
-  if WndType = 3 { ERROR      } then Result:=Application.MessageBox(PChar(WndText), PChar(APPNAME), MB_OK       + MB_ICONERROR);
-  if WndType = 4 { QUESTION 1 } then Result:=Application.MessageBox(PChar(WndText), PChar(APPNAME), MB_OKCANCEL + MB_ICONQUESTION);
-  if WndType = 5 { QUESTION 2 } then Result:=Application.MessageBox(PChar(WndText), PChar(APPNAME), MB_YESNO    + MB_ICONQUESTION);
+  if WndType = mcInfo      then Result:=Application.MessageBox(PChar(WndText), PChar(APPNAME), MB_OK       + MB_ICONINFORMATION);
+  if WndType = mcWarn      then Result:=Application.MessageBox(PChar(WndText), PChar(APPNAME), MB_OK       + MB_ICONWARNING);
+  if WndType = mcError     then Result:=Application.MessageBox(PChar(WndText), PChar(APPNAME), MB_OK       + MB_ICONERROR);
+  if WndType = mcQuestion1 then Result:=Application.MessageBox(PChar(WndText), PChar(APPNAME), MB_OKCANCEL + MB_ICONQUESTION);
+  if WndType = mcQuestion2 then Result:=Application.MessageBox(PChar(WndText), PChar(APPNAME), MB_YESNO    + MB_ICONQUESTION);
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------------- RESET SETTINGS }
@@ -2340,7 +2364,11 @@ end;
 { --------------------------------------------------------------------------------------------------------------------------------- EXCLUDE NON-OVERDUE ITEMS }
 procedure TMainForm.Action_OverdueClick(Sender: TObject);
 begin
-  // code here...
+  if Action_Overdue.Checked
+    then
+      Action_Overdue.Checked:=False
+        else
+          Action_Overdue.Checked:=True;
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------- SEARCH CUSTOMER }

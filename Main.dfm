@@ -6017,7 +6017,6 @@ object MainForm: TMainForm
     end
     object Action_Overdue: TMenuItem
       Caption = 'Exclude non-overdue items'
-      Enabled = False
       OnClick = Action_OverdueClick
     end
     object N15: TMenuItem

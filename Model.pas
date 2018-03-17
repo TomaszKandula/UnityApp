@@ -29,6 +29,7 @@ type
     var pCustFilter:  string;
     var pColumns   :  TStringList;
     var pValues    :  TStringList;
+    var pConditions:  TStringList;
   public
     property ConnStr   :  string      read pConnStr;
     property idThd     :  integer     read pidThd      write pidThd;
@@ -36,14 +37,16 @@ type
     property DataSet   :  _Recordset  read pDataSet    write pDataSet;
     property Columns   :  TStringList read pColumns    write pColumns;
     property Values    :  TStringList read pValues     write pValues;
+    property Conditions:  TStringList read pConditions write pConditions;
   published
     constructor Create(Connector: TADOConnection); overload;
     destructor  Destroy; override;
     function    BracketStr(Expression: string; BracketType: integer): string;
     function    ColumnsToList(Holder: TStringList; Quoted: integer): string;
+    procedure   CleanUp;
     function    OpenTable(TableName: string): boolean;
     function    InsertInto(TableName: string): boolean;
-    function    UpdateRecord(TableName: string; ColumnName: string; SetValue: string; Condition: string): boolean;
+    function    UpdateRecord(TableName: string): boolean;
   end;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -404,6 +407,7 @@ begin
   pDataSet   :=nil;
   pColumns   :=TStringList.Create;
   pValues    :=TStringList.Create;
+  pConditions:=TStringList.Create;
   inherited;
 end;
 
@@ -412,6 +416,7 @@ destructor TDataTables.Destroy;
 begin
   pColumns.Free;
   pValues.Free;
+  pConditions.Free;
   pDataSet:=nil;
   inherited Destroy;
 end;
@@ -449,6 +454,14 @@ begin
   end;
 end;
 
+{ ------------------------------------------------------------------------------------------------------------------------------------------- CLEAR ALL LISTS }
+procedure TDataTables.CleanUp;
+begin
+  pColumns.Clear;
+  pValues.Clear;
+  pConditions.Clear;
+end;
+
 { ----------------------------------------------------------------------------------------------------------------------------------- OPEN TABLE TO RECORDSET }
 function TDataTables.OpenTable(TableName: string): boolean;
 begin
@@ -482,19 +495,32 @@ begin
   end;
 end;
 
-{ ----------------------------------------------------------------------------------------------------------------------------------------- UPDATE SINGLE ROW }
-function TDataTables.UpdateRecord(TableName: string; ColumnName: string; SetValue: string; Condition: string): boolean;
+{ ------------------------------------------------------------------------------------------------------------------------- PERFORM UPDATING ON GIVEN COLUMNS }
+function TDataTables.UpdateRecord(TableName: string): boolean;
+var
+  iCNT:  integer;
+  Temp:  string;
 begin
-  Result:=True;
-  if (TableName = '') or (ColumnName = '') or (Condition = '') then
-  begin
-    Result:=False;
-    Exit;
-  end;
-  { EXECUTE }
+  Result:=False;
+  if (Columns.Text = '') or (Values.Text = '') or (Conditions.Text = '') then Exit;
+  { EXECUTE UPDATE FOR EACH COLUMN }
   try
-    StrSQL:=_UPDATE + TableName + _SET + ColumnName + EQUAL + QuotedStr(SetValue) + WHERE + Condition; { WARNING! ALWAYS REQUIRE CONDITION }
+    for iCNT:=0 to Columns.Count - 1 do
+    begin
+      Temp:=Temp + (
+                      _UPDATE +
+                        TableName +
+                      _SET +
+                        Columns.Strings[iCNT] +
+                      EQUAL +
+                        QuotedStr(Values.Strings[iCNT]) +
+                      WHERE +
+                        Conditions.Strings[iCNT] + ';'
+                   );
+    end;
+    StrSQL:=Temp;
     ExecSQL;
+    Result:=True;
   except
     Result:=False;
   end;

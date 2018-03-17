@@ -97,16 +97,11 @@ type
     property    CustName  :  string read pCustName   write pCustName;
     property    CustNumber:  string read pCustNumber write pCustNumber;
   published
-
-    //procedure   EditDetails; AB
-    //procedure   SaveDetails; AB
-
-    //procedure   SendStatement; IT
-
     function  GetRunningApps(SearchName: string): boolean;
     procedure GetData(OpenItemsDest: TStringGrid; HistoryDest: TStringGrid; OpenItemsSrc: TStringGrid);
+    procedure UpdateHistory(Grid: TStringGrid);
+    procedure SetHistoryCols(Grid: TStringGrid);
     procedure MakePhoneCall;
-
   end;
 
 var
@@ -226,15 +221,7 @@ begin
 
     { ------------------------------------------------------ ! HISTORY OF DAILY COMMENTS ! ------------------------------------------------------------------ }
 
-    DailyText:=TDataTables.Create(MainForm.FDbConnect);
-    try
-      DailyText.OpenTable(TblDaily);
-      DailyText.DataSet.Filter:=TDaily.CUID + EQUAL + QuotedStr(CUID);
-      DailyText.DataSet.Sort:=TDaily.STAMP + DESC;
-      if not (DailyText.DataSet.EOF) then DailyText.SqlToGrid(HistoryDest, DailyText.DataSet, False, True);
-    finally
-      DailyText.Free;
-    end;
+    UpdateHistory(HistoryDest);
 
     { ----------------------------------------------------------- ! GENERAL COMMENTS ! ---------------------------------------------------------------------- }
 
@@ -257,6 +244,40 @@ begin
     HistoryDest.SetColWidth(10, 20);
     Screen.Cursor:=crDefault;
   end;
+end;
+
+{ -------------------------------------------------------------------------------------------------------------------------------------- REFRESH HISTORY GRID }
+procedure TActionsForm.UpdateHistory(Grid: TStringGrid);
+var
+  DailyText: TDataTables;
+begin
+    DailyText:=TDataTables.Create(MainForm.FDbConnect);
+    try
+      DailyText.OpenTable(TblDaily);
+      DailyText.DataSet.Filter:=TDaily.CUID + EQUAL + QuotedStr(CUID);
+      DailyText.DataSet.Sort:=TDaily.STAMP + DESC;
+      if not (DailyText.DataSet.EOF) then
+      begin
+        DailyText.SqlToGrid(Grid, DailyText.DataSet, False, True);
+        SetHistoryCols(Grid);
+      end;
+    finally
+      DailyText.Free;
+    end;
+end;
+
+{ --------------------------------------------------------------------------------------------------------------------------- HIDE IRELEVANT FOR USER COLUMNS }
+procedure TActionsForm.SetHistoryCols(Grid: TStringGrid);
+begin
+  Grid.ColCount:=11;
+  Grid.ColWidths[1] := -1;
+  Grid.ColWidths[2] := -1;
+  Grid.ColWidths[3] := -1;
+  Grid.ColWidths[7] := -1;
+  Grid.ColWidths[8] := -1;
+  Grid.ColWidths[9] := -1;
+  Grid.ColWidths[10]:= -1;
+  Grid.SetColWidth(10, 20);
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------- MAKE PHONE CALL }
@@ -320,15 +341,7 @@ begin
   end;
   { ------------------------------------------------------------------------------------------------------------------------------------- HISTORY STRING GRID }
   HistoryGrid.RowCount:=2;
-  HistoryGrid.ColCount:=11;
-  { HIDE IRELEVANT FOR USER COLUMNS }
-  HistoryGrid.ColWidths[1] := -1;
-  HistoryGrid.ColWidths[2] := -1;
-  HistoryGrid.ColWidths[3] := -1;
-  HistoryGrid.ColWidths[7] := -1;
-  HistoryGrid.ColWidths[8] := -1;
-  HistoryGrid.ColWidths[9] := -1;
-  HistoryGrid.ColWidths[10]:= -1;
+  SetHistoryCols(HistoryGrid);
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------------- ON SHOW }
@@ -347,6 +360,8 @@ begin
   CUID      :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUID,            1, 1), MainForm.sgAgeView.Row];
   CustName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), MainForm.sgAgeView.Row];
   CustNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), MainForm.sgAgeView.Row];
+  { NO EDITING BY DEFAULT }
+  if IsEdit then imgEditDetailsClick(Self);
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------------------- ON ACTIVATE }
@@ -383,13 +398,10 @@ begin
 
 end;
 
-{ --------------------------------------------------------------------------------------------------------------------------------- SHOW DETAIL OF OPEN ITEMS }
+{ ---------------------------------------------------------------------------------------------------------------------------------- OPEN ITEMS DATE AND TIME }
 procedure TActionsForm.OpenItemsGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
 begin
-  {
-  StatusBar.SimpleText:='Invoice number: '       + OpenItemsGrid.Cells[1, ARow] +
-                        ' with due date as of: ' + OpenItemsGrid.Cells[7, ARow] + '. Text: ' + OpenItemsGrid.Cells[11, ARow];
-  }
+  StatusBar.SimpleText:=MainForm.OpenItemsUpdate;
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------- SHOW DATA WHEN SELECTED }
@@ -429,36 +441,18 @@ begin
         { UPDATE EXISTING COMMENT }
         if not (DailyText.DataSet.RecordCount = 0) then
         begin
-          { STAMP }
-          UpdateOK:=DailyText.UpdateRecord
-          (
-            TblDaily,
-            TDaily.STAMP,
-            DateTimeToStr(Now),
-            Condition
-          );
-          { USER_ALIAS }
-          UpdateOK:=DailyText.UpdateRecord
-          (
-            TblDaily,
-            TDaily.USER_ALIAS,
-            UpperCase(MainForm.FUserName),
-            Condition
-          );
-          { COMMENT }
-          UpdateOK:=DailyText.UpdateRecord
-          (
-            TblDaily,
-            TDaily.FIXCOMMENT,
-            DailyCom.Text,
-            Condition
-          );
+          DailyText.CleanUp;
+          { DEFINE COLUMNS, VALUES AND CONDITIONS }
+          DailyText.Columns.Add(TDaily.STAMP);        DailyText.Values.Add(DateTimeToStr(Now));             DailyText.Conditions.Add(Condition);
+          DailyText.Columns.Add(TDaily.USER_ALIAS);   DailyText.Values.Add(UpperCase(MainForm.FUserName));  DailyText.Conditions.Add(Condition);
+          DailyText.Columns.Add(TDaily.FIXCOMMENT);   DailyText.Values.Add(DailyCom.Text);                  DailyText.Conditions.Add(Condition);
+          { EXECUTE }
+          UpdateOK:=DailyText.UpdateRecord(TblDaily);
         end
         else
         { INSERT NEW RECORD }
         begin
-          DailyText.Columns.Clear;
-          DailyText.Values.Clear;
+          DailyText.CleanUp;
           { DEFINE COLUMNS AND VALUES }
           DailyText.Columns.Add(TDaily.GROUP_ID);     DailyText.Values.Add(MainForm.GroupIdSel);
           DailyText.Columns.Add(TDaily.CUID);         DailyText.Values.Add(CUID);
@@ -473,13 +467,7 @@ begin
           InsertOK:=DailyText.InsertInto(TblDaily);
         end;
         { REFRESH HISTORY GRID }
-        if (InsertOK) or (UpdateOK) then
-        begin
-          DailyText.OpenTable(TblDaily);
-          DailyText.DataSet.Filter:=TDaily.CUID + EQUAL + QuotedStr(CUID);
-          DailyText.DataSet.Sort:=TDaily.STAMP + DESC;
-          DailyText.SqlToGrid(HistoryGrid, DailyText.DataSet, False, True);
-        end;
+        if (InsertOK) or (UpdateOK) then UpdateHistory(HistoryGrid);
       finally
         DailyText.Free;
       end;
@@ -512,30 +500,13 @@ begin
         { UPDATE }
         if not (GenText.DataSet.RecordCount = 0) then
         begin
-          { STAMP }
-          GenText.UpdateRecord
-          (
-            TblGeneral,
-            TGeneral.STAMP,
-            DateTimeToStr(Now),
-            Condition
-          );
-          { USER_ALIAS }
-          GenText.UpdateRecord
-          (
-            TblGeneral,
-            TGeneral.USER_ALIAS,
-            UpperCase(MainForm.FUserName),
-            Condition
-          );
-          { COMMENT }
-          GenText.UpdateRecord
-          (
-            TblGeneral,
-            TGeneral.FIXCOMMENT,
-            GeneralCom.Text,
-            Condition
-          );
+          GenText.CleanUp;
+          { DEFINE COLUMNS, VALUES AND CONDITIONS }
+          GenText.Columns.Add(TGeneral.STAMP);        GenText.Values.Add(DateTimeToStr(Now));             GenText.Conditions.Add(Condition);
+          GenText.Columns.Add(TGeneral.USER_ALIAS);   GenText.Values.Add(UpperCase(MainForm.FUserName));  GenText.Conditions.Add(Condition);
+          GenText.Columns.Add(TGeneral.FIXCOMMENT);   GenText.Values.Add(GeneralCom.Text);                GenText.Conditions.Add(Condition);
+          { EXECUTE }
+          GenText.UpdateRecord(TblGeneral);
         end
         else
         { INSERT NEW }
@@ -628,20 +599,101 @@ end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------ ALLOW EDIT }
 procedure TActionsForm.imgEditDetailsClick(Sender: TObject);
+
+  (* NESTED PROCEDURE *)
+
+  procedure PicChange(number: integer);
+  begin
+    ActionsForm.imgSaveDetails.Picture.Bitmap.FreeImage;
+    ActionsForm.imgSaveDetails.Picture:=nil;
+    ActionsForm.imgList.GetBitmap(number, ActionsForm.imgSaveDetails.Picture.Bitmap);
+    ActionsForm.imgSaveDetails.Invalidate;
+  end;
+
 begin
-//
+  { IF NOT FOUND THEN QUIT }
+  if (Cust_Person.Text = unNotFound) and (Cust_Mail.Text = unNotFound) and (Cust_Phone.Text = unNotFound) then
+  begin
+    MainForm.MsgCall(1, 'This customer does not exist in Address Book. Please add to Address Book first.');
+    Exit;
+  end;
+  { EDIT ON/OFF }
+  if IsEdit then
+  begin
+    Cust_Person.Cursor    :=crHandPoint;
+    Cust_Mail.Cursor      :=crHandPoint;
+    Cust_Phone.Cursor     :=crHandPoint;
+    Cust_Person.ReadOnly  :=True;
+    Cust_Mail.ReadOnly    :=True;
+    Cust_Phone.ReadOnly   :=True;
+    Cust_Person.Font.Color:=clBlack;
+    Cust_Mail.Font.Color  :=clBlack;
+    Cust_Phone.Font.Color :=clBlack;
+    Cust_Person.Color     :=clWhite;
+    Cust_Mail.Color       :=clWhite;
+    Cust_Phone.Color      :=clWhite;
+    imgSaveDetails.Enabled:=False;
+    IsEdit:=False;
+    PicChange(imGreyed);
+  end else
+  begin
+    Cust_Person.Cursor    :=crIBeam;
+    Cust_Mail.Cursor      :=crIBeam;
+    Cust_Phone.Cursor     :=crIBeam;
+    Cust_Person.ReadOnly  :=False;
+    Cust_Mail.ReadOnly    :=False;
+    Cust_Phone.ReadOnly   :=False;
+    Cust_Person.Font.Color:=clNavy;
+    Cust_Mail.Font.Color  :=clNavy;
+    Cust_Phone.Font.Color :=clNavy;
+    Cust_Person.Color     :=clCream;
+    Cust_Mail.Color       :=clCream;
+    Cust_Phone.Color      :=clCream;
+    imgSaveDetails.Enabled:=True;
+    IsEdit:=True;
+    PicChange(imColour);
+  end;
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------- SAVE CUSTOMER DETAILS }
 procedure TActionsForm.imgSaveDetailsClick(Sender: TObject);
+var
+  AddrBook:  TDataTables;
+  Condition: string;
 begin
-//
+  AddrBook:=TDataTables.Create(MainForm.FDbConnect);
+  try
+    AddrBook.OpenTable(TblAddressbook);
+    Condition:=TAddressBook.CUID + EQUAL + QuotedStr(CUID);
+    AddrBook.DataSet.Filter:=Condition;
+    if not (AddrBook.DataSet.RecordCount = 0) then
+    begin
+      AddrBook.CleanUp;
+      { UPDATE DATA }
+      AddrBook.Columns.Add(TAddressBook.CONTACT);     AddrBook.Values.Add(Cust_Person.Text); AddrBook.Conditions.Add(Condition);
+      AddrBook.Columns.Add(TAddressBook.ESTATEMENTS); AddrBook.Values.Add(Cust_Mail.Text);   AddrBook.Conditions.Add(Condition);
+      AddrBook.Columns.Add(TAddressBook.TELEPHONE);   AddrBook.Values.Add(Cust_Phone.Text);  AddrBook.Conditions.Add(Condition);
+      { EXECUTE }
+      if not (AddrBook.UpdateRecord(TblAddressbook)) then
+        MainForm.MsgCall(mcWarn, 'Cannot save customer details. Please contact IT support.')
+          else
+            MainForm.MsgCall(mcInfo, 'Changes have been updated successfully.');
+    end;
+    imgEditDetailsClick(Self);
+  finally
+    AddrBook.Free;
+  end;
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------------- SEND STATEMENT }
 procedure TActionsForm.btnSendStatementClick(Sender: TObject);
 begin
 //
+
+
+
+
+
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------ SELECT NEXT OVERDUE CUSTOMER }

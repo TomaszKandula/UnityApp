@@ -3,9 +3,10 @@ object ActionsForm: TActionsForm
   Top = 0
   ActiveControl = OpenItemsGrid
   BorderIcons = [biSystemMenu]
+  BorderStyle = bsSingle
   Caption = 'Unity'
-  ClientHeight = 629
-  ClientWidth = 930
+  ClientHeight = 639
+  ClientWidth = 940
   Color = 15527148
   Constraints.MaxHeight = 668
   Constraints.MaxWidth = 946
@@ -26,19 +27,21 @@ object ActionsForm: TActionsForm
   TextHeight = 13
   object StatusBar: TStatusBar
     Left = 0
-    Top = 610
-    Width = 930
+    Top = 620
+    Width = 940
     Height = 19
     Color = 15527148
     Panels = <>
     SimplePanel = True
     SizeGrip = False
+    ExplicitTop = 610
+    ExplicitWidth = 930
   end
   object PanelMiddle: TPanel
     Left = 0
     Top = 107
-    Width = 930
-    Height = 282
+    Width = 940
+    Height = 292
     Margins.Left = 5
     Margins.Top = 5
     Margins.Right = 5
@@ -48,13 +51,14 @@ object ActionsForm: TActionsForm
     Color = 15527148
     ParentBackground = False
     TabOrder = 1
+    ExplicitWidth = 930
     ExplicitHeight = 321
     object OpenItemsGrid: TStringGrid
       AlignWithMargins = True
       Left = 5
       Top = 10
-      Width = 920
-      Height = 262
+      Width = 930
+      Height = 272
       Margins.Left = 5
       Margins.Top = 10
       Margins.Right = 5
@@ -73,6 +77,7 @@ object ActionsForm: TActionsForm
       OnMouseWheelDown = OpenItemsGridMouseWheelDown
       OnMouseWheelUp = OpenItemsGridMouseWheelUp
       OnSelectCell = OpenItemsGridSelectCell
+      ExplicitWidth = 920
       ExplicitHeight = 301
       ColWidths = (
         10
@@ -92,8 +97,8 @@ object ActionsForm: TActionsForm
   end
   object PanelBottom: TPanel
     Left = 0
-    Top = 389
-    Width = 930
+    Top = 399
+    Width = 940
     Height = 221
     Margins.Left = 5
     Margins.Top = 5
@@ -105,18 +110,20 @@ object ActionsForm: TActionsForm
     ParentBackground = False
     TabOrder = 2
     ExplicitTop = 428
+    ExplicitWidth = 930
     object ButtonPanel: TPanel
       Left = 0
       Top = 180
-      Width = 930
+      Width = 940
       Height = 41
       Align = alBottom
       BevelOuter = bvNone
       ParentColor = True
       TabOrder = 0
+      ExplicitWidth = 930
       object btnCallCustomer: TSpeedButton
         AlignWithMargins = True
-        Left = 805
+        Left = 815
         Top = 7
         Width = 110
         Height = 25
@@ -156,6 +163,7 @@ object ActionsForm: TActionsForm
           2D00C12D00C02C00BE2592E4A500BE2500C02C00C12D00C12D00C12D00C12D00
           C12D00C12D00C12D00C12D00C12D00C12D00C02C00BE2592E4A5}
         OnClick = btnCallCustomerClick
+        ExplicitLeft = 805
       end
       object btnNext: TSpeedButton
         Left = 15
@@ -168,7 +176,7 @@ object ActionsForm: TActionsForm
       end
       object btnSendStatement: TSpeedButton
         AlignWithMargins = True
-        Left = 678
+        Left = 688
         Top = 7
         Width = 110
         Height = 25
@@ -181,6 +189,7 @@ object ActionsForm: TActionsForm
         Anchors = [akRight]
         Caption = 'Send Statement'
         OnClick = btnSendStatementClick
+        ExplicitLeft = 678
       end
       object btnFeedback: TSpeedButton
         Left = 145
@@ -193,7 +202,7 @@ object ActionsForm: TActionsForm
       end
       object btnSendEmail: TSpeedButton
         AlignWithMargins = True
-        Left = 548
+        Left = 558
         Top = 7
         Width = 110
         Height = 25
@@ -207,6 +216,7 @@ object ActionsForm: TActionsForm
         Caption = 'Send Custom E-mail'
         Enabled = False
         OnClick = btnSendEmailClick
+        ExplicitLeft = 548
       end
     end
     object HistoryPanel: TPanel
@@ -267,15 +277,16 @@ object ActionsForm: TActionsForm
       AlignWithMargins = True
       Left = 315
       Top = 0
-      Width = 300
+      Width = 310
       Height = 175
       Margins.Left = 5
       Margins.Top = 0
       Margins.Right = 5
       Margins.Bottom = 5
-      Align = alLeft
+      Align = alClient
       BevelOuter = bvNone
       TabOrder = 2
+      ExplicitWidth = 300
       object DailyTitle: TLabel
         Left = 2
         Top = 0
@@ -292,7 +303,7 @@ object ActionsForm: TActionsForm
       object DailyCom: TMemo
         Left = 0
         Top = 24
-        Width = 300
+        Width = 310
         Height = 151
         Hint = 'Press Enter to save'
         Margins.Left = 5
@@ -316,11 +327,12 @@ object ActionsForm: TActionsForm
         TabOrder = 0
         WantReturns = False
         OnKeyDown = DailyComKeyDown
+        ExplicitWidth = 300
       end
     end
     object GeneralPanel: TPanel
       AlignWithMargins = True
-      Left = 625
+      Left = 635
       Top = 0
       Width = 300
       Height = 175
@@ -328,9 +340,10 @@ object ActionsForm: TActionsForm
       Margins.Top = 0
       Margins.Right = 5
       Margins.Bottom = 5
-      Align = alLeft
+      Align = alRight
       BevelOuter = bvNone
       TabOrder = 3
+      ExplicitLeft = 625
       object GeneralTitle: TLabel
         Left = 2
         Top = 0
@@ -378,7 +391,7 @@ object ActionsForm: TActionsForm
     AlignWithMargins = True
     Left = 0
     Top = 2
-    Width = 930
+    Width = 940
     Height = 105
     Margins.Left = 0
     Margins.Top = 2
@@ -389,11 +402,12 @@ object ActionsForm: TActionsForm
     Color = 15527148
     ParentBackground = False
     TabOrder = 3
+    ExplicitWidth = 930
     object InnerBox: TShape
       AlignWithMargins = True
       Left = 5
       Top = 5
-      Width = 920
+      Width = 930
       Height = 100
       Margins.Left = 5
       Margins.Top = 5
@@ -479,7 +493,7 @@ object ActionsForm: TActionsForm
       AlignWithMargins = True
       Left = 15
       Top = 44
-      Width = 900
+      Width = 910
       Height = 7
       Margins.Left = 0
       Margins.Top = 0
@@ -488,10 +502,11 @@ object ActionsForm: TActionsForm
       Align = alCustom
       Anchors = [akLeft, akRight]
       Shape = bsTopLine
+      ExplicitWidth = 900
     end
     object imgEditDetails: TImage
       AlignWithMargins = True
-      Left = 891
+      Left = 901
       Top = 60
       Width = 24
       Height = 24
@@ -565,10 +580,11 @@ object ActionsForm: TActionsForm
       ShowHint = True
       Stretch = True
       OnClick = imgEditDetailsClick
+      ExplicitLeft = 891
     end
     object imgSaveDetails: TImage
       AlignWithMargins = True
-      Left = 860
+      Left = 870
       Top = 60
       Width = 24
       Height = 24
@@ -643,6 +659,7 @@ object ActionsForm: TActionsForm
       ShowHint = True
       Stretch = True
       OnClick = imgSaveDetailsClick
+      ExplicitLeft = 860
     end
     object Cust_Person: TEdit
       Left = 128

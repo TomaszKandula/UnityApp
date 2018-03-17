@@ -65,7 +65,7 @@ var
 implementation
 
 uses
-  Settings;
+  Settings, Model;
 
 {$R *.dfm}
 
@@ -157,14 +157,21 @@ begin
       FilterForm.ListState[iCNT, 1]:=BoolToStr(FilterList.Checked[iCNT], True);
       SetLength(FilterForm.ListState, iCNT + 2, 2);
     end;
-    { -------------------------------------------------------------------------------------------------------------------------------------------- FILTER OUT }
+    { --------------------------------------------------------------------------------------------------------------------------------- FILTER SELECTED ITEMS }
     for iCNT:=0 to High(FilterForm.ListState) - 1 do
       for jCNT:=0 to MainForm.sgAgeView.RowCount - 1 do
       begin
         if (UpperCase(FilterForm.ListState[iCNT, 0]) = UpperCase(FGrid.Cells[FColNumber, jCNT])) then
         begin
-          if (FilterForm.ListState[iCNT, 1] = 'False') then FGrid.RowHeights[jCNT]:= -1;
-          if (FilterForm.ListState[iCNT, 1] = 'True' ) then FGrid.RowHeights[jCNT]:= 17;
+          if (FilterForm.ListState[iCNT, 1] = 'True' ) then
+          begin
+            FGrid.RowHeights[jCNT]:= 17;
+          end;
+          if (FilterForm.ListState[iCNT, 1] = 'False') or
+             (  (MainForm.Action_Overdue.Checked) and
+                (FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fOVERDUE, 1, 1), jCNT] = '0')
+             ) then
+                 FGrid.RowHeights[jCNT]:= -1;
         end;
       end;
   finally
