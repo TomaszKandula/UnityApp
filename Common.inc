@@ -149,6 +149,11 @@ const
   mcQuestion1 = 4;
   mcQuestion2 = 5;
 
+  { WINDOW STATE }
+
+  stModal    = 0;
+  stModeless = 1;
+
   { SQL KEYWORDS | ADD. SPACES FOR EASIER CONCATENATING }
 
   INSERT       : string = ' INSERT INTO ';

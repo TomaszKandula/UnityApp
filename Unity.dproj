@@ -52,6 +52,7 @@
 			<DelphiCompile Include="Unity.dpr">
 				<MainSource>MainSource</MainSource>
 			</DelphiCompile>
+			<DCCReference Include="Update.pas"/>
 			<DCCReference Include="Splash.pas"/>
 			<DCCReference Include="Main.pas"/>
 			<DCCReference Include="Filter.pas"/>

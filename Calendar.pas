@@ -18,7 +18,7 @@ unit Calendar;
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, ComCtrls, ExtCtrls, Main, StdCtrls;
+  Main, Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, ComCtrls, ExtCtrls, StdCtrls, DateUtils;
 
 { --------------------------------------------------------------- ! MAIN CLASS ! ---------------------------------------------------------------------------- }
 type
@@ -41,6 +41,7 @@ type
   public
     function MakeMyDay(Increment: integer): TDate;
     function IsWeekend(const DT: TDateTime): Boolean;
+    function GetCurrentWorkingDay(WhatDay: integer): boolean;
   end;
 
 var
@@ -56,6 +57,30 @@ uses
 {$R *.dfm}
 
 { ############################################################# ! MAIN FORM METHODS ! ####################################################################### }
+
+{ ------------------------------------------------------------------------------------------------------------------------- RETURN WORKING DAY IN GIVEN MONTH }
+function TCalendarForm.GetCurrentWorkingDay(WhatDay: Integer): boolean;
+var
+  Anchor: TDate;
+  iCNT:   integer;
+begin
+  { FIND WD FOR CURRENT MONTH }
+  Anchor:=EndOfAMonth(YearOf(Now), MonthOf(Now) - 1);
+  for iCNT:=1 to WhatDay do
+  begin
+    { IF WE HAVE WEEKEND, THEN MOVE TO NEXT WD }
+    if IsWeekend(Anchor) then
+      while IsWeekend(Anchor) do
+        Anchor:=Anchor + 1;
+    { INCREASE BY ONE WD }
+    Anchor:=Anchor + 1;
+  end;
+  { COMPARE }
+  if Now = Anchor then
+    Result:=True
+      else
+        Result:=False;
+end;
 
 { --------------------------------------------------------------------------------------------------------------------------------- CHECK IF TODAY IS WEEKEND }
 function TCalendarForm.IsWeekend(const DT: TDateTime): Boolean;

@@ -16,25 +16,25 @@ unit Mailer;
 interface
 
 uses
-  Main, SysUtils, Windows, Messages, StdCtrls, Classes, StrUtils, Variants, CDO_TLB, blcksock, smtpsend { MODIFIED FROM ORIGINAL }, pop3send, ssl_openssl, synautil,
-  synacode, mimemess { MODIFIED FROM ORIGINAL };
+  Main, Settings, SysUtils, Windows, Messages, StdCtrls, Classes, StrUtils, Variants, CDO_TLB,
+  blcksock, smtpsend { MODIFIED FROM ORIGINAL }, pop3send, ssl_openssl, synautil, synacode, mimemess { MODIFIED FROM ORIGINAL };
 
 
 { -------------------------------------------------------------- ! MAILER CLASS ! --------------------------------------------------------------------------- }
 type
-  TMailer = class
+  TMailer = class(TSettings)
   {$TYPEINFO ON}
   private
-    pidThd     : integer;
-    pXMailer   : string;
-    pmFrom     : string;
-    pmTo       : string;
-    pmCc       : string;
-    pmBcc      : string;
-    pmRt       : string;
-    pmSubject  : string;
-    pmBody     : string;
-    pmLogo     : string;
+    var pidThd     : integer;
+    var pXMailer   : string;
+    var pmFrom     : string;
+    var pmTo       : string;
+    var pmCc       : string;
+    var pmBcc      : string;
+    var pmRt       : string;
+    var pmSubject  : string;
+    var pmBody     : string;
+    var pmLogo     : string;
   public
     property    idThd       : integer read pidThd    write pidThd;
     property    XMailer     : string  read pXMailer  write pXMailer;
@@ -47,7 +47,6 @@ type
     property    MailBody    : string  read pmBody    write pmBody;
     property    Logo        : string  read pmLogo    write pmLogo;
   published
-    constructor Create;
     function    SendCDOSYS : boolean;
     function    SendSynapse: boolean;
     function    SendNow    : boolean;
@@ -63,33 +62,18 @@ type
     procedure   Refresh(var SG: TStringGrid; Param: string);
   end;
 
+{ ------------------------------------------------------------- ! IMPLEMENTATION ZONE ! --------------------------------------------------------------------- }
+
 implementation
 
 uses
-  Settings, Database, ADODB, Tracker;
+  Database, ADODB, Tracker;
 
 { ############################################################## ! MAILER CLASS ! ########################################################################### }
-
-{ ---------------------------------------------------------------------------------------------------------------------------------------------------- MAILER }
-constructor TMailer.Create;
-begin
-  (* INITIALIZE PRIVATE VARIABES *)
-  pidThd   :=0;
-  pXMailer :='';
-  pmFrom   :='';
-  pmTo     :='';
-  pmCc     :='';
-  pmBcc    :='';
-  pmRt     :='';
-  pmSubject:='';
-  pmBody   :='';
-  pmLogo   :='';
-end;
 
 { ---------------------------------------------------------------------------------------------------------------------------------- SEND USING CDOSYS | NTLM }
 function TMailer.SendCDOSYS: boolean;
 var
-  AppSettings:  TSettings;
   CdoMessage:   CDO_TLB.IMessage;
   Schema:       string;
 begin
@@ -108,32 +92,26 @@ begin
   CdoMessage.HTMLBody:=MailBody;
   { ----------------------------------------------------------------------------------------------------------------------------------------------- CONFIGURE }
   Schema:='http://schemas.microsoft.com/cdo/configuration/';
-  AppSettings:=TSettings.Create;
+  CdoMessage.Configuration.Fields.item[Schema + 'sendusing'       ].Value:=2; (* SEND THE MESSAGE USING THE NETWORK *)
+  CdoMessage.Configuration.Fields.item[Schema + 'smtpserver'      ].Value:=TMIG.ReadString(MailerCDOSYS, 'SMTP', '');
+  CdoMessage.Configuration.Fields.item[Schema + 'smtpserverport'  ].Value:=TMIG.ReadString(MailerCDOSYS, 'PORT', '');
+  CdoMessage.Configuration.Fields.item[Schema + 'smtpauthenticate'].Value:=2; (* NTLM *)
+  CdoMessage.Configuration.Fields.item[Schema + 'NNTPAccountName' ].Value:=XMailer;
+  CdoMessage.Configuration.Fields.update;
+  { ---------------------------------------------------------------------------------------------------------------------------------------------------- SEND }
   try
-    CdoMessage.Configuration.Fields.item[Schema + 'sendusing'       ].Value:=2; (* SEND THE MESSAGE USING THE NETWORK *)
-    CdoMessage.Configuration.Fields.item[Schema + 'smtpserver'      ].Value:=AppSettings.TMIG.ReadString(MailerCDOSYS, 'SMTP', '');
-    CdoMessage.Configuration.Fields.item[Schema + 'smtpserverport'  ].Value:=AppSettings.TMIG.ReadString(MailerCDOSYS, 'PORT', '');
-    CdoMessage.Configuration.Fields.item[Schema + 'smtpauthenticate'].Value:=2; (* NTLM *)
-    CdoMessage.Configuration.Fields.item[Schema + 'NNTPAccountName' ].Value:=XMailer;
-    CdoMessage.Configuration.Fields.update;
-    { ---------------------------------------------------------------------------------------------------------------------------------------------------- SEND }
-    try
-      CdoMessage.BodyPart.Charset:='utf-8';
-      CdoMessage.Send;
-      Result:=True;
-    except
-      on E: Exception do
-        LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(idThd) + ']: Could not send an e-mail. Error message thrown: ' + E.Message);
-    end;
-  finally
-    AppSettings.Free;
+    CdoMessage.BodyPart.Charset:='utf-8';
+    CdoMessage.Send;
+    Result:=True;
+  except
+    on E: Exception do
+      LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(idThd) + ']: Cannot send an e-mail. Error message has been thrown: ' + E.Message);
   end;
 end;
 
 { ---------------------------------------------------------------------------------------------------------------------------------------- SEND USING SYNAPSE }
 function TMailer.SendSynapse;
 var
-  AppSettings:  TSettings;
   Email:        TSMTPSend;
   MailContent:  TStringList;
   Msg:          TMimeMess;
@@ -152,7 +130,6 @@ begin
   MailContent:=TStringList.Create;
   Msg        :=TMimeMess.Create;
   Email      :=TSMTPSend.Create;
-  AppSettings:=TSettings.Create;
   try
     try
       { ------------------------------------------------------------------------------------------------------------------------ ADD PRE-PREPARED E-MAIL BODY }
@@ -194,18 +171,18 @@ begin
       Msg.AddPartHTML(MailContent, nil);
       Msg.EncodeMessage;
       { ------------------------------------------------------------------------------------------------------------------------ EMAIL CREDENTIALS AND SERVER }
-      Email.UserName  :=AppSettings.TMIG.ReadString(MailerSynapse, 'USERNAME', '');
-      Email.Password  :=AppSettings.TMIG.ReadString(MailerSynapse, 'PASSWORD', '');
-      Email.TargetHost:=AppSettings.TMIG.ReadString(MailerSynapse, 'SMTP', '');
-      Email.TargetPort:=AppSettings.TMIG.ReadString(MailerSynapse, 'PORT', '');
+      Email.UserName  :=TMIG.ReadString(MailerSynapse, 'USERNAME', '');
+      Email.Password  :=TMIG.ReadString(MailerSynapse, 'PASSWORD', '');
+      Email.TargetHost:=TMIG.ReadString(MailerSynapse, 'SMTP', '');
+      Email.TargetPort:=TMIG.ReadString(MailerSynapse, 'PORT', '');
       { ---------------------------------------------------------------------------------------------------------------------------------------- TLS OVER SSL }
-      if AppSettings.TMIG.ReadBool(MailerSynapse, 'TLS', False) = True then
+      if TMIG.ReadBool(MailerSynapse, 'TLS', False) = True then
       begin
         Email.AutoTLS:=True;
         Email.FullSSL:=False;
       end;
       { ---------------------------------------------------------------------------------------------------------------------------------------- SSL OVER TLS }
-      if AppSettings.TMIG.ReadBool(MailerSynapse, 'SSL', True) = True then
+      if TMIG.ReadBool(MailerSynapse, 'SSL', True) = True then
       begin
         Email.AutoTLS:=False;
         Email.FullSSL:=True;
@@ -237,8 +214,8 @@ begin
         LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(idThd) + ']: Could not send an e-mail. Error message thrown: ' + E.Message);
     end;
   finally
+    { ------------------------------------------------------------------------------------------------------------------------------------------ UNINITIALIZE }
     MailContent.Free;
-    AppSettings.Free;
     Msg.Free;
     Email.Free;
     SendTo.Free;
@@ -248,23 +225,188 @@ begin
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------------------- SEND E-MAIL }
-function TMailer.SendNow: boolean;  (* ASYNC *)
-var
-  AppSettings: TSettings;
+function TMailer.SendNow: boolean;
 begin
   Result:=False;
-  AppSettings:=TSettings.Create;
-  try
-    (* NTLM AUTHENTICATE ONLY *)
-    if AppSettings.TMIG.ReadString(MailerSetup, 'ACTIVE', '') = MailerCDOSYS then Result:=SendCDOSYS;
-    (* REQUIRE USERNAME AND PASSWORD, SSL/TLS *)
-    if AppSettings.TMIG.ReadString(MailerSetup, 'ACTIVE', '') = MailerSYNAPSE then Result:=SendSynapse;
-  finally
-    AppSettings.Free;
-  end;
+  (* NTLM AUTHENTICATE ONLY *)
+  if TMIG.ReadString(MailerSetup, 'ACTIVE', '') = MailerCDOSYS then Result:=SendCDOSYS;
+  (* REQUIRE USERNAME AND PASSWORD, SSL/TLS *)
+  if TMIG.ReadString(MailerSetup, 'ACTIVE', '') = MailerSYNAPSE then Result:=SendSynapse;
 end;
 
 { ########################################################## ! INVOICE TRACKER CLASS ! ###################################################################### }
+
+
+
+
+
+{ ----------------------------------------------------------------------------------------------------------------------------- REFRESH INVOICE TRACKER TABLE }
+procedure TInvoiceTracker.Refresh(var SG: TStringGrid; Param: string);
+var
+  AppSettings: TSettings;
+  { SQL }
+  Query:       TADOQuery;
+  StrSQL:      array of string;
+  Columns:     string;
+  Params:      string;
+  AddWhere:    string;
+  { COUNTERS }
+  iCNT:      integer;
+  jCNT:      integer;
+  { CURRENT DATE/TIME }
+  Stamp:  string;
+begin
+  { ---------------------------------------------------------------------------------------------------------------------------- DISABLE DRAWING 'STRINGGRID' }
+  with SG do SendMessage(Handle, WM_SETREDRAW, 0, 0);
+  { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
+  Query:=TADOQuery.Create(nil);
+  Query.Connection:=MainForm.FDbConnect;
+  Query.SQL.Clear;
+  Stamp:=DateTimeToStr(Now);
+  SetLength(StrSQL, 2);
+  AppSettings:=TSettings.Create;
+  { --------------------------------------------------------------------------------------------------------------------------------------------- CHECK PARAM }
+  if not (Param = 'ADD') and not (Param = 'REMOVE') then
+  begin
+    { ---------------------------------------------------------------------------------------------------------------------------------- BUILD SQL EXPRESSION }
+    if Param <> 'ALL' then AddWhere:=' where tbl_tracker.user_alias = ' + QuotedStr(Param);
+    StrSQL[0]:='SELECT '                                                      +
+                 'tbl_tracker.user_alias       as ''User Alias'','            +
+                 'tbl_tracker.cuid             as ''CUID'','                  +
+                 'tbl_tracker.custname         as ''Customer Name'','         +
+                 'tbl_tracker.co_code          as ''Co Code'','               +
+                 'tbl_tracker.branch           as ''Agent'','                 +
+                 'tbl_tracker.layout           as ''Applied Layout'','        +
+                 'tbl_tracker.stamp            as ''Created'','               +
+                 'tbl_company.send_note_from   as ''Send From'','             +
+                 'tbl_addressbook.emails       as ''Reminder To'','           +
+                 'tbl_addressbook.estatements  as ''Statement To'','          +
+                 'tbl_company.legalto          as ''Notification To'','       +
+                 'tbl_company.reminder1        as ''Timing (Reminder 1)'','   +
+                 'tbl_company.reminder2        as ''Timing (Reminder 2)'','   +
+                 'tbl_company.reminder3        as ''Timing (Reminder 3)'','   +
+                 'tbl_company.legalaction      as ''Timing (Legal Note)'','   +
+                 'tbl_company.first_statement  as ''1st Statement'','         +
+                 'tbl_company.second_statement as ''2nd Statement'','         +
+                 'tbl_company.stat_except      as ''Statement exception'','   +
+                 'tbl_company.rem_ex1          as ''Exception (1)'','         +
+                 'tbl_company.rem_ex2          as ''Exception (2)'','         +
+                 'tbl_company.rem_ex3          as ''Exception (3)'','         +
+                 'tbl_company.rem_ex4          as ''Exception (4)'','         +
+                 'tbl_company.rem_ex5          as ''Exception (5)'','         +
+                 'tbl_company.bankdetails      as ''Bank Account'','          +
+                 'tbl_company.coname           as ''Co Name'','               +
+                 'tbl_company.coaddress        as ''Co Address'','            +
+                 'tbl_company.vatno            as ''VAT number'','            +
+                 'tbl_company.telephone        as ''Phone number'' '          +
+               'FROM '                                                        +
+                 'tbl_tracker '                                               +
+               'LEFT JOIN '                                                   +
+                 'tbl_addressbook on tbl_tracker.cuid = tbl_addressbook.cuid '+
+               'LEFT JOIN '                                                   +
+                 'tbl_company on (tbl_tracker.co_code = tbl_company.co_code and tbl_tracker.branch = tbl_company.branch)' + AddWhere + ' ORDER BY tbl_tracker.co_code ASC ';
+    Query.SQL.Text:=StrSQL[0];
+    { ----------------------------------------------------------------------------------------------------------------------------- CONNECT, READ AND DISPLAY }
+    try
+      Query.Open;
+      if Query.RecordCount > 0 then
+      begin
+        SG.ClearAll(2, 1, 1, False);
+        iCNT:=0;
+        SG.RowCount:=Query.RecordCount + 1;
+        SG.ColCount:=Query.Recordset.Fields.Count + 1;
+        while not Query.Recordset.EOF do
+        begin
+          for jCNT:=0 to Query.Recordset.Fields.Count - 1 do
+          begin
+            if iCNT = 0 then SG.Cells[jCNT + 1, iCNT]:=Query.Recordset.Fields[jCNT].Name;
+            SG.Cells[jCNT + 1, iCNT + 1]:=VarToStr(Query.Recordset.Fields[jCNT].Value);
+          end;
+          Query.Recordset.MoveNext;
+          inc(iCNT);
+        end;
+      end;
+      Query.Close;
+      SG.SetColWidth(10, 20);
+    finally
+      Query.Free;
+      if not SG.Enabled then SG.Enabled:=True;
+    end;
+  end;
+  { --------------------------------------------------------------------------------------------------------------------------------------------- CHECK PARAM }
+  if (Param = 'ADD') or (Param = 'REMOVE') then
+  begin
+    { ADD ITEM TO INVOICE TRACKER LIST }
+    if Param = 'ADD' then
+    begin
+      { --------------------------------------------------------------------------------------------------- CHECK IF SELECTED CUSTOMER IS ALREADY ON THE LIST }
+      StrSQL[0]:='SELECT user_alias FROM tbl_tracker WHERE CUID = ' + QuotedStr(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('CUID', 1, 1), MainForm.sgAgeView.Row]);
+      Query.SQL.Add(StrSQL[0]);
+      try
+        Query.Open;
+        { ALREADY EXISTS }
+        if Query.RecordCount > 0 then SendMessage(MainForm.Handle, WM_GETINFO, 1, LPARAM(PChar('This customer is already on the Invoice Tracker list.')));
+        { NOT ON THE LIST }
+        if Query.RecordCount = 0 then
+        begin
+          { ---------------------------------------------------------------------------------------------------------------------------- BUILD SQL EXPRESSION }
+          Query.SQL.Clear;
+          Columns:='USER_ALIAS, CUID, CO_CODE, BRANCH, CUSTNAME, LAYOUT, STAMP';
+          Params:=QuotedStr(UpperCase(MainForm.FUserName)) + ', ' +
+                  QuotedStr(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('CUID',   1, 1),  MainForm.sgAgeView.Row]) + ', ' +
+                  QuotedStr(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('CO CODE', 1, 1), MainForm.sgAgeView.Row]) + ',' +
+                  QuotedStr(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('AGENT',   1, 1), MainForm.sgAgeView.Row]) + ', ' +
+                  QuotedStr(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('CUSTOMER NAME', 1, 1), MainForm.sgAgeView.Row]) + ', ' +
+                  QuotedStr(TrackerForm.LayoutList.Text) + ', ' +
+                  QuotedStr(Stamp);
+
+          StrSQL[0]:='INSERT INTO tbl_tracker (' + Columns + ') VALUES (' + Params + ')';
+          Query.SQL.Add(StrSQL[0]);
+          { ----------------------------------------------------------------------------------------------------------------------------------------- EXECUTE }
+          try
+            Query.ExecSQL;
+          finally
+            Query.Close;
+            if not SG.Enabled then SG.Enabled:=True;
+          end;
+          SendMessage(MainForm.Handle, WM_GETINFO, 1, LPARAM(PChar('Customer has been added to the Invoice Tracker.')));
+        end;
+      finally
+        Query.Free;
+      end;
+    end;
+    { ---------------------------------------------------------------------------------------------------------------------------------- REMOVE FROM THE LIST }
+    { 'TBL_TRACKER' IS RELATED WITH 'TBL_INVOICES'. WE USE ONE-TO-MANY RELATIONSHIP. TBL_TRACKER CONTAINS WITH CUSTOMER 'UNDER WATCH' WHILE 'TBL_INVOICES'    }
+    { CONTAINS WITH INVOICES THAT HAS BEEN ACTUALLY SENT (IF ANY) THEREFORE, WE MUST REMOVE ITEMS FROM 'TBL_INVOICES' AND THEN 'TBL_TRACKER', NOT THE         }
+    { OTHER WAY. IF THERE IS NO INVOICES ON THE 'TBL_INVOICES' LIST, DELETE STATEMENT RETURNS ONLY '0 ROWS AFFECTED'.                                         }
+    if Param = 'REMOVE' then
+    begin
+      StrSQL[0]:='DELETE FROM tbl_invoices WHERE CUID = ' + QuotedStr(SG.Cells[2, SG.Row]);
+      StrSQL[1]:='DELETE FROM tbl_tracker WHERE CUID = ' + QuotedStr(SG.Cells[2, SG.Row]);
+      try
+        for iCNT:=0 to 1 do
+        begin
+          Query.SQL.Clear;
+          Query.SQL.Add(StrSQL[iCNT]);
+          Query.ExecSQL;
+        end;
+      finally
+        Query.Free;
+        { REMOVE FROM 'STRINGGRID' }
+        SG.DeleteRowFrom(1, 1);
+      end;
+    end;
+  end;
+  { ----------------------------------------------------------------------------------------------------------------------------- ENABLE DRAWING 'STRINGGRID' }
+  AppSettings.Free;
+  with SG do SendMessage(Handle, WM_SETREDRAW, 1, 0);
+  SG.Repaint;
+end;
+
+
+
+
+
 
 { ----------------------------------------------------------------------------------------------------------------------------------------------- CONSTRUCTOR }
 constructor TInvoiceTracker.Create;
@@ -637,167 +779,5 @@ begin
   SendMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Ready.')));
 end;
 
-{ ----------------------------------------------------------------------------------------------------------------------------- REFRESH INVOICE TRACKER TABLE }
-procedure TInvoiceTracker.Refresh(var SG: TStringGrid; Param: string);
-var
-  AppSettings: TSettings;
-  { SQL }
-  Query:       TADOQuery;
-  StrSQL:      array of string;
-  Columns:     string;
-  Params:      string;
-  AddWhere:    string;
-  { COUNTERS }
-  iCNT:      integer;
-  jCNT:      integer;
-  { CURRENT DATE/TIME }
-  Stamp:  string;
-begin
-  { ---------------------------------------------------------------------------------------------------------------------------- DISABLE DRAWING 'STRINGGRID' }
-  with SG do SendMessage(Handle, WM_SETREDRAW, 0, 0);
-  { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-  Query:=TADOQuery.Create(nil);
-  Query.Connection:=MainForm.FDbConnect;
-  Query.SQL.Clear;
-  Stamp:=DateTimeToStr(Now);
-  SetLength(StrSQL, 2);
-  AppSettings:=TSettings.Create;
-  { --------------------------------------------------------------------------------------------------------------------------------------------- CHECK PARAM }
-  if not (Param = 'ADD') and not (Param = 'REMOVE') then
-  begin
-    { ---------------------------------------------------------------------------------------------------------------------------------- BUILD SQL EXPRESSION }
-    if Param <> 'ALL' then AddWhere:=' where tbl_tracker.user_alias = ' + QuotedStr(Param);
-    StrSQL[0]:='SELECT '                                                      +
-                 'tbl_tracker.user_alias       as ''User Alias'','            +
-                 'tbl_tracker.cuid             as ''CUID'','                  +
-                 'tbl_tracker.custname         as ''Customer Name'','         +
-                 'tbl_tracker.co_code          as ''Co Code'','               +
-                 'tbl_tracker.branch           as ''Agent'','                 +
-                 'tbl_tracker.layout           as ''Applied Layout'','        +
-                 'tbl_tracker.stamp            as ''Created'','               +
-                 'tbl_company.send_note_from   as ''Send From'','             +
-                 'tbl_addressbook.emails       as ''Reminder To'','           +
-                 'tbl_addressbook.estatements  as ''Statement To'','          +
-                 'tbl_company.legalto          as ''Notification To'','       +
-                 'tbl_company.reminder1        as ''Timing (Reminder 1)'','   +
-                 'tbl_company.reminder2        as ''Timing (Reminder 2)'','   +
-                 'tbl_company.reminder3        as ''Timing (Reminder 3)'','   +
-                 'tbl_company.legalaction      as ''Timing (Legal Note)'','   +
-                 'tbl_company.first_statement  as ''1st Statement'','         +
-                 'tbl_company.second_statement as ''2nd Statement'','         +
-                 'tbl_company.stat_except      as ''Statement exception'','   +
-                 'tbl_company.rem_ex1          as ''Exception (1)'','         +
-                 'tbl_company.rem_ex2          as ''Exception (2)'','         +
-                 'tbl_company.rem_ex3          as ''Exception (3)'','         +
-                 'tbl_company.rem_ex4          as ''Exception (4)'','         +
-                 'tbl_company.rem_ex5          as ''Exception (5)'','         +
-                 'tbl_company.bankdetails      as ''Bank Account'','          +
-                 'tbl_company.coname           as ''Co Name'','               +
-                 'tbl_company.coaddress        as ''Co Address'','            +
-                 'tbl_company.vatno            as ''VAT number'','            +
-                 'tbl_company.telephone        as ''Phone number'' '          +
-               'FROM '                                                        +
-                 'tbl_tracker '                                               +
-               'LEFT JOIN '                                                   +
-                 'tbl_addressbook on tbl_tracker.cuid = tbl_addressbook.cuid '+
-               'LEFT JOIN '                                                   +
-                 'tbl_company on (tbl_tracker.co_code = tbl_company.co_code and tbl_tracker.branch = tbl_company.branch)' + AddWhere + ' ORDER BY tbl_tracker.co_code ASC ';
-    Query.SQL.Text:=StrSQL[0];
-    { ----------------------------------------------------------------------------------------------------------------------------- CONNECT, READ AND DISPLAY }
-    try
-      Query.Open;
-      if Query.RecordCount > 0 then
-      begin
-        SG.ClearAll(2, 1, 1, False);
-        iCNT:=0;
-        SG.RowCount:=Query.RecordCount + 1;
-        SG.ColCount:=Query.Recordset.Fields.Count + 1;
-        while not Query.Recordset.EOF do
-        begin
-          for jCNT:=0 to Query.Recordset.Fields.Count - 1 do
-          begin
-            if iCNT = 0 then SG.Cells[jCNT + 1, iCNT]:=Query.Recordset.Fields[jCNT].Name;
-            SG.Cells[jCNT + 1, iCNT + 1]:=VarToStr(Query.Recordset.Fields[jCNT].Value);
-          end;
-          Query.Recordset.MoveNext;
-          inc(iCNT);
-        end;
-      end;
-      Query.Close;
-      SG.SetColWidth(10, 20);
-    finally
-      Query.Free;
-      if not SG.Enabled then SG.Enabled:=True;
-    end;
-  end;
-  { --------------------------------------------------------------------------------------------------------------------------------------------- CHECK PARAM }
-  if (Param = 'ADD') or (Param = 'REMOVE') then
-  begin
-    { ADD ITEM TO INVOICE TRACKER LIST }
-    if Param = 'ADD' then
-    begin
-      { --------------------------------------------------------------------------------------------------- CHECK IF SELECTED CUSTOMER IS ALREADY ON THE LIST }
-      StrSQL[0]:='SELECT user_alias FROM tbl_tracker WHERE CUID = ' + QuotedStr(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('CUID', 1, 1), MainForm.sgAgeView.Row]);
-      Query.SQL.Add(StrSQL[0]);
-      try
-        Query.Open;
-        { ALREADY EXISTS }
-        if Query.RecordCount > 0 then SendMessage(MainForm.Handle, WM_GETINFO, 1, LPARAM(PChar('This customer is already on the Invoice Tracker list.')));
-        { NOT ON THE LIST }
-        if Query.RecordCount = 0 then
-        begin
-          { ---------------------------------------------------------------------------------------------------------------------------- BUILD SQL EXPRESSION }
-          Query.SQL.Clear;
-          Columns:='USER_ALIAS, CUID, CO_CODE, BRANCH, CUSTNAME, LAYOUT, STAMP';
-          Params:=QuotedStr(UpperCase(MainForm.FUserName)) + ', ' +
-                  QuotedStr(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('CUID',   1, 1),  MainForm.sgAgeView.Row]) + ', ' +
-                  QuotedStr(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('CO CODE', 1, 1), MainForm.sgAgeView.Row]) + ',' +
-                  QuotedStr(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('AGENT',   1, 1), MainForm.sgAgeView.Row]) + ', ' +
-                  QuotedStr(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn('CUSTOMER NAME', 1, 1), MainForm.sgAgeView.Row]) + ', ' +
-                  QuotedStr(TrackerForm.LayoutList.Text) + ', ' +
-                  QuotedStr(Stamp);
-
-          StrSQL[0]:='INSERT INTO tbl_tracker (' + Columns + ') VALUES (' + Params + ')';
-          Query.SQL.Add(StrSQL[0]);
-          { ----------------------------------------------------------------------------------------------------------------------------------------- EXECUTE }
-          try
-            Query.ExecSQL;
-          finally
-            Query.Close;
-            if not SG.Enabled then SG.Enabled:=True;
-          end;
-          SendMessage(MainForm.Handle, WM_GETINFO, 1, LPARAM(PChar('Customer has been added to the Invoice Tracker.')));
-        end;
-      finally
-        Query.Free;
-      end;
-    end;
-    { ---------------------------------------------------------------------------------------------------------------------------------- REMOVE FROM THE LIST }
-    { 'TBL_TRACKER' IS RELATED WITH 'TBL_INVOICES'. WE USE ONE-TO-MANY RELATIONSHIP. TBL_TRACKER CONTAINS WITH CUSTOMER 'UNDER WATCH' WHILE 'TBL_INVOICES'    }
-    { CONTAINS WITH INVOICES THAT HAS BEEN ACTUALLY SENT (IF ANY) THEREFORE, WE MUST REMOVE ITEMS FROM 'TBL_INVOICES' AND THEN 'TBL_TRACKER', NOT THE         }
-    { OTHER WAY. IF THERE IS NO INVOICES ON THE 'TBL_INVOICES' LIST, DELETE STATEMENT RETURNS ONLY '0 ROWS AFFECTED'.                                         }
-    if Param = 'REMOVE' then
-    begin
-      StrSQL[0]:='DELETE FROM tbl_invoices WHERE CUID = ' + QuotedStr(SG.Cells[2, SG.Row]);
-      StrSQL[1]:='DELETE FROM tbl_tracker WHERE CUID = ' + QuotedStr(SG.Cells[2, SG.Row]);
-      try
-        for iCNT:=0 to 1 do
-        begin
-          Query.SQL.Clear;
-          Query.SQL.Add(StrSQL[iCNT]);
-          Query.ExecSQL;
-        end;
-      finally
-        Query.Free;
-        { REMOVE FROM 'STRINGGRID' }
-        SG.DeleteRowFrom(1, 1);
-      end;
-    end;
-  end;
-  { ----------------------------------------------------------------------------------------------------------------------------- ENABLE DRAWING 'STRINGGRID' }
-  AppSettings.Free;
-  with SG do SendMessage(Handle, WM_SETREDRAW, 1, 0);
-  SG.Repaint;
-end;
 
 end.

@@ -161,7 +161,6 @@ var
   iCNT:      integer;
   jCNT:      integer;
   zCNT:      integer;
-  DailyText: TDataTables;
   GenText:   TDataTables;
   AddrBook:  TDataTables;
 begin
@@ -290,13 +289,13 @@ begin
     { CHECK FOR 'LYNCCALL.EXE' }
     if not FileExists(AppSettings.AppDir + LyncCall) then
     begin
-      MainForm.MsgCall(3, APPNAME + ' cannot find ''lynccall.exe''. Please contact IT support.');
+      MainForm.MsgCall(mcError, APPNAME + ' cannot find ''lynccall.exe''. Please contact IT support.');
       Exit;
     end;
     { CHECK IF LYNC/SKYPE IS RUNNING }
     if not ActionsForm.GetRunningApps('lync.exe') then
     begin
-      MainForm.MsgCall(3, APPNAME + ' cannot find running Microsoft Skype/Lync for Business. Please open it and try again.');
+      MainForm.MsgCall(mcError, APPNAME + ' cannot find running Microsoft Skype/Lync for Business. Please open it and try again.');
       Exit;
     end;
     { RUN LYNC WITH GIVEN PHONE NUMBER }
@@ -368,6 +367,7 @@ end;
 procedure TActionsForm.FormActivate(Sender: TObject);
 begin
   GetData(OpenItemsGrid, HistoryGrid, MainForm.sgOpenItems);
+  StatusBar.SimpleText:='Open items last update: ' + MainForm.OpenItemsUpdate + '.';
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------ ON DESTROY }
@@ -401,7 +401,7 @@ end;
 { ---------------------------------------------------------------------------------------------------------------------------------- OPEN ITEMS DATE AND TIME }
 procedure TActionsForm.OpenItemsGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
 begin
-  StatusBar.SimpleText:=MainForm.OpenItemsUpdate;
+  { DO NOTHING }
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------- SHOW DATA WHEN SELECTED }
@@ -614,7 +614,7 @@ begin
   { IF NOT FOUND THEN QUIT }
   if (Cust_Person.Text = unNotFound) and (Cust_Mail.Text = unNotFound) and (Cust_Phone.Text = unNotFound) then
   begin
-    MainForm.MsgCall(1, 'This customer does not exist in Address Book. Please add to Address Book first.');
+    MainForm.MsgCall(mcWarn, 'This customer does not exist in Address Book. Please add to Address Book first.');
     Exit;
   end;
   { EDIT ON/OFF }
@@ -722,7 +722,7 @@ begin
   try
     GetData(OpenItemsGrid, HistoryGrid, MainForm.sgOpenItems);
   except
-    MainForm.MsgCall(2, 'Unexpected error has occured. Please close the window and try again.');
+    MainForm.MsgCall(mcWarn, 'Unexpected error has occured. Please close the window and try again.');
   end;
 end;
 

@@ -1582,8 +1582,8 @@ begin
   WinForm.PopupMode  :=pmAuto;
   WinForm.PopupParent:=MainForm;
   { CALL WINDOW }
-  if Mode = 0 then Result:=WinForm.ShowModal;
-  if Mode = 1 then WinForm.Show;
+  if Mode = stModal    then Result:=WinForm.ShowModal;
+  if Mode = stModeless then WinForm.Show;
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------- WRAPPER FOR WINDOWS MESSAGE BOX }
@@ -1722,7 +1722,7 @@ var
   UserControl:    TUserControl;
   Transactions:   TTransactions;
   RegSettings:    TFormatSettings;
-  InvoiceTracker: TInvoiceTracker;
+//  InvoiceTracker: TInvoiceTracker;
   NowTime:        TTime;
   iCNT:           integer;
 begin
@@ -1932,7 +1932,7 @@ begin
       OpenItemsUpdate:=Transactions.GetDateTime(gdDateTime);
       if OpenItemsUpdate = '' then
       begin
-        MsgCall(2, 'Cannot find open items in database. Please contact IT support.');
+        MsgCall(mcWarn, 'Cannot find open items in database. Please contact IT support.');
         TTReadAgeView.Create(thNullParameter);
       end
         else
@@ -1943,14 +1943,14 @@ begin
   end;
 
   { ----------------------------------------------------- ! LOAD INVOICE TRACKER CONTENT ! ------------------------------------------------------------------ }
-
+(*
   InvoiceTracker:=TInvoiceTracker.Create;
   try
     InvoiceTracker.Refresh(sgInvoiceTracker, 'ALL');
   finally
     InvoiceTracker.Free;
   end;
-
+*)
   { ------------------------------------------------------------ ! GENERAL TABLES ! ------------------------------------------------------------------------- }
 
   DataTables:=TDataTables.Create(FDbConnect);
@@ -2181,7 +2181,7 @@ var
   DataTables: TDataTables;
 begin
   { ASK BEFORE DELETE }
-  if MsgCall(5, 'Are you sure you want to delete this customer?' + CRLF + 'This operation cannot be reverted.') = IDNO then Exit;
+  if MsgCall(mcQuestion2, 'Are you sure you want to delete this customer?' + CRLF + 'This operation cannot be reverted.') = IDNO then Exit;
   { EXECUTE DELETE QUERY }
   if sgAddressBook.Cells[0, sgAddressBook.Row] <> '' then
   begin
@@ -2209,7 +2209,7 @@ begin
   SearchForm.SGrid     :=MainForm.sgAddressBook;
   SearchForm.SColName  :=TAddressBook.CUSTNAME;
   SearchForm.SColNumber:=TAddressBook.CUSTNUMBER;
-  WndCall(SearchForm, 0);
+  WndCall(SearchForm, stModal);
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------ SHOW ALL ENTRIES }
@@ -2265,7 +2265,7 @@ end;
 { ----------------------------------------------------------------------------------------------------------------------------------------------------- ABOUT }
 procedure TMainForm.Action_AboutClick(Sender: TObject);
 begin
-  WndCall(AboutForm, 0);
+  WndCall(AboutForm, stModal);
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------------ HELP }
@@ -2293,14 +2293,14 @@ end;
 { ------------------------------------------------------------------------------------------------------------------------------------------------- LYNC CALL }
 procedure TMainForm.Action_LyncCallClick(Sender: TObject);
 begin
-  WndCall(ActionsForm, 0);
+  WndCall(ActionsForm, stModal);
 end;
 
 { ---------------------------------------------------------------------------------------------------------------------- ADD TO INVOICE TRACKER | WINDOW CALL }
 
 procedure TMainForm.Action_TrackerClick(Sender: TObject);
 begin
-  WndCall(TrackerForm, 0);
+  WndCall(TrackerForm, stModal);
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------ ADD SELECTED ITEMS TO ADDRESS BOOK }
@@ -2345,10 +2345,10 @@ begin
   { -------------------------------------------------------------------------------------------------------------------------------------------- UNINITIALIZE }
   if (sgAgeView.Selection.Bottom - sgAgeView.Selection.Top) = 0 then
   begin
-    MsgCall(1, 'Customer has been addedd to the Address Book tabsheet.');
+    MsgCall(mcInfo, 'Customer has been addedd to the Address Book tabsheet.');
   end else
   begin
-      MsgCall(1, 'Customers have been addedd to the Address Book tabsheet.');
+      MsgCall(mcInfo, 'Customers have been addedd to the Address Book tabsheet.');
   end;
   Screen.Cursor:=crDefault;
 end;
@@ -2357,8 +2357,9 @@ end;
 procedure TMainForm.Action_FilterINF7Click(Sender: TObject);
 begin
   FilterForm.FColName:=TSnapshots.fINF7;
+  FilterForm.FOverdue:=TSnapshots.fOVERDUE;
   FilterForm.FGrid   :=MainForm.sgAgeView;
-  WndCall(FilterForm, 0);
+  WndCall(FilterForm, stModal);
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------- EXCLUDE NON-OVERDUE ITEMS }
@@ -2378,7 +2379,7 @@ begin
   SearchForm.SGrid     :=MainForm.sgAgeView;
   SearchForm.SColName  :=TSnapshots.fCUSTOMER_NAME;
   SearchForm.SColNumber:=TSnapshots.fCUSTOMER_NUMBER;
-  WndCall(SearchForm, 0);
+  WndCall(SearchForm, stModal);
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------------- SHOW PAYMENT TERM }
@@ -2388,7 +2389,7 @@ var
 begin
   AgeView:=TAgeView.Create(FDbConnect);
   try
-    MsgCall(1, 'Payment term: ' + AgeView.GetData(sgAgeView, sgPmtTerms, TSnapshots.fPAYMENT_TERMS));
+    MsgCall(mcInfo, 'Payment term: ' + AgeView.GetData(sgAgeView, sgPmtTerms, TSnapshots.fPAYMENT_TERMS));
   finally
     AgeView.Free;
   end;
@@ -2401,7 +2402,7 @@ var
 begin
   AgeView:=TAgeView.Create(FDbConnect);
   try
-    MsgCall(1, 'Assigned to Group3: ' + AgeView.GetData(sgAgeView, sgGroup3, TSnapshots.fGROUP3));
+    MsgCall(mcInfo, 'Assigned to Group3: ' + AgeView.GetData(sgAgeView, sgGroup3, TSnapshots.fGROUP3));
   finally
     AgeView.Free;
   end;
@@ -2414,7 +2415,7 @@ var
 begin
   AgeView:=TAgeView.Create(FDbConnect);
   try
-    MsgCall(1, 'Assigned to Person: ' + AgeView.GetData(sgAgeView, sgPerson, TSnapshots.fPERSON));
+    MsgCall(mcInfo, 'Assigned to Person: ' + AgeView.GetData(sgAgeView, sgPerson, TSnapshots.fPERSON));
   finally
     AgeView.Free;
   end;
@@ -2427,7 +2428,7 @@ var
 begin
   Return:=sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fINF4, 1, 1) , sgAgeView.Row];
   if (Return = '') or (Return = ' ') then Return:=unUnassigned;
-  MsgCall(1, 'Assigned to INF4: ' + Return);
+  MsgCall(mcInfo, 'Assigned to INF4: ' + Return);
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------ SAVE STRING GRID TO MS EXCEL }
@@ -2501,26 +2502,26 @@ begin
 
   { R/W USER CAN REMOVE ITEM }
   if (MainForm.AccessLevel = acReadWrite) and (UpperCase(MainForm.FUserName) = UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
-    if MsgCall(5, 'Are you sure you want to remove selected customer?') = IDYES then
+    if MsgCall(mcQuestion2, 'Are you sure you want to remove selected customer?') = IDYES then
       TTInvoiceTrackerRefresh.Create('REMOVE');
 
   { R/W USER CANNOT REMOVE OTHER ITEM }
   if (MainForm.AccessLevel = acReadWrite) and (UpperCase(MainForm.FUserName) <> UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
-    MsgCall(2, 'You cannot remove someone''s else item.');
+    MsgCall(mcWarn, 'You cannot remove someone''s else item.');
 
   { ADMINISTRATOR CAN REMOVE ANY ITEM }
   if (MainForm.AccessLevel = acADMIN) then
-    if MsgCall(5, 'Are you sure you want to remove selected customer?') = IDYES then TTInvoiceTrackerRefresh.Create('REMOVE');
+    if MsgCall(mcQuestion2, 'Are you sure you want to remove selected customer?') = IDYES then TTInvoiceTrackerRefresh.Create('REMOVE');
 
   { READ ONLY USER CANNOT REMOVE ANYTHING }
-  if (MainForm.AccessLevel = acReadOnly) then MsgCall(2, 'You don''t have permission to remove items.');
+  if (MainForm.AccessLevel = acReadOnly) then MsgCall(mcWarn, 'You don''t have permission to remove items.');
 
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------- SHOW SENT INVOICES FOR GIVEN 'CUID' }
 procedure TMainForm.Action_ShowRegisteredClick(Sender: TObject);
 begin
-  WndCall(InvoicesForm, 0);
+  WndCall(InvoicesForm, stModal);
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------- SHOW MY ITEMS }
@@ -2532,7 +2533,7 @@ end;
 { -------------------------------------------------------------------------------------------------------------------------------------------- SHOW ALL ITEMS }
 procedure TMainForm.Action_ShowAllClick(Sender: TObject);
 begin
-  TTInvoiceTrackerRefresh.Create('ALL');
+//  TTInvoiceTrackerRefresh.Create('ALL');
 end;
 
 { ---------------------------------------------------------------- ! TRYICON CALLS ! ------------------------------------------------------------------------ }
@@ -2631,7 +2632,7 @@ begin
           sgAgeView.SqlColumns[iCNT - 1, 0]:=Temp[iCNT, 0];
     except
       on E: Exception do
-        MainForm.MsgCall(2, 'Unexpected error has occured. Description: ' + E.Message + ' Please contact IT support.')
+        MainForm.MsgCall(mcWarn, 'Unexpected error has occured. Description: ' + E.Message + ' Please contact IT support.')
     end;
   finally
     { SAVE CHANGES }
@@ -2644,7 +2645,7 @@ end;
 { ----------------------------------------------------------------------------------------------------------------------------------- OPEN TRANSACTION WINDOW }
 procedure TMainForm.sgAgeViewDblClick(Sender: TObject);
 begin
-  WndCall(ActionsForm, 0);
+  WndCall(ActionsForm, stModal);
 end;
 
 { --------------------------------------------------------------------------------------------------------------- ALLOW OR DISALLOW EDIT CELL IN ADDRESS BOOK }
@@ -2663,7 +2664,7 @@ end;
 { ------------------------------------------------------------------------------------------------------------------------------------- LIST OF SENT INVOICES }
 procedure TMainForm.sgInvoiceTrackerDblClick(Sender: TObject);
 begin
-  WndCall(InvoicesForm, 0);
+  WndCall(InvoicesForm, stModal);
 end;
 
 { ---------------------------------------------------- ! SHOW NEGATIVE VALUES AND ROW SELECTION ! ----------------------------------------------------------- }
@@ -2886,11 +2887,13 @@ begin
   if (Key=VK_F4) and (Shift=[ssALT]) then Key:=0;
   { ----------------------------------------------------------------------------------------------------------------- CLOSE APPLICATION IF USER HIT 'ALT + Y' }
   if (Key=89) and (Shift=[ssALT]) then
-    if MsgCall(4, 'Are you sure you want to exit the application?') = IDOK then
+  begin
+    if MsgCall(mcQuestion1, 'Are you sure you want to exit the application?') = IDOK then
     begin
       PAllowClose:=True;
       Close;
     end;
+  end;
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------- LOCK ROWS FOR EDITING }
@@ -2998,8 +3001,11 @@ var
 begin
   { FIRST COLUMN ARE NOT EDITABLE }
   if (sgAddressBook.Col = 1) then Exit;
-  if (Key = 86) and (Shift = [ssCtrl]) then sgAddressBook.CopyCutPaste(adPaste);
+  { CALL "SAVE NEW" IF "CTRL + S" IS PRESSED }
+  if (Key = 115) and (Shift = [ssCtrl]) then TTAddressBook.Create(adSaveNew, sgAddressBook);
+  { COPY, PASTE, CUT }
   if (Key = 67) and (Shift = [ssCtrl]) then sgAddressBook.CopyCutPaste(adCopy);
+  if (Key = 86) and (Shift = [ssCtrl]) then sgAddressBook.CopyCutPaste(adPaste);
   if (Key = 88) and (Shift = [ssCtrl]) then sgAddressBook.CopyCutPaste(adCut);
   if Key = 46 then sgAddressBook.DelEsc(1, sgAddressBook.Col, sgAddressBook.Row);
   if Key = 27 then
@@ -3506,7 +3512,7 @@ begin
     TTReadAgeView.Create(thCallOpenItems);
   end
     else
-      MsgCall(2, 'Cannot load selected group.');
+      MsgCall(mcWarn, 'Cannot load selected group.');
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------- OPEN ITEMS | FORCE RELOAD }
@@ -3562,7 +3568,7 @@ begin
     TTMakeAgeView.Create(MainForm.OSAmount);
   end
     else
-      MsgCall(2, 'Please enter group name and try again.' + CRLF + 'If you will use existing one, then it will be overwritten.');
+      MsgCall(mcWarn, 'Please enter group name and try again.' + CRLF + 'If you will use existing one, then it will be overwritten.');
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------- USER ADDRESS BOOK | OPEN FROM DB }
@@ -3580,7 +3586,7 @@ end;
 { --------------------------------------------------------------------------------------------------------------------------------- USER ADDRESS BOOK | CLOSE }
 procedure TMainForm.btnCloseClick(Sender: TObject);
 begin
-  if MsgCall(5, 'Are you sure you want to close address book?') = IDYES then sgAddressBook.ClearAll(2, 1, 1, True);
+  if MsgCall(mcQuestion2, 'Are you sure you want to close address book?') = IDYES then sgAddressBook.ClearAll(2, 1, 1, True);
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------- USER ADDRESS BOOK | IMPORT DATA }
@@ -3613,7 +3619,7 @@ var
   iCNT:         integer;
 begin
   { ASK USER IF HE IS SURE BECAUSE ONCE DONE CANNOT BE UNDONE }
-  if MsgCall(5, 'Are you sure you want to delete this section? It cannot be undone.') = IDNO then exit;
+  if MsgCall(mcQuestion2, 'Are you sure you want to delete this section? It cannot be undone.') = IDNO then exit;
   if sgListSection.RowCount = 1 then exit;
   { DELETE SECTION FROM TMIg }
   AppSettings:=TSettings.Create;
@@ -3667,7 +3673,7 @@ var
   iCNT:         integer;
 begin
   { ASK USER IF HE IS SURE BECAUSE ONCE DONE CANNOT BE UNDONE }
-  if MsgCall(5, 'Are you sure you want to delete this key? It cannot be undone.') = IDNO then Exit;
+  if MsgCall(mcQuestion2, 'Are you sure you want to delete this key? It cannot be undone.') = IDNO then Exit;
   { CHECK FOR LAST ROW }
   if sgListValue.RowCount = 1 then exit;
   { DELETE SECTION FROM TMIg }
@@ -3691,12 +3697,12 @@ var
   iCNT:         integer;
 begin
   { ASK USER IF HE IS SURE BECAUSE ONCE DONE CANNOT BE UNDONE }
-  if MsgCall(5, 'Are you sure you want to save all the changes? It cannot be undone.') = IDNO then exit;
+  if MsgCall(mcQuestion2, 'Are you sure you want to save all the changes? It cannot be undone.') = IDNO then exit;
   { CHECK IF THERE IS NO EMPTY KEYS }
   for iCNT:= 1 to (sgListValue.RowCount - 1) do
     if sgListValue.Cells[1, iCNT] = '' then
     begin
-      MsgCall(2, 'Cannot save. At least one key has no label.');
+      MsgCall(mcWarn, 'Cannot save. At least one key has no label.');
       Exit;
     end;
   AppSettings:=TSettings.Create;
@@ -3709,7 +3715,7 @@ begin
   finally
     AppSettings.Free;
   end;
-  MsgCall(1, 'All Keys and its values has been saved successfully.');
+  MsgCall(mcInfo, 'All Keys and its values has been saved successfully.');
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------------- SAVE NEW PASSWORD }
@@ -3725,7 +3731,7 @@ begin
       AppSettings.TMIG.WriteString(Password,'VALUE',Edit_NewPassWd.Text);
       AppSettings.Encode(AppConfig);
       AppSettings.Free;
-      MsgCall(1, 'New password has been saved.');
+      MsgCall(mcInfo, 'New password has been saved.');
       btnPassUpdate.Enabled:=False;
       Edit_CurrPassWd.Enabled:=False;
       Edit_NewPassWd.Enabled:=False;
@@ -3736,10 +3742,10 @@ begin
       Edit_ConfPassWd.Text:='';
     end
       else
-        MsgCall(2, 'New password and confirmation does not match, please re-type it and try again.');
+        MsgCall(mcWarn, 'New password and confirmation does not match, please re-type it and try again.');
   end
     else
-      MsgCall(2, 'Current password is incorrect, please re-type it and try again.');
+      MsgCall(mcWarn, 'Current password is incorrect, please re-type it and try again.');
 end;
 
 { ---------------------------------------------------------------------------------------------------------------------------------------------------- UNLOCK }
@@ -3813,7 +3819,7 @@ procedure TMainForm.btnUnlockClick(Sender: TObject);
       if (AppSettings.TMIG.ReadString(Password, 'VALUE', '') <> '') and
          (AppSettings.TMIG.ReadString(Password, 'VALUE', '') <> Edit_PASSWORD.Text) then
       begin
-        MsgCall(2, 'Incorrect password, please re-type it and try again.');
+        MsgCall(mcWarn, 'Incorrect password, please re-type it and try again.');
       end;
 
       { SETUP NEW PASSWORD }
@@ -3822,7 +3828,7 @@ procedure TMainForm.btnUnlockClick(Sender: TObject);
         Edit_CurrPassWd.Enabled:=True;
         Edit_NewPassWd.Enabled :=True;
         Edit_ConfPassWd.Enabled:=True;
-        MsgCall(2, 'Please provide with new password.');
+        MsgCall(mcWarn, 'Please provide with new password.');
       end;
       Edit_PASSWORD.Text:='';
       Edit_PASSWORD.SetFocus;

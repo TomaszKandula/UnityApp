@@ -80,7 +80,7 @@ begin
   { CANNOT BE EMPTY }
   if (SearchString = '') or (SearchString = SPACE) then
   begin
-    MainForm.MsgCall(2, 'Cannot search empty string. Please provide with customer name or customer number and try again.');
+    MainForm.MsgCall(mcWarn, 'Cannot search empty string. Please provide with customer name or customer number and try again.');
     Exit;
   end;
 
@@ -114,7 +114,7 @@ begin
       begin
         IsNext:=True;
         if SGrid.RowHeights[FoundRow] = -1 then
-          MainForm.MsgCall(1, 'The item has been found (' + SGrid.Cells[SearchColumn, FoundRow] + ') for search pattern "' + SearchString + '". ' + CRLF +
+          MainForm.MsgCall(mcInfo, 'The item has been found (' + SGrid.Cells[SearchColumn, FoundRow] + ') for search pattern "' + SearchString + '". ' + CRLF +
                               'However it is hidden by the filter you have used. Remove the filtering to unhide searched item.');
         Break;
       end;
@@ -141,7 +141,7 @@ begin
       SGrid.Col:=SGrid.ReturnColumn(SColName, 1, 1);
     end
       else
-        MainForm.MsgCall(1, 'Cannot find specified customer.');
+        MainForm.MsgCall(mcInfo, 'Cannot find specified customer.');
   end;
 
   { SHOW ALL FOUND }
@@ -157,7 +157,7 @@ begin
     end
     else
     begin
-      MainForm.MsgCall(1, 'Cannot find specified customer.');
+      MainForm.MsgCall(mcInfo, 'Cannot find specified customer.');
       btnUnhide.Enabled:=False;
     end;
   end;

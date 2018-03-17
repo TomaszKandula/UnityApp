@@ -1191,7 +1191,7 @@ object MainForm: TMainForm
     Margins.Top = 10
     Margins.Right = 5
     Margins.Bottom = 0
-    ActivePage = TabSheet1
+    ActivePage = TabSheet3
     Align = alClient
     DoubleBuffered = True
     Font.Charset = DEFAULT_CHARSET

@@ -341,7 +341,7 @@ type
   public
     const ID         : string = 'ID';   { PRIMARY KEY -> FOREIGN KEY IN "TBL_INVOICES" }
     const USER_ALIAS : string = 'USER_ALIAS';
-    const CUID       : string = 'CUID';
+    const CUID       : string = 'CUID';  { CONSTRAINT UNIQUE }
     const CO_CODE    : string = 'CO_CODE';
     const BRANCH     : string = 'BRANCH';
     const CUSTNAME   : string = 'CUSTOMER_NAME';

@@ -20,7 +20,7 @@ uses
 
 { --------------------------------------------------------- ! APPLICATION SETTING CLASS ! ------------------------------------------------------------------- }
 type
-  TSettings = class                                    (* BASSE CLASS FOR SETTINGS HANDLING *)
+  TSettings = class                                    (* BASE CLASS FOR SETTINGS HANDLING *)
   {$TYPEINFO ON}
   private
     var pAppDir                : string;
@@ -84,7 +84,9 @@ begin
   begin
     Decode(AppConfig, True);
     pLayoutDir:=pTMIG.ReadString(VariousLayouts, 'PATH', 'C:\');
-  end else pGetLastError:=104;
+  end
+    else
+      pGetLastError:=104;
   if FileExists(pUserPath) then Decode(UserConfig, True) else pGetLastError:=104;
 end;
 

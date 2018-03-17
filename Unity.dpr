@@ -24,6 +24,7 @@ uses
   StdCtrls,
   INIFiles,
   CRC32u,
+  Update in 'Update.pas',
   Splash in 'Splash.pas',
   Main in 'Main.pas',
   Filter in 'Filter.pas',
@@ -147,6 +148,7 @@ begin
                            PChar(APPCAPTION), MB_OK + MB_ICONWARNING);
     Exit;
   end;
+
   { -------------------------------------------------------------------------------------------------------------- WINDOWS VERSION CHECK - WINDOWS 7 & HIGHER }
   if not StrToInt(GetOSVer(0)) >= 61 then
   begin
@@ -186,6 +188,19 @@ begin
     Application.MessageBox(PChar('Aero is not enabled. ' + APPCAPTION + ' will be closed.'), PChar(APPCAPTION), MB_OK + MB_ICONWARNING);
     Exit;
   end;
+
+  { --------------------------------------------------------------------------------------------------------------------------------------- CHECK FOR UPDATES }
+
+  // 1. check if new package is deployed
+  // 2. if so:
+  // 3.   - inform user about update (update screen)
+  // 4.   - copy package content into destination
+  // 5.   - rename itself to Unity.delete
+  // 6.   - rename Unity.new to Unity.exe
+  // 7.   - delete Unity.delete
+  // 8.   - free update screen
+  // 9.   - run new Unity.exe (should have different mutex!)
+  // 10.  - exit process(0)
 
   { ------------------------------------------------------------------------------------------------------------------------------------- SPLASH SCREEN START }
   SplashForm:=TSplashForm.Create(nil);

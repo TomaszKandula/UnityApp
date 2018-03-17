@@ -32,34 +32,15 @@ type
 type
   TTInvoiceTrackerRefresh = class(TThread)
   protected
-    procedure Execute; override;    //remove modes!
+    procedure Execute; override;
   private
     pMode: string;
   public
-    { MODES:                                    }
-    {   'ALL'    = SHOW ALL REGISTERED INVOICES }
-    {   'ADD'    = ADD NEW CUSTOMER             }
-    {   'REMOVE' = REMOVE SELECTED CUSTOMER     }
     constructor Create(cMode: string);
   end;
 
-(*
-  { ------------------------------------------------------------------------------------------------------------------------------------- COMMENTARY HANDLING }
-  TTCommentary = class(TThread)
-    protected
-      procedure Execute; override;
-    private
-      pMode:  string;
-      pValue: string;
-    public
-      { MODES:                                    }
-      {   '0' = GENERAL COMMENT                   }
-      {   '1' = DAILY COMMENT                     }
-      {   '2' = DAILY COMMENT + UPDATE VIEW       }
-      {   '3' = FOLLOW UP DATE                    }
-      constructor Create(cMode: string; dValue: string);
-  end;
-*)
+
+
 
 { ----------------------------------------------------------------------------------------------------------------------------------- CHECK SERVER CONNECTION }
 type
@@ -225,10 +206,13 @@ begin
 end;
 
 procedure TTInvoiceTrackerRefresh.Execute;
+(*
 var
   IDThread:  integer;
   InvoiceTracker: TInvoiceTracker;
+*)
 begin
+(*
   IDThread:=TTInvoiceTrackerRefresh.CurrentThread.ThreadID;
   InvoiceTracker:=TInvoiceTracker.Create;
   try
@@ -248,61 +232,8 @@ begin
   end;
   { RELEASE THREAD WHEN DONE }
   FreeOnTerminate:=True;
-end;
-
-
-(*
-{ ------------------------------------------------------------------------------------------------------------------------------------------- SAVE COMMENTARY }
-constructor TTCommentary.Create(cMode: string; dValue: string);
-begin
-  inherited Create(False);
-  pMode :=cMode;
-  pValue:=dValue;
-end;
-
-procedure TTCommentary.Execute;  { ASYNC }
-var
-  IDThread:  integer;
-//  Commentary:  TCommentary;
-begin
-  IDThread:=TTCommentary.CurrentThread.ThreadID;
-
-  try
-    ActiveThreads[6]:=True;
-
-    try
-      if DataBase.LastError = 0 then
-      begin
-        //Commentary:=TCommentary.Create;
-        //Commentary.idThd   :=IDThread;
-        //Commentary.Mode    :=pMode;
-        //Commentary.FollowUp:=pValue;
-        //Commentary.Write;
-      end;
-
-    except
-      on E: Exception do
-      begin
-        SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PCHAR('Cannot execute write function. Please contact IT support.')));
-        PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Ready.')));
-        LogText(Settings.AppDir + Settings.LOGFILE, 'Thread [' + IntToStr(IDThread) + ']: Execution of this tread work has been stopped. Error thrown: ' + E.Message + ' (TDBCommentUpdate).');
-      end;
-    end;
-
-  finally
-    ActiveThreads[6]:=False;
-  end;
-
-  { RELEASE THREAD WHEN DONE }
-  FreeOnTerminate:=True;
-end;
 *)
-
-
-
-
-
-
+end;
 
 
 

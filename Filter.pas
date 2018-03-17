@@ -49,10 +49,12 @@ type
     var   pFGrid      :  TStringGrid;
     var   pFColName   :  string;
     var   pFColNumber :  integer;
+    var   pFOverdue   :  string;
   public
     property  FColName   :  string      read pFColName   write pFColName;
     property  FColNumber :  integer     read pFColNumber write pFColNumber;
     property  FGrid      :  TStringGrid read pFGrid      write pFGrid;
+    property  FOverdue   :  string      read pFOverdue   write pFOverdue;
     procedure FilterInit;
     procedure FilterNow;
   end;
@@ -169,7 +171,7 @@ begin
           end;
           if (FilterForm.ListState[iCNT, 1] = 'False') or
              (  (MainForm.Action_Overdue.Checked) and
-                (FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fOVERDUE, 1, 1), jCNT] = '0')
+                (FGrid.Cells[FGrid.ReturnColumn(FOverdue, 1, 1), jCNT] = '0')
              ) then
                  FGrid.RowHeights[jCNT]:= -1;
         end;
