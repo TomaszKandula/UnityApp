@@ -89,11 +89,11 @@ object TrackerForm: TTrackerForm
     Caption = 'days from due date.'
   end
   object ErrorLegalTo: TLabel
-    Left = 374
+    Left = 402
     Top = 202
-    Width = 88
+    Width = 57
     Height = 13
-    Caption = 'Cannot invalidate!'
+    Caption = 'Empty field!'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clRed
     Font.Height = -11
@@ -102,11 +102,11 @@ object TrackerForm: TTrackerForm
     ParentFont = False
   end
   object ErrorMailTo: TLabel
-    Left = 374
+    Left = 402
     Top = 74
-    Width = 88
+    Width = 57
     Height = 13
-    Caption = 'Cannot invalidate!'
+    Caption = 'Empty field!'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clRed
     Font.Height = -11
@@ -143,11 +143,11 @@ object TrackerForm: TTrackerForm
     Caption = 'Reminder layout:'
   end
   object ErrorStatTo: TLabel
-    Left = 374
+    Left = 402
     Top = 138
-    Width = 88
+    Width = 57
     Height = 13
-    Caption = 'Cannot invalidate!'
+    Caption = 'Empty field!'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clRed
     Font.Height = -11
@@ -161,6 +161,19 @@ object TrackerForm: TTrackerForm
     Width = 191
     Height = 13
     Caption = 'Statement layout is fixed (English only).'
+  end
+  object ErrorEmailFrom: TLabel
+    Left = 370
+    Top = 290
+    Width = 57
+    Height = 13
+    Caption = 'Empty field!'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clRed
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
   end
   object TextReminder1: TLabeledEdit
     Left = 37
@@ -233,12 +246,13 @@ object TrackerForm: TTrackerForm
     Top = 175
     Width = 225
     Height = 21
-    Color = clCream
+    Cursor = crArrow
+    Color = clWhite
     EditLabel.Width = 131
     EditLabel.Height = 13
     EditLabel.Caption = 'Legal Action notification to:'
     Font.Charset = DEFAULT_CHARSET
-    Font.Color = clNavy
+    Font.Color = clBlack
     Font.Height = -11
     Font.Name = 'Tahoma'
     Font.Style = []
@@ -252,12 +266,13 @@ object TrackerForm: TTrackerForm
     Top = 47
     Width = 225
     Height = 21
-    Color = clCream
+    Cursor = crArrow
+    Color = clWhite
     EditLabel.Width = 99
     EditLabel.Height = 13
     EditLabel.Caption = 'Remainders send to:'
     Font.Charset = DEFAULT_CHARSET
-    Font.Color = clNavy
+    Font.Color = clBlack
     Font.Height = -11
     Font.Name = 'Tahoma'
     Font.Style = []
@@ -291,7 +306,7 @@ object TrackerForm: TTrackerForm
     Width = 150
     Height = 22
     Style = csOwnerDrawFixed
-    Color = clCream
+    Color = clWhite
     TabOrder = 7
   end
   object TextStatTo: TLabeledEdit
@@ -299,12 +314,13 @@ object TrackerForm: TTrackerForm
     Top = 111
     Width = 225
     Height = 21
-    Color = clCream
+    Cursor = crArrow
+    Color = clWhite
     EditLabel.Width = 98
     EditLabel.Height = 13
     EditLabel.Caption = 'Statements send to:'
     Font.Charset = DEFAULT_CHARSET
-    Font.Color = clNavy
+    Font.Color = clBlack
     Font.Height = -11
     Font.Name = 'Tahoma'
     Font.Style = []

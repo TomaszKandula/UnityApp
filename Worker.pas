@@ -26,21 +26,21 @@ type
   TTInvoiceTrackerScanner = class(TThread)
   protected
     procedure Execute; override;
+  public
+//    function CanSendStatement: boolean;
+//    function CanSendReminder: boolean;
   end;
 
 { ------------------------------------------------------------------------------------------------------------------------------ INVOICE TRACKER LIST REFRESH }
 type
   TTInvoiceTrackerRefresh = class(TThread)
   protected
-    procedure Execute; override;
+    procedure   Execute; override;
   private
-    pMode: string;
+    var pUserAlias: string;
   public
-    constructor Create(cMode: string);
+    constructor Create(UserAlias: string);
   end;
-
-
-
 
 { ----------------------------------------------------------------------------------------------------------------------------------- CHECK SERVER CONNECTION }
 type
@@ -145,99 +145,43 @@ type
 implementation
 
 uses
-  Model, DataBase, Settings, UAC, Mailer, AgeView, Transactions;
+  Model, DataBase, Settings, UAC, Mailer, AgeView, Transactions, Tracker;
 
 { ############################################################ ! SEPARATE CPU THREADS ! ##################################################################### }
 
+{ ############################################################## ! TRACKER SCANNER ! ######################################################################## }
+
 { ----------------------------------------------------------------------------------------------------------------------------------- INVOICE TRACKER SCANNER }
 procedure TTInvoiceTrackerScanner.Execute;
-(*
-var
-  IDThread:   integer;
-  THDMili:    extended;
-  THDSec:     extended;
-  StopWatch:  TStopWatch;
-  InvoiceTracker: TInvoiceTracker;
-  DataBase:   TDataBase;
-*)
 begin
-(*
-  IDThread:=TTInvoiceTrackerScanner.CurrentThread.ThreadID;
-  InvoiceTracker:=TInvoiceTracker.Create;
-  DataBase:=TDataBase.Create(False);
-  try
-    StopWatch:=TStopWatch.StartNew;
-    try
-      { ------------------------------------------------------- ! PRE | GUI UPDATE ! ------------------------------------------------------------------------ }
-      if DataBase.Check = 0 then
-      begin
-        { SYNCHRONIZED WITH THE MAIN THREAD }
-        Synchronize(procedure begin InvoiceTracker.Refresh(MainForm.sgInvoiceTracker, UpperCase(MainForm.FUserName)) end);
-        { ------------------------------------------------- ! HEAVY DUTY TASK (RUN ASYNC) ! ----------------------------------------------------------------- }
-        { CHECK CONDITIONS AND SEND E-MAILS }
-        InvoiceTracker.Scanner(IDThread);
-      end;
-
-    except
-      on E: Exception do
-      begin
-        //PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Ready.')));
-        LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Execution of this tread work has been stopped. Error thrown: ' + E.Message + ' (TInvoiceScanner). Exit Code = ' + IntToStr(ExitCode) + '.');
-      end;
-    end;
-  finally
-    DataBase.Free;
-    InvoiceTracker.Free;
-    THDMili:=StopWatch.ElapsedMilliseconds;
-    THDSec:=THDMili / 1000;
-    LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Scanning invoices and sending reminders (if any) executed within: ' +
-            FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
-  end;
-  { RELEASE THREAD WHEN DONE }
-  FreeOnTerminate:=True;
-*)
+  //
 end;
 
-{ -------------------------------------------------------------------------------------------------------------------------------------- TRACKER LIST REFRESH }
-constructor TTInvoiceTrackerRefresh.Create(cMode: string);
+{ ############################################################ ! INVOICE TRACKER LIST ! ##################################################################### }
+
+{ ------------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE }
+constructor TTInvoiceTrackerRefresh.Create(UserAlias: string);
 begin
   inherited Create(False);
-  pMode:=cMode;
+  pUserAlias:=UserAlias;
 end;
 
+{ ------------------------------------------------------------------------------------------------------------------------------------- EXECUTE WORKER THREAD }
 procedure TTInvoiceTrackerRefresh.Execute;
-(*
 var
   IDThread:  integer;
-  InvoiceTracker: TInvoiceTracker;
-*)
 begin
-(*
   IDThread:=TTInvoiceTrackerRefresh.CurrentThread.ThreadID;
-  InvoiceTracker:=TInvoiceTracker.Create;
   try
-    try
-      InvoiceTracker.Refresh(MainForm.sgInvoiceTracker, pMode);
-      LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Refresh Invoice Tracker list with mode = ' + pMode + ' has ended successfully.');
-    except
-      on E: Exception do
-      begin
-        SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PCHAR('Cannot refresh Invoice Tracker''s list. Please contact IT support.')));
-        PostMessage(MainForm.Handle, WM_GETINFO, 10, LPARAM(PCHAR('Ready.')));
-        LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Execution of this tread work has been stopped. Error thrown: ' + E.Message + ' (TInvoiceTracker).');
-      end;
-    end;
-  finally
-    InvoiceTracker.Free;
+    TrackerForm.UserAlias:=pUserAlias;
+    TrackerForm.Show;
+  except
+    on E: Exception do
+      LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Execution of this tread work has been stopped. Error has been thrown: ' + E.Message + ' (TInvoiceTracker).');
   end;
   { RELEASE THREAD WHEN DONE }
   FreeOnTerminate:=True;
-*)
 end;
-
-
-
-
 
 { ################################################################ ! NETWORK SCANNER ! ###################################################################### }
 
@@ -586,7 +530,7 @@ begin
     DataTables.Columns.Add(TAddressBook.CONTACT);
     DataTables.Columns.Add(TAddressBook.CUSTADDR);
     { FILTER BY USER ALIAS IF GIVEN }
-    if FMode = adOpenForUser then DataTables.CustFilter:=TAddressBook.USER_ALIAS + EQUAL + QuotedStr(MainForm.FUserName);
+    if FMode = adOpenForUser then DataTables.CustFilter:=WHERE + TAddressBook.USER_ALIAS + EQUAL + QuotedStr(MainForm.FUserName);
     DataTables.OpenTable(TblAddressbook);
     Result:=DataTables.SqlToGrid(FGrid, DataTables.DataSet, True, True);
   finally

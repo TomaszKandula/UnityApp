@@ -1191,7 +1191,7 @@ object MainForm: TMainForm
     Margins.Top = 10
     Margins.Right = 5
     Margins.Bottom = 0
-    ActivePage = TabSheet3
+    ActivePage = TabSheet4
     Align = alClient
     DoubleBuffered = True
     Font.Charset = DEFAULT_CHARSET
@@ -3983,7 +3983,6 @@ object MainForm: TMainForm
         DefaultColWidth = 40
         DefaultRowHeight = 17
         DrawingStyle = gdsGradient
-        Enabled = False
         RowCount = 2
         GradientEndColor = 15527148
         Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
@@ -6129,6 +6128,10 @@ object MainForm: TMainForm
     end
     object N8: TMenuItem
       Caption = '-'
+    end
+    object Action_Update: TMenuItem
+      Caption = 'Update this customer'
+      Enabled = False
     end
     object Action_Remove: TMenuItem
       Caption = 'Remove this customer'

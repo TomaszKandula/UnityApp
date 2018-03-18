@@ -3,7 +3,7 @@ object UpdateForm: TUpdateForm
   Top = 0
   BorderStyle = bsNone
   Caption = 'Unity'
-  ClientHeight = 300
+  ClientHeight = 314
   ClientWidth = 632
   Color = clWhite
   Font.Charset = DEFAULT_CHARSET
@@ -14,17 +14,19 @@ object UpdateForm: TUpdateForm
   FormStyle = fsStayOnTop
   OldCreateOrder = False
   Position = poDesktopCenter
+  OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
   object Background: TShape
     Left = 0
     Top = 0
     Width = 632
-    Height = 300
+    Height = 314
     Align = alClient
     Pen.Color = clGray
     ExplicitLeft = 8
     ExplicitWidth = 636
+    ExplicitHeight = 300
   end
   object MainText1: TLabel
     Left = 96
@@ -4416,7 +4418,7 @@ object UpdateForm: TUpdateForm
   end
   object Text3: TLabel
     Left = 24
-    Top = 275
+    Top = 288
     Width = 444
     Height = 13
     Cursor = crAppStart
@@ -4432,7 +4434,7 @@ object UpdateForm: TUpdateForm
   end
   object BottomLine: TBevel
     Left = 24
-    Top = 231
+    Top = 244
     Width = 585
     Height = 19
     Cursor = crAppStart
@@ -4440,7 +4442,7 @@ object UpdateForm: TUpdateForm
   end
   object Text2: TLabel
     Left = 24
-    Top = 255
+    Top = 268
     Width = 327
     Height = 13
     Cursor = crAppStart

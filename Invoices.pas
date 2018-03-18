@@ -41,7 +41,7 @@ var
 implementation
 
 uses
-  SQL, Settings, Database;
+  Settings, Model;
 
 {$R *.dfm}
 
@@ -80,21 +80,27 @@ end;
 { ----------------------------------------------------------------------------------------------------------------------------------------------- ON ACTIVATE }
 procedure TInvoicesForm.FormActivate(Sender: TObject);
 var
-  MSSQL:  TMSSQL;
+  Tables: TDataTables;
   CUID :  string;
 begin
-  { CHECK DATABASE CONNECTION AND PROCEED ACCORDINGLY }
-  MSSQL:=TMSSQL.Create(MainForm.FDbConnect);
+  Tables:=TDataTables.Create(MainForm.FDbConnect);
+  InvoicesGrid.Freeze(True);
   try
-    { PREPARE FOR QUERY }
-    CUID:=MainForm.sgInvoiceTracker.Cells[MainForm.sgInvoiceTracker.ReturnColumn('CUID', 1, 1), MainForm.sgInvoiceTracker.Row];
-    MSSQL.StrSQL:='SELECT INVOICENO, INVOICESTATE, STAMP FROM tbl_invoices WHERE CUID = ' + QuotedStr(CUID);
-    InvoicesGrid.Freeze(True);
-    { CLEAR, QUERY AND SHOW DATA IN STRING GRID }
-    MSSQL.SqlToGrid(InvoicesGrid, MSSQL.ExecSQL, False, True);
+    CUID:=MainForm.sgInvoiceTracker.Cells[MainForm.sgInvoiceTracker.ReturnColumn(TTracker.CUID, 1, 1), MainForm.sgInvoiceTracker.Row];
+    Tables.StrSQL:=SELECT                   +
+                     TInvoices.INVOICENO    + COMMA +
+                     TInvoices.INVOICESTATE + COMMA +
+                     TInvoices.STAMP        +
+                   FROM                     +
+                     TblInvoices            +
+                   WHERE                    +
+                     TInvoices.CUID         +
+                   EQUAL                    +
+                     QuotedStr(CUID);
+    Tables.SqlToGrid(InvoicesGrid, Tables.ExecSQL, False, True);
     InvoicesGrid.Freeze(False);
   finally
-    MSSQL.Free;
+    Tables.Free;
   end;
 end;
 
@@ -110,7 +116,7 @@ end;
 
 procedure TInvoicesForm.InvoicesGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if (Key = 67) and (Shift = [ssCtrl]) then InvoicesGrid.CopyCutPaste(1);
+  if (Key = 67) and (Shift = [ssCtrl]) then InvoicesGrid.CopyCutPaste(adCopy);
 end;
 
 end.

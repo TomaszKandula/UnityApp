@@ -29,6 +29,7 @@ type
     Text3: TLabel;
     BottomLine: TBevel;
     Text2: TLabel;
+    procedure FormShow(Sender: TObject);
   protected
     procedure CreateParams(var Params: TCreateParams); override;
   end;
@@ -53,6 +54,12 @@ begin
     Style:=WS_POPUP;
     WindowClass.style:=WindowClass.style or CS_DROPSHADOW;
   end;
+end;
+
+{ ------------------------------------------------------------------------------------------------------------------------------------------- START ANIMATION }
+procedure TUpdateForm.FormShow(Sender: TObject);
+begin
+  (MainImage.Picture.Graphic as TGIFImage).Animate:=True;
 end;
 
 end.

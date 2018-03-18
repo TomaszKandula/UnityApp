@@ -47,6 +47,7 @@ type
     function    OpenTable(TableName: string): boolean;
     function    InsertInto(TableName: string): boolean;
     function    UpdateRecord(TableName: string): boolean;
+    function    DeleteRecord(TableName: string; KeyName: string; ID: cardinal): boolean;
   end;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -109,10 +110,13 @@ type
   TTeamleaders = class(TDataTables)  { MANY-TO-MANY }
   {$TYPEINFO ON}
   public
-    const ID                    : string = 'ID';  { PRIMARY KEY <- FOREIGN KEY FROM "TBL_COMPANY" }
-    const AccountsPayableTLs    : string = 'AccountsPayableTLs';
-    const AccountsReceivableTLs : string = 'AccountsReceivableTLs';
-    const GeneralLedgerTLs      : string = 'GeneralLedgerTLs';
+    const ID  :  string = 'ID';  { PRIMARY KEY <- FOREIGN KEY FROM "TBL_COMPANY" }
+    const AP1 :  string = 'AP1';
+    const AP2 :  string = 'AP2';
+    const AR1 :  string = 'AR1';
+    const AR2 :  string = 'AR2';
+    const GL1 :  string = 'GL1';
+    const GL2 :  string = 'GL2';
   end;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -172,7 +176,7 @@ type
 
 { -------------------------------------------------------------- ! TBL_OPENITEMS ! --------------------------------------------------------------------------- }
 type
-  TOpenitems = class(TDataTables)
+  TOpenitems = class(TDataTables)                               (* FEED FROM ERP *)
   {$TYPEINFO ON}
   public
     const ID               : string = 'ID';  { PRIMARY KEY }
@@ -290,7 +294,7 @@ type
 
 { -------------------------------------------------------------- ! TBL_PAIDINFO ! --------------------------------------------------------------------------- }
 type
-  TPaidinfo = class(TDataTables)
+  TPaidinfo = class(TDataTables)                                (* FEED FROM ERP *)
   {$TYPEINFO ON}
   public
     const ID            : string = 'ID';  { PRIMARY KEY }
@@ -300,7 +304,7 @@ type
 
 { --------------------------------------------------------------- ! TBL_PERSON ! ---------------------------------------------------------------------------- }
 type
-  TPerson = class(TDataTables)
+  TPerson = class(TDataTables)                                  (* FEED FROM ERP *)
   {$TYPEINFO ON}
   public
     const ID            : string = 'ID';  { PRIMARY KEY }
@@ -310,7 +314,7 @@ type
 
 { --------------------------------------------------------------- ! TBL_GROUP3 ! ---------------------------------------------------------------------------- }
 type
-  TGroup3 = class(TDataTables)
+  TGroup3 = class(TDataTables)                                  (* FEED FROM ERP *)
   {$TYPEINFO ON}
   public
     const ID            : string = 'ID';  { PRIMARY KEY }
@@ -320,7 +324,7 @@ type
 
 { -------------------------------------------------------------- ! TBL_PMTTERMS ! --------------------------------------------------------------------------- }
 type
-  TPmtterms = class(TDataTables)
+  TPmtterms = class(TDataTables)                               (* FEED FROM ERP *)
   {$TYPEINFO ON}
   public
     const ID         : string = 'ID';  { PRIMARY KEY }
@@ -344,12 +348,13 @@ type
     const CUID       : string = 'CUID';  { CONSTRAINT UNIQUE }
     const CO_CODE    : string = 'CO_CODE';
     const BRANCH     : string = 'BRANCH';
-    const CUSTNAME   : string = 'CUSTOMER_NAME';
+    const CUSTNAME   : string = 'CUSTNAME';
     const LAYOUT     : string = 'LAYOUT';
     const STAMP      : string = 'STAMP';
     const INDV_REM1  : string = 'INDV_REM1';
     const INDV_REM2  : string = 'INDV_REM2';
     const INDV_REM3  : string = 'INDV_REM3';
+    const INDV_REM4  : string = 'INDV_REM4';
   end;
 
 
@@ -519,6 +524,20 @@ begin
                    );
     end;
     StrSQL:=Temp;
+    ExecSQL;
+    Result:=True;
+  except
+    Result:=False;
+  end;
+end;
+
+{ -------------------------------------------------------------------------------------------------------------------------------------- DELETE SINGLE RECORD }
+function TDataTables.DeleteRecord(TableName: string; KeyName: string; ID: Cardinal): boolean;
+begin
+  Result:=False;
+  if (TableName = '') and (ID = 0) then Exit;
+  try
+    StrSQL:=DELETE_FROM + TableName + WHERE + KeyName + EQUAL + IntToStr(ID);
     ExecSQL;
     Result:=True;
   except

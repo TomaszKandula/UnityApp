@@ -511,8 +511,7 @@ begin
         else
         { INSERT NEW }
         begin
-          GenText.Columns.Clear;
-          GenText.Values.Clear;
+          GenText.CleanUp;
           { DEFINE COLUMNS AND VALUES }
           GenText.Columns.Add(TGeneral.CUID);       GenText.Values.Add(CUID);
           GenText.Columns.Add(TGeneral.STAMP);      GenText.Values.Add(DateTimeToStr(Now));

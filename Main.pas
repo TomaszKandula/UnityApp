@@ -423,6 +423,7 @@ type                                                            (* GUI | MAIN TH
     EditGroupID: TLabeledEdit;
     Action_RowHighlight: TMenuItem;
     N16: TMenuItem;
+    Action_Update: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -585,8 +586,6 @@ type                                                            (* GUI | MAIN TH
 
     { ------------------------------------------------------------- ! HELPERS ! ----------------------------------------------------------------------------- }
 
-    { VARIABLES }
-
   private
     var PAllowClose         :  boolean;
     var PStartTime          :  TTime;
@@ -605,13 +604,11 @@ type                                                            (* GUI | MAIN TH
     var SGImage             :  TImage;
 
     { PROPERTIES }
-
     property   AccessLevel    : string  read PAccessLevel     write PAccessLevel;
     property   AccessMode     : string  read PAccessMode      write PAccessMode;
     property   OpenItemsUpdate: string  read POpenItemsUpdate write POpenItemsUpdate;
 
     { HELPER METHODS }
-
     procedure  DebugMsg(const Msg: String);
     procedure  ExecMessage(IsPostType: boolean; WM_CONST: integer; YOUR_INT: integer; YOUR_TEXT: string);
     function   OleGetStr(RecordsetField: variant): string;
@@ -626,7 +623,6 @@ type                                                            (* GUI | MAIN TH
   protected
 
     { WINDOWS MESSAGES }
-
     procedure  WndProc(var msg: Messages.TMessage); override;
 
   end;
@@ -1251,8 +1247,12 @@ begin
   (* 'COLORDERNAME' AND 'COLWIDTHNAME' PROVIDE WITH SECTION NAMES FOR COLUMN ORDER AND COLUMN WIDTH. *)
   (* BOTH SECTIONS MUST CONTAINS EQUAL NUMBER OF VALUE KEYS. EACH KEY CONTAIN COLUMN NAME USED BY    *)
   (* STRING GRID COMPONENT (AGE VIEW) THAT DISPLAYS DATA FROM SQL SERVER DATABASE, THUS COLUMN NAMES *)
-  (* ARE USED TO BUILD SQL QUERY, THIS IS BECAUSE WE USE SQL EXPRESSIONS TO OBTAIN PROPER OUTPUT     *)
-  (* AFTER FILTERING AND/OR SORTING ETC.                                                             *)
+  (* ARE USED TO BUILD SQL QUERY, THIS IS BECAUSE WE USE SQL EXPRESSIONS TO OBTAIN INITIAL OUTPUT    *)
+  (* WITH FILTERING AND/OR SORTING ETC. SEPARATE FILTERING TO SOME EXTEND IS ALLOWED IN STRING GRID  *)
+  (* HOWEVER, SEPARATE SORTING IS NOT IMPLEMENTED TO RESTRICT USER FORM "PLAYING AROUND"             *)
+  (* THEREFORE, THERE IS ONE PLACE (SERVER) WHERE THERE IS DECIDED HOW TO DISPLAY DATA TO USER,      *)
+  (* THIS IS PART OF AUTOMATION AND STANDARD APPROACH ACROSS ALL USERS, SO THE USER IS FORCED        *)
+  (* IN CERTAIN DIRECTION BY AUTOMATION, AND THUS CAN OBTAIN BETTER RESULTS, ETC.                    *)
 
   { CHECK NUMBER OF KEYS IN GIVEN SECTION }
   Result:=False;
@@ -1715,16 +1715,15 @@ end;
 { ------------------------------------------------------------------------------------------------------------------------------------------------- ON CREATE }
 procedure TMainForm.FormCreate(Sender: TObject);
 var
-  AppVersion:     string;
-  AppSettings:    TSettings;
-  DataBase:       TDataBase;
-  DataTables:     TDataTables;
-  UserControl:    TUserControl;
-  Transactions:   TTransactions;
-  RegSettings:    TFormatSettings;
-//  InvoiceTracker: TInvoiceTracker;
-  NowTime:        TTime;
-  iCNT:           integer;
+  AppVersion:    string;
+  AppSettings:   TSettings;
+  DataBase:      TDataBase;
+  DataTables:    TDataTables;
+  UserControl:   TUserControl;
+  Transactions:  TTransactions;
+  RegSettings:   TFormatSettings;
+  NowTime:       TTime;
+  iCNT:          integer;
 begin
 
   { ------------------------------------------------------------ ! INITIALIZATION ! ------------------------------------------------------------------------- }
@@ -1896,6 +1895,13 @@ begin
     FEventLogPath:=AppSettings.FPathEventLog;
     UserControl.UserName:=FUserName;
     AccessLevel:=UserControl.GetAccessData(adAccessLevel);
+    { IF USERNAME IS NOT FOUND, THEN CLOSE APPLICATION }
+    if AccessLevel = '' then
+    begin
+      MsgCall(mcError, 'Cannot find account for user name: ' + FUserName + '. Pease contact your administrator. Application will be terminated.');
+      Application.Terminate;
+    end;
+    { OTHERWISE PROCESS }
     AccessMode :=UserControl.GetAccessData(adAccessMode);
     if AccessMode = adAccessFull  then Action_FullView.Checked :=True;
     if AccessMode = adAccessBasic then Action_BasicView.Checked:=True;
@@ -1942,15 +1948,6 @@ begin
     end;
   end;
 
-  { ----------------------------------------------------- ! LOAD INVOICE TRACKER CONTENT ! ------------------------------------------------------------------ }
-(*
-  InvoiceTracker:=TInvoiceTracker.Create;
-  try
-    InvoiceTracker.Refresh(sgInvoiceTracker, 'ALL');
-  finally
-    InvoiceTracker.Free;
-  end;
-*)
   { ------------------------------------------------------------ ! GENERAL TABLES ! ------------------------------------------------------------------------- }
 
   DataTables:=TDataTables.Create(FDbConnect);
@@ -2500,10 +2497,12 @@ end;
 procedure TMainForm.Action_RemoveClick(Sender: TObject);
 begin
 
+  TrackerForm.CUID:=sgInvoiceTracker.Cells[sgInvoiceTracker.ReturnColumn(TTracker.CUID, 1, 1), sgInvoiceTracker.Row];
+
   { R/W USER CAN REMOVE ITEM }
   if (MainForm.AccessLevel = acReadWrite) and (UpperCase(MainForm.FUserName) = UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
     if MsgCall(mcQuestion2, 'Are you sure you want to remove selected customer?') = IDYES then
-      TTInvoiceTrackerRefresh.Create('REMOVE');
+      TrackerForm.Delete;
 
   { R/W USER CANNOT REMOVE OTHER ITEM }
   if (MainForm.AccessLevel = acReadWrite) and (UpperCase(MainForm.FUserName) <> UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
@@ -2511,7 +2510,8 @@ begin
 
   { ADMINISTRATOR CAN REMOVE ANY ITEM }
   if (MainForm.AccessLevel = acADMIN) then
-    if MsgCall(mcQuestion2, 'Are you sure you want to remove selected customer?') = IDYES then TTInvoiceTrackerRefresh.Create('REMOVE');
+    if MsgCall(mcQuestion2, 'Are you sure you want to remove selected customer?') = IDYES then
+      TrackerForm.Delete;
 
   { READ ONLY USER CANNOT REMOVE ANYTHING }
   if (MainForm.AccessLevel = acReadOnly) then MsgCall(mcWarn, 'You don''t have permission to remove items.');
@@ -2533,7 +2533,7 @@ end;
 { -------------------------------------------------------------------------------------------------------------------------------------------- SHOW ALL ITEMS }
 procedure TMainForm.Action_ShowAllClick(Sender: TObject);
 begin
-//  TTInvoiceTrackerRefresh.Create('ALL');
+  TTInvoiceTrackerRefresh.Create('*');
 end;
 
 { ---------------------------------------------------------------- ! TRYICON CALLS ! ------------------------------------------------------------------------ }
@@ -2568,10 +2568,10 @@ begin
   TabSheet7Show(self);
 end;
 
-{ --------------------------------------------------------------------------------------------------------------- REFRESH THE LIST AFTER ADDING/REMOVING ITEM }
+{ -------------------------------------------------------------------------------------------------------------------------------------------- SHOW ALL ITEMS }
 procedure TMainForm.TabSheet4Show(Sender: TObject);
 begin
-  TTInvoiceTrackerRefresh.Create('ALL');
+  TTInvoiceTrackerRefresh.Create('*');
 end;
 
 { ------------------------------------------------------------------------------------------------------------ MAKE PAYMENT TERMS AND PAID INFO TABLES HEIGHT }
