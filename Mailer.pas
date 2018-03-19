@@ -73,9 +73,10 @@ type
     var CoCode:      string;
     var Branch:      string;
     var SL:          TStringList;
-    var Grid:        TStringGrid;
+    var Aging:       TStringGrid;
+    var Items:       TStringGrid;
   published
-    constructor Create(AgeGrid: TStringGrid);
+    constructor Create(AgeGrid: TStringGrid; ItemsGrid: TStringGrid);
     destructor  Destroy; override;
     function    GetData: boolean;
     procedure   BuildHTML;
@@ -92,24 +93,32 @@ uses
 { ############################################################# ! STATEMENT CLASS ! ######################################################################### }
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE }
-constructor TStatement.Create(AgeGrid: TStringGrid);
+constructor TStatement.Create(AgeGrid: TStringGrid; ItemsGrid: TStringGrid);
 begin
   { LOAD ACCOUNT STATEMENT LAYOUT }
   SL:=TStringList.Create;
-  SL.LoadFromFile(LayoutDir + 'statements.html');
+  SL.LoadFromFile(LayoutDir + TMIG.ReadString(VariousLayouts, 'STATEMENT', '') + '.html');
+
   { PREPARE HTML TEMPLATES }
   HTMLTable:=CommonHTMLTable;
   HTMLRow  :=CommonHTMLRow;
-  { READ KEY CUSTOMER AND COMPANY INFORMATION }
-  Grid:=AgeGrid;
+
+  { ASSIGN AGEVIEW GRID }
+  Aging:=AgeGrid;
+
+  { ASSIGN OPEN ITEMS }
+  Items:=ItemsGrid;
+
+  {  }
   try
-    CUID    :=Grid.Cells[Grid.ReturnColumn(TSnapshots.fCUID,          1, 1), Grid.Row];
-    CustName:=Grid.Cells[Grid.ReturnColumn(TSnapshots.fCUSTOMER_NAME, 1, 1), Grid.Row];
-    CoCode  :=Grid.Cells[Grid.ReturnColumn(TSnapshots.fCO_CODE,       1, 1), Grid.Row];
-    Branch  :=Grid.Cells[Grid.ReturnColumn(TSnapshots.fAGENT,         1, 1), Grid.Row];
+    CUID    :=Aging.Cells[Aging.ReturnColumn(TSnapshots.fCUID,          1, 1), Aging.Row];
+    CustName:=Aging.Cells[Aging.ReturnColumn(TSnapshots.fCUSTOMER_NAME, 1, 1), Aging.Row];
+    CoCode  :=Aging.Cells[Aging.ReturnColumn(TSnapshots.fCO_CODE,       1, 1), Aging.Row];
+    Branch  :=Aging.Cells[Aging.ReturnColumn(TSnapshots.fAGENT,         1, 1), Aging.Row];
   finally
-    Grid.Free;
+    Aging.Free;
   end;
+
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------------- RELEASE }
@@ -130,14 +139,10 @@ begin
   MailTo  :='';
   DataBase:=TDataTables.Create(MainForm.FDbConnect);
   try
-    { GET "EMAIL TO" AND "ADDRESS" FROM ADDRESSBOOK }
+    { GET "EMAIL TO" FROM ADDRESSBOOK }
     DataBase.CustFilter:=WHERE + TAddressBook.CUID + EQUAL + QuotedStr(CUID);
     DataBase.OpenTable(TblAddressbook);
-    if DataBase.DataSet.RecordCount = 1 then
-    begin
-      MailTo  :=DataBase.DataSet.Fields[TAddressBook.ESTATEMENTS].Value;
-      CustAddr:=DataBase.DataSet.Fields[TAddressBook.CUSTADDR].Value;
-    end;
+    if DataBase.DataSet.RecordCount = 1 then MailTo:=DataBase.DataSet.Fields[TAddressBook.ESTATEMENTS].Value;
     { GET "EMAIL FROM" AND "BANK ACCOUNT" FROM COMPANY TABLE }
     DataBase.CustFilter:=WHERE +
                            TCompany.CO_CODE +
@@ -186,17 +191,25 @@ procedure TStatement.BuildHTML;
 
 begin
 
-    //build
-    { ------------------------------------------------------------------------------------------------------------------------------------------ HTML BUILDER }
-    for iCNT:=1 to ActionsForm.OpenItemsGrid.RowCount - 1 do
-      if StrToFloatDef(ActionsForm.OpenItemsGrid.Cells[5, iCNT], 0) <> 0 then OpenItemsToHtmlTable(HTMLStat, ActionsForm.OpenItemsGrid, iCNT);
-    //build
-    { ------------------------------------------------------------------------------------------------------------------ BUILD HTML CODE FOR CUSTOMER ADDRESS }
+    { GET CUSTOMER POSITION IN OPEN ITEMS }
+    for iCNT:=1 to MainForm.sgOpenItems.RowCount - 1 do
+      if MainForm.sgOpenItems.Cells[37, iCNT] = CUID then
+        break;
+
+    { OPEN ITEMS TO HTML TABLE }
+    for iCNT:=1 to MainForm.sgOpenItems.RowCount - 1 do
+      if StrToFloatDef(MainForm.sgOpenItems.Cells[5, iCNT], 0) <> 0 then
+        OpenItemsToHtmlTable(HTMLStat, MainForm.sgOpenItems, iCNT);
+
+
+    { BUILD CUSTOMER ADDRESS FIELD }
     CustAddr:='<p class="p"><b>' + CustName + '</b><br />' +#13#10;
+    if (MainForm.sgOpenItems.Cells[20, iCNT] <> '') and (MainForm.sgOpenItems.Cells[20, iCNT] <> ' ') then CustAddr:=CustAddr + MainForm.sgOpenItems.Cells[20, iCNT] + '<br />' +#13#10;
+    if (MainForm.sgOpenItems.Cells[21, iCNT] <> '') and (MainForm.sgOpenItems.Cells[21, iCNT] <> ' ') then CustAddr:=CustAddr + MainForm.sgOpenItems.Cells[21, iCNT] + '<br />' +#13#10;
+    if (MainForm.sgOpenItems.Cells[22, iCNT] <> '') and (MainForm.sgOpenItems.Cells[22, iCNT] <> ' ') then CustAddr:=CustAddr + MainForm.sgOpenItems.Cells[22, iCNT] + '<br />' +#13#10;
+    if (MainForm.sgOpenItems.Cells[23, iCNT] <> '') and (MainForm.sgOpenItems.Cells[23, iCNT] <> ' ') then CustAddr:=CustAddr + MainForm.sgOpenItems.Cells[23, iCNT] + '<br />' +#13#10;
+    if (MainForm.sgOpenItems.Cells[24, iCNT] <> '') and (MainForm.sgOpenItems.Cells[24, iCNT] <> ' ') then CustAddr:=CustAddr + MainForm.sgOpenItems.Cells[24, iCNT] + '<br />' +#13#10;
     CustAddr:=CustAddr + '</p>' +#13#10;
-
-
-
 
 end;
 
