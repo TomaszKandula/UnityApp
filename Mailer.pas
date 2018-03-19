@@ -54,45 +54,33 @@ type
 
 { ------------------------------------------------------------- ! STATEMENT CLASS ! ------------------------------------------------------------------------- }
 type
-  TStatement = class(TMailer)                             // refactor! remove tight coupling!
+  TStatement = class(TMailer)
   {$TYPEINFO ON}
   private
     { UNUSED }
   public
-    { HTML FOR INVOICE LIST }
+    { HTML BUILDER }
     var HTMLTable:   string;
     var HTMLTemp:    string;
     var HTMLRow:     string;
     var HTMLStat:    string;
-    var CustAddr:    string;
-    var CustName:    string;
-    { REAY EMAIL BODY }
     var BankDetails: string;
     var LBUAddress:  string;
     var Telephone:   string;
-    var SL:          TStringList;
+    var CustAddr:    string;
+    var CustName:    string;
     var CUID:        string;
+    var CoCode:      string;
+    var Branch:      string;
+    var SL:          TStringList;
+    var Grid:        TStringGrid;
   published
-    procedure OpenItemsToHtmlTable(var HtmlStatement: string; var SG: TStringGrid; ActualRow: integer);
-    function  RetriveEmails(InvoiceGrid: TStringGrid; AgeGrid: TStringGrid): boolean;
-    function  SendStatement: boolean;
+    constructor Create(AgeGrid: TStringGrid);
+    destructor  Destroy; override;
+    function    GetData: boolean;
+    procedure   BuildHTML;
+    function    SendStatement: boolean;
   end;
-
-{ -------------------------------------------------------------- ! REMINDER CLASS ! ------------------------------------------------------------------------- }
-(*
-type
-  TReminder = class(TMailer)
-  {$TYPEINFO ON}
-  private
-    { UNUSED }
-  public
-    { UNUSED }
-  published
-    function CheckInvoiceState: boolean;
-    function RegisterReminder: boolean;
-    function SendReminder: boolean;
-  end;
-*)
 
 { ----------------------------------------------------------- ! IMPLEMENTATION ZONE ! ----------------------------------------------------------------------- }
 
@@ -103,46 +91,113 @@ uses
 
 { ############################################################# ! STATEMENT CLASS ! ######################################################################### }
 
-{ --------------------------------------------------------------------------------------------------------------------------------- CONVERT DATA LINE TO HTML }
-procedure TStatement.OpenItemsToHtmlTable(var HtmlStatement: string; var SG: TStringGrid; ActualRow: Integer);
+{ ------------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE }
+constructor TStatement.Create(AgeGrid: TStringGrid);
 begin
-  HTMLTemp:=HTMLRow;
-  HTMLTemp:=StringReplace(HTMLTemp, '{INV_NUM}', SG.Cells[1,  ActualRow], [rfReplaceAll]);
-  HTMLTemp:=StringReplace(HTMLTemp, '{INV_DAT}', SG.Cells[10, ActualRow], [rfReplaceAll]);
-  HTMLTemp:=StringReplace(HTMLTemp, '{DUE_DAT}', SG.Cells[9,  ActualRow], [rfReplaceAll]);
-  HTMLTemp:=StringReplace(HTMLTemp, '{INV_CUR}', SG.Cells[8,  ActualRow], [rfReplaceAll]);
-  HTMLTemp:=StringReplace(HTMLTemp, '{INV_AMT}', SG.Cells[5,  ActualRow], [rfReplaceAll]);
-  HTMLTemp:=StringReplace(HTMLTemp, '{INV_OSA}', SG.Cells[4,  ActualRow], [rfReplaceAll]);
-  HtmlStatement:=HtmlStatement + HTMLTemp;
+  { LOAD ACCOUNT STATEMENT LAYOUT }
+  SL:=TStringList.Create;
+  SL.LoadFromFile(LayoutDir + 'statements.html');
+  { PREPARE HTML TEMPLATES }
+  HTMLTable:=CommonHTMLTable;
+  HTMLRow  :=CommonHTMLRow;
+  { READ KEY CUSTOMER AND COMPANY INFORMATION }
+  Grid:=AgeGrid;
+  try
+    CUID    :=Grid.Cells[Grid.ReturnColumn(TSnapshots.fCUID,          1, 1), Grid.Row];
+    CustName:=Grid.Cells[Grid.ReturnColumn(TSnapshots.fCUSTOMER_NAME, 1, 1), Grid.Row];
+    CoCode  :=Grid.Cells[Grid.ReturnColumn(TSnapshots.fCO_CODE,       1, 1), Grid.Row];
+    Branch  :=Grid.Cells[Grid.ReturnColumn(TSnapshots.fAGENT,         1, 1), Grid.Row];
+  finally
+    Grid.Free;
+  end;
+end;
+
+{ --------------------------------------------------------------------------------------------------------------------------------------------------- RELEASE }
+destructor TStatement.Destroy;
+begin
+  SL.Free;
+  inherited;
 end;
 
 { ---------------------------------------------------------------------------------------------------------------------------- READ EMAIL DETAILS AND ADDRESS }
-function TStatement.RetriveEmails(InvoiceGrid: TStringGrid; AgeGrid: TStringGrid): boolean;
+function TStatement.GetData: boolean;
 var
-  iCNT: integer;
+  DataBase: TDataTables;
 begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-  Result:=False;
+  Result  :=False;
   MailFrom:='';
-  MailTo:='';
-  { REFRESH INVOICE TRACKER }
-  TrackerForm.UserAlias:=MainForm.FUserName;
-  TrackerForm.Show;
-  { --------------------------------------------------------------------------------------- LOOK FOR EMAILS AND BANK DETAILS ON THE INVOICE TRACKER COMPONENT }
-  if InvoiceGrid.RowCount > 1 then
-    for iCNT:=1 to InvoiceGrid.RowCount - 1 do
-      if CUID = InvoiceGrid.Cells[2, iCNT] then
-      begin
-        MailFrom   :=InvoiceGrid.Cells[8,  iCNT];
-        MailTo     :=InvoiceGrid.Cells[10, iCNT];
-        BankDetails:=InvoiceGrid.Cells[24, iCNT];
-        LBUAddress :=InvoiceGrid.Cells[25, iCNT] + #13#10 + '<br>' +
-                     InvoiceGrid.Cells[26, iCNT] + #13#10 + '<br>' +
-                     InvoiceGrid.Cells[27, iCNT];
-        Telephone  :=InvoiceGrid.Cells[28, iCNT];
-        if (MailFrom <> '') and (MailTo <> '') then Result:=True;
-        Break;
-      end;
+  MailTo  :='';
+  DataBase:=TDataTables.Create(MainForm.FDbConnect);
+  try
+    { GET "EMAIL TO" AND "ADDRESS" FROM ADDRESSBOOK }
+    DataBase.CustFilter:=WHERE + TAddressBook.CUID + EQUAL + QuotedStr(CUID);
+    DataBase.OpenTable(TblAddressbook);
+    if DataBase.DataSet.RecordCount = 1 then
+    begin
+      MailTo  :=DataBase.DataSet.Fields[TAddressBook.ESTATEMENTS].Value;
+      CustAddr:=DataBase.DataSet.Fields[TAddressBook.CUSTADDR].Value;
+    end;
+    { GET "EMAIL FROM" AND "BANK ACCOUNT" FROM COMPANY TABLE }
+    DataBase.CustFilter:=WHERE +
+                           TCompany.CO_CODE +
+                         EQUAL +
+                           QuotedStr(CoCode) +
+                         _AND +
+                           TCompany.BRANCH +
+                         EQUAL +
+                           QuotedStr(Branch);
+    DataBase.OpenTable(TblCompany);
+    if DataBase.DataSet.RecordCount = 1 then
+    begin
+      MailFrom:=DataBase.DataSet.Fields[TCompany.SEND_NOTE_FROM].Value;
+      BankDetails:=DataBase.DataSet.Fields[TCompany.BANKDETAILS].Value;
+      LBUAddress:=DataBase.DataSet.Fields[TCompany.COADDRESS].Value;
+    end;
+    Result:=True;
+  finally
+    DataBase.Free;
+  end;
+end;
+
+{ ------------------------------------------------------------------------------------------------------------------------------------------------- MAKE HTML }
+procedure TStatement.BuildHTML;
+
+  (* COMMON VARIABLES *)
+
+  var
+    iCNT: integer;
+
+  (* NESTED METHOD *)
+
+  procedure OpenItemsToHtmlTable(var HtmlStatement: string; var SG: TStringGrid; ActualRow: Integer);
+  begin
+    HTMLTemp:=HTMLRow;
+    HTMLTemp:=StringReplace(HTMLTemp, '{INV_NUM}', SG.Cells[1,  ActualRow], [rfReplaceAll]);
+    HTMLTemp:=StringReplace(HTMLTemp, '{INV_DAT}', SG.Cells[10, ActualRow], [rfReplaceAll]);
+    HTMLTemp:=StringReplace(HTMLTemp, '{DUE_DAT}', SG.Cells[9,  ActualRow], [rfReplaceAll]);
+    HTMLTemp:=StringReplace(HTMLTemp, '{INV_CUR}', SG.Cells[8,  ActualRow], [rfReplaceAll]);
+    HTMLTemp:=StringReplace(HTMLTemp, '{INV_AMT}', SG.Cells[5,  ActualRow], [rfReplaceAll]);
+    HTMLTemp:=StringReplace(HTMLTemp, '{INV_OSA}', SG.Cells[4,  ActualRow], [rfReplaceAll]);
+    HtmlStatement:=HtmlStatement + HTMLTemp;
+  end;
+
+  (* MAIN BLOCK *)
+
+begin
+
+    //build
+    { ------------------------------------------------------------------------------------------------------------------------------------------ HTML BUILDER }
+    for iCNT:=1 to ActionsForm.OpenItemsGrid.RowCount - 1 do
+      if StrToFloatDef(ActionsForm.OpenItemsGrid.Cells[5, iCNT], 0) <> 0 then OpenItemsToHtmlTable(HTMLStat, ActionsForm.OpenItemsGrid, iCNT);
+    //build
+    { ------------------------------------------------------------------------------------------------------------------ BUILD HTML CODE FOR CUSTOMER ADDRESS }
+    CustAddr:='<p class="p"><b>' + CustName + '</b><br />' +#13#10;
+    CustAddr:=CustAddr + '</p>' +#13#10;
+
+
+
+
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------------- SEND STATEMENT }
@@ -150,86 +205,26 @@ function TStatement.SendStatement: boolean;
 var
   iCNT: integer;
 begin
-  { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-  Result:=False;
-  CUID    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUID,          1, 1), MainForm.sgAgeView.Row];
-  CustName:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME, 1, 1), MainForm.sgAgeView.Row];
-
-  if (ActionsForm.Cust_Mail.Text = '') or (ActionsForm.Cust_Mail.Text = ' ') or (ActionsForm.Cust_Mail.Text = unNotFound) then
+  if GetData then
   begin
-    MainForm.MsgCall(mcWarn, 'Statement cannot be sent. There is no e-mail provided.');
-    Exit;
-  end;
-
-  HTMLTable:=CommonHTMLTable;
-  HTMLRow  :=CommonHTMLRow;
-
-  SL:=TStringList.Create;
-
-  if ActionsForm.OpenItemsGrid.RowCount > 2 then
-  begin
-
-    { --------------------------------------------------------------------------------------------------------------------------- SKIP FIRST ROW BEING HEADER }
-    for iCNT:=1 to ActionsForm.OpenItemsGrid.RowCount - 1 do
-      if StrToFloatDef(ActionsForm.OpenItemsGrid.Cells[5, iCNT], 0) <> 0 then OpenItemsToHtmlTable(HTMLStat, ActionsForm.OpenItemsGrid, iCNT);
-
-    { ---------------------------------------------------------------------------------------------------------------- GET CUID POSITION FROM OPEN ITEMS LIST }
-    for iCNT:=1 to MainForm.sgOpenItems.RowCount - 1 do
-      if MainForm.sgOpenItems.Cells[37, iCNT] = CUID then break;
-
-    { ------------------------------------------------------------------------------------------------------------------ BUILD HTML CODE FOR CUSTOMER ADDRESS }
-    CustAddr:='<p class="p"><b>' + CustName + '</b><br />' +#13#10;
-
-    { ------------------------------------------------------------------------------------------------------------------------ ADD ADDRESS FIELD IF NOT EMPTY }
-    if (MainForm.sgOpenItems.Cells[20, iCNT] <> '') and (MainForm.sgOpenItems.Cells[20, iCNT] <> ' ') then CustAddr:=CustAddr + MainForm.sgOpenItems.Cells[20, iCNT] + '<br />' +#13#10;
-    if (MainForm.sgOpenItems.Cells[21, iCNT] <> '') and (MainForm.sgOpenItems.Cells[21, iCNT] <> ' ') then CustAddr:=CustAddr + MainForm.sgOpenItems.Cells[21, iCNT] + '<br />' +#13#10;
-    if (MainForm.sgOpenItems.Cells[22, iCNT] <> '') and (MainForm.sgOpenItems.Cells[22, iCNT] <> ' ') then CustAddr:=CustAddr + MainForm.sgOpenItems.Cells[22, iCNT] + '<br />' +#13#10;
-    if (MainForm.sgOpenItems.Cells[23, iCNT] <> '') and (MainForm.sgOpenItems.Cells[23, iCNT] <> ' ') then CustAddr:=CustAddr + MainForm.sgOpenItems.Cells[23, iCNT] + '<br />' +#13#10;
-    if (MainForm.sgOpenItems.Cells[24, iCNT] <> '') and (MainForm.sgOpenItems.Cells[24, iCNT] <> ' ') then CustAddr:=CustAddr + MainForm.sgOpenItems.Cells[24, iCNT] + '<br />' +#13#10;
-
-    CustAddr:=CustAddr + '</p>' +#13#10;
-
-    { ----------------------------------------------------------------------------------------------------------------------------------- FILL THE STATEMENT  }
-    try
-      { --------------------------------------------------------------------------------------------------------------------------------------------- PREPARE }
-      SL.LoadFromFile(LayoutDir + 'statement.html');
-      { ----------------------------------------------------------------------------------------------------------------------- SEND AN E-MAIL WITH STATEMENT }
-      if RetriveEmails(MainForm.sgInvoiceTracker, MainForm.sgAgeView) then
-      begin
-        { HTML BODY }
-        HTMLTable:=StringReplace(HTMLTable, '{ROWS}',         HTMLStat,   [rfReplaceAll]);
-        MailBody :=StringReplace(SL.Text,   '{INVOICE_LIST}', HTMLTable,  [rfReplaceAll]);
-        MailBody :=StringReplace(MailBody,  '{ADDR_DATA}',    CustAddr,   [rfReplaceAll]);
-        MailBody :=StringReplace(MailBody,  '{BANKS}',        BankDetails,[rfReplaceAll]);
-        MailBody :=StringReplace(MailBody,  '{ADDR_LBU}',     LBUAddress, [rfReplaceAll]);
-        MailBody :=StringReplace(MailBody,  '{EMAIL}',        MailFrom,   [rfReplaceAll]);
-        MailBody :=StringReplace(MailBody,  '{TEL}',          Telephone,  [rfReplaceAll]);
-        { EMAILS }
-        XMailer    :=MailFrom;
-        MailCc     :=MailFrom;
-        MailBcc    :='';
-        MailRt     :='';
-        MailSubject:='Account Statement (' + CustName + ')';
-(*
-        if SendNow then
-        begin
-          MainForm.MsgCall(mcInfo, 'Statement has been sent successfully!')
-        end
-          else
-            MainForm.MsgCall(mcWarn, 'Cannot send statement from e-mail address: ' + MailFrom + '. Please contact IT support.');
-*)
-        { ----------------------------------------------------------------------------------------------------------------------- DEBUG LINES | DO NOT DELETE }
-        SL.Text:=MailBody;
-        SL.SaveToFile('e:\test.html');
-      end
-        else
-          MainForm.MsgCall(mcWarn, 'Cannot send statement from e-mail address: ' + MailFrom + '. Please make sure that this customer is registered on Invoice Tracker list.');
-    finally
-      SL.Free;
-    end;
+    BuildHTML;
+    HTMLTable:=StringReplace(HTMLTable, '{ROWS}',         HTMLStat,   [rfReplaceAll]);
+    MailBody :=StringReplace(SL.Text,   '{INVOICE_LIST}', HTMLTable,  [rfReplaceAll]);
+    MailBody :=StringReplace(MailBody,  '{ADDR_DATA}',    CustAddr,   [rfReplaceAll]);
+    MailBody :=StringReplace(MailBody,  '{BANKS}',        BankDetails,[rfReplaceAll]);
+    MailBody :=StringReplace(MailBody,  '{ADDR_LBU}',     LBUAddress, [rfReplaceAll]);
+    MailBody :=StringReplace(MailBody,  '{EMAIL}',        MailFrom,   [rfReplaceAll]);
+    MailBody :=StringReplace(MailBody,  '{TEL}',          Telephone,  [rfReplaceAll]);
+    XMailer    :=MailFrom;
+    MailCc     :=MailFrom;
+    MailBcc    :='';
+    MailRt     :='';
+    MailSubject:='Account Statement (' + CustName + ')';
+    Result:=SendNow;
+    //SL.Text:=MailBody;
+    //SL.SaveToFile('e:\test.html');
   end;
 end;
-
 
 { ############################################################## ! MAILER CLASS ! ########################################################################### }
 

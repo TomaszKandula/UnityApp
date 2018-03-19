@@ -424,6 +424,8 @@ type                                                            (* GUI | MAIN TH
     Action_RowHighlight: TMenuItem;
     N16: TMenuItem;
     Action_Update: TMenuItem;
+    Action_Report: TMenuItem;
+    N17: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -583,6 +585,7 @@ type                                                            (* GUI | MAIN TH
     procedure DetailsGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
     procedure btnLoadAgeViewClick(Sender: TObject);
     procedure Action_RowHighlightClick(Sender: TObject);
+    procedure Action_ReportClick(Sender: TObject);
 
     { ------------------------------------------------------------- ! HELPERS ! ----------------------------------------------------------------------------- }
 
@@ -1889,24 +1892,28 @@ begin
   finally
     DataBase.Free;
   end;
+
   { UPLOAD USER DETAILS }
   UserControl:=TUserControl.Create(FDbConnect);
   try
     FEventLogPath:=AppSettings.FPathEventLog;
     UserControl.UserName:=FUserName;
     AccessLevel:=UserControl.GetAccessData(adAccessLevel);
+
     { IF USERNAME IS NOT FOUND, THEN CLOSE APPLICATION }
     if AccessLevel = '' then
     begin
       MsgCall(mcError, 'Cannot find account for user name: ' + FUserName + '. Pease contact your administrator. Application will be terminated.');
       Application.Terminate;
     end;
+
     { OTHERWISE PROCESS }
     AccessMode :=UserControl.GetAccessData(adAccessMode);
     if AccessMode = adAccessFull  then Action_FullView.Checked :=True;
     if AccessMode = adAccessBasic then Action_BasicView.Checked:=True;
     UserControl.GetGroupList(FGroupList, GroupListBox);
     UserControl.GetAgeDates(GroupListDates, FGroupList[0, 0]);
+
     { RESTRICTED FOR "ADMINS" }
     if AccessLevel <> acADMIN then
     begin
@@ -1915,6 +1922,7 @@ begin
       ReloadCover.Cursor    :=crNo;
       GroupListDates.Enabled:=False;
     end;
+
     { NOT ALLOWED FOR "RO" USERS }
     if AccessLevel = acReadOnly then
     begin
@@ -1952,11 +1960,19 @@ begin
 
   DataTables:=TDataTables.Create(FDbConnect);
   try
+
+    { LOAD DATA }
     DataTables.OpenTable(AppSettings.TMIG.ReadString(GeneralTables, 'MAP1', '')); DataTables.SqlToGrid(sgCoCodes,  DataTables.ExecSQL, False, True);
     DataTables.OpenTable(AppSettings.TMIG.ReadString(GeneralTables, 'MAP4', '')); DataTables.SqlToGrid(sgPmtTerms, DataTables.ExecSQL, False, True);
     DataTables.OpenTable(AppSettings.TMIG.ReadString(GeneralTables, 'MAP5', '')); DataTables.SqlToGrid(sgPaidInfo, DataTables.ExecSQL, False, True);
     DataTables.OpenTable(AppSettings.TMIG.ReadString(GeneralTables, 'MAP6', '')); DataTables.SqlToGrid(sgGroup3,   DataTables.ExecSQL, False, True);
     DataTables.OpenTable(AppSettings.TMIG.ReadString(GeneralTables, 'MAP7', '')); DataTables.SqlToGrid(sgPerson,   DataTables.ExecSQL, False, True);
+
+    { HIDE COLUMNS "BANKDETAILS", "MAN_ID" AND "TL_ID" IN "sgCoCodes" TABLE }
+    sgCoCodes.ColWidths[sgCoCodes.ReturnColumn('BANKDETAILS', 1 ,1)]:=-1;
+    sgCoCodes.ColWidths[sgCoCodes.ReturnColumn('MAN_ID',      1 ,1)]:=-1;
+    sgCoCodes.ColWidths[sgCoCodes.ReturnColumn('TL_ID',       1 ,1)]:=-1;
+
   finally
     DataTables.Free;
   end;
@@ -2223,28 +2239,6 @@ end;
 
 { -------------------------------------------------------------- ! MAIN FORM MENU ! ------------------------------------------------------------------------- }
 
-{ ----------------------------------------------------------------------------------------------------------------------------------- EXECUTE WHEN MENU OPENS }
-procedure TMainForm.AgeViewPopupPopup(Sender: TObject);
-begin
-
-  { ONLY ADMINS AND RW USERS CAN USE ADDRESSBOOK AND INVOICE TRACKER }
-  if AccessLevel = acReadOnly then Exit;
-
-  { CHECK IF USER SELECT A RANGE ON AGEGRID }
-  if (sgAgeView.Selection.Bottom - sgAgeView.Selection.Top) > 0 then
-    { WE ALLOW TO ADD CUSTOMER TO INVOICE TRACKER ONLY ONE AT A TIME }
-    Action_Tracker.Enabled:=False
-      else
-        Action_Tracker.Enabled:=True;
-end;
-
-{ ----------------------------------------------------------------------------------------------------------------------------------------------- HIDE WINDOW }
-procedure TMainForm.Action_HideAppClick(Sender: TObject);
-begin
-  ShowWindow(Handle, SW_MINIMIZE);
-  Hide();
-end;
-
 { ----------------------------------------------------------------------------------------------------------------------------------------------- SHOW WINDOW }
 procedure TMainForm.Action_ShowAppClick(Sender: TObject);
 begin
@@ -2253,22 +2247,11 @@ begin
   Application.BringToFront;
 end;
 
-{ ----------------------------------------------------------------------------------------------------------------------------------------------------- CLOSE }
-procedure TMainForm.Action_CloseClick(Sender: TObject);
+{ ----------------------------------------------------------------------------------------------------------------------------------------------- HIDE WINDOW }
+procedure TMainForm.Action_HideAppClick(Sender: TObject);
 begin
-  (* DO NOTHING *)
-end;
-
-{ ----------------------------------------------------------------------------------------------------------------------------------------------------- ABOUT }
-procedure TMainForm.Action_AboutClick(Sender: TObject);
-begin
-  WndCall(AboutForm, stModal);
-end;
-
-{ ------------------------------------------------------------------------------------------------------------------------------------------------------ HELP }
-procedure TMainForm.Action_HelpClick(Sender: TObject);
-begin
-  (* EXECUTE EXTERNAL PDF FILE *)
+  ShowWindow(Handle, SW_MINIMIZE);
+  Hide();
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------------------- STAY ON TOP }
@@ -2285,7 +2268,46 @@ begin
   end;
 end;
 
+{ ---------------------------------------------------------------------------------------------------------------------------------------------- REPORT A BUG }
+procedure TMainForm.Action_ReportClick(Sender: TObject);
+begin
+  //
+end;
+
+{ ------------------------------------------------------------------------------------------------------------------------------------------------------ HELP }
+procedure TMainForm.Action_HelpClick(Sender: TObject);
+begin
+  (* EXECUTE EXTERNAL PDF FILE *)
+end;
+
+{ ----------------------------------------------------------------------------------------------------------------------------------------------------- ABOUT }
+procedure TMainForm.Action_AboutClick(Sender: TObject);
+begin
+  WndCall(AboutForm, stModal);
+end;
+
+{ ----------------------------------------------------------------------------------------------------------------------------------------------------- CLOSE }
+procedure TMainForm.Action_CloseClick(Sender: TObject);
+begin
+  (* DO NOTHING *)
+end;
+
 { ----------------------------------------------------------------- ! AGE VIEW ! ---------------------------------------------------------------------------- }
+
+{ ----------------------------------------------------------------------------------------------------------------------------------- EXECUTE WHEN MENU OPENS }
+procedure TMainForm.AgeViewPopupPopup(Sender: TObject);
+begin
+
+  { ONLY ADMINS AND RW USERS CAN USE ADDRESSBOOK AND INVOICE TRACKER }
+  if AccessLevel = acReadOnly then Exit;
+
+  { CHECK IF USER SELECT A RANGE ON AGEGRID }
+  if (sgAgeView.Selection.Bottom - sgAgeView.Selection.Top) > 0 then
+    { WE ALLOW TO ADD CUSTOMER TO INVOICE TRACKER ONLY ONE AT A TIME }
+    Action_Tracker.Enabled:=False
+      else
+        Action_Tracker.Enabled:=True;
+end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------- LYNC CALL }
 procedure TMainForm.Action_LyncCallClick(Sender: TObject);

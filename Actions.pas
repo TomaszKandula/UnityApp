@@ -689,7 +689,7 @@ procedure TActionsForm.btnSendStatementClick(Sender: TObject);
 var
   Statement: TStatement;
 begin
-  Statement:=TStatement.Create;
+  Statement:=TStatement.Create(MainForm.sgAgeView);
   Screen.Cursor:=crHourGlass;
   try
     Statement.SendStatement;
