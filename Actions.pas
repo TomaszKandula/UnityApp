@@ -112,7 +112,7 @@ var
 implementation
 
 uses
-  Model, SQL, Worker, Calendar, Settings, Database, Mailer, Transactions;
+  Model, SQL, Worker, Calendar, Settings, Mailer, Transactions;
 
 {$R *.dfm}
 
@@ -686,13 +686,17 @@ end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------------- SEND STATEMENT }
 procedure TActionsForm.btnSendStatementClick(Sender: TObject);
+var
+  Statement: TStatement;
 begin
-//
-
-
-
-
-
+  Statement:=TStatement.Create;
+  Screen.Cursor:=crHourGlass;
+  try
+    Statement.SendStatement;
+  finally
+    Statement.Free;
+    Screen.Cursor:=crDefault;
+  end;
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------ SELECT NEXT OVERDUE CUSTOMER }

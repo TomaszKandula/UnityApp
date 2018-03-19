@@ -2311,6 +2311,8 @@ var
 begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   Screen.Cursor:=crHourGlass;
+  TTAddressBook.Create(adOpenAll, sgAddressBook);
+  Sleep(500);
   Row:=sgAgeView.Selection.Top;
   if sgAddressBook.Cells[0, 1] = '' then OffSet:=-1 else OffSet:=0;
   { ----------------------------------------------------------------------------------------------------------------------- GO ONE BY ONE AND LOOK FOR 'CUID' }

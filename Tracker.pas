@@ -94,7 +94,7 @@ var
 implementation
 
 uses
-  Model, SQL, Worker, Settings, Database;
+  Model, Worker, Settings, Database;
 
 {$R *.dfm}
 

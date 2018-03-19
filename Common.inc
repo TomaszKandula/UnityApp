@@ -319,37 +319,28 @@ const
 
   { EMAIL GENERATION | TEMPLATES }
 
-  HTMLTable ='<table class="data">'                   +#13#10+
-             '<!-- HEADERS -->'                       +#13#10+
-             '<tr>'                                   +#13#10+
-             '  <!-- COLUMNS -->'                     +#13#10+
-             '  <th class="col1">Invoice No.:</th>'   +#13#10+
-             '  <th class="col2">Invoice Date:</th>'  +#13#10+
-             '  <th class="col3">Due date:</th>'      +#13#10+
-             '  <th class="col4">Currency:</th>'      +#13#10+
-             '  <th class="col5">Amount:</th>'        +#13#10+
-             '  <th class="col6">O/S Amount:</th>'    +#13#10+
-             '</tr>'                                  +#13#10+
-             '  <!-- ROWS WITH DATA -->'              +#13#10+
-             '{ROWS}'                                 +#13#10+
-             '</table>';
+  CommonHTMLTable ='<table class="data">'                   +#13#10+
+                   '<!-- HEADERS -->'                       +#13#10+
+                   '<tr>'                                   +#13#10+
+                   '  <!-- COLUMNS -->'                     +#13#10+
+                   '  <th class="col1">Invoice No.:</th>'   +#13#10+
+                   '  <th class="col2">Invoice Date:</th>'  +#13#10+
+                   '  <th class="col3">Due date:</th>'      +#13#10+
+                   '  <th class="col4">Currency:</th>'      +#13#10+
+                   '  <th class="col5">Amount:</th>'        +#13#10+
+                   '  <th class="col6">O/S Amount:</th>'    +#13#10+
+                   '</tr>'                                  +#13#10+
+                   '  <!-- ROWS WITH DATA -->'              +#13#10+
+                   '{ROWS}'                                 +#13#10+
+                   '</table>';
 
-  HTMLRow ='<tr>'                                     +#13#10+
-           '  <td class="col1">{INV_NUM}</td>'        +#13#10+
-           '  <td class="col2">{INV_DAT}</td>'        +#13#10+
-           '  <td class="col3">{DUE_DAT}</td>'        +#13#10+
-           '  <td class="col4">{INV_CUR}</td>'        +#13#10+
-           '  <td class="col5">{INV_AMT}</td>'        +#13#10+
-           '  <td class="col6">{INV_OSA}</td>'        +#13#10+
-           '</tr>'                                    +#13#10;
-
-
-
-
-
-
-
-
-
+  CommonHTMLRow ='<tr>'                                     +#13#10+
+                 '  <td class="col1">{INV_NUM}</td>'        +#13#10+
+                 '  <td class="col2">{INV_DAT}</td>'        +#13#10+
+                 '  <td class="col3">{DUE_DAT}</td>'        +#13#10+
+                 '  <td class="col4">{INV_CUR}</td>'        +#13#10+
+                 '  <td class="col5">{INV_AMT}</td>'        +#13#10+
+                 '  <td class="col6">{INV_OSA}</td>'        +#13#10+
+                 '</tr>'                                    +#13#10;
 
 
