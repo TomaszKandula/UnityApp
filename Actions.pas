@@ -687,13 +687,28 @@ end;
 { -------------------------------------------------------------------------------------------------------------------------------------------- SEND STATEMENT }
 procedure TActionsForm.btnSendStatementClick(Sender: TObject);
 var
-  Statement: TStatement;
+  Statement:   TDocument;
+  AppSettings: TSettings;
 begin
-  Statement:=TStatement.Create(MainForm.sgAgeView);
+  Statement    :=TDocument.Create;
+  AppSettings  :=TSettings.Create;
   Screen.Cursor:=crHourGlass;
   try
-    Statement.SendStatement;
+    { SETUP CUSTOMER AND COMPANY }
+    Statement.CUID    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUID,          1, 1), MainForm.sgAgeView.Row];
+    Statement.CustName:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME, 1, 1), MainForm.sgAgeView.Row];
+    Statement.CoCode  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCO_CODE,       1, 1), MainForm.sgAgeView.Row];
+    Statement.Branch  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fAGENT,         1, 1), MainForm.sgAgeView.Row];
+    { SET OPEN ITEMS GRID }
+    Statement.OpenItems:=MainForm.sgOpenItems;
+    { GET HTML LAYOUT }
+    Statement.DocType:=dcStatement;
+    Statement.HTMLLayout:=Statement.LoadTemplate(AppSettings.LayoutDir + AppSettings.TMIG.ReadString(VariousLayouts, 'STATEMENT', '') + '.html');
+    { SEND STATEMENT }
+    Statement.MailSubject:='Account Statement (' + Statement.CustName + ')';
+    Statement.SendDocument;
   finally
+    AppSettings.Free;
     Statement.Free;
     Screen.Cursor:=crDefault;
   end;

@@ -154,6 +154,11 @@ const
   stModal    = 0;
   stModeless = 1;
 
+  { GENERATE DOCUMENT | ENUMERATION }
+
+  dcReminder  = 0;
+  dcStatement = 1;
+
   { SQL KEYWORDS | ADD. SPACES FOR EASIER CONCATENATING }
 
   INSERT       : string = ' INSERT INTO ';

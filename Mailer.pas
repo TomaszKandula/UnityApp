@@ -22,7 +22,7 @@ uses
 
 { -------------------------------------------------------------- ! MAILER CLASS ! --------------------------------------------------------------------------- }
 type
-  TMailer = class(TSettings)
+  TMailer = class
   {$TYPEINFO ON}
   private
     var pidThd     : integer;
@@ -54,16 +54,16 @@ type
 
 { ------------------------------------------------------------- ! STATEMENT CLASS ! ------------------------------------------------------------------------- }
 type
-  TStatement = class(TMailer)
+  TDocument = class(TMailer)
   {$TYPEINFO ON}
   private
     { UNUSED }
   public
-    { HTML BUILDER }
     var HTMLTable:   string;
     var HTMLTemp:    string;
     var HTMLRow:     string;
     var HTMLStat:    string;
+    var HTMLLayout:  string;
     var BankDetails: string;
     var LBUAddress:  string;
     var Telephone:   string;
@@ -72,15 +72,20 @@ type
     var CUID:        string;
     var CoCode:      string;
     var Branch:      string;
-    var SL:          TStringList;
-    var Aging:       TStringGrid;
-    var Items:       TStringGrid;
+    var REM_EX1:     string;
+    var REM_EX2:     string;
+    var REM_EX3:     string;
+    var REM_EX4:     string;
+    var REM_EX5:     string;
+    var SourceGrid:  TStringGrid;
+    var OpenItems:   TStringGrid;
+    var DocType:     integer;
   published
-    constructor Create(AgeGrid: TStringGrid; ItemsGrid: TStringGrid);
-    destructor  Destroy; override;
+    procedure   SaveOutput(FileName: string);
+    function    LoadTemplate(FileName: string): string;
     function    GetData: boolean;
     procedure   BuildHTML;
-    function    SendStatement: boolean;
+    function    SendDocument: boolean;
   end;
 
 { ----------------------------------------------------------- ! IMPLEMENTATION ZONE ! ----------------------------------------------------------------------- }
@@ -90,155 +95,6 @@ implementation
 uses
   ADODB, Tracker, Actions;
 
-{ ############################################################# ! STATEMENT CLASS ! ######################################################################### }
-
-{ ------------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE }
-constructor TStatement.Create(AgeGrid: TStringGrid; ItemsGrid: TStringGrid);
-begin
-  { LOAD ACCOUNT STATEMENT LAYOUT }
-  SL:=TStringList.Create;
-  SL.LoadFromFile(LayoutDir + TMIG.ReadString(VariousLayouts, 'STATEMENT', '') + '.html');
-
-  { PREPARE HTML TEMPLATES }
-  HTMLTable:=CommonHTMLTable;
-  HTMLRow  :=CommonHTMLRow;
-
-  { ASSIGN AGEVIEW GRID }
-  Aging:=AgeGrid;
-
-  { ASSIGN OPEN ITEMS }
-  Items:=ItemsGrid;
-
-  {  }
-  try
-    CUID    :=Aging.Cells[Aging.ReturnColumn(TSnapshots.fCUID,          1, 1), Aging.Row];
-    CustName:=Aging.Cells[Aging.ReturnColumn(TSnapshots.fCUSTOMER_NAME, 1, 1), Aging.Row];
-    CoCode  :=Aging.Cells[Aging.ReturnColumn(TSnapshots.fCO_CODE,       1, 1), Aging.Row];
-    Branch  :=Aging.Cells[Aging.ReturnColumn(TSnapshots.fAGENT,         1, 1), Aging.Row];
-  finally
-    Aging.Free;
-  end;
-
-end;
-
-{ --------------------------------------------------------------------------------------------------------------------------------------------------- RELEASE }
-destructor TStatement.Destroy;
-begin
-  SL.Free;
-  inherited;
-end;
-
-{ ---------------------------------------------------------------------------------------------------------------------------- READ EMAIL DETAILS AND ADDRESS }
-function TStatement.GetData: boolean;
-var
-  DataBase: TDataTables;
-begin
-  { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-  Result  :=False;
-  MailFrom:='';
-  MailTo  :='';
-  DataBase:=TDataTables.Create(MainForm.FDbConnect);
-  try
-    { GET "EMAIL TO" FROM ADDRESSBOOK }
-    DataBase.CustFilter:=WHERE + TAddressBook.CUID + EQUAL + QuotedStr(CUID);
-    DataBase.OpenTable(TblAddressbook);
-    if DataBase.DataSet.RecordCount = 1 then MailTo:=DataBase.DataSet.Fields[TAddressBook.ESTATEMENTS].Value;
-    { GET "EMAIL FROM" AND "BANK ACCOUNT" FROM COMPANY TABLE }
-    DataBase.CustFilter:=WHERE +
-                           TCompany.CO_CODE +
-                         EQUAL +
-                           QuotedStr(CoCode) +
-                         _AND +
-                           TCompany.BRANCH +
-                         EQUAL +
-                           QuotedStr(Branch);
-    DataBase.OpenTable(TblCompany);
-    if DataBase.DataSet.RecordCount = 1 then
-    begin
-      MailFrom:=DataBase.DataSet.Fields[TCompany.SEND_NOTE_FROM].Value;
-      BankDetails:=DataBase.DataSet.Fields[TCompany.BANKDETAILS].Value;
-      LBUAddress:=DataBase.DataSet.Fields[TCompany.COADDRESS].Value;
-    end;
-    Result:=True;
-  finally
-    DataBase.Free;
-  end;
-end;
-
-{ ------------------------------------------------------------------------------------------------------------------------------------------------- MAKE HTML }
-procedure TStatement.BuildHTML;
-
-  (* COMMON VARIABLES *)
-
-  var
-    iCNT: integer;
-
-  (* NESTED METHOD *)
-
-  procedure OpenItemsToHtmlTable(var HtmlStatement: string; var SG: TStringGrid; ActualRow: Integer);
-  begin
-    HTMLTemp:=HTMLRow;
-    HTMLTemp:=StringReplace(HTMLTemp, '{INV_NUM}', SG.Cells[1,  ActualRow], [rfReplaceAll]);
-    HTMLTemp:=StringReplace(HTMLTemp, '{INV_DAT}', SG.Cells[10, ActualRow], [rfReplaceAll]);
-    HTMLTemp:=StringReplace(HTMLTemp, '{DUE_DAT}', SG.Cells[9,  ActualRow], [rfReplaceAll]);
-    HTMLTemp:=StringReplace(HTMLTemp, '{INV_CUR}', SG.Cells[8,  ActualRow], [rfReplaceAll]);
-    HTMLTemp:=StringReplace(HTMLTemp, '{INV_AMT}', SG.Cells[5,  ActualRow], [rfReplaceAll]);
-    HTMLTemp:=StringReplace(HTMLTemp, '{INV_OSA}', SG.Cells[4,  ActualRow], [rfReplaceAll]);
-    HtmlStatement:=HtmlStatement + HTMLTemp;
-  end;
-
-  (* MAIN BLOCK *)
-
-begin
-
-    { GET CUSTOMER POSITION IN OPEN ITEMS }
-    for iCNT:=1 to MainForm.sgOpenItems.RowCount - 1 do
-      if MainForm.sgOpenItems.Cells[37, iCNT] = CUID then
-        break;
-
-    { OPEN ITEMS TO HTML TABLE }
-    for iCNT:=1 to MainForm.sgOpenItems.RowCount - 1 do
-      if StrToFloatDef(MainForm.sgOpenItems.Cells[5, iCNT], 0) <> 0 then
-        OpenItemsToHtmlTable(HTMLStat, MainForm.sgOpenItems, iCNT);
-
-
-    { BUILD CUSTOMER ADDRESS FIELD }
-    CustAddr:='<p class="p"><b>' + CustName + '</b><br />' +#13#10;
-    if (MainForm.sgOpenItems.Cells[20, iCNT] <> '') and (MainForm.sgOpenItems.Cells[20, iCNT] <> ' ') then CustAddr:=CustAddr + MainForm.sgOpenItems.Cells[20, iCNT] + '<br />' +#13#10;
-    if (MainForm.sgOpenItems.Cells[21, iCNT] <> '') and (MainForm.sgOpenItems.Cells[21, iCNT] <> ' ') then CustAddr:=CustAddr + MainForm.sgOpenItems.Cells[21, iCNT] + '<br />' +#13#10;
-    if (MainForm.sgOpenItems.Cells[22, iCNT] <> '') and (MainForm.sgOpenItems.Cells[22, iCNT] <> ' ') then CustAddr:=CustAddr + MainForm.sgOpenItems.Cells[22, iCNT] + '<br />' +#13#10;
-    if (MainForm.sgOpenItems.Cells[23, iCNT] <> '') and (MainForm.sgOpenItems.Cells[23, iCNT] <> ' ') then CustAddr:=CustAddr + MainForm.sgOpenItems.Cells[23, iCNT] + '<br />' +#13#10;
-    if (MainForm.sgOpenItems.Cells[24, iCNT] <> '') and (MainForm.sgOpenItems.Cells[24, iCNT] <> ' ') then CustAddr:=CustAddr + MainForm.sgOpenItems.Cells[24, iCNT] + '<br />' +#13#10;
-    CustAddr:=CustAddr + '</p>' +#13#10;
-
-end;
-
-{ -------------------------------------------------------------------------------------------------------------------------------------------- SEND STATEMENT }
-function TStatement.SendStatement: boolean;
-var
-  iCNT: integer;
-begin
-  if GetData then
-  begin
-    BuildHTML;
-    HTMLTable:=StringReplace(HTMLTable, '{ROWS}',         HTMLStat,   [rfReplaceAll]);
-    MailBody :=StringReplace(SL.Text,   '{INVOICE_LIST}', HTMLTable,  [rfReplaceAll]);
-    MailBody :=StringReplace(MailBody,  '{ADDR_DATA}',    CustAddr,   [rfReplaceAll]);
-    MailBody :=StringReplace(MailBody,  '{BANKS}',        BankDetails,[rfReplaceAll]);
-    MailBody :=StringReplace(MailBody,  '{ADDR_LBU}',     LBUAddress, [rfReplaceAll]);
-    MailBody :=StringReplace(MailBody,  '{EMAIL}',        MailFrom,   [rfReplaceAll]);
-    MailBody :=StringReplace(MailBody,  '{TEL}',          Telephone,  [rfReplaceAll]);
-    XMailer    :=MailFrom;
-    MailCc     :=MailFrom;
-    MailBcc    :='';
-    MailRt     :='';
-    MailSubject:='Account Statement (' + CustName + ')';
-    Result:=SendNow;
-    //SL.Text:=MailBody;
-    //SL.SaveToFile('e:\test.html');
-  end;
-end;
-
 { ############################################################## ! MAILER CLASS ! ########################################################################### }
 
 { ---------------------------------------------------------------------------------------------------------------------------------- SEND USING CDOSYS | NTLM }
@@ -246,6 +102,7 @@ function TMailer.SendCDOSYS: boolean;
 var
   CdoMessage:   CDO_TLB.IMessage;
   Schema:       string;
+  AppSettings:  TSettings;
 begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   Result:=False;
@@ -261,13 +118,18 @@ begin
   CdoMessage.Subject :=MailSubject;
   CdoMessage.HTMLBody:=MailBody;
   { ----------------------------------------------------------------------------------------------------------------------------------------------- CONFIGURE }
-  Schema:='http://schemas.microsoft.com/cdo/configuration/';
-  CdoMessage.Configuration.Fields.item[Schema + 'sendusing'       ].Value:=2; (* SEND THE MESSAGE USING THE NETWORK *)
-  CdoMessage.Configuration.Fields.item[Schema + 'smtpserver'      ].Value:=TMIG.ReadString(MailerCDOSYS, 'SMTP', '');
-  CdoMessage.Configuration.Fields.item[Schema + 'smtpserverport'  ].Value:=TMIG.ReadString(MailerCDOSYS, 'PORT', '');
-  CdoMessage.Configuration.Fields.item[Schema + 'smtpauthenticate'].Value:=2; (* NTLM *)
-  CdoMessage.Configuration.Fields.item[Schema + 'NNTPAccountName' ].Value:=XMailer;
-  CdoMessage.Configuration.Fields.update;
+  AppSettings:=TSettings.Create;
+  try
+    Schema:='http://schemas.microsoft.com/cdo/configuration/';
+    CdoMessage.Configuration.Fields.item[Schema + 'sendusing'       ].Value:=2; (* SEND THE MESSAGE USING THE NETWORK *)
+    CdoMessage.Configuration.Fields.item[Schema + 'smtpserver'      ].Value:=AppSettings.TMIG.ReadString(MailerCDOSYS, 'SMTP', '');
+    CdoMessage.Configuration.Fields.item[Schema + 'smtpserverport'  ].Value:=AppSettings.TMIG.ReadString(MailerCDOSYS, 'PORT', '');
+    CdoMessage.Configuration.Fields.item[Schema + 'smtpauthenticate'].Value:=2; (* NTLM *)
+    CdoMessage.Configuration.Fields.item[Schema + 'NNTPAccountName' ].Value:=XMailer;
+    CdoMessage.Configuration.Fields.update;
+  finally
+    AppSettings.Free;
+  end;
   { ---------------------------------------------------------------------------------------------------------------------------------------------------- SEND }
   try
     CdoMessage.BodyPart.Charset:='utf-8';
@@ -288,6 +150,7 @@ var
   SendTo:       TStringList;
   SendCc:       TStringList;
   SendBc:       TStringList;
+  AppSettings:  TSettings;
   Delimiter:    char;
   iCNT:         integer;
 begin
@@ -300,6 +163,7 @@ begin
   MailContent:=TStringList.Create;
   Msg        :=TMimeMess.Create;
   Email      :=TSMTPSend.Create;
+  AppSettings:=TSettings.Create;
   try
     try
       { ------------------------------------------------------------------------------------------------------------------------ ADD PRE-PREPARED E-MAIL BODY }
@@ -341,18 +205,18 @@ begin
       Msg.AddPartHTML(MailContent, nil);
       Msg.EncodeMessage;
       { ------------------------------------------------------------------------------------------------------------------------ EMAIL CREDENTIALS AND SERVER }
-      Email.UserName  :=TMIG.ReadString(MailerSynapse, 'USERNAME', '');
-      Email.Password  :=TMIG.ReadString(MailerSynapse, 'PASSWORD', '');
-      Email.TargetHost:=TMIG.ReadString(MailerSynapse, 'SMTP', '');
-      Email.TargetPort:=TMIG.ReadString(MailerSynapse, 'PORT', '');
+      Email.UserName  :=AppSettings.TMIG.ReadString(MailerSynapse, 'USERNAME', '');
+      Email.Password  :=AppSettings.TMIG.ReadString(MailerSynapse, 'PASSWORD', '');
+      Email.TargetHost:=AppSettings.TMIG.ReadString(MailerSynapse, 'SMTP', '');
+      Email.TargetPort:=AppSettings.TMIG.ReadString(MailerSynapse, 'PORT', '');
       { ---------------------------------------------------------------------------------------------------------------------------------------- TLS OVER SSL }
-      if TMIG.ReadBool(MailerSynapse, 'TLS', False) = True then
+      if AppSettings.TMIG.ReadBool(MailerSynapse, 'TLS', False) = True then
       begin
         Email.AutoTLS:=True;
         Email.FullSSL:=False;
       end;
       { ---------------------------------------------------------------------------------------------------------------------------------------- SSL OVER TLS }
-      if TMIG.ReadBool(MailerSynapse, 'SSL', True) = True then
+      if AppSettings.TMIG.ReadBool(MailerSynapse, 'SSL', True) = True then
       begin
         Email.AutoTLS:=False;
         Email.FullSSL:=True;
@@ -385,6 +249,7 @@ begin
     end;
   finally
     { ------------------------------------------------------------------------------------------------------------------------------------------ UNINITIALIZE }
+    AppSettings.Free;
     MailContent.Free;
     Msg.Free;
     Email.Free;
@@ -396,12 +261,195 @@ end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------------------- SEND E-MAIL }
 function TMailer.SendNow: boolean;
+var
+  AppSettings: TSettings;
 begin
   Result:=False;
-  (* NTLM AUTHENTICATE ONLY *)
-  if TMIG.ReadString(MailerSetup, 'ACTIVE', '') = MailerCDOSYS then Result:=SendCDOSYS;
-  (* REQUIRE USERNAME AND PASSWORD, SSL/TLS *)
-  if TMIG.ReadString(MailerSetup, 'ACTIVE', '') = MailerSYNAPSE then Result:=SendSynapse;
+  AppSettings:=TSettings.Create;
+  try
+    (* NTLM AUTHENTICATE ONLY *)
+    if AppSettings.TMIG.ReadString(MailerSetup, 'ACTIVE', '') = MailerCDOSYS then Result:=SendCDOSYS;
+    (* REQUIRE USERNAME AND PASSWORD, SSL/TLS *)
+    if AppSettings.TMIG.ReadString(MailerSetup, 'ACTIVE', '') = MailerSYNAPSE then Result:=SendSynapse;
+  finally
+    AppSettings.Free;
+  end;
+end;
+
+{ ############################################################## ! DOCUMENT CLASS ! ######################################################################### }
+
+{ ----------------------------------------------------------------------------------------------------------------------------------- LOAD TEMPLATE FROM FILE }
+function TDocument.LoadTemplate(FileName: string): string;
+var
+  SL: TStringList;
+begin
+  { LOAD LAYOUT }
+  SL:=TStringList.Create;
+  try
+    SL.LoadFromFile(FileName);
+    Result:=SL.Text;
+  finally
+    SL.Free;
+  end;
+end;
+
+{ ------------------------------------------------------------------------------------------------------------------------- SAVE GENERATED EMAIL BODY TO FILE }
+procedure TDocument.SaveOutput(FileName: string);
+var
+  SL: TStringList;
+begin
+  SL:=TStringList.Create;
+  try
+    SL.Text:=MailBody;
+    SL.SaveToFile(FileName);
+  finally
+    SL.Free;
+  end;
+end;
+
+{ ---------------------------------------------------------------------------------------------------------------------------- READ EMAIL DETAILS AND ADDRESS }
+function TDocument.GetData: boolean;
+var
+  DataBase: TDataTables;
+begin
+  { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
+  MailFrom:='';
+  MailTo  :='';
+  DataBase:=TDataTables.Create(MainForm.FDbConnect);
+  try
+    { GET "EMAIL TO" FROM ADDRESSBOOK }
+    DataBase.CustFilter:=WHERE + TAddressBook.CUID + EQUAL + QuotedStr(CUID);
+    DataBase.OpenTable(TblAddressbook);
+    if DataBase.DataSet.RecordCount = 1 then MailTo:=DataBase.DataSet.Fields[TAddressBook.ESTATEMENTS].Value;
+    { GET "EMAIL FROM" AND "BANK ACCOUNT" FROM COMPANY TABLE }
+    DataBase.CustFilter:=WHERE +
+                           TCompany.CO_CODE +
+                         EQUAL +
+                           QuotedStr(CoCode) +
+                         _AND +
+                           TCompany.BRANCH +
+                         EQUAL +
+                           QuotedStr(Branch);
+    DataBase.OpenTable(TblCompany);
+    if DataBase.DataSet.RecordCount = 1 then
+    begin
+      MailFrom:=DataBase.DataSet.Fields[TCompany.SEND_NOTE_FROM].Value;
+      BankDetails:=DataBase.DataSet.Fields[TCompany.BANKDETAILS].Value;
+      LBUAddress:=DataBase.DataSet.Fields[TCompany.COADDRESS].Value;
+    end;
+    Result:=True;
+  finally
+    DataBase.Free;
+  end;
+end;
+
+{ ------------------------------------------------------------------------------------------------------------------------------------------------- MAKE HTML }
+procedure TDocument.BuildHTML;
+
+  (* COMMON VARIABLES *)
+
+  var
+    iCNT: integer;
+    Pos:  integer;
+
+  (* NESTED METHOD *)
+
+  procedure OpenItemsToHtmlTable(var HtmlStatement: string; var SG: TStringGrid; ActualRow: Integer);
+  begin
+    HTMLTemp:=HTMLRow;
+    HTMLTemp:=StringReplace(HTMLTemp, '{INV_NUM}', SG.Cells[10, ActualRow], [rfReplaceAll]);
+    HTMLTemp:=StringReplace(HTMLTemp, '{INV_DAT}', SG.Cells[26, ActualRow], [rfReplaceAll]);
+    HTMLTemp:=StringReplace(HTMLTemp, '{DUE_DAT}', SG.Cells[11, ActualRow], [rfReplaceAll]);
+    HTMLTemp:=StringReplace(HTMLTemp, '{INV_CUR}', SG.Cells[7,  ActualRow], [rfReplaceAll]);
+    HTMLTemp:=StringReplace(HTMLTemp, '{INV_AMT}', SG.Cells[9,  ActualRow], [rfReplaceAll]);
+    HTMLTemp:=StringReplace(HTMLTemp, '{INV_OSA}', SG.Cells[5,  ActualRow], [rfReplaceAll]);
+    HtmlStatement:=HtmlStatement + HTMLTemp;
+  end;
+
+  (* MAIN BLOCK *)
+
+begin
+
+    Pos:=0;
+
+    HTMLTable:=CommonHTMLTable;
+    HTMLRow  :=CommonHTMLRow;
+
+    { OPEN ITEMS TO HTML TABLE }
+    for iCNT:=1 to OpenItems.RowCount - 1 do
+    begin
+      if OpenItems.Cells[37, iCNT] = CUID then
+      begin
+        if Pos = 0 then Pos:=iCNT;
+
+        { STATEMENT CONDITIONS }
+        if DocType = dcStatement then
+        begin
+          if StrToFloatDef(OpenItems.Cells[5, iCNT], 0) <> 0 then
+            OpenItemsToHtmlTable(HTMLStat, OpenItems, iCNT);
+        end;
+
+        { REMINDER CONDITIONS }
+        if DocType = dcReminder then
+        begin
+
+           { NOTE: WE EXCLUDE INVOICES WITH 'CONTROL STATUS' THAT         }
+           {       IS DIFFERENT THAN GIVEN NUMBER IN THE COMPANY TABLE    }
+
+           if ( ( OpenItems.Cells[19, iCNT] <> REM_EX1) or
+                ( OpenItems.Cells[19, iCNT] <> REM_EX2) or
+                ( OpenItems.Cells[19, iCNT] <> REM_EX3) or
+                ( OpenItems.Cells[19, iCNT] <> REM_EX4) or
+                ( OpenItems.Cells[19, iCNT] <> REM_EX5)
+              )
+           and
+             (
+               StrToFloatDef(OpenItems.Cells[5, iCNT], 0) > 0
+             )
+           then
+             OpenItemsToHtmlTable(HTMLStat, OpenItems, iCNT);
+
+        end;
+
+      end;
+    end;
+
+    { BUILD CUSTOMER ADDRESS FIELD }
+    CustAddr:='<p class="p"><b>' + CustName + '</b><br />' + CRLF;
+    if (OpenItems.Cells[20, Pos] <> '') and (OpenItems.Cells[20, Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[20, Pos] + '<br />' + CRLF;
+    if (OpenItems.Cells[21, Pos] <> '') and (OpenItems.Cells[21, Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[21, Pos] + '<br />' + CRLF;
+    if (OpenItems.Cells[22, Pos] <> '') and (OpenItems.Cells[22, Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[22, Pos] + '<br />' + CRLF;
+    if (OpenItems.Cells[23, Pos] <> '') and (OpenItems.Cells[23, Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[23, Pos] + '<br />' + CRLF;
+    if (OpenItems.Cells[24, Pos] <> '') and (OpenItems.Cells[24, Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[24, Pos] + '<br />' + CRLF;
+    CustAddr:=CustAddr + '</p>' + CRLF;
+
+end;
+
+{ -------------------------------------------------------------------------------------------------------------------------------------------- SEND STATEMENT }
+function TDocument.SendDocument;
+begin
+  Result:=False;
+  if GetData then
+  begin
+    { BUILD HTML }
+    BuildHTML;
+    { PUT DATA INTO PLACEHOLDERS }
+    HTMLTable:=StringReplace(HTMLTable,  '{ROWS}',         HTMLStat,   [rfReplaceAll]);
+    MailBody :=StringReplace(HTMLLayout, '{INVOICE_LIST}', HTMLTable,  [rfReplaceAll]);
+    MailBody :=StringReplace(MailBody,   '{ADDR_DATA}',    CustAddr,   [rfReplaceAll]);
+    MailBody :=StringReplace(MailBody,   '{BANKS}',        BankDetails,[rfReplaceAll]);
+    MailBody :=StringReplace(MailBody,   '{ADDR_LBU}',     LBUAddress, [rfReplaceAll]);
+    MailBody :=StringReplace(MailBody,   '{EMAIL}',        MailFrom,   [rfReplaceAll]);
+    MailBody :=StringReplace(MailBody,   '{TEL}',          Telephone,  [rfReplaceAll]);
+    { ASSIGN AND SEND }
+    XMailer    :=MailFrom;
+    MailCc     :=MailFrom;
+    MailBcc    :='';
+    MailRt     :='';
+    //Result:=SendNow;
+    { DEBUG LINE }
+    SaveOutput('e:\test.html');
+  end;
 end;
 
 end.
