@@ -124,6 +124,7 @@ type
     destructor  Destroy; override;
     function    Read     : boolean;
     function    Write    : boolean;
+    function    Add      : boolean;
   end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------- EXPORT TO EXCEL }
@@ -601,6 +602,12 @@ begin
     FGrid.Freeze(False);
     DataTables.Free;
   end;
+end;
+
+{ ---------------------------------------------------------------------------------------------------------------------- ADD SELECTED ITEM(S) TO ADDRESS BOOK }
+function TTAddressBook.Add: boolean;
+begin
+  Result:=False;
 end;
 
 { ############################################################## ! EXPORT TO EXCEL ! ######################################################################## }

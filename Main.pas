@@ -426,6 +426,14 @@ type                                                            (* GUI | MAIN TH
     Action_Update: TMenuItem;
     Action_Report: TMenuItem;
     N17: TMenuItem;
+    OpenPopup: TPopupMenu;
+    Action_AutoColumn: TMenuItem;
+    Action_ExportTransactions: TMenuItem;
+    Action_SelectAll: TMenuItem;
+    N18: TMenuItem;
+    Action_CopyToCB: TMenuItem;
+    N19: TMenuItem;
+    Action_ColumnWidth: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -586,9 +594,12 @@ type                                                            (* GUI | MAIN TH
     procedure btnLoadAgeViewClick(Sender: TObject);
     procedure Action_RowHighlightClick(Sender: TObject);
     procedure Action_ReportClick(Sender: TObject);
-
+    procedure Action_ExportTransactionsClick(Sender: TObject);
+    procedure Action_SelectAllClick(Sender: TObject);
+    procedure Action_CopyToCBClick(Sender: TObject);
+    procedure Action_AutoColumnClick(Sender: TObject);
+    procedure Action_ColumnWidthClick(Sender: TObject);
     { ------------------------------------------------------------- ! HELPERS ! ----------------------------------------------------------------------------- }
-
   private
     var PAllowClose         :  boolean;
     var PStartTime          :  TTime;
@@ -605,12 +616,10 @@ type                                                            (* GUI | MAIN TH
     var AgeDateSel          :  string;
     var OSAmount            :  double;
     var SGImage             :  TImage;
-
     { PROPERTIES }
     property   AccessLevel    : string  read PAccessLevel     write PAccessLevel;
     property   AccessMode     : string  read PAccessMode      write PAccessMode;
     property   OpenItemsUpdate: string  read POpenItemsUpdate write POpenItemsUpdate;
-
     { HELPER METHODS }
     procedure  DebugMsg(const Msg: String);
     procedure  ExecMessage(IsPostType: boolean; WM_CONST: integer; YOUR_INT: integer; YOUR_TEXT: string);
@@ -622,12 +631,10 @@ type                                                            (* GUI | MAIN TH
     function   ConvertName(CoNumber: string; Prefix: string; mode: integer): string;
     procedure  SwitchTimers(state: integer);
     procedure  LoadImageFromStream(Image: TImage; const FileName: string);
-
+    function   CDate(StrDate: string): TDate;
   protected
-
     { WINDOWS MESSAGES }
     procedure  WndProc(var msg: Messages.TMessage); override;
-
   end;
 
 { ---------------------------------------------------------- ! POINTERS TO DLL IMPORTS ! -------------------------------------------------------------------- }
@@ -663,7 +670,7 @@ var
 implementation
 
 uses
-  Filter, Tracker, Invoices, Actions, Calendar, About, Search, Worker, Model, SQL, Settings, Database, UAC, AgeView, Transactions, Mailer;
+  Filter, Tracker, Invoices, Actions, Calendar, About, Search, Worker, Model, Settings, Database, UAC, AgeView, Transactions, ReportBug;
 
 {$R *.dfm}
 
@@ -1713,6 +1720,12 @@ begin
   end;
 end;
 
+{ ------------------------------------------------------------------------------------------------------------------------ CONVERT STRING DATE TO DATE FORMAT }
+function TMainForm.CDate(StrDate: string): TDate;
+begin
+    Result:=StrToDateDef(StrDate, 0);
+end;
+
 { ################################################################## ! EVENTS ! ############################################################################# }
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------- ON CREATE }
@@ -2144,6 +2157,38 @@ end;
 
 { ---------------------------------------------------------------- ! POPUP MENUS ! -------------------------------------------------------------------------- }
 
+{ --------------------------------------------------------------- ! OPEN ITEMS MENU ! ----------------------------------------------------------------------- }
+
+{ --------------------------------------------------------------------------------------------------------------------------------- EXPORT ENTIRE GRID TO CSV }
+procedure TMainForm.Action_ExportTransactionsClick(Sender: TObject);
+begin
+  sgOpenItems.ExportCSV(CSVExport, '|');
+end;
+
+{ ------------------------------------------------------------------------------------------------------------------------------------------------ SELECT ALL }
+procedure TMainForm.Action_SelectAllClick(Sender: TObject);
+var
+  GridRect: TGridRect;
+begin
+  GridRect.Left  :=1;
+  GridRect.Top   :=1;
+  GridRect.Right :=sgOpenItems.ColCount;
+  GridRect.Bottom:=sgOpenItems.RowCount;
+  sgOpenItems.Selection:=GridRect;
+end;
+
+{ ----------------------------------------------------------------------------------------------------------------------------------------- COPY TO CLIPBOARD }
+procedure TMainForm.Action_CopyToCBClick(Sender: TObject);
+begin
+  sgOpenItems.CopyCutPaste(adCopy);
+end;
+
+{ ------------------------------------------------------------------------------------------------------------------------------------------ SET COLUMN WIDTH }
+procedure TMainForm.Action_AutoColumnClick(Sender: TObject);
+begin
+  sgOpenItems.SetColWidth(10, 20);
+end;
+
 { ------------------------------------------------------------- ! ADDRESS BOOK MENU ! ----------------------------------------------------------------------- }
 
 { --------------------------------------------------------------------------------------------------------------------------------- ADDRESS BOOK CONTEXT MENU }
@@ -2237,6 +2282,12 @@ begin
   TTAddressBook.Create(adOpenForUser, sgAddressBook);
 end;
 
+{ ------------------------------------------------------------------------------------------------------------------------------------------ SET COLUMN WIDTH }
+procedure TMainForm.Action_ColumnWidthClick(Sender: TObject);
+begin
+  sgAddressBook.SetColWidth(40, 10);
+end;
+
 { -------------------------------------------------------------- ! MAIN FORM MENU ! ------------------------------------------------------------------------- }
 
 { ----------------------------------------------------------------------------------------------------------------------------------------------- SHOW WINDOW }
@@ -2271,7 +2322,7 @@ end;
 { ---------------------------------------------------------------------------------------------------------------------------------------------- REPORT A BUG }
 procedure TMainForm.Action_ReportClick(Sender: TObject);
 begin
-  //
+  WndCall(ReportForm, stModal);
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------------ HELP }
@@ -2333,8 +2384,6 @@ var
 begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   Screen.Cursor:=crHourGlass;
-  TTAddressBook.Create(adOpenAll, sgAddressBook);
-  Sleep(500);
   Row:=sgAgeView.Selection.Top;
   if sgAddressBook.Cells[0, 1] = '' then OffSet:=-1 else OffSet:=0;
   { ----------------------------------------------------------------------------------------------------------------------- GO ONE BY ONE AND LOOK FOR 'CUID' }
@@ -2342,20 +2391,19 @@ begin
   begin
     for jCNT:=1 to sgOpenItems.RowCount - 1 do
       { ------------------------------------------------------------------------------------------------------------------- ADD DATA TO ADDRESS BOOK IF FOUND }
-      if (sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUID, 1, 1), iCNT] = sgOpenItems.Cells[38, jCNT]) and (sgAgeView.RowHeights[Row] <> - 1) then
+      if (sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUID, 1, 1), iCNT] = sgOpenItems.Cells[37, jCNT]) and (sgAgeView.RowHeights[Row] <> - 1) then
       begin
         sgAddressBook.RowCount:=sgAddressBook.RowCount + 1;
         { ----------------------------------------------------------------------------------------------------------------------------------------- MOVE DATA }
         sgAddressBook.Cells[0, sgAddressBook.RowCount - 1 + OffSet]:='';
         sgAddressBook.Cells[1, sgAddressBook.RowCount - 1 + OffSet]:=MainForm.FUserName;
-        sgAddressBook.Cells[2, sgAddressBook.RowCount - 1 + OffSet]:=sgOpenItems.Cells[38, jCNT];
+        sgAddressBook.Cells[2, sgAddressBook.RowCount - 1 + OffSet]:=sgOpenItems.Cells[37, jCNT];
         sgAddressBook.Cells[3, sgAddressBook.RowCount - 1 + OffSet]:=sgOpenItems.Cells[2,  jCNT];
-        sgAddressBook.Cells[4, sgAddressBook.RowCount - 1 + OffSet]:=sgOpenItems.Cells[7,  jCNT];
-        sgAddressBook.Cells[9, sgAddressBook.RowCount - 1 + OffSet]:=sgOpenItems.Cells[22, jCNT] + SPACE +
+        sgAddressBook.Cells[4, sgAddressBook.RowCount - 1 + OffSet]:=sgOpenItems.Cells[6,  jCNT];
+        sgAddressBook.Cells[9, sgAddressBook.RowCount - 1 + OffSet]:=sgOpenItems.Cells[21, jCNT] + SPACE +
+                                                                     sgOpenItems.Cells[22, jCNT] + SPACE +
                                                                      sgOpenItems.Cells[23, jCNT] + SPACE +
-                                                                     sgOpenItems.Cells[24, jCNT] + SPACE +
-                                                                     sgOpenItems.Cells[25, jCNT] + SPACE +
-                                                                     sgOpenItems.Cells[26, jCNT];
+                                                                     sgOpenItems.Cells[24, jCNT];
         { ---------------------------------------------------------------------------------------------------------------------------------------- EMPTY ROWS }
         for cCNT:=5 to 8 do sgAddressBook.Cells[cCNT, sgAddressBook.RowCount - 1]:='';
         { ---------------------------------------------------------------------------------------------------------------------------------------------- QUIT }
@@ -2710,7 +2758,6 @@ var
   Col14:       integer;
   iCNT:        integer;
   Width:       integer;
-  GetDate:     string;
   AgeViewCUID: string;
 begin
 
@@ -2740,12 +2787,32 @@ begin
   Col14:=sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1);
 
   { HIGHLIGHT FOLLOW UP COLUMN }
-  GetDate:=sgAgeView.Cells[Col12, ARow];
-  if (ACol = Col12) and (sgAgeView.Cells[ACol, ARow] = StatBar_TXT3.Caption) then
+  if not (CDate(sgAgeView.Cells[ACol, ARow]) = 0) then
   begin
-    sgAgeView.Canvas.Brush.Color:=TODAYCLR;
-    sgAgeView.Canvas.FillRect(Rect);
-    sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
+    { FUTURE DAYS }
+    if (ACol = Col12) and (CDate(sgAgeView.Cells[ACol, ARow]) > CDate(StatBar_TXT3.Caption)) then
+    begin
+      sgAgeView.Canvas.Brush.Color:=clFutureDay;
+      sgAgeView.Canvas.Font.Color :=clWhite;
+      sgAgeView.Canvas.FillRect(Rect);
+      sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
+    end;
+    { TODAY }
+    if (ACol = Col12) and (CDate(sgAgeView.Cells[ACol, ARow]) = CDate(StatBar_TXT3.Caption)) then
+    begin
+      sgAgeView.Canvas.Brush.Color:=clToday;
+      sgAgeView.Canvas.Font.Color :=clBlack;
+      sgAgeView.Canvas.FillRect(Rect);
+      sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
+    end;
+    { PAST DAYS }
+    if (ACol = Col12) and (CDate(sgAgeView.Cells[ACol, ARow]) < CDate(StatBar_TXT3.Caption)) then
+    begin
+      sgAgeView.Canvas.Brush.Color:=clPastDay;
+      sgAgeView.Canvas.Font.Color :=clWhite;
+      sgAgeView.Canvas.FillRect(Rect);
+      sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
+    end;
   end;
 
   { MARK CUSTOMER WITH STAR IF IT IS REGISTERED ON INVOICE TRACKER LIST }

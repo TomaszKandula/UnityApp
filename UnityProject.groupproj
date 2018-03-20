@@ -9,9 +9,6 @@
 			<Projects Include="Unitylib.dproj">
 				<Dependencies/>
 			</Projects>
-			<Projects Include="UnityCmd.dproj">
-				<Dependencies/>
-			</Projects>
 		</ItemGroup>
 		<ProjectExtensions>
 			<Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -38,23 +35,14 @@
 		<Target Name="Unitylib:Make">
 			<MSBuild Projects="Unitylib.dproj" Targets="Make"/>
 		</Target>
-		<Target Name="UnityCmd">
-			<MSBuild Projects="UnityCmd.dproj"/>
-		</Target>
-		<Target Name="UnityCmd:Clean">
-			<MSBuild Projects="UnityCmd.dproj" Targets="Clean"/>
-		</Target>
-		<Target Name="UnityCmd:Make">
-			<MSBuild Projects="UnityCmd.dproj" Targets="Make"/>
-		</Target>
 		<Target Name="Build">
-			<CallTarget Targets="Unity;Unitylib;UnityCmd"/>
+			<CallTarget Targets="Unity;Unitylib"/>
 		</Target>
 		<Target Name="Clean">
-			<CallTarget Targets="Unity:Clean;Unitylib:Clean;UnityCmd:Clean"/>
+			<CallTarget Targets="Unity:Clean;Unitylib:Clean"/>
 		</Target>
 		<Target Name="Make">
-			<CallTarget Targets="Unity:Make;Unitylib:Make;UnityCmd:Make"/>
+			<CallTarget Targets="Unity:Make;Unitylib:Make"/>
 		</Target>
 		<Import Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')" Project="$(BDS)\Bin\CodeGear.Group.Targets"/>
 	</Project>

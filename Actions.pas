@@ -58,7 +58,7 @@ type
     GeneralPanel: TPanel;
     GeneralTitle: TLabel;
     btnFeedback: TSpeedButton;
-    btnSendEmail: TSpeedButton;
+    btnClearFollowUp: TSpeedButton;
     procedure FormCreate(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure OpenItemsGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
@@ -80,13 +80,13 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure DailyComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure GeneralComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure btnSendEmailClick(Sender: TObject);
     procedure btnFeedbackClick(Sender: TObject);
     procedure Cust_NameClick(Sender: TObject);
     procedure Cust_NumberClick(Sender: TObject);
     procedure Cust_PersonClick(Sender: TObject);
     procedure Cust_MailClick(Sender: TObject);
     procedure Cust_PhoneClick(Sender: TObject);
+    procedure btnClearFollowUpClick(Sender: TObject);
   private
     pCUID       :  string;
     pCustName   :  string;
@@ -112,7 +112,7 @@ var
 implementation
 
 uses
-  Model, SQL, Worker, Calendar, Settings, Mailer, Transactions;
+  Model, Worker, Calendar, Settings, Mailer, Transactions;
 
 {$R *.dfm}
 
@@ -166,17 +166,17 @@ var
 begin
 
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
+  Screen.Cursor:=crHourGlass;
   OpenItemsDest.Freeze(True);
   HistoryDest.Freeze(True);
   OpenItemsDest.ClearAll(2, 1, 1, False);
   HistoryDest.ClearAll(2, 1, 1, False);
-  Screen.Cursor:=crHourGlass;
   zCNT:=1;
   try
     { --------------------------------------------------------- ! LIST OF OPEN ITEMS ! ---------------------------------------------------------------------- }
 
     { ----------------------------------------------------------------------------------------------------------------------- LOAD OPEN ITEMS FROM "MAINFORM" }
-    if OpenItemsSrc.RowCount > 2 then
+    if OpenItemsSrc.RowCount > 0 then
     begin
       { LOOK FOR THE SAME "CUID" }
       for iCNT:=1 to OpenItemsSrc.RowCount - 1 do
@@ -235,12 +235,12 @@ begin
 
   { -------------------------------------------------------------------------------------------------------------------------------------------- UNINITIALIZE }
   finally
-    OpenItemsDest.Freeze(False);
-    HistoryDest.Freeze(False);
     OpenItemsDest.AutoThumbSize;
     HistoryDest.AutoThumbSize;
     OpenItemsDest.SetColWidth(10, 20);
     HistoryDest.SetColWidth(10, 20);
+    OpenItemsDest.Freeze(False);
+    HistoryDest.Freeze(False);
     Screen.Cursor:=crDefault;
   end;
 end;
@@ -393,8 +393,8 @@ begin
   { DRAW SELECTED | SKIP HEADERS }
   OpenItemsGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
 
-  { ONLY FOR COLUMNS 2..5 }
-  if ( (ACol >= 3) and (ACol <= 8) and (ARow > 0) ) then OpenItemsGrid.ColorValues(ARow, ACol, Rect, clRed, clBlack);
+  { ONLY FOR COLUMNS 2..5 AND 12 }
+  if ( (ACol >= 3) and (ACol <= 8) and (ACol = 12) and (ARow > 0) ) then OpenItemsGrid.ColorValues(ARow, ACol, Rect, clRed, clBlack);
 
 end;
 
@@ -750,10 +750,21 @@ begin
   MainForm.WndCall(CalendarForm, 0);
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------------------ SEND EMAIL }
-procedure TActionsForm.btnSendEmailClick(Sender: TObject);
+{ ------------------------------------------------------------------------------------------------------------------------------------- REMOVE FOLLOW UP DATE }
+procedure TActionsForm.btnClearFollowUpClick(Sender: TObject);
+var
+  GeneralText: TDataTables;
+  Condition:   string;
 begin
-  { CODE HERE }
+  GeneralText:=TDataTables.Create(MainForm.FDbConnect);
+  try
+    Condition:=TGeneral.CUID + EQUAL + QuotedStr(CUID);
+    GeneralText.Columns.Add(TGeneral.FOLLOWUP); GeneralText.Values.Add(SPACE); GeneralText.Conditions.Add(Condition);
+    GeneralText.UpdateRecord(TblGeneral);
+    MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fFOLLOWUP, 1, 1), MainForm.sgAgeView.Row]:='';
+  finally
+    GeneralText.Free;
+  end;
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------- CALL CUSTOMER }

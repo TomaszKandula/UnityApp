@@ -54,9 +54,7 @@ type
     procedure btnOKClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormActivate(Sender: TObject);
-
     { ------------------------------------------------------------- ! HELPERS ! ----------------------------------------------------------------------------- }
-
   private
     var pTrackerGrid  :  TStringGrid;
     var pAgeGrid      :  TStringGrid;
@@ -71,19 +69,15 @@ type
     var Indv_Rem2 :  string;
     var Indv_Rem3 :  string;
     var Indv_Rem4 :  string;
-
     { PROPERTIES }
     property TrackerGrid :  TStringGrid read pTrackerGrid;
     property AgeGrid     :  TStringGrid read pAgeGrid;
-
     { HELPER METHODS FOR DEALING WITH INVOICE TRACKER ITEMS }
     procedure Show;
     procedure Add;
     procedure Delete;
-
     { DISPLAY ALL THE NECESSARY DATA }
     procedure GetData;
-
   end;
 
 var

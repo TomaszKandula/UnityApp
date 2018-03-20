@@ -3404,7 +3404,7 @@ object MainForm: TMainForm
         DrawingStyle = gdsGradient
         RowCount = 2
         GradientEndColor = 15527148
-        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goDrawFocusSelected, goColSizing, goThumbTracking]
+        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
         ParentShowHint = False
         ShowHint = False
         TabOrder = 0
@@ -5836,8 +5836,8 @@ object MainForm: TMainForm
   end
   object PopupMenu: TPopupMenu
     MenuAnimation = [maTopToBottom]
-    Left = 304
-    Top = 394
+    Left = 64
+    Top = 458
     object Action_ShowApp: TMenuItem
       Caption = 'Show'
       Default = True
@@ -6041,8 +6041,8 @@ object MainForm: TMainForm
   object AgeViewPopup: TPopupMenu
     MenuAnimation = [maLeftToRight]
     OnPopup = AgeViewPopupPopup
-    Left = 384
-    Top = 392
+    Left = 144
+    Top = 456
     object Action_LyncCall: TMenuItem
       Bitmap.Data = {
         36030000424D3603000000000000360000002800000010000000100000000100
@@ -6187,8 +6187,8 @@ object MainForm: TMainForm
   end
   object TrackerPopup: TPopupMenu
     MenuAnimation = [maLeftToRight]
-    Left = 464
-    Top = 392
+    Left = 224
+    Top = 456
     object Action_ShowRegistered: TMenuItem
       Bitmap.Data = {
         36030000424D3603000000000000360000002800000010000000100000000100
@@ -7407,8 +7407,8 @@ object MainForm: TMainForm
     PopupMenu = PopupMenu
     Visible = True
     OnDblClick = TrayIconDblClick
-    Left = 600
-    Top = 392
+    Left = 64
+    Top = 528
   end
   object InvoiceScanTimer: TTimer
     Enabled = False
@@ -7440,8 +7440,8 @@ object MainForm: TMainForm
   end
   object BookPopup: TPopupMenu
     OnPopup = BookPopupPopup
-    Left = 536
-    Top = 392
+    Left = 296
+    Top = 456
     object Action_Cut: TMenuItem
       Bitmap.Data = {
         36030000424D3603000000000000360000002800000010000000100000000100
@@ -7569,11 +7569,68 @@ object MainForm: TMainForm
       Caption = 'Show entries'
       OnClick = Action_ShowMyEntriesClick
     end
+    object N19: TMenuItem
+      Caption = '-'
+    end
+    object Action_ColumnWidth: TMenuItem
+      Caption = 'Auto column width'
+      OnClick = Action_ColumnWidthClick
+    end
   end
   object XLExport: TSaveDialog
     DefaultExt = '*.xlsx'
     Filter = 'XLSX (Microsoft Excel)|*.xlsx'
     Left = 216
     Top = 392
+  end
+  object OpenPopup: TPopupMenu
+    Left = 360
+    Top = 456
+    object Action_ExportTransactions: TMenuItem
+      Caption = 'Export to CSV'
+      OnClick = Action_ExportTransactionsClick
+    end
+    object Action_SelectAll: TMenuItem
+      Caption = 'Select All'
+      OnClick = Action_SelectAllClick
+    end
+    object Action_CopyToCB: TMenuItem
+      Bitmap.Data = {
+        36030000424D3603000000000000360000002800000010000000100000000100
+        18000000000000030000C40E0000C40E00000000000000000000FFFFFFD4D3D0
+        86817A918D86FFFFFFD4D3D086817AA8A49EA6A29CA6A29CA6A29CA6A29CA8A4
+        9E86817AD4D3D0FFFFFFFFFFFFC9C7C3D1CFCBFFFFFFFFFFFFCDCBC7E0DEDC9B
+        9690A09C96A09C96A09C96A09C969B9690E0DEDCCDCBC7FFFFFFFFFFFFF0EFEE
+        F0EFEEFFFFFFFFFFFFCDCBC7D3D1CDD8D6D4D8D6D4D8D6D4D8D6D4D8D6D4D8D6
+        D4D3D1CDCDCBC7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFD1CED2D3D1D0D8
+        D6D4D8D6D4D8D6D4D8D6D4D8D6D4D8D6D4D3D1CDCDCBC7FFFFFFFFFFFFF6F2D0
+        DCD45ED7D875D6E085A4AA5FD5D1C59B9793A09C96A09C96A09C96A09C969B96
+        90D8D6D4CDCBC7FFFFFFFFFFFFF7F4D6E0D96FDBDC85DBE493A8AE6AD6D2C79B
+        9793A09C96A09C96A09C96A09C969B9690D8D6D4CDCBC7FFFFFFFFFFFFF7F4D6
+        E0D96FDBDC85DBE493A8AE6AD1CCC1D8D7D6D8D6D4D8D6D4D8D6D4D8D6D4D8D6
+        D4D3D1CDCDCBC7FFFFFFFFFFFFF7F4D6E0D96FDBDC85DBE493A8AE6AD1CCC1D8
+        D7D6D8D6D4D8D6D4D8D6D4D8D6D4D8D6D4D3D1CDCDCBC7FFFFFFFFFFFFF7F4D6
+        E0D96FDBDC85DBE493A8AE6AD6D2C798938E9D989299948E99948E99948E9B96
+        90E0DEDCCDCAC7FFFFFFFFFFFFF7F4D6E0D96FDBDC85DBE493A8AE6AD2CEC3BE
+        BBB9BCB9B5E9E8E6E5E4E2F2F1F0A09C96837E76D3D1CEFFFFFFFFFFFFF7F4D6
+        E0D96FDBDC85DBE493A8AE6AD3CFC6FFFFFFFFFFFFFFFFFFFFFFFFD8D6D3A39E
+        999D9993FFFFFFFFFFFFFFFFFFF7F4D6E0D96FDBDC85DBE493ACB170746A4987
+        846B81826D7C82718B8B837F797199958EFFFFFFFFFFFFFFFFFFFFFFFFF7F4D6
+        E0D96FDBDC85D7DF8FD6E59DD3ECACCCEBB3C7EDBEBBECC5F3FFFAFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFFFFFFF7F4D6E0D96FDBDC85D7DF8FD2E098CBE1A4C7
+        E1AEC3E6BFB4E4C5E8F7EEFFFFFFFFFFFFF0EFEEF0EFEEFFFFFFFFFFFFF7F4D6
+        E0D96FDBDC85D7DF8FD2E098CBE1A4C7E4B5B5CB67BBCA5DFFFFFFFFFFFFFFFF
+        FFD1CFCBC9C7C3FFFFFFFFFFFFF7F4D6E0D96FDBDC85D7DF8FD2E098CBE1A4C5
+        E2B1C7DB95FFFFFFFFFFFFFFFFFF918D8686817AD4D3D0FFFFFF}
+      Caption = 'Copy to Clipboard'
+      OnClick = Action_CopyToCBClick
+    end
+    object N18: TMenuItem
+      Caption = '-'
+    end
+    object Action_AutoColumn: TMenuItem
+      Caption = 'Auto column width'
+      OnClick = Action_AutoColumnClick
+    end
   end
 end

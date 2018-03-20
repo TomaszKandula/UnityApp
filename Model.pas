@@ -537,7 +537,7 @@ begin
   Result:=False;
   if (TableName = '') and (ID = 0) then Exit;
   try
-    StrSQL:=DELETE_FROM + TableName + WHERE + KeyName + EQUAL + IntToStr(ID);
+    StrSQL:=DELETE_FROM + TableName + WHERE + KeyName + EQUAL + QuotedStr(IntToStr(ID));
     ExecSQL;
     Result:=True;
   except

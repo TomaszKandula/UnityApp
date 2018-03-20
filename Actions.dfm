@@ -34,8 +34,6 @@ object ActionsForm: TActionsForm
     Panels = <>
     SimplePanel = True
     SizeGrip = False
-    ExplicitTop = 610
-    ExplicitWidth = 930
   end
   object PanelMiddle: TPanel
     Left = 0
@@ -200,23 +198,14 @@ object ActionsForm: TActionsForm
         Caption = 'Feedback'
         OnClick = btnFeedbackClick
       end
-      object btnSendEmail: TSpeedButton
-        AlignWithMargins = True
-        Left = 558
+      object btnClearFollowUp: TSpeedButton
+        Left = 275
         Top = 7
         Width = 110
         Height = 25
         Cursor = crHandPoint
-        Margins.Left = 0
-        Margins.Top = 0
-        Margins.Right = 0
-        Margins.Bottom = 0
-        Align = alCustom
-        Anchors = [akRight]
-        Caption = 'Send Custom E-mail'
-        Enabled = False
-        OnClick = btnSendEmailClick
-        ExplicitLeft = 548
+        Caption = 'Clear Follow Up'
+        OnClick = btnClearFollowUpClick
       end
     end
     object HistoryPanel: TPanel

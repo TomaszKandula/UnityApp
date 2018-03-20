@@ -65,9 +65,11 @@ const
 
   { FIX COLORS }
 
-  SELCOLOR            = $00FFDBB7;
-  FONCOLOR            = $006433C9;
-  TODAYCLR            = $00E5FCB3;
+  SELCOLOR      = $00FFDBB7;
+  FONCOLOR      = $006433C9;
+  clToday       = $DCF8FF; //$00A5FF;       // $DCF8FF
+  clPastDay     = $7280FA; //$2222B2;       // $7280FA
+  clFutureDay   = $AACD66; //$228B22;       // $AACD66
 
   { SETTINGS FILE ID }
 

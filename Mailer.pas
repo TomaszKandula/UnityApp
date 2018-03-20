@@ -446,9 +446,9 @@ begin
     MailCc     :=MailFrom;
     MailBcc    :='';
     MailRt     :='';
-    //Result:=SendNow;
+    Result:=SendNow;
     { DEBUG LINE }
-    SaveOutput('e:\test.html');
+    { SaveOutput('e:\test.html'); }
   end;
 end;
 

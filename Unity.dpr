@@ -42,7 +42,8 @@ uses
   UAC in 'UAC.pas',
   Mailer in 'Mailer.pas',
   AgeView in 'AgeView.pas',
-  Transactions in 'Transactions.pas';
+  Transactions in 'Transactions.pas',
+  ReportBug in 'ReportBug.pas';
 
 type
   DWord = 0..$FFFFFFFF;
@@ -201,6 +202,8 @@ begin
   // 8.   - free update screen
   // 9.   - run new Unity.exe (should have different mutex!)
   // 10.  - exit process(0)
+
+
 
   { ------------------------------------------------------------------------------------------------------------------------------------- SPLASH SCREEN START }
   SplashForm:=TSplashForm.Create(nil);
@@ -451,6 +454,7 @@ begin
   { OTHER WINFORMS }
   Status(14, AllTasks, 400, 'Application initialization... WinForms loading, please wait.', False);
   Application.CreateForm(TAboutForm,    AboutForm);    LogText(AppSettings.FPathEventLog, '[GUI] ''AboutForm'' ......... has been created.');
+  Application.CreateForm(TReportForm,   ReportForm);   LogText(AppSettings.FPathEventLog, '[GUI] ''ReportForm'' ........ has been created.');
   Application.CreateForm(TSearchForm,   SearchForm);   LogText(AppSettings.FPathEventLog, '[GUI] ''SearchForm'' ........ has been created.');
   Application.CreateForm(TFilterForm,   FilterForm);   LogText(AppSettings.FPathEventLog, '[GUI] ''FilterForm'' ........ has been created.');
   Application.CreateForm(TTrackerForm,  TrackerForm);  LogText(AppSettings.FPathEventLog, '[GUI] ''TrackerForm'' ....... has been created.');
