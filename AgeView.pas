@@ -284,7 +284,7 @@ begin
   end;
 end;
 
-{ QUICK SORT }
+{ ------------------------------------------------------------------------------------------------------------------------------------------------ QUICK SORT }
 procedure TAgeView.QuickSortExt(var A: array of double; var L: array of integer; iLo, iHi: integer; ASC: boolean);
 { "A" VARIABLE HOLDS NUMERICAL DATA TO BE SORTED. "L" VARIABLE IS "ASSOCIATED" COLUMN WITH ORIGINAL LIST POSITION. THE SECOND ASSOCIATED COLUMN FOLLOWS }
 { "A" COLUMN, BUT IT IS NOT SORTED. IT ALLOWS TO ASSIGN SORTED VALUES BACK TO ORIGINAL LIST POSITION AFTER COMPUTATION IS DONE. THIS IS TO BE USED WHEN }
@@ -575,10 +575,15 @@ begin
       if MainForm.sgOpenItems.Cells[37, iCNT] = ArrAgeView[exRow, 29] then
       begin
         { SUM ITEMS: NOT DUE, RANGE1..6 }
-        ArrAgeView[exRow, bucket(StrToInt(MainForm.sgOpenItems.Cells[33, iCNT]), bias)]:=FloatToStr(
-                                                                           StrToFloat(ArrAgeView[exRow, bucket(StrToInt(MainForm.sgOpenItems.Cells[33, iCNT]), bias)]) +
-                                                                           StrToFloat(MainForm.sgOpenItems.Cells[5, iCNT])
-                                                                           );
+        ArrAgeView[exRow,
+                    bucket(
+                            StrToInt(MainForm.sgOpenItems.Cells[33, iCNT]),
+                            bias
+                          )
+                  ]:=FloatToStr(
+                                 StrToFloat(ArrAgeView[exRow, bucket(StrToInt(MainForm.sgOpenItems.Cells[33, iCNT]), bias)]) +
+                                 StrToFloat(MainForm.sgOpenItems.Cells[5, iCNT])
+                               );
         { SUM ITEMS: DISCOUNTED AMOUNT [34] | TECHNICAL VARIABLE }
         DiscAmnt:=DiscAmnt + StrToFloat(MainForm.sgOpenItems.Cells[34, iCNT]);
       end;
@@ -595,9 +600,9 @@ begin
                         );
     { TOTAL OVERDUE [13] = TOTAL AMOUNT [14] - NOT DUE [6] }
     ArrAgeView[exRow, 13]:=FloatToStr(
-                        StrToFloat(ArrAgeView[exRow, 14]) -
-                        StrToFloat(ArrAgeView[exRow,  6])
-                        );
+                                       StrToFloat(ArrAgeView[exRow, 14]) -
+                                       StrToFloat(ArrAgeView[exRow,  6])
+                                     );
     { EXCEEDED AMOUNT [16] = CREDIT LIMIT [15] - TOTAL AMOUNT [14] }
     ArrAgeView[exRow, 16]:=FloatToStr(StrToFloat(ArrAgeView[exRow, 15]) - StrToFloat(ArrAgeView[exRow, 14]));
     { WALLET SHARE [28] | TECHNICAL COLUMN }
@@ -698,7 +703,7 @@ begin
   { EXECUTE }
   StrSQL:=Transaction;
   try
-    MainForm.ExecMessage(False, WM_GETINFO, 10, stSQLupdate);
+    MainForm.ExecMessage(False, 10, stSQLupdate);
     ExecSQL;
   except
     on E: Exception do

@@ -3,9 +3,11 @@ object InvoicesForm: TInvoicesForm
   Top = 0
   BorderIcons = [biSystemMenu]
   Caption = 'Unity'
-  ClientHeight = 281
-  ClientWidth = 564
+  ClientHeight = 448
+  ClientWidth = 588
   Color = 15527148
+  Constraints.MaxHeight = 1050
+  Constraints.MaxWidth = 1280
   Constraints.MinHeight = 320
   Constraints.MinWidth = 580
   Font.Charset = DEFAULT_CHARSET
@@ -26,8 +28,8 @@ object InvoicesForm: TInvoicesForm
   object InvoicesGrid: TStringGrid
     Left = 0
     Top = 0
-    Width = 564
-    Height = 262
+    Width = 588
+    Height = 429
     Align = alClient
     BorderStyle = bsNone
     Color = clWhite
@@ -42,6 +44,8 @@ object InvoicesForm: TInvoicesForm
     TabOrder = 0
     OnDrawCell = InvoicesGridDrawCell
     OnKeyDown = InvoicesGridKeyDown
+    ExplicitWidth = 564
+    ExplicitHeight = 262
     ColWidths = (
       10
       183
@@ -50,10 +54,12 @@ object InvoicesForm: TInvoicesForm
   end
   object StatusBar: TStatusBar
     Left = 0
-    Top = 262
-    Width = 564
+    Top = 429
+    Width = 588
     Height = 19
     Panels = <>
     ParentColor = True
+    ExplicitTop = 262
+    ExplicitWidth = 564
   end
 end

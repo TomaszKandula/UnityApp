@@ -386,6 +386,7 @@ begin
         if DocType = dcStatement then
         begin
           if StrToFloatDef(OpenItems.Cells[5, iCNT], 0) <> 0 then
+            { MAKE }
             OpenItemsToHtmlTable(HTMLStat, OpenItems, iCNT);
         end;
 
@@ -403,10 +404,11 @@ begin
                 ( OpenItems.Cells[19, iCNT] <> REM_EX5)
               )
            and
-             (
+             ( { ONLY UNPAID INVOICES }
                StrToFloatDef(OpenItems.Cells[5, iCNT], 0) > 0
              )
            then
+             { MAKE }
              OpenItemsToHtmlTable(HTMLStat, OpenItems, iCNT);
 
         end;

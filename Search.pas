@@ -199,6 +199,8 @@ begin
   if (SColName <> '') and (SColNumber <> '') and (SGrid <> nil) then
   begin
     { RETURN FILTER STATE }
+    FilterForm.FGrid   :=SGrid;
+    FilterForm.FColName:=SColName;
     FilterForm.btnFilterClick(self);
     btnUnhide.Enabled:=False;
   end;

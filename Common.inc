@@ -150,6 +150,9 @@ const
   mcError     = 3;
   mcQuestion1 = 4;
   mcQuestion2 = 5;
+  mcStatusBar = 10;
+  conOK       = 14;
+  conERROR    = 15;
 
   { WINDOW STATE }
 

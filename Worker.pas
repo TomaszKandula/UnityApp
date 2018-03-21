@@ -16,10 +16,23 @@ unit Worker;
 interface
 
 uses
-  Main, Windows, Messages, SysUtils, Classes, Diagnostics, Graphics, ADODB, ComObj, SyncObjs, Dialogs;
+  Main, ReportBug, Windows, Messages, SysUtils, Classes, Diagnostics, Graphics, ADODB, ComObj, SyncObjs, Dialogs;
 
 { ----------------------------------------------------------- ! SEPARATE CPU THREADS ! ---------------------------------------------------------------------- }
 
+{ ------------------------------------------------------------------------------------------------------------------------------------------- SEND BUG REPORT }
+type
+  TTSendBugReport = class(TThread)
+  protected
+    procedure Execute; override;
+  private
+    var FLock:   TCriticalSection;
+    var FIDThd:  integer;
+  public
+    property    IDThd:  integer read FIDThd;
+    constructor Create;
+    destructor  Destroy; override;
+  end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------- INVOICE TRACKER SCANNER }
 type
@@ -38,7 +51,9 @@ type
     procedure   Execute; override;
   private
     var pUserAlias: string;
+    var FIDThd    : integer;
   public
+    property    IDThd:  integer read FIDThd;
     constructor Create(UserAlias: string);
   end;
 
@@ -150,9 +165,49 @@ uses
 
 { ############################################################ ! SEPARATE CPU THREADS ! ##################################################################### }
 
+{ ################################################################# ! BUG REPORT ! ########################################################################## }
+
+{ ------------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE }
+constructor TTSendBugReport.Create;
+begin
+  inherited Create(False);
+  FLock :=TCriticalSection.Create;
+  FIDThd:=0;
+end;
+
+{ --------------------------------------------------------------------------------------------------------------------------------------------------- RELEASE }
+destructor TTSendBugReport.Destroy;
+begin
+  FLock.Free;
+end;
+
+{ ------------------------------------------------------------------------------------------------------------------------------------- EXECUTE WORKER THREAD }
+procedure TTSendBugReport.Execute;
+begin
+  FLock.Acquire;
+  FIDThd:=GetCurrentThreadId;
+  try
+    if ReportForm.SendReport then
+    begin
+      MainForm.ExecMessage(False, mcInfo, 'Report has been sent successfully!');
+      Synchronize(ReportForm.ReportMemo.Clear);
+      LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Bug Report has been successfully sent by the user.');
+    end
+    else
+    begin
+      MainForm.ExecMessage(False, mcError, 'Cannot send Bug Report. Please contact IT support.');
+      LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot send Bug Report.');
+    end;
+  finally
+    FLock.Release;
+  end;
+  { RELEASE THREAD WHEN DONE }
+  FreeOnTerminate:=True;
+end;
+
 { ############################################################## ! TRACKER SCANNER ! ######################################################################## }
 
-{ ----------------------------------------------------------------------------------------------------------------------------------- INVOICE TRACKER SCANNER }
+{ ------------------------------------------------------------------------------------------------------------------------------------- EXECUTE WORKER THREAD }
 procedure TTInvoiceTrackerScanner.Execute;
 begin
   //
@@ -160,7 +215,7 @@ end;
 
 { ############################################################ ! INVOICE TRACKER LIST ! ##################################################################### }
 
-{ ------------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE }
+{ ------------------------------------------------------------------------------------------------------------------------------------- EXECUTE WORKER THREAD }
 constructor TTInvoiceTrackerRefresh.Create(UserAlias: string);
 begin
   inherited Create(False);
@@ -169,16 +224,14 @@ end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------- EXECUTE WORKER THREAD }
 procedure TTInvoiceTrackerRefresh.Execute;
-var
-  IDThread:  integer;
 begin
-  IDThread:=TTInvoiceTrackerRefresh.CurrentThread.ThreadID;
+  FIDThd:=CurrentThread.ThreadID;
   try
     TrackerForm.UserAlias:=pUserAlias;
     TrackerForm.Show;
   except
     on E: Exception do
-      LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThread) + ']: Execution of this tread work has been stopped. Error has been thrown: ' + E.Message + ' (TInvoiceTracker).');
+      LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Execution of this tread work has been stopped. Error has been thrown: ' + E.Message + ' (TInvoiceTracker).');
   end;
   { RELEASE THREAD WHEN DONE }
   FreeOnTerminate:=True;
@@ -228,12 +281,12 @@ var
   AgeView:    TAgeView;
 begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-  FIDThd:=TTMakeAgeView.CurrentThread.ThreadID;
+  FIDThd:=CurrentThread.ThreadID;
   FLock.Acquire;
   AgeView:=TAgeView.Create(MainForm.FDbConnect);
   try
     StopWatch:=TStopWatch.StartNew;
-    MainForm.ExecMessage(True, WM_GETINFO, 10, stGenerating);
+    MainForm.ExecMessage(True, mcStatusBar, stGenerating);
     LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Generating age view...');
     try
       AgeView.idThd:=IDThd;
@@ -262,7 +315,7 @@ begin
         LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot execute "TTMakeAgeView". Error has been thrown: ' + E.Message);
     end;
   finally
-    MainForm.ExecMessage(True, WM_GETINFO, 10, stReady);
+    MainForm.ExecMessage(True, mcStatusBar, stReady);
     THDMili:=StopWatch.ElapsedMilliseconds;
     THDSec:=THDMili / 1000;
     LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Age View thread has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
@@ -295,7 +348,7 @@ var
   Transactions: TTransactions;
   ReadDateTime: string;
 begin
-  FIDThd:=TTOpenItemsScanner.CurrentThread.ThreadID;
+  FIDThd:=CurrentThread.ThreadID;
   FLock.Acquire;
   Transactions:=TTransactions.Create(MainForm.FDbConnect);
   try
@@ -346,12 +399,12 @@ var
   StopWatch:  TStopWatch;
   AgeView:    TAgeView;
 begin
-  FIDThd:=TTReadAgeView.CurrentThread.ThreadID;
+  FIDThd:=CurrentThread.ThreadID;
   FLock.Acquire;
   AgeView:=TAgeView.Create(MainForm.FDbConnect);
   try
     StopWatch:=TStopWatch.StartNew;
-    MainForm.ExecMessage(True, WM_GETINFO, 10, stLoading);
+    MainForm.ExecMessage(True, mcStatusBar, stLoading);
     try
       { SYNC }
       Synchronize(AgeView.ClearSummary);
@@ -371,7 +424,7 @@ begin
         LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot execute "TTReadAgeView". Error has been thrown: ' + E.Message);
     end;
   finally
-    MainForm.ExecMessage(True, WM_GETINFO, 10, stReady);
+    MainForm.ExecMessage(True, mcStatusBar, stReady);
     THDMili:=StopWatch.ElapsedMilliseconds;
     THDSec:=THDMili / 1000;
     LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Thread for selected Group Id "' + AgeView.GroupID + '" has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
@@ -411,12 +464,12 @@ var
   StopWatch:  TStopWatch;
   OpenItems:  TTransactions;
 begin
-  FIDThd:=TTReadOpenItems.CurrentThread.ThreadID;
+  FIDThd:=CurrentThread.ThreadID;
   FLock.Acquire;
   OpenItems:=TTransactions.Create(MainForm.FDbConnect);
   try
     StopWatch:=TStopWatch.StartNew;
-    MainForm.ExecMessage(True, WM_GETINFO, 10, stDownloading);
+    MainForm.ExecMessage(True, mcStatusBar, stDownloading);
     try
       { SYNC }
       Synchronize(OpenItems.ClearSummary);
@@ -430,7 +483,7 @@ begin
         LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(FIDThd) + ']: Cannot execute "TTReadOpenItems". Error has been thorwn: ' + E.Message);
     end;
   finally
-    MainForm.ExecMessage(True, WM_GETINFO, 10, stReady);
+    MainForm.ExecMessage(True, mcStatusBar, stReady);
     THDMili:=StopWatch.ElapsedMilliseconds;
     THDSec:=THDMili / 1000;
     LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(FIDThd) + ']: Open Items loading thread has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
@@ -468,10 +521,10 @@ end;
 { --------------------------------------------------------------------------------------------------------------------------------------- EXECUTE THREAD WORK }
 procedure TTAddressBook.Execute;
 begin
-  FIDThd:=TTAddressBook.CurrentThread.ThreadID;
+  FIDThd:=CurrentThread.ThreadID;
   FLock.Acquire;
   try
-    MainForm.ExecMessage(True, WM_GETINFO, 10, stProcessing);
+    MainForm.ExecMessage(True, mcStatusBar, stProcessing);
     { -------------------------------------------------------------------------------------------------------------------------------------------------- OPEN }
     if (FMode = adOpenAll) or (FMode = adOpenForUser) then
     begin
@@ -504,7 +557,7 @@ begin
     end;
   finally
     { ------------------------------------------------------------------------------------------------------------------------------------------- RELEASE ALL }
-    MainForm.ExecMessage(True, WM_GETINFO, 10, stReady);
+    MainForm.ExecMessage(True, mcStatusBar, stReady);
     FLock.Release;
   end;
   { RELEASE THREAD WHEN DONE }
@@ -590,13 +643,13 @@ begin
         on E: Exception do
         begin
           LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot add new record(s). Error has been thrown: ' + E.Message + '.');
-          SendMessage(MainForm.Handle, WM_GETINFO, 3, LPARAM(PChar('Cannot add new record(s). Please contact IT support.')));
+          MainForm.ExecMessage(False, mcError, 'Cannot add new record(s). Please contact IT support.');
         end;
       end;
     end
     else
     begin
-      SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PChar('No new records have beed found. Process has been stopped.')));
+      MainForm.ExecMessage(False, mcWarn, 'No new records have beed found. Process has been stopped.');
     end;
   finally
     FGrid.Freeze(False);
@@ -632,10 +685,10 @@ var
   FileName:  string;
   Temp:      TStringGrid;
 begin
-  FIDThd:=TTExcelExport.CurrentThread.ThreadID;
+  FIDThd:=CurrentThread.ThreadID;
   FLock.Acquire;
   try
-    MainForm.ExecMessage(True, WM_GETINFO, 10, stExportXLS);
+    MainForm.ExecMessage(True, mcStatusBar, stExportXLS);
     { SAVE DIALOG BOX }
     Synchronize(procedure
                 begin
@@ -654,7 +707,7 @@ begin
     end;
   finally
     FLock.Release;
-    MainForm.ExecMessage(True, WM_GETINFO, 10, stReady);
+    MainForm.ExecMessage(True, mcStatusBar, stReady);
   end;
   FreeOnTerminate:=True;
 end;

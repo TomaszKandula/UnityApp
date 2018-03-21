@@ -373,7 +373,6 @@ type                                                            (* GUI | MAIN TH
     EventLogTimer: TTimer;
     N9: TMenuItem;
     Action_FilterINF7: TMenuItem;
-    UpdaterTimer: TTimer;
     N5: TMenuItem;
     N7: TMenuItem;
     N6: TMenuItem;
@@ -434,6 +433,7 @@ type                                                            (* GUI | MAIN TH
     Action_CopyToCB: TMenuItem;
     N19: TMenuItem;
     Action_ColumnWidth: TMenuItem;
+    FollowupPopup: TTimer;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -538,7 +538,6 @@ type                                                            (* GUI | MAIN TH
     procedure Action_CloseClick(Sender: TObject);
     procedure Action_FilterINF7Click(Sender: TObject);
     procedure sgAgeViewDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
-    procedure UpdaterTimerTimer(Sender: TObject);
     procedure sgAgeViewDblClick(Sender: TObject);
     procedure Action_ShowRegisteredClick(Sender: TObject);
     procedure sgInvoiceTrackerDblClick(Sender: TObject);
@@ -599,6 +598,7 @@ type                                                            (* GUI | MAIN TH
     procedure Action_CopyToCBClick(Sender: TObject);
     procedure Action_AutoColumnClick(Sender: TObject);
     procedure Action_ColumnWidthClick(Sender: TObject);
+    procedure FollowupPopupTimer(Sender: TObject);
     { ------------------------------------------------------------- ! HELPERS ! ----------------------------------------------------------------------------- }
   private
     var PAllowClose         :  boolean;
@@ -622,7 +622,7 @@ type                                                            (* GUI | MAIN TH
     property   OpenItemsUpdate: string  read POpenItemsUpdate write POpenItemsUpdate;
     { HELPER METHODS }
     procedure  DebugMsg(const Msg: String);
-    procedure  ExecMessage(IsPostType: boolean; WM_CONST: integer; YOUR_INT: integer; YOUR_TEXT: string);
+    procedure  ExecMessage(IsPostType: boolean; YOUR_INT: integer; YOUR_TEXT: string);
     function   OleGetStr(RecordsetField: variant): string;
     function   FindKey(INI: TMemIniFile; OpenedSection: string; KeyPosition: integer): string;
     function   WndCall(WinForm: TForm; Mode: integer): integer;
@@ -849,11 +849,11 @@ begin
   end;
 end;
 
-{ ----------------------------------------------------------------------------------------------------------------------------- WRAPPER FOR SEND/POST MESSAGE }
-procedure TMainForm.ExecMessage(IsPostType: boolean; WM_CONST: Integer; YOUR_INT: Integer; YOUR_TEXT: string);
+{ -------------------------------------------------------------------------------------------------------------------- WRAPPER FOR INTERNAL SEND/POST MESSAGE }
+procedure TMainForm.ExecMessage(IsPostType: boolean; YOUR_INT: Integer; YOUR_TEXT: string);
 begin
-  if IsPostType     then PostMessage(MainForm.Handle, WM_CONST, YOUR_INT, LPARAM(PCHAR(YOUR_TEXT)));
-  if not IsPostType then SendMessage(MainForm.Handle, WM_CONST, YOUR_INT, LPARAM(PCHAR(YOUR_TEXT)));
+  if IsPostType     then PostMessage(MainForm.Handle, WM_GETINFO, YOUR_INT, LPARAM(PCHAR(YOUR_TEXT)));
+  if not IsPostType then SendMessage(MainForm.Handle, WM_GETINFO, YOUR_INT, LPARAM(PCHAR(YOUR_TEXT)));
 end;
 
 { ####################################################### ! EXTENSION OF 'TSHAPE' CLASS ! ################################################################### }
@@ -1447,7 +1447,7 @@ begin
   { ----------------------------------------------------------------------------------------------------------------------------- GET THE FILE PATH AND PARSE }
   if DialogBox.Execute = True then
   begin
-    MainForm.ExecMessage(True, WM_GETINFO, 10, stImportCSV);
+    MainForm.ExecMessage(True, 10, stImportCSV);
     fPath  :=DialogBox.FileName;
     Data   :=TStringList.Create;
     Transit:=TStringList.Create;
@@ -1483,11 +1483,11 @@ begin
       end;
     { ----------------------------------------------------------------------------------------------------------------------------------- RELEASE FROM MEMORY }
     finally
-      MainForm.ExecMessage(True, WM_GETINFO, 10, stReady);
+      MainForm.ExecMessage(True, 10, stReady);
       if not IsError then
       begin
         LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: Data has been imported successfully!');
-        MainForm.ExecMessage(False, WM_GETINFO, 1, 'Data has been imported successfully!');
+        MainForm.ExecMessage(False, 1, 'Data has been imported successfully!');
       end;
       Data.Free;
       Transit.Free;
@@ -1512,7 +1512,7 @@ begin
   CSVData:=TStringList.Create;
   { ------------------------------------------------------------------------------------------------------------------------------------------ WRITE CSV FILE }
   try
-    MainForm.ExecMessage(True, WM_GETINFO, 10, stExportCSV);
+    MainForm.ExecMessage(True, 10, stExportCSV);
     { ADD ROWS AND COLUMNS WITH DELIMITER }
     for iCNT:=1 to Self.RowCount - 1 do
     begin
@@ -1546,7 +1546,7 @@ begin
       SendMessage(MainForm.Handle, WM_GETINFO, 1, LPARAM(PChar('Address Book have been exported successfully!')));
     end;
     CSVData.Free;
-    MainForm.ExecMessage(True, WM_GETINFO, 10, stReady);
+    MainForm.ExecMessage(True, 10, stReady);
   end;
 end;
 
@@ -1689,7 +1689,7 @@ begin
   begin
     EventLogTimer.Enabled    :=True;
     InvoiceScanTimer.Enabled :=True;
-    UpdaterTimer.Enabled     :=True;
+    FollowupPopup.Enabled    :=True;
     OILoader.Enabled         :=True;
   end;
   { DISABLE ALL CHECKERS }
@@ -1697,7 +1697,7 @@ begin
   begin
     EventLogTimer.Enabled    :=False;
     InvoiceScanTimer.Enabled :=False;
-    UpdaterTimer.Enabled     :=False;
+    FollowupPopup.Enabled    :=False;
     OILoader.Enabled         :=False;
   end;
 end;
@@ -2001,10 +2001,10 @@ begin
 
   (* 'INETTIMER' IS EXCLUDED FROM BELOW LIST BECAUSE IT IS CONTROLED BY 'INITIAIZECONNECTION' METHOD *)
 
-  EventLogTimer.Interval   :=AppSettings.TMIG.ReadInteger(TimersSettings, 'EVENTLOG_UPDATE', 60000);  { DEFAULT VALUE 60000   MILISECONDS = 1  MINUTE  }
-  InvoiceScanTimer.Interval:=AppSettings.TMIG.ReadInteger(TimersSettings, 'INVOICE_SCANNER', 900000); { DEFAULT VALUE 900000  MILISECONDS = 15 MINUTES }
-  UpdaterTimer.Interval    :=AppSettings.TMIG.ReadInteger(TimersSettings, 'UPDATE_CHECKER',  60000);  { DEFAULT VALUE 60000   MILISECONDS = 1  MINUTE  }
-  OILoader.Interval        :=AppSettings.TMIG.ReadInteger(TimersSettings, 'OI_LOADER',       300000); { DEFAULT VALUE 3000000 MILISECONDS = 5  MINUTES }
+  EventLogTimer.Interval   :=AppSettings.TMIG.ReadInteger(TimersSettings, 'EVENTLOG_UPDATE', 60000);   { DEFAULT VALUE 60000   MILISECONDS = 1  MINUTE  }
+  InvoiceScanTimer.Interval:=AppSettings.TMIG.ReadInteger(TimersSettings, 'INVOICE_SCANNER', 900000);  { DEFAULT VALUE 900000  MILISECONDS = 15 MINUTES }
+  FollowupPopup.Interval   :=AppSettings.TMIG.ReadInteger(TimersSettings, 'FOLLOWUP_CHECKER',1800000); { DEFAULT VALUE 1800000 MILISECONDS = 30 MINUTES }
+  OILoader.Interval        :=AppSettings.TMIG.ReadInteger(TimersSettings, 'OI_LOADER',       300000);  { DEFAULT VALUE 3000000 MILISECONDS = 5  MINUTES }
 
   { DISPOSE OBJECTS }
   AppSettings.Free;
@@ -2097,12 +2097,24 @@ end;
 
 { ------------------------------------------------------------------ ! TIMERS ! ----------------------------------------------------------------------------- }
 
-{ ---------------------------------------------------------------------------------------------------------------------------- CHECK PERIODICALLY FOR UPDATES }
-procedure TMainForm.UpdaterTimerTimer(Sender: TObject);
+{ --------------------------------------------------------------------------------------------------------------------------------- COUNT CURRENT FOLLOW-UP'S }
+procedure TMainForm.FollowupPopupTimer(Sender: TObject);
+var
+  iCNT: integer;
+  Sum:  integer;
 begin
-
-  { ... CODE HERE ... }
-
+  { COUNT ALL TODAY'S FOLLOW UPS }
+  Sum:=0;
+  for iCNT:=1 to sgAgeView.RowCount - 1 do
+    if CDate(sgAgeView.Cells[sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1), iCNT]) = CDate(StatBar_TXT3.Caption) then
+      Inc(Sum);
+  { DISPLAY IN TRAY BALOON }
+  if not (Sum = 0) then
+  begin
+    TrayIcon.Visible:=True;
+    TrayIcon.BalloonHint:='Hello, you have ' + IntToStr(Sum) + ' follow-up dates registered for today.' + CRLF + 'Let''s bother some customers and collect some money honey!';
+    TrayIcon.ShowBalloonHint;
+  end;
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------- MIRROR EVENT LOG FILE IN MEMO FIELD }
@@ -2626,7 +2638,11 @@ begin
   UserControl:=TUserControl.Create(FDbConnect);
   try
     UserControl.UserName:=FUserName;
-    UserControl.GetAgeDates(GroupListDates, FGroupList[GroupListBox.ItemIndex, 0]);
+    if not (UserControl.GetAgeDates(GroupListDates, FGroupList[GroupListBox.ItemIndex, 0])) then
+    begin
+      MsgCall(mcError, 'Cannot list age dates for selected group. Please contact IT support.');
+      LogText(FEventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: "GetAgeDates" returned false. Cannot get list of age dates for selected group (' + FGroupList[GroupListBox.ItemIndex, 0] + ').');
+    end;
   finally
     UserControl.Free;
   end;
@@ -2694,22 +2710,22 @@ begin
         sgAgeView.SqlColumns[iCNT, 1]:=sgAgeView.Cells[iCNT, 0];
       { ---------------------------------------------------------------------------------------------------------------- RE-WRITE OTHER SQL COLUMNS FROM TEMP }
       sgAgeView.SqlColumns[ToIndex, 0]:=Temp[FromIndex, 0];
-      { ---------------------------------------------------------------------------------------------------------------------------------- FROM RIGHT TO LEFT }
+      { ----------------------------------------------------------------------------------------------------------------------------- MOVE FROM RIGHT TO LEFT }
       if FromIndex > ToIndex then
         for iCNT:=ToIndex to (FromIndex - 1) do
           sgAgeView.SqlColumns[iCNT + 1, 0]:=Temp[iCNT, 0];
-      { ---------------------------------------------------------------------------------------------------------------------------------- FROM LEFT TO RIGHT }
+      { ----------------------------------------------------------------------------------------------------------------------------- MOVE FROM LEFT TO RIGHT }
       if FromIndex < ToIndex then
         for iCNT:=(FromIndex + 1) to ToIndex do
           sgAgeView.SqlColumns[iCNT - 1, 0]:=Temp[iCNT, 0];
     except
       on E: Exception do
-        MainForm.MsgCall(mcWarn, 'Unexpected error has occured. Description: ' + E.Message + ' Please contact IT support.')
+        MainForm.MsgCall(mcWarn, 'Unexpected error has occured. Description: ' + E.Message + '. Please contact IT support.')
     end;
   finally
     { SAVE CHANGES }
     sgAgeView.SaveLayout(ColumnWidthName, ColumnOrderName, ColumnNames, ColumnPrefix);
-    { REMOVE }
+    { REMOVE FROM MEMORY }
     Temp:=nil;
   end;
 end;
@@ -2764,7 +2780,7 @@ begin
   { SKIP HEADER }
   if ARow = 0 then Exit;
 
-  (* CALL SG_DRAWSELECTED BEFORE SG_COLORVALUES *)
+  (* CALL DRAWSELECTED BEFORE COLORVALUES *)
 
   { DRAW SELECTED ROW | SKIP HEADERS }
   sgAgeView.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
@@ -2840,7 +2856,7 @@ end;
 procedure TMainForm.sgOpenItemsDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
 
-  (* CALL SG_DRAWSELECTED BEFORE SG_COLORVALUES *)
+  (* CALL DRAWSELECTED BEFORE COLORVALUES *)
 
   { DRAW SELECTED ROW | SKIP HEADERS }
   MainForm.sgOpenItems.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);

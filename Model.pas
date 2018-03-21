@@ -379,7 +379,7 @@ type
   {$TYPEINFO ON}
   public
     const ID           : string = 'ID';  { PRIMARY KEY -> FOREIGN KEY IN "TBL_GROUPS" }
-    const USERNAME     : string = 'USERNAME';  { CONSTRAINT }
+    const USERNAME     : string = 'USERNAME';  { CONSTRAINT UNIQUE }
     const ACCESS_LEVEL : string = 'ACCESS_LEVEL';
     const ACCESS_MODE  : string = 'ACCESS_MODE';
   end;

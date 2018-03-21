@@ -27,11 +27,14 @@ type
     Text1: TLabel;
     Text2: TLabel;
     TotalWords: TLabel;
+    SpeedButton1: TSpeedButton;
     procedure ReportMemoKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure btnSendReportClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure SpeedButton1Click(Sender: TObject);
   public
     function WordCount(const InputStr: string): cardinal;
+    function SendReport: boolean;
   end;
 
 var
@@ -42,7 +45,7 @@ var
 implementation
 
 uses
-  Main, Mailer, Settings;
+  Main, Mailer, Settings, Worker;
 
 {$R *.dfm}
 
@@ -91,14 +94,8 @@ begin
   end;
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------------- SHOW WORD COUNT }
-procedure TReportForm.ReportMemoKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-begin
-  TotalWords.Caption:=IntToStr(WordCount(ReportMemo.Text)) + ' / 1024';
-end;
-
-{ ------------------------------------------------------------------------------------------------------------------------------------------------- SEND MEMO }
-procedure TReportForm.btnSendReportClick(Sender: TObject);
+{ ------------------------------------------------------------------------------------------------------------------------------------------------ SEND EMAIL }
+function TReportForm.SendReport: boolean;
 var
   Mail:      TMailer;
   AppSet:    TSettings;
@@ -107,12 +104,12 @@ var
   Transfer:  string;
   AppName:   string;
   AppVer:    string;
-  Stamp:     string;
 begin
+  Result:=False;
   { QUIT IF EMPTY }
   if ReportMemo.Text = '' then
   begin
-    MainForm.MsgCall(mcWarn, 'Cannot send empty report.');
+    MainForm.MsgCall(mcWarn, 'Cannot send empty report. Please write what feels right.');
     Exit;
   end;
   { PROCEED }
@@ -120,8 +117,9 @@ begin
   Mail  :=TMailer.Create;
   Doc   :=TDocument.Create;
   try
-    { GET APP NAME }
+    { GET APP NAME AND VERSION }
     AppName         :=AppSet.TMIG.ReadString(ApplicationDetails, 'VALUE', '');
+    AppVer          :=GetBuildInfoAsString;
     { SET EMAIL DETAILS }
     Mail.XMailer    :=AppSet.TMIG.ReadString(MailerCDOSYS, 'FROM', '');
     Mail.MailFrom   :=Mail.XMailer;
@@ -135,28 +133,37 @@ begin
     Transfer        :=StringReplace(Transfer, CRLF, '<br>', [rfReplaceAll]);
     HTMLBody        :=Doc.LoadTemplate(AppSet.LayoutDir + AppSet.TMIG.ReadString(VariousLayouts, 'BUGREPORT', '') + '.html');
     HTMLBody        :=StringReplace(HTMLBody, '{TEXT_HOLER}', Transfer, [rfReplaceAll]);
-    { SET STAMP }
-    AppVer          :=GetBuildInfoAsString;
-    Stamp           :=AppName + '<br>' + 'Build: ' + AppVer + '<br>' + 'Report date: ' + DateToStr(Now) + 'Report time: ' + TimeToStr(Now);
-    HTMLBody        :=StringReplace(HTMLBody, '{STAMP_HOLER}', Stamp, [rfReplaceAll]);
+    HTMLBody        :=StringReplace(HTMLBody, '{APPNAME}',      AppName,        [rfReplaceAll]);
+    HTMLBody        :=StringReplace(HTMLBody, '{BUILD}',        AppVer,         [rfReplaceAll]);
+    HTMLBody        :=StringReplace(HTMLBody, '{RREPORT_DATE}', DateToStr(Now), [rfReplaceAll]);
+    HTMLBody        :=StringReplace(HTMLBody, '{REPORT_TIME}',  TimeToStr(Now), [rfReplaceAll]);
     { ASSIGN PREPARED HTML }
     Mail.MailBody   :=HTMLBody;
     { SEND }
-    if Mail.SendNow then
-    begin
-      MainForm.MsgCall(mcInfo, 'Report has been sent successfully!');
-      Close;
-    end
-    else
-    begin
-      MainForm.MsgCall(mcError, 'Cannot send an e-mail. Please contact IT support.');
-      Close;
-    end;
+    Result:=Mail.SendNow;
   finally
     AppSet.Free;
     Mail.Free;
     Doc.Free;
   end;
+end;
+
+{ ------------------------------------------------------------------------------------------------------------------------------------------- SHOW WORD COUNT }
+procedure TReportForm.ReportMemoKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  TotalWords.Caption:=IntToStr(WordCount(ReportMemo.Text)) + ' / ' + IntToStr(ReportMemo.MaxLength);
+end;
+
+{ ------------------------------------------------------------------------------------------------------------------------------------------------- SEND MEMO }
+procedure TReportForm.btnSendReportClick(Sender: TObject);
+begin
+  TTSendBugReport.Create;
+end;
+
+{ ---------------------------------------------------------------------------------------------------------------------------------------------- CLOSE WINDOW }
+procedure TReportForm.SpeedButton1Click(Sender: TObject);
+begin
+  Close;
 end;
 
 end.

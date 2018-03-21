@@ -152,7 +152,7 @@ begin
   TrackerItems:=TDataTables.Create(MainForm.FDbConnect);
   try
     { BUILD SQL }
-    PrimaryTable:=DELETE_FROM + TblTracker  + WHERE + TTracker.CUID  + EQUAL + QuotedStr(CUID);  { HOLDS RECORDE CUSTOMERS  }
+    PrimaryTable:=DELETE_FROM + TblTracker  + WHERE + TTracker.CUID  + EQUAL + QuotedStr(CUID);  { HOLDS RECORDED CUSTOMERS }
     ForeignTable:=DELETE_FROM + TblInvoices + WHERE + TInvoices.CUID + EQUAL + QuotedStr(CUID);  { HOLDS CUSTOMERS INVOICES }
     { REMOVE FROM FOREIGN TABLE FIRST, THEN FROM PRIMARY TABLE }
     TrackerItems.StrSQL:=ForeignTable + ';' + PrimaryTable;

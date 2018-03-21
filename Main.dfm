@@ -2582,7 +2582,6 @@ object MainForm: TMainForm
         DefaultColWidth = 40
         DefaultRowHeight = 17
         DrawingStyle = gdsGradient
-        Enabled = False
         RowCount = 2
         GradientEndColor = 15527148
         Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goColMoving, goThumbTracking]
@@ -3406,6 +3405,7 @@ object MainForm: TMainForm
         GradientEndColor = 15527148
         Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
         ParentShowHint = False
+        PopupMenu = OpenPopup
         ShowHint = False
         TabOrder = 0
         OnDrawCell = sgOpenItemsDrawCell
@@ -6248,6 +6248,7 @@ object MainForm: TMainForm
     Animate = True
     Hint = 'Unity for Debt Management'
     BalloonTitle = 'Unity'
+    BalloonFlags = bfInfo
     Icon.Data = {
       000001000A00303010000100040068060000A60000002020100001000400E802
       00000E070000101010000100040028010000F60900003030000001000800A80E
@@ -7431,13 +7432,6 @@ object MainForm: TMainForm
     Left = 72
     Top = 336
   end
-  object UpdaterTimer: TTimer
-    Enabled = False
-    Interval = 60000
-    OnTimer = UpdaterTimerTimer
-    Left = 480
-    Top = 336
-  end
   object BookPopup: TPopupMenu
     OnPopup = BookPopupPopup
     Left = 296
@@ -7632,5 +7626,12 @@ object MainForm: TMainForm
       Caption = 'Auto column width'
       OnClick = Action_AutoColumnClick
     end
+  end
+  object FollowupPopup: TTimer
+    Enabled = False
+    Interval = 1800000
+    OnTimer = FollowupPopupTimer
+    Left = 480
+    Top = 336
   end
 end

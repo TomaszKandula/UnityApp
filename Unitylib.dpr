@@ -36,6 +36,7 @@ uses
 *)
 
 function GetCurrentUserSid: string; stdcall;
+
 { ------------------------------------------------------ ! COMMON CONSTANTS, VARIABLES AND TYPES ! ---------------------------------------------------------- }
 const
   HEAP_ZERO_MEMORY = $00000008;
@@ -45,7 +46,9 @@ type
   TTokenUser = packed record
     User: TSidAndAttributes;
   end;
-{ ---------------------------------------------------------------- ! INNER FUNCTIONS ! ---------------------------------------------------------------------- }
+
+{ ----------------------------------------------------------------- ! NESTED METHODS ! ---------------------------------------------------------------------- }
+
 { ------------------------------------------------------------------ ! CONVERT SID ! ------------------------------------------------------------------------ }
 function ConvertSid(Sid: PSID; pszSidText: PChar; var dwBufferLen: DWORD): BOOL;
 var
@@ -92,6 +95,7 @@ begin
   { SET TRUE IF NO ERROR OCCURED }
   Result := True;
 end;
+
 { ------------------------------------------------------------------ ! GET TEXT-SID ! ----------------------------------------------------------------------- }
 function ObtainTextSid(hToken: THandle; pszSid: PChar; var dwBufferLen: DWORD): BOOL;
 var
@@ -125,6 +129,7 @@ begin
   { SET TRUE IF NO ERROR }
   Result:=True;
 end;
+
 { ----------------------------------------------------------------- ! MAIN BLOCK ! -------------------------------------------------------------------------- }
 var
   hAccessToken: THandle;
@@ -221,7 +226,7 @@ begin
       FL.Position:=FL.Size;
       FL.WriteBuffer(UTF8String(Text)[1], Length(UTF8String(Text)));
     except
-      // DO NOTHING
+      { DO NOTHING }
     end;
   finally
     FL.Free;
@@ -230,10 +235,12 @@ end;
 
 { --------------------------------------------------------------------------------------------------------------------------------- MERGE SORT MAIN PROCEDURE }
 procedure MergeSort(Grid: TStringGrid; var Vals: array of integer; sortcol, datatype: integer; ascending: boolean); stdcall;
-{ --------------------------------------------------------------- ! INNER BLOCK ! --------------------------------------------------------------------------- }
+
+{ -------------------------------------------------------------- ! NESTED METHODS ! ------------------------------------------------------------------------- }
 var
   { TEMPORARY ARRAY FOR INTEGERS }
   AVals:  array of integer;
+
 { ---------------------------------------------------------------- ! COMPARISION ! -------------------------------------------------------------------------- }
 function compare(val1, val2:string): integer;
 var
@@ -270,6 +277,7 @@ begin
     else result:=0;
   end;
 end;
+
 { ------------------------------------------------------------- ! MERGE PROCEDURE ! ------------------------------------------------------------------------- }
 procedure Merge(ALo, AMid, AHi: integer);
 var
@@ -312,6 +320,7 @@ begin
       inc(i);
     end;
   end;
+
 { ------------------------------------------------------------ ! PERFORM MERGE SORT ! ----------------------------------------------------------------------- }
 procedure PerformMergeSort(ALo, AHi:Integer);
 (* RECURSIVELY SPLIT THE VALUE INTO TWO PIECES AND MERGE THEM BACK TOGETHER AS WE UNWIND THE RECURSION *)
@@ -325,6 +334,7 @@ begin
     Merge(ALo, AMid, AHi);
   end;
 end;
+
 { ---------------------------------------------------------------- ! MAIN BLOCK ! --------------------------------------------------------------------------- }
 begin
   PerformMergeSort(0, high(vals));

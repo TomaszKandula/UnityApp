@@ -193,7 +193,7 @@ begin
       end;
     end;
     { ------------------------------------------------------------------------------------------------------------------- SORT VIA PAYMENT STATUS | ASCENDING }
-    OpenItemsDest.MSort(11, 1, True);
+    OpenItemsDest.MSort(9, 0, True);
     { -------------------------------------------------------------------------------------------------------------------------------- CUSTOMER NAME & NUMBER }
     Cust_Name.Caption  :=CustName;
     Cust_Number.Caption:=CustNumber;
@@ -394,7 +394,7 @@ begin
   OpenItemsGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
 
   { ONLY FOR COLUMNS 2..5 AND 12 }
-  if ( (ACol >= 3) and (ACol <= 8) and (ACol = 12) and (ARow > 0) ) then OpenItemsGrid.ColorValues(ARow, ACol, Rect, clRed, clBlack);
+  if ( ( (ACol >= 3) and (ACol <= 8) or (ACol = 12) ) and (ARow > 0) ) then OpenItemsGrid.ColorValues(ARow, ACol, Rect, clRed, clBlack);
 
 end;
 
@@ -756,14 +756,17 @@ var
   GeneralText: TDataTables;
   Condition:   string;
 begin
-  GeneralText:=TDataTables.Create(MainForm.FDbConnect);
-  try
-    Condition:=TGeneral.CUID + EQUAL + QuotedStr(CUID);
-    GeneralText.Columns.Add(TGeneral.FOLLOWUP); GeneralText.Values.Add(SPACE); GeneralText.Conditions.Add(Condition);
-    GeneralText.UpdateRecord(TblGeneral);
-    MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fFOLLOWUP, 1, 1), MainForm.sgAgeView.Row]:='';
-  finally
-    GeneralText.Free;
+  if MainForm.MsgCall(mcQuestion2, 'Are you sure you want to clear this follow up?') = ID_YES then
+  begin
+    GeneralText:=TDataTables.Create(MainForm.FDbConnect);
+    try
+      Condition:=TGeneral.CUID + EQUAL + QuotedStr(CUID);
+      GeneralText.Columns.Add(TGeneral.FOLLOWUP); GeneralText.Values.Add(SPACE); GeneralText.Conditions.Add(Condition);
+      GeneralText.UpdateRecord(TblGeneral);
+      MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fFOLLOWUP, 1, 1), MainForm.sgAgeView.Row]:='';
+    finally
+      GeneralText.Free;
+    end;
   end;
 end;
 

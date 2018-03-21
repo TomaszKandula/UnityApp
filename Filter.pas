@@ -56,6 +56,7 @@ type
     property  FGrid      :  TStringGrid read pFGrid      write pFGrid;
     property  FOverdue   :  string      read pFOverdue   write pFOverdue;
     procedure FilterInit;
+    procedure FilterPrep;
     procedure FilterNow;
   end;
 
@@ -141,6 +142,16 @@ begin
   end;
 end;
 
+{ ------------------------------------------------------------------------------------------------------------------------------------- PREPARE FOR FILTERING }
+procedure TFilterForm.FilterPrep;
+begin
+  if (FGrid <> nil) and (FColName <> '') then
+  begin
+    FColNumber:=FGrid.ReturnColumn(FColName, 1, 1);
+    FilterInit;
+  end;
+end;
+
 { ------------------------------------------------------------------------------------------------------------------------------------------------ FILTER NOW }
 procedure TFilterForm.FilterNow;
 var
@@ -204,11 +215,7 @@ end;
 { --------------------------------------------------------------------------------------------------------------------------- ON ACTIVATE | INITIALIZE FILTER }
 procedure TFilterForm.FormActivate(Sender: TObject);
 begin
-  if (FGrid <> nil) and (FColName <> '') then
-  begin
-    FColNumber:=FGrid.ReturnColumn(FColName, 1, 1);
-    FilterInit;
-  end;
+  FilterPrep;
 end;
 
 { --------------------------------------------------------------- ! BUTTON CALLS ! -------------------------------------------------------------------------- }

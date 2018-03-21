@@ -99,6 +99,15 @@ object ReportForm: TReportForm
     Font.Style = []
     ParentFont = False
   end
+  object SpeedButton1: TSpeedButton
+    Left = 328
+    Top = 424
+    Width = 89
+    Height = 25
+    Cursor = crHandPoint
+    Caption = 'Cancel'
+    OnClick = SpeedButton1Click
+  end
   object ReportMemo: TMemo
     Left = 16
     Top = 40
