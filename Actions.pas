@@ -101,6 +101,7 @@ type
     procedure GetData(OpenItemsDest: TStringGrid; HistoryDest: TStringGrid; OpenItemsSrc: TStringGrid);
     procedure UpdateHistory(Grid: TStringGrid);
     procedure SetHistoryCols(Grid: TStringGrid);
+    procedure ClearAll;
     procedure MakePhoneCall;
   end;
 
@@ -279,6 +280,19 @@ begin
   Grid.SetColWidth(10, 20);
 end;
 
+{ ----------------------------------------------------------------------------------------------------------------------------------------- CLEAR ALL DETAILS }
+procedure TActionsForm.ClearAll;
+begin
+  Cust_Name.Caption   :=unNotFound;
+  Cust_Number.Caption :=unNotFound;
+  Cust_Person.Text    :=unNotFound;
+  Cust_Mail.Text      :=unNotFound;
+  Cust_Phone.Text     :=unNotFound;
+  DailyCom.Text       :='';
+  GeneralCom.Text     :='';
+  StatusBar.SimpleText:='';
+end;
+
 { ------------------------------------------------------------------------------------------------------------------------------------------- MAKE PHONE CALL }
 procedure TActionsForm.MakePhoneCall;
 var
@@ -347,14 +361,7 @@ end;
 procedure TActionsForm.FormShow(Sender: TObject);
 begin
   { CAPTIONS AND MEMO }
-  Cust_Name.Caption   :=unNotFound;
-  Cust_Number.Caption :=unNotFound;
-  Cust_Person.Text    :=unNotFound;
-  Cust_Mail.Text      :=unNotFound;
-  Cust_Phone.Text     :=unNotFound;
-  DailyCom.Text       :='';
-  GeneralCom.Text     :='';
-  StatusBar.SimpleText:='';
+  ClearAll;
   { CUSTOMER KEY INFORMATION }
   CUID      :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUID,            1, 1), MainForm.sgAgeView.Row];
   CustName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), MainForm.sgAgeView.Row];
@@ -733,9 +740,7 @@ begin
   CustName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), MainForm.sgAgeView.Row];
   CustNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), MainForm.sgAgeView.Row];
   { CLEAR ALL }
-  DailyCom.Text       :='';
-  GeneralCom.Text     :='';
-  StatusBar.SimpleText:='';
+  ClearAll;
   { LOAD NEW DATA }
   try
     GetData(OpenItemsGrid, HistoryGrid, MainForm.sgOpenItems);

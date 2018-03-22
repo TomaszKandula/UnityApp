@@ -434,6 +434,9 @@ type                                                            (* GUI | MAIN TH
     N19: TMenuItem;
     Action_ColumnWidth: TMenuItem;
     FollowupPopup: TTimer;
+    custRISKA: TLabel;
+    custRISKB: TLabel;
+    custRISKC: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -1916,12 +1919,12 @@ begin
     { IF USERNAME IS NOT FOUND, THEN CLOSE APPLICATION }
     if AccessLevel = '' then
     begin
-      MsgCall(mcError, 'Cannot find account for user name: ' + FUserName + '. Pease contact your administrator. Application will be terminated.');
+      MsgCall(mcError, 'Cannot find account for user name: ' + FUserName + '. Please contact your administrator. Application will be terminated.');
       Application.Terminate;
     end;
 
     { OTHERWISE PROCESS }
-    AccessMode :=UserControl.GetAccessData(adAccessMode);
+    AccessMode:=UserControl.GetAccessData(adAccessMode);
     if AccessMode = adAccessFull  then Action_FullView.Checked :=True;
     if AccessMode = adAccessBasic then Action_BasicView.Checked:=True;
     UserControl.GetGroupList(FGroupList, GroupListBox);
@@ -2106,13 +2109,24 @@ begin
   { COUNT ALL TODAY'S FOLLOW UPS }
   Sum:=0;
   for iCNT:=1 to sgAgeView.RowCount - 1 do
-    if CDate(sgAgeView.Cells[sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1), iCNT]) = CDate(StatBar_TXT3.Caption) then
-      Inc(Sum);
+    if
+      (
+        CDate(sgAgeView.Cells[sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1), iCNT]) = CDate(StatBar_TXT3.Caption)
+      )
+
+      and
+
+      (
+        sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.INF7, 1, 1), iCNT] = FUserName
+      )
+
+      then Inc(Sum);
   { DISPLAY IN TRAY BALOON }
   if not (Sum = 0) then
   begin
     TrayIcon.Visible:=True;
-    TrayIcon.BalloonHint:='Hello, you have ' + IntToStr(Sum) + ' follow-up dates registered for today.' + CRLF + 'Let''s bother some customers and collect some money honey!';
+    TrayIcon.BalloonHint:='Hello, you have ' + IntToStr(Sum) + ' follow-up dates registered for today.' + CRLF +
+                          'Let''s bother some customers and collect some money honey!' + CRLF;
     TrayIcon.ShowBalloonHint;
   end;
 end;
@@ -2772,6 +2786,7 @@ var
   Col12:       integer;
   Col13:       integer;
   Col14:       integer;
+  Col15:       integer;
   iCNT:        integer;
   Width:       integer;
   AgeViewCUID: string;
@@ -2801,6 +2816,7 @@ begin
   Col12:=sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP,          1, 1);
   Col13:=sgAgeView.ReturnColumn(TSnapshots.fCUID,            1, 1);
   Col14:=sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1);
+  Col15:=sgAgeView.ReturnColumn(TSnapshots.fRISK_CLASS,      1, 1);
 
   { HIGHLIGHT FOLLOW UP COLUMN }
   if not (CDate(sgAgeView.Cells[ACol, ARow]) = 0) then
@@ -2808,8 +2824,8 @@ begin
     { FUTURE DAYS }
     if (ACol = Col12) and (CDate(sgAgeView.Cells[ACol, ARow]) > CDate(StatBar_TXT3.Caption)) then
     begin
-      sgAgeView.Canvas.Brush.Color:=clFutureDay;
-      sgAgeView.Canvas.Font.Color :=clWhite;
+      sgAgeView.Canvas.Brush.Color:=clWhite;  { clFutureDay; }
+      sgAgeView.Canvas.Font.Color :=clBlack;  { clWhite;     }
       sgAgeView.Canvas.FillRect(Rect);
       sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
     end;
@@ -2829,6 +2845,14 @@ begin
       sgAgeView.Canvas.FillRect(Rect);
       sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
     end;
+  end;
+
+  { CUSTOMER CONTRIBUTING TO RISK CLASS "A" SET TO BOLD FONT }
+  if (ACol = Col14) and (sgAgeView.Cells[Col15, ARow] = 'A') then
+  begin
+    sgAgeView.Canvas.Font.Style:=[fsBold];
+    sgAgeView.Canvas.FillRect(Rect);
+    sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
   end;
 
   { MARK CUSTOMER WITH STAR IF IT IS REGISTERED ON INVOICE TRACKER LIST }

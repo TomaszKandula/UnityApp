@@ -109,7 +109,7 @@ begin
   { QUIT IF EMPTY }
   if ReportMemo.Text = '' then
   begin
-    MainForm.MsgCall(mcWarn, 'Cannot send empty report. Please write what feels right.');
+    MainForm.MsgCall(mcWarn, 'Cannot send empty report. Please write what feels right and then send.');
     Exit;
   end;
   { PROCEED }
@@ -132,11 +132,11 @@ begin
     Transfer        :=ReportMemo.Text;
     Transfer        :=StringReplace(Transfer, CRLF, '<br>', [rfReplaceAll]);
     HTMLBody        :=Doc.LoadTemplate(AppSet.LayoutDir + AppSet.TMIG.ReadString(VariousLayouts, 'BUGREPORT', '') + '.html');
-    HTMLBody        :=StringReplace(HTMLBody, '{TEXT_HOLER}', Transfer, [rfReplaceAll]);
-    HTMLBody        :=StringReplace(HTMLBody, '{APPNAME}',      AppName,        [rfReplaceAll]);
-    HTMLBody        :=StringReplace(HTMLBody, '{BUILD}',        AppVer,         [rfReplaceAll]);
-    HTMLBody        :=StringReplace(HTMLBody, '{RREPORT_DATE}', DateToStr(Now), [rfReplaceAll]);
-    HTMLBody        :=StringReplace(HTMLBody, '{REPORT_TIME}',  TimeToStr(Now), [rfReplaceAll]);
+    HTMLBody        :=StringReplace(HTMLBody, '{TEXT_HOLER}',  Transfer,       [rfReplaceAll]);
+    HTMLBody        :=StringReplace(HTMLBody, '{APPNAME}',     AppName,        [rfReplaceAll]);
+    HTMLBody        :=StringReplace(HTMLBody, '{BUILD}',       AppVer,         [rfReplaceAll]);
+    HTMLBody        :=StringReplace(HTMLBody, '{REPORT_DATE}', DateToStr(Now), [rfReplaceAll]);
+    HTMLBody        :=StringReplace(HTMLBody, '{REPORT_TIME}', TimeToStr(Now), [rfReplaceAll]);
     { ASSIGN PREPARED HTML }
     Mail.MailBody   :=HTMLBody;
     { SEND }

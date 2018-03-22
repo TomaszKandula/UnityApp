@@ -1264,9 +1264,9 @@ object MainForm: TMainForm
         TabOrder = 0
         object GridFillerTop1: TImage
           AlignWithMargins = True
-          Left = 1027
+          Left = 1125
           Top = 15
-          Width = 282
+          Width = 184
           Height = 89
           Margins.Left = 0
           Margins.Top = 15
@@ -1334,16 +1334,14 @@ object MainForm: TMainForm
             922449921AB9E9CFCCCCCCCCCCCCCCCCCCCC1CB1A5BF244992244992244991DC
             F467666666666666666666668EF80207857685CC3D365D0000000049454E44AE
             426082}
-          ExplicitLeft = 1616
-          ExplicitTop = 17
-          ExplicitWidth = 100
-          ExplicitHeight = 88
+          ExplicitLeft = 1160
+          ExplicitWidth = 149
         end
         object MainPanel1: TPanel
           AlignWithMargins = True
           Left = 17
           Top = 15
-          Width = 1010
+          Width = 1108
           Height = 91
           Margins.Left = 17
           Margins.Top = 15
@@ -1355,13 +1353,13 @@ object MainForm: TMainForm
           object hShapeSet: TShape
             Left = 404
             Top = 17
-            Width = 289
+            Width = 387
             Height = 72
             Brush.Style = bsClear
             Pen.Color = clMedGray
           end
           object hShapeAct: TShape
-            Left = 700
+            Left = 798
             Top = 17
             Width = 310
             Height = 72
@@ -1492,7 +1490,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object Cap03: TShape
-            Left = 700
+            Left = 798
             Top = 0
             Width = 310
             Height = 19
@@ -1502,7 +1500,7 @@ object MainForm: TMainForm
           object Cap02: TShape
             Left = 404
             Top = 0
-            Width = 289
+            Width = 387
             Height = 19
             Brush.Color = 15527148
             Pen.Color = clMedGray
@@ -1516,7 +1514,7 @@ object MainForm: TMainForm
             Pen.Color = clMedGray
           end
           object Text31: TLabel
-            Left = 725
+            Left = 823
             Top = 61
             Width = 67
             Height = 13
@@ -1549,7 +1547,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object valRISKA: TLabel
-            Left = 575
+            Left = 578
             Top = 25
             Width = 7
             Height = 13
@@ -1562,7 +1560,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object valRISKB: TLabel
-            Left = 575
+            Left = 578
             Top = 44
             Width = 7
             Height = 13
@@ -1575,7 +1573,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object valRISKC: TLabel
-            Left = 575
+            Left = 578
             Top = 63
             Width = 7
             Height = 13
@@ -1679,7 +1677,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object btnLoadAgeView: TSpeedButton
-            Left = 937
+            Left = 1035
             Top = 30
             Width = 59
             Height = 50
@@ -1906,8 +1904,47 @@ object MainForm: TMainForm
               FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
             OnClick = btnLoadAgeViewClick
           end
+          object custRISKA: TLabel
+            Left = 666
+            Top = 25
+            Width = 7
+            Height = 13
+            Caption = '0'
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clBlack
+            Font.Height = -11
+            Font.Name = 'Tahoma'
+            Font.Style = [fsBold]
+            ParentFont = False
+          end
+          object custRISKB: TLabel
+            Left = 666
+            Top = 44
+            Width = 7
+            Height = 13
+            Caption = '0'
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clBlack
+            Font.Height = -11
+            Font.Name = 'Tahoma'
+            Font.Style = [fsBold]
+            ParentFont = False
+          end
+          object custRISKC: TLabel
+            Left = 666
+            Top = 63
+            Width = 7
+            Height = 13
+            Caption = '0'
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clBlack
+            Font.Height = -11
+            Font.Name = 'Tahoma'
+            Font.Style = [fsBold]
+            ParentFont = False
+          end
           object GroupListBox: TComboBox
-            Left = 725
+            Left = 823
             Top = 30
             Width = 192
             Height = 22
@@ -1920,7 +1957,7 @@ object MainForm: TMainForm
             OnSelect = GroupListBoxSelect
           end
           object GroupListDates: TComboBox
-            Left = 801
+            Left = 899
             Top = 58
             Width = 116
             Height = 22

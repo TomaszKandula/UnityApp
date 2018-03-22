@@ -44,6 +44,9 @@ type
     var RCA        : extended;
     var RCB        : extended;
     var RCC        : extended;
+    var RCAcount   : cardinal;
+    var RCBcount   : cardinal;
+    var RCCcount   : cardinal;
     { THREAD ID }
     var idThd      : integer;
     { SELECTION }
@@ -92,7 +95,6 @@ begin
   StrSQL :=EXECUTE + AgeViewReport + SPACE + QuotedStr(StrCol) + COMMA + QuotedStr(GroupID) + COMMA + QuotedStr(AgeDate);
   SqlToGrid(Grid, ExecSQL, False, False);
   LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(idThd) + ']: SQL statement applied [' + StrSQL + '].');
-  LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(idThd) + ']: SQL statement parameters [uParam1 = ' + GroupID + '], [uParam2 = ' + AgeDate + '].');
   { ---------------------------------------------------------------------------------------------------------------------------------------- CALCULATE VALUES }
   for iCNT:=1 to Grid.RowCount - 1 do
   begin
@@ -117,9 +119,21 @@ begin
       TotalExceed:=TotalExceed + Abs(StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fEXCEEDED_AMOUNT, 1, 1), iCNT], 0));
     end;
     { SUM ALL ITEMS FOR RISK CLASSES }
-    if Grid.Cells[Grid.ReturnColumn(TSnapshots.fRISK_CLASS, 1, 1), iCNT] = 'A' then RCA:=RCA + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fTOTAL, 1, 1), iCNT], 0);
-    if Grid.Cells[Grid.ReturnColumn(TSnapshots.fRISK_CLASS, 1, 1), iCNT] = 'B' then RCB:=RCB + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fTOTAL, 1, 1), iCNT], 0);
-    if Grid.Cells[Grid.ReturnColumn(TSnapshots.fRISK_CLASS, 1, 1), iCNT] = 'C' then RCC:=RCC + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fTOTAL, 1, 1), iCNT], 0);
+    if Grid.Cells[Grid.ReturnColumn(TSnapshots.fRISK_CLASS, 1, 1), iCNT] = 'A' then
+    begin
+      RCA:=RCA + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fTOTAL, 1, 1), iCNT], 0);
+      inc(RCAcount);
+    end;
+    if Grid.Cells[Grid.ReturnColumn(TSnapshots.fRISK_CLASS, 1, 1), iCNT] = 'B' then
+    begin
+      RCB:=RCB + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fTOTAL, 1, 1), iCNT], 0);
+      inc(RCBcount);
+    end;
+    if Grid.Cells[Grid.ReturnColumn(TSnapshots.fRISK_CLASS, 1, 1), iCNT] = 'C' then
+    begin
+      RCC:=RCC + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fTOTAL, 1, 1), iCNT], 0);
+      Inc(RCCcount);
+    end;
     { COUNT ITEMS }
     inc(CustAll);
   end;
@@ -187,6 +201,7 @@ end;
 { --------------------------------------------------------------------------------------------------------------------------------------------- CLEAR SUMMARY }
 procedure TAgeView.ClearSummary;
 begin
+  MainForm.OSAmount             :=0;
   { TOP }
   MainForm.tcCOCODE.Caption     :='n/a';
   MainForm.tcCURRENCY.Caption   :='n/a';
@@ -201,6 +216,9 @@ begin
   MainForm.valR4.Caption        :='0';
   MainForm.valR5.Caption        :='0';
   MainForm.valR6.Caption        :='0';
+  MainForm.custRISKA.Caption    :='0';
+  MainForm.custRISKB.Caption    :='0';
+  MainForm.custRISKC.Caption    :='0';
   MainForm.valTAMT.Caption      :='0';
   { PERCENTAGE }
   MainForm.procND.Caption       :='0';
@@ -256,6 +274,9 @@ begin
   MainForm.valRISKA.Caption:=FormatFloat('#,##0.00', RCA);
   MainForm.valRISKB.Caption:=FormatFloat('#,##0.00', RCB);
   MainForm.valRISKC.Caption:=FormatFloat('#,##0.00', RCC);
+  MainForm.custRISKA.Caption:=IntToStr(RCAcount) + ' customers';
+  MainForm.custRISKB.Caption:=IntToStr(RCBcount) + ' customers';
+  MainForm.custRISKC.Caption:=IntToStr(RCCcount) + ' customers';
   { BOTTOM | EXCEEDERS }
   MainForm.valEXCEEDERS.Caption :=IntToStr(Exceeders);
   MainForm.valTEXCEES.Caption   :=FormatFloat('#,##0.00', TotalExceed);
