@@ -73,6 +73,7 @@
 			<DCCReference Include="Transactions.pas"/>
 			<DCCReference Include="ReportBug.pas">
 				<Form>;
+  Colors in &apos;Colors.pas&apos;;
 
 type
   DWord = 0..$FFFFFFFF;
@@ -95,6 +96,7 @@ var
 
 {$R *.res</DesignClass>
 			</DCCReference>
+			<DCCReference Include="Colors.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>
@@ -120,7 +122,7 @@ var
 						<VersionInfo Name="MajorVer">0</VersionInfo>
 						<VersionInfo Name="MinorVer">1</VersionInfo>
 						<VersionInfo Name="Release">0</VersionInfo>
-						<VersionInfo Name="Build">405</VersionInfo>
+						<VersionInfo Name="Build">408</VersionInfo>
 						<VersionInfo Name="Debug">False</VersionInfo>
 						<VersionInfo Name="PreRelease">True</VersionInfo>
 						<VersionInfo Name="Special">False</VersionInfo>
@@ -132,7 +134,7 @@ var
 					<VersionInfoKeys>
 						<VersionInfoKeys Name="CompanyName"/>
 						<VersionInfoKeys Name="FileDescription"/>
-						<VersionInfoKeys Name="FileVersion">0.1.0.405</VersionInfoKeys>
+						<VersionInfoKeys Name="FileVersion">0.1.0.408</VersionInfoKeys>
 						<VersionInfoKeys Name="InternalName"/>
 						<VersionInfoKeys Name="LegalCopyright"/>
 						<VersionInfoKeys Name="LegalTrademarks"/>

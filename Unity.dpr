@@ -43,7 +43,8 @@ uses
   Mailer in 'Mailer.pas',
   AgeView in 'AgeView.pas',
   Transactions in 'Transactions.pas',
-  ReportBug in 'ReportBug.pas';
+  ReportBug in 'ReportBug.pas',
+  Colors in 'Colors.pas';
 
 type
   DWord = 0..$FFFFFFFF;
@@ -449,6 +450,7 @@ begin
 
   { MAIN FORM }
   Application.CreateForm(TMainForm, MainForm);
+  Application.CreateForm(TColorsForm, ColorsForm);
   LogText(AppSettings.FPathEventLog, '[GUI] Initialization methods executed within main thread, ''MainForm'' has been created. Main process thread ID = ' + IntToStr(MainThreadID) + '.');
 
   { OTHER WINFORMS }

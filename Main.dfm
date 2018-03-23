@@ -6204,9 +6204,13 @@ object MainForm: TMainForm
     object N12: TMenuItem
       Caption = '-'
     end
-    object Action_AutoColumnSize: TMenuItem
-      Caption = 'Auto column width'
-      OnClick = Action_AutoColumnSizeClick
+    object Action_FollowUpColors: TMenuItem
+      Caption = 'Follow-Up colors'
+      OnClick = Action_FollowUpColorsClick
+    end
+    object Action_RowHighlight: TMenuItem
+      Caption = 'Row highlight'
+      OnClick = Action_RowHighlightClick
     end
     object N13: TMenuItem
       Caption = '-'
@@ -6222,9 +6226,9 @@ object MainForm: TMainForm
     object N16: TMenuItem
       Caption = '-'
     end
-    object Action_RowHighlight: TMenuItem
-      Caption = 'Row highlight'
-      OnClick = Action_RowHighlightClick
+    object Action_AutoColumnSize: TMenuItem
+      Caption = 'Auto column width'
+      OnClick = Action_AutoColumnSizeClick
     end
   end
   object TrackerPopup: TPopupMenu

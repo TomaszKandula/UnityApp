@@ -437,6 +437,7 @@ type                                                            (* GUI | MAIN TH
     custRISKA: TLabel;
     custRISKB: TLabel;
     custRISKC: TLabel;
+    Action_FollowUpColors: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -602,6 +603,7 @@ type                                                            (* GUI | MAIN TH
     procedure Action_AutoColumnClick(Sender: TObject);
     procedure Action_ColumnWidthClick(Sender: TObject);
     procedure FollowupPopupTimer(Sender: TObject);
+    procedure Action_FollowUpColorsClick(Sender: TObject);
     { ------------------------------------------------------------- ! HELPERS ! ----------------------------------------------------------------------------- }
   private
     var PAllowClose         :  boolean;
@@ -673,7 +675,7 @@ var
 implementation
 
 uses
-  Filter, Tracker, Invoices, Actions, Calendar, About, Search, Worker, Model, Settings, Database, UAC, AgeView, Transactions, ReportBug;
+  Filter, Tracker, Invoices, Actions, Calendar, About, Search, Worker, Model, Settings, Database, UAC, AgeView, Transactions, ReportBug, Colors;
 
 {$R *.dfm}
 
@@ -2117,7 +2119,7 @@ begin
       and
 
       (
-        sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.INF7, 1, 1), iCNT] = FUserName
+        sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.INF7, 1, 1), iCNT] = UpperCase(FUserName)
       )
 
       then Inc(Sum);
@@ -2570,6 +2572,12 @@ begin
   { TICK }
   Action_BasicView.Checked:=False;
   Action_FullView.Checked :=True;
+end;
+
+{ -------------------------------------------------------------------------------------------------------------------------------------- SET FOLLOW-UP COLORS }
+procedure TMainForm.Action_FollowUpColorsClick(Sender: TObject);
+begin
+  WndCall(ColorsForm, stModal);
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------- ROW HIGHLIGHT }

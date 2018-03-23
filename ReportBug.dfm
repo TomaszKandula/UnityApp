@@ -6,7 +6,7 @@ object ReportForm: TReportForm
   Caption = 'Unity'
   ClientHeight = 469
   ClientWidth = 538
-  Color = clBtnFace
+  Color = 15527148
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
