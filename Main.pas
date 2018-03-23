@@ -3661,7 +3661,7 @@ begin
   end;
 end;
 
-{ ---------------------------------------------------------------------------------------------------------------------------------------- ACTIONS | MAKE AGE }
+{ ----------------------------------------------------------------------------------------------------------------------------- ACTIONS | OPEN MAKE AGE PANEL }
 procedure TMainForm.btnMakeGroupClick(Sender: TObject);
 begin
   cbDump.Checked:=False;
@@ -3675,11 +3675,8 @@ begin
     begin
       PanelGroupName.Visible:=True;
       { SUGGEST THE SAME GROUP NAME AND GROUP ID }
-      EditGroupName.Text:=GroupListBox.Text;
-      EditGroupID.Text  :=ConvertName(DetailsGrid.Cells[0, 0], '', 1) +
-                          ConvertName(DetailsGrid.Cells[1, 0], '', 1) +
-                          ConvertName(DetailsGrid.Cells[2, 0], '', 1) +
-                          ConvertName(DetailsGrid.Cells[3, 0], '', 1);
+      EditGroupName.Text:=GroupNmSel;
+      EditGroupID.Text  :=GroupIdSel;
     end
     else
     begin

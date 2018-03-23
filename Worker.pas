@@ -291,10 +291,11 @@ begin
     try
       AgeView.idThd:=IDThd;
       { ASYNC }
-      if MainForm.EditGroupID.Text = MainForm.GroupIdSel then
-        AgeView.GroupID:=MainForm.GroupIdSel
-          else
-            AgeView.GroupID:=MainForm.EditGroupID.Text;
+      if MainForm.EditGroupID.Text = MainForm.GroupIdSel then AgeView.GroupID:=MainForm.GroupIdSel
+        else
+          if MainForm.EditGroupID.Text <> '' then AgeView.GroupID:=MainForm.EditGroupID.Text
+            else
+              AgeView.GroupID:=MainForm.GroupIdSel;
       { GENERATE AGING }
       AgeView.Make(MainForm.OSAmount);
       { CSV OR SERVER? }
@@ -471,11 +472,14 @@ begin
     StopWatch:=TStopWatch.StartNew;
     MainForm.ExecMessage(True, mcStatusBar, stDownloading);
     try
-      { SYNC }
-      Synchronize(OpenItems.ClearSummary);
-      { ASYNC }
+      { ASSIGN }
       OpenItems.DestGrid   :=MainForm.sgOpenItems;
       OpenItems.SettingGrid:=MainForm.DetailsGrid;
+      { FREEZE }
+      OpenItems.DestGrid.Freeze(True);
+      { SYNC WITH GUI }
+      Synchronize(OpenItems.ClearSummary);
+      { ASYNC }
       OpenItems.LoadToGrid;
       OpenItems.UpdateSummary;
     except
@@ -483,10 +487,16 @@ begin
         LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(FIDThd) + ']: Cannot execute "TTReadOpenItems". Error has been thorwn: ' + E.Message);
     end;
   finally
-    MainForm.ExecMessage(True, mcStatusBar, stReady);
     THDMili:=StopWatch.ElapsedMilliseconds;
     THDSec:=THDMili / 1000;
     LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(FIDThd) + ']: Open Items loading thread has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
+    MainForm.ExecMessage(True, mcStatusBar, stReady);
+    { RELEASE VCL }
+    Synchronize(procedure
+                begin
+                  OpenItems.DestGrid.SetColWidth(10, 20);
+                end);
+    OpenItems.DestGrid.Freeze(False);
     OpenItems.Free;
     FLock.Release;
   end;

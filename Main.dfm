@@ -1526,6 +1526,7 @@ object MainForm: TMainForm
             Width = 53
             Height = 13
             Caption = 'No of calls:'
+            Enabled = False
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clBlack
             Font.Height = -11
@@ -1539,6 +1540,7 @@ object MainForm: TMainForm
             Width = 66
             Height = 13
             Caption = 'No of e-mails:'
+            Enabled = False
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clBlack
             Font.Height = -11
@@ -1547,7 +1549,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object valRISKA: TLabel
-            Left = 578
+            Left = 582
             Top = 25
             Width = 7
             Height = 13
@@ -1560,7 +1562,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object valRISKB: TLabel
-            Left = 578
+            Left = 582
             Top = 44
             Width = 7
             Height = 13
@@ -1573,7 +1575,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object valRISKC: TLabel
-            Left = 578
+            Left = 582
             Top = 63
             Width = 7
             Height = 13
@@ -1630,6 +1632,7 @@ object MainForm: TMainForm
             Width = 7
             Height = 13
             Caption = '0'
+            Enabled = False
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clBlack
             Font.Height = -11
@@ -1643,6 +1646,7 @@ object MainForm: TMainForm
             Width = 7
             Height = 13
             Caption = '0'
+            Enabled = False
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clBlack
             Font.Height = -11
@@ -1905,7 +1909,7 @@ object MainForm: TMainForm
             OnClick = btnLoadAgeViewClick
           end
           object custRISKA: TLabel
-            Left = 666
+            Left = 687
             Top = 25
             Width = 7
             Height = 13
@@ -1918,7 +1922,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object custRISKB: TLabel
-            Left = 666
+            Left = 687
             Top = 44
             Width = 7
             Height = 13
@@ -1931,7 +1935,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object custRISKC: TLabel
-            Left = 666
+            Left = 687
             Top = 63
             Width = 7
             Height = 13
@@ -3387,6 +3391,7 @@ object MainForm: TMainForm
               Top = 17
               Width = 133
               Height = 21
+              CharCase = ecUpperCase
               Color = clCream
               DoubleBuffered = False
               EditLabel.Width = 92

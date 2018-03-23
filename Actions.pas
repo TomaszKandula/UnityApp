@@ -713,7 +713,10 @@ begin
     Statement.HTMLLayout:=Statement.LoadTemplate(AppSettings.LayoutDir + AppSettings.TMIG.ReadString(VariousLayouts, 'STATEMENT', '') + '.html');
     { SEND STATEMENT }
     Statement.MailSubject:='Account Statement (' + Statement.CustName + ')';
-    Statement.SendDocument;
+    if Statement.SendDocument then
+      MainForm.ExecMessage(False, mcInfo, 'Account Statement has been sent successfully!')
+        else
+          MainForm.ExecMessage(False, mcError, 'Account Statement cannot be sent. Please contact IT support.');
   finally
     AppSettings.Free;
     Statement.Free;

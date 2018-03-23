@@ -78,7 +78,7 @@ begin
   Result:=0;
   TextLength:=Length(InputStr);
   FindWord:=False;
-  { COUNT IF WOR FOUND }
+  { COUNT IF WORD IS FOUND }
   for iCNT:=1 to TextLength do
   begin
     if not (CharInSet(InputStr[iCNT], ToSkip)) then

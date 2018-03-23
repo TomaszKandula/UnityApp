@@ -201,7 +201,6 @@ end;
 { --------------------------------------------------------------------------------------------------------------------------------------------- CLEAR SUMMARY }
 procedure TAgeView.ClearSummary;
 begin
-  MainForm.OSAmount             :=0;
   { TOP }
   MainForm.tcCOCODE.Caption     :='n/a';
   MainForm.tcCURRENCY.Caption   :='n/a';
@@ -627,7 +626,7 @@ begin
     { EXCEEDED AMOUNT [16] = CREDIT LIMIT [15] - TOTAL AMOUNT [14] }
     ArrAgeView[exRow, 16]:=FloatToStr(StrToFloat(ArrAgeView[exRow, 15]) - StrToFloat(ArrAgeView[exRow, 14]));
     { WALLET SHARE [28] | TECHNICAL COLUMN }
-    if OSAmount <> 0 then ArrAgeView[exRow, 28]:=FloatToStrF(( (StrToFloat(ArrAgeView[exRow, 14]) / OSAmount) * 1), ffFixed, 4, 4)
+    if OSAmount <> 0 then ArrAgeView[exRow, 28]:=FloatToStrF(( (StrToFloat(ArrAgeView[exRow, 14]) / OSAmount) * 1), ffFixed, 8, 8)
       else
         ArrAgeView[exRow, 28]:='0';
     { CALCULATE QUALITY INDEX [27] }

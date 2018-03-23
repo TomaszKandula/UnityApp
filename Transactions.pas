@@ -131,6 +131,7 @@ end;
 { --------------------------------------------------------------------------------------------------------------------------------- CLEAR ALL SUMMARY DETAILS }
 procedure TTransactions.ClearSummary;
 begin
+  MainForm.OSAmount                :=0;
   MainForm.tcOpenItems.Caption     :='0';
   MainForm.tcOverdue.Caption       :='0';
   MainForm.tcInvoices.Caption      :='0';
@@ -244,7 +245,6 @@ procedure TTransactions.UpdateSummary;
 
 begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-  DestGrid.Freeze(True);
   VarInitialize;
   VoucherNumber:=GetVoucherNumber;
   { ------------------------------------------------------------------------------------------------------------------------------------------------- COMPUTE }
@@ -288,9 +288,6 @@ begin
     if (StrToFloat(DestGrid.Cells[5, iCNT]) < 0) and (DestGrid.Cells[3, iCNT] = VoucherNumber) then
       UNamt:=UNamt + StrToFloatDef(DestGrid.Cells[5, iCNT], 0);
   end;
-  { -------------------------------------------------------------------------------------------------------------------------------------------- UNINITIALIZE }
-  DestGrid.SetColWidth(10, 20);
-  DestGrid.Freeze(False);
   { DISPLAY }
   MainForm.tcOpenItems.Caption     :=FormatFloat('### ###',  DestGrid.RowCount - 1);
   MainForm.tcInvoices.Caption      :=FormatFloat('### ###',  nInvoices);
