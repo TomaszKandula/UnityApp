@@ -98,6 +98,7 @@ const
   Unallocated         = 'UNALLOCATED_DEFINITION';
   VariousLayouts      = 'LAYOUTS';
   TimersSettings      = 'TIMERS_INTERVALS';
+  FollowUpColors      = 'FOLLOWUPS_COLORS';
   ColumnPrefix        = 'COLUMN';
   ColumnWidthName     = 'COLUMNWIDTH';
   ColumnOrderName     = 'COLUMNORDER';

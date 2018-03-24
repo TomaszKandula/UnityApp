@@ -606,12 +606,27 @@ type                                                            (* GUI | MAIN TH
     procedure Action_FollowUpColorsClick(Sender: TObject);
     { ------------------------------------------------------------- ! HELPERS ! ----------------------------------------------------------------------------- }
   private
+    {  }
     var PAllowClose         :  boolean;
     var PStartTime          :  TTime;
     var PAccessLevel        :  string;
     var PAccessMode         :  string;
     var POpenItemsUpdate    :  string;
- public
+    { GETTERS AND SETTERS FOR FOLLOW-UP COLORS SAVED IN SETTINGS FILE }
+    function  GetTodayFColor  : TColor;
+    function  GetTodayBColor  : TColor;
+    function  GetPastFColor   : TColor;
+    function  GetPastBColor   : TColor;
+    function  GetFutureFColor : TColor;
+    function  GetFutureBColor : TColor;
+    procedure SetTodayFColor(NewColor:  TColor);
+    procedure SetTodayBColor(NewColor:  TColor);
+    procedure SetPastFColor(NewColor:   TColor);
+    procedure SetPastBColor(NewColor:   TColor);
+    procedure SetFutureFColor(NewColor: TColor);
+    procedure SetFutureBColor(NewColor: TColor);
+  public
+    {  }
     var FUserName           :  string;
     var FEventLogPath       :  string;
     var FDbConnect          :  TADOConnection;
@@ -621,7 +636,14 @@ type                                                            (* GUI | MAIN TH
     var AgeDateSel          :  string;
     var OSAmount            :  double;
     var SGImage             :  TImage;
-    { PROPERTIES }
+    {  }
+    property TodayFColor:  TColor read GetTodayFColor  write SetTodayFColor;
+    property TodayBColor:  TColor read GetTodayBColor  write SetTodayBColor;
+    property PastFColor:   TColor read GetPastFColor   write SetPastFColor;
+    property PastBColor:   TColor read GetPastBColor   write SetPastBColor;
+    property FutureFColor: TColor read GetFutureFColor write SetFutureFColor;
+    property FutureBColor: TColor read GetFutureBColor write SetFutureBColor;
+    {  }
     property   AccessLevel    : string  read PAccessLevel     write PAccessLevel;
     property   AccessMode     : string  read PAccessMode      write PAccessMode;
     property   OpenItemsUpdate: string  read POpenItemsUpdate write POpenItemsUpdate;
@@ -679,60 +701,181 @@ uses
 
 {$R *.dfm}
 
-{ ---------------------------------------------------------------- ! DEBUGGING ! ---------------------------------------------------------------------------- }
+{ ----------------------------------------------------------------- ! DEBUGGING ! --------------------------------------------------------------------------- }
 procedure TMainForm.DebugMsg(const Msg: String);
 begin
   OutputDebugString(PChar(Msg));
 end;
 
-(* ******************************************************** ! MESSAGES BETWEEN THREADS ! **********************************************************************
+{ -------------------------------------------------- ! GETTERS AND SETTERS FOR FOLLOW-UP COLORS ! ----------------------------------------------------------- }
 
-IMPORTANT NOTE:
----------------
+{ --------------------------------------------------------------------------------------------------------------------------------------------------- GETTERS }
 
-TMESSAGE CARRY TWO PARAMETERS (AMONG OTHERS) THAT WE USE MOSTLY:
-  WPARAM = DIGIT
-  LPARAM = STRING
+{ FONT COLOR }
+function TMainForm.GetTodayFColor: TColor;
+var
+  AppSet: TSettings;
+begin
+  AppSet:=TSettings.Create;
+  try
+    Result:=AppSet.TMIG.ReadInteger(FollowUpColors, 'TODAY_FCOLOR', 0);
+  finally
+    AppSet.Free;
+  end;
+end;
 
-THE APPLICATION GUI CAN BE HANDLED BY THE MAIN THREAD ONLY. THUS, WORKER THREAD SHOULD NOT MESS UP WITH THE VCL'S. IF THE WORKER THREAD REQUIRE
-ACCESS TO VISUAL COMPONENT TO UPDATE THE DATA (I.E. SHOWING PROGRESS BAR DURING ONGOING CALCULATION), THEN SYNCHRONISATION BETWEEN MAIN THREAD AND WORKER
-THREAD IS NECESSARY. PLEASE NOTE THAT SYNCHRONIZED METHOD IS RUN IN THE MAIN THREAD, THEREFORE, FOR HEAVY DUTY TASK, IT WILL FREEZE APPLICATION UNTIL
-THE CALCULATION IS DONE, IT IS STRONGLY ADVISED NOT TO SYNCHRONIZE HEAVY DUTY TASKS, BUT RATHER USE SYNCHRONIZATION TO UPDATE VCL WHILE THE COMPUTATION
-IS DONE BY THE WORKER THREAD.
+{ BACKGROUND COLOR }
+function TMainForm.GetTodayBColor: TColor;
+var
+  AppSet: TSettings;
+begin
+  AppSet:=TSettings.Create;
+  try
+    Result:=AppSet.TMIG.ReadInteger(FollowUpColors, 'TODAY_BCOLOR', 0);
+  finally
+    AppSet.Free;
+  end;
+end;
 
-NOTED EXCEPTION:
-----------------
+{ FONT COLOR }
+function TMainForm.GetPastFColor: TColor;
+var
+  AppSet: TSettings;
+begin
+  AppSet:=TSettings.Create;
+  try
+    Result:=AppSet.TMIG.ReadInteger(FollowUpColors, 'PAST_FCOLOR', 0);
+  finally
+    AppSet.Free;
+  end;
+end;
 
-IF VCL DRAWING IS DISABLED AND THERE IS NO COMPLEX CODE UNDERNEATH THE COMPONENT, BUT RATHER PROPERTIES, VARIABLES, THEN WORKER THREAD CAN DO ANYTHING
-SAFELY WITH THE COMPONENT. ONCE THE WORK IS DONE, THE VCL DRAWING CAN BE ENABLED BACK AGAIN, AND THE MAIN THREAD CAN REPAINT VCL SAFELY, SHOWING UPDATED DATA
-WITHIN THIS VCL.
+{ BACKGROUND COLOR }
+function TMainForm.GetPastBColor: TColor;
+var
+  AppSet: TSettings;
+begin
+  AppSet:=TSettings.Create;
+  try
+    Result:=AppSet.TMIG.ReadInteger(FollowUpColors, 'PAST_BCOLOR', 0);
+  finally
+    AppSet.Free;
+  end;
+end;
 
-TO PASS THE INFORMATION FROM THE WORKER THREAD TO THE MAIN THREAD, WE USE WINDOWS MESSAGES, AS BELOW.
+{ FONT COLOR }
+function TMainForm.GetFutureFColor: TColor;
+var
+  AppSet: TSettings;
+begin
+  AppSet:=TSettings.Create;
+  try
+    Result:=AppSet.TMIG.ReadInteger(FollowUpColors, 'FUTURE_FCOLOR', 0);
+  finally
+    AppSet.Free;
+  end;
+end;
 
-WINDOWS API:
-------------
+{ BACKGROUND COLOR }
+function TMainForm.GetFutureBColor: TColor;
+var
+  AppSet: TSettings;
+begin
+  AppSet:=TSettings.Create;
+  try
+    Result:=AppSet.TMIG.ReadInteger(FollowUpColors, 'FUTURE_BCOLOR', 0);
+  finally
+    AppSet.Free;
+  end;
+end;
 
-  1. SEND MESSAGE - SYNCHRONOUS DELIVERY, WORKER THREAD MUST WAIT FOR MAIN THREAD.
-  2. POST MESSAGE - ASYNCHRONOUS DELIVERY, RETURN RESULT IMMEDIATELY.
+{ --------------------------------------------------------------------------------------------------------------------------------------------------- SETTERS }
 
-  USAGE:
+{ FONT COLOR }
+procedure TMainForm.SetTodayFColor(NewColor: TColor);
+var
+  AppSet: TSettings;
+begin
+  AppSet:=TSettings.Create;
+  try
+    AppSet.TMIG.WriteInteger(FollowUpColors, 'TODAY_FCOLOR', NewColor);
+    AppSet.Encode(AppConfig);
+  finally
+    AppSet.Free;
+  end;
+end;
 
-  SENDMESSAGE(<FORM>.HANDLE, WM_GETINFO, <YOUR INTEGER>, LPARAM(PCHAR(<YOUR STRING>)));
-  POSTMESSAGE(<FORM>.HANDLE, WM_GETINFO, <YOUR INTEGER>, LPARAM(PCHAR(<YOUR STRING>)));
+{ BACKGROUND COLOR }
+procedure TMainForm.SetTodayBColor(NewColor: TColor);
+var
+  AppSet: TSettings;
+begin
+  AppSet:=TSettings.Create;
+  try
+    AppSet.TMIG.WriteInteger(FollowUpColors, 'TODAY_BCOLOR', NewColor);
+    AppSet.Encode(AppConfig);
+  finally
+    AppSet.Free;
+  end;
+end;
 
-  OR USE POINTER, THEN:
+{ FONT COLOR }
+procedure TMainForm.SetPastFColor(NewColor: TColor);
+var
+  AppSet: TSettings;
+begin
+  AppSet:=TSettings.Create;
+  try
+    AppSet.TMIG.WriteInteger(FollowUpColors, 'PAST_FCOLOR', NewColor);
+    AppSet.Encode(AppConfig);
+  finally
+    AppSet.Free;
+  end;
+end;
 
-  VAR
-    LOG: PSTRING;
+{ BACKGROUND COLOR }
+procedure TMainForm.SetPastBColor(NewColor: TColor);
+var
+  AppSet: TSettings;
+begin
+  AppSet:=TSettings.Create;
+  try
+    AppSet.TMIG.WriteInteger(FollowUpColors, 'PAST_BCOLOR', NewColor);
+    AppSet.Encode(AppConfig);
+  finally
+    AppSet.Free;
+  end;
+end;
 
-  LOG^:='TEST';
+{ FONT COLOR }
+procedure TMainForm.SetFutureFColor(NewColor: TColor);
+var
+  AppSet: TSettings;
+begin
+  AppSet:=TSettings.Create;
+  try
+    AppSet.TMIG.WriteInteger(FollowUpColors, 'FUTURE_FCOLOR', NewColor);
+    AppSet.Encode(AppConfig);
+  finally
+    AppSet.Free;
+  end;
+end;
 
-  SENDMESSAGE(<CLASS>.HANDLE, WM_GETINFO, <YOUR INTEGER>, LPARAM(LOG));
-  POSTMESSAGE(<CLASS>.HANDLE, WM_GETINFO, <YOUR INTEGER>, LPARAM(LOG));
+{ BACKGROUND COLOR }
+procedure TMainForm.SetFutureBColor(NewColor: TColor);
+var
+  AppSet: TSettings;
+begin
+  AppSet:=TSettings.Create;
+  try
+    AppSet.TMIG.WriteInteger(FollowUpColors, 'FUTURE_BCOLOR', NewColor);
+    AppSet.Encode(AppConfig);
+  finally
+    AppSet.Free;
+  end;
+end;
 
-  WARNING! DO NOT USE POSTMESSAGE TO CARRY LARGE CHUNK OF DATA.
-
-************************************************************************************************************************************************************ *)
+{ -------------------------------------------------------------- ! WINDOWS MESSAGES ! ----------------------------------------------------------------------- }
 
 { ----------------------------------------------------------------------------------------------------------------------- MESSAGE RECEIVER FOR WORKER THREADS }
 procedure TMainForm.WndProc(var Msg: Messages.TMessage);
@@ -826,19 +969,6 @@ begin
       end;
   end;
   { --------------------------------------------------------------------------------------------------------------- CLOSE UNITY WHEN WINDOWS IS SHUTTING DOWN }
-
-  (* *********************************************************************************************************************************************************
-
-  WARNING!
-  ========
-
-  IF WE USE "ON CLOSE QUERY" AND PREVENT USER/WINDOWS FROM CLOSING APPLICATION BY CLICKING "X" (REQUIRE USER DECISION TO CLOSE THE PROGRAM, ETC.),
-  THEN WE SHOULD USE GLOBAL FLAG SET BY DEFAULT TO FALSE AND LISTENING TO WINDOWS MESSAGES. IF WINDOWS PASS "QUERY END SESSION" OR "END SESSION",
-  THEN WE SHOULD SET THIS FLAG TO TRUE AND ALLOW TO CLOSE WHEN METHOD "ON CLOSE QUERY" IS CALLED. OTHERWISE, APPLICATION WILL NOT BE TO CLOSED (AWAITING
-  USER RESPOND, ETC.) AND WINDOWS WILL DISPLAY NOTIFICATION THAT APPLICATION PREVENT WINDOWS FROM SHUTTING DOWN.
-
-  ********************************************************************************************************************************************************** *)
-
   { WINDOWS' QUERY FOR SHUTDOWN }
   if Msg.Msg = WM_QUERYENDSESSION then
   begin
@@ -1789,13 +1919,13 @@ begin
 
   { ------------------------------------------------------------- ! DATE & TIME ! --------------------------------------------------------------------------- }
 
-  { ------------------------------------------------------------------------------------------------------------------------------------ FORMAT DATE AND TIME }
   NowTime   :=Now;
   PStartTime:=Now;
   FormatDateTime('hh:mm:ss', NowTime);
   FormatDateTime('hh:mm:ss', PStartTime);
 
   { ------------------------------------------------------------- ! STATUS BAR ! ---------------------------------------------------------------------------- }
+
   StatBar_TXT1.Caption:=stReady;
   StatBar_TXT2.Caption:=FUserName + '.';
   StatBar_TXT3.Caption:=DateToStr(Now);
@@ -1809,7 +1939,7 @@ begin
   btnPassUpdate.Enabled:=False;
   MyPages.ActivePage   :=TabSheet1;
 
-  { ------------------------------------------------------------ ! RISK CLASSESS ! -------------------------------------------------------------------------- }
+  { ------------------------------------------------------------ ! RISK CLASSES ! --------------------------------------------------------------------------- }
 
   { WE USE COMMA DECIMAL SEPARATOR BY DEFAULT }
   if FormatSettings.DecimalSeparator = ',' then
@@ -2832,24 +2962,24 @@ begin
     { FUTURE DAYS }
     if (ACol = Col12) and (CDate(sgAgeView.Cells[ACol, ARow]) > CDate(StatBar_TXT3.Caption)) then
     begin
-      sgAgeView.Canvas.Brush.Color:=clWhite;  { clFutureDay; }
-      sgAgeView.Canvas.Font.Color :=clBlack;  { clWhite;     }
+      sgAgeView.Canvas.Brush.Color:=FutureBColor; //clWhite;
+      sgAgeView.Canvas.Font.Color :=FutureFColor; //clBlack;
       sgAgeView.Canvas.FillRect(Rect);
       sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
     end;
     { TODAY }
     if (ACol = Col12) and (CDate(sgAgeView.Cells[ACol, ARow]) = CDate(StatBar_TXT3.Caption)) then
     begin
-      sgAgeView.Canvas.Brush.Color:=clToday;
-      sgAgeView.Canvas.Font.Color :=clBlack;
+      sgAgeView.Canvas.Brush.Color:=TodayBColor; //clToday;
+      sgAgeView.Canvas.Font.Color :=TodayFColor; //clBlack;
       sgAgeView.Canvas.FillRect(Rect);
       sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
     end;
     { PAST DAYS }
     if (ACol = Col12) and (CDate(sgAgeView.Cells[ACol, ARow]) < CDate(StatBar_TXT3.Caption)) then
     begin
-      sgAgeView.Canvas.Brush.Color:=clPastDay;
-      sgAgeView.Canvas.Font.Color :=clWhite;
+      sgAgeView.Canvas.Brush.Color:=PastBColor; //clPastDay;
+      sgAgeView.Canvas.Font.Color :=PastFColor; //clWhite;
       sgAgeView.Canvas.FillRect(Rect);
       sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
     end;

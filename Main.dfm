@@ -6205,7 +6205,8 @@ object MainForm: TMainForm
       Caption = '-'
     end
     object Action_FollowUpColors: TMenuItem
-      Caption = 'Follow-Up colors'
+      Caption = 'Follow-Up colors (ADMIN)'
+      Enabled = False
       OnClick = Action_FollowUpColorsClick
     end
     object Action_RowHighlight: TMenuItem
