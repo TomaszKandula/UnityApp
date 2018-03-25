@@ -15,6 +15,7 @@ object ColorsForm: TColorsForm
   OldCreateOrder = False
   Position = poMainFormCenter
   OnCreate = FormCreate
+  OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
   object AppMain: TShape
@@ -41,9 +42,9 @@ object ColorsForm: TColorsForm
     Caption = 'Today Follow-Up'
     TabOrder = 0
     object ColorBox1: TShape
-      Left = 16
+      Left = 136
       Top = 61
-      Width = 145
+      Width = 25
       Height = 20
       Pen.Color = clSilver
     end
@@ -157,6 +158,13 @@ object ColorsForm: TColorsForm
       Spacing = 0
       OnClick = btnTodayClick
     end
+    object ColorPreview1: TLabel
+      Left = 84
+      Top = 63
+      Width = 42
+      Height = 13
+      Caption = 'Preview:'
+    end
     object ColorList1: TComboBox
       Left = 16
       Top = 24
@@ -180,9 +188,9 @@ object ColorsForm: TColorsForm
     Caption = 'Past Follow-Up'
     TabOrder = 1
     object ColorBox2: TShape
-      Left = 16
+      Left = 136
       Top = 61
-      Width = 145
+      Width = 25
       Height = 20
       Pen.Color = clSilver
     end
@@ -296,6 +304,13 @@ object ColorsForm: TColorsForm
       Spacing = 0
       OnClick = btnPastClick
     end
+    object ColorPreview2: TLabel
+      Left = 84
+      Top = 63
+      Width = 42
+      Height = 13
+      Caption = 'Preview:'
+    end
     object ColorList2: TComboBox
       Left = 16
       Top = 24
@@ -319,9 +334,9 @@ object ColorsForm: TColorsForm
     Caption = 'Future Follow-Up'
     TabOrder = 2
     object ColorBox3: TShape
-      Left = 16
+      Left = 136
       Top = 61
-      Width = 145
+      Width = 25
       Height = 20
       Pen.Color = clSilver
     end
@@ -435,6 +450,13 @@ object ColorsForm: TColorsForm
       Spacing = 0
       OnClick = btnFutureClick
     end
+    object ColorPreview3: TLabel
+      Left = 84
+      Top = 63
+      Width = 42
+      Height = 13
+      Caption = 'Preview:'
+    end
     object ColorList3: TComboBox
       Left = 16
       Top = 24
@@ -453,7 +475,7 @@ object ColorsForm: TColorsForm
   object ColorDialog: TColorDialog
     Color = clCream
     Options = [cdFullOpen, cdAnyColor]
-    Left = 128
-    Top = 80
+    Left = 200
+    Top = 8
   end
 end

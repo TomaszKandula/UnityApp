@@ -23,6 +23,7 @@ uses
 { REFERENCE TO ARRAYS }
 type
   TLists    = array of array of string;
+  TStrings  = array of string;
   TIntigers = array of integer;
 
 { 'TSTRINGGRID' REFERENCE FOR DELETE OPTION }
@@ -200,7 +201,7 @@ type                                                            (* GUI | MAIN TH
     Edit_CurrPassWd: TEdit;
     Edit_NewPassWd: TEdit;
     Edit_ConfPassWd: TEdit;
-    ShapeList: TShape;
+    ShapeList1: TShape;
     imgKeyAdd: TImage;
     imgKeyRemove: TImage;
     imgUpdateValues: TImage;
@@ -368,9 +369,7 @@ type                                                            (* GUI | MAIN TH
     InetTimer: TTimer;
     StatBar_TXT7: TLabel;
     InnerPanel8Right: TPanel;
-    EventLog: TMemo;
     Cap27: TShape;
-    EventLogTimer: TTimer;
     N9: TMenuItem;
     Action_FilterINF7: TMenuItem;
     N5: TMenuItem;
@@ -387,7 +386,6 @@ type                                                            (* GUI | MAIN TH
     sgPmtTerms: TStringGrid;
     Action_AutoColumnSize: TMenuItem;
     Action_INF4: TMenuItem;
-    EventReload: TImage;
     InnerPanelTop: TPanel;
     SplitLine2: TBevel;
     Action_Search: TMenuItem;
@@ -438,6 +436,14 @@ type                                                            (* GUI | MAIN TH
     custRISKB: TLabel;
     custRISKC: TLabel;
     Action_FollowUpColors: TMenuItem;
+    ShapeList2: TShape;
+    SplitLine3: TBevel;
+    imgEventLog: TImage;
+    Text51: TLabel;
+    sgGroups: TStringGrid;
+    sgUAC: TStringGrid;
+    GridFillerRight8: TImage;
+    Splitter1: TSplitter;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -538,7 +544,6 @@ type                                                            (* GUI | MAIN TH
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure TrayIconDblClick(Sender: TObject);
     procedure InetTimerTimer(Sender: TObject);
-    procedure EventLogTimerTimer(Sender: TObject);
     procedure Action_CloseClick(Sender: TObject);
     procedure Action_FilterINF7Click(Sender: TObject);
     procedure sgAgeViewDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
@@ -571,7 +576,6 @@ type                                                            (* GUI | MAIN TH
     procedure sgInvoiceTrackerKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure sgOpenItemsKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure sgAgeViewKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure EventReloadClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure Action_SearchClick(Sender: TObject);
     procedure Action_CutClick(Sender: TObject);
@@ -604,49 +608,48 @@ type                                                            (* GUI | MAIN TH
     procedure Action_ColumnWidthClick(Sender: TObject);
     procedure FollowupPopupTimer(Sender: TObject);
     procedure Action_FollowUpColorsClick(Sender: TObject);
+    procedure imgEventLogClick(Sender: TObject);
+    procedure imgEventLogMouseEnter(Sender: TObject);
+    procedure imgEventLogMouseLeave(Sender: TObject);
     { ------------------------------------------------------------- ! HELPERS ! ----------------------------------------------------------------------------- }
   private
-    {  }
-    var PAllowClose         :  boolean;
-    var PStartTime          :  TTime;
-    var PAccessLevel        :  string;
-    var PAccessMode         :  string;
-    var POpenItemsUpdate    :  string;
-    { GETTERS AND SETTERS FOR FOLLOW-UP COLORS SAVED IN SETTINGS FILE }
+    { GENERAL }
+    var pAllowClose         :  boolean;
+    var pStartTime          :  TTime;
+    { GETTERS AND SETTERS FOR "FOLLOW-UP" COLORS SAVED IN SETTINGS FILE }
     function  GetTodayFColor  : TColor;
     function  GetTodayBColor  : TColor;
     function  GetPastFColor   : TColor;
     function  GetPastBColor   : TColor;
     function  GetFutureFColor : TColor;
     function  GetFutureBColor : TColor;
-    procedure SetTodayFColor(NewColor:  TColor);
-    procedure SetTodayBColor(NewColor:  TColor);
-    procedure SetPastFColor(NewColor:   TColor);
-    procedure SetPastBColor(NewColor:   TColor);
+    procedure SetTodayFColor (NewColor: TColor);
+    procedure SetTodayBColor (NewColor: TColor);
+    procedure SetPastFColor  (NewColor: TColor);
+    procedure SetPastBColor  (NewColor: TColor);
     procedure SetFutureFColor(NewColor: TColor);
     procedure SetFutureBColor(NewColor: TColor);
   public
-    {  }
-    var FUserName           :  string;
-    var FEventLogPath       :  string;
-    var FDbConnect          :  TADOConnection;
-    var FGroupList          :  TLists;
+    { GENERAL }
+    var WinUserName         :  string;
+    var EventLogPath        :  string;
+    var DbConnect           :  TADOConnection;
+    var GroupList           :  TLists;
     var GroupIdSel          :  string;
     var GroupNmSel          :  string;
     var AgeDateSel          :  string;
     var OSAmount            :  double;
-    var SGImage             :  TImage;
-    {  }
+    var GridPicture         :  TImage;
+    var AccessLevel         :  string;
+    var AccessMode          :  string;
+    var OpenItemsUpdate     :  string;
+    { FOR "FOLLOW-UP" COLOR PICKER }
     property TodayFColor:  TColor read GetTodayFColor  write SetTodayFColor;
     property TodayBColor:  TColor read GetTodayBColor  write SetTodayBColor;
     property PastFColor:   TColor read GetPastFColor   write SetPastFColor;
     property PastBColor:   TColor read GetPastBColor   write SetPastBColor;
     property FutureFColor: TColor read GetFutureFColor write SetFutureFColor;
     property FutureBColor: TColor read GetFutureBColor write SetFutureBColor;
-    {  }
-    property   AccessLevel    : string  read PAccessLevel     write PAccessLevel;
-    property   AccessMode     : string  read PAccessMode      write PAccessMode;
-    property   OpenItemsUpdate: string  read POpenItemsUpdate write POpenItemsUpdate;
     { HELPER METHODS }
     procedure  DebugMsg(const Msg: String);
     procedure  ExecMessage(IsPostType: boolean; YOUR_INT: integer; YOUR_TEXT: string);
@@ -674,12 +677,14 @@ type                                                            (* GUI | MAIN TH
 
 TLogText              = procedure(filename: string; text: string); stdcall;
 TMergeSort            = procedure(Grid: TStringgrid; var Vals: array of integer; sortcol, datatype: integer; ascending: boolean); stdcall;
+TPrintf               = function(text: string; s: string): string; stdcall;
 TGetOSVer             = function(mode: integer): string; stdcall;
 TGetCurrentUserSid    = function: string stdcall;
 TGetBuildInfoAsString = function: string stdcall;
 
 const Assembly = 'Unitylib.dll';
 
+function  Printf(Text: string; s: string): string; stdcall; external Assembly;
 function  GetCurrentUserSid: string; stdcall; external Assembly;
 function  GetOSVer(mode: integer): string; stdcall; external Assembly;
 function  GetBuildInfoAsString: string; stdcall; external Assembly;
@@ -697,7 +702,7 @@ var
 implementation
 
 uses
-  Filter, Tracker, Invoices, Actions, Calendar, About, Search, Worker, Model, Settings, Database, UAC, AgeView, Transactions, ReportBug, Colors;
+  Filter, Tracker, Invoices, Actions, Calendar, About, Search, Worker, Model, Settings, Database, UAC, AgeView, Transactions, ReportBug, Colors, EventLog;
 
 {$R *.dfm}
 
@@ -707,7 +712,7 @@ begin
   OutputDebugString(PChar(Msg));
 end;
 
-{ -------------------------------------------------- ! GETTERS AND SETTERS FOR FOLLOW-UP COLORS ! ----------------------------------------------------------- }
+{ ################################################## ! GETTERS AND SETTERS FOR FOLLOW-UP COLORS ! ########################################################### }
 
 { --------------------------------------------------------------------------------------------------------------------------------------------------- GETTERS }
 
@@ -875,7 +880,7 @@ begin
   end;
 end;
 
-{ -------------------------------------------------------------- ! WINDOWS MESSAGES ! ----------------------------------------------------------------------- }
+{ ############################################################## ! WINDOWS MESSAGES ! ####################################################################### }
 
 { ----------------------------------------------------------------------------------------------------------------------- MESSAGE RECEIVER FOR WORKER THREADS }
 procedure TMainForm.WndProc(var Msg: Messages.TMessage);
@@ -925,7 +930,7 @@ begin
       { LOG TIME IN SECONDS IN DATABASE }
       if Msg.LParam > 0 then
       begin
-        DailyText:=TDataTables.Create(FDbConnect);
+        DailyText:=TDataTables.Create(DbConnect);
         try
           DailyText.OpenTable(TblDaily);
           CUID:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUID, 1, 1), MainForm.sgAgeView.Row];
@@ -940,7 +945,7 @@ begin
             DailyText.CleanUp;
             { DEFINE COLUMNS, VALUES AND CONDITIONS }
             DailyText.Columns.Add(TDaily.STAMP);         DailyText.Values.Add(DateTimeToStr(Now));             DailyText.Conditions.Add(Condition);
-            DailyText.Columns.Add(TDaily.USER_ALIAS);    DailyText.Values.Add(UpperCase(MainForm.FUserName));  DailyText.Conditions.Add(Condition);
+            DailyText.Columns.Add(TDaily.USER_ALIAS);    DailyText.Values.Add(UpperCase(MainForm.WinUserName));  DailyText.Conditions.Add(Condition);
             DailyText.Columns.Add(TDaily.CALLEVENT);     DailyText.Values.Add(IntToStr(CallEvent));            DailyText.Conditions.Add(Condition);
             DailyText.Columns.Add(TDaily.CALLDURATION);  DailyText.Values.Add(IntToStr(Msg.LParam));           DailyText.Conditions.Add(Condition);
             { EXECUTE }
@@ -955,7 +960,7 @@ begin
             DailyText.Columns.Add(TDaily.CUID);         DailyText.Values.Add(CUID);
             DailyText.Columns.Add(TDaily.AGEDATE);      DailyText.Values.Add(MainForm.AgeDateSel);
             DailyText.Columns.Add(TDaily.STAMP);        DailyText.Values.Add(DateTimeToStr(Now));
-            DailyText.Columns.Add(TDaily.USER_ALIAS);   DailyText.Values.Add(UpperCase(MainForm.FUserName));
+            DailyText.Columns.Add(TDaily.USER_ALIAS);   DailyText.Values.Add(UpperCase(MainForm.WinUserName));
             DailyText.Columns.Add(TDaily.EMAIL);        DailyText.Values.Add('0');
             DailyText.Columns.Add(TDaily.CALLEVENT);    DailyText.Values.Add('1');
             DailyText.Columns.Add(TDaily.CALLDURATION); DailyText.Values.Add(IntToStr(Msg.LParam));
@@ -972,15 +977,15 @@ begin
   { WINDOWS' QUERY FOR SHUTDOWN }
   if Msg.Msg = WM_QUERYENDSESSION then
   begin
-    LogText(FEventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(Msg.Msg) + ' (WM_QUERYENDSESSION). Windows is going to be shut down. Closing ' + APPNAME + '...');
-    PAllowClose:=True;
+    LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(Msg.Msg) + ' (WM_QUERYENDSESSION). Windows is going to be shut down. Closing ' + APPNAME + '...');
+    pAllowClose:=True;
     Msg.Result:=1;
   end;
   { WINDOWS IS SHUTTING DOWN }
   if Msg.Msg = WM_ENDSESSION then
   begin
-    LogText(FEventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(Msg.Msg) + ' (WM_ENDSESSION). Windows is shutting down...');
-    PAllowClose:=True;
+    LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(Msg.Msg) + ' (WM_ENDSESSION). Windows is shutting down...');
+    pAllowClose:=True;
   end;
 end;
 
@@ -1359,19 +1364,19 @@ begin
     { COLUMN WIDTH }
     for iCNT:=0 to Self.ColCount - 1 do
     begin
-      if iCNT = 0 then AppSettings.TMIP.WriteInteger(ColWidthName, ColPrefix + IntToStr(iCNT), 10);
-      if iCNT > 0 then AppSettings.TMIP.WriteInteger(ColWidthName, ColPrefix + IntToStr(iCNT), Self.ColWidths[iCNT]);
+      if iCNT = 0 then AppSettings.TMIG.WriteInteger(ColWidthName, ColPrefix + IntToStr(iCNT), 10);
+      if iCNT > 0 then AppSettings.TMIG.WriteInteger(ColWidthName, ColPrefix + IntToStr(iCNT), Self.ColWidths[iCNT]);
     end;
     { SQL COLUMN NAME }
-    for iCNT:=0 to Self.ColCount - 1 do AppSettings.TMIP.WriteString(ColOrderName, ColPrefix + IntToStr(iCNT), Self.SqlColumns[iCNT, 0]);
+    for iCNT:=0 to Self.ColCount - 1 do AppSettings.TMIG.WriteString(ColOrderName, ColPrefix + IntToStr(iCNT), Self.SqlColumns[iCNT, 0]);
     { COLUMN TITLE }
     for iCNT:=0 to Self.ColCount - 1 do
     begin
-      if iCNT = 0 then AppSettings.TMIP.WriteString(ColNames, ColPrefix + IntToStr(iCNT), '');
-      if iCNT > 0 then AppSettings.TMIP.WriteString(ColNames, ColPrefix + IntToStr(iCNT), Self.SqlColumns[iCNT, 1]);
+      if iCNT = 0 then AppSettings.TMIG.WriteString(ColNames, ColPrefix + IntToStr(iCNT), '');
+      if iCNT > 0 then AppSettings.TMIG.WriteString(ColNames, ColPrefix + IntToStr(iCNT), Self.SqlColumns[iCNT, 1]);
     end;
     { ENCODE }
-    AppSettings.Encode(UserConfig);
+    AppSettings.Encode(AppConfig);
   finally
     AppSettings.Free;
   end;
@@ -1406,9 +1411,9 @@ begin
   ColNamesSec:=TStringList.Create;
   AppSettings:=TSettings.Create;
   try
-    AppSettings.TMIP.ReadSection(ColWidthName, ColWidthSec);
-    AppSettings.TMIP.ReadSection(ColOrderName, ColOrderSec);
-    AppSettings.TMIP.ReadSection(ColNames, ColNamesSec);
+    AppSettings.TMIG.ReadSection(ColWidthName, ColWidthSec);
+    AppSettings.TMIG.ReadSection(ColOrderName, ColOrderSec);
+    AppSettings.TMIG.ReadSection(ColNames, ColNamesSec);
     if (ColWidthSec.Count = ColOrderSec.Count) and (ColWidthSec.Count = ColNamesSec.Count) then
     begin
       Self.ColCount:=ColWidthSec.Count;
@@ -1420,19 +1425,19 @@ begin
         if iCNT > 0 then
         begin
           if iCNT < (Self.ColCount - 1) then
-            StrCol:=StrCol + AppSettings.TMIP.ReadString(ColOrderName, ColPrefix + IntToStr(iCNT), '') + ','
+            StrCol:=StrCol + AppSettings.TMIG.ReadString(ColOrderName, ColPrefix + IntToStr(iCNT), '') + ','
               else
-                StrCol:=StrCol + AppSettings.TMIP.ReadString(ColOrderName, ColPrefix + IntToStr(iCNT), '') + ' ';
+                StrCol:=StrCol + AppSettings.TMIG.ReadString(ColOrderName, ColPrefix + IntToStr(iCNT), '') + ' ';
 
           { STORE SQL "COLUMN NAMES" AND "USER FRIENDLY NAMES" INTO HELPER ARRAY }
-          Self.SqlColumns[iCNT, 0]:=AppSettings.TMIP.ReadString(ColOrderName, ColPrefix + IntToStr(iCNT), '');
-          Self.SqlColumns[iCNT, 1]:=AppSettings.TMIP.ReadString(ColNames, ColPrefix + IntToStr(iCNT), '');
+          Self.SqlColumns[iCNT, 0]:=AppSettings.TMIG.ReadString(ColOrderName, ColPrefix + IntToStr(iCNT), '');
+          Self.SqlColumns[iCNT, 1]:=AppSettings.TMIG.ReadString(ColNames, ColPrefix + IntToStr(iCNT), '');
 
           { DISPLAY "USER FRIENDLY" COLUMN NAME }
-          Self.Cells[iCNT, 0]:=AppSettings.TMIP.ReadString(ColNames, ColPrefix + IntToStr(iCNT), '');
+          Self.Cells[iCNT, 0]:=AppSettings.TMIG.ReadString(ColNames, ColPrefix + IntToStr(iCNT), '');
         end;
         { ASSIGN SAVED WIDTH }
-        Self.ColWidths[iCNT]:=AppSettings.TMIP.ReadInteger(ColWidthName, ColPrefix + IntToStr(iCNT), 100);
+        Self.ColWidths[iCNT]:=AppSettings.TMIG.ReadInteger(ColWidthName, ColPrefix + IntToStr(iCNT), 100);
       end;
     end;
   finally
@@ -1479,11 +1484,11 @@ var
   DataTables: TDataTables;
 begin
   Result:=False;
-  DataTables:=TDataTables.Create(MainForm.FDbConnect);
+  DataTables:=TDataTables.Create(MainForm.DbConnect);
   try
     { EXECUTE STORED PROCEDURE }
     DataTables.StrSQL:=EXECUTE + AgeViewExport + SPACE +
-                       QuotedStr(MainForm.FGroupList[MainForm.GroupListBox.ItemIndex, 0]) + COMMA +
+                       QuotedStr(MainForm.GroupList[MainForm.GroupListBox.ItemIndex, 0]) + COMMA +
                        QuotedStr(MainForm.GroupListDates.Text);
     { QUERIED DATA TO SELF AND RELEASE }
     DataTables.SqlToGrid(Self, DataTables.ExecSQL, False, True);
@@ -1524,7 +1529,7 @@ begin
         { ------------------------------------------------------------------------------------------------------------------------------- SUCCESSFULL MESSAGE }
         if Result then
         begin
-          LogText(MainForm.FEventLogPath, 'Thread: [' + IntToStr(OpenThdId) + ']: The data has been successfully transferred to Excel.');
+          LogText(MainForm.EventLogPath, 'Thread: [' + IntToStr(OpenThdId) + ']: The data has been successfully transferred to Excel.');
           SendMessage(MainForm.Handle, WM_GETINFO, 1, LPARAM(PCHAR('The data has been successfully transferred to Excel.')));
         end;
       end;
@@ -1536,12 +1541,12 @@ begin
         if E.Message = xlWARN_MESSAGE then
         { EXCEL NOT FOUND }
         begin
-          LogText(MainForm.FEventLogPath, 'Thread: [' + IntToStr(OpenThdId) + ']: The data cannot be exported because Excel cannot be found.');
+          LogText(MainForm.EventLogPath, 'Thread: [' + IntToStr(OpenThdId) + ']: The data cannot be exported because Excel cannot be found.');
           SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PCHAR('The data cannot be exported because Excel cannot be found.')));
         end else
         { GENERIC MESSAGE }
         begin
-          LogText(MainForm.FEventLogPath, 'Thread: [' + IntToStr(OpenThdId) + ']: The data cannot be exported, error message thrown: ' + E.Message + '.');
+          LogText(MainForm.EventLogPath, 'Thread: [' + IntToStr(OpenThdId) + ']: The data cannot be exported, error message thrown: ' + E.Message + '.');
           SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PCHAR('The data cannot be exported. Please contact IT support.')));
         end;
       end;
@@ -1611,7 +1616,7 @@ begin
       except
         on E: Exception do
         begin
-          LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: CSV Import has failed: ' + ExtractFileName(fPath));
+          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: CSV Import has failed: ' + ExtractFileName(fPath));
           SendMessage(MainForm.Handle, WM_GETINFO, 3, LPARAM(PChar('CSV Import has failed. Please check the file and try again.')));
           IsError:=True;
         end;
@@ -1621,7 +1626,7 @@ begin
       MainForm.ExecMessage(True, 10, stReady);
       if not IsError then
       begin
-        LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: Data has been imported successfully!');
+        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: Data has been imported successfully!');
         MainForm.ExecMessage(False, 1, 'Data has been imported successfully!');
       end;
       Data.Free;
@@ -1668,7 +1673,7 @@ begin
     except
       on E: Exception do
       begin
-        LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: Cannot saved file: ' + ExtractFileName(fPath));
+        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: Cannot saved file: ' + ExtractFileName(fPath));
         SendMessage(MainForm.Handle, WM_GETINFO, 3, LPARAM(PChar('Cannot save the file in the given location.')));
         IsError:=True;
       end;
@@ -1677,7 +1682,7 @@ begin
   finally
     if not IsError then
     begin
-      LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: Data has been exported successfully!');
+      LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: Data has been exported successfully!');
       SendMessage(MainForm.Handle, WM_GETINFO, 1, LPARAM(PChar('Address Book have been exported successfully!')));
     end;
     CSVData.Free;
@@ -1747,26 +1752,28 @@ end;
 procedure TMainForm.LockSettingsPanel;
 begin
   { VISIBLE ON }
-  MainForm.imgOFF.Visible         :=True;
-  MainForm.btnPassUpdate.Enabled  :=False;
+  imgOFF.Visible         :=True;
+  btnPassUpdate.Enabled  :=False;
   { EDIT BOXES }
-  MainForm.Edit_CurrPassWd.Enabled:=False;
-  MainForm.Edit_NewPassWd.Enabled :=False;
-  MainForm.Edit_ConfPassWd.Enabled:=False;
-  MainForm.Edit_CurrPassWd.Text   :='';
-  MainForm.Edit_NewPassWd.Text    :='';
-  MainForm.Edit_ConfPassWd.Text   :='';
-  MainForm.Edit_PASSWORD.Text     :='';
+  Edit_CurrPassWd.Enabled:=False;
+  Edit_NewPassWd.Enabled :=False;
+  Edit_ConfPassWd.Enabled:=False;
+  Edit_CurrPassWd.Text   :='';
+  Edit_NewPassWd.Text    :='';
+  Edit_ConfPassWd.Text   :='';
+  Edit_PASSWORD.Text     :='';
   { STRING GRIDS }
-  MainForm.sgListSection.ClearAll(2, 0, 0, False);
-  MainForm.sgListValue.ClearAll(2, 0, 0, False);
-  MainForm.sgListSection.Row:=1;
-  MainForm.sgListValue.Row:=1;
-  MainForm.sgListSection.Enabled :=False;
-  MainForm.sgListValue.Enabled   :=False;
+  sgListSection.ClearAll(2, 0, 0, False);
+  sgListValue.ClearAll(2, 0, 0, False);
+  sgListSection.Row:=1;
+  sgListValue.Row:=1;
+  sgListSection.Enabled:=False;
+  sgListValue.Enabled  :=False;
+  sgUAC.Enabled        :=False;
+  sgGroups.Enabled     :=False;
   { ENDING }
-  MainForm.btnUnlock.Caption:='Unlock';
-  MainForm.Edit_PASSWORD.SetFocus;
+  btnUnlock.Caption:='Unlock';
+  Edit_PASSWORD.SetFocus;
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------- CO CODE NAME CONVERTION }
@@ -1822,7 +1829,6 @@ begin
   { ENABLE ALL CHECKERS }
   if state = tmEnabled then
   begin
-    EventLogTimer.Enabled    :=True;
     InvoiceScanTimer.Enabled :=True;
     FollowupPopup.Enabled    :=True;
     OILoader.Enabled         :=True;
@@ -1830,7 +1836,6 @@ begin
   { DISABLE ALL CHECKERS }
   if state = tmDisabled then
   begin
-    EventLogTimer.Enabled    :=False;
     InvoiceScanTimer.Enabled :=False;
     FollowupPopup.Enabled    :=False;
     OILoader.Enabled         :=False;
@@ -1858,7 +1863,7 @@ end;
 { ------------------------------------------------------------------------------------------------------------------------ CONVERT STRING DATE TO DATE FORMAT }
 function TMainForm.CDate(StrDate: string): TDate;
 begin
-    Result:=StrToDateDef(StrDate, 0);
+    Result:=StrToDateDef(StrDate, NULLDATE);
 end;
 
 { ################################################################## ! EVENTS ! ############################################################################# }
@@ -1879,18 +1884,17 @@ begin
 
   { ------------------------------------------------------------ ! INITIALIZATION ! ------------------------------------------------------------------------- }
 
-  AppSettings  :=TSettings.Create;
-  FUserName    :=AppSettings.WinUserName;
-  FEventLogPath:=AppSettings.FPathEventLog;
-  AppVersion   :=GetBuildInfoAsString;
-  KeyPreview   :=True;
-  PAllowClose  :=False;
+  AppSettings :=TSettings.Create;
+  WinUserName :=AppSettings.FWinUserName;
+  EventLogPath:=AppSettings.FPathEventLog;
+  AppVersion  :=GetBuildInfoAsString;
+  pAllowClose :=False;
 
   { ---------------------------------------------------- ! LOAD IMAGE FOR STRING GRID CELLS ! --------------------------------------------------------------- }
 
-  SGImage:=TImage.Create(MainForm);
-  SGImage.SetBounds(0, 0, 16, 16);
-  LoadImageFromStream(SGImage, AppSettings.SGImagePath);
+  GridPicture:=TImage.Create(MainForm);
+  GridPicture.SetBounds(0, 0, 16, 16);
+  LoadImageFromStream(GridPicture, AppSettings.FPathGridImage);
 
   { --------------------------------------------------------------------------------------------------------------------------------------- REGIONAL SETTINGS }
   RegSettings:=TFormatSettings.Create;
@@ -1907,10 +1911,10 @@ begin
   Application.UpdateFormatSettings:=False;
 
   { ------------------------------------------------------------------------------------------------------------------------------ APPLICATION NAME | CAPTION }
-  MainForm.Caption :=AppSettings.TMIG.ReadString(ApplicationDetails, 'VALUE', APPNAME);
+  MainForm.Caption :=AppSettings.TMIG.ReadString(ApplicationDetails, 'WND_MAIN', APPNAME);
   GroupName.Caption:=AppSettings.TMIG.ReadString(ApplicationDetails, 'GROUP_NAME', 'n/a');
 
-  { --------------------------------------------------------------- ! WINDOW POSITION ! --------------------------------------------------------------------- }
+  { ----------------------------------------------------------- ! WINDOW POSITION ! ------------------------------------------------------------------------- }
 
   MainForm.DefaultMonitor:=dmDesktop;          (* DO NOT CHANGE THAT *)
   MainForm.Position      :=poDefaultSizeOnly;  (* DO NOT CHANGE THAT *)
@@ -1920,14 +1924,14 @@ begin
   { ------------------------------------------------------------- ! DATE & TIME ! --------------------------------------------------------------------------- }
 
   NowTime   :=Now;
-  PStartTime:=Now;
+  pStartTime:=Now;
   FormatDateTime('hh:mm:ss', NowTime);
-  FormatDateTime('hh:mm:ss', PStartTime);
+  FormatDateTime('hh:mm:ss', pStartTime);
 
   { ------------------------------------------------------------- ! STATUS BAR ! ---------------------------------------------------------------------------- }
 
   StatBar_TXT1.Caption:=stReady;
-  StatBar_TXT2.Caption:=FUserName + '.';
+  StatBar_TXT2.Caption:=WinUserName + '.';
   StatBar_TXT3.Caption:=DateToStr(Now);
 
   { ----------------------------------------------------------- ! DEFAULT VALUES ! -------------------------------------------------------------------------- }
@@ -2033,25 +2037,25 @@ begin
   { ------------------------------------------------------ ! DATABASE INITIALIZATION & UAC ! ---------------------------------------------------------------- }
 
   { ESTABLISH ACTIVE CONNECTIVITY }
-  FDbConnect:=TADOConnection.Create(MainForm);
+  DbConnect:=TADOConnection.Create(MainForm);
   DataBase  :=TDataBase.Create(True);
   try
-    DataBase.InitializeConnection(MainThreadID, True, FDbConnect);
+    DataBase.InitializeConnection(MainThreadID, True, DbConnect);
   finally
     DataBase.Free;
   end;
 
   { UPLOAD USER DETAILS }
-  UserControl:=TUserControl.Create(FDbConnect);
+  UserControl:=TUserControl.Create(DbConnect);
   try
-    FEventLogPath:=AppSettings.FPathEventLog;
-    UserControl.UserName:=FUserName;
+    EventLogPath:=AppSettings.FPathEventLog;
+    UserControl.UserName:=WinUserName;
     AccessLevel:=UserControl.GetAccessData(adAccessLevel);
 
     { IF USERNAME IS NOT FOUND, THEN CLOSE APPLICATION }
     if AccessLevel = '' then
     begin
-      MsgCall(mcError, 'Cannot find account for user name: ' + FUserName + '. Please contact your administrator. Application will be terminated.');
+      MsgCall(mcError, 'Cannot find account for user alias: ' + UpperCase(WinUserName) + '. Please contact your administrator. Application will be terminated.');
       Application.Terminate;
     end;
 
@@ -2059,8 +2063,8 @@ begin
     AccessMode:=UserControl.GetAccessData(adAccessMode);
     if AccessMode = adAccessFull  then Action_FullView.Checked :=True;
     if AccessMode = adAccessBasic then Action_BasicView.Checked:=True;
-    UserControl.GetGroupList(FGroupList, GroupListBox);
-    UserControl.GetAgeDates(GroupListDates, FGroupList[0, 0]);
+    UserControl.GetGroupList(GroupList, GroupListBox);
+    UserControl.GetAgeDates(GroupListDates, GroupList[0, 0]);
 
     { RESTRICTED FOR "ADMINS" }
     if AccessLevel <> acADMIN then
@@ -2069,6 +2073,7 @@ begin
       ReloadCover.Visible   :=True;
       ReloadCover.Cursor    :=crNo;
       GroupListDates.Enabled:=False;
+      Action_FollowUpColors.Enabled:=False;
     end;
 
     { NOT ALLOWED FOR "RO" USERS }
@@ -2085,11 +2090,11 @@ begin
 
   if (GroupListBox.Text <> '') and (GroupListDates.Text <> '') then
   begin
-    GroupIdSel:=FGroupList[GroupListBox.ItemIndex, 0];
-    GroupNmSel:=FGroupList[GroupListBox.ItemIndex, 1];
+    GroupIdSel:=GroupList[GroupListBox.ItemIndex, 0];
+    GroupNmSel:=GroupList[GroupListBox.ItemIndex, 1];
     AgeDateSel:=GroupListDates.Text;
     sgAgeView.Enabled:=True;
-    Transactions:=TTransactions.Create(FDbConnect);
+    Transactions:=TTransactions.Create(DbConnect);
     try
       OpenItemsUpdate:=Transactions.GetDateTime(gdDateTime);
       if OpenItemsUpdate = '' then
@@ -2106,7 +2111,7 @@ begin
 
   { ------------------------------------------------------------ ! GENERAL TABLES ! ------------------------------------------------------------------------- }
 
-  DataTables:=TDataTables.Create(FDbConnect);
+  DataTables:=TDataTables.Create(DbConnect);
   try
 
     { LOAD DATA }
@@ -2129,14 +2134,13 @@ begin
   WebBrowser.Navigate(WideString(AppSettings.TMIG.ReadString(ApplicationDetails, 'START_PAGE', '')), $02);
 
   { -------------------------------------------------------------------------------------------------------------------------- APPLICATION VERSION & USER SID }
-  LogText(FEventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Application version = ' + AppVersion);
-  LogText(FEventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: User SID = ' + GetCurrentUserSid);
+  LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Application version = ' + AppVersion);
+  LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: User SID = ' + GetCurrentUserSid);
 
   { ---------------------------------------------------------- ! TIMERS INTERVALS ! ------------------------------------------------------------------------- }
 
   (* 'INETTIMER' IS EXCLUDED FROM BELOW LIST BECAUSE IT IS CONTROLED BY 'INITIAIZECONNECTION' METHOD *)
 
-  EventLogTimer.Interval   :=AppSettings.TMIG.ReadInteger(TimersSettings, 'EVENTLOG_UPDATE', 60000);   { DEFAULT VALUE 60000   MILISECONDS = 1  MINUTE  }
   InvoiceScanTimer.Interval:=AppSettings.TMIG.ReadInteger(TimersSettings, 'INVOICE_SCANNER', 900000);  { DEFAULT VALUE 900000  MILISECONDS = 15 MINUTES }
   FollowupPopup.Interval   :=AppSettings.TMIG.ReadInteger(TimersSettings, 'FOLLOWUP_CHECKER',1800000); { DEFAULT VALUE 1800000 MILISECONDS = 30 MINUTES }
   OILoader.Interval        :=AppSettings.TMIG.ReadInteger(TimersSettings, 'OI_LOADER',       300000);  { DEFAULT VALUE 3000000 MILISECONDS = 5  MINUTES }
@@ -2161,7 +2165,7 @@ begin
   { RELEASE WEB BROWSER COMPONENT MANUALLY }
   WebBrowser.Free;
   { CLOSE DB CONNECTION }
-  FDbConnect.Close;
+  DbConnect.Close;
   { SAVE AGE VIEW LAYOUT }
   if sgAgeView.RowCount > 2 then sgAgeView.SaveLayout(ColumnWidthName, ColumnOrderName, ColumnNames, ColumnPrefix);
   { SAVE OTHER SETTINGS }
@@ -2173,7 +2177,7 @@ begin
     if MainForm.WindowState = wsMaximized then AppSettings.TMIG.WriteString(ApplicationDetails,  'WINDOW_STATE', 'wsMaximized');
     if MainForm.WindowState = wsMinimized then AppSettings.TMIG.WriteString(ApplicationDetails,  'WINDOW_STATE', 'wsMinimized');
     AppSettings.Encode(AppConfig);
-    LogText(FEventLogPath, 'Application closed.');
+    LogText(EventLogPath, 'Application closed.');
   finally
     AppSettings.Free;
   end;
@@ -2217,7 +2221,7 @@ end;
 procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
   { GO MINIMIZE AND HIDE FROM TASKBAR | DO NOT CLOSE }
-  if not PAllowClose then
+  if not pAllowClose then
   begin
     CanClose:=False;
     ShowWindow(Handle, SW_MINIMIZE);
@@ -2249,7 +2253,7 @@ begin
       and
 
       (
-        sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.INF7, 1, 1), iCNT] = UpperCase(FUserName)
+        sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.INF7, 1, 1), iCNT] = UpperCase(WinUserName)
       )
 
       then Inc(Sum);
@@ -2260,22 +2264,6 @@ begin
     TrayIcon.BalloonHint:='Hello, you have ' + IntToStr(Sum) + ' follow-up dates registered for today.' + CRLF +
                           'Let''s bother some customers and collect some money honey!' + CRLF;
     TrayIcon.ShowBalloonHint;
-  end;
-end;
-
-{ ----------------------------------------------------------------------------------------------------------------------- MIRROR EVENT LOG FILE IN MEMO FIELD }
-procedure TMainForm.EventLogTimerTimer(Sender: TObject);
-begin
-  try
-    try
-      EventLog.Lines.LoadFromFile(FEventLogPath);
-    except
-      EventLog.Lines.Text:='Exception catch message: cannot load event log file. The file is locked by another process. Please try again later.';
-    end;
-  finally
-    EventLog.SelStart:=Length(EventLog.Text);
-    EventLog.SelLength:=0;
-    SendMessage(EventLog.Handle, EM_SCROLLCARET, 0, 0);
   end;
 end;
 
@@ -2294,7 +2282,7 @@ end;
 { --------------------------------------------------------------------------------------------------------------------------------- AUTOLOADER FOR OPEN ITEMS }
 procedure TMainForm.OILoaderTimer(Sender: TObject);
 begin
-  LogText(FEventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Calling open items scanner...');
+  LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Calling open items scanner...');
   TTOpenItemsScanner.Create;
 end;
 
@@ -2309,7 +2297,7 @@ procedure TMainForm.UpTimeTimer(Sender: TObject);
 var
   Result: TTime;
 begin
-  Result:=Now - PStartTime;
+  Result:=Now - pStartTime;
   StatBar_TXT5.Caption:=TimeToStr(Result);
 end;
 
@@ -2352,7 +2340,7 @@ end;
 { --------------------------------------------------------------------------------------------------------------------------------- ADDRESS BOOK CONTEXT MENU }
 procedure TMainForm.BookPopupPopup(Sender: TObject);
 begin
-  Action_ShowMyEntries.Caption:='Show ' + UpperCase(MainForm.FUserName) + ' entries';
+  Action_ShowMyEntries.Caption:='Show ' + UpperCase(MainForm.WinUserName) + ' entries';
   { CHECK IF USER SELECT A RANGE }
   if (sgAddressBook.Selection.Bottom - sgAddressBook.Selection.Top) > 0 then
     { WE ALLOW TO DELETE ONLY ONE LINE AT THE TIME }
@@ -2387,7 +2375,7 @@ begin
   sgAddressBook.RowCount:=sgAddressBook.RowCount + 1;
   sgAddressBook.Row:=sgAddressBook.RowCount - 1;
   sgAddressBook.Cells[0, sgAddressBook.RowCount - 1]:='';
-  sgAddressBook.Cells[1, sgAddressBook.RowCount - 1]:=MainForm.FUserName;
+  sgAddressBook.Cells[1, sgAddressBook.RowCount - 1]:=MainForm.WinUserName;
   for jCNT:=2 to sgAddressBook.ColCount - 1 do sgAddressBook.Cells[jCNT, sgAddressBook.RowCount - 1]:='';
 end;
 
@@ -2401,7 +2389,7 @@ begin
   { EXECUTE DELETE QUERY }
   if sgAddressBook.Cells[0, sgAddressBook.Row] <> '' then
   begin
-    DataTables:=TDataTables.Create(FDbConnect);
+    DataTables:=TDataTables.Create(DbConnect);
     try
       DataTables.StrSQL:=DELETE_FROM         +
                            TblAddressbook    +
@@ -2554,7 +2542,7 @@ begin
         sgAddressBook.RowCount:=sgAddressBook.RowCount + 1;
         { ----------------------------------------------------------------------------------------------------------------------------------------- MOVE DATA }
         sgAddressBook.Cells[0, sgAddressBook.RowCount - 1 + OffSet]:='';
-        sgAddressBook.Cells[1, sgAddressBook.RowCount - 1 + OffSet]:=MainForm.FUserName;
+        sgAddressBook.Cells[1, sgAddressBook.RowCount - 1 + OffSet]:=MainForm.WinUserName;
         sgAddressBook.Cells[2, sgAddressBook.RowCount - 1 + OffSet]:=sgOpenItems.Cells[37, jCNT];
         sgAddressBook.Cells[3, sgAddressBook.RowCount - 1 + OffSet]:=sgOpenItems.Cells[2,  jCNT];
         sgAddressBook.Cells[4, sgAddressBook.RowCount - 1 + OffSet]:=sgOpenItems.Cells[6,  jCNT];
@@ -2614,7 +2602,7 @@ procedure TMainForm.Action_PaymentTermClick(Sender: TObject);
 var
   AgeView: TAgeView;
 begin
-  AgeView:=TAgeView.Create(FDbConnect);
+  AgeView:=TAgeView.Create(DbConnect);
   try
     MsgCall(mcInfo, 'Payment term: ' + AgeView.GetData(sgAgeView, sgPmtTerms, TSnapshots.fPAYMENT_TERMS));
   finally
@@ -2627,7 +2615,7 @@ procedure TMainForm.Action_Group3Click(Sender: TObject);
 var
   AgeView: TAgeView;
 begin
-  AgeView:=TAgeView.Create(FDbConnect);
+  AgeView:=TAgeView.Create(DbConnect);
   try
     MsgCall(mcInfo, 'Assigned to Group3: ' + AgeView.GetData(sgAgeView, sgGroup3, TSnapshots.fGROUP3));
   finally
@@ -2640,7 +2628,7 @@ procedure TMainForm.Action_PersonClick(Sender: TObject);
 var
   AgeView: TAgeView;
 begin
-  AgeView:=TAgeView.Create(FDbConnect);
+  AgeView:=TAgeView.Create(DbConnect);
   try
     MsgCall(mcInfo, 'Assigned to Person: ' + AgeView.GetData(sgAgeView, sgPerson, TSnapshots.fPERSON));
   finally
@@ -2675,7 +2663,7 @@ procedure TMainForm.Action_BasicViewClick(Sender: TObject);
 var
   AgeView: TAgeView;
 begin
-  AgeView:=TAgeView.Create(FDbConnect);
+  AgeView:=TAgeView.Create(DbConnect);
   try
     AgeView.AgeViewMode(mainForm.sgAgeView, AgingBasic);
   finally
@@ -2692,7 +2680,7 @@ procedure TMainForm.Action_FullViewClick(Sender: TObject);
 var
   AgeView: TAgeView;
 begin
-  AgeView:=TAgeView.Create(FDbConnect);
+  AgeView:=TAgeView.Create(DbConnect);
   try
     AgeView.AgeViewMode(mainForm.sgAgeView, AgingFull);
   finally
@@ -2736,12 +2724,12 @@ begin
   TrackerForm.CUID:=sgInvoiceTracker.Cells[sgInvoiceTracker.ReturnColumn(TTracker.CUID, 1, 1), sgInvoiceTracker.Row];
 
   { R/W USER CAN REMOVE ITEM }
-  if (MainForm.AccessLevel = acReadWrite) and (UpperCase(MainForm.FUserName) = UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
+  if (MainForm.AccessLevel = acReadWrite) and (UpperCase(MainForm.WinUserName) = UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
     if MsgCall(mcQuestion2, 'Are you sure you want to remove selected customer?') = IDYES then
       TrackerForm.Delete;
 
   { R/W USER CANNOT REMOVE OTHER ITEM }
-  if (MainForm.AccessLevel = acReadWrite) and (UpperCase(MainForm.FUserName) <> UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
+  if (MainForm.AccessLevel = acReadWrite) and (UpperCase(MainForm.WinUserName) <> UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
     MsgCall(mcWarn, 'You cannot remove someone''s else item.');
 
   { ADMINISTRATOR CAN REMOVE ANY ITEM }
@@ -2763,7 +2751,7 @@ end;
 { --------------------------------------------------------------------------------------------------------------------------------------------- SHOW MY ITEMS }
 procedure TMainForm.Action_ShowMyClick(Sender: TObject);
 begin
-  TTInvoiceTrackerRefresh.Create(UpperCase(MainForm.FUserName));
+  TTInvoiceTrackerRefresh.Create(UpperCase(MainForm.WinUserName));
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------------- SHOW ALL ITEMS }
@@ -2787,13 +2775,13 @@ procedure TMainForm.GroupListBoxSelect(Sender: TObject);
 var
   UserControl: TUserControl;
 begin
-  UserControl:=TUserControl.Create(FDbConnect);
+  UserControl:=TUserControl.Create(DbConnect);
   try
-    UserControl.UserName:=FUserName;
-    if not (UserControl.GetAgeDates(GroupListDates, FGroupList[GroupListBox.ItemIndex, 0])) then
+    UserControl.UserName:=WinUserName;
+    if not (UserControl.GetAgeDates(GroupListDates, GroupList[GroupListBox.ItemIndex, 0])) then
     begin
       MsgCall(mcError, 'Cannot list age dates for selected group. Please contact IT support.');
-      LogText(FEventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: "GetAgeDates" returned false. Cannot get list of age dates for selected group (' + FGroupList[GroupListBox.ItemIndex, 0] + ').');
+      LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: "GetAgeDates" returned false. Cannot get list of age dates for selected group (' + GroupList[GroupListBox.ItemIndex, 0] + ').');
     end;
   finally
     UserControl.Free;
@@ -2962,24 +2950,24 @@ begin
     { FUTURE DAYS }
     if (ACol = Col12) and (CDate(sgAgeView.Cells[ACol, ARow]) > CDate(StatBar_TXT3.Caption)) then
     begin
-      sgAgeView.Canvas.Brush.Color:=FutureBColor; //clWhite;
-      sgAgeView.Canvas.Font.Color :=FutureFColor; //clBlack;
+      sgAgeView.Canvas.Brush.Color:=FutureBColor;
+      sgAgeView.Canvas.Font.Color :=FutureFColor;
       sgAgeView.Canvas.FillRect(Rect);
       sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
     end;
     { TODAY }
     if (ACol = Col12) and (CDate(sgAgeView.Cells[ACol, ARow]) = CDate(StatBar_TXT3.Caption)) then
     begin
-      sgAgeView.Canvas.Brush.Color:=TodayBColor; //clToday;
-      sgAgeView.Canvas.Font.Color :=TodayFColor; //clBlack;
+      sgAgeView.Canvas.Brush.Color:=TodayBColor;
+      sgAgeView.Canvas.Font.Color :=TodayFColor;
       sgAgeView.Canvas.FillRect(Rect);
       sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
     end;
     { PAST DAYS }
     if (ACol = Col12) and (CDate(sgAgeView.Cells[ACol, ARow]) < CDate(StatBar_TXT3.Caption)) then
     begin
-      sgAgeView.Canvas.Brush.Color:=PastBColor; //clPastDay;
-      sgAgeView.Canvas.Font.Color :=PastFColor; //clWhite;
+      sgAgeView.Canvas.Brush.Color:=PastBColor;
+      sgAgeView.Canvas.Font.Color :=PastFColor;
       sgAgeView.Canvas.FillRect(Rect);
       sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
     end;
@@ -3002,16 +2990,19 @@ begin
     begin
       if AgeViewCUID = sgInvoiceTracker.Cells[2, iCNT] then
       begin
-        sgAgeView.Canvas.Draw(Rect.Left + Width - 16, Rect.Top, SGImage.Picture.Graphic);
+        sgAgeView.Canvas.Draw(Rect.Left + Width - 16, Rect.Top, GridPicture.Picture.Graphic);
         Break;
       end;
     end;
   end;
 
-  { DRAW ONLY SELECTED COLUMNS }
-  if (ACol = Col1) or (ACol = Col2) or (ACol = Col3) or (ACol = Col4) or (ACol = Col5) or (ACol = Col6) or (ACol = Col7) or (ACol = Col8) or (ACol = Col9) or (ACol = Col10) or (ACol = Col11)
-    then
-      sgAgeView.ColorValues(ARow, ACol, Rect, clRed, clBlack);
+  { COLOUR NEGATIVE VALUES IN SELECTED COLUMNS }
+  if (ACol = Col1)  or (ACol = Col2) or (ACol = Col3) or
+     (ACol = Col4)  or (ACol = Col5) or (ACol = Col6) or
+     (ACol = Col7)  or (ACol = Col8) or (ACol = Col9) or
+     (ACol = Col10) or (ACol = Col11)
+  then
+    sgAgeView.ColorValues(ARow, ACol, Rect, clRed, clBlack);
 
 end;
 
@@ -3159,7 +3150,7 @@ begin
   begin
     if MsgCall(mcQuestion1, 'Are you sure you want to exit the application?') = IDOK then
     begin
-      PAllowClose:=True;
+      pAllowClose:=True;
       Close;
     end;
   end;
@@ -3289,7 +3280,7 @@ begin
     if not (sgAddressBook.Cells[0, sgAddressBook.Row] = '') then
     begin
       { CONNECT AND UPDATE }
-      DataTables:=TDataTables.Create(FDbConnect);
+      DataTables:=TDataTables.Create(DbConnect);
       try
         { GET USER VALUE AND COLUMN NAME }
         Value:=DataTables.CleanStr(sgAddressBook.Cells[sgAddressBook.Col, sgAddressBook.Row], True);
@@ -3713,6 +3704,21 @@ begin
   Text50.Font.Color:=clBlack;
 end;
 
+{ ------------------------------------------------------------------------------------------------------------------------------------------------- EVENT LOG }
+procedure TMainForm.imgEventLogMouseEnter(Sender: TObject);
+begin
+  { CHANGE CURSOR TO HAND POINT }
+  imgAllowEdit.Cursor:=crHandPoint;
+  Text51.Font.Color:=FONCOLOR;
+end;
+
+procedure TMainForm.imgEventLogMouseLeave(Sender: TObject);
+begin
+  { CHANGE CURSOR TO DEFAULT (ARROW) }
+  imgAllowEdit.Cursor:=crDefault;
+  Text51.Font.Color:=clBlack;
+end;
+
 { ---------------------------------------------------------------------------------------------------------------------- SECTION LIST | SWITCH OFF/ON BUTTONS }
 procedure TMainForm.sgListSectionClick(Sender: TObject);
 begin
@@ -3749,22 +3755,6 @@ end;
 
 { --------------------------------------------------------------- ! BUTTON CALLS ! -------------------------------------------------------------------------- }
 
-{ ----------------------------------------------------------------------------------------------------------------------------------- MEMO | RELOAD EVENT LOG }
-procedure TMainForm.EventReloadClick(Sender: TObject);
-begin
-  try
-    try
-      EventLog.Lines.LoadFromFile(FEventLogPath);
-    except
-      EventLog.Lines.Text:='Exception catch message: cannot load event log file. The file is locked by another process. Please try again later.';
-    end;
-  finally
-    EventLog.SelStart:=Length(EventLog.Text);
-    EventLog.SelLength:=0;
-    SendMessage(EventLog.Handle, EM_SCROLLCARET, 0, 0);
-  end;
-end;
-
 { ------------------------------------------------------------------------------------------------------------------------------------------- AGE VIEW | LOAD }
 procedure TMainForm.btnLoadAgeViewClick(Sender: TObject);
 begin
@@ -3772,8 +3762,8 @@ begin
   begin
     { REMEMBER USER'S CHOICE }
     { AUTOMATION WIIL FOLLOW }
-    GroupIdSel:=FGroupList[GroupListBox.ItemIndex, 0];
-    GroupNmSel:=FGroupList[GroupListBox.ItemIndex, 1];
+    GroupIdSel:=GroupList[GroupListBox.ItemIndex, 0];
+    GroupNmSel:=GroupList[GroupListBox.ItemIndex, 1];
     AgeDateSel:=GroupListDates.Text;
     { SWITCH OFF ALL TIMERS }
     MainForm.SwitchTimers(tmDisabled);
@@ -3795,7 +3785,7 @@ begin
   end else
   begin
     StatBar_TXT1.Caption:=stReady;
-    LogText(FEventLogPath, '[Open Items]: User have no R/W access, process halted.');
+    LogText(EventLogPath, '[Open Items]: User have no R/W access, process halted.');
   end;
 end;
 
@@ -3819,7 +3809,7 @@ begin
     else
     begin
       StatBar_TXT1.Caption:='Insufficient UAC level.';
-      LogText(FEventLogPath, '[Make Group]: User have no R/W access, process halted.');
+      LogText(EventLogPath, '[Make Group]: User have no R/W access, process halted.');
     end;
 end;
 
@@ -3916,6 +3906,12 @@ begin
     sgListValue.Options  :=sgListValue.Options   + [goEditing];
     Text50.Font.Style    :=[fsBold];
   end;
+end;
+
+{ -------------------------------------------------------------------------------------------------------------------------------------------- OPEN EVENT LOG }
+procedure TMainForm.imgEventLogClick(Sender: TObject);
+begin
+  WndCall(EventForm, stModeless);
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------- VALUES LIST | ADD KEY }
@@ -4050,6 +4046,8 @@ procedure TMainForm.btnUnlockClick(Sender: TObject);
         Edit_NewPassWd.Enabled :=True;
         Edit_ConfPassWd.Enabled:=True;
         { STRING GRIDS }
+        sgUAC.Enabled:=True;
+        sgGroups.Enabled:=True;
         sgListSection.Enabled:=True;
         sgListValue.Enabled:=True;
         sgListSectionClick(self);

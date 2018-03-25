@@ -21,10 +21,8 @@ uses
 type
   TUserControl = class(TDataTables)
   {$TYPEINFO ON}
-  private
-    var pUserName: string;
   public
-    property UserName: string read pUserName write pUserName;
+    var UserName: string;
     function GetAccessData(DataType: integer): string;
     function GetGroupList(var List: TLists; GroupListBox: TComboBox): boolean;
     function GetAgeDates(AgeDatesBox: TComboBox; GroupID: string): boolean;
@@ -36,10 +34,10 @@ implementation
 function TUserControl.GetAccessData(DataType: integer): string;
 begin
   Result:='';
-  if pUserName = '' then Exit;
+  if UserName = '' then Exit;
   try
     OpenTable(TblUAC);
-    DataSet.Filter:=TUAC.USERNAME + EQUAL + QuotedStr(pUserName);
+    DataSet.Filter:=TUAC.USERNAME + EQUAL + QuotedStr(UserName);
     { USERNAME IS CONSTRAINED, THUS EXCEPTING ONLY ONE ROW IF FOUND }
     if not DataSet.EOF then
     begin

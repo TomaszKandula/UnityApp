@@ -212,6 +212,16 @@ begin
   end;
 end;
 
+{ ----------------------------------------------------------------------------------------------------------- SIMPLE WRAPPER OF STRING REPLACE | ONLY STRINGS }
+function Printf(text: string; s: string): string;
+begin
+  Text:=StringReplace(Text, '%s',   s,      [rfReplaceAll]);
+  Text:=StringReplace(Text, '\n',   #10,    [rfReplaceAll]);
+  Text:=StringReplace(Text, '\r\n', #13#10, [rfReplaceAll]);
+  Text:=StringReplace(Text, '\r',   #13,    [rfReplaceAll]);
+  Result:=Text;
+end;
+
 { ----------------------------------------------------------------------------------------------------------------------------------------- TEXT INTO LOGFILE }
 procedure LogText(FileName: string; Text: string); stdcall;
 var
@@ -341,6 +351,9 @@ begin
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------ QUICK SORT }
+
+{ !!! DO NOT USE, ACCESS VIOLATION ISSUE, TO BE FIXED !!! }
+
 procedure QuickSort(var A: array of double; var L: array of integer; iLo, iHi: integer; ASC: boolean);
 { 'A' VARIABLE HOLDS NUMERICAL DATA TO BE SORTED. 'L' VARIABLE IS ASSOCIATED COLUMN WITH ORIGINAL LIST POSITION. THE SECOND ASSOCIATED COLUMN FOLLOWS   }
 { 'A' COLUMN, BUT IT IS NOT SORTED. IT ALLOWS TO ASSIGN SORTED VALUES BACK TO ORIGINAL LIST POSITION AFTER COMPUTATION IS DONE. THIS IS TO BE USED WHEN }
@@ -425,10 +438,11 @@ end;
 { --------------------------------------------------------------------------------------------------------------------------------------------------- EXPORTS }
 
 exports
+  Printf,
   LogText,
   GetOSVer,
   MergeSort,
-  QuickSort,  (* DO NOT USE, ACCESS VIOLATION ISSUE, TO BE FIXED *)
+  QuickSort,
   GetCurrentUserSid,
   GetBuildInfoAsString;
 

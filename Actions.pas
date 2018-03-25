@@ -87,15 +87,11 @@ type
     procedure Cust_MailClick(Sender: TObject);
     procedure Cust_PhoneClick(Sender: TObject);
     procedure btnClearFollowUpClick(Sender: TObject);
-  private
-    pCUID       :  string;
-    pCustName   :  string;
-    pCustNumber :  string;
   public
-    var         IsEdit    :  boolean;
-    property    CUID      :  string read pCUID       write pCUID;
-    property    CustName  :  string read pCustName   write pCustName;
-    property    CustNumber:  string read pCustNumber write pCustNumber;
+    var IsEdit     :  boolean;
+    var CUID       :  string;
+    var CustName   :  string;
+    var CustNumber :  string;
   published
     function  GetRunningApps(SearchName: string): boolean;
     procedure GetData(OpenItemsDest: TStringGrid; HistoryDest: TStringGrid; OpenItemsSrc: TStringGrid);
@@ -201,7 +197,7 @@ begin
 
     { ----------------------------------------------------------- ! CUSTOMER DATA ! ------------------------------------------------------------------------- }
 
-    AddrBook:=TDataTables.Create(MainForm.FDbConnect);
+    AddrBook:=TDataTables.Create(MainForm.DbConnect);
     try
       AddrBook.Columns.Add(TAddressBook.CONTACT);
       AddrBook.Columns.Add(TAddressBook.ESTATEMENTS);
@@ -225,7 +221,7 @@ begin
 
     { ----------------------------------------------------------- ! GENERAL COMMENTS ! ---------------------------------------------------------------------- }
 
-    GenText:=TDataTables.Create(MainForm.FDbConnect);
+    GenText:=TDataTables.Create(MainForm.DbConnect);
     try
       GenText.OpenTable(TblGeneral);
       GenText.DataSet.Filter:=TGeneral.CUID + EQUAL + QuotedStr(CUID);
@@ -251,7 +247,7 @@ procedure TActionsForm.UpdateHistory(Grid: TStringGrid);
 var
   DailyText: TDataTables;
 begin
-    DailyText:=TDataTables.Create(MainForm.FDbConnect);
+    DailyText:=TDataTables.Create(MainForm.DbConnect);
     try
       DailyText.OpenTable(TblDaily);
       DailyText.DataSet.Filter:=TDaily.CUID + EQUAL + QuotedStr(CUID);
@@ -301,7 +297,7 @@ begin
   AppSettings:=TSettings.Create;
   try
     { CHECK FOR 'LYNCCALL.EXE' }
-    if not FileExists(AppSettings.AppDir + LyncCall) then
+    if not FileExists(AppSettings.FAppDir + LyncCall) then
     begin
       MainForm.MsgCall(mcError, APPNAME + ' cannot find ''lynccall.exe''. Please contact IT support.');
       Exit;
@@ -313,7 +309,7 @@ begin
       Exit;
     end;
     { RUN LYNC WITH GIVEN PHONE NUMBER }
-    ShellExecute(ActionsForm.Handle, 'open', PChar(AppSettings.AppDir + LyncCall), PChar(ActionsForm.Cust_Phone.Text), nil, SW_SHOWNORMAL);
+    ShellExecute(ActionsForm.Handle, 'open', PChar(AppSettings.FAppDir + LyncCall), PChar(ActionsForm.Cust_Phone.Text), nil, SW_SHOWNORMAL);
     if ActionsForm.DailyCom.Text = '' then ActionsForm.DailyCom.Text:='Called customer today.'
       else
         ActionsForm.DailyCom.Text:=ActionsForm.DailyCom.Text + CRLF + 'Called customer today.';
@@ -440,7 +436,7 @@ begin
     begin
       UpdateOK:=False;
       InsertOK:=False;
-      DailyText:=TDataTables.Create(MainForm.FDbConnect);
+      DailyText:=TDataTables.Create(MainForm.DbConnect);
       try
         DailyText.OpenTable(TblDaily);
         Condition:=TDaily.CUID + EQUAL + QuotedStr(CUID) + _AND + TDaily.AGEDATE + EQUAL + QuotedStr(MainForm.AgeDateSel);
@@ -451,7 +447,7 @@ begin
           DailyText.CleanUp;
           { DEFINE COLUMNS, VALUES AND CONDITIONS }
           DailyText.Columns.Add(TDaily.STAMP);        DailyText.Values.Add(DateTimeToStr(Now));             DailyText.Conditions.Add(Condition);
-          DailyText.Columns.Add(TDaily.USER_ALIAS);   DailyText.Values.Add(UpperCase(MainForm.FUserName));  DailyText.Conditions.Add(Condition);
+          DailyText.Columns.Add(TDaily.USER_ALIAS);   DailyText.Values.Add(UpperCase(MainForm.WinUserName));DailyText.Conditions.Add(Condition);
           DailyText.Columns.Add(TDaily.FIXCOMMENT);   DailyText.Values.Add(DailyCom.Text);                  DailyText.Conditions.Add(Condition);
           { EXECUTE }
           UpdateOK:=DailyText.UpdateRecord(TblDaily);
@@ -465,7 +461,7 @@ begin
           DailyText.Columns.Add(TDaily.CUID);         DailyText.Values.Add(CUID);
           DailyText.Columns.Add(TDaily.AGEDATE);      DailyText.Values.Add(MainForm.AgeDateSel);
           DailyText.Columns.Add(TDaily.STAMP);        DailyText.Values.Add(DateTimeToStr(Now));
-          DailyText.Columns.Add(TDaily.USER_ALIAS);   DailyText.Values.Add(UpperCase(MainForm.FUserName));
+          DailyText.Columns.Add(TDaily.USER_ALIAS);   DailyText.Values.Add(UpperCase(MainForm.WinUserName));
           DailyText.Columns.Add(TDaily.EMAIL);        DailyText.Values.Add('0');
           DailyText.Columns.Add(TDaily.CALLEVENT);    DailyText.Values.Add('0');
           DailyText.Columns.Add(TDaily.CALLDURATION); DailyText.Values.Add('0');
@@ -499,7 +495,7 @@ begin
   begin
     if GeneralCom.Text <> '' then
     begin
-      GenText:=TDataTables.Create(MainForm.FDbConnect);
+      GenText:=TDataTables.Create(MainForm.DbConnect);
       try
         GenText.OpenTable(TblGeneral);
         Condition:=TGeneral.CUID + EQUAL + QuotedStr(CUID);
@@ -510,7 +506,7 @@ begin
           GenText.CleanUp;
           { DEFINE COLUMNS, VALUES AND CONDITIONS }
           GenText.Columns.Add(TGeneral.STAMP);        GenText.Values.Add(DateTimeToStr(Now));             GenText.Conditions.Add(Condition);
-          GenText.Columns.Add(TGeneral.USER_ALIAS);   GenText.Values.Add(UpperCase(MainForm.FUserName));  GenText.Conditions.Add(Condition);
+          GenText.Columns.Add(TGeneral.USER_ALIAS);   GenText.Values.Add(UpperCase(MainForm.WinUserName));GenText.Conditions.Add(Condition);
           GenText.Columns.Add(TGeneral.FIXCOMMENT);   GenText.Values.Add(GeneralCom.Text);                GenText.Conditions.Add(Condition);
           { EXECUTE }
           GenText.UpdateRecord(TblGeneral);
@@ -522,7 +518,7 @@ begin
           { DEFINE COLUMNS AND VALUES }
           GenText.Columns.Add(TGeneral.CUID);       GenText.Values.Add(CUID);
           GenText.Columns.Add(TGeneral.STAMP);      GenText.Values.Add(DateTimeToStr(Now));
-          GenText.Columns.Add(TGeneral.USER_ALIAS); GenText.Values.Add(UpperCase(MainForm.FUserName));
+          GenText.Columns.Add(TGeneral.USER_ALIAS); GenText.Values.Add(UpperCase(MainForm.WinUserName));
           GenText.Columns.Add(TGeneral.FIXCOMMENT); GenText.Values.Add(GeneralCom.Text);
           GenText.Columns.Add(TGeneral.FOLLOWUP);   GenText.Values.Add('');
           { EXECUTE }
@@ -667,7 +663,7 @@ var
   AddrBook:  TDataTables;
   Condition: string;
 begin
-  AddrBook:=TDataTables.Create(MainForm.FDbConnect);
+  AddrBook:=TDataTables.Create(MainForm.DbConnect);
   try
     AddrBook.OpenTable(TblAddressbook);
     Condition:=TAddressBook.CUID + EQUAL + QuotedStr(CUID);
@@ -710,7 +706,7 @@ begin
     Statement.OpenItems:=MainForm.sgOpenItems;
     { GET HTML LAYOUT }
     Statement.DocType:=dcStatement;
-    Statement.HTMLLayout:=Statement.LoadTemplate(AppSettings.LayoutDir + AppSettings.TMIG.ReadString(VariousLayouts, 'STATEMENT', '') + '.html');
+    Statement.HTMLLayout:=Statement.LoadTemplate(AppSettings.FLayoutDir + AppSettings.TMIG.ReadString(VariousLayouts, 'STATEMENT', '') + '.html');
     { SEND STATEMENT }
     Statement.MailSubject:='Account Statement (' + Statement.CustName + ')';
     if Statement.SendDocument then
@@ -766,7 +762,7 @@ var
 begin
   if MainForm.MsgCall(mcQuestion2, 'Are you sure you want to clear this follow up?') = ID_YES then
   begin
-    GeneralText:=TDataTables.Create(MainForm.FDbConnect);
+    GeneralText:=TDataTables.Create(MainForm.DbConnect);
     try
       Condition:=TGeneral.CUID + EQUAL + QuotedStr(CUID);
       GeneralText.Columns.Add(TGeneral.FOLLOWUP); GeneralText.Values.Add(SPACE); GeneralText.Conditions.Add(Condition);

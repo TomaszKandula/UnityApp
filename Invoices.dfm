@@ -44,8 +44,6 @@ object InvoicesForm: TInvoicesForm
     TabOrder = 0
     OnDrawCell = InvoicesGridDrawCell
     OnKeyDown = InvoicesGridKeyDown
-    ExplicitWidth = 564
-    ExplicitHeight = 262
     ColWidths = (
       10
       183
@@ -59,7 +57,5 @@ object InvoicesForm: TInvoicesForm
     Height = 19
     Panels = <>
     ParentColor = True
-    ExplicitTop = 262
-    ExplicitWidth = 564
   end
 end

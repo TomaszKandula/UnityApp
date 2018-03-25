@@ -47,14 +47,10 @@ type
     var RCAcount   : cardinal;
     var RCBcount   : cardinal;
     var RCCcount   : cardinal;
-    { THREAD ID }
-    var idThd      : integer;
     { SELECTION }
-    var PGroupID   : string;
-    var PAgeDate   : string;
+    var GroupID   : string;
+    var AgeDate   : string;
   published
-    property   GroupID: string read PGroupID write PGroupID;
-    property   AgeDate: string read PAgeDate write PAgeDate;
     destructor Destroy; override;
     procedure  Read(var Grid: TStringGrid);
     procedure  Details(var Grid: TStringGrid);
@@ -71,7 +67,7 @@ type
 implementation
 
 uses
-  Settings, SQL;
+  Settings;
 
 { ############################################################## ! AGE VIEW CLASS ! ######################################################################### }
 
@@ -94,7 +90,7 @@ begin
   CmdType:=cmdText;
   StrSQL :=EXECUTE + AgeViewReport + SPACE + QuotedStr(StrCol) + COMMA + QuotedStr(GroupID) + COMMA + QuotedStr(AgeDate);
   SqlToGrid(Grid, ExecSQL, False, False);
-  LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(idThd) + ']: SQL statement applied [' + StrSQL + '].');
+  LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: SQL statement applied [' + StrSQL + '].');
   { ---------------------------------------------------------------------------------------------------------------------------------------- CALCULATE VALUES }
   for iCNT:=1 to Grid.RowCount - 1 do
   begin
@@ -727,9 +723,9 @@ begin
     ExecSQL;
   except
     on E: Exception do
-      LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(idThd) + ']: Cannot send to server. Error has been thrown: ' + E.Message);
+      LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Cannot send to server. Error has been thrown: ' + E.Message);
   end;
-  LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(idThd) + ']: Age View transferred to Microsoft SQL Server. Rows affected: ' + IntToStr(High(SourceArray)) + '.');
+  LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Age View transferred to Microsoft SQL Server. Rows affected: ' + IntToStr(High(SourceArray)) + '.');
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------- EXPORT AGE VIEW TO CSV FILE }

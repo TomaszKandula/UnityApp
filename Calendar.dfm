@@ -101,7 +101,7 @@ object CalendarForm: TCalendarForm
       CalColors.TitleBackColor = clSilver
       CalColors.TitleTextColor = clBlack
       CalColors.TrailingTextColor = clMaroon
-      Date = 43147.541138599540000000
+      Date = 43147.631662349540000000
       FirstDayOfWeek = dowMonday
       ParentShowHint = False
       ShowHint = True

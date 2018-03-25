@@ -191,12 +191,12 @@ begin
     begin
       MainForm.ExecMessage(False, mcInfo, 'Report has been sent successfully!');
       Synchronize(ReportForm.ReportMemo.Clear);
-      LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Bug Report has been successfully sent by the user.');
+      LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Bug Report has been successfully sent by the user.');
     end
     else
     begin
       MainForm.ExecMessage(False, mcError, 'Cannot send Bug Report. Please contact IT support.');
-      LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot send Bug Report.');
+      LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot send Bug Report.');
     end;
   finally
     FLock.Release;
@@ -231,7 +231,7 @@ begin
     TrackerForm.Show;
   except
     on E: Exception do
-      LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Execution of this tread work has been stopped. Error has been thrown: ' + E.Message + ' (TInvoiceTracker).');
+      LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Execution of this tread work has been stopped. Error has been thrown: ' + E.Message + ' (TInvoiceTracker).');
   end;
   { RELEASE THREAD WHEN DONE }
   FreeOnTerminate:=True;
@@ -248,7 +248,7 @@ begin
   DataBase:=TDataBase.Create(False);
   try
     IDThread:=TTCheckServerConnection.CurrentThread.ThreadID;
-    if DataBase.Check <> 0 then DataBase.InitializeConnection(IDThread, False, MainForm.FDbConnect);
+    if DataBase.Check <> 0 then DataBase.InitializeConnection(IDThread, False, MainForm.DbConnect);
   finally
     DataBase.Free;
   end;
@@ -283,11 +283,11 @@ begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   FIDThd:=CurrentThread.ThreadID;
   FLock.Acquire;
-  AgeView:=TAgeView.Create(MainForm.FDbConnect);
+  AgeView:=TAgeView.Create(MainForm.DbConnect);
   try
     StopWatch:=TStopWatch.StartNew;
     MainForm.ExecMessage(True, mcStatusBar, stGenerating);
-    LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Generating age view...');
+    LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Generating age view...');
     try
       AgeView.idThd:=IDThd;
       { ASYNC }
@@ -313,13 +313,13 @@ begin
       end;
     except
       on E: Exception do
-        LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot execute "TTMakeAgeView". Error has been thrown: ' + E.Message);
+        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot execute "TTMakeAgeView". Error has been thrown: ' + E.Message);
     end;
   finally
     MainForm.ExecMessage(True, mcStatusBar, stReady);
     THDMili:=StopWatch.ElapsedMilliseconds;
     THDSec:=THDMili / 1000;
-    LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Age View thread has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
+    LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Age View thread has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
     AgeView.Free;
     FLock.Release;
   end;
@@ -351,7 +351,7 @@ var
 begin
   FIDThd:=CurrentThread.ThreadID;
   FLock.Acquire;
-  Transactions:=TTransactions.Create(MainForm.FDbConnect);
+  Transactions:=TTransactions.Create(MainForm.DbConnect);
   try
     try
       ReadDateTime:=Transactions.GetDateTime(gdDateTime);
@@ -365,7 +365,7 @@ begin
       end;
     except
       on E: Exception do
-        LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot execute "TTOpenItemsScanner". Error has been thrown: ' + E.Message);
+        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot execute "TTOpenItemsScanner". Error has been thrown: ' + E.Message);
     end;
   finally
     Transactions.Free;
@@ -402,7 +402,7 @@ var
 begin
   FIDThd:=CurrentThread.ThreadID;
   FLock.Acquire;
-  AgeView:=TAgeView.Create(MainForm.FDbConnect);
+  AgeView:=TAgeView.Create(MainForm.DbConnect);
   try
     StopWatch:=TStopWatch.StartNew;
     MainForm.ExecMessage(True, mcStatusBar, stLoading);
@@ -422,13 +422,13 @@ begin
                   end);
     except
       on E: Exception do
-        LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot execute "TTReadAgeView". Error has been thrown: ' + E.Message);
+        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot execute "TTReadAgeView". Error has been thrown: ' + E.Message);
     end;
   finally
     MainForm.ExecMessage(True, mcStatusBar, stReady);
     THDMili:=StopWatch.ElapsedMilliseconds;
     THDSec:=THDMili / 1000;
-    LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Thread for selected Group Id "' + AgeView.GroupID + '" has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
+    LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Thread for selected Group Id "' + AgeView.GroupID + '" has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
     AgeView.Free;
     FLock.Release;
     { SWITCH ON ALL TIMERS }
@@ -467,7 +467,7 @@ var
 begin
   FIDThd:=CurrentThread.ThreadID;
   FLock.Acquire;
-  OpenItems:=TTransactions.Create(MainForm.FDbConnect);
+  OpenItems:=TTransactions.Create(MainForm.DbConnect);
   try
     StopWatch:=TStopWatch.StartNew;
     MainForm.ExecMessage(True, mcStatusBar, stDownloading);
@@ -484,12 +484,12 @@ begin
       OpenItems.UpdateSummary;
     except
       on E: Exception do
-        LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(FIDThd) + ']: Cannot execute "TTReadOpenItems". Error has been thorwn: ' + E.Message);
+        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(FIDThd) + ']: Cannot execute "TTReadOpenItems". Error has been thorwn: ' + E.Message);
     end;
   finally
     THDMili:=StopWatch.ElapsedMilliseconds;
     THDSec:=THDMili / 1000;
-    LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(FIDThd) + ']: Open Items loading thread has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
+    LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(FIDThd) + ']: Open Items loading thread has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
     MainForm.ExecMessage(True, mcStatusBar, stReady);
     { RELEASE VCL }
     Synchronize(procedure
@@ -538,10 +538,10 @@ begin
     { -------------------------------------------------------------------------------------------------------------------------------------------------- OPEN }
     if (FMode = adOpenAll) or (FMode = adOpenForUser) then
     begin
-      if Read then LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Address Book has been opened successfully.')
+      if Read then LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Address Book has been opened successfully.')
       else
       begin
-        LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot open Address Book.');
+        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot open Address Book.');
         SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PCHAR('Read function of Address Book has failed. Please contact IT support.')));
       end;
     end;
@@ -549,9 +549,9 @@ begin
     if FMode = adSaveNew then
     begin
       if Write then
-        LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: The Address Book has been saved successfully.')
+        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: The Address Book has been saved successfully.')
           else
-            LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot save to Address Book.');
+            LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot save to Address Book.');
     end;
     { ------------------------------------------------------------------------------------------------------------------------------------------------ IMPORT }
     if FMode = adImport then
@@ -579,7 +579,7 @@ function TTAddressBook.Read: boolean;
 var
   DataTables: TDataTables;
 begin
-  DataTables:=TDataTables.Create(MainForm.FDbConnect);
+  DataTables:=TDataTables.Create(MainForm.DbConnect);
   try
     { FREEZE STRING GRID }
     FGrid.Freeze(True);
@@ -594,7 +594,7 @@ begin
     DataTables.Columns.Add(TAddressBook.CONTACT);
     DataTables.Columns.Add(TAddressBook.CUSTADDR);
     { FILTER BY USER ALIAS IF GIVEN }
-    if FMode = adOpenForUser then DataTables.CustFilter:=WHERE + TAddressBook.USER_ALIAS + EQUAL + QuotedStr(MainForm.FUserName);
+    if FMode = adOpenForUser then DataTables.CustFilter:=WHERE + TAddressBook.USER_ALIAS + EQUAL + QuotedStr(MainForm.WinUserName);
     DataTables.OpenTable(TblAddressbook);
     Result:=DataTables.SqlToGrid(FGrid, DataTables.DataSet, True, True);
   finally
@@ -614,7 +614,7 @@ begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   Result :=False;
   Start  :=0;
-  DataTables:=TDataTables.Create(MainForm.FDbConnect);
+  DataTables:=TDataTables.Create(MainForm.DbConnect);
   try
     { FREEZE STRING GRID }
     FGrid.Freeze(True);
@@ -652,7 +652,7 @@ begin
       except
         on E: Exception do
         begin
-          LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot add new record(s). Error has been thrown: ' + E.Message + '.');
+          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot add new record(s). Error has been thrown: ' + E.Message + '.');
           MainForm.ExecMessage(False, mcError, 'Cannot add new record(s). Please contact IT support.');
         end;
       end;

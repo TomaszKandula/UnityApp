@@ -12,11 +12,18 @@
 {                                                                                                                                                             }
 { ----------------------------------------------------------------------------------------------------------------------------------------------------------- }
 
+(* DEPENDENCIES *)
+
+{ E:\Projects\Unity Project\__Unity\__dependencies\Synapse Trunk;  }
+{ E:\Projects\Unity Project\__Unity\__dependencies\Synopse Zip;    }
+{ E:\Projects\Unity Project\__Unity\__dependencies\BCrypt;         }
+{ E:\Projects\Unity Project\__Unity\__dependencies;                }
+
 (* ALL APPLICATION CONSTANTS *)
 
 const
 
-  { WINDOWS MESSAGES FOR EXTERNAL AND INTERNAL MESSAGES }
+  { WINDOWS MESSAGES | INTERNAL AND EXTERNAL }
 
   WM_GETINFO = WM_USER + 120;
   WM_EXTINFO = WM_APP  + 150;
@@ -25,14 +32,13 @@ const
 
   DelayStd:       integer = 50;               { SLOW DOWN A BIT TO SHOW MESSAGE  }
   DelayErr:       integer = 750;              { SLOW DOWN SIGNIFICANTLY FOR USER }
-  AllTasks:       integer = 15;               { TOTAL NUMBER OF ALL BASIC TASKS  }
+  AllTasks:       integer = 14;               { TOTAL NUMBER OF ALL BASIC TASKS  }
   DecryptKey:     integer = 429496;
   APPCAPTION:     string  = 'Unity';
   LyncCall:       string  = 'LyncCall.exe';
   ConfigFile:     string  = 'Config.cfg';
-  UserFolder:     string  = 'Users';
   LicenceFile:    string  = 'Unity.licx';
-  SGImageFile:    string  = 'Unity.img';
+  GridImgFile:    string  = 'Unity.img';
 
   { DESKTOP WINDOW MANAGER API }
 
@@ -43,9 +49,9 @@ const
   DLL1:           string  = 'libeay32.dll';
   DLL2:           string  = 'ssleay32.dll';
   DLL3:           string  = 'vsinit.dll';
-  CRC32DLL1:      DWord   = 3118596872;       { CRC32 CHECK }
-  CRC32DLL2:      DWord   = 3608491174;       { CRC32 CHECK }
-  CRC32DLL3:      DWord   = 4084329229;       { CRC32 CHECK }
+  CRC32DLL1:      DWord   = 3118596872;
+  CRC32DLL2:      DWord   = 3608491174;
+  CRC32DLL3:      DWord   = 4084329229;
 
   { MICROSOFT ASSEMBLIES FOR LYNC/SKYPE FOR BUSINESS }
 
@@ -57,25 +63,26 @@ const
 
   { APPLICATION NAME }
 
-  APPNAME             = 'Unity';
+  APPNAME       = 'Unity';
 
   { SETTING FILE DECRYPT KEY }
 
-  FILEKEY             = 429496;
+  FILEKEY       = 429496;
 
   { FIX COLORS }
 
   SELCOLOR      = $00FFDBB7;
   FONCOLOR      = $006433C9;
-  clToday       = $DCF8FF; //$00A5FF;       // $DCF8FF
-  clPastDay     = $7280FA; //$2222B2;       // $7280FA
-  clFutureDay   = $AACD66; //$228B22;       // $AACD66
 
   { SETTINGS FILE ID }
 
-  UserConfig          = 1;
-  AppConfig           = 2;
-  LicData             = 3;
+  AppConfig     = 2;
+  LicData       = 3;
+
+  { UNPACK METHOD ENUMS }
+
+  LeaveAsIs = 0;
+  DeleteOld = 1;
 
   { SECTION NAMES IN SETTING FILE }
 
@@ -114,6 +121,8 @@ const
 
   ERR_MESSAGE = 'Cannot connect with Microsoft SQL Server. Please re-check your server settings or contact IT support.';
   ERR_LOGTEXT = 'ADO connection error. Exception thrown: ';
+
+  NULLDATE     : TDateTime = 0;
 
   { SPECIAL CHARACTERS }
 
@@ -294,32 +303,6 @@ const
   AgeViewReport  = 'AgeViewReport';
   AgeViewDetails = 'AgeViewDetails';
 
-  { CURSOR TYPE ENUM, MSDN: https://docs.microsoft.com/en-us/sql/ado/reference/ado-api/cursortypeenum }
-
-  adOpenDynamic     = 2;
-  adOpenForwardOnly = 0;
-  adOpenKeyset      = 1;
-  adOpenStatic      = 3;
-  adOpenUnspecified = -1;
-
-  { COMMAND TYPE ENUM, MSDN: https://docs.microsoft.com/en-us/sql/ado/reference/ado-api/commandtypeenum }
-
-  adCmdUnspecified = -1;
-  adCmdText        = 1;
-  adCmdTable       = 2;
-  adCmdStoredProc	 = 4;
-  adCmdUnknown     = 8;
-  adCmdFile        = 256;
-  adCmdTableDirect = 512;
-
-  { LOCK TYPE ENUM, MSDN: https://docs.microsoft.com/en-us/sql/ado/reference/ado-api/locktypeenum }
-
-  adLockBatchOptimistic = 4;
-  adLockOptimistic      = 3;
-  adLockPessimistic     = 2;
-  adLockReadOnly        = 1;
-  adLockUnspecified     = -1;
-
   { ADO FILTER ENUM, MSDN: https://msdn.microsoft.com/en-us/library/ee275540(v=bts.10).aspx }
 
   adFilterNone               = 0;
@@ -327,6 +310,7 @@ const
   adFilterAffectedRecords    = 2;
   adFilterFetchedRecords     = 3;
   adFilterConflictingRecords = 5;
+
 
   { EMAIL GENERATION | TEMPLATES }
 

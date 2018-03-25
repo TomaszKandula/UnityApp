@@ -23,35 +23,30 @@ type
   TSettings = class                                    (* BASE CLASS FOR SETTINGS HANDLING *)
   {$TYPEINFO ON}
   private
+    { GENERAL }
     var pAppDir                : string;
     var pLayoutDir             : string;
-    var pAppCfg                : string;
-    var pUserCfg               : string;
+    var pAppLog                : string;
     var pWinUserName           : string;
-    var pLogTextTo             : string;
-    var pConfigPath            : string;
-    var pUserPath              : string;
-    var pLicencePath           : string;
-    var pGetLastError          : integer;
-    var pSGImagePath           : string;
-    var pTMIP                  : TMemIniFile;
-    var pTMIG                  : TMemIniFile;
-    var pTMIL                  : TMemIniFile;
+    { PATHS }
+    var pPathEventLog          : string;
+    var pPathAppCfg            : string;
+    var pPathLicence           : string;
+    var pPathGridImage         : string;
   public
-    property AppDir            : string      read pAppDir;
-    property LayoutDir         : string      read pLayoutDir;
-    property AppCfg            : string      read pAppCfg;
-    property UserCfg           : string      read pUserCfg;
-    property WinUserName       : string      read pWinUserName;
-    property SGImagePath       : string      read pSGImagePath;
-    property FPathEventLog     : string      read pLogTextTo;
-    property FPathAppCfg       : string      read pConfigPath;
-    property FPathUserCfg      : string      read pUserPath;
-    property FPathLicence      : string      read pLicencePath;
-    property GetLastError      : integer     read pGetLastError write pGetLastError default 0;
-    property TMIP              : TMemIniFile read pTMIP         write pTMIP;
-    property TMIG              : TMemIniFile read pTMIG         write pTMIG;
-    property TMIL              : TMemIniFile read pTMIL         write pTMIL;
+    { GENERAL }
+    var GetLastError           : integer;
+    var TMIG                   : TMemIniFile;
+    var TMIL                   : TMemIniFile;
+    { READ ONLY PROPERTIES }
+    property FAppDir           : string read pAppDir;
+    property FLayoutDir        : string read pLayoutDir;
+    property FAppLog           : string read pAppLog;
+    property FWinUserName      : string read pWinUserName;
+    property FPathGridImage    : string read pPathGridImage;
+    property FPathEventLog     : string read pPathEventLog;
+    property FPathAppCfg       : string read pPathAppCfg;
+    property FPathLicence      : string read pPathLicence;
   published
     constructor Create;
     destructor  Destroy; override;
@@ -67,35 +62,32 @@ implementation
 constructor TSettings.Create;
 begin
   (* INITIALIZATION *)
-  pTMIP:=TMemIniFile.Create('');
-  pTMIG:=TMemIniFile.Create('');
-  pTMIL:=TMemIniFile.Create('');
-  pAppDir     :=ExtractFileDir(Application.ExeName) + '\';
-  pWinUserName:=Trim(LowerCase(GetEnvironmentVariable('username')));
-  pAppCfg     :=pWinUserName + '.log';                  { EVENT LOG FILE NAME        }
-  pUserCfg    :=pWinUserName + '.cfg';                  { USER CONFIG FILE NAME      }
-  pConfigPath :=pAppDir + ConfigFile;                   { CONFIG FULL PATH           }
-  pLicencePath:=pAppDir + LicenceFile;                  { LICENCE FULL PATH          }
-  pSGImagePath:=pAppDir + SGImageFile;                  { IMAGE FOR STRING GRID CELL }
-  pUserPath   :=pAppDir + UserFolder + '\' + pUserCfg;  { USER CONFIG FULL PATH      }
-  pLogTextTo  :=pAppDir + UserFolder + '\' + pAppCfg;   { EVENT LOG FULL PATH        }
+  TMIG:=TMemIniFile.Create('');
+  TMIL:=TMemIniFile.Create('');
+  pAppDir        :=ExtractFileDir(Application.ExeName) + '\';
+  pWinUserName   :=Trim(LowerCase(GetEnvironmentVariable('username')));
+  pAppLog        :=pWinUserName + '.log';
+  pPathAppCfg    :=pAppDir + ConfigFile;
+  pPathLicence   :=pAppDir + LicenceFile;
+  pPathEventLog  :=pAppDir + pAppLog;
+  pPathGridImage :=pAppDir + GridImgFile;
   (* READ CONFIG FILES *)
-  if FileExists(pConfigPath) then
+  if FileExists(pPathAppCfg) then
   begin
     Decode(AppConfig, True);
-    pLayoutDir:=pTMIG.ReadString(VariousLayouts, 'PATH', 'C:\');
+    pLayoutDir:=TMIG.ReadString(VariousLayouts, 'PATH', 'C:\');
   end
-    else
-      pGetLastError:=104;
-  if FileExists(pUserPath) then Decode(UserConfig, True) else pGetLastError:=104;
+  else
+  begin
+    GetLastError:=104;
+  end;
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------------- RELEASE }
 destructor TSettings.Destroy;
 begin
-  pTMIP.Free;
-  pTMIG.Free;
-  pTMIL.Free;
+  TMIG.Free;
+  TMIL.Free;
   inherited;
 end;
 
@@ -123,7 +115,6 @@ begin
   try
     try
       { LOAD INI FROM MEMORY }
-      if ConfigType = UserConfig then TMIP.GetStrings(hStream);
       if ConfigType = AppConfig  then TMIG.GetStrings(hStream);
       hStream.SaveToStream(rStream);
       rStream.Position:=0;
@@ -145,7 +136,6 @@ begin
       end;
       { SAVE TO FILE }
       wStream.Position:=0;
-      if ConfigType = UserConfig then wStream.SaveToFile(FPathUserCfg);
       if ConfigType = AppConfig  then wStream.SaveToFile(FPathAppCfg);
       Result:=True;
       (* FOR DEBUG: IntToStr(wStream.Size); *)
@@ -181,7 +171,6 @@ begin
   try
     try
       { LOAD FROM FILE }
-      if ConfigType = UserConfig then rStream.LoadFromFile(FPathUserCfg);
       if ConfigType = AppConfig  then rStream.LoadFromFile(FPathAppCfg);
       if ConfigType = LicData    then rStream.LoadFromFile(FPathLicence);
       { DECODE ALL }
@@ -207,9 +196,8 @@ begin
       hString.LoadFromStream(wStream);
       if ToMemory then
       begin
-        if ConfigType = UserConfig then pTMIP.SetStrings(hString);
-        if ConfigType = AppConfig  then pTMIG.SetStrings(hString);
-        if ConfigType = LicData    then pTMIL.SetStrings(hString);
+        if ConfigType = AppConfig  then TMIG.SetStrings(hString);
+        if ConfigType = LicData    then TMIL.SetStrings(hString);
         Result:=True;
       end
       else

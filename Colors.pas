@@ -35,6 +35,9 @@ type
     ColorList3: TComboBox;
     ColorBox3: TShape;
     btnFuture: TSpeedButton;
+    ColorPreview1: TLabel;
+    ColorPreview2: TLabel;
+    ColorPreview3: TLabel;
     procedure btnTodayClick(Sender: TObject);
     procedure btnPastClick(Sender: TObject);
     procedure btnFutureClick(Sender: TObject);
@@ -42,6 +45,7 @@ type
     procedure ColorList1Select(Sender: TObject);
     procedure ColorList2Select(Sender: TObject);
     procedure ColorList3Select(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   end;
 
 var
@@ -61,12 +65,31 @@ procedure TColorsForm.FormCreate(Sender: TObject);
 var
   AppSettings: TSettings;
 begin
+  { ------------------------------------------------------------------------------------------------------------------------------------------ WINDOW CAPTION }
   AppSettings:=TSettings.Create;
   try
     ColorsForm.Caption:=AppSettings.TMIG.ReadString(ApplicationDetails, 'WND_COLORS', APPNAME);
   finally
     AppSettings.Free;
   end;
+  { ------------------------------------------------------------------------------------------------------------------------------------------ SELECT DEFAULT }
+  if (ColorList1.Items.Count > 0) and (ColorList2.Items.Count > 0) and (ColorList3.Items.Count > 0) then
+  begin
+    ColorList1.ItemIndex:=0;
+    ColorList2.ItemIndex:=0;
+    ColorList3.ItemIndex:=0;
+  end;
+end;
+
+{ --------------------------------------------------------------------------------------------------------------------------------------------------- ON SHOW }
+procedure TColorsForm.FormShow(Sender: TObject);
+begin
+  ColorList1.Items[ColorList1.ItemIndex];
+  ColorList2.Items[ColorList1.ItemIndex];
+  ColorList3.Items[ColorList1.ItemIndex];
+  ColorList1Select(Self);
+  ColorList2Select(Self);
+  ColorList3Select(Self);
 end;
 
 { --------------------------------------------------------------- ! COMPONENT EVENTS ! ---------------------------------------------------------------------- }

@@ -23,21 +23,15 @@ type
   TDataTables = class(TMSSQL)
   {$TYPEINFO ON}
   private
-    var pidThd     :  integer;
-    var pDataSet   :  _Recordset;
     var pConnStr   :  string;
-    var pCustFilter:  string;
-    var pColumns   :  TStringList;
-    var pValues    :  TStringList;
-    var pConditions:  TStringList;
   public
-    property ConnStr   :  string      read pConnStr;
-    property idThd     :  integer     read pidThd      write pidThd;
-    property CustFilter:  string      read pCustFilter write pCustFilter;
-    property DataSet   :  _Recordset  read pDataSet    write pDataSet;
-    property Columns   :  TStringList read pColumns    write pColumns;
-    property Values    :  TStringList read pValues     write pValues;
-    property Conditions:  TStringList read pConditions write pConditions;
+    var idThd      :  integer;
+    var CustFilter :  string;
+    var DataSet    :  _Recordset;
+    var Columns    :  TStringList;
+    var Values     :  TStringList;
+    var Conditions :  TStringList;
+    property ConnStr : string read pConnStr;
   published
     constructor Create(Connector: TADOConnection); overload;
     destructor  Destroy; override;
@@ -407,22 +401,22 @@ implementation
 { ------------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE }
 constructor TDataTables.Create(Connector: TADOConnection);
 begin
-  pidThd     :=0;
-  pCustFilter:='';
-  pDataSet   :=nil;
-  pColumns   :=TStringList.Create;
-  pValues    :=TStringList.Create;
-  pConditions:=TStringList.Create;
+  idThd     :=0;
+  CustFilter:='';
+  DataSet   :=nil;
+  Columns   :=TStringList.Create;
+  Values    :=TStringList.Create;
+  Conditions:=TStringList.Create;
   inherited;
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------------- RELEASE }
 destructor TDataTables.Destroy;
 begin
-  pColumns.Free;
-  pValues.Free;
-  pConditions.Free;
-  pDataSet:=nil;
+  Columns.Free;
+  Values.Free;
+  Conditions.Free;
+  DataSet:=nil;
   inherited Destroy;
 end;
 
@@ -462,9 +456,9 @@ end;
 { ------------------------------------------------------------------------------------------------------------------------------------------- CLEAR ALL LISTS }
 procedure TDataTables.CleanUp;
 begin
-  pColumns.Clear;
-  pValues.Clear;
-  pConditions.Clear;
+  Columns.Clear;
+  Values.Clear;
+  Conditions.Clear;
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------- OPEN TABLE TO RECORDSET }
@@ -473,9 +467,9 @@ begin
   Result:=True;
   { EXECUTE QUERY }
   try
-    if pCustFilter =  '' then StrSQL:=SELECT + ColumnsToList(Columns, enQuotesOff) + FROM + TableName;
-    if pCustFilter <> '' then StrSQL:=SELECT + ColumnsToList(Columns, enQuotesOff) + FROM + TableName + pCustFilter; { WARNING! REQUIRE WHERE CLAUSE }
-    pDataSet:=ExecSQL;
+    if CustFilter =  '' then StrSQL:=SELECT + ColumnsToList(Columns, enQuotesOff) + FROM + TableName;
+    if CustFilter <> '' then StrSQL:=SELECT + ColumnsToList(Columns, enQuotesOff) + FROM + TableName + CustFilter; { WARNING! REQUIRE WHERE CLAUSE }
+    DataSet:=ExecSQL;
   except
     Result:=False;
   end;

@@ -37,14 +37,11 @@ type
   private
     var   FoundRow   :  integer;
     var   IsNext     :  boolean;
-    var   pSGrid     :  TStringGrid;
     var   Groupping  :  array of integer;
-    var   pSName     :  string;
-    var   pSNumber   :  string;
   public
-    property SGrid     :  TStringGrid read pSGrid   write pSGrid;
-    property SColName  :  string      read pSName   write pSName;
-    property SColNumber:  string      read pSNumber write pSNumber;
+    var SGrid     :  TStringGrid;
+    var SColName  :  string;
+    var SColNumber:  string;
   published
     procedure Search;
   end;

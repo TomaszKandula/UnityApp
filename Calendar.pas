@@ -153,7 +153,7 @@ var
   Condition:  string;
   CUID:       string;
 begin
-  GenText:=TDataTables.Create(MainForm.FDbConnect);
+  GenText:=TDataTables.Create(MainForm.DbConnect);
   try
     GenText.OpenTable(TblGeneral);
     CUID:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUID, 1, 1), MainForm.sgAgeView.Row];
@@ -165,7 +165,7 @@ begin
       GenText.CleanUp;
       { DEFINE COLUMNS, VALUES AND CONDITIONS }
       GenText.Columns.Add(TGeneral.STAMP);      GenText.Values.Add(DateTimeToStr(Now));                      GenText.Conditions.Add(Condition);
-      GenText.Columns.Add(TGeneral.USER_ALIAS); GenText.Values.Add(UpperCase(MainForm.FUserName));           GenText.Conditions.Add(Condition);
+      GenText.Columns.Add(TGeneral.USER_ALIAS); GenText.Values.Add(UpperCase(MainForm.WinUserName));         GenText.Conditions.Add(Condition);
       GenText.Columns.Add(TGeneral.FOLLOWUP);   GenText.Values.Add(DateToStr(CalendarForm.MyCalendar.Date)); GenText.Conditions.Add(Condition);
       { EXECUTE }
       GenText.UpdateRecord(TblGeneral);
@@ -180,7 +180,7 @@ begin
       { DEFINE COLUMNS AND VALUES }
       GenText.Columns.Add(TGeneral.CUID);       GenText.Values.Add(CUID);
       GenText.Columns.Add(TGeneral.STAMP);      GenText.Values.Add(DateTimeToStr(Now));
-      GenText.Columns.Add(TGeneral.USER_ALIAS); GenText.Values.Add(UpperCase(MainForm.FUserName));
+      GenText.Columns.Add(TGeneral.USER_ALIAS); GenText.Values.Add(UpperCase(MainForm.WinUserName));
       GenText.Columns.Add(TGeneral.FIXCOMMENT); GenText.Values.Add('');
       GenText.Columns.Add(TGeneral.FOLLOWUP);   GenText.Values.Add(DateToStr(CalendarForm.MyCalendar.Date));
       { EXECUTE }

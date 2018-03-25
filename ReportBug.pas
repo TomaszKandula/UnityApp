@@ -124,14 +124,14 @@ begin
     Mail.XMailer    :=AppSet.TMIG.ReadString(MailerCDOSYS, 'FROM', '');
     Mail.MailFrom   :=Mail.XMailer;
     Mail.MailTo     :=AppSet.TMIG.ReadString(MailerCDOSYS, 'TO', '');
-    Mail.MailCc     :=MainForm.FUserName + '@' + AppSet.TMIG.ReadString(ApplicationDetails, 'MAIL_DOMAIN', '');
+    Mail.MailCc     :=MainForm.WinUserName + '@' + AppSet.TMIG.ReadString(ApplicationDetails, 'MAIL_DOMAIN', '');
     Mail.MailBcc    :='';
     Mail.MailRt     :=AppSet.TMIG.ReadString(MailerCDOSYS, 'REPLY-TO', '');
-    Mail.MailSubject:='Unity Bug Report from User: ' + UpperCase(MainForm.FUserName);
+    Mail.MailSubject:='Unity Bug Report from User: ' + UpperCase(MainForm.WinUserName);
     { PLAIN TEXT TO HTML TEMPLATE }
     Transfer        :=ReportMemo.Text;
     Transfer        :=StringReplace(Transfer, CRLF, '<br>', [rfReplaceAll]);
-    HTMLBody        :=Doc.LoadTemplate(AppSet.LayoutDir + AppSet.TMIG.ReadString(VariousLayouts, 'BUGREPORT', '') + '.html');
+    HTMLBody        :=Doc.LoadTemplate(AppSet.FLayoutDir + AppSet.TMIG.ReadString(VariousLayouts, 'BUGREPORT', '') + '.html');
     HTMLBody        :=StringReplace(HTMLBody, '{TEXT_HOLER}',  Transfer,       [rfReplaceAll]);
     HTMLBody        :=StringReplace(HTMLBody, '{APPNAME}',     AppName,        [rfReplaceAll]);
     HTMLBody        :=StringReplace(HTMLBody, '{BUILD}',       AppVer,         [rfReplaceAll]);

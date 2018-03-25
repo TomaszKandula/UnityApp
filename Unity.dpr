@@ -44,7 +44,8 @@ uses
   AgeView in 'AgeView.pas',
   Transactions in 'Transactions.pas',
   ReportBug in 'ReportBug.pas',
-  Colors in 'Colors.pas';
+  Colors in 'Colors.pas',
+  EventLog in 'EventLog.pas';
 
 type
   DWord = 0..$FFFFFFFF;
@@ -63,6 +64,8 @@ var
   Mutex:          integer;
   WndRect:        TRect;
   AppSettings:    TSettings;
+  UnityFiles:     TLists;
+  MsAssemblies:   TStrings;
 
 {$R *.res}
 
@@ -70,13 +73,12 @@ var
 
 {$R 'binres.res' 'binres.rc'}
 
-{ LIST:                                                       }
-{  10 RCDATA "08_Makefile\\general.def"    GENERAL SETTINGS   }
-{  20 RCDATA "08_Makefile\\logon.def"      USER CONFIG FILE   }
-{  30 RCDATA "08_Makefile\\libeay32.dll"   DLL FOR SYNAPSE    }
-{  40 RCDATA "08_Makefile\\ssleay32.dll"   DLL FOR SYNAPSE    }
-{  50 RCDATA "08_Makefile\\vsinit.dll"     DLL FOR SYNAPSE    }
-{  60 RCDATA "08_Makefile\\logon.log"      USER LOG FILE      }
+{ LIST:                                                      }
+{  10 RCDATA "__Makefile\\config.cfg"     GENERAL SETTINGS   }
+{  30 RCDATA "__Makefile\\libeay32.dll"   DLL FOR SYNAPSE    }
+{  40 RCDATA "__Makefile\\ssleay32.dll"   DLL FOR SYNAPSE    }
+{  50 RCDATA "__Makefile\\vsinit.dll"     DLL FOR SYNAPSE    }
+{  60 RCDATA "__Makefile\\logon.log"      USER LOG FILE      }
 
 { ------------------------------------------------------------------------------------------------------------------ EXTRACT GIVEN RESOURCE FILE BY ID NUMBER }
 function Unpack(ItemID: integer; FileName: string; mode: integer): boolean;
@@ -93,7 +95,10 @@ begin
     except
       on E: Exception do
       begin
-        Application.MessageBox(PCHar('Cannot extract file from resource container. Exception has been thrown: ' + E.Message), PChar(APPCAPTION), MB_OK + MB_ICONERROR);
+        Application.MessageBox(
+                                PCHar('Cannot extract file from resource container. Exception has been thrown: ' + E.Message),
+                                PChar(APPCAPTION), MB_OK + MB_ICONERROR
+                              );
         Exit;
       end;
     end;
@@ -125,29 +130,36 @@ begin
   ReportMemoryLeaksOnShutdown:=DebugHook <> 0;
 
   { ---------------------------------------------------------------------------------------------------------------------------- ONLY ONE COPY RUNNING PER PC }
-  Mutex:=CreateMutex(nil, True, 'UnityAppication2018');
+  Mutex:=CreateMutex(nil, True, 'UnityApplication2018');
   if (Mutex = 0) OR (GetLastError = ERROR_ALREADY_EXISTS) then
   begin
-    Application.MessageBox(PCHar('Unity is already running. You can only have one instance at a time.'), PChar(APPCAPTION), MB_OK + MB_ICONWARNING);
+    Application.MessageBox(
+                            PCHar('Unity is already running. You can only have one instance at a time.'),
+                            PChar(APPCAPTION), MB_OK + MB_ICONWARNING
+                          );
     Exit;
   end;
 
-  { READ ALL THE SETTINGS }
+  { ACCESS ALL THE SETTINGS }
   AppSettings:=TSettings.Create;
 
   { -------------------------------------------------------------------------------------------------------------------------------------- CHECK FOR PASSOWRD }
   if AppSettings.TMIG.ReadString(Password, 'VALUE', '') = '' then
   begin
-    Application.MessageBox(PCHar('No master password has been found. Program will be terminated. Please contact IT Support.'),
-                           PChar(APPCAPTION), MB_OK + MB_ICONERROR);
+    Application.MessageBox(
+                            PCHar('No master password has been found. Program will be terminated. Please contact IT Support.'),
+                            PChar(APPCAPTION), MB_OK + MB_ICONERROR
+                          );
     Exit;
   end;
 
   { ---------------------------------------------------------------------------------------------------------------------------------- CHECK FOR LICENCE FILE }
   if not FileExists(AppSettings.FPathLicence) then
   begin
-    Application.MessageBox(PCHar('Cannot find licence file (' + LicenceFile + '). Program will be closed. Please contact IT Support.'),
-                           PChar(APPCAPTION), MB_OK + MB_ICONWARNING);
+    Application.MessageBox(
+                            PCHar('Cannot find licence file (' + LicenceFile + '). Program will be closed. Please contact IT Support.'),
+                            PChar(APPCAPTION), MB_OK + MB_ICONWARNING
+                          );
     Exit;
   end;
 
@@ -160,34 +172,10 @@ begin
     except
       { DO NOTHING, WE SHOW MESSAGE BOX AND QUIT ANYWAY }
     end;
-    Application.MessageBox(PCHar('Program must be run under Windows 7 or higher. ' + APPCAPTION + ' will be closed.'),
-                           PChar(APPCAPTION), MB_OK + MB_ICONWARNING);
-    Exit;
-  end;
-
-  { --------------------------------------------------------------------------------------------------------------------------------- AREO CHECK - MUST BE ON }
-  IsAeroEnabled:=False;
-  ModuleHandle :=LoadLibrary(PChar(DWMI));
-  if ModuleHandle <> 0 then
-  begin
-    try
-      @IsAreoOn:=GetProcAddress(ModuleHandle, 'DwmIsCompositionEnabled');
-      if Assigned(IsAreoOn) then
-        if IsAreoOn(IsEnabled) = S_OK then
-          IsAeroEnabled:=IsEnabled;
-    finally
-      FreeLibrary(ModuleHandle);
-    end;
-  end;
-  if IsAeroEnabled = False then
-  begin
-    { SAVE IT INO LOG FILE }
-    try
-      LogText(AppSettings.FPathEventLog, 'Areo is not enabled. Application terminated.');
-    except
-      { DO NOTHING, WE SHOW MESSAGE BOX AND QUIT ANYWAY }
-    end;
-    Application.MessageBox(PChar('Aero is not enabled. ' + APPCAPTION + ' will be closed.'), PChar(APPCAPTION), MB_OK + MB_ICONWARNING);
+    Application.MessageBox(
+                            PCHar('Program must be run under Windows 7 or higher. ' + APPCAPTION + ' will be closed.'),
+                            PChar(APPCAPTION), MB_OK + MB_ICONWARNING
+                          );
     Exit;
   end;
 
@@ -204,233 +192,156 @@ begin
   // 9.   - run new Unity.exe (should have different mutex!)
   // 10.  - exit process(0)
 
-
+  { ----------------------------------------------------------------------------------------------------------- AREO CHECK MUST BE TURNED ON | WINDOWS 7 ONLY }
+  if StrToInt(GetOSVer(0)) = 61 then
+  begin
+    { INITIALIZE }
+    IsAeroEnabled:=False;
+    ModuleHandle :=LoadLibrary(PChar(DWMI));
+    { CHECK }
+    if ModuleHandle <> 0 then
+    begin
+      try
+        @IsAreoOn:=GetProcAddress(ModuleHandle, 'DwmIsCompositionEnabled');
+        if Assigned(IsAreoOn) then
+          if IsAreoOn(IsEnabled) = S_OK then
+            IsAeroEnabled:=IsEnabled;
+      finally
+        FreeLibrary(ModuleHandle);
+      end;
+    end;
+    { TERMINATE IF NOT SWITCHED ON }
+    if IsAeroEnabled = False then
+    begin
+      try
+        LogText(AppSettings.FPathEventLog, 'Areo is not enabled. Application terminated.');
+      except
+        { DO NOTHING, WE SHOW MESSAGE BOX AND QUIT ANYWAY }
+      end;
+      Application.MessageBox(
+                              PChar('Aero is not enabled. ' + APPCAPTION + ' will be closed.'),
+                              PChar(APPCAPTION), MB_OK + MB_ICONWARNING
+                            );
+      Exit;
+    end;
+  end;
 
   { ------------------------------------------------------------------------------------------------------------------------------------- SPLASH SCREEN START }
   SplashForm:=TSplashForm.Create(nil);
   SystemParametersInfo(SPI_GETWORKAREA, 0, @WndRect, 0);
+
   { MAKE IT CENTRED ON THE SCREEN }
   SplashForm.Top :=((WndRect.Bottom - WndRect.Top ) div 2) - (SplashForm.Height div 2);
   SplashForm.Left:=((WndRect.Right  - WndRect.Left) div 2) - (SplashForm.Width  div 2);
+
   { FADE IN AND UPDATE }
   AnimateWindow(SplashForm.Handle, 500, AW_BLEND or AW_ACTIVATE);
   SplashForm.Update;
 
   { ---- START ---- }
 
-  { --------------------------------------------------------------------------------------------------------------- CHECK CONFIG FILES & DEPLOY IF NECCESSARY }
-  try
+  { ------------------------------------------------------------------------------------------------------------------------------------ CHECK EVENT LOG FILE }
+  if FileExists(AppSettings.FPathEventLog) then
+  begin
     LogText(AppSettings.FPathEventLog, 'Start checking resources files and configuration files.');
-    Status(1, AllTasks, DelayStd, 'Checking ' + ExtractFileName(AppSettings.AppCfg) + '... OK.', True);
-    { IF WE CANNOT SAVE INTO LOG FILE, THEN SOMETHING IS NOT RIGHT }
-  except
-    { ---------------------------------------------------------------------------------------------------------------------- EXTRACT DEFAULT FILES IF MISSING }
-    Status(1, AllTasks, DelayErr, 'Checking ' + ExtractFileName(AppSettings.FPathEventLog) + '... not found! Extracting new log file...', False);
-    if Unpack(60, AppSettings.FPathEventLog, 0) = True then
+    Status(1, AllTasks, DelayStd, 'Checking ' + ExtractFileName(AppSettings.FAppLog) + '... OK.', True);
+  end
+  else
+  begin
+    { ----------------------------------------------------------------------------------------------------------------------------- OTHERWISE EXTRACT DEFAULT }
+    if Unpack(60, AppSettings.FPathEventLog, LeaveAsIs) = True then
     begin
       { PUT USER LOGON NAME TO LOG FILE (@ EOF) }
       FL:=TFileStream.Create(AppSettings.FPathEventLog, fmOpenWrite);
       try
-        StrWrite:=AppSettings.WinUserName + '.' + #13#10 + #13#10;
-        { GO TO EOF }
+        StrWrite:=AppSettings.FWinUserName + '.' + CRLF + CRLF;
         FL.Position:=FL.Size;
-        { WRITE BYTE BY BYTE }
         for iCNT:=1 to length(StrWrite) do FL.Write(StrWrite[iCNT], 1);
       finally
         FL.Free;
       end;
+      LogText(AppSettings.FPathEventLog, 'Start checking resources files and configuration files.');
       Status(1, AllTasks, DelayStd, 'Checking ' + ExtractFileName(AppSettings.FPathEventLog) + '... extracted. OK.', True);
     end
     else
     begin
       Status(1, AllTasks, DelayErr, 'Cannot extract ' + ExtractFileName(AppSettings.FPathEventLog) + '..., unexpected error!', False);
-      Application.MessageBox(PChar('Cannot create log file. ' + APPCAPTION + ' will be closed.'), PChar(APPCAPTION), MB_OK + MB_ICONWARNING);
+      Application.MessageBox(
+                              PChar('Cannot create log file. ' + APPCAPTION + ' will be closed. Please contact IT support.'),
+                              PChar(APPCAPTION), MB_OK + MB_ICONWARNING
+                            );
       Exit;
     end;
   end;
 
-  { ----------------------------------------------------------------------------------------------------------------------------- CHECK IF <LOGON>.CFG EXISTS }
-  Status(2, AllTasks, DelayStd, 'Checking ' + ExtractFileName(AppSettings.FPathUserCfg) + '...', True);
-  { IF EXISTS, READ LAST 8 BYTES (CRC32 CHECKSUM) AND VERIFY IT }
-
-  if FileExists(AppSettings.FPathUserCfg) then
-  begin
-    Status(2, AllTasks, DelayStd, 'Checking ' + ExtractFileName(AppSettings.FPathUserCfg) + '... CRC32.', True);
-    { CRC32 CHECK HERE }
-    { IF ERROR, THEN EXTRACT DEFAULT }
-    if not (AppSettings.Decode(UserConfig, False)) then
-    begin
-      Status(2, AllTasks, DelayErr, 'Checking ' + ExtractFileName(AppSettings.FPathUserCfg) + '... corrupted! Extracting default file...', True);
-      if Unpack(20, AppSettings.FPathUserCfg, 1) = False then Status(2, AllTasks, DelayErr, 'Cannot extract ' + ExtractFileName(AppSettings.FPathUserCfg) + '..., unexpected error!', True);
-    end;
-  end
-  { ------------------------------------------------------------------------------------------------------------------------------- OTHERWISE EXTRACT DEFAULT }
-  else
-  begin
-    Status(2, AllTasks, DelayErr, 'Checking ' + ExtractFileName(AppSettings.FPathUserCfg) + '... not found! Extracting default file...', True);
-    if Unpack(20, AppSettings.FPathUserCfg, 0) = False then Status(2, AllTasks, DelayErr, 'Cannot extract ' + ExtractFileName(AppSettings.FPathUserCfg) + '..., unexpected error!', True);
-  end;
-
-  { ----------------------------------------------------------------------------------------------------------------------------- CHECK IF GENERAL.CFG EXISTS }
-  Status(3, AllTasks, DelayStd, 'Checking ' + ConfigFile + '...', True);
-  { ---------------------------------------------------------------------------------------------- IF EXIST, READ LAST 8 BYTES (CRC32 CHECKSUM) AND VERIFY IT }
+  { ---------------------------------------------------------------------------------------------------------------------------------------- CHECK CONFIG.CFG }
+  Status(2, AllTasks, DelayStd, 'Checking ' + ConfigFile + '...', True);
   if FileExists(AppSettings.FPathAppCfg) then
   begin
-    Status(3, AllTasks, DelayStd, 'Checking ' + ConfigFile + '... CRC32.', True);
-    { CRC32 CHECK HERE }
-    { IF ERROR, THEN EXTRACT DEFAULT }
+    Status(2, AllTasks, DelayStd, 'Checking ' + ConfigFile + '... CRC32.', True);
     if not (AppSettings.Decode(AppConfig, False)) then
     begin
-      Status(3, AllTasks, DelayErr, 'Checking ' + ConfigFile + '... corrupted! Extracting default file...', True);
-      if Unpack(10, AppSettings.FPathAppCfg, 1) = False then Status(3, AllTasks, DelayErr, 'Cannot extract ' + ConfigFile + '..., unexpected error!', True);
+      Status(2, AllTasks, DelayErr, 'Checking ' + ConfigFile + '... corrupted! Extracting default file...', True);
+      if Unpack(10, AppSettings.FPathAppCfg, DeleteOld) = False then Status(2, AllTasks, DelayErr, 'Cannot extract ' + ConfigFile + '..., unexpected error!', True);
     end;
   end
   { ------------------------------------------------------------------------------------------------------------------------------- OTHERWISE EXTRACT DEFAULT }
   else
   begin
-    Status(3, AllTasks, DelayErr, 'Checking ' + ConfigFile + '... not found! Extracting default file...', True);
-    if Unpack(10, AppSettings.FPathAppCfg, 0) = False then Status(3, AllTasks, DelayStd, 'Cannot extract ' + ConfigFile + '..., unexpected error!', True);
+    Status(2, AllTasks, DelayErr, 'Checking ' + ConfigFile + '... not found! Extracting default file...', True);
+    if Unpack(10, AppSettings.FPathAppCfg, LeaveAsIs) = False then Status(2, AllTasks, DelayStd, 'Cannot extract ' + ConfigFile + '..., unexpected error!', True);
   end;
 
-  { ------------------------------------------------------------------------------------------------------------------ CHECK DLL FILES & DEPLOY IF NECCESSARY }
-  { ---------------------------------------------------------------------------------------------------------------------------- CHECK IF LIBEAY32.DLL EXISTS }
-  Status(4, AllTasks, DelayStd, 'Checking ' + DLL1 + '...', True);
-  { IF EXISTS, READ LAST 8 BYTES (CRC32 CHECKSUM) AND VERIFY IT }
-  if FileExists(AppSettings.AppDir + DLL1) then
+  { ---------------------------------------------------------------------------------------------------------------------------------------------- OTHER FILES}
+
+  SetLength(UnityFiles, 3, 3);
+  UnityFiles[0, 0]:=DLL1;  UnityFiles[0, 1]:='30';  UnityFiles[0, 2]:=IntToStr(CRC32DLL1);
+  UnityFiles[1, 0]:=DLL2;  UnityFiles[1, 1]:='40';  UnityFiles[1, 2]:=IntToStr(CRC32DLL2);
+  UnityFiles[2, 0]:=DLL3;  UnityFiles[2, 1]:='50';  UnityFiles[2, 2]:=IntToStr(CRC32DLL3);
+
+  for iCNT:=0 to High(UnityFiles) - 1 do
   begin
-    Status(4, AllTasks, DelayStd, 'Checking ' + DLL1 + '... CRC32.', True);
-    { CRC32 CHECK HERE }
-    { IF ERROR, THEN EXTRACT DEFAULT }
-    if CRC32DLL1 <> CRC32File(AppSettings.AppDir + DLL1) then
+    Status(iCNT + 3, AllTasks, DelayStd, 'Checking ' + UnityFiles[iCNT, 0] + '...', True);
+    if FileExists(AppSettings.FPathAppCfg) then
     begin
-      Status(4, AllTasks, DelayErr, 'Checking ' + DLL1 + '... corrupted! Extracting default file...', True);
-      if Unpack(30, AppSettings.AppDir + DLL1, 1) = False then Status(4, AllTasks, DelayErr, 'Cannot extract ' + DLL1 + '..., unexpected error!', True);
-    end;
-  end
-  { ------------------------------------------------------------------------------------------------------------------------------- OTHERWISE EXTRACT DEFAULT }
-  else begin
-    Status(4, AllTasks, DelayErr, 'Checking ' + DLL1 + '... not found! Extracting default file...', True);
-    if Unpack(30, AppSettings.AppDir + DLL1, 0) = False then Status(4, AllTasks, DelayErr, 'Cannot extract ' + DLL1 + '..., unexpected error!', True);
-  end;
-
-  { ---------------------------------------------------------------------------------------------------------------------------- CHECK IF SSLEAY32.DLL EXISTS }
-  Status(5, AllTasks, DelayStd, 'Checking ' + DLL2 + '...', True);
-  { IF EXISTS, READ LAST 8 BYTES (CRC32 CHECKSUM) AND VERIFY IT }
-  if FileExists(AppSettings.AppDir + DLL2) then
-  begin
-    Status(5, AllTasks, DelayStd, 'Checking ' + DLL2 + '... CRC32.', True);
-    { CRC32 CHECK HERE }
-    { IF ERROR, THEN EXTRACT DEFAULT }
-    if CRC32DLL2 <> CRC32File(AppSettings.AppDir + DLL2) then
+      Status(iCNT + 3, AllTasks, DelayStd, 'Checking ' + UnityFiles[iCNT, 0] + '... CRC32.', True);
+      { CRC32 CHECK, EXTRACT DEFAULT FILE ON ERROR }
+      if UnityFiles[iCNT, 2] <> IntToStr(CRC32File(AppSettings.FAppDir + UnityFiles[iCNT, 0])) then
+      begin
+        Status(iCNT + 3, AllTasks, DelayErr, 'Checking ' + UnityFiles[iCNT, 0] + '... corrupted! Extracting default file...', True);
+        if Unpack(StrToInt(UnityFiles[iCNT, 1]), AppSettings.FPathAppCfg, DeleteOld) = False then Status(iCNT, AllTasks, DelayErr, 'Cannot extract ' + UnityFiles[iCNT, 0] + '..., unexpected error!', True);
+      end;
+    end
+    else
     begin
-      Status(5, AllTasks, DelayErr, 'Checking ' + DLL2 + '... corrupted! Extracting default file...', True);
-      if Unpack(40, AppSettings.AppDir + DLL2, 1) = False then Status(5, AllTasks, DelayErr, 'Cannot extract ' + DLL2 + '..., unexpected error!', True);
+      Status(iCNT + 3, AllTasks, DelayErr, 'Checking ' + UnityFiles[iCNT, 0] + '... not found! Extracting default file...', True);
+      if Unpack(StrToInt(UnityFiles[iCNT, 1]), AppSettings.FPathAppCfg, LeaveAsIs) = False then Status(iCNT, AllTasks, DelayStd, 'Cannot extract ' + UnityFiles[iCNT, 0] + '..., unexpected error!', True);
     end;
-  end
-  { ------------------------------------------------------------------------------------------------------------------------------- OTHERWISE EXTRACT DEFAULT }
-  else
-  begin
-    Status(5, AllTasks, DelayErr, 'Checking ' + DLL2 + '... not found! Extracting default file...', True);
-    if Unpack(40, AppSettings.AppDir + DLL2, 0) = False then Status(5, AllTasks, DelayErr, 'Cannot extract ' + DLL2 + '..., unexpected error!', True);
   end;
 
-  { ------------------------------------------------------------------------------------------------------------------------------ CHECK IF VSINIT.DLL EXISTS }
-  Status(6, AllTasks, DelayStd, 'Checking ' + DLL3 + '...', True);
-  { IF EXISTS, READ LAST 8 BYTES (CRC32 CHECKSUM) AND VERIFY IT }
-  if FileExists(AppSettings.AppDir + DLL3) then
+  SetLength(MsAssemblies, 6);
+  MsAssemblies[0]:=DLL4;
+  MsAssemblies[1]:=DLL5;
+  MsAssemblies[2]:=DLL6;
+  MsAssemblies[3]:=DLL7;
+  MsAssemblies[4]:=DLL8;
+  MsAssemblies[5]:=LyncCall;
+
+  for iCNT:=0 to High(MsAssemblies) - 1 do
   begin
-    Status(6, AllTasks, DelayStd, 'Checking ' + DLL3 + '... CRC32.', True);
-    { CRC32 CHECK HERE }
-    { IF ERROR, THEN EXTRACT DEFAULT }
-    if CRC32DLL3 <> CRC32File(AppSettings.AppDir + DLL3) then
+    Status(iCNT + 6, AllTasks, DelayStd, 'Checking ' + MsAssemblies[iCNT] + '...', True);
+    if FileExists(AppSettings.FAppDir + DLL4) then
     begin
-      Status(6, AllTasks, DelayErr, 'Checking ' + DLL3 + '... corrupted! Extracting default file...', True);
-      if Unpack(50, AppSettings.AppDir + DLL3, 1) = False then Status(6, AllTasks, DelayErr, 'Cannot extract ' + DLL3 + '..., unexpected error!', True);
+      Status(iCNT + 6, AllTasks, DelayStd, 'Checking ' + MsAssemblies[iCNT] + '... OK.', True);
+    end
+    else
+    begin
+      Application.MessageBox(
+                              PCHar('Cannot find ' + MsAssemblies[iCNT] + '. Please reinstall application or contact IT support.'),
+                              PChar(APPCAPTION), MB_OK + MB_ICONERROR
+                            );
+      Exit;
     end;
-  end
-  { ------------------------------------------------------------------------------------------------------------------------------- OTHERWISE EXTRACT DEFAULT }
-  else
-  begin
-    Status(6, AllTasks, DelayErr, 'Checking ' + DLL3 + '... not found! Extracting default file...', True);
-    if Unpack(50, AppSettings.AppDir + DLL3, 0) = False then Status(6, AllTasks, DelayErr, 'Cannot extract ' + DLL3 + '..., unexpected error!', True);
-  end;
-
-  { ------------------------------------------------------------------------------------------------------------------------------------ MICROSOFT ASSEMBLIES }
-
-  { --------------------------------------------------------------------------------------------------------------------------- "Microsoft.Lync.Controls.dll" }
-  Status(7, AllTasks, DelayStd, 'Checking ' + DLL4 + '...', True);
-  if FileExists(AppSettings.AppDir + DLL4) then
-  begin
-    Status(7, AllTasks, DelayStd, 'Checking ' + DLL4 + '... OK.', True);
-  end
-  else
-  begin
-    Application.MessageBox(PCHar('Cannot find ' + DLL4 + '. Please reinstall application or contact IT support.'), PChar(APPCAPTION), MB_OK + MB_ICONERROR);
-    Exit;
-  end;
-
-  { ----------------------------------------------------------------------------------------------------------------- "Microsoft.Lync.Controls.Framework.dll" }
-  Status(8, AllTasks, DelayStd, 'Checking ' + DLL5 + '...', True);
-  if FileExists(AppSettings.AppDir + DLL5) then
-  begin
-    Status(8, AllTasks, DelayStd, 'Checking ' + DLL5 + '... OK.', True);
-  end
-  else
-  begin
-    Application.MessageBox(PCHar('Cannot find ' + DLL5 + '. Please reinstall application or contact IT support.'), PChar(APPCAPTION), MB_OK + MB_ICONERROR);
-    Exit;
-  end;
-
-  { ------------------------------------------------------------------------------------------------------------------------------ "Microsoft.Lync.Model.dll" }
-  Status(9, AllTasks, DelayStd, 'Checking ' + DLL6 + '...', True);
-  if FileExists(AppSettings.AppDir + DLL6) then
-  begin
-    Status(9, AllTasks, DelayStd, 'Checking ' + DLL6 + '... OK.', True);
-  end
-  else
-  begin
-    Application.MessageBox(PCHar('Cannot find ' + DLL6 + '. Please reinstall application or contact IT support.'), PChar(APPCAPTION), MB_OK + MB_ICONERROR);
-    Exit;
-  end;
-
-  { -------------------------------------------------------------------------------------------------------------------------- "Microsoft.Lync.Utilities.dll" }
-
-  Status(10, AllTasks, DelayStd, 'Checking ' + DLL7 + '...', True);
-  if FileExists(AppSettings.AppDir + DLL7) then
-  begin
-    Status(10, AllTasks, DelayStd, 'Checking ' + DLL7 + '... OK.', True);
-  end
-  else
-  begin
-    Application.MessageBox(PCHar('Cannot find ' + DLL7 + '. Please reinstall application or contact IT support.'), PChar(APPCAPTION), MB_OK + MB_ICONERROR);
-    Exit;
-  end;
-
-  { ------------------------------------------------------------------------------------------------------------------------------- "Microsoft.Office.Uc.dll" }
-
-  Status(11, AllTasks, DelayStd, 'Checking ' + DLL8 + '...', True);
-  if FileExists(AppSettings.AppDir + DLL8) then
-  begin
-    Status(11, AllTasks, DelayStd, 'Checking ' + DLL8 + '... OK.', True);
-  end
-  else
-  begin
-    Application.MessageBox(PCHar('Cannot find ' + DLL8 + '. Please reinstall application or contact IT support.'), PChar(APPCAPTION), MB_OK + MB_ICONERROR);
-    Exit;
-  end;
-
-  { ----------------------------------------------------------------------------------------------------------------------------- EXTERNAL HELPER APPLICATION }
-  { ------------------------------------------------------------------------------------------------------------------------------------------ "LyncCall.exe" }
-
-  Status(12, AllTasks, DelayStd, 'Checking ' + LyncCall + '...', True);
-  if FileExists(AppSettings.AppDir + LyncCall) then
-  begin
-    Status(12, AllTasks, DelayStd, 'Checking ' + LyncCall + '... OK.', True);
-  end
-  else
-  begin
-    Application.MessageBox(PCHar('Cannot find ' + LyncCall + '. Please reinstall application or contact IT support.'), PChar(APPCAPTION), MB_OK + MB_ICONERROR);
-    Exit;
   end;
 
   LogText(AppSettings.FPathEventLog, 'End of checking resource files and configuration files.');
@@ -439,7 +350,7 @@ begin
   { ---- END ---- }
 
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-  Status(13, AllTasks, 50, 'Application initialization... connecting with SQL server..., please wait.', False);
+  Status(12, AllTasks, 50, 'Application initialization... connecting with SQL server..., please wait.', False);
   Application.Initialize;
   Application.Title:=APPCAPTION;
   Application.MainFormOnTaskbar:=False;
@@ -453,8 +364,9 @@ begin
   LogText(AppSettings.FPathEventLog, '[GUI] Initialization methods executed within main thread, ''MainForm'' has been created. Main process thread ID = ' + IntToStr(MainThreadID) + '.');
 
   { OTHER WINFORMS }
-  Status(14, AllTasks, 400, 'Application initialization... WinForms loading, please wait.', False);
+  Status(13, AllTasks, 400, 'Application initialization... WinForms loading, please wait.', False);
   Application.CreateForm(TAboutForm,    AboutForm);    LogText(AppSettings.FPathEventLog, '[GUI] ''AboutForm'' ......... has been created.');
+  Application.CreateForm(TEventForm,    EventForm);    LogText(AppSettings.FPathEventLog, '[GUI] ''EventForm'' ......... has been created.');
   Application.CreateForm(TColorsForm,   ColorsForm);   LogText(AppSettings.FPathEventLog, '[GUI] ''ColorsForm'' ........ has been created.');
   Application.CreateForm(TReportForm,   ReportForm);   LogText(AppSettings.FPathEventLog, '[GUI] ''ReportForm'' ........ has been created.');
   Application.CreateForm(TSearchForm,   SearchForm);   LogText(AppSettings.FPathEventLog, '[GUI] ''SearchForm'' ........ has been created.');
@@ -465,7 +377,7 @@ begin
   Application.CreateForm(TInvoicesForm, InvoicesForm); LogText(AppSettings.FPathEventLog, '[GUI] ''InvoicesForm'' ...... has been created.');
 
   { SPLASH SCREEN - 100% }
-  Status(15, AllTasks, 900, 'Application initialization... done.', False);
+  Status(14, AllTasks, 900, 'Application initialization... done.', False);
 
   { --------------------------------------------------------------------------------------------------------------------------------------- SPLASH SCREEN END }
   AnimateWindow(SplashForm.Handle, 500, AW_BLEND or AW_HIDE);

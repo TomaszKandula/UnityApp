@@ -46,15 +46,11 @@ type
     procedure btnCloseClick(Sender: TObject);
   private
     var   ListState   :  TLists;      { KEEP VALUES AND THEIR STATE }
-    var   pFGrid      :  TStringGrid;
-    var   pFColName   :  string;
-    var   pFColNumber :  integer;
-    var   pFOverdue   :  string;
   public
-    property  FColName   :  string      read pFColName   write pFColName;
-    property  FColNumber :  integer     read pFColNumber write pFColNumber;
-    property  FGrid      :  TStringGrid read pFGrid      write pFGrid;
-    property  FOverdue   :  string      read pFOverdue   write pFOverdue;
+    var FColName   :  string;
+    var FColNumber :  integer;
+    var FGrid      :  TStringGrid;
+    var FOverdue   :  string;
     procedure FilterInit;
     procedure FilterPrep;
     procedure FilterNow;

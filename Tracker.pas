@@ -69,7 +69,7 @@ type
     var Indv_Rem2 :  string;
     var Indv_Rem3 :  string;
     var Indv_Rem4 :  string;
-    { PROPERTIES }
+    { READ-ONLY PROPERTIES }
     property TrackerGrid :  TStringGrid read pTrackerGrid;
     property AgeGrid     :  TStringGrid read pAgeGrid;
     { HELPER METHODS FOR DEALING WITH INVOICE TRACKER ITEMS }
@@ -100,7 +100,7 @@ var
   TrackerItems: TDataTables;
   Source:       TStringGrid;
 begin
-  TrackerItems:=TDataTables.Create(MainForm.FDbConnect);
+  TrackerItems:=TDataTables.Create(MainForm.DbConnect);
   Source:=TrackerGrid;
   try
     TrackerGrid.Freeze(True);
@@ -117,7 +117,7 @@ procedure TTrackerForm.Add;
 var
   TrackerItems: TDataTables;
 begin
-  TrackerItems:=TDataTables.Create(MainForm.FDbConnect);
+  TrackerItems:=TDataTables.Create(MainForm.DbConnect);
   try
     { CLEAN UP AND FILL WITH NEW DATA }
     TrackerItems.CleanUp;
@@ -149,7 +149,7 @@ var
   PrimaryTable: string;
   ForeignTable: string;
 begin
-  TrackerItems:=TDataTables.Create(MainForm.FDbConnect);
+  TrackerItems:=TDataTables.Create(MainForm.DbConnect);
   try
     { BUILD SQL }
     PrimaryTable:=DELETE_FROM + TblTracker  + WHERE + TTracker.CUID  + EQUAL + QuotedStr(CUID);  { HOLDS RECORDED CUSTOMERS }
@@ -193,7 +193,7 @@ begin
     if LayoutList.Items.Count > 0 then LayoutList.ItemIndex:=0;
   end;
   { ------------------------------------------------------------------------------------------------------------------------------------------------ READ OUT }
-  Tables:=TDataTables.Create(MainForm.FDbConnect);
+  Tables:=TDataTables.Create(MainForm.DbConnect);
   try
     { GET DATA FROM ADDRESS BOOK }
     Tables.CustFilter:=WHERE + TAddressBook.CUID + EQUAL + QuotedStr(CUID);
@@ -282,7 +282,7 @@ end;
 procedure TTrackerForm.btnOKClick(Sender: TObject);
 begin
   { ASSIGN }
-  UserAlias:=UpperCase(MainForm.FUserName);
+  UserAlias:=UpperCase(MainForm.WinUserName);
   Layout:=LayoutList.Text;
   Indv_Rem1:=TextReminder1.Text;
   Indv_Rem2:=TextReminder2.Text;

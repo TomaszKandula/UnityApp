@@ -83,7 +83,7 @@ var
   Tables: TDataTables;
   CUID :  string;
 begin
-  Tables:=TDataTables.Create(MainForm.FDbConnect);
+  Tables:=TDataTables.Create(MainForm.DbConnect);
   InvoicesGrid.Freeze(True);
   try
     CUID:=MainForm.sgInvoiceTracker.Cells[MainForm.sgInvoiceTracker.ReturnColumn(TTracker.CUID, 1, 1), MainForm.sgInvoiceTracker.Row];

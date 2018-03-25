@@ -22,12 +22,9 @@ uses
 type
   TTransactions = class(TDataTables)
   {$TYPEINFO ON}
-  private
-    var PIdThd:    integer;
   public
-    var DestGrid   :  TStringGrid;
-    var SettingGrid:  TStringGrid;
-    property IdThd :  integer read PIdThd;
+    var DestGrid    :  TStringGrid;
+    var SettingGrid :  TStringGrid;
   published
     function  GetDateTime(Return: integer): string;
     function  LoadToGrid: boolean;

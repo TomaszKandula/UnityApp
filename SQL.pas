@@ -16,21 +16,17 @@ unit SQL;
 interface
 
 uses
-  SysUtils, Windows, Classes, ADODB, StrUtils, Variants, Main, DB;
+  SysUtils, Windows, Classes, ADODB, StrUtils, Variants, Main;
 
 { --------------------------------------------------------------- ! MS SQL CLASS ! -------------------------------------------------------------------------- }
 type
   TMSSQL = class                                          (* BASE CLASS FOR SQL HANDLING *)
   {$TYPEINFO ON}
-  private
-    var         pStrSQL    : string;
-    var         pADOCon    : TADOConnection;
-    var         pCmdType   : TCommandType;
   public
-    var         FParamList : TLists;
-    property    StrSQL     : string         read pStrSQL  write pStrSQL;
-    property    ADOCon     : TADOConnection read pADOCon  write pADOCon;
-    property    CmdType    : TCommandType   read pCmdType write pCmdType;
+    var FParamList : TLists;
+    var StrSQL     : string;
+    var ADOCon     : TADOConnection;
+    var CmdType    : TCommandType;
   published
     constructor Create(Connector: TADOConnection);
     destructor  Destroy; override;
@@ -51,9 +47,9 @@ implementation
 { ------------------------------------------------------------------------------------------------------------------------- CREATE OBJECT AND SETUP EMPTY SQL }
 constructor TMSSQL.Create(Connector: TADOConnection);
 begin
-  pStrSQL:='';
-  pADOCon:=Connector;
-  pCmdType:=cmdText;
+  StrSQL:='';
+  ADOCon:=Connector;
+  CmdType:=cmdText;
   SetLength(FParamList, 1, 2);
 end;
 

@@ -1,5 +1,4 @@
 10 RCDATA "_makefile\\$_ResFiles\\general.def"
-20 RCDATA "_makefile\\$_ResFiles\\logon.def"
 30 RCDATA "_makefile\\$_ResFiles\\libeay32.dll"
 40 RCDATA "_makefile\\$_ResFiles\\ssleay32.dll"
 50 RCDATA "_makefile\\$_ResFiles\\vsinit.dll"

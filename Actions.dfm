@@ -49,8 +49,6 @@ object ActionsForm: TActionsForm
     Color = 15527148
     ParentBackground = False
     TabOrder = 1
-    ExplicitWidth = 930
-    ExplicitHeight = 321
     object OpenItemsGrid: TStringGrid
       AlignWithMargins = True
       Left = 5
@@ -75,8 +73,6 @@ object ActionsForm: TActionsForm
       OnMouseWheelDown = OpenItemsGridMouseWheelDown
       OnMouseWheelUp = OpenItemsGridMouseWheelUp
       OnSelectCell = OpenItemsGridSelectCell
-      ExplicitWidth = 920
-      ExplicitHeight = 301
       ColWidths = (
         10
         119
@@ -107,8 +103,6 @@ object ActionsForm: TActionsForm
     Color = 15527148
     ParentBackground = False
     TabOrder = 2
-    ExplicitTop = 428
-    ExplicitWidth = 930
     object ButtonPanel: TPanel
       Left = 0
       Top = 180
@@ -118,7 +112,6 @@ object ActionsForm: TActionsForm
       BevelOuter = bvNone
       ParentColor = True
       TabOrder = 0
-      ExplicitWidth = 930
       object btnCallCustomer: TSpeedButton
         AlignWithMargins = True
         Left = 815
@@ -275,7 +268,6 @@ object ActionsForm: TActionsForm
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 2
-      ExplicitWidth = 300
       object DailyTitle: TLabel
         Left = 2
         Top = 0
@@ -316,7 +308,6 @@ object ActionsForm: TActionsForm
         TabOrder = 0
         WantReturns = False
         OnKeyDown = DailyComKeyDown
-        ExplicitWidth = 300
       end
     end
     object GeneralPanel: TPanel
@@ -332,7 +323,6 @@ object ActionsForm: TActionsForm
       Align = alRight
       BevelOuter = bvNone
       TabOrder = 3
-      ExplicitLeft = 625
       object GeneralTitle: TLabel
         Left = 2
         Top = 0
@@ -391,7 +381,6 @@ object ActionsForm: TActionsForm
     Color = 15527148
     ParentBackground = False
     TabOrder = 3
-    ExplicitWidth = 930
     object InnerBox: TShape
       AlignWithMargins = True
       Left = 5
@@ -728,7 +717,7 @@ object ActionsForm: TActionsForm
     Left = 24
     Top = 168
     Bitmap = {
-      494C010102003800D00018001800FFFFFF00FF10FFFFFFFFFFFFFFFF424D3600
+      494C010102003800D40018001800FFFFFF00FF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000600000001800000001002000000000000024
       000000000000000000000000000000000000FFFFFF00FFFFFF00FFFFFF00FFFF
       FF00FFFFFF00FFFFFF00FFFFFF00E9E9E900CDCDCD00A9A9A9008E8E8E008080

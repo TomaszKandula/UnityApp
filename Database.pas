@@ -22,18 +22,12 @@ uses
 type
   TDataBase = class                                    (* BASE CLASS FOR CONNECTION HANDLING *)
   {$TYPEINFO ON}
-  private
-    pdbProvider  : string;
-    pdbConnStr   : string;
-    pInterval    : integer;
-    pCmdTimeout  : integer;
-    pConTimeout  : integer;
   public
-    property    dbProvider   : string  read pdbProvider  write pdbProvider;
-    property    dbConnStr    : string  read pdbConnStr   write pdbConnStr;
-    property    Interval     : integer read pInterval    write pInterval;
-    property    CmdTimeout   : integer read pCmdTimeout  write pCmdTimeout;
-    property    ConTimeout   : Integer read pConTimeout  write pConTimeout;
+    var DBProvider  : string;
+    var DBConnStr   : string;
+    var Interval    : integer;
+    var CmdTimeout  : integer;
+    var ConTimeout  : Integer;
   published
     constructor Create(ShowConnStr: boolean);
     procedure   InitializeConnection(idThd: integer; ErrorShow: boolean; var ActiveConnection: TADOConnection);
@@ -54,21 +48,21 @@ begin
   try
     if AppSettings.TMIG.ReadString(DatabaseSetup,'ACTIVE','') = 'MSSQL' then
     begin
-      dbProvider :=AppSettings.TMIG.ReadString(DatabaseSetup, 'MSSQLPROVIDER', '');
-      dbConnNoPwd:='Provider='         + dbProvider
+      DBProvider :=AppSettings.TMIG.ReadString(DatabaseSetup, 'MSSQLPROVIDER', '');
+      dbConnNoPwd:='Provider='         + DBProvider
                  + ';Data Source='     + AppSettings.TMIG.ReadString(DatabaseSetup, 'MSSQLSERVER',        '')
                  + ','                 + AppSettings.TMIG.ReadString(DatabaseSetup, 'MSSQLPORT',          '')
                  + ';Initial catalog=' + AppSettings.TMIG.ReadString(DatabaseSetup, 'MSSQLCATALOG',       '')
                  + ';User Id='         + AppSettings.TMIG.ReadString(DatabaseSetup, 'MSSQLUSERNAME',      '');
-      dbConnStr  :=dbConnNoPwd + ';Password=' + AppSettings.TMIG.ReadString(DatabaseSetup, 'MSSQLPASSWORD', '');
-      pInterval  :=AppSettings.TMIG.ReadInteger(TimersSettings, 'NET_CONNETCTION', 15000);
-      pCmdTimeout:=AppSettings.TMIG.ReadInteger(DatabaseSetup, 'COMMAND_TIMEOUT',    15);
-      pConTimeout:=AppSettings.TMIG.ReadInteger(DatabaseSetup, 'CONNECTION_TIMEOUT', 15);
+      DBConnStr :=dbConnNoPwd + ';Password=' + AppSettings.TMIG.ReadString(DatabaseSetup, 'MSSQLPASSWORD', '');
+      Interval  :=AppSettings.TMIG.ReadInteger(TimersSettings, 'NET_CONNETCTION', 15000);
+      CmdTimeout:=AppSettings.TMIG.ReadInteger(DatabaseSetup, 'COMMAND_TIMEOUT',    15);
+      ConTimeout:=AppSettings.TMIG.ReadInteger(DatabaseSetup, 'CONNECTION_TIMEOUT', 15);
     end;
   finally
     AppSettings.Free;
   end;
-  if ShowConnStr then LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Connection string built [show_no_password] = ' + dbConnNoPwd);
+  if ShowConnStr then LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Connection string built [show_no_password] = ' + dbConnNoPwd);
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------- CONNECT TO DATABASE }
@@ -80,7 +74,7 @@ procedure TDataBase.InitializeConnection(idThd: integer; ErrorShow: boolean; var
 { -------------------------------------------------------------- ! INNER BLOCK ! ---------------------------------------------------------------------------- }
 procedure ErrorHandler(err_class: string; err_msg: string; should_quit: boolean; err_wnd: boolean);
 begin
-  LogText(MainForm.FEventLogPath, ERR_LOGTEXT + '[' + err_class + '] ' + err_msg + ' (' + IntToStr(ExitCode) + ').');
+  LogText(MainForm.EventLogPath, ERR_LOGTEXT + '[' + err_class + '] ' + err_msg + ' (' + IntToStr(ExitCode) + ').');
   if err_wnd     then Application.MessageBox(PChar(ERR_MESSAGE), PChar(MainForm.CAPTION), MB_OK + MB_ICONWARNING);
   if should_quit then Application.Terminate;
 end;
@@ -92,8 +86,8 @@ begin
   { --------------------------------------------------------------------------------------------------------------------- SETUP CONNECTION AND TRY TO CONNECT }
   try
     { CONNECTION SETTINGS }
-    ActiveConnection.ConnectionString :=dbConnStr;
-    ActiveConnection.Provider         :=dbProvider;
+    ActiveConnection.ConnectionString :=DBConnStr;
+    ActiveConnection.Provider         :=DBProvider;
     ActiveConnection.ConnectionTimeout:=ConTimeout;
     ActiveConnection.CommandTimeout   :=CmdTimeout;
     ActiveConnection.ConnectOptions   :=coConnectUnspecified;
@@ -141,8 +135,8 @@ begin
   Result:=0;
   ConCheck:=TADOConnection.Create(nil);
   { ASSIGN PARAMETERS }
-  ConCheck.ConnectionString :=dbConnStr;
-  ConCheck.Provider         :=dbProvider;
+  ConCheck.ConnectionString :=DBConnStr;
+  ConCheck.Provider         :=DBProvider;
   ConCheck.ConnectionTimeout:=ConTimeout;
   ConCheck.CommandTimeout   :=CmdTimeout;
   ConCheck.KeepConnection   :=False;

@@ -24,28 +24,17 @@ uses
 type
   TMailer = class
   {$TYPEINFO ON}
-  private
-    var pidThd     : integer;
-    var pXMailer   : string;
-    var pmFrom     : string;
-    var pmTo       : string;
-    var pmCc       : string;
-    var pmBcc      : string;
-    var pmRt       : string;
-    var pmSubject  : string;
-    var pmBody     : string;
-    var pmLogo     : string;
   public
-    property    idThd       : integer read pidThd    write pidThd;
-    property    XMailer     : string  read pXMailer  write pXMailer;
-    property    MailFrom    : string  read pmFrom    write pmFrom;
-    property    MailTo      : string  read pmTo      write pmTo;
-    property    MailCc      : string  read pmCc      write pmCc;
-    property    MailBcc     : string  read pmBcc     write pmBcc;
-    property    MailRt      : string  read pmRt      write pmRt;
-    property    MailSubject : string  read pmSubject write pmSubject;
-    property    MailBody    : string  read pmBody    write pmBody;
-    property    Logo        : string  read pmLogo    write pmLogo;
+    var idThd       : integer;
+    var XMailer     : string;
+    var MailFrom    : string;
+    var MailTo      : string;
+    var MailCc      : string;
+    var MailBcc     : string;
+    var MailRt      : string;
+    var MailSubject : string;
+    var MailBody    : string;
+    var Logo        : string;
   published
     function    SendCDOSYS : boolean;
     function    SendSynapse: boolean;
@@ -56,8 +45,6 @@ type
 type
   TDocument = class(TMailer)
   {$TYPEINFO ON}
-  private
-    { UNUSED }
   public
     var HTMLTable:   string;
     var HTMLTemp:    string;
@@ -137,7 +124,7 @@ begin
     Result:=True;
   except
     on E: Exception do
-      LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(idThd) + ']: Cannot send an e-mail. Error message has been thrown: ' + E.Message);
+      LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Cannot send an e-mail. Error message has been thrown: ' + E.Message);
   end;
 end;
 
@@ -245,7 +232,7 @@ begin
       end;
     except
       on E: Exception do
-        LogText(MainForm.FEventLogPath, 'Thread [' + IntToStr(idThd) + ']: Could not send an e-mail. Error message thrown: ' + E.Message);
+        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Could not send an e-mail. Error message thrown: ' + E.Message);
     end;
   finally
     { ------------------------------------------------------------------------------------------------------------------------------------------ UNINITIALIZE }
@@ -315,7 +302,7 @@ begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   MailFrom:='';
   MailTo  :='';
-  DataBase:=TDataTables.Create(MainForm.FDbConnect);
+  DataBase:=TDataTables.Create(MainForm.DbConnect);
   try
     { GET "EMAIL TO" FROM ADDRESSBOOK }
     DataBase.CustFilter:=WHERE + TAddressBook.CUID + EQUAL + QuotedStr(CUID);
