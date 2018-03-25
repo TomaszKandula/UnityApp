@@ -135,7 +135,6 @@
     <File Path="ReportBug.pas"/>
     <File Path="ReportBug.dfm"/>
     <File Path="Colors.pas"/>
-    <File Path="Colors.dfm"/>
     <File Path="EventLog.pas"/>
     <File Path="EventLog.dfm"/>
   </ProjectSortOrder>

@@ -32,13 +32,22 @@ const
 
   DelayStd:       integer = 50;               { SLOW DOWN A BIT TO SHOW MESSAGE  }
   DelayErr:       integer = 750;              { SLOW DOWN SIGNIFICANTLY FOR USER }
-  AllTasks:       integer = 14;               { TOTAL NUMBER OF ALL BASIC TASKS  }
+  AllTasks:       integer = 13;               { TOTAL NUMBER OF ALL BASIC TASKS  }
   DecryptKey:     integer = 429496;
   APPCAPTION:     string  = 'Unity';
   LyncCall:       string  = 'LyncCall.exe';
   ConfigFile:     string  = 'Config.cfg';
   LicenceFile:    string  = 'Unity.licx';
   GridImgFile:    string  = 'Unity.img';
+  ReleaseFile:    string  = 'Release.pak';
+  CurrentMutex:   PWideChar = 'UNITY_10005';  { WARNING! INCREASE IT WITH EACH NEW RELEASE }
+
+  { SPLASH SCREEN }
+
+  spFree = 0;
+  spShow = 1;
+  spSplash = 100;
+  spUpdate = 200;
 
   { DESKTOP WINDOW MANAGER API }
 
@@ -87,7 +96,7 @@ const
   { SECTION NAMES IN SETTING FILE }
 
   ApplicationDetails  = 'APPLICATION';
-  Password            = 'PASSWD';
+  Password            = 'PASSWORD';
   TabSheetsNames      = 'TABSHEETS_NAMES';
   RiskClassDetails    = 'RISK_CLASS_DETAILS';
   MailerCDOSYS        = 'MAILER_CDOSYS_NTLM';

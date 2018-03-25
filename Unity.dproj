@@ -71,32 +71,9 @@
 			<DCCReference Include="Mailer.pas"/>
 			<DCCReference Include="AgeView.pas"/>
 			<DCCReference Include="Transactions.pas"/>
-			<DCCReference Include="ReportBug.pas">
-				<Form>;
-  Colors in &apos;Colors.pas&apos;,
-  EventLog in &apos;EventLog.pas&apos; {EventForm</Form>
-				<DesignClass>BOOL): HRESULT; stdcall;
-
-(* NOTE: CONSTANTS ARE DEFINED IN &quot;MAIN&quot; VIA &quot;COMMON.INC&quot; *)
-
-var
-  StrWrite:       string;
-  iCNT:           integer;
-  FL:             TFileStream;
-  IsEnabled:      BOOL;
-  ModuleHandle:   HMODULE;
-  IsAreoOn:       TDwmIsCompositionEnabledFunc;
-  IsAeroEnabled:  boolean;
-  Mutex:          integer;
-  WndRect:        TRect;
-  AppSettings:    TSettings;
-
-{$R *.res</DesignClass>
-			</DCCReference>
+			<DCCReference Include="ReportBug.pas"/>
 			<DCCReference Include="Colors.pas"/>
-			<DCCReference Include="EventLog.pas">
-				<Form>EventForm</Form>
-			</DCCReference>
+			<DCCReference Include="EventLog.pas"/>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>
@@ -122,7 +99,7 @@ var
 						<VersionInfo Name="MajorVer">0</VersionInfo>
 						<VersionInfo Name="MinorVer">1</VersionInfo>
 						<VersionInfo Name="Release">0</VersionInfo>
-						<VersionInfo Name="Build">409</VersionInfo>
+						<VersionInfo Name="Build">428</VersionInfo>
 						<VersionInfo Name="Debug">False</VersionInfo>
 						<VersionInfo Name="PreRelease">True</VersionInfo>
 						<VersionInfo Name="Special">False</VersionInfo>
@@ -132,21 +109,23 @@ var
 						<VersionInfo Name="CodePage">1252</VersionInfo>
 					</VersionInfo>
 					<VersionInfoKeys>
-						<VersionInfoKeys Name="CompanyName"/>
-						<VersionInfoKeys Name="FileDescription"/>
-						<VersionInfoKeys Name="FileVersion">0.1.0.409</VersionInfoKeys>
-						<VersionInfoKeys Name="InternalName"/>
-						<VersionInfoKeys Name="LegalCopyright"/>
-						<VersionInfoKeys Name="LegalTrademarks"/>
-						<VersionInfoKeys Name="OriginalFilename"/>
-						<VersionInfoKeys Name="ProductName"/>
+						<VersionInfoKeys Name="CompanyName">Tomasz Kandula for DFDS Polska sp. z o.o.</VersionInfoKeys>
+						<VersionInfoKeys Name="FileDescription">Unity for Debt Management</VersionInfoKeys>
+						<VersionInfoKeys Name="FileVersion">0.1.0.428</VersionInfoKeys>
+						<VersionInfoKeys Name="InternalName">Unity</VersionInfoKeys>
+						<VersionInfoKeys Name="LegalCopyright">Tomasz Kandula/DFDS Polska sp. z o.o.</VersionInfoKeys>
+						<VersionInfoKeys Name="LegalTrademarks">Tomasz Kandula/DFDS Polska sp. z o.o.</VersionInfoKeys>
+						<VersionInfoKeys Name="OriginalFilename">Unity.exe</VersionInfoKeys>
+						<VersionInfoKeys Name="ProductName">Unity for Debt Management</VersionInfoKeys>
 						<VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
-						<VersionInfoKeys Name="Comments"/>
+						<VersionInfoKeys Name="Comments">Unity for Debt Management</VersionInfoKeys>
 					</VersionInfoKeys>
 					<Source>
 						<Source Name="MainSource">Unity.dpr</Source>
 					</Source>
 					<Excluded_Packages>
+						<Excluded_Packages Name="$(BDSBIN)\bcboffice2k150.bpl">Embarcadero C++Builder Office 2000 Servers Package</Excluded_Packages>
+						<Excluded_Packages Name="$(BDSBIN)\bcbofficexp150.bpl">Embarcadero C++Builder Office XP Servers Package</Excluded_Packages>
 						<Excluded_Packages Name="$(BDSBIN)\dcloffice2k150.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
 						<Excluded_Packages Name="$(BDSBIN)\dclofficexp150.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
 					</Excluded_Packages>

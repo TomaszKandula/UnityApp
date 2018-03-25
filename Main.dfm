@@ -6887,17 +6887,6 @@ object MainForm: TMainForm
           ExplicitTop = 17
           ExplicitWidth = 879
         end
-        object Splitter1: TSplitter
-          Left = 0
-          Top = 411
-          Width = 396
-          Height = 3
-          Cursor = crVSplit
-          Align = alTop
-          Beveled = True
-          ResizeStyle = rsUpdate
-          ExplicitWidth = 51
-        end
         object InnerPanelTop: TPanel
           AlignWithMargins = True
           Left = 0
@@ -6934,11 +6923,11 @@ object MainForm: TMainForm
         object sgGroups: TStringGrid
           AlignWithMargins = True
           Left = 0
-          Top = 424
+          Top = 411
           Width = 396
-          Height = 302
+          Height = 315
           Margins.Left = 0
-          Margins.Top = 10
+          Margins.Top = 5
           Margins.Right = 0
           Margins.Bottom = 0
           Align = alClient
@@ -6969,7 +6958,7 @@ object MainForm: TMainForm
           Margins.Left = 0
           Margins.Top = 5
           Margins.Right = 0
-          Margins.Bottom = 10
+          Margins.Bottom = 5
           Align = alTop
           Color = clWhite
           ColCount = 3

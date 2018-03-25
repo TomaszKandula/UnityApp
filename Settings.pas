@@ -33,20 +33,29 @@ type
     var pPathAppCfg            : string;
     var pPathLicence           : string;
     var pPathGridImage         : string;
+    var pPathRelease           : string;
+    { RELEASE DATE AND TIME }
+    function  pGetReleaseDateTime: TDateTime;
+    procedure pSetReleaseDateTime(NewDateTime: TDateTime);
+    function  pGetRelFileDateTime: TDateTime;
   public
     { GENERAL }
     var GetLastError           : integer;
     var TMIG                   : TMemIniFile;
     var TMIL                   : TMemIniFile;
     { READ ONLY PROPERTIES }
-    property FAppDir           : string read pAppDir;
-    property FLayoutDir        : string read pLayoutDir;
-    property FAppLog           : string read pAppLog;
-    property FWinUserName      : string read pWinUserName;
-    property FPathGridImage    : string read pPathGridImage;
-    property FPathEventLog     : string read pPathEventLog;
-    property FPathAppCfg       : string read pPathAppCfg;
-    property FPathLicence      : string read pPathLicence;
+    property FAppDir           : string    read pAppDir;
+    property FLayoutDir        : string    read pLayoutDir;
+    property FAppLog           : string    read pAppLog;
+    property FWinUserName      : string    read pWinUserName;
+    property FPathGridImage    : string    read pPathGridImage;
+    property FPathEventLog     : string    read pPathEventLog;
+    property FPathAppCfg       : string    read pPathAppCfg;
+    property FPathLicence      : string    read pPathLicence;
+    property FPathRelease      : string    read pPathRelease;
+    property FRelFileDateTime  : TDateTime read pGetRelFileDateTime;
+    { READ/WRITE PROPERTIES }
+    property FReleaseDateTime  : TDateTime read pGetReleaseDateTime write pSetReleaseDateTime;
   published
     constructor Create;
     destructor  Destroy; override;
@@ -61,9 +70,12 @@ implementation
 { ------------------------------------------------------------------------------------------------------------------------------------------------ INITIALZIE }
 constructor TSettings.Create;
 begin
+
   (* INITIALIZATION *)
   TMIG:=TMemIniFile.Create('');
   TMIL:=TMemIniFile.Create('');
+
+  (* POPULATE *)
   pAppDir        :=ExtractFileDir(Application.ExeName) + '\';
   pWinUserName   :=Trim(LowerCase(GetEnvironmentVariable('username')));
   pAppLog        :=pWinUserName + '.log';
@@ -71,16 +83,20 @@ begin
   pPathLicence   :=pAppDir + LicenceFile;
   pPathEventLog  :=pAppDir + pAppLog;
   pPathGridImage :=pAppDir + GridImgFile;
+
   (* READ CONFIG FILES *)
   if FileExists(pPathAppCfg) then
   begin
     Decode(AppConfig, True);
-    pLayoutDir:=TMIG.ReadString(VariousLayouts, 'PATH', 'C:\');
+    pLayoutDir  :=TMIG.ReadString(VariousLayouts,     'PATH',        '');
+    pPathRelease:=TMIG.ReadString(ApplicationDetails, 'UPDATE_PATH', '');
+    pPathRelease:=pPathRelease + ReleaseFile;
   end
   else
   begin
-    GetLastError:=104;
+    GetLastError:=404;
   end;
+
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------------- RELEASE }
@@ -89,6 +105,32 @@ begin
   TMIG.Free;
   TMIL.Free;
   inherited;
+end;
+
+{ -------------------------------------------------------------------------------------------------------------------------------- GET RELEASE FILE DATE&TIME }
+function TSettings.pGetRelFileDateTime: TDateTime;
+var
+  PakDateTime: TDateTimeInfoRec;
+begin
+  Result:=NULLDATE;
+  if pPathRelease <> '' then
+  begin
+    FileGetDateTimeInfo(pPathRelease, PakDateTime, True);
+    Result:=StrToDateTime(FormatDateTime('yyyy-mm-dd hh:mm:ss', PakDateTime.TimeStamp)); { NOTE! "TIMESTAMP" IS PRECISE TO MILLISECONDS }
+  end;
+end;
+
+{ ---------------------------------------------------------------------------------------------------------------------------- GET NEW RELEASE FILE DATE&TIME }
+function TSettings.pGetReleaseDateTime: TDateTime;
+begin
+  Result:=StrToDateTimeDef(TMIG.ReadString(ApplicationDetails, 'UPDATE_DATETIME', ''), NULLDATE);
+end;
+
+{ ---------------------------------------------------------------------------------------------------------------------------- SET NEW RELEASE FILE DATE&TIME }
+procedure TSettings.pSetReleaseDateTime(NewDateTime: TDateTime);
+begin
+  TMIG.WriteString(ApplicationDetails, 'UPDATE_DATETIME', DateTimeToStr(NewDateTime));
+  Encode(AppConfig);
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------- ENCRYPT & COMPUTE CRC32 }

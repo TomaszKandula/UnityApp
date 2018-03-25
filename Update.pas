@@ -16,7 +16,7 @@ unit Update;
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, ExtCtrls, GIFImg;
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, ExtCtrls, GIFImg, Gauges;
 
 { --------------------------------------------------------------- ! MAIN CLASS ! ---------------------------------------------------------------------------- }
 type
@@ -25,10 +25,10 @@ type
     MainText1: TLabel;
     MainText2: TLabel;
     Text1: TLabel;
-    MainImage: TImage;
     Text3: TLabel;
     BottomLine: TBevel;
     Text2: TLabel;
+    Progress: TGauge;
     procedure FormShow(Sender: TObject);
   protected
     procedure CreateParams(var Params: TCreateParams); override;
@@ -59,7 +59,7 @@ end;
 { ------------------------------------------------------------------------------------------------------------------------------------------- START ANIMATION }
 procedure TUpdateForm.FormShow(Sender: TObject);
 begin
-  (MainImage.Picture.Graphic as TGIFImage).Animate:=True;
+  { DO NOTHING }
 end;
 
 end.

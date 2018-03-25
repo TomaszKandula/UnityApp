@@ -22,8 +22,12 @@ uses
   Classes,
   SysUtils,
   StdCtrls,
+  ShellApi,
+  IOUtils,
   INIFiles,
   CRC32u,
+  SynZip,
+  SynZipFiles,
   Update in 'Update.pas',
   Splash in 'Splash.pas',
   Main in 'Main.pas',
@@ -78,7 +82,7 @@ var
 {  30 RCDATA "__Makefile\\libeay32.dll"   DLL FOR SYNAPSE    }
 {  40 RCDATA "__Makefile\\ssleay32.dll"   DLL FOR SYNAPSE    }
 {  50 RCDATA "__Makefile\\vsinit.dll"     DLL FOR SYNAPSE    }
-{  60 RCDATA "__Makefile\\logon.log"      USER LOG FILE      }
+{  60 RCDATA "__Makefile\\logon.log"      EVENT LOG FILE     }
 
 { ------------------------------------------------------------------------------------------------------------------ EXTRACT GIVEN RESOURCE FILE BY ID NUMBER }
 function Unpack(ItemID: integer; FileName: string; mode: integer): boolean;
@@ -108,11 +112,10 @@ begin
   end;
 end;
 
-{ UPDATE 'STATUS' ON SPLASH SCREEN                                        }
-{   NOTE1: SPLASH SCREEN MUST BE ALREADY INITIALIZED                      }
-{   NOTE2: SLEEP WILL FREEZE APPLICATION & NO MESSAGES WILL BE PROCESSED  }
-
 { ------------------------------------------------------------------------------------------------------------------------------ SHOW STATUS ON SPLASH SCREEN }
+
+(* NOTE! IT REQUIRES "SPLASHFORM" TO BE INITIALIZED *)
+
 procedure Status(Task: integer; Total: integer; Time: integer; Text: string; TextMode: boolean);
 begin
   SplashForm.Status.Caption:=Text;
@@ -123,14 +126,67 @@ begin
   if TextMode = True then LogText(AppSettings.FPathEventLog, Text);
 end;
 
+{ ------------------------------------------------------------------------------------------------------------------------ UPDATE ALL FILES FROM RELEASE PACK }
+
+(* NOTE! IT REQUIRES "UPDATEFORM" TO BE INITIALIZED *)
+
+function UnzippReleaseFile(FileName: string; DestDir: string; EventLogPath: string): boolean;
+var
+  iCNT:    integer;
+  ZipR:    TZipReader;
+  FS:      TFileStream;
+  Zipped:  string;
+begin
+  FS:=nil;
+  ZipR:=TZipReader.Create(FileName);
+  LogText(EventLogPath, 'New update package has been found, updating files...');
+  try
+    for iCNT:=0 to ZipR.Count - 1 do
+    begin
+      Zipped:=ZipR.Entry[iCNT].ZipName;
+      try
+        RenameFile(DestDir + Zipped, Zipped + '.del');
+        FS:=TFileStream.Create(DestDir + Zipped, fmCreate);
+        ZipR.GetData(iCNT, FS);
+        UpdateForm.Progress.Progress:=Trunc(((iCNT + 1)/ZipR.Count) * 100);
+        UpdateForm.Update;
+        Sleep(DelayStd);
+        LogText(EventLogPath, '... ' + Zipped + '. Status: ' + BoolToStr(DeleteFile(DestDir + Zipped + '.del'), False) + '.');
+      finally
+        FS.Free;
+      end;
+    end;
+    Result:=True;
+    LogText(EventLogPath, 'Old files with status (0) will be rmoved by new instance.');
+  finally
+    ZipR.Free;
+  end;
+end;
+
+{ ---------------------------------------------------------------------------------------------------------------------- DELETE FILES FOLLOWING GIVEN PATTERN }
+procedure DeleteFilesMatchingPattern(const directory, pattern: string; EventLogPath: string);
+var
+  FileName: string;
+  Check:    cardinal;
+begin
+  Check:=0;
+  for FileName in TDirectory.GetFiles(directory, pattern) do
+  begin
+    TFile.Delete(FileName);
+    LogText(EventLogPath, 'File "' + FileName + '" has been removed.');
+    Inc(Check);
+  end;
+  if Check > 0 then LogText(EventLogPath, 'Cleaning folder after last update has been done (' + IntToStr(Check) + ' items removed).');
+end;
+
 { ---------------------------------------------------------------- ! MAIN BLOCK ! --------------------------------------------------------------------------- }
 begin
 
   { DEBUG LINE }
   ReportMemoryLeaksOnShutdown:=DebugHook <> 0;
 
-  { ---------------------------------------------------------------------------------------------------------------------------- ONLY ONE COPY RUNNING PER PC }
-  Mutex:=CreateMutex(nil, True, 'UnityApplication2018');
+  { ----------------------------------------------------------------------------------------------------------------------------------- ONLY ONE RUNNING COPY }
+  Mutex:=CreateMutex(nil, True, CurrentMutex);
   if (Mutex = 0) OR (GetLastError = ERROR_ALREADY_EXISTS) then
   begin
     Application.MessageBox(
@@ -140,17 +196,49 @@ begin
     Exit;
   end;
 
-  { ACCESS ALL THE SETTINGS }
+  { --------------------------------------------------------------------------------------------------------------------------------- ACCESS ALL THE SETTINGS }
   AppSettings:=TSettings.Create;
 
+  { ------------------------------------------------------------------------------------------------------------------------------------ CHECK EVENT LOG FILE }
+  if FileExists(AppSettings.FPathEventLog) then
+  begin
+    LogText(AppSettings.FPathEventLog, 'Starting application...');
+  end
+  else
+  begin
+    { ----------------------------------------------------------------------------------------------------------------------------- OTHERWISE EXTRACT DEFAULT }
+    if Unpack(60, AppSettings.FPathEventLog, LeaveAsIs) = True then
+    begin
+      { PUT USER LOGON NAME TO LOG FILE (@ EOF) }
+      FL:=TFileStream.Create(AppSettings.FPathEventLog, fmOpenWrite);
+      try
+        StrWrite:=AppSettings.FWinUserName + '.' + CRLF + CRLF;
+        FL.Position:=FL.Size;
+        for iCNT:=1 to length(StrWrite) do FL.Write(StrWrite[iCNT], 1);
+      finally
+        FL.Free;
+      end;
+      LogText(AppSettings.FPathEventLog, 'Starting application...');
+    end
+    else
+    begin
+      Application.MessageBox(
+                              PChar('Cannot create log file. ' + APPCAPTION + ' will be closed. Please contact IT support.'),
+                              PChar(APPCAPTION), MB_OK + MB_ICONWARNING
+                            );
+      ExitProcess(0);
+    end;
+  end;
+
   { -------------------------------------------------------------------------------------------------------------------------------------- CHECK FOR PASSOWRD }
-  if AppSettings.TMIG.ReadString(Password, 'VALUE', '') = '' then
+  if AppSettings.TMIG.ReadString(Password, 'HASH', '') = '' then
   begin
     Application.MessageBox(
-                            PCHar('No master password has been found. Program will be terminated. Please contact IT Support.'),
+                            PCHar('No master password has been found. Program will be closed. Please contact IT Support.'),
                             PChar(APPCAPTION), MB_OK + MB_ICONERROR
                           );
-    Exit;
+    LogText(AppSettings.FPathEventLog, '[Critical Error]: No master password has been found. Application terminated.');
+    ExitProcess(0);
   end;
 
   { ---------------------------------------------------------------------------------------------------------------------------------- CHECK FOR LICENCE FILE }
@@ -160,7 +248,8 @@ begin
                             PCHar('Cannot find licence file (' + LicenceFile + '). Program will be closed. Please contact IT Support.'),
                             PChar(APPCAPTION), MB_OK + MB_ICONWARNING
                           );
-    Exit;
+    LogText(AppSettings.FPathEventLog, '[Critical Error]: No licence file has been found. Application terminated.');
+    ExitProcess(0);
   end;
 
   { -------------------------------------------------------------------------------------------------------------- WINDOWS VERSION CHECK - WINDOWS 7 & HIGHER }
@@ -168,7 +257,7 @@ begin
   begin
     { SAVE IT INTO LOG FILE }
     try
-      LogText(AppSettings.FPathEventLog, 'Program must be run under Windows 7 or higher. Application terminated.');
+      LogText(AppSettings.FPathEventLog, 'Program must be run under Windows 7 or higher. Application will be closed.');
     except
       { DO NOTHING, WE SHOW MESSAGE BOX AND QUIT ANYWAY }
     end;
@@ -176,21 +265,9 @@ begin
                             PCHar('Program must be run under Windows 7 or higher. ' + APPCAPTION + ' will be closed.'),
                             PChar(APPCAPTION), MB_OK + MB_ICONWARNING
                           );
-    Exit;
+    LogText(AppSettings.FPathEventLog, '[Critical Error]: Invalid Operating System. Application terminated.');
+    ExitProcess(0);
   end;
-
-  { --------------------------------------------------------------------------------------------------------------------------------------- CHECK FOR UPDATES }
-
-  // 1. check if new package is deployed
-  // 2. if so:
-  // 3.   - inform user about update (update screen)
-  // 4.   - copy package content into destination
-  // 5.   - rename itself to Unity.delete
-  // 6.   - rename Unity.new to Unity.exe
-  // 7.   - delete Unity.delete
-  // 8.   - free update screen
-  // 9.   - run new Unity.exe (should have different mutex!)
-  // 10.  - exit process(0)
 
   { ----------------------------------------------------------------------------------------------------------- AREO CHECK MUST BE TURNED ON | WINDOWS 7 ONLY }
   if StrToInt(GetOSVer(0)) = 61 then
@@ -214,7 +291,7 @@ begin
     if IsAeroEnabled = False then
     begin
       try
-        LogText(AppSettings.FPathEventLog, 'Areo is not enabled. Application terminated.');
+        LogText(AppSettings.FPathEventLog, 'Areo composition must be enabled. Program will be closed. Please change Windows settings.');
       except
         { DO NOTHING, WE SHOW MESSAGE BOX AND QUIT ANYWAY }
       end;
@@ -222,77 +299,69 @@ begin
                               PChar('Aero is not enabled. ' + APPCAPTION + ' will be closed.'),
                               PChar(APPCAPTION), MB_OK + MB_ICONWARNING
                             );
-      Exit;
+      LogText(AppSettings.FPathEventLog, '[Critical Error]: Areo composition is deisabled. Application terminated.');
+      ExitProcess(0);
     end;
   end;
 
-  { ------------------------------------------------------------------------------------------------------------------------------------- SPLASH SCREEN START }
-  SplashForm:=TSplashForm.Create(nil);
-  SystemParametersInfo(SPI_GETWORKAREA, 0, @WndRect, 0);
-
-  { MAKE IT CENTRED ON THE SCREEN }
-  SplashForm.Top :=((WndRect.Bottom - WndRect.Top ) div 2) - (SplashForm.Height div 2);
-  SplashForm.Left:=((WndRect.Right  - WndRect.Left) div 2) - (SplashForm.Width  div 2);
-
-  { FADE IN AND UPDATE }
-  AnimateWindow(SplashForm.Handle, 500, AW_BLEND or AW_ACTIVATE);
-  SplashForm.Update;
-
-  { ---- START ---- }
-
-  { ------------------------------------------------------------------------------------------------------------------------------------ CHECK EVENT LOG FILE }
-  if FileExists(AppSettings.FPathEventLog) then
+  { ------------------------------------------------------------------------------------------------------------------ PERFORM UPDATE IF NEW RELEASE IS FOUND }
+  if FileExists(AppSettings.FPathRelease) then
   begin
-    LogText(AppSettings.FPathEventLog, 'Start checking resources files and configuration files.');
-    Status(1, AllTasks, DelayStd, 'Checking ' + ExtractFileName(AppSettings.FAppLog) + '... OK.', True);
-  end
-  else
-  begin
-    { ----------------------------------------------------------------------------------------------------------------------------- OTHERWISE EXTRACT DEFAULT }
-    if Unpack(60, AppSettings.FPathEventLog, LeaveAsIs) = True then
+    if AppSettings.FRelFileDateTime > AppSettings.FReleaseDateTime then
     begin
-      { PUT USER LOGON NAME TO LOG FILE (@ EOF) }
-      FL:=TFileStream.Create(AppSettings.FPathEventLog, fmOpenWrite);
-      try
-        StrWrite:=AppSettings.FWinUserName + '.' + CRLF + CRLF;
-        FL.Position:=FL.Size;
-        for iCNT:=1 to length(StrWrite) do FL.Write(StrWrite[iCNT], 1);
-      finally
-        FL.Free;
-      end;
-      LogText(AppSettings.FPathEventLog, 'Start checking resources files and configuration files.');
-      Status(1, AllTasks, DelayStd, 'Checking ' + ExtractFileName(AppSettings.FPathEventLog) + '... extracted. OK.', True);
+      { UPDATE SCREEN }
+      UpdateForm:=TUpdateForm.Create(nil);
+      SystemParametersInfo(SPI_GETWORKAREA, 0, @WndRect, 0);
+      UpdateForm.Top :=((WndRect.Bottom - WndRect.Top ) div 2) - (UpdateForm.Height div 2);
+      UpdateForm.Left:=((WndRect.Right  - WndRect.Left) div 2) - (UpdateForm.Width  div 2);
+      AnimateWindow(UpdateForm.Handle, 500, AW_BLEND or AW_ACTIVATE);
+      UpdateForm.Update;
+      { REPLACE FILES AND SAVE DATE&TIME }
+      UnzippReleaseFile(AppSettings.FPathRelease, AppSettings.FAppDir, AppSettings.FPathEventLog);
+      AppSettings.FReleaseDateTime:=AppSettings.FRelFileDateTime;
+      { OPEN NEW COPY AND CLOSE CURRENT INSTANCE }
+      ShellExecute(Application.Handle, 'open', PChar(Application.ExeName), nil, nil, SW_SHOWNORMAL);
+      UpdateForm.Free;
+      AppSettings.Free;
+      ExitProcess(0);
     end
     else
     begin
-      Status(1, AllTasks, DelayErr, 'Cannot extract ' + ExtractFileName(AppSettings.FPathEventLog) + '..., unexpected error!', False);
-      Application.MessageBox(
-                              PChar('Cannot create log file. ' + APPCAPTION + ' will be closed. Please contact IT support.'),
-                              PChar(APPCAPTION), MB_OK + MB_ICONWARNING
-                            );
-      Exit;
+      { CLEANING UP FROM PREVIOUS UPDATE }
+      DeleteFilesMatchingPattern(AppSettings.FAppDir, '*.del', AppSettings.FPathEventLog);
     end;
   end;
 
+  { ---- START ---- }
+
+  SplashForm:=TSplashForm.Create(nil);
+  SystemParametersInfo(SPI_GETWORKAREA, 0, @WndRect, 0);
+  SplashForm.Top :=((WndRect.Bottom - WndRect.Top ) div 2) - (SplashForm.Height div 2);
+  SplashForm.Left:=((WndRect.Right  - WndRect.Left) div 2) - (SplashForm.Width  div 2);
+  AnimateWindow(SplashForm.Handle, 500, AW_BLEND or AW_ACTIVATE);
+  SplashForm.Update;
+
   { ---------------------------------------------------------------------------------------------------------------------------------------- CHECK CONFIG.CFG }
-  Status(2, AllTasks, DelayStd, 'Checking ' + ConfigFile + '...', True);
+  Status(1, AllTasks, DelayStd, 'Checking ' + ConfigFile + '...', True);
   if FileExists(AppSettings.FPathAppCfg) then
   begin
-    Status(2, AllTasks, DelayStd, 'Checking ' + ConfigFile + '... CRC32.', True);
+    Status(1, AllTasks, DelayStd, 'Checking ' + ConfigFile + '... CRC32.', True);
     if not (AppSettings.Decode(AppConfig, False)) then
     begin
-      Status(2, AllTasks, DelayErr, 'Checking ' + ConfigFile + '... corrupted! Extracting default file...', True);
+      Status(1, AllTasks, DelayErr, 'Checking ' + ConfigFile + '... corrupted! Extracting default file...', True);
       if Unpack(10, AppSettings.FPathAppCfg, DeleteOld) = False then Status(2, AllTasks, DelayErr, 'Cannot extract ' + ConfigFile + '..., unexpected error!', True);
     end;
   end
   { ------------------------------------------------------------------------------------------------------------------------------- OTHERWISE EXTRACT DEFAULT }
   else
   begin
-    Status(2, AllTasks, DelayErr, 'Checking ' + ConfigFile + '... not found! Extracting default file...', True);
-    if Unpack(10, AppSettings.FPathAppCfg, LeaveAsIs) = False then Status(2, AllTasks, DelayStd, 'Cannot extract ' + ConfigFile + '..., unexpected error!', True);
+    Status(1, AllTasks, DelayErr, 'Checking ' + ConfigFile + '... not found! Extracting default file...', True);
+    if Unpack(10, AppSettings.FPathAppCfg, LeaveAsIs) = False then Status(1, AllTasks, DelayStd, 'Cannot extract ' + ConfigFile + '..., unexpected error!', True);
   end;
 
   { ---------------------------------------------------------------------------------------------------------------------------------------------- OTHER FILES}
+
+  (* CRCR3 CHECK *)
 
   SetLength(UnityFiles, 3, 3);
   UnityFiles[0, 0]:=DLL1;  UnityFiles[0, 1]:='30';  UnityFiles[0, 2]:=IntToStr(CRC32DLL1);
@@ -301,23 +370,25 @@ begin
 
   for iCNT:=0 to High(UnityFiles) - 1 do
   begin
-    Status(iCNT + 3, AllTasks, DelayStd, 'Checking ' + UnityFiles[iCNT, 0] + '...', True);
+    Status(iCNT + 2, AllTasks, DelayStd, 'Checking ' + UnityFiles[iCNT, 0] + '...', True);
     if FileExists(AppSettings.FPathAppCfg) then
     begin
-      Status(iCNT + 3, AllTasks, DelayStd, 'Checking ' + UnityFiles[iCNT, 0] + '... CRC32.', True);
+      Status(iCNT + 2, AllTasks, DelayStd, 'Checking ' + UnityFiles[iCNT, 0] + '... CRC32.', True);
       { CRC32 CHECK, EXTRACT DEFAULT FILE ON ERROR }
       if UnityFiles[iCNT, 2] <> IntToStr(CRC32File(AppSettings.FAppDir + UnityFiles[iCNT, 0])) then
       begin
-        Status(iCNT + 3, AllTasks, DelayErr, 'Checking ' + UnityFiles[iCNT, 0] + '... corrupted! Extracting default file...', True);
+        Status(iCNT + 2, AllTasks, DelayErr, 'Checking ' + UnityFiles[iCNT, 0] + '... corrupted! Extracting default file...', True);
         if Unpack(StrToInt(UnityFiles[iCNT, 1]), AppSettings.FPathAppCfg, DeleteOld) = False then Status(iCNT, AllTasks, DelayErr, 'Cannot extract ' + UnityFiles[iCNT, 0] + '..., unexpected error!', True);
       end;
     end
     else
     begin
-      Status(iCNT + 3, AllTasks, DelayErr, 'Checking ' + UnityFiles[iCNT, 0] + '... not found! Extracting default file...', True);
+      Status(iCNT + 2, AllTasks, DelayErr, 'Checking ' + UnityFiles[iCNT, 0] + '... not found! Extracting default file...', True);
       if Unpack(StrToInt(UnityFiles[iCNT, 1]), AppSettings.FPathAppCfg, LeaveAsIs) = False then Status(iCNT, AllTasks, DelayStd, 'Cannot extract ' + UnityFiles[iCNT, 0] + '..., unexpected error!', True);
     end;
   end;
+
+  (* CHECK IF EXISTS *)
 
   SetLength(MsAssemblies, 6);
   MsAssemblies[0]:=DLL4;
@@ -329,10 +400,10 @@ begin
 
   for iCNT:=0 to High(MsAssemblies) - 1 do
   begin
-    Status(iCNT + 6, AllTasks, DelayStd, 'Checking ' + MsAssemblies[iCNT] + '...', True);
+    Status(iCNT + 5, AllTasks, DelayStd, 'Checking ' + MsAssemblies[iCNT] + '...', True);
     if FileExists(AppSettings.FAppDir + DLL4) then
     begin
-      Status(iCNT + 6, AllTasks, DelayStd, 'Checking ' + MsAssemblies[iCNT] + '... OK.', True);
+      Status(iCNT + 5, AllTasks, DelayStd, 'Checking ' + MsAssemblies[iCNT] + '... OK.', True);
     end
     else
     begin
@@ -340,17 +411,17 @@ begin
                               PCHar('Cannot find ' + MsAssemblies[iCNT] + '. Please reinstall application or contact IT support.'),
                               PChar(APPCAPTION), MB_OK + MB_ICONERROR
                             );
-      Exit;
+      ExitProcess(0);
     end;
   end;
 
-  LogText(AppSettings.FPathEventLog, 'End of checking resource files and configuration files.');
+  LogText(AppSettings.FPathEventLog, 'End of checking resource and configuration files.');
   LogText(AppSettings.FPathEventLog, 'Create Forms and execute their methods...');
 
   { ---- END ---- }
 
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-  Status(12, AllTasks, 50, 'Application initialization... connecting with SQL server..., please wait.', False);
+  Status(11, AllTasks, 50, 'Application initialization... connecting with SQL server..., please wait.', False);
   Application.Initialize;
   Application.Title:=APPCAPTION;
   Application.MainFormOnTaskbar:=False;
@@ -364,7 +435,7 @@ begin
   LogText(AppSettings.FPathEventLog, '[GUI] Initialization methods executed within main thread, ''MainForm'' has been created. Main process thread ID = ' + IntToStr(MainThreadID) + '.');
 
   { OTHER WINFORMS }
-  Status(13, AllTasks, 400, 'Application initialization... WinForms loading, please wait.', False);
+  Status(12, AllTasks, 400, 'Application initialization... WinForms loading, please wait.', False);
   Application.CreateForm(TAboutForm,    AboutForm);    LogText(AppSettings.FPathEventLog, '[GUI] ''AboutForm'' ......... has been created.');
   Application.CreateForm(TEventForm,    EventForm);    LogText(AppSettings.FPathEventLog, '[GUI] ''EventForm'' ......... has been created.');
   Application.CreateForm(TColorsForm,   ColorsForm);   LogText(AppSettings.FPathEventLog, '[GUI] ''ColorsForm'' ........ has been created.');
@@ -377,7 +448,7 @@ begin
   Application.CreateForm(TInvoicesForm, InvoicesForm); LogText(AppSettings.FPathEventLog, '[GUI] ''InvoicesForm'' ...... has been created.');
 
   { SPLASH SCREEN - 100% }
-  Status(14, AllTasks, 900, 'Application initialization... done.', False);
+  Status(13, AllTasks, 900, 'Application initialization... done.', False);
 
   { --------------------------------------------------------------------------------------------------------------------------------------- SPLASH SCREEN END }
   AnimateWindow(SplashForm.Handle, 500, AW_BLEND or AW_HIDE);

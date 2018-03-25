@@ -559,6 +559,7 @@ var CRC: cardinal;
     tmp: PAnsiChar;
     L: cardinal;
 begin
+  result := nil; { ADDED }
   if (self=nil) or (aIndex<0) or (aIndex>=Count) or (Map.buf=nil) then
     result := nil else
     with Entry[aIndex], LocalHeader(Map.buf)^ do

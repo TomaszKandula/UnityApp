@@ -443,7 +443,6 @@ type                                                            (* GUI | MAIN TH
     sgGroups: TStringGrid;
     sgUAC: TStringGrid;
     GridFillerRight8: TImage;
-    Splitter1: TSplitter;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -4032,8 +4031,8 @@ procedure TMainForm.btnUnlockClick(Sender: TObject);
     if btnUnlock.Caption = 'Unlock' then
     begin
       { IF PASSWORD IS OK, THEN UNLOCK AND LOAD CONFIGURATION SCRIPT FOR EDITING }
-      if (AppSettings.TMIG.ReadString(Password, 'VALUE', '') <> '') and
-         (AppSettings.TMIG.ReadString(Password, 'VALUE', '') = Edit_PASSWORD.Text) then
+      if (AppSettings.TMIG.ReadString(Password, 'HASH', '') <> '') and
+         (AppSettings.TMIG.ReadString(Password, 'HASH', '') = Edit_PASSWORD.Text) then
       begin
         sgListSection.Cols[0].Text:='Lp';
         sgListSection.Cols[1].Text:='Sections';
@@ -4080,14 +4079,14 @@ procedure TMainForm.btnUnlockClick(Sender: TObject);
       end;
 
       { STOP IF PASSWORD IS INVALID }
-      if (AppSettings.TMIG.ReadString(Password, 'VALUE', '') <> '') and
-         (AppSettings.TMIG.ReadString(Password, 'VALUE', '') <> Edit_PASSWORD.Text) then
+      if (AppSettings.TMIG.ReadString(Password, 'HASH', '') <> '') and
+         (AppSettings.TMIG.ReadString(Password, 'HASH', '') <> Edit_PASSWORD.Text) then
       begin
         MsgCall(mcWarn, 'Incorrect password, please re-type it and try again.');
       end;
 
       { SETUP NEW PASSWORD }
-      if (AppSettings.TMIG.ReadString(Password, 'VALUE', '') = '') then
+      if (AppSettings.TMIG.ReadString(Password, 'HASH', '') = '') then
       begin
         Edit_CurrPassWd.Enabled:=True;
         Edit_NewPassWd.Enabled :=True;
