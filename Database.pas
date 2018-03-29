@@ -55,7 +55,7 @@ begin
                  + ';Initial catalog=' + AppSettings.TMIG.ReadString(DatabaseSetup, 'MSSQLCATALOG',       '')
                  + ';User Id='         + AppSettings.TMIG.ReadString(DatabaseSetup, 'MSSQLUSERNAME',      '');
       DBConnStr :=dbConnNoPwd + ';Password=' + AppSettings.TMIG.ReadString(DatabaseSetup, 'MSSQLPASSWORD', '');
-      Interval  :=AppSettings.TMIG.ReadInteger(TimersSettings, 'NET_CONNETCTION', 15000);
+      Interval  :=AppSettings.TMIG.ReadInteger(TimersSettings, 'NET_CONNETCTION', 5000);
       CmdTimeout:=AppSettings.TMIG.ReadInteger(DatabaseSetup, 'COMMAND_TIMEOUT',    15);
       ConTimeout:=AppSettings.TMIG.ReadInteger(DatabaseSetup, 'CONNECTION_TIMEOUT', 15);
     end;
@@ -98,22 +98,10 @@ begin
     ActiveConnection.IsolationLevel   :=ilCursorStability;  (* https://technet.microsoft.com/en-us/library/ms189122(v=sql.105).aspx                    *)
     { CONNECT TO GIVEN SERVER }
     try
-      { ALL OK }
-      if Check = 0 then
-      begin
-        ActiveConnection.Connected       :=True;
-        MainForm.InvoiceScanTimer.Enabled:=True;
-        MainForm.OILoader.Enabled        :=True;
-        SendMessage(MainForm.Handle, WM_GETINFO, 14, LPARAM(PCHAR('NULL')));
-      end else
-      { CANNOT CONNECT }
-      begin
-        MainForm.InvoiceScanTimer.Enabled:=False;
-        MainForm.OILoader.Enabled        :=False;
-        SendMessage(MainForm.Handle, WM_GETINFO, 15, LPARAM(PCHAR('NULL')));
-      end;
+      ActiveConnection.Connected:=True;
     except
-      on E: Exception do ErrorHandler(E.ClassName, E.Message, False, ErrorShow);
+      on E: Exception do
+        ErrorHandler(E.ClassName, E.Message, False, ErrorShow);
     end;
   finally
     { CHECK SERVER CONNECTION ON REGULAR BASIS }
@@ -150,7 +138,7 @@ begin
     except
       on E: Exception do
       begin
-        Result:=404;
+        Result:=100;
         if E is EOLEException then
         begin
           EO:=EOleException(E);
@@ -161,7 +149,12 @@ begin
   finally
     if ConCheck.Connected then
     begin
+      MainForm.ExecMessage(False, conOK, strNULL);
       ConCheck.Close;
+    end
+    else
+    begin
+      MainForm.ExecMessage(False, conERROR, strNULL);
     end;
     ConCheck.Free;
   end;

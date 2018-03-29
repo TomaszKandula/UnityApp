@@ -642,6 +642,7 @@ type                                                            (* GUI | MAIN TH
     var AccessLevel         :  string;
     var AccessMode          :  string;
     var OpenItemsUpdate     :  string;
+    var ConnLastError       :  cardinal;
     { FOR "FOLLOW-UP" COLOR PICKER }
     property TodayFColor:  TColor read GetTodayFColor  write SetTodayFColor;
     property TodayBColor:  TColor read GetTodayBColor  write SetTodayBColor;
@@ -2037,9 +2038,20 @@ begin
 
   { ESTABLISH ACTIVE CONNECTIVITY }
   DbConnect:=TADOConnection.Create(MainForm);
-  DataBase  :=TDataBase.Create(True);
+  DataBase :=TDataBase.Create(True);
   try
-    DataBase.InitializeConnection(MainThreadID, True, DbConnect);
+    ConnLastError:=DataBase.Check;
+    if ConnLastError = 0 then
+    begin
+      DataBase.InitializeConnection(MainThreadID, True, DbConnect);
+      MainForm.InvoiceScanTimer.Enabled:=True;
+      MainForm.OILoader.Enabled        :=True;
+    end
+    else
+    begin
+      MainForm.InvoiceScanTimer.Enabled:=False;
+      MainForm.OILoader.Enabled        :=False;
+    end;
   finally
     DataBase.Free;
   end;
@@ -2055,7 +2067,7 @@ begin
     if AccessLevel = '' then
     begin
       MsgCall(mcError, 'Cannot find account for user alias: ' + UpperCase(WinUserName) + '. Please contact your administrator. Application will be terminated.');
-      Application.Terminate;
+      ExitProcess(0);
     end;
 
     { OTHERWISE PROCESS }
@@ -2071,15 +2083,18 @@ begin
       DetailsGrid.Enabled   :=False;
       ReloadCover.Visible   :=True;
       ReloadCover.Cursor    :=crNo;
-      GroupListDates.Enabled:=False;
+      GroupListDates.Enabled       :=False;
       Action_FollowUpColors.Enabled:=False;
     end;
 
     { NOT ALLOWED FOR "RO" USERS }
     if AccessLevel = acReadOnly then
     begin
-      Action_Tracker.Enabled  :=False;
-      Action_AddToBook.Enabled:=False;
+      Action_Tracker.Enabled        :=False;
+      Action_AddToBook.Enabled      :=False;
+      ActionsForm.DailyCom.Enabled  :=False;
+      ActionsForm.GeneralCom.Enabled:=False;
+      btnSave.Enabled               :=False;
     end;
   finally
     UserControl.Free;
@@ -2508,14 +2523,20 @@ end;
 { ------------------------------------------------------------------------------------------------------------------------------------------------- LYNC CALL }
 procedure TMainForm.Action_LyncCallClick(Sender: TObject);
 begin
-  WndCall(ActionsForm, stModal);
+  if ConnLastError = 0 then
+    WndCall(ActionsForm, stModal)
+      else
+        MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
 end;
 
 { ---------------------------------------------------------------------------------------------------------------------- ADD TO INVOICE TRACKER | WINDOW CALL }
 
 procedure TMainForm.Action_TrackerClick(Sender: TObject);
 begin
-  WndCall(TrackerForm, stModal);
+  if ConnLastError = 0 then
+    WndCall(TrackerForm, stModal)
+      else
+        MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------ ADD SELECTED ITEMS TO ADDRESS BOOK }
@@ -2720,6 +2741,13 @@ end;
 procedure TMainForm.Action_RemoveClick(Sender: TObject);
 begin
 
+  { EXIT IF NO CONNECTION }
+  if ConnLastError <> 0 then
+  begin
+    MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+    Exit;
+  end;
+
   TrackerForm.CUID:=sgInvoiceTracker.Cells[sgInvoiceTracker.ReturnColumn(TTracker.CUID, 1, 1), sgInvoiceTracker.Row];
 
   { R/W USER CAN REMOVE ITEM }
@@ -2750,13 +2778,19 @@ end;
 { --------------------------------------------------------------------------------------------------------------------------------------------- SHOW MY ITEMS }
 procedure TMainForm.Action_ShowMyClick(Sender: TObject);
 begin
-  TTInvoiceTrackerRefresh.Create(UpperCase(MainForm.WinUserName));
+  if ConnLastError = 0 then
+    TTInvoiceTrackerRefresh.Create(UpperCase(MainForm.WinUserName))
+      else
+        MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------------- SHOW ALL ITEMS }
 procedure TMainForm.Action_ShowAllClick(Sender: TObject);
 begin
-  TTInvoiceTrackerRefresh.Create('*');
+  if ConnLastError = 0 then
+    TTInvoiceTrackerRefresh.Create('*')
+      else
+        MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
 end;
 
 { ---------------------------------------------------------------- ! TRYICON CALLS ! ------------------------------------------------------------------------ }
@@ -2774,6 +2808,11 @@ procedure TMainForm.GroupListBoxSelect(Sender: TObject);
 var
   UserControl: TUserControl;
 begin
+  if ConnLastError <> 0 then
+  begin
+    MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+    Exit;
+  end;
   UserControl:=TUserControl.Create(DbConnect);
   try
     UserControl.UserName:=WinUserName;
@@ -2872,7 +2911,10 @@ end;
 { ----------------------------------------------------------------------------------------------------------------------------------- OPEN TRANSACTION WINDOW }
 procedure TMainForm.sgAgeViewDblClick(Sender: TObject);
 begin
-  WndCall(ActionsForm, stModal);
+  if ConnLastError = 0 then
+    WndCall(ActionsForm, stModal)
+      else
+        MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
 end;
 
 { --------------------------------------------------------------------------------------------------------------- ALLOW OR DISALLOW EDIT CELL IN ADDRESS BOOK }
@@ -2891,7 +2933,10 @@ end;
 { ------------------------------------------------------------------------------------------------------------------------------------- LIST OF SENT INVOICES }
 procedure TMainForm.sgInvoiceTrackerDblClick(Sender: TObject);
 begin
-  WndCall(InvoicesForm, stModal);
+  if ConnLastError = 0 then
+    WndCall(InvoicesForm, stModal)
+      else
+        MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
 end;
 
 { ---------------------------------------------------- ! SHOW NEGATIVE VALUES AND ROW SELECTION ! ----------------------------------------------------------- }
@@ -3258,6 +3303,12 @@ var
   Value:      string;
   Column:     string;
 begin
+  { "READ ONLY" USERS ARE NOT ALLOWED TO MAKE CHANGES }
+  if AccessLevel = acReadOnly then
+  begin
+    MsgCall(mcWarn, 'You don''t have permission to edit Address Book records.');
+    Exit;
+  end;
   { FIRST COLUMN ARE NOT EDITABLE }
   if (sgAddressBook.Col = 1) then Exit;
   { CALL "SAVE NEW" IF "CTRL + S" IS PRESSED }
@@ -3776,6 +3827,12 @@ end;
 { --------------------------------------------------------------------------------------------------------------------------------- OPEN ITEMS | FORCE RELOAD }
 procedure TMainForm.btnReloadClick(Sender: TObject);
 begin
+  { EXIT ON NO CONNECTION }
+  if ConnLastError <> 0 then
+  begin
+    MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+    Exit;
+  end;
   { ONLY ADMINISTRATORS ARE ALLOWED }
   StatBar_TXT1.Caption :=stProcessing;
   if MainForm.AccessLevel = acADMIN then
@@ -3792,6 +3849,12 @@ end;
 procedure TMainForm.btnMakeGroupClick(Sender: TObject);
 begin
   cbDump.Checked:=False;
+  { EXIT ON NO CONNECTION }
+  if ConnLastError <> 0 then
+  begin
+    MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+    Exit;
+  end;
   if sgOpenItems.RowCount < 2 then Exit;
   { ONLY ADMINISTRATORS ARE ALLOWED }
   if MainForm.AccessLevel = acADMIN then
@@ -3829,13 +3892,19 @@ end;
 { -------------------------------------------------------------------------------------------------------------------------- USER ADDRESS BOOK | OPEN FROM DB }
 procedure TMainForm.btnOpenABClick(Sender: TObject);
 begin
-  TTAddressBook.Create(adOpenAll, sgAddressBook);
+  if ConnLastError = 0 then
+    TTAddressBook.Create(adOpenAll, sgAddressBook)
+      else
+        MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
 end;
 
 { ---------------------------------------------------------------------------------------------------------------------- USER ADDRESS BOOK | SAVE NEWLY ADDED }
 procedure TMainForm.btnSaveClick(Sender: TObject);
 begin
-  TTAddressBook.Create(adSaveNew, sgAddressBook);
+  if ConnLastError = 0 then
+    TTAddressBook.Create(adSaveNew, sgAddressBook)
+      else
+        MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------- USER ADDRESS BOOK | CLOSE }
@@ -4113,5 +4182,20 @@ begin
     AppSettings.Free;
   end;
 end;
+
+(*
+//test
+procedure TMainForm.Button1Click(Sender: TObject);
+var
+  db: TDataBase;
+begin
+  db:=TDataBase.Create(False);
+  try
+    db.InitializeConnection(MainThreadID, True, DbConnect);
+  finally
+    db.Free;
+  end;
+end;
+*)
 
 end.

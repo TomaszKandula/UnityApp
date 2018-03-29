@@ -242,13 +242,30 @@ end;
 { ------------------------------------------------------------------------------------------------------------------------------------- EXECUTE WORKER THREAD }
 procedure TTCheckServerConnection.Execute;
 var
-  IDThread:  integer;
-  DataBase:  TDataBase;
+  IDThd:       integer;
+  DataBase:    TDataBase;
+  ConnStatus:  integer;
 begin
   DataBase:=TDataBase.Create(False);
   try
-    IDThread:=TTCheckServerConnection.CurrentThread.ThreadID;
-    if DataBase.Check <> 0 then DataBase.InitializeConnection(IDThread, False, MainForm.DbConnect);
+    IDThd:=TTCheckServerConnection.CurrentThread.ThreadID;
+    ConnStatus:=DataBase.Check;
+    if (MainForm.ConnLastError <> 0) and (ConnStatus = 0) then
+    begin
+      Synchronize(procedure
+      begin
+        DataBase.InitializeConnection(IDThd, False, MainForm.DbConnect);
+        MainForm.ConnLastError:=ConnStatus;
+        MainForm.InvoiceScanTimer.Enabled:=True;
+        MainForm.OILoader.Enabled        :=True;
+        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Connection with SQL Server database has been re-established.');
+      end);
+    end;
+    if ConnStatus <> 0 then
+    begin
+      MainForm.ConnLastError:=ConnStatus;
+      LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Connection with SQL Server database has been lost, awaiting to reconnect...');
+    end;
   finally
     DataBase.Free;
   end;
@@ -279,11 +296,13 @@ var
   THDSec:     extended;
   StopWatch:  TStopWatch;
   AgeView:    TAgeView;
+  UserCtrl:   TUserControl;
 begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   FIDThd:=CurrentThread.ThreadID;
   FLock.Acquire;
-  AgeView:=TAgeView.Create(MainForm.DbConnect);
+  AgeView :=TAgeView.Create(MainForm.DbConnect);
+  UserCtrl:=TUserControl.Create(MainForm.DbConnect);
   try
     StopWatch:=TStopWatch.StartNew;
     MainForm.ExecMessage(True, mcStatusBar, stGenerating);
@@ -305,10 +324,17 @@ begin
           AgeView.ExportToCSV(MainForm.CSVExport.FileName, AgeView.ArrAgeView);
       end
       else
-      { SEND TO SQL SERVER }
+      { SEND TO SQL SERVER, UPDATE AGE DATE LIST AND RELOAD AGE VIEW ON MAIN TAB }
       begin
         AgeView.Write(TblSnapshots, AgeView.ArrAgeView);
-        { RELOAD AGE VIEW ON MAIN TAB }
+        Synchronize(procedure
+                    begin
+                      try
+                        UserCtrl.GetAgeDates(MainForm.GroupListDates, MainForm.GroupList[0, 0]);
+                      finally
+                        UserCtrl.Free;
+                      end;
+        end);
         TTReadAgeView.Create(thNullParameter);
       end;
     except

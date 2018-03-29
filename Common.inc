@@ -40,7 +40,7 @@ const
   LicenceFile:    string  = 'Unity.licx';
   GridImgFile:    string  = 'Unity.img';
   ReleaseFile:    string  = 'Release.pak';
-  CurrentMutex:   PWideChar = 'UNITY_10005';  { WARNING! INCREASE IT WITH EACH NEW RELEASE }
+  CurrentMutex:   PWideChar = 'UNITY_10006';  { WARNING! INCREASE IT WITH EACH NEW RELEASE }
 
   { SPLASH SCREEN }
 
@@ -172,6 +172,7 @@ const
   mcStatusBar = 10;
   conOK       = 14;
   conERROR    = 15;
+  strNULL     = 'NULL';
 
   { WINDOW STATE }
 
