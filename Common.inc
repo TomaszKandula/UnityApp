@@ -28,6 +28,11 @@ const
   WM_GETINFO = WM_USER + 120;
   WM_EXTINFO = WM_APP  + 150;
 
+  { WINDOWS MESSAGES | WINDOWS SESSIONS }
+
+  NOTIFY_FOR_THIS_SESSION = $0;
+  NOTIFY_FOR_ALL_SESSIONS = $1;
+
   { INITIALIZATION DETAILS }
 
   DelayStd:       integer = 50;               { SLOW DOWN A BIT TO SHOW MESSAGE  }
@@ -40,7 +45,7 @@ const
   LicenceFile:    string  = 'Unity.licx';
   GridImgFile:    string  = 'Unity.img';
   ReleaseFile:    string  = 'Release.pak';
-  CurrentMutex:   PWideChar = 'UNITY_10006';  { WARNING! INCREASE IT WITH EACH NEW RELEASE }
+  CurrentMutex:   PWideChar = 'UNITY_10007';  { WARNING! INCREASE IT WITH EACH NEW RELEASE }
 
   { SPLASH SCREEN }
 

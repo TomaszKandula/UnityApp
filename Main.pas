@@ -610,11 +610,13 @@ type                                                            (* GUI | MAIN TH
     procedure imgEventLogClick(Sender: TObject);
     procedure imgEventLogMouseEnter(Sender: TObject);
     procedure imgEventLogMouseLeave(Sender: TObject);
+    procedure LockTimeTimer(Sender: TObject);
     { ------------------------------------------------------------- ! HELPERS ! ----------------------------------------------------------------------------- }
   private
     { GENERAL }
     var pAllowClose         :  boolean;
     var pStartTime          :  TTime;
+    //var pSessionWnd         :  HWND;
     { GETTERS AND SETTERS FOR "FOLLOW-UP" COLORS SAVED IN SETTINGS FILE }
     function  GetTodayFColor  : TColor;
     function  GetTodayBColor  : TColor;
@@ -643,6 +645,7 @@ type                                                            (* GUI | MAIN TH
     var AccessMode          :  string;
     var OpenItemsUpdate     :  string;
     var ConnLastError       :  cardinal;
+    //var LockedCount         :  cardinal;
     { FOR "FOLLOW-UP" COLOR PICKER }
     property TodayFColor:  TColor read GetTodayFColor  write SetTodayFColor;
     property TodayBColor:  TColor read GetTodayBColor  write SetTodayBColor;
@@ -675,6 +678,8 @@ type                                                            (* GUI | MAIN TH
 { TYPE, PLEASE USE 'PCHAR' TYPE, ETC., ALSO, IN CASE OF C# LANGUAGE,       }
 { PLEASE REFER TO MANUAL ON 'MAKING C# DLL LIBRARY FOR DELPHI USAGE'       }
 
+{ RELATED TO UNITYLIB.DLL }
+
 TLogText              = procedure(filename: string; text: string); stdcall;
 TMergeSort            = procedure(Grid: TStringgrid; var Vals: array of integer; sortcol, datatype: integer; ascending: boolean); stdcall;
 TPrintf               = function(text: string; s: string): string; stdcall;
@@ -690,6 +695,11 @@ function  GetOSVer(mode: integer): string; stdcall; external Assembly;
 function  GetBuildInfoAsString: string; stdcall; external Assembly;
 procedure LogText(filename: string; text: string); stdcall; external Assembly;
 procedure MergeSort(grid: TStringgrid; var vals: array of integer; sortcol, datatype: integer; ascending: boolean); stdcall; external Assembly;
+
+const Win32API = 'wtsapi32.dll';
+
+function WTSRegisterSessionNotification(hWnd: HWND; dwFlags: DWORD): Boolean; stdcall; external Win32API name 'WTSRegisterSessionNotification';
+function WTSUnRegisterSessionNotification(hWnd: HWND):               Boolean; stdcall; external Win32API name 'WTSUnRegisterSessionNotification';
 
 {$I Common.inc}
 
@@ -885,13 +895,16 @@ end;
 { ----------------------------------------------------------------------------------------------------------------------- MESSAGE RECEIVER FOR WORKER THREADS }
 procedure TMainForm.WndProc(var Msg: Messages.TMessage);
 var
+  DataBase:   TDataBase;
   DailyText:  TDataTables;
   CUID:       string;
   Condition:  string;
   CallEvent:  cardinal;
 begin
   inherited;
+
   { ------------------------------------------------------------------------------------------------ INTERNAL MESSAGES BETWEEN WORKER THREADS AND MAIN THREAD }
+
   if Msg.Msg = WM_GETINFO then
   begin
     { DEBUG LINE }
@@ -917,7 +930,9 @@ begin
       end;
     end;
   end;
+
   { --------------------------------------------------------------------------------------------------------------- RECEIVE MESSAGE FROM EXTERNAL APPLICATION }
+
   if Msg.Msg = WM_EXTINFO then
   begin
     { DEBUG LINE }
@@ -945,7 +960,7 @@ begin
             DailyText.CleanUp;
             { DEFINE COLUMNS, VALUES AND CONDITIONS }
             DailyText.Columns.Add(TDaily.STAMP);         DailyText.Values.Add(DateTimeToStr(Now));             DailyText.Conditions.Add(Condition);
-            DailyText.Columns.Add(TDaily.USER_ALIAS);    DailyText.Values.Add(UpperCase(MainForm.WinUserName));  DailyText.Conditions.Add(Condition);
+            DailyText.Columns.Add(TDaily.USER_ALIAS);    DailyText.Values.Add(UpperCase(MainForm.WinUserName));DailyText.Conditions.Add(Condition);
             DailyText.Columns.Add(TDaily.CALLEVENT);     DailyText.Values.Add(IntToStr(CallEvent));            DailyText.Conditions.Add(Condition);
             DailyText.Columns.Add(TDaily.CALLDURATION);  DailyText.Values.Add(IntToStr(Msg.LParam));           DailyText.Conditions.Add(Condition);
             { EXECUTE }
@@ -973,7 +988,9 @@ begin
         end;
       end;
   end;
+
   { --------------------------------------------------------------------------------------------------------------- CLOSE UNITY WHEN WINDOWS IS SHUTTING DOWN }
+
   { WINDOWS' QUERY FOR SHUTDOWN }
   if Msg.Msg = WM_QUERYENDSESSION then
   begin
@@ -981,12 +998,70 @@ begin
     pAllowClose:=True;
     Msg.Result:=1;
   end;
+
   { WINDOWS IS SHUTTING DOWN }
   if Msg.Msg = WM_ENDSESSION then
   begin
     LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(Msg.Msg) + ' (WM_ENDSESSION). Windows is shutting down...');
     pAllowClose:=True;
   end;
+
+(*
+  { WINDOWS LOCK SCREEN }
+  if Msg.Msg = WM_WTSSESSION_CHANGE then
+  begin
+    case Msg.wParam of
+      WTS_SESSION_LOCK:
+      begin
+        Inc(LockedCount);
+        LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(Msg.Msg) + ' (WM_WTSSESSION_CHANGE). User has locked the screen (' + IntToStr(LockedCount) + ').');
+      end;
+      WTS_SESSION_UNLOCK:
+      begin
+        { DO NOTHING }
+      end;
+    end;
+  end;
+*)
+
+  { WINDOWS HAS RESUMED AFTER BEING SUSPENDED }
+  if Msg.Msg = WM_POWERBROADCAST then
+  begin
+
+    if Msg.WParam = PBT_APMSUSPEND then
+    begin
+      DbConnect.Connected:=False;
+      ConnLastError:=404;
+    end;
+
+    { MSDN: https://msdn.microsoft.com/en-us/library/windows/desktop/aa372720%28v=vs.85%29.aspx }
+    if Msg.WParam = PBT_APMRESUMESUSPEND then
+    begin
+//      LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(Msg.Msg) + ' (WM_POWERBROADCAST). Windows has resumed after being suspended.');
+//      DbConnect.Connected:=True;
+(*
+      { ENFORCE RECONNECTION TO DATABASE }
+      LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Forcing re-connection to SQL Server...');
+      DataBase:=TDataBase.Create(False);
+      try
+        try
+          DataBase.InitializeConnection(MainThreadID, False, DbConnect);
+        except
+          on E: Exception do
+            LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Forcing re-connection to SQL Server... failed. Error has been thorwn: ' + E.Message);
+        end;
+        LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Forcing re-connection to SQL Server... OK.');
+      finally
+        DataBase.Free;
+      end;
+*)
+    end;
+
+
+  end;
+
+  //Msg.Result:=DefWindowProc(pSessionWnd, Msg.Msg, Msg.WParam, Msg.LParam);
+
 end;
 
 { -------------------------------------------------------------------------------------------------------------------- WRAPPER FOR INTERNAL SEND/POST MESSAGE }
@@ -2162,6 +2237,12 @@ begin
   { DISPOSE OBJECTS }
   AppSettings.Free;
 
+(*
+  { ALLOCATE SEPARATE WINDOW FOR MONITORING SESSIONS }
+  pSessionWnd:=AllocateHWnd(WndProc);
+  if not WTSRegisterSessionNotification(pSessionWnd, NOTIFY_FOR_THIS_SESSION) then RaiseLastOSError;
+*)
+
   { START CHECKERS }
   SwitchTimers(tmEnabled);
 
@@ -2176,6 +2257,14 @@ procedure TMainForm.FormDestroy(Sender: TObject);
 var
   AppSettings: TSettings;
 begin
+(*
+  { DEALLOCATE WINDOW FOR SESSION MONITORING }
+  if pSessionWnd <> 0 then
+  begin
+    WTSUnRegisterSessionNotification(pSessionWnd);
+    DeallocateHWnd(pSessionWnd);
+  end;
+*)
   { RELEASE WEB BROWSER COMPONENT MANUALLY }
   WebBrowser.Free;
   { CLOSE DB CONNECTION }
@@ -2249,6 +2338,14 @@ begin
 end;
 
 { ------------------------------------------------------------------ ! TIMERS ! ----------------------------------------------------------------------------- }
+
+{ ----------------------------------------------------------------------------------------------------------------------- FOR HOW LONG USER HAS BEEN LOCK-OUT }
+procedure TMainForm.LockTimeTimer(Sender: TObject);
+begin
+
+
+
+end;
 
 { --------------------------------------------------------------------------------------------------------------------------------- COUNT CURRENT FOLLOW-UP'S }
 procedure TMainForm.FollowupPopupTimer(Sender: TObject);
@@ -4182,20 +4279,5 @@ begin
     AppSettings.Free;
   end;
 end;
-
-(*
-//test
-procedure TMainForm.Button1Click(Sender: TObject);
-var
-  db: TDataBase;
-begin
-  db:=TDataBase.Create(False);
-  try
-    db.InitializeConnection(MainThreadID, True, DbConnect);
-  finally
-    db.Free;
-  end;
-end;
-*)
 
 end.

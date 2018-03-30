@@ -331,6 +331,7 @@ begin
                     begin
                       try
                         UserCtrl.GetAgeDates(MainForm.GroupListDates, MainForm.GroupList[0, 0]);
+                        MainForm.AgeDateSel:=MainForm.GroupListDates.Text;
                       finally
                         UserCtrl.Free;
                       end;

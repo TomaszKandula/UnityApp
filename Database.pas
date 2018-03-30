@@ -118,9 +118,11 @@ function TDataBase.Check: integer;
 var
   EO:        EOleException;
   ConCheck:  TADOConnection;
+  StrSQL:    string;
 begin
   { INITIALIZE }
   Result:=0;
+  StrSQL:='SELECT 1';
   ConCheck:=TADOConnection.Create(nil);
   { ASSIGN PARAMETERS }
   ConCheck.ConnectionString :=DBConnStr;
@@ -134,7 +136,7 @@ begin
   try
     try
       ConCheck.Connected:=True;
-      ConCheck.Open;
+      ConCheck.Execute(StrSQL, cmdText);
     except
       on E: Exception do
       begin
