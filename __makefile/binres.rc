@@ -1,5 +1,2 @@
 10 RCDATA "$_ResFiles\\Config.cfg"
-30 RCDATA "$_ResFiles\\Libeay32.dll"
-40 RCDATA "$_ResFiles\\Ssleay32.dll"
-50 RCDATA "$_ResFiles\\Vsinit.dll"
 60 RCDATA "$_ResFiles\\Logon.cfg"

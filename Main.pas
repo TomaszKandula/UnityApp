@@ -17,8 +17,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, Menus, ComCtrls, Grids, ExtCtrls, StdCtrls, CheckLst, Buttons, PNGImage,
-  DBGrids, AppEvnts, ShellAPI, INIFiles, StrUtils, ValEdit, DateUtils, Clipbrd, DB, ADODB, ActiveX, CDO_TLB, Diagnostics, Math, Wininet, ComObj, OleCtrls, SHDocVw,
-  blcksock, smtpsend { MODIFIED FROM ORIGINAL }, pop3send, ssl_openssl, synautil, synacode, mimemess { MODIFIED FROM ORIGINAL };
+  DBGrids, AppEvnts, ShellAPI, INIFiles, StrUtils, ValEdit, DateUtils, Clipbrd, DB, ADODB, ActiveX, CDO_TLB, Diagnostics, Math, Wininet, ComObj, OleCtrls, SHDocVw;
 
 { REFERENCE TO ARRAYS }
 type
@@ -610,13 +609,12 @@ type                                                            (* GUI | MAIN TH
     procedure imgEventLogClick(Sender: TObject);
     procedure imgEventLogMouseEnter(Sender: TObject);
     procedure imgEventLogMouseLeave(Sender: TObject);
-    procedure LockTimeTimer(Sender: TObject);
     { ------------------------------------------------------------- ! HELPERS ! ----------------------------------------------------------------------------- }
   private
     { GENERAL }
     var pAllowClose         :  boolean;
     var pStartTime          :  TTime;
-    //var pSessionWnd         :  HWND;
+    var pSessionWnd         :  HWND;
     { GETTERS AND SETTERS FOR "FOLLOW-UP" COLORS SAVED IN SETTINGS FILE }
     function  GetTodayFColor  : TColor;
     function  GetTodayBColor  : TColor;
@@ -645,7 +643,7 @@ type                                                            (* GUI | MAIN TH
     var AccessMode          :  string;
     var OpenItemsUpdate     :  string;
     var ConnLastError       :  cardinal;
-    //var LockedCount         :  cardinal;
+    var LockedCount         :  cardinal;
     { FOR "FOLLOW-UP" COLOR PICKER }
     property TodayFColor:  TColor read GetTodayFColor  write SetTodayFColor;
     property TodayBColor:  TColor read GetTodayBColor  write SetTodayBColor;
@@ -959,10 +957,10 @@ begin
             Inc(CallEvent);
             DailyText.CleanUp;
             { DEFINE COLUMNS, VALUES AND CONDITIONS }
-            DailyText.Columns.Add(TDaily.STAMP);         DailyText.Values.Add(DateTimeToStr(Now));             DailyText.Conditions.Add(Condition);
-            DailyText.Columns.Add(TDaily.USER_ALIAS);    DailyText.Values.Add(UpperCase(MainForm.WinUserName));DailyText.Conditions.Add(Condition);
-            DailyText.Columns.Add(TDaily.CALLEVENT);     DailyText.Values.Add(IntToStr(CallEvent));            DailyText.Conditions.Add(Condition);
-            DailyText.Columns.Add(TDaily.CALLDURATION);  DailyText.Values.Add(IntToStr(Msg.LParam));           DailyText.Conditions.Add(Condition);
+            DailyText.Columns.Add(TDaily.STAMP);         DailyText.Values.Add(DateTimeToStr(Now));               DailyText.Conditions.Add(Condition);
+            DailyText.Columns.Add(TDaily.USER_ALIAS);    DailyText.Values.Add(UpperCase(MainForm.WinUserName));  DailyText.Conditions.Add(Condition);
+            DailyText.Columns.Add(TDaily.CALLEVENT);     DailyText.Values.Add(IntToStr(CallEvent));              DailyText.Conditions.Add(Condition);
+            DailyText.Columns.Add(TDaily.CALLDURATION);  DailyText.Values.Add(IntToStr(Msg.LParam));             DailyText.Conditions.Add(Condition);
             { EXECUTE }
             DailyText.UpdateRecord(TblDaily);
           end
@@ -971,15 +969,18 @@ begin
           begin
             DailyText.CleanUp;
             { DEFINE COLUMNS AND VALUES }
-            DailyText.Columns.Add(TDaily.GROUP_ID);     DailyText.Values.Add(MainForm.GroupIdSel);
-            DailyText.Columns.Add(TDaily.CUID);         DailyText.Values.Add(CUID);
-            DailyText.Columns.Add(TDaily.AGEDATE);      DailyText.Values.Add(MainForm.AgeDateSel);
-            DailyText.Columns.Add(TDaily.STAMP);        DailyText.Values.Add(DateTimeToStr(Now));
-            DailyText.Columns.Add(TDaily.USER_ALIAS);   DailyText.Values.Add(UpperCase(MainForm.WinUserName));
-            DailyText.Columns.Add(TDaily.EMAIL);        DailyText.Values.Add('0');
-            DailyText.Columns.Add(TDaily.CALLEVENT);    DailyText.Values.Add('1');
-            DailyText.Columns.Add(TDaily.CALLDURATION); DailyText.Values.Add(IntToStr(Msg.LParam));
-            DailyText.Columns.Add(TDaily.FIXCOMMENT);   DailyText.Values.Add('');
+            DailyText.Columns.Add(TDaily.GROUP_ID);        DailyText.Values.Add(MainForm.GroupIdSel);
+            DailyText.Columns.Add(TDaily.CUID);            DailyText.Values.Add(CUID);
+            DailyText.Columns.Add(TDaily.AGEDATE);         DailyText.Values.Add(MainForm.AgeDateSel);
+            DailyText.Columns.Add(TDaily.STAMP);           DailyText.Values.Add(DateTimeToStr(Now));
+            DailyText.Columns.Add(TDaily.USER_ALIAS);      DailyText.Values.Add(UpperCase(MainForm.WinUserName));
+            DailyText.Columns.Add(TDaily.EMAIL);           DailyText.Values.Add('0');
+            DailyText.Columns.Add(TDaily.CALLEVENT);       DailyText.Values.Add('1');
+            DailyText.Columns.Add(TDaily.CALLDURATION);    DailyText.Values.Add(IntToStr(Msg.LParam));
+            DailyText.Columns.Add(TDaily.FIXCOMMENT);      DailyText.Values.Add('');
+            DailyText.Columns.Add(TDaily.EMAIL_Reminder);  DailyText.Values.Add('0');
+            DailyText.Columns.Add(TDaily.EMAIL_AutoStat);  DailyText.Values.Add('0');
+            DailyText.Columns.Add(TDaily.EMAIL_ManuStat);  DailyText.Values.Add('0');
             { EXECUTE }
             DailyText.InsertInto(TblDaily);
           end;
@@ -994,7 +995,7 @@ begin
   { WINDOWS' QUERY FOR SHUTDOWN }
   if Msg.Msg = WM_QUERYENDSESSION then
   begin
-    LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(Msg.Msg) + ' (WM_QUERYENDSESSION). Windows is going to be shut down. Closing ' + APPNAME + '...');
+    LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(Msg.Msg) + ' WM_QUERYENDSESSION. Windows is going to be shut down. Closing ' + APPNAME + '...');
     pAllowClose:=True;
     Msg.Result:=1;
   end;
@@ -1002,11 +1003,10 @@ begin
   { WINDOWS IS SHUTTING DOWN }
   if Msg.Msg = WM_ENDSESSION then
   begin
-    LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(Msg.Msg) + ' (WM_ENDSESSION). Windows is shutting down...');
+    LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(Msg.Msg) + ' WM_ENDSESSION. Windows is shutting down...');
     pAllowClose:=True;
   end;
 
-(*
   { WINDOWS LOCK SCREEN }
   if Msg.Msg = WM_WTSSESSION_CHANGE then
   begin
@@ -1014,7 +1014,7 @@ begin
       WTS_SESSION_LOCK:
       begin
         Inc(LockedCount);
-        LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(Msg.Msg) + ' (WM_WTSSESSION_CHANGE). User has locked the screen (' + IntToStr(LockedCount) + ').');
+        LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(Msg.Msg) + ' WM_WTSSESSION_CHANGE. User has locked the screen (' + IntToStr(LockedCount) + ').');
       end;
       WTS_SESSION_UNLOCK:
       begin
@@ -1022,46 +1022,23 @@ begin
       end;
     end;
   end;
-*)
 
   { WINDOWS HAS RESUMED AFTER BEING SUSPENDED }
   if Msg.Msg = WM_POWERBROADCAST then
   begin
-
+    { DISCONNECT FROM SERVER ON SUSPEND MODE EVENT }
     if Msg.WParam = PBT_APMSUSPEND then
     begin
       DbConnect.Connected:=False;
       ConnLastError:=404;
+      LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(Msg.Msg) + ' WM_POWERBROADCAST with PBT_APMSUSPEND. Going into suspension, disconnecting from server.');
     end;
-
-    { MSDN: https://msdn.microsoft.com/en-us/library/windows/desktop/aa372720%28v=vs.85%29.aspx }
+    { RESUME FROM SUSPEND MODE }
     if Msg.WParam = PBT_APMRESUMESUSPEND then
     begin
-//      LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(Msg.Msg) + ' (WM_POWERBROADCAST). Windows has resumed after being suspended.');
-//      DbConnect.Connected:=True;
-(*
-      { ENFORCE RECONNECTION TO DATABASE }
-      LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Forcing re-connection to SQL Server...');
-      DataBase:=TDataBase.Create(False);
-      try
-        try
-          DataBase.InitializeConnection(MainThreadID, False, DbConnect);
-        except
-          on E: Exception do
-            LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Forcing re-connection to SQL Server... failed. Error has been thorwn: ' + E.Message);
-        end;
-        LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Forcing re-connection to SQL Server... OK.');
-      finally
-        DataBase.Free;
-      end;
-*)
+      LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(Msg.Msg) + ' WM_POWERBROADCAST. Windows has resumed after being suspended.');
     end;
-
-
   end;
-
-  //Msg.Result:=DefWindowProc(pSessionWnd, Msg.Msg, Msg.WParam, Msg.LParam);
-
 end;
 
 { -------------------------------------------------------------------------------------------------------------------- WRAPPER FOR INTERNAL SEND/POST MESSAGE }
@@ -2237,11 +2214,9 @@ begin
   { DISPOSE OBJECTS }
   AppSettings.Free;
 
-(*
   { ALLOCATE SEPARATE WINDOW FOR MONITORING SESSIONS }
   pSessionWnd:=AllocateHWnd(WndProc);
   if not WTSRegisterSessionNotification(pSessionWnd, NOTIFY_FOR_THIS_SESSION) then RaiseLastOSError;
-*)
 
   { START CHECKERS }
   SwitchTimers(tmEnabled);
@@ -2257,14 +2232,12 @@ procedure TMainForm.FormDestroy(Sender: TObject);
 var
   AppSettings: TSettings;
 begin
-(*
   { DEALLOCATE WINDOW FOR SESSION MONITORING }
   if pSessionWnd <> 0 then
   begin
     WTSUnRegisterSessionNotification(pSessionWnd);
     DeallocateHWnd(pSessionWnd);
   end;
-*)
   { RELEASE WEB BROWSER COMPONENT MANUALLY }
   WebBrowser.Free;
   { CLOSE DB CONNECTION }
@@ -2339,14 +2312,6 @@ end;
 
 { ------------------------------------------------------------------ ! TIMERS ! ----------------------------------------------------------------------------- }
 
-{ ----------------------------------------------------------------------------------------------------------------------- FOR HOW LONG USER HAS BEEN LOCK-OUT }
-procedure TMainForm.LockTimeTimer(Sender: TObject);
-begin
-
-
-
-end;
-
 { --------------------------------------------------------------------------------------------------------------------------------- COUNT CURRENT FOLLOW-UP'S }
 procedure TMainForm.FollowupPopupTimer(Sender: TObject);
 var
@@ -2364,7 +2329,7 @@ begin
       and
 
       (
-        sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.INF7, 1, 1), iCNT] = UpperCase(WinUserName)
+        UpperCase(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.INF7, 1, 1), iCNT]) = UpperCase(WinUserName)
       )
 
       then Inc(Sum);

@@ -59,6 +59,7 @@ type
     GeneralTitle: TLabel;
     btnFeedback: TSpeedButton;
     btnClearFollowUp: TSpeedButton;
+    btnSendEmail: TSpeedButton;
     procedure FormCreate(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure OpenItemsGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
@@ -87,6 +88,7 @@ type
     procedure Cust_MailClick(Sender: TObject);
     procedure Cust_PhoneClick(Sender: TObject);
     procedure btnClearFollowUpClick(Sender: TObject);
+    procedure btnSendEmailClick(Sender: TObject);
   public
     var IsEdit     :  boolean;
     var CUID       :  string;
@@ -446,9 +448,9 @@ begin
         begin
           DailyText.CleanUp;
           { DEFINE COLUMNS, VALUES AND CONDITIONS }
-          DailyText.Columns.Add(TDaily.STAMP);        DailyText.Values.Add(DateTimeToStr(Now));             DailyText.Conditions.Add(Condition);
-          DailyText.Columns.Add(TDaily.USER_ALIAS);   DailyText.Values.Add(UpperCase(MainForm.WinUserName));DailyText.Conditions.Add(Condition);
-          DailyText.Columns.Add(TDaily.FIXCOMMENT);   DailyText.Values.Add(DailyCom.Text);                  DailyText.Conditions.Add(Condition);
+          DailyText.Columns.Add(TDaily.STAMP);       DailyText.Values.Add(DateTimeToStr(Now));               DailyText.Conditions.Add(Condition);
+          DailyText.Columns.Add(TDaily.USER_ALIAS);  DailyText.Values.Add(UpperCase(MainForm.WinUserName));  DailyText.Conditions.Add(Condition);
+          DailyText.Columns.Add(TDaily.FIXCOMMENT);  DailyText.Values.Add(DailyCom.Text);                    DailyText.Conditions.Add(Condition);
           { EXECUTE }
           UpdateOK:=DailyText.UpdateRecord(TblDaily);
         end
@@ -457,15 +459,18 @@ begin
         begin
           DailyText.CleanUp;
           { DEFINE COLUMNS AND VALUES }
-          DailyText.Columns.Add(TDaily.GROUP_ID);     DailyText.Values.Add(MainForm.GroupIdSel);
-          DailyText.Columns.Add(TDaily.CUID);         DailyText.Values.Add(CUID);
-          DailyText.Columns.Add(TDaily.AGEDATE);      DailyText.Values.Add(MainForm.AgeDateSel);
-          DailyText.Columns.Add(TDaily.STAMP);        DailyText.Values.Add(DateTimeToStr(Now));
-          DailyText.Columns.Add(TDaily.USER_ALIAS);   DailyText.Values.Add(UpperCase(MainForm.WinUserName));
-          DailyText.Columns.Add(TDaily.EMAIL);        DailyText.Values.Add('0');
-          DailyText.Columns.Add(TDaily.CALLEVENT);    DailyText.Values.Add('0');
-          DailyText.Columns.Add(TDaily.CALLDURATION); DailyText.Values.Add('0');
-          DailyText.Columns.Add(TDaily.FIXCOMMENT);   DailyText.Values.Add(DailyCom.Text);
+          DailyText.Columns.Add(TDaily.GROUP_ID);       DailyText.Values.Add(MainForm.GroupIdSel);
+          DailyText.Columns.Add(TDaily.CUID);           DailyText.Values.Add(CUID);
+          DailyText.Columns.Add(TDaily.AGEDATE);        DailyText.Values.Add(MainForm.AgeDateSel);
+          DailyText.Columns.Add(TDaily.STAMP);          DailyText.Values.Add(DateTimeToStr(Now));
+          DailyText.Columns.Add(TDaily.USER_ALIAS);     DailyText.Values.Add(UpperCase(MainForm.WinUserName));
+          DailyText.Columns.Add(TDaily.EMAIL);          DailyText.Values.Add('0');
+          DailyText.Columns.Add(TDaily.CALLEVENT);      DailyText.Values.Add('0');
+          DailyText.Columns.Add(TDaily.CALLDURATION);   DailyText.Values.Add('0');
+          DailyText.Columns.Add(TDaily.FIXCOMMENT);     DailyText.Values.Add(DailyCom.Text);
+          DailyText.Columns.Add(TDaily.EMAIL_Reminder); DailyText.Values.Add('0');
+          DailyText.Columns.Add(TDaily.EMAIL_AutoStat); DailyText.Values.Add('0');
+          DailyText.Columns.Add(TDaily.EMAIL_ManuStat); DailyText.Values.Add('0');
           { EXECUTE }
           InsertOK:=DailyText.InsertInto(TblDaily);
         end;
@@ -687,12 +692,21 @@ begin
   end;
 end;
 
+{ ----------------------------------------------------------------------------------------------------------------------------------------- SEND MANUAL EMAIL }
+procedure TActionsForm.btnSendEmailClick(Sender: TObject);
+begin
+//
+end;
+
 { -------------------------------------------------------------------------------------------------------------------------------------------- SEND STATEMENT }
 procedure TActionsForm.btnSendStatementClick(Sender: TObject);
 var
   Statement:   TDocument;
   AppSettings: TSettings;
 begin
+  { ASK USER BEFORE SENDING THE EMAIL }
+  if MainForm.MsgCall(mcQuestion2, 'Are you absolutely sure, for 100%, that you really want it to be sent, right now?') = IDNO then Exit;
+  { PROCEED }
   Statement    :=TDocument.Create;
   AppSettings  :=TSettings.Create;
   Screen.Cursor:=crHourGlass;
@@ -705,7 +719,7 @@ begin
     { SET OPEN ITEMS GRID }
     Statement.OpenItems:=MainForm.sgOpenItems;
     { GET HTML LAYOUT }
-    Statement.DocType:=dcStatement;
+    Statement.DocType    :=dcStatement;
     Statement.HTMLLayout:=Statement.LoadTemplate(AppSettings.FLayoutDir + AppSettings.TMIG.ReadString(VariousLayouts, 'STATEMENT', '') + '.html');
     { SEND STATEMENT }
     Statement.MailSubject:='Account Statement (' + Statement.CustName + ')';
@@ -713,6 +727,10 @@ begin
       MainForm.ExecMessage(False, mcInfo, 'Account Statement has been sent successfully!')
         else
           MainForm.ExecMessage(False, mcError, 'Account Statement cannot be sent. Please contact IT support.');
+    { REGISTER THIS ACTION IN DATABASE }
+
+
+
   finally
     AppSettings.Free;
     Statement.Free;

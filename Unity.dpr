@@ -68,7 +68,6 @@ var
   Mutex:          integer;
   WndRect:        TRect;
   AppSettings:    TSettings;
-  UnityFiles:     TLists;
   MsAssemblies:   TStrings;
 
 {$R *.res}
@@ -79,9 +78,6 @@ var
 
 { LIST:                                                      }
 {  10 RCDATA "__Makefile\\config.cfg"     GENERAL SETTINGS   }
-{  30 RCDATA "__Makefile\\libeay32.dll"   DLL FOR SYNAPSE    }
-{  40 RCDATA "__Makefile\\ssleay32.dll"   DLL FOR SYNAPSE    }
-{  50 RCDATA "__Makefile\\vsinit.dll"     DLL FOR SYNAPSE    }
 {  60 RCDATA "__Makefile\\logon.log"      EVENT LOG FILE     }
 
 { ------------------------------------------------------------------------------------------------------------------ EXTRACT GIVEN RESOURCE FILE BY ID NUMBER }
@@ -176,7 +172,7 @@ begin
     LogText(EventLogPath, 'File "' + FileName + '" has been removed.');
     Inc(Check);
   end;
-  if Check > 0 then LogText(EventLogPath, 'Cleaning folder after last update has been done (' + IntToStr(Check) + ' items removed).');
+  if Check > 0 then LogText(EventLogPath, 'Cleaning folder after previous update has been done (' + IntToStr(Check) + ' items removed).');
 end;
 
 { ---------------------------------------------------------------- ! MAIN BLOCK ! --------------------------------------------------------------------------- }
@@ -327,7 +323,7 @@ begin
     end
     else
     begin
-      { CLEANING UP FROM PREVIOUS UPDATE }
+      { CLEANING UP REMAINING FILES AFTER PREVIOUS UPDATE }
       DeleteFilesMatchingPattern(AppSettings.FAppDir, '*.del', AppSettings.FPathEventLog);
     end;
   end;
@@ -359,51 +355,22 @@ begin
     if Unpack(10, AppSettings.FPathAppCfg, LeaveAsIs) = False then Status(1, AllTasks, DelayStd, 'Cannot extract ' + ConfigFile + '..., unexpected error!', True);
   end;
 
-  { ---------------------------------------------------------------------------------------------------------------------------------------------- OTHER FILES}
-
-  (* CRCR3 CHECK *)
-
-  SetLength(UnityFiles, 3, 3);
-  UnityFiles[0, 0]:=DLL1;  UnityFiles[0, 1]:='30';  UnityFiles[0, 2]:=IntToStr(CRC32DLL1);
-  UnityFiles[1, 0]:=DLL2;  UnityFiles[1, 1]:='40';  UnityFiles[1, 2]:=IntToStr(CRC32DLL2);
-  UnityFiles[2, 0]:=DLL3;  UnityFiles[2, 1]:='50';  UnityFiles[2, 2]:=IntToStr(CRC32DLL3);
-
-  for iCNT:=0 to High(UnityFiles) - 1 do
-  begin
-    Status(iCNT + 2, AllTasks, DelayStd, 'Checking ' + UnityFiles[iCNT, 0] + '...', True);
-    if FileExists(AppSettings.FPathAppCfg) then
-    begin
-      Status(iCNT + 2, AllTasks, DelayStd, 'Checking ' + UnityFiles[iCNT, 0] + '... CRC32.', True);
-      { CRC32 CHECK, EXTRACT DEFAULT FILE ON ERROR }
-      if UnityFiles[iCNT, 2] <> IntToStr(CRC32File(AppSettings.FAppDir + UnityFiles[iCNT, 0])) then
-      begin
-        Status(iCNT + 2, AllTasks, DelayErr, 'Checking ' + UnityFiles[iCNT, 0] + '... corrupted! Extracting default file...', True);
-        if Unpack(StrToInt(UnityFiles[iCNT, 1]), AppSettings.FPathAppCfg, DeleteOld) = False then Status(iCNT, AllTasks, DelayErr, 'Cannot extract ' + UnityFiles[iCNT, 0] + '..., unexpected error!', True);
-      end;
-    end
-    else
-    begin
-      Status(iCNT + 2, AllTasks, DelayErr, 'Checking ' + UnityFiles[iCNT, 0] + '... not found! Extracting default file...', True);
-      if Unpack(StrToInt(UnityFiles[iCNT, 1]), AppSettings.FPathAppCfg, LeaveAsIs) = False then Status(iCNT, AllTasks, DelayStd, 'Cannot extract ' + UnityFiles[iCNT, 0] + '..., unexpected error!', True);
-    end;
-  end;
-
-  (* CHECK IF EXISTS *)
+  { ------------------------------------------------------------------------------------------------------------- CHECK ASSEMBLIES AND LYNCCALL.EXE IF EXISTS }
 
   SetLength(MsAssemblies, 6);
-  MsAssemblies[0]:=DLL4;
-  MsAssemblies[1]:=DLL5;
-  MsAssemblies[2]:=DLL6;
-  MsAssemblies[3]:=DLL7;
-  MsAssemblies[4]:=DLL8;
+  MsAssemblies[0]:=DLL1;
+  MsAssemblies[1]:=DLL2;
+  MsAssemblies[2]:=DLL3;
+  MsAssemblies[3]:=DLL4;
+  MsAssemblies[4]:=DLL5;
   MsAssemblies[5]:=LyncCall;
 
   for iCNT:=0 to High(MsAssemblies) - 1 do
   begin
-    Status(iCNT + 5, AllTasks, DelayStd, 'Checking ' + MsAssemblies[iCNT] + '...', True);
+    Status(iCNT + 2, AllTasks, DelayStd, 'Checking ' + MsAssemblies[iCNT] + '...', True);
     if FileExists(AppSettings.FAppDir + DLL4) then
     begin
-      Status(iCNT + 5, AllTasks, DelayStd, 'Checking ' + MsAssemblies[iCNT] + '... OK.', True);
+      Status(iCNT + 2, AllTasks, DelayStd, 'Checking ' + MsAssemblies[iCNT] + '... OK.', True);
     end
     else
     begin
@@ -421,7 +388,7 @@ begin
   { ---- END ---- }
 
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-  Status(11, AllTasks, 50, 'Application initialization... connecting with SQL server..., please wait.', False);
+  Status(8, AllTasks, 50, 'Application initialization... connecting with SQL server..., please wait.', False);
   Application.Initialize;
   Application.Title:=APPCAPTION;
   Application.MainFormOnTaskbar:=False;
@@ -435,7 +402,7 @@ begin
   LogText(AppSettings.FPathEventLog, '[GUI] Initialization methods executed within main thread, ''MainForm'' has been created. Main process thread ID = ' + IntToStr(MainThreadID) + '.');
 
   { OTHER WINFORMS }
-  Status(12, AllTasks, 400, 'Application initialization... WinForms loading, please wait.', False);
+  Status(9, AllTasks, 400, 'Application initialization... WinForms loading, please wait.', False);
   Application.CreateForm(TAboutForm,    AboutForm);    LogText(AppSettings.FPathEventLog, '[GUI] ''AboutForm'' ......... has been created.');
   Application.CreateForm(TEventForm,    EventForm);    LogText(AppSettings.FPathEventLog, '[GUI] ''EventForm'' ......... has been created.');
   Application.CreateForm(TColorsForm,   ColorsForm);   LogText(AppSettings.FPathEventLog, '[GUI] ''ColorsForm'' ........ has been created.');
@@ -448,7 +415,7 @@ begin
   Application.CreateForm(TInvoicesForm, InvoicesForm); LogText(AppSettings.FPathEventLog, '[GUI] ''InvoicesForm'' ...... has been created.');
 
   { SPLASH SCREEN - 100% }
-  Status(13, AllTasks, 900, 'Application initialization... done.', False);
+  Status(10, AllTasks, 900, 'Application initialization... done.', False);
 
   { --------------------------------------------------------------------------------------------------------------------------------------- SPLASH SCREEN END }
   AnimateWindow(SplashForm.Handle, 500, AW_BLEND or AW_HIDE);

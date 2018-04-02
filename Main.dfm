@@ -1208,6 +1208,10 @@ object MainForm: TMainForm
     object TabSheet9: TTabSheet
       Caption = 'START'
       ImageIndex = 8
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object WebContainer: TPanel
         AlignWithMargins = True
         Left = 17
@@ -2672,6 +2676,10 @@ object MainForm: TMainForm
     object TabSheet2: TTabSheet
       Caption = 'VISMA Open Items'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Header2: TPanel
         Left = 0
         Top = 0
@@ -3500,6 +3508,10 @@ object MainForm: TMainForm
     object TabSheet3: TTabSheet
       Caption = 'Private Address Book'
       ImageIndex = 2
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Header3: TPanel
         Left = 0
         Top = 0
@@ -3850,6 +3862,10 @@ object MainForm: TMainForm
       Caption = 'Invoice Tracker'
       ImageIndex = 4
       OnShow = TabSheet4Show
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Header4: TPanel
         Left = 0
         Top = 0
@@ -4042,6 +4058,10 @@ object MainForm: TMainForm
       Caption = 'Reporting'
       ImageIndex = 5
       TabVisible = False
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Header5: TPanel
         Left = 0
         Top = 0
@@ -4183,6 +4203,10 @@ object MainForm: TMainForm
       Caption = 'Management View'
       ImageIndex = 7
       TabVisible = False
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Header6: TPanel
         Left = 0
         Top = 0
@@ -4322,6 +4346,10 @@ object MainForm: TMainForm
       ImageIndex = 8
       OnResize = TabSheet7Resize
       OnShow = TabSheet7Show
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Header7: TPanel
         Left = 0
         Top = 0
@@ -4757,6 +4785,10 @@ object MainForm: TMainForm
       Caption = 'Settings Panel'
       ImageIndex = 6
       OnShow = TabSheet8Show
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object GridFillerRight8: TImage
         AlignWithMargins = True
         Left = 1326

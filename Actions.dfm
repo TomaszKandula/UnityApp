@@ -200,6 +200,23 @@ object ActionsForm: TActionsForm
         Caption = 'Clear Follow Up'
         OnClick = btnClearFollowUpClick
       end
+      object btnSendEmail: TSpeedButton
+        AlignWithMargins = True
+        Left = 560
+        Top = 7
+        Width = 110
+        Height = 25
+        Cursor = crHandPoint
+        Margins.Left = 0
+        Margins.Top = 0
+        Margins.Right = 0
+        Margins.Bottom = 0
+        Align = alCustom
+        Anchors = [akRight]
+        Caption = 'Send Statement'
+        Enabled = False
+        OnClick = btnSendEmailClick
+      end
     end
     object HistoryPanel: TPanel
       AlignWithMargins = True
@@ -717,7 +734,7 @@ object ActionsForm: TActionsForm
     Left = 24
     Top = 168
     Bitmap = {
-      494C010102003800D80018001800FFFFFF00FF10FFFFFFFFFFFFFFFF424D3600
+      494C010102003800DC0018001800FFFFFF00FF10FFFFFFFFFFFFFFFF424D3600
       0000000000003600000028000000600000001800000001002000000000000024
       000000000000000000000000000000000000FFFFFF00FFFFFF00FFFFFF00FFFF
       FF00FFFFFF00FFFFFF00FFFFFF00E9E9E900CDCDCD00A9A9A9008E8E8E008080

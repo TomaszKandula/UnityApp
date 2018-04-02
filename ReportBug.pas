@@ -121,12 +121,21 @@ begin
     AppName         :=AppSet.TMIG.ReadString(ApplicationDetails, 'VALUE', '');
     AppVer          :=GetBuildInfoAsString;
     { SET EMAIL DETAILS }
-    Mail.XMailer    :=AppSet.TMIG.ReadString(MailerCDOSYS, 'FROM', '');
+    if AppSet.TMIG.ReadString(MailerSetup, 'ACTIVE', '') = MailerNTLM  then
+    begin
+      Mail.XMailer    :=AppSet.TMIG.ReadString(MailerNTLM, 'FROM', '');
+      Mail.MailTo     :=AppSet.TMIG.ReadString(MailerNTLM, 'TO', '');
+      Mail.MailRt     :=AppSet.TMIG.ReadString(MailerNTLM, 'REPLY-TO', '');
+    end;
+    if AppSet.TMIG.ReadString(MailerSetup, 'ACTIVE', '') = MailerBASIC then
+    begin
+      Mail.XMailer    :=AppSet.TMIG.ReadString(MailerBASIC, 'FROM', '');
+      Mail.MailTo     :=AppSet.TMIG.ReadString(MailerBASIC, 'TO', '');
+      Mail.MailRt     :=AppSet.TMIG.ReadString(MailerBASIC, 'REPLY-TO', '');
+    end;
     Mail.MailFrom   :=Mail.XMailer;
-    Mail.MailTo     :=AppSet.TMIG.ReadString(MailerCDOSYS, 'TO', '');
     Mail.MailCc     :=MainForm.WinUserName + '@' + AppSet.TMIG.ReadString(ApplicationDetails, 'MAIL_DOMAIN', '');
     Mail.MailBcc    :='';
-    Mail.MailRt     :=AppSet.TMIG.ReadString(MailerCDOSYS, 'REPLY-TO', '');
     Mail.MailSubject:='Unity Bug Report from User: ' + UpperCase(MainForm.WinUserName);
     { PLAIN TEXT TO HTML TEMPLATE }
     Transfer        :=ReportMemo.Text;

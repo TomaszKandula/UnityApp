@@ -35,17 +35,17 @@ const
 
   { INITIALIZATION DETAILS }
 
-  DelayStd:       integer = 50;               { SLOW DOWN A BIT TO SHOW MESSAGE  }
-  DelayErr:       integer = 750;              { SLOW DOWN SIGNIFICANTLY FOR USER }
-  AllTasks:       integer = 13;               { TOTAL NUMBER OF ALL BASIC TASKS  }
-  DecryptKey:     integer = 429496;
-  APPCAPTION:     string  = 'Unity';
-  LyncCall:       string  = 'LyncCall.exe';
-  ConfigFile:     string  = 'Config.cfg';
-  LicenceFile:    string  = 'Unity.licx';
-  GridImgFile:    string  = 'Unity.img';
-  ReleaseFile:    string  = 'Release.pak';
-  CurrentMutex:   PWideChar = 'UNITY_10007';  { WARNING! INCREASE IT WITH EACH NEW RELEASE }
+  DelayStd:       integer   = 50;               { SLOW DOWN A BIT TO SHOW MESSAGE  }
+  DelayErr:       integer   = 750;              { SLOW DOWN SIGNIFICANTLY FOR USER }
+  AllTasks:       integer   = 10;               { TOTAL NUMBER OF ALL BASIC TASKS  }
+  DecryptKey:     integer   = 429496;
+  APPCAPTION:     string    = 'Unity';
+  LyncCall:       string    = 'LyncCall.exe';
+  ConfigFile:     string    = 'Config.cfg';
+  LicenceFile:    string    = 'Unity.licx';
+  GridImgFile:    string    = 'Unity.img';
+  ReleaseFile:    string    = 'Release.pak';
+  CurrentMutex:   PWideChar = 'UNITY_10009';  { WARNING! INCREASE IT WITH EACH NEW RELEASE }
 
   { SPLASH SCREEN }
 
@@ -58,22 +58,27 @@ const
 
   DWMI:           string  = 'dwmapi.dll';
 
-  { SYNAPSE ASSEMBLIES }
-
-  DLL1:           string  = 'libeay32.dll';
-  DLL2:           string  = 'ssleay32.dll';
-  DLL3:           string  = 'vsinit.dll';
-  CRC32DLL1:      DWord   = 3118596872;
-  CRC32DLL2:      DWord   = 3608491174;
-  CRC32DLL3:      DWord   = 4084329229;
-
   { MICROSOFT ASSEMBLIES FOR LYNC/SKYPE FOR BUSINESS }
 
-  DLL4:           string = 'Microsoft.Lync.Controls.dll';
-  DLL5:           string = 'Microsoft.Lync.Controls.Framework.dll';
-  DLL6:           string = 'Microsoft.Lync.Model.dll';
-  DLL7:           string = 'Microsoft.Lync.Utilities.dll';
-  DLL8:           string = 'Microsoft.Office.Uc.dll';
+  DLL1:           string = 'Microsoft.Lync.Controls.dll';
+  DLL2:           string = 'Microsoft.Lync.Controls.Framework.dll';
+  DLL3:           string = 'Microsoft.Lync.Model.dll';
+  DLL4:           string = 'Microsoft.Lync.Utilities.dll';
+  DLL5:           string = 'Microsoft.Office.Uc.dll';
+
+  { EMAIL OPTION }
+
+  auNTLM  = 0;
+  auBASIC = 1;
+
+  { EMAIL AUTHENTICATION ENUMS }
+
+  cdoSendUsingPickup   = 1;
+  cdoSendUsingPort     = 2;
+  cdoSendUsingExchange = 3;
+  cdoAnonymous         = 0;
+  cdoBasic             = 1;
+  cdoNTLM              = 2;
 
   { APPLICATION NAME }
 
@@ -104,9 +109,11 @@ const
   Password            = 'PASSWORD';
   TabSheetsNames      = 'TABSHEETS_NAMES';
   RiskClassDetails    = 'RISK_CLASS_DETAILS';
-  MailerCDOSYS        = 'MAILER_CDOSYS_NTLM';
-  MailerSYNAPSE       = 'MAILER_SYNAPSE';
+
+  MailerNTLM          = 'MAILER_NTLM';
+  MailerBASIC         = 'MAILER_BASIC';
   MailerSetup         = 'MAILER_SETUP';
+
   DatabaseSetup       = 'DATABASE_SETTINGS';
   OpenItemsData       = 'OPEN_ITEMS';
   AddressBookData     = 'ADDRESS_BOOK';

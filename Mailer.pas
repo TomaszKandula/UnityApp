@@ -16,9 +16,7 @@ unit Mailer;
 interface
 
 uses
-  Main, Model, Settings, SysUtils, Windows, Messages, StdCtrls, Classes, StrUtils, Variants, CDO_TLB,
-  blcksock, smtpsend { MODIFIED FROM ORIGINAL }, pop3send, ssl_openssl, synautil, synacode, mimemess { MODIFIED FROM ORIGINAL };
-
+  Main, Model, Settings, SysUtils, Windows, Messages, StdCtrls, Classes, StrUtils, Variants, CDO_TLB;
 
 { -------------------------------------------------------------- ! MAILER CLASS ! --------------------------------------------------------------------------- }
 type
@@ -36,9 +34,8 @@ type
     var MailBody    : string;
     var Logo        : string;
   published
-    function    SendCDOSYS : boolean;
-    function    SendSynapse: boolean;
-    function    SendNow    : boolean;
+    function  SendEmail(oauth: integer) : boolean;
+    function  SendNow: boolean;
   end;
 
 { ------------------------------------------------------------- ! STATEMENT CLASS ! ------------------------------------------------------------------------- }
@@ -85,7 +82,7 @@ uses
 { ############################################################## ! MAILER CLASS ! ########################################################################### }
 
 { ---------------------------------------------------------------------------------------------------------------------------------- SEND USING CDOSYS | NTLM }
-function TMailer.SendCDOSYS: boolean;
+function TMailer.SendEmail(oauth: integer): boolean;
 var
   CdoMessage:   CDO_TLB.IMessage;
   Schema:       string;
@@ -108,12 +105,29 @@ begin
   AppSettings:=TSettings.Create;
   try
     Schema:='http://schemas.microsoft.com/cdo/configuration/';
-    CdoMessage.Configuration.Fields.item[Schema + 'sendusing'       ].Value:=2; (* SEND THE MESSAGE USING THE NETWORK *)
-    CdoMessage.Configuration.Fields.item[Schema + 'smtpserver'      ].Value:=AppSettings.TMIG.ReadString(MailerCDOSYS, 'SMTP', '');
-    CdoMessage.Configuration.Fields.item[Schema + 'smtpserverport'  ].Value:=AppSettings.TMIG.ReadString(MailerCDOSYS, 'PORT', '');
-    CdoMessage.Configuration.Fields.item[Schema + 'smtpauthenticate'].Value:=2; (* NTLM *)
+
+    if oauth = auNTLM then
+    begin
+      CdoMessage.Configuration.Fields.item[Schema + 'sendusing'       ].Value:=cdoSendUsingPort;
+      CdoMessage.Configuration.Fields.item[Schema + 'smtpauthenticate'].Value:=cdoNTLM;
+      CdoMessage.Configuration.Fields.item[Schema + 'smtpserver'      ].Value:=AppSettings.TMIG.ReadString(MailerNTLM, 'SMTP', '');
+      CdoMessage.Configuration.Fields.item[Schema + 'smtpserverport'  ].Value:=AppSettings.TMIG.ReadString(MailerNTLM, 'PORT', '');
+    end;
+
+    if oauth = auBASIC then
+    begin
+      CdoMessage.Configuration.Fields.item[Schema + 'sendusing'       ].Value:=cdoSendUsingPort;
+      CdoMessage.Configuration.Fields.item[Schema + 'smtpauthenticate'].Value:=cdoBasic;
+      CdoMessage.Configuration.Fields.item[Schema + 'smtpserver'      ].Value:=AppSettings.TMIG.ReadString(MailerBASIC, 'SMTP', '');
+      CdoMessage.Configuration.Fields.item[Schema + 'smtpserverport'  ].Value:=AppSettings.TMIG.ReadString(MailerBASIC, 'PORT', '');
+      CdoMessage.Configuration.Fields.item[Schema + 'sendusername'    ].Value:=AppSettings.TMIG.ReadString(MailerBASIC, 'USERNAME', '');
+      CdoMessage.Configuration.Fields.item[Schema + 'sendpassword'    ].Value:=AppSettings.TMIG.ReadString(MailerBASIC, 'PASSWORD', '');
+      CdoMessage.Configuration.Fields.item[Schema + 'smtpusessl'      ].Value:=AppSettings.TMIG.ReadString(MailerBASIC, 'SSL', '');
+    end;
+
     CdoMessage.Configuration.Fields.item[Schema + 'NNTPAccountName' ].Value:=XMailer;
     CdoMessage.Configuration.Fields.update;
+
   finally
     AppSettings.Free;
   end;
@@ -122,127 +136,10 @@ begin
     CdoMessage.BodyPart.Charset:='utf-8';
     CdoMessage.Send;
     Result:=True;
+    LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: E-mail has been sent successfully.');
   except
     on E: Exception do
       LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Cannot send an e-mail. Error message has been thrown: ' + E.Message);
-  end;
-end;
-
-{ ---------------------------------------------------------------------------------------------------------------------------------------- SEND USING SYNAPSE }
-function TMailer.SendSynapse;
-var
-  Email:        TSMTPSend;
-  MailContent:  TStringList;
-  Msg:          TMimeMess;
-  SendTo:       TStringList;
-  SendCc:       TStringList;
-  SendBc:       TStringList;
-  AppSettings:  TSettings;
-  Delimiter:    char;
-  iCNT:         integer;
-begin
-  { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-  Result     :=False;
-  Delimiter  :=';';
-  SendTo     :=TStringList.Create;
-  SendCc     :=TStringList.Create;
-  SendBc     :=TStringList.Create;
-  MailContent:=TStringList.Create;
-  Msg        :=TMimeMess.Create;
-  Email      :=TSMTPSend.Create;
-  AppSettings:=TSettings.Create;
-  try
-    try
-      { ------------------------------------------------------------------------------------------------------------------------ ADD PRE-PREPARED E-MAIL BODY }
-      MailContent.Add(MailBody);
-      { -------------------------------------------------------------------------------------------------------------------------------------- E-MAIL HEADERS }
-      Msg.Header.From    :=XMailer;
-      Msg.Header.Priority:=mp_High;
-      Msg.Header.Subject :=MailSubject;
-      Msg.Header.XMailer :=XMailer;
-      if MailRt <> '' then Msg.Header.ReplyTo:=MailRt;
-
-      (* SCAN FOR ALL EMAILS DELIMINATED BY SEMI-COLON          *)
-      (* AND ADD THEM TO 'MAIL TO', 'CARBON COPY' AND           *)
-      (* 'BLIND CARBON COPY' RESPECTIVELY                       *)
-      (* ALL ARRAYS WILL BE MERGED LATER AND WILL BE ADDED TO   *)
-      (* SMTP BEFORE SEND AN EMAIL                              *)
-
-      { -------------------------------------------------------------------------------------------------------------------------------------------------- TO }
-      SendTo.Delimiter      :=Delimiter;
-      SendTo.StrictDelimiter:=False;
-      SendTo.DelimitedText  :=MailTo;
-      for iCNT:=0 to SendTo.Count - 1 do Msg.Header.ToList.Add(SendTo[iCNT]);
-      { ----------------------------------------------------------------------------------------------------------------------------------------- CARBON COPY }
-      if MailCc <> '' then
-      begin
-        SendCc.Delimiter      :=Delimiter;
-        SendCc.StrictDelimiter:=False;
-        SendCC.DelimitedText  :=MailCc;
-        for iCNT:=0 to SendCc.Count - 1 do Msg.Header.CCList.Add(SendCc[iCNT]);
-      end;
-      { ----------------------------------------------------------------------------------------------------------------------------------- BLIND CARBON COPY }
-      if MailBcc <> '' then
-      begin
-        SendBc.Delimiter      :=Delimiter;
-        SendBc.StrictDelimiter:=False;
-        SendBC.DelimitedText  :=MailBcc;
-      end;
-      { ------------------------------------------------------------------------------------------------------------------------------------------ SETTING UP }
-      Msg.AddPartHTML(MailContent, nil);
-      Msg.EncodeMessage;
-      { ------------------------------------------------------------------------------------------------------------------------ EMAIL CREDENTIALS AND SERVER }
-      Email.UserName  :=AppSettings.TMIG.ReadString(MailerSynapse, 'USERNAME', '');
-      Email.Password  :=AppSettings.TMIG.ReadString(MailerSynapse, 'PASSWORD', '');
-      Email.TargetHost:=AppSettings.TMIG.ReadString(MailerSynapse, 'SMTP', '');
-      Email.TargetPort:=AppSettings.TMIG.ReadString(MailerSynapse, 'PORT', '');
-      { ---------------------------------------------------------------------------------------------------------------------------------------- TLS OVER SSL }
-      if AppSettings.TMIG.ReadBool(MailerSynapse, 'TLS', False) = True then
-      begin
-        Email.AutoTLS:=True;
-        Email.FullSSL:=False;
-      end;
-      { ---------------------------------------------------------------------------------------------------------------------------------------- SSL OVER TLS }
-      if AppSettings.TMIG.ReadBool(MailerSynapse, 'SSL', True) = True then
-      begin
-        Email.AutoTLS:=False;
-        Email.FullSSL:=True;
-      end;
-      { -------------------------------------------------------------------------------------------------------------------------------------- SENDING E-MAIL }
-      if Email.Login then
-      begin
-        if Email.AuthDone then
-        begin
-          Email.MailFrom(MailFrom, length(MailFrom));
-
-          (* ADD ALL RECIPIENTS REGARDLESS IF BCC OR NOT *)
-          (* BCC CANNOT BE INCLUDED IN HEADERS           *)
-          (* ADD ONE PER 'MAILTO' FUNCTION               *)
-
-          for iCNT:=0 to SendTo.Count - 1 do Email.MailTo(SendTo[iCNT]);
-          for iCNT:=0 to SendCc.Count - 1 do Email.MailTo(SendCc[iCNT]);
-          for iCNT:=0 to SendBc.Count - 1 do Email.MailTo(SendBc[iCNT]);
-          { --------------------------------------------------------------------------------------------------------------------------------- SEND AND LOGOUT }
-          if Email.MailData(Msg.Lines) then
-          begin
-            Result:=True;
-            Email.Logout;
-          end;
-        end;
-      end;
-    except
-      on E: Exception do
-        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Could not send an e-mail. Error message thrown: ' + E.Message);
-    end;
-  finally
-    { ------------------------------------------------------------------------------------------------------------------------------------------ UNINITIALIZE }
-    AppSettings.Free;
-    MailContent.Free;
-    Msg.Free;
-    Email.Free;
-    SendTo.Free;
-    SendCc.Free;
-    SendBc.Free;
   end;
 end;
 
@@ -254,14 +151,13 @@ begin
   Result:=False;
   AppSettings:=TSettings.Create;
   try
-    (* NTLM AUTHENTICATE ONLY *)
-    if AppSettings.TMIG.ReadString(MailerSetup, 'ACTIVE', '') = MailerCDOSYS then Result:=SendCDOSYS;
-    (* REQUIRE USERNAME AND PASSWORD, SSL/TLS *)
-    if AppSettings.TMIG.ReadString(MailerSetup, 'ACTIVE', '') = MailerSYNAPSE then Result:=SendSynapse;
+    if AppSettings.TMIG.ReadString(MailerSetup, 'ACTIVE', '') = MailerNTLM  then Result:=SendEmail(auNTLM);
+    if AppSettings.TMIG.ReadString(MailerSetup, 'ACTIVE', '') = MailerBASIC then Result:=SendEmail(auBASIC);
   finally
     AppSettings.Free;
   end;
 end;
+
 
 { ############################################################## ! DOCUMENT CLASS ! ######################################################################### }
 
@@ -300,15 +196,16 @@ var
   DataBase: TDataTables;
 begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-  MailFrom:='';
-  MailTo  :='';
+  MailFrom :='';
+  MailTo   :='';
+  Telephone:='';
   DataBase:=TDataTables.Create(MainForm.DbConnect);
   try
-    { GET "EMAIL TO" FROM ADDRESSBOOK }
+    { GET "MAILTO" }
     DataBase.CustFilter:=WHERE + TAddressBook.CUID + EQUAL + QuotedStr(CUID);
     DataBase.OpenTable(TblAddressbook);
     if DataBase.DataSet.RecordCount = 1 then MailTo:=DataBase.DataSet.Fields[TAddressBook.ESTATEMENTS].Value;
-    { GET "EMAIL FROM" AND "BANK ACCOUNT" FROM COMPANY TABLE }
+    { GET: "MAILFROM", "BANKS", "LBU ADDRESS" AND "TELEPHONE" }
     DataBase.CustFilter:=WHERE +
                            TCompany.CO_CODE +
                          EQUAL +
@@ -320,9 +217,10 @@ begin
     DataBase.OpenTable(TblCompany);
     if DataBase.DataSet.RecordCount = 1 then
     begin
-      MailFrom:=DataBase.DataSet.Fields[TCompany.SEND_NOTE_FROM].Value;
+      MailFrom   :=DataBase.DataSet.Fields[TCompany.SEND_NOTE_FROM].Value;
       BankDetails:=DataBase.DataSet.Fields[TCompany.BANKDETAILS].Value;
-      LBUAddress:=DataBase.DataSet.Fields[TCompany.COADDRESS].Value;
+      LBUAddress :=DataBase.DataSet.Fields[TCompany.COADDRESS].Value;
+      Telephone  :=DataBase.DataSet.Fields[TCompany.Telephone].Value;
     end;
     Result:=True;
   finally
@@ -431,11 +329,11 @@ begin
     MailBody :=StringReplace(MailBody,   '{EMAIL}',        MailFrom,   [rfReplaceAll]);
     MailBody :=StringReplace(MailBody,   '{TEL}',          Telephone,  [rfReplaceAll]);
     { ASSIGN AND SEND }
-    XMailer    :=MailFrom;
-    MailCc     :=MailFrom;
-    MailBcc    :='';
-    MailRt     :='';
-    Result:=SendNow;
+    XMailer  :=MailFrom;
+    MailCc   :=MailFrom;
+    MailBcc  :='';
+    MailRt   :='';
+    Result   :=SendNow;
     { DEBUG LINE }
     { SaveOutput('e:\test.html'); }
   end;

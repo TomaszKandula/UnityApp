@@ -69,10 +69,6 @@ type
     const KPI_UNALLOCATED_TARGET : string = 'KPI_UNALLOCATED_TARGET';
     const SEND_NOTE_FROM         : string = 'SEND_NOTE_FROM';
     const LEGALTO                : string = 'LEGALTO';
-    const REMINDER1              : string = 'REMINDER1';
-    const REMINDER2              : string = 'REMINDER2';
-    const REMINDER3              : string = 'REMINDER3';
-    const LEGALACTION            : string = 'LEGALACTION';
     const BANKDETAILS            : string = 'BANKDETAILS';
     const STAT_EXCEPT            : string = 'STAT_EXCEPT';
     const FIRST_STATEMENT        : string = 'FIRST_STATEMENT';
@@ -137,16 +133,19 @@ type
   TDaily = class(TDataTables)
   {$TYPEINFO ON}
   public
-    const ID          : string = 'ID';  { PRIMARY KEY }
-    const GROUP_ID    : string = 'GROUP_ID';
-    const CUID        : string = 'CUID';
-    const AGEDATE     : string = 'AGEDATE';
-    const STAMP       : string = 'STAMP';
-    const USER_ALIAS  : string = 'USER_ALIAS';
-    const EMAIL       : string = 'EMAIL';
-    const CALLEVENT   : string = 'CALLEVENT';
-    const CALLDURATION: string = 'CALLDURATION';
-    const FIXCOMMENT  : string = 'FIXCOMMENT';
+    const ID            : string = 'ID';  { PRIMARY KEY }
+    const GROUP_ID      : string = 'GROUP_ID';
+    const CUID          : string = 'CUID';
+    const AGEDATE       : string = 'AGEDATE';
+    const STAMP         : string = 'STAMP';
+    const USER_ALIAS    : string = 'USER_ALIAS';
+    const EMAIL         : string = 'EMAIL';
+    const CALLEVENT     : string = 'CALLEVENT';
+    const CALLDURATION  : string = 'CALLDURATION';
+    const FIXCOMMENT    : string = 'FIXCOMMENT';
+    const EMAIL_Reminder: string = 'EMAIL_Reminder';
+    const EMAIL_AutoStat: string = 'EMAIL_AutoStat';
+    const EMAIL_ManuStat: string = 'EMAIL_ManuStat';
   end;
 
 { --------------------------------------------------------------- ! TBL_GENERAL ! --------------------------------------------------------------------------- }
