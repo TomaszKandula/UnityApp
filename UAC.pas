@@ -63,6 +63,7 @@ begin
     UserKey:=GetAccessData(adUserKeyID);
     OpenTable(TblGroups);
     DataSet.Filter:=TGroups.FID + EQUAL + QuotedStr(UserKey);
+    DataSet.Sort:=TGroups.GROUP_NAME + ASC;
     { FOR GIVEN USER ID, WE CAN HAVE MANY ITEMS }
     if DataSet.RecordCount > 0 then
     begin

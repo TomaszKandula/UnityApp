@@ -196,6 +196,11 @@ const
   dcReminder  = 0;
   dcStatement = 1;
 
+  { CALENDAR MODES }
+
+  cfDateToDB = 0;
+  cfGetDate  = 1;
+
   { SQL KEYWORDS | ADD. SPACES FOR EASIER CONCATENATING }
 
   INSERT       : string = ' INSERT INTO ';

@@ -257,10 +257,6 @@ type                                                            (* GUI | MAIN TH
     hShapeInfoAM: TShape;
     Cap43: TShape;
     GridFillerTop4: TImage;
-    Header5: TPanel;
-    ShapeContent5: TShape;
-    Cap51: TShape;
-    GridFillerTop5: TImage;
     Header6: TPanel;
     ShapeContent6: TShape;
     Cap61: TShape;
@@ -270,7 +266,6 @@ type                                                            (* GUI | MAIN TH
     Cap15: TShape;
     GridFillerTop7: TImage;
     Text54L2: TLabel;
-    MainShape2: TPanel;
     MainShape6: TPanel;
     AppFooter: TPanel;
     Shape2: TShape;
@@ -303,7 +298,6 @@ type                                                            (* GUI | MAIN TH
     RightPanel: TPanel;
     MidPanel: TPanel;
     ContentPanel6: TPanel;
-    ContentPanel5: TPanel;
     ContentPanel1: TPanel;
     ContentPanel: TPanel;
     ContentPanel2: TPanel;
@@ -412,7 +406,7 @@ type                                                            (* GUI | MAIN TH
     Action_Overdue: TMenuItem;
     N15: TMenuItem;
     TabSheet9: TTabSheet;
-    WebBrowser: TWebBrowser;
+    WebBrowser1: TWebBrowser;
     WebContainer: TPanel;
     DetailsGrid: TStringGrid;
     btnLoadAgeView: TSpeedButton;
@@ -442,6 +436,14 @@ type                                                            (* GUI | MAIN TH
     sgGroups: TStringGrid;
     sgUAC: TStringGrid;
     GridFillerRight8: TImage;
+    ReportContainer: TPanel;
+    WebBrowser2: TWebBrowser;
+    Action_INF7_Filter: TMenuItem;
+    Action_CoCode_Filter: TMenuItem;
+    Action_Agent_Filter: TMenuItem;
+    Action_Division_Filter: TMenuItem;
+    Action_FollowUp_Filter: TMenuItem;
+    Action_GroupFollowUp: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -543,7 +545,6 @@ type                                                            (* GUI | MAIN TH
     procedure TrayIconDblClick(Sender: TObject);
     procedure InetTimerTimer(Sender: TObject);
     procedure Action_CloseClick(Sender: TObject);
-    procedure Action_FilterINF7Click(Sender: TObject);
     procedure sgAgeViewDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
     procedure sgAgeViewDblClick(Sender: TObject);
     procedure Action_ShowRegisteredClick(Sender: TObject);
@@ -609,12 +610,24 @@ type                                                            (* GUI | MAIN TH
     procedure imgEventLogClick(Sender: TObject);
     procedure imgEventLogMouseEnter(Sender: TObject);
     procedure imgEventLogMouseLeave(Sender: TObject);
+    procedure Action_INF7_FilterClick(Sender: TObject);
+    procedure Action_CoCode_FilterClick(Sender: TObject);
+    procedure Action_Agent_FilterClick(Sender: TObject);
+    procedure Action_Division_FilterClick(Sender: TObject);
+    procedure Action_FollowUp_FilterClick(Sender: TObject);
+    procedure N9Click(Sender: TObject);
+    procedure sgUACDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+    procedure sgUACMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+    procedure sgUACMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+    procedure sgGroupsDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+    procedure sgGroupsMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+    procedure sgGroupsMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+    procedure Action_GroupFollowUpClick(Sender: TObject);
     { ------------------------------------------------------------- ! HELPERS ! ----------------------------------------------------------------------------- }
   private
     { GENERAL }
     var pAllowClose         :  boolean;
     var pStartTime          :  TTime;
-    var pSessionWnd         :  HWND;
     { GETTERS AND SETTERS FOR "FOLLOW-UP" COLORS SAVED IN SETTINGS FILE }
     function  GetTodayFColor  : TColor;
     function  GetTodayBColor  : TColor;
@@ -643,7 +656,6 @@ type                                                            (* GUI | MAIN TH
     var AccessMode          :  string;
     var OpenItemsUpdate     :  string;
     var ConnLastError       :  cardinal;
-    var LockedCount         :  cardinal;
     { FOR "FOLLOW-UP" COLOR PICKER }
     property TodayFColor:  TColor read GetTodayFColor  write SetTodayFColor;
     property TodayBColor:  TColor read GetTodayBColor  write SetTodayBColor;
@@ -893,7 +905,6 @@ end;
 { ----------------------------------------------------------------------------------------------------------------------- MESSAGE RECEIVER FOR WORKER THREADS }
 procedure TMainForm.WndProc(var Msg: Messages.TMessage);
 var
-  DataBase:   TDataBase;
   DailyText:  TDataTables;
   CUID:       string;
   Condition:  string;
@@ -1005,22 +1016,6 @@ begin
   begin
     LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(Msg.Msg) + ' WM_ENDSESSION. Windows is shutting down...');
     pAllowClose:=True;
-  end;
-
-  { WINDOWS LOCK SCREEN }
-  if Msg.Msg = WM_WTSSESSION_CHANGE then
-  begin
-    case Msg.wParam of
-      WTS_SESSION_LOCK:
-      begin
-        Inc(LockedCount);
-        LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(Msg.Msg) + ' WM_WTSSESSION_CHANGE. User has locked the screen (' + IntToStr(LockedCount) + ').');
-      end;
-      WTS_SESSION_UNLOCK:
-      begin
-        { DO NOTHING }
-      end;
-    end;
   end;
 
   { WINDOWS HAS RESUMED AFTER BEING SUSPENDED }
@@ -1598,8 +1593,8 @@ begin
         end else
         { GENERIC MESSAGE }
         begin
-          LogText(MainForm.EventLogPath, 'Thread: [' + IntToStr(OpenThdId) + ']: The data cannot be exported, error message thrown: ' + E.Message + '.');
-          SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PCHAR('The data cannot be exported. Please contact IT support.')));
+          LogText(MainForm.EventLogPath, 'Thread: [' + IntToStr(OpenThdId) + ']: The data cannot be exported, error message has been thrown: ' + E.Message + '.');
+          SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PCHAR('The data cannot be exported. Description received: ' + E.Message)));
         end;
       end;
   end;
@@ -1800,6 +1795,11 @@ begin
   if WndType = mcQuestion2 then Result:=Application.MessageBox(PChar(WndText), PChar(APPNAME), MB_YESNO    + MB_ICONQUESTION);
 end;
 
+procedure TMainForm.N9Click(Sender: TObject);
+begin
+
+end;
+
 { -------------------------------------------------------------------------------------------------------------------------------------------- RESET SETTINGS }
 procedure TMainForm.LockSettingsPanel;
 begin
@@ -1819,6 +1819,10 @@ begin
   sgListValue.ClearAll(2, 0, 0, False);
   sgListSection.Row:=1;
   sgListValue.Row:=1;
+  sgUAC.ClearAll(2, 0, 0, False);
+  sgGroups.ClearAll(2, 0, 0, False);
+  sgUAC.Row:=1;
+  sgGroups.Row:=1;
   sgListSection.Enabled:=False;
   sgListValue.Enabled  :=False;
   sgUAC.Enabled        :=False;
@@ -2196,8 +2200,9 @@ begin
     DataTables.Free;
   end;
 
-  { ----------------------------------------------------------------------------------------------------------------------------- START WEB PAGE | UNITY INFO }
-  WebBrowser.Navigate(WideString(AppSettings.TMIG.ReadString(ApplicationDetails, 'START_PAGE', '')), $02);
+  { ------------------------------------------------------------------------------------------------------------------- START WEB PAGE | UNITY INFO | TABLEAU }
+  WebBrowser1.Navigate(WideString(AppSettings.TMIG.ReadString(ApplicationDetails, 'START_PAGE', 'about:blank')),  $02);
+  WebBrowser2.Navigate(WideString(AppSettings.TMIG.ReadString(ApplicationDetails, 'REPORT_PAGE', 'about:blank')), $02);
 
   { -------------------------------------------------------------------------------------------------------------------------- APPLICATION VERSION & USER SID }
   LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Application version = ' + AppVersion);
@@ -2214,10 +2219,6 @@ begin
   { DISPOSE OBJECTS }
   AppSettings.Free;
 
-  { ALLOCATE SEPARATE WINDOW FOR MONITORING SESSIONS }
-  pSessionWnd:=AllocateHWnd(WndProc);
-  if not WTSRegisterSessionNotification(pSessionWnd, NOTIFY_FOR_THIS_SESSION) then RaiseLastOSError;
-
   { START CHECKERS }
   SwitchTimers(tmEnabled);
 
@@ -2232,14 +2233,9 @@ procedure TMainForm.FormDestroy(Sender: TObject);
 var
   AppSettings: TSettings;
 begin
-  { DEALLOCATE WINDOW FOR SESSION MONITORING }
-  if pSessionWnd <> 0 then
-  begin
-    WTSUnRegisterSessionNotification(pSessionWnd);
-    DeallocateHWnd(pSessionWnd);
-  end;
   { RELEASE WEB BROWSER COMPONENT MANUALLY }
-  WebBrowser.Free;
+  WebBrowser1.Free;
+  WebBrowser2.Free;
   { CLOSE DB CONNECTION }
   DbConnect.Close;
   { SAVE AGE VIEW LAYOUT }
@@ -2280,17 +2276,19 @@ end;
 procedure TMainForm.FormResize(Sender: TObject);
 begin
   (* EACH TIME FORM IS RESIZED WE UPDATE THUMB SIZE OF STRING GRID COMPONENT *)
+  sgAgeView.AutoThumbSize;
   sgOpenItems.AutoThumbSize;
   sgAddressBook.AutoThumbSize;
-  sgListSection.AutoThumbSize;
-  sgListValue.AutoThumbSize;
   sgInvoiceTracker.AutoThumbSize;
-  sgAgeView.AutoThumbSize;
   sgCoCodes.AutoThumbSize;
   sgPmtTerms.AutoThumbSize;
   sgPaidInfo.AutoThumbSize;
   sgPerson.AutoThumbSize;
   sgGroup3.AutoThumbSize;
+  sgListSection.AutoThumbSize;
+  sgListValue.AutoThumbSize;
+  sgUAC.AutoThumbSize;
+  sgGroups.AutoThumbSize;
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------------- ON CLOSE QUERY }
@@ -2576,10 +2574,18 @@ begin
 
   { CHECK IF USER SELECT A RANGE ON AGEGRID }
   if (sgAgeView.Selection.Bottom - sgAgeView.Selection.Top) > 0 then
+  begin
     { WE ALLOW TO ADD CUSTOMER TO INVOICE TRACKER ONLY ONE AT A TIME }
-    Action_Tracker.Enabled:=False
-      else
-        Action_Tracker.Enabled:=True;
+    Action_Tracker.Enabled:=False;
+    { WE CAN ADD THE SAME FOLLOW UP ONLY TO A SELECTED GROUP }
+    Action_GroupFollowUp.Enabled:=True;
+  end
+  else
+  begin
+    Action_Tracker.Enabled:=True;
+    Action_GroupFollowUp.Enabled:=False;
+  end;
+
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------- LYNC CALL }
@@ -2650,13 +2656,57 @@ begin
   Screen.Cursor:=crDefault;
 end;
 
-{ ---------------------------------------------------------------------------------------------------------------------------------------- FILTER INF7 COLUMN }
-procedure TMainForm.Action_FilterINF7Click(Sender: TObject);
+{ --------------------------------------------------------------------------------------------------------------------------- ADD FOLLOW-UP TO SELECTED GROUP }
+procedure TMainForm.Action_GroupFollowUpClick(Sender: TObject);
+var
+  iCNT: integer;
+begin
+  Screen.Cursor:=crHourGlass;
+  CalendarForm.CalendarMode:=cfGetDate;
+  MainForm.WndCall(CalendarForm, 0);
+  { IF SELECTED MORE THAN ONE CUSTOMER, ASSIGN GIVEN DATE TO SELECTED CUSTOMERS }
+  if CalendarForm.SelectedDate <> NULLDATE then
+  begin
+    for iCNT:=sgAgeView.Selection.Top to sgAgeView.Selection.Bottom do
+      if sgAgeView.RowHeights[iCNT] <> - 1 then
+        CalendarForm.SetFollowUp(CalendarForm.SelectedDate, sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUID, 1, 1), iCNT], iCNT);
+  end;
+  Screen.Cursor:=crDefault;
+end;
+
+{ ------------------------------------------------------------- ! FILTER AGE VIEW GRID ! -------------------------------------------------------------------- }
+
+{ -------------------------------------------------------------------------------------------------------------------------------------------------- VIA INF7 }
+procedure TMainForm.Action_INF7_FilterClick(Sender: TObject);
 begin
   FilterForm.FColName:=TSnapshots.fINF7;
   FilterForm.FOverdue:=TSnapshots.fOVERDUE;
   FilterForm.FGrid   :=MainForm.sgAgeView;
   WndCall(FilterForm, stModal);
+end;
+
+{ ------------------------------------------------------------------------------------------------------------------------------------------------ VIA COCODE }
+procedure TMainForm.Action_CoCode_FilterClick(Sender: TObject);
+begin
+  //
+end;
+
+{ ------------------------------------------------------------------------------------------------------------------------------------------------- VIA AGENT }
+procedure TMainForm.Action_Agent_FilterClick(Sender: TObject);
+begin
+  //
+end;
+
+{ ---------------------------------------------------------------------------------------------------------------------------------------------- VIA DIVISION }
+procedure TMainForm.Action_Division_FilterClick(Sender: TObject);
+begin
+  //
+end;
+
+{ --------------------------------------------------------------------------------------------------------------------------------------------- VIA FOLLOW UP }
+procedure TMainForm.Action_FollowUp_FilterClick(Sender: TObject);
+begin
+  //
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------- EXCLUDE NON-OVERDUE ITEMS }
@@ -3198,6 +3248,16 @@ begin
   sgListValue.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
 end;
 
+procedure TMainForm.sgUACDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+begin
+  sgUAC.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
+end;
+
+procedure TMainForm.sgGroupsDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+begin
+  sgGroups.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
+end;
+
 { ---------------------------------------------------- ! SETTING PANEL STRING GRID EVENTS !  ---------------------------------------------------------------- }
 
 { --------------------------------------------------------------------------------------------------------------------------------- LIST ALL KEYS WITH VALUES }
@@ -3619,6 +3679,34 @@ procedure TMainForm.sgPersonMouseWheelUp(Sender: TObject; Shift: TShiftState; Mo
 begin
   Handled:=True;
   sgPerson.Perform(WM_VSCROLL, SB_LINEUP, 0);
+end;
+
+{ UAC | WHEEL DOWN }
+procedure TMainForm.sgUACMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+begin
+  Handled:=True;
+  sgUAC.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
+end;
+
+{ UAC | WHEE UP }
+procedure TMainForm.sgUACMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+begin
+  Handled:=True;
+  sgUAC.Perform(WM_VSCROLL, SB_LINEUP, 0);
+end;
+
+{ GROUPS | WHEEL DOWN }
+procedure TMainForm.sgGroupsMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+begin
+  Handled:=True;
+  sgGroups.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
+end;
+
+{ GROUPS | WHEEL UP }
+procedure TMainForm.sgGroupsMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+begin
+  Handled:=True;
+  sgGroups.Perform(WM_VSCROLL, SB_LINEUP, 0);
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------- OPEN ITEMS | RELOAD BUTTON }
@@ -4146,6 +4234,7 @@ procedure TMainForm.btnUnlockClick(Sender: TObject);
   (* COMMON VARIABLES *)
   var
     AppSettings:  TSettings;
+    DataTables:   TDataTables;
 
   (* NESTED PROCEDURE *)
 
@@ -4165,6 +4254,7 @@ procedure TMainForm.btnUnlockClick(Sender: TObject);
       if (AppSettings.TMIG.ReadString(Password, 'HASH', '') <> '') and
          (AppSettings.TMIG.ReadString(Password, 'HASH', '') = Edit_PASSWORD.Text) then
       begin
+        { SETUP HEADERS }
         sgListSection.Cols[0].Text:='Lp';
         sgListSection.Cols[1].Text:='Sections';
         sgListValue.Cols[0].Text  :='Lp';
@@ -4185,10 +4275,10 @@ procedure TMainForm.btnUnlockClick(Sender: TObject);
         sgListValue.Row:=1;
         { TRANSPARENCY OFF }
         imgOFF.Visible:=False;
-        { POPULATE STRING GRID }
+        { POPULATE STRING GRIDS }
         tStrings:=TStringList.Create();
         try
-          { READ ALL }
+          { READ ALL SETTINGS }
           AppSettings.TMIG.ReadSections(tStrings);
           { LIST ALL SECTIONS EXCEPT 'PASSWD' SECTION }
           sgListSection.RowCount:=tStrings.Count;
@@ -4201,6 +4291,18 @@ procedure TMainForm.btnUnlockClick(Sender: TObject);
               sgListSection.Cells[1, inner]:=tStrings.Strings[iCNT];
               inc(inner);
             end;
+          end;
+          sgListSection.SetColWidth(10, 20);
+          sgListValue.SetColWidth  (10, 20);
+          { READ UAC AND GROUPS }
+          DataTables:=TDataTables.Create(DbConnect);
+          try
+            DataTables.OpenTable(TblUAC);    DataTables.SqlToGrid(sgUAC,    DataTables.ExecSQL, False, True);
+            DataTables.OpenTable(TblGroups); DataTables.SqlToGrid(sgGroups, DataTables.ExecSQL, False, True);
+          finally
+            DataTables.Free;
+            sgUAC.SetColWidth   (10, 20);
+            sgGroups.SetColWidth(10, 20);
           end;
         finally
           tStrings.Free;

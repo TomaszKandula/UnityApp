@@ -769,6 +769,7 @@ end;
 { --------------------------------------------------------------------------------------------------------------------------------------- FEEDBACK AFTER CALL }
 procedure TActionsForm.btnFeedbackClick(Sender: TObject);
 begin
+  CalendarForm.CalendarMode:=cfDateToDB;
   MainForm.WndCall(CalendarForm, 0);
 end;
 

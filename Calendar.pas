@@ -39,9 +39,12 @@ type
     procedure FormShow(Sender: TObject);
     procedure MyCalendarClick(Sender: TObject);
   public
-    function MakeMyDay(Increment: integer): TDate;
-    function IsWeekend(const DT: TDateTime): Boolean;
-    function GetCurrentWorkingDay(WhatDay: integer): boolean;
+    var CalendarMode: integer;
+    var SelectedDate: TDateTime;
+    function  MakeMyDay(Increment: integer): TDate;
+    function  IsWeekend(const DT: TDateTime): Boolean;
+    function  GetCurrentWorkingDay(WhatDay: integer): boolean;
+    procedure SetFollowUp(SelectedDate: TDate; SelectedCUID: string; Row: integer);
   end;
 
 var
@@ -109,6 +112,8 @@ begin
   finally
     AppSettings.Free;
   end;
+  { DEFAULT DATE }
+  SelectedDate:=NULLDATE;
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------ RESET CHECKBOXES }
@@ -146,31 +151,29 @@ begin
   MyCalendar.Date:=MakeMyDay(7);
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------- APPROVE SELECTED DATE }
-procedure TCalendarForm.MyCalendarDblClick(Sender: TObject);
+{ --------------------------------------------------------------------------------------------------------------------------------------- SET GIVEN FOLLOW UP }
+procedure TCalendarForm.SetFollowUp(SelectedDate: TDate; SelectedCUID: string; Row: integer);
 var
   GenText:    TDataTables;
   Condition:  string;
-  CUID:       string;
 begin
   GenText:=TDataTables.Create(MainForm.DbConnect);
   try
     GenText.OpenTable(TblGeneral);
-    CUID:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUID, 1, 1), MainForm.sgAgeView.Row];
-    Condition:=TGeneral.CUID + EQUAL + QuotedStr(CUID);
+    Condition:=TGeneral.CUID + EQUAL + QuotedStr(SelectedCUID);
     GenText.DataSet.Filter:=Condition;
     { UPDATE }
     if not (GenText.DataSet.RecordCount = 0) then
     begin
       GenText.CleanUp;
       { DEFINE COLUMNS, VALUES AND CONDITIONS }
-      GenText.Columns.Add(TGeneral.STAMP);      GenText.Values.Add(DateTimeToStr(Now));                      GenText.Conditions.Add(Condition);
-      GenText.Columns.Add(TGeneral.USER_ALIAS); GenText.Values.Add(UpperCase(MainForm.WinUserName));         GenText.Conditions.Add(Condition);
-      GenText.Columns.Add(TGeneral.FOLLOWUP);   GenText.Values.Add(DateToStr(CalendarForm.MyCalendar.Date)); GenText.Conditions.Add(Condition);
+      GenText.Columns.Add(TGeneral.STAMP);      GenText.Values.Add(DateTimeToStr(Now));              GenText.Conditions.Add(Condition);
+      GenText.Columns.Add(TGeneral.USER_ALIAS); GenText.Values.Add(UpperCase(MainForm.WinUserName)); GenText.Conditions.Add(Condition);
+      GenText.Columns.Add(TGeneral.FOLLOWUP);   GenText.Values.Add(DateToStr(SelectedDate));         GenText.Conditions.Add(Condition);
       { EXECUTE }
       GenText.UpdateRecord(TblGeneral);
       { DISPLAY NOW ON STRING GRID }
-      MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fFOLLOWUP, 1, 1), MainForm.sgAgeView.Row]:=DateToStr(CalendarForm.MyCalendar.Date);
+      MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fFOLLOWUP, 1, 1), Row]:=DateToStr(SelectedDate);
     end
     else
     { INSERT NEW }
@@ -178,19 +181,40 @@ begin
       GenText.Columns.Clear;
       GenText.Values.Clear;
       { DEFINE COLUMNS AND VALUES }
-      GenText.Columns.Add(TGeneral.CUID);       GenText.Values.Add(CUID);
+      GenText.Columns.Add(TGeneral.CUID);       GenText.Values.Add(SelectedCUID);
       GenText.Columns.Add(TGeneral.STAMP);      GenText.Values.Add(DateTimeToStr(Now));
       GenText.Columns.Add(TGeneral.USER_ALIAS); GenText.Values.Add(UpperCase(MainForm.WinUserName));
       GenText.Columns.Add(TGeneral.FIXCOMMENT); GenText.Values.Add('');
-      GenText.Columns.Add(TGeneral.FOLLOWUP);   GenText.Values.Add(DateToStr(CalendarForm.MyCalendar.Date));
+      GenText.Columns.Add(TGeneral.FOLLOWUP);   GenText.Values.Add(DateToStr(SelectedDate));
       { EXECUTE }
       GenText.InsertInto(TblGeneral);
-      MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fFOLLOWUP, 1, 1), MainForm.sgAgeView.Row]:=DateToStr(CalendarForm.MyCalendar.Date);
+      MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fFOLLOWUP, 1, 1), Row]:=DateToStr(SelectedDate);
     end;
   finally
     GenText.Free;
   end;
-  Close;
+end;
+
+{ ------------------------------------------------------------------------------------------------------------------------------------- APPROVE SELECTED DATE }
+procedure TCalendarForm.MyCalendarDblClick(Sender: TObject);
+begin
+  { PUT SELECTED DATE INTO DATABASE }
+  if CalendarMode = cfDateToDB then
+  begin
+    SetFollowUp(
+                 CalendarForm.MyCalendar.Date,
+                 MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUID, 1, 1),
+                 MainForm.sgAgeView.Row],
+                 MainForm.sgAgeView.Row
+               );
+    Close;
+  end;
+  { JUST RETURN SELECTED DATE }
+  if CalendarMode = cfGetDate then
+  begin
+    SelectedDate:=CalendarForm.MyCalendar.Date;
+    Close;
+  end;
 end;
 
 end.

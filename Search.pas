@@ -198,6 +198,7 @@ begin
     { RETURN FILTER STATE }
     FilterForm.FGrid   :=SGrid;
     FilterForm.FColName:=SColName;
+    FilterForm.FilterPrep;
     FilterForm.btnFilterClick(self);
     btnUnhide.Enabled:=False;
   end;

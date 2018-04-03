@@ -213,7 +213,7 @@ object ActionsForm: TActionsForm
         Margins.Bottom = 0
         Align = alCustom
         Anchors = [akRight]
-        Caption = 'Send Statement'
+        Caption = 'Send Email'
         Enabled = False
         OnClick = btnSendEmailClick
       end

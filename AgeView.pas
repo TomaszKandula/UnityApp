@@ -139,7 +139,7 @@ begin
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------- RETURN BASIC DETAILS }
-procedure TAgeView.Details(var Grid: TStringGrid);
+procedure TAgeView.Details(var Grid: TStringGrid);        //refactor!!
 var
   Temp:  TStringGrid;
   iCNT:  integer;
@@ -174,7 +174,7 @@ begin
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------- FIND MATCH DATA IN GENERAL TABLES }
-function TAgeView.GetData(Grid: TStringGrid; Source: TStringGrid; WhichCol: string): string;
+function TAgeView.GetData(Grid: TStringGrid; Source: TStringGrid; WhichCol: string): string;   //refactor! use db query
 var
   iCNT:  integer;
   jCNT:  integer;
