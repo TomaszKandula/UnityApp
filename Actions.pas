@@ -37,7 +37,6 @@ type
     Text6: TLabel;
     Text7: TLabel;
     Text8: TLabel;
-    BevelLine: TBevel;
     Cust_Name: TLabel;
     Cust_Number: TLabel;
     btnSendStatement: TSpeedButton;
@@ -47,9 +46,7 @@ type
     PanelTop: TPanel;
     Cust_Person: TEdit;
     Cust_Mail: TEdit;
-    Cust_Phone: TEdit;
     imgSaveDetails: TImage;
-    imgList: TImageList;
     ButtonPanel: TPanel;
     HistoryPanel: TPanel;
     HistoryTitle: TLabel;
@@ -60,6 +57,7 @@ type
     btnFeedback: TSpeedButton;
     btnClearFollowUp: TSpeedButton;
     btnSendEmail: TSpeedButton;
+    Cust_Phone: TComboBox;
     procedure FormCreate(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure OpenItemsGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
@@ -89,8 +87,8 @@ type
     procedure Cust_PhoneClick(Sender: TObject);
     procedure btnClearFollowUpClick(Sender: TObject);
     procedure btnSendEmailClick(Sender: TObject);
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
   public
-    var IsEdit     :  boolean;
     var CUID       :  string;
     var CustName   :  string;
     var CustNumber :  string;
@@ -156,12 +154,15 @@ const
   { SHOWS SELECTED DETAILS OF ALL REGISTERED OPEN ITEMS FOR GIVEN CUSTOMER  }
   { THAT WE IDENTIFY BY 'CUID' NUMBER.                                      }
   SrcColumns:  array[0..11] of integer = (10, 29, 32, 5, 9, 4, 8, 7, 11, 26, 19, 33);
+  Delimiter:   char = ';';
 var
   iCNT:      integer;
   jCNT:      integer;
   zCNT:      integer;
   GenText:   TDataTables;
   AddrBook:  TDataTables;
+  Phones:    string;
+  SL:        TStringList;
 begin
 
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
@@ -175,7 +176,7 @@ begin
     { --------------------------------------------------------- ! LIST OF OPEN ITEMS ! ---------------------------------------------------------------------- }
 
     { ----------------------------------------------------------------------------------------------------------------------- LOAD OPEN ITEMS FROM "MAINFORM" }
-    if OpenItemsSrc.RowCount > 0 then
+    if MainForm.StatBar_TXT1.Caption = stReady then
     begin
       { LOOK FOR THE SAME "CUID" }
       for iCNT:=1 to OpenItemsSrc.RowCount - 1 do
@@ -190,6 +191,10 @@ begin
           OpenItemsDest.RowCount:=zCNT;
         end;
       end;
+    end
+    else
+    begin
+      MainForm.MsgCall(mcWarn, 'Wait until "Ready" status and try again after open items are fully loaded.');
     end;
     { ------------------------------------------------------------------------------------------------------------------- SORT VIA PAYMENT STATUS | ASCENDING }
     OpenItemsDest.MSort(9, 0, True);
@@ -210,8 +215,30 @@ begin
       begin
         Cust_Person.Text:=MainForm.OleGetStr(AddrBook.DataSet.Fields[TAddressBook.CONTACT].Value);
         Cust_Mail.Text  :=MainForm.OleGetStr(AddrBook.DataSet.Fields[TAddressBook.ESTATEMENTS].Value);
-        Cust_Phone.Text :=MainForm.OleGetStr(AddrBook.DataSet.Fields[TAddressBook.TELEPHONE].Value);
-        Cust_Phone.Text:=StringReplace(Cust_Phone.Text, CRLF, ' ', [rfReplaceAll]);
+        Phones:=MainForm.OleGetStr(AddrBook.DataSet.Fields[TAddressBook.TELEPHONE].Value);
+        if (Phones <> '') or (Phones <> ' ') then
+        begin
+          Cust_Phone.Clear;
+          { MANY NUMBERS DELIMITED BY SEMICOLON }
+          if AnsiPos(Delimiter, Phones) > 0 then
+          begin
+            SL:=TStringList.Create;
+            try
+              SL.Delimiter:=Delimiter;
+              SL.StrictDelimiter:=True;
+              SL.DelimitedText:=Phones;
+              for iCNT:=0 to SL.Count do Cust_Phone.Items.Add(SL.Strings[iCNT]);
+            finally
+              SL.Free;
+            end;
+          end
+          else
+          { JUST ONE TELEPHONE NUMBER }
+          begin
+            Cust_Phone.Items.Add(Phones);
+          end;
+          Cust_Phone.ItemIndex:=0;
+        end;
       end;
     finally
       AddrBook.Free;
@@ -285,7 +312,9 @@ begin
   Cust_Number.Caption :=unNotFound;
   Cust_Person.Text    :=unNotFound;
   Cust_Mail.Text      :=unNotFound;
-  Cust_Phone.Text     :=unNotFound;
+  Cust_Phone.Clear;
+  Cust_Phone.Items.Add(unNotFound);
+  Cust_Phone.ItemIndex:=0;
   DailyCom.Text       :='';
   GeneralCom.Text     :='';
   StatusBar.SimpleText:='';
@@ -364,8 +393,6 @@ begin
   CUID      :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUID,            1, 1), MainForm.sgAgeView.Row];
   CustName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), MainForm.sgAgeView.Row];
   CustNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), MainForm.sgAgeView.Row];
-  { NO EDITING BY DEFAULT }
-  if IsEdit then imgEditDetailsClick(Self);
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------------------- ON ACTIVATE }
@@ -373,6 +400,13 @@ procedure TActionsForm.FormActivate(Sender: TObject);
 begin
   GetData(OpenItemsGrid, HistoryGrid, MainForm.sgOpenItems);
   StatusBar.SimpleText:='Open items last update: ' + MainForm.OpenItemsUpdate + '.';
+end;
+
+{ ------------------------------------------------------------------------------------------------------------------------------------- QUIT EDITING ON CLOSE }
+procedure TActionsForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+begin
+  if imgSaveDetails.Enabled then imgEditDetailsClick(Self);
+  CanClose:=True;
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------ ON DESTROY }
@@ -606,17 +640,6 @@ end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------ ALLOW EDIT }
 procedure TActionsForm.imgEditDetailsClick(Sender: TObject);
-
-  (* NESTED PROCEDURE *)
-
-  procedure PicChange(number: integer);
-  begin
-    ActionsForm.imgSaveDetails.Picture.Bitmap.FreeImage;
-    ActionsForm.imgSaveDetails.Picture:=nil;
-    ActionsForm.imgList.GetBitmap(number, ActionsForm.imgSaveDetails.Picture.Bitmap);
-    ActionsForm.imgSaveDetails.Invalidate;
-  end;
-
 begin
   { IF NOT FOUND THEN QUIT }
   if (Cust_Person.Text = unNotFound) and (Cust_Mail.Text = unNotFound) and (Cust_Phone.Text = unNotFound) then
@@ -625,23 +648,19 @@ begin
     Exit;
   end;
   { EDIT ON/OFF }
-  if IsEdit then
+  if imgSaveDetails.Enabled then
   begin
     Cust_Person.Cursor    :=crHandPoint;
     Cust_Mail.Cursor      :=crHandPoint;
     Cust_Phone.Cursor     :=crHandPoint;
     Cust_Person.ReadOnly  :=True;
     Cust_Mail.ReadOnly    :=True;
-    Cust_Phone.ReadOnly   :=True;
     Cust_Person.Font.Color:=clBlack;
     Cust_Mail.Font.Color  :=clBlack;
     Cust_Phone.Font.Color :=clBlack;
     Cust_Person.Color     :=clWhite;
     Cust_Mail.Color       :=clWhite;
-    Cust_Phone.Color      :=clWhite;
     imgSaveDetails.Enabled:=False;
-    IsEdit:=False;
-    PicChange(imGreyed);
   end else
   begin
     Cust_Person.Cursor    :=crIBeam;
@@ -649,16 +668,12 @@ begin
     Cust_Phone.Cursor     :=crIBeam;
     Cust_Person.ReadOnly  :=False;
     Cust_Mail.ReadOnly    :=False;
-    Cust_Phone.ReadOnly   :=False;
     Cust_Person.Font.Color:=clNavy;
     Cust_Mail.Font.Color  :=clNavy;
     Cust_Phone.Font.Color :=clNavy;
     Cust_Person.Color     :=clCream;
     Cust_Mail.Color       :=clCream;
-    Cust_Phone.Color      :=clCream;
     imgSaveDetails.Enabled:=True;
-    IsEdit:=True;
-    PicChange(imColour);
   end;
 end;
 
@@ -695,7 +710,7 @@ end;
 { ----------------------------------------------------------------------------------------------------------------------------------------- SEND MANUAL EMAIL }
 procedure TActionsForm.btnSendEmailClick(Sender: TObject);
 begin
-//
+  // code here...
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------------- SEND STATEMENT }
@@ -703,9 +718,12 @@ procedure TActionsForm.btnSendStatementClick(Sender: TObject);
 var
   Statement:   TDocument;
   AppSettings: TSettings;
+  DailyText:   TDataTables;
+  Condition:   string;
+  ManuStat:    integer;
 begin
   { ASK USER BEFORE SENDING THE EMAIL }
-  if MainForm.MsgCall(mcQuestion2, 'Are you absolutely sure, for 100%, that you really want it to be sent, right now?') = IDNO then Exit;
+  if MainForm.MsgCall(mcQuestion2, 'Are you absolutely sure (for 100%) that you really want it to be sent, right now?') = IDNO then Exit;
   { PROCEED }
   Statement    :=TDocument.Create;
   AppSettings  :=TSettings.Create;
@@ -728,9 +746,47 @@ begin
         else
           MainForm.ExecMessage(False, mcError, 'Account Statement cannot be sent. Please contact IT support.');
     { REGISTER THIS ACTION IN DATABASE }
-
-
-
+    DailyText:=TDataTables.Create(MainForm.DbConnect);
+    try
+      DailyText.OpenTable(TblDaily);
+      Condition:=TDaily.CUID + EQUAL + QuotedStr(CUID) + _AND + TDaily.AGEDATE + EQUAL + QuotedStr(MainForm.AgeDateSel);
+      DailyText.DataSet.Filter:=Condition;
+      ManuStat:=StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDaily.EMAIL_ManuStat].Value), 0);
+      Inc(ManuStat);
+      { UPDATE EXISTING COMMENT }
+      if not (DailyText.DataSet.RecordCount = 0) then
+      begin
+        DailyText.CleanUp;
+        { DEFINE COLUMNS, VALUES AND CONDITIONS }
+        DailyText.Columns.Add(TDaily.STAMP);           DailyText.Values.Add(DateTimeToStr(Now));               DailyText.Conditions.Add(Condition);
+        DailyText.Columns.Add(TDaily.USER_ALIAS);      DailyText.Values.Add(UpperCase(MainForm.WinUserName));  DailyText.Conditions.Add(Condition);
+        DailyText.Columns.Add(TDaily.EMAIL_ManuStat);  DailyText.Values.Add(IntToStr(ManuStat));               DailyText.Conditions.Add(Condition);
+        { EXECUTE }
+        DailyText.UpdateRecord(TblDaily);
+      end
+      else
+      { INSERT NEW RECORD }
+      begin
+        DailyText.CleanUp;
+        { DEFINE COLUMNS AND VALUES }
+        DailyText.Columns.Add(TDaily.GROUP_ID);       DailyText.Values.Add(MainForm.GroupIdSel);
+        DailyText.Columns.Add(TDaily.CUID);           DailyText.Values.Add(CUID);
+        DailyText.Columns.Add(TDaily.AGEDATE);        DailyText.Values.Add(MainForm.AgeDateSel);
+        DailyText.Columns.Add(TDaily.STAMP);          DailyText.Values.Add(DateTimeToStr(Now));
+        DailyText.Columns.Add(TDaily.USER_ALIAS);     DailyText.Values.Add(UpperCase(MainForm.WinUserName));
+        DailyText.Columns.Add(TDaily.EMAIL);          DailyText.Values.Add('0');
+        DailyText.Columns.Add(TDaily.CALLEVENT);      DailyText.Values.Add('0');
+        DailyText.Columns.Add(TDaily.CALLDURATION);   DailyText.Values.Add('0');
+        DailyText.Columns.Add(TDaily.FIXCOMMENT);     DailyText.Values.Add(DailyCom.Text);
+        DailyText.Columns.Add(TDaily.EMAIL_Reminder); DailyText.Values.Add('0');
+        DailyText.Columns.Add(TDaily.EMAIL_AutoStat); DailyText.Values.Add('0');
+        DailyText.Columns.Add(TDaily.EMAIL_ManuStat); DailyText.Values.Add('1');
+        { EXECUTE }
+        DailyText.InsertInto(TblDaily);
+      end;
+    finally
+      DailyText.Free;
+    end;
   finally
     AppSettings.Free;
     Statement.Free;
