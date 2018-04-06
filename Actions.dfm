@@ -433,7 +433,7 @@ object ActionsForm: TActionsForm
     end
     object Text6: TLabel
       Left = 15
-      Top = 66
+      Top = 65
       Width = 78
       Height = 13
       Caption = 'Contact Person:'
@@ -447,7 +447,7 @@ object ActionsForm: TActionsForm
     end
     object Text8: TLabel
       Left = 392
-      Top = 66
+      Top = 65
       Width = 86
       Height = 13
       Caption = 'Phone number(s):'
@@ -456,8 +456,8 @@ object ActionsForm: TActionsForm
       Left = 128
       Top = 22
       Width = 657
-      Height = 21
-      Cursor = crHandPoint
+      Height = 13
+      Cursor = crArrow
       Hint = 'Copy to Clipboard'
       Caption = '{data}'
       Font.Charset = DEFAULT_CHARSET
@@ -474,8 +474,8 @@ object ActionsForm: TActionsForm
       Left = 128
       Top = 43
       Width = 241
-      Height = 21
-      Cursor = crHandPoint
+      Height = 13
+      Cursor = crArrow
       Hint = 'Copy to Clipboard'
       AutoSize = False
       Caption = '{data}'
@@ -595,10 +595,10 @@ object ActionsForm: TActionsForm
     end
     object Cust_Person: TEdit
       Left = 128
-      Top = 66
+      Top = 65
       Width = 241
-      Height = 21
-      Cursor = crHandPoint
+      Height = 13
+      Cursor = crArrow
       Hint = 'Copy to Clipboard'
       BorderStyle = bsNone
       Color = clWhite
@@ -619,8 +619,8 @@ object ActionsForm: TActionsForm
       Left = 542
       Top = 43
       Width = 243
-      Height = 21
-      Cursor = crHandPoint
+      Height = 13
+      Cursor = crArrow
       Hint = 'Copy to Clipboard'
       BorderStyle = bsNone
       Color = clWhite
@@ -639,10 +639,10 @@ object ActionsForm: TActionsForm
     end
     object Cust_Phone: TComboBox
       Left = 542
-      Top = 63
+      Top = 62
       Width = 179
       Height = 21
-      BevelEdges = []
+      Cursor = crHandPoint
       Style = csDropDownList
       Color = clWhite
       ItemIndex = 0

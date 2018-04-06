@@ -166,7 +166,7 @@ var
 begin
 
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-  Screen.Cursor:=crHourGlass;
+  Screen.Cursor:=crSQLWait;
   OpenItemsDest.Freeze(True);
   HistoryDest.Freeze(True);
   OpenItemsDest.ClearAll(2, 1, 1, False);
@@ -176,25 +176,18 @@ begin
     { --------------------------------------------------------- ! LIST OF OPEN ITEMS ! ---------------------------------------------------------------------- }
 
     { ----------------------------------------------------------------------------------------------------------------------- LOAD OPEN ITEMS FROM "MAINFORM" }
-    if MainForm.StatBar_TXT1.Caption = stReady then
+    { LOOK FOR THE SAME "CUID" }
+    for iCNT:=1 to OpenItemsSrc.RowCount - 1 do
     begin
-      { LOOK FOR THE SAME "CUID" }
-      for iCNT:=1 to OpenItemsSrc.RowCount - 1 do
+      if OpenItemsSrc.Cells[37, iCNT] = CUID then
       begin
-        if OpenItemsSrc.Cells[37, iCNT] = CUID then
-        begin
-          { MOVE DATA FOR SELECTED COLUMNS AND GIVEN ROW ONCE "CUID" IS FOUND }
-          for jCNT:=Low(SrcColumns) to High(SrcColumns)
-            do OpenItemsDest.Cells[jCNT + 1, zCNT]:=OpenItemsSrc.Cells[SrcColumns[jCNT], iCNT];
-          { MOVE NEXT }
-          inc(zCNT);
-          OpenItemsDest.RowCount:=zCNT;
-        end;
+        { MOVE DATA FOR SELECTED COLUMNS AND GIVEN ROW ONCE "CUID" IS FOUND }
+        for jCNT:=Low(SrcColumns) to High(SrcColumns)
+          do OpenItemsDest.Cells[jCNT + 1, zCNT]:=OpenItemsSrc.Cells[SrcColumns[jCNT], iCNT];
+        { MOVE NEXT }
+        inc(zCNT);
+        OpenItemsDest.RowCount:=zCNT;
       end;
-    end
-    else
-    begin
-      MainForm.MsgCall(mcWarn, 'Wait until "Ready" status and try again after open items are fully loaded.');
     end;
     { ------------------------------------------------------------------------------------------------------------------- SORT VIA PAYMENT STATUS | ASCENDING }
     OpenItemsDest.MSort(9, 0, True);
@@ -650,9 +643,9 @@ begin
   { EDIT ON/OFF }
   if imgSaveDetails.Enabled then
   begin
-    Cust_Person.Cursor    :=crHandPoint;
-    Cust_Mail.Cursor      :=crHandPoint;
-    Cust_Phone.Cursor     :=crHandPoint;
+    Cust_Person.Cursor    :=crArrow;
+    Cust_Mail.Cursor      :=crArrow;
+    Cust_Phone.Cursor     :=crArrow;
     Cust_Person.ReadOnly  :=True;
     Cust_Mail.ReadOnly    :=True;
     Cust_Person.Font.Color:=clBlack;
@@ -727,7 +720,7 @@ begin
   { PROCEED }
   Statement    :=TDocument.Create;
   AppSettings  :=TSettings.Create;
-  Screen.Cursor:=crHourGlass;
+  Screen.Cursor:=crSQLWait;
   try
     { SETUP CUSTOMER AND COMPANY }
     Statement.CUID    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUID,          1, 1), MainForm.sgAgeView.Row];
@@ -745,17 +738,19 @@ begin
       MainForm.ExecMessage(False, mcInfo, 'Account Statement has been sent successfully!')
         else
           MainForm.ExecMessage(False, mcError, 'Account Statement cannot be sent. Please contact IT support.');
+
     { REGISTER THIS ACTION IN DATABASE }
     DailyText:=TDataTables.Create(MainForm.DbConnect);
     try
       DailyText.OpenTable(TblDaily);
       Condition:=TDaily.CUID + EQUAL + QuotedStr(CUID) + _AND + TDaily.AGEDATE + EQUAL + QuotedStr(MainForm.AgeDateSel);
       DailyText.DataSet.Filter:=Condition;
-      ManuStat:=StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDaily.EMAIL_ManuStat].Value), 0);
-      Inc(ManuStat);
       { UPDATE EXISTING COMMENT }
       if not (DailyText.DataSet.RecordCount = 0) then
       begin
+        { GET MANUAL STATEMENTS SENT AND INCREASE BY ONE }
+        ManuStat:=StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDaily.EMAIL_ManuStat].Value), 0);
+        Inc(ManuStat);
         DailyText.CleanUp;
         { DEFINE COLUMNS, VALUES AND CONDITIONS }
         DailyText.Columns.Add(TDaily.STAMP);           DailyText.Values.Add(DateTimeToStr(Now));               DailyText.Conditions.Add(Condition);
@@ -777,7 +772,7 @@ begin
         DailyText.Columns.Add(TDaily.EMAIL);          DailyText.Values.Add('0');
         DailyText.Columns.Add(TDaily.CALLEVENT);      DailyText.Values.Add('0');
         DailyText.Columns.Add(TDaily.CALLDURATION);   DailyText.Values.Add('0');
-        DailyText.Columns.Add(TDaily.FIXCOMMENT);     DailyText.Values.Add(DailyCom.Text);
+        DailyText.Columns.Add(TDaily.FIXCOMMENT);     DailyText.Values.Add('');
         DailyText.Columns.Add(TDaily.EMAIL_Reminder); DailyText.Values.Add('0');
         DailyText.Columns.Add(TDaily.EMAIL_AutoStat); DailyText.Values.Add('0');
         DailyText.Columns.Add(TDaily.EMAIL_ManuStat); DailyText.Values.Add('1');
@@ -787,6 +782,7 @@ begin
     finally
       DailyText.Free;
     end;
+
   finally
     AppSettings.Free;
     Statement.Free;

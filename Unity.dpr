@@ -142,18 +142,18 @@ begin
       Zipped:=ZipR.Entry[iCNT].ZipName;
       try
         RenameFile(DestDir + Zipped, Zipped + '.del');
+        { LogText(EventLogPath, '... ' + Zipped + '. Status: ' + BoolToStr(DeleteFile(DestDir + Zipped + '.del'), True) + '.'); }
         FS:=TFileStream.Create(DestDir + Zipped, fmCreate);
         ZipR.GetData(iCNT, FS);
         UpdateForm.Progress.Progress:=Trunc(((iCNT + 1)/ZipR.Count) * 100);
         UpdateForm.Update;
         Sleep(DelayStd);
-        LogText(EventLogPath, '... ' + Zipped + '. Status: ' + BoolToStr(DeleteFile(DestDir + Zipped + '.del'), False) + '.');
       finally
         FS.Free;
       end;
     end;
     Result:=True;
-    LogText(EventLogPath, 'Old files with status (0) will be rmoved by new instance.');
+    LogText(EventLogPath, 'Old files will be rmoved by new instance.');
   finally
     ZipR.Free;
   end;

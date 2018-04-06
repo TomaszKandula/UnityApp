@@ -139,42 +139,41 @@ begin
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------- RETURN BASIC DETAILS }
-procedure TAgeView.Details(var Grid: TStringGrid);        //refactor!!
+procedure TAgeView.Details(var Grid: TStringGrid);
 var
-  Temp:  TStringGrid;
-  iCNT:  integer;
-  jCNT:  integer;
+  SL:   TStringList;
+  iCNT: integer;
 begin
   { CLEAR GRID }
   Grid.ClearAll(4, 0, 0, False);
-  { EXECUTE STORED PROCEDURE }
-  CmdType:=cmdText;
-  StrSQL :=EXECUTE + AgeViewDetails + SPACE + QuotedStr(GroupID) + COMMA + QuotedStr(AgeDate);
-  { EXECUTE TO TEMPORARY STRING GRID }
-  Temp:=TStringGrid.Create(nil);
+  { GET CO CODES FROM SELECTED GROUP }
+  MainForm.tcCOCODE1.Caption:=MainForm.GetCoCode(1, MainForm.GroupIdSel);
+  MainForm.tcCOCODE2.Caption:=MainForm.GetCoCode(2, MainForm.GroupIdSel);
+  MainForm.tcCOCODE3.Caption:=MainForm.GetCoCode(3, MainForm.GroupIdSel);
+  MainForm.tcCOCODE4.Caption:=MainForm.GetCoCode(4, MainForm.GroupIdSel);
+  Grid.Cells[0, 0]:=MainForm.tcCOCODE1.Caption; MainForm.Find(0);
+  Grid.Cells[1, 0]:=MainForm.tcCOCODE2.Caption; MainForm.Find(1);
+  Grid.Cells[2, 0]:=MainForm.tcCOCODE3.Caption; MainForm.Find(2);
+  Grid.Cells[3, 0]:=MainForm.tcCOCODE4.Caption; MainForm.Find(3);
+  { GET CURRENCY CODES }
+
+  (* NOTE: THERE SHOULD BE ALWAYS SAME CURRENCY CODE FOR ALL STACKED COMPANIES *)
+
+  SL:=TStringList.Create;
   try
-    { EXECUTE AND PUT INTO TEMP GRID }
-    SqlToGrid(Temp, ExecSQL, False, False);
-    { TRANSPOSE TEMP TO GRID }
-
-    { NOTE! DESTINATION GRID HAS FIXED DIMENSIONS }
-    {       WE QUERY BASIC DETAILS FOR OPEN ITEMS }
-    {       SETTING GRID: COMPANIES, CURRENCIES,  }
-    {       INTEREST RATE AND AGENT STATUS        }
-
-    for iCNT:=1 to Temp.RowCount do
-      for jCNT:=1 to Temp.ColCount do
-        Grid.Cells[iCNT - 1, jCNT - 1]:=Temp.Cells[jCNT, iCNT];
+    SL.Clear;
+    SL.Sorted:=True;
+    SL.Duplicates:=dupIgnore;
+    for iCNT:=1 to MainForm.sgAgeView.RowCount - 1 do
+      SL.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fLEDGER_ISO, 1, 1), iCNT]);
   finally
-    Temp.Free;
+    MainForm.tcCURRENCY.Caption:=SL.Text;
+    SL.Free;
   end;
-  { ---------------------------------------------------------------------------------------------------------------------------- DISPLAY CO CODE AND CURRENCY }
-  MainForm.tcCOCODE.Caption  :=Grid.Cells[0, 0] + SPACE + Grid.Cells[1, 0] + SPACE + Grid.Cells[2, 0] + SPACE + Grid.Cells[3, 0];
-  MainForm.tcCURRENCY.Caption:=Grid.Cells[0, 1] + SPACE + Grid.Cells[1, 1] + SPACE + Grid.Cells[2, 1] + SPACE + Grid.Cells[3, 1];
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------- FIND MATCH DATA IN GENERAL TABLES }
-function TAgeView.GetData(Grid: TStringGrid; Source: TStringGrid; WhichCol: string): string;   //refactor! use db query
+function TAgeView.GetData(Grid: TStringGrid; Source: TStringGrid; WhichCol: string): string;
 var
   iCNT:  integer;
   jCNT:  integer;
@@ -198,11 +197,12 @@ end;
 procedure TAgeView.ClearSummary;
 begin
   { TOP }
-  MainForm.tcCOCODE.Caption     :='n/a';
+  MainForm.tcCOCODE1.Caption    :='n/a';
+  MainForm.tcCOCODE2.Caption    :='n/a';
+  MainForm.tcCOCODE3.Caption    :='n/a';
+  MainForm.tcCOCODE4.Caption    :='n/a';
   MainForm.tcCURRENCY.Caption   :='n/a';
   MainForm.tcTOTAL.Caption      :='0';
-  MainForm.tcNumCalls.Caption   :='0';
-  MainForm.tcNumEmails.Caption  :='0';
   { TRADE RECEIVABLES SUMMARY }
   MainForm.valND.Caption        :='0';
   MainForm.valR1.Caption        :='0';
@@ -238,8 +238,6 @@ procedure TAgeView.UpdateSummary;
 begin
   { TOP | AGE VIEW DETAILS }
   MainForm.tcTOTAL.Caption    :=IntToStr(CustAll);
-  MainForm.tcNumCalls.Caption :=IntToStr(CallsAll);
-  MainForm.tcNumEmails.Caption:=IntToStr(EmailsAll);
   { BOTTOM | TRADE RECEIVABLES SUMMARY }
   { VALUES }
   MainForm.valND.Caption     :=FormatFloat('#,##0.00', ANotDue);

@@ -108,7 +108,7 @@ type                                                            (* GUI | MAIN TH
     Text01: TLabel;
     Text02: TLabel;
     Text06: TLabel;
-    tcCOCODE: TLabel;
+    tcCOCODE1: TLabel;
     tcCURRENCY: TLabel;
     tcTOTAL: TLabel;
     Cap01: TShape;
@@ -143,7 +143,6 @@ type                                                            (* GUI | MAIN TH
     Text12: TLabel;
     hShapeAct: TShape;
     Cap03: TShape;
-    GridFillerTop1: TImage;
     hShapeTC: TShape;
     Cap06: TShape;
     Text17: TLabel;
@@ -163,7 +162,6 @@ type                                                            (* GUI | MAIN TH
     valRISKA: TLabel;
     valRISKB: TLabel;
     valRISKC: TLabel;
-    GridFillerBottom: TImage;
     Shape1: TShape;
     StatBar_CAP1: TLabel;
     StatBar_TXT1: TLabel;
@@ -218,7 +216,6 @@ type                                                            (* GUI | MAIN TH
     hShapeActionPAB: TShape;
     Cap13: TShape;
     imgOFF: TImage;
-    GridFillerTop3: TImage;
     Header2: TPanel;
     hShapeActionsVOI: TShape;
     Cap10: TShape;
@@ -226,7 +223,6 @@ type                                                            (* GUI | MAIN TH
     Cap11: TShape;
     hShapeDetailsVOI: TShape;
     Cap12: TShape;
-    GridFillerTop2: TImage;
     btnReload: TImage;
     Text54L1: TLabel;
     btnOpenAB: TImage;
@@ -252,19 +248,15 @@ type                                                            (* GUI | MAIN TH
     btnImport: TImage;
     btnExport: TImage;
     Text69: TLabel;
-    GridFillerTop8: TImage;
     Header4: TPanel;
     hShapeInfoAM: TShape;
     Cap43: TShape;
-    GridFillerTop4: TImage;
     Header6: TPanel;
     ShapeContent6: TShape;
     Cap61: TShape;
-    GridFillerTop6: TImage;
     Header7: TPanel;
     hShapeInfoGT: TShape;
     Cap15: TShape;
-    GridFillerTop7: TImage;
     Text54L2: TLabel;
     MainShape6: TPanel;
     AppFooter: TPanel;
@@ -321,13 +313,9 @@ type                                                            (* GUI | MAIN TH
     GroupListBox: TComboBox;
     GroupListDates: TComboBox;
     Text31: TLabel;
-    Text34: TLabel;
-    Text35: TLabel;
     procRISKA: TLabel;
     procRISKB: TLabel;
     procRISKC: TLabel;
-    tcNumCalls: TLabel;
-    tcNumEmails: TLabel;
     Text36: TLabel;
     GroupName: TLabel;
     btnMakeGroup: TImage;
@@ -435,7 +423,6 @@ type                                                            (* GUI | MAIN TH
     Text51: TLabel;
     sgGroups: TStringGrid;
     sgUAC: TStringGrid;
-    GridFillerRight8: TImage;
     ReportContainer: TPanel;
     WebBrowser2: TWebBrowser;
     Action_INF7_Filter: TMenuItem;
@@ -444,6 +431,9 @@ type                                                            (* GUI | MAIN TH
     Action_Division_Filter: TMenuItem;
     Action_FollowUp_Filter: TMenuItem;
     Action_GroupFollowUp: TMenuItem;
+    tcCOCODE2: TLabel;
+    tcCOCODE3: TLabel;
+    tcCOCODE4: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -672,6 +662,8 @@ type                                                            (* GUI | MAIN TH
     function   MsgCall(WndType: integer; WndText: string): integer;
     procedure  LockSettingsPanel;
     function   ConvertName(CoNumber: string; Prefix: string; mode: integer): string;
+    function   GetCoCode(CoPos: integer; GroupId: string): string;
+    procedure  Find(ColumnNum: integer);
     procedure  SwitchTimers(state: integer);
     procedure  LoadImageFromStream(Image: TImage; const FileName: string);
     function   CDate(StrDate: string): TDate;
@@ -1879,6 +1871,43 @@ begin
   end;
 end;
 
+{ -------------------------------------------------------------------------------------------------------------------- RETURN SPECIFIC 'COCOE' FROM THE GROUP }
+function TMainForm.GetCoCode(CoPos: integer; GroupId: string): string;
+{ WARNING! GROUP ID FORMAT: SERIES OF 4 GROUPS OF 5 DIGITS, I.E.: '020470034000043' MUST BE READ AS FOLLOWS: }
+{   1. 1ST CO CODE: 02047 (2047)                                                                             }
+{   2. 2ND CO CODE: 00340 (340)                                                                              }
+{   3. 3RD CO CODE: 00043 (43)                                                                               }
+{   4. 4TH CO CODE: 00000 (0)                                                                                }
+begin
+  if CoPos = 1 then Result:=IntToStr(StrToInt(MidStr(GroupId, 1,  5)));
+  if CoPos = 2 then Result:=IntToStr(StrToInt(MidStr(GroupId, 6,  5)));
+  if CoPos = 3 then Result:=IntToStr(StrToInt(MidStr(GroupId, 11, 5)));
+  if CoPos = 4 then Result:=IntToStr(StrToInt(MidStr(GroupId, 16, 5)));
+end;
+
+{ ----------------------------------------------------------------------------------------------------------------- FIND OTHER DETAILS FOR GIVEN COMPANY CODE }
+procedure TMainForm.Find(ColumnNum: integer);
+var
+  iCNT:  integer;
+begin
+  for iCNT:=1 to sgCoCodes.RowCount - 1 do
+  begin
+    if DetailsGrid.Cells[ColumnNum, 0] = sgCoCodes.Cells[sgCoCodes.ReturnColumn(TCompany.CO_CODE, 1, 1), iCNT] then
+    begin
+      DetailsGrid.Cells[ColumnNum, 1]:=sgCoCodes.Cells[sgCoCodes.ReturnColumn(TCompany.COCURRENCY,    1, 1), iCNT];
+      DetailsGrid.Cells[ColumnNum, 2]:=sgCoCodes.Cells[sgCoCodes.ReturnColumn(TCompany.INTEREST_RATE, 1, 1), iCNT];
+      DetailsGrid.Cells[ColumnNum, 3]:=sgCoCodes.Cells[sgCoCodes.ReturnColumn(TCompany.AGENTS,        1, 1), iCNT];
+      Break;
+    end
+    else
+    begin
+      DetailsGrid.Cells[ColumnNum, 1]:=unNA;
+      DetailsGrid.Cells[ColumnNum, 2]:=unNA;
+      DetailsGrid.Cells[ColumnNum, 3]:=unNA;
+    end;
+  end;
+end;
+
 { ------------------------------------------------------------------------------------------------------------------------------------- TURN ON OR OFF TIMERS }
 procedure TMainForm.SwitchTimers(state: integer);
 begin
@@ -2072,6 +2101,9 @@ begin
   Cap23.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS8TXT03', 'EMPTY'), [fsBold]);
   Cap27.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS8TXT04', 'EMPTY'), [fsBold]);
 
+  { UNIDENTIFIED TRANSACTIONS | TABSHEET6 }
+  Cap61.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS6TXT01', 'EMPTY'), [fsBold]);
+
   { -------------------------------------------------------- ! ADDRESS BOOK TABSHEET ! ---------------------------------------------------------------------- }
 
   sgAddressBook.RowCount:=2;
@@ -2185,13 +2217,13 @@ begin
   try
 
     { LOAD DATA }
-    DataTables.OpenTable(AppSettings.TMIG.ReadString(GeneralTables, 'MAP1', '')); DataTables.SqlToGrid(sgCoCodes,  DataTables.ExecSQL, False, True);
-    DataTables.OpenTable(AppSettings.TMIG.ReadString(GeneralTables, 'MAP4', '')); DataTables.SqlToGrid(sgPmtTerms, DataTables.ExecSQL, False, True);
-    DataTables.OpenTable(AppSettings.TMIG.ReadString(GeneralTables, 'MAP5', '')); DataTables.SqlToGrid(sgPaidInfo, DataTables.ExecSQL, False, True);
-    DataTables.OpenTable(AppSettings.TMIG.ReadString(GeneralTables, 'MAP6', '')); DataTables.SqlToGrid(sgGroup3,   DataTables.ExecSQL, False, True);
-    DataTables.OpenTable(AppSettings.TMIG.ReadString(GeneralTables, 'MAP7', '')); DataTables.SqlToGrid(sgPerson,   DataTables.ExecSQL, False, True);
+    DataTables.OpenTable(TblCompany);  DataTables.SqlToGrid(sgCoCodes,  DataTables.ExecSQL, False, True);
+    DataTables.OpenTable(TblPmtterms); DataTables.SqlToGrid(sgPmtTerms, DataTables.ExecSQL, False, True);
+    DataTables.OpenTable(TblPaidinfo); DataTables.SqlToGrid(sgPaidInfo, DataTables.ExecSQL, False, True);
+    DataTables.OpenTable(TblGroup3);   DataTables.SqlToGrid(sgGroup3,   DataTables.ExecSQL, False, True);
+    DataTables.OpenTable(TblPerson);   DataTables.SqlToGrid(sgPerson,   DataTables.ExecSQL, False, True);
 
-    { HIDE COLUMNS "BANKDETAILS", "MAN_ID" AND "TL_ID" IN "sgCoCodes" TABLE }
+    { HIDE SPECIFIC COLUMNS }
     sgCoCodes.ColWidths[sgCoCodes.ReturnColumn('BANKDETAILS', 1 ,1)]:=-1;
     sgCoCodes.ColWidths[sgCoCodes.ReturnColumn('MAN_ID',      1 ,1)]:=-1;
     sgCoCodes.ColWidths[sgCoCodes.ReturnColumn('TL_ID',       1 ,1)]:=-1;
@@ -2377,7 +2409,7 @@ end;
 
 { ---------------------------------------------------------------- ! POPUP MENUS ! -------------------------------------------------------------------------- }
 
-{ --------------------------------------------------------------- ! OPEN ITEMS MENU ! ----------------------------------------------------------------------- }
+{ -------------------------------------------------------------- ! OPEN ITEMS MENU ! ------------------------------------------------------------------------ }
 
 { --------------------------------------------------------------------------------------------------------------------------------- EXPORT ENTIRE GRID TO CSV }
 procedure TMainForm.Action_ExportTransactionsClick(Sender: TObject);
@@ -2592,7 +2624,12 @@ end;
 procedure TMainForm.Action_LyncCallClick(Sender: TObject);
 begin
   if ConnLastError = 0 then
-    WndCall(ActionsForm, stModal)
+  begin
+    if MainForm.StatBar_TXT1.Caption = stReady then
+      WndCall(ActionsForm, stModal)
+        else
+          MainForm.MsgCall(mcWarn, 'Wait until "Ready" status and try again.');
+  end
       else
         MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
 end;
@@ -2940,12 +2977,6 @@ end;
 
 { ------------------------------------------------------- ! COMPONENT EVENTS | TABSHEETS ! ------------------------------------------------------------------ }
 
-{ ---------------------------------------------------------------------------------------------------------------------------------------------- REFRESH VIEW }
-procedure TMainForm.TabSheet7Resize(Sender: TObject);
-begin
-  TabSheet7Show(self);
-end;
-
 { -------------------------------------------------------------------------------------------------------------------------------------------- SHOW ALL ITEMS }
 procedure TMainForm.TabSheet4Show(Sender: TObject);
 begin
@@ -2957,6 +2988,12 @@ procedure TMainForm.TabSheet7Show(Sender: TObject);
 begin
   sgPmtTerms.Height:=Round(0.5 * sgCoCodes.Height);
   sgPaidInfo.Height:=Round(0.5 * sgCoCodes.Height);
+end;
+
+{ ---------------------------------------------------------------------------------------------------------------------------------------------- REFRESH VIEW }
+procedure TMainForm.TabSheet7Resize(Sender: TObject);
+begin
+  TabSheet7Show(self);
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------- LOCK SETTING PANEL WHEN LEAVE }
@@ -3023,10 +3060,7 @@ end;
 { ----------------------------------------------------------------------------------------------------------------------------------- OPEN TRANSACTION WINDOW }
 procedure TMainForm.sgAgeViewDblClick(Sender: TObject);
 begin
-  if ConnLastError = 0 then
-    WndCall(ActionsForm, stModal)
-      else
-        MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+  Action_LyncCallClick(Self);
 end;
 
 { --------------------------------------------------------------------------------------------------------------- ALLOW OR DISALLOW EDIT CELL IN ADDRESS BOOK }
@@ -3333,33 +3367,6 @@ end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------- INVOKE AUTOFILL }
 procedure TMainForm.DetailsGridKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-
-  (* NESTED PROCEDURE *)
-
-  procedure Find(ColumnNum: integer);
-  var
-    iCNT:  integer;
-  begin
-    for iCNT:=1 to sgCoCodes.RowCount - 1 do
-    begin
-      if DetailsGrid.Cells[ColumnNum, 0] = sgCoCodes.Cells[sgCoCodes.ReturnColumn(TCompany.CO_CODE, 1, 1), iCNT] then
-      begin
-        DetailsGrid.Cells[ColumnNum, 1]:=sgCoCodes.Cells[sgCoCodes.ReturnColumn(TCompany.COCURRENCY,    1, 1), iCNT];
-        DetailsGrid.Cells[ColumnNum, 2]:=sgCoCodes.Cells[sgCoCodes.ReturnColumn(TCompany.INTEREST_RATE, 1, 1), iCNT];
-        DetailsGrid.Cells[ColumnNum, 3]:=sgCoCodes.Cells[sgCoCodes.ReturnColumn(TCompany.AGENTS,        1, 1), iCNT];
-        Break;
-      end
-      else
-      begin
-        DetailsGrid.Cells[ColumnNum, 1]:=unNA;
-        DetailsGrid.Cells[ColumnNum, 2]:=unNA;
-        DetailsGrid.Cells[ColumnNum, 3]:=unNA;
-      end;
-    end;
-  end;
-
-  (* MAIN BLOCK *)
-
 begin
   { FIND GIVEN COMPANY CODE IN GENERAL TABLE AND RETURN ASSIGNED CURRENCY, INTEREST RATE AND AGENT INFO }
   if DetailsGrid.Col = 0 then Find(DetailsGrid.Col);
@@ -3958,6 +3965,13 @@ end;
 { ------------------------------------------------------------------------------------------------------------------------------------------- AGE VIEW | LOAD }
 procedure TMainForm.btnLoadAgeViewClick(Sender: TObject);
 begin
+  { WAIT UNTIL READY }
+  if not (StatBar_TXT1.Caption = stReady) then
+  begin
+    MsgCall(mcWarn, 'Wait until "Ready" status and try again.');
+    Exit;
+  end;
+  { PROCEED }
   if (GroupListBox.Text <> '') and (GroupListDates.Text <> '') then
   begin
     { REMEMBER USER'S CHOICE }
@@ -4292,8 +4306,6 @@ procedure TMainForm.btnUnlockClick(Sender: TObject);
               inc(inner);
             end;
           end;
-          sgListSection.SetColWidth(10, 20);
-          sgListValue.SetColWidth  (10, 20);
           { READ UAC AND GROUPS }
           DataTables:=TDataTables.Create(DbConnect);
           try
