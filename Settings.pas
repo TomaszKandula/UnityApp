@@ -6,7 +6,7 @@
 { Originate:        10-07-2016 (Concept & GUI)                                                                                                                }
 { IDE:              RAD Studio with Delphi XE2 (migrated to Delphi Tokyo)                                                                                     }
 { Target:           Microsoft Windows 7 or newer                                                                                                              }
-{ Dependencies:     Ararat Synapse (modified third-party) and own libraries                                                                                   }
+{ Dependencies:     Synopse Zip and own libraries                                                                                                             }
 { NET Framework:    Required 4.6 or newer (Lync / Skype calls)                                                                                                }
 { LYNC version:     2013 or newer                                                                                                                             }
 {                                                                                                                                                             }
@@ -61,6 +61,7 @@ type
     destructor  Destroy; override;
     function    Encode(ConfigType: integer): boolean;
     function    Decode(ConfigType: integer; ToMemory: boolean): boolean;
+    function    ConfigToMemory: boolean;
   end;
 
 implementation
@@ -86,16 +87,9 @@ begin
 
   (* READ CONFIG FILES *)
   if FileExists(pPathAppCfg) then
-  begin
-    Decode(AppConfig, True);
-    pLayoutDir  :=TMIG.ReadString(VariousLayouts,     'PATH',        '');
-    pPathRelease:=TMIG.ReadString(ApplicationDetails, 'UPDATE_PATH', '');
-    pPathRelease:=pPathRelease + ReleaseFile;
-  end
-  else
-  begin
-    GetLastError:=404;
-  end;
+    ConfigToMemory
+      else
+        GetLastError:=404;
 
 end;
 
@@ -105,6 +99,21 @@ begin
   TMIG.Free;
   TMIL.Free;
   inherited;
+end;
+
+{ ----------------------------------------------------------------------------------------------------------------------------- PUSH CONFIG CONTENT TO MEMORY }
+function TSettings.ConfigToMemory: boolean;
+begin
+  Result:=False;
+  if Assigned(TMIG) then
+  begin
+    Decode(AppConfig, True);
+    pLayoutDir  :=TMIG.ReadString(VariousLayouts,     'PATH',        '');
+    pPathRelease:=TMIG.ReadString(ApplicationDetails, 'UPDATE_PATH', '');
+    pPathRelease:=pPathRelease + ReleaseFile;
+    GetLastError:=0;
+    Result:=True;
+  end;
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------- GET RELEASE FILE DATE&TIME }

@@ -6,7 +6,7 @@
 { Originate:        10-07-2016 (Concept & GUI)                                                                                                                }
 { IDE:              RAD Studio with Delphi XE2 (migrated to Delphi Tokyo)                                                                                     }
 { Target:           Microsoft Windows 7 or newer                                                                                                              }
-{ Dependencies:     Ararat Synapse (modified third-party) and own libraries                                                                                   }
+{ Dependencies:     Synopse Zip and own libraries                                                                                                             }
 { NET Framework:    Required 4.6 or newer (Lync / Skype calls)                                                                                                }
 { LYNC version:     2013 or newer                                                                                                                             }
 {                                                                                                                                                             }
@@ -27,11 +27,11 @@ type
     Text1: TLabel;
     Text2: TLabel;
     TotalWords: TLabel;
-    SpeedButton1: TSpeedButton;
+    btnCancel: TSpeedButton;
     procedure ReportMemoKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure btnSendReportClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
-    procedure SpeedButton1Click(Sender: TObject);
+    procedure btnCancelClick(Sender: TObject);
   public
     function WordCount(const InputStr: string): cardinal;
     function SendReport: boolean;
@@ -170,7 +170,7 @@ begin
 end;
 
 { ---------------------------------------------------------------------------------------------------------------------------------------------- CLOSE WINDOW }
-procedure TReportForm.SpeedButton1Click(Sender: TObject);
+procedure TReportForm.btnCancelClick(Sender: TObject);
 begin
   Close;
 end;

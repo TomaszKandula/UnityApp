@@ -6,7 +6,7 @@
 { Originate:        10-07-2016 (Concept & GUI)                                                                                                                }
 { IDE:              RAD Studio with Delphi XE2 (migrated to Delphi Tokyo)                                                                                     }
 { Target:           Microsoft Windows 7 or newer                                                                                                              }
-{ Dependencies:     Ararat Synapse (modified third-party) and own libraries                                                                                   }
+{ Dependencies:     Synopse Zip and own libraries                                                                                                             }
 { NET Framework:    Required 4.6 or newer (Lync / Skype calls)                                                                                                }
 { LYNC version:     2013 or newer                                                                                                                             }
 {                                                                                                                                                             }
@@ -45,7 +45,19 @@ type
     procedure FilterListClickCheck(Sender: TObject);
     procedure btnCloseClick(Sender: TObject);
   private
-    var   ListState   :  TLists;      { KEEP VALUES AND THEIR STATE }
+    { KEEP VALUES AND THEIR STATE }
+    var INF7       :  TLists;
+
+    // TO BE ADDEDD:
+
+{
+    var CoCode     :  TLists;
+    var Agent      :  TLists;
+    var Division   :  TLists;
+    var FollowUp   :  TLists;
+    var INF4       :  TLists;
+    var Gr3        :  TLists;
+}
   public
     var FColName   :  string;
     var FColNumber :  integer;
@@ -121,14 +133,14 @@ begin
     end;
     { ----------------------------------------------------------------------------------------------------------- UNTICK IF VALUE WAS FILTERED OUT PREVIOUSLY }
     FilterList.CheckAll(cbChecked, False, True);
-    if not (FilterForm.ListState[0, 0] = '') then
+    if not (FilterForm.INF7[0, 0] = '') then
     begin
-      for iCNT:=0 to High(FilterForm.ListState) - 1 do
+      for iCNT:=0 to High(FilterForm.INF7) - 1 do
         for jCNT:=0 to FilterList.Count - 1 do
-          if (UpperCase(FilterForm.ListState[iCNT, 0]) = UpperCase(FilterList.Items.Strings[jCNT])) then
+          if (UpperCase(FilterForm.INF7[iCNT, 0]) = UpperCase(FilterList.Items.Strings[jCNT])) then
           begin
-            if (FilterForm.ListState[iCNT, 1] = 'False') then FilterList.Checked[jCNT]:=False;
-            if (FilterForm.ListState[iCNT, 1] = 'True' ) then FilterList.Checked[jCNT]:=True;
+            if (FilterForm.INF7[iCNT, 1] = 'False') then FilterList.Checked[jCNT]:=False;
+            if (FilterForm.INF7[iCNT, 1] = 'True' ) then FilterList.Checked[jCNT]:=True;
           end;
     end;
   finally
@@ -162,21 +174,21 @@ begin
   try
     for iCNT:=0 to FilterList.Count - 1 do
     begin
-      FilterForm.ListState[iCNT, 0]:=FilterList.Items.Strings[iCNT];
-      FilterForm.ListState[iCNT, 1]:=BoolToStr(FilterList.Checked[iCNT], True);
-      SetLength(FilterForm.ListState, iCNT + 2, 2);
+      FilterForm.INF7[iCNT, 0]:=FilterList.Items.Strings[iCNT];
+      FilterForm.INF7[iCNT, 1]:=BoolToStr(FilterList.Checked[iCNT], True);
+      SetLength(FilterForm.INF7, iCNT + 2, 2);
     end;
     { --------------------------------------------------------------------------------------------------------------------------------- FILTER SELECTED ITEMS }
-    for iCNT:=0 to High(FilterForm.ListState) - 1 do
+    for iCNT:=0 to High(FilterForm.INF7) - 1 do
       for jCNT:=0 to MainForm.sgAgeView.RowCount - 1 do
       begin
-        if (UpperCase(FilterForm.ListState[iCNT, 0]) = UpperCase(FGrid.Cells[FColNumber, jCNT])) then
+        if (UpperCase(FilterForm.INF7[iCNT, 0]) = UpperCase(FGrid.Cells[FColNumber, jCNT])) then
         begin
-          if (FilterForm.ListState[iCNT, 1] = 'True' ) then
+          if (FilterForm.INF7[iCNT, 1] = 'True' ) then
           begin
             FGrid.RowHeights[jCNT]:= 17;
           end;
-          if (FilterForm.ListState[iCNT, 1] = 'False') or
+          if (FilterForm.INF7[iCNT, 1] = 'False') or
              (  (MainForm.Action_Overdue.Checked) and
                 (FGrid.Cells[FGrid.ReturnColumn(FOverdue, 1, 1), jCNT] = '0')
              ) then
@@ -186,7 +198,7 @@ begin
   finally
     { ------------------------------------------------------------------------------------------------------------------------------------------ UNINITIALIZE }
     FGrid.Freeze(False);
-    FilterForm.ListState[1, 0]:='(Blanks)';  { REVERT TO '(BLANKS)' }
+    FilterForm.INF7[1, 0]:='(Blanks)';  { REVERT TO '(BLANKS)' }
     Screen.Cursor:=crDefault;
     Close;
   end;
@@ -205,7 +217,7 @@ begin
     AppSettings.Free;
   end;
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-  SetLength(FilterForm.ListState, 1, 2);
+  SetLength(FilterForm.INF7, 1, 2);
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------- ON ACTIVATE | INITIALIZE FILTER }

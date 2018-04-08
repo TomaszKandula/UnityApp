@@ -58,6 +58,8 @@ object CalendarForm: TCalendarForm
       Height = 17
       Cursor = crHandPoint
       Caption = 'One day from now'
+      Ctl3D = True
+      ParentCtl3D = False
       TabOrder = 0
       OnClick = DaysOneClick
     end
@@ -101,7 +103,7 @@ object CalendarForm: TCalendarForm
       CalColors.TitleBackColor = clSilver
       CalColors.TitleTextColor = clBlack
       CalColors.TrailingTextColor = clMaroon
-      Date = 43147.016784861110000000
+      Date = 43147.721848703710000000
       FirstDayOfWeek = dowMonday
       ParentShowHint = False
       ShowHint = True

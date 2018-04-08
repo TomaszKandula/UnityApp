@@ -50,8 +50,6 @@ object ActionsForm: TActionsForm
     Color = 15527148
     ParentBackground = False
     TabOrder = 1
-    ExplicitTop = 113
-    ExplicitHeight = 286
     object OpenItemsGrid: TStringGrid
       AlignWithMargins = True
       Left = 5
@@ -76,8 +74,6 @@ object ActionsForm: TActionsForm
       OnMouseWheelDown = OpenItemsGridMouseWheelDown
       OnMouseWheelUp = OpenItemsGridMouseWheelUp
       OnSelectCell = OpenItemsGridSelectCell
-      ExplicitTop = 10
-      ExplicitHeight = 279
       ColWidths = (
         10
         119
@@ -403,7 +399,6 @@ object ActionsForm: TActionsForm
     Color = 15527148
     ParentBackground = False
     TabOrder = 3
-    ExplicitTop = 2
     object InnerBox: TShape
       AlignWithMargins = True
       Left = 5
@@ -455,7 +450,7 @@ object ActionsForm: TActionsForm
     object Cust_Name: TLabel
       Left = 128
       Top = 22
-      Width = 657
+      Width = 40
       Height = 13
       Cursor = crArrow
       Hint = 'Copy to Clipboard'

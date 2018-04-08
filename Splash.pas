@@ -6,7 +6,7 @@
 { Originate:        10-07-2016 (Concept & GUI)                                                                                                                }
 { IDE:              RAD Studio with Delphi XE2 (migrated to Delphi Tokyo)                                                                                     }
 { Target:           Microsoft Windows 7 or newer                                                                                                              }
-{ Dependencies:     Ararat Synapse (modified third-party) and own libraries                                                                                   }
+{ Dependencies:     Synopse Zip and own libraries                                                                                                             }
 { NET Framework:    Required 4.6 or newer (Lync / Skype calls)                                                                                                }
 { LYNC version:     2013 or newer                                                                                                                             }
 {                                                                                                                                                             }
@@ -25,7 +25,6 @@ type
     MainText2: TLabel;
     BottomLine: TBevel;
     Progress: TGauge;
-    Text1: TLabel;
     Text2: TLabel;
     Text3: TLabel;
     MainText1: TLabel;
@@ -34,10 +33,6 @@ type
     Text4: TLabel;
     ImageDB2: TImage;
     ProgressText: TLabel;
-    BtnMinimize: TLabel;
-    procedure BtnMinimizeClick(Sender: TObject);
-    procedure BtnMinimizeMouseEnter(Sender: TObject);
-    procedure BtnMinimizeMouseLeave(Sender: TObject);
   protected
     procedure CreateParams(var Params: TCreateParams); override;
   end;
@@ -62,30 +57,6 @@ begin
     Style:=WS_POPUP;
     WindowClass.style:=WindowClass.style or CS_DROPSHADOW;
   end;
-end;
-
-{ --------------------------------------------------------------- ! BUTTON CALLS ! -------------------------------------------------------------------------- }
-
-{ --------------------------------------------------------------------------------------------------------------------------------------------- MINIMIZE FORM }
-procedure TSplashForm.BtnMinimizeClick(Sender: TObject);
-begin
-  ShowWindow(Handle, SW_MINIMIZE);
-end;
-
-{ --------------------------------------------------------------- ! MOUSE EVENTS ! -------------------------------------------------------------------------- }
-
-{ -------------------------------------------------------------------------------------------------------------------------------------------- ON MOUSE ENTER }
-procedure TSplashForm.BtnMinimizeMouseEnter(Sender: TObject);
-begin
-  BtnMinimize.Color     :=clSkyBlue;
-  BtnMinimize.Font.Color:=clWhite;
-end;
-
-{ -------------------------------------------------------------------------------------------------------------------------------------------- ON MOUSE LEAVE }
-procedure TSplashForm.BtnMinimizeMouseLeave(Sender: TObject);
-begin
-  BtnMinimize.Color     :=clWhite;
-  BtnMinimize.Font.Color:=clGray;
 end;
 
 end.

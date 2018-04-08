@@ -6,7 +6,7 @@
 { Originate:        10-07-2016 (Concept & GUI)                                                                                                                }
 { IDE:              RAD Studio with Delphi XE2 (migrated to Delphi Tokyo)                                                                                     }
 { Target:           Microsoft Windows 7 or newer                                                                                                              }
-{ Dependencies:     Ararat Synapse (modified third-party) and own libraries                                                                                   }
+{ Dependencies:     Synopse Zip and own libraries                                                                                                             }
 { NET Framework:    Required 4.6 or newer (Lync / Skype calls)                                                                                                }
 { LYNC version:     2013 or newer                                                                                                                             }
 {                                                                                                                                                             }
@@ -434,6 +434,10 @@ type                                                            (* GUI | MAIN TH
     tcCOCODE2: TLabel;
     tcCOCODE3: TLabel;
     tcCOCODE4: TLabel;
+    Action_INF4_Filter: TMenuItem;
+    Action_Gr3_Filter: TMenuItem;
+    TopPanel8: TPanel;
+    RightPanel8: TPanel;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -613,6 +617,9 @@ type                                                            (* GUI | MAIN TH
     procedure sgGroupsMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
     procedure sgGroupsMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
     procedure Action_GroupFollowUpClick(Sender: TObject);
+    procedure Action_INF4_FilterClick(Sender: TObject);
+    procedure Action_Gr3_FilterClick(Sender: TObject);
+    procedure sgAddressBookKeyPress(Sender: TObject; var Key: Char);
     { ------------------------------------------------------------- ! HELPERS ! ----------------------------------------------------------------------------- }
   private
     { GENERAL }
@@ -2446,13 +2453,28 @@ end;
 { --------------------------------------------------------------------------------------------------------------------------------- ADDRESS BOOK CONTEXT MENU }
 procedure TMainForm.BookPopupPopup(Sender: TObject);
 begin
+
   Action_ShowMyEntries.Caption:='Show ' + UpperCase(MainForm.WinUserName) + ' entries';
+
   { CHECK IF USER SELECT A RANGE }
   if (sgAddressBook.Selection.Bottom - sgAddressBook.Selection.Top) > 0 then
     { WE ALLOW TO DELETE ONLY ONE LINE AT THE TIME }
     Action_DelRow.Enabled:=False
       else
         Action_DelRow.Enabled:=True;
+
+  { DISABLE "CUT" AND "PASTE" IF SELECTED ALREADY SAVED ITEM }
+  if sgAddressBook.Cells[0, sgAddressBook.Row] <> '' then
+  begin
+    Action_Cut.Enabled  :=False;
+    Action_Paste.Enabled:=False;
+  end
+  else
+  begin
+    Action_Cut.Enabled  :=True;
+    Action_Paste.Enabled:=True;
+  end;
+
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------------- CUT }
@@ -2722,6 +2744,12 @@ begin
   WndCall(FilterForm, stModal);
 end;
 
+{ ------------------------------------------------------------------------------------------------------------------------------------------------------ INF4 }
+procedure TMainForm.Action_INF4_FilterClick(Sender: TObject);
+begin
+  //
+end;
+
 { ------------------------------------------------------------------------------------------------------------------------------------------------ VIA COCODE }
 procedure TMainForm.Action_CoCode_FilterClick(Sender: TObject);
 begin
@@ -2746,6 +2774,12 @@ begin
   //
 end;
 
+{ --------------------------------------------------------------------------------------------------------------------------------------------------- GROUP 3 }
+procedure TMainForm.Action_Gr3_FilterClick(Sender: TObject);
+begin
+  //
+end;
+
 { --------------------------------------------------------------------------------------------------------------------------------- EXCLUDE NON-OVERDUE ITEMS }
 procedure TMainForm.Action_OverdueClick(Sender: TObject);
 begin
@@ -2763,7 +2797,7 @@ begin
   SearchForm.SGrid     :=MainForm.sgAgeView;
   SearchForm.SColName  :=TSnapshots.fCUSTOMER_NAME;
   SearchForm.SColNumber:=TSnapshots.fCUSTOMER_NUMBER;
-  WndCall(SearchForm, stModal);
+  WndCall(SearchForm, stModeless);
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------------- SHOW PAYMENT TERM }
@@ -3378,7 +3412,7 @@ end;
 { ----------------------------------------------------------------------------------------------------------------------------------- OPEN ITEMS | MAKE GROUP }
 procedure TMainForm.EditGroupNameKeyPress(Sender: TObject; var Key: Char);
 begin
-  if (not (CharInSet(Key, ['A'..'Z', 'a'..'z', '0'..'9', '-', #8]))) then Key:=#0;
+  if (not (CharInSet(Key, ['A'..'Z', 'a'..'z', '0'..'9', '-', BACKSPACE]))) then Key:=#0;
 end;
 
 { -------------------------------------------------------------- ! COPY PASTE CUT ! ------------------------------------------------------------------------- }
@@ -3425,6 +3459,13 @@ begin
   if (Key = 67) and (Shift = [ssCtrl]) then sgAgeView.CopyCutPaste(adCopy);
 end;
 
+{ ------------------------------------------------------------------------------------------------------------------ ADDRESS BOOK | RESTRICT TELEPHONE COLUMN }
+procedure TMainForm.sgAddressBookKeyPress(Sender: TObject; var Key: Char);
+begin
+  if sgAddressBook.Col = sgAddressBook.ReturnColumn(TAddressBook.TELEPHONE, 1, 1) then
+    if (not (CharInSet(Key, ['0'..'9', ';', SPACE, BACKSPACE]))) then Key:=#0;
+end;
+
 { --------------------------------------------------------------------------------------------------------------------------- ADDRESS BOOK | PASTE, CUT, COPY }
 procedure TMainForm.sgAddressBookKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 var
@@ -3444,8 +3485,8 @@ begin
   if (Key = 115) and (Shift = [ssCtrl]) then TTAddressBook.Create(adSaveNew, sgAddressBook);
   { COPY, PASTE, CUT }
   if (Key = 67) and (Shift = [ssCtrl]) then sgAddressBook.CopyCutPaste(adCopy);
-  if (Key = 86) and (Shift = [ssCtrl]) then sgAddressBook.CopyCutPaste(adPaste);
-  if (Key = 88) and (Shift = [ssCtrl]) then sgAddressBook.CopyCutPaste(adCut);
+  if (Key = 86) and (Shift = [ssCtrl]) and (sgAddressBook.Cells[0, sgAddressBook.Row] <> '') then sgAddressBook.CopyCutPaste(adPaste);
+  if (Key = 88) and (Shift = [ssCtrl]) and (sgAddressBook.Cells[0, sgAddressBook.Row] <> '') then sgAddressBook.CopyCutPaste(adCut);
   if Key = 46 then sgAddressBook.DelEsc(1, sgAddressBook.Col, sgAddressBook.Row);
   if Key = 27 then
   begin

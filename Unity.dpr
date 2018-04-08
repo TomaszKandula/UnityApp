@@ -6,7 +6,7 @@
 { Originate:        10-07-2016 (Concept & GUI)                                                                                                                }
 { IDE:              RAD Studio with Delphi XE2 (migrated to Delphi Tokyo)                                                                                     }
 { Target:           Microsoft Windows 7 or newer                                                                                                              }
-{ Dependencies:     Ararat Synapse (modified third-party) and own libraries                                                                                   }
+{ Dependencies:     Synopse Zip and own libraries                                                                                                             }
 { NET Framework:    Required 4.6 or newer (Lync / Skype calls)                                                                                                }
 { LYNC version:     2013 or newer                                                                                                                             }
 {                                                                                                                                                             }
@@ -53,22 +53,28 @@ uses
 
 type
   DWord = 0..$FFFFFFFF;
-  TDwmIsCompositionEnabledFunc = function(out pfEnabled: BOOL): HRESULT; stdcall;
+  TDwmIsCompositionEnabledFunc = function(out pfEnabled: boolean): HRESULT; stdcall;
 
 (* NOTE: CONSTANTS ARE DEFINED IN "MAIN" VIA "COMMON.INC" *)
 
 var
-  StrWrite:       string;
-  iCNT:           integer;
-  FL:             TFileStream;
-  IsEnabled:      BOOL;
-  ModuleHandle:   HMODULE;
-  IsAreoOn:       TDwmIsCompositionEnabledFunc;
-  IsAeroEnabled:  boolean;
-  Mutex:          integer;
-  WndRect:        TRect;
-  AppSettings:    TSettings;
-  MsAssemblies:   TStrings;
+  StrWrite:         string;
+  iCNT:             integer;
+  FL:               TFileStream;
+  IsEnabled:        Boolean;
+  ModuleHandle:     HMODULE;
+  IsAreoOn:         TDwmIsCompositionEnabledFunc;
+  IsAeroEnabled:    boolean;
+  Mutex:            integer;
+  WndRect:          TRect;
+  AppSettings:      TSettings;
+  MsAssemblies:     TStrings;
+  FileDateTime:     TDateTime;
+  ReleaseDateTime:  TDateTime;
+  PathRelease:      string;
+  PathEventLog:     string;
+  PathAppDir:       string;
+  WinUserName:      string;
 
 {$R *.res}
 
@@ -76,9 +82,9 @@ var
 
 {$R 'binres.res' 'binres.rc'}
 
-{ LIST:                                                      }
-{  10 RCDATA "__Makefile\\config.cfg"     GENERAL SETTINGS   }
-{  60 RCDATA "__Makefile\\logon.log"      EVENT LOG FILE     }
+{ LIST:                                                          }
+{  10 RCDATA "__Makefile\\config.cfg" DEFAULT GENERAL SETTINGS   }
+{  60 RCDATA "__Makefile\\logon.log"  PRE-DEFINED EVENT LOG FILE }
 
 { ------------------------------------------------------------------------------------------------------------------ EXTRACT GIVEN RESOURCE FILE BY ID NUMBER }
 function Unpack(ItemID: integer; FileName: string; mode: integer): boolean;
@@ -112,14 +118,14 @@ end;
 
 (* NOTE! IT REQUIRES "SPLASHFORM" TO BE INITIALIZED *)
 
-procedure Status(Task: integer; Total: integer; Time: integer; Text: string; TextMode: boolean);
+procedure Status(Task: integer; Total: integer; Time: integer; Text: string; TextMode: boolean; EventLogPath: string);
 begin
   SplashForm.Status.Caption:=Text;
   SplashForm.Progress.Progress:=Trunc((Task / Total) * 100);
   SplashForm.ProgressText.Caption:=IntToStr(SplashForm.Progress.Progress) + '%';
   SplashForm.Update;
   Sleep(Time);
-  if TextMode = True then LogText(AppSettings.FPathEventLog, Text);
+  if TextMode = True then LogText(EventLogPath, Text);
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------ UPDATE ALL FILES FROM RELEASE PACK }
@@ -142,7 +148,6 @@ begin
       Zipped:=ZipR.Entry[iCNT].ZipName;
       try
         RenameFile(DestDir + Zipped, Zipped + '.del');
-        { LogText(EventLogPath, '... ' + Zipped + '. Status: ' + BoolToStr(DeleteFile(DestDir + Zipped + '.del'), True) + '.'); }
         FS:=TFileStream.Create(DestDir + Zipped, fmCreate);
         ZipR.GetData(iCNT, FS);
         UpdateForm.Progress.Progress:=Trunc(((iCNT + 1)/ZipR.Count) * 100);
@@ -153,20 +158,20 @@ begin
       end;
     end;
     Result:=True;
-    LogText(EventLogPath, 'Old files will be rmoved by new instance.');
+    LogText(EventLogPath, 'Old files will be removed by new instance.');
   finally
     ZipR.Free;
   end;
 end;
 
 { ---------------------------------------------------------------------------------------------------------------------- DELETE FILES FOLLOWING GIVEN PATTERN }
-procedure DeleteFilesMatchingPattern(const directory, pattern: string; EventLogPath: string);
+procedure DeleteFilesMatchingPattern(const Directory: string; const Pattern: string; EventLogPath: string);
 var
   FileName: string;
   Check:    cardinal;
 begin
   Check:=0;
-  for FileName in TDirectory.GetFiles(directory, pattern) do
+  for FileName in TDirectory.GetFiles(Directory, Pattern) do
   begin
     TFile.Delete(FileName);
     LogText(EventLogPath, 'File "' + FileName + '" has been removed.');
@@ -177,133 +182,90 @@ end;
 
 { ---------------------------------------------------------------- ! MAIN BLOCK ! --------------------------------------------------------------------------- }
 begin
-
-  { DEBUG LINE }
+  { ---------------------------------------------------------------------------------------------------------------------------------------------- DEBUG LINE }
   ReportMemoryLeaksOnShutdown:=DebugHook <> 0;
-
-  { ----------------------------------------------------------------------------------------------------------------------------------- ONLY ONE RUNNING COPY }
+  { -------------------------------------------------------------------------------------------------------------------------------------- ALLOW ONE INSTANCE }
   Mutex:=CreateMutex(nil, True, CurrentMutex);
-  if (Mutex = 0) OR (GetLastError = ERROR_ALREADY_EXISTS) then
+  if (Mutex = 0) or (GetLastError = ERROR_ALREADY_EXISTS) then
   begin
     Application.MessageBox(
-                            PCHar('Unity is already running. You can only have one instance at a time.'),
+                            PCHar(APPCAPTION + ' is already running. You can only have one instance at a time.'),
                             PChar(APPCAPTION), MB_OK + MB_ICONWARNING
                           );
-    Exit;
+    ExitProcess(0);
   end;
-
-  { --------------------------------------------------------------------------------------------------------------------------------- ACCESS ALL THE SETTINGS }
+  { ------------------------------------------------------------------------------------------------------- READ CURRENT CONFIG.CFG BEFORE ANY UPDATE ATTEMPT }
   AppSettings:=TSettings.Create;
-
+  try
+    { INITIALIZE }
+    FileDateTime   :=NULLDATE;
+    ReleaseDateTime:=NULLDATE;
+    PathRelease    :='';
+    PathEventLog   :='';
+    PathAppDir     :='';
+    WinUserName    :='';
+    { EXTRACT DEFAULT CONFIG.CFG IF MISSING }
+    if AppSettings.GetLastError = 404 then
+    begin
+      if Unpack(10, AppSettings.FPathAppCfg, DeleteOld) then
+        AppSettings.ConfigToMemory
+          else
+          begin
+            Application.MessageBox(
+                                    PCHar('Cannot extract missing configuration file. ' + APPCAPTION + ' will be closed. Please contact IT support.'),
+                                    PChar(APPCAPTION), MB_OK + MB_ICONERROR
+                                  );
+            AppSettings.Free;
+            ExitProcess(0);
+          end;
+    end;
+    { PROCEED OTHERWISE }
+    if AppSettings.GetLastError = 0 then
+    begin
+      FileDateTime   :=AppSettings.FRelFileDateTime;
+      ReleaseDateTime:=AppSettings.FReleaseDateTime;
+      PathRelease    :=AppSettings.FPathRelease;
+      PathEventLog   :=AppSettings.FPathEventLog;
+      PathAppDir     :=AppSettings.FAppDir;
+      WinUserName    :=AppSettings.FWinUserName;
+    end;
+  finally
+    AppSettings.Free;
+  end;
   { ------------------------------------------------------------------------------------------------------------------------------------ CHECK EVENT LOG FILE }
-  if FileExists(AppSettings.FPathEventLog) then
+  if FileExists(PathEventLog) then
   begin
-    LogText(AppSettings.FPathEventLog, 'Starting application...');
+    LogText(PathEventLog, 'Starting application...');
   end
   else
   begin
     { ----------------------------------------------------------------------------------------------------------------------------- OTHERWISE EXTRACT DEFAULT }
-    if Unpack(60, AppSettings.FPathEventLog, LeaveAsIs) = True then
+    if Unpack(60, PathEventLog, LeaveAsIs) then
     begin
       { PUT USER LOGON NAME TO LOG FILE (@ EOF) }
-      FL:=TFileStream.Create(AppSettings.FPathEventLog, fmOpenWrite);
+      FL:=TFileStream.Create(PathEventLog, fmOpenWrite);
       try
-        StrWrite:=AppSettings.FWinUserName + '.' + CRLF + CRLF;
+        StrWrite:=WinUserName + '.' + CRLF + CRLF;
         FL.Position:=FL.Size;
         for iCNT:=1 to length(StrWrite) do FL.Write(StrWrite[iCNT], 1);
       finally
         FL.Free;
       end;
-      LogText(AppSettings.FPathEventLog, 'Starting application...');
+      LogText(PathEventLog, 'Starting application...');
     end
     else
     begin
       Application.MessageBox(
                               PChar('Cannot create log file. ' + APPCAPTION + ' will be closed. Please contact IT support.'),
-                              PChar(APPCAPTION), MB_OK + MB_ICONWARNING
+                              PChar(APPCAPTION), MB_OK + MB_ICONERROR
                             );
       ExitProcess(0);
     end;
   end;
-
-  { -------------------------------------------------------------------------------------------------------------------------------------- CHECK FOR PASSOWRD }
-  if AppSettings.TMIG.ReadString(Password, 'HASH', '') = '' then
-  begin
-    Application.MessageBox(
-                            PCHar('No master password has been found. Program will be closed. Please contact IT Support.'),
-                            PChar(APPCAPTION), MB_OK + MB_ICONERROR
-                          );
-    LogText(AppSettings.FPathEventLog, '[Critical Error]: No master password has been found. Application terminated.');
-    ExitProcess(0);
-  end;
-
-  { ---------------------------------------------------------------------------------------------------------------------------------- CHECK FOR LICENCE FILE }
-  if not FileExists(AppSettings.FPathLicence) then
-  begin
-    Application.MessageBox(
-                            PCHar('Cannot find licence file (' + LicenceFile + '). Program will be closed. Please contact IT Support.'),
-                            PChar(APPCAPTION), MB_OK + MB_ICONWARNING
-                          );
-    LogText(AppSettings.FPathEventLog, '[Critical Error]: No licence file has been found. Application terminated.');
-    ExitProcess(0);
-  end;
-
-  { -------------------------------------------------------------------------------------------------------------- WINDOWS VERSION CHECK - WINDOWS 7 & HIGHER }
-  if not StrToInt(GetOSVer(0)) >= 61 then
-  begin
-    { SAVE IT INTO LOG FILE }
-    try
-      LogText(AppSettings.FPathEventLog, 'Program must be run under Windows 7 or higher. Application will be closed.');
-    except
-      { DO NOTHING, WE SHOW MESSAGE BOX AND QUIT ANYWAY }
-    end;
-    Application.MessageBox(
-                            PCHar('Program must be run under Windows 7 or higher. ' + APPCAPTION + ' will be closed.'),
-                            PChar(APPCAPTION), MB_OK + MB_ICONWARNING
-                          );
-    LogText(AppSettings.FPathEventLog, '[Critical Error]: Invalid Operating System. Application terminated.');
-    ExitProcess(0);
-  end;
-
-  { ----------------------------------------------------------------------------------------------------------- AREO CHECK MUST BE TURNED ON | WINDOWS 7 ONLY }
-  if StrToInt(GetOSVer(0)) = 61 then
-  begin
-    { INITIALIZE }
-    IsAeroEnabled:=False;
-    ModuleHandle :=LoadLibrary(PChar(DWMI));
-    { CHECK }
-    if ModuleHandle <> 0 then
-    begin
-      try
-        @IsAreoOn:=GetProcAddress(ModuleHandle, 'DwmIsCompositionEnabled');
-        if Assigned(IsAreoOn) then
-          if IsAreoOn(IsEnabled) = S_OK then
-            IsAeroEnabled:=IsEnabled;
-      finally
-        FreeLibrary(ModuleHandle);
-      end;
-    end;
-    { TERMINATE IF NOT SWITCHED ON }
-    if IsAeroEnabled = False then
-    begin
-      try
-        LogText(AppSettings.FPathEventLog, 'Areo composition must be enabled. Program will be closed. Please change Windows settings.');
-      except
-        { DO NOTHING, WE SHOW MESSAGE BOX AND QUIT ANYWAY }
-      end;
-      Application.MessageBox(
-                              PChar('Aero is not enabled. ' + APPCAPTION + ' will be closed.'),
-                              PChar(APPCAPTION), MB_OK + MB_ICONWARNING
-                            );
-      LogText(AppSettings.FPathEventLog, '[Critical Error]: Areo composition is deisabled. Application terminated.');
-      ExitProcess(0);
-    end;
-  end;
-
   { ------------------------------------------------------------------------------------------------------------------ PERFORM UPDATE IF NEW RELEASE IS FOUND }
-  if FileExists(AppSettings.FPathRelease) then
+  if FileExists(PathRelease) then
   begin
-    if AppSettings.FRelFileDateTime > AppSettings.FReleaseDateTime then
+    if FileDateTime > ReleaseDateTime then
     begin
       { UPDATE SCREEN }
       UpdateForm:=TUpdateForm.Create(nil);
@@ -312,23 +274,40 @@ begin
       UpdateForm.Left:=((WndRect.Right  - WndRect.Left) div 2) - (UpdateForm.Width  div 2);
       AnimateWindow(UpdateForm.Handle, 500, AW_BLEND or AW_ACTIVATE);
       UpdateForm.Update;
-      { REPLACE FILES AND SAVE DATE&TIME }
-      UnzippReleaseFile(AppSettings.FPathRelease, AppSettings.FAppDir, AppSettings.FPathEventLog);
-      AppSettings.FReleaseDateTime:=AppSettings.FRelFileDateTime;
+      { UNZIP NEW FILES | NOTE! CONFIG.CFG MAY BE ALSO UPDATED }
+      UnzippReleaseFile(PathRelease, PathAppDir, PathEventLog);
+      { UPDATE DATE AND TIME OF NEW RELEASE }
+      AppSettings:=TSettings.Create;
+      try
+        try
+          AppSettings.FReleaseDateTime:=FileDateTime;
+        except
+          on E: Exception do
+          begin
+            Application.MessageBox(
+                                    PChar('Cannot finalize automatic update. ' + APPCAPTION + ' will be closed. Please contact IT support. Error has been thrown: ' + E.Message),
+                                    PChar(APPCAPTION), MB_OK + MB_ICONERROR
+                                  );
+            LogText(AppSettings.FPathEventLog, '[Critical Error]: Cannot finalize automatic update. Error has been thrown: ' + E.Message);
+            ExitProcess(0);
+          end;
+        end;
+      finally
+        AppSettings.Free;
+      end;
       { OPEN NEW COPY AND CLOSE CURRENT INSTANCE }
       ShellExecute(Application.Handle, 'open', PChar(Application.ExeName), nil, nil, SW_SHOWNORMAL);
       UpdateForm.Free;
-      AppSettings.Free;
       ExitProcess(0);
     end
     else
     begin
       { CLEANING UP REMAINING FILES AFTER PREVIOUS UPDATE }
-      DeleteFilesMatchingPattern(AppSettings.FAppDir, '*.del', AppSettings.FPathEventLog);
+      DeleteFilesMatchingPattern(PathAppDir, '*.del', PathEventLog);
     end;
   end;
 
-  { ---- START ---- }
+  { ---- START  ---- }
 
   SplashForm:=TSplashForm.Create(nil);
   SystemParametersInfo(SPI_GETWORKAREA, 0, @WndRect, 0);
@@ -337,97 +316,198 @@ begin
   AnimateWindow(SplashForm.Handle, 500, AW_BLEND or AW_ACTIVATE);
   SplashForm.Update;
 
-  { ---------------------------------------------------------------------------------------------------------------------------------------- CHECK CONFIG.CFG }
-  Status(1, AllTasks, DelayStd, 'Checking ' + ConfigFile + '...', True);
-  if FileExists(AppSettings.FPathAppCfg) then
-  begin
-    Status(1, AllTasks, DelayStd, 'Checking ' + ConfigFile + '... CRC32.', True);
-    if not (AppSettings.Decode(AppConfig, False)) then
+  { ---------------------------------------------------------------------------------------------------------- RE-OPEN SETTINGS FILE AND PERFORM OTHER CHECKS }
+  AppSettings:=TSettings.Create;
+  try
+    { ----------------------------------------------------------------------------------------------------------------------------- CHECK FOR MASTER PASSOWRD }
+    if AppSettings.TMIG.ReadString(Password, 'HASH', '') = '' then
     begin
-      Status(1, AllTasks, DelayErr, 'Checking ' + ConfigFile + '... corrupted! Extracting default file...', True);
-      if Unpack(10, AppSettings.FPathAppCfg, DeleteOld) = False then Status(2, AllTasks, DelayErr, 'Cannot extract ' + ConfigFile + '..., unexpected error!', True);
-    end;
-  end
-  { ------------------------------------------------------------------------------------------------------------------------------- OTHERWISE EXTRACT DEFAULT }
-  else
-  begin
-    Status(1, AllTasks, DelayErr, 'Checking ' + ConfigFile + '... not found! Extracting default file...', True);
-    if Unpack(10, AppSettings.FPathAppCfg, LeaveAsIs) = False then Status(1, AllTasks, DelayStd, 'Cannot extract ' + ConfigFile + '..., unexpected error!', True);
-  end;
-
-  { ------------------------------------------------------------------------------------------------------------- CHECK ASSEMBLIES AND LYNCCALL.EXE IF EXISTS }
-
-  SetLength(MsAssemblies, 6);
-  MsAssemblies[0]:=DLL1;
-  MsAssemblies[1]:=DLL2;
-  MsAssemblies[2]:=DLL3;
-  MsAssemblies[3]:=DLL4;
-  MsAssemblies[4]:=DLL5;
-  MsAssemblies[5]:=LyncCall;
-
-  for iCNT:=0 to High(MsAssemblies) - 1 do
-  begin
-    Status(iCNT + 2, AllTasks, DelayStd, 'Checking ' + MsAssemblies[iCNT] + '...', True);
-    if FileExists(AppSettings.FAppDir + DLL4) then
-    begin
-      Status(iCNT + 2, AllTasks, DelayStd, 'Checking ' + MsAssemblies[iCNT] + '... OK.', True);
+      Status(1, AllTasks, DelayStd, 'Checking master password... failed!', True, AppSettings.FPathEventLog);
+      Application.MessageBox(
+                              PCHar('No master password has been found. ' + APPCAPTION + ' will be closed. Please contact IT Support.'),
+                              PChar(APPCAPTION), MB_OK + MB_ICONERROR
+                            );
+      LogText(AppSettings.FPathEventLog, '[Critical Error]: No master password has been found. Application has been terminated.');
+      AppSettings.Free;
+      ExitProcess(0);
     end
     else
     begin
+      Status(1, AllTasks, DelayStd, 'Checking master password... OK.', True, AppSettings.FPathEventLog);
+    end;
+    { -------------------------------------------------------------------------------------------------------------------------------- CHECK FOR LICENCE FILE }
+    if not FileExists(AppSettings.FPathLicence) then
+    begin
+      Status(2, AllTasks, DelayStd, 'Checking licence file... failed!', True, AppSettings.FPathEventLog);
+
+      (* CHECK HERE ".LICX" FILE IN CASE OF UNITY IS SHAREWARE/LIMITED COMMERCIAL APPLICATION *)
+
       Application.MessageBox(
-                              PCHar('Cannot find ' + MsAssemblies[iCNT] + '. Please reinstall application or contact IT support.'),
+                              PCHar('Cannot find licence file (' + LicenceFile + '). ' + APPCAPTION + ' will be closed. Please contact IT Support.'),
                               PChar(APPCAPTION), MB_OK + MB_ICONERROR
                             );
+      LogText(AppSettings.FPathEventLog, '[Critical Error]: No licence file has been found. Application has been terminated.');
+      AppSettings.Free;
       ExitProcess(0);
+    end
+    else
+    begin
+      Status(2, AllTasks, DelayStd, 'Checking licence file... OK.', True, AppSettings.FPathEventLog);
     end;
+    { ------------------------------------------------------------------------------------------------------------ WINDOWS VERSION CHECK - WINDOWS 7 & HIGHER }
+    if not StrToInt(GetOSVer(0)) >= 61 then
+    begin
+      Status(3, AllTasks, DelayStd, 'Checking operating system version... failed!', True, AppSettings.FPathEventLog);
+      Application.MessageBox(
+                              PCHar(APPCAPTION + ' must be run under Windows 7 or higher. ' + APPCAPTION + ' will be closed. Please contact IT Support.'),
+                              PChar(APPCAPTION), MB_OK + MB_ICONERROR
+                            );
+      LogText(AppSettings.FPathEventLog, '[Critical Error]: Invalid Operating System. Application has been terminated.');
+      AppSettings.Free;
+      ExitProcess(0);
+    end
+    else
+    begin
+      Status(3, AllTasks, DelayStd, 'Checking operating system version... OK.', True, AppSettings.FPathEventLog);
+    end;
+    { --------------------------------------------------------------------------------------------------------- AREO CHECK MUST BE TURNED ON | WINDOWS 7 ONLY }
+    if StrToInt(GetOSVer(0)) = 61 then
+    begin
+      { INITIALIZE }
+      Status(4, AllTasks, DelayStd, 'Checking Windows 7 Areo composition... ', True, AppSettings.FPathEventLog);
+      IsAeroEnabled:=False;
+      ModuleHandle :=LoadLibrary(PChar(DWMI));
+      { CHECK }
+      if ModuleHandle <> 0 then
+      begin
+        try
+          @IsAreoOn:=GetProcAddress(ModuleHandle, 'DwmIsCompositionEnabled');
+          if Assigned(IsAreoOn) then
+            if IsAreoOn(IsEnabled) = S_OK then
+              IsAeroEnabled:=IsEnabled;
+        finally
+          FreeLibrary(ModuleHandle);
+        end;
+      end;
+      { TERMINATE IF NOT SWITCHED ON }
+      if IsAeroEnabled = False then
+      begin
+        Status(4, AllTasks, DelayStd, 'Checking Windows 7 Areo composition... disabled!', True, AppSettings.FPathEventLog);
+        Application.MessageBox(
+                                PChar('Aero is not enabled. ' + APPCAPTION + ' will be closed. Please contact IT Support.'),
+                                PChar(APPCAPTION), MB_OK + MB_ICONERROR
+                              );
+        LogText(AppSettings.FPathEventLog, '[Critical Error]: Areo composition is deisabled. Application has been terminated.');
+        AppSettings.Free;
+        ExitProcess(0);
+      end;
+    end
+    else
+    begin
+      Status(4, AllTasks, DelayStd, 'Checking Windows 7 Areo composition... OK.', True, AppSettings.FPathEventLog);
+    end;
+    { ------------------------------------------------------------------------------------------------------------------------------ CHECK CONFIG.CFG | CRC32 }
+    Status(5, AllTasks, DelayStd, 'CRC32 check: ' + ConfigFile + '...', True, AppSettings.FPathEventLog);
+    if not (AppSettings.Decode(AppConfig, False)) then
+    begin
+      Status(5, AllTasks, DelayErr, 'CRC32 check: ' + ConfigFile + '... corrupted! Extracting default file...', True, AppSettings.FPathEventLog);
+      try
+        Unpack(10, AppSettings.FPathAppCfg, DeleteOld);
+      except
+        on E: Exception do
+        begin
+          Application.MessageBox(
+                                  PChar('Cannot extract config.cfg. ' + APPCAPTION + ' will be closed. Please contact IT Support.'),
+                                  PChar(APPCAPTION), MB_OK + MB_ICONERROR
+                                );
+          Status(5, AllTasks, DelayErr, 'CRC32 check: ' + ConfigFile + '..., unexpected error!', True, AppSettings.FPathEventLog);
+          LogText(AppSettings.FPathEventLog, '[Critical Error]: Cannot extract "config.cfg" from resources. Error has been thrown: ' + E.Message);
+          AppSettings.Free;
+          ExitProcess(0);
+        end;
+      end;
+    end
+    else
+    begin
+      Status(5, AllTasks, DelayStd, 'CRC32 check: ' + ConfigFile + '...OK.', True, AppSettings.FPathEventLog);
+    end;
+    { ----------------------------------------------------------------------------------------------------------- CHECK ASSEMBLIES AND LYNCCALL.EXE IF EXISTS }
+    SetLength(MsAssemblies, 6);
+    MsAssemblies[0]:=DLL1;
+    MsAssemblies[1]:=DLL2;
+    MsAssemblies[2]:=DLL3;
+    MsAssemblies[3]:=DLL4;
+    MsAssemblies[4]:=DLL5;
+    MsAssemblies[5]:=LyncCall;
+    for iCNT:=0 to High(MsAssemblies) - 1 do
+    begin
+      Status(iCNT + 6, AllTasks, DelayStd, 'Checking ' + MsAssemblies[iCNT] + '...', True, AppSettings.FPathEventLog);
+      if FileExists(AppSettings.FAppDir + MsAssemblies[iCNT]) then
+      begin
+        Status(iCNT + 6, AllTasks, DelayStd, 'Checking ' + MsAssemblies[iCNT] + '... OK.', True, AppSettings.FPathEventLog);
+      end
+      else
+      begin
+        Application.MessageBox(
+                                PCHar('Cannot find ' + MsAssemblies[iCNT] + '. Please reinstall application and/or contact IT support.'),
+                                PChar(APPCAPTION), MB_OK + MB_ICONERROR
+                              );
+        AppSettings.Free;
+        ExitProcess(0);
+      end;
+    end;
+    LogText(AppSettings.FPathEventLog, 'End of checking resource and configuration files.');
+  finally
+    AppSettings.Free;
   end;
-
-  LogText(AppSettings.FPathEventLog, 'End of checking resource and configuration files.');
-  LogText(AppSettings.FPathEventLog, 'Create Forms and execute their methods...');
 
   { ---- END ---- }
 
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-  Status(8, AllTasks, 50, 'Application initialization... connecting with SQL server..., please wait.', False);
-  Application.Initialize;
-  Application.Title:=APPCAPTION;
-  Application.MainFormOnTaskbar:=False;
+  AppSettings:=TSettings.Create;
+  try
+    Status(12, AllTasks, 50, 'Application initialization... connecting with SQL server..., please wait.', False, AppSettings.FPathEventLog);
+    Application.Initialize;
+    Application.Title:=APPCAPTION;
+    Application.MainFormOnTaskbar:=False;
 
-  { ---------------------------------------------------------------------------------------------------------------------------------------- CREATE ALL FORMS }
+    { -------------------------------------------------------------------------------------------------------------------------------------- CREATE ALL FORMS }
 
-  (* NOTE: ALL FORMS MUST HAVE VISIBE PARAMETER SET TO FALSE *)
+    (* NOTE: ALL FORMS MUST HAVE VISIBE PARAMETER SET TO FALSE *)
 
-  { MAIN FORM }
-  Application.CreateForm(TMainForm, MainForm);
-  LogText(AppSettings.FPathEventLog, '[GUI] Initialization methods executed within main thread, ''MainForm'' has been created. Main process thread ID = ' + IntToStr(MainThreadID) + '.');
+    { MAIN FORM }
+    Application.CreateForm(TMainForm, MainForm);
+    LogText(AppSettings.FPathEventLog, '[GUI] Initialization methods executed within main thread, ''MainForm'' has been created. Main process thread ID = ' + IntToStr(MainThreadID) + '.');
 
-  { OTHER WINFORMS }
-  Status(9, AllTasks, 400, 'Application initialization... WinForms loading, please wait.', False);
-  Application.CreateForm(TAboutForm,    AboutForm);    LogText(AppSettings.FPathEventLog, '[GUI] ''AboutForm'' ......... has been created.');
-  Application.CreateForm(TEventForm,    EventForm);    LogText(AppSettings.FPathEventLog, '[GUI] ''EventForm'' ......... has been created.');
-  Application.CreateForm(TColorsForm,   ColorsForm);   LogText(AppSettings.FPathEventLog, '[GUI] ''ColorsForm'' ........ has been created.');
-  Application.CreateForm(TReportForm,   ReportForm);   LogText(AppSettings.FPathEventLog, '[GUI] ''ReportForm'' ........ has been created.');
-  Application.CreateForm(TSearchForm,   SearchForm);   LogText(AppSettings.FPathEventLog, '[GUI] ''SearchForm'' ........ has been created.');
-  Application.CreateForm(TFilterForm,   FilterForm);   LogText(AppSettings.FPathEventLog, '[GUI] ''FilterForm'' ........ has been created.');
-  Application.CreateForm(TTrackerForm,  TrackerForm);  LogText(AppSettings.FPathEventLog, '[GUI] ''TrackerForm'' ....... has been created.');
-  Application.CreateForm(TActionsForm,  ActionsForm);  LogText(AppSettings.FPathEventLog, '[GUI] ''ActionsForm'' ....... has been created.');
-  Application.CreateForm(TCalendarForm, CalendarForm); LogText(AppSettings.FPathEventLog, '[GUI] ''CalendarForm'' ...... has been created.');
-  Application.CreateForm(TInvoicesForm, InvoicesForm); LogText(AppSettings.FPathEventLog, '[GUI] ''InvoicesForm'' ...... has been created.');
+    { OTHER WINFORMS }
+    Status(13, AllTasks, 400, 'Application initialization... VCL forms loading, please wait.', False, AppSettings.FPathEventLog);
+    Application.CreateForm(TAboutForm,    AboutForm);    LogText(AppSettings.FPathEventLog, '[GUI] ''AboutForm'' ......... has been created.');
+    Application.CreateForm(TEventForm,    EventForm);    LogText(AppSettings.FPathEventLog, '[GUI] ''EventForm'' ......... has been created.');
+    Application.CreateForm(TColorsForm,   ColorsForm);   LogText(AppSettings.FPathEventLog, '[GUI] ''ColorsForm'' ........ has been created.');
+    Application.CreateForm(TReportForm,   ReportForm);   LogText(AppSettings.FPathEventLog, '[GUI] ''ReportForm'' ........ has been created.');
+    Application.CreateForm(TSearchForm,   SearchForm);   LogText(AppSettings.FPathEventLog, '[GUI] ''SearchForm'' ........ has been created.');
+    Application.CreateForm(TFilterForm,   FilterForm);   LogText(AppSettings.FPathEventLog, '[GUI] ''FilterForm'' ........ has been created.');
+    Application.CreateForm(TTrackerForm,  TrackerForm);  LogText(AppSettings.FPathEventLog, '[GUI] ''TrackerForm'' ....... has been created.');
+    Application.CreateForm(TActionsForm,  ActionsForm);  LogText(AppSettings.FPathEventLog, '[GUI] ''ActionsForm'' ....... has been created.');
+    Application.CreateForm(TCalendarForm, CalendarForm); LogText(AppSettings.FPathEventLog, '[GUI] ''CalendarForm'' ...... has been created.');
+    Application.CreateForm(TInvoicesForm, InvoicesForm); LogText(AppSettings.FPathEventLog, '[GUI] ''InvoicesForm'' ...... has been created.');
 
-  { SPLASH SCREEN - 100% }
-  Status(10, AllTasks, 900, 'Application initialization... done.', False);
+    { SPLASH SCREEN - 100% }
+    Status(14, AllTasks, 900, 'Application initialization... done.', False, AppSettings.FPathEventLog);
 
-  { --------------------------------------------------------------------------------------------------------------------------------------- SPLASH SCREEN END }
-  AnimateWindow(SplashForm.Handle, 500, AW_BLEND or AW_HIDE);
-  Sleep(150);
-  SplashForm.Free;
+    { ------------------------------------------------------------------------------------------------------------------------------------- SPLASH SCREEN END }
+    AnimateWindow(SplashForm.Handle, 500, AW_BLEND or AW_HIDE);
+    Sleep(150);
+    SplashForm.Free;
 
-  { ----------------------------------------------------------------------------------------------------------------------- SETUP SAVED WINDOW STATE AND SHOW }
-  if AppSettings.TMIG.ReadString(ApplicationDetails,  'WINDOW_STATE', '') = 'wsNormal'    then MainForm.WindowState:=wsNormal;
-  if AppSettings.TMIG.ReadString(ApplicationDetails,  'WINDOW_STATE', '') = 'wsMaximized' then MainForm.WindowState:=wsMaximized;
-  if AppSettings.TMIG.ReadString(ApplicationDetails,  'WINDOW_STATE', '') = 'wsMinimized' then MainForm.WindowState:=wsMinimized;
-  LogText(AppSettings.FPathEventLog, 'Initialization is completed. Application is running.');
-  AppSettings.Free;
+    { --------------------------------------------------------------------------------------------------------------------- SETUP SAVED WINDOW STATE AND SHOW }
+    if AppSettings.TMIG.ReadString(ApplicationDetails,  'WINDOW_STATE', '') = 'wsNormal'    then MainForm.WindowState:=wsNormal;
+    if AppSettings.TMIG.ReadString(ApplicationDetails,  'WINDOW_STATE', '') = 'wsMaximized' then MainForm.WindowState:=wsMaximized;
+    if AppSettings.TMIG.ReadString(ApplicationDetails,  'WINDOW_STATE', '') = 'wsMinimized' then MainForm.WindowState:=wsMinimized;
+    LogText(AppSettings.FPathEventLog, 'Initialization is completed. Application is running.');
+  finally
+    AppSettings.Free;
+  end;
 
   { ----------------------------------------------------------------------------------------------------------------------------------------------------- RUN }
   MainForm.Show;

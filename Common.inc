@@ -6,7 +6,7 @@
 { Originate:        10-07-2016 (Concept & GUI)                                                                                                                }
 { IDE:              RAD Studio with Delphi XE2 (migrated to Delphi Tokyo)                                                                                     }
 { Target:           Microsoft Windows 7 or newer                                                                                                              }
-{ Dependencies:     Ararat Synapse (modified third-party) and own libraries                                                                                   }
+{ Dependencies:     Synopse Zip and own libraries                                                                                                             }
 { NET Framework:    Required 4.6 or newer (Lync / Skype calls)                                                                                                }
 { LYNC version:     2013 or newer                                                                                                                             }
 {                                                                                                                                                             }
@@ -14,7 +14,6 @@
 
 (* DEPENDENCIES *)
 
-{ E:\Projects\Unity Project\__Unity\__dependencies\Synapse Trunk;  }
 { E:\Projects\Unity Project\__Unity\__dependencies\Synopse Zip;    }
 { E:\Projects\Unity Project\__Unity\__dependencies\BCrypt;         }
 { E:\Projects\Unity Project\__Unity\__dependencies;                }
@@ -37,7 +36,7 @@ const
 
   DelayStd:       integer   = 50;               { SLOW DOWN A BIT TO SHOW MESSAGE  }
   DelayErr:       integer   = 750;              { SLOW DOWN SIGNIFICANTLY FOR USER }
-  AllTasks:       integer   = 10;               { TOTAL NUMBER OF ALL BASIC TASKS  }
+  AllTasks:       integer   = 14;               { TOTAL NUMBER OF ALL BASIC TASKS  }
   DecryptKey:     integer   = 429496;
   APPCAPTION:     string    = 'Unity';
   LyncCall:       string    = 'LyncCall.exe';
@@ -45,7 +44,7 @@ const
   LicenceFile:    string    = 'Unity.licx';
   GridImgFile:    string    = 'Unity.img';
   ReleaseFile:    string    = 'Release.pak';
-  CurrentMutex:   PWideChar = 'UNITY_10015';  { WARNING! INCREASE IT WITH EACH NEW RELEASE }
+  CurrentMutex:   PWideChar = 'UNITY_10016';  { WARNING! INCREASE IT WITH EACH NEW RELEASE }
 
   { SPLASH SCREEN }
 
@@ -150,6 +149,7 @@ const
   CRLF         : string = #13#10;
   CR           : char   = #13;
   LF           : char   = #10;
+  BACKSPACE    : char   = #8;
   TAB          : char   = #9;
   SPACE        : char   = #32;
   QUOTE        : char   = #39;

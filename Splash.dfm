@@ -39,7 +39,7 @@ object SplashForm: TSplashForm
     Font.Style = [fsBold]
     Font.Quality = fqAntialiased
     ParentFont = False
-    Transparent = False
+    Transparent = True
   end
   object BottomLine: TBevel
     Left = 40
@@ -48,20 +48,6 @@ object SplashForm: TSplashForm
     Height = 19
     Cursor = crAppStart
     Shape = bsBottomLine
-  end
-  object Text1: TLabel
-    Left = 174
-    Top = 191
-    Width = 68
-    Height = 13
-    Cursor = crAppStart
-    Caption = 'Performing:'
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -11
-    Font.Name = 'Verdana'
-    Font.Style = []
-    ParentFont = False
   end
   object Text2: TLabel
     Left = 40
@@ -96,7 +82,7 @@ object SplashForm: TSplashForm
     ParentFont = False
   end
   object MainText1: TLabel
-    Left = 216
+    Left = 213
     Top = 107
     Width = 24
     Height = 35
@@ -139,13 +125,12 @@ object SplashForm: TSplashForm
     ShowText = False
   end
   object Status: TLabel
-    Left = 248
+    Left = 180
     Top = 191
-    Width = 440
+    Width = 501
     Height = 13
     Cursor = crAppStart
     AutoSize = False
-    Caption = '                                 '
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
     Font.Height = -11
@@ -422,31 +407,14 @@ object SplashForm: TSplashForm
   object ProgressText: TLabel
     Left = 424
     Top = 230
-    Width = 17
+    Width = 20
     Height = 13
     Caption = '0%'
-  end
-  object BtnMinimize: TLabel
-    Left = 834
-    Top = 8
-    Width = 26
-    Height = 22
-    Cursor = crHandPoint
-    Hint = 'Minimize'
-    Caption = '  -  '
-    Color = clWhite
     Font.Charset = DEFAULT_CHARSET
-    Font.Color = clGray
-    Font.Height = -19
-    Font.Name = 'Arial'
+    Font.Color = clBlack
+    Font.Height = -11
+    Font.Name = 'Tahoma'
     Font.Style = [fsBold]
-    ParentColor = False
     ParentFont = False
-    ParentShowHint = False
-    ShowHint = True
-    Transparent = False
-    OnClick = BtnMinimizeClick
-    OnMouseEnter = BtnMinimizeMouseEnter
-    OnMouseLeave = BtnMinimizeMouseLeave
   end
 end

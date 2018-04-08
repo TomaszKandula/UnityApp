@@ -99,14 +99,14 @@ object ReportForm: TReportForm
     Font.Style = []
     ParentFont = False
   end
-  object SpeedButton1: TSpeedButton
+  object btnCancel: TSpeedButton
     Left = 328
     Top = 424
     Width = 89
     Height = 25
     Cursor = crHandPoint
     Caption = 'Cancel'
-    OnClick = SpeedButton1Click
+    OnClick = btnCancelClick
   end
   object ReportMemo: TMemo
     Left = 16
@@ -119,7 +119,7 @@ object ReportForm: TReportForm
     Font.Height = -11
     Font.Name = 'Tahoma'
     Font.Style = []
-    MaxLength = 1024
+    MaxLength = 255
     ParentFont = False
     ScrollBars = ssVertical
     TabOrder = 0

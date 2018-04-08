@@ -159,7 +159,7 @@ object AboutForm: TAboutForm
     Transparent = False
   end
   object Text02: TLabel
-    Left = 280
+    Left = 281
     Top = 25
     Width = 309
     Height = 25

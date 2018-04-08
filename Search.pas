@@ -6,7 +6,7 @@
 { Originate:        10-07-2016 (Concept & GUI)                                                                                                                }
 { IDE:              RAD Studio with Delphi XE2 (migrated to Delphi Tokyo)                                                                                     }
 { Target:           Microsoft Windows 7 or newer                                                                                                              }
-{ Dependencies:     Ararat Synapse (modified third-party) and own libraries                                                                                   }
+{ Dependencies:     Synopse Zip and own libraries                                                                                                             }
 { NET Framework:    Required 4.6 or newer (Lync / Skype calls)                                                                                                }
 { LYNC version:     2013 or newer                                                                                                                             }
 {                                                                                                                                                             }
@@ -29,6 +29,10 @@ type
     CaseSensitive: TCheckBox;
     ShowAll: TCheckBox;
     btnUnhide: TSpeedButton;
+    GroupSearch: TGroupBox;
+    GroupOptions: TGroupBox;
+    CheckUp: TRadioButton;
+    CheckDown: TRadioButton;
     procedure btnSearchClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -42,6 +46,7 @@ type
     var SGrid     :  TStringGrid;
     var SColName  :  string;
     var SColNumber:  string;
+    var SearchEnd :  integer;
   published
     procedure Search;
   end;
@@ -62,12 +67,47 @@ uses
 
 { ------------------------------------------------------------------------------------------------------------------------------------ SEARCH IN GIVEN STRING }
 procedure TSearchForm.Search;
-var
-  IsNumber:      boolean;
-  SearchString:  string;
-  CompareValue:  string;
-  iCNT:          integer;
-  SearchColumn:  integer;
+
+  (* COMMON VARIABLES *)
+
+  var
+    IsNumber:      boolean;
+    SearchString:  string;
+    CompareValue:  string;
+    iCNT:          integer;
+    SearchColumn:  integer;
+
+  (* NESTED METHODS *)
+
+  procedure SearchPartial_Prepare;
+  begin
+      SetLength(Groupping, SGrid.RowCount);
+      if not (CaseSensitive.Checked) then CompareValue:=UpperCase(SGrid.Cells[SearchColumn, iCNT]);
+      if (CaseSensitive.Checked)     then CompareValue:=SGrid.Cells[SearchColumn, iCNT];
+  end;
+
+  procedure SearchPartial_NextBreak;
+  begin
+    IsNext:=True;
+    if SGrid.RowHeights[FoundRow] = -1 then
+      MainForm.MsgCall(
+                        mcInfo,
+                        'The item has been found (' + SGrid.Cells[SearchColumn, FoundRow] + ') for search pattern "' +
+                        SearchString + '". ' + CRLF +
+                        'However, it is hidden by the filter. Remove filtering to unhide searched item.'
+                      );
+  end;
+
+  procedure SearchPartial_ShowAll;
+  begin
+    { PUT CORRESPONDING ROWS INTO AN ARRAY }
+    if (ShowAll.Checked) then
+    begin
+      Groupping[iCNT]:=FoundRow;
+      IsNext:=False;
+    end;
+  end;
+
 begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   SearchColumn:=0;
@@ -82,51 +122,81 @@ begin
   end;
 
   { CHECK IF USER PROVIDED NUMBER }
-  {$D-}
   IsNumber:=True;
   try
     StrToInt64(EditSearch.Text);
   except
     IsNumber:=False;
   end;
-  {$D+}
 
   { ASSIGN PROPER COLUMN NUMBER FROM AGE VIEW }
   if (IsNumber)     then SearchColumn:=SGrid.ReturnColumn(SColNumber, 1, 1);
   if not (IsNumber) then SearchColumn:=SGrid.ReturnColumn(SColName,   1, 1);
 
-  { SEARCH DATA }
-  if (IsNext) and (FoundRow <> (SGrid.RowCount - 1)) then FoundRow:=FoundRow + 1;
-  SetLength(Groupping, 0);
-  for iCNT:=FoundRow to SGrid.RowCount - 1 do
+  { SEARCH DIRECTION | UP }
+  if CheckUp.Checked then
   begin
-    SetLength(Groupping, SGrid.RowCount);
-    if not (CaseSensitive.Checked) then CompareValue:=UpperCase(SGrid.Cells[SearchColumn, iCNT]);
-    if (CaseSensitive.Checked)     then CompareValue:=SGrid.Cells[SearchColumn, iCNT];
-    if Pos(SearchString, CompareValue) > 0 then
+    if (IsNext) and (FoundRow > SearchEnd) then FoundRow:=FoundRow - 1;
+    SearchEnd:=1;
+  end;
+
+  { SEARCH DIRECTION | DOWN }
+  if CheckDown.Checked then
+  begin
+    if (IsNext) and (FoundRow < SearchEnd) then FoundRow:=FoundRow + 1;
+    SearchEnd:=SGrid.RowCount - 1;
+  end;
+
+  SetLength(Groupping, 0);
+
+  { SEARCH UP }
+  if CheckUp.Checked then
+  begin
+    for iCNT:=FoundRow downto SearchEnd do
     begin
-      FoundRow:=iCNT;
-      { EXIT ON FOUND GIVEN ITEM }
-      if not (ShowAll.Checked) then
+      SearchPartial_Prepare;
+      if Pos(SearchString, CompareValue) > 0 then
       begin
-        IsNext:=True;
-        if SGrid.RowHeights[FoundRow] = -1 then
-          MainForm.MsgCall(mcInfo, 'The item has been found (' + SGrid.Cells[SearchColumn, FoundRow] + ') for search pattern "' + SearchString + '". ' + CRLF +
-                              'However it is hidden by the filter you have used. Remove the filtering to unhide searched item.');
-        Break;
-      end;
-      { PUT CORRESPONDING ROWS INTO AN ARRAY }
-      if (ShowAll.Checked) then
-      begin
-        Groupping[iCNT]:=FoundRow;
-        IsNext:=False;
-      end;
-    end
+        FoundRow:=iCNT;
+        { EXIT ON FOUND GIVEN ITEM }
+        if not (ShowAll.Checked) then
+        begin
+          SearchPartial_NextBreak;
+          Break;
+        end;
+        SearchPartial_ShowAll;
+      end
       else
       begin
         IsNext  :=False;
         FoundRow:=0;
       end;
+    end;
+  end;
+
+  { SEARCH DOWN }
+  if CheckDown.Checked then
+  begin
+    for iCNT:=FoundRow to SearchEnd do
+    begin
+      SearchPartial_Prepare;
+      if Pos(SearchString, CompareValue) > 0 then
+      begin
+        FoundRow:=iCNT;
+        { EXIT ON FOUND GIVEN ITEM }
+        if not (ShowAll.Checked) then
+        begin
+          SearchPartial_NextBreak;
+          Break;
+        end;
+        SearchPartial_ShowAll;
+      end
+      else
+      begin
+        IsNext  :=False;
+        FoundRow:=0;
+      end;
+    end;
   end;
 
   { HIGHLIGHT FOUND ROW }
@@ -207,9 +277,11 @@ end;
 { ------------------------------------------------------------------------------------------------------------------------------------------- RESET SETTINIGS }
 procedure TSearchForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  IsNext  :=False;
   FoundRow:=0;
+  IsNext:=False;
   EditSearch.Text:='';
+  CheckUp.Checked:=False;
+  CheckDown.Checked:=True;
 end;
 
 end.

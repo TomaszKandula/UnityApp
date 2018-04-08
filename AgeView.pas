@@ -6,7 +6,7 @@
 { Originate:        10-07-2016 (Concept & GUI)                                                                                                                }
 { IDE:              RAD Studio with Delphi XE2 (migrated to Delphi Tokyo)                                                                                     }
 { Target:           Microsoft Windows 7 or newer                                                                                                              }
-{ Dependencies:     Ararat Synapse (modified third-party) and own libraries                                                                                   }
+{ Dependencies:     Synopse Zip and own libraries                                                                                                             }
 { NET Framework:    Required 4.6 or newer (Lync / Skype calls)                                                                                                }
 { LYNC version:     2013 or newer                                                                                                                             }
 {                                                                                                                                                             }
@@ -16,7 +16,7 @@ unit AgeView;
 interface
 
 uses
-  Main, Model, ADODB, StrUtils, SysUtils, Variants, Messages, Windows, Classes;
+  Main, Model, ADODB, StrUtils, SysUtils, Variants, Messages, Windows, Classes, Graphics;
 
 { ------------------------------------------------------------- ! AGE VIEW CLASS ! -------------------------------------------------------------------------- }
 type
@@ -151,13 +151,17 @@ begin
   MainForm.tcCOCODE2.Caption:=MainForm.GetCoCode(2, MainForm.GroupIdSel);
   MainForm.tcCOCODE3.Caption:=MainForm.GetCoCode(3, MainForm.GroupIdSel);
   MainForm.tcCOCODE4.Caption:=MainForm.GetCoCode(4, MainForm.GroupIdSel);
+  if MainForm.tcCOCODE1.Caption = '0' then MainForm.tcCOCODE1.Font.Color:=clWhite else MainForm.tcCOCODE1.Font.Color:=clBlack;
+  if MainForm.tcCOCODE2.Caption = '0' then MainForm.tcCOCODE2.Font.Color:=clWhite else MainForm.tcCOCODE2.Font.Color:=clBlack;
+  if MainForm.tcCOCODE3.Caption = '0' then MainForm.tcCOCODE3.Font.Color:=clWhite else MainForm.tcCOCODE3.Font.Color:=clBlack;
+  if MainForm.tcCOCODE4.Caption = '0' then MainForm.tcCOCODE4.Font.Color:=clWhite else MainForm.tcCOCODE4.Font.Color:=clBlack;
   Grid.Cells[0, 0]:=MainForm.tcCOCODE1.Caption; MainForm.Find(0);
   Grid.Cells[1, 0]:=MainForm.tcCOCODE2.Caption; MainForm.Find(1);
   Grid.Cells[2, 0]:=MainForm.tcCOCODE3.Caption; MainForm.Find(2);
   Grid.Cells[3, 0]:=MainForm.tcCOCODE4.Caption; MainForm.Find(3);
   { GET CURRENCY CODES }
 
-  (* NOTE: THERE SHOULD BE ALWAYS SAME CURRENCY CODE FOR ALL STACKED COMPANIES *)
+  (* NOTE: THERE SHOULD BE ALWAYS THE SAME CURRENCY CODE FOR ALL STACKED COMPANIES *)
 
   SL:=TStringList.Create;
   try

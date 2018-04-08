@@ -2,11 +2,14 @@ object EventForm: TEventForm
   Left = 0
   Top = 0
   BorderIcons = [biSystemMenu]
-  BorderStyle = bsSingle
   Caption = 'Unity'
-  ClientHeight = 610
-  ClientWidth = 834
-  Color = clBtnFace
+  ClientHeight = 620
+  ClientWidth = 824
+  Color = 15527148
+  Constraints.MaxHeight = 1200
+  Constraints.MaxWidth = 1200
+  Constraints.MinHeight = 400
+  Constraints.MinWidth = 400
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -20,27 +23,18 @@ object EventForm: TEventForm
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
-  object AppMain: TShape
+  object EventMemo: TMemo
     AlignWithMargins = True
     Left = 5
     Top = 5
-    Width = 824
-    Height = 600
+    Width = 814
+    Height = 591
+    Hint = 'Press F5 to reload'
     Margins.Left = 5
     Margins.Top = 5
     Margins.Right = 5
     Margins.Bottom = 5
     Align = alClient
-    Pen.Color = clMedGray
-    ExplicitWidth = 491
-    ExplicitHeight = 292
-  end
-  object EventMemo: TMemo
-    Left = 17
-    Top = 16
-    Width = 801
-    Height = 577
-    Hint = 'Press F5 to reload'
     Color = clCream
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clNavy
@@ -56,5 +50,19 @@ object EventForm: TEventForm
     WantTabs = True
     WordWrap = False
     OnKeyUp = FormKeyUp
+    ExplicitLeft = 17
+    ExplicitTop = 16
+    ExplicitWidth = 801
+    ExplicitHeight = 577
+  end
+  object StatusBar: TStatusBar
+    Left = 0
+    Top = 601
+    Width = 824
+    Height = 19
+    Color = 15527148
+    Panels = <>
+    ExplicitTop = 611
+    ExplicitWidth = 834
   end
 end
