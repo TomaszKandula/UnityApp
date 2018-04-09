@@ -220,7 +220,8 @@ begin
               SL.Delimiter:=Delimiter;
               SL.StrictDelimiter:=True;
               SL.DelimitedText:=Phones;
-              for iCNT:=0 to SL.Count do Cust_Phone.Items.Add(SL.Strings[iCNT]);
+              for iCNT:=0 to SL.Count - 1 do
+                Cust_Phone.Items.Add(SL.Strings[iCNT]);
             finally
               SL.Free;
             end;
