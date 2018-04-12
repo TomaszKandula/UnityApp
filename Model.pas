@@ -82,6 +82,7 @@ type
     const Telephone              : string = 'Telephone';
     const MAN_ID                 : string = 'MAN_ID';  { FOREIGN KEY -> PRIMARY KEY IN "TBL_MANAGERS"    }
     const TL_ID                  : string = 'TL_ID';   { FOREIGN KEY -> PRIMARY KEY IN "TBL_TEAMLEADERS" }
+    const DIVISIONS              : string = 'DIVISIONS';
   end;
 
 { -------------------------------------------------------------- ! TBL_MANAGERS ! --------------------------------------------------------------------------- }

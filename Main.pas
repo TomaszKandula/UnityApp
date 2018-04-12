@@ -235,15 +235,11 @@ type                                                            (* GUI | MAIN TH
     Text55: TLabel;
     Text56: TLabel;
     Text57: TLabel;
-    Text60: TLabel;
-    Text59: TLabel;
     Text58: TLabel;
     tcOpenItems: TLabel;
     tcInvoices: TLabel;
     tcOSAmt: TLabel;
     tcOverdue: TLabel;
-    tcDecAmt: TLabel;
-    tcRecovery: TLabel;
     Text68: TLabel;
     btnImport: TImage;
     btnExport: TImage;
@@ -281,8 +277,6 @@ type                                                            (* GUI | MAIN TH
     Cap18: TShape;
     CSVExport: TSaveDialog;
     CSVImport: TOpenDialog;
-    Text77: TLabel;
-    tcDisAmt: TLabel;
     Cap19: TShape;
     Cap20: TShape;
     LeftPanel: TPanel;
@@ -300,9 +294,7 @@ type                                                            (* GUI | MAIN TH
     tcUNAmt: TLabel;
     Text70: TLabel;
     Text72: TLabel;
-    Text79: TLabel;
     Text73: TLabel;
-    tcOverdueRatio: TLabel;
     OILoader: TTimer;
     Text80: TLabel;
     Text81: TLabel;
@@ -438,6 +430,7 @@ type                                                            (* GUI | MAIN TH
     Action_Gr3_Filter: TMenuItem;
     TopPanel8: TPanel;
     RightPanel8: TPanel;
+    PanelDetailsGrid: TPanel;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -1904,6 +1897,7 @@ begin
       DetailsGrid.Cells[ColumnNum, 1]:=sgCoCodes.Cells[sgCoCodes.ReturnColumn(TCompany.COCURRENCY,    1, 1), iCNT];
       DetailsGrid.Cells[ColumnNum, 2]:=sgCoCodes.Cells[sgCoCodes.ReturnColumn(TCompany.INTEREST_RATE, 1, 1), iCNT];
       DetailsGrid.Cells[ColumnNum, 3]:=sgCoCodes.Cells[sgCoCodes.ReturnColumn(TCompany.AGENTS,        1, 1), iCNT];
+      DetailsGrid.Cells[ColumnNum, 4]:=sgCoCodes.Cells[sgCoCodes.ReturnColumn(TCompany.DIVISIONS,     1, 1), iCNT];
       Break;
     end
     else
@@ -1911,6 +1905,7 @@ begin
       DetailsGrid.Cells[ColumnNum, 1]:=unNA;
       DetailsGrid.Cells[ColumnNum, 2]:=unNA;
       DetailsGrid.Cells[ColumnNum, 3]:=unNA;
+      DetailsGrid.Cells[ColumnNum, 4]:=unNA;
     end;
   end;
 end;

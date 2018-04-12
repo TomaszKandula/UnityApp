@@ -1192,7 +1192,7 @@ object MainForm: TMainForm
     Margins.Top = 10
     Margins.Right = 5
     Margins.Bottom = 0
-    ActivePage = TabSheet1
+    ActivePage = TabSheet2
     Align = alClient
     DoubleBuffered = True
     Font.Charset = DEFAULT_CHARSET
@@ -2576,7 +2576,7 @@ object MainForm: TMainForm
           AlignWithMargins = True
           Left = 17
           Top = 15
-          Width = 1265
+          Width = 1047
           Height = 121
           Margins.Left = 17
           Margins.Top = 15
@@ -2633,23 +2633,10 @@ object MainForm: TMainForm
           object hShapeDetailsVOI: TShape
             Left = 478
             Top = 17
-            Width = 787
+            Width = 569
             Height = 104
             Brush.Style = bsClear
             Pen.Color = clMedGray
-          end
-          object tcDecAmt: TLabel
-            Left = 839
-            Top = 52
-            Width = 7
-            Height = 13
-            Caption = '0'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clBlack
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = [fsBold]
-            ParentFont = False
           end
           object tcInvoices: TLabel
             Left = 614
@@ -2693,32 +2680,6 @@ object MainForm: TMainForm
           object tcOverdue: TLabel
             Left = 614
             Top = 52
-            Width = 7
-            Height = 13
-            Caption = '0'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clBlack
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = [fsBold]
-            ParentFont = False
-          end
-          object tcRecovery: TLabel
-            Left = 839
-            Top = 71
-            Width = 7
-            Height = 13
-            Caption = '0'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clBlack
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = [fsBold]
-            ParentFont = False
-          end
-          object tcDisAmt: TLabel
-            Left = 839
-            Top = 33
             Width = 7
             Height = 13
             Caption = '0'
@@ -2782,7 +2743,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object Text57: TLabel
-            Left = 957
+            Left = 728
             Top = 33
             Width = 85
             Height = 13
@@ -2800,52 +2761,6 @@ object MainForm: TMainForm
             Width = 61
             Height = 13
             Caption = 'O/S amount:'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clBlack
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-          end
-          object Text59: TLabel
-            Left = 732
-            Top = 52
-            Width = 89
-            Height = 13
-            Caption = 'Decrease in value:'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clBlack
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-          end
-          object Text60: TLabel
-            Left = 732
-            Top = 71
-            Width = 79
-            Height = 13
-            Caption = 'Recovery value:'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clBlack
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-          end
-          object Text63: TLabel
-            Left = 153
-            Top = 33
-            Width = 56
-            Height = 13
-            Caption = 'Companies:'
-          end
-          object Text77: TLabel
-            Left = 732
-            Top = 33
-            Width = 96
-            Height = 13
-            Caption = 'Discounted amount:'
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clBlack
             Font.Height = -11
@@ -2872,13 +2787,13 @@ object MainForm: TMainForm
           object Cap12: TShape
             Left = 478
             Top = 0
-            Width = 787
+            Width = 569
             Height = 19
             Brush.Color = 15527148
             Pen.Color = clMedGray
           end
           object tcUNAmt: TLabel
-            Left = 957
+            Left = 728
             Top = 90
             Width = 7
             Height = 13
@@ -2891,7 +2806,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object Text70: TLabel
-            Left = 957
+            Left = 728
             Top = 71
             Width = 99
             Height = 13
@@ -2903,64 +2818,12 @@ object MainForm: TMainForm
             Font.Style = []
             ParentFont = False
           end
-          object Text72: TLabel
-            Left = 153
-            Top = 52
-            Width = 48
-            Height = 13
-            Caption = 'Currency:'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clBlack
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-          end
-          object Text79: TLabel
-            Left = 732
-            Top = 90
-            Width = 71
-            Height = 13
-            Caption = 'Overdue ratio:'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clBlack
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-          end
-          object Text73: TLabel
-            Left = 153
-            Top = 71
-            Width = 69
-            Height = 13
-            Caption = 'Interest Rate:'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clBlack
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-          end
-          object tcOverdueRatio: TLabel
-            Left = 839
-            Top = 90
-            Width = 7
-            Height = 13
-            Caption = '0'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clBlack
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = [fsBold]
-            ParentFont = False
-          end
           object Text80: TLabel
-            Left = 1103
+            Left = 874
             Top = 33
-            Width = 57
+            Width = 49
             Height = 13
-            Caption = '(KPI target)'
+            Caption = 'KPI target'
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clBlack
             Font.Height = -11
@@ -2969,11 +2832,11 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object Text81: TLabel
-            Left = 1103
+            Left = 874
             Top = 73
-            Width = 57
+            Width = 49
             Height = 13
-            Caption = '(KPI target)'
+            Caption = 'KPI target'
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clBlack
             Font.Height = -11
@@ -2982,7 +2845,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object tcKPIoverdue: TLabel
-            Left = 1103
+            Left = 874
             Top = 53
             Width = 7
             Height = 13
@@ -2995,7 +2858,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object tcKPIunalLocated: TLabel
-            Left = 1103
+            Left = 874
             Top = 90
             Width = 7
             Height = 13
@@ -3021,7 +2884,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object tcOvdAmt: TLabel
-            Left = 957
+            Left = 728
             Top = 52
             Width = 7
             Height = 13
@@ -3072,19 +2935,6 @@ object MainForm: TMainForm
             Width = 29
             Height = 13
             Caption = 'Group'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clBlack
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-          end
-          object Text53: TLabel
-            Left = 153
-            Top = 90
-            Width = 38
-            Height = 13
-            Caption = 'Agents:'
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clBlack
             Font.Height = -11
@@ -3155,35 +3005,89 @@ object MainForm: TMainForm
             Transparent = True
             Visible = False
           end
-          object DetailsGrid: TStringGrid
-            Left = 239
-            Top = 29
-            Width = 207
-            Height = 79
-            BevelInner = bvNone
-            BevelKind = bkFlat
+          object PanelDetailsGrid: TPanel
+            Left = 136
+            Top = 19
+            Width = 335
+            Height = 100
             BevelOuter = bvNone
-            Color = clCream
-            ColCount = 4
-            DefaultColWidth = 50
-            DefaultRowHeight = 18
-            DrawingStyle = gdsGradient
-            FixedColor = clCream
-            FixedCols = 0
-            RowCount = 4
-            FixedRows = 0
-            GradientEndColor = clCream
-            GradientStartColor = clCream
-            Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goDrawFocusSelected, goEditing, goTabs]
-            ScrollBars = ssNone
             TabOrder = 1
-            OnDrawCell = DetailsGridDrawCell
-            OnKeyPress = DetailsGridKeyPress
-            OnKeyUp = DetailsGridKeyUp
-            OnSelectCell = DetailsGridSelectCell
+            object Text63: TLabel
+              Left = 16
+              Top = 15
+              Width = 70
+              Height = 13
+              Caption = 'Companies:'
+            end
+            object Text72: TLabel
+              Left = 16
+              Top = 34
+              Width = 57
+              Height = 13
+              Caption = 'Currency:'
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clBlack
+              Font.Height = -11
+              Font.Name = 'Tahoma'
+              Font.Style = []
+              ParentFont = False
+            end
+            object Text73: TLabel
+              Left = 16
+              Top = 54
+              Width = 81
+              Height = 13
+              Caption = 'Interest Rate:'
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clBlack
+              Font.Height = -11
+              Font.Name = 'Tahoma'
+              Font.Style = []
+              ParentFont = False
+            end
+            object Text53: TLabel
+              Left = 16
+              Top = 71
+              Width = 65
+              Height = 13
+              Caption = 'Agents:'
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clBlack
+              Font.Height = -11
+              Font.Name = 'Tahoma'
+              Font.Style = []
+              ParentFont = False
+            end
+            object DetailsGrid: TStringGrid
+              Left = 113
+              Top = 11
+              Width = 207
+              Height = 79
+              TabStop = False
+              BevelInner = bvNone
+              BevelKind = bkFlat
+              BevelOuter = bvNone
+              Color = clCream
+              ColCount = 4
+              DefaultColWidth = 50
+              DefaultRowHeight = 18
+              DrawingStyle = gdsGradient
+              FixedColor = clCream
+              FixedCols = 0
+              FixedRows = 0
+              GradientEndColor = clCream
+              GradientStartColor = clCream
+              Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goDrawFocusSelected, goEditing, goTabs]
+              ScrollBars = ssNone
+              TabOrder = 0
+              OnDrawCell = DetailsGridDrawCell
+              OnKeyPress = DetailsGridKeyPress
+              OnKeyUp = DetailsGridKeyUp
+              OnSelectCell = DetailsGridSelectCell
+            end
           end
           object PanelGroupName: TPanel
-            Left = 144
+            Left = 143
             Top = 25
             Width = 321
             Height = 88

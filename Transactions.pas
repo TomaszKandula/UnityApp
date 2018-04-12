@@ -76,6 +76,7 @@ var
   CutOff:      string;
   INF4:        string;
   Agents:      string;
+  Divisions:   string;
   SortPos:     integer;
   iCNT:        integer;
 begin
@@ -96,11 +97,15 @@ begin
 
   for iCNT:=0 to 3 do
   begin
-    { TO STACK COMPANIES ALL AGENT  }
-    { INFORMATION MUST BE THE SAME  }
-    { THUS SET AGENT PER LAST FOUND }
-    if SettingGrid.Cells[iCNT, 3] = 'OFF' then Agents:='OFF';
-    if SettingGrid.Cells[iCNT, 3] = 'ON'  then Agents:='ON';
+    { TO STACK COMPANIES ALL AGENT   }
+    { INFORMATION MUST BE THE SAME   }
+    { THUS SET AGENT PER LAST FOUND  }
+    { THE SAME PRINCIPLE APPLIES FOR }
+    { DIVISION                       }
+    if SettingGrid.Cells[iCNT, 3] = 'OFF' then Agents   :='OFF';
+    if SettingGrid.Cells[iCNT, 3] = 'ON'  then Agents   :='ON';
+    if SettingGrid.Cells[iCNT, 4] = 'OFF' then Divisions:='OFF';
+    if SettingGrid.Cells[iCNT, 4] = 'ON'  then Divisions:='ON';
   end;
   { -------------------------------------------------------------------------------------------------------------------------------------- EXECUTE STORED SQL }
 
@@ -118,6 +123,7 @@ begin
           QuotedStr(MainForm.ConvertName(SettingGrid.Cells[3, 0], 'F', 0)) + COMMA +
           QuotedStr(CutOff)                                       + COMMA +
           QuotedStr(Agents)                                       + COMMA +
+          QuotedStr(Divisions)                                    + COMMA +
           QuotedStr(INF4);
   ExecSQL;
   Result:=SqlToGrid(DestGrid, ExecSQL, False, False);
@@ -132,13 +138,9 @@ begin
   MainForm.tcOpenItems.Caption     :='0';
   MainForm.tcOverdue.Caption       :='0';
   MainForm.tcInvoices.Caption      :='0';
-  MainForm.tcDecAmt.Caption        :='0';
-  MainForm.tcDisAmt.Caption        :='0';
-  MainForm.tcRecovery.Caption      :='0';
   MainForm.tcOSAmt.Caption         :='0';
   MainForm.tcUNamt.Caption         :='0';
   MainForm.tcOvdAmt.Caption        :='0';
-  MainForm.tcOverdueRatio.Caption  :='0';
   MainForm.tcKPIoverdue.Caption    :='0';
   MainForm.tcKPIunallocated.Caption:='0';
 end;
@@ -180,19 +182,8 @@ procedure TTransactions.UpdateSummary;
     { AMOUNTS }
     OverdueAmt      : double;
     UNamt           : double;
-    { REFLECTS TIME VALUE OF MONEY: DISCOUNTED AMOUNT, DECREASE IN AMOUNT AND RECOVERY AMOUNT }
-    cDiscountedAmt  : double;
-    cDecreaseAmt    : double;
-    cRecoveryAmt    : double;
-    DiscountedAmt   : double;
-    DecreaseAmt     : double;
-    RecoveryAmt     : double;
-    { INTEREST RATE FOR GIVEN COMPANY CODE }
-    InterestRate    : double;
     { AMOUNT OF OUTSTANDING INVOICES ONLY }
     InvoiceAmt      : double;
-    { PAYMENT STATUS }
-    TimeDiff        : integer;
     { VOUCHER NUMBER }
     VoucherNumber   : string;
 
@@ -201,12 +192,14 @@ procedure TTransactions.UpdateSummary;
   { INITIALIZE ALL LOCAL VARIABLES }
   procedure VarInitialize;
   begin
-    nInvoices     :=0; Overdue     :=0; OverdueAmt  :=0; UNamt:=0;
-    cDiscountedAmt:=0; cDecreaseAmt:=0; cRecoveryAmt:=0;
-    DiscountedAmt :=0; DecreaseAmt :=0; RecoveryAmt :=0;
-    InterestRate  :=0; InvoiceAmt  :=0; TimeDiff    :=0;
+    nInvoices :=0;
+    Overdue   :=0;
+    OverdueAmt:=0;
+    UNamt     :=0;
+    InvoiceAmt:=0;
   end;
 
+(*
   { GET INTEREST RATE FOR GIVEN CO CODE }
   function GetInterestRate(CoCode: string): double;
   var
@@ -225,6 +218,7 @@ procedure TTransactions.UpdateSummary;
       end;
     end;
   end;
+*)
 
   { GET VOUCHER NUMBER FROM SETTINGS }
   function GetVoucherNumber: string;
@@ -247,12 +241,11 @@ begin
   { ------------------------------------------------------------------------------------------------------------------------------------------------- COMPUTE }
   for iCNT:=1 to DestGrid.RowCount - 1 do
   begin
-    { GET PAYMENT STATUS }
-    TimeDiff:=StrToIntDef(DestGrid.Cells[33, iCNT], 0);
     { GET ACTUAL INVOICE OPEN AMOUNT }
     InvoiceAmt:=StrToFloatDef(DestGrid.Cells[5, iCNT], 0);
     { AGGREGATE INVOICE AMOUNT }
     MainForm.OSAmount:=MainForm.OSAmount + InvoiceAmt;
+(*
     { GET INTEREST RATE }
     InterestRate:=GetInterestRate(DestGrid.Cells[1, iCNT]);
     { COMPUTE INVOICE DISCOUNTING }
@@ -271,6 +264,7 @@ begin
       cDecreaseAmt  :=cDecreaseAmt   + DecreaseAmt;
       cRecoveryAmt  :=cRecoveryAmt   + RecoveryAmt;
     end;
+*)
     { DEPENDS ON INVOICE TYPE DEFINED IN THE GENERAL SETTINGS }
     if IsVoType(DestGrid.Cells[3, iCNT]) = True then inc(nInvoices);
     { ------------------------------------------------------------------------------------------------------------- COUNT ALL OVERDUE INVOICES AND ITS AMOUNT }
@@ -289,10 +283,6 @@ begin
   MainForm.tcOpenItems.Caption     :=FormatFloat('### ###',  DestGrid.RowCount - 1);
   MainForm.tcInvoices.Caption      :=FormatFloat('### ###',  nInvoices);
   MainForm.tcOverdue.Caption       :=FormatFloat('### ###',  Overdue);
-  MainForm.tcOverdueRatio.Caption  :=FormatFloat('0.00',     (( (Overdue / nInvoices) * 100 ))) + '%';
-  MainForm.tcDisAmt.Caption        :=FormatFloat('#,##0.00', cDiscountedAmt);
-  MainForm.tcDecAmt.Caption        :=FormatFloat('#,##0.00', cDecreaseAmt);
-  MainForm.tcRecovery.Caption      :=FormatFloat('#,##0.00', cRecoveryAmt);
   MainForm.tcOSAmt.Caption         :=FormatFloat('#,##0.00', MainForm.OSAmount);
   MainForm.tcOvdAmt.Caption        :=FormatFloat('#,##0.00', OverdueAmt);
   MainForm.tcUNAmt.Caption         :=FormatFloat('#,##0.00', abs(UNamt));

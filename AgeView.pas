@@ -91,6 +91,7 @@ begin
   StrSQL :=EXECUTE + AgeViewReport + SPACE + QuotedStr(StrCol) + COMMA + QuotedStr(GroupID) + COMMA + QuotedStr(AgeDate);
   SqlToGrid(Grid, ExecSQL, False, False);
   LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: SQL statement applied [' + StrSQL + '].');
+
   { ---------------------------------------------------------------------------------------------------------------------------------------- CALCULATE VALUES }
   for iCNT:=1 to Grid.RowCount - 1 do
   begin
@@ -114,6 +115,8 @@ begin
       { SUM ALL EXCEEDERS AMOUNT }
       TotalExceed:=TotalExceed + Abs(StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fEXCEEDED_AMOUNT, 1, 1), iCNT], 0));
     end;
+
+(*
     { SUM ALL ITEMS FOR RISK CLASSES }
     if Grid.Cells[Grid.ReturnColumn(TSnapshots.fRISK_CLASS, 1, 1), iCNT] = 'A' then
     begin
@@ -130,6 +133,8 @@ begin
       RCC:=RCC + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fTOTAL, 1, 1), iCNT], 0);
       Inc(RCCcount);
     end;
+*)
+
     { COUNT ITEMS }
     inc(CustAll);
   end;
@@ -241,7 +246,7 @@ end;
 procedure TAgeView.UpdateSummary;
 begin
   { TOP | AGE VIEW DETAILS }
-  MainForm.tcTOTAL.Caption    :=IntToStr(CustAll);
+  MainForm.tcTOTAL.Caption   :=IntToStr(CustAll);
   { BOTTOM | TRADE RECEIVABLES SUMMARY }
   { VALUES }
   MainForm.valND.Caption     :=FormatFloat('#,##0.00', ANotDue);
@@ -394,16 +399,16 @@ COLUMN NUMBER   | FIELD NAME          | ASSIGN NUMBER   | FIELD NAME       | ASS
  24             | PArea               | 13              | INF7             | D          | 23
  25             | GenAcNo             | 30              | PERSON           | D          | 24
  26             | ValDt               | 28              | GROUP3           | D          | 25
- 27             | R1  (division)      | -               | RISK_CLASS       | C          | 26
- 28             | Gr3                 | -               | QUALITY_IDX      | C          | 27
- 29             | Txt                 | -               | WALET_SHARE      | C          | 28
+ 27             | R1  (division)      | -               | RISK_CLASS       | C          | 26        //unused
+ 28             | Gr3                 | -               | QUALITY_IDX      | C          | 27        //unused
+ 29             | Txt                 | -               | WALET_SHARE      | C          | 28        //unused
  30             | R8  (person)        | 37              | CUID             | D          | 29
  31             | DirDeb              | -               | -                |            |
  32             | AddTxt              | -               | -                |            |
- 33             | PmtStat             | -               | -                |            |
- 34             | DiscAmt             | -               | -                |            |
- 35             | DecVal              | -               | -                |            |
- 36             | RecVal              | -               | -                |            |
+ 33             | PmtStat (calc)!     | -               | -                |            |
+ 34             | DiscAmt (remove)!   | -               | -                |            |
+ 35             | DecVal  (remove)!   | -               | -                |            |
+ 36             | RecVal  (remove)!   | -               | -                |            |
  37             | CUID                | -               | -                |            |
 
 ************************************************************************************************************************************************************ *)
@@ -527,6 +532,9 @@ begin
       ArrAgeView[avRow, 0]:=GroupID;
       ArrAgeView[avRow, 1]:=DateToStr(CutOff);
       ArrAgeView[avRow, 2]:=DatTim;
+      ArrAgeView[avRow, 26]:='0'; //unused field
+      ArrAgeView[avRow, 27]:='0'; //unused field
+      ArrAgeView[avRow, 28]:='0'; //unused field
       { ------------------------------------------------------------------------------------------------------------------------ RE-WRITE REST OF THE COLUMNS }
       for jCNT:=0 to high(oiCol) do ArrAgeView[avRow, avCol[jCNT]]:=MainForm.sgOpenItems.Cells[oiCol[jCNT], iCNT];
       { ---------------------------------------------------------------------------------------------------------------------------------------- ALTERNATIONS }
@@ -549,6 +557,8 @@ begin
       { ZERO FIELDS }
       AgeViewZeroFields(avRow);
     end;
+
+(*
   { ---------------------------------------------------------------------------------------------------------------------------- RANGES AND RISK CLASS BOUNDS }
   AppSettings:=TSettings.Create;
   try
@@ -581,6 +591,8 @@ begin
   finally
     AppSettings.Free;
   end;
+*)
+
   { ------------------------------------------------------------------------------------------------------------------------------------------------ POPULATE }
   { LOOP VIA CUID COLUMN IN AGE VIEW [29] }
   for exRow:=0 to avRow - 1 do
@@ -623,6 +635,8 @@ begin
                                      );
     { EXCEEDED AMOUNT [16] = CREDIT LIMIT [15] - TOTAL AMOUNT [14] }
     ArrAgeView[exRow, 16]:=FloatToStr(StrToFloat(ArrAgeView[exRow, 15]) - StrToFloat(ArrAgeView[exRow, 14]));
+
+(*
     { WALLET SHARE [28] | TECHNICAL COLUMN }
     if OSAmount <> 0 then ArrAgeView[exRow, 28]:=FloatToStrF(( (StrToFloat(ArrAgeView[exRow, 14]) / OSAmount) * 1), ffFixed, 8, 8)
       else
@@ -631,7 +645,11 @@ begin
     if OSAmount <> 0 then ArrAgeView[exRow, 27]:=FloatToStrF(( 1 - (DiscAmnt / OSAmount) ), ffFixed, 6, 6)
       else
         ArrAgeView[exRow, 27]:='0';
+*)
+
   end;
+
+(*
   { --------------------------------------------------------------------------------------------------------------------------------- RISK CLASS CALCULATIONS }
   SetLength(MyWallet, avRow);
   SetLength(MyList,   avRow);
@@ -656,6 +674,8 @@ begin
     { ASSIGN RISK CLASS 'C' }
     if Count > RcHi then    ArrAgeView[MyList[iCNT], 26]:='C';
   end;
+*)
+
   { --------------------------------------------------------------------------------------------------------------------------------------- DECIMAL SEPARATOR }
   if FormatSettings.DecimalSeparator = ',' then
     for exRow:=0 to avRow - 1 do
