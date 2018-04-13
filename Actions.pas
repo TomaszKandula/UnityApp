@@ -161,6 +161,7 @@ var
   zCNT:      integer;
   GenText:   TDataTables;
   AddrBook:  TDataTables;
+  OpenItems: TDataTables;
   Phones:    string;
   SL:        TStringList;
 begin
@@ -189,6 +190,18 @@ begin
         OpenItemsDest.RowCount:=zCNT;
       end;
     end;
+
+(*
+    OpenItems:=TDataTables.Create(MainForm.DbConnect);
+    try
+
+
+
+    finally
+      OpenItems.Free;
+    end;
+*)
+
     { ------------------------------------------------------------------------------------------------------------------- SORT VIA PAYMENT STATUS | ASCENDING }
     OpenItemsDest.MSort(9, 0, True);
     { -------------------------------------------------------------------------------------------------------------------------------- CUSTOMER NAME & NUMBER }

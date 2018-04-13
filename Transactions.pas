@@ -104,8 +104,8 @@ begin
     { DIVISION                       }
     if SettingGrid.Cells[iCNT, 3] = 'OFF' then Agents   :='OFF';
     if SettingGrid.Cells[iCNT, 3] = 'ON'  then Agents   :='ON';
-    if SettingGrid.Cells[iCNT, 4] = 'OFF' then Divisions:='OFF';
-    if SettingGrid.Cells[iCNT, 4] = 'ON'  then Divisions:='ON';
+    if SettingGrid.Cells[iCNT, 2] = 'OFF' then Divisions:='OFF';
+    if SettingGrid.Cells[iCNT, 2] = 'ON'  then Divisions:='ON';
   end;
   { -------------------------------------------------------------------------------------------------------------------------------------- EXECUTE STORED SQL }
 
@@ -199,27 +199,6 @@ procedure TTransactions.UpdateSummary;
     InvoiceAmt:=0;
   end;
 
-(*
-  { GET INTEREST RATE FOR GIVEN CO CODE }
-  function GetInterestRate(CoCode: string): double;
-  var
-    iCNT: integer;
-  begin
-    Result:=0;
-    CoCode:=IntToStr((StrToInt(StringReplace(CoCode, 'F', '0', [rfReplaceAll]))));
-    { NOTE OF CAUTION: SETTING GRID ON "TRANSACTIONS" HAS FIXED DIMENSION }
-    {                  INTEREST RATE IS IN SECOND ROW                     }
-    for iCNT:=0 to 3 do
-    begin
-      if SettingGrid.Cells[iCNT, 0] = CoCode then
-      begin
-        Result:=StrToFloatDef(SettingGrid.Cells[iCNT, 2], 0);
-        Break;
-      end;
-    end;
-  end;
-*)
-
   { GET VOUCHER NUMBER FROM SETTINGS }
   function GetVoucherNumber: string;
   var
@@ -245,33 +224,13 @@ begin
     InvoiceAmt:=StrToFloatDef(DestGrid.Cells[5, iCNT], 0);
     { AGGREGATE INVOICE AMOUNT }
     MainForm.OSAmount:=MainForm.OSAmount + InvoiceAmt;
-(*
-    { GET INTEREST RATE }
-    InterestRate:=GetInterestRate(DestGrid.Cells[1, iCNT]);
-    { COMPUTE INVOICE DISCOUNTING }
-    if (TimeDiff < 0) and (InterestRate > 0) and (InvoiceAmt > 0) and (IsVoType(DestGrid.Cells[3, iCNT]) = True) then
-    begin
-      { CALCULATE FOR GIVEN INVOICE }
-      DiscountedAmt:=InvoiceAmt / ( 1 + ( (InterestRate / 365) * ABS(TimeDiff)) );
-      DecreaseAmt  :=InvoiceAmt - DiscountedAmt;
-      RecoveryAmt  :=InvoiceAmt + DecreaseAmt;
-      { WRITE TO STRING GRID }
-      DestGrid.Cells[34, iCNT]:=FormatFloat('###0.00', DiscountedAmt);
-      DestGrid.Cells[35, iCNT]:=FormatFloat('###0.00', DecreaseAmt);
-      DestGrid.Cells[36, iCNT]:=FormatFloat('###0.00', RecoveryAmt);
-      { AGGREGATE FOR SUMMARY }
-      cDiscountedAmt:=cDiscountedAmt + DiscountedAmt;
-      cDecreaseAmt  :=cDecreaseAmt   + DecreaseAmt;
-      cRecoveryAmt  :=cRecoveryAmt   + RecoveryAmt;
-    end;
-*)
     { DEPENDS ON INVOICE TYPE DEFINED IN THE GENERAL SETTINGS }
     if IsVoType(DestGrid.Cells[3, iCNT]) = True then inc(nInvoices);
     { ------------------------------------------------------------------------------------------------------------- COUNT ALL OVERDUE INVOICES AND ITS AMOUNT }
     if (StrToIntDef(DestGrid.Cells[33, iCNT], 0) < 0) and (IsVoType(DestGrid.Cells[3, iCNT]) = True) then
     begin
       inc(Overdue);
-      OverdueAmt:=OverdueAmt + StrToFloatDef(DestGrid.Cells[5, iCNT], 0)
+      OverdueAmt:=OverdueAmt + StrToFloatDef(DestGrid.Cells[5, iCNT], 0);
     end;
     { ------------------------------------------------------------------------------------------------------------------------------ UNALLOCATED PAYMENTS }
     { WE TAKE INTO CONSIDERATION NEGATIVE AMOUNTS }
@@ -280,12 +239,12 @@ begin
       UNamt:=UNamt + StrToFloatDef(DestGrid.Cells[5, iCNT], 0);
   end;
   { DISPLAY }
-  MainForm.tcOpenItems.Caption     :=FormatFloat('### ###',  DestGrid.RowCount - 1);
-  MainForm.tcInvoices.Caption      :=FormatFloat('### ###',  nInvoices);
-  MainForm.tcOverdue.Caption       :=FormatFloat('### ###',  Overdue);
-  MainForm.tcOSAmt.Caption         :=FormatFloat('#,##0.00', MainForm.OSAmount);
-  MainForm.tcOvdAmt.Caption        :=FormatFloat('#,##0.00', OverdueAmt);
-  MainForm.tcUNAmt.Caption         :=FormatFloat('#,##0.00', abs(UNamt));
+  MainForm.tcOpenItems.Caption:=FormatFloat('### ###',  DestGrid.RowCount - 1);
+  MainForm.tcInvoices.Caption :=FormatFloat('### ###',  nInvoices);
+  MainForm.tcOverdue.Caption  :=FormatFloat('### ###',  Overdue);
+  MainForm.tcOSAmt.Caption    :=FormatFloat('#,##0.00', MainForm.OSAmount);
+  MainForm.tcOvdAmt.Caption   :=FormatFloat('#,##0.00', OverdueAmt);
+  MainForm.tcUNAmt.Caption    :=FormatFloat('#,##0.00', abs(UNamt));
 end;
 
 end.

@@ -1895,9 +1895,8 @@ begin
     if DetailsGrid.Cells[ColumnNum, 0] = sgCoCodes.Cells[sgCoCodes.ReturnColumn(TCompany.CO_CODE, 1, 1), iCNT] then
     begin
       DetailsGrid.Cells[ColumnNum, 1]:=sgCoCodes.Cells[sgCoCodes.ReturnColumn(TCompany.COCURRENCY,    1, 1), iCNT];
-      DetailsGrid.Cells[ColumnNum, 2]:=sgCoCodes.Cells[sgCoCodes.ReturnColumn(TCompany.INTEREST_RATE, 1, 1), iCNT];
+      DetailsGrid.Cells[ColumnNum, 2]:=sgCoCodes.Cells[sgCoCodes.ReturnColumn(TCompany.DIVISIONS,     1, 1), iCNT];
       DetailsGrid.Cells[ColumnNum, 3]:=sgCoCodes.Cells[sgCoCodes.ReturnColumn(TCompany.AGENTS,        1, 1), iCNT];
-      DetailsGrid.Cells[ColumnNum, 4]:=sgCoCodes.Cells[sgCoCodes.ReturnColumn(TCompany.DIVISIONS,     1, 1), iCNT];
       Break;
     end
     else
@@ -1905,7 +1904,6 @@ begin
       DetailsGrid.Cells[ColumnNum, 1]:=unNA;
       DetailsGrid.Cells[ColumnNum, 2]:=unNA;
       DetailsGrid.Cells[ColumnNum, 3]:=unNA;
-      DetailsGrid.Cells[ColumnNum, 4]:=unNA;
     end;
   end;
 end;
@@ -2174,7 +2172,7 @@ begin
       ReloadCover.Visible   :=True;
       ReloadCover.Cursor    :=crNo;
       GroupListDates.Enabled       :=False;
-      Action_FollowUpColors.Enabled:=False;
+      { Action_FollowUpColors.Enabled:=False; }
     end;
 
     { NOT ALLOWED FOR "RO" USERS }

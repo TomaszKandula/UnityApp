@@ -1192,7 +1192,7 @@ object MainForm: TMainForm
     Margins.Top = 10
     Margins.Right = 5
     Margins.Bottom = 0
-    ActivePage = TabSheet2
+    ActivePage = TabSheet1
     Align = alClient
     DoubleBuffered = True
     Font.Charset = DEFAULT_CHARSET
@@ -3035,9 +3035,9 @@ object MainForm: TMainForm
             object Text73: TLabel
               Left = 16
               Top = 54
-              Width = 81
+              Width = 45
               Height = 13
-              Caption = 'Interest Rate:'
+              Caption = 'Divisions:'
               Font.Charset = DEFAULT_CHARSET
               Font.Color = clBlack
               Font.Height = -11
@@ -3074,6 +3074,7 @@ object MainForm: TMainForm
               DrawingStyle = gdsGradient
               FixedColor = clCream
               FixedCols = 0
+              RowCount = 4
               FixedRows = 0
               GradientEndColor = clCream
               GradientStartColor = clCream
@@ -5580,7 +5581,7 @@ object MainForm: TMainForm
       Caption = '-'
     end
     object Action_FollowUpColors: TMenuItem
-      Caption = 'Follow-Up colors (ADMIN)'
+      Caption = 'Follow-Up colors'
       OnClick = Action_FollowUpColorsClick
     end
     object Action_RowHighlight: TMenuItem

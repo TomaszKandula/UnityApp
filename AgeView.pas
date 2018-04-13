@@ -92,6 +92,7 @@ begin
   SqlToGrid(Grid, ExecSQL, False, False);
   LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: SQL statement applied [' + StrSQL + '].');
 
+
   { ---------------------------------------------------------------------------------------------------------------------------------------- CALCULATE VALUES }
   for iCNT:=1 to Grid.RowCount - 1 do
   begin
@@ -409,7 +410,7 @@ COLUMN NUMBER   | FIELD NAME          | ASSIGN NUMBER   | FIELD NAME       | ASS
  34             | DiscAmt (remove)!   | -               | -                |            |
  35             | DecVal  (remove)!   | -               | -                |            |
  36             | RecVal  (remove)!   | -               | -                |            |
- 37             | CUID                | -               | -                |            |
+ 37             | CUID    (calc)!     | -               | -                |            |
 
 ************************************************************************************************************************************************************ *)
 
@@ -558,7 +559,6 @@ begin
       AgeViewZeroFields(avRow);
     end;
 
-(*
   { ---------------------------------------------------------------------------------------------------------------------------- RANGES AND RISK CLASS BOUNDS }
   AppSettings:=TSettings.Create;
   try
@@ -575,23 +575,9 @@ begin
     R3hi:=AppSettings.TMIG.ReadInteger(AgingRanges, 'RANGE3B', 0);
     R4hi:=AppSettings.TMIG.ReadInteger(AgingRanges, 'RANGE4B', 0);
     R5hi:=AppSettings.TMIG.ReadInteger(AgingRanges, 'RANGE5B', 0);
-    { RISK CLASS BOUNDS }
-    if FormatSettings.DecimalSeparator = ',' then
-    begin
-      RcLo:=StrToFloat(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_A_MAX', '0,80'));     { EXAMPLE: 80% }
-      RcHi:=StrToFloat(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_A_MAX', '0,80')) +    { EXAMPLE: 95% }
-            StrToFloat(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_B_MAX', '0,15'));
-    end;
-    if FormatSettings.DecimalSeparator = '.' then
-    begin
-      RcLo:=StrToFloat(StringReplace(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_A_MAX', '0,80'), ',', '.', [rfReplaceAll]));
-      RcHi:=StrToFloat(StringReplace(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_A_MAX', '0,80'), ',', '.', [rfReplaceAll])) +
-            StrToFloat(StringReplace(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_B_MAX', '0,15'), ',', '.', [rfReplaceAll]));
-    end;
   finally
     AppSettings.Free;
   end;
-*)
 
   { ------------------------------------------------------------------------------------------------------------------------------------------------ POPULATE }
   { LOOP VIA CUID COLUMN IN AGE VIEW [29] }
@@ -636,46 +622,7 @@ begin
     { EXCEEDED AMOUNT [16] = CREDIT LIMIT [15] - TOTAL AMOUNT [14] }
     ArrAgeView[exRow, 16]:=FloatToStr(StrToFloat(ArrAgeView[exRow, 15]) - StrToFloat(ArrAgeView[exRow, 14]));
 
-(*
-    { WALLET SHARE [28] | TECHNICAL COLUMN }
-    if OSAmount <> 0 then ArrAgeView[exRow, 28]:=FloatToStrF(( (StrToFloat(ArrAgeView[exRow, 14]) / OSAmount) * 1), ffFixed, 8, 8)
-      else
-        ArrAgeView[exRow, 28]:='0';
-    { CALCULATE QUALITY INDEX [27] }
-    if OSAmount <> 0 then ArrAgeView[exRow, 27]:=FloatToStrF(( 1 - (DiscAmnt / OSAmount) ), ffFixed, 6, 6)
-      else
-        ArrAgeView[exRow, 27]:='0';
-*)
-
   end;
-
-(*
-  { --------------------------------------------------------------------------------------------------------------------------------- RISK CLASS CALCULATIONS }
-  SetLength(MyWallet, avRow);
-  SetLength(MyList,   avRow);
-  Count:=0;
-  { MOVE REQUIRED ITEMS TO ARRAYS }
-  for iCNT:=0 to avRow - 1 do
-  begin
-    MyList[iCNT]  :=iCNT;                             { ORIGINAL LP  }
-    MyWallet[iCNT]:=StrToFloat(ArrAgeView[iCNT, 28]); { WALLET SHARE }
-  end;
-  { SORT DESCENDING VIA WALLET SHARTE }
-  QuickSortExt(MyWallet, MyList, Low(MyWallet), High(MyWallet), False);
-  { CALCULATE AND ASSIGN }
-  for iCNT:=0 to avRow - 1 do
-  begin
-    Count:=Count + MyWallet[iCNT];
-    { ASSIGN RISK CLASS 'A' }
-    if Count <= RcLo then   ArrAgeView[MyList[iCNT], 26]:='A';
-    { ASSIGN RISK CLASS 'B' }
-    if (Count > RcLo)  and
-       (Count <= RcHi) then ArrAgeView[MyList[iCNT], 26]:='B';
-    { ASSIGN RISK CLASS 'C' }
-    if Count > RcHi then    ArrAgeView[MyList[iCNT], 26]:='C';
-  end;
-*)
-
   { --------------------------------------------------------------------------------------------------------------------------------------- DECIMAL SEPARATOR }
   if FormatSettings.DecimalSeparator = ',' then
     for exRow:=0 to avRow - 1 do
