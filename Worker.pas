@@ -625,8 +625,8 @@ begin
     DataTables.OpenTable(TblAddressbook);
     Result:=DataTables.SqlToGrid(FGrid, DataTables.DataSet, True, True);
   finally
-    FGrid.SetColWidth(40, 10);
     FGrid.Freeze(False);
+    FGrid.SetColWidth(40, 10);
     DataTables.Free;
   end;
 end;

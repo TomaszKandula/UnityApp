@@ -246,8 +246,8 @@ procedure TDocument.BuildHTML;
     HTMLTemp:=StringReplace(HTMLTemp, '{INV_DAT}', SG.Cells[26, ActualRow], [rfReplaceAll]);
     HTMLTemp:=StringReplace(HTMLTemp, '{DUE_DAT}', SG.Cells[11, ActualRow], [rfReplaceAll]);
     HTMLTemp:=StringReplace(HTMLTemp, '{INV_CUR}', SG.Cells[7,  ActualRow], [rfReplaceAll]);
-    HTMLTemp:=StringReplace(HTMLTemp, '{INV_AMT}', SG.Cells[9,  ActualRow], [rfReplaceAll]);
-    HTMLTemp:=StringReplace(HTMLTemp, '{INV_OSA}', SG.Cells[5,  ActualRow], [rfReplaceAll]);
+    HTMLTemp:=StringReplace(HTMLTemp, '{INV_AMT}', SG.Cells[8,  ActualRow], [rfReplaceAll]);
+    HTMLTemp:=StringReplace(HTMLTemp, '{INV_OSA}', SG.Cells[4,  ActualRow], [rfReplaceAll]);
     HtmlStatement:=HtmlStatement + HTMLTemp;
   end;
 

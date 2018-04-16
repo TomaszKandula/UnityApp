@@ -249,9 +249,9 @@ const
 
   { RETURN TYPES FOR "GETDATETIME" }
 
-  gdTimeOnly = 0;
-  gdDateOnly = 1;
-  gdDateTime = 2;
+  gdTimeOnly    = 0;
+  gdDateOnly    = 1;
+  gdDateTime    = 2;
 
   (* NOTE! WE USE ONLY "YYYY-MM-DD" AND "hh:mm:ss" *)
 
@@ -269,13 +269,13 @@ const
 
   { ACCESS LEVELS }
 
-  acADMIN     = 'AD';
-  acReadWrite = 'RW';
-  acReadOnly  = 'RO';
+  acADMIN       = 'AD';
+  acReadWrite   = 'RW';
+  acReadOnly    = 'RO';
 
   { STATUS MESSAGES }
 
-  stReady       = 'Ready.';
+  stReady       = 'Ready';
   stProcessing  = 'Processing...';
   stExportXLS   = 'Exporting to Excel...';
   stExportCSV   = 'Exporting to CSV file...';

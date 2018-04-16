@@ -325,7 +325,6 @@ type                                                            (* GUI | MAIN TH
     Action_Tracker: TMenuItem;
     N4: TMenuItem;
     Action_PaymentTerm: TMenuItem;
-    Action_Group3: TMenuItem;
     Action_Person: TMenuItem;
     Label2: TLabel;
     Label3: TLabel;
@@ -358,7 +357,6 @@ type                                                            (* GUI | MAIN TH
     sgGroup3: TStringGrid;
     sgPmtTerms: TStringGrid;
     Action_AutoColumnSize: TMenuItem;
-    Action_INF4: TMenuItem;
     InnerPanelTop: TPanel;
     SplitLine2: TBevel;
     Action_Search: TMenuItem;
@@ -431,6 +429,7 @@ type                                                            (* GUI | MAIN TH
     TopPanel8: TPanel;
     RightPanel8: TPanel;
     PanelDetailsGrid: TPanel;
+    Action_HideSummary: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -520,7 +519,6 @@ type                                                            (* GUI | MAIN TH
     procedure sgInvoiceTrackerMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
     procedure Action_TrackerClick(Sender: TObject);
     procedure Action_PaymentTermClick(Sender: TObject);
-    procedure Action_Group3Click(Sender: TObject);
     procedure Action_PersonClick(Sender: TObject);
     procedure Action_RemoveClick(Sender: TObject);
     procedure Action_ShowMyClick(Sender: TObject);
@@ -553,7 +551,6 @@ type                                                            (* GUI | MAIN TH
     procedure sgPersonDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
     procedure sgGroup3DrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
     procedure Action_AutoColumnSizeClick(Sender: TObject);
-    procedure Action_INF4Click(Sender: TObject);
     procedure sgCoCodesKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure sgPaidInfoKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure sgPmtTermsKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -616,8 +613,8 @@ type                                                            (* GUI | MAIN TH
     { ------------------------------------------------------------- ! HELPERS ! ----------------------------------------------------------------------------- }
   private
     { GENERAL }
-    var pAllowClose         :  boolean;
-    var pStartTime          :  TTime;
+    var pAllowClose           :  boolean;
+    var pStartTime            :  TTime;
     { GETTERS AND SETTERS FOR "FOLLOW-UP" COLORS SAVED IN SETTINGS FILE }
     function  GetTodayFColor  : TColor;
     function  GetTodayBColor  : TColor;
@@ -1373,7 +1370,8 @@ begin
   { ----------------------------------------------------------------------------------------------------------------------------------------------- READ DATA }
   Fillchar(info, SizeOf(info), 0);
   { ----------------------------------------------------------------------------------------------------------------------------------------------- VERITICAL }
-  with info do begin
+  with info do
+  begin
     cbSize:=SizeOf(info);
     fmask :=SIF_ALL;
     GetScrollInfo(Self.Handle, SB_VERT, info);
@@ -1382,7 +1380,8 @@ begin
   end;
   SetScrollInfo(Self.Handle, SB_VERT, info, True);
   { ---------------------------------------------------------------------------------------------------------------------------------------------- HORIZONTAL }
-  with info do begin
+  with info do
+  begin
     cbSize:=SizeOf(info);
     fMask :=SIF_ALL;
     GetScrollInfo(Self.Handle, SB_HORZ, info);
@@ -1964,24 +1963,15 @@ var
   Transactions:  TTransactions;
   RegSettings:   TFormatSettings;
   NowTime:       TTime;
-  iCNT:          integer;
 begin
 
   { ------------------------------------------------------------ ! INITIALIZATION ! ------------------------------------------------------------------------- }
 
-  AppSettings :=TSettings.Create;
-  WinUserName :=AppSettings.FWinUserName;
-  EventLogPath:=AppSettings.FPathEventLog;
-  AppVersion  :=GetBuildInfoAsString;
-  pAllowClose :=False;
-
-  { ---------------------------------------------------- ! LOAD IMAGE FOR STRING GRID CELLS ! --------------------------------------------------------------- }
-
-  GridPicture:=TImage.Create(MainForm);
-  GridPicture.SetBounds(0, 0, 16, 16);
-  LoadImageFromStream(GridPicture, AppSettings.FPathGridImage);
+  AppVersion :=GetBuildInfoAsString;
+  pAllowClose:=False;
 
   { --------------------------------------------------------------------------------------------------------------------------------------- REGIONAL SETTINGS }
+
   RegSettings:=TFormatSettings.Create;
   RegSettings.CurrencyDecimals    :=4;
   RegSettings.DateSeparator       :='-';
@@ -1995,16 +1985,199 @@ begin
   FormatSettings                  :=RegSettings;
   Application.UpdateFormatSettings:=False;
 
-  { ------------------------------------------------------------------------------------------------------------------------------ APPLICATION NAME | CAPTION }
-  MainForm.Caption :=AppSettings.TMIG.ReadString(ApplicationDetails, 'WND_MAIN', APPNAME);
-  GroupName.Caption:=AppSettings.TMIG.ReadString(ApplicationDetails, 'GROUP_NAME', 'n/a');
+  { --------------------------------------------------------- ! READ SETTINGS AND INITIALIZE ! -------------------------------------------------------------- }
 
-  { ----------------------------------------------------------- ! WINDOW POSITION ! ------------------------------------------------------------------------- }
+  AppSettings :=TSettings.Create;
+  try
 
-  MainForm.DefaultMonitor:=dmDesktop;          (* DO NOT CHANGE THAT *)
-  MainForm.Position      :=poDefaultSizeOnly;  (* DO NOT CHANGE THAT *)
-  MainForm.Top           :=AppSettings.TMIG.ReadInteger(ApplicationDetails, 'WINDOW_TOP',  0);
-  MainForm.Left          :=AppSettings.TMIG.ReadInteger(ApplicationDetails, 'WINDOW_LEFT', 0);
+    { USER NAME AND EVENT LOG PATH }
+    WinUserName :=AppSettings.FWinUserName;
+    EventLogPath:=AppSettings.FPathEventLog;
+
+    { ------------------------------------------------------ ! DATABASE INITIALIZATION & UAC ! -------------------------------------------------------------- }
+
+    { ------------------------------------------------------------------------------------------------------------------------- ESTABLISH ACTIVE CONNECTIVITY }
+    DbConnect:=TADOConnection.Create(MainForm);
+    DataBase :=TDataBase.Create(True);
+    try
+      ConnLastError:=DataBase.Check;
+      if ConnLastError = 0 then
+      begin
+        DataBase.InitializeConnection(MainThreadID, True, DbConnect);
+        MainForm.InvoiceScanTimer.Enabled:=True;
+        MainForm.OILoader.Enabled        :=True;
+      end
+      else
+      begin
+        MainForm.InvoiceScanTimer.Enabled:=False;
+        MainForm.OILoader.Enabled        :=False;
+      end;
+    finally
+      DataBase.Free;
+    end;
+
+    { ----------------------------------------------------------------------------------------------------------------------------------- UPLOAD USER DETAILS }
+    UserControl:=TUserControl.Create(DbConnect);
+    try
+      EventLogPath        :=AppSettings.FPathEventLog;
+      UserControl.UserName:=WinUserName;
+      AccessLevel         :=UserControl.GetAccessData(adAccessLevel);
+
+      { IF USERNAME IS NOT FOUND, THEN CLOSE APPLICATION }
+      if AccessLevel = '' then
+      begin
+        MsgCall(mcError, 'Cannot find account for user alias: ' + UpperCase(WinUserName) + '. Please contact your administrator. Application will be closed.');
+        ExitProcess(0);
+      end;
+
+      { OTHERWISE PROCESS }
+      AccessMode:=UserControl.GetAccessData(adAccessMode);
+      if AccessMode = adAccessFull  then Action_FullView.Checked :=True;
+      if AccessMode = adAccessBasic then Action_BasicView.Checked:=True;
+      UserControl.GetGroupList(GroupList, GroupListBox);
+      UserControl.GetAgeDates(GroupListDates, GroupList[0, 0]);
+
+      (* NOTE: REPLACE BELOW WITH USER MATRIX *)
+
+      { RESTRICTED FOR "ADMINS" }
+      if AccessLevel <> acADMIN then
+      begin
+        DetailsGrid.Enabled   :=False;
+        ReloadCover.Visible   :=True;
+        ReloadCover.Cursor    :=crNo;
+        GroupListDates.Enabled:=False;
+      end;
+
+      { NOT ALLOWED FOR "RO" USERS }
+      if AccessLevel = acReadOnly then
+      begin
+        Action_Tracker.Enabled        :=False;
+        Action_AddToBook.Enabled      :=False;
+        ActionsForm.DailyCom.Enabled  :=False;
+        ActionsForm.GeneralCom.Enabled:=False;
+        btnSave.Enabled               :=False;
+      end;
+
+    finally
+      UserControl.Free;
+    end;
+
+    { -------------------------------------------------- ! LOAD IMAGE FOR STRING GRID CELLS ! --------------------------------------------------------------- }
+
+    GridPicture:=TImage.Create(MainForm);
+    GridPicture.SetBounds(0, 0, 16, 16);
+    LoadImageFromStream(GridPicture, AppSettings.FPathGridImage);
+
+    { ----------------------------------------------------- ! APPLICATION NAME | CAPTION ! ------------------------------------------------------------------ }
+
+    MainForm.Caption :=AppSettings.TMIG.ReadString(ApplicationDetails, 'WND_MAIN', APPNAME);
+    GroupName.Caption:=AppSettings.TMIG.ReadString(ApplicationDetails, 'GROUP_NAME', 'n/a');
+
+    { --------------------------------------------------------- ! WINDOW POSITION ! ------------------------------------------------------------------------- }
+
+    MainForm.DefaultMonitor:=dmDesktop;          (* DO NOT CHANGE THAT *)
+    MainForm.Position      :=poDefaultSizeOnly;  (* DO NOT CHANGE THAT *)
+    MainForm.Top           :=AppSettings.TMIG.ReadInteger(ApplicationDetails, 'WINDOW_TOP',  0);
+    MainForm.Left          :=AppSettings.TMIG.ReadInteger(ApplicationDetails, 'WINDOW_LEFT', 0);
+
+    { ----------------------------------------------------------------------------------------------------------------- START WEB PAGE | UNITY INFO | TABLEAU }
+
+    WebBrowser1.Navigate(WideString(AppSettings.TMIG.ReadString(ApplicationDetails, 'START_PAGE', 'about:blank')),  $02);
+    WebBrowser2.Navigate(WideString(AppSettings.TMIG.ReadString(ApplicationDetails, 'REPORT_PAGE', 'about:blank')), $02);
+
+    { -------------------------------------------------------- ! TIMERS INTERVALS ! ------------------------------------------------------------------------- }
+
+    (* 'INETTIMER' IS EXCLUDED FROM BELOW LIST BECAUSE IT IS CONTROLED BY 'INITIAIZECONNECTION' METHOD *)
+
+    InvoiceScanTimer.Interval:=AppSettings.TMIG.ReadInteger(TimersSettings, 'INVOICE_SCANNER', 900000);  { DEFAULT VALUE 900000  MILISECONDS = 15 MINUTES }
+    FollowupPopup.Interval   :=AppSettings.TMIG.ReadInteger(TimersSettings, 'FOLLOWUP_CHECKER',1800000); { DEFAULT VALUE 1800000 MILISECONDS = 30 MINUTES }
+    OILoader.Interval        :=AppSettings.TMIG.ReadInteger(TimersSettings, 'OI_LOADER',       300000);  { DEFAULT VALUE 3000000 MILISECONDS = 5  MINUTES }
+
+    { ---------------------------------------------------------- ! RISK CLASSES ! --------------------------------------------------------------------------- }
+
+    { WE USE COMMA DECIMAL SEPARATOR BY DEFAULT }
+    if FormatSettings.DecimalSeparator = ',' then
+    begin
+      procRISKA.Caption:=FloatToStr(StrToFloat(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_A_MAX', RISK_CLASS_A)) * 100) + '%';
+      procRISKB.Caption:=FloatToStr(StrToFloat(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_B_MAX', RISK_CLASS_B)) * 100) + '%';
+      procRISKC.Caption:=FloatToStr(StrToFloat(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_C_MAX', RISK_CLASS_C)) * 100) + '%';
+    end;
+    { CHANGE COMMA DECIMAL SEPARATOR TO POINT DECIMAL SEPARATOR }
+    if FormatSettings.DecimalSeparator = '.' then
+    begin
+      procRISKA.Caption:=FloatToStr(StrToFloat(StringReplace(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_A_MAX', RISK_CLASS_A), ',', '.', [rfReplaceAll])) * 100) + '%';
+      procRISKB.Caption:=FloatToStr(StrToFloat(StringReplace(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_B_MAX', RISK_CLASS_B), ',', '.', [rfReplaceAll])) * 100) + '%';
+      procRISKC.Caption:=FloatToStr(StrToFloat(StringReplace(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_C_MAX', RISK_CLASS_C), ',', '.', [rfReplaceAll])) * 100) + '%';
+    end;
+
+    { ----------------------------------------------------------- ! TAB SHEETS ! ---------------------------------------------------------------------------- }
+
+    TabSheet1.Caption:=AppSettings.TMIG.ReadString(TabSheetsNames, 'TAB1', 'TAB1');
+    TabSheet2.Caption:=AppSettings.TMIG.ReadString(TabSheetsNames, 'TAB2', 'TAB2');
+    TabSheet3.Caption:=AppSettings.TMIG.ReadString(TabSheetsNames, 'TAB3', 'TAB3');
+    TabSheet4.Caption:=AppSettings.TMIG.ReadString(TabSheetsNames, 'TAB4', 'TAB4');
+    TabSheet5.Caption:=AppSettings.TMIG.ReadString(TabSheetsNames, 'TAB5', 'TAB5');
+    TabSheet6.Caption:=AppSettings.TMIG.ReadString(TabSheetsNames, 'TAB6', 'TAB6');
+    TabSheet7.Caption:=AppSettings.TMIG.ReadString(TabSheetsNames, 'TAB7', 'TAB7');
+    TabSheet8.Caption:=AppSettings.TMIG.ReadString(TabSheetsNames, 'TAB8', 'TAB8');
+
+    { ----------------------------------------------------- ! CAPTIONS FOR ALL SHAPES ! --------------------------------------------------------------------- }
+
+    { AGING REPORT | TABSHEET1 }
+    Cap01.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS1TXT01', 'EMPTY'), [fsBold]);
+    Cap02.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS1TXT02', 'EMPTY'), [fsBold]);
+    Cap03.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS1TXT03', 'EMPTY'), [fsBold]);
+    Cap05.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS1TXT05', 'EMPTY'), [fsBold]);
+    Cap06.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS1TXT06', 'EMPTY'), [fsBold]);
+    Cap07.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS1TXT07', 'EMPTY'), [fsBold]);
+
+    { OPEN ITEMS | TABSHEET2 }
+    Cap10.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS2TXT01', 'EMPTY'), [fsBold]);
+    Cap11.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS2TXT02', 'EMPTY'), [fsBold]);
+    Cap12.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS2TXT03', 'EMPTY'), [fsBold]);
+
+    { ADDRESS BOOK | TABSHEET3 }
+    Cap13.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS3TXT01', 'EMPTY'), [fsBold]);
+
+    { INVOICE TRACKER | TABSHEET4 }
+    Cap43.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS4TXT01', 'EMPTY'), [fsBold]);
+
+    { GENERAL TABLES  | TABSHEET7 }
+    Cap15.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS7TXT01', 'EMPTY'), [fsBold]);
+    Cap16.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS7TXT02', 'EMPTY'), [fsBold]);
+    Cap17.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS7TXT03', 'EMPTY'), [fsBold]);
+    Cap18.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS7TXT04', 'EMPTY'), [fsBold]);
+    Cap19.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS7TXT05', 'EMPTY'), [fsBold]);
+    Cap20.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS7TXT06', 'EMPTY'), [fsBold]);
+
+    { SETTINGS | TABSHEET8 }
+    Cap21.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS8TXT01', 'EMPTY'), [fsBold]);
+    Cap22.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS8TXT02', 'EMPTY'), [fsBold]);
+    Cap23.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS8TXT03', 'EMPTY'), [fsBold]);
+    Cap27.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS8TXT04', 'EMPTY'), [fsBold]);
+
+    { UNIDENTIFIED TRANSACTIONS | TABSHEET6 }
+    Cap61.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS6TXT01', 'EMPTY'), [fsBold]);
+
+    { ------------------------------------------------------------ ! MAIN VIEW ! ---------------------------------------------------------------------------- }
+
+    { ------------------------------------------------------------------------------------------------------------------------------- AGING BUCKETS | CAPTION }
+
+    tR1.Caption:=AppSettings.TMIG.ReadString(AgingRanges,'RANGE1A','') + ' - ' + AppSettings.TMIG.ReadString(AgingRanges,'RANGE1B','');
+    tR2.Caption:=AppSettings.TMIG.ReadString(AgingRanges,'RANGE2A','') + ' - ' + AppSettings.TMIG.ReadString(AgingRanges,'RANGE2B','');
+    tR3.Caption:=AppSettings.TMIG.ReadString(AgingRanges,'RANGE3A','') + ' - ' + AppSettings.TMIG.ReadString(AgingRanges,'RANGE3B','');
+    tR4.Caption:=AppSettings.TMIG.ReadString(AgingRanges,'RANGE4A','') + ' - ' + AppSettings.TMIG.ReadString(AgingRanges,'RANGE4B','');
+    tR5.Caption:=AppSettings.TMIG.ReadString(AgingRanges,'RANGE5A','') + ' - ' + AppSettings.TMIG.ReadString(AgingRanges,'RANGE5B','');
+    tR6.Caption:=AppSettings.TMIG.ReadString(AgingRanges,'RANGE6A','') + ' - ' + AppSettings.TMIG.ReadString(AgingRanges,'RANGE6B','');
+
+    { -------------------------------------------------------------------------------------------------------------------------------- SUMMARY BOX | CAPTIONS }
+
+    Text21.Caption:=AppSettings.TMIG.ReadString(AgingRanges,'RANGE1A','') + ' - ' + AppSettings.TMIG.ReadString(AgingRanges,'RANGE3B','') + ':';
+    Text22.Caption:=AppSettings.TMIG.ReadString(AgingRanges,'RANGE4A','') + ' - ' + AppSettings.TMIG.ReadString(AgingRanges,'RANGE6B','') + ':';
+
+  finally
+    AppSettings.Free;
+  end;
 
   { ------------------------------------------------------------- ! DATE & TIME ! --------------------------------------------------------------------------- }
 
@@ -2016,7 +2189,7 @@ begin
   { ------------------------------------------------------------- ! STATUS BAR ! ---------------------------------------------------------------------------- }
 
   StatBar_TXT1.Caption:=stReady;
-  StatBar_TXT2.Caption:=WinUserName + '.';
+  StatBar_TXT2.Caption:=WinUserName;
   StatBar_TXT3.Caption:=DateToStr(Now);
 
   { ----------------------------------------------------------- ! DEFAULT VALUES ! -------------------------------------------------------------------------- }
@@ -2027,166 +2200,6 @@ begin
   Edit_ConfPassWd.Text :='';
   btnPassUpdate.Enabled:=False;
   MyPages.ActivePage   :=TabSheet1;
-
-  { ------------------------------------------------------------ ! RISK CLASSES ! --------------------------------------------------------------------------- }
-
-  { WE USE COMMA DECIMAL SEPARATOR BY DEFAULT }
-  if FormatSettings.DecimalSeparator = ',' then
-  begin
-    procRISKA.Caption:=FloatToStr(StrToFloat(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_A_MAX', RISK_CLASS_A)) * 100) + '%';
-    procRISKB.Caption:=FloatToStr(StrToFloat(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_B_MAX', RISK_CLASS_B)) * 100) + '%';
-    procRISKC.Caption:=FloatToStr(StrToFloat(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_C_MAX', RISK_CLASS_C)) * 100) + '%';
-  end;
-  { CHANGE COMMA DECIMAL SEPARATOR TO POINT DECIMAL SEPARATOR }
-  if FormatSettings.DecimalSeparator = '.' then
-  begin
-    procRISKA.Caption:=FloatToStr(StrToFloat(StringReplace(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_A_MAX', RISK_CLASS_A), ',', '.', [rfReplaceAll])) * 100) + '%';
-    procRISKB.Caption:=FloatToStr(StrToFloat(StringReplace(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_B_MAX', RISK_CLASS_B), ',', '.', [rfReplaceAll])) * 100) + '%';
-    procRISKC.Caption:=FloatToStr(StrToFloat(StringReplace(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_C_MAX', RISK_CLASS_C), ',', '.', [rfReplaceAll])) * 100) + '%';
-  end;
-  { ------------------------------------------------------------- ! TAB SHEETS ! ---------------------------------------------------------------------------- }
-
-  TabSheet1.Caption:=AppSettings.TMIG.ReadString(TabSheetsNames, 'TAB1', 'TAB1');
-  TabSheet2.Caption:=AppSettings.TMIG.ReadString(TabSheetsNames, 'TAB2', 'TAB2');
-  TabSheet3.Caption:=AppSettings.TMIG.ReadString(TabSheetsNames, 'TAB3', 'TAB3');
-  TabSheet4.Caption:=AppSettings.TMIG.ReadString(TabSheetsNames, 'TAB4', 'TAB4');
-  TabSheet5.Caption:=AppSettings.TMIG.ReadString(TabSheetsNames, 'TAB5', 'TAB5');
-  TabSheet6.Caption:=AppSettings.TMIG.ReadString(TabSheetsNames, 'TAB6', 'TAB6');
-  TabSheet7.Caption:=AppSettings.TMIG.ReadString(TabSheetsNames, 'TAB7', 'TAB7');
-  TabSheet8.Caption:=AppSettings.TMIG.ReadString(TabSheetsNames, 'TAB8', 'TAB8');
-
-  { ------------------------------------------------------- ! ASSIGN PRE-DEFINED HEADERS ! ------------------------------------------------------------------ }
-
-  { ---------------------------------------------------------------------------------------------------------------------------------------------- OPEN ITEMS }
-
-  sgOpenItems.RowCount:=2;
-  sgOpenItems.Cols[0].Text:= '';
-  for iCNT:=1 to sgOpenItems.ColCount do
-  begin
-    sgOpenItems.Cols[iCNT].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER' + IntToStr(iCNT),  '(column)');
-  end;
-
-  { ------------------------------------------------------- ! CAPTIONS FOR ALL SHAPES ! --------------------------------------------------------------------- }
-
-  { AGING REPORT | TABSHEET1 }
-  Cap01.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS1TXT01', 'EMPTY'), [fsBold]);
-  Cap02.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS1TXT02', 'EMPTY'), [fsBold]);
-  Cap03.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS1TXT03', 'EMPTY'), [fsBold]);
-  Cap05.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS1TXT05', 'EMPTY'), [fsBold]);
-  Cap06.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS1TXT06', 'EMPTY'), [fsBold]);
-  Cap07.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS1TXT07', 'EMPTY'), [fsBold]);
-
-  { OPEN ITEMS | TABSHEET2 }
-  Cap10.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS2TXT01', 'EMPTY'), [fsBold]);
-  Cap11.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS2TXT02', 'EMPTY'), [fsBold]);
-  Cap12.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS2TXT03', 'EMPTY'), [fsBold]);
-
-  { ADDRESS BOOK | TABSHEET3 }
-  Cap13.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS3TXT01', 'EMPTY'), [fsBold]);
-
-  { INVOICE TRACKER | TABSHEET4 }
-  Cap43.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS4TXT01', 'EMPTY'), [fsBold]);
-
-  { GENERAL TABLES  | TABSHEET7 }
-  Cap15.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS7TXT01', 'EMPTY'), [fsBold]);
-  Cap16.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS7TXT02', 'EMPTY'), [fsBold]);
-  Cap17.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS7TXT03', 'EMPTY'), [fsBold]);
-  Cap18.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS7TXT04', 'EMPTY'), [fsBold]);
-  Cap19.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS7TXT05', 'EMPTY'), [fsBold]);
-  Cap20.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS7TXT06', 'EMPTY'), [fsBold]);
-
-  { SETTINGS | TABSHEET8 }
-  Cap21.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS8TXT01', 'EMPTY'), [fsBold]);
-  Cap22.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS8TXT02', 'EMPTY'), [fsBold]);
-  Cap23.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS8TXT03', 'EMPTY'), [fsBold]);
-  Cap27.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS8TXT04', 'EMPTY'), [fsBold]);
-
-  { UNIDENTIFIED TRANSACTIONS | TABSHEET6 }
-  Cap61.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS6TXT01', 'EMPTY'), [fsBold]);
-
-  { -------------------------------------------------------- ! ADDRESS BOOK TABSHEET ! ---------------------------------------------------------------------- }
-
-  sgAddressBook.RowCount:=2;
-
-  { -------------------------------------------------------------- ! MAIN VIEW ! ---------------------------------------------------------------------------- }
-
-  { --------------------------------------------------------------------------------------------------------------------------------- AGING BUCKETS | CAPTION }
-  tR1.Caption:=AppSettings.TMIG.ReadString(AgingRanges,'RANGE1A','') + ' - ' + AppSettings.TMIG.ReadString(AgingRanges,'RANGE1B','');
-  tR2.Caption:=AppSettings.TMIG.ReadString(AgingRanges,'RANGE2A','') + ' - ' + AppSettings.TMIG.ReadString(AgingRanges,'RANGE2B','');
-  tR3.Caption:=AppSettings.TMIG.ReadString(AgingRanges,'RANGE3A','') + ' - ' + AppSettings.TMIG.ReadString(AgingRanges,'RANGE3B','');
-  tR4.Caption:=AppSettings.TMIG.ReadString(AgingRanges,'RANGE4A','') + ' - ' + AppSettings.TMIG.ReadString(AgingRanges,'RANGE4B','');
-  tR5.Caption:=AppSettings.TMIG.ReadString(AgingRanges,'RANGE5A','') + ' - ' + AppSettings.TMIG.ReadString(AgingRanges,'RANGE5B','');
-  tR6.Caption:=AppSettings.TMIG.ReadString(AgingRanges,'RANGE6A','') + ' - ' + AppSettings.TMIG.ReadString(AgingRanges,'RANGE6B','');
-
-  { ---------------------------------------------------------------------------------------------------------------------------------- SUMMARY BOX | CAPTIONS }
-  Text21.Caption:=AppSettings.TMIG.ReadString(AgingRanges,'RANGE1A','') + ' - ' + AppSettings.TMIG.ReadString(AgingRanges,'RANGE3B','') + ':';
-  Text22.Caption:=AppSettings.TMIG.ReadString(AgingRanges,'RANGE4A','') + ' - ' + AppSettings.TMIG.ReadString(AgingRanges,'RANGE6B','') + ':';
-
-  { ------------------------------------------------------ ! DATABASE INITIALIZATION & UAC ! ---------------------------------------------------------------- }
-
-  { ESTABLISH ACTIVE CONNECTIVITY }
-  DbConnect:=TADOConnection.Create(MainForm);
-  DataBase :=TDataBase.Create(True);
-  try
-    ConnLastError:=DataBase.Check;
-    if ConnLastError = 0 then
-    begin
-      DataBase.InitializeConnection(MainThreadID, True, DbConnect);
-      MainForm.InvoiceScanTimer.Enabled:=True;
-      MainForm.OILoader.Enabled        :=True;
-    end
-    else
-    begin
-      MainForm.InvoiceScanTimer.Enabled:=False;
-      MainForm.OILoader.Enabled        :=False;
-    end;
-  finally
-    DataBase.Free;
-  end;
-
-  { UPLOAD USER DETAILS }
-  UserControl:=TUserControl.Create(DbConnect);
-  try
-    EventLogPath:=AppSettings.FPathEventLog;
-    UserControl.UserName:=WinUserName;
-    AccessLevel:=UserControl.GetAccessData(adAccessLevel);
-
-    { IF USERNAME IS NOT FOUND, THEN CLOSE APPLICATION }
-    if AccessLevel = '' then
-    begin
-      MsgCall(mcError, 'Cannot find account for user alias: ' + UpperCase(WinUserName) + '. Please contact your administrator. Application will be terminated.');
-      ExitProcess(0);
-    end;
-
-    { OTHERWISE PROCESS }
-    AccessMode:=UserControl.GetAccessData(adAccessMode);
-    if AccessMode = adAccessFull  then Action_FullView.Checked :=True;
-    if AccessMode = adAccessBasic then Action_BasicView.Checked:=True;
-    UserControl.GetGroupList(GroupList, GroupListBox);
-    UserControl.GetAgeDates(GroupListDates, GroupList[0, 0]);
-
-    { RESTRICTED FOR "ADMINS" }
-    if AccessLevel <> acADMIN then
-    begin
-      DetailsGrid.Enabled   :=False;
-      ReloadCover.Visible   :=True;
-      ReloadCover.Cursor    :=crNo;
-      GroupListDates.Enabled       :=False;
-      { Action_FollowUpColors.Enabled:=False; }
-    end;
-
-    { NOT ALLOWED FOR "RO" USERS }
-    if AccessLevel = acReadOnly then
-    begin
-      Action_Tracker.Enabled        :=False;
-      Action_AddToBook.Enabled      :=False;
-      ActionsForm.DailyCom.Enabled  :=False;
-      ActionsForm.GeneralCom.Enabled:=False;
-      btnSave.Enabled               :=False;
-    end;
-  finally
-    UserControl.Free;
-  end;
 
   { --------------------------------------------------------- ! READ DEFAULT AGE VIEW ! --------------------------------------------------------------------- }
 
@@ -2215,48 +2228,48 @@ begin
 
   DataTables:=TDataTables.Create(DbConnect);
   try
-
-    { LOAD DATA }
-    DataTables.OpenTable(TblCompany);  DataTables.SqlToGrid(sgCoCodes,  DataTables.ExecSQL, False, True);
-    DataTables.OpenTable(TblPmtterms); DataTables.SqlToGrid(sgPmtTerms, DataTables.ExecSQL, False, True);
-    DataTables.OpenTable(TblPaidinfo); DataTables.SqlToGrid(sgPaidInfo, DataTables.ExecSQL, False, True);
-    DataTables.OpenTable(TblGroup3);   DataTables.SqlToGrid(sgGroup3,   DataTables.ExecSQL, False, True);
-    DataTables.OpenTable(TblPerson);   DataTables.SqlToGrid(sgPerson,   DataTables.ExecSQL, False, True);
-
-    { HIDE SPECIFIC COLUMNS }
-    sgCoCodes.ColWidths[sgCoCodes.ReturnColumn('BANKDETAILS', 1 ,1)]:=-1;
-    sgCoCodes.ColWidths[sgCoCodes.ReturnColumn('MAN_ID',      1 ,1)]:=-1;
-    sgCoCodes.ColWidths[sgCoCodes.ReturnColumn('TL_ID',       1 ,1)]:=-1;
-
+    { SELECTED COLUMNS }
+    DataTables.CleanUp;
+    DataTables.Columns.Add(TCompany.CO_CODE);
+    DataTables.Columns.Add(TCompany.BRANCH);
+    DataTables.Columns.Add(TCompany.CONAME);
+    DataTables.Columns.Add(TCompany.COADDRESS);
+    DataTables.Columns.Add(TCompany.VATNO);
+    DataTables.Columns.Add(TCompany.DUNS);
+    DataTables.Columns.Add(TCompany.COUNTRY);
+    DataTables.Columns.Add(TCompany.CITY);
+    DataTables.Columns.Add(TCompany.FMANAGER);
+    DataTables.Columns.Add(TCompany.Telephone);
+    DataTables.Columns.Add(TCompany.COTYPE);
+    DataTables.Columns.Add(TCompany.COCURRENCY);
+    DataTables.Columns.Add(TCompany.INTEREST_RATE);
+    DataTables.Columns.Add(TCompany.KPI_OVERDUE_TARGET);
+    DataTables.Columns.Add(TCompany.KPI_UNALLOCATED_TARGET);
+    DataTables.Columns.Add(TCompany.AGENTS);
+    DataTables.Columns.Add(TCompany.DIVISIONS);
+    { READ }
+    DataTables.OpenTable(TblCompany);
+    DataTables.SqlToGrid(sgCoCodes,  DataTables.DataSet, False, True);
+    { READ BEOW TABLES "AS IS" }
+    DataTables.CleanUp; DataTables.OpenTable(TblPmtterms); DataTables.SqlToGrid(sgPmtTerms, DataTables.DataSet, False, True);
+    DataTables.CleanUp; DataTables.OpenTable(TblPaidinfo); DataTables.SqlToGrid(sgPaidInfo, DataTables.DataSet, False, True);
+    DataTables.CleanUp; DataTables.OpenTable(TblGroup3);   DataTables.SqlToGrid(sgGroup3,   DataTables.DataSet, False, True);
+    DataTables.CleanUp; DataTables.OpenTable(TblPerson);   DataTables.SqlToGrid(sgPerson,   DataTables.DataSet, False, True);
   finally
     DataTables.Free;
   end;
 
-  { ------------------------------------------------------------------------------------------------------------------- START WEB PAGE | UNITY INFO | TABLEAU }
-  WebBrowser1.Navigate(WideString(AppSettings.TMIG.ReadString(ApplicationDetails, 'START_PAGE', 'about:blank')),  $02);
-  WebBrowser2.Navigate(WideString(AppSettings.TMIG.ReadString(ApplicationDetails, 'REPORT_PAGE', 'about:blank')), $02);
-
   { -------------------------------------------------------------------------------------------------------------------------- APPLICATION VERSION & USER SID }
+
   LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Application version = ' + AppVersion);
   LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: User SID = ' + GetCurrentUserSid);
-
-  { ---------------------------------------------------------- ! TIMERS INTERVALS ! ------------------------------------------------------------------------- }
-
-  (* 'INETTIMER' IS EXCLUDED FROM BELOW LIST BECAUSE IT IS CONTROLED BY 'INITIAIZECONNECTION' METHOD *)
-
-  InvoiceScanTimer.Interval:=AppSettings.TMIG.ReadInteger(TimersSettings, 'INVOICE_SCANNER', 900000);  { DEFAULT VALUE 900000  MILISECONDS = 15 MINUTES }
-  FollowupPopup.Interval   :=AppSettings.TMIG.ReadInteger(TimersSettings, 'FOLLOWUP_CHECKER',1800000); { DEFAULT VALUE 1800000 MILISECONDS = 30 MINUTES }
-  OILoader.Interval        :=AppSettings.TMIG.ReadInteger(TimersSettings, 'OI_LOADER',       300000);  { DEFAULT VALUE 3000000 MILISECONDS = 5  MINUTES }
-
-  { DISPOSE OBJECTS }
-  AppSettings.Free;
-
-  { START CHECKERS }
-  SwitchTimers(tmEnabled);
 
   { TIME ON STATBAR }
   UpTime.Enabled     :=True;
   CurrentTime.Enabled:=True;
+
+  { START CHECKERS }
+  SwitchTimers(tmEnabled);
 
 end;
 
@@ -2368,7 +2381,7 @@ begin
   begin
     TrayIcon.Visible:=True;
     TrayIcon.BalloonHint:='Hello, you have ' + IntToStr(Sum) + ' follow-up dates registered for today.' + CRLF +
-                          'Let''s bother some customers and collect some money honey!' + CRLF;
+                          'Let''s bother some customers and collect some money money!' + CRLF;
     TrayIcon.ShowBalloonHint;
   end;
 end;
@@ -2806,19 +2819,6 @@ begin
   end;
 end;
 
-{ ----------------------------------------------------------------------------------------------------------------------------------------------- SHOW GROUP3 }
-procedure TMainForm.Action_Group3Click(Sender: TObject);
-var
-  AgeView: TAgeView;
-begin
-  AgeView:=TAgeView.Create(DbConnect);
-  try
-    MsgCall(mcInfo, 'Assigned to Group3: ' + AgeView.GetData(sgAgeView, sgGroup3, TSnapshots.fGROUP3));
-  finally
-    AgeView.Free;
-  end;
-end;
-
 { ----------------------------------------------------------------------------------------------------------------------------------------------- SHOW PERSON }
 procedure TMainForm.Action_PersonClick(Sender: TObject);
 var
@@ -2830,16 +2830,6 @@ begin
   finally
     AgeView.Free;
   end;
-end;
-
-{ ------------------------------------------------------------------------------------------------------------------------------------------------- SHOW INF4 }
-procedure TMainForm.Action_INF4Click(Sender: TObject);
-var
-  Return:  string;
-begin
-  Return:=sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fINF4, 1, 1) , sgAgeView.Row];
-  if (Return = '') or (Return = ' ') then Return:=unUnassigned;
-  MsgCall(mcInfo, 'Assigned to INF4: ' + Return);
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------ SAVE STRING GRID TO MS EXCEL }
@@ -3463,8 +3453,6 @@ end;
 procedure TMainForm.sgAddressBookKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 var
   DataTables: TDataTables;
-  Value:      string;
-  Column:     string;
 begin
   { "READ ONLY" USERS ARE NOT ALLOWED TO MAKE CHANGES }
   if AccessLevel = acReadOnly then
@@ -3496,20 +3484,11 @@ begin
       DataTables:=TDataTables.Create(DbConnect);
       try
         { GET USER VALUE AND COLUMN NAME }
-        Value:=DataTables.CleanStr(sgAddressBook.Cells[sgAddressBook.Col, sgAddressBook.Row], True);
-        Column:=sgAddressBook.Cells[sgAddressBook.Col, 0];
-        { PREPARE NON-QUERY }
-        DataTables.StrSQL:=_UPDATE             +
-                             TblAddressbook    +
-                           _SET                +
-                             Column            +
-                           EQUAL               +
-                             Value             +
-                           WHERE               +
-                             TAddressBook.CUID +
-                           EQUAL               +
-                             DataTables.CleanStr(sgAddressBook.Cells[2, sgAddressBook.Row], True);
-        DataTables.ExecSQL;
+        DataTables.CleanUp;
+        DataTables.Columns.Add(sgAddressBook.Cells[sgAddressBook.Col, 0]);
+        DataTables.Values.Add(DataTables.CleanStr(sgAddressBook.Cells[sgAddressBook.Col, sgAddressBook.Row], False));
+        DataTables.Conditions.Add(TAddressBook.CUID + EQUAL + DataTables.CleanStr(sgAddressBook.Cells[2, sgAddressBook.Row], True));
+        DataTables.UpdateRecord(TblAddressbook);
       finally
         DataTables.Free;
       end;

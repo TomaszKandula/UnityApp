@@ -126,7 +126,7 @@ begin
           QuotedStr(Divisions)                                    + COMMA +
           QuotedStr(INF4);
   ExecSQL;
-  Result:=SqlToGrid(DestGrid, ExecSQL, False, False);
+  Result:=SqlToGrid(DestGrid, ExecSQL, False, True);
   { ----------------------------------------------------------------------------------------------------------------------------------------- SORT VIA CUID }
   DestGrid.MSort(SortPos, 2, True);
 end;

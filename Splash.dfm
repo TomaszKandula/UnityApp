@@ -407,14 +407,14 @@ object SplashForm: TSplashForm
   object ProgressText: TLabel
     Left = 424
     Top = 230
-    Width = 20
+    Width = 17
     Height = 13
     Caption = '0%'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlack
     Font.Height = -11
     Font.Name = 'Tahoma'
-    Font.Style = [fsBold]
+    Font.Style = []
     ParentFont = False
   end
 end

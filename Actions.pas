@@ -161,7 +161,6 @@ var
   zCNT:      integer;
   GenText:   TDataTables;
   AddrBook:  TDataTables;
-  OpenItems: TDataTables;
   Phones:    string;
   SL:        TStringList;
 begin
@@ -190,18 +189,6 @@ begin
         OpenItemsDest.RowCount:=zCNT;
       end;
     end;
-
-(*
-    OpenItems:=TDataTables.Create(MainForm.DbConnect);
-    try
-
-
-
-    finally
-      OpenItems.Free;
-    end;
-*)
-
     { ------------------------------------------------------------------------------------------------------------------- SORT VIA PAYMENT STATUS | ASCENDING }
     OpenItemsDest.MSort(9, 0, True);
     { -------------------------------------------------------------------------------------------------------------------------------- CUSTOMER NAME & NUMBER }
@@ -371,18 +358,18 @@ begin
     OpenItemsGrid.RowCount:=2;
     OpenItemsGrid.ColCount:=13;
     OpenItemsGrid.Cols[0].Text :='';
-    OpenItemsGrid.Cols[1].Text :=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER10', 'InvoNo');
-    OpenItemsGrid.Cols[2].Text :=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER29', 'Txt');
-    OpenItemsGrid.Cols[3].Text :=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER32', 'AddTxt');
-    OpenItemsGrid.Cols[4].Text :=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER5',  'OpenAm');
-    OpenItemsGrid.Cols[5].Text :=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER9',  'Am');
-    OpenItemsGrid.Cols[6].Text :=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER4',  'OpenCurAm');
-    OpenItemsGrid.Cols[7].Text :=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER8',  'CurAm');
-    OpenItemsGrid.Cols[8].Text :=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER7',  'ISO');
-    OpenItemsGrid.Cols[9].Text :=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER11', 'DueDt');
-    OpenItemsGrid.Cols[10].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER26', 'ValDt');
-    OpenItemsGrid.Cols[11].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER19', 'Ctrl');
-    OpenItemsGrid.Cols[12].Text:=AppSettings.TMIG.ReadString(OpenItemsData, 'HEADER33', 'PmtStat');
+    OpenItemsGrid.Cols[1].Text :='Invoice Number';
+    OpenItemsGrid.Cols[2].Text :='Text';
+    OpenItemsGrid.Cols[3].Text :='Add. Text';
+    OpenItemsGrid.Cols[4].Text :='Open Amount';
+    OpenItemsGrid.Cols[5].Text :='Amount';
+    OpenItemsGrid.Cols[6].Text :='Open Cur. Amount';
+    OpenItemsGrid.Cols[7].Text :='Currency Amount';
+    OpenItemsGrid.Cols[8].Text :='Currency';
+    OpenItemsGrid.Cols[9].Text :='Due Date';
+    OpenItemsGrid.Cols[10].Text:='Value Date';
+    OpenItemsGrid.Cols[11].Text:='Control Status';
+    OpenItemsGrid.Cols[12].Text:='Payment Status';
   finally
     AppSettings.Free;
   end;
@@ -730,7 +717,7 @@ var
   ManuStat:    integer;
 begin
   { ASK USER BEFORE SENDING THE EMAIL }
-  if MainForm.MsgCall(mcQuestion2, 'Are you absolutely sure (for 100%) that you really want it to be sent, right now?') = IDNO then Exit;
+  if MainForm.MsgCall(mcQuestion2, 'Are you absolutely sure that you really want it to be sent, right now?') = IDNO then Exit;
   { PROCEED }
   Statement    :=TDocument.Create;
   AppSettings  :=TSettings.Create;

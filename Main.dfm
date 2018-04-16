@@ -3547,17 +3547,16 @@ object MainForm: TMainForm
         OnMouseWheelDown = sgAddressBookMouseWheelDown
         OnMouseWheelUp = sgAddressBookMouseWheelUp
         OnSelectCell = sgAddressBookSelectCell
-        ExplicitWidth = 1250
         ColWidths = (
           40
-          85
-          149
-          265
-          309
-          326
-          177
-          165
-          258
+          39
+          43
+          43
+          45
+          48
+          39
+          37
+          33
           40)
       end
     end
@@ -5557,17 +5556,9 @@ object MainForm: TMainForm
       Caption = 'Payment Term'
       OnClick = Action_PaymentTermClick
     end
-    object Action_Group3: TMenuItem
-      Caption = 'Group3'
-      OnClick = Action_Group3Click
-    end
     object Action_Person: TMenuItem
       Caption = 'Person'
       OnClick = Action_PersonClick
-    end
-    object Action_INF4: TMenuItem
-      Caption = 'INF4'
-      OnClick = Action_INF4Click
     end
     object N5: TMenuItem
       Caption = '-'
@@ -5601,6 +5592,9 @@ object MainForm: TMainForm
     end
     object N16: TMenuItem
       Caption = '-'
+    end
+    object Action_HideSummary: TMenuItem
+      Caption = '{MODE} aging summary'
     end
     object Action_AutoColumnSize: TMenuItem
       Caption = 'Auto column width'

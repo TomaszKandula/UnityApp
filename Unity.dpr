@@ -262,6 +262,10 @@ begin
       ExitProcess(0);
     end;
   end;
+
+  { ---------------------------------------------------------------------------------------------------- FORCE CLEAN UP REMAINING FILES AFTER PREVIOUS UPDATE }
+  DeleteFilesMatchingPattern(PathAppDir, '*.del', PathEventLog);
+
   { ------------------------------------------------------------------------------------------------------------------ PERFORM UPDATE IF NEW RELEASE IS FOUND }
   if FileExists(PathRelease) then
   begin
@@ -299,11 +303,6 @@ begin
       ShellExecute(Application.Handle, 'open', PChar(Application.ExeName), nil, nil, SW_SHOWNORMAL);
       UpdateForm.Free;
       ExitProcess(0);
-    end
-    else
-    begin
-      { CLEANING UP REMAINING FILES AFTER PREVIOUS UPDATE }
-      DeleteFilesMatchingPattern(PathAppDir, '*.del', PathEventLog);
     end;
   end;
 
