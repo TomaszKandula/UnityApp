@@ -54,6 +54,7 @@ type
     var CustAddr:    string;
     var CustName:    string;
     var CUID:        string;
+    var SCUID:       string;
     var CoCode:      string;
     var Branch:      string;
     var REM_EX1:     string;
@@ -202,7 +203,7 @@ begin
   DataBase:=TDataTables.Create(MainForm.DbConnect);
   try
     { GET "MAILTO" }
-    DataBase.CustFilter:=WHERE + TAddressBook.CUID + EQUAL + QuotedStr(CUID);
+    DataBase.CustFilter:=WHERE + TAddressBook.SCUID + EQUAL + QuotedStr(SCUID);
     DataBase.OpenTable(TblAddressbook);
     if DataBase.DataSet.RecordCount = 1 then MailTo:=DataBase.DataSet.Fields[TAddressBook.ESTATEMENTS].Value;
     { GET: "MAILFROM", "BANKS", "LBU ADDRESS" AND "TELEPHONE" }

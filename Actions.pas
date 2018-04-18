@@ -90,6 +90,8 @@ type
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
   public
     var CUID       :  string;
+    var SCUID      :  string;
+    var CoCode     :  string;
     var CustName   :  string;
     var CustNumber :  string;
   published
@@ -201,14 +203,14 @@ begin
     try
       AddrBook.Columns.Add(TAddressBook.CONTACT);
       AddrBook.Columns.Add(TAddressBook.ESTATEMENTS);
-      AddrBook.Columns.Add(TAddressBook.TELEPHONE);
-      AddrBook.CustFilter:=WHERE + TAddressBook.CUID + EQUAL + QuotedStr(CUID);
+      AddrBook.Columns.Add(TAddressBook.PHONE_NUMBERS);
+      AddrBook.CustFilter:=WHERE + TAddressBook.SCUID + EQUAL + QuotedStr(SCUID);
       AddrBook.OpenTable(TblAddressbook);
       if AddrBook.DataSet.RecordCount = 1 then
       begin
         Cust_Person.Text:=MainForm.OleGetStr(AddrBook.DataSet.Fields[TAddressBook.CONTACT].Value);
         Cust_Mail.Text  :=MainForm.OleGetStr(AddrBook.DataSet.Fields[TAddressBook.ESTATEMENTS].Value);
-        Phones:=MainForm.OleGetStr(AddrBook.DataSet.Fields[TAddressBook.TELEPHONE].Value);
+        Phones:=MainForm.OleGetStr(AddrBook.DataSet.Fields[TAddressBook.PHONE_NUMBERS].Value);
         if (Phones <> '') or (Phones <> ' ') then
         begin
           Cust_Phone.Clear;
@@ -385,8 +387,10 @@ begin
   ClearAll;
   { CUSTOMER KEY INFORMATION }
   CUID      :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUID,            1, 1), MainForm.sgAgeView.Row];
+  CoCode    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCO_CODE,         1, 1), MainForm.sgAgeView.Row];
   CustName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), MainForm.sgAgeView.Row];
   CustNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), MainForm.sgAgeView.Row];
+  SCUID     :=CustNumber + MainForm.ConvertName(CoCode, 'F', 3);
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------------------- ON ACTIVATE }
@@ -680,15 +684,15 @@ begin
   AddrBook:=TDataTables.Create(MainForm.DbConnect);
   try
     AddrBook.OpenTable(TblAddressbook);
-    Condition:=TAddressBook.CUID + EQUAL + QuotedStr(CUID);
+    Condition:=TAddressBook.SCUID + EQUAL + QuotedStr(SCUID);
     AddrBook.DataSet.Filter:=Condition;
     if not (AddrBook.DataSet.RecordCount = 0) then
     begin
       AddrBook.CleanUp;
       { UPDATE DATA }
-      AddrBook.Columns.Add(TAddressBook.CONTACT);     AddrBook.Values.Add(Cust_Person.Text); AddrBook.Conditions.Add(Condition);
-      AddrBook.Columns.Add(TAddressBook.ESTATEMENTS); AddrBook.Values.Add(Cust_Mail.Text);   AddrBook.Conditions.Add(Condition);
-      AddrBook.Columns.Add(TAddressBook.TELEPHONE);   AddrBook.Values.Add(Cust_Phone.Text);  AddrBook.Conditions.Add(Condition);
+      AddrBook.Columns.Add(TAddressBook.CONTACT);        AddrBook.Values.Add(Cust_Person.Text); AddrBook.Conditions.Add(Condition);
+      AddrBook.Columns.Add(TAddressBook.ESTATEMENTS);    AddrBook.Values.Add(Cust_Mail.Text);   AddrBook.Conditions.Add(Condition);
+      AddrBook.Columns.Add(TAddressBook.PHONE_NUMBERS);  AddrBook.Values.Add(Cust_Phone.Text);  AddrBook.Conditions.Add(Condition);
       { EXECUTE }
       if not (AddrBook.UpdateRecord(TblAddressbook)) then
         MainForm.MsgCall(mcWarn, 'Cannot save customer details. Please contact IT support.')
@@ -728,6 +732,7 @@ begin
     Statement.CustName:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME, 1, 1), MainForm.sgAgeView.Row];
     Statement.CoCode  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCO_CODE,       1, 1), MainForm.sgAgeView.Row];
     Statement.Branch  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fAGENT,         1, 1), MainForm.sgAgeView.Row];
+    Statement.SCUID   :=SCUID;
     { SET OPEN ITEMS GRID }
     Statement.OpenItems:=MainForm.sgOpenItems;
     { GET HTML LAYOUT }

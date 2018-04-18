@@ -610,6 +610,7 @@ type                                                            (* GUI | MAIN TH
     procedure Action_INF4_FilterClick(Sender: TObject);
     procedure Action_Gr3_FilterClick(Sender: TObject);
     procedure sgAddressBookKeyPress(Sender: TObject; var Key: Char);
+    procedure Action_HideSummaryClick(Sender: TObject);
     { ------------------------------------------------------------- ! HELPERS ! ----------------------------------------------------------------------------- }
   private
     { GENERAL }
@@ -1868,6 +1869,20 @@ begin
       end;
     end;
   end;
+
+  { CONVERTS FROM    }
+  {  1. 2020 TO 2020 }
+  {  2. 340  TO 0340 }
+  {  3. 43   TO 0043 }
+  {  4. 5    TO 0005 }
+  if mode = 3 then
+  begin
+    if Length(CoNumber) = 4 then Result:=CoNumber;
+    if Length(CoNumber) = 3 then Result:='0'    + CoNumber;
+    if Length(CoNumber) = 2 then Result:='00'   + CoNumber;
+    if Length(CoNumber) = 1 then Result:='000'  + CoNumber;
+  end;
+
 end;
 
 { -------------------------------------------------------------------------------------------------------------------- RETURN SPECIFIC 'COCOE' FROM THE GROUP }
@@ -2525,11 +2540,11 @@ begin
   begin
     DataTables:=TDataTables.Create(DbConnect);
     try
-      DataTables.StrSQL:=DELETE_FROM         +
-                           TblAddressbook    +
-                         WHERE               +
-                           TAddressBook.CUID +
-                         EQUAL               +
+      DataTables.StrSQL:=DELETE_FROM          +
+                           TblAddressbook     +
+                         WHERE                +
+                           TAddressBook.SCUID +
+                         EQUAL                +
                            DataTables.CleanStr(sgAddressBook.Cells[2, sgAddressBook.Row], True);
       DataTables.ExecSQL;
     finally
@@ -2545,8 +2560,8 @@ procedure TMainForm.Action_SearchBookClick(Sender: TObject);
 begin
   { SETUP AND CALL WINDOW }
   SearchForm.SGrid     :=MainForm.sgAddressBook;
-  SearchForm.SColName  :=TAddressBook.CUSTNAME;
-  SearchForm.SColNumber:=TAddressBook.CUSTNUMBER;
+  SearchForm.SColName  :=TAddressBook.CUSTOMER_NAME;
+  SearchForm.SColNumber:=TAddressBook.CUSTOMER_NUMBER;
   WndCall(SearchForm, stModal);
 end;
 
@@ -2635,14 +2650,11 @@ begin
   { CHECK IF USER SELECT A RANGE ON AGEGRID }
   if (sgAgeView.Selection.Bottom - sgAgeView.Selection.Top) > 0 then
   begin
-    { WE ALLOW TO ADD CUSTOMER TO INVOICE TRACKER ONLY ONE AT A TIME }
-    Action_Tracker.Enabled:=False;
     { WE CAN ADD THE SAME FOLLOW UP ONLY TO A SELECTED GROUP }
     Action_GroupFollowUp.Enabled:=True;
   end
   else
   begin
-    Action_Tracker.Enabled:=True;
     Action_GroupFollowUp.Enabled:=False;
   end;
 
@@ -2663,13 +2675,43 @@ begin
 end;
 
 { ---------------------------------------------------------------------------------------------------------------------- ADD TO INVOICE TRACKER | WINDOW CALL }
-
 procedure TMainForm.Action_TrackerClick(Sender: TObject);
+var
+  iCNT: integer;
+  Item: TListItem;
 begin
   if ConnLastError = 0 then
-    WndCall(TrackerForm, stModal)
-      else
-        MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+  begin
+    TrackerForm.CustomerList.Clear;
+    { ONE CUSTOMER HAS BEEN SELECTED }
+    if (sgAgeView.Selection.Top - sgAgeView.Selection.Bottom) = 0 then
+    begin
+      Item:=TrackerForm.CustomerList.Items.Add;
+      Item.Caption:='1';
+      Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.CUID, 1, 1),           sgAgeView.Row]);
+      Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME, 1, 1), sgAgeView.Row]);
+    end
+    { MANY CUSTOMERS HAS BEEN SELECTED }
+    else
+    begin
+      for iCNT:=sgAgeView.Selection.Top to sgAgeView.Selection.Bottom do
+      begin
+        if sgAgeView.RowHeights[iCNT] <> - 1 then
+        begin
+          Item:=TrackerForm.CustomerList.Items.Add;
+          Item.Caption:=IntToStr(iCNT);
+          Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.CUID, 1, 1),           iCNT]);
+          Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME, 1, 1), iCNT]);
+        end;
+      end;
+    end;
+    { OPEN FORM }
+    WndCall(TrackerForm, stModal);
+  end
+  else
+  begin
+    MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+  end;
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------ ADD SELECTED ITEMS TO ADDRESS BOOK }
@@ -2699,10 +2741,6 @@ begin
         sgAddressBook.Cells[2, sgAddressBook.RowCount - 1 + OffSet]:=sgOpenItems.Cells[37, jCNT];
         sgAddressBook.Cells[3, sgAddressBook.RowCount - 1 + OffSet]:=sgOpenItems.Cells[2,  jCNT];
         sgAddressBook.Cells[4, sgAddressBook.RowCount - 1 + OffSet]:=sgOpenItems.Cells[6,  jCNT];
-        sgAddressBook.Cells[9, sgAddressBook.RowCount - 1 + OffSet]:=sgOpenItems.Cells[21, jCNT] + SPACE +
-                                                                     sgOpenItems.Cells[22, jCNT] + SPACE +
-                                                                     sgOpenItems.Cells[23, jCNT] + SPACE +
-                                                                     sgOpenItems.Cells[24, jCNT];
         { ---------------------------------------------------------------------------------------------------------------------------------------- EMPTY ROWS }
         for cCNT:=5 to 8 do sgAddressBook.Cells[cCNT, sgAddressBook.RowCount - 1]:='';
         { ---------------------------------------------------------------------------------------------------------------------------------------------- QUIT }
@@ -2813,7 +2851,17 @@ var
 begin
   AgeView:=TAgeView.Create(DbConnect);
   try
-    MsgCall(mcInfo, 'Payment term: ' + AgeView.GetData(sgAgeView, sgPmtTerms, TSnapshots.fPAYMENT_TERMS));
+    MsgCall(
+             mcInfo,
+             'Payment term: ' +
+             AgeView.GetData(
+                              sgAgeView.Cells[
+                                               sgAgeView.ReturnColumn(TSnapshots.fPAYMENT_TERMS, 1, 1),
+                                               sgAgeView.Row
+                                             ],
+                              TblPmtterms
+                            )
+           );
   finally
     AgeView.Free;
   end;
@@ -2826,7 +2874,17 @@ var
 begin
   AgeView:=TAgeView.Create(DbConnect);
   try
-    MsgCall(mcInfo, 'Assigned to Person: ' + AgeView.GetData(sgAgeView, sgPerson, TSnapshots.fPERSON));
+    MsgCall(
+             mcInfo,
+             'Payment term: ' +
+             AgeView.GetData(
+                              sgAgeView.Cells[
+                                               sgAgeView.ReturnColumn(TSnapshots.fPERSON, 1, 1),
+                                               sgAgeView.Row
+                                             ],
+                              TblPerson
+                            )
+           );
   finally
     AgeView.Free;
   end;
@@ -2836,6 +2894,23 @@ end;
 procedure TMainForm.Action_ToExceClick(Sender: TObject);
 begin
   TTExcelExport.Create;
+end;
+
+{ -------------------------------------------------------------------------------------------------------------------------------------- HIDE OR SHOW SUMMARY }
+procedure TMainForm.Action_HideSummaryClick(Sender: TObject);
+begin
+  if Action_HideSummary.Checked then
+  begin
+    Footer1.Visible:=False;
+    sgAgeView.Margins.Bottom:=17;
+    Action_HideSummary.Checked:=False;
+  end
+  else
+  begin
+    Footer1.Visible:=True;
+    sgAgeView.Margins.Bottom:=0;
+    Action_HideSummary.Checked:=True;
+  end;
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------- AUTO COLUMN RE-SIZE }
@@ -3445,7 +3520,7 @@ end;
 { ------------------------------------------------------------------------------------------------------------------ ADDRESS BOOK | RESTRICT TELEPHONE COLUMN }
 procedure TMainForm.sgAddressBookKeyPress(Sender: TObject; var Key: Char);
 begin
-  if sgAddressBook.Col = sgAddressBook.ReturnColumn(TAddressBook.TELEPHONE, 1, 1) then
+  if sgAddressBook.Col = sgAddressBook.ReturnColumn(TAddressBook.PHONE_NUMBERS, 1, 1) then
     if (not (CharInSet(Key, ['0'..'9', ';', SPACE, BACKSPACE]))) then Key:=#0;
 end;
 
@@ -3487,7 +3562,7 @@ begin
         DataTables.CleanUp;
         DataTables.Columns.Add(sgAddressBook.Cells[sgAddressBook.Col, 0]);
         DataTables.Values.Add(DataTables.CleanStr(sgAddressBook.Cells[sgAddressBook.Col, sgAddressBook.Row], False));
-        DataTables.Conditions.Add(TAddressBook.CUID + EQUAL + DataTables.CleanStr(sgAddressBook.Cells[2, sgAddressBook.Row], True));
+        DataTables.Conditions.Add(TAddressBook.SCUID + EQUAL + DataTables.CleanStr(sgAddressBook.Cells[2, sgAddressBook.Row], True));
         DataTables.UpdateRecord(TblAddressbook);
       finally
         DataTables.Free;

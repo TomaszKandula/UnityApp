@@ -53,8 +53,10 @@ type
   published
     destructor Destroy; override;
     procedure  Read(var Grid: TStringGrid);
+    //procedure  ShowSummary;
+    //procedure  CalculateRiskClasses;
     procedure  Details(var Grid: TStringGrid);
-    function   GetData(Grid: TStringGrid; Source: TStringGrid; WhichCol: string): string;
+    function   GetData(Code: string; Table: string): string;
     procedure  ClearSummary;
     procedure  UpdateSummary;
     procedure  AgeViewMode(var Grid: TStringGrid; ModeBySection: string);
@@ -81,7 +83,7 @@ end;
 procedure TAgeView.Read(var Grid: TStringGrid);
 var
   StrCol: string;
-  iCNT:   integer;
+//  iCNT:   integer;
 begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   Grid.Freeze(True);
@@ -92,7 +94,7 @@ begin
   SqlToGrid(Grid, ExecSQL, False, False);
   LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: SQL statement applied [' + StrSQL + '].');
 
-
+(*
   { ---------------------------------------------------------------------------------------------------------------------------------------- CALCULATE VALUES }
   for iCNT:=1 to Grid.RowCount - 1 do
   begin
@@ -116,8 +118,6 @@ begin
       { SUM ALL EXCEEDERS AMOUNT }
       TotalExceed:=TotalExceed + Abs(StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fEXCEEDED_AMOUNT, 1, 1), iCNT], 0));
     end;
-
-(*
     { SUM ALL ITEMS FOR RISK CLASSES }
     if Grid.Cells[Grid.ReturnColumn(TSnapshots.fRISK_CLASS, 1, 1), iCNT] = 'A' then
     begin
@@ -134,15 +134,17 @@ begin
       RCC:=RCC + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fTOTAL, 1, 1), iCNT], 0);
       Inc(RCCcount);
     end;
-*)
-
     { COUNT ITEMS }
     inc(CustAll);
   end;
+*)
+
   { -------------------------------------------------------------------------------------------------------------------------------------------- UNINITIALIZE }
   Grid.DefaultRowHeight:=17;
   Grid.Freeze(False);
 end;
+
+
 
 { -------------------------------------------------------------------------------------------------------------------------------------- RETURN BASIC DETAILS }
 procedure TAgeView.Details(var Grid: TStringGrid);
@@ -183,23 +185,50 @@ begin
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------- FIND MATCH DATA IN GENERAL TABLES }
-function TAgeView.GetData(Grid: TStringGrid; Source: TStringGrid; WhichCol: string): string;
+function TAgeView.GetData(Code: string; Table: string): string;
 var
-  iCNT:  integer;
-  jCNT:  integer;
+  DataTables: TDataTables;
+  Field:      string;
 begin
   Result:=unUnassigned;
-  { FIND GIVEN COLUMN }
-  for jCNT:=1 to Grid.ColCount - 1 do
-    if WhichCol = Grid.Cells[jCNT, 0] then Break;
-  { FIND DATA }
-  for iCNT:=1 to Source.RowCount - 1 do
-  begin
-    if Grid.Cells[jCNT, Grid.Row] = Source.Cells[2, iCNT] then
+  if (Code = ' ') or (Code = '') then Exit;
+  DataTables:=TDataTables.Create(MainForm.DbConnect);
+  try
+    { "GROUP3" TABLE }
+    if Table = TblGroup3 then
     begin
-      if (Source.Cells[3, iCNT] = '') or (Source.Cells[3, iCNT] = ' ') then Result:=unUnassigned else Result:=Source.Cells[3, iCNT];
-      Break;
+      Field:=TGroup3.DESCRIPTION;
+      DataTables.Columns.Add(Field);
+      DataTables.CustFilter:=WHERE + TGroup3.ERP_CODE + EQUAL + Code;
+      DataTables.OpenTable(Table);
     end;
+    { "PAID INFO" TABLE }
+    if Table = TblPaidinfo then
+    begin
+      Field:=TPaidinfo.DESCRIPTION;
+      DataTables.Columns.Add(Field);
+      DataTables.CustFilter:=WHERE + TPaidInfo.ERP_CODE + EQUAL + Code;
+      DataTables.OpenTable(Table);
+    end;
+    { "PAYMENT TERMS" TABLE }
+    if Table = TblPmtterms then
+    begin
+      Field:=TPmtterms.DESCRIPTION;
+      DataTables.Columns.Add(Field);
+      DataTables.CustFilter:=WHERE + TPmtterms.ERP_CODE + EQUAL + Code;
+      DataTables.OpenTable(Table);
+    end;
+    { "PERSONS" TABLE }
+    if Table = TblPerson then
+    begin
+      Field:=TPerson.DESCRIPTION;
+      DataTables.Columns.Add(Field);
+      DataTables.CustFilter:=WHERE + TPerson.ERP_CODE + EQUAL + Code;
+      DataTables.OpenTable(Table);
+    end;
+    if DataTables.DataSet.RecordCount = 1 then Result:=MainForm.OleGetStr(DataTables.DataSet.Fields[Field].Value);
+  finally
+    DataTables.Free;
   end;
 end;
 
@@ -665,8 +694,8 @@ begin
   Columns.Add(TSnapshots.PERSON);
   Columns.Add(TSnapshots.GROUP3);
   Columns.Add(TSnapshots.RISK_CLASS);
-  Columns.Add(TSnapshots.QUALITY_IDX);
-  Columns.Add(TSnapshots.WALLET_SHARE);
+  Columns.Add(TSnapshots.FREE1);
+  Columns.Add(TSnapshots.FREE2);
   Columns.Add(TSnapshots.CUID);
   { DELETE STATEMENT | REMOVE OLD DATA }
   DeleteData:=DELETE_FROM +

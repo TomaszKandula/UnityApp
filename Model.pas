@@ -51,7 +51,7 @@ type
   TCompany = class(TDataTables)  { MANY-TO-MANY }
   {$TYPEINFO ON}
   public
-    const ID                     : string = 'ID';  { PRIMARY KEY }
+    const ID                     : string = 'ID';           { PRIMARY KEY }
     const CO_CODE                : string = 'CO_CODE';
     const DBNAME                 : string = 'DBNAME';
     const BRANCH                 : string = 'BRANCH';
@@ -80,8 +80,8 @@ type
     const REM_EX5                : string = 'REM_EX5';
     const DUNS                   : string = 'DUNS';
     const Telephone              : string = 'Telephone';
-    const MAN_ID                 : string = 'MAN_ID';  { FOREIGN KEY -> PRIMARY KEY IN "TBL_MANAGERS"    }
-    const TL_ID                  : string = 'TL_ID';   { FOREIGN KEY -> PRIMARY KEY IN "TBL_TEAMLEADERS" }
+    const MAN_ID                 : string = 'MAN_ID';       { FOREIGN KEY -> PRIMARY KEY IN "TBL_MANAGERS"    }
+    const TL_ID                  : string = 'TL_ID';        { FOREIGN KEY -> PRIMARY KEY IN "TBL_TEAMLEADERS" }
     const DIVISIONS              : string = 'DIVISIONS';
   end;
 
@@ -90,7 +90,7 @@ type
   TManagers = class(TDataTables)  { MANY-TO-MANY }
   {$TYPEINFO ON}
   public
-    const ID        : string = 'ID';  { PRIMARY KEY <- FOREGIN KEY FROM "TBL_COMPANY" }
+    const ID        : string = 'ID';            { PRIMARY KEY <- FOREGIN KEY FROM "TBL_COMPANY" }
     const ManagerAR : string = 'ManagerAR';
     const ManagerAP : string = 'ManagerAP';
     const ManagerGL : string = 'ManagerGL';
@@ -101,7 +101,7 @@ type
   TTeamleaders = class(TDataTables)  { MANY-TO-MANY }
   {$TYPEINFO ON}
   public
-    const ID  :  string = 'ID';  { PRIMARY KEY <- FOREIGN KEY FROM "TBL_COMPANY" }
+    const ID  :  string = 'ID';                 { PRIMARY KEY <- FOREIGN KEY FROM "TBL_COMPANY" }
     const AP1 :  string = 'AP1';
     const AP2 :  string = 'AP2';
     const AR1 :  string = 'AR1';
@@ -117,16 +117,15 @@ type
   TAddressBook = class(TDataTables)
   {$TYPEINFO ON}
   public
-    const ID         : string = 'ID';  { PRIMARY KEY }
-    const USER_ALIAS : string = 'USER_ALIAS';
-    const CUID       : string = 'CUID';  { CONSTRAINT UNIQUE }
-    const CUSTNUMBER : string = 'CUSTNUMBER';
-    const CUSTNAME   : string = 'CUSTNAME';
-    const EMAILS     : string = 'EMAILS';
-    const TELEPHONE  : string = 'TELEPHONE';
-    const CONTACT    : string = 'CONTACT';
-    const CUSTADDR   : string = 'CUSTADDR';
-    const ESTATEMENTS: string = 'ESTATEMENTS';
+    const ID               : string = 'ID';           { PRIMARY KEY }
+    const USER_ALIAS       : string = 'USER_ALIAS';
+    const SCUID            : string = 'SCUID';        { CONSTRAINT UNIQUE }
+    const CUSTOMER_NUMBER  : string = 'CUSTOMER_NUMBER';
+    const CUSTOMER_NAME    : string = 'CUSTOMER_NAME';
+    const EMAILS           : string = 'EMAILS';
+    const PHONE_NUMBERS    : string = 'PHONE_NUMBERS';
+    const CONTACT          : string = 'CONTACT';
+    const ESTATEMENTS      : string = 'ESTATEMENTS';
   end;
 
 { --------------------------------------------------------------- ! TBL_DAILY ! ----------------------------------------------------------------------------- }
@@ -134,7 +133,7 @@ type
   TDaily = class(TDataTables)
   {$TYPEINFO ON}
   public
-    const ID            : string = 'ID';  { PRIMARY KEY }
+    const ID            : string = 'ID';        { PRIMARY KEY }
     const GROUP_ID      : string = 'GROUP_ID';
     const CUID          : string = 'CUID';
     const AGEDATE       : string = 'AGEDATE';
@@ -154,8 +153,8 @@ type
   TGeneral = class(TDataTables)
   {$TYPEINFO ON}
   public
-    const ID          : string = 'ID';  { PRIMARY KEY }
-    const CUID        : string = 'CUID';  { CONSTRAINT UNIQUE }
+    const ID          : string = 'ID';          { PRIMARY KEY }
+    const CUID        : string = 'CUID';        { CONSTRAINT UNIQUE }
     const STAMP       : string = 'STAMP';
     const USER_ALIAS  : string = 'USER_ALIAS';
     const FIXCOMMENT  : string = 'FIXCOMMENT';
@@ -173,7 +172,7 @@ type
   TOpenitems = class(TDataTables)                               (* FEED FROM ERP *)
   {$TYPEINFO ON}
   public
-    const ID               : string = 'ID';  { PRIMARY KEY }
+    const ID               : string = 'ID';     { PRIMARY KEY }
     const SourceDBName     : string = 'SourceDBName';
     const CustNo           : string = 'CustNo';
     const VoTp             : string = 'VoTp';
@@ -246,8 +245,8 @@ type
     const PERSON          : string = 'PERSON';
     const GROUP3          : string = 'GROUP3';
     const RISK_CLASS      : string = 'RISK_CLASS';
-    const QUALITY_IDX     : string = 'QUALITY_IDX';
-    const WALLET_SHARE    : string = 'WALLET_SHARE';
+    const FREE1           : string = 'FREE1';
+    const FREE2           : string = 'FREE2';
     const CUID            : string = 'CUID';
 
     (* REFLECTS "FRIENDLY" COLUMN NAMES USED IN THE APPLICATION *)
@@ -291,7 +290,7 @@ type
   TPaidinfo = class(TDataTables)                                (* FEED FROM ERP *)
   {$TYPEINFO ON}
   public
-    const ID            : string = 'ID';  { PRIMARY KEY }
+    const ID            : string = 'ID';        { PRIMARY KEY }
     const ERP_CODE      : string = 'ERP_CODE';
     const DESCRIPTION   : string = 'DESCRIPTION';
   end;
@@ -301,9 +300,9 @@ type
   TPerson = class(TDataTables)                                  (* FEED FROM ERP *)
   {$TYPEINFO ON}
   public
-    const ID            : string = 'ID';  { PRIMARY KEY }
+    const ID            : string = 'ID';        { PRIMARY KEY }
     const ERP_CODE      : string = 'ERP_CODE';
-    const PERSON_NAME   : string = 'PERSON_NAME';
+    const DESCRIPTION   : string = 'DESCRIPTION';
   end;
 
 { --------------------------------------------------------------- ! TBL_GROUP3 ! ---------------------------------------------------------------------------- }
@@ -311,9 +310,9 @@ type
   TGroup3 = class(TDataTables)                                  (* FEED FROM ERP *)
   {$TYPEINFO ON}
   public
-    const ID            : string = 'ID';  { PRIMARY KEY }
+    const ID            : string = 'ID';        { PRIMARY KEY }
     const ERP_CODE      : string = 'ERP_CODE';
-    const SALESMEN_NAME : string = 'SALESMEN_NAME';
+    const DESCRIPTION   : string = 'DESCRIPTION';
   end;
 
 { -------------------------------------------------------------- ! TBL_PMTTERMS ! --------------------------------------------------------------------------- }
@@ -321,9 +320,9 @@ type
   TPmtterms = class(TDataTables)                               (* FEED FROM ERP *)
   {$TYPEINFO ON}
   public
-    const ID         : string = 'ID';  { PRIMARY KEY }
+    const ID         : string = 'ID';           { PRIMARY KEY }
     const ERP_CODE   : string = 'ERP_CODE';
-    const TEXT_DESC  : string = 'TEXT_DESC';
+    const DESCRIPTION: string = 'DESCRIPTION';
     const I_MONTH    : string = 'I_MONTH';
     const I_DAYS     : string = 'I_DAYS';
     const I_DAYS_NET : string = 'I_DAYS_NET';
@@ -334,12 +333,12 @@ type
 
 { --------------------------------------------------------------- ! TBL_TRACKER ! --------------------------------------------------------------------------- }
 type
-  TTracker = class(TDataTables)  { ONE-TO-MANY }
+  TTracker = class(TDataTables)  { MANY-TO-MANY }
   {$TYPEINFO ON}
   public
-    const ID         : string = 'ID';   { PRIMARY KEY -> FOREIGN KEY IN "TBL_INVOICES" }
+    const ID         : string = 'ID';           { PRIMARY KEY -> FOREIGN KEY IN "TBL_INVOICES" }
     const USER_ALIAS : string = 'USER_ALIAS';
-    const CUID       : string = 'CUID';  { CONSTRAINT UNIQUE }
+    const CUID       : string = 'CUID';         { CONSTRAINT UNIQUE }
     const CO_CODE    : string = 'CO_CODE';
     const BRANCH     : string = 'BRANCH';
     const CUSTNAME   : string = 'CUSTNAME';
@@ -349,20 +348,31 @@ type
     const INDV_REM2  : string = 'INDV_REM2';
     const INDV_REM3  : string = 'INDV_REM3';
     const INDV_REM4  : string = 'INDV_REM4';
+    const EXP_REM2   : string = 'EXP_REM2';
+    const EXP_REM3   : string = 'EXP_REM3';
+    const LAYOUT_ID  : string = 'LAYOUT_ID';    { FOREIGN KEY -> PRIMARY KEY IN "TBL_REMINDERLAYOUTS" }
   end;
-
 
 { -------------------------------------------------------------- ! TBL_INVOICES ! --------------------------------------------------------------------------- }
 type
   TInvoices = class(TDataTables)  { ONE-TO-MANY }
   {$TYPEINFO ON}
   public
-    const ID           : string = 'ID';  { PRIMARY KEY }
-    const SK           : string = 'SK';  { FOREIGN KEY -> PRIMARY KEY IN "TBL_TRACKER" }
+    const ID           : string = 'ID';         { PRIMARY KEY }
+    const SK           : string = 'SK';         { FOREIGN KEY -> PRIMARY KEY IN "TBL_TRACKER" }
     const CUID         : string = 'CUID';
     const INVOICENO    : string = 'INVOICENO';
     const INVOICESTATE : string = 'INVOICESTATE';
     const STAMP        : string = 'STAMP';
+  end;
+
+{ ------------------------------------------------------------ ! TBL_REMINERLAYOUTS ! ----------------------------------------------------------------------- }
+type
+  TReminderLayouts = class(TDataTables)  { ONE-TO-MANY }
+  {$TYPEINFO ON}
+  public
+    const ID           : string = 'ID';         { PRIMARY KEY }
+    const LAYOUTNAME   : string = 'LAYOUTNAME';
   end;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -372,8 +382,8 @@ type
   TUAC = class(TDataTables)  { ONE-TO-MANY }
   {$TYPEINFO ON}
   public
-    const ID           : string = 'ID';  { PRIMARY KEY -> FOREIGN KEY IN "TBL_GROUPS" }
-    const USERNAME     : string = 'USERNAME';  { CONSTRAINT UNIQUE }
+    const ID           : string = 'ID';         { PRIMARY KEY -> FOREIGN KEY IN "TBL_GROUPS" }
+    const USERNAME     : string = 'USERNAME';   { CONSTRAINT UNIQUE }
     const ACCESS_LEVEL : string = 'ACCESS_LEVEL';
     const ACCESS_MODE  : string = 'ACCESS_MODE';
   end;
@@ -384,10 +394,10 @@ type
   TGroups = class(TDataTables)  { ONE-TO-MANY }
   {$TYPEINFO ON}
   public
-    const ID            : string = 'ID';   { PRIMARY KEY }
+    const ID            : string = 'ID';        { PRIMARY KEY }
     const GROUP_ID      : string = 'GROUP_ID';
     const GROUP_NAME    : string = 'GROUP_NAME';
-    const FID           : string = 'FID';  { FOREIGN KEY -> PRIMARY KEY IN "TBL_UAC" }
+    const FID           : string = 'FID';       { FOREIGN KEY -> PRIMARY KEY IN "TBL_UAC" }
   end;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

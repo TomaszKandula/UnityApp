@@ -1205,12 +1205,10 @@ object MainForm: TMainForm
     TabOrder = 0
     TabStop = False
     TabWidth = 150
-    ExplicitWidth = 1292
     object TabSheet9: TTabSheet
       Caption = 'START'
       Highlighted = True
       ImageIndex = 8
-      ExplicitWidth = 1284
       object WebContainer: TPanel
         AlignWithMargins = True
         Left = 17
@@ -1225,7 +1223,6 @@ object MainForm: TMainForm
         BevelKind = bkFlat
         BevelOuter = bvNone
         TabOrder = 0
-        ExplicitWidth = 1250
         object WebBrowser1: TWebBrowser
           AlignWithMargins = True
           Left = 5
@@ -1255,7 +1252,6 @@ object MainForm: TMainForm
       Caption = 'Reporting'
       Highlighted = True
       ImageIndex = 5
-      ExplicitWidth = 1284
       object ReportContainer: TPanel
         AlignWithMargins = True
         Left = 17
@@ -1270,7 +1266,6 @@ object MainForm: TMainForm
         BevelKind = bkFlat
         BevelOuter = bvNone
         TabOrder = 0
-        ExplicitWidth = 1250
         object WebBrowser2: TWebBrowser
           AlignWithMargins = True
           Left = 5
@@ -1305,7 +1300,6 @@ object MainForm: TMainForm
       Font.Style = []
       Highlighted = True
       ParentFont = False
-      ExplicitWidth = 1284
       object Header1: TPanel
         Left = 0
         Top = 0
@@ -1314,7 +1308,6 @@ object MainForm: TMainForm
         Align = alTop
         BevelOuter = bvNone
         TabOrder = 0
-        ExplicitWidth = 1284
         object MainPanel1: TPanel
           AlignWithMargins = True
           Left = 17
@@ -1943,7 +1936,6 @@ object MainForm: TMainForm
         Align = alBottom
         BevelOuter = bvNone
         TabOrder = 1
-        ExplicitWidth = 1284
         object BottomPanel1: TPanel
           AlignWithMargins = True
           Left = 17
@@ -2523,7 +2515,6 @@ object MainForm: TMainForm
         OnKeyDown = sgAgeViewKeyDown
         OnMouseWheelDown = sgAgeViewMouseWheelDown
         OnMouseWheelUp = sgAgeViewMouseWheelUp
-        ExplicitWidth = 1250
         ColWidths = (
           40
           40
@@ -2560,7 +2551,6 @@ object MainForm: TMainForm
       Caption = 'VISMA Open Items'
       Highlighted = True
       ImageIndex = 1
-      ExplicitWidth = 1284
       object Header2: TPanel
         Left = 0
         Top = 0
@@ -2571,7 +2561,6 @@ object MainForm: TMainForm
         Color = clWhite
         ParentBackground = False
         TabOrder = 1
-        ExplicitWidth = 1284
         object ContentPanel2: TPanel
           AlignWithMargins = True
           Left = 17
@@ -3015,14 +3004,14 @@ object MainForm: TMainForm
             object Text63: TLabel
               Left = 16
               Top = 15
-              Width = 70
+              Width = 56
               Height = 13
               Caption = 'Companies:'
             end
             object Text72: TLabel
               Left = 16
               Top = 34
-              Width = 57
+              Width = 48
               Height = 13
               Caption = 'Currency:'
               Font.Charset = DEFAULT_CHARSET
@@ -3048,7 +3037,7 @@ object MainForm: TMainForm
             object Text53: TLabel
               Left = 16
               Top = 71
-              Width = 65
+              Width = 38
               Height = 13
               Caption = 'Agents:'
               Font.Charset = DEFAULT_CHARSET
@@ -3174,7 +3163,6 @@ object MainForm: TMainForm
         OnKeyDown = sgOpenItemsKeyDown
         OnMouseWheelDown = sgOpenItemsMouseWheelDown
         OnMouseWheelUp = sgOpenItemsMouseWheelUp
-        ExplicitWidth = 1473
         ColWidths = (
           40
           67
@@ -3221,7 +3209,6 @@ object MainForm: TMainForm
       Caption = 'Unidentified Transactions'
       Highlighted = True
       ImageIndex = 7
-      ExplicitWidth = 1284
       object Header6: TPanel
         Left = 0
         Top = 0
@@ -3232,7 +3219,6 @@ object MainForm: TMainForm
         Color = clWhite
         ParentBackground = False
         TabOrder = 0
-        ExplicitWidth = 1284
         object ContentPanel6: TPanel
           AlignWithMargins = True
           Left = 17
@@ -3280,14 +3266,12 @@ object MainForm: TMainForm
         Color = 15527148
         ParentBackground = False
         TabOrder = 1
-        ExplicitWidth = 1250
       end
     end
     object TabSheet3: TTabSheet
       Caption = 'Private Address Book'
       Highlighted = True
       ImageIndex = 2
-      ExplicitWidth = 1284
       object Header3: TPanel
         Left = 0
         Top = 0
@@ -3297,7 +3281,6 @@ object MainForm: TMainForm
         BevelOuter = bvNone
         Color = clWhite
         TabOrder = 0
-        ExplicitWidth = 1284
         object ContentPanel: TPanel
           AlignWithMargins = True
           Left = 17
@@ -3565,7 +3548,6 @@ object MainForm: TMainForm
       Highlighted = True
       ImageIndex = 4
       OnShow = TabSheet4Show
-      ExplicitWidth = 1284
       object Header4: TPanel
         Left = 0
         Top = 0
@@ -3576,7 +3558,6 @@ object MainForm: TMainForm
         Color = clWhite
         ParentBackground = False
         TabOrder = 0
-        ExplicitWidth = 1284
         object ContentPanel1: TPanel
           AlignWithMargins = True
           Left = 17
@@ -3678,7 +3659,6 @@ object MainForm: TMainForm
         OnKeyDown = sgInvoiceTrackerKeyDown
         OnMouseWheelDown = sgInvoiceTrackerMouseWheelDown
         OnMouseWheelUp = sgInvoiceTrackerMouseWheelUp
-        ExplicitWidth = 1250
       end
     end
     object TabSheet7: TTabSheet
@@ -3687,7 +3667,6 @@ object MainForm: TMainForm
       ImageIndex = 8
       OnResize = TabSheet7Resize
       OnShow = TabSheet7Show
-      ExplicitWidth = 1284
       object Header7: TPanel
         Left = 0
         Top = 0
@@ -3698,7 +3677,6 @@ object MainForm: TMainForm
         Color = clWhite
         ParentBackground = False
         TabOrder = 0
-        ExplicitWidth = 1284
         object ContentPanel7: TPanel
           Left = 0
           Top = 0
@@ -3793,7 +3771,6 @@ object MainForm: TMainForm
         BevelOuter = bvNone
         Color = clWhite
         TabOrder = 1
-        ExplicitWidth = 611
         object Cap16: TShape
           AlignWithMargins = True
           Left = 0
@@ -3835,7 +3812,6 @@ object MainForm: TMainForm
           OnKeyDown = sgCoCodesKeyDown
           OnMouseWheelDown = sgCoCodesMouseWheelDown
           OnMouseWheelUp = sgCoCodesMouseWheelUp
-          ExplicitWidth = 611
           ColWidths = (
             10
             76)
@@ -3854,7 +3830,6 @@ object MainForm: TMainForm
         Align = alRight
         BevelOuter = bvNone
         TabOrder = 2
-        ExplicitLeft = 964
         object Cap17: TShape
           AlignWithMargins = True
           Left = 0
@@ -3957,7 +3932,6 @@ object MainForm: TMainForm
         Align = alRight
         BevelOuter = bvNone
         TabOrder = 3
-        ExplicitLeft = 645
         object Cap20: TShape
           AlignWithMargins = True
           Left = 0
@@ -4052,7 +4026,6 @@ object MainForm: TMainForm
       Highlighted = True
       ImageIndex = 6
       OnShow = TabSheet8Show
-      ExplicitWidth = 1284
       object Header8: TPanel
         Left = 0
         Top = 0
@@ -4063,7 +4036,6 @@ object MainForm: TMainForm
         Color = clWhite
         ParentBackground = False
         TabOrder = 0
-        ExplicitWidth = 1284
         object ContentPanel8: TPanel
           AlignWithMargins = True
           Left = 17
@@ -4297,9 +4269,6 @@ object MainForm: TMainForm
           Color = clWhite
           ParentBackground = False
           TabOrder = 1
-          ExplicitTop = 26
-          ExplicitWidth = 185
-          ExplicitHeight = 41
         end
       end
       object InnerPanel8Left: TPanel
@@ -4795,8 +4764,6 @@ object MainForm: TMainForm
           OnKeyPress = sgListValueKeyPress
           OnMouseWheelDown = sgListValueMouseWheelDown
           OnMouseWheelUp = sgListValueMouseWheelUp
-          ExplicitLeft = 438
-          ExplicitWidth = 469
           ColWidths = (
             30
             129
@@ -4845,7 +4812,6 @@ object MainForm: TMainForm
           Align = alTop
           BevelOuter = bvNone
           TabOrder = 0
-          ExplicitWidth = 396
           object Cap27: TShape
             AlignWithMargins = True
             Left = 0
@@ -4892,7 +4858,6 @@ object MainForm: TMainForm
           OnDrawCell = sgGroupsDrawCell
           OnMouseWheelDown = sgGroupsMouseWheelDown
           OnMouseWheelUp = sgGroupsMouseWheelUp
-          ExplicitWidth = 396
           ColWidths = (
             30
             35
@@ -4924,7 +4889,6 @@ object MainForm: TMainForm
           OnDrawCell = sgUACDrawCell
           OnMouseWheelDown = sgUACMouseWheelDown
           OnMouseWheelUp = sgUACMouseWheelUp
-          ExplicitWidth = 396
           ColWidths = (
             30
             33
@@ -4946,10 +4910,6 @@ object MainForm: TMainForm
         Color = 15527148
         ParentBackground = False
         TabOrder = 3
-        ExplicitLeft = 941
-        ExplicitTop = 26
-        ExplicitWidth = 185
-        ExplicitHeight = 41
       end
     end
   end
@@ -4969,7 +4929,6 @@ object MainForm: TMainForm
     ParentColor = True
     ParentDoubleBuffered = False
     TabOrder = 1
-    ExplicitWidth = 1292
     object Shape7: TShape
       AlignWithMargins = True
       Left = 1073
@@ -5594,7 +5553,9 @@ object MainForm: TMainForm
       Caption = '-'
     end
     object Action_HideSummary: TMenuItem
-      Caption = '{MODE} aging summary'
+      Caption = 'Show aging summary'
+      Checked = True
+      OnClick = Action_HideSummaryClick
     end
     object Action_AutoColumnSize: TMenuItem
       Caption = 'Auto column width'

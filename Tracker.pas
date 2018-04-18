@@ -18,12 +18,11 @@ interface
 (* NOTE: DO NOT PLACE 'MAIN' REFERENCE IN THE IMPLEMENTATION SECTION BUT IN THE INTERFACE SECTION. THIS IS NECESSARY DUE TO CLASS EXTENSIONS DEFINED IN MAIN *)
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, ExtCtrls, StdCtrls, Buttons, StrUtils, ADODB, Main;
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, ExtCtrls, StdCtrls, Buttons, StrUtils, ADODB, Main, ComCtrls;
 
 { --------------------------------------------------------------- ! MAIN CLASS ! ---------------------------------------------------------------------------- }
 type
   TTrackerForm = class(TForm)
-    FrameBottom: TShape;
     Label6: TLabel;
     EmailFromList: TComboBox;
     TextStatTo: TLabeledEdit;
@@ -31,11 +30,9 @@ type
     AppMain: TShape;
     btnOK: TSpeedButton;
     btnCancel: TSpeedButton;
-    FrameTop: TShape;
     TextReminder1: TLabeledEdit;
     TextReminder2: TLabeledEdit;
     TextReminder3: TLabeledEdit;
-    SplitLine: TBevel;
     TextMailTo: TLabeledEdit;
     TextLegalTo: TLabeledEdit;
     LayoutList: TComboBox;
@@ -49,6 +46,13 @@ type
     Label5: TLabel;
     Label7: TLabel;
     ErrorEmailFrom: TLabel;
+    Exp_Rem2_Switch: TCheckBox;
+    Exp_Rem3_Switch: TCheckBox;
+    GroupBoxLeft: TGroupBox;
+    GroupBoxBottom: TGroupBox;
+    GroupBoxMid: TGroupBox;
+    GroupBoxRight: TGroupBox;
+    CustomerList: TListView;
     procedure FormCreate(Sender: TObject);
     procedure btnCancelClick(Sender: TObject);
     procedure btnOKClick(Sender: TObject);
@@ -61,19 +65,23 @@ type
   public
     var UserAlias :  string;
     var CUID      :  string;
+    var SCUID     :  string;
     var CoCode    :  string;
     var Branch    :  string;
+    var CustNumber:  string;
     var CustName  :  string;
     var Layout    :  string;
     var Indv_Rem1 :  string;
     var Indv_Rem2 :  string;
     var Indv_Rem3 :  string;
     var Indv_Rem4 :  string;
+    var Exp_Rem2  :  string;
+    var Exp_Rem3  :  string;
     { READ-ONLY PROPERTIES }
-    property TrackerGrid :  TStringGrid read pTrackerGrid;
-    property AgeGrid     :  TStringGrid read pAgeGrid;
+    property  TrackerGrid :  TStringGrid read pTrackerGrid;
+    property  AgeGrid     :  TStringGrid read pAgeGrid;
     { HELPER METHODS FOR DEALING WITH INVOICE TRACKER ITEMS }
-    procedure Show;
+    procedure Display;
     procedure Add;
     procedure Delete;
     { DISPLAY ALL THE NECESSARY DATA }
@@ -95,7 +103,7 @@ uses
 { ------------------------------------------------------------- ! SUPPORTING METHODS ! ---------------------------------------------------------------------- }
 
 { ------------------------------------------------------------------------------------------------------------------------------ REFRESH INVOICE TRACKER LIST }
-procedure TTrackerForm.Show;
+procedure TTrackerForm.Display;
 var
   TrackerItems: TDataTables;
   Source:       TStringGrid;
@@ -126,12 +134,14 @@ begin
     TrackerItems.Columns.Add(TTracker.CO_CODE);     TrackerItems.Values.Add(CoCode);
     TrackerItems.Columns.Add(TTracker.BRANCH);      TrackerItems.Values.Add(Branch);
     TrackerItems.Columns.Add(TTracker.CUSTNAME);    TrackerItems.Values.Add(CustName);
-    TrackerItems.Columns.Add(TTracker.LAYOUT);      TrackerItems.Values.Add(Layout);
+    TrackerItems.Columns.Add(TTracker.LAYOUT_ID);   TrackerItems.Values.Add(Layout);
     TrackerItems.Columns.Add(TTracker.STAMP);       TrackerItems.Values.Add(DateTimeToStr(Now));
     TrackerItems.Columns.Add(TTracker.INDV_REM1);   TrackerItems.Values.Add(Indv_Rem1);
     TrackerItems.Columns.Add(TTracker.INDV_REM2);   TrackerItems.Values.Add(Indv_Rem2);
     TrackerItems.Columns.Add(TTracker.INDV_REM3);   TrackerItems.Values.Add(Indv_Rem3);
     TrackerItems.Columns.Add(TTracker.INDV_REM4);   TrackerItems.Values.Add(Indv_Rem4);
+    TrackerItems.Columns.Add(TTracker.EXP_REM2);    TrackerItems.Values.Add(Exp_Rem2);
+    TrackerItems.Columns.Add(TTracker.EXP_REM3);    TrackerItems.Values.Add(Exp_Rem3);
     { EXECUTE }
     if TrackerItems.InsertInto(TblTracker) then
       MainForm.MsgCall(mcInfo, 'Customer has been successfuly added to the Invoice Tracker.')
@@ -166,43 +176,41 @@ end;
 { ---------------------------------------------------------------------------------------------------------------------------------- RETRIVE AND DISPLAY DATA }
 procedure TTrackerForm.GetData;
 var
-  Tables: TDataTables;
-  AppSettings:  TSettings;
-  SetKeys:      TStringList;
-  iCNT:         integer;
+  Tables:       TDataTables;
 begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   Screen.Cursor:=crHourGlass;
-  SetKeys:=TStringList.Create();
-  AppSettings:=TSettings.Create;
-  CUID    :=AgeGrid.Cells[AgeGrid.ReturnColumn(TSnapshots.fCUID,          1, 1), AgeGrid.Row];
-  CoCode  :=AgeGrid.Cells[AgeGrid.ReturnColumn(TSnapshots.fCO_CODE,       1, 1), AgeGrid.Row];
-  Branch  :=AgeGrid.Cells[AgeGrid.ReturnColumn(TSnapshots.fAGENT,         1, 1), AgeGrid.Row];
-  CustName:=AgeGrid.Cells[AgeGrid.ReturnColumn(TSnapshots.fCUSTOMER_NAME, 1, 1), AgeGrid.Row];
-  { ----------------------------------------------------------------------------------------------------------------------------------------- LIST OF LAYOUTS }
-  try
-    AppSettings.TMIG.ReadSection(VariousLayouts, SetKeys);
-    for iCNT:=0 to SetKeys.Count - 1 do
-      { ADD TO LIST ONLY THOSE FOR WHICH KEY EQUALS 'TRACKER' }
-      if MidStr(SetKeys.Strings[iCNT], 1, 7) = 'TRACKER' then
-        if AppSettings.TMIG.ReadString(VariousLayouts, 'TRACKER' + IntToStr(iCNT), '') <> '' then
-          LayoutList.Items.Add(AppSettings.TMIG.ReadString(VariousLayouts, 'TRACKER' + IntToStr(iCNT), ''));
-  finally
-    AppSettings.Free;
-    SetKeys.Free;
-    if LayoutList.Items.Count > 0 then LayoutList.ItemIndex:=0;
-  end;
+  CUID      :=AgeGrid.Cells[AgeGrid.ReturnColumn(TSnapshots.fCUID,            1, 1), AgeGrid.Row];
+  CoCode    :=AgeGrid.Cells[AgeGrid.ReturnColumn(TSnapshots.fCO_CODE,         1, 1), AgeGrid.Row];
+  Branch    :=AgeGrid.Cells[AgeGrid.ReturnColumn(TSnapshots.fAGENT,           1, 1), AgeGrid.Row];
+  CustName  :=AgeGrid.Cells[AgeGrid.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), AgeGrid.Row];
+  CustNumber:=AgeGrid.Cells[AgeGrid.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), AgeGrid.Row];
+  SCUID     :=CustNumber + MainForm.ConvertName(CoCode, 'F', 3);
   { ------------------------------------------------------------------------------------------------------------------------------------------------ READ OUT }
   Tables:=TDataTables.Create(MainForm.DbConnect);
   try
+    { GET LIST OF LAYOUTS }
+    Tables.Columns.Add(TReminderLayouts.LAYOUTNAME);
+    Tables.OpenTable(TblReminderLayouts);
+    if Tables.DataSet.RecordCount > 0 then
+    begin
+      while not Tables.DataSet.EOF do
+      begin
+        LayoutList.Items.Add(Tables.DataSet.Fields[TReminderLayouts.LAYOUTNAME].Value);
+        Tables.DataSet.MoveNext;
+      end;
+      LayoutList.ItemIndex:=0;
+    end;
+    Tables.CleanUp;
     { GET DATA FROM ADDRESS BOOK }
-    Tables.CustFilter:=WHERE + TAddressBook.CUID + EQUAL + QuotedStr(CUID);
+    Tables.CustFilter:=WHERE + TAddressBook.SCUID + EQUAL + QuotedStr(SCUID);
     Tables.OpenTable(TblAddressbook);
     if Tables.DataSet.RecordCount = 1 then { CUID IS UNIQUE IN ADDRESS BOOK, THUS CANNOT HAVE MORE THAN ONE ITEM PER CUID }
     begin
       TextMailTo.Text:=Tables.DataSet.Fields[TAddressBook.EMAILS].Value;
       TextStatTo.Text:=Tables.DataSet.Fields[TAddressBook.ESTATEMENTS].Value;
     end;
+    Tables.CleanUp;
     { GET DATA FROM COMPANY TABLE }
     Tables.CustFilter:=WHERE +
                          TCompany.CO_CODE +
@@ -221,10 +229,10 @@ begin
     end;
   finally
     Tables.Free;
-    if TextMailTo.Text    <> '' then ErrorMailTo.Visible   :=False;
-    if TextLegalTo.Text   <> '' then ErrorStatTo.Visible   :=False;
-    if TextStatTo.Text    <> '' then ErrorLegalTo.Visible  :=False;
-    if EmailFromList.Text <> '' then ErrorEmailFrom.Visible:=False;
+    if Length(TextMailTo.Text)    > 5 then ErrorMailTo.Visible   :=False;
+    if Length(TextStatTo.Text)    > 5 then ErrorStatTo.Visible   :=False;
+    if Length(TextLegalTo.Text)   > 5 then ErrorLegalTo.Visible  :=False;
+    if Length(EmailFromList.Text) > 5 then ErrorEmailFrom.Visible:=False;
     if not (ErrorLegalTo.Visible) and not (ErrorMailTo.Visible) and not (ErrorStatTo.Visible) then btnOK.Enabled:=True;
     Screen.Cursor:=crDefault;
   end;
@@ -236,6 +244,7 @@ end;
 procedure TTrackerForm.FormCreate(Sender: TObject);
 var
   AppSettings:  TSettings;
+  lsColumns:    TListColumn;
 begin
   { ------------------------------------------------------------------------------------------------------------------------------------------ WINDOW CAPTION }
   AppSettings:=TSettings.Create;
@@ -244,11 +253,21 @@ begin
   finally
     AppSettings.Free;
   end;
+  { ------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE LIST VIEW }
+  lsColumns:=CustomerList.Columns.Add;
+  lsColumns.Caption:='LP';
+  lsColumns.Width  :=40;
+  lsColumns:=CustomerList.Columns.Add;
+  lsColumns.Caption:='CUID';
+  lsColumns.Width  :=80;
+  lsColumns:=CustomerList.Columns.Add;
+  lsColumns.Caption:='Customer Name';
+  lsColumns.Width  :=150;
   { --------------------------------------------------------------------------------------------------------------------------- LOAD ALL INVOCE TRACKER ITEMS }
   pAgeGrid    :=MainForm.sgAgeView;
   pTrackerGrid:=MainForm.sgInvoiceTracker;
   UserAlias   :='*';
-  Show;
+  Display;
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------------- ON SHOW }
@@ -280,14 +299,26 @@ end;
 
 { ---------------------------------------------------------------------------------------------------------------------------------------------- OK | PROCESS }
 procedure TTrackerForm.btnOKClick(Sender: TObject);
+var
+  Tables: TDataTables;
 begin
   { ASSIGN }
   UserAlias:=UpperCase(MainForm.WinUserName);
-  Layout:=LayoutList.Text;
+  Tables:=TDataTables.Create(MainForm.DbConnect);
+  try
+    Tables.Columns.Add(TReminderLayouts.ID);
+    Tables.CustFilter:=WHERE + TReminderLayouts.LAYOUTNAME + EQUAL + QuotedStr(LayoutList.Text);
+    Tables.OpenTable(TblReminderLayouts);
+    if Tables.DataSet.RecordCount = 1 then Layout:=Tables.DataSet.Fields[TReminderLayouts.ID].Value;
+  finally
+    Tables.Free;
+  end;
   Indv_Rem1:=TextReminder1.Text;
   Indv_Rem2:=TextReminder2.Text;
   Indv_Rem3:=TextReminder3.Text;
   Indv_Rem4:=TextReminder4.Text;
+  if Exp_Rem2_Switch.Checked then Exp_Rem2:='1' else Exp_Rem2:='0';
+  if Exp_Rem3_Switch.Checked then Exp_Rem3:='1' else Exp_Rem3:='0';
   { DISALLOW ZERO VALUES }
   if (Indv_Rem1 = '0') or (Indv_Rem2 = '0') or (Indv_Rem3 = '0') or (Indv_Rem4 = '0') then
   begin

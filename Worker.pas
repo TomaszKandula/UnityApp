@@ -228,7 +228,7 @@ begin
   FIDThd:=CurrentThread.ThreadID;
   try
     TrackerForm.UserAlias:=pUserAlias;
-    TrackerForm.Show;
+    TrackerForm.Display;
   except
     on E: Exception do
       LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Execution of this tread work has been stopped. Error has been thrown: ' + E.Message + ' (TInvoiceTracker).');
@@ -612,14 +612,13 @@ begin
     FGrid.Freeze(True);
     { COLUMN SELECTION }
     DataTables.Columns.Add(TAddressBook.USER_ALIAS);
-    DataTables.Columns.Add(TAddressBook.CUID);
-    DataTables.Columns.Add(TAddressBook.CUSTNUMBER);
-    DataTables.Columns.Add(TAddressBook.CUSTNAME);
+    DataTables.Columns.Add(TAddressBook.SCUID);
+    DataTables.Columns.Add(TAddressBook.CUSTOMER_NUMBER);
+    DataTables.Columns.Add(TAddressBook.CUSTOMER_NAME);
     DataTables.Columns.Add(TAddressBook.EMAILS);
     DataTables.Columns.Add(TAddressBook.ESTATEMENTS);
-    DataTables.Columns.Add(TAddressBook.TELEPHONE);
+    DataTables.Columns.Add(TAddressBook.PHONE_NUMBERS);
     DataTables.Columns.Add(TAddressBook.CONTACT);
-    DataTables.Columns.Add(TAddressBook.CUSTADDR);
     { FILTER BY USER ALIAS IF GIVEN }
     if FMode = adOpenForUser then DataTables.CustFilter:=WHERE + TAddressBook.USER_ALIAS + EQUAL + QuotedStr(MainForm.WinUserName);
     DataTables.OpenTable(TblAddressbook);
@@ -647,14 +646,13 @@ begin
     FGrid.Freeze(True);
     { COLUMN SELECTION }
     DataTables.Columns.Add(TAddressBook.USER_ALIAS);
-    DataTables.Columns.Add(TAddressBook.CUID);  { CONSTRAINT UNIQUE }
-    DataTables.Columns.Add(TAddressBook.CUSTNUMBER);
-    DataTables.Columns.Add(TAddressBook.CUSTNAME);
+    DataTables.Columns.Add(TAddressBook.SCUID);  { CONSTRAINT UNIQUE }
+    DataTables.Columns.Add(TAddressBook.CUSTOMER_NUMBER);
+    DataTables.Columns.Add(TAddressBook.CUSTOMER_NAME);
     DataTables.Columns.Add(TAddressBook.EMAILS);
     DataTables.Columns.Add(TAddressBook.ESTATEMENTS);
-    DataTables.Columns.Add(TAddressBook.TELEPHONE);
+    DataTables.Columns.Add(TAddressBook.PHONE_NUMBERS);
     DataTables.Columns.Add(TAddressBook.CONTACT);
-    DataTables.Columns.Add(TAddressBook.CUSTADDR);
     { PERFORM INSERT ON NEWLY ADDED ROWS ONLY }
     for iCNT:=1 to FGrid.RowCount - 1 do
     begin

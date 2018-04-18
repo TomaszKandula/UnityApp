@@ -108,11 +108,9 @@ const
   Password            = 'PASSWORD';
   TabSheetsNames      = 'TABSHEETS_NAMES';
   RiskClassDetails    = 'RISK_CLASS_DETAILS';
-
   MailerNTLM          = 'MAILER_NTLM';
   MailerBASIC         = 'MAILER_BASIC';
   MailerSetup         = 'MAILER_SETUP';
-
   DatabaseSetup       = 'DATABASE_SETTINGS';
   OpenItemsData       = 'OPEN_ITEMS';
   AddressBookData     = 'ADDRESS_BOOK';
@@ -305,22 +303,23 @@ const
 
   { MAPPED TABLES FROM DATABASE | WE DO NOT USE SEPARATE ORM FRAMEWORK }
 
-  TblDaily       = 'tbl_daily';
-  TblGeneral     = 'tbl_general';
-  TblCompany     = 'tbl_company';
-  TblManagers    = 'tbl_managers';
-  TblTeamleaders = 'tbl_teamleaders';
-  TblInvoices    = 'tbl_invoices';
-  TblTracker     = 'tbl_tracker';
-  TblGroup3      = 'tbl_group3';
-  TblPaidinfo    = 'tbl_paidinfo';
-  TblPmtterms    = 'tbl_pmtterms';
-  TblPerson      = 'tbl_person';
-  TblUAC         = 'tbl_UAC';
-  TblGroups      = 'tbl_groups';
-  TblAddressbook = 'tbl_addressbook';
-  TblOpenitems   = 'tbl_openitems';
-  TblSnapshots   = 'tbl_snapshots';
+  TblDaily           = 'tbl_daily';
+  TblGeneral         = 'tbl_general';
+  TblCompany         = 'tbl_company';
+  TblManagers        = 'tbl_managers';
+  TblTeamleaders     = 'tbl_teamleaders';
+  TblReminderLayouts = 'tbl_reminderlayouts';
+  TblInvoices        = 'tbl_invoices';
+  TblTracker         = 'tbl_tracker';
+  TblGroup3          = 'tbl_group3';
+  TblPaidinfo        = 'tbl_paidinfo';
+  TblPmtterms        = 'tbl_pmtterms';
+  TblPerson          = 'tbl_person';
+  TblUAC             = 'tbl_UAC';
+  TblGroups          = 'tbl_groups';
+  TblAddressbook     = 'tbl_addressbook';
+  TblOpenitems       = 'tbl_openitems';
+  TblSnapshots       = 'tbl_snapshots';
 
   { STORED PROCEDURES }
 
