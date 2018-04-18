@@ -2718,35 +2718,28 @@ end;
 procedure TMainForm.Action_AddToBookClick(Sender: TObject);
 var
   iCNT:    integer;
-  jCNT:    integer;
-  cCNT:    integer;
-  Row:     integer;
   OffSet:  integer;
 begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   Screen.Cursor:=crHourGlass;
-  Row:=sgAgeView.Selection.Top;
   if sgAddressBook.Cells[0, 1] = '' then OffSet:=-1 else OffSet:=0;
   { ----------------------------------------------------------------------------------------------------------------------- GO ONE BY ONE AND LOOK FOR 'CUID' }
   for iCNT:=sgAgeView.Selection.Top to sgAgeView.Selection.Bottom do
   begin
-    for jCNT:=1 to sgOpenItems.RowCount - 1 do
-      { ------------------------------------------------------------------------------------------------------------------- ADD DATA TO ADDRESS BOOK IF FOUND }
-      if (sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUID, 1, 1), iCNT] = sgOpenItems.Cells[37, jCNT]) and (sgAgeView.RowHeights[Row] <> - 1) then
-      begin
-        sgAddressBook.RowCount:=sgAddressBook.RowCount + 1;
-        { ----------------------------------------------------------------------------------------------------------------------------------------- MOVE DATA }
-        sgAddressBook.Cells[0, sgAddressBook.RowCount - 1 + OffSet]:='';
-        sgAddressBook.Cells[1, sgAddressBook.RowCount - 1 + OffSet]:=MainForm.WinUserName;
-        sgAddressBook.Cells[2, sgAddressBook.RowCount - 1 + OffSet]:=sgOpenItems.Cells[37, jCNT];
-        sgAddressBook.Cells[3, sgAddressBook.RowCount - 1 + OffSet]:=sgOpenItems.Cells[2,  jCNT];
-        sgAddressBook.Cells[4, sgAddressBook.RowCount - 1 + OffSet]:=sgOpenItems.Cells[6,  jCNT];
-        { ---------------------------------------------------------------------------------------------------------------------------------------- EMPTY ROWS }
-        for cCNT:=5 to 8 do sgAddressBook.Cells[cCNT, sgAddressBook.RowCount - 1]:='';
-        { ---------------------------------------------------------------------------------------------------------------------------------------------- QUIT }
-        Break;
-      end;
-    inc(Row);
+    if sgAgeView.RowHeights[iCNT] <> - 1 then
+    begin
+      sgAddressBook.Cells[0, sgAddressBook.RowCount - 1 + OffSet]:='';
+      sgAddressBook.Cells[1, sgAddressBook.RowCount - 1 + OffSet]:=MainForm.WinUserName;
+      sgAddressBook.Cells[2, sgAddressBook.RowCount - 1 + OffSet]:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), iCNT] +
+                                                                   ConvertName(
+                                                                                sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCO_CODE, 1, 1), iCNT],
+                                                                                'F',
+                                                                                3
+                                                                              );
+      sgAddressBook.Cells[3, sgAddressBook.RowCount - 1 + OffSet]:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), iCNT];
+      sgAddressBook.Cells[4, sgAddressBook.RowCount - 1 + OffSet]:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), iCNT];
+      sgAddressBook.RowCount:=sgAddressBook.RowCount + 1 + OffSet;
+    end;
   end;
   { -------------------------------------------------------------------------------------------------------------------------------------------- UNINITIALIZE }
   if (sgAgeView.Selection.Bottom - sgAgeView.Selection.Top) = 0 then
@@ -3521,7 +3514,7 @@ end;
 procedure TMainForm.sgAddressBookKeyPress(Sender: TObject; var Key: Char);
 begin
   if sgAddressBook.Col = sgAddressBook.ReturnColumn(TAddressBook.PHONE_NUMBERS, 1, 1) then
-    if (not (CharInSet(Key, ['0'..'9', ';', SPACE, BACKSPACE]))) then Key:=#0;
+    if (not (CharInSet(Key, ['0'..'9', ';', BACKSPACE]))) then Key:=#0;
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------- ADDRESS BOOK | PASTE, CUT, COPY }

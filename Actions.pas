@@ -21,6 +21,19 @@ uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,  Dialogs, Grids, Buttons, ExtCtrls, ComCtrls, StdCtrls, ADODB, StrUtils, ShellApi,
   TLHelp32, pngimage, ImgList, GIFImg, Clipbrd, Main;
 
+{ ------------------------------------------------------------ ! INTERPOSER CLASSES ! ----------------------------------------------------------------------- }
+                                                    (* EXTEND CURRENT COMPONENTS | MAIN THREAD *)
+
+{ --------------------------------------------------------------- ! TEDIT CLASS ! --------------------------------------------------------------------------- }
+type
+  TEdit = Class(StdCtrls.TEdit)
+  public
+    FAlignment: TAlignment;
+    procedure SetAlignment(value: TAlignment);
+    procedure CreateParams(var params: TCreateParams); override;
+    property  Alignment: TAlignment read FAlignment write SetAlignment;
+  end;
+
 { --------------------------------------------------------------- ! MAIN CLASS ! ---------------------------------------------------------------------------- }
 type
   TActionsForm = class(TForm)
@@ -40,13 +53,11 @@ type
     Cust_Name: TLabel;
     Cust_Number: TLabel;
     btnSendStatement: TSpeedButton;
-    imgEditDetails: TImage;
     PanelMiddle: TPanel;
     PanelBottom: TPanel;
     PanelTop: TPanel;
     Cust_Person: TEdit;
     Cust_Mail: TEdit;
-    imgSaveDetails: TImage;
     ButtonPanel: TPanel;
     HistoryPanel: TPanel;
     HistoryTitle: TLabel;
@@ -58,6 +69,15 @@ type
     btnClearFollowUp: TSpeedButton;
     btnSendEmail: TSpeedButton;
     Cust_Phone: TComboBox;
+    GroupCustomerDetails: TGroupBox;
+    Copy_CustName: TImage;
+    Copy_CustNumber: TImage;
+    Copy_Person: TImage;
+    Copy_Email: TImage;
+    btnSaveCustDetails: TSpeedButton;
+    Text9: TLabel;
+    Cust_MailBack: TShape;
+    Cust_PersonBack: TShape;
     procedure FormCreate(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure OpenItemsGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
@@ -74,20 +94,18 @@ type
     procedure OpenItemsGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure HistoryGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure btnCallCustomerClick(Sender: TObject);
-    procedure imgEditDetailsClick(Sender: TObject);
-    procedure imgSaveDetailsClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure DailyComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure GeneralComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure btnFeedbackClick(Sender: TObject);
-    procedure Cust_NameClick(Sender: TObject);
-    procedure Cust_NumberClick(Sender: TObject);
-    procedure Cust_PersonClick(Sender: TObject);
-    procedure Cust_MailClick(Sender: TObject);
-    procedure Cust_PhoneClick(Sender: TObject);
     procedure btnClearFollowUpClick(Sender: TObject);
     procedure btnSendEmailClick(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+    procedure btnSaveCustDetailsClick(Sender: TObject);
+    procedure Copy_CustNameClick(Sender: TObject);
+    procedure Copy_CustNumberClick(Sender: TObject);
+    procedure Copy_PersonClick(Sender: TObject);
+    procedure Copy_EmailClick(Sender: TObject);
   public
     var CUID       :  string;
     var SCUID      :  string;
@@ -114,6 +132,29 @@ uses
   Model, Worker, Calendar, Settings, Mailer, Transactions;
 
 {$R *.dfm}
+
+{ ####################################################### ! EXTENSION OF 'TSHAPE' CLASS ! ################################################################### }
+
+{ --------------------------------------------------------------------------------------------------------------------------- CREATE PARAMETERS FOR COMPONENT }
+procedure TEdit.CreateParams(var Params: TCreateParams);
+begin
+  inherited CreateParams(Params);
+  case Alignment of
+    taLeftJustify:  Params.Style:=Params.Style or ES_LEFT   and not ES_MULTILINE;
+    taRightJustify: Params.Style:=Params.Style or ES_RIGHT  and not ES_MULTILINE;
+    taCenter:       Params.Style:=Params.Style or ES_CENTER and not ES_MULTILINE;
+  end;
+end;
+
+{ ------------------------------------------------------------------------------------------------------------------------------------ SET THE TEXT ALIGNMENT }
+procedure TEdit.SetAlignment(value: TAlignment);
+begin
+  if FAlignment <> value then
+  begin
+    FAlignment:=value;
+    RecreateWnd;
+  end;
+end;
 
 { ------------------------------------------------------------- ! SUPPORTING METHODS ! ---------------------------------------------------------------------- }
 
@@ -398,12 +439,16 @@ procedure TActionsForm.FormActivate(Sender: TObject);
 begin
   GetData(OpenItemsGrid, HistoryGrid, MainForm.sgOpenItems);
   StatusBar.SimpleText:='Open items last update: ' + MainForm.OpenItemsUpdate + '.';
+  { SAVE BUTTON }
+  if (Cust_Person.Text = unNotFound) or (Cust_Mail.Text = unNotFound) then
+    btnSaveCustDetails.Enabled:=False
+      else
+        btnSaveCustDetails.Enabled:=True;
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------- QUIT EDITING ON CLOSE }
 procedure TActionsForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
-  if imgSaveDetails.Enabled then imgEditDetailsClick(Self);
   CanClose:=True;
 end;
 
@@ -611,72 +656,28 @@ end;
 { --------------------------------------------------------------- ! BUTTON CALLS ! -------------------------------------------------------------------------- }
 
 { ----------------------------------------------------------------------------------------------------------------------------------------- COPY TO CLIPBOARD }
-procedure TActionsForm.Cust_NameClick(Sender: TObject);
+procedure TActionsForm.Copy_CustNameClick(Sender: TObject);
 begin
   ClipBoard.AsText:=Cust_Name.Caption;
 end;
 
-procedure TActionsForm.Cust_NumberClick(Sender: TObject);
+procedure TActionsForm.Copy_CustNumberClick(Sender: TObject);
 begin
   ClipBoard.AsText:=Cust_Number.Caption;
 end;
 
-procedure TActionsForm.Cust_PersonClick(Sender: TObject);
+procedure TActionsForm.Copy_PersonClick(Sender: TObject);
 begin
   ClipBoard.AsText:=Cust_Person.Text;
 end;
 
-procedure TActionsForm.Cust_MailClick(Sender: TObject);
+procedure TActionsForm.Copy_EmailClick(Sender: TObject);
 begin
   ClipBoard.AsText:=Cust_Mail.Text;
 end;
 
-procedure TActionsForm.Cust_PhoneClick(Sender: TObject);
-begin
-  ClipBoard.AsText:=Cust_Phone.Text;
-end;
-
-{ ------------------------------------------------------------------------------------------------------------------------------------------------ ALLOW EDIT }
-procedure TActionsForm.imgEditDetailsClick(Sender: TObject);
-begin
-  { IF NOT FOUND THEN QUIT }
-  if (Cust_Person.Text = unNotFound) and (Cust_Mail.Text = unNotFound) and (Cust_Phone.Text = unNotFound) then
-  begin
-    MainForm.MsgCall(mcWarn, 'This customer does not exist in Address Book. Please add to Address Book first.');
-    Exit;
-  end;
-  { EDIT ON/OFF }
-  if imgSaveDetails.Enabled then
-  begin
-    Cust_Person.Cursor    :=crArrow;
-    Cust_Mail.Cursor      :=crArrow;
-    Cust_Phone.Cursor     :=crArrow;
-    Cust_Person.ReadOnly  :=True;
-    Cust_Mail.ReadOnly    :=True;
-    Cust_Person.Font.Color:=clBlack;
-    Cust_Mail.Font.Color  :=clBlack;
-    Cust_Phone.Font.Color :=clBlack;
-    Cust_Person.Color     :=clWhite;
-    Cust_Mail.Color       :=clWhite;
-    imgSaveDetails.Enabled:=False;
-  end else
-  begin
-    Cust_Person.Cursor    :=crIBeam;
-    Cust_Mail.Cursor      :=crIBeam;
-    Cust_Phone.Cursor     :=crIBeam;
-    Cust_Person.ReadOnly  :=False;
-    Cust_Mail.ReadOnly    :=False;
-    Cust_Person.Font.Color:=clNavy;
-    Cust_Mail.Font.Color  :=clNavy;
-    Cust_Phone.Font.Color :=clNavy;
-    Cust_Person.Color     :=clCream;
-    Cust_Mail.Color       :=clCream;
-    imgSaveDetails.Enabled:=True;
-  end;
-end;
-
 { ------------------------------------------------------------------------------------------------------------------------------------- SAVE CUSTOMER DETAILS }
-procedure TActionsForm.imgSaveDetailsClick(Sender: TObject);
+procedure TActionsForm.btnSaveCustDetailsClick(Sender: TObject);
 var
   AddrBook:  TDataTables;
   Condition: string;
@@ -699,7 +700,6 @@ begin
           else
             MainForm.MsgCall(mcInfo, 'Changes have been updated successfully.');
     end;
-    imgEditDetailsClick(Self);
   finally
     AddrBook.Free;
   end;
@@ -814,6 +814,7 @@ begin
   CUID      :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUID,            1, 1), MainForm.sgAgeView.Row];
   CustName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), MainForm.sgAgeView.Row];
   CustNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), MainForm.sgAgeView.Row];
+  SCUID     :=CustNumber + MainForm.ConvertName(CoCode, 'F', 3);
   { CLEAR ALL }
   ClearAll;
   { LOAD NEW DATA }
