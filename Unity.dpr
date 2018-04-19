@@ -49,7 +49,8 @@ uses
   Transactions in 'Transactions.pas',
   ReportBug in 'ReportBug.pas',
   Colors in 'Colors.pas',
-  EventLog in 'EventLog.pas';
+  EventLog in 'EventLog.pas',
+  Send in 'Send.pas';
 
 type
   DWord = 0..$FFFFFFFF;
@@ -480,6 +481,7 @@ begin
 
     { OTHER WINFORMS }
     Status(13, AllTasks, 400, 'Application initialization... VCL forms loading, please wait.', False, AppSettings.FPathEventLog);
+    Application.CreateForm(TSendForm,     SendForm);     LogText(AppSettings.FPathEventLog, '[GUI] ''SendForm'' .......... has been created.');
     Application.CreateForm(TAboutForm,    AboutForm);    LogText(AppSettings.FPathEventLog, '[GUI] ''AboutForm'' ......... has been created.');
     Application.CreateForm(TEventForm,    EventForm);    LogText(AppSettings.FPathEventLog, '[GUI] ''EventForm'' ......... has been created.');
     Application.CreateForm(TColorsForm,   ColorsForm);   LogText(AppSettings.FPathEventLog, '[GUI] ''ColorsForm'' ........ has been created.');

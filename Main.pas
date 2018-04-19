@@ -2728,17 +2728,23 @@ begin
   begin
     if sgAgeView.RowHeights[iCNT] <> - 1 then
     begin
+      { EMPTY ID BAR }
       sgAddressBook.Cells[0, sgAddressBook.RowCount - 1 + OffSet]:='';
-      sgAddressBook.Cells[1, sgAddressBook.RowCount - 1 + OffSet]:=MainForm.WinUserName;
+      { MANDATORY FIELDS }
+      sgAddressBook.Cells[1, sgAddressBook.RowCount - 1 + OffSet]:=UpperCase(MainForm.WinUserName);
       sgAddressBook.Cells[2, sgAddressBook.RowCount - 1 + OffSet]:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), iCNT] +
                                                                    ConvertName(
                                                                                 sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCO_CODE, 1, 1), iCNT],
                                                                                 'F',
                                                                                 3
                                                                               );
-      sgAddressBook.Cells[3, sgAddressBook.RowCount - 1 + OffSet]:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), iCNT];
-      sgAddressBook.Cells[4, sgAddressBook.RowCount - 1 + OffSet]:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), iCNT];
-      sgAddressBook.RowCount:=sgAddressBook.RowCount + 1 + OffSet;
+      { FIELDS WITH DATA THAT MAY BE EMPTY }
+      sgAddressBook.Cells[3, sgAddressBook.RowCount - 1 + OffSet]:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), iCNT];
+      sgAddressBook.Cells[4, sgAddressBook.RowCount - 1 + OffSet]:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), iCNT];
+      sgAddressBook.Cells[5, sgAddressBook.RowCount - 1 + OffSet]:='';
+      sgAddressBook.Cells[6, sgAddressBook.RowCount - 1 + OffSet]:='';
+      sgAddressBook.Cells[7, sgAddressBook.RowCount - 1 + OffSet]:='';
+      sgAddressBook.RowCount:=sgAddressBook.RowCount + 1;
     end;
   end;
   { -------------------------------------------------------------------------------------------------------------------------------------------- UNINITIALIZE }
@@ -2747,7 +2753,7 @@ begin
     MsgCall(mcInfo, 'Customer has been addedd to the Address Book tabsheet.');
   end else
   begin
-      MsgCall(mcInfo, 'Customers have been addedd to the Address Book tabsheet.');
+    MsgCall(mcInfo, 'Customers have been addedd to the Address Book tabsheet.');
   end;
   Screen.Cursor:=crDefault;
 end;

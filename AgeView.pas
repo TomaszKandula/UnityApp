@@ -83,7 +83,7 @@ end;
 procedure TAgeView.Read(var Grid: TStringGrid);
 var
   StrCol: string;
-//  iCNT:   integer;
+  iCNT:   integer;
 begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   Grid.Freeze(True);
@@ -94,7 +94,7 @@ begin
   SqlToGrid(Grid, ExecSQL, False, False);
   LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: SQL statement applied [' + StrSQL + '].');
 
-(*
+
   { ---------------------------------------------------------------------------------------------------------------------------------------- CALCULATE VALUES }
   for iCNT:=1 to Grid.RowCount - 1 do
   begin
@@ -118,6 +118,7 @@ begin
       { SUM ALL EXCEEDERS AMOUNT }
       TotalExceed:=TotalExceed + Abs(StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fEXCEEDED_AMOUNT, 1, 1), iCNT], 0));
     end;
+(*
     { SUM ALL ITEMS FOR RISK CLASSES }
     if Grid.Cells[Grid.ReturnColumn(TSnapshots.fRISK_CLASS, 1, 1), iCNT] = 'A' then
     begin
@@ -134,10 +135,10 @@ begin
       RCC:=RCC + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fTOTAL, 1, 1), iCNT], 0);
       Inc(RCCcount);
     end;
+*)
     { COUNT ITEMS }
     inc(CustAll);
   end;
-*)
 
   { -------------------------------------------------------------------------------------------------------------------------------------------- UNINITIALIZE }
   Grid.DefaultRowHeight:=17;

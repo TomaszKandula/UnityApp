@@ -5,7 +5,7 @@ object ActionsForm: TActionsForm
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'Unity'
-  ClientHeight = 778
+  ClientHeight = 708
   ClientWidth = 940
   Color = 15527148
   Font.Charset = DEFAULT_CHARSET
@@ -24,20 +24,20 @@ object ActionsForm: TActionsForm
   TextHeight = 13
   object StatusBar: TStatusBar
     Left = 0
-    Top = 759
+    Top = 689
     Width = 940
     Height = 19
     Color = 15527148
     Panels = <>
     SimplePanel = True
     SizeGrip = False
-    ExplicitTop = 620
+    ExplicitTop = 759
   end
   object PanelMiddle: TPanel
     Left = 0
     Top = 177
     Width = 940
-    Height = 361
+    Height = 291
     Margins.Left = 5
     Margins.Top = 0
     Margins.Right = 5
@@ -54,7 +54,7 @@ object ActionsForm: TActionsForm
       Left = 5
       Top = 0
       Width = 930
-      Height = 351
+      Height = 281
       Margins.Left = 5
       Margins.Top = 0
       Margins.Right = 5
@@ -92,7 +92,7 @@ object ActionsForm: TActionsForm
   end
   object PanelBottom: TPanel
     Left = 0
-    Top = 538
+    Top = 468
     Width = 940
     Height = 221
     Margins.Left = 5
@@ -216,7 +216,6 @@ object ActionsForm: TActionsForm
         Align = alCustom
         Anchors = [akRight]
         Caption = 'Send Email'
-        Enabled = False
         OnClick = btnSendEmailClick
       end
     end

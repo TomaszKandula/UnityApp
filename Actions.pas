@@ -119,6 +119,7 @@ type
     procedure SetHistoryCols(Grid: TStringGrid);
     procedure ClearAll;
     procedure MakePhoneCall;
+    procedure SetControls;
   end;
 
 var
@@ -238,7 +239,7 @@ begin
     Cust_Name.Caption  :=CustName;
     Cust_Number.Caption:=CustNumber;
 
-    { ----------------------------------------------------------- ! CUSTOMER DATA ! ------------------------------------------------------------------------- }
+    { ------------------------------------------------------------- ! CUSTOMER DATA ! ----------------------------------------------------------------------- }
 
     AddrBook:=TDataTables.Create(MainForm.DbConnect);
     try
@@ -434,16 +435,21 @@ begin
   SCUID     :=CustNumber + MainForm.ConvertName(CoCode, 'F', 3);
 end;
 
+{ ----------------------------------------------------------------------------------------------------------------------------------- ENABLE/DISABLE CONTROLS }
+procedure TActionsForm.SetControls;
+begin
+  if (Cust_Person.Text = unNotFound) or (Cust_Mail.Text = unNotFound) then btnSaveCustDetails.Enabled:=False else btnSaveCustDetails.Enabled:=True;
+  if Cust_Phone.Text = unNotFound then Cust_Phone.Enabled:=False else Cust_Phone.Enabled:=True;
+  if Cust_Mail.Text = unNotFound then Cust_Mail.Enabled:=False else Cust_Mail.Enabled:=True;
+  if Cust_Person.Text = unNotFound then Cust_Person.Enabled:=False else Cust_Person.Enabled:=True;
+end;
+
 { ----------------------------------------------------------------------------------------------------------------------------------------------- ON ACTIVATE }
 procedure TActionsForm.FormActivate(Sender: TObject);
 begin
   GetData(OpenItemsGrid, HistoryGrid, MainForm.sgOpenItems);
   StatusBar.SimpleText:='Open items last update: ' + MainForm.OpenItemsUpdate + '.';
-  { SAVE BUTTON }
-  if (Cust_Person.Text = unNotFound) or (Cust_Mail.Text = unNotFound) then
-    btnSaveCustDetails.Enabled:=False
-      else
-        btnSaveCustDetails.Enabled:=True;
+  SetControls;
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------- QUIT EDITING ON CLOSE }
@@ -709,6 +715,9 @@ end;
 procedure TActionsForm.btnSendEmailClick(Sender: TObject);
 begin
   // code here...
+
+
+
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------------- SEND STATEMENT }
@@ -820,6 +829,7 @@ begin
   { LOAD NEW DATA }
   try
     GetData(OpenItemsGrid, HistoryGrid, MainForm.sgOpenItems);
+    SetControls;
   except
     MainForm.MsgCall(mcWarn, 'Unexpected error has occured. Please close the window and try again.');
   end;

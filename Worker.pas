@@ -518,7 +518,7 @@ begin
     THDSec:=THDMili / 1000;
     LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(FIDThd) + ']: Open Items loading thread has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
     MainForm.ExecMessage(True, mcStatusBar, stReady);
-    { RELEASE VCL }
+    { RELEASE VCL AND SET AUTO COLUMN WIDTH }
     Synchronize(procedure
                 begin
                   OpenItems.DestGrid.SetColWidth(10, 20);
@@ -624,9 +624,14 @@ begin
     DataTables.OpenTable(TblAddressbook);
     Result:=DataTables.SqlToGrid(FGrid, DataTables.DataSet, True, True);
   finally
-    FGrid.Freeze(False);
-    FGrid.SetColWidth(40, 10);
     DataTables.Free;
+    { SET AUTO COLUMN WIDTH }
+    Synchronize(procedure
+                begin
+                  FGrid.SetColWidth(40, 10);
+                end);
+    { LET IT GO }
+    FGrid.Freeze(False);
   end;
 end;
 
@@ -636,10 +641,12 @@ var
   DataTables: TDataTables;
   iCNT:       integer;
   Start:      integer;
+  TotalRows:  integer;
 begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-  Result :=False;
-  Start  :=0;
+  Result   :=False;
+  Start    :=0;
+  TotalRows:=0;
   DataTables:=TDataTables.Create(MainForm.DbConnect);
   try
     { FREEZE STRING GRID }
@@ -656,9 +663,10 @@ begin
     { PERFORM INSERT ON NEWLY ADDED ROWS ONLY }
     for iCNT:=1 to FGrid.RowCount - 1 do
     begin
-      if FGrid.Cells[0, iCNT] = '' then
+      if (FGrid.Cells[0, iCNT] = '') and (FGrid.Cells[1, iCNT] <> '') and (FGrid.Cells[2, iCNT] <> '') then
       begin
         Start:=iCNT;
+        TotalRows:=(FGrid.RowCount - 1) - Start;
         Break;
       end;
     end;
@@ -674,6 +682,8 @@ begin
           for iCNT:=1 to FGrid.RowCount - 1 do FGrid.Cells[0, iCNT]:= IntToStr(iCNT);
           Result:=True;
         end;
+        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Address Book has been saved. Number of new lines written: ' + IntToStr(TotalRows) + '.');
+        MainForm.ExecMessage(False, mcInfo, 'Address Book has been saved successfully!');
       except
         on E: Exception do
         begin
