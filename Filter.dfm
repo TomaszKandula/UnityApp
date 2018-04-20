@@ -3,10 +3,10 @@ object FilterForm: TFilterForm
   Left = 0
   Top = 0
   BorderIcons = [biSystemMenu]
-  BorderStyle = bsToolWindow
+  BorderStyle = bsDialog
   Caption = 'Unity'
-  ClientHeight = 456
-  ClientWidth = 280
+  ClientHeight = 607
+  ClientWidth = 551
   Color = 15527148
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
@@ -14,20 +14,22 @@ object FilterForm: TFilterForm
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
+  KeyPreview = True
   OldCreateOrder = False
   PopupMode = pmExplicit
   PopupParent = MainForm.Owner
   Position = poMainFormCenter
   OnActivate = FormActivate
   OnCreate = FormCreate
+  OnKeyPress = FormKeyPress
   PixelsPerInch = 96
   TextHeight = 13
   object AppMain: TShape
     AlignWithMargins = True
     Left = 5
     Top = 5
-    Width = 270
-    Height = 413
+    Width = 541
+    Height = 564
     Margins.Left = 5
     Margins.Top = 5
     Margins.Right = 5
@@ -35,10 +37,11 @@ object FilterForm: TFilterForm
     Align = alClient
     Pen.Color = clMedGray
     ExplicitWidth = 271
+    ExplicitHeight = 413
   end
   object Text: TLabel
-    Left = 14
-    Top = 14
+    Left = 358
+    Top = 134
     Width = 128
     Height = 13
     Caption = 'Filter items from below list:'
@@ -51,8 +54,8 @@ object FilterForm: TFilterForm
   end
   object FilterList: TCheckListBox
     AlignWithMargins = True
-    Left = 14
-    Top = 34
+    Left = 62
+    Top = 106
     Width = 252
     Height = 376
     Margins.Left = 8
@@ -62,8 +65,6 @@ object FilterForm: TFilterForm
     OnClickCheck = FilterListClickCheck
     ItemHeight = 13
     Items.Strings = (
-      '(Blanks)'
-      '(Select all)'
       'Test item 1'
       'Test item 1'
       'Test item 1'
@@ -98,14 +99,13 @@ object FilterForm: TFilterForm
       'Test item 81')
     ParentShowHint = False
     ShowHint = False
-    Sorted = True
     TabOrder = 0
   end
   object ButtonPanel: TPanel
     AlignWithMargins = True
     Left = 5
-    Top = 423
-    Width = 270
+    Top = 574
+    Width = 541
     Height = 28
     Margins.Left = 5
     Margins.Top = 0
@@ -114,6 +114,8 @@ object FilterForm: TFilterForm
     Align = alBottom
     BevelOuter = bvNone
     TabOrder = 1
+    ExplicitTop = 423
+    ExplicitWidth = 270
     object btnFilter: TSpeedButton
       Left = 109
       Top = 2
@@ -132,5 +134,21 @@ object FilterForm: TFilterForm
       Caption = 'Cose'
       OnClick = btnCloseClick
     end
+  end
+  object CheckBox1: TCheckBox
+    Left = 62
+    Top = 32
+    Width = 147
+    Height = 17
+    Caption = 'Select All'
+    TabOrder = 2
+  end
+  object CheckBox2: TCheckBox
+    Left = 62
+    Top = 55
+    Width = 97
+    Height = 17
+    Caption = 'CheckBox2'
+    TabOrder = 3
   end
 end

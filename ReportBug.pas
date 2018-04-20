@@ -32,6 +32,7 @@ type
     procedure btnSendReportClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure btnCancelClick(Sender: TObject);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
   public
     function WordCount(const InputStr: string): cardinal;
     function SendReport: boolean;
@@ -173,6 +174,12 @@ end;
 procedure TReportForm.btnCancelClick(Sender: TObject);
 begin
   Close;
+end;
+
+{ -------------------------------------------------------------------------------------------------------------------------------------------- CLOSE ON <ESC> }
+procedure TReportForm.FormKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = ESC then Close;
 end;
 
 end.

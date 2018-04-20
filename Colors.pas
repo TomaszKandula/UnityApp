@@ -46,6 +46,7 @@ type
     procedure ColorList2Select(Sender: TObject);
     procedure ColorList3Select(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
   end;
 
 var
@@ -113,6 +114,12 @@ procedure TColorsForm.ColorList3Select(Sender: TObject);
 begin
   if ColorList3.Text = 'Font Color'       then ColorBox3.Brush.Color:=MainForm.FutureFColor;
   if ColorList3.Text = 'Background Color' then ColorBox3.Brush.Color:=MainForm.FutureBColor;
+end;
+
+{ -------------------------------------------------------------------------------------------------------------------------------------------- CLOSE ON <ESC> }
+procedure TColorsForm.FormKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = ESC then Close;
 end;
 
 { ----------------------------------------------------------------- ! BUTTON CALLS ! ------------------------------------------------------------------------ }

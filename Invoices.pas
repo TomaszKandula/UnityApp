@@ -31,6 +31,7 @@ type
     procedure FormShow(Sender: TObject);
     procedure InvoicesGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
     procedure InvoicesGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
   end;
 
 var
@@ -114,9 +115,16 @@ end;
 
 { ------------------------------------------------------------ ! KEYBOARD EVENTS ! -------------------------------------------------------------------------- }
 
+{ ---------------------------------------------------------------------------------------------------------------------------------------------- COPY CONTENT }
 procedure TInvoicesForm.InvoicesGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   if (Key = 67) and (Shift = [ssCtrl]) then InvoicesGrid.CopyCutPaste(adCopy);
+end;
+
+{ -------------------------------------------------------------------------------------------------------------------------------------------- CLOSE ON <ESC> }
+procedure TInvoicesForm.FormKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = ESC then Close;
 end;
 
 end.

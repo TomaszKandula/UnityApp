@@ -12,12 +12,14 @@ object TrackerForm: TTrackerForm
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
+  KeyPreview = True
   OldCreateOrder = True
   PopupMode = pmExplicit
   PopupParent = MainForm.Owner
   Position = poMainFormCenter
   OnActivate = FormActivate
   OnCreate = FormCreate
+  OnKeyPress = FormKeyPress
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13

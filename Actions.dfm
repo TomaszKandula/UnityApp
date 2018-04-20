@@ -13,12 +13,14 @@ object ActionsForm: TActionsForm
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
+  KeyPreview = True
   OldCreateOrder = False
   Position = poMainFormCenter
   OnActivate = FormActivate
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  OnKeyPress = FormKeyPress
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
@@ -31,7 +33,6 @@ object ActionsForm: TActionsForm
     Panels = <>
     SimplePanel = True
     SizeGrip = False
-    ExplicitTop = 759
   end
   object PanelMiddle: TPanel
     Left = 0

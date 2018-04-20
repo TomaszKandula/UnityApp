@@ -126,6 +126,9 @@ type
     const PHONE_NUMBERS    : string = 'PHONE_NUMBERS';
     const CONTACT          : string = 'CONTACT';
     const ESTATEMENTS      : string = 'ESTATEMENTS';
+    const AGENT            : string = 'AGENT';
+    const DIVISION         : string = 'DIVISION';
+    const COCODE           : string = 'COCODE';
   end;
 
 { --------------------------------------------------------------- ! TBL_DAILY ! ----------------------------------------------------------------------------- }
@@ -245,9 +248,9 @@ type
     const PERSON          : string = 'PERSON';
     const GROUP3          : string = 'GROUP3';
     const RISK_CLASS      : string = 'RISK_CLASS';
+    const CUID            : string = 'CUID';
     const FREE1           : string = 'FREE1';
     const FREE2           : string = 'FREE2';
-    const CUID            : string = 'CUID';
 
     (* REFLECTS "FRIENDLY" COLUMN NAMES USED IN THE APPLICATION *)
     (* THE BELOW GIVEN NAMES ARE USED IN BOTH SETTING FILES     *)
@@ -281,6 +284,8 @@ type
     const fQUALITY_IDX     = 'QUALITY IDX';
     const fWALLET_SHARE    = 'WALLET SHARE';
     const fCUID            = 'CUID';
+    const fFREE1           = 'FREE1';
+    const fFREE2           = 'FREE2';
   end;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

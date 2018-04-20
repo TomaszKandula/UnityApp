@@ -20,18 +20,11 @@ uses
 
 { ----------------------------------------------------------- ! SEPARATE CPU THREADS ! ---------------------------------------------------------------------- }
 
-{ ------------------------------------------------------------------------------------------------------------------------------------------- SEND BUG REPORT }
+{ ----------------------------------------------------------------------------------------------------------------------------------- CHECK SERVER CONNECTION }
 type
-  TTSendBugReport = class(TThread)
+  TTCheckServerConnection = class(TThread)
   protected
     procedure Execute; override;
-  private
-    var FLock:   TCriticalSection;
-    var FIDThd:  integer;
-  public
-    property    IDThd:  integer read FIDThd;
-    constructor Create;
-    destructor  Destroy; override;
   end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------- INVOICE TRACKER SCANNER }
@@ -40,8 +33,8 @@ type
   protected
     procedure Execute; override;
   public
-//    function CanSendStatement: boolean;
-//    function CanSendReminder: boolean;
+    //function CanSendStatement: boolean;
+    //function CanSendReminder: boolean;
   end;
 
 { ------------------------------------------------------------------------------------------------------------------------------ INVOICE TRACKER LIST REFRESH }
@@ -55,13 +48,6 @@ type
   public
     property    IDThd:  integer read FIDThd;
     constructor Create(UserAlias: string);
-  end;
-
-{ ----------------------------------------------------------------------------------------------------------------------------------- CHECK SERVER CONNECTION }
-type
-  TTCheckServerConnection = class(TThread)
-  protected
-    procedure Execute; override;
   end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------- MAKE AGE VIEW }
@@ -79,20 +65,6 @@ type
     destructor  Destroy; override;
   end;
 
-{ ---------------------------------------------------------------------------------------------------------------------------------------- OPEN ITEMS SCANNER }
-type
-  TTOpenItemsScanner = class(TThread)
-  protected
-    procedure Execute; override;
-  private
-    var FLock:  TCriticalSection;
-    var FIDThd: integer;
-  public
-    property    IDThd:  integer read FIDThd;
-    constructor Create;
-    destructor  Destroy; override;
-  end;
-
 { --------------------------------------------------------------------------------------------------------------------------------------------- READ AGE VIEW }
 type
   TTReadAgeView = class(TThread)
@@ -105,6 +77,20 @@ type
   public
     property    IDThd:  integer read FIDThd;
     constructor Create(ActionMode: integer);
+    destructor  Destroy; override;
+  end;
+
+{ ---------------------------------------------------------------------------------------------------------------------------------------- OPEN ITEMS SCANNER }
+type
+  TTOpenItemsScanner = class(TThread)
+  protected
+    procedure Execute; override;
+  private
+    var FLock:  TCriticalSection;
+    var FIDThd: integer;
+  public
+    property    IDThd:  integer read FIDThd;
+    constructor Create;
     destructor  Destroy; override;
   end;
 
@@ -142,6 +128,20 @@ type
     function    Add      : boolean;
   end;
 
+{ ------------------------------------------------------------------------------------------------------------------------------------------- SEND BUG REPORT }
+type
+  TTSendBugReport = class(TThread)
+  protected
+    procedure Execute; override;
+  private
+    var FLock:   TCriticalSection;
+    var FIDThd:  integer;
+  public
+    property    IDThd:  integer read FIDThd;
+    constructor Create;
+    destructor  Destroy; override;
+  end;
+
 { ------------------------------------------------------------------------------------------------------------------------------------------- EXPORT TO EXCEL }
 type
   TTExcelExport = class(TThread)
@@ -164,78 +164,6 @@ uses
   Model, DataBase, Settings, UAC, Mailer, AgeView, Transactions, Tracker;
 
 { ############################################################ ! SEPARATE CPU THREADS ! ##################################################################### }
-
-{ ################################################################# ! BUG REPORT ! ########################################################################## }
-
-{ ------------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE }
-constructor TTSendBugReport.Create;
-begin
-  inherited Create(False);
-  FLock :=TCriticalSection.Create;
-  FIDThd:=0;
-end;
-
-{ --------------------------------------------------------------------------------------------------------------------------------------------------- RELEASE }
-destructor TTSendBugReport.Destroy;
-begin
-  FLock.Free;
-end;
-
-{ ------------------------------------------------------------------------------------------------------------------------------------- EXECUTE WORKER THREAD }
-procedure TTSendBugReport.Execute;
-begin
-  FLock.Acquire;
-  FIDThd:=GetCurrentThreadId;
-  try
-    if ReportForm.SendReport then
-    begin
-      MainForm.ExecMessage(False, mcInfo, 'Report has been sent successfully!');
-      Synchronize(ReportForm.ReportMemo.Clear);
-      LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Bug Report has been successfully sent by the user.');
-    end
-    else
-    begin
-      MainForm.ExecMessage(False, mcError, 'Cannot send Bug Report. Please contact IT support.');
-      LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot send Bug Report.');
-    end;
-  finally
-    FLock.Release;
-  end;
-  { RELEASE THREAD WHEN DONE }
-  FreeOnTerminate:=True;
-end;
-
-{ ############################################################## ! TRACKER SCANNER ! ######################################################################## }
-
-{ ------------------------------------------------------------------------------------------------------------------------------------- EXECUTE WORKER THREAD }
-procedure TTInvoiceTrackerScanner.Execute;
-begin
-  //
-end;
-
-{ ############################################################ ! INVOICE TRACKER LIST ! ##################################################################### }
-
-{ ------------------------------------------------------------------------------------------------------------------------------------- EXECUTE WORKER THREAD }
-constructor TTInvoiceTrackerRefresh.Create(UserAlias: string);
-begin
-  inherited Create(False);
-  pUserAlias:=UserAlias;
-end;
-
-{ ------------------------------------------------------------------------------------------------------------------------------------- EXECUTE WORKER THREAD }
-procedure TTInvoiceTrackerRefresh.Execute;
-begin
-  FIDThd:=CurrentThread.ThreadID;
-  try
-    TrackerForm.UserAlias:=pUserAlias;
-    TrackerForm.Display;
-  except
-    on E: Exception do
-      LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Execution of this tread work has been stopped. Error has been thrown: ' + E.Message + ' (TInvoiceTracker).');
-  end;
-  { RELEASE THREAD WHEN DONE }
-  FreeOnTerminate:=True;
-end;
 
 { ################################################################ ! NETWORK SCANNER ! ###################################################################### }
 
@@ -269,6 +197,38 @@ begin
   finally
     DataBase.Free;
   end;
+  FreeOnTerminate:=True;
+end;
+
+{ ############################################################## ! TRACKER SCANNER ! ######################################################################## }
+
+{ ------------------------------------------------------------------------------------------------------------------------------------- EXECUTE WORKER THREAD }
+procedure TTInvoiceTrackerScanner.Execute;
+begin
+  //
+end;
+
+{ ############################################################ ! INVOICE TRACKER LIST ! ##################################################################### }
+
+{ ------------------------------------------------------------------------------------------------------------------------------------- EXECUTE WORKER THREAD }
+constructor TTInvoiceTrackerRefresh.Create(UserAlias: string);
+begin
+  inherited Create(False);
+  pUserAlias:=UserAlias;
+end;
+
+{ ------------------------------------------------------------------------------------------------------------------------------------- EXECUTE WORKER THREAD }
+procedure TTInvoiceTrackerRefresh.Execute;
+begin
+  FIDThd:=CurrentThread.ThreadID;
+  try
+    TrackerForm.UserAlias:=pUserAlias;
+    TrackerForm.Display;
+  except
+    on E: Exception do
+      LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Execution of this tread work has been stopped. Error has been thrown: ' + E.Message + ' (TInvoiceTracker).');
+  end;
+  { RELEASE THREAD WHEN DONE }
   FreeOnTerminate:=True;
 end;
 
@@ -354,54 +314,6 @@ begin
   FreeOnTerminate:=True;
 end;
 
-{ ############################################################## ! OPEN ITEMS SCANNER ! ##################################################################### }
-
-{ ------------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE }
-constructor TTOpenItemsScanner.Create;
-begin
-  inherited Create(False);
-  FLock :=TCriticalSection.Create;
-  FIDThd:=0;
-end;
-
-{ --------------------------------------------------------------------------------------------------------------------------------------------------- RELEASE }
-destructor TTOpenItemsScanner.Destroy;
-begin
-  FLock.Free;
-end;
-
-{ ---------------------------------------------------------------------------------------------------------------------------------------- OPEN ITEMS SCANNER }
-procedure TTOpenItemsScanner.Execute;
-var
-  Transactions: TTransactions;
-  ReadDateTime: string;
-begin
-  FIDThd:=CurrentThread.ThreadID;
-  FLock.Acquire;
-  Transactions:=TTransactions.Create(MainForm.DbConnect);
-  try
-    try
-      ReadDateTime:=Transactions.GetDateTime(gdDateTime);
-      if StrToDateTime(MainForm.OpenItemsUpdate) < StrToDateTime(ReadDateTime) then
-      begin
-        { SWITCH OFF ALL TIMERS }
-        MainForm.SwitchTimers(tmDisabled);
-        { REFRESH OPEN ITEMS AND MAKE NEW AGING VIEW }
-        MainForm.OpenItemsUpdate:=ReadDateTime;
-        TTReadOpenItems.Create(thCallMakeAge);
-      end;
-    except
-      on E: Exception do
-        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot execute "TTOpenItemsScanner". Error has been thrown: ' + E.Message);
-    end;
-  finally
-    Transactions.Free;
-    FLock.Release;
-  end;
-  { RELEASE THREAD WHEN DONE }
-  FreeOnTerminate:=True;
-end;
-
 { ################################################################ ! READ AGE VIEW ! ######################################################################## }
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE }
@@ -465,6 +377,54 @@ begin
   FreeOnTerminate:=True;
   { CALL OPEN ITEMS IF USER SELECT ANOTHER AGE VIEW }
   if FMode = thCallOpenItems then TTReadOpenItems.Create(thNullParameter);
+end;
+
+{ ############################################################## ! OPEN ITEMS SCANNER ! ##################################################################### }
+
+{ ------------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE }
+constructor TTOpenItemsScanner.Create;
+begin
+  inherited Create(False);
+  FLock :=TCriticalSection.Create;
+  FIDThd:=0;
+end;
+
+{ --------------------------------------------------------------------------------------------------------------------------------------------------- RELEASE }
+destructor TTOpenItemsScanner.Destroy;
+begin
+  FLock.Free;
+end;
+
+{ ---------------------------------------------------------------------------------------------------------------------------------------- OPEN ITEMS SCANNER }
+procedure TTOpenItemsScanner.Execute;
+var
+  Transactions: TTransactions;
+  ReadDateTime: string;
+begin
+  FIDThd:=CurrentThread.ThreadID;
+  FLock.Acquire;
+  Transactions:=TTransactions.Create(MainForm.DbConnect);
+  try
+    try
+      ReadDateTime:=Transactions.GetDateTime(gdDateTime);
+      if StrToDateTime(MainForm.OpenItemsUpdate) < StrToDateTime(ReadDateTime) then
+      begin
+        { SWITCH OFF ALL TIMERS }
+        MainForm.SwitchTimers(tmDisabled);
+        { REFRESH OPEN ITEMS AND MAKE NEW AGING VIEW }
+        MainForm.OpenItemsUpdate:=ReadDateTime;
+        TTReadOpenItems.Create(thCallMakeAge);
+      end;
+    except
+      on E: Exception do
+        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot execute "TTOpenItemsScanner". Error has been thrown: ' + E.Message);
+    end;
+  finally
+    Transactions.Free;
+    FLock.Release;
+  end;
+  { RELEASE THREAD WHEN DONE }
+  FreeOnTerminate:=True;
 end;
 
 { ################################################################ ! OPEN ITEMS ! ########################################################################### }
@@ -612,13 +572,16 @@ begin
     FGrid.Freeze(True);
     { COLUMN SELECTION }
     DataTables.Columns.Add(TAddressBook.USER_ALIAS);
-    DataTables.Columns.Add(TAddressBook.SCUID);
+    DataTables.Columns.Add(TAddressBook.SCUID);       { CONSTRAINT UNIQUE }
     DataTables.Columns.Add(TAddressBook.CUSTOMER_NUMBER);
     DataTables.Columns.Add(TAddressBook.CUSTOMER_NAME);
     DataTables.Columns.Add(TAddressBook.EMAILS);
     DataTables.Columns.Add(TAddressBook.ESTATEMENTS);
     DataTables.Columns.Add(TAddressBook.PHONE_NUMBERS);
     DataTables.Columns.Add(TAddressBook.CONTACT);
+    DataTables.Columns.Add(TAddressBook.COCODE);
+    DataTables.Columns.Add(TAddressBook.AGENT);
+    DataTables.Columns.Add(TAddressBook.DIVISION);
     { FILTER BY USER ALIAS IF GIVEN }
     if FMode = adOpenForUser then DataTables.CustFilter:=WHERE + TAddressBook.USER_ALIAS + EQUAL + QuotedStr(MainForm.WinUserName);
     DataTables.OpenTable(TblAddressbook);
@@ -653,13 +616,16 @@ begin
     FGrid.Freeze(True);
     { COLUMN SELECTION }
     DataTables.Columns.Add(TAddressBook.USER_ALIAS);
-    DataTables.Columns.Add(TAddressBook.SCUID);  { CONSTRAINT UNIQUE }
+    DataTables.Columns.Add(TAddressBook.SCUID);       { CONSTRAINT UNIQUE }
     DataTables.Columns.Add(TAddressBook.CUSTOMER_NUMBER);
     DataTables.Columns.Add(TAddressBook.CUSTOMER_NAME);
     DataTables.Columns.Add(TAddressBook.EMAILS);
     DataTables.Columns.Add(TAddressBook.ESTATEMENTS);
     DataTables.Columns.Add(TAddressBook.PHONE_NUMBERS);
     DataTables.Columns.Add(TAddressBook.CONTACT);
+    DataTables.Columns.Add(TAddressBook.COCODE);
+    DataTables.Columns.Add(TAddressBook.AGENT);
+    DataTables.Columns.Add(TAddressBook.DIVISION);
     { PERFORM INSERT ON NEWLY ADDED ROWS ONLY }
     for iCNT:=1 to FGrid.RowCount - 1 do
     begin
@@ -706,6 +672,46 @@ end;
 function TTAddressBook.Add: boolean;
 begin
   Result:=False;
+end;
+
+{ ################################################################# ! BUG REPORT ! ########################################################################## }
+
+{ ------------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE }
+constructor TTSendBugReport.Create;
+begin
+  inherited Create(False);
+  FLock :=TCriticalSection.Create;
+  FIDThd:=0;
+end;
+
+{ --------------------------------------------------------------------------------------------------------------------------------------------------- RELEASE }
+destructor TTSendBugReport.Destroy;
+begin
+  FLock.Free;
+end;
+
+{ ------------------------------------------------------------------------------------------------------------------------------------- EXECUTE WORKER THREAD }
+procedure TTSendBugReport.Execute;
+begin
+  FLock.Acquire;
+  FIDThd:=GetCurrentThreadId;
+  try
+    if ReportForm.SendReport then
+    begin
+      MainForm.ExecMessage(False, mcInfo, 'Report has been sent successfully!');
+      Synchronize(ReportForm.ReportMemo.Clear);
+      LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Bug Report has been successfully sent by the user.');
+    end
+    else
+    begin
+      MainForm.ExecMessage(False, mcError, 'Cannot send Bug Report. Please contact IT support.');
+      LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot send Bug Report.');
+    end;
+  finally
+    FLock.Release;
+  end;
+  { RELEASE THREAD WHEN DONE }
+  FreeOnTerminate:=True;
 end;
 
 { ############################################################## ! EXPORT TO EXCEL ! ######################################################################## }

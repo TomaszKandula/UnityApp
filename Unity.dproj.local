@@ -130,6 +130,8 @@
     <File Path="Model.pas"/>
     <File Path="ReportBug.pas"/>
     <File Path="Search.pas"/>
+    <File Path="Send.pas"/>
+    <File Path="Send.dfm"/>
     <File Path="Settings.pas"/>
     <File Path="Splash.pas"/>
     <File Path="SQL.pas"/>
@@ -138,7 +140,5 @@
     <File Path="UAC.pas"/>
     <File Path="Update.pas"/>
     <File Path="Worker.pas"/>
-    <File Path="Send.pas"/>
-    <File Path="Send.dfm"/>
   </ProjectSortOrder>
 </BorlandProject>

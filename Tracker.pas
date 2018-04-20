@@ -58,6 +58,7 @@ type
     procedure btnOKClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormActivate(Sender: TObject);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
     { ------------------------------------------------------------- ! HELPERS ! ----------------------------------------------------------------------------- }
   private
     var pTrackerGrid  :  TStringGrid;
@@ -334,6 +335,12 @@ end;
 procedure TTrackerForm.btnCancelClick(Sender: TObject);
 begin
   Close;
+end;
+
+{ -------------------------------------------------------------------------------------------------------------------------------------------- CLOSE ON <ESC> }
+procedure TTrackerForm.FormKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = ESC then Close;
 end;
 
 end.

@@ -6,8 +6,6 @@ object EventForm: TEventForm
   ClientHeight = 620
   ClientWidth = 824
   Color = 15527148
-  Constraints.MaxHeight = 1200
-  Constraints.MaxWidth = 1200
   Constraints.MinHeight = 400
   Constraints.MinWidth = 400
   Font.Charset = DEFAULT_CHARSET
@@ -19,6 +17,7 @@ object EventForm: TEventForm
   OldCreateOrder = False
   Position = poMainFormCenter
   OnCreate = FormCreate
+  OnKeyPress = FormKeyPress
   OnKeyUp = FormKeyUp
   OnShow = FormShow
   PixelsPerInch = 96
@@ -50,10 +49,6 @@ object EventForm: TEventForm
     WantTabs = True
     WordWrap = False
     OnKeyUp = FormKeyUp
-    ExplicitLeft = 17
-    ExplicitTop = 16
-    ExplicitWidth = 801
-    ExplicitHeight = 577
   end
   object StatusBar: TStatusBar
     Left = 0
@@ -62,7 +57,5 @@ object EventForm: TEventForm
     Height = 19
     Color = 15527148
     Panels = <>
-    ExplicitTop = 611
-    ExplicitWidth = 834
   end
 end

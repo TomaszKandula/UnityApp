@@ -87,6 +87,7 @@ type
     procedure Freeze(PaintWnd: boolean);
     function  ImportCSV(DialogBox: TOpenDialog; Delimiter: string): boolean;
     function  ExportCSV(DialogBox: TSaveDialog; Delimiter: string): boolean;
+    procedure SelectAll;
   public
     var OpenThdId:  integer;
     var SqlColumns: TLists;
@@ -430,6 +431,10 @@ type                                                            (* GUI | MAIN TH
     RightPanel8: TPanel;
     PanelDetailsGrid: TPanel;
     Action_HideSummary: TMenuItem;
+    Action_ExportCSV: TMenuItem;
+    Action_SelectAgeView: TMenuItem;
+    Action_CopyAll: TMenuItem;
+    Action_RemoveFilters: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -611,6 +616,10 @@ type                                                            (* GUI | MAIN TH
     procedure Action_Gr3_FilterClick(Sender: TObject);
     procedure sgAddressBookKeyPress(Sender: TObject; var Key: Char);
     procedure Action_HideSummaryClick(Sender: TObject);
+    procedure Action_ExportCSVClick(Sender: TObject);
+    procedure Action_SelectAgeViewClick(Sender: TObject);
+    procedure Action_CopyAllClick(Sender: TObject);
+    procedure Action_RemoveFiltersClick(Sender: TObject);
     { ------------------------------------------------------------- ! HELPERS ! ----------------------------------------------------------------------------- }
   private
     { GENERAL }
@@ -1729,6 +1738,18 @@ begin
   end;
 end;
 
+{ ------------------------------------------------------------------------------------------------------------------------------------------------ SELECT ALL }
+procedure TStringGrid.SelectAll;
+var
+  GridRect: TGridRect;
+begin
+  GridRect.Left  :=1;
+  GridRect.Top   :=1;
+  GridRect.Right :=Self.ColCount;
+  GridRect.Bottom:=Self.RowCount;
+  Self.Selection :=GridRect;
+end;
+
 { ################################################################## ! HELPERS ! ############################################################################ }
 
 { ----------------------------------------------------------------------------------------------------------------------------------------- CONVERT TO STRING }
@@ -2447,14 +2468,8 @@ end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------ SELECT ALL }
 procedure TMainForm.Action_SelectAllClick(Sender: TObject);
-var
-  GridRect: TGridRect;
 begin
-  GridRect.Left  :=1;
-  GridRect.Top   :=1;
-  GridRect.Right :=sgOpenItems.ColCount;
-  GridRect.Bottom:=sgOpenItems.RowCount;
-  sgOpenItems.Selection:=GridRect;
+  sgOpenItems.SelectAll;
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------------- COPY TO CLIPBOARD }
@@ -2647,6 +2662,12 @@ begin
   { ONLY ADMINS AND RW USERS CAN USE ADDRESSBOOK AND INVOICE TRACKER }
   if AccessLevel = acReadOnly then Exit;
 
+  { ENABLE OR DISABLE FILTER REMOVAL }
+  if FilterForm.InUse then
+    Action_RemoveFilters.Enabled:=True
+      else
+        Action_RemoveFilters.Enabled:=False;
+
   { CHECK IF USER SELECT A RANGE ON AGEGRID }
   if (sgAgeView.Selection.Bottom - sgAgeView.Selection.Top) > 0 then
   begin
@@ -2731,19 +2752,26 @@ begin
       { EMPTY ID BAR }
       sgAddressBook.Cells[0, sgAddressBook.RowCount - 1 + OffSet]:='';
       { MANDATORY FIELDS }
-      sgAddressBook.Cells[1, sgAddressBook.RowCount - 1 + OffSet]:=UpperCase(MainForm.WinUserName);
-      sgAddressBook.Cells[2, sgAddressBook.RowCount - 1 + OffSet]:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), iCNT] +
-                                                                   ConvertName(
-                                                                                sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCO_CODE, 1, 1), iCNT],
-                                                                                'F',
-                                                                                3
-                                                                              );
-      { FIELDS WITH DATA THAT MAY BE EMPTY }
-      sgAddressBook.Cells[3, sgAddressBook.RowCount - 1 + OffSet]:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), iCNT];
-      sgAddressBook.Cells[4, sgAddressBook.RowCount - 1 + OffSet]:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), iCNT];
-      sgAddressBook.Cells[5, sgAddressBook.RowCount - 1 + OffSet]:='';
-      sgAddressBook.Cells[6, sgAddressBook.RowCount - 1 + OffSet]:='';
-      sgAddressBook.Cells[7, sgAddressBook.RowCount - 1 + OffSet]:='';
+      sgAddressBook.Cells[sgAddressBook.ReturnColumn(TAddressBook.USER_ALIAS, 1, 1), sgAddressBook.RowCount - 1 + OffSet]:=UpperCase(MainForm.WinUserName);
+      sgAddressBook.Cells[sgAddressBook.ReturnColumn(TAddressBook.SCUID, 1, 1), sgAddressBook.RowCount - 1 + OffSet]:=
+        sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), iCNT] +
+          ConvertName(
+                       sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCO_CODE, 1, 1), iCNT],
+                       'F',
+                       3
+                     );
+      { FIELDS WITH DATA }
+      sgAddressBook.Cells[sgAddressBook.ReturnColumn(TAddressBook.CUSTOMER_NUMBER, 1, 1) , sgAddressBook.RowCount - 1 + OffSet]:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), iCNT];
+      sgAddressBook.Cells[sgAddressBook.ReturnColumn(TAddressBook.CUSTOMER_NAME, 1, 1), sgAddressBook.RowCount - 1 + OffSet]:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), iCNT];
+      sgAddressBook.Cells[sgAddressBook.ReturnColumn(TAddressBook.AGENT, 1, 1), sgAddressBook.RowCount - 1 + OffSet]:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fAGENT, 1, 1), iCNT];
+      sgAddressBook.Cells[sgAddressBook.ReturnColumn(TAddressBook.DIVISION, 1, 1), sgAddressBook.RowCount - 1 + OffSet]:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fDIVISION, 1, 1), iCNT];
+      sgAddressBook.Cells[sgAddressBook.ReturnColumn(TAddressBook.COCODE, 1, 1), sgAddressBook.RowCount - 1 + OffSet]:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCO_CODE, 1, 1), iCNT];
+      { EMPTY FIELDS }
+      sgAddressBook.Cells[sgAddressBook.ReturnColumn(TAddressBook.EMAILS, 1, 1), sgAddressBook.RowCount - 1 + OffSet]:='';
+      sgAddressBook.Cells[sgAddressBook.ReturnColumn(TAddressBook.PHONE_NUMBERS, 1, 1), sgAddressBook.RowCount - 1 + OffSet]:='';
+      sgAddressBook.Cells[sgAddressBook.ReturnColumn(TAddressBook.CONTACT, 1, 1), sgAddressBook.RowCount - 1 + OffSet]:='';
+      sgAddressBook.Cells[sgAddressBook.ReturnColumn(TAddressBook.ESTATEMENTS, 1, 1), sgAddressBook.RowCount - 1 + OffSet]:='';
+      { NEXT ROW }
       sgAddressBook.RowCount:=sgAddressBook.RowCount + 1;
     end;
   end;
@@ -2784,43 +2812,77 @@ begin
   FilterForm.FColName:=TSnapshots.fINF7;
   FilterForm.FOverdue:=TSnapshots.fOVERDUE;
   FilterForm.FGrid   :=MainForm.sgAgeView;
+  FilterForm.FFilterNum:=flt_INF7;
   WndCall(FilterForm, stModal);
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------------ INF4 }
 procedure TMainForm.Action_INF4_FilterClick(Sender: TObject);
 begin
-  //
+  FilterForm.FColName  :=TSnapshots.fINF4;
+  FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
+  FilterForm.FGrid     :=MainForm.sgAgeView;
+  FilterForm.FFilterNum:=flt_INF4;
+  WndCall(FilterForm, stModal);
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------ VIA COCODE }
 procedure TMainForm.Action_CoCode_FilterClick(Sender: TObject);
 begin
-  //
+  FilterForm.FColName  :=TSnapshots.fCO_CODE;
+  FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
+  FilterForm.FGrid     :=MainForm.sgAgeView;
+  FilterForm.FFilterNum:=flt_COCODE;
+  WndCall(FilterForm, stModal);
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------- VIA AGENT }
 procedure TMainForm.Action_Agent_FilterClick(Sender: TObject);
 begin
-  //
+  FilterForm.FColName  :=TSnapshots.fAGENT;
+  FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
+  FilterForm.FGrid     :=MainForm.sgAgeView;
+  FilterForm.FFilterNum:=flt_AGENT;
+  WndCall(FilterForm, stModal);
 end;
 
 { ---------------------------------------------------------------------------------------------------------------------------------------------- VIA DIVISION }
 procedure TMainForm.Action_Division_FilterClick(Sender: TObject);
 begin
-  //
+  FilterForm.FColName  :=TSnapshots.fDIVISION;
+  FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
+  FilterForm.FGrid     :=MainForm.sgAgeView;
+  FilterForm.FFilterNum:=flt_DIVISION;
+  WndCall(FilterForm, stModal);
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------- VIA FOLLOW UP }
 procedure TMainForm.Action_FollowUp_FilterClick(Sender: TObject);
 begin
-  //
+  FilterForm.FColName  :=TSnapshots.fFOLLOWUP;
+  FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
+  FilterForm.FGrid     :=MainForm.sgAgeView;
+  FilterForm.FFilterNum:=flt_FOLLOWUP;
+  WndCall(FilterForm, stModal);
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------------- GROUP 3 }
 procedure TMainForm.Action_Gr3_FilterClick(Sender: TObject);
 begin
-  //
+  FilterForm.FColName  :=TSnapshots.fGROUP3;
+  FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
+  FilterForm.FGrid     :=MainForm.sgAgeView;
+  FilterForm.FFilterNum:=flt_GR3;
+  WndCall(FilterForm, stModal);
+end;
+
+{ ---------------------------------------------------------------------------------------------------------------------------------------- REMOVE ALL FILTERS }
+procedure TMainForm.Action_RemoveFiltersClick(Sender: TObject);
+var
+  iCNT: integer;
+begin
+  for iCNT:=1 to sgAgeView.RowCount - 1 do sgAgeView.RowHeights[iCNT]:=sgRowHeight;
+  FilterForm.FilterClearAll;
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------- EXCLUDE NON-OVERDUE ITEMS }
@@ -2893,6 +2955,24 @@ end;
 procedure TMainForm.Action_ToExceClick(Sender: TObject);
 begin
   TTExcelExport.Create;
+end;
+
+{ ------------------------------------------------------------------------------------------------------------------------------------------------ EXPORT CSV }
+procedure TMainForm.Action_ExportCSVClick(Sender: TObject);
+begin
+  sgAgeView.ExportCSV(CSVExport, '|');
+end;
+
+{ ------------------------------------------------------------------------------------------------------------------------------------------------ SELECT ALL }
+procedure TMainForm.Action_SelectAgeViewClick(Sender: TObject);
+begin
+  sgAgeView.SelectAll;
+end;
+
+{ ------------------------------------------------------------------------------------------------------------------------------- COPY SELECTION TO CLIPBOARD }
+procedure TMainForm.Action_CopyAllClick(Sender: TObject);
+begin
+  sgAgeView.CopyCutPaste(adCopy);
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------- HIDE OR SHOW SUMMARY }
@@ -3194,6 +3274,7 @@ var
   Col13:       integer;
   Col14:       integer;
   Col15:       integer;
+  Col16:       integer;
   iCNT:        integer;
   Width:       integer;
   AgeViewCUID: string;
@@ -3224,6 +3305,17 @@ begin
   Col13:=sgAgeView.ReturnColumn(TSnapshots.fCUID,            1, 1);
   Col14:=sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1);
   Col15:=sgAgeView.ReturnColumn(TSnapshots.fRISK_CLASS,      1, 1);
+  Col16:=sgAgeView.ReturnColumn(TSnapshots.fGROUP3,          1, 1);
+
+  { MAP GROUP3 COLUMN }
+  if ACol = Col16 then
+  begin
+    for iCNT:=1 to sgGroup3.RowCount - 1 do
+    begin
+      if sgGroup3.Cells[sgGroup3.ReturnColumn(TGroup3.ERP_CODE, 1, 1), iCNT] = sgAgeView.Cells[ACol, ARow] then
+        sgAgeView.Cells[ACol, ARow]:=sgGroup3.Cells[sgGroup3.ReturnColumn(TGroup3.DESCRIPTION, 1, 1), iCNT];
+    end;
+  end;
 
   { HIGHLIGHT FOLLOW UP COLUMN }
   if not (CDate(sgAgeView.Cells[ACol, ARow]) = 0) then

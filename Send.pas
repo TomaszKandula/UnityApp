@@ -29,6 +29,10 @@ type
     Text2: TLabel;
     Text_Body: TMemo;
     StatementAttach: TCheckBox;
+    procedure btnCancelClick(Sender: TObject);
+    procedure btnSendEmailClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
   private
   public
   end;
@@ -47,6 +51,36 @@ uses
 
 { ############################################################# ! MAIN FORM METHODS ! ####################################################################### }
 
+{ ------------------------------------------------------------- ! EXECUTE ON CREATE ! ----------------------------------------------------------------------- }
+procedure TSendForm.FormCreate(Sender: TObject);
+var
+  AppSettings: TSettings;
+begin
+  AppSettings:=TSettings.Create;
+  try
+    { ----------------------------------------------------------------------------------------------------------------------------------- LOAD WINDOW CAPTION }
+    SendForm.Caption:=AppSettings.TMIG.ReadString(ApplicationDetails, 'WND_SENDMAIL', APPNAME);
+  finally
+    AppSettings.Free;
+  end;
+end;
 
+{ ------------------------------------------------------------------------------------------------------------------------------------------------ SEND EMAIL }
+procedure TSendForm.btnSendEmailClick(Sender: TObject);
+begin
+
+end;
+
+{ ---------------------------------------------------------------------------------------------------------------------------------------------- CLOSE WINDOW }
+procedure TSendForm.btnCancelClick(Sender: TObject);
+begin
+  Close;
+end;
+
+{ -------------------------------------------------------------------------------------------------------------------------------------------- CLOSE ON <ESC> }
+procedure TSendForm.FormKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = ESC then Close;
+end;
 
 end.

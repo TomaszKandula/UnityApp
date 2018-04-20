@@ -38,6 +38,7 @@ type
     procedure DaysSevenClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure MyCalendarClick(Sender: TObject);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
   public
     var CalendarMode: integer;
     var SelectedDate: TDateTime;
@@ -215,6 +216,12 @@ begin
     SelectedDate:=CalendarForm.MyCalendar.Date;
     Close;
   end;
+end;
+
+{ -------------------------------------------------------------------------------------------------------------------------------------------- CLOSE ON <ESC> }
+procedure TCalendarForm.FormKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = ESC then Close;
 end;
 
 end.

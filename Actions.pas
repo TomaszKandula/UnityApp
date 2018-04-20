@@ -106,6 +106,7 @@ type
     procedure Copy_CustNumberClick(Sender: TObject);
     procedure Copy_PersonClick(Sender: TObject);
     procedure Copy_EmailClick(Sender: TObject);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
   public
     var CUID       :  string;
     var SCUID      :  string;
@@ -130,7 +131,7 @@ var
 implementation
 
 uses
-  Model, Worker, Calendar, Settings, Mailer, Transactions;
+  Model, Worker, Calendar, Settings, Mailer, Transactions, Send;
 
 {$R *.dfm}
 
@@ -500,6 +501,12 @@ end;
 
 { --------------------------------------------------------------- ! KEYBOARD EVENTS ! ----------------------------------------------------------------------- }
 
+{ -------------------------------------------------------------------------------------------------------------------------------------------- CLOSE ON <ESC> }
+procedure TActionsForm.FormKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = ESC then Close;
+end;
+
 { ----------------------------------------------------------------------------------------------------------------------------------- SAVE COMMENT ON <ENTER> }
 procedure TActionsForm.DailyComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 var
@@ -714,10 +721,7 @@ end;
 { ----------------------------------------------------------------------------------------------------------------------------------------- SEND MANUAL EMAIL }
 procedure TActionsForm.btnSendEmailClick(Sender: TObject);
 begin
-  // code here...
-
-
-
+  MainForm.WndCall(SendForm, 0);
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------------- SEND STATEMENT }

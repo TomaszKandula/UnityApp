@@ -10,7 +10,11 @@ object SendForm: TSendForm
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
+  KeyPreview = True
   OldCreateOrder = False
+  Position = poMainFormCenter
+  OnCreate = FormCreate
+  OnKeyPress = FormKeyPress
   PixelsPerInch = 96
   TextHeight = 13
   object AppMain: TShape
@@ -35,6 +39,7 @@ object SendForm: TSendForm
     Height = 25
     Cursor = crHandPoint
     Caption = 'Cancel'
+    OnClick = btnCancelClick
   end
   object btnSendEmail: TSpeedButton
     Left = 432
@@ -74,6 +79,7 @@ object SendForm: TSendForm
     ParentShowHint = False
     ShowHint = True
     Spacing = 10
+    OnClick = btnSendEmailClick
   end
   object Text1: TLabel
     Left = 16
@@ -109,7 +115,7 @@ object SendForm: TSendForm
     Left = 16
     Top = 91
     Width = 505
-    Height = 182
+    Height = 318
     Color = clCream
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clNavy

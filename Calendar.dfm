@@ -11,9 +11,11 @@ object CalendarForm: TCalendarForm
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
+  KeyPreview = True
   OldCreateOrder = False
   Position = poMainFormCenter
   OnCreate = FormCreate
+  OnKeyPress = FormKeyPress
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
@@ -103,7 +105,7 @@ object CalendarForm: TCalendarForm
       CalColors.TitleBackColor = clSilver
       CalColors.TitleTextColor = clBlack
       CalColors.TrailingTextColor = clMaroon
-      Date = 43147.721848703710000000
+      Date = 43147.978370486110000000
       FirstDayOfWeek = dowMonday
       ParentShowHint = False
       ShowHint = True

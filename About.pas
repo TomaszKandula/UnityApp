@@ -66,6 +66,7 @@ type
     procedure txt_ITSClick(Sender: TObject);
     procedure txt_WEBClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
   protected
     function Is64BitOS: Boolean;
   end;
@@ -194,6 +195,14 @@ begin
         txt_MEM.Caption:=formatfloat('## ###', ((mem_64.ullTotalPhys) DIV 1048576)) + ' MB';
         txt_USG.Caption:=formatfloat('## ###', ((mem_64.ullTotalPhys-mem_64.ullAvailPhys) DIV 1048576)) + ' MB';
       end;
+end;
+
+{ -------------------------------------------------------------- ! KEYBOARD EVENTS ! ------------------------------------------------------------------------ }
+
+{ -------------------------------------------------------------------------------------------------------------------------------------------- CLOSE ON <ESC> }
+procedure TAboutForm.FormKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = ESC then Close;
 end;
 
 { --------------------------------------------------------------- ! BUTTON CALLS ! -------------------------------------------------------------------------- }

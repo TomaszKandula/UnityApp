@@ -44,7 +44,7 @@ const
   LicenceFile:    string    = 'Unity.licx';
   GridImgFile:    string    = 'Unity.img';
   ReleaseFile:    string    = 'Release.pak';
-  CurrentMutex:   PWideChar = 'UNITY_10019';  { WARNING! INCREASE IT WITH EACH NEW RELEASE }
+  CurrentMutex:   PWideChar = 'UNITY_10020';  { WARNING! INCREASE IT WITH EACH NEW RELEASE }
 
   { SPLASH SCREEN }
 
@@ -64,6 +64,21 @@ const
   DLL3:           string = 'Microsoft.Lync.Model.dll';
   DLL4:           string = 'Microsoft.Lync.Utilities.dll';
   DLL5:           string = 'Microsoft.Office.Uc.dll';
+
+  { STRING GRID ROW HEIGHT }
+
+  sgRowHeight = 17;
+  sgRowHidden = -1;
+
+  { FILTER ENUMERATION }
+
+  flt_INF7     = 0;
+  flt_INF4     = 1;
+  flt_COCODE   = 2;
+  flt_AGENT    = 3;
+  flt_DIVISION = 4;
+  flt_FOLLOWUP = 5;
+  flt_GR3      = 6;
 
   { EMAIL OPTION }
 
@@ -149,6 +164,7 @@ const
   LF           : char   = #10;
   BACKSPACE    : char   = #8;
   TAB          : char   = #9;
+  ESC          : char   = #27;
   SPACE        : char   = #32;
   QUOTE        : char   = #39;
   COMMA        : char   = #44;

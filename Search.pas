@@ -38,6 +38,7 @@ type
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnUnhideClick(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
   private
     var   FoundRow   :  integer;
     var   IsNext     :  boolean;
@@ -282,6 +283,12 @@ begin
   EditSearch.Text:='';
   CheckUp.Checked:=False;
   CheckDown.Checked:=True;
+end;
+
+{ -------------------------------------------------------------------------------------------------------------------------------------------- CLOSE ON <ESC> }
+procedure TSearchForm.FormKeyPress(Sender: TObject; var Key: Char);
+begin
+  if Key = ESC then Close;
 end;
 
 end.
