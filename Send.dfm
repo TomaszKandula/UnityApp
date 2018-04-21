@@ -1,9 +1,11 @@
 object SendForm: TSendForm
   Left = 0
   Top = 0
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsSingle
   Caption = 'Unity'
-  ClientHeight = 466
-  ClientWidth = 539
+  ClientHeight = 509
+  ClientWidth = 538
   Color = 15527148
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -21,20 +23,20 @@ object SendForm: TSendForm
     AlignWithMargins = True
     Left = 5
     Top = 5
-    Width = 529
-    Height = 456
+    Width = 528
+    Height = 499
     Margins.Left = 5
     Margins.Top = 5
     Margins.Right = 5
     Margins.Bottom = 5
     Align = alClient
     Pen.Color = clMedGray
-    ExplicitWidth = 491
-    ExplicitHeight = 292
+    ExplicitWidth = 524
+    ExplicitHeight = 514
   end
   object btnCancel: TSpeedButton
     Left = 328
-    Top = 424
+    Top = 466
     Width = 89
     Height = 25
     Cursor = crHandPoint
@@ -43,7 +45,7 @@ object SendForm: TSendForm
   end
   object btnSendEmail: TSpeedButton
     Left = 432
-    Top = 424
+    Top = 466
     Width = 89
     Height = 25
     Cursor = crHandPoint
@@ -83,21 +85,160 @@ object SendForm: TSendForm
   end
   object Text1: TLabel
     Left = 16
-    Top = 16
-    Width = 66
+    Top = 56
+    Width = 90
     Height = 13
-    Caption = 'Email subject:'
+    Caption = 'Custom salutation:'
   end
   object Text2: TLabel
     Left = 16
-    Top = 72
-    Width = 55
+    Top = 152
+    Width = 85
     Height = 13
-    Caption = 'Email body:'
+    Caption = 'Custom message:'
   end
-  object Text_Subject: TMemo
+  object Shape_Customer: TShape
     Left = 16
-    Top = 35
+    Top = 111
+    Width = 505
+    Height = 26
+    Pen.Color = clMedGray
+    Pen.Style = psDot
+  end
+  object Shape_Invoices: TShape
+    Left = 16
+    Top = 303
+    Width = 505
+    Height = 26
+    Pen.Color = clMedGray
+    Pen.Style = psDot
+  end
+  object Shape_Business: TShape
+    Left = 16
+    Top = 20
+    Width = 505
+    Height = 26
+    Pen.Color = clMedGray
+    Pen.Style = psDot
+  end
+  object Shape_Terms: TShape
+    Left = 16
+    Top = 343
+    Width = 505
+    Height = 26
+    Pen.Color = clMedGray
+    Pen.Style = psDot
+  end
+  object Shape_Banks: TShape
+    Left = 16
+    Top = 383
+    Width = 505
+    Height = 26
+    Pen.Color = clMedGray
+    Pen.Style = psDot
+  end
+  object Shape_Footer: TShape
+    Left = 16
+    Top = 423
+    Width = 505
+    Height = 26
+    Pen.Color = clMedGray
+    Pen.Style = psDot
+  end
+  object Text_Business: TLabel
+    Left = 437
+    Top = 26
+    Width = 76
+    Height = 13
+    Caption = 'LBU ADDRESS'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clGray
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object Text_Customer: TLabel
+    Left = 22
+    Top = 117
+    Width = 116
+    Height = 13
+    Caption = 'CUSTOMER ADDRESS'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clGray
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object Text_Invoices: TLabel
+    Left = 22
+    Top = 308
+    Width = 73
+    Height = 13
+    Caption = 'INVOICE LIST'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clGray
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object Text_Footer: TLabel
+    Left = 22
+    Top = 429
+    Width = 43
+    Height = 13
+    Caption = 'FOOTER'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clGray
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object Text_Banks: TLabel
+    Left = 22
+    Top = 389
+    Width = 151
+    Height = 13
+    Caption = 'BANK ACCOUNTS (IF GIVEN)'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clGray
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object Text_Terms: TLabel
+    Left = 22
+    Top = 349
+    Width = 93
+    Height = 13
+    Caption = 'PAYMENT TERMS'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clGray
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object Text_Warn: TLabel
+    Left = 16
+    Top = 471
+    Width = 227
+    Height = 13
+    Caption = '*Account Statement is available only in English.'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clBlack
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+  end
+  object Text_Salut: TMemo
+    Left = 16
+    Top = 75
     Width = 505
     Height = 22
     Color = clCream
@@ -111,11 +252,11 @@ object SendForm: TSendForm
     TabOrder = 0
     WantTabs = True
   end
-  object Text_Body: TMemo
+  object Text_Message: TMemo
     Left = 16
-    Top = 91
+    Top = 171
     Width = 505
-    Height = 318
+    Height = 118
     Color = clCream
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clNavy
@@ -126,15 +267,5 @@ object SendForm: TSendForm
     ParentFont = False
     TabOrder = 1
     WantTabs = True
-  end
-  object StatementAttach: TCheckBox
-    Left = 16
-    Top = 424
-    Width = 161
-    Height = 17
-    Caption = 'Attach account statement'
-    Checked = True
-    State = cbChecked
-    TabOrder = 2
   end
 end

@@ -28,6 +28,7 @@ type
     var pLayoutDir             : string;
     var pAppLog                : string;
     var pWinUserName           : string;
+    var pWinTempFolder         : string;
     { PATHS }
     var pPathEventLog          : string;
     var pPathAppCfg            : string;
@@ -48,6 +49,7 @@ type
     property FLayoutDir        : string    read pLayoutDir;
     property FAppLog           : string    read pAppLog;
     property FWinUserName      : string    read pWinUserName;
+    property FWinTempFolder    : string    read pWinTempFolder;
     property FPathGridImage    : string    read pPathGridImage;
     property FPathEventLog     : string    read pPathEventLog;
     property FPathAppCfg       : string    read pPathAppCfg;
@@ -79,6 +81,7 @@ begin
   (* POPULATE *)
   pAppDir        :=ExtractFileDir(Application.ExeName) + '\';
   pWinUserName   :=Trim(LowerCase(GetEnvironmentVariable('username')));
+  pWinTempFolder :=GetEnvironmentVariable('TEMP');
   pAppLog        :=pWinUserName + '.log';
   pPathAppCfg    :=pAppDir + ConfigFile;
   pPathLicence   :=pAppDir + LicenceFile;

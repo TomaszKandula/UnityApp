@@ -210,6 +210,10 @@ type
     const AddTxt           : string = 'AddTxt';
     const ExtractDateStamp : string = 'ExtractDateStamp';
     const ProcessBatchKey  : string = 'ProcessBatchKey';
+
+    (* CUID IS ADDITIONA COLUMN MADE 'ON THE FLY' *)
+    const CUID             : string = 'CUID';
+
   end;
 
 { -------------------------------------------------------------- ! TBL_SNAPSHOTS ! -------------------------------------------------------------------------- }

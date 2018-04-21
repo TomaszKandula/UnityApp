@@ -48,8 +48,6 @@ object ActionsForm: TActionsForm
     Color = 15527148
     ParentBackground = False
     TabOrder = 1
-    ExplicitTop = 116
-    ExplicitHeight = 283
     object OpenItemsGrid: TStringGrid
       AlignWithMargins = True
       Left = 5
@@ -74,7 +72,6 @@ object ActionsForm: TActionsForm
       OnMouseWheelDown = OpenItemsGridMouseWheelDown
       OnMouseWheelUp = OpenItemsGridMouseWheelUp
       OnSelectCell = OpenItemsGridSelectCell
-      ExplicitHeight = 273
       ColWidths = (
         10
         119
@@ -105,7 +102,6 @@ object ActionsForm: TActionsForm
     Color = 15527148
     ParentBackground = False
     TabOrder = 2
-    ExplicitTop = 399
     object ButtonPanel: TPanel
       Left = 0
       Top = 180
@@ -160,12 +156,12 @@ object ActionsForm: TActionsForm
         ExplicitLeft = 805
       end
       object btnNext: TSpeedButton
-        Left = 15
+        Left = 81
         Top = 7
-        Width = 110
+        Width = 42
         Height = 25
         Cursor = crHandPoint
-        Caption = 'Next'
+        Caption = '>>'
         OnClick = btnNextClick
       end
       object btnSendStatement: TSpeedButton
@@ -218,6 +214,15 @@ object ActionsForm: TActionsForm
         Anchors = [akRight]
         Caption = 'Send Email'
         OnClick = btnSendEmailClick
+      end
+      object btnBack: TSpeedButton
+        Left = 18
+        Top = 7
+        Width = 42
+        Height = 25
+        Cursor = crHandPoint
+        Caption = '<<'
+        OnClick = btnBackClick
       end
     end
     object HistoryPanel: TPanel
@@ -455,45 +460,6 @@ object ActionsForm: TActionsForm
         Height = 13
         Caption = 'Phone number(s):'
       end
-      object Cust_Name: TLabel
-        Left = 130
-        Top = 28
-        Width = 260
-        Height = 21
-        Hint = 'Copy to Clipboard'
-        AutoSize = False
-        Caption = '{data}'
-        Color = 15527148
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Tahoma'
-        Font.Style = [fsBold]
-        ParentColor = False
-        ParentFont = False
-        ParentShowHint = False
-        ShowHint = True
-        Transparent = False
-        Layout = tlCenter
-      end
-      object Cust_Number: TLabel
-        Left = 130
-        Top = 55
-        Width = 260
-        Height = 21
-        AutoSize = False
-        Caption = '{data}'
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Tahoma'
-        Font.Style = [fsBold]
-        ParentFont = False
-        ParentShowHint = False
-        ShowHint = True
-        Transparent = False
-        Layout = tlCenter
-      end
       object Copy_CustName: TImage
         Left = 396
         Top = 28
@@ -680,24 +646,77 @@ object ActionsForm: TActionsForm
         Top = 55
         Width = 261
         Height = 21
-        Brush.Color = 15527148
-        Pen.Style = psClear
+        Pen.Color = 15527148
       end
       object Cust_PersonBack: TShape
         Left = 591
         Top = 28
         Width = 261
         Height = 21
-        Brush.Color = 15527148
-        Pen.Style = psClear
+        Pen.Color = 15527148
+      end
+      object Cust_NumberBack: TShape
+        Left = 130
+        Top = 55
+        Width = 261
+        Height = 21
+        Pen.Color = 15527148
+      end
+      object Cust_Number: TLabel
+        Left = 136
+        Top = 59
+        Width = 250
+        Height = 13
+        AutoSize = False
+        Caption = '{data}'
+        Color = clWhite
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = [fsBold]
+        ParentColor = False
+        ParentFont = False
+        ParentShowHint = False
+        ShowHint = True
+        Transparent = False
+        Layout = tlCenter
+      end
+      object Cust_NameBack: TShape
+        Left = 131
+        Top = 28
+        Width = 261
+        Height = 21
+        Pen.Color = 15527148
+      end
+      object Cust_Name: TLabel
+        Left = 136
+        Top = 32
+        Width = 250
+        Height = 13
+        Hint = 'Copy to Clipboard'
+        AutoSize = False
+        Caption = '{data}'
+        Color = clWhite
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = [fsBold]
+        ParentColor = False
+        ParentFont = False
+        ParentShowHint = False
+        ShowHint = True
+        Transparent = False
+        Layout = tlCenter
       end
       object Cust_Mail: TEdit
-        Left = 591
+        Left = 596
         Top = 59
-        Width = 260
+        Width = 250
         Height = 13
         BorderStyle = bsNone
-        Color = 15527148
+        Color = clWhite
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
         Font.Height = -11
@@ -710,12 +729,12 @@ object ActionsForm: TActionsForm
         Text = '{data}'
       end
       object Cust_Person: TEdit
-        Left = 591
+        Left = 596
         Top = 32
-        Width = 260
+        Width = 250
         Height = 13
         BorderStyle = bsNone
-        Color = 15527148
+        Color = clWhite
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
         Font.Height = -11

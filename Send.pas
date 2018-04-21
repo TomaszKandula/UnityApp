@@ -24,17 +24,27 @@ type
     AppMain: TShape;
     btnCancel: TSpeedButton;
     btnSendEmail: TSpeedButton;
-    Text_Subject: TMemo;
+    Text_Salut: TMemo;
     Text1: TLabel;
     Text2: TLabel;
-    Text_Body: TMemo;
-    StatementAttach: TCheckBox;
+    Text_Message: TMemo;
+    Shape_Customer: TShape;
+    Shape_Invoices: TShape;
+    Shape_Business: TShape;
+    Shape_Terms: TShape;
+    Shape_Banks: TShape;
+    Shape_Footer: TShape;
+    Text_Business: TLabel;
+    Text_Customer: TLabel;
+    Text_Invoices: TLabel;
+    Text_Footer: TLabel;
+    Text_Banks: TLabel;
+    Text_Terms: TLabel;
+    Text_Warn: TLabel;
     procedure btnCancelClick(Sender: TObject);
     procedure btnSendEmailClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
-  private
-  public
   end;
 
 var
@@ -45,7 +55,7 @@ var
 implementation
 
 uses
-  Main, Settings;
+  Main, Settings, Actions;
 
 {$R *.dfm}
 
@@ -68,7 +78,10 @@ end;
 { ------------------------------------------------------------------------------------------------------------------------------------------------ SEND EMAIL }
 procedure TSendForm.btnSendEmailClick(Sender: TObject);
 begin
-
+  { ASK USER BEFORE SENDING THE EMAIL }
+  if MainForm.MsgCall(mcQuestion2, 'Are you absolutely sure that you really want it to be sent, right now?') = IDNO then Exit;
+  ActionsForm.SendAccountStatement(maCustom, Text_Salut.Text, Text_Message.Text);
+  ActionsForm.RegisterAction;
 end;
 
 { ---------------------------------------------------------------------------------------------------------------------------------------------- CLOSE WINDOW }

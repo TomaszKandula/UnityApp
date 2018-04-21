@@ -5430,7 +5430,6 @@ object MainForm: TMainForm
     end
     object N9: TMenuItem
       Caption = '-'
-      OnClick = N9Click
     end
     object Action_FilterINF7: TMenuItem
       Bitmap.Data = {
@@ -5488,6 +5487,10 @@ object MainForm: TMainForm
       object Action_Gr3_Filter: TMenuItem
         Caption = 'Group 3'
         OnClick = Action_Gr3_FilterClick
+      end
+      object Action_Free1: TMenuItem
+        Caption = 'Free1'
+        OnClick = Action_Free1Click
       end
     end
     object Action_RemoveFilters: TMenuItem

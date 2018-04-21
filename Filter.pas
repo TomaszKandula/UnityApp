@@ -34,19 +34,15 @@ type
 type
   TFilterForm = class(TForm)
     btnFilter: TSpeedButton;
-    Text: TLabel;
     FilterList: TCheckListBox;
-    AppMain: TShape;
-    ButtonPanel: TPanel;
-    btnClose: TSpeedButton;
-    CheckBox1: TCheckBox;
-    CheckBox2: TCheckBox;
+    PanelBottom: TPanel;
+    cbSelectAll: TCheckBox;
     procedure btnFilterClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormActivate(Sender: TObject);
-    procedure FilterListClickCheck(Sender: TObject);
     procedure btnCloseClick(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
+    procedure cbSelectAllClick(Sender: TObject);
   private
     { KEEP VALUES AND THEIR STATE }
     var INF7       :  TLists;
@@ -56,6 +52,7 @@ type
     var Division   :  TLists;
     var FollowUp   :  TLists;
     var Gr3        :  TLists;
+    var Free1      :  TLists;
   public
     var FColName   :  string;
     var FColNumber :  integer;
@@ -64,6 +61,7 @@ type
     var FFilterNum :  integer;
     var InUse      :  boolean;
     procedure FilterClearAll;
+    procedure FilterSelectCheck;
     procedure FilterPrep;
     procedure FilterInit(FFilter: TLists);
     procedure FilterNow(FFilter: TLists);
@@ -72,7 +70,7 @@ type
 var
   FilterForm:  TFilterForm;
 
-{ ------------------------------------------------------------- ! IMPLEMENTATION ZONE ! --------------------------------------------------------------------- }
+{ ------------------------------------------------------------ ! IMPLEMENTATION ZONE ! ---------------------------------------------------------------------- }
 
 implementation
 
@@ -111,7 +109,27 @@ begin
   SetLength(FilterForm.Division, 1, 2);
   SetLength(FilterForm.FollowUp, 1, 2);
   SetLength(FilterForm.Gr3,      1, 2);
+  SetLength(FilterForm.Free1,    1, 2);
   InUse:=False;
+end;
+
+{ ------------------------------------------------------------------------------------------------------------------------------------- CHECK IF ALL SELECTED }
+procedure TFilterForm.FilterSelectCheck;
+var
+  iCNT:  integer;
+  Check: integer;
+begin
+  Check:=0;
+  { CHECK IF ITEM IS SELECTED }
+  for iCNT:=0 to FilterList.Count - 1 do
+    if FilterList.Checked[iCNT] = True
+      then
+        inc(Check);
+  { IF ALL SELECTED, THEN TICK }
+  if Check = FilterList.Count then
+    cbSelectAll.Checked:=True
+      else
+        cbSelectAll.Checked:=False;
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------- PREPARE FOR FILTERING }
@@ -127,6 +145,7 @@ begin
     if FFilterNum = flt_DIVISION then FilterInit(Division);
     if FFilterNum = flt_FOLLOWUP then FilterInit(FollowUp);
     if FFilterNum = flt_GR3      then FilterInit(Gr3);
+    if FFilterNum = flt_FREE1    then FilterInit(Free1);
   end;
 end;
 
@@ -135,40 +154,38 @@ procedure TFilterForm.FilterInit(FFilter: TLists);
 var
   iCNT:  integer;
   jCNT:  integer;
+  SL:    TStringList;
 begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   Screen.Cursor:=crHourGlass;
   FilterList.Items.Clear;
-  FilterList.Items.Add('(Select All)');  { MUST BE AN ITEM = 0 }
-  FilterList.Items.Add('(Blanks)');      { MUST BE AN ITEM = 1 }
   FilterList.Sorted:=False;
   FilterList.Freeze(True);
   { ------------------------------------------------------------------------------------------------------------------------------- MAKE UNIQUE LIST OF ITEMS }
   try
     if FGrid.RowCount > 2 then
     begin
-      for iCNT:=1 to FGrid.RowCount - 1 do
-      begin
-        { POPULATE AND REMOVE DUPLICATES }
-        if (
-             (FGrid.Cells[FColNumber, iCNT] <> SPACE)
-             or
-             (FGrid.Cells[FColNumber, iCNT] <> '')
-           )
-           and
-           (FilterList.Items.IndexOf(FGrid.Cells[FColNumber, iCNT]) = sgRowHidden)
-           and
-           (FGrid.RowHeights[iCNT] <> sgRowHidden)
-           then
-             FilterList.Items.Add(FGrid.Cells[FColNumber, iCNT]);
+      SL:=TStringList.Create;
+      try
+        SL.Sorted:=True;
+        SL.Duplicates:=dupIgnore;
+        for iCNT:=1 to FGrid.RowCount - 1 do
+        begin
+          if
+          {  (FGrid.Cells[FColNumber, iCNT] <> SPACE)
+          and
+            (FGrid.Cells[FColNumber, iCNT] <> '')
+          and }
+            (FGrid.RowHeights[iCNT] <> sgRowHidden)
+          then
+            SL.Add(FGrid.Cells[FColNumber, iCNT]);
+        end;
+        { STRING LIST TO CHECK BOX LIST }
+        for iCNT:=0 to SL.Count - 1 do
+          FilterList.Items.Add(SL.Strings[iCNT]);
+      finally
+        SL.Free;
       end;
-(*
-      { SORT ALL ADDED ITEMS ASCENDING }
-      FilterList.Sorted:=True;
-      { REMOVE PREFIXES FROM TWO FIXED ITEMS }
-      FilterList.Items.Strings[0]:=MidStr(FilterList.Items.Strings[0], 4, Length(FilterList.Items.Strings[0]) - 3);
-      FilterList.Items.Strings[1]:=MidStr(FilterList.Items.Strings[1], 4, Length(FilterList.Items.Strings[1]) - 3);
-*)
     end;
     { ----------------------------------------------------------------------------------------------------------- UNTICK IF VALUE WAS FILTERED OUT PREVIOUSLY }
     FilterList.CheckAll(cbChecked, False, True);
@@ -196,9 +213,6 @@ var
   jCNT:  integer;
 begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-
-  FilterList.Items.Strings[1]:=SPACE; { MAKE '(BLANKS)' A WHITESPACE }
-
   Screen.Cursor:=crHourGlass;
   FGrid.Freeze(True);
   { ----------------------------------------------------------------------------------------------------------------------------------- ADD TO THE LIST STATE }
@@ -215,10 +229,6 @@ begin
       begin
         if (UpperCase(FFilter[iCNT, 0]) = UpperCase(FGrid.Cells[FColNumber, jCNT])) then
         begin
-          if (FFilter[iCNT, 1] = 'True' ) then
-          begin
-            { FGrid.RowHeights[jCNT]:= sgRowHeight; }
-          end;
           if (FFilter[iCNT, 1] = 'False') or
              (
                (
@@ -240,13 +250,12 @@ begin
   finally
     { ------------------------------------------------------------------------------------------------------------------------------------------ UNINITIALIZE }
     FGrid.Freeze(False);
-
-    FFilter[1, 0]:='(Blanks)';  { REVERT TO '(BLANKS)' }
-
     Screen.Cursor:=crDefault;
     Close;
   end;
 end;
+
+{ ################################################################## ! EVENTS ! ############################################################################# }
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------- ON CREATE }
 procedure TFilterForm.FormCreate(Sender: TObject);
@@ -268,6 +277,7 @@ end;
 procedure TFilterForm.FormActivate(Sender: TObject);
 begin
   FilterPrep;
+  FilterSelectCheck;
 end;
 
 { --------------------------------------------------------------- ! BUTTON CALLS ! -------------------------------------------------------------------------- }
@@ -284,21 +294,19 @@ begin
     if FFilterNum = flt_DIVISION then FilterNow(Division);
     if FFilterNum = flt_FOLLOWUP then FilterNow(FollowUp);
     if FFilterNum = flt_GR3      then FilterNow(Gr3);
+    if FFilterNum = flt_FREE1    then FilterNow(Free1);
   end;
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------ SELECT ALL ITEMS }
-procedure TFilterForm.FilterListClickCheck(Sender: TObject);
+procedure TFilterForm.cbSelectAllClick(Sender: TObject);
 var
   iCNT:  integer;
 begin
-  { WE USE FIRST POSITION 'SELECT ALL' THE SAME WAY AS IN THE MANY POPULAR APPLICATION }
-  { IF USER TICK ITEM 'SELECT ALL' WE SELECT OR DESELECT REST OF THE LISTED ITEMS      }
-  if (FilterList.Selected[0] = True)  then
-    if (FilterList.Checked[0] = True) then
-      for iCNT:=1 to FilterList.Count - 1 do FilterList.Checked[iCNT]:=True
-        else
-          for iCNT:=1 to FilterList.Count - 1 do FilterList.Checked[iCNT]:=False;
+  if (cbSelectAll.Checked) then
+    for iCNT:=0 to FilterList.Count - 1 do FilterList.Checked[iCNT]:=True
+      else
+        for iCNT:=0 to FilterList.Count - 1 do FilterList.Checked[iCNT]:=False;
 end;
 
 { ---------------------------------------------------------------------------------------------------------------------------------------------- CLOSE WINDOW }

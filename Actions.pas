@@ -78,6 +78,9 @@ type
     Text9: TLabel;
     Cust_MailBack: TShape;
     Cust_PersonBack: TShape;
+    Cust_NumberBack: TShape;
+    Cust_NameBack: TShape;
+    btnBack: TSpeedButton;
     procedure FormCreate(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure OpenItemsGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
@@ -107,6 +110,7 @@ type
     procedure Copy_PersonClick(Sender: TObject);
     procedure Copy_EmailClick(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
+    procedure btnBackClick(Sender: TObject);
   public
     var CUID       :  string;
     var SCUID      :  string;
@@ -118,9 +122,17 @@ type
     procedure GetData(OpenItemsDest: TStringGrid; HistoryDest: TStringGrid; OpenItemsSrc: TStringGrid);
     procedure UpdateHistory(Grid: TStringGrid);
     procedure SetHistoryCols(Grid: TStringGrid);
+    procedure SetControls;
+    procedure Initialize;
     procedure ClearAll;
     procedure MakePhoneCall;
-    procedure SetControls;
+    procedure LoadCustomer(Direction: integer);
+    procedure SendAccountStatement(Layout: integer; Salut: string; Mess: string);
+    procedure RegisterAction;
+    procedure ClearFollowUp;
+    procedure SaveCustomerDetails;
+    procedure SaveGeneralComment;
+    procedure SaveDailyComment;
   end;
 
 var
@@ -224,7 +236,7 @@ begin
     { LOOK FOR THE SAME "CUID" }
     for iCNT:=1 to OpenItemsSrc.RowCount - 1 do
     begin
-      if OpenItemsSrc.Cells[37, iCNT] = CUID then
+      if OpenItemsSrc.Cells[MainForm.sgOpenItems.ReturnColumn(TOpenitems.CUID, 1, 1), iCNT] = CUID then
       begin
         { MOVE DATA FOR SELECTED COLUMNS AND GIVEN ROW ONCE "CUID" IS FOUND }
         for jCNT:=Low(SrcColumns) to High(SrcColumns)
@@ -344,6 +356,34 @@ begin
   Grid.SetColWidth(10, 20);
 end;
 
+{ ----------------------------------------------------------------------------------------------------------------------------------- ENABLE/DISABLE CONTROLS }
+procedure TActionsForm.SetControls;
+begin
+  { DISABLE SAVE BUTTON IF CUSTOMER IS NOT REGISTERED }
+  if
+    (Cust_Person.Text = unNotFound)
+  or
+    (Cust_Mail.Text = unNotFound)
+  then
+    btnSaveCustDetails.Enabled:=False else btnSaveCustDetails.Enabled:=True;
+  { DISABLE TEXT FIELDS IF CUSTOMER IS NOT REGISTERED }
+  if Cust_Phone.Text  = unNotFound then Cust_Phone.Enabled :=False else Cust_Phone.Enabled :=True;
+  if Cust_Mail.Text   = unNotFound then Cust_Mail.Enabled  :=False else Cust_Mail.Enabled  :=True;
+  if Cust_Person.Text = unNotFound then Cust_Person.Enabled:=False else Cust_Person.Enabled:=True;
+end;
+
+{ --------------------------------------------------------------------------------------------------------------------------------- PREPARE FOR NEW DATA LOAD }
+procedure TActionsForm.Initialize;
+begin
+  { ASSIGN DATA FOR GIVEN ROW }
+  CUID      :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUID,            1, 1), MainForm.sgAgeView.Row];
+  CustName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), MainForm.sgAgeView.Row];
+  CustNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), MainForm.sgAgeView.Row];
+  SCUID     :=CustNumber + MainForm.ConvertName(CoCode, 'F', 3);
+  { CLEAR ALL }
+  ClearAll;
+end;
+
 { ----------------------------------------------------------------------------------------------------------------------------------------- CLEAR ALL DETAILS }
 procedure TActionsForm.ClearAll;
 begin
@@ -388,7 +428,298 @@ begin
   end;
 end;
 
-{ ----------------------------------------------------------- ! MAIN THREAD METHODS ! ----------------------------------------------------------------------- }
+{ ---------------------------------------------------------------------------------------------------------------------------- LOAD NEXT OR PREVIOUS CUSTOMER }
+procedure TActionsForm.LoadCustomer(Direction: integer);
+var
+  iCNT:  integer;
+begin
+  { LOOP TO THE NEAREST UNHIDDEN ROW }
+  for iCNT:=(MainForm.sgAgeView.Selection.Top + 1) to MainForm.sgAgeView.RowCount - 1 do
+  begin
+    if (MainForm.sgAgeView.RowHeights[iCNT] <> -1) and (MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fOVERDUE, 1, 1), iCNT] <> '0') then
+    begin
+      MainForm.sgAgeView.Row:=iCNT;
+      Break;
+    end;
+  end;
+  { LOAD NEW DATA }
+  Initialize;
+  try
+    GetData(OpenItemsGrid, HistoryGrid, MainForm.sgOpenItems);
+    SetControls;
+  except
+    MainForm.MsgCall(mcWarn, 'Unexpected error has occured. Please close the window and try again.');
+  end;
+end;
+
+{ ------------------------------------------------------------------------------------------------------------------------------------ SEND ACCOUNT STATEMENT }
+procedure TActionsForm.SendAccountStatement(Layout: integer; Salut: string; Mess: string);
+var
+  Statement:   TDocument;
+  AppSettings: TSettings;
+begin
+  { PROCEED }
+  Statement    :=TDocument.Create;
+  AppSettings  :=TSettings.Create;
+  Screen.Cursor:=crSQLWait;
+  try
+    { SETUP CUSTOMER AND COMPANY }
+    Statement.CUID    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUID,          1, 1), MainForm.sgAgeView.Row];
+    Statement.CustName:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME, 1, 1), MainForm.sgAgeView.Row];
+    Statement.CoCode  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCO_CODE,       1, 1), MainForm.sgAgeView.Row];
+    Statement.Branch  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fAGENT,         1, 1), MainForm.sgAgeView.Row];
+    Statement.SCUID   :=SCUID;
+    { SET OPEN ITEMS GRID }
+    Statement.OpenItems:=MainForm.sgOpenItems;
+    { GET HTML LAYOUT }
+    Statement.DocType  :=dcStatement;
+    Statement.CustSalut:=Salut;
+    Statement.CustMess :=Mess;
+    { USE FULLY PRE-DEFINED TEMPLATE }
+    if Layout = maDefined then
+    begin
+      Statement.HTMLLayout:=Statement.LoadTemplate(AppSettings.FLayoutDir + AppSettings.TMIG.ReadString(VariousLayouts, 'STATEMENT', '') + '.html');
+    end;
+    { USE PRE-DEFINED TEMPLATE WITH TWO CUSTOM FILEDS }
+    if Layout = maCustom then
+    begin
+      Statement.HTMLLayout:=Statement.LoadTemplate(AppSettings.FLayoutDir + AppSettings.TMIG.ReadString(VariousLayouts, 'CUSTSTATEMENT', '') + '.html');
+    end;
+    { SEND STATEMENT }
+    Statement.MailSubject:='Account Statement (' + Statement.CustName + ')';
+    if Statement.SendDocument then
+      MainForm.ExecMessage(False, mcInfo, 'Account Statement has been sent successfully!')
+        else
+          MainForm.ExecMessage(False, mcError, 'Account Statement cannot be sent. Please contact IT support.');
+    RegisterAction;
+  finally
+    AppSettings.Free;
+    Statement.Free;
+    Screen.Cursor:=crDefault;
+  end;
+end;
+
+{ -------------------------------------------------------------------------------------------------------------------------- REGISTER THIS ACTION IN DATABASE }
+procedure TActionsForm.RegisterAction;
+var
+  DailyText:   TDataTables;
+  Condition:   string;
+  ManuStat:    integer;
+begin
+  { REGISTER THIS ACTION IN DATABASE }
+  DailyText:=TDataTables.Create(MainForm.DbConnect);
+  try
+    DailyText.OpenTable(TblDaily);
+    Condition:=TDaily.CUID + EQUAL + QuotedStr(CUID) + _AND + TDaily.AGEDATE + EQUAL + QuotedStr(MainForm.AgeDateSel);
+    DailyText.DataSet.Filter:=Condition;
+    { UPDATE EXISTING COMMENT }
+    if not (DailyText.DataSet.RecordCount = 0) then
+    begin
+      { GET MANUAL STATEMENTS SENT AND INCREASE BY ONE }
+      ManuStat:=StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDaily.EMAIL_ManuStat].Value), 0);
+      Inc(ManuStat);
+      DailyText.CleanUp;
+      { DEFINE COLUMNS, VALUES AND CONDITIONS }
+      DailyText.Columns.Add(TDaily.STAMP);           DailyText.Values.Add(DateTimeToStr(Now));               DailyText.Conditions.Add(Condition);
+      DailyText.Columns.Add(TDaily.USER_ALIAS);      DailyText.Values.Add(UpperCase(MainForm.WinUserName));  DailyText.Conditions.Add(Condition);
+      DailyText.Columns.Add(TDaily.EMAIL_ManuStat);  DailyText.Values.Add(IntToStr(ManuStat));               DailyText.Conditions.Add(Condition);
+      { EXECUTE }
+      DailyText.UpdateRecord(TblDaily);
+    end
+    else
+    { INSERT NEW RECORD }
+    begin
+      DailyText.CleanUp;
+      { DEFINE COLUMNS AND VALUES }
+      DailyText.Columns.Add(TDaily.GROUP_ID);       DailyText.Values.Add(MainForm.GroupIdSel);
+      DailyText.Columns.Add(TDaily.CUID);           DailyText.Values.Add(CUID);
+      DailyText.Columns.Add(TDaily.AGEDATE);        DailyText.Values.Add(MainForm.AgeDateSel);
+      DailyText.Columns.Add(TDaily.STAMP);          DailyText.Values.Add(DateTimeToStr(Now));
+      DailyText.Columns.Add(TDaily.USER_ALIAS);     DailyText.Values.Add(UpperCase(MainForm.WinUserName));
+      DailyText.Columns.Add(TDaily.EMAIL);          DailyText.Values.Add('0');
+      DailyText.Columns.Add(TDaily.CALLEVENT);      DailyText.Values.Add('0');
+      DailyText.Columns.Add(TDaily.CALLDURATION);   DailyText.Values.Add('0');
+      DailyText.Columns.Add(TDaily.FIXCOMMENT);     DailyText.Values.Add('');
+      DailyText.Columns.Add(TDaily.EMAIL_Reminder); DailyText.Values.Add('0');
+      DailyText.Columns.Add(TDaily.EMAIL_AutoStat); DailyText.Values.Add('0');
+      DailyText.Columns.Add(TDaily.EMAIL_ManuStat); DailyText.Values.Add('1');
+      { EXECUTE }
+      DailyText.InsertInto(TblDaily);
+    end;
+  finally
+    DailyText.Free;
+  end;
+end;
+
+{ ----------------------------------------------------------------------------------------------------------------------- CLEAR FOLLOW-UP FROM GIVEN CUSTOMER }
+procedure TActionsForm.ClearFollowUp;
+var
+  GeneralText: TDataTables;
+  Condition:   string;
+begin
+  if MainForm.MsgCall(mcQuestion2, 'Are you sure you want to clear this follow up?') = ID_YES then
+  begin
+    GeneralText:=TDataTables.Create(MainForm.DbConnect);
+    try
+      Condition:=TGeneral.CUID + EQUAL + QuotedStr(CUID);
+      GeneralText.Columns.Add(TGeneral.FOLLOWUP); GeneralText.Values.Add(SPACE); GeneralText.Conditions.Add(Condition);
+      GeneralText.UpdateRecord(TblGeneral);
+      MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fFOLLOWUP, 1, 1), MainForm.sgAgeView.Row]:='';
+    finally
+      GeneralText.Free;
+    end;
+  end;
+end;
+
+{ -------------------------------------------------------------------------------------------------------------------------------- SAVE SOME CUSTOMER DETAILS }
+procedure TActionsForm.SaveCustomerDetails;
+var
+  AddrBook:  TDataTables;
+  Condition: string;
+begin
+  AddrBook:=TDataTables.Create(MainForm.DbConnect);
+  try
+    AddrBook.OpenTable(TblAddressbook);
+    Condition:=TAddressBook.SCUID + EQUAL + QuotedStr(SCUID);
+    AddrBook.DataSet.Filter:=Condition;
+    if not (AddrBook.DataSet.RecordCount = 0) then
+    begin
+      AddrBook.CleanUp;
+      { UPDATE DATA }
+      AddrBook.Columns.Add(TAddressBook.CONTACT);        AddrBook.Values.Add(Cust_Person.Text); AddrBook.Conditions.Add(Condition);
+      AddrBook.Columns.Add(TAddressBook.ESTATEMENTS);    AddrBook.Values.Add(Cust_Mail.Text);   AddrBook.Conditions.Add(Condition);
+      AddrBook.Columns.Add(TAddressBook.PHONE_NUMBERS);  AddrBook.Values.Add(Cust_Phone.Text);  AddrBook.Conditions.Add(Condition);
+      { EXECUTE }
+      if not (AddrBook.UpdateRecord(TblAddressbook)) then
+        MainForm.MsgCall(mcWarn, 'Cannot save customer details. Please contact IT support.')
+          else
+            MainForm.MsgCall(mcInfo, 'Changes have been updated successfully.');
+    end;
+  finally
+    AddrBook.Free;
+  end;
+end;
+
+{ ----------------------------------------------------------------------------------------------------------------------------------------------------------  }
+procedure TActionsForm.SaveGeneralComment;
+var
+  GenText:   TDataTables;
+  Condition: string;
+begin
+  { NEW LINE }
+  if (Key = VK_RETURN) and (Shift=[ssALT]) then
+  begin
+    GeneralCom.Lines.Add(CRLF);
+    Exit;
+  end;
+  { SAVE TO DB }
+  if (Key = VK_RETURN) then
+  begin
+    if GeneralCom.Text <> '' then
+    begin
+      GenText:=TDataTables.Create(MainForm.DbConnect);
+      try
+        GenText.OpenTable(TblGeneral);
+        Condition:=TGeneral.CUID + EQUAL + QuotedStr(CUID);
+        GenText.DataSet.Filter:=Condition;
+        { UPDATE }
+        if not (GenText.DataSet.RecordCount = 0) then
+        begin
+          GenText.CleanUp;
+          { DEFINE COLUMNS, VALUES AND CONDITIONS }
+          GenText.Columns.Add(TGeneral.STAMP);        GenText.Values.Add(DateTimeToStr(Now));             GenText.Conditions.Add(Condition);
+          GenText.Columns.Add(TGeneral.USER_ALIAS);   GenText.Values.Add(UpperCase(MainForm.WinUserName));GenText.Conditions.Add(Condition);
+          GenText.Columns.Add(TGeneral.FIXCOMMENT);   GenText.Values.Add(GeneralCom.Text);                GenText.Conditions.Add(Condition);
+          { EXECUTE }
+          GenText.UpdateRecord(TblGeneral);
+        end
+        else
+        { INSERT NEW }
+        begin
+          GenText.CleanUp;
+          { DEFINE COLUMNS AND VALUES }
+          GenText.Columns.Add(TGeneral.CUID);       GenText.Values.Add(CUID);
+          GenText.Columns.Add(TGeneral.STAMP);      GenText.Values.Add(DateTimeToStr(Now));
+          GenText.Columns.Add(TGeneral.USER_ALIAS); GenText.Values.Add(UpperCase(MainForm.WinUserName));
+          GenText.Columns.Add(TGeneral.FIXCOMMENT); GenText.Values.Add(GeneralCom.Text);
+          GenText.Columns.Add(TGeneral.FOLLOWUP);   GenText.Values.Add('');
+          { EXECUTE }
+          GenText.InsertInto(TblGeneral);
+        end;
+      finally
+        GenText.Free;
+      end;
+    end;
+  end;
+end;
+
+{ ----------------------------------------------------------------------------------------------------------------------------------------------------------  }
+procedure TActionsForm.SaveDailyComment;
+var
+  DailyText: TDataTables;
+  UpdateOK:  boolean;
+  InsertOK:  boolean;
+  Condition: string;
+begin
+  { NEW LINE }
+  if (Key = VK_RETURN) and (Shift=[ssALT]) then
+  begin
+    DailyCom.Lines.Add(CRLF);
+    Exit;
+  end;
+  { SAVE TO DB }
+  if (Key = VK_RETURN) then
+  begin
+    if DailyCom.Text <> '' then
+    begin
+      UpdateOK:=False;
+      InsertOK:=False;
+      DailyText:=TDataTables.Create(MainForm.DbConnect);
+      try
+        DailyText.OpenTable(TblDaily);
+        Condition:=TDaily.CUID + EQUAL + QuotedStr(CUID) + _AND + TDaily.AGEDATE + EQUAL + QuotedStr(MainForm.AgeDateSel);
+        DailyText.DataSet.Filter:=Condition;
+        { UPDATE EXISTING COMMENT }
+        if not (DailyText.DataSet.RecordCount = 0) then
+        begin
+          DailyText.CleanUp;
+          { DEFINE COLUMNS, VALUES AND CONDITIONS }
+          DailyText.Columns.Add(TDaily.STAMP);       DailyText.Values.Add(DateTimeToStr(Now));               DailyText.Conditions.Add(Condition);
+          DailyText.Columns.Add(TDaily.USER_ALIAS);  DailyText.Values.Add(UpperCase(MainForm.WinUserName));  DailyText.Conditions.Add(Condition);
+          DailyText.Columns.Add(TDaily.FIXCOMMENT);  DailyText.Values.Add(DailyCom.Text);                    DailyText.Conditions.Add(Condition);
+          { EXECUTE }
+          UpdateOK:=DailyText.UpdateRecord(TblDaily);
+        end
+        else
+        { INSERT NEW RECORD }
+        begin
+          DailyText.CleanUp;
+          { DEFINE COLUMNS AND VALUES }
+          DailyText.Columns.Add(TDaily.GROUP_ID);       DailyText.Values.Add(MainForm.GroupIdSel);
+          DailyText.Columns.Add(TDaily.CUID);           DailyText.Values.Add(CUID);
+          DailyText.Columns.Add(TDaily.AGEDATE);        DailyText.Values.Add(MainForm.AgeDateSel);
+          DailyText.Columns.Add(TDaily.STAMP);          DailyText.Values.Add(DateTimeToStr(Now));
+          DailyText.Columns.Add(TDaily.USER_ALIAS);     DailyText.Values.Add(UpperCase(MainForm.WinUserName));
+          DailyText.Columns.Add(TDaily.EMAIL);          DailyText.Values.Add('0');
+          DailyText.Columns.Add(TDaily.CALLEVENT);      DailyText.Values.Add('0');
+          DailyText.Columns.Add(TDaily.CALLDURATION);   DailyText.Values.Add('0');
+          DailyText.Columns.Add(TDaily.FIXCOMMENT);     DailyText.Values.Add(DailyCom.Text);
+          DailyText.Columns.Add(TDaily.EMAIL_Reminder); DailyText.Values.Add('0');
+          DailyText.Columns.Add(TDaily.EMAIL_AutoStat); DailyText.Values.Add('0');
+          DailyText.Columns.Add(TDaily.EMAIL_ManuStat); DailyText.Values.Add('0');
+          { EXECUTE }
+          InsertOK:=DailyText.InsertInto(TblDaily);
+        end;
+        { REFRESH HISTORY GRID }
+        if (InsertOK) or (UpdateOK) then UpdateHistory(HistoryGrid);
+      finally
+        DailyText.Free;
+      end;
+    end;
+  end;
+end;
+
+{ ############################################################ ! MAIN THREAD EVENTS ! ####################################################################### }
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------- ON CREATE }
 procedure TActionsForm.FormCreate(Sender: TObject);
@@ -426,23 +757,7 @@ end;
 { --------------------------------------------------------------------------------------------------------------------------------------------------- ON SHOW }
 procedure TActionsForm.FormShow(Sender: TObject);
 begin
-  { CAPTIONS AND MEMO }
-  ClearAll;
-  { CUSTOMER KEY INFORMATION }
-  CUID      :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUID,            1, 1), MainForm.sgAgeView.Row];
-  CoCode    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCO_CODE,         1, 1), MainForm.sgAgeView.Row];
-  CustName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), MainForm.sgAgeView.Row];
-  CustNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), MainForm.sgAgeView.Row];
-  SCUID     :=CustNumber + MainForm.ConvertName(CoCode, 'F', 3);
-end;
-
-{ ----------------------------------------------------------------------------------------------------------------------------------- ENABLE/DISABLE CONTROLS }
-procedure TActionsForm.SetControls;
-begin
-  if (Cust_Person.Text = unNotFound) or (Cust_Mail.Text = unNotFound) then btnSaveCustDetails.Enabled:=False else btnSaveCustDetails.Enabled:=True;
-  if Cust_Phone.Text = unNotFound then Cust_Phone.Enabled:=False else Cust_Phone.Enabled:=True;
-  if Cust_Mail.Text = unNotFound then Cust_Mail.Enabled:=False else Cust_Mail.Enabled:=True;
-  if Cust_Person.Text = unNotFound then Cust_Person.Enabled:=False else Cust_Person.Enabled:=True;
+  Initialize;
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------------------- ON ACTIVATE }
@@ -509,121 +824,14 @@ end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------- SAVE COMMENT ON <ENTER> }
 procedure TActionsForm.DailyComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-var
-  DailyText: TDataTables;
-  UpdateOK:  boolean;
-  InsertOK:  boolean;
-  Condition: string;
 begin
-  { NEW LINE }
-  if (Key = VK_RETURN) and (Shift=[ssALT]) then
-  begin
-    DailyCom.Lines.Add(CRLF);
-    Exit;
-  end;
-  { SAVE TO DB }
-  if (Key = VK_RETURN) then
-  begin
-    if DailyCom.Text <> '' then
-    begin
-      UpdateOK:=False;
-      InsertOK:=False;
-      DailyText:=TDataTables.Create(MainForm.DbConnect);
-      try
-        DailyText.OpenTable(TblDaily);
-        Condition:=TDaily.CUID + EQUAL + QuotedStr(CUID) + _AND + TDaily.AGEDATE + EQUAL + QuotedStr(MainForm.AgeDateSel);
-        DailyText.DataSet.Filter:=Condition;
-        { UPDATE EXISTING COMMENT }
-        if not (DailyText.DataSet.RecordCount = 0) then
-        begin
-          DailyText.CleanUp;
-          { DEFINE COLUMNS, VALUES AND CONDITIONS }
-          DailyText.Columns.Add(TDaily.STAMP);       DailyText.Values.Add(DateTimeToStr(Now));               DailyText.Conditions.Add(Condition);
-          DailyText.Columns.Add(TDaily.USER_ALIAS);  DailyText.Values.Add(UpperCase(MainForm.WinUserName));  DailyText.Conditions.Add(Condition);
-          DailyText.Columns.Add(TDaily.FIXCOMMENT);  DailyText.Values.Add(DailyCom.Text);                    DailyText.Conditions.Add(Condition);
-          { EXECUTE }
-          UpdateOK:=DailyText.UpdateRecord(TblDaily);
-        end
-        else
-        { INSERT NEW RECORD }
-        begin
-          DailyText.CleanUp;
-          { DEFINE COLUMNS AND VALUES }
-          DailyText.Columns.Add(TDaily.GROUP_ID);       DailyText.Values.Add(MainForm.GroupIdSel);
-          DailyText.Columns.Add(TDaily.CUID);           DailyText.Values.Add(CUID);
-          DailyText.Columns.Add(TDaily.AGEDATE);        DailyText.Values.Add(MainForm.AgeDateSel);
-          DailyText.Columns.Add(TDaily.STAMP);          DailyText.Values.Add(DateTimeToStr(Now));
-          DailyText.Columns.Add(TDaily.USER_ALIAS);     DailyText.Values.Add(UpperCase(MainForm.WinUserName));
-          DailyText.Columns.Add(TDaily.EMAIL);          DailyText.Values.Add('0');
-          DailyText.Columns.Add(TDaily.CALLEVENT);      DailyText.Values.Add('0');
-          DailyText.Columns.Add(TDaily.CALLDURATION);   DailyText.Values.Add('0');
-          DailyText.Columns.Add(TDaily.FIXCOMMENT);     DailyText.Values.Add(DailyCom.Text);
-          DailyText.Columns.Add(TDaily.EMAIL_Reminder); DailyText.Values.Add('0');
-          DailyText.Columns.Add(TDaily.EMAIL_AutoStat); DailyText.Values.Add('0');
-          DailyText.Columns.Add(TDaily.EMAIL_ManuStat); DailyText.Values.Add('0');
-          { EXECUTE }
-          InsertOK:=DailyText.InsertInto(TblDaily);
-        end;
-        { REFRESH HISTORY GRID }
-        if (InsertOK) or (UpdateOK) then UpdateHistory(HistoryGrid);
-      finally
-        DailyText.Free;
-      end;
-    end;
-  end;
+  SaveDailyComment;
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------- SAVE COMMENT ON <ENTER> }
 procedure TActionsForm.GeneralComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-var
-  GenText:   TDataTables;
-  Condition: string;
 begin
-  { NEW LINE }
-  if (Key = VK_RETURN) and (Shift=[ssALT]) then
-  begin
-    GeneralCom.Lines.Add(CRLF);
-    Exit;
-  end;
-  { SAVE TO DB }
-  if (Key = VK_RETURN) then
-  begin
-    if GeneralCom.Text <> '' then
-    begin
-      GenText:=TDataTables.Create(MainForm.DbConnect);
-      try
-        GenText.OpenTable(TblGeneral);
-        Condition:=TGeneral.CUID + EQUAL + QuotedStr(CUID);
-        GenText.DataSet.Filter:=Condition;
-        { UPDATE }
-        if not (GenText.DataSet.RecordCount = 0) then
-        begin
-          GenText.CleanUp;
-          { DEFINE COLUMNS, VALUES AND CONDITIONS }
-          GenText.Columns.Add(TGeneral.STAMP);        GenText.Values.Add(DateTimeToStr(Now));             GenText.Conditions.Add(Condition);
-          GenText.Columns.Add(TGeneral.USER_ALIAS);   GenText.Values.Add(UpperCase(MainForm.WinUserName));GenText.Conditions.Add(Condition);
-          GenText.Columns.Add(TGeneral.FIXCOMMENT);   GenText.Values.Add(GeneralCom.Text);                GenText.Conditions.Add(Condition);
-          { EXECUTE }
-          GenText.UpdateRecord(TblGeneral);
-        end
-        else
-        { INSERT NEW }
-        begin
-          GenText.CleanUp;
-          { DEFINE COLUMNS AND VALUES }
-          GenText.Columns.Add(TGeneral.CUID);       GenText.Values.Add(CUID);
-          GenText.Columns.Add(TGeneral.STAMP);      GenText.Values.Add(DateTimeToStr(Now));
-          GenText.Columns.Add(TGeneral.USER_ALIAS); GenText.Values.Add(UpperCase(MainForm.WinUserName));
-          GenText.Columns.Add(TGeneral.FIXCOMMENT); GenText.Values.Add(GeneralCom.Text);
-          GenText.Columns.Add(TGeneral.FOLLOWUP);   GenText.Values.Add('');
-          { EXECUTE }
-          GenText.InsertInto(TblGeneral);
-        end;
-      finally
-        GenText.Free;
-      end;
-    end;
-  end;
+  SaveGeneralComment;
 end;
 
 { --------------------------------------------------------------------------------------------------------------------- COPY STRING GRID CONTENT TO CLIPBOARD }
@@ -668,6 +876,12 @@ end;
 
 { --------------------------------------------------------------- ! BUTTON CALLS ! -------------------------------------------------------------------------- }
 
+{ ------------------------------------------------------------------------------------------------------------------------------------- SAVE CUSTOMER DETAILS }
+procedure TActionsForm.btnSaveCustDetailsClick(Sender: TObject);
+begin
+  SaveCustomerDetails;
+end;
+
 { ----------------------------------------------------------------------------------------------------------------------------------------- COPY TO CLIPBOARD }
 procedure TActionsForm.Copy_CustNameClick(Sender: TObject);
 begin
@@ -689,154 +903,16 @@ begin
   ClipBoard.AsText:=Cust_Mail.Text;
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------- SAVE CUSTOMER DETAILS }
-procedure TActionsForm.btnSaveCustDetailsClick(Sender: TObject);
-var
-  AddrBook:  TDataTables;
-  Condition: string;
+{ -------------------------------------------------------------------------------------------------------------------------- SELECT PREVIOUS OVERDUE CUSTOMER }
+procedure TActionsForm.btnBackClick(Sender: TObject);
 begin
-  AddrBook:=TDataTables.Create(MainForm.DbConnect);
-  try
-    AddrBook.OpenTable(TblAddressbook);
-    Condition:=TAddressBook.SCUID + EQUAL + QuotedStr(SCUID);
-    AddrBook.DataSet.Filter:=Condition;
-    if not (AddrBook.DataSet.RecordCount = 0) then
-    begin
-      AddrBook.CleanUp;
-      { UPDATE DATA }
-      AddrBook.Columns.Add(TAddressBook.CONTACT);        AddrBook.Values.Add(Cust_Person.Text); AddrBook.Conditions.Add(Condition);
-      AddrBook.Columns.Add(TAddressBook.ESTATEMENTS);    AddrBook.Values.Add(Cust_Mail.Text);   AddrBook.Conditions.Add(Condition);
-      AddrBook.Columns.Add(TAddressBook.PHONE_NUMBERS);  AddrBook.Values.Add(Cust_Phone.Text);  AddrBook.Conditions.Add(Condition);
-      { EXECUTE }
-      if not (AddrBook.UpdateRecord(TblAddressbook)) then
-        MainForm.MsgCall(mcWarn, 'Cannot save customer details. Please contact IT support.')
-          else
-            MainForm.MsgCall(mcInfo, 'Changes have been updated successfully.');
-    end;
-  finally
-    AddrBook.Free;
-  end;
-end;
-
-{ ----------------------------------------------------------------------------------------------------------------------------------------- SEND MANUAL EMAIL }
-procedure TActionsForm.btnSendEmailClick(Sender: TObject);
-begin
-  MainForm.WndCall(SendForm, 0);
-end;
-
-{ -------------------------------------------------------------------------------------------------------------------------------------------- SEND STATEMENT }
-procedure TActionsForm.btnSendStatementClick(Sender: TObject);
-var
-  Statement:   TDocument;
-  AppSettings: TSettings;
-  DailyText:   TDataTables;
-  Condition:   string;
-  ManuStat:    integer;
-begin
-  { ASK USER BEFORE SENDING THE EMAIL }
-  if MainForm.MsgCall(mcQuestion2, 'Are you absolutely sure that you really want it to be sent, right now?') = IDNO then Exit;
-  { PROCEED }
-  Statement    :=TDocument.Create;
-  AppSettings  :=TSettings.Create;
-  Screen.Cursor:=crSQLWait;
-  try
-    { SETUP CUSTOMER AND COMPANY }
-    Statement.CUID    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUID,          1, 1), MainForm.sgAgeView.Row];
-    Statement.CustName:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME, 1, 1), MainForm.sgAgeView.Row];
-    Statement.CoCode  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCO_CODE,       1, 1), MainForm.sgAgeView.Row];
-    Statement.Branch  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fAGENT,         1, 1), MainForm.sgAgeView.Row];
-    Statement.SCUID   :=SCUID;
-    { SET OPEN ITEMS GRID }
-    Statement.OpenItems:=MainForm.sgOpenItems;
-    { GET HTML LAYOUT }
-    Statement.DocType    :=dcStatement;
-    Statement.HTMLLayout:=Statement.LoadTemplate(AppSettings.FLayoutDir + AppSettings.TMIG.ReadString(VariousLayouts, 'STATEMENT', '') + '.html');
-    { SEND STATEMENT }
-    Statement.MailSubject:='Account Statement (' + Statement.CustName + ')';
-    if Statement.SendDocument then
-      MainForm.ExecMessage(False, mcInfo, 'Account Statement has been sent successfully!')
-        else
-          MainForm.ExecMessage(False, mcError, 'Account Statement cannot be sent. Please contact IT support.');
-
-    { REGISTER THIS ACTION IN DATABASE }
-    DailyText:=TDataTables.Create(MainForm.DbConnect);
-    try
-      DailyText.OpenTable(TblDaily);
-      Condition:=TDaily.CUID + EQUAL + QuotedStr(CUID) + _AND + TDaily.AGEDATE + EQUAL + QuotedStr(MainForm.AgeDateSel);
-      DailyText.DataSet.Filter:=Condition;
-      { UPDATE EXISTING COMMENT }
-      if not (DailyText.DataSet.RecordCount = 0) then
-      begin
-        { GET MANUAL STATEMENTS SENT AND INCREASE BY ONE }
-        ManuStat:=StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDaily.EMAIL_ManuStat].Value), 0);
-        Inc(ManuStat);
-        DailyText.CleanUp;
-        { DEFINE COLUMNS, VALUES AND CONDITIONS }
-        DailyText.Columns.Add(TDaily.STAMP);           DailyText.Values.Add(DateTimeToStr(Now));               DailyText.Conditions.Add(Condition);
-        DailyText.Columns.Add(TDaily.USER_ALIAS);      DailyText.Values.Add(UpperCase(MainForm.WinUserName));  DailyText.Conditions.Add(Condition);
-        DailyText.Columns.Add(TDaily.EMAIL_ManuStat);  DailyText.Values.Add(IntToStr(ManuStat));               DailyText.Conditions.Add(Condition);
-        { EXECUTE }
-        DailyText.UpdateRecord(TblDaily);
-      end
-      else
-      { INSERT NEW RECORD }
-      begin
-        DailyText.CleanUp;
-        { DEFINE COLUMNS AND VALUES }
-        DailyText.Columns.Add(TDaily.GROUP_ID);       DailyText.Values.Add(MainForm.GroupIdSel);
-        DailyText.Columns.Add(TDaily.CUID);           DailyText.Values.Add(CUID);
-        DailyText.Columns.Add(TDaily.AGEDATE);        DailyText.Values.Add(MainForm.AgeDateSel);
-        DailyText.Columns.Add(TDaily.STAMP);          DailyText.Values.Add(DateTimeToStr(Now));
-        DailyText.Columns.Add(TDaily.USER_ALIAS);     DailyText.Values.Add(UpperCase(MainForm.WinUserName));
-        DailyText.Columns.Add(TDaily.EMAIL);          DailyText.Values.Add('0');
-        DailyText.Columns.Add(TDaily.CALLEVENT);      DailyText.Values.Add('0');
-        DailyText.Columns.Add(TDaily.CALLDURATION);   DailyText.Values.Add('0');
-        DailyText.Columns.Add(TDaily.FIXCOMMENT);     DailyText.Values.Add('');
-        DailyText.Columns.Add(TDaily.EMAIL_Reminder); DailyText.Values.Add('0');
-        DailyText.Columns.Add(TDaily.EMAIL_AutoStat); DailyText.Values.Add('0');
-        DailyText.Columns.Add(TDaily.EMAIL_ManuStat); DailyText.Values.Add('1');
-        { EXECUTE }
-        DailyText.InsertInto(TblDaily);
-      end;
-    finally
-      DailyText.Free;
-    end;
-
-  finally
-    AppSettings.Free;
-    Statement.Free;
-    Screen.Cursor:=crDefault;
-  end;
+  LoadCustomer(loadPrev);
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------ SELECT NEXT OVERDUE CUSTOMER }
 procedure TActionsForm.btnNextClick(Sender: TObject);
-var
-  iCNT:  integer;
 begin
-  { LOOP TO THE NEAREST UNHIDDEN ROW }
-  for iCNT:=(MainForm.sgAgeView.Selection.Top + 1) to MainForm.sgAgeView.RowCount - 1 do
-  begin
-    if (MainForm.sgAgeView.RowHeights[iCNT] <> -1) and (MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fOVERDUE, 1, 1), iCNT] <> '0') then
-    begin
-      MainForm.sgAgeView.Row:=iCNT;
-      Break;
-    end;
-  end;
-  { ASSIGN DATA FROM NEXT ROW }
-  CUID      :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUID,            1, 1), MainForm.sgAgeView.Row];
-  CustName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), MainForm.sgAgeView.Row];
-  CustNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), MainForm.sgAgeView.Row];
-  SCUID     :=CustNumber + MainForm.ConvertName(CoCode, 'F', 3);
-  { CLEAR ALL }
-  ClearAll;
-  { LOAD NEW DATA }
-  try
-    GetData(OpenItemsGrid, HistoryGrid, MainForm.sgOpenItems);
-    SetControls;
-  except
-    MainForm.MsgCall(mcWarn, 'Unexpected error has occured. Please close the window and try again.');
-  end;
+  LoadCustomer(loadNext);
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------- FEEDBACK AFTER CALL }
@@ -848,22 +924,23 @@ end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------- REMOVE FOLLOW UP DATE }
 procedure TActionsForm.btnClearFollowUpClick(Sender: TObject);
-var
-  GeneralText: TDataTables;
-  Condition:   string;
 begin
-  if MainForm.MsgCall(mcQuestion2, 'Are you sure you want to clear this follow up?') = ID_YES then
-  begin
-    GeneralText:=TDataTables.Create(MainForm.DbConnect);
-    try
-      Condition:=TGeneral.CUID + EQUAL + QuotedStr(CUID);
-      GeneralText.Columns.Add(TGeneral.FOLLOWUP); GeneralText.Values.Add(SPACE); GeneralText.Conditions.Add(Condition);
-      GeneralText.UpdateRecord(TblGeneral);
-      MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fFOLLOWUP, 1, 1), MainForm.sgAgeView.Row]:='';
-    finally
-      GeneralText.Free;
-    end;
-  end;
+  ClearFollowUp;
+end;
+
+{ ----------------------------------------------------------------------------------------------------------------------------------------- SEND MANUAL EMAIL }
+procedure TActionsForm.btnSendEmailClick(Sender: TObject);
+begin
+  MainForm.WndCall(SendForm, 0);
+end;
+
+{ -------------------------------------------------------------------------------------------------------------------------------------------- SEND STATEMENT }
+procedure TActionsForm.btnSendStatementClick(Sender: TObject);
+begin
+  { ASK USER BEFORE SENDING THE EMAIL }
+  if MainForm.MsgCall(mcQuestion2, 'Are you absolutely sure that you really want it to be sent, right now?') = IDNO then Exit;
+  SendAccountStatement(maDefined, '', '');
+  RegisterAction;
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------- CALL CUSTOMER }

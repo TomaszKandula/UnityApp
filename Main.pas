@@ -435,6 +435,7 @@ type                                                            (* GUI | MAIN TH
     Action_SelectAgeView: TMenuItem;
     Action_CopyAll: TMenuItem;
     Action_RemoveFilters: TMenuItem;
+    Action_Free1: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -604,7 +605,6 @@ type                                                            (* GUI | MAIN TH
     procedure Action_Agent_FilterClick(Sender: TObject);
     procedure Action_Division_FilterClick(Sender: TObject);
     procedure Action_FollowUp_FilterClick(Sender: TObject);
-    procedure N9Click(Sender: TObject);
     procedure sgUACDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
     procedure sgUACMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
     procedure sgUACMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
@@ -620,6 +620,7 @@ type                                                            (* GUI | MAIN TH
     procedure Action_SelectAgeViewClick(Sender: TObject);
     procedure Action_CopyAllClick(Sender: TObject);
     procedure Action_RemoveFiltersClick(Sender: TObject);
+    procedure Action_Free1Click(Sender: TObject);
     { ------------------------------------------------------------- ! HELPERS ! ----------------------------------------------------------------------------- }
   private
     { GENERAL }
@@ -1808,11 +1809,6 @@ begin
   if WndType = mcQuestion2 then Result:=Application.MessageBox(PChar(WndText), PChar(APPNAME), MB_YESNO    + MB_ICONQUESTION);
 end;
 
-procedure TMainForm.N9Click(Sender: TObject);
-begin
-
-end;
-
 { -------------------------------------------------------------------------------------------------------------------------------------------- RESET SETTINGS }
 procedure TMainForm.LockSettingsPanel;
 begin
@@ -1986,7 +1982,7 @@ begin
     Result:=StrToDateDef(StrDate, NULLDATE);
 end;
 
-{ ################################################################## ! EVENTS ! ############################################################################# }
+{ ############################################################## ! MAIN THREAD EVENTS ! ##################################################################### }
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------- ON CREATE }
 procedure TMainForm.FormCreate(Sender: TObject);
@@ -2335,8 +2331,6 @@ begin
     AppSettings.Free;
   end;
 end;
-
-{ ------------------------------------------------------------- ! MAIN FORM EVENTS ! ------------------------------------------------------------------------ }
 
 { --------------------------------------------------------------------------------------------------------------------------------------------------- ON SHOW }
 procedure TMainForm.FormShow(Sender: TObject);
@@ -2873,6 +2867,16 @@ begin
   FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
   FilterForm.FGrid     :=MainForm.sgAgeView;
   FilterForm.FFilterNum:=flt_GR3;
+  WndCall(FilterForm, stModal);
+end;
+
+{ ----------------------------------------------------------------------------------------------------------------------------------------------------- FREE1 }
+procedure TMainForm.Action_Free1Click(Sender: TObject);
+begin
+  FilterForm.FColName  :=TSnapshots.fFREE1;
+  FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
+  FilterForm.FGrid     :=MainForm.sgAgeView;
+  FilterForm.FFilterNum:=flt_Free1;
   WndCall(FilterForm, stModal);
 end;
 

@@ -62,6 +62,8 @@ type
     var REM_EX3:     string;
     var REM_EX4:     string;
     var REM_EX5:     string;
+    var CustSalut:   string;
+    var CustMess:    string;
     var SourceGrid:  TStringGrid;
     var OpenItems:   TStringGrid;
     var DocType:     integer;
@@ -329,6 +331,9 @@ begin
     MailBody :=StringReplace(MailBody,   '{ADDR_LBU}',     LBUAddress, [rfReplaceAll]);
     MailBody :=StringReplace(MailBody,   '{EMAIL}',        MailFrom,   [rfReplaceAll]);
     MailBody :=StringReplace(MailBody,   '{TEL}',          Telephone,  [rfReplaceAll]);
+    { CUSTOM SALUTATION AND MESSAGE }
+    if CustSalut <> '' then MailBody:=StringReplace(MailBody, '{SALUT}', CustSalut, [rfReplaceAll]);
+    if CustMess  <> '' then MailBody:=StringReplace(MailBody, '{TEXT}',  CustMess,  [rfReplaceAll]);
     { ASSIGN AND SEND }
     XMailer  :=MailFrom;
     MailCc   :=MailFrom;
@@ -336,7 +341,7 @@ begin
     MailRt   :='';
     Result   :=SendNow;
     { DEBUG LINE }
-    { SaveOutput('d:\test.html'); }
+    //SaveOutput('d:\test.html'); Result:=True;
   end;
 end;
 

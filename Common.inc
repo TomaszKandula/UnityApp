@@ -79,6 +79,7 @@ const
   flt_DIVISION = 4;
   flt_FOLLOWUP = 5;
   flt_GR3      = 6;
+  flt_Free1    = 7;
 
   { EMAIL OPTION }
 
@@ -353,6 +354,15 @@ const
   adFilterFetchedRecords     = 3;
   adFilterConflictingRecords = 5;
 
+  { ACTIONS }
+
+  loadNext = 0;
+  loadPrev = 1;
+
+  { EMAIL ENUMS }
+
+  maCustom  = 0;
+  maDefined = 1;
 
   { EMAIL GENERATION | TEMPLATES }
 
