@@ -375,13 +375,13 @@ end;
 { --------------------------------------------------------------------------------------------------------------------------------- PREPARE FOR NEW DATA LOAD }
 procedure TActionsForm.Initialize;
 begin
+  { CLEAR ALL }
+  ClearAll;
   { ASSIGN DATA FOR GIVEN ROW }
   CUID      :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUID,            1, 1), MainForm.sgAgeView.Row];
   CustName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), MainForm.sgAgeView.Row];
   CustNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), MainForm.sgAgeView.Row];
   SCUID     :=CustNumber + MainForm.ConvertName(CoCode, 'F', 3);
-  { CLEAR ALL }
-  ClearAll;
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------------- CLEAR ALL DETAILS }
@@ -396,7 +396,7 @@ begin
   Cust_Phone.ItemIndex:=0;
   DailyCom.Text       :='';
   GeneralCom.Text     :='';
-  StatusBar.SimpleText:='';
+  { StatusBar.SimpleText:=''; }
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------- MAKE PHONE CALL }
@@ -430,18 +430,36 @@ end;
 
 { ---------------------------------------------------------------------------------------------------------------------------- LOAD NEXT OR PREVIOUS CUSTOMER }
 procedure TActionsForm.LoadCustomer(Direction: integer);
-var
-  iCNT:  integer;
-begin
-  { LOOP TO THE NEAREST UNHIDDEN ROW }
-  for iCNT:=(MainForm.sgAgeView.Selection.Top + 1) to MainForm.sgAgeView.RowCount - 1 do
+
+  (* COMMON VARIABLES *)
+
+  var
+    iCNT:  integer;
+
+  (* NESTED METHOD *)
+
+  function CheckRow(iterator: integer): boolean;
   begin
-    if (MainForm.sgAgeView.RowHeights[iCNT] <> -1) and (MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fOVERDUE, 1, 1), iCNT] <> '0') then
+    Result:=True;
+    if (MainForm.sgAgeView.RowHeights[iterator] <> -1) and (MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fOVERDUE, 1, 1), iterator] <> '0') then
     begin
-      MainForm.sgAgeView.Row:=iCNT;
-      Break;
+      MainForm.sgAgeView.Row:=iterator;
+      Result:=False;
     end;
   end;
+
+begin
+
+  { LOOP TO THE PREVIOUS UNHIDDEN ROW }
+  if Direction = loadPrev then
+    for iCNT:=(MainForm.sgAgeView.Row - 1) Downto 1 do
+      if not CheckRow(iCNT) then Break;
+
+  { LOOP TO THE NEXT UNHIDDEN ROW }
+  if Direction = loadNext then
+    for iCNT:=(MainForm.sgAgeView.Row + 1) to MainForm.sgAgeView.RowCount - 1 do
+      if not CheckRow(iCNT) then Break;
+
   { LOAD NEW DATA }
   Initialize;
   try
@@ -450,6 +468,7 @@ begin
   except
     MainForm.MsgCall(mcWarn, 'Unexpected error has occured. Please close the window and try again.');
   end;
+
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------ SEND ACCOUNT STATEMENT }
@@ -600,60 +619,47 @@ begin
   end;
 end;
 
-{ ----------------------------------------------------------------------------------------------------------------------------------------------------------  }
+{ ------------------------------------------------------------------------------------------------------------------------ SAVE GENERAL COMMENT INTO DATABASE }
 procedure TActionsForm.SaveGeneralComment;
 var
   GenText:   TDataTables;
   Condition: string;
 begin
-  { NEW LINE }
-  if (Key = VK_RETURN) and (Shift=[ssALT]) then
-  begin
-    GeneralCom.Lines.Add(CRLF);
-    Exit;
-  end;
-  { SAVE TO DB }
-  if (Key = VK_RETURN) then
-  begin
-    if GeneralCom.Text <> '' then
+  GenText:=TDataTables.Create(MainForm.DbConnect);
+  try
+    GenText.OpenTable(TblGeneral);
+    Condition:=TGeneral.CUID + EQUAL + QuotedStr(CUID);
+    GenText.DataSet.Filter:=Condition;
+    { UPDATE }
+    if not (GenText.DataSet.RecordCount = 0) then
     begin
-      GenText:=TDataTables.Create(MainForm.DbConnect);
-      try
-        GenText.OpenTable(TblGeneral);
-        Condition:=TGeneral.CUID + EQUAL + QuotedStr(CUID);
-        GenText.DataSet.Filter:=Condition;
-        { UPDATE }
-        if not (GenText.DataSet.RecordCount = 0) then
-        begin
-          GenText.CleanUp;
-          { DEFINE COLUMNS, VALUES AND CONDITIONS }
-          GenText.Columns.Add(TGeneral.STAMP);        GenText.Values.Add(DateTimeToStr(Now));             GenText.Conditions.Add(Condition);
-          GenText.Columns.Add(TGeneral.USER_ALIAS);   GenText.Values.Add(UpperCase(MainForm.WinUserName));GenText.Conditions.Add(Condition);
-          GenText.Columns.Add(TGeneral.FIXCOMMENT);   GenText.Values.Add(GeneralCom.Text);                GenText.Conditions.Add(Condition);
-          { EXECUTE }
-          GenText.UpdateRecord(TblGeneral);
-        end
-        else
-        { INSERT NEW }
-        begin
-          GenText.CleanUp;
-          { DEFINE COLUMNS AND VALUES }
-          GenText.Columns.Add(TGeneral.CUID);       GenText.Values.Add(CUID);
-          GenText.Columns.Add(TGeneral.STAMP);      GenText.Values.Add(DateTimeToStr(Now));
-          GenText.Columns.Add(TGeneral.USER_ALIAS); GenText.Values.Add(UpperCase(MainForm.WinUserName));
-          GenText.Columns.Add(TGeneral.FIXCOMMENT); GenText.Values.Add(GeneralCom.Text);
-          GenText.Columns.Add(TGeneral.FOLLOWUP);   GenText.Values.Add('');
-          { EXECUTE }
-          GenText.InsertInto(TblGeneral);
-        end;
-      finally
-        GenText.Free;
-      end;
+      GenText.CleanUp;
+      { DEFINE COLUMNS, VALUES AND CONDITIONS }
+      GenText.Columns.Add(TGeneral.STAMP);        GenText.Values.Add(DateTimeToStr(Now));             GenText.Conditions.Add(Condition);
+      GenText.Columns.Add(TGeneral.USER_ALIAS);   GenText.Values.Add(UpperCase(MainForm.WinUserName));GenText.Conditions.Add(Condition);
+      GenText.Columns.Add(TGeneral.FIXCOMMENT);   GenText.Values.Add(GeneralCom.Text);                GenText.Conditions.Add(Condition);
+      { EXECUTE }
+      GenText.UpdateRecord(TblGeneral);
+    end
+    else
+    { INSERT NEW }
+    begin
+      GenText.CleanUp;
+      { DEFINE COLUMNS AND VALUES }
+      GenText.Columns.Add(TGeneral.CUID);       GenText.Values.Add(CUID);
+      GenText.Columns.Add(TGeneral.STAMP);      GenText.Values.Add(DateTimeToStr(Now));
+      GenText.Columns.Add(TGeneral.USER_ALIAS); GenText.Values.Add(UpperCase(MainForm.WinUserName));
+      GenText.Columns.Add(TGeneral.FIXCOMMENT); GenText.Values.Add(GeneralCom.Text);
+      GenText.Columns.Add(TGeneral.FOLLOWUP);   GenText.Values.Add('');
+      { EXECUTE }
+      GenText.InsertInto(TblGeneral);
     end;
+  finally
+    GenText.Free;
   end;
 end;
 
-{ ----------------------------------------------------------------------------------------------------------------------------------------------------------  }
+{ -------------------------------------------------------------------------------------------------------------------------- SAVE DAILY COMMENT INTO DATABASE }
 procedure TActionsForm.SaveDailyComment;
 var
   DailyText: TDataTables;
@@ -661,61 +667,48 @@ var
   InsertOK:  boolean;
   Condition: string;
 begin
-  { NEW LINE }
-  if (Key = VK_RETURN) and (Shift=[ssALT]) then
-  begin
-    DailyCom.Lines.Add(CRLF);
-    Exit;
-  end;
-  { SAVE TO DB }
-  if (Key = VK_RETURN) then
-  begin
-    if DailyCom.Text <> '' then
+  UpdateOK:=False;
+  InsertOK:=False;
+  DailyText:=TDataTables.Create(MainForm.DbConnect);
+  try
+    DailyText.OpenTable(TblDaily);
+    Condition:=TDaily.CUID + EQUAL + QuotedStr(CUID) + _AND + TDaily.AGEDATE + EQUAL + QuotedStr(MainForm.AgeDateSel);
+    DailyText.DataSet.Filter:=Condition;
+    { UPDATE EXISTING COMMENT }
+    if not (DailyText.DataSet.RecordCount = 0) then
     begin
-      UpdateOK:=False;
-      InsertOK:=False;
-      DailyText:=TDataTables.Create(MainForm.DbConnect);
-      try
-        DailyText.OpenTable(TblDaily);
-        Condition:=TDaily.CUID + EQUAL + QuotedStr(CUID) + _AND + TDaily.AGEDATE + EQUAL + QuotedStr(MainForm.AgeDateSel);
-        DailyText.DataSet.Filter:=Condition;
-        { UPDATE EXISTING COMMENT }
-        if not (DailyText.DataSet.RecordCount = 0) then
-        begin
-          DailyText.CleanUp;
-          { DEFINE COLUMNS, VALUES AND CONDITIONS }
-          DailyText.Columns.Add(TDaily.STAMP);       DailyText.Values.Add(DateTimeToStr(Now));               DailyText.Conditions.Add(Condition);
-          DailyText.Columns.Add(TDaily.USER_ALIAS);  DailyText.Values.Add(UpperCase(MainForm.WinUserName));  DailyText.Conditions.Add(Condition);
-          DailyText.Columns.Add(TDaily.FIXCOMMENT);  DailyText.Values.Add(DailyCom.Text);                    DailyText.Conditions.Add(Condition);
-          { EXECUTE }
-          UpdateOK:=DailyText.UpdateRecord(TblDaily);
-        end
-        else
-        { INSERT NEW RECORD }
-        begin
-          DailyText.CleanUp;
-          { DEFINE COLUMNS AND VALUES }
-          DailyText.Columns.Add(TDaily.GROUP_ID);       DailyText.Values.Add(MainForm.GroupIdSel);
-          DailyText.Columns.Add(TDaily.CUID);           DailyText.Values.Add(CUID);
-          DailyText.Columns.Add(TDaily.AGEDATE);        DailyText.Values.Add(MainForm.AgeDateSel);
-          DailyText.Columns.Add(TDaily.STAMP);          DailyText.Values.Add(DateTimeToStr(Now));
-          DailyText.Columns.Add(TDaily.USER_ALIAS);     DailyText.Values.Add(UpperCase(MainForm.WinUserName));
-          DailyText.Columns.Add(TDaily.EMAIL);          DailyText.Values.Add('0');
-          DailyText.Columns.Add(TDaily.CALLEVENT);      DailyText.Values.Add('0');
-          DailyText.Columns.Add(TDaily.CALLDURATION);   DailyText.Values.Add('0');
-          DailyText.Columns.Add(TDaily.FIXCOMMENT);     DailyText.Values.Add(DailyCom.Text);
-          DailyText.Columns.Add(TDaily.EMAIL_Reminder); DailyText.Values.Add('0');
-          DailyText.Columns.Add(TDaily.EMAIL_AutoStat); DailyText.Values.Add('0');
-          DailyText.Columns.Add(TDaily.EMAIL_ManuStat); DailyText.Values.Add('0');
-          { EXECUTE }
-          InsertOK:=DailyText.InsertInto(TblDaily);
-        end;
-        { REFRESH HISTORY GRID }
-        if (InsertOK) or (UpdateOK) then UpdateHistory(HistoryGrid);
-      finally
-        DailyText.Free;
-      end;
+      DailyText.CleanUp;
+      { DEFINE COLUMNS, VALUES AND CONDITIONS }
+      DailyText.Columns.Add(TDaily.STAMP);       DailyText.Values.Add(DateTimeToStr(Now));               DailyText.Conditions.Add(Condition);
+      DailyText.Columns.Add(TDaily.USER_ALIAS);  DailyText.Values.Add(UpperCase(MainForm.WinUserName));  DailyText.Conditions.Add(Condition);
+      DailyText.Columns.Add(TDaily.FIXCOMMENT);  DailyText.Values.Add(DailyCom.Text);                    DailyText.Conditions.Add(Condition);
+      { EXECUTE }
+      UpdateOK:=DailyText.UpdateRecord(TblDaily);
+    end
+    else
+    { INSERT NEW RECORD }
+    begin
+      DailyText.CleanUp;
+      { DEFINE COLUMNS AND VALUES }
+      DailyText.Columns.Add(TDaily.GROUP_ID);       DailyText.Values.Add(MainForm.GroupIdSel);
+      DailyText.Columns.Add(TDaily.CUID);           DailyText.Values.Add(CUID);
+      DailyText.Columns.Add(TDaily.AGEDATE);        DailyText.Values.Add(MainForm.AgeDateSel);
+      DailyText.Columns.Add(TDaily.STAMP);          DailyText.Values.Add(DateTimeToStr(Now));
+      DailyText.Columns.Add(TDaily.USER_ALIAS);     DailyText.Values.Add(UpperCase(MainForm.WinUserName));
+      DailyText.Columns.Add(TDaily.EMAIL);          DailyText.Values.Add('0');
+      DailyText.Columns.Add(TDaily.CALLEVENT);      DailyText.Values.Add('0');
+      DailyText.Columns.Add(TDaily.CALLDURATION);   DailyText.Values.Add('0');
+      DailyText.Columns.Add(TDaily.FIXCOMMENT);     DailyText.Values.Add(DailyCom.Text);
+      DailyText.Columns.Add(TDaily.EMAIL_Reminder); DailyText.Values.Add('0');
+      DailyText.Columns.Add(TDaily.EMAIL_AutoStat); DailyText.Values.Add('0');
+      DailyText.Columns.Add(TDaily.EMAIL_ManuStat); DailyText.Values.Add('0');
+      { EXECUTE }
+      InsertOK:=DailyText.InsertInto(TblDaily);
     end;
+    { REFRESH HISTORY GRID }
+    if (InsertOK) or (UpdateOK) then UpdateHistory(HistoryGrid);
+  finally
+    DailyText.Free;
   end;
 end;
 
@@ -825,13 +818,33 @@ end;
 { ----------------------------------------------------------------------------------------------------------------------------------- SAVE COMMENT ON <ENTER> }
 procedure TActionsForm.DailyComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  SaveDailyComment;
+  { NEW LINE }
+  if (Key = VK_RETURN) and (Shift=[ssALT]) then
+  begin
+    DailyCom.Lines.Add(CRLF);
+    Exit;
+  end;
+  { SAVE TO DB }
+  if (Key = VK_RETURN) then
+  begin
+    if DailyCom.Text <> '' then SaveDailyComment;
+  end;
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------- SAVE COMMENT ON <ENTER> }
 procedure TActionsForm.GeneralComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  SaveGeneralComment;
+  { NEW LINE }
+  if (Key = VK_RETURN) and (Shift=[ssALT]) then
+  begin
+    GeneralCom.Lines.Add(CRLF);
+    Exit;
+  end;
+  { SAVE TO DB }
+  if (Key = VK_RETURN) then
+  begin
+    if GeneralCom.Text <> '' then SaveGeneralComment;
+  end;
 end;
 
 { --------------------------------------------------------------------------------------------------------------------- COPY STRING GRID CONTENT TO CLIPBOARD }

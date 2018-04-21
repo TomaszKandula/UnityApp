@@ -2281,6 +2281,7 @@ begin
     DataTables.Columns.Add(TCompany.DIVISIONS);
     { READ }
     DataTables.OpenTable(TblCompany);
+    DataTables.DataSet.Sort:=TCompany.CO_CODE + ASC;
     DataTables.SqlToGrid(sgCoCodes,  DataTables.DataSet, False, True);
     { READ BEOW TABLES "AS IS" }
     DataTables.CleanUp; DataTables.OpenTable(TblPmtterms); DataTables.SqlToGrid(sgPmtTerms, DataTables.DataSet, False, True);
