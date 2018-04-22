@@ -33,8 +33,7 @@ type
   protected
     procedure Execute; override;
   public
-    //function CanSendStatement: boolean;
-    //function CanSendReminder: boolean;
+
   end;
 
 { ------------------------------------------------------------------------------------------------------------------------------ INVOICE TRACKER LIST REFRESH }
@@ -354,10 +353,12 @@ begin
       AgeView.AgeDate:=MainForm.AgeDateSel;
       AgeView.Read(MainForm.sgAgeView);
       { SYNC }
-      Synchronize(AgeView.UpdateSummary);
       Synchronize(procedure
                   begin
-                    AgeView.Details(MainForm.DetailsGrid);
+                    AgeView.ComputeAgeSummary(MainForm.sgAgeView);
+                    AgeView.ComputeAndShowRCA(MainForm.sgAgeView);
+                    AgeView.UpdateSummary;
+                    AgeView.GetDetails(MainForm.DetailsGrid);
                   end);
     except
       on E: Exception do

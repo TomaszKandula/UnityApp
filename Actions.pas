@@ -117,6 +117,7 @@ type
     var CoCode     :  string;
     var CustName   :  string;
     var CustNumber :  string;
+    var SrcColumns :  array of integer;
   published
     function  GetRunningApps(SearchName: string): boolean;
     procedure GetData(OpenItemsDest: TStringGrid; HistoryDest: TStringGrid; OpenItemsSrc: TStringGrid);
@@ -205,21 +206,14 @@ end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------- GET ALL RELEVANT DATA }
 procedure TActionsForm.GetData(OpenItemsDest: TStringGrid; HistoryDest: TStringGrid; OpenItemsSrc: TStringGrid);
-const
-  { BELOW ARRAY CONTAINS WITH COLUMN NUMBERS OF 'STRINGGRID' THAT KEEPS OUR }
-  { SOURCE DATA THAT WILL BE TRANSFERRED TO 'OPENITEMSGRID'. THIS COMPONENT }
-  { SHOWS SELECTED DETAILS OF ALL REGISTERED OPEN ITEMS FOR GIVEN CUSTOMER  }
-  { THAT WE IDENTIFY BY 'CUID' NUMBER.                                      }
-  SrcColumns:  array[0..11] of integer = (10, 29, 32, 5, 9, 4, 8, 7, 11, 26, 19, 33);
-  Delimiter:   char = ';';
 var
-  iCNT:      integer;
-  jCNT:      integer;
-  zCNT:      integer;
-  GenText:   TDataTables;
-  AddrBook:  TDataTables;
-  Phones:    string;
-  SL:        TStringList;
+  iCNT       :  integer;
+  jCNT       :  integer;
+  kCNT       :  integer;
+  GenText    :  TDataTables;
+  AddrBook   :  TDataTables;
+  Phones     :  string;
+  SL         :  TStringList;
 begin
 
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
@@ -228,7 +222,22 @@ begin
   HistoryDest.Freeze(True);
   OpenItemsDest.ClearAll(2, 1, 1, False);
   HistoryDest.ClearAll(2, 1, 1, False);
-  zCNT:=1;
+  kCNT:=1;
+
+  { -------------------------------------------------------------------------------------------------------------------------------------- GET SOURCE COLUMNS }
+  SrcColumns[0] :=OpenItemsSrc.ReturnColumn(TOpenitems.InvoNo,    1, 1);
+  SrcColumns[1] :=OpenItemsSrc.ReturnColumn(TOpenitems.Txt,       1, 1);
+  SrcColumns[2] :=OpenItemsSrc.ReturnColumn(TOpenitems.AddTxt,    1, 1);
+  SrcColumns[3] :=OpenItemsSrc.ReturnColumn(TOpenitems.OpenAm,    1, 1);
+  SrcColumns[4] :=OpenItemsSrc.ReturnColumn(TOpenitems.Am,        1, 1);
+  SrcColumns[5] :=OpenItemsSrc.ReturnColumn(TOpenitems.OpenCurAm, 1, 1);
+  SrcColumns[6] :=OpenItemsSrc.ReturnColumn(TOpenitems.CurAm,     1, 1);
+  SrcColumns[7] :=OpenItemsSrc.ReturnColumn(TOpenitems.ISO,       1, 1);
+  SrcColumns[8] :=OpenItemsSrc.ReturnColumn(TOpenitems.DueDt,     1, 1);
+  SrcColumns[9] :=OpenItemsSrc.ReturnColumn(TOpenitems.ValDt,     1, 1);
+  SrcColumns[10]:=OpenItemsSrc.ReturnColumn(TOpenitems.Ctrl,      1, 1);
+  SrcColumns[11]:=OpenItemsSrc.ReturnColumn(TOpenitems.PmtStat,   1, 1);
+
   try
     { --------------------------------------------------------- ! LIST OF OPEN ITEMS ! ---------------------------------------------------------------------- }
 
@@ -240,10 +249,10 @@ begin
       begin
         { MOVE DATA FOR SELECTED COLUMNS AND GIVEN ROW ONCE "CUID" IS FOUND }
         for jCNT:=Low(SrcColumns) to High(SrcColumns)
-          do OpenItemsDest.Cells[jCNT + 1, zCNT]:=OpenItemsSrc.Cells[SrcColumns[jCNT], iCNT];
+          do OpenItemsDest.Cells[jCNT + 1, kCNT]:=OpenItemsSrc.Cells[SrcColumns[jCNT], iCNT];
         { MOVE NEXT }
-        inc(zCNT);
-        OpenItemsDest.RowCount:=zCNT;
+        inc(kCNT);
+        OpenItemsDest.RowCount:=kCNT;
       end;
     end;
     { ------------------------------------------------------------------------------------------------------------------- SORT VIA PAYMENT STATUS | ASCENDING }
@@ -270,11 +279,11 @@ begin
         begin
           Cust_Phone.Clear;
           { MANY NUMBERS DELIMITED BY SEMICOLON }
-          if AnsiPos(Delimiter, Phones) > 0 then
+          if AnsiPos(deSemicolon, Phones) > 0 then
           begin
             SL:=TStringList.Create;
             try
-              SL.Delimiter:=Delimiter;
+              SL.Delimiter:=deSemicolon;
               SL.StrictDelimiter:=True;
               SL.DelimitedText:=Phones;
               for iCNT:=0 to SL.Count - 1 do
@@ -381,6 +390,7 @@ begin
   CUID      :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUID,            1, 1), MainForm.sgAgeView.Row];
   CustName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), MainForm.sgAgeView.Row];
   CustNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), MainForm.sgAgeView.Row];
+  CoCode    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCO_CODE,         1, 1), MainForm.sgAgeView.Row];
   SCUID     :=CustNumber + MainForm.ConvertName(CoCode, 'F', 3);
 end;
 
@@ -441,7 +451,11 @@ procedure TActionsForm.LoadCustomer(Direction: integer);
   function CheckRow(iterator: integer): boolean;
   begin
     Result:=True;
-    if (MainForm.sgAgeView.RowHeights[iterator] <> -1) and (MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fOVERDUE, 1, 1), iterator] <> '0') then
+    if
+      (MainForm.sgAgeView.RowHeights[iterator] <> -1)
+    and
+      (MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fOVERDUE, 1, 1), iterator] <> '0')
+    then
     begin
       MainForm.sgAgeView.Row:=iterator;
       Result:=False;
@@ -724,6 +738,7 @@ begin
     { ----------------------------------------------------------------------------------------------------------------------------------- LOAD WINDOW CAPTION }
     ActionsForm.Caption:=AppSettings.TMIG.ReadString(ApplicationDetails, 'WND_TRANSACTIONS', APPNAME);
     { -------------------------------------------------------------------------------------------------------------------------------- OPEN ITEMS STRING GRID }
+    SetLength(SrcColumns, 12);
     OpenItemsGrid.RowCount:=2;
     OpenItemsGrid.ColCount:=13;
     OpenItemsGrid.Cols[0].Text :='';

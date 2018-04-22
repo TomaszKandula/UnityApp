@@ -2884,10 +2884,22 @@ end;
 { ---------------------------------------------------------------------------------------------------------------------------------------- REMOVE ALL FILTERS }
 procedure TMainForm.Action_RemoveFiltersClick(Sender: TObject);
 var
-  iCNT: integer;
+  iCNT:  integer;
+  AgeView: TAgeView;
 begin
+  sgAgeView.Freeze(True);
   for iCNT:=1 to sgAgeView.RowCount - 1 do sgAgeView.RowHeights[iCNT]:=sgRowHeight;
   FilterForm.FilterClearAll;
+  { RE-COMPUTE AGING SUMMARY }
+  AgeView:=TAgeView.Create(MainForm.DbConnect);
+  try
+    AgeView.ComputeAgeSummary(MainForm.sgAgeView);
+    AgeView.ComputeAndShowRCA(MainForm.sgAgeView);
+    AgeView.UpdateSummary;
+  finally
+   AgeView.Free;
+  end;
+  sgAgeView.Freeze(False);
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------- EXCLUDE NON-OVERDUE ITEMS }

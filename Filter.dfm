@@ -27,9 +27,9 @@ object FilterForm: TFilterForm
   object FilterList: TCheckListBox
     AlignWithMargins = True
     Left = 5
-    Top = 5
+    Top = 35
     Width = 223
-    Height = 312
+    Height = 282
     Margins.Left = 5
     Margins.Top = 5
     Margins.Right = 5
@@ -73,10 +73,8 @@ object FilterForm: TFilterForm
     ParentShowHint = False
     ShowHint = False
     TabOrder = 0
-    ExplicitLeft = 13
-    ExplicitTop = 34
-    ExplicitWidth = 252
-    ExplicitHeight = 376
+    ExplicitTop = 5
+    ExplicitHeight = 312
   end
   object PanelBottom: TPanel
     AlignWithMargins = True
@@ -93,8 +91,6 @@ object FilterForm: TFilterForm
     Color = 15527148
     ParentBackground = False
     TabOrder = 1
-    ExplicitTop = 423
-    ExplicitWidth = 270
     object btnFilter: TSpeedButton
       Left = 150
       Top = 2
@@ -104,9 +100,23 @@ object FilterForm: TFilterForm
       Caption = 'Filter'
       OnClick = btnFilterClick
     end
+  end
+  object PanelTop: TPanel
+    AlignWithMargins = True
+    Left = 5
+    Top = 5
+    Width = 223
+    Height = 20
+    Margins.Left = 5
+    Margins.Top = 5
+    Margins.Right = 5
+    Margins.Bottom = 5
+    Align = alTop
+    BevelOuter = bvNone
+    TabOrder = 2
     object cbSelectAll: TCheckBox
       Left = 0
-      Top = 6
+      Top = 4
       Width = 77
       Height = 17
       Caption = 'Select All'

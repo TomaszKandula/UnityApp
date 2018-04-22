@@ -37,6 +37,7 @@ type
     FilterList: TCheckListBox;
     PanelBottom: TPanel;
     cbSelectAll: TCheckBox;
+    PanelTop: TPanel;
     procedure btnFilterClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormActivate(Sender: TObject);
@@ -75,7 +76,7 @@ var
 implementation
 
 uses
-  Settings, Model;
+  Settings, Model, AgeView;
 
 {$R *.dfm}
 
@@ -284,9 +285,12 @@ end;
 
 { ---------------------------------------------------------------------------------------------------------------------------------------------------- FILTER }
 procedure TFilterForm.btnFilterClick(Sender: TObject);
+var
+  AgeView: TAgeView;
 begin
   if FColNumber > 0 then
   begin
+    { FILTER }
     if FFilterNum = flt_INF7     then FilterNow(INF7);
     if FFilterNum = flt_INF4     then FilterNow(INF4);
     if FFilterNum = flt_CoCode   then FilterNow(CoCode);
@@ -295,6 +299,15 @@ begin
     if FFilterNum = flt_FOLLOWUP then FilterNow(FollowUp);
     if FFilterNum = flt_GR3      then FilterNow(Gr3);
     if FFilterNum = flt_FREE1    then FilterNow(Free1);
+    { RE-COMPUTE AGING SUMMARY }
+    AgeView:=TAgeView.Create(MainForm.DbConnect);
+    try
+      AgeView.ComputeAgeSummary(MainForm.sgAgeView);
+      AgeView.ComputeAndShowRCA(MainForm.sgAgeView);
+      AgeView.UpdateSummary;
+    finally
+      AgeView.Free;
+    end;
   end;
 end;
 

@@ -173,6 +173,12 @@ const
   SingleQuote  : string = '''';
   DoubleQuote  : string = '''''';
 
+  { DELIMITERS }
+
+  deSemicolon = ';';
+  deCommaa    = ',';
+  dePipe      = '|';
+
   { BRACKET ENUMARATIONS }
 
   brRound      : integer = 0;

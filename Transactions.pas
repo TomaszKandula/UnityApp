@@ -77,7 +77,6 @@ var
   INF4:        string;
   Agents:      string;
   Divisions:   string;
-  SortPos:     integer;
   iCNT:        integer;
 begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
@@ -86,8 +85,6 @@ begin
     { PARAMETERS FOR SQL PROCEDURE }
     CutOff :=IntToStr(AppSettings.TMIG.ReadInteger(OpenItemsData, 'NRCUTOFFNUM', 0));
     INF4   :=AppSettings.TMIG.ReadString(OpenItemsData, 'TXCUTOFFTXT', '');
-    { FOR STRING GRID SORTING }
-    SortPos:=AppSettings.TMIG.ReadInteger(OpenItemsData, 'SORTPOS', 0);
   finally
     AppSettings.Free;
   end;
@@ -127,22 +124,8 @@ begin
           QuotedStr(INF4);
   ExecSQL;
   Result:=SqlToGrid(DestGrid, ExecSQL, False, True);
-  { ----------------------------------------------------------------------------------------------------------------------------------------- SORT VIA CUID }
-  DestGrid.MSort(SortPos, 2, True);
-end;
-
-{ --------------------------------------------------------------------------------------------------------------------------------- CLEAR ALL SUMMARY DETAILS }
-procedure TTransactions.ClearSummary;
-begin
-  MainForm.OSAmount                :=0;
-  MainForm.tcOpenItems.Caption     :='0';
-  MainForm.tcOverdue.Caption       :='0';
-  MainForm.tcInvoices.Caption      :='0';
-  MainForm.tcOSAmt.Caption         :='0';
-  MainForm.tcUNamt.Caption         :='0';
-  MainForm.tcOvdAmt.Caption        :='0';
-  MainForm.tcKPIoverdue.Caption    :='0';
-  MainForm.tcKPIunallocated.Caption:='0';
+  { ------------------------------------------------------------------------------------------------------------------------------------------- SORT VIA CUID }
+  DestGrid.MSort(DestGrid.ReturnColumn(TOpenitems.CUID, 1 ,1), 2, True);  //to be removed - to be done on SQL server
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------- LOOK FOR VOUCHER TYPE IN SETTINGS }
@@ -169,8 +152,22 @@ begin
   end;
 end;
 
+{ --------------------------------------------------------------------------------------------------------------------------------- CLEAR ALL SUMMARY DETAILS }
+procedure TTransactions.ClearSummary;
+begin
+  MainForm.OSAmount                :=0;
+  MainForm.tcOpenItems.Caption     :='0';
+  MainForm.tcOverdue.Caption       :='0';
+  MainForm.tcInvoices.Caption      :='0';
+  MainForm.tcOSAmt.Caption         :='0';
+  MainForm.tcUNamt.Caption         :='0';
+  MainForm.tcOvdAmt.Caption        :='0';
+  MainForm.tcKPIoverdue.Caption    :='0';
+  MainForm.tcKPIunallocated.Caption:='0';
+end;
+
 { ---------------------------------------------------------------------------------------------------------------------- DISPLAY UPDATED SUMMARY FOR THE USER }
-procedure TTransactions.UpdateSummary;
+procedure TTransactions.UpdateSummary;  //REFACTOR!!!
 
   (* COMMON VARIABLES *)
 
@@ -232,7 +229,7 @@ begin
       inc(Overdue);
       OverdueAmt:=OverdueAmt + StrToFloatDef(DestGrid.Cells[5, iCNT], 0);
     end;
-    { ------------------------------------------------------------------------------------------------------------------------------ UNALLOCATED PAYMENTS }
+    { ---------------------------------------------------------------------------------------------------------------------------------- UNALLOCATED PAYMENTS }
     { WE TAKE INTO CONSIDERATION NEGATIVE AMOUNTS }
     { AND VOUCHER THAT INDICATE BANK POSTINGS     }
     if (StrToFloat(DestGrid.Cells[5, iCNT]) < 0) and (DestGrid.Cells[3, iCNT] = VoucherNumber) then

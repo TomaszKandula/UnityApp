@@ -85,21 +85,21 @@ object SendForm: TSendForm
   end
   object Text1: TLabel
     Left = 16
-    Top = 56
+    Top = 94
     Width = 90
     Height = 13
     Caption = 'Custom salutation:'
   end
   object Text2: TLabel
     Left = 16
-    Top = 152
+    Top = 141
     Width = 85
     Height = 13
     Caption = 'Custom message:'
   end
   object Shape_Customer: TShape
     Left = 16
-    Top = 111
+    Top = 60
     Width = 505
     Height = 26
     Pen.Color = clMedGray
@@ -160,7 +160,7 @@ object SendForm: TSendForm
   end
   object Text_Customer: TLabel
     Left = 22
-    Top = 117
+    Top = 66
     Width = 116
     Height = 13
     Caption = 'CUSTOMER ADDRESS'
@@ -238,7 +238,7 @@ object SendForm: TSendForm
   end
   object Text_Salut: TMemo
     Left = 16
-    Top = 75
+    Top = 113
     Width = 505
     Height = 22
     Color = clCream
@@ -254,9 +254,9 @@ object SendForm: TSendForm
   end
   object Text_Message: TMemo
     Left = 16
-    Top = 171
+    Top = 160
     Width = 505
-    Height = 118
+    Height = 129
     Color = clCream
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clNavy

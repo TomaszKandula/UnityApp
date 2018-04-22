@@ -211,7 +211,8 @@ type
     const ExtractDateStamp : string = 'ExtractDateStamp';
     const ProcessBatchKey  : string = 'ProcessBatchKey';
 
-    (* CUID IS ADDITIONA COLUMN MADE 'ON THE FLY' *)
+    (* "CUID" AND "PMTSTAT" IS ADDITIONAL COLUMN CALCULATED 'ON THE FLY' *)
+    const PmtStat          : string = 'PmtStat';
     const CUID             : string = 'CUID';
 
   end;
