@@ -189,7 +189,7 @@ begin
   { ------------------------------------------------------------------------------------------------------------------------------------ SORT VIA WALLETSHARE }
   QuickSortExt(WalletShare, ListPosition, Low(WalletShare), High(WalletShare), False);
   { ------------------------------------------------------------------------------------------------------------------------------------ COMPUTE AND SHOW RCA }
-  for iCNT:=Low(ListPosition) to High(ListPosition) do
+  for iCNT:=Low(ListPosition) to High(ListPosition) do     //split presentation and computation
   begin
     Count:=Count + WalletShare[iCNT];
     { ASSIGN RISK CLASS 'A' }
@@ -217,7 +217,7 @@ begin
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------- CLEAR SUMMARY }
-procedure TAgeView.ClearSummary;
+procedure TAgeView.ClearSummary;  //to mainform
 begin
   { TOP }
   MainForm.tcCOCODE1.Caption    :='n/a';
@@ -257,7 +257,7 @@ begin
 end;
 
 { ---------------------------------------------------------------------------------------------------------------------------------------- FORMAT AND DISPLAY }
-procedure TAgeView.UpdateSummary;
+procedure TAgeView.UpdateSummary;   //to mainform
 begin
   { TOP | AGE VIEW DETAILS }
   MainForm.tcTOTAL.Caption   :=IntToStr(CustAll);
@@ -307,7 +307,7 @@ begin
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------- RETURN BASIC DETAILS }
-procedure TAgeView.GetDetails(var Grid: TStringGrid);
+procedure TAgeView.GetDetails(var Grid: TStringGrid);  //to mainform
 var
   SL:   TStringList;
   iCNT: integer;
@@ -345,7 +345,7 @@ begin
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------- FIND MATCH DATA IN GENERAL TABLES }
-function TAgeView.GetData(Code: string; Table: string): string;
+function TAgeView.GetData(Code: string; Table: string): string;  //move to another module
 var
   DataTables: TDataTables;
   Field:      string;

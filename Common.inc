@@ -44,7 +44,7 @@ const
   LicenceFile:    string    = 'Unity.licx';
   GridImgFile:    string    = 'Unity.img';
   ReleaseFile:    string    = 'Release.pak';
-  CurrentMutex:   PWideChar = 'UNITY_10020';  { WARNING! INCREASE IT WITH EACH NEW RELEASE }
+  CurrentMutex:   PWideChar = 'UNITY_10021';  { WARNING! INCREASE IT WITH EACH NEW RELEASE }
 
   { SPLASH SCREEN }
 
@@ -247,6 +247,7 @@ const
   _AND         : string = ' AND ';
   _AS          : string = ' AS ';
   MAX          : string = ' MAX ';
+  SUM          : string = ' SUM ';
   EXECUTE      : string = ' EXEC ';
 
   { "OPEN ITEMS" AND "AGING" WORKERS ENUMERATIONS }

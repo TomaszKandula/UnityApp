@@ -54,7 +54,6 @@ begin
              );
   { OPEN COLUMN WITH FUNCTION APPLIED }
   OpenTable(TblOpenitems);
-  ExecSQL;
   { EXAMINE RECEIVED DATA }
   if (not (DataSet = nil)) and (DataSet.RecordCount = 1) then
   begin
@@ -179,6 +178,8 @@ procedure TTransactions.UpdateSummary;  //REFACTOR!!!
     { AMOUNTS }
     OverdueAmt      : double;
     UNamt           : double;
+    KPIOverdue      : double;
+    KPIUnalloc      : double;
     { AMOUNT OF OUTSTANDING INVOICES ONLY }
     InvoiceAmt      : double;
     { VOUCHER NUMBER }
@@ -235,13 +236,51 @@ begin
     if (StrToFloat(DestGrid.Cells[5, iCNT]) < 0) and (DestGrid.Cells[3, iCNT] = VoucherNumber) then
       UNamt:=UNamt + StrToFloatDef(DestGrid.Cells[5, iCNT], 0);
   end;
+  { GET TOTAL SUM OF KPI TARGETS FOR ALL LOADED COMPANY CODES }
+  CleanUp;
+  Columns.Add(
+               SUM +
+                 BracketStr(TCompany.KPI_OVERDUE_TARGET, brRound) +
+               _AS +
+                 QuotedStr(TCompany.KPI_OVERDUE_TARGET)
+             );
+  Columns.Add(
+               SUM +
+                 BracketStr(TCompany.KPI_UNALLOCATED_TARGET, brRound) +
+               _AS +
+                 QuotedStr(TCompany.KPI_UNALLOCATED_TARGET)
+             );
+  CustFilter:=WHERE +
+                TCompany.CO_CODE +
+              EQUAL +
+                QuotedStr(SettingGrid.Cells[0, 0]) +
+              _AND  +
+                TCompany.CO_CODE +
+              EQUAL +
+                QuotedStr(SettingGrid.Cells[1, 0]) +
+              _AND  +
+                TCompany.CO_CODE +
+              EQUAL +
+                QuotedStr(SettingGrid.Cells[2, 0]) +
+              _AND  +
+                TCompany.CO_CODE +
+              EQUAL +
+                QuotedStr(SettingGrid.Cells[3, 0]);
+  OpenTable(TblCompany);
+  if DataSet.RecordCount = 1 then
+  begin
+    KPIOverdue:=StrToFloatDef(MainForm.OleGetStr(DataSet.Fields[TCompany.KPI_OVERDUE_TARGET].Value), 0);
+    KPIUnalloc:=StrToFloatDef(MainForm.OleGetStr(DataSet.Fields[TCompany.KPI_UNALLOCATED_TARGET].Value), 0);
+  end;
   { DISPLAY }
-  MainForm.tcOpenItems.Caption:=FormatFloat('### ###',  DestGrid.RowCount - 1);
-  MainForm.tcInvoices.Caption :=FormatFloat('### ###',  nInvoices);
-  MainForm.tcOverdue.Caption  :=FormatFloat('### ###',  Overdue);
-  MainForm.tcOSAmt.Caption    :=FormatFloat('#,##0.00', MainForm.OSAmount);
-  MainForm.tcOvdAmt.Caption   :=FormatFloat('#,##0.00', OverdueAmt);
-  MainForm.tcUNAmt.Caption    :=FormatFloat('#,##0.00', abs(UNamt));
+  MainForm.tcOpenItems.Caption     :=FormatFloat('### ###',  DestGrid.RowCount - 1);
+  MainForm.tcInvoices.Caption      :=FormatFloat('### ###',  nInvoices);
+  MainForm.tcOverdue.Caption       :=FormatFloat('### ###',  Overdue);
+  MainForm.tcOSAmt.Caption         :=FormatFloat('#,##0.00', MainForm.OSAmount);
+  MainForm.tcOvdAmt.Caption        :=FormatFloat('#,##0.00', OverdueAmt);
+  MainForm.tcUNAmt.Caption         :=FormatFloat('#,##0.00', abs(UNamt));
+  MainForm.tcKPIoverdue.Caption    :=FormatFloat('#,##0.00', KPIOverdue);
+  MainForm.tcKPIUnallocated.Caption:=FormatFloat('#,##0.00', KPIUnalloc);
 end;
 
 end.

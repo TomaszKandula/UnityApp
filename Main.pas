@@ -300,7 +300,7 @@ type                                                            (* GUI | MAIN TH
     Text80: TLabel;
     Text81: TLabel;
     tcKPIoverdue: TLabel;
-    tcKPIunalLocated: TLabel;
+    tcKPIUnallocated: TLabel;
     Text82: TLabel;
     tcOvdAmt: TLabel;
     GroupListBox: TComboBox;

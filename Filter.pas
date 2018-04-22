@@ -37,7 +37,6 @@ type
     FilterList: TCheckListBox;
     PanelBottom: TPanel;
     cbSelectAll: TCheckBox;
-    PanelTop: TPanel;
     procedure btnFilterClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormActivate(Sender: TObject);
@@ -64,8 +63,8 @@ type
     procedure FilterClearAll;
     procedure FilterSelectCheck;
     procedure FilterPrep;
-    procedure FilterInit(FFilter: TLists);
-    procedure FilterNow(FFilter: TLists);
+    procedure FilterInit(var FFilter: TLists);
+    procedure FilterNow(var FFilter: TLists);
   end;
 
 var
@@ -151,16 +150,14 @@ begin
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------ INITIAIZE FILTER }
-procedure TFilterForm.FilterInit(FFilter: TLists);
+procedure TFilterForm.FilterInit(var FFilter: TLists);
 var
   iCNT:  integer;
-  jCNT:  integer;
   SL:    TStringList;
 begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   Screen.Cursor:=crHourGlass;
   FilterList.Items.Clear;
-  FilterList.Sorted:=False;
   FilterList.Freeze(True);
   { ------------------------------------------------------------------------------------------------------------------------------- MAKE UNIQUE LIST OF ITEMS }
   try
@@ -170,35 +167,18 @@ begin
       try
         SL.Sorted:=True;
         SL.Duplicates:=dupIgnore;
-        for iCNT:=1 to FGrid.RowCount - 1 do
-        begin
-          if
-          {  (FGrid.Cells[FColNumber, iCNT] <> SPACE)
-          and
-            (FGrid.Cells[FColNumber, iCNT] <> '')
-          and }
-            (FGrid.RowHeights[iCNT] <> sgRowHidden)
-          then
-            SL.Add(FGrid.Cells[FColNumber, iCNT]);
-        end;
-        { STRING LIST TO CHECK BOX LIST }
-        for iCNT:=0 to SL.Count - 1 do
-          FilterList.Items.Add(SL.Strings[iCNT]);
+        for iCNT:=1 to FGrid.RowCount - 1 do SL.Add(FGrid.Cells[FColNumber, iCNT]);
+        for iCNT:=0 to SL.Count - 1 do FilterList.Items.Add(SL.Strings[iCNT]);
       finally
         SL.Free;
       end;
     end;
-    { ----------------------------------------------------------------------------------------------------------- UNTICK IF VALUE WAS FILTERED OUT PREVIOUSLY }
+    { -------------------------------------------------------------------------------------------------------------------- TICK OR UNTICK PREVIOUSLY FILTERED }
     FilterList.CheckAll(cbChecked, False, True);
-    if not (FFilter[0, 0] = '') then
+    for iCNT:=0 to High(FFilter) - 1 do
     begin
-      for iCNT:=0 to High(FFilter) - 1 do
-        for jCNT:=0 to FilterList.Count - 1 do
-          if (UpperCase(FFilter[iCNT, 0]) = UpperCase(FilterList.Items.Strings[jCNT])) then
-          begin
-            if (FFilter[iCNT, 1] = 'False') then FilterList.Checked[jCNT]:=False;
-            if (FFilter[iCNT, 1] = 'True' ) then FilterList.Checked[jCNT]:=True;
-          end;
+      if FFilter[iCNT, 1] = 'False' then FilterList.Checked[iCNT]:=False;
+      if FFilter[iCNT, 1] = 'True'  then FilterList.Checked[iCNT]:=True;
     end;
   finally
     { ------------------------------------------------------------------------------------------------------------------------------------------ UNINITIALIZE }
@@ -208,7 +188,7 @@ begin
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------ FILTER NOW }
-procedure TFilterForm.FilterNow(FFilter: TLists);
+procedure TFilterForm.FilterNow(var FFilter: TLists);
 var
   iCNT:  integer;
   jCNT:  integer;
@@ -230,21 +210,28 @@ begin
       begin
         if (UpperCase(FFilter[iCNT, 0]) = UpperCase(FGrid.Cells[FColNumber, jCNT])) then
         begin
-          if (FFilter[iCNT, 1] = 'False') or
-             (
-               (
-                 MainForm.Action_Overdue.Checked
-               )
-
-               and
-
-               (
-                 FGrid.Cells[FGrid.ReturnColumn(FOverdue, 1, 1), jCNT] = '0'
-               )
-             )
-
-             then
-               FGrid.RowHeights[jCNT]:= sgRowHidden;
+          if
+            (
+              FFilter[iCNT, 1] = 'True'
+            )
+          then
+            FGrid.RowHeights[jCNT]:= sgRowHeight;
+          if
+            (
+              FFilter[iCNT, 1] = 'False'
+            )
+            or
+            (
+              (
+                MainForm.Action_Overdue.Checked
+              )
+              and
+              (
+                FGrid.Cells[FGrid.ReturnColumn(FOverdue, 1, 1), jCNT] = '0'
+              )
+            )
+            then
+              FGrid.RowHeights[jCNT]:= sgRowHidden;
         end;
       end;
     InUse:=True;

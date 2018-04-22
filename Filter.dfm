@@ -27,9 +27,9 @@ object FilterForm: TFilterForm
   object FilterList: TCheckListBox
     AlignWithMargins = True
     Left = 5
-    Top = 35
+    Top = 28
     Width = 223
-    Height = 282
+    Height = 289
     Margins.Left = 5
     Margins.Top = 5
     Margins.Right = 5
@@ -101,29 +101,22 @@ object FilterForm: TFilterForm
       OnClick = btnFilterClick
     end
   end
-  object PanelTop: TPanel
+  object cbSelectAll: TCheckBox
     AlignWithMargins = True
     Left = 5
-    Top = 5
+    Top = 3
     Width = 223
     Height = 20
     Margins.Left = 5
-    Margins.Top = 5
     Margins.Right = 5
-    Margins.Bottom = 5
+    Margins.Bottom = 0
     Align = alTop
-    BevelOuter = bvNone
+    Caption = 'Select All'
+    Checked = True
+    State = cbChecked
     TabOrder = 2
-    object cbSelectAll: TCheckBox
-      Left = 0
-      Top = 4
-      Width = 77
-      Height = 17
-      Caption = 'Select All'
-      Checked = True
-      State = cbChecked
-      TabOrder = 0
-      OnClick = cbSelectAllClick
-    end
+    OnClick = cbSelectAllClick
+    ExplicitLeft = 0
+    ExplicitTop = 0
   end
 end

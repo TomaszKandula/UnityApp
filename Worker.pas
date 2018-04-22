@@ -469,7 +469,8 @@ begin
       Synchronize(OpenItems.ClearSummary);
       { ASYNC }
       OpenItems.LoadToGrid;
-      OpenItems.UpdateSummary;
+      { SYNC WITH GUI }
+      Synchronize(OpenItems.UpdateSummary);
     except
       on E: Exception do
         LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(FIDThd) + ']: Cannot execute "TTReadOpenItems". Error has been thorwn: ' + E.Message);
