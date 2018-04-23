@@ -428,7 +428,7 @@ begin
   FreeOnTerminate:=True;
 end;
 
-{ ################################################################ ! OPEN ITEMS ! ########################################################################### }
+{ ############################################################# ! READ OPEN ITEMS ! ######################################################################### }
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE }
 constructor TTReadOpenItems.Create(ActionMode: integer);
@@ -469,8 +469,7 @@ begin
       Synchronize(OpenItems.ClearSummary);
       { ASYNC }
       OpenItems.LoadToGrid;
-      { SYNC WITH GUI }
-      Synchronize(OpenItems.UpdateSummary);
+      OpenItems.UpdateSummary;
     except
       on E: Exception do
         LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(FIDThd) + ']: Cannot execute "TTReadOpenItems". Error has been thorwn: ' + E.Message);

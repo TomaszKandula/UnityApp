@@ -167,7 +167,23 @@ begin
       try
         SL.Sorted:=True;
         SL.Duplicates:=dupIgnore;
-        for iCNT:=1 to FGrid.RowCount - 1 do SL.Add(FGrid.Cells[FColNumber, iCNT]);
+
+        { IF NOT PREVIOUSLY FILTERED, THEN SHOW ALL ITEMS }
+        if (High(FFilter) = 0) and (InUse = False) then
+          for iCNT:=1 to FGrid.RowCount - 1 do SL.Add(FGrid.Cells[FColNumber, iCNT]);
+
+        { IF NOT PREVIOUSLY FILTERED BY ANY OTHER COLUMN, THEN SHOW ONLY VISIBLE ITEMS }
+        if (High(FFilter) = 0) and (InUse = True) then
+          for iCNT:=1 to FGrid.RowCount - 1 do
+            if FGrid.RowHeights[iCNT] <> sgRowHidden then
+              SL.Add(FGrid.Cells[FColNumber, iCNT]);
+
+        { IF PREVIOUSLY FILTERED, THEN UPLOAD ITEMS WITH FILTER STATE }
+        if High(FFilter) > 0 then
+          for iCNT:=0 to High(FFilter) - 1 do SL.Add(FFilter[iCNT, 0]);
+
+
+        { MOVE TO CHECKBOX LIST }
         for iCNT:=0 to SL.Count - 1 do FilterList.Items.Add(SL.Strings[iCNT]);
       finally
         SL.Free;
@@ -210,12 +226,14 @@ begin
       begin
         if (UpperCase(FFilter[iCNT, 0]) = UpperCase(FGrid.Cells[FColNumber, jCNT])) then
         begin
+          {
           if
             (
               FFilter[iCNT, 1] = 'True'
             )
           then
             FGrid.RowHeights[jCNT]:= sgRowHeight;
+          }
           if
             (
               FFilter[iCNT, 1] = 'False'
