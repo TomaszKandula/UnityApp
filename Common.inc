@@ -44,7 +44,7 @@ const
   LicenceFile:    string    = 'Unity.licx';
   GridImgFile:    string    = 'Unity.img';
   ReleaseFile:    string    = 'Release.pak';
-  CurrentMutex:   PWideChar = 'UNITY_10024';  { WARNING! INCREASE IT WITH EACH NEW RELEASE }
+  CurrentMutex:   PWideChar = 'UNITY_10025';  { WARNING! INCREASE IT WITH EACH NEW RELEASE }
 
   { SPLASH SCREEN }
 
@@ -241,6 +241,7 @@ const
   INNER_JOIN   : string = ' INNER JOIN ';
   OUTER_JOIN   : string = ' OUTER JOIN ';
   _ON          : string = ' ON ';
+  _OR          : string = ' OR ';
   ORDER        : string = ' ORDER BY ';
   ASC          : string = ' ASC ';
   DESC         : string = ' DESC ';

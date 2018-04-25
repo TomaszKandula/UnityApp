@@ -195,6 +195,8 @@ procedure TTransactions.UpdateSummary;  //REFACTOR!!!
     OverdueAmt:=0;
     UNamt     :=0;
     InvoiceAmt:=0;
+    KPIOverdue:=0;
+    KPIUnalloc:=0;
   end;
 
   { GET VOUCHER NUMBER FROM SETTINGS }
@@ -254,15 +256,15 @@ begin
                 TCompany.CO_CODE +
               EQUAL +
                 QuotedStr(SettingGrid.Cells[0, 0]) +
-              _AND  +
+              _OR  +
                 TCompany.CO_CODE +
               EQUAL +
                 QuotedStr(SettingGrid.Cells[1, 0]) +
-              _AND  +
+              _OR  +
                 TCompany.CO_CODE +
               EQUAL +
                 QuotedStr(SettingGrid.Cells[2, 0]) +
-              _AND  +
+              _OR  +
                 TCompany.CO_CODE +
               EQUAL +
                 QuotedStr(SettingGrid.Cells[3, 0]);

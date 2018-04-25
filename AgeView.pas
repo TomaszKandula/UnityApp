@@ -392,7 +392,6 @@ begin
   end;
 end;
 
-
 { --------------------------------------------------------------------------------------------------------------------------- SETUP PROPER COLUMNS VISIBILITY }
 procedure TAgeView.AgeViewMode(var Grid: TStringGrid; ModeBySection: string);
 var

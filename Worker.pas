@@ -256,8 +256,10 @@ var
   StopWatch:  TStopWatch;
   AgeView:    TAgeView;
   UserCtrl:   TUserControl;
+  CanReload:  boolean;
 begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
+  CanReload:=False;
   FIDThd:=CurrentThread.ThreadID;
   FLock.Acquire;
   AgeView :=TAgeView.Create(MainForm.DbConnect);
@@ -295,7 +297,7 @@ begin
                         UserCtrl.Free;
                       end;
         end);
-        TTReadAgeView.Create(thNullParameter);
+        CanReload:=True;
       end;
     except
       on E: Exception do
@@ -311,6 +313,7 @@ begin
   end;
   { RELEASE THREAD WHEN DONE }
   FreeOnTerminate:=True;
+  if CanReload then TTReadAgeView.Create(thNullParameter);
 end;
 
 { ################################################################ ! READ AGE VIEW ! ######################################################################## }
@@ -401,7 +404,9 @@ procedure TTOpenItemsScanner.Execute;
 var
   Transactions: TTransactions;
   ReadDateTime: string;
+  CanMakeAge:   boolean;
 begin
+  CanMakeAge:=False;
   FIDThd:=CurrentThread.ThreadID;
   FLock.Acquire;
   Transactions:=TTransactions.Create(MainForm.DbConnect);
@@ -414,7 +419,7 @@ begin
         MainForm.SwitchTimers(tmDisabled);
         { REFRESH OPEN ITEMS AND MAKE NEW AGING VIEW }
         MainForm.OpenItemsUpdate:=ReadDateTime;
-        TTReadOpenItems.Create(thCallMakeAge);
+        CanMakeAge:=True;
       end;
     except
       on E: Exception do
@@ -426,6 +431,7 @@ begin
   end;
   { RELEASE THREAD WHEN DONE }
   FreeOnTerminate:=True;
+  if CanMakeAge then TTReadOpenItems.Create(thCallMakeAge);
 end;
 
 { ############################################################# ! READ OPEN ITEMS ! ######################################################################### }
