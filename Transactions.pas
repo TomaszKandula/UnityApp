@@ -61,9 +61,9 @@ begin
     { WE GOT THE DATE AND TIME }
     if Value <> '' then
     begin
-      if Return = gdTimeOnly then Result:=FormatDateTime(gdTimeFormat,     StrToDateTime(Value));
-      if Return = gdDateOnly then Result:=FormatDateTime(gdDateFormat,     StrToDateTime(Value));
-      if Return = gdDateTime then Result:=FormatDateTime(gdDateTimeFormat, StrToDateTime(Value));
+      if Return = gdTimeOnly then Result:=FormatDateTime(gdTimeFormat,     VarToDateTime(Value));
+      if Return = gdDateOnly then Result:=FormatDateTime(gdDateFormat,     VarToDateTime(Value));
+      if Return = gdDateTime then Result:=FormatDateTime(gdDateTimeFormat, VarToDateTime(Value));
     end;
   end;
 end;

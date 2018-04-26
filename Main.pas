@@ -2004,7 +2004,9 @@ begin
 
   { --------------------------------------------------------------------------------------------------------------------------------------- REGIONAL SETTINGS }
 
-  RegSettings:=TFormatSettings.Create;
+  {$WARN SYMBOL_PLATFORM OFF}
+  RegSettings:=TFormatSettings.Create(LOCALE_USER_DEFAULT);
+  {$WARN SYMBOL_PLATFORM OFF}
   RegSettings.CurrencyDecimals    :=4;
   RegSettings.DateSeparator       :='-';
   RegSettings.ShortDateFormat     :='yyyy-mm-dd';

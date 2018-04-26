@@ -76,6 +76,7 @@ var
   PathEventLog:     string;
   PathAppDir:       string;
   WinUserName:      string;
+  RegSettings:      TFormatSettings;
 
 {$R *.res}
 
@@ -195,6 +196,21 @@ begin
                           );
     ExitProcess(0);
   end;
+  { ------------------------------------------------------------------------------------------------------------------------------------------- SETUP FORMATS }
+  {$WARN SYMBOL_PLATFORM OFF}
+  RegSettings:=TFormatSettings.Create(LOCALE_USER_DEFAULT);
+  {$WARN SYMBOL_PLATFORM OFF}
+  RegSettings.CurrencyDecimals    :=4;
+  RegSettings.DateSeparator       :='-';
+  RegSettings.ShortDateFormat     :='yyyy-mm-dd';
+  RegSettings.LongDateFormat      :='yyyy-mm-dd';
+  RegSettings.TimeSeparator       :=':';
+  RegSettings.TimeAMString        :='AM';
+  RegSettings.TimePMString        :='PM';
+  RegSettings.ShortTimeFormat     :='hh:mm:ss';
+  RegSettings.LongTimeFormat      :='hh:mm:ss';
+  FormatSettings                  :=RegSettings;
+  Application.UpdateFormatSettings:=False;
   { ------------------------------------------------------------------------------------------------------- READ CURRENT CONFIG.CFG BEFORE ANY UPDATE ATTEMPT }
   AppSettings:=TSettings.Create;
   try
@@ -223,8 +239,12 @@ begin
     { PROCEED OTHERWISE }
     if AppSettings.GetLastError = 0 then
     begin
+      //FileDateTime   :=VarToDateTime(AppSettings.FRelFileDateTime);
+      //ReleaseDateTime:=VarToDateTime(AppSettings.FReleaseDateTime);
+
       FileDateTime   :=AppSettings.FRelFileDateTime;
       ReleaseDateTime:=AppSettings.FReleaseDateTime;
+
       PathRelease    :=AppSettings.FPathRelease;
       PathEventLog   :=AppSettings.FPathEventLog;
       PathAppDir     :=AppSettings.FAppDir;
