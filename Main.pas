@@ -436,6 +436,13 @@ type                                                            (* GUI | MAIN TH
     Action_CopyAll: TMenuItem;
     Action_RemoveFilters: TMenuItem;
     Action_Free1: TMenuItem;
+    NavigationBar: TPanel;
+    btnHome: TSpeedButton;
+    btnReport1: TSpeedButton;
+    btnReport2: TSpeedButton;
+    btnReport3: TSpeedButton;
+    btnReport4: TSpeedButton;
+    Pipe: TBevel;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -621,6 +628,11 @@ type                                                            (* GUI | MAIN TH
     procedure Action_CopyAllClick(Sender: TObject);
     procedure Action_RemoveFiltersClick(Sender: TObject);
     procedure Action_Free1Click(Sender: TObject);
+    procedure btnHomeClick(Sender: TObject);
+    procedure btnReport1Click(Sender: TObject);
+    procedure btnReport2Click(Sender: TObject);
+    procedure btnReport3Click(Sender: TObject);
+    procedure btnReport4Click(Sender: TObject);
     { ------------------------------------------------------------- ! HELPERS ! ----------------------------------------------------------------------------- }
   private
     { GENERAL }
@@ -4160,13 +4172,78 @@ end;
 
 { --------------------------------------------------------------- ! BUTTON CALLS ! -------------------------------------------------------------------------- }
 
+{ --------------------------------------------------------------------------------------------------------------------------------- GO TO REPORTING HOME PAGE }
+procedure TMainForm.btnHomeClick(Sender: TObject);
+var
+  AppSettings: TSettings;
+begin
+  AppSettings:=TSettings.Create;
+  try
+    WebBrowser2.Navigate(WideString(AppSettings.TMIG.ReadString(ApplicationDetails, 'REPORT_PAGE', 'about:blank')), $02);
+  finally
+    AppSettings.Free;
+  end;
+end;
+
+{ -------------------------------------------------------------------------------------------------------------------------------------------- GO TO REPORT 1 }
+procedure TMainForm.btnReport1Click(Sender: TObject);
+var
+  AppSettings: TSettings;
+begin
+  AppSettings:=TSettings.Create;
+  try
+    WebBrowser2.Navigate(WideString(AppSettings.TMIG.ReadString(ApplicationDetails, 'REPORT_Report1', 'about:blank')), $02);
+  finally
+    AppSettings.Free;
+  end;
+end;
+
+{ -------------------------------------------------------------------------------------------------------------------------------------------- GO TO REPORT 2 }
+procedure TMainForm.btnReport2Click(Sender: TObject);
+var
+  AppSettings: TSettings;
+begin
+  AppSettings:=TSettings.Create;
+  try
+    WebBrowser2.Navigate(WideString(AppSettings.TMIG.ReadString(ApplicationDetails, 'REPORT_Report2', 'about:blank')), $02);
+  finally
+    AppSettings.Free;
+  end;
+end;
+
+{ -------------------------------------------------------------------------------------------------------------------------------------------- GO TO REPORT 3 }
+procedure TMainForm.btnReport3Click(Sender: TObject);
+var
+  AppSettings: TSettings;
+begin
+  AppSettings:=TSettings.Create;
+  try
+    WebBrowser2.Navigate(WideString(AppSettings.TMIG.ReadString(ApplicationDetails, 'REPORT_Report3', 'about:blank')), $02);
+  finally
+    AppSettings.Free;
+  end;
+end;
+
+{ -------------------------------------------------------------------------------------------------------------------------------------------- GO TO REPORT 4 }
+procedure TMainForm.btnReport4Click(Sender: TObject);
+var
+  AppSettings: TSettings;
+begin
+  AppSettings:=TSettings.Create;
+  try
+    WebBrowser2.Navigate(WideString(AppSettings.TMIG.ReadString(ApplicationDetails, 'REPORT_Report4', 'about:blank')), $02);
+  finally
+    AppSettings.Free;
+  end;
+end;
+
 { ------------------------------------------------------------------------------------------------------------------------------------------- AGE VIEW | LOAD }
 procedure TMainForm.btnLoadAgeViewClick(Sender: TObject);
 begin
   { WAIT UNTIL READY }
   if not (StatBar_TXT1.Caption = stReady) then
   begin
-    MsgCall(mcWarn, 'Wait until "Ready" status and try again.');
+    MsgCall(mcWarn, 'Please wait until "Ready" status and try again.');
     Exit;
   end;
   { PROCEED }

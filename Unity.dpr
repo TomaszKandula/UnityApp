@@ -239,12 +239,8 @@ begin
     { PROCEED OTHERWISE }
     if AppSettings.GetLastError = 0 then
     begin
-      //FileDateTime   :=VarToDateTime(AppSettings.FRelFileDateTime);
-      //ReleaseDateTime:=VarToDateTime(AppSettings.FReleaseDateTime);
-
       FileDateTime   :=AppSettings.FRelFileDateTime;
       ReleaseDateTime:=AppSettings.FReleaseDateTime;
-
       PathRelease    :=AppSettings.FPathRelease;
       PathEventLog   :=AppSettings.FPathEventLog;
       PathAppDir     :=AppSettings.FAppDir;
