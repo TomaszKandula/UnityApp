@@ -17,7 +17,8 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, Menus, ComCtrls, Grids, ExtCtrls, StdCtrls, CheckLst, Buttons, PNGImage,
-  DBGrids, AppEvnts, ShellAPI, INIFiles, StrUtils, ValEdit, DateUtils, Clipbrd, DB, ADODB, ActiveX, CDO_TLB, Diagnostics, Math, Wininet, ComObj, OleCtrls, SHDocVw;
+  DBGrids, AppEvnts, ShellAPI, INIFiles, StrUtils, ValEdit, DateUtils, Clipbrd, DB, ADODB, ActiveX, CDO_TLB, Diagnostics, Math, Wininet, ComObj, OleCtrls, SHDocVw,
+  uCEFWindowParent, uCEFChromium, uCEFChromiumWindow, uCEFTypes, uCEFInterfaces;
 
 { REFERENCE TO ARRAYS }
 type
@@ -443,6 +444,8 @@ type                                                            (* GUI | MAIN TH
     btnReport3: TSpeedButton;
     btnReport4: TSpeedButton;
     Pipe: TBevel;
+    Chromium: TChromiumWindow;
+    Timer1: TTimer;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -633,6 +636,10 @@ type                                                            (* GUI | MAIN TH
     procedure btnReport2Click(Sender: TObject);
     procedure btnReport3Click(Sender: TObject);
     procedure btnReport4Click(Sender: TObject);
+    procedure ChromiumBeforeClose(Sender: TObject);
+    procedure ChromiumClose(Sender: TObject);
+    procedure ChromiumAfterCreated(Sender: TObject);
+    procedure Timer1Timer(Sender: TObject);
     { ------------------------------------------------------------- ! HELPERS ! ----------------------------------------------------------------------------- }
   private
     { GENERAL }
@@ -651,6 +658,25 @@ type                                                            (* GUI | MAIN TH
     procedure SetPastBColor  (NewColor: TColor);
     procedure SetFutureFColor(NewColor: TColor);
     procedure SetFutureBColor(NewColor: TColor);
+
+    { CHROMIUM }
+
+    // You have to handle this two messages to call NotifyMoveOrResizeStarted or some page elements will be misaligned.
+//    procedure WMMove(var aMessage : TWMMove); message WM_MOVE;
+//    procedure WMMoving(var aMessage : TMessage); message WM_MOVING;
+    // You also have to handle these two messages to set GlobalCEFApp.OsmodalLoop
+//    procedure WMEnterMenuLoop(var aMessage: TMessage); message WM_ENTERMENULOOP;
+//    procedure WMExitMenuLoop(var aMessage: TMessage); message WM_EXITMENULOOP;
+
+  protected
+
+    { CHROMIUM }
+
+    // Variables to control when can we destroy the form safely
+    FCanClose : boolean;  // Set to True in TChromium.OnBeforeClose
+    FClosing  : boolean;  // Set to True in the CloseQuery event.
+    procedure Chromium_OnBeforePopup(Sender: TObject; const browser: ICefBrowser; const frame: ICefFrame; const targetUrl, targetFrameName: ustring; targetDisposition: TCefWindowOpenDisposition; userGesture: Boolean; const popupFeatures: TCefPopupFeatures; var windowInfo: TCefWindowInfo; var client: ICefClient; var settings: TCefBrowserSettings; var noJavascriptAccess: Boolean; var Result: Boolean);
+
   public
     { GENERAL }
     var WinUserName         :  string;
@@ -734,7 +760,8 @@ var
 implementation
 
 uses
-  Filter, Tracker, Invoices, Actions, Calendar, About, Search, Worker, Model, Settings, Database, UAC, AgeView, Transactions, ReportBug, Colors, EventLog;
+  Filter, Tracker, Invoices, Actions, Calendar, About, Search, Worker, Model, Settings, Database, UAC, AgeView, Transactions, ReportBug, Colors, EventLog,
+  uCEFApplication;
 
 {$R *.dfm}
 
@@ -912,6 +939,42 @@ begin
   end;
 end;
 
+{ CHROMIUM }
+
+procedure TMainForm.ChromiumAfterCreated(Sender: TObject);
+begin
+  // Now the browser is fully initialized we can load the initial web page.
+  //Chromium.LoadURL('www.google.com');
+end;
+
+procedure TMainForm.ChromiumBeforeClose(Sender: TObject);
+begin
+  FCanClose := True;
+  //Close;
+end;
+
+procedure TMainForm.ChromiumClose(Sender: TObject);
+begin
+  // DestroyChildWindow will destroy the child window created by CEF at the top of the Z order.
+  if not(Chromium.DestroyChildWindow) then
+    begin
+      FCanClose := True;
+      //Close;
+    end;
+end;
+
+procedure TMainForm.Chromium_OnBeforePopup(Sender: TObject;
+  const browser: ICefBrowser; const frame: ICefFrame; const targetUrl,
+  targetFrameName: ustring; targetDisposition: TCefWindowOpenDisposition;
+  userGesture: Boolean; const popupFeatures: TCefPopupFeatures;
+  var windowInfo: TCefWindowInfo; var client: ICefClient;
+  var settings: TCefBrowserSettings; var noJavascriptAccess: Boolean;
+  var Result: Boolean);
+begin
+  // For simplicity, this demo blocks all popup windows and new tabs
+  Result := (targetDisposition in [WOD_NEW_FOREGROUND_TAB, WOD_NEW_BACKGROUND_TAB, WOD_NEW_POPUP, WOD_NEW_WINDOW]);
+end;
+
 { ############################################################## ! WINDOWS MESSAGES ! ####################################################################### }
 
 { ----------------------------------------------------------------------------------------------------------------------- MESSAGE RECEIVER FOR WORKER THREADS }
@@ -1012,6 +1075,12 @@ begin
         end;
       end;
   end;
+
+  { CHROMIUM }
+  if Msg.Msg = WM_MOVE          then if (Chromium <> nil) then Chromium.NotifyMoveOrResizeStarted;
+  if Msg.Msg = WM_MOVING        then if (Chromium <> nil) then Chromium.NotifyMoveOrResizeStarted;
+  if Msg.Msg = WM_ENTERMENULOOP then if (Msg.wParam = 0)  and (GlobalCEFApp <> nil) then GlobalCEFApp.OsmodalLoop:=True;
+  if Msg.Msg = WM_EXITMENULOOP  then if (Msg.wParam = 0)  and (GlobalCEFApp <> nil) then GlobalCEFApp.OsmodalLoop:=False;
 
   { --------------------------------------------------------------------------------------------------------------- CLOSE UNITY WHEN WINDOWS IS SHUTTING DOWN }
 
@@ -2005,7 +2074,7 @@ var
   DataTables:    TDataTables;
   UserControl:   TUserControl;
   Transactions:  TTransactions;
-  RegSettings:   TFormatSettings;
+  //RegSettings:   TFormatSettings;
   NowTime:       TTime;
 begin
 
@@ -2013,9 +2082,12 @@ begin
 
   AppVersion :=GetBuildInfoAsString;
   pAllowClose:=False;
+  FCanClose  :=False;
+  FClosing   :=False;
 
   { --------------------------------------------------------------------------------------------------------------------------------------- REGIONAL SETTINGS }
 
+(*
   {$WARN SYMBOL_PLATFORM OFF}
   RegSettings:=TFormatSettings.Create(LOCALE_USER_DEFAULT);
   {$WARN SYMBOL_PLATFORM OFF}
@@ -2030,6 +2102,7 @@ begin
   RegSettings.LongTimeFormat      :='hh:mm:ss';
   FormatSettings                  :=RegSettings;
   Application.UpdateFormatSettings:=False;
+*)
 
   { --------------------------------------------------------- ! READ SETTINGS AND INITIALIZE ! -------------------------------------------------------------- }
 
@@ -2128,8 +2201,8 @@ begin
 
     { ----------------------------------------------------------------------------------------------------------------- START WEB PAGE | UNITY INFO | TABLEAU }
 
-    WebBrowser1.Navigate(WideString(AppSettings.TMIG.ReadString(ApplicationDetails, 'START_PAGE', 'about:blank')),  $02);
-    WebBrowser2.Navigate(WideString(AppSettings.TMIG.ReadString(ApplicationDetails, 'REPORT_PAGE', 'about:blank')), $02);
+    //WebBrowser1.Navigate(WideString(AppSettings.TMIG.ReadString(ApplicationDetails, 'START_PAGE', 'about:blank')),  $02);
+    //WebBrowser2.Navigate(WideString(AppSettings.TMIG.ReadString(ApplicationDetails, 'REPORT_PAGE', 'about:blank')), $02);
 
     { -------------------------------------------------------- ! TIMERS INTERVALS ! ------------------------------------------------------------------------- }
 
@@ -2315,6 +2388,9 @@ begin
   UpTime.Enabled     :=True;
   CurrentTime.Enabled:=True;
 
+  { CHROMIUM }
+  if not(Chromium.CreateBrowser) then Timer1.Enabled:=True;
+
   { START CHECKERS }
   SwitchTimers(tmEnabled);
 
@@ -2360,6 +2436,8 @@ begin
   MainForm.sgOpenItems.SetColWidth     (10, 20);
   MainForm.sgAddressBook.SetColWidth   (10, 20);
   MainForm.sgInvoiceTracker.SetColWidth(10, 20);
+  { CHROMIUM }
+  Chromium.ChromiumBrowser.OnBeforePopup:=Chromium_OnBeforePopup;
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------ MAIN FORM RESIZE }
@@ -2395,6 +2473,12 @@ begin
   { SHUTDOWN APPLICATION }
   begin
     CanClose:=True;
+    if not(FClosing) then
+    begin
+      FClosing := True;
+      Visible  := False;
+      Chromium.CloseBrowser(True);
+    end;
   end;
 end;
 
@@ -3202,6 +3286,14 @@ end;
 procedure TMainForm.TabSheet8Show(Sender: TObject);
 begin
   MainForm.LockSettingsPanel;
+end;
+
+{ CHROMIUM }
+procedure TMainForm.Timer1Timer(Sender: TObject);
+begin
+  Timer1.Enabled:=False;
+  if not(Chromium.CreateBrowser) and not(Chromium.Initialized) then
+    Timer1.Enabled:=True;
 end;
 
 { -------------------------------------------------------- ! COMPONENT EVENTS | GRIDS ! --------------------------------------------------------------------- }

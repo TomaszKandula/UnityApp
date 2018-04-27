@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <BorlandProject>
 	<Transactions>
-    <Transaction>1899-12-30 00:00:00.000.425,=C:\Users\Root\Documents\RAD Studio\Projects\Unit1.pas</Transaction>
-    <Transaction>1899-12-30 00:00:00.000.947,F:\03_Projects\Delphi XE2\01_Unity\Unitylib.dproj=C:\Users\Root\Documents\RAD Studio\Projects\Project1.dproj</Transaction>
+    <Transaction>1899/12/30 00:00:00.000.947,C:\Users\Root\Documents\RAD Studio\Projects\Project1.dproj=F:\03_Projects\Delphi XE2\01_Unity\Unitylib.dproj</Transaction>
+    <Transaction>1899/12/30 00:00:00.000.425,=C:\Users\Root\Documents\RAD Studio\Projects\Unit1.pas</Transaction>
   </Transactions>
 </BorlandProject>
