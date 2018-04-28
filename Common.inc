@@ -40,11 +40,12 @@ const
   DecryptKey:     integer   = 429496;
   APPCAPTION:     string    = 'Unity';
   LyncCall:       string    = 'LyncCall.exe';
+  BrowserProc:    string    = 'UnityBrowser.exe';
   ConfigFile:     string    = 'Config.cfg';
   LicenceFile:    string    = 'Unity.licx';
   GridImgFile:    string    = 'Unity.img';
   ReleaseFile:    string    = 'Release.pak';
-  CurrentMutex:   PWideChar = 'UNITY_10029';  { WARNING! INCREASE IT WITH EACH NEW RELEASE }
+  CurrentMutex:   PWideChar = 'UNITY_10029';    { WARNING! INCREASE IT WITH EACH NEW RELEASE }
 
   { SPLASH SCREEN }
 

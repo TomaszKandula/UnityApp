@@ -13,7 +13,7 @@
 { ----------------------------------------------------------------------------------------------------------------------------------------------------------- }
 program Unity;
 
-{$SetPEFlags $0020}  { LARGE ADDRESS AWARE }
+{$SetPEFlags $0020}  { LARGE ADDRESS AWARE | USING MORE THAN 3GB FOR 32-BIT PROGRAM }
 
 uses
   Forms,
@@ -28,7 +28,6 @@ uses
   CRC32u,
   SynZip,
   SynZipFiles,
-  uCEFApplication,
   Update in 'Update.pas',
   Splash in 'Splash.pas',
   Main in 'Main.pas',
@@ -197,10 +196,6 @@ begin
                           );
     ExitProcess(0);
   end;
-
-  { CHROMIUM INIT }
-  GlobalCEFApp:=TCefApplication.Create;
-
   { ------------------------------------------------------------------------------------------------------------------------------------------- SETUP FORMATS }
   {$WARN SYMBOL_PLATFORM OFF}
   RegSettings:=TFormatSettings.Create(LOCALE_USER_DEFAULT);
@@ -484,61 +479,56 @@ begin
 
   { ---- END ---- }
 
-  { ------------------------------------------------------------------------------------------------------------------ INITIALLIZE IF CHROMIUM PROCESS STARTS }
-  if GlobalCEFApp.StartMainProcess then
-  begin
-    { -------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-    AppSettings:=TSettings.Create;
-    try
-      Status(12, AllTasks, 50, 'Application initialization... connecting with SQL server..., please wait.', False, AppSettings.FPathEventLog);
-      Application.Initialize;
-      Application.Title:=APPCAPTION;
-      Application.MainFormOnTaskbar:=False;
-      { ------------------------------------------------------------------------------------------------------------------------------------ CREATE ALL FORMS }
+  { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
+  AppSettings:=TSettings.Create;
+  try
+    Status(12, AllTasks, 50, 'Application initialization... connecting with SQL server..., please wait.', False, AppSettings.FPathEventLog);
+    Application.Initialize;
+    Application.Title:=APPCAPTION;
+    Application.MainFormOnTaskbar:=False;
+    { -------------------------------------------------------------------------------------------------------------------------------------- CREATE ALL FORMS }
 
-      (* NOTE: ALL FORMS MUST HAVE VISIBE PARAMETER SET TO FALSE *)
+    (* NOTE: ALL FORMS MUST HAVE VISIBE PARAMETER SET TO FALSE *)
 
-      { MAIN FORM }
-      Application.CreateForm(TMainForm, MainForm);
-      LogText(AppSettings.FPathEventLog, '[GUI] Initialization methods executed within main thread, ''MainForm'' has been created. Main process thread ID = ' + IntToStr(MainThreadID) + '.');
+    { MAIN FORM }
+    Application.CreateForm(TMainForm, MainForm);
+    LogText(AppSettings.FPathEventLog, '[GUI] Initialization methods executed within main thread, ''MainForm'' has been created. Main process thread ID = ' + IntToStr(MainThreadID) + '.');
 
-      { OTHER WINFORMS }
-      Status(13, AllTasks, 400, 'Application initialization... VCL forms loading, please wait.', False, AppSettings.FPathEventLog);
-      Application.CreateForm(TSendForm,     SendForm);     LogText(AppSettings.FPathEventLog, '[GUI] ''SendForm'' .......... has been created.');
-      Application.CreateForm(TAboutForm,    AboutForm);    LogText(AppSettings.FPathEventLog, '[GUI] ''AboutForm'' ......... has been created.');
-      Application.CreateForm(TEventForm,    EventForm);    LogText(AppSettings.FPathEventLog, '[GUI] ''EventForm'' ......... has been created.');
-      Application.CreateForm(TColorsForm,   ColorsForm);   LogText(AppSettings.FPathEventLog, '[GUI] ''ColorsForm'' ........ has been created.');
-      Application.CreateForm(TReportForm,   ReportForm);   LogText(AppSettings.FPathEventLog, '[GUI] ''ReportForm'' ........ has been created.');
-      Application.CreateForm(TSearchForm,   SearchForm);   LogText(AppSettings.FPathEventLog, '[GUI] ''SearchForm'' ........ has been created.');
-      Application.CreateForm(TFilterForm,   FilterForm);   LogText(AppSettings.FPathEventLog, '[GUI] ''FilterForm'' ........ has been created.');
-      Application.CreateForm(TTrackerForm,  TrackerForm);  LogText(AppSettings.FPathEventLog, '[GUI] ''TrackerForm'' ....... has been created.');
-      Application.CreateForm(TActionsForm,  ActionsForm);  LogText(AppSettings.FPathEventLog, '[GUI] ''ActionsForm'' ....... has been created.');
-      Application.CreateForm(TCalendarForm, CalendarForm); LogText(AppSettings.FPathEventLog, '[GUI] ''CalendarForm'' ...... has been created.');
-      Application.CreateForm(TInvoicesForm, InvoicesForm); LogText(AppSettings.FPathEventLog, '[GUI] ''InvoicesForm'' ...... has been created.');
+    { OTHER WINFORMS }
+    Status(13, AllTasks, 400, 'Application initialization... VCL forms loading, please wait.', False, AppSettings.FPathEventLog);
+    Application.CreateForm(TSendForm,     SendForm);     LogText(AppSettings.FPathEventLog, '[GUI] ''SendForm'' .......... has been created.');
+    Application.CreateForm(TAboutForm,    AboutForm);    LogText(AppSettings.FPathEventLog, '[GUI] ''AboutForm'' ......... has been created.');
+    Application.CreateForm(TEventForm,    EventForm);    LogText(AppSettings.FPathEventLog, '[GUI] ''EventForm'' ......... has been created.');
+    Application.CreateForm(TColorsForm,   ColorsForm);   LogText(AppSettings.FPathEventLog, '[GUI] ''ColorsForm'' ........ has been created.');
+    Application.CreateForm(TReportForm,   ReportForm);   LogText(AppSettings.FPathEventLog, '[GUI] ''ReportForm'' ........ has been created.');
+    Application.CreateForm(TSearchForm,   SearchForm);   LogText(AppSettings.FPathEventLog, '[GUI] ''SearchForm'' ........ has been created.');
+    Application.CreateForm(TFilterForm,   FilterForm);   LogText(AppSettings.FPathEventLog, '[GUI] ''FilterForm'' ........ has been created.');
+    Application.CreateForm(TTrackerForm,  TrackerForm);  LogText(AppSettings.FPathEventLog, '[GUI] ''TrackerForm'' ....... has been created.');
+    Application.CreateForm(TActionsForm,  ActionsForm);  LogText(AppSettings.FPathEventLog, '[GUI] ''ActionsForm'' ....... has been created.');
+    Application.CreateForm(TCalendarForm, CalendarForm); LogText(AppSettings.FPathEventLog, '[GUI] ''CalendarForm'' ...... has been created.');
+    Application.CreateForm(TInvoicesForm, InvoicesForm); LogText(AppSettings.FPathEventLog, '[GUI] ''InvoicesForm'' ...... has been created.');
 
-      { SPLASH SCREEN - 100% }
-      Status(14, AllTasks, 900, 'Application initialization... done.', False, AppSettings.FPathEventLog);
+    { SPLASH SCREEN - 100% }
+    Status(14, AllTasks, 900, 'Application initialization... done.', False, AppSettings.FPathEventLog);
 
-      { ----------------------------------------------------------------------------------------------------------------------------------- SPLASH SCREEN END }
-      AnimateWindow(SplashForm.Handle, 500, AW_BLEND or AW_HIDE);
-      Sleep(150);
-      SplashForm.Free;
+    { ----------------------------------------------------------------------------------------------------------------------------------- SPLASH SCREEN END }
+    AnimateWindow(SplashForm.Handle, 500, AW_BLEND or AW_HIDE);
+    Sleep(150);
+    SplashForm.Free;
 
-      { ------------------------------------------------------------------------------------------------------------------- SETUP SAVED WINDOW STATE AND SHOW }
-      if AppSettings.TMIG.ReadString(ApplicationDetails,  'WINDOW_STATE', '') = 'wsNormal'    then MainForm.WindowState:=wsNormal;
-      if AppSettings.TMIG.ReadString(ApplicationDetails,  'WINDOW_STATE', '') = 'wsMaximized' then MainForm.WindowState:=wsMaximized;
-      if AppSettings.TMIG.ReadString(ApplicationDetails,  'WINDOW_STATE', '') = 'wsMinimized' then MainForm.WindowState:=wsMinimized;
-      LogText(AppSettings.FPathEventLog, 'Initialization is completed. Application is running.');
-    finally
-      AppSettings.Free;
-    end;
-    { --------------------------------------------------------------------------------------------------------------------------------------------------- RUN }
-    MainForm.Show;
-    Application.MainFormOnTaskbar:=True;
-    Application.Run;
+    { ------------------------------------------------------------------------------------------------------------------- SETUP SAVED WINDOW STATE AND SHOW }
+    if AppSettings.TMIG.ReadString(ApplicationDetails,  'WINDOW_STATE', '') = 'wsNormal'    then MainForm.WindowState:=wsNormal;
+    if AppSettings.TMIG.ReadString(ApplicationDetails,  'WINDOW_STATE', '') = 'wsMaximized' then MainForm.WindowState:=wsMaximized;
+    if AppSettings.TMIG.ReadString(ApplicationDetails,  'WINDOW_STATE', '') = 'wsMinimized' then MainForm.WindowState:=wsMinimized;
+    LogText(AppSettings.FPathEventLog, 'Initialization is completed. Application is running.');
+  finally
+    AppSettings.Free;
   end;
+  { ----------------------------------------------------------------------------------------------------------------------------------------------------- RUN }
+  MainForm.Show;
+  Application.MainFormOnTaskbar:=True;
+  Application.Run;
 
-  GlobalCEFApp.Free;
   (* BREAKS THE MESSAGE LOOPS IN APPLICATION.RUN CLASS *)
   Application.Terminate;
 end.

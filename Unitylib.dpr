@@ -11,7 +11,7 @@
 { LYNC version:     2013 or newer                                                                                                                             }
 {                                                                                                                                                             }
 { ----------------------------------------------------------------------------------------------------------------------------------------------------------- }
-{ ---------------------------------------------------------------- ! IMPORTANT NOTE ! ----------------------------------------------------------------------- }
+{ -------------------------------------------------------------- ! IMPORTANT NOTE ! ------------------------------------------------------------------------- }
 { IMPORTANT NOTE ABOUT 'DLL' MEMORY MANAGAMENT: SHAREMEM MUST BE THE FIRST UNIT IN YOUR LIBRARY'S 'USES' CLAUSE & YOUR PROJECT'S (SELECT                      }
 { PROJECT-VIEW SOURCE) 'USES' CLAUSE IF YOUR 'DLL' EXPORTS ANY PROCEDURES OR FUNCTIONS THAT PASS STRINGS AS PARAMETERS OR FUNCTION RESULTS. THIS              }
 { APPLIES TO ALL STRINGS PASSED TO AND FROM YOUR 'DLL--EVEN' THOSE THAT ARE NESTED IN RECORDS AND CLASSES. SHAREMEM IS THE INTERFACE UNIT TO                  }
@@ -37,7 +37,7 @@ uses
 
 function GetCurrentUserSid: string; stdcall;
 
-{ ------------------------------------------------------ ! COMMON CONSTANTS, VARIABLES AND TYPES ! ---------------------------------------------------------- }
+{ ----------------------------------------------------- ! COMMON CONSTANTS, VARIABLES AND TYPES ! ----------------------------------------------------------- }
 const
   HEAP_ZERO_MEMORY = $00000008;
   SID_REVISION     = 1; { CURRENT REVISION LEVEL }
@@ -47,9 +47,9 @@ type
     User: TSidAndAttributes;
   end;
 
-{ ----------------------------------------------------------------- ! NESTED METHODS ! ---------------------------------------------------------------------- }
+{ --------------------------------------------------------------- ! NESTED METHODS ! ------------------------------------------------------------------------ }
 
-{ ------------------------------------------------------------------ ! CONVERT SID ! ------------------------------------------------------------------------ }
+{ ---------------------------------------------------------------- ! CONVERT SID ! -------------------------------------------------------------------------- }
 function ConvertSid(Sid: PSID; pszSidText: PChar; var dwBufferLen: DWORD): BOOL;
 var
   psia:              PSIDIdentifierAuthority;
@@ -96,7 +96,7 @@ begin
   Result := True;
 end;
 
-{ ------------------------------------------------------------------ ! GET TEXT-SID ! ----------------------------------------------------------------------- }
+{ ---------------------------------------------------------------- ! GET TEXT-SID ! ------------------------------------------------------------------------- }
 function ObtainTextSid(hToken: THandle; pszSid: PChar; var dwBufferLen: DWORD): BOOL;
 var
   dwReturnLength:    DWORD;
@@ -130,7 +130,7 @@ begin
   Result:=True;
 end;
 
-{ ----------------------------------------------------------------- ! MAIN BLOCK ! -------------------------------------------------------------------------- }
+{ ---------------------------------------------------------------- ! MAIN BLOCK ! --------------------------------------------------------------------------- }
 var
   hAccessToken: THandle;
   bSuccess:     BOOL;
