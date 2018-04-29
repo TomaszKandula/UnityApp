@@ -39,7 +39,7 @@ type                                                            (* GUI | MAIN TH
     procedure Chromium_OnBeforePopup(Sender: TObject; const browser: ICefBrowser; const frame: ICefFrame; const targetUrl, targetFrameName: ustring; targetDisposition: TCefWindowOpenDisposition; userGesture: Boolean; const popupFeatures: TCefPopupFeatures; var windowInfo: TCefWindowInfo; var client: ICefClient; var settings: TCefBrowserSettings; var noJavascriptAccess: Boolean; var Result: Boolean);
     procedure WndProc(var msg: Messages.TMessage); override;
   public
-    {  }
+    var input : string;
   end;
 
 var
@@ -52,7 +52,9 @@ implementation
 uses
   uCEFApplication;
 
-{  }
+{ ------------------------------------------------------------------ ! WINDOWS ! ---------------------------------------------------------------------------- }
+
+{ ------------------------------------------------------------------------------------------------------------------------- PROCESS SELECTED WINDOWS MESSAGES }
 procedure TFormReader.WndProc(var Msg: Messages.TMessage);
 begin
   inherited;
@@ -62,32 +64,23 @@ begin
   if Msg.Msg = WM_EXITMENULOOP  then if (Msg.wParam = 0)  and (GlobalCEFApp <> nil) then GlobalCEFApp.OsmodalLoop:=False;
 end;
 
-{  }
-procedure TFormReader.Chromium_OnBeforePopup(Sender: TObject;
-  const browser: ICefBrowser; const frame: ICefFrame; const targetUrl,
-  targetFrameName: ustring; targetDisposition: TCefWindowOpenDisposition;
-  userGesture: Boolean; const popupFeatures: TCefPopupFeatures;
-  var windowInfo: TCefWindowInfo; var client: ICefClient;
-  var settings: TCefBrowserSettings; var noJavascriptAccess: Boolean;
-  var Result: Boolean);
-begin
-  Result:=(targetDisposition in [WOD_NEW_FOREGROUND_TAB, WOD_NEW_BACKGROUND_TAB, WOD_NEW_POPUP, WOD_NEW_WINDOW]);
-end;
+{ ------------------------------------------------------- ! MAIN THREAD METHODS AND EVENTS ! ---------------------------------------------------------------- }
 
-{  }
+{ ------------------------------------------------------------------------------------------------------------------------------------------------- ON CREATE }
 procedure TFormReader.FormCreate(Sender: TObject);
 begin
-//
+  StatusBar.Panels.Items[0].Text:='Status: disconnected';
+  StatusBar.Panels.Items[1].Text:='URL: none';
 end;
 
-{  }
+{ --------------------------------------------------------------------------------------------------------------------------------------------------- ON SHOW }
 procedure TFormReader.FormShow(Sender: TObject);
 begin
   ChromiumWindow.ChromiumBrowser.OnBeforePopup:=Chromium_OnBeforePopup;
   if not(ChromiumWindow.CreateBrowser) then Timer.Enabled:=True;
 end;
 
-{  }
+{ ----------------------------------------------------------------------------------------------------------------------------------------- BEFORE FORM CLOSE }
 procedure TFormReader.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
   CanClose:=FCanClose;
@@ -99,7 +92,7 @@ begin
   end;
 end;
 
-{  }
+{ ---------------------------------------------------------------------------------------------------------------------------------------- TIMER FOR CHROMIUM }
 procedure TFormReader.TimerTimer(Sender: TObject);
 begin
   Timer.Enabled:=False;
@@ -107,7 +100,39 @@ begin
     Timer.Enabled:=True;
 end;
 
-{  }
+{ ----------------------------------------------------------------- ! CHROMIUM ! ---------------------------------------------------------------------------- }
+
+{ ----------------------------------------------------------------------------------------------------------------------------------- IGNORE TABS AND POP-UPS }
+procedure TFormReader.Chromium_OnBeforePopup(Sender: TObject;
+  const browser: ICefBrowser; const frame: ICefFrame; const targetUrl,
+  targetFrameName: ustring; targetDisposition: TCefWindowOpenDisposition;
+  userGesture: Boolean; const popupFeatures: TCefPopupFeatures;
+  var windowInfo: TCefWindowInfo; var client: ICefClient;
+  var settings: TCefBrowserSettings; var noJavascriptAccess: Boolean;
+  var Result: Boolean);
+begin
+  Result:=(targetDisposition in [WOD_NEW_FOREGROUND_TAB, WOD_NEW_BACKGROUND_TAB, WOD_NEW_POPUP, WOD_NEW_WINDOW]);
+end;
+
+{ -------------------------------------------------------------------------------------------------------------------------------------------- CREATE BROWSER }
+procedure TFormReader.ChromiumWindowAfterCreated(Sender: TObject);
+begin
+  if not(input = '') then
+  begin
+    ChromiumWindow.LoadURL(input);
+    StatusBar.Panels.Items[0].Text:='Status: OK';
+    StatusBar.Panels.Items[1].Text:='URL: ' + input;
+  end;
+end;
+
+{ ------------------------------------------------------------------------------------------------------------------------------------- CHROMIUM BEFORE CLOSE }
+procedure TFormReader.ChromiumWindowBeforeClose(Sender: TObject);
+begin
+  FCanClose:=True;
+  Close;
+end;
+
+{ -------------------------------------------------------------------------------------------------------------------------------------------- CLOSE CHROMIUM }
 procedure TFormReader.ChromiumWindowClose(Sender: TObject);
 begin
   if not(ChromiumWindow.DestroyChildWindow) then
@@ -115,19 +140,6 @@ begin
     FCanClose:=True;
     Close;
   end;
-end;
-
-{  }
-procedure TFormReader.ChromiumWindowAfterCreated(Sender: TObject);
-begin
-//ChromiumWindow1.LoadURL('www.google.pl');
-end;
-
-{  }
-procedure TFormReader.ChromiumWindowBeforeClose(Sender: TObject);
-begin
-  FCanClose:=True;
-  Close;
 end;
 
 end.

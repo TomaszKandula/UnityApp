@@ -629,7 +629,6 @@ type                                                            (* GUI | MAIN TH
     procedure Action_CopyAllClick(Sender: TObject);
     procedure Action_RemoveFiltersClick(Sender: TObject);
     procedure Action_Free1Click(Sender: TObject);
-    procedure btnHomeClick(Sender: TObject);
     procedure btnReport1Click(Sender: TObject);
     procedure btnReport2Click(Sender: TObject);
     procedure btnReport3Click(Sender: TObject);
@@ -688,6 +687,7 @@ type                                                            (* GUI | MAIN TH
     procedure  SwitchTimers(state: integer);
     procedure  LoadImageFromStream(Image: TImage; const FileName: string);
     function   CDate(StrDate: string): TDate;
+    function   ShowReport(ReportNumber: cardinal): cardinal;
   protected
     { WINDOWS MESSAGES }
     procedure  WndProc(var msg: Messages.TMessage); override;
@@ -1994,6 +1994,21 @@ end;
 function TMainForm.CDate(StrDate: string): TDate;
 begin
     Result:=StrToDateDef(StrDate, NULLDATE);
+end;
+
+{ --------------------------------------------------------------------------------------------------------------------- EXECUTE CHROMIUM READER FOR REPORTING }
+function TMainForm.ShowReport(ReportNumber: cardinal): cardinal;
+var
+  AppSettings: TSettings;
+  AppParam:    string;
+begin
+  AppSettings:=TSettings.Create;
+  try
+    AppParam:=AppSettings.TMIG.ReadString(ApplicationDetails, 'REPORT_Report' + IntToStr(ReportNumber), 'about:blank');
+    Result:=ShellExecute(MainForm.Handle, seOpen, PChar(UnityReader), PChar(AppParam), nil, SW_SHOWNORMAL);
+  finally
+    AppSettings.Free;
+  end;
 end;
 
 { ############################################################## ! MAIN THREAD EVENTS ! ##################################################################### }
@@ -4155,68 +4170,55 @@ end;
 
 { --------------------------------------------------------------- ! BUTTON CALLS ! -------------------------------------------------------------------------- }
 
-{ --------------------------------------------------------------------------------------------------------------------------------- GO TO REPORTING HOME PAGE }
-procedure TMainForm.btnHomeClick(Sender: TObject);
-var
-  AppSettings: TSettings;
-begin
-  AppSettings:=TSettings.Create;
-  try
-    //WebBrowser2.Navigate(WideString(AppSettings.TMIG.ReadString(ApplicationDetails, 'REPORT_PAGE', 'about:blank')), $02);
-  finally
-    AppSettings.Free;
-  end;
-end;
-
 { -------------------------------------------------------------------------------------------------------------------------------------------- GO TO REPORT 1 }
 procedure TMainForm.btnReport1Click(Sender: TObject);
 var
-  AppSettings: TSettings;
+  Return: cardinal;
 begin
-  AppSettings:=TSettings.Create;
-  try
-    //WebBrowser2.Navigate(WideString(AppSettings.TMIG.ReadString(ApplicationDetails, 'REPORT_Report1', 'about:blank')), $02);
-  finally
-    AppSettings.Free;
+  Return:=ShowReport(1);
+  if not(Return > 32) then
+  begin
+    MsgCall(mcWarn, 'Cannot execute report. Please contact with IT support.');
+    LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
   end;
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------------- GO TO REPORT 2 }
 procedure TMainForm.btnReport2Click(Sender: TObject);
 var
-  AppSettings: TSettings;
+  Return: cardinal;
 begin
-  AppSettings:=TSettings.Create;
-  try
-    //WebBrowser2.Navigate(WideString(AppSettings.TMIG.ReadString(ApplicationDetails, 'REPORT_Report2', 'about:blank')), $02);
-  finally
-    AppSettings.Free;
+  Return:=ShowReport(2);
+  if not(Return > 32) then
+  begin
+    MsgCall(mcWarn, 'Cannot execute report. Please contact with IT support.');
+    LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
   end;
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------------- GO TO REPORT 3 }
 procedure TMainForm.btnReport3Click(Sender: TObject);
 var
-  AppSettings: TSettings;
+  Return: cardinal;
 begin
-  AppSettings:=TSettings.Create;
-  try
-    //WebBrowser2.Navigate(WideString(AppSettings.TMIG.ReadString(ApplicationDetails, 'REPORT_Report3', 'about:blank')), $02);
-  finally
-    AppSettings.Free;
+  Return:=ShowReport(3);
+  if not(Return > 32) then
+  begin
+    MsgCall(mcWarn, 'Cannot execute report. Please contact with IT support.');
+    LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
   end;
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------------- GO TO REPORT 4 }
 procedure TMainForm.btnReport4Click(Sender: TObject);
 var
-  AppSettings: TSettings;
+  Return: cardinal;
 begin
-  AppSettings:=TSettings.Create;
-  try
-    //WebBrowser2.Navigate(WideString(AppSettings.TMIG.ReadString(ApplicationDetails, 'REPORT_Report4', 'about:blank')), $02);
-  finally
-    AppSettings.Free;
+  Return:=ShowReport(4);
+  if not(Return > 32) then
+  begin
+    MsgCall(mcWarn, 'Cannot execute report. Please contact with IT support.');
+    LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
   end;
 end;
 

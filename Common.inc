@@ -38,9 +38,9 @@ const
   DelayErr:       integer   = 750;              { SLOW DOWN SIGNIFICANTLY FOR USER }
   AllTasks:       integer   = 14;               { TOTAL NUMBER OF ALL BASIC TASKS  }
   DecryptKey:     integer   = 429496;
-  APPCAPTION:     string    = 'Unity';
+  APPCAPTION:     string    = 'Unity';          { USE IT FOR "FINDWINDOW" }
   LyncCall:       string    = 'LyncCall.exe';
-  BrowserProc:    string    = 'UnityBrowser.exe';
+  UnityReader:    string    = 'UnityReader.exe';
   ConfigFile:     string    = 'Config.cfg';
   LicenceFile:    string    = 'Unity.licx';
   GridImgFile:    string    = 'Unity.img';
@@ -65,6 +65,12 @@ const
   DLL3:           string = 'Microsoft.Lync.Model.dll';
   DLL4:           string = 'Microsoft.Lync.Utilities.dll';
   DLL5:           string = 'Microsoft.Office.Uc.dll';
+
+  { SHELL EXECUTE }
+
+  seOpen    = 'open';
+  seExplore = 'explore';
+  seFind    = 'find';
 
   { STRING GRID ROW HEIGHT }
 

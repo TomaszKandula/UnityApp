@@ -317,7 +317,7 @@ begin
         AppSettings.Free;
       end;
       { OPEN NEW COPY AND CLOSE CURRENT INSTANCE }
-      ShellExecute(Application.Handle, 'open', PChar(Application.ExeName), nil, nil, SW_SHOWNORMAL);
+      ShellExecute(Application.Handle, seOpen, PChar(Application.ExeName), nil, nil, SW_SHOWNORMAL);
       UpdateForm.Free;
       ExitProcess(0);
     end;

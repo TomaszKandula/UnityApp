@@ -600,7 +600,7 @@ begin
                 begin
                   FGrid.SetColWidth(40, 10);
                 end);
-    { LET IT GO }
+    { RELEASE }
     FGrid.Freeze(False);
   end;
 end;

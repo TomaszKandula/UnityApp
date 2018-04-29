@@ -70,14 +70,14 @@
 			<BorlandProject>
 				<Delphi.Personality>
 					<VersionInfo>
-						<VersionInfo Name="IncludeVerInfo">False</VersionInfo>
-						<VersionInfo Name="AutoIncBuild">False</VersionInfo>
-						<VersionInfo Name="MajorVer">1</VersionInfo>
-						<VersionInfo Name="MinorVer">0</VersionInfo>
+						<VersionInfo Name="IncludeVerInfo">True</VersionInfo>
+						<VersionInfo Name="AutoIncBuild">True</VersionInfo>
+						<VersionInfo Name="MajorVer">0</VersionInfo>
+						<VersionInfo Name="MinorVer">1</VersionInfo>
 						<VersionInfo Name="Release">0</VersionInfo>
-						<VersionInfo Name="Build">0</VersionInfo>
+						<VersionInfo Name="Build">3</VersionInfo>
 						<VersionInfo Name="Debug">False</VersionInfo>
-						<VersionInfo Name="PreRelease">False</VersionInfo>
+						<VersionInfo Name="PreRelease">True</VersionInfo>
 						<VersionInfo Name="Special">False</VersionInfo>
 						<VersionInfo Name="Private">False</VersionInfo>
 						<VersionInfo Name="DLL">False</VersionInfo>
@@ -85,20 +85,21 @@
 						<VersionInfo Name="CodePage">1252</VersionInfo>
 					</VersionInfo>
 					<VersionInfoKeys>
-						<VersionInfoKeys Name="CompanyName"/>
-						<VersionInfoKeys Name="FileDescription"/>
-						<VersionInfoKeys Name="FileVersion">1.0.0.0</VersionInfoKeys>
-						<VersionInfoKeys Name="InternalName"/>
-						<VersionInfoKeys Name="LegalCopyright"/>
-						<VersionInfoKeys Name="LegalTrademarks"/>
-						<VersionInfoKeys Name="OriginalFilename"/>
-						<VersionInfoKeys Name="ProductName"/>
+						<VersionInfoKeys Name="CompanyName">Tomasz Kandula for DFDS Polska sp. z o.o.</VersionInfoKeys>
+						<VersionInfoKeys Name="FileDescription">Unity Reader (Chromium)</VersionInfoKeys>
+						<VersionInfoKeys Name="FileVersion">0.1.0.3</VersionInfoKeys>
+						<VersionInfoKeys Name="InternalName">Unity Reader</VersionInfoKeys>
+						<VersionInfoKeys Name="LegalCopyright">Tomasz Kandula/DFDS Polska sp. z o.o.</VersionInfoKeys>
+						<VersionInfoKeys Name="LegalTrademarks">Tomasz Kandula/DFDS Polska sp. z o.o.</VersionInfoKeys>
+						<VersionInfoKeys Name="OriginalFilename">UnityReader.exe</VersionInfoKeys>
+						<VersionInfoKeys Name="ProductName">Unity for Debt Management</VersionInfoKeys>
 						<VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
-						<VersionInfoKeys Name="Comments"/>
+						<VersionInfoKeys Name="Comments">Unity for Debt Management</VersionInfoKeys>
 					</VersionInfoKeys>
 					<Source>
 						<Source Name="MainSource">UnityReader.dpr</Source>
 					</Source>
+					<Parameters/>
 				</Delphi.Personality>
 				<Platforms>
 					<Platform value="Win32">True</Platform>

@@ -1,7 +1,7 @@
 object FormReader: TFormReader
   Left = 0
   Top = 0
-  Caption = 'Unity'
+  Caption = 'Unity Reader'
   ClientHeight = 727
   ClientWidth = 1030
   Color = 15527148
@@ -39,11 +39,11 @@ object FormReader: TFormReader
     Height = 19
     Panels = <
       item
-        Text = 'Status1'
+        Text = 'Status:'
         Width = 150
       end
       item
-        Text = 'Status2'
+        Text = 'URL: '
         Width = 150
       end>
     ExplicitLeft = 736
@@ -51,6 +51,7 @@ object FormReader: TFormReader
     ExplicitWidth = 0
   end
   object Timer: TTimer
+    Enabled = False
     OnTimer = TimerTimer
     Left = 16
     Top = 16
