@@ -69,7 +69,7 @@ end;
 { ------------------------------------------------------------------------------------------------------------------------------------------------- ON CREATE }
 procedure TFormReader.FormCreate(Sender: TObject);
 begin
-  StatusBar.Panels.Items[0].Text:='Status: disconnected';
+  StatusBar.Panels.Items[0].Text:='Status: no param';
   StatusBar.Panels.Items[1].Text:='URL: none';
 end;
 
@@ -119,9 +119,16 @@ procedure TFormReader.ChromiumWindowAfterCreated(Sender: TObject);
 begin
   if not(input = '') then
   begin
-    ChromiumWindow.LoadURL(input);
-    StatusBar.Panels.Items[0].Text:='Status: OK';
-    StatusBar.Panels.Items[1].Text:='URL: ' + input;
+    try
+      try
+        ChromiumWindow.LoadURL(input);
+        StatusBar.Panels.Items[0].Text:='Status: OK';
+      except
+        StatusBar.Panels.Items[0].Text:='Status: ERROR';
+      end;
+    finally
+      StatusBar.Panels.Items[1].Text:='URL: ' + input;
+    end;
   end;
 end;
 

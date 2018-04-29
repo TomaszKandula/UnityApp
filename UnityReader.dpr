@@ -28,7 +28,6 @@ var
   WindowHandle:  HWND;
 
 begin
-
   { FIND UNITY RUNNING }
   WindowHandle:=FindWindow(nil, PChar('Unity'));
   if not(IsWindow(WindowHandle)) then
@@ -36,14 +35,11 @@ begin
     Application.MessageBox(PChar('Cannot find Unity opened. Process has been stopped.'), PChar('Unity Reader'), MB_OK + MB_ICONWARNING);
     ExitProcess(0);
   end;
-
   { GET APPLICATION PARAMETER }
   if not(ParamCount = 0) then URLparam:=ParamStr(1);
-
   { INITIATE CHROMIUM APPLICATION }
   GlobalCEFApp:=TCefApplication.Create;
   GlobalCEFApp.BrowserSubprocessPath:='SubProcess.exe';
-
   { START UNITY READER IF IN MAIN THREAD }
   if GlobalCEFApp.StartMainProcess then
   begin
@@ -54,7 +50,6 @@ begin
     if not(URLparam = '') then FormReader.input:=URLparam;
     Application.Run;
   end;
-
   { RELEASE CHROMIUM }
   GlobalCEFApp.Free;
 end.

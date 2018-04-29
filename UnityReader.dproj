@@ -75,7 +75,7 @@
 						<VersionInfo Name="MajorVer">0</VersionInfo>
 						<VersionInfo Name="MinorVer">1</VersionInfo>
 						<VersionInfo Name="Release">0</VersionInfo>
-						<VersionInfo Name="Build">3</VersionInfo>
+						<VersionInfo Name="Build">4</VersionInfo>
 						<VersionInfo Name="Debug">False</VersionInfo>
 						<VersionInfo Name="PreRelease">True</VersionInfo>
 						<VersionInfo Name="Special">False</VersionInfo>
@@ -87,7 +87,7 @@
 					<VersionInfoKeys>
 						<VersionInfoKeys Name="CompanyName">Tomasz Kandula for DFDS Polska sp. z o.o.</VersionInfoKeys>
 						<VersionInfoKeys Name="FileDescription">Unity Reader (Chromium)</VersionInfoKeys>
-						<VersionInfoKeys Name="FileVersion">0.1.0.3</VersionInfoKeys>
+						<VersionInfoKeys Name="FileVersion">0.1.0.4</VersionInfoKeys>
 						<VersionInfoKeys Name="InternalName">Unity Reader</VersionInfoKeys>
 						<VersionInfoKeys Name="LegalCopyright">Tomasz Kandula/DFDS Polska sp. z o.o.</VersionInfoKeys>
 						<VersionInfoKeys Name="LegalTrademarks">Tomasz Kandula/DFDS Polska sp. z o.o.</VersionInfoKeys>
