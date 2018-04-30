@@ -1,0 +1,48 @@
+﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+		<PropertyGroup>
+			<ProjectGuid>{22C8D2EE-AF10-462F-9E8A-4BA5D327380E}</ProjectGuid>
+		</PropertyGroup>
+		<ItemGroup>
+			<Projects Include="SubProcess.dproj">
+				<Dependencies/>
+			</Projects>
+			<Projects Include="SimpleBrowser.dproj">
+				<Dependencies/>
+			</Projects>
+		</ItemGroup>
+		<ProjectExtensions>
+			<Borland.Personality>Default.Personality.12</Borland.Personality>
+			<Borland.ProjectType/>
+			<BorlandProject>
+				<Default.Personality/>
+			</BorlandProject>
+		</ProjectExtensions>
+		<Target Name="SubProcess">
+			<MSBuild Projects="SubProcess.dproj"/>
+		</Target>
+		<Target Name="SubProcess:Clean">
+			<MSBuild Projects="SubProcess.dproj" Targets="Clean"/>
+		</Target>
+		<Target Name="SubProcess:Make">
+			<MSBuild Projects="SubProcess.dproj" Targets="Make"/>
+		</Target>
+		<Target Name="SimpleBrowser">
+			<MSBuild Projects="SimpleBrowser.dproj"/>
+		</Target>
+		<Target Name="SimpleBrowser:Clean">
+			<MSBuild Projects="SimpleBrowser.dproj" Targets="Clean"/>
+		</Target>
+		<Target Name="SimpleBrowser:Make">
+			<MSBuild Projects="SimpleBrowser.dproj" Targets="Make"/>
+		</Target>
+		<Target Name="Build">
+			<CallTarget Targets="SubProcess;SimpleBrowser"/>
+		</Target>
+		<Target Name="Clean">
+			<CallTarget Targets="SubProcess:Clean;SimpleBrowser:Clean"/>
+		</Target>
+		<Target Name="Make">
+			<CallTarget Targets="SubProcess:Make;SimpleBrowser:Make"/>
+		</Target>
+		<Import Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')" Project="$(BDS)\Bin\CodeGear.Group.Targets"/>
+	</Project>

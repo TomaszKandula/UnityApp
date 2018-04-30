@@ -2326,6 +2326,7 @@ var
 begin
   { RELEASE "TWEBBROWSER" COMPONENT MANUALLY }
   WebBrowser1.Free;
+  WebBrowser2.Free;
   { CLOSE DB CONNECTION }
   DbConnect.Close;
   { SAVE AGE VIEW LAYOUT }

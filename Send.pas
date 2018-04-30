@@ -41,6 +41,7 @@ type
     Text_Banks: TLabel;
     Text_Terms: TLabel;
     Text_Warn: TLabel;
+    cbAddOverdue: TCheckBox;
     procedure btnCancelClick(Sender: TObject);
     procedure btnSendEmailClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);

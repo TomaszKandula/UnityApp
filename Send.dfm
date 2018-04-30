@@ -4,7 +4,7 @@ object SendForm: TSendForm
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'Unity'
-  ClientHeight = 509
+  ClientHeight = 522
   ClientWidth = 538
   Color = 15527148
   Font.Charset = DEFAULT_CHARSET
@@ -24,7 +24,7 @@ object SendForm: TSendForm
     Left = 5
     Top = 5
     Width = 528
-    Height = 499
+    Height = 512
     Margins.Left = 5
     Margins.Top = 5
     Margins.Right = 5
@@ -36,7 +36,7 @@ object SendForm: TSendForm
   end
   object btnCancel: TSpeedButton
     Left = 328
-    Top = 466
+    Top = 474
     Width = 89
     Height = 25
     Cursor = crHandPoint
@@ -45,7 +45,7 @@ object SendForm: TSendForm
   end
   object btnSendEmail: TSpeedButton
     Left = 432
-    Top = 466
+    Top = 474
     Width = 89
     Height = 25
     Cursor = crHandPoint
@@ -225,7 +225,7 @@ object SendForm: TSendForm
   end
   object Text_Warn: TLabel
     Left = 16
-    Top = 471
+    Top = 479
     Width = 227
     Height = 13
     Caption = '*Account Statement is available only in English.'
@@ -267,5 +267,14 @@ object SendForm: TSendForm
     ParentFont = False
     TabOrder = 1
     WantTabs = True
+  end
+  object cbAddOverdue: TCheckBox
+    Left = 424
+    Top = 307
+    Width = 97
+    Height = 17
+    Caption = 'Overdue only'
+    Enabled = False
+    TabOrder = 2
   end
 end

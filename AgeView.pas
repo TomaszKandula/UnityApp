@@ -47,8 +47,9 @@ type
     var RCAcount   : cardinal;
     var RCBcount   : cardinal;
     var RCCcount   : cardinal;
-    var RcHi       : double;
-    var RcLo       : double;
+    var Class_A    : double;
+    var Class_B    : double;
+    var Class_C    : double;
     { SELECTION }
     var GroupID   : string;
     var AgeDate   : string;
@@ -85,15 +86,15 @@ begin
   try
     if FormatSettings.DecimalSeparator = ',' then
     begin
-      RcLo:=StrToFloat(AppSet.TMIG.ReadString(RiskClassDetails, 'CLASS_A_MAX', '0,80'));
-      RcHi:=StrToFloat(AppSet.TMIG.ReadString(RiskClassDetails, 'CLASS_A_MAX', '0,80')) +
-            StrToFloat(AppSet.TMIG.ReadString(RiskClassDetails, 'CLASS_B_MAX', '0,15'));
+      Class_A:=StrToFloat(AppSet.TMIG.ReadString(RiskClassDetails, 'CLASS_A_MAX', '0,80'));
+      Class_B:=StrToFloat(AppSet.TMIG.ReadString(RiskClassDetails, 'CLASS_B_MAX', '0,15'));
+      Class_C:=StrToFloat(AppSet.TMIG.ReadString(RiskClassDetails, 'CLASS_C_MAX', '0,05'));
     end;
     if FormatSettings.DecimalSeparator = '.' then
     begin
-      RcLo:=StrToFloat(StringReplace(AppSet.TMIG.ReadString(RiskClassDetails, 'CLASS_A_MAX', '0,80'), ',', '.', [rfReplaceAll]));
-      RcHi:=StrToFloat(StringReplace(AppSet.TMIG.ReadString(RiskClassDetails, 'CLASS_A_MAX', '0,80'), ',', '.', [rfReplaceAll])) +
-            StrToFloat(StringReplace(AppSet.TMIG.ReadString(RiskClassDetails, 'CLASS_B_MAX', '0,15'), ',', '.', [rfReplaceAll]));
+      Class_A:=StrToFloat(StringReplace(AppSet.TMIG.ReadString(RiskClassDetails, 'CLASS_A_MAX', '0,80'), ',', '.', [rfReplaceAll]));
+      Class_B:=StrToFloat(StringReplace(AppSet.TMIG.ReadString(RiskClassDetails, 'CLASS_B_MAX', '0,15'), ',', '.', [rfReplaceAll]));
+      Class_C:=StrToFloat(StringReplace(AppSet.TMIG.ReadString(RiskClassDetails, 'CLASS_C_MAX', '0,05'), ',', '.', [rfReplaceAll]));
     end;
   finally
     AppSet.Free;
@@ -167,50 +168,50 @@ var
   Rows        :  integer;
   iCNT        :  integer;
   Count       :  double;
-  WalletShare :  array of double;
+  TotalPerItem:  array of double;
   ListPosition:  array of integer;
 begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   if Balance = 0 then Exit;
   Count:=0;
   Rows :=0;
-  { ------------------------------------------------------------------------------------------------------------------------------------ COMPUTE WALLET SHARE }
+  RCA:=Balance * Class_A;
+  RCB:=Balance * Class_B;
+  RCC:=Balance * Class_C;
+  { --------------------------------------------------------------------------------------------------------------------- TOTALS AND ITS POSITIONS INTO ARRAY }
   for iCNT:=1 to Grid.RowCount do
   begin
     if Grid.RowHeights[iCNT] <> sgRowHidden then
     begin
       SetLength(ListPosition, Rows + 1);
-      SetLength(WalletShare,  Rows + 1);
+      SetLength(TotalPerItem, Rows + 1);
       ListPosition[Rows]:=iCNT;
-      WalletShare [Rows]:=StrToFloatDef((Grid.Cells[Grid.ReturnColumn(TSnapshots.fTOTAL, 1, 1), iCNT + 1]), 0) / Balance;
+      TotalPerItem[Rows]:=StrToFloatDef((Grid.Cells[Grid.ReturnColumn(TSnapshots.fTOTAL, 1, 1), iCNT]), 0);
       inc(Rows);
     end;
   end;
-  { ------------------------------------------------------------------------------------------------------------------------------------ SORT VIA WALLETSHARE }
-  QuickSortExt(WalletShare, ListPosition, Low(WalletShare), High(WalletShare), False);
+  { ------------------------------------------------------------------------------------------------------------------------------------ SORT VIA TOTAL VALUE }
+  QuickSortExt(TotalPerItem, ListPosition, Low(TotalPerItem), High(TotalPerItem), False);
   { ------------------------------------------------------------------------------------------------------------------------------------ COMPUTE AND SHOW RCA }
-  for iCNT:=Low(ListPosition) to High(ListPosition) do     //split presentation and computation
+  for iCNT:=Low(ListPosition) to High(ListPosition) - 1 do
   begin
-    Count:=Count + WalletShare[iCNT];
+    Count:=Count + TotalPerItem[iCNT];
     { ASSIGN RISK CLASS 'A' }
-    if Count <= RcLo then
+    if Count <= RCA then
     begin
       Grid.Cells[Grid.ReturnColumn(TSnapshots.fRISK_CLASS, 1, 1), ListPosition[iCNT]]:='A';
-      RCA:=RCA + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fTOTAL, 1, 1), ListPosition[iCNT]], 0);
       inc(RCAcount);
     end;
     { ASSIGN RISK CLASS 'B' }
-    if (Count > RcLo) and (Count <= RcHi) then
+    if (Count > RCA) and (Count <= RCA + RCB) then
     begin
       Grid.Cells[Grid.ReturnColumn(TSnapshots.fRISK_CLASS, 1, 1), ListPosition[iCNT]]:='B';
-      RCB:=RCB + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fTOTAL, 1, 1), ListPosition[iCNT]], 0);
       inc(RCBcount);
     end;
     { ASSIGN RISK CLASS 'C' }
-    if Count > RcHi then
+    if Count > RCA + RCB then
     begin
       Grid.Cells[Grid.ReturnColumn(TSnapshots.fRISK_CLASS, 1, 1), ListPosition[iCNT]]:='C';
-      RCC:=RCC + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fTOTAL, 1, 1), ListPosition[iCNT]], 0);
       inc(RCCcount);
     end;
   end;

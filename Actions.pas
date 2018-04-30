@@ -70,10 +70,6 @@ type
     btnSendEmail: TSpeedButton;
     Cust_Phone: TComboBox;
     GroupCustomerDetails: TGroupBox;
-    Copy_CustName: TImage;
-    Copy_CustNumber: TImage;
-    Copy_Person: TImage;
-    Copy_Email: TImage;
     btnSaveCustDetails: TSpeedButton;
     Text9: TLabel;
     Cust_MailBack: TShape;
@@ -81,6 +77,11 @@ type
     Cust_NumberBack: TShape;
     Cust_NameBack: TShape;
     btnBack: TSpeedButton;
+    btnEdit: TSpeedButton;
+    btnCopyCustName: TSpeedButton;
+    btnCopyCustNumber: TSpeedButton;
+    btnCopyPerson: TSpeedButton;
+    btnCopyEmail: TSpeedButton;
     procedure FormCreate(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure OpenItemsGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
@@ -105,12 +106,13 @@ type
     procedure btnSendEmailClick(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure btnSaveCustDetailsClick(Sender: TObject);
-    procedure Copy_CustNameClick(Sender: TObject);
-    procedure Copy_CustNumberClick(Sender: TObject);
-    procedure Copy_PersonClick(Sender: TObject);
-    procedure Copy_EmailClick(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure btnBackClick(Sender: TObject);
+    procedure btnCopyCustNameClick(Sender: TObject);
+    procedure btnCopyCustNumberClick(Sender: TObject);
+    procedure btnCopyPersonClick(Sender: TObject);
+    procedure btnCopyEmailClick(Sender: TObject);
+    procedure btnEditClick(Sender: TObject);
   public
     var CUID       :  string;
     var SCUID      :  string;
@@ -406,7 +408,6 @@ begin
   Cust_Phone.ItemIndex:=0;
   DailyCom.Text       :='';
   GeneralCom.Text     :='';
-  { StatusBar.SimpleText:=''; }
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------- MAKE PHONE CALL }
@@ -904,6 +905,12 @@ end;
 
 { --------------------------------------------------------------- ! BUTTON CALLS ! -------------------------------------------------------------------------- }
 
+{ ---------------------------------------------------------------------------------------------------------------------------------------- EDIT PHONE NUMBERS }
+procedure TActionsForm.btnEditClick(Sender: TObject);
+begin
+  //
+end;
+
 { ------------------------------------------------------------------------------------------------------------------------------------- SAVE CUSTOMER DETAILS }
 procedure TActionsForm.btnSaveCustDetailsClick(Sender: TObject);
 begin
@@ -911,22 +918,22 @@ begin
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------------- COPY TO CLIPBOARD }
-procedure TActionsForm.Copy_CustNameClick(Sender: TObject);
+procedure TActionsForm.btnCopyCustNameClick(Sender: TObject);
 begin
   ClipBoard.AsText:=Cust_Name.Caption;
 end;
 
-procedure TActionsForm.Copy_CustNumberClick(Sender: TObject);
+procedure TActionsForm.btnCopyCustNumberClick(Sender: TObject);
 begin
   ClipBoard.AsText:=Cust_Number.Caption;
 end;
 
-procedure TActionsForm.Copy_PersonClick(Sender: TObject);
+procedure TActionsForm.btnCopyPersonClick(Sender: TObject);
 begin
   ClipBoard.AsText:=Cust_Person.Text;
 end;
 
-procedure TActionsForm.Copy_EmailClick(Sender: TObject);
+procedure TActionsForm.btnCopyEmailClick(Sender: TObject);
 begin
   ClipBoard.AsText:=Cust_Mail.Text;
 end;
