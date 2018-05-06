@@ -1280,9 +1280,6 @@ object MainForm: TMainForm
           BevelKind = bkFlat
           BevelOuter = bvNone
           TabOrder = 0
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 1246
           object btnReport1: TSpeedButton
             Left = 135
             Top = 12
@@ -1582,12 +1579,9 @@ object MainForm: TMainForm
           Margins.Bottom = 5
           Align = alClient
           TabOrder = 1
-          ExplicitLeft = 119
-          ExplicitTop = 243
-          ExplicitWidth = 300
-          ExplicitHeight = 150
+          ExplicitHeight = 813
           ControlData = {
-            4C000000BF7F0000075400000100000001020000000000000000000000000000
+            4C000000BF7F0000CB4C00000100000001020000000000000000000000000000
             000000004C000000000000000000000001000000E0D057007335CF11AE690800
             2B2E126208000000000000004C0000000114020000000000C000000000000046
             8000000000000000000000000000000000000000000000000000000000000000
@@ -5216,6 +5210,68 @@ object MainForm: TMainForm
         TabOrder = 3
       end
     end
+    object TabSheet10: TTabSheet
+      Caption = 'Supplier Form'
+      ImageIndex = 9
+      object MainShape10: TPanel
+        AlignWithMargins = True
+        Left = 17
+        Top = 118
+        Width = 1250
+        Height = 726
+        Margins.Left = 17
+        Margins.Top = 0
+        Margins.Right = 17
+        Margins.Bottom = 17
+        Align = alClient
+        BevelKind = bkFlat
+        BevelOuter = bvNone
+        BorderWidth = 1
+        Color = 15527148
+        ParentBackground = False
+        TabOrder = 0
+      end
+      object Header10: TPanel
+        Left = 0
+        Top = 0
+        Width = 1284
+        Height = 118
+        Align = alTop
+        BevelOuter = bvNone
+        Color = clWhite
+        ParentBackground = False
+        TabOrder = 1
+        object Panel3: TPanel
+          AlignWithMargins = True
+          Left = 17
+          Top = 15
+          Width = 1032
+          Height = 91
+          Margins.Left = 17
+          Margins.Top = 15
+          Margins.Right = 0
+          Margins.Bottom = 12
+          Align = alLeft
+          BevelOuter = bvNone
+          TabOrder = 0
+          object Shape6: TShape
+            Left = 0
+            Top = 0
+            Width = 265
+            Height = 19
+            Brush.Color = 15527148
+            Pen.Color = clMedGray
+          end
+          object Shape8: TShape
+            Left = 0
+            Top = 17
+            Width = 265
+            Height = 72
+            Pen.Color = clMedGray
+          end
+        end
+      end
+    end
   end
   object AppFooter: TPanel
     AlignWithMargins = True
@@ -5722,6 +5778,7 @@ object MainForm: TMainForm
     end
     object Action_Tracker: TMenuItem
       Caption = 'Add to Invoice Tracker'
+      Enabled = False
       OnClick = Action_TrackerClick
     end
     object Action_AddToBook: TMenuItem

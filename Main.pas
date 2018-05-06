@@ -444,6 +444,12 @@ type                                                            (* GUI | MAIN TH
     WebBrowser2: TWebBrowser;
     TextReport: TLabel;
     SeparateLine: TBevel;
+    TabSheet10: TTabSheet;
+    MainShape10: TPanel;
+    Header10: TPanel;
+    Panel3: TPanel;
+    Shape6: TShape;
+    Shape8: TShape;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -688,6 +694,7 @@ type                                                            (* GUI | MAIN TH
     procedure  LoadImageFromStream(Image: TImage; const FileName: string);
     function   CDate(StrDate: string): TDate;
     function   ShowReport(ReportNumber: cardinal): cardinal;
+    procedure  CopyFile(const Source, Dest: string);
   protected
     { WINDOWS MESSAGES }
     procedure  WndProc(var msg: Messages.TMessage); override;
@@ -2011,6 +2018,24 @@ begin
   end;
 end;
 
+{ ------------------------------------------------------------------------------------------------------------------------------- COPY FILE BETWEEN LOCATIONS }
+procedure TMainForm.CopyFile(const Source, Dest: string);
+var
+  SourceStream: TFileStream;
+  DestStream:   TFileStream;
+begin
+  DestStream:=nil;
+  SourceStream:=TFileStream.Create(Source, fmOpenRead or fmShareDenyWrite);
+  try
+    DestStream:=TFileStream.Create(Dest, fmCreate or fmShareExclusive);
+    DestStream.CopyFrom(SourceStream, SourceStream.Size);
+    FileSetDate(DestStream.Handle, FileGetDate(SourceStream.Handle));
+  finally
+    DestStream.Free;
+    SourceStream.Free;
+  end;
+end;
+
 { ############################################################## ! MAIN THREAD EVENTS ! ##################################################################### }
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------- ON CREATE }
@@ -2769,16 +2794,16 @@ begin
                        3
                      );
       { FIELDS WITH DATA }
-      sgAddressBook.Cells[sgAddressBook.ReturnColumn(TAddressBook.CUSTOMER_NUMBER, 1, 1) , sgAddressBook.RowCount - 1 + OffSet]:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), iCNT];
-      sgAddressBook.Cells[sgAddressBook.ReturnColumn(TAddressBook.CUSTOMER_NAME, 1, 1), sgAddressBook.RowCount - 1 + OffSet]:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), iCNT];
-      sgAddressBook.Cells[sgAddressBook.ReturnColumn(TAddressBook.AGENT, 1, 1), sgAddressBook.RowCount - 1 + OffSet]:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fAGENT, 1, 1), iCNT];
-      sgAddressBook.Cells[sgAddressBook.ReturnColumn(TAddressBook.DIVISION, 1, 1), sgAddressBook.RowCount - 1 + OffSet]:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fDIVISION, 1, 1), iCNT];
-      sgAddressBook.Cells[sgAddressBook.ReturnColumn(TAddressBook.COCODE, 1, 1), sgAddressBook.RowCount - 1 + OffSet]:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCO_CODE, 1, 1), iCNT];
+      sgAddressBook.Cells[sgAddressBook.ReturnColumn(TAddressBook.CUSTOMER_NUMBER, 1, 1), sgAddressBook.RowCount - 1 + OffSet]:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), iCNT];
+      sgAddressBook.Cells[sgAddressBook.ReturnColumn(TAddressBook.CUSTOMER_NAME,   1, 1), sgAddressBook.RowCount - 1 + OffSet]:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), iCNT];
+      sgAddressBook.Cells[sgAddressBook.ReturnColumn(TAddressBook.AGENT,           1, 1), sgAddressBook.RowCount - 1 + OffSet]:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fAGENT,           1, 1), iCNT];
+      sgAddressBook.Cells[sgAddressBook.ReturnColumn(TAddressBook.DIVISION,        1, 1), sgAddressBook.RowCount - 1 + OffSet]:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fDIVISION,        1, 1), iCNT];
+      sgAddressBook.Cells[sgAddressBook.ReturnColumn(TAddressBook.COCODE,          1, 1), sgAddressBook.RowCount - 1 + OffSet]:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCO_CODE,         1, 1), iCNT];
       { EMPTY FIELDS }
-      sgAddressBook.Cells[sgAddressBook.ReturnColumn(TAddressBook.EMAILS, 1, 1), sgAddressBook.RowCount - 1 + OffSet]:='';
-      sgAddressBook.Cells[sgAddressBook.ReturnColumn(TAddressBook.PHONE_NUMBERS, 1, 1), sgAddressBook.RowCount - 1 + OffSet]:='';
-      sgAddressBook.Cells[sgAddressBook.ReturnColumn(TAddressBook.CONTACT, 1, 1), sgAddressBook.RowCount - 1 + OffSet]:='';
-      sgAddressBook.Cells[sgAddressBook.ReturnColumn(TAddressBook.ESTATEMENTS, 1, 1), sgAddressBook.RowCount - 1 + OffSet]:='';
+      sgAddressBook.Cells[sgAddressBook.ReturnColumn(TAddressBook.EMAILS,          1, 1), sgAddressBook.RowCount - 1 + OffSet]:='';
+      sgAddressBook.Cells[sgAddressBook.ReturnColumn(TAddressBook.PHONE_NUMBERS,   1, 1), sgAddressBook.RowCount - 1 + OffSet]:='';
+      sgAddressBook.Cells[sgAddressBook.ReturnColumn(TAddressBook.CONTACT,         1, 1), sgAddressBook.RowCount - 1 + OffSet]:='';
+      sgAddressBook.Cells[sgAddressBook.ReturnColumn(TAddressBook.ESTATEMENTS,     1, 1), sgAddressBook.RowCount - 1 + OffSet]:='';
       { NEXT ROW }
       sgAddressBook.RowCount:=sgAddressBook.RowCount + 1;
     end;

@@ -51,38 +51,38 @@ type
   TCompany = class(TDataTables)  { MANY-TO-MANY }
   {$TYPEINFO ON}
   public
-    const ID                     : string = 'ID';           { PRIMARY KEY }
-    const CO_CODE                : string = 'CO_CODE';
-    const DBNAME                 : string = 'DBNAME';
-    const BRANCH                 : string = 'BRANCH';
-    const CONAME                 : string = 'CONAME';
-    const COCURRENCY             : string = 'COCURRENCY';
-    const COTYPE                 : string = 'COTYPE';
-    const COUNTRY                : string = 'COUNTRY';
-    const CITY                   : string = 'CITY';
-    const FMANAGER               : string = 'FMANAGER';
-    const INTEREST_RATE          : string = 'INTEREST_RATE';
-    const VATNO                  : string = 'VATNO';
-    const COADDRESS              : string = 'COADDRESS';
-    const AGENTS                 : string = 'AGENTS';
-    const KPI_OVERDUE_TARGET     : string = 'KPI_OVERDUE_TARGET';
-    const KPI_UNALLOCATED_TARGET : string = 'KPI_UNALLOCATED_TARGET';
-    const SEND_NOTE_FROM         : string = 'SEND_NOTE_FROM';
-    const LEGALTO                : string = 'LEGALTO';
-    const BANKDETAILS            : string = 'BANKDETAILS';
-    const STAT_EXCEPT            : string = 'STAT_EXCEPT';
-    const FIRST_STATEMENT        : string = 'FIRST_STATEMENT';
-    const SECOND_STATEMENT       : string = 'SECOND_STATEMENT';
-    const REM_EX1                : string = 'REM_EX1';
-    const REM_EX2                : string = 'REM_EX2';
-    const REM_EX3                : string = 'REM_EX3';
-    const REM_EX4                : string = 'REM_EX4';
-    const REM_EX5                : string = 'REM_EX5';
-    const DUNS                   : string = 'DUNS';
-    const Telephone              : string = 'Telephone';
-    const MAN_ID                 : string = 'MAN_ID';       { FOREIGN KEY -> PRIMARY KEY IN "TBL_MANAGERS"    }
-    const TL_ID                  : string = 'TL_ID';        { FOREIGN KEY -> PRIMARY KEY IN "TBL_TEAMLEADERS" }
-    const DIVISIONS              : string = 'DIVISIONS';
+    const ID                     : string = 'Id';           { PRIMARY KEY }
+    const CO_CODE                : string = 'CoCode';
+    const DBNAME                 : string = 'DbName';
+    const BRANCH                 : string = 'Branch';
+    const CONAME                 : string = 'CoName';
+    const COCURRENCY             : string = 'CoCurrency';
+    const COTYPE                 : string = 'CoType';
+    const COUNTRY                : string = 'Country';
+    const CITY                   : string = 'City';
+    const FMANAGER               : string = 'FinManager';
+    const INTEREST_RATE          : string = 'InterestRate';
+    const VATNO                  : string = 'VatNo';
+    const COADDRESS              : string = 'CoAddress';
+    const AGENTS                 : string = 'Agents';
+    const KPI_OVERDUE_TARGET     : string = 'KpiOverdueTarget';
+    const KPI_UNALLOCATED_TARGET : string = 'KpiUnallocatedTarget';
+    const SEND_NOTE_FROM         : string = 'SendNoteFrom';
+    const LEGALTO                : string = 'LegalTo';
+    const BANKDETAILS            : string = 'BankAccounts';
+    const STAT_EXCEPT            : string = 'StatementExcept';
+    const FIRST_STATEMENT        : string = 'FirstStatement';
+    const SECOND_STATEMENT       : string = 'SecondStatement';
+    const REM_EX1                : string = 'ReminderException1';
+    const REM_EX2                : string = 'ReminderException2';
+    const REM_EX3                : string = 'ReminderException3';
+    const REM_EX4                : string = 'ReminderException4';
+    const REM_EX5                : string = 'ReminderException5';
+    const DUNS                   : string = 'Duns';
+    const Telephone              : string = 'TelephoneNumbers';
+    const MAN_ID                 : string = 'IdManager';           { FOREIGN KEY -> PRIMARY KEY IN "TBL_MANAGERS"    }
+    const TL_ID                  : string = 'IdTeamleader';        { FOREIGN KEY -> PRIMARY KEY IN "TBL_TEAMLEADERS" }
+    const DIVISIONS              : string = 'Divisions';
   end;
 
 { -------------------------------------------------------------- ! TBL_MANAGERS ! --------------------------------------------------------------------------- }
@@ -90,7 +90,7 @@ type
   TManagers = class(TDataTables)  { MANY-TO-MANY }
   {$TYPEINFO ON}
   public
-    const ID        : string = 'ID';            { PRIMARY KEY <- FOREGIN KEY FROM "TBL_COMPANY" }
+    const ID        : string = 'Id';            { PRIMARY KEY <- FOREGIN KEY FROM "TBL_COMPANY" }
     const ManagerAR : string = 'ManagerAR';
     const ManagerAP : string = 'ManagerAP';
     const ManagerGL : string = 'ManagerGL';
@@ -101,13 +101,13 @@ type
   TTeamleaders = class(TDataTables)  { MANY-TO-MANY }
   {$TYPEINFO ON}
   public
-    const ID  :  string = 'ID';                 { PRIMARY KEY <- FOREIGN KEY FROM "TBL_COMPANY" }
-    const AP1 :  string = 'AP1';
-    const AP2 :  string = 'AP2';
-    const AR1 :  string = 'AR1';
-    const AR2 :  string = 'AR2';
-    const GL1 :  string = 'GL1';
-    const GL2 :  string = 'GL2';
+    const ID  :  string = 'Id';                 { PRIMARY KEY <- FOREIGN KEY FROM "TBL_COMPANY" }
+    const AP1 :  string = 'TeamleaderAp1';
+    const AP2 :  string = 'TeamleaderAp2';
+    const AR1 :  string = 'TeamleaderAr1';
+    const AR2 :  string = 'TeamleaderAr2';
+    const GL1 :  string = 'TeamleaderGl1';
+    const GL2 :  string = 'TeamleaderGl2';
   end;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -117,18 +117,18 @@ type
   TAddressBook = class(TDataTables)
   {$TYPEINFO ON}
   public
-    const ID               : string = 'ID';           { PRIMARY KEY }
-    const USER_ALIAS       : string = 'USER_ALIAS';
-    const SCUID            : string = 'SCUID';        { CONSTRAINT UNIQUE }
-    const CUSTOMER_NUMBER  : string = 'CUSTOMER_NUMBER';
-    const CUSTOMER_NAME    : string = 'CUSTOMER_NAME';
-    const EMAILS           : string = 'EMAILS';
-    const PHONE_NUMBERS    : string = 'PHONE_NUMBERS';
-    const CONTACT          : string = 'CONTACT';
-    const ESTATEMENTS      : string = 'ESTATEMENTS';
-    const AGENT            : string = 'AGENT';
-    const DIVISION         : string = 'DIVISION';
-    const COCODE           : string = 'COCODE';
+    const ID               : string = 'Id';           { PRIMARY KEY }
+    const USER_ALIAS       : string = 'UserAlias';
+    const SCUID            : string = 'Scuid';        { CONSTRAINT UNIQUE }
+    const CUSTOMER_NUMBER  : string = 'CustomerNumber';
+    const CUSTOMER_NAME    : string = 'CustomerName';
+    const EMAILS           : string = 'Emails';
+    const PHONE_NUMBERS    : string = 'PhoneNumbers';
+    const CONTACT          : string = 'Contact';
+    const ESTATEMENTS      : string = 'Estatements';
+    const AGENT            : string = 'Agent';
+    const DIVISION         : string = 'Division';
+    const COCODE           : string = 'CoCode';
   end;
 
 { --------------------------------------------------------------- ! TBL_DAILY ! ----------------------------------------------------------------------------- }
@@ -136,19 +136,19 @@ type
   TDaily = class(TDataTables)
   {$TYPEINFO ON}
   public
-    const ID            : string = 'ID';        { PRIMARY KEY }
-    const GROUP_ID      : string = 'GROUP_ID';
-    const CUID          : string = 'CUID';
-    const AGEDATE       : string = 'AGEDATE';
-    const STAMP         : string = 'STAMP';
-    const USER_ALIAS    : string = 'USER_ALIAS';
-    const EMAIL         : string = 'EMAIL';
-    const CALLEVENT     : string = 'CALLEVENT';
-    const CALLDURATION  : string = 'CALLDURATION';
-    const FIXCOMMENT    : string = 'FIXCOMMENT';
-    const EMAIL_Reminder: string = 'EMAIL_Reminder';
-    const EMAIL_AutoStat: string = 'EMAIL_AutoStat';
-    const EMAIL_ManuStat: string = 'EMAIL_ManuStat';
+    const ID            : string = 'Id';        { PRIMARY KEY }
+    const GROUP_ID      : string = 'GroupId';
+    const CUID          : string = 'Cuid';
+    const AGEDATE       : string = 'AgeDate';
+    const STAMP         : string = 'Stamp';
+    const USER_ALIAS    : string = 'UserAlias';
+    const EMAIL         : string = 'Email';
+    const CALLEVENT     : string = 'CallEvent';
+    const CALLDURATION  : string = 'CallDuration';
+    const FIXCOMMENT    : string = 'FixedComment';
+    const EMAIL_Reminder: string = 'EmailReminder';
+    const EMAIL_AutoStat: string = 'EmailAutoStat';
+    const EMAIL_ManuStat: string = 'EmailManuStat';
   end;
 
 { --------------------------------------------------------------- ! TBL_GENERAL ! --------------------------------------------------------------------------- }
@@ -156,12 +156,12 @@ type
   TGeneral = class(TDataTables)
   {$TYPEINFO ON}
   public
-    const ID          : string = 'ID';          { PRIMARY KEY }
-    const CUID        : string = 'CUID';        { CONSTRAINT UNIQUE }
-    const STAMP       : string = 'STAMP';
-    const USER_ALIAS  : string = 'USER_ALIAS';
-    const FIXCOMMENT  : string = 'FIXCOMMENT';
-    const FOLLOWUP    : string = 'FOLLOWUP';
+    const ID          : string = 'Id';          { PRIMARY KEY }
+    const CUID        : string = 'Cuid';        { CONSTRAINT UNIQUE }
+    const STAMP       : string = 'Stamp';
+    const USER_ALIAS  : string = 'UserAlias';
+    const FIXCOMMENT  : string = 'FixedComment';
+    const FOLLOWUP    : string = 'FollowUp';
 
     (* USER FRIENDLY NAME FOR GIVEN COLUMNS *)
 
@@ -175,7 +175,7 @@ type
   TOpenitems = class(TDataTables)                               (* FEED FROM ERP *)
   {$TYPEINFO ON}
   public
-    const ID               : string = 'ID';     { PRIMARY KEY }
+    const ID               : string = 'Id';     { PRIMARY KEY }
     const SourceDBName     : string = 'SourceDBName';
     const CustNo           : string = 'CustNo';
     const VoTp             : string = 'VoTp';
@@ -213,7 +213,7 @@ type
 
     (* "CUID" AND "PMTSTAT" IS ADDITIONAL COLUMN CALCULATED 'ON THE FLY' *)
     const PmtStat          : string = 'PmtStat';
-    const CUID             : string = 'CUID';
+    const CUID             : string = 'Cuid';
 
   end;
 
@@ -225,84 +225,84 @@ type
 
     (* REFLECTS TABLE COLUMNS IN GIVEN DATABASE *)
 
-    const ID              : string = 'ID';
-    const GROUP_ID        : string = 'GROUP_ID';
-    const AGE_DATE        : string = 'AGE_DATE';
-    const SNAPSHOT_DT     : string = 'SNAPSHOT_DT';
-    const CUSTOMER_NAME   : string = 'CUSTOMER_NAME';
-    const CUSTOMER_NUMBER : string = 'CUSTOMER_NUMBER';
-    const COUNTRY_CODE    : string = 'COUNTRY_CODE';
-    const NOT_DUE         : string = 'NOT_DUE';
-    const RANGE1          : string = 'RANGE1';
-    const RANGE2          : string = 'RANGE2';
-    const RANGE3          : string = 'RANGE3';
-    const RANGE4          : string = 'RANGE4';
-    const RANGE5          : string = 'RANGE5';
-    const RANGE6          : string = 'RANGE6';
-    const OVERDUE         : string = 'OVERDUE';
-    const TOTAL           : string = 'TOTAL';
-    const CREDIT_LIMIT    : string = 'CREDIT_LIMIT';
-    const EXCEEDED_AMOUNT : string = 'EXCEEDED_AMOUNT';
-    const PAYMENT_TERMS   : string = 'PAYMENT_TERMS';
-    const AGENT           : string = 'AGENT';
-    const DIVISION        : string = 'DIVISION';
-    const CO_CODE         : string = 'CO_CODE';
-    const LEDGER_ISO      : string = 'LEDGER_ISO';
-    const INF4            : string = 'INF4';
-    const INF7            : string = 'INF7';
-    const PERSON          : string = 'PERSON';
-    const GROUP3          : string = 'GROUP3';
-    const RISK_CLASS      : string = 'RISK_CLASS';
-    const CUID            : string = 'CUID';
-    const FREE1           : string = 'FREE1';
-    const FREE2           : string = 'FREE2';
+    const ID              : string = 'Id';
+    const GROUP_ID        : string = 'GroupId';
+    const AGE_DATE        : string = 'AgeDate';
+    const SNAPSHOT_DT     : string = 'SnapshotDt';
+    const CUSTOMER_NAME   : string = 'CustomerName';
+    const CUSTOMER_NUMBER : string = 'CustomerNumber';
+    const COUNTRY_CODE    : string = 'CountryCode';
+    const NOT_DUE         : string = 'NotDue';
+    const RANGE1          : string = 'Range1';
+    const RANGE2          : string = 'Range2';
+    const RANGE3          : string = 'Range3';
+    const RANGE4          : string = 'Range4';
+    const RANGE5          : string = 'Range5';
+    const RANGE6          : string = 'Range6';
+    const OVERDUE         : string = 'Overdue';
+    const TOTAL           : string = 'Total';
+    const CREDIT_LIMIT    : string = 'CreditLimit';
+    const EXCEEDED_AMOUNT : string = 'ExceededAmount';
+    const PAYMENT_TERMS   : string = 'PaymentTerms';
+    const AGENT           : string = 'Agent';
+    const DIVISION        : string = 'Division';
+    const CO_CODE         : string = 'CoCode';
+    const LEDGER_ISO      : string = 'LedgerIso';
+    const INF4            : string = 'Inf4';
+    const INF7            : string = 'Inf7';
+    const PERSON          : string = 'Person';
+    const GROUP3          : string = 'Group3';
+    const RISK_CLASS      : string = 'RiskClass';
+    const CUID            : string = 'Cuid';
+    const FREE1           : string = 'Free1';
+    const FREE2           : string = 'Free2';
 
     (* REFLECTS "FRIENDLY" COLUMN NAMES USED IN THE APPLICATION *)
     (* THE BELOW GIVEN NAMES ARE USED IN BOTH SETTING FILES     *)
     (* WARNING! THE NAMES ARE CASE SENSITIVE                    *)
 
-    const fCUSTOMER_NAME   = 'CUSTOMER NAME';
-    const fCUSTOMER_NUMBER = 'CUSTOMER NUMBER';
-    const fFOLLOWUP        = 'FOLLOW UP';
-    const fNOT_DUE         = 'NOT DUE';
-    const fCOUNTRY_CODE    = 'COUNTRY CODE';
+    const fCUSTOMER_NAME   = 'Customer Name';
+    const fCUSTOMER_NUMBER = 'Customer Number';
+    const fFOLLOWUP        = 'Follow Up';
+    const fNOT_DUE         = 'Not Due';
+    const fCOUNTRY_CODE    = 'Country Code';
     const fRANGE1          = '1 - 7';
     const fRANGE2          = '8 - 30';
     const fRANGE3          = '31 - 60';
     const fRANGE4          = '61 - 90';
     const fRANGE5          = '91 - 120';
     const fRANGE6          = '121 - oo';
-    const fTOTAL           = 'TOTAL';
-    const fOVERDUE         = 'OVERDUE';
-    const fCREDIT_LIMIT    = 'CREDIT LIMIT';
-    const fEXCEEDED_AMOUNT = 'EXCEEDED AMOUNT';
-    const fAGENT           = 'AGENT';
-    const fCO_CODE         = 'CO CODE';
-    const fPAYMENT_TERMS   = 'PAYMENT TERMS';
-    const fDIVISION        = 'DIVISION';
-    const fLEDGER_ISO      = 'LEDGER ISO';
-    const fINF4            = 'INF4';
-    const fINF7            = 'INF7';
-    const fPERSON          = 'PERSON';
-    const fGROUP3          = 'GROUP3';
-    const fRISK_CLASS      = 'RISK CLASS';
-    const fQUALITY_IDX     = 'QUALITY IDX';
-    const fWALLET_SHARE    = 'WALLET SHARE';
-    const fCUID            = 'CUID';
-    const fFREE1           = 'FREE1';
-    const fFREE2           = 'FREE2';
+    const fTOTAL           = 'Total';
+    const fOVERDUE         = 'Overdue';
+    const fCREDIT_LIMIT    = 'Credit Limit';
+    const fEXCEEDED_AMOUNT = 'Exceeded Amount';
+    const fAGENT           = 'Agent';
+    const fCO_CODE         = 'Co Code';
+    const fPAYMENT_TERMS   = 'Payment Terms';
+    const fDIVISION        = 'Division';
+    const fLEDGER_ISO      = 'Ledger Iso';
+    const fINF4            = 'Inf4';
+    const fINF7            = 'Inf7';
+    const fPERSON          = 'Person';
+    const fGROUP3          = 'Group3';
+    const fRISK_CLASS      = 'Risk Class';
+    const fCUID            = 'Cuid';
+    const fFREE1           = 'Free1';
+    const fFREE2           = 'Free2';
   end;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 { -------------------------------------------------------------- ! TBL_PAIDINFO ! --------------------------------------------------------------------------- }
 type
-  TPaidinfo = class(TDataTables)                                (* FEED FROM ERP *)
+  TPaidinfo = class(TDataTables)                            (* FIXED FOR ALL ENTITIES *)
   {$TYPEINFO ON}
   public
-    const ID            : string = 'ID';        { PRIMARY KEY }
-    const ERP_CODE      : string = 'ERP_CODE';
-    const DESCRIPTION   : string = 'DESCRIPTION';
+    const ID            : string = 'Id';        { PRIMARY KEY }
+    const ERP_CODE      : string = 'ErpCode';
+    const DESCRIPTION   : string = 'Description';
+    const STAMP         : string = 'ExtractDateStamp';
+    const KEY           : string = 'ProcessBatchKey';
   end;
 
 { --------------------------------------------------------------- ! TBL_PERSON ! ---------------------------------------------------------------------------- }
@@ -310,9 +310,12 @@ type
   TPerson = class(TDataTables)                                  (* FEED FROM ERP *)
   {$TYPEINFO ON}
   public
-    const ID            : string = 'ID';        { PRIMARY KEY }
-    const ERP_CODE      : string = 'ERP_CODE';
-    const DESCRIPTION   : string = 'DESCRIPTION';
+    const ID            : string = 'Id';        { PRIMARY KEY }
+    const ERP_CODE      : string = 'ErpCode';
+    const DESCRIPTION   : string = 'Description';
+    const STAMP         : string = 'ExtractDateStamp';
+    const KEY           : string = 'ProcessBatchKey';
+    const COCODE        : string = 'Entity';
   end;
 
 { --------------------------------------------------------------- ! TBL_GROUP3 ! ---------------------------------------------------------------------------- }
@@ -320,9 +323,12 @@ type
   TGroup3 = class(TDataTables)                                  (* FEED FROM ERP *)
   {$TYPEINFO ON}
   public
-    const ID            : string = 'ID';        { PRIMARY KEY }
-    const ERP_CODE      : string = 'ERP_CODE';
-    const DESCRIPTION   : string = 'DESCRIPTION';
+    const ID            : string = 'Id';        { PRIMARY KEY }
+    const ERP_CODE      : string = 'ErpCode';
+    const DESCRIPTION   : string = 'Description';
+    const STAMP         : string = 'ExtractDateStamp';
+    const KEY           : string = 'ProcessBatchKey';
+    const COCODE        : string = 'Entity';
   end;
 
 { -------------------------------------------------------------- ! TBL_PMTTERMS ! --------------------------------------------------------------------------- }
@@ -330,13 +336,16 @@ type
   TPmtterms = class(TDataTables)                               (* FEED FROM ERP *)
   {$TYPEINFO ON}
   public
-    const ID         : string = 'ID';           { PRIMARY KEY }
-    const ERP_CODE   : string = 'ERP_CODE';
-    const DESCRIPTION: string = 'DESCRIPTION';
-    const I_MONTH    : string = 'I_MONTH';
-    const I_DAYS     : string = 'I_DAYS';
-    const I_DAYS_NET : string = 'I_DAYS_NET';
-    const I_USING    : string = 'I_USING';
+    const ID            : string = 'Id';           { PRIMARY KEY }
+    const ERP_CODE      : string = 'ErpCode';
+    const DESCRIPTION   : string = 'Description';
+    const I_MONTH       : string = 'Month';
+    const I_DAYS        : string = 'Days';
+    const I_DAYS_NET    : string = 'DaysNet';
+    const I_USING       : string = 'Using';
+    const STAMP         : string = 'ExtractDateStamp';
+    const KEY           : string = 'ProcessBatchKey';
+    const COCODE        : string = 'Entity';
   end;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -346,21 +355,20 @@ type
   TTracker = class(TDataTables)  { MANY-TO-MANY }
   {$TYPEINFO ON}
   public
-    const ID         : string = 'ID';           { PRIMARY KEY -> FOREIGN KEY IN "TBL_INVOICES" }
-    const USER_ALIAS : string = 'USER_ALIAS';
-    const CUID       : string = 'CUID';         { CONSTRAINT UNIQUE }
-    const CO_CODE    : string = 'CO_CODE';
-    const BRANCH     : string = 'BRANCH';
-    const CUSTNAME   : string = 'CUSTNAME';
-    const LAYOUT     : string = 'LAYOUT';
-    const STAMP      : string = 'STAMP';
-    const INDV_REM1  : string = 'INDV_REM1';
-    const INDV_REM2  : string = 'INDV_REM2';
-    const INDV_REM3  : string = 'INDV_REM3';
-    const INDV_REM4  : string = 'INDV_REM4';
-    const EXP_REM2   : string = 'EXP_REM2';
-    const EXP_REM3   : string = 'EXP_REM3';
-    const LAYOUT_ID  : string = 'LAYOUT_ID';    { FOREIGN KEY -> PRIMARY KEY IN "TBL_REMINDERLAYOUTS" }
+    const ID         : string = 'Id';           { PRIMARY KEY -> FOREIGN KEY IN "TBL_INVOICES" }
+    const USER_ALIAS : string = 'UserAlias';
+    const CUID       : string = 'Cuid';         { CONSTRAINT UNIQUE }
+    const CO_CODE    : string = 'CoCode';
+    const BRANCH     : string = 'Branch';
+    const CUSTNAME   : string = 'CustomerName';
+    const STAMP      : string = 'Stamp';
+    const INDV_REM1  : string = 'SendReminder1';
+    const INDV_REM2  : string = 'SendReminder2';
+    const INDV_REM3  : string = 'SendReminder3';
+    const INDV_REM4  : string = 'SendReminder4';
+    const EXP_REM2   : string = 'ExceptionReminder2';
+    const EXP_REM3   : string = 'ExceptionReminder3';
+    const LAYOUT_ID  : string = 'LayoutId';    { FOREIGN KEY -> PRIMARY KEY IN "TBL_REMINDERLAYOUTS" }
   end;
 
 { -------------------------------------------------------------- ! TBL_INVOICES ! --------------------------------------------------------------------------- }
@@ -368,12 +376,12 @@ type
   TInvoices = class(TDataTables)  { ONE-TO-MANY }
   {$TYPEINFO ON}
   public
-    const ID           : string = 'ID';         { PRIMARY KEY }
-    const SK           : string = 'SK';         { FOREIGN KEY -> PRIMARY KEY IN "TBL_TRACKER" }
-    const CUID         : string = 'CUID';
-    const INVOICENO    : string = 'INVOICENO';
-    const INVOICESTATE : string = 'INVOICESTATE';
-    const STAMP        : string = 'STAMP';
+    const ID           : string = 'Id';         { PRIMARY KEY }
+    const SK           : string = 'Sk';         { FOREIGN KEY -> PRIMARY KEY IN "TBL_TRACKER" }
+    const CUID         : string = 'Cuid';
+    const INVOICENO    : string = 'InvoiceNo';
+    const INVOICESTATE : string = 'InvoiceState';
+    const STAMP        : string = 'Stamp';
   end;
 
 { ------------------------------------------------------------ ! TBL_REMINERLAYOUTS ! ----------------------------------------------------------------------- }
@@ -381,8 +389,8 @@ type
   TReminderLayouts = class(TDataTables)  { ONE-TO-MANY }
   {$TYPEINFO ON}
   public
-    const ID           : string = 'ID';         { PRIMARY KEY }
-    const LAYOUTNAME   : string = 'LAYOUTNAME';
+    const ID           : string = 'Id';         { PRIMARY KEY }
+    const LAYOUTNAME   : string = 'LayoutName';
   end;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -392,10 +400,10 @@ type
   TUAC = class(TDataTables)  { ONE-TO-MANY }
   {$TYPEINFO ON}
   public
-    const ID           : string = 'ID';         { PRIMARY KEY -> FOREIGN KEY IN "TBL_GROUPS" }
-    const USERNAME     : string = 'USERNAME';   { CONSTRAINT UNIQUE }
-    const ACCESS_LEVEL : string = 'ACCESS_LEVEL';
-    const ACCESS_MODE  : string = 'ACCESS_MODE';
+    const ID           : string = 'Id';         { PRIMARY KEY -> FOREIGN KEY IN "TBL_GROUPS" }
+    const USERNAME     : string = 'UserName';   { CONSTRAINT UNIQUE }
+    const ACCESS_LEVEL : string = 'AccessLevel';
+    const ACCESS_MODE  : string = 'AccessMode';
   end;
 
 
@@ -404,10 +412,23 @@ type
   TGroups = class(TDataTables)  { ONE-TO-MANY }
   {$TYPEINFO ON}
   public
-    const ID            : string = 'ID';        { PRIMARY KEY }
-    const GROUP_ID      : string = 'GROUP_ID';
-    const GROUP_NAME    : string = 'GROUP_NAME';
-    const FID           : string = 'FID';       { FOREIGN KEY -> PRIMARY KEY IN "TBL_UAC" }
+    const ID            : string = 'Id';        { PRIMARY KEY }
+    const GROUP_ID      : string = 'GroupId';
+    const GROUP_NAME    : string = 'GroupName';
+    const FID           : string = 'Fid';       { FOREIGN KEY -> PRIMARY KEY IN "TBL_UAC" }
+  end;
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+{ -------------------------------------------------------------- ! TBL_FXRATES ! ---------------------------------------------------------------------------- }
+type
+  TFxRates = class(TDataTables)
+  {$TYPEINFO ON}
+  public
+    const ID            : string = 'Id';
+    const ISO           : string = 'Iso';
+    const EXRATE        : string = 'ExRate';
+    const KEY           : string = 'ProcessBatchKey';
   end;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

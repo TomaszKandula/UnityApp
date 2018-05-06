@@ -295,7 +295,11 @@ begin
       UpdateForm.Left:=((WndRect.Right  - WndRect.Left) div 2) - (UpdateForm.Width  div 2);
       AnimateWindow(UpdateForm.Handle, 500, AW_BLEND or AW_ACTIVATE);
       UpdateForm.Update;
-      { UNZIP NEW FILES | NOTE! CONFIG.CFG MAY BE ALSO UPDATED }
+      { COPY RELEASE PACKAGE FROM SOURCE NETWORK DRIVE TO APPLICATION DIRECTORY }
+
+      // ...
+
+      { UNZIP ALL FILES | NOTE: CONFIG.CFG MAY BE ALSO UPDATED }
       UnzippReleaseFile(PathRelease, PathAppDir, PathEventLog);
       { UPDATE DATE AND TIME OF NEW RELEASE }
       AppSettings:=TSettings.Create;

@@ -45,7 +45,7 @@ const
   LicenceFile:    string    = 'Unity.licx';
   GridImgFile:    string    = 'Unity.img';
   ReleaseFile:    string    = 'Release.pak';
-  CurrentMutex:   PWideChar = 'UNITY_10031';    { WARNING! INCREASE IT WITH EACH NEW RELEASE }
+  CurrentMutex:   PWideChar = 'UNITY_10032';    { WARNING! INCREASE IT WITH EACH NEW RELEASE }
 
   { SPLASH SCREEN }
 
@@ -335,23 +335,24 @@ const
 
   { MAPPED TABLES FROM DATABASE | WE DO NOT USE SEPARATE ORM FRAMEWORK }
 
-  TblDaily           = 'tbl_daily';
-  TblGeneral         = 'tbl_general';
-  TblCompany         = 'tbl_company';
-  TblManagers        = 'tbl_managers';
-  TblTeamleaders     = 'tbl_teamleaders';
-  TblReminderLayouts = 'tbl_reminderlayouts';
-  TblInvoices        = 'tbl_invoices';
-  TblTracker         = 'tbl_tracker';
-  TblGroup3          = 'tbl_group3';
-  TblPaidinfo        = 'tbl_paidinfo';
-  TblPmtterms        = 'tbl_pmtterms';
-  TblPerson          = 'tbl_person';
-  TblUAC             = 'tbl_UAC';
-  TblGroups          = 'tbl_groups';
-  TblAddressbook     = 'tbl_addressbook';
-  TblOpenitems       = 'tbl_openitems';
-  TblSnapshots       = 'tbl_snapshots';
+  TblFxRates         = 'FxRates';
+  TblDaily           = 'DailyComment';
+  TblGeneral         = 'GeneralComment';
+  TblCompany         = 'CompanyData';
+  TblManagers        = 'Managers';
+  TblTeamleaders     = 'TeamLeaders';
+  TblReminderLayouts = 'ReminderLayouts';
+  TblInvoices        = 'TrackerInvoices';
+  TblTracker         = 'TrackerData';
+  TblGroup3          = 'Group3';
+  TblPaidinfo        = 'PaidInfo';
+  TblPmtterms        = 'PaymentTerms';
+  TblPerson          = 'Person';
+  TblUAC             = 'UAC';
+  TblGroups          = 'Groups';
+  TblAddressbook     = 'AddressBook';
+  TblOpenitems       = 'OpenItems';
+  TblSnapshots       = 'Snapshots';
 
   { STORED PROCEDURES }
 
