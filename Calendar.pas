@@ -174,7 +174,7 @@ begin
       { EXECUTE }
       GenText.UpdateRecord(TblGeneral);
       { DISPLAY NOW ON STRING GRID }
-      MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fFOLLOWUP, 1, 1), Row]:=DateToStr(SelectedDate);
+      MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1), Row]:=DateToStr(SelectedDate);
     end
     else
     { INSERT NEW }
@@ -189,7 +189,7 @@ begin
       GenText.Columns.Add(TGeneral.FOLLOWUP);   GenText.Values.Add(DateToStr(SelectedDate));
       { EXECUTE }
       GenText.InsertInto(TblGeneral);
-      MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fFOLLOWUP, 1, 1), Row]:=DateToStr(SelectedDate);
+      MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1), Row]:=DateToStr(SelectedDate);
     end;
   finally
     GenText.Free;

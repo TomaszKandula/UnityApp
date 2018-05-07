@@ -598,7 +598,7 @@ begin
       Condition:=TGeneral.CUID + EQUAL + QuotedStr(CUID);
       GeneralText.Columns.Add(TGeneral.FOLLOWUP); GeneralText.Values.Add(SPACE); GeneralText.Conditions.Add(Condition);
       GeneralText.UpdateRecord(TblGeneral);
-      MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fFOLLOWUP, 1, 1), MainForm.sgAgeView.Row]:='';
+      MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1), MainForm.sgAgeView.Row]:='';
     finally
       GeneralText.Free;
     end;

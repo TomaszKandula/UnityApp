@@ -448,8 +448,70 @@ type                                                            (* GUI | MAIN TH
     MainShape10: TPanel;
     Header10: TPanel;
     Panel3: TPanel;
-    Shape6: TShape;
+    Cap24: TShape;
     Shape8: TShape;
+    LbuPanel: TPanel;
+    ApproverPanel: TPanel;
+    editCustomerName: TLabeledEdit;
+    editSerticaHandlingOrder: TLabeledEdit;
+    editSerticaUnits: TLabeledEdit;
+    editSerticaBuyOrder: TLabeledEdit;
+    editSerticaTerms: TLabeledEdit;
+    editEmailAddress: TLabeledEdit;
+    EditAddComment: TMemo;
+    Text7: TLabel;
+    SerticaGroup: TGroupBox;
+    btnSupplierSubmit: TSpeedButton;
+    btnSupplierSave: TSpeedButton;
+    btnSupplierClear: TSpeedButton;
+    cbPOD: TComboBox;
+    Text6: TLabel;
+    cbSupplierType: TComboBox;
+    Text4: TLabel;
+    cbPaymentTerms: TComboBox;
+    Text5: TLabel;
+    cbCurrency: TComboBox;
+    Text3: TLabel;
+    cbCompany: TComboBox;
+    Text1: TLabel;
+    cbAgent: TComboBox;
+    Text2: TLabel;
+    GroupBox2: TGroupBox;
+    edtUserAlias: TEdit;
+    Text8: TLabel;
+    GroupBox3: TGroupBox;
+    Text9: TLabel;
+    Text13: TLabel;
+    edtAgent: TEdit;
+    edtCompany: TEdit;
+    GroupBox4: TGroupBox;
+    Text14: TLabel;
+    Text15: TLabel;
+    edtCustomerName: TEdit;
+    edtAddress: TEdit;
+    edtTown: TEdit;
+    Text16: TLabel;
+    edtCountry: TEdit;
+    Text23: TLabel;
+    edtPostal: TEdit;
+    Text24: TLabel;
+    edtVAT: TEdit;
+    Text25: TLabel;
+    edtPerson: TEdit;
+    Text26: TLabel;
+    edtNumber: TEdit;
+    Text27: TLabel;
+    edtEmail: TEdit;
+    Text28: TLabel;
+    edtTerms: TEdit;
+    Text29: TLabel;
+    edtCurrency: TEdit;
+    Text30: TLabel;
+    Text34: TLabel;
+    ReadAddComment: TMemo;
+    btnSupplierApprove: TSpeedButton;
+    btnSupplierReject: TSpeedButton;
+    btnSupplierOpen: TSpeedButton;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -639,6 +701,12 @@ type                                                            (* GUI | MAIN TH
     procedure btnReport2Click(Sender: TObject);
     procedure btnReport3Click(Sender: TObject);
     procedure btnReport4Click(Sender: TObject);
+    procedure btnSupplierClearClick(Sender: TObject);
+    procedure btnSupplierSaveClick(Sender: TObject);
+    procedure btnSupplierSubmitClick(Sender: TObject);
+    procedure btnSupplierOpenClick(Sender: TObject);
+    procedure btnSupplierRejectClick(Sender: TObject);
+    procedure btnSupplierApproveClick(Sender: TObject);
     { ------------------------------------------------------------- ! HELPERS ! ----------------------------------------------------------------------------- }
   private
     { GENERAL }
@@ -743,7 +811,7 @@ implementation
 
 uses
   Filter, Tracker, Invoices, Actions, Calendar, About, Search, Worker, Model, Settings, Database, UAC, AgeView, Transactions, ReportBug, Colors, EventLog,
-  uCEFApplication;
+  Supplier, TicketList, uCEFApplication;
 
 {$R *.dfm}
 
@@ -2212,6 +2280,9 @@ begin
     { INVOICE TRACKER | TABSHEET4 }
     Cap43.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS4TXT01', 'EMPTY'), [fsBold]);
 
+    { UNIDENTIFIED TRANSACTIONS | TABSHEET6 }
+    Cap61.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS6TXT01', 'EMPTY'), [fsBold]);
+
     { GENERAL TABLES  | TABSHEET7 }
     Cap15.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS7TXT01', 'EMPTY'), [fsBold]);
     Cap16.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS7TXT02', 'EMPTY'), [fsBold]);
@@ -2226,8 +2297,8 @@ begin
     Cap23.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS8TXT03', 'EMPTY'), [fsBold]);
     Cap27.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS8TXT04', 'EMPTY'), [fsBold]);
 
-    { UNIDENTIFIED TRANSACTIONS | TABSHEET6 }
-    Cap61.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS6TXT01', 'EMPTY'), [fsBold]);
+    { SUPPLIER FORM | TABSHEET10 }
+    Cap24.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS10TXT01', 'EMPTY'), [fsBold]);
 
     { ------------------------------------------------------------ ! MAIN VIEW ! ---------------------------------------------------------------------------- }
 
@@ -2892,7 +2963,7 @@ end;
 { --------------------------------------------------------------------------------------------------------------------------------------------- VIA FOLLOW UP }
 procedure TMainForm.Action_FollowUp_FilterClick(Sender: TObject);
 begin
-  FilterForm.FColName  :=TSnapshots.fFOLLOWUP;
+  FilterForm.FColName  :=TGeneral.fFOLLOWUP;
   FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
   FilterForm.FGrid     :=MainForm.sgAgeView;
   FilterForm.FFilterNum:=flt_FOLLOWUP;
@@ -4195,6 +4266,38 @@ begin
 end;
 
 { --------------------------------------------------------------- ! BUTTON CALLS ! -------------------------------------------------------------------------- }
+
+{ ------------------------------------------------------------------------------------------------------------------------------------------ SUPPLIER BUTTONS }
+procedure TMainForm.btnSupplierClearClick(Sender: TObject);
+begin
+//
+end;
+
+procedure TMainForm.btnSupplierSaveClick(Sender: TObject);
+begin
+//
+end;
+
+procedure TMainForm.btnSupplierOpenClick(Sender: TObject);
+begin
+  WndCall(TicketForm, 0)
+end;
+
+procedure TMainForm.btnSupplierSubmitClick(Sender: TObject);
+begin
+//
+end;
+
+
+procedure TMainForm.btnSupplierRejectClick(Sender: TObject);
+begin
+//
+end;
+
+procedure TMainForm.btnSupplierApproveClick(Sender: TObject);
+begin
+//
+end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------------- GO TO REPORT 1 }
 procedure TMainForm.btnReport1Click(Sender: TObject);

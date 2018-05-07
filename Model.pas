@@ -165,7 +165,7 @@ type
 
     (* USER FRIENDLY NAME FOR GIVEN COLUMNS *)
 
-    const fFOLLOWUP   : string = 'FOLLOW UP';
+    const fFOLLOWUP   : string = 'Follow Up';
   end;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -211,7 +211,7 @@ type
     const ExtractDateStamp : string = 'ExtractDateStamp';
     const ProcessBatchKey  : string = 'ProcessBatchKey';
 
-    (* "CUID" AND "PMTSTAT" IS ADDITIONAL COLUMN CALCULATED 'ON THE FLY' *)
+    (* "CUID" AND "PMTSTAT" ARE ADDITIONAL COLUMNS CALCULATED 'ON THE FLY' *)
     const PmtStat          : string = 'PmtStat';
     const CUID             : string = 'Cuid';
 
@@ -263,7 +263,6 @@ type
 
     const fCUSTOMER_NAME   = 'Customer Name';
     const fCUSTOMER_NUMBER = 'Customer Number';
-    const fFOLLOWUP        = 'Follow Up';
     const fNOT_DUE         = 'Not Due';
     const fCOUNTRY_CODE    = 'Country Code';
     const fRANGE1          = '1 - 7';
