@@ -16,7 +16,7 @@ unit SQL;
 interface
 
 uses
-  SysUtils, Windows, Classes, ADODB, StrUtils, Variants, Main;
+  SysUtils, Windows, Classes, ADODB, StrUtils, Variants, StdCtrls, Main;
 
 { --------------------------------------------------------------- ! MS SQL CLASS ! -------------------------------------------------------------------------- }
 type
@@ -36,6 +36,7 @@ type
     function    GridToSql(Grid: TStringGrid; tblName: string; tblColumns: string; sRow: integer; sCol: integer): string;
     function    ArrayToSql(Table: TLists; tblName: string; tblColumns: string): string;
     function    SqlToGrid(var Grid: TStringGrid; RS: _Recordset; AutoNoCol: boolean; Headers: boolean): boolean;
+    function    SqlToSimpleList(var List: TComboBox; RS: _Recordset): boolean;
   end;
 
 { ------------------------------------------------------------- ! IMPLEMENTATION ZONE ! --------------------------------------------------------------------- }
@@ -226,5 +227,28 @@ begin
     Result:=False;
   end;
 end;
+
+{ ----------------------------------------------------------------------------------------------------------------- RETURN ONE COLUMN TO COMBOBOX | NO HEADER }
+function TMSSQL.SqlToSimpleList(var List: TComboBox; RS: _Recordset): boolean;
+begin
+  { INITIALIZE }
+  Result:=False;
+  { EXIT CONDITION }
+  if not (RS.RecordCount > 0) then Exit;
+  if RS.Fields.Count > 1      then Exit;
+  { PROCESS }
+  try
+    while not RS.EOF do
+    begin
+      List.Items.Add(RS.Fields[0].Value);
+      RS.MoveNext;
+    end;
+    Result:=True;
+  except
+    Result:=False;
+  end;
+end;
+
+
 
 end.

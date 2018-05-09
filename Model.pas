@@ -46,7 +46,7 @@ type
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-{ -------------------------------------------------------------- ! TBL_COMPANY ! ---------------------------------------------------------------------------- }
+{ -------------------------------------------------------------- ! COMPANYDATA ! ---------------------------------------------------------------------------- }
 type
   TCompany = class(TDataTables)  { MANY-TO-MANY }
   {$TYPEINFO ON}
@@ -85,7 +85,7 @@ type
     const DIVISIONS              : string = 'Divisions';
   end;
 
-{ -------------------------------------------------------------- ! TBL_MANAGERS ! --------------------------------------------------------------------------- }
+{ ------------------------------------------------------------------ ! MANAGERS ! --------------------------------------------------------------------------- }
 type
   TManagers = class(TDataTables)  { MANY-TO-MANY }
   {$TYPEINFO ON}
@@ -96,7 +96,7 @@ type
     const ManagerGL : string = 'ManagerGL';
   end;
 
-{ ------------------------------------------------------------- ! TBL_TEAMLEADERS ! ------------------------------------------------------------------------- }
+{ ----------------------------------------------------------------- ! TEAMLEADERS ! ------------------------------------------------------------------------- }
 type
   TTeamleaders = class(TDataTables)  { MANY-TO-MANY }
   {$TYPEINFO ON}
@@ -112,7 +112,7 @@ type
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-{ ------------------------------------------------------------ ! TBL_ADDRESSBOOK ! -------------------------------------------------------------------------- }
+{ ---------------------------------------------------------------- ! ADDRESSBOOK ! -------------------------------------------------------------------------- }
 type
   TAddressBook = class(TDataTables)
   {$TYPEINFO ON}
@@ -131,7 +131,7 @@ type
     const COCODE           : string = 'CoCode';
   end;
 
-{ --------------------------------------------------------------- ! TBL_DAILY ! ----------------------------------------------------------------------------- }
+{ ---------------------------------------------------------------- ! DAILYCOMMENT ! ------------------------------------------------------------------------- }
 type
   TDaily = class(TDataTables)
   {$TYPEINFO ON}
@@ -151,7 +151,7 @@ type
     const EMAIL_ManuStat: string = 'EmailManuStat';
   end;
 
-{ --------------------------------------------------------------- ! TBL_GENERAL ! --------------------------------------------------------------------------- }
+{ -------------------------------------------------------------- ! GENERALCOMMENT ! ------------------------------------------------------------------------- }
 type
   TGeneral = class(TDataTables)
   {$TYPEINFO ON}
@@ -170,7 +170,7 @@ type
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-{ -------------------------------------------------------------- ! TBL_OPENITEMS ! --------------------------------------------------------------------------- }
+{ ----------------------------------------------------------------- ! OPENITEMS ! --------------------------------------------------------------------------- }
 type
   TOpenitems = class(TDataTables)                               (* FEED FROM ERP *)
   {$TYPEINFO ON}
@@ -217,7 +217,7 @@ type
 
   end;
 
-{ -------------------------------------------------------------- ! TBL_SNAPSHOTS ! -------------------------------------------------------------------------- }
+{ ------------------------------------------------------------------ ! SNAPSHOTS ! -------------------------------------------------------------------------- }
 type
   TSnapshots = class(TDataTables)
   {$TYPEINFO ON}
@@ -292,7 +292,7 @@ type
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-{ -------------------------------------------------------------- ! TBL_PAIDINFO ! --------------------------------------------------------------------------- }
+{ ------------------------------------------------------------------ ! PAIDINFO ! --------------------------------------------------------------------------- }
 type
   TPaidinfo = class(TDataTables)                            (* FIXED FOR ALL ENTITIES *)
   {$TYPEINFO ON}
@@ -304,7 +304,7 @@ type
     const KEY           : string = 'ProcessBatchKey';
   end;
 
-{ --------------------------------------------------------------- ! TBL_PERSON ! ---------------------------------------------------------------------------- }
+{ ------------------------------------------------------------------- ! PERSON ! ---------------------------------------------------------------------------- }
 type
   TPerson = class(TDataTables)                                  (* FEED FROM ERP *)
   {$TYPEINFO ON}
@@ -317,7 +317,7 @@ type
     const COCODE        : string = 'Entity';
   end;
 
-{ --------------------------------------------------------------- ! TBL_GROUP3 ! ---------------------------------------------------------------------------- }
+{ ------------------------------------------------------------------- ! GROUP3 ! ---------------------------------------------------------------------------- }
 type
   TGroup3 = class(TDataTables)                                  (* FEED FROM ERP *)
   {$TYPEINFO ON}
@@ -330,7 +330,7 @@ type
     const COCODE        : string = 'Entity';
   end;
 
-{ -------------------------------------------------------------- ! TBL_PMTTERMS ! --------------------------------------------------------------------------- }
+{ ----------------------------------------------------------------- ! PAYMENTTERMS ! ------------------------------------------------------------------------ }
 type
   TPmtterms = class(TDataTables)                               (* FEED FROM ERP *)
   {$TYPEINFO ON}
@@ -349,7 +349,7 @@ type
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-{ --------------------------------------------------------------- ! TBL_TRACKER ! --------------------------------------------------------------------------- }
+{ --------------------------------------------------------------- ! TRACKERDATA ! --------------------------------------------------------------------------- }
 type
   TTracker = class(TDataTables)  { MANY-TO-MANY }
   {$TYPEINFO ON}
@@ -370,7 +370,7 @@ type
     const LAYOUT_ID  : string = 'LayoutId';    { FOREIGN KEY -> PRIMARY KEY IN "TBL_REMINDERLAYOUTS" }
   end;
 
-{ -------------------------------------------------------------- ! TBL_INVOICES ! --------------------------------------------------------------------------- }
+{ ------------------------------------------------------------- ! TRACKERINVOICES ! ------------------------------------------------------------------------- }
 type
   TInvoices = class(TDataTables)  { ONE-TO-MANY }
   {$TYPEINFO ON}
@@ -383,7 +383,7 @@ type
     const STAMP        : string = 'Stamp';
   end;
 
-{ ------------------------------------------------------------ ! TBL_REMINERLAYOUTS ! ----------------------------------------------------------------------- }
+{ -------------------------------------------------------------- ! REMINERLAYOUTS ! ------------------------------------------------------------------------- }
 type
   TReminderLayouts = class(TDataTables)  { ONE-TO-MANY }
   {$TYPEINFO ON}
@@ -394,7 +394,7 @@ type
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-{ ----------------------------------------------------------------- ! TBL_UAC ! ----------------------------------------------------------------------------- }
+{ ------------------------------------------------------------------- ! UAC ! ------------------------------------------------------------------------------- }
 type
   TUAC = class(TDataTables)  { ONE-TO-MANY }
   {$TYPEINFO ON}
@@ -406,7 +406,7 @@ type
   end;
 
 
-{ ---------------------------------------------------------------- ! TBL_GROUPS ! --------------------------------------------------------------------------- }
+{ ------------------------------------------------------------------ ! GROUPS ! ----------------------------------------------------------------------------- }
 type
   TGroups = class(TDataTables)  { ONE-TO-MANY }
   {$TYPEINFO ON}
@@ -419,7 +419,7 @@ type
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-{ -------------------------------------------------------------- ! TBL_FXRATES ! ---------------------------------------------------------------------------- }
+{ ------------------------------------------------------------------ ! FXRATES ! ---------------------------------------------------------------------------- }
 type
   TFxRates = class(TDataTables)
   {$TYPEINFO ON}
@@ -428,6 +428,96 @@ type
     const ISO           : string = 'Iso';
     const EXRATE        : string = 'ExRate';
     const KEY           : string = 'ProcessBatchKey';
+  end;
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+{ ------------------------------------------------------------------ ! CURRENCIES ! ------------------------------------------------------------------------- }
+type
+  TCurrencies = class(TDataTables)
+  {$TYPEINFO ON}
+  public
+    const Id           : string = 'Id';
+    const Iso          : string = 'Iso';
+    const CurrencyName : string = 'CurrencyName';
+    const Terrority    : string = 'Terrority';
+  end;
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+{ ---------------------------------------------------------------- ! SUPPLIER DATA ! ------------------------------------------------------------------------ }
+type
+  TSupplierData = class(TDataTables)
+  {$TYPEINFO ON}
+  public
+    const Id               : string = 'Id';               { PRIMARY KEY }
+    const TicketNumberRef  : string = 'TicketNumberRef';  { FOREIGN KEY --> 'SUPPLIERREQUEST' TABLE }
+    const CustomerName     : string = 'CustomerName';
+    const VATreg           : string = 'VATreg';
+    const VATnumber        : string = 'VATnumber';
+    const AddressLine      : string = 'AddressLine';
+    const Town             : string = 'Town';
+    const Country          : string = 'Country';
+    const PostalCode       : string = 'PostalCode';
+    const Iban             : string = 'Iban';
+    const SwiftNumber      : string = 'SwiftNumber';
+    const ContactPerson    : string = 'ContactPerson';
+    const MainPhone        : string = 'MainPhone';
+    const MainEmail        : string = 'MainEmail';
+    const FinancePhone     : string = 'FinancePhone';
+    const FinanceEmail     : string = 'FinanceEmail';
+    const Remittance       : string = 'Remittance';
+    const EmailForQuote    : string = 'EmailForQuote';
+    const EmailForPO       : string = 'EmailForPO';
+    const SerticaName1     : string = 'SerticaName1';
+    const SerticaArea1     : string = 'SerticaArea1';
+    const SerticaPhone1    : string = 'SerticaPhone1';
+    const SerticaPlace1    : string = 'SerticaPlace1';
+    const SerticaAddr1     : string = 'SerticaAddr1';
+    const SerticaName2     : string = 'SerticaName2';
+    const SerticaArea2     : string = 'SerticaArea2';
+    const SerticaPhone2    : string = 'SerticaPhone2';
+    const SerticaPlace2    : string = 'SerticaPlace2';
+    const SerticaAddr2     : string = 'SerticaAddr2';
+    const SerticaName3     : string = 'SerticaName3';
+    const SerticaArea3     : string = 'SerticaArea3';
+    const SerticaPhone3    : string = 'SerticaPhone3';
+    const SerticaPlace3    : string = 'SerticaPlace3';
+    const SerticaAddr3     : string = 'SerticaAddr3';
+  end;
+
+{ ------------------------------------------------------------- ! SUPPLIER REQUEST ! ------------------------------------------------------------------------ }
+type
+  TSupplierRequest = class(TDataTables)
+  {$TYPEINFO ON}
+  public
+    const id               : string = 'Id';               { PRIMARY KEY }
+    const Stamp            : string = 'Stamp';
+    const UserAlias        : string = 'UserAlias';
+    const LegalEntityRef   : string = 'LegalEntityRef';   { FOREIGN KEY --> 'COMPANYDATA' TABLE  }
+    const CurrencyRef      : string = 'CurrencyRef';      { FOREIGN KEY --> 'CURRENCY' TABLE     }
+    const SupplierTypeRef  : string = 'SupplierTypeRef';  { FOREIGN KEY --> 'SUPPLIERTYPE' TABLE }
+    const PaymentTerm      : string = 'PaymentTerm';
+    const SerticaUnits     : string = 'SerticaUnits';
+    const SerticaHandle    : string = 'SerticaHandle';
+    const SerticaPrice     : string = 'SerticaPrice';
+    const SerticaTerms     : string = 'SerticaTerms';
+    const POD              : string = 'POD';
+    const AddComment       : string = 'AddComment';
+    const EmailAddress     : string = 'EmailAddress';
+    const Token            : string = 'Token';
+    const TokenStatus      : string = 'TokenStatus';
+    const TicketNumber     : string = 'TicketNumber';
+    const RequestStatus    : string = 'RequestStatus';
+  end;
+
+{ --------------------------------------------------------------- ! SUPPLIER TYPE ! ------------------------------------------------------------------------- }
+type
+  TSupplierType = class(TDataTables)
+  {$TYPEINFO ON}
+  public
+    const Id           :  string = 'Id';
+    const SupplierType :  string = 'SupplierType';
   end;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

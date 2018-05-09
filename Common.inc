@@ -235,6 +235,7 @@ const
   VAL          : string = ' VALUES ';
   SELECT       : string = ' SELECT ';
   SELECT_DIS   : string = ' SELECT DISTINCT ';
+  DISTINCT     : string = ' DISTINCT ';
   _UPDATE      : string = ' UPDATE ';
   DELETE_FROM  : string = ' DELETE FROM ';
   _SET         : string = ' SET ';
@@ -353,6 +354,10 @@ const
   TblAddressbook     = 'AddressBook';
   TblOpenitems       = 'OpenItems';
   TblSnapshots       = 'Snapshots';
+  TblSupplierData    = 'SupplierData';
+  TblSupplierRequest = 'SupplierRequest';
+  TblSupplierType    = 'SupplierTypes';
+  TblCurrencies      = 'Currencies';
 
   { STORED PROCEDURES }
 

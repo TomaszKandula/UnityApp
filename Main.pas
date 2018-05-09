@@ -512,6 +512,20 @@ type                                                            (* GUI | MAIN TH
     btnSupplierApprove: TSpeedButton;
     btnSupplierReject: TSpeedButton;
     btnSupplierOpen: TSpeedButton;
+    btnStart: TSpeedButton;
+    Separate1: TBevel;
+    btnSettings: TSpeedButton;
+    btnTabelauReport: TSpeedButton;
+    btnAgeDebt: TSpeedButton;
+    btnOpenItems: TSpeedButton;
+    btnOtherTrans: TSpeedButton;
+    btnAddressBook: TSpeedButton;
+    AppHeader: TGroupBox;
+    btnTracker: TSpeedButton;
+    btnGeneral: TSpeedButton;
+    btnSupplier: TSpeedButton;
+    Separate2: TBevel;
+    Separate3: TBevel;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -707,6 +721,18 @@ type                                                            (* GUI | MAIN TH
     procedure btnSupplierOpenClick(Sender: TObject);
     procedure btnSupplierRejectClick(Sender: TObject);
     procedure btnSupplierApproveClick(Sender: TObject);
+    procedure btnStartClick(Sender: TObject);
+    procedure btnTabelauReportClick(Sender: TObject);
+    procedure btnGeneralClick(Sender: TObject);
+    procedure btnSettingsClick(Sender: TObject);
+    procedure btnAgeDebtClick(Sender: TObject);
+    procedure btnOpenItemsClick(Sender: TObject);
+    procedure btnOtherTransClick(Sender: TObject);
+    procedure btnTrackerClick(Sender: TObject);
+    procedure btnAddressBookClick(Sender: TObject);
+    procedure btnSupplierClick(Sender: TObject);
+    procedure TabSheet10Show(Sender: TObject);
+    procedure cbSupplierTypeSelect(Sender: TObject);
     { ------------------------------------------------------------- ! HELPERS ! ----------------------------------------------------------------------------- }
   private
     { GENERAL }
@@ -2115,7 +2141,9 @@ var
   DataTables:    TDataTables;
   UserControl:   TUserControl;
   Transactions:  TTransactions;
+  Vendor:        TSupplierForm;
   NowTime:       TTime;
+  iCNT:          integer;
 begin
 
   { ------------------------------------------------------------ ! INITIALIZATION ! ------------------------------------------------------------------------- }
@@ -2250,6 +2278,9 @@ begin
 
     { ----------------------------------------------------------- ! TAB SHEETS ! ---------------------------------------------------------------------------- }
 
+    { HIDE ALL TABSHEETS }
+    for iCNT:=0 to MyPages.PageCount - 1 do MyPages.Pages[iCNT].TabVisible:=False;
+    {
     TabSheet1.Caption:=AppSettings.TMIG.ReadString(TabSheetsNames, 'TAB1', 'TAB1');
     TabSheet2.Caption:=AppSettings.TMIG.ReadString(TabSheetsNames, 'TAB2', 'TAB2');
     TabSheet3.Caption:=AppSettings.TMIG.ReadString(TabSheetsNames, 'TAB3', 'TAB3');
@@ -2258,6 +2289,7 @@ begin
     TabSheet6.Caption:=AppSettings.TMIG.ReadString(TabSheetsNames, 'TAB6', 'TAB6');
     TabSheet7.Caption:=AppSettings.TMIG.ReadString(TabSheetsNames, 'TAB7', 'TAB7');
     TabSheet8.Caption:=AppSettings.TMIG.ReadString(TabSheetsNames, 'TAB8', 'TAB8');
+    }
 
     { ----------------------------------------------------- ! CAPTIONS FOR ALL SHAPES ! --------------------------------------------------------------------- }
 
@@ -2399,6 +2431,15 @@ begin
     DataTables.CleanUp; DataTables.OpenTable(TblPerson);   DataTables.SqlToGrid(sgPerson,   DataTables.DataSet, False, True);
   finally
     DataTables.Free;
+  end;
+
+  { --- ! SUPPLIER FORM DEMO ! --- }
+
+  Vendor:=TSupplierForm.Create(DbConnect);
+  try
+    Vendor.InitSupplierRequestForm(cbCompany, cbCurrency, cbSupplierType);
+  finally
+    Vendor.Free;
   end;
 
   { -------------------------------------------------------------------------------------------------------------------------- APPLICATION VERSION & USER SID }
@@ -3273,6 +3314,29 @@ begin
 end;
 
 { ------------------------------------------------------- ! COMPONENT EVENTS | TABSHEETS ! ------------------------------------------------------------------ }
+
+{ -------------------------------------------------------------------------------------------------------------------------------------------- SERTICA EVENTS }
+procedure TMainForm.cbSupplierTypeSelect(Sender: TObject);
+begin
+  if cbSupplierType.Text = 'Sertica' then
+  begin
+    SerticaGroup.Enabled:=True;
+    SerticaGroup.Cursor:=crDefault;
+  end
+  else
+  begin
+    SerticaGroup.Enabled:=False;
+    SerticaGroup.Cursor:=crNo;
+  end;
+end;
+
+//...
+
+{ -------------------------------------------------------------------------------------------------------------------------------------------- POPULATE LISTS }
+procedure TMainForm.TabSheet10Show(Sender: TObject);
+begin
+  { KEEP UNUSED }
+end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------------- SHOW ALL ITEMS }
 procedure TMainForm.TabSheet4Show(Sender: TObject);
@@ -4267,6 +4331,58 @@ end;
 
 { --------------------------------------------------------------- ! BUTTON CALLS ! -------------------------------------------------------------------------- }
 
+{ ---------------------------------------------------------------------------------------------------------------------------------------------- MENU BUTTONS }
+procedure TMainForm.btnStartClick(Sender: TObject);
+begin
+  MyPages.ActivePage:=TabSheet9;
+  //btnStart.AllowAllUp:=True;
+end;
+
+procedure TMainForm.btnTabelauReportClick(Sender: TObject);
+begin
+  MyPages.ActivePage:=TabSheet5;
+end;
+
+procedure TMainForm.btnGeneralClick(Sender: TObject);
+begin
+  MyPages.ActivePage:=TabSheet7;
+end;
+
+procedure TMainForm.btnSettingsClick(Sender: TObject);
+begin
+  MyPages.ActivePage:=TabSheet8;
+end;
+
+procedure TMainForm.btnAgeDebtClick(Sender: TObject);
+begin
+  MyPages.ActivePage:=TabSheet1;
+end;
+
+procedure TMainForm.btnOpenItemsClick(Sender: TObject);
+begin
+  MyPages.ActivePage:=TabSheet2;
+end;
+
+procedure TMainForm.btnOtherTransClick(Sender: TObject);
+begin
+  MyPages.ActivePage:=TabSheet6;
+end;
+
+procedure TMainForm.btnTrackerClick(Sender: TObject);
+begin
+  MyPages.ActivePage:=TabSheet4;
+end;
+
+procedure TMainForm.btnAddressBookClick(Sender: TObject);
+begin
+  MyPages.ActivePage:=TabSheet3;
+end;
+
+procedure TMainForm.btnSupplierClick(Sender: TObject);
+begin
+  MyPages.ActivePage:=TabSheet10;
+end;
+
 { ------------------------------------------------------------------------------------------------------------------------------------------ SUPPLIER BUTTONS }
 procedure TMainForm.btnSupplierClearClick(Sender: TObject);
 begin
@@ -4287,7 +4403,6 @@ procedure TMainForm.btnSupplierSubmitClick(Sender: TObject);
 begin
 //
 end;
-
 
 procedure TMainForm.btnSupplierRejectClick(Sender: TObject);
 begin
