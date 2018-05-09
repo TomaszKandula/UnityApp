@@ -50,7 +50,9 @@ uses
   ReportBug in 'ReportBug.pas',
   Colors in 'Colors.pas',
   EventLog in 'EventLog.pas',
-  Send in 'Send.pas';
+  Send in 'Send.pas',
+  TicketList in 'TicketList.pas',
+  Supplier in 'Supplier.pas';
 
 type
   DWord = 0..$FFFFFFFF;
@@ -503,6 +505,7 @@ begin
     Application.CreateForm(TSendForm,     SendForm);     LogText(AppSettings.FPathEventLog, '[GUI] ''SendForm'' .......... has been created.');
     Application.CreateForm(TAboutForm,    AboutForm);    LogText(AppSettings.FPathEventLog, '[GUI] ''AboutForm'' ......... has been created.');
     Application.CreateForm(TEventForm,    EventForm);    LogText(AppSettings.FPathEventLog, '[GUI] ''EventForm'' ......... has been created.');
+    Application.CreateForm(TTicketForm,   TicketForm);   LogText(AppSettings.FPathEventLog, '[GUI] ''TicketForm'' ........ has been created.');
     Application.CreateForm(TColorsForm,   ColorsForm);   LogText(AppSettings.FPathEventLog, '[GUI] ''ColorsForm'' ........ has been created.');
     Application.CreateForm(TReportForm,   ReportForm);   LogText(AppSettings.FPathEventLog, '[GUI] ''ReportForm'' ........ has been created.');
     Application.CreateForm(TSearchForm,   SearchForm);   LogText(AppSettings.FPathEventLog, '[GUI] ''SearchForm'' ........ has been created.');

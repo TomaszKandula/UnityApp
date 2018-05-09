@@ -446,10 +446,6 @@ type                                                            (* GUI | MAIN TH
     SeparateLine: TBevel;
     TabSheet10: TTabSheet;
     MainShape10: TPanel;
-    Header10: TPanel;
-    Panel3: TPanel;
-    Cap24: TShape;
-    Shape8: TShape;
     LbuPanel: TPanel;
     ApproverPanel: TPanel;
     editCustomerName: TLabeledEdit;
@@ -458,7 +454,7 @@ type                                                            (* GUI | MAIN TH
     editSerticaBuyOrder: TLabeledEdit;
     editSerticaTerms: TLabeledEdit;
     editEmailAddress: TLabeledEdit;
-    EditAddComment: TMemo;
+    editAddComment: TMemo;
     Text7: TLabel;
     SerticaGroup: TGroupBox;
     btnSupplierSubmit: TSpeedButton;
@@ -733,6 +729,7 @@ type                                                            (* GUI | MAIN TH
     procedure btnSupplierClick(Sender: TObject);
     procedure TabSheet10Show(Sender: TObject);
     procedure cbSupplierTypeSelect(Sender: TObject);
+    procedure cbCompanySelect(Sender: TObject);
     { ------------------------------------------------------------- ! HELPERS ! ----------------------------------------------------------------------------- }
   private
     { GENERAL }
@@ -789,6 +786,7 @@ type                                                            (* GUI | MAIN TH
     function   CDate(StrDate: string): TDate;
     function   ShowReport(ReportNumber: cardinal): cardinal;
     procedure  CopyFile(const Source, Dest: string);
+    procedure  ResetTabsheetButtons;
   protected
     { WINDOWS MESSAGES }
     procedure  WndProc(var msg: Messages.TMessage); override;
@@ -2329,9 +2327,6 @@ begin
     Cap23.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS8TXT03', 'EMPTY'), [fsBold]);
     Cap27.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS8TXT04', 'EMPTY'), [fsBold]);
 
-    { SUPPLIER FORM | TABSHEET10 }
-    Cap24.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS10TXT01', 'EMPTY'), [fsBold]);
-
     { ------------------------------------------------------------ ! MAIN VIEW ! ---------------------------------------------------------------------------- }
 
     { ------------------------------------------------------------------------------------------------------------------------------- AGING BUCKETS | CAPTION }
@@ -3316,26 +3311,46 @@ end;
 { ------------------------------------------------------- ! COMPONENT EVENTS | TABSHEETS ! ------------------------------------------------------------------ }
 
 { -------------------------------------------------------------------------------------------------------------------------------------------- SERTICA EVENTS }
+procedure TMainForm.cbCompanySelect(Sender: TObject);
+var
+  Vendor:  TSupplierForm;
+begin
+  Screen.Cursor:=crHourGlass;
+  Vendor:=TSupplierForm.Create(DbConnect);
+  try
+    if Vendor.SqlToSimpleList(cbAgent, Vendor.GetAllAgents(cbCompany.Items[cbCompany.ItemIndex]))       then cbAgent.ItemIndex:=0;
+    if Vendor.SqlToSimpleList(cbPaymentTerms, Vendor.GetAllTerms(cbCompany.Items[cbCompany.ItemIndex])) then cbPaymentTerms.ItemIndex:=0;
+  finally
+    Vendor.Free;
+  end;
+  Screen.Cursor:=crDefault;
+end;
+
 procedure TMainForm.cbSupplierTypeSelect(Sender: TObject);
 begin
   if cbSupplierType.Text = 'Sertica' then
   begin
-    SerticaGroup.Enabled:=True;
+    editSerticaHandlingOrder.ReadOnly:=False;
+    editSerticaUnits.ReadOnly:=False;
+    editSerticaBuyOrder.ReadOnly:=False;
+    editSerticaTerms.ReadOnly:=False;
     SerticaGroup.Cursor:=crDefault;
   end
   else
   begin
-    SerticaGroup.Enabled:=False;
+    editSerticaHandlingOrder.ReadOnly:=True;
+    editSerticaUnits.ReadOnly:=True;
+    editSerticaBuyOrder.ReadOnly:=True;
+    editSerticaTerms.ReadOnly:=True;
     SerticaGroup.Cursor:=crNo;
   end;
 end;
 
-//...
-
 { -------------------------------------------------------------------------------------------------------------------------------------------- POPULATE LISTS }
 procedure TMainForm.TabSheet10Show(Sender: TObject);
 begin
-  { KEEP UNUSED }
+  cbSupplierTypeSelect(Self);
+  cbCompanySelect(Self);
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------------- SHOW ALL ITEMS }
@@ -4332,61 +4347,101 @@ end;
 { --------------------------------------------------------------- ! BUTTON CALLS ! -------------------------------------------------------------------------- }
 
 { ---------------------------------------------------------------------------------------------------------------------------------------------- MENU BUTTONS }
+
+procedure TMainForm.ResetTabsheetButtons;
+begin
+  btnStart.AllowAllUp:=False;
+  btnTabelauReport.AllowAllUp:=False;
+  btnGeneral.AllowAllUp:=False;
+  btnSettings.AllowAllUp:=False;
+  btnAgeDebt.AllowAllUp:=False;
+  btnOpenItems.AllowAllUp:=False;
+  btnOtherTrans.AllowAllUp:=False;
+  btnTracker.AllowAllUp:=False;
+  btnAddressBook.AllowAllUp:=False;
+  btnSupplier.AllowAllUp:=False;
+end;
+
 procedure TMainForm.btnStartClick(Sender: TObject);
 begin
   MyPages.ActivePage:=TabSheet9;
-  //btnStart.AllowAllUp:=True;
+  ResetTabsheetButtons;
+  btnStart.AllowAllUp:=True;
 end;
 
 procedure TMainForm.btnTabelauReportClick(Sender: TObject);
 begin
   MyPages.ActivePage:=TabSheet5;
+  ResetTabsheetButtons;
+  btnTabelauReport.AllowAllUp:=True;
 end;
 
 procedure TMainForm.btnGeneralClick(Sender: TObject);
 begin
   MyPages.ActivePage:=TabSheet7;
+  ResetTabsheetButtons;
+  btnGeneral.AllowAllUp:=True;
 end;
 
 procedure TMainForm.btnSettingsClick(Sender: TObject);
 begin
   MyPages.ActivePage:=TabSheet8;
+  ResetTabsheetButtons;
+  btnSettings.AllowAllUp:=True;
 end;
 
 procedure TMainForm.btnAgeDebtClick(Sender: TObject);
 begin
   MyPages.ActivePage:=TabSheet1;
+  ResetTabsheetButtons;
+  btnAgeDebt.AllowAllUp:=True;
 end;
 
 procedure TMainForm.btnOpenItemsClick(Sender: TObject);
 begin
   MyPages.ActivePage:=TabSheet2;
+  ResetTabsheetButtons;
+  btnOpenItems.AllowAllUp:=True;
 end;
 
 procedure TMainForm.btnOtherTransClick(Sender: TObject);
 begin
   MyPages.ActivePage:=TabSheet6;
+  ResetTabsheetButtons;
+  btnOtherTrans.AllowAllUp:=True;
 end;
 
 procedure TMainForm.btnTrackerClick(Sender: TObject);
 begin
   MyPages.ActivePage:=TabSheet4;
+  ResetTabsheetButtons;
+  btnTracker.AllowAllUp:=True;
 end;
 
 procedure TMainForm.btnAddressBookClick(Sender: TObject);
 begin
   MyPages.ActivePage:=TabSheet3;
+  ResetTabsheetButtons;
+  btnAddressBook.AllowAllUp:=True;
 end;
 
 procedure TMainForm.btnSupplierClick(Sender: TObject);
 begin
   MyPages.ActivePage:=TabSheet10;
+  ResetTabsheetButtons;
+  btnSupplier.AllowAllUp:=True;
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------ SUPPLIER BUTTONS }
 procedure TMainForm.btnSupplierClearClick(Sender: TObject);
 begin
-//
+  editCustomerName.Text:='';
+  editSerticaUnits.Text:='';
+  editSerticaTerms.Text:='';
+  editSerticaBuyOrder.Text:='';
+  editSerticaHandlingOrder.Text:='';
+  editAddComment.Text:='';
+  editEmailAddress.Text:='';
 end;
 
 procedure TMainForm.btnSupplierSaveClick(Sender: TObject);
@@ -4400,8 +4455,18 @@ begin
 end;
 
 procedure TMainForm.btnSupplierSubmitClick(Sender: TObject);
+var
+  Vendor: TSupplierForm;
 begin
-//
+  Vendor:=TSupplierForm.Create(DbConnect);
+  try
+    if SerticaGroup.Cursor = crNo then
+      Vendor.WriteRequest(offSertica, cbCompany.Text, cbCurrency.Text, cbSupplierType.Text, cbAgent.Text)
+        else
+          Vendor.WriteRequest(onSertica, cbCompany.Text, cbCurrency.Text, cbSupplierType.Text, cbAgent.Text);
+  finally
+    Vendor.Free;
+  end;
 end;
 
 procedure TMainForm.btnSupplierRejectClick(Sender: TObject);

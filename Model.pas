@@ -505,8 +505,7 @@ type
     const POD              : string = 'POD';
     const AddComment       : string = 'AddComment';
     const EmailAddress     : string = 'EmailAddress';
-    const Token            : string = 'Token';
-    const TokenStatus      : string = 'TokenStatus';
+    const TicketStatus     : string = 'TicketStatus';
     const TicketNumber     : string = 'TicketNumber';
     const RequestStatus    : string = 'RequestStatus';
   end;
@@ -617,6 +616,9 @@ begin
                 TableName + SPACE + BracketStr(ColumnsToList(Columns, enQuotesOff), brRound) +
               VAL +
                 BracketStr(ColumnsToList(Values, enQuotesOn), brRound);
+
+      MainFOrm.DebugMsg(StrSQL);
+
       ExecSQL;
     end;
   except

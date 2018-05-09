@@ -238,6 +238,7 @@ begin
   if RS.Fields.Count > 1      then Exit;
   { PROCESS }
   try
+    List.Clear;
     while not RS.EOF do
     begin
       List.Items.Add(RS.Fields[0].Value);

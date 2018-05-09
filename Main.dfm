@@ -3,10 +3,10 @@ object MainForm: TMainForm
   Top = 100
   VertScrollBar.Style = ssFlat
   Caption = 'Unity for Debt Management'
-  ClientHeight = 944
+  ClientHeight = 997
   ClientWidth = 1302
   Color = 15527148
-  Constraints.MinHeight = 700
+  Constraints.MinHeight = 1000
   Constraints.MinWidth = 1318
   DefaultMonitor = dmDesktop
   DoubleBuffered = True
@@ -1187,7 +1187,7 @@ object MainForm: TMainForm
     Left = 5
     Top = 67
     Width = 1292
-    Height = 832
+    Height = 885
     Margins.Left = 5
     Margins.Top = 10
     Margins.Right = 5
@@ -1217,7 +1217,7 @@ object MainForm: TMainForm
         Left = 17
         Top = 17
         Width = 1250
-        Height = 770
+        Height = 823
         Margins.Left = 17
         Margins.Top = 17
         Margins.Right = 17
@@ -1232,7 +1232,7 @@ object MainForm: TMainForm
           Left = 5
           Top = 5
           Width = 1236
-          Height = 756
+          Height = 809
           Margins.Left = 5
           Margins.Top = 5
           Margins.Right = 5
@@ -1244,7 +1244,7 @@ object MainForm: TMainForm
           ExplicitWidth = 300
           ExplicitHeight = 150
           ControlData = {
-            4C000000BF7F0000234E00000100000001020000000000000000000000000000
+            4C000000BF7F00009D5300000100000001020000000000000000000000000000
             000000004C000000000000000000000001000000E0D057007335CF11AE690800
             2B2E126208000000000000004C0000000114020000000000C000000000000046
             8000000000000000000000000000000000000000000000000000000000000000
@@ -1262,7 +1262,7 @@ object MainForm: TMainForm
         Left = 17
         Top = 17
         Width = 1250
-        Height = 770
+        Height = 823
         Margins.Left = 17
         Margins.Top = 17
         Margins.Right = 17
@@ -1578,7 +1578,7 @@ object MainForm: TMainForm
           Left = 5
           Top = 75
           Width = 1236
-          Height = 686
+          Height = 739
           Margins.Left = 5
           Margins.Top = 5
           Margins.Right = 5
@@ -1587,7 +1587,7 @@ object MainForm: TMainForm
           TabOrder = 1
           ExplicitHeight = 813
           ControlData = {
-            4C000000BF7F0000E64600000100000001020000000000000000000000000000
+            4C000000BF7F0000614C00000100000001020000000000000000000000000000
             000000004C000000000000000000000001000000E0D057007335CF11AE690800
             2B2E126208000000000000004C0000000114020000000000C000000000000046
             8000000000000000000000000000000000000000000000000000000000000000
@@ -2235,7 +2235,7 @@ object MainForm: TMainForm
       end
       object Footer1: TPanel
         Left = 0
-        Top = 683
+        Top = 736
         Width = 1284
         Height = 121
         Align = alBottom
@@ -2797,7 +2797,7 @@ object MainForm: TMainForm
         Left = 17
         Top = 135
         Width = 1250
-        Height = 548
+        Height = 601
         Margins.Left = 17
         Margins.Top = 0
         Margins.Right = 17
@@ -3450,7 +3450,7 @@ object MainForm: TMainForm
         Left = 17
         Top = 150
         Width = 1250
-        Height = 637
+        Height = 690
         Margins.Left = 17
         Margins.Top = 0
         Margins.Right = 17
@@ -3564,7 +3564,7 @@ object MainForm: TMainForm
         Left = 17
         Top = 118
         Width = 1250
-        Height = 669
+        Height = 722
         Margins.Left = 17
         Margins.Top = 0
         Margins.Right = 17
@@ -3816,7 +3816,7 @@ object MainForm: TMainForm
         Left = 17
         Top = 118
         Width = 1250
-        Height = 669
+        Height = 722
         Margins.Left = 17
         Margins.Top = 0
         Margins.Right = 17
@@ -3953,7 +3953,7 @@ object MainForm: TMainForm
         Left = 17
         Top = 118
         Width = 1250
-        Height = 669
+        Height = 722
         Margins.Left = 17
         Margins.Top = 0
         Margins.Right = 17
@@ -4078,7 +4078,7 @@ object MainForm: TMainForm
         Left = 17
         Top = 118
         Width = 611
-        Height = 669
+        Height = 722
         Margins.Left = 17
         Margins.Top = 0
         Margins.Right = 0
@@ -4111,7 +4111,7 @@ object MainForm: TMainForm
           Left = 0
           Top = 29
           Width = 611
-          Height = 640
+          Height = 693
           Margins.Left = 0
           Margins.Top = 5
           Margins.Right = 0
@@ -4140,7 +4140,7 @@ object MainForm: TMainForm
         Left = 964
         Top = 118
         Width = 303
-        Height = 669
+        Height = 722
         Margins.Left = 0
         Margins.Top = 0
         Margins.Right = 17
@@ -4188,7 +4188,7 @@ object MainForm: TMainForm
           Left = 0
           Top = 385
           Width = 303
-          Height = 284
+          Height = 337
           Margins.Left = 0
           Margins.Top = 5
           Margins.Right = 0
@@ -4244,7 +4244,7 @@ object MainForm: TMainForm
         Left = 645
         Top = 118
         Width = 302
-        Height = 669
+        Height = 722
         Margins.Left = 17
         Margins.Top = 0
         Margins.Right = 17
@@ -4318,7 +4318,7 @@ object MainForm: TMainForm
           Left = 0
           Top = 385
           Width = 302
-          Height = 284
+          Height = 337
           Margins.Left = 0
           Margins.Top = 5
           Margins.Right = 0
@@ -4599,7 +4599,7 @@ object MainForm: TMainForm
         Left = 17
         Top = 118
         Width = 907
-        Height = 669
+        Height = 722
         Margins.Left = 17
         Margins.Top = 0
         Margins.Right = 17
@@ -5032,7 +5032,7 @@ object MainForm: TMainForm
           Left = 0
           Top = 120
           Width = 433
-          Height = 549
+          Height = 602
           Margins.Left = 0
           Margins.Top = 5
           Margins.Right = 5
@@ -5066,7 +5066,7 @@ object MainForm: TMainForm
           Left = 443
           Top = 120
           Width = 464
-          Height = 549
+          Height = 602
           Margins.Left = 5
           Margins.Top = 5
           Margins.Right = 0
@@ -5101,7 +5101,7 @@ object MainForm: TMainForm
         Left = 941
         Top = 118
         Width = 330
-        Height = 669
+        Height = 722
         Margins.Left = 0
         Margins.Top = 0
         Margins.Right = 17
@@ -5164,7 +5164,7 @@ object MainForm: TMainForm
           Left = 0
           Top = 411
           Width = 330
-          Height = 258
+          Height = 311
           Margins.Left = 0
           Margins.Top = 5
           Margins.Right = 0
@@ -5228,7 +5228,7 @@ object MainForm: TMainForm
         Left = 1288
         Top = 118
         Width = 0
-        Height = 671
+        Height = 724
         Margins.Left = 0
         Margins.Top = 0
         Margins.Right = 17
@@ -5251,11 +5251,11 @@ object MainForm: TMainForm
       object MainShape10: TPanel
         AlignWithMargins = True
         Left = 17
-        Top = 118
+        Top = 17
         Width = 1250
-        Height = 669
+        Height = 823
         Margins.Left = 17
-        Margins.Top = 0
+        Margins.Top = 17
         Margins.Right = 17
         Margins.Bottom = 17
         Align = alClient
@@ -5265,6 +5265,7 @@ object MainForm: TMainForm
         Color = 15527148
         ParentBackground = False
         TabOrder = 0
+        ExplicitTop = 118
         ExplicitHeight = 726
         object LbuPanel: TPanel
           Left = 16
@@ -5387,7 +5388,7 @@ object MainForm: TMainForm
             ParentFont = False
             TabOrder = 1
           end
-          object EditAddComment: TMemo
+          object editAddComment: TMemo
             Left = 24
             Top = 432
             Width = 369
@@ -5407,7 +5408,6 @@ object MainForm: TMainForm
             Width = 369
             Height = 126
             Caption = 'Sertica'
-            Enabled = False
             TabOrder = 3
             object editSerticaTerms: TLabeledEdit
               Left = 216
@@ -5513,6 +5513,7 @@ object MainForm: TMainForm
             Font.Name = 'Tahoma'
             Font.Style = []
             ParentFont = False
+            Sorted = True
             TabOrder = 5
             OnSelect = cbSupplierTypeSelect
           end
@@ -5530,6 +5531,7 @@ object MainForm: TMainForm
             Font.Name = 'Tahoma'
             Font.Style = []
             ParentFont = False
+            Sorted = True
             TabOrder = 6
           end
           object cbCurrency: TComboBox
@@ -5546,6 +5548,7 @@ object MainForm: TMainForm
             Font.Name = 'Tahoma'
             Font.Style = []
             ParentFont = False
+            Sorted = True
             TabOrder = 7
           end
           object cbCompany: TComboBox
@@ -5563,6 +5566,7 @@ object MainForm: TMainForm
             Font.Style = []
             ParentFont = False
             TabOrder = 8
+            OnSelect = cbCompanySelect
           end
           object cbAgent: TComboBox
             Left = 240
@@ -5578,6 +5582,7 @@ object MainForm: TMainForm
             Font.Name = 'Tahoma'
             Font.Style = []
             ParentFont = False
+            Sorted = True
             TabOrder = 9
           end
         end
@@ -5877,52 +5882,12 @@ object MainForm: TMainForm
           end
         end
       end
-      object Header10: TPanel
-        Left = 0
-        Top = 0
-        Width = 1284
-        Height = 118
-        Align = alTop
-        BevelOuter = bvNone
-        Color = clWhite
-        ParentBackground = False
-        TabOrder = 1
-        object Panel3: TPanel
-          AlignWithMargins = True
-          Left = 17
-          Top = 15
-          Width = 1032
-          Height = 91
-          Margins.Left = 17
-          Margins.Top = 15
-          Margins.Right = 0
-          Margins.Bottom = 12
-          Align = alLeft
-          BevelOuter = bvNone
-          TabOrder = 0
-          object Cap24: TShape
-            Left = 0
-            Top = 0
-            Width = 585
-            Height = 19
-            Brush.Color = 15527148
-            Pen.Color = clMedGray
-          end
-          object Shape8: TShape
-            Left = 0
-            Top = 17
-            Width = 585
-            Height = 72
-            Pen.Color = clMedGray
-          end
-        end
-      end
     end
   end
   object AppFooter: TPanel
     AlignWithMargins = True
     Left = 5
-    Top = 904
+    Top = 957
     Width = 1292
     Height = 35
     Margins.Left = 5
@@ -5935,6 +5900,7 @@ object MainForm: TMainForm
     ParentColor = True
     ParentDoubleBuffered = False
     TabOrder = 1
+    ExplicitTop = 904
     object Shape7: TShape
       AlignWithMargins = True
       Left = 1073
@@ -6194,7 +6160,7 @@ object MainForm: TMainForm
     ParentColor = False
     TabOrder = 2
     object Separate1: TBevel
-      Left = 140
+      Left = 443
       Top = 7
       Width = 17
       Height = 36
@@ -6203,10 +6169,11 @@ object MainForm: TMainForm
     object btnStart: TSpeedButton
       Left = 17
       Top = 7
-      Width = 36
+      Width = 82
       Height = 36
       Cursor = crHandPoint
       Hint = 'Start'
+      Caption = 'START'
       Flat = True
       Glyph.Data = {
         360C0000424D360C000000000000360000002800000020000000200000000100
@@ -6312,12 +6279,13 @@ object MainForm: TMainForm
       OnClick = btnStartClick
     end
     object btnSettings: TSpeedButton
-      Left = 229
+      Left = 341
       Top = 7
-      Width = 36
+      Width = 89
       Height = 36
       Cursor = crHandPoint
       Hint = 'Settings'
+      Caption = 'SETTINGS'
       Flat = True
       Glyph.Data = {
         360C0000424D360C000000000000360000002800000020000000200000000100
@@ -6423,12 +6391,13 @@ object MainForm: TMainForm
       OnClick = btnSettingsClick
     end
     object btnTabelauReport: TSpeedButton
-      Left = 78
+      Left = 120
       Top = 7
-      Width = 36
+      Width = 90
       Height = 36
       Cursor = crHandPoint
       Hint = 'Tableau Reports'
+      Caption = 'REPORTS'
       Flat = True
       Glyph.Data = {
         360C0000424D360C000000000000360000002800000020000000200000000100
@@ -6532,12 +6501,13 @@ object MainForm: TMainForm
       OnClick = btnTabelauReportClick
     end
     object btnAgeDebt: TSpeedButton
-      Left = 317
+      Left = 466
       Top = 7
-      Width = 36
+      Width = 87
       Height = 36
       Cursor = crHandPoint
       Hint = 'Debtors Aging'
+      Caption = 'DEBTORS'
       Flat = True
       Glyph.Data = {
         360C0000424D360C000000000000360000002800000020000000200000000100
@@ -6643,12 +6613,13 @@ object MainForm: TMainForm
       OnClick = btnAgeDebtClick
     end
     object btnOpenItems: TSpeedButton
-      Left = 377
+      Left = 575
       Top = 7
-      Width = 36
+      Width = 100
       Height = 36
       Cursor = crHandPoint
       Hint = 'Open Items'
+      Caption = 'OPEN ITEMS'
       Flat = True
       Glyph.Data = {
         360C0000424D360C000000000000360000002800000020000000200000000100
@@ -6754,12 +6725,13 @@ object MainForm: TMainForm
       OnClick = btnOpenItemsClick
     end
     object btnOtherTrans: TSpeedButton
-      Left = 436
+      Left = 691
       Top = 7
-      Width = 36
+      Width = 118
       Height = 36
       Cursor = crHandPoint
       Hint = 'Unidentified Transactions'
+      Caption = 'UNIDENTIFIED'
       Flat = True
       Glyph.Data = {
         360C0000424D360C000000000000360000002800000020000000200000000100
@@ -6865,12 +6837,13 @@ object MainForm: TMainForm
       OnClick = btnOtherTransClick
     end
     object btnAddressBook: TSpeedButton
-      Left = 558
+      Left = 929
       Top = 7
-      Width = 36
+      Width = 118
       Height = 36
       Cursor = crHandPoint
       Hint = 'Address Book'
+      Caption = 'ADRESS BOOK'
       Flat = True
       Glyph.Data = {
         360C0000424D360C000000000000360000002800000020000000200000000100
@@ -6976,12 +6949,13 @@ object MainForm: TMainForm
       OnClick = btnAddressBookClick
     end
     object btnTracker: TSpeedButton
-      Left = 497
+      Left = 823
       Top = 7
-      Width = 36
+      Width = 90
       Height = 36
       Cursor = crHandPoint
       Hint = 'Invoice Tracker'
+      Caption = 'TRACKER'
       Flat = True
       Glyph.Data = {
         360C0000424D360C000000000000360000002800000020000000200000000100
@@ -7087,12 +7061,13 @@ object MainForm: TMainForm
       OnClick = btnTrackerClick
     end
     object btnGeneral: TSpeedButton
-      Left = 169
+      Left = 240
       Top = 7
-      Width = 36
+      Width = 85
       Height = 36
       Cursor = crHandPoint
       Hint = 'General Tables'
+      Caption = 'TABLES'
       Flat = True
       Glyph.Data = {
         360C0000424D360C000000000000360000002800000020000000200000000100
@@ -7198,12 +7173,13 @@ object MainForm: TMainForm
       OnClick = btnGeneralClick
     end
     object btnSupplier: TSpeedButton
-      Left = 640
+      Left = 1084
       Top = 7
-      Width = 36
+      Width = 122
       Height = 36
       Cursor = crHandPoint
       Hint = 'Supplier Form'
+      Caption = 'SUPPLIER FORM'
       Flat = True
       Glyph.Data = {
         360C0000424D360C000000000000360000002800000020000000200000000100
@@ -7309,14 +7285,14 @@ object MainForm: TMainForm
       OnClick = btnSupplierClick
     end
     object Separate2: TBevel
-      Left = 290
+      Left = 1061
       Top = 7
       Width = 17
       Height = 36
       Shape = bsLeftLine
     end
     object Separate3: TBevel
-      Left = 617
+      Left = 223
       Top = 7
       Width = 17
       Height = 36
@@ -7325,8 +7301,8 @@ object MainForm: TMainForm
   end
   object PopupMenu: TPopupMenu
     MenuAnimation = [maLeftToRight]
-    Left = 880
-    Top = 898
+    Left = 1232
+    Top = 306
     object Action_ShowApp: TMenuItem
       Caption = 'Show'
       Default = True
@@ -7499,39 +7475,39 @@ object MainForm: TMainForm
   object CurrentTime: TTimer
     Enabled = False
     OnTimer = CurrentTimeTimer
-    Left = 200
-    Top = 896
+    Left = 1232
+    Top = 808
   end
   object UpTime: TTimer
     Enabled = False
     OnTimer = UpTimeTimer
-    Left = 264
-    Top = 896
+    Left = 1232
+    Top = 752
   end
   object CSVExport: TSaveDialog
     DefaultExt = '*.csv'
     Filter = 'CSV (Delimited)|*.csv'
-    Left = 680
-    Top = 896
+    Left = 1232
+    Top = 456
   end
   object CSVImport: TOpenDialog
     DefaultExt = '*.csv'
     Filter = 'CSV (Delimited)|*.csv'
-    Left = 608
-    Top = 896
+    Left = 1232
+    Top = 504
   end
   object OILoader: TTimer
     Enabled = False
     Interval = 10000
     OnTimer = OILoaderTimer
-    Left = 472
-    Top = 896
+    Left = 1232
+    Top = 600
   end
   object AgeViewPopup: TPopupMenu
     MenuAnimation = [maLeftToRight]
     OnPopup = AgeViewPopupPopup
-    Left = 960
-    Top = 896
+    Left = 1232
+    Top = 256
     object Action_LyncCall: TMenuItem
       Bitmap.Data = {
         36030000424D3603000000000000360000002800000010000000100000000100
@@ -7783,8 +7759,8 @@ object MainForm: TMainForm
   end
   object TrackerPopup: TPopupMenu
     MenuAnimation = [maLeftToRight]
-    Left = 1040
-    Top = 896
+    Left = 1232
+    Top = 208
     object Action_ShowRegistered: TMenuItem
       Bitmap.Data = {
         36030000424D3603000000000000360000002800000010000000100000000100
@@ -9004,28 +8980,28 @@ object MainForm: TMainForm
     PopupMenu = PopupMenu
     Visible = True
     OnDblClick = TrayIconDblClick
-    Left = 816
-    Top = 896
+    Left = 1232
+    Top = 360
   end
   object InvoiceScanTimer: TTimer
     Enabled = False
     Interval = 900000
     OnTimer = InvoiceScanTimerTimer
-    Left = 544
-    Top = 896
+    Left = 1232
+    Top = 552
   end
   object InetTimer: TTimer
     Enabled = False
     Interval = 60000
     OnTimer = InetTimerTimer
-    Left = 328
-    Top = 896
+    Left = 1232
+    Top = 704
   end
   object BookPopup: TPopupMenu
     MenuAnimation = [maLeftToRight]
     OnPopup = BookPopupPopup
-    Left = 1112
-    Top = 896
+    Left = 1232
+    Top = 152
     object Action_Cut: TMenuItem
       Bitmap.Data = {
         36030000424D3603000000000000360000002800000010000000100000000100
@@ -9164,13 +9140,13 @@ object MainForm: TMainForm
   object XLExport: TSaveDialog
     DefaultExt = '*.xlsx'
     Filter = 'XLSX (Microsoft Excel)|*.xlsx'
-    Left = 752
-    Top = 896
+    Left = 1232
+    Top = 408
   end
   object OpenPopup: TPopupMenu
     MenuAnimation = [maLeftToRight]
-    Left = 1176
-    Top = 896
+    Left = 1232
+    Top = 96
     object Action_ExportTransactions: TMenuItem
       Caption = 'Export to CSV'
       OnClick = Action_ExportTransactionsClick
@@ -9222,7 +9198,7 @@ object MainForm: TMainForm
     Enabled = False
     Interval = 1800000
     OnTimer = FollowupPopupTimer
-    Left = 392
-    Top = 896
+    Left = 1232
+    Top = 656
   end
 end

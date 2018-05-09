@@ -265,6 +265,11 @@ const
   thCallOpenItems = 1;
   thCallMakeAge   = 2;
 
+  { SERTICA }
+
+  onSertica  = 0;
+  offSertica = 1;
+
   { "ADDRESS BOOK" WORKER ENUMERATION }
 
   adOpenAll     = 0;
