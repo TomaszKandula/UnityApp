@@ -16,14 +16,14 @@ unit Supplier;
 interface
 
 uses
-  Main, Settings, Model, ADODB, SysUtils, StdCtrls, Math;
+  ADODB, SysUtils, StdCtrls, Math, Model;
 
 { ------------------------------------------------------------ ! SUPPLIER FORM CLASS ! ---------------------------------------------------------------------- }
 type
   TSupplierForm = class(TDataTables)
   {$TYPEINFO ON}
   private
-    {  }
+
   public
     { RETRIVE LISTS }
     function  GetAllEntities: _Recordset;
@@ -36,11 +36,15 @@ type
     { WRITE TO DATABASE }
     function  WriteRequest(IsSertica: integer; LegalEntity: string; Currency: string; SupplierType: string; Branch: string): boolean;
     { SUPPORTING METHODS }
+    function  SendEmailToSupplier(CustomerName, LegalEntityName: string; IsSertica: integer; EmailTo: string): boolean;
     function  GenerateTicket: integer;
-    //procedure SendEmailToSupplier;
+    var       GetTicket: string;
   end;
 
 implementation
+
+uses
+  Main, Settings, Mailer;
 
 { ------------------------------------------------------------ ! BASE CLASS METHODS ! ----------------------------------------------------------------------- }
 
@@ -129,6 +133,7 @@ begin
   Check :=-100;
   Limit :=10;
   iCNT  :=0;
+  TicketNumber:=0;
   while Check <> 0 do
   begin
     { GENERATE TICKET }
@@ -155,11 +160,10 @@ var
   LegalEntityRef:  string;
   CurrencyRef:     string;
   SupplierTypeRef: string;
-  GenTicket:       string;
 begin
 
   { INITIALIZE }
-  GenTicket:=IntToStr(GenerateTicket);
+  GetTicket:=IntToStr(GenerateTicket);
   Result:=False;
 
   { FIND NECESSARY KEYS }
@@ -200,7 +204,7 @@ begin
   Columns.Add(TSupplierRequest.AddComment);       Values.Add(MainForm.editAddComment.Text);
   Columns.Add(TSupplierRequest.EmailAddress);     Values.Add(MainForm.editEmailAddress.Text);
   Columns.Add(TSupplierRequest.TicketStatus);     Values.Add('OPEN');
-  Columns.Add(TSupplierRequest.TicketNumber);     Values.Add(GenTicket);
+  Columns.Add(TSupplierRequest.TicketNumber);     Values.Add(GetTicket);
   Columns.Add(TSupplierRequest.RequestStatus);    Values.Add('PENDING');
 
   { OPTIONAL }
@@ -214,6 +218,56 @@ begin
 
   { INSERT NEW RECORD }
   Result:=InsertInto(TblSupplierRequest);
+end;
+
+{ ----------------------------------------------------------------------------------------------------------------------------------- SEND EMAIL NOTIFICATION }
+function TSupplierForm.SendEmailToSupplier(CustomerName, LegalEntityName: string; IsSertica: integer; EmailTo: string): boolean;
+var
+  Mail:      TMailer;
+  AppSet:    TSettings;
+  Doc:       TDocument;
+  HTMLBody:  string;
+begin
+  Result:=False;
+  { PROCEED }
+  AppSet:=TSettings.Create;
+  Mail  :=TMailer.Create;
+  Doc   :=TDocument.Create;
+  try
+    { SET EMAIL DETAILS }
+    if AppSet.TMIG.ReadString(MailerSetup, 'ACTIVE', '') = MailerNTLM  then
+    begin
+      //Mail.XMailer    :=AppSet.TMIG.ReadString(MailerNTLM, 'FROM', '');
+      //Mail.MailTo     :=AppSet.TMIG.ReadString(MailerNTLM, 'TO', '');
+      //Mail.MailRt     :=AppSet.TMIG.ReadString(MailerNTLM, 'REPLY-TO', '');
+    end;
+    if AppSet.TMIG.ReadString(MailerSetup, 'ACTIVE', '') = MailerBASIC then
+    begin
+      //Mail.XMailer    :=AppSet.TMIG.ReadString(MailerBASIC, 'FROM', '');
+      //Mail.MailTo     :=AppSet.TMIG.ReadString(MailerBASIC, 'TO', '');
+      //Mail.MailRt     :=AppSet.TMIG.ReadString(MailerBASIC, 'REPLY-TO', '');
+    end;
+    Mail.MailFrom   :=MainForm.WinUserName + '@' + AppSet.TMIG.ReadString(ApplicationDetails, 'MAIL_DOMAIN', '');
+    Mail.XMailer    :=Mail.MailFrom;
+    Mail.MailTo     :=EmailTo;
+    Mail.MailRt     :='';
+    Mail.MailCc     :='';
+    Mail.MailBcc    :='';
+    Mail.MailSubject:='New Supplier Request for ' + CustomerName;
+    { PLAIN TEXT TO HTML TEMPLATE }
+    HTMLBody        :=Doc.LoadTemplate(AppSet.FLayoutDir + AppSet.TMIG.ReadString(VariousLayouts, 'SUPPLIERNOTF', '') + '.html');
+    HTMLBody        :=StringReplace(HTMLBody, '{ADDR_LBU}',  LegalEntityName, [rfReplaceAll]);
+    HTMLBody        :=StringReplace(HTMLBody, '{ADDR_DATA}', CustomerName,    [rfReplaceAll]);
+    HTMLBody        :=StringReplace(HTMLBody, '{LINK}',      AppSet.TMIG.ReadString(VariousLayouts, 'TICKET_PATH', '') + GetTicket + '&sertica=' + IntToStr(IsSertica), [rfReplaceAll]);
+    { ASSIGN PREPARED HTML }
+    Mail.MailBody   :=HTMLBody;
+    { SEND }
+    Result:=Mail.SendNow;
+  finally
+    AppSet.Free;
+    Mail.Free;
+    Doc.Free;
+  end;
 end;
 
 end.

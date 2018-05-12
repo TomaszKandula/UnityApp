@@ -164,7 +164,6 @@ type                                                            (* GUI | MAIN TH
     valRISKA: TLabel;
     valRISKB: TLabel;
     valRISKC: TLabel;
-    Shape1: TShape;
     StatBar_CAP1: TLabel;
     StatBar_TXT1: TLabel;
     StatBar_CAP2: TLabel;
@@ -258,17 +257,12 @@ type                                                            (* GUI | MAIN TH
     Text54L2: TLabel;
     MainShape6: TPanel;
     AppFooter: TPanel;
-    Shape2: TShape;
-    Shape3: TShape;
     StatBar_CAP3: TLabel;
     StatBar_TXT3: TLabel;
-    Shape4: TShape;
     StatBar_CAP4: TLabel;
     StatBar_TXT4: TLabel;
-    Shape5: TShape;
     StatBar_CAP5: TLabel;
     StatBar_TXT5: TLabel;
-    Shape7: TShape;
     CurrentTime: TTimer;
     UpTime: TTimer;
     txtInfo1: TLabel;
@@ -516,12 +510,16 @@ type                                                            (* GUI | MAIN TH
     btnOpenItems: TSpeedButton;
     btnOtherTrans: TSpeedButton;
     btnAddressBook: TSpeedButton;
-    AppHeader: TGroupBox;
     btnTracker: TSpeedButton;
     btnGeneral: TSpeedButton;
     btnSupplier: TSpeedButton;
     Separate2: TBevel;
     Separate3: TBevel;
+    Separate4: TBevel;
+    AppHeader: TPanel;
+    Bevel1: TBevel;
+    Bevel2: TBevel;
+    Bevel3: TBevel;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -1190,7 +1188,7 @@ begin
   { FIXED }
   Font.Name  :='Tahoma';
   Font.Size  :=10;
-  Font.Color :=clGray;
+  Font.Color :=clBlack;
   { NON-FIXED }
   Font.Style :=Format;
   Caption    :=StrText;
@@ -1845,7 +1843,7 @@ begin
     if not IsError then
     begin
       LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: Data has been exported successfully!');
-      SendMessage(MainForm.Handle, WM_GETINFO, 1, LPARAM(PChar('Address Book have been exported successfully!')));
+      SendMessage(MainForm.Handle, WM_GETINFO, 1, LPARAM(PChar('Data have been exported successfully!')));
     end;
     CSVData.Free;
     MainForm.ExecMessage(True, 10, stReady);
@@ -2278,16 +2276,6 @@ begin
 
     { HIDE ALL TABSHEETS }
     for iCNT:=0 to MyPages.PageCount - 1 do MyPages.Pages[iCNT].TabVisible:=False;
-    {
-    TabSheet1.Caption:=AppSettings.TMIG.ReadString(TabSheetsNames, 'TAB1', 'TAB1');
-    TabSheet2.Caption:=AppSettings.TMIG.ReadString(TabSheetsNames, 'TAB2', 'TAB2');
-    TabSheet3.Caption:=AppSettings.TMIG.ReadString(TabSheetsNames, 'TAB3', 'TAB3');
-    TabSheet4.Caption:=AppSettings.TMIG.ReadString(TabSheetsNames, 'TAB4', 'TAB4');
-    TabSheet5.Caption:=AppSettings.TMIG.ReadString(TabSheetsNames, 'TAB5', 'TAB5');
-    TabSheet6.Caption:=AppSettings.TMIG.ReadString(TabSheetsNames, 'TAB6', 'TAB6');
-    TabSheet7.Caption:=AppSettings.TMIG.ReadString(TabSheetsNames, 'TAB7', 'TAB7');
-    TabSheet8.Caption:=AppSettings.TMIG.ReadString(TabSheetsNames, 'TAB8', 'TAB8');
-    }
 
     { ----------------------------------------------------- ! CAPTIONS FOR ALL SHAPES ! --------------------------------------------------------------------- }
 
@@ -2442,11 +2430,9 @@ begin
   LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Application version = ' + AppVersion);
   LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: User SID = ' + GetCurrentUserSid);
 
-  { TIME ON STATBAR }
+  { ---------------------------------------------------------------------------------------------------------------------------------------- START ALL TIMERS }
   UpTime.Enabled     :=True;
   CurrentTime.Enabled:=True;
-
-  { START CHECKERS }
   SwitchTimers(tmEnabled);
 
 end;
@@ -2482,7 +2468,7 @@ end;
 procedure TMainForm.FormShow(Sender: TObject);
 begin
   FormResize(self);
-  (* CustomPanelBorders(Header1, clWhite, clRed, clRed, clRed, clRed); TPANEL TEST LINE *)
+  AppHeader.PanelBorders(clWhite, clSkyBlue, clWhite, clWhite, clWhite);
   MainForm.sgCoCodes.SetColWidth       (10, 30);
   MainForm.sgPmtTerms.SetColWidth      (10, 30);
   MainForm.sgPaidInfo.SetColWidth      (10, 30);
@@ -2491,6 +2477,10 @@ begin
   MainForm.sgOpenItems.SetColWidth     (10, 20);
   MainForm.sgAddressBook.SetColWidth   (10, 20);
   MainForm.sgInvoiceTracker.SetColWidth(10, 20);
+
+  {  }
+  sgAgeView.RowHeights[0]:=30;
+
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------ MAIN FORM RESIZE }
@@ -3330,18 +3320,32 @@ procedure TMainForm.cbSupplierTypeSelect(Sender: TObject);
 begin
   if cbSupplierType.Text = 'Sertica' then
   begin
+    { ALLOW WRITE }
     editSerticaHandlingOrder.ReadOnly:=False;
     editSerticaUnits.ReadOnly:=False;
     editSerticaBuyOrder.ReadOnly:=False;
     editSerticaTerms.ReadOnly:=False;
+    { COLOR TO WHITE }
+    editSerticaHandlingOrder.Color:=clCream;
+    editSerticaUnits.Color:=clCream;
+    editSerticaBuyOrder.Color:=clCream;
+    editSerticaTerms.Color:=clCream;
+    { ARROW OR BEAM }
     SerticaGroup.Cursor:=crDefault;
   end
   else
   begin
+    { READ ONLY }
     editSerticaHandlingOrder.ReadOnly:=True;
     editSerticaUnits.ReadOnly:=True;
     editSerticaBuyOrder.ReadOnly:=True;
     editSerticaTerms.ReadOnly:=True;
+    { COLOR TO WHITE }
+    editSerticaHandlingOrder.Color:=clWhite;
+    editSerticaUnits.Color:=clWhite;
+    editSerticaBuyOrder.Color:=clWhite;
+    editSerticaTerms.Color:=clWhite;
+    { "NO" CURSOR }
     SerticaGroup.Cursor:=crNo;
   end;
 end;
@@ -4350,86 +4354,86 @@ end;
 
 procedure TMainForm.ResetTabsheetButtons;
 begin
-  btnStart.AllowAllUp:=False;
-  btnTabelauReport.AllowAllUp:=False;
-  btnGeneral.AllowAllUp:=False;
-  btnSettings.AllowAllUp:=False;
-  btnAgeDebt.AllowAllUp:=False;
-  btnOpenItems.AllowAllUp:=False;
-  btnOtherTrans.AllowAllUp:=False;
-  btnTracker.AllowAllUp:=False;
-  btnAddressBook.AllowAllUp:=False;
-  btnSupplier.AllowAllUp:=False;
+  btnStart.Font.Style:=[];
+  btnTabelauReport.Font.Style:=[];
+  btnAgeDebt.Font.Style:=[];
+  btnTracker.Font.Style:=[];
+  btnAddressBook.Font.Style:=[];
+  btnOpenItems.Font.Style:=[];
+  btnOtherTrans.Font.Style:=[];
+  btnGeneral.Font.Style:=[];
+  btnSettings.Font.Style:=[];
+  btnSupplier.Font.Style:=[];
 end;
 
 procedure TMainForm.btnStartClick(Sender: TObject);
 begin
   MyPages.ActivePage:=TabSheet9;
   ResetTabsheetButtons;
-  btnStart.AllowAllUp:=True;
+  btnStart.Font.Style:=[fsBold];
 end;
 
 procedure TMainForm.btnTabelauReportClick(Sender: TObject);
 begin
   MyPages.ActivePage:=TabSheet5;
   ResetTabsheetButtons;
-  btnTabelauReport.AllowAllUp:=True;
+  btnTabelauReport.Font.Style:=[fsBold];
 end;
 
 procedure TMainForm.btnGeneralClick(Sender: TObject);
 begin
   MyPages.ActivePage:=TabSheet7;
   ResetTabsheetButtons;
-  btnGeneral.AllowAllUp:=True;
+  btnGeneral.Font.Style:=[fsBold];
 end;
 
 procedure TMainForm.btnSettingsClick(Sender: TObject);
 begin
   MyPages.ActivePage:=TabSheet8;
   ResetTabsheetButtons;
-  btnSettings.AllowAllUp:=True;
+  btnSettings.Font.Style:=[fsBold];
 end;
 
 procedure TMainForm.btnAgeDebtClick(Sender: TObject);
 begin
   MyPages.ActivePage:=TabSheet1;
   ResetTabsheetButtons;
-  btnAgeDebt.AllowAllUp:=True;
+  btnAgeDebt.Font.Style:=[fsBold];
 end;
 
 procedure TMainForm.btnOpenItemsClick(Sender: TObject);
 begin
   MyPages.ActivePage:=TabSheet2;
   ResetTabsheetButtons;
-  btnOpenItems.AllowAllUp:=True;
+  btnOpenItems.Font.Style:=[fsBold];
 end;
 
 procedure TMainForm.btnOtherTransClick(Sender: TObject);
 begin
   MyPages.ActivePage:=TabSheet6;
   ResetTabsheetButtons;
-  btnOtherTrans.AllowAllUp:=True;
+  btnOtherTrans.Font.Style:=[fsBold];
 end;
 
 procedure TMainForm.btnTrackerClick(Sender: TObject);
 begin
   MyPages.ActivePage:=TabSheet4;
   ResetTabsheetButtons;
-  btnTracker.AllowAllUp:=True;
+  btnTracker.Font.Style:=[fsBold];
 end;
 
 procedure TMainForm.btnAddressBookClick(Sender: TObject);
 begin
   MyPages.ActivePage:=TabSheet3;
   ResetTabsheetButtons;
-  btnAddressBook.AllowAllUp:=True;
+  btnAddressBook.Font.Style:=[fsBold];
 end;
 
 procedure TMainForm.btnSupplierClick(Sender: TObject);
 begin
   MyPages.ActivePage:=TabSheet10;
   ResetTabsheetButtons;
-  btnSupplier.AllowAllUp:=True;
+  btnSupplier.Font.Style:=[fsBold];
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------ SUPPLIER BUTTONS }
@@ -4457,13 +4461,41 @@ end;
 procedure TMainForm.btnSupplierSubmitClick(Sender: TObject);
 var
   Vendor: TSupplierForm;
+  Return: boolean;
+  Check:  integer;
 begin
   Vendor:=TSupplierForm.Create(DbConnect);
+  Check:=0;
   try
+    { CHECK IF FILEDS ARE NOT EMPTY }
+    if (editCustomerName.Text = '') or (editEmailAddress.Text = '') then Dec(Check);
+    { WRITE TO DATABASE AND SEND EMAIL NOTIFICATION }
     if SerticaGroup.Cursor = crNo then
-      Vendor.WriteRequest(offSertica, cbCompany.Text, cbCurrency.Text, cbSupplierType.Text, cbAgent.Text)
-        else
-          Vendor.WriteRequest(onSertica, cbCompany.Text, cbCurrency.Text, cbSupplierType.Text, cbAgent.Text);
+    begin
+      Return:=Vendor.WriteRequest(offSertica, cbCompany.Text, cbCurrency.Text, cbSupplierType.Text, cbAgent.Text);
+      if not Return then
+        Inc(Check)
+          else
+          begin
+            Return:=Vendor.SendEmailToSupplier(edtCustomerName.Text, cbCompany.Text, offSertica, editEmailAddress.Text);
+            if not Return then Inc(Check);
+          end;
+    end
+    else
+    begin
+      Return:=Vendor.WriteRequest(onSertica, cbCompany.Text, cbCurrency.Text, cbSupplierType.Text, cbAgent.Text);
+      if not Return then
+        Inc(Check)
+          else
+          begin
+            Return:=Vendor.SendEmailToSupplier(edtCustomerName.Text, cbCompany.Text, onSertica, editEmailAddress.Text);
+            if not Return then Inc(Check);
+          end;
+    end;
+    { SHOW MESSAGE }
+    if Check = 0 then MsgCall(mcInfo,  'New supplier request has been established and Supplier has been notified.');
+    if Check > 0 then MsgCall(mcError, 'Cannot process the request. Please contact IT support.');
+    if Check < 0 then MsgCall(mcWarn,  'Cannot process the request. Please make sure that all the required fields are filled.');
   finally
     Vendor.Free;
   end;

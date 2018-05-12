@@ -38,10 +38,8 @@ type
 type
   TActionsForm = class(TForm)
     OpenItemsGrid: TStringGrid;
-    StatusBar: TStatusBar;
     DailyCom: TMemo;
     HistoryGrid: TStringGrid;
-    InnerBox: TShape;
     btnCallCustomer: TSpeedButton;
     btnNext: TSpeedButton;
     GeneralCom: TMemo;
@@ -82,6 +80,8 @@ type
     btnCopyCustNumber: TSpeedButton;
     btnCopyPerson: TSpeedButton;
     btnCopyEmail: TSpeedButton;
+    PanelStatusBar: TPanel;
+    SimpleText: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure OpenItemsGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
@@ -773,7 +773,7 @@ end;
 procedure TActionsForm.FormActivate(Sender: TObject);
 begin
   GetData(OpenItemsGrid, HistoryGrid, MainForm.sgOpenItems);
-  StatusBar.SimpleText:='Open items last update: ' + MainForm.OpenItemsUpdate + '.';
+  SimpleText.Caption:='Open items last update: ' + MainForm.OpenItemsUpdate + '.';
   SetControls;
 end;
 

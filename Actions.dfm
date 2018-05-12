@@ -24,21 +24,11 @@ object ActionsForm: TActionsForm
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
-  object StatusBar: TStatusBar
-    Left = 0
-    Top = 689
-    Width = 940
-    Height = 19
-    Color = 15527148
-    Panels = <>
-    SimplePanel = True
-    SizeGrip = False
-  end
   object PanelMiddle: TPanel
     Left = 0
-    Top = 177
+    Top = 168
     Width = 940
-    Height = 291
+    Height = 281
     Margins.Left = 5
     Margins.Top = 0
     Margins.Right = 5
@@ -47,13 +37,15 @@ object ActionsForm: TActionsForm
     BevelOuter = bvNone
     Color = 15527148
     ParentBackground = False
-    TabOrder = 1
+    TabOrder = 0
+    ExplicitTop = 177
+    ExplicitHeight = 291
     object OpenItemsGrid: TStringGrid
       AlignWithMargins = True
       Left = 5
       Top = 0
       Width = 930
-      Height = 281
+      Height = 271
       Margins.Left = 5
       Margins.Top = 0
       Margins.Right = 5
@@ -62,7 +54,6 @@ object ActionsForm: TActionsForm
       ColCount = 13
       DefaultColWidth = 10
       DefaultRowHeight = 17
-      DrawingStyle = gdsGradient
       RowCount = 2
       GradientEndColor = 15527148
       Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
@@ -72,6 +63,7 @@ object ActionsForm: TActionsForm
       OnMouseWheelDown = OpenItemsGridMouseWheelDown
       OnMouseWheelUp = OpenItemsGridMouseWheelUp
       OnSelectCell = OpenItemsGridSelectCell
+      ExplicitHeight = 281
       ColWidths = (
         10
         119
@@ -90,7 +82,7 @@ object ActionsForm: TActionsForm
   end
   object PanelBottom: TPanel
     Left = 0
-    Top = 468
+    Top = 449
     Width = 940
     Height = 221
     Margins.Left = 5
@@ -101,7 +93,8 @@ object ActionsForm: TActionsForm
     BevelOuter = bvNone
     Color = 15527148
     ParentBackground = False
-    TabOrder = 2
+    TabOrder = 1
+    ExplicitTop = 468
     object ButtonPanel: TPanel
       Left = 0
       Top = 180
@@ -265,7 +258,6 @@ object ActionsForm: TActionsForm
         ColCount = 9
         DefaultColWidth = 10
         DefaultRowHeight = 17
-        DrawingStyle = gdsGradient
         RowCount = 10
         GradientEndColor = 15527148
         Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
@@ -277,6 +269,16 @@ object ActionsForm: TActionsForm
         OnMouseWheelDown = HistoryGridMouseWheelDown
         OnMouseWheelUp = HistoryGridMouseWheelUp
         OnSelectCell = HistoryGridSelectCell
+        ColWidths = (
+          10
+          96
+          89
+          81
+          75
+          72
+          64
+          53
+          42)
       end
     end
     object DailyPanel: TPanel
@@ -393,34 +395,21 @@ object ActionsForm: TActionsForm
   object PanelTop: TPanel
     AlignWithMargins = True
     Left = 0
-    Top = 5
+    Top = 0
     Width = 940
-    Height = 172
+    Height = 153
     Margins.Left = 0
-    Margins.Top = 5
+    Margins.Top = 0
     Margins.Right = 0
-    Margins.Bottom = 0
+    Margins.Bottom = 15
     Align = alTop
     BevelOuter = bvNone
-    Color = 15527148
+    Color = clWhite
     ParentBackground = False
-    TabOrder = 3
-    object InnerBox: TShape
-      AlignWithMargins = True
-      Left = 5
-      Top = 5
-      Width = 930
-      Height = 156
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
-      Align = alTop
-      Pen.Color = clMedGray
-    end
+    TabOrder = 2
     object GroupCustomerDetails: TGroupBox
-      Left = 19
-      Top = 16
+      Left = 18
+      Top = 8
       Width = 902
       Height = 129
       Caption = 'Customer details'
@@ -463,15 +452,44 @@ object ActionsForm: TActionsForm
       object btnSaveCustDetails: TSpeedButton
         AlignWithMargins = True
         Left = 591
-        Top = 86
+        Top = 89
         Width = 82
-        Height = 21
+        Height = 19
         Cursor = crHandPoint
         Margins.Left = 0
         Margins.Top = 0
         Margins.Right = 0
         Margins.Bottom = 0
-        Caption = 'Save Now'
+        Caption = 'Save'
+        Flat = True
+        Glyph.Data = {
+          36030000424D3603000000000000360000002800000010000000100000000100
+          18000000000000030000C40E0000C40E00000000000000000000C0CB77B4C25C
+          CDD59AF7F6FFF0F0EFF0F0EFF0F0EFF0F0EFF0F0EFF0F0EFF0F0EFF0F0EFF7F5
+          FECDD59AB4C25CC0CB77B7C463B5C25DCDD59AF8F9FFE4DDD7E2DAD5E2DBD5E2
+          DBD5E2DBD5E2DBD5E2DAD5E4DCD7F8F8FFCDD59AB5C25DB7C463B8C565B5C25D
+          CDD59AF8F7FFEDEAE8EDEAE7EDEAE8EDEAE8EDEAE8EDEAE8EDEAE7EDEBE8F8F6
+          FFCDD59AB5C25DB8C565B8C565B5C25DCDD59AF8F7FFEAE5E2E9E4E0E9E4E0E9
+          E4E0E9E4E0E9E4E0E9E4E0EAE5E1F8F7FFCDD59AB5C25DB8C565B8C565B5C25D
+          CDD59AF8F9FFE7E2DDE6E0DBE6E0DCE6E0DCE6E0DCE6E0DCE6E0DBE7E1DCF8F7
+          FFCDD59AB5C25DB8C565B8C565B5C25DCED69DFBFAFFF1EEF2F1EDF1F1EEF2F1
+          EEF2F1EEF2F1EEF2F1EDF1F1EEF2FBF9FFCED69EB5C25DB8C565B8C565B6C361
+          C2CD7FD8DDB0D6DCACD6DCACD6DCACD6DCACD6DCACD6DCACD6DCACD6DCACD8DD
+          B0C2CD80B6C361B8C565B8C565B8C565B6C361B3C15BB3C15BB3C15BB3C15BB3
+          C15BB3C15BB3C15BB3C15BB3C15BB3C15BB6C361B8C565B8C565B8C565B8C565
+          B8C565B8C565B8C565B8C565B8C565B8C565B8C565B8C565B8C565B8C565B8C5
+          65B8C565B8C565B8C565B8C565B8C565B8C565B8C565B8C565B8C565B8C565B8
+          C565B8C565B8C565B8C565B8C565B8C565B8C565B8C565B8C565B8C565B8C565
+          B8C565B5C25EB3C159B3C159B3C159B3C159B3C159B3C059B2C059B3C159B5C2
+          5EB8C565B8C565B8C565B8C565B8C565B5C35FCAD38DDBE0BBD9DEB6D9DEB6D9
+          DEB6D9DEB6E3EBC0EBF4C8E2E8C2CAD38DB5C35FB8C565B7C464B8C565B8C565
+          B3C159DBE0B9F8F7FFF5F4F9F5F4F9F5F4F9FEFEFFAEA49C6D5C4ACFC7CAE0E5
+          C0B3C159B7C464B3C05BB8C565B8C565B3C15ADADEB5F5F4F9F2F2F2F2F2F2F1
+          F1F1FDFEFF9F9485543F24C5BEB8E0E5BDB4C25AA9B946FAFBF4B7C463B8C565
+          B3C15ADADEB5F5F4F9F2F2F2F2F2F2F1F1F1FDFEFF958978412A0BBEB6AFE0E6
+          BDA5B53BF8FAF1FFFFFFC0CB77B7C463B3C15ADADEB5F5F4F9F2F2F2F2F2F2F2
+          F1F1F3F4F4ECECEBE6E4E2F2F2F7D6DDAEF5F7EAFFFFFFFFFFFF}
+        Spacing = 15
         OnClick = btnSaveCustDetailsClick
       end
       object Text9: TLabel
@@ -555,13 +573,42 @@ object ActionsForm: TActionsForm
         Left = 309
         Top = 86
         Width = 82
-        Height = 21
+        Height = 22
         Cursor = crHandPoint
         Margins.Left = 0
         Margins.Top = 0
         Margins.Right = 0
         Margins.Bottom = 0
         Caption = 'Edit'
+        Flat = True
+        Glyph.Data = {
+          36030000424D3603000000000000360000002800000010000000100000000100
+          18000000000000030000C40E0000C40E000000000000000000006F655AC5E4FB
+          D9ECFEFCFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+          FFFFFFFFFFFFFFFFFFFFC5E4FB8FC0ED99CBFBA3C8FD1EB3ECFFFFFFFFFFFFFF
+          FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFD9ECFF99CBFC
+          78C7F666CDF327C6EC1074EBFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+          FFFFFFFFFFFFFFFFFFFFFCFEFEA4C8FD66CDF30786EB1496EC10B4EA1278ECFF
+          FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF1EB2EC
+          27C6EC1597EB1981ED1993EC10B4EA1278ECFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+          FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF1073EB10B4EA1993EC1982ED1993EC10
+          B4EA1278ECFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+          FFFFFF1278EC10B4EA1993EC1982ED1993EC10B4EA1278ECFFFFFFFFFFFFFFFF
+          FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF1278EC10B4EA1993EC19
+          82ED1993EC10B4EA1278ECFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+          FFFFFFFFFFFFFFFFFF1278EC10B4EA1993EC1982ED1993EC10B4EA1278ECFFFF
+          FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF1278EC10
+          B4EA1993EC1982ED1993EC10B4EA0F77EBFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+          FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF1278EC10B4EA1993EC1982ED1390EC0FAE
+          EECAE1E3FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+          FFFF1278EC10B4EA1290EC1386F0E3F1E7C3D5D5C5DFDAFFFFFFFFFFFFFFFFFF
+          FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0F77EB0FAEEEE4F1E7C4D6
+          D6CDE7DEACABC16977E3FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+          FFFFFFFFFFFFFFFFCAE1E3C3D5D5CDE7DEB4B2C32D40DA4152D4FFFFFFFFFFFF
+          FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFC5DEDAACAC
+          C12D40DA4253D56471DCFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+          FFFFFFFFFFFFFFFFFFFFFFFFFFFF6A77E34152D46471DCFBFCFE}
+        Spacing = 15
         OnClick = btnEditClick
       end
       object btnCopyCustName: TSpeedButton
@@ -760,9 +807,9 @@ object ActionsForm: TActionsForm
         Left = 130
         Top = 86
         Width = 156
-        Height = 21
+        Height = 22
         Cursor = crHandPoint
-        Style = csDropDownList
+        Style = csOwnerDrawFixed
         Color = clWhite
         ItemIndex = 0
         Sorted = True
@@ -771,6 +818,29 @@ object ActionsForm: TActionsForm
         Items.Strings = (
           '{data}')
       end
+    end
+  end
+  object PanelStatusBar: TPanel
+    AlignWithMargins = True
+    Left = 0
+    Top = 680
+    Width = 940
+    Height = 28
+    Margins.Left = 0
+    Margins.Top = 10
+    Margins.Right = 0
+    Margins.Bottom = 0
+    Align = alBottom
+    BevelOuter = bvNone
+    Color = clWhite
+    ParentBackground = False
+    TabOrder = 3
+    object SimpleText: TLabel
+      Left = 7
+      Top = 8
+      Width = 34
+      Height = 13
+      Caption = '{TEXT}'
     end
   end
 end
