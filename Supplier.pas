@@ -180,7 +180,7 @@ begin
   Columns.Add(TCurrencies.Id);
   CustFilter:=WHERE + TCurrencies.Iso + EQUAL + QuotedStr(Currency);
   OpenTable(TblCurrencies);
-  if DataSet.RecordCount > 0 then CurrencyRef:=DataSet.Fields[TCurrencies.Id].Value;      ///!!!
+  if DataSet.RecordCount = 1 then CurrencyRef:=DataSet.Fields[TCurrencies.Id].Value;
 
   { SUPPLIER TYPE }
   CleanUp;
@@ -228,7 +228,6 @@ var
   Doc:       TDocument;
   HTMLBody:  string;
 begin
-  Result:=False;
   { PROCEED }
   AppSet:=TSettings.Create;
   Mail  :=TMailer.Create;

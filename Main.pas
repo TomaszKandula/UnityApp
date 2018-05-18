@@ -728,6 +728,7 @@ type                                                            (* GUI | MAIN TH
     procedure TabSheet10Show(Sender: TObject);
     procedure cbSupplierTypeSelect(Sender: TObject);
     procedure cbCompanySelect(Sender: TObject);
+    procedure sgAgeViewKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     { ------------------------------------------------------------- ! HELPERS ! ----------------------------------------------------------------------------- }
   private
     { GENERAL }
@@ -760,6 +761,7 @@ type                                                            (* GUI | MAIN TH
     var AccessLevel         :  string;
     var AccessMode          :  string;
     var OpenItemsUpdate     :  string;
+    var OpenItemsStatus     :  string;
     var ConnLastError       :  cardinal;
     { FOR "FOLLOW-UP" COLOR PICKER }
     property TodayFColor:  TColor read GetTodayFColor  write SetTodayFColor;
@@ -2368,6 +2370,7 @@ begin
     Transactions:=TTransactions.Create(DbConnect);
     try
       OpenItemsUpdate:=Transactions.GetDateTime(gdDateTime);
+      OpenItemsStatus:=Transactions.GetStatus(OpenItemsUpdate);
       if OpenItemsUpdate = '' then
       begin
         MsgCall(mcWarn, 'Cannot find open items in database. Please contact IT support.');
@@ -2477,10 +2480,6 @@ begin
   MainForm.sgOpenItems.SetColWidth     (10, 20);
   MainForm.sgAddressBook.SetColWidth   (10, 20);
   MainForm.sgInvoiceTracker.SetColWidth(10, 20);
-
-  {  }
-  sgAgeView.RowHeights[0]:=30;
-
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------ MAIN FORM RESIZE }
@@ -3812,10 +3811,64 @@ begin
   if (Key = 67) and (Shift = [ssCtrl]) then sgOpenItems.CopyCutPaste(adCopy);
 end;
 
+{ ------------------------------------------------------------ ! EDIT AGE VIEW COLUMN ! --------------------------------------------------------------------- }
+
+{ ------------------------------------------------------------------------------------------------------------------------------------------ EDIT FREE COLUMN }
 procedure TMainForm.sgAgeViewKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
+  { ALLOW COPYING }
   if (Key = 67) and (Shift = [ssCtrl]) then sgAgeView.CopyCutPaste(adCopy);
+  { ALLOW EDITING FREE COLUMNS }
+  if (
+       (sgAgeView.ReturnColumn(TSnapshots.FREE1, 1, 1) = sgAgeView.Col)
+         or
+           (sgAgeView.ReturnColumn(TSnapshots.FREE2, 1, 1) = sgAgeView.Col)
+     )
+     and
+     (
+       sgAgeView.Row > 0
+     )
+       then
+         sgAgeView.Options:=sgAgeView.Options + [goEditing]
+       else
+         sgAgeView.Options:=sgAgeView.Options - [goEditing];
+  { WRITE INTO DATABASE }
+  if Key = VK_RETURN then
+  begin
+    TTFreeColumn.Create(
+                         sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.FREE1, 1, 1), sgAgeView.Row],
+                         colFree1,
+                         sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.CUID,  1, 1), sgAgeView.Row]
+                       );
+    sgAgeView.Options:=sgAgeView.Options - [goEditing];
+  end;
 end;
+
+procedure TMainForm.sgAgeViewKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  { DELETE GIVEN RECORD }
+  if Key = VK_DELETE then
+  begin
+    TTFreeColumn.Create(
+                         ' ',
+                         colFree1,
+                         sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.CUID,  1, 1), sgAgeView.Row]
+                       );
+    sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.FREE1, 1, 1), sgAgeView.Row]:='';
+    sgAgeView.Options:=sgAgeView.Options - [goEditing];
+  end;
+  { QUIT EDITING }
+  if Key = VK_ESCAPE then sgAgeView.Options:=sgAgeView.Options - [goEditing];
+end;
+
+
+
+
+
+
+
+
+////////////// REFACTOR!!!!
 
 { ------------------------------------------------------------------------------------------------------------------ ADDRESS BOOK | RESTRICT TELEPHONE COLUMN }
 procedure TMainForm.sgAddressBookKeyPress(Sender: TObject; var Key: Char);
@@ -3873,6 +3926,13 @@ begin
   { ALLOW EDITING | F2 }
   if Key = VK_F2 then sgAddressBook.Options:=sgAddressBook.Options + [goEditing];
 end;
+
+////////////// REFACTOR!!!!
+
+
+
+
+
 
 { -------------------------------------------------------------------------------------------------------------------------------------- UPDATE SECTION VALUE }
 procedure TMainForm.sgListSectionKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -4565,6 +4625,8 @@ end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------- AGE VIEW | LOAD }
 procedure TMainForm.btnLoadAgeViewClick(Sender: TObject);
+var
+  iCNT: integer;
 begin
   { WAIT UNTIL READY }
   if not (StatBar_TXT1.Caption = stReady) then
@@ -4580,6 +4642,9 @@ begin
     GroupIdSel:=GroupList[GroupListBox.ItemIndex, 0];
     GroupNmSel:=GroupList[GroupListBox.ItemIndex, 1];
     AgeDateSel:=GroupListDates.Text;
+    { REMOVE FILTERS }
+    for iCNT:=1 to sgAgeView.RowCount - 1 do sgAgeView.RowHeights[iCNT]:=sgRowHeight;
+    FilterForm.FilterClearAll;
     { SWITCH OFF ALL TIMERS }
     MainForm.SwitchTimers(tmDisabled);
     { LOAD AGE VIEW FOR SELECTED GROUP }

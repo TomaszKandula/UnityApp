@@ -45,7 +45,12 @@ const
   LicenceFile:    string    = 'Unity.licx';
   GridImgFile:    string    = 'Unity.img';
   ReleaseFile:    string    = 'Release.pak';
-  CurrentMutex:   PWideChar = 'UNITY_10032';    { WARNING! INCREASE IT WITH EACH NEW RELEASE }
+  CurrentMutex:   PWideChar = 'UNITY_10046';    { WARNING! INCREASE IT WITH EACH NEW RELEASE }
+
+  { FREE COLUMNS }
+
+  colFree1 = 0;
+  colFree2 = 1;
 
   { SPLASH SCREEN }
 
@@ -363,6 +368,12 @@ const
   TblSupplierRequest = 'SupplierRequest';
   TblSupplierType    = 'SupplierTypes';
   TblCurrencies      = 'Currencies';
+  TblSSISMaster      = 'SSISMaster';
+
+  { SSIS STATUS CODES }
+
+  gsRunning    = 'Running';
+  gsCompleted  = 'Completed';
 
   { STORED PROCEDURES }
 

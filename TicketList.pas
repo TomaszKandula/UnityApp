@@ -16,15 +16,15 @@ unit TicketList;
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, Buttons, StdCtrls, ExtCtrls, Main;
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, Buttons, StdCtrls, ExtCtrls, Main, Grids;
 
 { ------------------------------------------------------------------ ! MAIN CLASS ! ------------------------------------------------------------------------- }
 type
   TTicketForm = class(TForm)
     AppMain: TShape;
-    TicketList: TListBox;
     btnSelect: TSpeedButton;
     btnCancel: TSpeedButton;
+    sgTicketList: TStringGrid;
     procedure FormCreate(Sender: TObject);
     procedure btnCancelClick(Sender: TObject);
     procedure btnSelectClick(Sender: TObject);

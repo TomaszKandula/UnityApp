@@ -49,12 +49,11 @@ object TicketForm: TTicketForm
     Caption = 'Cancel'
     OnClick = btnCancelClick
   end
-  object TicketList: TListBox
-    Left = 16
+  object sgTicketList: TStringGrid
+    Left = 25
     Top = 16
-    Width = 329
-    Height = 401
-    ItemHeight = 13
+    Width = 320
+    Height = 393
     TabOrder = 0
   end
 end

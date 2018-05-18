@@ -69,7 +69,6 @@ type
     Cust_Phone: TComboBox;
     GroupCustomerDetails: TGroupBox;
     btnSaveCustDetails: TSpeedButton;
-    Text9: TLabel;
     Cust_MailBack: TShape;
     Cust_PersonBack: TShape;
     Cust_NumberBack: TShape;
@@ -82,6 +81,7 @@ type
     btnCopyEmail: TSpeedButton;
     PanelStatusBar: TPanel;
     SimpleText: TLabel;
+    Label1: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure OpenItemsGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
@@ -636,95 +636,14 @@ end;
 
 { ------------------------------------------------------------------------------------------------------------------------ SAVE GENERAL COMMENT INTO DATABASE }
 procedure TActionsForm.SaveGeneralComment;
-var
-  GenText:   TDataTables;
-  Condition: string;
 begin
-  GenText:=TDataTables.Create(MainForm.DbConnect);
-  try
-    GenText.OpenTable(TblGeneral);
-    Condition:=TGeneral.CUID + EQUAL + QuotedStr(CUID);
-    GenText.DataSet.Filter:=Condition;
-    { UPDATE }
-    if not (GenText.DataSet.RecordCount = 0) then
-    begin
-      GenText.CleanUp;
-      { DEFINE COLUMNS, VALUES AND CONDITIONS }
-      GenText.Columns.Add(TGeneral.STAMP);        GenText.Values.Add(DateTimeToStr(Now));             GenText.Conditions.Add(Condition);
-      GenText.Columns.Add(TGeneral.USER_ALIAS);   GenText.Values.Add(UpperCase(MainForm.WinUserName));GenText.Conditions.Add(Condition);
-      GenText.Columns.Add(TGeneral.FIXCOMMENT);   GenText.Values.Add(GeneralCom.Text);                GenText.Conditions.Add(Condition);
-      { EXECUTE }
-      GenText.UpdateRecord(TblGeneral);
-    end
-    else
-    { INSERT NEW }
-    begin
-      GenText.CleanUp;
-      { DEFINE COLUMNS AND VALUES }
-      GenText.Columns.Add(TGeneral.CUID);       GenText.Values.Add(CUID);
-      GenText.Columns.Add(TGeneral.STAMP);      GenText.Values.Add(DateTimeToStr(Now));
-      GenText.Columns.Add(TGeneral.USER_ALIAS); GenText.Values.Add(UpperCase(MainForm.WinUserName));
-      GenText.Columns.Add(TGeneral.FIXCOMMENT); GenText.Values.Add(GeneralCom.Text);
-      GenText.Columns.Add(TGeneral.FOLLOWUP);   GenText.Values.Add('');
-      { EXECUTE }
-      GenText.InsertInto(TblGeneral);
-    end;
-  finally
-    GenText.Free;
-  end;
+  TTGeneralComment.Create(GeneralCom.Text, CUID);
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------- SAVE DAILY COMMENT INTO DATABASE }
 procedure TActionsForm.SaveDailyComment;
-var
-  DailyText: TDataTables;
-  UpdateOK:  boolean;
-  InsertOK:  boolean;
-  Condition: string;
 begin
-  UpdateOK:=False;
-  InsertOK:=False;
-  DailyText:=TDataTables.Create(MainForm.DbConnect);
-  try
-    DailyText.OpenTable(TblDaily);
-    Condition:=TDaily.CUID + EQUAL + QuotedStr(CUID) + _AND + TDaily.AGEDATE + EQUAL + QuotedStr(MainForm.AgeDateSel);
-    DailyText.DataSet.Filter:=Condition;
-    { UPDATE EXISTING COMMENT }
-    if not (DailyText.DataSet.RecordCount = 0) then
-    begin
-      DailyText.CleanUp;
-      { DEFINE COLUMNS, VALUES AND CONDITIONS }
-      DailyText.Columns.Add(TDaily.STAMP);       DailyText.Values.Add(DateTimeToStr(Now));               DailyText.Conditions.Add(Condition);
-      DailyText.Columns.Add(TDaily.USER_ALIAS);  DailyText.Values.Add(UpperCase(MainForm.WinUserName));  DailyText.Conditions.Add(Condition);
-      DailyText.Columns.Add(TDaily.FIXCOMMENT);  DailyText.Values.Add(DailyCom.Text);                    DailyText.Conditions.Add(Condition);
-      { EXECUTE }
-      UpdateOK:=DailyText.UpdateRecord(TblDaily);
-    end
-    else
-    { INSERT NEW RECORD }
-    begin
-      DailyText.CleanUp;
-      { DEFINE COLUMNS AND VALUES }
-      DailyText.Columns.Add(TDaily.GROUP_ID);       DailyText.Values.Add(MainForm.GroupIdSel);
-      DailyText.Columns.Add(TDaily.CUID);           DailyText.Values.Add(CUID);
-      DailyText.Columns.Add(TDaily.AGEDATE);        DailyText.Values.Add(MainForm.AgeDateSel);
-      DailyText.Columns.Add(TDaily.STAMP);          DailyText.Values.Add(DateTimeToStr(Now));
-      DailyText.Columns.Add(TDaily.USER_ALIAS);     DailyText.Values.Add(UpperCase(MainForm.WinUserName));
-      DailyText.Columns.Add(TDaily.EMAIL);          DailyText.Values.Add('0');
-      DailyText.Columns.Add(TDaily.CALLEVENT);      DailyText.Values.Add('0');
-      DailyText.Columns.Add(TDaily.CALLDURATION);   DailyText.Values.Add('0');
-      DailyText.Columns.Add(TDaily.FIXCOMMENT);     DailyText.Values.Add(DailyCom.Text);
-      DailyText.Columns.Add(TDaily.EMAIL_Reminder); DailyText.Values.Add('0');
-      DailyText.Columns.Add(TDaily.EMAIL_AutoStat); DailyText.Values.Add('0');
-      DailyText.Columns.Add(TDaily.EMAIL_ManuStat); DailyText.Values.Add('0');
-      { EXECUTE }
-      InsertOK:=DailyText.InsertInto(TblDaily);
-    end;
-    { REFRESH HISTORY GRID }
-    if (InsertOK) or (UpdateOK) then UpdateHistory(HistoryGrid);
-  finally
-    DailyText.Free;
-  end;
+  TTDailyComment.Create(DailyCom.Text, CUID);
 end;
 
 { ############################################################ ! MAIN THREAD EVENTS ! ####################################################################### }
@@ -761,6 +680,7 @@ begin
   { ------------------------------------------------------------------------------------------------------------------------------------- HISTORY STRING GRID }
   HistoryGrid.RowCount:=2;
   SetHistoryCols(HistoryGrid);
+  PanelTop.PanelBorders(clWhite, clSkyBlue, clWhite, clWhite, clWhite);
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------------- ON SHOW }

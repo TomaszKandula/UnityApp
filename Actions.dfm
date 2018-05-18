@@ -38,8 +38,6 @@ object ActionsForm: TActionsForm
     Color = 15527148
     ParentBackground = False
     TabOrder = 0
-    ExplicitTop = 177
-    ExplicitHeight = 291
     object OpenItemsGrid: TStringGrid
       AlignWithMargins = True
       Left = 5
@@ -63,7 +61,6 @@ object ActionsForm: TActionsForm
       OnMouseWheelDown = OpenItemsGridMouseWheelDown
       OnMouseWheelUp = OpenItemsGridMouseWheelUp
       OnSelectCell = OpenItemsGridSelectCell
-      ExplicitHeight = 281
       ColWidths = (
         10
         119
@@ -94,7 +91,6 @@ object ActionsForm: TActionsForm
     Color = 15527148
     ParentBackground = False
     TabOrder = 1
-    ExplicitTop = 468
     object ButtonPanel: TPanel
       Left = 0
       Top = 180
@@ -409,7 +405,7 @@ object ActionsForm: TActionsForm
     TabOrder = 2
     object GroupCustomerDetails: TGroupBox
       Left = 18
-      Top = 8
+      Top = 12
       Width = 902
       Height = 129
       Caption = 'Customer details'
@@ -451,16 +447,15 @@ object ActionsForm: TActionsForm
       end
       object btnSaveCustDetails: TSpeedButton
         AlignWithMargins = True
-        Left = 591
-        Top = 89
-        Width = 82
-        Height = 19
+        Left = 596
+        Top = 86
+        Width = 25
+        Height = 22
         Cursor = crHandPoint
         Margins.Left = 0
         Margins.Top = 0
         Margins.Right = 0
         Margins.Bottom = 0
-        Caption = 'Save'
         Flat = True
         Glyph.Data = {
           36030000424D3603000000000000360000002800000010000000100000000100
@@ -491,13 +486,6 @@ object ActionsForm: TActionsForm
           F1F1F3F4F4ECECEBE6E4E2F2F2F7D6DDAEF5F7EAFFFFFFFFFFFF}
         Spacing = 15
         OnClick = btnSaveCustDetailsClick
-      end
-      object Text9: TLabel
-        Left = 443
-        Top = 89
-        Width = 120
-        Height = 13
-        Caption = 'Update customer details:'
       end
       object Cust_MailBack: TShape
         Left = 591
@@ -570,16 +558,15 @@ object ActionsForm: TActionsForm
       end
       object btnEdit: TSpeedButton
         AlignWithMargins = True
-        Left = 309
+        Left = 299
         Top = 86
-        Width = 82
+        Width = 25
         Height = 22
         Cursor = crHandPoint
         Margins.Left = 0
         Margins.Top = 0
         Margins.Right = 0
         Margins.Bottom = 0
-        Caption = 'Edit'
         Flat = True
         Glyph.Data = {
           36030000424D3603000000000000360000002800000010000000100000000100
@@ -766,6 +753,13 @@ object ActionsForm: TActionsForm
         ParentShowHint = False
         ShowHint = True
         OnClick = btnCopyEmailClick
+      end
+      object Label1: TLabel
+        Left = 443
+        Top = 89
+        Width = 84
+        Height = 13
+        Caption = 'Save all changes:'
       end
       object Cust_Mail: TEdit
         Left = 596

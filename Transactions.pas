@@ -27,6 +27,7 @@ type
     var SettingGrid :  TStringGrid;
   published
     function  GetDateTime(Return: integer): string;
+    function  GetStatus(DateTime: string): string;
     function  LoadToGrid: boolean;
     function  IsVoType(VoType: string): boolean;
     procedure ClearSummary;
@@ -40,24 +41,25 @@ uses
 
 { ############################################################## ! OPEN ITEMS CLASS ! ####################################################################### }
 
-{ --------------------------------------------------------------------------------------------------------------------------------- GET CURRENT DATE AND TIME }
+{ ----------------------------------------------------------------------------------------------------------------------- GET DATE AND TIME FROM "SSISMASTER" }
 function TTransactions.GetDateTime(Return: integer): string;
 var
-  Value:       string;
+  Value:  string;
 begin
+  CleanUp;
   { GET LATEST DATE AND TIME }
   Columns.Add(
                MAX +
-                 BracketStr(TOpenitems.ExtractDateStamp, brRound) +
+                 BracketStr(TSSISMaster.StartDateTime, brRound) +
                _AS +
-                 QuotedStr(TOpenitems.ExtractDateStamp)
+                 QuotedStr(TSSISMaster.StartDateTime)
              );
   { OPEN COLUMN WITH FUNCTION APPLIED }
-  OpenTable(TblOpenitems);
+  OpenTable(TblSSISMaster);
   { EXAMINE RECEIVED DATA }
   if (not (DataSet = nil)) and (DataSet.RecordCount = 1) then
   begin
-    Value:=VarToStr(DataSet.Fields.Item[TOpenitems.ExtractDateStamp].Value);
+    Value:=VarToStr(DataSet.Fields.Item[TSSISMaster.StartDateTime].Value);
     { WE GOT THE DATE AND TIME }
     if Value <> '' then
     begin
@@ -66,6 +68,16 @@ begin
       if Return = gdDateTime then Result:=FormatDateTime(gdDateTimeFormat, VarToDateTime(Value));
     end;
   end;
+end;
+
+{ ----------------------------------------------------------------------------------------------------------- GET STATUS FROM "SSISMASTER" FOR GIVEN DATETIME }
+function TTransactions.GetStatus(DateTime: string): string;
+begin
+  CleanUp;
+  Columns.Add(TSSISMaster.StatusCode);
+  CustFilter:=WHERE + TSSISMaster.StartDateTime + EQUAL + QuotedStr(DateTime);
+  OpenTable(TblSSISMaster);
+  if (not (DataSet = nil)) and (DataSet.RecordCount = 1) then Result:=VarToStr(DataSet.Fields.Item[TSSISMaster.StatusCode].Value);
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------- LOAD OPEN ITEMS FROM DATABASE }

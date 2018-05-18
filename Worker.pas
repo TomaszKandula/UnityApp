@@ -155,12 +155,62 @@ type
     destructor  Destroy; override;
   end;
 
+{ --------------------------------------------------------------------------------------------------------------------------------------- FREE COLUMN EDITING }
+type
+  TTFreeColumn = class(TThread)
+  protected
+    procedure Execute; override;
+  private
+    var FLock:       TCriticalSection;
+    var FIDThd:      integer;
+    var FField:      integer;
+    var FFreeText1:  string;
+    var FFreeText2:  string;
+    var FCUID:       string;
+  public
+    property    IDThd:  integer read FIDThd;
+    constructor Create(FreeText: string; Field: integer; CUID: string);
+    destructor  Destroy; override;
+  end;
+
+{ --------------------------------------------------------------------------------------------------------------------------------------- WRITE DAILY COMMENT }
+type
+  TTDailyComment = class(TThread)
+  protected
+    procedure Execute; override;
+  private
+    var FLock:       TCriticalSection;
+    var FIDThd:      integer;
+    var FComment:    string;
+    var FCUID:       string;
+  public
+    property    IDThd:  integer read FIDThd;
+    constructor Create(Comment: string; CUID: string);
+    destructor  Destroy; override;
+  end;
+
+{ ------------------------------------------------------------------------------------------------------------------------------------- WRITE GENERAL COMMENT }
+type
+  TTGeneralComment = class(TThread)
+  protected
+    procedure Execute; override;
+  private
+    var FLock:       TCriticalSection;
+    var FIDThd:      integer;
+    var FComment:    string;
+    var FCUID:       string;
+  public
+    property    IDThd:  integer read FIDThd;
+    constructor Create(Comment: string; CUID: string);
+    destructor  Destroy; override;
+  end;
+
 { ------------------------------------------------------------- ! IMPLEMENTATION ZONE ! --------------------------------------------------------------------- }
 
 implementation
 
 uses
-  Model, DataBase, Settings, UAC, Mailer, AgeView, Transactions, Tracker;
+  Model, DataBase, Settings, UAC, Mailer, AgeView, Transactions, Tracker, Actions;
 
 { ############################################################ ! SEPARATE CPU THREADS ! ##################################################################### }
 
@@ -404,6 +454,7 @@ procedure TTOpenItemsScanner.Execute;
 var
   Transactions: TTransactions;
   ReadDateTime: string;
+  ReadStatus:   string;
   CanMakeAge:   boolean;
 begin
   CanMakeAge:=False;
@@ -413,12 +464,14 @@ begin
   try
     try
       ReadDateTime:=Transactions.GetDateTime(gdDateTime);
-      if StrToDateTime(MainForm.OpenItemsUpdate) < StrToDateTime(ReadDateTime) then
+      ReadStatus:=Transactions.GetStatus(ReadDateTime);
+      if ( StrToDateTime(MainForm.OpenItemsUpdate) < StrToDateTime(ReadDateTime) ) and ( ReadStatus = gsCompleted ) then
       begin
         { SWITCH OFF ALL TIMERS }
         MainForm.SwitchTimers(tmDisabled);
         { REFRESH OPEN ITEMS AND MAKE NEW AGING VIEW }
         MainForm.OpenItemsUpdate:=ReadDateTime;
+        MainForm.OpenItemsStatus:='';
         CanMakeAge:=True;
       end;
     except
@@ -766,6 +819,268 @@ begin
   finally
     FLock.Release;
     MainForm.ExecMessage(True, mcStatusBar, stReady);
+  end;
+  FreeOnTerminate:=True;
+end;
+
+{ ############################################################ ! FREE COLUMN EDITING ! ###################################################################### }
+
+{ ------------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE }
+constructor TTFreeColumn.Create(FreeText: string; Field: integer; CUID: string);
+begin
+  inherited Create(False);
+  FLock :=TCriticalSection.Create;
+  FIDThd:=0;
+  FField:=Field;
+  FCUID:=CUID;
+  if FField = colFree1 then FFreeText1:=FreeText;
+  if FField = colFree2 then FFreeText2:=FreeText;
+end;
+
+{ --------------------------------------------------------------------------------------------------------------------------------------------------- RELEASE }
+destructor TTFreeColumn.Destroy;
+begin
+  FLock.Free;
+end;
+
+{ ---------------------------------------------------------------------------------------------------------------------- PERFORM INSERT/UPDATE ON FREE COLUMN }
+procedure TTFreeColumn.Execute;
+var
+  GenText:   TDataTables;
+  Condition: string;
+begin
+  FIDThd:=CurrentThread.ThreadID;
+  FLock.Acquire;
+  try
+    GenText:=TDataTables.Create(MainForm.DbConnect);
+    try
+      GenText.OpenTable(TblGeneral);
+      Condition:=TGeneral.CUID + EQUAL + QuotedStr(FCUID);
+      GenText.DataSet.Filter:=Condition;
+      { UPDATE }
+      if not (GenText.DataSet.RecordCount = 0) then
+      begin
+        GenText.CleanUp;
+        { DEFINE COLUMNS, VALUES AND CONDITIONS }
+        GenText.Columns.Add(TGeneral.STAMP);        GenText.Values.Add(DateTimeToStr(Now));              GenText.Conditions.Add(Condition);
+        GenText.Columns.Add(TGeneral.USER_ALIAS);   GenText.Values.Add(UpperCase(MainForm.WinUserName)); GenText.Conditions.Add(Condition);
+        if FField = colFree1 then
+        begin
+          GenText.Columns.Add(TGeneral.Free1);
+          GenText.Values.Add(FFreeText1);
+        end;
+        if FField = colFree2 then
+        begin
+          GenText.Columns.Add(TGeneral.Free2);
+          GenText.Values.Add(FFreeText2);
+        end;
+        GenText.Conditions.Add(Condition);
+        { EXECUTE }
+        GenText.UpdateRecord(TblGeneral);
+      end
+      else
+      { INSERT NEW }
+      begin
+        GenText.CleanUp;
+        { DEFINE COLUMNS AND VALUES }
+        GenText.Columns.Add(TGeneral.CUID);       GenText.Values.Add(FCUID);
+        GenText.Columns.Add(TGeneral.STAMP);      GenText.Values.Add(DateTimeToStr(Now));
+        GenText.Columns.Add(TGeneral.USER_ALIAS); GenText.Values.Add(UpperCase(MainForm.WinUserName));
+        GenText.Columns.Add(TGeneral.FIXCOMMENT); GenText.Values.Add('');
+        GenText.Columns.Add(TGeneral.FOLLOWUP);   GenText.Values.Add('');
+        if FField = colFree1 then
+        begin
+          GenText.Columns.Add(TGeneral.Free1);      GenText.Values.Add(FFreeText1);
+          GenText.Columns.Add(TGeneral.Free2);      GenText.Values.Add('');
+        end;
+        if FField = colFree2 then
+        begin
+          GenText.Columns.Add(TGeneral.Free1);      GenText.Values.Add('');
+          GenText.Columns.Add(TGeneral.Free2);      GenText.Values.Add(FFreeText2);
+        end;
+        { EXECUTE }
+        if GenText.InsertInto(TblGeneral) then
+        begin
+          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Free Column has been posted for CUID: ' + FCUID + '.');
+        end
+        else
+        begin
+          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot post "' + FFreeText1 + '" or "' + FFreeText2 + '" for CUID: ' + FCUID + '.');
+          MainForm.ExecMessage(False, mcError, 'Cannot post Free Column into database. Please contact IT support.');
+        end;
+      end;
+    finally
+      GenText.Free;
+    end;
+  finally
+    FLock.Release;
+  end;
+  FreeOnTerminate:=True;
+end;
+
+{ ############################################################# ! WRITE DAILY COMMENT ! ##################################################################### }
+
+{ ------------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE }
+constructor TTDailyComment.Create(Comment: string; CUID: string);
+begin
+  inherited Create(False);
+  FLock :=TCriticalSection.Create;
+  FIDThd:=0;
+  FComment:=Comment;
+  FCUID:=CUID;
+end;
+
+{ --------------------------------------------------------------------------------------------------------------------------------------------------- RELEASE }
+destructor TTDailyComment.Destroy;
+begin
+  FLock.Free;
+end;
+
+{ ------------------------------------------------------------------------------------------------------------------------------------------------ WRITE DATA }
+procedure TTDailyComment.Execute;
+var
+  DailyText: TDataTables;
+  UpdateOK:  boolean;
+  InsertOK:  boolean;
+  Condition: string;
+begin
+  FIDThd:=CurrentThread.ThreadID;
+  FLock.Acquire;
+  try
+    UpdateOK:=False;
+    InsertOK:=False;
+    DailyText:=TDataTables.Create(MainForm.DbConnect);
+    try
+      DailyText.OpenTable(TblDaily);
+      Condition:=TDaily.CUID + EQUAL + QuotedStr(FCUID) + _AND + TDaily.AGEDATE + EQUAL + QuotedStr(MainForm.AgeDateSel);
+      DailyText.DataSet.Filter:=Condition;
+      { UPDATE EXISTING COMMENT }
+      if not (DailyText.DataSet.RecordCount = 0) then
+      begin
+        DailyText.CleanUp;
+        { DEFINE COLUMNS, VALUES AND CONDITIONS }
+        DailyText.Columns.Add(TDaily.STAMP);       DailyText.Values.Add(DateTimeToStr(Now));               DailyText.Conditions.Add(Condition);
+        DailyText.Columns.Add(TDaily.USER_ALIAS);  DailyText.Values.Add(UpperCase(MainForm.WinUserName));  DailyText.Conditions.Add(Condition);
+        DailyText.Columns.Add(TDaily.FIXCOMMENT);  DailyText.Values.Add(FComment);                         DailyText.Conditions.Add(Condition);
+        { EXECUTE }
+        UpdateOK:=DailyText.UpdateRecord(TblDaily);
+      end
+      else
+      { INSERT NEW RECORD }
+      begin
+        DailyText.CleanUp;
+        { DEFINE COLUMNS AND VALUES }
+        DailyText.Columns.Add(TDaily.GROUP_ID);       DailyText.Values.Add(MainForm.GroupIdSel);
+        DailyText.Columns.Add(TDaily.CUID);           DailyText.Values.Add(FCUID);
+        DailyText.Columns.Add(TDaily.AGEDATE);        DailyText.Values.Add(MainForm.AgeDateSel);
+        DailyText.Columns.Add(TDaily.STAMP);          DailyText.Values.Add(DateTimeToStr(Now));
+        DailyText.Columns.Add(TDaily.USER_ALIAS);     DailyText.Values.Add(UpperCase(MainForm.WinUserName));
+        DailyText.Columns.Add(TDaily.EMAIL);          DailyText.Values.Add('0');
+        DailyText.Columns.Add(TDaily.CALLEVENT);      DailyText.Values.Add('0');
+        DailyText.Columns.Add(TDaily.CALLDURATION);   DailyText.Values.Add('0');
+        DailyText.Columns.Add(TDaily.FIXCOMMENT);     DailyText.Values.Add(FComment);
+        DailyText.Columns.Add(TDaily.EMAIL_Reminder); DailyText.Values.Add('0');
+        DailyText.Columns.Add(TDaily.EMAIL_AutoStat); DailyText.Values.Add('0');
+        DailyText.Columns.Add(TDaily.EMAIL_ManuStat); DailyText.Values.Add('0');
+        { EXECUTE }
+        InsertOK:=DailyText.InsertInto(TblDaily);
+      end;
+      { REFRESH HISTORY GRID }
+      Synchronize(procedure
+                  begin
+                    { OK }
+                    if (InsertOK) or (UpdateOK) then
+                    begin
+                      ActionsForm.UpdateHistory(ActionsForm.HistoryGrid);
+                      LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Daily comment has been posted for CUID: ' + FCUID + '.');
+                    end
+                    { ERROR }
+                    else
+                    begin
+                      LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot post daily comment for CUID: ' + FCUID + '.');
+                      MainForm.ExecMessage(False, mcError, 'Cannot post daily comment into database. Please contact IT support.');
+                    end;
+                  end);
+    finally
+      DailyText.Free;
+    end;
+  finally
+    FLock.Release;
+  end;
+  FreeOnTerminate:=True;
+end;
+
+{ ############################################################ ! WRITE GENERAL COMMENT ! #################################################################### }
+
+{ ------------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE }
+constructor TTGeneralComment.Create(Comment: string; CUID: string);
+begin
+  inherited Create(False);
+  FLock :=TCriticalSection.Create;
+  FIDThd:=0;
+  FComment:=Comment;
+  FCUID:=CUID;
+end;
+
+{ --------------------------------------------------------------------------------------------------------------------------------------------------- RELEASE }
+destructor TTGeneralComment.Destroy;
+begin
+  FLock.Free;
+end;
+
+{ ------------------------------------------------------------------------------------------------------------------------------------------------ WRITE DATA }
+procedure TTGeneralComment.Execute;
+var
+  GenText:   TDataTables;
+  Condition: string;
+begin
+  FIDThd:=CurrentThread.ThreadID;
+  FLock.Acquire;
+  try
+    GenText:=TDataTables.Create(MainForm.DbConnect);
+    try
+      GenText.OpenTable(TblGeneral);
+      Condition:=TGeneral.CUID + EQUAL + QuotedStr(FCUID);
+      GenText.DataSet.Filter:=Condition;
+      { UPDATE }
+      if not (GenText.DataSet.RecordCount = 0) then
+      begin
+        GenText.CleanUp;
+        { DEFINE COLUMNS, VALUES AND CONDITIONS }
+        GenText.Columns.Add(TGeneral.STAMP);        GenText.Values.Add(DateTimeToStr(Now));             GenText.Conditions.Add(Condition);
+        GenText.Columns.Add(TGeneral.USER_ALIAS);   GenText.Values.Add(UpperCase(MainForm.WinUserName));GenText.Conditions.Add(Condition);
+        GenText.Columns.Add(TGeneral.FIXCOMMENT);   GenText.Values.Add(FComment);                       GenText.Conditions.Add(Condition);
+        { EXECUTE }
+        GenText.UpdateRecord(TblGeneral);
+      end
+      else
+      { INSERT NEW }
+      begin
+        GenText.CleanUp;
+        { DEFINE COLUMNS AND VALUES }
+        GenText.Columns.Add(TGeneral.CUID);       GenText.Values.Add(FCUID);
+        GenText.Columns.Add(TGeneral.STAMP);      GenText.Values.Add(DateTimeToStr(Now));
+        GenText.Columns.Add(TGeneral.USER_ALIAS); GenText.Values.Add(UpperCase(MainForm.WinUserName));
+        GenText.Columns.Add(TGeneral.FIXCOMMENT); GenText.Values.Add(FComment);
+        GenText.Columns.Add(TGeneral.FOLLOWUP);   GenText.Values.Add('');
+        GenText.Columns.Add(TGeneral.Free1);      GenText.Values.Add('');
+        GenText.Columns.Add(TGeneral.Free2);      GenText.Values.Add('');
+        { EXECUTE }
+        if GenText.InsertInto(TblGeneral) then
+        begin
+          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: General comment has been posted for CUID: ' + FCUID + '.');
+        end
+        else
+        begin
+          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot post general comment for CUID: ' + FCUID + '.');
+          MainForm.ExecMessage(False, mcError, 'Cannot post general comment into database. Please contact IT support.');
+        end;
+      end;
+    finally
+      GenText.Free;
+    end;
+  finally
+    FLock.Release;
   end;
   FreeOnTerminate:=True;
 end;
