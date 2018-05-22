@@ -1193,7 +1193,7 @@ object MainForm: TMainForm
     Margins.Top = 0
     Margins.Right = 5
     Margins.Bottom = 0
-    ActivePage = TabSheet1
+    ActivePage = TabSheet10
     Align = alClient
     DoubleBuffered = True
     Font.Charset = DEFAULT_CHARSET
@@ -5269,16 +5269,6 @@ object MainForm: TMainForm
             Caption = 'Submit'
             OnClick = btnSupplierSubmitClick
           end
-          object btnSupplierSave: TSpeedButton
-            Left = 114
-            Top = 632
-            Width = 75
-            Height = 25
-            Cursor = crHandPoint
-            Caption = 'Save'
-            Enabled = False
-            OnClick = btnSupplierSaveClick
-          end
           object btnSupplierClear: TSpeedButton
             Left = 24
             Top = 632
@@ -5599,6 +5589,19 @@ object MainForm: TMainForm
             Cursor = crHandPoint
             Caption = 'Open Ticket'
             OnClick = btnSupplierOpenClick
+          end
+          object TextSelectedTicket: TLabel
+            Left = 160
+            Top = 13
+            Width = 89
+            Height = 13
+            Caption = '{TICKET NUMBER}'
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWhite
+            Font.Height = -11
+            Font.Name = 'Tahoma'
+            Font.Style = []
+            ParentFont = False
           end
           object GroupBox2: TGroupBox
             Left = 24

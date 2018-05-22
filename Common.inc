@@ -45,7 +45,7 @@ const
   LicenceFile:    string    = 'Unity.licx';
   GridImgFile:    string    = 'Unity.img';
   ReleaseFile:    string    = 'Release.pak';
-  CurrentMutex:   PWideChar = 'UNITY_10046';    { WARNING! INCREASE IT WITH EACH NEW RELEASE }
+  CurrentMutex:   PWideChar = 'UNITY_10048';    { WARNING! INCREASE IT WITH EACH NEW RELEASE }
 
   { FREE COLUMNS }
 
@@ -234,6 +234,15 @@ const
   cfDateToDB = 0;
   cfGetDate  = 1;
 
+  { SUPPLIER DEMO CONSTS }
+
+  sdCLOSE   = 'CLOSE';
+  sdOPEN    = 'OPEN';
+  sdPENDING = 'PENDING';
+  sdAPPROVE = 'APPROVED';
+  sdREJECT  = 'REJECTED';
+
+
   { SQL KEYWORDS | ADD. SPACES FOR EASIER CONCATENATING }
 
   INSERT       : string = ' INSERT INTO ';
@@ -377,11 +386,12 @@ const
 
   { STORED PROCEDURES }
 
-  QueryOpenItems = 'QueryOpenItems';
-  TrackerList    = 'TrackerList';
-  AgeViewExport  = 'AgeViewExport';
-  AgeViewReport  = 'AgeViewReport';
-  AgeViewDetails = 'AgeViewDetails';
+  QueryOpenItems   = 'QueryOpenItems';
+  TrackerList      = 'TrackerList';
+  AgeViewExport    = 'AgeViewExport';
+  AgeViewReport    = 'AgeViewReport';
+  AgeViewDetails   = 'AgeViewDetails';
+  SupplierDataView = 'SupplierDataView';
 
   { ADO FILTER ENUM, MSDN: https://msdn.microsoft.com/en-us/library/ee275540(v=bts.10).aspx }
 

@@ -470,6 +470,7 @@ type
     const Remittance       : string = 'Remittance';
     const EmailForQuote    : string = 'EmailForQuote';
     const EmailForPO       : string = 'EmailForPO';
+    const SelfBillingEmail : string = 'SelfBillingEmail';
     const SerticaName1     : string = 'SerticaName1';
     const SerticaArea1     : string = 'SerticaArea1';
     const SerticaPhone1    : string = 'SerticaPhone1';

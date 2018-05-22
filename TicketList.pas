@@ -16,7 +16,7 @@ unit TicketList;
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, Buttons, StdCtrls, ExtCtrls, Main, Grids;
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, Buttons, StdCtrls, ExtCtrls, Grids, Main;
 
 { ------------------------------------------------------------------ ! MAIN CLASS ! ------------------------------------------------------------------------- }
 type
@@ -28,6 +28,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure btnCancelClick(Sender: TObject);
     procedure btnSelectClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
   public
   end;
@@ -40,7 +41,7 @@ var
 implementation
 
 uses
-  Settings, Supplier;
+  Settings, Supplier, Model;
 
 {$R *.dfm}
 
@@ -58,12 +59,76 @@ begin
   finally
     AppSettings.Free;
   end;
+  { HIDE FEW COLUMNS }
+  sgTicketList.ColWidths[3]:=-1;
+  sgTicketList.ColWidths[4]:=-1;
+  sgTicketList.ColWidths[5]:=-1;
+end;
+
+{ --------------------------------------------------------------------------------------------------------------------------------------------------- ON SHOW }
+procedure TTicketForm.FormShow(Sender: TObject);
+var
+  Vendor: TSupplierForm;
+begin
+  Vendor:=TSupplierForm.Create(MainForm.DbConnect);
+  try
+    if not(Vendor.SqlToGrid(sgTicketList, Vendor.GetAllOpenPending, False, True)) then
+    begin
+      MainForm.MsgCall(mcWarn, 'The are no tickets on the list to approve/reject.');
+      Close;
+    end
+    else
+    begin
+      sgTicketList.SetColWidth(10, 30);
+    end;
+  finally
+    Vendor.Free;
+  end;
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------- PROCESS GIVEN TICKET }
 procedure TTicketForm.btnSelectClick(Sender: TObject);
+var
+  Vendor:          TSupplierForm;
+  TicketIdRef:     string;
+  LegalEntityRef:  string;
+  CurrencyRef:     string;
 begin
-//
+  { GET THE SELECTED TICKET NUMBER REFERENCE }
+  MainForm.TextSelectedTicket.Caption:=sgTicketList.Cells[sgTicketList.ReturnColumn(TSupplierRequest.TicketNumber, 1, 1), sgTicketList.Row];
+  TicketIdRef:=sgTicketList.Cells[sgTicketList.ReturnColumn(TSupplierData.TicketNumberRef, 1, 1), sgTicketList.Row];
+  LegalEntityRef:=sgTicketList.Cells[sgTicketList.ReturnColumn(TSupplierRequest.LegalEntityRef, 1, 1), sgTicketList.Row];
+  CurrencyRef:=sgTicketList.Cells[sgTicketList.ReturnColumn(TSupplierRequest.CurrencyRef, 1, 1), sgTicketList.Row];
+  Vendor:=TSupplierForm.Create(MainForm.DbConnect);
+  try
+    { GET DATA }
+    Vendor.GetSelectedTicket(TicketIdRef, LegalEntityRef, CurrencyRef);
+    { FILL ALL THE FIELDS }
+    if Vendor.DataSet.RecordCount = 1 then
+    begin
+      { SUPPLIER REQUEST }
+      MainForm.edtUserAlias.Text   :=Vendor.DataSet.Fields[TSupplierRequest.UserAlias].Value;
+      MainForm.edtTerms.Text       :=Vendor.DataSet.Fields[TSupplierRequest.PaymentTerm].Value;
+      MainForm.ReadAddComment.Text :=Vendor.DataSet.Fields[TSupplierRequest.AddComment].Value;
+      { SUBQUERIED COLUMNS }
+      MainForm.edtCompany.Text     :=Vendor.DataSet.Fields['CompanyName'].Value;
+      MainForm.edtAgent.Text       :=Vendor.DataSet.Fields['CompanyAgent'].Value;
+      MainForm.edtCurrency.Text    :=Vendor.DataSet.Fields['Currency'].Value;
+      { SUPPLIER DATA }
+      MainForm.edtCustomerName.Text:=Vendor.DataSet.Fields[TSupplierData.CustomerName].Value;
+      MainForm.edtAddress.Text     :=Vendor.DataSet.Fields[TSupplierData.AddressLine].Value;
+      MainForm.edtTown.Text        :=Vendor.DataSet.Fields[TSupplierData.Town].Value;
+      MainForm.edtCountry.Text     :=Vendor.DataSet.Fields[TSupplierData.Country].Value;
+      MainForm.edtPostal.Text      :=Vendor.DataSet.Fields[TSupplierData.PostalCode].Value;
+      MainForm.edtVAT.Text         :=Vendor.DataSet.Fields[TSupplierData.VATnumber].Value;
+      MainForm.edtPerson.Text      :=Vendor.DataSet.Fields[TSupplierData.ContactPerson].Value;
+      MainForm.edtNumber.Text      :=Vendor.DataSet.Fields[TSupplierData.MainPhone].Value;
+      MainForm.edtEmail.Text       :=Vendor.DataSet.Fields[TSupplierData.MainEmail].Value;
+    end;
+  finally
+    Vendor.Free;
+  end;
+  Close;
 end;
 
 { ---------------------------------------------------------------------------------------------------------------------------------------------- CLOSE WINDOW }

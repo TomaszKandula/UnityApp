@@ -452,7 +452,6 @@ type                                                            (* GUI | MAIN TH
     Text7: TLabel;
     SerticaGroup: TGroupBox;
     btnSupplierSubmit: TSpeedButton;
-    btnSupplierSave: TSpeedButton;
     btnSupplierClear: TSpeedButton;
     cbPOD: TComboBox;
     Text6: TLabel;
@@ -520,6 +519,7 @@ type                                                            (* GUI | MAIN TH
     Bevel1: TBevel;
     Bevel2: TBevel;
     Bevel3: TBevel;
+    TextSelectedTicket: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -710,10 +710,8 @@ type                                                            (* GUI | MAIN TH
     procedure btnReport3Click(Sender: TObject);
     procedure btnReport4Click(Sender: TObject);
     procedure btnSupplierClearClick(Sender: TObject);
-    procedure btnSupplierSaveClick(Sender: TObject);
     procedure btnSupplierSubmitClick(Sender: TObject);
     procedure btnSupplierOpenClick(Sender: TObject);
-    procedure btnSupplierRejectClick(Sender: TObject);
     procedure btnSupplierApproveClick(Sender: TObject);
     procedure btnStartClick(Sender: TObject);
     procedure btnTabelauReportClick(Sender: TObject);
@@ -729,6 +727,7 @@ type                                                            (* GUI | MAIN TH
     procedure cbSupplierTypeSelect(Sender: TObject);
     procedure cbCompanySelect(Sender: TObject);
     procedure sgAgeViewKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure btnSupplierRejectClick(Sender: TObject);
     { ------------------------------------------------------------- ! HELPERS ! ----------------------------------------------------------------------------- }
   private
     { GENERAL }
@@ -787,6 +786,7 @@ type                                                            (* GUI | MAIN TH
     function   ShowReport(ReportNumber: cardinal): cardinal;
     procedure  CopyFile(const Source, Dest: string);
     procedure  ResetTabsheetButtons;
+    procedure  SupplierResetFields;
   protected
     { WINDOWS MESSAGES }
     procedure  WndProc(var msg: Messages.TMessage); override;
@@ -2126,6 +2126,42 @@ begin
     DestStream.Free;
     SourceStream.Free;
   end;
+end;
+
+{ ---------------------------------------------------------------------------------------------------------------------------------- UNBOLD FONTS ON MENU BAR }
+procedure TMainForm.ResetTabsheetButtons;
+begin
+  btnStart.Font.Style:=[];
+  btnTabelauReport.Font.Style:=[];
+  btnAgeDebt.Font.Style:=[];
+  btnTracker.Font.Style:=[];
+  btnAddressBook.Font.Style:=[];
+  btnOpenItems.Font.Style:=[];
+  btnOtherTrans.Font.Style:=[];
+  btnGeneral.Font.Style:=[];
+  btnSettings.Font.Style:=[];
+  btnSupplier.Font.Style:=[];
+end;
+
+{ ---------------------------------------------------------------------------------------------------------------------------------- CLEAR ALL SUPLIER FIELDS }
+procedure TMainForm.SupplierResetFields;
+begin
+  TextSelectedTicket.Caption:='';
+  edtUserAlias.Text   :='';
+  edtAgent.Text       :='';
+  edtCompany.Text     :='';
+  edtCustomerName.Text:='';
+  edtAddress.Text     :='';
+  edtTown.Text        :='';
+  edtCountry.Text     :='';
+  edtPostal.Text      :='';
+  edtVAT.Text         :='';
+  edtPerson.Text      :='';
+  edtNumber.Text      :='';
+  edtEmail.Text       :='';
+  edtTerms.Text       :='';
+  edtCurrency.Text    :='';
+  ReadAddComment.Text :='';
 end;
 
 { ############################################################## ! MAIN THREAD EVENTS ! ##################################################################### }
@@ -4412,20 +4448,6 @@ end;
 
 { ---------------------------------------------------------------------------------------------------------------------------------------------- MENU BUTTONS }
 
-procedure TMainForm.ResetTabsheetButtons;
-begin
-  btnStart.Font.Style:=[];
-  btnTabelauReport.Font.Style:=[];
-  btnAgeDebt.Font.Style:=[];
-  btnTracker.Font.Style:=[];
-  btnAddressBook.Font.Style:=[];
-  btnOpenItems.Font.Style:=[];
-  btnOtherTrans.Font.Style:=[];
-  btnGeneral.Font.Style:=[];
-  btnSettings.Font.Style:=[];
-  btnSupplier.Font.Style:=[];
-end;
-
 procedure TMainForm.btnStartClick(Sender: TObject);
 begin
   MyPages.ActivePage:=TabSheet9;
@@ -4508,14 +4530,9 @@ begin
   editEmailAddress.Text:='';
 end;
 
-procedure TMainForm.btnSupplierSaveClick(Sender: TObject);
-begin
-//
-end;
-
 procedure TMainForm.btnSupplierOpenClick(Sender: TObject);
 begin
-  WndCall(TicketForm, 0)
+  WndCall(TicketForm, 0);
 end;
 
 procedure TMainForm.btnSupplierSubmitClick(Sender: TObject);
@@ -4561,14 +4578,47 @@ begin
   end;
 end;
 
-procedure TMainForm.btnSupplierRejectClick(Sender: TObject);
+procedure TMainForm.btnSupplierApproveClick(Sender: TObject);
+var
+  Vendor: TSupplierForm;
 begin
-//
+  if edtUserAlias.Text = '' then
+  begin
+    MsgCall(mcWarn, 'Please open ticket first.');
+    Exit;
+  end;
+  Vendor:=TSupplierForm.Create(DbConnect);
+  try
+    if Vendor.TicketDecision(TextSelectedTicket.Caption, sdAPPROVE) then
+    begin
+      MsgCall(mcInfo, 'Ticket has been successfully approved!');
+      SupplierResetFields;
+    end;
+  finally
+    Vendor.Free;
+  end;
 end;
 
-procedure TMainForm.btnSupplierApproveClick(Sender: TObject);
+
+procedure TMainForm.btnSupplierRejectClick(Sender: TObject);
+var
+  Vendor: TSupplierForm;
 begin
-//
+  if edtUserAlias.Text = '' then
+  begin
+    MsgCall(mcWarn, 'Please open ticket first.');
+    Exit;
+  end;
+  Vendor:=TSupplierForm.Create(DbConnect);
+  try
+    if Vendor.TicketDecision(TextSelectedTicket.Caption, sdREJECT) then
+    begin
+      MsgCall(mcInfo, 'Ticket has been successfully rejected!');
+      SupplierResetFields;
+    end;
+  finally
+    Vendor.Free;
+  end;
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------------- GO TO REPORT 1 }

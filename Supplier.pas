@@ -11,7 +11,7 @@
 { LYNC version:     2013 or newer                                                                                                                             }
 {                                                                                                                                                             }
 { ----------------------------------------------------------------------------------------------------------------------------------------------------------- }
-unit Supplier;
+unit Supplier;         (* !!! CLASS TEMPORARY CLASS !!! *)
 
 interface
 
@@ -25,16 +25,23 @@ type
   private
 
   public
+
     { RETRIVE LISTS }
     function  GetAllEntities: _Recordset;
     function  GetAllAgents(EntityName: string): _Recordset;
     function  GetAllTerms(EntityName: string):  _Recordset;
     function  GetAllCurrencies: _Recordset;
     function  GetAllSupplierTypes: _Recordset;
+    function  GetAllOpenPending: _Recordset;
+    function  GetSelectedTicket(TicketNumberRef, LegalEntityRef, CurrencyRef: string): _Recordset;
+
     { DATA TO GIVEN VIEW COMPONENT }
     procedure InitSupplierRequestForm(CompanyList, CurrencyList, SupplierTypeList: TComboBox);
+
     { WRITE TO DATABASE }
     function  WriteRequest(IsSertica: integer; LegalEntity: string; Currency: string; SupplierType: string; Branch: string): boolean;
+    function  TicketDecision(TicketNumber, NewRequestStatus: string): boolean;
+
     { SUPPORTING METHODS }
     function  SendEmailToSupplier(CustomerName, LegalEntityName: string; IsSertica: integer; EmailTo: string): boolean;
     function  GenerateTicket: integer;
@@ -106,6 +113,47 @@ begin
   CleanUp;
   Columns.Add(TSupplierType.SupplierType);
   OpenTable(TblSupplierType);
+  Result:=DataSet;
+end;
+
+{ -------------------------------------------------------------------------------------------------------------------------- GET ALL OPEN AND PENDING TICKETS }
+function TSupplierForm.GetAllOpenPending: _Recordset;
+begin
+  CleanUp;
+  StrSQL:=SELECT +
+            TblSupplierRequest + '.' + TSupplierRequest.TicketNumber + COMMA +
+            TblSupplierData    + '.' + TSupplierData.CustomerName + COMMA +
+            TblSupplierData    + '.' + TSupplierData.TicketNumberRef + COMMA +
+            TblSupplierRequest + '.' + TSupplierRequest.LegalEntityRef + COMMA +
+            TblSupplierRequest + '.' + TSupplierRequest.CurrencyRef +
+          FROM +
+            TblSupplierRequest +
+          LEFT_JOIN +
+            TblSupplierData +
+          _ON +
+            TblSupplierRequest + '.' + TSupplierRequest.id +
+          EQUAL +
+            TblSupplierData    + '.' + TSupplierData.TicketNumberRef +
+          WHERE +
+            TblSupplierRequest + '.' + TSupplierRequest.TicketStatus +
+          EQUAL +
+            QuotedStr(sdCLOSE) +
+          _AND +
+            TblSupplierRequest + '.' + TSupplierRequest.RequestStatus +
+          EQUAL +
+            QuotedStr(sdPENDING);
+
+   MainForm.DebugMsg(StrSQL);
+
+  Result:=ExecSQL;
+end;
+
+{ ---------------------------------------------------------------------------------------------------------------------------------- GET ONLY SELECTED TICKET }
+function TSupplierForm.GetSelectedTicket(TicketNumberRef, LegalEntityRef, CurrencyRef: string): _Recordset;
+begin
+  CleanUp;
+  StrSQL:=EXECUTE + SupplierDataView + SPACE + QuotedStr(TicketNumberRef) + COMMA + QuotedStr(LegalEntityRef) + COMMA + QuotedStr(CurrencyRef);
+  DataSet:=ExecSQL;
   Result:=DataSet;
 end;
 
@@ -220,6 +268,21 @@ begin
   Result:=InsertInto(TblSupplierRequest);
 end;
 
+{ ------------------------------------------------------------------------------------------------------------------------------------- UPDATE REQUEST STATUS }
+function TSupplierForm.TicketDecision(TicketNumber: string; NewRequestStatus: string): boolean;
+var
+  Condition:  string;
+begin
+  CleanUp;
+  OpenTable(TblSupplierRequest);
+  Condition:=TSupplierRequest.TicketNumber + EQUAL + QuotedStr(TicketNumber);
+  DataSet.Filter:=Condition;
+  Columns.Add(TSupplierRequest.RequestStatus);
+  Values.Add(NewRequestStatus);
+  Conditions.Add(Condition);
+  Result:=UpdateRecord(TblSupplierRequest);
+end;
+
 { ----------------------------------------------------------------------------------------------------------------------------------- SEND EMAIL NOTIFICATION }
 function TSupplierForm.SendEmailToSupplier(CustomerName, LegalEntityName: string; IsSertica: integer; EmailTo: string): boolean;
 var
@@ -252,12 +315,12 @@ begin
     Mail.MailRt     :='';
     Mail.MailCc     :='';
     Mail.MailBcc    :='';
-    Mail.MailSubject:='New Supplier Request for ' + CustomerName;
+    Mail.MailSubject:='New Supplier Request'; //+ CustomerName;
     { PLAIN TEXT TO HTML TEMPLATE }
     HTMLBody        :=Doc.LoadTemplate(AppSet.FLayoutDir + AppSet.TMIG.ReadString(VariousLayouts, 'SUPPLIERNOTF', '') + '.html');
     HTMLBody        :=StringReplace(HTMLBody, '{ADDR_LBU}',  LegalEntityName, [rfReplaceAll]);
     HTMLBody        :=StringReplace(HTMLBody, '{ADDR_DATA}', CustomerName,    [rfReplaceAll]);
-    HTMLBody        :=StringReplace(HTMLBody, '{LINK}',      AppSet.TMIG.ReadString(VariousLayouts, 'TICKET_PATH', '') + GetTicket + '&sertica=' + IntToStr(IsSertica), [rfReplaceAll]);
+    HTMLBody        :=StringReplace(HTMLBody, '{LINK}',      AppSet.TMIG.ReadString(VariousLayouts, 'TICKET_PATH', '') + GetTicket, [rfReplaceAll]);
     { ASSIGN PREPARED HTML }
     Mail.MailBody   :=HTMLBody;
     { SEND }

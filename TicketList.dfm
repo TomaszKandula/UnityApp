@@ -15,6 +15,7 @@ object TicketForm: TTicketForm
   OldCreateOrder = False
   Position = poMainFormCenter
   OnCreate = FormCreate
+  OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
   object AppMain: TShape
@@ -34,26 +35,39 @@ object TicketForm: TTicketForm
     ExplicitHeight = 459
   end
   object btnSelect: TSpeedButton
-    Left = 272
+    Left = 279
     Top = 430
     Width = 73
     Height = 25
+    Cursor = crHandPoint
     Caption = 'Select'
     OnClick = btnSelectClick
   end
   object btnCancel: TSpeedButton
-    Left = 184
+    Left = 187
     Top = 430
     Width = 73
     Height = 25
+    Cursor = crHandPoint
     Caption = 'Cancel'
     OnClick = btnCancelClick
   end
   object sgTicketList: TStringGrid
-    Left = 25
+    Left = 17
     Top = 16
-    Width = 320
+    Width = 335
     Height = 393
+    ColCount = 6
+    DefaultColWidth = 10
+    FixedColor = clWhite
+    Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goRowSelect]
     TabOrder = 0
+    ColWidths = (
+      10
+      10
+      10
+      10
+      10
+      10)
   end
 end
