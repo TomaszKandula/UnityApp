@@ -18,7 +18,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, Menus, ComCtrls, Grids, ExtCtrls, StdCtrls, CheckLst, Buttons, PNGImage,
   DBGrids, AppEvnts, ShellAPI, INIFiles, StrUtils, ValEdit, DateUtils, Clipbrd, DB, ADODB, ActiveX, CDO_TLB, Diagnostics, Math, Wininet, ComObj, OleCtrls,
-  SHDocVw;
+  SHDocVw, GIFImg;
 
 { REFERENCE TO ARRAYS }
 type
@@ -185,14 +185,12 @@ type                                                            (* GUI | MAIN TH
     sgAddressBook: TStringGrid;
     Header8: TPanel;
     Edit_PASSWORD: TEdit;
-    btnUnlock: TButton;
     Cap21: TShape;
     hShapeCred: TShape;
     Text32: TLabel;
     Text33: TLabel;
     hShapePass: TShape;
     Cap22: TShape;
-    btnPassUpdate: TButton;
     Text37: TLabel;
     Text38: TLabel;
     Text39: TLabel;
@@ -520,6 +518,25 @@ type                                                            (* GUI | MAIN TH
     Bevel2: TBevel;
     Bevel3: TBevel;
     TextSelectedTicket: TLabel;
+    PanelAgeView: TPanel;
+    ImgLoadingAgeView: TImage;
+    PanelOpenItems: TPanel;
+    ImgLoadingOpenItems: TImage;
+    PanelAddressBook: TPanel;
+    ImgLoadingAddressBook: TImage;
+    PanelInvoiceTracker: TPanel;
+    ImgLoadingInvoiceTracker: TImage;
+    PanelCoCodes: TPanel;
+    PanelPaidInfo: TPanel;
+    PanelPerson: TPanel;
+    PanelPmtTerms: TPanel;
+    PanelGroup3: TPanel;
+    PanelSettingsSections: TPanel;
+    PanelSettingsValues: TPanel;
+    PanelUAC: TPanel;
+    PanelGroups: TPanel;
+    btnUnlock: TSpeedButton;
+    btnPassUpdate: TSpeedButton;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -528,9 +545,7 @@ type                                                            (* GUI | MAIN TH
     procedure Action_HelpClick(Sender: TObject);
     procedure Action_AboutClick(Sender: TObject);
     procedure Action_OnTopClick(Sender: TObject);
-    procedure btnUnlockClick(Sender: TObject);
     procedure TabSheet8Show(Sender: TObject);
-    procedure btnPassUpdateClick(Sender: TObject);
     procedure imgKeyAddMouseEnter(Sender: TObject);
     procedure imgKeyAddMouseLeave(Sender: TObject);
     procedure imgKeyRemoveMouseEnter(Sender: TObject);
@@ -728,6 +743,8 @@ type                                                            (* GUI | MAIN TH
     procedure cbCompanySelect(Sender: TObject);
     procedure sgAgeViewKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure btnSupplierRejectClick(Sender: TObject);
+    procedure btnUnlockClick(Sender: TObject);
+    procedure btnPassUpdateClick(Sender: TObject);
     { ------------------------------------------------------------- ! HELPERS ! ----------------------------------------------------------------------------- }
   private
     { GENERAL }
@@ -787,6 +804,7 @@ type                                                            (* GUI | MAIN TH
     procedure  CopyFile(const Source, Dest: string);
     procedure  ResetTabsheetButtons;
     procedure  SupplierResetFields;
+    procedure  LoadingAnimation(GIFImage: TImage; Grid: TStringGrid; State: integer);
   protected
     { WINDOWS MESSAGES }
     procedure  WndProc(var msg: Messages.TMessage); override;
@@ -2164,6 +2182,26 @@ begin
   ReadAddComment.Text :='';
 end;
 
+{ ----------------------------------------------------------------------------------------------------------------------------------------- LOADING ANIMATION }
+procedure TMainForm.LoadingAnimation(GIFImage: TImage; Grid: TStringGrid; State: Integer);
+begin
+  case State of
+    AnimationON:
+    begin
+      Grid.Visible:=False;
+      GIFImage.Visible:=True;
+      (GIFImage.Picture.Graphic as TGIFImage).Animate:=True;
+    end;
+    AnimationOFF:
+    begin
+      (GIFImage.Picture.Graphic as TGIFImage).Animate:=False;
+      GIFImage.Visible:=False;
+      Grid.Visible:=True;
+    end;
+  end;
+end;
+
+
 { ############################################################## ! MAIN THREAD EVENTS ! ##################################################################### }
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------- ON CREATE }
@@ -2506,8 +2544,24 @@ end;
 { --------------------------------------------------------------------------------------------------------------------------------------------------- ON SHOW }
 procedure TMainForm.FormShow(Sender: TObject);
 begin
+  { UPDATE THUMB SIZE }
   FormResize(self);
+  { SETUP PANEL BORDER COLORS FOR STRING GRIDS }
   AppHeader.PanelBorders(clWhite, clSkyBlue, clWhite, clWhite, clWhite);
+  PanelAgeView.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+  PanelOpenItems.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+  PanelAddressBook.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+  PanelInvoiceTracker.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+  PanelCoCodes.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+  PanelPaidInfo.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+  PanelPerson.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+  PanelPmtTerms.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+  PanelGroup3.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+  PanelSettingsSections.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+  PanelSettingsValues.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+  PanelUAC.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+  PanelGroups.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+  { SET COLUMN WIDTH }
   MainForm.sgCoCodes.SetColWidth       (10, 30);
   MainForm.sgPmtTerms.SetColWidth      (10, 30);
   MainForm.sgPaidInfo.SetColWidth      (10, 30);
@@ -3174,7 +3228,7 @@ begin
   else
   begin
     Footer1.Visible:=True;
-    sgAgeView.Margins.Bottom:=0;
+    sgAgeView.Margins.Bottom:=2;
     Action_HideSummary.Checked:=True;
   end;
 end;
@@ -3518,7 +3572,8 @@ var
   Col13:       integer;
   Col14:       integer;
   Col15:       integer;
-  Col16:       integer;
+  Col16:       integer;  // tbr
+  Col17:       integer;  // tbr
   iCNT:        integer;
   Width:       integer;
   AgeViewCUID: string;
@@ -3549,15 +3604,24 @@ begin
   Col13:=sgAgeView.ReturnColumn(TSnapshots.fCUID,            1, 1);
   Col14:=sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1);
   Col15:=sgAgeView.ReturnColumn(TSnapshots.fRISK_CLASS,      1, 1);
-  Col16:=sgAgeView.ReturnColumn(TSnapshots.fGROUP3,          1, 1);
+  Col16:=sgAgeView.ReturnColumn(TSnapshots.fGROUP3,          1, 1); // tbr
+  Col17:=sgAgeView.ReturnColumn(TSnapshots.fCO_CODE,         1, 1); // tbr
 
-  { MAP GROUP3 COLUMN }
-  if ACol = Col16 then
+  { MAP GROUP3 COLUMN }  // <---- remove to SQL proc, use join
+  if (ACol = Col16) then
   begin
     for iCNT:=1 to sgGroup3.RowCount - 1 do
     begin
-      if sgGroup3.Cells[sgGroup3.ReturnColumn(TGroup3.ERP_CODE, 1, 1), iCNT] = sgAgeView.Cells[ACol, ARow] then
-        sgAgeView.Cells[ACol, ARow]:=sgGroup3.Cells[sgGroup3.ReturnColumn(TGroup3.DESCRIPTION, 1, 1), iCNT];
+      if
+        (
+          sgGroup3.Cells[sgGroup3.ReturnColumn(TGroup3.ERP_CODE, 1, 1), iCNT] = sgAgeView.Cells[ACol, ARow]
+        )
+        and
+        (
+          sgGroup3.Cells[sgGroup3.ReturnColumn(TGroup3.COCODE, 1, 1), iCNT] = sgAgeView.Cells[Col17, ARow]
+        )
+        then
+          sgAgeView.Cells[ACol, ARow]:=sgGroup3.Cells[sgGroup3.ReturnColumn(TGroup3.DESCRIPTION, 1, 1), iCNT];
     end;
   end;
 

@@ -52,6 +52,11 @@ const
   colFree1 = 0;
   colFree2 = 1;
 
+  { ANIMATION }
+
+  AnimationON  = 0;
+  AnimationOFF = 1;
+
   { SPLASH SCREEN }
 
   spFree = 0;
@@ -117,7 +122,7 @@ const
 
   { FIX COLORS }
 
-  SELCOLOR      = $00FFDBB7;
+  SELCOLOR      = $00FFDBB7; { SKYBLUE: $00FFDBB7 }
   FONCOLOR      = $006433C9;
 
   { SETTINGS FILE ID }

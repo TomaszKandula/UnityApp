@@ -395,8 +395,13 @@ begin
   FLock.Acquire;
   AgeView:=TAgeView.Create(MainForm.DbConnect);
   try
+    { PREP }
     StopWatch:=TStopWatch.StartNew;
     MainForm.ExecMessage(True, mcStatusBar, stLoading);
+    Synchronize(procedure
+                begin
+                  MainForm.LoadingAnimation(MainForm.ImgLoadingAgeView, MainForm.sgAgeView, AnimationON);
+                end);
     try
       { SYNC }
       Synchronize(AgeView.ClearSummary);
@@ -412,6 +417,8 @@ begin
                     AgeView.ComputeAndShowRCA(MainForm.sgAgeView);
                     AgeView.UpdateSummary;
                     AgeView.GetDetails(MainForm.DetailsGrid);
+                    MainForm.sgAgeView.Repaint;
+                    MainForm.LoadingAnimation(MainForm.ImgLoadingAgeView, MainForm.sgAgeView, AnimationOFF);
                   end);
     except
       on E: Exception do
@@ -518,6 +525,11 @@ begin
   try
     StopWatch:=TStopWatch.StartNew;
     MainForm.ExecMessage(True, mcStatusBar, stDownloading);
+    { BUSY ANIMATION ON }
+    Synchronize(procedure
+                begin
+                  MainForm.LoadingAnimation(MainForm.ImgLoadingOpenItems, MainForm.sgOpenItems, AnimationON);
+                end);
     try
       { ASSIGN }
       OpenItems.DestGrid   :=MainForm.sgOpenItems;
@@ -542,6 +554,7 @@ begin
     Synchronize(procedure
                 begin
                   OpenItems.DestGrid.SetColWidth(10, 20);
+                  MainForm.LoadingAnimation(MainForm.ImgLoadingOpenItems, MainForm.sgOpenItems, AnimationOFF);
                 end);
     OpenItems.DestGrid.Freeze(False);
     OpenItems.Free;
@@ -628,6 +641,11 @@ var
 begin
   DataTables:=TDataTables.Create(MainForm.DbConnect);
   try
+    { BUSY ANIMATION ON }
+    Synchronize(procedure
+                begin
+                  MainForm.LoadingAnimation(MainForm.ImgLoadingAddressBook, MainForm.sgAddressBook, AnimationON);
+                end);
     { FREEZE STRING GRID }
     FGrid.Freeze(True);
     { COLUMN SELECTION }
@@ -652,6 +670,7 @@ begin
     Synchronize(procedure
                 begin
                   FGrid.SetColWidth(40, 10);
+                  MainForm.LoadingAnimation(MainForm.ImgLoadingAddressBook, MainForm.sgAddressBook, AnimationOFF);
                 end);
     { RELEASE }
     FGrid.Freeze(False);

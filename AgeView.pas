@@ -178,7 +178,7 @@ begin
   RCA:=Balance * Class_A;
   RCB:=Balance * Class_B;
   RCC:=Balance * Class_C;
-  { --------------------------------------------------------------------------------------------------------------------- TOTALS AND ITS POSITIONS INTO ARRAY }
+  { ---------------------------------------------------------------------------------------------------------------- MOVE TOTALS AND ITS POSITIONS INTO ARRAY }
   for iCNT:=1 to Grid.RowCount do
   begin
     if Grid.RowHeights[iCNT] <> sgRowHidden then

@@ -80,8 +80,16 @@ type
     btnCopyPerson: TSpeedButton;
     btnCopyEmail: TSpeedButton;
     PanelStatusBar: TPanel;
-    SimpleText: TLabel;
+    SimpleText1: TLabel;
     Label1: TLabel;
+    MasterPanel: TPanel;
+    Text1: TLabel;
+    Splitter1: TBevel;
+    Text2: TLabel;
+    SimpleText2: TLabel;
+    Bevel1: TBevel;
+    Bevel2: TBevel;
+    Bevel3: TBevel;
     procedure FormCreate(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure OpenItemsGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
@@ -207,7 +215,7 @@ begin
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------- GET ALL RELEVANT DATA }
-procedure TActionsForm.GetData(OpenItemsDest: TStringGrid; HistoryDest: TStringGrid; OpenItemsSrc: TStringGrid);
+procedure TActionsForm.GetData(OpenItemsDest: TStringGrid; HistoryDest: TStringGrid; OpenItemsSrc: TStringGrid);  // refactor!!!!
 var
   iCNT       :  integer;
   jCNT       :  integer;
@@ -353,7 +361,7 @@ begin
     end;
 end;
 
-{ --------------------------------------------------------------------------------------------------------------------------- HIDE IRELEVANT FOR USER COLUMNS }
+{ ------------------------------------------------------------------------------------------------------------------------------------ HIDE IRELEVANT COLUMNS }
 procedure TActionsForm.SetHistoryCols(Grid: TStringGrid);
 begin
   Grid.ColCount:=11;
@@ -487,7 +495,7 @@ begin
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------ SEND ACCOUNT STATEMENT }
-procedure TActionsForm.SendAccountStatement(Layout: integer; Salut: string; Mess: string);
+procedure TActionsForm.SendAccountStatement(Layout: integer; Salut: string; Mess: string); //to worker
 var
   Statement:   TDocument;
   AppSettings: TSettings;
@@ -534,7 +542,7 @@ begin
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------- REGISTER THIS ACTION IN DATABASE }
-procedure TActionsForm.RegisterAction;
+procedure TActionsForm.RegisterAction;  //to worker
 var
   DailyText:   TDataTables;
   Condition:   string;
@@ -586,7 +594,7 @@ begin
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------- CLEAR FOLLOW-UP FROM GIVEN CUSTOMER }
-procedure TActionsForm.ClearFollowUp;
+procedure TActionsForm.ClearFollowUp; //to worker
 var
   GeneralText: TDataTables;
   Condition:   string;
@@ -606,7 +614,7 @@ begin
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------- SAVE SOME CUSTOMER DETAILS }
-procedure TActionsForm.SaveCustomerDetails;
+procedure TActionsForm.SaveCustomerDetails; //to worker
 var
   AddrBook:  TDataTables;
   Condition: string;
@@ -649,7 +657,7 @@ end;
 { ############################################################ ! MAIN THREAD EVENTS ! ####################################################################### }
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------- ON CREATE }
-procedure TActionsForm.FormCreate(Sender: TObject);
+procedure TActionsForm.FormCreate(Sender: TObject);  //???
 var
   AppSettings: TSettings;
 begin
@@ -681,6 +689,13 @@ begin
   HistoryGrid.RowCount:=2;
   SetHistoryCols(HistoryGrid);
   PanelTop.PanelBorders(clWhite, clSkyBlue, clWhite, clWhite, clWhite);
+
+  btnEdit.Glyph.Transparent:=True;
+  btnEdit.Glyph.TransparentColor:=clWhite;
+
+  btnSendEmail.Glyph.Transparent:=True;
+  btnSendEmail.Glyph.TransparentColor:=clWhite;
+
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------------- ON SHOW }
@@ -693,7 +708,7 @@ end;
 procedure TActionsForm.FormActivate(Sender: TObject);
 begin
   GetData(OpenItemsGrid, HistoryGrid, MainForm.sgOpenItems);
-  SimpleText.Caption:='Open items last update: ' + MainForm.OpenItemsUpdate + '.';
+  SimpleText2.Caption:=MainForm.OpenItemsUpdate;
   SetControls;
 end;
 
