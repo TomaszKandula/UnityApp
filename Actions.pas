@@ -50,7 +50,7 @@ type
     Text8: TLabel;
     Cust_Name: TLabel;
     Cust_Number: TLabel;
-    btnSendStatement: TSpeedButton;
+    btnAutoStatement: TSpeedButton;
     PanelMiddle: TPanel;
     PanelBottom: TPanel;
     PanelTop: TPanel;
@@ -63,9 +63,9 @@ type
     DailyTitle: TLabel;
     GeneralPanel: TPanel;
     GeneralTitle: TLabel;
-    btnFeedback: TSpeedButton;
+    btnSetFollowUp: TSpeedButton;
     btnClearFollowUp: TSpeedButton;
-    btnSendEmail: TSpeedButton;
+    btnCustomStatement: TSpeedButton;
     Cust_Phone: TComboBox;
     GroupCustomerDetails: TGroupBox;
     btnSaveCustDetails: TSpeedButton;
@@ -80,16 +80,15 @@ type
     btnCopyPerson: TSpeedButton;
     btnCopyEmail: TSpeedButton;
     PanelStatusBar: TPanel;
-    SimpleText1: TLabel;
     Label1: TLabel;
     MasterPanel: TPanel;
-    Text1: TLabel;
-    Splitter1: TBevel;
-    Text2: TLabel;
-    SimpleText2: TLabel;
-    Bevel1: TBevel;
-    Bevel2: TBevel;
-    Bevel3: TBevel;
+    Text: TLabel;
+    SimpleText: TLabel;
+    PanelHistoryGrid: TPanel;
+    PanelDailyCom: TPanel;
+    PanelGeneralCom: TPanel;
+    PanelOpenItemsGrid: TPanel;
+    ImgLoadingWindow: TImage;
     procedure FormCreate(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure OpenItemsGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
@@ -98,7 +97,7 @@ type
     procedure OpenItemsGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
     procedure btnNextClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
-    procedure btnSendStatementClick(Sender: TObject);
+    procedure btnAutoStatementClick(Sender: TObject);
     procedure HistoryGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
     procedure HistoryGridMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
     procedure HistoryGridMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
@@ -109,9 +108,9 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure DailyComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure GeneralComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure btnFeedbackClick(Sender: TObject);
+    procedure btnSetFollowUpClick(Sender: TObject);
     procedure btnClearFollowUpClick(Sender: TObject);
-    procedure btnSendEmailClick(Sender: TObject);
+    procedure btnCustomStatementClick(Sender: TObject);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure btnSaveCustDetailsClick(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
@@ -127,23 +126,28 @@ type
     var CoCode     :  string;
     var CustName   :  string;
     var CustNumber :  string;
-    var SrcColumns :  array of integer;
+    var SrcColumns :  TIntigers;
   published
     function  GetRunningApps(SearchName: string): boolean;
-    procedure GetData(OpenItemsDest: TStringGrid; HistoryDest: TStringGrid; OpenItemsSrc: TStringGrid);
-    procedure UpdateHistory(Grid: TStringGrid);
-    procedure SetHistoryCols(Grid: TStringGrid);
+    procedure GetData;
+    procedure UpdateOpenItems(OpenItemsDest, OpenItemsSrc: TStringGrid);
+    procedure UpdateDetails(CustPerson, CustMail: TEdit; CustPhone: TComboBox);
+    procedure UpdateHistory(var Grid: TStringGrid);
+    procedure UpdateGeneral(Text: TMemo);
     procedure SetControls;
     procedure Initialize;
     procedure ClearAll;
     procedure MakePhoneCall;
     procedure LoadCustomer(Direction: integer);
-    procedure SendAccountStatement(Layout: integer; Salut: string; Mess: string);
+    procedure SendAccountStatement(Layout: integer; Salut: string; Mess: string; IsOverdue: boolean);
     procedure RegisterAction;
     procedure ClearFollowUp;
     procedure SaveCustomerDetails;
     procedure SaveGeneralComment;
     procedure SaveDailyComment;
+    procedure InitializePanels;
+    procedure InitializeSpeedButtons;
+    procedure LoadingAnimation(GIFImage: TImage; State: integer);
   end;
 
 var
@@ -158,7 +162,7 @@ uses
 
 {$R *.dfm}
 
-{ ####################################################### ! EXTENSION OF 'TSHAPE' CLASS ! ################################################################### }
+{ ######################################################## ! EXTENSION OF 'TEDIT' CLASS ! ################################################################### }
 
 { --------------------------------------------------------------------------------------------------------------------------- CREATE PARAMETERS FOR COMPONENT }
 procedure TEdit.CreateParams(var Params: TCreateParams);
@@ -215,26 +219,44 @@ begin
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------- GET ALL RELEVANT DATA }
-procedure TActionsForm.GetData(OpenItemsDest: TStringGrid; HistoryDest: TStringGrid; OpenItemsSrc: TStringGrid);  // refactor!!!!
-var
-  iCNT       :  integer;
-  jCNT       :  integer;
-  kCNT       :  integer;
-  GenText    :  TDataTables;
-  AddrBook   :  TDataTables;
-  Phones     :  string;
-  SL         :  TStringList;
+procedure TActionsForm.GetData;
 begin
-
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   Screen.Cursor:=crSQLWait;
-  OpenItemsDest.Freeze(True);
-  HistoryDest.Freeze(True);
-  OpenItemsDest.ClearAll(2, 1, 1, False);
-  HistoryDest.ClearAll(2, 1, 1, False);
-  kCNT:=1;
+  OpenItemsGrid.Freeze(True);
+  OpenItemsGrid.ClearAll(2, 1, 1, False);
+  HistoryGrid.Freeze(True);
+  HistoryGrid.ClearAll(2, 1, 1, False);
+  { ------------------------------------------------------------------------------------------------------------------------------------------------- PROCESS }
+  try
+    Cust_Name.Caption  :=CustName;
+    Cust_Number.Caption:=CustNumber;
+    UpdateOpenItems(OpenItemsGrid, MainForm.sgOpenItems);
+    UpdateDetails(Cust_Person, Cust_Mail, Cust_Phone);
+    UpdateHistory(HistoryGrid);
+    UpdateGeneral(GeneralCom);
+  finally
+    { ------------------------------------------------------------------------------------------------------------------------------------------ UNINITIALIZE }
+    OpenItemsGrid.AutoThumbSize;
+    OpenItemsGrid.SetColWidth(10, 20);
+    OpenItemsGrid.Freeze(False);
+    HistoryGrid.AutoThumbSize;
+    HistoryGrid.SetColWidth(10, 20);
+    HistoryGrid.Freeze(False);
+    Screen.Cursor:=crDefault;
+  end;
+end;
 
-  { -------------------------------------------------------------------------------------------------------------------------------------- GET SOURCE COLUMNS }
+{ -------------------------------------------------------------------------------------------------------------------------------- GET OPEN ITEMS FROM SOURCE }
+procedure TActionsForm.UpdateOpenItems(OpenItemsDest: TStringGrid; OpenItemsSrc: TStringGrid);
+var
+  iCNT  : integer;
+  jCNT  : integer;
+  kCNT  : integer;
+begin
+  { INITIALIZE }
+  kCNT:=1;
+  { GET COLUMNS NUMBERS FROM SOURCE OPEN ITEMS GRID }
   SrcColumns[0] :=OpenItemsSrc.ReturnColumn(TOpenitems.InvoNo,    1, 1);
   SrcColumns[1] :=OpenItemsSrc.ReturnColumn(TOpenitems.Txt,       1, 1);
   SrcColumns[2] :=OpenItemsSrc.ReturnColumn(TOpenitems.AddTxt,    1, 1);
@@ -247,132 +269,124 @@ begin
   SrcColumns[9] :=OpenItemsSrc.ReturnColumn(TOpenitems.ValDt,     1, 1);
   SrcColumns[10]:=OpenItemsSrc.ReturnColumn(TOpenitems.Ctrl,      1, 1);
   SrcColumns[11]:=OpenItemsSrc.ReturnColumn(TOpenitems.PmtStat,   1, 1);
-
-  try
-    { --------------------------------------------------------- ! LIST OF OPEN ITEMS ! ---------------------------------------------------------------------- }
-
-    { ----------------------------------------------------------------------------------------------------------------------- LOAD OPEN ITEMS FROM "MAINFORM" }
-    { LOOK FOR THE SAME "CUID" }
-    for iCNT:=1 to OpenItemsSrc.RowCount - 1 do
+  { HELPER COLUMNS }
+  SrcColumns[12]:=OpenItemsSrc.ReturnColumn(TOpenitems.Ad1,       1, 1);
+  SrcColumns[13]:=OpenItemsSrc.ReturnColumn(TOpenitems.Ad2,       1, 1);
+  SrcColumns[14]:=OpenItemsSrc.ReturnColumn(TOpenitems.Ad3,       1, 1);
+  SrcColumns[15]:=OpenItemsSrc.ReturnColumn(TOpenitems.Pno,       1, 1);
+  SrcColumns[16]:=OpenItemsSrc.ReturnColumn(TOpenitems.PArea,     1, 1);
+  SrcColumns[17]:=OpenItemsSrc.ReturnColumn(TOpenitems.CUID,      1, 1);
+  { GET HEADERS }
+  for iCNT:=Low(SrcColumns) to High(SrcColumns) do OpenItemsDest.Cells[iCNT + 1, 0]:=OpenItemsSrc.Cells[SrcColumns[iCNT], 0];
+  { LOOK FOR THE SAME "CUID" AND PUT IT INTO SOURCE GRID }
+  for iCNT:=1 to OpenItemsSrc.RowCount - 1 do
+  begin
+    if OpenItemsSrc.Cells[MainForm.sgOpenItems.ReturnColumn(TOpenitems.CUID, 1, 1), iCNT] = CUID then
     begin
-      if OpenItemsSrc.Cells[MainForm.sgOpenItems.ReturnColumn(TOpenitems.CUID, 1, 1), iCNT] = CUID then
-      begin
-        { MOVE DATA FOR SELECTED COLUMNS AND GIVEN ROW ONCE "CUID" IS FOUND }
-        for jCNT:=Low(SrcColumns) to High(SrcColumns)
-          do OpenItemsDest.Cells[jCNT + 1, kCNT]:=OpenItemsSrc.Cells[SrcColumns[jCNT], iCNT];
-        { MOVE NEXT }
-        inc(kCNT);
-        OpenItemsDest.RowCount:=kCNT;
-      end;
+      for jCNT:=Low(SrcColumns) to High(SrcColumns) do OpenItemsDest.Cells[jCNT + 1, kCNT]:=OpenItemsSrc.Cells[SrcColumns[jCNT], iCNT];
+      { MOVE NEXT }
+      inc(kCNT);
+      OpenItemsDest.RowCount:=kCNT;
     end;
-    { ------------------------------------------------------------------------------------------------------------------- SORT VIA PAYMENT STATUS | ASCENDING }
-    OpenItemsDest.MSort(9, 0, True);
-    { -------------------------------------------------------------------------------------------------------------------------------- CUSTOMER NAME & NUMBER }
-    Cust_Name.Caption  :=CustName;
-    Cust_Number.Caption:=CustNumber;
+  end;
+  { HIDE HELPER COLUMNS }
+  OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.Ad1,   1, 1)]:=-1;
+  OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.Ad2,   1, 1)]:=-1;
+  OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.Ad3,   1, 1)]:=-1;
+  OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.Pno,   1, 1)]:=-1;
+  OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.PArea, 1, 1)]:=-1;
+  OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.CUID,  1, 1)]:=-1;
+  { SORT VIA DUE DATE }
+  OpenItemsDest.MSort(OpenItemsDest.ReturnColumn(TOpenitems.PmtStat, 1, 1), sdtINTEGER, True);
+end;
 
-    { ------------------------------------------------------------- ! CUSTOMER DATA ! ----------------------------------------------------------------------- }
-
-    AddrBook:=TDataTables.Create(MainForm.DbConnect);
-    try
-      AddrBook.Columns.Add(TAddressBook.CONTACT);
-      AddrBook.Columns.Add(TAddressBook.ESTATEMENTS);
-      AddrBook.Columns.Add(TAddressBook.PHONE_NUMBERS);
-      AddrBook.CustFilter:=WHERE + TAddressBook.SCUID + EQUAL + QuotedStr(SCUID);
-      AddrBook.OpenTable(TblAddressbook);
-      if AddrBook.DataSet.RecordCount = 1 then
+{ -------------------------------------------------------------------------------------------------------------------------------------- GET CUSTOMER DETAILS }
+procedure TActionsForm.UpdateDetails(CustPerson: TEdit; CustMail: TEdit; CustPhone: TComboBox);
+var
+  AddrBook  : TDataTables;
+  Phones    : string;
+  SL        : TStringList;
+  iCNT      : integer;
+begin
+  AddrBook:=TDataTables.Create(MainForm.DbConnect);
+  try
+    AddrBook.Columns.Add(TAddressBook.CONTACT);
+    AddrBook.Columns.Add(TAddressBook.ESTATEMENTS);
+    AddrBook.Columns.Add(TAddressBook.PHONE_NUMBERS);
+    AddrBook.CustFilter:=WHERE + TAddressBook.SCUID + EQUAL + QuotedStr(SCUID);
+    AddrBook.OpenTable(TblAddressbook);
+    if AddrBook.DataSet.RecordCount = 1 then
+    begin
+      CustPerson.Text:=MainForm.OleGetStr(AddrBook.DataSet.Fields[TAddressBook.CONTACT].Value);
+      CustMail.Text  :=MainForm.OleGetStr(AddrBook.DataSet.Fields[TAddressBook.ESTATEMENTS].Value);
+      Phones:=MainForm.OleGetStr(AddrBook.DataSet.Fields[TAddressBook.PHONE_NUMBERS].Value);
+      if (Phones <> '') or (Phones <> ' ') then
       begin
-        Cust_Person.Text:=MainForm.OleGetStr(AddrBook.DataSet.Fields[TAddressBook.CONTACT].Value);
-        Cust_Mail.Text  :=MainForm.OleGetStr(AddrBook.DataSet.Fields[TAddressBook.ESTATEMENTS].Value);
-        Phones:=MainForm.OleGetStr(AddrBook.DataSet.Fields[TAddressBook.PHONE_NUMBERS].Value);
-        if (Phones <> '') or (Phones <> ' ') then
+        CustPhone.Clear;
+        { MANY NUMBERS DELIMITED BY SEMICOLON }
+        if AnsiPos(deSemicolon, Phones) > 0 then
         begin
-          Cust_Phone.Clear;
-          { MANY NUMBERS DELIMITED BY SEMICOLON }
-          if AnsiPos(deSemicolon, Phones) > 0 then
-          begin
-            SL:=TStringList.Create;
-            try
-              SL.Delimiter:=deSemicolon;
-              SL.StrictDelimiter:=True;
-              SL.DelimitedText:=Phones;
-              for iCNT:=0 to SL.Count - 1 do
-                Cust_Phone.Items.Add(SL.Strings[iCNT]);
-            finally
-              SL.Free;
-            end;
-          end
-          else
-          { JUST ONE TELEPHONE NUMBER }
-          begin
-            Cust_Phone.Items.Add(Phones);
+          SL:=TStringList.Create;
+          try
+            SL.Delimiter:=deSemicolon;
+            SL.StrictDelimiter:=True;
+            SL.DelimitedText:=Phones;
+            for iCNT:=0 to SL.Count - 1 do
+              CustPhone.Items.Add(SL.Strings[iCNT]);
+          finally
+            SL.Free;
           end;
-          Cust_Phone.ItemIndex:=0;
+        end
+        else
+        { JUST ONE TELEPHONE NUMBER }
+        begin
+          CustPhone.Items.Add(Phones);
         end;
+        CustPhone.ItemIndex:=0;
       end;
-    finally
-      AddrBook.Free;
     end;
-
-    { ------------------------------------------------------ ! HISTORY OF DAILY COMMENTS ! ------------------------------------------------------------------ }
-
-    UpdateHistory(HistoryDest);
-
-    { ----------------------------------------------------------- ! GENERAL COMMENTS ! ---------------------------------------------------------------------- }
-
-    GenText:=TDataTables.Create(MainForm.DbConnect);
-    try
-      GenText.OpenTable(TblGeneral);
-      GenText.DataSet.Filter:=TGeneral.CUID + EQUAL + QuotedStr(CUID);
-      if not (GenText.DataSet.EOF) then GeneralCom.Text:=MainForm.OleGetStr(GenText.DataSet.Fields[TGeneral.FIXCOMMENT].Value);
-    finally
-      GenText.Free;
-    end;
-
-  { -------------------------------------------------------------------------------------------------------------------------------------------- UNINITIALIZE }
   finally
-    OpenItemsDest.AutoThumbSize;
-    HistoryDest.AutoThumbSize;
-    OpenItemsDest.SetColWidth(10, 20);
-    HistoryDest.SetColWidth(10, 20);
-    OpenItemsDest.Freeze(False);
-    HistoryDest.Freeze(False);
-    Screen.Cursor:=crDefault;
+    AddrBook.Free;
   end;
 end;
 
-{ -------------------------------------------------------------------------------------------------------------------------------------- REFRESH HISTORY GRID }
-procedure TActionsForm.UpdateHistory(Grid: TStringGrid);
+{ -------------------------------------------------------------------------------------------------------------------------- REFRESH HISTORY OF DAILY COMMENT }
+procedure TActionsForm.UpdateHistory(var Grid: TStringGrid);
 var
   DailyText: TDataTables;
 begin
-    DailyText:=TDataTables.Create(MainForm.DbConnect);
-    try
-      DailyText.OpenTable(TblDaily);
-      DailyText.DataSet.Filter:=TDaily.CUID + EQUAL + QuotedStr(CUID);
-      DailyText.DataSet.Sort:=TDaily.STAMP + DESC;
-      if not (DailyText.DataSet.EOF) then
-      begin
-        DailyText.SqlToGrid(Grid, DailyText.DataSet, False, True);
-        SetHistoryCols(Grid);
-      end;
-    finally
-      DailyText.Free;
+  DailyText:=TDataTables.Create(MainForm.DbConnect);
+  try
+    DailyText.Columns.Add(TDaily.AGEDATE);
+    DailyText.Columns.Add(TDaily.STAMP);
+    DailyText.Columns.Add(TDaily.USER_ALIAS);
+    DailyText.Columns.Add(TDaily.FIXCOMMENT);
+    DailyText.CustFilter:=WHERE + TDaily.CUID + EQUAL + QuotedStr(CUID);
+    DailyText.OpenTable(TblDaily);
+    DailyText.DataSet.Sort:=TDaily.STAMP + DESC;
+    if not (DailyText.DataSet.EOF) then
+    begin
+      DailyText.SqlToGrid(Grid, DailyText.DataSet, False, True);
+      Grid.ColWidths[Grid.ReturnColumn(TDaily.FIXCOMMENT, 1, 1)]:=-1;
     end;
+  finally
+    DailyText.Free;
+  end;
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------ HIDE IRELEVANT COLUMNS }
-procedure TActionsForm.SetHistoryCols(Grid: TStringGrid);
+{ ----------------------------------------------------------------------------------------------------------------------------------- REFRESH GENERAL COMMENT }
+procedure TActionsForm.UpdateGeneral(Text: TMemo);
+var
+  GenText: TDataTables;
 begin
-  Grid.ColCount:=11;
-  Grid.ColWidths[1] := -1;
-  Grid.ColWidths[2] := -1;
-  Grid.ColWidths[3] := -1;
-  Grid.ColWidths[7] := -1;
-  Grid.ColWidths[8] := -1;
-  Grid.ColWidths[9] := -1;
-  Grid.ColWidths[10]:= -1;
-  Grid.SetColWidth(10, 20);
+  GenText:=TDataTables.Create(MainForm.DbConnect);
+  try
+    GenText.CustFilter:=WHERE + TGeneral.CUID + EQUAL + QuotedStr(CUID);
+    GenText.OpenTable(TblGeneral);
+    if not (GenText.DataSet.EOF) then Text.Text:=MainForm.OleGetStr(GenText.DataSet.Fields[TGeneral.FIXCOMMENT].Value);
+  finally
+    GenText.Free;
+  end;
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------- ENABLE/DISABLE CONTROLS }
@@ -486,7 +500,7 @@ begin
   { LOAD NEW DATA }
   Initialize;
   try
-    GetData(OpenItemsGrid, HistoryGrid, MainForm.sgOpenItems);
+    GetData;
     SetControls;
   except
     MainForm.MsgCall(mcWarn, 'Unexpected error has occured. Please close the window and try again.');
@@ -495,7 +509,7 @@ begin
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------ SEND ACCOUNT STATEMENT }
-procedure TActionsForm.SendAccountStatement(Layout: integer; Salut: string; Mess: string); //to worker
+procedure TActionsForm.SendAccountStatement(Layout: integer; Salut: string; Mess: string; IsOverdue: boolean); //to worker
 var
   Statement:   TDocument;
   AppSettings: TSettings;
@@ -512,11 +526,12 @@ begin
     Statement.Branch  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fAGENT,         1, 1), MainForm.sgAgeView.Row];
     Statement.SCUID   :=SCUID;
     { SET OPEN ITEMS GRID }
-    Statement.OpenItems:=MainForm.sgOpenItems;
+    Statement.OpenItems:=OpenItemsGrid;
     { GET HTML LAYOUT }
     Statement.DocType  :=dcStatement;
     Statement.CustSalut:=Salut;
     Statement.CustMess :=Mess;
+    Statement.IsOverdue:=IsOverdue;
     { USE FULLY PRE-DEFINED TEMPLATE }
     if Layout = maDefined then
     begin
@@ -604,7 +619,9 @@ begin
     GeneralText:=TDataTables.Create(MainForm.DbConnect);
     try
       Condition:=TGeneral.CUID + EQUAL + QuotedStr(CUID);
-      GeneralText.Columns.Add(TGeneral.FOLLOWUP); GeneralText.Values.Add(SPACE); GeneralText.Conditions.Add(Condition);
+      GeneralText.Columns.Add(TGeneral.FOLLOWUP);
+      GeneralText.Values.Add(SPACE);
+      GeneralText.Conditions.Add(Condition);
       GeneralText.UpdateRecord(TblGeneral);
       MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1), MainForm.sgAgeView.Row]:='';
     finally
@@ -654,48 +671,76 @@ begin
   TTDailyComment.Create(DailyCom.Text, CUID);
 end;
 
+{ --------------------------------------------------------------------------------------------------------------------------------------- DRAW PANELS BORDERS }
+procedure TActionsForm.InitializePanels;
+begin
+  PanelTop.PanelBorders(clWhite, clSkyBlue, clWhite, clWhite, clWhite);
+  PanelOpenItemsGrid.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+  PanelHistoryGrid.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+  PanelDailyCom.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+  PanelGeneralCom.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+end;
+
+{ ------------------------------------------------------------------------------------------------------------------------------ TSPEEDBUTTONS | TRANSPARENCY }
+procedure TActionsForm.InitializeSpeedButtons;
+begin
+  btnEdit.Glyph.Transparent:=True;
+  btnEdit.Glyph.TransparentColor:=clWhite;
+  btnSaveCustDetails.Glyph.Transparent:=True;
+  btnSaveCustDetails.Glyph.TransparentColor:=clWhite;
+  btnBack.Glyph.Transparent:=True;
+  btnBack.Glyph.TransparentColor:=clWhite;
+  btnNext.Glyph.Transparent:=True;
+  btnNext.Glyph.TransparentColor:=clWhite;
+  btnSetFollowUp.Glyph.Transparent:=True;
+  btnSetFollowUp.Glyph.TransparentColor:=clWhite;
+  btnClearFollowUp.Glyph.Transparent:=True;
+  btnClearFollowUp.Glyph.TransparentColor:=clWhite;
+  btnCustomStatement.Glyph.Transparent:=True;
+  btnCustomStatement.Glyph.TransparentColor:=clWhite;
+  btnAutoStatement.Glyph.Transparent:=True;
+  btnAutoStatement.Glyph.TransparentColor:=clWhite;
+  btnCallCustomer.Glyph.Transparent:=True;
+  btnCallCustomer.Glyph.TransparentColor:=clWhite;
+end;
+
+{ --------------------------------------------------------------------------------------------------------------------------- ANIMATION DURING WINDOW LOADING }
+procedure TActionsForm.LoadingAnimation(GIFImage: TImage; State: Integer);
+begin
+  if State = AnimationON then
+  begin
+    MasterPanel.Visible:=False;
+    ImgLoadingWindow.Visible:=True;
+    (GIFImage.Picture.Graphic as TGIFImage).Animate:=True;
+  end;
+  if State = AnimationOFF then
+  begin
+    (GIFImage.Picture.Graphic as TGIFImage).Animate:=False;
+    ImgLoadingWindow.Visible:=False;
+    MasterPanel.Visible:=True;
+  end;
+end;
+
 { ############################################################ ! MAIN THREAD EVENTS ! ####################################################################### }
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------- ON CREATE }
-procedure TActionsForm.FormCreate(Sender: TObject);  //???
+procedure TActionsForm.FormCreate(Sender: TObject);
 var
   AppSettings: TSettings;
 begin
+  { ------------------------------------------------------------------------------------------------------------------------------------- LOAD WINDOW CAPTION }
   AppSettings:=TSettings.Create;
   try
-    { ----------------------------------------------------------------------------------------------------------------------------------- LOAD WINDOW CAPTION }
     ActionsForm.Caption:=AppSettings.TMIG.ReadString(ApplicationDetails, 'WND_TRANSACTIONS', APPNAME);
-    { -------------------------------------------------------------------------------------------------------------------------------- OPEN ITEMS STRING GRID }
-    SetLength(SrcColumns, 12);
-    OpenItemsGrid.RowCount:=2;
-    OpenItemsGrid.ColCount:=13;
-    OpenItemsGrid.Cols[0].Text :='';
-    OpenItemsGrid.Cols[1].Text :='Invoice Number';
-    OpenItemsGrid.Cols[2].Text :='Text';
-    OpenItemsGrid.Cols[3].Text :='Add. Text';
-    OpenItemsGrid.Cols[4].Text :='Open Amount';
-    OpenItemsGrid.Cols[5].Text :='Amount';
-    OpenItemsGrid.Cols[6].Text :='Open Cur. Amount';
-    OpenItemsGrid.Cols[7].Text :='Currency Amount';
-    OpenItemsGrid.Cols[8].Text :='Currency';
-    OpenItemsGrid.Cols[9].Text :='Due Date';
-    OpenItemsGrid.Cols[10].Text:='Value Date';
-    OpenItemsGrid.Cols[11].Text:='Control Status';
-    OpenItemsGrid.Cols[12].Text:='Payment Status';
   finally
     AppSettings.Free;
   end;
-  { ------------------------------------------------------------------------------------------------------------------------------------- HISTORY STRING GRID }
-  HistoryGrid.RowCount:=2;
-  SetHistoryCols(HistoryGrid);
-  PanelTop.PanelBorders(clWhite, clSkyBlue, clWhite, clWhite, clWhite);
-
-  btnEdit.Glyph.Transparent:=True;
-  btnEdit.Glyph.TransparentColor:=clWhite;
-
-  btnSendEmail.Glyph.Transparent:=True;
-  btnSendEmail.Glyph.TransparentColor:=clWhite;
-
+  { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
+  SetLength(SrcColumns, 19);
+  OpenItemsGrid.ColCount:=19;
+  HistoryGrid.ColCount:=11;
+  InitializePanels;
+  InitializeSpeedButtons;
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------------- ON SHOW }
@@ -707,9 +752,11 @@ end;
 { ----------------------------------------------------------------------------------------------------------------------------------------------- ON ACTIVATE }
 procedure TActionsForm.FormActivate(Sender: TObject);
 begin
-  GetData(OpenItemsGrid, HistoryGrid, MainForm.sgOpenItems);
-  SimpleText2.Caption:=MainForm.OpenItemsUpdate;
+  LoadingAnimation(ImgLoadingWindow, AnimationON);
+  GetData;
+  SimpleText.Caption:=MainForm.OpenItemsUpdate;
   SetControls;
+  LoadingAnimation(ImgLoadingWindow, AnimationOFF);
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------- QUIT EDITING ON CLOSE }
@@ -721,7 +768,8 @@ end;
 { ------------------------------------------------------------------------------------------------------------------------------------------------ ON DESTROY }
 procedure TActionsForm.FormDestroy(Sender: TObject);
 begin
-  { DO NOTHING }
+  MasterPanel.Visible:=False;
+  ImgLoadingWindow.Visible:=True;
 end;
 
 { ---------------------------------------------------------- ! COMPONENT EVENTS | EVENTS ! ------------------------------------------------------------------ }
@@ -886,7 +934,7 @@ begin
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------- FEEDBACK AFTER CALL }
-procedure TActionsForm.btnFeedbackClick(Sender: TObject);
+procedure TActionsForm.btnSetFollowUpClick(Sender: TObject);
 begin
   CalendarForm.CalendarMode:=cfDateToDB;
   MainForm.WndCall(CalendarForm, 0);
@@ -899,17 +947,17 @@ begin
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------------- SEND MANUAL EMAIL }
-procedure TActionsForm.btnSendEmailClick(Sender: TObject);
+procedure TActionsForm.btnCustomStatementClick(Sender: TObject);
 begin
   MainForm.WndCall(SendForm, 0);
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------------- SEND STATEMENT }
-procedure TActionsForm.btnSendStatementClick(Sender: TObject);
+procedure TActionsForm.btnAutoStatementClick(Sender: TObject);
 begin
   { ASK USER BEFORE SENDING THE EMAIL }
   if MainForm.MsgCall(mcQuestion2, 'Are you absolutely sure that you really want it to be sent, right now?') = IDNO then Exit;
-  SendAccountStatement(maDefined, '', '');
+  SendAccountStatement(maDefined, '', '', False);
   RegisterAction;
 end;
 

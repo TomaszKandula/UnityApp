@@ -81,7 +81,10 @@ procedure TSendForm.btnSendEmailClick(Sender: TObject);
 begin
   { ASK USER BEFORE SENDING THE EMAIL }
   if MainForm.MsgCall(mcQuestion2, 'Are you absolutely sure that you really want it to be sent, right now?') = IDNO then Exit;
-  ActionsForm.SendAccountStatement(maCustom, Text_Salut.Text, Text_Message.Text);
+  if cbAddOverdue.Checked then
+    ActionsForm.SendAccountStatement(maCustom, Text_Salut.Text, Text_Message.Text, True)
+      else
+        ActionsForm.SendAccountStatement(maCustom, Text_Salut.Text, Text_Message.Text, False);
   ActionsForm.RegisterAction;
 end;
 

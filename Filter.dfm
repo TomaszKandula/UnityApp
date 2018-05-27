@@ -73,8 +73,6 @@ object FilterForm: TFilterForm
     ParentShowHint = False
     ShowHint = False
     TabOrder = 0
-    ExplicitTop = 5
-    ExplicitHeight = 312
   end
   object PanelBottom: TPanel
     AlignWithMargins = True
@@ -116,7 +114,5 @@ object FilterForm: TFilterForm
     State = cbChecked
     TabOrder = 2
     OnClick = cbSelectAllClick
-    ExplicitLeft = 0
-    ExplicitTop = 0
   end
 end

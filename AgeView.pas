@@ -123,9 +123,11 @@ begin
   SqlToGrid(Grid, ExecSQL, False, False);
   LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: SQL statement applied [' + StrSQL + '].');
   { -------------------------------------------------------------------------------------------------------------------------------------------- UNINITIALIZE }
-  Grid.DefaultRowHeight:=17;
+  Grid.SetRowHeight(19, 25);
   Grid.Freeze(False);
 end;
+
+//...map group3 here
 
 { ------------------------------------------------------------------------------------------------------------------------------------- COMPUTE AGING SUMMARY }
 procedure TAgeView.ComputeAgeSummary(Grid: TStringGrid);

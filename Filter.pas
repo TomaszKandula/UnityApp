@@ -222,7 +222,7 @@ begin
     end;
     { --------------------------------------------------------------------------------------------------------------------------------- FILTER SELECTED ITEMS }
     for iCNT:=0 to High(FFilter) - 1 do
-      for jCNT:=0 to MainForm.sgAgeView.RowCount - 1 do
+      for jCNT:=1 { SKIP HEADER } to FGrid.RowCount - 1 do
       begin
         if (UpperCase(FFilter[iCNT, 0]) = UpperCase(FGrid.Cells[FColNumber, jCNT])) then
         begin

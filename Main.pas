@@ -79,6 +79,7 @@ type
     procedure DrawSelected(ARow: integer; ACol: integer; State: TGridDrawState; Rect: TRect; FontColorSel: TColor; BrushColorSel: TColor; FontColor: TColor; BrushColor: TColor; Headers: boolean);
     procedure ColorValues(ARow: integer; ACol: integer; Rect: TRect; NegativeColor: TColor; PositiveColor: TColor);
     procedure SetColWidth(FirstDefault: integer; AddSpace: integer);
+    procedure SetRowHeight(RowHeight, Header: integer);
 	  procedure MSort(const SortCol, datatype: integer; const ascending: boolean);
     procedure AutoThumbSize;
     procedure SaveLayout(ColWidthName: string; ColOrderName: string; ColNames: string; ColPrefix: string);
@@ -806,7 +807,7 @@ type                                                            (* GUI | MAIN TH
     procedure  SupplierResetFields;
     procedure  LoadingAnimation(GIFImage: TImage; Grid: TStringGrid; State: integer);
   protected
-    { WINDOWS MESSAGES }
+    { PROCESS ALL WINDOWS MESSAGES }
     procedure  WndProc(var msg: Messages.TMessage); override;
   end;
 
@@ -1412,15 +1413,6 @@ var
   FixedColumn:  integer;
   FixedRow:     integer;
 begin
-  { HIGHLLIGHT ENTIRE ROW IF CELL IS SELECTED }
-  if (State = [gdSelected]) or (State = [gdFocused]) then
-  begin
-    Canvas.Font.Color :=FontColorSel;
-    Canvas.Brush.Color:=BrushColorSel
-  end else begin
-    Canvas.Font.Color :=FontColor;
-    Canvas.Brush.Color:=BrushColor;
-  end;
   { EXTEND DRAWING ON HEADERS IF FALSE }
   FixedColumn:=0;
   FixedRow   :=0;
@@ -1432,6 +1424,19 @@ begin
   { DRAW SELECTED ROW }
   if (ARow > FixedRow) and (ACol > FixedColumn) then
   begin
+    { SELECTED LINE OR CELL(S) }
+    if gdSelected in State then
+    begin
+      { SELECTED }
+      Canvas.Font.Color :=FontColorSel;
+      Canvas.Brush.Color:=BrushColorSel;
+    end
+    else
+    begin
+      { NORMAL }
+      Canvas.Font.Color :=FontColor;
+      Canvas.Brush.Color:=BrushColor;
+    end;
     Canvas.FillRect(Rect);
     Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, Cells[ACol, ARow]);
   end;
@@ -1472,6 +1477,20 @@ begin
     if not (ColWidths[jCNT] = -1) then ColWidths[jCNT]:=MaxIntValue(tblArray) + AddSpace;  (* SKIP HIDDEN COLUMNS *)
   end;
   SetLength(tblArray, 1);
+end;
+
+{ -------------------------------------------------------------------------------------------------------------------------- SET ROW HEIGHT AND HEADER HEIGHT }
+procedure TStringGrid.SetRowHeight(RowHeight: Integer; Header: Integer);
+var
+  iCNT:  integer;
+begin
+  for iCNT:=0 to RowCount - 1 do
+  begin
+    if iCNT = 0 then
+      RowHeights[iCNT]:=Header
+        else
+          RowHeights[iCNT]:=RowHeight;
+  end;
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------ MERGE SORT }
@@ -2149,16 +2168,16 @@ end;
 { ---------------------------------------------------------------------------------------------------------------------------------- UNBOLD FONTS ON MENU BAR }
 procedure TMainForm.ResetTabsheetButtons;
 begin
-  btnStart.Font.Style:=[];
+  btnStart.Font.Style        :=[];
   btnTabelauReport.Font.Style:=[];
-  btnAgeDebt.Font.Style:=[];
-  btnTracker.Font.Style:=[];
-  btnAddressBook.Font.Style:=[];
-  btnOpenItems.Font.Style:=[];
-  btnOtherTrans.Font.Style:=[];
-  btnGeneral.Font.Style:=[];
-  btnSettings.Font.Style:=[];
-  btnSupplier.Font.Style:=[];
+  btnAgeDebt.Font.Style      :=[];
+  btnTracker.Font.Style      :=[];
+  btnAddressBook.Font.Style  :=[];
+  btnOpenItems.Font.Style    :=[];
+  btnOtherTrans.Font.Style   :=[];
+  btnGeneral.Font.Style      :=[];
+  btnSettings.Font.Style     :=[];
+  btnSupplier.Font.Style     :=[];
 end;
 
 { ---------------------------------------------------------------------------------------------------------------------------------- CLEAR ALL SUPLIER FIELDS }
@@ -2200,7 +2219,6 @@ begin
     end;
   end;
 end;
-
 
 { ############################################################## ! MAIN THREAD EVENTS ! ##################################################################### }
 
@@ -2484,7 +2502,7 @@ begin
     DataTables.OpenTable(TblCompany);
     DataTables.DataSet.Sort:=TCompany.CO_CODE + ASC;
     DataTables.SqlToGrid(sgCoCodes,  DataTables.DataSet, False, True);
-    { READ BEOW TABLES "AS IS" }
+    { READ BELOW TABLES "AS IS" }
     DataTables.CleanUp; DataTables.OpenTable(TblPmtterms); DataTables.SqlToGrid(sgPmtTerms, DataTables.DataSet, False, True);
     DataTables.CleanUp; DataTables.OpenTable(TblPaidinfo); DataTables.SqlToGrid(sgPaidInfo, DataTables.DataSet, False, True);
     DataTables.CleanUp; DataTables.OpenTable(TblGroup3);   DataTables.SqlToGrid(sgGroup3,   DataTables.DataSet, False, True);
@@ -2936,7 +2954,7 @@ begin
     begin
       for iCNT:=sgAgeView.Selection.Top to sgAgeView.Selection.Bottom do
       begin
-        if sgAgeView.RowHeights[iCNT] <> - 1 then
+        if sgAgeView.RowHeights[iCNT] <> sgRowHidden then
         begin
           Item:=TrackerForm.CustomerList.Items.Add;
           Item.Caption:=IntToStr(iCNT);
@@ -2953,6 +2971,9 @@ begin
     MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
   end;
 end;
+
+
+////////////////////////////// refactor!!!
 
 { ------------------------------------------------------------------------------------------------------------------------ ADD SELECTED ITEMS TO ADDRESS BOOK }
 procedure TMainForm.Action_AddToBookClick(Sender: TObject);
@@ -3005,6 +3026,11 @@ begin
   Screen.Cursor:=crDefault;
 end;
 
+////////////////////////////// refactor!!!
+
+
+
+
 { --------------------------------------------------------------------------------------------------------------------------- ADD FOLLOW-UP TO SELECTED GROUP }
 procedure TMainForm.Action_GroupFollowUpClick(Sender: TObject);
 var
@@ -3017,7 +3043,7 @@ begin
   if CalendarForm.SelectedDate <> NULLDATE then
   begin
     for iCNT:=sgAgeView.Selection.Top to sgAgeView.Selection.Bottom do
-      if sgAgeView.RowHeights[iCNT] <> - 1 then
+      if sgAgeView.RowHeights[iCNT] <> sgRowHidden then
         CalendarForm.SetFollowUp(CalendarForm.SelectedDate, sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUID, 1, 1), iCNT], iCNT);
   end;
   Screen.Cursor:=crDefault;
@@ -3178,7 +3204,7 @@ begin
   try
     MsgCall(
              mcInfo,
-             'Payment term: ' +
+             'Person assigned: ' +
              AgeView.GetData(
                               sgAgeView.Cells[
                                                sgAgeView.ReturnColumn(TSnapshots.fPERSON, 1, 1),
@@ -3607,7 +3633,7 @@ begin
   Col16:=sgAgeView.ReturnColumn(TSnapshots.fGROUP3,          1, 1); // tbr
   Col17:=sgAgeView.ReturnColumn(TSnapshots.fCO_CODE,         1, 1); // tbr
 
-  { MAP GROUP3 COLUMN }  // <---- remove to SQL proc, use join
+  { MAP GROUP3 COLUMN }  // <---- pre-loading on age view load
   if (ACol = Col16) then
   begin
     for iCNT:=1 to sgGroup3.RowCount - 1 do

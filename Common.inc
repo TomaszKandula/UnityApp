@@ -64,6 +64,12 @@ const
   spSplash = 100;
   spUpdate = 200;
 
+  { SORTING COLUMN DATA TYPE }
+
+  sdtSTRING  = 0;
+  sdtINTEGER = 1;
+  sdtFLOAT   = 2;
+
   { DESKTOP WINDOW MANAGER API }
 
   DWMI:           string  = 'dwmapi.dll';
@@ -84,7 +90,7 @@ const
 
   { STRING GRID ROW HEIGHT }
 
-  sgRowHeight = 17;
+  sgRowHeight = 19;
   sgRowHidden = -1;
 
   { FILTER ENUMERATION }
@@ -122,7 +128,7 @@ const
 
   { FIX COLORS }
 
-  SELCOLOR      = $00FFDBB7; { SKYBLUE: $00FFDBB7 }
+  SELCOLOR      = $00F2E4D7; { SKYBLUE: $00FFDBB7 }
   FONCOLOR      = $006433C9;
 
   { SETTINGS FILE ID }
