@@ -746,6 +746,7 @@ type                                                            (* GUI | MAIN TH
     procedure btnSupplierRejectClick(Sender: TObject);
     procedure btnUnlockClick(Sender: TObject);
     procedure btnPassUpdateClick(Sender: TObject);
+    procedure sgAgeViewSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
     { ------------------------------------------------------------- ! HELPERS ! ----------------------------------------------------------------------------- }
   private
     { GENERAL }
@@ -806,6 +807,10 @@ type                                                            (* GUI | MAIN TH
     procedure  ResetTabsheetButtons;
     procedure  SupplierResetFields;
     procedure  LoadingAnimation(GIFImage: TImage; Grid: TStringGrid; State: integer);
+    procedure  SetPanelBorders;
+    procedure  SetGridColumnWidths;
+    procedure  SetGridRowHeights;
+    procedure  SetGridThumbSizes;
   protected
     { PROCESS ALL WINDOWS MESSAGES }
     procedure  WndProc(var msg: Messages.TMessage); override;
@@ -2220,6 +2225,77 @@ begin
   end;
 end;
 
+{ -------------------------------------------------------------------------------------------------------------------------------------------- PANELS BORDERS }
+procedure TMainForm.SetPanelBorders;
+begin
+  AppHeader.PanelBorders            (clWhite, clSkyBlue, clWhite,   clWhite,   clWhite);
+  PanelAgeView.PanelBorders         (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+  PanelOpenItems.PanelBorders       (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+  PanelAddressBook.PanelBorders     (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+  PanelInvoiceTracker.PanelBorders  (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+  PanelCoCodes.PanelBorders         (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+  PanelPaidInfo.PanelBorders        (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+  PanelPerson.PanelBorders          (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+  PanelPmtTerms.PanelBorders        (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+  PanelGroup3.PanelBorders          (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+  PanelSettingsSections.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+  PanelSettingsValues.PanelBorders  (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+  PanelUAC.PanelBorders             (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+  PanelGroups.PanelBorders          (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+end;
+
+{ -------------------------------------------------------------------------------------------------------------------------------- SET COLUMN WIDTH FOR GRIDS }
+procedure TMainForm.SetGridColumnWidths;
+begin
+  sgOpenItems.SetColWidth     (10, 20);
+  sgAddressBook.SetColWidth   (10, 20);
+  sgListValue.SetColWidth     (10, 20);
+  sgListSection.SetColWidth   (10, 20);
+  sgInvoiceTracker.SetColWidth(10, 20);
+  sgCoCodes.SetColWidth       (10, 30);
+  sgPaidInfo.SetColWidth      (10, 30);
+  sgPerson.SetColWidth        (10, 30);
+  sgGroup3.SetColWidth        (10, 30);
+  sgPmtTerms.SetColWidth      (10, 30);
+  sgGroups.SetColWidth        (10, 30);
+end;
+
+{ ---------------------------------------------------------------------------------------------------------------------------------- SET ROW HEIGHT FOR GRIDS }
+procedure TMainForm.SetGridRowHeights;
+begin
+  sgOpenItems.SetRowHeight     (19, 25);
+  sgAddressBook.SetRowHeight   (19, 25);
+  sgListValue.SetRowHeight     (19, 25);
+  sgListSection.SetRowHeight   (19, 25);
+  sgAgeView.SetRowHeight       (19, 25);
+  sgInvoiceTracker.SetRowHeight(19, 25);
+  sgCoCodes.SetRowHeight       (19, 25);
+  sgPaidInfo.SetRowHeight      (19, 25);
+  sgPerson.SetRowHeight        (19, 25);
+  sgGroup3.SetRowHeight        (19, 25);
+  sgPmtTerms.SetRowHeight      (19, 25);
+  sgGroups.SetRowHeight        (19, 25);
+  sgUAC.SetRowHeight           (19, 25);
+end;
+
+{ ---------------------------------------------------------------------------------------------------------------------------------- SET THUMB SIZE FOR GRIDS }
+procedure TMainForm.SetGridThumbSizes;
+begin
+  sgAgeView.AutoThumbSize;
+  sgOpenItems.AutoThumbSize;
+  sgAddressBook.AutoThumbSize;
+  sgInvoiceTracker.AutoThumbSize;
+  sgCoCodes.AutoThumbSize;
+  sgPmtTerms.AutoThumbSize;
+  sgPaidInfo.AutoThumbSize;
+  sgPerson.AutoThumbSize;
+  sgGroup3.AutoThumbSize;
+  sgListSection.AutoThumbSize;
+  sgListValue.AutoThumbSize;
+  sgUAC.AutoThumbSize;
+  sgGroups.AutoThumbSize;
+end;
+
 { ############################################################## ! MAIN THREAD EVENTS ! ##################################################################### }
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------- ON CREATE }
@@ -2501,7 +2577,7 @@ begin
     { READ }
     DataTables.OpenTable(TblCompany);
     DataTables.DataSet.Sort:=TCompany.CO_CODE + ASC;
-    DataTables.SqlToGrid(sgCoCodes,  DataTables.DataSet, False, True);
+    DataTables.SqlToGrid(sgCoCodes, DataTables.DataSet, False, True);
     { READ BELOW TABLES "AS IS" }
     DataTables.CleanUp; DataTables.OpenTable(TblPmtterms); DataTables.SqlToGrid(sgPmtTerms, DataTables.DataSet, False, True);
     DataTables.CleanUp; DataTables.OpenTable(TblPaidinfo); DataTables.SqlToGrid(sgPaidInfo, DataTables.DataSet, False, True);
@@ -2520,12 +2596,20 @@ begin
     Vendor.Free;
   end;
 
-  { -------------------------------------------------------------------------------------------------------------------------- APPLICATION VERSION & USER SID }
+  { ---------------------------------------------------------- ! COMPONENTS SETUP ! ------------------------------------------------------------------------- }
+
+  SetPanelBorders;
+  SetGridColumnWidths;
+  SetGridRowHeights;
+  SetGridThumbSizes;
+
+  { ----------------------------------------------------- ! APPLICATION VERSION & USER SID ! ---------------------------------------------------------------- }
 
   LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Application version = ' + AppVersion);
   LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: User SID = ' + GetCurrentUserSid);
 
-  { ---------------------------------------------------------------------------------------------------------------------------------------- START ALL TIMERS }
+  { ---------------------------------------------------------- ! START ALL TIMERS ! ------------------------------------------------------------------------- }
+
   UpTime.Enabled     :=True;
   CurrentTime.Enabled:=True;
   SwitchTimers(tmEnabled);
@@ -2564,49 +2648,13 @@ procedure TMainForm.FormShow(Sender: TObject);
 begin
   { UPDATE THUMB SIZE }
   FormResize(self);
-  { SETUP PANEL BORDER COLORS FOR STRING GRIDS }
-  AppHeader.PanelBorders(clWhite, clSkyBlue, clWhite, clWhite, clWhite);
-  PanelAgeView.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-  PanelOpenItems.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-  PanelAddressBook.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-  PanelInvoiceTracker.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-  PanelCoCodes.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-  PanelPaidInfo.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-  PanelPerson.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-  PanelPmtTerms.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-  PanelGroup3.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-  PanelSettingsSections.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-  PanelSettingsValues.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-  PanelUAC.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-  PanelGroups.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-  { SET COLUMN WIDTH }
-  MainForm.sgCoCodes.SetColWidth       (10, 30);
-  MainForm.sgPmtTerms.SetColWidth      (10, 30);
-  MainForm.sgPaidInfo.SetColWidth      (10, 30);
-  MainForm.sgGroup3.SetColWidth        (10, 30);
-  MainForm.sgPerson.SetColWidth        (10, 30);
-  MainForm.sgOpenItems.SetColWidth     (10, 20);
-  MainForm.sgAddressBook.SetColWidth   (10, 20);
-  MainForm.sgInvoiceTracker.SetColWidth(10, 20);
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------ MAIN FORM RESIZE }
 procedure TMainForm.FormResize(Sender: TObject);
 begin
   (* EACH TIME FORM IS RESIZED WE UPDATE THUMB SIZE OF STRING GRID COMPONENT *)
-  sgAgeView.AutoThumbSize;
-  sgOpenItems.AutoThumbSize;
-  sgAddressBook.AutoThumbSize;
-  sgInvoiceTracker.AutoThumbSize;
-  sgCoCodes.AutoThumbSize;
-  sgPmtTerms.AutoThumbSize;
-  sgPaidInfo.AutoThumbSize;
-  sgPerson.AutoThumbSize;
-  sgGroup3.AutoThumbSize;
-  sgListSection.AutoThumbSize;
-  sgListValue.AutoThumbSize;
-  sgUAC.AutoThumbSize;
-  sgGroups.AutoThumbSize;
+  SetGridThumbSizes;
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------------- ON CLOSE QUERY }
@@ -2634,7 +2682,9 @@ var
   iCNT: integer;
   Sum:  integer;
 begin
+
   { COUNT ALL TODAY'S FOLLOW UPS }
+
   Sum:=0;
   for iCNT:=1 to sgAgeView.RowCount - 1 do
     if
@@ -2648,8 +2698,11 @@ begin
         UpperCase(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.INF7, 1, 1), iCNT]) = UpperCase(WinUserName)
       )
 
-      then Inc(Sum);
+      then
+        Inc(Sum);
+
   { DISPLAY IN TRAY BALOON }
+
   if not (Sum = 0) then
   begin
     TrayIcon.Visible:=True;
@@ -2657,6 +2710,7 @@ begin
                           'Let''s bother some customers and collect some money money!' + CRLF;
     TrayIcon.ShowBalloonHint;
   end;
+
 end;
 
 { -------------------------------------------------------------------------------------------------------------------- CHECK INTERNET CONNECTION PERIODICALLY }
@@ -3187,7 +3241,11 @@ begin
                                                sgAgeView.ReturnColumn(TSnapshots.fPAYMENT_TERMS, 1, 1),
                                                sgAgeView.Row
                                              ],
-                              TblPmtterms
+                              TblPmtterms,
+                              sgAgeView.Cells[
+                                               sgAgeView.ReturnColumn(TSnapshots.fCO_CODE, 1, 1),
+                                               sgAgeView.Row
+                                             ]
                             )
            );
   finally
@@ -3210,7 +3268,11 @@ begin
                                                sgAgeView.ReturnColumn(TSnapshots.fPERSON, 1, 1),
                                                sgAgeView.Row
                                              ],
-                              TblPerson
+                              TblPerson,
+                              sgAgeView.Cells[
+                                               sgAgeView.ReturnColumn(TSnapshots.fCO_CODE, 1, 1),
+                                               sgAgeView.Row
+                                             ]
                             )
            );
   finally
@@ -3630,9 +3692,9 @@ begin
   Col13:=sgAgeView.ReturnColumn(TSnapshots.fCUID,            1, 1);
   Col14:=sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1);
   Col15:=sgAgeView.ReturnColumn(TSnapshots.fRISK_CLASS,      1, 1);
-  Col16:=sgAgeView.ReturnColumn(TSnapshots.fGROUP3,          1, 1); // tbr
-  Col17:=sgAgeView.ReturnColumn(TSnapshots.fCO_CODE,         1, 1); // tbr
-
+//  Col16:=sgAgeView.ReturnColumn(TSnapshots.fGROUP3,          1, 1); // tbr
+//  Col17:=sgAgeView.ReturnColumn(TSnapshots.fCO_CODE,         1, 1); // tbr
+(*
   { MAP GROUP3 COLUMN }  // <---- pre-loading on age view load
   if (ACol = Col16) then
   begin
@@ -3650,7 +3712,7 @@ begin
           sgAgeView.Cells[ACol, ARow]:=sgGroup3.Cells[sgGroup3.ReturnColumn(TGroup3.DESCRIPTION, 1, 1), iCNT];
     end;
   end;
-
+*)
   { HIGHLIGHT FOLLOW UP COLUMN }
   if not (CDate(sgAgeView.Cells[ACol, ARow]) = 0) then
   begin
@@ -3730,8 +3792,14 @@ end;
 
 { ------------------------------------------------------------ ! STRING GRID ROW SELECTION ! ---------------------------------------------------------------- }
 
+procedure TMainForm.sgAgeViewSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
+begin
+  sgAgeView.Selection:=TGridRect(Rect(-1, -1, -1, -1));
+end;
+
 procedure TMainForm.sgAddressBookSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
 begin
+  sgAddressBook.Selection:=TGridRect(Rect(-1, -1, -1, -1));
   if ACol = 1 then
   begin
     CanSelect:=False;

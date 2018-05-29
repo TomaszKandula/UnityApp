@@ -5965,6 +5965,7 @@ object MainForm: TMainForm
           OnKeyUp = sgAgeViewKeyUp
           OnMouseWheelDown = sgAgeViewMouseWheelDown
           OnMouseWheelUp = sgAgeViewMouseWheelUp
+          OnSelectCell = sgAgeViewSelectCell
           ColWidths = (
             40
             40
@@ -13290,6 +13291,7 @@ object MainForm: TMainForm
           PopupMenu = BookPopup
           ShowHint = False
           TabOrder = 0
+          Visible = False
           OnClick = sgAddressBookClick
           OnDblClick = sgAddressBookDblClick
           OnDrawCell = sgAddressBookDrawCell
@@ -16568,6 +16570,7 @@ object MainForm: TMainForm
           Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
           PopupMenu = TrackerPopup
           TabOrder = 0
+          Visible = False
           OnDblClick = sgInvoiceTrackerDblClick
           OnDrawCell = sgInvoiceTrackerDrawCell
           OnKeyDown = sgInvoiceTrackerKeyDown

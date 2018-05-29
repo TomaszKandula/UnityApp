@@ -62,7 +62,8 @@ type
     procedure   ClearSummary;
     procedure   UpdateSummary;
     procedure   GetDetails(var Grid: TStringGrid);
-    function    GetData(Code: string; Table: string): string;
+    procedure   MapGroup3(var Grid: TStringGrid; Source: TStringGrid);
+    function    GetData(Code: string; Table: string; Entity: string): string;
     procedure   AgeViewMode(var Grid: TStringGrid; ModeBySection: string);
     procedure   QuickSortExt(var A: array of double; var L: array of integer; iLo, iHi: integer; ASC: boolean);
     procedure   Make(OSAmount: double);
@@ -126,8 +127,6 @@ begin
   Grid.SetRowHeight(19, 25);
   Grid.Freeze(False);
 end;
-
-//...map group3 here
 
 { ------------------------------------------------------------------------------------------------------------------------------------- COMPUTE AGING SUMMARY }
 procedure TAgeView.ComputeAgeSummary(Grid: TStringGrid);
@@ -312,8 +311,8 @@ end;
 { -------------------------------------------------------------------------------------------------------------------------------------- RETURN BASIC DETAILS }
 procedure TAgeView.GetDetails(var Grid: TStringGrid);  //to mainform
 var
-  SL:   TStringList;
-  iCNT: integer;
+  SL:    TStringList;
+  iCNT:  integer;
 begin
   { CLEAR GRID }
   Grid.ClearAll(4, 0, 0, False);
@@ -347,51 +346,76 @@ begin
   end;
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------- FIND MATCH DATA IN GENERAL TABLES }
-function TAgeView.GetData(Code: string; Table: string): string;  //move to another module
+{ ----------------------------------------------------------------------------------------------------------------------------------------- MAP GROUP3 COLUMN }
+
+(* NOTE: DO NOT RUN IT UNTILL GROUP3 GRID IS POPULATED *)
+
+procedure TAgeView.MapGroup3(var Grid: TStringGrid; Source: TStringGrid);
 var
-  DataTables: TDataTables;
-  Field:      string;
+  iCNT:  integer;
+  jCNT:  integer;
+begin
+  for iCNT:=1 to Grid.RowCount - 1 do
+    for jCNT:=1 to Source.RowCount - 1 do
+    if
+      (
+        Grid.Cells[Grid.ReturnColumn(TSnapshots.fGROUP3, 1, 1), iCNT] = Source.Cells[Source.ReturnColumn(TGroup3.ERP_CODE, 1, 1), jCNT]
+      )
+    and
+      (
+        Grid.Cells[Grid.ReturnColumn(TSnapshots.fCO_CODE, 1, 1), iCNT] = Source.Cells[Source.ReturnColumn(TGroup3.COCODE, 1, 1), jCNT]
+      )
+    then
+      Grid.Cells[Grid.ReturnColumn(TSnapshots.fGROUP3, 1, 1), iCNT]:=Source.Cells[Source.ReturnColumn(TGroup3.DESCRIPTION, 1, 1), jCNT]
+end;
+
+{ ------------------------------------------------------------------------------------------------------------------------- FIND MATCH DATA IN GENERAL TABLES }
+function TAgeView.GetData(Code: string; Table: string; Entity: string): string;  //move to another module
+var
+  Field:  string;
 begin
   Result:=unUnassigned;
-  if (Code = ' ') or (Code = '') then Exit;
-  DataTables:=TDataTables.Create(MainForm.DbConnect);
+  if (Code = ' ') or (Code = '') or (Entity = ' ') or (Entity = '') then Exit;
   try
     { "GROUP3" TABLE }
     if Table = TblGroup3 then
     begin
       Field:=TGroup3.DESCRIPTION;
-      DataTables.Columns.Add(Field);
-      DataTables.CustFilter:=WHERE + TGroup3.ERP_CODE + EQUAL + Code;
-      DataTables.OpenTable(Table);
+      CleanUp;
+      Columns.Add(Field);
+      CustFilter:=WHERE + TGroup3.ERP_CODE + EQUAL + QuotedStr(Code) + _AND + TGroup3.COCODE + EQUAL + QuotedStr(Entity);
+      OpenTable(Table);
     end;
-    { "PAID INFO" TABLE }
+    { "PAID INFO" TABLE | INDEPENDENT FROM ENTITY CODE }
     if Table = TblPaidinfo then
     begin
       Field:=TPaidinfo.DESCRIPTION;
-      DataTables.Columns.Add(Field);
-      DataTables.CustFilter:=WHERE + TPaidInfo.ERP_CODE + EQUAL + Code;
-      DataTables.OpenTable(Table);
+      CleanUp;
+      Columns.Add(Field);
+      CustFilter:=WHERE + TPaidInfo.ERP_CODE + EQUAL + QuotedStr(Code);
+      OpenTable(Table);
     end;
     { "PAYMENT TERMS" TABLE }
     if Table = TblPmtterms then
     begin
       Field:=TPmtterms.DESCRIPTION;
-      DataTables.Columns.Add(Field);
-      DataTables.CustFilter:=WHERE + TPmtterms.ERP_CODE + EQUAL + Code;
-      DataTables.OpenTable(Table);
+      CleanUp;
+      Columns.Add(Field);
+      CustFilter:=WHERE + TPmtterms.ERP_CODE + EQUAL + QuotedStr(Code) + _AND + TPmtterms.COCODE + EQUAL + QuotedStr(Entity);
+      OpenTable(Table);
     end;
     { "PERSONS" TABLE }
     if Table = TblPerson then
     begin
       Field:=TPerson.DESCRIPTION;
-      DataTables.Columns.Add(Field);
-      DataTables.CustFilter:=WHERE + TPerson.ERP_CODE + EQUAL + Code;
-      DataTables.OpenTable(Table);
+      CleanUp;
+      Columns.Add(Field);
+      CustFilter:=WHERE + TPerson.ERP_CODE + EQUAL + QuotedStr(Code) + _AND + TPerson.COCODE + EQUAL + QuotedStr(Entity);
+      OpenTable(Table);
     end;
-    if DataTables.DataSet.RecordCount = 1 then Result:=MainForm.OleGetStr(DataTables.DataSet.Fields[Field].Value);
-  finally
-    DataTables.Free;
+    if DataSet.RecordCount = 1 then Result:=MainForm.OleGetStr(DataSet.Fields[Field].Value);
+  except
+    Result:='';
   end;
 end;
 

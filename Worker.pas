@@ -417,7 +417,7 @@ begin
                     AgeView.ComputeAndShowRCA(MainForm.sgAgeView);
                     AgeView.UpdateSummary;
                     AgeView.GetDetails(MainForm.DetailsGrid);
-                    //...group3 mapping call here
+                    AgeView.MapGroup3(MainForm.sgAgeView, MainForm.sgGroup3);
                     MainForm.sgAgeView.Repaint;
                     MainForm.LoadingAnimation(MainForm.ImgLoadingAgeView, MainForm.sgAgeView, AnimationOFF);
                   end);
