@@ -442,10 +442,7 @@ type                                                            (* GUI | MAIN TH
     LbuPanel: TPanel;
     ApproverPanel: TPanel;
     editCustomerName: TLabeledEdit;
-    editSerticaHandlingOrder: TLabeledEdit;
-    editSerticaUnits: TLabeledEdit;
     editSerticaBuyOrder: TLabeledEdit;
-    editSerticaTerms: TLabeledEdit;
     editEmailAddress: TLabeledEdit;
     editAddComment: TMemo;
     Text7: TLabel;
@@ -538,6 +535,12 @@ type                                                            (* GUI | MAIN TH
     PanelGroups: TPanel;
     btnUnlock: TSpeedButton;
     btnPassUpdate: TSpeedButton;
+    editSerticaHandlingOrder: TComboBox;
+    editSerticaTerms: TComboBox;
+    editSerticaUnits: TComboBox;
+    Label1: TLabel;
+    Label5: TLabel;
+    Label6: TLabel;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -810,6 +813,8 @@ type                                                            (* GUI | MAIN TH
     procedure  SetGridColumnWidths;
     procedure  SetGridRowHeights;
     procedure  SetGridThumbSizes;
+    function   Explode(Text: string; SourceDelim: char): string;
+    function   Implode(Text: TStringList; TargetDelim: char): string;
   protected
     { PROCESS ALL WINDOWS MESSAGES }
     procedure  WndProc(var msg: Messages.TMessage); override;
@@ -2264,6 +2269,18 @@ begin
   sgGroups.AutoThumbSize;
 end;
 
+{ ------------------------------------------------------------------------------------------------------------------------------- CONVERT TO MULTILINE STRING }
+function TMainForm.Explode(Text: string; SourceDelim: char): string;
+begin
+  Result:=StringReplace(Text, SourceDelim, CRLF, [rfReplaceAll]);
+end;
+
+{ -------------------------------------------------------------------------------------------------------------------------------- CONVERT TO ONE LINE STRING }
+function TMainForm.Implode(Text: TStringList; TargetDelim: char): string;
+begin
+  Result:=StringReplace(Text.Text, CRLF, TargetDelim, [rfReplaceAll]);
+end;
+
 { ############################################################## ! MAIN THREAD EVENTS ! ##################################################################### }
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------- ON CREATE }
@@ -3462,35 +3479,13 @@ end;
 
 procedure TMainForm.cbSupplierTypeSelect(Sender: TObject);
 begin
-  if cbSupplierType.Text = 'Sertica' then
+  if (cbSupplierType.Text = 'Workshop supplier (Sertica & Visma)') or (cbSupplierType.Text = 'Service or Goods Supplier (Sertica & Visma)') then
   begin
-    { ALLOW WRITE }
-    editSerticaHandlingOrder.ReadOnly:=False;
-    editSerticaUnits.ReadOnly:=False;
-    editSerticaBuyOrder.ReadOnly:=False;
-    editSerticaTerms.ReadOnly:=False;
-    { COLOR TO WHITE }
-    editSerticaHandlingOrder.Color:=clCream;
-    editSerticaUnits.Color:=clCream;
-    editSerticaBuyOrder.Color:=clCream;
-    editSerticaTerms.Color:=clCream;
-    { ARROW OR BEAM }
-    SerticaGroup.Cursor:=crDefault;
+    SerticaGroup.Visible:=True;
   end
   else
   begin
-    { READ ONLY }
-    editSerticaHandlingOrder.ReadOnly:=True;
-    editSerticaUnits.ReadOnly:=True;
-    editSerticaBuyOrder.ReadOnly:=True;
-    editSerticaTerms.ReadOnly:=True;
-    { COLOR TO WHITE }
-    editSerticaHandlingOrder.Color:=clWhite;
-    editSerticaUnits.Color:=clWhite;
-    editSerticaBuyOrder.Color:=clWhite;
-    editSerticaTerms.Color:=clWhite;
-    { "NO" CURSOR }
-    SerticaGroup.Cursor:=crNo;
+    SerticaGroup.Visible:=False;
   end;
 end;
 

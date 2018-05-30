@@ -142,9 +142,6 @@ begin
             TblSupplierRequest + '.' + TSupplierRequest.RequestStatus +
           EQUAL +
             QuotedStr(sdPENDING);
-
-   MainForm.DebugMsg(StrSQL);
-
   Result:=ExecSQL;
 end;
 
@@ -325,6 +322,7 @@ begin
     Mail.MailBody   :=HTMLBody;
     { SEND }
     Result:=Mail.SendNow;
+    //Result:=True;
   finally
     AppSet.Free;
     Mail.Free;

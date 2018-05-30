@@ -158,7 +158,7 @@ var
 implementation
 
 uses
-  Model, Worker, Calendar, Settings, Mailer, Transactions, Send;
+  Model, Worker, Calendar, Settings, Mailer, Transactions, Send, PhoneList;
 
 {$R *.dfm}
 
@@ -305,7 +305,6 @@ procedure TActionsForm.UpdateDetails(CustPerson: TEdit; CustMail: TEdit; CustPho
 var
   AddrBook  : TDataTables;
   Phones    : string;
-  SL        : TStringList;
   iCNT      : integer;
 begin
   AddrBook:=TDataTables.Create(MainForm.DbConnect);
@@ -323,25 +322,7 @@ begin
       if (Phones <> '') or (Phones <> ' ') then
       begin
         CustPhone.Clear;
-        { MANY NUMBERS DELIMITED BY SEMICOLON }
-        if AnsiPos(deSemicolon, Phones) > 0 then
-        begin
-          SL:=TStringList.Create;
-          try
-            SL.Delimiter:=deSemicolon;
-            SL.StrictDelimiter:=True;
-            SL.DelimitedText:=Phones;
-            for iCNT:=0 to SL.Count - 1 do
-              CustPhone.Items.Add(SL.Strings[iCNT]);
-          finally
-            SL.Free;
-          end;
-        end
-        else
-        { JUST ONE TELEPHONE NUMBER }
-        begin
-          CustPhone.Items.Add(Phones);
-        end;
+        CustPhone.Items.Text:=MainForm.Explode(Phones, deSemicolon);
         CustPhone.ItemIndex:=0;
       end;
     end;
@@ -908,7 +889,7 @@ end;
 { ---------------------------------------------------------------------------------------------------------------------------------------- EDIT PHONE NUMBERS }
 procedure TActionsForm.btnEditClick(Sender: TObject);
 begin
-  //
+  MainForm.WndCall(PhoneListForm, 0);
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------- SAVE CUSTOMER DETAILS }

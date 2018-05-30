@@ -1193,7 +1193,7 @@ object MainForm: TMainForm
     Margins.Top = 0
     Margins.Right = 10
     Margins.Bottom = 0
-    ActivePage = TabSheet4
+    ActivePage = TabSheet1
     Align = alClient
     DoubleBuffered = True
     Font.Charset = DEFAULT_CHARSET
@@ -18052,7 +18052,7 @@ object MainForm: TMainForm
             Caption = 'Additional comment'
           end
           object btnSupplierSubmit: TSpeedButton
-            Left = 318
+            Left = 396
             Top = 632
             Width = 75
             Height = 25
@@ -18084,14 +18084,14 @@ object MainForm: TMainForm
             Caption = 'Supplier Type'
           end
           object Text5: TLabel
-            Left = 240
+            Left = 318
             Top = 144
             Width = 74
             Height = 13
             Caption = 'Payment Terms'
           end
           object Text3: TLabel
-            Left = 240
+            Left = 318
             Top = 88
             Width = 44
             Height = 13
@@ -18105,7 +18105,7 @@ object MainForm: TMainForm
             Caption = 'DFDS Company'
           end
           object Text2: TLabel
-            Left = 240
+            Left = 318
             Top = 32
             Width = 29
             Height = 13
@@ -18114,12 +18114,12 @@ object MainForm: TMainForm
           object editCustomerName: TLabeledEdit
             Left = 24
             Top = 104
-            Width = 177
+            Width = 266
             Height = 21
             Color = clCream
-            EditLabel.Width = 124
+            EditLabel.Width = 68
             EditLabel.Height = 13
-            EditLabel.Caption = 'Customer Company Name'
+            EditLabel.Caption = 'Supplier Name'
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clNavy
             Font.Height = -11
@@ -18131,7 +18131,7 @@ object MainForm: TMainForm
           object editEmailAddress: TLabeledEdit
             Left = 24
             Top = 589
-            Width = 369
+            Width = 447
             Height = 21
             Color = clCream
             EditLabel.Width = 110
@@ -18148,7 +18148,7 @@ object MainForm: TMainForm
           object editAddComment: TMemo
             Left = 24
             Top = 432
-            Width = 369
+            Width = 447
             Height = 121
             Color = clCream
             Font.Charset = DEFAULT_CHARSET
@@ -18161,67 +18161,36 @@ object MainForm: TMainForm
           end
           object SerticaGroup: TGroupBox
             Left = 24
-            Top = 211
-            Width = 369
-            Height = 126
+            Top = 208
+            Width = 447
+            Height = 135
             Caption = 'Sertica'
             TabOrder = 3
-            object editSerticaTerms: TLabeledEdit
-              Left = 216
-              Top = 84
-              Width = 121
-              Height = 21
-              Color = clCream
-              EditLabel.Width = 71
-              EditLabel.Height = 13
-              EditLabel.Caption = 'Delivery Terms'
-              Font.Charset = DEFAULT_CHARSET
-              Font.Color = clNavy
-              Font.Height = -11
-              Font.Name = 'Tahoma'
-              Font.Style = []
-              ParentFont = False
-              TabOrder = 0
-            end
-            object editSerticaHandlingOrder: TLabeledEdit
-              Left = 216
-              Top = 36
-              Width = 121
-              Height = 21
-              Color = clCream
-              EditLabel.Width = 90
-              EditLabel.Height = 13
-              EditLabel.Caption = 'Handling of Orders'
-              Font.Charset = DEFAULT_CHARSET
-              Font.Color = clNavy
-              Font.Height = -11
-              Font.Name = 'Tahoma'
-              Font.Style = []
-              NumbersOnly = True
-              ParentFont = False
-              TabOrder = 1
-            end
-            object editSerticaUnits: TLabeledEdit
+            object Label1: TLabel
               Left = 30
-              Top = 36
-              Width = 121
-              Height = 21
-              Color = clCream
-              EditLabel.Width = 60
-              EditLabel.Height = 13
-              EditLabel.Caption = 'Sertica Units'
-              Font.Charset = DEFAULT_CHARSET
-              Font.Color = clNavy
-              Font.Height = -11
-              Font.Name = 'Tahoma'
-              Font.Style = []
-              ParentFont = False
-              TabOrder = 2
+              Top = 26
+              Width = 60
+              Height = 13
+              Caption = 'Sertica Units'
+            end
+            object Label5: TLabel
+              Left = 248
+              Top = 26
+              Width = 90
+              Height = 13
+              Caption = 'Handling of Orders'
+            end
+            object Label6: TLabel
+              Left = 248
+              Top = 76
+              Width = 71
+              Height = 13
+              Caption = 'Delivery Terms'
             end
             object editSerticaBuyOrder: TLabeledEdit
               Left = 30
-              Top = 84
-              Width = 121
+              Top = 92
+              Width = 155
               Height = 21
               Color = clCream
               EditLabel.Width = 121
@@ -18233,7 +18202,130 @@ object MainForm: TMainForm
               Font.Name = 'Tahoma'
               Font.Style = []
               ParentFont = False
+              TabOrder = 0
+            end
+            object editSerticaHandlingOrder: TComboBox
+              Left = 248
+              Top = 45
+              Width = 169
+              Height = 22
+              Cursor = crHandPoint
+              Style = csOwnerDrawFixed
+              Color = clCream
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clNavy
+              Font.Height = -11
+              Font.Name = 'Tahoma'
+              Font.Style = []
+              ItemIndex = 0
+              ParentFont = False
+              Sorted = True
+              TabOrder = 1
+              Text = 'Email / PDF'
+              Items.Strings = (
+                'Email / PDF'
+                'none'
+                'Sertica Connect')
+            end
+            object editSerticaTerms: TComboBox
+              Left = 248
+              Top = 92
+              Width = 169
+              Height = 22
+              Cursor = crHandPoint
+              Style = csOwnerDrawFixed
+              Color = clCream
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clNavy
+              Font.Height = -11
+              Font.Name = 'Tahoma'
+              Font.Style = []
+              ItemIndex = 0
+              ParentFont = False
+              Sorted = True
+              TabOrder = 2
+              Text = 'CFR - Cost and Freight'
+              Items.Strings = (
+                'CFR - Cost and Freight'
+                'CIF - Cost and Freight'
+                'CIP - Carriage and Insurance Paid'
+                'CPT - Carriage Paid To'
+                'DAP - Delivered at Place'
+                'DAT - Delivered at Terminal'
+                'DDP - Delivered Duty Paid'
+                'DDU - Delivered Duty Unpaid'
+                'EXW - Ex Works'
+                'FAS - Free Alongside Ship'
+                'FCA - Free Carrier'
+                'FOB - Free on Board')
+            end
+            object editSerticaUnits: TComboBox
+              Left = 30
+              Top = 43
+              Width = 155
+              Height = 22
+              Cursor = crHandPoint
+              Style = csOwnerDrawFixed
+              Color = clCream
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clNavy
+              Font.Height = -11
+              Font.Name = 'Tahoma'
+              Font.Style = []
+              ItemIndex = 0
+              ParentFont = False
+              Sorted = True
               TabOrder = 3
+              Text = 'ADAN - Ark Dania'
+              Items.Strings = (
+                'ADAN - Ark Dania'
+                'AGER - Ark Germania'
+                'ANGS - Anglia Seaways'
+                'ATHS - Athena Seaways'
+                'CALB - Cote Dalbatre'
+                'CALS - Calais Seaways'
+                'CATE - Calais Terminal'
+                'CDUN - Cote Des Dunes'
+                'CFLA - Cote Des Flandres'
+                'CSCA - Crown Seaways'
+                'DELS - Delft Seaways'
+                'DITE - Dieppe Terminal'
+                'DOVS - Dover Seaways'
+                'DUNS - Dunkerque Seaways'
+                'DUTE - Dunkerque Terminal'
+                'GARS - Gardenia Seaways'
+                'GRTE - Gothenburg Terminal Workshop'
+                'IMFM - Immingham Facility Management'
+                'IMGP - Immingham General Purchases'
+                'KAUN - Kaunas Seaways'
+                'KSCA - King Seaways'
+                'LBRI - Lysbris Seaways'
+                'LOPT - Optima Seaways'
+                'LPAT - Patria Seaways'
+                'LSEA - Liverpool Seaways'
+                'LVIK - Lysvik Seaways'
+                'MATE - Marseille Terminal'
+                'OCTV - Octeville sur Mer'
+                'PNOR- Princess Seaways'
+                'PSCD - Pearl Seaways'
+                'REGS - Regina Seaways'
+                'SSIS - Seven Sisters'
+                'TBEG - Begonia Seaways'
+                'TBOT - Botnia Seaways'
+                'TBRI - Britannia Seaways'
+                'TERM - Immingham Terminal Workshop'
+                'TFIC- Ficaria Seaways'
+                'TFIN - Finlandia Seaways'
+                'TFRE - Freesia Seaways'
+                'TFUT - Ark Futura'
+                'TMAG - Magnolia Seaways'
+                'TPET - Petunia Seaways'
+                'TPRI - Primula Seaways'
+                'TSEL - Selandia Seaways'
+                'TSUE - Suecia Seaways'
+                'TULS - Tulipa Seaways'
+                'VILN - Vilnius Seaways'
+                'VSEA - Victoria Seaways')
             end
           end
           object cbPOD: TComboBox
@@ -18260,7 +18352,7 @@ object MainForm: TMainForm
           object cbSupplierType: TComboBox
             Left = 24
             Top = 160
-            Width = 177
+            Width = 266
             Height = 22
             Cursor = crHandPoint
             Style = csOwnerDrawFixed
@@ -18276,7 +18368,7 @@ object MainForm: TMainForm
             OnSelect = cbSupplierTypeSelect
           end
           object cbPaymentTerms: TComboBox
-            Left = 240
+            Left = 318
             Top = 160
             Width = 153
             Height = 22
@@ -18293,7 +18385,7 @@ object MainForm: TMainForm
             TabOrder = 6
           end
           object cbCurrency: TComboBox
-            Left = 240
+            Left = 318
             Top = 104
             Width = 153
             Height = 22
@@ -18312,7 +18404,7 @@ object MainForm: TMainForm
           object cbCompany: TComboBox
             Left = 24
             Top = 48
-            Width = 177
+            Width = 266
             Height = 22
             Cursor = crHandPoint
             Style = csOwnerDrawFixed
@@ -18327,7 +18419,7 @@ object MainForm: TMainForm
             OnSelect = cbCompanySelect
           end
           object cbAgent: TComboBox
-            Left = 240
+            Left = 318
             Top = 48
             Width = 153
             Height = 22
@@ -19991,8 +20083,8 @@ object MainForm: TMainForm
   end
   object PopupMenu: TPopupMenu
     MenuAnimation = [maLeftToRight]
-    Left = 152
-    Top = 682
+    Left = 240
+    Top = 698
     object Action_ShowApp: TMenuItem
       Caption = 'Show'
       Default = True
@@ -20165,39 +20257,39 @@ object MainForm: TMainForm
   object CurrentTime: TTimer
     Enabled = False
     OnTimer = CurrentTimeTimer
-    Left = 304
-    Top = 680
+    Left = 392
+    Top = 696
   end
   object UpTime: TTimer
     Enabled = False
     OnTimer = UpTimeTimer
-    Left = 304
-    Top = 624
+    Left = 392
+    Top = 640
   end
   object CSVExport: TSaveDialog
     DefaultExt = '*.csv'
     Filter = 'CSV (Delimited)|*.csv'
-    Left = 232
-    Top = 584
+    Left = 320
+    Top = 600
   end
   object CSVImport: TOpenDialog
     DefaultExt = '*.csv'
     Filter = 'CSV (Delimited)|*.csv'
-    Left = 232
-    Top = 632
+    Left = 320
+    Top = 648
   end
   object OILoader: TTimer
     Enabled = False
     Interval = 10000
     OnTimer = OILoaderTimer
-    Left = 304
-    Top = 472
+    Left = 392
+    Top = 488
   end
   object AgeViewPopup: TPopupMenu
     MenuAnimation = [maLeftToRight]
     OnPopup = AgeViewPopupPopup
-    Left = 152
-    Top = 632
+    Left = 240
+    Top = 648
     object Action_LyncCall: TMenuItem
       Bitmap.Data = {
         36030000424D3603000000000000360000002800000010000000100000000100
@@ -20449,8 +20541,8 @@ object MainForm: TMainForm
   end
   object TrackerPopup: TPopupMenu
     MenuAnimation = [maLeftToRight]
-    Left = 152
-    Top = 584
+    Left = 240
+    Top = 600
     object Action_ShowRegistered: TMenuItem
       Bitmap.Data = {
         36030000424D3603000000000000360000002800000010000000100000000100
@@ -21670,28 +21762,28 @@ object MainForm: TMainForm
     PopupMenu = PopupMenu
     Visible = True
     OnDblClick = TrayIconDblClick
-    Left = 232
-    Top = 488
+    Left = 320
+    Top = 504
   end
   object InvoiceScanTimer: TTimer
     Enabled = False
     Interval = 900000
     OnTimer = InvoiceScanTimerTimer
-    Left = 232
-    Top = 680
+    Left = 320
+    Top = 696
   end
   object InetTimer: TTimer
     Enabled = False
     Interval = 60000
     OnTimer = InetTimerTimer
-    Left = 304
-    Top = 576
+    Left = 392
+    Top = 592
   end
   object BookPopup: TPopupMenu
     MenuAnimation = [maLeftToRight]
     OnPopup = BookPopupPopup
-    Left = 152
-    Top = 528
+    Left = 240
+    Top = 544
     object Action_Cut: TMenuItem
       Bitmap.Data = {
         36030000424D3603000000000000360000002800000010000000100000000100
@@ -21830,13 +21922,13 @@ object MainForm: TMainForm
   object XLExport: TSaveDialog
     DefaultExt = '*.xlsx'
     Filter = 'XLSX (Microsoft Excel)|*.xlsx'
-    Left = 232
-    Top = 536
+    Left = 320
+    Top = 552
   end
   object OpenPopup: TPopupMenu
     MenuAnimation = [maLeftToRight]
-    Left = 152
-    Top = 472
+    Left = 240
+    Top = 488
     object Action_ExportTransactions: TMenuItem
       Caption = 'Export to CSV'
       OnClick = Action_ExportTransactionsClick
@@ -21888,7 +21980,7 @@ object MainForm: TMainForm
     Enabled = False
     Interval = 1800000
     OnTimer = FollowupPopupTimer
-    Left = 304
-    Top = 528
+    Left = 392
+    Top = 544
   end
 end

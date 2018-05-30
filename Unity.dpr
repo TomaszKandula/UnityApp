@@ -52,7 +52,8 @@ uses
   EventLog in 'EventLog.pas',
   Send in 'Send.pas',
   TicketList in 'TicketList.pas',
-  Supplier in 'Supplier.pas';
+  Supplier in 'Supplier.pas',
+  PhoneList in 'PhoneList.pas';
 
 type
   DWord = 0..$FFFFFFFF;
@@ -502,18 +503,19 @@ begin
 
     { OTHER WINFORMS }
     Status(13, AllTasks, 400, 'Application initialization... VCL forms loading, please wait.', False, AppSettings.FPathEventLog);
-    Application.CreateForm(TSendForm,     SendForm);     LogText(AppSettings.FPathEventLog, '[GUI] ''SendForm'' .......... has been created.');
-    Application.CreateForm(TAboutForm,    AboutForm);    LogText(AppSettings.FPathEventLog, '[GUI] ''AboutForm'' ......... has been created.');
-    Application.CreateForm(TEventForm,    EventForm);    LogText(AppSettings.FPathEventLog, '[GUI] ''EventForm'' ......... has been created.');
-    Application.CreateForm(TTicketForm,   TicketForm);   LogText(AppSettings.FPathEventLog, '[GUI] ''TicketForm'' ........ has been created.');
-    Application.CreateForm(TColorsForm,   ColorsForm);   LogText(AppSettings.FPathEventLog, '[GUI] ''ColorsForm'' ........ has been created.');
-    Application.CreateForm(TReportForm,   ReportForm);   LogText(AppSettings.FPathEventLog, '[GUI] ''ReportForm'' ........ has been created.');
-    Application.CreateForm(TSearchForm,   SearchForm);   LogText(AppSettings.FPathEventLog, '[GUI] ''SearchForm'' ........ has been created.');
-    Application.CreateForm(TFilterForm,   FilterForm);   LogText(AppSettings.FPathEventLog, '[GUI] ''FilterForm'' ........ has been created.');
-    Application.CreateForm(TTrackerForm,  TrackerForm);  LogText(AppSettings.FPathEventLog, '[GUI] ''TrackerForm'' ....... has been created.');
-    Application.CreateForm(TActionsForm,  ActionsForm);  LogText(AppSettings.FPathEventLog, '[GUI] ''ActionsForm'' ....... has been created.');
-    Application.CreateForm(TCalendarForm, CalendarForm); LogText(AppSettings.FPathEventLog, '[GUI] ''CalendarForm'' ...... has been created.');
-    Application.CreateForm(TInvoicesForm, InvoicesForm); LogText(AppSettings.FPathEventLog, '[GUI] ''InvoicesForm'' ...... has been created.');
+    Application.CreateForm(TSendForm,      SendForm);      LogText(AppSettings.FPathEventLog, '[GUI] ''SendForm'' .......... has been created.');
+    Application.CreateForm(TAboutForm,     AboutForm);     LogText(AppSettings.FPathEventLog, '[GUI] ''AboutForm'' ......... has been created.');
+    Application.CreateForm(TEventForm,     EventForm);     LogText(AppSettings.FPathEventLog, '[GUI] ''EventForm'' ......... has been created.');
+    Application.CreateForm(TTicketForm,    TicketForm);    LogText(AppSettings.FPathEventLog, '[GUI] ''TicketForm'' ........ has been created.');
+    Application.CreateForm(TColorsForm,    ColorsForm);    LogText(AppSettings.FPathEventLog, '[GUI] ''ColorsForm'' ........ has been created.');
+    Application.CreateForm(TReportForm,    ReportForm);    LogText(AppSettings.FPathEventLog, '[GUI] ''ReportForm'' ........ has been created.');
+    Application.CreateForm(TSearchForm,    SearchForm);    LogText(AppSettings.FPathEventLog, '[GUI] ''SearchForm'' ........ has been created.');
+    Application.CreateForm(TFilterForm,    FilterForm);    LogText(AppSettings.FPathEventLog, '[GUI] ''FilterForm'' ........ has been created.');
+    Application.CreateForm(TTrackerForm,   TrackerForm);   LogText(AppSettings.FPathEventLog, '[GUI] ''TrackerForm'' ....... has been created.');
+    Application.CreateForm(TActionsForm,   ActionsForm);   LogText(AppSettings.FPathEventLog, '[GUI] ''ActionsForm'' ....... has been created.');
+    Application.CreateForm(TCalendarForm,  CalendarForm);  LogText(AppSettings.FPathEventLog, '[GUI] ''CalendarForm'' ...... has been created.');
+    Application.CreateForm(TInvoicesForm,  InvoicesForm);  LogText(AppSettings.FPathEventLog, '[GUI] ''InvoicesForm'' ...... has been created.');
+    Application.CreateForm(TPhoneListForm, PhoneListForm); LogText(AppSettings.FPathEventLog, '[GUI] ''PhoneListForm'' ..... has been created.');
 
     { SPLASH SCREEN - 100% }
     Status(14, AllTasks, 900, 'Application initialization... done.', False, AppSettings.FPathEventLog);
