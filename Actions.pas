@@ -319,7 +319,7 @@ begin
     begin
       CustPerson.Text:=MainForm.OleGetStr(AddrBook.DataSet.Fields[TAddressBook.CONTACT].Value);
       CustMail.Text  :=MainForm.OleGetStr(AddrBook.DataSet.Fields[TAddressBook.ESTATEMENTS].Value);
-      Phones:=MainForm.OleGetStr(AddrBook.DataSet.Fields[TAddressBook.PHONE_NUMBERS].Value);
+      Phones         :=MainForm.OleGetStr(AddrBook.DataSet.Fields[TAddressBook.PHONE_NUMBERS].Value);
       if (Phones <> '') or (Phones <> ' ') then
       begin
         CustPhone.Clear;
@@ -543,7 +543,7 @@ begin
       Statement.HTMLLayout:=Statement.LoadTemplate(AppSettings.FLayoutDir + AppSettings.TMIG.ReadString(VariousLayouts, 'CUSTSTATEMENT', '') + '.html');
     end;
     { SEND STATEMENT }
-    Statement.MailSubject:='Account Statement (' + Statement.CustName + ')';
+    Statement.MailSubject:='Account Statement - ' + Statement.CustName + ' - ' + CustNumber;
     if Statement.SendDocument then
       MainForm.ExecMessage(False, mcInfo, 'Account Statement has been sent successfully!')
         else
@@ -662,13 +662,28 @@ end;
 { ------------------------------------------------------------------------------------------------------------------------ SAVE GENERAL COMMENT INTO DATABASE }
 procedure TActionsForm.SaveGeneralComment;
 begin
-  TTGeneralComment.Create(GeneralCom.Text, CUID);
+  TTGeneralComment.Create(
+                           CUID,
+                           GeneralCom.Text,
+                           strNULL,
+                           strNULL,
+                           strNULL
+                         );
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------- SAVE DAILY COMMENT INTO DATABASE }
 procedure TActionsForm.SaveDailyComment;
 begin
-  TTDailyComment.Create(DailyCom.Text, CUID);
+  TTDailyComment.Create(
+                         CUID,
+                         False,
+                         False,
+                         0,
+                         DailyCom.Text,
+                         False,
+                         False,
+                         False
+                       );
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------- DRAW PANELS BORDERS }
@@ -738,7 +753,9 @@ begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   SetLength(SrcColumns, 19);
   OpenItemsGrid.ColCount:=19;
+  OpenItemsGrid.SetRowHeight(sgRowHeight, 25);
   HistoryGrid.ColCount:=11;
+  HistoryGrid.SetRowHeight(sgRowHeight, 25);
   InitializePanels;
   InitializeSpeedButtons;
 end;

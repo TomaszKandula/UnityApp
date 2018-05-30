@@ -38,7 +38,6 @@ object InvoicesForm: TInvoicesForm
     ColCount = 4
     DefaultColWidth = 10
     DefaultRowHeight = 17
-    DrawingStyle = gdsGradient
     FixedColor = clSilver
     RowCount = 2
     GradientEndColor = 15527148

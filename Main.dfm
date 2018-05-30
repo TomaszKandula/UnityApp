@@ -1193,7 +1193,7 @@ object MainForm: TMainForm
     Margins.Top = 0
     Margins.Right = 10
     Margins.Bottom = 0
-    ActivePage = TabSheet1
+    ActivePage = TabSheet4
     Align = alClient
     DoubleBuffered = True
     Font.Charset = DEFAULT_CHARSET
@@ -5965,7 +5965,6 @@ object MainForm: TMainForm
           OnKeyUp = sgAgeViewKeyUp
           OnMouseWheelDown = sgAgeViewMouseWheelDown
           OnMouseWheelUp = sgAgeViewMouseWheelUp
-          OnSelectCell = sgAgeViewSelectCell
           ColWidths = (
             40
             40
@@ -17749,7 +17748,7 @@ object MainForm: TMainForm
           AlignWithMargins = True
           Left = 0
           Top = 120
-          Width = 372
+          Width = 270
           Height = 513
           Margins.Left = 0
           Margins.Top = 5
@@ -17764,7 +17763,7 @@ object MainForm: TMainForm
             AlignWithMargins = True
             Left = 2
             Top = 2
-            Width = 368
+            Width = 266
             Height = 509
             Margins.Left = 2
             Margins.Top = 2
@@ -17780,7 +17779,6 @@ object MainForm: TMainForm
             RowCount = 2
             GradientEndColor = 15527148
             Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
-            ScrollBars = ssVertical
             TabOrder = 0
             OnClick = sgListSectionClick
             OnDrawCell = sgListSectionDrawCell
@@ -17796,9 +17794,9 @@ object MainForm: TMainForm
         end
         object PanelSettingsValues: TPanel
           AlignWithMargins = True
-          Left = 382
+          Left = 280
           Top = 120
-          Width = 525
+          Width = 627
           Height = 513
           Margins.Left = 5
           Margins.Top = 5
@@ -17809,11 +17807,13 @@ object MainForm: TMainForm
           Color = clWhite
           ParentBackground = False
           TabOrder = 1
+          ExplicitLeft = 382
+          ExplicitWidth = 525
           object sgListValue: TStringGrid
             AlignWithMargins = True
             Left = 2
             Top = 2
-            Width = 521
+            Width = 623
             Height = 509
             Margins.Left = 2
             Margins.Top = 2
@@ -17829,7 +17829,6 @@ object MainForm: TMainForm
             RowCount = 2
             GradientEndColor = 15527148
             Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
-            ScrollBars = ssVertical
             TabOrder = 0
             OnClick = sgListValueClick
             OnDrawCell = sgListValueDrawCell
@@ -17941,7 +17940,6 @@ object MainForm: TMainForm
             RowCount = 2
             GradientEndColor = 15527148
             Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
-            ScrollBars = ssVertical
             TabOrder = 0
             OnDrawCell = sgUACDrawCell
             OnMouseWheelDown = sgUACMouseWheelDown
@@ -17987,7 +17985,6 @@ object MainForm: TMainForm
             RowCount = 2
             GradientEndColor = 15527148
             Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
-            ScrollBars = ssVertical
             TabOrder = 0
             OnDrawCell = sgGroupsDrawCell
             OnMouseWheelDown = sgGroupsMouseWheelDown

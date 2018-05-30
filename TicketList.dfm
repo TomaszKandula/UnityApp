@@ -4,8 +4,8 @@ object TicketForm: TTicketForm
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'Unity'
-  ClientHeight = 474
-  ClientWidth = 370
+  ClientHeight = 465
+  ClientWidth = 531
   Color = 15527148
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -22,8 +22,8 @@ object TicketForm: TTicketForm
     AlignWithMargins = True
     Left = 5
     Top = 5
-    Width = 360
-    Height = 464
+    Width = 521
+    Height = 455
     Margins.Left = 5
     Margins.Top = 5
     Margins.Right = 5
@@ -35,8 +35,8 @@ object TicketForm: TTicketForm
     ExplicitHeight = 459
   end
   object btnSelect: TSpeedButton
-    Left = 279
-    Top = 430
+    Left = 440
+    Top = 419
     Width = 73
     Height = 25
     Cursor = crHandPoint
@@ -44,8 +44,8 @@ object TicketForm: TTicketForm
     OnClick = btnSelectClick
   end
   object btnCancel: TSpeedButton
-    Left = 187
-    Top = 430
+    Left = 348
+    Top = 419
     Width = 73
     Height = 25
     Cursor = crHandPoint
@@ -55,8 +55,8 @@ object TicketForm: TTicketForm
   object sgTicketList: TStringGrid
     Left = 17
     Top = 16
-    Width = 335
-    Height = 393
+    Width = 496
+    Height = 385
     ColCount = 6
     DefaultColWidth = 10
     FixedColor = clWhite

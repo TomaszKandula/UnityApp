@@ -746,7 +746,6 @@ type                                                            (* GUI | MAIN TH
     procedure btnSupplierRejectClick(Sender: TObject);
     procedure btnUnlockClick(Sender: TObject);
     procedure btnPassUpdateClick(Sender: TObject);
-    procedure sgAgeViewSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
     { ------------------------------------------------------------- ! HELPERS ! ----------------------------------------------------------------------------- }
   private
     { GENERAL }
@@ -1042,10 +1041,7 @@ end;
 { ----------------------------------------------------------------------------------------------------------------------- MESSAGE RECEIVER FOR WORKER THREADS }
 procedure TMainForm.WndProc(var Msg: Messages.TMessage);
 var
-  DailyText:  TDataTables;
   CUID:       string;
-  Condition:  string;
-  CallEvent:  cardinal;
 begin
   inherited;
 
@@ -1091,50 +1087,17 @@ begin
       { LOG TIME IN SECONDS IN DATABASE }
       if Msg.LParam > 0 then
       begin
-        DailyText:=TDataTables.Create(DbConnect);
-        try
-          DailyText.OpenTable(TblDaily);
-          CUID:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUID, 1, 1), MainForm.sgAgeView.Row];
-          Condition:=TDaily.CUID + EQUAL + QuotedStr(CUID) + _AND + TDaily.AGEDATE + EQUAL + QuotedStr(AgeDateSel);
-          DailyText.DataSet.Filter:=Condition;
-          { UPDATE EXISTING COMMENT }
-          if not (DailyText.DataSet.RecordCount = 0) then
-          begin
-            { GET AND SET CALL EVENT }
-            CallEvent:=StrToIntDef(OleGetStr(DailyText.DataSet.Fields[TDaily.CALLEVENT].Value), 0);
-            Inc(CallEvent);
-            DailyText.CleanUp;
-            { DEFINE COLUMNS, VALUES AND CONDITIONS }
-            DailyText.Columns.Add(TDaily.STAMP);         DailyText.Values.Add(DateTimeToStr(Now));               DailyText.Conditions.Add(Condition);
-            DailyText.Columns.Add(TDaily.USER_ALIAS);    DailyText.Values.Add(UpperCase(MainForm.WinUserName));  DailyText.Conditions.Add(Condition);
-            DailyText.Columns.Add(TDaily.CALLEVENT);     DailyText.Values.Add(IntToStr(CallEvent));              DailyText.Conditions.Add(Condition);
-            DailyText.Columns.Add(TDaily.CALLDURATION);  DailyText.Values.Add(IntToStr(Msg.LParam));             DailyText.Conditions.Add(Condition);
-            { EXECUTE }
-            DailyText.UpdateRecord(TblDaily);
-          end
-          else
-          { INSERT NEW RECORD }
-          begin
-            DailyText.CleanUp;
-            { DEFINE COLUMNS AND VALUES }
-            DailyText.Columns.Add(TDaily.GROUP_ID);        DailyText.Values.Add(MainForm.GroupIdSel);
-            DailyText.Columns.Add(TDaily.CUID);            DailyText.Values.Add(CUID);
-            DailyText.Columns.Add(TDaily.AGEDATE);         DailyText.Values.Add(MainForm.AgeDateSel);
-            DailyText.Columns.Add(TDaily.STAMP);           DailyText.Values.Add(DateTimeToStr(Now));
-            DailyText.Columns.Add(TDaily.USER_ALIAS);      DailyText.Values.Add(UpperCase(MainForm.WinUserName));
-            DailyText.Columns.Add(TDaily.EMAIL);           DailyText.Values.Add('0');
-            DailyText.Columns.Add(TDaily.CALLEVENT);       DailyText.Values.Add('1');
-            DailyText.Columns.Add(TDaily.CALLDURATION);    DailyText.Values.Add(IntToStr(Msg.LParam));
-            DailyText.Columns.Add(TDaily.FIXCOMMENT);      DailyText.Values.Add('');
-            DailyText.Columns.Add(TDaily.EMAIL_Reminder);  DailyText.Values.Add('0');
-            DailyText.Columns.Add(TDaily.EMAIL_AutoStat);  DailyText.Values.Add('0');
-            DailyText.Columns.Add(TDaily.EMAIL_ManuStat);  DailyText.Values.Add('0');
-            { EXECUTE }
-            DailyText.InsertInto(TblDaily);
-          end;
-        finally
-          DailyText.Free;
-        end;
+        CUID:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUID, 1, 1) , sgAgeView.Row];
+        TTDailyComment.Create(
+                               CUID,
+                               False,
+                               True,
+                               Msg.LParam,
+                               '',
+                               False,
+                               False,
+                               False
+                             );
       end;
   end;
 
@@ -1486,9 +1449,12 @@ end;
 
 { -------------------------------------------------------------------------------------------------------------------------- SET ROW HEIGHT AND HEADER HEIGHT }
 procedure TStringGrid.SetRowHeight(RowHeight: Integer; Header: Integer);
-var
-  iCNT:  integer;
+//var
+//  iCNT:  integer;
 begin
+  DefaultRowHeight:=RowHeight;
+  RowHeights[0]:=Header;
+(*
   for iCNT:=0 to RowCount - 1 do
   begin
     if iCNT = 0 then
@@ -1496,6 +1462,7 @@ begin
         else
           RowHeights[iCNT]:=RowHeight;
   end;
+*)
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------ MERGE SORT }
@@ -2249,33 +2216,34 @@ procedure TMainForm.SetGridColumnWidths;
 begin
   sgOpenItems.SetColWidth     (10, 20);
   sgAddressBook.SetColWidth   (10, 20);
-  sgListValue.SetColWidth     (10, 20);
-  sgListSection.SetColWidth   (10, 20);
+  sgListValue.SetColWidth     (25, 20);
+  sgListSection.SetColWidth   (25, 20);
   sgInvoiceTracker.SetColWidth(10, 20);
   sgCoCodes.SetColWidth       (10, 30);
   sgPaidInfo.SetColWidth      (10, 30);
   sgPerson.SetColWidth        (10, 30);
   sgGroup3.SetColWidth        (10, 30);
   sgPmtTerms.SetColWidth      (10, 30);
-  sgGroups.SetColWidth        (10, 30);
+  sgGroups.SetColWidth        (10, 20);
+  sgUAC.SetColWidth           (10, 20);
 end;
 
 { ---------------------------------------------------------------------------------------------------------------------------------- SET ROW HEIGHT FOR GRIDS }
 procedure TMainForm.SetGridRowHeights;
 begin
-  sgOpenItems.SetRowHeight     (19, 25);
-  sgAddressBook.SetRowHeight   (19, 25);
-  sgListValue.SetRowHeight     (19, 25);
-  sgListSection.SetRowHeight   (19, 25);
-  sgAgeView.SetRowHeight       (19, 25);
-  sgInvoiceTracker.SetRowHeight(19, 25);
-  sgCoCodes.SetRowHeight       (19, 25);
-  sgPaidInfo.SetRowHeight      (19, 25);
-  sgPerson.SetRowHeight        (19, 25);
-  sgGroup3.SetRowHeight        (19, 25);
-  sgPmtTerms.SetRowHeight      (19, 25);
-  sgGroups.SetRowHeight        (19, 25);
-  sgUAC.SetRowHeight           (19, 25);
+  sgOpenItems.SetRowHeight     (sgRowHeight, 25);
+  sgAddressBook.SetRowHeight   (sgRowHeight, 25);
+  sgListValue.SetRowHeight     (sgRowHeight, 25);
+  sgListSection.SetRowHeight   (sgRowHeight, 25);
+  sgAgeView.SetRowHeight       (sgRowHeight, 25);
+  sgInvoiceTracker.SetRowHeight(sgRowHeight, 25);
+  sgCoCodes.SetRowHeight       (sgRowHeight, 25);
+  sgPaidInfo.SetRowHeight      (sgRowHeight, 25);
+  sgPerson.SetRowHeight        (sgRowHeight, 25);
+  sgGroup3.SetRowHeight        (sgRowHeight, 25);
+  sgPmtTerms.SetRowHeight      (sgRowHeight, 25);
+  sgGroups.SetRowHeight        (sgRowHeight, 25);
+  sgUAC.SetRowHeight           (sgRowHeight, 25);
 end;
 
 { ---------------------------------------------------------------------------------------------------------------------------------- SET THUMB SIZE FOR GRIDS }
@@ -2596,13 +2564,6 @@ begin
     Vendor.Free;
   end;
 
-  { ---------------------------------------------------------- ! COMPONENTS SETUP ! ------------------------------------------------------------------------- }
-
-  SetPanelBorders;
-  SetGridColumnWidths;
-  SetGridRowHeights;
-  SetGridThumbSizes;
-
   { ----------------------------------------------------- ! APPLICATION VERSION & USER SID ! ---------------------------------------------------------------- }
 
   LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Application version = ' + AppVersion);
@@ -2648,12 +2609,18 @@ procedure TMainForm.FormShow(Sender: TObject);
 begin
   { UPDATE THUMB SIZE }
   FormResize(self);
+  { DRAW PANELS BORDERS }
+  SetPanelBorders;
+  { GRIDS WIDTH, HEIGHT AND YHUMB SIZE }
+  SetGridColumnWidths;
+  SetGridRowHeights;
+  SetGridThumbSizes;
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------ MAIN FORM RESIZE }
 procedure TMainForm.FormResize(Sender: TObject);
 begin
-  (* EACH TIME FORM IS RESIZED WE UPDATE THUMB SIZE OF STRING GRID COMPONENT *)
+  { EACH TIME FORM IS RESIZED WE UPDATE THUMB SIZE OF STRING GRID COMPONENT }
   SetGridThumbSizes;
 end;
 
@@ -2683,7 +2650,7 @@ var
   Sum:  integer;
 begin
 
-  { COUNT ALL TODAY'S FOLLOW UPS }
+  { COUNT ALL TODAY'S FOLLOW-UPS }
 
   Sum:=0;
   for iCNT:=1 to sgAgeView.RowCount - 1 do
@@ -3310,13 +3277,13 @@ begin
   if Action_HideSummary.Checked then
   begin
     Footer1.Visible:=False;
-    sgAgeView.Margins.Bottom:=17;
+    PanelAgeView.Margins.Bottom:=17;
     Action_HideSummary.Checked:=False;
   end
   else
   begin
     Footer1.Visible:=True;
-    sgAgeView.Margins.Bottom:=2;
+    PanelAgeView.Margins.Bottom:=0;
     Action_HideSummary.Checked:=True;
   end;
 end;
@@ -3537,7 +3504,7 @@ end;
 { -------------------------------------------------------------------------------------------------------------------------------------------- SHOW ALL ITEMS }
 procedure TMainForm.TabSheet4Show(Sender: TObject);
 begin
-  TTInvoiceTrackerRefresh.Create('*');
+  //TTInvoiceTrackerRefresh.Create('*');
 end;
 
 { ------------------------------------------------------------------------------------------------------------ MAKE PAYMENT TERMS AND PAID INFO TABLES HEIGHT }
@@ -3660,8 +3627,6 @@ var
   Col13:       integer;
   Col14:       integer;
   Col15:       integer;
-  Col16:       integer;  // tbr
-  Col17:       integer;  // tbr
   iCNT:        integer;
   Width:       integer;
   AgeViewCUID: string;
@@ -3692,27 +3657,7 @@ begin
   Col13:=sgAgeView.ReturnColumn(TSnapshots.fCUID,            1, 1);
   Col14:=sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1);
   Col15:=sgAgeView.ReturnColumn(TSnapshots.fRISK_CLASS,      1, 1);
-//  Col16:=sgAgeView.ReturnColumn(TSnapshots.fGROUP3,          1, 1); // tbr
-//  Col17:=sgAgeView.ReturnColumn(TSnapshots.fCO_CODE,         1, 1); // tbr
-(*
-  { MAP GROUP3 COLUMN }  // <---- pre-loading on age view load
-  if (ACol = Col16) then
-  begin
-    for iCNT:=1 to sgGroup3.RowCount - 1 do
-    begin
-      if
-        (
-          sgGroup3.Cells[sgGroup3.ReturnColumn(TGroup3.ERP_CODE, 1, 1), iCNT] = sgAgeView.Cells[ACol, ARow]
-        )
-        and
-        (
-          sgGroup3.Cells[sgGroup3.ReturnColumn(TGroup3.COCODE, 1, 1), iCNT] = sgAgeView.Cells[Col17, ARow]
-        )
-        then
-          sgAgeView.Cells[ACol, ARow]:=sgGroup3.Cells[sgGroup3.ReturnColumn(TGroup3.DESCRIPTION, 1, 1), iCNT];
-    end;
-  end;
-*)
+
   { HIGHLIGHT FOLLOW UP COLUMN }
   if not (CDate(sgAgeView.Cells[ACol, ARow]) = 0) then
   begin
@@ -3790,16 +3735,10 @@ begin
 
 end;
 
-{ ------------------------------------------------------------ ! STRING GRID ROW SELECTION ! ---------------------------------------------------------------- }
-
-procedure TMainForm.sgAgeViewSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
-begin
-  sgAgeView.Selection:=TGridRect(Rect(-1, -1, -1, -1));
-end;
+{ -------------------------------------------------------- ! STRING GRID ROW SELECTION ! -------------------------------------------------------------------- }
 
 procedure TMainForm.sgAddressBookSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
 begin
-  sgAddressBook.Selection:=TGridRect(Rect(-1, -1, -1, -1));
   if ACol = 1 then
   begin
     CanSelect:=False;
@@ -3920,6 +3859,7 @@ begin
     AppSettings.Free;
     tsKEY.Free;
     tsVAL.Free;
+    sgListValue.SetColWidth(25, 30);
   end;
 end;
 
@@ -4029,11 +3969,13 @@ begin
   { WRITE INTO DATABASE }
   if Key = VK_RETURN then
   begin
-    TTFreeColumn.Create(
-                         sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.FREE1, 1, 1), sgAgeView.Row],
-                         colFree1,
-                         sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.CUID,  1, 1), sgAgeView.Row]
-                       );
+    TTGeneralComment.Create(
+                             sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.CUID,  1, 1), sgAgeView.Row],
+                             strNULL,
+                             strNULL,
+                             sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.FREE1, 1, 1), sgAgeView.Row],
+                             strNULL
+                           );
     sgAgeView.Options:=sgAgeView.Options - [goEditing];
   end;
 end;
@@ -4043,11 +3985,13 @@ begin
   { DELETE GIVEN RECORD }
   if Key = VK_DELETE then
   begin
-    TTFreeColumn.Create(
-                         ' ',
-                         colFree1,
-                         sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.CUID,  1, 1), sgAgeView.Row]
-                       );
+    TTGeneralComment.Create(
+                             sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.CUID,  1, 1), sgAgeView.Row],
+                             strNULL,
+                             strNULL,
+                             '',
+                             strNULL
+                           );
     sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.FREE1, 1, 1), sgAgeView.Row]:='';
     sgAgeView.Options:=sgAgeView.Options - [goEditing];
   end;
@@ -4948,7 +4892,11 @@ end;
 { --------------------------------------------------------------------------------------------------------------------------------- USER ADDRESS BOOK | CLOSE }
 procedure TMainForm.btnCloseClick(Sender: TObject);
 begin
-  if MsgCall(mcQuestion2, 'Are you sure you want to close address book?') = IDYES then sgAddressBook.ClearAll(2, 1, 1, True);
+  if MsgCall(mcQuestion2, 'Are you sure you want to close address book?') = IDYES then
+  begin
+    sgAddressBook.ClearAll(2, 1, 1, True);
+    sgAddressBook.Visible:=False;
+  end;
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------- USER ADDRESS BOOK | IMPORT DATA }
@@ -5117,7 +5065,7 @@ begin
 end;
 
 { ---------------------------------------------------------------------------------------------------------------------------------------------------- UNLOCK }
-procedure TMainForm.btnUnlockClick(Sender: TObject);
+procedure TMainForm.btnUnlockClick(Sender: TObject);  // refactor + bcrypt
 
   (* COMMON VARIABLES *)
   var
@@ -5228,6 +5176,10 @@ begin
   AppSettings:=TSettings.Create;
   try
     LockAction;
+    sgListValue.SetColWidth(25, 30);
+    sgListSection.SetColWidth(25, 30);
+    sgUAC.SetColWidth(10, 20);
+    sgGroups.SetColWidth(10, 20);
   finally
     AppSettings.Free;
   end;

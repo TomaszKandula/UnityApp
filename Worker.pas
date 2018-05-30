@@ -155,37 +155,25 @@ type
     destructor  Destroy; override;
   end;
 
-{ --------------------------------------------------------------------------------------------------------------------------------------- FREE COLUMN EDITING }
-type
-  TTFreeColumn = class(TThread)
-  protected
-    procedure Execute; override;
-  private
-    var FLock:       TCriticalSection;
-    var FIDThd:      integer;
-    var FField:      integer;
-    var FFreeText1:  string;
-    var FFreeText2:  string;
-    var FCUID:       string;
-  public
-    property    IDThd:  integer read FIDThd;
-    constructor Create(FreeText: string; Field: integer; CUID: string);
-    destructor  Destroy; override;
-  end;
-
 { --------------------------------------------------------------------------------------------------------------------------------------- WRITE DAILY COMMENT }
 type
   TTDailyComment = class(TThread)
   protected
     procedure Execute; override;
   private
-    var FLock:       TCriticalSection;
-    var FIDThd:      integer;
-    var FComment:    string;
-    var FCUID:       string;
+    var FLock:          TCriticalSection;
+    var FIDThd:         integer;
+    var FCUID:          string;
+    var FEmail:         boolean;
+    var FCallEvent:     boolean;
+    var FCallDuration:  string;
+    var FFixedComment:  string;
+    var FEmailReminder: boolean;
+    var FEmailAutoStat: boolean;
+    var FEmailManuStat: boolean;
   public
     property    IDThd:  integer read FIDThd;
-    constructor Create(Comment: string; CUID: string);
+    constructor Create(CUID: string; Email: boolean; CallEvent: boolean; CallDuration: integer; Comment: string; EmailReminder, EmailAutoStat, EmailManuStat: boolean);
     destructor  Destroy; override;
   end;
 
@@ -195,13 +183,16 @@ type
   protected
     procedure Execute; override;
   private
-    var FLock:       TCriticalSection;
-    var FIDThd:      integer;
-    var FComment:    string;
-    var FCUID:       string;
+    var FLock:         TCriticalSection;
+    var FIDThd:        integer;
+    var FCUID:         string;
+    var FFixedComment: string;
+    var FFollowUp:     string;
+    var FFree1:        string;
+    var FFree2:        string;
   public
     property    IDThd:  integer read FIDThd;
-    constructor Create(Comment: string; CUID: string);
+    constructor Create(CUID: string; FixedComment: string; FollowUp: string; Free1: string; Free2: string);
     destructor  Destroy; override;
   end;
 
@@ -843,111 +834,22 @@ begin
   FreeOnTerminate:=True;
 end;
 
-{ ############################################################ ! FREE COLUMN EDITING ! ###################################################################### }
-
-{ ------------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE }
-constructor TTFreeColumn.Create(FreeText: string; Field: integer; CUID: string);
-begin
-  inherited Create(False);
-  FLock :=TCriticalSection.Create;
-  FIDThd:=0;
-  FField:=Field;
-  FCUID:=CUID;
-  if FField = colFree1 then FFreeText1:=FreeText;
-  if FField = colFree2 then FFreeText2:=FreeText;
-end;
-
-{ --------------------------------------------------------------------------------------------------------------------------------------------------- RELEASE }
-destructor TTFreeColumn.Destroy;
-begin
-  FLock.Free;
-end;
-
-{ ---------------------------------------------------------------------------------------------------------------------- PERFORM INSERT/UPDATE ON FREE COLUMN }
-procedure TTFreeColumn.Execute;
-var
-  GenText:   TDataTables;
-  Condition: string;
-begin
-  FIDThd:=CurrentThread.ThreadID;
-  FLock.Acquire;
-  try
-    GenText:=TDataTables.Create(MainForm.DbConnect);
-    try
-      GenText.OpenTable(TblGeneral);
-      Condition:=TGeneral.CUID + EQUAL + QuotedStr(FCUID);
-      GenText.DataSet.Filter:=Condition;
-      { UPDATE }
-      if not (GenText.DataSet.RecordCount = 0) then
-      begin
-        GenText.CleanUp;
-        { DEFINE COLUMNS, VALUES AND CONDITIONS }
-        GenText.Columns.Add(TGeneral.STAMP);        GenText.Values.Add(DateTimeToStr(Now));              GenText.Conditions.Add(Condition);
-        GenText.Columns.Add(TGeneral.USER_ALIAS);   GenText.Values.Add(UpperCase(MainForm.WinUserName)); GenText.Conditions.Add(Condition);
-        if FField = colFree1 then
-        begin
-          GenText.Columns.Add(TGeneral.Free1);
-          GenText.Values.Add(FFreeText1);
-        end;
-        if FField = colFree2 then
-        begin
-          GenText.Columns.Add(TGeneral.Free2);
-          GenText.Values.Add(FFreeText2);
-        end;
-        GenText.Conditions.Add(Condition);
-        { EXECUTE }
-        GenText.UpdateRecord(TblGeneral);
-      end
-      else
-      { INSERT NEW }
-      begin
-        GenText.CleanUp;
-        { DEFINE COLUMNS AND VALUES }
-        GenText.Columns.Add(TGeneral.CUID);       GenText.Values.Add(FCUID);
-        GenText.Columns.Add(TGeneral.STAMP);      GenText.Values.Add(DateTimeToStr(Now));
-        GenText.Columns.Add(TGeneral.USER_ALIAS); GenText.Values.Add(UpperCase(MainForm.WinUserName));
-        GenText.Columns.Add(TGeneral.FIXCOMMENT); GenText.Values.Add('');
-        GenText.Columns.Add(TGeneral.FOLLOWUP);   GenText.Values.Add('');
-        if FField = colFree1 then
-        begin
-          GenText.Columns.Add(TGeneral.Free1);      GenText.Values.Add(FFreeText1);
-          GenText.Columns.Add(TGeneral.Free2);      GenText.Values.Add('');
-        end;
-        if FField = colFree2 then
-        begin
-          GenText.Columns.Add(TGeneral.Free1);      GenText.Values.Add('');
-          GenText.Columns.Add(TGeneral.Free2);      GenText.Values.Add(FFreeText2);
-        end;
-        { EXECUTE }
-        if GenText.InsertInto(TblGeneral) then
-        begin
-          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Free Column has been posted for CUID: ' + FCUID + '.');
-        end
-        else
-        begin
-          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot post "' + FFreeText1 + '" or "' + FFreeText2 + '" for CUID: ' + FCUID + '.');
-          MainForm.ExecMessage(False, mcError, 'Cannot post Free Column into database. Please contact IT support.');
-        end;
-      end;
-    finally
-      GenText.Free;
-    end;
-  finally
-    FLock.Release;
-  end;
-  FreeOnTerminate:=True;
-end;
-
 { ############################################################# ! WRITE DAILY COMMENT ! ##################################################################### }
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE }
-constructor TTDailyComment.Create(Comment: string; CUID: string);
+constructor TTDailyComment.Create(CUID: string; Email: boolean; CallEvent: boolean; CallDuration: integer; Comment: string; EmailReminder, EmailAutoStat, EmailManuStat: boolean);
 begin
   inherited Create(False);
-  FLock :=TCriticalSection.Create;
-  FIDThd:=0;
-  FComment:=Comment;
-  FCUID:=CUID;
+  FLock         :=TCriticalSection.Create;
+  FIDThd        :=0;
+  FCUID         :=CUID;
+  FEmail        :=Email;
+  FCallEvent    :=CallEvent;
+  FCallDuration :=IntToStr(CallDuration);
+  FFixedComment :=Comment;
+  FEmailReminder:=EmailReminder;
+  FEmailAutoStat:=EmailAutoStat;
+  FEmailManuStat:=EmailManuStat;
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------------- RELEASE }
@@ -959,10 +861,15 @@ end;
 { ------------------------------------------------------------------------------------------------------------------------------------------------ WRITE DATA }
 procedure TTDailyComment.Execute;
 var
-  DailyText: TDataTables;
-  UpdateOK:  boolean;
-  InsertOK:  boolean;
-  Condition: string;
+  DailyText:     TDataTables;
+  UpdateOK:      boolean;
+  InsertOK:      boolean;
+  Condition:     string;
+  Email:         string;
+  CallEvent:     integer;
+  EmailReminder: string;
+  EmailAutoStat: string;
+  EmailManuStat: string;
 begin
   FIDThd:=CurrentThread.ThreadID;
   FLock.Acquire;
@@ -971,17 +878,66 @@ begin
     InsertOK:=False;
     DailyText:=TDataTables.Create(MainForm.DbConnect);
     try
-      DailyText.OpenTable(TblDaily);
       Condition:=TDaily.CUID + EQUAL + QuotedStr(FCUID) + _AND + TDaily.AGEDATE + EQUAL + QuotedStr(MainForm.AgeDateSel);
-      DailyText.DataSet.Filter:=Condition;
+      DailyText.CustFilter:=WHERE + Condition;
+      DailyText.OpenTable(TblDaily);
       { UPDATE EXISTING COMMENT }
       if not (DailyText.DataSet.RecordCount = 0) then
       begin
         DailyText.CleanUp;
         { DEFINE COLUMNS, VALUES AND CONDITIONS }
-        DailyText.Columns.Add(TDaily.STAMP);       DailyText.Values.Add(DateTimeToStr(Now));               DailyText.Conditions.Add(Condition);
-        DailyText.Columns.Add(TDaily.USER_ALIAS);  DailyText.Values.Add(UpperCase(MainForm.WinUserName));  DailyText.Conditions.Add(Condition);
-        DailyText.Columns.Add(TDaily.FIXCOMMENT);  DailyText.Values.Add(FComment);                         DailyText.Conditions.Add(Condition);
+        DailyText.Columns.Add(TDaily.STAMP);
+        DailyText.Values.Add(DateTimeToStr(Now));
+        DailyText.Conditions.Add(Condition);
+        DailyText.Columns.Add(TDaily.USER_ALIAS);
+        DailyText.Values.Add(UpperCase(MainForm.WinUserName));
+        DailyText.Conditions.Add(Condition);
+        if FEmail then
+        begin
+          Email:=IntToStr(StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDaily.EMAIL].Value), 0));
+          DailyText.Columns.Add(TDaily.EMAIL);
+          DailyText.Values.Add(Email);
+          DailyText.Conditions.Add(Condition);
+        end;
+        { CALL EVENT AND CALL DURATION ALWAYS COMES TOGETHER }
+        if FCallEvent then
+        begin
+          CallEvent:=StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDaily.CALLEVENT].Value), 0);
+          Inc(CallEvent);
+          DailyText.Columns.Add(TDaily.CALLEVENT);
+          DailyText.Values.Add(IntToStr(CallEvent));
+          DailyText.Conditions.Add(Condition);
+          DailyText.Columns.Add(TDaily.CALLDURATION);
+          DailyText.Values.Add(FCallDuration);
+          DailyText.Conditions.Add(Condition);
+        end;
+        if FEmailReminder then
+        begin
+          EmailReminder:=IntToStr(StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDaily.EMAIL_Reminder].Value), 0));
+          DailyText.Columns.Add(TDaily.EMAIL_Reminder);
+          DailyText.Values.Add(EmailReminder);
+          DailyText.Conditions.Add(Condition);
+        end;
+        if FEmailAutoStat then
+        begin
+          EmailAutoStat:=IntToStr(StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDaily.EMAIL_AutoStat].Value), 0));
+          DailyText.Columns.Add(TDaily.EMAIL_AutoStat);
+          DailyText.Values.Add(EmailAutoStat);
+          DailyText.Conditions.Add(Condition);
+        end;
+        if FEmailManuStat then
+        begin
+          EmailManuStat:=IntToStr(StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDaily.EMAIL_ManuStat].Value), 0));
+          DailyText.Columns.Add(TDaily.EMAIL_ManuStat);
+          DailyText.Values.Add(EmailManuStat);
+          DailyText.Conditions.Add(Condition);
+        end;
+        if not(FFixedComment = '') then
+        begin
+          DailyText.Columns.Add(TDaily.FIXCOMMENT);
+          DailyText.Values.Add(FFixedComment);
+          DailyText.Conditions.Add(Condition);
+        end;
         { EXECUTE }
         UpdateOK:=DailyText.UpdateRecord(TblDaily);
       end
@@ -995,13 +951,62 @@ begin
         DailyText.Columns.Add(TDaily.AGEDATE);        DailyText.Values.Add(MainForm.AgeDateSel);
         DailyText.Columns.Add(TDaily.STAMP);          DailyText.Values.Add(DateTimeToStr(Now));
         DailyText.Columns.Add(TDaily.USER_ALIAS);     DailyText.Values.Add(UpperCase(MainForm.WinUserName));
-        DailyText.Columns.Add(TDaily.EMAIL);          DailyText.Values.Add('0');
-        DailyText.Columns.Add(TDaily.CALLEVENT);      DailyText.Values.Add('0');
-        DailyText.Columns.Add(TDaily.CALLDURATION);   DailyText.Values.Add('0');
-        DailyText.Columns.Add(TDaily.FIXCOMMENT);     DailyText.Values.Add(FComment);
-        DailyText.Columns.Add(TDaily.EMAIL_Reminder); DailyText.Values.Add('0');
-        DailyText.Columns.Add(TDaily.EMAIL_AutoStat); DailyText.Values.Add('0');
-        DailyText.Columns.Add(TDaily.EMAIL_ManuStat); DailyText.Values.Add('0');
+        if FEmail then
+        begin
+          DailyText.Columns.Add(TDaily.EMAIL);
+          DailyText.Values.Add('1');
+        end
+        else
+        begin
+          DailyText.Columns.Add(TDaily.EMAIL);
+          DailyText.Values.Add('0');
+        end;
+        if FEmailReminder then
+        begin
+          DailyText.Columns.Add(TDaily.EMAIL_Reminder);
+          DailyText.Values.Add('1');
+        end
+        else
+        begin
+          DailyText.Columns.Add(TDaily.EMAIL_Reminder);
+          DailyText.Values.Add('0');
+        end;
+        if FEmailAutoStat then
+        begin
+          DailyText.Columns.Add(TDaily.EMAIL_AutoStat);
+          DailyText.Values.Add('1');
+        end
+        else
+        begin
+          DailyText.Columns.Add(TDaily.EMAIL_AutoStat);
+          DailyText.Values.Add('0');
+        end;
+        if FEmailManuStat then
+        begin
+          DailyText.Columns.Add(TDaily.EMAIL_ManuStat);
+          DailyText.Values.Add('1');
+        end
+        else
+        begin
+          DailyText.Columns.Add(TDaily.EMAIL_ManuStat);
+          DailyText.Values.Add('0');
+        end;
+        if FCallEvent then
+        begin
+          DailyText.Columns.Add(TDaily.CALLEVENT);
+          DailyText.Values.Add('1');
+          DailyText.Columns.Add(TDaily.CALLDURATION);
+          DailyText.Values.Add(FCallDuration);
+        end
+        else
+        begin
+          DailyText.Columns.Add(TDaily.CALLEVENT);
+          DailyText.Values.Add('0');
+          DailyText.Columns.Add(TDaily.CALLDURATION);
+          DailyText.Values.Add('0');
+        end;
+        DailyText.Columns.Add(TDaily.FIXCOMMENT);
+        DailyText.Values.Add(FFixedComment);
         { EXECUTE }
         InsertOK:=DailyText.InsertInto(TblDaily);
       end;
@@ -1033,13 +1038,16 @@ end;
 { ############################################################ ! WRITE GENERAL COMMENT ! #################################################################### }
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE }
-constructor TTGeneralComment.Create(Comment: string; CUID: string);
+constructor TTGeneralComment.Create(CUID: string; FixedComment: string; FollowUp: string; Free1: string; Free2: string);
 begin
   inherited Create(False);
   FLock :=TCriticalSection.Create;
   FIDThd:=0;
-  FComment:=Comment;
   FCUID:=CUID;
+  FFixedComment:=FixedComment;
+  FFollowUp:=FollowUp;
+  FFree1:=Free1;
+  FFree2:=Free2;
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------------- RELEASE }
@@ -1059,17 +1067,44 @@ begin
   try
     GenText:=TDataTables.Create(MainForm.DbConnect);
     try
-      GenText.OpenTable(TblGeneral);
       Condition:=TGeneral.CUID + EQUAL + QuotedStr(FCUID);
-      GenText.DataSet.Filter:=Condition;
+      GenText.CustFilter:=WHERE + Condition;
+      GenText.OpenTable(TblGeneral);
       { UPDATE }
       if not (GenText.DataSet.RecordCount = 0) then
       begin
         GenText.CleanUp;
         { DEFINE COLUMNS, VALUES AND CONDITIONS }
-        GenText.Columns.Add(TGeneral.STAMP);        GenText.Values.Add(DateTimeToStr(Now));             GenText.Conditions.Add(Condition);
-        GenText.Columns.Add(TGeneral.USER_ALIAS);   GenText.Values.Add(UpperCase(MainForm.WinUserName));GenText.Conditions.Add(Condition);
-        GenText.Columns.Add(TGeneral.FIXCOMMENT);   GenText.Values.Add(FComment);                       GenText.Conditions.Add(Condition);
+        GenText.Columns.Add(TGeneral.STAMP);
+        GenText.Values.Add(DateTimeToStr(Now));
+        GenText.Conditions.Add(Condition);
+        GenText.Columns.Add(TGeneral.USER_ALIAS);
+        GenText.Values.Add(UpperCase(MainForm.WinUserName));
+        GenText.Conditions.Add(Condition);
+        if not(FFixedComment = strNULL) then
+        begin
+          GenText.Columns.Add(TGeneral.FIXCOMMENT);
+          GenText.Values.Add(FFixedComment);
+          GenText.Conditions.Add(Condition);
+        end;
+        if not(FFollowUp = strNULL) then
+        begin
+          GenText.Columns.Add(TGeneral.FOLLOWUP);
+          GenText.Values.Add(FFollowUp);
+          GenText.Conditions.Add(Condition);
+        end;
+        if not(FFree1 = strNULL) then
+        begin
+          GenText.Columns.Add(TGeneral.Free1);
+          GenText.Values.Add(FFree1);
+          GenText.Conditions.Add(Condition);
+        end;
+        if not(FFree2 = strNULL) then
+        begin
+          GenText.Columns.Add(TGeneral.Free2);
+          GenText.Values.Add(FFree2);
+          GenText.Conditions.Add(Condition);
+        end;
         { EXECUTE }
         GenText.UpdateRecord(TblGeneral);
       end
@@ -1081,10 +1116,46 @@ begin
         GenText.Columns.Add(TGeneral.CUID);       GenText.Values.Add(FCUID);
         GenText.Columns.Add(TGeneral.STAMP);      GenText.Values.Add(DateTimeToStr(Now));
         GenText.Columns.Add(TGeneral.USER_ALIAS); GenText.Values.Add(UpperCase(MainForm.WinUserName));
-        GenText.Columns.Add(TGeneral.FIXCOMMENT); GenText.Values.Add(FComment);
-        GenText.Columns.Add(TGeneral.FOLLOWUP);   GenText.Values.Add('');
-        GenText.Columns.Add(TGeneral.Free1);      GenText.Values.Add('');
-        GenText.Columns.Add(TGeneral.Free2);      GenText.Values.Add('');
+        if not(FFixedComment = strNULL) then
+        begin
+          GenText.Columns.Add(TGeneral.FIXCOMMENT);
+          GenText.Values.Add(FFixedComment);
+        end
+        else
+        begin
+          GenText.Columns.Add(TGeneral.FIXCOMMENT);
+          GenText.Values.Add('');
+        end;
+        if not(FFollowUp = strNULL) then
+        begin
+          GenText.Columns.Add(TGeneral.FOLLOWUP);
+          GenText.Values.Add(FFollowUp);
+        end
+        else
+        begin
+          GenText.Columns.Add(TGeneral.FOLLOWUP);
+          GenText.Values.Add('');
+        end;
+        if not(FFree1 = strNULL) then
+        begin
+          GenText.Columns.Add(TGeneral.Free1);
+          GenText.Values.Add(FFree1);
+        end
+        else
+        begin
+          GenText.Columns.Add(TGeneral.Free1);
+          GenText.Values.Add('');
+        end;
+        if not(FFree1 = strNULL) then
+        begin
+          GenText.Columns.Add(TGeneral.Free2);
+          GenText.Values.Add(FFree2);
+        end
+        else
+        begin
+          GenText.Columns.Add(TGeneral.Free2);
+          GenText.Values.Add('');
+        end;
         { EXECUTE }
         if GenText.InsertInto(TblGeneral) then
         begin

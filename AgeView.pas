@@ -124,7 +124,6 @@ begin
   SqlToGrid(Grid, ExecSQL, False, False);
   LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: SQL statement applied [' + StrSQL + '].');
   { -------------------------------------------------------------------------------------------------------------------------------------------- UNINITIALIZE }
-  Grid.SetRowHeight(19, 25);
   Grid.Freeze(False);
 end;
 

@@ -4,7 +4,7 @@ object ActionsForm: TActionsForm
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'Unity'
-  ClientHeight = 746
+  ClientHeight = 680
   ClientWidth = 940
   Color = clWhite
   Font.Charset = DEFAULT_CHARSET
@@ -28,7 +28,7 @@ object ActionsForm: TActionsForm
     Left = 10
     Top = 10
     Width = 920
-    Height = 726
+    Height = 660
     Margins.Left = 10
     Margins.Top = 10
     Margins.Right = 10
@@ -3157,20 +3157,20 @@ object ActionsForm: TActionsForm
     Left = 0
     Top = 0
     Width = 940
-    Height = 746
+    Height = 680
     Align = alClient
     BevelOuter = bvNone
     Color = 15527148
     ParentBackground = False
     TabOrder = 0
     Visible = False
-    ExplicitHeight = 771
+    ExplicitHeight = 685
     object PanelBottom: TPanel
       AlignWithMargins = True
       Left = 10
-      Top = 441
+      Top = 418
       Width = 920
-      Height = 213
+      Height = 170
       Margins.Left = 10
       Margins.Top = 0
       Margins.Right = 10
@@ -3180,13 +3180,12 @@ object ActionsForm: TActionsForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 0
-      ExplicitTop = 466
       object HistoryPanel: TPanel
         AlignWithMargins = True
         Left = 0
         Top = 0
         Width = 321
-        Height = 213
+        Height = 170
         Margins.Left = 0
         Margins.Top = 0
         Margins.Right = 0
@@ -3196,11 +3195,12 @@ object ActionsForm: TActionsForm
         Color = clWhite
         ParentBackground = False
         TabOrder = 0
+        ExplicitHeight = 206
         object HistoryTitle: TLabel
           AlignWithMargins = True
           Left = 10
           Top = 5
-          Width = 306
+          Width = 134
           Height = 16
           Margins.Left = 10
           Margins.Top = 5
@@ -3216,14 +3216,13 @@ object ActionsForm: TActionsForm
           Font.Style = [fsUnderline]
           ParentColor = False
           ParentFont = False
-          ExplicitWidth = 134
         end
         object PanelHistoryGrid: TPanel
           AlignWithMargins = True
           Left = 10
           Top = 36
           Width = 301
-          Height = 167
+          Height = 124
           Margins.Left = 10
           Margins.Top = 10
           Margins.Right = 10
@@ -3233,12 +3232,13 @@ object ActionsForm: TActionsForm
           Color = clWhite
           ParentBackground = False
           TabOrder = 0
+          ExplicitHeight = 160
           object HistoryGrid: TStringGrid
             AlignWithMargins = True
             Left = 2
             Top = 2
             Width = 297
-            Height = 163
+            Height = 120
             Hint = 'Your daily comments history'
             Margins.Left = 2
             Margins.Top = 2
@@ -3255,6 +3255,7 @@ object ActionsForm: TActionsForm
             GradientEndColor = 15527148
             Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
             ParentShowHint = False
+            ScrollBars = ssVertical
             ShowHint = True
             TabOrder = 0
             Visible = False
@@ -3263,6 +3264,7 @@ object ActionsForm: TActionsForm
             OnMouseWheelDown = HistoryGridMouseWheelDown
             OnMouseWheelUp = HistoryGridMouseWheelUp
             OnSelectCell = HistoryGridSelectCell
+            ExplicitHeight = 110
             ColWidths = (
               10
               10
@@ -3283,7 +3285,7 @@ object ActionsForm: TActionsForm
         Left = 321
         Top = 0
         Width = 299
-        Height = 213
+        Height = 170
         Margins.Left = 0
         Margins.Top = 0
         Margins.Right = 0
@@ -3293,11 +3295,12 @@ object ActionsForm: TActionsForm
         Color = clWhite
         ParentBackground = False
         TabOrder = 1
+        ExplicitHeight = 206
         object DailyTitle: TLabel
           AlignWithMargins = True
           Left = 10
           Top = 5
-          Width = 284
+          Width = 91
           Height = 16
           Margins.Left = 10
           Margins.Top = 5
@@ -3313,14 +3316,13 @@ object ActionsForm: TActionsForm
           Font.Style = [fsUnderline]
           ParentColor = False
           ParentFont = False
-          ExplicitWidth = 91
         end
         object PanelDailyCom: TPanel
           AlignWithMargins = True
           Left = 10
           Top = 36
           Width = 279
-          Height = 167
+          Height = 124
           Margins.Left = 10
           Margins.Top = 10
           Margins.Right = 10
@@ -3330,16 +3332,13 @@ object ActionsForm: TActionsForm
           Color = clWhite
           ParentBackground = False
           TabOrder = 0
-          ExplicitLeft = 64
-          ExplicitTop = 72
-          ExplicitWidth = 185
-          ExplicitHeight = 41
+          ExplicitHeight = 160
           object DailyCom: TMemo
             AlignWithMargins = True
             Left = 2
             Top = 2
             Width = 275
-            Height = 163
+            Height = 120
             Hint = 'Press Enter to save'
             Margins.Left = 2
             Margins.Top = 2
@@ -3360,10 +3359,7 @@ object ActionsForm: TActionsForm
             TabOrder = 0
             WantReturns = False
             OnKeyDown = DailyComKeyDown
-            ExplicitLeft = 56
-            ExplicitTop = -58
-            ExplicitWidth = 129
-            ExplicitHeight = 99
+            ExplicitHeight = 156
           end
         end
       end
@@ -3372,7 +3368,7 @@ object ActionsForm: TActionsForm
         Left = 620
         Top = 0
         Width = 300
-        Height = 213
+        Height = 170
         Margins.Left = 0
         Margins.Top = 0
         Margins.Right = 0
@@ -3382,11 +3378,12 @@ object ActionsForm: TActionsForm
         Color = clWhite
         ParentBackground = False
         TabOrder = 2
+        ExplicitHeight = 206
         object GeneralTitle: TLabel
           AlignWithMargins = True
           Left = 10
           Top = 5
-          Width = 285
+          Width = 108
           Height = 16
           Margins.Left = 10
           Margins.Top = 5
@@ -3402,14 +3399,13 @@ object ActionsForm: TActionsForm
           Font.Style = [fsUnderline]
           ParentColor = False
           ParentFont = False
-          ExplicitWidth = 108
         end
         object PanelGeneralCom: TPanel
           AlignWithMargins = True
           Left = 10
           Top = 36
           Width = 280
-          Height = 167
+          Height = 124
           Margins.Left = 10
           Margins.Top = 10
           Margins.Right = 10
@@ -3419,16 +3415,13 @@ object ActionsForm: TActionsForm
           Color = clWhite
           ParentBackground = False
           TabOrder = 0
-          ExplicitLeft = 32
-          ExplicitTop = 96
-          ExplicitWidth = 185
-          ExplicitHeight = 41
+          ExplicitHeight = 160
           object GeneralCom: TMemo
             AlignWithMargins = True
             Left = 2
             Top = 2
             Width = 276
-            Height = 163
+            Height = 120
             Hint = 'Press Enter to save'
             Margins.Left = 2
             Margins.Top = 2
@@ -3449,10 +3442,7 @@ object ActionsForm: TActionsForm
             TabOrder = 0
             WantReturns = False
             OnKeyDown = GeneralComKeyDown
-            ExplicitLeft = -9
-            ExplicitTop = -74
-            ExplicitWidth = 194
-            ExplicitHeight = 115
+            ExplicitHeight = 156
           end
         end
       end
@@ -3462,7 +3452,7 @@ object ActionsForm: TActionsForm
       Left = 10
       Top = 163
       Width = 920
-      Height = 278
+      Height = 255
       Margins.Left = 10
       Margins.Top = 0
       Margins.Right = 10
@@ -3472,16 +3462,13 @@ object ActionsForm: TActionsForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 1
-      ExplicitLeft = 0
-      ExplicitTop = 168
-      ExplicitWidth = 940
-      ExplicitHeight = 298
+      ExplicitHeight = 224
       object PanelOpenItemsGrid: TPanel
         AlignWithMargins = True
         Left = 10
         Top = 10
         Width = 900
-        Height = 258
+        Height = 235
         Margins.Left = 10
         Margins.Top = 10
         Margins.Right = 10
@@ -3491,16 +3478,13 @@ object ActionsForm: TActionsForm
         Color = clWhite
         ParentBackground = False
         TabOrder = 0
-        ExplicitLeft = 101
-        ExplicitTop = 64
-        ExplicitWidth = 185
-        ExplicitHeight = 41
+        ExplicitHeight = 204
         object OpenItemsGrid: TStringGrid
           AlignWithMargins = True
           Left = 2
           Top = 2
           Width = 896
-          Height = 254
+          Height = 231
           Margins.Left = 2
           Margins.Top = 2
           Margins.Right = 2
@@ -3520,13 +3504,14 @@ object ActionsForm: TActionsForm
           OnMouseWheelDown = OpenItemsGridMouseWheelDown
           OnMouseWheelUp = OpenItemsGridMouseWheelUp
           OnSelectCell = OpenItemsGridSelectCell
+          ExplicitHeight = 210
         end
       end
     end
     object PanelStatusBar: TPanel
       AlignWithMargins = True
       Left = 0
-      Top = 714
+      Top = 648
       Width = 940
       Height = 32
       Margins.Left = 0
@@ -3538,7 +3523,7 @@ object ActionsForm: TActionsForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 2
-      ExplicitTop = 739
+      ExplicitTop = 653
       object Text: TLabel
         Left = 14
         Top = 9
@@ -3620,9 +3605,9 @@ object ActionsForm: TActionsForm
         object btnSaveCustDetails: TSpeedButton
           AlignWithMargins = True
           Left = 596
-          Top = 86
+          Top = 83
           Width = 25
-          Height = 22
+          Height = 27
           Cursor = crHandPoint
           Margins.Left = 0
           Margins.Top = 0
@@ -3731,9 +3716,9 @@ object ActionsForm: TActionsForm
         object btnEdit: TSpeedButton
           AlignWithMargins = True
           Left = 299
-          Top = 86
+          Top = 84
           Width = 68
-          Height = 22
+          Height = 27
           Cursor = crHandPoint
           Margins.Left = 0
           Margins.Top = 0
@@ -3993,7 +3978,7 @@ object ActionsForm: TActionsForm
     object ButtonPanel: TPanel
       AlignWithMargins = True
       Left = 10
-      Top = 654
+      Top = 588
       Width = 920
       Height = 50
       Margins.Left = 10
@@ -4007,13 +3992,13 @@ object ActionsForm: TActionsForm
       ParentBackground = False
       ParentDoubleBuffered = False
       TabOrder = 4
-      ExplicitTop = 679
+      ExplicitTop = 593
       object btnCallCustomer: TSpeedButton
         AlignWithMargins = True
         Left = 800
-        Top = 12
+        Top = 10
         Width = 110
-        Height = 25
+        Height = 27
         Cursor = crHandPoint
         Margins.Left = 0
         Margins.Top = 0
@@ -4055,9 +4040,9 @@ object ActionsForm: TActionsForm
       end
       object btnNext: TSpeedButton
         Left = 93
-        Top = 12
+        Top = 10
         Width = 77
-        Height = 25
+        Height = 27
         Cursor = crHandPoint
         Caption = 'Next'
         Flat = True
@@ -4095,9 +4080,9 @@ object ActionsForm: TActionsForm
       object btnAutoStatement: TSpeedButton
         AlignWithMargins = True
         Left = 680
-        Top = 12
+        Top = 10
         Width = 110
-        Height = 25
+        Height = 27
         Cursor = crHandPoint
         Margins.Left = 0
         Margins.Top = 0
@@ -4138,9 +4123,9 @@ object ActionsForm: TActionsForm
       end
       object btnSetFollowUp: TSpeedButton
         Left = 242
-        Top = 12
+        Top = 10
         Width = 77
-        Height = 25
+        Height = 27
         Cursor = crHandPoint
         Caption = 'Set'
         Flat = True
@@ -4176,9 +4161,9 @@ object ActionsForm: TActionsForm
       end
       object btnClearFollowUp: TSpeedButton
         Left = 325
-        Top = 12
+        Top = 10
         Width = 77
-        Height = 25
+        Height = 27
         Cursor = crHandPoint
         Caption = 'Clear'
         Flat = True
@@ -4215,9 +4200,9 @@ object ActionsForm: TActionsForm
       object btnCustomStatement: TSpeedButton
         AlignWithMargins = True
         Left = 553
-        Top = 12
+        Top = 10
         Width = 110
-        Height = 25
+        Height = 27
         Cursor = crHandPoint
         Margins.Left = 0
         Margins.Top = 0
@@ -4259,9 +4244,9 @@ object ActionsForm: TActionsForm
       end
       object btnBack: TSpeedButton
         Left = 10
-        Top = 12
+        Top = 10
         Width = 77
-        Height = 25
+        Height = 27
         Cursor = crHandPoint
         Caption = 'Back'
         Flat = True

@@ -63,12 +63,14 @@ begin
   { ----------------------------------------------------------------------------------------------------------------------------- 'STRINGGRID' INITIALIZATION }
   InvoicesGrid.RowCount:=2;
   InvoicesGrid.ColCount:=4;
+  InvoicesGrid.SetRowHeight(sgRowHeight, 25);
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------------- ON SHOW }
 procedure TInvoicesForm.FormShow(Sender: TObject);
 begin
   InvoicesGrid.ClearAll(2, 1, 1, False);
+  InvoicesGrid.SetColWidth(10, 20);
   InvoicesGrid.AutoThumbSize;
 end;
 
