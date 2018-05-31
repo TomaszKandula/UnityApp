@@ -537,62 +537,22 @@ begin
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------- REGISTER THIS ACTION IN DATABASE }
-procedure TActionsForm.RegisterAction;  //to worker
-var
-  DailyText:   TDataTables;
-  Condition:   string;
-  ManuStat:    integer;
+procedure TActionsForm.RegisterAction;
 begin
-  { REGISTER THIS ACTION IN DATABASE }
-  DailyText:=TDataTables.Create(MainForm.DbConnect);
-  try
-    DailyText.OpenTable(TblDaily);
-    Condition:=TDaily.CUID + EQUAL + QuotedStr(CUID) + _AND + TDaily.AGEDATE + EQUAL + QuotedStr(MainForm.AgeDateSel);
-    DailyText.DataSet.Filter:=Condition;
-    { UPDATE EXISTING COMMENT }
-    if not (DailyText.DataSet.RecordCount = 0) then
-    begin
-      { GET MANUAL STATEMENTS SENT AND INCREASE BY ONE }
-      ManuStat:=StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDaily.EMAIL_ManuStat].Value), 0);
-      Inc(ManuStat);
-      DailyText.CleanUp;
-      { DEFINE COLUMNS, VALUES AND CONDITIONS }
-      DailyText.Columns.Add(TDaily.STAMP);           DailyText.Values.Add(DateTimeToStr(Now));               DailyText.Conditions.Add(Condition);
-      DailyText.Columns.Add(TDaily.USER_ALIAS);      DailyText.Values.Add(UpperCase(MainForm.WinUserName));  DailyText.Conditions.Add(Condition);
-      DailyText.Columns.Add(TDaily.EMAIL_ManuStat);  DailyText.Values.Add(IntToStr(ManuStat));               DailyText.Conditions.Add(Condition);
-      { EXECUTE }
-      DailyText.UpdateRecord(TblDaily);
-    end
-    else
-    { INSERT NEW RECORD }
-    begin
-      DailyText.CleanUp;
-      { DEFINE COLUMNS AND VALUES }
-      DailyText.Columns.Add(TDaily.GROUP_ID);       DailyText.Values.Add(MainForm.GroupIdSel);
-      DailyText.Columns.Add(TDaily.CUID);           DailyText.Values.Add(CUID);
-      DailyText.Columns.Add(TDaily.AGEDATE);        DailyText.Values.Add(MainForm.AgeDateSel);
-      DailyText.Columns.Add(TDaily.STAMP);          DailyText.Values.Add(DateTimeToStr(Now));
-      DailyText.Columns.Add(TDaily.USER_ALIAS);     DailyText.Values.Add(UpperCase(MainForm.WinUserName));
-      DailyText.Columns.Add(TDaily.EMAIL);          DailyText.Values.Add('0');
-      DailyText.Columns.Add(TDaily.CALLEVENT);      DailyText.Values.Add('0');
-      DailyText.Columns.Add(TDaily.CALLDURATION);   DailyText.Values.Add('0');
-      DailyText.Columns.Add(TDaily.FIXCOMMENT);     DailyText.Values.Add('');
-      DailyText.Columns.Add(TDaily.EMAIL_Reminder); DailyText.Values.Add('0');
-      DailyText.Columns.Add(TDaily.EMAIL_AutoStat); DailyText.Values.Add('0');
-      DailyText.Columns.Add(TDaily.EMAIL_ManuStat); DailyText.Values.Add('1');
-      { EXECUTE }
-      DailyText.InsertInto(TblDaily);
-    end;
-  finally
-    DailyText.Free;
-  end;
+  TTDailyComment.Create(
+                         CUID,
+                         False,
+                         False,
+                         0,
+                         strNULL,
+                         False,
+                         False,
+                         True
+                       );
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------- CLEAR FOLLOW-UP FROM GIVEN CUSTOMER }
 procedure TActionsForm.ClearFollowUp;
-var
-  GeneralText: TDataTables;
-  Condition:   string;
 begin
   if MainForm.MsgCall(mcQuestion2, 'Are you sure you want to clear this follow up?') = ID_YES then
   begin

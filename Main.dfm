@@ -9909,7 +9909,7 @@ object MainForm: TMainForm
           AlignWithMargins = True
           Left = 17
           Top = 15
-          Width = 369
+          Width = 281
           Height = 91
           Margins.Left = 17
           Margins.Top = 15
@@ -9921,12 +9921,12 @@ object MainForm: TMainForm
           object hShapeActionPAB: TShape
             Left = 0
             Top = 17
-            Width = 369
+            Width = 281
             Height = 72
             Brush.Style = bsClear
             Pen.Color = clGradientInactiveCaption
           end
-          object btnClose: TImage
+          object btnCloseAB: TImage
             Left = 163
             Top = 29
             Width = 24
@@ -9946,12 +9946,12 @@ object MainForm: TMainForm
               094D41600BFE0301654123C5A0BF661D83DC8138A454848868322CC09EDE8151
               CE70393694E1E24D98AF204995640B2EC79A23190271BD2E2CC01F2D66581232
               15A118980901FA7121716F3BB68E0000000049454E44AE426082}
-            OnClick = btnCloseClick
-            OnMouseEnter = btnCloseMouseEnter
-            OnMouseLeave = btnCloseMouseLeave
+            OnClick = btnCloseABClick
+            OnMouseEnter = btnCloseABMouseEnter
+            OnMouseLeave = btnCloseABMouseLeave
           end
-          object btnExport: TImage
-            Left = 303
+          object btnExportAB: TImage
+            Left = 227
             Top = 29
             Width = 25
             Height = 30
@@ -9966,28 +9966,9 @@ object MainForm: TMainForm
               631380B35D90D37C86DBE5FA39048167AF2036B2066A5017040FDDAEDD9F6B8D
               D56607F2A308EC544AE1FDF8E51165E357104E7771DC14469883657F00000000
               49454E44AE426082}
-            OnClick = btnExportClick
-            OnMouseEnter = btnExportMouseEnter
-            OnMouseLeave = btnExportMouseLeave
-          end
-          object btnImport: TImage
-            Left = 233
-            Top = 29
-            Width = 25
-            Height = 30
-            Picture.Data = {
-              0954506E67496D61676589504E470D0A1A0A0000000D49484452000000190000
-              001E0806000000D9ECB5DB000000017352474200AECE1CE90000000467414D41
-              0000B18F0BFC6105000000097048597300000EC400000EC401952B0E1B000000
-              A44944415478DAEDD3311603111080E171006D6EA2740147D12AB64499C229DC
-              2E3A17B051A4F192ECEC8CB7CDFA1B0DBE874784101A1032C680520A355774C4
-              7B7F0A8831829412B4D628888C586B21E78C82C8485F534A41412CA48781D808
-              069A821C4164E45FE37E24E4EC2917B290DF39E758F00D91941209E86BA7204F
-              F180ADBD167217E4B3F9384E47C6A62323F4EDCAAE7D1338A8D6CAFBF1ED1D66
-              E22508A71D930914462F5A0CD40000000049454E44AE426082}
-            OnClick = btnImportClick
-            OnMouseEnter = btnImportMouseEnter
-            OnMouseLeave = btnImportMouseLeave
+            OnClick = btnExportABClick
+            OnMouseEnter = btnExportABMouseEnter
+            OnMouseLeave = btnExportABMouseLeave
           end
           object btnOpenAB: TImage
             Left = 30
@@ -10012,7 +9993,7 @@ object MainForm: TMainForm
             OnMouseEnter = btnOpenABMouseEnter
             OnMouseLeave = btnOpenABMouseLeave
           end
-          object btnSave: TImage
+          object btnUpdateAB: TImage
             Left = 95
             Top = 29
             Width = 23
@@ -10044,14 +10025,14 @@ object MainForm: TMainForm
               1AC132BD97868646FCF18FC6E0DDAEDBB0DCC00F294E5DF3AAC83743FCBB68B0
               4913D02CAAAAB0CD6221180C939EADA6B6CA4E341BE02771370326F76CEAB900
               00000049454E44AE426082}
-            OnClick = btnSaveClick
-            OnMouseEnter = btnSaveMouseEnter
-            OnMouseLeave = btnSaveMouseLeave
+            OnClick = btnUpdateABClick
+            OnMouseEnter = btnUpdateABMouseEnter
+            OnMouseLeave = btnUpdateABMouseLeave
           end
           object Cap13: TShape
             Left = 0
             Top = 4
-            Width = 369
+            Width = 281
             Height = 19
             Brush.Color = 15918295
             Pen.Color = clSkyBlue
@@ -10095,21 +10076,8 @@ object MainForm: TMainForm
             Font.Style = []
             ParentFont = False
           end
-          object Text68: TLabel
-            Left = 231
-            Top = 65
-            Width = 32
-            Height = 13
-            Caption = 'Import'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clBlack
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-          end
           object Text69: TLabel
-            Left = 300
+            Left = 224
             Top = 65
             Width = 32
             Height = 13
@@ -10135,6 +10103,10 @@ object MainForm: TMainForm
         Margins.Bottom = 17
         Align = alClient
         BevelOuter = bvNone
+        Color = clWhite
+        DoubleBuffered = False
+        ParentBackground = False
+        ParentDoubleBuffered = False
         TabOrder = 1
         object ImgLoadingAddressBook: TImage
           AlignWithMargins = True
@@ -13283,9 +13255,11 @@ object MainForm: TMainForm
           ColCount = 10
           DefaultColWidth = 40
           DefaultRowHeight = 17
+          DoubleBuffered = True
           RowCount = 2
           GradientEndColor = 15527148
           Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
+          ParentDoubleBuffered = False
           ParentShowHint = False
           PopupMenu = BookPopup
           ShowHint = False

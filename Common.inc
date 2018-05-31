@@ -59,8 +59,8 @@ const
 
   { SPLASH SCREEN }
 
-  spFree = 0;
-  spShow = 1;
+  spFree   = 0;
+  spShow   = 1;
   spSplash = 100;
   spUpdate = 200;
 
@@ -199,7 +199,7 @@ const
   { DELIMITERS }
 
   deSemicolon = ';';
-  deCommaa    = ',';
+  deComma     = ',';
   dePipe      = '|';
 
   { BRACKET ENUMARATIONS }
@@ -299,9 +299,10 @@ const
 
   adOpenAll     = 0;
   adOpenForUser = 1;
-  adSaveNew     = 2;
+  adUpdate      = 2;
   adExport      = 3;
   adImport      = 4;
+  adInsert      = 5;
   adCopy        = 100;
   adPaste       = 101;
   adCut         = 102;

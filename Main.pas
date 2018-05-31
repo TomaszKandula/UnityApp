@@ -226,8 +226,8 @@ type                                                            (* GUI | MAIN TH
     btnReload: TImage;
     Text54L1: TLabel;
     btnOpenAB: TImage;
-    btnSave: TImage;
-    btnClose: TImage;
+    btnUpdateAB: TImage;
+    btnCloseAB: TImage;
     Text64: TLabel;
     Text66: TLabel;
     Text67: TLabel;
@@ -240,9 +240,7 @@ type                                                            (* GUI | MAIN TH
     tcInvoices: TLabel;
     tcOSAmt: TLabel;
     tcOverdue: TLabel;
-    Text68: TLabel;
-    btnImport: TImage;
-    btnExport: TImage;
+    btnExportAB: TImage;
     Text69: TLabel;
     Header4: TPanel;
     hShapeInfoAM: TShape;
@@ -574,14 +572,12 @@ type                                                            (* GUI | MAIN TH
     procedure btnReloadMouseLeave(Sender: TObject);
     procedure btnOpenABMouseEnter(Sender: TObject);
     procedure btnOpenABMouseLeave(Sender: TObject);
-    procedure btnSaveMouseEnter(Sender: TObject);
-    procedure btnSaveMouseLeave(Sender: TObject);
-    procedure btnCloseMouseEnter(Sender: TObject);
-    procedure btnCloseMouseLeave(Sender: TObject);
-    procedure btnImportMouseEnter(Sender: TObject);
-    procedure btnImportMouseLeave(Sender: TObject);
-    procedure btnExportMouseEnter(Sender: TObject);
-    procedure btnExportMouseLeave(Sender: TObject);
+    procedure btnUpdateABMouseEnter(Sender: TObject);
+    procedure btnUpdateABMouseLeave(Sender: TObject);
+    procedure btnCloseABMouseEnter(Sender: TObject);
+    procedure btnCloseABMouseLeave(Sender: TObject);
+    procedure btnExportABMouseEnter(Sender: TObject);
+    procedure btnExportABMouseLeave(Sender: TObject);
     procedure btnReloadClick(Sender: TObject);
     procedure sgListSectionKeyPress(Sender: TObject; var Key: Char);
     procedure sgListValueKeyPress(Sender: TObject; var Key: Char);
@@ -597,11 +593,10 @@ type                                                            (* GUI | MAIN TH
     procedure sgAddressBookKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure sgListValueKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure sgListSectionKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure btnCloseClick(Sender: TObject);
-    procedure btnSaveClick(Sender: TObject);
+    procedure btnCloseABClick(Sender: TObject);
+    procedure btnUpdateABClick(Sender: TObject);
     procedure btnOpenABClick(Sender: TObject);
-    procedure btnImportClick(Sender: TObject);
-    procedure btnExportClick(Sender: TObject);
+    procedure btnExportABClick(Sender: TObject);
     procedure TabSheet7Show(Sender: TObject);
     procedure TabSheet7Resize(Sender: TObject);
     procedure sgCoCodesMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
@@ -815,7 +810,6 @@ type                                                            (* GUI | MAIN TH
     procedure  SetGridThumbSizes;
     function   Explode(Text: string; SourceDelim: char): string;
     function   Implode(Text: TStringList; TargetDelim: char): string;
-    procedure  AddToAddrBook(SrcGrid: TStringGrid);
   protected
     { PROCESS ALL WINDOWS MESSAGES }
     procedure  WndProc(var msg: Messages.TMessage); override;
@@ -2271,75 +2265,6 @@ begin
   Result:=StringReplace(Text.Text, CRLF, TargetDelim, [rfReplaceAll]);
 end;
 
-{ --------------------------------------------------------------------------------------------------------------------------------------- ADD TO ADDRESS BOOK }
-procedure TMainForm.AddToAddrBook(SrcGrid: TStringGrid);
-var
-  iCNT:     integer;
-  jCNT:     integer;
-  SCUID:    string;
-  AddrBook: TLists;
-  Book:     TDataTables;
-begin
-  ExecMessage(False, 10, stProcessing);
-  SetLength(AddrBook, 1, 11);
-  jCNT:=0;
-  { ------------------------------------------------------------------------------------------------------------------------------- GET DATA FROM STRING GRID }
-  for iCNT:=SrcGrid.Selection.Top to SrcGrid.Selection.Bottom do
-  begin
-    if SrcGrid.RowHeights[iCNT] <> sgRowHidden then
-    begin
-      { BUILD CUID }
-      SCUID:=SrcGrid.Cells[SrcGrid.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), iCNT] +
-             ConvertName(
-                          SrcGrid.Cells[SrcGrid.ReturnColumn(TSnapshots.fCO_CODE, 1, 1), iCNT],
-                          'F',
-                          3
-                        );
-      { BUILD ARRAY }
-      AddrBook[jCNT,  0]:=UpperCase(MainForm.WinUserName);
-      AddrBook[jCNT,  1]:=SCUID;
-      AddrBook[jCNT,  2]:=SrcGrid.Cells[SrcGrid.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), iCNT];
-      AddrBook[jCNT,  3]:=SrcGrid.Cells[SrcGrid.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), iCNT];
-      AddrBook[jCNT,  8]:=SrcGrid.Cells[SrcGrid.ReturnColumn(TSnapshots.fAGENT,           1, 1), iCNT];
-      AddrBook[jCNT,  9]:=SrcGrid.Cells[SrcGrid.ReturnColumn(TSnapshots.fDIVISION,        1, 1), iCNT];
-      AddrBook[jCNT, 10]:=SrcGrid.Cells[SrcGrid.ReturnColumn(TSnapshots.fCO_CODE,         1, 1), iCNT];
-      { MOVE NEXT }
-      Inc(jCNT);
-      SetLength(AddrBook, jCNT + 1, 11);
-    end;
-  end;
-  { ---------------------------------------------------------------------------------------------------------------------------------------- SEND TO DATABASE }
-  Book:=TDataTables.Create(DbConnect);
-  try
-    Book.Columns.Add(TAddressBook.USER_ALIAS);
-    Book.Columns.Add(TAddressBook.SCUID);
-    Book.Columns.Add(TAddressBook.CUSTOMER_NUMBER);
-    Book.Columns.Add(TAddressBook.CUSTOMER_NAME);
-    Book.Columns.Add(TAddressBook.EMAILS);
-    Book.Columns.Add(TAddressBook.PHONE_NUMBERS);
-    Book.Columns.Add(TAddressBook.CONTACT);
-    Book.Columns.Add(TAddressBook.ESTATEMENTS);
-    Book.Columns.Add(TAddressBook.AGENT);
-    Book.Columns.Add(TAddressBook.DIVISION);
-    Book.Columns.Add(TAddressBook.COCODE);
-    try
-      Book.StrSQL:=Book.ArrayToSql(AddrBook, TblAddressbook, Book.ColumnsToList(Book.Columns, enQuotesOff));
-      Book.ExecSQL;
-      MsgCall(mcInfo, 'Selected item(s) are added successfully!');
-    except
-      on E: Exception do
-      begin
-        MsgCall(mcError, 'Cannot save selected item(s). Exception has been thrown: ' + E.Message);
-        LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Cannot write Address Book item(s) into database. Error: ' + E.Message);
-      end;
-    end;
-  finally
-    Book.Free;
-    AddrBook:=nil;
-    ExecMessage(False, 10, stReady);
-  end;
-end;
-
 { ############################################################## ! MAIN THREAD EVENTS ! ##################################################################### }
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------- ON CREATE }
@@ -2431,7 +2356,7 @@ begin
         Action_AddToBook.Enabled      :=False;
         ActionsForm.DailyCom.Enabled  :=False;
         ActionsForm.GeneralCom.Enabled:=False;
-        btnSave.Enabled               :=False;
+        btnUpdateAB.Enabled           :=False;
       end;
 
     finally
@@ -3072,9 +2997,10 @@ end;
 { ------------------------------------------------------------------------------------------------------------------------ ADD SELECTED ITEMS TO ADDRESS BOOK }
 procedure TMainForm.Action_AddToBookClick(Sender: TObject);
 begin
-  Screen.Cursor:=crHourGlass;
-  AddToAddrBook(sgAgeView);
-  Screen.Cursor:=crDefault;
+  if ConnLastError = 0 then
+    TTAddressBook.Create(adInsert, sgAgeView)
+      else
+        MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------- ADD FOLLOW-UP TO SELECTED GROUP }
@@ -4002,27 +3928,23 @@ begin
   if Key = VK_ESCAPE then sgAgeView.Options:=sgAgeView.Options - [goEditing];
 end;
 
-
-
-
-
-
-
-
 ////////////// REFACTOR!!!!
 
 { ------------------------------------------------------------------------------------------------------------------ ADDRESS BOOK | RESTRICT TELEPHONE COLUMN }
 procedure TMainForm.sgAddressBookKeyPress(Sender: TObject; var Key: Char);
 begin
-  if sgAddressBook.Col = sgAddressBook.ReturnColumn(TAddressBook.PHONE_NUMBERS, 1, 1) then
-    if (not (CharInSet(Key, ['0'..'9', ';', BACKSPACE]))) then Key:=#0;
+//  if sgAddressBook.Col = sgAddressBook.ReturnColumn(TAddressBook.PHONE_NUMBERS, 1, 1) then
+//    if (not (CharInSet(Key, ['0'..'9', ';', BACKSPACE]))) then Key:=#0;
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------- ADDRESS BOOK | PASTE, CUT, COPY }
 procedure TMainForm.sgAddressBookKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+(*
 var
   DataTables: TDataTables;
+*)
 begin
+(*
   { "READ ONLY" USERS ARE NOT ALLOWED TO MAKE CHANGES }
   if AccessLevel = acReadOnly then
   begin
@@ -4032,7 +3954,7 @@ begin
   { FIRST COLUMN ARE NOT EDITABLE }
   if (sgAddressBook.Col = 1) then Exit;
   { CALL "SAVE NEW" IF "CTRL + S" IS PRESSED }
-  if (Key = 115) and (Shift = [ssCtrl]) then TTAddressBook.Create(adSaveNew, sgAddressBook);
+  if (Key = 115) and (Shift = [ssCtrl]) then TTAddressBook.Create(adUpdate, sgAddressBook);
   { COPY, PASTE, CUT }
   if (Key = 67) and (Shift = [ssCtrl]) then sgAddressBook.CopyCutPaste(adCopy);
   if (Key = 86) and (Shift = [ssCtrl]) and (sgAddressBook.Cells[0, sgAddressBook.Row] <> '') then sgAddressBook.CopyCutPaste(adPaste);
@@ -4066,14 +3988,10 @@ begin
   end;
   { ALLOW EDITING | F2 }
   if Key = VK_F2 then sgAddressBook.Options:=sgAddressBook.Options + [goEditing];
+*)
 end;
 
 ////////////// REFACTOR!!!!
-
-
-
-
-
 
 { -------------------------------------------------------------------------------------------------------------------------------------- UPDATE SECTION VALUE }
 procedure TMainForm.sgListSectionKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -4351,62 +4269,47 @@ begin
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------------- SAVE AB }
-procedure TMainForm.btnSaveMouseEnter(Sender: TObject);
+procedure TMainForm.btnUpdateABMouseEnter(Sender: TObject);
 begin
   { CHANGE CURSOR TO HAND POINT }
-  btnSave.Cursor:=crHandPoint;
+  btnUpdateAB.Cursor:=crHandPoint;
   Text66.Font.Color:=FONCOLOR;
 end;
 
-procedure TMainForm.btnSaveMouseLeave(Sender: TObject);
+procedure TMainForm.btnUpdateABMouseLeave(Sender: TObject);
 begin
   { CHANGE CURSOR TO DEFAULT (ARROW) }
-  btnSave.Cursor:=crDefault;
+  btnUpdateAB.Cursor:=crDefault;
   Text66.Font.Color:=clBlack;
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------------------- CLOSE AB }
-procedure TMainForm.btnCloseMouseEnter(Sender: TObject);
+procedure TMainForm.btnCloseABMouseEnter(Sender: TObject);
 begin
   { CHANGE CURSOR TO HAND POINT }
-  btnClose.Cursor:=crHandPoint;
+  btnCloseAB.Cursor:=crHandPoint;
   Text67.Font.Color:=FONCOLOR;
 end;
 
-procedure TMainForm.btnCloseMouseLeave(Sender: TObject);
+procedure TMainForm.btnCloseABMouseLeave(Sender: TObject);
 begin
   { CHANGE CURSOR TO DEFAULT (ARROW) }
-  btnClose.Cursor:=crDefault;
+  btnCloseAB.Cursor:=crDefault;
   Text67.Font.Color:=clBlack;
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------------------- IMPORT AB }
-procedure TMainForm.btnImportMouseEnter(Sender: TObject);
-begin
-  { CHANGE CURSOR TO HAND POINT }
-  btnImport.Cursor:=crHandPoint;
-  Text68.Font.Color:=FONCOLOR;
-end;
-
-procedure TMainForm.btnImportMouseLeave(Sender: TObject);
-begin
-  { CHANGE CURSOR TO DEFAULT (ARROW) }
-  btnImport.Cursor:=crDefault;
-  Text68.Font.Color:=clBlack;
-end;
-
 { ------------------------------------------------------------------------------------------------------------------------------------------------- EXPORT AB }
-procedure TMainForm.btnExportMouseEnter(Sender: TObject);
+procedure TMainForm.btnExportABMouseEnter(Sender: TObject);
 begin
   { CHANGE CURSOR TO HAND POINT }
-  btnExport.Cursor:=crHandPoint;
+  btnExportAB.Cursor:=crHandPoint;
   Text69.Font.Color:=FONCOLOR;
 end;
 
-procedure TMainForm.btnExportMouseLeave(Sender: TObject);
+procedure TMainForm.btnExportABMouseLeave(Sender: TObject);
 begin
   { CHANGE CURSOR TO DEFAULT (ARROW) }
-  btnExport.Cursor:=crDefault;
+  btnExportAB.Cursor:=crDefault;
   Text69.Font.Color:=clBlack;
 end;
 
@@ -4883,17 +4786,17 @@ begin
         MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
 end;
 
-{ ---------------------------------------------------------------------------------------------------------------------- USER ADDRESS BOOK | SAVE NEWLY ADDED }
-procedure TMainForm.btnSaveClick(Sender: TObject);
+{ ------------------------------------------------------------------------------------------------------------------------ USER ADDRESS BOOK | UPDATE RECORDS }
+procedure TMainForm.btnUpdateABClick(Sender: TObject);
 begin
   if ConnLastError = 0 then
-    TTAddressBook.Create(adSaveNew, sgAddressBook)
+    TTAddressBook.Create(adUpdate, sgAddressBook)
       else
         MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------- USER ADDRESS BOOK | CLOSE }
-procedure TMainForm.btnCloseClick(Sender: TObject);
+procedure TMainForm.btnCloseABClick(Sender: TObject);
 begin
   if MsgCall(mcQuestion2, 'Are you sure you want to close address book?') = IDYES then
   begin
@@ -4902,14 +4805,8 @@ begin
   end;
 end;
 
-{ --------------------------------------------------------------------------------------------------------------------------- USER ADDRESS BOOK | IMPORT DATA }
-procedure TMainForm.btnImportClick(Sender: TObject);
-begin
-  TTAddressBook.Create(adImport, sgAddressBook);
-end;
-
 { ---------------------------------------------------------------------------------------------------------------------------- USER ADDRESS BOOK | EXPORT ALL }
-procedure TMainForm.btnExportClick(Sender: TObject);
+procedure TMainForm.btnExportABClick(Sender: TObject);
 begin
   TTAddressBook.Create(adExport, sgAddressBook);
 end;

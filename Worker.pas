@@ -16,7 +16,7 @@ unit Worker;
 interface
 
 uses
-  Main, ReportBug, Windows, Messages, SysUtils, Classes, Diagnostics, Graphics, ADODB, ComObj, SyncObjs, Dialogs;
+  Main, ReportBug, Windows, Messages, SysUtils, Classes, Diagnostics, Graphics, ADODB, ComObj, SyncObjs, Dialogs, DB;
 
 { ----------------------------------------------------------- ! SEPARATE CPU THREADS ! ---------------------------------------------------------------------- }
 
@@ -123,7 +123,7 @@ type
     constructor Create(ActionMode: integer; Grid: TStringGrid);
     destructor  Destroy; override;
     function    Read     : boolean;
-    function    Write    : boolean;
+    function    Update   : boolean;
     function    Add      : boolean;
   end;
 
@@ -597,19 +597,21 @@ begin
         SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PCHAR('Read function of Address Book has failed. Please contact IT support.')));
       end;
     end;
-    { ---------------------------------------------------------------------------------------------------------------------------------------------- SAVE NEW }
-    if FMode = adSaveNew then
+    { ------------------------------------------------------------------------------------------------------------------------------------------------ UPDATE }
+    if FMode = adUpdate then
     begin
-      if Write then
+      if Update then
         LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: The Address Book has been saved successfully.')
           else
-            LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot save to Address Book.');
+            LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot update data in Address Book.');
     end;
-    { ------------------------------------------------------------------------------------------------------------------------------------------------ IMPORT }
-    if FMode = adImport then
+    { ------------------------------------------------------------------------------------------------------------------------------------ INSERT NEW RECORDS }
+    if FMode = adInsert then
     begin
-      FGrid.OpenThdId:=IDThd;
-      FGrid.ImportCSV(MainForm.CSVImport, '|');
+      if Add then
+        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: The Address Book insertion has been successfully.')
+          else
+            LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot insert data to Address Book.');
     end;
     { ------------------------------------------------------------------------------------------------------------------------------------------------ EXPORT }
     if FMode = adExport then
@@ -670,13 +672,17 @@ begin
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------------------------- WRITE }
-function TTAddressBook.Write: boolean;
+function TTAddressBook.Update: boolean;
+(*
 var
   DataTables: TDataTables;
   iCNT:       integer;
   Start:      integer;
   TotalRows:  integer;
+*)
 begin
+  Result:=False;
+(*
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   Result   :=False;
   Start    :=0;
@@ -737,12 +743,76 @@ begin
     FGrid.Freeze(False);
     DataTables.Free;
   end;
+*)
 end;
 
 { ---------------------------------------------------------------------------------------------------------------------- ADD SELECTED ITEM(S) TO ADDRESS BOOK }
 function TTAddressBook.Add: boolean;
+var
+  iCNT:     integer;
+  jCNT:     integer;
+  SCUID:    string;
+  AddrBook: TLists;
+  Book:     TDataTables;
 begin
   Result:=False;
+  SetLength(AddrBook, 1, 11);
+  jCNT:=0;
+  { ------------------------------------------------------------------------------------------------------------------------------- GET DATA FROM STRING GRID }
+  for iCNT:=FGrid.Selection.Top to FGrid.Selection.Bottom do
+  begin
+    if FGrid.RowHeights[iCNT] <> sgRowHidden then
+    begin
+      { BUILD CUID }
+      SCUID:=FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), iCNT] +
+             MainForm.ConvertName(
+                                   FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fCO_CODE, 1, 1), iCNT],
+                                   'F',
+                                    3
+                                 );
+      { BUILD ARRAY }
+      AddrBook[jCNT,  0]:=UpperCase(MainForm.WinUserName);
+      AddrBook[jCNT,  1]:=SCUID;
+      AddrBook[jCNT,  2]:=FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), iCNT];
+      AddrBook[jCNT,  3]:=FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), iCNT];
+      AddrBook[jCNT,  8]:=FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fAGENT,           1, 1), iCNT];
+      AddrBook[jCNT,  9]:=FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fDIVISION,        1, 1), iCNT];
+      AddrBook[jCNT, 10]:=FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fCO_CODE,         1, 1), iCNT];
+      { MOVE NEXT }
+      Inc(jCNT);
+      SetLength(AddrBook, jCNT + 1, 11);
+    end;
+  end;
+  { ---------------------------------------------------------------------------------------------------------------------------------------- SEND TO DATABASE }
+  Book:=TDataTables.Create(MainForm.DbConnect);
+  try
+    Book.Columns.Add(TAddressBook.USER_ALIAS);
+    Book.Columns.Add(TAddressBook.SCUID);
+    Book.Columns.Add(TAddressBook.CUSTOMER_NUMBER);
+    Book.Columns.Add(TAddressBook.CUSTOMER_NAME);
+    Book.Columns.Add(TAddressBook.EMAILS);
+    Book.Columns.Add(TAddressBook.PHONE_NUMBERS);
+    Book.Columns.Add(TAddressBook.CONTACT);
+    Book.Columns.Add(TAddressBook.ESTATEMENTS);
+    Book.Columns.Add(TAddressBook.AGENT);
+    Book.Columns.Add(TAddressBook.DIVISION);
+    Book.Columns.Add(TAddressBook.COCODE);
+    try
+      Book.StrSQL:=Book.ArrayToSql(AddrBook, TblAddressbook, Book.ColumnsToList(Book.Columns, enQuotesOff));
+      Book.ExecSQL;
+      MainForm.ExecMessage(False, mcInfo, 'Address Book has been successfully populated by selected item(s).');
+      Result:=True;
+    except
+      on E: Exception do
+      begin
+        MainForm.ExecMessage(False, mcError, 'Cannot save selected item(s). Exception has been thrown: ' + E.Message);
+        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Cannot write Address Book item(s) into database. Error: ' + E.Message);
+      end;
+    end;
+  finally
+    Book.Free;
+    AddrBook:=nil;
+  end;
 end;
 
 { ################################################################# ! BUG REPORT ! ########################################################################## }
