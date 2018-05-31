@@ -815,6 +815,7 @@ type                                                            (* GUI | MAIN TH
     procedure  SetGridThumbSizes;
     function   Explode(Text: string; SourceDelim: char): string;
     function   Implode(Text: TStringList; TargetDelim: char): string;
+    procedure  AddToAddrBook(SrcGrid: TStringGrid);
   protected
     { PROCESS ALL WINDOWS MESSAGES }
     procedure  WndProc(var msg: Messages.TMessage); override;
@@ -1454,20 +1455,9 @@ end;
 
 { -------------------------------------------------------------------------------------------------------------------------- SET ROW HEIGHT AND HEADER HEIGHT }
 procedure TStringGrid.SetRowHeight(RowHeight: Integer; Header: Integer);
-//var
-//  iCNT:  integer;
 begin
   DefaultRowHeight:=RowHeight;
   RowHeights[0]:=Header;
-(*
-  for iCNT:=0 to RowCount - 1 do
-  begin
-    if iCNT = 0 then
-      RowHeights[iCNT]:=Header
-        else
-          RowHeights[iCNT]:=RowHeight;
-  end;
-*)
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------ MERGE SORT }
@@ -2281,6 +2271,75 @@ begin
   Result:=StringReplace(Text.Text, CRLF, TargetDelim, [rfReplaceAll]);
 end;
 
+{ --------------------------------------------------------------------------------------------------------------------------------------- ADD TO ADDRESS BOOK }
+procedure TMainForm.AddToAddrBook(SrcGrid: TStringGrid);
+var
+  iCNT:     integer;
+  jCNT:     integer;
+  SCUID:    string;
+  AddrBook: TLists;
+  Book:     TDataTables;
+begin
+  ExecMessage(False, 10, stProcessing);
+  SetLength(AddrBook, 1, 11);
+  jCNT:=0;
+  { ------------------------------------------------------------------------------------------------------------------------------- GET DATA FROM STRING GRID }
+  for iCNT:=SrcGrid.Selection.Top to SrcGrid.Selection.Bottom do
+  begin
+    if SrcGrid.RowHeights[iCNT] <> sgRowHidden then
+    begin
+      { BUILD CUID }
+      SCUID:=SrcGrid.Cells[SrcGrid.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), iCNT] +
+             ConvertName(
+                          SrcGrid.Cells[SrcGrid.ReturnColumn(TSnapshots.fCO_CODE, 1, 1), iCNT],
+                          'F',
+                          3
+                        );
+      { BUILD ARRAY }
+      AddrBook[jCNT,  0]:=UpperCase(MainForm.WinUserName);
+      AddrBook[jCNT,  1]:=SCUID;
+      AddrBook[jCNT,  2]:=SrcGrid.Cells[SrcGrid.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), iCNT];
+      AddrBook[jCNT,  3]:=SrcGrid.Cells[SrcGrid.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), iCNT];
+      AddrBook[jCNT,  8]:=SrcGrid.Cells[SrcGrid.ReturnColumn(TSnapshots.fAGENT,           1, 1), iCNT];
+      AddrBook[jCNT,  9]:=SrcGrid.Cells[SrcGrid.ReturnColumn(TSnapshots.fDIVISION,        1, 1), iCNT];
+      AddrBook[jCNT, 10]:=SrcGrid.Cells[SrcGrid.ReturnColumn(TSnapshots.fCO_CODE,         1, 1), iCNT];
+      { MOVE NEXT }
+      Inc(jCNT);
+      SetLength(AddrBook, jCNT + 1, 11);
+    end;
+  end;
+  { ---------------------------------------------------------------------------------------------------------------------------------------- SEND TO DATABASE }
+  Book:=TDataTables.Create(DbConnect);
+  try
+    Book.Columns.Add(TAddressBook.USER_ALIAS);
+    Book.Columns.Add(TAddressBook.SCUID);
+    Book.Columns.Add(TAddressBook.CUSTOMER_NUMBER);
+    Book.Columns.Add(TAddressBook.CUSTOMER_NAME);
+    Book.Columns.Add(TAddressBook.EMAILS);
+    Book.Columns.Add(TAddressBook.PHONE_NUMBERS);
+    Book.Columns.Add(TAddressBook.CONTACT);
+    Book.Columns.Add(TAddressBook.ESTATEMENTS);
+    Book.Columns.Add(TAddressBook.AGENT);
+    Book.Columns.Add(TAddressBook.DIVISION);
+    Book.Columns.Add(TAddressBook.COCODE);
+    try
+      Book.StrSQL:=Book.ArrayToSql(AddrBook, TblAddressbook, Book.ColumnsToList(Book.Columns, enQuotesOff));
+      Book.ExecSQL;
+      MsgCall(mcInfo, 'Selected item(s) are added successfully!');
+    except
+      on E: Exception do
+      begin
+        MsgCall(mcError, 'Cannot save selected item(s). Exception has been thrown: ' + E.Message);
+        LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Cannot write Address Book item(s) into database. Error: ' + E.Message);
+      end;
+    end;
+  finally
+    Book.Free;
+    AddrBook:=nil;
+    ExecMessage(False, 10, stReady);
+  end;
+end;
+
 { ############################################################## ! MAIN THREAD EVENTS ! ##################################################################### }
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------- ON CREATE }
@@ -3010,64 +3069,13 @@ begin
   end;
 end;
 
-
-////////////////////////////// refactor!!!
-
 { ------------------------------------------------------------------------------------------------------------------------ ADD SELECTED ITEMS TO ADDRESS BOOK }
 procedure TMainForm.Action_AddToBookClick(Sender: TObject);
-var
-  iCNT:    integer;
-  OffSet:  integer;
 begin
-  { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   Screen.Cursor:=crHourGlass;
-  if sgAddressBook.Cells[0, 1] = '' then OffSet:=-1 else OffSet:=0;
-  { ----------------------------------------------------------------------------------------------------------------------- GO ONE BY ONE AND LOOK FOR 'CUID' }
-  for iCNT:=sgAgeView.Selection.Top to sgAgeView.Selection.Bottom do
-  begin
-    if sgAgeView.RowHeights[iCNT] <> - 1 then
-    begin
-      { EMPTY ID BAR }
-      sgAddressBook.Cells[0, sgAddressBook.RowCount - 1 + OffSet]:='';
-      { MANDATORY FIELDS }
-      sgAddressBook.Cells[sgAddressBook.ReturnColumn(TAddressBook.USER_ALIAS, 1, 1), sgAddressBook.RowCount - 1 + OffSet]:=UpperCase(MainForm.WinUserName);
-      sgAddressBook.Cells[sgAddressBook.ReturnColumn(TAddressBook.SCUID, 1, 1), sgAddressBook.RowCount - 1 + OffSet]:=
-        sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), iCNT] +
-          ConvertName(
-                       sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCO_CODE, 1, 1), iCNT],
-                       'F',
-                       3
-                     );
-      { FIELDS WITH DATA }
-      sgAddressBook.Cells[sgAddressBook.ReturnColumn(TAddressBook.CUSTOMER_NUMBER, 1, 1), sgAddressBook.RowCount - 1 + OffSet]:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), iCNT];
-      sgAddressBook.Cells[sgAddressBook.ReturnColumn(TAddressBook.CUSTOMER_NAME,   1, 1), sgAddressBook.RowCount - 1 + OffSet]:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), iCNT];
-      sgAddressBook.Cells[sgAddressBook.ReturnColumn(TAddressBook.AGENT,           1, 1), sgAddressBook.RowCount - 1 + OffSet]:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fAGENT,           1, 1), iCNT];
-      sgAddressBook.Cells[sgAddressBook.ReturnColumn(TAddressBook.DIVISION,        1, 1), sgAddressBook.RowCount - 1 + OffSet]:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fDIVISION,        1, 1), iCNT];
-      sgAddressBook.Cells[sgAddressBook.ReturnColumn(TAddressBook.COCODE,          1, 1), sgAddressBook.RowCount - 1 + OffSet]:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCO_CODE,         1, 1), iCNT];
-      { EMPTY FIELDS }
-      sgAddressBook.Cells[sgAddressBook.ReturnColumn(TAddressBook.EMAILS,          1, 1), sgAddressBook.RowCount - 1 + OffSet]:='';
-      sgAddressBook.Cells[sgAddressBook.ReturnColumn(TAddressBook.PHONE_NUMBERS,   1, 1), sgAddressBook.RowCount - 1 + OffSet]:='';
-      sgAddressBook.Cells[sgAddressBook.ReturnColumn(TAddressBook.CONTACT,         1, 1), sgAddressBook.RowCount - 1 + OffSet]:='';
-      sgAddressBook.Cells[sgAddressBook.ReturnColumn(TAddressBook.ESTATEMENTS,     1, 1), sgAddressBook.RowCount - 1 + OffSet]:='';
-      { NEXT ROW }
-      sgAddressBook.RowCount:=sgAddressBook.RowCount + 1;
-    end;
-  end;
-  { -------------------------------------------------------------------------------------------------------------------------------------------- UNINITIALIZE }
-  if (sgAgeView.Selection.Bottom - sgAgeView.Selection.Top) = 0 then
-  begin
-    MsgCall(mcInfo, 'Customer has been addedd to the Address Book tabsheet.');
-  end else
-  begin
-    MsgCall(mcInfo, 'Customers have been addedd to the Address Book tabsheet.');
-  end;
+  AddToAddrBook(sgAgeView);
   Screen.Cursor:=crDefault;
 end;
-
-////////////////////////////// refactor!!!
-
-
-
 
 { --------------------------------------------------------------------------------------------------------------------------- ADD FOLLOW-UP TO SELECTED GROUP }
 procedure TMainForm.Action_GroupFollowUpClick(Sender: TObject);

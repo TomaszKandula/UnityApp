@@ -1193,7 +1193,7 @@ object MainForm: TMainForm
     Margins.Top = 0
     Margins.Right = 10
     Margins.Bottom = 0
-    ActivePage = TabSheet1
+    ActivePage = TabSheet3
     Align = alClient
     DoubleBuffered = True
     Font.Charset = DEFAULT_CHARSET
@@ -9909,7 +9909,7 @@ object MainForm: TMainForm
           AlignWithMargins = True
           Left = 17
           Top = 15
-          Width = 678
+          Width = 369
           Height = 91
           Margins.Left = 17
           Margins.Top = 15
@@ -9921,7 +9921,7 @@ object MainForm: TMainForm
           object hShapeActionPAB: TShape
             Left = 0
             Top = 17
-            Width = 625
+            Width = 369
             Height = 72
             Brush.Style = bsClear
             Pen.Color = clGradientInactiveCaption
@@ -10050,8 +10050,8 @@ object MainForm: TMainForm
           end
           object Cap13: TShape
             Left = 0
-            Top = 0
-            Width = 625
+            Top = 4
+            Width = 369
             Height = 19
             Brush.Color = 15918295
             Pen.Color = clSkyBlue
@@ -10070,11 +10070,11 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object Text66: TLabel
-            Left = 86
+            Left = 90
             Top = 65
-            Width = 48
+            Width = 35
             Height = 13
-            Caption = 'Save New'
+            Caption = 'Update'
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clBlack
             Font.Height = -11

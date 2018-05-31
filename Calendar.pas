@@ -56,7 +56,7 @@ var
 implementation
 
 uses
-  Model, Settings;
+  Model, Settings, Worker;
 
 {$R *.dfm}
 
@@ -154,46 +154,15 @@ end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------- SET GIVEN FOLLOW UP }
 procedure TCalendarForm.SetFollowUp(SelectedDate: TDate; SelectedCUID: string; Row: integer);
-var
-  GenText:    TDataTables;
-  Condition:  string;
 begin
-  GenText:=TDataTables.Create(MainForm.DbConnect);
-  try
-    GenText.OpenTable(TblGeneral);
-    Condition:=TGeneral.CUID + EQUAL + QuotedStr(SelectedCUID);
-    GenText.DataSet.Filter:=Condition;
-    { UPDATE }
-    if not (GenText.DataSet.RecordCount = 0) then
-    begin
-      GenText.CleanUp;
-      { DEFINE COLUMNS, VALUES AND CONDITIONS }
-      GenText.Columns.Add(TGeneral.STAMP);      GenText.Values.Add(DateTimeToStr(Now));              GenText.Conditions.Add(Condition);
-      GenText.Columns.Add(TGeneral.USER_ALIAS); GenText.Values.Add(UpperCase(MainForm.WinUserName)); GenText.Conditions.Add(Condition);
-      GenText.Columns.Add(TGeneral.FOLLOWUP);   GenText.Values.Add(DateToStr(SelectedDate));         GenText.Conditions.Add(Condition);
-      { EXECUTE }
-      GenText.UpdateRecord(TblGeneral);
-      { DISPLAY NOW ON STRING GRID }
-      MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1), Row]:=DateToStr(SelectedDate);
-    end
-    else
-    { INSERT NEW }
-    begin
-      GenText.Columns.Clear;
-      GenText.Values.Clear;
-      { DEFINE COLUMNS AND VALUES }
-      GenText.Columns.Add(TGeneral.CUID);       GenText.Values.Add(SelectedCUID);
-      GenText.Columns.Add(TGeneral.STAMP);      GenText.Values.Add(DateTimeToStr(Now));
-      GenText.Columns.Add(TGeneral.USER_ALIAS); GenText.Values.Add(UpperCase(MainForm.WinUserName));
-      GenText.Columns.Add(TGeneral.FIXCOMMENT); GenText.Values.Add('');
-      GenText.Columns.Add(TGeneral.FOLLOWUP);   GenText.Values.Add(DateToStr(SelectedDate));
-      { EXECUTE }
-      GenText.InsertInto(TblGeneral);
-      MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1), Row]:=DateToStr(SelectedDate);
-    end;
-  finally
-    GenText.Free;
-  end;
+  TTGeneralComment.Create(
+                           SelectedCUID,
+                           strNULL,
+                           DateToStr(SelectedDate),
+                           strNULL,
+                           strNULL
+                         );
+  MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1), Row]:=DateToStr(SelectedDate);
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------- APPROVE SELECTED DATE }

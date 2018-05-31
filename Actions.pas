@@ -305,7 +305,6 @@ procedure TActionsForm.UpdateDetails(CustPerson: TEdit; CustMail: TEdit; CustPho
 var
   AddrBook  : TDataTables;
   Phones    : string;
-  iCNT      : integer;
 begin
   AddrBook:=TDataTables.Create(MainForm.DbConnect);
   try
@@ -590,33 +589,33 @@ begin
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------- CLEAR FOLLOW-UP FROM GIVEN CUSTOMER }
-procedure TActionsForm.ClearFollowUp; //to worker
+procedure TActionsForm.ClearFollowUp;
 var
   GeneralText: TDataTables;
   Condition:   string;
 begin
   if MainForm.MsgCall(mcQuestion2, 'Are you sure you want to clear this follow up?') = ID_YES then
   begin
-    GeneralText:=TDataTables.Create(MainForm.DbConnect);
-    try
-      Condition:=TGeneral.CUID + EQUAL + QuotedStr(CUID);
-      GeneralText.Columns.Add(TGeneral.FOLLOWUP);
-      GeneralText.Values.Add(SPACE);
-      GeneralText.Conditions.Add(Condition);
-      GeneralText.UpdateRecord(TblGeneral);
-      MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1), MainForm.sgAgeView.Row]:='';
-    finally
-      GeneralText.Free;
-    end;
+    TTGeneralComment.Create(
+                             CUID,
+                             strNULL,
+                             SPACE,
+                             strNULL,
+                             strNULL
+                           );
+    MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1), MainForm.sgAgeView.Row]:='';
   end;
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------- SAVE SOME CUSTOMER DETAILS }
-procedure TActionsForm.SaveCustomerDetails; //to worker
+procedure TActionsForm.SaveCustomerDetails;
+(*
 var
   AddrBook:  TDataTables;
   Condition: string;
+*)
 begin
+(*
   AddrBook:=TDataTables.Create(MainForm.DbConnect);
   try
     AddrBook.OpenTable(TblAddressbook);
@@ -638,6 +637,7 @@ begin
   finally
     AddrBook.Free;
   end;
+*)
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------ SAVE GENERAL COMMENT INTO DATABASE }
