@@ -71,6 +71,12 @@ type
 { ------------------------------------------------------------- ! TSTRINGGRID CLASS ! ----------------------------------------------------------------------- }
 type
   TStringGrid = class(Grids.TStringGrid)
+  public
+    var OpenThdId:  integer;
+    var SqlColumns: TLists;
+    var UpdatedRowsHolder: TIntigers;
+    procedure SetUpdatedRow(Row: integer);
+    procedure RecordRowsAffected;
   published
     procedure CopyCutPaste(mode: integer);
     procedure DelEsc(mode: integer; pCol, pRow: integer);
@@ -90,9 +96,6 @@ type
     function  ImportCSV(DialogBox: TOpenDialog; Delimiter: string): boolean;
     function  ExportCSV(DialogBox: TSaveDialog; Delimiter: string): boolean;
     procedure SelectAll;
-  public
-    var OpenThdId:  integer;
-    var SqlColumns: TLists;
   end;
 
 { ----------------------------------------------------------------- ! MAIN CLASS ! -------------------------------------------------------------------------- }
@@ -359,7 +362,6 @@ type                                                            (* GUI | MAIN TH
     Action_Cut: TMenuItem;
     Action_DelRow: TMenuItem;
     N10: TMenuItem;
-    Action_AddRow: TMenuItem;
     N11: TMenuItem;
     Action_ShowAsIs: TMenuItem;
     Action_ShowMyEntries: TMenuItem;
@@ -580,7 +582,6 @@ type                                                            (* GUI | MAIN TH
     procedure btnExportABMouseLeave(Sender: TObject);
     procedure btnReloadClick(Sender: TObject);
     procedure sgListSectionKeyPress(Sender: TObject; var Key: Char);
-    procedure sgListValueKeyPress(Sender: TObject; var Key: Char);
     procedure sgListValueClick(Sender: TObject);
     procedure sgListSectionClick(Sender: TObject);
     procedure Edit_PASSWORDKeyPress(Sender: TObject; var Key: Char);
@@ -590,7 +591,6 @@ type                                                            (* GUI | MAIN TH
     procedure sgListSectionMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
     procedure sgListValueMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
     procedure sgListValueMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-    procedure sgAddressBookKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure sgListValueKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure sgListSectionKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure btnCloseABClick(Sender: TObject);
@@ -670,7 +670,6 @@ type                                                            (* GUI | MAIN TH
     procedure Action_PasteClick(Sender: TObject);
     procedure Action_DelRowClick(Sender: TObject);
     procedure BookPopupPopup(Sender: TObject);
-    procedure Action_AddRowClick(Sender: TObject);
     procedure Action_ShowAsIsClick(Sender: TObject);
     procedure Action_ShowMyEntriesClick(Sender: TObject);
     procedure sgAddressBookSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
@@ -712,7 +711,6 @@ type                                                            (* GUI | MAIN TH
     procedure Action_GroupFollowUpClick(Sender: TObject);
     procedure Action_INF4_FilterClick(Sender: TObject);
     procedure Action_Gr3_FilterClick(Sender: TObject);
-    procedure sgAddressBookKeyPress(Sender: TObject; var Key: Char);
     procedure Action_HideSummaryClick(Sender: TObject);
     procedure Action_ExportCSVClick(Sender: TObject);
     procedure Action_SelectAgeViewClick(Sender: TObject);
@@ -744,6 +742,10 @@ type                                                            (* GUI | MAIN TH
     procedure btnSupplierRejectClick(Sender: TObject);
     procedure btnUnlockClick(Sender: TObject);
     procedure btnPassUpdateClick(Sender: TObject);
+    procedure sgAddressBookKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure sgAddressBookKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure sgListSectionKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure sgListValueKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     { ------------------------------------------------------------- ! HELPERS ! ----------------------------------------------------------------------------- }
   private
     { GENERAL }
@@ -809,7 +811,7 @@ type                                                            (* GUI | MAIN TH
     procedure  SetGridRowHeights;
     procedure  SetGridThumbSizes;
     function   Explode(Text: string; SourceDelim: char): string;
-    function   Implode(Text: TStringList; TargetDelim: char): string;
+    function   Implode(Text: Classes.TStrings; TargetDelim: char): string;
   protected
     { PROCESS ALL WINDOWS MESSAGES }
     procedure  WndProc(var msg: Messages.TMessage); override;
@@ -1244,6 +1246,46 @@ end;
 
 { ##################################################### ! EXTENSION OF 'TSTRINGGRID' CLASS ! ################################################################ }
 
+{ ---------------------------------------------------------------------------------------------------------------------------------- REGISTER ROWS FOR UPDATE }
+procedure TStringGrid.SetUpdatedRow(Row: integer);
+var
+  Rows: integer;
+begin
+  if Row = 0 then
+  begin
+    UpdatedRowsHolder:=nil;
+    Exit;
+  end;
+  if UpdatedRowsHolder = nil then
+  begin
+    SetLength(UpdatedRowsHolder, 1);
+    UpdatedRowsHolder[0]:=Row;
+  end
+  else
+  begin
+    Rows:=high(UpdatedRowsHolder);
+    Rows:=Rows + 2;
+    SetLength(UpdatedRowsHolder, Rows);
+    UpdatedRowsHolder[Rows - 1]:=Row;
+  end;
+end;
+
+{ ------------------------------------------------------------------------------------------------------------------------------------ REGISTER ROWS AFFECTED }
+procedure TStringGrid.RecordRowsAffected;
+var
+  iCNT: integer;
+begin
+  if Selection.Top - Selection.Bottom = 0 then
+  begin
+    SetUpdatedRow(Row);
+  end
+  else
+  begin
+    for iCNT:=Selection.Top to Selection.Bottom do
+      SetUpdatedRow(iCNT);
+  end;
+end;
+
 { ---------------------------------------------------------------------------------------------------------------------- PASTE, CUT, COPY TO/FROM STRING GRID }
 procedure TStringGrid.CopyCutPaste(mode: integer);
 { AVAILABLE MODES:                 }
@@ -1258,6 +1300,8 @@ var
   L:           integer;
   R:           integer;
   C:           integer;
+  RTop:        integer;
+  CLeft:       integer;
   Sel:         TGridRect;
   Row, Col:    integer;
   TxtFromSel:  string;
@@ -1269,6 +1313,9 @@ begin
     GRect:=Selection;
     L    :=GRect.Left;
     R    :=GRect.Top;
+    RTop :=R;
+    CLeft:=L;
+    C    :=0;
     S    :=ClipBoard.AsText;
     R    :=R - 1;
     { GO 'BREAK_LINE' BY 'BREAK_LINE' }
@@ -1288,6 +1335,7 @@ begin
       Delete(S, 1,Pos(CR, S));
       if Copy(S, 1, 1) = LF then Delete(S, 1, 1);
     end;
+    Selection:=TGridRect(Rect(CLeft, RTop, C + 1, R));
   end;
   { ----------------------------------------------------------------------------------------------------------------------- COPY OR CUT DATA FROM STRING GRID }
   if (mode = adCopy) or (mode = adCut) then
@@ -2260,9 +2308,19 @@ begin
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------- CONVERT TO ONE LINE STRING }
-function TMainForm.Implode(Text: TStringList; TargetDelim: char): string;
+function TMainForm.Implode(Text: Classes.TStrings; TargetDelim: char): string;
+var
+  iCNT:  integer;
+  Str:   string;
 begin
-  Result:=StringReplace(Text.Text, CRLF, TargetDelim, [rfReplaceAll]);
+  for iCNT:=0 to Text.Count do
+  begin
+    if iCNT < Text.Count then
+      Str:=Str + Text.Strings[iCNT] + TargetDelim
+        else
+          Str:=Str + Text.Strings[iCNT];
+  end;
+  Result:=Str;
 end;
 
 { ############################################################## ! MAIN THREAD EVENTS ! ##################################################################### }
@@ -2758,24 +2816,13 @@ begin
       else
         Action_DelRow.Enabled:=True;
 
-  { DISABLE "CUT" AND "PASTE" IF SELECTED ALREADY SAVED ITEM }
-  if sgAddressBook.Cells[0, sgAddressBook.Row] <> '' then
-  begin
-    Action_Cut.Enabled  :=False;
-    Action_Paste.Enabled:=False;
-  end
-  else
-  begin
-    Action_Cut.Enabled  :=True;
-    Action_Paste.Enabled:=True;
-  end;
-
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------------- CUT }
 procedure TMainForm.Action_CutClick(Sender: TObject);
 begin
   sgAddressBook.CopyCutPaste(adCut);
+  sgAddressBook.RecordRowsAffected;
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------------ COPY }
@@ -2788,18 +2835,7 @@ end;
 procedure TMainForm.Action_PasteClick(Sender: TObject);
 begin
   sgAddressBook.CopyCutPaste(adPaste);
-end;
-
-{ ------------------------------------------------------------------------------------------------------------------------- ADD EMPTY ROW TO THE ADDRESS BOOK }
-procedure TMainForm.Action_AddRowClick(Sender: TObject);
-var
-  jCNT:  integer;
-begin
-  sgAddressBook.RowCount:=sgAddressBook.RowCount + 1;
-  sgAddressBook.Row:=sgAddressBook.RowCount - 1;
-  sgAddressBook.Cells[0, sgAddressBook.RowCount - 1]:='';
-  sgAddressBook.Cells[1, sgAddressBook.RowCount - 1]:=MainForm.WinUserName;
-  for jCNT:=2 to sgAddressBook.ColCount - 1 do sgAddressBook.Cells[jCNT, sgAddressBook.RowCount - 1]:='';
+  sgAddressBook.RecordRowsAffected;
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------- DELETE GIVEN CUID FROM DB }
@@ -2842,13 +2878,27 @@ end;
 { ------------------------------------------------------------------------------------------------------------------------------------------ SHOW ALL ENTRIES }
 procedure TMainForm.Action_ShowAsIsClick(Sender: TObject);
 begin
-  TTAddressBook.Create(adOpenAll, sgAddressBook);
+  TTAddressBook.Create(
+                        adOpenAll,
+                        sgAddressBook,
+                        '',
+                        '',
+                        '',
+                        ''
+                      );
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------ SHOW USER ENTRIES ONLY }
 procedure TMainForm.Action_ShowMyEntriesClick(Sender: TObject);
 begin
-  TTAddressBook.Create(adOpenForUser, sgAddressBook);
+  TTAddressBook.Create(
+                        adOpenForUser,
+                        sgAddressBook,
+                        '',
+                        '',
+                        '',
+                        ''
+                      );
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------ SET COLUMN WIDTH }
@@ -2998,7 +3048,14 @@ end;
 procedure TMainForm.Action_AddToBookClick(Sender: TObject);
 begin
   if ConnLastError = 0 then
-    TTAddressBook.Create(adInsert, sgAgeView)
+    TTAddressBook.Create(
+                          adInsert,
+                          sgAgeView,
+                          '',
+                          '',
+                          '',
+                          ''
+                        )
       else
         MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
 end;
@@ -3668,16 +3725,32 @@ end;
 
 procedure TMainForm.sgAddressBookSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
 begin
-  if ACol = 1 then
+  if
+     (
+       ACol = sgAddressBook.ReturnColumn(TAddressBook.EMAILS, 1, 1)
+     )
+     or
+     (
+       ACol = sgAddressBook.ReturnColumn(TAddressBook.PHONE_NUMBERS, 1, 1)
+     )
+     or
+     (
+       ACol = sgAddressBook.ReturnColumn(TAddressBook.CONTACT, 1, 1)
+     )
+     or
+     (
+       ACol = sgAddressBook.ReturnColumn(TAddressBook.ESTATEMENTS, 1, 1)
+     )
+  then
+  begin
+    CanSelect:=True;
+    sgAddressBook.Options:=sgAddressBook.Options + [goRangeSelect];
+  end
+  else
   begin
     CanSelect:=False;
     sgAddressBook.Options:=sgAddressBook.Options - [goRangeSelect];
-  end
-    else
-      begin
-        CanSelect:=True;
-        sgAddressBook.Options:=sgAddressBook.Options + [goRangeSelect];
-      end;
+  end;
 end;
 
 procedure TMainForm.DetailsGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
@@ -3876,7 +3949,7 @@ end;
 
 { ------------------------------------------------------------ ! EDIT AGE VIEW COLUMN ! --------------------------------------------------------------------- }
 
-{ ------------------------------------------------------------------------------------------------------------------------------------------ EDIT FREE COLUMN }
+{ ----------------------------------------------------------------------------------------------------------------------------------------------- ON KEY DOWN }
 procedure TMainForm.sgAgeViewKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   { ALLOW COPYING }
@@ -3909,6 +3982,7 @@ begin
   end;
 end;
 
+{ ------------------------------------------------------------------------------------------------------------------------------------------------- ON KEY UP }
 procedure TMainForm.sgAgeViewKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   { DELETE GIVEN RECORD }
@@ -3928,82 +4002,101 @@ begin
   if Key = VK_ESCAPE then sgAgeView.Options:=sgAgeView.Options - [goEditing];
 end;
 
-////////////// REFACTOR!!!!
+{ ------------------------------------------------------------ ! EDIT ADDRESS BOOK  ! ----------------------------------------------------------------------- }
 
-{ ------------------------------------------------------------------------------------------------------------------ ADDRESS BOOK | RESTRICT TELEPHONE COLUMN }
-procedure TMainForm.sgAddressBookKeyPress(Sender: TObject; var Key: Char);
+{ ----------------------------------------------------------------------------------------------------------------------------------------------- ON KEY DOWN }
+procedure TMainForm.sgAddressBookKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-//  if sgAddressBook.Col = sgAddressBook.ReturnColumn(TAddressBook.PHONE_NUMBERS, 1, 1) then
-//    if (not (CharInSet(Key, ['0'..'9', ';', BACKSPACE]))) then Key:=#0;
+  if Key = VK_RETURN then
+  begin
+    sgAddressBook.DelEsc(adESC, sgAddressBook.Col, sgAddressBook.Row);
+    sgAddressBook.Options:=sgAddressBook.Options - [goEditing];
+    sgAddressBook.SetUpdatedRow(sgAddressBook.Row);
+  end;
+  if Key = VK_DELETE then
+  begin
+    sgAddressBook.DelEsc(adDEL, sgAddressBook.Col, sgAddressBook.Row);
+    sgAddressBook.SetUpdatedRow(sgAddressBook.Row);
+  end;
 end;
 
-{ --------------------------------------------------------------------------------------------------------------------------- ADDRESS BOOK | PASTE, CUT, COPY }
-procedure TMainForm.sgAddressBookKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-(*
-var
-  DataTables: TDataTables;
-*)
+{ ------------------------------------------------------------------------------------------------------------------------------------------------- ON KEY UP }
+procedure TMainForm.sgAddressBookKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-(*
-  { "READ ONLY" USERS ARE NOT ALLOWED TO MAKE CHANGES }
+
   if AccessLevel = acReadOnly then
   begin
     MsgCall(mcWarn, 'You don''t have permission to edit Address Book records.');
     Exit;
   end;
-  { FIRST COLUMN ARE NOT EDITABLE }
-  if (sgAddressBook.Col = 1) then Exit;
-  { CALL "SAVE NEW" IF "CTRL + S" IS PRESSED }
-  if (Key = 115) and (Shift = [ssCtrl]) then TTAddressBook.Create(adUpdate, sgAddressBook);
-  { COPY, PASTE, CUT }
+
+  if
+      (
+        Key = VK_F2
+      )
+      or
+      (
+        (
+          sgAddressBook.Col = sgAddressBook.ReturnColumn(TAddressBook.EMAILS, 1, 1)
+        )
+        or
+        (
+          sgAddressBook.Col = sgAddressBook.ReturnColumn(TAddressBook.PHONE_NUMBERS, 1, 1)
+        )
+        or
+        (
+          sgAddressBook.Col = sgAddressBook.ReturnColumn(TAddressBook.CONTACT, 1, 1)
+        )
+        or
+        (
+          sgAddressBook.Col = sgAddressBook.ReturnColumn(TAddressBook.ESTATEMENTS, 1, 1)
+        )
+      )
+      and
+      (
+        Key <> VK_RETURN
+      )
+  then
+    sgAddressBook.Options:=sgAddressBook.Options + [goEditing];
+
+  if Key = VK_ESCAPE then
+  begin
+    sgAddressBook.DelEsc(adESC, sgAddressBook.Col, sgAddressBook.Row);
+    sgAddressBook.Options:=sgAddressBook.Options - [goEditing];
+  end;
+
   if (Key = 67) and (Shift = [ssCtrl]) then sgAddressBook.CopyCutPaste(adCopy);
-  if (Key = 86) and (Shift = [ssCtrl]) and (sgAddressBook.Cells[0, sgAddressBook.Row] <> '') then sgAddressBook.CopyCutPaste(adPaste);
-  if (Key = 88) and (Shift = [ssCtrl]) and (sgAddressBook.Cells[0, sgAddressBook.Row] <> '') then sgAddressBook.CopyCutPaste(adCut);
-  if Key = 46 then sgAddressBook.DelEsc(1, sgAddressBook.Col, sgAddressBook.Row);
-  if Key = 27 then
+
+  if (Key = 86) and (Shift = [ssCtrl]) then
   begin
-    sgAddressBook.DelEsc(0, sgAddressBook.Col, sgAddressBook.Row);
-    sgAddressBook.Options:=sgAddressBook.Options - [goEditing];
+    sgAddressBook.CopyCutPaste(adPaste);
+    sgAddressBook.RecordRowsAffected;
   end;
-  { UPDATE SQL DATABASE TABLE ON ENTER }
-  if Key = 13 then
+
+  if (Key = 88) and (Shift = [ssCtrl]) then
   begin
-    { LP COLUMN CANNOT BE EMPTY }
-    if not (sgAddressBook.Cells[0, sgAddressBook.Row] = '') then
-    begin
-      { CONNECT AND UPDATE }
-      DataTables:=TDataTables.Create(DbConnect);
-      try
-        { GET USER VALUE AND COLUMN NAME }
-        DataTables.CleanUp;
-        DataTables.Columns.Add(sgAddressBook.Cells[sgAddressBook.Col, 0]);
-        DataTables.Values.Add(DataTables.CleanStr(sgAddressBook.Cells[sgAddressBook.Col, sgAddressBook.Row], False));
-        DataTables.Conditions.Add(TAddressBook.SCUID + EQUAL + DataTables.CleanStr(sgAddressBook.Cells[2, sgAddressBook.Row], True));
-        DataTables.UpdateRecord(TblAddressbook);
-      finally
-        DataTables.Free;
-      end;
-    end;
-    sgAddressBook.Options:=sgAddressBook.Options - [goEditing];
+    sgAddressBook.CopyCutPaste(adCut);
+    sgAddressBook.RecordRowsAffected;
   end;
-  { ALLOW EDITING | F2 }
-  if Key = VK_F2 then sgAddressBook.Options:=sgAddressBook.Options + [goEditing];
-*)
+
 end;
 
-////////////// REFACTOR!!!!
-
 { -------------------------------------------------------------------------------------------------------------------------------------- UPDATE SECTION VALUE }
-procedure TMainForm.sgListSectionKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TMainForm.sgListSectionKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   if Text50.Font.Style = [fsBold] then
   begin
     if (Key = 86) and (Shift = [ssCtrl]) then sgListSection.CopyCutPaste(adPaste);
     if (Key = 88) and (Shift = [ssCtrl]) then sgListSection.CopyCutPaste(adCut);
   end;
+
   if (Key = 67) and (Shift = [ssCtrl]) then sgListSection.CopyCutPaste(adCopy);
   if (Key = 46) and (Text50.Font.Style = [fsBold]) then sgListSection.DelEsc(adDEL, sgListSection.Col, sgListSection.Row);
-  if Key = 27 then sgListSection.DelEsc(adESC, sgListSection.Col, sgListSection.Row);
+end;
+
+procedure TMainForm.sgListSectionKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  if Key = VK_RETURN then sgListSection.DelEsc(adESC, sgListSection.Col, sgListSection.Row);
 end;
 
 procedure TMainForm.sgListSectionKeyPress(Sender: TObject; var Key: Char);
@@ -4013,7 +4106,7 @@ begin
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------ UPDATE VALUE KEY }
-procedure TMainForm.sgListValueKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TMainForm.sgListValueKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   if Text50.Font.Style = [fsBold] then
   begin
@@ -4022,13 +4115,11 @@ begin
   end;
   if (Key = 67) and (Shift = [ssCtrl]) then sgListValue.CopyCutPaste(adCopy);
   if (Key = 46) and (Text50.Font.Style = [fsBold]) then sgListValue.DelEsc(adDEL, sgListValue.Col, sgListValue.Row);
-  if Key = 27 then sgListValue.DelEsc(adESC, sgListValue.Col, sgListValue.Row);
 end;
 
-procedure TMainForm.sgListValueKeyPress(Sender: TObject; var Key: Char);
+procedure TMainForm.sgListValueKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  { FORCE CAPITAL CHARACTERS IF <ENTER> IS PRESSED }
-  (* if Key = #13 then sgListValue.Cells[1, sgListValue.Row]:=UpperCase(sgListValue.Cells[1, sgListValue.Row]); OFF *)
+  if Key = VK_RETURN then sgListValue.DelEsc(adESC, sgListValue.Col, sgListValue.Row);
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------- CALL PASSWORD UNLOCK }
@@ -4781,16 +4872,38 @@ end;
 procedure TMainForm.btnOpenABClick(Sender: TObject);
 begin
   if ConnLastError = 0 then
-    TTAddressBook.Create(adOpenAll, sgAddressBook)
-      else
-        MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+  begin
+    sgAddressBook.SetUpdatedRow(0);
+    TTAddressBook.Create(
+                          adOpenAll,
+                          sgAddressBook,
+                          '',
+                          '',
+                          '',
+                          ''
+                        )
+  end
+  else
+    MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------ USER ADDRESS BOOK | UPDATE RECORDS }
 procedure TMainForm.btnUpdateABClick(Sender: TObject);
 begin
+  if not(sgAddressBook.Visible) then
+  begin
+    MsgCall(mcWarn, 'Please open Address Book first.');
+    Exit;
+  end;
   if ConnLastError = 0 then
-    TTAddressBook.Create(adUpdate, sgAddressBook)
+    TTAddressBook.Create(
+                          adUpdate,
+                          sgAddressBook,
+                          '',
+                          '',
+                          '',
+                          ''
+                        )
       else
         MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
 end;
@@ -4800,6 +4913,7 @@ procedure TMainForm.btnCloseABClick(Sender: TObject);
 begin
   if MsgCall(mcQuestion2, 'Are you sure you want to close address book?') = IDYES then
   begin
+    sgAddressBook.SetUpdatedRow(0);
     sgAddressBook.ClearAll(2, 1, 1, True);
     sgAddressBook.Visible:=False;
   end;
@@ -4808,7 +4922,19 @@ end;
 { ---------------------------------------------------------------------------------------------------------------------------- USER ADDRESS BOOK | EXPORT ALL }
 procedure TMainForm.btnExportABClick(Sender: TObject);
 begin
-  TTAddressBook.Create(adExport, sgAddressBook);
+  if not(sgAddressBook.Visible) then
+  begin
+    MsgCall(mcWarn, 'Please open Address Book first.');
+    Exit;
+  end;
+  TTAddressBook.Create(
+                        adExport,
+                        sgAddressBook,
+                        '',
+                        '',
+                        '',
+                        ''
+                      );
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------- SECTION LIST | ADD SECTION }

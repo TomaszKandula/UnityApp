@@ -114,13 +114,17 @@ type
   protected
     procedure Execute; override;
   private
-    var FLock:  TCriticalSection;
-    var FMode:  integer;
-    var FGrid:  TStringGrid;
-    var FIDThd: integer;
+    var FLock:       TCriticalSection;
+    var FMode:       integer;
+    var FGrid:       TStringGrid;
+    var FIDThd:      integer;
+    var FContact:    string;
+    var FEstatement: string;
+    var FPhones:     string;
+    var FSCUID:      string;
   public
     property    IDThd:  integer read FIDThd;
-    constructor Create(ActionMode: integer; Grid: TStringGrid);
+    constructor Create(ActionMode: integer; Grid: TStringGrid; SCUID, Contact, Estatement, Phones: string);
     destructor  Destroy; override;
     function    Read     : boolean;
     function    Update   : boolean;
@@ -203,7 +207,7 @@ implementation
 uses
   Model, DataBase, Settings, UAC, Mailer, AgeView, Transactions, Tracker, Actions;
 
-{ ############################################################ ! SEPARATE CPU THREADS ! ##################################################################### }
+{ ############################################################# ! SEPARATE CPU THREADS ! #################################################################### }
 
 { ################################################################ ! NETWORK SCANNER ! ###################################################################### }
 
@@ -565,13 +569,17 @@ end;
 { ############################################################### ! ADRESS BOOK ! ########################################################################### }
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE }
-constructor TTAddressBook.Create(ActionMode: integer; Grid: TStringGrid);
+constructor TTAddressBook.Create(ActionMode: integer; Grid: TStringGrid; SCUID, Contact, Estatement, Phones: string);
 begin
   inherited Create(False);
-  FLock :=TCriticalSection.Create;
-  FMode :=ActionMode;
-  FGrid :=Grid;
-  FIDThd:=0;
+  FLock      :=TCriticalSection.Create;
+  FMode      :=ActionMode;
+  FGrid      :=Grid;
+  FContact   :=Contact;
+  FEstatement:=Estatement;
+  FPhones    :=Phones;
+  FSCUID     :=SCUID;
+  FIDThd     :=0;
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------------- RELEASE }
@@ -594,14 +602,14 @@ begin
       else
       begin
         LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot open Address Book.');
-        SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PCHAR('Read function of Address Book has failed. Please contact IT support.')));
+        MainForm.ExecMessage(False, mcError, 'Read function of Address Book has failed. Please contact IT support.');
       end;
     end;
     { ------------------------------------------------------------------------------------------------------------------------------------------------ UPDATE }
     if FMode = adUpdate then
     begin
       if Update then
-        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: The Address Book has been saved successfully.')
+        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: The Address Book has been updated successfully.')
           else
             LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot update data in Address Book.');
     end;
@@ -673,77 +681,84 @@ end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------------------------- WRITE }
 function TTAddressBook.Update: boolean;
-(*
 var
-  DataTables: TDataTables;
+  Book:       TDataTables;
   iCNT:       integer;
-  Start:      integer;
-  TotalRows:  integer;
-*)
+  Condition:  string;
 begin
   Result:=False;
-(*
-  { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-  Result   :=False;
-  Start    :=0;
-  TotalRows:=0;
-  DataTables:=TDataTables.Create(MainForm.DbConnect);
+  Book:=TDataTables.Create(MainForm.DbConnect);
   try
-    { FREEZE STRING GRID }
-    FGrid.Freeze(True);
-    { COLUMN SELECTION }
-    DataTables.Columns.Add(TAddressBook.USER_ALIAS);
-    DataTables.Columns.Add(TAddressBook.SCUID);       { CONSTRAINT UNIQUE }
-    DataTables.Columns.Add(TAddressBook.CUSTOMER_NUMBER);
-    DataTables.Columns.Add(TAddressBook.CUSTOMER_NAME);
-    DataTables.Columns.Add(TAddressBook.EMAILS);
-    DataTables.Columns.Add(TAddressBook.ESTATEMENTS);
-    DataTables.Columns.Add(TAddressBook.PHONE_NUMBERS);
-    DataTables.Columns.Add(TAddressBook.CONTACT);
-    DataTables.Columns.Add(TAddressBook.COCODE);
-    DataTables.Columns.Add(TAddressBook.AGENT);
-    DataTables.Columns.Add(TAddressBook.DIVISION);
-    { PERFORM INSERT ON NEWLY ADDED ROWS ONLY }
-    for iCNT:=1 to FGrid.RowCount - 1 do
+    { UPDATE FROM ADDRESS BOOK STRING GRID }
+    if FGrid <> nil then
     begin
-      if (FGrid.Cells[0, iCNT] = '') and (FGrid.Cells[1, iCNT] <> '') and (FGrid.Cells[2, iCNT] <> '') then
+      if FGrid.UpdatedRowsHolder <> nil then
       begin
-        Start:=iCNT;
-        TotalRows:=(FGrid.RowCount - 1) - Start;
-        Break;
+        for iCNT:=low(FGrid.UpdatedRowsHolder) to high(FGrid.UpdatedRowsHolder) do
+        begin
+          Condition:=TAddressBook.SCUID + EQUAL + FGrid.Cells[FGrid.ReturnColumn(TAddressBook.SCUID, 1, 1), FGrid.UpdatedRowsHolder[iCNT]];
+          { COLUMNS }
+          Book.Columns.Add(TAddressBook.EMAILS);
+          Book.Columns.Add(TAddressBook.PHONE_NUMBERS);
+          Book.Columns.Add(TAddressBook.CONTACT);
+          Book.Columns.Add(TAddressBook.ESTATEMENTS);
+          { VALUES }
+          Book.Values.Add(FGrid.Cells[FGrid.ReturnColumn(TAddressBook.EMAILS,        1, 1), FGrid.UpdatedRowsHolder[iCNT]]);
+          Book.Values.Add(FGrid.Cells[FGrid.ReturnColumn(TAddressBook.PHONE_NUMBERS, 1, 1), FGrid.UpdatedRowsHolder[iCNT]]);
+          Book.Values.Add(FGrid.Cells[FGrid.ReturnColumn(TAddressBook.CONTACT,       1, 1), FGrid.UpdatedRowsHolder[iCNT]]);
+          Book.Values.Add(FGrid.Cells[FGrid.ReturnColumn(TAddressBook.ESTATEMENTS,   1, 1), FGrid.UpdatedRowsHolder[iCNT]]);
+          { CONDITIONS }
+          Book.Conditions.Add(Condition);
+          Book.Conditions.Add(Condition);
+          Book.Conditions.Add(Condition);
+          Book.Conditions.Add(Condition);
+        end;
+        Result:=Book.UpdateRecord(TblAddressbook);
+        { SUCCESS }
+        if Result then
+        begin
+          FGrid.SetUpdatedRow(0);
+          MainForm.ExecMessage(False, mcInfo, 'Address Book has been updated succesfully!');
+        end
+        else
+        { ERROR DURING POST }
+        begin
+          MainForm.ExecMessage(False, mcError, 'Cannot update Address Book. Please contact IT support.');
+        end;
+      end
+      else
+      { NO CHANGES WITHIN ADDRESS BOOK STRING GRID }
+      begin
+        MainForm.ExecMessage(False, mcWarn, 'Nothing to update. Please make changes first and try again.');
       end;
     end;
-    { IF NEW ROWS EXISTS, THEN SAVE }
-    if Start > 0 then
+    { UPDATE FROM ACTION LOG VIEW }
+    if FGrid = nil then
     begin
-      try
-        DataTables.ClearSQL;
-        DataTables.StrSQL:=DataTables.GridToSql(FGrid, TblAddressbook, DataTables.ColumnsToList(DataTables.Columns, enQuotesOff), Start, 1);
-        if not (DataTables.ExecSQL = nil) then
-        begin
-          { RE-DO LIST POSITION }
-          for iCNT:=1 to FGrid.RowCount - 1 do FGrid.Cells[0, iCNT]:= IntToStr(iCNT);
-          Result:=True;
-        end;
-        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Address Book has been saved. Number of new lines written: ' + IntToStr(TotalRows) + '.');
-        MainForm.ExecMessage(False, mcInfo, 'Address Book has been saved successfully!');
-      except
-        on E: Exception do
-        begin
-          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot add new record(s). Error has been thrown: ' + E.Message + '.');
-          MainForm.ExecMessage(False, mcError, 'Cannot add new record(s). Please contact IT support.');
-        end;
+      Condition:=TAddressBook.SCUID + EQUAL + QuotedStr(FSCUID);
+      { COLUMNS }
+      Book.Columns.Add(TAddressBook.PHONE_NUMBERS);
+      Book.Columns.Add(TAddressBook.CONTACT);
+      Book.Columns.Add(TAddressBook.ESTATEMENTS);
+      { VALUES }
+      Book.Values.Add(FPhones);
+      Book.Values.Add(FContact);
+      Book.Values.Add(FEstatement);
+      { CONDITIONS }
+      Book.Conditions.Add(Condition);
+      Book.Conditions.Add(Condition);
+      Book.Conditions.Add(Condition);
+      { EXECUTE }
+      Result:=Book.UpdateRecord(TblAddressbook);
+      { ENDING }
+      if Result then
+        MainForm.ExecMessage(False, mcInfo, 'Address Book has been updated succesfully!')
+          else
+            MainForm.ExecMessage(False, mcError, 'Cannot update Address Book. Please contact IT support.');
       end;
-    end
-    else
-    begin
-      MainForm.ExecMessage(False, mcWarn, 'No new records have beed found. Process has been stopped.');
-    end;
   finally
-    FGrid.Freeze(False);
-    DataTables.Free;
+    Book.Free;
   end;
-*)
 end;
 
 { ---------------------------------------------------------------------------------------------------------------------- ADD SELECTED ITEM(S) TO ADDRESS BOOK }

@@ -2801,7 +2801,9 @@ object MainForm: TMainForm
         Align = alClient
         BevelOuter = bvNone
         Color = clWhite
+        DoubleBuffered = False
         ParentBackground = False
+        ParentDoubleBuffered = False
         TabOrder = 2
         object ImgLoadingAgeView: TImage
           AlignWithMargins = True
@@ -13269,7 +13271,7 @@ object MainForm: TMainForm
           OnDblClick = sgAddressBookDblClick
           OnDrawCell = sgAddressBookDrawCell
           OnKeyDown = sgAddressBookKeyDown
-          OnKeyPress = sgAddressBookKeyPress
+          OnKeyUp = sgAddressBookKeyUp
           OnMouseWheelDown = sgAddressBookMouseWheelDown
           OnMouseWheelUp = sgAddressBookMouseWheelUp
           OnSelectCell = sgAddressBookSelectCell
@@ -17758,6 +17760,7 @@ object MainForm: TMainForm
             OnDrawCell = sgListSectionDrawCell
             OnKeyDown = sgListSectionKeyDown
             OnKeyPress = sgListSectionKeyPress
+            OnKeyUp = sgListSectionKeyUp
             OnMouseWheelDown = sgListSectionMouseWheelDown
             OnMouseWheelUp = sgListSectionMouseWheelUp
             OnSelectCell = sgListSectionSelectCell
@@ -17807,7 +17810,7 @@ object MainForm: TMainForm
             OnClick = sgListValueClick
             OnDrawCell = sgListValueDrawCell
             OnKeyDown = sgListValueKeyDown
-            OnKeyPress = sgListValueKeyPress
+            OnKeyUp = sgListValueKeyUp
             OnMouseWheelDown = sgListValueMouseWheelDown
             OnMouseWheelUp = sgListValueMouseWheelUp
             ColWidths = (
@@ -21856,11 +21859,6 @@ object MainForm: TMainForm
     end
     object N10: TMenuItem
       Caption = '-'
-    end
-    object Action_AddRow: TMenuItem
-      Caption = 'Add row'
-      Enabled = False
-      OnClick = Action_AddRowClick
     end
     object Action_DelRow: TMenuItem
       Caption = 'Delete row'

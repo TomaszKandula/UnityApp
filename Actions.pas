@@ -569,35 +569,15 @@ end;
 
 { -------------------------------------------------------------------------------------------------------------------------------- SAVE SOME CUSTOMER DETAILS }
 procedure TActionsForm.SaveCustomerDetails;
-(*
-var
-  AddrBook:  TDataTables;
-  Condition: string;
-*)
 begin
-(*
-  AddrBook:=TDataTables.Create(MainForm.DbConnect);
-  try
-    AddrBook.OpenTable(TblAddressbook);
-    Condition:=TAddressBook.SCUID + EQUAL + QuotedStr(SCUID);
-    AddrBook.DataSet.Filter:=Condition;
-    if not (AddrBook.DataSet.RecordCount = 0) then
-    begin
-      AddrBook.CleanUp;
-      { UPDATE DATA }
-      AddrBook.Columns.Add(TAddressBook.CONTACT);        AddrBook.Values.Add(Cust_Person.Text); AddrBook.Conditions.Add(Condition);
-      AddrBook.Columns.Add(TAddressBook.ESTATEMENTS);    AddrBook.Values.Add(Cust_Mail.Text);   AddrBook.Conditions.Add(Condition);
-      AddrBook.Columns.Add(TAddressBook.PHONE_NUMBERS);  AddrBook.Values.Add(Cust_Phone.Text);  AddrBook.Conditions.Add(Condition);
-      { EXECUTE }
-      if not (AddrBook.UpdateRecord(TblAddressbook)) then
-        MainForm.MsgCall(mcWarn, 'Cannot save customer details. Please contact IT support.')
-          else
-            MainForm.MsgCall(mcInfo, 'Changes have been updated successfully.');
-    end;
-  finally
-    AddrBook.Free;
-  end;
-*)
+  TTAddressBook.Create(
+                        adUpdate,
+                        nil,
+                        SCUID,
+                        Cust_Person.Text,
+                        Cust_Mail.Text,
+                        MainForm.Implode(Cust_Phone.Items, deSemicolon)
+                      );
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------ SAVE GENERAL COMMENT INTO DATABASE }
