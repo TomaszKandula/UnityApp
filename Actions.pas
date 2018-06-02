@@ -140,7 +140,6 @@ type
     procedure MakePhoneCall;
     procedure LoadCustomer(Direction: integer);
     procedure SendAccountStatement(Layout: integer; Salut: string; Mess: string; IsOverdue: boolean);
-    procedure RegisterAction;
     procedure ClearFollowUp;
     procedure SaveCustomerDetails;
     procedure SaveGeneralComment;
@@ -489,66 +488,21 @@ begin
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------ SEND ACCOUNT STATEMENT }
-procedure TActionsForm.SendAccountStatement(Layout: integer; Salut: string; Mess: string; IsOverdue: boolean); //to worker
-var
-  Statement:   TDocument;
-  AppSettings: TSettings;
+procedure TActionsForm.SendAccountStatement(Layout: integer; Salut: string; Mess: string; IsOverdue: boolean);
 begin
-  { PROCEED }
-  Statement    :=TDocument.Create;
-  AppSettings  :=TSettings.Create;
-  Screen.Cursor:=crSQLWait;
-  try
-    { SETUP CUSTOMER AND COMPANY }
-    Statement.CUID    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUID,          1, 1), MainForm.sgAgeView.Row];
-    Statement.CustName:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME, 1, 1), MainForm.sgAgeView.Row];
-    Statement.CoCode  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCO_CODE,       1, 1), MainForm.sgAgeView.Row];
-    Statement.Branch  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fAGENT,         1, 1), MainForm.sgAgeView.Row];
-    Statement.SCUID   :=SCUID;
-    { SET OPEN ITEMS GRID }
-    Statement.OpenItems:=OpenItemsGrid;
-    { GET HTML LAYOUT }
-    Statement.DocType  :=dcStatement;
-    Statement.CustSalut:=Salut;
-    Statement.CustMess :=Mess;
-    Statement.IsOverdue:=IsOverdue;
-    { USE FULLY PRE-DEFINED TEMPLATE }
-    if Layout = maDefined then
-    begin
-      Statement.HTMLLayout:=Statement.LoadTemplate(AppSettings.FLayoutDir + AppSettings.TMIG.ReadString(VariousLayouts, 'STATEMENT', '') + '.html');
-    end;
-    { USE PRE-DEFINED TEMPLATE WITH TWO CUSTOM FILEDS }
-    if Layout = maCustom then
-    begin
-      Statement.HTMLLayout:=Statement.LoadTemplate(AppSettings.FLayoutDir + AppSettings.TMIG.ReadString(VariousLayouts, 'CUSTSTATEMENT', '') + '.html');
-    end;
-    { SEND STATEMENT }
-    Statement.MailSubject:='Account Statement - ' + Statement.CustName + ' - ' + CustNumber;
-    if Statement.SendDocument then
-      MainForm.ExecMessage(False, mcInfo, 'Account Statement has been sent successfully!')
-        else
-          MainForm.ExecMessage(False, mcError, 'Account Statement cannot be sent. Please contact IT support.');
-    RegisterAction;
-  finally
-    AppSettings.Free;
-    Statement.Free;
-    Screen.Cursor:=crDefault;
-  end;
-end;
-
-{ -------------------------------------------------------------------------------------------------------------------------- REGISTER THIS ACTION IN DATABASE }
-procedure TActionsForm.RegisterAction;
-begin
-  TTDailyComment.Create(
-                         CUID,
-                         False,
-                         False,
-                         0,
-                         strNULL,
-                         False,
-                         False,
-                         True
-                       );
+  TTSendAccountStatement.Create(
+                                 Layout,
+                                 Salut,
+                                 Mess,
+                                 IsOverdue,
+                                 OpenItemsGrid,
+                                 SCUID,
+                                 MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUID,            1, 1), MainForm.sgAgeView.Row],
+                                 MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), MainForm.sgAgeView.Row],
+                                 MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), MainForm.sgAgeView.Row],
+                                 MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCO_CODE,         1, 1), MainForm.sgAgeView.Row],
+                                 MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fAGENT,           1, 1), MainForm.sgAgeView.Row]
+                               );
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------- CLEAR FOLLOW-UP FROM GIVEN CUSTOMER }
@@ -896,7 +850,6 @@ begin
   { ASK USER BEFORE SENDING THE EMAIL }
   if MainForm.MsgCall(mcQuestion2, 'Are you absolutely sure that you really want it to be sent, right now?') = IDNO then Exit;
   SendAccountStatement(maDefined, '', '', False);
-  RegisterAction;
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------- CALL CUSTOMER }

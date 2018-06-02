@@ -85,7 +85,6 @@ begin
     ActionsForm.SendAccountStatement(maCustom, Text_Salut.Text, Text_Message.Text, True)
       else
         ActionsForm.SendAccountStatement(maCustom, Text_Salut.Text, Text_Message.Text, False);
-  ActionsForm.RegisterAction;
 end;
 
 { ---------------------------------------------------------------------------------------------------------------------------------------------- CLOSE WINDOW }

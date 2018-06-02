@@ -200,6 +200,31 @@ type
     destructor  Destroy; override;
   end;
 
+{ ------------------------------------------------------------------------------------------------------------------------------------ SEND ACCOUNT STATEMENT }
+type
+  TTSendAccountStatement = class(TThread)
+  protected
+    procedure Execute; override;
+  private
+    var FLock:         TCriticalSection;
+    var FIDThd:        integer;
+    var FLayout:       integer;
+    var FSalut:        string;
+    var FMess:         string;
+    var FIsOverdue:    boolean;
+    var FCUID:         string;
+    var FCustName:     string;
+    var FCoCode:       string;
+    var FBranch:       string;
+    var FSCUID:        string;
+    var FOpenItems:    TStringGrid;
+    var FCustNumber:   string;
+  public
+    property    IDThd:  integer read FIDThd;
+    constructor Create(Layout: integer; Salut: string; Mess: string; IsOverdue: boolean; OpenItems: TStringGrid; SCUID: string; CUID: string; CustName: string; CustNumber: string; CoCode: string; Branch: string);
+    destructor  Destroy; override;
+  end;
+
 { ------------------------------------------------------------- ! IMPLEMENTATION ZONE ! --------------------------------------------------------------------- }
 
 implementation
@@ -1126,13 +1151,13 @@ end;
 constructor TTGeneralComment.Create(CUID: string; FixedComment: string; FollowUp: string; Free1: string; Free2: string);
 begin
   inherited Create(False);
-  FLock :=TCriticalSection.Create;
-  FIDThd:=0;
-  FCUID:=CUID;
+  FLock        :=TCriticalSection.Create;
+  FIDThd       :=0;
+  FCUID        :=CUID;
   FFixedComment:=FixedComment;
-  FFollowUp:=FollowUp;
-  FFree1:=Free1;
-  FFree2:=Free2;
+  FFollowUp    :=FollowUp;
+  FFree1       :=Free1;
+  FFree2       :=Free2;
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------------- RELEASE }
@@ -1261,4 +1286,88 @@ begin
   FreeOnTerminate:=True;
 end;
 
+{ ########################################################### ! SEND ACCOUNT STATEMENT ! #################################################################### }
+
+{ ------------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE }
+constructor TTSendAccountStatement.Create(Layout: integer; Salut: string; Mess: string; IsOverdue: boolean; OpenItems: TStringGrid; SCUID: string; CUID: string; CustName: string; CustNumber: string; CoCode: string; Branch: string);
+begin
+  inherited Create(False);
+  FLock      :=TCriticalSection.Create;
+  FIDThd     :=0;
+  FLayout    :=Layout;
+  FSalut     :=Salut;
+  FMess      :=Mess;
+  FIsOverdue :=IsOverdue;
+  FOpenItems :=OpenItems;
+  FSCUID     :=SCUID;
+  FCUID      :=CUID;
+  FCustName  :=CustName;
+  FCustNumber:=CustNumber;
+  FCoCode    :=CoCode;
+  FBranch    :=Branch;
+end;
+
+{ --------------------------------------------------------------------------------------------------------------------------------------------------- RELEASE }
+destructor TTSendAccountStatement.Destroy;
+begin
+  FLock.Free;
+end;
+
+{ ------------------------------------------------------------------------------------------------------------------------------------ SEND ACCOUNT STATEMENT }
+procedure TTSendAccountStatement.Execute;
+var
+  Statement:   TDocument;
+  AppSettings: TSettings;
+begin
+  FIDThd:=CurrentThread.ThreadID;
+  FLock.Acquire;
+  try
+    Statement  :=TDocument.Create;
+    AppSettings:=TSettings.Create;
+    try
+      { SETUP DETAILS }
+      Statement.SCUID    :=FSCUID;
+      Statement.CUID     :=FCUID;
+      Statement.CustName :=FCustName;
+      Statement.CoCode   :=FCoCode;
+      Statement.Branch   :=FBranch;
+      Statement.CustSalut:=FSalut;
+      Statement.CustMess :=FMess;
+      Statement.IsOverdue:=FIsOverdue;
+      Statement.OpenItems:=FOpenItems;
+      Statement.DocType  :=dcStatement;  { FIXED FLAG }
+
+      { USE FULLY PRE-DEFINED TEMPLATE }
+      if FLayout = maDefined then
+      begin
+        Statement.HTMLLayout:=Statement.LoadTemplate(AppSettings.FLayoutDir + AppSettings.TMIG.ReadString(VariousLayouts, 'STATEMENT', '') + '.html');
+      end;
+
+      { USE PRE-DEFINED TEMPLATE WITH TWO CUSTOM FILEDS }
+      if FLayout = maCustom then
+      begin
+        Statement.HTMLLayout:=Statement.LoadTemplate(AppSettings.FLayoutDir + AppSettings.TMIG.ReadString(VariousLayouts, 'CUSTSTATEMENT', '') + '.html');
+      end;
+
+      { SEND STATEMENT }
+      Statement.MailSubject:='Account Statement - ' + FCustName + ' - ' + FCustNumber;
+      if Statement.SendDocument then
+        MainForm.ExecMessage(False, mcInfo, 'Account Statement has been sent successfully!')
+          else
+            MainForm.ExecMessage(False, mcError, 'Account Statement cannot be sent. Please contact IT support.');
+
+      { REGISTER ACTION }
+      TTDailyComment.Create(FCUID, False, False, 0, 'Account Statement has been sent.', False, False, True);
+
+    finally
+      AppSettings.Free;
+      Statement.Free;
+    end;
+  finally
+    FLock.Release;
+  end;
+  FreeOnTerminate:=True;
+end;
+
 end.
+

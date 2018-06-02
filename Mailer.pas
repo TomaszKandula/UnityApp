@@ -374,7 +374,7 @@ begin
     MailBcc  :='';
     MailRt   :='';
     Result   :=SendNow;
-    { DEBUG LINE }
+    { DEBUG LINES }
     //Result:=True;
     //SaveOutput('d:\test.html'); Result:=True;
   end;
