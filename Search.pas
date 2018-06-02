@@ -23,9 +23,7 @@ uses
 { --------------------------------------------------------------- ! MAIN CLASS ! ---------------------------------------------------------------------------- }
 type
   TSearchForm = class(TForm)
-    AppMain: TShape;
     btnSearch: TSpeedButton;
-    EditSearch: TLabeledEdit;
     CaseSensitive: TCheckBox;
     ShowAll: TCheckBox;
     btnUnhide: TSpeedButton;
@@ -33,6 +31,12 @@ type
     GroupOptions: TGroupBox;
     CheckUp: TRadioButton;
     CheckDown: TRadioButton;
+    PanelEditBox: TPanel;
+    PanelEditSearch: TPanel;
+    EditSearch: TEdit;
+    TextSearch: TLabel;
+    PanelMain: TPanel;
+    TextWarn: TLabel;
     procedure btnSearchClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -40,9 +44,9 @@ type
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
   private
-    var   FoundRow   :  integer;
-    var   IsNext     :  boolean;
-    var   Groupping  :  array of integer;
+    var FoundRow   :  integer;
+    var IsNext     :  boolean;
+    var Groupping  :  array of integer;
   public
     var SGrid     :  TStringGrid;
     var SColName  :  string;
@@ -111,18 +115,19 @@ procedure TSearchForm.Search;
 
 begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
+  SGrid.Freeze(True);
   SearchColumn:=0;
   if not (CaseSensitive.Checked) then SearchString:=UpperCase(EditSearch.Text);
   if (CaseSensitive.Checked)     then SearchString:=EditSearch.Text;
 
-  { CANNOT BE EMPTY }
+  { ----------------------------------------------------------------------------------------------------------------------------------------- CANNOT BE EMPTY }
   if (SearchString = '') or (SearchString = SPACE) then
   begin
     MainForm.MsgCall(mcWarn, 'Cannot search empty string. Please provide with customer name or customer number and try again.');
     Exit;
   end;
 
-  { CHECK IF USER PROVIDED NUMBER }
+  { --------------------------------------------------------------------------------------------------------------------------- CHECK IF USER PROVIDED NUMBER }
   IsNumber:=True;
   try
     StrToInt64(EditSearch.Text);
@@ -130,18 +135,18 @@ begin
     IsNumber:=False;
   end;
 
-  { ASSIGN PROPER COLUMN NUMBER FROM AGE VIEW }
+  { --------------------------------------------------------------------------------------------------------------- ASSIGN PROPER COLUMN NUMBER FROM AGE VIEW }
   if (IsNumber)     then SearchColumn:=SGrid.ReturnColumn(SColNumber, 1, 1);
   if not (IsNumber) then SearchColumn:=SGrid.ReturnColumn(SColName,   1, 1);
 
-  { SEARCH DIRECTION | UP }
+  { ----------------------------------------------------------------------------------------------------------------------------------- SEARCH DIRECTION | UP }
   if CheckUp.Checked then
   begin
     if (IsNext) and (FoundRow > SearchEnd) then FoundRow:=FoundRow - 1;
     SearchEnd:=1;
   end;
 
-  { SEARCH DIRECTION | DOWN }
+  { --------------------------------------------------------------------------------------------------------------------------------- SEARCH DIRECTION | DOWN }
   if CheckDown.Checked then
   begin
     if (IsNext) and (FoundRow < SearchEnd) then FoundRow:=FoundRow + 1;
@@ -150,7 +155,7 @@ begin
 
   SetLength(Groupping, 0);
 
-  { SEARCH UP }
+  { ----------------------------------------------------------------------------------------------------------------------------------------------- SEARCH UP }
   if CheckUp.Checked then
   begin
     for iCNT:=FoundRow downto SearchEnd do
@@ -175,7 +180,7 @@ begin
     end;
   end;
 
-  { SEARCH DOWN }
+  { --------------------------------------------------------------------------------------------------------------------------------------------- SEARCH DOWN }
   if CheckDown.Checked then
   begin
     for iCNT:=FoundRow to SearchEnd do
@@ -200,7 +205,7 @@ begin
     end;
   end;
 
-  { HIGHLIGHT FOUND ROW }
+  { ------------------------------------------------------------------------------------------------------------------------------------- HIGHLIGHT FOUND ROW }
   if not (ShowAll.Checked) then
   begin
     if not (FoundRow = 0) then
@@ -212,15 +217,15 @@ begin
         MainForm.MsgCall(mcInfo, 'Cannot find specified customer.');
   end;
 
-  { SHOW ALL FOUND }
+  { ------------------------------------------------------------------------------------------------------------------------------------------ SHOW ALL FOUND }
   if (ShowAll.Checked) then
   begin
-    { MAKE SURE ALL ROWS ARE VISIBLE }
-    SGrid.DefaultRowHeight:=17;
+    { MAKE SURE THAT ALL ROWS ARE VISIBLE }
+    SGrid.DefaultRowHeight:=sgRowHeight;
     if High(Groupping) > 0 then
     begin
       for iCNT:=0 to SGrid.RowCount - 1 do
-        if Groupping[iCNT] <> iCNT then SGrid.RowHeights[iCNT]:=-1;
+        if Groupping[iCNT] <> iCNT then SGrid.RowHeights[iCNT]:=sgRowHidden;
       btnUnhide.Enabled:=True;
     end
     else
@@ -229,6 +234,9 @@ begin
       btnUnhide.Enabled:=False;
     end;
   end;
+
+  { -------------------------------------------------------------------------------------------------------------------------------------------- UNINITIALIZE }
+  SGrid.Freeze(False);
 
 end;
 
@@ -245,6 +253,7 @@ begin
     AppSettings.Free;
   end;
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
+  PanelEditSearch.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
   SColName  :='';
   SColNumber:='';
 end;
@@ -266,11 +275,7 @@ procedure TSearchForm.btnUnhideClick(Sender: TObject);
 begin
   if (SColName <> '') and (SColNumber <> '') and (SGrid <> nil) then
   begin
-    { RETURN FILTER STATE }
-    FilterForm.FGrid   :=SGrid;
-    FilterForm.FColName:=SColName;
-    FilterForm.FilterPrep;
-    FilterForm.btnFilterClick(self);
+    MainForm.Action_RemoveFiltersClick(Self);
     btnUnhide.Enabled:=False;
   end;
 end;
@@ -280,7 +285,7 @@ procedure TSearchForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   FoundRow:=0;
   IsNext:=False;
-  EditSearch.Text:='';
+  (* EditSearch.Text:=''; *)
   CheckUp.Checked:=False;
   CheckDown.Checked:=True;
 end;

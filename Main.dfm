@@ -17784,8 +17784,6 @@ object MainForm: TMainForm
           Color = clWhite
           ParentBackground = False
           TabOrder = 1
-          ExplicitLeft = 382
-          ExplicitWidth = 525
           object sgListValue: TStringGrid
             AlignWithMargins = True
             Left = 2

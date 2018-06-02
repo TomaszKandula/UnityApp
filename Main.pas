@@ -2614,7 +2614,7 @@ begin
     DataTables.Free;
   end;
 
-  { --- ! SUPPLIER FORM DEMO ! --- }
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// SUPPLIER FORM DEMO ! TO BE REMOVED !
 
   Vendor:=TSupplierForm.Create(DbConnect);
   try
@@ -2622,6 +2622,8 @@ begin
   finally
     Vendor.Free;
   end;
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// SUPPLIER FORM DEMO ! TO BE REMOVED !
 
   { ----------------------------------------------------- ! APPLICATION VERSION & USER SID ! ---------------------------------------------------------------- }
 
@@ -2868,11 +2870,13 @@ end;
 { ---------------------------------------------------------------------------------------------------------------------------------------- OPEN SEARCH WINDOW }
 procedure TMainForm.Action_SearchBookClick(Sender: TObject);
 begin
+(*
   { SETUP AND CALL WINDOW }
   SearchForm.SGrid     :=MainForm.sgAddressBook;
   SearchForm.SColName  :=TAddressBook.CUSTOMER_NAME;
   SearchForm.SColNumber:=TAddressBook.CUSTOMER_NUMBER;
   WndCall(SearchForm, stModal);
+*)
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------ SHOW ALL ENTRIES }
@@ -3005,6 +3009,9 @@ begin
 end;
 
 { ---------------------------------------------------------------------------------------------------------------------- ADD TO INVOICE TRACKER | WINDOW CALL }
+
+(* OFF TEMPORARLY *)
+
 procedure TMainForm.Action_TrackerClick(Sender: TObject);
 var
   iCNT: integer;
@@ -3163,7 +3170,7 @@ end;
 { ---------------------------------------------------------------------------------------------------------------------------------------- REMOVE ALL FILTERS }
 procedure TMainForm.Action_RemoveFiltersClick(Sender: TObject);
 var
-  iCNT:  integer;
+  iCNT:    integer;
   AgeView: TAgeView;
 begin
   sgAgeView.Freeze(True);
@@ -4617,6 +4624,8 @@ begin
   btnSupplier.Font.Style:=[fsBold];
 end;
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// SUPPLIER FORM DEMO ! TO BE REMOVED !
+
 { ------------------------------------------------------------------------------------------------------------------------------------------ SUPPLIER BUTTONS }
 procedure TMainForm.btnSupplierClearClick(Sender: TObject);
 begin
@@ -4719,6 +4728,8 @@ begin
     Vendor.Free;
   end;
 end;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// SUPPLIER FORM DEMO ! TO BE REMOVED !
 
 { -------------------------------------------------------------------------------------------------------------------------------------------- GO TO REPORT 1 }
 procedure TMainForm.btnReport1Click(Sender: TObject);

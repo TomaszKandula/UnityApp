@@ -14,9 +14,10 @@
 
 (* DEPENDENCIES *)
 
-{ E:\Projects\Unity Project\__Unity\__dependencies\Synopse Zip;    }
-{ E:\Projects\Unity Project\__Unity\__dependencies\BCrypt;         }
-{ E:\Projects\Unity Project\__Unity\__dependencies;                }
+{ ...Projects\Unity Project\__Unity\__dependencies\Synopse Zip;    }
+{ ...Projects\Unity Project\__Unity\__dependencies\CEF4Delphi;     }
+{ ...Projects\Unity Project\__Unity\__dependencies\BCrypt;         }
+{ ...Projects\Unity Project\__Unity\__dependencies;                }
 
 (* ALL APPLICATION CONSTANTS *)
 

@@ -290,12 +290,12 @@ begin
     end;
   end;
   { HIDE HELPER COLUMNS }
-  OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.Ad1,   1, 1)]:=-1;
-  OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.Ad2,   1, 1)]:=-1;
-  OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.Ad3,   1, 1)]:=-1;
-  OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.Pno,   1, 1)]:=-1;
-  OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.PArea, 1, 1)]:=-1;
-  OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.CUID,  1, 1)]:=-1;
+  OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.Ad1,   1, 1)]:=sgRowHidden;
+  OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.Ad2,   1, 1)]:=sgRowHidden;
+  OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.Ad3,   1, 1)]:=sgRowHidden;
+  OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.Pno,   1, 1)]:=sgRowHidden;
+  OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.PArea, 1, 1)]:=sgRowHidden;
+  OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.CUID,  1, 1)]:=sgRowHidden;
   { SORT VIA DUE DATE }
   OpenItemsDest.MSort(OpenItemsDest.ReturnColumn(TOpenitems.PmtStat, 1, 1), sdtINTEGER, True);
 end;
@@ -347,7 +347,7 @@ begin
     if not (DailyText.DataSet.EOF) then
     begin
       DailyText.SqlToGrid(Grid, DailyText.DataSet, False, True);
-      Grid.ColWidths[Grid.ReturnColumn(TDaily.FIXCOMMENT, 1, 1)]:=-1;
+      Grid.ColWidths[Grid.ReturnColumn(TDaily.FIXCOMMENT, 1, 1)]:=sgRowHidden;
     end;
   finally
     DailyText.Free;
