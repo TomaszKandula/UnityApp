@@ -18,19 +18,19 @@ unit Calendar;
 interface
 
 uses
-  Main, Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, ComCtrls, ExtCtrls, StdCtrls, DateUtils;
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, ComCtrls, ExtCtrls, StdCtrls, DateUtils, Main;
 
 { --------------------------------------------------------------- ! MAIN CLASS ! ---------------------------------------------------------------------------- }
 type
   TCalendarForm = class(TForm)
-    AppMain: TShape;
     MyCalendar: TMonthCalendar;
-    MainPanel: TPanel;
+    PanelActions: TPanel;
     DaysOne: TRadioButton;
     DaysThreen: TRadioButton;
     DaysSeven: TRadioButton;
-    CalendarPanel: TPanel;
-    Label1: TLabel;
+    PanelCalendar: TPanel;
+    Text: TLabel;
+    PanelClient: TPanel;
     procedure MyCalendarDblClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure DaysOneClick(Sender: TObject);
@@ -115,6 +115,9 @@ begin
   end;
   { DEFAULT DATE }
   SelectedDate:=NULLDATE;
+  { PANELS BORDERS }
+  PanelActions.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+  PanelCalendar.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------ RESET CHECKBOXES }

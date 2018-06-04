@@ -13,21 +13,25 @@
 { ----------------------------------------------------------------------------------------------------------------------------------------------------------- }
 unit ReportBug;
 
+(* NOTE: DO NOT PLACE 'MAIN' REFERENCE IN THE IMPLEMENTATION SECTION BUT IN THE INTERFACE SECTION. THIS IS NECESSARY DUE TO CLASS EXTENSIONS DEFINED IN MAIN *)
+
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, Buttons, ExtCtrls;
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, Buttons, ExtCtrls, Main;
 
 { ------------------------------------------------------------------ ! MAIN CLASS ! ------------------------------------------------------------------------- }
 type
   TReportForm = class(TForm)
-    AppMain: TShape;
     ReportMemo: TMemo;
     btnSendReport: TSpeedButton;
-    Text1: TLabel;
     Text2: TLabel;
     TotalWords: TLabel;
     btnCancel: TSpeedButton;
+    PanelClient: TPanel;
+    PanelReportMemo: TPanel;
+    PanelArea: TPanel;
+    PanelBottom: TPanel;
     procedure ReportMemoKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure btnSendReportClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -46,7 +50,7 @@ var
 implementation
 
 uses
-  Main, Mailer, Settings, Worker;
+  Mailer, Settings, Worker;
 
 {$R *.dfm}
 
@@ -64,6 +68,8 @@ begin
   finally
     AppSettings.Free;
   end;
+  { PANEL BORDERS }
+  PanelReportMemo.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------- SHOW WORD COUNT }
@@ -140,7 +146,7 @@ begin
     Mail.MailSubject:='Unity Bug Report from User: ' + UpperCase(MainForm.WinUserName);
     { PLAIN TEXT TO HTML TEMPLATE }
     Transfer        :=ReportMemo.Text;
-    Transfer        :=StringReplace(Transfer, CRLF, '<br>', [rfReplaceAll]);
+    Transfer        :=StringReplace(Transfer, CRLF, HTML_BR, [rfReplaceAll]);
     HTMLBody        :=Doc.LoadTemplate(AppSet.FLayoutDir + AppSet.TMIG.ReadString(VariousLayouts, 'BUGREPORT', '') + '.html');
     HTMLBody        :=StringReplace(HTMLBody, '{TEXT_HOLER}',  Transfer,       [rfReplaceAll]);
     HTMLBody        :=StringReplace(HTMLBody, '{APPNAME}',     AppName,        [rfReplaceAll]);

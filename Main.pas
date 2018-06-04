@@ -859,8 +859,8 @@ var
 implementation
 
 uses
-  Filter, Tracker, Invoices, Actions, Calendar, About, Search, Worker, Model, Settings, Database, UAC, AgeView, Transactions, ReportBug, Colors, EventLog,
-  Supplier, TicketList, uCEFApplication;
+  Filter, Tracker, Invoices, Actions, Calendar, About, Search, Worker, Model, Settings, Database, UAC, AgeView, Transactions, Colors, EventLog,
+  Supplier, TicketList, uCEFApplication, ReportBug, ViewSearch;
 
 {$R *.dfm}
 
@@ -2870,13 +2870,7 @@ end;
 { ---------------------------------------------------------------------------------------------------------------------------------------- OPEN SEARCH WINDOW }
 procedure TMainForm.Action_SearchBookClick(Sender: TObject);
 begin
-(*
-  { SETUP AND CALL WINDOW }
-  SearchForm.SGrid     :=MainForm.sgAddressBook;
-  SearchForm.SColName  :=TAddressBook.CUSTOMER_NAME;
-  SearchForm.SColNumber:=TAddressBook.CUSTOMER_NUMBER;
-  WndCall(SearchForm, stModal);
-*)
+  WndCall(ViewSearchForm, stModeless);
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------ SHOW ALL ENTRIES }
@@ -2885,6 +2879,7 @@ begin
   TTAddressBook.Create(
                         adOpenAll,
                         sgAddressBook,
+                        '',
                         '',
                         '',
                         '',
@@ -2901,7 +2896,8 @@ begin
                         '',
                         '',
                         '',
-                        ''
+                        '',
+                        WHERE + TAddressBook.USER_ALIAS + EQUAL + QuotedStr(MainForm.WinUserName)
                       );
 end;
 
@@ -3061,6 +3057,7 @@ begin
                           '',
                           '',
                           '',
+                          '',
                           ''
                         )
       else
@@ -3093,7 +3090,7 @@ begin
   FilterForm.FColName:=TSnapshots.fINF7;
   FilterForm.FOverdue:=TSnapshots.fOVERDUE;
   FilterForm.FGrid   :=MainForm.sgAgeView;
-  FilterForm.FFilterNum:=flt_INF7;
+  FilterForm.FFilterNum:=fltINF7;
   WndCall(FilterForm, stModal);
 end;
 
@@ -3103,7 +3100,7 @@ begin
   FilterForm.FColName  :=TSnapshots.fINF4;
   FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
   FilterForm.FGrid     :=MainForm.sgAgeView;
-  FilterForm.FFilterNum:=flt_INF4;
+  FilterForm.FFilterNum:=fltINF4;
   WndCall(FilterForm, stModal);
 end;
 
@@ -3113,7 +3110,7 @@ begin
   FilterForm.FColName  :=TSnapshots.fCO_CODE;
   FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
   FilterForm.FGrid     :=MainForm.sgAgeView;
-  FilterForm.FFilterNum:=flt_COCODE;
+  FilterForm.FFilterNum:=fltCOCODE;
   WndCall(FilterForm, stModal);
 end;
 
@@ -3123,7 +3120,7 @@ begin
   FilterForm.FColName  :=TSnapshots.fAGENT;
   FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
   FilterForm.FGrid     :=MainForm.sgAgeView;
-  FilterForm.FFilterNum:=flt_AGENT;
+  FilterForm.FFilterNum:=fltAGENT;
   WndCall(FilterForm, stModal);
 end;
 
@@ -3133,7 +3130,7 @@ begin
   FilterForm.FColName  :=TSnapshots.fDIVISION;
   FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
   FilterForm.FGrid     :=MainForm.sgAgeView;
-  FilterForm.FFilterNum:=flt_DIVISION;
+  FilterForm.FFilterNum:=fltDIVISION;
   WndCall(FilterForm, stModal);
 end;
 
@@ -3143,7 +3140,7 @@ begin
   FilterForm.FColName  :=TGeneral.fFOLLOWUP;
   FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
   FilterForm.FGrid     :=MainForm.sgAgeView;
-  FilterForm.FFilterNum:=flt_FOLLOWUP;
+  FilterForm.FFilterNum:=fltFOLLOWUP;
   WndCall(FilterForm, stModal);
 end;
 
@@ -3153,7 +3150,7 @@ begin
   FilterForm.FColName  :=TSnapshots.fGROUP3;
   FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
   FilterForm.FGrid     :=MainForm.sgAgeView;
-  FilterForm.FFilterNum:=flt_GR3;
+  FilterForm.FFilterNum:=fltGR3;
   WndCall(FilterForm, stModal);
 end;
 
@@ -3163,7 +3160,7 @@ begin
   FilterForm.FColName  :=TSnapshots.fFREE1;
   FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
   FilterForm.FGrid     :=MainForm.sgAgeView;
-  FilterForm.FFilterNum:=flt_Free1;
+  FilterForm.FFilterNum:=fltFree1;
   WndCall(FilterForm, stModal);
 end;
 
@@ -4891,6 +4888,7 @@ begin
                           '',
                           '',
                           '',
+                          '',
                           ''
                         )
   end
@@ -4910,6 +4908,7 @@ begin
     TTAddressBook.Create(
                           adUpdate,
                           sgAddressBook,
+                          '',
                           '',
                           '',
                           '',
@@ -4941,6 +4940,7 @@ begin
   TTAddressBook.Create(
                         adExport,
                         sgAddressBook,
+                        '',
                         '',
                         '',
                         '',

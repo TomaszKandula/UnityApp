@@ -530,7 +530,8 @@ begin
                         SCUID,
                         Cust_Person.Text,
                         Cust_Mail.Text,
-                        MainForm.Implode(Cust_Phone.Items, deSemicolon)
+                        MainForm.Implode(Cust_Phone.Items, deSemicolon),
+                        ''
                       );
 end;
 
@@ -848,7 +849,7 @@ end;
 procedure TActionsForm.btnAutoStatementClick(Sender: TObject);
 begin
   { ASK USER BEFORE SENDING THE EMAIL }
-  if MainForm.MsgCall(mcQuestion2, 'Are you absolutely sure that you really want it to be sent, right now?') = IDNO then Exit;
+  if MainForm.MsgCall(mcQuestion2, 'Are you absolutely sure you want to send it, right now?') = IDNO then Exit;
   SendAccountStatement(maDefined, '', '', False);
 end;
 

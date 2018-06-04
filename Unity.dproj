@@ -82,6 +82,9 @@
 			<DCCReference Include="PhoneList.pas">
 				<Form>PhoneListForm</Form>
 			</DCCReference>
+			<DCCReference Include="ViewSearch.pas">
+				<Form>ViewSearchForm</Form>
+			</DCCReference>
 			<BuildConfiguration Include="Release">
 				<Key>Cfg_2</Key>
 				<CfgParent>Base</CfgParent>
@@ -107,7 +110,7 @@
 						<VersionInfo Name="MajorVer">0</VersionInfo>
 						<VersionInfo Name="MinorVer">1</VersionInfo>
 						<VersionInfo Name="Release">0</VersionInfo>
-						<VersionInfo Name="Build">515</VersionInfo>
+						<VersionInfo Name="Build">516</VersionInfo>
 						<VersionInfo Name="Debug">False</VersionInfo>
 						<VersionInfo Name="PreRelease">True</VersionInfo>
 						<VersionInfo Name="Special">False</VersionInfo>
@@ -119,7 +122,7 @@
 					<VersionInfoKeys>
 						<VersionInfoKeys Name="CompanyName">Tomasz Kandula for DFDS Polska sp. z o.o.</VersionInfoKeys>
 						<VersionInfoKeys Name="FileDescription">Unity for Debt Management</VersionInfoKeys>
-						<VersionInfoKeys Name="FileVersion">0.1.0.515</VersionInfoKeys>
+						<VersionInfoKeys Name="FileVersion">0.1.0.516</VersionInfoKeys>
 						<VersionInfoKeys Name="InternalName">Unity</VersionInfoKeys>
 						<VersionInfoKeys Name="LegalCopyright">Tomasz Kandula/DFDS Polska sp. z o.o.</VersionInfoKeys>
 						<VersionInfoKeys Name="LegalTrademarks">Tomasz Kandula/DFDS Polska sp. z o.o.</VersionInfoKeys>

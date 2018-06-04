@@ -3,8 +3,8 @@ object SearchForm: TSearchForm
   Top = 0
   BorderStyle = bsToolWindow
   Caption = 'Unity - Search'
-  ClientHeight = 236
-  ClientWidth = 386
+  ClientHeight = 250
+  ClientWidth = 398
   Color = 15527148
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -22,23 +22,23 @@ object SearchForm: TSearchForm
   TextHeight = 13
   object PanelMain: TPanel
     AlignWithMargins = True
-    Left = 5
-    Top = 5
-    Width = 376
-    Height = 226
-    Margins.Left = 5
-    Margins.Top = 5
-    Margins.Right = 5
-    Margins.Bottom = 5
+    Left = 10
+    Top = 10
+    Width = 378
+    Height = 230
+    Margins.Left = 10
+    Margins.Top = 10
+    Margins.Right = 10
+    Margins.Bottom = 10
     Align = alClient
     BevelOuter = bvNone
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
-    ExplicitLeft = 53
-    ExplicitTop = 0
-    ExplicitWidth = 627
-    ExplicitHeight = 336
+    ExplicitLeft = 5
+    ExplicitTop = 5
+    ExplicitWidth = 376
+    ExplicitHeight = 226
     object btnSearch: TSpeedButton
       Left = 293
       Top = 188
@@ -83,7 +83,7 @@ object SearchForm: TSearchForm
       Width = 73
       Height = 25
       Cursor = crHandPoint
-      Caption = 'Unfold'
+      Caption = 'Unfold all'
       Enabled = False
       Flat = True
       OnClick = btnUnhideClick
@@ -119,7 +119,6 @@ object SearchForm: TSearchForm
         Color = clWhite
         ParentBackground = False
         TabOrder = 0
-        ExplicitWidth = 318
         object EditSearch: TEdit
           AlignWithMargins = True
           Left = 2
@@ -133,8 +132,6 @@ object SearchForm: TSearchForm
           Align = alClient
           BorderStyle = bsNone
           TabOrder = 0
-          ExplicitWidth = 307
-          ExplicitHeight = 26
         end
       end
     end
@@ -149,7 +146,7 @@ object SearchForm: TSearchForm
         Left = 7
         Top = 83
         Width = 149
-        Height = 21
+        Height = 13
         Caption = '*This will replace existing filter.'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clGray

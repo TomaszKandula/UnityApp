@@ -122,9 +122,10 @@ type
     var FEstatement: string;
     var FPhones:     string;
     var FSCUID:      string;
+    var FConditions: string;
   public
     property    IDThd:  integer read FIDThd;
-    constructor Create(ActionMode: integer; Grid: TStringGrid; SCUID, Contact, Estatement, Phones: string);
+    constructor Create(ActionMode: integer; Grid: TStringGrid; SCUID, Contact, Estatement, Phones: string; Conditions: string);
     destructor  Destroy; override;
     function    Read     : boolean;
     function    Update   : boolean;
@@ -594,7 +595,7 @@ end;
 { ############################################################### ! ADRESS BOOK ! ########################################################################### }
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE }
-constructor TTAddressBook.Create(ActionMode: integer; Grid: TStringGrid; SCUID, Contact, Estatement, Phones: string);
+constructor TTAddressBook.Create(ActionMode: integer; Grid: TStringGrid; SCUID, Contact, Estatement, Phones: string; Conditions: string);
 begin
   inherited Create(False);
   FLock      :=TCriticalSection.Create;
@@ -605,6 +606,7 @@ begin
   FPhones    :=Phones;
   FSCUID     :=SCUID;
   FIDThd     :=0;
+  FConditions:=Conditions;
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------------- RELEASE }
@@ -688,7 +690,7 @@ begin
     DataTables.Columns.Add(TAddressBook.AGENT);
     DataTables.Columns.Add(TAddressBook.DIVISION);
     { FILTER BY USER ALIAS IF GIVEN }
-    if FMode = adOpenForUser then DataTables.CustFilter:=WHERE + TAddressBook.USER_ALIAS + EQUAL + QuotedStr(MainForm.WinUserName);
+    if FMode = adOpenForUser then DataTables.CustFilter:=FConditions;
     DataTables.OpenTable(TblAddressbook);
     Result:=DataTables.SqlToGrid(FGrid, DataTables.DataSet, True, True);
   finally
@@ -977,9 +979,9 @@ var
   Condition:     string;
   Email:         string;
   CallEvent:     integer;
-  EmailReminder: string;
-  EmailAutoStat: string;
-  EmailManuStat: string;
+  EmailReminder: integer;
+  EmailAutoStat: integer;
+  EmailManuStat: integer;
 begin
   FIDThd:=CurrentThread.ThreadID;
   FLock.Acquire;
@@ -1023,23 +1025,26 @@ begin
         end;
         if FEmailReminder then
         begin
-          EmailReminder:=IntToStr(StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDaily.EMAIL_Reminder].Value), 0));
+          EmailReminder:=StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDaily.EMAIL_Reminder].Value), 0);
+          Inc(EmailReminder);
           DailyText.Columns.Add(TDaily.EMAIL_Reminder);
-          DailyText.Values.Add(EmailReminder);
+          DailyText.Values.Add(IntToStr(EmailReminder));
           DailyText.Conditions.Add(Condition);
         end;
         if FEmailAutoStat then
         begin
-          EmailAutoStat:=IntToStr(StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDaily.EMAIL_AutoStat].Value), 0));
+          EmailAutoStat:=StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDaily.EMAIL_AutoStat].Value), 0);
+          Inc(EmailAutoStat);
           DailyText.Columns.Add(TDaily.EMAIL_AutoStat);
-          DailyText.Values.Add(EmailAutoStat);
+          DailyText.Values.Add(IntToStr(EmailAutoStat));
           DailyText.Conditions.Add(Condition);
         end;
         if FEmailManuStat then
         begin
-          EmailManuStat:=IntToStr(StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDaily.EMAIL_ManuStat].Value), 0));
+          EmailManuStat:=StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDaily.EMAIL_ManuStat].Value), 0);
+          Inc(EmailManuStat);
           DailyText.Columns.Add(TDaily.EMAIL_ManuStat);
-          DailyText.Values.Add(EmailManuStat);
+          DailyText.Values.Add(IntToStr(EmailManuStat));
           DailyText.Conditions.Add(Condition);
         end;
         if not(FFixedComment = '') then
@@ -1352,12 +1357,16 @@ begin
       { SEND STATEMENT }
       Statement.MailSubject:='Account Statement - ' + FCustName + ' - ' + FCustNumber;
       if Statement.SendDocument then
+      begin
+        { REGISTER ACTION }
+        if FLayout = maDefined then TTDailyComment.Create(FCUID, False, False, 0, 'Automatic account statement has been sent.', False, True, False);
+        if FLayout = maCustom  then TTDailyComment.Create(FCUID, False, False, 0, 'Custom defined account statement has been sent.', False, False, True);
         MainForm.ExecMessage(False, mcInfo, 'Account Statement has been sent successfully!')
-          else
-            MainForm.ExecMessage(False, mcError, 'Account Statement cannot be sent. Please contact IT support.');
-
-      { REGISTER ACTION }
-      TTDailyComment.Create(FCUID, False, False, 0, 'Account Statement has been sent.', False, False, True);
+      end
+      else
+      begin
+        MainForm.ExecMessage(False, mcError, 'Account Statement cannot be sent. Please contact IT support.');
+      end;
 
     finally
       AppSettings.Free;

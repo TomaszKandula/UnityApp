@@ -5,7 +5,7 @@ object FilterForm: TFilterForm
   BorderIcons = [biSystemMenu]
   BorderStyle = bsToolWindow
   Caption = 'Unity'
-  ClientHeight = 378
+  ClientHeight = 408
   ClientWidth = 249
   Color = 15527148
   DoubleBuffered = True
@@ -29,7 +29,7 @@ object FilterForm: TFilterForm
     Left = 5
     Top = 5
     Width = 239
-    Height = 368
+    Height = 398
     Margins.Left = 5
     Margins.Top = 5
     Margins.Right = 5
@@ -39,20 +39,18 @@ object FilterForm: TFilterForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
-    ExplicitTop = 33
-    ExplicitWidth = 1039
-    ExplicitHeight = 407
+    ExplicitHeight = 368
     object btnFilter: TSpeedButton
       AlignWithMargins = True
-      Left = 5
-      Top = 338
-      Width = 229
+      Left = 10
+      Top = 333
+      Width = 219
       Height = 25
       Cursor = crHandPoint
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
-      Margins.Bottom = 5
+      Margins.Left = 10
+      Margins.Top = 10
+      Margins.Right = 10
+      Margins.Bottom = 10
       Align = alBottom
       Caption = 'Filter'
       Flat = True
@@ -89,12 +87,59 @@ object FilterForm: TFilterForm
       ExplicitTop = 376
       ExplicitWidth = 1039
     end
+    object btnRemove: TSpeedButton
+      AlignWithMargins = True
+      Left = 10
+      Top = 368
+      Width = 219
+      Height = 25
+      Cursor = crHandPoint
+      Margins.Left = 10
+      Margins.Top = 0
+      Margins.Right = 10
+      Margins.Bottom = 5
+      Align = alBottom
+      Caption = 'Remove'
+      Flat = True
+      Glyph.Data = {
+        36030000424D3603000000000000360000002800000010000000100000000100
+        1800000000000003000000000000000000000000000000000000FFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF758CE3B6
+        C2F0FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFDAE0F7889CE6FFFFFFFFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFFFF728AE23658D6D3DAF5FFFFFFFFFFFFFFFFFFDAE0
+        F74E6CDBE6EAF9FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEDF0FB4E
+        6CDB3D5ED7D7DEF6FFFFFFD7DEF64262D8AEBCEEFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFE8ECFA617CDF3F60D8A5B4EC4262D8728A
+        E2FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272727272727272FF
+        FFFFFCFCFE5F7ADE3255D64C6ADAF4F6FCFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFFFFFFFFF727272B8B8B8FFFFFFEDF0FB758CE33255D65874DD6680E0859A
+        E6F7F8FDFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFFBFCAF13F
+        60D83255D66B84E1F4F6FCFFFFFFC7D0F37990E3C9D2F3FFFFFFFFFFFFFFFFFF
+        FFFFFFFFFFFF727272FFFFFFA0B0EB4C6ADAB6C2F0FFFFFFFFFFFFFFFFFFFFFF
+        FFFFFFFFDFE4F8FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272B7B7B7FFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFFFC2C2C2727272727272727272BCBCBCFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFD3D3D373737372727272727272727272
+        7272CCCCCCFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFE0E0E0
+        767676727272727272727272727272727272747474DADADAFFFFFFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFEAEAEA7D7D7D72727272727272727272727272727272
+        7272727272797979E5E5E5FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF8A8A8A727272
+        727272727272727272727272727272727272727272727272808080FFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFF79797972727272727272727272727272727272727272
+        7272727272727272727272FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
+      Spacing = 15
+      OnClick = btnRemoveClick
+      ExplicitLeft = 0
+      ExplicitTop = 381
+      ExplicitWidth = 229
+    end
     object PanelListItems: TPanel
       AlignWithMargins = True
       Left = 5
       Top = 35
       Width = 229
-      Height = 293
+      Height = 283
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
@@ -104,15 +149,13 @@ object FilterForm: TFilterForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 0
-      ExplicitTop = 5
-      ExplicitWidth = 1029
-      ExplicitHeight = 228
+      ExplicitHeight = 293
       object FilterList: TCheckListBox
         AlignWithMargins = True
         Left = 2
         Top = 2
         Width = 225
-        Height = 289
+        Height = 279
         Cursor = crHandPoint
         Margins.Left = 2
         Margins.Top = 2
@@ -158,8 +201,7 @@ object FilterForm: TFilterForm
         ParentShowHint = False
         ShowHint = False
         TabOrder = 0
-        ExplicitWidth = 330
-        ExplicitHeight = 357
+        ExplicitHeight = 289
       end
     end
     object cbSelectAll: TCheckBox
@@ -179,8 +221,6 @@ object FilterForm: TFilterForm
       State = cbChecked
       TabOrder = 1
       OnClick = cbSelectAllClick
-      ExplicitTop = 3
-      ExplicitWidth = 1049
     end
   end
 end

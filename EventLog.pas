@@ -13,16 +13,21 @@
 { ----------------------------------------------------------------------------------------------------------------------------------------------------------- }
 unit EventLog;
 
+(* NOTE: DO NOT PLACE 'MAIN' REFERENCE IN THE IMPLEMENTATION SECTION BUT IN THE INTERFACE SECTION. THIS IS NECESSARY DUE TO CLASS EXTENSIONS DEFINED IN MAIN *)
+
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, ExtCtrls, StdCtrls, ComCtrls;
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, ExtCtrls, StdCtrls, ComCtrls, pngimage, Main;
 
 { ---------------------------------------------------------------- ! MAIN CLASS ! --------------------------------------------------------------------------- }
 type
   TEventForm = class(TForm)
     EventMemo: TMemo;
-    StatusBar: TStatusBar;
+    PanelEventMemo: TPanel;
+    PanelClient: TPanel;
+    PanelBottom: TPanel;
+    ImageGrip: TImage;
     procedure FormCreate(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -39,7 +44,7 @@ var
 implementation
 
 uses
-  Main, Settings;
+  Settings;
 
 {$R *.dfm}
 
@@ -74,6 +79,8 @@ begin
   finally
     AppSettings.Free;
   end;
+  { PANEL BORDERS }
+  PanelEventMemo.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------------- ON SHOW }

@@ -96,14 +96,16 @@ const
 
   { FILTER ENUMERATION }
 
-  flt_INF7     = 0;
-  flt_INF4     = 1;
-  flt_COCODE   = 2;
-  flt_AGENT    = 3;
-  flt_DIVISION = 4;
-  flt_FOLLOWUP = 5;
-  flt_GR3      = 6;
-  flt_Free1    = 7;
+  fltINF7      = 0;
+  fltINF4      = 1;
+  fltCOCODE    = 2;
+  fltAGENT     = 3;
+  fltDIVISION  = 4;
+  fltFOLLOWUP  = 5;
+  fltGR3       = 6;
+  fltFree1     = 7;
+  fltIncrement = 10;
+  fltDecrement = 11;
 
   { EMAIL OPTION }
 
@@ -240,6 +242,8 @@ const
 
   dcReminder  = 0;
   dcStatement = 1;
+  dcAuto      = 2;
+  dcManual    = 3;
 
   { CALENDAR MODES }
 
@@ -425,6 +429,8 @@ const
   maDefined = 1;
 
   { EMAIL GENERATION | TEMPLATES }
+
+  HTML_BR = '<br>';
 
   CommonHTMLTable ='<table class="data">'                   +#13#10+
                    '<!-- HEADERS -->'                       +#13#10+

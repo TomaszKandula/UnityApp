@@ -38,12 +38,13 @@ type
     cbSelectAll: TCheckBox;
     PanelListItems: TPanel;
     PanelBackground: TPanel;
+    btnRemove: TSpeedButton;
     procedure btnFilterClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormActivate(Sender: TObject);
-    procedure btnCloseClick(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure cbSelectAllClick(Sender: TObject);
+    procedure btnRemoveClick(Sender: TObject);
   private
     { KEEP VALUES AND THEIR STATE }
     var INF7       :  TLists;
@@ -75,9 +76,10 @@ type
     procedure FilterClearAll;
     procedure FilterSelectCheck;
     procedure FilterPrep;
-    procedure FilterCount;
+    procedure FilterCount(Change: integer);
     procedure FilterInit(var FFilter: TLists);
     procedure FilterNow(var FFilter: TLists);
+    procedure FilterRemove(var FFilter: TLists);
   end;
 
 var
@@ -142,11 +144,11 @@ var
   Check: integer;
 begin
   Check:=0;
+
   { CHECK IF ITEM IS SELECTED }
   for iCNT:=0 to FilterList.Count - 1 do
-    if FilterList.Checked[iCNT] = True
-      then
-        inc(Check);
+    if FilterList.Checked[iCNT] = True then inc(Check);
+
   { IF ALL SELECTED, THEN TICK }
   if Check = FilterList.Count then
     cbSelectAll.Checked:=True
@@ -160,29 +162,47 @@ begin
   if (FGrid <> nil) and (FColName <> '') then
   begin
     FColNumber:=FGrid.ReturnColumn(FColName, 1, 1);
-    if FFilterNum = flt_INF7     then FilterInit(INF7);
-    if FFilterNum = flt_INF4     then FilterInit(INF4);
-    if FFilterNum = flt_CoCode   then FilterInit(CoCode);
-    if FFilterNum = flt_Agent    then FilterInit(Agent);
-    if FFilterNum = flt_DIVISION then FilterInit(Division);
-    if FFilterNum = flt_FOLLOWUP then FilterInit(FollowUp);
-    if FFilterNum = flt_GR3      then FilterInit(Gr3);
-    if FFilterNum = flt_FREE1    then FilterInit(Free1);
+    if FFilterNum = fltINF7     then FilterInit(INF7);
+    if FFilterNum = fltINF4     then FilterInit(INF4);
+    if FFilterNum = fltCoCode   then FilterInit(CoCode);
+    if FFilterNum = fltAgent    then FilterInit(Agent);
+    if FFilterNum = fltDIVISION then FilterInit(Division);
+    if FFilterNum = fltFOLLOWUP then FilterInit(FollowUp);
+    if FFilterNum = fltGR3      then FilterInit(Gr3);
+    if FFilterNum = fltFREE1    then FilterInit(Free1);
   end;
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------- UPDATE FILTER COUNT }
-procedure TFilterForm.FilterCount;
+procedure TFilterForm.FilterCount(Change: integer);
 begin
-  if (FFilterNum = flt_INF7)     and (countINF7     = 0) then Inc(countINF7);
-  if (FFilterNum = flt_INF4)     and (countINF4     = 0) then Inc(countINF4);
-  if (FFilterNum = flt_CoCode)   and (countCoCode   = 0) then Inc(countCoCode);
-  if (FFilterNum = flt_Agent)    and (countAgent    = 0) then Inc(countAgent);
-  if (FFilterNum = flt_DIVISION) and (countDivision = 0) then Inc(countDivision);
-  if (FFilterNum = flt_FOLLOWUP) and (countFollowUp = 0) then Inc(countFollowUp);
-  if (FFilterNum = flt_GR3)      and (countGr3      = 0) then Inc(countGr3);
-  if (FFilterNum = flt_FREE1)    and (countFree1    = 0) then Inc(countFree1);
+
+  if Change = fltIncrement then
+  begin
+    if (FFilterNum = fltINF7)     and (countINF7     = 0) then Inc(countINF7);
+    if (FFilterNum = fltINF4)     and (countINF4     = 0) then Inc(countINF4);
+    if (FFilterNum = fltCoCode)   and (countCoCode   = 0) then Inc(countCoCode);
+    if (FFilterNum = fltAgent)    and (countAgent    = 0) then Inc(countAgent);
+    if (FFilterNum = fltDIVISION) and (countDivision = 0) then Inc(countDivision);
+    if (FFilterNum = fltFOLLOWUP) and (countFollowUp = 0) then Inc(countFollowUp);
+    if (FFilterNum = fltGR3)      and (countGr3      = 0) then Inc(countGr3);
+    if (FFilterNum = fltFREE1)    and (countFree1    = 0) then Inc(countFree1);
+  end;
+
+  if Change = fltDecrement then
+  begin
+    if (FFilterNum = fltINF7)     and (countINF7     > 0) then Dec(countINF7);
+    if (FFilterNum = fltINF4)     and (countINF4     > 0) then Dec(countINF4);
+    if (FFilterNum = fltCoCode)   and (countCoCode   > 0) then Dec(countCoCode);
+    if (FFilterNum = fltAgent)    and (countAgent    > 0) then Dec(countAgent);
+    if (FFilterNum = fltDIVISION) and (countDivision > 0) then Dec(countDivision);
+    if (FFilterNum = fltFOLLOWUP) and (countFollowUp > 0) then Dec(countFollowUp);
+    if (FFilterNum = fltGR3)      and (countGr3      > 0) then Dec(countGr3);
+    if (FFilterNum = fltFREE1)    and (countFree1    > 0) then Dec(countFree1);
+  end;
+
   HowManyFlts:=countINF7 + countINF4 + countCoCode + countAgent + countDivision + countFollowUp + countGr3 + countFree1;
+
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------ INITIAIZE FILTER }
@@ -228,6 +248,7 @@ begin
     end;
     { -------------------------------------------------------------------------------------------------------------------- TICK OR UNTICK PREVIOUSLY FILTERED }
     FilterList.CheckAll(cbChecked, False, True);
+
     for iCNT:=0 to High(FFilter) - 1 do
     begin
 
@@ -244,6 +265,7 @@ begin
   finally
     { ------------------------------------------------------------------------------------------------------------------------------------------ UNINITIALIZE }
     FilterList.Freeze(False);
+    FilterList.Repaint;
     Screen.Cursor:=crDefault;
   end;
 end;
@@ -254,79 +276,96 @@ var
   iCNT:  integer;
   jCNT:  integer;
 begin
-  { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-  Screen.Cursor:=crHourGlass;
-  FGrid.Freeze(True);
   { ----------------------------------------------------------------------------------------------------------------------------------- ADD TO THE LIST STATE }
-  try
-    for iCNT:=0 to FilterList.Count - 1 do
+  for iCNT:=0 to FilterList.Count - 1 do
+  begin
+    FFilter[iCNT, 0]:=FilterList.Items.Strings[iCNT];
+    FFilter[iCNT, 1]:=BoolToStr(FilterList.Checked[iCNT], True);
+    SetLength(FFilter, iCNT + 2, 2);
+  end;
+  InUse:=True;
+  FilterCount(fltIncrement);
+  { --------------------------------------------------------------------------------------------------------------------------------- FILTER SELECTED ITEMS }
+  for iCNT:=0 to High(FFilter) - 1 do
+    for jCNT:=1 { SKIP HEADER } to FGrid.RowCount - 1 do
     begin
-      FFilter[iCNT, 0]:=FilterList.Items.Strings[iCNT];
-      FFilter[iCNT, 1]:=BoolToStr(FilterList.Checked[iCNT], True);
-      SetLength(FFilter, iCNT + 2, 2);
+      if (UpperCase(FFilter[iCNT, 0]) = UpperCase(FGrid.Cells[FColNumber, jCNT])) then
+      begin
+
+        { UNHIDE ROW }
+        if
+          (
+            HowManyFlts = 1
+          )
+          and
+          (
+            FFilter[iCNT, 1] = 'True'
+          )
+        then
+          FGrid.RowHeights[jCNT]:= sgRowHeight;
+
+        { UNHIDE ROW }
+        if
+          (
+            HowManyFlts > 1
+          )
+          and
+          (
+            FFilter[iCNT, 1] = 'True'
+          )
+          and
+          (
+            FGrid.RowHeights[jCNT] <> sgRowHidden
+          )
+        then
+          FGrid.RowHeights[jCNT]:= sgRowHeight;
+
+        { HIDE ROW }
+        if
+          (
+            FFilter[iCNT, 1] = 'False'
+          )
+          or
+          (
+            (
+              MainForm.Action_Overdue.Checked
+            )
+            and
+            (
+              FGrid.Cells[FGrid.ReturnColumn(FOverdue, 1, 1), jCNT] = '0'
+            )
+          )
+          then
+            FGrid.RowHeights[jCNT]:= sgRowHidden;
+      end;
     end;
-    { --------------------------------------------------------------------------------------------------------------------------------- FILTER SELECTED ITEMS }
-    for iCNT:=0 to High(FFilter) - 1 do
+end;
+
+{ ---------------------------------------------------------------------------------------------------------------------------------------- CLEAR GIVEN FILTER }
+procedure TFilterForm.FilterRemove(var FFilter: TLists);
+var
+  iCNT:  integer;
+  jCNT:  integer;
+begin
+
+  for iCNT:=0 to high(FFilter) - 1 do
+  begin
+    FilterList.ItemEnabled[iCNT]:=True;
+    if FFilter[iCNT, 1] = 'False' then
+    begin
+      FFilter[iCNT, 1]:='True';
+      FilterList.Checked[iCNT]:=True;
       for jCNT:=1 { SKIP HEADER } to FGrid.RowCount - 1 do
       begin
         if (UpperCase(FFilter[iCNT, 0]) = UpperCase(FGrid.Cells[FColNumber, jCNT])) then
-        begin
-
-          { UNHIDE ROW }
-          if
-            (
-              HowManyFlts = 1
-            )
-            and
-            (
-              FFilter[iCNT, 1] = 'True'
-            )
-          then
-            FGrid.RowHeights[jCNT]:= sgRowHeight;
-
-          { UNHIDE ROW }
-          if
-            (
-              HowManyFlts > 1
-            )
-            and
-            (
-              FFilter[iCNT, 1] = 'True'
-            )
-            and
-            (
-              FGrid.RowHeights[jCNT] <> sgRowHidden
-            )
-          then
-            FGrid.RowHeights[jCNT]:= sgRowHeight;
-
-          { HIDE ROW }
-          if
-            (
-              FFilter[iCNT, 1] = 'False'
-            )
-            or
-            (
-              (
-                MainForm.Action_Overdue.Checked
-              )
-              and
-              (
-                FGrid.Cells[FGrid.ReturnColumn(FOverdue, 1, 1), jCNT] = '0'
-              )
-            )
-            then
-              FGrid.RowHeights[jCNT]:= sgRowHidden;
-        end;
+          FGrid.RowHeights[jCNT]:= sgRowHeight;
       end;
-    InUse:=True;
-    FilterCount;
-  finally
-    { ------------------------------------------------------------------------------------------------------------------------------------------ UNINITIALIZE }
-    FGrid.Freeze(False);
-    Screen.Cursor:=crDefault;
-    Close;
+    end;
   end;
+
+  cbSelectAll.Checked:=True;
+  FilterCount(fltDecrement);
+
 end;
 
 { ################################################################## ! EVENTS ! ############################################################################# }
@@ -350,9 +389,27 @@ end;
 
 { --------------------------------------------------------------------------------------------------------------------------- ON ACTIVATE | INITIALIZE FILTER }
 procedure TFilterForm.FormActivate(Sender: TObject);
+
+  (* NESTED METHOD *)
+
+  procedure SetAndQuit;
+  begin
+    btnRemove.Enabled:=True;
+    Exit;
+  end;
+
 begin
   FilterPrep;
   FilterSelectCheck;
+  btnRemove.Enabled:=False;
+  if (FFilterNum = fltINF7)     and (countINF7     > 0) then SetAndQuit;
+  if (FFilterNum = fltINF4)     and (countINF4     > 0) then SetAndQuit;
+  if (FFilterNum = fltCOCODE)   and (countCoCode   > 0) then SetAndQuit;
+  if (FFilterNum = fltAGENT)    and (countAgent    > 0) then SetAndQuit;
+  if (FFilterNum = fltDIVISION) and (countDivision > 0) then SetAndQuit;
+  if (FFilterNum = fltFOLLOWUP) and (countFollowUp > 0) then SetAndQuit;
+  if (FFilterNum = fltGR3)      and (countGr3      > 0) then SetAndQuit;
+  if (FFilterNum = fltFree1)    and (countFree1    > 0) then SetAndQuit;
 end;
 
 { --------------------------------------------------------------- ! BUTTON CALLS ! -------------------------------------------------------------------------- }
@@ -364,25 +421,71 @@ var
 begin
   if FColNumber > 0 then
   begin
-    { FILTER }
-    if FFilterNum = flt_INF7     then FilterNow(INF7);
-    if FFilterNum = flt_INF4     then FilterNow(INF4);
-    if FFilterNum = flt_CoCode   then FilterNow(CoCode);
-    if FFilterNum = flt_Agent    then FilterNow(Agent);
-    if FFilterNum = flt_DIVISION then FilterNow(Division);
-    if FFilterNum = flt_FOLLOWUP then FilterNow(FollowUp);
-    if FFilterNum = flt_GR3      then FilterNow(Gr3);
-    if FFilterNum = flt_FREE1    then FilterNow(Free1);
-    { RE-COMPUTE AGING SUMMARY }
+    Screen.Cursor:=crHourGlass;
     AgeView:=TAgeView.Create(MainForm.DbConnect);
     try
-      AgeView.ComputeAgeSummary(MainForm.sgAgeView);
-      AgeView.ComputeAndShowRCA(MainForm.sgAgeView);
+      FGrid.Freeze(True);
+      { FILTER }
+      if FFilterNum = fltINF7     then FilterNow(INF7);
+      if FFilterNum = fltINF4     then FilterNow(INF4);
+      if FFilterNum = fltCoCode   then FilterNow(CoCode);
+      if FFilterNum = fltAgent    then FilterNow(Agent);
+      if FFilterNum = fltDIVISION then FilterNow(Division);
+      if FFilterNum = fltFOLLOWUP then FilterNow(FollowUp);
+      if FFilterNum = fltGR3      then FilterNow(Gr3);
+      if FFilterNum = fltFREE1    then FilterNow(Free1);
+      { RE-COMPUTE AGING SUMMARY }
+      AgeView.ComputeAgeSummary(FGrid);
+      AgeView.ComputeAndShowRCA(FGrid);
       AgeView.UpdateSummary;
     finally
       AgeView.Free;
       FGrid.Repaint;
+      FGrid.Freeze(False);
+      Screen.Cursor:=crDefault;
     end;
+    Close;
+  end;
+end;
+
+{ --------------------------------------------------------------------------------------------------------------------------------------------- REMOVE FILTER }
+procedure TFilterForm.btnRemoveClick(Sender: TObject);
+var
+  AgeView: TAgeView;
+begin
+
+  if HowManyFlts < 2 then
+  begin
+    MainForm.Action_RemoveFiltersClick(Self);
+    Close;
+  end;
+
+  if FColNumber > 0 then
+  begin
+    Screen.Cursor:=crHourGlass;
+    AgeView:=TAgeView.Create(MainForm.DbConnect);
+    try
+      FGrid.Freeze(True);
+      { FILTER }
+      if FFilterNum = fltINF7     then FilterRemove(INF7);
+      if FFilterNum = fltINF4     then FilterRemove(INF4);
+      if FFilterNum = fltCoCode   then FilterRemove(CoCode);
+      if FFilterNum = fltAgent    then FilterRemove(Agent);
+      if FFilterNum = fltDIVISION then FilterRemove(Division);
+      if FFilterNum = fltFOLLOWUP then FilterRemove(FollowUp);
+      if FFilterNum = fltGR3      then FilterRemove(Gr3);
+      if FFilterNum = fltFREE1    then FilterRemove(Free1);
+      { RE-COMPUTE AGING SUMMARY }
+      AgeView.ComputeAgeSummary(FGrid);
+      AgeView.ComputeAndShowRCA(FGrid);
+      AgeView.UpdateSummary;
+    finally
+      AgeView.Free;
+      FGrid.Repaint;
+      FGrid.Freeze(False);
+      Screen.Cursor:=crDefault;
+    end;
+    Close;
   end;
 end;
 
@@ -391,16 +494,14 @@ procedure TFilterForm.cbSelectAllClick(Sender: TObject);
 var
   iCNT:  integer;
 begin
-  if (cbSelectAll.Checked) then
-    for iCNT:=0 to FilterList.Count - 1 do FilterList.Checked[iCNT]:=True
-      else
-        for iCNT:=0 to FilterList.Count - 1 do FilterList.Checked[iCNT]:=False;
-end;
-
-{ ---------------------------------------------------------------------------------------------------------------------------------------------- CLOSE WINDOW }
-procedure TFilterForm.btnCloseClick(Sender: TObject);
-begin
-  Close;
+  if cbSelectAll.Checked then
+  begin
+    for iCNT:=0 to FilterList.Count - 1 do
+      if FilterList.ItemEnabled[iCNT] = True then FilterList.Checked[iCNT]:=True
+  end
+  else
+    for iCNT:=0 to FilterList.Count - 1 do
+      if FilterList.ItemEnabled[iCNT] = True then FilterList.Checked[iCNT]:=False;
 end;
 
 { -------------------------------------------------------------- ! KEYBOARD EVENTS ! ------------------------------------------------------------------------ }

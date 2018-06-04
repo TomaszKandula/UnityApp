@@ -13,15 +13,16 @@
 { ----------------------------------------------------------------------------------------------------------------------------------------------------------- }
 unit Send;
 
+(* NOTE: DO NOT PLACE 'MAIN' REFERENCE IN THE IMPLEMENTATION SECTION BUT IN THE INTERFACE SECTION. THIS IS NECESSARY DUE TO CLASS EXTENSIONS DEFINED IN MAIN *)
+
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, Buttons, ExtCtrls;
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, Buttons, ExtCtrls, Main;
 
 { ------------------------------------------------------------------ ! MAIN CLASS ! ------------------------------------------------------------------------- }
 type
   TSendForm = class(TForm)
-    AppMain: TShape;
     btnCancel: TSpeedButton;
     btnSendEmail: TSpeedButton;
     Text_Salut: TMemo;
@@ -42,6 +43,10 @@ type
     Text_Terms: TLabel;
     Text_Warn: TLabel;
     cbAddOverdue: TCheckBox;
+    PanelSalutation: TPanel;
+    PanelMessage: TPanel;
+    PanelClient: TPanel;
+    PanelBottom: TPanel;
     procedure btnCancelClick(Sender: TObject);
     procedure btnSendEmailClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -51,18 +56,18 @@ type
 var
   SendForm: TSendForm;
 
-{ -------------------------------------------------------------- ! IMPLEMENTATION ZONE ! -------------------------------------------------------------------- }
+{ ------------------------------------------------------------ ! IMPLEMENTATION ZONE ! ---------------------------------------------------------------------- }
 
 implementation
 
 uses
-  Main, Settings, Actions;
+  Settings, Actions;
 
 {$R *.dfm}
 
 { ############################################################# ! MAIN FORM METHODS ! ####################################################################### }
 
-{ ------------------------------------------------------------- ! EXECUTE ON CREATE ! ----------------------------------------------------------------------- }
+{ ------------------------------------------------------------------------------------------------------------------------------------------------- ON CREATE }
 procedure TSendForm.FormCreate(Sender: TObject);
 var
   AppSettings: TSettings;
@@ -74,17 +79,36 @@ begin
   finally
     AppSettings.Free;
   end;
+  { PANELS BORDERS }
+  PanelSalutation.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+  PanelMessage.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
 end;
+
+{ ----------------------------------------------------------------- ! MOUSE EVENTS ! ------------------------------------------------------------------------ }
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------ SEND EMAIL }
 procedure TSendForm.btnSendEmailClick(Sender: TObject);
+var
+  TempStr: string;
 begin
-  { ASK USER BEFORE SENDING THE EMAIL }
-  if MainForm.MsgCall(mcQuestion2, 'Are you absolutely sure that you really want it to be sent, right now?') = IDNO then Exit;
+
+  if (Text_Salut.Text = '') or (Text_Message.Text = '') then
+  begin
+    MainForm.MsgCall(mcWarn, 'Please provide with custom message and salutation.');
+    Exit;
+  end;
+
+  if MainForm.MsgCall(mcQuestion2, 'Are you absolutely sure you want to send it, right now?') = IDNO then Exit;
+
+  TempStr:=StringReplace(Text_Message.Text, CRLF, HTML_BR, [rfReplaceAll]);
+
   if cbAddOverdue.Checked then
-    ActionsForm.SendAccountStatement(maCustom, Text_Salut.Text, Text_Message.Text, True)
+    ActionsForm.SendAccountStatement(maCustom, Text_Salut.Text, TempStr, True)
       else
-        ActionsForm.SendAccountStatement(maCustom, Text_Salut.Text, Text_Message.Text, False);
+        ActionsForm.SendAccountStatement(maCustom, Text_Salut.Text, TempStr, False);
+
+  Close;
+
 end;
 
 { ---------------------------------------------------------------------------------------------------------------------------------------------- CLOSE WINDOW }
@@ -93,6 +117,8 @@ begin
   Close;
 end;
 
+{ --------------------------------------------------------------- ! KEYBOARD EVENTS ! ----------------------------------------------------------------------- }
+
 { -------------------------------------------------------------------------------------------------------------------------------------------- CLOSE ON <ESC> }
 procedure TSendForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
@@ -100,3 +126,4 @@ begin
 end;
 
 end.
+
