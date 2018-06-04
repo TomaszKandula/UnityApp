@@ -140,10 +140,11 @@ end;
 
 function UnzippReleaseFile(FileName: string; DestDir: string; EventLogPath: string): boolean;
 var
-  iCNT:    integer;
-  ZipR:    TZipReader;
-  FS:      TFileStream;
-  Zipped:  string;
+  iCNT:      integer;
+  ZipR:      TZipReader;
+  FS:        TFileStream;
+  Zipped:    string;
+  FullPath:  string;
 begin
   FS:=nil;
   ZipR:=TZipReader.Create(FileName);
@@ -152,15 +153,19 @@ begin
     for iCNT:=0 to ZipR.Count - 1 do
     begin
       Zipped:=ZipR.Entry[iCNT].ZipName;
-      try
-        RenameFile(DestDir + Zipped, Zipped + '.del');
-        FS:=TFileStream.Create(DestDir + Zipped, fmCreate);
-        ZipR.GetData(iCNT, FS);
-        UpdateForm.Progress.Progress:=Trunc(((iCNT + 1)/ZipR.Count) * 100);
-        UpdateForm.Update;
-        Sleep(DelayStd);
-      finally
-        FS.Free;
+      FullPath:=DestDir + Zipped;
+      if ExtractFileName(FullPath) <> '' then
+      begin
+        RenameFile(FullPath, Zipped + '.del');
+        FS:=TFileStream.Create(FullPath, fmCreate);
+        try
+          ZipR.GetData(iCNT, FS);
+          UpdateForm.Progress.Progress:=Trunc(((iCNT + 1)/ZipR.Count) * 100);
+          UpdateForm.Update;
+          Sleep(DelayStd);
+        finally
+          FS.Free;
+        end;
       end;
     end;
     Result:=True;
@@ -299,10 +304,6 @@ begin
       UpdateForm.Left:=((WndRect.Right  - WndRect.Left) div 2) - (UpdateForm.Width  div 2);
       AnimateWindow(UpdateForm.Handle, 500, AW_BLEND or AW_ACTIVATE);
       UpdateForm.Update;
-      { COPY RELEASE PACKAGE FROM SOURCE NETWORK DRIVE TO APPLICATION DIRECTORY }
-
-      // ...
-
       { UNZIP ALL FILES | NOTE: CONFIG.CFG MAY BE ALSO UPDATED }
       UnzippReleaseFile(PathRelease, PathAppDir, PathEventLog);
       { UPDATE DATE AND TIME OF NEW RELEASE }

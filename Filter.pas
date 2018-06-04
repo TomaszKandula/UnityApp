@@ -302,7 +302,7 @@ begin
             FFilter[iCNT, 1] = 'True'
           )
         then
-          FGrid.RowHeights[jCNT]:= sgRowHeight;
+          FGrid.RowHeights[jCNT]:=sgRowHeight;
 
         { UNHIDE ROW }
         if
@@ -318,7 +318,7 @@ begin
             FGrid.RowHeights[jCNT] <> sgRowHidden
           )
         then
-          FGrid.RowHeights[jCNT]:= sgRowHeight;
+          FGrid.RowHeights[jCNT]:=sgRowHeight;
 
         { HIDE ROW }
         if
@@ -335,8 +335,8 @@ begin
               FGrid.Cells[FGrid.ReturnColumn(FOverdue, 1, 1), jCNT] = '0'
             )
           )
-          then
-            FGrid.RowHeights[jCNT]:= sgRowHidden;
+        then
+          FGrid.RowHeights[jCNT]:=sgRowHidden;
       end;
     end;
 end;
@@ -347,25 +347,32 @@ var
   iCNT:  integer;
   jCNT:  integer;
 begin
-
   for iCNT:=0 to high(FFilter) - 1 do
   begin
     FilterList.ItemEnabled[iCNT]:=True;
     if FFilter[iCNT, 1] = 'False' then
     begin
-      FFilter[iCNT, 1]:='True';
       FilterList.Checked[iCNT]:=True;
       for jCNT:=1 { SKIP HEADER } to FGrid.RowCount - 1 do
       begin
         if (UpperCase(FFilter[iCNT, 0]) = UpperCase(FGrid.Cells[FColNumber, jCNT])) then
-          FGrid.RowHeights[jCNT]:= sgRowHeight;
+        begin
+          { UNHIDE ROW }
+          if
+            (
+              FFilter[iCNT, 1] = 'False'
+            )
+          then
+          begin
+            FFilter[iCNT, 1]:='True';
+            FGrid.RowHeights[jCNT]:=sgRowHeight;
+          end;
+        end;
       end;
     end;
   end;
-
   cbSelectAll.Checked:=True;
   FilterCount(fltDecrement);
-
 end;
 
 { ################################################################## ! EVENTS ! ############################################################################# }

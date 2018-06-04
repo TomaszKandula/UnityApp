@@ -3,7 +3,7 @@ object ViewSearchForm: TViewSearchForm
   Top = 0
   BorderStyle = bsToolWindow
   Caption = 'Unity'
-  ClientHeight = 271
+  ClientHeight = 406
   ClientWidth = 498
   Color = 15527148
   Font.Charset = DEFAULT_CHARSET
@@ -22,7 +22,7 @@ object ViewSearchForm: TViewSearchForm
     Left = 10
     Top = 10
     Width = 478
-    Height = 206
+    Height = 341
     Margins.Left = 10
     Margins.Top = 10
     Margins.Right = 10
@@ -41,7 +41,7 @@ object ViewSearchForm: TViewSearchForm
       Left = 10
       Top = 10
       Width = 458
-      Height = 186
+      Height = 321
       Margins.Left = 10
       Margins.Top = 10
       Margins.Right = 10
@@ -83,109 +83,398 @@ object ViewSearchForm: TViewSearchForm
       end
       object Text5: TLabel
         Left = 24
-        Top = 140
+        Top = 139
         Width = 35
         Height = 13
         Caption = 'Phones'
       end
-      object EditName: TEdit
-        Left = 136
-        Top = 56
-        Width = 217
-        Height = 21
-        Enabled = False
-        TabOrder = 0
+      object Splitter: TBevel
+        Left = 24
+        Top = 176
+        Width = 417
+        Height = 17
+        Shape = bsTopLine
       end
-      object EditNumber: TEdit
-        Left = 136
-        Top = 29
-        Width = 217
-        Height = 21
-        NumbersOnly = True
-        TabOrder = 1
+      object Text6: TLabel
+        Left = 24
+        Top = 199
+        Width = 47
+        Height = 13
+        Caption = 'User Alias'
       end
-      object EditEmail: TEdit
-        Left = 136
-        Top = 83
-        Width = 217
-        Height = 21
-        Enabled = False
-        TabOrder = 2
+      object Text7: TLabel
+        Left = 24
+        Top = 225
+        Width = 41
+        Height = 13
+        Caption = 'Co Code'
       end
-      object EditEstatement: TEdit
-        Left = 136
-        Top = 110
-        Width = 217
-        Height = 21
-        Enabled = False
-        TabOrder = 3
+      object Text8: TLabel
+        Left = 24
+        Top = 252
+        Width = 29
+        Height = 13
+        Caption = 'Agent'
       end
-      object EditPhones: TEdit
-        Left = 136
-        Top = 137
-        Width = 217
-        Height = 21
-        Enabled = False
-        TabOrder = 4
+      object Text9: TLabel
+        Left = 24
+        Top = 279
+        Width = 36
+        Height = 13
+        Caption = 'Division'
       end
       object CheckBoxName: TCheckBox
         Left = 385
         Top = 58
-        Width = 97
+        Width = 56
         Height = 17
         Cursor = crHandPoint
         Caption = 'Include'
-        TabOrder = 5
+        TabOrder = 0
         OnClick = CheckBoxNameClick
       end
       object CheckBoxNumber: TCheckBox
         Left = 385
         Top = 31
-        Width = 97
+        Width = 56
         Height = 17
         Cursor = crHandPoint
         Caption = 'Include'
         Checked = True
         State = cbChecked
-        TabOrder = 6
+        TabOrder = 1
         OnClick = CheckBoxNumberClick
       end
       object CheckBoxEmail: TCheckBox
         Left = 385
         Top = 85
-        Width = 97
+        Width = 56
         Height = 17
         Cursor = crHandPoint
         Caption = 'Include'
-        TabOrder = 7
+        TabOrder = 2
         OnClick = CheckBoxEmailClick
       end
       object CheckBoxEstatement: TCheckBox
         Left = 385
         Top = 112
-        Width = 97
+        Width = 56
         Height = 17
         Cursor = crHandPoint
         Caption = 'Include'
-        TabOrder = 8
+        TabOrder = 3
         OnClick = CheckBoxEstatementClick
       end
       object CheckBoxPhones: TCheckBox
         Left = 385
-        Top = 139
-        Width = 97
+        Top = 138
+        Width = 56
         Height = 17
         Cursor = crHandPoint
         Caption = 'Include'
-        TabOrder = 9
+        TabOrder = 4
         OnClick = CheckBoxPhonesClick
+      end
+      object PanelEditNumber: TPanel
+        Left = 136
+        Top = 26
+        Width = 217
+        Height = 25
+        BevelOuter = bvNone
+        Color = clWhite
+        ParentBackground = False
+        TabOrder = 5
+        object EditNumber: TEdit
+          AlignWithMargins = True
+          Left = 2
+          Top = 2
+          Width = 213
+          Height = 21
+          Margins.Left = 2
+          Margins.Top = 2
+          Margins.Right = 2
+          Margins.Bottom = 2
+          Align = alClient
+          BorderStyle = bsNone
+          Color = clCream
+          NumbersOnly = True
+          TabOrder = 0
+          ExplicitLeft = 24
+          ExplicitTop = 29
+          ExplicitWidth = 217
+        end
+      end
+      object PanelEditName: TPanel
+        Left = 136
+        Top = 53
+        Width = 217
+        Height = 26
+        BevelOuter = bvNone
+        Color = clWhite
+        ParentBackground = False
+        TabOrder = 6
+        object EditName: TEdit
+          AlignWithMargins = True
+          Left = 2
+          Top = 2
+          Width = 213
+          Height = 22
+          Margins.Left = 2
+          Margins.Top = 2
+          Margins.Right = 2
+          Margins.Bottom = 2
+          Align = alClient
+          BorderStyle = bsNone
+          Color = clWhite
+          Enabled = False
+          TabOrder = 0
+          ExplicitLeft = -32
+          ExplicitTop = 20
+          ExplicitWidth = 217
+          ExplicitHeight = 21
+        end
+      end
+      object PanelEmail: TPanel
+        Left = 136
+        Top = 80
+        Width = 217
+        Height = 25
+        BevelOuter = bvNone
+        Color = clWhite
+        ParentBackground = False
+        TabOrder = 7
+        object EditEmail: TEdit
+          AlignWithMargins = True
+          Left = 3
+          Top = 3
+          Width = 211
+          Height = 19
+          Align = alClient
+          BevelOuter = bvNone
+          BorderStyle = bsNone
+          Color = clWhite
+          Enabled = False
+          TabOrder = 0
+          ExplicitHeight = 25
+        end
+      end
+      object PanelPhones: TPanel
+        Left = 136
+        Top = 134
+        Width = 217
+        Height = 25
+        BevelOuter = bvNone
+        Color = clWhite
+        ParentBackground = False
+        TabOrder = 8
+        object EditPhones: TEdit
+          AlignWithMargins = True
+          Left = 2
+          Top = 2
+          Width = 213
+          Height = 21
+          Margins.Left = 2
+          Margins.Top = 2
+          Margins.Right = 2
+          Margins.Bottom = 2
+          Align = alClient
+          BevelOuter = bvNone
+          BorderStyle = bsNone
+          Color = clWhite
+          Enabled = False
+          TabOrder = 0
+          ExplicitLeft = 0
+          ExplicitTop = 20
+          ExplicitWidth = 217
+        end
+      end
+      object PanelEstatement: TPanel
+        Left = 136
+        Top = 107
+        Width = 217
+        Height = 25
+        BevelOuter = bvNone
+        Color = clWhite
+        ParentBackground = False
+        TabOrder = 9
+        object EditEstatement: TEdit
+          AlignWithMargins = True
+          Left = 2
+          Top = 2
+          Width = 213
+          Height = 21
+          Margins.Left = 2
+          Margins.Top = 2
+          Margins.Right = 2
+          Margins.Bottom = 2
+          Align = alClient
+          BorderStyle = bsNone
+          Color = clWhite
+          Enabled = False
+          TabOrder = 0
+          ExplicitLeft = 0
+          ExplicitTop = 20
+          ExplicitWidth = 217
+        end
+      end
+      object CheckBoxUserAlias: TCheckBox
+        Left = 385
+        Top = 197
+        Width = 56
+        Height = 17
+        Cursor = crHandPoint
+        Caption = 'Include'
+        TabOrder = 10
+        OnClick = CheckBoxUserAliasClick
+      end
+      object CheckBoxCoCode: TCheckBox
+        Left = 385
+        Top = 224
+        Width = 56
+        Height = 17
+        Cursor = crHandPoint
+        Caption = 'Include'
+        TabOrder = 11
+        OnClick = CheckBoxCoCodeClick
+      end
+      object CheckBoxAgent: TCheckBox
+        Left = 385
+        Top = 251
+        Width = 56
+        Height = 17
+        Cursor = crHandPoint
+        Caption = 'Include'
+        TabOrder = 12
+        OnClick = CheckBoxAgentClick
+      end
+      object CheckBoxDivision: TCheckBox
+        Left = 385
+        Top = 278
+        Width = 56
+        Height = 17
+        Cursor = crHandPoint
+        Caption = 'Include'
+        TabOrder = 13
+        OnClick = CheckBoxDivisionClick
+      end
+      object PanelUserAlias: TPanel
+        Left = 138
+        Top = 193
+        Width = 217
+        Height = 25
+        BevelOuter = bvNone
+        Color = clWhite
+        ParentBackground = False
+        TabOrder = 14
+        object EditUserAlias: TEdit
+          AlignWithMargins = True
+          Left = 2
+          Top = 2
+          Width = 213
+          Height = 21
+          Margins.Left = 2
+          Margins.Top = 2
+          Margins.Right = 2
+          Margins.Bottom = 2
+          Align = alClient
+          BevelOuter = bvNone
+          BorderStyle = bsNone
+          Color = clWhite
+          Enabled = False
+          TabOrder = 0
+        end
+      end
+      object PanelCoCode: TPanel
+        Left = 138
+        Top = 219
+        Width = 217
+        Height = 25
+        BevelOuter = bvNone
+        Color = clWhite
+        ParentBackground = False
+        TabOrder = 15
+        object EditCoCode: TEdit
+          AlignWithMargins = True
+          Left = 2
+          Top = 2
+          Width = 213
+          Height = 21
+          Margins.Left = 2
+          Margins.Top = 2
+          Margins.Right = 2
+          Margins.Bottom = 2
+          Align = alClient
+          BevelOuter = bvNone
+          BorderStyle = bsNone
+          Color = clWhite
+          Enabled = False
+          NumbersOnly = True
+          TabOrder = 0
+        end
+      end
+      object PanelAgent: TPanel
+        Left = 138
+        Top = 246
+        Width = 217
+        Height = 25
+        BevelOuter = bvNone
+        Color = clWhite
+        ParentBackground = False
+        TabOrder = 16
+        object EditAgent: TEdit
+          AlignWithMargins = True
+          Left = 2
+          Top = 2
+          Width = 213
+          Height = 21
+          Margins.Left = 2
+          Margins.Top = 2
+          Margins.Right = 2
+          Margins.Bottom = 2
+          Align = alClient
+          BevelOuter = bvNone
+          BorderStyle = bsNone
+          Color = clWhite
+          Enabled = False
+          NumbersOnly = True
+          TabOrder = 0
+          ExplicitWidth = 211
+        end
+      end
+      object PanelDivision: TPanel
+        Left = 138
+        Top = 273
+        Width = 217
+        Height = 25
+        BevelOuter = bvNone
+        Color = clWhite
+        ParentBackground = False
+        TabOrder = 17
+        object EditDivision: TEdit
+          AlignWithMargins = True
+          Left = 2
+          Top = 2
+          Width = 213
+          Height = 21
+          Margins.Left = 2
+          Margins.Top = 2
+          Margins.Right = 2
+          Margins.Bottom = 2
+          Align = alClient
+          BevelOuter = bvNone
+          BorderStyle = bsNone
+          Color = clWhite
+          Enabled = False
+          NumbersOnly = True
+          TabOrder = 0
+        end
       end
     end
   end
   object PanelBottom: TPanel
     AlignWithMargins = True
     Left = 0
-    Top = 226
+    Top = 361
     Width = 498
     Height = 45
     Margins.Left = 0

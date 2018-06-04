@@ -89,6 +89,7 @@ type
     PanelGeneralCom: TPanel;
     PanelOpenItemsGrid: TPanel;
     ImgLoadingWindow: TImage;
+    PanelCtrl: TPanel;
     procedure FormCreate(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure OpenItemsGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
@@ -120,6 +121,8 @@ type
     procedure btnCopyPersonClick(Sender: TObject);
     procedure btnCopyEmailClick(Sender: TObject);
     procedure btnEditClick(Sender: TObject);
+  private
+    var FHistoryGrid: boolean;
   public
     var CUID       :  string;
     var SCUID      :  string;
@@ -345,8 +348,13 @@ begin
     DailyText.DataSet.Sort:=TDaily.STAMP + DESC;
     if not (DailyText.DataSet.EOF) then
     begin
+      FHistoryGrid:=True;
       DailyText.SqlToGrid(Grid, DailyText.DataSet, False, True);
       Grid.ColWidths[Grid.ReturnColumn(TDaily.FIXCOMMENT, 1, 1)]:=sgRowHidden;
+    end
+    else
+    begin
+      FHistoryGrid:=False;
     end;
   finally
     DailyText.Free;
@@ -481,6 +489,7 @@ begin
   try
     GetData;
     SetControls;
+    PanelCtrl.Visible:=FHistoryGrid;
   except
     MainForm.MsgCall(mcWarn, 'Unexpected error has occured. Please close the window and try again.');
   end;
@@ -609,6 +618,7 @@ begin
     (GIFImage.Picture.Graphic as TGIFImage).Animate:=False;
     ImgLoadingWindow.Visible:=False;
     MasterPanel.Visible:=True;
+    PanelCtrl.Visible:=FHistoryGrid;
   end;
 end;
 

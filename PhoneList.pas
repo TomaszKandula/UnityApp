@@ -82,6 +82,7 @@ procedure TPhoneListForm.btnSubmitClick(Sender: TObject);
 begin
   ActionsForm.Cust_Phone.Items.Clear;
   ActionsForm.Cust_Phone.Items.AddStrings(PhoneList.Lines);
+  if ActionsForm.Cust_Phone.Items.Count > 0 then ActionsForm.Cust_Phone.ItemIndex:=0;
   Close;
 end;
 

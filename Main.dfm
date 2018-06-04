@@ -1193,7 +1193,7 @@ object MainForm: TMainForm
     Margins.Top = 0
     Margins.Right = 10
     Margins.Bottom = 0
-    ActivePage = TabSheet3
+    ActivePage = TabSheet1
     Align = alClient
     DoubleBuffered = True
     Font.Charset = DEFAULT_CHARSET
@@ -6630,6 +6630,10 @@ object MainForm: TMainForm
         Margins.Bottom = 17
         Align = alClient
         BevelOuter = bvNone
+        Color = clWhite
+        DoubleBuffered = False
+        ParentBackground = False
+        ParentDoubleBuffered = False
         TabOrder = 1
         object ImgLoadingOpenItems: TImage
           AlignWithMargins = True
@@ -17029,7 +17033,7 @@ object MainForm: TMainForm
             Pen.Color = clGradientInactiveCaption
           end
           object Cap21: TShape
-            Left = 0
+            Left = 1
             Top = 0
             Width = 464
             Height = 19

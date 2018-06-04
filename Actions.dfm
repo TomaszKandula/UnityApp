@@ -3228,52 +3228,75 @@ object ActionsForm: TActionsForm
           Margins.Bottom = 10
           Align = alClient
           BevelOuter = bvNone
+          Caption = 'No data to display'
           Color = clWhite
           ParentBackground = False
           TabOrder = 0
-          object HistoryGrid: TStringGrid
+          object PanelCtrl: TPanel
             AlignWithMargins = True
             Left = 2
             Top = 2
             Width = 297
             Height = 120
-            Hint = 'Your daily comments history'
             Margins.Left = 2
             Margins.Top = 2
             Margins.Right = 2
             Margins.Bottom = 2
             Align = alClient
-            BorderStyle = bsNone
+            BevelOuter = bvNone
             Color = clWhite
-            ColCount = 11
-            DefaultColWidth = 10
-            DefaultRowHeight = 17
-            FixedColor = clWhite
-            RowCount = 2
-            GradientEndColor = 15527148
-            Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
-            ParentShowHint = False
-            ScrollBars = ssVertical
-            ShowHint = True
+            ParentBackground = False
             TabOrder = 0
             Visible = False
-            OnDrawCell = HistoryGridDrawCell
-            OnKeyDown = HistoryGridKeyDown
-            OnMouseWheelDown = HistoryGridMouseWheelDown
-            OnMouseWheelUp = HistoryGridMouseWheelUp
-            OnSelectCell = HistoryGridSelectCell
-            ColWidths = (
-              10
-              10
-              10
-              10
-              10
-              10
-              10
-              10
-              10
-              10
-              10)
+            ExplicitLeft = 136
+            ExplicitTop = 40
+            ExplicitWidth = 185
+            ExplicitHeight = 41
+            object HistoryGrid: TStringGrid
+              Left = 0
+              Top = 0
+              Width = 297
+              Height = 120
+              Hint = 'Your daily comments history'
+              Margins.Left = 2
+              Margins.Top = 2
+              Margins.Right = 2
+              Margins.Bottom = 2
+              Align = alClient
+              BorderStyle = bsNone
+              Color = clWhite
+              ColCount = 11
+              DefaultColWidth = 10
+              DefaultRowHeight = 17
+              FixedColor = clWhite
+              RowCount = 2
+              GradientEndColor = 15527148
+              Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
+              ParentShowHint = False
+              ScrollBars = ssVertical
+              ShowHint = True
+              TabOrder = 0
+              Visible = False
+              OnDrawCell = HistoryGridDrawCell
+              OnKeyDown = HistoryGridKeyDown
+              OnMouseWheelDown = HistoryGridMouseWheelDown
+              OnMouseWheelUp = HistoryGridMouseWheelUp
+              OnSelectCell = HistoryGridSelectCell
+              ExplicitLeft = -112
+              ExplicitTop = -79
+              ColWidths = (
+                10
+                10
+                10
+                10
+                10
+                10
+                10
+                10
+                10
+                10
+                10)
+            end
           end
         end
       end
