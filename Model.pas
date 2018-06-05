@@ -31,7 +31,7 @@ type
     var Columns    :  TStringList;
     var Values     :  TStringList;
     var Conditions :  TStringList;
-    property ConnStr : string read pConnStr;
+    property    ConnStr : string read pConnStr;
   published
     constructor Create(Connector: TADOConnection); overload;
     destructor  Destroy; override;
@@ -41,7 +41,7 @@ type
     function    OpenTable(TableName: string): boolean;
     function    InsertInto(TableName: string): boolean;
     function    UpdateRecord(TableName: string): boolean;
-    function    DeleteRecord(TableName: string; KeyName: string; ID: cardinal): boolean;
+    function    DeleteRecord(TableName: string; KeyName: string; KeyValue: string): boolean;
   end;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -149,6 +149,7 @@ type
     const EMAIL_Reminder: string = 'EmailReminder';
     const EMAIL_AutoStat: string = 'EmailAutoStat';
     const EMAIL_ManuStat: string = 'EmailManuStat';
+    const DATACHECKSUM  : string = 'DataCheckSum';
   end;
 
 { ------------------------------------------------------------- ! GENERAL COMMENT ! ------------------------------------------------------------------------- }
@@ -671,12 +672,12 @@ begin
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------- DELETE SINGLE RECORD }
-function TDataTables.DeleteRecord(TableName: string; KeyName: string; ID: Cardinal): boolean;
+function TDataTables.DeleteRecord(TableName: string; KeyName: string; KeyValue: string): boolean;
 begin
   Result:=False;
-  if (TableName = '') and (ID = 0) then Exit;
+  if (TableName = '') and (KeyValue = '') then Exit;
   try
-    StrSQL:=DELETE_FROM + TableName + WHERE + KeyName + EQUAL + QuotedStr(IntToStr(ID));
+    StrSQL:=DELETE_FROM + TableName + WHERE + KeyName + EQUAL + QuotedStr(KeyValue);
     ExecSQL;
     Result:=True;
   except

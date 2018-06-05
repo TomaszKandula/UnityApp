@@ -21,7 +21,7 @@ object SplashForm: TSplashForm
     Width = 868
     Height = 450
     Align = alClient
-    Pen.Color = clGray
+    Pen.Color = clSkyBlue
     ExplicitLeft = -24
     ExplicitTop = -8
   end
@@ -105,16 +105,16 @@ object SplashForm: TSplashForm
     Width = 514
     Height = 43
     Cursor = crAppStart
-    Pen.Color = 14277081
+    Pen.Color = clSkyBlue
   end
   object Progress: TGauge
-    Left = 180
-    Top = 220
-    Width = 501
-    Height = 33
+    Left = 175
+    Top = 216
+    Width = 512
+    Height = 41
     Cursor = crAppStart
     BorderStyle = bsNone
-    ForeColor = 15318149
+    ForeColor = 15918295
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlack
     Font.Height = -11

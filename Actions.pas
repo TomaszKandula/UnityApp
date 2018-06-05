@@ -348,9 +348,11 @@ begin
     DailyText.DataSet.Sort:=TDaily.STAMP + DESC;
     if not (DailyText.DataSet.EOF) then
     begin
-      FHistoryGrid:=True;
       DailyText.SqlToGrid(Grid, DailyText.DataSet, False, True);
       Grid.ColWidths[Grid.ReturnColumn(TDaily.FIXCOMMENT, 1, 1)]:=sgRowHidden;
+      Grid.SetColWidth(10, 20);
+      FHistoryGrid:=True;
+      PanelCtrl.Visible:=FHistoryGrid;
     end
     else
     begin
@@ -611,10 +613,12 @@ begin
   begin
     MasterPanel.Visible:=False;
     ImgLoadingWindow.Visible:=True;
+    ActionsForm.DoubleBuffered:=False;
     (GIFImage.Picture.Graphic as TGIFImage).Animate:=True;
   end;
   if State = AnimationOFF then
   begin
+    ActionsForm.DoubleBuffered:=True;
     (GIFImage.Picture.Graphic as TGIFImage).Animate:=False;
     ImgLoadingWindow.Visible:=False;
     MasterPanel.Visible:=True;

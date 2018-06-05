@@ -2801,7 +2801,7 @@ object MainForm: TMainForm
         Align = alClient
         BevelOuter = bvNone
         Color = clWhite
-        DoubleBuffered = False
+        DoubleBuffered = True
         ParentBackground = False
         ParentDoubleBuffered = False
         TabOrder = 2
@@ -5953,9 +5953,11 @@ object MainForm: TMainForm
           ColCount = 29
           DefaultColWidth = 40
           DefaultRowHeight = 25
+          DoubleBuffered = True
           RowCount = 2
           GradientEndColor = clGradientInactiveCaption
           Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goColMoving, goThumbTracking]
+          ParentDoubleBuffered = False
           ParentShowHint = False
           PopupMenu = AgeViewPopup
           ShowHint = False
@@ -6631,7 +6633,7 @@ object MainForm: TMainForm
         Align = alClient
         BevelOuter = bvNone
         Color = clWhite
-        DoubleBuffered = False
+        DoubleBuffered = True
         ParentBackground = False
         ParentDoubleBuffered = False
         TabOrder = 1
@@ -10110,7 +10112,7 @@ object MainForm: TMainForm
         Align = alClient
         BevelOuter = bvNone
         Color = clWhite
-        DoubleBuffered = False
+        DoubleBuffered = True
         ParentBackground = False
         ParentDoubleBuffered = False
         TabOrder = 1

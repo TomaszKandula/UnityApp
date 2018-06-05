@@ -122,7 +122,7 @@ object UpdateForm: TUpdateForm
     Cursor = crAppStart
     BorderStyle = bsNone
     Color = clWhite
-    ForeColor = 15318149
+    ForeColor = 15918295
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlack
     Font.Height = -11

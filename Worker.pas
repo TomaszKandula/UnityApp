@@ -421,7 +421,7 @@ begin
     MainForm.ExecMessage(True, mcStatusBar, stLoading);
     Synchronize(procedure
                 begin
-                  MainForm.LoadingAnimation(MainForm.ImgLoadingAgeView, MainForm.sgAgeView, AnimationON);
+                  MainForm.LoadingAnimation(MainForm.ImgLoadingAgeView, MainForm.sgAgeView, MainForm.PanelAgeView, AnimationON);
                 end);
     try
       { SYNC }
@@ -440,7 +440,7 @@ begin
                     AgeView.GetDetails(MainForm.DetailsGrid);
                     AgeView.MapGroup3(MainForm.sgAgeView, MainForm.sgGroup3);
                     MainForm.sgAgeView.Repaint;
-                    MainForm.LoadingAnimation(MainForm.ImgLoadingAgeView, MainForm.sgAgeView, AnimationOFF);
+                    MainForm.LoadingAnimation(MainForm.ImgLoadingAgeView, MainForm.sgAgeView, MainForm.PanelAgeView, AnimationOFF);
                   end);
     except
       on E: Exception do
@@ -550,7 +550,7 @@ begin
     { BUSY ANIMATION ON }
     Synchronize(procedure
                 begin
-                  MainForm.LoadingAnimation(MainForm.ImgLoadingOpenItems, MainForm.sgOpenItems, AnimationON);
+                  MainForm.LoadingAnimation(MainForm.ImgLoadingOpenItems, MainForm.sgOpenItems, MainForm.PanelOpenItems, AnimationON);
                 end);
     try
       { ASSIGN }
@@ -576,7 +576,7 @@ begin
     Synchronize(procedure
                 begin
                   OpenItems.DestGrid.SetColWidth(10, 20);
-                  MainForm.LoadingAnimation(MainForm.ImgLoadingOpenItems, MainForm.sgOpenItems, AnimationOFF);
+                  MainForm.LoadingAnimation(MainForm.ImgLoadingOpenItems, MainForm.sgOpenItems, MainForm.PanelOpenItems, AnimationOFF);
                 end);
     OpenItems.DestGrid.Freeze(False);
     OpenItems.Free;
@@ -644,7 +644,7 @@ begin
     if FMode = adInsert then
     begin
       if Add then
-        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: The Address Book insertion has been successfully.')
+        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: The Address Book insertion has been executed successfully.')
           else
             LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot insert data to Address Book.');
     end;
@@ -673,7 +673,7 @@ begin
     { BUSY ANIMATION ON }
     Synchronize(procedure
                 begin
-                  MainForm.LoadingAnimation(MainForm.ImgLoadingAddressBook, MainForm.sgAddressBook, AnimationON);
+                  MainForm.LoadingAnimation(MainForm.ImgLoadingAddressBook, MainForm.sgAddressBook, MainForm.PanelAddressBook, AnimationON);
                 end);
     { FREEZE STRING GRID }
     FGrid.Freeze(True);
@@ -699,7 +699,7 @@ begin
     Synchronize(procedure
                 begin
                   FGrid.SetColWidth(40, 10);
-                  MainForm.LoadingAnimation(MainForm.ImgLoadingAddressBook, MainForm.sgAddressBook, AnimationOFF);
+                  MainForm.LoadingAnimation(MainForm.ImgLoadingAddressBook, MainForm.sgAddressBook, MainForm.PanelAddressBook, AnimationOFF);
                 end);
     { RELEASE }
     FGrid.Freeze(False);
@@ -801,29 +801,42 @@ begin
   SetLength(AddrBook, 1, 11);
   jCNT:=0;
   { ------------------------------------------------------------------------------------------------------------------------------- GET DATA FROM STRING GRID }
-  for iCNT:=FGrid.Selection.Top to FGrid.Selection.Bottom do
-  begin
-    if FGrid.RowHeights[iCNT] <> sgRowHidden then
+  Book:=TDataTables.Create(MainForm.DbConnect);
+  try
+    for iCNT:=FGrid.Selection.Top to FGrid.Selection.Bottom do
     begin
-      { BUILD CUID }
-      SCUID:=FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), iCNT] +
-             MainForm.ConvertName(
-                                   FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fCO_CODE, 1, 1), iCNT],
-                                   'F',
-                                    3
-                                 );
-      { BUILD ARRAY }
-      AddrBook[jCNT,  0]:=UpperCase(MainForm.WinUserName);
-      AddrBook[jCNT,  1]:=SCUID;
-      AddrBook[jCNT,  2]:=FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), iCNT];
-      AddrBook[jCNT,  3]:=FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), iCNT];
-      AddrBook[jCNT,  8]:=FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fAGENT,           1, 1), iCNT];
-      AddrBook[jCNT,  9]:=FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fDIVISION,        1, 1), iCNT];
-      AddrBook[jCNT, 10]:=FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fCO_CODE,         1, 1), iCNT];
-      { MOVE NEXT }
-      Inc(jCNT);
-      SetLength(AddrBook, jCNT + 1, 11);
+      if FGrid.RowHeights[iCNT] <> sgRowHidden then
+      begin
+        { BUILD CUID }
+        SCUID:=FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), iCNT] +
+               MainForm.ConvertName(
+                                     FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fCO_CODE, 1, 1), iCNT],
+                                     'F',
+                                      3
+                                   );
+        Book.CleanUp;
+        Book.Columns.Add(TAddressBook.SCUID);
+        Book.CustFilter:=WHERE + TAddressBook.SCUID + EQUAL + QuotedStr(SCUID);
+        Book.OpenTable(TblAddressbook);
+        { ADD TO ARRAY IF NOT EXISTS }
+        if Book.DataSet.RecordCount = 0 then
+        begin
+          { BUILD ARRAY }
+          AddrBook[jCNT,  0]:=UpperCase(MainForm.WinUserName);
+          AddrBook[jCNT,  1]:=SCUID;
+          AddrBook[jCNT,  2]:=FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), iCNT];
+          AddrBook[jCNT,  3]:=FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), iCNT];
+          AddrBook[jCNT,  8]:=FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fAGENT,           1, 1), iCNT];
+          AddrBook[jCNT,  9]:=FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fDIVISION,        1, 1), iCNT];
+          AddrBook[jCNT, 10]:=FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fCO_CODE,         1, 1), iCNT];
+          { MOVE NEXT }
+          Inc(jCNT);
+          SetLength(AddrBook, jCNT + 1, 11);
+        end;
+      end;
     end;
+  finally
+    Book.Free;
   end;
   { ---------------------------------------------------------------------------------------------------------------------------------------- SEND TO DATABASE }
   Book:=TDataTables.Create(MainForm.DbConnect);
@@ -842,8 +855,16 @@ begin
     try
       Book.StrSQL:=Book.ArrayToSql(AddrBook, TblAddressbook, Book.ColumnsToList(Book.Columns, enQuotesOff));
       Book.ExecSQL;
-      MainForm.ExecMessage(False, mcInfo, 'Address Book has been successfully populated by selected item(s).');
-      Result:=True;
+      if Book.RowsAffected > 0 then
+      begin
+        MainForm.ExecMessage(False, mcInfo, 'Address Book has been successfully populated by selected item(s).');
+        Result:=True;
+      end
+      else
+      begin
+        MainForm.ExecMessage(False, mcError, 'Address Book cannot be updated. Please contact IT support.');
+        Result:=False;
+      end;
     except
       on E: Exception do
       begin
@@ -974,23 +995,21 @@ end;
 procedure TTDailyComment.Execute;
 var
   DailyText:     TDataTables;
-  UpdateOK:      boolean;
-  InsertOK:      boolean;
   Condition:     string;
   Email:         string;
   CallEvent:     integer;
   EmailReminder: integer;
   EmailAutoStat: integer;
   EmailManuStat: integer;
+  DataCheckSum:  string;
 begin
   FIDThd:=CurrentThread.ThreadID;
   FLock.Acquire;
   try
-    UpdateOK:=False;
-    InsertOK:=False;
     DailyText:=TDataTables.Create(MainForm.DbConnect);
     try
       Condition:=TDaily.CUID + EQUAL + QuotedStr(FCUID) + _AND + TDaily.AGEDATE + EQUAL + QuotedStr(MainForm.AgeDateSel);
+      DataCheckSum:=FCUID + StringReplace(MainForm.AgeDateSel, '-', '', [rfReplaceAll]);
       DailyText.CustFilter:=WHERE + Condition;
       DailyText.OpenTable(TblDaily);
       { UPDATE EXISTING COMMENT }
@@ -1054,7 +1073,20 @@ begin
           DailyText.Conditions.Add(Condition);
         end;
         { EXECUTE }
-        UpdateOK:=DailyText.UpdateRecord(TblDaily);
+        if (DailyText.UpdateRecord(TblDaily)) and (DailyText.RowsAffected > 0) then
+        begin
+          { REFRESH HISTORY GRID }
+          Synchronize(procedure
+                      begin
+                        ActionsForm.UpdateHistory(ActionsForm.HistoryGrid);
+                      end);
+          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: ''DailyComment'' table has been updated (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(DailyText.RowsAffected) + '.');
+        end
+        else
+        begin
+          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot update daily comment (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(DailyText.RowsAffected) + '.');
+          MainForm.ExecMessage(False, mcError, 'Cannot update daily comment into database. Please contact IT support.');
+        end;
       end
       else
       { INSERT NEW RECORD }
@@ -1066,6 +1098,7 @@ begin
         DailyText.Columns.Add(TDaily.AGEDATE);        DailyText.Values.Add(MainForm.AgeDateSel);
         DailyText.Columns.Add(TDaily.STAMP);          DailyText.Values.Add(DateTimeToStr(Now));
         DailyText.Columns.Add(TDaily.USER_ALIAS);     DailyText.Values.Add(UpperCase(MainForm.WinUserName));
+        DailyText.Columns.Add(TDaily.DATACHECKSUM);   DailyText.Values.Add(DataCheckSum);
         if FEmail then
         begin
           DailyText.Columns.Add(TDaily.EMAIL);
@@ -1123,24 +1156,21 @@ begin
         DailyText.Columns.Add(TDaily.FIXCOMMENT);
         DailyText.Values.Add(FFixedComment);
         { EXECUTE }
-        InsertOK:=DailyText.InsertInto(TblDaily);
+        if (DailyText.InsertInto(TblDaily)) and (DailyText.RowsAffected > 0) then
+        begin
+          { REFRESH HISTORY GRID }
+          Synchronize(procedure
+                      begin
+                        ActionsForm.UpdateHistory(ActionsForm.HistoryGrid);
+                      end);
+          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: ''DailyComment'' table has been posted (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(DailyText.RowsAffected) + '.');
+        end
+        else
+        begin
+          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot post daily comment (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(DailyText.RowsAffected) + '.');
+          MainForm.ExecMessage(False, mcError, 'Cannot post daily comment into database. Please contact IT support.');
+        end;
       end;
-      { REFRESH HISTORY GRID }
-      Synchronize(procedure
-                  begin
-                    { OK }
-                    if (InsertOK) or (UpdateOK) then
-                    begin
-                      ActionsForm.UpdateHistory(ActionsForm.HistoryGrid);
-                      LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Daily comment has been posted for CUID: ' + FCUID + '.');
-                    end
-                    { ERROR }
-                    else
-                    begin
-                      LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot post daily comment for CUID: ' + FCUID + '.');
-                      MainForm.ExecMessage(False, mcError, 'Cannot post daily comment into database. Please contact IT support.');
-                    end;
-                  end);
     finally
       DailyText.Free;
     end;
@@ -1221,7 +1251,15 @@ begin
           GenText.Conditions.Add(Condition);
         end;
         { EXECUTE }
-        GenText.UpdateRecord(TblGeneral);
+        if (GenText.UpdateRecord(TblGeneral)) and (GenText.RowsAffected > 0) then
+        begin
+          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: ''GeneralComment'' table has been updated (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(GenText.RowsAffected) + '.');
+        end
+        else
+        begin
+          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot update general comment (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(GenText.RowsAffected) + '.');
+          MainForm.ExecMessage(False, mcError, 'Cannot update general comment into database. Please contact IT support.');
+        end;
       end
       else
       { INSERT NEW }
@@ -1272,13 +1310,13 @@ begin
           GenText.Values.Add('');
         end;
         { EXECUTE }
-        if GenText.InsertInto(TblGeneral) then
+        if (GenText.InsertInto(TblGeneral)) and (GenText.RowsAffected > 0) then
         begin
-          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: General comment has been posted for CUID: ' + FCUID + '.');
+          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: ''GeneralComment'' table has been posted (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(GenText.RowsAffected) + '.');
         end
         else
         begin
-          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot post general comment for CUID: ' + FCUID + '.');
+          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot post general comment (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(GenText.RowsAffected) + '.');
           MainForm.ExecMessage(False, mcError, 'Cannot post general comment into database. Please contact IT support.');
         end;
       end;

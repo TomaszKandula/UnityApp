@@ -23,10 +23,11 @@ type
   TMSSQL = class                                          (* BASE CLASS FOR SQL HANDLING *)
   {$TYPEINFO ON}
   public
-    var FParamList : TLists;
-    var StrSQL     : string;
-    var ADOCon     : TADOConnection;
-    var CmdType    : TCommandType;
+    var FParamList  : TLists;
+    var StrSQL      : string;
+    var ADOCon      : TADOConnection;
+    var CmdType     : TCommandType;
+    var RowsAffected: integer;
   published
     constructor Create(Connector: TADOConnection);
     destructor  Destroy; override;
@@ -66,6 +67,7 @@ end;
 procedure TMSSQL.ClearSQL;
 begin
   StrSQL:='';
+  RowsAffected:=0;
 end;
 
 { ------------------------------------------------------------------------------------------------ REMOVE CHARACTERS THAT MAY NEGATIVELY AFFECT SQL EXECUTION }
@@ -90,7 +92,7 @@ end;
 
 function TMSSQL.ExecSQL: _Recordset;
 var
-  Query:      TADOCommand;
+  Query:  TADOCommand;
 begin
   Result:=nil;
   if not (Length(StrSQL)) > 0 then Exit;
@@ -100,7 +102,8 @@ begin
     try
       Query.CommandType:=CmdType;
       Query.CommandText:=StrSQL;
-      Result:=Query.Execute;
+      RowsAffected:=0;
+      Result:=Query.Execute(RowsAffected, 0);
     except
       Result:=nil;
     end;

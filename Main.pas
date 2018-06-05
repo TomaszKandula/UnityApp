@@ -805,7 +805,7 @@ type                                                            (* GUI | MAIN TH
     procedure  CopyFile(const Source, Dest: string);
     procedure  ResetTabsheetButtons;
     procedure  SupplierResetFields;
-    procedure  LoadingAnimation(GIFImage: TImage; Grid: TStringGrid; State: integer);
+    procedure  LoadingAnimation(GIFImage: TImage; Grid: TStringGrid; GridPanel: TPanel; State: integer);
     procedure  SetPanelBorders;
     procedure  SetGridColumnWidths;
     procedure  SetGridRowHeights;
@@ -2211,7 +2211,7 @@ begin
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------------- LOADING ANIMATION }
-procedure TMainForm.LoadingAnimation(GIFImage: TImage; Grid: TStringGrid; State: Integer);
+procedure TMainForm.LoadingAnimation(GIFImage: TImage; Grid: TStringGrid; GridPanel: TPanel; State: Integer);
 begin
   case State of
     AnimationON:
@@ -2219,9 +2219,11 @@ begin
       Grid.Visible:=False;
       GIFImage.Visible:=True;
       (GIFImage.Picture.Graphic as TGIFImage).Animate:=True;
+      GridPanel.DoubleBuffered:=True;
     end;
     AnimationOFF:
     begin
+      GridPanel.DoubleBuffered:=False;
       (GIFImage.Picture.Graphic as TGIFImage).Animate:=False;
       GIFImage.Visible:=False;
       Grid.Visible:=True;
@@ -2848,23 +2850,19 @@ begin
   { ASK BEFORE DELETE }
   if MsgCall(mcQuestion2, 'Are you sure you want to delete this customer?' + CRLF + 'This operation cannot be reverted.') = IDNO then Exit;
   { EXECUTE DELETE QUERY }
-  if sgAddressBook.Cells[0, sgAddressBook.Row] <> '' then
-  begin
-    DataTables:=TDataTables.Create(DbConnect);
-    try
-      DataTables.StrSQL:=DELETE_FROM          +
-                           TblAddressbook     +
-                         WHERE                +
-                           TAddressBook.SCUID +
-                         EQUAL                +
-                           DataTables.CleanStr(sgAddressBook.Cells[2, sgAddressBook.Row], True);
-      DataTables.ExecSQL;
-    finally
-      DataTables.Free;
-    end;
+  DataTables:=TDataTables.Create(DbConnect);
+  try
+    DataTables.DeleteRecord(TblAddressbook, TAddressBook.SCUID, DataTables.CleanStr(sgAddressBook.Cells[2, sgAddressBook.Row], False));
+    if DataTables.RowsAffected > 0 then
+      sgAddressBook.DeleteRowFrom(1, 1)
+        else
+        begin
+          LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Cannot delete selected row (rows affected: ' + IntToStr(DataTables.RowsAffected) + ').');
+          MainForm.ExecMessage(False, mcError, 'Cannot delete selected row. Please contact IT support.');
+        end;
+  finally
+    DataTables.Free;
   end;
-  { REMOVE FROM STRING GRID ANYWAY }
-  sgAddressBook.DeleteRowFrom(1, 1);
 end;
 
 { ---------------------------------------------------------------------------------------------------------------------------------------- OPEN SEARCH WINDOW }

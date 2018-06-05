@@ -7,6 +7,7 @@ object ActionsForm: TActionsForm
   ClientHeight = 680
   ClientWidth = 940
   Color = clWhite
+  DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -3248,10 +3249,6 @@ object ActionsForm: TActionsForm
             ParentBackground = False
             TabOrder = 0
             Visible = False
-            ExplicitLeft = 136
-            ExplicitTop = 40
-            ExplicitWidth = 185
-            ExplicitHeight = 41
             object HistoryGrid: TStringGrid
               Left = 0
               Top = 0
@@ -3282,8 +3279,6 @@ object ActionsForm: TActionsForm
               OnMouseWheelDown = HistoryGridMouseWheelDown
               OnMouseWheelUp = HistoryGridMouseWheelUp
               OnSelectCell = HistoryGridSelectCell
-              ExplicitLeft = -112
-              ExplicitTop = -79
               ColWidths = (
                 10
                 10
