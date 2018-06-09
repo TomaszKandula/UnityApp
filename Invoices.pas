@@ -70,7 +70,7 @@ end;
 procedure TInvoicesForm.FormShow(Sender: TObject);
 begin
   InvoicesGrid.ClearAll(2, 1, 1, False);
-  InvoicesGrid.SetColWidth(10, 20);
+  InvoicesGrid.SetColWidth(10, 20, 400);
   InvoicesGrid.AutoThumbSize;
 end;
 

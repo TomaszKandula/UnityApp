@@ -126,9 +126,9 @@ end;
 
 procedure Status(Task: integer; Total: integer; Time: integer; Text: string; TextMode: boolean; EventLogPath: string);
 begin
-  SplashForm.Status.Caption:=Text;
-  SplashForm.Progress.Progress:=Trunc((Task / Total) * 100);
-  SplashForm.ProgressText.Caption:=IntToStr(SplashForm.Progress.Progress) + '%';
+  SplashForm.TextStatus.Caption:=Text;
+  SplashForm.ProgressBar.Progress:=Trunc((Task / Total) * 100);
+  SplashForm.TextProgress.Caption:=IntToStr(SplashForm.ProgressBar.Progress) + '%';
   SplashForm.Update;
   Sleep(Time);
   if TextMode = True then LogText(EventLogPath, Text);
@@ -146,14 +146,14 @@ var
   Zipped:    string;
   FullPath:  string;
 begin
-  FS:=nil;
   ZipR:=TZipReader.Create(FileName);
   LogText(EventLogPath, 'New update package has been found, updating files...');
   try
     for iCNT:=0 to ZipR.Count - 1 do
     begin
-      Zipped:=ZipR.Entry[iCNT].ZipName;
+      Zipped:=string(ZipR.Entry[iCNT].ZipName);
       FullPath:=DestDir + Zipped;
+      { CHECK IF WE HAVE PATH TO FILE OR TO FOLDER }
       if ExtractFileName(FullPath) <> '' then
       begin
         RenameFile(FullPath, Zipped + '.del');
@@ -166,6 +166,11 @@ begin
         finally
           FS.Free;
         end;
+      end
+      { OTHERWISE CREATE GIVEN FOLDER SO LATER WE CAN EXTRACT FILE(S) THERE }
+      else
+      begin
+        CreateDir(FullPath);
       end;
     end;
     Result:=True;
@@ -194,7 +199,9 @@ end;
 { ---------------------------------------------------------------- ! MAIN BLOCK ! --------------------------------------------------------------------------- }
 begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- DEBUG LINE }
+  {$WARN SYMBOL_PLATFORM OFF}
   ReportMemoryLeaksOnShutdown:=DebugHook <> 0;
+  {$WARN SYMBOL_PLATFORM ON}
   { -------------------------------------------------------------------------------------------------------------------------------------- ALLOW ONE INSTANCE }
   Mutex:=CreateMutex(nil, True, CurrentMutex);
   if (Mutex = 0) or (GetLastError = ERROR_ALREADY_EXISTS) then
@@ -208,7 +215,7 @@ begin
   { ------------------------------------------------------------------------------------------------------------------------------------------- SETUP FORMATS }
   {$WARN SYMBOL_PLATFORM OFF}
   RegSettings:=TFormatSettings.Create(LOCALE_USER_DEFAULT);
-  {$WARN SYMBOL_PLATFORM OFF}
+  {$WARN SYMBOL_PLATFORM ON}
   RegSettings.CurrencyDecimals    :=4;
   RegSettings.DateSeparator       :='-';
   RegSettings.ShortDateFormat     :='yyyy-mm-dd';
@@ -345,7 +352,7 @@ begin
   AppSettings:=TSettings.Create;
   try
     { ----------------------------------------------------------------------------------------------------------------------------- CHECK FOR MASTER PASSOWRD }
-    if AppSettings.TMIG.ReadString(Password, 'HASH', '') = '' then
+    if AppSettings.TMIG.ReadString(PasswordSection, 'HASH', '') = '' then
     begin
       Status(1, AllTasks, DelayStd, 'Checking master password... failed!', True, AppSettings.FPathEventLog);
       Application.MessageBox(

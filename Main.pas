@@ -18,7 +18,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, Menus, ComCtrls, Grids, ExtCtrls, StdCtrls, CheckLst, Buttons, PNGImage,
   DBGrids, AppEvnts, ShellAPI, INIFiles, StrUtils, ValEdit, DateUtils, Clipbrd, DB, ADODB, ActiveX, CDO_TLB, Diagnostics, Math, Wininet, ComObj, OleCtrls,
-  SHDocVw, GIFImg;
+  SHDocVw, GIFImg, Scrypt;
 
 { REFERENCE TO ARRAYS }
 type
@@ -84,7 +84,7 @@ type
     procedure DeleteRowFrom(FixedRow: integer; FixedCol: integer);
     procedure DrawSelected(ARow: integer; ACol: integer; State: TGridDrawState; Rect: TRect; FontColorSel: TColor; BrushColorSel: TColor; FontColor: TColor; BrushColor: TColor; Headers: boolean);
     procedure ColorValues(ARow: integer; ACol: integer; Rect: TRect; NegativeColor: TColor; PositiveColor: TColor);
-    procedure SetColWidth(FirstDefault: integer; AddSpace: integer);
+    procedure SetColWidth(FirstDefault: integer; AddSpace: integer; Limit: integer);
     procedure SetRowHeight(RowHeight, Header: integer);
 	  procedure MSort(const SortCol, datatype: integer; const ascending: boolean);
     procedure AutoThumbSize;
@@ -188,7 +188,7 @@ type                                                            (* GUI | MAIN TH
     Header3: TPanel;
     sgAddressBook: TStringGrid;
     Header8: TPanel;
-    Edit_PASSWORD: TEdit;
+    EditPassword: TEdit;
     Cap21: TShape;
     hShapeCred: TShape;
     Text32: TLabel;
@@ -198,9 +198,9 @@ type                                                            (* GUI | MAIN TH
     Text37: TLabel;
     Text38: TLabel;
     Text39: TLabel;
-    Edit_CurrPassWd: TEdit;
-    Edit_NewPassWd: TEdit;
-    Edit_ConfPassWd: TEdit;
+    EditCurrentPassword: TEdit;
+    EditNewPassword: TEdit;
+    EditNewPasswordConfirmation: TEdit;
     ShapeList1: TShape;
     imgKeyAdd: TImage;
     imgKeyRemove: TImage;
@@ -389,7 +389,7 @@ type                                                            (* GUI | MAIN TH
     Action_Update: TMenuItem;
     Action_Report: TMenuItem;
     N17: TMenuItem;
-    OpenPopup: TPopupMenu;
+    CommonPopupMenu: TPopupMenu;
     Action_AutoColumn: TMenuItem;
     Action_ExportTransactions: TMenuItem;
     Action_SelectAll: TMenuItem;
@@ -584,7 +584,7 @@ type                                                            (* GUI | MAIN TH
     procedure sgListSectionKeyPress(Sender: TObject; var Key: Char);
     procedure sgListValueClick(Sender: TObject);
     procedure sgListSectionClick(Sender: TObject);
-    procedure Edit_PASSWORDKeyPress(Sender: TObject; var Key: Char);
+    procedure EditPasswordKeyPress(Sender: TObject; var Key: Char);
     procedure CurrentTimeTimer(Sender: TObject);
     procedure UpTimeTimer(Sender: TObject);
     procedure sgListSectionMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
@@ -672,7 +672,6 @@ type                                                            (* GUI | MAIN TH
     procedure BookPopupPopup(Sender: TObject);
     procedure Action_ShowAsIsClick(Sender: TObject);
     procedure Action_ShowMyEntriesClick(Sender: TObject);
-    procedure sgAddressBookSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
     procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure Action_ToExceClick(Sender: TObject);
     procedure Action_BasicViewClick(Sender: TObject);
@@ -794,7 +793,7 @@ type                                                            (* GUI | MAIN TH
     function   FindKey(INI: TMemIniFile; OpenedSection: string; KeyPosition: integer): string;
     function   WndCall(WinForm: TForm; Mode: integer): integer;
     function   MsgCall(WndType: integer; WndText: string): integer;
-    procedure  LockSettingsPanel;
+    procedure  SetSettingsPanel(Mode: integer);
     function   ConvertName(CoNumber: string; Prefix: string; mode: integer): string;
     function   GetCoCode(CoPos: integer; GroupId: string): string;
     procedure  Find(ColumnNum: integer);
@@ -812,6 +811,10 @@ type                                                            (* GUI | MAIN TH
     procedure  SetGridThumbSizes;
     function   Explode(Text: string; SourceDelim: char): string;
     function   Implode(Text: Classes.TStrings; TargetDelim: char): string;
+    function   CheckGivenPassword(Password: string): boolean;
+    function   SetNewPassword(Password: string): boolean;
+    function   AddressBookExclusion: boolean;
+    function   CheckIfDate(StrDate: string): boolean;
   protected
     { PROCESS ALL WINDOWS MESSAGES }
     procedure  WndProc(var msg: Messages.TMessage); override;
@@ -1475,11 +1478,12 @@ begin
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------------- AUTO COLUMN WIDTH }
-procedure TStringGrid.SetColWidth(FirstDefault: integer; AddSpace: integer);
+procedure TStringGrid.SetColWidth(FirstDefault: integer; AddSpace: integer; Limit: integer);
 var
-  tblArray:  array of integer;
+  tblArray:  TIntigers;
   iCNT:      integer;
   jCNT:      integer;
+  NewWidth:  integer;
 begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   if Row > 0 then SetLength(tblArray, RowCount) else Exit;
@@ -1490,7 +1494,14 @@ begin
     { ----------------------------------------------------------------------------------------------------- ITERATE THROUGHT ALL ROWS INCLUDING ACTUAL HEADER }
     for iCNT:=0 to RowCount - 1 do tblArray[iCNT]:=Canvas.TextWidth(Cells[jCNT, iCNT]);
     { ---------------------------------------------------------------------------------------------------------------------------------- RETURN HIGHEST VALUE }
-    if not (ColWidths[jCNT] = -1) then ColWidths[jCNT]:=MaxIntValue(tblArray) + AddSpace;  (* SKIP HIDDEN COLUMNS *)
+    if not (ColWidths[jCNT] = -1) then { SKIP HIDDEN COLUMNS }
+    begin
+      NewWidth:=MaxIntValue(tblArray) + AddSpace;
+      if NewWidth < Limit then
+        ColWidths[jCNT]:=NewWidth
+          else
+            ColWidths[jCNT]:=Limit;
+    end;
   end;
   SetLength(tblArray, 1);
 end;
@@ -1795,7 +1806,7 @@ begin
   { ----------------------------------------------------------------------------------------------------------------------------- GET THE FILE PATH AND PARSE }
   if DialogBox.Execute = True then
   begin
-    MainForm.ExecMessage(True, 10, stImportCSV);
+    MainForm.ExecMessage(True, mcStatusBar, stImportCSV);
     fPath  :=DialogBox.FileName;
     Data   :=TStringList.Create;
     Transit:=TStringList.Create;
@@ -1825,20 +1836,20 @@ begin
         on E: Exception do
         begin
           LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: CSV Import has failed: ' + ExtractFileName(fPath));
-          SendMessage(MainForm.Handle, WM_GETINFO, 3, LPARAM(PChar('CSV Import has failed. Please check the file and try again.')));
+          MainForm.ExecMessage(False, mcError, 'CSV Import has failed. Please check the file and try again.');
           IsError:=True;
         end;
       end;
     { ----------------------------------------------------------------------------------------------------------------------------------- RELEASE FROM MEMORY }
     finally
-      MainForm.ExecMessage(True, 10, stReady);
       if not IsError then
       begin
         LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: Data has been imported successfully!');
-        MainForm.ExecMessage(False, 1, 'Data has been imported successfully!');
+        MainForm.ExecMessage(False, mcInfo, 'Data has been imported successfully!');
       end;
       Data.Free;
       Transit.Free;
+      MainForm.ExecMessage(True, mcStatusBar, stReady);
     end;
   end;
 end;
@@ -1860,7 +1871,7 @@ begin
   CSVData:=TStringList.Create;
   { ------------------------------------------------------------------------------------------------------------------------------------------ WRITE CSV FILE }
   try
-    MainForm.ExecMessage(True, 10, stExportCSV);
+    MainForm.ExecMessage(False, mcStatusBar, stExportCSV);
     { ADD ROWS AND COLUMNS WITH DELIMITER }
     for iCNT:=1 to Self.RowCount - 1 do
     begin
@@ -1875,14 +1886,19 @@ begin
     end;
     { SAVE TO FILE AS PLAIN TEXT }
     try
-      if DialogBox.Execute = True then CSVData.SaveToFile(DialogBox.FileName);
-      Result:=True;
-    { ------------------------------------------------------------------------------------------------------------------------------------------ ON EXCEPTION }
+      if DialogBox.Execute then
+      begin
+        CSVData.SaveToFile(DialogBox.FileName);
+        Result:=True;
+      end
+        else
+          Exit;
     except
+      { ---------------------------------------------------------------------------------------------------------------------------------------- ON EXCEPTION }
       on E: Exception do
       begin
         LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: Cannot saved file: ' + ExtractFileName(fPath));
-        SendMessage(MainForm.Handle, WM_GETINFO, 3, LPARAM(PChar('Cannot save the file in the given location.')));
+        MainForm.ExecMessage(False, mcError, 'Cannot save the file in the given location.');
         IsError:=True;
       end;
     end;
@@ -1891,10 +1907,10 @@ begin
     if not IsError then
     begin
       LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: Data has been exported successfully!');
-      SendMessage(MainForm.Handle, WM_GETINFO, 1, LPARAM(PChar('Data have been exported successfully!')));
+      MainForm.ExecMessage(False, mcInfo, 'Data have been exported successfully!');
     end;
     CSVData.Free;
-    MainForm.ExecMessage(True, 10, stReady);
+    MainForm.ExecMessage(False, mcStatusBar, stReady);
   end;
 end;
 
@@ -1968,36 +1984,66 @@ begin
   if WndType = mcQuestion2 then Result:=Application.MessageBox(PChar(WndText), PChar(APPNAME), MB_YESNO    + MB_ICONQUESTION);
 end;
 
-{ -------------------------------------------------------------------------------------------------------------------------------------------- RESET SETTINGS }
-procedure TMainForm.LockSettingsPanel;
+{ ----------------------------------------------------------------------------------------------------------------------------------------- (UN)LOCK SETTINGS }
+procedure TMainForm.SetSettingsPanel(Mode: integer);
 begin
-  { VISIBLE ON }
-  imgOFF.Visible         :=True;
-  btnPassUpdate.Enabled  :=False;
-  { EDIT BOXES }
-  Edit_CurrPassWd.Enabled:=False;
-  Edit_NewPassWd.Enabled :=False;
-  Edit_ConfPassWd.Enabled:=False;
-  Edit_CurrPassWd.Text   :='';
-  Edit_NewPassWd.Text    :='';
-  Edit_ConfPassWd.Text   :='';
-  Edit_PASSWORD.Text     :='';
-  { STRING GRIDS }
-  sgListSection.ClearAll(2, 0, 0, False);
-  sgListValue.ClearAll(2, 0, 0, False);
-  sgListSection.Row:=1;
-  sgListValue.Row:=1;
-  sgUAC.ClearAll(2, 0, 0, False);
-  sgGroups.ClearAll(2, 0, 0, False);
-  sgUAC.Row:=1;
-  sgGroups.Row:=1;
-  sgListSection.Enabled:=False;
-  sgListValue.Enabled  :=False;
-  sgUAC.Enabled        :=False;
-  sgGroups.Enabled     :=False;
-  { ENDING }
-  btnUnlock.Caption:='Unlock';
-  Edit_PASSWORD.SetFocus;
+  if Mode = spLock then
+  begin
+    { VISIBLE ON }
+    imgOFF.Visible         :=True;
+    btnPassUpdate.Enabled  :=False;
+    { EDIT BOXES }
+    EditCurrentPassword.Enabled:=False;
+    EditNewPassword.Enabled:=False;
+    EditNewPasswordConfirmation.Enabled:=False;
+    EditCurrentPassword.Text:='';
+    EditNewPassword.Text    :='';
+    EditNewPasswordConfirmation.Text:='';
+    EditPassword.Text:='';
+    { STRING GRIDS }
+    sgListSection.ClearAll(2, 0, 0, False);
+    sgListValue.ClearAll(2, 0, 0, False);
+    sgListSection.Row:=1;
+    sgListValue.Row:=1;
+    sgUAC.ClearAll(2, 0, 0, False);
+    sgGroups.ClearAll(2, 0, 0, False);
+    sgUAC.Row:=1;
+    sgGroups.Row:=1;
+    sgListSection.Enabled:=False;
+    sgListValue.Enabled  :=False;
+    sgUAC.Enabled        :=False;
+    sgGroups.Enabled     :=False;
+    { ENDING }
+    btnUnlock.Caption:='Unlock';
+    EditPassword.SetFocus;
+  end;
+  if Mode = spUnLock then
+  begin
+    { SETUP HEADERS }
+    sgListSection.Cols[0].Text:='Lp';
+    sgListSection.Cols[1].Text:='Sections';
+    sgListValue.Cols[0].Text  :='Lp';
+    sgListValue.Cols[1].Text  :='Key';
+    sgListValue.Cols[2].Text  :='Value';
+    { CREDENTIALS }
+    btnPassUpdate.Enabled  :=True;
+    EditCurrentPassword.Enabled:=True;
+    EditNewPassword.Enabled :=True;
+    EditNewPasswordConfirmation.Enabled:=True;
+    { STRING GRIDS }
+    sgUAC.Enabled:=True;
+    sgGroups.Enabled:=True;
+    sgListSection.Enabled:=True;
+    sgListValue.Enabled:=True;
+    sgListSectionClick(self);
+    sgListSection.Row:=1;
+    sgListValue.Row:=1;
+    { TRANSPARENCY OFF }
+    imgOFF.Visible:=False;
+    { ENDING }
+    btnUnlock.Caption:='Lock';
+    EditPassword.SetFocus;
+  end;
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------- CO CODE NAME CONVERTION }
@@ -2167,7 +2213,10 @@ begin
   try
     DestStream:=TFileStream.Create(Dest, fmCreate or fmShareExclusive);
     DestStream.CopyFrom(SourceStream, SourceStream.Size);
+    {$WARN SYMBOL_PLATFORM OFF}
+    { YOU MAY USE PLATFORM INDEPENDENT: function FileSetDate(const FileName: string; Age: Integer): Integer; overload; }
     FileSetDate(DestStream.Handle, FileGetDate(SourceStream.Handle));
+    {$WARN SYMBOL_PLATFORM ON}
   finally
     DestStream.Free;
     SourceStream.Free;
@@ -2253,18 +2302,18 @@ end;
 { -------------------------------------------------------------------------------------------------------------------------------- SET COLUMN WIDTH FOR GRIDS }
 procedure TMainForm.SetGridColumnWidths;
 begin
-  sgOpenItems.SetColWidth     (10, 20);
-  sgAddressBook.SetColWidth   (10, 20);
-  sgListValue.SetColWidth     (25, 20);
-  sgListSection.SetColWidth   (25, 20);
-  sgInvoiceTracker.SetColWidth(10, 20);
-  sgCoCodes.SetColWidth       (10, 30);
-  sgPaidInfo.SetColWidth      (10, 30);
-  sgPerson.SetColWidth        (10, 30);
-  sgGroup3.SetColWidth        (10, 30);
-  sgPmtTerms.SetColWidth      (10, 30);
-  sgGroups.SetColWidth        (10, 20);
-  sgUAC.SetColWidth           (10, 20);
+  sgOpenItems.SetColWidth     (10, 20, 400);
+  sgAddressBook.SetColWidth   (10, 20, 400);
+  sgListValue.SetColWidth     (25, 20, 400);
+  sgListSection.SetColWidth   (25, 20, 400);
+  sgInvoiceTracker.SetColWidth(10, 20, 400);
+  sgCoCodes.SetColWidth       (10, 30, 400);
+  sgPaidInfo.SetColWidth      (10, 30, 400);
+  sgPerson.SetColWidth        (10, 30, 400);
+  sgGroup3.SetColWidth        (10, 30, 400);
+  sgPmtTerms.SetColWidth      (10, 30, 400);
+  sgGroups.SetColWidth        (10, 20, 400);
+  sgUAC.SetColWidth           (10, 20, 400);
 end;
 
 { ---------------------------------------------------------------------------------------------------------------------------------- SET ROW HEIGHT FOR GRIDS }
@@ -2323,6 +2372,87 @@ begin
           Str:=Str + Text.Strings[iCNT];
   end;
   Result:=Str;
+end;
+
+{ ----------------------------------------------------------------------------------------------------------------------------------------- VALIDATE PASSWORD }
+function TMainForm.CheckGivenPassword(Password: string): boolean;
+var
+  AppSet:   TSettings;
+  Hash:     string;
+  ReHashed: boolean;
+begin
+  Result:=False;
+
+  AppSet:=TSettings.Create;
+  try
+    Hash:=AppSet.TMIG.ReadString(PasswordSection, 'HASH', '');
+  finally
+    AppSet.Free;
+  end;
+
+  if Hash = '' then
+    Exit
+      else
+        Result:=TScrypt.CheckPassword(Password, Hash, ReHashed);
+
+end;
+
+{ --------------------------------------------------------------------------------------------------------------------------------------- HASH GIVEN PASSWORD }
+function TMainForm.SetNewPassword(Password: string): boolean;
+var
+  AppSet:      TSettings;
+  HashPasswd:  string;
+begin
+
+  { EXIT CONDITION }
+  Result:=False;
+  if Password = '' then Exit;
+
+  { GENERATE HASH VALUE AND SALT }
+  HashPasswd:=TScrypt.HashPassword(Password, 14, 8, 1);
+
+  { SAVE IT }
+  AppSet:=TSettings.Create;
+  try
+    AppSet.TMIG.WriteString(PasswordSection, 'HASH', HashPasswd);
+    AppSet.Encode(AppConfig);
+    Result:=True;
+  finally
+    AppSet.Free;
+  end;
+
+end;
+
+{ -------------------------------------------------------------------------------------------------------------------------------- INDICATES EDITABLE COLUMNS }
+function TMainForm.AddressBookExclusion: boolean;
+begin
+  if
+     (
+       sgAddressBook.Col = sgAddressBook.ReturnColumn(TAddressBook.EMAILS, 1, 1)
+     )
+     or
+     (
+       sgAddressBook.Col = sgAddressBook.ReturnColumn(TAddressBook.PHONE_NUMBERS, 1, 1)
+     )
+     or
+     (
+       sgAddressBook.Col = sgAddressBook.ReturnColumn(TAddressBook.CONTACT, 1, 1)
+     )
+     or
+     (
+       sgAddressBook.Col = sgAddressBook.ReturnColumn(TAddressBook.ESTATEMENTS, 1, 1)
+     )
+  then
+    Result:=False { DO NOT EXCLUDE COLUMN FROM EDITING }
+  else
+    Result:=True; { EXCLUDE COLUMN FROM EDITING }
+end;
+
+{ -------------------------------------------------------------------------------------------------------------------------------------- VALIDATE STRING DATE }
+function TMainForm.CheckIfDate(StrDate: string): boolean;
+begin
+  Result:=False;
+  if StrToDateDef(StrDate, NULLDATE) <> NULLDATE then Result:=True;
 end;
 
 { ############################################################## ! MAIN THREAD EVENTS ! ##################################################################### }
@@ -2549,11 +2679,6 @@ begin
 
   { ----------------------------------------------------------- ! DEFAULT VALUES ! -------------------------------------------------------------------------- }
 
-  Edit_PASSWORD.Text   :='';
-  Edit_CurrPassWd.Text :='';
-  Edit_NewPassWd.Text  :='';
-  Edit_ConfPassWd.Text :='';
-  btnPassUpdate.Enabled:=False;
   MyPages.ActivePage   :=TabSheet1;
 
   { --------------------------------------------------------- ! READ DEFAULT AGE VIEW ! --------------------------------------------------------------------- }
@@ -2779,30 +2904,98 @@ end;
 
 { ---------------------------------------------------------------- ! POPUP MENUS ! -------------------------------------------------------------------------- }
 
-{ -------------------------------------------------------------- ! OPEN ITEMS MENU ! ------------------------------------------------------------------------ }
+{ ---------------------------------------------------------------- ! COMMON MENU ! -------------------------------------------------------------------------- }
 
 { --------------------------------------------------------------------------------------------------------------------------------- EXPORT ENTIRE GRID TO CSV }
 procedure TMainForm.Action_ExportTransactionsClick(Sender: TObject);
 begin
-  sgOpenItems.ExportCSV(CSVExport, '|');
+
+  { MAIN VIEW }
+
+  if sgOpenItems.Focused   then sgOpenItems.ExportCSV(CSVExport, '|');
+  if sgCoCodes.Focused     then sgCoCodes.ExportCSV(CSVExport, '|');
+  if sgPaidInfo.Focused    then sgPaidInfo.ExportCSV(CSVExport, '|');
+  if sgPerson.Focused      then sgPerson.ExportCSV(CSVExport, '|');
+  if sgGroup3.Focused      then sgGroup3.ExportCSV(CSVExport, '|');
+  if sgPmtTerms.Focused    then sgPmtTerms.ExportCSV(CSVExport, '|');
+  if sgListValue.Focused   then sgListValue.ExportCSV(CSVExport, '|');
+  if sgListSection.Focused then sgListSection.ExportCSV(CSVExport, '|');
+  if sgGroups.Focused      then sgGroups.ExportCSV(CSVExport, '|');
+  if sgUAC.Focused         then sgUAC.ExportCSV(CSVExport, '|');
+
+  { ACTION VIEW }
+
+  if ActionsForm.OpenItemsGrid.Focused then ActionsForm.OpenItemsGrid.ExportCSV(CSVExport, '|');
+
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------ SELECT ALL }
 procedure TMainForm.Action_SelectAllClick(Sender: TObject);
 begin
-  sgOpenItems.SelectAll;
+
+  { MAIN VIEW }
+
+  if sgOpenItems.Focused   then sgOpenItems.SelectAll;
+  if sgCoCodes.Focused     then sgCoCodes.SelectAll;
+  if sgPaidInfo.Focused    then sgPaidInfo.SelectAll;
+  if sgPerson.Focused      then sgPerson.SelectAll;
+  if sgGroup3.Focused      then sgGroup3.SelectAll;
+  if sgPmtTerms.Focused    then sgPmtTerms.SelectAll;
+  if sgListValue.Focused   then sgListValue.SelectAll;
+  if sgListSection.Focused then sgListSection.SelectAll;
+  if sgGroups.Focused      then sgGroups.SelectAll;
+  if sgUAC.Focused         then sgUAC.SelectAll;
+
+  { ACTION VIEW }
+
+  if ActionsForm.OpenItemsGrid.Focused then ActionsForm.OpenItemsGrid.SelectAll;
+
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------------- COPY TO CLIPBOARD }
 procedure TMainForm.Action_CopyToCBClick(Sender: TObject);
 begin
-  sgOpenItems.CopyCutPaste(adCopy);
+
+  { MAIN VIEW }
+
+  if sgOpenItems.Focused   then sgOpenItems.CopyCutPaste(adCopy);
+  if sgCoCodes.Focused     then sgCoCodes.CopyCutPaste(adCopy);
+  if sgPaidInfo.Focused    then sgPaidInfo.CopyCutPaste(adCopy);
+  if sgPerson.Focused      then sgPerson.CopyCutPaste(adCopy);
+  if sgGroup3.Focused      then sgGroup3.CopyCutPaste(adCopy);
+  if sgPmtTerms.Focused    then sgPmtTerms.CopyCutPaste(adCopy);
+  if sgListValue.Focused   then sgListValue.CopyCutPaste(adCopy);
+  if sgListSection.Focused then sgListSection.CopyCutPaste(adCopy);
+  if sgGroups.Focused      then sgGroups.CopyCutPaste(adCopy);
+  if sgUAC.Focused         then sgUAC.CopyCutPaste(adCopy);
+
+  { ACTION VIEW }
+
+  if ActionsForm.OpenItemsGrid.Focused then ActionsForm.OpenItemsGrid.CopyCutPaste(adCopy);
+
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------ SET COLUMN WIDTH }
 procedure TMainForm.Action_AutoColumnClick(Sender: TObject);
 begin
-  sgOpenItems.SetColWidth(10, 20);
+
+  { MAIN VIEW }
+
+  if sgOpenItems.Focused   then sgOpenItems.SetColWidth(10, 20, 400);
+  if sgCoCodes.Focused     then sgCoCodes.SetColWidth(10, 20, 400);
+  if sgPaidInfo.Focused    then sgPaidInfo.SetColWidth(10, 20, 400);
+  if sgPerson.Focused      then sgPerson.SetColWidth(10, 20, 400);
+  if sgGroup3.Focused      then sgGroup3.SetColWidth(10, 20, 400);
+  if sgPmtTerms.Focused    then sgPmtTerms.SetColWidth(10, 20, 400);
+  if sgListValue.Focused   then sgListValue.SetColWidth(25, 20, 400);
+  if sgListSection.Focused then sgListSection.SetColWidth(25, 20, 400);
+  if sgGroups.Focused      then sgGroups.SetColWidth(10, 20, 400);
+  if sgUAC.Focused         then sgUAC.SetColWidth(10, 20, 400);
+
+  { ACTION VIEW }
+
+  if ActionsForm.OpenItemsGrid.Focused then ActionsForm.OpenItemsGrid.SetColWidth(10, 20, 400);
+
 end;
 
 { ------------------------------------------------------------- ! ADDRESS BOOK MENU ! ----------------------------------------------------------------------- }
@@ -2825,6 +3018,13 @@ end;
 { ------------------------------------------------------------------------------------------------------------------------------------------------------- CUT }
 procedure TMainForm.Action_CutClick(Sender: TObject);
 begin
+
+  if AddressBookExclusion then
+  begin
+    MsgCall(mcWarn, 'This column is locked for editing.');
+    Exit;
+  end;
+
   sgAddressBook.CopyCutPaste(adCut);
   sgAddressBook.RecordRowsAffected;
 end;
@@ -2838,6 +3038,13 @@ end;
 { ----------------------------------------------------------------------------------------------------------------------------------------------------- PASTE }
 procedure TMainForm.Action_PasteClick(Sender: TObject);
 begin
+
+  if AddressBookExclusion then
+  begin
+    MsgCall(mcWarn, 'This column is locked for editing.');
+    Exit;
+  end;
+
   sgAddressBook.CopyCutPaste(adPaste);
   sgAddressBook.RecordRowsAffected;
 end;
@@ -2902,7 +3109,7 @@ end;
 { ------------------------------------------------------------------------------------------------------------------------------------------ SET COLUMN WIDTH }
 procedure TMainForm.Action_ColumnWidthClick(Sender: TObject);
 begin
-  sgAddressBook.SetColWidth(40, 10);
+  sgAddressBook.SetColWidth(40, 10, 400);
 end;
 
 { -------------------------------------------------------------- ! MAIN FORM MENU ! ------------------------------------------------------------------------- }
@@ -3068,15 +3275,22 @@ var
   iCNT: integer;
 begin
   Screen.Cursor:=crHourGlass;
+
   CalendarForm.CalendarMode:=cfGetDate;
+
   MainForm.WndCall(CalendarForm, 0);
+
   { IF SELECTED MORE THAN ONE CUSTOMER, ASSIGN GIVEN DATE TO SELECTED CUSTOMERS }
   if CalendarForm.SelectedDate <> NULLDATE then
   begin
     for iCNT:=sgAgeView.Selection.Top to sgAgeView.Selection.Bottom do
+
       if sgAgeView.RowHeights[iCNT] <> sgRowHidden then
         CalendarForm.SetFollowUp(CalendarForm.SelectedDate, sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUID, 1, 1), iCNT], iCNT);
+
   end;
+
+
   Screen.Cursor:=crDefault;
 end;
 
@@ -3301,7 +3515,7 @@ end;
 { --------------------------------------------------------------------------------------------------------------------------------------- AUTO COLUMN RE-SIZE }
 procedure TMainForm.Action_AutoColumnSizeClick(Sender: TObject);
 begin
-  MainForm.sgAgeView.SetColWidth(10, 20);
+  MainForm.sgAgeView.SetColWidth(10, 20, 400);
 end;
 
 { ------------------------------------------------------------------------------------------------------- SHOW ONLY BASIC VIEW DEFINIED IN CONFIGURATION FILE }
@@ -3511,7 +3725,7 @@ end;
 { ----------------------------------------------------------------------------------------------------------------------------- LOCK SETTING PANEL WHEN LEAVE }
 procedure TMainForm.TabSheet8Show(Sender: TObject);
 begin
-  MainForm.LockSettingsPanel;
+  SetSettingsPanel(spLock);
 end;
 
 { -------------------------------------------------------- ! COMPONENT EVENTS | GRIDS ! --------------------------------------------------------------------- }
@@ -3725,36 +3939,6 @@ end;
 
 { -------------------------------------------------------- ! STRING GRID ROW SELECTION ! -------------------------------------------------------------------- }
 
-procedure TMainForm.sgAddressBookSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
-begin
-  if
-     (
-       ACol = sgAddressBook.ReturnColumn(TAddressBook.EMAILS, 1, 1)
-     )
-     or
-     (
-       ACol = sgAddressBook.ReturnColumn(TAddressBook.PHONE_NUMBERS, 1, 1)
-     )
-     or
-     (
-       ACol = sgAddressBook.ReturnColumn(TAddressBook.CONTACT, 1, 1)
-     )
-     or
-     (
-       ACol = sgAddressBook.ReturnColumn(TAddressBook.ESTATEMENTS, 1, 1)
-     )
-  then
-  begin
-    CanSelect:=True;
-    sgAddressBook.Options:=sgAddressBook.Options + [goRangeSelect];
-  end
-  else
-  begin
-    CanSelect:=False;
-    sgAddressBook.Options:=sgAddressBook.Options - [goRangeSelect];
-  end;
-end;
-
 procedure TMainForm.DetailsGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
 begin
   DetailsGrid.Selection:=TGridRect(Rect(-1, -1, -1, -1));
@@ -3863,7 +4047,7 @@ begin
     AppSettings.Free;
     tsKEY.Free;
     tsVAL.Free;
-    sgListValue.SetColWidth(25, 30);
+    sgListValue.SetColWidth(25, 30, 400);
   end;
 end;
 
@@ -3953,55 +4137,138 @@ end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------------------- ON KEY DOWN }
 procedure TMainForm.sgAgeViewKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+var
+  Col0: integer;
+  Col1: integer;
+  Col2: integer;
+  Col3: integer;
 begin
+
+  { GET COLUMNS NUMBERS }
+  Col0:=sgAgeView.ReturnColumn(TSnapshots.CUID,    1, 1);
+  Col1:=sgAgeView.ReturnColumn(TSnapshots.FREE1,   1, 1);
+  Col2:=sgAgeView.ReturnColumn(TSnapshots.FREE2,   1, 1);
+  Col3:=sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1);
+
   { ALLOW COPYING }
   if (Key = 67) and (Shift = [ssCtrl]) then sgAgeView.CopyCutPaste(adCopy);
+
   { ALLOW EDITING FREE COLUMNS }
   if (
-       (sgAgeView.ReturnColumn(TSnapshots.FREE1, 1, 1) = sgAgeView.Col)
-         or
-           (sgAgeView.ReturnColumn(TSnapshots.FREE2, 1, 1) = sgAgeView.Col)
+       (
+         Col1 = sgAgeView.Col
+       )
+       or
+       (
+         Col2 = sgAgeView.Col
+       )
+       or
+       (
+         Col3 = sgAgeView.Col
+       )
      )
      and
      (
        sgAgeView.Row > 0
      )
-       then
-         sgAgeView.Options:=sgAgeView.Options + [goEditing]
-       else
-         sgAgeView.Options:=sgAgeView.Options - [goEditing];
+  then
+    sgAgeView.Options:=sgAgeView.Options + [goEditing]
+  else
+    sgAgeView.Options:=sgAgeView.Options - [goEditing];
+
   { WRITE INTO DATABASE }
   if Key = VK_RETURN then
   begin
+
+    if (
+         sgAgeView.Cells[Col3, sgAgeView.Row] <> ''
+       )
+       and
+       (
+         sgAgeView.Cells[Col3, sgAgeView.Row] <> SPACE
+       )
+    then
+    begin
+      if not(CheckIfDate(sgAgeView.Cells[Col3, sgAgeView.Row])) then
+      begin
+        MsgCall(mcWarn, 'Invalid date format, please use "yyyy-mm-dd".');
+        sgAgeView.Cells[Col3, sgAgeView.Row]:=SPACE;
+        sgAgeView.Options:=sgAgeView.Options - [goEditing];
+        Exit;
+      end;
+    end;
+
     TTGeneralComment.Create(
-                             sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.CUID,  1, 1), sgAgeView.Row],
+                             sgAgeView.Cells[Col0, sgAgeView.Row],
                              strNULL,
-                             strNULL,
-                             sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.FREE1, 1, 1), sgAgeView.Row],
+                             sgAgeView.Cells[Col3, sgAgeView.Row],
+                             sgAgeView.Cells[Col1, sgAgeView.Row],
                              strNULL
                            );
+
     sgAgeView.Options:=sgAgeView.Options - [goEditing];
+
   end;
+
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------- ON KEY UP }
 procedure TMainForm.sgAgeViewKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  { DELETE GIVEN RECORD }
-  if Key = VK_DELETE then
+
+  { DELETE GIVEN RECORD | FREE1 AND FOLLOW-UP COLUMNS }
+  if (
+       (
+         Key = VK_DELETE
+       )
+       and
+       (
+         (
+           sgAgeView.Col = sgAgeView.ReturnColumn(TSnapshots.FREE1, 1, 1)
+         )
+         or
+         (
+           sgAgeView.Col = sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1)
+         )
+       )
+     )
+  then
   begin
-    TTGeneralComment.Create(
-                             sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.CUID,  1, 1), sgAgeView.Row],
-                             strNULL,
-                             strNULL,
-                             '',
-                             strNULL
-                           );
-    sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.FREE1, 1, 1), sgAgeView.Row]:='';
+
+    { DELETE CONTENT OF FREE1 COLUMN }
+    if sgAgeView.Col = sgAgeView.ReturnColumn(TSnapshots.FREE1, 1, 1) then
+    begin
+      TTGeneralComment.Create(
+                               sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.CUID,  1, 1), sgAgeView.Row],
+                               strNULL,
+                               strNULL,
+                               '',
+                               strNULL
+                             );
+      sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.FREE1,   1, 1), sgAgeView.Row]:='';
+    end;
+
+    { DELETE CONTENT OF FOLLOW-UP COLUMN }
+    if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1) then
+    begin
+      TTGeneralComment.Create(
+                               sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.CUID,  1, 1), sgAgeView.Row],
+                               strNULL,
+                               '',
+                               strNULL,
+                               strNULL
+                             );
+      sgAgeView.Cells[sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1), sgAgeView.Row]:='';
+    end;
+
+    { QUIT EDITING }
     sgAgeView.Options:=sgAgeView.Options - [goEditing];
+
   end;
+
   { QUIT EDITING }
   if Key = VK_ESCAPE then sgAgeView.Options:=sgAgeView.Options - [goEditing];
+
 end;
 
 { ------------------------------------------------------------ ! EDIT ADDRESS BOOK  ! ----------------------------------------------------------------------- }
@@ -4009,17 +4276,31 @@ end;
 { ----------------------------------------------------------------------------------------------------------------------------------------------- ON KEY DOWN }
 procedure TMainForm.sgAddressBookKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if Key = VK_RETURN then
+
+  if (Key <> VK_LEFT) and (Key <> VK_RIGHT) and (Key <> VK_UP) and (Key <> VK_DOWN) then
   begin
-    sgAddressBook.DelEsc(adESC, sgAddressBook.Col, sgAddressBook.Row);
-    sgAddressBook.Options:=sgAddressBook.Options - [goEditing];
-    sgAddressBook.SetUpdatedRow(sgAddressBook.Row);
+
+    if AddressBookExclusion then
+    begin
+      MsgCall(mcWarn, 'This column is locked for editing.');
+      Exit;
+    end;
+
+    if Key = VK_RETURN then
+    begin
+      sgAddressBook.DelEsc(adESC, sgAddressBook.Col, sgAddressBook.Row);
+      sgAddressBook.Options:=sgAddressBook.Options - [goEditing];
+      sgAddressBook.SetUpdatedRow(sgAddressBook.Row);
+    end;
+
+    if Key = VK_DELETE then
+    begin
+      sgAddressBook.DelEsc(adDEL, sgAddressBook.Col, sgAddressBook.Row);
+      sgAddressBook.SetUpdatedRow(sgAddressBook.Row);
+    end;
+
   end;
-  if Key = VK_DELETE then
-  begin
-    sgAddressBook.DelEsc(adDEL, sgAddressBook.Col, sgAddressBook.Row);
-    sgAddressBook.SetUpdatedRow(sgAddressBook.Row);
-  end;
+
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------- ON KEY UP }
@@ -4125,7 +4406,7 @@ begin
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------- CALL PASSWORD UNLOCK }
-procedure TMainForm.Edit_PASSWORDKeyPress(Sender: TObject; var Key: Char);
+procedure TMainForm.EditPasswordKeyPress(Sender: TObject; var Key: Char);
 begin
   { ON <ENTER> }
   if Key = CR then btnUnlockClick(self);
@@ -5071,153 +5352,153 @@ end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------------- SAVE NEW PASSWORD }
 procedure TMainForm.btnPassUpdateClick(Sender: TObject);
-var
-  AppSettings:  TSettings;
 begin
-  AppSettings:=TSettings.Create;
-  if (AppSettings.TMIG.ReadString(Password, 'VALUE', '') = Edit_CurrPassWd.Text) then
+
+  { ------------------------------------------------------------- ! CHECK FIELDS ! -------------------------------------------------------------------------- }
+
+  if
+     (
+       EditCurrentPassword.Text <> ''
+     )
+     and
+     (
+       EditNewPassword.Text <> ''
+     )
+     and
+     (
+       EditNewPasswordConfirmation.Text <> ''
+     )
+  then
   begin
-    if Edit_NewPassWd.Text=Edit_ConfPassWd.text then
+
+    { -------------------------------------------------------- ! CHECK GIVEN PASSWORD ! --------------------------------------------------------------------- }
+
+    if not(CheckGivenPassword(EditPassword.Text)) then
     begin
-      AppSettings.TMIG.WriteString(Password,'VALUE',Edit_NewPassWd.Text);
-      AppSettings.Encode(AppConfig);
-      AppSettings.Free;
-      MsgCall(mcInfo, 'New password has been saved.');
-      btnPassUpdate.Enabled:=False;
-      Edit_CurrPassWd.Enabled:=False;
-      Edit_NewPassWd.Enabled:=False;
-      Edit_ConfPassWd.Enabled:=False;
-      Edit_PASSWORD.Text:='';
-      Edit_CurrPassWd.Text:='';
-      Edit_NewPassWd.Text:='';
-      Edit_ConfPassWd.Text:='';
+      MsgCall(mcWarn, 'Incorrect password, please re-type it and try again.');
+      Exit;
+    end;
+
+    { ---------------------------------------------------------- ! INCORRECT MATCH ! ------------------------------------------------------------------------ }
+
+    if EditNewPassword.Text <> EditNewPasswordConfirmation.Text then
+    begin
+      MsgCall(mcWarn, 'New password and its confirmation does not match, please re-type it and try again.');
+      Exit;
     end
-      else
-        MsgCall(mcWarn, 'New password and confirmation does not match, please re-type it and try again.');
-  end
     else
-      MsgCall(mcWarn, 'Current password is incorrect, please re-type it and try again.');
+
+    { ------------------------------------------------------------ ! HASH AND SAVE ! ------------------------------------------------------------------------ }
+
+    begin
+      if SetNewPassword(EditNewPassword.Text) then
+      begin
+        MsgCall(mcInfo, 'New password has been saved.');
+        btnPassUpdate.Enabled:=False;
+        EditCurrentPassword.Enabled:=False;
+        EditNewPassword.Enabled:=False;
+        EditNewPasswordConfirmation.Enabled:=False;
+        EditCurrentPassword.Text:='';
+        EditNewPassword.Text:='';
+        EditNewPasswordConfirmation.Text:='';
+      end
+      else
+
+      { ------------------------------------------------------ ! CANNOT HASH AND SAVE ! --------------------------------------------------------------------- }
+
+      begin
+        MsgCall(mcError, 'Cannot save new password. Please contact IT support.');
+      end;
+
+    end;
+
+  end
+  else
+
+  { --------------------------------------------------------- ! NO FIELDS CAN BE EMPTY ! -------------------------------------------------------------------- }
+
+  begin
+    MsgCall(mcWarn, 'Please provide with current password, new password and its confirmation.');
+  end;
+
 end;
 
 { ---------------------------------------------------------------------------------------------------------------------------------------------------- UNLOCK }
-procedure TMainForm.btnUnlockClick(Sender: TObject);  // refactor + bcrypt
+procedure TMainForm.btnUnlockClick(Sender: TObject);
+var
+  List:     TStringList;
+  AppSet:   TSettings;
+  UserAcc:  TDataTables;
+  iCNT:     integer;
+  jCNT:     integer;
+begin
 
-  (* COMMON VARIABLES *)
-  var
-    AppSettings:  TSettings;
-    DataTables:   TDataTables;
+  { ----------------------------------------------------------- ! NO PASSWORD GIVEN ! ----------------------------------------------------------------------- }
 
-  (* NESTED PROCEDURE *)
-
-  procedure LockAction;
-  var
-    tStrings:     TStringList;
-    iCNT:         integer;
-    inner:        integer;
+  if EditPassword.Text = '' then
   begin
+    MsgCall(mcWarn, 'Please provide with password.');
+    Exit;
+  end
+  else
 
-    if not Assigned(AppSettings) then Exit;
+  { ------------------------------------------------------------ ! PASSWORD IS VALID ! ---------------------------------------------------------------------- }
 
-    { LOCK / UNLOCK }
-    if btnUnlock.Caption = 'Unlock' then
-    begin
-      { IF PASSWORD IS OK, THEN UNLOCK AND LOAD CONFIGURATION SCRIPT FOR EDITING }
-      if (AppSettings.TMIG.ReadString(Password, 'HASH', '') <> '') and
-         (AppSettings.TMIG.ReadString(Password, 'HASH', '') = Edit_PASSWORD.Text) then
+  if CheckGivenPassword(EditPassword.Text) then
+  begin
+    { ENABLE CONTROLS }
+    SetSettingsPanel(spUnLock);
+
+    { POPULATE STRING GRIDS }
+    List:=TStringList.Create();
+    AppSet:=TSettings.Create;
+    try
+      AppSet.TMIG.ReadSections(List);
+      sgListSection.RowCount:=List.Count;
+      jCNT:=1;
+      for iCNT:=0 to List.Count - 1 do
       begin
-        { SETUP HEADERS }
-        sgListSection.Cols[0].Text:='Lp';
-        sgListSection.Cols[1].Text:='Sections';
-        sgListValue.Cols[0].Text  :='Lp';
-        sgListValue.Cols[1].Text  :='Key';
-        sgListValue.Cols[2].Text  :='Value';
-        { CREDENTIALS }
-        btnPassUpdate.Enabled  :=True;
-        Edit_CurrPassWd.Enabled:=True;
-        Edit_NewPassWd.Enabled :=True;
-        Edit_ConfPassWd.Enabled:=True;
-        { STRING GRIDS }
-        sgUAC.Enabled:=True;
-        sgGroups.Enabled:=True;
-        sgListSection.Enabled:=True;
-        sgListValue.Enabled:=True;
-        sgListSectionClick(self);
-        sgListSection.Row:=1;
-        sgListValue.Row:=1;
-        { TRANSPARENCY OFF }
-        imgOFF.Visible:=False;
-        { POPULATE STRING GRIDS }
-        tStrings:=TStringList.Create();
-        try
-          { READ ALL SETTINGS }
-          AppSettings.TMIG.ReadSections(tStrings);
-          { LIST ALL SECTIONS EXCEPT 'PASSWD' SECTION }
-          sgListSection.RowCount:=tStrings.Count;
-          inner:=1;
-          for iCNT:=0 to tStrings.Count - 1 do
-          begin
-            if tStrings.Strings[iCNT] <> Password then
-            begin
-              sgListSection.Cells[0, inner]:=IntToStr(inner);
-              sgListSection.Cells[1, inner]:=tStrings.Strings[iCNT];
-              inc(inner);
-            end;
-          end;
-          { READ UAC AND GROUPS }
-          DataTables:=TDataTables.Create(DbConnect);
-          try
-            DataTables.OpenTable(TblUAC);    DataTables.SqlToGrid(sgUAC,    DataTables.ExecSQL, False, True);
-            DataTables.OpenTable(TblGroups); DataTables.SqlToGrid(sgGroups, DataTables.ExecSQL, False, True);
-          finally
-            DataTables.Free;
-            sgUAC.SetColWidth   (10, 20);
-            sgGroups.SetColWidth(10, 20);
-          end;
-        finally
-          tStrings.Free;
-          btnUnlock.Caption:='Lock';
-          sgListValue.RowCount:=2;
+        if List.Strings[iCNT] <> PasswordSection then
+        begin
+          sgListSection.Cells[0, jCNT]:=IntToStr(jCNT);
+          sgListSection.Cells[1, jCNT]:=List.Strings[iCNT];
+          inc(jCNT);
         end;
       end;
-
-      { STOP IF PASSWORD IS INVALID }
-      if (AppSettings.TMIG.ReadString(Password, 'HASH', '') <> '') and
-         (AppSettings.TMIG.ReadString(Password, 'HASH', '') <> Edit_PASSWORD.Text) then
-      begin
-        MsgCall(mcWarn, 'Incorrect password, please re-type it and try again.');
-      end;
-
-      { SETUP NEW PASSWORD }
-      if (AppSettings.TMIG.ReadString(Password, 'HASH', '') = '') then
-      begin
-        Edit_CurrPassWd.Enabled:=True;
-        Edit_NewPassWd.Enabled :=True;
-        Edit_ConfPassWd.Enabled:=True;
-        MsgCall(mcWarn, 'Please provide with new password.');
-      end;
-      Edit_PASSWORD.Text:='';
-      Edit_PASSWORD.SetFocus;
-    end else
-    { LOCK TABSHEET }
-    begin
-      MainForm.LockSettingsPanel;
+    finally
+      List.Free;
+      AppSet.Free;
     end;
 
+    { GET UAC AND GROUPS }
+    UserAcc:=TDataTables.Create(DbConnect);
+    try
+      UserAcc.OpenTable(TblUAC);    UserAcc.SqlToGrid(sgUAC,    UserAcc.ExecSQL, False, True);
+      UserAcc.OpenTable(TblGroups); UserAcc.SqlToGrid(sgGroups, UserAcc.ExecSQL, False, True);
+    finally
+      UserAcc.Free;
+      sgUAC.SetColWidth   (10, 20, 400);
+      sgGroups.SetColWidth(10, 20, 400);
+    end;
+
+    { STRING GRIDS DIMENSIONS }
+    sgListValue.SetColWidth(25, 30, 400);
+    sgListSection.SetColWidth(25, 30, 400);
+    sgUAC.SetColWidth(10, 20, 400);
+    sgGroups.SetColWidth(10, 20, 400);
+
+    { CLEAR EDIT BOX FROM PROVIDED PASWORD }
+    EditPassword.Text:='';
+
+  end
+  else
+
+  { ------------------------------------------------------------- ! INVALID PASSWORD ! ---------------------------------------------------------------------- }
+
+  begin
+    MsgCall(mcWarn, 'Incorrect password, please re-type it and try again.');
   end;
 
-  (* MAIN BLOCK *)
-
-begin
-  AppSettings:=TSettings.Create;
-  try
-    LockAction;
-    sgListValue.SetColWidth(25, 30);
-    sgListSection.SetColWidth(25, 30);
-    sgUAC.SetColWidth(10, 20);
-    sgGroups.SetColWidth(10, 20);
-  finally
-    AppSettings.Free;
-  end;
 end;
 
 end.

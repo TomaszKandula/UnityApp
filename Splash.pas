@@ -16,23 +16,22 @@ unit Splash;
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, ExtCtrls, Gauges, StdCtrls, pngimage;
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, ExtCtrls, Gauges, StdCtrls, pngimage, Main;
 
 { --------------------------------------------------------------- ! MAIN CLASS ! ---------------------------------------------------------------------------- }
 type
   TSplashForm = class(TForm)
-    Background: TShape;
     MainText2: TLabel;
-    BottomLine: TBevel;
-    Progress: TGauge;
-    Text2: TLabel;
-    Text3: TLabel;
+    ProgressBar: TGauge;
+    TextFooterA: TLabel;
+    TextFooter2B: TLabel;
     MainText1: TLabel;
-    ProgressBar: TShape;
-    Status: TLabel;
-    Text4: TLabel;
-    ImageDB2: TImage;
-    ProgressText: TLabel;
+    TextStatus: TLabel;
+    SubText: TLabel;
+    TextProgress: TLabel;
+    ShapeProgressBar: TShape;
+    ShapeBackground: TShape;
+    procedure FormCreate(Sender: TObject);
   protected
     procedure CreateParams(var Params: TCreateParams); override;
   end;
@@ -57,6 +56,12 @@ begin
     Style:=WS_POPUP;
     WindowClass.style:=WindowClass.style or CS_DROPSHADOW;
   end;
+end;
+
+{ ------------------------------------------------------------------------------------------------------------------------------------------------- ON CREATE }
+procedure TSplashForm.FormCreate(Sender: TObject);
+begin
+  { DO NOTHING }
 end;
 
 end.

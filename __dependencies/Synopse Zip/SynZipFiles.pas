@@ -866,7 +866,7 @@ begin
       exit;
   if FileQueue<>nil then
   for i := 0 to FileQueue.Count-1 do
-    if GetValueFromIndex(FileQueue,i)=aZipName then begin
+    if GetValueFromIndex(FileQueue,i)=string(aZipName) then begin  //use string(param) to convert RAWUTF8 to string
       FileQueue.Delete(i);
       break;
     end;
@@ -1375,7 +1375,9 @@ begin
   ftruncate(outFile.Handle, outFile.seek(0,soFromCurrent));
 {$endif}
   if forceFileAge<>0 then
-    FileSetDate(outFile.Handle,forceFileAge);
+    {$WARN SYMBOL_PLATFORM OFF}
+    FileSetDate(outFile.Handle,forceFileAge); //FileSetDate is specific to a platform !!!!
+    {$WARN SYMBOL_PLATFORM ON}
   outFile.Free;
   // 5. if we worked on a .tmp file (recreated from a TZipReader) -> make it new
   if fDestFileName<>'' then begin

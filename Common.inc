@@ -121,6 +121,11 @@ const
   cdoBasic             = 1;
   cdoNTLM              = 2;
 
+  { SETTINGS PANEL ENUMS }
+
+  spLock   = 0;
+  spUnLock = 1;
+
   { APPLICATION NAME }
 
   APPNAME       = 'Unity';
@@ -147,7 +152,7 @@ const
   { SECTION NAMES IN SETTING FILE }
 
   ApplicationDetails  = 'APPLICATION';
-  Password            = 'PASSWORD';
+  PasswordSection     = 'PASSWORD';
   TabSheetsNames      = 'TABSHEETS_NAMES';
   RiskClassDetails    = 'RISK_CLASS_DETAILS';
   MailerNTLM          = 'MAILER_NTLM';

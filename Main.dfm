@@ -1193,7 +1193,7 @@ object MainForm: TMainForm
     Margins.Top = 0
     Margins.Right = 10
     Margins.Bottom = 0
-    ActivePage = TabSheet1
+    ActivePage = TabSheet3
     Align = alClient
     DoubleBuffered = True
     Font.Charset = DEFAULT_CHARSET
@@ -9787,7 +9787,7 @@ object MainForm: TMainForm
           GradientEndColor = 15527148
           Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
           ParentShowHint = False
-          PopupMenu = OpenPopup
+          PopupMenu = CommonPopupMenu
           ShowHint = False
           TabOrder = 0
           OnDrawCell = sgOpenItemsDrawCell
@@ -13280,7 +13280,6 @@ object MainForm: TMainForm
           OnKeyUp = sgAddressBookKeyUp
           OnMouseWheelDown = sgAddressBookMouseWheelDown
           OnMouseWheelUp = sgAddressBookMouseWheelUp
-          OnSelectCell = sgAddressBookSelectCell
           ColWidths = (
             40
             39
@@ -16718,6 +16717,7 @@ object MainForm: TMainForm
             RowCount = 2
             GradientEndColor = 15527148
             Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
+            PopupMenu = CommonPopupMenu
             TabOrder = 0
             OnDrawCell = sgCoCodesDrawCell
             OnKeyDown = sgCoCodesKeyDown
@@ -16806,6 +16806,7 @@ object MainForm: TMainForm
             RowCount = 2
             GradientEndColor = 15527148
             Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goThumbTracking]
+            PopupMenu = CommonPopupMenu
             TabOrder = 0
             OnDrawCell = sgPmtTermsDrawCell
             OnKeyDown = sgPmtTermsKeyDown
@@ -16847,6 +16848,7 @@ object MainForm: TMainForm
             RowCount = 2
             GradientEndColor = 15527148
             Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goThumbTracking]
+            PopupMenu = CommonPopupMenu
             TabOrder = 0
             OnDrawCell = sgGroup3DrawCell
             OnKeyDown = sgGroup3KeyDown
@@ -16935,6 +16937,7 @@ object MainForm: TMainForm
             RowCount = 2
             GradientEndColor = 15527148
             Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goThumbTracking]
+            PopupMenu = CommonPopupMenu
             TabOrder = 0
             OnDrawCell = sgPaidInfoDrawCell
             OnKeyDown = sgPaidInfoKeyDown
@@ -16978,6 +16981,7 @@ object MainForm: TMainForm
             RowCount = 2
             GradientEndColor = 15527148
             Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goThumbTracking]
+            PopupMenu = CommonPopupMenu
             TabOrder = 0
             OnDrawCell = sgPersonDrawCell
             OnKeyDown = sgPersonKeyDown
@@ -17156,12 +17160,13 @@ object MainForm: TMainForm
             OnClick = btnUnlockClick
           end
           object btnPassUpdate: TSpeedButton
-            Left = 816
+            Left = 821
             Top = 54
             Width = 75
             Height = 25
             Cursor = crHandPoint
             Caption = 'Update'
+            Enabled = False
             Flat = True
             Glyph.Data = {
               36030000424D3603000000000000360000002800000010000000100000000100
@@ -17193,7 +17198,7 @@ object MainForm: TMainForm
             Spacing = 7
             OnClick = btnPassUpdateClick
           end
-          object Edit_ConfPassWd: TEdit
+          object EditNewPasswordConfirmation: TEdit
             Left = 591
             Top = 62
             Width = 201
@@ -17214,9 +17219,8 @@ object MainForm: TMainForm
             PasswordChar = '*'
             ShowHint = False
             TabOrder = 0
-            Text = 'root@trtool'
           end
-          object Edit_CurrPassWd: TEdit
+          object EditCurrentPassword: TEdit
             Left = 591
             Top = 24
             Width = 201
@@ -17237,9 +17241,8 @@ object MainForm: TMainForm
             PasswordChar = '*'
             ShowHint = False
             TabOrder = 1
-            Text = 'root@trtool'
           end
-          object Edit_NewPassWd: TEdit
+          object EditNewPassword: TEdit
             Left = 591
             Top = 43
             Width = 201
@@ -17260,9 +17263,8 @@ object MainForm: TMainForm
             PasswordChar = '*'
             ShowHint = False
             TabOrder = 2
-            Text = 'root@trtool'
           end
-          object Edit_PASSWORD: TEdit
+          object EditPassword: TEdit
             Left = 151
             Top = 56
             Width = 201
@@ -17274,8 +17276,7 @@ object MainForm: TMainForm
             MaxLength = 25
             PasswordChar = '*'
             TabOrder = 3
-            Text = 'root@trtool'
-            OnKeyPress = Edit_PASSWORDKeyPress
+            OnKeyPress = EditPasswordKeyPress
           end
         end
         object TopPanel8: TPanel
@@ -17761,6 +17762,7 @@ object MainForm: TMainForm
             RowCount = 2
             GradientEndColor = 15527148
             Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
+            PopupMenu = CommonPopupMenu
             TabOrder = 0
             OnClick = sgListSectionClick
             OnDrawCell = sgListSectionDrawCell
@@ -17810,6 +17812,7 @@ object MainForm: TMainForm
             RowCount = 2
             GradientEndColor = 15527148
             Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
+            PopupMenu = CommonPopupMenu
             TabOrder = 0
             OnClick = sgListValueClick
             OnDrawCell = sgListValueDrawCell
@@ -17921,6 +17924,7 @@ object MainForm: TMainForm
             RowCount = 2
             GradientEndColor = 15527148
             Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
+            PopupMenu = CommonPopupMenu
             TabOrder = 0
             OnDrawCell = sgUACDrawCell
             OnMouseWheelDown = sgUACMouseWheelDown
@@ -17966,6 +17970,7 @@ object MainForm: TMainForm
             RowCount = 2
             GradientEndColor = 15527148
             Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
+            PopupMenu = CommonPopupMenu
             TabOrder = 0
             OnDrawCell = sgGroupsDrawCell
             OnMouseWheelDown = sgGroupsMouseWheelDown
@@ -21901,7 +21906,7 @@ object MainForm: TMainForm
     Left = 320
     Top = 552
   end
-  object OpenPopup: TPopupMenu
+  object CommonPopupMenu: TPopupMenu
     MenuAnimation = [maLeftToRight]
     Left = 240
     Top = 488

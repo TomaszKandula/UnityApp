@@ -82,7 +82,7 @@ begin
     end
     else
     begin
-      sgTicketList.SetColWidth(10, 30);
+      sgTicketList.SetColWidth(10, 30, 400);
     end;
   finally
     Vendor.Free;

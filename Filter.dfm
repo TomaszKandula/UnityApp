@@ -39,7 +39,6 @@ object FilterForm: TFilterForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
-    ExplicitHeight = 368
     object btnFilter: TSpeedButton
       AlignWithMargins = True
       Left = 10
@@ -149,7 +148,6 @@ object FilterForm: TFilterForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 0
-      ExplicitHeight = 293
       object FilterList: TCheckListBox
         AlignWithMargins = True
         Left = 2
@@ -201,7 +199,6 @@ object FilterForm: TFilterForm
         ParentShowHint = False
         ShowHint = False
         TabOrder = 0
-        ExplicitHeight = 289
       end
     end
     object cbSelectAll: TCheckBox

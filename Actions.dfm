@@ -3507,6 +3507,7 @@ object ActionsForm: TActionsForm
           RowCount = 2
           GradientEndColor = 15527148
           Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
+          PopupMenu = MainForm.CommonPopupMenu
           TabOrder = 0
           OnDrawCell = OpenItemsGridDrawCell
           OnKeyDown = OpenItemsGridKeyDown

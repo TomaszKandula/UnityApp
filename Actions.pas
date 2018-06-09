@@ -240,10 +240,10 @@ begin
   finally
     { ------------------------------------------------------------------------------------------------------------------------------------------ UNINITIALIZE }
     OpenItemsGrid.AutoThumbSize;
-    OpenItemsGrid.SetColWidth(10, 20);
+    OpenItemsGrid.SetColWidth(10, 20, 400);
     OpenItemsGrid.Freeze(False);
     HistoryGrid.AutoThumbSize;
-    HistoryGrid.SetColWidth(10, 20);
+    HistoryGrid.SetColWidth(10, 20, 400);
     HistoryGrid.Freeze(False);
     Screen.Cursor:=crDefault;
   end;
@@ -350,7 +350,7 @@ begin
     begin
       DailyText.SqlToGrid(Grid, DailyText.DataSet, False, True);
       Grid.ColWidths[Grid.ReturnColumn(TDaily.FIXCOMMENT, 1, 1)]:=sgRowHidden;
-      Grid.SetColWidth(10, 20);
+      Grid.SetColWidth(10, 20, 400);
       FHistoryGrid:=True;
       PanelCtrl.Visible:=FHistoryGrid;
     end

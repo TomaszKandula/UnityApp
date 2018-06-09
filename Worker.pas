@@ -575,7 +575,7 @@ begin
     { RELEASE VCL AND SET AUTO COLUMN WIDTH }
     Synchronize(procedure
                 begin
-                  OpenItems.DestGrid.SetColWidth(10, 20);
+                  OpenItems.DestGrid.SetColWidth(10, 20, 400);
                   MainForm.LoadingAnimation(MainForm.ImgLoadingOpenItems, MainForm.sgOpenItems, MainForm.PanelOpenItems, AnimationOFF);
                 end);
     OpenItems.DestGrid.Freeze(False);
@@ -698,7 +698,7 @@ begin
     { SET AUTO COLUMN WIDTH }
     Synchronize(procedure
                 begin
-                  FGrid.SetColWidth(40, 10);
+                  FGrid.SetColWidth(40, 10, 400);
                   MainForm.LoadingAnimation(MainForm.ImgLoadingAddressBook, MainForm.sgAddressBook, MainForm.PanelAddressBook, AnimationOFF);
                 end);
     { RELEASE }
