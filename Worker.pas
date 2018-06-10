@@ -176,9 +176,10 @@ type
     var FEmailReminder: boolean;
     var FEmailAutoStat: boolean;
     var FEmailManuStat: boolean;
+    var FEventLog:      boolean;
   public
     property    IDThd:  integer read FIDThd;
-    constructor Create(CUID: string; Email: boolean; CallEvent: boolean; CallDuration: integer; Comment: string; EmailReminder, EmailAutoStat, EmailManuStat: boolean);
+    constructor Create(CUID: string; Email: boolean; CallEvent: boolean; CallDuration: integer; Comment: string; EmailReminder, EmailAutoStat, EmailManuStat: boolean; EventLog: boolean);
     destructor  Destroy; override;
   end;
 
@@ -195,9 +196,10 @@ type
     var FFollowUp:     string;
     var FFree1:        string;
     var FFree2:        string;
+    var FEventLog:     boolean;
   public
     property    IDThd:  integer read FIDThd;
-    constructor Create(CUID: string; FixedComment: string; FollowUp: string; Free1: string; Free2: string);
+    constructor Create(CUID: string; FixedComment: string; FollowUp: string; Free1: string; Free2: string; EventLog: boolean);
     destructor  Destroy; override;
   end;
 
@@ -740,7 +742,7 @@ begin
           Book.Conditions.Add(Condition);
           Book.Conditions.Add(Condition);
         end;
-        Result:=Book.UpdateRecord(TblAddressbook);
+        Result:=Book.UpdateRecord(TblAddressbook, ttExplicit);
         { SUCCESS }
         if Result then
         begin
@@ -776,7 +778,7 @@ begin
       Book.Conditions.Add(Condition);
       Book.Conditions.Add(Condition);
       { EXECUTE }
-      Result:=Book.UpdateRecord(TblAddressbook);
+      Result:=Book.UpdateRecord(TblAddressbook, ttExplicit);
       { ENDING }
       if Result then
         MainForm.ExecMessage(False, mcInfo, 'Address Book has been updated succesfully!')
@@ -970,7 +972,7 @@ end;
 { ############################################################# ! WRITE DAILY COMMENT ! ##################################################################### }
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE }
-constructor TTDailyComment.Create(CUID: string; Email: boolean; CallEvent: boolean; CallDuration: integer; Comment: string; EmailReminder, EmailAutoStat, EmailManuStat: boolean);
+constructor TTDailyComment.Create(CUID: string; Email: boolean; CallEvent: boolean; CallDuration: integer; Comment: string; EmailReminder, EmailAutoStat, EmailManuStat: boolean; EventLog: boolean);
 begin
   inherited Create(False);
   FLock         :=TCriticalSection.Create;
@@ -983,6 +985,7 @@ begin
   FEmailReminder:=EmailReminder;
   FEmailAutoStat:=EmailAutoStat;
   FEmailManuStat:=EmailManuStat;
+  FEventLog     :=EventLog;
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------------- RELEASE }
@@ -1073,14 +1076,14 @@ begin
           DailyText.Conditions.Add(Condition);
         end;
         { EXECUTE }
-        if (DailyText.UpdateRecord(TblDaily)) and (DailyText.RowsAffected > 0) then
+        if (DailyText.UpdateRecord(TblDaily, ttExplicit)) and (DailyText.RowsAffected > 0) then
         begin
           { REFRESH HISTORY GRID }
           Synchronize(procedure
                       begin
                         ActionsForm.UpdateHistory(ActionsForm.HistoryGrid);
                       end);
-          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: ''DailyComment'' table has been updated (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(DailyText.RowsAffected) + '.');
+          if FEventLog then LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: ''DailyComment'' table has been updated (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(DailyText.RowsAffected) + '.');
         end
         else
         begin
@@ -1156,14 +1159,14 @@ begin
         DailyText.Columns.Add(TDaily.FIXCOMMENT);
         DailyText.Values.Add(FFixedComment);
         { EXECUTE }
-        if (DailyText.InsertInto(TblDaily)) and (DailyText.RowsAffected > 0) then
+        if (DailyText.InsertInto(TblDaily, ttExplicit)) and (DailyText.RowsAffected > 0) then
         begin
           { REFRESH HISTORY GRID }
           Synchronize(procedure
                       begin
                         ActionsForm.UpdateHistory(ActionsForm.HistoryGrid);
                       end);
-          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: ''DailyComment'' table has been posted (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(DailyText.RowsAffected) + '.');
+          if FEventLog then LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: ''DailyComment'' table has been posted (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(DailyText.RowsAffected) + '.');
         end
         else
         begin
@@ -1183,7 +1186,7 @@ end;
 { ############################################################ ! WRITE GENERAL COMMENT ! #################################################################### }
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE }
-constructor TTGeneralComment.Create(CUID: string; FixedComment: string; FollowUp: string; Free1: string; Free2: string);
+constructor TTGeneralComment.Create(CUID: string; FixedComment: string; FollowUp: string; Free1: string; Free2: string; EventLog: boolean);
 begin
   inherited Create(False);
   FLock        :=TCriticalSection.Create;
@@ -1193,6 +1196,7 @@ begin
   FFollowUp    :=FollowUp;
   FFree1       :=Free1;
   FFree2       :=Free2;
+  FEventLog    :=EventLog;
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------------- RELEASE }
@@ -1251,9 +1255,9 @@ begin
           GenText.Conditions.Add(Condition);
         end;
         { EXECUTE }
-        if (GenText.UpdateRecord(TblGeneral)) and (GenText.RowsAffected > 0) then
+        if (GenText.UpdateRecord(TblGeneral, ttExplicit)) and (GenText.RowsAffected > 0) then
         begin
-          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: ''GeneralComment'' table has been updated (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(GenText.RowsAffected) + '.');
+          if FEventLog then LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: ''GeneralComment'' table has been updated (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(GenText.RowsAffected) + '.');
         end
         else
         begin
@@ -1310,9 +1314,9 @@ begin
           GenText.Values.Add('');
         end;
         { EXECUTE }
-        if (GenText.InsertInto(TblGeneral)) and (GenText.RowsAffected > 0) then
+        if (GenText.InsertInto(TblGeneral, ttExplicit)) and (GenText.RowsAffected > 0) then
         begin
-          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: ''GeneralComment'' table has been posted (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(GenText.RowsAffected) + '.');
+          if FEventLog then LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: ''GeneralComment'' table has been posted (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(GenText.RowsAffected) + '.');
         end
         else
         begin
@@ -1397,8 +1401,8 @@ begin
       if Statement.SendDocument then
       begin
         { REGISTER ACTION }
-        if FLayout = maDefined then TTDailyComment.Create(FCUID, False, False, 0, 'Automatic account statement has been sent.', False, True, False);
-        if FLayout = maCustom  then TTDailyComment.Create(FCUID, False, False, 0, 'Custom defined account statement has been sent.', False, False, True);
+        if FLayout = maDefined then TTDailyComment.Create(FCUID, False, False, 0, 'Automatic account statement has been sent.', False, True, False, True);
+        if FLayout = maCustom  then TTDailyComment.Create(FCUID, False, False, 0, 'Custom defined account statement has been sent.', False, False, True, True);
         MainForm.ExecMessage(False, mcInfo, 'Account Statement has been sent successfully!')
       end
       else

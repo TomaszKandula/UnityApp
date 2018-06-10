@@ -39,9 +39,9 @@ type
     function    ColumnsToList(Holder: TStringList; Quoted: integer): string;
     procedure   CleanUp;
     function    OpenTable(TableName: string): boolean;
-    function    InsertInto(TableName: string): boolean;
-    function    UpdateRecord(TableName: string): boolean;
-    function    DeleteRecord(TableName: string; KeyName: string; KeyValue: string): boolean;
+    function    InsertInto(TableName: string; TransactionType: integer): boolean;
+    function    UpdateRecord(TableName: string; TransactionType: integer): boolean;
+    function    DeleteRecord(TableName: string; KeyName: string; KeyValue: string; TransactionType: integer): boolean;
   end;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -621,8 +621,19 @@ begin
   end;
 end;
 
+(*  TRANSACTION TYPE PARAMETER                                               *)
+(*  ==========================                                               *)
+(*                                                                           *)
+(*  ttImplicit - sends to SQL Server bare SQL statement(s) which imposes     *)
+(*               autocommit after each statement and involves no rollback    *)
+(*               in case of default.                                         *)
+(*  ttExplicit - sends to SQL Server statement(s) with begin and end of the  *)
+(*               transaction, it allows rollback in case of default.         *)
+
 { ------------------------------------------------------------------------------------------------------------------------------- INSERT SINGE ROW INTO TABLE }
-function TDataTables.InsertInto(TableName: string): boolean;
+function TDataTables.InsertInto(TableName: string; TransactionType: integer): boolean;
+var
+  Transact: string;
 begin
   Result:=True;
   { BUILD AND EXECUTE }
@@ -633,6 +644,12 @@ begin
                 TableName + SPACE + BracketStr(ColumnsToList(Columns, enQuotesOff), brRound) +
               VAL +
                 BracketStr(ColumnsToList(Values, enQuotesOn), brRound);
+      if TransactionType = ttExplicit then
+      begin
+        Transact:=TransactTemp;
+        Transact:=StringReplace(Transact, '{STRSQL}', StrSQL, [rfReplaceAll]);
+        StrSQL:=Transact;
+      end;
       ExecSQL;
     end;
   except
@@ -641,10 +658,11 @@ begin
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------- PERFORM UPDATING ON GIVEN COLUMNS }
-function TDataTables.UpdateRecord(TableName: string): boolean;
+function TDataTables.UpdateRecord(TableName: string; TransactionType: integer): boolean;
 var
-  iCNT:  integer;
-  Temp:  string;
+  iCNT:     integer;
+  Temp:     string;
+  Transact: string;
 begin
   Result:=False;
   if (Columns.Text = '') or (Values.Text = '') or (Conditions.Text = '') then Exit;
@@ -664,6 +682,12 @@ begin
                    );
     end;
     StrSQL:=Temp;
+    if TransactionType = ttExplicit then
+    begin
+      Transact:=TransactTemp;
+      Transact:=StringReplace(Transact, '{STRSQL}', StrSQL, [rfReplaceAll]);
+      StrSQL:=Transact;
+    end;
     ExecSQL;
     Result:=True;
   except
@@ -672,12 +696,20 @@ begin
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------- DELETE SINGLE RECORD }
-function TDataTables.DeleteRecord(TableName: string; KeyName: string; KeyValue: string): boolean;
+function TDataTables.DeleteRecord(TableName: string; KeyName: string; KeyValue: string; TransactionType: integer): boolean;
+var
+  Transact: string;
 begin
   Result:=False;
   if (TableName = '') and (KeyValue = '') then Exit;
   try
     StrSQL:=DELETE_FROM + TableName + WHERE + KeyName + EQUAL + QuotedStr(KeyValue);
+    if TransactionType = ttExplicit then
+    begin
+      Transact:=TransactTemp;
+      Transact:=StringReplace(Transact, '{STRSQL}', StrSQL, [rfReplaceAll]);
+      StrSQL:=Transact;
+    end;
     ExecSQL;
     Result:=True;
   except

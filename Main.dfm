@@ -1193,7 +1193,7 @@ object MainForm: TMainForm
     Margins.Top = 0
     Margins.Right = 10
     Margins.Bottom = 0
-    ActivePage = TabSheet3
+    ActivePage = TabSheet8
     Align = alClient
     DoubleBuffered = True
     Font.Charset = DEFAULT_CHARSET
@@ -20321,8 +20321,15 @@ object MainForm: TMainForm
       OnClick = Action_AddToBookClick
     end
     object Action_GroupFollowUp: TMenuItem
-      Caption = 'Add Follow-Up to group'
-      OnClick = Action_GroupFollowUpClick
+      Caption = 'Modify Follow-Ups'
+      object Action_AddFollowUpGroup: TMenuItem
+        Caption = 'Add Follow-Up to the group'
+        OnClick = Action_AddFollowUpGroupClick
+      end
+      object Action_RemoveFollowUps: TMenuItem
+        Caption = 'Remove selected Follow-Ups'
+        OnClick = Action_RemoveFollowUpsClick
+      end
     end
     object N9: TMenuItem
       Caption = '-'

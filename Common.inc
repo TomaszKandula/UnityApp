@@ -46,7 +46,7 @@ const
   LicenceFile:    string    = 'Unity.licx';
   GridImgFile:    string    = 'Unity.img';
   ReleaseFile:    string    = 'Release.pak';
-  CurrentMutex:   PWideChar = 'UNITY_10063';    { WARNING! INCREASE IT WITH EACH NEW RELEASE }
+  CurrentMutex:   PWideChar = 'UNITY_10066';    { WARNING! INCREASE IT WITH EACH NEW RELEASE }
 
   { FREE COLUMNS }
 
@@ -138,6 +138,15 @@ const
 
   SELCOLOR      = $00F2E4D7; { SKYBLUE: $00FFDBB7 }
   FONCOLOR      = $006433C9;
+
+  { RISK CLASS COLORS }
+
+  FClassA = 16777215;
+  BClassA = 8421631;
+  FClassC = 16777215;
+  BClassC = 11316313;
+  FClassB = 8404992;
+  BClassB = 13434879;
 
   { SETTINGS FILE ID }
 
@@ -294,6 +303,19 @@ const
   SUM          : string = ' SUM ';
   EXECUTE      : string = ' EXEC ';
 
+  { TRANSACTION WRAPPER }
+
+  TransactTemp = 'BEGIN TRANSACTION  ' + #13#10 +
+                 '  SET XACT_ABORT ON' + #13#10 +
+                 '  SET NOCOUNT OFF  ' + #13#10 +
+                 '  {STRSQL}         ' + #13#10 +
+                 'COMMIT TRANSACTION ';
+
+  { SQL TRANSACTION TYPE }
+
+  ttImplicita = 0;
+  ttExplicit = 1;
+
   { "OPEN ITEMS" AND "AGING" WORKERS ENUMERATIONS }
 
   thNullParameter = 0;
@@ -437,28 +459,28 @@ const
 
   HTML_BR = '<br>';
 
-  CommonHTMLTable ='<table class="data">'                   +#13#10+
-                   '<!-- HEADERS -->'                       +#13#10+
-                   '<tr>'                                   +#13#10+
-                   '  <!-- COLUMNS -->'                     +#13#10+
-                   '  <th class="col1">Invoice No.:</th>'   +#13#10+
-                   '  <th class="col2">Invoice Date:</th>'  +#13#10+
-                   '  <th class="col3">Due date:</th>'      +#13#10+
-                   '  <th class="col4">Currency:</th>'      +#13#10+
-                   '  <th class="col5">Amount:</th>'        +#13#10+
-                   '  <th class="col6">O/S Amount:</th>'    +#13#10+
-                   '</tr>'                                  +#13#10+
-                   '  <!-- ROWS WITH DATA -->'              +#13#10+
-                   '{ROWS}'                                 +#13#10+
+  CommonHTMLTable ='<table class="data">'                   + #13#10 +
+                   '<!-- HEADERS -->'                       + #13#10 +
+                   '<tr>'                                   + #13#10 +
+                   '  <!-- COLUMNS -->'                     + #13#10 +
+                   '  <th class="col1">Invoice No.:</th>'   + #13#10 +
+                   '  <th class="col2">Invoice Date:</th>'  + #13#10 +
+                   '  <th class="col3">Due date:</th>'      + #13#10 +
+                   '  <th class="col4">Currency:</th>'      + #13#10 +
+                   '  <th class="col5">Amount:</th>'        + #13#10 +
+                   '  <th class="col6">O/S Amount:</th>'    + #13#10 +
+                   '</tr>'                                  + #13#10 +
+                   '  <!-- ROWS WITH DATA -->'              + #13#10 +
+                   '{ROWS}'                                 + #13#10 +
                    '</table>';
 
-  CommonHTMLRow ='<tr>'                                     +#13#10+
-                 '  <td class="col1">{INV_NUM}</td>'        +#13#10+
-                 '  <td class="col2">{INV_DAT}</td>'        +#13#10+
-                 '  <td class="col3">{DUE_DAT}</td>'        +#13#10+
-                 '  <td class="col4">{INV_CUR}</td>'        +#13#10+
-                 '  <td class="col5">{INV_AMT}</td>'        +#13#10+
-                 '  <td class="col6">{INV_OSA}</td>'        +#13#10+
-                 '</tr>'                                    +#13#10;
+  CommonHTMLRow ='<tr>'                                     + #13#10 +
+                 '  <td class="col1">{INV_NUM}</td>'        + #13#10 +
+                 '  <td class="col2">{INV_DAT}</td>'        + #13#10 +
+                 '  <td class="col3">{DUE_DAT}</td>'        + #13#10 +
+                 '  <td class="col4">{INV_CUR}</td>'        + #13#10 +
+                 '  <td class="col5">{INV_AMT}</td>'        + #13#10 +
+                 '  <td class="col6">{INV_OSA}</td>'        + #13#10 +
+                 '</tr>'                                    + #13#10;
 
 

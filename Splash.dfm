@@ -22,8 +22,7 @@ object SplashForm: TSplashForm
     Width = 843
     Height = 425
     Align = alClient
-    Pen.Color = 15918295
-    Pen.Width = 3
+    Pen.Color = clGray
     ExplicitLeft = 28
     ExplicitTop = 78
     ExplicitWidth = 449

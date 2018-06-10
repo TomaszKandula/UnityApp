@@ -34,10 +34,6 @@ object CalendarForm: TCalendarForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
-    ExplicitLeft = 8
-    ExplicitTop = 18
-    ExplicitWidth = 554
-    ExplicitHeight = 383
     object PanelCalendar: TPanel
       AlignWithMargins = True
       Left = 10
@@ -53,10 +49,6 @@ object CalendarForm: TCalendarForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 0
-      ExplicitLeft = 245
-      ExplicitTop = 96
-      ExplicitWidth = 287
-      ExplicitHeight = 185
       object MyCalendar: TMonthCalendar
         AlignWithMargins = True
         Left = 2
@@ -74,7 +66,7 @@ object CalendarForm: TCalendarForm
         CalColors.TitleBackColor = clSilver
         CalColors.TitleTextColor = clBlack
         CalColors.TrailingTextColor = clMaroon
-        Date = 43147.411461377310000000
+        Date = 43147.825214560190000000
         FirstDayOfWeek = dowMonday
         ParentShowHint = False
         ShowHint = True
@@ -82,8 +74,6 @@ object CalendarForm: TCalendarForm
         WeekNumbers = True
         OnClick = MyCalendarClick
         OnDblClick = MyCalendarDblClick
-        ExplicitWidth = 283
-        ExplicitHeight = 181
       end
     end
     object PanelActions: TPanel
@@ -101,9 +91,6 @@ object CalendarForm: TCalendarForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 1
-      ExplicitLeft = 117
-      ExplicitTop = 261
-      ExplicitWidth = 287
       object Text: TLabel
         Left = 8
         Top = 13

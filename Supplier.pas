@@ -265,7 +265,7 @@ begin
   end;
 
   { INSERT NEW RECORD }
-  Result:=InsertInto(TblSupplierRequest);
+  Result:=InsertInto(TblSupplierRequest, ttExplicit);
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------- UPDATE REQUEST STATUS }
@@ -280,7 +280,7 @@ begin
   Columns.Add(TSupplierRequest.RequestStatus);
   Values.Add(NewRequestStatus);
   Conditions.Add(Condition);
-  Result:=UpdateRecord(TblSupplierRequest);
+  Result:=UpdateRecord(TblSupplierRequest, ttExplicit);
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------- SEND EMAIL NOTIFICATION }

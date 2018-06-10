@@ -122,14 +122,15 @@ end;
 
 function TMSSQL.ArrayToSql(Table: TLists; tblName: string; tblColumns: string): string;
 var
-  iCNT   : integer;
-  jCNT   : integer;
-  LEAD   : string;
-  LINE   : string;
-  LINES  : string;
-  mRows  : integer;
-  mCols  : integer;
-  Clean  : string;
+  iCNT    : integer;
+  jCNT    : integer;
+  LEAD    : string;
+  LINE    : string;
+  LINES   : string;
+  mRows   : integer;
+  mCols   : integer;
+  Clean   : string;
+  Transact: string;
 begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   Result:='';
@@ -153,21 +154,24 @@ begin
     LINE:='';
   end;
   { ---------------------------------------------------------------------------------------------------------------------------------------- OUTPUT BUILT SQL }
-  Result:=LEAD + LINES;
+  Transact:=TransactTemp;
+  Transact:=StringReplace(Transact, '{STRSQL}', (LEAD + LINES), [rfReplaceAll]);
+  Result:=Transact;
 end;
 
 (* USING STRING GRID *)
 
 function TMSSQL.GridToSql(Grid: TStringGrid; tblName: string; tblColumns: string; sRow: integer; sCol: integer): string;
 var
-  iCNT   : integer;
-  jCNT   : integer;
-  LEAD   : string;
-  LINE   : string;
-  LINES  : string;
-  mRows  : integer;
-  mCols  : integer;
-  Clean  : string;
+  iCNT    : integer;
+  jCNT    : integer;
+  LEAD    : string;
+  LINE    : string;
+  LINES   : string;
+  mRows   : integer;
+  mCols   : integer;
+  Clean   : string;
+  Transact: string;
 begin
   { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
   Result:='';
@@ -191,7 +195,9 @@ begin
     LINE:='';
   end;
   { ---------------------------------------------------------------------------------------------------------------------------------------- OUTPUT BUILT SQL }
-  Result:=LEAD + LINES;
+  Transact:=TransactTemp;
+  Transact:=StringReplace(Transact, '{STRSQL}', (LEAD + LINES), [rfReplaceAll]);
+  Result:=Transact;
 end;
 
 { -------------------------------------------------------------------------------------------------------- MOVE RECORDSET CONTENT TO STRING GRID WITH HEADERS }

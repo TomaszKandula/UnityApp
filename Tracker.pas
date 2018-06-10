@@ -144,7 +144,7 @@ begin
     TrackerItems.Columns.Add(TTracker.EXP_REM2);    TrackerItems.Values.Add(Exp_Rem2);
     TrackerItems.Columns.Add(TTracker.EXP_REM3);    TrackerItems.Values.Add(Exp_Rem3);
     { EXECUTE }
-    if TrackerItems.InsertInto(TblTracker) then
+    if TrackerItems.InsertInto(TblTracker, ttExplicit) then
       MainForm.MsgCall(mcInfo, 'Customer has been successfuly added to the Invoice Tracker.')
         else
           MainForm.MsgCall(mcError, 'Cannot execute writing to database. Please contact with IT support.');

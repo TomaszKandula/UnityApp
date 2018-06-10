@@ -541,6 +541,8 @@ type                                                            (* GUI | MAIN TH
     Label1: TLabel;
     Label5: TLabel;
     Label6: TLabel;
+    Action_AddFollowUpGroup: TMenuItem;
+    Action_RemoveFollowUps: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -707,7 +709,6 @@ type                                                            (* GUI | MAIN TH
     procedure sgGroupsDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
     procedure sgGroupsMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
     procedure sgGroupsMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-    procedure Action_GroupFollowUpClick(Sender: TObject);
     procedure Action_INF4_FilterClick(Sender: TObject);
     procedure Action_Gr3_FilterClick(Sender: TObject);
     procedure Action_HideSummaryClick(Sender: TObject);
@@ -745,6 +746,8 @@ type                                                            (* GUI | MAIN TH
     procedure sgAddressBookKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure sgListSectionKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure sgListValueKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure Action_AddFollowUpGroupClick(Sender: TObject);
+    procedure Action_RemoveFollowUpsClick(Sender: TObject);
     { ------------------------------------------------------------- ! HELPERS ! ----------------------------------------------------------------------------- }
   private
     { GENERAL }
@@ -1101,7 +1104,8 @@ begin
                                '',
                                False,
                                False,
-                               False
+                               False,
+                               True
                              );
       end;
   end;
@@ -3059,7 +3063,7 @@ begin
   { EXECUTE DELETE QUERY }
   DataTables:=TDataTables.Create(DbConnect);
   try
-    DataTables.DeleteRecord(TblAddressbook, TAddressBook.SCUID, DataTables.CleanStr(sgAddressBook.Cells[2, sgAddressBook.Row], False));
+    DataTables.DeleteRecord(TblAddressbook, TAddressBook.SCUID, DataTables.CleanStr(sgAddressBook.Cells[2, sgAddressBook.Row], False), ttExplicit);
     if DataTables.RowsAffected > 0 then
       sgAddressBook.DeleteRowFrom(1, 1)
         else
@@ -3270,27 +3274,44 @@ begin
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------- ADD FOLLOW-UP TO SELECTED GROUP }
-procedure TMainForm.Action_GroupFollowUpClick(Sender: TObject);
+procedure TMainForm.Action_AddFollowUpGroupClick(Sender: TObject);
 var
   iCNT: integer;
 begin
   Screen.Cursor:=crHourGlass;
-
   CalendarForm.CalendarMode:=cfGetDate;
-
   MainForm.WndCall(CalendarForm, 0);
-
   { IF SELECTED MORE THAN ONE CUSTOMER, ASSIGN GIVEN DATE TO SELECTED CUSTOMERS }
   if CalendarForm.SelectedDate <> NULLDATE then
   begin
     for iCNT:=sgAgeView.Selection.Top to sgAgeView.Selection.Bottom do
-
       if sgAgeView.RowHeights[iCNT] <> sgRowHidden then
         CalendarForm.SetFollowUp(CalendarForm.SelectedDate, sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUID, 1, 1), iCNT], iCNT);
-
+    LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ''GeneralComment'' table with column FollowUp has been updated with ' + DateToStr(CalendarForm.SelectedDate) + ' for multiple items.');
   end;
+  Screen.Cursor:=crDefault;
+end;
 
-
+{ -------------------------------------------------------------------------------------------------------------------------------- REMOVE SELECTED FOLLOW-UPS }
+procedure TMainForm.Action_RemoveFollowUpsClick(Sender: TObject);
+var
+  iCNT: integer;
+begin
+  Screen.Cursor:=crHourGlass;
+  for iCNT:=sgAgeView.Selection.Top to sgAgeView.Selection.Bottom do
+    if sgAgeView.RowHeights[iCNT] <> sgRowHidden then
+    begin
+      TTGeneralComment.Create(
+                               sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUID, 1, 1), iCNT],
+                               strNULL,
+                               SPACE,
+                               strNULL,
+                               strNULL,
+                               False
+                             );
+      MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1), iCNT]:=SPACE;
+    end;
+  LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ''GeneralComment'' table with column FollowUp has been updated with removal for multiple items.');
   Screen.Cursor:=crDefault;
 end;
 
@@ -3834,16 +3855,10 @@ var
   AgeViewCUID: string;
 begin
 
-  { SKIP HEADER }
+  { --------------------------------------------------------------------------------------------------------------------------------------------- SKIP HEADER }
   if ARow = 0 then Exit;
 
-  (* CALL DRAWSELECTED BEFORE COLORVALUES *)
-
-  { DRAW SELECTED ROW | SKIP HEADERS }
-  sgAgeView.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
-
-  { COLUMNS ORDER MAY BE CHANGED BY THE USER  }
-  { FIND COLUMN NUMBERS FOR GIVEN COLUMN NAME }
+  { --------------------------------------------------------------------------------------------------------------- FIND COLUMN NUMBERS FOR GIVEN COLUMN NAME }
   Col1 :=sgAgeView.ReturnColumn(TSnapshots.fNOT_DUE,         1, 1);
   Col2 :=sgAgeView.ReturnColumn(TSnapshots.fRANGE1,          1, 1);
   Col3 :=sgAgeView.ReturnColumn(TSnapshots.fRANGE2,          1, 1);
@@ -3860,34 +3875,8 @@ begin
   Col14:=sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1);
   Col15:=sgAgeView.ReturnColumn(TSnapshots.fRISK_CLASS,      1, 1);
 
-  { HIGHLIGHT FOLLOW UP COLUMN }
-  if not (CDate(sgAgeView.Cells[ACol, ARow]) = 0) then
-  begin
-    { FUTURE DAYS }
-    if (ACol = Col12) and (CDate(sgAgeView.Cells[ACol, ARow]) > CDate(StatBar_TXT3.Caption)) then
-    begin
-      sgAgeView.Canvas.Brush.Color:=FutureBColor;
-      sgAgeView.Canvas.Font.Color :=FutureFColor;
-      sgAgeView.Canvas.FillRect(Rect);
-      sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
-    end;
-    { TODAY }
-    if (ACol = Col12) and (CDate(sgAgeView.Cells[ACol, ARow]) = CDate(StatBar_TXT3.Caption)) then
-    begin
-      sgAgeView.Canvas.Brush.Color:=TodayBColor;
-      sgAgeView.Canvas.Font.Color :=TodayFColor;
-      sgAgeView.Canvas.FillRect(Rect);
-      sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
-    end;
-    { PAST DAYS }
-    if (ACol = Col12) and (CDate(sgAgeView.Cells[ACol, ARow]) < CDate(StatBar_TXT3.Caption)) then
-    begin
-      sgAgeView.Canvas.Brush.Color:=PastBColor;
-      sgAgeView.Canvas.Font.Color :=PastFColor;
-      sgAgeView.Canvas.FillRect(Rect);
-      sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
-    end;
-  end;
+  { ------------------------------------------------------------------------------------------------------------------------ DRAW SELECTED ROW | SKIP HEADERS }
+  sgAgeView.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
 
   { CUSTOMER CONTRIBUTING TO RISK CLASS "A" SET TO BOLD FONT }
   if (ACol = Col14) and (sgAgeView.Cells[Col15, ARow] = 'A') then
@@ -3897,22 +3886,84 @@ begin
     sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
   end;
 
-  { MARK CUSTOMER WITH STAR IF IT IS REGISTERED ON INVOICE TRACKER LIST }
-  if ACol = Col14 then
+  { ------------------------------------------------------------------------------------------------------------------------------- DRAW ONLY IF NOT SELECTED }
+  if not(gdSelected in State) then
   begin
-    Width:=sgAgeView.ColWidths[Col14];
-    AgeViewCUID:=sgAgeView.Cells[Col13, ARow];
-    for iCNT:=1 to sgInvoiceTracker.RowCount - 1 do
+
+    { HIGHLIGHT FOLLOW UP COLUMN }
+    if not (CDate(sgAgeView.Cells[ACol, ARow]) = 0) then
     begin
-      if AgeViewCUID = sgInvoiceTracker.Cells[2, iCNT] then
+      { FUTURE DAYS }
+      if (ACol = Col12) and (CDate(sgAgeView.Cells[ACol, ARow]) > CDate(StatBar_TXT3.Caption)) then
       begin
-        sgAgeView.Canvas.Draw(Rect.Left + Width - 16, Rect.Top, GridPicture.Picture.Graphic);
-        Break;
+        sgAgeView.Canvas.Brush.Color:=FutureBColor;
+        sgAgeView.Canvas.Font.Color :=FutureFColor;
+        sgAgeView.Canvas.FillRect(Rect);
+        sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
+      end;
+      { TODAY }
+      if (ACol = Col12) and (CDate(sgAgeView.Cells[ACol, ARow]) = CDate(StatBar_TXT3.Caption)) then
+      begin
+        sgAgeView.Canvas.Brush.Color:=TodayBColor;
+        sgAgeView.Canvas.Font.Color :=TodayFColor;
+        sgAgeView.Canvas.FillRect(Rect);
+        sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
+      end;
+      { PAST DAYS }
+      if (ACol = Col12) and (CDate(sgAgeView.Cells[ACol, ARow]) < CDate(StatBar_TXT3.Caption)) then
+      begin
+        sgAgeView.Canvas.Brush.Color:=PastBColor;
+        sgAgeView.Canvas.Font.Color :=PastFColor;
+        sgAgeView.Canvas.FillRect(Rect);
+        sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
       end;
     end;
+
+    { HIGHLIGHT RISK CLASS "A" }
+    if (ACol = Col15) and (sgAgeView.Cells[Col15, ARow] = 'A') then
+    begin
+      sgAgeView.Canvas.Brush.Color:=BClassA;
+      sgAgeView.Canvas.Font.Color :=FClassA;
+      sgAgeView.Canvas.FillRect(Rect);
+      sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
+    end;
+
+    { HIGHLIGHT RISK CLASS "B" }
+    if (ACol = Col15) and (sgAgeView.Cells[Col15, ARow] = 'B') then
+    begin
+      sgAgeView.Canvas.Brush.Color:=BClassB;
+      sgAgeView.Canvas.Font.Color :=FClassB;
+      sgAgeView.Canvas.FillRect(Rect);
+      sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
+    end;
+
+    { HIGHLIGHT RISK CLASS "C" }
+    if (ACol = Col15) and (sgAgeView.Cells[Col15, ARow] = 'C') then
+    begin
+      sgAgeView.Canvas.Brush.Color:=BClassC;
+      sgAgeView.Canvas.Font.Color :=FClassC;
+      sgAgeView.Canvas.FillRect(Rect);
+      sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
+    end;
+
+    { MARK CUSTOMER WITH STAR IF IT IS REGISTERED ON INVOICE TRACKER LIST }
+    if ACol = Col14 then
+    begin
+      Width:=sgAgeView.ColWidths[Col14];
+      AgeViewCUID:=sgAgeView.Cells[Col13, ARow];
+      for iCNT:=1 to sgInvoiceTracker.RowCount - 1 do
+      begin
+        if AgeViewCUID = sgInvoiceTracker.Cells[2, iCNT] then
+        begin
+          sgAgeView.Canvas.Draw(Rect.Left + Width - 16, Rect.Top, GridPicture.Picture.Graphic);
+          Break;
+        end;
+      end;
+    end;
+
   end;
 
-  { COLOUR NEGATIVE VALUES IN SELECTED COLUMNS }
+  { -------------------------------------------------------------------------------------------------------------- COLOUR NEGATIVE VALUES IN SELECTED COLUMNS }
   if (ACol = Col1)  or (ACol = Col2) or (ACol = Col3) or
      (ACol = Col4)  or (ACol = Col5) or (ACol = Col6) or
      (ACol = Col7)  or (ACol = Col8) or (ACol = Col9) or
@@ -4203,7 +4254,8 @@ begin
                              strNULL,
                              sgAgeView.Cells[Col3, sgAgeView.Row],
                              sgAgeView.Cells[Col1, sgAgeView.Row],
-                             strNULL
+                             strNULL,
+                             True
                            );
 
     sgAgeView.Options:=sgAgeView.Options - [goEditing];
@@ -4243,7 +4295,8 @@ begin
                                strNULL,
                                strNULL,
                                '',
-                               strNULL
+                               strNULL,
+                               True
                              );
       sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.FREE1,   1, 1), sgAgeView.Row]:='';
     end;
@@ -4256,7 +4309,8 @@ begin
                                strNULL,
                                '',
                                strNULL,
-                               strNULL
+                               strNULL,
+                               True
                              );
       sgAgeView.Cells[sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1), sgAgeView.Row]:='';
     end;
@@ -5434,6 +5488,12 @@ var
 begin
 
   { ----------------------------------------------------------- ! NO PASSWORD GIVEN ! ----------------------------------------------------------------------- }
+
+  if btnUnlock.Caption = 'Lock' then
+  begin
+    SetSettingsPanel(spLock);
+    Exit;
+  end;
 
   if EditPassword.Text = '' then
   begin

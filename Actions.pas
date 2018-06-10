@@ -526,7 +526,8 @@ begin
                              strNULL,
                              SPACE,
                              strNULL,
-                             strNULL
+                             strNULL,
+                             True
                            );
     MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1), MainForm.sgAgeView.Row]:='';
   end;
@@ -554,7 +555,8 @@ begin
                            GeneralCom.Text,
                            strNULL,
                            strNULL,
-                           strNULL
+                           strNULL,
+                           True
                          );
 end;
 
@@ -569,7 +571,8 @@ begin
                          DailyCom.Text,
                          False,
                          False,
-                         False
+                         False,
+                         True
                        );
 end;
 
