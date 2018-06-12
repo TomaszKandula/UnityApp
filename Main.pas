@@ -548,6 +548,7 @@ type                                                            (* GUI | MAIN TH
     Action_MassMailer: TMenuItem;
     btnPasswordPreview: TSpeedButton;
     hShapeEye: TShape;
+    N20: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -1566,20 +1567,22 @@ begin
   with info do
   begin
     cbSize:=SizeOf(info);
+    fMask:=SIF_ALL;
     GetScrollInfo(Self.Handle, SB_VERT, info);
-    fMask :=SIF_ALL or SIF_PAGE;
-    nMin :=0;
-    nMax :=Self.RowCount;
-    nPage:=Self.VisibleRowCount;
+    fMask:=fMask or SIF_PAGE;
+    nPage:=(nMax - nMin) div Self.RowCount;
+    //nPage:=Self.RowCount div Self.VisibleRowCount;
   end;
   SetScrollInfo(Self.Handle, SB_VERT, info, True);
   { ---------------------------------------------------------------------------------------------------------------------------------------------- HORIZONTAL }
   with info do
   begin
     cbSize:=SizeOf(info);
+    fMask:=SIF_ALL;
     GetScrollInfo(Self.Handle, SB_HORZ, info);
-    fMask :=SIF_ALL or SIF_PAGE;
-    nPage :=( Self.VisibleColCount * (nmax - nmin) ) div Self.ColCount;
+    fMask:=fMask or SIF_PAGE;
+    nPage:=(nMax - nMin) div Self.ColCount;
+    //nPage:=Self.ColCount div Self.VisibleColCount;
   end;
   SetScrollInfo(Self.Handle, SB_HORZ, info, True);
 end;
@@ -3070,7 +3073,7 @@ begin
   sgAddressBook.RecordRowsAffected;
 end;
 
-{ --------------------------------------------------------------------------------------------------------------------------------- DELETE GIVEN CUID FROM DB }
+{ -------------------------------------------------------------------------------------------------------------------------------- DELETE GIVEN SCUID FROM DB }
 procedure TMainForm.Action_DelRowClick(Sender: TObject);
 var
   DataTables: TDataTables;

@@ -375,7 +375,6 @@ begin
     MailRt   :='';
     Result   :=SendNow;
     { DEBUG LINES }
-    //Result:=True;
     //SaveOutput('d:\test.html'); Result:=True;
   end;
 end;

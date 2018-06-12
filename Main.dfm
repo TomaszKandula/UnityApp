@@ -20416,6 +20416,9 @@ object MainForm: TMainForm
       Caption = 'Fire Mass Mailer'
       OnClick = Action_MassMailerClick
     end
+    object N20: TMenuItem
+      Caption = '-'
+    end
     object Action_GroupFollowUp: TMenuItem
       Caption = 'Modify Follow-Ups'
       object Action_AddFollowUpGroup: TMenuItem

@@ -216,10 +216,10 @@ type
     var FMess:         string;
     var FIsOverdue:    boolean;
     var FCUID:         string;
+    var FSCUID:        string;
     var FCustName:     string;
     var FCoCode:       string;
     var FBranch:       string;
-    var FSCUID:        string;
     var FOpenItems:    TStringGrid;
     var FCustNumber:   string;
   public
@@ -1346,8 +1346,8 @@ begin
   FMess      :=Mess;
   FIsOverdue :=IsOverdue;
   FOpenItems :=OpenItems;
-  FSCUID     :=SCUID;
   FCUID      :=CUID;
+  FSCUID     :=SCUID;
   FCustName  :=CustName;
   FCustNumber:=CustNumber;
   FCoCode    :=CoCode;
@@ -1377,8 +1377,8 @@ begin
     try
 
       { SETUP DETAILS }
-      Statement.SCUID    :=FSCUID;
       Statement.CUID     :=FCUID;
+      Statement.SCUID    :=FSCUID;
       Statement.CustName :=FCustName;
       Statement.CoCode   :=FCoCode;
       Statement.Branch   :=FBranch;
