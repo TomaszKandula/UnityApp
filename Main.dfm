@@ -1193,7 +1193,7 @@ object MainForm: TMainForm
     Margins.Top = 0
     Margins.Right = 10
     Margins.Bottom = 0
-    ActivePage = TabSheet8
+    ActivePage = TabSheet1
     Align = alClient
     DoubleBuffered = True
     Font.Charset = DEFAULT_CHARSET
@@ -1608,6 +1608,22 @@ object MainForm: TMainForm
         Align = alTop
         BevelOuter = bvNone
         TabOrder = 0
+        ExplicitTop = -3
+        object Shape2: TShape
+          Left = 1059
+          Top = 33
+          Width = 208
+          Height = 87
+          Pen.Color = clGradientInactiveCaption
+        end
+        object Cap24: TShape
+          Left = 1059
+          Top = 15
+          Width = 208
+          Height = 19
+          Brush.Color = 15918295
+          Pen.Color = clSkyBlue
+        end
         object MainPanel1: TPanel
           AlignWithMargins = True
           Left = 17
@@ -9936,7 +9952,7 @@ object MainForm: TMainForm
           end
           object btnCloseAB: TImage
             Left = 163
-            Top = 29
+            Top = 33
             Width = 24
             Height = 31
             Picture.Data = {
@@ -9960,7 +9976,7 @@ object MainForm: TMainForm
           end
           object btnExportAB: TImage
             Left = 227
-            Top = 29
+            Top = 33
             Width = 25
             Height = 30
             Picture.Data = {
@@ -9980,7 +9996,7 @@ object MainForm: TMainForm
           end
           object btnOpenAB: TImage
             Left = 30
-            Top = 29
+            Top = 33
             Width = 23
             Height = 30
             Picture.Data = {
@@ -10003,7 +10019,7 @@ object MainForm: TMainForm
           end
           object btnUpdateAB: TImage
             Left = 95
-            Top = 29
+            Top = 33
             Width = 23
             Height = 30
             Picture.Data = {
@@ -10046,8 +10062,8 @@ object MainForm: TMainForm
             Pen.Color = clSkyBlue
           end
           object Text64: TLabel
-            Left = 29
-            Top = 65
+            Left = 30
+            Top = 68
             Width = 26
             Height = 13
             Caption = 'Open'
@@ -10060,7 +10076,7 @@ object MainForm: TMainForm
           end
           object Text66: TLabel
             Left = 90
-            Top = 65
+            Top = 68
             Width = 35
             Height = 13
             Caption = 'Update'
@@ -10073,7 +10089,7 @@ object MainForm: TMainForm
           end
           object Text67: TLabel
             Left = 163
-            Top = 65
+            Top = 68
             Width = 26
             Height = 13
             Caption = 'Close'
@@ -10086,7 +10102,7 @@ object MainForm: TMainForm
           end
           object Text69: TLabel
             Left = 224
-            Top = 65
+            Top = 68
             Width = 32
             Height = 13
             Caption = 'Export'
@@ -17022,6 +17038,14 @@ object MainForm: TMainForm
           Align = alLeft
           BevelOuter = bvNone
           TabOrder = 0
+          object hShapeEye: TShape
+            Left = 326
+            Top = 56
+            Width = 33
+            Height = 21
+            Brush.Color = clCream
+            Pen.Color = 15790320
+          end
           object hShapePass: TShape
             Left = 471
             Top = 17
@@ -17122,7 +17146,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object btnUnlock: TSpeedButton
-            Left = 372
+            Left = 377
             Top = 54
             Width = 75
             Height = 25
@@ -17198,6 +17222,57 @@ object MainForm: TMainForm
             Spacing = 7
             OnClick = btnPassUpdateClick
           end
+          object btnPasswordPreview: TSpeedButton
+            Left = 326
+            Top = 56
+            Width = 33
+            Height = 21
+            Cursor = crHandPoint
+            Flat = True
+            Glyph.Data = {
+              36030000424D3603000000000000360000002800000010000000100000000100
+              18000000000000030000C40E0000C40E00000000000000000000FFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFDADADA8585855C
+              5C5C5C5C5C858585DADADAFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFF7B7B7B171717000000888888E4E4E4E4E4E48888880000001717177B7B
+              7BFFFFFFFFFFFFFFFFFFFFFFFFF4F4F4030303CBCBCB2F2F2FFDFDFDFFFFFFFF
+              FFFFFFFFFFFFFFFFFDFDFD2F2F2FCBCBCB040404F5F5F5FFFFFFF1F1F1030303
+              FFFFFFC3C3C37C7C7CFFFFFFFFFFFF454545454545FFFFFFFFFFFF7C7C7CC3C3
+              C3FFFFFF030303F1F1F1242424FFFFFFFFFFFF5F5F5FE3E3E3FFFFFF454545E1
+              E1E1E1E1E1454545FFFFFFE3E3E35F5F5FFFFFFFFFFFFF242424242424FFFFFF
+              FFFFFF5F5F5FE3E3E3FFFFFF454545E1E1E1E1E1E1454545FFFFFFE3E3E35F5F
+              5FFFFFFFFFFFFF242424F1F1F1030303FFFFFFC3C3C37C7C7CFFFFFFFFFFFF45
+              4545454545FFFFFFFFFFFF7C7C7CC3C3C3FFFFFF030303F1F1F1FFFFFFF4F4F4
+              030303CBCBCB2F2F2FFDFDFDFFFFFFFFFFFFFFFFFFFFFFFFFDFDFD2F2F2FCBCB
+              CB040404F5F5F5FFFFFFFFFFFFFFFFFFFFFFFF7B7B7B171717000000888888E4
+              E4E4E4E4E48888880000001717177B7B7BFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFDADADA8585855C5C5C5C5C5C858585DADADAFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
+            OnMouseDown = btnPasswordPreviewMouseDown
+            OnMouseUp = btnPasswordPreviewMouseUp
+          end
+          object EditPassword: TEdit
+            Left = 151
+            Top = 56
+            Width = 175
+            Height = 21
+            BevelKind = bkFlat
+            BevelOuter = bvNone
+            BorderStyle = bsNone
+            Color = clCream
+            MaxLength = 25
+            PasswordChar = '*'
+            TabOrder = 3
+            OnKeyPress = EditPasswordKeyPress
+          end
           object EditNewPasswordConfirmation: TEdit
             Left = 591
             Top = 62
@@ -17263,20 +17338,6 @@ object MainForm: TMainForm
             PasswordChar = '*'
             ShowHint = False
             TabOrder = 2
-          end
-          object EditPassword: TEdit
-            Left = 151
-            Top = 56
-            Width = 201
-            Height = 21
-            BevelKind = bkFlat
-            BevelOuter = bvNone
-            BorderStyle = bsNone
-            Color = clCream
-            MaxLength = 25
-            PasswordChar = '*'
-            TabOrder = 3
-            OnKeyPress = EditPasswordKeyPress
           end
         end
         object TopPanel8: TPanel
@@ -17764,6 +17825,7 @@ object MainForm: TMainForm
             Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
             PopupMenu = CommonPopupMenu
             TabOrder = 0
+            Visible = False
             OnClick = sgListSectionClick
             OnDrawCell = sgListSectionDrawCell
             OnKeyDown = sgListSectionKeyDown
@@ -17814,6 +17876,7 @@ object MainForm: TMainForm
             Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
             PopupMenu = CommonPopupMenu
             TabOrder = 0
+            Visible = False
             OnClick = sgListValueClick
             OnDrawCell = sgListValueDrawCell
             OnKeyDown = sgListValueKeyDown
@@ -17926,6 +17989,7 @@ object MainForm: TMainForm
             Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
             PopupMenu = CommonPopupMenu
             TabOrder = 0
+            Visible = False
             OnDrawCell = sgUACDrawCell
             OnMouseWheelDown = sgUACMouseWheelDown
             OnMouseWheelUp = sgUACMouseWheelUp
@@ -17972,6 +18036,7 @@ object MainForm: TMainForm
             Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
             PopupMenu = CommonPopupMenu
             TabOrder = 0
+            Visible = False
             OnDrawCell = sgGroupsDrawCell
             OnMouseWheelDown = sgGroupsMouseWheelDown
             OnMouseWheelUp = sgGroupsMouseWheelUp
@@ -20319,6 +20384,37 @@ object MainForm: TMainForm
     object Action_AddToBook: TMenuItem
       Caption = 'Add to Address Book'
       OnClick = Action_AddToBookClick
+    end
+    object Action_MassMailer: TMenuItem
+      Bitmap.Data = {
+        36030000424D3603000000000000360000002800000010000000100000000100
+        18000000000000030000C40E0000C40E00000000000000000000FFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFCFEBFFACE9FFFCFEFFFDFEFFB0E8FFCEEAFFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF95D1FF44CEFFFFFFFFFF
+        FFFFFFFFFFFFFFFF44CEFF95D1FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFFFD4EDFF2DAFFF7AE5FFFFFFFFFFFFFFFFFFFFFFFFFF7DE5FF31B5FFD4EC
+        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF66C0FF47BCFF55DBFFFFFFFFFF
+        FFFFFFFFFFFFFFFF64DDFF4FC9FF65BEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFFF3AAEFF42B0FF5BDDFFCCF3FFFFFFFFFFFFFFFCFEFF53DAFF55CAFF38AC
+        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF3AAFFF42B0FF54CAFF84E5FF50
+        D7FFFFFFFFADECFF5DDDFF4EC0FF38ADFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFFF61BFFF40B1FF42B0FF61DCFF57D8FFC7F2FF59DAFF64DDFF3FAEFF53B9
+        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFA6DBFF39AEFF45B3FF3EACFF5E
+        D4FF5EDBFF67E1FF4ABAFF3CAFFF7FCBFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFFFEBF7FF2CA9FF83CDFF48B2FF58CDFF69E2FF4EC0FF3FAEFF39AEFFB1DF
+        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF1BA2FFCBEAFF59BAFF4E
+        C2FF59CEFF3FAEFF66C1FF30ABFFDCF0FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFFFFFFFFF4BB6FFFFFFFF4EB7FF45B6FF35AFFFC7E8FFF3FAFF16A0FFE8F5
+        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7FCFFFFFFFFFFFFFF3FB1FF40
+        B1FF4BB5FFFFFFFFFFFFFFC8E8FFC1E6FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFFFF45B3FF38AEFF9ED7FFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7AC9FF2E
+        AAFFC6E8FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFFFFF4FAFF1BA3FFC8E8FFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFD9
+        EFFFABDDFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
+      Caption = 'Fire Mass Mailer'
+      OnClick = Action_MassMailerClick
     end
     object Action_GroupFollowUp: TMenuItem
       Caption = 'Modify Follow-Ups'

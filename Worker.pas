@@ -864,7 +864,7 @@ begin
       end
       else
       begin
-        MainForm.ExecMessage(False, mcError, 'Address Book cannot be updated. Please contact IT support.');
+        MainForm.ExecMessage(False, mcWarn, 'Selected customers are already in Address Book.');
         Result:=False;
       end;
     except
@@ -1365,6 +1365,9 @@ procedure TTSendAccountStatement.Execute;
 var
   Statement:   TDocument;
   AppSettings: TSettings;
+  DailyText:   TDataTables;
+  Status:      string;
+  Condition:   string;
 begin
   FIDThd:=CurrentThread.ThreadID;
   FLock.Acquire;
@@ -1372,6 +1375,7 @@ begin
     Statement  :=TDocument.Create;
     AppSettings:=TSettings.Create;
     try
+
       { SETUP DETAILS }
       Statement.SCUID    :=FSCUID;
       Statement.CUID     :=FCUID;
@@ -1400,10 +1404,32 @@ begin
       Statement.MailSubject:='Account Statement - ' + FCustName + ' - ' + FCustNumber;
       if Statement.SendDocument then
       begin
+
+        { GET CURRENT DAILY COMMENT FOR GIVEN CUID }
+        DailyText:=TDataTables.Create(MainForm.DbConnect);
+        try
+          DailyText.Columns.Add(TDaily.FIXCOMMENT);
+          Condition:=TDaily.CUID + EQUAL + QuotedStr(FCUID) + _AND + TDaily.AGEDATE + EQUAL + QuotedStr(MainForm.AgeDateSel);
+          DailyText.CustFilter:=WHERE + Condition;
+          DailyText.OpenTable(TblDaily);
+          if not (DailyText.DataSet.RecordCount = 0) then
+          begin
+            Status:=DailyText.DataSet.Fields[TDaily.FIXCOMMENT].Value;
+            Status:=Status + CRLF + 'New account statement has been sent to the customer.';
+          end
+          else
+          begin
+            Status:='New account statement has been sent to the customer.';
+          end;
+        finally
+          DailyText.Free;
+        end;
+
         { REGISTER ACTION }
-        if FLayout = maDefined then TTDailyComment.Create(FCUID, False, False, 0, 'Automatic account statement has been sent.', False, True, False, True);
-        if FLayout = maCustom  then TTDailyComment.Create(FCUID, False, False, 0, 'Custom defined account statement has been sent.', False, False, True, True);
+        if FLayout = maDefined then TTDailyComment.Create(FCUID, False, False, 0, Status, False, True, False, True);
+        if FLayout = maCustom  then TTDailyComment.Create(FCUID, False, False, 0, Status, False, False, True, True);
         MainForm.ExecMessage(False, mcInfo, 'Account Statement has been sent successfully!')
+
       end
       else
       begin

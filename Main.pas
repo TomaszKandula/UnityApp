@@ -543,6 +543,11 @@ type                                                            (* GUI | MAIN TH
     Label6: TLabel;
     Action_AddFollowUpGroup: TMenuItem;
     Action_RemoveFollowUps: TMenuItem;
+    Cap24: TShape;
+    Shape2: TShape;
+    Action_MassMailer: TMenuItem;
+    btnPasswordPreview: TSpeedButton;
+    hShapeEye: TShape;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -748,6 +753,9 @@ type                                                            (* GUI | MAIN TH
     procedure sgListValueKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure Action_AddFollowUpGroupClick(Sender: TObject);
     procedure Action_RemoveFollowUpsClick(Sender: TObject);
+    procedure Action_MassMailerClick(Sender: TObject);
+    procedure btnPasswordPreviewMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure btnPasswordPreviewMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     { ------------------------------------------------------------- ! HELPERS ! ----------------------------------------------------------------------------- }
   private
     { GENERAL }
@@ -1558,20 +1566,20 @@ begin
   with info do
   begin
     cbSize:=SizeOf(info);
-    fmask :=SIF_ALL;
     GetScrollInfo(Self.Handle, SB_VERT, info);
-    fMask :=fmask or SIF_PAGE;
-    nPage :=Self.VisibleRowCount * (nmax - nmin) div Self.RowCount;
+    fMask :=SIF_ALL or SIF_PAGE;
+    nMin :=0;
+    nMax :=Self.RowCount;
+    nPage:=Self.VisibleRowCount;
   end;
   SetScrollInfo(Self.Handle, SB_VERT, info, True);
   { ---------------------------------------------------------------------------------------------------------------------------------------------- HORIZONTAL }
   with info do
   begin
     cbSize:=SizeOf(info);
-    fMask :=SIF_ALL;
     GetScrollInfo(Self.Handle, SB_HORZ, info);
-    fmask :=fmask or SIF_PAGE;
-    nPage :=Self.VisibleColCount * (nmax - nmin) div Self.ColCount;
+    fMask :=SIF_ALL or SIF_PAGE;
+    nPage :=( Self.VisibleColCount * (nmax - nmin) ) div Self.ColCount;
   end;
   SetScrollInfo(Self.Handle, SB_HORZ, info, True);
 end;
@@ -2009,6 +2017,10 @@ begin
     sgListValue.ClearAll(2, 0, 0, False);
     sgListSection.Row:=1;
     sgListValue.Row:=1;
+    sgListSection.Visible:=False;
+    sgListValue.Visible:=False;
+    sgUAC.Visible:=False;
+    sgGroups.Visible:=False;
     sgUAC.ClearAll(2, 0, 0, False);
     sgGroups.ClearAll(2, 0, 0, False);
     sgUAC.Row:=1;
@@ -2042,6 +2054,10 @@ begin
     sgListSectionClick(self);
     sgListSection.Row:=1;
     sgListValue.Row:=1;
+    sgListSection.Visible:=True;
+    sgListValue.Visible:=True;
+    sgUAC.Visible:=True;
+    sgGroups.Visible:=True;
     { TRANSPARENCY OFF }
     imgOFF.Visible:=False;
     { ENDING }
@@ -2619,6 +2635,7 @@ begin
     Cap05.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS1TXT05', 'EMPTY'), [fsBold]);
     Cap06.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS1TXT06', 'EMPTY'), [fsBold]);
     Cap07.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS1TXT07', 'EMPTY'), [fsBold]);
+    Cap24.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS1TXT08', 'EMPTY'), [fsBold]);
 
     { OPEN ITEMS | TABSHEET2 }
     Cap10.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS2TXT01', 'EMPTY'), [fsBold]);
@@ -3271,6 +3288,12 @@ begin
                         )
       else
         MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+end;
+
+{ ------------------------------------------------------------------------------------------------------------------------------------------ OPEN MASS MAILER }
+procedure TMainForm.Action_MassMailerClick(Sender: TObject);
+begin
+//
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------- ADD FOLLOW-UP TO SELECTED GROUP }
@@ -4880,6 +4903,18 @@ begin
   Text49.Enabled:=False;
 end;
 
+{ ------------------------------------------------------------------------------------------------------------------------------------------- UNMASK PASSWORD }
+procedure TMainForm.btnPasswordPreviewMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  EditPassword.PasswordChar:=#0;
+end;
+
+{ --------------------------------------------------------------------------------------------------------------------------------------------- MASK PASSWORD }
+procedure TMainForm.btnPasswordPreviewMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+  EditPassword.PasswordChar:='*';
+end;
+
 { --------------------------------------------------------------- ! BUTTON CALLS ! -------------------------------------------------------------------------- }
 
 { ---------------------------------------------------------------------------------------------------------------------------------------------- MENU BUTTONS }
@@ -4953,113 +4988,6 @@ begin
   ResetTabsheetButtons;
   btnSupplier.Font.Style:=[fsBold];
 end;
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// SUPPLIER FORM DEMO ! TO BE REMOVED !
-
-{ ------------------------------------------------------------------------------------------------------------------------------------------ SUPPLIER BUTTONS }
-procedure TMainForm.btnSupplierClearClick(Sender: TObject);
-begin
-  editCustomerName.Text:='';
-  editSerticaUnits.Text:='';
-  editSerticaTerms.Text:='';
-  editSerticaBuyOrder.Text:='';
-  editSerticaHandlingOrder.Text:='';
-  editAddComment.Text:='';
-  editEmailAddress.Text:='';
-end;
-
-procedure TMainForm.btnSupplierOpenClick(Sender: TObject);
-begin
-  WndCall(TicketForm, 0);
-end;
-
-procedure TMainForm.btnSupplierSubmitClick(Sender: TObject);
-var
-  Vendor: TSupplierForm;
-  Return: boolean;
-  Check:  integer;
-begin
-  Vendor:=TSupplierForm.Create(DbConnect);
-  Check:=0;
-  try
-    { CHECK IF FILEDS ARE NOT EMPTY }
-    if (editCustomerName.Text = '') or (editEmailAddress.Text = '') then Dec(Check);
-    { WRITE TO DATABASE AND SEND EMAIL NOTIFICATION }
-    if SerticaGroup.Cursor = crNo then
-    begin
-      Return:=Vendor.WriteRequest(offSertica, cbCompany.Text, cbCurrency.Text, cbSupplierType.Text, cbAgent.Text);
-      if not Return then
-        Inc(Check)
-          else
-          begin
-            Return:=Vendor.SendEmailToSupplier(edtCustomerName.Text, cbCompany.Text, offSertica, editEmailAddress.Text);
-            if not Return then Inc(Check);
-          end;
-    end
-    else
-    begin
-      Return:=Vendor.WriteRequest(onSertica, cbCompany.Text, cbCurrency.Text, cbSupplierType.Text, cbAgent.Text);
-      if not Return then
-        Inc(Check)
-          else
-          begin
-            Return:=Vendor.SendEmailToSupplier(edtCustomerName.Text, cbCompany.Text, onSertica, editEmailAddress.Text);
-            if not Return then Inc(Check);
-          end;
-    end;
-    { SHOW MESSAGE }
-    if Check = 0 then MsgCall(mcInfo,  'New supplier request has been established and Supplier has been notified.');
-    if Check > 0 then MsgCall(mcError, 'Cannot process the request. Please contact IT support.');
-    if Check < 0 then MsgCall(mcWarn,  'Cannot process the request. Please make sure that all the required fields are filled.');
-  finally
-    Vendor.Free;
-  end;
-end;
-
-procedure TMainForm.btnSupplierApproveClick(Sender: TObject);
-var
-  Vendor: TSupplierForm;
-begin
-  if edtUserAlias.Text = '' then
-  begin
-    MsgCall(mcWarn, 'Please open ticket first.');
-    Exit;
-  end;
-  Vendor:=TSupplierForm.Create(DbConnect);
-  try
-    if Vendor.TicketDecision(TextSelectedTicket.Caption, sdAPPROVE) then
-    begin
-      MsgCall(mcInfo, 'Ticket has been successfully approved!');
-      SupplierResetFields;
-    end;
-  finally
-    Vendor.Free;
-  end;
-end;
-
-
-procedure TMainForm.btnSupplierRejectClick(Sender: TObject);
-var
-  Vendor: TSupplierForm;
-begin
-  if edtUserAlias.Text = '' then
-  begin
-    MsgCall(mcWarn, 'Please open ticket first.');
-    Exit;
-  end;
-  Vendor:=TSupplierForm.Create(DbConnect);
-  try
-    if Vendor.TicketDecision(TextSelectedTicket.Caption, sdREJECT) then
-    begin
-      MsgCall(mcInfo, 'Ticket has been successfully rejected!');
-      SupplierResetFields;
-    end;
-  finally
-    Vendor.Free;
-  end;
-end;
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// SUPPLIER FORM DEMO ! TO BE REMOVED !
 
 { -------------------------------------------------------------------------------------------------------------------------------------------- GO TO REPORT 1 }
 procedure TMainForm.btnReport1Click(Sender: TObject);
@@ -5557,8 +5485,120 @@ begin
 
   begin
     MsgCall(mcWarn, 'Incorrect password, please re-type it and try again.');
+    EditPassword.Text:='';
   end;
 
 end;
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// SUPPLIER FORM DEMO ! TO BE REMOVED !
+
+
+{ ------------------------------------------------------------------------------------------------------------------------------------------ SUPPLIER BUTTONS }
+procedure TMainForm.btnSupplierClearClick(Sender: TObject);
+begin
+  editCustomerName.Text:='';
+  editSerticaUnits.Text:='';
+  editSerticaTerms.Text:='';
+  editSerticaBuyOrder.Text:='';
+  editSerticaHandlingOrder.Text:='';
+  editAddComment.Text:='';
+  editEmailAddress.Text:='';
+end;
+
+procedure TMainForm.btnSupplierOpenClick(Sender: TObject);
+begin
+  WndCall(TicketForm, 0);
+end;
+
+procedure TMainForm.btnSupplierSubmitClick(Sender: TObject);
+var
+  Vendor: TSupplierForm;
+  Return: boolean;
+  Check:  integer;
+begin
+  Vendor:=TSupplierForm.Create(DbConnect);
+  Check:=0;
+  try
+    { CHECK IF FILEDS ARE NOT EMPTY }
+    if (editCustomerName.Text = '') or (editEmailAddress.Text = '') then Dec(Check);
+    { WRITE TO DATABASE AND SEND EMAIL NOTIFICATION }
+    if SerticaGroup.Cursor = crNo then
+    begin
+      Return:=Vendor.WriteRequest(offSertica, cbCompany.Text, cbCurrency.Text, cbSupplierType.Text, cbAgent.Text);
+      if not Return then
+        Inc(Check)
+          else
+          begin
+            Return:=Vendor.SendEmailToSupplier(edtCustomerName.Text, cbCompany.Text, offSertica, editEmailAddress.Text);
+            if not Return then Inc(Check);
+          end;
+    end
+    else
+    begin
+      Return:=Vendor.WriteRequest(onSertica, cbCompany.Text, cbCurrency.Text, cbSupplierType.Text, cbAgent.Text);
+      if not Return then
+        Inc(Check)
+          else
+          begin
+            Return:=Vendor.SendEmailToSupplier(edtCustomerName.Text, cbCompany.Text, onSertica, editEmailAddress.Text);
+            if not Return then Inc(Check);
+          end;
+    end;
+    { SHOW MESSAGE }
+    if Check = 0 then MsgCall(mcInfo,  'New supplier request has been established and Supplier has been notified.');
+    if Check > 0 then MsgCall(mcError, 'Cannot process the request. Please contact IT support.');
+    if Check < 0 then MsgCall(mcWarn,  'Cannot process the request. Please make sure that all the required fields are filled.');
+  finally
+    Vendor.Free;
+  end;
+end;
+
+procedure TMainForm.btnSupplierApproveClick(Sender: TObject);
+var
+  Vendor: TSupplierForm;
+begin
+  if edtUserAlias.Text = '' then
+  begin
+    MsgCall(mcWarn, 'Please open ticket first.');
+    Exit;
+  end;
+  Vendor:=TSupplierForm.Create(DbConnect);
+  try
+    if Vendor.TicketDecision(TextSelectedTicket.Caption, sdAPPROVE) then
+    begin
+      MsgCall(mcInfo, 'Ticket has been successfully approved!');
+      SupplierResetFields;
+    end;
+  finally
+    Vendor.Free;
+  end;
+end;
+
+
+procedure TMainForm.btnSupplierRejectClick(Sender: TObject);
+var
+  Vendor: TSupplierForm;
+begin
+  if edtUserAlias.Text = '' then
+  begin
+    MsgCall(mcWarn, 'Please open ticket first.');
+    Exit;
+  end;
+  Vendor:=TSupplierForm.Create(DbConnect);
+  try
+    if Vendor.TicketDecision(TextSelectedTicket.Caption, sdREJECT) then
+    begin
+      MsgCall(mcInfo, 'Ticket has been successfully rejected!');
+      SupplierResetFields;
+    end;
+  finally
+    Vendor.Free;
+  end;
+end;
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// SUPPLIER FORM DEMO ! TO BE REMOVED !
+
 
 end.

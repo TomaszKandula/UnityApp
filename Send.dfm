@@ -34,10 +34,6 @@ object SendForm: TSendForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
-    ExplicitLeft = 5
-    ExplicitTop = 5
-    ExplicitWidth = 535
-    ExplicitHeight = 467
     object Shape_Banks: TShape
       Left = 16
       Top = 383
@@ -214,7 +210,7 @@ object SendForm: TSendForm
         Font.Height = -11
         Font.Name = 'Tahoma'
         Font.Style = []
-        MaxLength = 255
+        MaxLength = 1024
         ParentFont = False
         ScrollBars = ssVertical
         TabOrder = 0
@@ -276,9 +272,6 @@ object SendForm: TSendForm
     ParentBackground = False
     ParentFont = False
     TabOrder = 1
-    ExplicitLeft = 5
-    ExplicitTop = 477
-    ExplicitWidth = 535
     object Text_Warn: TLabel
       Left = 16
       Top = 12

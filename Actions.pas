@@ -442,9 +442,16 @@ begin
     end;
     { RUN LYNC WITH GIVEN PHONE NUMBER }
     ShellExecute(ActionsForm.Handle, 'open', PChar(AppSettings.FAppDir + LyncCall), PChar(ActionsForm.Cust_Phone.Text), nil, SW_SHOWNORMAL);
-    if ActionsForm.DailyCom.Text = '' then ActionsForm.DailyCom.Text:='Called customer today.'
-      else
-        ActionsForm.DailyCom.Text:=ActionsForm.DailyCom.Text + CRLF + 'Called customer today.';
+    if ActionsForm.DailyCom.Text = '' then
+    begin
+      ActionsForm.DailyCom.Text:='Called customer today.';
+      SaveDailyComment;
+    end
+    else
+    begin
+      ActionsForm.DailyCom.Text:=ActionsForm.DailyCom.Text + CRLF + 'Called customer today.';
+      SaveDailyComment;
+    end;
   finally
     AppSettings.Free;
   end;
@@ -728,7 +735,7 @@ end;
 procedure TActionsForm.DailyComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   { NEW LINE }
-  if (Key = VK_RETURN) and (Shift=[ssALT]) then
+  if ( (Key = VK_RETURN) and (Shift=[ssALT]) ) or ( (Key = VK_RETURN) and (Shift=[ssShift]) ) then
   begin
     DailyCom.Lines.Add(CRLF);
     Exit;
@@ -744,7 +751,7 @@ end;
 procedure TActionsForm.GeneralComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   { NEW LINE }
-  if (Key = VK_RETURN) and (Shift=[ssALT]) then
+  if ( (Key = VK_RETURN) and (Shift=[ssALT]) ) or ( (Key = VK_RETURN) and (Shift=[ssShift]) ) then
   begin
     GeneralCom.Lines.Add(CRLF);
     Exit;
