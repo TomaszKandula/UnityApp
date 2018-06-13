@@ -63,6 +63,7 @@ type
     procedure   UpdateSummary;
     procedure   GetDetails(var Grid: TStringGrid);
     procedure   MapGroup3(var Grid: TStringGrid; Source: TStringGrid);
+    //procedure   FormatNumbers(var Grid: TStringGrid; Field1, Field2, Field3, Field4, Field5, Field6, Field7, Field8, Field9, Field10, Field11: string);
     function    GetData(Code: string; Table: string; Entity: string): string;
     procedure   AgeViewMode(var Grid: TStringGrid; ModeBySection: string);
     procedure   QuickSortExt(var A: array of double; var L: array of integer; iLo, iHi: integer; ASC: boolean);
@@ -368,6 +369,53 @@ begin
       Grid.Cells[Grid.ReturnColumn(TSnapshots.fGROUP3, 1, 1), iCNT]:=Source.Cells[Source.ReturnColumn(TGroup3.DESCRIPTION, 1, 1), jCNT]
 end;
 
+(*
+{ ----------------------------------------------------------------------------------------------------------------------------------------- FORMAT NUMERICALS }
+procedure TAgeView.FormatNumbers(var Grid: TStringGrid; Field1, Field2, Field3, Field4, Field5, Field6, Field7, Field8, Field9, Field10, Field11: string);
+
+  { COMMON VARIABLES }
+
+  var
+    iCNT:  integer;
+
+  { NESTED METHOD }
+
+  function ReturnNumber(Value: string): extended;
+  var
+    TestCell: string;
+  begin
+
+    TestCell:=Value;
+
+    if FormatSettings.ThousandSeparator = ',' then TestCell:=StringReplace(TestCell, ',', '', [rfReplaceAll]);
+    if FormatSettings.ThousandSeparator = '.' then TestCell:=StringReplace(TestCell, '.', '', [rfReplaceAll]);
+
+    Result:=StrToIntDef(TestCell, 0);
+
+  end;
+
+begin
+  if Grid <> nil then
+  begin
+    for iCNT:=1 { SKIP HEADER } to Grid.RowCount - 1 do
+    begin
+      { FORMAT ALL FIELDS }
+      if Field1  <> '' then Grid.Cells[Grid.ReturnColumn(Field1,  1, 1), iCNT]:=FormatFloat('#,##0.00', ReturnNumber(Grid.Cells[Grid.ReturnColumn(Field1,  1, 1), iCNT]));
+      if Field2  <> '' then Grid.Cells[Grid.ReturnColumn(Field2,  1, 1), iCNT]:=FormatFloat('#,##0.00', ReturnNumber(Grid.Cells[Grid.ReturnColumn(Field2,  1, 1), iCNT]));
+      if Field3  <> '' then Grid.Cells[Grid.ReturnColumn(Field3,  1, 1), iCNT]:=FormatFloat('#,##0.00', ReturnNumber(Grid.Cells[Grid.ReturnColumn(Field3,  1, 1), iCNT]));
+      if Field4  <> '' then Grid.Cells[Grid.ReturnColumn(Field4,  1, 1), iCNT]:=FormatFloat('#,##0.00', ReturnNumber(Grid.Cells[Grid.ReturnColumn(Field4,  1, 1), iCNT]));
+      if Field5  <> '' then Grid.Cells[Grid.ReturnColumn(Field5,  1, 1), iCNT]:=FormatFloat('#,##0.00', ReturnNumber(Grid.Cells[Grid.ReturnColumn(Field5,  1, 1), iCNT]));
+      if Field6  <> '' then Grid.Cells[Grid.ReturnColumn(Field6,  1, 1), iCNT]:=FormatFloat('#,##0.00', ReturnNumber(Grid.Cells[Grid.ReturnColumn(Field6,  1, 1), iCNT]));
+      if Field7  <> '' then Grid.Cells[Grid.ReturnColumn(Field7,  1, 1), iCNT]:=FormatFloat('#,##0.00', ReturnNumber(Grid.Cells[Grid.ReturnColumn(Field7,  1, 1), iCNT]));
+      if Field8  <> '' then Grid.Cells[Grid.ReturnColumn(Field8,  1, 1), iCNT]:=FormatFloat('#,##0.00', ReturnNumber(Grid.Cells[Grid.ReturnColumn(Field8,  1, 1), iCNT]));
+      if Field9  <> '' then Grid.Cells[Grid.ReturnColumn(Field9,  1, 1), iCNT]:=FormatFloat('#,##0.00', ReturnNumber(Grid.Cells[Grid.ReturnColumn(Field9,  1, 1), iCNT]));
+      if Field10 <> '' then Grid.Cells[Grid.ReturnColumn(Field10, 1, 1), iCNT]:=FormatFloat('#,##0.00', ReturnNumber(Grid.Cells[Grid.ReturnColumn(Field10, 1, 1), iCNT]));
+      if Field11 <> '' then Grid.Cells[Grid.ReturnColumn(Field11, 1, 1), iCNT]:=FormatFloat('#,##0.00', ReturnNumber(Grid.Cells[Grid.ReturnColumn(Field11, 1, 1), iCNT]));
+    end;
+  end;
+end;
+*)
+
 { ------------------------------------------------------------------------------------------------------------------------- FIND MATCH DATA IN GENERAL TABLES }
 function TAgeView.GetData(Code: string; Table: string; Entity: string): string;  //move to another module
 var
@@ -428,9 +476,9 @@ begin
   try
     for iCNT:=0 to Grid.ColCount - 2 do
       if AppSettings.TMIG.ReadString(ModeBySection, MainForm.FindKey(AppSettings.TMIG, ModeBySection, iCNT), 'True') = 'False' then
-        Grid.ColWidths[Grid.ReturnColumn(MainForm.FindKey(AppSettings.TMIG, ModeBySection, iCNT), 1, 1)]:= -1
+        Grid.ColWidths[Grid.ReturnColumn(MainForm.FindKey(AppSettings.TMIG, ModeBySection, iCNT), 1, 1)]:=-1
           else
-            Grid.ColWidths[Grid.ReturnColumn(MainForm.FindKey(AppSettings.TMIG, ModeBySection, iCNT), 1, 1)]:= 100;
+            Grid.ColWidths[Grid.ReturnColumn(MainForm.FindKey(AppSettings.TMIG, ModeBySection, iCNT), 1, 1)]:=100;
   finally
     AppSettings.Free;
   end;
@@ -529,8 +577,8 @@ COLUMN NUMBER   | FIELD NAME          | ASSIGN NUMBER   | FIELD NAME       | ASS
  25             | GenAcNo             | 30              | PERSON           | D          | 24
  26             | ValDt               | 28              | GROUP3           | D          | 25
  27             | R1  (division)      | -               | RISK_CLASS       | C          | 26
- 28             | Gr3                 | -               | FREE1            | C          | 27
- 29             | Txt                 | -               | FREE2            | C          | 28
+ 28             | Gr3                 | -               | FREE1            | C          | 27 to be removed
+ 29             | Txt                 | -               | FREE2            | C          | 28 to be removed
  30             | R8  (person)        | 37              | CUID             | D          | 29
  31             | DirDeb              | -               | -                |            |
  32             | AddTxt              | -               | -                |            |
@@ -816,7 +864,7 @@ begin
   { EXECUTE }
   StrSQL:=Transaction;
   try
-    MainForm.ExecMessage(False, 10, stSQLupdate);
+    MainForm.ExecMessage(False, mcStatusBar, stSQLupdate);
     ExecSQL;
   except
     on E: Exception do

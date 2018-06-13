@@ -441,6 +441,23 @@ begin
                     AgeView.UpdateSummary;
                     AgeView.GetDetails(MainForm.DetailsGrid);
                     AgeView.MapGroup3(MainForm.sgAgeView, MainForm.sgGroup3);
+{
+                    AgeView.FormatNumbers
+                    (
+                      MainForm.sgAgeView,
+                      TSnapshots.fNOT_DUE,
+                      TSnapshots.fRANGE1,
+                      TSnapshots.fRANGE2,
+                      TSnapshots.fRANGE3,
+                      TSnapshots.fRANGE4,
+                      TSnapshots.fRANGE5,
+                      TSnapshots.fRANGE6,
+                      TSnapshots.fOVERDUE,
+                      TSnapshots.fTOTAL,
+                      TSnapshots.fCREDIT_LIMIT,
+                      TSnapshots.fEXCEEDED_AMOUNT
+                    );
+}
                     MainForm.sgAgeView.Repaint;
                     MainForm.LoadingAnimation(MainForm.ImgLoadingAgeView, MainForm.sgAgeView, MainForm.PanelAgeView, AnimationOFF);
                   end);

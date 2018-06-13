@@ -20378,7 +20378,6 @@ object MainForm: TMainForm
     end
     object Action_Tracker: TMenuItem
       Caption = 'Add to Invoice Tracker'
-      Enabled = False
       OnClick = Action_TrackerClick
     end
     object Action_AddToBook: TMenuItem
@@ -20504,6 +20503,7 @@ object MainForm: TMainForm
       end
       object Action_Ranges: TMenuItem
         Caption = 'Ranges'
+        Enabled = False
         object Action_Range1: TMenuItem
           Caption = 'Range1'
           OnClick = Action_Range1Click
@@ -20531,6 +20531,7 @@ object MainForm: TMainForm
       end
       object Action_Amounts: TMenuItem
         Caption = 'Amounts'
+        Enabled = False
         object Action_TotalAmount: TMenuItem
           Caption = 'Total Amount'
           OnClick = Action_TotalAmountClick
@@ -20584,93 +20585,64 @@ object MainForm: TMainForm
       ShortCut = 16454
       OnClick = Action_SearchClick
     end
-    object N4: TMenuItem
-      Caption = '-'
-    end
-    object Action_PaymentTerm: TMenuItem
-      Caption = 'Payment Term'
-      OnClick = Action_PaymentTermClick
-    end
-    object Action_Person: TMenuItem
-      Caption = 'Person'
-      OnClick = Action_PersonClick
+    object Action_ShowDetails: TMenuItem
+      Caption = 'Show Details'
+      object Action_PaymentTerm: TMenuItem
+        Caption = 'Payment Term'
+        OnClick = Action_PaymentTermClick
+      end
+      object Action_Person: TMenuItem
+        Caption = 'Person'
+        OnClick = Action_PersonClick
+      end
     end
     object N5: TMenuItem
       Caption = '-'
     end
-    object Action_ToExce: TMenuItem
-      Caption = 'Generate Excel Report'
-      ShortCut = 16467
-      OnClick = Action_ToExceClick
-    end
-    object Action_ExportCSV: TMenuItem
-      Caption = 'Quick Export to CSV'
-      OnClick = Action_ExportCSVClick
-    end
-    object Action_SelectAgeView: TMenuItem
-      Caption = 'Select All'
-      OnClick = Action_SelectAgeViewClick
-    end
-    object Action_CopyAll: TMenuItem
-      Bitmap.Data = {
-        36030000424D3603000000000000360000002800000010000000100000000100
-        18000000000000030000C30E0000C30E00000000000000000000FFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF72
-        7272727272727272727272727272727272727272727272727272FFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFF727272FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF72
-        7272FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFF727272
-        727272727272727272727272FFFFFF727272FFFFFFB17D4AB17D4AB17D4AB17D
-        4AB17D4AFFFFFF727272FFFFFF727272FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF72
-        7272FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFF727272
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFFB17D4AB17D4AB17D4AB17D
-        4AB17D4AFFFFFF727272FFFFFF727272FFFFFFB17D4AB17D4AB17D4AFFFFFF72
-        7272FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFF727272
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFFB17D4AB17D4AFFFFFF7272
-        72727272727272727272FFFFFF727272FFFFFFB17D4AB17D4AB17D4AFFFFFF72
-        7272FFFFFFFFFFFFFFFFFFFFFFFF727272D6D6D67D7D7DE0E0E0FFFFFF727272
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFFFFFFFFFFFFFFFFFFFF7272
-        727D7D7DE0E0E0FFFFFFFFFFFF727272FFFFFFB17D4AB17D4AFFFFFFFFFFFF72
-        7272727272727272727272727272727272E0E0E0FFFFFFFFFFFFFFFFFF727272
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFFFFFFFFFFFFFFFFFFFF7272727D
-        7D7DE0E0E0FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272
-        727272727272727272727272727272E0E0E0FFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
-      Caption = 'Copy to Clipboard'
-      OnClick = Action_CopyAllClick
-    end
-    object N12: TMenuItem
-      Caption = '-'
-    end
-    object Action_FollowUpColors: TMenuItem
-      Caption = 'Follow-Up colors'
-      OnClick = Action_FollowUpColorsClick
-    end
-    object Action_RowHighlight: TMenuItem
-      Caption = 'Row highlight'
-      OnClick = Action_RowHighlightClick
+    object Action_QuickReporting: TMenuItem
+      Caption = 'Quick Reporting'
+      object Action_ToExce: TMenuItem
+        Caption = 'Generate Excel Report'
+        ShortCut = 16467
+        OnClick = Action_ToExceClick
+      end
+      object Action_ExportCSV: TMenuItem
+        Caption = 'Export to CSV'
+        OnClick = Action_ExportCSVClick
+      end
     end
     object N13: TMenuItem
       Caption = '-'
     end
-    object Action_BasicView: TMenuItem
-      Caption = 'Basic view'
-      OnClick = Action_BasicViewClick
-    end
-    object Action_FullView: TMenuItem
-      Caption = 'Full view'
-      OnClick = Action_FullViewClick
-    end
-    object N16: TMenuItem
-      Caption = '-'
-    end
-    object Action_HideSummary: TMenuItem
-      Caption = 'Show aging summary'
-      Checked = True
-      OnClick = Action_HideSummaryClick
+    object Action_ViewOptions: TMenuItem
+      Caption = 'Age View Options'
+      object Action_BasicView: TMenuItem
+        Caption = 'Basic view'
+        OnClick = Action_BasicViewClick
+      end
+      object Action_FullView: TMenuItem
+        Caption = 'Full view'
+        OnClick = Action_FullViewClick
+      end
+      object N22: TMenuItem
+        Caption = '-'
+      end
+      object Action_RowHighlight: TMenuItem
+        Caption = 'Row highlight'
+        OnClick = Action_RowHighlightClick
+      end
+      object Action_HideSummary: TMenuItem
+        Caption = 'Show aging summary'
+        Checked = True
+        OnClick = Action_HideSummaryClick
+      end
+      object N16: TMenuItem
+        Caption = '-'
+      end
+      object Action_FollowUpColors: TMenuItem
+        Caption = 'Follow-Up colors'
+        OnClick = Action_FollowUpColorsClick
+      end
     end
     object Action_AutoColumnSize: TMenuItem
       Caption = 'Auto column width'

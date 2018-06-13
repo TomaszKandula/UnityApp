@@ -153,7 +153,7 @@ begin
     begin
       Zipped:=string(ZipR.Entry[iCNT].ZipName);
       FullPath:=DestDir + Zipped;
-      { CHECK IF WE HAVE PATH TO FILE OR TO FOLDER }
+      { CHECK IF WE HAVE PATH TO FILE OR PATH TO FOLDER }
       if ExtractFileName(FullPath) <> '' then
       begin
         RenameFile(FullPath, Zipped + '.del');

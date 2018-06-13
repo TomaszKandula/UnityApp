@@ -319,7 +319,6 @@ type                                                            (* GUI | MAIN TH
     sgInvoiceTracker: TStringGrid;
     AgeViewPopup: TPopupMenu;
     Action_Tracker: TMenuItem;
-    N4: TMenuItem;
     Action_PaymentTerm: TMenuItem;
     Action_Person: TMenuItem;
     Label2: TLabel;
@@ -366,7 +365,6 @@ type                                                            (* GUI | MAIN TH
     Action_ShowAsIs: TMenuItem;
     Action_ShowMyEntries: TMenuItem;
     Action_ToExce: TMenuItem;
-    N12: TMenuItem;
     Action_BasicView: TMenuItem;
     N13: TMenuItem;
     Action_FullView: TMenuItem;
@@ -385,7 +383,6 @@ type                                                            (* GUI | MAIN TH
     btnLoadAgeView: TSpeedButton;
     EditGroupID: TLabeledEdit;
     Action_RowHighlight: TMenuItem;
-    N16: TMenuItem;
     Action_Update: TMenuItem;
     Action_Report: TMenuItem;
     N17: TMenuItem;
@@ -425,8 +422,6 @@ type                                                            (* GUI | MAIN TH
     PanelDetailsGrid: TPanel;
     Action_HideSummary: TMenuItem;
     Action_ExportCSV: TMenuItem;
-    Action_SelectAgeView: TMenuItem;
-    Action_CopyAll: TMenuItem;
     Action_RemoveFilters: TMenuItem;
     Action_Free1: TMenuItem;
     NavigationBar: TPanel;
@@ -561,6 +556,11 @@ type                                                            (* GUI | MAIN TH
     Action_TotalAmount: TMenuItem;
     Action_Overdues: TMenuItem;
     Action_Free2: TMenuItem;
+    Action_ViewOptions: TMenuItem;
+    N16: TMenuItem;
+    N22: TMenuItem;
+    Action_ShowDetails: TMenuItem;
+    Action_QuickReporting: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -731,8 +731,6 @@ type                                                            (* GUI | MAIN TH
     procedure Action_Gr3_FilterClick(Sender: TObject);
     procedure Action_HideSummaryClick(Sender: TObject);
     procedure Action_ExportCSVClick(Sender: TObject);
-    procedure Action_SelectAgeViewClick(Sender: TObject);
-    procedure Action_CopyAllClick(Sender: TObject);
     procedure Action_RemoveFiltersClick(Sender: TObject);
     procedure Action_Free1Click(Sender: TObject);
     procedure btnReport1Click(Sender: TObject);
@@ -1498,17 +1496,30 @@ end;
 { ----------------------------------------------------------------------------------------------------------------------------------- FONT COLORS FOR NUMBERS }
 procedure TStringGrid.ColorValues(ARow: integer; ACol: integer; Rect: TRect; NegativeColor: TColor; PositiveColor: TColor);
 var
-  MyCell:  string;
+  MyCell:   string;
+  TestCell: string;
 begin
+
+  { GET DATA }
   MyCell:=Cells[ACol, ARow];
-  { COLORS }
-  if StrToFloatDef(MyCell, 0) < 0 then
-    Canvas.Font.Color:=NegativeColor
-      else
-        Canvas.Font.Color:=PositiveColor;
+  TestCell:=MyCell;
+
+  { REMOVE DECIMAL SEPARATOR SO IT CAN BE CONVERTED CORRECTLY }
+  if FormatSettings.ThousandSeparator = ',' then TestCell:=StringReplace(TestCell, ',', '', [rfReplaceAll]);
+  if FormatSettings.ThousandSeparator = '.' then TestCell:=StringReplace(TestCell, '.', '', [rfReplaceAll]);
+
+  { SETUP NEW COLORS }
+  if StrToFloatDef(TestCell, 0) < 0 then Canvas.Font.Color:=NegativeColor;
+  if StrToFloatDef(TestCell, 0) > 0 then Canvas.Font.Color:=PositiveColor;
+  if StrToFloatDef(TestCell, 0) = 0 then Canvas.Font.Color:=clSilver;
+
+  { FORMAT CELL }
+  MyCell:=FormatFloat('#,##0.00', StrToFloatDef(TestCell, 0));
+
   { MAKE RECTANGLE SMALLER ENOUGH SO IT WILL NOT OVERLAP GRID LINES }
   InflateRect(Rect, -2, -2);
   Canvas.TextRect(Rect, MyCell);
+
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------------- AUTO COLUMN WIDTH }
@@ -3263,6 +3274,10 @@ var
   iCNT: integer;
   Item: TListItem;
 begin
+
+  MsgCall(mcInfo, 'This feature is not yet accessible. Please try later.');
+  Exit;
+
   if ConnLastError = 0 then
   begin
     TrackerForm.CustomerList.Clear;
@@ -3317,7 +3332,10 @@ end;
 { ------------------------------------------------------------------------------------------------------------------------------------------ OPEN MASS MAILER }
 procedure TMainForm.Action_MassMailerClick(Sender: TObject);
 begin
-//
+
+  MsgCall(mcInfo, 'This feature is not yet accessible. Please try later.');
+  Exit;
+
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------- ADD FOLLOW-UP TO SELECTED GROUP }
@@ -3603,18 +3621,6 @@ end;
 procedure TMainForm.Action_ExportCSVClick(Sender: TObject);
 begin
   sgAgeView.ExportCSV(CSVExport, '|');
-end;
-
-{ ------------------------------------------------------------------------------------------------------------------------------------------------ SELECT ALL }
-procedure TMainForm.Action_SelectAgeViewClick(Sender: TObject);
-begin
-  sgAgeView.SelectAll;
-end;
-
-{ ------------------------------------------------------------------------------------------------------------------------------- COPY SELECTION TO CLIPBOARD }
-procedure TMainForm.Action_CopyAllClick(Sender: TObject);
-begin
-  sgAgeView.CopyCutPaste(adCopy);
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------- HIDE OR SHOW SUMMARY }
@@ -4305,6 +4311,9 @@ begin
   { ALLOW COPYING }
   if (Key = 67) and (Shift = [ssCtrl]) then sgAgeView.CopyCutPaste(adCopy);
 
+  { SELECT ALL }
+  if (Key = 65) and (Shift = [ssCtrl] )then sgAgeView.SelectAll;
+
   { ALLOW EDITING FREE COLUMNS }
   if (
        (
@@ -4343,7 +4352,7 @@ begin
     begin
       if not(CheckIfDate(sgAgeView.Cells[Col3, sgAgeView.Row])) then
       begin
-        MsgCall(mcWarn, 'Invalid date format, please use "yyyy-mm-dd".');
+        MsgCall(mcWarn, 'Invalid date or format, please remember to use "yyyy-mm-dd".');
         sgAgeView.Cells[Col3, sgAgeView.Row]:=SPACE;
         sgAgeView.Options:=sgAgeView.Options - [goEditing];
         Exit;
@@ -4432,7 +4441,43 @@ end;
 procedure TMainForm.sgAddressBookKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
 
-  if (Key <> VK_LEFT) and (Key <> VK_RIGHT) and (Key <> VK_UP) and (Key <> VK_DOWN) then
+  if
+    (
+      Key <> VK_LEFT
+    )
+    and
+    (
+      Key <> VK_RIGHT
+    )
+    and
+    (
+      Key <> VK_UP
+    )
+    and
+    (
+      Key <> VK_DOWN
+    )
+    and
+    (
+      Shift <> [ssShift]
+    )
+    and
+    (
+      Shift <> [ssCtrl]
+    )
+    and
+    (
+      Shift <> [ssAlt]
+    )
+    and
+    (
+      Key <> VK_BACK
+    )
+    and
+    (
+      Key <> VK_TAB
+    )
+  then
   begin
 
     if AddressBookExclusion then
