@@ -35,10 +35,6 @@ object SearchForm: TSearchForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
-    ExplicitLeft = 5
-    ExplicitTop = 5
-    ExplicitWidth = 376
-    ExplicitHeight = 226
     object btnSearch: TSpeedButton
       Left = 293
       Top = 188

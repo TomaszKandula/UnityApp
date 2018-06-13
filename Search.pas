@@ -99,7 +99,7 @@ procedure TSearchForm.Search;
                         mcInfo,
                         'The item has been found (' + SGrid.Cells[SearchColumn, FoundRow] + ') for search pattern "' +
                         SearchString + '". ' + CRLF +
-                        'However, it is hidden by the filter. Remove filtering to unhide searched item.'
+                        'However, it is hidden by the filter. Remove filtering to unhide search item.'
                       );
   end;
 
@@ -285,7 +285,7 @@ procedure TSearchForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   FoundRow:=0;
   IsNext:=False;
-  (* EditSearch.Text:=''; *)
+  EditSearch.Text:='';
   CheckUp.Checked:=False;
   CheckDown.Checked:=True;
 end;

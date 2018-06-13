@@ -32,10 +32,6 @@ object ViewSearchForm: TViewSearchForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
-    ExplicitLeft = 64
-    ExplicitTop = 216
-    ExplicitWidth = 665
-    ExplicitHeight = 361
     object SearchBox: TGroupBox
       AlignWithMargins = True
       Left = 10
@@ -49,10 +45,6 @@ object ViewSearchForm: TViewSearchForm
       Align = alClient
       Caption = 'Search Address Book'
       TabOrder = 0
-      ExplicitLeft = 32
-      ExplicitTop = 16
-      ExplicitWidth = 481
-      ExplicitHeight = 233
       object Text1: TLabel
         Left = 24
         Top = 59
@@ -199,9 +191,6 @@ object ViewSearchForm: TViewSearchForm
           Color = clCream
           NumbersOnly = True
           TabOrder = 0
-          ExplicitLeft = 24
-          ExplicitTop = 29
-          ExplicitWidth = 217
         end
       end
       object PanelEditName: TPanel
@@ -228,10 +217,6 @@ object ViewSearchForm: TViewSearchForm
           Color = clWhite
           Enabled = False
           TabOrder = 0
-          ExplicitLeft = -32
-          ExplicitTop = 20
-          ExplicitWidth = 217
-          ExplicitHeight = 21
         end
       end
       object PanelEmail: TPanel
@@ -255,7 +240,6 @@ object ViewSearchForm: TViewSearchForm
           Color = clWhite
           Enabled = False
           TabOrder = 0
-          ExplicitHeight = 25
         end
       end
       object PanelPhones: TPanel
@@ -283,9 +267,6 @@ object ViewSearchForm: TViewSearchForm
           Color = clWhite
           Enabled = False
           TabOrder = 0
-          ExplicitLeft = 0
-          ExplicitTop = 20
-          ExplicitWidth = 217
         end
       end
       object PanelEstatement: TPanel
@@ -312,9 +293,6 @@ object ViewSearchForm: TViewSearchForm
           Color = clWhite
           Enabled = False
           TabOrder = 0
-          ExplicitLeft = 0
-          ExplicitTop = 20
-          ExplicitWidth = 217
         end
       end
       object CheckBoxUserAlias: TCheckBox
@@ -438,7 +416,6 @@ object ViewSearchForm: TViewSearchForm
           Enabled = False
           NumbersOnly = True
           TabOrder = 0
-          ExplicitWidth = 211
         end
       end
       object PanelDivision: TPanel
@@ -486,8 +463,6 @@ object ViewSearchForm: TViewSearchForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 1
-    ExplicitTop = 190
-    ExplicitWidth = 433
     object btnSearch: TSpeedButton
       AlignWithMargins = True
       Left = 368

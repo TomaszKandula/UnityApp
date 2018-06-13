@@ -17223,9 +17223,9 @@ object MainForm: TMainForm
             OnClick = btnPassUpdateClick
           end
           object btnPasswordPreview: TSpeedButton
-            Left = 326
+            Left = 327
             Top = 56
-            Width = 33
+            Width = 32
             Height = 21
             Cursor = crHandPoint
             Flat = True
@@ -17262,7 +17262,7 @@ object MainForm: TMainForm
           object EditPassword: TEdit
             Left = 151
             Top = 56
-            Width = 175
+            Width = 176
             Height = 21
             BevelKind = bkFlat
             BevelOuter = bvNone
@@ -20385,6 +20385,9 @@ object MainForm: TMainForm
       Caption = 'Add to Address Book'
       OnClick = Action_AddToBookClick
     end
+    object N21: TMenuItem
+      Caption = '-'
+    end
     object Action_MassMailer: TMenuItem
       Bitmap.Data = {
         36030000424D3603000000000000360000002800000010000000100000000100
@@ -20493,6 +20496,49 @@ object MainForm: TMainForm
       object Action_Free1: TMenuItem
         Caption = 'Free1'
         OnClick = Action_Free1Click
+      end
+      object Action_Free2: TMenuItem
+        Caption = 'Free2'
+        Enabled = False
+        OnClick = Action_Free2Click
+      end
+      object Action_Ranges: TMenuItem
+        Caption = 'Ranges'
+        object Action_Range1: TMenuItem
+          Caption = 'Range1'
+          OnClick = Action_Range1Click
+        end
+        object Action_Range2: TMenuItem
+          Caption = 'Range2'
+          OnClick = Action_Range2Click
+        end
+        object Action_Range3: TMenuItem
+          Caption = 'Range3'
+          OnClick = Action_Range3Click
+        end
+        object Action_Range4: TMenuItem
+          Caption = 'Range4'
+          OnClick = Action_Range4Click
+        end
+        object Action_Range5: TMenuItem
+          Caption = 'Range5'
+          OnClick = Action_Range5Click
+        end
+        object Action_Range6: TMenuItem
+          Caption = 'Range6'
+          OnClick = Action_Range6Click
+        end
+      end
+      object Action_Amounts: TMenuItem
+        Caption = 'Amounts'
+        object Action_TotalAmount: TMenuItem
+          Caption = 'Total Amount'
+          OnClick = Action_TotalAmountClick
+        end
+        object Action_Overdues: TMenuItem
+          Caption = 'Overdue'
+          OnClick = Action_OverduesClick
+        end
       end
     end
     object Action_RemoveFilters: TMenuItem

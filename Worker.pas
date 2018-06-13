@@ -640,7 +640,7 @@ begin
       if Update then
         LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: The Address Book has been updated successfully.')
           else
-            LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot update data in Address Book.');
+            LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot insert data to Address Book, either error occured or item already exist.');
     end;
     { ------------------------------------------------------------------------------------------------------------------------------------ INSERT NEW RECORDS }
     if FMode = adInsert then
@@ -648,7 +648,7 @@ begin
       if Add then
         LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: The Address Book insertion has been executed successfully.')
           else
-            LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot insert data to Address Book.');
+            LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot insert data to Address Book, either error occured or item already exist.');
     end;
     { ------------------------------------------------------------------------------------------------------------------------------------------------ EXPORT }
     if FMode = adExport then
@@ -793,15 +793,17 @@ end;
 { ---------------------------------------------------------------------------------------------------------------------- ADD SELECTED ITEM(S) TO ADDRESS BOOK }
 function TTAddressBook.Add: boolean;
 var
-  iCNT:     integer;
-  jCNT:     integer;
-  SCUID:    string;
-  AddrBook: TLists;
-  Book:     TDataTables;
+  iCNT:       integer;
+  jCNT:       integer;
+  SCUID:      string;
+  AddrBook:   TLists;
+  Book:       TDataTables;
+  Check:      cardinal;
 begin
   Result:=False;
   SetLength(AddrBook, 1, 11);
   jCNT:=0;
+  Check:=0;
   { ------------------------------------------------------------------------------------------------------------------------------- GET DATA FROM STRING GRID }
   Book:=TDataTables.Create(MainForm.DbConnect);
   try
@@ -823,6 +825,7 @@ begin
         { ADD TO ARRAY IF NOT EXISTS }
         if Book.DataSet.RecordCount = 0 then
         begin
+          Inc(Check);
           { BUILD ARRAY }
           AddrBook[jCNT,  0]:=UpperCase(MainForm.WinUserName);
           AddrBook[jCNT,  1]:=SCUID;
@@ -841,42 +844,48 @@ begin
     Book.Free;
   end;
   { ---------------------------------------------------------------------------------------------------------------------------------------- SEND TO DATABASE }
-  Book:=TDataTables.Create(MainForm.DbConnect);
-  try
-    Book.Columns.Add(TAddressBook.USER_ALIAS);
-    Book.Columns.Add(TAddressBook.SCUID);
-    Book.Columns.Add(TAddressBook.CUSTOMER_NUMBER);
-    Book.Columns.Add(TAddressBook.CUSTOMER_NAME);
-    Book.Columns.Add(TAddressBook.EMAILS);
-    Book.Columns.Add(TAddressBook.PHONE_NUMBERS);
-    Book.Columns.Add(TAddressBook.CONTACT);
-    Book.Columns.Add(TAddressBook.ESTATEMENTS);
-    Book.Columns.Add(TAddressBook.AGENT);
-    Book.Columns.Add(TAddressBook.DIVISION);
-    Book.Columns.Add(TAddressBook.COCODE);
+  if Check > 0 then
+  begin
+    Book:=TDataTables.Create(MainForm.DbConnect);
     try
-      Book.StrSQL:=Book.ArrayToSql(AddrBook, TblAddressbook, Book.ColumnsToList(Book.Columns, enQuotesOff));
-      Book.ExecSQL;
-      if Book.RowsAffected > 0 then
-      begin
-        MainForm.ExecMessage(False, mcInfo, 'Address Book has been successfully populated by selected item(s).');
-        Result:=True;
-      end
-      else
-      begin
-        MainForm.ExecMessage(False, mcWarn, 'Selected customers are already in Address Book.');
-        Result:=False;
+      Book.Columns.Add(TAddressBook.USER_ALIAS);
+      Book.Columns.Add(TAddressBook.SCUID);
+      Book.Columns.Add(TAddressBook.CUSTOMER_NUMBER);
+      Book.Columns.Add(TAddressBook.CUSTOMER_NAME);
+      Book.Columns.Add(TAddressBook.EMAILS);
+      Book.Columns.Add(TAddressBook.PHONE_NUMBERS);
+      Book.Columns.Add(TAddressBook.CONTACT);
+      Book.Columns.Add(TAddressBook.ESTATEMENTS);
+      Book.Columns.Add(TAddressBook.AGENT);
+      Book.Columns.Add(TAddressBook.DIVISION);
+      Book.Columns.Add(TAddressBook.COCODE);
+      try
+        Book.StrSQL:=Book.ArrayToSql(AddrBook, TblAddressbook, Book.ColumnsToList(Book.Columns, enQuotesOff));
+        Book.ExecSQL;
+        if Book.RowsAffected > 0 then
+        begin
+          MainForm.ExecMessage(False, mcInfo, 'Address Book has been successfully populated by selected item(s).');
+          Result:=True;
+        end
+        else
+        begin
+          MainForm.ExecMessage(False, mcWarn, 'Cannot update Address Book. Please contact IT support.');
+        end;
+      except
+        on E: Exception do
+        begin
+          MainForm.ExecMessage(False, mcError, 'Cannot save selected item(s). Exception has been thrown: ' + E.Message);
+          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Cannot write Address Book item(s) into database. Error: ' + E.Message);
+        end;
       end;
-    except
-      on E: Exception do
-      begin
-        MainForm.ExecMessage(False, mcError, 'Cannot save selected item(s). Exception has been thrown: ' + E.Message);
-        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Cannot write Address Book item(s) into database. Error: ' + E.Message);
-      end;
+    finally
+      Book.Free;
+      AddrBook:=nil;
     end;
-  finally
-    Book.Free;
-    AddrBook:=nil;
+  end
+  else
+  begin
+    MainForm.ExecMessage(False, mcWarn, 'Selected customers are already in Address Book.');
   end;
 end;
 

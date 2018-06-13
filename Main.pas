@@ -549,6 +549,18 @@ type                                                            (* GUI | MAIN TH
     btnPasswordPreview: TSpeedButton;
     hShapeEye: TShape;
     N20: TMenuItem;
+    N21: TMenuItem;
+    Action_Ranges: TMenuItem;
+    Action_Range1: TMenuItem;
+    Action_Range2: TMenuItem;
+    Action_Range3: TMenuItem;
+    Action_Range4: TMenuItem;
+    Action_Range5: TMenuItem;
+    Action_Range6: TMenuItem;
+    Action_Amounts: TMenuItem;
+    Action_TotalAmount: TMenuItem;
+    Action_Overdues: TMenuItem;
+    Action_Free2: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -757,6 +769,15 @@ type                                                            (* GUI | MAIN TH
     procedure Action_MassMailerClick(Sender: TObject);
     procedure btnPasswordPreviewMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure btnPasswordPreviewMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+    procedure Action_Free2Click(Sender: TObject);
+    procedure Action_Range1Click(Sender: TObject);
+    procedure Action_Range2Click(Sender: TObject);
+    procedure Action_Range3Click(Sender: TObject);
+    procedure Action_Range4Click(Sender: TObject);
+    procedure Action_Range5Click(Sender: TObject);
+    procedure Action_Range6Click(Sender: TObject);
+    procedure Action_TotalAmountClick(Sender: TObject);
+    procedure Action_OverduesClick(Sender: TObject);
     { ------------------------------------------------------------- ! HELPERS ! ----------------------------------------------------------------------------- }
   private
     { GENERAL }
@@ -3421,6 +3442,60 @@ begin
   FilterForm.FGrid     :=MainForm.sgAgeView;
   FilterForm.FFilterNum:=fltFree1;
   WndCall(FilterForm, stModal);
+end;
+
+{ ---------------------------------------------------------------------------------------------------------------------------------------------------- FREE 2 }
+procedure TMainForm.Action_Free2Click(Sender: TObject);
+begin
+//
+end;
+
+{ --------------------------------------------------------------------------------------------------------------------------------------------------- OVERDUE }
+procedure TMainForm.Action_OverduesClick(Sender: TObject);
+begin
+//
+end;
+
+{ ---------------------------------------------------------------------------------------------------------------------------------------------- TOTAL AMOUNT }
+procedure TMainForm.Action_TotalAmountClick(Sender: TObject);
+begin
+//
+end;
+
+{ ---------------------------------------------------------------------------------------------------------------------------------------------------- RANGE1 }
+procedure TMainForm.Action_Range1Click(Sender: TObject);
+begin
+//
+end;
+
+{ ---------------------------------------------------------------------------------------------------------------------------------------------------- RANGE2 }
+procedure TMainForm.Action_Range2Click(Sender: TObject);
+begin
+//
+end;
+
+{ ---------------------------------------------------------------------------------------------------------------------------------------------------- RANGE3 }
+procedure TMainForm.Action_Range3Click(Sender: TObject);
+begin
+//
+end;
+
+{ ---------------------------------------------------------------------------------------------------------------------------------------------------- RANGE4 }
+procedure TMainForm.Action_Range4Click(Sender: TObject);
+begin
+//
+end;
+
+{ ---------------------------------------------------------------------------------------------------------------------------------------------------- RANGE5 }
+procedure TMainForm.Action_Range5Click(Sender: TObject);
+begin
+//
+end;
+
+{ ---------------------------------------------------------------------------------------------------------------------------------------------------- RANGE6 }
+procedure TMainForm.Action_Range6Click(Sender: TObject);
+begin
+//
 end;
 
 { ---------------------------------------------------------------------------------------------------------------------------------------- REMOVE ALL FILTERS }

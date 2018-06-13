@@ -364,6 +364,22 @@ begin
     (
       CheckBoxPhones.Checked = False
     )
+    and
+    (
+      CheckBoxUserAlias.Checked = False
+    )
+    and
+    (
+      CheckBoxCoCode.Checked = False
+    )
+    and
+    (
+      CheckBoxAgent.Checked = False
+    )
+    and
+    (
+      CheckBoxDivision.Checked = False
+    )
   then
   begin
     MainForm.ExecMessage(False, mcWarn, 'Please provide with at least one condition.');
