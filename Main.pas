@@ -71,6 +71,10 @@ type
 { ------------------------------------------------------------- ! TSTRINGGRID CLASS ! ----------------------------------------------------------------------- }
 type
   TStringGrid = class(Grids.TStringGrid)
+  private
+    var FHideFocusRect: Boolean;
+  protected
+    procedure Paint; override;
   public
     var OpenThdId:  integer;
     var SqlColumns: TLists;
@@ -78,6 +82,7 @@ type
     procedure SetUpdatedRow(Row: integer);
     procedure RecordRowsAffected;
   published
+    property  HideFocusRect:Boolean read FHideFocusRect write FHideFocusRect;
     procedure CopyCutPaste(mode: integer);
     procedure DelEsc(mode: integer; pCol, pRow: integer);
     procedure ClearAll(dfRows: integer; FixedRows: integer; FixedCols: integer; ZeroCol: boolean);
@@ -561,6 +566,8 @@ type                                                            (* GUI | MAIN TH
     N22: TMenuItem;
     Action_ShowDetails: TMenuItem;
     Action_QuickReporting: TMenuItem;
+    SortListBox: TComboBox;
+    btnSortApply: TSpeedButton;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -776,6 +783,20 @@ type                                                            (* GUI | MAIN TH
     procedure Action_Range6Click(Sender: TObject);
     procedure Action_TotalAmountClick(Sender: TObject);
     procedure Action_OverduesClick(Sender: TObject);
+    procedure sgAgeViewSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
+    procedure btnSortApplyClick(Sender: TObject);
+    procedure sgCoCodesMouseEnter(Sender: TObject);
+    procedure sgPaidInfoMouseEnter(Sender: TObject);
+    procedure sgPersonMouseEnter(Sender: TObject);
+    procedure sgPmtTermsMouseEnter(Sender: TObject);
+    procedure sgGroup3MouseEnter(Sender: TObject);
+    procedure sgInvoiceTrackerMouseEnter(Sender: TObject);
+    procedure sgAddressBookMouseEnter(Sender: TObject);
+    procedure sgOpenItemsMouseEnter(Sender: TObject);
+    procedure sgAgeViewMouseEnter(Sender: TObject);
+    procedure GroupListBoxMouseEnter(Sender: TObject);
+    procedure GroupListDatesMouseEnter(Sender: TObject);
+    procedure SortListBoxMouseEnter(Sender: TObject);
     { ------------------------------------------------------------- ! HELPERS ! ----------------------------------------------------------------------------- }
   private
     { GENERAL }
@@ -840,6 +861,7 @@ type                                                            (* GUI | MAIN TH
     procedure  SetGridColumnWidths;
     procedure  SetGridRowHeights;
     procedure  SetGridThumbSizes;
+    procedure  SetGridFocus;
     function   Explode(Text: string; SourceDelim: char): string;
     function   Implode(Text: Classes.TStrings; TargetDelim: char): string;
     function   CheckGivenPassword(Password: string): boolean;
@@ -1321,6 +1343,20 @@ begin
   end;
 end;
 
+{ ------------------------------------------------------------------------------------------------------------------------------------ REMOVE FOCUS RECTANGLE }
+procedure TStringGrid.Paint;
+var
+  FocusRect: TRect;
+begin
+  inherited;
+  if HideFocusRect then
+  begin
+    FocusRect:=CellRect(Col, Row);
+    if DrawingStyle = gdsThemed then InflateRect(FocusRect, -1, -1);
+    DrawFocusRect(Canvas.Handle, FocusRect);
+  end;
+end;
+
 { ---------------------------------------------------------------------------------------------------------------------- PASTE, CUT, COPY TO/FROM STRING GRID }
 procedure TStringGrid.CopyCutPaste(mode: integer);
 { AVAILABLE MODES:                 }
@@ -1601,7 +1637,7 @@ begin
     cbSize:=SizeOf(info);
     fMask:=SIF_ALL;
     GetScrollInfo(Self.Handle, SB_VERT, info);
-    fMask:=fMask or SIF_PAGE;
+    fMask:=fMask or SIF_PAGE or SIF_RANGE;
     nPage:=(nMax - nMin) div Self.RowCount;
     //nPage:=Self.RowCount div Self.VisibleRowCount;
   end;
@@ -1612,7 +1648,7 @@ begin
     cbSize:=SizeOf(info);
     fMask:=SIF_ALL;
     GetScrollInfo(Self.Handle, SB_HORZ, info);
-    fMask:=fMask or SIF_PAGE;
+    fMask:=fMask or SIF_PAGE or SIF_RANGE;
     nPage:=(nMax - nMin) div Self.ColCount;
     //nPage:=Self.ColCount div Self.VisibleColCount;
   end;
@@ -2407,6 +2443,24 @@ begin
   sgGroups.AutoThumbSize;
 end;
 
+{ -------------------------------------------------------------------------------------------------------------------------- SWITCH OFF FOCUSING ON ALL GRIDS }
+procedure TMainForm.SetGridFocus;
+begin
+  sgAgeView.FHideFocusRect       :=True;
+  sgOpenItems.FHideFocusRect     :=True;
+  sgAddressBook.FHideFocusRect   :=True;
+  sgInvoiceTracker.FHideFocusRect:=True;
+  sgCoCodes.FHideFocusRect       :=True;
+  sgPmtTerms.FHideFocusRect      :=True;
+  sgPaidInfo.FHideFocusRect      :=True;
+  sgPerson.FHideFocusRect        :=True;
+  sgGroup3.FHideFocusRect        :=True;
+  sgListSection.FHideFocusRect   :=True;
+  sgListValue.FHideFocusRect     :=True;
+  sgUAC.FHideFocusRect           :=True;
+  sgGroups.FHideFocusRect        :=True;
+end;
+
 { ------------------------------------------------------------------------------------------------------------------------------- CONVERT TO MULTILINE STRING }
 function TMainForm.Explode(Text: string; SourceDelim: char): string;
 begin
@@ -2858,14 +2912,14 @@ begin
   { GRIDS WIDTH, HEIGHT AND YHUMB SIZE }
   SetGridColumnWidths;
   SetGridRowHeights;
-  SetGridThumbSizes;
+  (* SetGridThumbSizes; *)
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------ MAIN FORM RESIZE }
 procedure TMainForm.FormResize(Sender: TObject);
 begin
   { EACH TIME FORM IS RESIZED WE UPDATE THUMB SIZE OF STRING GRID COMPONENT }
-  SetGridThumbSizes;
+  (* SetGridThumbSizes; *)
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------------- ON CLOSE QUERY }
@@ -3144,6 +3198,7 @@ begin
                         '',
                         '',
                         '',
+                        '',
                         ''
                       );
 end;
@@ -3154,6 +3209,7 @@ begin
   TTAddressBook.Create(
                         adOpenForUser,
                         sgAddressBook,
+                        '',
                         '',
                         '',
                         '',
@@ -3319,6 +3375,7 @@ begin
     TTAddressBook.Create(
                           adInsert,
                           sgAgeView,
+                          '',
                           '',
                           '',
                           '',
@@ -4081,17 +4138,50 @@ begin
 end;
 
 procedure TMainForm.sgOpenItemsDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+var
+  Col1: integer;
+  Col2: integer;
+  Col3: integer;
+  Col4: integer;
+  Col5: integer;
 begin
 
-  (* CALL DRAWSELECTED BEFORE COLORVALUES *)
+  { SKIP HEADERS }
+  if ARow = 0 then Exit;
+
+  { GET COLUMNS }
+  Col1:=sgOpenItems.ReturnColumn(TOpenitems.OpenCurAm, 1, 1);
+  Col2:=sgOpenItems.ReturnColumn(TOpenitems.OpenAm,    1, 1);
+  Col3:=sgOpenItems.ReturnColumn(TOpenitems.CurAm,     1, 1);
+  Col4:=sgOpenItems.ReturnColumn(TOpenitems.Am,        1, 1);
+  Col5:=sgOpenItems.ReturnColumn(TOpenitems.PmtStat,   1, 1);
 
   { DRAW SELECTED ROW | SKIP HEADERS }
   MainForm.sgOpenItems.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
 
-  { ONLY FOR COLUMNS 4, 5, 8, 9 THAT SHOWS NEGATIVE AMOUNTS AND COLUMN 33 FOR PAYMENT STATUS }
-  if ( (ACol = 4) or (ACol = 5) or (ACol = 8) or (ACol = 9) or (ACol = 33) ) and (ARow > 0) then begin
+  { COLOR VALUES }
+  if
+    (
+      ACol = Col1
+    )
+    or
+    (
+      ACol = Col2
+    )
+    or
+    (
+      ACol = Col3
+    )
+    or
+    (
+      ACol = Col4
+    )
+    or
+    (
+      ACol = Col5
+    )
+  then
     MainForm.sgOpenItems.ColorValues(ARow, ACol, Rect, clRed, clBlack);
-  end;
 
 end;
 
@@ -4099,8 +4189,14 @@ end;
 
 procedure TMainForm.DetailsGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
 begin
-  DetailsGrid.Selection:=TGridRect(Rect(-1, -1, -1, -1));
+  //DetailsGrid.Selection:=TGridRect(Rect(-1, -1, -1, -1));
 end;
+
+procedure TMainForm.sgAgeViewSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
+begin
+  //sgAgeView.Selection:=TGridRect(Rect(-1, -1, -1, -1));
+end;
+
 
 procedure TMainForm.DetailsGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
@@ -4613,6 +4709,67 @@ begin
 end;
 
 { -------------------------------------------------------------- ! MOUSE EVENTS ! --------------------------------------------------------------------------- }
+
+{ ------------------------------------------------------------------------------------------------------------------------------ SET FOCUS ON THE STRING GRID }
+procedure TMainForm.sgAgeViewMouseEnter(Sender: TObject);
+begin
+  if (sgAgeView.Enabled) and (sgAgeView.Visible) then sgAgeView.SetFocus;
+end;
+
+procedure TMainForm.GroupListBoxMouseEnter(Sender: TObject);
+begin
+  if (GroupListBox.Enabled) and (GroupListBox.Visible) then GroupListBox.SetFocus;
+end;
+
+procedure TMainForm.GroupListDatesMouseEnter(Sender: TObject);
+begin
+  if (GroupListDates.Enabled) and (GroupListDates.Visible) then GroupListDates.SetFocus;
+end;
+
+procedure TMainForm.SortListBoxMouseEnter(Sender: TObject);
+begin
+  if (SortListBox.Enabled) and (SortListBox.Visible) then SortListBox.SetFocus;
+end;
+
+procedure TMainForm.sgOpenItemsMouseEnter(Sender: TObject);
+begin
+  if (sgOpenItems.Enabled) and (sgOpenItems.Visible) then sgOpenItems.SetFocus;
+end;
+
+procedure TMainForm.sgAddressBookMouseEnter(Sender: TObject);
+begin
+  if (sgAddressBook.Enabled) and (sgAddressBook.Visible) then sgAddressBook.SetFocus;
+end;
+
+procedure TMainForm.sgInvoiceTrackerMouseEnter(Sender: TObject);
+begin
+  if (sgInvoiceTracker.Enabled) and (sgInvoiceTracker.Visible) then sgInvoiceTracker.SetFocus;
+end;
+
+procedure TMainForm.sgCoCodesMouseEnter(Sender: TObject);
+begin
+  if (sgCoCodes.Enabled) and (sgCoCodes.Visible) then sgCoCodes.SetFocus;
+end;
+
+procedure TMainForm.sgPaidInfoMouseEnter(Sender: TObject);
+begin
+  if (sgPaidInfo.Enabled) and (sgPaidInfo.Visible) then sgPaidInfo.SetFocus;
+end;
+
+procedure TMainForm.sgPersonMouseEnter(Sender: TObject);
+begin
+  if (sgPerson.Enabled) and (sgPerson.Visible) then sgPerson.SetFocus;
+end;
+
+procedure TMainForm.sgPmtTermsMouseEnter(Sender: TObject);
+begin
+  if (sgPmtTerms.Enabled) and (sgPmtTerms.Visible) then sgPmtTerms.SetFocus;
+end;
+
+procedure TMainForm.sgGroup3MouseEnter(Sender: TObject);
+begin
+  if (sgGroup3.Enabled) and (sgGroup3.Visible) then sgGroup3.SetFocus;
+end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------------------- SCROLL BARS }
 { AGE VIEW | WHEEL DOWN }
@@ -5195,6 +5352,17 @@ begin
       MsgCall(mcWarn, 'Cannot load selected group.');
 end;
 
+{ ---------------------------------------------------------------------------------------------------------------------------------- AGE VIEW | APPLY SORTING }
+procedure TMainForm.btnSortApplyClick(Sender: TObject);
+begin
+  //...
+
+
+
+
+
+end;
+
 { --------------------------------------------------------------------------------------------------------------------------------- OPEN ITEMS | FORCE RELOAD }
 procedure TMainForm.btnReloadClick(Sender: TObject);
 begin
@@ -5273,6 +5441,7 @@ begin
                           '',
                           '',
                           '',
+                          '',
                           ''
                         )
   end
@@ -5292,6 +5461,7 @@ begin
     TTAddressBook.Create(
                           adUpdate,
                           sgAddressBook,
+                          '',
                           '',
                           '',
                           '',
@@ -5324,6 +5494,7 @@ begin
   TTAddressBook.Create(
                         adExport,
                         sgAddressBook,
+                        '',
                         '',
                         '',
                         '',

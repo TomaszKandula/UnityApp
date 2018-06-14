@@ -1609,26 +1609,11 @@ object MainForm: TMainForm
         BevelOuter = bvNone
         TabOrder = 0
         ExplicitTop = -3
-        object Shape2: TShape
-          Left = 1059
-          Top = 33
-          Width = 208
-          Height = 87
-          Pen.Color = clGradientInactiveCaption
-        end
-        object Cap24: TShape
-          Left = 1059
-          Top = 15
-          Width = 208
-          Height = 19
-          Brush.Color = 15918295
-          Pen.Color = clSkyBlue
-        end
         object MainPanel1: TPanel
           AlignWithMargins = True
           Left = 17
           Top = 15
-          Width = 1034
+          Width = 1253
           Height = 108
           Margins.Left = 17
           Margins.Top = 15
@@ -2216,6 +2201,89 @@ object MainForm: TMainForm
             Font.Style = [fsBold]
             ParentFont = False
           end
+          object Shape2: TShape
+            Left = 1045
+            Top = 18
+            Width = 208
+            Height = 87
+            Pen.Color = clGradientInactiveCaption
+          end
+          object btnSortApply: TSpeedButton
+            Left = 1104
+            Top = 67
+            Width = 100
+            Height = 30
+            Cursor = crHandPoint
+            Caption = 'Apply'
+            Flat = True
+            Glyph.Data = {
+              F6060000424DF606000000000000360000002800000018000000180000000100
+              180000000000C0060000C40E0000C40E00000000000000000000FFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFBBAFB0CEC5C6FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBBAEB0B4A7A8C8BEBFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBEB3B4
+              B5A8A9C8BEBFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFEFEF2F2F2F3F2
+              F3F3F2F3F3F2F3F3F2F3F3F2F3F3F2F3F3F2F3F3F3F4EFEDEDEEEBEBEEEBECEE
+              EBECF0EDEDF1EEEFBAADAFB7AAABC7BEBEFFFFFFFFFFFFFFFFFFFFFFFFEDECED
+              C7C4C7CAC8CACAC8CACAC8CACAC8CACAC8CACAC8CACAC8CACAC8CACCCBCDBAAE
+              B1B5A8A9B6A9AAB6A9AAB6A9AAB6AAABBBAFB0BCB0B1B7AAABC8BEBFFFFFFFFF
+              FFFFFFFFFFC8C5C8CECCCECFCDCFCFCDCFCFCDCFCFCDCFCFCDCFCFCDCFCFCDCF
+              CFCDCFD0CFD1BFB5B7BBAFB0BCB0B1BCB0B1BCB0B1BCB0B1BCB0B1BCB0B1BCB0
+              B1B7AAABC7BEBFFFFFFFFAFAFAC9C6C9CFCDCFCFCDCFCFCDCFCFCDCFCFCDCFCF
+              CDCFCFCDCFCFCDCFCFCDCFD0CFD1BFB5B7BBAFB0BCB0B1BCB0B1BCB0B1BCB0B1
+              BCB0B1BCB0B1BCB0B1BBAFB0AE9FA0FAFAFAFFFFFFCCCACCCCCACCCECCCECECC
+              CECECCCECECCCECECCCECECCCECECCCECECCCED0CFD1BFB4B7BBAEAFBBAFB0BB
+              AFB0BBAFB0BBAFB0BBAFB0BCB0B1BBAFB0B2A5A6E3DEDFFFFFFFFFFFFFFBFBFB
+              D3D1D3C9C7C9CAC8CACAC8CACAC8CACAC8CACAC8CACAC8CACAC8CACCCACDB9AD
+              B0B4A6A7B4A7A8B4A7A8B4A7A8B7AAABBBB0B1BBAFB0B2A5A6E3DEDFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFAF9F9B8ACADB2A4A6E3DE
+              DFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF1EFEFB2A5A6
+              B2A4A5E3DEDFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFBEBAFE8E87FEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFAD9FA0B1A3A5E3DEDFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFBAB6FF3F34FF3529FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFD2CACAE5E0E1FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFBAB6FF4135FF4237FFDDDBFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBAB6FF4136FF5046FFF2F1FFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBAB6FF4236FF584E
+              FF584EFE4C41FE463BFE463BFE463BFE463BFE473DFF3A24DC371DD3371ED437
+              1ED4371ED4371ED4371ED4371ED4341BD35A45DBF3F1FCFFFFFFFFFFFFBAB6FF
+              4237FF584EFF594FFF584EFF584EFF584EFF584EFF584EFF584EFF5A51FF4B37
+              DF4730D64831D74831D74831D74831D74831D74831D74831D74129D64028D6FF
+              FFFFF4F3FF362AFF584EFF594FFF594FFF594FFF594FFF594FFF594FFF594FFF
+              594FFF5A51FF4C38DF4831D64932D84932D84932D84932D84932D84932D84932
+              D84932D83218D3EDEAFBFFFFFF756DFF4D42FF594FFF594FFF594FFF594FFF59
+              4FFF594FFF594FFF594FFF5A51FF4C38DF4831D64932D84932D84932D84932D8
+              4932D84932D84932D84730D72E14D2FFFFFFFFFFFFFFFFFF766DFF4D42FF594F
+              FF584EFF4C41FF4A3FFF4A3FFF4A3FFF4A3FFF4B42FF3C26DD381ED3381FD438
+              1FD4381FD4381FD4381FD4381FD4381FD42B11D1BBB3F0FFFFFFFFFFFFFFFFFF
+              FFFFFF756DFF4C42FF544AFEDCDAFEDAD8FED6D3FED6D3FED6D3FED6D4FFD3CE
+              F7D3CDF5D3CDF5D3CDF5D3CDF5D3CDF5D3CDF5D2CDF5D0CBF5FDFCFEFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFF766DFF493EFF5F55FFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF766DFF463BFF56
+              4CFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFF867EFE574DFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
+            Spacing = 10
+            OnClick = btnSortApplyClick
+          end
+          object Cap24: TShape
+            Left = 1045
+            Top = 0
+            Width = 208
+            Height = 19
+            Brush.Color = 15918295
+            Pen.Color = clSkyBlue
+          end
           object GroupListDates: TComboBox
             Left = 822
             Top = 64
@@ -2230,6 +2298,7 @@ object MainForm: TMainForm
             Sorted = True
             TabOrder = 1
             TabStop = False
+            OnMouseEnter = GroupListDatesMouseEnter
           end
           object GroupListBox: TComboBox
             Left = 746
@@ -2245,7 +2314,29 @@ object MainForm: TMainForm
             DropDownCount = 12
             TabOrder = 0
             TabStop = False
+            OnMouseEnter = GroupListBoxMouseEnter
             OnSelect = GroupListBoxSelect
+          end
+          object SortListBox: TComboBox
+            Left = 1069
+            Top = 35
+            Width = 164
+            Height = 22
+            Cursor = crHandPoint
+            BevelInner = bvLowered
+            BevelKind = bkFlat
+            BevelOuter = bvNone
+            Style = csOwnerDrawFixed
+            ItemIndex = 0
+            Sorted = True
+            TabOrder = 2
+            Text = 'All ranges down'
+            OnMouseEnter = SortListBoxMouseEnter
+            Items.Strings = (
+              'All ranges down'
+              'Follow-Up (ZA)'
+              'Total amount (ZA)'
+              'Total overdue (ZA)')
           end
         end
       end
@@ -5983,8 +6074,10 @@ object MainForm: TMainForm
           OnDrawCell = sgAgeViewDrawCell
           OnKeyDown = sgAgeViewKeyDown
           OnKeyUp = sgAgeViewKeyUp
+          OnMouseEnter = sgAgeViewMouseEnter
           OnMouseWheelDown = sgAgeViewMouseWheelDown
           OnMouseWheelUp = sgAgeViewMouseWheelUp
+          OnSelectCell = sgAgeViewSelectCell
           ColWidths = (
             40
             40
@@ -9808,6 +9901,7 @@ object MainForm: TMainForm
           TabOrder = 0
           OnDrawCell = sgOpenItemsDrawCell
           OnKeyDown = sgOpenItemsKeyDown
+          OnMouseEnter = sgOpenItemsMouseEnter
           OnMouseWheelDown = sgOpenItemsMouseWheelDown
           OnMouseWheelUp = sgOpenItemsMouseWheelUp
           ColWidths = (
@@ -13294,6 +13388,7 @@ object MainForm: TMainForm
           OnDrawCell = sgAddressBookDrawCell
           OnKeyDown = sgAddressBookKeyDown
           OnKeyUp = sgAddressBookKeyUp
+          OnMouseEnter = sgAddressBookMouseEnter
           OnMouseWheelDown = sgAddressBookMouseWheelDown
           OnMouseWheelUp = sgAddressBookMouseWheelUp
           ColWidths = (
@@ -16570,6 +16665,7 @@ object MainForm: TMainForm
           OnDblClick = sgInvoiceTrackerDblClick
           OnDrawCell = sgInvoiceTrackerDrawCell
           OnKeyDown = sgInvoiceTrackerKeyDown
+          OnMouseEnter = sgInvoiceTrackerMouseEnter
           OnMouseWheelDown = sgInvoiceTrackerMouseWheelDown
           OnMouseWheelUp = sgInvoiceTrackerMouseWheelUp
         end
@@ -16737,6 +16833,7 @@ object MainForm: TMainForm
             TabOrder = 0
             OnDrawCell = sgCoCodesDrawCell
             OnKeyDown = sgCoCodesKeyDown
+            OnMouseEnter = sgCoCodesMouseEnter
             OnMouseWheelDown = sgCoCodesMouseWheelDown
             OnMouseWheelUp = sgCoCodesMouseWheelUp
             ColWidths = (
@@ -16826,6 +16923,7 @@ object MainForm: TMainForm
             TabOrder = 0
             OnDrawCell = sgPmtTermsDrawCell
             OnKeyDown = sgPmtTermsKeyDown
+            OnMouseEnter = sgPmtTermsMouseEnter
             OnMouseWheelDown = sgPmtTermsMouseWheelDown
             OnMouseWheelUp = sgPmtTermsMouseWheelUp
             ColWidths = (
@@ -16868,6 +16966,7 @@ object MainForm: TMainForm
             TabOrder = 0
             OnDrawCell = sgGroup3DrawCell
             OnKeyDown = sgGroup3KeyDown
+            OnMouseEnter = sgGroup3MouseEnter
             OnMouseWheelDown = sgGroup3MouseWheelDown
             OnMouseWheelUp = sgGroup3MouseWheelUp
             ColWidths = (
@@ -16957,6 +17056,7 @@ object MainForm: TMainForm
             TabOrder = 0
             OnDrawCell = sgPaidInfoDrawCell
             OnKeyDown = sgPaidInfoKeyDown
+            OnMouseEnter = sgPaidInfoMouseEnter
             OnMouseWheelDown = sgPaidInfoMouseWheelDown
             OnMouseWheelUp = sgPaidInfoMouseWheelUp
             ColWidths = (
@@ -17001,6 +17101,7 @@ object MainForm: TMainForm
             TabOrder = 0
             OnDrawCell = sgPersonDrawCell
             OnKeyDown = sgPersonKeyDown
+            OnMouseEnter = sgPersonMouseEnter
             OnMouseWheelDown = sgPersonMouseWheelDown
             OnMouseWheelUp = sgPersonMouseWheelUp
             ColWidths = (

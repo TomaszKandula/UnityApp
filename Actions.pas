@@ -80,7 +80,7 @@ type
     btnCopyPerson: TSpeedButton;
     btnCopyEmail: TSpeedButton;
     PanelStatusBar: TPanel;
-    Label1: TLabel;
+    TextSave: TLabel;
     MasterPanel: TPanel;
     Text: TLabel;
     SimpleText: TLabel;
@@ -90,6 +90,11 @@ type
     PanelOpenItemsGrid: TPanel;
     ImgLoadingWindow: TImage;
     PanelCtrl: TPanel;
+    btnQMStoggle: TSpeedButton;
+    Text9: TLabel;
+    Cust_MailGeneral: TEdit;
+    Cust_MailGeneralBack: TShape;
+    btnCopyGeneralMail: TSpeedButton;
     procedure FormCreate(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure OpenItemsGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
@@ -121,6 +126,16 @@ type
     procedure btnCopyPersonClick(Sender: TObject);
     procedure btnCopyEmailClick(Sender: TObject);
     procedure btnEditClick(Sender: TObject);
+    procedure btnCopyGeneralMailClick(Sender: TObject);
+    procedure btnQMStoggleClick(Sender: TObject);
+    procedure Cust_PhoneMouseEnter(Sender: TObject);
+    procedure Cust_PersonMouseEnter(Sender: TObject);
+    procedure Cust_MailMouseEnter(Sender: TObject);
+    procedure Cust_MailGeneralMouseEnter(Sender: TObject);
+    procedure OpenItemsGridMouseEnter(Sender: TObject);
+    procedure HistoryGridMouseEnter(Sender: TObject);
+    procedure DailyComMouseEnter(Sender: TObject);
+    procedure GeneralComMouseEnter(Sender: TObject);
   private
     var FHistoryGrid: boolean;
   public
@@ -134,7 +149,7 @@ type
     function  GetRunningApps(SearchName: string): boolean;
     procedure GetData;
     procedure UpdateOpenItems(OpenItemsDest, OpenItemsSrc: TStringGrid);
-    procedure UpdateDetails(CustPerson, CustMail: TEdit; CustPhone: TComboBox);
+    procedure UpdateDetails(CustPerson: TEdit; CustMail: TEdit; CustMailGen: TEdit; CustPhone: TComboBox);
     procedure UpdateHistory(var Grid: TStringGrid);
     procedure UpdateGeneral(Text: TMemo);
     procedure SetControls;
@@ -234,7 +249,7 @@ begin
     Cust_Name.Caption  :=CustName;
     Cust_Number.Caption:=CustNumber;
     UpdateOpenItems(OpenItemsGrid, MainForm.sgOpenItems);
-    UpdateDetails(Cust_Person, Cust_Mail, Cust_Phone);
+    UpdateDetails(Cust_Person, Cust_Mail, Cust_MailGeneral, Cust_Phone);
     UpdateHistory(HistoryGrid);
     UpdateGeneral(GeneralCom);
   finally
@@ -303,7 +318,7 @@ begin
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------- GET CUSTOMER DETAILS }
-procedure TActionsForm.UpdateDetails(CustPerson: TEdit; CustMail: TEdit; CustPhone: TComboBox);
+procedure TActionsForm.UpdateDetails(CustPerson: TEdit; CustMail: TEdit; CustMailGen: TEdit; CustPhone: TComboBox);
 var
   AddrBook  : TDataTables;
   Phones    : string;
@@ -311,15 +326,17 @@ begin
   AddrBook:=TDataTables.Create(MainForm.DbConnect);
   try
     AddrBook.Columns.Add(TAddressBook.CONTACT);
+    AddrBook.Columns.Add(TAddressBook.EMAILS);
     AddrBook.Columns.Add(TAddressBook.ESTATEMENTS);
     AddrBook.Columns.Add(TAddressBook.PHONE_NUMBERS);
     AddrBook.CustFilter:=WHERE + TAddressBook.SCUID + EQUAL + QuotedStr(SCUID);
     AddrBook.OpenTable(TblAddressbook);
     if AddrBook.DataSet.RecordCount = 1 then
     begin
-      CustPerson.Text:=MainForm.OleGetStr(AddrBook.DataSet.Fields[TAddressBook.CONTACT].Value);
-      CustMail.Text  :=MainForm.OleGetStr(AddrBook.DataSet.Fields[TAddressBook.ESTATEMENTS].Value);
-      Phones         :=MainForm.OleGetStr(AddrBook.DataSet.Fields[TAddressBook.PHONE_NUMBERS].Value);
+      CustPerson.Text :=MainForm.OleGetStr(AddrBook.DataSet.Fields[TAddressBook.CONTACT].Value);
+      CustMailGen.Text:=MainForm.OleGetStr(AddrBook.DataSet.Fields[TAddressBook.EMAILS].Value);
+      CustMail.Text   :=MainForm.OleGetStr(AddrBook.DataSet.Fields[TAddressBook.ESTATEMENTS].Value);
+      Phones          :=MainForm.OleGetStr(AddrBook.DataSet.Fields[TAddressBook.PHONE_NUMBERS].Value);
       if (Phones <> '') or (Phones <> ' ') then
       begin
         CustPhone.Clear;
@@ -381,17 +398,23 @@ end;
 { ----------------------------------------------------------------------------------------------------------------------------------- ENABLE/DISABLE CONTROLS }
 procedure TActionsForm.SetControls;
 begin
+
   { DISABLE SAVE BUTTON IF CUSTOMER IS NOT REGISTERED }
   if
     (Cust_Person.Text = unNotFound)
   or
     (Cust_Mail.Text = unNotFound)
+  or
+    (Cust_MailGeneral.Text = unNotFound)
   then
     btnSaveCustDetails.Enabled:=False else btnSaveCustDetails.Enabled:=True;
+
   { DISABLE TEXT FIELDS IF CUSTOMER IS NOT REGISTERED }
-  if Cust_Phone.Text  = unNotFound then Cust_Phone.Enabled :=False else Cust_Phone.Enabled :=True;
-  if Cust_Mail.Text   = unNotFound then Cust_Mail.Enabled  :=False else Cust_Mail.Enabled  :=True;
-  if Cust_Person.Text = unNotFound then Cust_Person.Enabled:=False else Cust_Person.Enabled:=True;
+  if Cust_Phone.Text       = unNotFound then Cust_Phone.Enabled      :=False else Cust_Phone.Enabled      :=True;
+  if Cust_Mail.Text        = unNotFound then Cust_Mail.Enabled       :=False else Cust_Mail.Enabled       :=True;
+  if Cust_Person.Text      = unNotFound then Cust_Person.Enabled     :=False else Cust_Person.Enabled     :=True;
+  if Cust_MailGeneral.Text = unNotFound then Cust_MailGeneral.Enabled:=False else Cust_MailGeneral.Enabled:=True;
+
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------- PREPARE FOR NEW DATA LOAD }
@@ -410,10 +433,11 @@ end;
 { ----------------------------------------------------------------------------------------------------------------------------------------- CLEAR ALL DETAILS }
 procedure TActionsForm.ClearAll;
 begin
-  Cust_Name.Caption   :=unNotFound;
-  Cust_Number.Caption :=unNotFound;
-  Cust_Person.Text    :=unNotFound;
-  Cust_Mail.Text      :=unNotFound;
+  Cust_Name.Caption    :=unNotFound;
+  Cust_Number.Caption  :=unNotFound;
+  Cust_Person.Text     :=unNotFound;
+  Cust_Mail.Text       :=unNotFound;
+  Cust_MailGeneral.Text:=unNotFound;
   Cust_Phone.Clear;
   Cust_Phone.Items.Add(unNotFound);
   Cust_Phone.ItemIndex:=0;
@@ -549,6 +573,7 @@ begin
                         SCUID,
                         Cust_Person.Text,
                         Cust_Mail.Text,
+                        Cust_MailGeneral.Text,
                         MainForm.Implode(Cust_Phone.Items, deSemicolon),
                         ''
                       );
@@ -699,15 +724,44 @@ end;
 
 { ------------------------------------------------------------------------------------------------------------------------------- COLOR NUMBERS AND SELECTION }
 procedure TActionsForm.OpenItemsGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+var
+  Col1 :integer;
+  Col2 :integer;
+  Col3 :integer;
+  Col4 :integer;
 begin
 
-  (* CALL DRAWSELECTED BEFORE COLORVALUES *)
+  { SKIP HEADER }
+  if ARow = 0 then Exit;
 
-  { DRAW SELECTED | SKIP HEADERS }
+  { GET COLUMNS }
+  Col1:=OpenItemsGrid.ReturnColumn(TOpenitems.OpenCurAm, 1, 1);
+  Col2:=OpenItemsGrid.ReturnColumn(TOpenitems.OpenAm,    1, 1);
+  Col3:=OpenItemsGrid.ReturnColumn(TOpenitems.CurAm,     1, 1);
+  Col4:=OpenItemsGrid.ReturnColumn(TOpenitems.Am,        1, 1);
+
+  { DRAW SELECTED }
   OpenItemsGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
 
-  { ONLY FOR COLUMNS 2..5 AND 12 }
-  if ( ( (ACol >= 3) and (ACol <= 8) or (ACol = 12) ) and (ARow > 0) ) then OpenItemsGrid.ColorValues(ARow, ACol, Rect, clRed, clBlack);
+  { DRAW FOR CERTAIN COLOR }
+  if
+    (
+      ACol = Col1
+    )
+    or
+    (
+      ACol = Col2
+    )
+    or
+    (
+      ACol = Col3
+    )
+    or
+    (
+      ACol = Col4
+    )
+  then
+    OpenItemsGrid.ColorValues(ARow, ACol, Rect, clRed, clBlack);
 
 end;
 
@@ -777,6 +831,48 @@ end;
 
 { ----------------------------------------------------------------- ! MOUSE EVENTS ! ------------------------------------------------------------------------ }
 
+{ ------------------------------------------------------------------------------------------------------------------------------------ SET FOCUS ON COMPONENT }
+
+procedure TActionsForm.Cust_PhoneMouseEnter(Sender: TObject);
+begin
+  if (Cust_Phone.Enabled) and (Cust_Phone.Visible) then Cust_Phone.SetFocus;
+end;
+
+procedure TActionsForm.Cust_PersonMouseEnter(Sender: TObject);
+begin
+  if (Cust_Person.Enabled) and (Cust_Person.Visible) then Cust_Person.SetFocus;
+end;
+
+procedure TActionsForm.Cust_MailMouseEnter(Sender: TObject);
+begin
+  if (Cust_Mail.Enabled) and (Cust_Mail.Visible) then Cust_Mail.SetFocus;
+end;
+
+procedure TActionsForm.Cust_MailGeneralMouseEnter(Sender: TObject);
+begin
+  if (Cust_MailGeneral.Enabled) and (Cust_MailGeneral.Visible) then Cust_MailGeneral.SetFocus;
+end;
+
+procedure TActionsForm.OpenItemsGridMouseEnter(Sender: TObject);
+begin
+  if (OpenItemsGrid.Enabled) and (OpenItemsGrid.Visible) then OpenItemsGrid.SetFocus;
+end;
+
+procedure TActionsForm.HistoryGridMouseEnter(Sender: TObject);
+begin
+  if (HistoryGrid.Enabled) and (HistoryGrid.Visible) then HistoryGrid.SetFocus;
+end;
+
+procedure TActionsForm.DailyComMouseEnter(Sender: TObject);
+begin
+  if (DailyCom.Enabled) and (DailyCom.Visible) then DailyCom.SetFocus;
+end;
+
+procedure TActionsForm.GeneralComMouseEnter(Sender: TObject);
+begin
+  if (GeneralCom.Enabled) and (GeneralCom.Visible) then GeneralCom.SetFocus;
+end;
+
 { ----------------------------------------------------------------------------------------------------------------------------------------- SCROLL BARS MOVES }
 procedure TActionsForm.OpenItemsGridMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
@@ -789,7 +885,6 @@ begin
   Handled:=True;
   OpenItemsGrid.Perform(WM_VSCROLL, SB_LINEUP, 0);
 end;
-
 
 procedure TActionsForm.HistoryGridMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
@@ -836,6 +931,17 @@ end;
 procedure TActionsForm.btnCopyEmailClick(Sender: TObject);
 begin
   ClipBoard.AsText:=Cust_Mail.Text;
+end;
+
+procedure TActionsForm.btnCopyGeneralMailClick(Sender: TObject);
+begin
+  Clipboard.AsText:=Cust_MailGeneral.Text;
+end;
+
+{ ---------------------------------------------------------------------------------------------------------------------------------------- SWITCH VIEW TO QMS }
+procedure TActionsForm.btnQMStoggleClick(Sender: TObject);
+begin
+  MainForm.MsgCall(mcInfo, 'This feature is unavailable. Please try again later.');
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------- SELECT PREVIOUS OVERDUE CUSTOMER }

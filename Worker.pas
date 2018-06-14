@@ -120,12 +120,13 @@ type
     var FIDThd:      integer;
     var FContact:    string;
     var FEstatement: string;
+    var FEmail:      string;
     var FPhones:     string;
     var FSCUID:      string;
     var FConditions: string;
   public
     property    IDThd:  integer read FIDThd;
-    constructor Create(ActionMode: integer; Grid: TStringGrid; SCUID, Contact, Estatement, Phones: string; Conditions: string);
+    constructor Create(ActionMode: integer; Grid: TStringGrid; SCUID, Contact, Estatement, Email, Phones: string; Conditions: string);
     destructor  Destroy; override;
     function    Read     : boolean;
     function    Update   : boolean;
@@ -441,23 +442,6 @@ begin
                     AgeView.UpdateSummary;
                     AgeView.GetDetails(MainForm.DetailsGrid);
                     AgeView.MapGroup3(MainForm.sgAgeView, MainForm.sgGroup3);
-{
-                    AgeView.FormatNumbers
-                    (
-                      MainForm.sgAgeView,
-                      TSnapshots.fNOT_DUE,
-                      TSnapshots.fRANGE1,
-                      TSnapshots.fRANGE2,
-                      TSnapshots.fRANGE3,
-                      TSnapshots.fRANGE4,
-                      TSnapshots.fRANGE5,
-                      TSnapshots.fRANGE6,
-                      TSnapshots.fOVERDUE,
-                      TSnapshots.fTOTAL,
-                      TSnapshots.fCREDIT_LIMIT,
-                      TSnapshots.fEXCEEDED_AMOUNT
-                    );
-}
                     MainForm.sgAgeView.Repaint;
                     MainForm.LoadingAnimation(MainForm.ImgLoadingAgeView, MainForm.sgAgeView, MainForm.PanelAgeView, AnimationOFF);
                   end);
@@ -614,7 +598,7 @@ end;
 { ############################################################### ! ADRESS BOOK ! ########################################################################### }
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE }
-constructor TTAddressBook.Create(ActionMode: integer; Grid: TStringGrid; SCUID, Contact, Estatement, Phones: string; Conditions: string);
+constructor TTAddressBook.Create(ActionMode: integer; Grid: TStringGrid; SCUID, Contact, Estatement, Email, Phones: string; Conditions: string);
 begin
   inherited Create(False);
   FLock      :=TCriticalSection.Create;
@@ -622,6 +606,7 @@ begin
   FGrid      :=Grid;
   FContact   :=Contact;
   FEstatement:=Estatement;
+  FEmail     :=Email;
   FPhones    :=Phones;
   FSCUID     :=SCUID;
   FIDThd     :=0;
@@ -786,11 +771,14 @@ begin
       Book.Columns.Add(TAddressBook.PHONE_NUMBERS);
       Book.Columns.Add(TAddressBook.CONTACT);
       Book.Columns.Add(TAddressBook.ESTATEMENTS);
+      Book.Columns.Add(TAddressBook.EMAILS);
       { VALUES }
       Book.Values.Add(FPhones);
       Book.Values.Add(FContact);
       Book.Values.Add(FEstatement);
+      Book.Values.Add(FEmail);
       { CONDITIONS }
+      Book.Conditions.Add(Condition);
       Book.Conditions.Add(Condition);
       Book.Conditions.Add(Condition);
       Book.Conditions.Add(Condition);
