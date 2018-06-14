@@ -2289,6 +2289,7 @@ object MainForm: TMainForm
             Top = 64
             Width = 116
             Height = 22
+            Cursor = crHandPoint
             AutoComplete = False
             BevelInner = bvLowered
             BevelKind = bkFlat
@@ -2305,6 +2306,7 @@ object MainForm: TMainForm
             Top = 35
             Width = 192
             Height = 22
+            Cursor = crHandPoint
             AutoComplete = False
             BevelInner = bvLowered
             BevelKind = bkFlat
@@ -6077,7 +6079,6 @@ object MainForm: TMainForm
           OnMouseEnter = sgAgeViewMouseEnter
           OnMouseWheelDown = sgAgeViewMouseWheelDown
           OnMouseWheelUp = sgAgeViewMouseWheelUp
-          OnSelectCell = sgAgeViewSelectCell
           ColWidths = (
             40
             40
@@ -6636,7 +6637,6 @@ object MainForm: TMainForm
               OnDrawCell = DetailsGridDrawCell
               OnKeyPress = DetailsGridKeyPress
               OnKeyUp = DetailsGridKeyUp
-              OnSelectCell = DetailsGridSelectCell
             end
           end
           object PanelGroupName: TPanel
@@ -9900,7 +9900,7 @@ object MainForm: TMainForm
           ShowHint = False
           TabOrder = 0
           OnDrawCell = sgOpenItemsDrawCell
-          OnKeyDown = sgOpenItemsKeyDown
+          OnKeyUp = sgOpenItemsKeyUp
           OnMouseEnter = sgOpenItemsMouseEnter
           OnMouseWheelDown = sgOpenItemsMouseWheelDown
           OnMouseWheelUp = sgOpenItemsMouseWheelUp
@@ -16664,7 +16664,7 @@ object MainForm: TMainForm
           Visible = False
           OnDblClick = sgInvoiceTrackerDblClick
           OnDrawCell = sgInvoiceTrackerDrawCell
-          OnKeyDown = sgInvoiceTrackerKeyDown
+          OnKeyUp = sgInvoiceTrackerKeyUp
           OnMouseEnter = sgInvoiceTrackerMouseEnter
           OnMouseWheelDown = sgInvoiceTrackerMouseWheelDown
           OnMouseWheelUp = sgInvoiceTrackerMouseWheelUp
@@ -16832,7 +16832,7 @@ object MainForm: TMainForm
             PopupMenu = CommonPopupMenu
             TabOrder = 0
             OnDrawCell = sgCoCodesDrawCell
-            OnKeyDown = sgCoCodesKeyDown
+            OnKeyUp = sgCoCodesKeyUp
             OnMouseEnter = sgCoCodesMouseEnter
             OnMouseWheelDown = sgCoCodesMouseWheelDown
             OnMouseWheelUp = sgCoCodesMouseWheelUp
@@ -16922,7 +16922,7 @@ object MainForm: TMainForm
             PopupMenu = CommonPopupMenu
             TabOrder = 0
             OnDrawCell = sgPmtTermsDrawCell
-            OnKeyDown = sgPmtTermsKeyDown
+            OnKeyUp = sgPmtTermsKeyUp
             OnMouseEnter = sgPmtTermsMouseEnter
             OnMouseWheelDown = sgPmtTermsMouseWheelDown
             OnMouseWheelUp = sgPmtTermsMouseWheelUp
@@ -16965,7 +16965,7 @@ object MainForm: TMainForm
             PopupMenu = CommonPopupMenu
             TabOrder = 0
             OnDrawCell = sgGroup3DrawCell
-            OnKeyDown = sgGroup3KeyDown
+            OnKeyUp = sgGroup3KeyUp
             OnMouseEnter = sgGroup3MouseEnter
             OnMouseWheelDown = sgGroup3MouseWheelDown
             OnMouseWheelUp = sgGroup3MouseWheelUp
@@ -17055,7 +17055,7 @@ object MainForm: TMainForm
             PopupMenu = CommonPopupMenu
             TabOrder = 0
             OnDrawCell = sgPaidInfoDrawCell
-            OnKeyDown = sgPaidInfoKeyDown
+            OnKeyUp = sgPaidInfoKeyUp
             OnMouseEnter = sgPaidInfoMouseEnter
             OnMouseWheelDown = sgPaidInfoMouseWheelDown
             OnMouseWheelUp = sgPaidInfoMouseWheelUp
@@ -17100,7 +17100,7 @@ object MainForm: TMainForm
             PopupMenu = CommonPopupMenu
             TabOrder = 0
             OnDrawCell = sgPersonDrawCell
-            OnKeyDown = sgPersonKeyDown
+            OnKeyUp = sgPersonKeyUp
             OnMouseEnter = sgPersonMouseEnter
             OnMouseWheelDown = sgPersonMouseWheelDown
             OnMouseWheelUp = sgPersonMouseWheelUp

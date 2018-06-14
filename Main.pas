@@ -682,13 +682,6 @@ type                                                            (* GUI | MAIN TH
     procedure sgPersonDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
     procedure sgGroup3DrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
     procedure Action_AutoColumnSizeClick(Sender: TObject);
-    procedure sgCoCodesKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure sgPaidInfoKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure sgPmtTermsKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure sgPersonKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure sgGroup3KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure sgInvoiceTrackerKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure sgOpenItemsKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure sgAgeViewKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormDestroy(Sender: TObject);
     procedure Action_SearchClick(Sender: TObject);
@@ -709,7 +702,6 @@ type                                                            (* GUI | MAIN TH
     procedure DetailsGridKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure DetailsGridKeyPress(Sender: TObject; var Key: Char);
     procedure DetailsGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
-    procedure DetailsGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
     procedure btnLoadAgeViewClick(Sender: TObject);
     procedure Action_RowHighlightClick(Sender: TObject);
     procedure Action_ReportClick(Sender: TObject);
@@ -783,7 +775,6 @@ type                                                            (* GUI | MAIN TH
     procedure Action_Range6Click(Sender: TObject);
     procedure Action_TotalAmountClick(Sender: TObject);
     procedure Action_OverduesClick(Sender: TObject);
-    procedure sgAgeViewSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
     procedure btnSortApplyClick(Sender: TObject);
     procedure sgCoCodesMouseEnter(Sender: TObject);
     procedure sgPaidInfoMouseEnter(Sender: TObject);
@@ -797,6 +788,13 @@ type                                                            (* GUI | MAIN TH
     procedure GroupListBoxMouseEnter(Sender: TObject);
     procedure GroupListDatesMouseEnter(Sender: TObject);
     procedure SortListBoxMouseEnter(Sender: TObject);
+    procedure sgOpenItemsKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure sgInvoiceTrackerKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure sgGroup3KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure sgPersonKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure sgPmtTermsKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure sgPaidInfoKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure sgCoCodesKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     { ------------------------------------------------------------- ! HELPERS ! ----------------------------------------------------------------------------- }
   private
     { GENERAL }
@@ -2806,10 +2804,10 @@ begin
       if OpenItemsUpdate = '' then
       begin
         MsgCall(mcWarn, 'Cannot find open items in database. Please contact IT support.');
-        TTReadAgeView.Create(thNullParameter);
+        TTReadAgeView.Create(thNullParameter, smRanges);
       end
         else
-          TTReadAgeView.Create(thCallOpenItems);
+          TTReadAgeView.Create(thCallOpenItems, smRanges);
     finally
       Transactions.Free;
     end;
@@ -3512,7 +3510,7 @@ end;
 { ----------------------------------------------------------------------------------------------------------------------------------------------------- FREE1 }
 procedure TMainForm.Action_Free1Click(Sender: TObject);
 begin
-  FilterForm.FColName  :=TSnapshots.fFREE1;
+  FilterForm.FColName  :=TGeneral.Free1;
   FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
   FilterForm.FGrid     :=MainForm.sgAgeView;
   FilterForm.FFilterNum:=fltFree1;
@@ -4187,17 +4185,6 @@ end;
 
 { -------------------------------------------------------- ! STRING GRID ROW SELECTION ! -------------------------------------------------------------------- }
 
-procedure TMainForm.DetailsGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
-begin
-  //DetailsGrid.Selection:=TGridRect(Rect(-1, -1, -1, -1));
-end;
-
-procedure TMainForm.sgAgeViewSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
-begin
-  //sgAgeView.Selection:=TGridRect(Rect(-1, -1, -1, -1));
-end;
-
-
 procedure TMainForm.DetailsGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
   DetailsGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, clCream, clBlack, clCream, False);
@@ -4352,39 +4339,39 @@ end;
 
                                                   (* ALLOW COPY "CTRL + C" ON ALL STRING GRIDS *)
 
-procedure TMainForm.sgCoCodesKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TMainForm.sgOpenItemsKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if (Key = 67) and (Shift = [ssCtrl]) then sgCoCodes.CopyCutPaste(adCopy);
+  if (Key = 67) and (Shift = [ssCtrl]) then sgOpenItems.CopyCutPaste(adCopy);
 end;
 
-procedure TMainForm.sgPaidInfoKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-begin
-  if (Key = 67) and (Shift = [ssCtrl]) then sgPaidInfo.CopyCutPaste(adCopy);
-end;
-
-procedure TMainForm.sgPmtTermsKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-begin
-  if (Key = 67) and (Shift = [ssCtrl]) then sgPmtTerms.CopyCutPaste(adCopy);
-end;
-
-procedure TMainForm.sgPersonKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-begin
-  if (Key = 67) and (Shift = [ssCtrl]) then sgPerson.CopyCutPaste(adCopy);
-end;
-
-procedure TMainForm.sgGroup3KeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-begin
-  if (Key = 67) and (Shift = [ssCtrl]) then sgGroup3.CopyCutPaste(adCopy);
-end;
-
-procedure TMainForm.sgInvoiceTrackerKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TMainForm.sgInvoiceTrackerKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   if (Key = 67) and (Shift = [ssCtrl]) then sgInvoiceTracker.CopyCutPaste(adCopy);
 end;
 
-procedure TMainForm.sgOpenItemsKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TMainForm.sgCoCodesKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if (Key = 67) and (Shift = [ssCtrl]) then sgOpenItems.CopyCutPaste(adCopy);
+  if (Key = 67) and (Shift = [ssCtrl]) then sgCoCodes.CopyCutPaste(adCopy);
+end;
+
+procedure TMainForm.sgPaidInfoKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  if (Key = 67) and (Shift = [ssCtrl]) then sgPaidInfo.CopyCutPaste(adCopy);
+end;
+
+procedure TMainForm.sgPmtTermsKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  if (Key = 67) and (Shift = [ssCtrl]) then sgPmtTerms.CopyCutPaste(adCopy);
+end;
+
+procedure TMainForm.sgPersonKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  if (Key = 67) and (Shift = [ssCtrl]) then sgPerson.CopyCutPaste(adCopy);
+end;
+
+procedure TMainForm.sgGroup3KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  if (Key = 67) and (Shift = [ssCtrl]) then sgGroup3.CopyCutPaste(adCopy);
 end;
 
 { ------------------------------------------------------------ ! EDIT AGE VIEW COLUMN ! --------------------------------------------------------------------- }
@@ -4400,15 +4387,9 @@ begin
 
   { GET COLUMNS NUMBERS }
   Col0:=sgAgeView.ReturnColumn(TSnapshots.CUID,    1, 1);
-  Col1:=sgAgeView.ReturnColumn(TSnapshots.FREE1,   1, 1);
-  Col2:=sgAgeView.ReturnColumn(TSnapshots.FREE2,   1, 1);
+  Col1:=sgAgeView.ReturnColumn(TGeneral.Free1,     1, 1);
+  Col2:=sgAgeView.ReturnColumn(TGeneral.Free2,     1, 1);
   Col3:=sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1);
-
-  { ALLOW COPYING }
-  if (Key = 67) and (Shift = [ssCtrl]) then sgAgeView.CopyCutPaste(adCopy);
-
-  { SELECT ALL }
-  if (Key = 65) and (Shift = [ssCtrl] )then sgAgeView.SelectAll;
 
   { ALLOW EDITING FREE COLUMNS }
   if (
@@ -4474,6 +4455,22 @@ end;
 procedure TMainForm.sgAgeViewKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
 
+  { ALLOW COPYING SELECTED AREA }
+  if (Key = 67) and (Shift = [ssCtrl]) then
+  begin
+    sgAgeView.CopyCutPaste(adCopy);
+    Exit;
+  end;
+
+  { SELECT ALL }
+  if (Key = 65) and (Shift = [ssCtrl]) then
+  begin
+    sgAgeView.SelectAll;
+    sgAgeView.CopyCutPaste(adCopy);
+    MsgCall(mcInfo, 'The selected spreadsheet has been copied to clipboard.');
+    Exit;
+  end;
+
   { DELETE GIVEN RECORD | FREE1 AND FOLLOW-UP COLUMNS }
   if (
        (
@@ -4482,7 +4479,7 @@ begin
        and
        (
          (
-           sgAgeView.Col = sgAgeView.ReturnColumn(TSnapshots.FREE1, 1, 1)
+           sgAgeView.Col = sgAgeView.ReturnColumn(TGeneral.Free1, 1, 1)
          )
          or
          (
@@ -4494,7 +4491,7 @@ begin
   begin
 
     { DELETE CONTENT OF FREE1 COLUMN }
-    if sgAgeView.Col = sgAgeView.ReturnColumn(TSnapshots.FREE1, 1, 1) then
+    if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneral.Free1, 1, 1) then
     begin
       TTGeneralComment.Create(
                                sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.CUID,  1, 1), sgAgeView.Row],
@@ -4504,7 +4501,7 @@ begin
                                strNULL,
                                True
                              );
-      sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.FREE1,   1, 1), sgAgeView.Row]:='';
+      sgAgeView.Cells[sgAgeView.ReturnColumn(TGeneral.Free1,   1, 1), sgAgeView.Row]:='';
     end;
 
     { DELETE CONTENT OF FOLLOW-UP COLUMN }
@@ -4523,11 +4520,16 @@ begin
 
     { QUIT EDITING }
     sgAgeView.Options:=sgAgeView.Options - [goEditing];
+    Exit;
 
   end;
 
   { QUIT EDITING }
-  if Key = VK_ESCAPE then sgAgeView.Options:=sgAgeView.Options - [goEditing];
+  if Key = VK_ESCAPE then
+  begin
+    sgAgeView.Options:=sgAgeView.Options - [goEditing];
+    Exit;
+  end;
 
 end;
 
@@ -5346,7 +5348,7 @@ begin
     { SWITCH OFF ALL TIMERS }
     MainForm.SwitchTimers(tmDisabled);
     { LOAD AGE VIEW FOR SELECTED GROUP }
-    TTReadAgeView.Create(thCallOpenItems);
+    TTReadAgeView.Create(thCallOpenItems, smRanges);
   end
     else
       MsgCall(mcWarn, 'Cannot load selected group.');
@@ -5354,13 +5356,53 @@ end;
 
 { ---------------------------------------------------------------------------------------------------------------------------------- AGE VIEW | APPLY SORTING }
 procedure TMainForm.btnSortApplyClick(Sender: TObject);
+var
+  iCNT: integer;
 begin
-  //...
 
+  if
+    (
+      SortListBox.ItemIndex <> smRanges
+    )
+    and
+    (
+      SortListBox.ItemIndex <> smFollowUp
+    )
+    and
+    (
+      SortListBox.ItemIndex <> smTotal
+    )
+    and
+    (
+      SortListBox.ItemIndex <> smOverdue
+    )
+  then
+    Exit;
 
-
-
-
+  { WAIT UNTIL READY }
+  if not (StatBar_TXT1.Caption = stReady) then
+  begin
+    MsgCall(mcWarn, 'Please wait until "Ready" status and try again.');
+    Exit;
+  end;
+  { PROCEED }
+  if (GroupListBox.Text <> '') and (GroupListDates.Text <> '') then
+  begin
+    { REMEMBER USER'S CHOICE }
+    { AUTOMATION WIIL FOLLOW }
+    GroupIdSel:=GroupList[GroupListBox.ItemIndex, 0];
+    GroupNmSel:=GroupList[GroupListBox.ItemIndex, 1];
+    AgeDateSel:=GroupListDates.Text;
+    { REMOVE FILTERS }
+    for iCNT:=1 to sgAgeView.RowCount - 1 do sgAgeView.RowHeights[iCNT]:=sgRowHeight;
+    FilterForm.FilterClearAll;
+    { SWITCH OFF ALL TIMERS }
+    MainForm.SwitchTimers(tmDisabled);
+    { LOAD AGE VIEW FOR SELECTED GROUP }
+    TTReadAgeView.Create(thNullParameter, SortListBox.ItemIndex);
+  end
+    else
+      MsgCall(mcWarn, 'Cannot load selected group.');
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------- OPEN ITEMS | FORCE RELOAD }

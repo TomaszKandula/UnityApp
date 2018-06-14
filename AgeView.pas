@@ -56,7 +56,7 @@ type
   published
     constructor Create(Connector: TADOConnection); overload;
     destructor  Destroy; override;
-    procedure   Read(var Grid: TStringGrid);
+    procedure   Read(var Grid: TStringGrid; Mode: integer);
     procedure   ComputeAgeSummary(Grid: TStringGrid);
     procedure   ComputeAndShowRCA(Grid: TStringGrid);
     procedure   ClearSummary;
@@ -111,7 +111,7 @@ begin
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------------ READ }
-procedure TAgeView.Read(var Grid: TStringGrid);
+procedure TAgeView.Read(var Grid: TStringGrid; Mode: integer);
 var
   StrCol: string;
 begin
@@ -120,7 +120,7 @@ begin
   { --------------------------------------------------------------------------------------------- READ GRID LAYOUT TO BE PASSED AS PARAMETER TO SQL STATEMENT }
   Grid.LoadLayout(StrCol, ColumnWidthName, ColumnOrderName, ColumnNames, ColumnPrefix);
   CmdType:=cmdText;
-  StrSQL :=EXECUTE + AgeViewReport + SPACE + QuotedStr(StrCol) + COMMA + QuotedStr(GroupID) + COMMA + QuotedStr(AgeDate);
+  StrSQL:=EXECUTE + AgeViewReport + SPACE + QuotedStr(StrCol) + COMMA + QuotedStr(GroupID) + COMMA + QuotedStr(AgeDate) + COMMA + QuotedStr(IntToStr(Mode));
   SqlToGrid(Grid, ExecSQL, False, False);
   LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: SQL statement applied [' + StrSQL + '].');
   { -------------------------------------------------------------------------------------------------------------------------------------------- UNINITIALIZE }
@@ -529,21 +529,18 @@ COLUMN NUMBER   | FIELD NAME          | ASSIGN NUMBER   | FIELD NAME       | ASS
  25             | GenAcNo             | 30              | PERSON           | D          | 24
  26             | ValDt               | 28              | GROUP3           | D          | 25
  27             | R1  (division)      | -               | RISK_CLASS       | C          | 26
- 28             | Gr3                 | -               | FREE1            | C          | 27 to be removed
- 29             | Txt                 | -               | FREE2            | C          | 28 to be removed
- 30             | R8  (person)        | 37              | CUID             | D          | 29
+ 28             | Gr3                 | -               | CUID             | D          | 27
+ 29             | Txt                 | -               | -                |            |
+ 30             | R8  (person)        | 37              | -                |            |
  31             | DirDeb              | -               | -                |            |
  32             | AddTxt              | -               | -                |            |
- 33             | PmtStat (calc)!     | -               | -                |            |
- 34             | DiscAmt (remove)!   | -               | -                |            |
- 35             | DecVal  (remove)!   | -               | -                |            |
- 36             | RecVal  (remove)!   | -               | -                |            |
- 37             | CUID    (calc)!     | -               | -                |            |
+ 33             | PmtStat (calc)      | -               | -                |            |
+ 34             | CUID    (calc)      | -               | -                |            |
 
 ************************************************************************************************************************************************************ *)
 
 { -------------------------------------------------------------------------------------------------------------------------------------------- GENERATE AGING }
-procedure TAgeView.Make(OSAmount: double);      // REFACTOR!!!
+procedure TAgeView.Make(OSAmount: double);
 
 (* COMMON VARIABLES AND CONSTANTS *)
 
@@ -586,10 +583,10 @@ var
 
 const
   { WARNING! BELOW MUST BE ALIGNED WITH OPEN ITEMS SOURCE AND DESTINATION TABLE IN DATABASE FOR AGE VIEW }
-  oiCol: array[0..12] of integer = (6, 2, 15, 14, 16, 18, 27, 1, 12, 13, 30, 28, 37);     { DEFINES SOURCE COLUMNS TO BE TRANSFERRED TO AGE VIEW 'AS IS' }
-  avCol: array[0..12] of integer = (3, 4, 5, 15, 17, 18, 19, 20, 22, 23, 24, 25, 29);     { DEFINES DESTINATION COLUMNS IN AGE VIEW ARRAY                }
-  rnCol: array[0..7 ] of integer = (6, 7, 8, 9, 10, 11, 12, 13);                          { DEFINES BUCKET COLUMNS: NOT DUE, RANGE1..6, OVERDUE          }
-  rfCol: array[0..13] of integer = (6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 26, 27, 28);  { DEFINES ALL COLUMNS WITH VALUES, TO BE REPLACED WITH '.'     }
+  oiCol: array[0..12] of integer = (6, 2, 15, 14, 16, 18, 27, 1,  12, 13, 30, 28, 34);     { DEFINES SOURCE COLUMNS TO BE TRANSFERRED TO AGE VIEW 'AS IS' }
+  avCol: array[0..12] of integer = (3, 4, 5,  15, 17, 18, 19, 20, 22, 23, 24, 25, 27);     { DEFINES DESTINATION COLUMNS IN AGE VIEW ARRAY                }
+  rnCol: array[0..7 ] of integer = (6, 7, 8,  9,  10, 11, 12, 13);                         { DEFINES BUCKET COLUMNS: NOT DUE, RANGE1..6, OVERDUE          }
+  rfCol: array[0..11] of integer = (6, 7, 8,  9,  10, 11, 12, 13, 14, 15, 16, 26);         { DEFINES ALL COLUMNS WITH VALUES, TO BE REPLACED WITH '.'     }
 
 (* NESTED METHODS *)
 
@@ -641,7 +638,7 @@ begin
   RcLo :=0;
   RcHi :=0;
   avRow:=0;
-  SetLength(ArrAgeView, 1, 30);  { MAKE 1 ROW AND 1..30 COLUMNS }
+  SetLength(ArrAgeView, 1, 28);  { MAKE 1 ROW AND 1..28 COLUMNS }
   { PUT ZERO FIELDS }
   AgeViewZeroFields(0);
   { ------------------------------------------------------------------------------------------------------------------------------------------  DATE AND TIME }
@@ -655,15 +652,13 @@ begin
   {          IN "STRING GRID"                                        }
   for iCNT:=1 to MainForm.sgOpenItems.RowCount - 1 do
     { GO THROUGH THE ROWS AND POPULATE WHEN FIND THAT THE ROW BELOW IS DIFFERENT THAN CURRENT }
-    if (MainForm.sgOpenItems.Cells[37, iCNT] <> MainForm.sgOpenItems.Cells[37, iCNT + 1]) then
+    if (MainForm.sgOpenItems.Cells[34, iCNT] <> MainForm.sgOpenItems.Cells[34, iCNT + 1]) then
     begin
       { ---------------------------------------------------------------------------------------------------------------------------------- FIXED DATA PER ROW }
       ArrAgeView[avRow, 0]:=GroupID;
       ArrAgeView[avRow, 1]:=DateToStr(CutOff);
       ArrAgeView[avRow, 2]:=DatTim;
-      ArrAgeView[avRow, 26]:=' ';  { RISK CLASS }
-      ArrAgeView[avRow, 27]:=' ';  { FREE1 }
-      ArrAgeView[avRow, 28]:=' ';  { FREE2 }
+      ArrAgeView[avRow, 26]:=' ';  { DUMMY FIELD AFTER EMBEDDED RISK CLASS }
       { ------------------------------------------------------------------------------------------------------------------------ RE-WRITE REST OF THE COLUMNS }
       for jCNT:=0 to high(oiCol) do ArrAgeView[avRow, avCol[jCNT]]:=MainForm.sgOpenItems.Cells[oiCol[jCNT], iCNT];
       { ---------------------------------------------------------------------------------------------------------------------------------------- ALTERNATIONS }
@@ -682,7 +677,7 @@ begin
       { MOVE COUNTER }
       inc(avRow);
       { EXPAND ARRAY BY ONE EMPTY ROW }
-      SetLength(ArrAgeView, avRow + 1, 30);
+      SetLength(ArrAgeView, avRow + 1, 28);
       { ZERO FIELDS }
       AgeViewZeroFields(avRow);
     end;
@@ -708,15 +703,15 @@ begin
   end;
 
   { ------------------------------------------------------------------------------------------------------------------------------------------------ POPULATE }
-  { LOOP VIA CUID COLUMN IN AGE VIEW [29] }
+  { LOOP VIA CUID COLUMN IN AGE VIEW [27] }
   for exRow:=0 to avRow - 1 do
   begin
     DiscAmnt:=0;
-    { LOOP VIA CUID COLUMN IN OPEN ITEMS [37] }
+    { LOOP VIA CUID COLUMN IN OPEN ITEMS [34] }
     for iCNT:=0 to MainForm.sgOpenItems.RowCount - 1 do
     begin
       { COMPARE AND EXECUTE IF THE SAME }
-      if MainForm.sgOpenItems.Cells[37, iCNT] = ArrAgeView[exRow, 29] then
+      if MainForm.sgOpenItems.Cells[34, iCNT] = ArrAgeView[exRow, 27] then
       begin
         { SUM ITEMS: NOT DUE, RANGE1..6 }
         ArrAgeView[exRow,
@@ -793,8 +788,6 @@ begin
   Columns.Add(TSnapshots.PERSON);
   Columns.Add(TSnapshots.GROUP3);
   Columns.Add(TSnapshots.RISK_CLASS);
-  Columns.Add(TSnapshots.FREE1);
-  Columns.Add(TSnapshots.FREE2);
   Columns.Add(TSnapshots.CUID);
   { DELETE STATEMENT | REMOVE OLD DATA }
   DeleteData:=DELETE_FROM +

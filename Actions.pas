@@ -724,21 +724,10 @@ end;
 
 { ------------------------------------------------------------------------------------------------------------------------------- COLOR NUMBERS AND SELECTION }
 procedure TActionsForm.OpenItemsGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
-var
-  Col1 :integer;
-  Col2 :integer;
-  Col3 :integer;
-  Col4 :integer;
 begin
 
   { SKIP HEADER }
   if ARow = 0 then Exit;
-
-  { GET COLUMNS }
-  Col1:=OpenItemsGrid.ReturnColumn(TOpenitems.OpenCurAm, 1, 1);
-  Col2:=OpenItemsGrid.ReturnColumn(TOpenitems.OpenAm,    1, 1);
-  Col3:=OpenItemsGrid.ReturnColumn(TOpenitems.CurAm,     1, 1);
-  Col4:=OpenItemsGrid.ReturnColumn(TOpenitems.Am,        1, 1);
 
   { DRAW SELECTED }
   OpenItemsGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
@@ -746,19 +735,23 @@ begin
   { DRAW FOR CERTAIN COLOR }
   if
     (
-      ACol = Col1
+      ACol = OpenItemsGrid.ReturnColumn(TOpenitems.OpenCurAm, 1, 1)
     )
     or
     (
-      ACol = Col2
+      ACol = OpenItemsGrid.ReturnColumn(TOpenitems.OpenAm, 1, 1)
     )
     or
     (
-      ACol = Col3
+      ACol = OpenItemsGrid.ReturnColumn(TOpenitems.CurAm, 1, 1)
     )
     or
     (
-      ACol = Col4
+      ACol = OpenItemsGrid.ReturnColumn(TOpenitems.Am, 1, 1)
+    )
+    or
+    (
+      ACol = OpenItemsGrid.ReturnColumn(TOpenitems.PmtStat, 1, 1)
     )
   then
     OpenItemsGrid.ColorValues(ARow, ACol, Rect, clRed, clBlack);

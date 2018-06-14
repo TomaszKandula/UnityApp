@@ -70,12 +70,13 @@ type
   protected
     procedure Execute; override;
   private
-    var FMode:  integer;
     var FLock:  TCriticalSection;
     var FIDThd: integer;
+    var FMode:  integer;
+    var FSort:  integer;
   public
     property    IDThd:  integer read FIDThd;
-    constructor Create(ActionMode: integer);
+    constructor Create(ActionMode: integer; SortMode: integer);
     destructor  Destroy; override;
   end;
 
@@ -387,17 +388,18 @@ begin
   end;
   { RELEASE THREAD WHEN DONE }
   FreeOnTerminate:=True;
-  if CanReload then TTReadAgeView.Create(thNullParameter);
+  if CanReload then TTReadAgeView.Create(thNullParameter, smRanges);
 end;
 
 { ################################################################ ! READ AGE VIEW ! ######################################################################## }
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE }
-constructor TTReadAgeView.Create(ActionMode: integer);
+constructor TTReadAgeView.Create(ActionMode: integer; SortMode: integer);
 begin
   inherited Create(False);
   FLock :=TCriticalSection.Create;
   FMode :=ActionMode;
+  FSort :=SortMode;
   FIDThd:=0;
 end;
 
@@ -433,7 +435,7 @@ begin
       AgeView.idThd  :=IDThd;
       AgeView.GroupID:=MainForm.GroupIdSel;
       AgeView.AgeDate:=MainForm.AgeDateSel;
-      AgeView.Read(MainForm.sgAgeView);
+      AgeView.Read(MainForm.sgAgeView, FSort);
       { SYNC }
       Synchronize(procedure
                   begin

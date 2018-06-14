@@ -46,12 +46,14 @@ const
   LicenceFile:    string    = 'Unity.licx';
   GridImgFile:    string    = 'Unity.img';
   ReleaseFile:    string    = 'Release.pak';
-  CurrentMutex:   PWideChar = 'UNITY_10069';    { WARNING! INCREASE IT WITH EACH NEW RELEASE }
+  CurrentMutex:   PWideChar = 'UNITY_10071';    { WARNING! INCREASE IT WITH EACH NEW RELEASE }
 
-  { FREE COLUMNS }
+  { AGE VIEW SORTING MODES }
 
-  colFree1 = 0;
-  colFree2 = 1;
+  smRanges   = 0;
+  smFollowUp = 1;
+  smTotal    = 2;
+  smOverdue  = 3;
 
   { ANIMATION }
 

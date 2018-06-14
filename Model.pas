@@ -257,8 +257,6 @@ type
     const GROUP3          : string = 'Group3';
     const RISK_CLASS      : string = 'RiskClass';
     const CUID            : string = 'Cuid';
-    const FREE1           : string = 'Free1';  // to be deleted
-    const FREE2           : string = 'Free2';  // to be deleted
 
     (* REFLECTS "FRIENDLY" COLUMN NAMES USED IN THE APPLICATION *)
     (* THE BELOW GIVEN NAMES ARE USED IN BOTH SETTING FILES     *)
@@ -289,8 +287,6 @@ type
     const fGROUP3          = 'Group3';
     const fRISK_CLASS      = 'Risk Class';
     const fCUID            = 'Cuid';
-    const fFREE1           = 'Free1';  // to be deleted
-    const fFREE2           = 'Free2';  // to be deleted
   end;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
