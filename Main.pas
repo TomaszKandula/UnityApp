@@ -682,7 +682,6 @@ type                                                            (* GUI | MAIN TH
     procedure sgPersonDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
     procedure sgGroup3DrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
     procedure Action_AutoColumnSizeClick(Sender: TObject);
-    procedure sgAgeViewKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure FormDestroy(Sender: TObject);
     procedure Action_SearchClick(Sender: TObject);
     procedure Action_CutClick(Sender: TObject);
@@ -795,6 +794,8 @@ type                                                            (* GUI | MAIN TH
     procedure sgPmtTermsKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure sgPaidInfoKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure sgCoCodesKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure sgAgeViewClick(Sender: TObject);
+    procedure sgAgeViewKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     { ------------------------------------------------------------- ! HELPERS ! ----------------------------------------------------------------------------- }
   private
     { GENERAL }
@@ -3913,6 +3914,15 @@ end;
 
 { -------------------------------------------------------- ! COMPONENT EVENTS | GRIDS ! --------------------------------------------------------------------- }
 
+{ ---------------------------------------------------------------------------------------------------------------------------------------- FORCE RANGE SELECT }
+procedure TMainForm.sgAgeViewClick(Sender: TObject);
+begin
+  sgAgeView.Options:=sgAgeView.Options - [goEditing];
+  sgAgeView.Options:=sgAgeView.Options - [goAlwaysShowEditor];
+  sgAgeView.SetFocus;
+  sgAgeView.EditorMode:=False;
+end;
+
 { ------------------------------------------------------------------------------------------------------------------- MOVE COLUMN AND UPDATE SQL COLUMN ARRAY }
 procedure TMainForm.sgAgeViewColumnMoved(Sender: TObject; FromIndex, ToIndex: Integer);
 var
@@ -4374,79 +4384,115 @@ begin
   if (Key = 67) and (Shift = [ssCtrl]) then sgGroup3.CopyCutPaste(adCopy);
 end;
 
-{ ------------------------------------------------------------ ! EDIT AGE VIEW COLUMN ! --------------------------------------------------------------------- }
+{ ------------------------------------------------------- ! EDIT SELECTED AGE VIEW COLUMNS ! ---------------------------------------------------------------- }
 
-{ ----------------------------------------------------------------------------------------------------------------------------------------------- ON KEY DOWN }
+{ -------------------------------------------------------------------------------------------------------------------------------------------------- KEY DOWN }
 procedure TMainForm.sgAgeViewKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-var
-  Col0: integer;
-  Col1: integer;
-  Col2: integer;
-  Col3: integer;
+
+  (* NESTED CONSTANTS *)
+
+  const
+    ctFree1    = 0;
+    ctFree2    = 1;
+    ctFollowUp = 2;
+
+  (* NESTED METHODS *)
+
+  { MODIFY DATA FOR GIVEN COLUMN }
+  procedure ModifyCell(CUIDRef: integer; ColumnType: integer; Text: string);
+  begin
+    if ColumnType = ctFree1    then TTGeneralComment.Create(sgAgeView.Cells[CUIDRef, sgAgeView.Row], strNULL, strNULL, Text, strNULL, True);
+    if ColumnType = ctFollowUp then TTGeneralComment.Create(sgAgeView.Cells[CUIDRef, sgAgeView.Row], strNULL, Text, strNULL, strNULL, True);
+  end;
+
+  { QUIT EDITING }
+  procedure QuitEditing;
+  begin
+    sgAgeView.Options:=sgAgeView.Options - [goEditing];
+    sgAgeView.EditorMode:=False;
+  end;
+
 begin
 
-  { GET COLUMNS NUMBERS }
-  Col0:=sgAgeView.ReturnColumn(TSnapshots.CUID,    1, 1);
-  Col1:=sgAgeView.ReturnColumn(TGeneral.Free1,     1, 1);
-  Col2:=sgAgeView.ReturnColumn(TGeneral.Free2,     1, 1);
-  Col3:=sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1);
-
-  { ALLOW EDITING FREE COLUMNS }
-  if (
-       (
-         Col1 = sgAgeView.Col
-       )
-       or
-       (
-         Col2 = sgAgeView.Col
-       )
-       or
-       (
-         Col3 = sgAgeView.Col
-       )
+  { ALLOW EDITING ONLY FREE COLUMNS AND FOLLOW-UP COLUMN }
+  if
+     (
+       sgAgeView.Col <> sgAgeView.ReturnColumn(TGeneral.Free1, 1, 1)
      )
      and
      (
-       sgAgeView.Row > 0
+       sgAgeView.Col <> sgAgeView.ReturnColumn(TGeneral.Free2, 1, 1)
+     )
+     and
+     (
+       sgAgeView.Col <> sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1)
      )
   then
-    sgAgeView.Options:=sgAgeView.Options + [goEditing]
-  else
-    sgAgeView.Options:=sgAgeView.Options - [goEditing];
+    Exit;
 
-  { WRITE INTO DATABASE }
+  { DISALLOW ARROWS WHEN INPLACE EDITOR IS ENABLED }
+  if (sgAgeView.EditorMode) and ( (Key = VK_LEFT) or (Key = VK_RIGHT) or (Key = VK_UP) or (Key = VK_DOWN) ) then
+  begin
+    Key:=0;
+    QuitEditing;
+    Exit;
+  end;
+
+  { ALLOW EDITING }
+  if Key = VK_F2 then
+  begin
+    Key:=0;
+    sgAgeView.Options:=sgAgeView.Options + [goEditing];
+    sgAgeView.EditorMode:=True;
+  end;
+
+  { QUIT EDITING }
+  if Key = VK_ESCAPE then
+  begin
+    Key:=0;
+    QuitEditing;
+  end;
+
+  { QUIT EDITING AND WRITE TO DATABASE }
   if Key = VK_RETURN then
   begin
-
-    if (
-         sgAgeView.Cells[Col3, sgAgeView.Row] <> ''
-       )
-       and
-       (
-         sgAgeView.Cells[Col3, sgAgeView.Row] <> SPACE
-       )
-    then
+    Key:=0;
+    QuitEditing;
+    { FREE1 COLUMN }
+    if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneral.Free1, 1, 1) then
+      ModifyCell(sgAgeView.ReturnColumn(TSnapshots.CUID, 1, 1), ctFree1, sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]);
+    { FOLLOW-UP COLUMN }
+    if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1) then
     begin
-      if not(CheckIfDate(sgAgeView.Cells[Col3, sgAgeView.Row])) then
+      { VALIDATE THE CELL }
+      if not(CheckIfDate(sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row])) then
       begin
         MsgCall(mcWarn, 'Invalid date or format, please remember to use "yyyy-mm-dd".');
-        sgAgeView.Cells[Col3, sgAgeView.Row]:=SPACE;
-        sgAgeView.Options:=sgAgeView.Options - [goEditing];
-        Exit;
+        sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]:=SPACE;
+      end
+      else
+      begin
+        ModifyCell(sgAgeView.ReturnColumn(TSnapshots.CUID, 1, 1), ctFollowUp, sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]);
       end;
     end;
+  end;
 
-    TTGeneralComment.Create(
-                             sgAgeView.Cells[Col0, sgAgeView.Row],
-                             strNULL,
-                             sgAgeView.Cells[Col3, sgAgeView.Row],
-                             sgAgeView.Cells[Col1, sgAgeView.Row],
-                             strNULL,
-                             True
-                           );
-
-    sgAgeView.Options:=sgAgeView.Options - [goEditing];
-
+  { DELETE ENTRY FROM DATABASE }
+  if Key = VK_DELETE then
+  begin
+    Key:=0;
+    { FREE1 COLUMN }
+    if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneral.Free1, 1, 1) then
+    begin
+      ModifyCell(sgAgeView.ReturnColumn(TSnapshots.CUID, 1, 1), ctFree1, '');
+      sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]:='';
+    end;
+    { FOLLOW-UP COLUMN }
+    if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1) then
+    begin
+      ModifyCell(sgAgeView.ReturnColumn(TSnapshots.CUID, 1, 1), ctFollowUp, '');
+      sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]:='';
+    end;
   end;
 
 end;
@@ -4456,79 +4502,14 @@ procedure TMainForm.sgAgeViewKeyUp(Sender: TObject; var Key: Word; Shift: TShift
 begin
 
   { ALLOW COPYING SELECTED AREA }
-  if (Key = 67) and (Shift = [ssCtrl]) then
-  begin
-    sgAgeView.CopyCutPaste(adCopy);
-    Exit;
-  end;
+  if (Key = 67) and (Shift = [ssCtrl]) then sgAgeView.CopyCutPaste(adCopy);
 
-  { SELECT ALL }
+  { SELECT AND COPY AT ONCE }
   if (Key = 65) and (Shift = [ssCtrl]) then
   begin
     sgAgeView.SelectAll;
     sgAgeView.CopyCutPaste(adCopy);
     MsgCall(mcInfo, 'The selected spreadsheet has been copied to clipboard.');
-    Exit;
-  end;
-
-  { DELETE GIVEN RECORD | FREE1 AND FOLLOW-UP COLUMNS }
-  if (
-       (
-         Key = VK_DELETE
-       )
-       and
-       (
-         (
-           sgAgeView.Col = sgAgeView.ReturnColumn(TGeneral.Free1, 1, 1)
-         )
-         or
-         (
-           sgAgeView.Col = sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1)
-         )
-       )
-     )
-  then
-  begin
-
-    { DELETE CONTENT OF FREE1 COLUMN }
-    if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneral.Free1, 1, 1) then
-    begin
-      TTGeneralComment.Create(
-                               sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.CUID,  1, 1), sgAgeView.Row],
-                               strNULL,
-                               strNULL,
-                               '',
-                               strNULL,
-                               True
-                             );
-      sgAgeView.Cells[sgAgeView.ReturnColumn(TGeneral.Free1,   1, 1), sgAgeView.Row]:='';
-    end;
-
-    { DELETE CONTENT OF FOLLOW-UP COLUMN }
-    if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1) then
-    begin
-      TTGeneralComment.Create(
-                               sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.CUID,  1, 1), sgAgeView.Row],
-                               strNULL,
-                               '',
-                               strNULL,
-                               strNULL,
-                               True
-                             );
-      sgAgeView.Cells[sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1), sgAgeView.Row]:='';
-    end;
-
-    { QUIT EDITING }
-    sgAgeView.Options:=sgAgeView.Options - [goEditing];
-    Exit;
-
-  end;
-
-  { QUIT EDITING }
-  if Key = VK_ESCAPE then
-  begin
-    sgAgeView.Options:=sgAgeView.Options - [goEditing];
-    Exit;
   end;
 
 end;
@@ -4574,6 +4555,14 @@ begin
     and
     (
       Key <> VK_TAB
+    )
+    and
+    (
+      Key <> VK_ESCAPE
+    )
+    and
+    (
+      Key <> VK_RETURN
     )
   then
   begin

@@ -6071,6 +6071,7 @@ object MainForm: TMainForm
           PopupMenu = AgeViewPopup
           ShowHint = False
           TabOrder = 0
+          OnClick = sgAgeViewClick
           OnColumnMoved = sgAgeViewColumnMoved
           OnDblClick = sgAgeViewDblClick
           OnDrawCell = sgAgeViewDrawCell
