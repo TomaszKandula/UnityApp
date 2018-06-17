@@ -49,6 +49,7 @@ type
     function  SendEmailToSupplier(CustomerName, LegalEntityName: string; IsSertica: integer; EmailTo: string): boolean;
     function  GenerateTicket: integer;
     var       GetTicket: string;
+
   end;
 
 implementation

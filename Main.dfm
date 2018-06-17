@@ -1193,7 +1193,7 @@ object MainForm: TMainForm
     Margins.Top = 0
     Margins.Right = 10
     Margins.Bottom = 0
-    ActivePage = TabSheet1
+    ActivePage = TabSheet10
     Align = alClient
     DoubleBuffered = True
     Font.Charset = DEFAULT_CHARSET
@@ -18309,6 +18309,7 @@ object MainForm: TMainForm
             Font.Height = -11
             Font.Name = 'Tahoma'
             Font.Style = []
+            MaxLength = 255
             ParentFont = False
             TabOrder = 2
           end
@@ -18340,22 +18341,47 @@ object MainForm: TMainForm
               Height = 13
               Caption = 'Delivery Terms'
             end
-            object editSerticaBuyOrder: TLabeledEdit
+            object Label7: TLabel
               Left = 30
-              Top = 92
-              Width = 155
-              Height = 21
-              Color = clCream
-              EditLabel.Width = 121
-              EditLabel.Height = 13
-              EditLabel.Caption = 'Prices on Purchase Order'
-              Font.Charset = DEFAULT_CHARSET
-              Font.Color = clNavy
-              Font.Height = -11
-              Font.Name = 'Tahoma'
-              Font.Style = []
-              ParentFont = False
-              TabOrder = 0
+              Top = 76
+              Width = 121
+              Height = 13
+              Caption = 'Prices on Purchase Order'
+            end
+            object SpeedButton1: TSpeedButton
+              Left = 165
+              Top = 45
+              Width = 23
+              Height = 22
+              Cursor = crHandPoint
+              Flat = True
+              Glyph.Data = {
+                36030000424D3603000000000000360000002800000010000000100000000100
+                18000000000000030000C40E0000C40E00000000000000000000FFFFFFFFFFFF
+                FFFFFFFFFFFFF4F9F2A3D29574BB5F5DB0445DB04474BB5FA3D295F4F9F2FFFF
+                FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF94CB8444A42853AB3959AE3F5B
+                AF425BAF4259AE3F53AB3944A42894CB84FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+                6FB9594FA9345BAF425CB0435CB04359AE3F59AE3F5CB0435CB0435BAF424FA9
+                346FB959FFFFFFFFFFFFFFFFFF94CB844FA9345CB0435CB0435CB04359AE3F72
+                BA5C72BA5C59AE3F5CB0435CB0435CB0434FA93494CB84FFFFFFF4FAF244A428
+                5BAF425CB0435CB0435CB04355AC3B9ACD8A9ACD8A55AC3B5CB0435CB0435CB0
+                435BAF4244A428F4FAF2A3D29553AB395CB0435CB0435CB0435CB04355AC3B96
+                CC8696CC8655AC3B5CB0435CB0435CB0435CB04353AB39A3D29574BB5E58AE3F
+                5CB0435AAF4155AC3B55AC3B4EA93392C98192C9814EA93355AC3B55AC3B5AAF
+                415CB04358AE3F74BB5E5DB0445BAF425AAF4166B54F9BCE8C96CC8692CA81BC
+                DEB2BCDEB292CA8196CC869BCE8C66B54F5AAF415BAF425DB0445DB0445BAF42
+                5AAF4166B54F9BCE8C96CC8692CA81BCDEB2BCDEB292CA8196CC869BCE8C66B5
+                4F5AAF415BAF425DB04474BB5E58AE3F5CB0435AAF4155AC3B55AC3B4EA93392
+                C98192C9814EA93355AC3B55AC3B5AAF415CB04358AE3F74BB5EA3D29553AB39
+                5CB0435CB0435CB0435CB04355AC3B96CC8696CC8655AC3B5CB0435CB0435CB0
+                435CB04353AB39A3D295F4FAF244A4285BAF425CB0435CB0435CB04355AC3B9B
+                CE8C9BCE8C55AC3B5CB0435CB0435CB0435BAF4244A428F4FAF2FFFFFF94CB84
+                4FA9345CB0435CB0435CB0435BAF425CB0435CB0435BAF425CB0435CB0435CB0
+                434FA93494CB84FFFFFFFFFFFFFFFFFF6FB9594FA9345BAF425CB0435CB0435B
+                AF425BAF425CB0435CB0435BAF424FA9346FB959FFFFFFFFFFFFFFFFFFFFFFFF
+                FFFFFF94CB8444A42853AB3959AE3F5BAF425BAF4259AE3F53AB3944A42894CB
+                84FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF4F9F2A3D29574BB5F5D
+                B0445DB04474BB5FA3D295F4F9F2FFFFFFFFFFFFFFFFFFFFFFFF}
             end
             object editSerticaHandlingOrder: TComboBox
               Left = 248
@@ -18373,7 +18399,7 @@ object MainForm: TMainForm
               ItemIndex = 0
               ParentFont = False
               Sorted = True
-              TabOrder = 1
+              TabOrder = 0
               Text = 'Email / PDF'
               Items.Strings = (
                 'Email / PDF'
@@ -18396,7 +18422,7 @@ object MainForm: TMainForm
               ItemIndex = 0
               ParentFont = False
               Sorted = True
-              TabOrder = 2
+              TabOrder = 1
               Text = 'CFR - Cost and Freight'
               Items.Strings = (
                 'CFR - Cost and Freight'
@@ -18412,9 +18438,9 @@ object MainForm: TMainForm
                 'FCA - Free Carrier'
                 'FOB - Free on Board')
             end
-            object editSerticaUnits: TComboBox
+            object editSerticaBuyOrder: TComboBox
               Left = 30
-              Top = 43
+              Top = 92
               Width = 155
               Height = 22
               Cursor = crHandPoint
@@ -18425,60 +18451,28 @@ object MainForm: TMainForm
               Font.Height = -11
               Font.Name = 'Tahoma'
               Font.Style = []
-              ItemIndex = 0
+              ItemIndex = 1
               ParentFont = False
-              Sorted = True
-              TabOrder = 3
-              Text = 'ADAN - Ark Dania'
+              TabOrder = 2
+              Text = 'No'
               Items.Strings = (
-                'ADAN - Ark Dania'
-                'AGER - Ark Germania'
-                'ANGS - Anglia Seaways'
-                'ATHS - Athena Seaways'
-                'CALB - Cote Dalbatre'
-                'CALS - Calais Seaways'
-                'CATE - Calais Terminal'
-                'CDUN - Cote Des Dunes'
-                'CFLA - Cote Des Flandres'
-                'CSCA - Crown Seaways'
-                'DELS - Delft Seaways'
-                'DITE - Dieppe Terminal'
-                'DOVS - Dover Seaways'
-                'DUNS - Dunkerque Seaways'
-                'DUTE - Dunkerque Terminal'
-                'GARS - Gardenia Seaways'
-                'GRTE - Gothenburg Terminal Workshop'
-                'IMFM - Immingham Facility Management'
-                'IMGP - Immingham General Purchases'
-                'KAUN - Kaunas Seaways'
-                'KSCA - King Seaways'
-                'LBRI - Lysbris Seaways'
-                'LOPT - Optima Seaways'
-                'LPAT - Patria Seaways'
-                'LSEA - Liverpool Seaways'
-                'LVIK - Lysvik Seaways'
-                'MATE - Marseille Terminal'
-                'OCTV - Octeville sur Mer'
-                'PNOR- Princess Seaways'
-                'PSCD - Pearl Seaways'
-                'REGS - Regina Seaways'
-                'SSIS - Seven Sisters'
-                'TBEG - Begonia Seaways'
-                'TBOT - Botnia Seaways'
-                'TBRI - Britannia Seaways'
-                'TERM - Immingham Terminal Workshop'
-                'TFIC- Ficaria Seaways'
-                'TFIN - Finlandia Seaways'
-                'TFRE - Freesia Seaways'
-                'TFUT - Ark Futura'
-                'TMAG - Magnolia Seaways'
-                'TPET - Petunia Seaways'
-                'TPRI - Primula Seaways'
-                'TSEL - Selandia Seaways'
-                'TSUE - Suecia Seaways'
-                'TULS - Tulipa Seaways'
-                'VILN - Vilnius Seaways'
-                'VSEA - Victoria Seaways')
+                'Yes'
+                'No')
+            end
+            object editSerticaUnits: TEdit
+              Left = 30
+              Top = 45
+              Width = 129
+              Height = 22
+              Color = clCream
+              Font.Charset = DEFAULT_CHARSET
+              Font.Color = clNavy
+              Font.Height = -11
+              Font.Name = 'Tahoma'
+              Font.Style = []
+              NumbersOnly = True
+              ParentFont = False
+              TabOrder = 3
             end
           end
           object cbPOD: TComboBox
@@ -20236,8 +20230,8 @@ object MainForm: TMainForm
   end
   object PopupMenu: TPopupMenu
     MenuAnimation = [maLeftToRight]
-    Left = 240
-    Top = 698
+    Left = 1240
+    Top = 682
     object Action_ShowApp: TMenuItem
       Caption = 'Show'
       Default = True
@@ -20410,39 +20404,39 @@ object MainForm: TMainForm
   object CurrentTime: TTimer
     Enabled = False
     OnTimer = CurrentTimeTimer
-    Left = 392
-    Top = 696
+    Left = 1240
+    Top = 312
   end
   object UpTime: TTimer
     Enabled = False
     OnTimer = UpTimeTimer
-    Left = 392
-    Top = 640
+    Left = 1240
+    Top = 256
   end
   object CSVExport: TSaveDialog
     DefaultExt = '*.csv'
     Filter = 'CSV (Delimited)|*.csv'
-    Left = 320
-    Top = 600
+    Left = 1240
+    Top = 480
   end
   object CSVImport: TOpenDialog
     DefaultExt = '*.csv'
     Filter = 'CSV (Delimited)|*.csv'
-    Left = 320
-    Top = 648
+    Left = 1240
+    Top = 528
   end
   object OILoader: TTimer
     Enabled = False
     Interval = 10000
     OnTimer = OILoaderTimer
-    Left = 392
-    Top = 488
+    Left = 1240
+    Top = 96
   end
   object AgeViewPopup: TPopupMenu
     MenuAnimation = [maLeftToRight]
     OnPopup = AgeViewPopupPopup
-    Left = 240
-    Top = 648
+    Left = 1240
+    Top = 632
     object Action_LyncCall: TMenuItem
       Bitmap.Data = {
         36030000424D3603000000000000360000002800000010000000100000000100
@@ -20524,13 +20518,40 @@ object MainForm: TMainForm
       Caption = '-'
     end
     object Action_GroupFollowUp: TMenuItem
-      Caption = 'Modify Follow-Ups'
+      Bitmap.Data = {
+        36030000424D3603000000000000360000002800000010000000100000000100
+        18000000000000030000C40E0000C40E00000000000000000000FFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF807F7EFDFFFFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFFFFFFFF4F9FFA6BFD63090DFFFFFFFFFFFFFFFFFFFFFFFFFF6F5F4F0F0EB
+        F1F0ECF1F0ECF1F0ECF2F2EEF1F0ECF1F0ECF2F0ECFFFAEF169CF91488E42B8D
+        DFFFF8EDF4F1EBFCFCFAF6F5F3F0EFEAF0EFEBF0F0EBF1F0ECE6E2DEF2F1EDF0
+        EFEBF6F6F2EDE6DFC4C2C117A2FF188AE42B8EE0FEFBEFFFFFFBF6F5F3F0EFEB
+        F1F0ECF2F1EEE6E3DEB09E96F7F7F4F4F4F0D2C9C3A28B83D5C4BA907E7916A2
+        FF1690E64056ABFFFFFDF6F5F3F0EFEBF1F0ECF2F1EEE8E5E0B5A49CF7F7F4F7
+        F7F4AA968EFEFFFDFCFEFBBBA296DDEAE7365DE02D32A58B8FC6F6F5F3F0EFEB
+        F1F0ECF2F1EEE8E5E0B5A49CF7F7F4F1F0ECF7F7F4F6F6F2FEFFFDB7A59EF1EB
+        E1E4E3EB6D7ADDFFFFFDF6F5F3F0EFEBF1F0ECF2F1EEE8E5E0B5A49CF7F7F4F1
+        F0ECFBFDF9BFB1AAAB978EAD9991EAE8E3F6F5EEFCFAECFDFDFBF6F5F3F0EFEB
+        F1F0ECF8F9F6EAE8E3B5A49CF7F7F4F6F7F3B8A8A0CCC1BBFBFDFA816257EDEB
+        E6F2F1EDEFEEEAFCFCFAF6F5F3F0EFEBF7F7F4AC9890D5CDC7B7A7A0F7F7F4F8
+        F9F69D857CFFFFFFFEFFFDB2A098EDEAE6F1F1EDEFEEEAFCFCFAF6F5F3F0EFEB
+        F1F0ECFDFFFC967D73B7A69FF7F7F4F4F3F0DBD4CF9B8278BEB0A8A18A81F9FB
+        F7F1F0ECEFEEEAFCFCFAFCF8FBF8F3F6F9F3F7F9F4F8FFFDFFF4EDF0FAF5F9F9
+        F3F7FDF8FDF8F2F6E6DBDDFFFFFFF9F3F7F9F3F7F8F2F6FEFDFECEE3BCA9CF89
+        ADD18EADD18EADD18EAED28FADD18EADD18EADD18EAED28FAFD491ADD18EADD1
+        8EADD18EA6CD84EEF5E698CB724CA50954A91354A91354A91354A91354A91354
+        A91354A91354A91354A91354A91354A91354A91346A200DAECCB9FCE7B56AA17
+        5EAE215EAE215EAE215EAE215EAE215EAE215EAE215EAE215EAE215EAE215EAE
+        215EAE214FA60DDDEECF9FCE7B56AA175EAE215EAE215EAE215EAE215EAE215E
+        AE215EAE215EAE215EAE215EAE215EAE215EAE214FA60DDDEECF}
+      Caption = 'Modify follow-up(s)'
       object Action_AddFollowUpGroup: TMenuItem
-        Caption = 'Add Follow-Up to the group'
+        Caption = 'Add selected'
         OnClick = Action_AddFollowUpGroupClick
       end
       object Action_RemoveFollowUps: TMenuItem
-        Caption = 'Remove selected Follow-Ups'
+        Caption = 'Remove selected'
         OnClick = Action_RemoveFollowUpsClick
       end
     end
@@ -20702,6 +20723,33 @@ object MainForm: TMainForm
       Caption = '-'
     end
     object Action_QuickReporting: TMenuItem
+      Bitmap.Data = {
+        36030000424D3603000000000000360000002800000010000000100000000100
+        18000000000000030000C40E0000C40E00000000000000000000D8D8D8C5C5C5
+        C5C5C5C5C5C5C5C5C5C5C5C5C6C6C6C7C7C7C7C7C7C7C7C7C6C6C6CCCCCCFFFF
+        FFFFFFFFFFFFFFFFFFFFC5C5C5E7E7E7F6F6F6F6F6F6F6F6F6F8F8F8F6F1EEE6
+        E4E3E4E4E4E5E5E5E5E5E5E3E3E2E4E4E4FFFFFFFFFFFFFFFFFFC5C5C5F6F6F6
+        ECECEDE2E2E3E4E4E5DDD9D777AAC3C4E2EFE5E5EAD3D3D4D3D3D4D8D8D9E0E0
+        E0FDFDFDFFFFFFFFFFFFC5C5C5F5F5F5EBEBECE1E1E2E1E1E2FBF3F057C8F5D5
+        9433DCC19CD3D9E4D2D2D4D7D7D8E1E1E1FDFDFDFFFFFFFFFFFFC5C5C5F4F4F4
+        F5F5F5F8F8F8F8F8F8F9FBFFF5D5ADD79432D89937DFC5A1E7EEF7E6E6E6E0E0
+        E0FDFDFDFFFFFFFFFFFFC5C5C5F6F6F5E2E2E3CDCDCFCFCFD1CFCFD1D0D5E0D1
+        BCA1E2A639E5AB3DC8AE8DCAD0DCE2E2E2FDFDFDFFFFFFFFFFFFC5C5C5F4F4F4
+        F5F5F5F8F8F7F8F8F7F8F8F7F8F8F7F9FFFFE9D4B7D89935E4AA3CDEC4A1E1E7
+        F1FDFDFDFFFFFFFFFFFFC5C5C5F5F5F5EBEBECE2E2E3E3E3E4E3E3E4E3E3E4E3
+        E3E4E5EBF4D9C3A8E3A83AE4AB3BD9BE9CFFFFFFFFFFFFFFFFFFC5C5C5F5F5F5
+        EBEBECE1E1E2E2E2E3E2E2E3E2E2E3E2E2E3E2E2E3E3E9F3E0CBAFE1A738E3A9
+        3AECD3AFFFFFFFFFFFFFC5C5C5F4F4F4F5F5F5F8F8F8F8F8F8F8F8F8F8F8F7F4
+        F4F4F4F4F4F4F4F4F6FCFFE7D1B5DEA237D29130F0D4A6FFFFFFC5C5C5F6F6F5
+        E2E2E3CDCDCFCFCFD1CECED1CECED1F5F5F5F3F3F3F3F3F3F3F3F3F5FBFFE8D2
+        B4D8942CD7D0DAB4B5F9C5C5C5F4F4F4F5F5F5F8F8F7F8F8F7F8F8F7F7F7F7F3
+        F3F3F3F3F3F3F3F3F5F5F5F5F5F5F7FBFEFAFAFA3234EA4141E6C5C5C5F5F5F5
+        EBEBECE2E2E3E3E3E4E2E2E4E2E2E3F4F4F4F3F3F3F4F4F4DDDDDDDDDDDDD9D9
+        D9FFFFFFCECEF9D8D8FAC3C3C3F5F5F5EBEBECE1E1E2E2E2E3E2E2E3E2E2E3F4
+        F4F4F4F4F4E3E3E3CBCBCBC6C6C6F9F9F9FFFFFFFFFFFFFFFFFFD3D3D3F2F2F2
+        F4F4F4F4F4F4F4F4F4F4F4F4F4F4F4F3F3F3F4F4F4E4E4E4C4C4C4FBFBFBFFFF
+        FFFFFFFFFFFFFFFFFFFFFFFFFFF6F6F6F2F2F2F3F3F3F3F3F3F3F3F3F3F3F3F3
+        F3F3F4F4F4E4E4E4F9F9F9FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
       Caption = 'Quick Reporting'
       object Action_ToExce: TMenuItem
         Caption = 'Generate Excel Report'
@@ -20753,8 +20801,8 @@ object MainForm: TMainForm
   end
   object TrackerPopup: TPopupMenu
     MenuAnimation = [maLeftToRight]
-    Left = 240
-    Top = 600
+    Left = 1240
+    Top = 728
     object Action_ShowRegistered: TMenuItem
       Bitmap.Data = {
         36030000424D3603000000000000360000002800000010000000100000000100
@@ -21974,28 +22022,28 @@ object MainForm: TMainForm
     PopupMenu = PopupMenu
     Visible = True
     OnDblClick = TrayIconDblClick
-    Left = 320
-    Top = 504
+    Left = 1240
+    Top = 368
   end
   object InvoiceScanTimer: TTimer
     Enabled = False
     Interval = 900000
     OnTimer = InvoiceScanTimerTimer
-    Left = 320
-    Top = 696
+    Left = 1240
+    Top = 576
   end
   object InetTimer: TTimer
     Enabled = False
     Interval = 60000
     OnTimer = InetTimerTimer
-    Left = 392
-    Top = 592
+    Left = 1240
+    Top = 208
   end
   object BookPopup: TPopupMenu
     MenuAnimation = [maLeftToRight]
     OnPopup = BookPopupPopup
-    Left = 240
-    Top = 544
+    Left = 1240
+    Top = 776
     object Action_Cut: TMenuItem
       Bitmap.Data = {
         36030000424D3603000000000000360000002800000010000000100000000100
@@ -22129,13 +22177,13 @@ object MainForm: TMainForm
   object XLExport: TSaveDialog
     DefaultExt = '*.xlsx'
     Filter = 'XLSX (Microsoft Excel)|*.xlsx'
-    Left = 320
-    Top = 552
+    Left = 1240
+    Top = 424
   end
   object CommonPopupMenu: TPopupMenu
     MenuAnimation = [maLeftToRight]
-    Left = 240
-    Top = 488
+    Left = 1240
+    Top = 824
     object Action_ExportTransactions: TMenuItem
       Caption = 'Export to CSV'
       OnClick = Action_ExportTransactionsClick
@@ -22187,7 +22235,7 @@ object MainForm: TMainForm
     Enabled = False
     Interval = 1800000
     OnTimer = FollowupPopupTimer
-    Left = 392
-    Top = 544
+    Left = 1240
+    Top = 152
   end
 end

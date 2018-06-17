@@ -540,7 +540,7 @@ COLUMN NUMBER   | FIELD NAME          | ASSIGN NUMBER   | FIELD NAME       | ASS
 ************************************************************************************************************************************************************ *)
 
 { -------------------------------------------------------------------------------------------------------------------------------------------- GENERATE AGING }
-procedure TAgeView.Make(OSAmount: double);
+procedure TAgeView.Make(OSAmount: double);  // REFACTOR TO REMOVE TIGHT COUPLING !!!
 
 (* COMMON VARIABLES AND CONSTANTS *)
 

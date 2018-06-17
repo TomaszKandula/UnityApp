@@ -442,7 +442,6 @@ type                                                            (* GUI | MAIN TH
     LbuPanel: TPanel;
     ApproverPanel: TPanel;
     editCustomerName: TLabeledEdit;
-    editSerticaBuyOrder: TLabeledEdit;
     editEmailAddress: TLabeledEdit;
     editAddComment: TMemo;
     Text7: TLabel;
@@ -537,7 +536,6 @@ type                                                            (* GUI | MAIN TH
     btnPassUpdate: TSpeedButton;
     editSerticaHandlingOrder: TComboBox;
     editSerticaTerms: TComboBox;
-    editSerticaUnits: TComboBox;
     Label1: TLabel;
     Label5: TLabel;
     Label6: TLabel;
@@ -568,6 +566,10 @@ type                                                            (* GUI | MAIN TH
     Action_QuickReporting: TMenuItem;
     SortListBox: TComboBox;
     btnSortApply: TSpeedButton;
+    editSerticaBuyOrder: TComboBox;
+    Label7: TLabel;
+    editSerticaUnits: TEdit;
+    SpeedButton1: TSpeedButton;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -1343,7 +1345,7 @@ begin
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------ REMOVE FOCUS RECTANGLE }
-procedure TStringGrid.Paint;
+procedure TStringGrid.Paint;  (* IT REQUIRES DEFAULT DRAWING TO BE OFF *)
 var
   FocusRect: TRect;
 begin
@@ -1624,7 +1626,7 @@ begin
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------- AUTO THUMB SIZE }
-procedure TStringGrid.AutoThumbSize;
+procedure TStringGrid.AutoThumbSize;  (* WARNING! DO NOT USE IT. TSTRING GRID SCROLLS ARE BUGGED. SEPARATE SCROLLS SHALL BE USED *)
 var
   info:  TScrollInfo;
 begin
@@ -3293,17 +3295,6 @@ begin
       else
         Action_RemoveFilters.Enabled:=False;
 
-  { CHECK IF USER SELECT A RANGE ON AGEGRID }
-  if (sgAgeView.Selection.Bottom - sgAgeView.Selection.Top) > 0 then
-  begin
-    { WE CAN ADD THE SAME FOLLOW UP ONLY TO A SELECTED GROUP }
-    Action_GroupFollowUp.Enabled:=True;
-  end
-  else
-  begin
-    Action_GroupFollowUp.Enabled:=False;
-  end;
-
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------- LYNC CALL }
@@ -3388,10 +3379,8 @@ end;
 { ------------------------------------------------------------------------------------------------------------------------------------------ OPEN MASS MAILER }
 procedure TMainForm.Action_MassMailerClick(Sender: TObject);
 begin
-
   MsgCall(mcInfo, 'This feature is not yet accessible. Please try later.');
   Exit;
-
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------- ADD FOLLOW-UP TO SELECTED GROUP }
@@ -4423,10 +4412,16 @@ begin
      (
        sgAgeView.Col <> sgAgeView.ReturnColumn(TGeneral.Free2, 1, 1)
      )
+
+  (* DISABLE EDITING FOLLOW-UP *)
+
+  (*
      and
      (
        sgAgeView.Col <> sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1)
      )
+  *)
+
   then
     Exit;
 
@@ -4461,6 +4456,9 @@ begin
     { FREE1 COLUMN }
     if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneral.Free1, 1, 1) then
       ModifyCell(sgAgeView.ReturnColumn(TSnapshots.CUID, 1, 1), ctFree1, sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]);
+
+    (*
+
     { FOLLOW-UP COLUMN }
     if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1) then
     begin
@@ -4475,6 +4473,9 @@ begin
         ModifyCell(sgAgeView.ReturnColumn(TSnapshots.CUID, 1, 1), ctFollowUp, sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]);
       end;
     end;
+
+    *)
+
   end;
 
   { DELETE ENTRY FROM DATABASE }
@@ -4487,12 +4488,18 @@ begin
       ModifyCell(sgAgeView.ReturnColumn(TSnapshots.CUID, 1, 1), ctFree1, '');
       sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]:='';
     end;
+
+    (*
+
     { FOLLOW-UP COLUMN }
     if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1) then
     begin
       ModifyCell(sgAgeView.ReturnColumn(TSnapshots.CUID, 1, 1), ctFollowUp, '');
       sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]:='';
     end;
+
+    *)
+
   end;
 
 end;
@@ -5899,7 +5906,6 @@ begin
     Vendor.Free;
   end;
 end;
-
 
 procedure TMainForm.btnSupplierRejectClick(Sender: TObject);
 var
