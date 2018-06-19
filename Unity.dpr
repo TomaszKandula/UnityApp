@@ -51,8 +51,6 @@ uses
   Colors in 'Colors.pas',
   EventLog in 'EventLog.pas',
   Send in 'Send.pas',
-  TicketList in 'TicketList.pas',
-  Supplier in 'Supplier.pas',
   PhoneList in 'PhoneList.pas',
   ViewSearch in 'ViewSearch.pas';
 
@@ -508,14 +506,13 @@ begin
 
     { MAIN FORM }
     Application.CreateForm(TMainForm, MainForm);
-    LogText(AppSettings.FPathEventLog, '[GUI] Initialization methods executed within main thread, ''MainForm'' has been created. Main process thread ID = ' + IntToStr(MainThreadID) + '.');
+  LogText(AppSettings.FPathEventLog, '[GUI] Initialization methods executed within main thread, ''MainForm'' has been created. Main process thread ID = ' + IntToStr(MainThreadID) + '.');
 
     { OTHER WINFORMS }
     Status(13, AllTasks, 400, 'Application initialization... VCL forms loading, please wait.', False, AppSettings.FPathEventLog);
     Application.CreateForm(TSendForm,       SendForm);       LogText(AppSettings.FPathEventLog, '[GUI] ''SendForm'' .......... has been created.');
     Application.CreateForm(TAboutForm,      AboutForm);      LogText(AppSettings.FPathEventLog, '[GUI] ''AboutForm'' ......... has been created.');
     Application.CreateForm(TEventForm,      EventForm);      LogText(AppSettings.FPathEventLog, '[GUI] ''EventForm'' ......... has been created.');
-    Application.CreateForm(TTicketForm,     TicketForm);     LogText(AppSettings.FPathEventLog, '[GUI] ''TicketForm'' ........ has been created.');
     Application.CreateForm(TColorsForm,     ColorsForm);     LogText(AppSettings.FPathEventLog, '[GUI] ''ColorsForm'' ........ has been created.');
     Application.CreateForm(TReportForm,     ReportForm);     LogText(AppSettings.FPathEventLog, '[GUI] ''ReportForm'' ........ has been created.');
     Application.CreateForm(TSearchForm,     SearchForm);     LogText(AppSettings.FPathEventLog, '[GUI] ''SearchForm'' ........ has been created.');

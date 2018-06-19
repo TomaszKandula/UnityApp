@@ -46,7 +46,7 @@ const
   LicenceFile:    string    = 'Unity.licx';
   GridImgFile:    string    = 'Unity.img';
   ReleaseFile:    string    = 'Release.pak';
-  CurrentMutex:   PWideChar = 'UNITY_10071';    { WARNING! INCREASE IT WITH EACH NEW RELEASE }
+  CurrentMutex:   PWideChar = 'UNITY_10080';    { WARNING! INCREASE IT WITH EACH NEW RELEASE }
 
   { AGE VIEW SORTING MODES }
 
@@ -401,29 +401,26 @@ const
 
   { MAPPED TABLES FROM DATABASE | WE DO NOT USE SEPARATE ORM FRAMEWORK }
 
-  TblFxRates         = 'FxRates';
-  TblDaily           = 'DailyComment';
-  TblGeneral         = 'GeneralComment';
-  TblCompany         = 'CompanyData';
-  TblManagers        = 'Managers';
-  TblTeamleaders     = 'TeamLeaders';
-  TblReminderLayouts = 'ReminderLayouts';
-  TblInvoices        = 'TrackerInvoices';
-  TblTracker         = 'TrackerData';
-  TblGroup3          = 'Group3';
-  TblPaidinfo        = 'PaidInfo';
-  TblPmtterms        = 'PaymentTerms';
-  TblPerson          = 'Person';
-  TblUAC             = 'UAC';
-  TblGroups          = 'Groups';
-  TblAddressbook     = 'AddressBook';
-  TblOpenitems       = 'OpenItems';
-  TblSnapshots       = 'Snapshots';
-  TblSupplierData    = 'SupplierData';
-  TblSupplierRequest = 'SupplierRequest';
-  TblSupplierType    = 'SupplierTypes';
-  TblCurrencies      = 'Currencies';
-  TblSSISMaster      = 'SSISMaster';
+  TblFxRates         = 'Customer.FxRates';
+  TblDaily           = 'Customer.DailyComment';
+  TblGeneral         = 'Customer.GeneralComment';
+  TblCompany         = 'Customer.CompanyData';
+  TblManagers        = 'Customer.Managers';
+  TblTeamleaders     = 'Customer.TeamLeaders';
+  TblReminderLayouts = 'Customer.ReminderLayouts';
+  TblInvoices        = 'Customer.TrackerInvoices';
+  TblTracker         = 'Customer.TrackerData';
+  TblAddressbook     = 'Customer.AddressBook';
+  TblSnapshots       = 'Customer.Snapshots';
+  TblPaidinfo        = 'Customer.PaidInfo';
+  TblGroups          = 'Customer.Groups';
+  TblUAC             = 'Customer.UAC';
+  TblCurrencies      = 'Common.Currencies';
+  TblSSISMaster      = 'Erp.SSISMaster';
+  TblOpenitems       = 'Erp.OpenItems';
+  TblGroup3          = 'Erp.Group3';
+  TblPmtterms        = 'Erp.PaymentTerms';
+  TblPerson          = 'Erp.Person';
 
   { SSIS STATUS CODES }
 
@@ -432,12 +429,10 @@ const
 
   { STORED PROCEDURES }
 
-  QueryOpenItems   = 'QueryOpenItems';
-  TrackerList      = 'TrackerList';
-  AgeViewExport    = 'AgeViewExport';
-  AgeViewReport    = 'AgeViewReport';
-  AgeViewDetails   = 'AgeViewDetails';
-  SupplierDataView = 'SupplierDataView';
+  AgeViewExport    = 'Customer.AgeViewExport';
+  AgeViewReport    = 'Customer.AgeViewReport';
+  QueryOpenItems   = 'Customer.QueryOpenItems';
+  TrackerList      = 'Customer.TrackerList';
 
   { ADO FILTER ENUM, MSDN: https://msdn.microsoft.com/en-us/library/ee275540(v=bts.10).aspx }
 

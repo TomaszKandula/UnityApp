@@ -1193,7 +1193,7 @@ object MainForm: TMainForm
     Margins.Top = 0
     Margins.Right = 10
     Margins.Bottom = 0
-    ActivePage = TabSheet10
+    ActivePage = TabSheet3
     Align = alClient
     DoubleBuffered = True
     Font.Charset = DEFAULT_CHARSET
@@ -18166,733 +18166,6 @@ object MainForm: TMainForm
         TabOrder = 3
       end
     end
-    object TabSheet10: TTabSheet
-      Caption = 'Supplier Form'
-      ImageIndex = 9
-      OnShow = TabSheet10Show
-      object MainShape10: TPanel
-        AlignWithMargins = True
-        Left = 17
-        Top = 17
-        Width = 1253
-        Height = 734
-        Margins.Left = 17
-        Margins.Top = 17
-        Margins.Right = 17
-        Margins.Bottom = 17
-        Align = alClient
-        BevelKind = bkFlat
-        BevelOuter = bvNone
-        BorderWidth = 1
-        Color = 15527148
-        ParentBackground = False
-        TabOrder = 0
-        object LbuPanel: TPanel
-          Left = 16
-          Top = 16
-          Width = 567
-          Height = 689
-          BevelKind = bkFlat
-          BevelOuter = bvNone
-          Color = clWhite
-          ParentBackground = False
-          TabOrder = 0
-          object Text7: TLabel
-            Left = 24
-            Top = 413
-            Width = 93
-            Height = 13
-            Caption = 'Additional comment'
-          end
-          object btnSupplierSubmit: TSpeedButton
-            Left = 396
-            Top = 632
-            Width = 75
-            Height = 25
-            Cursor = crHandPoint
-            Caption = 'Submit'
-            OnClick = btnSupplierSubmitClick
-          end
-          object btnSupplierClear: TSpeedButton
-            Left = 24
-            Top = 632
-            Width = 75
-            Height = 25
-            Cursor = crHandPoint
-            Caption = 'Clear All'
-            OnClick = btnSupplierClearClick
-          end
-          object Text6: TLabel
-            Left = 24
-            Top = 358
-            Width = 67
-            Height = 13
-            Caption = 'POD Required'
-          end
-          object Text4: TLabel
-            Left = 24
-            Top = 144
-            Width = 65
-            Height = 13
-            Caption = 'Supplier Type'
-          end
-          object Text5: TLabel
-            Left = 318
-            Top = 144
-            Width = 74
-            Height = 13
-            Caption = 'Payment Terms'
-          end
-          object Text3: TLabel
-            Left = 318
-            Top = 88
-            Width = 44
-            Height = 13
-            Caption = 'Currency'
-          end
-          object Text1: TLabel
-            Left = 24
-            Top = 32
-            Width = 74
-            Height = 13
-            Caption = 'DFDS Company'
-          end
-          object Text2: TLabel
-            Left = 318
-            Top = 32
-            Width = 29
-            Height = 13
-            Caption = 'Agent'
-          end
-          object editCustomerName: TLabeledEdit
-            Left = 24
-            Top = 104
-            Width = 266
-            Height = 21
-            Color = clCream
-            EditLabel.Width = 68
-            EditLabel.Height = 13
-            EditLabel.Caption = 'Supplier Name'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clNavy
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-            TabOrder = 0
-          end
-          object editEmailAddress: TLabeledEdit
-            Left = 24
-            Top = 589
-            Width = 447
-            Height = 21
-            Color = clCream
-            EditLabel.Width = 110
-            EditLabel.Height = 13
-            EditLabel.Caption = 'Supplier e-mail address'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clNavy
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-            TabOrder = 1
-          end
-          object editAddComment: TMemo
-            Left = 24
-            Top = 432
-            Width = 447
-            Height = 121
-            Color = clCream
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clNavy
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            MaxLength = 255
-            ParentFont = False
-            TabOrder = 2
-          end
-          object SerticaGroup: TGroupBox
-            Left = 24
-            Top = 208
-            Width = 447
-            Height = 135
-            Caption = 'Sertica'
-            TabOrder = 3
-            object Label1: TLabel
-              Left = 30
-              Top = 26
-              Width = 60
-              Height = 13
-              Caption = 'Sertica Units'
-            end
-            object Label5: TLabel
-              Left = 248
-              Top = 26
-              Width = 90
-              Height = 13
-              Caption = 'Handling of Orders'
-            end
-            object Label6: TLabel
-              Left = 248
-              Top = 76
-              Width = 71
-              Height = 13
-              Caption = 'Delivery Terms'
-            end
-            object Label7: TLabel
-              Left = 30
-              Top = 76
-              Width = 121
-              Height = 13
-              Caption = 'Prices on Purchase Order'
-            end
-            object SpeedButton1: TSpeedButton
-              Left = 165
-              Top = 45
-              Width = 23
-              Height = 22
-              Cursor = crHandPoint
-              Flat = True
-              Glyph.Data = {
-                36030000424D3603000000000000360000002800000010000000100000000100
-                18000000000000030000C40E0000C40E00000000000000000000FFFFFFFFFFFF
-                FFFFFFFFFFFFF4F9F2A3D29574BB5F5DB0445DB04474BB5FA3D295F4F9F2FFFF
-                FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF94CB8444A42853AB3959AE3F5B
-                AF425BAF4259AE3F53AB3944A42894CB84FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-                6FB9594FA9345BAF425CB0435CB04359AE3F59AE3F5CB0435CB0435BAF424FA9
-                346FB959FFFFFFFFFFFFFFFFFF94CB844FA9345CB0435CB0435CB04359AE3F72
-                BA5C72BA5C59AE3F5CB0435CB0435CB0434FA93494CB84FFFFFFF4FAF244A428
-                5BAF425CB0435CB0435CB04355AC3B9ACD8A9ACD8A55AC3B5CB0435CB0435CB0
-                435BAF4244A428F4FAF2A3D29553AB395CB0435CB0435CB0435CB04355AC3B96
-                CC8696CC8655AC3B5CB0435CB0435CB0435CB04353AB39A3D29574BB5E58AE3F
-                5CB0435AAF4155AC3B55AC3B4EA93392C98192C9814EA93355AC3B55AC3B5AAF
-                415CB04358AE3F74BB5E5DB0445BAF425AAF4166B54F9BCE8C96CC8692CA81BC
-                DEB2BCDEB292CA8196CC869BCE8C66B54F5AAF415BAF425DB0445DB0445BAF42
-                5AAF4166B54F9BCE8C96CC8692CA81BCDEB2BCDEB292CA8196CC869BCE8C66B5
-                4F5AAF415BAF425DB04474BB5E58AE3F5CB0435AAF4155AC3B55AC3B4EA93392
-                C98192C9814EA93355AC3B55AC3B5AAF415CB04358AE3F74BB5EA3D29553AB39
-                5CB0435CB0435CB0435CB04355AC3B96CC8696CC8655AC3B5CB0435CB0435CB0
-                435CB04353AB39A3D295F4FAF244A4285BAF425CB0435CB0435CB04355AC3B9B
-                CE8C9BCE8C55AC3B5CB0435CB0435CB0435BAF4244A428F4FAF2FFFFFF94CB84
-                4FA9345CB0435CB0435CB0435BAF425CB0435CB0435BAF425CB0435CB0435CB0
-                434FA93494CB84FFFFFFFFFFFFFFFFFF6FB9594FA9345BAF425CB0435CB0435B
-                AF425BAF425CB0435CB0435BAF424FA9346FB959FFFFFFFFFFFFFFFFFFFFFFFF
-                FFFFFF94CB8444A42853AB3959AE3F5BAF425BAF4259AE3F53AB3944A42894CB
-                84FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF4F9F2A3D29574BB5F5D
-                B0445DB04474BB5FA3D295F4F9F2FFFFFFFFFFFFFFFFFFFFFFFF}
-            end
-            object editSerticaHandlingOrder: TComboBox
-              Left = 248
-              Top = 45
-              Width = 169
-              Height = 22
-              Cursor = crHandPoint
-              Style = csOwnerDrawFixed
-              Color = clCream
-              Font.Charset = DEFAULT_CHARSET
-              Font.Color = clNavy
-              Font.Height = -11
-              Font.Name = 'Tahoma'
-              Font.Style = []
-              ItemIndex = 0
-              ParentFont = False
-              Sorted = True
-              TabOrder = 0
-              Text = 'Email / PDF'
-              Items.Strings = (
-                'Email / PDF'
-                'none'
-                'Sertica Connect')
-            end
-            object editSerticaTerms: TComboBox
-              Left = 248
-              Top = 92
-              Width = 169
-              Height = 22
-              Cursor = crHandPoint
-              Style = csOwnerDrawFixed
-              Color = clCream
-              Font.Charset = DEFAULT_CHARSET
-              Font.Color = clNavy
-              Font.Height = -11
-              Font.Name = 'Tahoma'
-              Font.Style = []
-              ItemIndex = 0
-              ParentFont = False
-              Sorted = True
-              TabOrder = 1
-              Text = 'CFR - Cost and Freight'
-              Items.Strings = (
-                'CFR - Cost and Freight'
-                'CIF - Cost and Freight'
-                'CIP - Carriage and Insurance Paid'
-                'CPT - Carriage Paid To'
-                'DAP - Delivered at Place'
-                'DAT - Delivered at Terminal'
-                'DDP - Delivered Duty Paid'
-                'DDU - Delivered Duty Unpaid'
-                'EXW - Ex Works'
-                'FAS - Free Alongside Ship'
-                'FCA - Free Carrier'
-                'FOB - Free on Board')
-            end
-            object editSerticaBuyOrder: TComboBox
-              Left = 30
-              Top = 92
-              Width = 155
-              Height = 22
-              Cursor = crHandPoint
-              Style = csOwnerDrawFixed
-              Color = clCream
-              Font.Charset = DEFAULT_CHARSET
-              Font.Color = clNavy
-              Font.Height = -11
-              Font.Name = 'Tahoma'
-              Font.Style = []
-              ItemIndex = 1
-              ParentFont = False
-              TabOrder = 2
-              Text = 'No'
-              Items.Strings = (
-                'Yes'
-                'No')
-            end
-            object editSerticaUnits: TEdit
-              Left = 30
-              Top = 45
-              Width = 129
-              Height = 22
-              Color = clCream
-              Font.Charset = DEFAULT_CHARSET
-              Font.Color = clNavy
-              Font.Height = -11
-              Font.Name = 'Tahoma'
-              Font.Style = []
-              NumbersOnly = True
-              ParentFont = False
-              TabOrder = 3
-            end
-          end
-          object cbPOD: TComboBox
-            Left = 24
-            Top = 375
-            Width = 145
-            Height = 22
-            Cursor = crHandPoint
-            Style = csOwnerDrawFixed
-            Color = clCream
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clNavy
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ItemIndex = 1
-            ParentFont = False
-            TabOrder = 4
-            Text = 'No'
-            Items.Strings = (
-              'Yes'
-              'No')
-          end
-          object cbSupplierType: TComboBox
-            Left = 24
-            Top = 160
-            Width = 266
-            Height = 22
-            Cursor = crHandPoint
-            Style = csOwnerDrawFixed
-            Color = clCream
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clNavy
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-            Sorted = True
-            TabOrder = 5
-            OnSelect = cbSupplierTypeSelect
-          end
-          object cbPaymentTerms: TComboBox
-            Left = 318
-            Top = 160
-            Width = 153
-            Height = 22
-            Cursor = crHandPoint
-            Style = csOwnerDrawFixed
-            Color = clCream
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clNavy
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-            Sorted = True
-            TabOrder = 6
-          end
-          object cbCurrency: TComboBox
-            Left = 318
-            Top = 104
-            Width = 153
-            Height = 22
-            Cursor = crHandPoint
-            Style = csOwnerDrawFixed
-            Color = clCream
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clNavy
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-            Sorted = True
-            TabOrder = 7
-          end
-          object cbCompany: TComboBox
-            Left = 24
-            Top = 48
-            Width = 266
-            Height = 22
-            Cursor = crHandPoint
-            Style = csOwnerDrawFixed
-            Color = clCream
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clNavy
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-            TabOrder = 8
-            OnSelect = cbCompanySelect
-          end
-          object cbAgent: TComboBox
-            Left = 318
-            Top = 48
-            Width = 153
-            Height = 22
-            Cursor = crHandPoint
-            Style = csOwnerDrawFixed
-            Color = clCream
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clNavy
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-            Sorted = True
-            TabOrder = 9
-          end
-        end
-        object ApproverPanel: TPanel
-          Left = 618
-          Top = 16
-          Width = 577
-          Height = 689
-          BevelKind = bkFlat
-          BevelOuter = bvNone
-          Color = clWhite
-          ParentBackground = False
-          TabOrder = 1
-          object btnSupplierApprove: TSpeedButton
-            Left = 382
-            Top = 632
-            Width = 75
-            Height = 25
-            Cursor = crHandPoint
-            Caption = 'Approve'
-            OnClick = btnSupplierApproveClick
-          end
-          object btnSupplierReject: TSpeedButton
-            Left = 286
-            Top = 632
-            Width = 75
-            Height = 25
-            Cursor = crHandPoint
-            Caption = 'Reject'
-            OnClick = btnSupplierRejectClick
-          end
-          object btnSupplierOpen: TSpeedButton
-            Left = 24
-            Top = 632
-            Width = 75
-            Height = 25
-            Cursor = crHandPoint
-            Caption = 'Open Ticket'
-            OnClick = btnSupplierOpenClick
-          end
-          object TextSelectedTicket: TLabel
-            Left = 160
-            Top = 13
-            Width = 89
-            Height = 13
-            Caption = '{TICKET NUMBER}'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clWhite
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-          end
-          object GroupBox2: TGroupBox
-            Left = 24
-            Top = 32
-            Width = 433
-            Height = 60
-            Caption = 'Requestor'
-            TabOrder = 0
-            object Text8: TLabel
-              Left = 24
-              Top = 24
-              Width = 47
-              Height = 13
-              Caption = 'User Alias'
-            end
-            object edtUserAlias: TEdit
-              Left = 136
-              Top = 21
-              Width = 257
-              Height = 21
-              ReadOnly = True
-              TabOrder = 0
-            end
-          end
-          object GroupBox3: TGroupBox
-            Left = 24
-            Top = 98
-            Width = 433
-            Height = 89
-            Caption = 'DFDS'
-            TabOrder = 1
-            object Text9: TLabel
-              Left = 24
-              Top = 24
-              Width = 29
-              Height = 13
-              Caption = 'Agent'
-            end
-            object Text13: TLabel
-              Left = 24
-              Top = 51
-              Width = 45
-              Height = 13
-              Caption = 'Company'
-            end
-            object edtAgent: TEdit
-              Left = 136
-              Top = 21
-              Width = 257
-              Height = 21
-              ReadOnly = True
-              TabOrder = 0
-            end
-            object edtCompany: TEdit
-              Left = 136
-              Top = 48
-              Width = 257
-              Height = 21
-              ReadOnly = True
-              TabOrder = 1
-            end
-          end
-          object GroupBox4: TGroupBox
-            Left = 24
-            Top = 193
-            Width = 433
-            Height = 416
-            Caption = 'Customer'
-            TabOrder = 2
-            object Text14: TLabel
-              Left = 24
-              Top = 24
-              Width = 75
-              Height = 13
-              Caption = 'Company Name'
-            end
-            object Text15: TLabel
-              Left = 24
-              Top = 51
-              Width = 39
-              Height = 13
-              Caption = 'Address'
-            end
-            object Text16: TLabel
-              Left = 24
-              Top = 78
-              Width = 26
-              Height = 13
-              Caption = 'Town'
-            end
-            object Text23: TLabel
-              Left = 24
-              Top = 105
-              Width = 39
-              Height = 13
-              Caption = 'Country'
-            end
-            object Text24: TLabel
-              Left = 24
-              Top = 132
-              Width = 57
-              Height = 13
-              Caption = 'Postal Code'
-            end
-            object Text25: TLabel
-              Left = 24
-              Top = 159
-              Width = 58
-              Height = 13
-              Caption = 'VAT number'
-            end
-            object Text26: TLabel
-              Left = 24
-              Top = 186
-              Width = 74
-              Height = 13
-              Caption = 'Contact Person'
-            end
-            object Text27: TLabel
-              Left = 24
-              Top = 213
-              Width = 94
-              Height = 13
-              Caption = 'Main phone number'
-            end
-            object Text28: TLabel
-              Left = 24
-              Top = 240
-              Width = 90
-              Height = 13
-              Caption = 'Main email address'
-            end
-            object Text29: TLabel
-              Left = 24
-              Top = 267
-              Width = 72
-              Height = 13
-              Caption = 'Payment terms'
-            end
-            object Text30: TLabel
-              Left = 24
-              Top = 294
-              Width = 44
-              Height = 13
-              Caption = 'Currency'
-            end
-            object Text34: TLabel
-              Left = 24
-              Top = 326
-              Width = 93
-              Height = 13
-              Caption = 'Additional comment'
-            end
-            object edtCustomerName: TEdit
-              Left = 136
-              Top = 21
-              Width = 257
-              Height = 21
-              ReadOnly = True
-              TabOrder = 0
-            end
-            object edtAddress: TEdit
-              Left = 136
-              Top = 48
-              Width = 257
-              Height = 21
-              ReadOnly = True
-              TabOrder = 1
-            end
-            object edtTown: TEdit
-              Left = 136
-              Top = 75
-              Width = 257
-              Height = 21
-              ReadOnly = True
-              TabOrder = 2
-            end
-            object edtCountry: TEdit
-              Left = 136
-              Top = 102
-              Width = 257
-              Height = 21
-              ReadOnly = True
-              TabOrder = 3
-            end
-            object edtPostal: TEdit
-              Left = 136
-              Top = 129
-              Width = 257
-              Height = 21
-              ReadOnly = True
-              TabOrder = 4
-            end
-            object edtVAT: TEdit
-              Left = 136
-              Top = 156
-              Width = 257
-              Height = 21
-              ReadOnly = True
-              TabOrder = 5
-            end
-            object edtPerson: TEdit
-              Left = 136
-              Top = 183
-              Width = 257
-              Height = 21
-              ReadOnly = True
-              TabOrder = 6
-            end
-            object edtNumber: TEdit
-              Left = 136
-              Top = 210
-              Width = 257
-              Height = 21
-              ReadOnly = True
-              TabOrder = 7
-            end
-            object edtEmail: TEdit
-              Left = 136
-              Top = 237
-              Width = 257
-              Height = 21
-              ReadOnly = True
-              TabOrder = 8
-            end
-            object edtTerms: TEdit
-              Left = 136
-              Top = 264
-              Width = 257
-              Height = 21
-              ReadOnly = True
-              TabOrder = 9
-            end
-            object edtCurrency: TEdit
-              Left = 136
-              Top = 291
-              Width = 257
-              Height = 21
-              ReadOnly = True
-              TabOrder = 10
-            end
-            object ReadAddComment: TMemo
-              Left = 24
-              Top = 345
-              Width = 369
-              Height = 41
-              Color = clWhite
-              Font.Charset = DEFAULT_CHARSET
-              Font.Color = clNavy
-              Font.Height = -11
-              Font.Name = 'Tahoma'
-              Font.Style = []
-              ParentFont = False
-              ReadOnly = True
-              ScrollBars = ssVertical
-              TabOrder = 11
-            end
-          end
-        end
-      end
-    end
   end
   object AppFooter: TPanel
     AlignWithMargins = True
@@ -19865,118 +19138,6 @@ object MainForm: TMainForm
       ShowHint = True
       OnClick = btnStartClick
     end
-    object btnSupplier: TSpeedButton
-      Left = 1100
-      Top = 10
-      Width = 165
-      Height = 36
-      Cursor = crHandPoint
-      Hint = 'Supplier Form'
-      Caption = 'SUPPLIER FORM DEMO'
-      Flat = True
-      Glyph.Data = {
-        360C0000424D360C000000000000360000002800000020000000200000000100
-        180000000000000C0000C40E0000C40E00000000000000000000FFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF8F5D6E1D7
-        81D7CA55D0C036CCBB27CCBB26CFC035D7C954E1D882F0ECC2FFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFEFDF4EEAAE8DE64C7B411C9B7
-        19CAB91FCBBA22CBBA24CBBA24CBBA22CAB91FC9B71AC7B512C6B30CDDD16EFD
-        FDFAFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF4EFB3EBE169E9DF6CC8B71CCBBA23CCBB
-        25CCBB25CCBB25CCBB25CCBB25CCBB25CCBB25CCBB25CCBB25CBBA24C9B71AC5
-        B107E1D782FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFECE37CEBE16EE8DE6BC7B515C9B71CCAB81DCAB8
-        1DCAB81DCAB81DCAB81DCAB81FCAB81FCAB81FCAB81FCBBA23CCBB25CCBB25CB
-        BA24C8B514CDBC2BFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFEFDF8EAE06CEBE272ECE47FD4C74FD6C851D6C953D6C953D6C9
-        53D6C953D6C953D6C954D6C847D6C849D6C849D7CA4DCBBA25CBB922CCBB25CC
-        BB25CCBB25CAB81EC7B511FBFAF2FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFEFFFFEAE06CEBE275EBE172F3EDA6FFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFD9FFFFDFFFFFDFFFFFEAEDE580C9B81DCBB922CC
-        BB25CCBB25CCBB25CAB920C7B411FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFECE37CEBE273ECE378EBE172F2ECA1FFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFCFACAFDFBD0FDFBD0FEFDD9EEE682EBE275C9B81FCB
-        B922CCBB25CCBB25CCBB25CAB81ECDBC2BFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        F4EFB2EAE06DECE378ECE378EBE172F2ECA1FFFFFFFFFFFFE0D6C4CDBEA1FFFF
-        FFD2C4AAC9B898C4B295FFFFD6FDFBD0FDFBD0FEFDD9EDE47EECE378EBE276C9
-        B81ECBB922CCBB25CCBB25CCBB25C8B514E1D882FFFFFFFFFFFFFFFFFFFEFEFC
-        E9DF65EBE277ECE378ECE378EBE172F2ECA1FFFFFFFFFFFFBCA67F947232FFFF
-        FFA0824A8C6722835C17FFFFE0FDFBD0FDFBD0FEFDD8EDE580EBE275EDE47AEB
-        E377CBBA23CBBA23CCBB25CCBB25CBBA24C5B107FDFDFAFFFFFFFFFFFFF2ECA6
-        EBE171ECE378ECE378ECE378EBE172F2ECA1FFFFFFFFFFFFC0AB86997A3DFFFF
-        FFFFFFFFFFFFFFFFFFFFFCFACAFDFBD0FDFBD0FDFBD0FEFDD8FEFDD9FEFDD9FF
-        FFE9DCD060C9B81DCCBB25CCBB25CCBB25C9B71ADDD16EFFFFFFFFFFFFE9E069
-        EBE277ECE378ECE378ECE378EBE172F2ECA1FFFFFFFFFFFFC0AB86997A3DFFFF
-        FFB8A278A98E5BA28553FFFFDBFDFBD0FDFBD0FDFBD0FDFBD0FDFBD0FDFBD0FF
-        FFDDDBCE5AC9B81DCCBB25CCBB25CCBB25CBBA24C6B30CFFFFFFF9F7DAEAE06C
-        ECE378ECE378ECE378ECE378EBE172F2ECA1FFFFFFFFFFFFC0AB86997A3DFFFF
-        FFBAA57CAC9160A58958FFFFDBFDFBD0FDFBD0FDFBD0FDFBD0FDFBD0FDFBD0FF
-        FFDDDBCE5AC9B81DCCBB25CCBB25CCBB25CCBB25C7B512F0ECC2F4EFB3EBE171
-        ECE378ECE378ECE378ECE378EBE172F2ECA1FFFFFFFFFFFFC0AB86997A3DFFFF
-        FFFFFFFFFFFFFFFFFFFFFCFACAFDFBD0FDFBD0FDFBD0FDFBD0FDFBD0FDFBD0FF
-        FFDDDBCE5AC9B81DCCBB25CCBB25CCBB25CCBB25C9B71AE1D882F0E996EBE274
-        ECE378ECE378ECE378ECE378EBE172F2ECA1FFFFFFFFFFFFC0AB86997A3DFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFCFFFFFD5FFFFD5FFFFD5FFFFD5FFFED2FDFBD0FF
-        FFDDDBCE5AC9B81DCCBB25CCBB25CCBB25CCBB25CAB91FD7C954EDE583EBE276
-        ECE378ECE378ECE378ECE378EBE172F2ECA1FFFFFFFFFFFFC0AB86997A3DFFFF
-        FFEDE8DDEAE3D7ECE6DDE3D6ABE4D8AFE4D8AFE4D8AFE2D6ADEEE6BDFFFED2FF
-        FFDDDBCE5AC9B81DCCBB25CCBB25CCBB25CCBB25CBBA22CFC035ECE37AEBE277
-        ECE378ECE378ECE378ECE378EBE172F2ECA1FFFFFFFFFFFFC0AB86997A3DFFFF
-        FF9573347E5508845F0F5C1B035F21055F21055F2105581700A17D5BFFFFDBFF
-        FFDDDBCE5AC9B81DCCBB25CCBB25CCBB25CCBB25CBBA24CCBB26EBE378EBE277
-        ECE378ECE378ECE378ECE378EBE172F2ECA1FFFFFFFFFFFFC0AB86997A3DFFFF
-        FFFAF8F5FBFAF9FFFFFFFDFBCCFEFCD1FEFCD1FEFCD1FDFBD0FDFBD0FEFCD1FF
-        FFDDDBCE5AC9B81DCCBB25CCBB25CCBB25CCBB25CBBA24CCBB27EDE582EBE276
-        ECE378ECE378ECE378ECE378EBE172F2ECA1FFFFFFFFFFFFC0AB86997A3DFFFF
-        FFFFFFFFEEE9E0CDBEA0BFA57FC1A883C1A883C1A883BEA47FDACBA3FFFFD5FF
-        FFDDDBCE5AC9B81DCCBB25CCBB25CCBB25CCBB25CBBA22D0C036F0E995EBE274
-        ECE378ECE378ECE378ECE378EBE172F2ECA1FFFFFFFFFFFFC0AB86997A3DFFFF
-        FFFFFFFFD4C7AE8763176A2F146D35176D35176D3517672B0EAA8865FFFFDAFF
-        FFDDDBCE5AC9B81DCCBB25CCBB25CCBB25CCBB25CAB91FD7C955F4EFB1EBE171
-        ECE378ECE378ECE378ECE378EBE172F2ECA1FFFFFFFFFFFFC0AB86997A3DFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFECFFFFF2FFFFF2FFFFF2FFFFF2FFFFE3FDFBD0FF
-        FFDDDBCE5AC9B81DCCBB25CCBB25CCBB25CCBB25C9B719E1D781F9F7D9EAE06C
-        ECE378ECE378ECE378ECE378EBE172F2ECA1FFFFFFFFFFFFC0AB86997A3DFFFF
-        FFFFFFFFE1D7C6AB915C956B4A976F4D976F4D976F4D936847C2AA84FFFFD8FF
-        FFDDDBCE5AC9B81DCCBB25CCBB25CCBB25CBBA23C7B411F8F5D6FFFFFFE9DF68
-        EBE277ECE378ECE378ECE378EBE172F2ECA1FFFFFFFFFFFFC0AB86997A3DFFFF
-        FFFFFFFFE0D6C4A88E57926646946B49946B49946B498F6443C0A782FFFFD8FF
-        FFDDDBCE5AC9B81DCCBB25CCBB25CBBA23C8B71CE8DE64FFFFFFFFFFFFF2ECA5
-        EBE171ECE378ECE378ECE378EBE172F2ECA1FFFFFFFFFFFFC0AB86997A3DFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFECFFFFF2FFFFF2FFFFF2FFFFF2FFFFE3FDFBD0FF
-        FFDDDBCE5AC9B81DCCBB25CBBA23C8B71DE9DF6CF4EEAAFFFFFFFFFFFFFEFEFC
-        E9DF65EBE277ECE378ECE378EBE172F2ECA1FFFFFFFFFFFFBCA67F947232FFFF
-        FFA0824A8C672291702A6D341870391B70391B70391B6A3012AB8B67FFFFDAFF
-        FFDDDBCE5AC9B81DCBBA23C8B71DEAE073EBE169FEFEFDFFFFFFFFFFFFFFFFFF
-        F4EFB1EAE06DECE378ECE378EBE172F2ECA1FFFFFFFFFFFFE0D6C4CDBEA1FFFF
-        FFD2C4AAC9B898CCBD9FBA9E78BCA17CBCA17CBCA17CB89C77D7C79FFFFFD5FF
-        FFDDDBCE5AC9B71BC8B71DEAE173ECE271F4EFB3FFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFECE37BEBE273ECE378EBE172F2ECA1FFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFD4FFFFDAFFFFDAFFFFDAFFFFDAFFFFD5FDFBD0FF
-        FFDDDACD59C6B415EAE173ECE377ECE47CFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFEFFFFEAE06CEBE275EBE172F3ECA6FFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFEFCD2FEFDD8FEFDD8FEFDD8FEFDD8FEFDD8FEFDD8FF
-        FFE5D9CC57E7DE6CEDE479EAE06CFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFDFDF6EAE06CEBE172EDE480F0E997F0E894F0E894F0E894F0E8
-        94F0E894F0E894F0E996EFE789EFE88AEFE88AEFE88AEFE88AEFE88AEFE88AF0
-        E88DEDE57FECE275EAE06CFEFDF8FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFECE37BEAE06BEBE173EBE273EBE273EBE273EBE2
-        73EBE273EBE273EBE273EBE275EBE275EBE275EBE275EBE275EBE275EBE275EB
-        E274EAE06CECE37CFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF4EFB1E9DF65EBE171EBE277ECE378ECE3
-        78ECE378ECE378ECE378ECE378ECE378ECE378ECE378ECE378EBE277EBE171E9
-        DF65F4EFB2FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFEFCF2ECA5E9DF68EAE06CEBE1
-        71EBE274EBE276EBE277EBE277EBE276EBE274EBE171EAE06CE9E069F2ECA6FE
-        FEFDFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF9F7D9F4EE
-        B1F0E995EDE582ECE378ECE37AEDE583F0E996F4EFB3F9F7DBFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
-      ParentShowHint = False
-      ShowHint = True
-      OnClick = btnSupplierClick
-    end
     object btnTabelauReport: TSpeedButton
       Left = 111
       Top = 10
@@ -20220,18 +19381,11 @@ object MainForm: TMainForm
       Height = 36
       Shape = bsLeftLine
     end
-    object Separate4: TBevel
-      Left = 1081
-      Top = 10
-      Width = 17
-      Height = 36
-      Shape = bsLeftLine
-    end
   end
   object PopupMenu: TPopupMenu
     MenuAnimation = [maLeftToRight]
-    Left = 1240
-    Top = 682
+    Left = 784
+    Top = 706
     object Action_ShowApp: TMenuItem
       Caption = 'Show'
       Default = True
@@ -20404,39 +19558,39 @@ object MainForm: TMainForm
   object CurrentTime: TTimer
     Enabled = False
     OnTimer = CurrentTimeTimer
-    Left = 1240
-    Top = 312
+    Left = 392
+    Top = 704
   end
   object UpTime: TTimer
     Enabled = False
     OnTimer = UpTimeTimer
-    Left = 1240
-    Top = 256
+    Left = 336
+    Top = 704
   end
   object CSVExport: TSaveDialog
     DefaultExt = '*.csv'
     Filter = 'CSV (Delimited)|*.csv'
-    Left = 1240
-    Top = 480
+    Left = 584
+    Top = 704
   end
   object CSVImport: TOpenDialog
     DefaultExt = '*.csv'
     Filter = 'CSV (Delimited)|*.csv'
-    Left = 1240
-    Top = 528
+    Left = 640
+    Top = 704
   end
   object OILoader: TTimer
     Enabled = False
     Interval = 10000
     OnTimer = OILoaderTimer
-    Left = 1240
-    Top = 96
+    Left = 144
+    Top = 704
   end
   object AgeViewPopup: TPopupMenu
     MenuAnimation = [maLeftToRight]
     OnPopup = AgeViewPopupPopup
-    Left = 1240
-    Top = 632
+    Left = 712
+    Top = 704
     object Action_LyncCall: TMenuItem
       Bitmap.Data = {
         36030000424D3603000000000000360000002800000010000000100000000100
@@ -20801,8 +19955,8 @@ object MainForm: TMainForm
   end
   object TrackerPopup: TPopupMenu
     MenuAnimation = [maLeftToRight]
-    Left = 1240
-    Top = 728
+    Left = 856
+    Top = 704
     object Action_ShowRegistered: TMenuItem
       Bitmap.Data = {
         36030000424D3603000000000000360000002800000010000000100000000100
@@ -22022,28 +21176,28 @@ object MainForm: TMainForm
     PopupMenu = PopupMenu
     Visible = True
     OnDblClick = TrayIconDblClick
-    Left = 1240
-    Top = 368
+    Left = 464
+    Top = 704
   end
   object InvoiceScanTimer: TTimer
     Enabled = False
     Interval = 900000
     OnTimer = InvoiceScanTimerTimer
-    Left = 1240
-    Top = 576
+    Left = 72
+    Top = 704
   end
   object InetTimer: TTimer
     Enabled = False
     Interval = 60000
     OnTimer = InetTimerTimer
-    Left = 1240
-    Top = 208
+    Left = 280
+    Top = 704
   end
   object BookPopup: TPopupMenu
     MenuAnimation = [maLeftToRight]
     OnPopup = BookPopupPopup
-    Left = 1240
-    Top = 776
+    Left = 920
+    Top = 704
     object Action_Cut: TMenuItem
       Bitmap.Data = {
         36030000424D3603000000000000360000002800000010000000100000000100
@@ -22177,13 +21331,13 @@ object MainForm: TMainForm
   object XLExport: TSaveDialog
     DefaultExt = '*.xlsx'
     Filter = 'XLSX (Microsoft Excel)|*.xlsx'
-    Left = 1240
-    Top = 424
+    Left = 528
+    Top = 704
   end
   object CommonPopupMenu: TPopupMenu
     MenuAnimation = [maLeftToRight]
-    Left = 1240
-    Top = 824
+    Left = 984
+    Top = 704
     object Action_ExportTransactions: TMenuItem
       Caption = 'Export to CSV'
       OnClick = Action_ExportTransactionsClick
@@ -22235,7 +21389,7 @@ object MainForm: TMainForm
     Enabled = False
     Interval = 1800000
     OnTimer = FollowupPopupTimer
-    Left = 1240
-    Top = 152
+    Left = 208
+    Top = 704
   end
 end

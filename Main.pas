@@ -437,65 +437,6 @@ type                                                            (* GUI | MAIN TH
     WebBrowser2: TWebBrowser;
     TextReport: TLabel;
     SeparateLine: TBevel;
-    TabSheet10: TTabSheet;
-    MainShape10: TPanel;
-    LbuPanel: TPanel;
-    ApproverPanel: TPanel;
-    editCustomerName: TLabeledEdit;
-    editEmailAddress: TLabeledEdit;
-    editAddComment: TMemo;
-    Text7: TLabel;
-    SerticaGroup: TGroupBox;
-    btnSupplierSubmit: TSpeedButton;
-    btnSupplierClear: TSpeedButton;
-    cbPOD: TComboBox;
-    Text6: TLabel;
-    cbSupplierType: TComboBox;
-    Text4: TLabel;
-    cbPaymentTerms: TComboBox;
-    Text5: TLabel;
-    cbCurrency: TComboBox;
-    Text3: TLabel;
-    cbCompany: TComboBox;
-    Text1: TLabel;
-    cbAgent: TComboBox;
-    Text2: TLabel;
-    GroupBox2: TGroupBox;
-    edtUserAlias: TEdit;
-    Text8: TLabel;
-    GroupBox3: TGroupBox;
-    Text9: TLabel;
-    Text13: TLabel;
-    edtAgent: TEdit;
-    edtCompany: TEdit;
-    GroupBox4: TGroupBox;
-    Text14: TLabel;
-    Text15: TLabel;
-    edtCustomerName: TEdit;
-    edtAddress: TEdit;
-    edtTown: TEdit;
-    Text16: TLabel;
-    edtCountry: TEdit;
-    Text23: TLabel;
-    edtPostal: TEdit;
-    Text24: TLabel;
-    edtVAT: TEdit;
-    Text25: TLabel;
-    edtPerson: TEdit;
-    Text26: TLabel;
-    edtNumber: TEdit;
-    Text27: TLabel;
-    edtEmail: TEdit;
-    Text28: TLabel;
-    edtTerms: TEdit;
-    Text29: TLabel;
-    edtCurrency: TEdit;
-    Text30: TLabel;
-    Text34: TLabel;
-    ReadAddComment: TMemo;
-    btnSupplierApprove: TSpeedButton;
-    btnSupplierReject: TSpeedButton;
-    btnSupplierOpen: TSpeedButton;
     btnStart: TSpeedButton;
     Separate1: TBevel;
     btnSettings: TSpeedButton;
@@ -506,15 +447,12 @@ type                                                            (* GUI | MAIN TH
     btnAddressBook: TSpeedButton;
     btnTracker: TSpeedButton;
     btnGeneral: TSpeedButton;
-    btnSupplier: TSpeedButton;
     Separate2: TBevel;
     Separate3: TBevel;
-    Separate4: TBevel;
     AppHeader: TPanel;
     Bevel1: TBevel;
     Bevel2: TBevel;
     Bevel3: TBevel;
-    TextSelectedTicket: TLabel;
     PanelAgeView: TPanel;
     ImgLoadingAgeView: TImage;
     PanelOpenItems: TPanel;
@@ -534,11 +472,6 @@ type                                                            (* GUI | MAIN TH
     PanelGroups: TPanel;
     btnUnlock: TSpeedButton;
     btnPassUpdate: TSpeedButton;
-    editSerticaHandlingOrder: TComboBox;
-    editSerticaTerms: TComboBox;
-    Label1: TLabel;
-    Label5: TLabel;
-    Label6: TLabel;
     Action_AddFollowUpGroup: TMenuItem;
     Action_RemoveFollowUps: TMenuItem;
     Cap24: TShape;
@@ -566,10 +499,6 @@ type                                                            (* GUI | MAIN TH
     Action_QuickReporting: TMenuItem;
     SortListBox: TComboBox;
     btnSortApply: TSpeedButton;
-    editSerticaBuyOrder: TComboBox;
-    Label7: TLabel;
-    editSerticaUnits: TEdit;
-    SpeedButton1: TSpeedButton;
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormShow(Sender: TObject);
@@ -737,10 +666,6 @@ type                                                            (* GUI | MAIN TH
     procedure btnReport2Click(Sender: TObject);
     procedure btnReport3Click(Sender: TObject);
     procedure btnReport4Click(Sender: TObject);
-    procedure btnSupplierClearClick(Sender: TObject);
-    procedure btnSupplierSubmitClick(Sender: TObject);
-    procedure btnSupplierOpenClick(Sender: TObject);
-    procedure btnSupplierApproveClick(Sender: TObject);
     procedure btnStartClick(Sender: TObject);
     procedure btnTabelauReportClick(Sender: TObject);
     procedure btnGeneralClick(Sender: TObject);
@@ -750,12 +675,7 @@ type                                                            (* GUI | MAIN TH
     procedure btnOtherTransClick(Sender: TObject);
     procedure btnTrackerClick(Sender: TObject);
     procedure btnAddressBookClick(Sender: TObject);
-    procedure btnSupplierClick(Sender: TObject);
-    procedure TabSheet10Show(Sender: TObject);
-    procedure cbSupplierTypeSelect(Sender: TObject);
-    procedure cbCompanySelect(Sender: TObject);
     procedure sgAgeViewKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure btnSupplierRejectClick(Sender: TObject);
     procedure btnUnlockClick(Sender: TObject);
     procedure btnPassUpdateClick(Sender: TObject);
     procedure sgAddressBookKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -856,7 +776,6 @@ type                                                            (* GUI | MAIN TH
     function   ShowReport(ReportNumber: cardinal): cardinal;
     procedure  CopyFile(const Source, Dest: string);
     procedure  ResetTabsheetButtons;
-    procedure  SupplierResetFields;
     procedure  LoadingAnimation(GIFImage: TImage; Grid: TStringGrid; GridPanel: TPanel; State: integer);
     procedure  SetPanelBorders;
     procedure  SetGridColumnWidths;
@@ -917,7 +836,7 @@ implementation
 
 uses
   Filter, Tracker, Invoices, Actions, Calendar, About, Search, Worker, Model, Settings, Database, UAC, AgeView, Transactions, Colors, EventLog,
-  Supplier, TicketList, uCEFApplication, ReportBug, ViewSearch;
+  uCEFApplication, ReportBug, ViewSearch;
 
 {$R *.dfm}
 
@@ -2327,28 +2246,6 @@ begin
   btnOtherTrans.Font.Style   :=[];
   btnGeneral.Font.Style      :=[];
   btnSettings.Font.Style     :=[];
-  btnSupplier.Font.Style     :=[];
-end;
-
-{ ---------------------------------------------------------------------------------------------------------------------------------- CLEAR ALL SUPLIER FIELDS }
-procedure TMainForm.SupplierResetFields;
-begin
-  TextSelectedTicket.Caption:='';
-  edtUserAlias.Text   :='';
-  edtAgent.Text       :='';
-  edtCompany.Text     :='';
-  edtCustomerName.Text:='';
-  edtAddress.Text     :='';
-  edtTown.Text        :='';
-  edtCountry.Text     :='';
-  edtPostal.Text      :='';
-  edtVAT.Text         :='';
-  edtPerson.Text      :='';
-  edtNumber.Text      :='';
-  edtEmail.Text       :='';
-  edtTerms.Text       :='';
-  edtCurrency.Text    :='';
-  ReadAddComment.Text :='';
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------------------- LOADING ANIMATION }
@@ -2576,7 +2473,6 @@ var
   DataTables:    TDataTables;
   UserControl:   TUserControl;
   Transactions:  TTransactions;
-  Vendor:        TSupplierForm;
   NowTime:       TTime;
   iCNT:          integer;
 begin
@@ -2851,17 +2747,6 @@ begin
   finally
     DataTables.Free;
   end;
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// SUPPLIER FORM DEMO ! TO BE REMOVED !
-
-  Vendor:=TSupplierForm.Create(DbConnect);
-  try
-    Vendor.InitSupplierRequestForm(cbCompany, cbCurrency, cbSupplierType);
-  finally
-    Vendor.Free;
-  end;
-
-  //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// SUPPLIER FORM DEMO ! TO BE REMOVED !
 
   { ----------------------------------------------------- ! APPLICATION VERSION & USER SID ! ---------------------------------------------------------------- }
 
@@ -3380,7 +3265,6 @@ end;
 procedure TMainForm.Action_MassMailerClick(Sender: TObject);
 begin
   MsgCall(mcInfo, 'This feature is not yet accessible. Please try later.');
-  Exit;
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------- ADD FOLLOW-UP TO SELECTED GROUP }
@@ -3840,41 +3724,6 @@ begin
 end;
 
 { ------------------------------------------------------- ! COMPONENT EVENTS | TABSHEETS ! ------------------------------------------------------------------ }
-
-{ -------------------------------------------------------------------------------------------------------------------------------------------- SERTICA EVENTS }
-procedure TMainForm.cbCompanySelect(Sender: TObject);
-var
-  Vendor:  TSupplierForm;
-begin
-  Screen.Cursor:=crHourGlass;
-  Vendor:=TSupplierForm.Create(DbConnect);
-  try
-    if Vendor.SqlToSimpleList(cbAgent, Vendor.GetAllAgents(cbCompany.Items[cbCompany.ItemIndex]))       then cbAgent.ItemIndex:=0;
-    if Vendor.SqlToSimpleList(cbPaymentTerms, Vendor.GetAllTerms(cbCompany.Items[cbCompany.ItemIndex])) then cbPaymentTerms.ItemIndex:=0;
-  finally
-    Vendor.Free;
-  end;
-  Screen.Cursor:=crDefault;
-end;
-
-procedure TMainForm.cbSupplierTypeSelect(Sender: TObject);
-begin
-  if (cbSupplierType.Text = 'Workshop supplier (Sertica & Visma)') or (cbSupplierType.Text = 'Service or Goods Supplier (Sertica & Visma)') then
-  begin
-    SerticaGroup.Visible:=True;
-  end
-  else
-  begin
-    SerticaGroup.Visible:=False;
-  end;
-end;
-
-{ -------------------------------------------------------------------------------------------------------------------------------------------- POPULATE LISTS }
-procedure TMainForm.TabSheet10Show(Sender: TObject);
-begin
-  cbSupplierTypeSelect(Self);
-  cbCompanySelect(Self);
-end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------------- SHOW ALL ITEMS }
 procedure TMainForm.TabSheet4Show(Sender: TObject);
@@ -4567,10 +4416,6 @@ begin
     (
       Key <> VK_ESCAPE
     )
-    and
-    (
-      Key <> VK_RETURN
-    )
   then
   begin
 
@@ -5241,9 +5086,13 @@ end;
 
 procedure TMainForm.btnOtherTransClick(Sender: TObject);
 begin
-  MyPages.ActivePage:=TabSheet6;
-  ResetTabsheetButtons;
-  btnOtherTrans.Font.Style:=[fsBold];
+
+  MsgCall(mcInfo, 'This feature is not yet accessible. Please try later.');
+
+  //MyPages.ActivePage:=TabSheet6;
+  //ResetTabsheetButtons;
+  //btnOtherTrans.Font.Style:=[fsBold];
+
 end;
 
 procedure TMainForm.btnTrackerClick(Sender: TObject);
@@ -5258,13 +5107,6 @@ begin
   MyPages.ActivePage:=TabSheet3;
   ResetTabsheetButtons;
   btnAddressBook.Font.Style:=[fsBold];
-end;
-
-procedure TMainForm.btnSupplierClick(Sender: TObject);
-begin
-  MyPages.ActivePage:=TabSheet10;
-  ResetTabsheetButtons;
-  btnSupplier.Font.Style:=[fsBold];
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------------------------- GO TO REPORT 1 }
@@ -5821,115 +5663,5 @@ begin
   end;
 
 end;
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// SUPPLIER FORM DEMO ! TO BE REMOVED !
-
-
-{ ------------------------------------------------------------------------------------------------------------------------------------------ SUPPLIER BUTTONS }
-procedure TMainForm.btnSupplierClearClick(Sender: TObject);
-begin
-  editCustomerName.Text:='';
-  editSerticaUnits.Text:='';
-  editSerticaTerms.Text:='';
-  editSerticaBuyOrder.Text:='';
-  editSerticaHandlingOrder.Text:='';
-  editAddComment.Text:='';
-  editEmailAddress.Text:='';
-end;
-
-procedure TMainForm.btnSupplierOpenClick(Sender: TObject);
-begin
-  WndCall(TicketForm, 0);
-end;
-
-procedure TMainForm.btnSupplierSubmitClick(Sender: TObject);
-var
-  Vendor: TSupplierForm;
-  Return: boolean;
-  Check:  integer;
-begin
-  Vendor:=TSupplierForm.Create(DbConnect);
-  Check:=0;
-  try
-    { CHECK IF FILEDS ARE NOT EMPTY }
-    if (editCustomerName.Text = '') or (editEmailAddress.Text = '') then Dec(Check);
-    { WRITE TO DATABASE AND SEND EMAIL NOTIFICATION }
-    if SerticaGroup.Cursor = crNo then
-    begin
-      Return:=Vendor.WriteRequest(offSertica, cbCompany.Text, cbCurrency.Text, cbSupplierType.Text, cbAgent.Text);
-      if not Return then
-        Inc(Check)
-          else
-          begin
-            Return:=Vendor.SendEmailToSupplier(edtCustomerName.Text, cbCompany.Text, offSertica, editEmailAddress.Text);
-            if not Return then Inc(Check);
-          end;
-    end
-    else
-    begin
-      Return:=Vendor.WriteRequest(onSertica, cbCompany.Text, cbCurrency.Text, cbSupplierType.Text, cbAgent.Text);
-      if not Return then
-        Inc(Check)
-          else
-          begin
-            Return:=Vendor.SendEmailToSupplier(edtCustomerName.Text, cbCompany.Text, onSertica, editEmailAddress.Text);
-            if not Return then Inc(Check);
-          end;
-    end;
-    { SHOW MESSAGE }
-    if Check = 0 then MsgCall(mcInfo,  'New supplier request has been established and Supplier has been notified.');
-    if Check > 0 then MsgCall(mcError, 'Cannot process the request. Please contact IT support.');
-    if Check < 0 then MsgCall(mcWarn,  'Cannot process the request. Please make sure that all the required fields are filled.');
-  finally
-    Vendor.Free;
-  end;
-end;
-
-procedure TMainForm.btnSupplierApproveClick(Sender: TObject);
-var
-  Vendor: TSupplierForm;
-begin
-  if edtUserAlias.Text = '' then
-  begin
-    MsgCall(mcWarn, 'Please open ticket first.');
-    Exit;
-  end;
-  Vendor:=TSupplierForm.Create(DbConnect);
-  try
-    if Vendor.TicketDecision(TextSelectedTicket.Caption, sdAPPROVE) then
-    begin
-      MsgCall(mcInfo, 'Ticket has been successfully approved!');
-      SupplierResetFields;
-    end;
-  finally
-    Vendor.Free;
-  end;
-end;
-
-procedure TMainForm.btnSupplierRejectClick(Sender: TObject);
-var
-  Vendor: TSupplierForm;
-begin
-  if edtUserAlias.Text = '' then
-  begin
-    MsgCall(mcWarn, 'Please open ticket first.');
-    Exit;
-  end;
-  Vendor:=TSupplierForm.Create(DbConnect);
-  try
-    if Vendor.TicketDecision(TextSelectedTicket.Caption, sdREJECT) then
-    begin
-      MsgCall(mcInfo, 'Ticket has been successfully rejected!');
-      SupplierResetFields;
-    end;
-  finally
-    Vendor.Free;
-  end;
-end;
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// SUPPLIER FORM DEMO ! TO BE REMOVED !
-
 
 end.
