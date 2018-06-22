@@ -49,12 +49,16 @@ begin
     if AppSettings.TMIG.ReadString(DatabaseSetup,'ACTIVE','') = 'MSSQL' then
     begin
       DBProvider :=AppSettings.TMIG.ReadString(DatabaseSetup, 'MSSQLPROVIDER', '');
-      dbConnNoPwd:='Provider='         + DBProvider
-                 + ';Data Source='     + AppSettings.TMIG.ReadString(DatabaseSetup, 'MSSQLSERVER',        '')
-                 + ','                 + AppSettings.TMIG.ReadString(DatabaseSetup, 'MSSQLPORT',          '')
-                 + ';Initial catalog=' + AppSettings.TMIG.ReadString(DatabaseSetup, 'MSSQLCATALOG',       '')
-                 + ';User Id='         + AppSettings.TMIG.ReadString(DatabaseSetup, 'MSSQLUSERNAME',      '');
-      DBConnStr :=dbConnNoPwd + ';Password=' + AppSettings.TMIG.ReadString(DatabaseSetup, 'MSSQLPASSWORD', '');
+      dbConnNoPwd:='Provider='                 + DBProvider + ';'
+                 + 'Data Source='              + AppSettings.TMIG.ReadString(DatabaseSetup, 'MSSQLSERVER',      '')  + ','
+                                               + AppSettings.TMIG.ReadString(DatabaseSetup, 'MSSQLPORT',        '')  + ';'
+                 + 'Initial catalog='          + AppSettings.TMIG.ReadString(DatabaseSetup, 'MSSQLCATALOG',     '')  + ';'
+                 + 'Persist Security Info='    + AppSettings.TMIG.ReadString(DatabaseSetup, 'MSSQLSECURITYINFO','')  + ';'
+                 + 'MultipleActiveResultSets=' + AppSettings.TMIG.ReadString(DatabaseSetup, 'MSSQLRESULTSETS',  '')  + ';'
+                 + 'Encrypt='                  + AppSettings.TMIG.ReadString(DatabaseSetup, 'MSSQLENCRYPT',     '')  + ';'
+                 + 'TrustServerCertificate='   + AppSettings.TMIG.ReadString(DatabaseSetup, 'MSSQLCERTIFICATE', '')  + ';'
+                 + 'User Id='                  + AppSettings.TMIG.ReadString(DatabaseSetup, 'MSSQLUSERNAME',    '')  + ';';
+      DBConnStr  :=dbConnNoPwd + 'Password='   + AppSettings.TMIG.ReadString(DatabaseSetup, 'MSSQLPASSWORD',    '')  + ';';
       Interval  :=AppSettings.TMIG.ReadInteger(TimersSettings, 'NET_CONNETCTION', 5000);
       CmdTimeout:=AppSettings.TMIG.ReadInteger(DatabaseSetup, 'COMMAND_TIMEOUT',    15);
       ConTimeout:=AppSettings.TMIG.ReadInteger(DatabaseSetup, 'CONNECTION_TIMEOUT', 15);
@@ -71,13 +75,14 @@ end;
 
 procedure TDataBase.InitializeConnection(idThd: integer; ErrorShow: boolean; var ActiveConnection: TADOConnection);
 
-{ -------------------------------------------------------------- ! INNER BLOCK ! ---------------------------------------------------------------------------- }
-procedure ErrorHandler(err_class: string; err_msg: string; should_quit: boolean; err_wnd: boolean);
-begin
-  LogText(MainForm.EventLogPath, ERR_LOGTEXT + '[' + err_class + '] ' + err_msg + ' (' + IntToStr(ExitCode) + ').');
-  if err_wnd     then Application.MessageBox(PChar(ERR_MESSAGE), PChar(MainForm.CAPTION), MB_OK + MB_ICONWARNING);
-  if should_quit then Application.Terminate;
-end;
+  (* NESTED METHOD *)
+
+  procedure ErrorHandler(err_class: string; err_msg: string; should_quit: boolean; err_wnd: boolean);
+  begin
+    LogText(MainForm.EventLogPath, ERR_LOGTEXT + '[' + err_class + '] ' + err_msg + ' (' + IntToStr(ExitCode) + ').');
+    if err_wnd     then Application.MessageBox(PChar(ERR_MESSAGE), PChar(MainForm.CAPTION), MB_OK + MB_ICONWARNING);
+    if should_quit then Application.Terminate;
+  end;
 
 { --------------------------------------------------------------- ! MAIN BLOCK ! ---------------------------------------------------------------------------- }
 begin
@@ -90,15 +95,16 @@ begin
     ActiveConnection.Provider         :=DBProvider;
     ActiveConnection.ConnectionTimeout:=ConTimeout;
     ActiveConnection.CommandTimeout   :=CmdTimeout;
-    ActiveConnection.ConnectOptions   :=coConnectUnspecified;
+    ActiveConnection.ConnectOptions   :=coConnectUnspecified; (* The connection is formed synchronously *)
     ActiveConnection.KeepConnection   :=True;
     ActiveConnection.LoginPrompt      :=False;
     ActiveConnection.Mode             :=cmReadWrite;
-    ActiveConnection.CursorLocation   :=clUseClient;        (* https://docs.microsoft.com/en-us/sql/ado/guide/data/the-significance-of-cursor-location *)
-    ActiveConnection.IsolationLevel   :=ilCursorStability;  (* https://technet.microsoft.com/en-us/library/ms189122(v=sql.105).aspx                    *)
+    ActiveConnection.CursorLocation   :=clUseClient;          (* https://docs.microsoft.com/en-us/sql/ado/guide/data/the-significance-of-cursor-location *)
+    ActiveConnection.IsolationLevel   :=ilCursorStability;    (* https://technet.microsoft.com/en-us/library/ms189122(v=sql.105).aspx                    *)
     { CONNECT TO GIVEN SERVER }
     try
       ActiveConnection.Connected:=True;
+      LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Server connection has been established successfully.');
     except
       on E: Exception do
         ErrorHandler(E.ClassName, E.Message, False, ErrorShow);
