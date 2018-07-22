@@ -533,7 +533,9 @@ end;
 procedure TActionsForm.SendAccountStatement(Layout: integer; Salut: string; Mess: string; IsOverdue: boolean);
 begin
   TTSendAccountStatement.Create(
+                                 False,
                                  Layout,
+                                 'Account Statement',
                                  Salut,
                                  Mess,
                                  IsOverdue,

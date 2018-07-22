@@ -275,9 +275,9 @@ object SendForm: TSendForm
     object Text_Warn: TLabel
       Left = 16
       Top = 12
-      Width = 274
+      Width = 277
       Height = 13
-      Caption = '*Account Statement is available in English language only.'
+      Caption = '* Account Statement is available in English language only.'
       Font.Charset = DEFAULT_CHARSET
       Font.Color = clBlack
       Font.Height = -11

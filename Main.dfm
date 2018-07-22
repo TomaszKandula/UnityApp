@@ -1193,7 +1193,7 @@ object MainForm: TMainForm
     Margins.Top = 0
     Margins.Right = 10
     Margins.Bottom = 0
-    ActivePage = TabSheet3
+    ActivePage = TabSheet1
     Align = alClient
     DoubleBuffered = True
     Font.Charset = DEFAULT_CHARSET
@@ -21336,7 +21336,7 @@ object MainForm: TMainForm
   end
   object CommonPopupMenu: TPopupMenu
     MenuAnimation = [maLeftToRight]
-    Left = 984
+    Left = 1000
     Top = 704
     object Action_ExportTransactions: TMenuItem
       Caption = 'Export to CSV'

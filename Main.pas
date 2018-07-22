@@ -836,7 +836,7 @@ implementation
 
 uses
   Filter, Tracker, Invoices, Actions, Calendar, About, Search, Worker, Model, Settings, Database, UAC, AgeView, Transactions, Colors, EventLog,
-  uCEFApplication, ReportBug, ViewSearch;
+  uCEFApplication, ReportBug, ViewSearch, ViewMailer;
 
 {$R *.dfm}
 
@@ -3263,8 +3263,58 @@ end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------ OPEN MASS MAILER }
 procedure TMainForm.Action_MassMailerClick(Sender: TObject);
+var
+  iCNT:       integer;
+  Item:       TListItem;
+  SCUID:      string;
+  CoCode:     string;
+  CustNumber: string;
+  CustName:   string;
 begin
-  MsgCall(mcInfo, 'This feature is not yet accessible. Please try later.');
+  if ConnLastError = 0 then
+  begin
+    ViewMailerForm.CustomerList.Clear;
+    { ONE CUSTOMER HAS BEEN SELECTED }
+    if (sgAgeView.Selection.Top - sgAgeView.Selection.Bottom) = 0 then
+    begin
+      Item:=ViewMailerForm.CustomerList.Items.Add;
+      Item.Caption:='1';
+      CustName  :=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), sgAgeView.Row];
+      CustNumber:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), sgAgeView.Row];
+      CoCode    :=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCO_CODE,         1, 1), sgAgeView.Row];
+      SCUID     :=CustNumber + MainForm.ConvertName(CoCode, 'F', 3);
+      Item.SubItems.Add(SCUID);
+      Item.SubItems.Add(CustName);
+      Item.SubItems.Add('Not Found');
+      //Item.SubItems.Add('No');
+    end
+    { MANY CUSTOMERS HAS BEEN SELECTED }
+    else
+    begin
+      for iCNT:=sgAgeView.Selection.Top to sgAgeView.Selection.Bottom do
+      begin
+        if sgAgeView.RowHeights[iCNT] <> sgRowHidden then
+        begin
+          Item:=ViewMailerForm.CustomerList.Items.Add;
+          Item.Caption:=IntToStr(iCNT);
+          CustName  :=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), iCNT];
+          CustNumber:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), iCNT];
+          CoCode    :=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCO_CODE,         1, 1), iCNT];
+          SCUID     :=CustNumber + MainForm.ConvertName(CoCode, 'F', 3);
+          Item.SubItems.Add(SCUID);
+          Item.SubItems.Add(CustName);
+          Item.SubItems.Add('Not Found');
+          //Item.SubItems.Add('No');
+        end;
+      end;
+    end;
+    { OPEN FORM }
+    WndCall(ViewMailerForm, stModal);
+  end
+  else
+  begin
+    MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+  end;
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------- ADD FOLLOW-UP TO SELECTED GROUP }
@@ -4240,6 +4290,7 @@ procedure TMainForm.sgAgeViewKeyDown(Sender: TObject; var Key: Word; Shift: TShi
   procedure ModifyCell(CUIDRef: integer; ColumnType: integer; Text: string);
   begin
     if ColumnType = ctFree1    then TTGeneralComment.Create(sgAgeView.Cells[CUIDRef, sgAgeView.Row], strNULL, strNULL, Text, strNULL, True);
+    if ColumnType = ctFree2    then TTGeneralComment.Create(sgAgeView.Cells[CUIDRef, sgAgeView.Row], strNULL, strNULL, strNULL, Text, True);
     if ColumnType = ctFollowUp then TTGeneralComment.Create(sgAgeView.Cells[CUIDRef, sgAgeView.Row], strNULL, Text, strNULL, strNULL, True);
   end;
 
@@ -4252,7 +4303,7 @@ procedure TMainForm.sgAgeViewKeyDown(Sender: TObject; var Key: Word; Shift: TShi
 
 begin
 
-  { ALLOW EDITING ONLY FREE COLUMNS AND FOLLOW-UP COLUMN }
+  { ALLOW EDITING ONLY FREE COLUMNS }
   if
      (
        sgAgeView.Col <> sgAgeView.ReturnColumn(TGeneral.Free1, 1, 1)
@@ -4261,16 +4312,6 @@ begin
      (
        sgAgeView.Col <> sgAgeView.ReturnColumn(TGeneral.Free2, 1, 1)
      )
-
-  (* DISABLE EDITING FOLLOW-UP *)
-
-  (*
-     and
-     (
-       sgAgeView.Col <> sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1)
-     )
-  *)
-
   then
     Exit;
 
@@ -4305,26 +4346,9 @@ begin
     { FREE1 COLUMN }
     if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneral.Free1, 1, 1) then
       ModifyCell(sgAgeView.ReturnColumn(TSnapshots.CUID, 1, 1), ctFree1, sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]);
-
-    (*
-
-    { FOLLOW-UP COLUMN }
-    if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1) then
-    begin
-      { VALIDATE THE CELL }
-      if not(CheckIfDate(sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row])) then
-      begin
-        MsgCall(mcWarn, 'Invalid date or format, please remember to use "yyyy-mm-dd".');
-        sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]:=SPACE;
-      end
-      else
-      begin
-        ModifyCell(sgAgeView.ReturnColumn(TSnapshots.CUID, 1, 1), ctFollowUp, sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]);
-      end;
-    end;
-
-    *)
-
+    { FREE2 COLUMN }
+    if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneral.Free2, 1, 1) then
+      ModifyCell(sgAgeView.ReturnColumn(TSnapshots.CUID, 1, 1), ctFree2, sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]);
   end;
 
   { DELETE ENTRY FROM DATABASE }
@@ -4337,18 +4361,12 @@ begin
       ModifyCell(sgAgeView.ReturnColumn(TSnapshots.CUID, 1, 1), ctFree1, '');
       sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]:='';
     end;
-
-    (*
-
-    { FOLLOW-UP COLUMN }
-    if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1) then
+    { FREE2 COLUMN }
+    if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneral.Free2, 1, 1) then
     begin
-      ModifyCell(sgAgeView.ReturnColumn(TSnapshots.CUID, 1, 1), ctFollowUp, '');
+      ModifyCell(sgAgeView.ReturnColumn(TSnapshots.CUID, 1, 1), ctFree2, '');
       sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]:='';
     end;
-
-    *)
-
   end;
 
 end;

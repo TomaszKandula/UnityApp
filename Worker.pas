@@ -213,7 +213,9 @@ type
   private
     var FLock:         TCriticalSection;
     var FIDThd:        integer;
+    var FSeries:       boolean;
     var FLayout:       integer;
+    var FSubject:      string;
     var FSalut:        string;
     var FMess:         string;
     var FIsOverdue:    boolean;
@@ -226,7 +228,7 @@ type
     var FCustNumber:   string;
   public
     property    IDThd:  integer read FIDThd;
-    constructor Create(Layout: integer; Salut: string; Mess: string; IsOverdue: boolean; OpenItems: TStringGrid; SCUID: string; CUID: string; CustName: string; CustNumber: string; CoCode: string; Branch: string);
+    constructor Create(Series: boolean; Layout: integer; Subject: string; Salut: string; Mess: string; IsOverdue: boolean; OpenItems: TStringGrid; SCUID: string; CUID: string; CustName: string; CustNumber: string; CoCode: string; Branch: string);
     destructor  Destroy; override;
   end;
 
@@ -1319,7 +1321,7 @@ begin
           GenText.Columns.Add(TGeneral.Free1);
           GenText.Values.Add('');
         end;
-        if not(FFree1 = strNULL) then
+        if not(FFree2 = strNULL) then
         begin
           GenText.Columns.Add(TGeneral.Free2);
           GenText.Values.Add(FFree2);
@@ -1352,12 +1354,14 @@ end;
 { ########################################################### ! SEND ACCOUNT STATEMENT ! #################################################################### }
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE }
-constructor TTSendAccountStatement.Create(Layout: integer; Salut: string; Mess: string; IsOverdue: boolean; OpenItems: TStringGrid; SCUID: string; CUID: string; CustName: string; CustNumber: string; CoCode: string; Branch: string);
+constructor TTSendAccountStatement.Create(Series: boolean; Layout: integer; Subject: string; Salut: string; Mess: string; IsOverdue: boolean; OpenItems: TStringGrid; SCUID: string; CUID: string; CustName: string; CustNumber: string; CoCode: string; Branch: string);
 begin
   inherited Create(False);
   FLock      :=TCriticalSection.Create;
   FIDThd     :=0;
+  FSeries    :=Series;
   FLayout    :=Layout;
+  FSubject   :=Subject;
   FSalut     :=Salut;
   FMess      :=Mess;
   FIsOverdue :=IsOverdue;
@@ -1417,7 +1421,7 @@ begin
       end;
 
       { SEND STATEMENT }
-      Statement.MailSubject:='Account Statement - ' + FCustName + ' - ' + FCustNumber;
+      Statement.MailSubject:=FSubject + ' - ' + FCustName + ' - ' + FCustNumber;
       if Statement.SendDocument then
       begin
 
@@ -1444,12 +1448,12 @@ begin
         { REGISTER ACTION }
         if FLayout = maDefined then TTDailyComment.Create(FCUID, False, False, 0, Status, False, True, False, True);
         if FLayout = maCustom  then TTDailyComment.Create(FCUID, False, False, 0, Status, False, False, True, True);
-        MainForm.ExecMessage(False, mcInfo, 'Account Statement has been sent successfully!')
+        if not FSeries then MainForm.ExecMessage(False, mcInfo, 'Account Statement has been sent successfully!')
 
       end
       else
       begin
-        MainForm.ExecMessage(False, mcError, 'Account Statement cannot be sent. Please contact IT support.');
+        if not FSeries then MainForm.ExecMessage(False, mcError, 'Account Statement cannot be sent. Please contact IT support.');
       end;
 
     finally

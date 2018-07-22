@@ -3477,8 +3477,6 @@ object ActionsForm: TActionsForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 1
-      ExplicitTop = 163
-      ExplicitHeight = 255
       object PanelOpenItemsGrid: TPanel
         AlignWithMargins = True
         Left = 10
@@ -3494,7 +3492,6 @@ object ActionsForm: TActionsForm
         Color = clWhite
         ParentBackground = False
         TabOrder = 0
-        ExplicitHeight = 235
         object OpenItemsGrid: TStringGrid
           AlignWithMargins = True
           Left = 2
@@ -3522,7 +3519,6 @@ object ActionsForm: TActionsForm
           OnMouseWheelDown = OpenItemsGridMouseWheelDown
           OnMouseWheelUp = OpenItemsGridMouseWheelUp
           OnSelectCell = OpenItemsGridSelectCell
-          ExplicitHeight = 231
           ColWidths = (
             10
             10
