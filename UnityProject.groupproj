@@ -1,60 +1,60 @@
-﻿	<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-		<PropertyGroup>
-			<ProjectGuid>{8FD56767-C861-4153-A09D-D1FA020646AC}</ProjectGuid>
-		</PropertyGroup>
-		<ItemGroup>
-			<Projects Include="Unity.dproj">
-				<Dependencies/>
-			</Projects>
-			<Projects Include="Unitylib.dproj">
-				<Dependencies/>
-			</Projects>
-			<Projects Include="UnityReader.dproj">
-				<Dependencies/>
-			</Projects>
-		</ItemGroup>
-		<ProjectExtensions>
-			<Borland.Personality>Default.Personality.12</Borland.Personality>
-			<Borland.ProjectType/>
-			<BorlandProject>
-				<Default.Personality/>
-			</BorlandProject>
-		</ProjectExtensions>
-		<Target Name="Unity">
-			<MSBuild Projects="Unity.dproj"/>
-		</Target>
-		<Target Name="Unity:Clean">
-			<MSBuild Projects="Unity.dproj" Targets="Clean"/>
-		</Target>
-		<Target Name="Unity:Make">
-			<MSBuild Projects="Unity.dproj" Targets="Make"/>
-		</Target>
-		<Target Name="Unitylib">
-			<MSBuild Projects="Unitylib.dproj"/>
-		</Target>
-		<Target Name="Unitylib:Clean">
-			<MSBuild Projects="Unitylib.dproj" Targets="Clean"/>
-		</Target>
-		<Target Name="Unitylib:Make">
-			<MSBuild Projects="Unitylib.dproj" Targets="Make"/>
-		</Target>
-		<Target Name="UnityReader">
-			<MSBuild Projects="UnityReader.dproj"/>
-		</Target>
-		<Target Name="UnityReader:Clean">
-			<MSBuild Projects="UnityReader.dproj" Targets="Clean"/>
-		</Target>
-		<Target Name="UnityReader:Make">
-			<MSBuild Projects="UnityReader.dproj" Targets="Make"/>
-		</Target>
-		<Target Name="Build">
-			<CallTarget Targets="Unity;Unitylib;UnityReader"/>
-		</Target>
-		<Target Name="Clean">
-			<CallTarget Targets="Unity:Clean;Unitylib:Clean;UnityReader:Clean"/>
-		</Target>
-		<Target Name="Make">
-			<CallTarget Targets="Unity:Make;Unitylib:Make;UnityReader:Make"/>
-		</Target>
-		<Import Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')" Project="$(BDS)\Bin\CodeGear.Group.Targets"/>
-	</Project>
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{F66C03EA-9FFD-4323-A997-2852E280D62B}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="Unity.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="Unitylib.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="UnityReader.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="Unity">
+        <MSBuild Projects="Unity.dproj"/>
+    </Target>
+    <Target Name="Unity:Clean">
+        <MSBuild Projects="Unity.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="Unity:Make">
+        <MSBuild Projects="Unity.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Unitylib">
+        <MSBuild Projects="Unitylib.dproj"/>
+    </Target>
+    <Target Name="Unitylib:Clean">
+        <MSBuild Projects="Unitylib.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="Unitylib:Make">
+        <MSBuild Projects="Unitylib.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="UnityReader">
+        <MSBuild Projects="UnityReader.dproj"/>
+    </Target>
+    <Target Name="UnityReader:Clean">
+        <MSBuild Projects="UnityReader.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="UnityReader:Make">
+        <MSBuild Projects="UnityReader.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="Unity;Unitylib;UnityReader"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="Unity:Clean;Unitylib:Clean;UnityReader:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="Unity:Make;Unitylib:Make;UnityReader:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>
