@@ -1,75 +1,63 @@
 
-/// <para>
-///     Filename: Unity.dpr
-/// </para>
-
 {$I \Include\Header.inc}
 
 program Unity;
 
 /// <remarks>
 ///     Large address aware (using more than 3GB for 32-bit program), or compile as a 64-bit.
-/// </remarks>
+/// </remarks>>
 
 {$SetPEFlags $0020}
 
 uses
-    Forms,
-    Windows,
-    Messages,
-    Classes,
-    SysUtils,
-    StdCtrls,
-    ShellApi,
-    IOUtils,
-    INIFiles,
-    CRC32u,
-    SynZip,
-    SynZipFiles,
-    System.Types,
-
-    // Database model and handler
-
-    Model in 'Model\Model.pas',
-    SQL   in 'Model\SQL.pas',
-
-    // Business logic
-
-    AgeView      in 'Logic\AgeView.pas',
-    Database     in 'Logic\Database.pas',
-    Mailer       in 'Logic\Mailer.pas',
-    Settings     in 'Logic\Settings.pas',
-    Transactions in 'Logic\Transactions.pas',
-    UAC          in 'Logic\UAC.pas',
-    Worker       in 'Logic\Worker.pas',
-
-    // Views
-
-    About      in 'View\About.pas'      {AboutForm},
-    Actions    in 'View\Actions.pas'    {ActionsForm},
-    Calendar   in 'View\Calendar.pas'   {CalendarForm},
-    Colors     in 'View\Colors.pas'     {ColorsForm},
-    EventLog   in 'View\EventLog.pas'   {EventForm},
-    Filter     in 'View\Filter.pas'     {FilterForm},
-    Invoices   in 'View\Invoices.pas'   {InvoicesForm},
-    Main       in 'View\Main.pas'       {MainForm},
-    PhoneList  in 'View\PhoneList.pas'  {PhoneListForm},
-    ReportBug  in 'View\ReportBug.pas'  {ReportForm},
-    AVSearch   in 'View\AVSearch.pas'   {SearchForm},
-    Send       in 'View\Send.pas'       {SendForm},
-    Splash     in 'View\Splash.pas'     {SplashForm},
-    Tracker    in 'View\Tracker.pas'    {TrackerForm},
-    Update     in 'View\Update.pas'     {UpdateForm},
-    MassMailer in 'View\MassMailer.pas' {ViewMailerForm},
-    ABSearch   in 'View\ABSearch.pas'   {ViewSearchForm};
+  Forms,
+  Windows,
+  Messages,
+  Classes,
+  SysUtils,
+  StdCtrls,
+  ShellApi,
+  IOUtils,
+  INIFiles,
+  CRC32u,
+  SynZip,
+  SynZipFiles,
+  System.Types,
+  Model in 'Model\Model.pas',
+  SQL in 'Model\SQL.pas',
+  AgeView in 'Logic\AgeView.pas',
+  Database in 'Logic\Database.pas',
+  Mailer in 'Logic\Mailer.pas',
+  Settings in 'Logic\Settings.pas',
+  Transactions in 'Logic\Transactions.pas',
+  UAC in 'Logic\UAC.pas',
+  Worker in 'Logic\Worker.pas',
+  Internet in 'Logic\Internet.pas',
+  About in 'View\About.pas' {AboutForm},
+  Actions in 'View\Actions.pas' {ActionsForm},
+  Calendar in 'View\Calendar.pas' {CalendarForm},
+  Colors in 'View\Colors.pas' {ColorsForm},
+  EventLog in 'View\EventLog.pas' {EventForm},
+  Filter in 'View\Filter.pas' {FilterForm},
+  Invoices in 'View\Invoices.pas' {InvoicesForm},
+  Main in 'View\Main.pas' {MainForm},
+  PhoneList in 'View\PhoneList.pas' {PhoneListForm},
+  ReportBug in 'View\ReportBug.pas' {ReportForm},
+  AVSearch in 'View\AVSearch.pas' {SearchForm},
+  Send in 'View\Send.pas' {SendForm},
+  Splash in 'View\Splash.pas' {SplashForm},
+  Tracker in 'View\Tracker.pas' {TrackerForm},
+  Update in 'View\Update.pas' {UpdateForm},
+  MassMailer in 'View\MassMailer.pas' {ViewMailerForm},
+  ABSearch in 'View\ABSearch.pas' {ViewSearchForm};
 
 type
     DWord = 0..$FFFFFFFF;
     TDwmIsCompositionEnabledFunc = function(out pfEnabled: boolean): HRESULT; stdcall;
 
 /// <remarks>
-///     Appication constants are defined in main view throught common.inc file.
-/// </remarks>
+///     Application constants are defined in main view throught "common.inc" file.
+/// </remarks>>
 
 var
     StrWrite:         string;
@@ -82,6 +70,7 @@ var
     Mutex:            integer;
     WndRect:          TRect;
     AppSettings:      TSettings;
+    CheckInet:        TInternetConnectivity;
     MsAssemblies:     TStrings;
     FileDateTime:     TDateTime;
     ReleaseDateTime:  TDateTime;
@@ -105,8 +94,8 @@ var
 /// <param name="mode">Integer.</param>
 /// <returns>Boolean. Set to true if succeed.</returns>
 /// <remarks>
-///     10 RCDATA "__Makefile\\config.cfg" default setting file.
-///     60 RCDATA "__Makefile\\logon.log"  pre-defined event log file.
+///     10 RCDATA "Makefile\\config.cfg" default setting file.
+///     60 RCDATA "Makefile\\logon.log"  pre-defined event log file.
 /// </remarks>
 
 function Unpack(ItemID: integer; FileName: string; mode: integer): boolean;
@@ -261,6 +250,16 @@ begin
     ReportMemoryLeaksOnShutdown:=DebugHook <> 0;
 
     {$WARN SYMBOL_PLATFORM ON}
+
+    CheckInet:=TInternetConnectivity.Create;
+    try
+
+        CheckInet.IsInternetPresent;
+
+    finally
+        CheckInet.Free;
+    end;
+
 
     // ---------------------------------------------------------------------------------------------------------------------------------- ALLOW ONE INSTANCE //
 
@@ -493,7 +492,7 @@ begin
 
         // ------------------------------------------------------------------------------------------------------ WINDOWS VERSION CHECK - WINDOWS 7 & HIGHER //
 
-        if not StrToInt(GetOSVer(0)) >= 61 then
+        if not StrToInt(GetOSVer(OSNumber)) >= 61 then
         begin
             Status(3, AllTasks, DelayStd, 'Checking operating system version... failed!', True, AppSettings.FPathEventLog);
             Application.MessageBox(
@@ -511,7 +510,7 @@ begin
 
         // --------------------------------------------------------------------------------------------------- AREO CHECK MUST BE TURNED ON | WINDOWS 7 ONLY //
 
-        if StrToInt(GetOSVer(0)) = 61 then
+        if StrToInt(GetOSVer(OSNumber)) = 61 then
         begin
 
             // Initialize
@@ -626,7 +625,7 @@ begin
         // -------------------------------------------------------------------------------------------------------------------------------- CREATE ALL FORMS //
 
         /// <remarks>
-        ///      All forms must have visible parameters set to false.
+        ///      All forms must have visible parameter set to false.
         /// </remarks>
 
         // Main form (view) load
@@ -641,9 +640,9 @@ begin
         Application.CreateForm(TColorsForm,      ColorsForm);      LogText(AppSettings.FPathEventLog, '[GUI] ''ColorsForm'' ........ has been created.');
         Application.CreateForm(TReportForm,      ReportForm);      LogText(AppSettings.FPathEventLog, '[GUI] ''ReportForm'' ........ has been created.');
         Application.CreateForm(TFilterForm,      FilterForm);      LogText(AppSettings.FPathEventLog, '[GUI] ''FilterForm'' ........ has been created.');
+        Application.CreateForm(TSearchForm,      SearchForm);      LogText(AppSettings.FPathEventLog, '[GUI] ''SearchForm'' ........ has been created.');
         Application.CreateForm(TTrackerForm,     TrackerForm);     LogText(AppSettings.FPathEventLog, '[GUI] ''TrackerForm'' ....... has been created.');
         Application.CreateForm(TActionsForm,     ActionsForm);     LogText(AppSettings.FPathEventLog, '[GUI] ''ActionsForm'' ....... has been created.');
-        Application.CreateForm(TSearchForm,      SearchForm);      LogText(AppSettings.FPathEventLog, '[GUI] ''SearchForm'' ........ has been created.');
         Application.CreateForm(TCalendarForm,    CalendarForm);    LogText(AppSettings.FPathEventLog, '[GUI] ''CalendarForm'' ...... has been created.');
         Application.CreateForm(TInvoicesForm,    InvoicesForm);    LogText(AppSettings.FPathEventLog, '[GUI] ''InvoicesForm'' ...... has been created.');
         Application.CreateForm(TPhoneListForm,   PhoneListForm);   LogText(AppSettings.FPathEventLog, '[GUI] ''PhoneListForm'' ..... has been created.');

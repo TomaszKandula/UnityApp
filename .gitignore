@@ -1,7 +1,9 @@
-# Ignore thumbnails created by Windows
+# Ignore thumbnails created by Windows:
 Thumbs.db
 
-# Ignore below folders
+# Ignore below folders (debugging and history):
 Debug/
 __history/
-__recovery
+__recovery/
+
+

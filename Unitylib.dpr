@@ -18,7 +18,7 @@ uses
 
 /// <para>
 ///     Definition of constants, pointers and records for SID method
-/// </para>
+/// </para>>
 
 const
     HEAP_ZERO_MEMORY = $00000008;
@@ -36,7 +36,7 @@ end;
 /// <summary>
 ///     Heper method for "ObtainTextSid" method.
 /// </summary>
-/// <returns>Boolean.</returns>
+/// <returns>Boolean.</returns>>
 
 function ConvertSid(Sid: PSID; pszSidText: PChar; var dwBufferLen: DWORD): BOOL;
 var
@@ -346,6 +346,7 @@ procedure MergeSort(Grid: TStringGrid; var Vals: array of integer; sortcol, data
     /// <remarks>
     ///     Temporary shared local array for integers.
     /// </remarks>
+
     var Avals:  array of integer;
 
 

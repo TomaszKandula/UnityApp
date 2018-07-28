@@ -144,6 +144,7 @@
         <DCCReference Include="Logic\Transactions.pas"/>
         <DCCReference Include="Logic\UAC.pas"/>
         <DCCReference Include="Logic\Worker.pas"/>
+        <DCCReference Include="Logic\Internet.pas"/>
         <DCCReference Include="View\About.pas">
             <Form>AboutForm</Form>
         </DCCReference>

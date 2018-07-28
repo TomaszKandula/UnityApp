@@ -1,102 +1,110 @@
-{ ----------------------------------------------------------------------------------------------------------------------------------------------------------- }
-{                                                                                                                                                             }
-{ Name:             Unity for Debt Management                                                                                                                 }
-{ Version:          0.1                                                                                                                                       }
-{ (C)(R):           Tomasz Kandula                                                                                                                            }
-{ Originate:        10-07-2016 (Concept & GUI)                                                                                                                }
-{ IDE:              RAD Studio with Delphi XE2 (migrated to Delphi Tokyo)                                                                                     }
-{ Target:           Microsoft Windows 7 or newer                                                                                                              }
-{ Dependencies:     Synopse Zip and own libraries                                                                                                             }
-{ NET Framework:    Required 4.6 or newer (Lync / Skype calls)                                                                                                }
-{ LYNC version:     2013 or newer                                                                                                                             }
-{                                                                                                                                                             }
-{ ----------------------------------------------------------------------------------------------------------------------------------------------------------- }
+
+{$I \Include\Header.inc}
+
 unit Settings;
 
 interface
 
 uses
-  Main, Forms, Windows, Messages, SysUtils, Classes, ShellAPI, CRC32u, INIFiles;
+    Main, Forms, Windows, Messages, SysUtils, Classes, ShellAPI, CRC32u, INIFiles;
 
-{ --------------------------------------------------------- ! APPLICATION SETTING CLASS ! ------------------------------------------------------------------- }
 type
-  TSettings = class                                    (* BASE CLASS FOR SETTINGS HANDLING *)
-  {$TYPEINFO ON}
-  private
-    { GENERAL }
-    var pAppDir                : string;
-    var pLayoutDir             : string;
-    var pAppLog                : string;
-    var pWinUserName           : string;
-    var pWinTempFolder         : string;
-    { PATHS }
-    var pPathEventLog          : string;
-    var pPathAppCfg            : string;
-    var pPathLicence           : string;
-    var pPathGridImage         : string;
-    var pPathRelease           : string;
-    { RELEASE DATE AND TIME }
-    function  pGetReleaseDateTime: TDateTime;
-    procedure pSetReleaseDateTime(NewDateTime: TDateTime);
-    function  pGetRelFileDateTime: TDateTime;
-  public
-    { GENERAL }
-    var GetLastError           : integer;
-    var TMIG                   : TMemIniFile;
-    var TMIL                   : TMemIniFile;
-    { READ ONLY PROPERTIES }
-    property FAppDir           : string    read pAppDir;
-    property FLayoutDir        : string    read pLayoutDir;
-    property FAppLog           : string    read pAppLog;
-    property FWinUserName      : string    read pWinUserName;
-    property FWinTempFolder    : string    read pWinTempFolder;
-    property FPathGridImage    : string    read pPathGridImage;
-    property FPathEventLog     : string    read pPathEventLog;
-    property FPathAppCfg       : string    read pPathAppCfg;
-    property FPathLicence      : string    read pPathLicence;
-    property FPathRelease      : string    read pPathRelease;
-    property FRelFileDateTime  : TDateTime read pGetRelFileDateTime;
-    { READ/WRITE PROPERTIES }
-    property FReleaseDateTime  : TDateTime read pGetReleaseDateTime write pSetReleaseDateTime;
-  published
-    constructor Create;
-    destructor  Destroy; override;
-    function    Encode(ConfigType: integer): boolean;
-    function    Decode(ConfigType: integer; ToMemory: boolean): boolean;
-    function    ConfigToMemory: boolean;
-  end;
+
+    /// <summary>
+    ///    Class constructor is responsibe for setting up variables with file paths and for the initialization of two separate
+    ///    classes that keeps settings during program runtime.
+    /// </summary>
+
+    TSettings = class
+        {$TYPEINFO ON}
+        private
+            // Files
+            var pAppDir        : string;
+            var pLayoutDir     : string;
+            var pAppLog        : string;
+            var pWinUserName   : string;
+            var pWinTempFolder : string;
+            // Paths
+            var pPathEventLog  : string;
+            var pPathAppCfg    : string;
+            var pPathLicence   : string;
+            var pPathGridImage : string;
+            var pPathRelease   : string;
+            // Time and date
+            function  pGetReleaseDateTime: TDateTime;
+            procedure pSetReleaseDateTime(NewDateTime: TDateTime);
+            function  pGetRelFileDateTime: TDateTime;
+        public
+            var GetLastError           : integer;
+            var TMIG                   : TMemIniFile;
+            var TMIL                   : TMemIniFile;
+            property FAppDir           : string    read pAppDir;
+            property FLayoutDir        : string    read pLayoutDir;
+            property FAppLog           : string    read pAppLog;
+            property FWinUserName      : string    read pWinUserName;
+            property FWinTempFolder    : string    read pWinTempFolder;
+            property FPathGridImage    : string    read pPathGridImage;
+            property FPathEventLog     : string    read pPathEventLog;
+            property FPathAppCfg       : string    read pPathAppCfg;
+            property FPathLicence      : string    read pPathLicence;
+            property FPathRelease      : string    read pPathRelease;
+            property FRelFileDateTime  : TDateTime read pGetRelFileDateTime;
+            property FReleaseDateTime  : TDateTime read pGetReleaseDateTime write pSetReleaseDateTime;
+        published
+            constructor Create;
+            destructor  Destroy; override;
+            function    Encode(ConfigType: integer): boolean;
+            function    Decode(ConfigType: integer; ToMemory: boolean): boolean;
+            function    ConfigToMemory: boolean;
+    end;
 
 implementation
 
-{ ############################################################# ! SETTINGS CLASS ! ########################################################################## }
 
-{ ------------------------------------------------------------------------------------------------------------------------------------------------ INITIALZIE }
+// ---------------------------------------------------------------------------------------------------------------------------------------- CREATE & RELEASE //
+
+
 constructor TSettings.Create;
 begin
 
-  (* INITIALIZATION *)
-  TMIG:=TMemIniFile.Create('');
-  TMIL:=TMemIniFile.Create('');
+    /// <remarks>
+    ///    General settings (config.cfg), containing all the necessary data for the application.
+    /// </remarks>
 
-  (* POPULATE *)
-  pAppDir        :=ExtractFileDir(Application.ExeName) + '\';
-  pWinUserName   :=Trim(LowerCase(GetEnvironmentVariable('username')));
-  pWinTempFolder :=GetEnvironmentVariable('TEMP');
-  pAppLog        :=pWinUserName + '.log';
-  pPathAppCfg    :=pAppDir + ConfigFile;
-  pPathLicence   :=pAppDir + LicenceFile;
-  pPathEventLog  :=pAppDir + pAppLog;
-  pPathGridImage :=pAppDir + GridImgFile;
+    TMIG:=TMemIniFile.Create('');
 
-  (* READ CONFIG FILES *)
-  if FileExists(pPathAppCfg) then
-    ConfigToMemory
-      else
-        GetLastError:=404;
+    /// <remarks>
+    ///    Licence details (unity.licx).
+    /// </remarks>
+
+    TMIL:=TMemIniFile.Create('');
+
+
+    pAppDir        :=ExtractFileDir(Application.ExeName) + '\';
+    pWinUserName   :=Trim(LowerCase(GetEnvironmentVariable('username')));
+    pWinTempFolder :=GetEnvironmentVariable('TEMP');
+    pAppLog        :=pWinUserName + '.log';
+    pPathAppCfg    :=pAppDir + ConfigFile;
+    pPathLicence   :=pAppDir + LicenceFile;
+    pPathEventLog  :=pAppDir + pAppLog;
+    pPathGridImage :=pAppDir + GridImgFile;
+
+
+    /// <remarks>
+    ///    Return 404 error code if configuration file cannot be found.
+    /// </remarks>
+
+    if FileExists(pPathAppCfg) then
+        ConfigToMemory
+            else
+                GetLastError:=404;
 
 end;
 
-{ --------------------------------------------------------------------------------------------------------------------------------------------------- RELEASE }
+/// <summary>
+///    Release all from memory. Call it before main form is destroyed.
+/// </summary>
+
 destructor TSettings.Destroy;
 begin
   TMIG.Free;
@@ -104,173 +112,270 @@ begin
   inherited;
 end;
 
-{ ----------------------------------------------------------------------------------------------------------------------------- PUSH CONFIG CONTENT TO MEMORY }
+
+// ------------------------------------------------------------------------------------------------------------------------------------------- CONFIGURATION //
+
+
+/// <summary>
+///    Push config content to memory.
+/// </summary>
+
 function TSettings.ConfigToMemory: boolean;
 begin
-  Result:=False;
-  if Assigned(TMIG) then
-  begin
-    Decode(AppConfig, True);
-    pLayoutDir  :=TMIG.ReadString(VariousLayouts,     'PATH',        '');
-    pPathRelease:=TMIG.ReadString(ApplicationDetails, 'UPDATE_PATH', '');
-    pPathRelease:=pPathRelease + ReleaseFile;
-    GetLastError:=0;
-    Result:=True;
-  end;
+    Result:=False;
+
+    if Assigned(TMIG) then
+    begin
+        Decode(AppConfig, True);
+        pLayoutDir  :=TMIG.ReadString(VariousLayouts,     'PATH',        '');
+        pPathRelease:=TMIG.ReadString(ApplicationDetails, 'UPDATE_PATH', '');
+        pPathRelease:=pPathRelease + ReleaseFile;
+        GetLastError:=0;
+        Result:=True;
+    end;
+
 end;
 
-{ -------------------------------------------------------------------------------------------------------------------------------- GET RELEASE FILE DATE&TIME }
+
+// ----------------------------------------------------------------------------------------------------------------------------- RELEASE PACKAGE DATE & TIME //
+
+
+/// <summary>
+///   Get file date and time for "Release.pak".
+/// </summary>
+
 function TSettings.pGetRelFileDateTime: TDateTime;
 var
-  PakDateTime: TDateTimeInfoRec;
+    PakDateTime: TDateTimeInfoRec;
 begin
-  Result:=NULLDATE;
-  if pPathRelease <> '' then
-  begin
-    FileGetDateTimeInfo(pPathRelease, PakDateTime, True);
-    Result:=StrToDateTime(FormatDateTime('yyyy-mm-dd hh:mm:ss', PakDateTime.TimeStamp)); { NOTE! "TIMESTAMP" IS PRECISE TO MILLISECONDS }
-  end;
+
+    Result:=NULLDATE;
+
+    if pPathRelease <> '' then
+    begin
+        FileGetDateTimeInfo(pPathRelease, PakDateTime, True);
+
+        /// <remarks>
+        ///    Timestamp method is precise to a miliseconds.
+        ///    This has to be considered during any comparision.
+        /// </remarks>
+
+        Result:=StrToDateTime(FormatDateTime('yyyy-mm-dd hh:mm:ss', PakDateTime.TimeStamp));
+    end;
+
 end;
 
-{ ---------------------------------------------------------------------------------------------------------------------------- GET NEW RELEASE FILE DATE&TIME }
+/// <summary>
+///    Get update time and date registered in setting file.
+/// </summary>
+
 function TSettings.pGetReleaseDateTime: TDateTime;
 begin
-  Result:=StrToDateTimeDef(TMIG.ReadString(ApplicationDetails, 'UPDATE_DATETIME', ''), NULLDATE);
+    Result:=NULLDATE;
+
+    if Assigned(TMIG) then
+    begin
+        Result:=StrToDateTimeDef(TMIG.ReadString(ApplicationDetails, 'UPDATE_DATETIME', ''), NULLDATE);
+    end;
+
 end;
 
-{ ---------------------------------------------------------------------------------------------------------------------------- SET NEW RELEASE FILE DATE&TIME }
+/// <summary>
+///    Set new update time and date.
+/// </summary>
+
 procedure TSettings.pSetReleaseDateTime(NewDateTime: TDateTime);
 begin
-  TMIG.WriteString(ApplicationDetails, 'UPDATE_DATETIME', DateTimeToStr(NewDateTime));
-  Encode(AppConfig);
+    if Assigned(TMIG) then
+    begin
+        TMIG.WriteString(ApplicationDetails, 'UPDATE_DATETIME', DateTimeToStr(NewDateTime));
+        Encode(AppConfig);
+    end;
 end;
 
-{ ----------------------------------------------------------------------------------------------------------------------------------- ENCRYPT & COMPUTE CRC32 }
+
+// --------------------------------------------------------------------------------------------------------------------------------------- ENCRYPT & DECRYPT //
+
+
+/// <summary>
+///    Encoding method based on XOR and SHR with secret KEY.
+/// </summary>
+
 function TSettings.Encode(ConfigType: integer): boolean;
 var
-  iCNT:        integer;
-  wStream:     TMemoryStream;
-  rStream:     TMemoryStream;
-  hStream:     TStringList;
-  buffer:      int64;
-  vCRC:        dWord;
-  sCRC:        string;
+    iCNT:        integer;
+    wStream:     TMemoryStream;
+    rStream:     TMemoryStream;
+    hStream:     TStringList;
+    buffer:      int64;
+    vCRC:        dWord;
+    sCRC:        string;
 begin
-  { DO NOT ALLOW TO ENCODE LICENCE }
-  if ConfigType = LicData then
-  begin
-    Result:=False;
-    Exit;
-  end;
-  { INITIALIZE }
-  rStream:=TMemoryStream.Create;
-  wStream:=TMemoryStream.Create;
-  hStream:=TStringList.Create;
-  try
-    try
-      { LOAD INI FROM MEMORY }
-      if ConfigType = AppConfig  then TMIG.GetStrings(hStream);
-      hStream.SaveToStream(rStream);
-      rStream.Position:=0;
-      { COMPUTE CRC32 CHECKSUM (BETWEEN $00000000 and $FFFFFFF) }
-      ComputeCRC32(rStream.Memory, rStream.Size, vCRC);
-      (* FOR DEBUG PURPOSES CRC32 (HEX): IntToHex(vCRC, 8) *)
-      (* FOR DEBUG PURPOSES CRC32 (DEC): IntToStr(vCRC)    *)
-      { SAVE LAST 8 BYTES TO STREAM }
-      sCRC:=IntToHex(vCRC, 8);
-      rStream.Position:=rStream.Size;
-      rStream.WriteBuffer(UTF8String(sCRC)[1], Length(UTF8String(sCRC)));
-      rStream.Position:=0;
-      (*  FOR DEBUG PURPOSES: rStream.SaveToFile(AppDir + 'check.txt'); *)
-      { ENCODING BYTE BY BYTE }
-      for iCNT:=0 to rStream.Size - 1 do begin
-        rStream.Read(buffer, 1);
-        buffer:=(buffer xor not (ord(DecryptKey shr iCNT)));
-        wStream.Write(buffer, 1);
-      end;
-      { SAVE TO FILE }
-      wStream.Position:=0;
-      if ConfigType = AppConfig  then wStream.SaveToFile(FPathAppCfg);
-      Result:=True;
-      (* FOR DEBUG: IntToStr(wStream.Size); *)
-    except
-      Result:=False;
-      GetLastError:=IOResult;
+
+    // Do not allow to encode licence file
+    if ConfigType = LicData then
+    begin
+        Result:=False;
+        Exit;
     end;
-  finally;
-    rStream.Free;
-    wStream.Free;
-    hStream.Free;
-  end;
+
+    rStream:=TMemoryStream.Create;
+    wStream:=TMemoryStream.Create;
+    hStream:=TStringList.Create;
+
+    try
+        try
+
+            // Move file to memory
+            if ConfigType = AppConfig then
+                TMIG.GetStrings(hStream);
+
+            hStream.SaveToStream(rStream);
+            rStream.Position:=0;
+
+            // Compute CRC32 checksum (between $00000000 and $FFFFFFF)
+            ComputeCRC32(rStream.Memory, rStream.Size, vCRC);
+
+            /// <remarks>
+            ///    To convert into HEX or Decimal, use:
+            ///    <code>
+            ///        IntToHex(vCRC, 8);
+            ///        IntToStr(vCRC);
+            ///    </code>
+            /// </remarks>
+
+            // Save last 8 bytes to stream
+            sCRC:=IntToHex(vCRC, 8);
+            rStream.Position:=rStream.Size;
+            rStream.WriteBuffer(UTF8String(sCRC)[1], Length(UTF8String(sCRC)));
+            rStream.Position:=0;
+
+            // Encoding byte by byte
+            for iCNT:=0 to rStream.Size - 1 do
+            begin
+                rStream.Read(buffer, 1);
+                buffer:=(buffer xor not (ord(DecryptKey shr iCNT)));
+                wStream.Write(buffer, 1);
+            end;
+
+            // Save to file
+            wStream.Position:=0;
+
+            if ConfigType = AppConfig then
+                wStream.SaveToFile(FPathAppCfg);
+
+            Result:=True;
+
+            /// <remarks>
+            ///    To check stream size, use:
+            ///    <code>
+            ///        IntToStr(wStream.Size);
+            ///    </code>
+            /// </remarks>
+
+        except
+            Result:=False;
+            GetLastError:=IOResult;
+        end;
+
+    finally;
+        rStream.Free;
+        wStream.Free;
+        hStream.Free;
+    end;
+
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------- DECRYPT & CHECK CRC32 }
+/// <summary>
+///    Decoding method based on XOR and SHR with secret KEY. Routine remain the same, if the key is unchanged, then appling the same stream
+///    will shift the characters numbers back to theirs original values.
+/// </summary>
+
 function TSettings.Decode(ConfigType: integer; ToMemory: boolean): boolean;
 var
-  iCNT:       integer;
-  rStream:    TMemoryStream;
-  wStream:    TMemoryStream;
-  hString:    TStringList;
-  bytes:      TBytes;
-  buffer:     int64;
-  vCRC:       dWord;
-  sCRC:       string;
+    iCNT:       integer;
+    rStream:    TMemoryStream;
+    wStream:    TMemoryStream;
+    hString:    TStringList;
+    bytes:      TBytes;
+    buffer:     int64;
+    vCRC:       dWord;
+    sCRC:       string;
 begin
-  { INITIALIZE }
-  Result:=False;
-  rStream:=TMemoryStream.Create;
-  wStream:=TMemoryStream.Create;
-  hString:=TStringList.Create;
-  { PROCEED }
-  try
+
+    Result:=False;
+
+    rStream:=TMemoryStream.Create;
+    wStream:=TMemoryStream.Create;
+    hString:=TStringList.Create;
+
     try
-      { LOAD FROM FILE }
-      if ConfigType = AppConfig  then rStream.LoadFromFile(FPathAppCfg);
-      if ConfigType = LicData    then rStream.LoadFromFile(FPathLicence);
-      { DECODE ALL }
-      for iCNT:=0 to rStream.Size - 1 do
-      begin
-        rStream.Read(buffer, 1);
-        buffer:=(buffer xor not (ord(DecryptKey shr iCNT)));
-        wStream.Write(buffer, 1);
-      end;
-      wStream.Position:=wStream.Size - 8;
-      { READ LAST 8 BYTES OF EMBEDDED CRC32 CHECKSUM }
-      SetLength(bytes, wStream.Size - (wStream.Size - 8));
-      wStream.Read(bytes[0], wStream.Size - (wStream.Size - 8));
-      sCRC:=TEncoding.UTF8.GetString(bytes);
-      (* FOR DEBUG: CRC32 (FROM FILE): sCRC *)
-      { COMPUTE CRC32 CHECKSUM (BETWEEN $00000000 and $FFFFFFF) }
-      wStream.Position:=0;
-      wStream.SetSize(wStream.Size - 8);
-      ComputeCRC32(wStream.Memory, wStream.Size, vCRC);
-      (* FOR DEBUG: CRC32 (COMPUTED): IntToHex(vCRC, 8) (HEX)  *)
-      (* FOR DEBUG: CRC32 (COMPUTED): IntToStr(vCRC) (DEC)     *)
-      (* FOR DEBUG: wStream.SaveToFile(AppDir + 'decoded.txt') *)
-      hString.LoadFromStream(wStream);
-      if ToMemory then
-      begin
-        if ConfigType = AppConfig  then TMIG.SetStrings(hString);
-        if ConfigType = LicData    then TMIL.SetStrings(hString);
-        Result:=True;
-      end
-      else
-      begin
-        if sCRC =  IntToHex(vCRC, 8) then Result:=True;
-        if sCRC <> IntToHex(vCRC, 8) then Result:=False;
-      end;
-    { ON ERROR }
-    except
-      Result:=False;
-      GetLastError:=IOResult;
+        try
+
+            // Load to memory
+            if ConfigType = AppConfig  then
+                rStream.LoadFromFile(FPathAppCfg);
+
+            if ConfigType = LicData then
+                rStream.LoadFromFile(FPathLicence);
+
+            // Decode byte by byte
+            for iCNT:=0 to rStream.Size - 1 do
+            begin
+                rStream.Read(buffer, 1);
+                buffer:=(buffer xor not (ord(DecryptKey shr iCNT)));
+                wStream.Write(buffer, 1);
+            end;
+
+            wStream.Position:=wStream.Size - 8;
+
+            // Read last 8 bytes of embedded CRC32 checksum
+            SetLength(bytes, wStream.Size - (wStream.Size - 8));
+            wStream.Read(bytes[0], wStream.Size - (wStream.Size - 8));
+            sCRC:=TEncoding.UTF8.GetString(bytes);
+
+            /// <remarks>
+            ///    If using test file from drive, please use sCRC method instead of vCRC.
+            /// </remarks>
+
+            // Compute CRC32 checksum (between $00000000 and $FFFFFFF)
+            wStream.Position:=0;
+            wStream.SetSize(wStream.Size - 8);
+            ComputeCRC32(wStream.Memory, wStream.Size, vCRC);
+
+            hString.LoadFromStream(wStream);
+
+            if ToMemory then
+            begin
+                if ConfigType = AppConfig then
+                    TMIG.SetStrings(hString);
+
+                if ConfigType = LicData then
+                        TMIL.SetStrings(hString);
+
+                Result:=True;
+            end
+            else
+            begin
+
+                if sCRC =  IntToHex(vCRC, 8) then
+                    Result:=True;
+
+                if sCRC <> IntToHex(vCRC, 8) then
+                    Result:=False;
+
+            end;
+
+        except
+            Result:=False;
+            GetLastError:=IOResult;
+        end;
+    finally
+        rStream.Free;
+        wStream.Free;
+        hString.Free;
     end;
-  finally
-    (* FOR DEBUG: IntToStr(wStream.Size) *)
-    { RELEASE }
-    rStream.Free;
-    wStream.Free;
-    hString.Free;
-  end;
+
 end;
 
 end.

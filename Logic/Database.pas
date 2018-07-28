@@ -1,171 +1,254 @@
-{ ----------------------------------------------------------------------------------------------------------------------------------------------------------- }
-{                                                                                                                                                             }
-{ Name:             Unity for Debt Management                                                                                                                 }
-{ Version:          0.1                                                                                                                                       }
-{ (C)(R):           Tomasz Kandula                                                                                                                            }
-{ Originate:        10-07-2016 (Concept & GUI)                                                                                                                }
-{ IDE:              RAD Studio with Delphi XE2 (migrated to Delphi Tokyo)                                                                                     }
-{ Target:           Microsoft Windows 7 or newer                                                                                                              }
-{ Dependencies:     Synopse Zip and own libraries                                                                                                             }
-{ NET Framework:    Required 4.6 or newer (Lync / Skype calls)                                                                                                }
-{ LYNC version:     2013 or newer                                                                                                                             }
-{                                                                                                                                                             }
-{ ----------------------------------------------------------------------------------------------------------------------------------------------------------- }
+
+{$I \Include\Header.inc}
+
 unit Database;
 
 interface
 
 uses
-  Main, Forms, Windows, Messages, Settings, ADODB, Classes, SysUtils, ComObj, StrUtils;
+    Main, Forms, Windows, Messages, Settings, ADODB, Classes, SysUtils, ComObj, StrUtils;
 
-{ --------------------------------------------------------------- ! DATABASE CLASS ! ------------------------------------------------------------------------ }
 type
-  TDataBase = class                                    (* BASE CLASS FOR CONNECTION HANDLING *)
-  {$TYPEINFO ON}
-  public
-    var DBProvider  : string;
-    var DBConnStr   : string;
-    var Interval    : integer;
-    var CmdTimeout  : integer;
-    var ConTimeout  : Integer;
-  published
-    constructor Create(ShowConnStr: boolean);
-    procedure   InitializeConnection(idThd: integer; ErrorShow: boolean; var ActiveConnection: TADOConnection);
-    function    Check: integer;
-  end;
+
+    /// <summary>
+    ///     Base class for handling SQL Server database connection.
+    /// </summary>
+
+    TDataBase = class
+        {$TYPEINFO ON}
+        strict private
+            var ODBC_Driver    : string;
+            var OLEDB_Provider : string;
+            var OLEDB_PSI      : string;
+            var Common_MARS    : string;
+            var Common_TSC     : string;
+            var Common_Encrypt : string;
+            var Common_Server  : string;
+            var Common_Database: string;
+            var Common_UserName: string;
+            var Common_Password: string;
+            var Interval       : integer;
+        private
+            var DBConnStr      : string;
+            var CmdTimeout     : integer;
+            var ConTimeout     : Integer;
+        published
+            /// <param name="ShowConnStr">
+            ///     Boolean. Set to true if you want to display connection string in the event log.
+            /// </param>
+            constructor Create(ShowConnStr: boolean);
+            procedure   InitializeConnection(idThd: integer; ErrorShow: boolean; var ActiveConnection: TADOConnection);
+            function    Check: integer;
+    end;
 
 implementation
 
-{ ############################################################## ! DATABASE CLASS ! ######################################################################### }
 
-{ ----------------------------------------------------------------------------------------------------------------------------------------------- CONSTRUCTOR }
+// ---------------------------------------------------------------------------------------------------------------------------------------- CREATE & RELEASE //
+
+
 constructor TDataBase.Create(ShowConnStr: boolean);
 var
-  AppSettings:  TSettings;
-  dbConnNoPwd:  string;
+    AppSettings: TSettings;
+    dbConnNoPwd: string;
+    WhichActive: string;
 begin
-  AppSettings:=TSettings.Create;
-  try
-    if AppSettings.TMIG.ReadString(DatabaseSetup,'ACTIVE','') = 'MSSQL' then
-    begin
-      DBProvider :=AppSettings.TMIG.ReadString(DatabaseSetup, 'MSSQLPROVIDER', '');
-      dbConnNoPwd:='Provider='                 + DBProvider + ';'
-                 + 'Data Source='              + AppSettings.TMIG.ReadString(DatabaseSetup, 'MSSQLSERVER',      '')  + ','
-                                               + AppSettings.TMIG.ReadString(DatabaseSetup, 'MSSQLPORT',        '')  + ';'
-                 + 'Initial catalog='          + AppSettings.TMIG.ReadString(DatabaseSetup, 'MSSQLCATALOG',     '')  + ';'
-                 + 'Persist Security Info='    + AppSettings.TMIG.ReadString(DatabaseSetup, 'MSSQLSECURITYINFO','')  + ';'
-                 + 'MultipleActiveResultSets=' + AppSettings.TMIG.ReadString(DatabaseSetup, 'MSSQLRESULTSETS',  '')  + ';'
-                 + 'Encrypt='                  + AppSettings.TMIG.ReadString(DatabaseSetup, 'MSSQLENCRYPT',     '')  + ';'
-                 + 'TrustServerCertificate='   + AppSettings.TMIG.ReadString(DatabaseSetup, 'MSSQLCERTIFICATE', '')  + ';'
-                 + 'User Id='                  + AppSettings.TMIG.ReadString(DatabaseSetup, 'MSSQLUSERNAME',    '')  + ';';
-      DBConnStr  :=dbConnNoPwd + 'Password='   + AppSettings.TMIG.ReadString(DatabaseSetup, 'MSSQLPASSWORD',    '')  + ';';
-      Interval  :=AppSettings.TMIG.ReadInteger(TimersSettings, 'NET_CONNETCTION', 5000);
-      CmdTimeout:=AppSettings.TMIG.ReadInteger(DatabaseSetup, 'COMMAND_TIMEOUT',    15);
-      ConTimeout:=AppSettings.TMIG.ReadInteger(DatabaseSetup, 'CONNECTION_TIMEOUT', 15);
+
+    // Get all data
+    AppSettings:=TSettings.Create;
+    try
+        WhichActive    :=AppSettings.TMIG.ReadString(DatabaseSetup,  'ACTIVE'         , '');
+        ODBC_Driver    :=AppSettings.TMIG.ReadString(DatabaseSetup,  'ODBC_Driver'    , '');
+        OLEDB_Provider :=AppSettings.TMIG.ReadString(DatabaseSetup,  'OLEDB_Provider' , '');
+        OLEDB_PSI      :=AppSettings.TMIG.ReadString(DatabaseSetup,  'OLEDB_PSI'      , '');
+        Common_MARS    :=AppSettings.TMIG.ReadString(DatabaseSetup,  'COMMON_MARS'    , '');
+        Common_TSC     :=AppSettings.TMIG.ReadString(DatabaseSetup,  'COMMON_TSC'     , '');
+        Common_Encrypt :=AppSettings.TMIG.ReadString(DatabaseSetup,  'COMMON_Encrypt' , '');
+        Common_Server  :=AppSettings.TMIG.ReadString(DatabaseSetup,  'COMMON_Server'  , '');
+        Common_Database:=AppSettings.TMIG.ReadString(DatabaseSetup,  'COMMON_Database', '');
+        Common_UserName:=AppSettings.TMIG.ReadString(DatabaseSetup,  'COMMON_UserName', '');
+        Common_Password:=AppSettings.TMIG.ReadString(DatabaseSetup,  'COMMON_Password', '');
+        CmdTimeout     :=AppSettings.TMIG.ReadInteger(DatabaseSetup, 'SERVER_CMD_TIMEOUT', 15);
+        ConTimeout     :=AppSettings.TMIG.ReadInteger(DatabaseSetup, 'SERVER_CON_TIMEOUT', 15);
+        Interval       :=AppSettings.TMIG.ReadInteger(TimersSettings,'NET_CONNETCTION'   , 5000);
+    finally
+        AppSettings.Free;
     end;
-  finally
-    AppSettings.Free;
-  end;
-  if ShowConnStr then LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Connection string built [show_no_password] = ' + dbConnNoPwd);
+
+    // Set template string
+    if WhichActive = dbODBC  then dbConnNoPwd:=ConStrODBC;
+    if WhichActive = dbOLEDB then dbConnNoPwd:=ConStrOLEDB;
+
+    // Replace tags for retrieved data (it ignores tags that are missing)
+    // Passwordless connection string
+    dbConnNoPwd:=ReplaceStr(dbConnNoPwd, '{ODBC_Driver}',      ODBC_Driver);
+    dbConnNoPwd:=ReplaceStr(dbConnNoPwd, '{OLEDB_Provider}',   OLEDB_Provider);
+    dbConnNoPwd:=ReplaceStr(dbConnNoPwd, '{OLEDB_PSI}',        OLEDB_PSI);
+    dbConnNoPwd:=ReplaceStr(dbConnNoPwd, '{Common_Server}',    Common_Server);
+    dbConnNoPwd:=ReplaceStr(dbConnNoPwd, '{Common_Database}',  Common_Database);
+    dbConnNoPwd:=ReplaceStr(dbConnNoPwd, '{Common_MARS}',      Common_MARS);
+    dbConnNoPwd:=ReplaceStr(dbConnNoPwd, '{Common_Encrypt}',   Common_Encrypt);
+    dbConnNoPwd:=ReplaceStr(dbConnNoPwd, '{Common_TSC}',       Common_TSC);
+    dbConnNoPwd:=ReplaceStr(dbConnNoPwd, '{Common_UserName}',  Common_UserName);
+
+    // Connection string with password
+    DBConnStr:=ReplaceStr(dbConnNoPwd, '{Common_Password}', Common_Password);
+
+    // Show connection string in event log
+    if (ShowConnStr) and (DBConnStr <> '') then
+        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Connection string built [show_no_password] = ' + dbConnNoPwd);
+
 end;
 
-{ --------------------------------------------------------------------------------------------------------------------------------------- CONNECT TO DATABASE }
 
-(* WARNING! MUST BE EXECUTED BEFORE ANY CONNECTION ATTEMPTS *)
+// ------------------------------------------------------------------------------------------------------------------------------------- CONNECT TO DATABASE //
+
+
+/// <summary>
+///     Initialize connection with database for given TADOConnection.
+/// </summary>
+/// <remarks>
+///     This method must be executed before any connection attempts.
+/// </remarks>
+/// <param name="idThd">Integer. Current thread id of running process.</param>
+/// <param name="ErrorShow">Boolean. Set to true if you want to display error message on connection failure.</param>
+/// <param name="ActiveConnection">TADOConnection. Must be established a'priori and passed as a reference.</param>
 
 procedure TDataBase.InitializeConnection(idThd: integer; ErrorShow: boolean; var ActiveConnection: TADOConnection);
 
-  (* NESTED METHOD *)
+    // --------------------------------------------------------------------------------------------------------------------------------------- NESTED METHOD //
 
-  procedure ErrorHandler(err_class: string; err_msg: string; should_quit: boolean; err_wnd: boolean);
-  begin
-    LogText(MainForm.EventLogPath, ERR_LOGTEXT + '[' + err_class + '] ' + err_msg + ' (' + IntToStr(ExitCode) + ').');
-    if err_wnd     then Application.MessageBox(PChar(ERR_MESSAGE), PChar(MainForm.CAPTION), MB_OK + MB_ICONWARNING);
-    if should_quit then Application.Terminate;
-  end;
-
-{ --------------------------------------------------------------- ! MAIN BLOCK ! ---------------------------------------------------------------------------- }
-begin
-  { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-  if not (ActiveConnection = nil) then ActiveConnection.Connected:=False;
-  { --------------------------------------------------------------------------------------------------------------------- SETUP CONNECTION AND TRY TO CONNECT }
-  try
-    { CONNECTION SETTINGS }
-    ActiveConnection.ConnectionString :=DBConnStr;
-    ActiveConnection.Provider         :=DBProvider;
-    ActiveConnection.ConnectionTimeout:=ConTimeout;
-    ActiveConnection.CommandTimeout   :=CmdTimeout;
-    ActiveConnection.ConnectOptions   :=coConnectUnspecified; (* The connection is formed synchronously *)
-    ActiveConnection.KeepConnection   :=True;
-    ActiveConnection.LoginPrompt      :=False;
-    ActiveConnection.Mode             :=cmReadWrite;
-    ActiveConnection.CursorLocation   :=clUseClient;          (* https://docs.microsoft.com/en-us/sql/ado/guide/data/the-significance-of-cursor-location *)
-    ActiveConnection.IsolationLevel   :=ilCursorStability;    (* https://technet.microsoft.com/en-us/library/ms189122(v=sql.105).aspx                    *)
-    { CONNECT TO GIVEN SERVER }
-    try
-      ActiveConnection.Connected:=True;
-      LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Server connection has been established successfully.');
-    except
-      on E: Exception do
-        ErrorHandler(E.ClassName, E.Message, False, ErrorShow);
-    end;
-  finally
-    { CHECK SERVER CONNECTION ON REGULAR BASIS }
-    if not MainForm.InetTimer.Enabled then
+    procedure ErrorHandler(err_class: string; err_msg: string; should_quit: boolean; err_wnd: boolean);
     begin
-      MainForm.InetTimer.Interval:=Interval;
-      MainForm.InetTimer.Enabled:=True;
+
+        LogText(MainForm.EventLogPath, ERR_LOGTEXT + '[' + err_class + '] ' + err_msg + ' (' + IntToStr(ExitCode) + ').');
+
+        if err_wnd then
+            Application.MessageBox(PChar(ERR_MESSAGE), PChar(MainForm.CAPTION), MB_OK + MB_ICONWARNING);
+
+        if should_quit then
+            Application.Terminate;
+
     end;
-  end;
+
+// ---------------------------------------------------------------------------------------------------------------------------------------------- MAIN BLOCK //
+
+begin
+
+    if not (ActiveConnection = nil)
+        then ActiveConnection.Connected:=False;
+
+    try
+
+        // Connection settings
+        ActiveConnection.ConnectionString :=DBConnStr;
+        ActiveConnection.ConnectionTimeout:=ConTimeout;
+        ActiveConnection.CommandTimeout   :=CmdTimeout;
+
+        /// <remarks>
+        ///     The connection is formed synchronously.
+        /// </remarks>
+
+        ActiveConnection.ConnectOptions   :=coConnectUnspecified;
+
+        ActiveConnection.KeepConnection   :=True;
+        ActiveConnection.LoginPrompt      :=False;
+        ActiveConnection.Mode             :=cmReadWrite;
+
+        /// <seealso cref="https://docs.microsoft.com/en-us/sql/ado/guide/data/the-significance-of-cursor-location"/>
+
+        ActiveConnection.CursorLocation   :=clUseClient;
+
+        /// <seealso cref="https://technet.microsoft.com/en-us/library/ms189122(v=sql.105).aspx"/>
+
+        ActiveConnection.IsolationLevel   :=ilCursorStability;
+
+        // Connect to given server
+        try
+            ActiveConnection.Connected:=True;
+            LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Server connection has been established successfully.');
+        except
+            on E: Exception do
+                ErrorHandler(E.ClassName, E.Message, False, ErrorShow);
+        end;
+
+    finally
+
+        // Check server connection on regular basis
+        if not MainForm.InetTimer.Enabled then
+        begin
+            MainForm.InetTimer.Interval:=Interval;
+            MainForm.InetTimer.Enabled:=True;
+        end;
+
+    end;
+
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------ CHECK CONNECTION WITH SERVER }
+// ---------------------------------------------------------------------------------------------------------------------------------- CONNECTION WITH SERVER //
+
+/// <summary>
+///     Check if can connect and query against given database.
+/// </summary>
+/// <returns>Integer. Error code.</returns>
+
 function TDataBase.Check: integer;
 var
-  EO:        EOleException;
-  ConCheck:  TADOConnection;
-  StrSQL:    string;
+    EO:        EOleException;
+    ConCheck:  TADOConnection;
+    StrSQL:    string;
 begin
-  { INITIALIZE }
-  Result:=0;
-  StrSQL:='SELECT 1';
-  ConCheck:=TADOConnection.Create(nil);
-  { ASSIGN PARAMETERS }
-  ConCheck.ConnectionString :=DBConnStr;
-  ConCheck.Provider         :=DBProvider;
-  ConCheck.ConnectionTimeout:=ConTimeout;
-  ConCheck.CommandTimeout   :=CmdTimeout;
-  ConCheck.KeepConnection   :=False;
-  ConCheck.LoginPrompt      :=False;
-  ConCheck.Mode             :=cmRead;
-  { TRY TO CONNECT }
-  try
+
+    Result:=0;
+
+    /// <remarks>
+    ///     It is not enough to establish connection, we must check if query can be executed. Therefore, we use simplist query
+    ///     to check if we can connect to the database and send/receive data.
+    /// </remarks>
+
+    StrSQL:='SELECT 1';
+    ConCheck:=TADOConnection.Create(nil);
+
+    // Assign parameters
+    ConCheck.ConnectionString :=DBConnStr;
+    ConCheck.ConnectionTimeout:=ConTimeout;
+    ConCheck.CommandTimeout   :=CmdTimeout;
+    ConCheck.KeepConnection   :=False;
+    ConCheck.LoginPrompt      :=False;
+    ConCheck.Mode             :=cmRead;
+
+    // Try to connect
     try
-      ConCheck.Connected:=True;
-      ConCheck.Execute(StrSQL, cmdText);
-    except
-      on E: Exception do
-      begin
-        Result:=100;
-        if E is EOLEException then
-        begin
-          EO:=EOleException(E);
-          Result:=EO.ErrorCode;
+        try
+            ConCheck.Connected:=True;
+            ConCheck.Execute(StrSQL, cmdText);
+        except
+            on E: Exception do
+            begin
+                Result:=100;
+                if E is EOLEException then
+                begin
+                    EO:=EOleException(E);
+                    Result:=EO.ErrorCode;
+                end;
+            end;
         end;
-      end;
+
+    finally
+
+        if ConCheck.Connected then
+        begin
+            MainForm.ExecMessage(False, conOK, strNULL);
+            ConCheck.Close;
+        end
+        else
+        begin
+            MainForm.ExecMessage(False, conERROR, strNULL);
+        end;
+
+        ConCheck.Free;
     end;
-  finally
-    if ConCheck.Connected then
-    begin
-      MainForm.ExecMessage(False, conOK, strNULL);
-      ConCheck.Close;
-    end
-    else
-    begin
-      MainForm.ExecMessage(False, conERROR, strNULL);
-    end;
-    ConCheck.Free;
-  end;
+
 end;
 
 end.

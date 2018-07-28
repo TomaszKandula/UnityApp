@@ -2,7 +2,7 @@
 /// <summary>
 ///     Below we provide all the application constants, so the project files do not use meaningless numbers
 ///     or custom strings within the methods and arguments. For clarity, always put new constant under relevant section.
-/// </summary>
+// </summary>
 
 const
 
@@ -61,21 +61,19 @@ const
 
     // -------------------------------------------------------------------------------------------------------------------------------------- INITIALIZATION //
 
-    DelayStd    :  integer   = 50;                 // Splash screen: slown down a bit to display the message during startup
+    DelayStd    :  integer   = 10;                 // Splash screen: slown down a bit to display the message during startup
     DelayErr    :  integer   = 750;                // Splash screen: slown down significantly for user in case of error
     AllTasks    :  integer   = 14;                 // Total number of all tasks on startup
     SELCOLOR    :  dword     = $00F2E4D7;          // Application color #1
     FONCOLOR    :  dword     = $006433C9;          // Application color #2
     CUSCOLOR    :  dword     = $00FFDBB7;          // Application color #3
     APPCAPTION  :  string    = 'Unity';            // Use it for "Findwindow" method
-    LyncCall    :  string    = 'LyncCall.exe';     // Lync/Skype API
-    UnityReader :  string    = 'UnityReader.exe';  // Chromium implementation
+    LyncCall    :  string    = 'LyncCall.exe';     // Lync/Skype API developed in VS2017/C#
+    UnityReader :  string    = 'UnityReader.exe';  // Chromium implementation CEF3 and CEF4
     LicenceFile :  string    = 'Unity.licx';       // Licence file
-    GridImgFile :  string    = 'Unity.img';        // Application custom image
+    GridImgFile :  string    = 'Unity.img';        // Application custom image(s)
     ReleaseFile :  string    = 'Release.pak';      // Release package
     CurrentMutex:  PWideChar = 'UNITY_10090';      // Mutex value, increase it with each release
-    AppConfig   :  integer   = 2;                  //
-    LicData     :  integer   = 3;                  //
 
     // --------------------------------------------------------------------------------------------------------------------------------------- SPLASH SCREEN //
 
@@ -123,6 +121,11 @@ const
 
     // MODES ----------------------------------------------------------------------------------------------------------------------------------------------- //
 
+
+    // ------------------------------------------------------------------------------------------------------------------------------------------- FILE TYPE //
+
+    AppConfig   :  integer   = 2;
+    LicData     :  integer   = 3;
 
     // -------------------------------------------------------------------------------------------------------------------------------- EMAIL AUTHENTICATION //
 
@@ -293,6 +296,10 @@ const
     conERROR    = 15;
     strNULL     = 'NULL';
 
+    // ---------------------------------------------------------------------------------------------------------------------------- DATABASE DRIVER/PROVIDER //
+
+    dbOLEDB = 'OLEDB';
+    dbODBC  = 'ODBC';
 
     // -------------------------------------------------------------------------------------------------------------------------------- ADODB/ADO.NET FILTER //
 
@@ -372,6 +379,22 @@ const
     // SQL SERVER DATABASE --------------------------------------------------------------------------------------------------------------------------------- //
 
 
+    // ------------------------------------------------------------------------------------------------------------------------------------------------ NCSI //
+
+    ncsiWww  : string = 'http://www.msftncsi.com/';
+    ncsiFile : string = 'ncsi.txt';
+    ncsiGet  : string = 'GET';
+    ncsiHead : string = 'HEAD';
+
+    HTTPREQUEST_SETCREDENTIALS_FOR_SERVER = 0;
+    HTTPREQUEST_SETCREDENTIALS_FOR_PROXY  = 1;
+
+    WINHTTP_AUTOLOGON_SECURITY_LEVEL_LOW    = 0;
+    WINHTTP_AUTOLOGON_SECURITY_LEVEL_MEDIUM = 1;
+    WINHTTP_AUTOLOGON_SECURITY_LEVEL_HIGH   = 2;
+
+    MAX_CHECK_ATTEMPTS = 6;
+
     // ---------------------------------------------------------------------------------------------------------------------------------------- SQL KEYWORDS //
 
     /// <remarks>
@@ -416,8 +439,8 @@ const
 
     // -------------------------------------------------------------------------------------------------------------------------------- SQL TRANSACTION TYPE //
 
-    ttImplicita = 0;
-    ttExplicit  = 1;
+    ttImplicit = 0;
+    ttExplicit = 1;
 
     // ----------------------------------------------------------------------------------------------------------------------------------- SSIS STATUS CODES //
 
@@ -491,4 +514,35 @@ const
                    '  <td class="col5">{INV_AMT}</td>'        + #13#10 +
                    '  <td class="col6">{INV_OSA}</td>'        + #13#10 +
                    '</tr>'                                    + #13#10;
+
+
+    // ----------------------------------------------------------------------------------------------------------------------------------- SERVER CONNECTION //
+
+
+    /// <summary>
+    ///     Connection string template for OLE DB providers.
+    /// </summary>
+
+    ConStrOLEDB: string = 'Provider={OLEDB_Provider};'              +
+                          'Data Source={Common_Server};'            +
+                          'Initial catalog={Common_Database};'      +
+                          'Persist Security Info={OLEDB_PSI};'      +
+                          'MultipleActiveResultSets={Common_MARS};' +
+                          'Encrypt={Common_Encrypt};'               +
+                          'TrustServerCertificate={Common_TSC};'    +
+                          'User Id={Common_UserName};'              +
+                          'Password={Common_Password};';
+
+    /// <summary>
+    ///     Connection string template for ODBC drivers.
+    /// </summary>
+
+    ConStrODBC: string = 'Driver={ODBC_Driver};'                 +
+                         'Server={Common_Server};'               +
+                         'Database={Common_Database};'           +
+                         'MARS_Connection={Common_MARS};'        +
+                         'Encrypt={Common_Encrypt};'             +
+                         'TrustServerCertificate={Common_TSC};'  +
+                         'Uid={Common_UserName};'                +
+                         'Pwd={Common_Password};';
 
