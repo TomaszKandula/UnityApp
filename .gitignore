@@ -1,9 +1,19 @@
 # Ignore thumbnails created by Windows:
 Thumbs.db
 
-# Ignore below folders (debugging and history):
+# Ignore below folders (build results) in RAD Studio:
 Debug/
 __history/
 __recovery/
 
-
+# Ignore below folders (build results) in Visual Studio:
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
