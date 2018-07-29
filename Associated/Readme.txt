@@ -3,6 +3,13 @@ Associated Project
 
 Folder: 	LyncCall/Lync1
 Name: 		LyncCall
-Description: 	Separate project in Visual Studio 2017. 
-		Skype/Lync API (executable form) to call passed (as parameter) phone number.
+Description: 	
+
+Separate project in Visual Studio 2017. Small Skype/Lync API (executable form) to call phone number,
+that has been passed as a parameter.
+
+WARNING:
+
+This is associated project, do not use Visual Studio git commit/push. Use only
+command-line git from master folder "/__Unity/".
 
