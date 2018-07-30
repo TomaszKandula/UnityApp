@@ -28,6 +28,7 @@ type
     var ADOCon      : TADOConnection;
     var CmdType     : TCommandType;
     var RowsAffected: integer;
+    var LastErrorMsg: string;
   published
     constructor Create(Connector: TADOConnection);
     destructor  Destroy; override;
@@ -67,6 +68,7 @@ end;
 procedure TMSSQL.ClearSQL;
 begin
   StrSQL:='';
+  LastErrorMsg:='';
   RowsAffected:=0;
 end;
 
@@ -105,7 +107,9 @@ begin
       RowsAffected:=0;
       Result:=Query.Execute(RowsAffected, 0);
     except
+
       Result:=nil;
+
     end;
   finally
     Query.Free;

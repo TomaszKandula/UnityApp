@@ -802,6 +802,7 @@ begin
   { INSERT STATEMENT | INSERT NEW DATA }
   Transaction:=ArrayToSql(SourceArray, DestTable, ColumnsToList(Columns, enQuotesOff));
   Transaction:='BEGIN TRANSACTION'                                              + CRLF +
+               'SET XACT_ABORT ON'                                              + CRLF +
                'SELECT TOP 1 * FROM ' + DestTable + ' WITH (TABLOCK, HOLDLOCK)' + CRLF +
                DeleteData                                                       + CRLF +
                Transaction                                                      + CRLF +
