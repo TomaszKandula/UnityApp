@@ -193,7 +193,7 @@ begin
   { ------------------------------------------------------------------------------------------------------------------------------------ SORT VIA TOTAL VALUE }
   QuickSortExt(TotalPerItem, ListPosition, Low(TotalPerItem), High(TotalPerItem), False);
   { ------------------------------------------------------------------------------------------------------------------------------------ COMPUTE AND SHOW RCA }
-  for iCNT:=Low(ListPosition) to High(ListPosition) - 1 do
+  for iCNT:=Low(ListPosition) to High(ListPosition) do
   begin
     Count:=Count + TotalPerItem[iCNT];
     { ASSIGN RISK CLASS 'A' }
@@ -794,19 +794,25 @@ begin
   { DELETE STATEMENT | REMOVE OLD DATA }
   DeleteData:=DELETE_FROM + DestTable;
   Condition:=TSnapshots.GROUP_ID + EQUAL + QuotedStr(SourceArray[0, 0]) + _AND + TSnapshots.AGE_DATE + EQUAL + QuotedStr(LeftStr(SourceArray[0, 1], 10));
-(*
+
   { INSERT STATEMENT | INSERT NEW DATA }
-  Transaction:=TransactSnap;
-  Transaction:=StringReplace(Transaction, '{DestTable}',   DestTable,   [rfReplaceAll]);
-  Transaction:=StringReplace(Transaction, '{Condition}',   Condition,   [rfReplaceAll]);
-  Transaction:=StringReplace(Transaction, '{DeleteData}',  DeleteData,  [rfReplaceAll]);
+  Transaction:=TransactTemp;
+  Transaction:=StringReplace(Transaction, '{CommonSelect}', CommonSelect, [rfReplaceAll]);
+  Transaction:=StringReplace(Transaction, '{CommonDelete}', CommonDelete, [rfReplaceAll]);
+  Transaction:=StringReplace(Transaction, '{DestTable}',    DestTable,    [rfReplaceAll]);
+  Transaction:=StringReplace(Transaction, '{Condition}',    Condition,    [rfReplaceAll]);
+  Transaction:=StringReplace(Transaction, '{DeleteData}',   DeleteData,   [rfReplaceAll]);
+  Transaction:=StringReplace(Transaction, '{SimpleInput}',  SPACE,        [rfReplaceAll]);
+  Transaction:=StringReplace(Transaction, '{SWITCH}',       'OFF',        [rfReplaceAll]);
+  Transaction:=StringReplace(Transaction, '{Begin}',        _BEGIN,       [rfReplaceAll]);
+  Transaction:=StringReplace(Transaction, '{End}',          _END,         [rfReplaceAll]);
   Transaction:=StringReplace(
         Transaction,
-        '{InsertNew}',
-        ArrayToSql(SourceArray, DestTable, ColumnsToList(Columns, enQuotesOff)),
+        '{ComplexInput}',
+        ToSqlInsert(SourceArray, nil, DestTable, ColumnsToList(Columns, enQuotesOff)),
         [rfReplaceAll]
   );
-*)
+
   { EXECUTE }
   StrSQL:=Transaction;
   try
@@ -816,7 +822,7 @@ begin
     on E: Exception do
       LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Cannot send to server. Error has been thrown: ' + E.Message);
   end;
-  LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Age View transferred to Microsoft SQL Server. Rows affected: ' + IntToStr(High(SourceArray)) + '.');
+  LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Age View transferred to Microsoft SQL Server. Rows affected: ' + RowsAffected.ToString + '.');
 end;
 
 { ----------------------------------------------------------------------------------------------------------------------------- EXPORT ARRAY DATA TO CSV FILE }

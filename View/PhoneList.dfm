@@ -161,7 +161,6 @@ object PhoneListForm: TPhoneListForm
         Color = clCream
         ScrollBars = ssVertical
         TabOrder = 0
-        OnKeyPress = PhoneListKeyPress
       end
     end
   end

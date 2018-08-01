@@ -3,8 +3,8 @@ object ViewSearchForm: TViewSearchForm
   Top = 0
   BorderStyle = bsToolWindow
   Caption = 'Unity'
-  ClientHeight = 406
-  ClientWidth = 498
+  ClientHeight = 403
+  ClientWidth = 683
   Color = 15527148
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -21,8 +21,8 @@ object ViewSearchForm: TViewSearchForm
     AlignWithMargins = True
     Left = 10
     Top = 10
-    Width = 478
-    Height = 341
+    Width = 663
+    Height = 338
     Margins.Left = 10
     Margins.Top = 10
     Margins.Right = 10
@@ -32,12 +32,14 @@ object ViewSearchForm: TViewSearchForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
+    ExplicitWidth = 478
+    ExplicitHeight = 341
     object SearchBox: TGroupBox
       AlignWithMargins = True
       Left = 10
       Top = 10
-      Width = 458
-      Height = 321
+      Width = 643
+      Height = 318
       Margins.Left = 10
       Margins.Top = 10
       Margins.Right = 10
@@ -45,6 +47,8 @@ object ViewSearchForm: TViewSearchForm
       Align = alClient
       Caption = 'Search Address Book'
       TabOrder = 0
+      ExplicitWidth = 458
+      ExplicitHeight = 321
       object Text1: TLabel
         Left = 24
         Top = 59
@@ -83,7 +87,7 @@ object ViewSearchForm: TViewSearchForm
       object Splitter: TBevel
         Left = 24
         Top = 176
-        Width = 417
+        Width = 593
         Height = 17
         Shape = bsTopLine
       end
@@ -116,7 +120,7 @@ object ViewSearchForm: TViewSearchForm
         Caption = 'Division'
       end
       object CheckBoxName: TCheckBox
-        Left = 385
+        Left = 457
         Top = 58
         Width = 56
         Height = 17
@@ -126,7 +130,7 @@ object ViewSearchForm: TViewSearchForm
         OnClick = CheckBoxNameClick
       end
       object CheckBoxNumber: TCheckBox
-        Left = 385
+        Left = 457
         Top = 31
         Width = 56
         Height = 17
@@ -138,7 +142,7 @@ object ViewSearchForm: TViewSearchForm
         OnClick = CheckBoxNumberClick
       end
       object CheckBoxEmail: TCheckBox
-        Left = 385
+        Left = 457
         Top = 85
         Width = 56
         Height = 17
@@ -148,7 +152,7 @@ object ViewSearchForm: TViewSearchForm
         OnClick = CheckBoxEmailClick
       end
       object CheckBoxEstatement: TCheckBox
-        Left = 385
+        Left = 457
         Top = 112
         Width = 56
         Height = 17
@@ -158,7 +162,7 @@ object ViewSearchForm: TViewSearchForm
         OnClick = CheckBoxEstatementClick
       end
       object CheckBoxPhones: TCheckBox
-        Left = 385
+        Left = 457
         Top = 138
         Width = 56
         Height = 17
@@ -168,7 +172,7 @@ object ViewSearchForm: TViewSearchForm
         OnClick = CheckBoxPhonesClick
       end
       object PanelEditNumber: TPanel
-        Left = 136
+        Left = 208
         Top = 26
         Width = 217
         Height = 25
@@ -191,10 +195,12 @@ object ViewSearchForm: TViewSearchForm
           Color = clCream
           NumbersOnly = True
           TabOrder = 0
+          ExplicitLeft = 10
+          ExplicitTop = 4
         end
       end
       object PanelEditName: TPanel
-        Left = 136
+        Left = 208
         Top = 53
         Width = 217
         Height = 26
@@ -220,7 +226,7 @@ object ViewSearchForm: TViewSearchForm
         end
       end
       object PanelEmail: TPanel
-        Left = 136
+        Left = 208
         Top = 80
         Width = 217
         Height = 25
@@ -243,7 +249,7 @@ object ViewSearchForm: TViewSearchForm
         end
       end
       object PanelPhones: TPanel
-        Left = 136
+        Left = 208
         Top = 134
         Width = 217
         Height = 25
@@ -270,7 +276,7 @@ object ViewSearchForm: TViewSearchForm
         end
       end
       object PanelEstatement: TPanel
-        Left = 136
+        Left = 208
         Top = 107
         Width = 217
         Height = 25
@@ -296,7 +302,7 @@ object ViewSearchForm: TViewSearchForm
         end
       end
       object CheckBoxUserAlias: TCheckBox
-        Left = 385
+        Left = 457
         Top = 197
         Width = 56
         Height = 17
@@ -306,7 +312,7 @@ object ViewSearchForm: TViewSearchForm
         OnClick = CheckBoxUserAliasClick
       end
       object CheckBoxCoCode: TCheckBox
-        Left = 385
+        Left = 457
         Top = 224
         Width = 56
         Height = 17
@@ -316,7 +322,7 @@ object ViewSearchForm: TViewSearchForm
         OnClick = CheckBoxCoCodeClick
       end
       object CheckBoxAgent: TCheckBox
-        Left = 385
+        Left = 457
         Top = 251
         Width = 56
         Height = 17
@@ -326,7 +332,7 @@ object ViewSearchForm: TViewSearchForm
         OnClick = CheckBoxAgentClick
       end
       object CheckBoxDivision: TCheckBox
-        Left = 385
+        Left = 457
         Top = 278
         Width = 56
         Height = 17
@@ -336,7 +342,7 @@ object ViewSearchForm: TViewSearchForm
         OnClick = CheckBoxDivisionClick
       end
       object PanelUserAlias: TPanel
-        Left = 138
+        Left = 210
         Top = 193
         Width = 217
         Height = 25
@@ -363,7 +369,7 @@ object ViewSearchForm: TViewSearchForm
         end
       end
       object PanelCoCode: TPanel
-        Left = 138
+        Left = 210
         Top = 219
         Width = 217
         Height = 25
@@ -391,7 +397,7 @@ object ViewSearchForm: TViewSearchForm
         end
       end
       object PanelAgent: TPanel
-        Left = 138
+        Left = 210
         Top = 246
         Width = 217
         Height = 25
@@ -419,7 +425,7 @@ object ViewSearchForm: TViewSearchForm
         end
       end
       object PanelDivision: TPanel
-        Left = 138
+        Left = 210
         Top = 273
         Width = 217
         Height = 25
@@ -446,13 +452,97 @@ object ViewSearchForm: TViewSearchForm
           TabOrder = 0
         end
       end
+      object CheckBoxNameEqual: TCheckBox
+        Left = 113
+        Top = 58
+        Width = 56
+        Height = 17
+        Cursor = crHandPoint
+        Caption = 'Equal'
+        Checked = True
+        State = cbChecked
+        TabOrder = 18
+        OnClick = CheckBoxNameEqualClick
+      end
+      object CheckBoxEmailEqual: TCheckBox
+        Left = 113
+        Top = 85
+        Width = 56
+        Height = 17
+        Cursor = crHandPoint
+        Caption = 'Equal'
+        Checked = True
+        State = cbChecked
+        TabOrder = 19
+        OnClick = CheckBoxEmailEqualClick
+      end
+      object CheckBoxEstatEqual: TCheckBox
+        Left = 113
+        Top = 112
+        Width = 56
+        Height = 17
+        Cursor = crHandPoint
+        Caption = 'Equal'
+        Checked = True
+        State = cbChecked
+        TabOrder = 20
+        OnClick = CheckBoxEstatEqualClick
+      end
+      object CheckBoxNameCase: TCheckBox
+        Left = 542
+        Top = 57
+        Width = 75
+        Height = 17
+        Cursor = crHandPoint
+        Caption = 'Match Case'
+        TabOrder = 21
+      end
+      object CheckBoxEmailCase: TCheckBox
+        Left = 542
+        Top = 85
+        Width = 75
+        Height = 17
+        Cursor = crHandPoint
+        Caption = 'Match Case'
+        TabOrder = 22
+      end
+      object CheckBoxEstatCase: TCheckBox
+        Left = 542
+        Top = 112
+        Width = 75
+        Height = 17
+        Cursor = crHandPoint
+        Caption = 'Match Case'
+        TabOrder = 23
+      end
+      object CheckBoxAliasEqual: TCheckBox
+        Left = 113
+        Top = 198
+        Width = 56
+        Height = 17
+        Cursor = crHandPoint
+        Caption = 'Equal'
+        Checked = True
+        State = cbChecked
+        TabOrder = 24
+        OnClick = CheckBoxAliasEqualClick
+      end
+      object CheckBoxAliasCase: TCheckBox
+        Left = 542
+        Top = 198
+        Width = 75
+        Height = 17
+        Cursor = crHandPoint
+        Caption = 'Match Case'
+        TabOrder = 25
+      end
     end
   end
   object PanelBottom: TPanel
     AlignWithMargins = True
     Left = 0
-    Top = 361
-    Width = 498
+    Top = 358
+    Width = 683
     Height = 45
     Margins.Left = 0
     Margins.Top = 10
@@ -463,9 +553,11 @@ object ViewSearchForm: TViewSearchForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 1
+    ExplicitTop = 361
+    ExplicitWidth = 498
     object btnSearch: TSpeedButton
       AlignWithMargins = True
-      Left = 368
+      Left = 553
       Top = 12
       Width = 110
       Height = 21
@@ -512,7 +604,7 @@ object ViewSearchForm: TViewSearchForm
     end
     object btnCancel: TSpeedButton
       AlignWithMargins = True
-      Left = 243
+      Left = 428
       Top = 12
       Width = 110
       Height = 21

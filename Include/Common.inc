@@ -429,7 +429,9 @@ const
     _AS          : string = ' AS ';
     MAX          : string = ' MAX ';
     SUM          : string = ' SUM ';
+    LIKE         : string = ' LIKE ';
     EXECUTE      : string = ' EXEC ';
+    MATCHCASE    : string = ' COLLATE SQL_Latin1_General_CP1_CS_AS ';
 
     // --------------------------------------------------------------------------------------------------------------------------------- TRANSACTION WRAPPER //
 

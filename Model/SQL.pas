@@ -29,10 +29,7 @@ type
         procedure   ClearSQL;
         function    CleanStr(Text: string; Quoted: boolean): string;
         function    ExecSQL: _Recordset;
-
-        function    GridToSql(Grid: TStringGrid; tblName: string; tblColumns: string; sRow: integer; sCol: integer): string;
-        function    ArrayToSql(Table: TLists; tblName: string; tblColumns: string): string;
-
+        function    ToSqlInsert(Table: TLists; Grid: TStringGrid; tblName: string; tblColumns: string): string;
         function    SqlToGrid(var Grid: TStringGrid; RS: _Recordset; AutoNoCol: boolean; Headers: boolean): boolean;
         function    SqlToSimpleList(var List: TComboBox; RS: _Recordset): boolean;
     end;
@@ -60,7 +57,7 @@ type
         function    ColumnsToList(Holder: TStringList; Quoted: integer): string;
         procedure   CleanUp;
         function    OpenTable(TableName: string): boolean;
-        function    InsertInto(TableName: string; TransactionType: integer): boolean;
+        function    InsertInto(TableName: string; TransactionType: integer; ExtSourceGrid: TStringGrid = nil {=OPTION}; ExtSourceArray: TLists = nil {=OPTION}): boolean;
         function    UpdateRecord(TableName: string; TransactionType: integer; SingleCondition: string = '' {=OPTIONAL} ): boolean;
         function    DeleteRecord(TableName: string; KeyName: string; KeyValue: string; TransactionType: integer): boolean;
     end;
@@ -168,7 +165,7 @@ end;
 //      using multi-dimensional array
 /// </remarks>
 
-function TMSSQL.ArrayToSql(Table: TLists; tblName: string; tblColumns: string): string;
+function TMSSQL.ToSqlInsert(Table: TLists; Grid: TStringGrid; tblName: string; tblColumns: string): string; // REFACTOR!!!
 var
     iCNT    : integer;
     jCNT    : integer;
@@ -177,28 +174,65 @@ var
     LINES   : string;
     mRows   : integer;
     mCols   : integer;
+    sRows   : integer;
+    sCols   : integer;
     Clean   : string;
-    Transact: string;
 begin
 
+    mRows :=0;
+    mCols :=0;
+    sRows :=0;
+    sCols :=0;
     Result:='';
-    LEAD:=INSERT + SPACE + tblName + ' ( ' + tblColumns + ' ) ' + CRLF;
-    mRows:=High(Table) - 1;
-    mCols:=High(Table[1]);
 
-    for iCNT:=0 to mRows do
+    // Table and Grid cannot be nil or provided at the same time
+    // We require only one of them
+    if (Table = nil)  and (Grid = nil) then Exit;
+    if (Table <> nil) and (Grid <> nil) then Exit;
+
+    LEAD:=INSERT + SPACE + tblName + ' ( ' + tblColumns + ' ) ' + CRLF;
+
+    if Table <> nil then
+    begin
+        mRows:=High(Table) - 1;
+        mCols:=High(Table[1]);
+        sRows:=0;
+        sCols:=0;
+    end;
+
+    if Grid <> nil then
+    begin
+        mRows:=Grid.RowCount - 1;
+        mCols:=Grid.ColCount - 1;
+        // Skipt first row in StringGrid (table header)
+        sRows:=1;
+        sCols:=1;
+    end;
+
+    for iCNT:=sRows to mRows do
     begin
         LINE:=SELECT + SPACE;
 
-        for jCNT:=0 to mCols do
+        for jCNT:=sCols to mCols do
         begin
 
             // Clear data from characters that may injured SQL execution
-            Clean:=CleanStr(Table[iCNT, jCNT], True);
+            if Table <> nil then Clean:=CleanStr(Table[iCNT, jCNT], True);
+            if Grid  <> nil then Clean:=CleanStr(Grid.Cells[jCNT, iCNT], True);
 
             if (jCNT <> mCols) then LINE:=LINE + Clean + COMMA;
-            if (jCNT =  mCols) and (iCNT <> mRows) then LINE:=LINE + QuotedStr(Table[iCNT, jCNT]) + SPACE + UNION + CRLF;
-            if (jCNT =  mCols) and (iCNT =  mRows) then LINE:=LINE + QuotedStr(Table[iCNT, jCNT]) + CRLF;
+
+            if Table <> nil then
+            begin
+                if (jCNT =  mCols) and (iCNT <> mRows) then LINE:=LINE + QuotedStr(Table[iCNT, jCNT]) + SPACE + UNION + CRLF;
+                if (jCNT =  mCols) and (iCNT =  mRows) then LINE:=LINE + QuotedStr(Table[iCNT, jCNT]) + CRLF;
+            end;
+
+            if Grid <> nil then
+            begin
+                if (jCNT =  mCols) and (iCNT <> mRows) then LINE:=LINE + QuotedStr(Grid.Cells[jCNT, iCNT]) + SPACE + UNION + CRLF;
+                if (jCNT =  mCols) and (iCNT =  mRows) then LINE:=LINE + QuotedStr(Grid.Cells[jCNT, iCNT]) + CRLF;
+            end;
 
         end;
 
@@ -207,48 +241,7 @@ begin
 
     end;
 
-    // Output SQL expression (no transaction)
-    Result:=(LEAD + LINES);
-
-end;
-
-function TMSSQL.GridToSql(Grid: TStringGrid; tblName: string; tblColumns: string; sRow: integer; sCol: integer): string;         /// REMOVE THAT ONE AND UPDATE ABOVE APPROPIATELY!!!
-var
-    iCNT    : integer;
-    jCNT    : integer;
-    LEAD    : string;
-    LINE    : string;
-    LINES   : string;
-    mRows   : integer;
-    mCols   : integer;
-    Clean   : string;
-    Transact: string;
-begin
-
-    Result:='';
-    LEAD:=INSERT + SPACE + tblName + ' ( ' + tblColumns + ' ) ' + CRLF;
-    mRows:=Grid.RowCount - 1;
-    mCols:=Grid.ColCount - 1;
-
-    for iCNT:=sRow to mRows do
-    begin
-        LINE:=SELECT + SPACE;
-
-        for jCNT:=sCol to mCols do
-        begin
-
-            Clean:=CleanStr(Grid.Cells[jCNT, iCNT], True);
-
-            if (jCNT <> mCols) then LINE:=LINE + Clean + COMMA;
-            if (jCNT =  mCols) and (iCNT <> mRows) then LINE:=LINE + QuotedStr(Grid.Cells[jCNT, iCNT]) + SPACE + UNION + CRLF;
-            if (jCNT =  mCols) and (iCNT =  mRows) then LINE:=LINE + QuotedStr(Grid.Cells[jCNT, iCNT]) + CRLF;
-        end;
-
-        LINES:=LINES + LINE;
-        LINE:='';
-    end;
-
-    // Output SQL expression
+    // Output SQL expression (without transaction template)
     Result:=(LEAD + LINES);
 
 end;
@@ -455,7 +448,7 @@ end;
 ///                  transaction, it allows rollback in case of default.
 /// </param>
 
-function TDataTables.InsertInto(TableName: string; TransactionType: integer): boolean;
+function TDataTables.InsertInto(TableName: string; TransactionType: integer; ExtSourceGrid: TStringGrid = nil {=OPTION}; ExtSourceArray: TLists = nil {=OPTION}): boolean;
 var
     Transact: string;
 begin
@@ -464,12 +457,19 @@ begin
 
     try
 
-        if (Values.Text <> '') and (Columns.Text <> '') then
+        if not(string.IsNullOrEmpty(Columns.Text)) then
         begin
-            StrSQL:=INSERT +
-                      TableName + SPACE + BracketStr(ColumnsToList(Columns, enQuotesOff), brRound) +
-                    VAL +
-                      BracketStr(ColumnsToList(Values, enQuotesOn), brRound);
+
+            if (string.IsNullOrEmpty(Values.Text)) and ( (ExtSourceGrid = nil) and (ExtSourceArray = nil) ) then
+            begin
+                StrSQL:=INSERT +
+                          TableName + SPACE + BracketStr(ColumnsToList(Columns, enQuotesOff), brRound) +
+                        VAL +
+                          BracketStr(ColumnsToList(Values, enQuotesOn), brRound);
+            end;
+
+            if (ExtSourceGrid = nil)  and (ExtSourceArray <> nil) then StrSQL:=ToSqlInsert(ExtSourceArray, nil, TableName, ColumnsToList(Columns, enQuotesOff));
+            if (ExtSourceGrid <> nil) and (ExtSourceArray = nil)  then StrSQL:=ToSqlInsert(nil, ExtSourceGrid, TableName, ColumnsToList(Columns, enQuotesOff));
 
             if TransactionType = ttExplicit then
             begin
@@ -520,7 +520,7 @@ begin
 
     Result:=False;
 
-    if (string.IsNullOrEmpty(Columns.Text)) or (string.IsNullOrEmpty(Values.Text)) then Exit;
+    if (string.IsNullOrEmpty(Columns.Text))    or  (string.IsNullOrEmpty(Values.Text))     then Exit;
     if (string.IsNullOrEmpty(SingleCondition)) and (string.IsNullOrEmpty(Conditions.Text)) then Exit;
 
     // Execute update for each column

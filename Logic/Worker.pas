@@ -834,11 +834,6 @@ begin
                     Book.Values.Add(FGrid.Cells[FGrid.ReturnColumn(TAddressBook.PHONE_NUMBERS, 1, 1), FGrid.UpdatedRowsHolder[iCNT]]);
                     Book.Values.Add(FGrid.Cells[FGrid.ReturnColumn(TAddressBook.CONTACT,       1, 1), FGrid.UpdatedRowsHolder[iCNT]]);
                     Book.Values.Add(FGrid.Cells[FGrid.ReturnColumn(TAddressBook.ESTATEMENTS,   1, 1), FGrid.UpdatedRowsHolder[iCNT]]);
-                    // Conditions
-                    Book.Conditions.Add(Condition);
-                    Book.Conditions.Add(Condition);
-                    Book.Conditions.Add(Condition);
-                    Book.Conditions.Add(Condition);
                 end;
 
                 Result:=Book.UpdateRecord(TblAddressbook, ttExplicit, Condition);
@@ -877,11 +872,6 @@ begin
             Book.Values.Add(FContact);
             Book.Values.Add(FEstatement);
             Book.Values.Add(FEmail);
-            // Conditions
-            Book.Conditions.Add(Condition);
-            Book.Conditions.Add(Condition);
-            Book.Conditions.Add(Condition);
-            Book.Conditions.Add(Condition);
 
             Result:=Book.UpdateRecord(TblAddressbook, ttExplicit, Condition);
 
@@ -968,8 +958,9 @@ begin
             Book.Columns.Add(TAddressBook.DIVISION);
             Book.Columns.Add(TAddressBook.COCODE);
             try
-                Book.StrSQL:=Book.ArrayToSql(AddrBook, TblAddressbook, Book.ColumnsToList(Book.Columns, enQuotesOff));
-                Book.ExecSQL;
+
+                Book.InsertInto(TblAddressbook, ttExplicit, nil, AddrBook);
+
                 if Book.RowsAffected > 0 then
                 begin
                     MainForm.ExecMessage(False, mcInfo, 'Address Book has been successfully populated by selected item(s).');
@@ -1150,17 +1141,14 @@ begin
                 // Define columns, values and conditions
                 DailyText.Columns.Add(TDaily.STAMP);
                 DailyText.Values.Add(DateTimeToStr(Now));
-                DailyText.Conditions.Add(Condition);
                 DailyText.Columns.Add(TDaily.USER_ALIAS);
                 DailyText.Values.Add(UpperCase(MainForm.WinUserName));
-                DailyText.Conditions.Add(Condition);
 
                 if FEmail then
                 begin
                     Email:=IntToStr(StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDaily.EMAIL].Value), 0));
                     DailyText.Columns.Add(TDaily.EMAIL);
                     DailyText.Values.Add(Email);
-                    DailyText.Conditions.Add(Condition);
                 end;
 
                 // Call event and call duration always comes together
@@ -1170,10 +1158,8 @@ begin
                     Inc(CallEvent);
                     DailyText.Columns.Add(TDaily.CALLEVENT);
                     DailyText.Values.Add(IntToStr(CallEvent));
-                    DailyText.Conditions.Add(Condition);
                     DailyText.Columns.Add(TDaily.CALLDURATION);
                     DailyText.Values.Add(FCallDuration);
-                    DailyText.Conditions.Add(Condition);
                 end;
 
                 if FEmailReminder then
@@ -1182,7 +1168,6 @@ begin
                     Inc(EmailReminder);
                     DailyText.Columns.Add(TDaily.EMAIL_Reminder);
                     DailyText.Values.Add(IntToStr(EmailReminder));
-                    DailyText.Conditions.Add(Condition);
                 end;
 
                 if FEmailAutoStat then
@@ -1191,7 +1176,6 @@ begin
                     Inc(EmailAutoStat);
                     DailyText.Columns.Add(TDaily.EMAIL_AutoStat);
                     DailyText.Values.Add(IntToStr(EmailAutoStat));
-                    DailyText.Conditions.Add(Condition);
                 end;
 
                 if FEmailManuStat then
@@ -1200,14 +1184,12 @@ begin
                     Inc(EmailManuStat);
                     DailyText.Columns.Add(TDaily.EMAIL_ManuStat);
                     DailyText.Values.Add(IntToStr(EmailManuStat));
-                    DailyText.Conditions.Add(Condition);
                 end;
 
                 if not(FFixedComment = '') then
                 begin
                     DailyText.Columns.Add(TDaily.FIXCOMMENT);
                     DailyText.Values.Add(FFixedComment);
-                    DailyText.Conditions.Add(Condition);
                 end;
 
                 // Execute
@@ -1380,37 +1362,31 @@ begin
                 // Define columns, vaues and conditions
                 GenText.Columns.Add(TGeneral.STAMP);
                 GenText.Values.Add(DateTimeToStr(Now));
-                GenText.Conditions.Add(Condition);
                 GenText.Columns.Add(TGeneral.USER_ALIAS);
                 GenText.Values.Add(UpperCase(MainForm.WinUserName));
-                GenText.Conditions.Add(Condition);
 
                 if not(FFixedComment = strNULL) then
                 begin
                     GenText.Columns.Add(TGeneral.FIXCOMMENT);
                     GenText.Values.Add(FFixedComment);
-                    GenText.Conditions.Add(Condition);
                 end;
 
                 if not(FFollowUp = strNULL) then
                 begin
                     GenText.Columns.Add(TGeneral.FOLLOWUP);
                     GenText.Values.Add(FFollowUp);
-                    GenText.Conditions.Add(Condition);
                 end;
 
                 if not(FFree1 = strNULL) then
                 begin
                     GenText.Columns.Add(TGeneral.Free1);
                     GenText.Values.Add(FFree1);
-                    GenText.Conditions.Add(Condition);
                 end;
 
                 if not(FFree2 = strNULL) then
                 begin
                     GenText.Columns.Add(TGeneral.Free2);
                     GenText.Values.Add(FFree2);
-                    GenText.Conditions.Add(Condition);
                 end;
 
                 // Execute
