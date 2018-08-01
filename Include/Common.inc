@@ -409,6 +409,8 @@ const
     _UPDATE      : string = ' UPDATE ';
     DELETE_FROM  : string = ' DELETE FROM ';
     _SET         : string = ' SET ';
+    _BEGIN       : string = ' BEGIN ';
+    _END         : string = ' END ';
     UNION        : string = ' UNION ALL ';
     EQUAL        : string = ' = ';
     FROM         : string = ' FROM ';
@@ -431,11 +433,19 @@ const
 
     // --------------------------------------------------------------------------------------------------------------------------------- TRANSACTION WRAPPER //
 
-    TransactTemp = 'BEGIN TRANSACTION  ' + #13#10 +
-                   '  SET XACT_ABORT ON' + #13#10 +
-                   '  SET NOCOUNT OFF  ' + #13#10 +
-                   '  {STRSQL}         ' + #13#10 +
-                   'COMMIT TRANSACTION ';
+    CommonSelect = 'IF EXISTS (SELECT 1 FROM {DestTable} WITH (UPDLOCK) WHERE {Condition})';
+    CommonDelete = '{DeleteData} WHERE {Condition}';
+    TransactTemp = 'SET TRANSACTION ISOLATION LEVEL SERIALIZABLE' + #13#10 +
+                   'BEGIN TRANSACTION                           ' + #13#10 +
+                   '    SET XACT_ABORT ON                       ' + #13#10 +
+                   '    SET NOCOUNT {SWITCH}                    ' + #13#10 +
+                   '    {CommonSelect}                          ' + #13#10 +
+                   '    {Begin}                                 ' + #13#10 +
+                   '    {CommonDelete}                          ' + #13#10 +
+                   '    {SimpleInput}                           ' + #13#10 +
+                   '    {ComplexInput}                          ' + #13#10 +
+                   '    {End}                                   ' + #13#10 +
+                   'COMMIT TRANSACTION                          ';
 
     // -------------------------------------------------------------------------------------------------------------------------------- SQL TRANSACTION TYPE //
 

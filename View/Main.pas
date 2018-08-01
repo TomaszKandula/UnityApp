@@ -835,8 +835,8 @@ var
 implementation
 
 uses
-  Filter, Tracker, Invoices, Actions, Calendar, About, AVSearch, Worker, Model, Settings, Database, UAC, AgeView, Transactions, Colors, EventLog, ReportBug,
-  ABSearch, MassMailer;
+  Filter, Tracker, Invoices, Actions, Calendar, About, AVSearch, Worker, SQL, Model, Settings, Database, UAC, AgeView, Transactions, Colors, EventLog,
+  ReportBug, ABSearch, MassMailer;
 
 {$R *.dfm}
 
@@ -2579,7 +2579,7 @@ begin
     { --------------------------------------------------------------------------------------------------------------------------- START WEB PAGE | UNITY INFO }
 
     WebBrowser1.Navigate(WideString(AppSettings.TMIG.ReadString(ApplicationDetails, 'START_PAGE',  'about:blank')), $02);
-    WebBrowser2.Navigate(WideString(AppSettings.TMIG.ReadString(ApplicationDetails, 'REPORT_PAGE', 'about:blank')), $02);
+    //WebBrowser2.Navigate(WideString(AppSettings.TMIG.ReadString(ApplicationDetails, 'REPORT_PAGE', 'about:blank')), $02);
 
     { -------------------------------------------------------- ! TIMERS INTERVALS ! ------------------------------------------------------------------------- }
 
@@ -2738,14 +2738,57 @@ begin
     DataTables.OpenTable(TblCompany);
     DataTables.DataSet.Sort:=TCompany.CO_CODE + ASC;
     DataTables.SqlToGrid(sgCoCodes, DataTables.DataSet, False, True);
-    { READ BELOW TABLES "AS IS" }
-    DataTables.CleanUp; DataTables.OpenTable(TblPmtterms); DataTables.SqlToGrid(sgPmtTerms, DataTables.DataSet, False, True);
-    DataTables.CleanUp; DataTables.OpenTable(TblPaidinfo); DataTables.SqlToGrid(sgPaidInfo, DataTables.DataSet, False, True);
-    DataTables.CleanUp; DataTables.OpenTable(TblGroup3);   DataTables.SqlToGrid(sgGroup3,   DataTables.DataSet, False, True);
-    DataTables.CleanUp; DataTables.OpenTable(TblPerson);   DataTables.SqlToGrid(sgPerson,   DataTables.DataSet, False, True);
+    { READ BELOW TABLES "AS IS" } //ODBC issue here
   finally
     DataTables.Free;
   end;
+
+  DataTables:=TDataTables.Create(DbConnect);
+  try
+    DataTables.CleanUp;
+    DataTables.OpenTable(TblPmtterms);
+    DataTables.SqlToGrid(sgPmtTerms, DataTables.DataSet, False, True);
+  finally
+    DataTables.Free;
+  end;
+
+  DataTables:=TDataTables.Create(DbConnect);
+  try
+    DataTables.CleanUp;
+    DataTables.OpenTable(TblPmtterms);
+    DataTables.SqlToGrid(sgPmtTerms, DataTables.DataSet, False, True);
+  finally
+    DataTables.Free;
+  end;
+
+  DataTables:=TDataTables.Create(DbConnect);
+  try
+    DataTables.CleanUp;
+    DataTables.OpenTable(TblPaidinfo);
+    DataTables.SqlToGrid(sgPaidInfo, DataTables.DataSet, False, True);
+  finally
+    DataTables.Free;
+  end;
+
+  DataTables:=TDataTables.Create(DbConnect);
+  try
+    DataTables.CleanUp;
+    DataTables.OpenTable(TblGroup3);
+    DataTables.SqlToGrid(sgGroup3,   DataTables.DataSet, False, True);
+  finally
+    DataTables.Free;
+  end;
+
+  DataTables:=TDataTables.Create(DbConnect);
+  try
+    DataTables.CleanUp;
+    DataTables.OpenTable(TblPerson);
+    DataTables.SqlToGrid(sgPerson,   DataTables.DataSet, False, True);
+
+  finally
+    DataTables.Free;
+  end;
+
 
   { ----------------------------------------------------- ! APPLICATION VERSION & USER SID ! ---------------------------------------------------------------- }
 

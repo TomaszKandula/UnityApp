@@ -16,7 +16,7 @@ unit Mailer;
 interface
 
 uses
-  Main, Model, Settings, SysUtils, Windows, Messages, StdCtrls, Classes, StrUtils, Variants, CDO_TLB;
+  Main, SQL, Model, Settings, SysUtils, Windows, Messages, StdCtrls, Classes, StrUtils, Variants, CDO_TLB;
 
 { -------------------------------------------------------------- ! MAILER CLASS ! --------------------------------------------------------------------------- }
 type

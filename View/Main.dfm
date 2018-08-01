@@ -1210,10 +1210,6 @@ object MainForm: TMainForm
       Caption = 'START'
       Highlighted = True
       ImageIndex = 8
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object WebContainer: TPanel
         AlignWithMargins = True
         Left = 17
@@ -1257,10 +1253,6 @@ object MainForm: TMainForm
       Caption = 'Reporting'
       Highlighted = True
       ImageIndex = 5
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object ReportContainer: TPanel
         AlignWithMargins = True
         Left = 17
@@ -6127,10 +6119,6 @@ object MainForm: TMainForm
       Caption = 'VISMA Open Items'
       Highlighted = True
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Header2: TPanel
         Left = 0
         Top = 0
@@ -9979,10 +9967,6 @@ object MainForm: TMainForm
       Caption = 'Unidentified Transactions'
       Highlighted = True
       ImageIndex = 7
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Header6: TPanel
         Left = 0
         Top = 0
@@ -10046,10 +10030,6 @@ object MainForm: TMainForm
       Caption = 'Private Address Book'
       Highlighted = True
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Header3: TPanel
         Left = 0
         Top = 0
@@ -13449,10 +13429,6 @@ object MainForm: TMainForm
       Highlighted = True
       ImageIndex = 4
       OnShow = TabSheet4Show
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Header4: TPanel
         Left = 0
         Top = 0
@@ -13556,8 +13532,8 @@ object MainForm: TMainForm
           AlignWithMargins = True
           Left = 10
           Top = 10
-          Width = 200
-          Height = 200
+          Width = 1233
+          Height = 613
           Margins.Left = 10
           Margins.Top = 10
           Margins.Right = 10
@@ -16681,6 +16657,8 @@ object MainForm: TMainForm
           Visible = False
           ExplicitLeft = 456
           ExplicitTop = 240
+          ExplicitWidth = 200
+          ExplicitHeight = 200
         end
         object sgInvoiceTracker: TStringGrid
           AlignWithMargins = True
@@ -16733,10 +16711,6 @@ object MainForm: TMainForm
       ImageIndex = 8
       OnResize = TabSheet7Resize
       OnShow = TabSheet7Show
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Header7: TPanel
         Left = 0
         Top = 0
@@ -17191,10 +17165,6 @@ object MainForm: TMainForm
       Highlighted = True
       ImageIndex = 6
       OnShow = TabSheet8Show
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Header8: TPanel
         Left = 0
         Top = 0

@@ -77,7 +77,7 @@ var
 implementation
 
 uses
-  Settings, Model, Worker;
+  Settings, SQL, Model, Worker;
 
 {$R *.dfm}
 

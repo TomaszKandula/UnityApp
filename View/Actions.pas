@@ -175,7 +175,7 @@ var
 implementation
 
 uses
-  Model, Worker, Calendar, Settings, Mailer, Transactions, Send, PhoneList;
+  SQL, Model, Worker, Calendar, Settings, Mailer, Transactions, Send, PhoneList;
 
 {$R *.dfm}
 

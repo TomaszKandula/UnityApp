@@ -16,7 +16,7 @@ unit Transactions;
 interface
 
 uses
-  Main, Model, Variants, StrUtils, SysUtils, StdCtrls, Classes, Windows, Messages, ADODB;
+  Main, Model, SQL, Variants, StrUtils, SysUtils, StdCtrls, Classes, Windows, Messages, ADODB;
 
 { ------------------------------------------------------------- ! OPEN ITEMS CLASS ! ------------------------------------------------------------------------ }
 type
@@ -133,7 +133,6 @@ begin
           QuotedStr(Agents)                                       + COMMA +
           QuotedStr(Divisions)                                    + COMMA +
           QuotedStr(INF4);
-  ExecSQL;
   Result:=SqlToGrid(DestGrid, ExecSQL, False, True);
   { ------------------------------------------------------------------------------------------------------------------------------------------- SORT VIA CUID }
   DestGrid.MSort(DestGrid.ReturnColumn(TOpenitems.CUID, 1 ,1), 2, True);  //to be removed - to be done on SQL server

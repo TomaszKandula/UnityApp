@@ -251,15 +251,14 @@ begin
 
     {$WARN SYMBOL_PLATFORM ON}
 
+(* TEST
     CheckInet:=TInternetConnectivity.Create;
     try
-
         CheckInet.IsInternetPresent;
-
     finally
         CheckInet.Free;
     end;
-
+*)
 
     // ---------------------------------------------------------------------------------------------------------------------------------- ALLOW ONE INSTANCE //
 
@@ -345,26 +344,19 @@ begin
     end
     else
     begin
-
         // Otherwise extract default
-
         if Unpack(60, PathEventLog, LeaveAsIs) then
         begin
-
             // Put user logon name to log file (@ eof)
             FL:=TFileStream.Create(PathEventLog, fmOpenWrite);
-
             try
                 StrWrite:=WinUserName + '.' + CRLF + CRLF;
                 FL.Position:=FL.Size;
-
                 for iCNT:=1 to length(StrWrite) do FL.Write(StrWrite[iCNT], 1);
-
             finally
                 FL.Free;
             end;
             LogText(PathEventLog, 'Starting application...');
-
         end
         else
         begin
@@ -380,7 +372,7 @@ begin
     DeleteFilesMatchingPattern(PathAppDir, '*.del', PathEventLog);
 
     // -------------------------------------------------------------------------------------------------------------- PERFORM UPDATE IF NEW RELEASE IS FOUND //
-
+(* OFF - TO BE CHANGED
     if FileExists(PathRelease) then
     begin
         if FileDateTime > ReleaseDateTime then
@@ -397,7 +389,7 @@ begin
             // Unzipp all files
 
             /// <remarks>
-            ///     Config.cfg may be also update.
+            ///     Config.cfg may be also updated.
             /// </remarks>
 
             UnzippReleaseFile(PathRelease, PathAppDir, PathEventLog);
@@ -431,16 +423,13 @@ begin
         end;
 
     end;
-
+*)
     // --------------------------------------------------------------------------------------------------------------------------------- START SPLASH SCREEN //
 
     SplashForm:=TSplashForm.Create(nil);
-
     SystemParametersInfo(SPI_GETWORKAREA, 0, @WndRect, 0);
-
     SplashForm.Top :=((WndRect.Bottom - WndRect.Top ) div 2) - (SplashForm.Height div 2);
     SplashForm.Left:=((WndRect.Right  - WndRect.Left) div 2) - (SplashForm.Width  div 2);
-
     AnimateWindow(SplashForm.Handle, 500, AW_BLEND or AW_ACTIVATE);
     SplashForm.Update;
 
@@ -625,7 +614,7 @@ begin
         // -------------------------------------------------------------------------------------------------------------------------------- CREATE ALL FORMS //
 
         /// <remarks>
-        ///      All forms must have visible parameter set to false.
+        ///      All forms must have parameter "visible" set to false.
         /// </remarks>
 
         // Main form (view) load

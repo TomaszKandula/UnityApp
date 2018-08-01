@@ -42,7 +42,7 @@ var
 implementation
 
 uses
-  Settings, Model;
+  Settings, SQL, Model;
 
 {$R *.dfm}
 

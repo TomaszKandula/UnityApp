@@ -16,7 +16,7 @@ unit AgeView;
 interface
 
 uses
-  Main, Model, ADODB, StrUtils, SysUtils, Variants, Messages, Windows, Classes, Graphics;
+  Main, Model, SQL, ADODB, StrUtils, SysUtils, Variants, Messages, Windows, Classes, Graphics;
 
 { ------------------------------------------------------------- ! AGE VIEW CLASS ! -------------------------------------------------------------------------- }
 type
@@ -759,6 +759,7 @@ procedure TAgeView.Write(DestTable: string; SourceArray: TLists);
 var
   Transaction:  string;
   DeleteData:   string;
+  Condition:    string;
 begin
   { ASSIGN COLUMNS | ADD ALL BUT ID COLUMN }
   Columns.Add(TSnapshots.GROUP_ID);
@@ -789,24 +790,23 @@ begin
   Columns.Add(TSnapshots.GROUP3);
   Columns.Add(TSnapshots.RISK_CLASS);
   Columns.Add(TSnapshots.CUID);
+
   { DELETE STATEMENT | REMOVE OLD DATA }
-  DeleteData:=DELETE_FROM +
-                DestTable +
-              WHERE +
-                TSnapshots.GROUP_ID +
-              EQUAL +
-                QuotedStr(SourceArray[0, 0]) +
-              _AND +
-                TSnapshots.AGE_DATE +
-              EQUAL + QuotedStr(LeftStr(SourceArray[0, 1], 10));
+  DeleteData:=DELETE_FROM + DestTable;
+  Condition:=TSnapshots.GROUP_ID + EQUAL + QuotedStr(SourceArray[0, 0]) + _AND + TSnapshots.AGE_DATE + EQUAL + QuotedStr(LeftStr(SourceArray[0, 1], 10));
+(*
   { INSERT STATEMENT | INSERT NEW DATA }
-  Transaction:=ArrayToSql(SourceArray, DestTable, ColumnsToList(Columns, enQuotesOff));
-  Transaction:='BEGIN TRANSACTION'                                              + CRLF +
-               'SET XACT_ABORT ON'                                              + CRLF +
-               'SELECT TOP 1 * FROM ' + DestTable + ' WITH (TABLOCK, HOLDLOCK)' + CRLF +
-               DeleteData                                                       + CRLF +
-               Transaction                                                      + CRLF +
-               'COMMIT TRANSACTION';
+  Transaction:=TransactSnap;
+  Transaction:=StringReplace(Transaction, '{DestTable}',   DestTable,   [rfReplaceAll]);
+  Transaction:=StringReplace(Transaction, '{Condition}',   Condition,   [rfReplaceAll]);
+  Transaction:=StringReplace(Transaction, '{DeleteData}',  DeleteData,  [rfReplaceAll]);
+  Transaction:=StringReplace(
+        Transaction,
+        '{InsertNew}',
+        ArrayToSql(SourceArray, DestTable, ColumnsToList(Columns, enQuotesOff)),
+        [rfReplaceAll]
+  );
+*)
   { EXECUTE }
   StrSQL:=Transaction;
   try
