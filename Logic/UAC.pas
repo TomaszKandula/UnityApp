@@ -39,8 +39,8 @@ begin
     if UserName = '' then Exit;
 
     try
+        CustFilter:=WHERE + TUAC.USERNAME + EQUAL + QuotedStr(UserName);
         OpenTable(TblUAC);
-        DataSet.Filter:=TUAC.USERNAME + EQUAL + QuotedStr(UserName);
 
         // USERNAME IS CONSTRAINED, THUS EXCEPTING ONLY ONE ROW IF FOUND
         if not DataSet.EOF then
@@ -70,9 +70,8 @@ begin
 
     try
         UserKey:=GetAccessData(adUserKeyID);
+        CustFilter:=WHERE + TGroups.FID + EQUAL + QuotedStr(UserKey) + ORDER + TGroups.GROUP_NAME + ASC;
         OpenTable(TblGroups);
-        DataSet.Filter:=TGroups.FID + EQUAL + QuotedStr(UserKey);
-        DataSet.Sort:=TGroups.GROUP_NAME + ASC;
 
         if DataSet.RecordCount > 0 then
         begin
@@ -110,10 +109,12 @@ var
 begin
 
     Result:=True;
-    StrSQL:=SELECT_DIS + TSnapshots.AGE_DATE + FROM + TblSnapshots + WHERE + TSnapshots.GROUP_ID + EQUAL + QuotedStr(GroupID);
+
+    Columns.Add(DISTINCT + TSnapshots.AGE_DATE);
+    CustFilter:=WHERE + TSnapshots.GROUP_ID + EQUAL + QuotedStr(GroupID);
+    OpenTable(TblSnapshots);
 
     try
-        DataSet:=ExecSQL;
         AgeDatesBox.Clear;
 
         if DataSet.RecordCount > 0 then

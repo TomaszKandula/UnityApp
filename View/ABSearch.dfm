@@ -32,8 +32,6 @@ object ViewSearchForm: TViewSearchForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
-    ExplicitWidth = 478
-    ExplicitHeight = 341
     object SearchBox: TGroupBox
       AlignWithMargins = True
       Left = 10
@@ -47,8 +45,6 @@ object ViewSearchForm: TViewSearchForm
       Align = alClient
       Caption = 'Search Address Book'
       TabOrder = 0
-      ExplicitWidth = 458
-      ExplicitHeight = 321
       object Text1: TLabel
         Left = 24
         Top = 59
@@ -195,8 +191,6 @@ object ViewSearchForm: TViewSearchForm
           Color = clCream
           NumbersOnly = True
           TabOrder = 0
-          ExplicitLeft = 10
-          ExplicitTop = 4
         end
       end
       object PanelEditName: TPanel
@@ -553,8 +547,6 @@ object ViewSearchForm: TViewSearchForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 1
-    ExplicitTop = 361
-    ExplicitWidth = 498
     object btnSearch: TSpeedButton
       AlignWithMargins = True
       Left = 553

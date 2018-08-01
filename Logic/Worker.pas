@@ -267,12 +267,76 @@ type
         );
     end;
 
+    /// <summary>
+    ///     Upload async. given general table. Use no locking.
+    /// </summary>
+
+    TTGeneralTables = class(TThread)
+    protected
+        procedure Execute; override;
+    private
+        var FIDThd:      integer;
+        var FTableName:  string;
+        var FColumns:    string;
+        var FDestGrid:   TStringGrid;
+        var FConditions: string;
+    public
+        constructor Create(TableName: string; DestGrid: TStringGrid; Columns: string = '' {=OPTION}; Conditions: string = '' {=OPTION});
+    end;
 
 implementation
 
 
 uses
     Model, DataBase, Settings, UAC, Mailer, AgeView, Transactions, Tracker, Actions;
+
+
+// ------------------------------------------------------------------------------------------------------------------------------- LOAD ASYNC. GENERAL TABLE //
+
+
+constructor TTGeneralTables.Create(TableName: string; DestGrid: TStringGrid; Columns: string = '' {=OPTION}; Conditions: string = '' {=OPTION});
+begin
+    inherited Create(False);
+    FTableName :=TableName;
+    FDestGrid  :=DestGrid;
+    FColumns   :=Columns;
+    FConditions:=Conditions;
+end;
+
+procedure TTGeneralTables.Execute;
+var
+    IDThd:       cardinal;
+    DataTables:  TDataTables;
+begin
+
+    IDThd:=TTGeneralTables.CurrentThread.ThreadID;  { USE FOR ERROR HANDLING AND LOGGING }
+    DataTables:=TDataTables.Create(MainForm.DbConnect);
+
+    try
+        try
+            DataTables.CleanUp;
+
+            if  not(string.IsNullOrEmpty(FColumns)) then
+                DataTables.Columns.Text:=FColumns;
+
+            if not(string.IsNullOrEmpty(FConditions)) then
+                DataTables.CustFilter:=FConditions;
+
+            if DataTables.OpenTable(FTableName) then
+                DataTables.SqlToGrid(FDestGrid, DataTables.DataSet, False, True);
+
+        except
+            on E: Exception do
+                { ERROR HANDLER HERE }
+        end;
+    finally
+        DataTables.Free;
+        { LOGGING HERE }
+    end;
+
+    FreeOnTerminate:=True;
+
+end;
 
 
 // --------------------------------------------------------------------------------------------------------------------------------- CHECK SERVER CONNECTION //

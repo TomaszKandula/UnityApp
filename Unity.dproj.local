@@ -35,8 +35,10 @@
     <Transaction>1899/12/30 00:00:00.000.179,=D:\Projects\Unity Project\__Unity\Logic\Database.pas</Transaction>
     <Transaction>1899/12/30 00:00:00.000.585,=D:\Projects\Unity Project\__Unity\View\Calendar.pas</Transaction>
     <Transaction>1899/12/30 00:00:00.000.727,=D:\Projects\Unity Project\__Unity\Model\Model.pas</Transaction>
-    <Transaction>1899/12/30 00:00:00.000.295,=D:\Projects\Unity Project\__Unity\View\EventLog.pas</Transaction>
     <Transaction>1899/12/30 00:00:00.000.501,=D:\Projects\Unity Project\__Unity\Logic\Transactions.pas</Transaction>
+    <Transaction>1899/12/30 00:00:00.000.295,=D:\Projects\Unity Project\__Unity\View\EventLog.pas</Transaction>
+    <Transaction>2018/08/01 19:43:58.318,=I:\Projects\Unity Project\__Unity\Unit1.pas</Transaction>
+    <Transaction>2018/08/01 19:44:21.271,I:\Projects\Unity Project\__Unity\Logic\GeneralTables.pas=I:\Projects\Unity Project\__Unity\Unit1.pas</Transaction>
   </Transactions>
 	<ProjectSortOrder AutoSort="0" SortType="0">
     <File Path="Include"/>
@@ -52,6 +54,7 @@
     <File Path="Logic\UAC.pas"/>
     <File Path="Logic\Worker.pas"/>
     <File Path="Logic\Internet.pas"/>
+    <File Path="Logic\GeneralTables.pas"/>
     <File Path="Model"/>
     <File Path="Model\Model.pas"/>
     <File Path="Model\SQL.pas"/>

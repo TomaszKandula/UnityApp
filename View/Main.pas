@@ -2469,7 +2469,6 @@ var
   AppVersion:    string;
   AppSettings:   TSettings;
   DataBase:      TDataBase;
-  DataTables:    TDataTables;
   UserControl:   TUserControl;
   Transactions:  TTransactions;
   NowTime:       TTime;
@@ -2533,29 +2532,29 @@ begin
       UserControl.GetGroupList(GroupList, GroupListBox);
       UserControl.GetAgeDates(GroupListDates, GroupList[0, 0]);
 
-      (* NOTE: REPLACE BELOW WITH USER MATRIX *)
-
-      { RESTRICTED FOR "ADMINS" }
-      if AccessLevel <> acADMIN then
-      begin
-        DetailsGrid.Enabled   :=False;
-        ReloadCover.Visible   :=True;
-        ReloadCover.Cursor    :=crNo;
-        GroupListDates.Enabled:=False;
-      end;
-
-      { NOT ALLOWED FOR "RO" USERS }
-      if AccessLevel = acReadOnly then
-      begin
-        Action_Tracker.Enabled        :=False;
-        Action_AddToBook.Enabled      :=False;
-        ActionsForm.DailyCom.Enabled  :=False;
-        ActionsForm.GeneralCom.Enabled:=False;
-        btnUpdateAB.Enabled           :=False;
-      end;
-
     finally
       UserControl.Free;
+    end;
+
+    (* NOTE: REPLACE BELOW WITH USER MATRIX *)
+
+    { RESTRICTED FOR "ADMINS" }
+    if AccessLevel <> acADMIN then
+    begin
+      DetailsGrid.Enabled   :=False;
+      ReloadCover.Visible   :=True;
+      ReloadCover.Cursor    :=crNo;
+      GroupListDates.Enabled:=False;
+    end;
+
+    { NOT ALLOWED FOR "RO" USERS }
+    if AccessLevel = acReadOnly then
+    begin
+      Action_Tracker.Enabled        :=False;
+      Action_AddToBook.Enabled      :=False;
+      ActionsForm.DailyCom.Enabled  :=False;
+      ActionsForm.GeneralCom.Enabled:=False;
+      btnUpdateAB.Enabled           :=False;
     end;
 
     { -------------------------------------------------- ! LOAD IMAGE FOR STRING GRID CELLS ! --------------------------------------------------------------- }
@@ -2711,84 +2710,32 @@ begin
     end;
   end;
 
-  { ------------------------------------------------------------ ! GENERAL TABLES ! ------------------------------------------------------------------------- }
-
-  DataTables:=TDataTables.Create(DbConnect);
-  try
-    { SELECTED COLUMNS }
-    DataTables.CleanUp;
-    DataTables.Columns.Add(TCompany.CO_CODE);
-    DataTables.Columns.Add(TCompany.BRANCH);
-    DataTables.Columns.Add(TCompany.CONAME);
-    DataTables.Columns.Add(TCompany.COADDRESS);
-    DataTables.Columns.Add(TCompany.VATNO);
-    DataTables.Columns.Add(TCompany.DUNS);
-    DataTables.Columns.Add(TCompany.COUNTRY);
-    DataTables.Columns.Add(TCompany.CITY);
-    DataTables.Columns.Add(TCompany.FMANAGER);
-    DataTables.Columns.Add(TCompany.Telephone);
-    DataTables.Columns.Add(TCompany.COTYPE);
-    DataTables.Columns.Add(TCompany.COCURRENCY);
-    DataTables.Columns.Add(TCompany.INTEREST_RATE);
-    DataTables.Columns.Add(TCompany.KPI_OVERDUE_TARGET);
-    DataTables.Columns.Add(TCompany.KPI_UNALLOCATED_TARGET);
-    DataTables.Columns.Add(TCompany.AGENTS);
-    DataTables.Columns.Add(TCompany.DIVISIONS);
-    { READ }
-    DataTables.OpenTable(TblCompany);
-    DataTables.DataSet.Sort:=TCompany.CO_CODE + ASC;
-    DataTables.SqlToGrid(sgCoCodes, DataTables.DataSet, False, True);
-    { READ BELOW TABLES "AS IS" } //ODBC issue here
-  finally
-    DataTables.Free;
-  end;
-
-  DataTables:=TDataTables.Create(DbConnect);
-  try
-    DataTables.CleanUp;
-    DataTables.OpenTable(TblPmtterms);
-    DataTables.SqlToGrid(sgPmtTerms, DataTables.DataSet, False, True);
-  finally
-    DataTables.Free;
-  end;
-
-  DataTables:=TDataTables.Create(DbConnect);
-  try
-    DataTables.CleanUp;
-    DataTables.OpenTable(TblPmtterms);
-    DataTables.SqlToGrid(sgPmtTerms, DataTables.DataSet, False, True);
-  finally
-    DataTables.Free;
-  end;
-
-  DataTables:=TDataTables.Create(DbConnect);
-  try
-    DataTables.CleanUp;
-    DataTables.OpenTable(TblPaidinfo);
-    DataTables.SqlToGrid(sgPaidInfo, DataTables.DataSet, False, True);
-  finally
-    DataTables.Free;
-  end;
-
-  DataTables:=TDataTables.Create(DbConnect);
-  try
-    DataTables.CleanUp;
-    DataTables.OpenTable(TblGroup3);
-    DataTables.SqlToGrid(sgGroup3,   DataTables.DataSet, False, True);
-  finally
-    DataTables.Free;
-  end;
-
-  DataTables:=TDataTables.Create(DbConnect);
-  try
-    DataTables.CleanUp;
-    DataTables.OpenTable(TblPerson);
-    DataTables.SqlToGrid(sgPerson,   DataTables.DataSet, False, True);
-
-  finally
-    DataTables.Free;
-  end;
-
+  // Run async. queries
+  TTGeneralTables.Create(TblCompany,
+        sgCoCodes,
+        TCompany.CO_CODE + COMMA +
+        TCompany.BRANCH + COMMA +
+        TCompany.CONAME + COMMA +
+        TCompany.COADDRESS + COMMA +
+        TCompany.VATNO + COMMA +
+        TCompany.DUNS + COMMA +
+        TCompany.COUNTRY + COMMA +
+        TCompany.CITY + COMMA +
+        TCompany.FMANAGER + COMMA +
+        TCompany.Telephone + COMMA +
+        TCompany.COTYPE + COMMA +
+        TCompany.COCURRENCY + COMMA +
+        TCompany.INTEREST_RATE + COMMA +
+        TCompany.KPI_OVERDUE_TARGET + COMMA +
+        TCompany.KPI_UNALLOCATED_TARGET + COMMA +
+        TCompany.AGENTS + COMMA +
+        TCompany.DIVISIONS,
+        ORDER + TCompany.CO_CODE + ASC
+  );
+  TTGeneralTables.Create(TblPmtterms, sgPmtTerms);
+  TTGeneralTables.Create(TblPaidinfo, sgPaidInfo);
+  TTGeneralTables.Create(TblGroup3,   sgGroup3);
+  TTGeneralTables.Create(TblPerson,   sgPerson);
 
   { ----------------------------------------------------- ! APPLICATION VERSION & USER SID ! ---------------------------------------------------------------- }
 

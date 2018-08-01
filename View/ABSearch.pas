@@ -88,9 +88,11 @@ type
         procedure CheckBoxEstatEqualClick(Sender: TObject);
         procedure CheckBoxAliasEqualClick(Sender: TObject);
     private
-
+        procedure Initialize;
+        procedure ClearAll;
+        procedure PerformSearch;
     public
-
+        { EMPTY }
     end;
 
 var
@@ -104,14 +106,14 @@ uses
     Settings, Worker, Model;
 
 
-// -------------------------------------------------------------------------------------------------------------------------------------------- MAIN METHODS //
+// ------------------------------------------------------------------------------------------------------------------------------------------- CLASS HELPERS //
 
 
 /// <summary>
-///     Setup the caption and panel borders for TEdit components residing inside.
+///     Execute at form creation. Setup the caption and panel borders for TEdit components residing inside.
 /// </summary>
 
-procedure TViewSearchForm.FormCreate(Sender: TObject);
+procedure TViewSearchForm.Initialize;
 var
     AppSettings: TSettings;
 begin
@@ -139,9 +141,8 @@ end;
 ///     Clear all and set default states before display to the user.
 /// </summary>
 
-procedure TViewSearchForm.FormShow(Sender: TObject);
+procedure TViewSearchForm.ClearAll;
 begin
-
     EditNumber.Enabled        :=True;
     EditName.Enabled          :=False;
     EditEmail.Enabled         :=False;
@@ -207,257 +208,13 @@ begin
     EditCoCode.Color          :=clWhite;
     EditAgent.Color           :=clWhite;
     EditDivision.Color        :=clWhite;
-
 end;
-
-
-// -------------------------------------------------------------------------------------------------------------------------------------------- MOUSE EVENTS //
-
-
-/// <summary>
-///     Change caption from default Equal to Like to indicate change in search function.
-/// </summary>
-
-procedure TViewSearchForm.CheckBoxNameEqualClick(Sender: TObject);
-begin
-    if not(CheckBoxNameEqual.Checked) then
-        CheckBoxNameEqual.Caption:='Like'
-            else
-                CheckBoxNameEqual.Caption:='Equal';
-end;
-
-/// <summary>
-///     Change caption from default Equal to Like to indicate change in search function.
-/// </summary>
-
-procedure TViewSearchForm.CheckBoxEmailEqualClick(Sender: TObject);
-begin
-    if not(CheckBoxEmailEqual.Checked) then
-        CheckBoxEmailEqual.Caption:='Like'
-            else
-                CheckBoxEmailEqual.Caption:='Equal';
-end;
-
-/// <summary>
-///     Change caption from default Equal to Like to indicate change in search function.
-/// </summary>
-
-procedure TViewSearchForm.CheckBoxEstatEqualClick(Sender: TObject);
-begin
-    if not(CheckBoxEstatEqual.Checked) then
-        CheckBoxEstatEqual.Caption:='Like'
-            else
-                CheckBoxEstatEqual.Caption:='Equal';
-end;
-
-/// <summary>
-///     Change caption from default Equal to Like to indicate change in search function.
-/// </summary>
-
-procedure TViewSearchForm.CheckBoxAliasEqualClick(Sender: TObject);
-begin
-    if not(CheckBoxAliasEqual.Checked) then
-        CheckBoxAliasEqual.Caption:='Like'
-            else
-                CheckBoxAliasEqual.Caption:='Equal';
-end;
-
-/// <summary>
-///     Change background color on check box change, reset the TEdit.
-/// </summary>
-
-procedure TViewSearchForm.CheckBoxNumberClick(Sender: TObject);
-begin
-    if CheckBoxNumber.Checked then
-    begin
-        EditNumber.Enabled:=True;
-        EditNumber.Color:=clCream;
-    end
-    else
-    begin
-        EditNumber.Enabled:=False;
-        EditNumber.Text:='';
-        EditNumber.Color:=clWhite;
-    end;
-end;
-
-/// <summary>
-///     Change background color on check box change, reset the TEdit.
-/// </summary>
-
-procedure TViewSearchForm.CheckBoxNameClick(Sender: TObject);
-begin
-    if CheckBoxName.Checked then
-    begin
-        EditName.Enabled:=True;
-        EditName.Color:=clCream;
-        CheckBoxNameEqual.Enabled:=True;
-        CheckBoxNameCase.Enabled:=True;
-    end
-    else
-    begin
-        EditName.Enabled:=False;
-        EditName.Text:='';
-        EditName.Color:=clWhite;
-        CheckBoxNameEqual.Enabled:=False;
-        CheckBoxNameCase.Enabled:=False;
-    end
-end;
-
-/// <summary>
-///     Change background color on check box change, reset the TEdit.
-/// </summary>
-
-procedure TViewSearchForm.CheckBoxEmailClick(Sender: TObject);
-begin
-    if CheckBoxEmail.Checked then
-    begin
-        EditEmail.Enabled:=True;
-        EditEmail.Color:=clCream;
-        CheckBoxEmailEqual.Enabled:=True;
-        CheckBoxEmailCase.Enabled:=True;
-    end
-    else
-    begin
-        EditEmail.Enabled:=False;
-        EditEmail.Text:='';
-        EditEmail.Color:=clWhite;
-        CheckBoxEmailEqual.Enabled:=False;
-        CheckBoxEmailCase.Enabled:=False;
-    end;
-end;
-
-/// <summary>
-///     Change background color on check box change, reset the TEdit.
-/// </summary>
-
-procedure TViewSearchForm.CheckBoxEstatementClick(Sender: TObject);
-begin
-    if CheckBoxEstatement.Checked then
-    begin
-        EditEstatement.Enabled:=True;
-        EditEstatement.Color:=clCream;
-        CheckBoxEstatEqual.Enabled:=True;
-        CheckBoxEstatCase.Enabled:=True;
-    end
-    else
-    begin
-        EditEstatement.Enabled:=False;
-        EditEstatement.Text:='';
-        EditEstatement.Color:=clWhite;
-        CheckBoxEstatEqual.Enabled:=False;
-        CheckBoxEstatCase.Enabled:=False;
-    end;
-end;
-
-/// <summary>
-///     Change background color on check box change, reset the TEdit.
-/// </summary>
-
-procedure TViewSearchForm.CheckBoxPhonesClick(Sender: TObject);
-begin
-    if CheckBoxPhones.Checked then
-    begin
-        EditPhones.Enabled:=True;
-        EditPhones.Color:=clCream;
-    end
-    else
-    begin
-        EditPhones.Enabled:=False;
-        EditPhones.Text:='';
-        EditPhones.Color:=clWhite;
-    end;
-end;
-
-/// <summary>
-///     Change background color on check box change, reset the TEdit.
-/// </summary>
-
-procedure TViewSearchForm.CheckBoxUserAliasClick(Sender: TObject);
-begin
-    if CheckBoxUserAlias.Checked then
-    begin
-        EditUserAlias.Enabled:=True;
-        EditUserAlias.Color:=clCream;
-        CheckBoxAliasEqual.Enabled:=True;
-        CheckBoxAliasCase.Enabled:=True;
-    end
-    else
-    begin
-        EditUserAlias.Enabled:=False;
-        EditUserAlias.Text:='';
-        EditUserAlias.Color:=clWhite;
-        CheckBoxAliasEqual.Enabled:=False;
-        CheckBoxAliasCase.Enabled:=False;
-    end;
-end;
-
-/// <summary>
-///     Change background color on check box change, reset the TEdit.
-/// </summary>
-
-procedure TViewSearchForm.CheckBoxAgentClick(Sender: TObject);
-begin
-    if CheckBoxAgent.Checked then
-    begin
-        EditAgent.Enabled:=True;
-        EditAgent.Color:=clCream;
-    end
-    else
-    begin
-        EditAgent.Enabled:=False;
-        EditAgent.Text:='';
-        EditAgent.Color:=clWhite;
-    end;
-end;
-
-/// <summary>
-///     Change background color on check box change, reset the TEdit.
-/// </summary>
-
-procedure TViewSearchForm.CheckBoxCoCodeClick(Sender: TObject);
-begin
-    if CheckBoxCoCode.Checked then
-    begin
-        EditCoCode.Enabled:=True;
-        EditCoCode.Color:=clCream;
-    end
-    else
-    begin
-        EditCoCode.Enabled:=False;
-        EditCoCode.Text:='';
-        EditCoCode.Color:=clWhite;
-    end;
-end;
-
-/// <summary>
-///     Change background color on check box change, reset the TEdit.
-/// </summary>
-
-procedure TViewSearchForm.CheckBoxDivisionClick(Sender: TObject);
-begin
-    if CheckBoxDivision.Checked then
-    begin
-        EditDivision.Enabled:=True;
-        EditDivision.Color:=clCream;
-    end
-    else
-    begin
-        EditDivision.Enabled:=False;
-        EditDivision.Text:='';
-        EditDivision.Color:=clWhite;
-    end;
-end;
-
-
-// ------------------------------------------------------------------------------------------------------------------------------------------- BUTTONS CALLS //
-
 
 /// <summary>
 ///     Check if required fields are not empty and perform search.
 /// </summary>
 
-procedure TViewSearchForm.btnSearchClick(Sender: TObject);
+procedure TViewSearchForm.PerformSearch;
 var
     Conditions:         string;
     StrEditName:        string;
@@ -570,16 +327,234 @@ begin
         '',
         WHERE + Conditions
     );
+end;
 
+
+// ------------------------------------------------------------------------------------------------------------------------------------------------- STARTUP //
+
+
+procedure TViewSearchForm.FormCreate(Sender: TObject);
+begin
+    Initialize;
+end;
+
+procedure TViewSearchForm.FormShow(Sender: TObject);
+begin
+    ClearAll;
+end;
+
+
+// -------------------------------------------------------------------------------------------------------------------------------------------- MOUSE EVENTS //
+
+
+/// <summary>
+///     Change caption from default Equal to Like, to indicate change in search function.
+/// </summary>
+
+procedure TViewSearchForm.CheckBoxNameEqualClick(Sender: TObject);
+begin
+    if not(CheckBoxNameEqual.Checked) then
+        CheckBoxNameEqual.Caption:='Like'
+            else
+                CheckBoxNameEqual.Caption:='Equal';
+end;
+
+procedure TViewSearchForm.CheckBoxEmailEqualClick(Sender: TObject);
+begin
+    if not(CheckBoxEmailEqual.Checked) then
+        CheckBoxEmailEqual.Caption:='Like'
+            else
+                CheckBoxEmailEqual.Caption:='Equal';
+end;
+
+procedure TViewSearchForm.CheckBoxEstatEqualClick(Sender: TObject);
+begin
+    if not(CheckBoxEstatEqual.Checked) then
+        CheckBoxEstatEqual.Caption:='Like'
+            else
+                CheckBoxEstatEqual.Caption:='Equal';
+end;
+
+procedure TViewSearchForm.CheckBoxAliasEqualClick(Sender: TObject);
+begin
+    if not(CheckBoxAliasEqual.Checked) then
+        CheckBoxAliasEqual.Caption:='Like'
+            else
+                CheckBoxAliasEqual.Caption:='Equal';
 end;
 
 /// <summary>
-///     Dismiss window with no action.
+///     Change background color on check box change, reset the TEdit.
 /// </summary>
+
+procedure TViewSearchForm.CheckBoxNumberClick(Sender: TObject);
+begin
+    if CheckBoxNumber.Checked then
+    begin
+        EditNumber.Enabled:=True;
+        EditNumber.Color:=clCream;
+    end
+    else
+    begin
+        EditNumber.Enabled:=False;
+        EditNumber.Text:='';
+        EditNumber.Color:=clWhite;
+    end;
+end;
+
+procedure TViewSearchForm.CheckBoxPhonesClick(Sender: TObject);
+begin
+    if CheckBoxPhones.Checked then
+    begin
+        EditPhones.Enabled:=True;
+        EditPhones.Color:=clCream;
+    end
+    else
+    begin
+        EditPhones.Enabled:=False;
+        EditPhones.Text:='';
+        EditPhones.Color:=clWhite;
+    end;
+end;
+
+procedure TViewSearchForm.CheckBoxAgentClick(Sender: TObject);
+begin
+    if CheckBoxAgent.Checked then
+    begin
+        EditAgent.Enabled:=True;
+        EditAgent.Color:=clCream;
+    end
+    else
+    begin
+        EditAgent.Enabled:=False;
+        EditAgent.Text:='';
+        EditAgent.Color:=clWhite;
+    end;
+end;
+
+procedure TViewSearchForm.CheckBoxCoCodeClick(Sender: TObject);
+begin
+    if CheckBoxCoCode.Checked then
+    begin
+        EditCoCode.Enabled:=True;
+        EditCoCode.Color:=clCream;
+    end
+    else
+    begin
+        EditCoCode.Enabled:=False;
+        EditCoCode.Text:='';
+        EditCoCode.Color:=clWhite;
+    end;
+end;
+
+procedure TViewSearchForm.CheckBoxDivisionClick(Sender: TObject);
+begin
+    if CheckBoxDivision.Checked then
+    begin
+        EditDivision.Enabled:=True;
+        EditDivision.Color:=clCream;
+    end
+    else
+    begin
+        EditDivision.Enabled:=False;
+        EditDivision.Text:='';
+        EditDivision.Color:=clWhite;
+    end;
+end;
+
+/// <remarks>
+///     Additionally, alter another check boxes.
+/// </remarks>
+
+procedure TViewSearchForm.CheckBoxNameClick(Sender: TObject);
+begin
+    if CheckBoxName.Checked then
+    begin
+        EditName.Enabled:=True;
+        EditName.Color:=clCream;
+        CheckBoxNameEqual.Enabled:=True;
+        CheckBoxNameCase.Enabled:=True;
+    end
+    else
+    begin
+        EditName.Enabled:=False;
+        EditName.Text:='';
+        EditName.Color:=clWhite;
+        CheckBoxNameEqual.Enabled:=False;
+        CheckBoxNameCase.Enabled:=False;
+    end
+end;
+
+procedure TViewSearchForm.CheckBoxEmailClick(Sender: TObject);
+begin
+    if CheckBoxEmail.Checked then
+    begin
+        EditEmail.Enabled:=True;
+        EditEmail.Color:=clCream;
+        CheckBoxEmailEqual.Enabled:=True;
+        CheckBoxEmailCase.Enabled:=True;
+    end
+    else
+    begin
+        EditEmail.Enabled:=False;
+        EditEmail.Text:='';
+        EditEmail.Color:=clWhite;
+        CheckBoxEmailEqual.Enabled:=False;
+        CheckBoxEmailCase.Enabled:=False;
+    end;
+end;
+
+procedure TViewSearchForm.CheckBoxEstatementClick(Sender: TObject);
+begin
+    if CheckBoxEstatement.Checked then
+    begin
+        EditEstatement.Enabled:=True;
+        EditEstatement.Color:=clCream;
+        CheckBoxEstatEqual.Enabled:=True;
+        CheckBoxEstatCase.Enabled:=True;
+    end
+    else
+    begin
+        EditEstatement.Enabled:=False;
+        EditEstatement.Text:='';
+        EditEstatement.Color:=clWhite;
+        CheckBoxEstatEqual.Enabled:=False;
+        CheckBoxEstatCase.Enabled:=False;
+    end;
+end;
+
+procedure TViewSearchForm.CheckBoxUserAliasClick(Sender: TObject);
+begin
+    if CheckBoxUserAlias.Checked then
+    begin
+        EditUserAlias.Enabled:=True;
+        EditUserAlias.Color:=clCream;
+        CheckBoxAliasEqual.Enabled:=True;
+        CheckBoxAliasCase.Enabled:=True;
+    end
+    else
+    begin
+        EditUserAlias.Enabled:=False;
+        EditUserAlias.Text:='';
+        EditUserAlias.Color:=clWhite;
+        CheckBoxAliasEqual.Enabled:=False;
+        CheckBoxAliasCase.Enabled:=False;
+    end;
+end;
+
+
+// ------------------------------------------------------------------------------------------------------------------------------------------- BUTTONS CALLS //
+
+
+procedure TViewSearchForm.btnSearchClick(Sender: TObject);
+begin
+    PerformSearch;
+end;
 
 procedure TViewSearchForm.btnCancelClick(Sender: TObject);
 begin
   Close;
 end;
+
 
 end.

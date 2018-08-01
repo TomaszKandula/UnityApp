@@ -33,6 +33,7 @@ uses
   UAC in 'Logic\UAC.pas',
   Worker in 'Logic\Worker.pas',
   Internet in 'Logic\Internet.pas',
+  GeneralTables in 'Logic\GeneralTables.pas',
   About in 'View\About.pas' {AboutForm},
   Actions in 'View\Actions.pas' {ActionsForm},
   Calendar in 'View\Calendar.pas' {CalendarForm},

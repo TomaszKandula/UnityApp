@@ -760,6 +760,9 @@ var
   Transaction:  string;
   DeleteData:   string;
   Condition:    string;
+
+  SL: TStringList;
+
 begin
   { ASSIGN COLUMNS | ADD ALL BUT ID COLUMN }
   Columns.Add(TSnapshots.GROUP_ID);
@@ -804,8 +807,8 @@ begin
   Transaction:=StringReplace(Transaction, '{DeleteData}',   DeleteData,   [rfReplaceAll]);
   Transaction:=StringReplace(Transaction, '{SimpleInput}',  SPACE,        [rfReplaceAll]);
   Transaction:=StringReplace(Transaction, '{SWITCH}',       'OFF',        [rfReplaceAll]);
-  Transaction:=StringReplace(Transaction, '{Begin}',        _BEGIN,       [rfReplaceAll]);
-  Transaction:=StringReplace(Transaction, '{End}',          _END,         [rfReplaceAll]);
+  Transaction:=StringReplace(Transaction, '{Begin}',        SPACE,        [rfReplaceAll]);
+  Transaction:=StringReplace(Transaction, '{End}',          SPACE,        [rfReplaceAll]);
   Transaction:=StringReplace(
         Transaction,
         '{ComplexInput}',
@@ -815,6 +818,17 @@ begin
 
   { EXECUTE }
   StrSQL:=Transaction;
+
+
+  SL:=TStringList.Create;
+  try
+    SL.Text:=StrSQL;
+    SL.SaveToFile('i:\test.txt');
+  finally
+    SL.Free;
+  end;
+
+
   try
     MainForm.ExecMessage(False, mcStatusBar, stSQLupdate);
     ExecSQL;

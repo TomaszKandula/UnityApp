@@ -460,7 +460,7 @@ begin
         if not(string.IsNullOrEmpty(Columns.Text)) then
         begin
 
-            if (string.IsNullOrEmpty(Values.Text)) and ( (ExtSourceGrid = nil) and (ExtSourceArray = nil) ) then
+            if (not(string.IsNullOrEmpty(Values.Text))) and ( (ExtSourceGrid = nil) and (Pointer(ExtSourceArray) = nil)) then
             begin
                 StrSQL:=INSERT +
                           TableName + SPACE + BracketStr(ColumnsToList(Columns, enQuotesOff), brRound) +
