@@ -17,7 +17,6 @@ type
 
     ISettings = Interface(IInterface)
     ['{FF5CBEC3-2576-4E1C-954E-C892AB4A7CC1}']
-        // Methods
         function  GetTodayFColor  : TColor;
         function  GetTodayBColor  : TColor;
         function  GetPastFColor   : TColor;
@@ -33,7 +32,6 @@ type
         function  Encode(ConfigType: integer): boolean;
         function  Decode(ConfigType: integer; ToMemory: boolean): boolean;
         function  ConfigToMemory: boolean;
-        // Properties
         property TodayFColor : TColor read GetTodayFColor  write SetTodayFColor;
         property TodayBColor : TColor read GetTodayBColor  write SetTodayBColor;
         property PastFColor  : TColor read GetPastFColor   write SetPastFColor;
@@ -48,68 +46,64 @@ type
     /// </summary>
 
     TSettings = class(TInterfacedObject, ISettings)
-        {$TYPEINFO ON}
-        private
-            // Files
-            var pAppDir        : string;
-            var pLayoutDir     : string;
-            var pAppLog        : string;
-            var pWinUserName   : string;
-            var pWinTempFolder : string;
-
-            // Paths
-            var pPathEventLog  : string;
-            var pPathAppCfg    : string;
-            var pPathLicence   : string;
-            var pPathGridImage : string;
-            var pPathRelease   : string;
-
-            // Time and date
-            function  pGetReleaseDateTime: TDateTime;
-            procedure pSetReleaseDateTime(NewDateTime: TDateTime);
-            function  pGetRelFileDateTime: TDateTime;
-
-            // Getters and setters for "follow-up" colors saved in settings file
-            function  GetTodayFColor  : TColor;
-            function  GetTodayBColor  : TColor;
-            function  GetPastFColor   : TColor;
-            function  GetPastBColor   : TColor;
-            function  GetFutureFColor : TColor;
-            function  GetFutureBColor : TColor;
-            procedure SetTodayFColor (NewColor: TColor);
-            procedure SetTodayBColor (NewColor: TColor);
-            procedure SetPastFColor  (NewColor: TColor);
-            procedure SetPastBColor  (NewColor: TColor);
-            procedure SetFutureFColor(NewColor: TColor);
-            procedure SetFutureBColor(NewColor: TColor);
-
-        public
-            var GetLastError           : integer;
-            var TMIG                   : TMemIniFile;
-            var TMIL                   : TMemIniFile;
-            property FAppDir           : string    read pAppDir;
-            property FLayoutDir        : string    read pLayoutDir;
-            property FAppLog           : string    read pAppLog;
-            property FWinUserName      : string    read pWinUserName;
-            property FWinTempFolder    : string    read pWinTempFolder;
-            property FPathGridImage    : string    read pPathGridImage;
-            property FPathEventLog     : string    read pPathEventLog;
-            property FPathAppCfg       : string    read pPathAppCfg;
-            property FPathLicence      : string    read pPathLicence;
-            property FPathRelease      : string    read pPathRelease;
-            property FRelFileDateTime  : TDateTime read pGetRelFileDateTime;
-            property FReleaseDateTime  : TDateTime read pGetReleaseDateTime write pSetReleaseDateTime;
-            property TodayFColor       : TColor    read GetTodayFColor      write SetTodayFColor;
-            property TodayBColor       : TColor    read GetTodayBColor      write SetTodayBColor;
-            property PastFColor        : TColor    read GetPastFColor       write SetPastFColor;
-            property PastBColor        : TColor    read GetPastBColor       write SetPastBColor;
-            property FutureFColor      : TColor    read GetFutureFColor     write SetFutureFColor;
-            property FutureBColor      : TColor    read GetFutureBColor     write SetFutureBColor;
-            constructor Create;
-            destructor  Destroy; override;
-            function    Encode(ConfigType: integer): boolean;
-            function    Decode(ConfigType: integer; ToMemory: boolean): boolean;
-            function    ConfigToMemory: boolean;
+    {$TYPEINFO ON}
+    private
+        // Files
+        var pAppDir        : string;
+        var pLayoutDir     : string;
+        var pAppLog        : string;
+        var pWinUserName   : string;
+        var pWinTempFolder : string;
+        // Paths
+        var pPathEventLog  : string;
+        var pPathAppCfg    : string;
+        var pPathLicence   : string;
+        var pPathGridImage : string;
+        var pPathRelease   : string;
+        // Time and date
+        function  pGetReleaseDateTime: TDateTime;
+        procedure pSetReleaseDateTime(NewDateTime: TDateTime);
+        function  pGetRelFileDateTime: TDateTime;
+        // Getters and setters for "follow-up" colors saved in settings file
+        function  GetTodayFColor  : TColor;
+        function  GetTodayBColor  : TColor;
+        function  GetPastFColor   : TColor;
+        function  GetPastBColor   : TColor;
+        function  GetFutureFColor : TColor;
+        function  GetFutureBColor : TColor;
+        procedure SetTodayFColor (NewColor: TColor);
+        procedure SetTodayBColor (NewColor: TColor);
+        procedure SetPastFColor  (NewColor: TColor);
+        procedure SetPastBColor  (NewColor: TColor);
+        procedure SetFutureFColor(NewColor: TColor);
+        procedure SetFutureBColor(NewColor: TColor);
+    public
+        var GetLastError           : integer;
+        var TMIG                   : TMemIniFile;
+        var TMIL                   : TMemIniFile;
+        property FAppDir           : string    read pAppDir;
+        property FLayoutDir        : string    read pLayoutDir;
+        property FAppLog           : string    read pAppLog;
+        property FWinUserName      : string    read pWinUserName;
+        property FWinTempFolder    : string    read pWinTempFolder;
+        property FPathGridImage    : string    read pPathGridImage;
+        property FPathEventLog     : string    read pPathEventLog;
+        property FPathAppCfg       : string    read pPathAppCfg;
+        property FPathLicence      : string    read pPathLicence;
+        property FPathRelease      : string    read pPathRelease;
+        property FRelFileDateTime  : TDateTime read pGetRelFileDateTime;
+        property FReleaseDateTime  : TDateTime read pGetReleaseDateTime write pSetReleaseDateTime;
+        property TodayFColor       : TColor    read GetTodayFColor      write SetTodayFColor;
+        property TodayBColor       : TColor    read GetTodayBColor      write SetTodayBColor;
+        property PastFColor        : TColor    read GetPastFColor       write SetPastFColor;
+        property PastBColor        : TColor    read GetPastBColor       write SetPastBColor;
+        property FutureFColor      : TColor    read GetFutureFColor     write SetFutureFColor;
+        property FutureBColor      : TColor    read GetFutureBColor     write SetFutureBColor;
+        constructor Create;
+        destructor  Destroy; override;
+        function    Encode(ConfigType: integer): boolean;
+        function    Decode(ConfigType: integer; ToMemory: boolean): boolean;
+        function    ConfigToMemory: boolean;
     end;
 
 implementation
@@ -161,9 +155,9 @@ end;
 
 destructor TSettings.Destroy;
 begin
-  TMIG.Free;
-  TMIL.Free;
-  inherited;
+    TMIG.Free;
+    TMIL.Free;
+    inherited;
 end;
 
 
@@ -432,11 +426,13 @@ begin
 
 end;
 
-{ ################################################## ! GETTERS AND SETTERS FOR FOLLOW-UP COLORS ! ########################################################### }
 
-{ --------------------------------------------------------------------------------------------------------------------------------------------------- GETTERS }
+// ---------------------------------------------------------------------------------------------------------------- GETTERS AND SETTERS FOR FOLLOW-UP COLORS //
 
-{ FONT COLOR }
+
+// GETTERS ------------------------------------------------------------------------------------------------------------------------------------------------- //
+
+// Font color
 function TSettings.GetTodayFColor: TColor;
 begin
     Result:=0;
@@ -446,7 +442,7 @@ begin
                 Result:=TMIG.ReadInteger(FollowUpColors, 'TODAY_FCOLOR', 0);
 end;
 
-{ BACKGROUND COLOR }
+// Background color
 function TSettings.GetTodayBColor: TColor;
 begin
     Result:=0;
@@ -456,7 +452,7 @@ begin
                 Result:=TMIG.ReadInteger(FollowUpColors, 'TODAY_BCOLOR', 0);
 end;
 
-{ FONT COLOR }
+// Font color
 function TSettings.GetPastFColor: TColor;
 begin
     Result:=0;
@@ -466,7 +462,7 @@ begin
                 Result:=TMIG.ReadInteger(FollowUpColors, 'PAST_FCOLOR', 0);
 end;
 
-{ BACKGROUND COLOR }
+// Background color
 function TSettings.GetPastBColor: TColor;
 begin
     Result:=0;
@@ -476,7 +472,7 @@ begin
                 Result:=TMIG.ReadInteger(FollowUpColors, 'PAST_BCOLOR', 0);
 end;
 
-{ FONT COLOR }
+// Font color
 function TSettings.GetFutureFColor: TColor;
 begin
     Result:=0;
@@ -486,7 +482,7 @@ begin
                 Result:=TMIG.ReadInteger(FollowUpColors, 'FUTURE_FCOLOR', 0);
 end;
 
-{ BACKGROUND COLOR }
+// Background color
 function TSettings.GetFutureBColor: TColor;
 begin
     Result:=0;
@@ -496,9 +492,11 @@ begin
                 Result:=TMIG.ReadInteger(FollowUpColors, 'FUTURE_BCOLOR', 0);
 end;
 
-{ --------------------------------------------------------------------------------------------------------------------------------------------------- SETTERS }
 
-{ FONT COLOR }
+// SETTERS ------------------------------------------------------------------------------------------------------------------------------------------------- //
+
+
+// Font color
 procedure TSettings.SetTodayFColor(NewColor: TColor);
 begin
     if not(Assigned(TMIG)) then Exit;
@@ -506,7 +504,7 @@ begin
     Encode(AppConfig);
 end;
 
-{ BACKGROUND COLOR }
+// Background color
 procedure TSettings.SetTodayBColor(NewColor: TColor);
 begin
     if not(Assigned(TMIG)) then Exit;
@@ -514,7 +512,7 @@ begin
     Encode(AppConfig);
 end;
 
-{ FONT COLOR }
+// Font color
 procedure TSettings.SetPastFColor(NewColor: TColor);
 begin
     if not(Assigned(TMIG)) then Exit;
@@ -522,7 +520,7 @@ begin
     Encode(AppConfig);
 end;
 
-{ BACKGROUND COLOR }
+// Background color
 procedure TSettings.SetPastBColor(NewColor: TColor);
 begin
     if not(Assigned(TMIG)) then Exit;
@@ -530,7 +528,7 @@ begin
     Encode(AppConfig);
 end;
 
-{ FONT COLOR }
+// Font color
 procedure TSettings.SetFutureFColor(NewColor: TColor);
 begin
     if not(Assigned(TMIG)) then Exit;
@@ -538,7 +536,7 @@ begin
     Encode(AppConfig);
 end;
 
-{ BACKGROUND COLOR }
+// Background color
 procedure TSettings.SetFutureBColor(NewColor: TColor);
 begin
     if not(Assigned(TMIG)) then Exit;

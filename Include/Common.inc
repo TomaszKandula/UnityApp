@@ -521,6 +521,7 @@ const
                      '  <th class="col4">Currency:</th>'      + #13#10 +
                      '  <th class="col5">Amount:</th>'        + #13#10 +
                      '  <th class="col6">O/S Amount:</th>'    + #13#10 +
+                     '  <th class="col7">Status:</th>'        + #13#10 +
                      '</tr>'                                  + #13#10 +
                      '  <!-- ROWS WITH DATA -->'              + #13#10 +
                      '{ROWS}'                                 + #13#10 +
@@ -533,6 +534,7 @@ const
                    '  <td class="col4">{INV_CUR}</td>'        + #13#10 +
                    '  <td class="col5">{INV_AMT}</td>'        + #13#10 +
                    '  <td class="col6">{INV_OSA}</td>'        + #13#10 +
+                   '  <td class="col7">{INV_CRL}</td>'        + #13#10 +
                    '</tr>'                                    + #13#10;
 
 
@@ -565,4 +567,5 @@ const
                          'TrustServerCertificate={Common_TSC};'  +
                          'Uid={Common_UserName};'                +
                          'Pwd={Common_Password};';
+
 

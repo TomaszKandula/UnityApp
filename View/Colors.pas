@@ -79,10 +79,6 @@ begin
 
 end;
 
-/// <summary>
-///     Defaults.
-/// </summary>
-
 procedure TColorsForm.FormShow(Sender: TObject);
 begin
   ColorList1.Items[ColorList1.ItemIndex];
@@ -94,10 +90,13 @@ begin
 end;
 
 
+// ---------------------------------------------------------------------------------------------------------------------------------------- COMPONENT EVENTS //
 
-{ --------------------------------------------------------------- ! COMPONENT EVENTS ! ---------------------------------------------------------------------- }
 
-{ ------------------------------------------------------------------------------------------------------------------------- COLOR SELECTION | TODAY FOLLOW-UP }
+/// <summary>
+///     Get colors from application settings file.
+/// </summary>
+
 procedure TColorsForm.ColorList1Select(Sender: TObject);
 var
     Settings: TSettings;
@@ -107,7 +106,6 @@ begin
     if ColorList1.Text = 'Background Color' then ColorBox1.Brush.Color:=Settings.TodayBColor;
 end;
 
-{ -------------------------------------------------------------------------------------------------------------------------- COLOR SELECTION | PAST FOLLOW-UP }
 procedure TColorsForm.ColorList2Select(Sender: TObject);
 var
     Settings: TSettings;
@@ -117,7 +115,6 @@ begin
     if ColorList2.Text = 'Background Color' then ColorBox2.Brush.Color:=Settings.PastBColor;
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------ COLOR SELECTION | FUTURE FOLLOW-UP }
 procedure TColorsForm.ColorList3Select(Sender: TObject);
 var
     Settings: TSettings;
@@ -127,15 +124,18 @@ begin
     if ColorList3.Text = 'Background Color' then ColorBox3.Brush.Color:=Settings.FutureBColor;
 end;
 
-{ -------------------------------------------------------------------------------------------------------------------------------------------- CLOSE ON <ESC> }
 procedure TColorsForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
   if Key = ESC then Close;
 end;
 
-{ ----------------------------------------------------------------- ! BUTTON CALLS ! ------------------------------------------------------------------------ }
 
-{ -------------------------------------------------------------------------------------------------------------------------------------- COLOR PICKER | TODAY }
+// -------------------------------------------------------------------------------------------------------------------------------------------- BUTTON CALLS //
+
+/// <summary>
+///     Set new colors into application settings file.
+/// </summary>
+
 procedure TColorsForm.btnTodayClick(Sender: TObject);
 var
     Settings: TSettings;
@@ -149,7 +149,6 @@ begin
     end;
 end;
 
-{ --------------------------------------------------------------------------------------------------------------------------------------- COLOR PICKER | PAST }
 procedure TColorsForm.btnPastClick(Sender: TObject);
 var
     Settings: TSettings;
@@ -163,7 +162,6 @@ begin
     end;
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------- COLOR PICKER | FUTURE }
 procedure TColorsForm.btnFutureClick(Sender: TObject);
 var
     Settings: TSettings;
@@ -176,5 +174,6 @@ begin
         ColorBox3.Brush.Color:=ColorDialog.Color;
     end;
 end;
+
 
 end.

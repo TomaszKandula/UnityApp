@@ -8,6 +8,11 @@ interface
 uses
     Arrays, Grids, ExtCtrls, Messages, Controls, Graphics, Types, Dialogs, Forms, Winapi.Windows, Clipbrd, SysUtils, Math, Classes, ComObj, Variants;
 
+    /// <summary>
+    ///     This unit contains all extensions of standard components introduced via interposer class.
+    ///     There is no need to register component as we do not make new derived class.
+    /// </summary>
+
 type
 
     /// <remarks>
@@ -747,7 +752,7 @@ end;
 ///     Load layout from application settings.
 /// </summary>
 /// <remarks>
-///     'Colordername' and 'colwidthname' provide with section names for column order and column width.
+///     'Colordername' and 'colwidthname' provide the section names for column order and column width.
 ///     both sections must contains equal number of value keys. Each key contain column name used by
 ///     string grid component (age view) that displays data from sql server database, thus column names
 ///     are used to build sql query, this is because we use sql expressions to obtain initial output
@@ -892,7 +897,7 @@ begin
             XLApp.Workbooks.Add(xlWBatWorkSheet);
 
             /// <remarks>
-            ///     Code insight may show false error for below code:
+            ///     Code insight may show false error for below lines of code:
             /// </remarks>
             /// <code>
             ///     Sheet:=XLApp.Workbooks[1].WorkSheets[1];
@@ -911,7 +916,7 @@ begin
             // To Excel sheet
             for Col:=0 to Self.ColCount - 1 do
                 for Row:=0 to Self.RowCount - 1 do
-                    { WE OMITT FIRST STRING GRID COLUMN }
+                    // We mitt first string grid column
                     Sheet.Cells[Row + RowOffset, Col + ColOffset]:=Self.Cells[Col + 1, Row];
 
             // Simple formatting (this can be extended
@@ -1133,7 +1138,7 @@ begin
 end;
 
 /// <summary>
-///     Select all rows and columns (except first row, title).
+///     Select all rows and columns (except first row which is presumbly a column title).
 /// </summary>
 
 procedure TStringGrid.SelectAll;

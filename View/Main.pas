@@ -630,24 +630,24 @@ type
         procedure sgAgeViewClick(Sender: TObject);
         procedure sgAgeViewKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     private
-        var pAllowClose           :  boolean;
-        var pStartTime            :  TTime;
+        var pAllowClose :  boolean;
+        var pStartTime  :  TTime;
     public
-        var WinUserName         :  string;
-        var EventLogPath        :  string;
-        var DbConnect           :  TADOConnection;
-        var GroupList           :  TLists;
-        var GroupIdSel          :  string;
-        var GroupNmSel          :  string;
-        var AgeDateSel          :  string;
-        var OSAmount            :  double;
-        var GridPicture         :  TImage;
-        var AccessLevel         :  string;
-        var AccessMode          :  string;
-        var OpenItemsUpdate     :  string;
-        var OpenItemsStatus     :  string;
-        var ConnLastError       :  cardinal;
-        // HELPER METHODS
+        // Helpers
+        var WinUserName    :  string;
+        var EventLogPath   :  string;
+        var DbConnect      :  TADOConnection;
+        var GroupList      :  TLists;
+        var GroupIdSel     :  string;
+        var GroupNmSel     :  string;
+        var AgeDateSel     :  string;
+        var OSAmount       :  double;
+        var GridPicture    :  TImage;
+        var AccessLevel    :  string;
+        var AccessMode     :  string;
+        var OpenItemsUpdate:  string;
+        var OpenItemsStatus:  string;
+        var ConnLastError  :  cardinal;
         procedure  DebugMsg(const Msg: String);
         procedure  ExecMessage(IsPostType: boolean; YOUR_INT: integer; YOUR_TEXT: string);
         function   OleGetStr(RecordsetField: variant): string;
@@ -677,9 +677,8 @@ type
         function   AddressBookExclusion: boolean;
         function   CheckIfDate(StrDate: string): boolean;
     protected
-        // PROCESS ALL WINDOWS MESSAGES }
+        // Process all Windows messgaes
         procedure  WndProc(var msg: Messages.TMessage); override;
-
     end;
 
     /// <remarks>

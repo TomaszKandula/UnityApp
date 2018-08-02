@@ -15,30 +15,30 @@ type
     /// </summary>
 
     TDataBase = class
-        {$TYPEINFO ON}
-        strict private
-            var ODBC_Driver    : string;
-            var OLEDB_Provider : string;
-            var OLEDB_PSI      : string;
-            var Common_MARS    : string;
-            var Common_TSC     : string;
-            var Common_Encrypt : string;
-            var Common_Server  : string;
-            var Common_Database: string;
-            var Common_UserName: string;
-            var Common_Password: string;
-            var Interval       : integer;
-        private
-            var DBConnStr      : string;
-            var CmdTimeout     : integer;
-            var ConTimeout     : Integer;
-        published
-            /// <param name="ShowConnStr">
-            ///     Boolean. Set to true if you want to display connection string in the event log.
-            /// </param>
-            constructor Create(ShowConnStr: boolean);
-            procedure   InitializeConnection(idThd: integer; ErrorShow: boolean; var ActiveConnection: TADOConnection);
-            function    Check: integer;
+    {$TYPEINFO ON}
+    strict private
+        var ODBC_Driver    : string;
+        var OLEDB_Provider : string;
+        var OLEDB_PSI      : string;
+        var Common_MARS    : string;
+        var Common_TSC     : string;
+        var Common_Encrypt : string;
+        var Common_Server  : string;
+        var Common_Database: string;
+        var Common_UserName: string;
+        var Common_Password: string;
+        var Interval       : integer;
+    private
+        var DBConnStr      : string;
+        var CmdTimeout     : integer;
+        var ConTimeout     : Integer;
+    published
+        /// <param name="ShowConnStr">
+        ///     Boolean. Set to true if you want to display connection string in the event log.
+        /// </param>
+        constructor Create(ShowConnStr: boolean);
+        procedure   InitializeConnection(idThd: integer; ErrorShow: boolean; var ActiveConnection: TADOConnection);
+        function    Check: integer;
     end;
 
 implementation
@@ -250,5 +250,6 @@ begin
     end;
 
 end;
+
 
 end.

@@ -10,52 +10,48 @@ program Unity;
 {$SetPEFlags $0020}
 
 uses
-  Forms,
-  Windows,
-  Messages,
-  Classes,
-  SysUtils,
-  StdCtrls,
-  ShellApi,
-  IOUtils,
-  INIFiles,
-  CRC32u,
-  SynZip,
-  SynZipFiles,
-  System.Types,
-  // Model
-  Model in 'Model\Model.pas',
-  SQL in 'Model\SQL.pas',
-  // Logic
-  AgeView in 'Logic\AgeView.pas',
-  Database in 'Logic\Database.pas',
-  Mailer in 'Logic\Mailer.pas',
-  Settings in 'Logic\Settings.pas',
-  Transactions in 'Logic\Transactions.pas',
-  UAC in 'Logic\UAC.pas',
-  Worker in 'Logic\Worker.pas',
-  Internet in 'Logic\Internet.pas',
-  // Extensions
-  Arrays in 'Extensions\Arrays.pas',
-  InterposerClasses in 'Extensions\InterposerClasses.pas',
-  // Views
-  About in 'View\About.pas' {AboutForm},
-  Actions in 'View\Actions.pas' {ActionsForm},
-  Calendar in 'View\Calendar.pas' {CalendarForm},
-  Colors in 'View\Colors.pas' {ColorsForm},
-  EventLog in 'View\EventLog.pas' {EventForm},
-  Filter in 'View\Filter.pas' {FilterForm},
-  Invoices in 'View\Invoices.pas' {InvoicesForm},
-  Main in 'View\Main.pas' {MainForm},
-  PhoneList in 'View\PhoneList.pas' {PhoneListForm},
-  ReportBug in 'View\ReportBug.pas' {ReportForm},
-  AVSearch in 'View\AVSearch.pas' {SearchForm},
-  Send in 'View\Send.pas' {SendForm},
-  Splash in 'View\Splash.pas' {SplashForm},
-  Tracker in 'View\Tracker.pas' {TrackerForm},
-  Update in 'View\Update.pas' {UpdateForm},
-  MassMailer in 'View\MassMailer.pas' {ViewMailerForm},
-  ABSearch in 'View\ABSearch.pas' {ViewSearchForm};
+    Forms, Windows, Messages, Classes, SysUtils, StdCtrls, ShellApi, IOUtils, INIFiles, CRC32u, SynZip, SynZipFiles, System.Types,
+
+    // ------------------------ Model ------------------------ //
+
+    Model   in 'Model\Model.pas',
+    SQL     in 'Model\SQL.pas',
+
+    // ------------------------ Logic ------------------------ //
+
+    AgeView         in 'Logic\AgeView.pas',
+    Database        in 'Logic\Database.pas',
+    Mailer          in 'Logic\Mailer.pas',
+    Settings        in 'Logic\Settings.pas',
+    Transactions    in 'Logic\Transactions.pas',
+    UAC             in 'Logic\UAC.pas',
+    Worker          in 'Logic\Worker.pas',
+    Internet        in 'Logic\Internet.pas',
+
+    // --------------------- EXTENSIONS ---------------------- //
+
+    Arrays            in 'Extensions\Arrays.pas',
+    InterposerClasses in 'Extensions\InterposerClasses.pas',
+
+    // ------------------------ Views ------------------------ //
+
+    About       in 'View\About.pas'         {AboutForm},
+    Actions     in 'View\Actions.pas'       {ActionsForm},
+    Calendar    in 'View\Calendar.pas'      {CalendarForm},
+    Colors      in 'View\Colors.pas'        {ColorsForm},
+    EventLog    in 'View\EventLog.pas'      {EventForm},
+    Filter      in 'View\Filter.pas'        {FilterForm},
+    Invoices    in 'View\Invoices.pas'      {InvoicesForm},
+    Main        in 'View\Main.pas'          {MainForm},
+    PhoneList   in 'View\PhoneList.pas'     {PhoneListForm},
+    ReportBug   in 'View\ReportBug.pas'     {ReportForm},
+    AVSearch    in 'View\AVSearch.pas'      {SearchForm},
+    Send        in 'View\Send.pas'          {SendForm},
+    Splash      in 'View\Splash.pas'        {SplashForm},
+    Tracker     in 'View\Tracker.pas'       {TrackerForm},
+    Update      in 'View\Update.pas'        {UpdateForm},
+    MassMailer  in 'View\MassMailer.pas'    {ViewMailerForm},
+    ABSearch    in 'View\ABSearch.pas'      {ViewSearchForm};
 
 type
     DWord = 0..$FFFFFFFF;
