@@ -13,12 +13,10 @@
 { ----------------------------------------------------------------------------------------------------------------------------------------------------------- }
 unit MassMailer;
 
-(* NOTE: DO NOT PLACE 'MAIN' REFERENCE IN THE IMPLEMENTATION SECTION BUT IN THE INTERFACE SECTION. THIS IS NECESSARY DUE TO CLASS EXTENSIONS DEFINED IN MAIN *)
-
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, ComCtrls, StdCtrls, ExtCtrls, Buttons, Main;
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, ComCtrls, StdCtrls, ExtCtrls, Buttons, InterposerClasses;
 
 { ----------------------------------------------------------------- ! MAIN CLASS ! -------------------------------------------------------------------------- }
 type
@@ -77,7 +75,7 @@ var
 implementation
 
 uses
-  Settings, SQL, Model, Worker;
+  Main, Settings, SQL, Model, Worker;
 
 {$R *.dfm}
 

@@ -13,12 +13,10 @@
 { ----------------------------------------------------------------------------------------------------------------------------------------------------------- }
 unit Calendar;
 
-(* NOTE: DO NOT PLACE 'MAIN' REFERENCE IN THE IMPLEMENTATION SECTION BUT IN THE INTERFACE SECTION. THIS IS NECESSARY DUE TO CLASS EXTENSIONS DEFINED IN MAIN *)
-
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, ComCtrls, ExtCtrls, StdCtrls, DateUtils, Main;
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, ComCtrls, ExtCtrls, StdCtrls, DateUtils, InterposerClasses;
 
 { --------------------------------------------------------------- ! MAIN CLASS ! ---------------------------------------------------------------------------- }
 type
@@ -56,7 +54,7 @@ var
 implementation
 
 uses
-  Model, Settings, Worker;
+  Main, Model, Settings, Worker;
 
 {$R *.dfm}
 

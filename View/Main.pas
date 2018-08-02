@@ -1,1017 +1,740 @@
-{ ----------------------------------------------------------------------------------------------------------------------------------------------------------- }
-{                                                                                                                                                             }
-{ Name:             Unity for Debt Management                                                                                                                 }
-{ Version:          0.1                                                                                                                                       }
-{ (C)(R):           Tomasz Kandula                                                                                                                            }
-{ Originate:        10-07-2016 (Concept & GUI)                                                                                                                }
-{ IDE:              RAD Studio with Delphi XE2 (migrated to Delphi Tokyo)                                                                                     }
-{ Target:           Microsoft Windows 7 or newer                                                                                                              }
-{ Dependencies:     Synopse Zip and own libraries                                                                                                             }
-{ NET Framework:    Required 4.6 or newer (Lync / Skype calls)                                                                                                }
-{ LYNC version:     2013 or newer                                                                                                                             }
-{                                                                                                                                                             }
-{ ----------------------------------------------------------------------------------------------------------------------------------------------------------- }
+
+{$I .\Include\Header.inc}
+
 unit Main;
 
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, Menus, ComCtrls, Grids, ExtCtrls, StdCtrls, CheckLst, Buttons, PNGImage,
-  DBGrids, AppEvnts, ShellAPI, INIFiles, StrUtils, ValEdit, DateUtils, Clipbrd, DB, ADODB, ActiveX, CDO_TLB, Diagnostics, Math, Wininet, ComObj, OleCtrls,
-  SHDocVw, GIFImg, System.UITypes, Bcrypt;
+    Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, Menus, ComCtrls, Grids, ExtCtrls, StdCtrls, CheckLst, Buttons, PNGImage,
+    DBGrids, AppEvnts, ShellAPI, INIFiles, StrUtils, ValEdit, DateUtils, Clipbrd, DB, ADODB, ActiveX, CDO_TLB, Diagnostics, Math, Wininet, ComObj, OleCtrls,
+    SHDocVw, GIFImg, System.UITypes, Bcrypt, InterposerClasses, Arrays;
 
-{ REFERENCE TO ARRAYS }
 type
-  TLists    = array of array of string;
-  TStrings  = array of string;
-  TIntigers = array of integer;
 
-{ 'TSTRINGGRID' REFERENCE FOR DELETE OPTION }
-type
-  TAbstractGrid = class(Grids.TStringGrid);
+    /// <summary>
+    ///     Main form class, represents GUI/main application thread.
+    /// </summary>
 
-{ ------------------------------------------------------------ ! INTERPOSER CLASSES ! ----------------------------------------------------------------------- }
-                                                    (* EXTEND CURRENT COMPONENTS | MAIN THREAD *)
+    TMainForm = class(TForm)
+        MyPages: TPageControl;
+        TabSheet1: TTabSheet;
+        TabSheet2: TTabSheet;
+        TabSheet3: TTabSheet;
+        TabSheet4: TTabSheet;
+        TabSheet5: TTabSheet;
+        TabSheet7: TTabSheet;
+        Header1: TPanel;
+        Footer1: TPanel;
+        hShapeGen: TShape;
+        Text01: TLabel;
+        Text02: TLabel;
+        Text06: TLabel;
+        tcCOCODE1: TLabel;
+        tcCURRENCY: TLabel;
+        tcTOTAL: TLabel;
+        Cap01: TShape;
+        hShapeSet: TShape;
+        Cap02: TShape;
+        hShapeAge: TShape;
+        Cap05: TShape;
+        Text09: TLabel;
+        tR1: TLabel;
+        tR2: TLabel;
+        tR3: TLabel;
+        tR4: TLabel;
+        tR5: TLabel;
+        Text08: TLabel;
+        procND: TLabel;
+        procR1: TLabel;
+        procR2: TLabel;
+        procR3: TLabel;
+        procR4: TLabel;
+        procR5: TLabel;
+        valND: TLabel;
+        valR1: TLabel;
+        valR2: TLabel;
+        valR3: TLabel;
+        valR4: TLabel;
+        valR5: TLabel;
+        tTAMT: TLabel;
+        valTAMT: TLabel;
+        procTAMT: TLabel;
+        Text10: TLabel;
+        Text11: TLabel;
+        Text12: TLabel;
+        hShapeAct: TShape;
+        Cap03: TShape;
+        hShapeTC: TShape;
+        Cap06: TShape;
+        Text17: TLabel;
+        Text18: TLabel;
+        Text19: TLabel;
+        hShapeTR: TShape;
+        Cap07: TShape;
+        Text20: TLabel;
+        Text21: TLabel;
+        Text22: TLabel;
+        valExceeders: TLabel;
+        valTEXCEES: TLabel;
+        valTLIMITS: TLabel;
+        valTND: TLabel;
+        valPASTDUE: TLabel;
+        valDEFAULTED: TLabel;
+        valRISKA: TLabel;
+        valRISKB: TLabel;
+        valRISKC: TLabel;
+        StatBar_CAP1: TLabel;
+        StatBar_TXT1: TLabel;
+        StatBar_CAP2: TLabel;
+        StatBar_TXT2: TLabel;
+        TabSheet8: TTabSheet;
+        PopupMenu: TPopupMenu;
+        Action_HideApp: TMenuItem;
+        Action_ShowApp: TMenuItem;
+        Action_Close: TMenuItem;
+        N1: TMenuItem;
+        Action_Help: TMenuItem;
+        Action_About: TMenuItem;
+        N2: TMenuItem;
+        Action_OnTop: TMenuItem;
+        N3: TMenuItem;
+        TabSheet6: TTabSheet;
+        sgOpenItems: TStringGrid;
+        Header3: TPanel;
+        sgAddressBook: TStringGrid;
+        Header8: TPanel;
+        EditPassword: TEdit;
+        Cap21: TShape;
+        hShapeCred: TShape;
+        Text32: TLabel;
+        Text33: TLabel;
+        hShapePass: TShape;
+        Cap22: TShape;
+        Text37: TLabel;
+        Text38: TLabel;
+        Text39: TLabel;
+        EditCurrentPassword: TEdit;
+        EditNewPassword: TEdit;
+        EditNewPasswordConfirmation: TEdit;
+        ShapeList1: TShape;
+        imgKeyAdd: TImage;
+        imgKeyRemove: TImage;
+        imgUpdateValues: TImage;
+        Text41: TLabel;
+        Text42: TLabel;
+        Text43: TLabel;
+        sgListValue: TStringGrid;
+        sgListSection: TStringGrid;
+        imgSectionAdd: TImage;
+        imgSectionRemove: TImage;
+        Text48: TLabel;
+        Text49: TLabel;
+        Cap23: TShape;
+        Text44: TLabel;
+        hShapeActionPAB: TShape;
+        Cap13: TShape;
+        imgOFF: TImage;
+        Header2: TPanel;
+        hShapeActionsVOI: TShape;
+        Cap10: TShape;
+        hShapeSettingsVOI: TShape;
+        Cap11: TShape;
+        hShapeDetailsVOI: TShape;
+        Cap12: TShape;
+        btnReload: TImage;
+        Text54L1: TLabel;
+        btnOpenAB: TImage;
+        btnUpdateAB: TImage;
+        btnCloseAB: TImage;
+        Text64: TLabel;
+        Text66: TLabel;
+        Text67: TLabel;
+        Text63: TLabel;
+        Text55: TLabel;
+        Text56: TLabel;
+        Text57: TLabel;
+        Text58: TLabel;
+        tcOpenItems: TLabel;
+        tcInvoices: TLabel;
+        tcOSAmt: TLabel;
+        tcOverdue: TLabel;
+        btnExportAB: TImage;
+        Text69: TLabel;
+        Header4: TPanel;
+        hShapeInfoAM: TShape;
+        Cap43: TShape;
+        Header6: TPanel;
+        ShapeContent6: TShape;
+        Cap61: TShape;
+        Header7: TPanel;
+        hShapeInfoGT: TShape;
+        Cap15: TShape;
+        Text54L2: TLabel;
+        MainShape6: TPanel;
+        AppFooter: TPanel;
+        StatBar_CAP3: TLabel;
+        StatBar_TXT3: TLabel;
+        StatBar_CAP4: TLabel;
+        StatBar_TXT4: TLabel;
+        StatBar_CAP5: TLabel;
+        StatBar_TXT5: TLabel;
+        CurrentTime: TTimer;
+        UpTime: TTimer;
+        txtInfo1: TLabel;
+        txtInfo3: TLabel;
+        txtInfo2: TLabel;
+        Cap16: TShape;
+        Cap17: TShape;
+        Cap18: TShape;
+        CSVExport: TSaveDialog;
+        CSVImport: TOpenDialog;
+        Cap19: TShape;
+        Cap20: TShape;
+        LeftPanel: TPanel;
+        ContentPanel7: TPanel;
+        RightPanel: TPanel;
+        MidPanel: TPanel;
+        ContentPanel6: TPanel;
+        ContentPanel1: TPanel;
+        ContentPanel: TPanel;
+        ContentPanel2: TPanel;
+        MainPanel1: TPanel;
+        BottomPanel1: TPanel;
+        ContentPanel8: TPanel;
+        InnerPanel8Left: TPanel;
+        tcUNAmt: TLabel;
+        Text70: TLabel;
+        Text72: TLabel;
+        Text73: TLabel;
+        OILoader: TTimer;
+        Text80: TLabel;
+        Text81: TLabel;
+        tcKPIoverdue: TLabel;
+        tcKPIUnallocated: TLabel;
+        Text82: TLabel;
+        tcOvdAmt: TLabel;
+        GroupListBox: TComboBox;
+        GroupListDates: TComboBox;
+        Text31: TLabel;
+        procRISKA: TLabel;
+        procRISKB: TLabel;
+        procRISKC: TLabel;
+        Text36: TLabel;
+        GroupName: TLabel;
+        btnMakeGroup: TImage;
+        Text83L1: TLabel;
+        Text83L2: TLabel;
+        Text53: TLabel;
+        PanelGroupName: TPanel;
+        btnMakeGroupAge: TSpeedButton;
+        EditGroupName: TLabeledEdit;
+        ReloadCover: TImage;
+        sgAgeView: TStringGrid;
+        cbDump: TCheckBox;
+        sgInvoiceTracker: TStringGrid;
+        AgeViewPopup: TPopupMenu;
+        Action_Tracker: TMenuItem;
+        Action_PaymentTerm: TMenuItem;
+        Action_Person: TMenuItem;
+        Label2: TLabel;
+        Label3: TLabel;
+        Label4: TLabel;
+        TrackerPopup: TPopupMenu;
+        Action_Remove: TMenuItem;
+        Action_ShowMy: TMenuItem;
+        Action_ShowAll: TMenuItem;
+        Action_LyncCall: TMenuItem;
+        TrayIcon: TTrayIcon;
+        InvoiceScanTimer: TTimer;
+        Action_ShowRegistered: TMenuItem;
+        N8: TMenuItem;
+        InetTimer: TTimer;
+        StatBar_TXT7: TLabel;
+        InnerPanel8Right: TPanel;
+        Cap27: TShape;
+        N9: TMenuItem;
+        Action_FilterINF7: TMenuItem;
+        N5: TMenuItem;
+        N7: TMenuItem;
+        N6: TMenuItem;
+        Action_AddToBook: TMenuItem;
+        Text50: TLabel;
+        imgAllowEdit: TImage;
+        SplitLine1: TBevel;
+        sgCoCodes: TStringGrid;
+        sgPaidInfo: TStringGrid;
+        sgPerson: TStringGrid;
+        sgGroup3: TStringGrid;
+        sgPmtTerms: TStringGrid;
+        Action_AutoColumnSize: TMenuItem;
+        InnerPanelTop: TPanel;
+        SplitLine2: TBevel;
+        Action_Search: TMenuItem;
+        BookPopup: TPopupMenu;
+        Action_Copy: TMenuItem;
+        Action_Paste: TMenuItem;
+        Action_Cut: TMenuItem;
+        Action_DelRow: TMenuItem;
+        N10: TMenuItem;
+        N11: TMenuItem;
+        Action_ShowAsIs: TMenuItem;
+        Action_ShowMyEntries: TMenuItem;
+        Action_ToExce: TMenuItem;
+        Action_BasicView: TMenuItem;
+        N13: TMenuItem;
+        Action_FullView: TMenuItem;
+        XLExport: TSaveDialog;
+        tR6: TLabel;
+        valR6: TLabel;
+        procR6: TLabel;
+        N14: TMenuItem;
+        Action_SearchBook: TMenuItem;
+        Action_Overdue: TMenuItem;
+        N15: TMenuItem;
+        TabSheet9: TTabSheet;
+        WebBrowser1: TWebBrowser;
+        WebContainer: TPanel;
+        DetailsGrid: TStringGrid;
+        btnLoadAgeView: TSpeedButton;
+        EditGroupID: TLabeledEdit;
+        Action_RowHighlight: TMenuItem;
+        Action_Update: TMenuItem;
+        Action_Report: TMenuItem;
+        N17: TMenuItem;
+        CommonPopupMenu: TPopupMenu;
+        Action_AutoColumn: TMenuItem;
+        Action_ExportTransactions: TMenuItem;
+        Action_SelectAll: TMenuItem;
+        N18: TMenuItem;
+        Action_CopyToCB: TMenuItem;
+        N19: TMenuItem;
+        Action_ColumnWidth: TMenuItem;
+        FollowupPopup: TTimer;
+        custRISKA: TLabel;
+        custRISKB: TLabel;
+        custRISKC: TLabel;
+        Action_FollowUpColors: TMenuItem;
+        ShapeList2: TShape;
+        SplitLine3: TBevel;
+        imgEventLog: TImage;
+        Text51: TLabel;
+        sgGroups: TStringGrid;
+        sgUAC: TStringGrid;
+        ReportContainer: TPanel;
+        Action_INF7_Filter: TMenuItem;
+        Action_CoCode_Filter: TMenuItem;
+        Action_Agent_Filter: TMenuItem;
+        Action_Division_Filter: TMenuItem;
+        Action_FollowUp_Filter: TMenuItem;
+        Action_GroupFollowUp: TMenuItem;
+        tcCOCODE2: TLabel;
+        tcCOCODE3: TLabel;
+        tcCOCODE4: TLabel;
+        Action_INF4_Filter: TMenuItem;
+        Action_Gr3_Filter: TMenuItem;
+        TopPanel8: TPanel;
+        RightPanel8: TPanel;
+        PanelDetailsGrid: TPanel;
+        Action_HideSummary: TMenuItem;
+        Action_ExportCSV: TMenuItem;
+        Action_RemoveFilters: TMenuItem;
+        Action_Free1: TMenuItem;
+        NavigationBar: TPanel;
+        btnReport1: TSpeedButton;
+        btnReport2: TSpeedButton;
+        btnReport3: TSpeedButton;
+        btnReport4: TSpeedButton;
+        WebBrowser2: TWebBrowser;
+        TextReport: TLabel;
+        SeparateLine: TBevel;
+        btnStart: TSpeedButton;
+        Separate1: TBevel;
+        btnSettings: TSpeedButton;
+        btnTabelauReport: TSpeedButton;
+        btnAgeDebt: TSpeedButton;
+        btnOpenItems: TSpeedButton;
+        btnOtherTrans: TSpeedButton;
+        btnAddressBook: TSpeedButton;
+        btnTracker: TSpeedButton;
+        btnGeneral: TSpeedButton;
+        Separate2: TBevel;
+        Separate3: TBevel;
+        AppHeader: TPanel;
+        Bevel1: TBevel;
+        Bevel2: TBevel;
+        Bevel3: TBevel;
+        PanelAgeView: TPanel;
+        ImgLoadingAgeView: TImage;
+        PanelOpenItems: TPanel;
+        ImgLoadingOpenItems: TImage;
+        PanelAddressBook: TPanel;
+        ImgLoadingAddressBook: TImage;
+        PanelInvoiceTracker: TPanel;
+        ImgLoadingInvoiceTracker: TImage;
+        PanelCoCodes: TPanel;
+        PanelPaidInfo: TPanel;
+        PanelPerson: TPanel;
+        PanelPmtTerms: TPanel;
+        PanelGroup3: TPanel;
+        PanelSettingsSections: TPanel;
+        PanelSettingsValues: TPanel;
+        PanelUAC: TPanel;
+        PanelGroups: TPanel;
+        btnUnlock: TSpeedButton;
+        btnPassUpdate: TSpeedButton;
+        Action_AddFollowUpGroup: TMenuItem;
+        Action_RemoveFollowUps: TMenuItem;
+        Cap24: TShape;
+        Shape2: TShape;
+        Action_MassMailer: TMenuItem;
+        btnPasswordPreview: TSpeedButton;
+        hShapeEye: TShape;
+        N20: TMenuItem;
+        N21: TMenuItem;
+        Action_Ranges: TMenuItem;
+        Action_Range1: TMenuItem;
+        Action_Range2: TMenuItem;
+        Action_Range3: TMenuItem;
+        Action_Range4: TMenuItem;
+        Action_Range5: TMenuItem;
+        Action_Range6: TMenuItem;
+        Action_Amounts: TMenuItem;
+        Action_TotalAmount: TMenuItem;
+        Action_Overdues: TMenuItem;
+        Action_Free2: TMenuItem;
+        Action_ViewOptions: TMenuItem;
+        N16: TMenuItem;
+        N22: TMenuItem;
+        Action_ShowDetails: TMenuItem;
+        Action_QuickReporting: TMenuItem;
+        SortListBox: TComboBox;
+        btnSortApply: TSpeedButton;
+        procedure FormCreate(Sender: TObject);
+        procedure FormResize(Sender: TObject);
+        procedure FormShow(Sender: TObject);
+        procedure Action_HideAppClick(Sender: TObject);
+        procedure Action_ShowAppClick(Sender: TObject);
+        procedure Action_HelpClick(Sender: TObject);
+        procedure Action_AboutClick(Sender: TObject);
+        procedure Action_OnTopClick(Sender: TObject);
+        procedure TabSheet8Show(Sender: TObject);
+        procedure imgKeyAddMouseEnter(Sender: TObject);
+        procedure imgKeyAddMouseLeave(Sender: TObject);
+        procedure imgKeyRemoveMouseEnter(Sender: TObject);
+        procedure imgKeyRemoveMouseLeave(Sender: TObject);
+        procedure imgUpdateValuesMouseEnter(Sender: TObject);
+        procedure imgUpdateValuesMouseLeave(Sender: TObject);
+        procedure imgSectionAddMouseEnter(Sender: TObject);
+        procedure imgSectionAddMouseLeave(Sender: TObject);
+        procedure imgSectionRemoveMouseEnter(Sender: TObject);
+        procedure imgSectionRemoveMouseLeave(Sender: TObject);
+        procedure sgListSectionSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
+        procedure imgSectionRemoveClick(Sender: TObject);
+        procedure imgKeyRemoveClick(Sender: TObject);
+        procedure imgSectionAddClick(Sender: TObject);
+        procedure imgKeyAddClick(Sender: TObject);
+        procedure imgUpdateValuesClick(Sender: TObject);
+        procedure sgAddressBookMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+        procedure sgAddressBookMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+        procedure sgOpenItemsMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+        procedure sgOpenItemsMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+        procedure btnReloadMouseEnter(Sender: TObject);
+        procedure btnReloadMouseLeave(Sender: TObject);
+        procedure btnOpenABMouseEnter(Sender: TObject);
+        procedure btnOpenABMouseLeave(Sender: TObject);
+        procedure btnUpdateABMouseEnter(Sender: TObject);
+        procedure btnUpdateABMouseLeave(Sender: TObject);
+        procedure btnCloseABMouseEnter(Sender: TObject);
+        procedure btnCloseABMouseLeave(Sender: TObject);
+        procedure btnExportABMouseEnter(Sender: TObject);
+        procedure btnExportABMouseLeave(Sender: TObject);
+        procedure btnReloadClick(Sender: TObject);
+        procedure sgListSectionKeyPress(Sender: TObject; var Key: Char);
+        procedure sgListValueClick(Sender: TObject);
+        procedure sgListSectionClick(Sender: TObject);
+        procedure EditPasswordKeyPress(Sender: TObject; var Key: Char);
+        procedure CurrentTimeTimer(Sender: TObject);
+        procedure UpTimeTimer(Sender: TObject);
+        procedure sgListSectionMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+        procedure sgListSectionMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+        procedure sgListValueMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+        procedure sgListValueMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+        procedure sgListValueKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure sgListSectionKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure btnCloseABClick(Sender: TObject);
+        procedure btnUpdateABClick(Sender: TObject);
+        procedure btnOpenABClick(Sender: TObject);
+        procedure btnExportABClick(Sender: TObject);
+        procedure TabSheet7Show(Sender: TObject);
+        procedure TabSheet7Resize(Sender: TObject);
+        procedure sgCoCodesMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+        procedure sgCoCodesMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+        procedure sgPmtTermsMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+        procedure sgPmtTermsMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+        procedure sgGroup3MouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+        procedure sgGroup3MouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+        procedure sgPaidInfoMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+        procedure sgPaidInfoMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+        procedure sgPersonMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+        procedure sgPersonMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+        procedure sgOpenItemsDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+        procedure OILoaderTimer(Sender: TObject);
+        procedure GroupListBoxSelect(Sender: TObject);
+        procedure btnMakeGroupClick(Sender: TObject);
+        procedure btnMakeGroupMouseEnter(Sender: TObject);
+        procedure btnMakeGroupMouseLeave(Sender: TObject);
+        procedure btnMakeGroupAgeClick(Sender: TObject);
+        procedure EditGroupNameKeyPress(Sender: TObject; var Key: Char);
+        procedure sgAgeViewMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+        procedure sgAgeViewMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+        procedure sgInvoiceTrackerMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+        procedure sgInvoiceTrackerMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+        procedure Action_TrackerClick(Sender: TObject);
+        procedure Action_PaymentTermClick(Sender: TObject);
+        procedure Action_PersonClick(Sender: TObject);
+        procedure Action_RemoveClick(Sender: TObject);
+        procedure Action_ShowMyClick(Sender: TObject);
+        procedure Action_ShowAllClick(Sender: TObject);
+        procedure TabSheet4Show(Sender: TObject);
+        procedure Action_LyncCallClick(Sender: TObject);
+        procedure InvoiceScanTimerTimer(Sender: TObject);
+        procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure TrayIconDblClick(Sender: TObject);
+        procedure InetTimerTimer(Sender: TObject);
+        procedure Action_CloseClick(Sender: TObject);
+        procedure sgAgeViewDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+        procedure sgAgeViewDblClick(Sender: TObject);
+        procedure Action_ShowRegisteredClick(Sender: TObject);
+        procedure sgInvoiceTrackerDblClick(Sender: TObject);
+        procedure Action_AddToBookClick(Sender: TObject);
+        procedure sgAddressBookDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+        procedure sgInvoiceTrackerDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+        procedure sgListSectionDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+        procedure sgListValueDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+        procedure imgAllowEditMouseEnter(Sender: TObject);
+        procedure imgAllowEditMouseLeave(Sender: TObject);
+        procedure imgAllowEditClick(Sender: TObject);
+        procedure sgAddressBookDblClick(Sender: TObject);
+        procedure sgAddressBookClick(Sender: TObject);
+        procedure AgeViewPopupPopup(Sender: TObject);
+        procedure sgCoCodesDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+        procedure sgPaidInfoDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+        procedure sgPmtTermsDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+        procedure sgPersonDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+        procedure sgGroup3DrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+        procedure Action_AutoColumnSizeClick(Sender: TObject);
+        procedure FormDestroy(Sender: TObject);
+        procedure Action_SearchClick(Sender: TObject);
+        procedure Action_CutClick(Sender: TObject);
+        procedure Action_CopyClick(Sender: TObject);
+        procedure Action_PasteClick(Sender: TObject);
+        procedure Action_DelRowClick(Sender: TObject);
+        procedure BookPopupPopup(Sender: TObject);
+        procedure Action_ShowAsIsClick(Sender: TObject);
+        procedure Action_ShowMyEntriesClick(Sender: TObject);
+        procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+        procedure Action_ToExceClick(Sender: TObject);
+        procedure Action_BasicViewClick(Sender: TObject);
+        procedure Action_FullViewClick(Sender: TObject);
+        procedure sgAgeViewColumnMoved(Sender: TObject; FromIndex, ToIndex: Integer);
+        procedure Action_SearchBookClick(Sender: TObject);
+        procedure Action_OverdueClick(Sender: TObject);
+        procedure DetailsGridKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure DetailsGridKeyPress(Sender: TObject; var Key: Char);
+        procedure DetailsGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+        procedure btnLoadAgeViewClick(Sender: TObject);
+        procedure Action_RowHighlightClick(Sender: TObject);
+        procedure Action_ReportClick(Sender: TObject);
+        procedure Action_ExportTransactionsClick(Sender: TObject);
+        procedure Action_SelectAllClick(Sender: TObject);
+        procedure Action_CopyToCBClick(Sender: TObject);
+        procedure Action_AutoColumnClick(Sender: TObject);
+        procedure Action_ColumnWidthClick(Sender: TObject);
+        procedure FollowupPopupTimer(Sender: TObject);
+        procedure Action_FollowUpColorsClick(Sender: TObject);
+        procedure imgEventLogClick(Sender: TObject);
+        procedure imgEventLogMouseEnter(Sender: TObject);
+        procedure imgEventLogMouseLeave(Sender: TObject);
+        procedure Action_INF7_FilterClick(Sender: TObject);
+        procedure Action_CoCode_FilterClick(Sender: TObject);
+        procedure Action_Agent_FilterClick(Sender: TObject);
+        procedure Action_Division_FilterClick(Sender: TObject);
+        procedure Action_FollowUp_FilterClick(Sender: TObject);
+        procedure sgUACDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+        procedure sgUACMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+        procedure sgUACMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+        procedure sgGroupsDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+        procedure sgGroupsMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+        procedure sgGroupsMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+        procedure Action_INF4_FilterClick(Sender: TObject);
+        procedure Action_Gr3_FilterClick(Sender: TObject);
+        procedure Action_HideSummaryClick(Sender: TObject);
+        procedure Action_ExportCSVClick(Sender: TObject);
+        procedure Action_RemoveFiltersClick(Sender: TObject);
+        procedure Action_Free1Click(Sender: TObject);
+        procedure btnReport1Click(Sender: TObject);
+        procedure btnReport2Click(Sender: TObject);
+        procedure btnReport3Click(Sender: TObject);
+        procedure btnReport4Click(Sender: TObject);
+        procedure btnStartClick(Sender: TObject);
+        procedure btnTabelauReportClick(Sender: TObject);
+        procedure btnGeneralClick(Sender: TObject);
+        procedure btnSettingsClick(Sender: TObject);
+        procedure btnAgeDebtClick(Sender: TObject);
+        procedure btnOpenItemsClick(Sender: TObject);
+        procedure btnOtherTransClick(Sender: TObject);
+        procedure btnTrackerClick(Sender: TObject);
+        procedure btnAddressBookClick(Sender: TObject);
+        procedure sgAgeViewKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure btnUnlockClick(Sender: TObject);
+        procedure btnPassUpdateClick(Sender: TObject);
+        procedure sgAddressBookKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure sgAddressBookKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure sgListSectionKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure sgListValueKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure Action_AddFollowUpGroupClick(Sender: TObject);
+        procedure Action_RemoveFollowUpsClick(Sender: TObject);
+        procedure Action_MassMailerClick(Sender: TObject);
+        procedure btnPasswordPreviewMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+        procedure btnPasswordPreviewMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+        procedure Action_Free2Click(Sender: TObject);
+        procedure Action_Range1Click(Sender: TObject);
+        procedure Action_Range2Click(Sender: TObject);
+        procedure Action_Range3Click(Sender: TObject);
+        procedure Action_Range4Click(Sender: TObject);
+        procedure Action_Range5Click(Sender: TObject);
+        procedure Action_Range6Click(Sender: TObject);
+        procedure Action_TotalAmountClick(Sender: TObject);
+        procedure Action_OverduesClick(Sender: TObject);
+        procedure btnSortApplyClick(Sender: TObject);
+        procedure sgCoCodesMouseEnter(Sender: TObject);
+        procedure sgPaidInfoMouseEnter(Sender: TObject);
+        procedure sgPersonMouseEnter(Sender: TObject);
+        procedure sgPmtTermsMouseEnter(Sender: TObject);
+        procedure sgGroup3MouseEnter(Sender: TObject);
+        procedure sgInvoiceTrackerMouseEnter(Sender: TObject);
+        procedure sgAddressBookMouseEnter(Sender: TObject);
+        procedure sgOpenItemsMouseEnter(Sender: TObject);
+        procedure sgAgeViewMouseEnter(Sender: TObject);
+        procedure GroupListBoxMouseEnter(Sender: TObject);
+        procedure GroupListDatesMouseEnter(Sender: TObject);
+        procedure SortListBoxMouseEnter(Sender: TObject);
+        procedure sgOpenItemsKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure sgInvoiceTrackerKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure sgGroup3KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure sgPersonKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure sgPmtTermsKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure sgPaidInfoKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure sgCoCodesKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure sgAgeViewClick(Sender: TObject);
+        procedure sgAgeViewKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    private
+        var pAllowClose           :  boolean;
+        var pStartTime            :  TTime;
+    public
+        var WinUserName         :  string;
+        var EventLogPath        :  string;
+        var DbConnect           :  TADOConnection;
+        var GroupList           :  TLists;
+        var GroupIdSel          :  string;
+        var GroupNmSel          :  string;
+        var AgeDateSel          :  string;
+        var OSAmount            :  double;
+        var GridPicture         :  TImage;
+        var AccessLevel         :  string;
+        var AccessMode          :  string;
+        var OpenItemsUpdate     :  string;
+        var OpenItemsStatus     :  string;
+        var ConnLastError       :  cardinal;
+        // HELPER METHODS
+        procedure  DebugMsg(const Msg: String);
+        procedure  ExecMessage(IsPostType: boolean; YOUR_INT: integer; YOUR_TEXT: string);
+        function   OleGetStr(RecordsetField: variant): string;
+        function   FindKey(INI: TMemIniFile; OpenedSection: string; KeyPosition: integer): string;
+        function   WndCall(WinForm: TForm; Mode: integer): integer;
+        function   MsgCall(WndType: integer; WndText: string): integer;
+        procedure  SetSettingsPanel(Mode: integer);
+        function   ConvertName(CoNumber: string; Prefix: string; mode: integer): string;
+        function   GetCoCode(CoPos: integer; GroupId: string): string;
+        procedure  Find(ColumnNum: integer);
+        procedure  SwitchTimers(state: integer);
+        procedure  LoadImageFromStream(Image: TImage; const FileName: string);
+        function   CDate(StrDate: string): TDate;
+        function   ShowReport(ReportNumber: cardinal): cardinal;
+        procedure  CopyFile(const Source, Dest: string);
+        procedure  ResetTabsheetButtons;
+        procedure  LoadingAnimation(GIFImage: TImage; Grid: TStringGrid; GridPanel: TPanel; State: integer);
+        procedure  SetPanelBorders;
+        procedure  SetGridColumnWidths;
+        procedure  SetGridRowHeights;
+        procedure  SetGridThumbSizes;
+        procedure  SetGridFocus;
+        function   Explode(Text: string; SourceDelim: char): string;
+        function   Implode(Text: Classes.TStrings; TargetDelim: char): string;
+        function   CheckGivenPassword(Password: string): boolean;
+        function   SetNewPassword(Password: string): boolean;
+        function   AddressBookExclusion: boolean;
+        function   CheckIfDate(StrDate: string): boolean;
+    protected
+        // PROCESS ALL WINDOWS MESSAGES }
+        procedure  WndProc(var msg: Messages.TMessage); override;
 
-{ -------------------------------------------------------------- ! TSHAPE CLASS ! --------------------------------------------------------------------------- }
-type
-  TShape = class(ExtCtrls.TShape)
-  protected
-    procedure Paint; override;
-    procedure CMFontChanged(var Msg: TMessage); message CM_FONTCHANGED;
-    procedure CMTextChanged(var Msg: TMessage); message CM_TEXTCHANGED;
-  published
-    property  Caption;
-    property  Font;
-    procedure ShapeText(Left, Top: integer; StrText: string; Format: TFontStyles);
-  public
-    var CaptionLeft : integer;
-    var CaptionTop  : integer;
-  end;
+    end;
 
-{ -------------------------------------------------------------- ! TPANEL CLASS ! --------------------------------------------------------------------------- }
-type
-  TPanel = class(ExtCtrls.TPanel)
-  protected
-    procedure Paint; override;
-  published
-    procedure PanelBorders(FillColor, TopColor, BottomColor, LeftColor, RightColor: TColor);
-  public
-    var PenWidthTop   :  integer;
-    var PenWidthBottom:  integer;
-    var PenWidthLeft  :  integer;
-    var PenWidthRight :  integer;
-    var PenColorTop   :  TColor;
-    var PenColorBottom:  TColor;
-    var PenColorLeft  :  TColor;
-    var PenColorRight :  TColor;
-    var mcBrushColor  :  TColor;
-  end;
+    /// <remarks>
+    ///     If library is written in delphi, then delphi types can be used as usual,
+    ///     however, if library is written in 'c' or any other language, then
+    ///     please use plain 'c' language types only, so instead of pascal 'string'
+    ///     type, please use 'pchar' type, etc., also, in case of c# language,
+    ///     please refer to manual on 'making c# dll library for delphi usage'
+    /// </remarks>
 
-{ ------------------------------------------------------------- ! TSTRINGGRID CLASS ! ----------------------------------------------------------------------- }
-type
-  TStringGrid = class(Grids.TStringGrid)
-  private
-    var FHideFocusRect: Boolean;
-  protected
-    procedure Paint; override;
-  public
-    var OpenThdId:  integer;
-    var SqlColumns: TLists;
-    var UpdatedRowsHolder: TIntigers;
-    procedure SetUpdatedRow(Row: integer);
-    procedure RecordRowsAffected;
-  published
-    property  HideFocusRect:Boolean read FHideFocusRect write FHideFocusRect;
-    procedure CopyCutPaste(mode: integer);
-    procedure DelEsc(mode: integer; pCol, pRow: integer);
-    procedure ClearAll(dfRows: integer; FixedRows: integer; FixedCols: integer; ZeroCol: boolean);
-    procedure DeleteRowFrom(FixedRow: integer; FixedCol: integer);
-    procedure DrawSelected(ARow: integer; ACol: integer; State: TGridDrawState; Rect: TRect; FontColorSel: TColor; BrushColorSel: TColor; FontColor: TColor; BrushColor: TColor; Headers: boolean);
-    procedure ColorValues(ARow: integer; ACol: integer; Rect: TRect; NegativeColor: TColor; PositiveColor: TColor);
-    procedure SetColWidth(FirstDefault: integer; AddSpace: integer; Limit: integer);
-    procedure SetRowHeight(RowHeight, Header: integer);
-	  procedure MSort(const SortCol, datatype: integer; const ascending: boolean);
-    procedure AutoThumbSize;
-    procedure SaveLayout(ColWidthName: string; ColOrderName: string; ColNames: string; ColPrefix: string);
-    function  LoadLayout(var StrCol: string; ColWidthName: string; ColOrderName: string; ColNames: string; ColPrefix: string): boolean;
-    function  ReturnColumn(ColumnName: string; FixedCol: integer; FixedRow: integer): integer;
-    function  ToExcel(ASheetName, AFileName: string): Boolean;
-    procedure Freeze(PaintWnd: boolean);
-    function  ImportCSV(DialogBox: TOpenDialog; Delimiter: string): boolean;
-    function  ExportCSV(DialogBox: TSaveDialog; Delimiter: string): boolean;
-    procedure SelectAll;
-  end;
+    TLogText              = procedure(filename: string; text: string); stdcall;
+    TMergeSort            = procedure(Grid: TStringgrid; var Vals: array of integer; sortcol, datatype: integer; ascending: boolean); stdcall;
+    TPrintf               = function(text: string; s: string): string; stdcall;
+    TGetOSVer             = function(mode: integer): string; stdcall;
+    TGetCurrentUserSid    = function: string stdcall;
+    TGetBuildInfoAsString = function: string stdcall;
 
-{ ----------------------------------------------------------------- ! MAIN CLASS ! -------------------------------------------------------------------------- }
-type                                                            (* GUI | MAIN THREAD *)
-  TMainForm = class(TForm)
-    MyPages: TPageControl;
-    TabSheet1: TTabSheet;
-    TabSheet2: TTabSheet;
-    TabSheet3: TTabSheet;
-    TabSheet4: TTabSheet;
-    TabSheet5: TTabSheet;
-    TabSheet7: TTabSheet;
-    Header1: TPanel;
-    Footer1: TPanel;
-    hShapeGen: TShape;
-    Text01: TLabel;
-    Text02: TLabel;
-    Text06: TLabel;
-    tcCOCODE1: TLabel;
-    tcCURRENCY: TLabel;
-    tcTOTAL: TLabel;
-    Cap01: TShape;
-    hShapeSet: TShape;
-    Cap02: TShape;
-    hShapeAge: TShape;
-    Cap05: TShape;
-    Text09: TLabel;
-    tR1: TLabel;
-    tR2: TLabel;
-    tR3: TLabel;
-    tR4: TLabel;
-    tR5: TLabel;
-    Text08: TLabel;
-    procND: TLabel;
-    procR1: TLabel;
-    procR2: TLabel;
-    procR3: TLabel;
-    procR4: TLabel;
-    procR5: TLabel;
-    valND: TLabel;
-    valR1: TLabel;
-    valR2: TLabel;
-    valR3: TLabel;
-    valR4: TLabel;
-    valR5: TLabel;
-    tTAMT: TLabel;
-    valTAMT: TLabel;
-    procTAMT: TLabel;
-    Text10: TLabel;
-    Text11: TLabel;
-    Text12: TLabel;
-    hShapeAct: TShape;
-    Cap03: TShape;
-    hShapeTC: TShape;
-    Cap06: TShape;
-    Text17: TLabel;
-    Text18: TLabel;
-    Text19: TLabel;
-    hShapeTR: TShape;
-    Cap07: TShape;
-    Text20: TLabel;
-    Text21: TLabel;
-    Text22: TLabel;
-    valExceeders: TLabel;
-    valTEXCEES: TLabel;
-    valTLIMITS: TLabel;
-    valTND: TLabel;
-    valPASTDUE: TLabel;
-    valDEFAULTED: TLabel;
-    valRISKA: TLabel;
-    valRISKB: TLabel;
-    valRISKC: TLabel;
-    StatBar_CAP1: TLabel;
-    StatBar_TXT1: TLabel;
-    StatBar_CAP2: TLabel;
-    StatBar_TXT2: TLabel;
-    TabSheet8: TTabSheet;
-    PopupMenu: TPopupMenu;
-    Action_HideApp: TMenuItem;
-    Action_ShowApp: TMenuItem;
-    Action_Close: TMenuItem;
-    N1: TMenuItem;
-    Action_Help: TMenuItem;
-    Action_About: TMenuItem;
-    N2: TMenuItem;
-    Action_OnTop: TMenuItem;
-    N3: TMenuItem;
-    TabSheet6: TTabSheet;
-    sgOpenItems: TStringGrid;
-    Header3: TPanel;
-    sgAddressBook: TStringGrid;
-    Header8: TPanel;
-    EditPassword: TEdit;
-    Cap21: TShape;
-    hShapeCred: TShape;
-    Text32: TLabel;
-    Text33: TLabel;
-    hShapePass: TShape;
-    Cap22: TShape;
-    Text37: TLabel;
-    Text38: TLabel;
-    Text39: TLabel;
-    EditCurrentPassword: TEdit;
-    EditNewPassword: TEdit;
-    EditNewPasswordConfirmation: TEdit;
-    ShapeList1: TShape;
-    imgKeyAdd: TImage;
-    imgKeyRemove: TImage;
-    imgUpdateValues: TImage;
-    Text41: TLabel;
-    Text42: TLabel;
-    Text43: TLabel;
-    sgListValue: TStringGrid;
-    sgListSection: TStringGrid;
-    imgSectionAdd: TImage;
-    imgSectionRemove: TImage;
-    Text48: TLabel;
-    Text49: TLabel;
-    Cap23: TShape;
-    Text44: TLabel;
-    hShapeActionPAB: TShape;
-    Cap13: TShape;
-    imgOFF: TImage;
-    Header2: TPanel;
-    hShapeActionsVOI: TShape;
-    Cap10: TShape;
-    hShapeSettingsVOI: TShape;
-    Cap11: TShape;
-    hShapeDetailsVOI: TShape;
-    Cap12: TShape;
-    btnReload: TImage;
-    Text54L1: TLabel;
-    btnOpenAB: TImage;
-    btnUpdateAB: TImage;
-    btnCloseAB: TImage;
-    Text64: TLabel;
-    Text66: TLabel;
-    Text67: TLabel;
-    Text63: TLabel;
-    Text55: TLabel;
-    Text56: TLabel;
-    Text57: TLabel;
-    Text58: TLabel;
-    tcOpenItems: TLabel;
-    tcInvoices: TLabel;
-    tcOSAmt: TLabel;
-    tcOverdue: TLabel;
-    btnExportAB: TImage;
-    Text69: TLabel;
-    Header4: TPanel;
-    hShapeInfoAM: TShape;
-    Cap43: TShape;
-    Header6: TPanel;
-    ShapeContent6: TShape;
-    Cap61: TShape;
-    Header7: TPanel;
-    hShapeInfoGT: TShape;
-    Cap15: TShape;
-    Text54L2: TLabel;
-    MainShape6: TPanel;
-    AppFooter: TPanel;
-    StatBar_CAP3: TLabel;
-    StatBar_TXT3: TLabel;
-    StatBar_CAP4: TLabel;
-    StatBar_TXT4: TLabel;
-    StatBar_CAP5: TLabel;
-    StatBar_TXT5: TLabel;
-    CurrentTime: TTimer;
-    UpTime: TTimer;
-    txtInfo1: TLabel;
-    txtInfo3: TLabel;
-    txtInfo2: TLabel;
-    Cap16: TShape;
-    Cap17: TShape;
-    Cap18: TShape;
-    CSVExport: TSaveDialog;
-    CSVImport: TOpenDialog;
-    Cap19: TShape;
-    Cap20: TShape;
-    LeftPanel: TPanel;
-    ContentPanel7: TPanel;
-    RightPanel: TPanel;
-    MidPanel: TPanel;
-    ContentPanel6: TPanel;
-    ContentPanel1: TPanel;
-    ContentPanel: TPanel;
-    ContentPanel2: TPanel;
-    MainPanel1: TPanel;
-    BottomPanel1: TPanel;
-    ContentPanel8: TPanel;
-    InnerPanel8Left: TPanel;
-    tcUNAmt: TLabel;
-    Text70: TLabel;
-    Text72: TLabel;
-    Text73: TLabel;
-    OILoader: TTimer;
-    Text80: TLabel;
-    Text81: TLabel;
-    tcKPIoverdue: TLabel;
-    tcKPIUnallocated: TLabel;
-    Text82: TLabel;
-    tcOvdAmt: TLabel;
-    GroupListBox: TComboBox;
-    GroupListDates: TComboBox;
-    Text31: TLabel;
-    procRISKA: TLabel;
-    procRISKB: TLabel;
-    procRISKC: TLabel;
-    Text36: TLabel;
-    GroupName: TLabel;
-    btnMakeGroup: TImage;
-    Text83L1: TLabel;
-    Text83L2: TLabel;
-    Text53: TLabel;
-    PanelGroupName: TPanel;
-    btnMakeGroupAge: TSpeedButton;
-    EditGroupName: TLabeledEdit;
-    ReloadCover: TImage;
-    sgAgeView: TStringGrid;
-    cbDump: TCheckBox;
-    sgInvoiceTracker: TStringGrid;
-    AgeViewPopup: TPopupMenu;
-    Action_Tracker: TMenuItem;
-    Action_PaymentTerm: TMenuItem;
-    Action_Person: TMenuItem;
-    Label2: TLabel;
-    Label3: TLabel;
-    Label4: TLabel;
-    TrackerPopup: TPopupMenu;
-    Action_Remove: TMenuItem;
-    Action_ShowMy: TMenuItem;
-    Action_ShowAll: TMenuItem;
-    Action_LyncCall: TMenuItem;
-    TrayIcon: TTrayIcon;
-    InvoiceScanTimer: TTimer;
-    Action_ShowRegistered: TMenuItem;
-    N8: TMenuItem;
-    InetTimer: TTimer;
-    StatBar_TXT7: TLabel;
-    InnerPanel8Right: TPanel;
-    Cap27: TShape;
-    N9: TMenuItem;
-    Action_FilterINF7: TMenuItem;
-    N5: TMenuItem;
-    N7: TMenuItem;
-    N6: TMenuItem;
-    Action_AddToBook: TMenuItem;
-    Text50: TLabel;
-    imgAllowEdit: TImage;
-    SplitLine1: TBevel;
-    sgCoCodes: TStringGrid;
-    sgPaidInfo: TStringGrid;
-    sgPerson: TStringGrid;
-    sgGroup3: TStringGrid;
-    sgPmtTerms: TStringGrid;
-    Action_AutoColumnSize: TMenuItem;
-    InnerPanelTop: TPanel;
-    SplitLine2: TBevel;
-    Action_Search: TMenuItem;
-    BookPopup: TPopupMenu;
-    Action_Copy: TMenuItem;
-    Action_Paste: TMenuItem;
-    Action_Cut: TMenuItem;
-    Action_DelRow: TMenuItem;
-    N10: TMenuItem;
-    N11: TMenuItem;
-    Action_ShowAsIs: TMenuItem;
-    Action_ShowMyEntries: TMenuItem;
-    Action_ToExce: TMenuItem;
-    Action_BasicView: TMenuItem;
-    N13: TMenuItem;
-    Action_FullView: TMenuItem;
-    XLExport: TSaveDialog;
-    tR6: TLabel;
-    valR6: TLabel;
-    procR6: TLabel;
-    N14: TMenuItem;
-    Action_SearchBook: TMenuItem;
-    Action_Overdue: TMenuItem;
-    N15: TMenuItem;
-    TabSheet9: TTabSheet;
-    WebBrowser1: TWebBrowser;
-    WebContainer: TPanel;
-    DetailsGrid: TStringGrid;
-    btnLoadAgeView: TSpeedButton;
-    EditGroupID: TLabeledEdit;
-    Action_RowHighlight: TMenuItem;
-    Action_Update: TMenuItem;
-    Action_Report: TMenuItem;
-    N17: TMenuItem;
-    CommonPopupMenu: TPopupMenu;
-    Action_AutoColumn: TMenuItem;
-    Action_ExportTransactions: TMenuItem;
-    Action_SelectAll: TMenuItem;
-    N18: TMenuItem;
-    Action_CopyToCB: TMenuItem;
-    N19: TMenuItem;
-    Action_ColumnWidth: TMenuItem;
-    FollowupPopup: TTimer;
-    custRISKA: TLabel;
-    custRISKB: TLabel;
-    custRISKC: TLabel;
-    Action_FollowUpColors: TMenuItem;
-    ShapeList2: TShape;
-    SplitLine3: TBevel;
-    imgEventLog: TImage;
-    Text51: TLabel;
-    sgGroups: TStringGrid;
-    sgUAC: TStringGrid;
-    ReportContainer: TPanel;
-    Action_INF7_Filter: TMenuItem;
-    Action_CoCode_Filter: TMenuItem;
-    Action_Agent_Filter: TMenuItem;
-    Action_Division_Filter: TMenuItem;
-    Action_FollowUp_Filter: TMenuItem;
-    Action_GroupFollowUp: TMenuItem;
-    tcCOCODE2: TLabel;
-    tcCOCODE3: TLabel;
-    tcCOCODE4: TLabel;
-    Action_INF4_Filter: TMenuItem;
-    Action_Gr3_Filter: TMenuItem;
-    TopPanel8: TPanel;
-    RightPanel8: TPanel;
-    PanelDetailsGrid: TPanel;
-    Action_HideSummary: TMenuItem;
-    Action_ExportCSV: TMenuItem;
-    Action_RemoveFilters: TMenuItem;
-    Action_Free1: TMenuItem;
-    NavigationBar: TPanel;
-    btnReport1: TSpeedButton;
-    btnReport2: TSpeedButton;
-    btnReport3: TSpeedButton;
-    btnReport4: TSpeedButton;
-    WebBrowser2: TWebBrowser;
-    TextReport: TLabel;
-    SeparateLine: TBevel;
-    btnStart: TSpeedButton;
-    Separate1: TBevel;
-    btnSettings: TSpeedButton;
-    btnTabelauReport: TSpeedButton;
-    btnAgeDebt: TSpeedButton;
-    btnOpenItems: TSpeedButton;
-    btnOtherTrans: TSpeedButton;
-    btnAddressBook: TSpeedButton;
-    btnTracker: TSpeedButton;
-    btnGeneral: TSpeedButton;
-    Separate2: TBevel;
-    Separate3: TBevel;
-    AppHeader: TPanel;
-    Bevel1: TBevel;
-    Bevel2: TBevel;
-    Bevel3: TBevel;
-    PanelAgeView: TPanel;
-    ImgLoadingAgeView: TImage;
-    PanelOpenItems: TPanel;
-    ImgLoadingOpenItems: TImage;
-    PanelAddressBook: TPanel;
-    ImgLoadingAddressBook: TImage;
-    PanelInvoiceTracker: TPanel;
-    ImgLoadingInvoiceTracker: TImage;
-    PanelCoCodes: TPanel;
-    PanelPaidInfo: TPanel;
-    PanelPerson: TPanel;
-    PanelPmtTerms: TPanel;
-    PanelGroup3: TPanel;
-    PanelSettingsSections: TPanel;
-    PanelSettingsValues: TPanel;
-    PanelUAC: TPanel;
-    PanelGroups: TPanel;
-    btnUnlock: TSpeedButton;
-    btnPassUpdate: TSpeedButton;
-    Action_AddFollowUpGroup: TMenuItem;
-    Action_RemoveFollowUps: TMenuItem;
-    Cap24: TShape;
-    Shape2: TShape;
-    Action_MassMailer: TMenuItem;
-    btnPasswordPreview: TSpeedButton;
-    hShapeEye: TShape;
-    N20: TMenuItem;
-    N21: TMenuItem;
-    Action_Ranges: TMenuItem;
-    Action_Range1: TMenuItem;
-    Action_Range2: TMenuItem;
-    Action_Range3: TMenuItem;
-    Action_Range4: TMenuItem;
-    Action_Range5: TMenuItem;
-    Action_Range6: TMenuItem;
-    Action_Amounts: TMenuItem;
-    Action_TotalAmount: TMenuItem;
-    Action_Overdues: TMenuItem;
-    Action_Free2: TMenuItem;
-    Action_ViewOptions: TMenuItem;
-    N16: TMenuItem;
-    N22: TMenuItem;
-    Action_ShowDetails: TMenuItem;
-    Action_QuickReporting: TMenuItem;
-    SortListBox: TComboBox;
-    btnSortApply: TSpeedButton;
-    procedure FormCreate(Sender: TObject);
-    procedure FormResize(Sender: TObject);
-    procedure FormShow(Sender: TObject);
-    procedure Action_HideAppClick(Sender: TObject);
-    procedure Action_ShowAppClick(Sender: TObject);
-    procedure Action_HelpClick(Sender: TObject);
-    procedure Action_AboutClick(Sender: TObject);
-    procedure Action_OnTopClick(Sender: TObject);
-    procedure TabSheet8Show(Sender: TObject);
-    procedure imgKeyAddMouseEnter(Sender: TObject);
-    procedure imgKeyAddMouseLeave(Sender: TObject);
-    procedure imgKeyRemoveMouseEnter(Sender: TObject);
-    procedure imgKeyRemoveMouseLeave(Sender: TObject);
-    procedure imgUpdateValuesMouseEnter(Sender: TObject);
-    procedure imgUpdateValuesMouseLeave(Sender: TObject);
-    procedure imgSectionAddMouseEnter(Sender: TObject);
-    procedure imgSectionAddMouseLeave(Sender: TObject);
-    procedure imgSectionRemoveMouseEnter(Sender: TObject);
-    procedure imgSectionRemoveMouseLeave(Sender: TObject);
-    procedure sgListSectionSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
-    procedure imgSectionRemoveClick(Sender: TObject);
-    procedure imgKeyRemoveClick(Sender: TObject);
-    procedure imgSectionAddClick(Sender: TObject);
-    procedure imgKeyAddClick(Sender: TObject);
-    procedure imgUpdateValuesClick(Sender: TObject);
-    procedure sgAddressBookMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-    procedure sgAddressBookMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-    procedure sgOpenItemsMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-    procedure sgOpenItemsMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-    procedure btnReloadMouseEnter(Sender: TObject);
-    procedure btnReloadMouseLeave(Sender: TObject);
-    procedure btnOpenABMouseEnter(Sender: TObject);
-    procedure btnOpenABMouseLeave(Sender: TObject);
-    procedure btnUpdateABMouseEnter(Sender: TObject);
-    procedure btnUpdateABMouseLeave(Sender: TObject);
-    procedure btnCloseABMouseEnter(Sender: TObject);
-    procedure btnCloseABMouseLeave(Sender: TObject);
-    procedure btnExportABMouseEnter(Sender: TObject);
-    procedure btnExportABMouseLeave(Sender: TObject);
-    procedure btnReloadClick(Sender: TObject);
-    procedure sgListSectionKeyPress(Sender: TObject; var Key: Char);
-    procedure sgListValueClick(Sender: TObject);
-    procedure sgListSectionClick(Sender: TObject);
-    procedure EditPasswordKeyPress(Sender: TObject; var Key: Char);
-    procedure CurrentTimeTimer(Sender: TObject);
-    procedure UpTimeTimer(Sender: TObject);
-    procedure sgListSectionMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-    procedure sgListSectionMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-    procedure sgListValueMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-    procedure sgListValueMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-    procedure sgListValueKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure sgListSectionKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure btnCloseABClick(Sender: TObject);
-    procedure btnUpdateABClick(Sender: TObject);
-    procedure btnOpenABClick(Sender: TObject);
-    procedure btnExportABClick(Sender: TObject);
-    procedure TabSheet7Show(Sender: TObject);
-    procedure TabSheet7Resize(Sender: TObject);
-    procedure sgCoCodesMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-    procedure sgCoCodesMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-    procedure sgPmtTermsMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-    procedure sgPmtTermsMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-    procedure sgGroup3MouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-    procedure sgGroup3MouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-    procedure sgPaidInfoMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-    procedure sgPaidInfoMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-    procedure sgPersonMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-    procedure sgPersonMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-    procedure sgOpenItemsDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
-    procedure OILoaderTimer(Sender: TObject);
-    procedure GroupListBoxSelect(Sender: TObject);
-    procedure btnMakeGroupClick(Sender: TObject);
-    procedure btnMakeGroupMouseEnter(Sender: TObject);
-    procedure btnMakeGroupMouseLeave(Sender: TObject);
-    procedure btnMakeGroupAgeClick(Sender: TObject);
-    procedure EditGroupNameKeyPress(Sender: TObject; var Key: Char);
-    procedure sgAgeViewMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-    procedure sgAgeViewMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-    procedure sgInvoiceTrackerMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-    procedure sgInvoiceTrackerMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-    procedure Action_TrackerClick(Sender: TObject);
-    procedure Action_PaymentTermClick(Sender: TObject);
-    procedure Action_PersonClick(Sender: TObject);
-    procedure Action_RemoveClick(Sender: TObject);
-    procedure Action_ShowMyClick(Sender: TObject);
-    procedure Action_ShowAllClick(Sender: TObject);
-    procedure TabSheet4Show(Sender: TObject);
-    procedure Action_LyncCallClick(Sender: TObject);
-    procedure InvoiceScanTimerTimer(Sender: TObject);
-    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure TrayIconDblClick(Sender: TObject);
-    procedure InetTimerTimer(Sender: TObject);
-    procedure Action_CloseClick(Sender: TObject);
-    procedure sgAgeViewDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
-    procedure sgAgeViewDblClick(Sender: TObject);
-    procedure Action_ShowRegisteredClick(Sender: TObject);
-    procedure sgInvoiceTrackerDblClick(Sender: TObject);
-    procedure Action_AddToBookClick(Sender: TObject);
-    procedure sgAddressBookDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
-    procedure sgInvoiceTrackerDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
-    procedure sgListSectionDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
-    procedure sgListValueDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
-    procedure imgAllowEditMouseEnter(Sender: TObject);
-    procedure imgAllowEditMouseLeave(Sender: TObject);
-    procedure imgAllowEditClick(Sender: TObject);
-    procedure sgAddressBookDblClick(Sender: TObject);
-    procedure sgAddressBookClick(Sender: TObject);
-    procedure AgeViewPopupPopup(Sender: TObject);
-    procedure sgCoCodesDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
-    procedure sgPaidInfoDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
-    procedure sgPmtTermsDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
-    procedure sgPersonDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
-    procedure sgGroup3DrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
-    procedure Action_AutoColumnSizeClick(Sender: TObject);
-    procedure FormDestroy(Sender: TObject);
-    procedure Action_SearchClick(Sender: TObject);
-    procedure Action_CutClick(Sender: TObject);
-    procedure Action_CopyClick(Sender: TObject);
-    procedure Action_PasteClick(Sender: TObject);
-    procedure Action_DelRowClick(Sender: TObject);
-    procedure BookPopupPopup(Sender: TObject);
-    procedure Action_ShowAsIsClick(Sender: TObject);
-    procedure Action_ShowMyEntriesClick(Sender: TObject);
-    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
-    procedure Action_ToExceClick(Sender: TObject);
-    procedure Action_BasicViewClick(Sender: TObject);
-    procedure Action_FullViewClick(Sender: TObject);
-    procedure sgAgeViewColumnMoved(Sender: TObject; FromIndex, ToIndex: Integer);
-    procedure Action_SearchBookClick(Sender: TObject);
-    procedure Action_OverdueClick(Sender: TObject);
-    procedure DetailsGridKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure DetailsGridKeyPress(Sender: TObject; var Key: Char);
-    procedure DetailsGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
-    procedure btnLoadAgeViewClick(Sender: TObject);
-    procedure Action_RowHighlightClick(Sender: TObject);
-    procedure Action_ReportClick(Sender: TObject);
-    procedure Action_ExportTransactionsClick(Sender: TObject);
-    procedure Action_SelectAllClick(Sender: TObject);
-    procedure Action_CopyToCBClick(Sender: TObject);
-    procedure Action_AutoColumnClick(Sender: TObject);
-    procedure Action_ColumnWidthClick(Sender: TObject);
-    procedure FollowupPopupTimer(Sender: TObject);
-    procedure Action_FollowUpColorsClick(Sender: TObject);
-    procedure imgEventLogClick(Sender: TObject);
-    procedure imgEventLogMouseEnter(Sender: TObject);
-    procedure imgEventLogMouseLeave(Sender: TObject);
-    procedure Action_INF7_FilterClick(Sender: TObject);
-    procedure Action_CoCode_FilterClick(Sender: TObject);
-    procedure Action_Agent_FilterClick(Sender: TObject);
-    procedure Action_Division_FilterClick(Sender: TObject);
-    procedure Action_FollowUp_FilterClick(Sender: TObject);
-    procedure sgUACDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
-    procedure sgUACMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-    procedure sgUACMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-    procedure sgGroupsDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
-    procedure sgGroupsMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-    procedure sgGroupsMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-    procedure Action_INF4_FilterClick(Sender: TObject);
-    procedure Action_Gr3_FilterClick(Sender: TObject);
-    procedure Action_HideSummaryClick(Sender: TObject);
-    procedure Action_ExportCSVClick(Sender: TObject);
-    procedure Action_RemoveFiltersClick(Sender: TObject);
-    procedure Action_Free1Click(Sender: TObject);
-    procedure btnReport1Click(Sender: TObject);
-    procedure btnReport2Click(Sender: TObject);
-    procedure btnReport3Click(Sender: TObject);
-    procedure btnReport4Click(Sender: TObject);
-    procedure btnStartClick(Sender: TObject);
-    procedure btnTabelauReportClick(Sender: TObject);
-    procedure btnGeneralClick(Sender: TObject);
-    procedure btnSettingsClick(Sender: TObject);
-    procedure btnAgeDebtClick(Sender: TObject);
-    procedure btnOpenItemsClick(Sender: TObject);
-    procedure btnOtherTransClick(Sender: TObject);
-    procedure btnTrackerClick(Sender: TObject);
-    procedure btnAddressBookClick(Sender: TObject);
-    procedure sgAgeViewKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure btnUnlockClick(Sender: TObject);
-    procedure btnPassUpdateClick(Sender: TObject);
-    procedure sgAddressBookKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure sgAddressBookKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure sgListSectionKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure sgListValueKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure Action_AddFollowUpGroupClick(Sender: TObject);
-    procedure Action_RemoveFollowUpsClick(Sender: TObject);
-    procedure Action_MassMailerClick(Sender: TObject);
-    procedure btnPasswordPreviewMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-    procedure btnPasswordPreviewMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-    procedure Action_Free2Click(Sender: TObject);
-    procedure Action_Range1Click(Sender: TObject);
-    procedure Action_Range2Click(Sender: TObject);
-    procedure Action_Range3Click(Sender: TObject);
-    procedure Action_Range4Click(Sender: TObject);
-    procedure Action_Range5Click(Sender: TObject);
-    procedure Action_Range6Click(Sender: TObject);
-    procedure Action_TotalAmountClick(Sender: TObject);
-    procedure Action_OverduesClick(Sender: TObject);
-    procedure btnSortApplyClick(Sender: TObject);
-    procedure sgCoCodesMouseEnter(Sender: TObject);
-    procedure sgPaidInfoMouseEnter(Sender: TObject);
-    procedure sgPersonMouseEnter(Sender: TObject);
-    procedure sgPmtTermsMouseEnter(Sender: TObject);
-    procedure sgGroup3MouseEnter(Sender: TObject);
-    procedure sgInvoiceTrackerMouseEnter(Sender: TObject);
-    procedure sgAddressBookMouseEnter(Sender: TObject);
-    procedure sgOpenItemsMouseEnter(Sender: TObject);
-    procedure sgAgeViewMouseEnter(Sender: TObject);
-    procedure GroupListBoxMouseEnter(Sender: TObject);
-    procedure GroupListDatesMouseEnter(Sender: TObject);
-    procedure SortListBoxMouseEnter(Sender: TObject);
-    procedure sgOpenItemsKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure sgInvoiceTrackerKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure sgGroup3KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure sgPersonKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure sgPmtTermsKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure sgPaidInfoKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure sgCoCodesKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure sgAgeViewClick(Sender: TObject);
-    procedure sgAgeViewKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    { ------------------------------------------------------------- ! HELPERS ! ----------------------------------------------------------------------------- }
-  private
-    { GENERAL }
-    var pAllowClose           :  boolean;
-    var pStartTime            :  TTime;
-    { GETTERS AND SETTERS FOR "FOLLOW-UP" COLORS SAVED IN SETTINGS FILE }
-    function  GetTodayFColor  : TColor;
-    function  GetTodayBColor  : TColor;
-    function  GetPastFColor   : TColor;
-    function  GetPastBColor   : TColor;
-    function  GetFutureFColor : TColor;
-    function  GetFutureBColor : TColor;
-    procedure SetTodayFColor (NewColor: TColor);
-    procedure SetTodayBColor (NewColor: TColor);
-    procedure SetPastFColor  (NewColor: TColor);
-    procedure SetPastBColor  (NewColor: TColor);
-    procedure SetFutureFColor(NewColor: TColor);
-    procedure SetFutureBColor(NewColor: TColor);
-  public
-    { GENERAL }
-    var WinUserName         :  string;
-    var EventLogPath        :  string;
-    var DbConnect           :  TADOConnection;
-    var GroupList           :  TLists;
-    var GroupIdSel          :  string;
-    var GroupNmSel          :  string;
-    var AgeDateSel          :  string;
-    var OSAmount            :  double;
-    var GridPicture         :  TImage;
-    var AccessLevel         :  string;
-    var AccessMode          :  string;
-    var OpenItemsUpdate     :  string;
-    var OpenItemsStatus     :  string;
-    var ConnLastError       :  cardinal;
-    { FOR "FOLLOW-UP" COLOR PICKER }
-    property TodayFColor:  TColor read GetTodayFColor  write SetTodayFColor;
-    property TodayBColor:  TColor read GetTodayBColor  write SetTodayBColor;
-    property PastFColor:   TColor read GetPastFColor   write SetPastFColor;
-    property PastBColor:   TColor read GetPastBColor   write SetPastBColor;
-    property FutureFColor: TColor read GetFutureFColor write SetFutureFColor;
-    property FutureBColor: TColor read GetFutureBColor write SetFutureBColor;
-    { HELPER METHODS }
-    procedure  DebugMsg(const Msg: String);
-    procedure  ExecMessage(IsPostType: boolean; YOUR_INT: integer; YOUR_TEXT: string);
-    function   OleGetStr(RecordsetField: variant): string;
-    function   FindKey(INI: TMemIniFile; OpenedSection: string; KeyPosition: integer): string;
-    function   WndCall(WinForm: TForm; Mode: integer): integer;
-    function   MsgCall(WndType: integer; WndText: string): integer;
-    procedure  SetSettingsPanel(Mode: integer);
-    function   ConvertName(CoNumber: string; Prefix: string; mode: integer): string;
-    function   GetCoCode(CoPos: integer; GroupId: string): string;
-    procedure  Find(ColumnNum: integer);
-    procedure  SwitchTimers(state: integer);
-    procedure  LoadImageFromStream(Image: TImage; const FileName: string);
-    function   CDate(StrDate: string): TDate;
-    function   ShowReport(ReportNumber: cardinal): cardinal;
-    procedure  CopyFile(const Source, Dest: string);
-    procedure  ResetTabsheetButtons;
-    procedure  LoadingAnimation(GIFImage: TImage; Grid: TStringGrid; GridPanel: TPanel; State: integer);
-    procedure  SetPanelBorders;
-    procedure  SetGridColumnWidths;
-    procedure  SetGridRowHeights;
-    procedure  SetGridThumbSizes;
-    procedure  SetGridFocus;
-    function   Explode(Text: string; SourceDelim: char): string;
-    function   Implode(Text: Classes.TStrings; TargetDelim: char): string;
-    function   CheckGivenPassword(Password: string): boolean;
-    function   SetNewPassword(Password: string): boolean;
-    function   AddressBookExclusion: boolean;
-    function   CheckIfDate(StrDate: string): boolean;
-  protected
-    { PROCESS ALL WINDOWS MESSAGES }
-    procedure  WndProc(var msg: Messages.TMessage); override;
-  end;
+    const Assembly = 'Unitylib.dll';
 
-{ ---------------------------------------------------------- ! POINTERS TO DLL IMPORTS ! -------------------------------------------------------------------- }
+    function  Printf(Text: string; s: string): string; stdcall; external Assembly;
+    function  GetCurrentUserSid: string; stdcall; external Assembly;
+    function  GetOSVer(mode: integer): string; stdcall; external Assembly;
+    function  GetBuildInfoAsString: string; stdcall; external Assembly;
+    procedure LogText(filename: string; text: string); stdcall; external Assembly;
+    procedure MergeSort(grid: TStringgrid; var vals: array of integer; sortcol, datatype: integer; ascending: boolean); stdcall; external Assembly;
 
-{ IF LIBRARY IS WRITTEN IN DELPHI, THEN DELPHI TYPES CAN BE USED AS USUAL, }
-{ HOWEVER, IF LIBRARY IS WRITTEN IN 'C' OR ANY OTHER LANGUAGE, THEN        }
-{ PLEASE USE PLAIN 'C' LANGUAGE TYPES ONLY, SO INSTEAD OF PASCAL 'STRING'  }
-{ TYPE, PLEASE USE 'PCHAR' TYPE, ETC., ALSO, IN CASE OF C# LANGUAGE,       }
-{ PLEASE REFER TO MANUAL ON 'MAKING C# DLL LIBRARY FOR DELPHI USAGE'       }
+    const Win32API = 'wtsapi32.dll';
 
-{ RELATED TO UNITYLIB.DLL }
+    function WTSRegisterSessionNotification(hWnd: HWND; dwFlags: DWORD): Boolean; stdcall; external Win32API name 'WTSRegisterSessionNotification';
+    function WTSUnRegisterSessionNotification(hWnd: HWND):               Boolean; stdcall; external Win32API name 'WTSUnRegisterSessionNotification';
 
-TLogText              = procedure(filename: string; text: string); stdcall;
-TMergeSort            = procedure(Grid: TStringgrid; var Vals: array of integer; sortcol, datatype: integer; ascending: boolean); stdcall;
-TPrintf               = function(text: string; s: string): string; stdcall;
-TGetOSVer             = function(mode: integer): string; stdcall;
-TGetCurrentUserSid    = function: string stdcall;
-TGetBuildInfoAsString = function: string stdcall;
+{$I .\Include\Common.inc}
 
-const Assembly = 'Unitylib.dll';
-
-function  Printf(Text: string; s: string): string; stdcall; external Assembly;
-function  GetCurrentUserSid: string; stdcall; external Assembly;
-function  GetOSVer(mode: integer): string; stdcall; external Assembly;
-function  GetBuildInfoAsString: string; stdcall; external Assembly;
-procedure LogText(filename: string; text: string); stdcall; external Assembly;
-procedure MergeSort(grid: TStringgrid; var vals: array of integer; sortcol, datatype: integer; ascending: boolean); stdcall; external Assembly;
-
-const Win32API = 'wtsapi32.dll';
-
-function WTSRegisterSessionNotification(hWnd: HWND; dwFlags: DWORD): Boolean; stdcall; external Win32API name 'WTSRegisterSessionNotification';
-function WTSUnRegisterSessionNotification(hWnd: HWND):               Boolean; stdcall; external Win32API name 'WTSUnRegisterSessionNotification';
-
-{$I \Include\Common.inc}
-
-{ ------------------------------------------------------------- ! MAIN FORM REFERENCE ! --------------------------------------------------------------------- }
 var
   MainForm :  TMainForm;
-
-{ ------------------------------------------------------------- ! IMPLEMENTATION ZONE ! --------------------------------------------------------------------- }
 
 implementation
 
 uses
-  Filter, Tracker, Invoices, Actions, Calendar, About, AVSearch, Worker, SQL, Model, Settings, Database, UAC, AgeView, Transactions, Colors, EventLog,
-  ReportBug, ABSearch, MassMailer;
+    Filter, Tracker, Invoices, Actions, Calendar, About, AVSearch, Worker, SQL, Model, Settings, Database, UAC, AgeView, Transactions, Colors, EventLog,
+    ReportBug, ABSearch, MassMailer, Splash;
 
 {$R *.dfm}
 
-{ ----------------------------------------------------------------- ! DEBUGGING ! --------------------------------------------------------------------------- }
+
+// ------------------------------------------------------------------------------------------------------------------------------------------ DEBUGER OUTPUT //
+
+
+/// <summary>
+///     Debugging.
+/// </summary>
+
 procedure TMainForm.DebugMsg(const Msg: String);
 begin
-  OutputDebugString(PChar(Msg));
-end;
-
-{ ################################################## ! GETTERS AND SETTERS FOR FOLLOW-UP COLORS ! ########################################################### }
-
-{ --------------------------------------------------------------------------------------------------------------------------------------------------- GETTERS }
-
-{ FONT COLOR }
-function TMainForm.GetTodayFColor: TColor;
-var
-  AppSet: TSettings;
-begin
-  AppSet:=TSettings.Create;
-  try
-    Result:=AppSet.TMIG.ReadInteger(FollowUpColors, 'TODAY_FCOLOR', 0);
-  finally
-    AppSet.Free;
-  end;
-end;
-
-{ BACKGROUND COLOR }
-function TMainForm.GetTodayBColor: TColor;
-var
-  AppSet: TSettings;
-begin
-  AppSet:=TSettings.Create;
-  try
-    Result:=AppSet.TMIG.ReadInteger(FollowUpColors, 'TODAY_BCOLOR', 0);
-  finally
-    AppSet.Free;
-  end;
-end;
-
-{ FONT COLOR }
-function TMainForm.GetPastFColor: TColor;
-var
-  AppSet: TSettings;
-begin
-  AppSet:=TSettings.Create;
-  try
-    Result:=AppSet.TMIG.ReadInteger(FollowUpColors, 'PAST_FCOLOR', 0);
-  finally
-    AppSet.Free;
-  end;
-end;
-
-{ BACKGROUND COLOR }
-function TMainForm.GetPastBColor: TColor;
-var
-  AppSet: TSettings;
-begin
-  AppSet:=TSettings.Create;
-  try
-    Result:=AppSet.TMIG.ReadInteger(FollowUpColors, 'PAST_BCOLOR', 0);
-  finally
-    AppSet.Free;
-  end;
-end;
-
-{ FONT COLOR }
-function TMainForm.GetFutureFColor: TColor;
-var
-  AppSet: TSettings;
-begin
-  AppSet:=TSettings.Create;
-  try
-    Result:=AppSet.TMIG.ReadInteger(FollowUpColors, 'FUTURE_FCOLOR', 0);
-  finally
-    AppSet.Free;
-  end;
-end;
-
-{ BACKGROUND COLOR }
-function TMainForm.GetFutureBColor: TColor;
-var
-  AppSet: TSettings;
-begin
-  AppSet:=TSettings.Create;
-  try
-    Result:=AppSet.TMIG.ReadInteger(FollowUpColors, 'FUTURE_BCOLOR', 0);
-  finally
-    AppSet.Free;
-  end;
-end;
-
-{ --------------------------------------------------------------------------------------------------------------------------------------------------- SETTERS }
-
-{ FONT COLOR }
-procedure TMainForm.SetTodayFColor(NewColor: TColor);
-var
-  AppSet: TSettings;
-begin
-  AppSet:=TSettings.Create;
-  try
-    AppSet.TMIG.WriteInteger(FollowUpColors, 'TODAY_FCOLOR', NewColor);
-    AppSet.Encode(AppConfig);
-  finally
-    AppSet.Free;
-  end;
-end;
-
-{ BACKGROUND COLOR }
-procedure TMainForm.SetTodayBColor(NewColor: TColor);
-var
-  AppSet: TSettings;
-begin
-  AppSet:=TSettings.Create;
-  try
-    AppSet.TMIG.WriteInteger(FollowUpColors, 'TODAY_BCOLOR', NewColor);
-    AppSet.Encode(AppConfig);
-  finally
-    AppSet.Free;
-  end;
-end;
-
-{ FONT COLOR }
-procedure TMainForm.SetPastFColor(NewColor: TColor);
-var
-  AppSet: TSettings;
-begin
-  AppSet:=TSettings.Create;
-  try
-    AppSet.TMIG.WriteInteger(FollowUpColors, 'PAST_FCOLOR', NewColor);
-    AppSet.Encode(AppConfig);
-  finally
-    AppSet.Free;
-  end;
-end;
-
-{ BACKGROUND COLOR }
-procedure TMainForm.SetPastBColor(NewColor: TColor);
-var
-  AppSet: TSettings;
-begin
-  AppSet:=TSettings.Create;
-  try
-    AppSet.TMIG.WriteInteger(FollowUpColors, 'PAST_BCOLOR', NewColor);
-    AppSet.Encode(AppConfig);
-  finally
-    AppSet.Free;
-  end;
-end;
-
-{ FONT COLOR }
-procedure TMainForm.SetFutureFColor(NewColor: TColor);
-var
-  AppSet: TSettings;
-begin
-  AppSet:=TSettings.Create;
-  try
-    AppSet.TMIG.WriteInteger(FollowUpColors, 'FUTURE_FCOLOR', NewColor);
-    AppSet.Encode(AppConfig);
-  finally
-    AppSet.Free;
-  end;
-end;
-
-{ BACKGROUND COLOR }
-procedure TMainForm.SetFutureBColor(NewColor: TColor);
-var
-  AppSet: TSettings;
-begin
-  AppSet:=TSettings.Create;
-  try
-    AppSet.TMIG.WriteInteger(FollowUpColors, 'FUTURE_BCOLOR', NewColor);
-    AppSet.Encode(AppConfig);
-  finally
-    AppSet.Free;
-  end;
+    OutputDebugString(PChar(Msg));
 end;
 
 { ############################################################## ! WINDOWS MESSAGES ! ####################################################################### }
@@ -1120,813 +843,6 @@ procedure TMainForm.ExecMessage(IsPostType: boolean; YOUR_INT: Integer; YOUR_TEX
 begin
   if IsPostType     then PostMessage(MainForm.Handle, WM_GETINFO, YOUR_INT, LPARAM(PCHAR(YOUR_TEXT)));
   if not IsPostType then SendMessage(MainForm.Handle, WM_GETINFO, YOUR_INT, LPARAM(PCHAR(YOUR_TEXT)));
-end;
-
-{ ####################################################### ! EXTENSION OF 'TSHAPE' CLASS ! ################################################################### }
-
-{ ----------------------------------------------------------------------------------------------------------------------------------------------- FONT CHANGE }
-procedure TShape.CMFontChanged(var Msg: TMessage);
-begin
-  inherited;
-  Invalidate;
-end;
-
-{ ----------------------------------------------------------------------------------------------------------------------------------------------- TEXT CHANGE }
-procedure TShape.CMTextChanged(var Msg: TMessage);
-begin
-  inherited;
-  Invalidate;
-end;
-
-{ --------------------------------------------------------------------------------------------------------------------- PAINT PROCEDURE WITH TEXTOUT FUNCTION }
-procedure TShape.Paint;
-var
-  R: TRect;
-begin
-  inherited;
-  Canvas.Font.Assign(Font);
-  R:=ClientRect;
-  (* DrawText(Canvas.Handle, PChar(Caption), -1, R, DT_VCENTER or DT_LEFT { DT_CENTER } or DT_SINGLELINE); *)
-  TextOut(Canvas.Handle, CaptionLeft, CaptionTop, PChar(Caption), Length(Caption));
-end;
-
-{ ------------------------------------------------------------------------------------------------------------------------------------ DRAW TEXT INSIDE SHAPE }
-procedure TShape.ShapeText(Left, Top: integer; StrText: string; Format: TFontStyles);
-begin
-  { FIXED }
-  Font.Name  :='Tahoma';
-  Font.Size  :=10;
-  Font.Color :=clBlack;
-  { NON-FIXED }
-  Font.Style :=Format;
-  Caption    :=StrText;
-  CaptionLeft:=Left;
-  CaptionTop :=Top;
-end;
-
-{ ####################################################### ! EXTENSION OF 'TPANEL' CLASS ! ################################################################### }
-
-{ ---------------------------------------------------------------------------------------------------------------------------------- EXTENDED PANEL COMPONENT }
-procedure TPanel.Paint;
-var
-  R: TRect;
-begin
-  inherited;
-
-  (* NONE OF THE GIVEN VARIABLES CAN BE BLACK *)
-
-  if (mcBrushColor   <> $00000000) and
-     (PenColorTop    <> $00000000) and
-     (PenColorBottom <> $00000000) and
-     (PenColorLeft   <> $00000000) and
-     (PenColorRight  <> $00000000) then
-    begin
-      { GET DIMENSIONS }
-      R:=ClientRect;
-      { FILL BACKGROUND }
-      Canvas.Brush.Color:=mcBrushColor;
-      { TOP BORDER }
-      Canvas.Pen.Width:=PenWidthTop;
-      Canvas.Pen.Color:=PenColorTop;
-      Canvas.MoveTo(1,           1);
-      Canvas.LineTo(R.Right - 1, 1);
-      { BOTTOM BORDER }
-      Canvas.Pen.Width:=PenWidthBottom;
-      Canvas.Pen.Color:=PenColorBottom;
-      Canvas.MoveTo(1,           R.Bottom - 1);
-      Canvas.LineTo(R.Right - 1, R.Bottom - 1);
-      { LEFT BORDER }
-      Canvas.Pen.Width:=PenWidthLeft;
-      Canvas.Pen.Color:=PenColorLeft;
-      Canvas.MoveTo(1,            1);
-      Canvas.LineTo(1, R.Bottom - 1);
-      { RIGHT BORDER }
-      Canvas.Pen.Width:=PenWidthRight;
-      Canvas.Pen.Color:=PenColorLeft;
-      Canvas.MoveTo(R.Right - 1,            1);
-      Canvas.LineTo(R.Right - 1, R.Bottom - 1);
-  end;
-end;
-
-{ --------------------------------------------------------------------------------------------------------------------------------------- DRAW TPANEL BORDERS }
-procedure TPanel.PanelBorders(FillColor, TopColor, BottomColor, LeftColor, RightColor: TColor);
-begin
-  { TURN-OFF STYLES }
-  BorderStyle   :=bsNone;
-  { ASSIGN COLORS AND DRAW }
-  mcBrushColor  :=FillColor;
-  PenColorTop   :=TopColor;
-  PenColorBottom:=BottomColor;
-  PenColorLeft  :=LeftColor;
-  PenColorRight :=RightColor;
-end;
-
-{ ##################################################### ! EXTENSION OF 'TSTRINGGRID' CLASS ! ################################################################ }
-
-{ ---------------------------------------------------------------------------------------------------------------------------------- REGISTER ROWS FOR UPDATE }
-procedure TStringGrid.SetUpdatedRow(Row: integer);
-var
-  Rows: integer;
-begin
-  if Row = 0 then
-  begin
-    UpdatedRowsHolder:=nil;
-    Exit;
-  end;
-  if UpdatedRowsHolder = nil then
-  begin
-    SetLength(UpdatedRowsHolder, 1);
-    UpdatedRowsHolder[0]:=Row;
-  end
-  else
-  begin
-    Rows:=high(UpdatedRowsHolder);
-    Rows:=Rows + 2;
-    SetLength(UpdatedRowsHolder, Rows);
-    UpdatedRowsHolder[Rows - 1]:=Row;
-  end;
-end;
-
-{ ------------------------------------------------------------------------------------------------------------------------------------ REGISTER ROWS AFFECTED }
-procedure TStringGrid.RecordRowsAffected;
-var
-  iCNT: integer;
-begin
-  if Selection.Top - Selection.Bottom = 0 then
-  begin
-    SetUpdatedRow(Row);
-  end
-  else
-  begin
-    for iCNT:=Selection.Top to Selection.Bottom do
-      SetUpdatedRow(iCNT);
-  end;
-end;
-
-{ ------------------------------------------------------------------------------------------------------------------------------------ REMOVE FOCUS RECTANGLE }
-procedure TStringGrid.Paint;  (* IT REQUIRES DEFAULT DRAWING TO BE OFF *)
-var
-  FocusRect: TRect;
-begin
-  inherited;
-  if HideFocusRect then
-  begin
-    FocusRect:=CellRect(Col, Row);
-    if DrawingStyle = gdsThemed then InflateRect(FocusRect, -1, -1);
-    DrawFocusRect(Canvas.Handle, FocusRect);
-  end;
-end;
-
-{ ---------------------------------------------------------------------------------------------------------------------- PASTE, CUT, COPY TO/FROM STRING GRID }
-procedure TStringGrid.CopyCutPaste(mode: integer);
-{ AVAILABLE MODES:                 }
-{   0 = PASTE DATA TO STRING GRID  }
-{   1 = COPY DATA FROM STRING GRID }
-{   2 = CUT DATA FROM STRING GRID  }
-var
-  Grect:       TGridRect;
-  S:           string;
-  CS:          string;
-  F:           string;
-  L:           integer;
-  R:           integer;
-  C:           integer;
-  RTop:        integer;
-  CLeft:       integer;
-  Sel:         TGridRect;
-  Row, Col:    integer;
-  TxtFromSel:  string;
-  RowNum:      integer;
-begin
-  { ----------------------------------------------------------------------------------------------------------------------------- PASTE DATA INTO STRING GRID }
-  if mode = adPaste then
-  begin
-    GRect:=Selection;
-    L    :=GRect.Left;
-    R    :=GRect.Top;
-    RTop :=R;
-    CLeft:=L;
-    C    :=0;
-    S    :=ClipBoard.AsText;
-    R    :=R - 1;
-    { GO 'BREAK_LINE' BY 'BREAK_LINE' }
-    while Pos(CR, S) > 0 do
-    begin
-      R :=R + 1;
-      C :=L - 1;
-      CS:=Copy(S, 1, Pos(CR, S));
-      while Pos(TAB, CS) > 0 do
-      begin
-        C:=C + 1;
-        if (C <= ColCount - 1) and (R <= RowCount - 1) then Cells[C, R]:=Copy(CS, 1, Pos(TAB, CS) - 1);
-        F:=Copy(CS, 1, Pos(TAB, CS) - 1);
-        Delete(CS,  1, Pos(TAB, CS));
-      end;
-      if (C <= ColCount - 1) and (R <= RowCount - 1) then Cells[C + 1, R]:=Copy(CS, 1, Pos(CR, CS) - 1);
-      Delete(S, 1,Pos(CR, S));
-      if Copy(S, 1, 1) = LF then Delete(S, 1, 1);
-    end;
-    Selection:=TGridRect(Rect(CLeft, RTop, C + 1, R));
-  end;
-  { ----------------------------------------------------------------------------------------------------------------------- COPY OR CUT DATA FROM STRING GRID }
-  if (mode = adCopy) or (mode = adCut) then
-  begin
-    Sel:=Selection;
-    TxtFromSel:='';
-    RowNum:=Sel.Top;
-    for Row:=Sel.Top to Sel.Bottom do
-    begin
-      if RowHeights[RowNum] <> -1 then
-      begin
-        for Col:=Sel.Left to Sel.Right do
-        begin
-          TxtFromSel:=TxtFromSel + Cells[Col, Row];
-          if mode = adCut then Cells[Col, Row]:='';  { CUT DATA FROM STRING GRID }
-          if Col < Sel.Right then TxtFromSel:=TxtFromSel + TAB;
-        end;
-        if Row < Sel.Bottom then TxtFromSel:=TxtFromSel + CRLF;
-      end;
-      inc(RowNum);
-    end;
-    ClipBoard.AsText:=TxtFromSel + CRLF;
-  end;
-end;
-
-{ --------------------------------------------------------------------------------------------------------------- DELETE AND ESCAPE BEHAVIOUR FOR STRING GRID }
-procedure TStringGrid.DelEsc(mode: integer; pCol, pRow: integer);
-begin
-  if mode = adESC then EditorMode:=False;
-  if mode = adDEL then Cells[pCol, pRow]:='';
-end;
-
-{ -------------------------------------------------------------------------------------------------------------------------- CLEAR ALL CONTENT OF STRING GRID }
-procedure TStringGrid.ClearAll(dfRows: integer; FixedRows: integer; FixedCols: integer; ZeroCol: boolean);
-var
-  iCNT:    integer;
-  jCNT:    integer;
-  OffSet:  integer;
-begin
-  if not Enabled then Exit;
-  if ZeroCol then OffSet:=1 else OffSet:=0;
-  for iCNT:=FixedRows to Self.RowCount do
-    for jCNT:=(FixedCols - OffSet) to Self.ColCount do
-      Cells[jCNT, iCNT]:='';
-  RowCount:=dfRows;
-end;
-
-{ --------------------------------------------------------------------------------------------------------------- DELETE SELECTED ROW FROM GIVEN 'STRINGGRID' }
-procedure TStringGrid.DeleteRowFrom(FixedRow: integer; FixedCol: integer);
-var
-  mySG:    TAbstractGrid;
-  myRect:  TGridRect;
-  sRow:    integer;
-  iCNT:    integer;
-  jCNT:    integer;
-begin
-  { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-  with Self do SendMessage(Handle, WM_SETREDRAW, 0, 0);
-  { -------------------------------------------------------------------------------------------------------------------------------------- CHECK FOR LAST ROW }
-  if RowCount > FixedRow + 1 then
-  begin
-    { REMEMBER SELECTED ROW }
-    sRow         :=Row;
-    { SELECTION }
-    myRect.Left  :=1;
-    myRect.Right :=Col;
-    myRect.Top   :=Row;
-    myRect.Bottom:=Row;
-    { ATTACHED 'STRINGGRID' TO 'MYSTRINGGRID' }
-    Selection :=myRect;
-    { DO NOT FREE OR NIL IT ! }
-    mySG:=TAbstractGrid(Self);
-    mySG.DeleteRow(sRow);
-    { KEEP SELECTION IN PLACE }
-    if (sRow < (RowCount - 1)) then Row:=sRow;
-  end
-    else
-      if RowCount = FixedRow + 1 then
-        for iCNT:=FixedRow to RowCount do for jCNT:=FixedCol to ColCount do Cells[jCNT, iCNT]:='';
-  { -------------------------------------------------------------------------------------------------------------------------------------------- UNINITIALIZE }
-  with Self do
-  begin
-    SendMessage(Handle, WM_SETREDRAW, 1, 0);
-    Repaint;
-  end;
-end;
-
-{ -------------------------------------------------------------------------------------------------------------------------- SELECTION COLOR IN 'TSTRINGGRID' }
-procedure TStringGrid.DrawSelected(ARow: integer; ACol: integer; State: TGridDrawState; Rect: TRect; FontColorSel: TColor; BrushColorSel: TColor; FontColor: TColor; BrushColor: TColor; Headers: boolean);
-var
-  FixedColumn:  integer;
-  FixedRow:     integer;
-begin
-  { EXTEND DRAWING ON HEADERS IF FALSE }
-  FixedColumn:=0;
-  FixedRow   :=0;
-  if not (Headers) then
-  begin
-    FixedColumn:= -1;
-    FixedRow   := -1;
-  end;
-  { DRAW SELECTED ROW }
-  if (ARow > FixedRow) and (ACol > FixedColumn) then
-  begin
-    { SELECTED LINE OR CELL(S) }
-    if gdSelected in State then
-    begin
-      { SELECTED }
-      Canvas.Font.Color :=FontColorSel;
-      Canvas.Brush.Color:=BrushColorSel;
-    end
-    else
-    begin
-      { NORMAL }
-      Canvas.Font.Color :=FontColor;
-      Canvas.Brush.Color:=BrushColor;
-    end;
-    Canvas.FillRect(Rect);
-    Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, Cells[ACol, ARow]);
-  end;
-end;
-
-{ ----------------------------------------------------------------------------------------------------------------------------------- FONT COLORS FOR NUMBERS }
-procedure TStringGrid.ColorValues(ARow: integer; ACol: integer; Rect: TRect; NegativeColor: TColor; PositiveColor: TColor);
-var
-  MyCell:   string;
-  TestCell: string;
-begin
-
-  { GET DATA }
-  MyCell:=Cells[ACol, ARow];
-  TestCell:=MyCell;
-
-  { REMOVE DECIMAL SEPARATOR SO IT CAN BE CONVERTED CORRECTLY }
-  if FormatSettings.ThousandSeparator = ',' then TestCell:=StringReplace(TestCell, ',', '', [rfReplaceAll]);
-  if FormatSettings.ThousandSeparator = '.' then TestCell:=StringReplace(TestCell, '.', '', [rfReplaceAll]);
-
-  { SETUP NEW COLORS }
-  if StrToFloatDef(TestCell, 0) < 0 then Canvas.Font.Color:=NegativeColor;
-  if StrToFloatDef(TestCell, 0) > 0 then Canvas.Font.Color:=PositiveColor;
-  if StrToFloatDef(TestCell, 0) = 0 then Canvas.Font.Color:=clSilver;
-
-  { FORMAT CELL }
-  MyCell:=FormatFloat('#,##0.00', StrToFloatDef(TestCell, 0));
-
-  { MAKE RECTANGLE SMALLER ENOUGH SO IT WILL NOT OVERLAP GRID LINES }
-  InflateRect(Rect, -2, -2);
-  Canvas.TextRect(Rect, MyCell);
-
-end;
-
-{ ----------------------------------------------------------------------------------------------------------------------------------------- AUTO COLUMN WIDTH }
-procedure TStringGrid.SetColWidth(FirstDefault: integer; AddSpace: integer; Limit: integer);
-var
-  tblArray:  TIntigers;
-  iCNT:      integer;
-  jCNT:      integer;
-  NewWidth:  integer;
-begin
-  { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-  if Row > 0 then SetLength(tblArray, RowCount) else Exit;
-  ColWidths[0]:=FirstDefault;
-  { ---------------------------------------------------------------------------------------------------------------------------- ITERATE THROUGHT ALL COLUMNS }
-  for jCNT:=1 to ColCount - 1 do
-  begin
-    { ----------------------------------------------------------------------------------------------------- ITERATE THROUGHT ALL ROWS INCLUDING ACTUAL HEADER }
-    for iCNT:=0 to RowCount - 1 do tblArray[iCNT]:=Canvas.TextWidth(Cells[jCNT, iCNT]);
-    { ---------------------------------------------------------------------------------------------------------------------------------- RETURN HIGHEST VALUE }
-    if not (ColWidths[jCNT] = -1) then { SKIP HIDDEN COLUMNS }
-    begin
-      NewWidth:=MaxIntValue(tblArray) + AddSpace;
-      if NewWidth < Limit then
-        ColWidths[jCNT]:=NewWidth
-          else
-            ColWidths[jCNT]:=Limit;
-    end;
-  end;
-  SetLength(tblArray, 1);
-end;
-
-{ -------------------------------------------------------------------------------------------------------------------------- SET ROW HEIGHT AND HEADER HEIGHT }
-procedure TStringGrid.SetRowHeight(RowHeight: Integer; Header: Integer);
-begin
-  DefaultRowHeight:=RowHeight;
-  RowHeights[0]:=Header;
-end;
-
-{ ------------------------------------------------------------------------------------------------------------------------------------------------ MERGE SORT }
-procedure TStringGrid.MSort(const SortCol: integer; const DataType: integer; const Ascending: boolean);
-var
-   iCNT:      integer;
-   TempGrid:  TStringGrid;
-   List:      array of integer;
-begin
-  TempGrid:=TStringGrid.create(nil);
-  try
-    TempGrid.RowCount :=RowCount;
-    TempGrid.ColCount :=ColCount;
-    TempGrid.FixedRows:=FixedRows;
-    SetLength(List, RowCount - FixedRows);
-    for iCNT:= FixedRows to RowCount - 1 do
-    begin
-      List[iCNT - FixedRows]:=iCNT;
-      TempGrid.Rows[iCNT].Assign(Rows[iCNT]);
-    end;
-    MergeSort(Self, List, SortCol, DataType, Ascending);
-    for iCNT:=0 to RowCount - FixedRows - 1 do
-    begin
-      Rows[iCNT + FixedRows].Assign(TempGrid.Rows[List[iCNT]]);
-    end;
-    Row:=FixedRows;
-  finally
-    TempGrid.Free;
-  end;
-  SetLength(List, 0);
-end;
-
-{ ------------------------------------------------------------------------------------------------------------------------------------------- AUTO THUMB SIZE }
-procedure TStringGrid.AutoThumbSize;  (* WARNING! DO NOT USE IT. TSTRING GRID SCROLLS ARE BUGGED. SEPARATE SCROLLS SHALL BE USED *)
-var
-  info:  TScrollInfo;
-begin
-  { ----------------------------------------------------------------------------------------------------------------------------------------------- READ DATA }
-  Fillchar(info, SizeOf(info), 0);
-  { ----------------------------------------------------------------------------------------------------------------------------------------------- VERITICAL }
-  with info do
-  begin
-    cbSize:=SizeOf(info);
-    fMask:=SIF_ALL;
-    GetScrollInfo(Self.Handle, SB_VERT, info);
-    fMask:=fMask or SIF_PAGE or SIF_RANGE;
-    nPage:=(nMax - nMin) div Self.RowCount;
-    //nPage:=Self.RowCount div Self.VisibleRowCount;
-  end;
-  SetScrollInfo(Self.Handle, SB_VERT, info, True);
-  { ---------------------------------------------------------------------------------------------------------------------------------------------- HORIZONTAL }
-  with info do
-  begin
-    cbSize:=SizeOf(info);
-    fMask:=SIF_ALL;
-    GetScrollInfo(Self.Handle, SB_HORZ, info);
-    fMask:=fMask or SIF_PAGE or SIF_RANGE;
-    nPage:=(nMax - nMin) div Self.ColCount;
-    //nPage:=Self.ColCount div Self.VisibleColCount;
-  end;
-  SetScrollInfo(Self.Handle, SB_HORZ, info, True);
-end;
-
-{ --------------------------------------------------------------------------------------------------------------------------------------------- LAYOUT | SAVE }
-procedure TStringGrid.SaveLayout(ColWidthName: string; ColOrderName: string; ColNames: string; ColPrefix: string);
-var
-  AppSettings:  TSettings;
-  iCNT:         integer;
-begin
-  AppSettings:=TSettings.Create;
-  try
-    { COLUMN WIDTH }
-    for iCNT:=0 to Self.ColCount - 1 do
-    begin
-      if iCNT = 0 then AppSettings.TMIG.WriteInteger(ColWidthName, ColPrefix + IntToStr(iCNT), 10);
-      if iCNT > 0 then AppSettings.TMIG.WriteInteger(ColWidthName, ColPrefix + IntToStr(iCNT), Self.ColWidths[iCNT]);
-    end;
-    { SQL COLUMN NAME }
-    for iCNT:=0 to Self.ColCount - 1 do AppSettings.TMIG.WriteString(ColOrderName, ColPrefix + IntToStr(iCNT), Self.SqlColumns[iCNT, 0]);
-    { COLUMN TITLE }
-    for iCNT:=0 to Self.ColCount - 1 do
-    begin
-      if iCNT = 0 then AppSettings.TMIG.WriteString(ColNames, ColPrefix + IntToStr(iCNT), '');
-      if iCNT > 0 then AppSettings.TMIG.WriteString(ColNames, ColPrefix + IntToStr(iCNT), Self.SqlColumns[iCNT, 1]);
-    end;
-    { ENCODE }
-    AppSettings.Encode(AppConfig);
-  finally
-    AppSettings.Free;
-  end;
-end;
-
-{ --------------------------------------------------------------------------------------------------------------------------------------------- LAYOUT | LOAD }
-function TStringGrid.LoadLayout(var StrCol: string; ColWidthName: string; ColOrderName: string; ColNames: string; ColPrefix: string): boolean;
-var
-  AppSettings:  TSettings;
-  ColOrderSec:  TStringList;
-  ColWidthSec:  TStringList;
-  ColNamesSec:  TStringList;
-  iCNT:         integer;
-begin
-
-  (* IMPORTANT NOTE *)
-
-  (* 'COLORDERNAME' AND 'COLWIDTHNAME' PROVIDE WITH SECTION NAMES FOR COLUMN ORDER AND COLUMN WIDTH. *)
-  (* BOTH SECTIONS MUST CONTAINS EQUAL NUMBER OF VALUE KEYS. EACH KEY CONTAIN COLUMN NAME USED BY    *)
-  (* STRING GRID COMPONENT (AGE VIEW) THAT DISPLAYS DATA FROM SQL SERVER DATABASE, THUS COLUMN NAMES *)
-  (* ARE USED TO BUILD SQL QUERY, THIS IS BECAUSE WE USE SQL EXPRESSIONS TO OBTAIN INITIAL OUTPUT    *)
-  (* WITH FILTERING AND/OR SORTING ETC. SEPARATE FILTERING TO SOME EXTEND IS ALLOWED IN STRING GRID  *)
-  (* HOWEVER, SEPARATE SORTING IS NOT IMPLEMENTED TO RESTRICT USER FORM "PLAYING AROUND"             *)
-  (* THEREFORE, THERE IS ONE PLACE (SERVER) WHERE THERE IS DECIDED HOW TO DISPLAY DATA TO USER,      *)
-  (* THIS IS PART OF AUTOMATION AND STANDARD APPROACH ACROSS ALL USERS, SO THE USER IS FORCED        *)
-  (* IN CERTAIN DIRECTION BY AUTOMATION, AND THUS CAN OBTAIN BETTER RESULTS, ETC.                    *)
-
-  { CHECK NUMBER OF KEYS IN GIVEN SECTION }
-  Result:=False;
-  ColWidthSec:=TStringList.Create;
-  ColOrderSec:=TStringList.Create;
-  ColNamesSec:=TStringList.Create;
-  AppSettings:=TSettings.Create;
-  try
-    AppSettings.TMIG.ReadSection(ColWidthName, ColWidthSec);
-    AppSettings.TMIG.ReadSection(ColOrderName, ColOrderSec);
-    AppSettings.TMIG.ReadSection(ColNames, ColNamesSec);
-    if (ColWidthSec.Count = ColOrderSec.Count) and (ColWidthSec.Count = ColNamesSec.Count) then
-    begin
-      Self.ColCount:=ColWidthSec.Count;
-      Result:=True;
-      SetLength(Self.SqlColumns, Self.ColCount, 2);
-      for iCNT:=0 to Self.ColCount - 1 do
-      begin
-        { SKIP FIRST COLUMN AS IT HOLDS EMPTY COLUMN }
-        if iCNT > 0 then
-        begin
-          if iCNT < (Self.ColCount - 1) then
-            StrCol:=StrCol + AppSettings.TMIG.ReadString(ColOrderName, ColPrefix + IntToStr(iCNT), '') + ','
-              else
-                StrCol:=StrCol + AppSettings.TMIG.ReadString(ColOrderName, ColPrefix + IntToStr(iCNT), '') + ' ';
-
-          { STORE SQL "COLUMN NAMES" AND "USER FRIENDLY NAMES" INTO HELPER ARRAY }
-          Self.SqlColumns[iCNT, 0]:=AppSettings.TMIG.ReadString(ColOrderName, ColPrefix + IntToStr(iCNT), '');
-          Self.SqlColumns[iCNT, 1]:=AppSettings.TMIG.ReadString(ColNames, ColPrefix + IntToStr(iCNT), '');
-
-          { DISPLAY "USER FRIENDLY" COLUMN NAME }
-          Self.Cells[iCNT, 0]:=AppSettings.TMIG.ReadString(ColNames, ColPrefix + IntToStr(iCNT), '');
-        end;
-        { ASSIGN SAVED WIDTH }
-        Self.ColWidths[iCNT]:=AppSettings.TMIG.ReadInteger(ColWidthName, ColPrefix + IntToStr(iCNT), 100);
-      end;
-    end;
-  finally
-    AppSettings.Free;
-    ColWidthSec.Free;
-    ColOrderSec.Free;
-    ColNamesSec.Free;
-  end;
-end;
-
-{ --------------------------------------------------------------------------------------------------------------------- RETURN COLUMN NUMBER FOR GIVEN HEADER }
-function TStringGrid.ReturnColumn(ColumnName: string; FixedCol: integer; FixedRow: integer): integer;
-var
-  iCNT: integer;
-begin
-  result:=-100; { RETURN OUT OF BOUND VALUE }
-  for iCNT:=FixedCol to ColCount - 1 do
-    if Cells[iCNT, FixedRow - 1] = ColumnName then
-    begin
-      result:=iCNT;
-      Exit;
-    end;
-end;
-
-{ ------------------------------------------------------------------------------------------------------------------ EXPORT STRING GRID CONTENT TO EXCEL FILE }
-
-(* ************************************************************************************************************************************************************
-
-NOTE: USER MUST HAVE INSTALLED MICROSOFT EXCEL WITH VBA INSTALLED BEFORE EXPORTING STRING GRID TO EXCEL FILE.
-      OTHERWISE ERROR MESSAGE "INVALID STRING CLASS" WILL OCCUR.
-
-NOTE: THIS METHOD SHOULD BE RUN IN WORKER THREAD.
-
-************************************************************************************************************************************************************ *)
-
-function TStringGrid.ToExcel(ASheetName: string; AFileName: string): boolean;
-var
-  Col:        integer;
-  Row:        integer;
-  RowOffset:  integer;     (* OFFSET CANNOT BE < 1 *)
-  ColOffset:  integer;     (* OFFSET CANNOT BE < 1 *)
-  XLApp:      OLEVariant;
-  Sheet:      OLEVariant;
-  DataTables: TDataTables;
-begin
-  Result:=False;
-  DataTables:=TDataTables.Create(MainForm.DbConnect);
-  try
-    { EXECUTE STORED PROCEDURE }
-    DataTables.StrSQL:=EXECUTE + AgeViewExport + SPACE +
-                       QuotedStr(MainForm.GroupList[MainForm.GroupListBox.ItemIndex, 0]) + COMMA +
-                       QuotedStr(MainForm.GroupListDates.Text);
-    { QUERIED DATA TO SELF AND RELEASE }
-    DataTables.SqlToGrid(Self, DataTables.ExecSQL, False, True);
-  finally
-    DataTables.Free;
-  end;
-  { ------------------------------------------------------------------------------------------------------------------------------ INITIATE EXCEL APPLICATION }
-  try
-    XLApp:=CreateOleObject('Excel.Application');
-    try
-      XLApp.Visible:=False;
-      XLApp.Caption:='Unity For Debt Management - Data Export';
-      XLApp.DisplayAlerts:=False;
-      XLApp.Workbooks.Add(xlWBatWorkSheet);
-      Sheet:=XLApp.Workbooks[1].WorkSheets[1]; (* WARNING! OLDER VERSION OF CODE INSIGHT MAY SHOW FALSE ERROR, IGNORE IT *)
-      Sheet.Name:=ASheetName;
-      ColOffset:=1;
-      RowOffset:=1;
-      { -------------------------------------------------------------------------------------------------------------------------- STRING GRID TO EXCEL SHEET }
-      for Col:=0 to Self.ColCount - 1 do
-        for Row:=0 to Self.RowCount - 1 do
-          { WE OMITT FIRST STRING GRID COLUMN }
-          Sheet.Cells[Row + RowOffset, Col + ColOffset]:=Self.Cells[Col + 1, Row];
-      { SIMPLE FORMATTING }
-      for Col:=0 to Self.ColCount - 1 do Sheet.Columns[Col + ColOffset].ColumnWidth:=15;
-      for Row:=0 to Self.RowCount - 1 do Sheet.Rows[Row + RowOffset].RowHeight:=15;
-      { ---------------------------------------------------------------------------------------------------------------------------------------- SAVE TO FILE }
-      XLApp.Workbooks[1].SaveAs(AFileName); (* WARNING! OLDER DELPHI CODE INSIGHT MAY SHOW FALSE ERROR, IGNORE IT *)
-      Result:=True;
-      { ----------------------------------------------------------------------------------------------------------------------------------- CLOSE AND DISPOSE }
-    finally
-      if not VarIsEmpty(XLApp) then
-      begin
-        XLApp.DisplayAlerts:=False;
-        XLApp.Quit;
-        XLAPP:=Unassigned;
-        Sheet:=Unassigned;
-        { ------------------------------------------------------------------------------------------------------------------------------- SUCCESSFULL MESSAGE }
-        if Result then
-        begin
-          LogText(MainForm.EventLogPath, 'Thread: [' + IntToStr(OpenThdId) + ']: The data has been successfully transferred to Excel.');
-          SendMessage(MainForm.Handle, WM_GETINFO, 1, LPARAM(PCHAR('The data has been successfully transferred to Excel.')));
-        end;
-      end;
-    end;
-  { --------------------------------------------------------------------------------------------------------------------------------- ON INITIALIZATION ERROR }
-  except
-    on E: Exception do
-      begin
-        if E.Message = xlWARN_MESSAGE then
-        { EXCEL NOT FOUND }
-        begin
-          LogText(MainForm.EventLogPath, 'Thread: [' + IntToStr(OpenThdId) + ']: The data cannot be exported because Excel cannot be found.');
-          SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PCHAR('The data cannot be exported because Excel cannot be found.')));
-        end else
-        { GENERIC MESSAGE }
-        begin
-          LogText(MainForm.EventLogPath, 'Thread: [' + IntToStr(OpenThdId) + ']: The data cannot be exported, error message has been thrown: ' + E.Message + '.');
-          SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PCHAR('The data cannot be exported. Description received: ' + E.Message)));
-        end;
-      end;
-  end;
-end;
-
-{ ------------------------------------------------------------------------------------------------------------------------ TURN ON OR OFF STRING GRID CONTENT }
-procedure TStringGrid.Freeze(PaintWnd: Boolean);
-begin
-  { TRUE | HIDE STRING GRID CONTENT }
-  if (PaintWnd) then
-  begin
-    with Self do SendMessage(Handle, WM_SETREDRAW, 0, 0);
-  end;
-  { FALSE | SHOW STRING GRID CONTENT }
-  if not (PaintWnd) then
-  begin
-    with Self do SendMessage(Handle, WM_SETREDRAW, 1, 0);
-    Self.Repaint;
-  end;
-end;
-
-{ --------------------------------------------------------------------------------------------------------------------------------------------- IMPORT TO CSV }
-function TStringGrid.ImportCSV(DialogBox: TOpenDialog; Delimiter: string): boolean;
-var
-  iCNT:       integer;
-  jCNT:       integer;
-  Count:      integer;
-  Data:       TStringList;
-  Transit:    TStringList;
-  fPath:      string;
-  IsError:    boolean;
-begin
-  { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-  Result :=False;
-  IsError:=False;
-  Count  :=0;
-  { ----------------------------------------------------------------------------------------------------------------------------- GET THE FILE PATH AND PARSE }
-  if DialogBox.Execute = True then
-  begin
-    MainForm.ExecMessage(True, mcStatusBar, stImportCSV);
-    fPath  :=DialogBox.FileName;
-    Data   :=TStringList.Create;
-    Transit:=TStringList.Create;
-    try
-      { LOAD DATA }
-      Data.LoadFromFile(fPath);
-      { COUNT ALL COLUMNS }
-      for iCNT:=0 to Length(Data[0]) do if copy(Data[0], iCNT, 1) = Delimiter then inc(Count);
-      { COUNT ALL ROWS & SETUP OFFSET }
-      Self.RowCount:=Data.Count + 1;
-      { SETUP TRANSIT THAT WILL HOLD SPLIT LINE }
-      Transit.StrictDelimiter:=True;
-      Transit.Delimiter:=Delimiter[1];
-      { ITERATE THROUGH ALL ROWS }
-      try
-        for iCNT:= 0 to Data.Count - 1 do
-        begin
-          { SPLIT STRING USING GIVEN DELIMITER }
-          Transit.DelimitedText:=Data[iCNT];
-          for jCNT:=1 to Count do Self.Cells[jCNT, iCNT + 1]:=Transit[jCNT - 1];
-          Self.Cells[0, iCNT + 1]:=IntToStr((iCNT + 1));
-          Transit.Clear;
-        end;
-        Result:=True;
-      { ---------------------------------------------------------------------------------------------------------------------------------------- ON EXCEPTION }
-      except
-        on E: Exception do
-        begin
-          LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: CSV Import has failed: ' + ExtractFileName(fPath));
-          MainForm.ExecMessage(False, mcError, 'CSV Import has failed. Please check the file and try again.');
-          IsError:=True;
-        end;
-      end;
-    { ----------------------------------------------------------------------------------------------------------------------------------- RELEASE FROM MEMORY }
-    finally
-      if not IsError then
-      begin
-        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: Data has been imported successfully!');
-        MainForm.ExecMessage(False, mcInfo, 'Data has been imported successfully!');
-      end;
-      Data.Free;
-      Transit.Free;
-      MainForm.ExecMessage(True, mcStatusBar, stReady);
-    end;
-  end;
-end;
-
-{ ---------------------------------------------------------------------------------------------------------------------------------------------------- EXPORT }
-function TStringGrid.ExportCSV(DialogBox: TSaveDialog; Delimiter: string): boolean;
-var
-  iCNT:       integer;
-  jCNT:       integer;
-  fPath:      string;
-  CSVData:    TStringList;
-  MyStr:      string;
-  CleanStr:   string;
-  IsError:    boolean;
-begin
-  { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-  Result :=False;
-  IsError:=False;
-  CSVData:=TStringList.Create;
-  { ------------------------------------------------------------------------------------------------------------------------------------------ WRITE CSV FILE }
-  try
-    MainForm.ExecMessage(False, mcStatusBar, stExportCSV);
-    { ADD ROWS AND COLUMNS WITH DELIMITER }
-    for iCNT:=1 to Self.RowCount - 1 do
-    begin
-      for jCNT:= 1 to Self.ColCount - 1 do
-      begin
-        CleanStr :=Self.Cells[jCNT, iCNT];
-        CleanStr :=StringReplace(CleanStr, CRLF, ' ', [rfReplaceAll]);
-        MyStr    :=MyStr + CleanStr + Delimiter;
-      end;
-      CSVData.Add(MyStr);
-      MyStr:='';
-    end;
-    { SAVE TO FILE AS PLAIN TEXT }
-    try
-      if DialogBox.Execute then
-      begin
-        CSVData.SaveToFile(DialogBox.FileName);
-        Result:=True;
-      end
-        else
-          Exit;
-    except
-      { ---------------------------------------------------------------------------------------------------------------------------------------- ON EXCEPTION }
-      on E: Exception do
-      begin
-        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: Cannot saved file: ' + ExtractFileName(fPath));
-        MainForm.ExecMessage(False, mcError, 'Cannot save the file in the given location.');
-        IsError:=True;
-      end;
-    end;
-  { ------------------------------------------------------------------------------------------------------------------------------------- RELEASE FROM MEMORY }
-  finally
-    if not IsError then
-    begin
-      LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: Data has been exported successfully!');
-      MainForm.ExecMessage(False, mcInfo, 'Data have been exported successfully!');
-    end;
-    CSVData.Free;
-    MainForm.ExecMessage(False, mcStatusBar, stReady);
-  end;
-end;
-
-{ ------------------------------------------------------------------------------------------------------------------------------------------------ SELECT ALL }
-procedure TStringGrid.SelectAll;
-var
-  GridRect: TGridRect;
-begin
-  GridRect.Left  :=1;
-  GridRect.Top   :=1;
-  GridRect.Right :=Self.ColCount;
-  GridRect.Bottom:=Self.RowCount;
-  Self.Selection :=GridRect;
 end;
 
 { ################################################################## ! HELPERS ! ############################################################################ }
@@ -2461,84 +1377,261 @@ begin
   if StrToDateDef(StrDate, NULLDATE) <> NULLDATE then Result:=True;
 end;
 
-{ ############################################################## ! MAIN THREAD EVENTS ! ##################################################################### }
 
-{ ------------------------------------------------------------------------------------------------------------------------------------------------- ON CREATE }
+// -------------------------------------------------------------------------------------------------------------------------------------- MAIN THREAD EVENTS //
+
+
+/// <summary>
+///     Initialize application, load all settings, establish database connectivity.
+/// </summary>
+
 procedure TMainForm.FormCreate(Sender: TObject);
+
+    /// <summary>
+    ///     Nested method for Splash Screen update with loading details.
+    /// </summary>
+
+    procedure OnCreateJob(Text: string);
+    begin
+        if Assigned(SplashForm) then
+        begin
+            SplashForm.TextStatus.Caption:='Application initialization: ' + Text;
+            SplashForm.Update;
+        end;
+    end;
+
+/// <summary>
+///     Local variables, inaccessibe for nested method.
+/// </summary>
+
 var
-  AppVersion:    string;
-  AppSettings:   TSettings;
-  DataBase:      TDataBase;
-  UserControl:   TUserControl;
-  Transactions:  TTransactions;
-  NowTime:       TTime;
-  iCNT:          integer;
+    AppVersion:    string;
+    AppSettings:   TSettings;
+    DataBase:      TDataBase;
+    UserControl:   TUserControl;
+    Transactions:  TTransactions;
+    NowTime:       TTime;
+    iCNT:          integer;
 begin
 
-  { ------------------------------------------------------------ ! INITIALIZATION ! ------------------------------------------------------------------------- }
+    AppVersion :=GetBuildInfoAsString;
+    pAllowClose:=False;
 
-  AppVersion :=GetBuildInfoAsString;
-  pAllowClose:=False;
+    // -------------------------------------------------------------------------------------------------------------------------------- GET AND SET SETTINGS //
+    OnCreateJob(spSetting);
 
-  { --------------------------------------------------------- ! READ SETTINGS AND INITIALIZE ! -------------------------------------------------------------- }
+    AppSettings :=TSettings.Create;
+    try
+        MainForm.Caption :=AppSettings.TMIG.ReadString(ApplicationDetails, 'WND_MAIN', APPCAPTION);
+        GroupName.Caption:=AppSettings.TMIG.ReadString(ApplicationDetails, 'GROUP_NAME', 'n/a');
 
-  AppSettings :=TSettings.Create;
-  try
+        WinUserName :=AppSettings.FWinUserName;
+        EventLogPath:=AppSettings.FPathEventLog;
 
-    { USER NAME AND EVENT LOG PATH }
-    WinUserName :=AppSettings.FWinUserName;
-    EventLogPath:=AppSettings.FPathEventLog;
+        GridPicture:=TImage.Create(MainForm);
+        GridPicture.SetBounds(0, 0, 16, 16);
+        LoadImageFromStream(GridPicture, AppSettings.FPathGridImage);
 
-    { ------------------------------------------------------ ! DATABASE INITIALIZATION & UAC ! -------------------------------------------------------------- }
+        /// <remarks>
+        ///     Window position. Do not change Default Monitor and Position.
+        /// </remarks>
 
-    { ------------------------------------------------------------------------------------------------------------------------- ESTABLISH ACTIVE CONNECTIVITY }
+        MainForm.DefaultMonitor:=dmDesktop;
+        MainForm.Position      :=poDefaultSizeOnly;
+        MainForm.Top           :=AppSettings.TMIG.ReadInteger(ApplicationDetails, 'WINDOW_TOP',  0);
+        MainForm.Left          :=AppSettings.TMIG.ReadInteger(ApplicationDetails, 'WINDOW_LEFT', 0);
+
+        // Load web page "Unity Info"
+        WebBrowser1.Navigate(WideString(AppSettings.TMIG.ReadString(ApplicationDetails, 'START_PAGE',  'about:blank')), $02);
+        //WebBrowser2.Navigate(WideString(AppSettings.TMIG.ReadString(ApplicationDetails, 'REPORT_PAGE', 'about:blank')), $02);
+
+        /// <remarks>
+        ///     "InteTimer" is excluded from below list because it is controlled by "InitializeConnection" method.
+        /// </remarks>
+
+        /// <remarks>
+        ///     Default value 900000 miliseconds = 15 minutes.
+        /// </remarks>
+
+        InvoiceScanTimer.Interval:=AppSettings.TMIG.ReadInteger(TimersSettings, 'INVOICE_SCANNER', 900000);
+
+        /// <remarks>
+        ///     Default value 1800000 miliseconds = 30 minutes.
+        /// </remarks>
+
+        FollowupPopup.Interval   :=AppSettings.TMIG.ReadInteger(TimersSettings, 'FOLLOWUP_CHECKER',1800000);
+
+        /// <remarks>
+        ///     Default value 300000 miliseconds = 5 minutes.
+        /// </remarks>
+
+        OILoader.Interval        :=AppSettings.TMIG.ReadInteger(TimersSettings, 'OI_LOADER',       300000);
+
+        /// <remarks>
+        ///     Get risk class values and convert default decimal separator.
+        /// </remarks>
+
+        if FormatSettings.DecimalSeparator = ',' then
+        begin
+            procRISKA.Caption:=FloatToStr(StrToFloat(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_A_MAX', RISK_CLASS_A)) * 100) + '%';
+            procRISKB.Caption:=FloatToStr(StrToFloat(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_B_MAX', RISK_CLASS_B)) * 100) + '%';
+            procRISKC.Caption:=FloatToStr(StrToFloat(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_C_MAX', RISK_CLASS_C)) * 100) + '%';
+        end;
+
+        if FormatSettings.DecimalSeparator = '.' then
+        begin
+            procRISKA.Caption:=FloatToStr(StrToFloat(StringReplace(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_A_MAX', RISK_CLASS_A), ',', '.', [rfReplaceAll])) * 100) + '%';
+            procRISKB.Caption:=FloatToStr(StrToFloat(StringReplace(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_B_MAX', RISK_CLASS_B), ',', '.', [rfReplaceAll])) * 100) + '%';
+            procRISKC.Caption:=FloatToStr(StrToFloat(StringReplace(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_C_MAX', RISK_CLASS_C), ',', '.', [rfReplaceAll])) * 100) + '%';
+        end;
+
+        /// <remarks>
+        ///     Hide all tabs on TPageControl component and set "Debtors" [TabSheet1] as starting page.
+        /// </remarks>
+
+        for iCNT:=0 to MyPages.PageCount - 1 do MyPages.Pages[iCNT].TabVisible:=False;
+        MyPages.ActivePage:=TabSheet1;
+
+        /// <summary>
+        ///     Main form captions.
+        /// </summary>
+
+        Cap01.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS1TXT01', 'EMPTY'), [fsBold]);
+        Cap02.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS1TXT02', 'EMPTY'), [fsBold]);
+        Cap03.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS1TXT03', 'EMPTY'), [fsBold]);
+        Cap05.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS1TXT05', 'EMPTY'), [fsBold]);
+        Cap06.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS1TXT06', 'EMPTY'), [fsBold]);
+        Cap07.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS1TXT07', 'EMPTY'), [fsBold]);
+        Cap24.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS1TXT08', 'EMPTY'), [fsBold]);
+
+        /// <summary>
+        ///     Open items captions.
+        /// </summary>
+
+        Cap10.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS2TXT01', 'EMPTY'), [fsBold]);
+        Cap11.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS2TXT02', 'EMPTY'), [fsBold]);
+        Cap12.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS2TXT03', 'EMPTY'), [fsBold]);
+
+        /// <summary>
+        ///     Address Book captions.
+        /// </summary>
+
+        Cap13.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS3TXT01', 'EMPTY'), [fsBold]);
+
+        /// <summary>
+        ///     Invoice tracker captions.
+        /// </summary>
+
+        Cap43.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS4TXT01', 'EMPTY'), [fsBold]);
+
+        /// <summary>
+        ///     Unidentified transactions.
+        /// </summary>
+
+        Cap61.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS6TXT01', 'EMPTY'), [fsBold]);
+
+        /// <summary>
+        ///     General tables captions.
+        /// </summary>
+
+        Cap15.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS7TXT01', 'EMPTY'), [fsBold]);
+        Cap16.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS7TXT02', 'EMPTY'), [fsBold]);
+        Cap17.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS7TXT03', 'EMPTY'), [fsBold]);
+        Cap18.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS7TXT04', 'EMPTY'), [fsBold]);
+        Cap19.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS7TXT05', 'EMPTY'), [fsBold]);
+        Cap20.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS7TXT06', 'EMPTY'), [fsBold]);
+
+        /// <summary>
+        ///     Settings captions.
+        /// </summary>
+
+        Cap21.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS8TXT01', 'EMPTY'), [fsBold]);
+        Cap22.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS8TXT02', 'EMPTY'), [fsBold]);
+        Cap23.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS8TXT03', 'EMPTY'), [fsBold]);
+        Cap27.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS8TXT04', 'EMPTY'), [fsBold]);
+
+        /// <summary>
+        ///     Aging buckets displayed on Age View.
+        /// </summary>
+
+        tR1.Caption:=AppSettings.TMIG.ReadString(AgingRanges,'RANGE1A','') + ' - ' + AppSettings.TMIG.ReadString(AgingRanges,'RANGE1B','');
+        tR2.Caption:=AppSettings.TMIG.ReadString(AgingRanges,'RANGE2A','') + ' - ' + AppSettings.TMIG.ReadString(AgingRanges,'RANGE2B','');
+        tR3.Caption:=AppSettings.TMIG.ReadString(AgingRanges,'RANGE3A','') + ' - ' + AppSettings.TMIG.ReadString(AgingRanges,'RANGE3B','');
+        tR4.Caption:=AppSettings.TMIG.ReadString(AgingRanges,'RANGE4A','') + ' - ' + AppSettings.TMIG.ReadString(AgingRanges,'RANGE4B','');
+        tR5.Caption:=AppSettings.TMIG.ReadString(AgingRanges,'RANGE5A','') + ' - ' + AppSettings.TMIG.ReadString(AgingRanges,'RANGE5B','');
+        tR6.Caption:=AppSettings.TMIG.ReadString(AgingRanges,'RANGE6A','') + ' - ' + AppSettings.TMIG.ReadString(AgingRanges,'RANGE6B','');
+
+        /// <summary>
+        ///     Age report summary.
+        /// </summary>
+
+        Text21.Caption:=AppSettings.TMIG.ReadString(AgingRanges,'RANGE1A','') + ' - ' + AppSettings.TMIG.ReadString(AgingRanges,'RANGE3B','') + ':';
+        Text22.Caption:=AppSettings.TMIG.ReadString(AgingRanges,'RANGE4A','') + ' - ' + AppSettings.TMIG.ReadString(AgingRanges,'RANGE6B','') + ':';
+
+    finally
+        AppSettings.Free;
+    end;
+
+    // ------------------------------------------------------------------------------------------------------------------------------- DATABASE CONNECTIVITY //
+    OnCreateJob(spConnecting);
+
+    /// <remarks>
+    ///     Establish connection with server.
+    /// </remarks>
+
     DbConnect:=TADOConnection.Create(MainForm);
     DataBase :=TDataBase.Create(True);
     try
-      ConnLastError:=DataBase.Check;
-      if ConnLastError = 0 then
-      begin
-        DataBase.InitializeConnection(MainThreadID, True, DbConnect);
-        MainForm.InvoiceScanTimer.Enabled:=True;
-        MainForm.OILoader.Enabled        :=True;
-      end
-      else
-      begin
-        MainForm.InvoiceScanTimer.Enabled:=False;
-        MainForm.OILoader.Enabled        :=False;
-      end;
+        ConnLastError:=DataBase.Check;
+
+        if ConnLastError = 0 then
+        begin
+            DataBase.InitializeConnection(MainThreadID, True, DbConnect);
+            MainForm.InvoiceScanTimer.Enabled:=True;
+            MainForm.OILoader.Enabled        :=True;
+        end
+        else
+        begin
+            MainForm.InvoiceScanTimer.Enabled:=False;
+            MainForm.OILoader.Enabled        :=False;
+        end;
+
     finally
-      DataBase.Free;
+        DataBase.Free;
     end;
 
-    { ----------------------------------------------------------------------------------------------------------------------------------- UPLOAD USER DETAILS }
+    // ---------------------------------------------------------------------------------------------------------------------------------------- GET UAC DATA //
+    OnCreateJob(spUserAccess);
+
     UserControl:=TUserControl.Create(DbConnect);
     try
-      EventLogPath        :=AppSettings.FPathEventLog;
-      UserControl.UserName:=WinUserName;
-      AccessLevel         :=UserControl.GetAccessData(adAccessLevel);
+        UserControl.UserName:=WinUserName;
+        AccessLevel         :=UserControl.GetAccessData(adAccessLevel);
 
-      { IF USERNAME IS NOT FOUND, THEN CLOSE APPLICATION }
-      if AccessLevel = '' then
-      begin
-        MsgCall(mcError, 'Cannot find account for user alias: ' + UpperCase(WinUserName) + '. Please contact your administrator. Application will be closed.');
-        ExitProcess(0);
-      end;
+        // Quit if username is not found
+        if AccessLevel = '' then
+        begin
+            MsgCall(mcError, 'Cannot find account for user alias: ' + UpperCase(WinUserName) + '. Please contact your administrator. Application will be closed.');
+            ExitProcess(0);
+        end;
 
-      { OTHERWISE PROCESS }
-      AccessMode:=UserControl.GetAccessData(adAccessMode);
-      if AccessMode = adAccessFull  then Action_FullView.Checked :=True;
-      if AccessMode = adAccessBasic then Action_BasicView.Checked:=True;
-      UserControl.GetGroupList(GroupList, GroupListBox);
-      UserControl.GetAgeDates(GroupListDates, GroupList[0, 0]);
+        AccessMode:=UserControl.GetAccessData(adAccessMode);
+        if AccessMode = adAccessFull  then Action_FullView.Checked :=True;
+        if AccessMode = adAccessBasic then Action_BasicView.Checked:=True;
+        UserControl.GetGroupList(GroupList, GroupListBox);
+        UserControl.GetAgeDates(GroupListDates, GroupList[0, 0]);
 
     finally
-      UserControl.Free;
+        UserControl.Free;
     end;
 
-    (* NOTE: REPLACE BELOW WITH USER MATRIX *)
+    /// <remarks>
+    ///     Depending on access level, enable/disable features.
+    /// </remarks>
 
-    { RESTRICTED FOR "ADMINS" }
+    {TODO -oTomek -cReplaceWith : ApprovalMatrix}
+
+    // Restricted for "ADMINS"
     if AccessLevel <> acADMIN then
     begin
       DetailsGrid.Enabled   :=False;
@@ -2547,7 +1640,7 @@ begin
       GroupListDates.Enabled:=False;
     end;
 
-    { NOT ALLOWED FOR "RO" USERS }
+    // Not allowed for "RO" users
     if AccessLevel = acReadOnly then
     begin
       Action_Tracker.Enabled        :=False;
@@ -2557,161 +1650,36 @@ begin
       btnUpdateAB.Enabled           :=False;
     end;
 
-    { -------------------------------------------------- ! LOAD IMAGE FOR STRING GRID CELLS ! --------------------------------------------------------------- }
+    // ----------------------------------------------------------------------------------------------------------------------------- SYNC LOAD AGE SNAPSHOTS //
+    OnCreateJob(spSnapshots);
 
-    GridPicture:=TImage.Create(MainForm);
-    GridPicture.SetBounds(0, 0, 16, 16);
-    LoadImageFromStream(GridPicture, AppSettings.FPathGridImage);
-
-    { ----------------------------------------------------- ! APPLICATION NAME | CAPTION ! ------------------------------------------------------------------ }
-
-    MainForm.Caption :=AppSettings.TMIG.ReadString(ApplicationDetails, 'WND_MAIN', APPCAPTION);
-    GroupName.Caption:=AppSettings.TMIG.ReadString(ApplicationDetails, 'GROUP_NAME', 'n/a');
-
-    { --------------------------------------------------------- ! WINDOW POSITION ! ------------------------------------------------------------------------- }
-
-    MainForm.DefaultMonitor:=dmDesktop;          (* DO NOT CHANGE THAT *)
-    MainForm.Position      :=poDefaultSizeOnly;  (* DO NOT CHANGE THAT *)
-    MainForm.Top           :=AppSettings.TMIG.ReadInteger(ApplicationDetails, 'WINDOW_TOP',  0);
-    MainForm.Left          :=AppSettings.TMIG.ReadInteger(ApplicationDetails, 'WINDOW_LEFT', 0);
-
-    { --------------------------------------------------------------------------------------------------------------------------- START WEB PAGE | UNITY INFO }
-
-    WebBrowser1.Navigate(WideString(AppSettings.TMIG.ReadString(ApplicationDetails, 'START_PAGE',  'about:blank')), $02);
-    //WebBrowser2.Navigate(WideString(AppSettings.TMIG.ReadString(ApplicationDetails, 'REPORT_PAGE', 'about:blank')), $02);
-
-    { -------------------------------------------------------- ! TIMERS INTERVALS ! ------------------------------------------------------------------------- }
-
-    (* 'INETTIMER' IS EXCLUDED FROM BELOW LIST BECAUSE IT IS CONTROLED BY 'INITIAIZECONNECTION' METHOD *)
-
-    InvoiceScanTimer.Interval:=AppSettings.TMIG.ReadInteger(TimersSettings, 'INVOICE_SCANNER', 900000);  { DEFAULT VALUE 900000  MILISECONDS = 15 MINUTES }
-    FollowupPopup.Interval   :=AppSettings.TMIG.ReadInteger(TimersSettings, 'FOLLOWUP_CHECKER',1800000); { DEFAULT VALUE 1800000 MILISECONDS = 30 MINUTES }
-    OILoader.Interval        :=AppSettings.TMIG.ReadInteger(TimersSettings, 'OI_LOADER',       300000);  { DEFAULT VALUE 3000000 MILISECONDS = 5  MINUTES }
-
-    { ---------------------------------------------------------- ! RISK CLASSES ! --------------------------------------------------------------------------- }
-
-    { WE USE COMMA DECIMAL SEPARATOR BY DEFAULT }
-    if FormatSettings.DecimalSeparator = ',' then
+    if not(string.IsNullOrEmpty(GroupListBox.Text)) and not(string.IsNullOrEmpty(GroupListDates.Text)) then
     begin
-      procRISKA.Caption:=FloatToStr(StrToFloat(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_A_MAX', RISK_CLASS_A)) * 100) + '%';
-      procRISKB.Caption:=FloatToStr(StrToFloat(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_B_MAX', RISK_CLASS_B)) * 100) + '%';
-      procRISKC.Caption:=FloatToStr(StrToFloat(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_C_MAX', RISK_CLASS_C)) * 100) + '%';
+        GroupIdSel:=GroupList[GroupListBox.ItemIndex, 0];
+        GroupNmSel:=GroupList[GroupListBox.ItemIndex, 1];
+        AgeDateSel:=GroupListDates.Text;
+        sgAgeView.Enabled:=True;
+
+        Transactions:=TTransactions.Create(DbConnect);
+        try
+            OpenItemsUpdate:=Transactions.GetDateTime(gdDateTime);
+            OpenItemsStatus:=Transactions.GetStatus(OpenItemsUpdate);
+            if string.IsNullOrEmpty(OpenItemsUpdate) then
+            begin
+                MsgCall(mcWarn, 'Cannot find open items in database. Please contact IT support.');
+                TTReadAgeView.Create(thNullParameter, smRanges);
+            end
+            else
+                TTReadAgeView.Create(thCallOpenItems, smRanges);
+        finally
+            Transactions.Free;
+        end;
     end;
-    { CHANGE COMMA DECIMAL SEPARATOR TO POINT DECIMAL SEPARATOR }
-    if FormatSettings.DecimalSeparator = '.' then
-    begin
-      procRISKA.Caption:=FloatToStr(StrToFloat(StringReplace(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_A_MAX', RISK_CLASS_A), ',', '.', [rfReplaceAll])) * 100) + '%';
-      procRISKB.Caption:=FloatToStr(StrToFloat(StringReplace(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_B_MAX', RISK_CLASS_B), ',', '.', [rfReplaceAll])) * 100) + '%';
-      procRISKC.Caption:=FloatToStr(StrToFloat(StringReplace(AppSettings.TMIG.ReadString(RiskClassDetails, 'CLASS_C_MAX', RISK_CLASS_C), ',', '.', [rfReplaceAll])) * 100) + '%';
-    end;
 
-    { ----------------------------------------------------------- ! TAB SHEETS ! ---------------------------------------------------------------------------- }
+    // ------------------------------------------------------------------------------------------------------------------------ ASYNC LOAD OF GENERAL TABLES //
+    OnCreateJob(spDelegate);
 
-    { HIDE ALL TABSHEETS }
-    for iCNT:=0 to MyPages.PageCount - 1 do MyPages.Pages[iCNT].TabVisible:=False;
-
-    { ----------------------------------------------------- ! CAPTIONS FOR ALL SHAPES ! --------------------------------------------------------------------- }
-
-    { AGING REPORT | TABSHEET1 }
-    Cap01.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS1TXT01', 'EMPTY'), [fsBold]);
-    Cap02.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS1TXT02', 'EMPTY'), [fsBold]);
-    Cap03.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS1TXT03', 'EMPTY'), [fsBold]);
-    Cap05.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS1TXT05', 'EMPTY'), [fsBold]);
-    Cap06.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS1TXT06', 'EMPTY'), [fsBold]);
-    Cap07.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS1TXT07', 'EMPTY'), [fsBold]);
-    Cap24.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS1TXT08', 'EMPTY'), [fsBold]);
-
-    { OPEN ITEMS | TABSHEET2 }
-    Cap10.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS2TXT01', 'EMPTY'), [fsBold]);
-    Cap11.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS2TXT02', 'EMPTY'), [fsBold]);
-    Cap12.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS2TXT03', 'EMPTY'), [fsBold]);
-
-    { ADDRESS BOOK | TABSHEET3 }
-    Cap13.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS3TXT01', 'EMPTY'), [fsBold]);
-
-    { INVOICE TRACKER | TABSHEET4 }
-    Cap43.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS4TXT01', 'EMPTY'), [fsBold]);
-
-    { UNIDENTIFIED TRANSACTIONS | TABSHEET6 }
-    Cap61.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS6TXT01', 'EMPTY'), [fsBold]);
-
-    { GENERAL TABLES  | TABSHEET7 }
-    Cap15.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS7TXT01', 'EMPTY'), [fsBold]);
-    Cap16.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS7TXT02', 'EMPTY'), [fsBold]);
-    Cap17.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS7TXT03', 'EMPTY'), [fsBold]);
-    Cap18.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS7TXT04', 'EMPTY'), [fsBold]);
-    Cap19.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS7TXT05', 'EMPTY'), [fsBold]);
-    Cap20.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS7TXT06', 'EMPTY'), [fsBold]);
-
-    { SETTINGS | TABSHEET8 }
-    Cap21.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS8TXT01', 'EMPTY'), [fsBold]);
-    Cap22.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS8TXT02', 'EMPTY'), [fsBold]);
-    Cap23.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS8TXT03', 'EMPTY'), [fsBold]);
-    Cap27.ShapeText(10, 1, AppSettings.TMIG.ReadString(TabSheetsCaps, 'TS8TXT04', 'EMPTY'), [fsBold]);
-
-    { ------------------------------------------------------------ ! MAIN VIEW ! ---------------------------------------------------------------------------- }
-
-    { ------------------------------------------------------------------------------------------------------------------------------- AGING BUCKETS | CAPTION }
-
-    tR1.Caption:=AppSettings.TMIG.ReadString(AgingRanges,'RANGE1A','') + ' - ' + AppSettings.TMIG.ReadString(AgingRanges,'RANGE1B','');
-    tR2.Caption:=AppSettings.TMIG.ReadString(AgingRanges,'RANGE2A','') + ' - ' + AppSettings.TMIG.ReadString(AgingRanges,'RANGE2B','');
-    tR3.Caption:=AppSettings.TMIG.ReadString(AgingRanges,'RANGE3A','') + ' - ' + AppSettings.TMIG.ReadString(AgingRanges,'RANGE3B','');
-    tR4.Caption:=AppSettings.TMIG.ReadString(AgingRanges,'RANGE4A','') + ' - ' + AppSettings.TMIG.ReadString(AgingRanges,'RANGE4B','');
-    tR5.Caption:=AppSettings.TMIG.ReadString(AgingRanges,'RANGE5A','') + ' - ' + AppSettings.TMIG.ReadString(AgingRanges,'RANGE5B','');
-    tR6.Caption:=AppSettings.TMIG.ReadString(AgingRanges,'RANGE6A','') + ' - ' + AppSettings.TMIG.ReadString(AgingRanges,'RANGE6B','');
-
-    { -------------------------------------------------------------------------------------------------------------------------------- SUMMARY BOX | CAPTIONS }
-
-    Text21.Caption:=AppSettings.TMIG.ReadString(AgingRanges,'RANGE1A','') + ' - ' + AppSettings.TMIG.ReadString(AgingRanges,'RANGE3B','') + ':';
-    Text22.Caption:=AppSettings.TMIG.ReadString(AgingRanges,'RANGE4A','') + ' - ' + AppSettings.TMIG.ReadString(AgingRanges,'RANGE6B','') + ':';
-
-  finally
-    AppSettings.Free;
-  end;
-
-  { ------------------------------------------------------------- ! DATE & TIME ! --------------------------------------------------------------------------- }
-
-  NowTime   :=Now;
-  pStartTime:=Now;
-  FormatDateTime('hh:mm:ss', NowTime);
-  FormatDateTime('hh:mm:ss', pStartTime);
-
-  { ------------------------------------------------------------- ! STATUS BAR ! ---------------------------------------------------------------------------- }
-
-  StatBar_TXT1.Caption:=stReady;
-  StatBar_TXT2.Caption:=WinUserName;
-  StatBar_TXT3.Caption:=DateToStr(Now);
-
-  { ----------------------------------------------------------- ! DEFAULT VALUES ! -------------------------------------------------------------------------- }
-
-  MyPages.ActivePage   :=TabSheet1;
-
-  { --------------------------------------------------------- ! READ DEFAULT AGE VIEW ! --------------------------------------------------------------------- }
-
-  if (GroupListBox.Text <> '') and (GroupListDates.Text <> '') then
-  begin
-    GroupIdSel:=GroupList[GroupListBox.ItemIndex, 0];
-    GroupNmSel:=GroupList[GroupListBox.ItemIndex, 1];
-    AgeDateSel:=GroupListDates.Text;
-    sgAgeView.Enabled:=True;
-    Transactions:=TTransactions.Create(DbConnect);
-    try
-      OpenItemsUpdate:=Transactions.GetDateTime(gdDateTime);
-      OpenItemsStatus:=Transactions.GetStatus(OpenItemsUpdate);
-      if OpenItemsUpdate = '' then
-      begin
-        MsgCall(mcWarn, 'Cannot find open items in database. Please contact IT support.');
-        TTReadAgeView.Create(thNullParameter, smRanges);
-      end
-        else
-          TTReadAgeView.Create(thCallOpenItems, smRanges);
-    finally
-      Transactions.Free;
-    end;
-  end;
-
-  // Run async. queries
-  TTGeneralTables.Create(TblCompany,
+    TTGeneralTables.Create(TblCompany,
         sgCoCodes,
         TCompany.CO_CODE + COMMA +
         TCompany.BRANCH + COMMA +
@@ -2731,26 +1699,33 @@ begin
         TCompany.AGENTS + COMMA +
         TCompany.DIVISIONS,
         ORDER + TCompany.CO_CODE + ASC
-  );
-  TTGeneralTables.Create(TblPmtterms, sgPmtTerms);
-  TTGeneralTables.Create(TblPaidinfo, sgPaidInfo);
-  TTGeneralTables.Create(TblGroup3,   sgGroup3);
-  TTGeneralTables.Create(TblPerson,   sgPerson);
+    );
+    TTGeneralTables.Create(TblPmtterms, sgPmtTerms);
+    TTGeneralTables.Create(TblPaidinfo, sgPaidInfo);
+    TTGeneralTables.Create(TblGroup3,   sgGroup3);
+    TTGeneralTables.Create(TblPerson,   sgPerson);
 
-  { ----------------------------------------------------- ! APPLICATION VERSION & USER SID ! ---------------------------------------------------------------- }
+    // ------------------------------------------------------------------------------------------------------------------------------------------- FINISHING //
+    OnCreateJob(spFinishing);
 
-  LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Application version = ' + AppVersion);
-  LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: User SID = ' + GetCurrentUserSid);
+    NowTime   :=Now;
+    pStartTime:=Now;
+    FormatDateTime('hh:mm:ss', NowTime);
+    FormatDateTime('hh:mm:ss', pStartTime);
 
-  { ---------------------------------------------------------- ! START ALL TIMERS ! ------------------------------------------------------------------------- }
+    StatBar_TXT1.Caption:=stReady;
+    StatBar_TXT2.Caption:=WinUserName;
+    StatBar_TXT3.Caption:=DateToStr(Now);
 
-  UpTime.Enabled     :=True;
-  CurrentTime.Enabled:=True;
-  SwitchTimers(tmEnabled);
+    UpTime.Enabled     :=True;
+    CurrentTime.Enabled:=True;
+    SwitchTimers(tmEnabled);
+
+    LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Application version = ' + AppVersion);
+    LogText(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: User SID = ' + GetCurrentUserSid);
 
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------------------ ON DESTROY }
 procedure TMainForm.FormDestroy(Sender: TObject);
 var
   AppSettings: TSettings;
@@ -3884,6 +2859,7 @@ end;
 { ---------------------------------------------------- ! SHOW NEGATIVE VALUES AND ROW SELECTION ! ----------------------------------------------------------- }
 procedure TMainForm.sgAgeViewDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 var
+  Settings:    TSettings;
   Col1:        integer;
   Col2:        integer;
   Col3:        integer;
@@ -3942,27 +2918,28 @@ begin
     { HIGHLIGHT FOLLOW UP COLUMN }
     if not (CDate(sgAgeView.Cells[ACol, ARow]) = 0) then
     begin
+      Settings:=TSettings.Create;
       { FUTURE DAYS }
       if (ACol = Col12) and (CDate(sgAgeView.Cells[ACol, ARow]) > CDate(StatBar_TXT3.Caption)) then
       begin
-        sgAgeView.Canvas.Brush.Color:=FutureBColor;
-        sgAgeView.Canvas.Font.Color :=FutureFColor;
+        sgAgeView.Canvas.Brush.Color:=Settings.FutureBColor;
+        sgAgeView.Canvas.Font.Color :=Settings.FutureFColor;
         sgAgeView.Canvas.FillRect(Rect);
         sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
       end;
       { TODAY }
       if (ACol = Col12) and (CDate(sgAgeView.Cells[ACol, ARow]) = CDate(StatBar_TXT3.Caption)) then
       begin
-        sgAgeView.Canvas.Brush.Color:=TodayBColor;
-        sgAgeView.Canvas.Font.Color :=TodayFColor;
+        sgAgeView.Canvas.Brush.Color:=Settings.TodayBColor;
+        sgAgeView.Canvas.Font.Color :=Settings.TodayFColor;
         sgAgeView.Canvas.FillRect(Rect);
         sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
       end;
       { PAST DAYS }
       if (ACol = Col12) and (CDate(sgAgeView.Cells[ACol, ARow]) < CDate(StatBar_TXT3.Caption)) then
       begin
-        sgAgeView.Canvas.Brush.Color:=PastBColor;
-        sgAgeView.Canvas.Font.Color :=PastFColor;
+        sgAgeView.Canvas.Brush.Color:=Settings.PastBColor;
+        sgAgeView.Canvas.Font.Color :=Settings.PastFColor;
         sgAgeView.Canvas.FillRect(Rect);
         sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
       end;

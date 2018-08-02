@@ -346,6 +346,14 @@ const
     stLoading     = 'Loading Aging Report...';
     stSQLupdate   = 'Sending to SQL Server...';
 
+    // ----------------------------------------------------------------------------------------------------------------------------------- SPLASH INDICATORS //
+
+    spSetting    = 'getting settings..., please wait.';
+    spConnecting = 'connecting to MS SQL Server..., please wait.';
+    spUserAccess = 'getting user access details..., please wait.';
+    spSnapshots  = 'loading default age view..., please wait.';
+    spDelegate   = 'delegating General Tables async load..., please wait.';
+    spFinishing  = 'finishing..., please wait.';
 
     // COMPONENT RELATED ----------------------------------------------------------------------------------------------------------------------------------- //
 

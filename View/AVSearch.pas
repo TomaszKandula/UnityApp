@@ -13,12 +13,11 @@
 { ----------------------------------------------------------------------------------------------------------------------------------------------------------- }
 unit AVSearch;
 
-(* NOTE: DO NOT PLACE 'MAIN' REFERENCE IN THE IMPLEMENTATION SECTION BUT IN THE INTERFACE SECTION. THIS IS NECESSARY DUE TO CLASS EXTENSIONS DEFINED IN MAIN *)
 
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, ExtCtrls, Buttons, Main;
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, ExtCtrls, Buttons, InterposerClasses;
 
 { --------------------------------------------------------------- ! MAIN CLASS ! ---------------------------------------------------------------------------- }
 type
@@ -64,7 +63,7 @@ var
 implementation
 
 uses
-  Filter, Settings;
+  Main, Filter, Settings;
 
 {$R *.dfm}
 

@@ -1,12 +1,12 @@
 
-{$I \Include\Header.inc}
+{$I .\Include\Header.inc}
 
 unit SQL;
 
 interface
 
 uses
-    Main, SysUtils, Windows, Classes, ADODB, StrUtils, Variants, StdCtrls;
+    SysUtils, Windows, Classes, ADODB, StrUtils, Variants, StdCtrls, InterposerClasses, Arrays;
 
 type
 
@@ -65,6 +65,8 @@ type
 
 implementation
 
+uses
+    Main;
 
 // MS SQL -------------------------------------------------------------------------------------------------------------------------------------------------- //
 

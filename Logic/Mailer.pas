@@ -16,7 +16,7 @@ unit Mailer;
 interface
 
 uses
-  Main, SQL, Model, Settings, SysUtils, Windows, Messages, StdCtrls, Classes, StrUtils, Variants, CDO_TLB;
+  SQL, Model, Settings, SysUtils, Windows, Messages, StdCtrls, Classes, StrUtils, Variants, CDO_TLB, InterposerClasses;
 
 { -------------------------------------------------------------- ! MAILER CLASS ! --------------------------------------------------------------------------- }
 type
@@ -82,7 +82,7 @@ type
 implementation
 
 uses
-  ADODB, Tracker, Actions;
+  Main, ADODB, Tracker, Actions;
 
 { ############################################################## ! MAILER CLASS ! ########################################################################### }
 

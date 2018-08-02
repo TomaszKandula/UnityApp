@@ -11,7 +11,7 @@ unit PhoneList;
 interface
 
 uses
-    Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, ExtCtrls, Buttons, StdCtrls, Main;
+    Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, ExtCtrls, Buttons, StdCtrls, InterposerClasses;
 
 type
 
@@ -42,7 +42,7 @@ implementation
 {$R *.dfm}
 
 uses
-    Actions, Settings;
+    Main, Actions, Settings;
 
 
 // ------------------------------------------------------------------------------------------------------------------------------------------- CLASS HELPERS //

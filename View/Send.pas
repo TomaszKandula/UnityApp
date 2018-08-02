@@ -18,7 +18,7 @@ unit Send;
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, Buttons, ExtCtrls, Main;
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, Buttons, ExtCtrls, InterposerClasses;
 
 { ----------------------------------------------------------------- ! MAIN CLASS ! -------------------------------------------------------------------------- }
 type
@@ -61,7 +61,7 @@ var
 implementation
 
 uses
-  Settings, Actions;
+  Main, Settings, Actions;
 
 {$R *.dfm}
 

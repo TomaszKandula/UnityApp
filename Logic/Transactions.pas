@@ -16,7 +16,7 @@ unit Transactions;
 interface
 
 uses
-  Main, Model, SQL, Variants, StrUtils, SysUtils, StdCtrls, Classes, Windows, Messages, ADODB;
+  InterposerClasses, Model, SQL, Variants, StrUtils, SysUtils, StdCtrls, Classes, Windows, Messages, ADODB;
 
 { ------------------------------------------------------------- ! OPEN ITEMS CLASS ! ------------------------------------------------------------------------ }
 type
@@ -37,7 +37,7 @@ type
 implementation
 
 uses
-  Settings;
+  Main, Settings;
 
 { ############################################################## ! OPEN ITEMS CLASS ! ####################################################################### }
 

@@ -1,12 +1,12 @@
 
-{$I \Include\Header.inc}
+{$I .\Include\Header.inc}
 
 unit Worker;
 
 interface
 
 uses
-    Main, SQL, ReportBug, Windows, Messages, SysUtils, Classes, Diagnostics, Graphics, ADODB, ComObj, SyncObjs, Dialogs, DB;
+    Windows, Messages, SysUtils, Classes, Diagnostics, Graphics, ADODB, ComObj, SyncObjs, Dialogs, DB, InterposerClasses, Arrays;
 
     /// <remarks>
     ///     Asynchronous methods executed within single thread classes. Most of the thread classes aquire lock, so they can be called
@@ -284,59 +284,12 @@ type
         constructor Create(TableName: string; DestGrid: TStringGrid; Columns: string = '' {=OPTION}; Conditions: string = '' {=OPTION});
     end;
 
+
 implementation
 
 
 uses
-    Model, DataBase, Settings, UAC, Mailer, AgeView, Transactions, Tracker, Actions;
-
-
-// ------------------------------------------------------------------------------------------------------------------------------- LOAD ASYNC. GENERAL TABLE //
-
-
-constructor TTGeneralTables.Create(TableName: string; DestGrid: TStringGrid; Columns: string = '' {=OPTION}; Conditions: string = '' {=OPTION});
-begin
-    inherited Create(False);
-    FTableName :=TableName;
-    FDestGrid  :=DestGrid;
-    FColumns   :=Columns;
-    FConditions:=Conditions;
-end;
-
-procedure TTGeneralTables.Execute;
-var
-    IDThd:       cardinal;
-    DataTables:  TDataTables;
-begin
-
-    IDThd:=TTGeneralTables.CurrentThread.ThreadID;  { USE FOR ERROR HANDLING AND LOGGING }
-    DataTables:=TDataTables.Create(MainForm.DbConnect);
-
-    try
-        try
-            DataTables.CleanUp;
-
-            if  not(string.IsNullOrEmpty(FColumns)) then
-                DataTables.Columns.Text:=FColumns;
-
-            if not(string.IsNullOrEmpty(FConditions)) then
-                DataTables.CustFilter:=FConditions;
-
-            if DataTables.OpenTable(FTableName) then
-                DataTables.SqlToGrid(FDestGrid, DataTables.DataSet, False, True);
-
-        except
-            on E: Exception do
-                { ERROR HANDLER HERE }
-        end;
-    finally
-        DataTables.Free;
-        { LOGGING HERE }
-    end;
-
-    FreeOnTerminate:=True;
-
-end;
+    Main, SQL, Model, DataBase, Settings, UAC, Mailer, AgeView, Transactions, Tracker, Actions, ReportBug;
 
 
 // --------------------------------------------------------------------------------------------------------------------------------- CHECK SERVER CONNECTION //
@@ -1660,6 +1613,55 @@ begin
     FreeOnTerminate:=True;
 
 end;
+
+
+// ------------------------------------------------------------------------------------------------------------------------------- LOAD ASYNC. GENERAL TABLE //
+
+
+constructor TTGeneralTables.Create(TableName: string; DestGrid: TStringGrid; Columns: string = '' {=OPTION}; Conditions: string = '' {=OPTION});
+begin
+    inherited Create(False);
+    FTableName :=TableName;
+    FDestGrid  :=DestGrid;
+    FColumns   :=Columns;
+    FConditions:=Conditions;
+end;
+
+procedure TTGeneralTables.Execute;
+var
+    IDThd:       cardinal;
+    DataTables:  TDataTables;
+begin
+
+    IDThd:=TTGeneralTables.CurrentThread.ThreadID;  { USE FOR ERROR HANDLING AND LOGGING }
+    DataTables:=TDataTables.Create(MainForm.DbConnect);
+
+    try
+        try
+            DataTables.CleanUp;
+
+            if  not(string.IsNullOrEmpty(FColumns)) then
+                DataTables.Columns.Text:=FColumns;
+
+            if not(string.IsNullOrEmpty(FConditions)) then
+                DataTables.CustFilter:=FConditions;
+
+            if DataTables.OpenTable(FTableName) then
+                DataTables.SqlToGrid(FDestGrid, DataTables.DataSet, False, True);
+
+        except
+            on E: Exception do
+                { ERROR HANDLER HERE }
+        end;
+    finally
+        DataTables.Free;
+        { LOGGING HERE }
+    end;
+
+    FreeOnTerminate:=True;
+
+end;
+
 
 end.
 

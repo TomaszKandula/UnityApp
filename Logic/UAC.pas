@@ -1,12 +1,12 @@
 
-{$I \Include\Header.inc}
+{$I .\Include\Header.inc}
 
 unit UAC;
 
 interface
 
 uses
-    Main, Model, SQL, SysUtils, Windows, StdCtrls, Classes, ADODB, StrUtils, Variants;
+    Arrays, InterposerClasses, Model, SQL, SysUtils, Windows, StdCtrls, Classes, ADODB, StrUtils, Variants;
 
 type
 
@@ -25,6 +25,8 @@ type
 
 implementation
 
+uses
+    Main;
 
 // --------------------------------------------------------------------------------------------------------------- READ THE ACCESS DATA FOR GIVEN USER ALIAS //
 

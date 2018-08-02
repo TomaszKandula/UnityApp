@@ -18,7 +18,7 @@ unit Invoices;
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, Grids, ADODB, ComCtrls, Main;
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, Grids, ADODB, ComCtrls, InterposerClasses;
 
 { --------------------------------------------------------------- ! MAIN CLASS ! ---------------------------------------------------------------------------- }
 type
@@ -42,7 +42,7 @@ var
 implementation
 
 uses
-  Settings, SQL, Model;
+  Main, Settings, SQL, Model;
 
 {$R *.dfm}
 

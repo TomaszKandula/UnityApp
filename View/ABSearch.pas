@@ -11,7 +11,7 @@ unit ABSearch;
 interface
 
 uses
-    Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, Buttons, StdCtrls, ExtCtrls, StrUtils, Main;
+    Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, Buttons, StdCtrls, ExtCtrls, StrUtils, InterposerClasses;
 
 type
 
@@ -103,7 +103,7 @@ implementation
 {$R *.dfm}
 
 uses
-    Settings, Worker, Model;
+    Main, Settings, Worker, Model;
 
 
 // ------------------------------------------------------------------------------------------------------------------------------------------- CLASS HELPERS //

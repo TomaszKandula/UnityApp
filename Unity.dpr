@@ -1,5 +1,5 @@
 
-{$I \Include\Header.inc}
+{$I .\Include\Header.inc}
 
 program Unity;
 
@@ -23,8 +23,10 @@ uses
   SynZip,
   SynZipFiles,
   System.Types,
+  // Model
   Model in 'Model\Model.pas',
   SQL in 'Model\SQL.pas',
+  // Logic
   AgeView in 'Logic\AgeView.pas',
   Database in 'Logic\Database.pas',
   Mailer in 'Logic\Mailer.pas',
@@ -33,7 +35,10 @@ uses
   UAC in 'Logic\UAC.pas',
   Worker in 'Logic\Worker.pas',
   Internet in 'Logic\Internet.pas',
-  GeneralTables in 'Logic\GeneralTables.pas',
+  // Extensions
+  Arrays in 'Extensions\Arrays.pas',
+  InterposerClasses in 'Extensions\InterposerClasses.pas',
+  // Views
   About in 'View\About.pas' {AboutForm},
   Actions in 'View\Actions.pas' {ActionsForm},
   Calendar in 'View\Calendar.pas' {CalendarForm},
@@ -56,9 +61,9 @@ type
     DWord = 0..$FFFFFFFF;
     TDwmIsCompositionEnabledFunc = function(out pfEnabled: boolean): HRESULT; stdcall;
 
-/// <remarks>
-///     Application constants are defined in main view throught "common.inc" file.
-/// </remarks>>
+    /// <remarks>
+    ///     Application constants are defined in main view throught "common.inc" file.
+    /// </remarks>>
 
 var
     StrWrite:         string;
@@ -241,7 +246,6 @@ begin
 
 end;
 
-
 // -------------------------------------------------------------------------------------------------------------------------------------- MAIN PROGRAM BLOCK //
 
 begin
@@ -353,7 +357,10 @@ begin
             try
                 StrWrite:=WinUserName + '.' + CRLF + CRLF;
                 FL.Position:=FL.Size;
-                for iCNT:=1 to length(StrWrite) do FL.Write(StrWrite[iCNT], 1);
+
+                for iCNT:=1 to length(StrWrite) do
+                    FL.Write(StrWrite[iCNT], 1);
+
             finally
                 FL.Free;
             end;
@@ -607,7 +614,7 @@ begin
 
     AppSettings:=TSettings.Create;
     try
-        Status(12, AllTasks, 50, 'Application initialization... connecting with SQL server..., please wait.', False, AppSettings.FPathEventLog);
+        Status(12, AllTasks, 50, 'Application initialization... ', False, AppSettings.FPathEventLog);
         Application.Initialize;
         Application.Title:=APPCAPTION;
         Application.MainFormOnTaskbar:=False;
@@ -623,7 +630,7 @@ begin
         LogText(AppSettings.FPathEventLog, '[GUI] Initialization methods executed within main thread, ''MainForm'' has been created. Main process thread ID = ' + IntToStr(MainThreadID) + '.');
 
         // Other forms (views)
-        Status(13, AllTasks, 400, 'Application initialization... VCL forms loading, please wait.', False, AppSettings.FPathEventLog);
+        Status(13, AllTasks, 400, 'Application initialization: VCL forms loading, please wait.', False, AppSettings.FPathEventLog);
         Application.CreateForm(TAboutForm,       AboutForm);       LogText(AppSettings.FPathEventLog, '[GUI] ''AboutForm'' ......... has been created.');
         Application.CreateForm(TSendForm,        SendForm);        LogText(AppSettings.FPathEventLog, '[GUI] ''SendForm'' .......... has been created.');
         Application.CreateForm(TEventForm,       EventForm);       LogText(AppSettings.FPathEventLog, '[GUI] ''EventForm'' ......... has been created.');
@@ -640,7 +647,7 @@ begin
         Application.CreateForm(TViewMailerForm,  ViewMailerForm);  LogText(AppSettings.FPathEventLog, '[GUI] ''ViewMailerForm'' .... has been created.');
 
         // Splash screen - 100%
-        Status(14, AllTasks, 900, 'Application initialization... done.', False, AppSettings.FPathEventLog);
+        Status(14, AllTasks, 900, 'Application is initialized.', False, AppSettings.FPathEventLog);
 
         // ------------------------------------------------------------------------------------------------------------------------------- SPLASH SCREEN END //
 

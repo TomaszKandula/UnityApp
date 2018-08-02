@@ -145,7 +145,8 @@
         <DCCReference Include="Logic\UAC.pas"/>
         <DCCReference Include="Logic\Worker.pas"/>
         <DCCReference Include="Logic\Internet.pas"/>
-        <DCCReference Include="Logic\GeneralTables.pas"/>
+        <DCCReference Include="Extensions\Arrays.pas"/>
+        <DCCReference Include="Extensions\InterposerClasses.pas"/>
         <DCCReference Include="View\About.pas">
             <Form>AboutForm</Form>
         </DCCReference>

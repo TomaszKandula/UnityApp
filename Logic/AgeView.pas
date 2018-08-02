@@ -16,7 +16,7 @@ unit AgeView;
 interface
 
 uses
-  Main, Model, SQL, ADODB, StrUtils, SysUtils, Variants, Messages, Windows, Classes, Graphics;
+  Model, SQL, ADODB, StrUtils, SysUtils, Variants, Messages, Windows, Classes, Graphics, InterposerClasses, Arrays;
 
 { ------------------------------------------------------------- ! AGE VIEW CLASS ! -------------------------------------------------------------------------- }
 type
@@ -74,7 +74,7 @@ type
 implementation
 
 uses
-  Settings;
+  Main, Settings;
 
 { ############################################################## ! AGE VIEW CLASS ! ######################################################################### }
 

@@ -1,21 +1,53 @@
 
-{$I \Include\Header.inc}
+{$I .\Include\Header.inc}
 
 unit Settings;
 
 interface
 
 uses
-    Main, Forms, Windows, Messages, SysUtils, Classes, ShellAPI, CRC32u, INIFiles;
+    Main, Forms, Windows, Messages, SysUtils, Classes, ShellAPI, CRC32u, INIFiles, Graphics;
 
 type
+
+    /// <summary>
+    ///     Interface exposing methods for encoding, decoding settings file and uploading it into memory. It also exposes
+    ///     getters and setters for follow-up colors.
+    /// </summary>
+
+    ISettings = Interface(IInterface)
+    ['{FF5CBEC3-2576-4E1C-954E-C892AB4A7CC1}']
+        // Methods
+        function  GetTodayFColor  : TColor;
+        function  GetTodayBColor  : TColor;
+        function  GetPastFColor   : TColor;
+        function  GetPastBColor   : TColor;
+        function  GetFutureFColor : TColor;
+        function  GetFutureBColor : TColor;
+        procedure SetTodayFColor (NewColor: TColor);
+        procedure SetTodayBColor (NewColor: TColor);
+        procedure SetPastFColor  (NewColor: TColor);
+        procedure SetPastBColor  (NewColor: TColor);
+        procedure SetFutureFColor(NewColor: TColor);
+        procedure SetFutureBColor(NewColor: TColor);
+        function  Encode(ConfigType: integer): boolean;
+        function  Decode(ConfigType: integer; ToMemory: boolean): boolean;
+        function  ConfigToMemory: boolean;
+        // Properties
+        property TodayFColor : TColor read GetTodayFColor  write SetTodayFColor;
+        property TodayBColor : TColor read GetTodayBColor  write SetTodayBColor;
+        property PastFColor  : TColor read GetPastFColor   write SetPastFColor;
+        property PastBColor  : TColor read GetPastBColor   write SetPastBColor;
+        property FutureFColor: TColor read GetFutureFColor write SetFutureFColor;
+        property FutureBColor: TColor read GetFutureBColor write SetFutureBColor;
+    end;
 
     /// <summary>
     ///    Class constructor is responsibe for setting up variables with file paths and for the initialization of two separate
     ///    classes that keeps settings during program runtime.
     /// </summary>
 
-    TSettings = class
+    TSettings = class(TInterfacedObject, ISettings)
         {$TYPEINFO ON}
         private
             // Files
@@ -24,16 +56,33 @@ type
             var pAppLog        : string;
             var pWinUserName   : string;
             var pWinTempFolder : string;
+
             // Paths
             var pPathEventLog  : string;
             var pPathAppCfg    : string;
             var pPathLicence   : string;
             var pPathGridImage : string;
             var pPathRelease   : string;
+
             // Time and date
             function  pGetReleaseDateTime: TDateTime;
             procedure pSetReleaseDateTime(NewDateTime: TDateTime);
             function  pGetRelFileDateTime: TDateTime;
+
+            // Getters and setters for "follow-up" colors saved in settings file
+            function  GetTodayFColor  : TColor;
+            function  GetTodayBColor  : TColor;
+            function  GetPastFColor   : TColor;
+            function  GetPastBColor   : TColor;
+            function  GetFutureFColor : TColor;
+            function  GetFutureBColor : TColor;
+            procedure SetTodayFColor (NewColor: TColor);
+            procedure SetTodayBColor (NewColor: TColor);
+            procedure SetPastFColor  (NewColor: TColor);
+            procedure SetPastBColor  (NewColor: TColor);
+            procedure SetFutureFColor(NewColor: TColor);
+            procedure SetFutureBColor(NewColor: TColor);
+
         public
             var GetLastError           : integer;
             var TMIG                   : TMemIniFile;
@@ -50,7 +99,12 @@ type
             property FPathRelease      : string    read pPathRelease;
             property FRelFileDateTime  : TDateTime read pGetRelFileDateTime;
             property FReleaseDateTime  : TDateTime read pGetReleaseDateTime write pSetReleaseDateTime;
-        published
+            property TodayFColor       : TColor    read GetTodayFColor      write SetTodayFColor;
+            property TodayBColor       : TColor    read GetTodayBColor      write SetTodayBColor;
+            property PastFColor        : TColor    read GetPastFColor       write SetPastFColor;
+            property PastBColor        : TColor    read GetPastBColor       write SetPastBColor;
+            property FutureFColor      : TColor    read GetFutureFColor     write SetFutureFColor;
+            property FutureBColor      : TColor    read GetFutureBColor     write SetFutureBColor;
             constructor Create;
             destructor  Destroy; override;
             function    Encode(ConfigType: integer): boolean;
@@ -377,5 +431,121 @@ begin
     end;
 
 end;
+
+{ ################################################## ! GETTERS AND SETTERS FOR FOLLOW-UP COLORS ! ########################################################### }
+
+{ --------------------------------------------------------------------------------------------------------------------------------------------------- GETTERS }
+
+{ FONT COLOR }
+function TSettings.GetTodayFColor: TColor;
+begin
+    Result:=0;
+    if not(Assigned(TMIG)) then
+        Exit
+            else
+                Result:=TMIG.ReadInteger(FollowUpColors, 'TODAY_FCOLOR', 0);
+end;
+
+{ BACKGROUND COLOR }
+function TSettings.GetTodayBColor: TColor;
+begin
+    Result:=0;
+    if not(Assigned(TMIG)) then
+        Exit
+            else
+                Result:=TMIG.ReadInteger(FollowUpColors, 'TODAY_BCOLOR', 0);
+end;
+
+{ FONT COLOR }
+function TSettings.GetPastFColor: TColor;
+begin
+    Result:=0;
+    if not(Assigned(TMIG)) then
+        Exit
+            else
+                Result:=TMIG.ReadInteger(FollowUpColors, 'PAST_FCOLOR', 0);
+end;
+
+{ BACKGROUND COLOR }
+function TSettings.GetPastBColor: TColor;
+begin
+    Result:=0;
+    if not(Assigned(TMIG)) then
+        Exit
+            else
+                Result:=TMIG.ReadInteger(FollowUpColors, 'PAST_BCOLOR', 0);
+end;
+
+{ FONT COLOR }
+function TSettings.GetFutureFColor: TColor;
+begin
+    Result:=0;
+    if not(Assigned(TMIG)) then
+        Exit
+            else
+                Result:=TMIG.ReadInteger(FollowUpColors, 'FUTURE_FCOLOR', 0);
+end;
+
+{ BACKGROUND COLOR }
+function TSettings.GetFutureBColor: TColor;
+begin
+    Result:=0;
+    if not(Assigned(TMIG)) then
+        Exit
+            else
+                Result:=TMIG.ReadInteger(FollowUpColors, 'FUTURE_BCOLOR', 0);
+end;
+
+{ --------------------------------------------------------------------------------------------------------------------------------------------------- SETTERS }
+
+{ FONT COLOR }
+procedure TSettings.SetTodayFColor(NewColor: TColor);
+begin
+    if not(Assigned(TMIG)) then Exit;
+    TMIG.WriteInteger(FollowUpColors, 'TODAY_FCOLOR', NewColor);
+    Encode(AppConfig);
+end;
+
+{ BACKGROUND COLOR }
+procedure TSettings.SetTodayBColor(NewColor: TColor);
+begin
+    if not(Assigned(TMIG)) then Exit;
+    TMIG.WriteInteger(FollowUpColors, 'TODAY_BCOLOR', NewColor);
+    Encode(AppConfig);
+end;
+
+{ FONT COLOR }
+procedure TSettings.SetPastFColor(NewColor: TColor);
+begin
+    if not(Assigned(TMIG)) then Exit;
+    TMIG.WriteInteger(FollowUpColors, 'PAST_FCOLOR', NewColor);
+    Encode(AppConfig);
+end;
+
+{ BACKGROUND COLOR }
+procedure TSettings.SetPastBColor(NewColor: TColor);
+begin
+    if not(Assigned(TMIG)) then Exit;
+    TMIG.WriteInteger(FollowUpColors, 'PAST_BCOLOR', NewColor);
+    Encode(AppConfig);
+end;
+
+{ FONT COLOR }
+procedure TSettings.SetFutureFColor(NewColor: TColor);
+begin
+    if not(Assigned(TMIG)) then Exit;
+    TMIG.WriteInteger(FollowUpColors, 'FUTURE_FCOLOR', NewColor);
+    Encode(AppConfig);
+end;
+
+{ BACKGROUND COLOR }
+procedure TSettings.SetFutureBColor(NewColor: TColor);
+begin
+    if not(Assigned(TMIG)) then Exit;
+    TMIG.WriteInteger(FollowUpColors, 'FUTURE_BCOLOR', NewColor);
+    Encode(AppConfig);
+end;
+
+
 
 end.

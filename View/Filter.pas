@@ -13,12 +13,11 @@
 { ----------------------------------------------------------------------------------------------------------------------------------------------------------- }
 unit Filter;
 
-(* NOTE: DO NOT PLACE 'MAIN' REFERENCE IN THE IMPLEMENTATION SECTION BUT IN THE INTERFACE SECTION. THIS IS NECESSARY DUE TO CLASS EXTENSIONS DEFINED IN MAIN *)
-
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, ExtCtrls, CheckLst, Buttons, pngimage, DBGrids, StrUtils, Main;
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, ExtCtrls, CheckLst, Buttons, pngimage, DBGrids, StrUtils,
+  InterposerClasses, Arrays;
 
 { -------------------------------------------------------------- ! INTERPOSES CLASS ! ----------------------------------------------------------------------- }
                                                      (* EXTEND CURRENT COMPONENTS | MAIN THREAD *)
@@ -90,7 +89,7 @@ var
 implementation
 
 uses
-  Settings, Model, AgeView;
+  Main, Settings, Model, AgeView;
 
 {$R *.dfm}
 

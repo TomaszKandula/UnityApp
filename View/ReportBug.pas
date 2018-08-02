@@ -18,7 +18,7 @@ unit ReportBug;
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, Buttons, ExtCtrls, Main;
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, Buttons, ExtCtrls, InterposerClasses;
 
 { ------------------------------------------------------------------ ! MAIN CLASS ! ------------------------------------------------------------------------- }
 type
@@ -50,7 +50,7 @@ var
 implementation
 
 uses
-  Mailer, Settings, Worker;
+  Main, Mailer, Settings, Worker;
 
 {$R *.dfm}
 

@@ -13,12 +13,10 @@
 { ----------------------------------------------------------------------------------------------------------------------------------------------------------- }
 unit EventLog;
 
-(* NOTE: DO NOT PLACE 'MAIN' REFERENCE IN THE IMPLEMENTATION SECTION BUT IN THE INTERFACE SECTION. THIS IS NECESSARY DUE TO CLASS EXTENSIONS DEFINED IN MAIN *)
-
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, ExtCtrls, StdCtrls, ComCtrls, pngimage, Main;
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, ExtCtrls, StdCtrls, ComCtrls, pngimage, InterposerCLasses;
 
 { ---------------------------------------------------------------- ! MAIN CLASS ! --------------------------------------------------------------------------- }
 type
@@ -44,7 +42,7 @@ var
 implementation
 
 uses
-  Settings;
+  Main, Settings;
 
 {$R *.dfm}
 

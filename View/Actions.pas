@@ -19,7 +19,7 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,  Dialogs, Grids, Buttons, ExtCtrls, ComCtrls, StdCtrls, ADODB, StrUtils, ShellApi,
-  TLHelp32, pngimage, ImgList, GIFImg, Clipbrd, Main;
+  TLHelp32, pngimage, ImgList, GIFImg, Clipbrd, InterposerClasses, Arrays;
 
 { ------------------------------------------------------------ ! INTERPOSER CLASSES ! ----------------------------------------------------------------------- }
                                                     (* EXTEND CURRENT COMPONENTS | MAIN THREAD *)
@@ -175,7 +175,7 @@ var
 implementation
 
 uses
-  SQL, Model, Worker, Calendar, Settings, Mailer, Transactions, Send, PhoneList;
+  Main, SQL, Model, Worker, Calendar, Settings, Mailer, Transactions, Send, PhoneList;
 
 {$R *.dfm}
 
