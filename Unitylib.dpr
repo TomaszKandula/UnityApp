@@ -25,9 +25,10 @@ const
     SID_REVISION     = 1;
 type
     PTokenUser = ^TTokenUser;
+
     TTokenUser = packed record
         User: TSidAndAttributes;
-end;
+    end;
 
 
 // --------------------------------------------------------------------------------------------------------------------------------------------------------- //

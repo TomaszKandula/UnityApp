@@ -2858,7 +2858,7 @@ end;
 { ---------------------------------------------------- ! SHOW NEGATIVE VALUES AND ROW SELECTION ! ----------------------------------------------------------- }
 procedure TMainForm.sgAgeViewDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 var
-  Settings:    TSettings;
+  Settings:    ISettings;
   Col1:        integer;
   Col2:        integer;
   Col3:        integer;

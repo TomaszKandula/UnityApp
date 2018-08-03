@@ -452,6 +452,5 @@ type
 
 implementation
 
-// No code here
 
 end.

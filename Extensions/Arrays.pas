@@ -29,8 +29,8 @@ type
 
     TIntigers = array of integer;
 
+
 implementation
 
-    // Leave it empty.
 
 end.

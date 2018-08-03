@@ -222,7 +222,7 @@ object AboutForm: TAboutForm
     Font.Name = 'Tahoma'
     Font.Style = [fsUnderline]
     ParentFont = False
-    OnClick = txt_INQClick
+    OnClick = txtINQClick
   end
   object txt_LIC: TLabel
     Left = 357
@@ -250,7 +250,7 @@ object AboutForm: TAboutForm
     Font.Name = 'Tahoma'
     Font.Style = [fsUnderline]
     ParentFont = False
-    OnClick = txt_ITSClick
+    OnClick = txtITSClick
   end
   object txt_SYS: TLabel
     Left = 358
@@ -331,7 +331,7 @@ object AboutForm: TAboutForm
     Font.Name = 'Tahoma'
     Font.Style = [fsUnderline]
     ParentFont = False
-    OnClick = txt_WEBClick
+    OnClick = txtWEBClick
   end
   object LineHor2: TBevel
     Left = 264
@@ -1963,15 +1963,14 @@ object AboutForm: TAboutForm
     ParentFont = False
     Transparent = True
   end
-  object btn_Close: TButton
-    Left = 542
+  object btnClose: TSpeedButton
+    Left = 543
     Top = 401
     Width = 73
     Height = 25
     Cursor = crHandPoint
     Caption = 'Close'
-    TabOrder = 0
-    TabStop = False
-    OnClick = btn_CloseClick
+    Flat = True
+    OnClick = btnCloseClick
   end
 end

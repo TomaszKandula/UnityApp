@@ -65,10 +65,10 @@ uses
 
 procedure TColorsForm.FormCreate(Sender: TObject);
 var
-    Settings: TSettings;
+    Settings: ISettings;
 begin
     Settings:=TSettings.Create;
-    ColorsForm.Caption:=Settings.TMIG.ReadString(ApplicationDetails, 'WND_COLORS', APPCAPTION);
+    ColorsForm.Caption:=Settings.GetStringValue(ApplicationDetails, 'WND_COLORS', APPCAPTION);
 
     if (ColorList1.Items.Count > 0) and (ColorList2.Items.Count > 0) and (ColorList3.Items.Count > 0) then
     begin
@@ -99,7 +99,7 @@ end;
 
 procedure TColorsForm.ColorList1Select(Sender: TObject);
 var
-    Settings: TSettings;
+    Settings: ISettings;
 begin
     Settings:=TSettings.Create;
     if ColorList1.Text = 'Font Color'       then ColorBox1.Brush.Color:=Settings.TodayFColor;

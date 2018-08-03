@@ -3,11 +3,6 @@
 
 unit ABSearch;
 
-    /// <remarks>
-    ///     Do not place 'MAIN' reference in the implementation section, do so in the interface section.
-    ///     This is necessary due to class extension defined in MAIN.
-    /// </remarks>
-
 interface
 
 uses
@@ -16,7 +11,7 @@ uses
 type
 
     /// <summary>
-    ///     Search view for Address Book.
+    ///     Search view form class with helpers for Address Book string grid page.
     /// </summary>
 
     TViewSearchForm = class(TForm)
@@ -98,7 +93,9 @@ type
 var
     ViewSearchForm: TViewSearchForm;
 
+
 implementation
+
 
 {$R *.dfm}
 
@@ -115,15 +112,11 @@ uses
 
 procedure TViewSearchForm.Initialize;
 var
-    AppSettings: TSettings;
+    Settings: ISettings;
 begin
 
-    AppSettings:=TSettings.Create;
-    try
-        ViewSearchForm.Caption:=AppSettings.TMIG.ReadString(ApplicationDetails, 'WND_SEARCH', APPCAPTION);
-    finally
-        AppSettings.Free;
-    end;
+    Settings:=TSettings.Create;
+    ViewSearchForm.Caption:=Settings.GetStringValue(ApplicationDetails, 'WND_SEARCH', APPCAPTION);
 
     PanelEditNumber.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
     PanelEditName.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);

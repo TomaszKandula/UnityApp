@@ -3199,7 +3199,7 @@ object ActionsForm: TActionsForm
           AlignWithMargins = True
           Left = 10
           Top = 5
-          Width = 134
+          Width = 306
           Height = 16
           Margins.Left = 10
           Margins.Top = 5
@@ -3215,6 +3215,7 @@ object ActionsForm: TActionsForm
           Font.Style = [fsUnderline]
           ParentColor = False
           ParentFont = False
+          ExplicitWidth = 134
         end
         object PanelHistoryGrid: TPanel
           AlignWithMargins = True
@@ -3318,7 +3319,7 @@ object ActionsForm: TActionsForm
           AlignWithMargins = True
           Left = 10
           Top = 5
-          Width = 91
+          Width = 284
           Height = 16
           Margins.Left = 10
           Margins.Top = 5
@@ -3334,6 +3335,7 @@ object ActionsForm: TActionsForm
           Font.Style = [fsUnderline]
           ParentColor = False
           ParentFont = False
+          ExplicitWidth = 91
         end
         object PanelDailyCom: TPanel
           AlignWithMargins = True
@@ -3399,7 +3401,7 @@ object ActionsForm: TActionsForm
           AlignWithMargins = True
           Left = 10
           Top = 5
-          Width = 108
+          Width = 285
           Height = 16
           Margins.Left = 10
           Margins.Top = 5
@@ -3415,6 +3417,7 @@ object ActionsForm: TActionsForm
           Font.Style = [fsUnderline]
           ParentColor = False
           ParentFont = False
+          ExplicitWidth = 108
         end
         object PanelGeneralCom: TPanel
           AlignWithMargins = True
@@ -3518,7 +3521,6 @@ object ActionsForm: TActionsForm
           OnMouseEnter = OpenItemsGridMouseEnter
           OnMouseWheelDown = OpenItemsGridMouseWheelDown
           OnMouseWheelUp = OpenItemsGridMouseWheelUp
-          OnSelectCell = OpenItemsGridSelectCell
           ColWidths = (
             10
             10

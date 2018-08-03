@@ -3,7 +3,7 @@ object ViewSearchForm: TViewSearchForm
   Top = 0
   BorderStyle = bsToolWindow
   Caption = 'Unity'
-  ClientHeight = 403
+  ClientHeight = 405
   ClientWidth = 683
   Color = 15527148
   Font.Charset = DEFAULT_CHARSET
@@ -22,7 +22,7 @@ object ViewSearchForm: TViewSearchForm
     Left = 10
     Top = 10
     Width = 663
-    Height = 338
+    Height = 336
     Margins.Left = 10
     Margins.Top = 10
     Margins.Right = 10
@@ -32,12 +32,13 @@ object ViewSearchForm: TViewSearchForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
+    ExplicitHeight = 338
     object SearchBox: TGroupBox
       AlignWithMargins = True
       Left = 10
       Top = 10
       Width = 643
-      Height = 318
+      Height = 316
       Margins.Left = 10
       Margins.Top = 10
       Margins.Right = 10
@@ -45,6 +46,7 @@ object ViewSearchForm: TViewSearchForm
       Align = alClient
       Caption = 'Search Address Book'
       TabOrder = 0
+      ExplicitHeight = 318
       object Text1: TLabel
         Left = 24
         Top = 59
@@ -535,9 +537,9 @@ object ViewSearchForm: TViewSearchForm
   object PanelBottom: TPanel
     AlignWithMargins = True
     Left = 0
-    Top = 358
+    Top = 356
     Width = 683
-    Height = 45
+    Height = 49
     Margins.Left = 0
     Margins.Top = 10
     Margins.Right = 0
@@ -547,12 +549,13 @@ object ViewSearchForm: TViewSearchForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 1
+    ExplicitTop = 376
     object btnSearch: TSpeedButton
       AlignWithMargins = True
       Left = 553
       Top = 12
       Width = 110
-      Height = 21
+      Height = 25
       Cursor = crHandPoint
       Margins.Left = 15
       Margins.Top = 12
@@ -592,14 +595,13 @@ object ViewSearchForm: TViewSearchForm
       OnClick = btnSearchClick
       ExplicitLeft = 443
       ExplicitTop = 13
-      ExplicitHeight = 25
     end
     object btnCancel: TSpeedButton
       AlignWithMargins = True
       Left = 428
       Top = 12
       Width = 110
-      Height = 21
+      Height = 25
       Cursor = crHandPoint
       Margins.Left = 0
       Margins.Top = 12
@@ -637,9 +639,7 @@ object ViewSearchForm: TViewSearchForm
         FFFFFFFFFFFFFFFFFFFFFFB4B4FF6362FFFFFFFFFFFFFFFFFFFF}
       Spacing = 10
       OnClick = btnCancelClick
-      ExplicitLeft = 327
-      ExplicitTop = 13
-      ExplicitHeight = 25
+      ExplicitHeight = 27
     end
   end
 end

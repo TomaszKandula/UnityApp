@@ -6,7 +6,7 @@ unit InterposerClasses;
 interface
 
 uses
-    Arrays, Grids, ExtCtrls, Messages, Controls, Graphics, Types, Dialogs, Forms, Winapi.Windows, Clipbrd, SysUtils, Math, Classes, ComObj, Variants;
+    Arrays, Grids, ExtCtrls, Messages, Controls, Graphics, Types, Dialogs, Forms, Winapi.Windows, Clipbrd, SysUtils, Math, Classes, ComObj, Variants, StdCtrls;
 
     /// <summary>
     ///     This unit contains all extensions of standard components introduced via interposer class.
@@ -20,6 +20,18 @@ type
     /// </remarks>
 
     TAbstractGrid = class(Grids.TStringGrid);
+
+    /// <summary>
+    ///     Interposer class of TEdit. Extension.
+    /// </summary>
+
+    TEdit = Class(StdCtrls.TEdit)
+    public
+        FAlignment: TAlignment;
+        procedure SetAlignment(value: TAlignment);
+        procedure CreateParams(var params: TCreateParams); override;
+        property  Alignment: TAlignment read FAlignment write SetAlignment;
+    end;
 
     /// <summary>
     ///     Interposer class of TShape component. Extension.
@@ -98,11 +110,38 @@ type
         procedure SelectAll;
     end;
 
+
 implementation
 
 
 uses
     Main, Settings, SQL;
+
+
+
+// ------------------------------------------------------------------------------------------------------------------------------ EXTENSION OF 'TEDIT' CLASS //
+
+
+procedure TEdit.CreateParams(var Params: TCreateParams);
+begin
+    inherited CreateParams(Params);
+
+    case Alignment of
+        taLeftJustify:  Params.Style:=Params.Style or ES_LEFT   and not ES_MULTILINE;
+        taRightJustify: Params.Style:=Params.Style or ES_RIGHT  and not ES_MULTILINE;
+        taCenter:       Params.Style:=Params.Style or ES_CENTER and not ES_MULTILINE;
+    end;
+
+end;
+
+procedure TEdit.SetAlignment(value: TAlignment);
+begin
+    if FAlignment <> value then
+    begin
+        FAlignment:=value;
+        RecreateWnd;
+    end;
+end;
 
 
 // ----------------------------------------------------------------------------------------------------------------------------- EXTENSION OF 'TSHAPE' CLASS //

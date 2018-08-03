@@ -11,12 +11,36 @@ uses
 type
 
     /// <summary>
-    ///     Interface exposing methods for encoding, decoding settings file and uploading it into memory. It also exposes
-    ///     getters and setters for follow-up colors.
+    ///     "ISetting" interface exposes properties and methods for reading/writing application settings file and licence file.
     /// </summary>
 
     ISettings = Interface(IInterface)
     ['{FF5CBEC3-2576-4E1C-954E-C892AB4A7CC1}']
+        // Methods
+        function  Encode(ConfigType: integer): boolean;
+        function  Decode(ConfigType: integer; ToMemory: boolean): boolean;
+        function  ConfigToMemory: boolean;
+        function  GetLicenceValue(Section: string; Key: string): string;
+        function  GetStringValue(Section: string; Key: string; Default: string): string;
+        procedure SetStringValue(Section: string; Key: string; Value: string);
+        function  GetIntegerValue(Section: string; Key: string; Default: integer): integer;
+        procedure SetIntegerValue(Section: string; Key: string; Value: integer);
+        procedure GetSectionValues(Section: string; var Values: TStringList);
+        function  GetLastError    : integer;
+        function  GetAppDir       : string;
+        function  GetLayoutDir    : string;
+        function  GetAppLog       : string;
+        function  GetWinUserName  : string;
+        function  GetWinTempFolder: string;
+        function  GetPathGridImage: string;
+        function  GetPathEventLog : string;
+        function  GetPathAppCfg   : string;
+        function  GetPathLicence  : string;
+        function  GetPathRelease  : string;
+        // Property's methods (invisible under interface)
+        function  GetReleaseDateTime: TDateTime;
+        procedure SetReleaseDateTime(NewDateTime: TDateTime);
+        function  GetRelFileDateTime: TDateTime;
         function  GetTodayFColor  : TColor;
         function  GetTodayBColor  : TColor;
         function  GetPastFColor   : TColor;
@@ -29,15 +53,15 @@ type
         procedure SetPastBColor  (NewColor: TColor);
         procedure SetFutureFColor(NewColor: TColor);
         procedure SetFutureBColor(NewColor: TColor);
-        function  Encode(ConfigType: integer): boolean;
-        function  Decode(ConfigType: integer; ToMemory: boolean): boolean;
-        function  ConfigToMemory: boolean;
-        property TodayFColor : TColor read GetTodayFColor  write SetTodayFColor;
-        property TodayBColor : TColor read GetTodayBColor  write SetTodayBColor;
-        property PastFColor  : TColor read GetPastFColor   write SetPastFColor;
-        property PastBColor  : TColor read GetPastBColor   write SetPastBColor;
-        property FutureFColor: TColor read GetFutureFColor write SetFutureFColor;
-        property FutureBColor: TColor read GetFutureBColor write SetFutureBColor;
+        // Properties
+        property FRelFileDateTime  : TDateTime read GetRelFileDateTime;
+        property FReleaseDateTime  : TDateTime read GetReleaseDateTime write SetReleaseDateTime;
+        property TodayFColor       : TColor    read GetTodayFColor     write SetTodayFColor;
+        property TodayBColor       : TColor    read GetTodayBColor     write SetTodayBColor;
+        property PastFColor        : TColor    read GetPastFColor      write SetPastFColor;
+        property PastBColor        : TColor    read GetPastBColor      write SetPastBColor;
+        property FutureFColor      : TColor    read GetFutureFColor    write SetFutureFColor;
+        property FutureBColor      : TColor    read GetFutureBColor    write SetFutureBColor;
     end;
 
     /// <summary>
@@ -47,7 +71,11 @@ type
 
     TSettings = class(TInterfacedObject, ISettings)
     {$TYPEINFO ON}
+    strict private
+        //
     private
+        // Variables
+        var pGetLastError  : integer;
         // Files
         var pAppDir        : string;
         var pLayoutDir     : string;
@@ -61,9 +89,9 @@ type
         var pPathGridImage : string;
         var pPathRelease   : string;
         // Time and date
-        function  pGetReleaseDateTime: TDateTime;
-        procedure pSetReleaseDateTime(NewDateTime: TDateTime);
-        function  pGetRelFileDateTime: TDateTime;
+        function  GetReleaseDateTime: TDateTime;
+        procedure SetReleaseDateTime(NewDateTime: TDateTime);
+        function  GetRelFileDateTime: TDateTime;
         // Getters and setters for "follow-up" colors saved in settings file
         function  GetTodayFColor  : TColor;
         function  GetTodayBColor  : TColor;
@@ -78,9 +106,10 @@ type
         procedure SetFutureFColor(NewColor: TColor);
         procedure SetFutureBColor(NewColor: TColor);
     public
-        var GetLastError           : integer;
-        var TMIG                   : TMemIniFile;
-        var TMIL                   : TMemIniFile;
+        // TMemoryIni holding encoded settings
+        var TMIG           : TMemIniFile;
+        var TMIL           : TMemIniFile;
+        // Properties
         property FAppDir           : string    read pAppDir;
         property FLayoutDir        : string    read pLayoutDir;
         property FAppLog           : string    read pAppLog;
@@ -91,20 +120,40 @@ type
         property FPathAppCfg       : string    read pPathAppCfg;
         property FPathLicence      : string    read pPathLicence;
         property FPathRelease      : string    read pPathRelease;
-        property FRelFileDateTime  : TDateTime read pGetRelFileDateTime;
-        property FReleaseDateTime  : TDateTime read pGetReleaseDateTime write pSetReleaseDateTime;
-        property TodayFColor       : TColor    read GetTodayFColor      write SetTodayFColor;
-        property TodayBColor       : TColor    read GetTodayBColor      write SetTodayBColor;
-        property PastFColor        : TColor    read GetPastFColor       write SetPastFColor;
-        property PastBColor        : TColor    read GetPastBColor       write SetPastBColor;
-        property FutureFColor      : TColor    read GetFutureFColor     write SetFutureFColor;
-        property FutureBColor      : TColor    read GetFutureBColor     write SetFutureBColor;
+        property FRelFileDateTime  : TDateTime read GetRelFileDateTime;
+        property FReleaseDateTime  : TDateTime read GetReleaseDateTime write SetReleaseDateTime;
+        property TodayFColor       : TColor    read GetTodayFColor     write SetTodayFColor;
+        property TodayBColor       : TColor    read GetTodayBColor     write SetTodayBColor;
+        property PastFColor        : TColor    read GetPastFColor      write SetPastFColor;
+        property PastBColor        : TColor    read GetPastBColor      write SetPastBColor;
+        property FutureFColor      : TColor    read GetFutureFColor    write SetFutureFColor;
+        property FutureBColor      : TColor    read GetFutureBColor    write SetFutureBColor;
+        // Constructors/destructors
         constructor Create;
         destructor  Destroy; override;
+        // Methods
         function    Encode(ConfigType: integer): boolean;
         function    Decode(ConfigType: integer; ToMemory: boolean): boolean;
         function    ConfigToMemory: boolean;
+        function    GetLicenceValue(Section: string; Key: string): string;
+        function    GetStringValue(Section: string; Key: string; Default: string): string;
+        procedure   SetStringValue(Section: string; Key: string; Value: string);
+        function    GetIntegerValue(Section: string; Key: string; Default: integer): integer;
+        procedure   SetIntegerValue(Section: string; Key: string; Value: integer);
+        procedure   GetSectionValues(Section: string; var Values: TStringList);
+        function    GetLastError    : integer;
+        function    GetAppDir       : string;
+        function    GetLayoutDir    : string;
+        function    GetAppLog       : string;
+        function    GetWinUserName  : string;
+        function    GetWinTempFolder: string;
+        function    GetPathGridImage: string;
+        function    GetPathEventLog : string;
+        function    GetPathAppCfg   : string;
+        function    GetPathLicence  : string;
+        function    GetPathRelease  : string;
     end;
+
 
 implementation
 
@@ -137,7 +186,6 @@ begin
     pPathEventLog  :=pAppDir + pAppLog;
     pPathGridImage :=pAppDir + GridImgFile;
 
-
     /// <remarks>
     ///    Return 404 error code if configuration file cannot be found.
     /// </remarks>
@@ -145,7 +193,7 @@ begin
     if FileExists(pPathAppCfg) then
         ConfigToMemory
             else
-                GetLastError:=404;
+                pGetLastError:=404;
 
 end;
 
@@ -178,7 +226,7 @@ begin
         pLayoutDir  :=TMIG.ReadString(VariousLayouts,     'PATH',        '');
         pPathRelease:=TMIG.ReadString(ApplicationDetails, 'UPDATE_PATH', '');
         pPathRelease:=pPathRelease + ReleaseFile;
-        GetLastError:=0;
+        pGetLastError:=0;
         Result:=True;
     end;
 
@@ -192,7 +240,7 @@ end;
 ///   Get file date and time for "Release.pak".
 /// </summary>
 
-function TSettings.pGetRelFileDateTime: TDateTime;
+function TSettings.GetRelFileDateTime: TDateTime;
 var
     PakDateTime: TDateTimeInfoRec;
 begin
@@ -217,7 +265,7 @@ end;
 ///    Get update time and date registered in setting file.
 /// </summary>
 
-function TSettings.pGetReleaseDateTime: TDateTime;
+function TSettings.GetReleaseDateTime: TDateTime;
 begin
     Result:=NULLDATE;
 
@@ -232,7 +280,7 @@ end;
 ///    Set new update time and date.
 /// </summary>
 
-procedure TSettings.pSetReleaseDateTime(NewDateTime: TDateTime);
+procedure TSettings.SetReleaseDateTime(NewDateTime: TDateTime);
 begin
     if Assigned(TMIG) then
     begin
@@ -323,7 +371,7 @@ begin
 
         except
             Result:=False;
-            GetLastError:=IOResult;
+            pGetLastError:=IOResult;
         end;
 
     finally;
@@ -416,7 +464,7 @@ begin
 
         except
             Result:=False;
-            GetLastError:=IOResult;
+            pGetLastError:=IOResult;
         end;
     finally
         rStream.Free;
@@ -424,6 +472,108 @@ begin
         hString.Free;
     end;
 
+end;
+
+
+// ----------------------------------------------------------------------------------------------------------- GETTERS AND SETTERS FOR REQUESTED SECTION/KEY //
+
+
+function TSettings.GetLicenceValue(Section: string; Key: string): string;
+begin
+    Result:='n/a';
+    if Assigned(TMIL) then
+        Result:=TMIL.ReadString(Section, Key, 'n/a');
+end;
+
+function TSettings.GetStringValue(Section: string; Key: string; Default: string): string;
+begin
+    Result:=Default;
+    if Assigned(TMIG) then
+        Result:=TMIG.ReadString(Section, Key, Default);
+end;
+
+procedure TSettings.SetStringValue(Section: string; Key: string; Value: string);
+begin
+    if Assigned(TMIG) then
+        TMIG.WriteString(Section, Key, Value);
+end;
+
+function TSettings.GetIntegerValue(Section: string; Key: string; Default: integer): integer;
+begin
+    Result:=Default;
+    if Assigned(TMIG) then
+        Result:=TMIG.ReadInteger(Section, Key, Default);
+end;
+
+procedure TSettings.SetIntegerValue(Section: string; Key: string; Value: integer);
+begin
+    if Assigned(TMIG) then
+        TMIG.WriteInteger(Section, Key, Value);
+end;
+
+procedure TSettings.GetSectionValues(Section: string; var Values: TStringList);
+begin
+    if Assigned(TMIG) then
+        TMIG.ReadSectionValues(Section, Values);
+end;
+
+
+// --------------------------------------------------------------------------------------------------------------------------------------- GET SETTINGS DATA //
+
+
+function TSettings.GetLastError: integer;
+begin
+    Result:=pGetLastError;
+end;
+
+function TSettings.GetAppDir: string;
+begin
+    Result:=FAppDir;
+end;
+
+function TSettings.GetLayoutDir: string;
+begin
+    Result:=FLayoutDir;
+end;
+
+function TSettings.GetAppLog: string;
+begin
+    Result:=FAppLog;
+end;
+
+function TSettings.GetWinUserName: string;
+begin
+    Result:=FWinUserName;
+end;
+
+function TSettings.GetWinTempFolder: string;
+begin
+    Result:=FWinTempFolder;
+end;
+
+function TSettings.GetPathGridImage: string;
+begin
+    Result:=FPathGridImage;
+end;
+
+function TSettings.GetPathEventLog: string;
+begin
+    Result:=FPathEventLog;
+end;
+
+function TSettings.GetPathAppCfg: string;
+begin
+    Result:=FPathAppCfg;
+end;
+
+function TSettings.GetPathLicence: string;
+begin
+    Result:=FPathLicence;
+end;
+
+function TSettings.GetPathRelease: string;
+begin
+    Result:=FPathRelease;
 end;
 
 
@@ -543,7 +693,6 @@ begin
     TMIG.WriteInteger(FollowUpColors, 'FUTURE_BCOLOR', NewColor);
     Encode(AppConfig);
 end;
-
 
 
 end.

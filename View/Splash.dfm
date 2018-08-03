@@ -3,7 +3,7 @@ object SplashForm: TSplashForm
   Top = 0
   BorderStyle = bsNone
   Caption = 'Unity'
-  ClientHeight = 425
+  ClientHeight = 428
   ClientWidth = 843
   Color = clWhite
   Font.Charset = DEFAULT_CHARSET
@@ -13,16 +13,16 @@ object SplashForm: TSplashForm
   Font.Style = []
   OldCreateOrder = False
   Position = poScreenCenter
-  OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
   object ShapeBackground: TShape
     Left = 0
     Top = 0
     Width = 843
-    Height = 425
+    Height = 428
     Align = alClient
-    Pen.Color = clGray
+    Pen.Color = clSkyBlue
+    Pen.Width = 2
     ExplicitLeft = 28
     ExplicitTop = 78
     ExplicitWidth = 449
@@ -70,9 +70,9 @@ object SplashForm: TSplashForm
     Transparent = True
   end
   object SubText: TLabel
-    Left = 492
+    Left = 494
     Top = 113
-    Width = 155
+    Width = 153
     Height = 16
     Cursor = crAppStart
     Caption = 'Desktop Edition 2018'
@@ -86,10 +86,10 @@ object SplashForm: TSplashForm
   end
   object ProgressBar: TGauge
     AlignWithMargins = True
-    Left = 196
-    Top = 227
-    Width = 447
-    Height = 27
+    Left = 197
+    Top = 228
+    Width = 445
+    Height = 25
     Cursor = crAppStart
     Margins.Left = 2
     Margins.Top = 2
@@ -111,7 +111,7 @@ object SplashForm: TSplashForm
   object TextFooter2B: TLabel
     AlignWithMargins = True
     Left = 160
-    Top = 391
+    Top = 383
     Width = 529
     Height = 13
     Cursor = crAppStart
@@ -132,7 +132,7 @@ object SplashForm: TSplashForm
   object TextFooterA: TLabel
     AlignWithMargins = True
     Left = 223
-    Top = 373
+    Top = 365
     Width = 393
     Height = 13
     Cursor = crAppStart
@@ -152,7 +152,7 @@ object SplashForm: TSplashForm
   end
   object TextProgress: TLabel
     Left = 412
-    Top = 233
+    Top = 234
     Width = 17
     Height = 13
     Alignment = taCenter

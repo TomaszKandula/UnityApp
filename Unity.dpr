@@ -71,7 +71,7 @@ var
     IsAeroEnabled:    boolean;
     Mutex:            integer;
     WndRect:          TRect;
-    AppSettings:      TSettings;
+    Settings:         ISettings;
     CheckInet:        TInternetConnectivity;
     MsAssemblies:     TStrings;
     FileDateTime:     TDateTime;
@@ -296,45 +296,40 @@ begin
 
     // --------------------------------------------------------------------------------------------------- READ CURRENT CONFIG.CFG BEFORE ANY UPDATE ATTEMPT //
 
-    AppSettings:=TSettings.Create;
+    Settings:=TSettings.Create;
 
-    try
-        // Initialize
-        FileDateTime   :=NULLDATE;
-        ReleaseDateTime:=NULLDATE;
-        PathRelease    :='';
-        PathEventLog   :='';
-        PathAppDir     :='';
-        WinUserName    :='';
+    // Initialize
+    FileDateTime   :=NULLDATE;
+    ReleaseDateTime:=NULLDATE;
+    PathRelease    :='';
+    PathEventLog   :='';
+    PathAppDir     :='';
+    WinUserName    :='';
 
-        // Extract default config.cfg if missing
-        if AppSettings.GetLastError = 404 then
+    // Extract default config.cfg if missing
+    if Settings.GetLastError = 404 then
+    begin
+        if Unpack(10, Settings.GetPathAppCfg, DeleteOld) then
+            Settings.ConfigToMemory
+        else
         begin
-            if Unpack(10, AppSettings.FPathAppCfg, DeleteOld) then
-                AppSettings.ConfigToMemory
-            else
-            begin
-                Application.MessageBox(
-                    PCHar('Cannot extract missing configuration file. ' + APPCAPTION + ' will be closed. Please contact IT support.'),
-                    PChar(APPCAPTION), MB_OK + MB_ICONERROR
-                );
-                AppSettings.Free;
-                ExitProcess(0);
-            end;
+            Application.MessageBox(
+                PCHar('Cannot extract missing configuration file. ' + APPCAPTION + ' will be closed. Please contact IT support.'),
+                PChar(APPCAPTION), MB_OK + MB_ICONERROR
+            );
+            ExitProcess(0);
         end;
+    end;
 
-        // Proceed otherwise
-        if AppSettings.GetLastError = 0 then
-        begin
-            FileDateTime   :=AppSettings.FRelFileDateTime;
-            ReleaseDateTime:=AppSettings.FReleaseDateTime;
-            PathRelease    :=AppSettings.FPathRelease;
-            PathEventLog   :=AppSettings.FPathEventLog;
-            PathAppDir     :=AppSettings.FAppDir;
-            WinUserName    :=AppSettings.FWinUserName;
-        end;
-    finally
-        AppSettings.Free;
+    // Proceed otherwise
+    if Settings.GetLastError = 0 then
+    begin
+        FileDateTime   :=Settings.GetRelFileDateTime;
+        ReleaseDateTime:=Settings.GetReleaseDateTime;
+        PathRelease    :=Settings.GetPathRelease;
+        PathEventLog   :=Settings.GetPathEventLog;
+        PathAppDir     :=Settings.GetAppDir;
+        WinUserName    :=Settings.GetWinUserName;
     end;
 
     // -------------------------------------------------------------------------------------------------------------------------------- CHECK EVENT LOG FILE //
@@ -439,228 +434,210 @@ begin
 
     // ------------------------------------------------------------------------------------------------------ RE-OPEN SETTINGS FILE AND PERFORM OTHER CHECKS //
 
-    AppSettings:=TSettings.Create;
-    try
 
-        // ----------------------------------------------------------------------------------------------------------------------- CHECK FOR MASTER PASSOWRD //
+    // --------------------------------------------------------------------------------------------------------------------------- CHECK FOR MASTER PASSOWRD //
 
-        if AppSettings.TMIG.ReadString(PasswordSection, 'HASH', '') = '' then
+    if Settings.GetStringValue(PasswordSection, 'HASH', '') = '' then
+    begin
+        Status(1, AllTasks, DelayStd, 'Checking master password... failed!', True, Settings.GetPathEventLog);
+        Application.MessageBox(
+            PCHar('No master password has been found. ' + APPCAPTION + ' will be closed. Please contact IT Support.'),
+            PChar(APPCAPTION), MB_OK + MB_ICONERROR
+        );
+        LogText(Settings.GetPathEventLog, '[Critical Error]: No master password has been found. Application has been terminated.');
+        ExitProcess(0);
+    end
+    else
+    begin
+        Status(1, AllTasks, DelayStd, 'Checking master password... OK.', True, Settings.GetPathEventLog);
+    end;
+
+    // ------------------------------------------------------------------------------------------------------------------------------ CHECK FOR LICENCE FILE //
+
+    if not FileExists(Settings.GetPathLicence) then
+    begin
+        Status(2, AllTasks, DelayStd, 'Checking licence file... failed!', True, Settings.GetPathEventLog);
+
+        /// <remarks>
+        ///     Check here ".LICX" file in case of Unity is shareware/limited commercial application.
+        /// </remarks>
+
+        Application.MessageBox(
+            PCHar('Cannot find licence file (' + LicenceFile + '). ' + APPCAPTION + ' will be closed. Please contact IT Support.'),
+            PChar(APPCAPTION), MB_OK + MB_ICONERROR
+        );
+        LogText(Settings.GetPathEventLog, '[Critical Error]: No licence file has been found. Application has been terminated.');
+        ExitProcess(0);
+    end
+    else
+    begin
+        Status(2, AllTasks, DelayStd, 'Checking licence file... OK.', True, Settings.GetPathEventLog);
+    end;
+
+    // ---------------------------------------------------------------------------------------------------------- WINDOWS VERSION CHECK - WINDOWS 7 & HIGHER //
+
+    if not StrToInt(GetOSVer(OSNumber)) >= 61 then
+    begin
+        Status(3, AllTasks, DelayStd, 'Checking operating system version... failed!', True, Settings.GetPathEventLog);
+        Application.MessageBox(
+            PCHar(APPCAPTION + ' must be run under Windows 7 or higher. ' + APPCAPTION + ' will be closed. Please contact IT Support.'),
+            PChar(APPCAPTION), MB_OK + MB_ICONERROR
+        );
+        LogText(Settings.GetPathEventLog, '[Critical Error]: Invalid Operating System. Application has been terminated.');
+        ExitProcess(0);
+    end
+    else
+    begin
+        Status(3, AllTasks, DelayStd, 'Checking operating system version... OK.', True, Settings.GetPathEventLog);
+    end;
+
+    // ------------------------------------------------------------------------------------------------------- AREO CHECK MUST BE TURNED ON | WINDOWS 7 ONLY //
+
+    if StrToInt(GetOSVer(OSNumber)) = 61 then
+    begin
+
+        // Initialize
+        Status(4, AllTasks, DelayStd, 'Checking Windows 7 Areo composition... ', True, Settings.GetPathEventLog);
+        IsAeroEnabled:=False;
+        ModuleHandle :=LoadLibrary(PChar(DWMI));
+
+        // Check
+        if ModuleHandle <> 0 then
         begin
-            Status(1, AllTasks, DelayStd, 'Checking master password... failed!', True, AppSettings.FPathEventLog);
+            try
+                @IsAreoOn:=GetProcAddress(ModuleHandle, 'DwmIsCompositionEnabled');
+                if Assigned(IsAreoOn) then
+                    if IsAreoOn(IsEnabled) = S_OK then
+                        IsAeroEnabled:=IsEnabled;
+            finally
+                FreeLibrary(ModuleHandle);
+            end;
+        end;
+
+        // Terminate if not switched on
+        if IsAeroEnabled = False then
+        begin
+            Status(4, AllTasks, DelayStd, 'Checking Windows 7 Areo composition... disabled!', True, Settings.GetPathEventLog);
             Application.MessageBox(
-                PCHar('No master password has been found. ' + APPCAPTION + ' will be closed. Please contact IT Support.'),
+                PChar('Aero is not enabled. ' + APPCAPTION + ' will be closed. Please contact IT Support.'),
                 PChar(APPCAPTION), MB_OK + MB_ICONERROR
             );
-            LogText(AppSettings.FPathEventLog, '[Critical Error]: No master password has been found. Application has been terminated.');
-            AppSettings.Free;
+            LogText(Settings.GetPathEventLog, '[Critical Error]: Areo composition is disabled. Application has been terminated.');
             ExitProcess(0);
-        end
-        else
-        begin
-            Status(1, AllTasks, DelayStd, 'Checking master password... OK.', True, AppSettings.FPathEventLog);
         end;
-
-        // -------------------------------------------------------------------------------------------------------------------------- CHECK FOR LICENCE FILE //
-
-        if not FileExists(AppSettings.FPathLicence) then
-        begin
-            Status(2, AllTasks, DelayStd, 'Checking licence file... failed!', True, AppSettings.FPathEventLog);
-
-            /// <remarks>
-            ///     Check here ".LICX" file in case of Unity is shareware/limited commercial application.
-            /// </remarks>
-
-            Application.MessageBox(
-                PCHar('Cannot find licence file (' + LicenceFile + '). ' + APPCAPTION + ' will be closed. Please contact IT Support.'),
-                    PChar(APPCAPTION), MB_OK + MB_ICONERROR
-            );
-            LogText(AppSettings.FPathEventLog, '[Critical Error]: No licence file has been found. Application has been terminated.');
-            AppSettings.Free;
-            ExitProcess(0);
-        end
-        else
-        begin
-            Status(2, AllTasks, DelayStd, 'Checking licence file... OK.', True, AppSettings.FPathEventLog);
-        end;
-
-        // ------------------------------------------------------------------------------------------------------ WINDOWS VERSION CHECK - WINDOWS 7 & HIGHER //
-
-        if not StrToInt(GetOSVer(OSNumber)) >= 61 then
-        begin
-            Status(3, AllTasks, DelayStd, 'Checking operating system version... failed!', True, AppSettings.FPathEventLog);
-            Application.MessageBox(
-                PCHar(APPCAPTION + ' must be run under Windows 7 or higher. ' + APPCAPTION + ' will be closed. Please contact IT Support.'),
-                    PChar(APPCAPTION), MB_OK + MB_ICONERROR
-            );
-            LogText(AppSettings.FPathEventLog, '[Critical Error]: Invalid Operating System. Application has been terminated.');
-            AppSettings.Free;
-            ExitProcess(0);
-        end
-        else
-        begin
-            Status(3, AllTasks, DelayStd, 'Checking operating system version... OK.', True, AppSettings.FPathEventLog);
-        end;
-
-        // --------------------------------------------------------------------------------------------------- AREO CHECK MUST BE TURNED ON | WINDOWS 7 ONLY //
-
-        if StrToInt(GetOSVer(OSNumber)) = 61 then
-        begin
-
-            // Initialize
-            Status(4, AllTasks, DelayStd, 'Checking Windows 7 Areo composition... ', True, AppSettings.FPathEventLog);
-            IsAeroEnabled:=False;
-            ModuleHandle :=LoadLibrary(PChar(DWMI));
-
-            // Check
-            if ModuleHandle <> 0 then
-            begin
-                try
-                    @IsAreoOn:=GetProcAddress(ModuleHandle, 'DwmIsCompositionEnabled');
-                    if Assigned(IsAreoOn) then
-                        if IsAreoOn(IsEnabled) = S_OK then
-                            IsAeroEnabled:=IsEnabled;
-                finally
-                    FreeLibrary(ModuleHandle);
-                end;
-            end;
-
-            // Terminate if not switched on
-            if IsAeroEnabled = False then
-            begin
-                Status(4, AllTasks, DelayStd, 'Checking Windows 7 Areo composition... disabled!', True, AppSettings.FPathEventLog);
-                Application.MessageBox(
-                    PChar('Aero is not enabled. ' + APPCAPTION + ' will be closed. Please contact IT Support.'),
-                    PChar(APPCAPTION), MB_OK + MB_ICONERROR
-                );
-                LogText(AppSettings.FPathEventLog, '[Critical Error]: Areo composition is disabled. Application has been terminated.');
-                AppSettings.Free;
-                ExitProcess(0);
-            end;
-        end
-        else
-        begin
-            Status(4, AllTasks, DelayStd, 'Checking Windows 7 Areo composition... OK.', True, AppSettings.FPathEventLog);
-        end;
-
-        // ------------------------------------------------------------------------------------------------------------------------ CHECK CONFIG.CFG | CRC32 //
-
-        Status(5, AllTasks, DelayStd, 'CRC32 check: ' + ConfigFile + '...', True, AppSettings.FPathEventLog);
-
-        if not (AppSettings.Decode(AppConfig, False)) then
-        begin
-            Status(5, AllTasks, DelayErr, 'CRC32 check: ' + ConfigFile + '... corrupted! Extracting default file...', True, AppSettings.FPathEventLog);
-            try
-                Unpack(10, AppSettings.FPathAppCfg, DeleteOld);
-            except
-                on E: Exception do
-                begin
-                    Application.MessageBox(
-                        PChar('Cannot extract config.cfg. ' + APPCAPTION + ' will be closed. Please contact IT Support.'),
-                        PChar(APPCAPTION), MB_OK + MB_ICONERROR
-                    );
-                    Status(5, AllTasks, DelayErr, 'CRC32 check: ' + ConfigFile + '..., unexpected error!', True, AppSettings.FPathEventLog);
-                    LogText(AppSettings.FPathEventLog, '[Critical Error]: Cannot extract "config.cfg" from resources. Error has been thrown: ' + E.Message);
-                    AppSettings.Free;
-                    ExitProcess(0);
-                end;
-            end;
-        end
-        else
-        begin
-            Status(5, AllTasks, DelayStd, 'CRC32 check: ' + ConfigFile + '...OK.', True, AppSettings.FPathEventLog);
-        end;
-
-        // ----------------------------------------------------------------------------------------------------- CHECK ASSEMBLIES AND LYNCCALL.EXE IF EXISTS //
-
-        SetLength(MsAssemblies, 6);
-        MsAssemblies[0]:=DLL1;
-        MsAssemblies[1]:=DLL2;
-        MsAssemblies[2]:=DLL3;
-        MsAssemblies[3]:=DLL4;
-        MsAssemblies[4]:=DLL5;
-        MsAssemblies[5]:=LyncCall;
-
-        for iCNT:=0 to High(MsAssemblies) - 1 do
-        begin
-            Status(iCNT + 6, AllTasks, DelayStd, 'Checking ' + MsAssemblies[iCNT] + '...', True, AppSettings.FPathEventLog);
-
-            if FileExists(AppSettings.FAppDir + MsAssemblies[iCNT]) then
-            begin
-                Status(iCNT + 6, AllTasks, DelayStd, 'Checking ' + MsAssemblies[iCNT] + '... OK.', True, AppSettings.FPathEventLog);
-            end
-            else
-            begin
-                Application.MessageBox(
-                    PCHar('Cannot find ' + MsAssemblies[iCNT] + '. Please reinstall application and/or contact IT support.'),
-                    PChar(APPCAPTION), MB_OK + MB_ICONERROR
-                );
-                AppSettings.Free;
-                ExitProcess(0);
-            end;
-        end;
-        LogText(AppSettings.FPathEventLog, 'End of checking resource and configuration files.');
-
-    finally
-        AppSettings.Free;
+    end
+    else
+    begin
+        Status(4, AllTasks, DelayStd, 'Checking Windows 7 Areo composition... OK.', True, Settings.GetPathEventLog);
     end;
+
+   // ----------------------------------------------------------------------------------------------------------------------------- CHECK CONFIG.CFG | CRC32 //
+
+   Status(5, AllTasks, DelayStd, 'CRC32 check: ' + ConfigFile + '...', True, Settings.GetPathEventLog);
+
+   if not (Settings.Decode(AppConfig, False)) then
+    begin
+        Status(5, AllTasks, DelayErr, 'CRC32 check: ' + ConfigFile + '... corrupted! Extracting default file...', True, Settings.GetPathEventLog);
+        try
+            Unpack(10, Settings.GetPathAppCfg, DeleteOld);
+        except
+            on E: Exception do
+            begin
+                Application.MessageBox(
+                    PChar('Cannot extract config.cfg. ' + APPCAPTION + ' will be closed. Please contact IT Support.'),
+                    PChar(APPCAPTION), MB_OK + MB_ICONERROR
+                );
+                Status(5, AllTasks, DelayErr, 'CRC32 check: ' + ConfigFile + '..., unexpected error!', True, Settings.GetPathEventLog);
+                LogText(Settings.GetPathEventLog, '[Critical Error]: Cannot extract "config.cfg" from resources. Error has been thrown: ' + E.Message);
+                ExitProcess(0);
+            end;
+        end;
+    end
+    else
+    begin
+        Status(5, AllTasks, DelayStd, 'CRC32 check: ' + ConfigFile + '...OK.', True, Settings.GetPathEventLog);
+    end;
+
+    // --------------------------------------------------------------------------------------------------------- CHECK ASSEMBLIES AND LYNCCALL.EXE IF EXISTS //
+
+    SetLength(MsAssemblies, 6);
+    MsAssemblies[0]:=DLL1;
+    MsAssemblies[1]:=DLL2;
+    MsAssemblies[2]:=DLL3;
+    MsAssemblies[3]:=DLL4;
+    MsAssemblies[4]:=DLL5;
+    MsAssemblies[5]:=LyncCall;
+
+    for iCNT:=0 to High(MsAssemblies) - 1 do
+    begin
+        Status(iCNT + 6, AllTasks, DelayStd, 'Checking ' + MsAssemblies[iCNT] + '...', True, Settings.GetPathEventLog);
+
+        if FileExists(Settings.GetAppDir + MsAssemblies[iCNT]) then
+        begin
+            Status(iCNT + 6, AllTasks, DelayStd, 'Checking ' + MsAssemblies[iCNT] + '... OK.', True, Settings.GetPathEventLog);
+        end
+        else
+        begin
+            Application.MessageBox(
+                PCHar('Cannot find ' + MsAssemblies[iCNT] + '. Please reinstall application and/or contact IT support.'),
+                PChar(APPCAPTION), MB_OK + MB_ICONERROR
+            );
+            ExitProcess(0);
+        end;
+    end;
+    LogText(Settings.GetPathEventLog, 'End of checking resource and configuration files.');
 
     // ------------------------------------------------------------------------------------------------------------------------------------------------- END //
 
     // ------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE //
 
-    AppSettings:=TSettings.Create;
-    try
-        Status(12, AllTasks, 50, 'Application initialization... ', False, AppSettings.FPathEventLog);
-        Application.Initialize;
-        Application.Title:=APPCAPTION;
-        Application.MainFormOnTaskbar:=False;
+    Status(12, AllTasks, 50, 'Application initialization... ', False, Settings.GetPathEventLog);
+    Application.Initialize;
+    Application.Title:=APPCAPTION;
+    Application.MainFormOnTaskbar:=False;
 
-        // -------------------------------------------------------------------------------------------------------------------------------- CREATE ALL FORMS //
+    // ------------------------------------------------------------------------------------------------------------------------------------ CREATE ALL FORMS //
 
-        /// <remarks>
-        ///      All forms must have parameter "visible" set to false.
-        /// </remarks>
+    /// <remarks>
+    ///      All forms must have parameter "visible" set to false.
+    /// </remarks>
 
-        // Main form (view) load
-        Application.CreateForm(TMainForm, MainForm);
-        LogText(AppSettings.FPathEventLog, '[GUI] Initialization methods executed within main thread, ''MainForm'' has been created. Main process thread ID = ' + IntToStr(MainThreadID) + '.');
+    // Main form (view) load
+    Application.CreateForm(TMainForm, MainForm);
+    LogText(Settings.GetPathEventLog, '[GUI] Initialization methods executed within main thread, ''MainForm'' has been created. Main process thread ID = ' + IntToStr(MainThreadID) + '.');
 
-        // Other forms (views)
-        Status(13, AllTasks, 400, 'Application initialization: VCL forms loading, please wait.', False, AppSettings.FPathEventLog);
-        Application.CreateForm(TAboutForm,       AboutForm);       LogText(AppSettings.FPathEventLog, '[GUI] ''AboutForm'' ......... has been created.');
-        Application.CreateForm(TSendForm,        SendForm);        LogText(AppSettings.FPathEventLog, '[GUI] ''SendForm'' .......... has been created.');
-        Application.CreateForm(TEventForm,       EventForm);       LogText(AppSettings.FPathEventLog, '[GUI] ''EventForm'' ......... has been created.');
-        Application.CreateForm(TColorsForm,      ColorsForm);      LogText(AppSettings.FPathEventLog, '[GUI] ''ColorsForm'' ........ has been created.');
-        Application.CreateForm(TReportForm,      ReportForm);      LogText(AppSettings.FPathEventLog, '[GUI] ''ReportForm'' ........ has been created.');
-        Application.CreateForm(TFilterForm,      FilterForm);      LogText(AppSettings.FPathEventLog, '[GUI] ''FilterForm'' ........ has been created.');
-        Application.CreateForm(TSearchForm,      SearchForm);      LogText(AppSettings.FPathEventLog, '[GUI] ''SearchForm'' ........ has been created.');
-        Application.CreateForm(TTrackerForm,     TrackerForm);     LogText(AppSettings.FPathEventLog, '[GUI] ''TrackerForm'' ....... has been created.');
-        Application.CreateForm(TActionsForm,     ActionsForm);     LogText(AppSettings.FPathEventLog, '[GUI] ''ActionsForm'' ....... has been created.');
-        Application.CreateForm(TCalendarForm,    CalendarForm);    LogText(AppSettings.FPathEventLog, '[GUI] ''CalendarForm'' ...... has been created.');
-        Application.CreateForm(TInvoicesForm,    InvoicesForm);    LogText(AppSettings.FPathEventLog, '[GUI] ''InvoicesForm'' ...... has been created.');
-        Application.CreateForm(TPhoneListForm,   PhoneListForm);   LogText(AppSettings.FPathEventLog, '[GUI] ''PhoneListForm'' ..... has been created.');
-        Application.CreateForm(TViewSearchForm,  ViewSearchForm);  LogText(AppSettings.FPathEventLog, '[GUI] ''ViewSearchForm'' .... has been created.');
-        Application.CreateForm(TViewMailerForm,  ViewMailerForm);  LogText(AppSettings.FPathEventLog, '[GUI] ''ViewMailerForm'' .... has been created.');
+    // Other forms (views)
+    Status(13, AllTasks, 400, 'Application initialization: VCL forms loading, please wait.', False, Settings.GetPathEventLog);
+    Application.CreateForm(TAboutForm,       AboutForm);       LogText(Settings.GetPathEventLog, '[GUI] ''AboutForm'' ......... has been created.');
+    Application.CreateForm(TSendForm,        SendForm);        LogText(Settings.GetPathEventLog, '[GUI] ''SendForm'' .......... has been created.');
+    Application.CreateForm(TEventForm,       EventForm);       LogText(Settings.GetPathEventLog, '[GUI] ''EventForm'' ......... has been created.');
+    Application.CreateForm(TColorsForm,      ColorsForm);      LogText(Settings.GetPathEventLog, '[GUI] ''ColorsForm'' ........ has been created.');
+    Application.CreateForm(TReportForm,      ReportForm);      LogText(Settings.GetPathEventLog, '[GUI] ''ReportForm'' ........ has been created.');
+    Application.CreateForm(TFilterForm,      FilterForm);      LogText(Settings.GetPathEventLog, '[GUI] ''FilterForm'' ........ has been created.');
+    Application.CreateForm(TSearchForm,      SearchForm);      LogText(Settings.GetPathEventLog, '[GUI] ''SearchForm'' ........ has been created.');
+    Application.CreateForm(TTrackerForm,     TrackerForm);     LogText(Settings.GetPathEventLog, '[GUI] ''TrackerForm'' ....... has been created.');
+    Application.CreateForm(TActionsForm,     ActionsForm);     LogText(Settings.GetPathEventLog, '[GUI] ''ActionsForm'' ....... has been created.');
+    Application.CreateForm(TCalendarForm,    CalendarForm);    LogText(Settings.GetPathEventLog, '[GUI] ''CalendarForm'' ...... has been created.');
+    Application.CreateForm(TInvoicesForm,    InvoicesForm);    LogText(Settings.GetPathEventLog, '[GUI] ''InvoicesForm'' ...... has been created.');
+    Application.CreateForm(TPhoneListForm,   PhoneListForm);   LogText(Settings.GetPathEventLog, '[GUI] ''PhoneListForm'' ..... has been created.');
+    Application.CreateForm(TViewSearchForm,  ViewSearchForm);  LogText(Settings.GetPathEventLog, '[GUI] ''ViewSearchForm'' .... has been created.');
+    Application.CreateForm(TViewMailerForm,  ViewMailerForm);  LogText(Settings.GetPathEventLog, '[GUI] ''ViewMailerForm'' .... has been created.');
 
-        // Splash screen - 100%
-        Status(14, AllTasks, 900, 'Application is initialized.', False, AppSettings.FPathEventLog);
+    // Splash screen - 100%
+    Status(14, AllTasks, 900, 'Application is initialized.', False, Settings.GetPathEventLog);
 
-        // ------------------------------------------------------------------------------------------------------------------------------- SPLASH SCREEN END //
+    // ----------------------------------------------------------------------------------------------------------------------------------- SPLASH SCREEN END //
 
-        AnimateWindow(SplashForm.Handle, 500, AW_BLEND or AW_HIDE);
-        Sleep(150);
-        SplashForm.Free;
+    AnimateWindow(SplashForm.Handle, 500, AW_BLEND or AW_HIDE);
+    Sleep(150);
+    SplashForm.Free;
 
-        // --------------------------------------------------------------------------------------------------------------- SETUP SAVED WINDOW STATE AND SHOW //
+    // ------------------------------------------------------------------------------------------------------------------- SETUP SAVED WINDOW STATE AND SHOW //
 
-        if AppSettings.TMIG.ReadString(ApplicationDetails,  'WINDOW_STATE', '') = 'wsNormal'    then MainForm.WindowState:=wsNormal;
-        if AppSettings.TMIG.ReadString(ApplicationDetails,  'WINDOW_STATE', '') = 'wsMaximized' then MainForm.WindowState:=wsMaximized;
-        if AppSettings.TMIG.ReadString(ApplicationDetails,  'WINDOW_STATE', '') = 'wsMinimized' then MainForm.WindowState:=wsMinimized;
-        LogText(AppSettings.FPathEventLog, 'Initialization is completed. Application is running.');
-
-    finally
-        AppSettings.Free;
-    end;
+    if Settings.GetStringValue(ApplicationDetails,  'WINDOW_STATE', '') = 'wsNormal'    then MainForm.WindowState:=wsNormal;
+    if Settings.GetStringValue(ApplicationDetails,  'WINDOW_STATE', '') = 'wsMaximized' then MainForm.WindowState:=wsMaximized;
+    if Settings.GetStringValue(ApplicationDetails,  'WINDOW_STATE', '') = 'wsMinimized' then MainForm.WindowState:=wsMinimized;
+    LogText(Settings.GetPathEventLog, 'Initialization is completed. Application is running.');
 
     // ------------------------------------------------------------------------------------------------------------------------------------------------- RUN //
 

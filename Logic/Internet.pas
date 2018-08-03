@@ -19,13 +19,14 @@ type
     /// </summary>
 
     TInternetConnectivity = class
-        {$TYPEINFO ON}
-        private
-            var ErrorMessage: string;
-            function CallNCSIServer(Server: string; FileName: string; Mode: string; var HttpResponse: string): integer;
-        public
-            function IsInternetPresent: boolean;
+    {$TYPEINFO ON}
+    private
+        var ErrorMessage: string;
+        function CallNCSIServer(Server: string; FileName: string; Mode: string; var HttpResponse: string): integer;
+    public
+        function IsInternetPresent: boolean;
     end;
+
 
 implementation
 
@@ -139,5 +140,6 @@ begin
             else
                 Result:=False;
 end;
+
 
 end.

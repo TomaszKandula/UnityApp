@@ -31,7 +31,7 @@ object ColorsForm: TColorsForm
     Margins.Right = 5
     Margins.Bottom = 5
     Align = alClient
-    Pen.Color = clMedGray
+    Pen.Color = clSkyBlue
     ExplicitTop = -106
     ExplicitWidth = 528
     ExplicitHeight = 459
@@ -42,6 +42,9 @@ object ColorsForm: TColorsForm
     Width = 281
     Height = 97
     Caption = 'Today Follow-Up'
+    Color = clWhite
+    ParentBackground = False
+    ParentColor = False
     TabOrder = 0
     object ColorBox1: TShape
       Left = 136
@@ -188,6 +191,9 @@ object ColorsForm: TColorsForm
     Width = 281
     Height = 97
     Caption = 'Past Follow-Up'
+    Color = clWhite
+    ParentBackground = False
+    ParentColor = False
     TabOrder = 1
     object ColorBox2: TShape
       Left = 136
@@ -334,6 +340,9 @@ object ColorsForm: TColorsForm
     Width = 281
     Height = 97
     Caption = 'Future Follow-Up'
+    Color = clWhite
+    ParentBackground = False
+    ParentColor = False
     TabOrder = 2
     object ColorBox3: TShape
       Left = 136

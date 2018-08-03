@@ -1,96 +1,107 @@
-{ ----------------------------------------------------------------------------------------------------------------------------------------------------------- }
-{                                                                                                                                                             }
-{ Name:             Unity for Debt Management                                                                                                                 }
-{ Version:          0.1                                                                                                                                       }
-{ (C)(R):           Tomasz Kandula                                                                                                                            }
-{ Originate:        10-07-2016 (Concept & GUI)                                                                                                                }
-{ IDE:              RAD Studio with Delphi XE2 (migrated to Delphi Tokyo)                                                                                     }
-{ Target:           Microsoft Windows 7 or newer                                                                                                              }
-{ Dependencies:     Synopse Zip and own libraries                                                                                                             }
-{ NET Framework:    Required 4.6 or newer (Lync / Skype calls)                                                                                                }
-{ LYNC version:     2013 or newer                                                                                                                             }
-{                                                                                                                                                             }
-{ ----------------------------------------------------------------------------------------------------------------------------------------------------------- }
+
+{$I .\Include\Header.inc}
+
 unit Calendar;
 
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, ComCtrls, ExtCtrls, StdCtrls, DateUtils, InterposerClasses;
+    Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, ComCtrls, ExtCtrls, StdCtrls, DateUtils, InterposerClasses;
 
-{ --------------------------------------------------------------- ! MAIN CLASS ! ---------------------------------------------------------------------------- }
 type
-  TCalendarForm = class(TForm)
-    MyCalendar: TMonthCalendar;
-    PanelActions: TPanel;
-    DaysOne: TRadioButton;
-    DaysThreen: TRadioButton;
-    DaysSeven: TRadioButton;
-    PanelCalendar: TPanel;
-    Text: TLabel;
-    PanelClient: TPanel;
-    procedure MyCalendarDblClick(Sender: TObject);
-    procedure FormCreate(Sender: TObject);
-    procedure DaysOneClick(Sender: TObject);
-    procedure DaysThreenClick(Sender: TObject);
-    procedure DaysSevenClick(Sender: TObject);
-    procedure FormShow(Sender: TObject);
-    procedure MyCalendarClick(Sender: TObject);
-    procedure FormKeyPress(Sender: TObject; var Key: Char);
-  public
-    var CalendarMode: integer;
-    var SelectedDate: TDateTime;
-    function  MakeMyDay(Increment: integer): TDate;
-    function  IsWeekend(const DT: TDateTime): Boolean;
-    function  GetCurrentWorkingDay(WhatDay: integer): boolean;
-    procedure SetFollowUp(SelectedDate: TDate; SelectedCUID: string; Row: integer);
-  end;
+
+    /// <summary>
+    ///     View form class with helpers for calendar functionality, so the user will not have to put follow-up date
+    ///     manually on age view string grid.
+    /// </summary>
+
+    TCalendarForm = class(TForm)
+        MyCalendar: TMonthCalendar;
+        PanelActions: TPanel;
+        DaysOne: TRadioButton;
+        DaysThreen: TRadioButton;
+        DaysSeven: TRadioButton;
+        PanelCalendar: TPanel;
+        Text: TLabel;
+        PanelClient: TPanel;
+        procedure MyCalendarDblClick(Sender: TObject);
+        procedure FormCreate(Sender: TObject);
+        procedure DaysOneClick(Sender: TObject);
+        procedure DaysThreenClick(Sender: TObject);
+        procedure DaysSevenClick(Sender: TObject);
+        procedure FormShow(Sender: TObject);
+        procedure MyCalendarClick(Sender: TObject);
+        procedure FormKeyPress(Sender: TObject; var Key: Char);
+    public
+        var CalendarMode: integer;
+        var SelectedDate: TDateTime;
+        function  MakeMyDay(Increment: integer): TDate;
+        function  IsWeekend(const DT: TDateTime): Boolean;
+        function  GetCurrentWorkingDay(WhatDay: integer): boolean;
+        procedure SetFollowUp(SelectedDate: TDate; SelectedCUID: string; Row: integer);
+    end;
 
 var
-  CalendarForm: TCalendarForm;
+    CalendarForm: TCalendarForm;
 
-{ ------------------------------------------------------------- ! IMPLEMENTATION ZONE ! --------------------------------------------------------------------- }
 
 implementation
 
+
 uses
-  Main, Model, Settings, Worker;
+    Main, Model, Settings, Worker;
 
 {$R *.dfm}
 
-{ ############################################################# ! MAIN FORM METHODS ! ####################################################################### }
 
-{ ------------------------------------------------------------------------------------------------------------------------- RETURN WORKING DAY IN GIVEN MONTH }
+// ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
+
+
+/// <summary>
+///     Return working day in given month.
+/// </summary>
+
 function TCalendarForm.GetCurrentWorkingDay(WhatDay: Integer): boolean;
 var
-  Anchor: TDate;
-  iCNT:   integer;
+    Anchor: TDate;
+    iCNT:   integer;
 begin
-  { FIND WD FOR CURRENT MONTH }
-  Anchor:=EndOfAMonth(YearOf(Now), MonthOf(Now) - 1);
-  for iCNT:=1 to WhatDay do
-  begin
-    { IF WE HAVE WEEKEND, THEN MOVE TO NEXT WD }
-    if IsWeekend(Anchor) then
-      while IsWeekend(Anchor) do
+
+    // Find working day for current month
+    Anchor:=EndOfAMonth(YearOf(Now), MonthOf(Now) - 1);
+
+    for iCNT:=1 to WhatDay do
+    begin
+        // If we have weekend, then move to next working day
+        if IsWeekend(Anchor) then
+            while IsWeekend(Anchor) do
+                Anchor:=Anchor + 1;
+
+        // Increase by one working day
         Anchor:=Anchor + 1;
-    { INCREASE BY ONE WD }
-    Anchor:=Anchor + 1;
-  end;
-  { COMPARE }
-  if Now = Anchor then
-    Result:=True
-      else
-        Result:=False;
+    end;
+
+    // Compare
+    if Now = Anchor then
+        Result:=True
+            else
+                Result:=False;
+
 end;
 
-{ --------------------------------------------------------------------------------------------------------------------------------- CHECK IF TODAY IS WEEKEND }
+/// <summary>
+///     Check if today is weekend.
+/// </summary>
+
 function TCalendarForm.IsWeekend(const DT: TDateTime): Boolean;
 begin
-  Result:=SysUtils.DayOfWeek(DT) in [1, 7];
+    Result:=SysUtils.DayOfWeek(DT) in [1, 7];
 end;
 
-{ --------------------------------------------------------------------------------------------------------------------------- MOVE TO NEXT DATE, SKIP WEEKEND }
+/// <summary>
+///     Move to next date, skip weekend.
+/// </summary>
+
 function TCalendarForm.MakeMyDay(Increment: integer): TDate;
 begin
   Result:=Now + Increment;
@@ -99,61 +110,10 @@ begin
       Result:=Result + 1;
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------------------- ON CREATE }
-procedure TCalendarForm.FormCreate(Sender: TObject);
-var
-  AppSettings:  TSettings;
-begin
-  { ------------------------------------------------------------------------------------------------------------------------------------------ WINDOW CAPTION }
-  AppSettings:=TSettings.Create;
-  try
-    CalendarForm.Caption:=AppSettings.TMIG.ReadString(ApplicationDetails, 'WND_CALENDAR', APPCAPTION);
-  finally
-    AppSettings.Free;
-  end;
-  { DEFAULT DATE }
-  SelectedDate:=NULLDATE;
-  { PANELS BORDERS }
-  PanelActions.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-  PanelCalendar.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-end;
+/// <summary>
+///     Set follow-up date and register it in general comment and update age view string grid.
+/// </summary>
 
-{ ------------------------------------------------------------------------------------------------------------------------------------------ RESET CHECKBOXES }
-procedure TCalendarForm.FormShow(Sender: TObject);
-begin
-  MyCalendar.Date   :=Now;
-  DaysOne.Checked   :=False;
-  DaysThreen.Checked:=False;
-  DaysSeven.Checked :=False;
-end;
-
-{ ----------------------------------------------------------------------------------------------------------------------------------------------- RESET BOXES }
-procedure TCalendarForm.MyCalendarClick(Sender: TObject);
-begin
-  DaysOne.Checked   :=False;
-  DaysThreen.Checked:=False;
-  DaysSeven.Checked :=False;
-end;
-
-{ ---------------------------------------------------------------------------------------------------------------------------------------------- SET NEXT DAY }
-procedure TCalendarForm.DaysOneClick(Sender: TObject);
-begin
-  MyCalendar.Date:=MakeMyDay(1);
-end;
-
-{ --------------------------------------------------------------------------------------------------------------------------------------- SET NEXT THREE DAYS }
-procedure TCalendarForm.DaysThreenClick(Sender: TObject);
-begin
-  MyCalendar.Date:=MakeMyDay(3);
-end;
-
-{ -------------------------------------------------------------------------------------------------------------------------------------- SET NEXT SEVENT DAYS }
-procedure TCalendarForm.DaysSevenClick(Sender: TObject);
-begin
-  MyCalendar.Date:=MakeMyDay(7);
-end;
-
-{ --------------------------------------------------------------------------------------------------------------------------------------- SET GIVEN FOLLOW UP }
 procedure TCalendarForm.SetFollowUp(SelectedDate: TDate; SelectedCUID: string; Row: integer);
 begin
   TTGeneralComment.Create(
@@ -167,32 +127,110 @@ begin
   MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1), Row]:=DateToStr(SelectedDate);
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------- APPROVE SELECTED DATE }
-procedure TCalendarForm.MyCalendarDblClick(Sender: TObject);
+
+// ------------------------------------------------------------------------------------------------------------------------------------------------- STARTUP //
+
+
+procedure TCalendarForm.FormCreate(Sender: TObject);
+var
+    Settings:  ISettings;
 begin
-  { PUT SELECTED DATE INTO DATABASE }
-  if CalendarMode = cfDateToDB then
-  begin
-    SetFollowUp(
-                 CalendarForm.MyCalendar.Date,
-                 MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUID, 1, 1),
-                 MainForm.sgAgeView.Row],
-                 MainForm.sgAgeView.Row
-               );
-    Close;
-  end;
-  { JUST RETURN SELECTED DATE }
-  if CalendarMode = cfGetDate then
-  begin
-    SelectedDate:=CalendarForm.MyCalendar.Date;
-    Close;
-  end;
+
+    Settings:=TSettings.Create;
+    CalendarForm.Caption:=Settings.GetStringValue(ApplicationDetails, 'WND_CALENDAR', APPCAPTION);
+
+    SelectedDate:=NULLDATE;
+
+    PanelActions.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+    PanelCalendar.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+
 end;
 
-{ -------------------------------------------------------------------------------------------------------------------------------------------- CLOSE ON <ESC> }
+procedure TCalendarForm.FormShow(Sender: TObject);
+begin
+    MyCalendar.Date   :=Now;
+    DaysOne.Checked   :=False;
+    DaysThreen.Checked:=False;
+    DaysSeven.Checked :=False;
+end;
+
+
+// ------------------------------------------------------------------------------------------------------------------------------------------- BUTTON EVENTS //
+
+/// <summary>
+///     Reset all check boxes.
+/// </summary>
+
+procedure TCalendarForm.MyCalendarClick(Sender: TObject);
+begin
+    DaysOne.Checked   :=False;
+    DaysThreen.Checked:=False;
+    DaysSeven.Checked :=False;
+end;
+
+/// <summary>
+///     Set next day.
+/// </summary>
+
+procedure TCalendarForm.DaysOneClick(Sender: TObject);
+begin
+    MyCalendar.Date:=MakeMyDay(1);
+end;
+
+/// <summary>
+///     Set next three days.
+/// </summary>
+
+procedure TCalendarForm.DaysThreenClick(Sender: TObject);
+begin
+    MyCalendar.Date:=MakeMyDay(3);
+end;
+
+/// <summary>
+///     Set next sevenm days.
+/// </summary>
+
+procedure TCalendarForm.DaysSevenClick(Sender: TObject);
+begin
+    MyCalendar.Date:=MakeMyDay(7);
+end;
+
+/// <summary>
+///     Confirm selected date.
+/// </summary>
+
+procedure TCalendarForm.MyCalendarDblClick(Sender: TObject);
+begin
+
+    // Put selected date into database
+    if CalendarMode = cfDateToDB then
+    begin
+        SetFollowUp(
+            CalendarForm.MyCalendar.Date,
+            MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUID, 1, 1),
+            MainForm.sgAgeView.Row],
+            MainForm.sgAgeView.Row
+        );
+        Close;
+    end;
+
+    // Just return selected date
+    if CalendarMode = cfGetDate then
+    begin
+        SelectedDate:=CalendarForm.MyCalendar.Date;
+        Close;
+    end;
+
+end;
+
+
+// ----------------------------------------------------------------------------------------------------------------------------------------- KEYBOARD EVENTS //
+
+
 procedure TCalendarForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-  if Key = ESC then Close;
+    if Key = ESC then Close;
 end;
+
 
 end.

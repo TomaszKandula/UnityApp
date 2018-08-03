@@ -1,106 +1,104 @@
-{ ----------------------------------------------------------------------------------------------------------------------------------------------------------- }
-{                                                                                                                                                             }
-{ Name:             Unity for Debt Management                                                                                                                 }
-{ Version:          0.1                                                                                                                                       }
-{ (C)(R):           Tomasz Kandula                                                                                                                            }
-{ Originate:        10-07-2016 (Concept & GUI)                                                                                                                }
-{ IDE:              RAD Studio with Delphi XE2 (migrated to Delphi Tokyo)                                                                                     }
-{ Target:           Microsoft Windows 7 or newer                                                                                                              }
-{ Dependencies:     Synopse Zip and own libraries                                                                                                             }
-{ NET Framework:    Required 4.6 or newer (Lync / Skype calls)                                                                                                }
-{ LYNC version:     2013 or newer                                                                                                                             }
-{                                                                                                                                                             }
-{ ----------------------------------------------------------------------------------------------------------------------------------------------------------- }
+
+{$I .\Include\Header.inc}
+
 unit EventLog;
 
 interface
 
 uses
-  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, ExtCtrls, StdCtrls, ComCtrls, pngimage, InterposerCLasses;
+    Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, ExtCtrls, StdCtrls, ComCtrls, pngimage, InterposerCLasses;
 
-{ ---------------------------------------------------------------- ! MAIN CLASS ! --------------------------------------------------------------------------- }
+
 type
-  TEventForm = class(TForm)
-    EventMemo: TMemo;
-    PanelEventMemo: TPanel;
-    PanelClient: TPanel;
-    PanelBottom: TPanel;
-    ImageGrip: TImage;
-    procedure FormCreate(Sender: TObject);
-    procedure FormShow(Sender: TObject);
-    procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure FormKeyPress(Sender: TObject; var Key: Char);
-  private
-    procedure LoadEventLog;
-  end;
+
+    /// <summary>
+    ///     View form class with helpers for displaying event log content in separate window.
+    /// </summary>
+
+    TEventForm = class(TForm)
+        EventMemo: TMemo;
+        PanelEventMemo: TPanel;
+        PanelClient: TPanel;
+        PanelBottom: TPanel;
+        ImageGrip: TImage;
+        procedure FormCreate(Sender: TObject);
+        procedure FormShow(Sender: TObject);
+        procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure FormKeyPress(Sender: TObject; var Key: Char);
+    private
+        procedure LoadEventLog;
+    end;
 
 var
-  EventForm: TEventForm;
+    EventForm: TEventForm;
 
-{ ------------------------------------------------------------ ! IMPLEMENTATION ZONE ! ---------------------------------------------------------------------- }
 
 implementation
 
 uses
-  Main, Settings;
+    Main, Settings;
 
 {$R *.dfm}
 
-{ ############################################################# ! MAIN FORM METHODS ! ####################################################################### }
 
-{ --------------------------------------------------------------------------------------------------------------------------------------- LOAD EVENT LOG FILE }
+// ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
+
+
+/// <summary>
+///     Load event log from file, fixed path is provided by application settings class.
+/// </summary>
+
 procedure TEventForm.LoadEventLog;
 var
-  AppSettings: TSettings;
+    Settings: ISettings;
 begin
-  AppSettings:=TSettings.Create;
-  try
+
+    Settings:=TSettings.Create;
+
     try
-      EventMemo.Lines.LoadFromFile(AppSettings.FPathEventLog);
+        EventMemo.Lines.LoadFromFile(Settings.GetPathEventLog);
     except
-      on E: Exception do
-        EventMemo.Lines.Text:='Cannot load event log file. Error has been thorwn: ' + E.Message;
+        on E: Exception do
+            EventMemo.Lines.Text:='Cannot load event log file. Error has been thorwn: ' + E.Message;
     end;
-  finally
-    AppSettings.Free;
-  end;
+
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------------------- ON CREATE }
+
+// ------------------------------------------------------------------------------------------------------------------------------------------------- STARTUP //
+
+
 procedure TEventForm.FormCreate(Sender: TObject);
 var
-  AppSettings: TSettings;
+    Settings: ISettings;
 begin
-  AppSettings:=TSettings.Create;
-  try
-    EventForm.Caption:=AppSettings.TMIG.ReadString(ApplicationDetails, 'WND_EVENTLOG', APPCAPTION);
-  finally
-    AppSettings.Free;
-  end;
-  { PANEL BORDERS }
-  PanelEventMemo.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+    Settings:=TSettings.Create;
+    EventForm.Caption:=Settings.GetStringValue(ApplicationDetails, 'WND_EVENTLOG', APPCAPTION);
+    PanelEventMemo.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
 end;
 
-{ --------------------------------------------------------------------------------------------------------------------------------------------------- ON SHOW }
 procedure TEventForm.FormShow(Sender: TObject);
 begin
-  LoadEventLog;
+    LoadEventLog;
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------ REFRESH EVENT LOG [F5] }
+
+// ----------------------------------------------------------------------------------------------------------------------------------------- KEYBOARD EVENTS //
+
+
 procedure TEventForm.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if Key = VK_F5 then
-  begin
-    LoadEventLog;
-    SendMessage(EventMemo.Handle, EM_SCROLLCARET, 0, 0);
-  end;
+    if Key = VK_F5 then
+    begin
+        LoadEventLog;
+        SendMessage(EventMemo.Handle, EM_SCROLLCARET, 0, 0);
+    end;
 end;
 
-{ -------------------------------------------------------------------------------------------------------------------------------------------- CLOSE ON <ESC> }
 procedure TEventForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-  if Key = ESC then Close;
+    if Key = ESC then Close;
 end;
+
 
 end.
