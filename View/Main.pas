@@ -340,14 +340,6 @@ type
         Action_ExportCSV: TMenuItem;
         Action_RemoveFilters: TMenuItem;
         Action_Free1: TMenuItem;
-        NavigationBar: TPanel;
-        btnReport1: TSpeedButton;
-        btnReport2: TSpeedButton;
-        btnReport3: TSpeedButton;
-        btnReport4: TSpeedButton;
-        WebBrowser2: TWebBrowser;
-        TextReport: TLabel;
-        SeparateLine: TBevel;
         btnStart: TSpeedButton;
         Separate1: TBevel;
         btnSettings: TSpeedButton;
@@ -410,6 +402,22 @@ type
         Action_QuickReporting: TMenuItem;
         SortListBox: TComboBox;
         btnSortApply: TSpeedButton;
+    ReportFrame: TPanel;
+    Label1: TLabel;
+    Panel1: TPanel;
+    Label5: TLabel;
+    Panel2: TPanel;
+    Label6: TLabel;
+    Label7: TLabel;
+    Label8: TLabel;
+    Label9: TLabel;
+    btnOverdue: TSpeedButton;
+    btnCreditLimits: TSpeedButton;
+    btnDebtors: TSpeedButton;
+    btnControlStatus: TSpeedButton;
+    Label10: TLabel;
+    Label11: TLabel;
+    Label12: TLabel;
         procedure FormCreate(Sender: TObject);
         procedure FormResize(Sender: TObject);
         procedure FormShow(Sender: TObject);
@@ -573,10 +581,6 @@ type
         procedure Action_ExportCSVClick(Sender: TObject);
         procedure Action_RemoveFiltersClick(Sender: TObject);
         procedure Action_Free1Click(Sender: TObject);
-        procedure btnReport1Click(Sender: TObject);
-        procedure btnReport2Click(Sender: TObject);
-        procedure btnReport3Click(Sender: TObject);
-        procedure btnReport4Click(Sender: TObject);
         procedure btnStartClick(Sender: TObject);
         procedure btnTabelauReportClick(Sender: TObject);
         procedure btnGeneralClick(Sender: TObject);
@@ -629,6 +633,10 @@ type
         procedure sgCoCodesKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure sgAgeViewClick(Sender: TObject);
         procedure sgAgeViewKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure btnOverdueClick(Sender: TObject);
+    procedure btnCreditLimitsClick(Sender: TObject);
+    procedure btnDebtorsClick(Sender: TObject);
+    procedure btnControlStatusClick(Sender: TObject);
     private
         var pAllowClose:    boolean;
         var pStartTime:     TTime;
@@ -749,7 +757,7 @@ var
 begin
     inherited;
 
-    // INTERNAL MESSAGES BETWEEN WORKER THREADS AND MAIN THREAD //
+    // INTERNAL MESSAGES BETWEEN WORKER THREADS AND MAIN THREAD -------------------------------------------------------------------------------------------- //
 
     if Msg.Msg = WM_GETINFO then
     begin
@@ -786,7 +794,7 @@ begin
         end;
     end;
 
-    // RECEIVE MESSAGE FROM EXTERNAL APPLICATION //
+    // RECEIVE MESSAGE FROM EXTERNAL APPLICATION ----------------------------------------------------------------------------------------------------------- //
 
     if Msg.Msg = WM_EXTINFO then
     begin
@@ -821,7 +829,7 @@ begin
 
     end;
 
-    // CLOSE UNITY WHEN WINDOWS IS SHUTTING DOWN //
+    // CLOSE UNITY WHEN WINDOWS IS SHUTTING DOWN ----------------------------------------------------------------------------------------------------------- //
 
     // Windows query for shutdown
     if Msg.Msg = WM_QUERYENDSESSION then
@@ -867,7 +875,7 @@ begin
 end;
 
 /// <summary>
-///
+///     Initialize connection with database server.
 /// </summary>
 
 procedure TMainForm.TryInitConnection;
@@ -894,7 +902,7 @@ begin
 end;
 
 /// <summary>
-///
+///     Simple wrapper for PostMessage and SendMessage.
 /// </summary>
 
 procedure TMainForm.ExecMessage(IsPostType: boolean; YOUR_INT: Integer; YOUR_TEXT: string);
@@ -907,530 +915,638 @@ end;
 // ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
 
 
+/// <summary>
+///     Use this when dealing with database datasets/recordset results, field may be null and thus must be converted into string.
+/// </summary>
+
 function TMainForm.OleGetStr(RecordsetField: variant): string;
 begin
-  {$D-}
-  try
-    OleGetStr:=RecordsetField;
-  except
-    { CASE OF NULL FIELD }
-    OleGetStr:=VarToStr(RecordsetField);
-  end;
-  {$D+}
+    {$D-}
+    try
+        OleGetStr:=RecordsetField;
+    except
+        { CASE OF NULL FIELD }
+        OleGetStr:=VarToStr(RecordsetField);
+    end;
+    {$D+}
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------ RETURN KEY VALUE FOR GIVEN LIST POSITION }
+/// <summary>
+///     Return key vaue for given list position.
+/// </summary>
+
 function TMainForm.FindKey(INI: TMemIniFile; OpenedSection: string; KeyPosition: integer): string;
 var
-  SL:  TStringList;
+    SL:  TStringList;
 begin
-  { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-  Result:=unNA;
-  SL:=TStringList.Create;
-  { ------------------------------------------------------------------------------------------------------------------------------------- EVALUATE AND RETURN }
-  try
-    INI.ReadSectionValues(OpenedSection, SL);
-    if KeyPosition > SL.Count then Exit else
-      begin
-        Result:=LeftStr(SL.Strings[KeyPosition], AnsiPos('=', SL.Strings[KeyPosition]) - 1);
-      end;
-  finally
-    SL.Free;
-  end;
+
+    Result:=unNA;
+    SL:=TStringList.Create;
+
+    try
+
+        INI.ReadSectionValues(OpenedSection, SL);
+
+        if KeyPosition > SL.Count then
+            Exit
+                else
+                    Result:=LeftStr(SL.Strings[KeyPosition], AnsiPos('=', SL.Strings[KeyPosition]) - 1);
+
+    finally
+        SL.Free;
+    end;
+
 end;
 
-{ ---------------------------------------------------------------------------------------------------------------------------------------------- MODAL WINDOW }
+/// <summary>
+///     Wrapper for calling moda or modless window.
+/// </summary>
+
 function TMainForm.WndCall(WinForm: TForm; Mode: integer): integer;
 begin
-  Result:=0;
-  { SETUP POPUPS }
-  WinForm.PopupMode  :=pmAuto;
-  WinForm.PopupParent:=MainForm;
-  { CALL WINDOW }
-  if Mode = stModal    then Result:=WinForm.ShowModal;
-  if Mode = stModeless then WinForm.Show;
+    Result:=0;
+
+    // Setup popups
+    WinForm.PopupMode  :=pmAuto;
+    WinForm.PopupParent:=MainForm;
+
+    // Call window
+    if Mode = stModal    then Result:=WinForm.ShowModal;
+    if Mode = stModeless then WinForm.Show;
+
 end;
 
-{ --------------------------------------------------------------------------------------------------------------------------- WRAPPER FOR WINDOWS MESSAGE BOX }
+/// <summary>
+///     Wrapper for windows message boxes.
+/// </summary>
+
 function TMainForm.MsgCall(WndType: integer; WndText: string): integer;
 begin
-  Result:=0;
-  if WndText = '' then Exit;
-  if WndType = mcInfo      then Result:=Application.MessageBox(PChar(WndText), PChar(APPCAPTION), MB_OK       + MB_ICONINFORMATION);
-  if WndType = mcWarn      then Result:=Application.MessageBox(PChar(WndText), PChar(APPCAPTION), MB_OK       + MB_ICONWARNING);
-  if WndType = mcError     then Result:=Application.MessageBox(PChar(WndText), PChar(APPCAPTION), MB_OK       + MB_ICONERROR);
-  if WndType = mcQuestion1 then Result:=Application.MessageBox(PChar(WndText), PChar(APPCAPTION), MB_OKCANCEL + MB_ICONQUESTION);
-  if WndType = mcQuestion2 then Result:=Application.MessageBox(PChar(WndText), PChar(APPCAPTION), MB_YESNO    + MB_ICONQUESTION);
+    Result:=0;
+    if WndText = '' then Exit;
+    if WndType = mcInfo      then Result:=Application.MessageBox(PChar(WndText), PChar(APPCAPTION), MB_OK       + MB_ICONINFORMATION);
+    if WndType = mcWarn      then Result:=Application.MessageBox(PChar(WndText), PChar(APPCAPTION), MB_OK       + MB_ICONWARNING);
+    if WndType = mcError     then Result:=Application.MessageBox(PChar(WndText), PChar(APPCAPTION), MB_OK       + MB_ICONERROR);
+    if WndType = mcQuestion1 then Result:=Application.MessageBox(PChar(WndText), PChar(APPCAPTION), MB_OKCANCEL + MB_ICONQUESTION);
+    if WndType = mcQuestion2 then Result:=Application.MessageBox(PChar(WndText), PChar(APPCAPTION), MB_YESNO    + MB_ICONQUESTION);
 end;
 
-{ ----------------------------------------------------------------------------------------------------------------------------------------- (UN)LOCK SETTINGS }
+/// <summary>
+///     Lock/unlock administrator panel on Settings tabsheet.
+/// </summary>
+
 procedure TMainForm.SetSettingsPanel(Mode: integer);
 begin
-  if Mode = spLock then
-  begin
-    { VISIBLE ON }
-    imgOFF.Visible         :=True;
-    btnPassUpdate.Enabled  :=False;
-    { EDIT BOXES }
-    EditCurrentPassword.Enabled:=False;
-    EditNewPassword.Enabled:=False;
-    EditNewPasswordConfirmation.Enabled:=False;
-    EditCurrentPassword.Text:='';
-    EditNewPassword.Text    :='';
-    EditNewPasswordConfirmation.Text:='';
-    EditPassword.Text:='';
-    { STRING GRIDS }
-    sgListSection.ClearAll(2, 0, 0, False);
-    sgListValue.ClearAll(2, 0, 0, False);
-    sgListSection.Row:=1;
-    sgListValue.Row:=1;
-    sgListSection.Visible:=False;
-    sgListValue.Visible:=False;
-    sgUAC.Visible:=False;
-    sgGroups.Visible:=False;
-    sgUAC.ClearAll(2, 0, 0, False);
-    sgGroups.ClearAll(2, 0, 0, False);
-    sgUAC.Row:=1;
-    sgGroups.Row:=1;
-    sgListSection.Enabled:=False;
-    sgListValue.Enabled  :=False;
-    sgUAC.Enabled        :=False;
-    sgGroups.Enabled     :=False;
-    { ENDING }
-    btnUnlock.Caption:='Unlock';
-    EditPassword.SetFocus;
-  end;
-  if Mode = spUnLock then
-  begin
-    { SETUP HEADERS }
-    sgListSection.Cols[0].Text:='Lp';
-    sgListSection.Cols[1].Text:='Sections';
-    sgListValue.Cols[0].Text  :='Lp';
-    sgListValue.Cols[1].Text  :='Key';
-    sgListValue.Cols[2].Text  :='Value';
-    { CREDENTIALS }
-    btnPassUpdate.Enabled  :=True;
-    EditCurrentPassword.Enabled:=True;
-    EditNewPassword.Enabled :=True;
-    EditNewPasswordConfirmation.Enabled:=True;
-    { STRING GRIDS }
-    sgUAC.Enabled:=True;
-    sgGroups.Enabled:=True;
-    sgListSection.Enabled:=True;
-    sgListValue.Enabled:=True;
-    sgListSectionClick(self);
-    sgListSection.Row:=1;
-    sgListValue.Row:=1;
-    sgListSection.Visible:=True;
-    sgListValue.Visible:=True;
-    sgUAC.Visible:=True;
-    sgGroups.Visible:=True;
-    { TRANSPARENCY OFF }
-    imgOFF.Visible:=False;
-    { ENDING }
-    btnUnlock.Caption:='Lock';
-    EditPassword.SetFocus;
-  end;
+    if Mode = spLock then
+    begin
+        // Visibility on
+        imgOFF.Visible         :=True;
+        btnPassUpdate.Enabled  :=False;
+
+        // Edit boxes
+        EditCurrentPassword.Enabled:=False;
+        EditNewPassword.Enabled:=False;
+        EditNewPasswordConfirmation.Enabled:=False;
+        EditCurrentPassword.Text:='';
+        EditNewPassword.Text    :='';
+        EditNewPasswordConfirmation.Text:='';
+        EditPassword.Text:='';
+
+        // String grids
+        sgListSection.ClearAll(2, 0, 0, False);
+        sgListValue.ClearAll(2, 0, 0, False);
+        sgListSection.Row:=1;
+        sgListValue.Row:=1;
+        sgListSection.Visible:=False;
+        sgListValue.Visible:=False;
+        sgUAC.Visible:=False;
+        sgGroups.Visible:=False;
+        sgUAC.ClearAll(2, 0, 0, False);
+        sgGroups.ClearAll(2, 0, 0, False);
+        sgUAC.Row:=1;
+        sgGroups.Row:=1;
+        sgListSection.Enabled:=False;
+        sgListValue.Enabled  :=False;
+        sgUAC.Enabled        :=False;
+        sgGroups.Enabled     :=False;
+
+        btnUnlock.Caption:='Unlock';
+        EditPassword.SetFocus;
+
+    end;
+
+    if Mode = spUnLock then
+    begin
+        // Setup headers
+        sgListSection.Cols[0].Text:='Lp';
+        sgListSection.Cols[1].Text:='Sections';
+        sgListValue.Cols[0].Text  :='Lp';
+        sgListValue.Cols[1].Text  :='Key';
+        sgListValue.Cols[2].Text  :='Value';
+
+        // Credentials
+        btnPassUpdate.Enabled  :=True;
+        EditCurrentPassword.Enabled:=True;
+        EditNewPassword.Enabled :=True;
+        EditNewPasswordConfirmation.Enabled:=True;
+
+        // String grids
+        sgUAC.Enabled:=True;
+        sgGroups.Enabled:=True;
+        sgListSection.Enabled:=True;
+        sgListValue.Enabled:=True;
+        sgListSectionClick(self);
+        sgListSection.Row:=1;
+        sgListValue.Row:=1;
+        sgListSection.Visible:=True;
+        sgListValue.Visible:=True;
+        sgUAC.Visible:=True;
+        sgGroups.Visible:=True;
+
+        // Transparency off
+        imgOFF.Visible:=False;
+
+        btnUnlock.Caption:='Lock';
+        EditPassword.SetFocus;
+    end;
+
 end;
 
-{ ----------------------------------------------------------------------------------------------------------------------------------- CO CODE NAME CONVERTION }
+/// <summary>
+///     Co name convertion.
+/// </summary>
+
 function TMainForm.ConvertName(CoNumber: string; Prefix: string; mode: integer): string;
 var
-  iCNT:  integer;
+    iCNT:  integer;
 begin
-  { INITIALIZE }
-  Result:= '';
 
-  (* USED ONLY FOR OPEN ITEMS AND AGING VIEW *)
+    Result:= '';
 
-  { ALLOW TO CONVERT '2020' TO 'F2020', ETC. }
-  if mode = 0 then
-  begin
-    if Length(CoNumber) = 4 then Result:=Prefix + CoNumber;
-    if Length(CoNumber) = 3 then Result:=Prefix + '0'  + CoNumber;
-    if Length(CoNumber) = 2 then Result:=Prefix + '00' + CoNumber;
-  end;
+    /// <remarks>
+    ///     Used only for open items and aging view.
+    /// </remarks>
 
-  (* USED ONLY TO BUILD GROUP_ID *)
-
-  { CONVERTS FROM     }
-  {  1. 2020 TO 02020 }
-  {  2. 340  TO 00340 }
-  {  3. 43   TO 00043 }
-  {  4. 0    TO 00000 }
-  if mode = 1 then
-  begin
-    if Length(CoNumber) = 4 then Result:='0'   + CoNumber;
-    if Length(CoNumber) = 3 then Result:='00'  + CoNumber;
-    if Length(CoNumber) = 2 then Result:='000' + CoNumber;
-    if Length(CoNumber) = 1 then Result:='00000';
-  end;
-
-  { CONVERTS FROM 02020 TO 2020 }
-  if mode = 2 then
-  begin
-    for iCNT:= 1 to Length(CoNumber) do
+    // Allow to convert '2020' to 'F2020', etc.
+    if mode = 0 then
     begin
-      if CoNumber[iCNT] <> '0' then
-      begin
-        Result:=Copy(CoNumber, iCNT, MaxInt);
-        Exit;
-      end;
+        if Length(CoNumber) = 4 then Result:=Prefix + CoNumber;
+        if Length(CoNumber) = 3 then Result:=Prefix + '0'  + CoNumber;
+        if Length(CoNumber) = 2 then Result:=Prefix + '00' + CoNumber;
     end;
-  end;
 
-  { CONVERTS FROM    }
-  {  1. 2020 TO 2020 }
-  {  2. 340  TO 0340 }
-  {  3. 43   TO 0043 }
-  {  4. 5    TO 0005 }
-  if mode = 3 then
-  begin
-    if Length(CoNumber) = 4 then Result:=CoNumber;
-    if Length(CoNumber) = 3 then Result:='0'    + CoNumber;
-    if Length(CoNumber) = 2 then Result:='00'   + CoNumber;
-    if Length(CoNumber) = 1 then Result:='000'  + CoNumber;
-  end;
+    /// <remarks>
+    ///     Used only to build GroupID.
+    /// </remarks>
+
+    // Converts from 2020 to 02020, 340 to 00340 and so on.
+    if mode = 1 then
+    begin
+        if Length(CoNumber) = 4 then Result:='0'   + CoNumber;
+        if Length(CoNumber) = 3 then Result:='00'  + CoNumber;
+        if Length(CoNumber) = 2 then Result:='000' + CoNumber;
+        if Length(CoNumber) = 1 then Result:='00000';
+    end;
+
+    // Converts from 02020 to 2020.
+    if mode = 2 then
+    begin
+        for iCNT:= 1 to Length(CoNumber) do
+        begin
+            if CoNumber[iCNT] <> '0' then
+            begin
+                Result:=Copy(CoNumber, iCNT, MaxInt);
+                Exit;
+            end;
+        end;
+    end;
+
+    // Converts from 2020 to 2020, 340 to 0340... .
+    if mode = 3 then
+    begin
+        if Length(CoNumber) = 4 then Result:=CoNumber;
+        if Length(CoNumber) = 3 then Result:='0'    + CoNumber;
+        if Length(CoNumber) = 2 then Result:='00'   + CoNumber;
+        if Length(CoNumber) = 1 then Result:='000'  + CoNumber;
+    end;
 
 end;
 
-{ -------------------------------------------------------------------------------------------------------------------- RETURN SPECIFIC 'COCOE' FROM THE GROUP }
+/// <summary>
+///     Return specific CoCode from the given group.
+/// </summary>
+
 function TMainForm.GetCoCode(CoPos: integer; GroupId: string): string;
-{ WARNING! GROUP ID FORMAT: SERIES OF 4 GROUPS OF 5 DIGITS, I.E.: '020470034000043' MUST BE READ AS FOLLOWS: }
-{   1. 1ST CO CODE: 02047 (2047)                                                                             }
-{   2. 2ND CO CODE: 00340 (340)                                                                              }
-{   3. 3RD CO CODE: 00043 (43)                                                                               }
-{   4. 4TH CO CODE: 00000 (0)                                                                                }
 begin
-  if CoPos = 1 then Result:=IntToStr(StrToInt(MidStr(GroupId, 1,  5)));
-  if CoPos = 2 then Result:=IntToStr(StrToInt(MidStr(GroupId, 6,  5)));
-  if CoPos = 3 then Result:=IntToStr(StrToInt(MidStr(GroupId, 11, 5)));
-  if CoPos = 4 then Result:=IntToStr(StrToInt(MidStr(GroupId, 16, 5)));
+
+    /// <remarks>
+    ///     Group id format: series of 4 groups of 5 digits, i.e.: '020470034000043' must be read as follows:
+    ///     1. 1ST CO CODE: 02047 (2047)
+    ///     2. 2ND CO CODE: 00340 (340)
+    ///     3. 3RD CO CODE: 00043 (43)
+    ///     4. 4TH CO CODE: 00000 (0)
+    /// </remarks>
+
+    if CoPos = 1 then Result:=IntToStr(StrToInt(MidStr(GroupId, 1,  5)));
+    if CoPos = 2 then Result:=IntToStr(StrToInt(MidStr(GroupId, 6,  5)));
+    if CoPos = 3 then Result:=IntToStr(StrToInt(MidStr(GroupId, 11, 5)));
+    if CoPos = 4 then Result:=IntToStr(StrToInt(MidStr(GroupId, 16, 5)));
+
 end;
 
-{ ----------------------------------------------------------------------------------------------------------------- FIND OTHER DETAILS FOR GIVEN COMPANY CODE }
+/// <summary>
+///     Find other details (currency, division, agents) for given company code. It searches age view string grid.
+/// </summary>
+
 procedure TMainForm.Find(ColumnNum: integer);
 var
-  iCNT:  integer;
+    iCNT:  integer;
 begin
-  for iCNT:=1 to sgCoCodes.RowCount - 1 do
-  begin
-    if DetailsGrid.Cells[ColumnNum, 0] = sgCoCodes.Cells[sgCoCodes.ReturnColumn(TCompany.CO_CODE, 1, 1), iCNT] then
+
+    for iCNT:=1 to sgCoCodes.RowCount - 1 do
     begin
-      DetailsGrid.Cells[ColumnNum, 1]:=sgCoCodes.Cells[sgCoCodes.ReturnColumn(TCompany.COCURRENCY,    1, 1), iCNT];
-      DetailsGrid.Cells[ColumnNum, 2]:=sgCoCodes.Cells[sgCoCodes.ReturnColumn(TCompany.DIVISIONS,     1, 1), iCNT];
-      DetailsGrid.Cells[ColumnNum, 3]:=sgCoCodes.Cells[sgCoCodes.ReturnColumn(TCompany.AGENTS,        1, 1), iCNT];
-      Break;
-    end
-    else
-    begin
-      DetailsGrid.Cells[ColumnNum, 1]:=unNA;
-      DetailsGrid.Cells[ColumnNum, 2]:=unNA;
-      DetailsGrid.Cells[ColumnNum, 3]:=unNA;
+        if DetailsGrid.Cells[ColumnNum, 0] = sgCoCodes.Cells[sgCoCodes.ReturnColumn(TCompany.CO_CODE, 1, 1), iCNT] then
+        begin
+            DetailsGrid.Cells[ColumnNum, 1]:=sgCoCodes.Cells[sgCoCodes.ReturnColumn(TCompany.COCURRENCY,    1, 1), iCNT];
+            DetailsGrid.Cells[ColumnNum, 2]:=sgCoCodes.Cells[sgCoCodes.ReturnColumn(TCompany.DIVISIONS,     1, 1), iCNT];
+            DetailsGrid.Cells[ColumnNum, 3]:=sgCoCodes.Cells[sgCoCodes.ReturnColumn(TCompany.AGENTS,        1, 1), iCNT];
+            Break;
+        end
+        else
+        begin
+            DetailsGrid.Cells[ColumnNum, 1]:=unNA;
+            DetailsGrid.Cells[ColumnNum, 2]:=unNA;
+            DetailsGrid.Cells[ColumnNum, 3]:=unNA;
+        end;
     end;
-  end;
+
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------- TURN ON OR OFF TIMERS }
+/// <summary>
+///     Turn off or on given timers.
+/// </summary>
+
 procedure TMainForm.SwitchTimers(state: integer);
 begin
-  { ENABLE ALL CHECKERS }
-  if state = tmEnabled then
-  begin
-    InvoiceScanTimer.Enabled :=True;
-    FollowupPopup.Enabled    :=True;
-    OILoader.Enabled         :=True;
-  end;
-  { DISABLE ALL CHECKERS }
-  if state = tmDisabled then
-  begin
-    InvoiceScanTimer.Enabled :=False;
-    FollowupPopup.Enabled    :=False;
-    OILoader.Enabled         :=False;
-  end;
+
+    if state = tmEnabled then
+    begin
+        InvoiceScanTimer.Enabled :=True;
+        FollowupPopup.Enabled    :=True;
+        OILoader.Enabled         :=True;
+    end;
+
+    if state = tmDisabled then
+    begin
+        InvoiceScanTimer.Enabled :=False;
+        FollowupPopup.Enabled    :=False;
+        OILoader.Enabled         :=False;
+    end;
+
 end;
 
-{ --------------------------------------------------------------------------------------------------------------------------- LOAD ANY IMAGE FORMAT TO TIMAGE }
+/// <summary>
+///     oad desired image format to TImage component.
+/// </summary>
+
 procedure TMainForm.LoadImageFromStream(Image: TImage; const FileName: string);
 var
-  WIC: TWICImage;
-  FS:  TFileStream;
+    WIC: TWICImage;
+    FS:  TFileStream;
 begin
-  FS:=TFileStream.Create(FileName, fmOpenRead);
-  FS.Position:=0;
-  WIC:=TWICImage.Create;
-  try
-    WIC.LoadFromStream(FS);
-    Image.Picture.Assign(WIC);
-  finally
-    WIC.Free;
-    FS.Free;
-  end;
+
+    FS:=TFileStream.Create(FileName, fmOpenRead);
+    FS.Position:=0;
+    WIC:=TWICImage.Create;
+
+    try
+        WIC.LoadFromStream(FS);
+        Image.Picture.Assign(WIC);
+    finally
+        WIC.Free;
+        FS.Free;
+    end;
+
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------ CONVERT STRING DATE TO DATE FORMAT }
+/// <summary>
+///     Convert string date to date format.
+/// </summary>
+
 function TMainForm.CDate(StrDate: string): TDate;
 begin
     Result:=StrToDateDef(StrDate, NULLDATE);
 end;
 
-{ --------------------------------------------------------------------------------------------------------------------- EXECUTE CHROMIUM READER FOR REPORTING }
+/// <summary>
+///     Execute chromium reader for reporting.
+/// </summary>
+
 function TMainForm.ShowReport(ReportNumber: cardinal): cardinal;
 var
-  AppSettings: TSettings;
-  AppParam:    string;
+    Settings: ISettings;
+    AppParam: string;
 begin
-  AppSettings:=TSettings.Create;
-  try
-    AppParam:=AppSettings.TMIG.ReadString(ApplicationDetails, 'REPORT_Report' + IntToStr(ReportNumber), 'about:blank');
+    Settings:=TSettings.Create;
+    AppParam:=Settings.GetStringValue(ApplicationDetails, 'REPORT_Report' + IntToStr(ReportNumber), 'about:blank');
     Result:=ShellExecute(MainForm.Handle, seOpen, PChar(UnityReader), PChar(AppParam), nil, SW_SHOWNORMAL);
-  finally
-    AppSettings.Free;
-  end;
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------- COPY FILE BETWEEN LOCATIONS }
+/// <summary>
+///     Copy file between locations.
+/// </summary>
+
 procedure TMainForm.CopyFile(const Source, Dest: string);
 var
-  SourceStream: TFileStream;
-  DestStream:   TFileStream;
+    SourceStream: TFileStream;
+    DestStream:   TFileStream;
 begin
-  DestStream:=nil;
-  SourceStream:=TFileStream.Create(Source, fmOpenRead or fmShareDenyWrite);
-  try
-    DestStream:=TFileStream.Create(Dest, fmCreate or fmShareExclusive);
-    DestStream.CopyFrom(SourceStream, SourceStream.Size);
-    {$WARN SYMBOL_PLATFORM OFF}
-    { YOU MAY USE PLATFORM INDEPENDENT: function FileSetDate(const FileName: string; Age: Integer): Integer; overload; }
-    FileSetDate(DestStream.Handle, FileGetDate(SourceStream.Handle));
-    {$WARN SYMBOL_PLATFORM ON}
-  finally
-    DestStream.Free;
-    SourceStream.Free;
-  end;
+    DestStream:=nil;
+
+    SourceStream:=TFileStream.Create(Source, fmOpenRead or fmShareDenyWrite);
+    try
+        DestStream:=TFileStream.Create(Dest, fmCreate or fmShareExclusive);
+        DestStream.CopyFrom(SourceStream, SourceStream.Size);
+
+        {$WARN SYMBOL_PLATFORM OFF}
+        // You may use platform independent: function FileSetDate(const FileName: string; Age: Integer): Integer; overload;
+        FileSetDate(DestStream.Handle, FileGetDate(SourceStream.Handle));
+        {$WARN SYMBOL_PLATFORM ON}
+
+    finally
+        DestStream.Free;
+        SourceStream.Free;
+    end;
+
 end;
 
-{ ---------------------------------------------------------------------------------------------------------------------------------- UNBOLD FONTS ON MENU BAR }
+/// <summary>
+///     Switch off bold for all fonts used in top menu.
+/// </summary>
+
 procedure TMainForm.ResetTabsheetButtons;
 begin
-  btnStart.Font.Style        :=[];
-  btnTabelauReport.Font.Style:=[];
-  btnAgeDebt.Font.Style      :=[];
-  btnTracker.Font.Style      :=[];
-  btnAddressBook.Font.Style  :=[];
-  btnOpenItems.Font.Style    :=[];
-  btnOtherTrans.Font.Style   :=[];
-  btnGeneral.Font.Style      :=[];
-  btnSettings.Font.Style     :=[];
+    btnStart.Font.Style        :=[];
+    btnTabelauReport.Font.Style:=[];
+    btnAgeDebt.Font.Style      :=[];
+    btnTracker.Font.Style      :=[];
+    btnAddressBook.Font.Style  :=[];
+    btnOpenItems.Font.Style    :=[];
+    btnOtherTrans.Font.Style   :=[];
+    btnGeneral.Font.Style      :=[];
+    btnSettings.Font.Style     :=[];
 end;
 
-{ ----------------------------------------------------------------------------------------------------------------------------------------- LOADING ANIMATION }
+/// <summary>
+///     Show/hide animation during loading data into string grid.
+/// </summary>
+
 procedure TMainForm.LoadingAnimation(GIFImage: TImage; Grid: TStringGrid; GridPanel: TPanel; State: Integer);
 begin
-  case State of
-    AnimationON:
-    begin
-      Grid.Visible:=False;
-      GIFImage.Visible:=True;
-      (GIFImage.Picture.Graphic as TGIFImage).Animate:=True;
-      GridPanel.DoubleBuffered:=True;
+
+    case State of
+        AnimationON:
+        begin
+            Grid.Visible:=False;
+            GIFImage.Visible:=True;
+            (GIFImage.Picture.Graphic as TGIFImage).Animate:=True;
+            GridPanel.DoubleBuffered:=True;
+        end;
+
+        AnimationOFF:
+        begin
+            GridPanel.DoubleBuffered:=False;
+            (GIFImage.Picture.Graphic as TGIFImage).Animate:=False;
+            GIFImage.Visible:=False;
+            Grid.Visible:=True;
+        end;
     end;
-    AnimationOFF:
-    begin
-      GridPanel.DoubleBuffered:=False;
-      (GIFImage.Picture.Graphic as TGIFImage).Animate:=False;
-      GIFImage.Visible:=False;
-      Grid.Visible:=True;
-    end;
-  end;
+
 end;
 
-{ -------------------------------------------------------------------------------------------------------------------------------------------- PANELS BORDERS }
+/// <summary>
+///     Draw custom border around panels.
+/// </summary>
+
 procedure TMainForm.SetPanelBorders;
 begin
-  AppHeader.PanelBorders            (clWhite, clSkyBlue, clWhite,   clWhite,   clWhite);
-  PanelAgeView.PanelBorders         (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-  PanelOpenItems.PanelBorders       (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-  PanelAddressBook.PanelBorders     (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-  PanelInvoiceTracker.PanelBorders  (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-  PanelCoCodes.PanelBorders         (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-  PanelPaidInfo.PanelBorders        (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-  PanelPerson.PanelBorders          (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-  PanelPmtTerms.PanelBorders        (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-  PanelGroup3.PanelBorders          (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-  PanelSettingsSections.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-  PanelSettingsValues.PanelBorders  (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-  PanelUAC.PanelBorders             (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-  PanelGroups.PanelBorders          (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+
+    /// <remarks>
+    ///     TPanel component must have properties such as BevelInner, BevelKind and BevelOuter and BorderStyle set to none.
+    /// </remarks>
+
+    AppHeader.PanelBorders            (clWhite, clSkyBlue, clWhite,   clWhite,   clWhite);
+    PanelAgeView.PanelBorders         (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+    PanelOpenItems.PanelBorders       (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+    PanelAddressBook.PanelBorders     (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+    PanelInvoiceTracker.PanelBorders  (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+    PanelCoCodes.PanelBorders         (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+    PanelPaidInfo.PanelBorders        (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+    PanelPerson.PanelBorders          (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+    PanelPmtTerms.PanelBorders        (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+    PanelGroup3.PanelBorders          (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+    PanelSettingsSections.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+    PanelSettingsValues.PanelBorders  (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+    PanelUAC.PanelBorders             (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+    PanelGroups.PanelBorders          (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+    ReportContainer.PanelBorders      (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+    ReportFrame.PanelBorders          (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
 end;
 
-{ -------------------------------------------------------------------------------------------------------------------------------- SET COLUMN WIDTH FOR GRIDS }
+/// <summary>
+///     Set default column width for string grids.
+/// </summary>
+
 procedure TMainForm.SetGridColumnWidths;
 begin
-  sgOpenItems.SetColWidth     (10, 20, 400);
-  sgAddressBook.SetColWidth   (10, 20, 400);
-  sgListValue.SetColWidth     (25, 20, 400);
-  sgListSection.SetColWidth   (25, 20, 400);
-  sgInvoiceTracker.SetColWidth(10, 20, 400);
-  sgCoCodes.SetColWidth       (10, 30, 400);
-  sgPaidInfo.SetColWidth      (10, 30, 400);
-  sgPerson.SetColWidth        (10, 30, 400);
-  sgGroup3.SetColWidth        (10, 30, 400);
-  sgPmtTerms.SetColWidth      (10, 30, 400);
-  sgGroups.SetColWidth        (10, 20, 400);
-  sgUAC.SetColWidth           (10, 20, 400);
+    sgOpenItems.SetColWidth     (10, 20, 400);
+    sgAddressBook.SetColWidth   (10, 20, 400);
+    sgListValue.SetColWidth     (25, 20, 400);
+    sgListSection.SetColWidth   (25, 20, 400);
+    sgInvoiceTracker.SetColWidth(10, 20, 400);
+    sgCoCodes.SetColWidth       (10, 30, 400);
+    sgPaidInfo.SetColWidth      (10, 30, 400);
+    sgPerson.SetColWidth        (10, 30, 400);
+    sgGroup3.SetColWidth        (10, 30, 400);
+    sgPmtTerms.SetColWidth      (10, 30, 400);
+    sgGroups.SetColWidth        (10, 20, 400);
+    sgUAC.SetColWidth           (10, 20, 400);
 end;
 
-{ ---------------------------------------------------------------------------------------------------------------------------------- SET ROW HEIGHT FOR GRIDS }
+/// <summary>
+///     Set row height for string grids.
+/// </summary>
+
 procedure TMainForm.SetGridRowHeights;
 begin
-  sgOpenItems.SetRowHeight     (sgRowHeight, 25);
-  sgAddressBook.SetRowHeight   (sgRowHeight, 25);
-  sgListValue.SetRowHeight     (sgRowHeight, 25);
-  sgListSection.SetRowHeight   (sgRowHeight, 25);
-  sgAgeView.SetRowHeight       (sgRowHeight, 25);
-  sgInvoiceTracker.SetRowHeight(sgRowHeight, 25);
-  sgCoCodes.SetRowHeight       (sgRowHeight, 25);
-  sgPaidInfo.SetRowHeight      (sgRowHeight, 25);
-  sgPerson.SetRowHeight        (sgRowHeight, 25);
-  sgGroup3.SetRowHeight        (sgRowHeight, 25);
-  sgPmtTerms.SetRowHeight      (sgRowHeight, 25);
-  sgGroups.SetRowHeight        (sgRowHeight, 25);
-  sgUAC.SetRowHeight           (sgRowHeight, 25);
+    sgOpenItems.SetRowHeight     (sgRowHeight, 25);
+    sgAddressBook.SetRowHeight   (sgRowHeight, 25);
+    sgListValue.SetRowHeight     (sgRowHeight, 25);
+    sgListSection.SetRowHeight   (sgRowHeight, 25);
+    sgAgeView.SetRowHeight       (sgRowHeight, 25);
+    sgInvoiceTracker.SetRowHeight(sgRowHeight, 25);
+    sgCoCodes.SetRowHeight       (sgRowHeight, 25);
+    sgPaidInfo.SetRowHeight      (sgRowHeight, 25);
+    sgPerson.SetRowHeight        (sgRowHeight, 25);
+    sgGroup3.SetRowHeight        (sgRowHeight, 25);
+    sgPmtTerms.SetRowHeight      (sgRowHeight, 25);
+    sgGroups.SetRowHeight        (sgRowHeight, 25);
+    sgUAC.SetRowHeight           (sgRowHeight, 25);
 end;
 
-{ ---------------------------------------------------------------------------------------------------------------------------------- SET THUMB SIZE FOR GRIDS }
+/// <summary>
+///     Set thumb size for scroll
+/// </summary>
+
 procedure TMainForm.SetGridThumbSizes;
 begin
-  sgAgeView.AutoThumbSize;
-  sgOpenItems.AutoThumbSize;
-  sgAddressBook.AutoThumbSize;
-  sgInvoiceTracker.AutoThumbSize;
-  sgCoCodes.AutoThumbSize;
-  sgPmtTerms.AutoThumbSize;
-  sgPaidInfo.AutoThumbSize;
-  sgPerson.AutoThumbSize;
-  sgGroup3.AutoThumbSize;
-  sgListSection.AutoThumbSize;
-  sgListValue.AutoThumbSize;
-  sgUAC.AutoThumbSize;
-  sgGroups.AutoThumbSize;
+    sgAgeView.AutoThumbSize;
+    sgOpenItems.AutoThumbSize;
+    sgAddressBook.AutoThumbSize;
+    sgInvoiceTracker.AutoThumbSize;
+    sgCoCodes.AutoThumbSize;
+    sgPmtTerms.AutoThumbSize;
+    sgPaidInfo.AutoThumbSize;
+    sgPerson.AutoThumbSize;
+    sgGroup3.AutoThumbSize;
+    sgListSection.AutoThumbSize;
+    sgListValue.AutoThumbSize;
+    sgUAC.AutoThumbSize;
+    sgGroups.AutoThumbSize;
 end;
 
-{ -------------------------------------------------------------------------------------------------------------------------- SWITCH OFF FOCUSING ON ALL GRIDS }
+/// <summary>
+///     Switch off focusing on all grids.
+/// </summary>
+
 procedure TMainForm.SetGridFocus;
 begin
-  sgAgeView.FHideFocusRect       :=True;
-  sgOpenItems.FHideFocusRect     :=True;
-  sgAddressBook.FHideFocusRect   :=True;
-  sgInvoiceTracker.FHideFocusRect:=True;
-  sgCoCodes.FHideFocusRect       :=True;
-  sgPmtTerms.FHideFocusRect      :=True;
-  sgPaidInfo.FHideFocusRect      :=True;
-  sgPerson.FHideFocusRect        :=True;
-  sgGroup3.FHideFocusRect        :=True;
-  sgListSection.FHideFocusRect   :=True;
-  sgListValue.FHideFocusRect     :=True;
-  sgUAC.FHideFocusRect           :=True;
-  sgGroups.FHideFocusRect        :=True;
+    sgAgeView.FHideFocusRect       :=True;
+    sgOpenItems.FHideFocusRect     :=True;
+    sgAddressBook.FHideFocusRect   :=True;
+    sgInvoiceTracker.FHideFocusRect:=True;
+    sgCoCodes.FHideFocusRect       :=True;
+    sgPmtTerms.FHideFocusRect      :=True;
+    sgPaidInfo.FHideFocusRect      :=True;
+    sgPerson.FHideFocusRect        :=True;
+    sgGroup3.FHideFocusRect        :=True;
+    sgListSection.FHideFocusRect   :=True;
+    sgListValue.FHideFocusRect     :=True;
+    sgUAC.FHideFocusRect           :=True;
+    sgGroups.FHideFocusRect        :=True;
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------- CONVERT TO MULTILINE STRING }
+/// <summary>
+///     Convert to multiline string.
+/// </summary>
+
 function TMainForm.Explode(Text: string; SourceDelim: char): string;
 begin
-  Result:=StringReplace(Text, SourceDelim, CRLF, [rfReplaceAll]);
+    Result:=StringReplace(Text, SourceDelim, CRLF, [rfReplaceAll]);
 end;
 
-{ -------------------------------------------------------------------------------------------------------------------------------- CONVERT TO ONE LINE STRING }
+/// <summary>
+///     Convert multiline string to one line string.
+/// </summary>
+
 function TMainForm.Implode(Text: Classes.TStrings; TargetDelim: char): string;
 var
-  iCNT:  integer;
-  Str:   string;
+    iCNT:  integer;
+    Str:   string;
 begin
-  for iCNT:=0 to Text.Count do
-  begin
-    if iCNT < Text.Count then
-      Str:=Str + Text.Strings[iCNT] + TargetDelim
-        else
-          Str:=Str + Text.Strings[iCNT];
-  end;
-  Result:=Str;
+
+    for iCNT:=0 to Text.Count do
+    begin
+        if iCNT < Text.Count then
+            Str:=Str + Text.Strings[iCNT] + TargetDelim
+                else
+                    Str:=Str + Text.Strings[iCNT];
+    end;
+
+    Result:=Str;
+
 end;
 
-{ ----------------------------------------------------------------------------------------------------------------------------------------- VALIDATE PASSWORD }
+/// <summary>
+///     Validate password.
+/// </summary>
+
 function TMainForm.CheckGivenPassword(Password: string): boolean;
 var
-  AppSet:   TSettings;
-  Hash:     string;
-  ReHashed: boolean;
+    Settings:   ISettings;
+    Hash:       string;
+    ReHashed:   boolean;
 begin
-  Result:=False;
 
-  AppSet:=TSettings.Create;
-  try
-    Hash:=AppSet.TMIG.ReadString(PasswordSection, 'HASH', '');
-  finally
-    AppSet.Free;
-  end;
+    Result:=False;
 
-  if Hash = '' then
-    Exit
-      else
-        Result:=TBcrypt.CheckPassword(Password, Hash, ReHashed);
+    Settings:=TSettings.Create;
+    Hash:=Settings.GetStringValue(PasswordSection, 'HASH', '');
+
+    if Hash = '' then
+        Exit
+            else
+                Result:=TBcrypt.CheckPassword(Password, Hash, ReHashed);
 
 end;
 
-{ --------------------------------------------------------------------------------------------------------------------------------------- HASH GIVEN PASSWORD }
+/// <summary>
+///     Hash given password.
+/// </summary>
+
 function TMainForm.SetNewPassword(Password: string): boolean;
 var
-  AppSet:      TSettings;
-  HashPasswd:  string;
+    Settings:    ISettings;
+    HashPasswd:  string;
 begin
 
-  { EXIT CONDITION }
-  Result:=False;
-  if Password = '' then Exit;
+    // Exit condition
+    Result:=False;
+    if Password = '' then Exit;
 
-  { GENERATE HASH VALUE AND SALT }
-  HashPasswd:=TBcrypt.HashPassword(Password);
+    // Generate hash and salt it
+    HashPasswd:=TBcrypt.HashPassword(Password);
 
-  { SAVE IT }
-  AppSet:=TSettings.Create;
-  try
-    AppSet.TMIG.WriteString(PasswordSection, 'HASH', HashPasswd);
-    AppSet.Encode(AppConfig);
+    // Save it
+    Settings:=TSettings.Create;
+    Settings.SetStringValue(PasswordSection, 'HASH', HashPasswd);
+    Settings.Encode(AppConfig);
     Result:=True;
-  finally
-    AppSet.Free;
-  end;
+
 end;
 
-{ -------------------------------------------------------------------------------------------------------------------------------- INDICATES EDITABLE COLUMNS }
+/// <summary>
+///     Indicates editable columns.
+/// </summary>
+
 function TMainForm.AddressBookExclusion: boolean;
 begin
-  if
-     (
-       sgAddressBook.Col = sgAddressBook.ReturnColumn(TAddressBook.EMAILS, 1, 1)
-     )
-     or
-     (
-       sgAddressBook.Col = sgAddressBook.ReturnColumn(TAddressBook.PHONE_NUMBERS, 1, 1)
-     )
-     or
-     (
-       sgAddressBook.Col = sgAddressBook.ReturnColumn(TAddressBook.CONTACT, 1, 1)
-     )
-     or
-     (
-       sgAddressBook.Col = sgAddressBook.ReturnColumn(TAddressBook.ESTATEMENTS, 1, 1)
-     )
-  then
-    Result:=False { DO NOT EXCLUDE COLUMN FROM EDITING }
-  else
-    Result:=True; { EXCLUDE COLUMN FROM EDITING }
+    if
+        (
+            sgAddressBook.Col = sgAddressBook.ReturnColumn(TAddressBook.EMAILS, 1, 1)
+        )
+    or
+        (
+            sgAddressBook.Col = sgAddressBook.ReturnColumn(TAddressBook.PHONE_NUMBERS, 1, 1)
+        )
+    or
+        (
+            sgAddressBook.Col = sgAddressBook.ReturnColumn(TAddressBook.CONTACT, 1, 1)
+        )
+    or
+        (
+            sgAddressBook.Col = sgAddressBook.ReturnColumn(TAddressBook.ESTATEMENTS, 1, 1)
+        )
+    then
+        Result:=False // DO NOT EXCLUDE COLUMN FROM EDITING
+            else
+                Result:=True; // EXCLUDE COLUMN FROM EDITING
 end;
 
-{ -------------------------------------------------------------------------------------------------------------------------------------- VALIDATE STRING DATE }
+/// <summary>
+///     validate string date.
+/// </summary>
+
 function TMainForm.CheckIfDate(StrDate: string): boolean;
 begin
   Result:=False;
@@ -1438,7 +1554,7 @@ begin
 end;
 
 
-// -------------------------------------------------------------------------------------------------------------------------------------- MAIN THREAD EVENTS //
+// ------------------------------------------------------------------------------------------------------------------------------------------------ START UP //
 
 
 /// <summary>
@@ -1787,7 +1903,6 @@ begin
 
 end;
 
-{ --------------------------------------------------------------------------------------------------------------------------------------------------- ON SHOW }
 procedure TMainForm.FormShow(Sender: TObject);
 begin
 
@@ -1804,21 +1919,18 @@ begin
 
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------------ MAIN FORM RESIZE }
 procedure TMainForm.FormResize(Sender: TObject);
 begin
-  { EACH TIME FORM IS RESIZED WE UPDATE THUMB SIZE OF STRING GRID COMPONENT }
-  (* SetGridThumbSizes; *)
+    (* SetGridThumbSizes; *)
 end;
 
-{ -------------------------------------------------------------------------------------------------------------------------------------------- ON CLOSE QUERY }
 procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 var
     Today:    string;
     UserLogs: TDataTables;
 begin
 
-    { GO MINIMIZE AND HIDE FROM TASKBAR | DO NOT CLOSE }
+    // Go minimize and hide from taskbar | do not close
     if not pAllowClose then
     begin
         CanClose:=False;
@@ -1826,7 +1938,7 @@ begin
         Hide();
     end
     else
-    { SHUTDOWN APPLICATION }
+    // Shutdown application
     begin
 
         ExecMessage(False, mcStatusBar, 'Ending session...');
@@ -1861,7 +1973,9 @@ begin
     end;
 end;
 
-{ ------------------------------------------------------------------ ! TIMERS ! ----------------------------------------------------------------------------- }
+
+// -------------------------------------------------------------------------------------------------------------------------------------------------- TIMERS //
+
 
 { --------------------------------------------------------------------------------------------------------------------------------- COUNT CURRENT FOLLOW-UP'S }
 procedure TMainForm.FollowupPopupTimer(Sender: TObject);
@@ -4165,56 +4279,52 @@ begin
   btnAddressBook.Font.Style:=[fsBold];
 end;
 
-{ -------------------------------------------------------------------------------------------------------------------------------------------- GO TO REPORT 1 }
-procedure TMainForm.btnReport1Click(Sender: TObject);
+procedure TMainForm.btnOverdueClick(Sender: TObject);
 var
-  Return: cardinal;
+    Return: cardinal;
 begin
-  Return:=ShowReport(1);
-  if not(Return > 32) then
-  begin
-    MsgCall(mcWarn, 'Cannot execute report. Please contact with IT support.');
-    LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
-  end;
+    Return:=ShowReport(1);
+    if not(Return > 32) then
+    begin
+        MsgCall(mcWarn, 'Cannot execute report. Please contact with IT support.');
+        LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
+    end;
 end;
 
-{ -------------------------------------------------------------------------------------------------------------------------------------------- GO TO REPORT 2 }
-procedure TMainForm.btnReport2Click(Sender: TObject);
+procedure TMainForm.btnCreditLimitsClick(Sender: TObject);
 var
-  Return: cardinal;
+    Return: cardinal;
 begin
-  Return:=ShowReport(2);
-  if not(Return > 32) then
-  begin
-    MsgCall(mcWarn, 'Cannot execute report. Please contact with IT support.');
-    LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
-  end;
+    Return:=ShowReport(1);
+    if not(Return > 32) then
+    begin
+        MsgCall(mcWarn, 'Cannot execute report. Please contact with IT support.');
+        LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
+    end;
 end;
 
-{ -------------------------------------------------------------------------------------------------------------------------------------------- GO TO REPORT 3 }
-procedure TMainForm.btnReport3Click(Sender: TObject);
+procedure TMainForm.btnDebtorsClick(Sender: TObject);
 var
-  Return: cardinal;
+    Return: cardinal;
 begin
-  Return:=ShowReport(3);
-  if not(Return > 32) then
-  begin
-    MsgCall(mcWarn, 'Cannot execute report. Please contact with IT support.');
-    LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
-  end;
+    Return:=ShowReport(3);
+    if not(Return > 32) then
+    begin
+        MsgCall(mcWarn, 'Cannot execute report. Please contact with IT support.');
+        LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
+    end;
 end;
 
-{ -------------------------------------------------------------------------------------------------------------------------------------------- GO TO REPORT 4 }
-procedure TMainForm.btnReport4Click(Sender: TObject);
+procedure TMainForm.btnControlStatusClick(Sender: TObject);
 var
-  Return: cardinal;
+    Return: cardinal;
 begin
-  Return:=ShowReport(4);
-  if not(Return > 32) then
-  begin
-    MsgCall(mcWarn, 'Cannot execute report. Please contact with IT support.');
-    LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
-  end;
+    Return:=ShowReport(4);
+    if not(Return > 32) then
+    begin
+        MsgCall(mcWarn, 'Cannot execute report. Please contact with IT support.');
+        LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
+    end;
 end;
 
 { ------------------------------------------------------------------------------------------------------------------------------------------- AGE VIEW | LOAD }
