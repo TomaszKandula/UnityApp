@@ -23,7 +23,7 @@ type
         ShapeProgressBar: TShape;
         ShapeBackground: TShape;
     protected
-        procedure CreateParams(var Params: TCreateParams); override;
+//        procedure CreateParams(var Params: TCreateParams); override;
     end;
 
 var
@@ -39,21 +39,17 @@ implementation
 // ----------------------------------------------------------------------------------------------------------------------------------------------- APPERANCE //
 
 
-/// <summary>
-///     Applay window shadow.
-/// </summary>
-
-procedure TSplashForm.CreateParams(var Params: TCreateParams);
-begin
-
-    inherited CreateParams(Params);
-
-    with Params do begin
-        Style:=WS_POPUP;
-        WindowClass.style:=WindowClass.style or CS_DROPSHADOW;
-    end;
-
-end;
+//procedure TSplashForm.CreateParams(var Params: TCreateParams);
+//begin
+//
+//    inherited CreateParams(Params);
+//
+//    with Params do begin
+//        Style:=WS_POPUP;
+//        WindowClass.style:=WindowClass.style or CS_DROPSHADOW;
+//    end;
+//
+//end;
 
 
 end.

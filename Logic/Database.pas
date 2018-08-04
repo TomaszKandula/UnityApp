@@ -50,31 +50,27 @@ implementation
 
 constructor TDataBase.Create(ShowConnStr: boolean);
 var
-    AppSettings: TSettings;
+    Settings:    ISettings;
     dbConnNoPwd: string;
     WhichActive: string;
 begin
 
     // Get all data
-    AppSettings:=TSettings.Create;
-    try
-        WhichActive    :=AppSettings.TMIG.ReadString(DatabaseSetup,  'ACTIVE'         , '');
-        ODBC_Driver    :=AppSettings.TMIG.ReadString(DatabaseSetup,  'ODBC_Driver'    , '');
-        OLEDB_Provider :=AppSettings.TMIG.ReadString(DatabaseSetup,  'OLEDB_Provider' , '');
-        OLEDB_PSI      :=AppSettings.TMIG.ReadString(DatabaseSetup,  'OLEDB_PSI'      , '');
-        Common_MARS    :=AppSettings.TMIG.ReadString(DatabaseSetup,  'COMMON_MARS'    , '');
-        Common_TSC     :=AppSettings.TMIG.ReadString(DatabaseSetup,  'COMMON_TSC'     , '');
-        Common_Encrypt :=AppSettings.TMIG.ReadString(DatabaseSetup,  'COMMON_Encrypt' , '');
-        Common_Server  :=AppSettings.TMIG.ReadString(DatabaseSetup,  'COMMON_Server'  , '');
-        Common_Database:=AppSettings.TMIG.ReadString(DatabaseSetup,  'COMMON_Database', '');
-        Common_UserName:=AppSettings.TMIG.ReadString(DatabaseSetup,  'COMMON_UserName', '');
-        Common_Password:=AppSettings.TMIG.ReadString(DatabaseSetup,  'COMMON_Password', '');
-        CmdTimeout     :=AppSettings.TMIG.ReadInteger(DatabaseSetup, 'SERVER_CMD_TIMEOUT', 15);
-        ConTimeout     :=AppSettings.TMIG.ReadInteger(DatabaseSetup, 'SERVER_CON_TIMEOUT', 15);
-        Interval       :=AppSettings.TMIG.ReadInteger(TimersSettings,'NET_CONNETCTION'   , 5000);
-    finally
-        AppSettings.Free;
-    end;
+    Settings:=TSettings.Create;
+    WhichActive    :=Settings.GetStringValue(DatabaseSetup,  'ACTIVE'            , '');
+    ODBC_Driver    :=Settings.GetStringValue(DatabaseSetup,  'ODBC_Driver'       , '');
+    OLEDB_Provider :=Settings.GetStringValue(DatabaseSetup,  'OLEDB_Provider'    , '');
+    OLEDB_PSI      :=Settings.GetStringValue(DatabaseSetup,  'OLEDB_PSI'         , '');
+    Common_MARS    :=Settings.GetStringValue(DatabaseSetup,  'COMMON_MARS'       , '');
+    Common_TSC     :=Settings.GetStringValue(DatabaseSetup,  'COMMON_TSC'        , '');
+    Common_Encrypt :=Settings.GetStringValue(DatabaseSetup,  'COMMON_Encrypt'    , '');
+    Common_Server  :=Settings.GetStringValue(DatabaseSetup,  'COMMON_Server'     , '');
+    Common_Database:=Settings.GetStringValue(DatabaseSetup,  'COMMON_Database'   , '');
+    Common_UserName:=Settings.GetStringValue(DatabaseSetup,  'COMMON_UserName'   , '');
+    Common_Password:=Settings.GetStringValue(DatabaseSetup,  'COMMON_Password'   , '');
+    CmdTimeout     :=Settings.GetIntegerValue(DatabaseSetup, 'SERVER_CMD_TIMEOUT', 15);
+    ConTimeout     :=Settings.GetIntegerValue(DatabaseSetup, 'SERVER_CON_TIMEOUT', 15);
+    Interval       :=Settings.GetIntegerValue(TimersSettings,'NET_CONNETCTION'   , 5000);
 
     // Set template string
     if WhichActive = dbODBC  then dbConnNoPwd:=ConStrODBC;
@@ -97,7 +93,7 @@ begin
 
     // Show connection string in event log
     if (ShowConnStr) and (DBConnStr <> '') then
-        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Connection string built [show_no_password] = ' + dbConnNoPwd);
+        MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Connection string built [show_no_password] = ' + dbConnNoPwd);
 
 end;
 
@@ -122,7 +118,7 @@ procedure TDataBase.InitializeConnection(idThd: integer; ErrorShow: boolean; var
     procedure ErrorHandler(err_class: string; err_msg: string; should_quit: boolean; err_wnd: boolean);
     begin
 
-        LogText(MainForm.EventLogPath, ERR_LOGTEXT + '[' + err_class + '] ' + err_msg + ' (' + IntToStr(ExitCode) + ').');
+        MainForm.LogText.Log(MainForm.EventLogPath, ERR_LOGTEXT + '[' + err_class + '] ' + err_msg + ' (' + IntToStr(ExitCode) + ').');
 
         if err_wnd then
             Application.MessageBox(PChar(ERR_MESSAGE), PChar(MainForm.CAPTION), MB_OK + MB_ICONWARNING);
@@ -167,7 +163,7 @@ begin
         // Connect to given server
         try
             ActiveConnection.Connected:=True;
-            LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Server connection has been established successfully.');
+            MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Server connection has been established successfully.');
         except
             on E: Exception do
                 ErrorHandler(E.ClassName, E.Message, False, ErrorShow);

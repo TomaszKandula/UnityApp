@@ -199,6 +199,7 @@ object FilterForm: TFilterForm
         ParentShowHint = False
         ShowHint = False
         TabOrder = 0
+        OnClick = FilterListClick
       end
     end
     object cbSelectAll: TCheckBox

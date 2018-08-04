@@ -289,7 +289,7 @@ implementation
 
 
 uses
-    Main, SQL, Model, DataBase, Settings, UAC, Mailer, AgeView, Transactions, Tracker, Actions, ReportBug;
+    Main, SQL, Model, DataBase, Settings, UAC, Mailer, AgeView, Transactions, Tracker, Actions, SendFeedback;
 
 
 // --------------------------------------------------------------------------------------------------------------------------------- CHECK SERVER CONNECTION //
@@ -299,30 +299,25 @@ procedure TTCheckServerConnection.Execute;
 var
     IDThd:       integer;
     DataBase:    TDataBase;
-    ConnStatus:  integer;
 begin
 
     DataBase:=TDataBase.Create(False);
 
     try
         IDThd:=TTCheckServerConnection.CurrentThread.ThreadID;
-        ConnStatus:=DataBase.Check;
-        if (MainForm.ConnLastError <> 0) and (ConnStatus = 0) then
+        if (not(MainForm.IsConnected)) and (DataBase.Check = 0) then
         begin
             Synchronize(procedure
             begin
-                DataBase.InitializeConnection(IDThd, False, MainForm.DbConnect);
-                MainForm.ConnLastError:=ConnStatus;
-                MainForm.InvoiceScanTimer.Enabled:=True;
-                MainForm.OILoader.Enabled        :=True;
-                LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Connection with SQL Server database has been re-established.');
+                MainForm.TryInitConnection;
+                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Connection with SQL Server database has been re-established.');
             end);
         end;
 
-        if ConnStatus <> 0 then
+        if DataBase.Check <> 0 then
         begin
-            MainForm.ConnLastError:=ConnStatus;
-            LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Connection with SQL Server database has been lost, waiting to reconnect...');
+            MainForm.IsConnected:=False;
+            MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Connection with SQL Server database has been lost, waiting to reconnect...');
         end;
 
     finally
@@ -361,7 +356,7 @@ begin
         TrackerForm.Display;
     except
         on E: Exception do
-            LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Execution of this tread work has been stopped. Error has been thrown: ' + E.Message + ' (TInvoiceTracker).');
+            MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Execution of this tread work has been stopped. Error has been thrown: ' + E.Message + ' (TInvoiceTracker).');
     end;
 
     // Release when finished
@@ -406,7 +401,7 @@ begin
     try
         StopWatch:=TStopWatch.StartNew;
         MainForm.ExecMessage(True, mcStatusBar, stGenerating);
-        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']:' + stGenerating);
+        MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']:' + stGenerating);
 
         try
             AgeView.idThd:=IDThd;
@@ -448,14 +443,14 @@ begin
 
         except
             on E: Exception do
-                LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot execute "TTMakeAgeView". Error has been thrown: ' + E.Message);
+                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot execute "TTMakeAgeView". Error has been thrown: ' + E.Message);
         end;
 
     finally
         MainForm.ExecMessage(True, mcStatusBar, stReady);
         THDMili:=StopWatch.ElapsedMilliseconds;
         THDSec:=THDMili / 1000;
-        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Age View thread has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
+        MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Age View thread has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
         AgeView.Free;
         FLock.Release;
     end;
@@ -527,14 +522,14 @@ begin
 
         except
             on E: Exception do
-                LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot execute "TTReadAgeView". Error has been thrown: ' + E.Message);
+                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot execute "TTReadAgeView". Error has been thrown: ' + E.Message);
         end;
 
     finally
         MainForm.ExecMessage(True, mcStatusBar, stReady);
         THDMili:=StopWatch.ElapsedMilliseconds;
         THDSec:=THDMili / 1000;
-        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Thread for selected Group Id "' + AgeView.GroupID + '" has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
+        MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Thread for selected Group Id "' + AgeView.GroupID + '" has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
         AgeView.Free;
         FLock.Release;
 
@@ -595,7 +590,7 @@ begin
             end;
         except
             on E: Exception do
-                LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot execute "TTOpenItemsScanner". Error has been thrown: ' + E.Message);
+                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot execute "TTOpenItemsScanner". Error has been thrown: ' + E.Message);
         end;
     finally
         Transactions.Free;
@@ -660,13 +655,13 @@ begin
             OpenItems.UpdateSummary;
         except
             on E: Exception do
-                LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(FIDThd) + ']: Cannot execute "TTReadOpenItems". Error has been thorwn: ' + E.Message);
+                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(FIDThd) + ']: Cannot execute "TTReadOpenItems". Error has been thorwn: ' + E.Message);
         end;
 
     finally
         THDMili:=StopWatch.ElapsedMilliseconds;
         THDSec:=THDMili / 1000;
-        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(FIDThd) + ']: Open Items loading thread has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
+        MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(FIDThd) + ']: Open Items loading thread has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
         MainForm.ExecMessage(True, mcStatusBar, stReady);
 
         // Release VCL and set auto column width
@@ -729,10 +724,10 @@ begin
         if (FMode = adOpenAll) or (FMode = adOpenForUser) then
         begin
             if Read then
-                LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Address Book has been opened successfully.')
+                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Address Book has been opened successfully.')
                     else
                         begin
-                            LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot open Address Book.');
+                            MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot open Address Book.');
                             MainForm.ExecMessage(False, mcError, 'Read function of Address Book has failed. Please contact IT support.');
                         end;
         end;
@@ -741,18 +736,18 @@ begin
         if FMode = adUpdate then
         begin
             if Update then
-                LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: The Address Book has been updated successfully.')
+                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: The Address Book has been updated successfully.')
                     else
-                        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot insert data to Address Book, either error occured or item already exist.');
+                        MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot insert data to Address Book, either error occured or item already exist.');
         end;
 
         // Insert new recodrs
         if FMode = adInsert then
         begin
             if Add then
-                LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: The Address Book insertion has been executed successfully.')
+                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: The Address Book insertion has been executed successfully.')
                     else
-                        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot insert data to Address Book, either error occured or item already exist.');
+                        MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot insert data to Address Book, either error occured or item already exist.');
         end;
 
         // Export
@@ -991,7 +986,7 @@ begin
                 on E: Exception do
                 begin
                     MainForm.ExecMessage(False, mcError, 'Cannot save selected item(s). Exception has been thrown: ' + E.Message);
-                    LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Cannot write Address Book item(s) into database. Error: ' + E.Message);
+                    MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Cannot write Address Book item(s) into database. Error: ' + E.Message);
                 end;
             end;
         finally
@@ -1032,12 +1027,12 @@ begin
         begin
             MainForm.ExecMessage(False, mcInfo, 'Report has been sent successfully!');
             Synchronize(ReportForm.ReportMemo.Clear);
-            LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Bug Report has been successfully sent by the user.');
+            MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Bug Report has been successfully sent by the user.');
         end
         else
         begin
             MainForm.ExecMessage(False, mcError, 'Cannot send Bug Report. Please contact IT support.');
-            LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot send Bug Report.');
+            MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot send Bug Report.');
         end;
     finally
         FLock.Release;
@@ -1219,11 +1214,11 @@ begin
                     end);
 
                     if FEventLog then
-                        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: ''DailyComment'' table has been updated (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(DailyText.RowsAffected) + '.');
+                        MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: ''DailyComment'' table has been updated (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(DailyText.RowsAffected) + '.');
                 end
                 else
                 begin
-                    LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot update daily comment (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(DailyText.RowsAffected) + '. Error message received: ' + DailyText.LastErrorMsg + '.');
+                    MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot update daily comment (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(DailyText.RowsAffected) + '. Error message received: ' + DailyText.LastErrorMsg + '.');
                     MainForm.ExecMessage(False, mcError, 'Cannot update daily comment into database.' +  CRLF + 'Error message received: ' + DailyText.LastErrorMsg + CRLF + 'Please contact IT support.');
                 end;
             end
@@ -1313,11 +1308,11 @@ begin
                     end);
 
                     if FEventLog then
-                        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: ''DailyComment'' table has been posted (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(DailyText.RowsAffected) + '.');
+                        MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: ''DailyComment'' table has been posted (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(DailyText.RowsAffected) + '.');
                 end
                 else
                 begin
-                    LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot update daily comment (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(DailyText.RowsAffected) + '. Error message received: ' + DailyText.LastErrorMsg + '.');
+                    MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot update daily comment (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(DailyText.RowsAffected) + '. Error message received: ' + DailyText.LastErrorMsg + '.');
                     MainForm.ExecMessage(False, mcError, 'Cannot post daily comment into database.' +  CRLF + 'Error message received: ' + DailyText.LastErrorMsg + CRLF + 'Please contact IT support.');
                 end;
             end;
@@ -1410,11 +1405,11 @@ begin
                 if (GenText.UpdateRecord(TblGeneral, ttExplicit, Condition)) and (GenText.RowsAffected > 0) then
                 begin
                     if FEventLog then
-                        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: ''GeneralComment'' table has been updated (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(GenText.RowsAffected) + '.');
+                        MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: ''GeneralComment'' table has been updated (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(GenText.RowsAffected) + '.');
                 end
                 else
                 begin
-                    LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot update general comment (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(GenText.RowsAffected) + '. Error message received: ' + GenText.LastErrorMsg + '.');
+                    MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot update general comment (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(GenText.RowsAffected) + '. Error message received: ' + GenText.LastErrorMsg + '.');
                     MainForm.ExecMessage(False, mcError, 'Cannot update general comment into database.' +  CRLF + 'Error message received: ' + GenText.LastErrorMsg + CRLF + 'Please contact IT support.');
                 end;
             end
@@ -1476,11 +1471,11 @@ begin
                 if (GenText.InsertInto(TblGeneral, ttExplicit)) and (GenText.RowsAffected > 0) then
                 begin
                     if FEventLog then
-                        LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: ''GeneralComment'' table has been posted (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(GenText.RowsAffected) + '.');
+                        MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: ''GeneralComment'' table has been posted (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(GenText.RowsAffected) + '.');
                 end
                 else
                 begin
-                    LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot update general comment (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(GenText.RowsAffected) + '. Error message received: ' + GenText.LastErrorMsg + '.');
+                    MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot update general comment (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(GenText.RowsAffected) + '. Error message received: ' + GenText.LastErrorMsg + '.');
                     MainForm.ExecMessage(False, mcError, 'Cannot update general comment into database.' +  CRLF + 'Error message received: ' + GenText.LastErrorMsg + CRLF + 'Please contact IT support.');
                 end;
             end;

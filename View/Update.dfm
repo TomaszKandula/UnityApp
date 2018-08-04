@@ -3,8 +3,8 @@ object UpdateForm: TUpdateForm
   Top = 0
   BorderStyle = bsNone
   Caption = 'Unity'
-  ClientHeight = 314
-  ClientWidth = 632
+  ClientHeight = 373
+  ClientWidth = 704
   Color = clWhite
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -13,23 +13,23 @@ object UpdateForm: TUpdateForm
   Font.Style = []
   OldCreateOrder = False
   Position = poMainFormCenter
-  OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
   object Background: TShape
     Left = 0
     Top = 0
-    Width = 632
-    Height = 314
+    Width = 704
+    Height = 373
     Align = alClient
-    Pen.Color = clGray
+    Pen.Color = clSkyBlue
+    Pen.Width = 2
     ExplicitLeft = 8
     ExplicitWidth = 636
     ExplicitHeight = 300
   end
   object MainText1: TLabel
-    Left = 96
-    Top = 35
+    Left = 127
+    Top = 43
     Width = 24
     Height = 35
     Cursor = crAppStart
@@ -46,8 +46,8 @@ object UpdateForm: TUpdateForm
     Transparent = False
   end
   object MainText2: TLabel
-    Left = 120
-    Top = 35
+    Left = 151
+    Top = 43
     Width = 424
     Height = 35
     Cursor = crAppStart
@@ -62,7 +62,7 @@ object UpdateForm: TUpdateForm
     Transparent = False
   end
   object Text1: TLabel
-    Left = 153
+    Left = 177
     Top = 128
     Width = 342
     Height = 18
@@ -74,9 +74,9 @@ object UpdateForm: TUpdateForm
     Font.Style = []
     ParentFont = False
   end
-  object Text3: TLabel
+  object Text4: TLabel
     Left = 24
-    Top = 288
+    Top = 336
     Width = 444
     Height = 13
     Cursor = crAppStart
@@ -92,15 +92,15 @@ object UpdateForm: TUpdateForm
   end
   object BottomLine: TBevel
     Left = 24
-    Top = 244
-    Width = 585
+    Top = 291
+    Width = 657
     Height = 19
     Cursor = crAppStart
     Shape = bsBottomLine
   end
-  object Text2: TLabel
+  object Text3: TLabel
     Left = 24
-    Top = 268
+    Top = 316
     Width = 327
     Height = 13
     Cursor = crAppStart
@@ -114,9 +114,16 @@ object UpdateForm: TUpdateForm
     Font.Style = []
     ParentFont = False
   end
+  object ShapeProgressBar: TShape
+    Left = 175
+    Top = 182
+    Width = 346
+    Height = 21
+    Pen.Color = clSkyBlue
+  end
   object Progress: TGauge
-    Left = 153
-    Top = 152
+    Left = 177
+    Top = 184
     Width = 342
     Height = 17
     Cursor = crAppStart
@@ -132,5 +139,18 @@ object UpdateForm: TUpdateForm
     ParentFont = False
     Progress = 0
     ShowText = False
+  end
+  object Text2: TLabel
+    Left = 233
+    Top = 240
+    Width = 249
+    Height = 18
+    Caption = 'Do not turn off your computer.'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -16
+    Font.Name = 'Verdana'
+    Font.Style = []
+    ParentFont = False
   end
 end

@@ -449,6 +449,20 @@ type
         const SystemCode      : string = 'SystemCode';
     end;
 
+    /// <summary>
+    ///     Contains all user logs from application.
+    /// </summary>
+
+    TUnityEventLogs = class(TDataTables)
+    {$TYPEINFO ON}
+    public
+        const Id           : string = 'Id';
+        const UserAlias    : string = 'UserAlias';
+        const DateTimeStamp: string = 'DateTimeStamp';
+        const AppEventLog  : string = 'AppEventLog';
+        const AppName      : string = 'AppName';
+    end;
+
 
 implementation
 

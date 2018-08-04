@@ -498,6 +498,8 @@ const
     TblGroups          = schCustomer + '.' + 'Groups';
     TblUAC             = schCustomer + '.' + 'UAC';
     TblCurrencies      = schCommon   + '.' + 'Currencies';
+    TblAzureJobsReport = schCommon   + '.' + 'AzureJobsReport';
+    TblUnityEventLogs  = schCommon   + '.' + 'UnityEventLogs';
     TblSSISMaster      = schErp      + '.' + 'SSISMaster';
     TblOpenitems       = schErp      + '.' + 'OpenItems';
     TblGroup3          = schErp      + '.' + 'Group3';

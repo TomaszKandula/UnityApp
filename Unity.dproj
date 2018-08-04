@@ -145,6 +145,8 @@
         <DCCReference Include="Logic\UAC.pas"/>
         <DCCReference Include="Logic\Worker.pas"/>
         <DCCReference Include="Logic\Internet.pas"/>
+        <DCCReference Include="Logic\ThreadUtilities.pas"/>
+        <DCCReference Include="Logic\EventLogger.pas"/>
         <DCCReference Include="Extensions\Arrays.pas"/>
         <DCCReference Include="Extensions\InterposerClasses.pas"/>
         <DCCReference Include="View\About.pas">
@@ -174,7 +176,7 @@
         <DCCReference Include="View\PhoneList.pas">
             <Form>PhoneListForm</Form>
         </DCCReference>
-        <DCCReference Include="View\ReportBug.pas">
+        <DCCReference Include="View\SendFeedback.pas">
             <Form>ReportForm</Form>
         </DCCReference>
         <DCCReference Include="View\AVSearch.pas">
@@ -198,7 +200,7 @@
         <DCCReference Include="View\ABSearch.pas">
             <Form>ViewSearchForm</Form>
         </DCCReference>
-        <None Include="Include\cef.inc"/>
+        <None Include="Include\Cef.inc"/>
         <None Include="Include\Common.inc"/>
         <None Include="Include\Header.inc"/>
         <BuildConfiguration Include="Release">
@@ -268,7 +270,7 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="Include\cef.inc" Configuration="Debug" Class="ProjectFile">
+                <DeployFile LocalName="Include\Cef.inc" Configuration="Debug" Class="ProjectFile">
                     <Platform Name="Win32">
                         <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>

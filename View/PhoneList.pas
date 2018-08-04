@@ -3,11 +3,6 @@
 
 unit PhoneList;
 
-    /// <remarks>
-    ///     Do not place 'MAIN' reference in the implementation section, do so in the interface section.
-    ///     This is necessary due to class extension defined in MAIN.
-    /// </remarks>
-
 interface
 
 uses
@@ -16,7 +11,7 @@ uses
 type
 
     /// <summary>
-    ///     Dispays phone list from Address Book.
+    ///     View form class with helpers for dispaying phone list from Address Book.
     /// </summary>
 
     TPhoneListForm = class(TForm)

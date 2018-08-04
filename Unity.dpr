@@ -10,48 +10,50 @@ program Unity;
 {$SetPEFlags $0020}
 
 uses
-    Forms, Windows, Messages, Classes, SysUtils, StdCtrls, ShellApi, IOUtils, INIFiles, CRC32u, SynZip, SynZipFiles, System.Types,
-
-    // ------------------------ Model ------------------------ //
-
-    Model   in 'Model\Model.pas',
-    SQL     in 'Model\SQL.pas',
-
-    // ------------------------ Logic ------------------------ //
-
-    AgeView         in 'Logic\AgeView.pas',
-    Database        in 'Logic\Database.pas',
-    Mailer          in 'Logic\Mailer.pas',
-    Settings        in 'Logic\Settings.pas',
-    Transactions    in 'Logic\Transactions.pas',
-    UAC             in 'Logic\UAC.pas',
-    Worker          in 'Logic\Worker.pas',
-    Internet        in 'Logic\Internet.pas',
-
-    // --------------------- EXTENSIONS ---------------------- //
-
-    Arrays            in 'Extensions\Arrays.pas',
-    InterposerClasses in 'Extensions\InterposerClasses.pas',
-
-    // ------------------------ Views ------------------------ //
-
-    About       in 'View\About.pas'         {AboutForm},
-    Actions     in 'View\Actions.pas'       {ActionsForm},
-    Calendar    in 'View\Calendar.pas'      {CalendarForm},
-    Colors      in 'View\Colors.pas'        {ColorsForm},
-    EventLog    in 'View\EventLog.pas'      {EventForm},
-    Filter      in 'View\Filter.pas'        {FilterForm},
-    Invoices    in 'View\Invoices.pas'      {InvoicesForm},
-    Main        in 'View\Main.pas'          {MainForm},
-    PhoneList   in 'View\PhoneList.pas'     {PhoneListForm},
-    ReportBug   in 'View\ReportBug.pas'     {ReportForm},
-    AVSearch    in 'View\AVSearch.pas'      {SearchForm},
-    Send        in 'View\Send.pas'          {SendForm},
-    Splash      in 'View\Splash.pas'        {SplashForm},
-    Tracker     in 'View\Tracker.pas'       {TrackerForm},
-    Update      in 'View\Update.pas'        {UpdateForm},
-    MassMailer  in 'View\MassMailer.pas'    {ViewMailerForm},
-    ABSearch    in 'View\ABSearch.pas'      {ViewSearchForm};
+  Forms,
+  Windows,
+  Messages,
+  Classes,
+  SysUtils,
+  StdCtrls,
+  ShellApi,
+  IOUtils,
+  INIFiles,
+  CRC32u,
+  SynZip,
+  SynZipFiles,
+  System.Types,
+  Model in 'Model\Model.pas',
+  SQL in 'Model\SQL.pas',
+  AgeView in 'Logic\AgeView.pas',
+  Database in 'Logic\Database.pas',
+  Mailer in 'Logic\Mailer.pas',
+  Settings in 'Logic\Settings.pas',
+  Transactions in 'Logic\Transactions.pas',
+  UAC in 'Logic\UAC.pas',
+  Worker in 'Logic\Worker.pas',
+  Internet in 'Logic\Internet.pas',
+  ThreadUtilities in 'Logic\ThreadUtilities.pas',
+  EventLogger in 'Logic\EventLogger.pas',
+  Arrays in 'Extensions\Arrays.pas',
+  InterposerClasses in 'Extensions\InterposerClasses.pas',
+  About in 'View\About.pas' {AboutForm},
+  Actions in 'View\Actions.pas' {ActionsForm},
+  Calendar in 'View\Calendar.pas' {CalendarForm},
+  Colors in 'View\Colors.pas' {ColorsForm},
+  EventLog in 'View\EventLog.pas' {EventForm},
+  Filter in 'View\Filter.pas' {FilterForm},
+  Invoices in 'View\Invoices.pas' {InvoicesForm},
+  Main in 'View\Main.pas' {MainForm},
+  PhoneList in 'View\PhoneList.pas' {PhoneListForm},
+  SendFeedback in 'View\SendFeedback.pas' {ReportForm},
+  AVSearch in 'View\AVSearch.pas' {SearchForm},
+  Send in 'View\Send.pas' {SendForm},
+  Splash in 'View\Splash.pas' {SplashForm},
+  Tracker in 'View\Tracker.pas' {TrackerForm},
+  Update in 'View\Update.pas' {UpdateForm},
+  MassMailer in 'View\MassMailer.pas' {ViewMailerForm},
+  ABSearch in 'View\ABSearch.pas' {ViewSearchForm};
 
 type
     DWord = 0..$FFFFFFFF;
@@ -72,6 +74,7 @@ var
     Mutex:            integer;
     WndRect:          TRect;
     Settings:         ISettings;
+    LogText:          TThreadFileLog;
     CheckInet:        TInternetConnectivity;
     MsAssemblies:     TStrings;
     FileDateTime:     TDateTime;
@@ -153,7 +156,7 @@ begin
     Sleep(Time);
 
     if TextMode = True then
-        LogText(EventLogPath, Text);
+        LogText.Log(EventLogPath, Text);
 
 end;
 
@@ -175,7 +178,7 @@ var
     FullPath:  string;
 begin
     ZipR:=TZipReader.Create(FileName);
-    LogText(EventLogPath, 'New update package has been found, updating files...');
+    LogText.Log(EventLogPath, 'New update package has been found, updating files...');
 
     try
         for iCNT:=0 to ZipR.Count - 1 do
@@ -206,7 +209,7 @@ begin
         end;
 
         Result:=True;
-        LogText(EventLogPath, 'Old files will be removed by new instance.');
+        LogText.Log(EventLogPath, 'Old files will be removed by new instance.');
     finally
         ZipR.Free;
     end;
@@ -233,12 +236,12 @@ begin
     for FileName in TDirectory.GetFiles(Directory, Pattern) do
     begin
         TFile.Delete(FileName);
-        LogText(EventLogPath, 'File "' + FileName + '" has been removed.');
+        LogText.Log(EventLogPath, 'File "' + FileName + '" has been removed.');
         Inc(Check);
     end;
 
     if Check > 0 then
-        LogText(EventLogPath, 'Cleaning folder after previous update has been done (' + IntToStr(Check) + ' items removed).');
+        LogText.Log(EventLogPath, 'Cleaning folder after previous update has been done (' + IntToStr(Check) + ' items removed).');
 
 end;
 
@@ -252,14 +255,23 @@ begin
 
     {$WARN SYMBOL_PLATFORM ON}
 
-(* TEST
+    // --------------------------------------------------------------------------------------------------------------------------- CHECK INTERNET CONNECTION //
+
     CheckInet:=TInternetConnectivity.Create;
     try
-        CheckInet.IsInternetPresent;
+
+        if not(CheckInet.IsInternetPresent) then
+        begin
+            Application.MessageBox(
+                PCHar(APPCAPTION + ' cannot work off-line. Please check Internet connection or contact your network administrator. Program will be closed.'),
+                PChar(APPCAPTION), MB_OK + MB_ICONWARNING
+            );
+            ExitProcess(0);
+        end;
+
     finally
         CheckInet.Free;
     end;
-*)
 
     // ---------------------------------------------------------------------------------------------------------------------------------- ALLOW ONE INSTANCE //
 
@@ -334,9 +346,11 @@ begin
 
     // -------------------------------------------------------------------------------------------------------------------------------- CHECK EVENT LOG FILE //
 
+    LogText:=TThreadFileLog.Create;
+
     if FileExists(PathEventLog) then
     begin
-        LogText(PathEventLog, 'Starting application...');
+        LogText.Log(PathEventLog, 'Starting application...');
     end
     else
     begin
@@ -355,7 +369,7 @@ begin
             finally
                 FL.Free;
             end;
-            LogText(PathEventLog, 'Starting application...');
+            LogText.Log(PathEventLog, 'Starting application...');
         end
         else
         begin
@@ -444,7 +458,7 @@ begin
             PCHar('No master password has been found. ' + APPCAPTION + ' will be closed. Please contact IT Support.'),
             PChar(APPCAPTION), MB_OK + MB_ICONERROR
         );
-        LogText(Settings.GetPathEventLog, '[Critical Error]: No master password has been found. Application has been terminated.');
+        LogText.Log(Settings.GetPathEventLog, '[Critical Error]: No master password has been found. Application has been terminated.');
         ExitProcess(0);
     end
     else
@@ -466,7 +480,7 @@ begin
             PCHar('Cannot find licence file (' + LicenceFile + '). ' + APPCAPTION + ' will be closed. Please contact IT Support.'),
             PChar(APPCAPTION), MB_OK + MB_ICONERROR
         );
-        LogText(Settings.GetPathEventLog, '[Critical Error]: No licence file has been found. Application has been terminated.');
+        LogText.Log(Settings.GetPathEventLog, '[Critical Error]: No licence file has been found. Application has been terminated.');
         ExitProcess(0);
     end
     else
@@ -483,7 +497,7 @@ begin
             PCHar(APPCAPTION + ' must be run under Windows 7 or higher. ' + APPCAPTION + ' will be closed. Please contact IT Support.'),
             PChar(APPCAPTION), MB_OK + MB_ICONERROR
         );
-        LogText(Settings.GetPathEventLog, '[Critical Error]: Invalid Operating System. Application has been terminated.');
+        LogText.Log(Settings.GetPathEventLog, '[Critical Error]: Invalid Operating System. Application has been terminated.');
         ExitProcess(0);
     end
     else
@@ -522,7 +536,7 @@ begin
                 PChar('Aero is not enabled. ' + APPCAPTION + ' will be closed. Please contact IT Support.'),
                 PChar(APPCAPTION), MB_OK + MB_ICONERROR
             );
-            LogText(Settings.GetPathEventLog, '[Critical Error]: Areo composition is disabled. Application has been terminated.');
+            LogText.Log(Settings.GetPathEventLog, '[Critical Error]: Areo composition is disabled. Application has been terminated.');
             ExitProcess(0);
         end;
     end
@@ -548,7 +562,7 @@ begin
                     PChar(APPCAPTION), MB_OK + MB_ICONERROR
                 );
                 Status(5, AllTasks, DelayErr, 'CRC32 check: ' + ConfigFile + '..., unexpected error!', True, Settings.GetPathEventLog);
-                LogText(Settings.GetPathEventLog, '[Critical Error]: Cannot extract "config.cfg" from resources. Error has been thrown: ' + E.Message);
+                LogText.Log(Settings.GetPathEventLog, '[Critical Error]: Cannot extract "config.cfg" from resources. Error has been thrown: ' + E.Message);
                 ExitProcess(0);
             end;
         end;
@@ -585,9 +599,11 @@ begin
             ExitProcess(0);
         end;
     end;
-    LogText(Settings.GetPathEventLog, 'End of checking resource and configuration files.');
+    LogText.Log(Settings.GetPathEventLog, 'End of checking resource and configuration files.');
 
-    // ------------------------------------------------------------------------------------------------------------------------------------------------- END //
+    // --------------------------------------------------------------------------------------------------------------------------------------- CHECKING ENDS //
+
+    LogText.Free;
 
     // ------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE //
 
@@ -604,24 +620,24 @@ begin
 
     // Main form (view) load
     Application.CreateForm(TMainForm, MainForm);
-    LogText(Settings.GetPathEventLog, '[GUI] Initialization methods executed within main thread, ''MainForm'' has been created. Main process thread ID = ' + IntToStr(MainThreadID) + '.');
+    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] Initialization methods executed within main thread, ''MainForm'' has been created. Main process thread ID = ' + IntToStr(MainThreadID) + '.');
 
     // Other forms (views)
     Status(13, AllTasks, 400, 'Application initialization: VCL forms loading, please wait.', False, Settings.GetPathEventLog);
-    Application.CreateForm(TAboutForm,       AboutForm);       LogText(Settings.GetPathEventLog, '[GUI] ''AboutForm'' ......... has been created.');
-    Application.CreateForm(TSendForm,        SendForm);        LogText(Settings.GetPathEventLog, '[GUI] ''SendForm'' .......... has been created.');
-    Application.CreateForm(TEventForm,       EventForm);       LogText(Settings.GetPathEventLog, '[GUI] ''EventForm'' ......... has been created.');
-    Application.CreateForm(TColorsForm,      ColorsForm);      LogText(Settings.GetPathEventLog, '[GUI] ''ColorsForm'' ........ has been created.');
-    Application.CreateForm(TReportForm,      ReportForm);      LogText(Settings.GetPathEventLog, '[GUI] ''ReportForm'' ........ has been created.');
-    Application.CreateForm(TFilterForm,      FilterForm);      LogText(Settings.GetPathEventLog, '[GUI] ''FilterForm'' ........ has been created.');
-    Application.CreateForm(TSearchForm,      SearchForm);      LogText(Settings.GetPathEventLog, '[GUI] ''SearchForm'' ........ has been created.');
-    Application.CreateForm(TTrackerForm,     TrackerForm);     LogText(Settings.GetPathEventLog, '[GUI] ''TrackerForm'' ....... has been created.');
-    Application.CreateForm(TActionsForm,     ActionsForm);     LogText(Settings.GetPathEventLog, '[GUI] ''ActionsForm'' ....... has been created.');
-    Application.CreateForm(TCalendarForm,    CalendarForm);    LogText(Settings.GetPathEventLog, '[GUI] ''CalendarForm'' ...... has been created.');
-    Application.CreateForm(TInvoicesForm,    InvoicesForm);    LogText(Settings.GetPathEventLog, '[GUI] ''InvoicesForm'' ...... has been created.');
-    Application.CreateForm(TPhoneListForm,   PhoneListForm);   LogText(Settings.GetPathEventLog, '[GUI] ''PhoneListForm'' ..... has been created.');
-    Application.CreateForm(TViewSearchForm,  ViewSearchForm);  LogText(Settings.GetPathEventLog, '[GUI] ''ViewSearchForm'' .... has been created.');
-    Application.CreateForm(TViewMailerForm,  ViewMailerForm);  LogText(Settings.GetPathEventLog, '[GUI] ''ViewMailerForm'' .... has been created.');
+    Application.CreateForm(TAboutForm,       AboutForm);       MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''AboutForm'' ......... has been created.');
+    Application.CreateForm(TSendForm,        SendForm);        MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''SendForm'' .......... has been created.');
+    Application.CreateForm(TEventForm,       EventForm);       MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''EventForm'' ......... has been created.');
+    Application.CreateForm(TColorsForm,      ColorsForm);      MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ColorsForm'' ........ has been created.');
+    Application.CreateForm(TReportForm,      ReportForm);      MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ReportForm'' ........ has been created.');
+    Application.CreateForm(TFilterForm,      FilterForm);      MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''FilterForm'' ........ has been created.');
+    Application.CreateForm(TSearchForm,      SearchForm);      MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''SearchForm'' ........ has been created.');
+    Application.CreateForm(TTrackerForm,     TrackerForm);     MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''TrackerForm'' ....... has been created.');
+    Application.CreateForm(TActionsForm,     ActionsForm);     MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ActionsForm'' ....... has been created.');
+    Application.CreateForm(TCalendarForm,    CalendarForm);    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''CalendarForm'' ...... has been created.');
+    Application.CreateForm(TInvoicesForm,    InvoicesForm);    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''InvoicesForm'' ...... has been created.');
+    Application.CreateForm(TPhoneListForm,   PhoneListForm);   MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''PhoneListForm'' ..... has been created.');
+    Application.CreateForm(TViewSearchForm,  ViewSearchForm);  MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ViewSearchForm'' .... has been created.');
+    Application.CreateForm(TViewMailerForm,  ViewMailerForm);  MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ViewMailerForm'' .... has been created.');
 
     // Splash screen - 100%
     Status(14, AllTasks, 900, 'Application is initialized.', False, Settings.GetPathEventLog);
@@ -637,7 +653,7 @@ begin
     if Settings.GetStringValue(ApplicationDetails,  'WINDOW_STATE', '') = 'wsNormal'    then MainForm.WindowState:=wsNormal;
     if Settings.GetStringValue(ApplicationDetails,  'WINDOW_STATE', '') = 'wsMaximized' then MainForm.WindowState:=wsMaximized;
     if Settings.GetStringValue(ApplicationDetails,  'WINDOW_STATE', '') = 'wsMinimized' then MainForm.WindowState:=wsMinimized;
-    LogText(Settings.GetPathEventLog, 'Initialization is completed. Application is running.');
+    MainForm.LogText.Log(Settings.GetPathEventLog, 'Initialization is completed. Application is running.');
 
     // ------------------------------------------------------------------------------------------------------------------------------------------------- RUN //
 

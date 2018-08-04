@@ -766,10 +766,18 @@ end;
 procedure TActionsForm.FormActivate(Sender: TObject);
 begin
     LoadingAnimation(ImgLoadingWindow, AnimationON);
-    GetData;
-    SimpleText.Caption:=MainForm.OpenItemsUpdate;
-    SetControls;
-    LoadingAnimation(ImgLoadingWindow, AnimationOFF);
+    if MainForm.IsConnected then
+    begin
+        GetData;
+        SimpleText.Caption:=MainForm.OpenItemsUpdate;
+        SetControls;
+        LoadingAnimation(ImgLoadingWindow, AnimationOFF);
+    end
+    else
+    begin
+        MainForm.MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+        Close;
+    end;
 end;
 
 procedure TActionsForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);

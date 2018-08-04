@@ -6,7 +6,8 @@ unit InterposerClasses;
 interface
 
 uses
-    Arrays, Grids, ExtCtrls, Messages, Controls, Graphics, Types, Dialogs, Forms, Winapi.Windows, Clipbrd, SysUtils, Math, Classes, ComObj, Variants, StdCtrls;
+    Arrays, Grids, ExtCtrls, Messages, Controls, Graphics, Types, Dialogs, Forms, Winapi.Windows, Clipbrd, SysUtils, Math, Classes, ComObj, Variants, StdCtrls,
+    CheckLst;
 
     /// <summary>
     ///     This unit contains all extensions of standard components introduced via interposer class.
@@ -20,6 +21,15 @@ type
     /// </remarks>
 
     TAbstractGrid = class(Grids.TStringGrid);
+
+    /// <summary>
+    ///
+    /// </summary>
+
+    TCheckListBox = class(CheckLst.TCheckListBox)
+    published
+        procedure Freeze(PaintWnd: boolean);
+    end;
 
     /// <summary>
     ///     Interposer class of TEdit. Extension.
@@ -117,6 +127,28 @@ implementation
 uses
     Main, Settings, SQL;
 
+
+// --------------------------------------------------------------------------------------------------------------------------- EXTENSION OF 'TLISTBOX' CLASS //
+
+/// <summary>
+///     Allow to freeze component.
+/// </summary>
+
+procedure TCheckListBox.Freeze(PaintWnd: Boolean);
+begin
+
+    if (PaintWnd) then
+    begin
+        with Self do SendMessage(Handle, WM_SETREDRAW, 0, 0);
+    end;
+
+    if not (PaintWnd) then
+    begin
+        with Self do SendMessage(Handle, WM_SETREDRAW, 1, 0);
+        Self.Repaint;
+    end;
+
+end;
 
 
 // ------------------------------------------------------------------------------------------------------------------------------ EXTENSION OF 'TEDIT' CLASS //
@@ -977,7 +1009,7 @@ begin
 
                 if Result then
                 begin
-                    LogText(MainForm.EventLogPath, 'Thread: [' + IntToStr(OpenThdId) + ']: The data has been successfully transferred to Excel.');
+                    MainForm.LogText.Log(MainForm.EventLogPath, 'Thread: [' + IntToStr(OpenThdId) + ']: The data has been successfully transferred to Excel.');
                     SendMessage(MainForm.Handle, WM_GETINFO, 1, LPARAM(PCHAR('The data has been successfully transferred to Excel.')));
                 end;
 
@@ -990,13 +1022,13 @@ begin
             if E.Message = xlWARN_MESSAGE then
             // Excel not found
             begin
-                LogText(MainForm.EventLogPath, 'Thread: [' + IntToStr(OpenThdId) + ']: The data cannot be exported because Microsoft Excel cannot be found.');
+                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread: [' + IntToStr(OpenThdId) + ']: The data cannot be exported because Microsoft Excel cannot be found.');
                 SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PCHAR('The data cannot be exported because Microsoft Excel cannot be found.')));
             end
             else
             // General message
             begin
-                LogText(MainForm.EventLogPath, 'Thread: [' + IntToStr(OpenThdId) + ']: The data cannot be exported, error message has been thrown: ' + E.Message + '.');
+                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread: [' + IntToStr(OpenThdId) + ']: The data cannot be exported, error message has been thrown: ' + E.Message + '.');
                 SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PCHAR('The data cannot be exported. Description received: ' + E.Message)));
             end;
         end;
@@ -1088,7 +1120,7 @@ begin
             except
                 on E: Exception do
                 begin
-                    LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: CSV Import has failed: ' + ExtractFileName(fPath));
+                    MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: CSV Import has failed: ' + ExtractFileName(fPath));
                     MainForm.ExecMessage(False, mcError, 'CSV Import has failed. Please check the file and try again.');
                     IsError:=True;
                 end;
@@ -1097,7 +1129,7 @@ begin
         finally
             if not IsError then
             begin
-                LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: Data has been imported successfully!');
+                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: Data has been imported successfully!');
                 MainForm.ExecMessage(False, mcInfo, 'Data has been imported successfully!');
             end;
             Data.Free;
@@ -1158,7 +1190,7 @@ begin
         except
             on E: Exception do
             begin
-                LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: Cannot saved file: ' + ExtractFileName(fPath));
+                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: Cannot saved file: ' + ExtractFileName(fPath));
                 MainForm.ExecMessage(False, mcError, 'Cannot save the file in the given location.');
                 IsError:=True;
             end;
@@ -1167,7 +1199,7 @@ begin
     finally
         if not IsError then
         begin
-            LogText(MainForm.EventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: Data has been exported successfully!');
+            MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: Data has been exported successfully!');
             MainForm.ExecMessage(False, mcInfo, 'Data have been exported successfully!');
         end;
         CSVData.Free;
