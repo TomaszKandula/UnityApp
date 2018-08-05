@@ -1186,14 +1186,14 @@ object MainForm: TMainForm
   object MyPages: TPageControl
     AlignWithMargins = True
     Left = 10
-    Top = 65
+    Top = 67
     Width = 1295
-    Height = 721
+    Height = 719
     Margins.Left = 10
     Margins.Top = 0
     Margins.Right = 10
     Margins.Bottom = 0
-    ActivePage = TabSheet1
+    ActivePage = TabSheet5
     Align = alClient
     DoubleBuffered = True
     Font.Charset = DEFAULT_CHARSET
@@ -1206,6 +1206,7 @@ object MainForm: TMainForm
     TabOrder = 0
     TabStop = False
     TabWidth = 150
+    ExplicitTop = 65
     ExplicitHeight = 796
     object TabSheet9: TTabSheet
       Caption = 'START'
@@ -1217,7 +1218,7 @@ object MainForm: TMainForm
         Left = 17
         Top = 17
         Width = 1253
-        Height = 659
+        Height = 657
         Margins.Left = 17
         Margins.Top = 17
         Margins.Right = 17
@@ -1232,7 +1233,7 @@ object MainForm: TMainForm
           Left = 5
           Top = 5
           Width = 1239
-          Height = 645
+          Height = 643
           Margins.Left = 5
           Margins.Top = 5
           Margins.Right = 5
@@ -1244,7 +1245,7 @@ object MainForm: TMainForm
           ExplicitWidth = 300
           ExplicitHeight = 150
           ControlData = {
-            4C0000000E800000AA4200000100000001020000000000000000000000000000
+            4C0000000E800000754200000100000001020000000000000000000000000000
             000000004C000000000000000000000001000000E0D057007335CF11AE690800
             2B2E126208000000000000004C0000000114020000000000C000000000000046
             8000000000000000000000000000000000000000000000000000000000000000
@@ -1262,7 +1263,7 @@ object MainForm: TMainForm
         Left = 17
         Top = 17
         Width = 1253
-        Height = 659
+        Height = 657
         Margins.Left = 17
         Margins.Top = 17
         Margins.Right = 17
@@ -1278,7 +1279,7 @@ object MainForm: TMainForm
           Left = 100
           Top = 50
           Width = 1053
-          Height = 559
+          Height = 557
           Margins.Left = 100
           Margins.Top = 50
           Margins.Right = 100
@@ -1288,6 +1289,7 @@ object MainForm: TMainForm
           Color = clWhite
           ParentBackground = False
           TabOrder = 0
+          ExplicitHeight = 559
           object Label1: TLabel
             AlignWithMargins = True
             Left = 50
@@ -3837,7 +3839,7 @@ object MainForm: TMainForm
       end
       object Footer1: TPanel
         Left = 0
-        Top = 572
+        Top = 570
         Width = 1287
         Height = 121
         Align = alBottom
@@ -4396,7 +4398,7 @@ object MainForm: TMainForm
         Left = 17
         Top = 135
         Width = 1253
-        Height = 437
+        Height = 435
         Margins.Left = 17
         Margins.Top = 0
         Margins.Right = 17
@@ -4414,7 +4416,7 @@ object MainForm: TMainForm
           Left = 10
           Top = 10
           Width = 1233
-          Height = 417
+          Height = 415
           Margins.Left = 10
           Margins.Top = 10
           Margins.Right = 10
@@ -7546,7 +7548,7 @@ object MainForm: TMainForm
           Left = 2
           Top = 2
           Width = 1249
-          Height = 433
+          Height = 431
           Margins.Left = 2
           Margins.Top = 2
           Margins.Right = 2
@@ -8245,7 +8247,7 @@ object MainForm: TMainForm
         Left = 17
         Top = 150
         Width = 1253
-        Height = 526
+        Height = 524
         Margins.Left = 17
         Margins.Top = 0
         Margins.Right = 17
@@ -8263,7 +8265,7 @@ object MainForm: TMainForm
           Left = 10
           Top = 10
           Width = 1233
-          Height = 506
+          Height = 504
           Margins.Left = 10
           Margins.Top = 10
           Margins.Right = 10
@@ -11394,7 +11396,7 @@ object MainForm: TMainForm
           Left = 2
           Top = 2
           Width = 1249
-          Height = 522
+          Height = 520
           Margins.Left = 2
           Margins.Top = 2
           Margins.Right = 2
@@ -11513,7 +11515,7 @@ object MainForm: TMainForm
         Left = 17
         Top = 118
         Width = 1253
-        Height = 558
+        Height = 556
         Margins.Left = 17
         Margins.Top = 0
         Margins.Right = 17
@@ -11733,7 +11735,7 @@ object MainForm: TMainForm
         Left = 17
         Top = 118
         Width = 1253
-        Height = 558
+        Height = 556
         Margins.Left = 17
         Margins.Top = 0
         Margins.Right = 17
@@ -11751,7 +11753,7 @@ object MainForm: TMainForm
           Left = 10
           Top = 10
           Width = 1233
-          Height = 538
+          Height = 536
           Margins.Left = 10
           Margins.Top = 10
           Margins.Right = 10
@@ -14882,7 +14884,7 @@ object MainForm: TMainForm
           Left = 2
           Top = 2
           Width = 1249
-          Height = 554
+          Height = 552
           Margins.Left = 2
           Margins.Top = 2
           Margins.Right = 2
@@ -15026,7 +15028,7 @@ object MainForm: TMainForm
         Left = 17
         Top = 118
         Width = 1253
-        Height = 558
+        Height = 556
         Margins.Left = 17
         Margins.Top = 0
         Margins.Right = 17
@@ -15040,7 +15042,7 @@ object MainForm: TMainForm
           Left = 10
           Top = 10
           Width = 1233
-          Height = 538
+          Height = 536
           Margins.Left = 10
           Margins.Top = 10
           Margins.Right = 10
@@ -18172,7 +18174,7 @@ object MainForm: TMainForm
           Left = 2
           Top = 2
           Width = 1249
-          Height = 554
+          Height = 552
           Margins.Left = 2
           Margins.Top = 2
           Margins.Right = 2
@@ -18315,7 +18317,7 @@ object MainForm: TMainForm
         Left = 17
         Top = 118
         Width = 614
-        Height = 558
+        Height = 556
         Margins.Left = 17
         Margins.Top = 0
         Margins.Right = 0
@@ -18347,7 +18349,7 @@ object MainForm: TMainForm
           Left = 0
           Top = 29
           Width = 614
-          Height = 529
+          Height = 527
           Margins.Left = 0
           Margins.Top = 5
           Margins.Right = 0
@@ -18361,7 +18363,7 @@ object MainForm: TMainForm
             Left = 2
             Top = 2
             Width = 610
-            Height = 525
+            Height = 523
             Margins.Left = 2
             Margins.Top = 2
             Margins.Right = 2
@@ -18396,7 +18398,7 @@ object MainForm: TMainForm
         Left = 967
         Top = 118
         Width = 303
-        Height = 558
+        Height = 556
         Margins.Left = 0
         Margins.Top = 0
         Margins.Right = 17
@@ -18489,7 +18491,7 @@ object MainForm: TMainForm
           Left = 0
           Top = 386
           Width = 303
-          Height = 167
+          Height = 165
           Margins.Left = 0
           Margins.Top = 5
           Margins.Right = 0
@@ -18503,7 +18505,7 @@ object MainForm: TMainForm
             Left = 2
             Top = 2
             Width = 299
-            Height = 163
+            Height = 161
             Margins.Left = 2
             Margins.Top = 2
             Margins.Right = 2
@@ -18538,7 +18540,7 @@ object MainForm: TMainForm
         Left = 648
         Top = 118
         Width = 302
-        Height = 558
+        Height = 556
         Margins.Left = 17
         Margins.Top = 0
         Margins.Right = 17
@@ -18631,7 +18633,7 @@ object MainForm: TMainForm
           Left = 0
           Top = 385
           Width = 302
-          Height = 168
+          Height = 166
           Margins.Left = 0
           Margins.Top = 5
           Margins.Right = 0
@@ -18647,7 +18649,7 @@ object MainForm: TMainForm
             Left = 2
             Top = 2
             Width = 298
-            Height = 164
+            Height = 162
             Margins.Left = 2
             Margins.Top = 2
             Margins.Right = 2
@@ -19031,7 +19033,7 @@ object MainForm: TMainForm
         Left = 17
         Top = 118
         Width = 907
-        Height = 558
+        Height = 556
         Margins.Left = 17
         Margins.Top = 0
         Margins.Right = 17
@@ -19463,7 +19465,7 @@ object MainForm: TMainForm
           Left = 0
           Top = 120
           Width = 270
-          Height = 438
+          Height = 436
           Margins.Left = 0
           Margins.Top = 5
           Margins.Right = 5
@@ -19479,7 +19481,7 @@ object MainForm: TMainForm
             Left = 2
             Top = 2
             Width = 266
-            Height = 434
+            Height = 432
             Margins.Left = 2
             Margins.Top = 2
             Margins.Right = 2
@@ -19505,6 +19507,7 @@ object MainForm: TMainForm
             OnMouseWheelDown = sgListSectionMouseWheelDown
             OnMouseWheelUp = sgListSectionMouseWheelUp
             OnSelectCell = sgListSectionSelectCell
+            ExplicitHeight = 434
             ColWidths = (
               30
               381)
@@ -19518,7 +19521,7 @@ object MainForm: TMainForm
           Left = 280
           Top = 120
           Width = 627
-          Height = 438
+          Height = 436
           Margins.Left = 5
           Margins.Top = 5
           Margins.Right = 0
@@ -19534,7 +19537,7 @@ object MainForm: TMainForm
             Left = 2
             Top = 2
             Width = 623
-            Height = 434
+            Height = 432
             Margins.Left = 2
             Margins.Top = 2
             Margins.Right = 2
@@ -19558,6 +19561,7 @@ object MainForm: TMainForm
             OnKeyUp = sgListValueKeyUp
             OnMouseWheelDown = sgListValueMouseWheelDown
             OnMouseWheelUp = sgListValueMouseWheelUp
+            ExplicitHeight = 434
             ColWidths = (
               30
               169
@@ -19573,7 +19577,7 @@ object MainForm: TMainForm
         Left = 941
         Top = 118
         Width = 330
-        Height = 558
+        Height = 556
         Margins.Left = 0
         Margins.Top = 0
         Margins.Right = 17
@@ -19686,7 +19690,7 @@ object MainForm: TMainForm
           Left = 0
           Top = 379
           Width = 330
-          Height = 179
+          Height = 177
           Margins.Left = 0
           Margins.Top = 5
           Margins.Right = 0
@@ -19700,7 +19704,7 @@ object MainForm: TMainForm
             Left = 2
             Top = 2
             Width = 326
-            Height = 175
+            Height = 173
             Margins.Left = 2
             Margins.Top = 2
             Margins.Right = 2
@@ -19723,6 +19727,7 @@ object MainForm: TMainForm
             OnDrawCell = sgGroupsDrawCell
             OnMouseWheelDown = sgGroupsMouseWheelDown
             OnMouseWheelUp = sgGroupsMouseWheelUp
+            ExplicitHeight = 175
             ColWidths = (
               30
               35
@@ -19738,7 +19743,7 @@ object MainForm: TMainForm
         Left = 1288
         Top = 118
         Width = 0
-        Height = 560
+        Height = 558
         Margins.Left = 0
         Margins.Top = 0
         Margins.Right = 17
@@ -19956,7 +19961,7 @@ object MainForm: TMainForm
     Left = 0
     Top = 0
     Width = 1315
-    Height = 55
+    Height = 57
     Margins.Left = 0
     Margins.Top = 0
     Margins.Right = 0
@@ -19968,9 +19973,9 @@ object MainForm: TMainForm
     TabOrder = 2
     object btnAddressBook: TSpeedButton
       Left = 443
-      Top = 10
+      Top = 8
       Width = 118
-      Height = 36
+      Height = 40
       Cursor = crHandPoint
       Hint = 'Address Book'
       Caption = 'ADRESS BOOK'
@@ -20080,9 +20085,9 @@ object MainForm: TMainForm
     end
     object btnAgeDebt: TSpeedButton
       Left = 240
-      Top = 10
+      Top = 8
       Width = 87
-      Height = 36
+      Height = 40
       Cursor = crHandPoint
       Hint = 'Debtors Aging'
       Caption = 'DEBTORS'
@@ -20197,10 +20202,10 @@ object MainForm: TMainForm
       OnClick = btnAgeDebtClick
     end
     object btnGeneral: TSpeedButton
-      Left = 869
-      Top = 10
+      Left = 981
+      Top = 8
       Width = 85
-      Height = 36
+      Height = 40
       Cursor = crHandPoint
       Hint = 'General Tables'
       Caption = 'TABLES'
@@ -20310,9 +20315,9 @@ object MainForm: TMainForm
     end
     object btnOpenItems: TSpeedButton
       Left = 598
-      Top = 10
+      Top = 8
       Width = 110
-      Height = 36
+      Height = 40
       Cursor = crHandPoint
       Hint = 'Open Items'
       Caption = 'OPEN ITEMS'
@@ -20422,9 +20427,9 @@ object MainForm: TMainForm
     end
     object btnOtherTrans: TSpeedButton
       Left = 718
-      Top = 10
+      Top = 8
       Width = 118
-      Height = 36
+      Height = 40
       Cursor = crHandPoint
       Hint = 'Unidentified Transactions'
       Caption = 'UNIDENTIFIED'
@@ -20533,10 +20538,10 @@ object MainForm: TMainForm
       OnClick = btnOtherTransClick
     end
     object btnSettings: TSpeedButton
-      Left = 972
-      Top = 10
+      Left = 1084
+      Top = 8
       Width = 89
-      Height = 36
+      Height = 40
       Cursor = crHandPoint
       Hint = 'Settings'
       Caption = 'SETTINGS'
@@ -20646,9 +20651,9 @@ object MainForm: TMainForm
     end
     object btnStart: TSpeedButton
       Left = 14
-      Top = 10
+      Top = 8
       Width = 82
-      Height = 36
+      Height = 40
       Cursor = crHandPoint
       Hint = 'Start'
       Caption = 'START'
@@ -20726,9 +20731,9 @@ object MainForm: TMainForm
     end
     object btnTabelauReport: TSpeedButton
       Left = 111
-      Top = 10
+      Top = 8
       Width = 90
-      Height = 36
+      Height = 40
       Cursor = crHandPoint
       Hint = 'Tableau Reports'
       Caption = 'REPORTS'
@@ -20836,9 +20841,9 @@ object MainForm: TMainForm
     end
     object btnTracker: TSpeedButton
       Left = 343
-      Top = 10
+      Top = 8
       Width = 90
-      Height = 36
+      Height = 40
       Cursor = crHandPoint
       Hint = 'Invoice Tracker'
       Caption = 'TRACKER'
@@ -20948,24 +20953,135 @@ object MainForm: TMainForm
     end
     object Separate1: TBevel
       Left = 579
-      Top = 10
+      Top = 8
       Width = 17
-      Height = 36
+      Height = 40
       Shape = bsLeftLine
     end
     object Separate2: TBevel
       Left = 217
-      Top = 10
+      Top = 8
       Width = 17
-      Height = 36
+      Height = 40
       Shape = bsLeftLine
     end
     object Separate3: TBevel
-      Left = 852
-      Top = 10
+      Left = 964
+      Top = 8
       Width = 17
-      Height = 36
+      Height = 40
       Shape = bsLeftLine
+    end
+    object btnQueries: TSpeedButton
+      Left = 849
+      Top = 8
+      Width = 101
+      Height = 40
+      Cursor = crHandPoint
+      Hint = 'Open Items'
+      Caption = 'QUERIES'
+      Flat = True
+      Glyph.Data = {
+        360C0000424D360C000000000000360000002800000020000000200000000100
+        180000000000000C0000C40E0000C40E00000000000000000000FFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF4EDC8E7D7
+        87DEC859D7BE39D5BA2DD5BA2DD7BE39DEC859E7D787F4EDC8FFFFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFE4D275CFB00FCEB011D0B3
+        19D1B41FD2B622D2B623D2B623D2B622D1B41FD0B319CEB011CFB00FE4D275FF
+        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFE8D989CDAD08D0B319D2B623D3B725D3B7
+        25D3B725D3B725D3B725D3B725D3B725D3B725D3B725D3B725D2B623D0B319CD
+        AD08E8D989FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFFFFD6BB30CFB012D2B624D3B725D3B725D3B725D3B7
+        25D3B725D3B725D3B725D3B725D3B725D3B725D3B725D3B725D3B725D3B725D2
+        B624CFB012D6BB30FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFFFFFFFFFFDFCF5D0B216D1B41DD3B725D3B725D3B725D3B725D3B725D3B7
+        25D3B725D3B725D3B725D3B725D3B725D3B725D3B725D3B725D3B725D3B725D3
+        B725D3B725D1B41DD0B216FDFCF5FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFFFFFFFFFD0B216D1B51FD3B725D3B725DAB41BE1B313E1B313E1B313E1B3
+        13E1B313E1B313E1B313E4B616E4B617E4B617E4B617E4B617E4B617E4B617DB
+        B61DD3B725D3B725D1B51FD0B216FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFFFD6BB30D1B41DD3B725D3B725DAB41B93CA7A4AD6C452D5BC52D5BC52D5
+        BC52D5BC52D5BC54D8BF38BAA136B8A036B8A036B8A036B8A036B8A02DB8A683
+        BA6CDBB61DD3B725D3B725D1B41DD6BB30FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        E8D889CFB012D3B725D3B725D3B725DBB41A8DCB7F3ED7CD47D6C447D6C447D6
+        C447D6C447D6C44AD9C72FB9A72CB7A52DB7A52DB7A52DB7A52DB7A523B7AC7E
+        BA70DDB61CD3B725D3B725D3B725CFB012E8D889FFFFFFFFFFFFFFFFFFFFFFFF
+        CDAD08D2B624D3B725D3B725D3B725DBB41A8FCA7E41D7CA4AD6C24AD6C24AD6
+        C24AD6C249D5C04BD7C133B89F30B79F30B7A330B8A430B8A430B8A426B7AA7F
+        BA6FDDB61CD3B725D3B725D3B725D2B624CDAD08FFFFFFFFFFFFFFFFFFE4D274
+        D0B319D3B725D3B725D3B725D3B725DBB41A8FCA7E41D7CA4AD6C24AD6C24AD6
+        C247D3BC4CD8C75EEAE421C3DD26BABC33B79930B7A330B8A430B8A426B7AA7F
+        BA6FDDB61CD3B725D3B725D3B725D3B725D0B319E4D274FFFFFFFFFFFFCFB00F
+        D2B623D3B725D3B725D3B725D3B725DBB41A8FCA7E41D7CA4AD6C24AD6C247D2
+        BB58E5E269FFFF6FFFFF1AA6D406C9FF13BFF333B79C30B7A330B8A426B7AA7F
+        BA6FDDB61CD3B725D3B725D3B725D3B725D2B623CFB00FFFFFFFF4EDC8CEB011
+        D3B725D3B725D3B725D3B725D3B725DBB41A8FCA7E41D7CA4AD6C248D4BF51DD
+        D169FEFF6AB9B07763384131111D94B40AC6FF1ABEE032B79C30B8A426B7AA7F
+        BA6FDDB61CD3B725D3B725D3B725D3B725D3B725CEB011F4EDC8E7D887D0B319
+        D3B725D3B725D3B725D3B725D3B725DBB41A8FCA7E41D7CA4AD6C247D3BC60ED
+        F266F8FF68D3D36CFBFF33575247140009D0FF0BC1FF33B79C30B7A326B7AA7F
+        BA6FDDB61CD3B725D3B725D3B725D3B725D3B725D0B319E7D887DEC859D1B41F
+        D3B725D3B725D3B725D3B725D3B725DBB41A8ECA7D41D7CA4AD6C247D2BB63F2
+        FA66F6FF65F7FF757C5B4427001D92B20CC6FF0AC0FF2FB9A830B7A225B7AB7F
+        BA6EDDB61CD3B725D3B725D3B725D3B725D3B725D1B41FDEC859D8BE39D2B622
+        D3B725D3B725D3B725D3B725D3B725DAB51B96C67040D7CC4AD6C247D3BC5EEC
+        EF66FFFF6E8A71777C58248DA90FBBF60DC2FF0CC1FF33B79A30B7A324B7AC87
+        B863DCB61DD3B725D3B725D3B725D3B725D3B725D2B622D8BE39D6BA2DD2B623
+        D3B725D3B725D3B725D3B725D3B725D7B51FB6C04E3BD8D14AD6C249D5C04DDA
+        CA6AFCFF67E4EA766B444721002F5D5B07CAFF1FBDD532B79D30B8A41FB7AFAE
+        B948D8B620D3B725D3B725D3B725D3B725D3B725D2B623D6BA2DD6BA2DD2B623
+        D3B725D3B725D3B725D3B725D3B725D3B624E2B41542D9CF48D6C34AD6C247D3
+        BD52DFD569FBFF70FFFF16B1E804CCFF1BBEE033B79930B7A32EB7A425B9AFE5
+        B718D3B624D3B725D3B725D3B725D3B725D3B725D2B623D6BA2DD8BE39D2B622
+        D3B725D3B725D3B725D3B725D3B725D3B725DAB41B9CC76D3AD8D14AD6C24AD6
+        C248D4BE48D4BE57E4D827C0CA2DB8A932B79B30B7A330B8A41EB7B08FBA61DC
+        B61CD3B725D3B725D3B725D3B725D3B725D3B725D2B622D8BE39DEC859D1B41F
+        D3B725D3B725D3B725D3B725D3B725D3B725D3B624E4B31166D3AB3ED7CD4AD6
+        C24AD6C249D5C14BD8C232B8A130B7A130B8A430B8A422B7AC4FBA93E8B715D3
+        B624D3B725D3B725D3B725D3B725D3B725D3B725D1B41FDEC859E7D887D0B319
+        D3B725D3B725D3B725D3B725D3B725D3B725D3B725D3B623E4B41473D09E37D9
+        D545D6C649D6C24CD9C531B9A52EB7A32AB7A71AB7B35EBA88E6B717D3B623D3
+        B725D3B725D3B725D3B725D3B725D3B725D3B725D0B319E7D887F4EDC8CEB011
+        D3B725D3B725D3B725D3B725D3B725D3B725D3B725D3B725D3B624E2B211B9C1
+        4E66D2AA45E0CC55EBC237CAA42EC4A850B98FB1BA47E5B614D3B624D3B725D3
+        B725D3B725D3B725D3B725D3B725D3B725D3B725CEB011F4EDC8FFFFFFCFB00F
+        D2B623D3B725D3B725D3B725D3B725D3B725D3B725D3B725D3B725D3B725D7B5
+        1EEAB90B848171002BEC001DAA2F438CF4C20CD8B61FD3B725D3B725D3B725D3
+        B725D3B725D3B725D3B725D3B725D3B725D2B623CFB00FFFFFFFFFFFFFE4D274
+        D0B319D3B725D3B725D3B725D3B725D3B725D3B725D3B725D3B725D3B725D3B7
+        25DEBD196C7D85002BEC0020A91A3D97E7C318D3B725D3B725D3B725D3B725D3
+        B725D3B725D3B725D3B725D3B725D3B725D0B319E4D274FFFFFFFFFFFFFFFFFF
+        CDAD08D2B624D3B725D3B725D3B725D3B725D3B725D3B725D3B725D3B725D3B7
+        25D7B81FC7AF382CB6DA1B95AC789F6AE0BA1AD3B725D3B725D3B725D3B725D3
+        B725D3B725D3B725D3B725D3B725D2B624CDAD08FFFFFFFFFFFFFFFFFFFFFFFF
+        E8D889CFB012D3B725D3B725D3B725D3B725D3B725D3B725D3B725D3B725D3B7
+        25DCB4188ACE8444E0CF2EBEA82DBCA8E5B717D3B624D3B725D3B725D3B725D3
+        B725D3B725D3B725D3B725D3B725CFB012E8D889FFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFFFD6BB30D1B41DD3B725D3B725D3B725D3B725D3B725D3B725D3B725D3B6
+        23D8B82546D9CD53D8BF38BAA128B8A995B95BD9B61FD3B725D3B725D3B725D3
+        B725D3B725D3B725D3B725D1B41DD6BB30FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFFFFFFFFFD0B216D1B51FD3B725D3B725D3B725D3B725D3B725D3B725D3B7
+        25D3B623E0B314E1B313E4B616E4B617D9B61FD3B725D3B725D3B725D3B725D3
+        B725D3B725D3B725D1B51FD0B216FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFFFFFFFFFFDFCF5D0B216D1B41DD3B725D3B725D3B725D3B725D3B725D3B7
+        25D3B725D3B725D3B725D3B725D3B725D3B725D3B725D3B725D3B725D3B725D3
+        B725D3B725D1B41DD0B216FDFCF5FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFFFFD6BB30CFB012D2B624D3B725D3B725D3B725D3B7
+        25D3B725D3B725D3B725D3B725D3B725D3B725D3B725D3B725D3B725D3B725D2
+        B624CFB012D6BB30FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFE8D989CDAD08D0B319D2B623D3B725D3B7
+        25D3B725D3B725D3B725D3B725D3B725D3B725D3B725D3B725D2B623D0B319CD
+        AD08E8D989FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFE4D275CFB00FCEB011D0B3
+        19D1B41FD2B622D2B623D2B623D2B622D1B41FD0B319CEB011CFB00FE4D275FF
+        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF4EDC8E7D7
+        87DEC859D7BE39D5BA2DD5BA2DD7BE39DEC859E7D787F4EDC8FFFFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
+      ParentShowHint = False
+      ShowHint = True
     end
   end
   object PopupMenu: TPopupMenu
@@ -22976,6 +23092,10 @@ object MainForm: TMainForm
     Interval = 1800000
     OnTimer = FollowupPopupTimer
     Left = 208
+    Top = 704
+  end
+  object MyImages: TImageList
+    Left = 1083
     Top = 704
   end
 end

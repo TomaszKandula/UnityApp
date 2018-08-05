@@ -8,7 +8,7 @@ interface
 uses
     Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, Menus, ComCtrls, Grids, ExtCtrls, StdCtrls, CheckLst, Buttons,
     PNGImage, DBGrids, AppEvnts, ShellAPI, INIFiles, StrUtils, ValEdit, DateUtils, Clipbrd, DB, ADODB, ActiveX, CDO_TLB, Diagnostics, Math, Wininet, ComObj,
-    OleCtrls, SHDocVw, GIFImg, System.UITypes, Bcrypt, InterposerClasses, Arrays, EventLogger;
+    OleCtrls, SHDocVw, GIFImg, System.UITypes, Bcrypt, InterposerClasses, Arrays, EventLogger, System.ImageList, Vcl.ImgList;
 
 type
 
@@ -418,6 +418,8 @@ type
     Label10: TLabel;
     Label11: TLabel;
     Label12: TLabel;
+    MyImages: TImageList;
+    btnQueries: TSpeedButton;
         procedure FormCreate(Sender: TObject);
         procedure FormResize(Sender: TObject);
         procedure FormShow(Sender: TObject);
