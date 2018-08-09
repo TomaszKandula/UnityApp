@@ -39,6 +39,7 @@ type
         var FollowUp   :  TLists;
         var Gr3        :  TLists;
         var Free1      :  TLists;
+        var Free2      :  TLists;
         // Usage counter (how many times column was filtered)
         var countINF7      : integer;
         var countINF4      : integer;
@@ -48,6 +49,7 @@ type
         var countFollowUp  : integer;
         var countGr3       : integer;
         var countFree1     : integer;
+        var countFree2     : integer;
         // Global filter count
         var HowManyFlts    : integer;
     public
@@ -96,6 +98,7 @@ begin
     SetLength(FilterForm.FollowUp, 1, 2);
     SetLength(FilterForm.Gr3,      1, 2);
     SetLength(FilterForm.Free1,    1, 2);
+    SetLength(FilterForm.Free2,    1, 2);
     countINF7    :=0;
     countINF4    :=0;
     countCoCode  :=0;
@@ -104,6 +107,7 @@ begin
     countFollowUp:=0;
     countGr3     :=0;
     countFree1   :=0;
+    countFree2   :=0;
     HowManyFlts  :=0;
     InUse:=False;
 end;
@@ -150,6 +154,7 @@ begin
         if FFilterNum = fltFOLLOWUP then FilterInit(FollowUp);
         if FFilterNum = fltGR3      then FilterInit(Gr3);
         if FFilterNum = fltFREE1    then FilterInit(Free1);
+        if FFilterNum = fltFREE2    then FilterInit(Free2);
     end;
 end;
 
@@ -170,6 +175,7 @@ begin
         if (FFilterNum = fltFOLLOWUP) and (countFollowUp = 0) then Inc(countFollowUp);
         if (FFilterNum = fltGR3)      and (countGr3      = 0) then Inc(countGr3);
         if (FFilterNum = fltFREE1)    and (countFree1    = 0) then Inc(countFree1);
+        if (FFilterNum = fltFREE2)    and (countFree2    = 0) then Inc(countFree2);
     end;
 
     if Change = fltDecrement then
@@ -182,9 +188,10 @@ begin
         if (FFilterNum = fltFOLLOWUP) and (countFollowUp > 0) then Dec(countFollowUp);
         if (FFilterNum = fltGR3)      and (countGr3      > 0) then Dec(countGr3);
         if (FFilterNum = fltFREE1)    and (countFree1    > 0) then Dec(countFree1);
+        if (FFilterNum = fltFREE2)    and (countFree2    > 0) then Dec(countFree2);
     end;
 
-    HowManyFlts:=countINF7 + countINF4 + countCoCode + countAgent + countDivision + countFollowUp + countGr3 + countFree1;
+    HowManyFlts:=countINF7 + countINF4 + countCoCode + countAgent + countDivision + countFollowUp + countGr3 + countFree1 + countFree2;
 
 end;
 
@@ -427,6 +434,7 @@ begin
     if (FFilterNum = fltFOLLOWUP) and (countFollowUp > 0) then SetAndQuit;
     if (FFilterNum = fltGR3)      and (countGr3      > 0) then SetAndQuit;
     if (FFilterNum = fltFree1)    and (countFree1    > 0) then SetAndQuit;
+    if (FFilterNum = fltFree2)    and (countFree2    > 0) then SetAndQuit;
 end;
 
 
@@ -456,6 +464,7 @@ begin
             if FFilterNum = fltFOLLOWUP then FilterNow(FollowUp);
             if FFilterNum = fltGR3      then FilterNow(Gr3);
             if FFilterNum = fltFREE1    then FilterNow(Free1);
+            if FFilterNum = fltFREE2    then FilterNow(Free2);
 
             // Re-compute aging summary
             AgeView.ComputeAgeSummary(FGrid);
@@ -505,6 +514,7 @@ begin
             if FFilterNum = fltFOLLOWUP then FilterRemove(FollowUp);
             if FFilterNum = fltGR3      then FilterRemove(Gr3);
             if FFilterNum = fltFREE1    then FilterRemove(Free1);
+            if FFilterNum = fltFREE2    then FilterRemove(Free2);
 
             // Re-compute aging summary
             AgeView.ComputeAgeSummary(FGrid);

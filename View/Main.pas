@@ -403,23 +403,29 @@ type
         SortListBox: TComboBox;
         btnSortApply: TSpeedButton;
     ReportFrame: TPanel;
-    Label1: TLabel;
-    Panel1: TPanel;
-    Label5: TLabel;
-    Panel2: TPanel;
-    Label6: TLabel;
-    Label7: TLabel;
-    Label8: TLabel;
-    Label9: TLabel;
-    btnOverdue: TSpeedButton;
-    btnCreditLimits: TSpeedButton;
-    btnDebtors: TSpeedButton;
-    btnControlStatus: TSpeedButton;
-    Label10: TLabel;
-    Label11: TLabel;
-    Label12: TLabel;
+    TextHeader: TLabel;
+    TextTitle: TLabel;
+    TextLine1: TLabel;
+    TextLine2: TLabel;
+    TextLine3: TLabel;
+    TextLine4: TLabel;
+    DescLine1: TLabel;
+    DescLine2: TLabel;
     MyImages: TImageList;
     btnQueries: TSpeedButton;
+    DescTitle: TLabel;
+    DescLine3: TLabel;
+    imgOverdue: TImage;
+    imgCreditLimits: TImage;
+    imgDebtors: TImage;
+    imgControlStatus: TImage;
+    PanelTop: TPanel;
+    Line1: TShape;
+    PanelContent1: TPanel;
+    Line2: TShape;
+    PanelContent2: TPanel;
+    PanelContent3: TPanel;
+    Shape1: TShape;
         procedure FormCreate(Sender: TObject);
         procedure FormResize(Sender: TObject);
         procedure FormShow(Sender: TObject);
@@ -635,10 +641,14 @@ type
         procedure sgCoCodesKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure sgAgeViewClick(Sender: TObject);
         procedure sgAgeViewKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure btnOverdueClick(Sender: TObject);
-    procedure btnCreditLimitsClick(Sender: TObject);
-    procedure btnDebtorsClick(Sender: TObject);
-    procedure btnControlStatusClick(Sender: TObject);
+        procedure imgOverdueClick(Sender: TObject);
+        procedure imgCreditLimitsClick(Sender: TObject);
+        procedure imgDebtorsClick(Sender: TObject);
+        procedure imgControlStatusClick(Sender: TObject);
+        procedure imgOverdueMouseEnter(Sender: TObject);
+        procedure imgCreditLimitsMouseEnter(Sender: TObject);
+        procedure imgDebtorsMouseEnter(Sender: TObject);
+        procedure imgControlStatusMouseEnter(Sender: TObject);
     private
         var pAllowClose:    boolean;
         var pStartTime:     TTime;
@@ -2596,7 +2606,11 @@ end;
 { ---------------------------------------------------------------------------------------------------------------------------------------------------- FREE 2 }
 procedure TMainForm.Action_Free2Click(Sender: TObject);
 begin
-//
+  FilterForm.FColName  :=TGeneral.Free2;
+  FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
+  FilterForm.FGrid     :=MainForm.sgAgeView;
+  FilterForm.FFilterNum:=fltFree2;
+  WndCall(FilterForm, stModal);
 end;
 
 { --------------------------------------------------------------------------------------------------------------------------------------------------- OVERDUE }
@@ -4210,6 +4224,54 @@ begin
   EditPassword.PasswordChar:='*';
 end;
 
+/// <summary>
+///     Show description on mouse hoover onto the image.
+/// </summary>
+
+procedure TMainForm.imgOverdueMouseEnter(Sender: TObject);
+var
+    Settings: ISettings;
+begin
+    Settings:=TSettings.Create;
+    DescTitle.Caption:='Overdue Report';
+    DescLine1.Caption:=Settings.GetStringValue('REPORTS_TEXT', 'OVERDUE_INF1', 'Line not provided');
+    DescLine2.Caption:=Settings.GetStringValue('REPORTS_TEXT', 'OVERDUE_INF2', 'Line not provided');
+    DescLine3.Caption:=Settings.GetStringValue('REPORTS_TEXT', 'OVERDUE_INF3', 'Line not provided');
+end;
+
+procedure TMainForm.imgCreditLimitsMouseEnter(Sender: TObject);
+var
+    Settings: ISettings;
+begin
+    Settings:=TSettings.Create;
+    DescTitle.Caption:='Credit Limit Report';
+    DescLine1.Caption:=Settings.GetStringValue('REPORTS_TEXT', 'LIMITS_INF1', 'Line not provided');
+    DescLine2.Caption:=Settings.GetStringValue('REPORTS_TEXT', 'LIMITS_INF2', 'Line not provided');
+    DescLine3.Caption:=Settings.GetStringValue('REPORTS_TEXT', 'LIMITS_INF3', 'Line not provided');
+end;
+
+procedure TMainForm.imgDebtorsMouseEnter(Sender: TObject);
+var
+    Settings: ISettings;
+begin
+    Settings:=TSettings.Create;
+    DescTitle.Caption:='Debtors Report';
+    DescLine1.Caption:=Settings.GetStringValue('REPORTS_TEXT', 'DEBTORS_INF1', 'Line not provided');
+    DescLine2.Caption:=Settings.GetStringValue('REPORTS_TEXT', 'DEBTORS_INF2', 'Line not provided');
+    DescLine3.Caption:=Settings.GetStringValue('REPORTS_TEXT', 'DEBTORS_INF3', 'Line not provided');
+end;
+
+procedure TMainForm.imgControlStatusMouseEnter(Sender: TObject);
+var
+    Settings: ISettings;
+begin
+    Settings:=TSettings.Create;
+    DescTitle.Caption:='Control Status Report';
+    DescLine1.Caption:=Settings.GetStringValue('REPORTS_TEXT', 'STATUS_INF1', 'Line not provided');
+    DescLine2.Caption:=Settings.GetStringValue('REPORTS_TEXT', 'STATUS_INF2', 'Line not provided');
+    DescLine3.Caption:=Settings.GetStringValue('REPORTS_TEXT', 'STATUS_INF3', 'Line not provided');
+end;
+
 { --------------------------------------------------------------- ! BUTTON CALLS ! -------------------------------------------------------------------------- }
 
 { ---------------------------------------------------------------------------------------------------------------------------------------------- MENU BUTTONS }
@@ -4281,7 +4343,7 @@ begin
   btnAddressBook.Font.Style:=[fsBold];
 end;
 
-procedure TMainForm.btnOverdueClick(Sender: TObject);
+procedure TMainForm.imgOverdueClick(Sender: TObject);
 var
     Return: cardinal;
 begin
@@ -4293,11 +4355,11 @@ begin
     end;
 end;
 
-procedure TMainForm.btnCreditLimitsClick(Sender: TObject);
+procedure TMainForm.imgCreditLimitsClick(Sender: TObject);
 var
     Return: cardinal;
 begin
-    Return:=ShowReport(1);
+    Return:=ShowReport(2);
     if not(Return > 32) then
     begin
         MsgCall(mcWarn, 'Cannot execute report. Please contact with IT support.');
@@ -4305,7 +4367,7 @@ begin
     end;
 end;
 
-procedure TMainForm.btnDebtorsClick(Sender: TObject);
+procedure TMainForm.imgDebtorsClick(Sender: TObject);
 var
     Return: cardinal;
 begin
@@ -4317,7 +4379,7 @@ begin
     end;
 end;
 
-procedure TMainForm.btnControlStatusClick(Sender: TObject);
+procedure TMainForm.imgControlStatusClick(Sender: TObject);
 var
     Return: cardinal;
 begin

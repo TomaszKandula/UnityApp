@@ -174,6 +174,7 @@ const
     fltFOLLOWUP  = 5;
     fltGR3       = 6;
     fltFree1     = 7;
+    fltFree2     = 8;
     fltIncrement = 10;
     fltDecrement = 11;
 
