@@ -67,7 +67,7 @@ var
     Settings: ISettings;
 begin
     Settings:=TSettings.Create;
-    SendForm.Caption:=Settings.GetStringValue(ApplicationDetails, 'WND_SENDMAIL', APPCAPTION);
+    SendForm.Caption:=Settings.GetStringValue(ApplicationDetails, 'WND_SEND', APPCAPTION);
     PanelSalutation.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
     PanelMessage.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
 end;

@@ -4,8 +4,8 @@ object ReportForm: TReportForm
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'Unity'
-  ClientHeight = 455
-  ClientWidth = 511
+  ClientHeight = 456
+  ClientWidth = 506
   Color = 15527148
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -23,8 +23,8 @@ object ReportForm: TReportForm
     AlignWithMargins = True
     Left = 10
     Top = 10
-    Width = 491
-    Height = 395
+    Width = 486
+    Height = 396
     Margins.Left = 10
     Margins.Top = 10
     Margins.Right = 10
@@ -34,12 +34,14 @@ object ReportForm: TReportForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
+    ExplicitWidth = 491
+    ExplicitHeight = 395
     object PanelArea: TPanel
       AlignWithMargins = True
       Left = 5
       Top = 5
-      Width = 481
-      Height = 385
+      Width = 476
+      Height = 386
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
@@ -49,11 +51,13 @@ object ReportForm: TReportForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 0
+      ExplicitWidth = 481
+      ExplicitHeight = 385
       object Caption: TLabel
         AlignWithMargins = True
         Left = 5
         Top = 5
-        Width = 471
+        Width = 466
         Height = 13
         Margins.Left = 5
         Margins.Top = 5
@@ -69,8 +73,8 @@ object ReportForm: TReportForm
         AlignWithMargins = True
         Left = 5
         Top = 28
-        Width = 471
-        Height = 352
+        Width = 466
+        Height = 353
         Margins.Left = 5
         Margins.Top = 5
         Margins.Right = 5
@@ -80,12 +84,14 @@ object ReportForm: TReportForm
         Color = clWhite
         ParentBackground = False
         TabOrder = 0
+        ExplicitWidth = 471
+        ExplicitHeight = 352
         object ReportMemo: TMemo
           AlignWithMargins = True
           Left = 2
           Top = 2
-          Width = 467
-          Height = 348
+          Width = 462
+          Height = 349
           Margins.Left = 2
           Margins.Top = 2
           Margins.Right = 2
@@ -103,6 +109,8 @@ object ReportForm: TReportForm
           ScrollBars = ssVertical
           TabOrder = 0
           OnKeyUp = ReportMemoKeyUp
+          ExplicitWidth = 467
+          ExplicitHeight = 348
         end
       end
     end
@@ -110,8 +118,8 @@ object ReportForm: TReportForm
   object PanelBottom: TPanel
     AlignWithMargins = True
     Left = 0
-    Top = 415
-    Width = 511
+    Top = 416
+    Width = 506
     Height = 40
     Margins.Left = 0
     Margins.Top = 5
@@ -122,6 +130,8 @@ object ReportForm: TReportForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 1
+    ExplicitTop = 415
+    ExplicitWidth = 511
     object Text2: TLabel
       Left = 12
       Top = 14

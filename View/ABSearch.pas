@@ -116,7 +116,7 @@ var
 begin
 
     Settings:=TSettings.Create;
-    ViewSearchForm.Caption:=Settings.GetStringValue(ApplicationDetails, 'WND_SEARCH', APPCAPTION);
+    ViewSearchForm.Caption:=Settings.GetStringValue(ApplicationDetails, 'WND_ABSEARCH', APPCAPTION);
 
     PanelEditNumber.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
     PanelEditName.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);

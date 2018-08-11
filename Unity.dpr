@@ -4,56 +4,57 @@
 program Unity;
 
 /// <remarks>
-///     Large address aware (using more than 3GB for 32-bit program), or compile as a 64-bit.
+///     Large address aware - allow 32-bit program to use more than 2GB (up to 4GB). If still not enough, then compile as a 64-bit.
 /// </remarks>>
 
 {$SetPEFlags $0020}
 
 uses
-  Forms,
-  Windows,
-  Messages,
-  Classes,
-  SysUtils,
-  StdCtrls,
-  ShellApi,
-  IOUtils,
-  INIFiles,
-  CRC32u,
-  SynZip,
-  SynZipFiles,
-  System.Types,
-  Model in 'Model\Model.pas',
-  SQL in 'Model\SQL.pas',
-  AgeView in 'Logic\AgeView.pas',
-  Database in 'Logic\Database.pas',
-  Mailer in 'Logic\Mailer.pas',
-  Settings in 'Logic\Settings.pas',
-  Transactions in 'Logic\Transactions.pas',
-  UAC in 'Logic\UAC.pas',
-  Worker in 'Logic\Worker.pas',
-  Internet in 'Logic\Internet.pas',
-  ThreadUtilities in 'Logic\ThreadUtilities.pas',
-  EventLogger in 'Logic\EventLogger.pas',
-  Arrays in 'Extensions\Arrays.pas',
-  InterposerClasses in 'Extensions\InterposerClasses.pas',
-  About in 'View\About.pas' {AboutForm},
-  Actions in 'View\Actions.pas' {ActionsForm},
-  Calendar in 'View\Calendar.pas' {CalendarForm},
-  Colors in 'View\Colors.pas' {ColorsForm},
-  EventLog in 'View\EventLog.pas' {EventForm},
-  Filter in 'View\Filter.pas' {FilterForm},
-  Invoices in 'View\Invoices.pas' {InvoicesForm},
-  Main in 'View\Main.pas' {MainForm},
-  PhoneList in 'View\PhoneList.pas' {PhoneListForm},
-  SendFeedback in 'View\SendFeedback.pas' {ReportForm},
-  AVSearch in 'View\AVSearch.pas' {SearchForm},
-  Send in 'View\Send.pas' {SendForm},
-  Splash in 'View\Splash.pas' {SplashForm},
-  Tracker in 'View\Tracker.pas' {TrackerForm},
-  Update in 'View\Update.pas' {UpdateForm},
-  MassMailer in 'View\MassMailer.pas' {ViewMailerForm},
-  ABSearch in 'View\ABSearch.pas' {ViewSearchForm};
+    Forms,
+    Windows,
+    Messages,
+    Classes,
+    SysUtils,
+    StrUtils,
+    StdCtrls,
+    ShellApi,
+    IOUtils,
+    INIFiles,
+    CRC32u,
+    SynZip,
+    SynZipFiles,
+    System.Types,
+    Model in 'Model\Model.pas',
+    SQL in 'Model\SQL.pas',
+    AgeView in 'Logic\AgeView.pas',
+    Database in 'Logic\Database.pas',
+    Mailer in 'Logic\Mailer.pas',
+    Settings in 'Logic\Settings.pas',
+    Transactions in 'Logic\Transactions.pas',
+    UAC in 'Logic\UAC.pas',
+    Worker in 'Logic\Worker.pas',
+    Internet in 'Logic\Internet.pas',
+    ThreadUtilities in 'Logic\ThreadUtilities.pas',
+    EventLogger in 'Logic\EventLogger.pas',
+    Arrays in 'Extensions\Arrays.pas',
+    InterposerClasses in 'Extensions\InterposerClasses.pas',
+    About in 'View\About.pas' {AboutForm},
+    Actions in 'View\Actions.pas' {ActionsForm},
+    Calendar in 'View\Calendar.pas' {CalendarForm},
+    Colors in 'View\Colors.pas' {ColorsForm},
+    EventLog in 'View\EventLog.pas' {EventForm},
+    Filter in 'View\Filter.pas' {FilterForm},
+    Invoices in 'View\Invoices.pas' {InvoicesForm},
+    Main in 'View\Main.pas' {MainForm},
+    PhoneList in 'View\PhoneList.pas' {PhoneListForm},
+    SendFeedback in 'View\SendFeedback.pas' {ReportForm},
+    AVSearch in 'View\AVSearch.pas' {SearchForm},
+    Send in 'View\Send.pas' {SendForm},
+    Splash in 'View\Splash.pas' {SplashForm},
+    Tracker in 'View\Tracker.pas' {TrackerForm},
+    Update in 'View\Update.pas' {UpdateForm},
+    MassMailer in 'View\MassMailer.pas' {ViewMailerForm},
+    ABSearch in 'View\ABSearch.pas' {ViewSearchForm};
 
 type
     DWord = 0..$FFFFFFFF;
@@ -75,21 +76,23 @@ var
     WndRect:          TRect;
     Settings:         ISettings;
     LogText:          TThreadFileLog;
-    CheckInet:        TInternetConnectivity;
+    Connection:       IConnectivity;
     MsAssemblies:     TStrings;
-    FileDateTime:     TDateTime;
-    ReleaseDateTime:  TDateTime;
-    PathRelease:      string;
+    ReleaseNumber:    cardinal;
+    PathReleasePak:   string;
+    PathReleaseMan:   string;
     PathEventLog:     string;
     PathAppDir:       string;
     WinUserName:      string;
+    Manifest:         string;
     RegSettings:      TFormatSettings;
 
 {$R *.res}
-
-// ------------------------------------------------------------------------------------------------------------------------------------ ADDITIONAL RESOURCES //
-
 {$R 'binres.res' 'binres.rc'}
+
+
+// ------------------------------------------------------------------------------------------------------------------------------------------ HELPER METHODS //
+
 
 /// <summary>
 ///     Extract given source file by provided ID number.
@@ -136,8 +139,6 @@ begin
 
 end;
 
-// ---------------------------------------------------------------------------------------------------------------------------- SHOW STATUS ON SPLASH SCREEN //
-
 /// <summary>
 ///     Update splash form message and loading status.
 /// </summary>
@@ -159,8 +160,6 @@ begin
         LogText.Log(EventLogPath, Text);
 
 end;
-
-// ---------------------------------------------------------------------------------------------------------------------- UPDATE ALL FILES FROM RELEASE PACK //
 
 /// <summary>
 ///     Unpack "Release.pak" file.
@@ -193,7 +192,7 @@ begin
                 FS:=TFileStream.Create(FullPath, fmCreate);
                 try
                     ZipR.GetData(iCNT, FS);
-                    UpdateForm.Progress.Progress:=Trunc(((iCNT + 1)/ZipR.Count) * 100);
+                    UpdateForm.Progress.Progress:=Trunc( ( (iCNT + 1) / ZipR.Count ) * 100 );
                     UpdateForm.Update;
                     Sleep(DelayStd);
                 finally
@@ -215,8 +214,6 @@ begin
     end;
 
 end;
-
-// ------------------------------------------------------------------------------------------------------------------- DELETE FILES FOLLOWING GIVEN PATTERN //
 
 /// <summary>
 ///     During the update, some files cannot be overwritten or removed, thus we change the name and copy new file(s) into the very same place.
@@ -245,38 +242,51 @@ begin
 
 end;
 
+/// <summary>
+///     Parse content of manifest file and return requested Key value.
+/// </summary>
+
+function GetManifestValue(Key: string; Source: string): string;
+
+    // Nested method
+
+    function GetValue(Key: string): string;
+    var
+        iCNT:     integer;
+        StartPos: integer;
+    begin
+
+        StartPos:=AnsiPos(Key, Source);
+
+        for iCNT:=StartPos to Length(Source) do
+            if Source[iCNT] = CR then
+                Break;
+
+        Result:=MidStr(Source, StartPos, (iCNT - StartPos)).Replace(Key, '').ToLower;
+
+    end;
+
+    // Main block
+
+begin
+    Result:=GetValue('$' + Key + '=');
+end;
+
+
 // -------------------------------------------------------------------------------------------------------------------------------------- MAIN PROGRAM BLOCK //
+
 
 begin
 
     {$WARN SYMBOL_PLATFORM OFF}
-
     ReportMemoryLeaksOnShutdown:=DebugHook <> 0;
-
     {$WARN SYMBOL_PLATFORM ON}
 
-    // --------------------------------------------------------------------------------------------------------------------------- CHECK INTERNET CONNECTION //
-
-    CheckInet:=TInternetConnectivity.Create;
-    try
-
-        if not(CheckInet.IsInternetPresent) then
-        begin
-            Application.MessageBox(
-                PCHar(APPCAPTION + ' cannot work off-line. Please check Internet connection or contact your network administrator. Program will be closed.'),
-                PChar(APPCAPTION), MB_OK + MB_ICONWARNING
-            );
-            ExitProcess(0);
-        end;
-
-    finally
-        CheckInet.Free;
-    end;
-
-    // ---------------------------------------------------------------------------------------------------------------------------------- ALLOW ONE INSTANCE //
+    /// <summary>
+    ///     We allow only one instance of running program.
+    /// </summary>
 
     Mutex:=CreateMutex(nil, True, CurrentMutex);
-
     if (Mutex = 0) or (GetLastError = ERROR_ALREADY_EXISTS) then
     begin
         Application.MessageBox(
@@ -286,12 +296,12 @@ begin
         ExitProcess(0);
     end;
 
-    // --------------------------------------------------------------------------------------------------------------------------------------- SETUP FORMATS //
+    /// <summary>
+    ///     Setup formats to user local settings.
+    /// </summary>
 
     {$WARN SYMBOL_PLATFORM OFF}
-
     RegSettings:=TFormatSettings.Create(LOCALE_USER_DEFAULT);
-
     {$WARN SYMBOL_PLATFORM ON}
 
     RegSettings.CurrencyDecimals    :=4;
@@ -306,19 +316,34 @@ begin
     FormatSettings                  :=RegSettings;
     Application.UpdateFormatSettings:=False;
 
-    // --------------------------------------------------------------------------------------------------- READ CURRENT CONFIG.CFG BEFORE ANY UPDATE ATTEMPT //
+    /// <summary>
+    ///     Initialize interfaced objects for internet methods and settings file operations and event logging.
+    /// </summary>
 
-    Settings:=TSettings.Create;
+    Connection:=TConnectivity.Create;
+    Settings  :=TSettings.Create;
+    LogText   :=TThreadFileLog.Create;
 
-    // Initialize
-    FileDateTime   :=NULLDATE;
-    ReleaseDateTime:=NULLDATE;
-    PathRelease    :='';
-    PathEventLog   :='';
-    PathAppDir     :='';
-    WinUserName    :='';
+    /// <summary>
+    ///     Check internet connection.
+    /// </summary>
 
-    // Extract default config.cfg if missing
+    if not(Connection.IsInternetPresent) then
+    begin
+        Application.MessageBox(
+            PCHar(APPCAPTION + ' cannot work off-line. Please check Internet connection or contact your network administrator. Program will be closed.'),
+            PChar(APPCAPTION), MB_OK + MB_ICONWARNING
+        );
+        ExitProcess(0);
+    end;
+
+    /// <summary>
+    ///     Get all necessary settings from configuration file before any possible update.
+    /// </summary>
+
+    ReleaseNumber:=0;
+
+    // Extract default config.cfg if it is missing
     if Settings.GetLastError = 404 then
     begin
         if Unpack(10, Settings.GetPathAppCfg, DeleteOld) then
@@ -336,17 +361,17 @@ begin
     // Proceed otherwise
     if Settings.GetLastError = 0 then
     begin
-        FileDateTime   :=Settings.GetRelFileDateTime;
-        ReleaseDateTime:=Settings.GetReleaseDateTime;
-        PathRelease    :=Settings.GetPathRelease;
+        ReleaseNumber  :=Settings.ReleaseNumber;
+        PathReleasePak :=Settings.GetReleasePakURL;
+        PathReleaseMan :=Settings.GetReleaseManURL;
         PathEventLog   :=Settings.GetPathEventLog;
         PathAppDir     :=Settings.GetAppDir;
         WinUserName    :=Settings.GetWinUserName;
     end;
 
-    // -------------------------------------------------------------------------------------------------------------------------------- CHECK EVENT LOG FILE //
-
-    LogText:=TThreadFileLog.Create;
+    /// <summary>
+    ///     Check event log file.
+    /// </summary>
 
     if FileExists(PathEventLog) then
     begin
@@ -384,60 +409,64 @@ begin
     // Force clean up remaining files after previous update
     DeleteFilesMatchingPattern(PathAppDir, '*.del', PathEventLog);
 
-    // -------------------------------------------------------------------------------------------------------------- PERFORM UPDATE IF NEW RELEASE IS FOUND //
-(* OFF - TO BE CHANGED
-    if FileExists(PathRelease) then
+    // Check directories
+    if not(DirectoryExists(Settings.GetLayoutDir)) then
+        CreateDir(Settings.GetLayoutDir);
+
+    if not(DirectoryExists(Settings.GetPackageDir)) then
+        CreateDir(Settings.GetPackageDir);
+
+    /// <summary>
+    ///     Check manifest and update if application release number is lower.
+    /// </summary>
+
+    Manifest:=Connection.GetResponseText(Settings.GetReleaseManURL);
+    if ( GetManifestValue('Status', Manifest) = 'update' ) and ( GetManifestValue('Release', Manifest) > IntToStr(ReleaseNumber) ) then
     begin
-        if FileDateTime > ReleaseDateTime then
+
+        // Update screen
+        UpdateForm:=TUpdateForm.Create(nil);
+        SystemParametersInfo(SPI_GETWORKAREA, 0, @WndRect, 0);
+        UpdateForm.Top :=((WndRect.Bottom - WndRect.Top ) div 2) - (UpdateForm.Height div 2);
+        UpdateForm.Left:=((WndRect.Right  - WndRect.Left) div 2) - (UpdateForm.Width  div 2);
+        AnimateWindow(UpdateForm.Handle, 500, AW_BLEND or AW_ACTIVATE);
+        UpdateForm.Update;
+
+        // Get package from website
+        if Connection.Download(PathReleasePak, Settings.GetPackageDir + ReleaseFile) then
         begin
-
-            // Update screen
-            UpdateForm:=TUpdateForm.Create(nil);
-            SystemParametersInfo(SPI_GETWORKAREA, 0, @WndRect, 0);
-            UpdateForm.Top :=((WndRect.Bottom - WndRect.Top ) div 2) - (UpdateForm.Height div 2);
-            UpdateForm.Left:=((WndRect.Right  - WndRect.Left) div 2) - (UpdateForm.Width  div 2);
-            AnimateWindow(UpdateForm.Handle, 500, AW_BLEND or AW_ACTIVATE);
-            UpdateForm.Update;
-
-            // Unzipp all files
-
-            /// <remarks>
-            ///     Config.cfg may be also updated.
-            /// </remarks>
-
-            UnzippReleaseFile(PathRelease, PathAppDir, PathEventLog);
-
-            // Update date and time of new release
-            AppSettings:=TSettings.Create;
-
-            try
-                try
-                    AppSettings.FReleaseDateTime:=FileDateTime;
-                except
-                    on E: Exception do
-                    begin
-                        Application.MessageBox(
-                            PChar('Cannot finalize automatic update. ' + APPCAPTION + ' will be closed. Please contact IT support. Error has been thrown: ' + E.Message),
-                            PChar(APPCAPTION), MB_OK + MB_ICONERROR
-                        );
-                        LogText(AppSettings.FPathEventLog, '[Critical Error]: Cannot finalize automatic update. Error has been thrown: ' + E.Message);
-                        ExitProcess(0);
-                    end;
-                end;
-            finally
-                AppSettings.Free;
+            // Unzip the content, update settings file and execute new release
+            if UnzippReleaseFile(Settings.GetPackageDir + ReleaseFile, PathAppDir, PathEventLog) then
+            begin
+                Settings.ReleaseDateTime:=Now;
+                Settings.ReleaseNumber:=StrToInt(GetManifestValue('Release', Manifest));
+                ShellExecute(Application.Handle, seOpen, PChar(Application.ExeName), nil, nil, SW_SHOWNORMAL);
+            end
+            else
+            begin
+                Application.MessageBox(
+                    PChar('Cannot unpack files. ' + APPCAPTION + ' will be closed. Please contact IT support.'),
+                    PChar(APPCAPTION), MB_OK + MB_ICONERROR
+                );
             end;
-
-            // Open new copy and close current instance
-            ShellExecute(Application.Handle, seOpen, PChar(Application.ExeName), nil, nil, SW_SHOWNORMAL);
-            UpdateForm.Free;
-            ExitProcess(0);
-
+        end
+        else
+        begin
+            Application.MessageBox(
+                PChar('Cannot download new release package. ' + APPCAPTION + ' will be closed. Please contact IT support.'),
+                PChar(APPCAPTION), MB_OK + MB_ICONERROR
+            );
         end;
 
+        // Exit
+        UpdateForm.Free;
+        ExitProcess(0);
+
     end;
-*)
-    // --------------------------------------------------------------------------------------------------------------------------------- START SPLASH SCREEN //
+
+    /// <remarks>
+    ///     Splash screen requires updating to display the changed content.
+    /// </remarks>
 
     SplashForm:=TSplashForm.Create(nil);
     SystemParametersInfo(SPI_GETWORKAREA, 0, @WndRect, 0);
@@ -446,19 +475,18 @@ begin
     AnimateWindow(SplashForm.Handle, 500, AW_BLEND or AW_ACTIVATE);
     SplashForm.Update;
 
-    // ------------------------------------------------------------------------------------------------------ RE-OPEN SETTINGS FILE AND PERFORM OTHER CHECKS //
+    /// <summary>
+    ///     Check password. It is hashed with BCrypt and cannot be shorter than 60 characters.
+    /// </summary>
 
-
-    // --------------------------------------------------------------------------------------------------------------------------- CHECK FOR MASTER PASSOWRD //
-
-    if Settings.GetStringValue(PasswordSection, 'HASH', '') = '' then
+    if Length(Settings.GetStringValue(PasswordSection, 'HASH', '')) < 60 then
     begin
         Status(1, AllTasks, DelayStd, 'Checking master password... failed!', True, Settings.GetPathEventLog);
         Application.MessageBox(
-            PCHar('No master password has been found. ' + APPCAPTION + ' will be closed. Please contact IT Support.'),
+            PCHar('Invalid master password has been found. ' + APPCAPTION + ' will be closed. Please contact IT Support.'),
             PChar(APPCAPTION), MB_OK + MB_ICONERROR
         );
-        LogText.Log(Settings.GetPathEventLog, '[Critical Error]: No master password has been found. Application has been terminated.');
+        LogText.Log(Settings.GetPathEventLog, '[Critical Error]: Invaid master password has been found. Application has been terminated.');
         ExitProcess(0);
     end
     else
@@ -466,14 +494,16 @@ begin
         Status(1, AllTasks, DelayStd, 'Checking master password... OK.', True, Settings.GetPathEventLog);
     end;
 
-    // ------------------------------------------------------------------------------------------------------------------------------ CHECK FOR LICENCE FILE //
+    /// <summary>
+    ///     Licence file.
+    /// </summary>
 
-    if not FileExists(Settings.GetPathLicence) then
+    if not FileExists(Settings.GetPathLicenceLic) then
     begin
         Status(2, AllTasks, DelayStd, 'Checking licence file... failed!', True, Settings.GetPathEventLog);
 
         /// <remarks>
-        ///     Check here ".LICX" file in case of Unity is shareware/limited commercial application.
+        ///     Check here ".LIC" file in case of Unity is shareware/limited commercial application.
         /// </remarks>
 
         Application.MessageBox(
@@ -488,7 +518,9 @@ begin
         Status(2, AllTasks, DelayStd, 'Checking licence file... OK.', True, Settings.GetPathEventLog);
     end;
 
-    // ---------------------------------------------------------------------------------------------------------- WINDOWS VERSION CHECK - WINDOWS 7 & HIGHER //
+    /// <summary>
+    ///     Check Windows version. We allow only Windows 7 (with Areo) or Windows 10 (and above).
+    /// </summary>
 
     if not StrToInt(GetOSVer(OSNumber)) >= 61 then
     begin
@@ -505,7 +537,9 @@ begin
         Status(3, AllTasks, DelayStd, 'Checking operating system version... OK.', True, Settings.GetPathEventLog);
     end;
 
-    // ------------------------------------------------------------------------------------------------------- AREO CHECK MUST BE TURNED ON | WINDOWS 7 ONLY //
+    /// <summary>
+    ///     Areo must be enabled if program runs under Windows 7.
+    /// </summary>
 
     if StrToInt(GetOSVer(OSNumber)) = 61 then
     begin
@@ -545,7 +579,9 @@ begin
         Status(4, AllTasks, DelayStd, 'Checking Windows 7 Areo composition... OK.', True, Settings.GetPathEventLog);
     end;
 
-   // ----------------------------------------------------------------------------------------------------------------------------- CHECK CONFIG.CFG | CRC32 //
+   /// <summary>
+   ///      Check configuration file and deploy default if corrupted.
+   /// </summary>
 
    Status(5, AllTasks, DelayStd, 'CRC32 check: ' + ConfigFile + '...', True, Settings.GetPathEventLog);
 
@@ -572,7 +608,13 @@ begin
         Status(5, AllTasks, DelayStd, 'CRC32 check: ' + ConfigFile + '...OK.', True, Settings.GetPathEventLog);
     end;
 
-    // --------------------------------------------------------------------------------------------------------- CHECK ASSEMBLIES AND LYNCCALL.EXE IF EXISTS //
+    /// <summary>
+    ///     Check if assemlbies exists in main folder. All assemlbies must be present to run the program. We exclude from the list
+    ///     assemblies related to Chromium.
+    /// </summary>
+    /// <remarks>
+    ///     We do not check CRC32 correctness.
+    /// </remarks>
 
     SetLength(MsAssemblies, 6);
     MsAssemblies[0]:=DLL1;
@@ -599,20 +641,37 @@ begin
             ExitProcess(0);
         end;
     end;
+
     LogText.Log(Settings.GetPathEventLog, 'End of checking resource and configuration files.');
 
-    // --------------------------------------------------------------------------------------------------------------------------------------- CHECKING ENDS //
+    /// <summary>
+    ///     Synchronise all layouts listed in settings file.
+    /// </summary>
+
+    Status(12, AllTasks, DelayStd, 'Synchronising layouts...', True, Settings.GetPathEventLog);
+
+    for iCNT:=0 to Settings.LayoutLists.Count - 1 do
+    begin
+        if Connection.Download(Settings.GetLayoutsURL + Settings.LayoutLists.Strings[iCNT], Settings.GetLayoutDir + Settings.LayoutLists.Strings[iCNT]) then
+            LogText.Log(Settings.GetPathEventLog, Settings.LayoutLists.Strings[iCNT] + '... synchronised.')
+                else
+                    LogText.Log(Settings.GetPathEventLog, Settings.LayoutLists.Strings[iCNT] + '... failed to download.');
+    end;
+
+    /// <remarks>
+    ///     Release logger object. It will be re-introduced after MainForm initialization.
+    /// </remarks>
 
     LogText.Free;
 
-    // ------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZE //
+    /// <summary>
+    ///     Start the application.
+    /// </summary>
 
-    Status(12, AllTasks, 50, 'Application initialization... ', False, Settings.GetPathEventLog);
+    Status(13, AllTasks, 50, 'Application initialization... ', False, Settings.GetPathEventLog);
     Application.Initialize;
     Application.Title:=APPCAPTION;
     Application.MainFormOnTaskbar:=False;
-
-    // ------------------------------------------------------------------------------------------------------------------------------------ CREATE ALL FORMS //
 
     /// <remarks>
     ///      All forms must have parameter "visible" set to false.
@@ -623,7 +682,7 @@ begin
     MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] Initialization methods executed within main thread, ''MainForm'' has been created. Main process thread ID = ' + IntToStr(MainThreadID) + '.');
 
     // Other forms (views)
-    Status(13, AllTasks, 400, 'Application initialization: VCL forms loading, please wait.', False, Settings.GetPathEventLog);
+    Status(14, AllTasks, 400, 'Application initialization: VCL forms loading, please wait.', False, Settings.GetPathEventLog);
     Application.CreateForm(TAboutForm,       AboutForm);       MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''AboutForm'' ......... has been created.');
     Application.CreateForm(TSendForm,        SendForm);        MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''SendForm'' .......... has been created.');
     Application.CreateForm(TEventForm,       EventForm);       MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''EventForm'' ......... has been created.');
@@ -640,24 +699,26 @@ begin
     Application.CreateForm(TViewMailerForm,  ViewMailerForm);  MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ViewMailerForm'' .... has been created.');
 
     // Splash screen - 100%
-    Status(14, AllTasks, 900, 'Application is initialized.', False, Settings.GetPathEventLog);
-
-    // ----------------------------------------------------------------------------------------------------------------------------------- SPLASH SCREEN END //
+    Status(15, AllTasks, 900, 'Application is initialized.', False, Settings.GetPathEventLog);
 
     AnimateWindow(SplashForm.Handle, 500, AW_BLEND or AW_HIDE);
     Sleep(150);
     SplashForm.Free;
 
-    // ------------------------------------------------------------------------------------------------------------------- SETUP SAVED WINDOW STATE AND SHOW //
+    /// <summary>
+    ///     Setup last window position and show it to the user.
+    /// </summary>
 
     if Settings.GetStringValue(ApplicationDetails,  'WINDOW_STATE', '') = 'wsNormal'    then MainForm.WindowState:=wsNormal;
     if Settings.GetStringValue(ApplicationDetails,  'WINDOW_STATE', '') = 'wsMaximized' then MainForm.WindowState:=wsMaximized;
     if Settings.GetStringValue(ApplicationDetails,  'WINDOW_STATE', '') = 'wsMinimized' then MainForm.WindowState:=wsMinimized;
     MainForm.LogText.Log(Settings.GetPathEventLog, 'Initialization is completed. Application is running.');
-
-    // ------------------------------------------------------------------------------------------------------------------------------------------------- RUN //
-
     MainForm.Show;
+
+    /// <remarks>
+    ///     Show taskbar icon.
+    /// </remarks>
+
     Application.MainFormOnTaskbar:=True;
     Application.Run;
 

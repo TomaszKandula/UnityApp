@@ -13,7 +13,7 @@ const
     // ------------------------------------------------------------------------------------------------------------------------- DESKTOP WINDOWS MANAGER API //
 
     DWMI:  string  = 'dwmapi.dll';
-    CS_DROPSHADOW = $00020000;
+    CS_DROPSHADOW  = $00020000;
 
     // ----------------------------------------------------------------------------------------------------------------------------- LYNC/SKYPE FOR BUSINESS //
 
@@ -64,16 +64,17 @@ const
 
     DelayStd    :  integer   = 10;                 // Splash screen: slown down a bit to display the message during startup
     DelayErr    :  integer   = 750;                // Splash screen: slown down significantly for user in case of error
-    AllTasks    :  integer   = 14;                 // Total number of all tasks on startup
+    AllTasks    :  integer   = 15;                 // Total number of all tasks on startup
     SELCOLOR    :  dword     = $00F2E4D7;          // Application color #1
     FONCOLOR    :  dword     = $006433C9;          // Application color #2
     CUSCOLOR    :  dword     = $00FFDBB7;          // Application color #3
     APPCAPTION  :  string    = 'Unity';            // Use it for "Findwindow" method
     LyncCall    :  string    = 'LyncCall.exe';     // Lync/Skype API developed in VS2017/C#
     UnityReader :  string    = 'UnityReader.exe';  // Chromium implementation CEF3 and CEF4
-    LicenceFile :  string    = 'Unity.licx';       // Licence file
+    LicenceFile :  string    = 'Unity.lic';        // Licence file
     GridImgFile :  string    = 'Unity.img';        // Application custom image(s)
     ReleaseFile :  string    = 'Release.pak';      // Release package
+    ManifestFile:  string    = 'Unity.manifest';   // Manifest file on the server
     CurrentMutex:  PWideChar = 'UNITY_10090';      // Mutex value, increase it with each release
 
     // --------------------------------------------------------------------------------------------------------------------------------------- SPLASH SCREEN //
@@ -111,7 +112,7 @@ const
     AgingBasic          = 'AGEVIEW_BASIC';
     AgingFull           = 'AGEVIEW_FULL';
     Unallocated         = 'UNALLOCATED_DEFINITION';
-    VariousLayouts      = 'LAYOUTS';
+    Layouts             = 'LAYOUTS';
     TimersSettings      = 'TIMERS_INTERVALS';
     FollowUpColors      = 'FOLLOWUPS_COLORS';
     ColumnPrefix        = 'COLUMN';

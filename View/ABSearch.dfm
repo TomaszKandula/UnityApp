@@ -32,7 +32,6 @@ object ViewSearchForm: TViewSearchForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
-    ExplicitHeight = 338
     object SearchBox: TGroupBox
       AlignWithMargins = True
       Left = 10
@@ -46,7 +45,6 @@ object ViewSearchForm: TViewSearchForm
       Align = alClient
       Caption = 'Search Address Book'
       TabOrder = 0
-      ExplicitHeight = 318
       object Text1: TLabel
         Left = 24
         Top = 59
@@ -549,7 +547,6 @@ object ViewSearchForm: TViewSearchForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 1
-    ExplicitTop = 376
     object btnSearch: TSpeedButton
       AlignWithMargins = True
       Left = 553

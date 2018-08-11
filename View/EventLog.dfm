@@ -3,7 +3,7 @@ object EventForm: TEventForm
   Top = 0
   BorderIcons = [biSystemMenu]
   Caption = 'Unity'
-  ClientHeight = 735
+  ClientHeight = 674
   ClientWidth = 1062
   Color = 15527148
   Constraints.MinHeight = 400
@@ -27,7 +27,7 @@ object EventForm: TEventForm
     Left = 10
     Top = 10
     Width = 1042
-    Height = 699
+    Height = 638
     Margins.Left = 10
     Margins.Top = 10
     Margins.Right = 10
@@ -37,14 +37,13 @@ object EventForm: TEventForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
-    ExplicitWidth = 508
-    ExplicitHeight = 442
+    ExplicitHeight = 699
     object PanelEventMemo: TPanel
       AlignWithMargins = True
       Left = 10
       Top = 10
       Width = 1022
-      Height = 679
+      Height = 618
       Margins.Left = 10
       Margins.Top = 10
       Margins.Right = 10
@@ -54,14 +53,13 @@ object EventForm: TEventForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 0
-      ExplicitWidth = 488
-      ExplicitHeight = 422
+      ExplicitHeight = 679
       object EventMemo: TMemo
         AlignWithMargins = True
         Left = 2
         Top = 2
         Width = 1018
-        Height = 675
+        Height = 614
         Hint = 'Press F5 to reload'
         Margins.Left = 2
         Margins.Top = 2
@@ -84,15 +82,14 @@ object EventForm: TEventForm
         WantTabs = True
         WordWrap = False
         OnKeyUp = FormKeyUp
-        ExplicitWidth = 484
-        ExplicitHeight = 418
+        ExplicitHeight = 675
       end
     end
   end
   object PanelBottom: TPanel
     AlignWithMargins = True
     Left = 0
-    Top = 719
+    Top = 658
     Width = 1062
     Height = 16
     Margins.Left = 0
@@ -104,8 +101,7 @@ object EventForm: TEventForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 1
-    ExplicitTop = 462
-    ExplicitWidth = 528
+    ExplicitTop = 719
     object ImageGrip: TImage
       Left = 1046
       Top = 0

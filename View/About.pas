@@ -181,7 +181,7 @@ begin
 
     AboutForm.Caption:=Settings.GetStringValue(ApplicationDetails, 'WND_ABOUT', APPCAPTION);
 
-    if FileExists(Settings.GetPathLicence) then
+    if FileExists(Settings.GetPathLicenceLic) then
     begin
         if Settings.Decode(LicData, True) then
         begin

@@ -743,7 +743,7 @@ var
 begin
 
     Settings:=TSettings.Create;
-    ActionsForm.Caption:=Settings.GetStringValue(ApplicationDetails, 'WND_TRANSACTIONS', APPCAPTION);
+    ActionsForm.Caption:=Settings.GetStringValue(ApplicationDetails, 'WND_ACTIONS', APPCAPTION);
 
     SetLength(SrcColumns, 19);
 

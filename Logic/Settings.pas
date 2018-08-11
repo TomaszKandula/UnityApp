@@ -6,7 +6,7 @@ unit Settings;
 interface
 
 uses
-    Main, Forms, Windows, Messages, SysUtils, Classes, ShellAPI, CRC32u, INIFiles, Graphics;
+    Main, Forms, Windows, Messages, StrUtils, SysUtils, Classes, ShellAPI, CRC32u, INIFiles, Graphics;
 
 type
 
@@ -26,21 +26,26 @@ type
         function  GetIntegerValue(Section: string; Key: string; Default: integer): integer;
         procedure SetIntegerValue(Section: string; Key: string; Value: integer);
         procedure GetSectionValues(Section: string; var Values: TStringList);
-        function  GetLastError    : integer;
-        function  GetAppDir       : string;
-        function  GetLayoutDir    : string;
-        function  GetAppLog       : string;
-        function  GetWinUserName  : string;
-        function  GetWinTempFolder: string;
-        function  GetPathGridImage: string;
-        function  GetPathEventLog : string;
-        function  GetPathAppCfg   : string;
-        function  GetPathLicence  : string;
-        function  GetPathRelease  : string;
+        function  GetLastError     : integer;
+        function  GetAppDir        : string;
+        function  GetAppLog        : string;
+        function  GetLayoutDir     : string;
+        function  GetPackageDir    : string;
+        function  GetWinUserName   : string;
+        function  GetWinTempFolder : string;
+        function  GetPathGridImage : string;
+        function  GetPathEventLog  : string;
+        function  GetPathAppCfg    : string;
+        function  GetPathLicenceLic: string;
+        function  GetReleasePakURL : string;
+        function  GetReleaseManURL : string;
+        function  GetLayoutsURL    : string;
         // Property's methods (invisible under interface)
         function  GetReleaseDateTime: TDateTime;
         procedure SetReleaseDateTime(NewDateTime: TDateTime);
-        function  GetRelFileDateTime: TDateTime;
+        function  GetReleaseNumber: cardinal;
+        procedure SetReleaseNumber(NewRelease: cardinal);
+        function  GetLayoutLists: TStringList;
         function  GetTodayFColor  : TColor;
         function  GetTodayBColor  : TColor;
         function  GetPastFColor   : TColor;
@@ -54,14 +59,15 @@ type
         procedure SetFutureFColor(NewColor: TColor);
         procedure SetFutureBColor(NewColor: TColor);
         // Properties
-        property FRelFileDateTime  : TDateTime read GetRelFileDateTime;
-        property FReleaseDateTime  : TDateTime read GetReleaseDateTime write SetReleaseDateTime;
-        property TodayFColor       : TColor    read GetTodayFColor     write SetTodayFColor;
-        property TodayBColor       : TColor    read GetTodayBColor     write SetTodayBColor;
-        property PastFColor        : TColor    read GetPastFColor      write SetPastFColor;
-        property PastBColor        : TColor    read GetPastBColor      write SetPastBColor;
-        property FutureFColor      : TColor    read GetFutureFColor    write SetFutureFColor;
-        property FutureBColor      : TColor    read GetFutureBColor    write SetFutureBColor;
+        property  LayoutLists    : TStringList read GetLayoutLists;
+        property  ReleaseNumber  : cardinal    read GetReleaseNumber   write SetReleaseNumber;
+        property  ReleaseDateTime: TDateTime   read GetReleaseDateTime write SetReleaseDateTime;
+        property  TodayFColor    : TColor      read GetTodayFColor     write SetTodayFColor;
+        property  TodayBColor    : TColor      read GetTodayBColor     write SetTodayBColor;
+        property  PastFColor     : TColor      read GetPastFColor      write SetPastFColor;
+        property  PastBColor     : TColor      read GetPastBColor      write SetPastBColor;
+        property  FutureFColor   : TColor      read GetFutureFColor    write SetFutureFColor;
+        property  FutureBColor   : TColor      read GetFutureBColor    write SetFutureBColor;
     end;
 
     /// <summary>
@@ -71,27 +77,35 @@ type
 
     TSettings = class(TInterfacedObject, ISettings)
     {$TYPEINFO ON}
-    strict private
-        //
     private
-        // Variables
         var pGetLastError  : integer;
-        // Files
-        var pAppDir        : string;
-        var pLayoutDir     : string;
-        var pAppLog        : string;
         var pWinUserName   : string;
-        var pWinTempFolder : string;
-        // Paths
+        var pPathGridImage : string;
+
+        // Directories
+        var pAppLog        : string;
         var pPathEventLog  : string;
         var pPathAppCfg    : string;
-        var pPathLicence   : string;
-        var pPathGridImage : string;
-        var pPathRelease   : string;
-        // Time and date
+        var pPathLicenceLic: string;
+
+        // Files
+        var pAppDir        : string;
+        var pDirLayouts    : string;
+        var pDirPackage    : string;
+        var pWinTempFolder : string;
+
+        // URL
+        var pReleasePakURL: string;
+        var pReleaseManURL: string;
+        var pGetLayoutsURL : string;
+
+        // Others
         function  GetReleaseDateTime: TDateTime;
         procedure SetReleaseDateTime(NewDateTime: TDateTime);
-        function  GetRelFileDateTime: TDateTime;
+        function  GetReleaseNumber: cardinal;
+        procedure SetReleaseNumber(NewRelease: cardinal);
+        function  GetLayoutLists: TStringList;
+
         // Getters and setters for "follow-up" colors saved in settings file
         function  GetTodayFColor  : TColor;
         function  GetTodayBColor  : TColor;
@@ -107,20 +121,32 @@ type
         procedure SetFutureBColor(NewColor: TColor);
     public
         // TMemoryIni holding encoded settings
-        var TMIG           : TMemIniFile;
-        var TMIL           : TMemIniFile;
+        var TMIG : TMemIniFile;
+        var TMIL : TMemIniFile;
+        var List : TStringList;
+
         // Properties
-        property FAppDir           : string    read pAppDir;
-        property FLayoutDir        : string    read pLayoutDir;
-        property FAppLog           : string    read pAppLog;
         property FWinUserName      : string    read pWinUserName;
-        property FWinTempFolder    : string    read pWinTempFolder;
+
+        // Files
+        property FAppLog           : string    read pAppLog;
         property FPathGridImage    : string    read pPathGridImage;
         property FPathEventLog     : string    read pPathEventLog;
         property FPathAppCfg       : string    read pPathAppCfg;
-        property FPathLicence      : string    read pPathLicence;
-        property FPathRelease      : string    read pPathRelease;
-        property FRelFileDateTime  : TDateTime read GetRelFileDateTime;
+        property FPathLicenceLic   : string    read pPathLicenceLic;
+
+        // URL
+        property FReleasePakURL   : string    read pReleasePakURL;
+        property FReleaseManURL   : string    read pReleaseManURL;
+        property FGetLayoutsURL    : string    read pGetLayoutsURL;
+
+        // Directories
+        property FAppDir           : string    read pAppDir;
+        property FDirLayouts       : string    read pDirLayouts;
+        property FDirPackage       : string    read pDirPackage;
+        property FWinTempFolder    : string    read pWinTempFolder;
+
+        // Other
         property FReleaseDateTime  : TDateTime read GetReleaseDateTime write SetReleaseDateTime;
         property TodayFColor       : TColor    read GetTodayFColor     write SetTodayFColor;
         property TodayBColor       : TColor    read GetTodayBColor     write SetTodayBColor;
@@ -128,9 +154,11 @@ type
         property PastBColor        : TColor    read GetPastBColor      write SetPastBColor;
         property FutureFColor      : TColor    read GetFutureFColor    write SetFutureFColor;
         property FutureBColor      : TColor    read GetFutureBColor    write SetFutureBColor;
+
         // Constructors/destructors
         constructor Create;
         destructor  Destroy; override;
+
         // Methods
         function    Encode(ConfigType: integer): boolean;
         function    Decode(ConfigType: integer; ToMemory: boolean): boolean;
@@ -141,17 +169,20 @@ type
         function    GetIntegerValue(Section: string; Key: string; Default: integer): integer;
         procedure   SetIntegerValue(Section: string; Key: string; Value: integer);
         procedure   GetSectionValues(Section: string; var Values: TStringList);
-        function    GetLastError    : integer;
-        function    GetAppDir       : string;
-        function    GetLayoutDir    : string;
-        function    GetAppLog       : string;
-        function    GetWinUserName  : string;
-        function    GetWinTempFolder: string;
-        function    GetPathGridImage: string;
-        function    GetPathEventLog : string;
-        function    GetPathAppCfg   : string;
-        function    GetPathLicence  : string;
-        function    GetPathRelease  : string;
+        function    GetLastError     : integer;
+        function    GetAppDir        : string;
+        function    GetLayoutDir     : string;
+        function    GetPackageDir    : string;
+        function    GetAppLog        : string;
+        function    GetWinUserName   : string;
+        function    GetWinTempFolder : string;
+        function    GetPathGridImage : string;
+        function    GetPathEventLog  : string;
+        function    GetPathAppCfg    : string;
+        function    GetPathLicenceLic: string;
+        function    GetReleasePakURL : string;
+        function    GetReleaseManURL : string;
+        function    GetLayoutsURL    : string;
     end;
 
 
@@ -176,13 +207,25 @@ begin
 
     TMIL:=TMemIniFile.Create('');
 
+    /// <summary>
+    ///     Holds list of all registered layouts.
+    /// </summary>
 
-    pAppDir        :=ExtractFileDir(Application.ExeName) + '\';
+    List:=TStringList.Create;
+
+    // User Alias
     pWinUserName   :=Trim(LowerCase(GetEnvironmentVariable('username')));
+
+    // Directories
+    pAppDir        :=ExtractFileDir(Application.ExeName) + '\';
+    pDirLayouts    :=pAppDir + 'layouts\';
+    pDirPackage    :=pAppDir + 'package\';
     pWinTempFolder :=GetEnvironmentVariable('TEMP');
+
+    // Files
     pAppLog        :=pWinUserName + '.log';
     pPathAppCfg    :=pAppDir + ConfigFile;
-    pPathLicence   :=pAppDir + LicenceFile;
+    pPathLicenceLic:=pAppDir + LicenceFile;
     pPathEventLog  :=pAppDir + pAppLog;
     pPathGridImage :=pAppDir + GridImgFile;
 
@@ -205,6 +248,7 @@ destructor TSettings.Destroy;
 begin
     TMIG.Free;
     TMIL.Free;
+    List.Free;
     inherited;
 end;
 
@@ -213,19 +257,30 @@ end;
 
 
 /// <summary>
-///    Push config content to memory.
+///    Push config content to the memory.
 /// </summary>
 
 function TSettings.ConfigToMemory: boolean;
+var
+    iCNT: cardinal;
 begin
     Result:=False;
 
     if Assigned(TMIG) then
     begin
         Decode(AppConfig, True);
-        pLayoutDir  :=TMIG.ReadString(VariousLayouts,     'PATH',        '');
-        pPathRelease:=TMIG.ReadString(ApplicationDetails, 'UPDATE_PATH', '');
-        pPathRelease:=pPathRelease + ReleaseFile;
+
+        pReleasePakURL:=TMIG.ReadString(ApplicationDetails, 'UPDATE_PATH', '') + ReleaseFile;
+        pReleaseManURL:=TMIG.ReadString(ApplicationDetails, 'UPDATE_PATH', '') + ManifestFile;
+
+        pGetLayoutsURL:=TMIG.ReadString(ApplicationDetails, 'LAYOUT_PATH', '');
+
+        GetSectionValues(Layouts, List);
+        for iCNT:=0 to List.Count - 1 do
+        begin
+            List.Strings[iCNT]:=MidStr(List.Strings[iCNT], AnsiPos('=', List.Strings[iCNT]) + 1, 255);
+        end;
+
         pGetLastError:=0;
         Result:=True;
     end;
@@ -233,32 +288,43 @@ begin
 end;
 
 
-// ----------------------------------------------------------------------------------------------------------------------------- RELEASE PACKAGE DATE & TIME //
-
+// --------------------------------------------------------------------------------------------------------------------------------- GET RELEASE STATUS CODE //
 
 /// <summary>
-///   Get file date and time for "Release.pak".
+///     Get release number from release manifest hosted at:
+///     https://unityinfo.azurewebsites.net/release/package/unity.manifest
 /// </summary>
 
-function TSettings.GetRelFileDateTime: TDateTime;
-var
-    PakDateTime: TDateTimeInfoRec;
+function TSettings.GetReleaseNumber: cardinal;
 begin
+    Result:=0;
 
-    Result:=NULLDATE;
-
-    if pPathRelease <> '' then
+    if Assigned(TMIG) then
     begin
-        FileGetDateTimeInfo(pPathRelease, PakDateTime, True);
-
-        /// <remarks>
-        ///    Timestamp method is precise to a miliseconds.
-        ///    This has to be considered during any comparision.
-        /// </remarks>
-
-        Result:=StrToDateTime(FormatDateTime('yyyy-mm-dd hh:mm:ss', PakDateTime.TimeStamp));
+        Result:=StrToIntDef(TMIG.ReadString(ApplicationDetails, 'RELEASE_NUMBER', ''), 0);
     end;
+end;
 
+/// <summary>
+///     Set release number in settings file.
+/// </summary>
+
+procedure TSettings.SetReleaseNumber(NewRelease: cardinal);
+begin
+    if Assigned(TMIG) then
+    begin
+        TMIG.WriteInteger(ApplicationDetails, 'RELEASE_NUMBER', NewRelease);
+        Encode(AppConfig);
+    end;
+end;
+
+/// <summary>
+///     Pass layout list from settings file to a usable variable.
+/// </summary>
+
+function TSettings.GetLayoutLists: TStringList;
+begin
+    Result:=List;
 end;
 
 /// <summary>
@@ -413,7 +479,7 @@ begin
                 rStream.LoadFromFile(FPathAppCfg);
 
             if ConfigType = LicData then
-                rStream.LoadFromFile(FPathLicence);
+                rStream.LoadFromFile(FPathLicenceLic);
 
             // Decode byte by byte
             for iCNT:=0 to rStream.Size - 1 do
@@ -533,7 +599,12 @@ end;
 
 function TSettings.GetLayoutDir: string;
 begin
-    Result:=FLayoutDir;
+    Result:=FDirLayouts;
+end;
+
+function TSettings.GetPackageDir: string;
+begin
+    Result:=FDirPackage;
 end;
 
 function TSettings.GetAppLog: string;
@@ -566,14 +637,24 @@ begin
     Result:=FPathAppCfg;
 end;
 
-function TSettings.GetPathLicence: string;
+function TSettings.GetPathLicenceLic: string;
 begin
-    Result:=FPathLicence;
+    Result:=FPathLicenceLic;
 end;
 
-function TSettings.GetPathRelease: string;
+function TSettings.GetReleasePakURL: string;
 begin
-    Result:=FPathRelease;
+    Result:=FReleasePakURL;
+end;
+
+function TSettings.GetReleaseManURL: string;
+begin
+    Result:=FReleaseManURL;
+end;
+
+function TSettings.GetLayoutsURL: string;
+begin
+    Result:=FGetLayoutsURL;
 end;
 
 

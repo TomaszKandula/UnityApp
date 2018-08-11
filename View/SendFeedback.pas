@@ -139,7 +139,7 @@ begin
         // Plain text to HTML using template
         Transfer:=ReportMemo.Text;
         Transfer:=StringReplace(Transfer, CRLF, HTML_BR, [rfReplaceAll]);
-        HTMLBody:=Doc.LoadTemplate(Settings.GetLayoutDir + Settings.GetStringValue(VariousLayouts, 'BUGREPORT', '') + '.html');
+        HTMLBody:=Doc.LoadTemplate(Settings.GetLayoutDir + Settings.GetStringValue(Layouts, 'SENDFEEDBACK', '') + '.html');
         HTMLBody:=StringReplace(HTMLBody, '{TEXT_HOLER}',  Transfer,       [rfReplaceAll]);
         HTMLBody:=StringReplace(HTMLBody, '{APPNAME}',     AppName,        [rfReplaceAll]);
         HTMLBody:=StringReplace(HTMLBody, '{BUILD}',       AppVer,         [rfReplaceAll]);
@@ -166,7 +166,7 @@ var
     Settings: ISettings;
 begin
     Settings:=TSettings.Create;
-    ReportForm.Caption:=Settings.GetStringValue(ApplicationDetails, 'WND_BUGREPORT', APPCAPTION);
+    ReportForm.Caption:=Settings.GetStringValue(ApplicationDetails, 'WND_SENDFEEDBACK', APPCAPTION);
     PanelReportMemo.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
 end;
 

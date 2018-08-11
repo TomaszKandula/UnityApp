@@ -185,7 +185,7 @@ var
 begin
 
     Settings:=TSettings.Create;
-    ViewMailerForm.Caption:=Settings.GetStringValue(ApplicationDetails, 'WND_SENDMAIL', APPCAPTION);
+    ViewMailerForm.Caption:=Settings.GetStringValue(ApplicationDetails, 'WND_MASSMAILER', APPCAPTION);
 
     // INITIALIZE LIST VIEW
     lsColumns:=CustomerList.Columns.Add;

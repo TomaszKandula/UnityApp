@@ -253,7 +253,7 @@ var
     Settings:  ISettings;
 begin
   Settings:=TSettings.Create;
-  SearchForm.Caption:=Settings.GetStringValue(ApplicationDetails, 'WND_SEARCH', APPCAPTION);
+  SearchForm.Caption:=Settings.GetStringValue(ApplicationDetails, 'WND_AVSEARCH', APPCAPTION);
   PanelEditSearch.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
   SColName  :='';
   SColNumber:='';

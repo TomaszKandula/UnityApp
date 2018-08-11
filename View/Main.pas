@@ -1631,7 +1631,6 @@ begin
 
     // Load web page "Unity Info"
     WebBrowser1.Navigate(WideString(Settings.GetStringValue(ApplicationDetails, 'START_PAGE',  'about:blank')), $02);
-    //WebBrowser2.Navigate(WideString(AppSettings.TMIG.ReadString(ApplicationDetails, 'REPORT_PAGE', 'about:blank')), $02);
 
     /// <remarks>
     ///     "InteTimer" is excluded from below list because it is controlled by "InitializeConnection" method.

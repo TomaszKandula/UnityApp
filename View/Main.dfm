@@ -1210,6 +1210,10 @@ object MainForm: TMainForm
       Caption = 'START'
       Highlighted = True
       ImageIndex = 8
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object WebContainer: TPanel
         AlignWithMargins = True
         Left = 17
@@ -1283,7 +1287,6 @@ object MainForm: TMainForm
           Color = clWhite
           ParentBackground = False
           TabOrder = 0
-          ExplicitTop = 122
           object PanelTop: TPanel
             AlignWithMargins = True
             Left = 40
@@ -1299,7 +1302,6 @@ object MainForm: TMainForm
             Color = clWhite
             ParentBackground = False
             TabOrder = 0
-            ExplicitTop = 5
             object TextHeader: TLabel
               AlignWithMargins = True
               Left = 0
@@ -1318,8 +1320,6 @@ object MainForm: TMainForm
               Font.Name = 'Verdana'
               Font.Style = [fsBold]
               ParentFont = False
-              ExplicitLeft = 51
-              ExplicitTop = 16
               ExplicitWidth = 277
             end
             object Line1: TShape
@@ -1353,7 +1353,6 @@ object MainForm: TMainForm
             Color = clWhite
             ParentBackground = False
             TabOrder = 1
-            ExplicitTop = 89
             object TextTitle: TLabel
               AlignWithMargins = True
               Left = 0
@@ -1372,8 +1371,6 @@ object MainForm: TMainForm
               Font.Name = 'Verdana'
               Font.Style = [fsBold]
               ParentFont = False
-              ExplicitLeft = 65
-              ExplicitTop = 20
               ExplicitWidth = 256
             end
             object Line2: TShape
@@ -1409,8 +1406,6 @@ object MainForm: TMainForm
               Font.Name = 'Verdana'
               Font.Style = []
               ParentFont = False
-              ExplicitLeft = 50
-              ExplicitTop = 192
               ExplicitWidth = 334
             end
             object TextLine2: TLabel
@@ -1434,8 +1429,6 @@ object MainForm: TMainForm
               Font.Name = 'Verdana'
               Font.Style = []
               ParentFont = False
-              ExplicitLeft = -54
-              ExplicitTop = 224
               ExplicitWidth = 912
             end
             object TextLine3: TLabel
@@ -1458,8 +1451,6 @@ object MainForm: TMainForm
               Font.Name = 'Verdana'
               Font.Style = []
               ParentFont = False
-              ExplicitLeft = 50
-              ExplicitTop = 256
               ExplicitWidth = 565
             end
             object TextLine4: TLabel
@@ -1491,7 +1482,6 @@ object MainForm: TMainForm
             Color = clWhite
             ParentBackground = False
             TabOrder = 2
-            ExplicitTop = 241
             object imgControlStatus: TImage
               AlignWithMargins = True
               Left = 402
@@ -3152,9 +3142,6 @@ object MainForm: TMainForm
             Color = clWhite
             ParentBackground = False
             TabOrder = 3
-            ExplicitLeft = 176
-            ExplicitTop = 360
-            ExplicitWidth = 657
             object DescLine1: TLabel
               AlignWithMargins = True
               Left = 0
@@ -3260,6 +3247,10 @@ object MainForm: TMainForm
       Font.Style = []
       Highlighted = True
       ParentFont = False
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Header1: TPanel
         Left = 0
         Top = 0
@@ -4577,8 +4568,8 @@ object MainForm: TMainForm
           AlignWithMargins = True
           Left = 10
           Top = 10
-          Width = 1233
-          Height = 415
+          Width = 200
+          Height = 200
           Margins.Left = 10
           Margins.Top = 10
           Margins.Right = 10
@@ -7779,6 +7770,10 @@ object MainForm: TMainForm
       Caption = 'VISMA Open Items'
       Highlighted = True
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Header2: TPanel
         Left = 0
         Top = 0
@@ -11627,6 +11622,10 @@ object MainForm: TMainForm
       Caption = 'Unidentified Transactions'
       Highlighted = True
       ImageIndex = 7
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Header6: TPanel
         Left = 0
         Top = 0
@@ -11690,6 +11689,10 @@ object MainForm: TMainForm
       Caption = 'Private Address Book'
       Highlighted = True
       ImageIndex = 2
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Header3: TPanel
         Left = 0
         Top = 0
@@ -15089,6 +15092,10 @@ object MainForm: TMainForm
       Highlighted = True
       ImageIndex = 4
       OnShow = TabSheet4Show
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Header4: TPanel
         Left = 0
         Top = 0
@@ -15192,8 +15199,8 @@ object MainForm: TMainForm
           AlignWithMargins = True
           Left = 10
           Top = 10
-          Width = 1233
-          Height = 536
+          Width = 200
+          Height = 200
           Margins.Left = 10
           Margins.Top = 10
           Margins.Right = 10
@@ -18317,8 +18324,6 @@ object MainForm: TMainForm
           Visible = False
           ExplicitLeft = 456
           ExplicitTop = 240
-          ExplicitWidth = 200
-          ExplicitHeight = 200
         end
         object sgInvoiceTracker: TStringGrid
           AlignWithMargins = True
@@ -18371,6 +18376,10 @@ object MainForm: TMainForm
       ImageIndex = 8
       OnResize = TabSheet7Resize
       OnShow = TabSheet7Show
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Header7: TPanel
         Left = 0
         Top = 0
@@ -18825,6 +18834,10 @@ object MainForm: TMainForm
       Highlighted = True
       ImageIndex = 6
       OnShow = TabSheet8Show
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Header8: TPanel
         Left = 0
         Top = 0

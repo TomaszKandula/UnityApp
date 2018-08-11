@@ -1524,7 +1524,7 @@ end;
 procedure TTSendAccountStatement.Execute;
 var
     Statement:   TDocument;
-    AppSettings: TSettings;
+    Settings:    ISettings;
     DailyText:   TDataTables;
     Status:      string;
     Condition:   string;
@@ -1533,8 +1533,8 @@ begin
     FLock.Acquire;
 
     try
-        Statement  :=TDocument.Create;
-        AppSettings:=TSettings.Create;
+        Statement:=TDocument.Create;
+        Settings :=TSettings.Create;
         try
 
             // Setup
@@ -1551,11 +1551,11 @@ begin
 
             // Use fully pre-defined template
             if FLayout = maDefined then
-                Statement.HTMLLayout:=Statement.LoadTemplate(AppSettings.FLayoutDir + AppSettings.TMIG.ReadString(VariousLayouts, 'STATEMENT', '') + '.html');
+                Statement.HTMLLayout:=Statement.LoadTemplate(Settings.GetLayoutDir + Settings.GetStringValue(Layouts, 'STATEMENT', '') + '.html');
 
             // Use pre-defined template with two custom fields
             if FLayout = maCustom then
-                Statement.HTMLLayout:=Statement.LoadTemplate(AppSettings.FLayoutDir + AppSettings.TMIG.ReadString(VariousLayouts, 'CUSTSTATEMENT', '') + '.html');
+                Statement.HTMLLayout:=Statement.LoadTemplate(Settings.GetLayoutDir + Settings.GetStringValue(Layouts, 'CUSTSTATEMENT', '') + '.html');
 
             // Send statement
             Statement.MailSubject:=FSubject + ' - ' + FCustName + ' - ' + FCustNumber;
@@ -1597,7 +1597,6 @@ begin
             end;
 
         finally
-            AppSettings.Free;
             Statement.Free;
         end;
 

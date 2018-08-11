@@ -5,26 +5,39 @@ unit Internet;
 
 interface
 
-/// <remarks>
-///     Do not use WinInet API in service or service-like process as it requires human facing the application. Use WinHTTP instead.
-/// </remarks>
-
 uses
-    Main, WinHttp_TLB, Classes, SysUtils, ComObj, StrUtils;
+    Main, WinHttp_TLB, Classes, SysUtils, ComObj, StrUtils, Variants, ActiveX, AxCtrls;
+
+    /// <remarks>
+    ///     Do not use WinInet API in service or service-like process as it requires human facing the application. Use WinHTTP instead.
+    /// </remarks>
 
 type
+
+    /// <summary>
+    ///
+    /// </summary>
+
+    IConnectivity = Interface(IInterface)
+    ['{6C9DEA61-7E15-4FC0-8D66-B11E79F051DF}']
+        function IsInternetPresent: boolean;
+        function GetResponseText(FullURL: string): string;
+        function Download(const SourceUrl: string; DestFileName: String): Boolean;
+    End;
 
     /// <summary>
     ///     Base class for checking internet connection.
     /// </summary>
 
-    TInternetConnectivity = class
+    TConnectivity = class(TInterfacedObject, IConnectivity)
     {$TYPEINFO ON}
     private
         var ErrorMessage: string;
-        function CallNCSIServer(Server: string; FileName: string; Mode: string; var HttpResponse: string): integer;
+        function CallServer(CallUrl: string; Mode: string; var HttpResponse: string): integer;
     public
         function IsInternetPresent: boolean;
+        function GetResponseText(FullURL: string): string;
+        function Download(const SourceUrl: string; DestFileName: String): Boolean;
     end;
 
 
@@ -39,13 +52,12 @@ implementation
 /// <param name="Mode"></param>
 /// <returns>Integer. Http response code, we expects 200.</returns>
 
-function TInternetConnectivity.CallNCSIServer(Server: string; FileName: string; Mode: string; var HttpResponse: string): integer;
+function TConnectivity.CallServer(CallUrl: string; Mode: string; var HttpResponse: string): integer;
 var
     IsFinished:  boolean;
     NoAttempts:  cardinal;
     ReturnCode:  integer;
     ReturnText:  string;
-    CallUrl:     string;
     Http:        IWinHttpRequest;
 begin
     NoAttempts:=0;
@@ -53,13 +65,7 @@ begin
     IsFinished:=False;
     Result:=0;
 
-    if (Server = '') or (FileName = '') then  Exit;
-
-    if Mode = ncsiGet then
-        CallUrl:=server + filename;
-
-    if Mode = ncsiHead then
-        CallUrl:=server;
+    if string.IsNullOrEmpty(CallUrl) then Exit;
 
     Http:=CoWinHttpRequest.Create;
     try
@@ -71,13 +77,13 @@ begin
             begin
                 Inc(NoAttempts);
                 HttpResponse:=EmptyStr;
-                Http.Send(EmptyStr);
+                Http.Send(EmptyParam);
 
                 ReturnCode:=Http.Status;
                 ReturnText:=Http.StatusText;
 
                 if Mode = ncsiGet then
-                    HttpResponse:=Http.GetAllResponseHeaders + CRLF + Http.ResponseText;
+                    HttpResponse:=Http.ResponseText;
 
                 if Mode = ncsiHead then
                     HttpResponse:=Http.GetAllResponseHeaders;
@@ -131,14 +137,78 @@ end;
 /// </summary>
 /// <returns>Boolean. True if HTTP response is 200.</returns>
 
-function TInternetConnectivity.IsInternetPresent: boolean;
+function TConnectivity.IsInternetPresent: boolean;
 var
   Return: string;
 begin
-    if CallNCSIServer(ncsiWww, ncsiFile, ncsiGet, Return) = 200 then
+    if CallServer(ncsiWww + ncsiFile, ncsiGet, Return) = 200 then
         Result:=True
             else
                 Result:=False;
+end;
+
+/// <summary>
+///     Get the response text from given full URL. Used to extract plain text.
+/// </summary>
+
+function TConnectivity.GetResponseText(FullURL: string): string;
+var
+    Return: string;
+begin
+    if CallServer(FullURL, ncsiGet, Return) = 200 then
+        Result:=Return
+            else
+                Result:='';
+end;
+
+/// <summary>
+///     Download file from provided URL source.
+/// </summary>
+
+function TConnectivity.Download(const SourceUrl: string; DestFileName: String): Boolean;
+var
+   Http:        IWinHttpRequest;
+   wUrl:        WideString;
+   FileStream:  TFileStream;
+   HttpStream:  IStream;
+   OleStream:   TOleStream;
+begin
+
+    Result:=False;
+
+    try
+        wUrl:=SourceUrl;
+
+        Http:=CoWinHttpRequest.Create;
+        Http.open('GET', wUrl, False);
+        Http.send(EmptyParam);
+
+        if Http.status = 200 then
+        begin
+            Result:=True;
+
+            HttpStream:=IUnknown(Http.ResponseStream) as IStream;
+            OleStream :=TOleStream.Create(HttpStream);
+
+            try
+                FileStream:=TFileStream.Create(DestFileName, fmCreate);
+                try
+                    OleStream.Position:=0;
+                    FileStream.CopyFrom(OleStream, OleStream.Size);
+                finally
+                    FileStream.Free;
+                end;
+
+            finally
+                OleStream.Free;
+            end;
+
+        end;
+
+    except
+        Result:=False;
+    end;
+
 end;
 
 

@@ -84,7 +84,7 @@ var
 begin
     AppSettings:=TSettings.Create;
     try
-        ActionsForm.Caption:=AppSettings.TMIG.ReadString(ApplicationDetails, 'WND_PHONES', APPCAPTION);
+        ActionsForm.Caption:=AppSettings.TMIG.ReadString(ApplicationDetails, 'WND_PHONELIST', APPCAPTION);
     finally
         AppSettings.Free;
     end;

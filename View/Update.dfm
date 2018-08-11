@@ -62,14 +62,14 @@ object UpdateForm: TUpdateForm
     Transparent = False
   end
   object Text1: TLabel
-    Left = 177
-    Top = 128
-    Width = 342
+    Left = 201
+    Top = 150
+    Width = 302
     Height = 18
     Caption = 'Running automatic update, please wait...'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
-    Font.Height = -16
+    Font.Height = -15
     Font.Name = 'Verdana'
     Font.Style = []
     ParentFont = False
@@ -141,16 +141,16 @@ object UpdateForm: TUpdateForm
     ShowText = False
   end
   object Text2: TLabel
-    Left = 233
-    Top = 240
-    Width = 249
+    Left = 230
+    Top = 241
+    Width = 250
     Height = 18
     Caption = 'Do not turn off your computer.'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
-    Font.Height = -16
+    Font.Height = -15
     Font.Name = 'Verdana'
-    Font.Style = []
+    Font.Style = [fsBold]
     ParentFont = False
   end
 end
