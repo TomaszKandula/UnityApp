@@ -64,7 +64,7 @@ const
 
     DelayStd    :  integer   = 10;                 // Splash screen: slown down a bit to display the message during startup
     DelayErr    :  integer   = 750;                // Splash screen: slown down significantly for user in case of error
-    AllTasks    :  integer   = 15;                 // Total number of all tasks on startup
+    AllTasks    :  integer   = 29;                 // Total number of all tasks on startup
     SELCOLOR    :  dword     = $00F2E4D7;          // Application color #1
     FONCOLOR    :  dword     = $006433C9;          // Application color #2
     CUSCOLOR    :  dword     = $00FFDBB7;          // Application color #3

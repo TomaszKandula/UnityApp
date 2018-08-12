@@ -77,7 +77,7 @@ var
     Settings:         ISettings;
     LogText:          TThreadFileLog;
     Connection:       IConnectivity;
-    MsAssemblies:     TStrings;
+    Assemblies:       TStrings;
     ReleaseNumber:    cardinal;
     PathReleasePak:   string;
     PathReleaseMan:   string;
@@ -319,6 +319,9 @@ begin
     /// <summary>
     ///     Initialize interfaced objects for internet methods and settings file operations and event logging.
     /// </summary>
+    /// <remarks>
+    ///     Because LogText is re-introduced in MainForm, it has to be free before MainForm initialization.
+    /// </remarks>
 
     Connection:=TConnectivity.Create;
     Settings  :=TSettings.Create;
@@ -370,7 +373,7 @@ begin
     end;
 
     /// <summary>
-    ///     Check event log file.
+    ///     Check event log file. If it is missing, then unpack from EXE resources default file.
     /// </summary>
 
     if FileExists(PathEventLog) then
@@ -495,8 +498,11 @@ begin
     end;
 
     /// <summary>
-    ///     Licence file.
+    ///     Check if licence file exists.
     /// </summary>
+    /// <remarks>
+    ///     TODO: Extend this by adding CRC32 check.
+    /// </remarks>
 
     if not FileExists(Settings.GetPathLicenceLic) then
     begin
@@ -609,33 +615,34 @@ begin
     end;
 
     /// <summary>
-    ///     Check if assemlbies exists in main folder. All assemlbies must be present to run the program. We exclude from the list
-    ///     assemblies related to Chromium.
+    ///     Check if assemlbies exists in main folder. All assemlbies must be present to run the program. We exclude from this list
+    ///     Chromium assemblies because it is not needed to run key features. Chromium is primarly used to display Tableau reports and
+    ///     Unity Info web page. This also can be displayed by external web browser.
     /// </summary>
     /// <remarks>
     ///     We do not check CRC32 correctness.
     /// </remarks>
 
-    SetLength(MsAssemblies, 6);
-    MsAssemblies[0]:=DLL1;
-    MsAssemblies[1]:=DLL2;
-    MsAssemblies[2]:=DLL3;
-    MsAssemblies[3]:=DLL4;
-    MsAssemblies[4]:=DLL5;
-    MsAssemblies[5]:=LyncCall;
+    SetLength(Assemblies, 6);
+    Assemblies[0]:=DLL1;
+    Assemblies[1]:=DLL2;
+    Assemblies[2]:=DLL3;
+    Assemblies[3]:=DLL4;
+    Assemblies[4]:=DLL5;
+    Assemblies[5]:=LyncCall;
 
-    for iCNT:=0 to High(MsAssemblies) - 1 do
+    for iCNT:=0 to High(Assemblies) - 1 do
     begin
-        Status(iCNT + 6, AllTasks, DelayStd, 'Checking ' + MsAssemblies[iCNT] + '...', True, Settings.GetPathEventLog);
+        Status(iCNT + 6, AllTasks, DelayStd, 'Checking ' + Assemblies[iCNT] + '...', True, Settings.GetPathEventLog);
 
-        if FileExists(Settings.GetAppDir + MsAssemblies[iCNT]) then
+        if FileExists(Settings.GetAppDir + Assemblies[iCNT]) then
         begin
-            Status(iCNT + 6, AllTasks, DelayStd, 'Checking ' + MsAssemblies[iCNT] + '... OK.', True, Settings.GetPathEventLog);
+            Status(iCNT + 6, AllTasks, DelayStd, 'Checking ' + Assemblies[iCNT] + '... OK.', True, Settings.GetPathEventLog);
         end
         else
         begin
             Application.MessageBox(
-                PCHar('Cannot find ' + MsAssemblies[iCNT] + '. Please reinstall application and/or contact IT support.'),
+                PCHar('Cannot find ' + Assemblies[iCNT] + '. Please reinstall application and/or contact IT support.'),
                 PChar(APPCAPTION), MB_OK + MB_ICONERROR
             );
             ExitProcess(0);
@@ -659,7 +666,7 @@ begin
     end;
 
     /// <remarks>
-    ///     Release logger object. It will be re-introduced after MainForm initialization.
+    ///     Release logger object. It will be re-introduced during MainForm initialization.
     /// </remarks>
 
     LogText.Free;
@@ -673,33 +680,82 @@ begin
     Application.Title:=APPCAPTION;
     Application.MainFormOnTaskbar:=False;
 
+    /// <summary>
+    ///     Load Main Form and execute all of its initialization methods.
+    /// </summary>
     /// <remarks>
-    ///      All forms must have parameter "visible" set to false.
+    ///      Visible parameter must be set to false to prevent from showing the main application window while splash screen is still on.
     /// </remarks>
 
-    // Main form (view) load
     Application.CreateForm(TMainForm, MainForm);
     MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] Initialization methods executed within main thread, ''MainForm'' has been created. Main process thread ID = ' + IntToStr(MainThreadID) + '.');
 
-    // Other forms (views)
-    Status(14, AllTasks, 400, 'Application initialization: VCL forms loading, please wait.', False, Settings.GetPathEventLog);
-    Application.CreateForm(TAboutForm,       AboutForm);       MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''AboutForm'' ......... has been created.');
-    Application.CreateForm(TSendForm,        SendForm);        MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''SendForm'' .......... has been created.');
-    Application.CreateForm(TEventForm,       EventForm);       MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''EventForm'' ......... has been created.');
-    Application.CreateForm(TColorsForm,      ColorsForm);      MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ColorsForm'' ........ has been created.');
-    Application.CreateForm(TReportForm,      ReportForm);      MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ReportForm'' ........ has been created.');
-    Application.CreateForm(TFilterForm,      FilterForm);      MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''FilterForm'' ........ has been created.');
-    Application.CreateForm(TSearchForm,      SearchForm);      MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''SearchForm'' ........ has been created.');
-    Application.CreateForm(TTrackerForm,     TrackerForm);     MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''TrackerForm'' ....... has been created.');
-    Application.CreateForm(TActionsForm,     ActionsForm);     MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ActionsForm'' ....... has been created.');
-    Application.CreateForm(TCalendarForm,    CalendarForm);    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''CalendarForm'' ...... has been created.');
-    Application.CreateForm(TInvoicesForm,    InvoicesForm);    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''InvoicesForm'' ...... has been created.');
-    Application.CreateForm(TPhoneListForm,   PhoneListForm);   MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''PhoneListForm'' ..... has been created.');
-    Application.CreateForm(TViewSearchForm,  ViewSearchForm);  MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ViewSearchForm'' .... has been created.');
-    Application.CreateForm(TViewMailerForm,  ViewMailerForm);  MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ViewMailerForm'' .... has been created.');
+    /// <summary>
+    ///     Load all other forms and execute initialization methods. Similarly to MainForm, visible parameter of the forms must be set to false
+    ///     to prevent showing up windows.
+    /// </summary>
+    /// <remarks>
+    ///     Use Status method with TextMoe parameter set to False. It allows to log different text and to display different text during loading procedure.
+    /// </remarks>
+
+    Application.CreateForm(TAboutForm, AboutForm);
+    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''AboutForm'' ......... has been created.');
+    Status(15, AllTasks, 10, 'Application initialization: [VCL] About has been loaded.', False, Settings.GetPathEventLog);
+
+    Application.CreateForm(TSendForm, SendForm);
+    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''SendForm'' .......... has been created.');
+    Status(16, AllTasks, 10, 'Application initialization: [VCL] Send has been loaded.', False, Settings.GetPathEventLog);
+
+    Application.CreateForm(TEventForm, EventForm);
+    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''EventForm'' ......... has been created.');
+    Status(17, AllTasks, 10, 'Application initialization: [VCL] Event has been loaded.', False, Settings.GetPathEventLog);
+
+    Application.CreateForm(TColorsForm, ColorsForm);
+    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ColorsForm'' ........ has been created.');
+    Status(18, AllTasks, 10, 'Application initialization: [VCL] Colors has been loaded.', False, Settings.GetPathEventLog);
+
+    Application.CreateForm(TReportForm, ReportForm);
+    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ReportForm'' ........ has been created.');
+    Status(19, AllTasks, 10, 'Application initialization: [VCL] Report has been loaded.', False, Settings.GetPathEventLog);
+
+    Application.CreateForm(TFilterForm, FilterForm);
+    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''FilterForm'' ........ has been created.');
+    Status(20, AllTasks, 10, 'Application initialization: [VCL] Filter has been loaded.', False, Settings.GetPathEventLog);
+
+    Application.CreateForm(TSearchForm, SearchForm);
+    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''SearchForm'' ........ has been created.');
+    Status(21, AllTasks, 10, 'Application initialization: [VCL] Search has been loaded.', False, Settings.GetPathEventLog);
+
+    Application.CreateForm(TTrackerForm, TrackerForm);
+    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''TrackerForm'' ....... has been created.');
+    Status(22, AllTasks, 10, 'Application initialization: [VCL] Tracker has been loaded.', False, Settings.GetPathEventLog);
+
+    Application.CreateForm(TActionsForm, ActionsForm);
+    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ActionsForm'' ....... has been created.');
+    Status(23, AllTasks, 10, 'Application initialization: [VCL] Actions has been loaded.', False, Settings.GetPathEventLog);
+
+    Application.CreateForm(TCalendarForm, CalendarForm);
+    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''CalendarForm'' ...... has been created.');
+    Status(24, AllTasks, 10, 'Application initialization: [VCL] Calendar has been loaded.', False, Settings.GetPathEventLog);
+
+    Application.CreateForm(TInvoicesForm, InvoicesForm);
+    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''InvoicesForm'' ...... has been created.');
+    Status(25, AllTasks, 10, 'Application initialization: [VCL] Invoices has been loaded.', False, Settings.GetPathEventLog);
+
+    Application.CreateForm(TPhoneListForm, PhoneListForm);
+    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''PhoneListForm'' ..... has been created.');
+    Status(26, AllTasks, 10, 'Application initialization: [VCL] PhoneList has been loaded.', False, Settings.GetPathEventLog);
+
+    Application.CreateForm(TViewSearchForm, ViewSearchForm);
+    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ViewSearchForm'' .... has been created.');
+    Status(27, AllTasks, 10, 'Application initialization: [VCL] ViewSearch has been loaded.', False, Settings.GetPathEventLog);
+
+    Application.CreateForm(TViewMailerForm, ViewMailerForm);
+    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ViewMailerForm'' .... has been created.');
+    Status(28, AllTasks, 10, 'Application initialization: [VCL] ViewMailer has been loaded.', False, Settings.GetPathEventLog);
 
     // Splash screen - 100%
-    Status(15, AllTasks, 900, 'Application is initialized.', False, Settings.GetPathEventLog);
+    Status(29, AllTasks, 750, 'Application is initialized.', False, Settings.GetPathEventLog);
 
     AnimateWindow(SplashForm.Handle, 500, AW_BLEND or AW_HIDE);
     Sleep(150);
