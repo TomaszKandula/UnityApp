@@ -23,6 +23,7 @@ uses
     CRC32u,
     SynZip,
     SynZipFiles,
+    uCEFApplication,
     System.Types,
     Model in 'Model\Model.pas',
     SQL in 'Model\SQL.pas',
@@ -283,7 +284,7 @@ begin
     {$WARN SYMBOL_PLATFORM ON}
 
     /// <summary>
-    ///     We allow only one instance of running program.
+    ///     We allow only one instance of running program (no sessions).
     /// </summary>
 
     Mutex:=CreateMutex(nil, True, CurrentMutex);
@@ -525,7 +526,7 @@ begin
     end;
 
     /// <summary>
-    ///     Check Windows version. We allow only Windows 7 (with Areo) or Windows 10 (and above).
+    ///     Check Windows version. We allow only Windows 7 (with Aero) or Windows 10 (and above).
     /// </summary>
 
     if not StrToInt(GetOSVer(OSNumber)) >= 61 then
@@ -551,7 +552,7 @@ begin
     begin
 
         // Initialize
-        Status(4, AllTasks, DelayStd, 'Checking Windows 7 Areo composition... ', True, Settings.GetPathEventLog);
+        Status(4, AllTasks, DelayStd, 'Checking Windows 7 Aero composition... ', True, Settings.GetPathEventLog);
         IsAeroEnabled:=False;
         ModuleHandle :=LoadLibrary(PChar(DWMI));
 
@@ -571,18 +572,18 @@ begin
         // Terminate if not switched on
         if IsAeroEnabled = False then
         begin
-            Status(4, AllTasks, DelayStd, 'Checking Windows 7 Areo composition... disabled!', True, Settings.GetPathEventLog);
+            Status(4, AllTasks, DelayStd, 'Checking Windows 7 Aero composition... disabled!', True, Settings.GetPathEventLog);
             Application.MessageBox(
                 PChar('Aero is not enabled. ' + APPCAPTION + ' will be closed. Please contact IT Support.'),
                 PChar(APPCAPTION), MB_OK + MB_ICONERROR
             );
-            LogText.Log(Settings.GetPathEventLog, '[Critical Error]: Areo composition is disabled. Application has been terminated.');
+            LogText.Log(Settings.GetPathEventLog, '[Critical Error]: Aero composition is disabled. Application has been terminated.');
             ExitProcess(0);
         end;
     end
     else
     begin
-        Status(4, AllTasks, DelayStd, 'Checking Windows 7 Areo composition... OK.', True, Settings.GetPathEventLog);
+        Status(4, AllTasks, DelayStd, 'Checking Windows 7 Aero composition... OK.', True, Settings.GetPathEventLog);
     end;
 
    /// <summary>
@@ -617,7 +618,7 @@ begin
     /// <summary>
     ///     Check if assemlbies exists in main folder. All assemlbies must be present to run the program. We exclude from this list
     ///     Chromium assemblies because it is not needed to run key features. Chromium is primarly used to display Tableau reports and
-    ///     Unity Info web page. This also can be displayed by external web browser.
+    ///     Unity Info web page. This can be also displayed by external web browser.
     /// </summary>
     /// <remarks>
     ///     We do not check CRC32 correctness.
@@ -642,7 +643,7 @@ begin
         else
         begin
             Application.MessageBox(
-                PCHar('Cannot find ' + Assemblies[iCNT] + '. Please reinstall application and/or contact IT support.'),
+                PCHar('Cannot find ' + Assemblies[iCNT] + '. Please re-install application and/or contact IT support.'),
                 PChar(APPCAPTION), MB_OK + MB_ICONERROR
             );
             ExitProcess(0);
@@ -660,9 +661,15 @@ begin
     for iCNT:=0 to Settings.LayoutLists.Count - 1 do
     begin
         if Connection.Download(Settings.GetLayoutsURL + Settings.LayoutLists.Strings[iCNT], Settings.GetLayoutDir + Settings.LayoutLists.Strings[iCNT]) then
-            LogText.Log(Settings.GetPathEventLog, Settings.LayoutLists.Strings[iCNT] + '... synchronised.')
-                else
-                    LogText.Log(Settings.GetPathEventLog, Settings.LayoutLists.Strings[iCNT] + '... failed to download.');
+        begin
+            LogText.Log(Settings.GetPathEventLog, Settings.LayoutLists.Strings[iCNT] + '... synchronised.');
+            Status(12, AllTasks, DelayStd, 'Synchronising layouts... ' + Settings.LayoutLists.Strings[iCNT] + ' [synchronised].', False, Settings.GetPathEventLog);
+        end
+        else
+        begin
+            LogText.Log(Settings.GetPathEventLog, Settings.LayoutLists.Strings[iCNT] + '... failed to download.');
+            Status(12, AllTasks, DelayStd, 'Synchronising layouts... ' + Settings.LayoutLists.Strings[iCNT] + ' [failed].', False, Settings.GetPathEventLog);
+        end;
     end;
 
     /// <remarks>
@@ -670,6 +677,35 @@ begin
     /// </remarks>
 
     LogText.Free;
+
+    /// <summary>
+    ///     Initialize Chromium object before MainForm with Chromium window is created.
+    /// </summary>
+    /// <remarks>
+    ///     GlobalCEFApp is an instance of the TCEFApplication class an it simpliefies the Chromium initialization.
+    /// </remarks>
+
+    GlobalCEFApp:=TCefApplication.Create;
+
+    /// <summary>
+    ///
+    /// </summary>
+
+    GlobalCEFApp.BrowserSubprocessPath:='SubProcess.exe';
+
+    /// <summary>
+    ///     Because TApplication should be only initialized and run in the main process, we call GlobalCEFApp.StartMainProcess to check
+    ///     if we have main thread running. If not, we exit the program.
+    /// </summary>
+
+    if not(GlobalCEFApp.StartMainProcess) then
+    begin
+        Application.MessageBox(
+            PChar('Cannot detect main thread running. Program will be closed. Please contact IT support.'),
+            PChar(APPCAPTION), MB_OK + MB_ICONERROR
+        );
+        ExitProcess(0);
+    end;
 
     /// <summary>
     ///     Start the application.
@@ -777,6 +813,12 @@ begin
 
     Application.MainFormOnTaskbar:=True;
     Application.Run;
+
+    /// <summary>
+    ///     Destroy Chromium object when application.run exits.
+    /// </summary>
+
+    GlobalCEFApp.Free;
 
     /// <remarks>
     ///     Breaks the message loop in application.run class.

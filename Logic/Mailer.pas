@@ -92,7 +92,7 @@ function TMailer.SendEmail(oauth: integer): boolean;
 var
     CdoMessage: CDO_TLB.IMessage;
     Schema:     string;
-    ISettings:   TSettings;
+    Settings:   ISettings;
 begin
 
     Result:=False;
@@ -108,7 +108,7 @@ begin
     CdoMessage.HTMLBody:=MailBody;
 
     // Configure
-    ISettings:=TSettings.Create;
+    Settings:=TSettings.Create;
 
     Schema:='http://schemas.microsoft.com/cdo/configuration/';
 
@@ -116,19 +116,19 @@ begin
     begin
       CdoMessage.Configuration.Fields.item[Schema + 'sendusing'       ].Value:=cdoSendUsingPort;
       CdoMessage.Configuration.Fields.item[Schema + 'smtpauthenticate'].Value:=cdoNTLM;
-      CdoMessage.Configuration.Fields.item[Schema + 'smtpserver'      ].Value:=ISettings.TMIG.ReadString(MailerNTLM, 'SMTP', '');
-      CdoMessage.Configuration.Fields.item[Schema + 'smtpserverport'  ].Value:=ISettings.TMIG.ReadString(MailerNTLM, 'PORT', '');
+      CdoMessage.Configuration.Fields.item[Schema + 'smtpserver'      ].Value:=Settings.GetStringValue(MailerNTLM, 'SMTP', '');
+      CdoMessage.Configuration.Fields.item[Schema + 'smtpserverport'  ].Value:=Settings.GetStringValue(MailerNTLM, 'PORT', '');
     end;
 
     if oauth = auBASIC then
     begin
       CdoMessage.Configuration.Fields.item[Schema + 'sendusing'       ].Value:=cdoSendUsingPort;
       CdoMessage.Configuration.Fields.item[Schema + 'smtpauthenticate'].Value:=cdoBasic;
-      CdoMessage.Configuration.Fields.item[Schema + 'smtpserver'      ].Value:=ISettings.TMIG.ReadString(MailerBASIC, 'SMTP', '');
-      CdoMessage.Configuration.Fields.item[Schema + 'smtpserverport'  ].Value:=ISettings.TMIG.ReadString(MailerBASIC, 'PORT', '');
-      CdoMessage.Configuration.Fields.item[Schema + 'sendusername'    ].Value:=ISettings.TMIG.ReadString(MailerBASIC, 'USERNAME', '');
-      CdoMessage.Configuration.Fields.item[Schema + 'sendpassword'    ].Value:=ISettings.TMIG.ReadString(MailerBASIC, 'PASSWORD', '');
-      CdoMessage.Configuration.Fields.item[Schema + 'smtpusessl'      ].Value:=ISettings.TMIG.ReadString(MailerBASIC, 'SSL', '');
+      CdoMessage.Configuration.Fields.item[Schema + 'smtpserver'      ].Value:=Settings.GetStringValue(MailerBASIC, 'SMTP', '');
+      CdoMessage.Configuration.Fields.item[Schema + 'smtpserverport'  ].Value:=Settings.GetStringValue(MailerBASIC, 'PORT', '');
+      CdoMessage.Configuration.Fields.item[Schema + 'sendusername'    ].Value:=Settings.GetStringValue(MailerBASIC, 'USERNAME', '');
+      CdoMessage.Configuration.Fields.item[Schema + 'sendpassword'    ].Value:=Settings.GetStringValue(MailerBASIC, 'PASSWORD', '');
+      CdoMessage.Configuration.Fields.item[Schema + 'smtpusessl'      ].Value:=Settings.GetStringValue(MailerBASIC, 'SSL', '');
     end;
 
     CdoMessage.Configuration.Fields.item[Schema + 'NNTPAccountName' ].Value:=XMailer;
@@ -152,15 +152,15 @@ end;
 
 function TMailer.SendNow: boolean;
 var
-    ISettings: TSettings;
+    Settings: ISettings;
 begin
     Result:=False;
-    ISettings:=TSettings.Create;
+    Settings:=TSettings.Create;
 
-    if ISettings.TMIG.ReadString(MailerSetup, 'ACTIVE', '') = MailerNTLM then
+    if Settings.GetStringValue(MailerSetup, 'ACTIVE', '') = MailerNTLM then
         Result:=SendEmail(auNTLM);
 
-    if ISettings.TMIG.ReadString(MailerSetup, 'ACTIVE', '') = MailerBASIC then
+    if Settings.GetStringValue(MailerSetup, 'ACTIVE', '') = MailerBASIC then
         Result:=SendEmail(auBASIC);
 
 end;

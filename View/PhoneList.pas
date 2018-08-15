@@ -80,14 +80,10 @@ end;
 
 procedure TPhoneListForm.FormCreate(Sender: TObject);
 var
-    AppSettings: TSettings;
+    Settings: ISettings;
 begin
-    AppSettings:=TSettings.Create;
-    try
-        ActionsForm.Caption:=AppSettings.TMIG.ReadString(ApplicationDetails, 'WND_PHONELIST', APPCAPTION);
-    finally
-        AppSettings.Free;
-    end;
+    Settings:=TSettings.Create;
+    ActionsForm.Caption:=Settings.GetStringValue(ApplicationDetails, 'WND_PHONELIST', APPCAPTION);
     PanelMemo.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
 end;
 

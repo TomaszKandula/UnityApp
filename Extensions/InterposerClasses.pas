@@ -786,36 +786,32 @@ end;
 
 procedure TStringGrid.SaveLayout(ColWidthName: string; ColOrderName: string; ColNames: string; ColPrefix: string);
 var
-    AppSettings:  TSettings;
-    iCNT:         integer;
+    Settings:  ISettings;
+    iCNT:      integer;
 begin
-    AppSettings:=TSettings.Create;
+    Settings:=TSettings.Create;
 
-    try
-        // Column width
-        for iCNT:=0 to Self.ColCount - 1 do
-        begin
-            if iCNT = 0 then AppSettings.TMIG.WriteInteger(ColWidthName, ColPrefix + IntToStr(iCNT), 10);
-            if iCNT > 0 then AppSettings.TMIG.WriteInteger(ColWidthName, ColPrefix + IntToStr(iCNT), Self.ColWidths[iCNT]);
-        end;
-
-        // SQL column name
-        for iCNT:=0 to Self.ColCount - 1 do
-            AppSettings.TMIG.WriteString(ColOrderName, ColPrefix + IntToStr(iCNT), Self.SqlColumns[iCNT, 0]);
-
-        // Column title
-        for iCNT:=0 to Self.ColCount - 1 do
-        begin
-            if iCNT = 0 then AppSettings.TMIG.WriteString(ColNames, ColPrefix + IntToStr(iCNT), '');
-            if iCNT > 0 then AppSettings.TMIG.WriteString(ColNames, ColPrefix + IntToStr(iCNT), Self.SqlColumns[iCNT, 1]);
-        end;
-
-        // Encode
-        AppSettings.Encode(AppConfig);
-
-    finally
-        AppSettings.Free;
+    // Column width
+    for iCNT:=0 to Self.ColCount - 1 do
+    begin
+        if iCNT = 0 then Settings.SetIntegerValue(ColWidthName, ColPrefix + IntToStr(iCNT), 10);
+        if iCNT > 0 then Settings.SetIntegerValue(ColWidthName, ColPrefix + IntToStr(iCNT), Self.ColWidths[iCNT]);
     end;
+
+    // SQL column name
+    for iCNT:=0 to Self.ColCount - 1 do
+        Settings.SetStringValue(ColOrderName, ColPrefix + IntToStr(iCNT), Self.SqlColumns[iCNT, 0]);
+
+    // Column title
+    for iCNT:=0 to Self.ColCount - 1 do
+    begin
+        if iCNT = 0 then Settings.SetStringValue(ColNames, ColPrefix + IntToStr(iCNT), '');
+        if iCNT > 0 then Settings.SetStringValue(ColNames, ColPrefix + IntToStr(iCNT), Self.SqlColumns[iCNT, 1]);
+    end;
+
+    // Encode
+    Settings.Encode(AppConfig);
+
 
 end;
 
@@ -836,11 +832,11 @@ end;
 
 function TStringGrid.LoadLayout(var StrCol: string; ColWidthName: string; ColOrderName: string; ColNames: string; ColPrefix: string): boolean;
 var
-    AppSettings:  TSettings;
-    ColOrderSec:  TStringList;
-    ColWidthSec:  TStringList;
-    ColNamesSec:  TStringList;
-    iCNT:         integer;
+    Settings:       ISettings;
+    ColOrderSec:    TStringList;
+    ColWidthSec:    TStringList;
+    ColNamesSec:    TStringList;
+    iCNT:           integer;
 begin
 
     // Check number of keys in given section
@@ -850,11 +846,11 @@ begin
     ColOrderSec:=TStringList.Create;
     ColNamesSec:=TStringList.Create;
 
-    AppSettings:=TSettings.Create;
+    Settings:=TSettings.Create;
     try
-        AppSettings.TMIG.ReadSection(ColWidthName, ColWidthSec);
-        AppSettings.TMIG.ReadSection(ColOrderName, ColOrderSec);
-        AppSettings.TMIG.ReadSection(ColNames, ColNamesSec);
+        Settings.GetSection(ColWidthName, ColWidthSec);
+        Settings.GetSection(ColOrderName, ColOrderSec);
+        Settings.GetSection(ColNames, ColNamesSec);
 
         if (ColWidthSec.Count = ColOrderSec.Count) and (ColWidthSec.Count = ColNamesSec.Count) then
         begin
@@ -868,25 +864,24 @@ begin
                 if iCNT > 0 then
                 begin
                     if iCNT < (Self.ColCount - 1) then
-                        StrCol:=StrCol + AppSettings.TMIG.ReadString(ColOrderName, ColPrefix + IntToStr(iCNT), '') + ','
+                        StrCol:=StrCol + Settings.GetStringValue(ColOrderName, ColPrefix + IntToStr(iCNT), '') + ','
                             else
-                                StrCol:=StrCol + AppSettings.TMIG.ReadString(ColOrderName, ColPrefix + IntToStr(iCNT), '') + ' ';
+                                StrCol:=StrCol + Settings.GetStringValue(ColOrderName, ColPrefix + IntToStr(iCNT), '') + ' ';
 
                     // Store SQL column name and user friendly column name (column title) into helper array
-                    Self.SqlColumns[iCNT, 0]:=AppSettings.TMIG.ReadString(ColOrderName, ColPrefix + IntToStr(iCNT), '');
-                    Self.SqlColumns[iCNT, 1]:=AppSettings.TMIG.ReadString(ColNames, ColPrefix + IntToStr(iCNT), '');
+                    Self.SqlColumns[iCNT, 0]:=Settings.GetStringValue(ColOrderName, ColPrefix + IntToStr(iCNT), '');
+                    Self.SqlColumns[iCNT, 1]:=Settings.GetStringValue(ColNames, ColPrefix + IntToStr(iCNT), '');
 
                     // Display only column title
-                    Self.Cells[iCNT, 0]:=AppSettings.TMIG.ReadString(ColNames, ColPrefix + IntToStr(iCNT), '');
+                    Self.Cells[iCNT, 0]:=Settings.GetStringValue(ColNames, ColPrefix + IntToStr(iCNT), '');
                 end;
 
                 // Assign saved width
-                Self.ColWidths[iCNT]:=AppSettings.TMIG.ReadInteger(ColWidthName, ColPrefix + IntToStr(iCNT), 100);
+                Self.ColWidths[iCNT]:=Settings.GetIntegerValue(ColWidthName, ColPrefix + IntToStr(iCNT), 100);
 
             end;
         end;
     finally
-        AppSettings.Free;
         ColWidthSec.Free;
         ColOrderSec.Free;
         ColNamesSec.Free;

@@ -26,6 +26,10 @@ type
         function  GetIntegerValue(Section: string; Key: string; Default: integer): integer;
         procedure SetIntegerValue(Section: string; Key: string; Value: integer);
         procedure GetSectionValues(Section: string; var Values: TStringList);
+        procedure GetSection(Section: string; var Keys: TStringList);
+        procedure GetSections(List: TStringList);
+        procedure DeleteSection(SectionName: string);
+        procedure DeleteKey(Section: string; Ident: string);
         function  GetLastError     : integer;
         function  GetAppDir        : string;
         function  GetAppLog        : string;
@@ -78,6 +82,11 @@ type
     TSettings = class(TInterfacedObject, ISettings)
     {$TYPEINFO ON}
     private
+        // TMemoryIni holding encoded settings
+        var TMIG : TMemIniFile;
+        var TMIL : TMemIniFile;
+        var List : TStringList;
+
         var pGetLastError  : integer;
         var pWinUserName   : string;
         var pPathGridImage : string;
@@ -120,11 +129,6 @@ type
         procedure SetFutureFColor(NewColor: TColor);
         procedure SetFutureBColor(NewColor: TColor);
     public
-        // TMemoryIni holding encoded settings
-        var TMIG : TMemIniFile;
-        var TMIL : TMemIniFile;
-        var List : TStringList;
-
         // Properties
         property FWinUserName      : string    read pWinUserName;
 
@@ -169,6 +173,10 @@ type
         function    GetIntegerValue(Section: string; Key: string; Default: integer): integer;
         procedure   SetIntegerValue(Section: string; Key: string; Value: integer);
         procedure   GetSectionValues(Section: string; var Values: TStringList);
+        procedure   GetSection(Section: string; var Keys: TStringList);
+        procedure   GetSections(List: TStringList);
+        procedure   DeleteSection(SectionName: string);
+        procedure   DeleteKey(Section: string; Ident: string);
         function    GetLastError     : integer;
         function    GetAppDir        : string;
         function    GetLayoutDir     : string;
@@ -581,6 +589,30 @@ procedure TSettings.GetSectionValues(Section: string; var Values: TStringList);
 begin
     if Assigned(TMIG) then
         TMIG.ReadSectionValues(Section, Values);
+end;
+
+procedure TSettings.GetSection(Section: string; var Keys: TStringList);
+begin
+    if Assigned(TMIG) then
+        TMIG.ReadSection(Section, Keys);
+end;
+
+procedure TSettings.GetSections(List: TStringList);
+begin
+    if Assigned(TMIG) then
+        TMIG.ReadSections(List);
+end;
+
+procedure TSettings.DeleteSection(SectionName: string);
+begin
+    if Assigned(TMIG) then
+        TMIG.EraseSection(SectionName);
+end;
+
+procedure TSettings.DeleteKey(Section: string; Ident: string);
+begin
+    if Assigned(TMIG) then
+        TMIG.DeleteKey(Section, Ident);
 end;
 
 

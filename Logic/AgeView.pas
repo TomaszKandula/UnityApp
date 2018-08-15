@@ -79,22 +79,22 @@ uses
 
 constructor TAgeView.Create(Connector: TADOConnection);
 var
-    ISettings: TSettings;
+    Settings: ISettings;
 begin
-    ISettings:=TSettings.Create;
+    Settings:=TSettings.Create;
 
     if FormatSettings.DecimalSeparator = ',' then
     begin
-        Class_A:=StrToFloat(ISettings.TMIG.ReadString(RiskClassDetails, 'CLASS_A_MAX', '0,80'));
-        Class_B:=StrToFloat(ISettings.TMIG.ReadString(RiskClassDetails, 'CLASS_B_MAX', '0,15'));
-        Class_C:=StrToFloat(ISettings.TMIG.ReadString(RiskClassDetails, 'CLASS_C_MAX', '0,05'));
+        Class_A:=StrToFloat(Settings.GetStringValue(RiskClassDetails, 'CLASS_A_MAX', '0,80'));
+        Class_B:=StrToFloat(Settings.GetStringValue(RiskClassDetails, 'CLASS_B_MAX', '0,15'));
+        Class_C:=StrToFloat(Settings.GetStringValue(RiskClassDetails, 'CLASS_C_MAX', '0,05'));
     end;
 
     if FormatSettings.DecimalSeparator = '.' then
     begin
-        Class_A:=StrToFloat(StringReplace(ISettings.TMIG.ReadString(RiskClassDetails, 'CLASS_A_MAX', '0,80'), ',', '.', [rfReplaceAll]));
-        Class_B:=StrToFloat(StringReplace(ISettings.TMIG.ReadString(RiskClassDetails, 'CLASS_B_MAX', '0,15'), ',', '.', [rfReplaceAll]));
-        Class_C:=StrToFloat(StringReplace(ISettings.TMIG.ReadString(RiskClassDetails, 'CLASS_C_MAX', '0,05'), ',', '.', [rfReplaceAll]));
+        Class_A:=StrToFloat(StringReplace(Settings.GetStringValue(RiskClassDetails, 'CLASS_A_MAX', '0,80'), ',', '.', [rfReplaceAll]));
+        Class_B:=StrToFloat(StringReplace(Settings.GetStringValue(RiskClassDetails, 'CLASS_B_MAX', '0,15'), ',', '.', [rfReplaceAll]));
+        Class_C:=StrToFloat(StringReplace(Settings.GetStringValue(RiskClassDetails, 'CLASS_C_MAX', '0,05'), ',', '.', [rfReplaceAll]));
     end;
 
     inherited;
@@ -488,15 +488,15 @@ end;
 
 procedure TAgeView.AgeViewMode(var Grid: TStringGrid; ModeBySection: string);
 var
-    Settings: TSettings;
+    Settings: ISettings;
     iCNT:     integer;
 begin
     Settings:=TSettings.Create;
     for iCNT:=0 to Grid.ColCount - 2 do
-        if Settings.TMIG.ReadString(ModeBySection, MainForm.FindKey(Settings.TMIG, ModeBySection, iCNT), 'True') = 'False' then
-            Grid.ColWidths[Grid.ReturnColumn(MainForm.FindKey(Settings.TMIG, ModeBySection, iCNT), 1, 1)]:=-1
+        if Settings.GetStringValue(ModeBySection, MainForm.FindKey(ModeBySection, iCNT), 'True') = 'False' then
+            Grid.ColWidths[Grid.ReturnColumn(MainForm.FindKey(ModeBySection, iCNT), 1, 1)]:=-1
                 else
-                    Grid.ColWidths[Grid.ReturnColumn(MainForm.FindKey(Settings.TMIG, ModeBySection, iCNT), 1, 1)]:=100;
+                    Grid.ColWidths[Grid.ReturnColumn(MainForm.FindKey(ModeBySection, iCNT), 1, 1)]:=100;
 end;
 
 /// <summary>
@@ -676,7 +676,7 @@ var
   RcLo:      double;                    { LOWER BOUND                  }
   Count:     double;                    { SUMS WALLET SHARE            }
   { SETTINGS }
-  AppSettings: TSettings;
+  Settings:  ISettings;
 
 const
   { WARNING! BELOW MUST BE ALIGNED WITH OPEN ITEMS SOURCE AND DESTINATION TABLE IN DATABASE FOR AGE VIEW }
@@ -780,24 +780,20 @@ begin
     end;
 
   { ---------------------------------------------------------------------------------------------------------------------------- RANGES AND RISK CLASS BOUNDS }
-  AppSettings:=TSettings.Create;
-  try
+  Settings:=TSettings.Create;
     { LOWER BOUNDS }
-    R1lo:=AppSettings.TMIG.ReadInteger(AgingRanges, 'RANGE1A', 0);
-    R2lo:=AppSettings.TMIG.ReadInteger(AgingRanges, 'RANGE2A', 0);
-    R3lo:=AppSettings.TMIG.ReadInteger(AgingRanges, 'RANGE3A', 0);
-    R4lo:=AppSettings.TMIG.ReadInteger(AgingRanges, 'RANGE4A', 0);
-    R5lo:=AppSettings.TMIG.ReadInteger(AgingRanges, 'RANGE5A', 0);
-    R6lo:=AppSettings.TMIG.ReadInteger(AgingRanges, 'RANGE6A', 0);
-    { UPPER BOUNDS }
-    R1hi:=AppSettings.TMIG.ReadInteger(AgingRanges, 'RANGE1B', 0);
-    R2hi:=AppSettings.TMIG.ReadInteger(AgingRanges, 'RANGE2B', 0);
-    R3hi:=AppSettings.TMIG.ReadInteger(AgingRanges, 'RANGE3B', 0);
-    R4hi:=AppSettings.TMIG.ReadInteger(AgingRanges, 'RANGE4B', 0);
-    R5hi:=AppSettings.TMIG.ReadInteger(AgingRanges, 'RANGE5B', 0);
-  finally
-    AppSettings.Free;
-  end;
+  R1lo:=Settings.GetIntegerValue(AgingRanges, 'RANGE1A', 0);
+  R2lo:=Settings.GetIntegerValue(AgingRanges, 'RANGE2A', 0);
+  R3lo:=Settings.GetIntegerValue(AgingRanges, 'RANGE3A', 0);
+  R4lo:=Settings.GetIntegerValue(AgingRanges, 'RANGE4A', 0);
+  R5lo:=Settings.GetIntegerValue(AgingRanges, 'RANGE5A', 0);
+  R6lo:=Settings.GetIntegerValue(AgingRanges, 'RANGE6A', 0);
+  { UPPER BOUNDS }
+  R1hi:=Settings.GetIntegerValue(AgingRanges, 'RANGE1B', 0);
+  R2hi:=Settings.GetIntegerValue(AgingRanges, 'RANGE2B', 0);
+  R3hi:=Settings.GetIntegerValue(AgingRanges, 'RANGE3B', 0);
+  R4hi:=Settings.GetIntegerValue(AgingRanges, 'RANGE4B', 0);
+  R5hi:=Settings.GetIntegerValue(AgingRanges, 'RANGE5B', 0);
 
   { ------------------------------------------------------------------------------------------------------------------------------------------------ POPULATE }
   { LOOP VIA CUID COLUMN IN AGE VIEW [27] }

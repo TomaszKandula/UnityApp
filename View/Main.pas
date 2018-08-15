@@ -8,7 +8,8 @@ interface
 uses
     Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, Menus, ComCtrls, Grids, ExtCtrls, StdCtrls, CheckLst, Buttons,
     PNGImage, DBGrids, AppEvnts, ShellAPI, INIFiles, StrUtils, ValEdit, DateUtils, Clipbrd, DB, ADODB, ActiveX, CDO_TLB, Diagnostics, Math, Wininet, ComObj,
-    OleCtrls, SHDocVw, GIFImg, System.UITypes, Bcrypt, InterposerClasses, Arrays, EventLogger, System.ImageList, Vcl.ImgList;
+    OleCtrls, SHDocVw, GIFImg, System.UITypes, Bcrypt, InterposerClasses, Arrays, EventLogger, System.ImageList, Vcl.ImgList, uCEFChromium, uCEFWindowParent,
+    uCEFChromiumWindow, uCEFTypes, uCEFInterfaces;
 
 type
 
@@ -22,7 +23,6 @@ type
         TabSheet2: TTabSheet;
         TabSheet3: TTabSheet;
         TabSheet4: TTabSheet;
-        TabSheet5: TTabSheet;
         TabSheet7: TTabSheet;
         Header1: TPanel;
         Footer1: TPanel;
@@ -293,8 +293,6 @@ type
         Action_Overdue: TMenuItem;
         N15: TMenuItem;
         TabSheet9: TTabSheet;
-        WebBrowser1: TWebBrowser;
-        WebContainer: TPanel;
         DetailsGrid: TStringGrid;
         btnLoadAgeView: TSpeedButton;
         EditGroupID: TLabeledEdit;
@@ -321,7 +319,6 @@ type
         Text51: TLabel;
         sgGroups: TStringGrid;
         sgUAC: TStringGrid;
-        ReportContainer: TPanel;
         Action_INF7_Filter: TMenuItem;
         Action_CoCode_Filter: TMenuItem;
         Action_Agent_Filter: TMenuItem;
@@ -340,16 +337,7 @@ type
         Action_ExportCSV: TMenuItem;
         Action_RemoveFilters: TMenuItem;
         Action_Free1: TMenuItem;
-        btnStart: TSpeedButton;
         Separate1: TBevel;
-        btnSettings: TSpeedButton;
-        btnTabelauReport: TSpeedButton;
-        btnAgeDebt: TSpeedButton;
-        btnOpenItems: TSpeedButton;
-        btnOtherTrans: TSpeedButton;
-        btnAddressBook: TSpeedButton;
-        btnTracker: TSpeedButton;
-        btnGeneral: TSpeedButton;
         Separate2: TBevel;
         Separate3: TBevel;
         AppHeader: TPanel;
@@ -402,30 +390,44 @@ type
         Action_QuickReporting: TMenuItem;
         SortListBox: TComboBox;
         btnSortApply: TSpeedButton;
-    ReportFrame: TPanel;
-    TextHeader: TLabel;
-    TextTitle: TLabel;
-    TextLine1: TLabel;
-    TextLine2: TLabel;
-    TextLine3: TLabel;
-    TextLine4: TLabel;
-    DescLine1: TLabel;
-    DescLine2: TLabel;
-    MyImages: TImageList;
-    btnQueries: TSpeedButton;
-    DescTitle: TLabel;
-    DescLine3: TLabel;
-    imgOverdue: TImage;
-    imgCreditLimits: TImage;
-    imgDebtors: TImage;
-    imgControlStatus: TImage;
-    PanelTop: TPanel;
-    Line1: TShape;
-    PanelContent1: TPanel;
-    Line2: TShape;
-    PanelContent2: TPanel;
-    PanelContent3: TPanel;
-    Shape1: TShape;
+        imgStart: TImage;
+        btnStart: TPanel;
+        txtStart: TLabel;
+        btnReports: TPanel;
+        imgReports: TImage;
+        txtReports: TLabel;
+        btnDebtors: TPanel;
+        imgDebtors: TImage;
+        txtDebtors: TLabel;
+        btnTracker: TPanel;
+        imgTracker: TImage;
+        txtTracker: TLabel;
+        btnAddressBook: TPanel;
+        imgBook: TImage;
+        txtAddressBook: TLabel;
+        btnOpenItems: TPanel;
+        imgOpenItems: TImage;
+        txtOpenItems: TLabel;
+        btnUnidentified: TPanel;
+        imgUnidentified: TImage;
+        txtUnidentified: TLabel;
+        btnQueries: TPanel;
+        imgQueries: TImage;
+        txtQueries: TLabel;
+        btnTables: TPanel;
+        imgTables: TImage;
+        txtTables: TLabel;
+        btnSettings: TPanel;
+        imgSettings: TImage;
+        txtSettings: TLabel;
+        ChromiumWindow: TChromiumWindow;
+        Chromium: TChromium;
+        ChromiumTimer: TTimer;
+        txtOverdueItems: TLabel;
+        txtCreditLimitsReport: TLabel;
+        txtDebtorsReport: TLabel;
+        txtControlStatusReport: TLabel;
+        imgHideBar: TImage;
         procedure FormCreate(Sender: TObject);
         procedure FormResize(Sender: TObject);
         procedure FormShow(Sender: TObject);
@@ -589,15 +591,6 @@ type
         procedure Action_ExportCSVClick(Sender: TObject);
         procedure Action_RemoveFiltersClick(Sender: TObject);
         procedure Action_Free1Click(Sender: TObject);
-        procedure btnStartClick(Sender: TObject);
-        procedure btnTabelauReportClick(Sender: TObject);
-        procedure btnGeneralClick(Sender: TObject);
-        procedure btnSettingsClick(Sender: TObject);
-        procedure btnAgeDebtClick(Sender: TObject);
-        procedure btnOpenItemsClick(Sender: TObject);
-        procedure btnOtherTransClick(Sender: TObject);
-        procedure btnTrackerClick(Sender: TObject);
-        procedure btnAddressBookClick(Sender: TObject);
         procedure sgAgeViewKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure btnUnlockClick(Sender: TObject);
         procedure btnPassUpdateClick(Sender: TObject);
@@ -641,14 +634,54 @@ type
         procedure sgCoCodesKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure sgAgeViewClick(Sender: TObject);
         procedure sgAgeViewKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-        procedure imgOverdueClick(Sender: TObject);
-        procedure imgCreditLimitsClick(Sender: TObject);
-        procedure imgDebtorsClick(Sender: TObject);
-        procedure imgControlStatusClick(Sender: TObject);
-        procedure imgOverdueMouseEnter(Sender: TObject);
-        procedure imgCreditLimitsMouseEnter(Sender: TObject);
-        procedure imgDebtorsMouseEnter(Sender: TObject);
-        procedure imgControlStatusMouseEnter(Sender: TObject);
+        procedure btnStartMouseEnter(Sender: TObject);
+        procedure btnStartMouseLeave(Sender: TObject);
+        procedure btnReportsMouseEnter(Sender: TObject);
+        procedure btnReportsMouseLeave(Sender: TObject);
+        procedure btnDebtorsMouseEnter(Sender: TObject);
+        procedure btnDebtorsMouseLeave(Sender: TObject);
+        procedure btnTrackerMouseEnter(Sender: TObject);
+        procedure btnTrackerMouseLeave(Sender: TObject);
+        procedure btnAddressBookMouseEnter(Sender: TObject);
+        procedure btnAddressBookMouseLeave(Sender: TObject);
+        procedure btnOpenItemsMouseEnter(Sender: TObject);
+        procedure btnOpenItemsMouseLeave(Sender: TObject);
+        procedure btnUnidentifiedMouseEnter(Sender: TObject);
+        procedure btnUnidentifiedMouseLeave(Sender: TObject);
+        procedure btnQueriesMouseEnter(Sender: TObject);
+        procedure btnQueriesMouseLeave(Sender: TObject);
+        procedure btnTablesMouseEnter(Sender: TObject);
+        procedure btnTablesMouseLeave(Sender: TObject);
+        procedure btnSettingsMouseEnter(Sender: TObject);
+        procedure btnSettingsMouseLeave(Sender: TObject);
+        procedure ChromiumTimerTimer(Sender: TObject);
+        procedure ChromiumWindowAfterCreated(Sender: TObject);
+        procedure txtStartClick(Sender: TObject);
+        procedure txtReportsClick(Sender: TObject);
+        procedure txtDebtorsClick(Sender: TObject);
+        procedure txtTrackerClick(Sender: TObject);
+        procedure txtAddressBookClick(Sender: TObject);
+        procedure txtOpenItemsClick(Sender: TObject);
+        procedure txtUnidentifiedClick(Sender: TObject);
+        procedure txtQueriesClick(Sender: TObject);
+        procedure txtTablesClick(Sender: TObject);
+        procedure txtSettingsClick(Sender: TObject);
+        procedure txtOverdueItemsClick(Sender: TObject);
+        procedure txtCreditLimitsReportClick(Sender: TObject);
+        procedure txtDebtorsReportClick(Sender: TObject);
+        procedure txtControlStatusReportClick(Sender: TObject);
+        procedure txtOverdueItemsMouseEnter(Sender: TObject);
+        procedure txtOverdueItemsMouseLeave(Sender: TObject);
+        procedure txtCreditLimitsReportMouseEnter(Sender: TObject);
+        procedure txtCreditLimitsReportMouseLeave(Sender: TObject);
+        procedure txtDebtorsReportMouseEnter(Sender: TObject);
+        procedure txtDebtorsReportMouseLeave(Sender: TObject);
+        procedure txtControlStatusReportMouseEnter(Sender: TObject);
+        procedure txtControlStatusReportMouseLeave(Sender: TObject);
+        procedure AppHeaderClick(Sender: TObject);
+        procedure imgHideBarClick(Sender: TObject);
+        procedure AppHeaderMouseEnter(Sender: TObject);
+        procedure AppHeaderMouseLeave(Sender: TObject);
     private
         var pAllowClose:    boolean;
         var pStartTime:     TTime;
@@ -674,7 +707,7 @@ type
         procedure  TryInitConnection;
         procedure  ExecMessage(IsPostType: boolean; YOUR_INT: integer; YOUR_TEXT: string);
         function   OleGetStr(RecordsetField: variant): string;
-        function   FindKey(INI: TMemIniFile; OpenedSection: string; KeyPosition: integer): string;
+        function   FindKey(OpenedSection: string; KeyPosition: integer): string;
         function   WndCall(WinForm: TForm; Mode: integer): integer;
         function   MsgCall(WndType: integer; WndText: string): integer;
         procedure  SetSettingsPanel(Mode: integer);
@@ -687,6 +720,7 @@ type
         function   ShowReport(ReportNumber: cardinal): cardinal;
         procedure  CopyFile(const Source, Dest: string);
         procedure  ResetTabsheetButtons;
+        procedure  UnfoldReportsTab(Header: TPanel; Panel: TPanel);
         procedure  LoadingAnimation(GIFImage: TImage; Grid: TStringGrid; GridPanel: TPanel; State: integer);
         procedure  SetPanelBorders;
         procedure  SetGridColumnWidths;
@@ -700,16 +734,17 @@ type
         function   AddressBookExclusion: boolean;
         function   CheckIfDate(StrDate: string): boolean;
     protected
+        procedure Chromium_OnBeforePopup(Sender: TObject; const browser: ICefBrowser; const frame: ICefFrame; const targetUrl, targetFrameName: ustring; targetDisposition: TCefWindowOpenDisposition; userGesture: Boolean; const popupFeatures: TCefPopupFeatures; var windowInfo: TCefWindowInfo; var client: ICefClient; var settings: TCefBrowserSettings; var noJavascriptAccess: Boolean; var Result: Boolean);
         // Process all Windows messgaes
         procedure  WndProc(var msg: Messages.TMessage); override;
     end;
 
     /// <remarks>
-    ///     If library is written in delphi, then delphi types can be used as usual,
-    ///     however, if library is written in 'c' or any other language, then
-    ///     please use plain 'c' language types only, so instead of pascal 'string'
+    ///     If library is written in Delphi, then Delphi types can be used as usual,
+    ///     however, if library is written in 'C' or any other language, then
+    ///     please use plain 'C' language types only, so instead of pascal 'string'
     ///     type, please use 'pchar' type, etc., also, in case of c# language,
-    ///     please refer to manual on 'making c# dll library for delphi usage'
+    ///     please refer to manual on 'making C# dll library for delphi usage'
     /// </remarks>
 
     TMergeSort            = procedure(Grid: TStringgrid; var Vals: array of integer; sortcol, datatype: integer; ascending: boolean); stdcall;
@@ -742,7 +777,8 @@ implementation
 
 uses
     Filter, Tracker, Invoices, Actions, Calendar, About, AVSearch, Worker, SQL, Model, Settings, Database, UAC, AgeView, Transactions, Colors, EventLog,
-    SendFeedback, ABSearch, MassMailer, Splash;
+    SendFeedback, ABSearch, MassMailer, Splash, uCEFApplication;
+
 
 {$R *.dfm}
 
@@ -768,6 +804,24 @@ var
   CUID:       string;
 begin
     inherited;
+
+    // CHROMIUM -------------------------------------------------------------------------------------------------------------------------------------------- //
+
+    if Msg.Msg = WM_MOVE then
+        if (ChromiumWindow <> nil) then
+            ChromiumWindow.NotifyMoveOrResizeStarted;
+
+    if Msg.Msg = WM_MOVING then
+        if (ChromiumWindow <> nil) then
+            ChromiumWindow.NotifyMoveOrResizeStarted;
+
+    if Msg.Msg = WM_ENTERMENULOOP then
+        if (Msg.wParam = 0) and (GlobalCEFApp <> nil) then
+            GlobalCEFApp.OsmodalLoop:=True;
+
+    if Msg.Msg = WM_EXITMENULOOP  then
+        if (Msg.wParam = 0) and (GlobalCEFApp <> nil) then
+            GlobalCEFApp.OsmodalLoop:=False;
 
     // INTERNAL MESSAGES BETWEEN WORKER THREADS AND MAIN THREAD -------------------------------------------------------------------------------------------- //
 
@@ -887,6 +941,34 @@ begin
 end;
 
 /// <summary>
+///     Execute on "before popup" - ignore tab sheets and pop-ups.
+/// </summary>
+
+procedure TMainForm.Chromium_OnBeforePopup(Sender: TObject;
+    const browser: ICefBrowser;
+    const frame: ICefFrame;
+    const targetUrl, targetFrameName: ustring;
+    targetDisposition: TCefWindowOpenDisposition;
+    userGesture: Boolean;
+    const popupFeatures: TCefPopupFeatures;
+    var windowInfo: TCefWindowInfo;
+    var client: ICefClient;
+    var settings: TCefBrowserSettings;
+    var noJavascriptAccess: Boolean;
+    var Result: Boolean);
+begin
+    Result:=(
+                targetDisposition in
+                [
+                    WOD_NEW_FOREGROUND_TAB,
+                    WOD_NEW_BACKGROUND_TAB,
+                    WOD_NEW_POPUP,
+                    WOD_NEW_WINDOW
+                ]
+            );
+end;
+
+/// <summary>
 ///     Initialize connection with database server.
 /// </summary>
 
@@ -947,26 +1029,22 @@ end;
 ///     Return key vaue for given list position.
 /// </summary>
 
-function TMainForm.FindKey(INI: TMemIniFile; OpenedSection: string; KeyPosition: integer): string;
+function TMainForm.FindKey(OpenedSection: string; KeyPosition: integer): string;
 var
-    SL:  TStringList;
+    SL:         TStringList;
+    Settings:   ISettings;
 begin
 
     Result:=unNA;
     SL:=TStringList.Create;
+    Settings:=TSettings.Create;
 
-    try
+    Settings.GetSection(OpenedSection, SL);
 
-        INI.ReadSectionValues(OpenedSection, SL);
-
-        if KeyPosition > SL.Count then
-            Exit
-                else
-                    Result:=LeftStr(SL.Strings[KeyPosition], AnsiPos('=', SL.Strings[KeyPosition]) - 1);
-
-    finally
-        SL.Free;
-    end;
+    if KeyPosition > SL.Count then
+        Exit
+            else
+                Result:=LeftStr(SL.Strings[KeyPosition], AnsiPos('=', SL.Strings[KeyPosition]) - 1);
 
 end;
 
@@ -1298,15 +1376,50 @@ end;
 
 procedure TMainForm.ResetTabsheetButtons;
 begin
-    btnStart.Font.Style        :=[];
-    btnTabelauReport.Font.Style:=[];
-    btnAgeDebt.Font.Style      :=[];
-    btnTracker.Font.Style      :=[];
-    btnAddressBook.Font.Style  :=[];
-    btnOpenItems.Font.Style    :=[];
-    btnOtherTrans.Font.Style   :=[];
-    btnGeneral.Font.Style      :=[];
-    btnSettings.Font.Style     :=[];
+    txtStart.Font.Style       :=[];
+    txtStart.Font.Color       :=clBlack;
+    txtReports.Font.Style     :=[];
+    txtReports.Font.Color     :=clBlack;
+    txtDebtors.Font.Style     :=[];
+    txtDebtors.Font.Color     :=clBlack;
+    txtTracker.Font.Style     :=[];
+    txtTracker.Font.Color     :=clBlack;
+    txtAddressBook.Font.Style :=[];
+    txtAddressBook.Font.Color :=clBlack;
+    txtOpenItems.Font.Style   :=[];
+    txtOpenItems.Font.Color   :=clBlack;
+    txtUnidentified.Font.Style:=[];
+    txtUnidentified.Font.Color:=clBlack;
+    txtQueries.Font.Style     :=[];
+    txtQueries.Font.Color     :=clBlack;
+    txtTables.Font.Style      :=[];
+    txtTables.Font.Color      :=clBlack;
+    txtSettings.Font.Style    :=[];
+    txtSettings.Font.Color    :=clBlack;
+end;
+
+/// <summary>
+///     Check if header panel is already folded (based on its heigh) and unfold it back.
+/// </summary>
+/// <remarks>
+///     To display additional content, we extend button panel. Header panel that contains
+///     button panels must be also extended.
+/// </remarks>
+
+procedure TMainForm.UnfoldReportsTab(Header: TPanel; Panel: TPanel);
+begin
+    if Panel.Height > 32 then
+    begin
+        // Fold
+        Panel.Height:=32;
+        Header.Height:=57;
+    end
+    else
+    begin
+        // Unfold
+        Panel.Height:=116;
+        Header.Height:=Panel.Height + 13;
+    end;
 end;
 
 /// <summary>
@@ -1316,19 +1429,31 @@ end;
 procedure TMainForm.LoadingAnimation(GIFImage: TImage; Grid: TStringGrid; GridPanel: TPanel; State: Integer);
 begin
 
+    /// <remarks>
+    ///     Center property fails sometimes, thus to centralise the image we must manually set top/left values.
+    /// </remarks>
+
+    GIFImage.Center:=False;
+    GIFImage.Align:=alNone;
+    GIFImage.AutoSize:=True;
+
+    GIFImage.Top :=( ( GridPanel.Height - GridPanel.Top  ) div 2) - ( GIFImage.Height div 2 );
+    GIFImage.Left:=( ( GridPanel.Width  - GridPanel.Left ) div 2) - ( GIFImage.Width  div 2 );
+
+
     case State of
         AnimationON:
         begin
             Grid.Visible:=False;
+            GridPanel.DoubleBuffered:=True;
             GIFImage.Visible:=True;
             (GIFImage.Picture.Graphic as TGIFImage).Animate:=True;
-            GridPanel.DoubleBuffered:=True;
         end;
 
         AnimationOFF:
         begin
-            GridPanel.DoubleBuffered:=False;
             (GIFImage.Picture.Graphic as TGIFImage).Animate:=False;
+            GridPanel.DoubleBuffered:=False;
             GIFImage.Visible:=False;
             Grid.Visible:=True;
         end;
@@ -1361,8 +1486,6 @@ begin
     PanelSettingsValues.PanelBorders  (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
     PanelUAC.PanelBorders             (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
     PanelGroups.PanelBorders          (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    ReportContainer.PanelBorders      (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    ReportFrame.PanelBorders          (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
 end;
 
 /// <summary>
@@ -1565,7 +1688,6 @@ begin
   if StrToDateDef(StrDate, NULLDATE) <> NULLDATE then Result:=True;
 end;
 
-
 // ------------------------------------------------------------------------------------------------------------------------------------------------ START UP //
 
 
@@ -1628,9 +1750,6 @@ begin
     MainForm.Position      :=poDefaultSizeOnly;
     MainForm.Top           :=Settings.GetIntegerValue(ApplicationDetails, 'WINDOW_TOP',  0);
     MainForm.Left          :=Settings.GetIntegerValue(ApplicationDetails, 'WINDOW_LEFT', 0);
-
-    // Load web page "Unity Info"
-    WebBrowser1.Navigate(WideString(Settings.GetStringValue(ApplicationDetails, 'START_PAGE',  'about:blank')), $02);
 
     /// <remarks>
     ///     "InteTimer" is excluded from below list because it is controlled by "InitializeConnection" method.
@@ -1843,7 +1962,8 @@ begin
     // ------------------------------------------------------------------------------------------------------------------------ ASYNC LOAD OF GENERAL TABLES //
     OnCreateJob(spDelegate);
 
-    TTGeneralTables.Create(TblCompany,
+    TTGeneralTables.Create(
+        TblCompany,
         sgCoCodes,
         TCompany.CO_CODE + COMMA +
         TCompany.BRANCH + COMMA +
@@ -1889,51 +2009,66 @@ begin
 
 end;
 
-procedure TMainForm.FormDestroy(Sender: TObject);
-var
-    Settings: ISettings;
-begin
-
-    WebBrowser1.Free;
-
-    if sgAgeView.RowCount > 2 then
-        sgAgeView.SaveLayout(ColumnWidthName, ColumnOrderName, ColumnNames, ColumnPrefix);
-
-    Settings:=TSettings.Create;
-    Settings.SetIntegerValue(ApplicationDetails, 'WINDOW_TOP',  MainForm.Top);
-    Settings.SetIntegerValue(ApplicationDetails, 'WINDOW_LEFT', MainForm.Left);
-    if MainForm.WindowState = wsNormal    then Settings.SetStringValue(ApplicationDetails,  'WINDOW_STATE', 'wsNormal');
-    if MainForm.WindowState = wsMaximized then Settings.SetStringValue(ApplicationDetails,  'WINDOW_STATE', 'wsMaximized');
-    if MainForm.WindowState = wsMinimized then Settings.SetStringValue(ApplicationDetails,  'WINDOW_STATE', 'wsMinimized');
-
-    Settings.Encode(AppConfig);
-
-    LogText.Free;
-    DbConnect.Close;
-    DbConnect:=nil;
-
-end;
-
 procedure TMainForm.FormShow(Sender: TObject);
 begin
 
-    // UPDATE THUMB SIZE
+    // Update thumb size
     FormResize(self);
 
-    // DRAW PANELS BORDERS
+    // Draw panel borders
     SetPanelBorders;
 
-    // GRIDS WIDTH, HEIGHT AND YHUMB SIZE
+    // Update grids width, height and thumb size
     SetGridColumnWidths;
     SetGridRowHeights;
     (* SetGridThumbSizes; *)
+
+    // Initialize Chromium
+    ChromiumWindow.ChromiumBrowser.OnBeforePopup:=Chromium_OnBeforePopup;
+    if not(ChromiumWindow.CreateBrowser) then
+        ChromiumTimer.Enabled:=True;
 
 end;
 
 procedure TMainForm.FormResize(Sender: TObject);
 begin
-    (* SetGridThumbSizes; *)
+
+    /// <remarks>
+    ///     Do not use it. Scroll thumb size is buggy in Windows.
+    /// </remarks>
+
+    // SetGridThumbSizes;
+
 end;
+
+/// <summary>
+///     Load Unity Info web page.
+/// </summary>
+
+procedure TMainForm.ChromiumWindowAfterCreated(Sender: TObject);
+var
+    URL:        string;
+    Settings:   ISettings;
+begin
+    Settings:=TSettings.Create;
+    URL:=Settings.GetStringValue(ApplicationDetails, 'START_PAGE', 'about:blank');
+    try
+        ChromiumWindow.LoadURL(WideString(URL));
+    except
+        on E: exception do
+            LogText.Log(EventLogPath, '[Chromium] Cannot load URL: ' + URL + '. The error has been thrown: ' + E.Message);
+    end;
+end;
+
+
+// --------------------------------------------------------------------------------------------------------------------------------------- CLOSE APPLICATION //
+
+
+/// <summary>
+///     Execute when application receives windows message on shutting down the system; or user press key combination of <ALT> + <Y>; or
+///     simply clicks close button on application caption bar. Standard behaviour of application close button is changed to minimisation
+///     of the application to system tray (removes icon from taskbar).
+/// </summary>
 
 procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 var
@@ -1951,6 +2086,9 @@ begin
     else
     // Shutdown application
     begin
+
+        Visible :=False;
+        ChromiumWindow.CloseBrowser(True);
 
         ExecMessage(False, mcStatusBar, 'Ending session...');
         CurrentEvents:=CurrentEvents + '# -- SESSION END --';
@@ -1984,215 +2122,273 @@ begin
     end;
 end;
 
+/// <summary>
+///     Save window position and layout; and disconnect from the server.
+/// </summary>
+
+procedure TMainForm.FormDestroy(Sender: TObject);
+var
+    Settings: ISettings;
+begin
+
+    if sgAgeView.RowCount > 2 then
+        sgAgeView.SaveLayout(ColumnWidthName, ColumnOrderName, ColumnNames, ColumnPrefix);
+
+    Settings:=TSettings.Create;
+    Settings.SetIntegerValue(ApplicationDetails, 'WINDOW_TOP',  MainForm.Top);
+    Settings.SetIntegerValue(ApplicationDetails, 'WINDOW_LEFT', MainForm.Left);
+    if MainForm.WindowState = wsNormal    then Settings.SetStringValue(ApplicationDetails,  'WINDOW_STATE', 'wsNormal');
+    if MainForm.WindowState = wsMaximized then Settings.SetStringValue(ApplicationDetails,  'WINDOW_STATE', 'wsMaximized');
+    if MainForm.WindowState = wsMinimized then Settings.SetStringValue(ApplicationDetails,  'WINDOW_STATE', 'wsMinimized');
+
+    Settings.Encode(AppConfig);
+
+    LogText.Free;
+    DbConnect.Close;
+    DbConnect:=nil;
+
+end;
+
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------- TIMERS //
 
 
-{ --------------------------------------------------------------------------------------------------------------------------------- COUNT CURRENT FOLLOW-UP'S }
+/// <summary>
+///     Initiaize ChromiumWindow with time lag.
+/// </summary>
+
+procedure TMainForm.ChromiumTimerTimer(Sender: TObject);
+begin
+    ChromiumTimer.Enabled:=False;
+    if not(ChromiumWindow.CreateBrowser) and not(ChromiumWindow.Initialized) then
+        ChromiumTimer.Enabled:=True
+end;
+
+/// <summary>
+///     Count current follow-ups and display in notification baloon.
+/// </summary>
+
 procedure TMainForm.FollowupPopupTimer(Sender: TObject);
 var
-  iCNT: integer;
-  Sum:  integer;
+    iCNT: integer;
+    Sum:  integer;
 begin
 
-  { COUNT ALL TODAY'S FOLLOW-UPS }
+    Sum:=0;
+    for iCNT:=1 to sgAgeView.RowCount - 1 do
+        if
+            (
+                CDate(sgAgeView.Cells[sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1), iCNT]) = CDate(StatBar_TXT3.Caption)
+            )
+        and
+           (
+                UpperCase(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.INF7, 1, 1), iCNT]) = UpperCase(WinUserName)
+           )
+        then
+            Inc(Sum);
 
-  Sum:=0;
-  for iCNT:=1 to sgAgeView.RowCount - 1 do
-    if
-      (
-        CDate(sgAgeView.Cells[sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1), iCNT]) = CDate(StatBar_TXT3.Caption)
-      )
-
-      and
-
-      (
-        UpperCase(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.INF7, 1, 1), iCNT]) = UpperCase(WinUserName)
-      )
-
-      then
-        Inc(Sum);
-
-  { DISPLAY IN TRAY BALOON }
-
-  if not (Sum = 0) then
-  begin
-    TrayIcon.Visible:=True;
-    TrayIcon.BalloonHint:='Hello, you have ' + IntToStr(Sum) + ' follow-up dates registered for today.' + CRLF +
+    if not (Sum = 0) then
+    begin
+        TrayIcon.Visible:=True;
+        TrayIcon.BalloonHint:='Hello, you have ' + IntToStr(Sum) + ' follow-up dates registered for today.' + CRLF +
                           'Let''s bother some customers and collect some money money!' + CRLF;
-    TrayIcon.ShowBalloonHint;
-  end;
+        TrayIcon.ShowBalloonHint;
+    end;
 
 end;
 
-{ -------------------------------------------------------------------------------------------------------------------- CHECK INTERNET CONNECTION PERIODICALLY }
+/// <summary>
+///     Check internet connection on regular basis.
+/// </summary>
+
 procedure TMainForm.InetTimerTimer(Sender: TObject);
 begin
-  TTCheckServerConnection.Create(False);
+    TTCheckServerConnection.Create(False);
 end;
 
-{ --------------------------------------------------------------------------------------------------------------------------- INVOICE TRACKER SCANNING METHOD }
+/// <summary>
+///     Call Invoice Tracker scanning method.
+/// </summary>
+
 procedure TMainForm.InvoiceScanTimerTimer(Sender: TObject);
 begin
-  TTInvoiceTrackerScanner.Create(False);
+    TTInvoiceTrackerScanner.Create(False);
 end;
 
-{ --------------------------------------------------------------------------------------------------------------------------------- AUTOLOADER FOR OPEN ITEMS }
+/// <summary>
+///     Autoloader for open items.
+/// </summary>
+
 procedure TMainForm.OILoaderTimer(Sender: TObject);
 begin
-  LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Calling open items scanner...');
-  TTOpenItemsScanner.Create;
+    LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Calling open items scanner...');
+    TTOpenItemsScanner.Create;
 end;
 
-{ ----------------------------------------------------------------------------------------------------------------------------------------- SHOW CURRENT TIME }
+/// <summary>
+///     Display current time.
+/// </summary>
+
 procedure TMainForm.CurrentTimeTimer(Sender: TObject);
 begin
-  StatBar_TXT4.Caption:=TimeToStr(Now);
+    StatBar_TXT4.Caption:=TimeToStr(Now);
 end;
 
-{ ----------------------------------------------------------------------------------------------------------------------------------------------- SHOW UPTIME }
+/// <summary>
+///     Display current uptime.
+/// </summary>
+
 procedure TMainForm.UpTimeTimer(Sender: TObject);
 var
-  Result: TTime;
+    Result: TTime;
 begin
-  Result:=Now - pStartTime;
-  StatBar_TXT5.Caption:=TimeToStr(Result);
+    Result:=Now - pStartTime;
+    StatBar_TXT5.Caption:=TimeToStr(Result);
 end;
 
-{ ---------------------------------------------------------------- ! POPUP MENUS ! -------------------------------------------------------------------------- }
 
-{ ---------------------------------------------------------------- ! COMMON MENU ! -------------------------------------------------------------------------- }
+// --------------------------------------------------------------------------------------------------------------------------------------------- POPUP MENUS //
 
-{ --------------------------------------------------------------------------------------------------------------------------------- EXPORT ENTIRE GRID TO CSV }
+
+// ------------------------------------------------------------------------------------------------------------------------------------- COMMON MENU ACTIONS //
+
+
+/// <summary>
+///     Export entire grid content to CSV file.
+/// </summary>
+
 procedure TMainForm.Action_ExportTransactionsClick(Sender: TObject);
 begin
 
-  { MAIN VIEW }
+    // String grid placed on main view
+    if sgOpenItems.Focused   then sgOpenItems.ExportCSV(CSVExport, '|');
+    if sgCoCodes.Focused     then sgCoCodes.ExportCSV(CSVExport, '|');
+    if sgPaidInfo.Focused    then sgPaidInfo.ExportCSV(CSVExport, '|');
+    if sgPerson.Focused      then sgPerson.ExportCSV(CSVExport, '|');
+    if sgGroup3.Focused      then sgGroup3.ExportCSV(CSVExport, '|');
+    if sgPmtTerms.Focused    then sgPmtTerms.ExportCSV(CSVExport, '|');
+    if sgListValue.Focused   then sgListValue.ExportCSV(CSVExport, '|');
+    if sgListSection.Focused then sgListSection.ExportCSV(CSVExport, '|');
+    if sgGroups.Focused      then sgGroups.ExportCSV(CSVExport, '|');
+    if sgUAC.Focused         then sgUAC.ExportCSV(CSVExport, '|');
 
-  if sgOpenItems.Focused   then sgOpenItems.ExportCSV(CSVExport, '|');
-  if sgCoCodes.Focused     then sgCoCodes.ExportCSV(CSVExport, '|');
-  if sgPaidInfo.Focused    then sgPaidInfo.ExportCSV(CSVExport, '|');
-  if sgPerson.Focused      then sgPerson.ExportCSV(CSVExport, '|');
-  if sgGroup3.Focused      then sgGroup3.ExportCSV(CSVExport, '|');
-  if sgPmtTerms.Focused    then sgPmtTerms.ExportCSV(CSVExport, '|');
-  if sgListValue.Focused   then sgListValue.ExportCSV(CSVExport, '|');
-  if sgListSection.Focused then sgListSection.ExportCSV(CSVExport, '|');
-  if sgGroups.Focused      then sgGroups.ExportCSV(CSVExport, '|');
-  if sgUAC.Focused         then sgUAC.ExportCSV(CSVExport, '|');
-
-  { ACTION VIEW }
-
-  if ActionsForm.OpenItemsGrid.Focused then ActionsForm.OpenItemsGrid.ExportCSV(CSVExport, '|');
+    // String grid placed on action view
+    if ActionsForm.OpenItemsGrid.Focused then ActionsForm.OpenItemsGrid.ExportCSV(CSVExport, '|');
 
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------------------ SELECT ALL }
+/// <summary>
+///     Select all items on focused string grid.
+/// </summary>
+
 procedure TMainForm.Action_SelectAllClick(Sender: TObject);
 begin
 
-  { MAIN VIEW }
+    // String grid placed on main view
+    if sgOpenItems.Focused   then sgOpenItems.SelectAll;
+    if sgCoCodes.Focused     then sgCoCodes.SelectAll;
+    if sgPaidInfo.Focused    then sgPaidInfo.SelectAll;
+    if sgPerson.Focused      then sgPerson.SelectAll;
+    if sgGroup3.Focused      then sgGroup3.SelectAll;
+    if sgPmtTerms.Focused    then sgPmtTerms.SelectAll;
+    if sgListValue.Focused   then sgListValue.SelectAll;
+    if sgListSection.Focused then sgListSection.SelectAll;
+    if sgGroups.Focused      then sgGroups.SelectAll;
+    if sgUAC.Focused         then sgUAC.SelectAll;
 
-  if sgOpenItems.Focused   then sgOpenItems.SelectAll;
-  if sgCoCodes.Focused     then sgCoCodes.SelectAll;
-  if sgPaidInfo.Focused    then sgPaidInfo.SelectAll;
-  if sgPerson.Focused      then sgPerson.SelectAll;
-  if sgGroup3.Focused      then sgGroup3.SelectAll;
-  if sgPmtTerms.Focused    then sgPmtTerms.SelectAll;
-  if sgListValue.Focused   then sgListValue.SelectAll;
-  if sgListSection.Focused then sgListSection.SelectAll;
-  if sgGroups.Focused      then sgGroups.SelectAll;
-  if sgUAC.Focused         then sgUAC.SelectAll;
-
-  { ACTION VIEW }
-
-  if ActionsForm.OpenItemsGrid.Focused then ActionsForm.OpenItemsGrid.SelectAll;
+    // String grid placed on action view
+    if ActionsForm.OpenItemsGrid.Focused then ActionsForm.OpenItemsGrid.SelectAll;
 
 end;
 
-{ ----------------------------------------------------------------------------------------------------------------------------------------- COPY TO CLIPBOARD }
+/// <summary>
+///     Copy to clipboard selected cells on focused string grid.
+/// </summary>
+
 procedure TMainForm.Action_CopyToCBClick(Sender: TObject);
 begin
 
-  { MAIN VIEW }
+    // String grid placed on main view
+    if sgOpenItems.Focused   then sgOpenItems.CopyCutPaste(adCopy);
+    if sgCoCodes.Focused     then sgCoCodes.CopyCutPaste(adCopy);
+    if sgPaidInfo.Focused    then sgPaidInfo.CopyCutPaste(adCopy);
+    if sgPerson.Focused      then sgPerson.CopyCutPaste(adCopy);
+    if sgGroup3.Focused      then sgGroup3.CopyCutPaste(adCopy);
+    if sgPmtTerms.Focused    then sgPmtTerms.CopyCutPaste(adCopy);
+    if sgListValue.Focused   then sgListValue.CopyCutPaste(adCopy);
+    if sgListSection.Focused then sgListSection.CopyCutPaste(adCopy);
+    if sgGroups.Focused      then sgGroups.CopyCutPaste(adCopy);
+    if sgUAC.Focused         then sgUAC.CopyCutPaste(adCopy);
 
-  if sgOpenItems.Focused   then sgOpenItems.CopyCutPaste(adCopy);
-  if sgCoCodes.Focused     then sgCoCodes.CopyCutPaste(adCopy);
-  if sgPaidInfo.Focused    then sgPaidInfo.CopyCutPaste(adCopy);
-  if sgPerson.Focused      then sgPerson.CopyCutPaste(adCopy);
-  if sgGroup3.Focused      then sgGroup3.CopyCutPaste(adCopy);
-  if sgPmtTerms.Focused    then sgPmtTerms.CopyCutPaste(adCopy);
-  if sgListValue.Focused   then sgListValue.CopyCutPaste(adCopy);
-  if sgListSection.Focused then sgListSection.CopyCutPaste(adCopy);
-  if sgGroups.Focused      then sgGroups.CopyCutPaste(adCopy);
-  if sgUAC.Focused         then sgUAC.CopyCutPaste(adCopy);
-
-  { ACTION VIEW }
-
-  if ActionsForm.OpenItemsGrid.Focused then ActionsForm.OpenItemsGrid.CopyCutPaste(adCopy);
+    // String grid placed on action view
+    if ActionsForm.OpenItemsGrid.Focused then ActionsForm.OpenItemsGrid.CopyCutPaste(adCopy);
 
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------------ SET COLUMN WIDTH }
+/// <summary>
+///     Set column width.
+/// </summary>
+
 procedure TMainForm.Action_AutoColumnClick(Sender: TObject);
 begin
 
-  { MAIN VIEW }
+    // String grid placed on main view
+    if sgOpenItems.Focused   then sgOpenItems.SetColWidth(10, 20, 400);
+    if sgCoCodes.Focused     then sgCoCodes.SetColWidth(10, 20, 400);
+    if sgPaidInfo.Focused    then sgPaidInfo.SetColWidth(10, 20, 400);
+    if sgPerson.Focused      then sgPerson.SetColWidth(10, 20, 400);
+    if sgGroup3.Focused      then sgGroup3.SetColWidth(10, 20, 400);
+    if sgPmtTerms.Focused    then sgPmtTerms.SetColWidth(10, 20, 400);
+    if sgListValue.Focused   then sgListValue.SetColWidth(25, 20, 400);
+    if sgListSection.Focused then sgListSection.SetColWidth(25, 20, 400);
+    if sgGroups.Focused      then sgGroups.SetColWidth(10, 20, 400);
+    if sgUAC.Focused         then sgUAC.SetColWidth(10, 20, 400);
 
-  if sgOpenItems.Focused   then sgOpenItems.SetColWidth(10, 20, 400);
-  if sgCoCodes.Focused     then sgCoCodes.SetColWidth(10, 20, 400);
-  if sgPaidInfo.Focused    then sgPaidInfo.SetColWidth(10, 20, 400);
-  if sgPerson.Focused      then sgPerson.SetColWidth(10, 20, 400);
-  if sgGroup3.Focused      then sgGroup3.SetColWidth(10, 20, 400);
-  if sgPmtTerms.Focused    then sgPmtTerms.SetColWidth(10, 20, 400);
-  if sgListValue.Focused   then sgListValue.SetColWidth(25, 20, 400);
-  if sgListSection.Focused then sgListSection.SetColWidth(25, 20, 400);
-  if sgGroups.Focused      then sgGroups.SetColWidth(10, 20, 400);
-  if sgUAC.Focused         then sgUAC.SetColWidth(10, 20, 400);
-
-  { ACTION VIEW }
-
-  if ActionsForm.OpenItemsGrid.Focused then ActionsForm.OpenItemsGrid.SetColWidth(10, 20, 400);
+    // String grid placed on action view
+    if ActionsForm.OpenItemsGrid.Focused then ActionsForm.OpenItemsGrid.SetColWidth(10, 20, 400);
 
 end;
 
-{ ------------------------------------------------------------- ! ADDRESS BOOK MENU ! ----------------------------------------------------------------------- }
 
-{ --------------------------------------------------------------------------------------------------------------------------------- ADDRESS BOOK CONTEXT MENU }
+// --------------------------------------------------------------------------------------------------------------------------------------- ADDRESS BOOK MENU //
+
+
+/// <summary>
+///     Address Book context menu.
+/// </summary>
+
 procedure TMainForm.BookPopupPopup(Sender: TObject);
 begin
 
-  Action_ShowMyEntries.Caption:='Show ' + UpperCase(MainForm.WinUserName) + ' entries';
+    Action_ShowMyEntries.Caption:='Show ' + UpperCase(MainForm.WinUserName) + ' entries';
 
-  { CHECK IF USER SELECT A RANGE }
-  if (sgAddressBook.Selection.Bottom - sgAddressBook.Selection.Top) > 0 then
-    { WE ALLOW TO DELETE ONLY ONE LINE AT THE TIME }
-    Action_DelRow.Enabled:=False
-      else
-        Action_DelRow.Enabled:=True;
+    // Check if user select a range
+    if (sgAddressBook.Selection.Bottom - sgAddressBook.Selection.Top) > 0 then
+        // We allow to delete only one line at the time
+        Action_DelRow.Enabled:=False
+            else
+                Action_DelRow.Enabled:=True;
 
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------------------------- CUT }
+/// <summary>
+///     Allow to cut/paste the data from cell(s) if selected column is marked for editing.
+/// </summary>
+
 procedure TMainForm.Action_CutClick(Sender: TObject);
 begin
 
-  if AddressBookExclusion then
-  begin
-    MsgCall(mcWarn, 'This column is locked for editing.');
-    Exit;
-  end;
+    if AddressBookExclusion then
+    begin
+        MsgCall(mcWarn, 'This column is locked for editing.');
+        Exit;
+    end;
 
-  sgAddressBook.CopyCutPaste(adCut);
-  sgAddressBook.RecordRowsAffected;
+    sgAddressBook.CopyCutPaste(adCut);
+    sgAddressBook.RecordRowsAffected;
+
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------------------------ COPY }
-procedure TMainForm.Action_CopyClick(Sender: TObject);
-begin
-  sgAddressBook.CopyCutPaste(adCopy);
-end;
-
-{ ----------------------------------------------------------------------------------------------------------------------------------------------------- PASTE }
 procedure TMainForm.Action_PasteClick(Sender: TObject);
 begin
 
@@ -2206,2143 +2402,2673 @@ begin
   sgAddressBook.RecordRowsAffected;
 end;
 
-{ -------------------------------------------------------------------------------------------------------------------------------- DELETE GIVEN SCUID FROM DB }
+/// <summary>
+///     Copy :)
+/// </summary>
+
+procedure TMainForm.Action_CopyClick(Sender: TObject);
+begin
+    sgAddressBook.CopyCutPaste(adCopy);
+end;
+
+/// <summary>
+///     Deete given SCUID from database.
+/// </summary>
+
 procedure TMainForm.Action_DelRowClick(Sender: TObject);
 var
-  DataTables: TDataTables;
+    DataTables: TDataTables;
 begin
-  { ASK BEFORE DELETE }
-  if MsgCall(mcQuestion2, 'Are you sure you want to delete this customer?' + CRLF + 'This operation cannot be reverted.') = IDNO then Exit;
-  { EXECUTE DELETE QUERY }
-  DataTables:=TDataTables.Create(DbConnect);
-  try
-    DataTables.DeleteRecord(TblAddressbook, TAddressBook.SCUID, DataTables.CleanStr(sgAddressBook.Cells[2, sgAddressBook.Row], False), ttExplicit);
-    if DataTables.RowsAffected > 0 then
-      sgAddressBook.DeleteRowFrom(1, 1)
+
+    if MsgCall(mcQuestion2, 'Are you sure you want to delete this customer?' + CRLF + 'This operation cannot be reverted.') = IDNO then Exit;
+
+    DataTables:=TDataTables.Create(DbConnect);
+    try
+
+        DataTables.DeleteRecord(TblAddressbook, TAddressBook.SCUID, DataTables.CleanStr(sgAddressBook.Cells[2, sgAddressBook.Row], False), ttExplicit);
+
+        if DataTables.RowsAffected > 0 then
+        begin
+            sgAddressBook.DeleteRowFrom(1, 1)
+        end
         else
         begin
-          LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Cannot delete selected row (rows affected: ' + IntToStr(DataTables.RowsAffected) + ').');
-          MainForm.ExecMessage(False, mcError, 'Cannot delete selected row. Please contact IT support.');
+            LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Cannot delete selected row (rows affected: ' + IntToStr(DataTables.RowsAffected) + ').');
+            MainForm.ExecMessage(False, mcError, 'Cannot delete selected row. Please contact IT support.');
         end;
-  finally
-    DataTables.Free;
-  end;
+
+    finally
+        DataTables.Free;
+    end;
+
 end;
 
-{ ---------------------------------------------------------------------------------------------------------------------------------------- OPEN SEARCH WINDOW }
+/// <summary>
+///     Open search window.
+/// </summary>
+
 procedure TMainForm.Action_SearchBookClick(Sender: TObject);
 begin
-  WndCall(ViewSearchForm, stModeless);
+    WndCall(ViewSearchForm, stModeless);
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------------ SHOW ALL ENTRIES }
+/// <summary>
+///     Show all entries in Address Book from database.
+/// </summary>
+
 procedure TMainForm.Action_ShowAsIsClick(Sender: TObject);
 begin
-  TTAddressBook.Create(
-                        adOpenAll,
-                        sgAddressBook,
-                        '',
-                        '',
-                        '',
-                        '',
-                        '',
-                        ''
-                      );
+    TTAddressBook.Create(
+        adOpenAll,
+        sgAddressBook,
+        '',
+        '',
+        '',
+        '',
+        '',
+        ''
+    );
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------ SHOW USER ENTRIES ONLY }
+/// <summary>
+///     Show Address Book entries
+/// </summary>
+
 procedure TMainForm.Action_ShowMyEntriesClick(Sender: TObject);
 begin
-  TTAddressBook.Create(
-                        adOpenForUser,
-                        sgAddressBook,
-                        '',
-                        '',
-                        '',
-                        '',
-                        '',
-                        WHERE + TAddressBook.USER_ALIAS + EQUAL + QuotedStr(MainForm.WinUserName)
-                      );
+    TTAddressBook.Create(
+        adOpenForUser,
+        sgAddressBook,
+        '',
+        '',
+        '',
+        '',
+        '',
+        WHERE + TAddressBook.USER_ALIAS + EQUAL + QuotedStr(MainForm.WinUserName)
+    );
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------------ SET COLUMN WIDTH }
+/// <summary>
+///     Set column width.
+/// </summary>
+
 procedure TMainForm.Action_ColumnWidthClick(Sender: TObject);
 begin
-  sgAddressBook.SetColWidth(40, 10, 400);
+    sgAddressBook.SetColWidth(40, 10, 400);
 end;
 
-{ -------------------------------------------------------------- ! MAIN FORM MENU ! ------------------------------------------------------------------------- }
 
-{ ----------------------------------------------------------------------------------------------------------------------------------------------- SHOW WINDOW }
+// ---------------------------------------------------------------------------------------------------------------------------- MAIN FORM MENU (SYSTEM TRAY) //
+
+
+/// <summary>
+///     Bring to front main application window.
+/// </summary>
+
 procedure TMainForm.Action_ShowAppClick(Sender: TObject);
 begin
-  ShowWindow(Handle, SW_NORMAL);
-  Show();
-  Application.BringToFront;
+    ShowWindow(Handle, SW_NORMAL);
+    Show();
+    Application.BringToFront;
 end;
 
-{ ----------------------------------------------------------------------------------------------------------------------------------------------- HIDE WINDOW }
+/// <summary>
+///     Hide main application window to task bar.
+/// </summary>
+
 procedure TMainForm.Action_HideAppClick(Sender: TObject);
 begin
-  ShowWindow(Handle, SW_MINIMIZE);
-  Hide();
+    ShowWindow(Handle, SW_MINIMIZE);
+    Hide();
 end;
 
-{ ----------------------------------------------------------------------------------------------------------------------------------------------- STAY ON TOP }
+/// <summary>
+///     Allow to set stay on top.
+/// </summary>
+
 procedure TMainForm.Action_OnTopClick(Sender: TObject);
 begin
-  if Action_OnTop.Checked = False then
-  begin
-    MainForm.FormStyle:=fsStayOnTop;
-    Action_OnTop.Checked:=True;
-  end else
-  begin
-    MainForm.FormStyle:=fsNormal;
-    Action_OnTop.Checked:=False;
-  end;
+    if Action_OnTop.Checked = False then
+    begin
+        MainForm.FormStyle:=fsStayOnTop;
+        Action_OnTop.Checked:=True;
+    end
+    else
+    begin
+        MainForm.FormStyle:=fsNormal;
+        Action_OnTop.Checked:=False;
+    end;
 end;
 
-{ ---------------------------------------------------------------------------------------------------------------------------------------------- REPORT A BUG }
+/// <summary>
+///     Show user feedback window.
+/// </summary>
+
 procedure TMainForm.Action_ReportClick(Sender: TObject);
 begin
-  WndCall(ReportForm, stModal);
+    WndCall(ReportForm, stModal);
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------------------------ HELP }
+/// <summary>
+///     Open help file with basic manual on application usage. Use external PDF file.
+/// </summary>
+
 procedure TMainForm.Action_HelpClick(Sender: TObject);
 begin
-  (* EXECUTE EXTERNAL PDF FILE *)
+    // code here ...
 end;
 
-{ ----------------------------------------------------------------------------------------------------------------------------------------------------- ABOUT }
+/// <summary>
+///     Display about window.
+/// </summary>
+
 procedure TMainForm.Action_AboutClick(Sender: TObject);
 begin
-  WndCall(AboutForm, stModal);
+    WndCall(AboutForm, stModal);
 end;
 
-{ ----------------------------------------------------------------------------------------------------------------------------------------------------- CLOSE }
+/// <summary>
+///     Close button (disabled).
+/// </summary>
+
 procedure TMainForm.Action_CloseClick(Sender: TObject);
 begin
   (* DO NOTHING *)
 end;
 
-{ ----------------------------------------------------------------- ! AGE VIEW ! ---------------------------------------------------------------------------- }
 
-{ ----------------------------------------------------------------------------------------------------------------------------------- EXECUTE WHEN MENU OPENS }
+// ------------------------------------------------------------------------------------------------------------------------------------------------ AGE VIEW //
+
+
+/// <summary>
+///     Execute before context menu is shown.
+/// </summary>
+
 procedure TMainForm.AgeViewPopupPopup(Sender: TObject);
 begin
 
-  { ONLY ADMINS AND RW USERS CAN USE ADDRESSBOOK AND INVOICE TRACKER }
-  if AccessLevel = acReadOnly then Exit;
+    // Only admins and rw users can use addressbook and invoice tracker
+    if AccessLevel = acReadOnly then Exit;
 
-  { ENABLE OR DISABLE FILTER REMOVAL }
-  if FilterForm.InUse then
-    Action_RemoveFilters.Enabled:=True
-      else
-        Action_RemoveFilters.Enabled:=False;
+    // Enable or disable filter removal
+    if FilterForm.InUse then
+        Action_RemoveFilters.Enabled:=True
+            else
+                Action_RemoveFilters.Enabled:=False;
 
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------------------- LYNC CALL }
+/// <summary>
+///     Execute Action Log window with Lync abilities.
+/// </summary>
+
 procedure TMainForm.Action_LyncCallClick(Sender: TObject);
 begin
-  if IsConnected then
-  begin
-    if MainForm.StatBar_TXT1.Caption = stReady then
-      WndCall(ActionsForm, stModal)
+
+    if IsConnected then
+    begin
+        if MainForm.StatBar_TXT1.Caption = stReady then
+            WndCall(ActionsForm, stModal)
+                else
+                    MainForm.MsgCall(mcWarn, 'Wait until "Ready" status and try again.');
+    end
         else
-          MainForm.MsgCall(mcWarn, 'Wait until "Ready" status and try again.');
-  end
-      else
-        MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+            MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
 end;
 
-{ ---------------------------------------------------------------------------------------------------------------------- ADD TO INVOICE TRACKER | WINDOW CALL }
-
-(* OFF TEMPORARLY *)
+/// <summary>
+///     Add item(s) to Invoice Tracker list.
+/// </summary>
 
 procedure TMainForm.Action_TrackerClick(Sender: TObject);
 var
-  iCNT: integer;
-  Item: TListItem;
+    iCNT: integer;
+    Item: TListItem;
 begin
 
-  MsgCall(mcInfo, 'This feature is not yet accessible. Please try later.');
-  Exit;
+    MsgCall(mcInfo, 'This feature is not yet accessible. Please try later.');
+    Exit;
 
-  if IsConnected then
-  begin
-    TrackerForm.CustomerList.Clear;
-    { ONE CUSTOMER HAS BEEN SELECTED }
-    if (sgAgeView.Selection.Top - sgAgeView.Selection.Bottom) = 0 then
+    if IsConnected then
     begin
-      Item:=TrackerForm.CustomerList.Items.Add;
-      Item.Caption:='1';
-      Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.CUID, 1, 1),           sgAgeView.Row]);
-      Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME, 1, 1), sgAgeView.Row]);
+        TrackerForm.CustomerList.Clear;
+
+        // One customer
+        if (sgAgeView.Selection.Top - sgAgeView.Selection.Bottom) = 0 then
+        begin
+            Item:=TrackerForm.CustomerList.Items.Add;
+            Item.Caption:='1';
+            Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.CUID, 1, 1),           sgAgeView.Row]);
+            Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME, 1, 1), sgAgeView.Row]);
+        end
+        // Many customers
+        else
+        begin
+            for iCNT:=sgAgeView.Selection.Top to sgAgeView.Selection.Bottom do
+            begin
+                if sgAgeView.RowHeights[iCNT] <> sgRowHidden then
+                begin
+                    Item:=TrackerForm.CustomerList.Items.Add;
+                    Item.Caption:=IntToStr(iCNT);
+                    Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.CUID, 1, 1),           iCNT]);
+                    Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME, 1, 1), iCNT]);
+                end;
+            end;
+        end;
+
+        WndCall(TrackerForm, stModal);
+
     end
-    { MANY CUSTOMERS HAS BEEN SELECTED }
     else
     begin
-      for iCNT:=sgAgeView.Selection.Top to sgAgeView.Selection.Bottom do
-      begin
-        if sgAgeView.RowHeights[iCNT] <> sgRowHidden then
-        begin
-          Item:=TrackerForm.CustomerList.Items.Add;
-          Item.Caption:=IntToStr(iCNT);
-          Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.CUID, 1, 1),           iCNT]);
-          Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME, 1, 1), iCNT]);
-        end;
-      end;
+        MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
     end;
-    { OPEN FORM }
-    WndCall(TrackerForm, stModal);
-  end
-  else
-  begin
-    MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
-  end;
+
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------ ADD SELECTED ITEMS TO ADDRESS BOOK }
+/// <summary>
+///     Add customer(s) to address book.
+/// </summary>
+
 procedure TMainForm.Action_AddToBookClick(Sender: TObject);
 begin
-  if IsConnected then
-    TTAddressBook.Create(
-                          adInsert,
-                          sgAgeView,
-                          '',
-                          '',
-                          '',
-                          '',
-                          '',
-                          ''
-                        )
-      else
+    if IsConnected then
+        TTAddressBook.Create(
+            adInsert,
+            sgAgeView,
+            '',
+            '',
+            '',
+            '',
+            '',
+            ''
+        )
+    else
         MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------------ OPEN MASS MAILER }
+/// <summary>
+///     Add customer(s) to mass mailer.
+/// </summary>
+
 procedure TMainForm.Action_MassMailerClick(Sender: TObject);
 var
-  iCNT:       integer;
-  Item:       TListItem;
-  SCUID:      string;
-  CoCode:     string;
-  CustNumber: string;
-  CustName:   string;
+    iCNT:       integer;
+    Item:       TListItem;
+    SCUID:      string;
+    CoCode:     string;
+    CustNumber: string;
+    CustName:   string;
 begin
-  if IsConnected then
-  begin
-    ViewMailerForm.CustomerList.Clear;
-    { ONE CUSTOMER HAS BEEN SELECTED }
-    if (sgAgeView.Selection.Top - sgAgeView.Selection.Bottom) = 0 then
+
+    if IsConnected then
     begin
-      Item:=ViewMailerForm.CustomerList.Items.Add;
-      Item.Caption:='1';
-      CustName  :=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), sgAgeView.Row];
-      CustNumber:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), sgAgeView.Row];
-      CoCode    :=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCO_CODE,         1, 1), sgAgeView.Row];
-      SCUID     :=CustNumber + MainForm.ConvertName(CoCode, 'F', 3);
-      Item.SubItems.Add(SCUID);
-      Item.SubItems.Add(CustName);
-      Item.SubItems.Add('Not Found');
-      //Item.SubItems.Add('No');
+        ViewMailerForm.CustomerList.Clear;
+
+        // One customer
+        if (sgAgeView.Selection.Top - sgAgeView.Selection.Bottom) = 0 then
+        begin
+            Item:=ViewMailerForm.CustomerList.Items.Add;
+            Item.Caption:='1';
+            CustName  :=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), sgAgeView.Row];
+            CustNumber:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), sgAgeView.Row];
+            CoCode    :=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCO_CODE,         1, 1), sgAgeView.Row];
+            SCUID     :=CustNumber + MainForm.ConvertName(CoCode, 'F', 3);
+            Item.SubItems.Add(SCUID);
+            Item.SubItems.Add(CustName);
+            Item.SubItems.Add('Not Found');
+            //Item.SubItems.Add('No');
+        end
+        // Many customers
+        else
+        begin
+            for iCNT:=sgAgeView.Selection.Top to sgAgeView.Selection.Bottom do
+            begin
+                if sgAgeView.RowHeights[iCNT] <> sgRowHidden then
+                begin
+                    Item:=ViewMailerForm.CustomerList.Items.Add;
+                    Item.Caption:=IntToStr(iCNT);
+                    CustName  :=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), iCNT];
+                    CustNumber:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), iCNT];
+                    CoCode    :=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCO_CODE,         1, 1), iCNT];
+                    SCUID     :=CustNumber + MainForm.ConvertName(CoCode, 'F', 3);
+                    Item.SubItems.Add(SCUID);
+                    Item.SubItems.Add(CustName);
+                    Item.SubItems.Add('Not Found');
+                    //Item.SubItems.Add('No');
+                end;
+            end;
+        end;
+
+        WndCall(ViewMailerForm, stModal);
+
     end
-    { MANY CUSTOMERS HAS BEEN SELECTED }
     else
     begin
-      for iCNT:=sgAgeView.Selection.Top to sgAgeView.Selection.Bottom do
-      begin
-        if sgAgeView.RowHeights[iCNT] <> sgRowHidden then
-        begin
-          Item:=ViewMailerForm.CustomerList.Items.Add;
-          Item.Caption:=IntToStr(iCNT);
-          CustName  :=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), iCNT];
-          CustNumber:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), iCNT];
-          CoCode    :=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCO_CODE,         1, 1), iCNT];
-          SCUID     :=CustNumber + MainForm.ConvertName(CoCode, 'F', 3);
-          Item.SubItems.Add(SCUID);
-          Item.SubItems.Add(CustName);
-          Item.SubItems.Add('Not Found');
-          //Item.SubItems.Add('No');
-        end;
-      end;
+        MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
     end;
-    { OPEN FORM }
-    WndCall(ViewMailerForm, stModal);
-  end
-  else
-  begin
-    MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
-  end;
+
 end;
 
-{ --------------------------------------------------------------------------------------------------------------------------- ADD FOLLOW-UP TO SELECTED GROUP }
+/// <summary>
+///     Add follow-up to selected group of customers.
+/// </summary>
+
 procedure TMainForm.Action_AddFollowUpGroupClick(Sender: TObject);
 var
-  iCNT: integer;
+    iCNT: integer;
 begin
-  Screen.Cursor:=crHourGlass;
-  CalendarForm.CalendarMode:=cfGetDate;
-  MainForm.WndCall(CalendarForm, 0);
-  { IF SELECTED MORE THAN ONE CUSTOMER, ASSIGN GIVEN DATE TO SELECTED CUSTOMERS }
-  if CalendarForm.SelectedDate <> NULLDATE then
-  begin
-    for iCNT:=sgAgeView.Selection.Top to sgAgeView.Selection.Bottom do
-      if sgAgeView.RowHeights[iCNT] <> sgRowHidden then
-        CalendarForm.SetFollowUp(CalendarForm.SelectedDate, sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUID, 1, 1), iCNT], iCNT);
-    LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ''GeneralComment'' table with column FollowUp has been updated with ' + DateToStr(CalendarForm.SelectedDate) + ' for multiple items.');
-  end;
-  Screen.Cursor:=crDefault;
+
+    Screen.Cursor:=crHourGlass;
+    CalendarForm.CalendarMode:=cfGetDate;
+    MainForm.WndCall(CalendarForm, 0);
+
+    // IF SELECTED MORE THAN ONE CUSTOMER, ASSIGN GIVEN DATE TO SELECTED CUSTOMERS
+    if CalendarForm.SelectedDate <> NULLDATE then
+    begin
+        for iCNT:=sgAgeView.Selection.Top to sgAgeView.Selection.Bottom do
+
+            if sgAgeView.RowHeights[iCNT] <> sgRowHidden then
+                CalendarForm.SetFollowUp(CalendarForm.SelectedDate, sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUID, 1, 1), iCNT], iCNT);
+
+            LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ''GeneralComment'' table with column FollowUp has been updated with ' + DateToStr(CalendarForm.SelectedDate) + ' for multiple items.');
+    end;
+
+    Screen.Cursor:=crDefault;
+
 end;
 
-{ -------------------------------------------------------------------------------------------------------------------------------- REMOVE SELECTED FOLLOW-UPS }
+/// <summary>
+///     Remove selected follow-up.
+/// </summary>
+
 procedure TMainForm.Action_RemoveFollowUpsClick(Sender: TObject);
 var
-  iCNT: integer;
+    iCNT: integer;
 begin
-  Screen.Cursor:=crHourGlass;
-  for iCNT:=sgAgeView.Selection.Top to sgAgeView.Selection.Bottom do
-    if sgAgeView.RowHeights[iCNT] <> sgRowHidden then
+
+    Screen.Cursor:=crHourGlass;
+
+    for iCNT:=sgAgeView.Selection.Top to sgAgeView.Selection.Bottom do
     begin
-      TTGeneralComment.Create(
-                               sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUID, 1, 1), iCNT],
-                               strNULL,
-                               SPACE,
-                               strNULL,
-                               strNULL,
-                               False
-                             );
-      MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1), iCNT]:=SPACE;
+
+        if sgAgeView.RowHeights[iCNT] <> sgRowHidden then
+        begin
+            TTGeneralComment.Create(
+                sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUID, 1, 1), iCNT],
+                strNULL,
+                SPACE,
+                strNULL,
+                strNULL,
+                False
+            );
+            MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1), iCNT]:=SPACE;
+        end;
+
     end;
-  LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ''GeneralComment'' table with column FollowUp has been updated with removal for multiple items.');
-  Screen.Cursor:=crDefault;
+
+    LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ''GeneralComment'' table with column FollowUp has been updated with removal for multiple items.');
+
+    Screen.Cursor:=crDefault;
+
 end;
 
-{ ------------------------------------------------------------- ! FILTER AGE VIEW GRID ! -------------------------------------------------------------------- }
 
-{ -------------------------------------------------------------------------------------------------------------------------------------------------- VIA INF7 }
+// ------------------------------------------------------------------------------------------------------------------------------------ FILTER AGE VIEW GRID //
+
+/// <summary>
+///     Below methods setups FilterForm properties and execute filter window.
+/// </summary>
+
+// Filter via INF7
 procedure TMainForm.Action_INF7_FilterClick(Sender: TObject);
 begin
-  FilterForm.FColName:=TSnapshots.fINF7;
-  FilterForm.FOverdue:=TSnapshots.fOVERDUE;
-  FilterForm.FGrid   :=MainForm.sgAgeView;
-  FilterForm.FFilterNum:=fltINF7;
-  WndCall(FilterForm, stModal);
+    FilterForm.FColName:=TSnapshots.fINF7;
+    FilterForm.FOverdue:=TSnapshots.fOVERDUE;
+    FilterForm.FGrid   :=MainForm.sgAgeView;
+    FilterForm.FFilterNum:=fltINF7;
+    WndCall(FilterForm, stModal);
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------------------------ INF4 }
+// Filter via INF4
 procedure TMainForm.Action_INF4_FilterClick(Sender: TObject);
 begin
-  FilterForm.FColName  :=TSnapshots.fINF4;
-  FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
-  FilterForm.FGrid     :=MainForm.sgAgeView;
-  FilterForm.FFilterNum:=fltINF4;
-  WndCall(FilterForm, stModal);
+    FilterForm.FColName  :=TSnapshots.fINF4;
+    FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
+    FilterForm.FGrid     :=MainForm.sgAgeView;
+    FilterForm.FFilterNum:=fltINF4;
+    WndCall(FilterForm, stModal);
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------------------ VIA COCODE }
+// Filter via COCODE
 procedure TMainForm.Action_CoCode_FilterClick(Sender: TObject);
 begin
-  FilterForm.FColName  :=TSnapshots.fCO_CODE;
-  FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
-  FilterForm.FGrid     :=MainForm.sgAgeView;
-  FilterForm.FFilterNum:=fltCOCODE;
-  WndCall(FilterForm, stModal);
+    FilterForm.FColName  :=TSnapshots.fCO_CODE;
+    FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
+    FilterForm.FGrid     :=MainForm.sgAgeView;
+    FilterForm.FFilterNum:=fltCOCODE;
+    WndCall(FilterForm, stModal);
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------------------- VIA AGENT }
+// Filter via AGENT
 procedure TMainForm.Action_Agent_FilterClick(Sender: TObject);
 begin
-  FilterForm.FColName  :=TSnapshots.fAGENT;
-  FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
-  FilterForm.FGrid     :=MainForm.sgAgeView;
-  FilterForm.FFilterNum:=fltAGENT;
-  WndCall(FilterForm, stModal);
+    FilterForm.FColName  :=TSnapshots.fAGENT;
+    FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
+    FilterForm.FGrid     :=MainForm.sgAgeView;
+    FilterForm.FFilterNum:=fltAGENT;
+    WndCall(FilterForm, stModal);
 end;
 
-{ ---------------------------------------------------------------------------------------------------------------------------------------------- VIA DIVISION }
+// Filter via DIVISION
 procedure TMainForm.Action_Division_FilterClick(Sender: TObject);
 begin
-  FilterForm.FColName  :=TSnapshots.fDIVISION;
-  FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
-  FilterForm.FGrid     :=MainForm.sgAgeView;
-  FilterForm.FFilterNum:=fltDIVISION;
-  WndCall(FilterForm, stModal);
+    FilterForm.FColName  :=TSnapshots.fDIVISION;
+    FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
+    FilterForm.FGrid     :=MainForm.sgAgeView;
+    FilterForm.FFilterNum:=fltDIVISION;
+    WndCall(FilterForm, stModal);
 end;
 
-{ --------------------------------------------------------------------------------------------------------------------------------------------- VIA FOLLOW UP }
+// Filter via FOLLOW UP
 procedure TMainForm.Action_FollowUp_FilterClick(Sender: TObject);
 begin
-  FilterForm.FColName  :=TGeneral.fFOLLOWUP;
-  FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
-  FilterForm.FGrid     :=MainForm.sgAgeView;
-  FilterForm.FFilterNum:=fltFOLLOWUP;
-  WndCall(FilterForm, stModal);
+    FilterForm.FColName  :=TGeneral.fFOLLOWUP;
+    FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
+    FilterForm.FGrid     :=MainForm.sgAgeView;
+    FilterForm.FFilterNum:=fltFOLLOWUP;
+    WndCall(FilterForm, stModal);
 end;
 
-{ --------------------------------------------------------------------------------------------------------------------------------------------------- GROUP 3 }
+// Filter via GROUP 3
 procedure TMainForm.Action_Gr3_FilterClick(Sender: TObject);
 begin
-  FilterForm.FColName  :=TSnapshots.fGROUP3;
-  FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
-  FilterForm.FGrid     :=MainForm.sgAgeView;
-  FilterForm.FFilterNum:=fltGR3;
-  WndCall(FilterForm, stModal);
+    FilterForm.FColName  :=TSnapshots.fGROUP3;
+    FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
+    FilterForm.FGrid     :=MainForm.sgAgeView;
+    FilterForm.FFilterNum:=fltGR3;
+    WndCall(FilterForm, stModal);
 end;
 
-{ ----------------------------------------------------------------------------------------------------------------------------------------------------- FREE1 }
+// Filter via FREE1
 procedure TMainForm.Action_Free1Click(Sender: TObject);
 begin
-  FilterForm.FColName  :=TGeneral.Free1;
-  FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
-  FilterForm.FGrid     :=MainForm.sgAgeView;
-  FilterForm.FFilterNum:=fltFree1;
-  WndCall(FilterForm, stModal);
+    FilterForm.FColName  :=TGeneral.Free1;
+    FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
+    FilterForm.FGrid     :=MainForm.sgAgeView;
+    FilterForm.FFilterNum:=fltFree1;
+    WndCall(FilterForm, stModal);
 end;
 
-{ ---------------------------------------------------------------------------------------------------------------------------------------------------- FREE 2 }
+// Filter via FREE 2
 procedure TMainForm.Action_Free2Click(Sender: TObject);
 begin
-  FilterForm.FColName  :=TGeneral.Free2;
-  FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
-  FilterForm.FGrid     :=MainForm.sgAgeView;
-  FilterForm.FFilterNum:=fltFree2;
-  WndCall(FilterForm, stModal);
+    FilterForm.FColName  :=TGeneral.Free2;
+    FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
+    FilterForm.FGrid     :=MainForm.sgAgeView;
+    FilterForm.FFilterNum:=fltFree2;
+    WndCall(FilterForm, stModal);
 end;
 
-{ --------------------------------------------------------------------------------------------------------------------------------------------------- OVERDUE }
+// Filter via OVERDUE
 procedure TMainForm.Action_OverduesClick(Sender: TObject);
 begin
 //
 end;
 
-{ ---------------------------------------------------------------------------------------------------------------------------------------------- TOTAL AMOUNT }
+// Filter via TOTAL AMOUNT
 procedure TMainForm.Action_TotalAmountClick(Sender: TObject);
 begin
 //
 end;
 
-{ ---------------------------------------------------------------------------------------------------------------------------------------------------- RANGE1 }
+// Filter via RANGE1
 procedure TMainForm.Action_Range1Click(Sender: TObject);
 begin
 //
 end;
 
-{ ---------------------------------------------------------------------------------------------------------------------------------------------------- RANGE2 }
+// Filter via RANGE2
 procedure TMainForm.Action_Range2Click(Sender: TObject);
 begin
 //
 end;
 
-{ ---------------------------------------------------------------------------------------------------------------------------------------------------- RANGE3 }
+// Filter via RANGE3
 procedure TMainForm.Action_Range3Click(Sender: TObject);
 begin
 //
 end;
 
-{ ---------------------------------------------------------------------------------------------------------------------------------------------------- RANGE4 }
+// Filter via RANGE4
 procedure TMainForm.Action_Range4Click(Sender: TObject);
 begin
 //
 end;
 
-{ ---------------------------------------------------------------------------------------------------------------------------------------------------- RANGE5 }
+// Filter via RANGE5
 procedure TMainForm.Action_Range5Click(Sender: TObject);
 begin
 //
 end;
 
-{ ---------------------------------------------------------------------------------------------------------------------------------------------------- RANGE6 }
+// Filter via RANGE6
 procedure TMainForm.Action_Range6Click(Sender: TObject);
 begin
 //
 end;
 
-{ ---------------------------------------------------------------------------------------------------------------------------------------- REMOVE ALL FILTERS }
+// Filter via  REMOVE ALL FILTERS
 procedure TMainForm.Action_RemoveFiltersClick(Sender: TObject);
 var
-  iCNT:    integer;
-  AgeView: TAgeView;
+    iCNT:    integer;
+    AgeView: TAgeView;
 begin
-  sgAgeView.Freeze(True);
-  for iCNT:=1 to sgAgeView.RowCount - 1 do sgAgeView.RowHeights[iCNT]:=sgRowHeight;
-  FilterForm.FilterClearAll;
-  { RE-COMPUTE AGING SUMMARY }
-  AgeView:=TAgeView.Create(MainForm.DbConnect);
-  try
-    AgeView.ComputeAgeSummary(MainForm.sgAgeView);
-    AgeView.ComputeAndShowRCA(MainForm.sgAgeView);
-    AgeView.UpdateSummary;
-  finally
-   AgeView.Free;
-  end;
-  sgAgeView.Freeze(False);
+
+    sgAgeView.Freeze(True);
+
+    for iCNT:=1 to sgAgeView.RowCount - 1 do
+        sgAgeView.RowHeights[iCNT]:=sgRowHeight;
+
+    FilterForm.FilterClearAll;
+
+    // Re-compute aging summary
+
+    AgeView:=TAgeView.Create(MainForm.DbConnect);
+    try
+        AgeView.ComputeAgeSummary(MainForm.sgAgeView);
+        AgeView.ComputeAndShowRCA(MainForm.sgAgeView);
+        AgeView.UpdateSummary;
+    finally
+        AgeView.Free;
+    end;
+
+    sgAgeView.Freeze(False);
+
 end;
 
-{ --------------------------------------------------------------------------------------------------------------------------------- EXCLUDE NON-OVERDUE ITEMS }
+/// <summary>
+///     Allow to exclude non-overdue items.
+/// </summary>
+
 procedure TMainForm.Action_OverdueClick(Sender: TObject);
 begin
-  if Action_Overdue.Checked
-    then
-      Action_Overdue.Checked:=False
-        else
-          Action_Overdue.Checked:=True;
+    if Action_Overdue.Checked
+        then
+            Action_Overdue.Checked:=False
+                else
+                    Action_Overdue.Checked:=True;
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------------- SEARCH CUSTOMER }
+/// <summary>
+///     Display window for searching customer.
+/// </summary>
+
 procedure TMainForm.Action_SearchClick(Sender: TObject);
 begin
-  { SETUP AND CALL WINDOW }
-  SearchForm.SGrid     :=MainForm.sgAgeView;
-  SearchForm.SColName  :=TSnapshots.fCUSTOMER_NAME;
-  SearchForm.SColNumber:=TSnapshots.fCUSTOMER_NUMBER;
-  WndCall(SearchForm, stModeless);
+    SearchForm.SGrid     :=MainForm.sgAgeView;
+    SearchForm.SColName  :=TSnapshots.fCUSTOMER_NAME;
+    SearchForm.SColNumber:=TSnapshots.fCUSTOMER_NUMBER;
+    WndCall(SearchForm, stModeless);
 end;
 
-{ ----------------------------------------------------------------------------------------------------------------------------------------- SHOW PAYMENT TERM }
+/// <summary>
+///     Show payment term for selected customer.
+/// </summary>
+
 procedure TMainForm.Action_PaymentTermClick(Sender: TObject);
 var
-  AgeView: TAgeView;
+    AgeView: TAgeView;
 begin
-  AgeView:=TAgeView.Create(DbConnect);
-  try
-    MsgCall(
-             mcInfo,
-             'Payment term: ' +
-             AgeView.GetData(
-                              sgAgeView.Cells[
-                                               sgAgeView.ReturnColumn(TSnapshots.fPAYMENT_TERMS, 1, 1),
-                                               sgAgeView.Row
-                                             ],
-                              TblPmtterms,
-                              sgAgeView.Cells[
-                                               sgAgeView.ReturnColumn(TSnapshots.fCO_CODE, 1, 1),
-                                               sgAgeView.Row
-                                             ]
-                            )
-           );
-  finally
-    AgeView.Free;
-  end;
+
+    AgeView:=TAgeView.Create(DbConnect);
+
+    try
+
+        MsgCall(
+            mcInfo,
+            'Payment term: ' +
+            AgeView.GetData(
+                sgAgeView.Cells[
+                    sgAgeView.ReturnColumn(TSnapshots.fPAYMENT_TERMS, 1, 1),
+                    sgAgeView.Row
+                ],
+                TblPmtterms,
+                sgAgeView.Cells[
+                    sgAgeView.ReturnColumn(TSnapshots.fCO_CODE, 1, 1),
+                    sgAgeView.Row
+                ]
+            )
+        );
+
+    finally
+
+        AgeView.Free;
+
+    end;
+
 end;
 
-{ ----------------------------------------------------------------------------------------------------------------------------------------------- SHOW PERSON }
+/// <summary>
+///     Show assigned person term for selected customer.
+/// </summary>
+
 procedure TMainForm.Action_PersonClick(Sender: TObject);
 var
-  AgeView: TAgeView;
+    AgeView: TAgeView;
 begin
-  AgeView:=TAgeView.Create(DbConnect);
-  try
-    MsgCall(
-             mcInfo,
-             'Person assigned: ' +
-             AgeView.GetData(
-                              sgAgeView.Cells[
-                                               sgAgeView.ReturnColumn(TSnapshots.fPERSON, 1, 1),
-                                               sgAgeView.Row
-                                             ],
-                              TblPerson,
-                              sgAgeView.Cells[
-                                               sgAgeView.ReturnColumn(TSnapshots.fCO_CODE, 1, 1),
-                                               sgAgeView.Row
-                                             ]
-                            )
-           );
-  finally
-    AgeView.Free;
-  end;
+
+    AgeView:=TAgeView.Create(DbConnect);
+
+    try
+
+        MsgCall(
+            mcInfo,
+            'Person assigned: ' +
+            AgeView.GetData(
+                sgAgeView.Cells[
+                    sgAgeView.ReturnColumn(TSnapshots.fPERSON, 1, 1),
+                    sgAgeView.Row
+                ],
+                TblPerson,
+                sgAgeView.Cells[
+                    sgAgeView.ReturnColumn(TSnapshots.fCO_CODE, 1, 1),
+                    sgAgeView.Row
+                ]
+            )
+        );
+
+    finally
+
+        AgeView.Free;
+
+    end;
+
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------ SAVE STRING GRID TO MS EXCEL }
+/// <summary>
+///     Export aging view (report) to Microsoft Excel file.
+/// </summary>
+/// <remarks>
+///     Requires installed Microsopft Excel 2013 or higher.
+/// </remarks>
+
 procedure TMainForm.Action_ToExceClick(Sender: TObject);
 begin
-  TTExcelExport.Create;
+    TTExcelExport.Create;
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------------------ EXPORT CSV }
+/// <summary>
+///     Export aging view (report) to CSV file. Delimiter is fixed on vertical pipe.
+/// </summary>
+
 procedure TMainForm.Action_ExportCSVClick(Sender: TObject);
 begin
-  sgAgeView.ExportCSV(CSVExport, '|');
+    sgAgeView.ExportCSV(CSVExport, '|');
 end;
 
-{ -------------------------------------------------------------------------------------------------------------------------------------- HIDE OR SHOW SUMMARY }
+/// <summary>
+///     Hide or show aging summary displayed on the bottom of the page.
+/// </summary>
+
 procedure TMainForm.Action_HideSummaryClick(Sender: TObject);
 begin
-  if Action_HideSummary.Checked then
-  begin
-    Footer1.Visible:=False;
-    PanelAgeView.Margins.Bottom:=17;
-    Action_HideSummary.Checked:=False;
-  end
-  else
-  begin
-    Footer1.Visible:=True;
-    PanelAgeView.Margins.Bottom:=0;
-    Action_HideSummary.Checked:=True;
-  end;
+    if Action_HideSummary.Checked then
+    begin
+        Footer1.Visible:=False;
+        PanelAgeView.Margins.Bottom:=17;
+        Action_HideSummary.Checked:=False;
+    end
+    else
+    begin
+        Footer1.Visible:=True;
+        PanelAgeView.Margins.Bottom:=0;
+        Action_HideSummary.Checked:=True;
+    end;
 end;
 
-{ --------------------------------------------------------------------------------------------------------------------------------------- AUTO COLUMN RE-SIZE }
+/// <summary>
+///     Auto column re-size.
+/// </summary>
+
 procedure TMainForm.Action_AutoColumnSizeClick(Sender: TObject);
 begin
-  MainForm.sgAgeView.SetColWidth(10, 20, 400);
+    MainForm.sgAgeView.SetColWidth(10, 20, 400);
 end;
 
-{ ------------------------------------------------------------------------------------------------------- SHOW ONLY BASIC VIEW DEFINIED IN CONFIGURATION FILE }
+/// <summary>
+///     Show only basic view defined in configuration file.
+/// </summary>
+
 procedure TMainForm.Action_BasicViewClick(Sender: TObject);
 var
-  AgeView: TAgeView;
+    AgeView: TAgeView;
 begin
-  AgeView:=TAgeView.Create(DbConnect);
-  try
-    AgeView.AgeViewMode(mainForm.sgAgeView, AgingBasic);
-  finally
-    AgeView.Free;
-  end;
-  Action_AutoColumnSizeClick(Self);
-  { TICK }
-  Action_BasicView.Checked:=True;
-  Action_FullView.Checked :=False;
+
+    AgeView:=TAgeView.Create(DbConnect);
+    try
+        AgeView.AgeViewMode(mainForm.sgAgeView, AgingBasic);
+    finally
+        AgeView.Free;
+    end;
+
+    Action_AutoColumnSizeClick(Self);
+
+    // Tick
+    Action_BasicView.Checked:=True;
+    Action_FullView.Checked :=False;
+
 end;
 
-{ -------------------------------------------------------------------------------------------------------------------------------- SHOW ALL AVAILABLE COLUMNS }
+/// <summary>
+///     Show all available columns (defined in configuration file).
+/// </summary>
+
 procedure TMainForm.Action_FullViewClick(Sender: TObject);
 var
-  AgeView: TAgeView;
+    AgeView: TAgeView;
 begin
-  AgeView:=TAgeView.Create(DbConnect);
-  try
-    AgeView.AgeViewMode(mainForm.sgAgeView, AgingFull);
-  finally
-    AgeView.Free;
-  end;
-  Action_AutoColumnSizeClick(Self);
-  { TICK }
-  Action_BasicView.Checked:=False;
-  Action_FullView.Checked :=True;
+
+    AgeView:=TAgeView.Create(DbConnect);
+    try
+        AgeView.AgeViewMode(mainForm.sgAgeView, AgingFull);
+    finally
+        AgeView.Free;
+    end;
+
+    Action_AutoColumnSizeClick(Self);
+
+    // Tick
+    Action_BasicView.Checked:=False;
+    Action_FullView.Checked :=True;
+
 end;
 
-{ -------------------------------------------------------------------------------------------------------------------------------------- SET FOLLOW-UP COLORS }
+/// <summary>
+///     Display window to setup follow-up colors (font, background and foreground).
+/// </summary>
+
 procedure TMainForm.Action_FollowUpColorsClick(Sender: TObject);
 begin
-  WndCall(ColorsForm, stModal);
+    WndCall(ColorsForm, stModal);
 end;
 
-{ --------------------------------------------------------------------------------------------------------------------------------------------- ROW HIGHLIGHT }
+/// <summary>
+///     Row highlight (on/off).
+/// </summary>
+
 procedure TMainForm.Action_RowHighlightClick(Sender: TObject);
 begin
-  if Action_RowHighlight.Checked then
-  begin
-    sgAgeView.Options:=sgAgeView.Options - [goRowSelect];
-    sgAgeView.Options:=sgAgeView.Options + [goRangeSelect];
-    Action_RowHighlight.Checked:=False;
-  end
-  else
-  begin
-    sgAgeView.Options:=sgAgeView.Options + [goRowSelect];
-    sgAgeView.Options:=sgAgeView.Options - [goRangeSelect];
-    Action_RowHighlight.Checked:=True;
-  end;
+    if Action_RowHighlight.Checked then
+    begin
+        sgAgeView.Options:=sgAgeView.Options - [goRowSelect];
+        sgAgeView.Options:=sgAgeView.Options + [goRangeSelect];
+        Action_RowHighlight.Checked:=False;
+    end
+    else
+    begin
+        sgAgeView.Options:=sgAgeView.Options + [goRowSelect];
+        sgAgeView.Options:=sgAgeView.Options - [goRangeSelect];
+        Action_RowHighlight.Checked:=True;
+    end;
 end;
 
-{ -------------------------------------------------------------- ! INVOICE TRACKER ! ------------------------------------------------------------------------ }
 
-{ ------------------------------------------------------------------------------------------------------------------------------------------ REMOVE FROM LIST }
+// ------------------------------------------------------------------------------------------------------------------------------------ INVOICE TRACKER MENU //
+
+
+/// <summary>
+///     Remove selected customer from list.
+/// </summary>
+
 procedure TMainForm.Action_RemoveClick(Sender: TObject);
 begin
 
-  { EXIT IF NO CONNECTION }
-  if not(IsConnected) then
-  begin
-    MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
-    Exit;
-  end;
+    // Exit condition
+    if not(IsConnected) then
+    begin
+        MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+        Exit;
+    end;
 
-  TrackerForm.CUID:=sgInvoiceTracker.Cells[sgInvoiceTracker.ReturnColumn(TTracker.CUID, 1, 1), sgInvoiceTracker.Row];
+    TrackerForm.CUID:=sgInvoiceTracker.Cells[sgInvoiceTracker.ReturnColumn(TTracker.CUID, 1, 1), sgInvoiceTracker.Row];
 
-  { R/W USER CAN REMOVE ITEM }
-  if (MainForm.AccessLevel = acReadWrite) and (UpperCase(MainForm.WinUserName) = UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
-    if MsgCall(mcQuestion2, 'Are you sure you want to remove selected customer?') = IDYES then
-      TrackerForm.Delete;
+    // R/W user can remove item
+    if (MainForm.AccessLevel = acReadWrite) and (UpperCase(MainForm.WinUserName) = UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
+        if MsgCall(mcQuestion2, 'Are you sure you want to remove selected customer?') = IDYES then
+            TrackerForm.Delete;
 
-  { R/W USER CANNOT REMOVE OTHER ITEM }
-  if (MainForm.AccessLevel = acReadWrite) and (UpperCase(MainForm.WinUserName) <> UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
-    MsgCall(mcWarn, 'You cannot remove someone''s else item.');
+    // R/W user cannot remove other item
+    if (MainForm.AccessLevel = acReadWrite) and (UpperCase(MainForm.WinUserName) <> UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
+        MsgCall(mcWarn, 'You cannot remove someone''s else item.');
 
-  { ADMINISTRATOR CAN REMOVE ANY ITEM }
-  if (MainForm.AccessLevel = acADMIN) then
-    if MsgCall(mcQuestion2, 'Are you sure you want to remove selected customer?') = IDYES then
-      TrackerForm.Delete;
+    // Administrator can remove any item
+    if (MainForm.AccessLevel = acADMIN) then
+        if MsgCall(mcQuestion2, 'Are you sure you want to remove selected customer?') = IDYES then
+            TrackerForm.Delete;
 
-  { READ ONLY USER CANNOT REMOVE ANYTHING }
-  if (MainForm.AccessLevel = acReadOnly) then MsgCall(mcWarn, 'You don''t have permission to remove items.');
+    // Read only user cannot remove anything
+    if (MainForm.AccessLevel = acReadOnly) then MsgCall(mcWarn, 'You don''t have permission to remove items.');
 
 end;
 
-{ ----------------------------------------------------------------------------------------------------------------------- SHOW SENT INVOICES FOR GIVEN 'CUID' }
+/// <summary>
+///     Show sent invoices for given CUID.
+/// </summary>
+
 procedure TMainForm.Action_ShowRegisteredClick(Sender: TObject);
 begin
-  WndCall(InvoicesForm, stModal);
+    WndCall(InvoicesForm, stModal);
 end;
 
-{ --------------------------------------------------------------------------------------------------------------------------------------------- SHOW MY ITEMS }
+/// <summary>
+///     Show customers registered by logged user.
+/// </summary>
+
 procedure TMainForm.Action_ShowMyClick(Sender: TObject);
 begin
-  if IsConnected then
-    TTInvoiceTrackerRefresh.Create(UpperCase(MainForm.WinUserName))
-      else
-        MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+    if IsConnected then
+        TTInvoiceTrackerRefresh.Create(UpperCase(MainForm.WinUserName))
+            else
+                MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
 end;
 
-{ -------------------------------------------------------------------------------------------------------------------------------------------- SHOW ALL ITEMS }
+/// <summary>
+///     Show all registered customers.
+/// </summary>
+
 procedure TMainForm.Action_ShowAllClick(Sender: TObject);
 begin
-  if IsConnected then
-    TTInvoiceTrackerRefresh.Create('*')
-      else
-        MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+    if IsConnected then
+        TTInvoiceTrackerRefresh.Create('*')
+            else
+                MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
 end;
 
-{ ---------------------------------------------------------------- ! TRYICON CALLS ! ------------------------------------------------------------------------ }
 
-{ --------------------------------------------------------------------------------------------------------------------------------- SHOW THE APPLICATION FORM }
+// ------------------------------------------------------------------------------------------------------------------------------------------- TRYICON CALLS //
+
+
+/// <summary>
+///     Show the application form when user double click application icon visible on system tray.
+/// </summary>
+
 procedure TMainForm.TrayIconDblClick(Sender: TObject);
 begin
-  MainForm.Action_ShowAppClick(self);
+    MainForm.Action_ShowAppClick(self);
 end;
 
-{ ---------------------------------------------------------- ! COMPONENT EVENTS | LISTBOX ! ----------------------------------------------------------------- }
 
-{ ---------------------------------------------------------------------------------------------------------------------------- UPDATE LIST FOR SELECTED GROUP }
+// ------------------------------------------------------------------------------------------------------------------------- COMPONENT EVENTS | ENTITY GROUP //
+
+
+/// <summary>
+///     Update list for selected group of companies.
+/// </summary>
+
 procedure TMainForm.GroupListBoxSelect(Sender: TObject);
 var
-  UserControl: TUserControl;
+    UserControl: TUserControl;
 begin
-  if not(IsConnected) then
-  begin
-    MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
-    Exit;
-  end;
-  UserControl:=TUserControl.Create(DbConnect);
-  try
-    UserControl.UserName:=WinUserName;
-    if not (UserControl.GetAgeDates(GroupListDates, GroupList[GroupListBox.ItemIndex, 0])) then
+
+    if not(IsConnected) then
     begin
-      MsgCall(mcError, 'Cannot list age dates for selected group. Please contact IT support.');
-      LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: "GetAgeDates" returned false. Cannot get list of age dates for selected group (' + GroupList[GroupListBox.ItemIndex, 0] + ').');
+        MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+        Exit;
     end;
-  finally
-    UserControl.Free;
-  end;
+
+    UserControl:=TUserControl.Create(DbConnect);
+    try
+        UserControl.UserName:=WinUserName;
+
+        if not (UserControl.GetAgeDates(GroupListDates, GroupList[GroupListBox.ItemIndex, 0])) then
+        begin
+            MsgCall(mcError, 'Cannot list age dates for selected group. Please contact IT support.');
+            LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: "GetAgeDates" returned false. Cannot get list of age dates for selected group (' + GroupList[GroupListBox.ItemIndex, 0] + ').');
+        end;
+
+    finally
+        UserControl.Free;
+    end;
+
 end;
 
-{ ------------------------------------------------------- ! COMPONENT EVENTS | TABSHEETS ! ------------------------------------------------------------------ }
 
-{ -------------------------------------------------------------------------------------------------------------------------------------------- SHOW ALL ITEMS }
+// ---------------------------------------------------------------------------------------------------------------------------- COMPONENT EVENTS | TABSHEETS //
+
+
+/// <summary>
+///     Refresh all items registered with Invoice Tracer.
+/// </summary>
+
 procedure TMainForm.TabSheet4Show(Sender: TObject);
 begin
-  //TTInvoiceTrackerRefresh.Create('*');
+    //TTInvoiceTrackerRefresh.Create('*');
 end;
 
 { ------------------------------------------------------------------------------------------------------------ MAKE PAYMENT TERMS AND PAID INFO TABLES HEIGHT }
+
+/// <summary>
+///     Setup tables height for payment term tabe and paid info table. General table is fixed.
+/// </summary>
+
 procedure TMainForm.TabSheet7Show(Sender: TObject);
 begin
-  sgPmtTerms.Height:=Round(0.5 * sgCoCodes.Height);
-  sgPaidInfo.Height:=Round(0.5 * sgCoCodes.Height);
+    sgPmtTerms.Height:=Round(0.5 * sgCoCodes.Height);
+    sgPaidInfo.Height:=Round(0.5 * sgCoCodes.Height);
 end;
 
-{ ---------------------------------------------------------------------------------------------------------------------------------------------- REFRESH VIEW }
 procedure TMainForm.TabSheet7Resize(Sender: TObject);
 begin
-  TabSheet7Show(self);
+    TabSheet7Show(self);
 end;
 
-{ ----------------------------------------------------------------------------------------------------------------------------- LOCK SETTING PANEL WHEN LEAVE }
+/// <summary>
+///     Force lock settings panel. This is necessary, when administrator open settings panel and go to other tab without locking it. That prevents from
+///     leaving unlocked settings panel by mistake.
+/// </summary>
+
 procedure TMainForm.TabSheet8Show(Sender: TObject);
 begin
-  SetSettingsPanel(spLock);
+    SetSettingsPanel(spLock);
 end;
 
-{ -------------------------------------------------------- ! COMPONENT EVENTS | GRIDS ! --------------------------------------------------------------------- }
 
-{ ---------------------------------------------------------------------------------------------------------------------------------------- FORCE RANGE SELECT }
+// -------------------------------------------------------------------------------------------------------------------------------- COMPONENT EVENTS | GRIDS //
+
+
+/// <summary>
+///     Force range select.
+/// </summary>
+
 procedure TMainForm.sgAgeViewClick(Sender: TObject);
 begin
-  sgAgeView.Options:=sgAgeView.Options - [goEditing];
-  sgAgeView.Options:=sgAgeView.Options - [goAlwaysShowEditor];
-  sgAgeView.SetFocus;
-  sgAgeView.EditorMode:=False;
+    sgAgeView.Options:=sgAgeView.Options - [goEditing];
+    sgAgeView.Options:=sgAgeView.Options - [goAlwaysShowEditor];
+    sgAgeView.SetFocus;
+    sgAgeView.EditorMode:=False;
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------- MOVE COLUMN AND UPDATE SQL COLUMN ARRAY }
+/// <summary>
+///     Move column and update SQL column array.
+/// </summary>
+
 procedure TMainForm.sgAgeViewColumnMoved(Sender: TObject; FromIndex, ToIndex: Integer);
 var
-  iCNT:    integer;
-  jCNT:    integer;
-  Temp:    TLists;
-  SqlRows: integer;
-  TmpRows: integer;
+    iCNT:    integer;
+    jCNT:    integer;
+    Temp:    TLists;
+    SqlRows: integer;
+    TmpRows: integer;
 begin
-  try
+
     try
-      { ------------------------------------------------------------------------------------------------------------------------------- SETTING UP DIMENSIONS }
+        try
+            // Setting up dimensions
 
-      (* WARNING! "HIGH" METHOD RETURNS NUMBER OF ROWS COUNTING FROM ZERO *)
-      (*          WHILE "SETLENGTH" METHOD SETUP ARRAY COUNTING FROM ONE  *)
-      (*          THEREFORE, WE NEED TO ADD ONE TO MATCH DIMENSIONS       *)
+            /// <remarks>
+            ///     "High" method returns number of rows counting from zero
+            ///     while "setlength" method setup array counting from one
+            ///     therefore, we need to add one to match dimensions.
+            /// </remarks>
 
-      SqlRows:=high(sgAgeView.SqlColumns);
-      Inc(SqlRows);
-      SetLength(Temp, SqlRows, 2);
-      TmpRows:=high(Temp);
-      { ------------------------------------------------------------------------------------------------------------------------ COPY SQL ARRAY TO TEMP ARRAY }
+            SqlRows:=high(sgAgeView.SqlColumns);
+            Inc(SqlRows);
+            SetLength(Temp, SqlRows, 2);
+            TmpRows:=high(Temp);
 
-      (* DO NOT USE "COPY" METHOD *)
+            // Copy SQL array to temp array
 
-      for iCNT:=0 to TmpRows do
-        for jCNT:=0 to 1 do
-          Temp[iCNT, jCNT]:=sgAgeView.SqlColumns[iCNT, jCNT];
-      { ------------------------------------------------------------------------------------------------------------------- UPDATE TITLES IN SQL COLUMN ARRAY }
-      for iCNT:=0 to sgAgeView.ColCount - 1 do
-        sgAgeView.SqlColumns[iCNT, 1]:=sgAgeView.Cells[iCNT, 0];
-      { ---------------------------------------------------------------------------------------------------------------- RE-WRITE OTHER SQL COLUMNS FROM TEMP }
-      sgAgeView.SqlColumns[ToIndex, 0]:=Temp[FromIndex, 0];
-      { ----------------------------------------------------------------------------------------------------------------------------- MOVE FROM RIGHT TO LEFT }
-      if FromIndex > ToIndex then
-        for iCNT:=ToIndex to (FromIndex - 1) do
-          sgAgeView.SqlColumns[iCNT + 1, 0]:=Temp[iCNT, 0];
-      { ----------------------------------------------------------------------------------------------------------------------------- MOVE FROM LEFT TO RIGHT }
-      if FromIndex < ToIndex then
-        for iCNT:=(FromIndex + 1) to ToIndex do
-          sgAgeView.SqlColumns[iCNT - 1, 0]:=Temp[iCNT, 0];
-    except
-      on E: Exception do
-        MainForm.MsgCall(mcWarn, 'Unexpected error has occured. Description: ' + E.Message + '. Please contact IT support.')
+            /// <remarks>
+            ///     Do not use "copy" method.
+            /// </remarks>
+
+            for iCNT:=0 to TmpRows do
+                for jCNT:=0 to 1 do
+                    Temp[iCNT, jCNT]:=sgAgeView.SqlColumns[iCNT, jCNT];
+
+            // Update titles in SQL column array
+
+            for iCNT:=0 to sgAgeView.ColCount - 1 do
+                sgAgeView.SqlColumns[iCNT, 1]:=sgAgeView.Cells[iCNT, 0];
+
+            // Re-write other SQL columns from temp
+
+            sgAgeView.SqlColumns[ToIndex, 0]:=Temp[FromIndex, 0];
+
+            // Move column from right to left
+
+            if FromIndex > ToIndex then
+                for iCNT:=ToIndex to (FromIndex - 1) do
+                    sgAgeView.SqlColumns[iCNT + 1, 0]:=Temp[iCNT, 0];
+
+            // Move from left to right
+
+            if FromIndex < ToIndex then
+                for iCNT:=(FromIndex + 1) to ToIndex do
+                    sgAgeView.SqlColumns[iCNT - 1, 0]:=Temp[iCNT, 0];
+        except
+            on E: Exception do
+                MainForm.MsgCall(mcWarn, 'Unexpected error has occured. Description: ' + E.Message + '. Please contact IT support.')
+        end;
+
+    finally
+
+        sgAgeView.SaveLayout(ColumnWidthName, ColumnOrderName, ColumnNames, ColumnPrefix);
+        Temp:=nil;
+
     end;
-  finally
-    { SAVE CHANGES }
-    sgAgeView.SaveLayout(ColumnWidthName, ColumnOrderName, ColumnNames, ColumnPrefix);
-    { REMOVE FROM MEMORY }
-    Temp:=nil;
-  end;
+
 end;
 
-{ ----------------------------------------------------------------------------------------------------------------------------------- OPEN TRANSACTION WINDOW }
+/// <summary>
+///     Display Action Log.
+/// </summary>
+
 procedure TMainForm.sgAgeViewDblClick(Sender: TObject);
 begin
-  Action_LyncCallClick(Self);
+    Action_LyncCallClick(Self);
 end;
 
-{ --------------------------------------------------------------------------------------------------------------- ALLOW OR DISALLOW EDIT CELL IN ADDRESS BOOK }
+/// <summary>
+///     Allow or disallow edit cell in Address Book. First column are not editable.
+/// </summary>
+
 procedure TMainForm.sgAddressBookDblClick(Sender: TObject);
 begin
-  { FIRST COLUMN ARE NOT EDITABLE }
-  if (sgAddressBook.Col = 1) then Exit;
-  sgAddressBook.Options:=sgAddressBook.Options + [goEditing];
+
+    if (sgAddressBook.Col = 1) then
+        Exit;
+
+    sgAddressBook.Options:=sgAddressBook.Options + [goEditing];
+
 end;
+
+/// <summary>
+///     Disallow (quit) editing Address Book when user clicks on string grid component.
+/// </summary>
 
 procedure TMainForm.sgAddressBookClick(Sender: TObject);
 begin
-  sgAddressBook.Options:=sgAddressBook.Options - [goEditing];
+    sgAddressBook.Options:=sgAddressBook.Options - [goEditing];
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------- LIST OF SENT INVOICES }
+/// <summary>
+///     Display list of invoices sent by Invoice Tracker.
+/// </summary>
+
 procedure TMainForm.sgInvoiceTrackerDblClick(Sender: TObject);
 begin
-  if IsConnected then
-    WndCall(InvoicesForm, stModal)
-      else
-        MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+    if IsConnected then
+        WndCall(InvoicesForm, stModal)
+            else
+                MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
 end;
 
-{ ---------------------------------------------------- ! SHOW NEGATIVE VALUES AND ROW SELECTION ! ----------------------------------------------------------- }
+
+// ----------------------------------------------------------------------------------------------------------------------- CUSTOMIZE DRAWING OF STRING GRIDS //
+
+
 procedure TMainForm.sgAgeViewDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 var
-  Settings:    ISettings;
-  Col1:        integer;
-  Col2:        integer;
-  Col3:        integer;
-  Col4:        integer;
-  Col5:        integer;
-  Col6:        integer;
-  Col7:        integer;
-  Col8:        integer;
-  Col9:        integer;
-  Col10:       integer;
-  Col11:       integer;
-  Col12:       integer;
-  Col13:       integer;
-  Col14:       integer;
-  Col15:       integer;
-  iCNT:        integer;
-  Width:       integer;
-  AgeViewCUID: string;
+    Settings:    ISettings;
+    Col1:        integer;
+    Col2:        integer;
+    Col3:        integer;
+    Col4:        integer;
+    Col5:        integer;
+    Col6:        integer;
+    Col7:        integer;
+    Col8:        integer;
+    Col9:        integer;
+    Col10:       integer;
+    Col11:       integer;
+    Col12:       integer;
+    Col13:       integer;
+    Col14:       integer;
+    Col15:       integer;
+    iCNT:        integer;
+    Width:       integer;
+    AgeViewCUID: string;
 begin
 
-  { --------------------------------------------------------------------------------------------------------------------------------------------- SKIP HEADER }
-  if ARow = 0 then Exit;
+    // Skip header
+    if ARow = 0 then Exit;
 
-  { --------------------------------------------------------------------------------------------------------------- FIND COLUMN NUMBERS FOR GIVEN COLUMN NAME }
-  Col1 :=sgAgeView.ReturnColumn(TSnapshots.fNOT_DUE,         1, 1);
-  Col2 :=sgAgeView.ReturnColumn(TSnapshots.fRANGE1,          1, 1);
-  Col3 :=sgAgeView.ReturnColumn(TSnapshots.fRANGE2,          1, 1);
-  Col4 :=sgAgeView.ReturnColumn(TSnapshots.fRANGE3,          1, 1);
-  Col5 :=sgAgeView.ReturnColumn(TSnapshots.fRANGE4,          1, 1);
-  Col6 :=sgAgeView.ReturnColumn(TSnapshots.fRANGE5,          1, 1);
-  Col7 :=sgAgeView.ReturnColumn(TSnapshots.fRANGE6,          1, 1);
-  Col8 :=sgAgeView.ReturnColumn(TSnapshots.fOVERDUE,         1, 1);
-  Col9 :=sgAgeView.ReturnColumn(TSnapshots.fTOTAL,           1, 1);
-  Col10:=sgAgeView.ReturnColumn(TSnapshots.fCREDIT_LIMIT,    1, 1);
-  Col11:=sgAgeView.ReturnColumn(TSnapshots.fEXCEEDED_AMOUNT, 1, 1);
-  Col12:=sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP,          1, 1);
-  Col13:=sgAgeView.ReturnColumn(TSnapshots.fCUID,            1, 1);
-  Col14:=sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1);
-  Col15:=sgAgeView.ReturnColumn(TSnapshots.fRISK_CLASS,      1, 1);
+    // Find column numbers for given column name
+    Col1 :=sgAgeView.ReturnColumn(TSnapshots.fNOT_DUE,         1, 1);
+    Col2 :=sgAgeView.ReturnColumn(TSnapshots.fRANGE1,          1, 1);
+    Col3 :=sgAgeView.ReturnColumn(TSnapshots.fRANGE2,          1, 1);
+    Col4 :=sgAgeView.ReturnColumn(TSnapshots.fRANGE3,          1, 1);
+    Col5 :=sgAgeView.ReturnColumn(TSnapshots.fRANGE4,          1, 1);
+    Col6 :=sgAgeView.ReturnColumn(TSnapshots.fRANGE5,          1, 1);
+    Col7 :=sgAgeView.ReturnColumn(TSnapshots.fRANGE6,          1, 1);
+    Col8 :=sgAgeView.ReturnColumn(TSnapshots.fOVERDUE,         1, 1);
+    Col9 :=sgAgeView.ReturnColumn(TSnapshots.fTOTAL,           1, 1);
+    Col10:=sgAgeView.ReturnColumn(TSnapshots.fCREDIT_LIMIT,    1, 1);
+    Col11:=sgAgeView.ReturnColumn(TSnapshots.fEXCEEDED_AMOUNT, 1, 1);
+    Col12:=sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP,          1, 1);
+    Col13:=sgAgeView.ReturnColumn(TSnapshots.fCUID,            1, 1);
+    Col14:=sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1);
+    Col15:=sgAgeView.ReturnColumn(TSnapshots.fRISK_CLASS,      1, 1);
 
-  { ------------------------------------------------------------------------------------------------------------------------ DRAW SELECTED ROW | SKIP HEADERS }
-  sgAgeView.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
+    // Draw selected row | skip headers
+    sgAgeView.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
 
-  { CUSTOMER CONTRIBUTING TO RISK CLASS "A" SET TO BOLD FONT }
-  if (ACol = Col14) and (sgAgeView.Cells[Col15, ARow] = 'A') then
-  begin
-    sgAgeView.Canvas.Font.Style:=[fsBold];
-    sgAgeView.Canvas.FillRect(Rect);
-    sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
-  end;
-
-  { ------------------------------------------------------------------------------------------------------------------------------- DRAW ONLY IF NOT SELECTED }
-  if not(gdSelected in State) then
-  begin
-
-    { HIGHLIGHT FOLLOW UP COLUMN }
-    if not (CDate(sgAgeView.Cells[ACol, ARow]) = 0) then
+    // Mark bold all customers marked with risk class "A"
+    if (ACol = Col14) and (sgAgeView.Cells[Col15, ARow] = 'A') then
     begin
-      Settings:=TSettings.Create;
-      { FUTURE DAYS }
-      if (ACol = Col12) and (CDate(sgAgeView.Cells[ACol, ARow]) > CDate(StatBar_TXT3.Caption)) then
-      begin
-        sgAgeView.Canvas.Brush.Color:=Settings.FutureBColor;
-        sgAgeView.Canvas.Font.Color :=Settings.FutureFColor;
+        sgAgeView.Canvas.Font.Style:=[fsBold];
         sgAgeView.Canvas.FillRect(Rect);
         sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
-      end;
-      { TODAY }
-      if (ACol = Col12) and (CDate(sgAgeView.Cells[ACol, ARow]) = CDate(StatBar_TXT3.Caption)) then
-      begin
-        sgAgeView.Canvas.Brush.Color:=Settings.TodayBColor;
-        sgAgeView.Canvas.Font.Color :=Settings.TodayFColor;
-        sgAgeView.Canvas.FillRect(Rect);
-        sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
-      end;
-      { PAST DAYS }
-      if (ACol = Col12) and (CDate(sgAgeView.Cells[ACol, ARow]) < CDate(StatBar_TXT3.Caption)) then
-      begin
-        sgAgeView.Canvas.Brush.Color:=Settings.PastBColor;
-        sgAgeView.Canvas.Font.Color :=Settings.PastFColor;
-        sgAgeView.Canvas.FillRect(Rect);
-        sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
-      end;
     end;
 
-    { HIGHLIGHT RISK CLASS "A" }
-    if (ACol = Col15) and (sgAgeView.Cells[Col15, ARow] = 'A') then
+    // Draw only if not selected
+    if not(gdSelected in State) then
     begin
-      sgAgeView.Canvas.Brush.Color:=BClassA;
-      sgAgeView.Canvas.Font.Color :=FClassA;
-      sgAgeView.Canvas.FillRect(Rect);
-      sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
-    end;
 
-    { HIGHLIGHT RISK CLASS "B" }
-    if (ACol = Col15) and (sgAgeView.Cells[Col15, ARow] = 'B') then
-    begin
-      sgAgeView.Canvas.Brush.Color:=BClassB;
-      sgAgeView.Canvas.Font.Color :=FClassB;
-      sgAgeView.Canvas.FillRect(Rect);
-      sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
-    end;
-
-    { HIGHLIGHT RISK CLASS "C" }
-    if (ACol = Col15) and (sgAgeView.Cells[Col15, ARow] = 'C') then
-    begin
-      sgAgeView.Canvas.Brush.Color:=BClassC;
-      sgAgeView.Canvas.Font.Color :=FClassC;
-      sgAgeView.Canvas.FillRect(Rect);
-      sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
-    end;
-
-    { MARK CUSTOMER WITH STAR IF IT IS REGISTERED ON INVOICE TRACKER LIST }
-    if ACol = Col14 then
-    begin
-      Width:=sgAgeView.ColWidths[Col14];
-      AgeViewCUID:=sgAgeView.Cells[Col13, ARow];
-      for iCNT:=1 to sgInvoiceTracker.RowCount - 1 do
-      begin
-        if AgeViewCUID = sgInvoiceTracker.Cells[2, iCNT] then
+        // Highlight follow-up column
+        if not (CDate(sgAgeView.Cells[ACol, ARow]) = 0) then
         begin
-          sgAgeView.Canvas.Draw(Rect.Left + Width - 16, Rect.Top, GridPicture.Picture.Graphic);
-          Break;
+            Settings:=TSettings.Create;
+
+            // Future days
+            if (ACol = Col12) and (CDate(sgAgeView.Cells[ACol, ARow]) > CDate(StatBar_TXT3.Caption)) then
+            begin
+                sgAgeView.Canvas.Brush.Color:=Settings.FutureBColor;
+                sgAgeView.Canvas.Font.Color :=Settings.FutureFColor;
+                sgAgeView.Canvas.FillRect(Rect);
+                sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
+            end;
+
+            // Today
+            if (ACol = Col12) and (CDate(sgAgeView.Cells[ACol, ARow]) = CDate(StatBar_TXT3.Caption)) then
+            begin
+                sgAgeView.Canvas.Brush.Color:=Settings.TodayBColor;
+                sgAgeView.Canvas.Font.Color :=Settings.TodayFColor;
+                sgAgeView.Canvas.FillRect(Rect);
+                sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
+            end;
+
+            // Past days
+            if (ACol = Col12) and (CDate(sgAgeView.Cells[ACol, ARow]) < CDate(StatBar_TXT3.Caption)) then
+            begin
+                sgAgeView.Canvas.Brush.Color:=Settings.PastBColor;
+                sgAgeView.Canvas.Font.Color :=Settings.PastFColor;
+                sgAgeView.Canvas.FillRect(Rect);
+                sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
+            end;
         end;
-      end;
+
+        // Highlight risk class "A"
+        if (ACol = Col15) and (sgAgeView.Cells[Col15, ARow] = 'A') then
+        begin
+            sgAgeView.Canvas.Brush.Color:=BClassA;
+            sgAgeView.Canvas.Font.Color :=FClassA;
+            sgAgeView.Canvas.FillRect(Rect);
+            sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
+        end;
+
+        // Highlight risk class "B"
+        if (ACol = Col15) and (sgAgeView.Cells[Col15, ARow] = 'B') then
+        begin
+            sgAgeView.Canvas.Brush.Color:=BClassB;
+            sgAgeView.Canvas.Font.Color :=FClassB;
+            sgAgeView.Canvas.FillRect(Rect);
+            sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
+        end;
+
+        // Highlight risk class "C"
+        if (ACol = Col15) and (sgAgeView.Cells[Col15, ARow] = 'C') then
+        begin
+            sgAgeView.Canvas.Brush.Color:=BClassC;
+            sgAgeView.Canvas.Font.Color :=FClassC;
+            sgAgeView.Canvas.FillRect(Rect);
+            sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
+        end;
+
+        /// <remarks>
+        ///     Mark customers with picture, if it is registered on Invoice Tracker list.
+        ///     We loop through loaded list on another string grid component. Therefore,
+        ///     changes in database will not impact age view as long as Tracker List is
+        ///     not refreshed.
+        /// </remarks>
+
+        if ACol = Col14 then
+        begin
+            Width:=sgAgeView.ColWidths[Col14];
+            AgeViewCUID:=sgAgeView.Cells[Col13, ARow];
+
+            for iCNT:=1 to sgInvoiceTracker.RowCount - 1 do
+            begin
+                if AgeViewCUID = sgInvoiceTracker.Cells[2, iCNT] then
+                begin
+                    sgAgeView.Canvas.Draw(Rect.Left + Width - 16, Rect.Top, GridPicture.Picture.Graphic);
+                    Break;
+                end;
+            end;
+        end;
+
     end;
 
-  end;
+    /// <remarks>
+    ///     After all drawing (when cells not selected) is done, change font for numeric values. This shoud be executed always last.
+    /// </remarks>
 
-  { -------------------------------------------------------------------------------------------------------------- COLOUR NEGATIVE VALUES IN SELECTED COLUMNS }
-  if (ACol = Col1)  or (ACol = Col2) or (ACol = Col3) or
-     (ACol = Col4)  or (ACol = Col5) or (ACol = Col6) or
-     (ACol = Col7)  or (ACol = Col8) or (ACol = Col9) or
-     (ACol = Col10) or (ACol = Col11)
-  then
-    sgAgeView.ColorValues(ARow, ACol, Rect, clRed, clBlack);
+    if (ACol = Col1)  or (ACol = Col2) or (ACol = Col3) or
+       (ACol = Col4)  or (ACol = Col5) or (ACol = Col6) or
+       (ACol = Col7)  or (ACol = Col8) or (ACol = Col9) or
+       (ACol = Col10) or (ACol = Col11)
+    then
+        sgAgeView.ColorValues(ARow, ACol, Rect, clRed, clBlack);
 
 end;
 
 procedure TMainForm.sgOpenItemsDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 var
-  Col1: integer;
-  Col2: integer;
-  Col3: integer;
-  Col4: integer;
-  Col5: integer;
+    Col1: integer;
+    Col2: integer;
+    Col3: integer;
+    Col4: integer;
+    Col5: integer;
 begin
 
-  { SKIP HEADERS }
-  if ARow = 0 then Exit;
+    if ARow = 0 then Exit;
 
-  { GET COLUMNS }
-  Col1:=sgOpenItems.ReturnColumn(TOpenitems.OpenCurAm, 1, 1);
-  Col2:=sgOpenItems.ReturnColumn(TOpenitems.OpenAm,    1, 1);
-  Col3:=sgOpenItems.ReturnColumn(TOpenitems.CurAm,     1, 1);
-  Col4:=sgOpenItems.ReturnColumn(TOpenitems.Am,        1, 1);
-  Col5:=sgOpenItems.ReturnColumn(TOpenitems.PmtStat,   1, 1);
+    Col1:=sgOpenItems.ReturnColumn(TOpenitems.OpenCurAm, 1, 1);
+    Col2:=sgOpenItems.ReturnColumn(TOpenitems.OpenAm,    1, 1);
+    Col3:=sgOpenItems.ReturnColumn(TOpenitems.CurAm,     1, 1);
+    Col4:=sgOpenItems.ReturnColumn(TOpenitems.Am,        1, 1);
+    Col5:=sgOpenItems.ReturnColumn(TOpenitems.PmtStat,   1, 1);
 
-  { DRAW SELECTED ROW | SKIP HEADERS }
-  MainForm.sgOpenItems.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
+    // Selection
+    MainForm.sgOpenItems.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
 
-  { COLOR VALUES }
-  if
-    (
-      ACol = Col1
-    )
+    // Numeric values colors
+    if
+        (
+            ACol = Col1
+        )
     or
-    (
-      ACol = Col2
-    )
+        (
+            ACol = Col2
+        )
     or
-    (
-      ACol = Col3
-    )
+        (
+            ACol = Col3
+        )
     or
-    (
-      ACol = Col4
-    )
+        (
+            ACol = Col4
+        )
     or
-    (
-      ACol = Col5
-    )
-  then
-    MainForm.sgOpenItems.ColorValues(ARow, ACol, Rect, clRed, clBlack);
+        (
+            ACol = Col5
+        )
+    then
+        MainForm.sgOpenItems.ColorValues(ARow, ACol, Rect, clRed, clBlack);
 
 end;
 
-{ -------------------------------------------------------- ! STRING GRID ROW SELECTION ! -------------------------------------------------------------------- }
+
+// ------------------------------------------------------------------------------------------------------------------------------- STRING GRID ROW SELECTION //
+
 
 procedure TMainForm.DetailsGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-  DetailsGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, clCream, clBlack, clCream, False);
+    DetailsGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, clCream, clBlack, clCream, False);
 end;
 
 procedure TMainForm.sgAddressBookDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-  sgAddressBook.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
+    sgAddressBook.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
 end;
 
 procedure TMainForm.sgInvoiceTrackerDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-  sgInvoiceTracker.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
+    sgInvoiceTracker.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
 end;
 
 procedure TMainForm.sgCoCodesDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-  sgCoCodes.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
+    sgCoCodes.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
 end;
 
 procedure TMainForm.sgPaidInfoDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-  sgPaidInfo.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
+    sgPaidInfo.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
 end;
 
 procedure TMainForm.sgPmtTermsDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-  sgPmtTerms.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
+    sgPmtTerms.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
 end;
 
 procedure TMainForm.sgPersonDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-  sgPerson.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
+    sgPerson.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
 end;
 
 procedure TMainForm.sgGroup3DrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-  sgGroup3.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
+    sgGroup3.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
 end;
 
 procedure TMainForm.sgListSectionDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-  sgListSection.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
+    sgListSection.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
 end;
 
 procedure TMainForm.sgListValueDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-  sgListValue.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
+    sgListValue.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
 end;
 
 procedure TMainForm.sgUACDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-  sgUAC.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
+    sgUAC.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
 end;
 
 procedure TMainForm.sgGroupsDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-  sgGroups.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
+    sgGroups.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
 end;
 
-{ ---------------------------------------------------- ! SETTING PANEL STRING GRID EVENTS !  ---------------------------------------------------------------- }
 
-{ --------------------------------------------------------------------------------------------------------------------------------- LIST ALL KEYS WITH VALUES }
+// ------------------------------------------------------------------------------------------------------------------------ SETTING PANEL STRING GRID EVENTS //
+
+
+/// <summary>
+///     List all keys with theirs values.
+/// </summary>
+
 procedure TMainForm.sgListSectionSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
 var
-  tsKEY:      TStringList;
-  tsVAL:      TStringList;
-  AppSettings: TSettings;
-  iCNT:       integer;
-  junk:       string;
-  clean:      string;
+    Keys:       TStringList;
+    Values:     TStringList;
+    Settings:   ISettings;
+    iCNT:       integer;
+    junk:       string;
+    clean:      string;
 begin
-  CanSelect:=True;
-  { LIST KEYS AND VALUES }
-  tsKEY:=TStringList.Create();
-  tsVAL:=TStringList.Create();
-  AppSettings:=TSettings.Create;
-  try
-    AppSettings.TMIG.ReadSection(sgListSection.Cells[ACol, ARow], tsKEY);
-    AppSettings.TMIG.ReadSectionValues(sgListSection.Cells[ACol, ARow], tsVAL);
-    sgListValue.RowCount:=tsKEY.Count + 1;
-    if tsKEY.Count = 0 then
-    begin
-      sgListValue.RowCount:=2;
-      sgListValue.FixedRows:=1;
-      sgListValue.Cells[0, 1]:='1';
-      sgListValue.Cells[1, 1]:='';
-      sgListValue.Cells[2, 1]:='';
-    end else
-    begin
-      for iCNT:=1 to tsKEY.Count do
-      begin
-        sgListValue.Cells[0, iCNT]:=IntToStr(iCNT);
-        sgListValue.Cells[1, iCNT]:=tsKEY.Strings[iCNT - 1];
-        junk:=tsKEY.Strings[iCNT - 1] + '=';
-        clean:=StringReplace(tsVAL.Strings[iCNT - 1], junk, '', [rfReplaceAll]);
-        sgListValue.Cells[2, iCNT]:=clean;
-      end;
+
+    CanSelect:=True;
+
+    Keys:=TStringList.Create();
+    Values:=TStringList.Create();
+
+    Settings:=TSettings.Create;
+    try
+        Settings.GetSection(sgListSection.Cells[ACol, ARow], Keys);
+        Settings.GetSectionValues(sgListSection.Cells[ACol, ARow], Values);
+        sgListValue.RowCount:=Keys.Count + 1;
+
+        if Keys.Count = 0 then
+        begin
+            sgListValue.RowCount:=2;
+            sgListValue.FixedRows:=1;
+            sgListValue.Cells[0, 1]:='1';
+            sgListValue.Cells[1, 1]:='';
+            sgListValue.Cells[2, 1]:='';
+        end
+        else
+        begin
+            for iCNT:=1 to Keys.Count do
+            begin
+                sgListValue.Cells[0, iCNT]:=IntToStr(iCNT);
+                sgListValue.Cells[1, iCNT]:=Keys.Strings[iCNT - 1];
+                junk:=Keys.Strings[iCNT - 1] + '=';
+                clean:=StringReplace(Values.Strings[iCNT - 1], junk, '', [rfReplaceAll]);
+                sgListValue.Cells[2, iCNT]:=clean;
+            end;
+        end;
+
+    finally
+        Keys.Free;
+        Values.Free;
+        sgListValue.SetColWidth(25, 30, 400);
     end;
-  finally
-    AppSettings.Free;
-    tsKEY.Free;
-    tsVAL.Free;
-    sgListValue.SetColWidth(25, 30, 400);
-  end;
+
 end;
 
-{ ------------------------------------------------------------ ! KEYBOARD EVENTS ! -------------------------------------------------------------------------- }
 
-{ ---------------------------------------------------------------------------------------------------------------------------------- CLOSE WHEN HIT 'ALT + Y' }
+// ----------------------------------------------------------------------------------------------------------------------------------------- KEYBOARD EVENTS //
+
+
+/// <summary>
+///     Assign <ALT> + <Y> to application close.
+/// </summary>
+
 procedure TMainForm.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  { -------------------------------------------------------------------------------------------------------------------------- SWITCH OFF STANDARD 'ALT + F4' }
-  if (Key=VK_F4) and (Shift=[ssALT]) then Key:=0;
-  { ----------------------------------------------------------------------------------------------------------------- CLOSE APPLICATION IF USER HIT 'ALT + Y' }
-  if (Key=89) and (Shift=[ssALT]) then
-  begin
-    if MsgCall(mcQuestion1, 'Are you sure you want to exit the application?') = IDOK then
+
+    // Turn off standard <ALT> + <F4>
+    if (Key=VK_F4) and (Shift=[ssALT]) then Key:=0;
+
+    // Bind close application with <ALT> + <Y>
+    if (Key=89) and (Shift=[ssALT]) then
     begin
-      pAllowClose:=True;
-      Close;
+        if MsgCall(mcQuestion1, 'Are you absolutely sure you want to exit the Unity?') = IDOK then
+        begin
+            pAllowClose:=True;
+            Close;
+        end;
     end;
-  end;
+
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------- LOCK ROWS FOR EDITING }
+/// <summary>
+///     Lock rows for editing. We autofill rows 1..3 so user is prevented from manipulation. Additionally, we allow only digits
+///     for CoCode cell.
+/// </summary>
+
 procedure TMainForm.DetailsGridKeyPress(Sender: TObject; var Key: Char);
 begin
-  { WE WILL AUTOFILL ROWS 1..3, THUS PREVENT USER FROM MANIPULATING }
-  if (DetailsGrid.Row > 0) and (DetailsGrid.Row < 4) then  Key:=#0;
-  { ALLOW ONLY DIGITS FOR CO CODE CELLS }
-  if (DetailsGrid.Row = 0) and (not (CharInSet(Key, ['0'..'9', #8]))) then Key:=#0;
+
+    if (DetailsGrid.Row > 0) and (DetailsGrid.Row < 4) then
+        Key:=#0;
+
+    if (DetailsGrid.Row = 0) and (not (CharInSet(Key, ['0'..'9', #8]))) then
+        Key:=#0;
+
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------------- INVOKE AUTOFILL }
+/// <summary>
+///     Invoke autofill. Find given company code in general table and return assigned currency, agent and division info.
+/// </summary>
+
 procedure TMainForm.DetailsGridKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  { FIND GIVEN COMPANY CODE IN GENERAL TABLE AND RETURN ASSIGNED CURRENCY, INTEREST RATE AND AGENT INFO }
-  if DetailsGrid.Col = 0 then Find(DetailsGrid.Col);
-  if DetailsGrid.Col = 1 then Find(DetailsGrid.Col);
-  if DetailsGrid.Col = 2 then Find(DetailsGrid.Col);
-  if DetailsGrid.Col = 3 then Find(DetailsGrid.Col);
+    if DetailsGrid.Col = 0 then Find(DetailsGrid.Col);
+    if DetailsGrid.Col = 1 then Find(DetailsGrid.Col);
+    if DetailsGrid.Col = 2 then Find(DetailsGrid.Col);
+    if DetailsGrid.Col = 3 then Find(DetailsGrid.Col);
 end;
 
-{ ----------------------------------------------------------------------------------------------------------------------------------- OPEN ITEMS | MAKE GROUP }
+/// <summary>
+///     Allow only specific characters when naming the group for aging snapshot.
+/// </summary>
+
 procedure TMainForm.EditGroupNameKeyPress(Sender: TObject; var Key: Char);
 begin
-  if (not (CharInSet(Key, ['A'..'Z', 'a'..'z', '0'..'9', '-', BACKSPACE]))) then Key:=#0;
+    if (not (CharInSet(Key, ['A'..'Z', 'a'..'z', '0'..'9', '-', BACKSPACE]))) then
+        Key:=#0;
 end;
 
-{ -------------------------------------------------------------- ! COPY PASTE CUT ! ------------------------------------------------------------------------- }
 
-                                                  (* ALLOW COPY "CTRL + C" ON ALL STRING GRIDS *)
+// ------------------------------------------------------------------------------------------------------------------------------------------ COPY PASTE CUT //
+
+
+/// <remarks>
+///     Allow <CTRL> + <C> on all string grids.
+/// </remarks>
 
 procedure TMainForm.sgOpenItemsKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if (Key = 67) and (Shift = [ssCtrl]) then sgOpenItems.CopyCutPaste(adCopy);
+    if (Key = 67) and (Shift = [ssCtrl]) then
+        sgOpenItems.CopyCutPaste(adCopy);
 end;
 
 procedure TMainForm.sgInvoiceTrackerKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if (Key = 67) and (Shift = [ssCtrl]) then sgInvoiceTracker.CopyCutPaste(adCopy);
+    if (Key = 67) and (Shift = [ssCtrl]) then
+        sgInvoiceTracker.CopyCutPaste(adCopy);
 end;
 
 procedure TMainForm.sgCoCodesKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if (Key = 67) and (Shift = [ssCtrl]) then sgCoCodes.CopyCutPaste(adCopy);
+    if (Key = 67) and (Shift = [ssCtrl]) then
+        sgCoCodes.CopyCutPaste(adCopy);
 end;
 
 procedure TMainForm.sgPaidInfoKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if (Key = 67) and (Shift = [ssCtrl]) then sgPaidInfo.CopyCutPaste(adCopy);
+    if (Key = 67) and (Shift = [ssCtrl]) then
+        sgPaidInfo.CopyCutPaste(adCopy);
 end;
 
 procedure TMainForm.sgPmtTermsKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if (Key = 67) and (Shift = [ssCtrl]) then sgPmtTerms.CopyCutPaste(adCopy);
+    if (Key = 67) and (Shift = [ssCtrl]) then
+        sgPmtTerms.CopyCutPaste(adCopy);
 end;
 
 procedure TMainForm.sgPersonKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if (Key = 67) and (Shift = [ssCtrl]) then sgPerson.CopyCutPaste(adCopy);
+    if (Key = 67) and (Shift = [ssCtrl]) then
+        sgPerson.CopyCutPaste(adCopy);
 end;
 
 procedure TMainForm.sgGroup3KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if (Key = 67) and (Shift = [ssCtrl]) then sgGroup3.CopyCutPaste(adCopy);
+    if (Key = 67) and (Shift = [ssCtrl]) then
+        sgGroup3.CopyCutPaste(adCopy);
 end;
 
-{ ------------------------------------------------------- ! EDIT SELECTED AGE VIEW COLUMNS ! ---------------------------------------------------------------- }
+/// <summary>
+///     Edit selected age view columns.
+/// </summary>
 
-{ -------------------------------------------------------------------------------------------------------------------------------------------------- KEY DOWN }
 procedure TMainForm.sgAgeViewKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 
-  (* NESTED CONSTANTS *)
+    // Nested common constants
 
-  const
-    ctFree1    = 0;
-    ctFree2    = 1;
-    ctFollowUp = 2;
+    const
+        ctFree1    = 0;
+        ctFree2    = 1;
+        ctFollowUp = 2;
 
-  (* NESTED METHODS *)
+    // Nested methods
 
-  { MODIFY DATA FOR GIVEN COLUMN }
-  procedure ModifyCell(CUIDRef: integer; ColumnType: integer; Text: string);
-  begin
-    if ColumnType = ctFree1    then TTGeneralComment.Create(sgAgeView.Cells[CUIDRef, sgAgeView.Row], strNULL, strNULL, Text, strNULL, True);
-    if ColumnType = ctFree2    then TTGeneralComment.Create(sgAgeView.Cells[CUIDRef, sgAgeView.Row], strNULL, strNULL, strNULL, Text, True);
-    if ColumnType = ctFollowUp then TTGeneralComment.Create(sgAgeView.Cells[CUIDRef, sgAgeView.Row], strNULL, Text, strNULL, strNULL, True);
-  end;
+    // Modify data for given column
+    procedure ModifyCell(CUIDRef: integer; ColumnType: integer; Text: string);
+    begin
+        if ColumnType = ctFree1    then TTGeneralComment.Create(sgAgeView.Cells[CUIDRef, sgAgeView.Row], strNULL, strNULL, Text, strNULL, True);
+        if ColumnType = ctFree2    then TTGeneralComment.Create(sgAgeView.Cells[CUIDRef, sgAgeView.Row], strNULL, strNULL, strNULL, Text, True);
+        if ColumnType = ctFollowUp then TTGeneralComment.Create(sgAgeView.Cells[CUIDRef, sgAgeView.Row], strNULL, Text, strNULL, strNULL, True);
+    end;
 
-  { QUIT EDITING }
-  procedure QuitEditing;
-  begin
-    sgAgeView.Options:=sgAgeView.Options - [goEditing];
-    sgAgeView.EditorMode:=False;
-  end;
+    // Quit editing
+    procedure QuitEditing;
+    begin
+        sgAgeView.Options:=sgAgeView.Options - [goEditing];
+        sgAgeView.EditorMode:=False;
+    end;
 
 begin
 
-  { ALLOW EDITING ONLY FREE COLUMNS }
-  if
-     (
-       sgAgeView.Col <> sgAgeView.ReturnColumn(TGeneral.Free1, 1, 1)
-     )
-     and
-     (
-       sgAgeView.Col <> sgAgeView.ReturnColumn(TGeneral.Free2, 1, 1)
-     )
-  then
-    Exit;
+    // Allow editing only free columns
+    if
+        (
+            sgAgeView.Col <> sgAgeView.ReturnColumn(TGeneral.Free1, 1, 1)
+        )
+    and
+        (
+            sgAgeView.Col <> sgAgeView.ReturnColumn(TGeneral.Free2, 1, 1)
+        )
+    then
+        Exit;
 
-  { DISALLOW ARROWS WHEN INPLACE EDITOR IS ENABLED }
-  if (sgAgeView.EditorMode) and ( (Key = VK_LEFT) or (Key = VK_RIGHT) or (Key = VK_UP) or (Key = VK_DOWN) ) then
-  begin
-    Key:=0;
-    QuitEditing;
-    Exit;
-  end;
-
-  { ALLOW EDITING }
-  if Key = VK_F2 then
-  begin
-    Key:=0;
-    sgAgeView.Options:=sgAgeView.Options + [goEditing];
-    sgAgeView.EditorMode:=True;
-  end;
-
-  { QUIT EDITING }
-  if Key = VK_ESCAPE then
-  begin
-    Key:=0;
-    QuitEditing;
-  end;
-
-  { QUIT EDITING AND WRITE TO DATABASE }
-  if Key = VK_RETURN then
-  begin
-    Key:=0;
-    QuitEditing;
-    { FREE1 COLUMN }
-    if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneral.Free1, 1, 1) then
-      ModifyCell(sgAgeView.ReturnColumn(TSnapshots.CUID, 1, 1), ctFree1, sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]);
-    { FREE2 COLUMN }
-    if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneral.Free2, 1, 1) then
-      ModifyCell(sgAgeView.ReturnColumn(TSnapshots.CUID, 1, 1), ctFree2, sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]);
-  end;
-
-  { DELETE ENTRY FROM DATABASE }
-  if Key = VK_DELETE then
-  begin
-    Key:=0;
-    { FREE1 COLUMN }
-    if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneral.Free1, 1, 1) then
+    // Disallows "keyboard arrows" when inplace editor is enabled
+    if (sgAgeView.EditorMode) and ( (Key = VK_LEFT) or (Key = VK_RIGHT) or (Key = VK_UP) or (Key = VK_DOWN) ) then
     begin
-      ModifyCell(sgAgeView.ReturnColumn(TSnapshots.CUID, 1, 1), ctFree1, '');
-      sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]:='';
+        Key:=0;
+        QuitEditing;
+        Exit;
     end;
-    { FREE2 COLUMN }
-    if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneral.Free2, 1, 1) then
+
+    // Allow editing
+    if Key = VK_F2 then
     begin
-      ModifyCell(sgAgeView.ReturnColumn(TSnapshots.CUID, 1, 1), ctFree2, '');
-      sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]:='';
+        Key:=0;
+        sgAgeView.Options:=sgAgeView.Options + [goEditing];
+        sgAgeView.EditorMode:=True;
     end;
-  end;
+
+    // Quit editing
+    if Key = VK_ESCAPE then
+    begin
+        Key:=0;
+        QuitEditing;
+    end;
+
+    // Quit editing and write to database
+    if Key = VK_RETURN then
+    begin
+        Key:=0;
+        QuitEditing;
+
+        // Free 1
+        if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneral.Free1, 1, 1) then
+            ModifyCell(sgAgeView.ReturnColumn(TSnapshots.CUID, 1, 1), ctFree1, sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]);
+
+        // Free 2
+        if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneral.Free2, 1, 1) then
+            ModifyCell(sgAgeView.ReturnColumn(TSnapshots.CUID, 1, 1), ctFree2, sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]);
+    end;
+
+    // Delete entry from database
+    if Key = VK_DELETE then
+    begin
+        Key:=0;
+
+        // Free 1
+        if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneral.Free1, 1, 1) then
+        begin
+            ModifyCell(sgAgeView.ReturnColumn(TSnapshots.CUID, 1, 1), ctFree1, '');
+            sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]:='';
+        end;
+
+        // Free 2
+        if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneral.Free2, 1, 1) then
+        begin
+            ModifyCell(sgAgeView.ReturnColumn(TSnapshots.CUID, 1, 1), ctFree2, '');
+            sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]:='';
+        end;
+    end;
 
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------------------- ON KEY UP }
+/// <summary>
+///     Allow to copy selected area on age view string grid.
+/// </summary>
+
 procedure TMainForm.sgAgeViewKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
 
-  { ALLOW COPYING SELECTED AREA }
-  if (Key = 67) and (Shift = [ssCtrl]) then sgAgeView.CopyCutPaste(adCopy);
+    // <CTRL> + <C>
+    if (Key = 67) and (Shift = [ssCtrl]) then
+        sgAgeView.CopyCutPaste(adCopy);
 
-  { SELECT AND COPY AT ONCE }
-  if (Key = 65) and (Shift = [ssCtrl]) then
-  begin
-    sgAgeView.SelectAll;
-    sgAgeView.CopyCutPaste(adCopy);
-    MsgCall(mcInfo, 'The selected spreadsheet has been copied to clipboard.');
-  end;
+    // <CTRL> + <A>
+    if (Key = 65) and (Shift = [ssCtrl]) then
+    begin
+        sgAgeView.SelectAll;
+        sgAgeView.CopyCutPaste(adCopy);
+        MsgCall(mcInfo, 'The selected spreadsheet has been copied to clipboard.');
+    end;
 
 end;
 
-{ ------------------------------------------------------------ ! EDIT ADDRESS BOOK  ! ----------------------------------------------------------------------- }
 
-{ ----------------------------------------------------------------------------------------------------------------------------------------------- ON KEY DOWN }
+// --------------------------------------------------------------------------------------------------------------------------------------- EDIT ADDRESS BOOK //
+
+
+/// <summary>
+///     Allow to edit specific Address Book cells. Once edited, it will be saved to database if user click "Update" button.
+/// </summary>
+
 procedure TMainForm.sgAddressBookKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
 
-  if
-    (
-      Key <> VK_LEFT
-    )
+    if
+        (
+            Key <> VK_LEFT
+        )
     and
-    (
-      Key <> VK_RIGHT
-    )
+        (
+            Key <> VK_RIGHT
+        )
     and
-    (
-      Key <> VK_UP
-    )
+        (
+            Key <> VK_UP
+        )
     and
-    (
-      Key <> VK_DOWN
-    )
+        (
+            Key <> VK_DOWN
+        )
     and
-    (
-      Shift <> [ssShift]
-    )
+        (
+            Shift <> [ssShift]
+        )
     and
-    (
-      Shift <> [ssCtrl]
-    )
+        (
+            Shift <> [ssCtrl]
+        )
     and
-    (
-      Shift <> [ssAlt]
-    )
+        (
+            Shift <> [ssAlt]
+        )
     and
-    (
-      Key <> VK_BACK
-    )
+        (
+            Key <> VK_BACK
+        )
     and
-    (
-      Key <> VK_TAB
-    )
+        (
+            Key <> VK_TAB
+        )
     and
-    (
-      Key <> VK_ESCAPE
-    )
-  then
-  begin
-
-    if AddressBookExclusion then
+        (
+            Key <> VK_ESCAPE
+        )
+    then
     begin
-      MsgCall(mcWarn, 'This column is locked for editing.');
-      Exit;
-    end;
 
-    if Key = VK_RETURN then
-    begin
-      sgAddressBook.DelEsc(adESC, sgAddressBook.Col, sgAddressBook.Row);
-      sgAddressBook.Options:=sgAddressBook.Options - [goEditing];
-      sgAddressBook.SetUpdatedRow(sgAddressBook.Row);
-    end;
+        if AddressBookExclusion then
+        begin
+            MsgCall(mcWarn, 'This column is locked for editing.');
+            Exit;
+        end;
 
-    if Key = VK_DELETE then
-    begin
-      sgAddressBook.DelEsc(adDEL, sgAddressBook.Col, sgAddressBook.Row);
-      sgAddressBook.SetUpdatedRow(sgAddressBook.Row);
-    end;
+        if Key = VK_RETURN then
+        begin
+            sgAddressBook.DelEsc(adESC, sgAddressBook.Col, sgAddressBook.Row);
+            sgAddressBook.Options:=sgAddressBook.Options - [goEditing];
+            sgAddressBook.SetUpdatedRow(sgAddressBook.Row);
+        end;
 
-  end;
+        if Key = VK_DELETE then
+        begin
+            sgAddressBook.DelEsc(adDEL, sgAddressBook.Col, sgAddressBook.Row);
+            sgAddressBook.SetUpdatedRow(sgAddressBook.Row);
+        end;
+
+    end;
 
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------------------- ON KEY UP }
 procedure TMainForm.sgAddressBookKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
 
-  if AccessLevel = acReadOnly then
-  begin
-    MsgCall(mcWarn, 'You don''t have permission to edit Address Book records.');
-    Exit;
-  end;
+    if AccessLevel = acReadOnly then
+    begin
+        MsgCall(mcWarn, 'You don''t have permission to edit Address Book records.');
+        Exit;
+    end;
 
-  if
-      (
-        Key = VK_F2
-      )
-      or
-      (
+    if
         (
-          sgAddressBook.Col = sgAddressBook.ReturnColumn(TAddressBook.EMAILS, 1, 1)
+            Key = VK_F2
         )
+    or
+        (
+            (
+                sgAddressBook.Col = sgAddressBook.ReturnColumn(TAddressBook.EMAILS, 1, 1)
+            )
         or
-        (
-          sgAddressBook.Col = sgAddressBook.ReturnColumn(TAddressBook.PHONE_NUMBERS, 1, 1)
-        )
+            (
+                sgAddressBook.Col = sgAddressBook.ReturnColumn(TAddressBook.PHONE_NUMBERS, 1, 1)
+            )
         or
-        (
-          sgAddressBook.Col = sgAddressBook.ReturnColumn(TAddressBook.CONTACT, 1, 1)
-        )
+            (
+                sgAddressBook.Col = sgAddressBook.ReturnColumn(TAddressBook.CONTACT, 1, 1)
+            )
         or
-        (
-          sgAddressBook.Col = sgAddressBook.ReturnColumn(TAddressBook.ESTATEMENTS, 1, 1)
+            (
+                sgAddressBook.Col = sgAddressBook.ReturnColumn(TAddressBook.ESTATEMENTS, 1, 1)
+            )
         )
-      )
-      and
-      (
-        Key <> VK_RETURN
-      )
-  then
-    sgAddressBook.Options:=sgAddressBook.Options + [goEditing];
+    and
+        (
+            Key <> VK_RETURN
+        )
+    then
+        sgAddressBook.Options:=sgAddressBook.Options + [goEditing];
 
-  if Key = VK_ESCAPE then
-  begin
-    sgAddressBook.DelEsc(adESC, sgAddressBook.Col, sgAddressBook.Row);
-    sgAddressBook.Options:=sgAddressBook.Options - [goEditing];
-  end;
+    if Key = VK_ESCAPE then
+    begin
+        sgAddressBook.DelEsc(adESC, sgAddressBook.Col, sgAddressBook.Row);
+        sgAddressBook.Options:=sgAddressBook.Options - [goEditing];
+    end;
 
-  if (Key = 67) and (Shift = [ssCtrl]) then sgAddressBook.CopyCutPaste(adCopy);
+    if (Key = 67) and (Shift = [ssCtrl]) then
+        sgAddressBook.CopyCutPaste(adCopy);
 
-  if (Key = 86) and (Shift = [ssCtrl]) then
-  begin
-    sgAddressBook.CopyCutPaste(adPaste);
-    sgAddressBook.RecordRowsAffected;
-  end;
+    if (Key = 86) and (Shift = [ssCtrl]) then
+    begin
+        sgAddressBook.CopyCutPaste(adPaste);
+        sgAddressBook.RecordRowsAffected;
+    end;
 
-  if (Key = 88) and (Shift = [ssCtrl]) then
-  begin
-    sgAddressBook.CopyCutPaste(adCut);
-    sgAddressBook.RecordRowsAffected;
-  end;
+    if (Key = 88) and (Shift = [ssCtrl]) then
+    begin
+        sgAddressBook.CopyCutPaste(adCut);
+        sgAddressBook.RecordRowsAffected;
+    end;
 
 end;
 
-{ -------------------------------------------------------------------------------------------------------------------------------------- UPDATE SECTION VALUE }
+/// <summary>
+///     Update section value of settings file (decoded config.cfg).
+/// </summary>
+
 procedure TMainForm.sgListSectionKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if Text50.Font.Style = [fsBold] then
-  begin
-    if (Key = 86) and (Shift = [ssCtrl]) then sgListSection.CopyCutPaste(adPaste);
-    if (Key = 88) and (Shift = [ssCtrl]) then sgListSection.CopyCutPaste(adCut);
-  end;
 
-  if (Key = 67) and (Shift = [ssCtrl]) then sgListSection.CopyCutPaste(adCopy);
-  if (Key = 46) and (Text50.Font.Style = [fsBold]) then sgListSection.DelEsc(adDEL, sgListSection.Col, sgListSection.Row);
+    if Text50.Font.Style = [fsBold] then
+    begin
+        if (Key = 86) and (Shift = [ssCtrl]) then
+            sgListSection.CopyCutPaste(adPaste);
+        if (Key = 88) and (Shift = [ssCtrl]) then
+            sgListSection.CopyCutPaste(adCut);
+    end;
+
+    if (Key = 67) and (Shift = [ssCtrl]) then
+        sgListSection.CopyCutPaste(adCopy);
+    if (Key = 46) and (Text50.Font.Style = [fsBold]) then
+        sgListSection.DelEsc(adDEL, sgListSection.Col, sgListSection.Row);
 end;
 
 procedure TMainForm.sgListSectionKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if Key = VK_RETURN then sgListSection.DelEsc(adESC, sgListSection.Col, sgListSection.Row);
+    if Key = VK_RETURN then
+        sgListSection.DelEsc(adESC, sgListSection.Col, sgListSection.Row);
 end;
 
 procedure TMainForm.sgListSectionKeyPress(Sender: TObject; var Key: Char);
 begin
-  { UPDATE IF <ENTER> IS PRESSED }
-  if Key = CR then sgListSection.Cells[1, sgListSection.Row]:=UpperCase(sgListSection.Cells[1, sgListSection.Row]);
+    if Key = CR { ENTER } then
+        sgListSection.Cells[1, sgListSection.Row]:=UpperCase(sgListSection.Cells[1, sgListSection.Row]);
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------------ UPDATE VALUE KEY }
+/// <summary>
+///     Update value key of settings file (decoded config.cfg).
+/// </summary>
+
 procedure TMainForm.sgListValueKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if Text50.Font.Style = [fsBold] then
-  begin
-    if (Key = 86) and (Shift = [ssCtrl]) then sgListValue.CopyCutPaste(adPaste);
-    if (Key = 88) and (Shift = [ssCtrl]) then sgListValue.CopyCutPaste(adCut);
-  end;
-  if (Key = 67) and (Shift = [ssCtrl]) then sgListValue.CopyCutPaste(adCopy);
-  if (Key = 46) and (Text50.Font.Style = [fsBold]) then sgListValue.DelEsc(adDEL, sgListValue.Col, sgListValue.Row);
+
+    if Text50.Font.Style = [fsBold] then
+    begin
+        if (Key = 86) and (Shift = [ssCtrl]) then
+            sgListValue.CopyCutPaste(adPaste);
+
+        if (Key = 88) and (Shift = [ssCtrl]) then
+            sgListValue.CopyCutPaste(adCut);
+    end;
+
+    if (Key = 67) and (Shift = [ssCtrl]) then
+        sgListValue.CopyCutPaste(adCopy);
+
+    if (Key = 46) and (Text50.Font.Style = [fsBold]) then
+        sgListValue.DelEsc(adDEL, sgListValue.Col, sgListValue.Row);
+
 end;
 
 procedure TMainForm.sgListValueKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if Key = VK_RETURN then sgListValue.DelEsc(adESC, sgListValue.Col, sgListValue.Row);
+    if Key = VK_RETURN then
+        sgListValue.DelEsc(adESC, sgListValue.Col, sgListValue.Row);
 end;
 
-{ -------------------------------------------------------------------------------------------------------------------------------------- CALL PASSWORD UNLOCK }
+/// <summary>
+///     Unlock with given password settings panel.
+/// </summary>
+
 procedure TMainForm.EditPasswordKeyPress(Sender: TObject; var Key: Char);
 begin
-  { ON <ENTER> }
-  if Key = CR then btnUnlockClick(self);
+    if Key = CR { ENTER } then
+        btnUnlockClick(self);
 end;
 
-{ -------------------------------------------------------------- ! MOUSE EVENTS ! --------------------------------------------------------------------------- }
 
-{ ------------------------------------------------------------------------------------------------------------------------------ SET FOCUS ON THE STRING GRID }
+// -------------------------------------------------------------------------------------------------------------------------------------------- MOUSE EVENTS //
+
+
+/// <summary>
+///     Buttons (combined elements on common TPanel component) placed on application top panel "AppHeader".
+///     Providing the effect of text style/color change on mouse hoover.
+/// </summary>
+
+procedure TMainForm.AppHeaderMouseEnter(Sender: TObject);
+begin
+    if AppHeader.Height = 13 then
+    begin
+        AppHeader.Color:=clSkyBlue;
+        AppHeader.PanelBorders(clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+    end;
+end;
+
+procedure TMainForm.AppHeaderMouseLeave(Sender: TObject);
+begin
+    if AppHeader.Height = 13 then
+    begin
+        AppHeader.Color:=clWhite;
+        AppHeader.PanelBorders(clWhite, clWhite, clWhite, clWhite, clWhite);
+    end;
+end;
+
+procedure TMainForm.btnStartMouseEnter(Sender: TObject);
+begin
+    txtStart.Font.Color:=$006433C9;
+end;
+
+procedure TMainForm.btnStartMouseLeave(Sender: TObject);
+begin
+    if txtStart.Font.Style <> [fsBold] then
+        txtStart.Font.Color:=0;
+end;
+
+procedure TMainForm.btnReportsMouseEnter(Sender: TObject);
+begin
+    if btnReports.Height = 32 then
+       txtReports.Font.Color:=$006433C9;
+end;
+
+procedure TMainForm.btnReportsMouseLeave(Sender: TObject);
+begin
+    if btnReports.Height = 32 then
+        if txtReports.Font.Style <> [fsBold] then
+            txtReports.Font.Color:=0;
+end;
+
+procedure TMainForm.btnDebtorsMouseEnter(Sender: TObject);
+begin
+    txtDebtors.Font.Color:=$006433C9;
+end;
+
+procedure TMainForm.btnDebtorsMouseLeave(Sender: TObject);
+begin
+    if txtDebtors.Font.Style <> [fsBold] then
+        txtDebtors.Font.Color:=0;
+end;
+
+procedure TMainForm.btnTrackerMouseEnter(Sender: TObject);
+begin
+    txtTracker.Font.Color:=$006433C9;
+end;
+
+procedure TMainForm.btnTrackerMouseLeave(Sender: TObject);
+begin
+    if txtTracker.Font.Style <> [fsBold] then
+        txtTracker.Font.Color:=0
+end;
+
+procedure TMainForm.btnAddressBookMouseEnter(Sender: TObject);
+begin
+    txtAddressBook.Font.Color:=$006433C9;
+end;
+
+procedure TMainForm.btnAddressBookMouseLeave(Sender: TObject);
+begin
+    if txtAddressBook.Font.Style <> [fsBold] then
+        txtAddressBook.Font.Color:=0;
+end;
+
+procedure TMainForm.btnOpenItemsMouseEnter(Sender: TObject);
+begin
+    txtOpenItems.Font.Color:=$006433C9;
+end;
+
+procedure TMainForm.btnOpenItemsMouseLeave(Sender: TObject);
+begin
+    if txtOpenItems.Font.Style <> [fsBold] then
+        txtOpenItems.Font.Color:=0;
+end;
+
+procedure TMainForm.btnUnidentifiedMouseEnter(Sender: TObject);
+begin
+    txtUnidentified.Font.Color:=$006433C9;
+end;
+
+procedure TMainForm.btnUnidentifiedMouseLeave(Sender: TObject);
+begin
+    if txtUnidentified.Font.Style <> [fsBold] then
+        txtUnidentified.Font.Color:=0;
+end;
+
+procedure TMainForm.btnQueriesMouseEnter(Sender: TObject);
+begin
+    txtQueries.Font.Color:=$006433C9;
+end;
+
+procedure TMainForm.btnQueriesMouseLeave(Sender: TObject);
+begin
+    if txtQueries.Font.Style <> [fsBold] then
+        txtQueries.Font.Color:=0;
+end;
+
+procedure TMainForm.btnTablesMouseEnter(Sender: TObject);
+begin
+    txtTables.Font.Color:=$006433C9;
+end;
+
+procedure TMainForm.btnTablesMouseLeave(Sender: TObject);
+begin
+    if txtTables.Font.Style <> [fsBold] then
+        txtTables.Font.Color:=0;
+end;
+
+procedure TMainForm.btnSettingsMouseEnter(Sender: TObject);
+begin
+    txtSettings.Font.Color:=$006433C9;
+end;
+
+procedure TMainForm.btnSettingsMouseLeave(Sender: TObject);
+begin
+    if txtSettings.Font.Style <> [fsBold] then
+        txtSettings.Font.Color:=0;
+end;
+
+/// <summary>
+///     Extended button panel content. Introducing mouse hoover effect.
+/// </summary>
+
+procedure TMainForm.txtOverdueItemsMouseEnter(Sender: TObject);
+begin
+    txtOverdueItems.Font.Color:=$006433C9;
+    txtOverdueItems.Font.Style:=[fsUnderline];
+end;
+
+procedure TMainForm.txtOverdueItemsMouseLeave(Sender: TObject);
+begin
+    txtOverdueItems.Font.Color:=0;
+    txtOverdueItems.Font.Style:=[];
+end;
+
+procedure TMainForm.txtCreditLimitsReportMouseEnter(Sender: TObject);
+begin
+    txtCreditLimitsReport.Font.Color:=$006433C9;
+    txtCreditLimitsReport.Font.Style:=[fsUnderline];
+end;
+
+procedure TMainForm.txtCreditLimitsReportMouseLeave(Sender: TObject);
+begin
+    txtCreditLimitsReport.Font.Color:=0;
+    txtCreditLimitsReport.Font.Style:=[];
+end;
+
+procedure TMainForm.txtDebtorsReportMouseEnter(Sender: TObject);
+begin
+    txtDebtorsReport.Font.Color:=$006433C9;
+    txtDebtorsReport.Font.Style:=[fsUnderline];
+end;
+
+procedure TMainForm.txtDebtorsReportMouseLeave(Sender: TObject);
+begin
+    txtDebtorsReport.Font.Color:=0;
+    txtDebtorsReport.Font.Style:=[];
+end;
+
+procedure TMainForm.txtControlStatusReportMouseEnter(Sender: TObject);
+begin
+    txtControlStatusReport.Font.Color:=$006433C9;
+    txtControlStatusReport.Font.Style:=[fsUnderline];
+end;
+
+procedure TMainForm.txtControlStatusReportMouseLeave(Sender: TObject);
+begin
+    txtControlStatusReport.Font.Color:=0;
+    txtControlStatusReport.Font.Style:=[];
+end;
+
+/// <summary>
+///     Set focus on the string grid.
+/// </summary>
+
 procedure TMainForm.sgAgeViewMouseEnter(Sender: TObject);
 begin
-  if (sgAgeView.Enabled) and (sgAgeView.Visible) then sgAgeView.SetFocus;
+    if (sgAgeView.Enabled) and (sgAgeView.Visible) then
+        sgAgeView.SetFocus;
 end;
 
 procedure TMainForm.GroupListBoxMouseEnter(Sender: TObject);
 begin
-  if (GroupListBox.Enabled) and (GroupListBox.Visible) then GroupListBox.SetFocus;
+    if (GroupListBox.Enabled) and (GroupListBox.Visible) then
+        GroupListBox.SetFocus;
 end;
 
 procedure TMainForm.GroupListDatesMouseEnter(Sender: TObject);
 begin
-  if (GroupListDates.Enabled) and (GroupListDates.Visible) then GroupListDates.SetFocus;
+    if (GroupListDates.Enabled) and (GroupListDates.Visible) then
+        GroupListDates.SetFocus;
 end;
 
 procedure TMainForm.SortListBoxMouseEnter(Sender: TObject);
 begin
-  if (SortListBox.Enabled) and (SortListBox.Visible) then SortListBox.SetFocus;
+    if (SortListBox.Enabled) and (SortListBox.Visible) then
+        SortListBox.SetFocus;
 end;
 
 procedure TMainForm.sgOpenItemsMouseEnter(Sender: TObject);
 begin
-  if (sgOpenItems.Enabled) and (sgOpenItems.Visible) then sgOpenItems.SetFocus;
+    if (sgOpenItems.Enabled) and (sgOpenItems.Visible) then
+        sgOpenItems.SetFocus;
 end;
 
 procedure TMainForm.sgAddressBookMouseEnter(Sender: TObject);
 begin
-  if (sgAddressBook.Enabled) and (sgAddressBook.Visible) then sgAddressBook.SetFocus;
+    if (sgAddressBook.Enabled) and (sgAddressBook.Visible) then
+        sgAddressBook.SetFocus;
 end;
 
 procedure TMainForm.sgInvoiceTrackerMouseEnter(Sender: TObject);
 begin
-  if (sgInvoiceTracker.Enabled) and (sgInvoiceTracker.Visible) then sgInvoiceTracker.SetFocus;
+    if (sgInvoiceTracker.Enabled) and (sgInvoiceTracker.Visible) then
+        sgInvoiceTracker.SetFocus;
 end;
 
 procedure TMainForm.sgCoCodesMouseEnter(Sender: TObject);
 begin
-  if (sgCoCodes.Enabled) and (sgCoCodes.Visible) then sgCoCodes.SetFocus;
+    if (sgCoCodes.Enabled) and (sgCoCodes.Visible) then
+        sgCoCodes.SetFocus;
 end;
 
 procedure TMainForm.sgPaidInfoMouseEnter(Sender: TObject);
 begin
-  if (sgPaidInfo.Enabled) and (sgPaidInfo.Visible) then sgPaidInfo.SetFocus;
+    if (sgPaidInfo.Enabled) and (sgPaidInfo.Visible) then
+        sgPaidInfo.SetFocus;
 end;
 
 procedure TMainForm.sgPersonMouseEnter(Sender: TObject);
 begin
-  if (sgPerson.Enabled) and (sgPerson.Visible) then sgPerson.SetFocus;
+    if (sgPerson.Enabled) and (sgPerson.Visible) then
+        sgPerson.SetFocus;
 end;
 
 procedure TMainForm.sgPmtTermsMouseEnter(Sender: TObject);
 begin
-  if (sgPmtTerms.Enabled) and (sgPmtTerms.Visible) then sgPmtTerms.SetFocus;
+    if (sgPmtTerms.Enabled) and (sgPmtTerms.Visible) then
+        sgPmtTerms.SetFocus;
 end;
 
 procedure TMainForm.sgGroup3MouseEnter(Sender: TObject);
 begin
-  if (sgGroup3.Enabled) and (sgGroup3.Visible) then sgGroup3.SetFocus;
+    if (sgGroup3.Enabled) and (sgGroup3.Visible) then
+        sgGroup3.SetFocus;
 end;
 
-{ ----------------------------------------------------------------------------------------------------------------------------------------------- SCROLL BARS }
-{ AGE VIEW | WHEEL DOWN }
+/// <summary>
+///     Change standard behaviour of scroll bars on all string grids. The mouse weel on string grid component controls row selection instead of
+///     moving up/down thumb on scroll bar. Below methods introduce mouse weel controlling scroll bar.
+/// </summary>
+
+// AGE VIEW | WHEEL DOWN
 procedure TMainForm.sgAgeViewMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
-  Handled:=True;
-  sgAgeView.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
+    Handled:=True;
+    sgAgeView.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
 end;
 
-{ AGE VIEW | WHEEL UP }
+// AGE VIEW | WHEEL UP
 procedure TMainForm.sgAgeViewMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
-  Handled:=True;
-  sgAgeView.Perform(WM_VSCROLL, SB_LINEUP, 0);
+    Handled:=True;
+    sgAgeView.Perform(WM_VSCROLL, SB_LINEUP, 0);
 end;
 
-{ OPEN ITEMS | WHEEL DOWN }
+// OPEN ITEMS | WHEEL DOWN
 procedure TMainForm.sgOpenItemsMouseWheelDown(Sender: TObject; Shift:   TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
-  Handled:=True;
-  sgOpenItems.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
+    Handled:=True;
+    sgOpenItems.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
 end;
 
-{ OPEN ITEMS | WHEEL UP }
+// OPEN ITEMS | WHEEL UP
 procedure TMainForm.sgOpenItemsMouseWheelUp(Sender: TObject; Shift:     TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
-  Handled:=True;
-  sgOpenItems.Perform(WM_VSCROLL, SB_LINEUP, 0);
+    Handled:=True;
+    sgOpenItems.Perform(WM_VSCROLL, SB_LINEUP, 0);
 end;
 
-{ ADDRESS BOOK | WHEEL DOWN }
+// ADDRESS BOOK | WHEEL DOWN
 procedure TMainForm.sgAddressBookMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
-  Handled:=True;
-  sgAddressBook.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
+    Handled:=True;
+    sgAddressBook.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
 end;
 
-{ ADDRESS BOOK | WHEEL UP }
+// ADDRESS BOOK | WHEEL UP
 procedure TMainForm.sgAddressBookMouseWheelUp(Sender: TObject; Shift:   TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
-  Handled:=True;
-  sgAddressBook.Perform(WM_VSCROLL, SB_LINEUP, 0);
+    Handled:=True;
+    sgAddressBook.Perform(WM_VSCROLL, SB_LINEUP, 0);
 end;
 
-{ INVOICE TRACKER | WHEEL DOWN }
+// INVOICE TRACKER | WHEEL DOWN
 procedure TMainForm.sgInvoiceTrackerMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
-  Handled:=True;
-  sgInvoiceTracker.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
+    Handled:=True;
+    sgInvoiceTracker.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
 end;
 
-{ INVOICE TRACKER | WHEEL UP }
+// INVOICE TRACKER | WHEEL UP
 procedure TMainForm.sgInvoiceTrackerMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
-  Handled:=True;
-  sgInvoiceTracker.Perform(WM_VSCROLL, SB_LINEUP, 0);
+    Handled:=True;
+    sgInvoiceTracker.Perform(WM_VSCROLL, SB_LINEUP, 0);
 end;
 
-{ SECTION LIST | WHEEL DOWN }
+// SECTION LIST | WHEEL DOWN
 procedure TMainForm.sgListSectionMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
-  Handled:=True;
-  sgListSection.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
+    Handled:=True;
+    sgListSection.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
 end;
 
-{ SECTION LIST | WHEEL UP }
+// SECTION LIST | WHEEL UP
 procedure TMainForm.sgListSectionMouseWheelUp(Sender: TObject; Shift:   TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
-  Handled:=True;
-  sgListSection.Perform(WM_VSCROLL, SB_LINEUP, 0);
+    Handled:=True;
+    sgListSection.Perform(WM_VSCROLL, SB_LINEUP, 0);
 end;
 
-{ VALUE LIST | WHEEL DOWN }
+// VALUE LIST | WHEEL DOWN
 procedure TMainForm.sgListValueMouseWheelDown(Sender: TObject; Shift:   TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
-  Handled:=True;
-  sgListValue.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
+    Handled:=True;
+    sgListValue.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
 end;
 
-{ VALUE LIST  | WHEEL UP }
+// VALUE LIST  | WHEEL UP
 procedure TMainForm.sgListValueMouseWheelUp(Sender: TObject; Shift:     TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
-  Handled:=True;
-  sgListValue.Perform(WM_VSCROLL, SB_LINEUP, 0);
+    Handled:=True;
+    sgListValue.Perform(WM_VSCROLL, SB_LINEUP, 0);
 end;
 
-{ COMPANY CODES | WHEEL DOWN }
+// COMPANY CODES | WHEEL DOWN
 procedure TMainForm.sgCoCodesMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
-  Handled:=True;
-  sgCoCodes.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
+    Handled:=True;
+    sgCoCodes.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
 end;
 
-{ COMPANY CODES | WHEEL UP }
+// COMPANY CODES | WHEEL UP
 procedure TMainForm.sgCoCodesMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
-  Handled:=True;
-  sgCoCodes.Perform(WM_VSCROLL, SB_LINEUP, 0);
+    Handled:=True;
+    sgCoCodes.Perform(WM_VSCROLL, SB_LINEUP, 0);
 end;
 
-{ PAYMENT TERMS | WHEEL DOWN }
+// PAYMENT TERMS | WHEEL DOWN
 procedure TMainForm.sgPmtTermsMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
-  Handled:=True;
-  sgPmtTerms.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
+    Handled:=True;
+    sgPmtTerms.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
 end;
 
-{ PAYMENT TERMS | WHEEL UP }
+// PAYMENT TERMS | WHEEL UP
 procedure TMainForm.sgPmtTermsMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
-  Handled:=True;
-  sgPmtTerms.Perform(WM_VSCROLL, SB_LINEUP, 0);
+    Handled:=True;
+    sgPmtTerms.Perform(WM_VSCROLL, SB_LINEUP, 0);
 end;
 
-{ PAID INFO | WHEEL DOWN }
+// PAID INFO | WHEEL DOWN
 procedure TMainForm.sgPaidInfoMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
-  Handled:=True;
-  sgPaidInfo.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
+    Handled:=True;
+    sgPaidInfo.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
 end;
 
-{ PAID INFO | WHEEL UP }
+// PAID INFO | WHEEL UP
 procedure TMainForm.sgPaidInfoMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
-  Handled:=True;
-  sgPaidInfo.Perform(WM_VSCROLL, SB_LINEUP, 0);
+    Handled:=True;
+    sgPaidInfo.Perform(WM_VSCROLL, SB_LINEUP, 0);
 end;
 
-{ GROUP3 | WHEEL DOWN }
+// GROUP3 | WHEEL DOWN
 procedure TMainForm.sgGroup3MouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
-  Handled:=True;
-  sgGroup3.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
+    Handled:=True;
+    sgGroup3.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
 end;
 
-{ GROUP3 | WHEEL UP }
+// GROUP3 | WHEEL UP
 procedure TMainForm.sgGroup3MouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
-  Handled:=True;
-  sgGroup3.Perform(WM_VSCROLL, SB_LINEUP, 0);
+    Handled:=True;
+    sgGroup3.Perform(WM_VSCROLL, SB_LINEUP, 0);
 end;
 
-{ PERSON | WHEEL DOWN }
+// PERSON | WHEEL DOWN
 procedure TMainForm.sgPersonMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
-  Handled:=True;
-  sgPerson.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
+    Handled:=True;
+    sgPerson.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
 end;
 
-{ PERSON | WHEEL UP }
+// PERSON | WHEEL UP
 procedure TMainForm.sgPersonMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
-  Handled:=True;
-  sgPerson.Perform(WM_VSCROLL, SB_LINEUP, 0);
+    Handled:=True;
+    sgPerson.Perform(WM_VSCROLL, SB_LINEUP, 0);
 end;
 
-{ UAC | WHEEL DOWN }
+// UAC | WHEEL DOWN
 procedure TMainForm.sgUACMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
-  Handled:=True;
-  sgUAC.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
+    Handled:=True;
+    sgUAC.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
 end;
 
-{ UAC | WHEE UP }
+// UAC | WHEE UP
 procedure TMainForm.sgUACMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
-  Handled:=True;
-  sgUAC.Perform(WM_VSCROLL, SB_LINEUP, 0);
+    Handled:=True;
+    sgUAC.Perform(WM_VSCROLL, SB_LINEUP, 0);
 end;
 
-{ GROUPS | WHEEL DOWN }
+// GROUPS | WHEEL DOWN
 procedure TMainForm.sgGroupsMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
-  Handled:=True;
-  sgGroups.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
+    Handled:=True;
+    sgGroups.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
 end;
 
-{ GROUPS | WHEEL UP }
+// GROUPS | WHEEL UP
 procedure TMainForm.sgGroupsMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
-  Handled:=True;
-  sgGroups.Perform(WM_VSCROLL, SB_LINEUP, 0);
+    Handled:=True;
+    sgGroups.Perform(WM_VSCROLL, SB_LINEUP, 0);
 end;
 
-{ -------------------------------------------------------------------------------------------------------------------------------- OPEN ITEMS | RELOAD BUTTON }
+/// <summary>
+///     Open items buttons - mouse hoover effect.
+/// </summary>
+
 procedure TMainForm.btnReloadMouseEnter(Sender: TObject);
 begin
-  { CHANGE CURSOR TO HAND POINT }
-  Text54L1.Font.Color:=FONCOLOR;
-  Text54L2.Font.Color:=FONCOLOR;
+    Text54L1.Font.Color:=FONCOLOR;
+    Text54L2.Font.Color:=FONCOLOR;
 end;
 
 procedure TMainForm.btnReloadMouseLeave(Sender: TObject);
 begin
-  { CHANGE CURSOR TO DEFAULT (ARROW) }
-  Text54L1.Font.Color:=clBlack;
-  Text54L2.Font.Color:=clBlack;
+    Text54L1.Font.Color:=clBlack;
+    Text54L2.Font.Color:=clBlack;
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------------------ MAKE GROUP }
 procedure TMainForm.btnMakeGroupMouseEnter(Sender: TObject);
 begin
-  { CHANGE CURSOR TO HAND POINT }
-  Text83L1.Font.Color:=FONCOLOR;
-  Text83L2.Font.Color:=FONCOLOR;
+    Text83L1.Font.Color:=FONCOLOR;
+    Text83L2.Font.Color:=FONCOLOR;
 end;
 
 procedure TMainForm.btnMakeGroupMouseLeave(Sender: TObject);
 begin
-  { CHANGE CURSOR TO DEFAULT (ARROW) }
-  Text83L1.Font.Color:=clBlack;
-  Text83L2.Font.Color:=clBlack;
+    Text83L1.Font.Color:=clBlack;
+    Text83L2.Font.Color:=clBlack;
 end;
 
-{ --------------------------------------------------------------------------------------------------------------------------------------------------- OPEN AB }
+/// <summary>
+///     Adress Book buttons - mouse hoover effect.
+/// </summary>
+
 procedure TMainForm.btnOpenABMouseEnter(Sender: TObject);
 begin
-  { CHANGE CURSOR TO HAND POINT }
-  btnOpenAB.Cursor:=crHandPoint;
-  Text64.Font.Color:=FONCOLOR;
+    btnOpenAB.Cursor:=crHandPoint;
+    Text64.Font.Color:=FONCOLOR;
 end;
 
 procedure TMainForm.btnOpenABMouseLeave(Sender: TObject);
 begin
-  { CHANGE CURSOR TO DEFAULT (ARROW) }
-  btnOpenAB.Cursor:=crDefault;
-  Text64.Font.Color:=clBlack;
+    btnOpenAB.Cursor:=crDefault;
+    Text64.Font.Color:=clBlack;
 end;
 
-{ --------------------------------------------------------------------------------------------------------------------------------------------------- SAVE AB }
 procedure TMainForm.btnUpdateABMouseEnter(Sender: TObject);
 begin
-  { CHANGE CURSOR TO HAND POINT }
-  btnUpdateAB.Cursor:=crHandPoint;
-  Text66.Font.Color:=FONCOLOR;
+    btnUpdateAB.Cursor:=crHandPoint;
+    Text66.Font.Color:=FONCOLOR;
 end;
 
 procedure TMainForm.btnUpdateABMouseLeave(Sender: TObject);
 begin
-  { CHANGE CURSOR TO DEFAULT (ARROW) }
-  btnUpdateAB.Cursor:=crDefault;
-  Text66.Font.Color:=clBlack;
+    btnUpdateAB.Cursor:=crDefault;
+    Text66.Font.Color:=clBlack;
 end;
 
-{ -------------------------------------------------------------------------------------------------------------------------------------------------- CLOSE AB }
 procedure TMainForm.btnCloseABMouseEnter(Sender: TObject);
 begin
-  { CHANGE CURSOR TO HAND POINT }
-  btnCloseAB.Cursor:=crHandPoint;
-  Text67.Font.Color:=FONCOLOR;
+    btnCloseAB.Cursor:=crHandPoint;
+    Text67.Font.Color:=FONCOLOR;
 end;
 
 procedure TMainForm.btnCloseABMouseLeave(Sender: TObject);
 begin
-  { CHANGE CURSOR TO DEFAULT (ARROW) }
-  btnCloseAB.Cursor:=crDefault;
-  Text67.Font.Color:=clBlack;
+    btnCloseAB.Cursor:=crDefault;
+    Text67.Font.Color:=clBlack;
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------------------- EXPORT AB }
 procedure TMainForm.btnExportABMouseEnter(Sender: TObject);
 begin
-  { CHANGE CURSOR TO HAND POINT }
-  btnExportAB.Cursor:=crHandPoint;
-  Text69.Font.Color:=FONCOLOR;
+    btnExportAB.Cursor:=crHandPoint;
+    Text69.Font.Color:=FONCOLOR;
 end;
 
 procedure TMainForm.btnExportABMouseLeave(Sender: TObject);
 begin
-  { CHANGE CURSOR TO DEFAULT (ARROW) }
-  btnExportAB.Cursor:=crDefault;
-  Text69.Font.Color:=clBlack;
+    btnExportAB.Cursor:=crDefault;
+    Text69.Font.Color:=clBlack;
 end;
 
-{ --------------------------------------------------------------------------------------------------------------------------------------------------- ADD KEY }
+/// <summary>
+///     Settigs panel buttons - mouse hoover effect.
+/// </summary>
+
 procedure TMainForm.imgKeyAddMouseEnter(Sender: TObject);
 begin
-  { CHANGE CURSOR TO HAND POINT }
-  imgKeyAdd.Cursor:=crHandPoint;
-  Text41.Font.Color:=FONCOLOR;
+    imgKeyAdd.Cursor:=crHandPoint;
+    Text41.Font.Color:=FONCOLOR;
 end;
 
 procedure TMainForm.imgKeyAddMouseLeave(Sender: TObject);
 begin
-  { CHANGE CURSOR TO DEFAULT (ARROW) }
-  imgKeyAdd.Cursor:=crDefault;
-  Text41.Font.Color:=clBlack;
+    imgKeyAdd.Cursor:=crDefault;
+    Text41.Font.Color:=clBlack;
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------------------ REMOVE KEY }
 procedure TMainForm.imgKeyRemoveMouseEnter(Sender: TObject);
 begin
-  { CHANGE CURSOR TO HAND POINT }
-  imgKeyRemove.Cursor:=crHandPoint;
-  Text42.Font.Color:=FONCOLOR;
+    imgKeyRemove.Cursor:=crHandPoint;
+    Text42.Font.Color:=FONCOLOR;
 end;
 
 procedure TMainForm.imgKeyRemoveMouseLeave(Sender: TObject);
 begin
-  { CHANGE CURSOR TO DEFAULT (ARROW) }
-  imgKeyRemove.Cursor:=crDefault;
-  Text42.Font.Color:=clBlack;
+    imgKeyRemove.Cursor:=crDefault;
+    Text42.Font.Color:=clBlack;
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------ SAVE ALL VALUES, KEYS AND SECTIONS }
 procedure TMainForm.imgUpdateValuesMouseEnter(Sender: TObject);
 begin
-  { CHANGE CURSOR TO HAND POINT }
-  imgUpdateValues.Cursor:=crHandPoint;
-  Text43.Font.Color:=FONCOLOR;
+    imgUpdateValues.Cursor:=crHandPoint;
+    Text43.Font.Color:=FONCOLOR;
 end;
 
 procedure TMainForm.imgUpdateValuesMouseLeave(Sender: TObject);
 begin
-  { CHANGE CURSOR TO DEFAULT (ARROW) }
-  imgUpdateValues.Cursor:=crDefault;
-  Text43.Font.Color:=clBlack;
+    imgUpdateValues.Cursor:=crDefault;
+    Text43.Font.Color:=clBlack;
 end;
 
-{ ----------------------------------------------------------------------------------------------------------------------------------------------- ADD SECTION }
 procedure TMainForm.imgSectionAddMouseEnter(Sender: TObject);
 begin
-  { CHANGE CURSOR TO HAND POINT }
-  imgSectionAdd.Cursor:=crHandPoint;
-  Text48.Font.Color:=FONCOLOR;
+    imgSectionAdd.Cursor:=crHandPoint;
+    Text48.Font.Color:=FONCOLOR;
 end;
 
 procedure TMainForm.imgSectionAddMouseLeave(Sender: TObject);
 begin
-  { CHANGE CURSOR TO DEFAULT (ARROW) }
-  imgSectionAdd.Cursor:=crDefault;
-  Text48.Font.Color:=clBlack;
+    imgSectionAdd.Cursor:=crDefault;
+    Text48.Font.Color:=clBlack;
 end;
 
-{ -------------------------------------------------------------------------------------------------------------------------------------------- DELETE SECTION }
 procedure TMainForm.imgSectionRemoveMouseEnter(Sender: TObject);
 begin
-  { CHANGE CURSOR TO HAND POINT }
-  imgSectionRemove.Cursor:=crHandPoint;
-  Text49.Font.Color:=FONCOLOR;
+    imgSectionRemove.Cursor:=crHandPoint;
+    Text49.Font.Color:=FONCOLOR;
 end;
 
 procedure TMainForm.imgSectionRemoveMouseLeave(Sender: TObject);
 begin
-  { CHANGE CURSOR TO DEFAULT (ARROW) }
-  imgSectionRemove.Cursor:=crDefault;
-  Text49.Font.Color:=clBlack;
+    imgSectionRemove.Cursor:=crDefault;
+    Text49.Font.Color:=clBlack;
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------------------ ALLOW EDIT }
 procedure TMainForm.imgAllowEditMouseEnter(Sender: TObject);
 begin
-  { CHANGE CURSOR TO HAND POINT }
-  imgAllowEdit.Cursor:=crHandPoint;
-  Text50.Font.Color:=FONCOLOR;
+    imgAllowEdit.Cursor:=crHandPoint;
+    Text50.Font.Color:=FONCOLOR;
 end;
 
 procedure TMainForm.imgAllowEditMouseLeave(Sender: TObject);
 begin
-  { CHANGE CURSOR TO DEFAULT (ARROW) }
-  imgAllowEdit.Cursor:=crDefault;
-  Text50.Font.Color:=clBlack;
+    imgAllowEdit.Cursor:=crDefault;
+    Text50.Font.Color:=clBlack;
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------------------- EVENT LOG }
 procedure TMainForm.imgEventLogMouseEnter(Sender: TObject);
 begin
-  { CHANGE CURSOR TO HAND POINT }
-  imgAllowEdit.Cursor:=crHandPoint;
-  Text51.Font.Color:=FONCOLOR;
+    imgAllowEdit.Cursor:=crHandPoint;
+    Text51.Font.Color:=FONCOLOR;
 end;
 
 procedure TMainForm.imgEventLogMouseLeave(Sender: TObject);
 begin
-  { CHANGE CURSOR TO DEFAULT (ARROW) }
-  imgAllowEdit.Cursor:=crDefault;
-  Text51.Font.Color:=clBlack;
+    imgAllowEdit.Cursor:=crDefault;
+    Text51.Font.Color:=clBlack;
 end;
 
-{ ---------------------------------------------------------------------------------------------------------------------- SECTION LIST | SWITCH OFF/ON BUTTONS }
 procedure TMainForm.sgListSectionClick(Sender: TObject);
 begin
-  { IMAGES }
-  imgSectionAdd.Enabled   :=True;
-  imgSectionRemove.Enabled:=True;
-  imgKeyAdd.Enabled       :=False;
-  imgKeyRemove.Enabled    :=False;
-  imgUpdateValues.Enabled :=False;
-  { CAPTIONS }
-  Text41.Enabled:=False;
-  Text42.Enabled:=False;
-  Text43.Enabled:=False;
-  Text48.Enabled:=True;
-  Text49.Enabled:=True;
+    // Images
+    imgSectionAdd.Enabled   :=True;
+    imgSectionRemove.Enabled:=True;
+    imgKeyAdd.Enabled       :=False;
+    imgKeyRemove.Enabled    :=False;
+    imgUpdateValues.Enabled :=False;
+
+    // Captions
+    Text41.Enabled:=False;
+    Text42.Enabled:=False;
+    Text43.Enabled:=False;
+    Text48.Enabled:=True;
+    Text49.Enabled:=True;
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------ VALUE LIST | SWITCH OFF/ON BUTTONS }
 procedure TMainForm.sgListValueClick(Sender: TObject);
 begin
-  { IMAGES }
-  imgSectionAdd.Enabled   :=False;
-  imgSectionRemove.Enabled:=False;
-  imgKeyAdd.Enabled       :=True;
-  imgKeyRemove.Enabled    :=True;
-  imgUpdateValues.Enabled :=True;
-  { CAPTIONS }
-  Text41.Enabled:=True;
-  Text42.Enabled:=True;
-  Text43.Enabled:=True;
-  Text48.Enabled:=False;
-  Text49.Enabled:=False;
-end;
+    // Images
+    imgSectionAdd.Enabled   :=False;
+    imgSectionRemove.Enabled:=False;
+    imgKeyAdd.Enabled       :=True;
+    imgKeyRemove.Enabled    :=True;
+    imgUpdateValues.Enabled :=True;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------------- UNMASK PASSWORD }
-procedure TMainForm.btnPasswordPreviewMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-begin
-  EditPassword.PasswordChar:=#0;
-end;
-
-{ --------------------------------------------------------------------------------------------------------------------------------------------- MASK PASSWORD }
-procedure TMainForm.btnPasswordPreviewMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-begin
-  EditPassword.PasswordChar:='*';
+    // Captions
+    Text41.Enabled:=True;
+    Text42.Enabled:=True;
+    Text43.Enabled:=True;
+    Text48.Enabled:=False;
+    Text49.Enabled:=False;
 end;
 
 /// <summary>
-///     Show description on mouse hoover onto the image.
+///     Settings panel - password edit boxes.
 /// </summary>
 
-procedure TMainForm.imgOverdueMouseEnter(Sender: TObject);
-var
-    Settings: ISettings;
+procedure TMainForm.btnPasswordPreviewMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
-    Settings:=TSettings.Create;
-    DescTitle.Caption:='Overdue Report';
-    DescLine1.Caption:=Settings.GetStringValue('REPORTS_TEXT', 'OVERDUE_INF1', 'Line not provided');
-    DescLine2.Caption:=Settings.GetStringValue('REPORTS_TEXT', 'OVERDUE_INF2', 'Line not provided');
-    DescLine3.Caption:=Settings.GetStringValue('REPORTS_TEXT', 'OVERDUE_INF3', 'Line not provided');
+    EditPassword.PasswordChar:=#0;
 end;
 
-procedure TMainForm.imgCreditLimitsMouseEnter(Sender: TObject);
-var
-    Settings: ISettings;
+procedure TMainForm.btnPasswordPreviewMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 begin
-    Settings:=TSettings.Create;
-    DescTitle.Caption:='Credit Limit Report';
-    DescLine1.Caption:=Settings.GetStringValue('REPORTS_TEXT', 'LIMITS_INF1', 'Line not provided');
-    DescLine2.Caption:=Settings.GetStringValue('REPORTS_TEXT', 'LIMITS_INF2', 'Line not provided');
-    DescLine3.Caption:=Settings.GetStringValue('REPORTS_TEXT', 'LIMITS_INF3', 'Line not provided');
+    EditPassword.PasswordChar:='*';
 end;
 
-procedure TMainForm.imgDebtorsMouseEnter(Sender: TObject);
-var
-    Settings: ISettings;
+
+// -------------------------------------------------------------------------------------------------------------------------------------------- BUTTON CALLS //
+
+
+/// <summary>
+///     Application top bar/menu buttons.
+/// </summary>
+
+procedure TMainForm.AppHeaderClick(Sender: TObject);
 begin
-    Settings:=TSettings.Create;
-    DescTitle.Caption:='Debtors Report';
-    DescLine1.Caption:=Settings.GetStringValue('REPORTS_TEXT', 'DEBTORS_INF1', 'Line not provided');
-    DescLine2.Caption:=Settings.GetStringValue('REPORTS_TEXT', 'DEBTORS_INF2', 'Line not provided');
-    DescLine3.Caption:=Settings.GetStringValue('REPORTS_TEXT', 'DEBTORS_INF3', 'Line not provided');
+    if AppHeader.Height = 13 then
+    begin
+        AppHeader.Height:=57;
+        AppHeader.Cursor:=crDefault;
+        AppHeader.Color:=clWhite;
+        AppHeader.PanelBorders(clWhite, clSkyBlue, clWhite, clWhite, clWhite);
+    end;
 end;
 
-procedure TMainForm.imgControlStatusMouseEnter(Sender: TObject);
-var
-    Settings: ISettings;
+procedure TMainForm.imgHideBarClick(Sender: TObject);
 begin
-    Settings:=TSettings.Create;
-    DescTitle.Caption:='Control Status Report';
-    DescLine1.Caption:=Settings.GetStringValue('REPORTS_TEXT', 'STATUS_INF1', 'Line not provided');
-    DescLine2.Caption:=Settings.GetStringValue('REPORTS_TEXT', 'STATUS_INF2', 'Line not provided');
-    DescLine3.Caption:=Settings.GetStringValue('REPORTS_TEXT', 'STATUS_INF3', 'Line not provided');
+    if AppHeader.Height > 13 then
+    begin
+        AppHeader.Height:=13;
+        AppHeader.Cursor:=crHandPoint;
+        AppHeader.Color:=clWhite;
+        AppHeader.PanelBorders(clWhite, clWhite, clWhite, clWhite, clWhite);
+    end;
 end;
 
-{ --------------------------------------------------------------- ! BUTTON CALLS ! -------------------------------------------------------------------------- }
-
-{ ---------------------------------------------------------------------------------------------------------------------------------------------- MENU BUTTONS }
-
-procedure TMainForm.btnStartClick(Sender: TObject);
+procedure TMainForm.txtStartClick(Sender: TObject);
 begin
-  MyPages.ActivePage:=TabSheet9;
-  ResetTabsheetButtons;
-  btnStart.Font.Style:=[fsBold];
-end;
+    MyPages.ActivePage:=TabSheet9;
+    ResetTabsheetButtons;
+    txtStart.Font.Style:=[fsBold];
+    txtStart.Font.Color:=$006433C9;
 
-procedure TMainForm.btnTabelauReportClick(Sender: TObject);
-begin
-  MyPages.ActivePage:=TabSheet5;
-  ResetTabsheetButtons;
-  btnTabelauReport.Font.Style:=[fsBold];
-end;
+    /// <remarks>
+    ///     ChromiumWindow placed on TPageControl crashes application when the application starts maximised and
+    ///     ChromiumWindow completly fill the container. To overcome this, it is necessary to initialize and load
+    ///     given web page when ChromiumWindow is "small", and then re-size to fill the TabSheet at once.
+    /// </remarks>
 
-procedure TMainForm.btnGeneralClick(Sender: TObject);
-begin
-  MyPages.ActivePage:=TabSheet7;
-  ResetTabsheetButtons;
-  btnGeneral.Font.Style:=[fsBold];
-end;
-
-procedure TMainForm.btnSettingsClick(Sender: TObject);
-begin
-  MyPages.ActivePage:=TabSheet8;
-  ResetTabsheetButtons;
-  btnSettings.Font.Style:=[fsBold];
-end;
-
-procedure TMainForm.btnAgeDebtClick(Sender: TObject);
-begin
-  MyPages.ActivePage:=TabSheet1;
-  ResetTabsheetButtons;
-  btnAgeDebt.Font.Style:=[fsBold];
-end;
-
-procedure TMainForm.btnOpenItemsClick(Sender: TObject);
-begin
-  MyPages.ActivePage:=TabSheet2;
-  ResetTabsheetButtons;
-  btnOpenItems.Font.Style:=[fsBold];
-end;
-
-procedure TMainForm.btnOtherTransClick(Sender: TObject);
-begin
-
-  MsgCall(mcInfo, 'This feature is not yet accessible. Please try later.');
-
-  //MyPages.ActivePage:=TabSheet6;
-  //ResetTabsheetButtons;
-  //btnOtherTrans.Font.Style:=[fsBold];
+    if ChromiumWindow.Align <> alClient then ChromiumWindow.Align:=alClient;
 
 end;
 
-procedure TMainForm.btnTrackerClick(Sender: TObject);
+procedure TMainForm.txtReportsClick(Sender: TObject);
 begin
-  MyPages.ActivePage:=TabSheet4;
-  ResetTabsheetButtons;
-  btnTracker.Font.Style:=[fsBold];
+    UnfoldReportsTab(AppHeader, btnReports);
+    ResetTabsheetButtons;
+    txtReports.Font.Style:=[fsBold];
+    txtReports.Font.Color:=$006433C9;
 end;
 
-procedure TMainForm.btnAddressBookClick(Sender: TObject);
+procedure TMainForm.txtDebtorsClick(Sender: TObject);
 begin
-  MyPages.ActivePage:=TabSheet3;
-  ResetTabsheetButtons;
-  btnAddressBook.Font.Style:=[fsBold];
+    MyPages.ActivePage:=TabSheet1;
+    ResetTabsheetButtons;
+    txtDebtors.Font.Style:=[fsBold];
+    txtDebtors.Font.Color:=$006433C9;
 end;
 
-procedure TMainForm.imgOverdueClick(Sender: TObject);
+procedure TMainForm.txtTrackerClick(Sender: TObject);
+begin
+    MyPages.ActivePage:=TabSheet4;
+    ResetTabsheetButtons;
+    txtTracker.Font.Style:=[fsBold];
+    txtTracker.Font.Color:=$006433C9;
+end;
+
+procedure TMainForm.txtAddressBookClick(Sender: TObject);
+begin
+    MyPages.ActivePage:=TabSheet3;
+    ResetTabsheetButtons;
+    txtAddressBook.Font.Style:=[fsBold];
+    txtAddressBook.Font.Color:=$006433C9;
+end;
+
+procedure TMainForm.txtOpenItemsClick(Sender: TObject);
+begin
+    MyPages.ActivePage:=TabSheet2;
+    ResetTabsheetButtons;
+    txtOpenItems.Font.Style:=[fsBold];
+    txtOpenItems.Font.Color:=$006433C9;
+end;
+
+procedure TMainForm.txtUnidentifiedClick(Sender: TObject);
+begin
+    MsgCall(mcInfo, 'This feature is not yet accessible. Please try later.');
+end;
+
+procedure TMainForm.txtQueriesClick(Sender: TObject);
+begin
+    MsgCall(mcInfo, 'This feature is not yet accessible. Please try later.');
+end;
+
+procedure TMainForm.txtTablesClick(Sender: TObject);
+begin
+    MyPages.ActivePage:=TabSheet7;
+    ResetTabsheetButtons;
+    txtTables.Font.Style:=[fsBold];
+    txtTables.Font.Color:=$006433C9;
+end;
+
+procedure TMainForm.txtSettingsClick(Sender: TObject);
+begin
+    MyPages.ActivePage:=TabSheet8;
+    ResetTabsheetButtons;
+    txtSettings.Font.Style:=[fsBold];
+    txtSettings.Font.Color:=$006433C9;
+end;
+
+/// <summary>
+///     Extended list for Reports button.
+/// </summary>
+
+procedure TMainForm.txtOverdueItemsClick(Sender: TObject);
 var
     Return: cardinal;
 begin
@@ -4352,9 +5078,10 @@ begin
         MsgCall(mcWarn, 'Cannot execute report. Please contact with IT support.');
         LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
     end;
+    UnfoldReportsTab(AppHeader, btnReports);
 end;
 
-procedure TMainForm.imgCreditLimitsClick(Sender: TObject);
+procedure TMainForm.txtCreditLimitsReportClick(Sender: TObject);
 var
     Return: cardinal;
 begin
@@ -4364,9 +5091,10 @@ begin
         MsgCall(mcWarn, 'Cannot execute report. Please contact with IT support.');
         LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
     end;
+    UnfoldReportsTab(AppHeader, btnReports);
 end;
 
-procedure TMainForm.imgDebtorsClick(Sender: TObject);
+procedure TMainForm.txtDebtorsReportClick(Sender: TObject);
 var
     Return: cardinal;
 begin
@@ -4376,9 +5104,10 @@ begin
         MsgCall(mcWarn, 'Cannot execute report. Please contact with IT support.');
         LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
     end;
+    UnfoldReportsTab(AppHeader, btnReports);
 end;
 
-procedure TMainForm.imgControlStatusClick(Sender: TObject);
+procedure TMainForm.txtControlStatusReportClick(Sender: TObject);
 var
     Return: cardinal;
 begin
@@ -4388,508 +5117,610 @@ begin
         MsgCall(mcWarn, 'Cannot execute report. Please contact with IT support.');
         LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
     end;
+    UnfoldReportsTab(AppHeader, btnReports);
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------------- AGE VIEW | LOAD }
+/// <summary>
+///     Age View, loading selected group ID.
+/// </summary>
+
 procedure TMainForm.btnLoadAgeViewClick(Sender: TObject);
 var
-  iCNT: integer;
+    iCNT: integer;
 begin
-  { WAIT UNTIL READY }
-  if not (StatBar_TXT1.Caption = stReady) then
-  begin
-    MsgCall(mcWarn, 'Please wait until "Ready" status and try again.');
-    Exit;
-  end;
-  { PROCEED }
-  if (GroupListBox.Text <> '') and (GroupListDates.Text <> '') then
-  begin
-    { REMEMBER USER'S CHOICE }
-    { AUTOMATION WIIL FOLLOW }
-    GroupIdSel:=GroupList[GroupListBox.ItemIndex, 0];
-    GroupNmSel:=GroupList[GroupListBox.ItemIndex, 1];
-    AgeDateSel:=GroupListDates.Text;
-    { REMOVE FILTERS }
-    for iCNT:=1 to sgAgeView.RowCount - 1 do sgAgeView.RowHeights[iCNT]:=sgRowHeight;
-    FilterForm.FilterClearAll;
-    { SWITCH OFF ALL TIMERS }
-    MainForm.SwitchTimers(tmDisabled);
-    { LOAD AGE VIEW FOR SELECTED GROUP }
-    TTReadAgeView.Create(thCallOpenItems, smRanges);
-  end
-    else
-      MsgCall(mcWarn, 'Cannot load selected group.');
+
+    // Wait until "Ready" status
+    if not (StatBar_TXT1.Caption = stReady) then
+    begin
+        MsgCall(mcWarn, 'Please wait until "Ready" status and try again.');
+        Exit;
+    end;
+
+    if (not(string.IsNullOrEmpty(GroupListBox.Text))) and (not(string.IsNullOrEmpty(GroupListDates.Text))) then
+    begin
+
+        // Remember user's choice, automation will follow
+        GroupIdSel:=GroupList[GroupListBox.ItemIndex, 0];
+        GroupNmSel:=GroupList[GroupListBox.ItemIndex, 1];
+        AgeDateSel:=GroupListDates.Text;
+
+        // Remove filters
+        for iCNT:=1 to sgAgeView.RowCount - 1 do
+            sgAgeView.RowHeights[iCNT]:=sgRowHeight;
+
+        FilterForm.FilterClearAll;
+
+        // Turn off all timers
+        MainForm.SwitchTimers(tmDisabled);
+
+        // Load age view for selected group ID
+        TTReadAgeView.Create(thCallOpenItems, smRanges);
+    end
+        else
+            MsgCall(mcWarn, 'Cannot load selected group.');
 end;
 
-{ ---------------------------------------------------------------------------------------------------------------------------------- AGE VIEW | APPLY SORTING }
+/// <summary>
+///     Apply sorting on age view string grid.
+/// </summary>
+
 procedure TMainForm.btnSortApplyClick(Sender: TObject);
 var
-  iCNT: integer;
+    iCNT: integer;
 begin
 
-  if
-    (
-      SortListBox.ItemIndex <> smRanges
-    )
+    if
+        (
+            SortListBox.ItemIndex <> smRanges
+        )
     and
-    (
-      SortListBox.ItemIndex <> smFollowUp
-    )
+        (
+            SortListBox.ItemIndex <> smFollowUp
+        )
     and
-    (
-      SortListBox.ItemIndex <> smTotal
-    )
+        (
+            SortListBox.ItemIndex <> smTotal
+        )
     and
-    (
-      SortListBox.ItemIndex <> smOverdue
-    )
-  then
-    Exit;
+        (
+            SortListBox.ItemIndex <> smOverdue
+        )
+    then
+        Exit;
 
-  { WAIT UNTIL READY }
-  if not (StatBar_TXT1.Caption = stReady) then
-  begin
-    MsgCall(mcWarn, 'Please wait until "Ready" status and try again.');
-    Exit;
-  end;
-  { PROCEED }
-  if (GroupListBox.Text <> '') and (GroupListDates.Text <> '') then
-  begin
-    { REMEMBER USER'S CHOICE }
-    { AUTOMATION WIIL FOLLOW }
-    GroupIdSel:=GroupList[GroupListBox.ItemIndex, 0];
-    GroupNmSel:=GroupList[GroupListBox.ItemIndex, 1];
-    AgeDateSel:=GroupListDates.Text;
-    { REMOVE FILTERS }
-    for iCNT:=1 to sgAgeView.RowCount - 1 do sgAgeView.RowHeights[iCNT]:=sgRowHeight;
-    FilterForm.FilterClearAll;
-    { SWITCH OFF ALL TIMERS }
-    MainForm.SwitchTimers(tmDisabled);
-    { LOAD AGE VIEW FOR SELECTED GROUP }
-    TTReadAgeView.Create(thNullParameter, SortListBox.ItemIndex);
-  end
-    else
-      MsgCall(mcWarn, 'Cannot load selected group.');
+    if not (StatBar_TXT1.Caption = stReady) then
+    begin
+        MsgCall(mcWarn, 'Please wait until "Ready" status and try again.');
+        Exit;
+    end;
+
+    if (not(string.IsNullOrEmpty(GroupListBox.Text))) and (not(string.IsNullOrEmpty(GroupListDates.Text))) then
+    begin
+        // Remember user's choice, automation will follow
+        GroupIdSel:=GroupList[GroupListBox.ItemIndex, 0];
+        GroupNmSel:=GroupList[GroupListBox.ItemIndex, 1];
+        AgeDateSel:=GroupListDates.Text;
+
+        // Remove filters
+        for iCNT:=1 to sgAgeView.RowCount - 1 do
+            sgAgeView.RowHeights[iCNT]:=sgRowHeight;
+
+        FilterForm.FilterClearAll;
+
+        // Turn off all timers
+        MainForm.SwitchTimers(tmDisabled);
+
+        // Load age view for selected group ID
+        TTReadAgeView.Create(thNullParameter, SortListBox.ItemIndex);
+
+    end
+        else
+            MsgCall(mcWarn, 'Cannot load selected group.');
 end;
 
-{ --------------------------------------------------------------------------------------------------------------------------------- OPEN ITEMS | FORCE RELOAD }
+/// <summary>
+///     Reload on open items list on demand.
+/// </summary>
+
 procedure TMainForm.btnReloadClick(Sender: TObject);
 begin
-  { EXIT ON NO CONNECTION }
-  if not(IsConnected) then
-  begin
-    MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
-    Exit;
-  end;
-  { ONLY ADMINISTRATORS ARE ALLOWED }
-  StatBar_TXT1.Caption :=stProcessing;
-  if MainForm.AccessLevel = acADMIN then
-  begin
-    TTReadOpenItems.Create(thNullParameter);
-  end else
-  begin
-    StatBar_TXT1.Caption:=stReady;
-    LogText.Log(EventLogPath, '[Open Items]: User have no R/W access, process halted.');
-  end;
-end;
 
-{ ----------------------------------------------------------------------------------------------------------------------------- ACTIONS | OPEN MAKE AGE PANEL }
-procedure TMainForm.btnMakeGroupClick(Sender: TObject);
-begin
-  cbDump.Checked:=False;
-  { EXIT ON NO CONNECTION }
-  if not(IsConnected) then
-  begin
-    MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
-    Exit;
-  end;
-  if sgOpenItems.RowCount < 2 then Exit;
-  { ONLY ADMINISTRATORS ARE ALLOWED }
-  if MainForm.AccessLevel = acADMIN then
-    if PanelGroupName.Visible then
+    if not(IsConnected) then
     begin
-      PanelGroupName.Visible:=False;
-    end else
+        MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+        Exit;
+    end;
+
+    // Only administrator is allowed
+    StatBar_TXT1.Caption :=stProcessing;
+    if MainForm.AccessLevel = acADMIN then
     begin
-      PanelGroupName.Visible:=True;
-      { SUGGEST THE SAME GROUP NAME AND GROUP ID }
-      EditGroupName.Text:=GroupNmSel;
-      EditGroupID.Text  :=GroupIdSel;
+        TTReadOpenItems.Create(thNullParameter);
     end
     else
     begin
-      StatBar_TXT1.Caption:='Insufficient UAC level.';
-      LogText.Log(EventLogPath, '[Make Group]: User have no R/W access, process halted.');
+        StatBar_TXT1.Caption:=stReady;
+        LogText.Log(EventLogPath, '[Open Items]: User have no R/W access, process halted.');
     end;
+
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------- ACTIONS | MAKE AGING REPORT }
+/// <summary>
+///     Make snapshots for given selected group ID/name.
+/// </summary>
+
+procedure TMainForm.btnMakeGroupClick(Sender: TObject);
+begin
+
+    cbDump.Checked:=False;
+
+    if not(IsConnected) then
+    begin
+        MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+        Exit;
+    end;
+
+    if sgOpenItems.RowCount < 2 then
+        Exit;
+
+    // Only administrator is allowed
+    if MainForm.AccessLevel = acADMIN then
+    begin
+        if PanelGroupName.Visible then
+        begin
+            PanelGroupName.Visible:=False;
+        end
+        else
+        begin
+            PanelGroupName.Visible:=True;
+            // Suggest the same group name and group ID
+            EditGroupName.Text:=GroupNmSel;
+            EditGroupID.Text  :=GroupIdSel;
+        end
+    end
+    else
+    begin
+        StatBar_TXT1.Caption:='Insufficient UAC level.';
+        LogText.Log(EventLogPath, '[Make Group]: User have no R/W access, process halted.');
+    end;
+
+end;
+
+/// <summary>
+///     Make aging report (snapshot).
+/// </summary>
+
 procedure TMainForm.btnMakeGroupAgeClick(Sender: TObject);
 begin
-  if (EditGroupName.Text <> '') and (EditGroupID.Text <> '') then
-  begin
-    { START THREAD WITH NO PARAMETERS PASSED TO AN OBJECT }
-    PanelGroupName.Visible:=False;
-    ReloadCover.Visible   :=False;
-    TTMakeAgeView.Create(MainForm.OSAmount);
-  end
-    else
-      MsgCall(mcWarn, 'Please enter group name and try again.' + CRLF + 'If you will use existing one, then it will be overwritten.');
+
+    if (not(string.IsNullOrEmpty(EditGroupName.Text))) and (not(string.IsNullOrEmpty(EditGroupID.Text))) then
+    begin
+        // Start thread with no parameters passed to an object
+        PanelGroupName.Visible:=False;
+        ReloadCover.Visible   :=False;
+        TTMakeAgeView.Create(MainForm.OSAmount);
+    end
+        else
+            MsgCall(mcWarn, 'Please enter group name and try again.' + CRLF + 'If you will use existing one, then it will be overwritten.');
 end;
 
-{ -------------------------------------------------------------------------------------------------------------------------- USER ADDRESS BOOK | OPEN FROM DB }
+/// <summary>
+///     Address Book - open action.
+/// </summary>
+
 procedure TMainForm.btnOpenABClick(Sender: TObject);
 begin
-  if IsConnected then
-  begin
-    sgAddressBook.SetUpdatedRow(0);
-    TTAddressBook.Create(
-                          adOpenAll,
-                          sgAddressBook,
-                          '',
-                          '',
-                          '',
-                          '',
-                          '',
-                          ''
-                        )
-  end
-  else
-    MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+    if IsConnected then
+    begin
+        sgAddressBook.SetUpdatedRow(0);
+        TTAddressBook.Create(
+            adOpenAll,
+            sgAddressBook,
+            '',
+            '',
+            '',
+            '',
+            '',
+            ''
+        )
+    end
+        else
+            MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------ USER ADDRESS BOOK | UPDATE RECORDS }
+/// <summary>
+///     Address Book - update records.
+/// </summary>
+
 procedure TMainForm.btnUpdateABClick(Sender: TObject);
 begin
-  if not(sgAddressBook.Visible) then
-  begin
-    MsgCall(mcWarn, 'Please open Address Book first.');
-    Exit;
-  end;
-  if IsConnected then
-    TTAddressBook.Create(
-                          adUpdate,
-                          sgAddressBook,
-                          '',
-                          '',
-                          '',
-                          '',
-                          '',
-                          ''
-                        )
-      else
+
+    if not(sgAddressBook.Visible) then
+    begin
+        MsgCall(mcWarn, 'Please open Address Book first.');
+        Exit;
+    end;
+
+    if IsConnected then
+        TTAddressBook.Create(
+            adUpdate,
+            sgAddressBook,
+            '',
+            '',
+            '',
+            '',
+            '',
+            ''
+        )
+    else
         MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
 end;
 
-{ --------------------------------------------------------------------------------------------------------------------------------- USER ADDRESS BOOK | CLOSE }
+/// <summary>
+///     Address Book - clear all content of populated string grid.
+/// </summary>
+
 procedure TMainForm.btnCloseABClick(Sender: TObject);
 begin
-  if MsgCall(mcQuestion2, 'Are you sure you want to close address book?') = IDYES then
-  begin
-    sgAddressBook.SetUpdatedRow(0);
-    sgAddressBook.ClearAll(2, 1, 1, True);
-    sgAddressBook.Visible:=False;
-  end;
+    if MsgCall(mcQuestion2, 'Are you sure you want to close address book?') = IDYES then
+    begin
+        sgAddressBook.SetUpdatedRow(0);
+        sgAddressBook.ClearAll(2, 1, 1, True);
+        sgAddressBook.Visible:=False;
+    end;
 end;
 
-{ ---------------------------------------------------------------------------------------------------------------------------- USER ADDRESS BOOK | EXPORT ALL }
+/// <summary>
+///     Address Book - export all content to CSV file.
+/// </summary>
+
 procedure TMainForm.btnExportABClick(Sender: TObject);
 begin
-  if not(sgAddressBook.Visible) then
-  begin
-    MsgCall(mcWarn, 'Please open Address Book first.');
-    Exit;
-  end;
-  TTAddressBook.Create(
-                        adExport,
-                        sgAddressBook,
-                        '',
-                        '',
-                        '',
-                        '',
-                        '',
-                        ''
-                      );
+
+    if not(sgAddressBook.Visible) then
+    begin
+        MsgCall(mcWarn, 'Please open Address Book first.');
+        Exit;
+    end;
+    TTAddressBook.Create(
+        adExport,
+        sgAddressBook,
+        '',
+        '',
+        '',
+        '',
+        '',
+        ''
+    );
 end;
 
-{ -------------------------------------------------------------------------------------------------------------------------------- SECTION LIST | ADD SECTION }
+/// <summary>
+///     Settings panel - section list. Add new section.
+/// </summary>
+
 procedure TMainForm.imgSectionAddClick(Sender: TObject);
 var
-  iCNT:  integer;
+    iCNT:  integer;
 begin
-  { ADD ROW AT THE END OF THE LIST }
-  sgListSection.RowCount:=sgListSection.RowCount + 1;
-  sgListSection.Cells[1, sgListSection.RowCount]:= '';
-  for iCNT:= 1 to sgListSection.RowCount do sgListSection.Cells[0, iCNT]:=IntToStr(iCNT);
+
+    // Add row at the end of the list
+    sgListSection.RowCount:=sgListSection.RowCount + 1;
+    sgListSection.Cells[1, sgListSection.RowCount]:= '';
+
+    for iCNT:= 1 to sgListSection.RowCount do
+        sgListSection.Cells[0, iCNT]:=IntToStr(iCNT);
+
 end;
 
-{ ----------------------------------------------------------------------------------------------------------------------------- SECTION LIST | DELETE SECTION }
+/// <summary>
+///     Settings panel - section list. Delete selected section.
+/// </summary>
+
 procedure TMainForm.imgSectionRemoveClick(Sender: TObject);
 var
-  AppSettings:  TSettings;
-  iCNT:         integer;
+    Settings:   ISettings;
+    iCNT:       integer;
 begin
-  { ASK USER IF HE IS SURE BECAUSE ONCE DONE CANNOT BE UNDONE }
-  if MsgCall(mcQuestion2, 'Are you sure you want to delete this section? It cannot be undone.') = IDNO then exit;
-  if sgListSection.RowCount = 1 then exit;
-  { DELETE SECTION FROM TMIg }
-  AppSettings:=TSettings.Create;
-  try
-    AppSettings.TMIG.EraseSection(sgListSection.Cells[1, sgListSection.Row]);
-    AppSettings.Encode(AppConfig);
-  finally
-    AppSettings.Free;
-  end;
-  { DELETE SELECTED ROW FROM STRING GRID }
-  sgListSection.DeleteRowFrom(1, 1);
-  { RE-NUMBER }
-  for iCNT := 1 to sgListSection.RowCount do
-    sgListSection.Cells[0, iCNT]:=IntToStr(iCNT);
+
+    if MsgCall(mcQuestion2, 'Are you sure you want to delete this section? It cannot be undone.') = IDNO then exit;
+    if sgListSection.RowCount = 1 then exit;
+
+    // Remove given section
+    Settings:=TSettings.Create;
+    Settings.DeleteSection(sgListSection.Cells[1, sgListSection.Row]);
+    Settings.Encode(AppConfig);
+
+    // Remove from string grid
+    sgListSection.DeleteRowFrom(1, 1);
+
+    // Re-number
+    for iCNT := 1 to sgListSection.RowCount do
+        sgListSection.Cells[0, iCNT]:=IntToStr(iCNT);
+
 end;
 
-{ --------------------------------------------------------------------------------------------------------------------------------- SECTION LIST | ALLOW EDIT }
+/// <summary>
+///     Settings panel - section list. Allow edit. We require separate action for administrator to prevent from mistake changes etc.
+/// </summary>
+
 procedure TMainForm.imgAllowEditClick(Sender: TObject);
 begin
-  if Text50.Font.Style = [fsBold] then
-  begin
-    sgListSection.Options:=sgListSection.Options - [goEditing];
-    sgListValue.Options  :=sgListValue.Options   - [goEditing];
-    Text50.Font.Style    :=[];
-  end else
-  begin
-    sgListSection.Options:=sgListSection.Options + [goEditing];
-    sgListValue.Options  :=sgListValue.Options   + [goEditing];
-    Text50.Font.Style    :=[fsBold];
-  end;
+
+    if Text50.Font.Style = [fsBold] then
+    begin
+        sgListSection.Options:=sgListSection.Options - [goEditing];
+        sgListValue.Options  :=sgListValue.Options   - [goEditing];
+        Text50.Font.Style    :=[];
+    end
+    else
+    begin
+        sgListSection.Options:=sgListSection.Options + [goEditing];
+        sgListValue.Options  :=sgListValue.Options   + [goEditing];
+        Text50.Font.Style    :=[fsBold];
+    end;
+
 end;
 
-{ -------------------------------------------------------------------------------------------------------------------------------------------- OPEN EVENT LOG }
+
+/// <summary>
+///     Settings panel - open event log in separate window.
+/// </summary>
+
 procedure TMainForm.imgEventLogClick(Sender: TObject);
 begin
-  WndCall(EventForm, stModeless);
+    WndCall(EventForm, stModeless);
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------------------- VALUES LIST | ADD KEY }
+/// <summary>
+///     Settings panel - section list. Add key to selected section.
+/// </summary>
+
 procedure TMainForm.imgKeyAddClick(Sender: TObject);
 var
-  iCNT:  integer;
+    iCNT:  integer;
 begin
-  { ADD ROW AT THE END OF LIST }
-  iCNT:=sgListValue.RowCount + 1;
-  sgListValue.RowCount:=iCNT;
-  { MAKE SURE WE ADD EMPTY ROW }
-  sgListValue.Cells[1, iCNT - 1]:='';
-  sgListValue.Cells[2, iCNT - 1]:='';
-  for iCNT:= 1 to sgListValue.RowCount do sgListValue.Cells[0, iCNT]:=IntToStr(iCNT);
+
+    // Add row at the end of the list
+    iCNT:=sgListValue.RowCount + 1;
+    sgListValue.RowCount:=iCNT;
+
+    // Make sure we add empty row
+    sgListValue.Cells[1, iCNT - 1]:='';
+    sgListValue.Cells[2, iCNT - 1]:='';
+
+    for iCNT:= 1 to sgListValue.RowCount do
+        sgListValue.Cells[0, iCNT]:=IntToStr(iCNT);
+
 end;
 
-{ ---------------------------------------------------------------------------------------------------------------------------------- VALUES LIST | DELETE KEY }
+/// <summary>
+///     Settings panel - remove key with value from selected section.
+/// </summary>
+
 procedure TMainForm.imgKeyRemoveClick(Sender: TObject);
 var
-  AppSettings:  TSettings;
-  iCNT:         integer;
+    Settings:  ISettings;
+    iCNT:      integer;
 begin
-  { ASK USER IF HE IS SURE BECAUSE ONCE DONE CANNOT BE UNDONE }
-  if MsgCall(mcQuestion2, 'Are you sure you want to delete this key? It cannot be undone.') = IDNO then Exit;
-  { CHECK FOR LAST ROW }
-  if sgListValue.RowCount = 1 then exit;
-  { DELETE SECTION FROM TMIg }
-  AppSettings:=TSettings.Create;
-  try
-    AppSettings.TMIG.DeleteKey(sgListSection.Cells[1, sgListSection.Row], sgListValue.Cells[1, sgListValue.Row]);
-    AppSettings.Encode(AppConfig);
-  finally
-    AppSettings.Free;
-  end;
-  { DELETE SELECTED ROW FROM STRING GRID }
-  sgListValue.DeleteRowFrom(1, 1);
-  { RE-NUMBER }
-  for iCNT:= 1 to sgListValue.RowCount do sgListValue.Cells[0, iCNT]:=IntToStr(iCNT);
+
+    if MsgCall(mcQuestion2, 'Are you sure you want to delete this key? It cannot be undone.') = IDNO then Exit;
+
+    // Check for last row
+    if sgListValue.RowCount = 1 then
+        exit;
+
+    // Remove key
+    Settings:=TSettings.Create;
+    Settings.DeleteKey(sgListSection.Cells[1, sgListSection.Row], sgListValue.Cells[1, sgListValue.Row]);
+    Settings.Encode(AppConfig);
+
+    // Remove from string grid list
+    sgListValue.DeleteRowFrom(1, 1);
+
+    // Re-number
+    for iCNT:= 1 to sgListValue.RowCount do
+        sgListValue.Cells[0, iCNT]:=IntToStr(iCNT);
+
 end;
 
-{ ------------------------------------------------------------------------------------------------------------------------ VALUES, KEYS & SECTIONS | SAVE ALL }
+/// <summary>
+///     Settings panel - save all values and keys.
+/// </summary>
+
 procedure TMainForm.imgUpdateValuesClick(Sender: TObject);
 var
-  AppSettings:  TSettings;
-  iCNT:         integer;
+    Settings:  ISettings;
+    iCNT:      integer;
 begin
-  { ASK USER IF HE IS SURE BECAUSE ONCE DONE CANNOT BE UNDONE }
-  if MsgCall(mcQuestion2, 'Are you sure you want to save all the changes? It cannot be undone.') = IDNO then exit;
-  { CHECK IF THERE IS NO EMPTY KEYS }
-  for iCNT:= 1 to (sgListValue.RowCount - 1) do
-    if sgListValue.Cells[1, iCNT] = '' then
-    begin
-      MsgCall(mcWarn, 'Cannot save. At least one key has no label.');
-      Exit;
-    end;
-  AppSettings:=TSettings.Create;
-  { SAVE TO SETTINGS FILE }
-  try
-    { WRITE ALL KEYS AND VALUES INTO TMEMINI }
+
+    if MsgCall(mcQuestion2, 'Are you sure you want to save all the changes? It cannot be undone.') = IDNO then exit;
+
+    // Check if there is no empty keys
     for iCNT:= 1 to (sgListValue.RowCount - 1) do
-      AppSettings.TMIG.WriteString(sgListSection.Cells[1, sgListSection.Row], sgListValue.Cells[1, iCNT], sgListValue.Cells[2, iCNT]);
-    AppSettings.Encode(AppConfig);
-  finally
-    AppSettings.Free;
-  end;
-  MsgCall(mcInfo, 'All Keys and its values has been saved successfully.');
+    begin
+        if string.IsNullOrEmpty(sgListValue.Cells[1, iCNT]) then
+        begin
+            MsgCall(mcWarn, 'Cannot save. At least one key has no label.');
+            Exit;
+        end;
+    end;
+
+    Settings:=TSettings.Create;
+
+    // Save to settings file all the keys and values
+    for iCNT:= 1 to (sgListValue.RowCount - 1) do
+        Settings.SetStringValue(sgListSection.Cells[1, sgListSection.Row], sgListValue.Cells[1, iCNT], sgListValue.Cells[2, iCNT]);
+
+    Settings.Encode(AppConfig);
+
+    MsgCall(mcInfo, 'All Keys and its values has been saved successfully.');
+
 end;
 
-{ ----------------------------------------------------------------------------------------------------------------------------------------- SAVE NEW PASSWORD }
+/// <summary>
+///     Settings panel - save new password.
+/// </summary>
+
 procedure TMainForm.btnPassUpdateClick(Sender: TObject);
 begin
 
-  { ------------------------------------------------------------- ! CHECK FIELDS ! -------------------------------------------------------------------------- }
+    // Check fields
 
-  if
-     (
-       EditCurrentPassword.Text <> ''
-     )
-     and
-     (
-       EditNewPassword.Text <> ''
-     )
-     and
-     (
-       EditNewPasswordConfirmation.Text <> ''
-     )
-  then
-  begin
-
-    { -------------------------------------------------------- ! CHECK GIVEN PASSWORD ! --------------------------------------------------------------------- }
-
-    if not(CheckGivenPassword(EditPassword.Text)) then
+    if
+        (
+            not(string.IsNullOrEmpty(EditCurrentPassword.Text))
+        )
+    and
+        (
+            not(string.IsNullOrEmpty(EditNewPassword.Text))
+        )
+    and
+        (
+            not(string.IsNullOrEmpty(EditNewPasswordConfirmation.Text))
+        )
+    then
     begin
-      MsgCall(mcWarn, 'Incorrect password, please re-type it and try again.');
-      Exit;
-    end;
 
-    { ---------------------------------------------------------- ! INCORRECT MATCH ! ------------------------------------------------------------------------ }
+        // Check given password
 
-    if EditNewPassword.Text <> EditNewPasswordConfirmation.Text then
-    begin
-      MsgCall(mcWarn, 'New password and its confirmation does not match, please re-type it and try again.');
-      Exit;
+        if not(CheckGivenPassword(EditPassword.Text)) then
+        begin
+            MsgCall(mcWarn, 'Incorrect password, please re-type it and try again.');
+            Exit;
+        end;
+
+        // Incorrent match
+
+        if EditNewPassword.Text <> EditNewPasswordConfirmation.Text then
+        begin
+            MsgCall(mcWarn, 'New password and its confirmation does not match, please re-type it and try again.');
+            Exit;
+        end
+        else
+
+        // Hash and save
+
+        begin
+            if SetNewPassword(EditNewPassword.Text) then
+            begin
+                MsgCall(mcInfo, 'New password has been saved.');
+                btnPassUpdate.Enabled:=False;
+                EditCurrentPassword.Enabled:=False;
+                EditNewPassword.Enabled:=False;
+                EditNewPasswordConfirmation.Enabled:=False;
+                EditCurrentPassword.Text:='';
+                EditNewPassword.Text:='';
+                EditNewPasswordConfirmation.Text:='';
+            end
+            else
+
+            // Cannot hash and save
+
+            begin
+                MsgCall(mcError, 'Cannot save new password. Please contact IT support.');
+            end;
+
+        end;
+
     end
     else
 
-    { ------------------------------------------------------------ ! HASH AND SAVE ! ------------------------------------------------------------------------ }
+    // No fields can be empty
 
     begin
-      if SetNewPassword(EditNewPassword.Text) then
-      begin
-        MsgCall(mcInfo, 'New password has been saved.');
-        btnPassUpdate.Enabled:=False;
-        EditCurrentPassword.Enabled:=False;
-        EditNewPassword.Enabled:=False;
-        EditNewPasswordConfirmation.Enabled:=False;
-        EditCurrentPassword.Text:='';
-        EditNewPassword.Text:='';
-        EditNewPasswordConfirmation.Text:='';
-      end
-      else
-
-      { ------------------------------------------------------ ! CANNOT HASH AND SAVE ! --------------------------------------------------------------------- }
-
-      begin
-        MsgCall(mcError, 'Cannot save new password. Please contact IT support.');
-      end;
-
+        MsgCall(mcWarn, 'Please provide with current password, new password and its confirmation.');
     end;
-
-  end
-  else
-
-  { --------------------------------------------------------- ! NO FIELDS CAN BE EMPTY ! -------------------------------------------------------------------- }
-
-  begin
-    MsgCall(mcWarn, 'Please provide with current password, new password and its confirmation.');
-  end;
 
 end;
 
-{ ---------------------------------------------------------------------------------------------------------------------------------------------------- UNLOCK }
+/// <summary>
+///     Settings panel - unlock panel with provided password.
+/// </summary>
+
 procedure TMainForm.btnUnlockClick(Sender: TObject);
 var
-  List:     TStringList;
-  AppSet:   TSettings;
-  UserAcc:  TDataTables;
-  iCNT:     integer;
-  jCNT:     integer;
+    List:       TStringList;
+    Settings:   ISettings;
+    UserAcc:    TDataTables;
+    iCNT:       integer;
+    jCNT:       integer;
 begin
 
-  { ----------------------------------------------------------- ! NO PASSWORD GIVEN ! ----------------------------------------------------------------------- }
+    // NO PASSWORD GIVEN
 
-  if btnUnlock.Caption = 'Lock' then
-  begin
-    SetSettingsPanel(spLock);
-    Exit;
-  end;
+    if btnUnlock.Caption = 'Lock' then
+    begin
+        SetSettingsPanel(spLock);
+        Exit;
+    end;
 
-  if EditPassword.Text = '' then
-  begin
-    MsgCall(mcWarn, 'Please provide with password.');
-    Exit;
-  end
-  else
+    if EditPassword.Text = '' then
+    begin
+        MsgCall(mcWarn, 'Please provide with password.');
+        Exit;
+    end
+    else
 
-  { ------------------------------------------------------------ ! PASSWORD IS VALID ! ---------------------------------------------------------------------- }
+    // PASSWORD IS VALID
 
-  if CheckGivenPassword(EditPassword.Text) then
-  begin
-    { ENABLE CONTROLS }
-    SetSettingsPanel(spUnLock);
+    if CheckGivenPassword(EditPassword.Text) then
+    begin
 
-    { POPULATE STRING GRIDS }
-    List:=TStringList.Create();
-    AppSet:=TSettings.Create;
-    try
-      AppSet.TMIG.ReadSections(List);
-      sgListSection.RowCount:=List.Count;
-      jCNT:=1;
-      for iCNT:=0 to List.Count - 1 do
-      begin
-        if List.Strings[iCNT] <> PasswordSection then
-        begin
-          sgListSection.Cells[0, jCNT]:=IntToStr(jCNT);
-          sgListSection.Cells[1, jCNT]:=List.Strings[iCNT];
-          inc(jCNT);
+        { ENABLE CONTROLS }
+        SetSettingsPanel(spUnLock);
+
+        { POPULATE STRING GRIDS }
+        List:=TStringList.Create();
+        Settings:=TSettings.Create;
+
+        try
+            Settings.GetSections(List);
+            sgListSection.RowCount:=List.Count;
+            jCNT:=1;
+
+            for iCNT:=0 to List.Count - 1 do
+            begin
+                if List.Strings[iCNT] <> PasswordSection then
+                begin
+                    sgListSection.Cells[0, jCNT]:=IntToStr(jCNT);
+                    sgListSection.Cells[1, jCNT]:=List.Strings[iCNT];
+                    inc(jCNT);
+                end;
+            end;
+
+        finally
+            List.Free;
         end;
-      end;
-    finally
-      List.Free;
-      AppSet.Free;
+
+        { GET UAC AND GROUPS }
+        UserAcc:=TDataTables.Create(DbConnect);
+        try
+            UserAcc.OpenTable(TblUAC);    UserAcc.SqlToGrid(sgUAC,    UserAcc.ExecSQL, False, True);
+            UserAcc.OpenTable(TblGroups); UserAcc.SqlToGrid(sgGroups, UserAcc.ExecSQL, False, True);
+        finally
+            UserAcc.Free;
+            sgUAC.SetColWidth   (10, 20, 400);
+            sgGroups.SetColWidth(10, 20, 400);
+        end;
+
+        { STRING GRIDS DIMENSIONS }
+        sgListValue.SetColWidth(25, 30, 400);
+        sgListSection.SetColWidth(25, 30, 400);
+        sgUAC.SetColWidth(10, 20, 400);
+        sgGroups.SetColWidth(10, 20, 400);
+
+        { CLEAR EDIT BOX FROM PROVIDED PASWORD }
+        EditPassword.Text:='';
+
+    end
+    else
+
+    // INVALID PASSWORD
+
+    begin
+        MsgCall(mcWarn, 'Incorrect password, please re-type it and try again.');
+        EditPassword.Text:='';
     end;
-
-    { GET UAC AND GROUPS }
-    UserAcc:=TDataTables.Create(DbConnect);
-    try
-      UserAcc.OpenTable(TblUAC);    UserAcc.SqlToGrid(sgUAC,    UserAcc.ExecSQL, False, True);
-      UserAcc.OpenTable(TblGroups); UserAcc.SqlToGrid(sgGroups, UserAcc.ExecSQL, False, True);
-    finally
-      UserAcc.Free;
-      sgUAC.SetColWidth   (10, 20, 400);
-      sgGroups.SetColWidth(10, 20, 400);
-    end;
-
-    { STRING GRIDS DIMENSIONS }
-    sgListValue.SetColWidth(25, 30, 400);
-    sgListSection.SetColWidth(25, 30, 400);
-    sgUAC.SetColWidth(10, 20, 400);
-    sgGroups.SetColWidth(10, 20, 400);
-
-    { CLEAR EDIT BOX FROM PROVIDED PASWORD }
-    EditPassword.Text:='';
-
-  end
-  else
-
-  { ------------------------------------------------------------- ! INVALID PASSWORD ! ---------------------------------------------------------------------- }
-
-  begin
-    MsgCall(mcWarn, 'Incorrect password, please re-type it and try again.');
-    EditPassword.Text:='';
-  end;
 
 end;
 
