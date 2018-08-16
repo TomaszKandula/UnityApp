@@ -88,12 +88,12 @@ begin
     Database:=TDataTables.Create(MainForm.DbConnect);
 
     try
-        Database.Columns.Add(TAddressBook.EMAILS);
+        Database.Columns.Add(TAddressBook.ESTATEMENTS);
         Database.CustFilter:=WHERE + TAddressBook.SCUID + EQUAL + Scuid;
         Database.OpenTable(TblAddressbook);
 
         if Database.DataSet.RecordCount > 0 then
-            Result:=MainForm.OleGetStr(Database.DataSet.Fields[TAddressBook.EMAILS].Value)
+            Result:=MainForm.OleGetStr(Database.DataSet.Fields[TAddressBook.ESTATEMENTS].Value)
 
     finally
         Database.Free;
@@ -180,10 +180,10 @@ begin
 
     // INITIALIZE LIST VIEW
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='LP';
+    lsColumns.Caption:='Lp';
     lsColumns.Width  :=40;
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='CUID';
+    lsColumns.Caption:='Scuid';
     lsColumns.Width  :=80;
     lsColumns:=CustomerList.Columns.Add;
     lsColumns.Caption:='Customer Name';

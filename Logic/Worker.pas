@@ -1605,7 +1605,7 @@ begin
                 if not FSeries then
                     MainForm.ExecMessage(False, mcError, 'Account Statement cannot be sent. Please contact IT support.')
                         else
-                            MainForm.ExecMessage(False, mmSendMany, '0');
+                            MainForm.ExecMessage(False, mmSendMany, '-1');
 
             end;
 

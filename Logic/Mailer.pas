@@ -11,7 +11,7 @@ uses
 type
 
     /// <summary>
-    ///     Base class responsible for sending email.
+    ///     Base class responsible for sending email (using CDOSYS).
     /// </summary>
 
     TMailer = class
@@ -219,6 +219,8 @@ begin
     DataBase:=TDataTables.Create(MainForm.DbConnect);
     try
 
+        // skip mailto if serios "on"
+
         // Get "MAILTO"
         DataBase.CustFilter:=WHERE + TAddressBook.SCUID + EQUAL + QuotedStr(SCUID);
         DataBase.OpenTable(TblAddressbook);
@@ -262,13 +264,14 @@ procedure TDocument.BuildHTML;
     // Common variables
 
     var
-        iCNT: integer;
-        Pos:  integer;
-        Col1: integer;
-        Col2: integer;
-        Col3: integer;
-        Col4: integer;
-        Col5: integer;
+        iCNT:       integer;
+        Pos:        integer;
+        Col1:       integer;
+        Col2:       integer;
+        Col3:       integer;
+        Col4:       integer;
+        Col5:       integer;
+        CuidCol:    integer;
 
     // Nested method
 
@@ -289,6 +292,11 @@ procedure TDocument.BuildHTML;
 
 begin
 
+    // Get all column numbers
+
+    CuidCol:=OpenItems.ReturnColumn(TOpenitems.CUID, 1, 1);
+
+
     Pos:=0;
 
     HTMLTable:=CommonHTMLTable;
@@ -297,8 +305,10 @@ begin
     // Open items to HTML table
     for iCNT:=1 to OpenItems.RowCount - 1 do
     begin
-        if OpenItems.Cells[OpenItems.ReturnColumn(TOpenitems.CUID, 1, 1), iCNT] = CUID then
+        if OpenItems.Cells[CuidCol, iCNT] = CUID then
+        //if OpenItems.Cells[34, iCNT] = CUID then
         begin
+
             if Pos = 0 then Pos:=iCNT;
 
             // Statement conditions
@@ -380,6 +390,9 @@ end;
 /// </summary>
 
 function TDocument.SendDocument;
+
+var RAND: integer;
+
 begin
     Result:=False;
 
@@ -409,7 +422,8 @@ begin
         //Result   :=SendNow;
 
         // Debug lines
-        //SaveOutput('i:\test.html');
+        RAND:=Random(100000);
+        SaveOutput('i:\test' + IntToStr(RAND) + '.html');
         Result:=True;
 
     end;

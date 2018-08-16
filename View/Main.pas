@@ -860,7 +860,7 @@ begin
             // Mass Mailer (e-mail has been sent successfully), call from worker thread
             if Msg.WParam = 16 then
             begin
-                if PChar(Msg.LParam) <> '0' then
+                if PChar(Msg.LParam) > '-1' then
                     ViewMailerForm.CustomerList.Items[ StrToInt( PChar(Msg.LParam) ) ].SubItems[3]:='Sent';
             end;
 
@@ -2655,7 +2655,7 @@ begin
         if (sgAgeView.Selection.Top - sgAgeView.Selection.Bottom) = 0 then
         begin
             Item:=TrackerForm.CustomerList.Items.Add;
-            Item.Caption:='1';
+            Item.Caption:=IntToStr(sgAgeView.Row);
             Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.CUID, 1, 1),           sgAgeView.Row]);
             Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME, 1, 1), sgAgeView.Row]);
         end
@@ -2727,7 +2727,7 @@ begin
         if (sgAgeView.Selection.Top - sgAgeView.Selection.Bottom) = 0 then
         begin
             Item:=ViewMailerForm.CustomerList.Items.Add;
-            Item.Caption:='1';
+            Item.Caption:=IntToStr(sgAgeView.Row);
             CustName  :=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), sgAgeView.Row];
             CustNumber:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), sgAgeView.Row];
             CoCode    :=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCO_CODE,         1, 1), sgAgeView.Row];
