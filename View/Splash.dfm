@@ -111,7 +111,7 @@ object SplashForm: TSplashForm
   object TextFooter2B: TLabel
     AlignWithMargins = True
     Left = 160
-    Top = 439
+    Top = 431
     Width = 529
     Height = 13
     Cursor = crAppStart
@@ -132,7 +132,7 @@ object SplashForm: TSplashForm
   object TextFooterA: TLabel
     AlignWithMargins = True
     Left = 223
-    Top = 421
+    Top = 413
     Width = 393
     Height = 13
     Cursor = crAppStart
@@ -186,7 +186,7 @@ object SplashForm: TSplashForm
   end
   object CentreText: TLabel
     Left = 302
-    Top = 335
+    Top = 311
     Width = 242
     Height = 16
     Cursor = crAppStart
@@ -201,7 +201,7 @@ object SplashForm: TSplashForm
   end
   object FireMonkey: TImage
     Left = 277
-    Top = 319
+    Top = 295
     Width = 19
     Height = 32
     AutoSize = True

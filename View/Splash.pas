@@ -22,8 +22,8 @@ type
         TextProgress: TLabel;
         ShapeProgressBar: TShape;
         ShapeBackground: TShape;
-    CentreText: TLabel;
-    FireMonkey: TImage;
+        CentreText: TLabel;
+        FireMonkey: TImage;
     protected
 //        procedure CreateParams(var Params: TCreateParams); override;
     end;

@@ -135,7 +135,6 @@ type
         procedure ClearAll;
         procedure MakePhoneCall;
         procedure LoadCustomer(Direction: integer);
-        procedure SendAccountStatement(Layout: integer; Salut: string; Mess: string; IsOverdue: boolean);
         procedure ClearFollowUp;
         procedure SaveCustomerDetails;
         procedure SaveGeneralComment;
@@ -561,29 +560,6 @@ begin
         MainForm.MsgCall(mcWarn, 'Unexpected error has occured. Please close the window and try again.');
     end;
 
-end;
-
-/// <summary>
-///     Send account standard statement.
-/// </summary>
-
-procedure TActionsForm.SendAccountStatement(Layout: integer; Salut: string; Mess: string; IsOverdue: boolean);
-begin
-    TTSendAccountStatement.Create(
-        False,
-        Layout,
-        'Account Statement',
-        Salut,
-        Mess,
-        IsOverdue,
-        OpenItemsGrid,
-        SCUID,
-        MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUID,            1, 1), MainForm.sgAgeView.Row],
-        MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), MainForm.sgAgeView.Row],
-        MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), MainForm.sgAgeView.Row],
-        MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCO_CODE,         1, 1), MainForm.sgAgeView.Row],
-                                 MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fAGENT,           1, 1), MainForm.sgAgeView.Row]
-    );
 end;
 
 /// <summary>
@@ -1079,7 +1055,21 @@ begin
     if MainForm.MsgCall(mcQuestion2, 'Are you absolutely sure you want to send it, right now?') = IDNO
         then Exit;
 
-    SendAccountStatement(maDefined, '', '', False);
+    TTSendAccountStatement.Create(
+        False,
+        maDefined,
+        'Account Statement',
+        '',
+        '',
+        False,
+        OpenItemsGrid,
+        SCUID,
+        MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUID,            1, 1), MainForm.sgAgeView.Row],
+        MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), MainForm.sgAgeView.Row],
+        MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), MainForm.sgAgeView.Row],
+        MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCO_CODE,         1, 1), MainForm.sgAgeView.Row],
+        MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fAGENT,           1, 1), MainForm.sgAgeView.Row]
+    );
 
 end;
 

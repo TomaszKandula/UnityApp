@@ -720,7 +720,7 @@ type
         function   ShowReport(ReportNumber: cardinal): cardinal;
         procedure  CopyFile(const Source, Dest: string);
         procedure  ResetTabsheetButtons;
-        procedure  UnfoldReportsTab(Header: TPanel; Panel: TPanel);
+        procedure  UnfoldReportsTab(Header: TPanel; Panel: TPanel; ShouldHide: boolean = false);
         procedure  LoadingAnimation(GIFImage: TImage; Grid: TStringGrid; GridPanel: TPanel; State: integer);
         procedure  SetPanelBorders;
         procedure  SetGridColumnWidths;
@@ -801,7 +801,7 @@ end;
 
 procedure TMainForm.WndProc(var Msg: Messages.TMessage);
 var
-  CUID:       string;
+    CUID:   string;
 begin
     inherited;
 
@@ -831,7 +831,7 @@ begin
         // Debug line
         DebugMsg('WM_GETINFO RECEIVED');
 
-        // Show message window, call from worer thread
+        // Show message window, call from worker thread
         if ( (Msg.WParam > 0) and (Msg.WParam <= 4) ) and (not(string.IsNullOrEmpty(PChar(Msg.LParam)))) then
             MainForm.MsgCall(Msg.WParam, PChar(Msg.LParam));
 
@@ -857,7 +857,15 @@ begin
                 MainForm.StatBar_TXT7.Caption   :='Connection lost, re-connecting...';
             end;
 
+            // Mass Mailer (e-mail has been sent successfully), call from worker thread
+            if Msg.WParam = 16 then
+            begin
+                if PChar(Msg.LParam) <> '0' then
+                    ViewMailerForm.CustomerList.Items[ StrToInt( PChar(Msg.LParam) ) ].SubItems[3]:='Sent';
+            end;
+
         end;
+
     end;
 
     // RECEIVE MESSAGE FROM EXTERNAL APPLICATION ----------------------------------------------------------------------------------------------------------- //
@@ -1406,20 +1414,30 @@ end;
 ///     button panels must be also extended.
 /// </remarks>
 
-procedure TMainForm.UnfoldReportsTab(Header: TPanel; Panel: TPanel);
+procedure TMainForm.UnfoldReportsTab(Header: TPanel; Panel: TPanel; ShouldHide: boolean = false);
 begin
-    if Panel.Height > 32 then
+
+    if not(ShouldHide) then
     begin
-        // Fold
-        Panel.Height:=32;
-        Header.Height:=57;
+        if Panel.Height > 32 then
+        begin
+            // Fold
+            Panel.Height:=32;
+            Header.Height:=57;
+        end
+    else
+        begin
+            // Unfold
+            Panel.Height:=116;
+            Header.Height:=Panel.Height + 13;
+        end;
     end
     else
     begin
-        // Unfold
-        Panel.Height:=116;
-        Header.Height:=Panel.Height + 13;
+        Panel.Height:=32;
+        Header.Height:=57;
     end;
+
 end;
 
 /// <summary>
@@ -2717,7 +2735,7 @@ begin
             Item.SubItems.Add(SCUID);
             Item.SubItems.Add(CustName);
             Item.SubItems.Add('Not Found');
-            //Item.SubItems.Add('No');
+            Item.SubItems.Add('No');
         end
         // Many customers
         else
@@ -2735,7 +2753,7 @@ begin
                     Item.SubItems.Add(SCUID);
                     Item.SubItems.Add(CustName);
                     Item.SubItems.Add('Not Found');
-                    //Item.SubItems.Add('No');
+                    Item.SubItems.Add('No');
                 end;
             end;
         end;
@@ -4963,6 +4981,7 @@ procedure TMainForm.AppHeaderClick(Sender: TObject);
 begin
     if AppHeader.Height = 13 then
     begin
+        UnfoldReportsTab(AppHeader, btnReports, True);
         AppHeader.Height:=57;
         AppHeader.Cursor:=crDefault;
         AppHeader.Color:=clWhite;
@@ -4974,6 +4993,7 @@ procedure TMainForm.imgHideBarClick(Sender: TObject);
 begin
     if AppHeader.Height > 13 then
     begin
+        UnfoldReportsTab(AppHeader, btnReports, True);
         AppHeader.Height:=13;
         AppHeader.Cursor:=crHandPoint;
         AppHeader.Color:=clWhite;
@@ -4983,6 +5003,7 @@ end;
 
 procedure TMainForm.txtStartClick(Sender: TObject);
 begin
+    UnfoldReportsTab(AppHeader, btnReports, True);
     MyPages.ActivePage:=TabSheet9;
     ResetTabsheetButtons;
     txtStart.Font.Style:=[fsBold];
@@ -5008,6 +5029,7 @@ end;
 
 procedure TMainForm.txtDebtorsClick(Sender: TObject);
 begin
+    UnfoldReportsTab(AppHeader, btnReports, True);
     MyPages.ActivePage:=TabSheet1;
     ResetTabsheetButtons;
     txtDebtors.Font.Style:=[fsBold];
@@ -5016,6 +5038,7 @@ end;
 
 procedure TMainForm.txtTrackerClick(Sender: TObject);
 begin
+    UnfoldReportsTab(AppHeader, btnReports, True);
     MyPages.ActivePage:=TabSheet4;
     ResetTabsheetButtons;
     txtTracker.Font.Style:=[fsBold];
@@ -5024,6 +5047,7 @@ end;
 
 procedure TMainForm.txtAddressBookClick(Sender: TObject);
 begin
+    UnfoldReportsTab(AppHeader, btnReports, True);
     MyPages.ActivePage:=TabSheet3;
     ResetTabsheetButtons;
     txtAddressBook.Font.Style:=[fsBold];
@@ -5032,6 +5056,7 @@ end;
 
 procedure TMainForm.txtOpenItemsClick(Sender: TObject);
 begin
+    UnfoldReportsTab(AppHeader, btnReports, True);
     MyPages.ActivePage:=TabSheet2;
     ResetTabsheetButtons;
     txtOpenItems.Font.Style:=[fsBold];
@@ -5050,6 +5075,7 @@ end;
 
 procedure TMainForm.txtTablesClick(Sender: TObject);
 begin
+    UnfoldReportsTab(AppHeader, btnReports, True);
     MyPages.ActivePage:=TabSheet7;
     ResetTabsheetButtons;
     txtTables.Font.Style:=[fsBold];
@@ -5058,6 +5084,7 @@ end;
 
 procedure TMainForm.txtSettingsClick(Sender: TObject);
 begin
+    UnfoldReportsTab(AppHeader, btnReports, True);
     MyPages.ActivePage:=TabSheet8;
     ResetTabsheetButtons;
     txtSettings.Font.Style:=[fsBold];

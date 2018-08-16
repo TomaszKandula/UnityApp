@@ -247,6 +247,7 @@ type
         var FBranch:       string;
         var FOpenItems:    TStringGrid;
         var FCustNumber:   string;
+        var FItemNo:       integer;
     public
         property    IDThd:  integer read FIDThd;
         destructor  Destroy; override;
@@ -263,7 +264,8 @@ type
             CustName:   string;
             CustNumber: string;
             CoCode:     string;
-            Branch:     string
+            Branch:     string;
+            ItemNo:     integer = 0 {OPTION}
         );
     end;
 
@@ -1496,7 +1498,7 @@ end;
 // ---------------------------------------------------------------------------------------------------------------------------------- SEND ACCOUNT STATEMENT //
 
 
-constructor TTSendAccountStatement.Create(Series: boolean; Layout: integer; Subject: string; Salut: string; Mess: string; IsOverdue: boolean; OpenItems: TStringGrid; SCUID: string; CUID: string; CustName: string; CustNumber: string; CoCode: string; Branch: string);
+constructor TTSendAccountStatement.Create(Series: boolean; Layout: integer; Subject: string; Salut: string; Mess: string; IsOverdue: boolean; OpenItems: TStringGrid; SCUID: string; CUID: string; CustName: string; CustNumber: string; CoCode: string; Branch: string; ItemNo: integer = 0 {OPTION});
 begin
     inherited Create(False);
     FLock      :=TCriticalSection.Create;
@@ -1514,6 +1516,7 @@ begin
     FCustNumber:=CustNumber;
     FCoCode    :=CoCode;
     FBranch    :=Branch;
+    FItemNo    :=ItemNo;
 end;
 
 destructor TTSendAccountStatement.Destroy;
@@ -1551,11 +1554,11 @@ begin
 
             // Use fully pre-defined template
             if FLayout = maDefined then
-                Statement.HTMLLayout:=Statement.LoadTemplate(Settings.GetLayoutDir + Settings.GetStringValue(Layouts, 'STATEMENT', '') + '.html');
+                Statement.HTMLLayout:=Statement.LoadTemplate(Settings.GetLayoutDir + Settings.GetStringValue(Layouts, 'SINGLE2', ''));
 
             // Use pre-defined template with two custom fields
             if FLayout = maCustom then
-                Statement.HTMLLayout:=Statement.LoadTemplate(Settings.GetLayoutDir + Settings.GetStringValue(Layouts, 'CUSTSTATEMENT', '') + '.html');
+                Statement.HTMLLayout:=Statement.LoadTemplate(Settings.GetLayoutDir + Settings.GetStringValue(Layouts, 'SINGLE3', ''));
 
             // Send statement
             Statement.MailSubject:=FSubject + ' - ' + FCustName + ' - ' + FCustNumber;
@@ -1587,13 +1590,23 @@ begin
                 // Register action
                 if FLayout = maDefined then TTDailyComment.Create(FCUID, False, False, 0, Status, False, True, False, True);
                 if FLayout = maCustom  then TTDailyComment.Create(FCUID, False, False, 0, Status, False, False, True, True);
-                if not FSeries then MainForm.ExecMessage(False, mcInfo, 'Account Statement has been sent successfully!')
+
+                // We send single email or many emails
+                if not FSeries then
+                    MainForm.ExecMessage(False, mcInfo, 'Account Statement has been sent successfully!')
+                        else
+                            MainForm.ExecMessage(False, mmSendMany, IntToStr(FItemNo));
 
             end
             else
             begin
+
+                // Fail to send an e-mail(s)
                 if not FSeries then
-                    MainForm.ExecMessage(False, mcError, 'Account Statement cannot be sent. Please contact IT support.');
+                    MainForm.ExecMessage(False, mcError, 'Account Statement cannot be sent. Please contact IT support.')
+                        else
+                            MainForm.ExecMessage(False, mmSendMany, '0');
+
             end;
 
         finally

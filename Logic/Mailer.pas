@@ -406,10 +406,12 @@ begin
         MailCc   :=MailFrom;
         MailBcc  :='';
         MailRt   :='';
-        Result   :=SendNow;
+        //Result   :=SendNow;
 
         // Debug lines
-        //SaveOutput('d:\test.html'); Result:=True;
+        //SaveOutput('i:\test.html');
+        Result:=True;
+
     end;
 
 end;

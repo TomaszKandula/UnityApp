@@ -297,6 +297,7 @@ const
     mcStatusBar = 10;
     conOK       = 14;
     conERROR    = 15;
+    mmSendMany  = 16;
     strNULL     = 'NULL';
 
     // ---------------------------------------------------------------------------------------------------------------------------- DATABASE DRIVER/PROVIDER //

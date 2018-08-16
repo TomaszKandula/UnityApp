@@ -34,8 +34,6 @@ object ReportForm: TReportForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
-    ExplicitWidth = 491
-    ExplicitHeight = 395
     object PanelArea: TPanel
       AlignWithMargins = True
       Left = 5
@@ -51,8 +49,6 @@ object ReportForm: TReportForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 0
-      ExplicitWidth = 481
-      ExplicitHeight = 385
       object Caption: TLabel
         AlignWithMargins = True
         Left = 5
@@ -64,10 +60,10 @@ object ReportForm: TReportForm
         Margins.Right = 5
         Margins.Bottom = 5
         Align = alTop
-        Caption = 'User feedback:'
+        Caption = 'Your message to developer team:'
         Color = clWhite
         ParentColor = False
-        ExplicitWidth = 73
+        ExplicitWidth = 162
       end
       object PanelReportMemo: TPanel
         AlignWithMargins = True
@@ -84,8 +80,6 @@ object ReportForm: TReportForm
         Color = clWhite
         ParentBackground = False
         TabOrder = 0
-        ExplicitWidth = 471
-        ExplicitHeight = 352
         object ReportMemo: TMemo
           AlignWithMargins = True
           Left = 2
@@ -109,8 +103,6 @@ object ReportForm: TReportForm
           ScrollBars = ssVertical
           TabOrder = 0
           OnKeyUp = ReportMemoKeyUp
-          ExplicitWidth = 467
-          ExplicitHeight = 348
         end
       end
     end
@@ -130,8 +122,6 @@ object ReportForm: TReportForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 1
-    ExplicitTop = 415
-    ExplicitWidth = 511
     object Text2: TLabel
       Left = 12
       Top = 14

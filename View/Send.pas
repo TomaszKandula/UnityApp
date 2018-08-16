@@ -54,7 +54,7 @@ implementation
 
 
 uses
-    Main, Settings, Actions;
+    Main, Settings, Worker, Actions, Model;
 
 {$R *.dfm}
 
@@ -94,10 +94,21 @@ begin
 
     TempStr:=StringReplace(Text_Message.Text, CRLF, HTML_BR, [rfReplaceAll]);
 
-    if cbAddOverdue.Checked then
-        ActionsForm.SendAccountStatement(maCustom, Text_Salut.Text, TempStr, True)
-            else
-                ActionsForm.SendAccountStatement(maCustom, Text_Salut.Text, TempStr, False);
+    TTSendAccountStatement.Create(
+        False,
+        maCustom,
+        'Account Statement',
+        Text_Salut.Text,
+        TempStr,
+        cbAddOverdue.Checked,
+        ActionsForm.OpenItemsGrid,
+        ActionsForm.SCUID,
+        MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUID,            1, 1), MainForm.sgAgeView.Row],
+        MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), MainForm.sgAgeView.Row],
+        MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), MainForm.sgAgeView.Row],
+        MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCO_CODE,         1, 1), MainForm.sgAgeView.Row],
+        MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fAGENT,           1, 1), MainForm.sgAgeView.Row]
+    );
 
     Close;
 

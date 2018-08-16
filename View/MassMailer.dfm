@@ -1,9 +1,11 @@
 object ViewMailerForm: TViewMailerForm
   Left = 0
   Top = 0
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsSingle
   Caption = 'Unity'
-  ClientHeight = 609
-  ClientWidth = 1099
+  ClientHeight = 619
+  ClientWidth = 1085
   Color = 15527148
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -19,8 +21,8 @@ object ViewMailerForm: TViewMailerForm
   object PanelBottom: TPanel
     AlignWithMargins = True
     Left = 0
-    Top = 567
-    Width = 1099
+    Top = 577
+    Width = 1085
     Height = 42
     Margins.Left = 0
     Margins.Top = 10
@@ -37,6 +39,8 @@ object ViewMailerForm: TViewMailerForm
     ParentBackground = False
     ParentFont = False
     TabOrder = 0
+    ExplicitTop = 567
+    ExplicitWidth = 1099
     object Text_Warn: TLabel
       Left = 16
       Top = 12
@@ -51,7 +55,7 @@ object ViewMailerForm: TViewMailerForm
       ParentFont = False
     end
     object btnCancel: TSpeedButton
-      Left = 884
+      Left = 886
       Top = 9
       Width = 89
       Height = 25
@@ -89,7 +93,7 @@ object ViewMailerForm: TViewMailerForm
       OnClick = btnCancelClick
     end
     object btnSendEmail: TSpeedButton
-      Left = 984
+      Left = 986
       Top = 9
       Width = 89
       Height = 25
@@ -132,10 +136,10 @@ object ViewMailerForm: TViewMailerForm
   end
   object PanelClient: TPanel
     AlignWithMargins = True
-    Left = 552
+    Left = 538
     Top = 10
     Width = 537
-    Height = 547
+    Height = 557
     Margins.Left = 10
     Margins.Top = 10
     Margins.Right = 10
@@ -145,6 +149,8 @@ object ViewMailerForm: TViewMailerForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 1
+    ExplicitLeft = 552
+    ExplicitHeight = 547
     object Shape_Banks: TShape
       Left = 16
       Top = 461
@@ -407,8 +413,8 @@ object ViewMailerForm: TViewMailerForm
     AlignWithMargins = True
     Left = 10
     Top = 10
-    Width = 527
-    Height = 547
+    Width = 513
+    Height = 557
     Margins.Left = 10
     Margins.Top = 10
     Margins.Right = 5
@@ -418,12 +424,14 @@ object ViewMailerForm: TViewMailerForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 2
+    ExplicitWidth = 527
+    ExplicitHeight = 547
     object PanelEmailContainer: TPanel
       AlignWithMargins = True
       Left = 20
       Top = 93
-      Width = 487
-      Height = 434
+      Width = 473
+      Height = 444
       Margins.Left = 20
       Margins.Top = 10
       Margins.Right = 20
@@ -432,12 +440,14 @@ object ViewMailerForm: TViewMailerForm
       BevelOuter = bvNone
       Caption = 'PanelEmailContainer'
       TabOrder = 0
+      ExplicitWidth = 487
+      ExplicitHeight = 434
       object CustomerList: TListView
         AlignWithMargins = True
         Left = 5
         Top = 5
-        Width = 477
-        Height = 424
+        Width = 463
+        Height = 434
         Margins.Left = 5
         Margins.Top = 5
         Margins.Right = 5
@@ -450,13 +460,15 @@ object ViewMailerForm: TViewMailerForm
         ReadOnly = True
         TabOrder = 0
         ViewStyle = vsReport
+        ExplicitWidth = 477
+        ExplicitHeight = 424
       end
     end
     object PanelEmailFrom: TPanel
       AlignWithMargins = True
       Left = 20
       Top = 10
-      Width = 487
+      Width = 473
       Height = 63
       Margins.Left = 20
       Margins.Top = 10
@@ -467,6 +479,7 @@ object ViewMailerForm: TViewMailerForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 1
+      ExplicitWidth = 487
       object Text4: TLabel
         Left = 18
         Top = 10
@@ -481,6 +494,9 @@ object ViewMailerForm: TViewMailerForm
         Width = 178
         Height = 22
         Cursor = crHandPoint
+        BevelInner = bvLowered
+        BevelKind = bkFlat
+        BevelOuter = bvNone
         Style = csOwnerDrawFixed
         TabOrder = 0
       end

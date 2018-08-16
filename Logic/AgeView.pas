@@ -853,9 +853,9 @@ var
   Transaction:  string;
   DeleteData:   string;
   Condition:    string;
-
-  SL: TStringList;
-
+//
+//  SL: TStringList;
+//
 begin
   { ASSIGN COLUMNS | ADD ALL BUT ID COLUMN }
   Columns.Add(TSnapshots.GROUP_ID);
@@ -913,13 +913,13 @@ begin
   StrSQL:=Transaction;
 
 
-  SL:=TStringList.Create;
-  try
-    SL.Text:=StrSQL;
-    SL.SaveToFile('i:\test.txt');
-  finally
-    SL.Free;
-  end;
+//  SL:=TStringList.Create;
+//  try
+//    SL.Text:=StrSQL;
+//    SL.SaveToFile('i:\test.txt');
+//  finally
+//    SL.Free;
+//  end;
 
 
   try

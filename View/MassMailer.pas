@@ -56,7 +56,6 @@ type
         function  GetEmailAddress(Scuid: string): string;
         procedure SetEmailAddresses(List: TListView);
         procedure GetEmailList(List: TComboBox);
-        procedure SendAccountStatement(Series: boolean; Layout: integer; Subject: string; Salut: string; Mess: string; IsOverdue: boolean; SCUID: string; Row: integer); // to be removed!!!
     end;
 
 var
@@ -67,7 +66,7 @@ implementation
 
 
 uses
-    Main, Settings, SQL, Model, Worker;
+    Main, Settings, SQL, Model, Worker, Actions;
 
 {$R *.dfm}
 
@@ -84,13 +83,18 @@ var
     Database: TDataTables;
 begin
 
+    Result:='';
+
     Database:=TDataTables.Create(MainForm.DbConnect);
 
     try
         Database.Columns.Add(TAddressBook.EMAILS);
         Database.CustFilter:=WHERE + TAddressBook.SCUID + EQUAL + Scuid;
         Database.OpenTable(TblAddressbook);
-        Result:=MainForm.OleGetStr(Database.DataSet.Fields[TAddressBook.EMAILS].Value);
+
+        if Database.DataSet.RecordCount > 0 then
+            Result:=MainForm.OleGetStr(Database.DataSet.Fields[TAddressBook.EMAILS].Value)
+
     finally
         Database.Free;
     end;
@@ -103,21 +107,26 @@ end;
 
 procedure TViewMailerForm.SetEmailAddresses(List: TListView);
 var
-    iCNT: integer;
+    EmailAddress:   string;
+    iCNT:           integer;
 begin
 
     if List.Items.Count > 0 then
     begin
         for iCNT:=0 to List.Items.Count - 1 do
         begin
-            List.Items[iCNT].SubItems[2]:=GetEmailAddress(List.Items[iCNT].SubItems[0]);
+            EmailAddress:=GetEmailAddress(List.Items[iCNT].SubItems[0]);
+
+            if not(string.IsNullOrEmpty(EmailAddress)) then
+                List.Items[iCNT].SubItems[2]:=EmailAddress
+
         end;
     end;
 
 end;
 
 /// <summary>
-///     Get email list.
+///     Get list of emails addresses that can be use to send message to the selected recipients.
 /// </summary>
 
 procedure TViewMailerForm.GetEmailList(List: TComboBox);
@@ -147,33 +156,15 @@ begin
                              _OR +
                                 TCompany.CO_CODE + EQUAL + QuotedStr(COCODE4);
         Database.OpenTable(TblCompany);
-        Database.SqlToSimpleList(List, Database.DataSet);
+        if not(Database.DataSet.RecordCount = 0) then
+            Database.SqlToSimpleList(List, Database.DataSet)
+                else
+                    MainForm.MsgCall(mcWarn, 'Cannot find assigned email address to your organisation. Please contact Unity IT administrator.');
     finally
         Database.Free;
     end;
 
 end;
-
-// to be removed - temporary!
-procedure TViewMailerForm.SendAccountStatement(Series: boolean; Layout: integer; Subject: string; Salut: string; Mess: string; IsOverdue: boolean; SCUID: string; Row: integer);
-begin
-    TTSendAccountStatement.Create(
-        Series,
-        Layout,
-        Subject,
-        Salut,
-        Mess,
-        IsOverdue,
-        MainForm.sgOpenItems,
-        SCUID,
-        MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUID,            1, 1), Row],
-        MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), Row],
-        MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), Row],
-        MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCO_CODE,         1, 1), Row],
-        MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fAGENT,           1, 1), Row]
-    );
-end;
-
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------ START UP //
 
@@ -200,9 +191,9 @@ begin
     lsColumns:=CustomerList.Columns.Add;
     lsColumns.Caption:='To';
     lsColumns.Width  :=100;
-    //lsColumns:=CustomerList.Columns.Add;
-    //lsColumns.Caption:='Is sent?';
-    //lsColumns.Width  :=100;
+    lsColumns:=CustomerList.Columns.Add;
+    lsColumns.Caption:='Is sent?';
+    lsColumns.Width  :=100;
 
     // Draw panel borders
     PanelEmailContainer.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
@@ -224,7 +215,12 @@ end;
 // ------------------------------------------------------------------------------------------------------------------------------------------- BUTTON EVENTS //
 
 
-procedure TViewMailerForm.btnSendEmailClick(Sender: TObject); // refactor!!!!
+/// <summary>
+///     We loop through the list and send emails if email address is found. We execute TTSendAccountStatement with "Series" parameter set to true,
+///     this ensures that each time worker thread execute send method, it will return windows message with send status (false or true).
+/// </summary>
+
+procedure TViewMailerForm.btnSendEmailClick(Sender: TObject);
 var
     iCNT:    integer;
     TempStr: string;
@@ -236,21 +232,36 @@ begin
         for iCNT:=0 to CustomerList.Items.Count - 1 do
         begin
 
-            if CustomerList.Items[iCNT].SubItems[2] <> '' then
+            if CustomerList.Items[iCNT].SubItems[2] <> 'Not Found' then
             begin
 
                 TempStr:=StringReplace(Text_Message.Text, CRLF, HTML_BR, [rfReplaceAll]);
 
-                if cbAddOverdue.Checked then
-                    SendAccountStatement(True, maCustom, Text_Subject.Text, Text_Salut.Text, TempStr, True, CustomerList.Items[iCNT].SubItems[0], StrToInt(CustomerList.Items[iCNT].Caption))
-                        else
-                            SendAccountStatement(True, maCustom, Text_Subject.Text, Text_Salut.Text, TempStr, False, CustomerList.Items[iCNT].SubItems[0], StrToInt(CustomerList.Items[iCNT].Caption));
+                TTSendAccountStatement.Create(
+                    True,
+                    maCustom,
+                    Text_Subject.Text,
+                    Text_Salut.Text,
+                    TempStr,
+                    cbAddOverdue.Checked,
+                    MainForm.sgOpenItems,
+                    CustomerList.Items[iCNT].SubItems[0],
+                    MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUID,            1, 1), StrToInt(CustomerList.Items[iCNT].Caption)],
+                    MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), StrToInt(CustomerList.Items[iCNT].Caption)],
+                    MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), StrToInt(CustomerList.Items[iCNT].Caption)],
+                    MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCO_CODE,         1, 1), StrToInt(CustomerList.Items[iCNT].Caption)],
+                    MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fAGENT,           1, 1), StrToInt(CustomerList.Items[iCNT].Caption)],
+                    iCNT
+                );
 
-                MainForm.ExecMessage(False, mcInfo, 'Process has been run successfully!');
 
             end;
 
         end;
+
+       // Execute awaits here / display busy status to the user untill all emails has been processed
+
+       // ...
 
     end;
 
