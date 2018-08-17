@@ -52,6 +52,8 @@ type
         procedure btnSendEmailClick(Sender: TObject);
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
+    public
+        var ThreadCount: integer;
     private
         function  GetEmailAddress(Scuid: string): string;
         procedure SetEmailAddresses(List: TListView);
@@ -66,7 +68,7 @@ implementation
 
 
 uses
-    Main, Settings, SQL, Model, Worker, Actions;
+    Main, Settings, SQL, Model, Worker, Actions, Await;
 
 {$R *.dfm}
 
@@ -217,7 +219,7 @@ end;
 
 /// <summary>
 ///     We loop through the list and send emails if email address is found. We execute TTSendAccountStatement with "Series" parameter set to true,
-///     this ensures that each time worker thread execute send method, it will return windows message with send status (false or true).
+///     this ensures that each time worker thread execute send method, it will return windows message with processed row (if successfull).
 /// </summary>
 
 procedure TViewMailerForm.btnSendEmailClick(Sender: TObject);
@@ -226,9 +228,32 @@ var
     TempStr: string;
 begin
 
+    // Check fields
+    if
+        (
+            string.IsNullOrEmpty(Text_Subject.Text)
+        )
+    or
+        (
+            string.IsNullOrEmpty(Text_Salut.Text)
+        )
+    or
+        (
+            string.IsNullOrEmpty(Text_Message.Text)
+        )
+    then
+    begin
+        MainForm.MsgCall(mcWarn, 'Cannot send incomplete form. Please re-check it and try again.');
+        Exit;
+    end;
+
     if CustomerList.Items.Count > 0 then
     begin
 
+        // Update column references
+        MainForm.UpdateOpenItemsRefs(MainForm.sgOpenItems);
+
+        // Send concurrently
         for iCNT:=0 to CustomerList.Items.Count - 1 do
         begin
 
@@ -254,14 +279,18 @@ begin
                     iCNT
                 );
 
+                // Log started thread
+                Inc(ThreadCount);
 
             end;
 
         end;
 
-       // Execute awaits here / display busy status to the user untill all emails has been processed
+        /// <remarks>
+        ///     Display message window, it will be dismissed once all worker threads ends.
+        /// </remarks>
 
-       // ...
+        MainForm.WndCall(AwaitForm, stModal);
 
     end;
 

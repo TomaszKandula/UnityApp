@@ -94,6 +94,7 @@ begin
 
     TempStr:=StringReplace(Text_Message.Text, CRLF, HTML_BR, [rfReplaceAll]);
 
+    MainForm.UpdateOpenItemsRefs(ActionsForm.OpenItemsGrid);
     TTSendAccountStatement.Create(
         False,
         maCustom,

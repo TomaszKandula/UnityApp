@@ -6,7 +6,7 @@ unit Arrays;
 interface
 
     /// <summary>
-    ///     This class defines different array types.
+    ///     This class defines different array and record types.
     /// </summary>
 
 type
@@ -28,6 +28,30 @@ type
     /// </remarks>
 
     TIntigers = array of integer;
+
+    /// <remarks>
+    ///     This record definition allows to hold column numbers for given column name. This is necessary as column order may change.
+    ///     Normally we would use "ReturnColumn" extension method, but in case of multithreading, we must preset
+    ///     them before many threads use them at the same time (VCL components are not thread safe).
+    /// </remarks>
+
+    TOpenItemsRefs = record
+        Ad1Col:         integer;
+        Ad2Col:         integer;
+        Ad3Col:         integer;
+        PnoCol:         integer;
+        PAreaCol:       integer;
+        CuidCol:        integer;
+        OpenAmCol:      integer;
+        PmtStatCol:     integer;
+        CtrlCol:        integer;
+        InvoNoCol:      integer;
+        ValDtCol:       integer;
+        DueDtCol:       integer;
+        ISOCol:         integer;
+        CurAmCol:       integer;
+        OpenCurAmCol:   integer;
+    end;
 
 
 implementation

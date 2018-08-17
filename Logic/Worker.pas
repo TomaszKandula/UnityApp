@@ -196,9 +196,10 @@ type
         var FEmailAutoStat: boolean;
         var FEmailManuStat: boolean;
         var FEventLog:      boolean;
+        var FShouldLock:    boolean;
     public
         property    IDThd:  integer read FIDThd;
-        constructor Create(CUID: string; Email: boolean; CallEvent: boolean; CallDuration: integer; Comment: string; EmailReminder, EmailAutoStat, EmailManuStat: boolean; EventLog: boolean);
+        constructor Create(CUID: string; Email: boolean; CallEvent: boolean; CallDuration: integer; Comment: string; EmailReminder, EmailAutoStat, EmailManuStat: boolean; EventLog: boolean; ShouldLock: boolean = true {OPTION});
         destructor  Destroy; override;
     end;
 
@@ -1104,10 +1105,10 @@ end;
 // ------------------------------------------------------------------------------------------------------------------------------------- WRITE DAILY COMMENT //
 
 
-constructor TTDailyComment.Create(CUID: string; Email: boolean; CallEvent: boolean; CallDuration: integer; Comment: string; EmailReminder, EmailAutoStat, EmailManuStat: boolean; EventLog: boolean);
+constructor TTDailyComment.Create(CUID: string; Email: boolean; CallEvent: boolean; CallDuration: integer; Comment: string; EmailReminder, EmailAutoStat, EmailManuStat: boolean; EventLog: boolean; ShouldLock: boolean = true {OPTION});
 begin
     inherited Create(False);
-    FLock         :=TCriticalSection.Create;
+    FShouldLock   :=ShouldLock;
     FIDThd        :=0;
     FCUID         :=CUID;
     FEmail        :=Email;
@@ -1118,11 +1119,18 @@ begin
     FEmailAutoStat:=EmailAutoStat;
     FEmailManuStat:=EmailManuStat;
     FEventLog     :=EventLog;
+
+    if FShouldLock then
+        FLock:=TCriticalSection.Create;
+
 end;
 
 destructor TTDailyComment.Destroy;
 begin
-    FLock.Free;
+
+    if Assigned(FLock) then
+        FLock.Free;
+
 end;
 
 procedure TTDailyComment.Execute;
@@ -1137,7 +1145,9 @@ var
     DataCheckSum:  string;
 begin
     FIDThd:=CurrentThread.ThreadID;
-    FLock.Acquire;
+
+    if Assigned(FLock) then
+        FLock.Acquire;
 
     try
         DailyText:=TDataTables.Create(MainForm.DbConnect);
@@ -1324,7 +1334,8 @@ begin
         end;
 
     finally
-        FLock.Release;
+        if Assigned(FLock) then
+            FLock.Release;
     end;
 
     FreeOnTerminate:=True;
@@ -1524,6 +1535,10 @@ begin
     FLock.Free;
 end;
 
+/// <remarks>
+///     If execute in paraller, then slow down a bit the worker thread to avoid large CPU consumption.
+/// </remarks>
+
 procedure TTSendAccountStatement.Execute;
 var
     Statement:   TDocument;
@@ -1563,6 +1578,8 @@ begin
             // Send statement
             Statement.MailSubject:=FSubject + ' - ' + FCustName + ' - ' + FCustNumber;
 
+            if FSeries then CurrentThread.Sleep(50);
+
             if Statement.SendDocument then
             begin
 
@@ -1587,15 +1604,21 @@ begin
                     DailyText.Free;
                 end;
 
-                // Register action
-                if FLayout = maDefined then TTDailyComment.Create(FCUID, False, False, 0, Status, False, True, False, True);
-                if FLayout = maCustom  then TTDailyComment.Create(FCUID, False, False, 0, Status, False, False, True, True);
-
-                // We send single email or many emails
+                // Single email
                 if not FSeries then
-                    MainForm.ExecMessage(False, mcInfo, 'Account Statement has been sent successfully!')
-                        else
-                            MainForm.ExecMessage(False, mmSendMany, IntToStr(FItemNo));
+                begin
+                    // Register action (use thread locking by default)
+                    if FLayout = maDefined then TTDailyComment.Create(FCUID, False, False, 0, Status, False, True, False, True);
+                    if FLayout = maCustom  then TTDailyComment.Create(FCUID, False, False, 0, Status, False, False, True, True);
+                    MainForm.ExecMessage(False, mcInfo, 'Account Statement has been sent successfully!');
+                end
+                else
+                // Many emails
+                begin
+                    if FLayout = maDefined then TTDailyComment.Create(FCUID, False, False, 0, Status, False, True, False, True, False {no locking});
+                    if FLayout = maCustom  then TTDailyComment.Create(FCUID, False, False, 0, Status, False, False, True, True, False {no locking});
+                    MainForm.ExecMessage(False, mmSendMany, IntToStr(FItemNo));
+                end;
 
             end
             else
@@ -1625,7 +1648,7 @@ end;
 // ------------------------------------------------------------------------------------------------------------------------------- LOAD ASYNC. GENERAL TABLE //
 
 
-constructor TTGeneralTables.Create(TableName: string; DestGrid: TStringGrid; Columns: string = '' {=OPTION}; Conditions: string = '' {=OPTION});
+constructor TTGeneralTables.Create(TableName: string; DestGrid: TStringGrid; Columns: string = '' {OPTION}; Conditions: string = '' {OPTION});
 begin
     inherited Create(False);
     FTableName :=TableName;

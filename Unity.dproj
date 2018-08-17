@@ -200,6 +200,10 @@
         <DCCReference Include="View\ABSearch.pas">
             <Form>ViewSearchForm</Form>
         </DCCReference>
+        <DCCReference Include="View\Await.pas">
+            <Form>AwaitForm</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
         <None Include="Include\Cef.inc"/>
         <None Include="Include\Common.inc"/>
         <None Include="Include\Header.inc"/>

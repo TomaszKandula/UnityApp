@@ -161,7 +161,7 @@ begin
     Result:=SqlToGrid(DestGrid, ExecSQL, False, True);
 
     // Sort via CUID
-    DestGrid.MSort(DestGrid.ReturnColumn(TOpenitems.CUID, 1 ,1), 2, True);  //to be removed - to be done on SQL server
+    DestGrid.MSort(DestGrid.ReturnColumn(TOpenitems.CUID, 1 , 1), 2, True);  //to be removed - to be done on SQL server
 
 end;
 

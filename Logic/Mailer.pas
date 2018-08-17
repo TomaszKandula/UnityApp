@@ -68,7 +68,7 @@ type
     published
         procedure   SaveOutput(FileName: string);
         function    LoadTemplate(FileName: string): string;
-        function    GetData: boolean;
+        function    GetData(Series: boolean = false {OPTION}): boolean;
         procedure   BuildHTML;
         function    SendDocument: boolean;
     end;
@@ -207,7 +207,7 @@ end;
 ///     Get necessary details for sending email.
 /// </summary>
 
-function TDocument.GetData: boolean;
+function TDocument.GetData(Series: boolean = false {OPTION}): boolean;
 var
     DataBase: TDataTables;
 begin
@@ -219,12 +219,18 @@ begin
     DataBase:=TDataTables.Create(MainForm.DbConnect);
     try
 
-        // skip mailto if serios "on"
+        /// <remarks>
+        ///     TODO: refactor, "mailto" for single/one-off account statement should be already available in Action Log parent window, so no need
+        ///     to "re-do it".
+        /// </remarks>
 
-        // Get "MAILTO"
-        DataBase.CustFilter:=WHERE + TAddressBook.SCUID + EQUAL + QuotedStr(SCUID);
-        DataBase.OpenTable(TblAddressbook);
-        if DataBase.DataSet.RecordCount = 1 then MailTo:=DataBase.DataSet.Fields[TAddressBook.ESTATEMENTS].Value;
+        if not(Series) then
+        begin
+            // Get "MAILTO"
+            DataBase.CustFilter:=WHERE + TAddressBook.SCUID + EQUAL + QuotedStr(SCUID);
+            DataBase.OpenTable(TblAddressbook);
+            if DataBase.DataSet.RecordCount = 1 then MailTo:=DataBase.DataSet.Fields[TAddressBook.ESTATEMENTS].Value;
+        end;
 
         // Get "Mail from", "Banks", "LBU address" AND "Telephone"
         DataBase.CustFilter:=WHERE +
@@ -240,7 +246,9 @@ begin
 
         if DataBase.DataSet.RecordCount = 1 then
         begin
-            MailFrom   :=DataBase.DataSet.Fields[TCompany.SEND_NOTE_FROM].Value;
+
+            if not(Series) then MailFrom:=DataBase.DataSet.Fields[TCompany.SEND_NOTE_FROM].Value;
+
             BankDetails:=DataBase.DataSet.Fields[TCompany.BANKDETAILS].Value;
             LBUName    :=DataBase.DataSet.Fields[TCompany.CONAME].Value;
             LBUAddress :=DataBase.DataSet.Fields[TCompany.COADDRESS].Value;
@@ -264,27 +272,36 @@ procedure TDocument.BuildHTML;
     // Common variables
 
     var
-        iCNT:       integer;
-        Pos:        integer;
-        Col1:       integer;
-        Col2:       integer;
-        Col3:       integer;
-        Col4:       integer;
-        Col5:       integer;
-        CuidCol:    integer;
+        iCNT:           integer;
+        Pos:            integer;
+        Ad1Col:         integer;
+        Ad2Col:         integer;
+        Ad3Col:         integer;
+        PnoCol:         integer;
+        PAreaCol:       integer;
+        CuidCol:        integer;
+        OpenAmCol:      integer;
+        PmtStatCol:     integer;
+        CtrlCol:        integer;
+        InvoNoCol:      integer;
+        ValDtCol:       integer;
+        DueDtCol:       integer;
+        ISOCol:         integer;
+        CurAmCol:       integer;
+        OpenCurAmCol:   integer;
 
     // Nested method
 
     procedure OpenItemsToHtmlTable(var HtmlStatement: string; var SG: TStringGrid; ActualRow: Integer);
     begin
         HTMLTemp:=HTMLRow;
-        HTMLTemp:=StringReplace(HTMLTemp, '{INV_NUM}', SG.Cells[SG.ReturnColumn(TOpenitems.InvoNo,    1, 1), ActualRow], [rfReplaceAll]);
-        HTMLTemp:=StringReplace(HTMLTemp, '{INV_DAT}', SG.Cells[SG.ReturnColumn(TOpenitems.ValDt,     1, 1), ActualRow], [rfReplaceAll]);
-        HTMLTemp:=StringReplace(HTMLTemp, '{DUE_DAT}', SG.Cells[SG.ReturnColumn(TOpenitems.DueDt,     1, 1), ActualRow], [rfReplaceAll]);
-        HTMLTemp:=StringReplace(HTMLTemp, '{INV_CUR}', SG.Cells[SG.ReturnColumn(TOpenitems.ISO,       1, 1), ActualRow], [rfReplaceAll]);
-        HTMLTemp:=StringReplace(HTMLTemp, '{INV_AMT}', SG.Cells[SG.ReturnColumn(TOpenitems.CurAm,     1, 1), ActualRow], [rfReplaceAll]);
-        HTMLTemp:=StringReplace(HTMLTemp, '{INV_OSA}', SG.Cells[SG.ReturnColumn(TOpenitems.OpenCurAm, 1, 1), ActualRow], [rfReplaceAll]);
-        HTMLTemp:=StringReplace(HTMLTemp, '{INV_CRL}', SG.Cells[SG.ReturnColumn(TOpenitems.Ctrl,      1, 1), ActualRow], [rfReplaceAll]);
+        HTMLTemp:=StringReplace(HTMLTemp, '{INV_NUM}', SG.Cells[InvoNoCol,    ActualRow], [rfReplaceAll]);
+        HTMLTemp:=StringReplace(HTMLTemp, '{INV_DAT}', SG.Cells[ValDtCol,     ActualRow], [rfReplaceAll]);
+        HTMLTemp:=StringReplace(HTMLTemp, '{DUE_DAT}', SG.Cells[DueDtCol,     ActualRow], [rfReplaceAll]);
+        HTMLTemp:=StringReplace(HTMLTemp, '{INV_CUR}', SG.Cells[ISOCol,       ActualRow], [rfReplaceAll]);
+        HTMLTemp:=StringReplace(HTMLTemp, '{INV_AMT}', SG.Cells[CurAmCol,     ActualRow], [rfReplaceAll]);
+        HTMLTemp:=StringReplace(HTMLTemp, '{INV_OSA}', SG.Cells[OpenCurAmCol, ActualRow], [rfReplaceAll]);
+        HTMLTemp:=StringReplace(HTMLTemp, '{INV_CRL}', SG.Cells[CtrlCol,      ActualRow], [rfReplaceAll]);
         HtmlStatement:=HtmlStatement + HTMLTemp;
     end;
 
@@ -292,21 +309,33 @@ procedure TDocument.BuildHTML;
 
 begin
 
-    // Get all column numbers
-
-    CuidCol:=OpenItems.ReturnColumn(TOpenitems.CUID, 1, 1);
-
-
     Pos:=0;
 
+    // Get templates
     HTMLTable:=CommonHTMLTable;
     HTMLRow  :=CommonHTMLRow;
+
+    // Get all columns numbers
+    CuidCol     :=MainForm.OpenItemsRefs.CuidCol;
+    OpenAmCol   :=MainForm.OpenItemsRefs.OpenAmCol;
+    PmtStatCol  :=MainForm.OpenItemsRefs.PmtStatCol;
+    CtrlCol     :=MainForm.OpenItemsRefs.CtrlCol;
+    InvoNoCol   :=MainForm.OpenItemsRefs.InvoNoCol;
+    ValDtCol    :=MainForm.OpenItemsRefs.ValDtCol;
+    DueDtCol    :=MainForm.OpenItemsRefs.DueDtCol;
+    ISOCol      :=MainForm.OpenItemsRefs.ISOCol;
+    CurAmCol    :=MainForm.OpenItemsRefs.CurAmCol;
+    OpenCurAmCol:=MainForm.OpenItemsRefs.OpenCurAmCol;
+    Ad1Col      :=MainForm.OpenItemsRefs.Ad1Col;
+    Ad2Col      :=MainForm.OpenItemsRefs.Ad2Col;
+    Ad3Col      :=MainForm.OpenItemsRefs.Ad3Col;
+    PnoCol      :=MainForm.OpenItemsRefs.PnoCol;
+    PAreaCol    :=MainForm.OpenItemsRefs.PAreaCol;
 
     // Open items to HTML table
     for iCNT:=1 to OpenItems.RowCount - 1 do
     begin
         if OpenItems.Cells[CuidCol, iCNT] = CUID then
-        //if OpenItems.Cells[34, iCNT] = CUID then
         begin
 
             if Pos = 0 then Pos:=iCNT;
@@ -317,7 +346,7 @@ begin
                 if not(IsOverdue) then
                 begin
                     // All items
-                    if StrToFloatDef(OpenItems.Cells[OpenItems.ReturnColumn(TOpenitems.OpenAm, 1, 1), iCNT], 0) <> 0 then
+                    if StrToFloatDef(OpenItems.Cells[OpenAmCol, iCNT], 0) <> 0 then
                     // Generate HTML table
                     OpenItemsToHtmlTable(HTMLStat, OpenItems, iCNT);
                 end
@@ -326,11 +355,11 @@ begin
                     // Allow only overdue invoices
                     if
                     (
-                        StrToFloatDef(OpenItems.Cells[OpenItems.ReturnColumn(TOpenitems.OpenAm, 1, 1), iCNT], 0) <> 0
+                        StrToFloatDef(OpenItems.Cells[OpenAmCol, iCNT], 0) <> 0
                     )
                     and
                     (
-                        StrToFloatDef(OpenItems.Cells[OpenItems.ReturnColumn(TOpenitems.PmtStat, 1, 1), iCNT], 0) < 0
+                        StrToFloatDef(OpenItems.Cells[PmtStatCol, iCNT], 0) < 0
                     )
                     then
                     // Make
@@ -346,16 +375,16 @@ begin
                 ///     We exclude invoices with 'control status' that is different than given number in the comapny table.
                 /// </remarks>
 
-                if ( ( OpenItems.Cells[OpenItems.ReturnColumn(TOpenitems.Ctrl, 1, 1), iCNT] <> REM_EX1) or
-                     ( OpenItems.Cells[OpenItems.ReturnColumn(TOpenitems.Ctrl, 1, 1), iCNT] <> REM_EX2) or
-                     ( OpenItems.Cells[OpenItems.ReturnColumn(TOpenitems.Ctrl, 1, 1), iCNT] <> REM_EX3) or
-                     ( OpenItems.Cells[OpenItems.ReturnColumn(TOpenitems.Ctrl, 1, 1), iCNT] <> REM_EX4) or
-                     ( OpenItems.Cells[OpenItems.ReturnColumn(TOpenitems.Ctrl, 1, 1), iCNT] <> REM_EX5)
+                if ( ( OpenItems.Cells[CtrlCol, iCNT] <> REM_EX1) or
+                     ( OpenItems.Cells[CtrlCol, iCNT] <> REM_EX2) or
+                     ( OpenItems.Cells[CtrlCol, iCNT] <> REM_EX3) or
+                     ( OpenItems.Cells[CtrlCol, iCNT] <> REM_EX4) or
+                     ( OpenItems.Cells[CtrlCol, iCNT] <> REM_EX5)
                    )
                 and
                   (
                     // Only unpaid invoices
-                    StrToFloatDef(OpenItems.Cells[OpenItems.ReturnColumn(TOpenitems.OpenAm, 1, 1), iCNT], 0) > 0
+                    StrToFloatDef(OpenItems.Cells[OpenAmCol, iCNT], 0) > 0
                   )
                 then
 
@@ -368,19 +397,13 @@ begin
 
     end;
 
-    Col1:=OpenItems.ReturnColumn(TOpenitems.Ad1,   1, 1);
-    Col2:=OpenItems.ReturnColumn(TOpenitems.Ad2,   1, 1);
-    Col3:=OpenItems.ReturnColumn(TOpenitems.Ad3,   1, 1);
-    Col4:=OpenItems.ReturnColumn(TOpenitems.Pno,   1, 1);
-    Col5:=OpenItems.ReturnColumn(TOpenitems.PArea, 1, 1);
-
     // Build customer address field
     CustAddr:='<p class="p"><b>' + CustName + '</b><br />' + CRLF;
-    if (OpenItems.Cells[Col1, Pos] <> '') and (OpenItems.Cells[Col1, Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[Col1, Pos] + '<br />' + CRLF;
-    if (OpenItems.Cells[Col2, Pos] <> '') and (OpenItems.Cells[Col2, Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[Col2, Pos] + '<br />' + CRLF;
-    if (OpenItems.Cells[Col3, Pos] <> '') and (OpenItems.Cells[Col3, Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[Col3, Pos] + '<br />' + CRLF;
-    if (OpenItems.Cells[Col4, Pos] <> '') and (OpenItems.Cells[Col4, Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[Col4, Pos] + '<br />' + CRLF;
-    if (OpenItems.Cells[Col5, Pos] <> '') and (OpenItems.Cells[Col5, Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[Col5, Pos] + '<br />' + CRLF;
+    if (OpenItems.Cells[Ad1Col, Pos]   <> '') and (OpenItems.Cells[Ad1Col, Pos]   <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[Ad1Col,   Pos] + '<br />' + CRLF;
+    if (OpenItems.Cells[Ad2Col, Pos]   <> '') and (OpenItems.Cells[Ad2Col, Pos]   <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[Ad2Col,   Pos] + '<br />' + CRLF;
+    if (OpenItems.Cells[Ad3Col, Pos]   <> '') and (OpenItems.Cells[Ad3Col, Pos]   <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[Ad3Col,   Pos] + '<br />' + CRLF;
+    if (OpenItems.Cells[PnoCol, Pos]   <> '') and (OpenItems.Cells[PnoCol, Pos]   <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[PnoCol,   Pos] + '<br />' + CRLF;
+    if (OpenItems.Cells[PAreaCol, Pos] <> '') and (OpenItems.Cells[PAreaCol, Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[PAreaCol, Pos] + '<br />' + CRLF;
     CustAddr:=CustAddr + '</p>' + CRLF;
 
 end;
@@ -421,7 +444,7 @@ begin
         MailRt   :='';
         //Result   :=SendNow;
 
-        // Debug lines
+        // Debug lines to check concurrency and template generation
         RAND:=Random(100000);
         SaveOutput('i:\test' + IntToStr(RAND) + '.html');
         Result:=True;

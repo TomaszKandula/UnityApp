@@ -703,9 +703,11 @@ type
         var OpenItemsStatus:  string;
         var IsConnected:      boolean;
         var CurrentEvents:    string;
+        var OpenItemsRefs:    TOpenItemsRefs;
         procedure  DebugMsg(const Msg: String);
         procedure  TryInitConnection;
         procedure  ExecMessage(IsPostType: boolean; YOUR_INT: integer; YOUR_TEXT: string);
+        procedure  UpdateOpenItemsRefs(SourceGrid: TStringGrid);
         function   OleGetStr(RecordsetField: variant): string;
         function   FindKey(OpenedSection: string; KeyPosition: integer): string;
         function   WndCall(WinForm: TForm; Mode: integer): integer;
@@ -861,7 +863,16 @@ begin
             if Msg.WParam = 16 then
             begin
                 if PChar(Msg.LParam) > '-1' then
-                    ViewMailerForm.CustomerList.Items[ StrToInt( PChar(Msg.LParam) ) ].SubItems[3]:='Sent';
+
+                    /// <remarks>
+                    ///     Refers to view MassMailer -> CustomerList -> Column "IsSent"
+                    /// </remarks>
+
+                    ViewMailerForm.CustomerList.Items[StrToInt(PChar(Msg.LParam))].SubItems[3]:='Sent';
+
+                    // Decrease number of active threads
+                    Dec(ViewMailerForm.ThreadCount);
+
             end;
 
         end;
@@ -946,6 +957,29 @@ begin
 
     end;
 
+end;
+
+/// <summary>
+///
+/// </summary>
+
+procedure TMainForm.UpdateOpenItemsRefs(SourceGrid: TStringGrid);
+begin
+    OpenItemsRefs.CuidCol     :=SourceGrid.ReturnColumn(TOpenitems.CUID,      1, 1);
+    OpenItemsRefs.OpenAmCol   :=SourceGrid.ReturnColumn(TOpenitems.OpenAm,    1, 1);
+    OpenItemsRefs.PmtStatCol  :=SourceGrid.ReturnColumn(TOpenitems.PmtStat,   1, 1);
+    OpenItemsRefs.CtrlCol     :=SourceGrid.ReturnColumn(TOpenitems.Ctrl,      1, 1);
+    OpenItemsRefs.InvoNoCol   :=SourceGrid.ReturnColumn(TOpenitems.InvoNo,    1, 1);
+    OpenItemsRefs.ValDtCol    :=SourceGrid.ReturnColumn(TOpenitems.ValDt,     1, 1);
+    OpenItemsRefs.DueDtCol    :=SourceGrid.ReturnColumn(TOpenitems.DueDt,     1, 1);
+    OpenItemsRefs.ISOCol      :=SourceGrid.ReturnColumn(TOpenitems.ISO,       1, 1);
+    OpenItemsRefs.CurAmCol    :=SourceGrid.ReturnColumn(TOpenitems.CurAm,     1, 1);
+    OpenItemsRefs.OpenCurAmCol:=SourceGrid.ReturnColumn(TOpenitems.OpenCurAm, 1, 1);
+    OpenItemsRefs.Ad1Col      :=SourceGrid.ReturnColumn(TOpenitems.Ad1,       1, 1);
+    OpenItemsRefs.Ad2Col      :=SourceGrid.ReturnColumn(TOpenitems.Ad2,       1, 1);
+    OpenItemsRefs.Ad3Col      :=SourceGrid.ReturnColumn(TOpenitems.Ad3,       1, 1);
+    OpenItemsRefs.PnoCol      :=SourceGrid.ReturnColumn(TOpenitems.Pno,       1, 1);
+    OpenItemsRefs.PAreaCol    :=SourceGrid.ReturnColumn(TOpenitems.PArea,     1, 1);
 end;
 
 /// <summary>
@@ -1265,9 +1299,9 @@ begin
     begin
         if DetailsGrid.Cells[ColumnNum, 0] = sgCoCodes.Cells[sgCoCodes.ReturnColumn(TCompany.CO_CODE, 1, 1), iCNT] then
         begin
-            DetailsGrid.Cells[ColumnNum, 1]:=sgCoCodes.Cells[sgCoCodes.ReturnColumn(TCompany.COCURRENCY,    1, 1), iCNT];
-            DetailsGrid.Cells[ColumnNum, 2]:=sgCoCodes.Cells[sgCoCodes.ReturnColumn(TCompany.DIVISIONS,     1, 1), iCNT];
-            DetailsGrid.Cells[ColumnNum, 3]:=sgCoCodes.Cells[sgCoCodes.ReturnColumn(TCompany.AGENTS,        1, 1), iCNT];
+            DetailsGrid.Cells[ColumnNum, 1]:=sgCoCodes.Cells[sgCoCodes.ReturnColumn(TCompany.COCURRENCY, 1, 1), iCNT];
+            DetailsGrid.Cells[ColumnNum, 2]:=sgCoCodes.Cells[sgCoCodes.ReturnColumn(TCompany.DIVISIONS,  1, 1), iCNT];
+            DetailsGrid.Cells[ColumnNum, 3]:=sgCoCodes.Cells[sgCoCodes.ReturnColumn(TCompany.AGENTS,     1, 1), iCNT];
             Break;
         end
         else
@@ -1691,9 +1725,11 @@ begin
             sgAddressBook.Col = sgAddressBook.ReturnColumn(TAddressBook.ESTATEMENTS, 1, 1)
         )
     then
-        Result:=False // DO NOT EXCLUDE COLUMN FROM EDITING
+        // Do not exclude column from editing
+        Result:=False
             else
-                Result:=True; // EXCLUDE COLUMN FROM EDITING
+                // Exclude column from editing
+                Result:=True;
 end;
 
 /// <summary>
@@ -1703,7 +1739,10 @@ end;
 function TMainForm.CheckIfDate(StrDate: string): boolean;
 begin
   Result:=False;
-  if StrToDateDef(StrDate, NULLDATE) <> NULLDATE then Result:=True;
+
+  if StrToDateDef(StrDate, NULLDATE) <> NULLDATE then
+    Result:=True;
+
 end;
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------ START UP //

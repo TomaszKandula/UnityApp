@@ -617,7 +617,7 @@ begin
 end;
 
 /// <summary>
-///     Save daily comment into database.
+///     Save daily comment into database (use locking thread by default).
 /// </summary>
 
 procedure TActionsForm.SaveDailyComment;
@@ -1055,6 +1055,7 @@ begin
     if MainForm.MsgCall(mcQuestion2, 'Are you absolutely sure you want to send it, right now?') = IDNO
         then Exit;
 
+    MainForm.UpdateOpenItemsRefs(OpenItemsGrid);
     TTSendAccountStatement.Create(
         False,
         maDefined,

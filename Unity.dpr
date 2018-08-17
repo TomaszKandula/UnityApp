@@ -10,52 +10,53 @@ program Unity;
 {$SetPEFlags $0020}
 
 uses
-    Forms,
-    Windows,
-    Messages,
-    Classes,
-    SysUtils,
-    StrUtils,
-    StdCtrls,
-    ShellApi,
-    IOUtils,
-    INIFiles,
-    CRC32u,
-    SynZip,
-    SynZipFiles,
-    uCEFApplication,
-    System.Types,
-    Model in 'Model\Model.pas',
-    SQL in 'Model\SQL.pas',
-    AgeView in 'Logic\AgeView.pas',
-    Database in 'Logic\Database.pas',
-    Mailer in 'Logic\Mailer.pas',
-    Settings in 'Logic\Settings.pas',
-    Transactions in 'Logic\Transactions.pas',
-    UAC in 'Logic\UAC.pas',
-    Worker in 'Logic\Worker.pas',
-    Internet in 'Logic\Internet.pas',
-    ThreadUtilities in 'Logic\ThreadUtilities.pas',
-    EventLogger in 'Logic\EventLogger.pas',
-    Arrays in 'Extensions\Arrays.pas',
-    InterposerClasses in 'Extensions\InterposerClasses.pas',
-    About in 'View\About.pas' {AboutForm},
-    Actions in 'View\Actions.pas' {ActionsForm},
-    Calendar in 'View\Calendar.pas' {CalendarForm},
-    Colors in 'View\Colors.pas' {ColorsForm},
-    EventLog in 'View\EventLog.pas' {EventForm},
-    Filter in 'View\Filter.pas' {FilterForm},
-    Invoices in 'View\Invoices.pas' {InvoicesForm},
-    Main in 'View\Main.pas' {MainForm},
-    PhoneList in 'View\PhoneList.pas' {PhoneListForm},
-    SendFeedback in 'View\SendFeedback.pas' {ReportForm},
-    AVSearch in 'View\AVSearch.pas' {SearchForm},
-    Send in 'View\Send.pas' {SendForm},
-    Splash in 'View\Splash.pas' {SplashForm},
-    Tracker in 'View\Tracker.pas' {TrackerForm},
-    Update in 'View\Update.pas' {UpdateForm},
-    MassMailer in 'View\MassMailer.pas' {ViewMailerForm},
-    ABSearch in 'View\ABSearch.pas' {ViewSearchForm};
+  Forms,
+  Windows,
+  Messages,
+  Classes,
+  SysUtils,
+  StrUtils,
+  StdCtrls,
+  ShellApi,
+  IOUtils,
+  INIFiles,
+  CRC32u,
+  SynZip,
+  SynZipFiles,
+  uCEFApplication,
+  System.Types,
+  Model in 'Model\Model.pas',
+  SQL in 'Model\SQL.pas',
+  AgeView in 'Logic\AgeView.pas',
+  Database in 'Logic\Database.pas',
+  Mailer in 'Logic\Mailer.pas',
+  Settings in 'Logic\Settings.pas',
+  Transactions in 'Logic\Transactions.pas',
+  UAC in 'Logic\UAC.pas',
+  Worker in 'Logic\Worker.pas',
+  Internet in 'Logic\Internet.pas',
+  ThreadUtilities in 'Logic\ThreadUtilities.pas',
+  EventLogger in 'Logic\EventLogger.pas',
+  Arrays in 'Extensions\Arrays.pas',
+  InterposerClasses in 'Extensions\InterposerClasses.pas',
+  About in 'View\About.pas' {AboutForm},
+  Actions in 'View\Actions.pas' {ActionsForm},
+  Calendar in 'View\Calendar.pas' {CalendarForm},
+  Colors in 'View\Colors.pas' {ColorsForm},
+  EventLog in 'View\EventLog.pas' {EventForm},
+  Filter in 'View\Filter.pas' {FilterForm},
+  Invoices in 'View\Invoices.pas' {InvoicesForm},
+  Main in 'View\Main.pas' {MainForm},
+  PhoneList in 'View\PhoneList.pas' {PhoneListForm},
+  SendFeedback in 'View\SendFeedback.pas' {ReportForm},
+  AVSearch in 'View\AVSearch.pas' {SearchForm},
+  Send in 'View\Send.pas' {SendForm},
+  Splash in 'View\Splash.pas' {SplashForm},
+  Tracker in 'View\Tracker.pas' {TrackerForm},
+  Update in 'View\Update.pas' {UpdateForm},
+  MassMailer in 'View\MassMailer.pas' {ViewMailerForm},
+  ABSearch in 'View\ABSearch.pas' {ViewSearchForm},
+  Await in 'View\Await.pas' {AwaitForm};
 
 type
     DWord = 0..$FFFFFFFF;
@@ -790,8 +791,12 @@ begin
     MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ViewMailerForm'' .... has been created.');
     Status(28, AllTasks, 10, 'Application initialization: [VCL] ViewMailer has been loaded.', False, Settings.GetPathEventLog);
 
+    Application.CreateForm(TAwaitForm, AwaitForm);
+    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''AwaitForm'' .... has been created.');
+    Status(29, AllTasks, 10, 'Application initialization: [VCL] AwaitForm has been loaded.', False, Settings.GetPathEventLog);
+
     // Splash screen - 100%
-    Status(29, AllTasks, 750, 'Application is initialized.', False, Settings.GetPathEventLog);
+    Status(30, AllTasks, 750, 'Application is initialized.', False, Settings.GetPathEventLog);
 
     AnimateWindow(SplashForm.Handle, 500, AW_BLEND or AW_HIDE);
     Sleep(150);
