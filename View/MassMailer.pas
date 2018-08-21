@@ -52,6 +52,7 @@ type
         procedure btnSendEmailClick(Sender: TObject);
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
+        procedure FormClose(Sender: TObject; var Action: TCloseAction);
     public
         var ThreadCount: integer;
     private
@@ -168,8 +169,14 @@ begin
 
 end;
 
+
 // ------------------------------------------------------------------------------------------------------------------------------------------------ START UP //
 
+
+/// <summary>
+///     Prepare window caption, window panels and list view object, so it can be later used as we do not make
+///     change in columns at runtime.
+/// </summary>
 
 procedure TViewMailerForm.FormCreate(Sender: TObject);
 var
@@ -206,11 +213,42 @@ begin
 
 end;
 
+/// <summary>
+///     Before the form is shown to the user, get all email addresses from database. This may take some time, so we display busy cursor.
+///     We also switch off open items timer, so it wil not interfere when user sends the data.
+/// </summary>
+
 procedure TViewMailerForm.FormShow(Sender: TObject);
 begin
+    // Display busy cursor and change status
+    Screen.Cursor:=crSQLWait;
+    MainForm.ExecMessage(False, mcStatusBar, stProcessing);
+
+    // Get all necessary data
     GetEmailList(EmailList);
     EmailList.ItemIndex:=0;
     SetEmailAddresses(CustomerList);
+
+    // Default
+    Screen.Cursor:=crDefault;
+    MainForm.ExecMessage(False, mcStatusBar, stReady);
+
+    // Turn off open items timer
+    MainForm.OILoader.Enabled:=False;
+
+    // Log it to event log. As long as Mass Mailer is opened, we do not process
+    // any open items/age view snapshots
+    MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Mass mailer opened, open items loader is now on hold.');
+end;
+
+/// <summary>
+///     Turn on disabled timer for open items scanner.
+/// </summary>
+
+procedure TViewMailerForm.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+    MainForm.OILoader.Enabled:=True;
+    MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Mass mailer closed, open items loader is now enabled back again.');
 end;
 
 
@@ -218,14 +256,13 @@ end;
 
 
 /// <summary>
-///     We loop through the list and send emails if email address is found. We execute TTSendAccountStatement with "Series" parameter set to true,
-///     this ensures that each time worker thread execute send method, it will return windows message with processed row (if successfull).
+///     Execute worker thread to process the listed emails. Show busy window in main thread.
 /// </summary>
 
 procedure TViewMailerForm.btnSendEmailClick(Sender: TObject);
 var
     iCNT:    integer;
-    TempStr: string;
+    MessStr: string;
 begin
 
     // Check fields
@@ -247,54 +284,35 @@ begin
         Exit;
     end;
 
-    if CustomerList.Items.Count > 0 then
-    begin
+    // Ask user, they may press the button by mistake
+    if MainForm.MsgCall(mcQuestion2, 'Are you absolutely sure you want to send it, right now?') = IDNO
+        then
+            Exit;
 
-        // Update column references
-        MainForm.UpdateOpenItemsRefs(MainForm.sgOpenItems);
+    // Get item count for sendable emails
+    for iCNT:=0 to CustomerList.Items.Count - 1 do
+        if CustomerList.Items[iCNT].SubItems[2] <> 'Not Found' then
+            Inc(ThreadCount);
 
-        // Send concurrently
-        for iCNT:=0 to CustomerList.Items.Count - 1 do
-        begin
+    // Prepare custom message to the customer
+    MessStr:=StringReplace(Text_Message.Text, CRLF, HTML_BR, [rfReplaceAll]);
 
-            if CustomerList.Items[iCNT].SubItems[2] <> 'Not Found' then
-            begin
+    // Process listed customers in worker thread
+    TTSendAccountStatements.Create(
+        Text_Subject.Text,
+        Text_Salut.Text,
+        MessStr,
+        cbAddOverdue.Checked,
+        MainForm.sgOpenItems,
+        MainForm.sgAgeView,
+        ViewMailerForm.CustomerList
+    );
 
-                TempStr:=StringReplace(Text_Message.Text, CRLF, HTML_BR, [rfReplaceAll]);
-
-                TTSendAccountStatement.Create(
-                    True,
-                    maCustom,
-                    Text_Subject.Text,
-                    Text_Salut.Text,
-                    TempStr,
-                    cbAddOverdue.Checked,
-                    MainForm.sgOpenItems,
-                    CustomerList.Items[iCNT].SubItems[0],
-                    MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUID,            1, 1), StrToInt(CustomerList.Items[iCNT].Caption)],
-                    MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), StrToInt(CustomerList.Items[iCNT].Caption)],
-                    MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), StrToInt(CustomerList.Items[iCNT].Caption)],
-                    MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCO_CODE,         1, 1), StrToInt(CustomerList.Items[iCNT].Caption)],
-                    MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fAGENT,           1, 1), StrToInt(CustomerList.Items[iCNT].Caption)],
-                    iCNT
-                );
-
-                // Log started thread
-                Inc(ThreadCount);
-
-            end;
-
-        end;
-
-        /// <remarks>
-        ///     Display message window, it will be dismissed once all worker threads ends.
-        /// </remarks>
-
-        MainForm.WndCall(AwaitForm, stModal);
-
-    end;
+    // Display await window
+    MainForm.WndCall(AwaitForm, stModal);
 
 end;
+
 
 procedure TViewMailerForm.btnCancelClick(Sender: TObject);
 begin

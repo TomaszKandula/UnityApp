@@ -274,6 +274,7 @@ procedure TDocument.BuildHTML;
     var
         iCNT:           integer;
         Pos:            integer;
+
         Ad1Col:         integer;
         Ad2Col:         integer;
         Ad3Col:         integer;
@@ -413,9 +414,7 @@ end;
 /// </summary>
 
 function TDocument.SendDocument;
-
-var RAND: integer;
-
+//var RAND: integer;
 begin
     Result:=False;
 
@@ -442,12 +441,12 @@ begin
         MailCc   :=MailFrom;
         MailBcc  :='';
         MailRt   :='';
-        //Result   :=SendNow;
+        Result   :=SendNow;
 
         // Debug lines to check concurrency and template generation
-        RAND:=Random(100000);
-        SaveOutput('i:\test' + IntToStr(RAND) + '.html');
-        Result:=True;
+        //RAND:=Random(100000);
+        //SaveOutput('i:\test' + IntToStr(RAND) + '.html');
+        //Result:=True;
 
     end;
 

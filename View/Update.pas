@@ -20,11 +20,11 @@ type
         MainText2: TLabel;
         Text1: TLabel;
         Text4: TLabel;
-        BottomLine: TBevel;
         Text3: TLabel;
         Progress: TGauge;
         ShapeProgressBar: TShape;
         Text2: TLabel;
+        txtProgress: TLabel;
     protected
 //        procedure CreateParams(var Params: TCreateParams); override;
     end;

@@ -1057,7 +1057,6 @@ begin
 
     MainForm.UpdateOpenItemsRefs(OpenItemsGrid);
     TTSendAccountStatement.Create(
-        False,
         maDefined,
         'Account Statement',
         '',

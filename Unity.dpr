@@ -21,10 +21,9 @@ uses
   IOUtils,
   INIFiles,
   CRC32u,
-  SynZip,
-  SynZipFiles,
   uCEFApplication,
   System.Types,
+  System.Zip,
   Model in 'Model\Model.pas',
   SQL in 'Model\SQL.pas',
   AgeView in 'Logic\AgeView.pas',
@@ -173,46 +172,49 @@ end;
 function UnzippReleaseFile(FileName: string; DestDir: string; EventLogPath: string): boolean;
 var
     iCNT:      integer;
-    ZipR:      TZipReader;
-    FS:        TFileStream;
+    ZipRead:   TZipFile;
     Zipped:    string;
     FullPath:  string;
 begin
-    ZipR:=TZipReader.Create(FileName);
-    LogText.Log(EventLogPath, 'New update package has been found, updating files...');
 
+    Result:=False;
+
+    ZipRead:=TZipFile.Create;
     try
-        for iCNT:=0 to ZipR.Count - 1 do
-        begin
-            Zipped:=string(ZipR.Entry[iCNT].ZipName);
-            FullPath:=DestDir + Zipped;
+        try
+            ZipRead.Open(FileName, zmRead);
+            LogText.Log(EventLogPath, '[Automatic updater]: New update package has been found, updating files...');
 
-            // Check if we have path to file or path to folder
-            if ExtractFileName(FullPath) <> '' then
+            for iCNT:=0 to ZipRead.FileCount - 1 do
             begin
-                RenameFile(FullPath, Zipped + '.del');
-                FS:=TFileStream.Create(FullPath, fmCreate);
-                try
-                    ZipR.GetData(iCNT, FS);
-                    UpdateForm.Progress.Progress:=Trunc( ( (iCNT + 1) / ZipR.Count ) * 100 );
-                    UpdateForm.Update;
-                    Sleep(DelayStd);
-                finally
-                    FS.Free;
-                end;
-            end
+                Zipped:=ZipRead.FileName[iCNT];
+                FullPath:=DestDir + Zipped;
 
-            // Otherwise create given folder so later we can extract file(s) there
-            else
-            begin
-                CreateDir(FullPath);
+                // Rename old files
+                if not(string.IsNullOrEmpty(ExtractFileName(FullPath))) then
+                    RenameFile(FullPath, Zipped + '.del');
+
+                // Extract and create any folder if missing
+                ZipRead.Extract(iCNT, DestDir, True);
+
+                // Update screen
+                UpdateForm.Progress.Progress:=Trunc( ( (iCNT + 1) / ZipRead.FileCount ) * 100 );
+                UpdateForm.txtProgress.Caption:='Extracting: ' + Zipped + '.';
+                UpdateForm.Update;
+
             end;
+
+            Result:=True;
+            LogText.Log(EventLogPath, '[Automatic updater]: Old files will be removed by new instance.');
+
+        except
+            on E: Exception do
+                LogText.Log(EventLogPath, '[Automatic updater]: Unexpected error has been thrown: ' + E.Message);
         end;
 
-        Result:=True;
-        LogText.Log(EventLogPath, 'Old files will be removed by new instance.');
     finally
-        ZipR.Free;
+        ZipRead.Free;
+        DeleteFile(FileName);
     end;
 
 end;
@@ -235,12 +237,12 @@ begin
     for FileName in TDirectory.GetFiles(Directory, Pattern) do
     begin
         TFile.Delete(FileName);
-        LogText.Log(EventLogPath, 'File "' + FileName + '" has been removed.');
+        LogText.Log(EventLogPath, '[Automatic updater]: File "' + FileName + '" has been removed.');
         Inc(Check);
     end;
 
     if Check > 0 then
-        LogText.Log(EventLogPath, 'Cleaning folder after previous update has been done (' + IntToStr(Check) + ' items removed).');
+        LogText.Log(EventLogPath, '[Automatic updater]: Cleaning folder after previous update has been done (' + IntToStr(Check) + ' items removed).');
 
 end;
 
@@ -413,6 +415,8 @@ begin
 
     // Force clean up remaining files after previous update
     DeleteFilesMatchingPattern(PathAppDir, '*.del', PathEventLog);
+    DeleteFilesMatchingPattern(PathAppDir + 'locales\', '*.del', PathEventLog);
+    DeleteFilesMatchingPattern(PathAppDir + 'swiftshader\', '*.del', PathEventLog);
 
     // Check directories
     if not(DirectoryExists(Settings.GetLayoutDir)) then
@@ -435,6 +439,10 @@ begin
         UpdateForm.Top :=((WndRect.Bottom - WndRect.Top ) div 2) - (UpdateForm.Height div 2);
         UpdateForm.Left:=((WndRect.Right  - WndRect.Left) div 2) - (UpdateForm.Width  div 2);
         AnimateWindow(UpdateForm.Handle, 500, AW_BLEND or AW_ACTIVATE);
+        UpdateForm.Update;
+
+        // Update message for the user
+        UpdateForm.txtProgress.Caption:='Downloading...';
         UpdateForm.Update;
 
         // Get package from website
@@ -689,7 +697,7 @@ begin
     GlobalCEFApp:=TCefApplication.Create;
 
     /// <summary>
-    ///
+    ///     Do not run Chromium inside Unity application, all HTML rendering should be subprocessed.
     /// </summary>
 
     GlobalCEFApp.BrowserSubprocessPath:='SubProcess.exe';
@@ -732,67 +740,67 @@ begin
     ///     to prevent showing up windows.
     /// </summary>
     /// <remarks>
-    ///     Use Status method with TextMoe parameter set to False. It allows to log different text and to display different text during loading procedure.
+    ///     Use Status method with TextMode parameter set to False. It allows to log different text and to display different text during loading procedure.
     /// </remarks>
 
     Application.CreateForm(TAboutForm, AboutForm);
-    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''AboutForm'' ......... has been created.');
+    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''AboutForm'' has been created.');
     Status(15, AllTasks, 10, 'Application initialization: [VCL] About has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TSendForm, SendForm);
-    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''SendForm'' .......... has been created.');
+    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''SendForm'' has been created.');
     Status(16, AllTasks, 10, 'Application initialization: [VCL] Send has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TEventForm, EventForm);
-    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''EventForm'' ......... has been created.');
+    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''EventForm'' has been created.');
     Status(17, AllTasks, 10, 'Application initialization: [VCL] Event has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TColorsForm, ColorsForm);
-    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ColorsForm'' ........ has been created.');
+    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ColorsForm'' has been created.');
     Status(18, AllTasks, 10, 'Application initialization: [VCL] Colors has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TReportForm, ReportForm);
-    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ReportForm'' ........ has been created.');
+    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ReportForm'' has been created.');
     Status(19, AllTasks, 10, 'Application initialization: [VCL] Report has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TFilterForm, FilterForm);
-    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''FilterForm'' ........ has been created.');
+    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''FilterForm'' has been created.');
     Status(20, AllTasks, 10, 'Application initialization: [VCL] Filter has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TSearchForm, SearchForm);
-    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''SearchForm'' ........ has been created.');
+    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''SearchForm'' has been created.');
     Status(21, AllTasks, 10, 'Application initialization: [VCL] Search has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TTrackerForm, TrackerForm);
-    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''TrackerForm'' ....... has been created.');
+    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''TrackerForm'' has been created.');
     Status(22, AllTasks, 10, 'Application initialization: [VCL] Tracker has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TActionsForm, ActionsForm);
-    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ActionsForm'' ....... has been created.');
+    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ActionsForm'' has been created.');
     Status(23, AllTasks, 10, 'Application initialization: [VCL] Actions has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TCalendarForm, CalendarForm);
-    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''CalendarForm'' ...... has been created.');
+    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''CalendarForm'' has been created.');
     Status(24, AllTasks, 10, 'Application initialization: [VCL] Calendar has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TInvoicesForm, InvoicesForm);
-    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''InvoicesForm'' ...... has been created.');
+    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''InvoicesForm'' has been created.');
     Status(25, AllTasks, 10, 'Application initialization: [VCL] Invoices has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TPhoneListForm, PhoneListForm);
-    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''PhoneListForm'' ..... has been created.');
+    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''PhoneListForm'' has been created.');
     Status(26, AllTasks, 10, 'Application initialization: [VCL] PhoneList has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TViewSearchForm, ViewSearchForm);
-    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ViewSearchForm'' .... has been created.');
+    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ViewSearchForm'' has been created.');
     Status(27, AllTasks, 10, 'Application initialization: [VCL] ViewSearch has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TViewMailerForm, ViewMailerForm);
-    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ViewMailerForm'' .... has been created.');
+    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ViewMailerForm'' has been created.');
     Status(28, AllTasks, 10, 'Application initialization: [VCL] ViewMailer has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TAwaitForm, AwaitForm);
-    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''AwaitForm'' .... has been created.');
+    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''AwaitForm'' has been created.');
     Status(29, AllTasks, 10, 'Application initialization: [VCL] AwaitForm has been loaded.', False, Settings.GetPathEventLog);
 
     // Splash screen - 100%

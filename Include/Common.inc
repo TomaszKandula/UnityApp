@@ -73,9 +73,9 @@ const
     UnityReader :  string    = 'UnityReader.exe';  // Chromium implementation CEF3 and CEF4
     LicenceFile :  string    = 'Unity.lic';        // Licence file
     GridImgFile :  string    = 'Unity.img';        // Application custom image(s)
-    ReleaseFile :  string    = 'Release.pak';      // Release package
+    ReleaseFile :  string    = 'Release.zip';      // Release package
     ManifestFile:  string    = 'Unity.manifest';   // Manifest file on the server
-    CurrentMutex:  PWideChar = 'UNITY_10090';      // Mutex value, increase it with each release
+    CurrentMutex:  PWideChar = 'UNITY_10103';      // Mutex value, increase it with each release
 
     // --------------------------------------------------------------------------------------------------------------------------------------- SPLASH SCREEN //
 
@@ -289,16 +289,17 @@ const
 
     // --------------------------------------------------------------------------------------------------------------------------------- MESSAGE BOX WRAPPER //
 
-    mcInfo      = 1;
-    mcWarn      = 2;
-    mcError     = 3;
-    mcQuestion1 = 4;
-    mcQuestion2 = 5;
-    mcStatusBar = 10;
-    conOK       = 14;
-    conERROR    = 15;
-    mmSendMany  = 16;
-    strNULL     = 'NULL';
+    mcInfo       = 1;
+    mcWarn       = 2;
+    mcError      = 3;
+    mcQuestion1  = 4;
+    mcQuestion2  = 5;
+    mcStatusBar  = 10;
+    conOK        = 14;
+    conERROR     = 15;
+    mmMailerItem = 26;
+    mmAwaitClose = 27;
+    strNULL      = 'NULL';
 
     // ---------------------------------------------------------------------------------------------------------------------------- DATABASE DRIVER/PROVIDER //
 

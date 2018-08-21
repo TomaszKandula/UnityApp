@@ -3,7 +3,7 @@ object UpdateForm: TUpdateForm
   Top = 0
   BorderStyle = bsNone
   Caption = 'Unity'
-  ClientHeight = 373
+  ClientHeight = 380
   ClientWidth = 704
   Color = clWhite
   Font.Charset = DEFAULT_CHARSET
@@ -19,7 +19,7 @@ object UpdateForm: TUpdateForm
     Left = 0
     Top = 0
     Width = 704
-    Height = 373
+    Height = 380
     Align = alClient
     Pen.Color = clSkyBlue
     Pen.Width = 2
@@ -62,21 +62,21 @@ object UpdateForm: TUpdateForm
     Transparent = False
   end
   object Text1: TLabel
-    Left = 201
-    Top = 150
-    Width = 302
-    Height = 18
-    Caption = 'Running automatic update, please wait...'
+    Left = 439
+    Top = 84
+    Width = 136
+    Height = 16
+    Caption = 'Automatic updater'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
-    Font.Height = -15
+    Font.Height = -13
     Font.Name = 'Verdana'
-    Font.Style = []
+    Font.Style = [fsBold]
     ParentFont = False
   end
   object Text4: TLabel
-    Left = 24
-    Top = 336
+    Left = 131
+    Top = 344
     Width = 444
     Height = 13
     Cursor = crAppStart
@@ -90,17 +90,9 @@ object UpdateForm: TUpdateForm
     Font.Style = []
     ParentFont = False
   end
-  object BottomLine: TBevel
-    Left = 24
-    Top = 291
-    Width = 657
-    Height = 19
-    Cursor = crAppStart
-    Shape = bsBottomLine
-  end
   object Text3: TLabel
-    Left = 24
-    Top = 316
+    Left = 177
+    Top = 325
     Width = 327
     Height = 13
     Cursor = crAppStart
@@ -141,16 +133,28 @@ object UpdateForm: TUpdateForm
     ShowText = False
   end
   object Text2: TLabel
-    Left = 230
-    Top = 241
-    Width = 250
-    Height = 18
+    Left = 238
+    Top = 233
+    Width = 220
+    Height = 16
     Caption = 'Do not turn off your computer.'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
-    Font.Height = -15
+    Font.Height = -13
     Font.Name = 'Verdana'
     Font.Style = [fsBold]
+    ParentFont = False
+  end
+  object txtProgress: TLabel
+    Left = 177
+    Top = 164
+    Width = 4
+    Height = 13
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Verdana'
+    Font.Style = []
     ParentFont = False
   end
 end

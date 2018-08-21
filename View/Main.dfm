@@ -1985,8 +1985,6 @@ object MainForm: TMainForm
         Align = alBottom
         BevelOuter = bvNone
         TabOrder = 1
-        ExplicitLeft = 3
-        ExplicitTop = 571
         object BottomPanel1: TPanel
           AlignWithMargins = True
           Left = 17
@@ -5715,8 +5713,6 @@ object MainForm: TMainForm
           OnMouseEnter = sgAgeViewMouseEnter
           OnMouseWheelDown = sgAgeViewMouseWheelDown
           OnMouseWheelUp = sgAgeViewMouseWheelUp
-          ExplicitLeft = 825
-          ExplicitWidth = 426
           ColWidths = (
             40
             40
@@ -17622,7 +17618,6 @@ object MainForm: TMainForm
             OnMouseWheelDown = sgListSectionMouseWheelDown
             OnMouseWheelUp = sgListSectionMouseWheelUp
             OnSelectCell = sgListSectionSelectCell
-            ExplicitHeight = 389
             ColWidths = (
               30
               381)
@@ -17675,7 +17670,6 @@ object MainForm: TMainForm
             OnKeyUp = sgListValueKeyUp
             OnMouseWheelDown = sgListValueMouseWheelDown
             OnMouseWheelUp = sgListValueMouseWheelUp
-            ExplicitHeight = 389
             ColWidths = (
               30
               169
@@ -17839,7 +17833,6 @@ object MainForm: TMainForm
             OnDrawCell = sgGroupsDrawCell
             OnMouseWheelDown = sgGroupsMouseWheelDown
             OnMouseWheelUp = sgGroupsMouseWheelUp
-            ExplicitHeight = 130
             ColWidths = (
               30
               35

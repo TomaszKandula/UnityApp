@@ -3,7 +3,7 @@ object AwaitForm: TAwaitForm
   Top = 0
   BorderIcons = []
   BorderStyle = bsSingle
-  Caption = 'Processing...'
+  Caption = 'Unity'
   ClientHeight = 209
   ClientWidth = 371
   Color = clWhite
@@ -16,6 +16,7 @@ object AwaitForm: TAwaitForm
   OldCreateOrder = False
   Position = poMainFormCenter
   OnClose = FormClose
+  OnKeyDown = FormKeyDown
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
@@ -439,11 +440,5 @@ object AwaitForm: TAwaitForm
     ParentFont = False
     ExplicitWidth = 214
     ExplicitHeight = 14
-  end
-  object AwaitThdCheck: TTimer
-    Interval = 150
-    OnTimer = AwaitThdCheckTimer
-    Left = 40
-    Top = 24
   end
 end

@@ -779,7 +779,7 @@ implementation
 
 uses
     Filter, Tracker, Invoices, Actions, Calendar, About, AVSearch, Worker, SQL, Model, Settings, Database, UAC, AgeView, Transactions, Colors, EventLog,
-    SendFeedback, ABSearch, MassMailer, Splash, uCEFApplication;
+    SendFeedback, ABSearch, MassMailer, Splash, Await, uCEFApplication;
 
 
 {$R *.dfm}
@@ -804,6 +804,7 @@ end;
 procedure TMainForm.WndProc(var Msg: Messages.TMessage);
 var
     CUID:   string;
+    Param:  integer;
 begin
     inherited;
 
@@ -837,8 +838,8 @@ begin
         if ( (Msg.WParam > 0) and (Msg.WParam <= 4) ) and (not(string.IsNullOrEmpty(PChar(Msg.LParam)))) then
             MainForm.MsgCall(Msg.WParam, PChar(Msg.LParam));
 
-        // Pool of number to be used: 10..20 for other events
-        if (Msg.WParam >= 10) and (Msg.WParam <= 20) then
+        // Pool of number to be used: 10..40 for other events
+        if (Msg.WParam >= 10) and (Msg.WParam <= 40) then
         begin
 
             // Status bar change
@@ -859,21 +860,22 @@ begin
                 MainForm.StatBar_TXT7.Caption   :='Connection lost, re-connecting...';
             end;
 
-            // Mass Mailer (e-mail has been sent successfully), call from worker thread
-            if Msg.WParam = 16 then
+            // MASS MAILER --------------------------------------------------------------------------------------------------------------------------------- //
+
+            // Countdown processed emails
+            if (Msg.WParam = 26) then
             begin
-                if PChar(Msg.LParam) > '-1' then
-
-                    /// <remarks>
-                    ///     Refers to view MassMailer -> CustomerList -> Column "IsSent"
-                    /// </remarks>
-
-                    ViewMailerForm.CustomerList.Items[StrToInt(PChar(Msg.LParam))].SubItems[3]:='Sent';
-
-                    // Decrease number of active threads
+                Param:=StrToIntDef(PChar(Msg.LParam), -1);
+                if Param > -1 then
+                begin
+                    ViewMailerForm.CustomerList.Items[Param].SubItems[3]:='Sent';
                     Dec(ViewMailerForm.ThreadCount);
-
+                end;
             end;
+
+            // Close Await window if e-mails have been processed by worker thread
+            if (Msg.WParam = 27) and (PChar(Msg.LParam) = 'True') then
+                AwaitForm.Close;
 
         end;
 
@@ -2248,7 +2250,7 @@ begin
     begin
         TrayIcon.Visible:=True;
         TrayIcon.BalloonHint:='Hello, you have ' + IntToStr(Sum) + ' follow-up dates registered for today.' + CRLF +
-                          'Let''s bother some customers and collect some money money!' + CRLF;
+                              'Let''s bother some customers and collect some money money!' + CRLF;
         TrayIcon.ShowBalloonHint;
     end;
 
@@ -4274,14 +4276,17 @@ begin
 
     if Text50.Font.Style = [fsBold] then
     begin
+
         if (Key = 86) and (Shift = [ssCtrl]) then
             sgListSection.CopyCutPaste(adPaste);
+
         if (Key = 88) and (Shift = [ssCtrl]) then
             sgListSection.CopyCutPaste(adCut);
     end;
 
     if (Key = 67) and (Shift = [ssCtrl]) then
         sgListSection.CopyCutPaste(adCopy);
+
     if (Key = 46) and (Text50.Font.Style = [fsBold]) then
         sgListSection.DelEsc(adDEL, sgListSection.Col, sgListSection.Row);
 end;
@@ -5428,7 +5433,7 @@ end;
 
 procedure TMainForm.btnCloseABClick(Sender: TObject);
 begin
-    if MsgCall(mcQuestion2, 'Are you sure you want to close address book?') = IDYES then
+    if MsgCall(mcQuestion2, 'Are you sure you want to close Address Book?') = IDYES then
     begin
         sgAddressBook.SetUpdatedRow(0);
         sgAddressBook.ClearAll(2, 1, 1, True);
@@ -5712,7 +5717,7 @@ var
     jCNT:       integer;
 begin
 
-    // NO PASSWORD GIVEN
+    // No password given
 
     if btnUnlock.Caption = 'Lock' then
     begin
@@ -5727,15 +5732,15 @@ begin
     end
     else
 
-    // PASSWORD IS VALID
+    // Password is valid
 
     if CheckGivenPassword(EditPassword.Text) then
     begin
 
-        { ENABLE CONTROLS }
+        // Enable controls
         SetSettingsPanel(spUnLock);
 
-        { POPULATE STRING GRIDS }
+        // Populate string grids
         List:=TStringList.Create();
         Settings:=TSettings.Create;
 
@@ -5758,7 +5763,7 @@ begin
             List.Free;
         end;
 
-        { GET UAC AND GROUPS }
+        // Get UAC and groups
         UserAcc:=TDataTables.Create(DbConnect);
         try
             UserAcc.OpenTable(TblUAC);    UserAcc.SqlToGrid(sgUAC,    UserAcc.ExecSQL, False, True);
@@ -5769,19 +5774,19 @@ begin
             sgGroups.SetColWidth(10, 20, 400);
         end;
 
-        { STRING GRIDS DIMENSIONS }
+        // Grids dimensions
         sgListValue.SetColWidth(25, 30, 400);
         sgListSection.SetColWidth(25, 30, 400);
         sgUAC.SetColWidth(10, 20, 400);
         sgGroups.SetColWidth(10, 20, 400);
 
-        { CLEAR EDIT BOX FROM PROVIDED PASWORD }
+        // CLear edit box from provided password
         EditPassword.Text:='';
 
     end
     else
 
-    // INVALID PASSWORD
+    // Invalid password
 
     begin
         MsgCall(mcWarn, 'Incorrect password, please re-type it and try again.');

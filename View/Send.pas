@@ -96,7 +96,6 @@ begin
 
     MainForm.UpdateOpenItemsRefs(ActionsForm.OpenItemsGrid);
     TTSendAccountStatement.Create(
-        False,
         maCustom,
         'Account Statement',
         Text_Salut.Text,

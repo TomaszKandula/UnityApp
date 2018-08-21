@@ -14,14 +14,16 @@ type
     /// <summary>
     ///     Allow to display busy status to the user during processing any "heavy duty task".
     /// </summary>
+    /// <remarks>
+    ///     We doe not allow user to close the window. It is opened and closed by external event.
+    /// </remarks>
 
     TAwaitForm = class(TForm)
         WaitImage: TImage;
         WaitText: TLabel;
-    AwaitThdCheck: TTimer;
-    procedure FormShow(Sender: TObject);
-    procedure FormClose(Sender: TObject; var Action: TCloseAction);
-    procedure AwaitThdCheckTimer(Sender: TObject);
+        procedure FormShow(Sender: TObject);
+        procedure FormClose(Sender: TObject; var Action: TCloseAction);
+        procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     end;
 
 var
@@ -30,26 +32,42 @@ var
 
 implementation
 
+
 uses
     MassMailer;
 
 {$R *.dfm}
 
 
+
+/// <summary>
+///     Perform animation when window is about to be shown.
+/// </summary>
+
 procedure TAwaitForm.FormShow(Sender: TObject);
 begin
     (WaitImage.Picture.Graphic as TGIFImage).Animate:=True;
 end;
+
+/// <summary>
+///     If window is about to be closed, we disable GIF animation.
+/// </summary>
 
 procedure TAwaitForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
     (WaitImage.Picture.Graphic as TGIFImage).Animate:=False;
 end;
 
-procedure TAwaitForm.AwaitThdCheckTimer(Sender: TObject);
+/// <remarks>
+///     <ALT> + <F4> combination for window close is disabled.
+/// </remarks>
+
+procedure TAwaitForm.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-    if ViewMailerForm.ThreadCount = 0 then
-        Close;
+
+    if (Key=VK_F4) and (Shift=[ssALT]) then
+        Key:=0;
+
 end;
 
 

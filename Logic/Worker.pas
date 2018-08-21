@@ -6,7 +6,7 @@ unit Worker;
 interface
 
 uses
-    Windows, Messages, SysUtils, Classes, Diagnostics, Graphics, ADODB, ComObj, SyncObjs, Dialogs, DB, InterposerClasses, Arrays;
+    Windows, Messages, SysUtils, Classes, Diagnostics, Graphics, ADODB, ComObj, ComCtrls, SyncObjs, Dialogs, DB, InterposerClasses, Arrays;
 
     /// <remarks>
     ///     Asynchronous methods executed within single thread classes. Most of the thread classes aquire lock, so they can be called
@@ -196,11 +196,22 @@ type
         var FEmailAutoStat: boolean;
         var FEmailManuStat: boolean;
         var FEventLog:      boolean;
-        var FShouldLock:    boolean;
+        var FUpdateGrid:    boolean;
     public
         property    IDThd:  integer read FIDThd;
-        constructor Create(CUID: string; Email: boolean; CallEvent: boolean; CallDuration: integer; Comment: string; EmailReminder, EmailAutoStat, EmailManuStat: boolean; EventLog: boolean; ShouldLock: boolean = true {OPTION});
         destructor  Destroy; override;
+        constructor Create(
+            CUID:           string;
+            Email:          boolean;
+            CallEvent:      boolean;
+            CallDuration:   integer;
+            Comment:        string;
+            EmailReminder,
+            EmailAutoStat,
+            EmailManuStat:  boolean;
+            EventLog:       boolean;
+            UpdateGrid:     boolean = true
+        );
     end;
 
     /// <summary>
@@ -226,7 +237,7 @@ type
     end;
 
     /// <summary>
-    ///     Send account statement.
+    ///     Send single account statement.
     /// </summary>
 
     TTSendAccountStatement = class(TThread)
@@ -235,25 +246,24 @@ type
     private
         var FLock:         TCriticalSection;
         var FIDThd:        integer;
-        var FSeries:       boolean;
         var FLayout:       integer;
         var FSubject:      string;
         var FSalut:        string;
         var FMess:         string;
         var FIsOverdue:    boolean;
-        var FCUID:         string;
+        var FOpenItems:    TStringGrid;
         var FSCUID:        string;
+        var FCUID:         string;
         var FCustName:     string;
+        var FCustNumber:   string;
         var FCoCode:       string;
         var FBranch:       string;
-        var FOpenItems:    TStringGrid;
-        var FCustNumber:   string;
+        var FSeries:       boolean;
         var FItemNo:       integer;
     public
         property    IDThd:  integer read FIDThd;
         destructor  Destroy; override;
         constructor Create(
-            Series:     boolean;
             Layout:     integer;
             Subject:    string;
             Salut:      string;
@@ -266,7 +276,39 @@ type
             CustNumber: string;
             CoCode:     string;
             Branch:     string;
-            ItemNo:     integer = 0 {OPTION}
+            Series:     boolean = False;
+            ItemNo:     integer = 0
+        );
+    end;
+
+    /// <summary>
+    ///     Send multiple account statements to the selected customers (the source is TListView).
+    /// </summary>
+
+    TTSendAccountStatements = class(TThread)
+    protected
+        procedure Execute; override;
+    private
+        var FLock:         TCriticalSection;
+        var FIDThd:        integer;
+        var FSubject:      string;
+        var FSalut:        string;
+        var FMess:         string;
+        var FIsOverdue:    boolean;
+        var FOpenItems:    TStringGrid;
+        var FAgeView:      TStringGrid;
+        var FMailerList:   TListView;
+    public
+        property    IDThd: integer read FIDThd;
+        destructor  Destroy; override;
+        constructor Create(
+            Subject:    string;
+            Salut:      string;
+            Mess:       string;
+            IsOverdue:  boolean;
+            OpenItems:  TStringGrid;
+            AgeView:    TStringGrid;
+            MailerList: TListView
         );
     end;
 
@@ -278,7 +320,6 @@ type
     protected
         procedure Execute; override;
     private
-        var FIDThd:      integer;
         var FTableName:  string;
         var FColumns:    string;
         var FDestGrid:   TStringGrid;
@@ -1105,10 +1146,22 @@ end;
 // ------------------------------------------------------------------------------------------------------------------------------------- WRITE DAILY COMMENT //
 
 
-constructor TTDailyComment.Create(CUID: string; Email: boolean; CallEvent: boolean; CallDuration: integer; Comment: string; EmailReminder, EmailAutoStat, EmailManuStat: boolean; EventLog: boolean; ShouldLock: boolean = true {OPTION});
+constructor TTDailyComment.Create
+(
+    CUID:           string;
+    Email:          boolean;
+    CallEvent:      boolean;
+    CallDuration:   integer;
+    Comment:        string;
+    EmailReminder,
+    EmailAutoStat,
+    EmailManuStat:  boolean;
+    EventLog:       boolean;
+    UpdateGrid:     boolean = true
+);
 begin
     inherited Create(False);
-    FShouldLock   :=ShouldLock;
+    FLock         :=TCriticalSection.Create;
     FIDThd        :=0;
     FCUID         :=CUID;
     FEmail        :=Email;
@@ -1119,18 +1172,12 @@ begin
     FEmailAutoStat:=EmailAutoStat;
     FEmailManuStat:=EmailManuStat;
     FEventLog     :=EventLog;
-
-    if FShouldLock then
-        FLock:=TCriticalSection.Create;
-
+    FUpdateGrid   :=UpdateGrid;
 end;
 
 destructor TTDailyComment.Destroy;
 begin
-
-    if Assigned(FLock) then
-        FLock.Free;
-
+    FLock.Free;
 end;
 
 procedure TTDailyComment.Execute;
@@ -1145,9 +1192,7 @@ var
     DataCheckSum:  string;
 begin
     FIDThd:=CurrentThread.ThreadID;
-
-    if Assigned(FLock) then
-        FLock.Acquire;
+    FLock.Acquire;
 
     try
         DailyText:=TDataTables.Create(MainForm.DbConnect);
@@ -1219,10 +1264,11 @@ begin
                 // Execute
                 if (DailyText.UpdateRecord(TblDaily, ttExplicit, Condition)) and (DailyText.RowsAffected > 0) then
                 begin
+
                     // Refresh history grid
                     Synchronize(procedure
                     begin
-                        ActionsForm.UpdateHistory(ActionsForm.HistoryGrid);
+                        if FUpdateGrid then ActionsForm.UpdateHistory(ActionsForm.HistoryGrid);
                     end);
 
                     if FEventLog then
@@ -1236,7 +1282,7 @@ begin
             end
             else
 
-            // nsert new record
+            // Insert new record
             begin
                 DailyText.CleanUp;
 
@@ -1313,10 +1359,11 @@ begin
                 // Execute
                 if (DailyText.InsertInto(TblDaily, ttExplicit)) and (DailyText.RowsAffected > 0) then
                 begin
+
                     // Refresh history grid
                     Synchronize(procedure
                     begin
-                        ActionsForm.UpdateHistory(ActionsForm.HistoryGrid);
+                        if FUpdateGrid then ActionsForm.UpdateHistory(ActionsForm.HistoryGrid);
                     end);
 
                     if FEventLog then
@@ -1334,8 +1381,7 @@ begin
         end;
 
     finally
-        if Assigned(FLock) then
-            FLock.Release;
+        FLock.Release;
     end;
 
     FreeOnTerminate:=True;
@@ -1509,12 +1555,27 @@ end;
 // ---------------------------------------------------------------------------------------------------------------------------------- SEND ACCOUNT STATEMENT //
 
 
-constructor TTSendAccountStatement.Create(Series: boolean; Layout: integer; Subject: string; Salut: string; Mess: string; IsOverdue: boolean; OpenItems: TStringGrid; SCUID: string; CUID: string; CustName: string; CustNumber: string; CoCode: string; Branch: string; ItemNo: integer = 0 {OPTION});
+constructor TTSendAccountStatement.Create
+(
+    Layout:     integer;
+    Subject:    string;
+    Salut:      string;
+    Mess:       string;
+    IsOverdue:  boolean;
+    OpenItems:  TStringGrid;
+    SCUID:      string;
+    CUID:       string;
+    CustName:   string;
+    CustNumber: string;
+    CoCode:     string;
+    Branch:     string;
+    Series:     boolean = False;
+    ItemNo:     integer = 0
+);
 begin
     inherited Create(False);
     FLock      :=TCriticalSection.Create;
     FIDThd     :=0;
-    FSeries    :=Series;
     FLayout    :=Layout;
     FSubject   :=Subject;
     FSalut     :=Salut;
@@ -1527,6 +1588,7 @@ begin
     FCustNumber:=CustNumber;
     FCoCode    :=CoCode;
     FBranch    :=Branch;
+    FSeries    :=Series;
     FItemNo    :=ItemNo;
 end;
 
@@ -1535,27 +1597,25 @@ begin
     FLock.Free;
 end;
 
-/// <remarks>
-///     If execute in paraller, then slow down a bit the worker thread to avoid large CPU consumption.
-/// </remarks>
-
 procedure TTSendAccountStatement.Execute;
 var
     Statement:   TDocument;
     Settings:    ISettings;
-    DailyText:   TDataTables;
-    Status:      string;
-    Condition:   string;
+    CommThread:  TTDailyComment;
 begin
     FIDThd:=CurrentThread.ThreadID;
     FLock.Acquire;
+    CurrentThread.Sleep(50);
 
     try
         Statement:=TDocument.Create;
         Settings :=TSettings.Create;
         try
 
-            // Setup
+            /// <remarks>
+            ///     Assign all the necessary parameters.
+            /// </remarks>
+
             Statement.CUID     :=FCUID;
             Statement.SCUID    :=FSCUID;
             Statement.CustName :=FCustName;
@@ -1565,71 +1625,69 @@ begin
             Statement.CustMess :=FMess;
             Statement.IsOverdue:=FIsOverdue;
             Statement.OpenItems:=FOpenItems;
-            Statement.DocType  :=dcStatement;  { FIXED FLAG }
 
-            // Use fully pre-defined template
+            Statement.MailSubject:=FSubject + ' - ' + FCustName + ' - ' + FCustNumber;
+
+            /// <remarks>
+            ///     Use dcStatement, do not change this flag.
+            /// </remarks>
+
+            Statement.DocType  :=dcStatement;
+
+            /// <remarks>
+            ///     Load either fixed template or customizable template.
+            /// </remarks>
+            /// <param name="FLayout">
+            ///     Use maDefined for fully pre-defined template.
+            ///     Use maCustom for customised template. It requires FSalut, FMess and FSubject to be provided.
+            /// </param>
+
             if FLayout = maDefined then
                 Statement.HTMLLayout:=Statement.LoadTemplate(Settings.GetLayoutDir + Settings.GetStringValue(Layouts, 'SINGLE2', ''));
 
-            // Use pre-defined template with two custom fields
             if FLayout = maCustom then
                 Statement.HTMLLayout:=Statement.LoadTemplate(Settings.GetLayoutDir + Settings.GetStringValue(Layouts, 'SINGLE3', ''));
 
-            // Send statement
-            Statement.MailSubject:=FSubject + ' - ' + FCustName + ' - ' + FCustNumber;
-
-            if FSeries then CurrentThread.Sleep(50);
+            /// <remarks>
+            ///     Send email with account statement.
+            /// </remarks>
 
             if Statement.SendDocument then
             begin
 
-                // Get current daily comment for given CUID and extend it by adding status
-                DailyText:=TDataTables.Create(MainForm.DbConnect);
-                try
-                    DailyText.Columns.Add(TDaily.FIXCOMMENT);
-                    Condition:=TDaily.CUID + EQUAL + QuotedStr(FCUID) + _AND + TDaily.AGEDATE + EQUAL + QuotedStr(MainForm.AgeDateSel);
-                    DailyText.CustFilter:=WHERE + Condition;
-                    DailyText.OpenTable(TblDaily);
+                /// <summary>
+                ///     Register sent email either as manual statement or automatic statement.
+                /// </summary>
 
-                    if not (DailyText.DataSet.RecordCount = 0) then
-                    begin
-                        Status:=DailyText.DataSet.Fields[TDaily.FIXCOMMENT].Value;
-                        Status:=Status + CRLF + 'New account statement has been sent to the customer.';
-                    end
-                    else
-                    begin
-                        Status:='New account statement has been sent to the customer.';
-                    end;
-                finally
-                    DailyText.Free;
+                if FLayout = maDefined then
+                begin
+                    CommThread:=TTDailyComment.Create(FCUID, False, False, 0, 'New account statement has been sent to the customer', False, True, False, True, False);
+                    CommThread.WaitFor;
                 end;
 
-                // Single email
-                if not FSeries then
+                if FLayout = maCustom  then
                 begin
-                    // Register action (use thread locking by default)
-                    if FLayout = maDefined then TTDailyComment.Create(FCUID, False, False, 0, Status, False, True, False, True);
-                    if FLayout = maCustom  then TTDailyComment.Create(FCUID, False, False, 0, Status, False, False, True, True);
+                    CommThread:=TTDailyComment.Create(FCUID, False, False, 0, 'New account statement has been sent to the customer', False, False, True, True, False);
+                    CommThread.WaitFor;
+                end;
+
+                /// <remarks>
+                ///     Either single email (manual by user) or executed by mass mailer (multiple emails).
+                /// </remarks>
+
+                if not(FSeries) then
+                begin
                     MainForm.ExecMessage(False, mcInfo, 'Account Statement has been sent successfully!');
                 end
                 else
-                // Many emails
                 begin
-                    if FLayout = maDefined then TTDailyComment.Create(FCUID, False, False, 0, Status, False, True, False, True, False {no locking});
-                    if FLayout = maCustom  then TTDailyComment.Create(FCUID, False, False, 0, Status, False, False, True, True, False {no locking});
-                    MainForm.ExecMessage(False, mmSendMany, IntToStr(FItemNo));
+                    MainForm.ExecMessage(False, mmMailerItem, IntToStr(FItemNo));
                 end;
 
             end
             else
             begin
-
-                // Fail to send an e-mail(s)
-                if not FSeries then
-                    MainForm.ExecMessage(False, mcError, 'Account Statement cannot be sent. Please contact IT support.')
-                        else
-                            MainForm.ExecMessage(False, mmSendMany, '-1');
-
+                if not(FSeries) then MainForm.ExecMessage(False, mcError, 'Account Statement cannot be sent. Please contact IT support.')
             end;
 
         finally
@@ -1637,6 +1695,138 @@ begin
         end;
 
     finally
+        FLock.Release;
+    end;
+
+    FreeOnTerminate:=True;
+
+end;
+
+
+// --------------------------------------------------------------------------------------------------------------------------------- SEND ACCOUNT STATEMENTS //
+
+
+constructor TTSendAccountStatements.Create
+(
+    Subject:    string;
+    Salut:      string;
+    Mess:       string;
+    IsOverdue:  boolean;
+    OpenItems:  TStringGrid;
+    AgeView:    TStringGrid;
+    MailerList: TListView
+);
+begin
+    inherited Create(False);
+    FLock      :=TCriticalSection.Create;
+    FIDThd     :=0;
+    FSubject   :=Subject;
+    FSalut     :=Salut;
+    FMess      :=Mess;
+    FIsOverdue :=IsOverdue;
+    FOpenItems :=OpenItems;
+    FAgeView   :=AgeView;
+    FMailerList:=MailerList;
+end;
+
+destructor TTSendAccountStatements.Destroy;
+begin
+    FLock.Free;
+end;
+
+procedure TTSendAccountStatements.Execute;
+var
+    Statement:  TDocument;
+    iCNT:       integer;
+    SCUID:      string;
+    CUID:       string;
+    CustName:   string;
+    CustNumber: string;
+    CoCode:     string;
+    Agent:      string;
+    ListPos:    integer;
+    SendStat:   TTSendAccountStatement;
+begin
+    FIDThd:=CurrentThread.ThreadID;
+    FLock.Acquire;
+
+    try
+
+        /// <remarks>
+        ///     Lock VCL during processing by worker thread.
+        /// </remarks>
+
+        FOpenItems.Freeze(True);
+        FAgeView.Freeze(True);
+        FMailerList.Freeze(True);
+
+        Statement:=TDocument.Create;
+        try
+
+            /// <remarks>
+            ///     Update column references, as they depend on view from SQL which may be changed at runtime.
+            /// </remarks>
+
+            MainForm.UpdateOpenItemsRefs(MainForm.sgOpenItems);
+
+            for iCNT:=0 to FMailerList.Items.Count - 1 do
+            begin
+
+                if FMailerList.Items[iCNT].SubItems[2] <> 'Not Found' then
+                begin
+
+                    /// <remarks>
+                    ///     ListPos parameter refers to position of the customer on Age View (main application screen).
+                    /// </remarks>
+
+                    ListPos   :=StrToInt(FMailerList.Items[iCNT].Caption);
+
+                    /// <remarks>
+                    ///     Get rest of the data per listed customer.
+                    /// </remarks>
+
+                    SCUID     :=FMailerList.Items[iCNT].SubItems[0];
+                    CUID      :=FAgeView.Cells[FAgeView.ReturnColumn(TSnapshots.fCUID, 1, 1), ListPos];
+                    CustName  :=FAgeView.Cells[FAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME, 1, 1), ListPos];
+                    CustNumber:=FAgeView.Cells[FAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), ListPos];
+                    CoCode    :=FAgeView.Cells[FAgeView.ReturnColumn(TSnapshots.fCO_CODE, 1, 1), ListPos];
+                    Agent     :=FAgeView.Cells[FAgeView.ReturnColumn(TSnapshots.fAGENT, 1, 1), ListPos];
+
+                    /// <remarks>
+                    ///     Execute worker thread and wait untill it finishes the work.
+                    /// </remarks>
+
+                    SendStat:=TTSendAccountStatement.Create(
+                        maCustom,
+                        FSubject,
+                        FSalut,
+                        FMess,
+                        FIsOverdue,
+                        FOpenItems,
+					    SCUID,
+                        CUID,
+                        CustName,
+                        CustNumber,
+                        CoCode,
+                        Agent,
+                        True,
+                        iCNT
+                    );
+                    SendStat.WaitFor;
+
+                end;
+
+            end;
+
+        finally
+            Statement.Free;
+            MainForm.ExecMessage(False, mmAwaitClose, 'True');
+        end;
+
+    finally
+        FOpenItems.Freeze(False);
+        FAgeView.Freeze(False);
+        FMailerList.Freeze(False);
         FLock.Release;
     end;
 
@@ -1663,7 +1853,7 @@ var
     DataTables:  TDataTables;
 begin
 
-    IDThd:=TTGeneralTables.CurrentThread.ThreadID;  { USE FOR ERROR HANDLING AND LOGGING }
+    IDThd:=TTGeneralTables.CurrentThread.ThreadID;
     DataTables:=TDataTables.Create(MainForm.DbConnect);
 
     try
@@ -1681,11 +1871,10 @@ begin
 
         except
             on E: Exception do
-                { ERROR HANDLER HERE }
+                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot load general table, error has been thrown: ' + E.Message);
         end;
     finally
         DataTables.Free;
-        { LOGGING HERE }
     end;
 
     FreeOnTerminate:=True;

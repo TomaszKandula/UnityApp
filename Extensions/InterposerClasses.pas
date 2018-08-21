@@ -6,7 +6,7 @@ unit InterposerClasses;
 interface
 
 uses
-    Arrays, Grids, ExtCtrls, Messages, Controls, Graphics, Types, Dialogs, Forms, Winapi.Windows, Clipbrd, SysUtils, Math, Classes, ComObj, Variants, StdCtrls,
+    Arrays, Grids, ExtCtrls, Messages, Controls, Graphics, Types, Dialogs, Forms, Winapi.Windows, Clipbrd, SysUtils, Math, Classes, ComObj, ComCtrls, Variants, StdCtrls,
     CheckLst;
 
     /// <summary>
@@ -118,6 +118,15 @@ type
         function  ImportCSV(DialogBox: TOpenDialog; Delimiter: string): boolean;
         function  ExportCSV(DialogBox: TSaveDialog; Delimiter: string): boolean;
         procedure SelectAll;
+    end;
+
+    /// <summary>
+    ///     Interposer class of TListView component. Extension, add ability to freeze itself.
+    /// </summary>
+
+    TListView = class(Vcl.ComCtrls.TListView)
+    published
+        procedure Freeze(PaintWnd: boolean);
     end;
 
 
@@ -1216,6 +1225,29 @@ begin
     GridRect.Right :=Self.ColCount;
     GridRect.Bottom:=Self.RowCount;
     Self.Selection :=GridRect;
+end;
+
+/// <summary>
+///     Allow to disable or enable component drawing.
+/// </summary>
+/// <param name="PaintWnd">
+///     Boolean, set True to disable painting.
+/// </param>
+
+procedure TListView.Freeze(PaintWnd: Boolean);
+begin
+
+    if (PaintWnd) then
+    begin
+        with Self do SendMessage(Handle, WM_SETREDRAW, 0, 0);
+    end;
+
+    if not (PaintWnd) then
+    begin
+        with Self do SendMessage(Handle, WM_SETREDRAW, 1, 0);
+        Self.Repaint;
+    end;
+
 end;
 
 
