@@ -13,6 +13,7 @@ object ViewSearchForm: TViewSearchForm
   Font.Style = []
   OldCreateOrder = False
   Position = poMainFormCenter
+  Scaled = False
   OnCreate = FormCreate
   OnShow = FormShow
   PixelsPerInch = 96

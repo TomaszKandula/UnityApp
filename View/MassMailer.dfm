@@ -14,6 +14,7 @@ object ViewMailerForm: TViewMailerForm
   Font.Style = []
   OldCreateOrder = False
   Position = poMainFormCenter
+  Scaled = False
   OnClose = FormClose
   OnCreate = FormCreate
   OnShow = FormShow

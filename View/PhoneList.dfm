@@ -17,6 +17,7 @@ object PhoneListForm: TPhoneListForm
   OldCreateOrder = False
   ParentBiDiMode = False
   Position = poMainFormCenter
+  Scaled = False
   OnCreate = FormCreate
   OnKeyPress = FormKeyPress
   OnShow = FormShow

@@ -15,6 +15,7 @@ object ColorsForm: TColorsForm
   KeyPreview = True
   OldCreateOrder = False
   Position = poMainFormCenter
+  Scaled = False
   OnCreate = FormCreate
   OnKeyPress = FormKeyPress
   OnShow = FormShow

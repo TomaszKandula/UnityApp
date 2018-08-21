@@ -16,6 +16,7 @@ object EventForm: TEventForm
   KeyPreview = True
   OldCreateOrder = False
   Position = poMainFormCenter
+  Scaled = False
   OnCreate = FormCreate
   OnKeyPress = FormKeyPress
   OnKeyUp = FormKeyUp
@@ -37,7 +38,6 @@ object EventForm: TEventForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
-    ExplicitHeight = 699
     object PanelEventMemo: TPanel
       AlignWithMargins = True
       Left = 10
@@ -53,7 +53,6 @@ object EventForm: TEventForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 0
-      ExplicitHeight = 679
       object EventMemo: TMemo
         AlignWithMargins = True
         Left = 2
@@ -82,7 +81,6 @@ object EventForm: TEventForm
         WantTabs = True
         WordWrap = False
         OnKeyUp = FormKeyUp
-        ExplicitHeight = 675
       end
     end
   end
@@ -101,7 +99,6 @@ object EventForm: TEventForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 1
-    ExplicitTop = 719
     object ImageGrip: TImage
       Left = 1046
       Top = 0

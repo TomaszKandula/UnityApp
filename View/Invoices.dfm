@@ -20,6 +20,7 @@ object InvoicesForm: TInvoicesForm
   PopupMode = pmExplicit
   PopupParent = MainForm.Owner
   Position = poMainFormCenter
+  Scaled = False
   OnActivate = FormActivate
   OnCreate = FormCreate
   OnKeyPress = FormKeyPress

@@ -15,6 +15,7 @@ object AwaitForm: TAwaitForm
   Font.Style = []
   OldCreateOrder = False
   Position = poMainFormCenter
+  Scaled = False
   OnClose = FormClose
   OnKeyDown = FormKeyDown
   OnShow = FormShow

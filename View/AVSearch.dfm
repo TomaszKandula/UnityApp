@@ -14,6 +14,7 @@ object SearchForm: TSearchForm
   KeyPreview = True
   OldCreateOrder = False
   Position = poMainFormCenter
+  Scaled = False
   OnClose = FormClose
   OnCreate = FormCreate
   OnKeyDown = FormKeyDown

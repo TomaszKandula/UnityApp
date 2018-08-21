@@ -13,6 +13,7 @@ object SplashForm: TSplashForm
   Font.Style = []
   OldCreateOrder = False
   Position = poScreenCenter
+  Scaled = False
   PixelsPerInch = 96
   TextHeight = 13
   object ShapeBackground: TShape

@@ -1175,6 +1175,7 @@ object MainForm: TMainForm
   KeyPreview = True
   OldCreateOrder = False
   Position = poDefaultSizeOnly
+  Scaled = False
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy

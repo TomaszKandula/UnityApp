@@ -15,6 +15,7 @@ object SendForm: TSendForm
   KeyPreview = True
   OldCreateOrder = False
   Position = poMainFormCenter
+  Scaled = False
   OnCreate = FormCreate
   OnKeyPress = FormKeyPress
   PixelsPerInch = 96

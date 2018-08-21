@@ -940,10 +940,13 @@ begin
         // System is suspending operation
         if Msg.WParam = PBT_APMSUSPEND then
         begin
+            // Turn off timers
+            SwitchTimers(tmDisabled);
             // Disconnect
             InetTimer.Enabled:=False;
             DbConnect.Connected:=False;
             DbConnect:=nil;
+            IsConnected:=False;
             MainForm.ExecMessage(False, conERROR, strNULL);
             LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(Msg.Msg) + ' WM_POWERBROADCAST with PBT_APMSUSPEND. Going into suspension mode, Unity is disconnected from server.');
         end;
