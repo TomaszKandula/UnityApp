@@ -79,6 +79,7 @@ var
     LogText:          TThreadFileLog;
     Connection:       IConnectivity;
     Assemblies:       TStrings;
+    ChromiumExit:     boolean;
     ReleaseNumber:    cardinal;
     PathReleasePak:   string;
     PathReleaseMan:   string;
@@ -94,6 +95,21 @@ var
 
 // ------------------------------------------------------------------------------------------------------------------------------------------ HELPER METHODS //
 
+/// <summary>
+///     Allocate assemblies names that we are looing for.
+///     TODO: Subject for CRC32.
+/// </summary>
+
+procedure InitAssembliesRef;
+begin
+    SetLength(Assemblies, 6);
+    Assemblies[0]:=DLL1;
+    Assemblies[1]:=DLL2;
+    Assemblies[2]:=DLL3;
+    Assemblies[3]:=DLL4;
+    Assemblies[4]:=DLL5;
+    Assemblies[5]:=LyncCall;
+end;
 
 /// <summary>
 ///     Extract given source file by provided ID number.
@@ -633,13 +649,7 @@ begin
     ///     We do not check CRC32 correctness.
     /// </remarks>
 
-    SetLength(Assemblies, 6);
-    Assemblies[0]:=DLL1;
-    Assemblies[1]:=DLL2;
-    Assemblies[2]:=DLL3;
-    Assemblies[3]:=DLL4;
-    Assemblies[4]:=DLL5;
-    Assemblies[5]:=LyncCall;
+    InitAssembliesRef;
 
     for iCNT:=0 to High(Assemblies) - 1 do
     begin
@@ -681,49 +691,103 @@ begin
         end;
     end;
 
-    /// <remarks>
-    ///     Release logger object. It will be re-introduced during MainForm initialization.
-    /// </remarks>
-
-    LogText.Free;
-
     /// <summary>
-    ///     Initialize Chromium object before MainForm with Chromium window is created.
+    ///     Initialize Chromium object before Chromium component is created within MainForm.
     /// </summary>
+    /// <see cref="https://www.briskbard.com/index.php?lang=en&pageid=cef"/>
     /// <remarks>
     ///     GlobalCEFApp is an instance of the TCEFApplication class an it simpliefies the Chromium initialization.
     /// </remarks>
 
+    Status(13, AllTasks, DelayStd, 'Chromium initialization...', True, Settings.GetPathEventLog);
     GlobalCEFApp:=TCefApplication.Create;
+    ChromiumExit:=False;
 
-    /// <summary>
-    ///     Do not run Chromium inside Unity application, all HTML rendering should be subprocessed.
-    /// </summary>
+    try
 
-    GlobalCEFApp.BrowserSubprocessPath:='SubProcess.exe';
+        /// <summary>
+        ///     Do not run Chromium inside Unity application, all HTML rendering should be subprocessed.
+        /// </summary>
 
-    /// <summary>
-    ///     Because TApplication should be only initialized and run in the main process, we call GlobalCEFApp.StartMainProcess to check
-    ///     if we have main thread running. If not, we exit the program.
-    /// </summary>
+        Status(14, AllTasks, DelayStd, 'Chromium initialization: assigning sub process...', True, Settings.GetPathEventLog);
+        GlobalCEFApp.BrowserSubprocessPath:='SubProcess.exe';
 
-    if not(GlobalCEFApp.StartMainProcess) then
-    begin
-        Application.MessageBox(
-            PChar('Cannot detect main thread running. Program will be closed. Please contact IT support.'),
-            PChar(APPCAPTION), MB_OK + MB_ICONERROR
-        );
-        ExitProcess(0);
+        /// <summary>
+        ///     Because TApplication should be only initialized and run in the main process, we call GlobalCEFApp.StartMainProcess to check
+        ///     if we have main thread running. If not, we exit the program.
+        /// </summary>
+
+        Status(15, AllTasks, DelayStd, 'Chromium initialization: starting main process...', True, Settings.GetPathEventLog);
+
+        try
+
+            /// <remarks>
+            ///     Setup framework directory, explicitly to an absolute value. It ensures correct initialization.
+            /// </remarks>
+
+            GlobalCEFApp.FrameworkDirPath:=PathAppDir;
+            Status(16, AllTasks, DelayStd, 'Chromium initialization: setup Framework...', True, Settings.GetPathEventLog);
+
+            /// <remarks>
+            ///     Setup resources directory, explicitly to an absolute value. It ensures correct initialization.
+            /// </remarks>
+
+            GlobalCEFApp.ResourcesDirPath:=PathAppDir;
+            Status(17, AllTasks, DelayStd, 'Chromium initialization: setup Resources...', True, Settings.GetPathEventLog);
+
+            /// <remarks>
+            ///     Setup locales directory, explicitly to an absolute value. It ensures correct initialization.
+            /// </remarks>
+
+            GlobalCEFApp.LocalesDirPath:=PathAppDir + 'locales';
+            Status(18, AllTasks, DelayStd, 'Chromium initialization: setup Locales...', True, Settings.GetPathEventLog);
+
+            /// <remarks>
+            ///     Set the current application directory before loading the CEF3 libraries to avoid "CEF3 binaries missing !" error.
+            /// </remarks>
+
+            GlobalCEFApp.SetCurrentDir:=True;
+
+            if not(GlobalCEFApp.StartMainProcess) then
+            begin
+                Application.MessageBox(
+                    PChar('Cannot detect main thread running. Program will be closed. Please contact IT support.'),
+                    PChar(APPCAPTION), MB_OK + MB_ICONERROR
+                );
+                ChromiumExit:=True;
+            end;
+        except
+            on E: Exception do
+                Status(19, AllTasks, DelayStd, 'Chromium initialization failed, message received: ' + E.Message, False, Settings.GetPathEventLog);
+        end;
+    finally
+
+        if not(ChromiumExit) then
+        begin
+            Status(19, AllTasks, DelayStd, 'Chromium initialization: GlobalCEFApp.StartMainProcess returned true.', True, Settings.GetPathEventLog)
+        end
+        else
+        begin
+            Status(19, AllTasks, DelayStd, 'Chromium initialization failed, GlobalCEFApp.StartMainProcess returned false, no exception has been thrown.', False, Settings.GetPathEventLog);
+            ExitProcess(0);
+        end;
+
     end;
 
     /// <summary>
     ///     Start the application.
     /// </summary>
 
-    Status(13, AllTasks, 50, 'Application initialization... ', False, Settings.GetPathEventLog);
+    Status(20, AllTasks, 50, 'Application initialization... ', False, Settings.GetPathEventLog);
     Application.Initialize;
     Application.Title:=APPCAPTION;
     Application.MainFormOnTaskbar:=False;
+
+    /// <remarks>
+    ///     Release logger object. It will be re-introduced during MainForm initialization.
+    /// </remarks>
+
+    LogText.Free;
 
     /// <summary>
     ///     Load Main Form and execute all of its initialization methods.
@@ -745,66 +809,66 @@ begin
 
     Application.CreateForm(TAboutForm, AboutForm);
     MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''AboutForm'' has been created.');
-    Status(15, AllTasks, 10, 'Application initialization: [VCL] About has been loaded.', False, Settings.GetPathEventLog);
+    Status(21, AllTasks, 1, 'Application initialization: [VCL] AboutForm has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TSendForm, SendForm);
     MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''SendForm'' has been created.');
-    Status(16, AllTasks, 10, 'Application initialization: [VCL] Send has been loaded.', False, Settings.GetPathEventLog);
+    Status(22, AllTasks, 1, 'Application initialization: [VCL] SendForm has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TEventForm, EventForm);
     MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''EventForm'' has been created.');
-    Status(17, AllTasks, 10, 'Application initialization: [VCL] Event has been loaded.', False, Settings.GetPathEventLog);
+    Status(23, AllTasks, 1, 'Application initialization: [VCL] EventForm has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TColorsForm, ColorsForm);
     MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ColorsForm'' has been created.');
-    Status(18, AllTasks, 10, 'Application initialization: [VCL] Colors has been loaded.', False, Settings.GetPathEventLog);
+    Status(24, AllTasks, 1, 'Application initialization: [VCL] ColorsForm has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TReportForm, ReportForm);
     MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ReportForm'' has been created.');
-    Status(19, AllTasks, 10, 'Application initialization: [VCL] Report has been loaded.', False, Settings.GetPathEventLog);
+    Status(25, AllTasks, 1, 'Application initialization: [VCL] ReportForm has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TFilterForm, FilterForm);
     MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''FilterForm'' has been created.');
-    Status(20, AllTasks, 10, 'Application initialization: [VCL] Filter has been loaded.', False, Settings.GetPathEventLog);
+    Status(26, AllTasks, 1, 'Application initialization: [VCL] FilterForm has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TSearchForm, SearchForm);
     MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''SearchForm'' has been created.');
-    Status(21, AllTasks, 10, 'Application initialization: [VCL] Search has been loaded.', False, Settings.GetPathEventLog);
+    Status(27, AllTasks, 1, 'Application initialization: [VCL] SearchForm has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TTrackerForm, TrackerForm);
     MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''TrackerForm'' has been created.');
-    Status(22, AllTasks, 10, 'Application initialization: [VCL] Tracker has been loaded.', False, Settings.GetPathEventLog);
+    Status(28, AllTasks, 1, 'Application initialization: [VCL] TrackerForm has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TActionsForm, ActionsForm);
     MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ActionsForm'' has been created.');
-    Status(23, AllTasks, 10, 'Application initialization: [VCL] Actions has been loaded.', False, Settings.GetPathEventLog);
+    Status(29, AllTasks, 1, 'Application initialization: [VCL] ActionsForm has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TCalendarForm, CalendarForm);
     MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''CalendarForm'' has been created.');
-    Status(24, AllTasks, 10, 'Application initialization: [VCL] Calendar has been loaded.', False, Settings.GetPathEventLog);
+    Status(30, AllTasks, 1, 'Application initialization: [VCL] CalendarForm has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TInvoicesForm, InvoicesForm);
     MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''InvoicesForm'' has been created.');
-    Status(25, AllTasks, 10, 'Application initialization: [VCL] Invoices has been loaded.', False, Settings.GetPathEventLog);
+    Status(31, AllTasks, 1, 'Application initialization: [VCL] InvoicesForm has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TPhoneListForm, PhoneListForm);
     MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''PhoneListForm'' has been created.');
-    Status(26, AllTasks, 10, 'Application initialization: [VCL] PhoneList has been loaded.', False, Settings.GetPathEventLog);
+    Status(32, AllTasks, 1, 'Application initialization: [VCL] PhoneListForm has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TViewSearchForm, ViewSearchForm);
     MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ViewSearchForm'' has been created.');
-    Status(27, AllTasks, 10, 'Application initialization: [VCL] ViewSearch has been loaded.', False, Settings.GetPathEventLog);
+    Status(33, AllTasks, 1, 'Application initialization: [VCL] ViewSearchForm has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TViewMailerForm, ViewMailerForm);
     MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ViewMailerForm'' has been created.');
-    Status(28, AllTasks, 10, 'Application initialization: [VCL] ViewMailer has been loaded.', False, Settings.GetPathEventLog);
+    Status(34, AllTasks, 1, 'Application initialization: [VCL] ViewMailerForm has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TAwaitForm, AwaitForm);
     MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''AwaitForm'' has been created.');
-    Status(29, AllTasks, 10, 'Application initialization: [VCL] AwaitForm has been loaded.', False, Settings.GetPathEventLog);
+    Status(35, AllTasks, 1, 'Application initialization: [VCL] AwaitForm has been loaded.', False, Settings.GetPathEventLog);
 
     // Splash screen - 100%
-    Status(30, AllTasks, 750, 'Application is initialized.', False, Settings.GetPathEventLog);
+    Status(36, AllTasks, 500, 'Application is initialized.', False, Settings.GetPathEventLog);
 
     AnimateWindow(SplashForm.Handle, 500, AW_BLEND or AW_HIDE);
     Sleep(150);

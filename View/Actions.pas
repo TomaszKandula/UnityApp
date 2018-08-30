@@ -74,6 +74,12 @@ type
         Cust_MailGeneral: TEdit;
         Cust_MailGeneralBack: TShape;
         btnCopyGeneralMail: TSpeedButton;
+        PanelQMS: TPanel;
+        cbStatusQms: TComboBox;
+        btnSelectAll: TSpeedButton;
+        btnLogNow: TSpeedButton;
+        textStatus: TLabel;
+    btnLogMissingInv: TSpeedButton;
         procedure FormCreate(Sender: TObject);
         procedure FormActivate(Sender: TObject);
         procedure OpenItemsGridMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
@@ -732,6 +738,10 @@ begin
     InitializePanels;
     InitializeSpeedButtons;
 
+    //...
+
+
+
 end;
 
 procedure TActionsForm.FormShow(Sender: TObject);
@@ -790,6 +800,8 @@ begin
     // Skip heaer
     if ARow = 0 then Exit;
 
+    // -------------------------- NON-QMS MODE
+
     // Draw selected
     OpenItemsGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
 
@@ -816,6 +828,11 @@ begin
         )
     then
         OpenItemsGrid.ColorValues(ARow, ACol, Rect, clRed, clBlack);
+
+    // -------------------------- QMS MODE
+
+    // only whole line can be selected
+
 
 end;
 
@@ -1020,7 +1037,16 @@ end;
 
 procedure TActionsForm.btnQMStoggleClick(Sender: TObject);
 begin
-    MainForm.MsgCall(mcInfo, 'This feature is unavailable. Please try again later.');
+    if PanelQMS.Visible then
+    begin
+        PanelBottom.Visible:=True;
+        PanelQMS.Visible:=False;
+    end
+    else
+    begin
+        PanelBottom.Visible:=False;
+        PanelQMS.Visible:=True;
+    end;
 end;
 
 procedure TActionsForm.btnBackClick(Sender: TObject);

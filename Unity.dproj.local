@@ -25,9 +25,9 @@
     <Transaction>1899/12/30 00:00:00.000.300,=D:\Projects\Unity Project\__Unity\Logic\Mailer.pas</Transaction>
     <Transaction>1899/12/30 00:00:00.000.585,=D:\Projects\Unity Project\__Unity\View\Calendar.pas</Transaction>
     <Transaction>1899/12/30 00:00:00.000.159,=D:\Projects\Unity Project\__Unity\View\ReportBug.pas</Transaction>
-    <Transaction>1899/12/30 00:00:00.000.629,=D:\Projects\Unity Project\__Unity\View\About.pas</Transaction>
-    <Transaction>1899/12/30 00:00:00.000.673,=D:\Projects\Unity Project\__Unity\View\Main.pas</Transaction>
     <Transaction>1899/12/30 00:00:00.000.904,=D:\Projects\Unity Project\__Unity\View\PhoneList.pas</Transaction>
+    <Transaction>1899/12/30 00:00:00.000.673,=D:\Projects\Unity Project\__Unity\View\Main.pas</Transaction>
+    <Transaction>1899/12/30 00:00:00.000.629,=D:\Projects\Unity Project\__Unity\View\About.pas</Transaction>
     <Transaction>1899/12/30 00:00:00.000.036,D:\Projects\Unity Project\__Unity\View\Search.pas=D:\Projects\Unity Project\__Unity\View\AVSearch.pas</Transaction>
     <Transaction>1899/12/30 00:00:00.000.346,=D:\Projects\Unity Project\__Unity\View\Actions.pas</Transaction>
     <Transaction>1899/12/30 00:00:00.000.727,=D:\Projects\Unity Project\__Unity\Model\Model.pas</Transaction>

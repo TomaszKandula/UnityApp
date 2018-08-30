@@ -191,7 +191,7 @@ object SplashForm: TSplashForm
     Width = 242
     Height = 16
     Cursor = crAppStart
-    Caption = 'Mobile Enabled (Andorid and iOS)'
+    Caption = 'Mobile Enabled (Android and iOS)'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlack
     Font.Height = -13

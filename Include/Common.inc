@@ -64,7 +64,7 @@ const
 
     DelayStd    :  integer   = 10;                 // Splash screen: slown down a bit to display the message during startup
     DelayErr    :  integer   = 750;                // Splash screen: slown down significantly for user in case of error
-    AllTasks    :  integer   = 30;                 // Total number of all tasks on startup
+    AllTasks    :  integer   = 33;                 // Total number of all tasks on startup
     SELCOLOR    :  dword     = $00F2E4D7;          // Application color #1
     FONCOLOR    :  dword     = $006433C9;          // Application color #2
     CUSCOLOR    :  dword     = $00FFDBB7;          // Application color #3
@@ -75,7 +75,7 @@ const
     GridImgFile :  string    = 'Unity.img';        // Application custom image(s)
     ReleaseFile :  string    = 'Release.zip';      // Release package
     ManifestFile:  string    = 'Unity.manifest';   // Manifest file on the server
-    CurrentMutex:  PWideChar = 'UNITY_10105';      // Mutex value, increase it with each release
+    CurrentMutex:  PWideChar = 'UNITY_10110';      // Mutex value, increase it with each release
 
     // --------------------------------------------------------------------------------------------------------------------------------------- SPLASH SCREEN //
 
@@ -446,7 +446,7 @@ const
     EXECUTE      : string = ' EXEC ';
     MATCHCASE    : string = ' COLLATE SQL_Latin1_General_CP1_CS_AS ';
 
-    // --------------------------------------------------------------------------------------------------------------------------------- TRANSACTION WRAPPER //
+    // -------------------------------------------------------------------------------------------------------------------------------- TRANSACTION TEMPLATE //
 
     CommonSelect = 'IF EXISTS (SELECT 1 FROM {DestTable} WITH (UPDLOCK) WHERE {Condition})';
     CommonDelete = '{DeleteData} WHERE {Condition}';
@@ -509,7 +509,6 @@ const
     TblGroup3          = schErp      + '.' + 'Group3';
     TblPmtterms        = schErp      + '.' + 'PaymentTerms';
     TblPerson          = schErp      + '.' + 'Person';
-
 
     // TEMPLATES ------------------------------------------------------------------------------------------------------------------------------------------- //
 
