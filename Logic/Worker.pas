@@ -1768,6 +1768,7 @@ begin
             /// </remarks>
 
             MainForm.UpdateOpenItemsRefs(MainForm.sgOpenItems);
+            MainForm.UpdateControlStatusRefs(MainForm.sgControlStatus);
 
             for iCNT:=0 to FMailerList.Items.Count - 1 do
             begin

@@ -428,6 +428,13 @@ type
         txtDebtorsReport: TLabel;
         txtControlStatusReport: TLabel;
         imgHideBar: TImage;
+        MostRightPanel: TPanel;
+        Cap25: TShape;
+        Cap26: TShape;
+        PanelEmpty: TPanel;
+        sgEmpty: TStringGrid;
+        PanelControlStatus: TPanel;
+        sgControlStatus: TStringGrid;
         procedure FormCreate(Sender: TObject);
         procedure FormResize(Sender: TObject);
         procedure FormShow(Sender: TObject);
@@ -682,32 +689,39 @@ type
         procedure imgHideBarClick(Sender: TObject);
         procedure AppHeaderMouseEnter(Sender: TObject);
         procedure AppHeaderMouseLeave(Sender: TObject);
+        procedure sgControlStatusKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure sgControlStatusMouseEnter(Sender: TObject);
+        procedure sgControlStatusMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+        procedure sgControlStatusMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+        procedure sgControlStatusDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
     private
         var pAllowClose:    boolean;
         var pStartTime:     TTime;
     public
         // Helpers
-        var LogText:          TThreadFileLog;
-        var WinUserName:      string;
-        var EventLogPath:     string;
-        var DbConnect:        TADOConnection;
-        var GroupList:        TLists;
-        var GroupIdSel:       string;
-        var GroupNmSel:       string;
-        var AgeDateSel:       string;
-        var OSAmount:         double;
-        var GridPicture:      TImage;
-        var AccessLevel:      string;
-        var AccessMode:       string;
-        var OpenItemsUpdate:  string;
-        var OpenItemsStatus:  string;
-        var IsConnected:      boolean;
-        var CurrentEvents:    string;
-        var OpenItemsRefs:    TOpenItemsRefs;
+        var LogText:            TThreadFileLog;
+        var WinUserName:        string;
+        var EventLogPath:       string;
+        var DbConnect:          TADOConnection;
+        var GroupList:          TLists;
+        var GroupIdSel:         string;
+        var GroupNmSel:         string;
+        var AgeDateSel:         string;
+        var OSAmount:           double;
+        var GridPicture:        TImage;
+        var AccessLevel:        string;
+        var AccessMode:         string;
+        var OpenItemsUpdate:    string;
+        var OpenItemsStatus:    string;
+        var IsConnected:        boolean;
+        var CurrentEvents:      string;
+        var OpenItemsRefs:      TOpenItemsRefs;
+        var ControlStatusRefs:  TControlStatusRefs;
         procedure  DebugMsg(const Msg: String);
         procedure  TryInitConnection;
         procedure  ExecMessage(IsPostType: boolean; YOUR_INT: integer; YOUR_TEXT: string);
         procedure  UpdateOpenItemsRefs(SourceGrid: TStringGrid);
+        procedure  UpdateControlStatusRefs(SourceGrid: TStringGrid);
         function   OleGetStr(RecordsetField: variant): string;
         function   FindKey(OpenedSection: string; KeyPosition: integer): string;
         function   WndCall(WinForm: TForm; Mode: integer): integer;
@@ -965,8 +979,17 @@ begin
 end;
 
 /// <summary>
-///
+///     Get column reference on demand for Open Items string grid. The reason is, despite we do not change columns order
+///     at run time programatically, it may be changed on server-side and that will be immediatelly reflected
+///     in Open Items string grid that serves the user and program as a fast source access.
+///     Additional purpose of the code is - to get the columns at once instead using ReturnColumn multiple times in given
+///     method, this increase the overall performance of the code and decreases complexity.
 /// </summary>
+
+/// <remarks>
+///     The nature of open items is that, it changes continuously, but due to ERP database workload during the day
+///     we have decided to update the data in Open Items table few times a day (on regular basis).
+/// </remarks>
 
 procedure TMainForm.UpdateOpenItemsRefs(SourceGrid: TStringGrid);
 begin
@@ -985,6 +1008,19 @@ begin
     OpenItemsRefs.Ad3Col      :=SourceGrid.ReturnColumn(TOpenitems.Ad3,       1, 1);
     OpenItemsRefs.PnoCol      :=SourceGrid.ReturnColumn(TOpenitems.Pno,       1, 1);
     OpenItemsRefs.PAreaCol    :=SourceGrid.ReturnColumn(TOpenitems.PArea,     1, 1);
+end;
+
+/// <summary>
+///     Get column reference of Control Status table located in General Tables. Similarly to the "UpdateOpenItemsRefs" method, we use it
+///     to decrease level of usage of ReturnColumn method.
+/// </summary>
+
+procedure TMainForm.UpdateControlStatusRefs(SourceGrid: TStringGrid);
+begin
+    ControlStatusRefs.Id         :=SourceGrid.ReturnColumn(TControlStatus.Id,   1, 1);
+    ControlStatusRefs.Code       :=SourceGrid.ReturnColumn(TControlStatus.Code, 1, 1);
+    ControlStatusRefs.Text       :=SourceGrid.ReturnColumn(TControlStatus.Text, 1, 1);
+    ControlStatusRefs.Description:=SourceGrid.ReturnColumn(TControlStatus.Description, 1, 1);
 end;
 
 /// <summary>
@@ -1386,7 +1422,16 @@ var
 begin
     Settings:=TSettings.Create;
     AppParam:=Settings.GetStringValue(ApplicationDetails, 'REPORT_Report' + IntToStr(ReportNumber), 'about:blank');
-    Result:=ShellExecute(MainForm.Handle, seOpen, PChar(UnityReader), PChar(AppParam), nil, SW_SHOWNORMAL);
+
+    Result:=ShellExecute(
+        MainForm.Handle,
+        seOpen,
+        PChar(Settings.GetAppDir + UnityReader),
+        PChar(AppParam),
+        nil,
+        SW_SHOWNORMAL
+    );
+
 end;
 
 /// <summary>
@@ -1535,6 +1580,7 @@ begin
     PanelAddressBook.PanelBorders     (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
     PanelInvoiceTracker.PanelBorders  (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
     PanelCoCodes.PanelBorders         (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+    PanelControlStatus.PanelBorders   (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
     PanelPaidInfo.PanelBorders        (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
     PanelPerson.PanelBorders          (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
     PanelPmtTerms.PanelBorders        (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
@@ -1557,6 +1603,7 @@ begin
     sgListSection.SetColWidth   (25, 20, 400);
     sgInvoiceTracker.SetColWidth(10, 20, 400);
     sgCoCodes.SetColWidth       (10, 30, 400);
+    sgControlStatus.SetColWidth (10, 30, 400);
     sgPaidInfo.SetColWidth      (10, 30, 400);
     sgPerson.SetColWidth        (10, 30, 400);
     sgGroup3.SetColWidth        (10, 30, 400);
@@ -1578,6 +1625,7 @@ begin
     sgAgeView.SetRowHeight       (sgRowHeight, 25);
     sgInvoiceTracker.SetRowHeight(sgRowHeight, 25);
     sgCoCodes.SetRowHeight       (sgRowHeight, 25);
+    sgControlStatus.SetRowHeight (sgRowHeight, 25);
     sgPaidInfo.SetRowHeight      (sgRowHeight, 25);
     sgPerson.SetRowHeight        (sgRowHeight, 25);
     sgGroup3.SetRowHeight        (sgRowHeight, 25);
@@ -1597,6 +1645,7 @@ begin
     sgAddressBook.AutoThumbSize;
     sgInvoiceTracker.AutoThumbSize;
     sgCoCodes.AutoThumbSize;
+    sgControlStatus.AutoThumbSize;
     sgPmtTerms.AutoThumbSize;
     sgPaidInfo.AutoThumbSize;
     sgPerson.AutoThumbSize;
@@ -1618,6 +1667,7 @@ begin
     sgAddressBook.FHideFocusRect   :=True;
     sgInvoiceTracker.FHideFocusRect:=True;
     sgCoCodes.FHideFocusRect       :=True;
+    sgControlStatus.FHideFocusRect :=True;
     sgPmtTerms.FHideFocusRect      :=True;
     sgPaidInfo.FHideFocusRect      :=True;
     sgPerson.FHideFocusRect        :=True;
@@ -1908,6 +1958,7 @@ begin
     Cap18.ShapeText(10, 1, Settings.GetStringValue(TabSheetsCaps, 'TS7TXT04', 'EMPTY'), [fsBold]);
     Cap19.ShapeText(10, 1, Settings.GetStringValue(TabSheetsCaps, 'TS7TXT05', 'EMPTY'), [fsBold]);
     Cap20.ShapeText(10, 1, Settings.GetStringValue(TabSheetsCaps, 'TS7TXT06', 'EMPTY'), [fsBold]);
+    Cap25.ShapeText(10, 1, Settings.GetStringValue(TabSheetsCaps, 'TS7TXT07', 'EMPTY'), [fsBold]);
 
     /// <summary>
     ///     Settings captions.
@@ -2046,10 +2097,11 @@ begin
         TCompany.DIVISIONS,
         ORDER + TCompany.CO_CODE + ASC
     );
-    TTGeneralTables.Create(TblPmtterms, sgPmtTerms);
-    TTGeneralTables.Create(TblPaidinfo, sgPaidInfo);
-    TTGeneralTables.Create(TblGroup3,   sgGroup3);
-    TTGeneralTables.Create(TblPerson,   sgPerson);
+    TTGeneralTables.Create(TblPmtterms,      sgPmtTerms);
+    TTGeneralTables.Create(TblPaidinfo,      sgPaidInfo);
+    TTGeneralTables.Create(TblGroup3,        sgGroup3);
+    TTGeneralTables.Create(TblPerson,        sgPerson);
+    TTGeneralTables.Create(TblControlStatus, sgCOntrolStatus);
 
     // ------------------------------------------------------------------------------------------------------------------------------------------- FINISHING //
     OnCreateJob(spFinishing);
@@ -2683,13 +2735,23 @@ end;
 /// </summary>
 
 procedure TMainForm.Action_TrackerClick(Sender: TObject);
-var
-    iCNT: integer;
-    Item: TListItem;
-begin
 
-    MsgCall(mcInfo, 'This feature is not yet accessible. Please try later.');
-    Exit;
+    // Common variables
+    var
+        iCNT: integer;
+        Item: TListItem;
+        CustNumber: string;
+        CoCode: string;
+
+    // Nested method
+    function GetSCUID(position: integer): string;
+    begin
+        CustNumber:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), position];
+        CoCode    :=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCO_CODE,         1, 1), position];
+        Result    :=CustNumber + MainForm.ConvertName(CoCode, 'F', 3);
+    end;
+
+begin
 
     if IsConnected then
     begin
@@ -2700,7 +2762,8 @@ begin
         begin
             Item:=TrackerForm.CustomerList.Items.Add;
             Item.Caption:=IntToStr(sgAgeView.Row);
-            Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.CUID, 1, 1),           sgAgeView.Row]);
+            Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.CUID, 1, 1), sgAgeView.Row]);
+            Item.SubItems.Add(GetSCUID(sgAgeView.Row));
             Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME, 1, 1), sgAgeView.Row]);
         end
         // Many customers
@@ -2712,7 +2775,8 @@ begin
                 begin
                     Item:=TrackerForm.CustomerList.Items.Add;
                     Item.Caption:=IntToStr(iCNT);
-                    Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.CUID, 1, 1),           iCNT]);
+                    Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.CUID, 1, 1), iCNT]);
+                    Item.SubItems.Add(GetSCUID(iCNT));
                     Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME, 1, 1), iCNT]);
                 end;
             end;
@@ -3836,6 +3900,11 @@ begin
     sgGroups.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
 end;
 
+procedure TMainForm.sgControlStatusDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+begin
+    sgControlStatus.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
+end;
+
 
 // ------------------------------------------------------------------------------------------------------------------------ SETTING PANEL STRING GRID EVENTS //
 
@@ -4005,6 +4074,12 @@ procedure TMainForm.sgGroup3KeyUp(Sender: TObject; var Key: Word; Shift: TShiftS
 begin
     if (Key = 67) and (Shift = [ssCtrl]) then
         sgGroup3.CopyCutPaste(adCopy);
+end;
+
+procedure TMainForm.sgControlStatusKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+    if (Key = 67) and (Shift = [ssCtrl]) then
+        sgControlStatus.CopyCutPaste(adCopy);
 end;
 
 /// <summary>
@@ -4613,6 +4688,12 @@ begin
         sgGroup3.SetFocus;
 end;
 
+procedure TMainForm.sgControlStatusMouseEnter(Sender: TObject);
+begin
+    if (sgControlStatus.Enabled) and (sgControlStatus.Visible) then
+        sgControlStatus.SetFocus;
+end;
+
 /// <summary>
 ///     Change standard behaviour of scroll bars on all string grids. The mouse weel on string grid component controls row selection instead of
 ///     moving up/down thumb on scroll bar. Below methods introduce mouse weel controlling scroll bar.
@@ -4798,6 +4879,20 @@ procedure TMainForm.sgGroupsMouseWheelUp(Sender: TObject; Shift: TShiftState; Mo
 begin
     Handled:=True;
     sgGroups.Perform(WM_VSCROLL, SB_LINEUP, 0);
+end;
+
+// CONTROL STATUS | WHEEL DOWN
+procedure TMainForm.sgControlStatusMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+begin
+    Handled:=True;
+    sgControlStatus.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
+end;
+
+// CONTROL STATUS | WHEEL UP
+procedure TMainForm.sgControlStatusMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+begin
+    Handled:=True;
+    sgControlStatus.Perform(WM_VSCROLL, SB_LINEUP, 0);
 end;
 
 /// <summary>

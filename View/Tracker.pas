@@ -17,40 +17,35 @@ type
     TTrackerForm = class(TForm)
         Label6: TLabel;
         EmailFromList: TComboBox;
-        TextStatTo: TLabeledEdit;
-        ErrorStatTo: TLabel;
-        AppMain: TShape;
-        btnOK: TSpeedButton;
-        btnCancel: TSpeedButton;
         TextReminder1: TLabeledEdit;
         TextReminder2: TLabeledEdit;
         TextReminder3: TLabeledEdit;
-        TextMailTo: TLabeledEdit;
-        TextLegalTo: TLabeledEdit;
         LayoutList: TComboBox;
-        Label1: TLabel;
-        Label2: TLabel;
-        Label3: TLabel;
-        ErrorLegalTo: TLabel;
-        ErrorMailTo: TLabel;
         TextReminder4: TLabeledEdit;
-        Label4: TLabel;
         Label5: TLabel;
         Label7: TLabel;
         ErrorEmailFrom: TLabel;
         Exp_Rem2_Switch: TCheckBox;
         Exp_Rem3_Switch: TCheckBox;
-        GroupBoxLeft: TGroupBox;
-        GroupBoxBottom: TGroupBox;
-        GroupBoxMid: TGroupBox;
-        GroupBoxRight: TGroupBox;
+    GroupBoxMiddle: TGroupBox;
+    GroupBoxLeft: TGroupBox;
+    GroupBoxClient: TGroupBox;
         CustomerList: TListView;
+        PanelBottom: TPanel;
+        btnOK: TSpeedButton;
+        btnCancel: TSpeedButton;
+        PanelClient: TPanel;
+    LabeledEdit1: TLabeledEdit;
+    Memo: TMemo;
+    Help: TGroupBox;
+    btnApply: TSpeedButton;
         procedure FormCreate(Sender: TObject);
-        procedure btnCancelClick(Sender: TObject);
-        procedure btnOKClick(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
+        procedure btnOKClick(Sender: TObject);
+        procedure btnCancelClick(Sender: TObject);
+    procedure CustomerListSelectItem(Sender: TObject; Item: TListItem; Selected: Boolean);
     private
         var pTrackerGrid  :  TStringGrid;
         var pAgeGrid      :  TStringGrid;
@@ -71,6 +66,7 @@ type
         var Exp_Rem3  :  string;
         property  TrackerGrid :  TStringGrid read pTrackerGrid;
         property  AgeGrid     :  TStringGrid read pAgeGrid;
+        procedure Execute;
         procedure Display;
         procedure Add;
         procedure Delete;
@@ -87,21 +83,75 @@ implementation
 uses
     Main, SQL, Model, Worker, Settings, Database;
 
+
 {$R *.dfm}
 
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
 
+/// <summary>
+///
+/// </summary>
+
+procedure TTrackerForm.Execute;
+var
+    Tables: TDataTables;
+begin
+
+    UserAlias:=UpperCase(MainForm.WinUserName);
+    Tables:=TDataTables.Create(MainForm.DbConnect);
+
+    try
+        Tables.Columns.Add(TReminderLayouts.ID);
+        Tables.CustFilter:=WHERE + TReminderLayouts.LAYOUTNAME + EQUAL + QuotedStr(LayoutList.Text);
+        Tables.OpenTable(TblReminderLayouts);
+
+        if Tables.DataSet.RecordCount = 1 then
+            Layout:=Tables.DataSet.Fields[TReminderLayouts.ID].Value;
+
+    finally
+        Tables.Free;
+    end;
+
+    Indv_Rem1:=TextReminder1.Text;
+    Indv_Rem2:=TextReminder2.Text;
+    Indv_Rem3:=TextReminder3.Text;
+    Indv_Rem4:=TextReminder4.Text;
+
+    if Exp_Rem2_Switch.Checked then
+        Exp_Rem2:='1'
+            else
+                Exp_Rem2:='0';
+
+    if Exp_Rem3_Switch.Checked then
+        Exp_Rem3:='1'
+            else
+                Exp_Rem3:='0';
+
+    // Disallow zero values
+    if (Indv_Rem1 = '0') or (Indv_Rem2 = '0') or (Indv_Rem3 = '0') or (Indv_Rem4 = '0') then
+    begin
+        MainForm.MsgCall(mcWarn, 'Zero values are disallowed. Please correct and try again.');
+        Exit;
+    end;
+
+    Add;
+    Close;
+
+end;
 
 /// <summary>
 ///     Refresh invoice tracker list on application tab sheets (string grid component).
 /// </summary>
 
 procedure TTrackerForm.Display;
+(*
 var
     TrackerItems: TDataTables;
     Source:       TStringGrid;
+*)
 begin
+(*
     TrackerItems:=TDataTables.Create(MainForm.DbConnect);
     Source:=TrackerGrid;
     try
@@ -112,6 +162,7 @@ begin
         TrackerItems.Free;
         TrackerGrid.Freeze(False);
     end;
+*)
 end;
 
 /// <summary>
@@ -184,10 +235,9 @@ end;
 /// </summary>
 
 procedure TTrackerForm.GetData;
-var
-    Tables: TDataTables;
+//var
+//    Tables: TDataTables;
 begin
-
 
     Screen.Cursor:=crHourGlass;
     CUID      :=AgeGrid.Cells[AgeGrid.ReturnColumn(TSnapshots.fCUID,            1, 1), AgeGrid.Row];
@@ -197,8 +247,8 @@ begin
     CustNumber:=AgeGrid.Cells[AgeGrid.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), AgeGrid.Row];
     SCUID     :=CustNumber + MainForm.ConvertName(CoCode, 'F', 3);
 
+(*
     Tables:=TDataTables.Create(MainForm.DbConnect);
-
     try
         // Get list of layouts
         Tables.Columns.Add(TReminderLayouts.LAYOUTNAME);
@@ -261,6 +311,9 @@ begin
         Screen.Cursor:=crDefault;
 
     end;
+*)
+
+
 end;
 
 
@@ -277,25 +330,59 @@ begin
     TrackerForm.Caption:=Settings.GetStringValue(ApplicationDetails, 'WND_TRACKER', APPCAPTION);
 
     // List view initialization
+
+    // From debtors view
     lsColumns:=CustomerList.Columns.Add;
     lsColumns.Caption:='LP';
     lsColumns.Width  :=40;
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='CUID';
+    lsColumns.Caption:='Cuid';
+    lsColumns.Width  :=80;
+    lsColumns:=CustomerList.Columns.Add;
+    lsColumns.Caption:='Scuid';
     lsColumns.Width  :=80;
     lsColumns:=CustomerList.Columns.Add;
     lsColumns.Caption:='Customer Name';
     lsColumns.Width  :=150;
 
+    // From address book
+    lsColumns:=CustomerList.Columns.Add;
+    lsColumns.Caption:='Send from';
+    lsColumns.Width  :=100;
+    lsColumns:=CustomerList.Columns.Add;
+    lsColumns.Caption:='Statement To';
+    lsColumns.Width  :=100;
+    lsColumns:=CustomerList.Columns.Add;
+    lsColumns.Caption:='Reminder To';
+    lsColumns.Width  :=100;
+
+    // Timings
+    lsColumns:=CustomerList.Columns.Add;
+    lsColumns.Caption:='Timing 1';
+    lsColumns.Width  :=100;
+    lsColumns:=CustomerList.Columns.Add;
+    lsColumns.Caption:='Timing 2';
+    lsColumns.Width  :=100;
+    lsColumns:=CustomerList.Columns.Add;
+    lsColumns.Caption:='Timing 3';
+    lsColumns.Width  :=100;
+    lsColumns:=CustomerList.Columns.Add;
+    lsColumns.Caption:='Timing 4';
+    lsColumns.Width  :=100;
+    lsColumns:=CustomerList.Columns.Add;
+    lsColumns.Caption:='Timing 5';
+    lsColumns.Width  :=100;
+
     // Load all invoice tracker items
-    pAgeGrid    :=MainForm.sgAgeView;
-    pTrackerGrid:=MainForm.sgInvoiceTracker;
-    UserAlias   :='*';
-    Display;
+    //pAgeGrid    :=MainForm.sgAgeView;
+    //pTrackerGrid:=MainForm.sgInvoiceTracker;
+    //UserAlias   :='*';
+    //Display;
 end;
 
 procedure TTrackerForm.FormShow(Sender: TObject);
 begin
+(*
     LayoutList.Items.Clear;
     EmailFromList.Items.Clear;
     TextReminder1.Text    :='0';
@@ -310,67 +397,35 @@ begin
     ErrorLegalTo.Visible  :=True;
     ErrorEmailFrom.Visible:=True;
     btnOK.Enabled         :=False;
+*)
 end;
 
 procedure TTrackerForm.FormActivate(Sender: TObject);
 begin
-    GetData;
+//    GetData;
+end;
+
+
+// ------------------------------------------------------------------------------------------------------------------------------------------ BUTTONS EVENTS //
+
+
+procedure TTrackerForm.btnOKClick(Sender: TObject);
+begin
+    Execute;
+end;
+
+procedure TTrackerForm.btnCancelClick(Sender: TObject);
+begin
+    Close;
 end;
 
 
 // -------------------------------------------------------------------------------------------------------------------------------------------- MOUSE EVENTS //
 
 
-procedure TTrackerForm.btnOKClick(Sender: TObject);
-var
-    Tables: TDataTables;
+procedure TTrackerForm.CustomerListSelectItem(Sender: TObject; Item: TListItem; Selected: Boolean);
 begin
-
-    UserAlias:=UpperCase(MainForm.WinUserName);
-    Tables:=TDataTables.Create(MainForm.DbConnect);
-
-    try
-        Tables.Columns.Add(TReminderLayouts.ID);
-        Tables.CustFilter:=WHERE + TReminderLayouts.LAYOUTNAME + EQUAL + QuotedStr(LayoutList.Text);
-        Tables.OpenTable(TblReminderLayouts);
-
-        if Tables.DataSet.RecordCount = 1 then
-            Layout:=Tables.DataSet.Fields[TReminderLayouts.ID].Value;
-
-    finally
-        Tables.Free;
-    end;
-
-    Indv_Rem1:=TextReminder1.Text;
-    Indv_Rem2:=TextReminder2.Text;
-    Indv_Rem3:=TextReminder3.Text;
-    Indv_Rem4:=TextReminder4.Text;
-
-    if Exp_Rem2_Switch.Checked then
-        Exp_Rem2:='1'
-            else
-                Exp_Rem2:='0';
-
-    if Exp_Rem3_Switch.Checked then
-        Exp_Rem3:='1'
-            else
-                Exp_Rem3:='0';
-
-    // Disallow zero values
-    if (Indv_Rem1 = '0') or (Indv_Rem2 = '0') or (Indv_Rem3 = '0') or (Indv_Rem4 = '0') then
-    begin
-        MainForm.MsgCall(mcWarn, 'Zero values are disallowed. Please correct and try again.');
-        Exit;
-    end;
-
-    Add;
-    Close;
-
-end;
-
-procedure TTrackerForm.btnCancelClick(Sender: TObject);
-begin
-    Close;
+    //
 end;
 
 

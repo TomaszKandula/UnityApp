@@ -4,8 +4,8 @@ object ActionsForm: TActionsForm
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'Unity'
-  ClientHeight = 694
-  ClientWidth = 940
+  ClientHeight = 707
+  ClientWidth = 941
   Color = clWhite
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
@@ -29,8 +29,8 @@ object ActionsForm: TActionsForm
     AlignWithMargins = True
     Left = 10
     Top = 10
-    Width = 920
-    Height = 674
+    Width = 921
+    Height = 687
     Margins.Left = 10
     Margins.Top = 10
     Margins.Right = 10
@@ -3158,20 +3158,21 @@ object ActionsForm: TActionsForm
   object MasterPanel: TPanel
     Left = 0
     Top = 0
-    Width = 940
-    Height = 694
+    Width = 941
+    Height = 707
     Align = alClient
     BevelOuter = bvNone
     Color = 15527148
     ParentBackground = False
     TabOrder = 0
     Visible = False
-    ExplicitHeight = 680
+    ExplicitWidth = 940
+    ExplicitHeight = 694
     object PanelBottom: TPanel
       AlignWithMargins = True
       Left = 10
-      Top = 432
-      Width = 920
+      Top = 445
+      Width = 921
       Height = 220
       Margins.Left = 10
       Margins.Top = 0
@@ -3181,7 +3182,9 @@ object ActionsForm: TActionsForm
       BevelOuter = bvNone
       Color = clWhite
       ParentBackground = False
-      TabOrder = 0
+      TabOrder = 3
+      ExplicitTop = 432
+      ExplicitWidth = 920
       object HistoryPanel: TPanel
         AlignWithMargins = True
         Left = 0
@@ -3219,7 +3222,7 @@ object ActionsForm: TActionsForm
           ParentFont = False
           ExplicitWidth = 134
         end
-        object PanelHistoryGrid: TPanel
+        object HistoryGridBorders: TShape
           AlignWithMargins = True
           Left = 10
           Top = 36
@@ -3230,83 +3233,73 @@ object ActionsForm: TActionsForm
           Margins.Right = 10
           Margins.Bottom = 10
           Align = alClient
-          BevelOuter = bvNone
-          Caption = 'No data to display'
+          Pen.Color = clSkyBlue
+          ExplicitLeft = 201
+          ExplicitTop = 45
+          ExplicitWidth = 65
+          ExplicitHeight = 65
+        end
+        object HistoryGrid: TStringGrid
+          AlignWithMargins = True
+          Left = 12
+          Top = 38
+          Width = 297
+          Height = 120
+          Hint = 'Your daily comments history'
+          Margins.Left = 12
+          Margins.Top = 12
+          Margins.Right = 12
+          Margins.Bottom = 12
+          TabStop = False
+          Align = alClient
+          BorderStyle = bsNone
           Color = clWhite
-          ParentBackground = False
+          ColCount = 11
+          DefaultColWidth = 10
+          DefaultRowHeight = 17
+          DoubleBuffered = False
+          FixedColor = clWhite
+          RowCount = 2
+          GradientEndColor = 15527148
+          Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
+          ParentDoubleBuffered = False
+          ParentShowHint = False
+          PopupMenu = MainForm.CommonPopupMenu
+          ShowHint = True
           TabOrder = 0
-          object PanelCtrl: TPanel
-            AlignWithMargins = True
-            Left = 2
-            Top = 2
-            Width = 297
-            Height = 120
-            Margins.Left = 2
-            Margins.Top = 2
-            Margins.Right = 2
-            Margins.Bottom = 2
-            Align = alClient
-            BevelOuter = bvNone
-            Color = clWhite
-            ParentBackground = False
-            TabOrder = 0
-            Visible = False
-            object HistoryGrid: TStringGrid
-              Left = 0
-              Top = 0
-              Width = 297
-              Height = 120
-              Hint = 'Your daily comments history'
-              Margins.Left = 2
-              Margins.Top = 2
-              Margins.Right = 2
-              Margins.Bottom = 2
-              Align = alClient
-              BorderStyle = bsNone
-              Color = clWhite
-              ColCount = 11
-              DefaultColWidth = 10
-              DefaultRowHeight = 17
-              DoubleBuffered = False
-              FixedColor = clWhite
-              RowCount = 2
-              GradientEndColor = 15527148
-              Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goDrawFocusSelected, goColSizing, goThumbTracking]
-              ParentDoubleBuffered = False
-              ParentShowHint = False
-              ShowHint = True
-              TabOrder = 0
-              Visible = False
-              OnDrawCell = HistoryGridDrawCell
-              OnKeyDown = HistoryGridKeyDown
-              OnMouseEnter = HistoryGridMouseEnter
-              OnMouseWheelDown = HistoryGridMouseWheelDown
-              OnMouseWheelUp = HistoryGridMouseWheelUp
-              OnSelectCell = HistoryGridSelectCell
-              ColWidths = (
-                10
-                10
-                10
-                10
-                10
-                10
-                10
-                10
-                10
-                10
-                10)
-              RowHeights = (
-                17
-                17)
-            end
-          end
+          Visible = False
+          OnDrawCell = HistoryGridDrawCell
+          OnKeyDown = HistoryGridKeyDown
+          OnMouseEnter = HistoryGridMouseEnter
+          OnMouseWheelDown = HistoryGridMouseWheelDown
+          OnMouseWheelUp = HistoryGridMouseWheelUp
+          OnSelectCell = HistoryGridSelectCell
+          ExplicitLeft = 55
+          ExplicitTop = 48
+          ExplicitWidth = 141
+          ExplicitHeight = 57
+          ColWidths = (
+            10
+            10
+            8
+            10
+            10
+            10
+            10
+            10
+            10
+            10
+            10)
+          RowHeights = (
+            17
+            17)
         end
       end
       object DailyPanel: TPanel
         AlignWithMargins = True
         Left = 321
         Top = 0
-        Width = 299
+        Width = 300
         Height = 170
         Margins.Left = 0
         Margins.Top = 0
@@ -3316,12 +3309,13 @@ object ActionsForm: TActionsForm
         BevelOuter = bvNone
         Color = clWhite
         ParentBackground = False
-        TabOrder = 1
+        TabOrder = 2
+        ExplicitWidth = 299
         object DailyTitle: TLabel
           AlignWithMargins = True
           Left = 10
           Top = 5
-          Width = 284
+          Width = 285
           Height = 16
           Margins.Left = 10
           Margins.Top = 5
@@ -3339,54 +3333,59 @@ object ActionsForm: TActionsForm
           ParentFont = False
           ExplicitWidth = 91
         end
-        object PanelDailyCom: TPanel
+        object DailyComBorders: TShape
           AlignWithMargins = True
           Left = 10
           Top = 36
-          Width = 279
+          Width = 280
           Height = 124
           Margins.Left = 10
           Margins.Top = 10
           Margins.Right = 10
           Margins.Bottom = 10
           Align = alClient
-          BevelOuter = bvNone
-          Color = clWhite
-          ParentBackground = False
+          Pen.Color = clSkyBlue
+          ExplicitLeft = 120
+          ExplicitTop = 56
+          ExplicitWidth = 65
+          ExplicitHeight = 65
+        end
+        object DailyCom: TMemo
+          AlignWithMargins = True
+          Left = 12
+          Top = 38
+          Width = 276
+          Height = 120
+          Hint = 'Press Enter to save'
+          Margins.Left = 12
+          Margins.Top = 12
+          Margins.Right = 12
+          Margins.Bottom = 12
+          TabStop = False
+          Align = alClient
+          BorderStyle = bsNone
+          Color = clCream
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clNavy
+          Font.Height = -11
+          Font.Name = 'Tahoma'
+          Font.Style = []
+          ParentFont = False
+          ParentShowHint = False
+          ScrollBars = ssVertical
+          ShowHint = True
           TabOrder = 0
-          object DailyCom: TMemo
-            AlignWithMargins = True
-            Left = 2
-            Top = 2
-            Width = 275
-            Height = 120
-            Hint = 'Press Enter to save'
-            Margins.Left = 2
-            Margins.Top = 2
-            Margins.Right = 2
-            Margins.Bottom = 2
-            Align = alClient
-            BorderStyle = bsNone
-            Color = clCream
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clNavy
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-            ParentShowHint = False
-            ScrollBars = ssVertical
-            ShowHint = True
-            TabOrder = 0
-            WantReturns = False
-            OnKeyDown = DailyComKeyDown
-            OnMouseEnter = DailyComMouseEnter
-          end
+          WantReturns = False
+          OnKeyDown = DailyComKeyDown
+          OnKeyUp = DailyComKeyUp
+          OnMouseEnter = DailyComMouseEnter
+          ExplicitLeft = 2
+          ExplicitTop = 2
         end
       end
       object GeneralPanel: TPanel
         AlignWithMargins = True
-        Left = 620
+        Left = 621
         Top = 0
         Width = 300
         Height = 170
@@ -3398,7 +3397,8 @@ object ActionsForm: TActionsForm
         BevelOuter = bvNone
         Color = clWhite
         ParentBackground = False
-        TabOrder = 2
+        TabOrder = 1
+        ExplicitLeft = 620
         object GeneralTitle: TLabel
           AlignWithMargins = True
           Left = 10
@@ -3421,7 +3421,7 @@ object ActionsForm: TActionsForm
           ParentFont = False
           ExplicitWidth = 108
         end
-        object PanelGeneralCom: TPanel
+        object GeneralComBorders: TShape
           AlignWithMargins = True
           Left = 10
           Top = 36
@@ -3432,45 +3432,49 @@ object ActionsForm: TActionsForm
           Margins.Right = 10
           Margins.Bottom = 10
           Align = alClient
-          BevelOuter = bvNone
-          Color = clWhite
-          ParentBackground = False
+          Pen.Color = clSkyBlue
+          ExplicitLeft = 235
+          ExplicitTop = 105
+          ExplicitWidth = 65
+          ExplicitHeight = 65
+        end
+        object GeneralCom: TMemo
+          AlignWithMargins = True
+          Left = 12
+          Top = 38
+          Width = 276
+          Height = 120
+          Hint = 'Press Enter to save'
+          Margins.Left = 12
+          Margins.Top = 12
+          Margins.Right = 12
+          Margins.Bottom = 12
+          Align = alClient
+          BorderStyle = bsNone
+          Color = clCream
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clNavy
+          Font.Height = -11
+          Font.Name = 'Tahoma'
+          Font.Style = []
+          ParentFont = False
+          ParentShowHint = False
+          ScrollBars = ssVertical
+          ShowHint = True
           TabOrder = 0
-          object GeneralCom: TMemo
-            AlignWithMargins = True
-            Left = 2
-            Top = 2
-            Width = 276
-            Height = 120
-            Hint = 'Press Enter to save'
-            Margins.Left = 2
-            Margins.Top = 2
-            Margins.Right = 2
-            Margins.Bottom = 2
-            Align = alClient
-            BorderStyle = bsNone
-            Color = clCream
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clNavy
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-            ParentShowHint = False
-            ScrollBars = ssVertical
-            ShowHint = True
-            TabOrder = 0
-            WantReturns = False
-            OnKeyDown = GeneralComKeyDown
-            OnMouseEnter = GeneralComMouseEnter
-          end
+          WantReturns = False
+          OnKeyDown = GeneralComKeyDown
+          OnKeyUp = GeneralComKeyUp
+          OnMouseEnter = GeneralComMouseEnter
+          ExplicitLeft = 2
+          ExplicitTop = 2
         end
       end
       object ButtonPanel: TPanel
         AlignWithMargins = True
         Left = 0
         Top = 170
-        Width = 920
+        Width = 921
         Height = 50
         Margins.Left = 0
         Margins.Top = 0
@@ -3483,11 +3487,10 @@ object ActionsForm: TActionsForm
         ParentBackground = False
         ParentDoubleBuffered = False
         TabOrder = 3
-        ExplicitLeft = 10
-        ExplicitTop = 602
+        ExplicitWidth = 920
         object btnCallCustomer: TSpeedButton
           AlignWithMargins = True
-          Left = 800
+          Left = 801
           Top = 10
           Width = 110
           Height = 27
@@ -3529,6 +3532,7 @@ object ActionsForm: TActionsForm
             C12D00C12D00C12D00C12D00C12D00C12D00C02C00BE2592E4A5}
           Spacing = 7
           OnClick = btnCallCustomerClick
+          ExplicitLeft = 800
         end
         object btnNext: TSpeedButton
           Left = 93
@@ -3571,7 +3575,7 @@ object ActionsForm: TActionsForm
         end
         object btnAutoStatement: TSpeedButton
           AlignWithMargins = True
-          Left = 680
+          Left = 681
           Top = 10
           Width = 110
           Height = 27
@@ -3612,6 +3616,7 @@ object ActionsForm: TActionsForm
             FFFFFFFFFFFFFFFFFFFFFFFFFFF6F6F6F2F2F2F3F3F3F3F3F3F3F3F3F3F3F3F3
             F3F3F4F4F4E4E4E4F9F9F9FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
           OnClick = btnAutoStatementClick
+          ExplicitLeft = 680
         end
         object btnSetFollowUp: TSpeedButton
           Left = 242
@@ -3691,7 +3696,7 @@ object ActionsForm: TActionsForm
         end
         object btnCustomStatement: TSpeedButton
           AlignWithMargins = True
-          Left = 553
+          Left = 554
           Top = 10
           Width = 110
           Height = 27
@@ -3733,6 +3738,7 @@ object ActionsForm: TActionsForm
             F3F3F4F4F4E4E4E4F9F9F9FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
           Spacing = 5
           OnClick = btnCustomStatementClick
+          ExplicitLeft = 553
         end
         object btnBack: TSpeedButton
           Left = 10
@@ -3778,8 +3784,8 @@ object ActionsForm: TActionsForm
       AlignWithMargins = True
       Left = 10
       Top = 190
-      Width = 920
-      Height = 182
+      Width = 921
+      Height = 195
       Margins.Left = 10
       Margins.Top = 0
       Margins.Right = 10
@@ -3788,81 +3794,84 @@ object ActionsForm: TActionsForm
       BevelOuter = bvNone
       Color = clWhite
       ParentBackground = False
-      TabOrder = 1
-      ExplicitHeight = 177
-      object PanelOpenItemsGrid: TPanel
+      TabOrder = 2
+      ExplicitWidth = 920
+      ExplicitHeight = 182
+      object OpenItemsGridBorders: TShape
         AlignWithMargins = True
         Left = 10
         Top = 10
-        Width = 900
-        Height = 162
+        Width = 901
+        Height = 175
         Margins.Left = 10
         Margins.Top = 10
         Margins.Right = 10
         Margins.Bottom = 10
         Align = alClient
-        BevelOuter = bvNone
+        Pen.Color = clSkyBlue
+        ExplicitLeft = 72
+        ExplicitTop = 80
+        ExplicitWidth = 65
+        ExplicitHeight = 65
+      end
+      object OpenItemsGrid: TStringGrid
+        AlignWithMargins = True
+        Left = 12
+        Top = 12
+        Width = 897
+        Height = 171
+        Margins.Left = 12
+        Margins.Top = 12
+        Margins.Right = 12
+        Margins.Bottom = 12
+        TabStop = False
+        Align = alClient
+        BorderStyle = bsNone
         Color = clWhite
-        ParentBackground = False
+        ColCount = 18
+        DefaultColWidth = 10
+        DefaultRowHeight = 17
+        RowCount = 2
+        GradientEndColor = 15527148
+        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
+        PopupMenu = MainForm.CommonPopupMenu
         TabOrder = 0
-        ExplicitHeight = 208
-        object OpenItemsGrid: TStringGrid
-          AlignWithMargins = True
-          Left = 2
-          Top = 2
-          Width = 896
-          Height = 158
-          Margins.Left = 2
-          Margins.Top = 2
-          Margins.Right = 2
-          Margins.Bottom = 2
-          Align = alClient
-          BorderStyle = bsNone
-          Color = clWhite
-          ColCount = 18
-          DefaultColWidth = 10
-          DefaultRowHeight = 17
-          RowCount = 2
-          GradientEndColor = 15527148
-          Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
-          PopupMenu = MainForm.CommonPopupMenu
-          TabOrder = 0
-          OnDrawCell = OpenItemsGridDrawCell
-          OnKeyDown = OpenItemsGridKeyDown
-          OnMouseEnter = OpenItemsGridMouseEnter
-          OnMouseWheelDown = OpenItemsGridMouseWheelDown
-          OnMouseWheelUp = OpenItemsGridMouseWheelUp
-          ExplicitHeight = 204
-          ColWidths = (
-            10
-            10
-            10
-            10
-            10
-            10
-            10
-            10
-            10
-            10
-            10
-            10
-            10
-            10
-            10
-            10
-            10
-            10)
-          RowHeights = (
-            17
-            17)
-        end
+        OnDrawCell = OpenItemsGridDrawCell
+        OnKeyDown = OpenItemsGridKeyDown
+        OnMouseEnter = OpenItemsGridMouseEnter
+        OnMouseWheelDown = OpenItemsGridMouseWheelDown
+        OnMouseWheelUp = OpenItemsGridMouseWheelUp
+        ExplicitLeft = 2
+        ExplicitTop = 2
+        ColWidths = (
+          10
+          10
+          10
+          10
+          10
+          10
+          10
+          10
+          10
+          10
+          10
+          10
+          10
+          10
+          10
+          10
+          10
+          10)
+        RowHeights = (
+          17
+          17)
       end
     end
     object PanelStatusBar: TPanel
       AlignWithMargins = True
       Left = 0
-      Top = 662
-      Width = 940
+      Top = 675
+      Width = 941
       Height = 32
       Margins.Left = 0
       Margins.Top = 10
@@ -3872,8 +3881,9 @@ object ActionsForm: TActionsForm
       BevelOuter = bvNone
       Color = clWhite
       ParentBackground = False
-      TabOrder = 2
-      ExplicitTop = 648
+      TabOrder = 0
+      ExplicitTop = 662
+      ExplicitWidth = 940
       object Text: TLabel
         Left = 14
         Top = 9
@@ -3899,7 +3909,7 @@ object ActionsForm: TActionsForm
       AlignWithMargins = True
       Left = 0
       Top = 0
-      Width = 940
+      Width = 941
       Height = 180
       Margins.Left = 0
       Margins.Top = 0
@@ -3909,7 +3919,8 @@ object ActionsForm: TActionsForm
       BevelOuter = bvNone
       Color = clWhite
       ParentBackground = False
-      TabOrder = 3
+      TabOrder = 4
+      ExplicitWidth = 940
       object btnQMStoggle: TSpeedButton
         Left = 848
         Top = 147
@@ -4337,6 +4348,7 @@ object ActionsForm: TActionsForm
           Top = 60
           Width = 250
           Height = 13
+          TabStop = False
           BorderStyle = bsNone
           Color = clWhite
           Font.Charset = DEFAULT_CHARSET
@@ -4347,7 +4359,7 @@ object ActionsForm: TActionsForm
           ParentFont = False
           ParentShowHint = False
           ShowHint = True
-          TabOrder = 0
+          TabOrder = 3
           Text = '{data}'
           OnMouseEnter = Cust_MailMouseEnter
         end
@@ -4356,6 +4368,7 @@ object ActionsForm: TActionsForm
           Top = 32
           Width = 250
           Height = 13
+          TabStop = False
           BorderStyle = bsNone
           Color = clWhite
           Font.Charset = DEFAULT_CHARSET
@@ -4383,7 +4396,8 @@ object ActionsForm: TActionsForm
           Color = clWhite
           ItemIndex = 0
           Sorted = True
-          TabOrder = 2
+          TabOrder = 0
+          TabStop = False
           Text = '{data}'
           OnMouseEnter = Cust_PhoneMouseEnter
           Items.Strings = (
@@ -4394,6 +4408,7 @@ object ActionsForm: TActionsForm
           Top = 89
           Width = 250
           Height = 13
+          TabStop = False
           BorderStyle = bsNone
           Color = clWhite
           Font.Charset = DEFAULT_CHARSET
@@ -4404,7 +4419,7 @@ object ActionsForm: TActionsForm
           ParentFont = False
           ParentShowHint = False
           ShowHint = True
-          TabOrder = 3
+          TabOrder = 2
           Text = '{data}'
           OnMouseEnter = Cust_MailGeneralMouseEnter
         end
@@ -4413,8 +4428,8 @@ object ActionsForm: TActionsForm
     object PanelQMS: TPanel
       AlignWithMargins = True
       Left = 10
-      Top = 372
-      Width = 920
+      Top = 385
+      Width = 921
       Height = 60
       Margins.Left = 10
       Margins.Top = 0
@@ -4424,20 +4439,50 @@ object ActionsForm: TActionsForm
       BevelOuter = bvNone
       Color = clWhite
       ParentBackground = False
-      TabOrder = 4
+      TabOrder = 1
       Visible = False
+      ExplicitTop = 372
+      ExplicitWidth = 920
       object btnSelectAll: TSpeedButton
         Left = 12
-        Top = 8
+        Top = 16
         Width = 110
         Height = 27
         Cursor = crHandPoint
         Caption = 'Select All'
         Flat = True
+        Glyph.Data = {
+          36030000424D3603000000000000360000002800000010000000100000000100
+          18000000000000030000C40E0000C40E00000000000000000000000000FFFFFF
+          606060606060FFFFFF000000FFFFFF606060606060FFFFFF000000FFFFFF6060
+          60606060FFFFFF000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+          FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5F5F5FFFFFFF
+          FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+          FFFFFFFFFFFFFF5F5F5F5F5F5FFFFFFFFFFFFF60606060606060606060606060
+          6060606060606060606060606060606060FFFFFFFFFFFF5F5F5FFFFFFFFFFFFF
+          FFFFFF6060606060606060606060606060606060606060606060606060606060
+          60FFFFFFFFFFFFFFFFFF000000FFFFFFFFFFFF606060606060FFFFFFFFFFFFFF
+          FFFFFFFFFFFFFFFFFFFFFF606060606060FFFFFFFFFFFF000000FFFFFFFFFFFF
+          FFFFFF606060606060FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF6060606060
+          60FFFFFFFFFFFFFFFFFF5F5F5FFFFFFFFFFFFF606060606060FFFFFFFFFFFFFF
+          FFFFFFFFFFFFFFFFFFFFFF606060606060FFFFFFFFFFFF5F5F5F5F5F5FFFFFFF
+          FFFFFF606060606060FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF6060606060
+          60FFFFFFFFFFFF5F5F5FFFFFFFFFFFFFFFFFFF606060606060FFFFFFFFFFFFFF
+          FFFFFFFFFFFFFFFFFFFFFF606060606060FFFFFFFFFFFFFFFFFF000000FFFFFF
+          FFFFFF606060606060FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF6060606060
+          60FFFFFFFFFFFF000000FFFFFFFFFFFFFFFFFF60606060606060606060606060
+          6060606060606060606060606060606060FFFFFFFFFFFFFFFFFF5F5F5FFFFFFF
+          FFFFFF6060606060606060606060606060606060606060606060606060606060
+          60FFFFFFFFFFFF5F5F5F5F5F5FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+          FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5F5F5FFFFFFFFFFFFF
+          FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+          FFFFFFFFFFFFFFFFFFFF000000FFFFFF606060606060FFFFFF000000FFFFFF60
+          6060606060FFFFFF000000FFFFFF606060606060FFFFFF000000}
+        Spacing = 10
       end
       object btnLogNow: TSpeedButton
         Left = 800
-        Top = 8
+        Top = 16
         Width = 110
         Height = 27
         Cursor = crHandPoint
@@ -4473,30 +4518,61 @@ object ActionsForm: TActionsForm
       end
       object textStatus: TLabel
         Left = 550
-        Top = 14
+        Top = 22
         Width = 72
         Height = 13
         Caption = 'Invoice status:'
       end
       object btnLogMissingInv: TSpeedButton
         Left = 147
-        Top = 8
-        Width = 110
+        Top = 16
+        Width = 126
         Height = 27
         Cursor = crHandPoint
         Caption = 'Log missing invoice'
         Flat = True
+        Glyph.Data = {
+          36030000424D3603000000000000360000002800000010000000100000000100
+          18000000000000030000C40E0000C40E00000000000000000000D8D8D8C5C5C5
+          C5C5C5C5C5C5C5C5C5C5C5C5C6C6C6C7C7C7C7C7C7C7C7C7C6C6C6CCCCCCFFFF
+          FFFFFFFFFFFFFFFFFFFFC5C5C5E7E7E7F6F6F6F6F6F6F6F6F6F8F8F8F6F1EEE6
+          E4E3E4E4E4E5E5E5E5E5E5E3E3E2E4E4E4FFFFFFFFFFFFFFFFFFC5C5C5F6F6F6
+          ECECEDE2E2E3E4E4E5DDD9D777AAC3C4E2EFE5E5EAD3D3D4D3D3D4D8D8D9E0E0
+          E0FDFDFDFFFFFFFFFFFFC5C5C5F5F5F5EBEBECE1E1E2E1E1E2FBF3F057C8F5D5
+          9433DCC19CD3D9E4D2D2D4D7D7D8E1E1E1FDFDFDFFFFFFFFFFFFC5C5C5F4F4F4
+          F5F5F5F8F8F8F8F8F8F9FBFFF5D5ADD79432D89937DFC5A1E7EEF7E6E6E6E0E0
+          E0FDFDFDFFFFFFFFFFFFC5C5C5F6F6F5E2E2E3CDCDCFCFCFD1CFCFD1D0D5E0D1
+          BCA1E2A639E5AB3DC8AE8DCAD0DCE2E2E2FDFDFDFFFFFFFFFFFFC5C5C5F4F4F4
+          F5F5F5F8F8F7F8F8F7F8F8F7F8F8F7F9FFFFE9D4B7D89935E4AA3CDEC4A1E1E7
+          F1FDFDFDFFFFFFFFFFFFC5C5C5F5F5F5EBEBECE2E2E3E3E3E4E3E3E4E3E3E4E3
+          E3E4E5EBF4D9C3A8E3A83AE4AB3BD9BE9CFFFFFFFFFFFFFFFFFFC5C5C5F5F5F5
+          EBEBECE1E1E2E2E2E3E2E2E3E2E2E3E2E2E3E2E2E3E3E9F3E0CBAFE1A738E3A9
+          3AECD3AFFFFFFFFFFFFFC5C5C5F4F4F4F5F5F5F8F8F8F8F8F8F8F8F8F8F8F7F4
+          F4F4F4F4F4F4F4F4F6FCFFE7D1B5DEA237D29130F0D4A6FFFFFFC5C5C5F6F6F5
+          E2E2E3CDCDCFCFCFD1CECED1CECED1F5F5F5F3F3F3F3F3F3F3F3F3F5FBFFE8D2
+          B4D8942CD7D0DAB4B5F9C5C5C5F4F4F4F5F5F5F8F8F7F8F8F7F8F8F7F7F7F7F3
+          F3F3F3F3F3F3F3F3F5F5F5F5F5F5F7FBFEFAFAFA3234EA4141E6C5C5C5F5F5F5
+          EBEBECE2E2E3E3E3E4E2E2E4E2E2E3F4F4F4F3F3F3F4F4F4DDDDDDDDDDDDD9D9
+          D9FFFFFFCECEF9D8D8FAC3C3C3F5F5F5EBEBECE1E1E2E2E2E3E2E2E3E2E2E3F4
+          F4F4F4F4F4E3E3E3CBCBCBC6C6C6F9F9F9FFFFFFFFFFFFFFFFFFD3D3D3F2F2F2
+          F4F4F4F4F4F4F4F4F4F4F4F4F4F4F4F3F3F3F4F4F4E4E4E4C4C4C4FBFBFBFFFF
+          FFFFFFFFFFFFFFFFFFFFFFFFFFF6F6F6F2F2F2F3F3F3F3F3F3F3F3F3F3F3F3F3
+          F3F3F4F4F4E4E4E4F9F9F9FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
       end
       object cbStatusQms: TComboBox
         Left = 632
-        Top = 11
+        Top = 19
         Width = 144
         Height = 22
         Cursor = crHandPoint
+        BevelInner = bvLowered
+        BevelKind = bkFlat
+        BevelOuter = bvNone
         Style = csOwnerDrawFixed
         ItemIndex = 0
         Sorted = True
         TabOrder = 0
+        TabStop = False
         Text = 'POD'
         Items.Strings = (
           'POD'

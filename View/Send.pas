@@ -44,6 +44,12 @@ type
         procedure btnSendEmailClick(Sender: TObject);
         procedure FormCreate(Sender: TObject);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
+        procedure Text_SalutKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure Text_MessageKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure cbAddOverdueKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure FormShow(Sender: TObject);
+    private
+        procedure ExecuteMailer;
     end;
 
 var
@@ -59,30 +65,17 @@ uses
 {$R *.dfm}
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------ START UP //
+// ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
 
-
-procedure TSendForm.FormCreate(Sender: TObject);
-var
-    Settings: ISettings;
-begin
-    Settings:=TSettings.Create;
-    SendForm.Caption:=Settings.GetStringValue(ApplicationDetails, 'WND_SEND', APPCAPTION);
-    PanelSalutation.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    PanelMessage.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-end;
-
-// -------------------------------------------------------------------------------------------------------------------------------------------- MOUSE EVENTS //
 
 /// <summary>
 ///     Send statement with open items.
 /// </summary>
 
-procedure TSendForm.btnSendEmailClick(Sender: TObject);
+procedure TSendForm.ExecuteMailer;
 var
     TempStr: string;
 begin
-
     if (Text_Salut.Text = '') or (Text_Message.Text = '') then
     begin
         MainForm.MsgCall(mcWarn, 'Please provide with custom message and salutation.');
@@ -95,6 +88,7 @@ begin
     TempStr:=StringReplace(Text_Message.Text, CRLF, HTML_BR, [rfReplaceAll]);
 
     MainForm.UpdateOpenItemsRefs(ActionsForm.OpenItemsGrid);
+    MainForm.UpdateControlStatusRefs(MainForm.sgControlStatus);
     TTSendAccountStatement.Create(
         maCustom,
         'Account Statement',
@@ -111,7 +105,34 @@ begin
     );
 
     Close;
+end;
 
+
+// ------------------------------------------------------------------------------------------------------------------------------------------------ START UP //
+
+
+procedure TSendForm.FormCreate(Sender: TObject);
+var
+    Settings: ISettings;
+begin
+    Settings:=TSettings.Create;
+    SendForm.Caption:=Settings.GetStringValue(ApplicationDetails, 'WND_SEND', APPCAPTION);
+    PanelSalutation.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+    PanelMessage.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+end;
+
+procedure TSendForm.FormShow(Sender: TObject);
+begin
+    Text_Salut.SetFocus;
+end;
+
+
+// -------------------------------------------------------------------------------------------------------------------------------------------- MOUSE EVENTS //
+
+
+procedure TSendForm.btnSendEmailClick(Sender: TObject);
+begin
+    ExecuteMailer;
 end;
 
 procedure TSendForm.btnCancelClick(Sender: TObject);
@@ -126,6 +147,21 @@ end;
 procedure TSendForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
     if Key = ESC then Close;
+end;
+
+procedure TSendForm.Text_SalutKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+    if Key = VK_TAB then Text_Message.SetFocus;
+end;
+
+procedure TSendForm.Text_MessageKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+    if Key = VK_TAB then cbAddOverdue.SetFocus;
+end;
+
+procedure TSendForm.cbAddOverdueKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+    if Key = VK_TAB then Text_Salut.SetFocus;
 end;
 
 

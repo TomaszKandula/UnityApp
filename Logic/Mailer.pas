@@ -275,34 +275,59 @@ procedure TDocument.BuildHTML;
         iCNT:           integer;
         Pos:            integer;
 
-        Ad1Col:         integer;
-        Ad2Col:         integer;
-        Ad3Col:         integer;
-        PnoCol:         integer;
-        PAreaCol:       integer;
-        CuidCol:        integer;
-        OpenAmCol:      integer;
-        PmtStatCol:     integer;
-        CtrlCol:        integer;
-        InvoNoCol:      integer;
-        ValDtCol:       integer;
-        DueDtCol:       integer;
-        ISOCol:         integer;
-        CurAmCol:       integer;
-        OpenCurAmCol:   integer;
+    // Nested methods
 
-    // Nested method
-
-    procedure OpenItemsToHtmlTable(var HtmlStatement: string; var SG: TStringGrid; ActualRow: Integer);
+    // Replace status code to text (short code description)
+    function StatusCodeToText(TextCode: string; Source: TStringGrid): string;
+    var
+        iCNT: integer;
     begin
+
+        for iCNT:=1 to Source.RowCount do
+        begin
+
+            if Source.Cells[MainForm.ControlStatusRefs.Code, iCNT] = TextCode then
+            begin
+                Result:=Source.Cells[MainForm.ControlStatusRefs.Text, iCNT];
+                Break;
+            end;
+
+        end;
+
+    end;
+
+    // Move open items to HTML template
+    procedure OpenItemsToHtmlTable(var HtmlStatement: string; var SG: TStringGrid; ActualRow: Integer);
+    var
+        CurAmount: string;
+        Amount:    string;
+    begin
+
+        // Get outstanding amounts
+        CurAmount:=SG.Cells[MainForm.OpenItemsRefs.CurAmCol, ActualRow];
+        Amount   :=SG.Cells[MainForm.OpenItemsRefs.OpenCurAmCol, ActualRow];
+
+        // Format number (from 1000,00 to 1 000,00)
+        CurAmount:=FormatFloat('#,##0.00', StrToFloat(CurAmount));
+        Amount   :=FormatFloat('#,##0.00', StrToFloat(Amount));
+
+        // Generate HTML
         HTMLTemp:=HTMLRow;
-        HTMLTemp:=StringReplace(HTMLTemp, '{INV_NUM}', SG.Cells[InvoNoCol,    ActualRow], [rfReplaceAll]);
-        HTMLTemp:=StringReplace(HTMLTemp, '{INV_DAT}', SG.Cells[ValDtCol,     ActualRow], [rfReplaceAll]);
-        HTMLTemp:=StringReplace(HTMLTemp, '{DUE_DAT}', SG.Cells[DueDtCol,     ActualRow], [rfReplaceAll]);
-        HTMLTemp:=StringReplace(HTMLTemp, '{INV_CUR}', SG.Cells[ISOCol,       ActualRow], [rfReplaceAll]);
-        HTMLTemp:=StringReplace(HTMLTemp, '{INV_AMT}', SG.Cells[CurAmCol,     ActualRow], [rfReplaceAll]);
-        HTMLTemp:=StringReplace(HTMLTemp, '{INV_OSA}', SG.Cells[OpenCurAmCol, ActualRow], [rfReplaceAll]);
-        HTMLTemp:=StringReplace(HTMLTemp, '{INV_CRL}', SG.Cells[CtrlCol,      ActualRow], [rfReplaceAll]);
+        HTMLTemp:=StringReplace(HTMLTemp, '{INV_NUM}', SG.Cells[MainForm.OpenItemsRefs.InvoNoCol, ActualRow], [rfReplaceAll]);
+        HTMLTemp:=StringReplace(HTMLTemp, '{INV_DAT}', SG.Cells[MainForm.OpenItemsRefs.ValDtCol,  ActualRow], [rfReplaceAll]);
+        HTMLTemp:=StringReplace(HTMLTemp, '{DUE_DAT}', SG.Cells[MainForm.OpenItemsRefs.DueDtCol,  ActualRow], [rfReplaceAll]);
+        HTMLTemp:=StringReplace(HTMLTemp, '{INV_CUR}', SG.Cells[MainForm.OpenItemsRefs.ISOCol,    ActualRow], [rfReplaceAll]);
+        HTMLTemp:=StringReplace(HTMLTemp, '{INV_AMT}', CurAmount, [rfReplaceAll]);
+        HTMLTemp:=StringReplace(HTMLTemp, '{INV_OSA}', Amount,    [rfReplaceAll]);
+
+        // Replace control status number to description
+        HTMLTemp:=StringReplace(
+            HTMLTemp,
+            '{INV_CRL}',
+            StatusCodeToText(SG.Cells[MainForm.OpenItemsRefs.CtrlCol, ActualRow], MainForm.sgControlStatus),
+            [rfReplaceAll]
+        );
+
         HtmlStatement:=HtmlStatement + HTMLTemp;
     end;
 
@@ -316,27 +341,10 @@ begin
     HTMLTable:=CommonHTMLTable;
     HTMLRow  :=CommonHTMLRow;
 
-    // Get all columns numbers
-    CuidCol     :=MainForm.OpenItemsRefs.CuidCol;
-    OpenAmCol   :=MainForm.OpenItemsRefs.OpenAmCol;
-    PmtStatCol  :=MainForm.OpenItemsRefs.PmtStatCol;
-    CtrlCol     :=MainForm.OpenItemsRefs.CtrlCol;
-    InvoNoCol   :=MainForm.OpenItemsRefs.InvoNoCol;
-    ValDtCol    :=MainForm.OpenItemsRefs.ValDtCol;
-    DueDtCol    :=MainForm.OpenItemsRefs.DueDtCol;
-    ISOCol      :=MainForm.OpenItemsRefs.ISOCol;
-    CurAmCol    :=MainForm.OpenItemsRefs.CurAmCol;
-    OpenCurAmCol:=MainForm.OpenItemsRefs.OpenCurAmCol;
-    Ad1Col      :=MainForm.OpenItemsRefs.Ad1Col;
-    Ad2Col      :=MainForm.OpenItemsRefs.Ad2Col;
-    Ad3Col      :=MainForm.OpenItemsRefs.Ad3Col;
-    PnoCol      :=MainForm.OpenItemsRefs.PnoCol;
-    PAreaCol    :=MainForm.OpenItemsRefs.PAreaCol;
-
     // Open items to HTML table
     for iCNT:=1 to OpenItems.RowCount - 1 do
     begin
-        if OpenItems.Cells[CuidCol, iCNT] = CUID then
+        if OpenItems.Cells[MainForm.OpenItemsRefs.CuidCol, iCNT] = CUID then
         begin
 
             if Pos = 0 then Pos:=iCNT;
@@ -347,7 +355,7 @@ begin
                 if not(IsOverdue) then
                 begin
                     // All items
-                    if StrToFloatDef(OpenItems.Cells[OpenAmCol, iCNT], 0) <> 0 then
+                    if StrToFloatDef(OpenItems.Cells[MainForm.OpenItemsRefs.OpenAmCol, iCNT], 0) <> 0 then
                     // Generate HTML table
                     OpenItemsToHtmlTable(HTMLStat, OpenItems, iCNT);
                 end
@@ -356,11 +364,11 @@ begin
                     // Allow only overdue invoices
                     if
                     (
-                        StrToFloatDef(OpenItems.Cells[OpenAmCol, iCNT], 0) <> 0
+                        StrToFloatDef(OpenItems.Cells[MainForm.OpenItemsRefs.OpenAmCol, iCNT], 0) <> 0
                     )
                     and
                     (
-                        StrToFloatDef(OpenItems.Cells[PmtStatCol, iCNT], 0) < 0
+                        StrToFloatDef(OpenItems.Cells[MainForm.OpenItemsRefs.PmtStatCol, iCNT], 0) < 0
                     )
                     then
                     // Make
@@ -376,16 +384,16 @@ begin
                 ///     We exclude invoices with 'control status' that is different than given number in the comapny table.
                 /// </remarks>
 
-                if ( ( OpenItems.Cells[CtrlCol, iCNT] <> REM_EX1) or
-                     ( OpenItems.Cells[CtrlCol, iCNT] <> REM_EX2) or
-                     ( OpenItems.Cells[CtrlCol, iCNT] <> REM_EX3) or
-                     ( OpenItems.Cells[CtrlCol, iCNT] <> REM_EX4) or
-                     ( OpenItems.Cells[CtrlCol, iCNT] <> REM_EX5)
+                if ( ( OpenItems.Cells[MainForm.OpenItemsRefs.CtrlCol, iCNT] <> REM_EX1) or
+                     ( OpenItems.Cells[MainForm.OpenItemsRefs.CtrlCol, iCNT] <> REM_EX2) or
+                     ( OpenItems.Cells[MainForm.OpenItemsRefs.CtrlCol, iCNT] <> REM_EX3) or
+                     ( OpenItems.Cells[MainForm.OpenItemsRefs.CtrlCol, iCNT] <> REM_EX4) or
+                     ( OpenItems.Cells[MainForm.OpenItemsRefs.CtrlCol, iCNT] <> REM_EX5)
                    )
                 and
                   (
                     // Only unpaid invoices
-                    StrToFloatDef(OpenItems.Cells[OpenAmCol, iCNT], 0) > 0
+                    StrToFloatDef(OpenItems.Cells[MainForm.OpenItemsRefs.OpenAmCol, iCNT], 0) > 0
                   )
                 then
 
@@ -400,11 +408,11 @@ begin
 
     // Build customer address field
     CustAddr:='<p class="p"><b>' + CustName + '</b><br />' + CRLF;
-    if (OpenItems.Cells[Ad1Col, Pos]   <> '') and (OpenItems.Cells[Ad1Col, Pos]   <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[Ad1Col,   Pos] + '<br />' + CRLF;
-    if (OpenItems.Cells[Ad2Col, Pos]   <> '') and (OpenItems.Cells[Ad2Col, Pos]   <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[Ad2Col,   Pos] + '<br />' + CRLF;
-    if (OpenItems.Cells[Ad3Col, Pos]   <> '') and (OpenItems.Cells[Ad3Col, Pos]   <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[Ad3Col,   Pos] + '<br />' + CRLF;
-    if (OpenItems.Cells[PnoCol, Pos]   <> '') and (OpenItems.Cells[PnoCol, Pos]   <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[PnoCol,   Pos] + '<br />' + CRLF;
-    if (OpenItems.Cells[PAreaCol, Pos] <> '') and (OpenItems.Cells[PAreaCol, Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[PAreaCol, Pos] + '<br />' + CRLF;
+    if (OpenItems.Cells[MainForm.OpenItemsRefs.Ad1Col,Pos] <> '') and (OpenItems.Cells[MainForm.OpenItemsRefs.Ad1Col,Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[MainForm.OpenItemsRefs.Ad1Col,Pos] + '<br />' + CRLF;
+    if (OpenItems.Cells[MainForm.OpenItemsRefs.Ad2Col,Pos] <> '') and (OpenItems.Cells[MainForm.OpenItemsRefs.Ad2Col,Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[MainForm.OpenItemsRefs.Ad2Col,Pos] + '<br />' + CRLF;
+    if (OpenItems.Cells[MainForm.OpenItemsRefs.Ad3Col,Pos] <> '') and (OpenItems.Cells[MainForm.OpenItemsRefs.Ad3Col,Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[MainForm.OpenItemsRefs.Ad3Col,Pos] + '<br />' + CRLF;
+    if (OpenItems.Cells[MainForm.OpenItemsRefs.PnoCol,Pos] <> '') and (OpenItems.Cells[MainForm.OpenItemsRefs.PnoCol,Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[MainForm.OpenItemsRefs.PnoCol,Pos] + '<br />' + CRLF;
+    if (OpenItems.Cells[MainForm.OpenItemsRefs.PAreaCol, Pos] <> '') and (OpenItems.Cells[MainForm.OpenItemsRefs.PAreaCol, Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[MainForm.OpenItemsRefs.PAreaCol, Pos] + '<br />' + CRLF;
     CustAddr:=CustAddr + '</p>' + CRLF;
 
 end;
@@ -414,7 +422,7 @@ end;
 /// </summary>
 
 function TDocument.SendDocument;
-//var RAND: integer;
+//var RAND: integer; (* DEBUG *)
 begin
     Result:=False;
 
@@ -443,9 +451,9 @@ begin
         MailRt   :='';
         Result   :=SendNow;
 
-        // Debug lines to check concurrency and template generation
+        (* DEBUG *)
         //RAND:=Random(100000);
-        //SaveOutput('i:\test' + IntToStr(RAND) + '.html');
+        //SaveOutput('i:\temp\test' + IntToStr(RAND) + '.html');
         //Result:=True;
 
     end;

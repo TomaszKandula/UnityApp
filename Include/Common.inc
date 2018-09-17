@@ -75,7 +75,7 @@ const
     GridImgFile :  string    = 'Unity.img';        // Application custom image(s)
     ReleaseFile :  string    = 'Release.zip';      // Release package
     ManifestFile:  string    = 'Unity.manifest';   // Manifest file on the server
-    CurrentMutex:  PWideChar = 'UNITY_10110';      // Mutex value, increase it with each release
+    CurrentMutex:  PWideChar = 'UNITY_10115';      // Mutex value, increase it with each release
 
     // --------------------------------------------------------------------------------------------------------------------------------------- SPLASH SCREEN //
 
@@ -493,6 +493,7 @@ const
     TblCompany         = schCustomer + '.' + 'CompanyData';
     TblManagers        = schCustomer + '.' + 'Managers';
     TblTeamleaders     = schCustomer + '.' + 'TeamLeaders';
+    TblControlStatus   = schCustomer + '.' + 'ControlStatus';
     TblReminderLayouts = schCustomer + '.' + 'ReminderLayouts';
     TblInvoices        = schCustomer + '.' + 'TrackerInvoices';
     TblTracker         = schCustomer + '.' + 'TrackerData';

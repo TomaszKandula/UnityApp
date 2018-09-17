@@ -53,12 +53,18 @@ type
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormClose(Sender: TObject; var Action: TCloseAction);
+        procedure Text_SubjectKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure Text_SalutKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure Text_MessageKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure cbAddOverdueKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure EmailListKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     public
         var ThreadCount: integer;
     private
         function  GetEmailAddress(Scuid: string): string;
         procedure SetEmailAddresses(List: TListView);
         procedure GetEmailList(List: TComboBox);
+        procedure ExecuteMailer;
     end;
 
 var
@@ -169,6 +175,73 @@ begin
 
 end;
 
+/// <summary>
+///     Execute worker thread to process the listed emails. Show busy window in main thread.
+/// </summary>
+
+procedure TViewMailerForm.ExecuteMailer;
+var
+    iCNT:    integer;
+    MessStr: string;
+begin
+
+    // Check fields
+    if
+        (
+            string.IsNullOrEmpty(Text_Subject.Text)
+        )
+    or
+        (
+            string.IsNullOrEmpty(Text_Salut.Text)
+        )
+    or
+        (
+            string.IsNullOrEmpty(Text_Message.Text)
+        )
+    then
+    begin
+        MainForm.MsgCall(mcWarn, 'Cannot send incomplete form. Please re-check it and try again.');
+        Exit;
+    end;
+
+    // Check if EmailList contains "noreply" emailbox (default). if so, we should not allow to send from such email address.
+    if AnsiPos(EmailList.Items[EmailList.ItemIndex], 'noreply') > 0 then
+    begin
+        MainForm.MsgCall(mcWarn, 'Cannot send e-mail from "noreply" email box. Please select other email address and try again.');
+        Exit;
+    end;
+
+    // Ask user, they may press the button by mistake
+    if MainForm.MsgCall(mcQuestion2, 'Are you absolutely sure you want to send it, right now?') = IDNO
+        then
+            Exit;
+
+    // Get item count for sendable emails
+    for iCNT:=0 to CustomerList.Items.Count - 1 do
+        if CustomerList.Items[iCNT].SubItems[2] <> 'Not Found' then
+            Inc(ThreadCount);
+
+    // Prepare custom message to the customer
+    MessStr:=StringReplace(Text_Message.Text, CRLF, HTML_BR, [rfReplaceAll]);
+
+    // Sort Open Items via Due Date
+    MainForm.sgOpenItems.MSort(MainForm.sgOpenItems.ReturnColumn(TOpenitems.PmtStat, 1 , 1), 2, True);
+
+    // Process listed customers in worker thread
+    TTSendAccountStatements.Create(
+        Text_Subject.Text,
+        Text_Salut.Text,
+        MessStr,
+        cbAddOverdue.Checked,
+        MainForm.sgOpenItems,
+        MainForm.sgAgeView,
+        ViewMailerForm.CustomerList
+    );
+
+    // Display await window
+    MainForm.WndCall(AwaitForm, stModal);
+end;
+
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------ START UP //
 
@@ -220,6 +293,9 @@ end;
 
 procedure TViewMailerForm.FormShow(Sender: TObject);
 begin
+    // Set focus on subject field
+    Text_Subject.SetFocus;
+
     // Display busy cursor and change status
     Screen.Cursor:=crSQLWait;
     MainForm.ExecMessage(False, mcStatusBar, stProcessing);
@@ -255,68 +331,43 @@ end;
 // ------------------------------------------------------------------------------------------------------------------------------------------- BUTTON EVENTS //
 
 
-/// <summary>
-///     Execute worker thread to process the listed emails. Show busy window in main thread.
-/// </summary>
-
 procedure TViewMailerForm.btnSendEmailClick(Sender: TObject);
-var
-    iCNT:    integer;
-    MessStr: string;
 begin
-
-    // Check fields
-    if
-        (
-            string.IsNullOrEmpty(Text_Subject.Text)
-        )
-    or
-        (
-            string.IsNullOrEmpty(Text_Salut.Text)
-        )
-    or
-        (
-            string.IsNullOrEmpty(Text_Message.Text)
-        )
-    then
-    begin
-        MainForm.MsgCall(mcWarn, 'Cannot send incomplete form. Please re-check it and try again.');
-        Exit;
-    end;
-
-    // Ask user, they may press the button by mistake
-    if MainForm.MsgCall(mcQuestion2, 'Are you absolutely sure you want to send it, right now?') = IDNO
-        then
-            Exit;
-
-    // Get item count for sendable emails
-    for iCNT:=0 to CustomerList.Items.Count - 1 do
-        if CustomerList.Items[iCNT].SubItems[2] <> 'Not Found' then
-            Inc(ThreadCount);
-
-    // Prepare custom message to the customer
-    MessStr:=StringReplace(Text_Message.Text, CRLF, HTML_BR, [rfReplaceAll]);
-
-    // Process listed customers in worker thread
-    TTSendAccountStatements.Create(
-        Text_Subject.Text,
-        Text_Salut.Text,
-        MessStr,
-        cbAddOverdue.Checked,
-        MainForm.sgOpenItems,
-        MainForm.sgAgeView,
-        ViewMailerForm.CustomerList
-    );
-
-    // Display await window
-    MainForm.WndCall(AwaitForm, stModal);
-
+    ExecuteMailer;
 end;
-
 
 procedure TViewMailerForm.btnCancelClick(Sender: TObject);
 begin
     Close;
+end;
+
+
+// ----------------------------------------------------------------------------------------------------------------------------------------- KEYBOARD EVENTS //
+
+
+procedure TViewMailerForm.Text_SubjectKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+    if Key = VK_TAB then Text_Salut.SetFocus;
+end;
+
+procedure TViewMailerForm.Text_SalutKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+    if Key = VK_TAB then Text_Message.SetFocus;
+end;
+
+procedure TViewMailerForm.Text_MessageKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+    if Key = VK_TAB then cbAddOverdue.SetFocus;
+end;
+
+procedure TViewMailerForm.cbAddOverdueKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+    if Key = VK_TAB then EmailList.SetFocus;
+end;
+
+procedure TViewMailerForm.EmailListKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+    if Key = VK_TAB then Text_Subject.SetFocus;
 end;
 
 

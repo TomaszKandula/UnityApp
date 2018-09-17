@@ -211,7 +211,7 @@ begin
                     RenameFile(FullPath, Zipped + '.del');
 
                 // Extract and create any folder if missing
-                ZipRead.Extract(iCNT, DestDir, True);
+                    ZipRead.Extract(iCNT, DestDir, True);
 
                 // Update screen
                 UpdateForm.Progress.Progress:=Trunc( ( (iCNT + 1) / ZipRead.FileCount ) * 100 );

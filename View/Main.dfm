@@ -16440,7 +16440,7 @@ object MainForm: TMainForm
         AlignWithMargins = True
         Left = 17
         Top = 118
-        Width = 614
+        Width = 332
         Height = 556
         Margins.Left = 17
         Margins.Top = 0
@@ -16450,11 +16450,12 @@ object MainForm: TMainForm
         BevelOuter = bvNone
         Color = clWhite
         TabOrder = 1
+        ExplicitWidth = 429
         object Cap16: TShape
           AlignWithMargins = True
           Left = 0
           Top = 0
-          Width = 614
+          Width = 332
           Height = 19
           Margins.Left = 0
           Margins.Top = 0
@@ -16471,7 +16472,7 @@ object MainForm: TMainForm
           AlignWithMargins = True
           Left = 0
           Top = 29
-          Width = 614
+          Width = 332
           Height = 527
           Margins.Left = 0
           Margins.Top = 5
@@ -16480,11 +16481,12 @@ object MainForm: TMainForm
           Align = alClient
           BevelOuter = bvNone
           TabOrder = 0
+          ExplicitWidth = 614
           object sgCoCodes: TStringGrid
             AlignWithMargins = True
             Left = 2
             Top = 2
-            Width = 610
+            Width = 328
             Height = 523
             Margins.Left = 2
             Margins.Top = 2
@@ -16505,6 +16507,7 @@ object MainForm: TMainForm
             OnMouseEnter = sgCoCodesMouseEnter
             OnMouseWheelDown = sgCoCodesMouseWheelDown
             OnMouseWheelUp = sgCoCodesMouseWheelUp
+            ExplicitWidth = 610
             ColWidths = (
               10
               76)
@@ -16516,9 +16519,9 @@ object MainForm: TMainForm
       end
       object RightPanel: TPanel
         AlignWithMargins = True
-        Left = 967
+        Left = 673
         Top = 118
-        Width = 303
+        Width = 290
         Height = 556
         Margins.Left = 0
         Margins.Top = 0
@@ -16527,11 +16530,12 @@ object MainForm: TMainForm
         Align = alRight
         BevelOuter = bvNone
         TabOrder = 2
+        ExplicitLeft = 660
         object Cap17: TShape
           AlignWithMargins = True
           Left = 0
           Top = 0
-          Width = 303
+          Width = 290
           Height = 19
           Margins.Left = 0
           Margins.Top = 0
@@ -16548,7 +16552,7 @@ object MainForm: TMainForm
           AlignWithMargins = True
           Left = 0
           Top = 357
-          Width = 303
+          Width = 290
           Height = 19
           Margins.Left = 0
           Margins.Top = 5
@@ -16564,7 +16568,7 @@ object MainForm: TMainForm
           AlignWithMargins = True
           Left = 0
           Top = 29
-          Width = 303
+          Width = 290
           Height = 318
           Margins.Left = 0
           Margins.Top = 5
@@ -16573,11 +16577,12 @@ object MainForm: TMainForm
           Align = alTop
           BevelOuter = bvNone
           TabOrder = 0
+          ExplicitWidth = 303
           object sgPmtTerms: TStringGrid
             AlignWithMargins = True
             Left = 2
             Top = 2
-            Width = 299
+            Width = 286
             Height = 314
             Margins.Left = 2
             Margins.Top = 2
@@ -16598,6 +16603,7 @@ object MainForm: TMainForm
             OnMouseEnter = sgPmtTermsMouseEnter
             OnMouseWheelDown = sgPmtTermsMouseWheelDown
             OnMouseWheelUp = sgPmtTermsMouseWheelUp
+            ExplicitWidth = 299
             ColWidths = (
               10
               76)
@@ -16610,7 +16616,7 @@ object MainForm: TMainForm
           AlignWithMargins = True
           Left = 0
           Top = 386
-          Width = 303
+          Width = 290
           Height = 165
           Margins.Left = 0
           Margins.Top = 5
@@ -16619,11 +16625,12 @@ object MainForm: TMainForm
           Align = alClient
           BevelOuter = bvNone
           TabOrder = 1
+          ExplicitWidth = 303
           object sgGroup3: TStringGrid
             AlignWithMargins = True
             Left = 2
             Top = 2
-            Width = 299
+            Width = 286
             Height = 161
             Margins.Left = 2
             Margins.Top = 2
@@ -16644,6 +16651,7 @@ object MainForm: TMainForm
             OnMouseEnter = sgGroup3MouseEnter
             OnMouseWheelDown = sgGroup3MouseWheelDown
             OnMouseWheelUp = sgGroup3MouseWheelUp
+            ExplicitWidth = 299
             ColWidths = (
               10
               76)
@@ -16655,9 +16663,9 @@ object MainForm: TMainForm
       end
       object MidPanel: TPanel
         AlignWithMargins = True
-        Left = 648
+        Left = 366
         Top = 118
-        Width = 302
+        Width = 290
         Height = 556
         Margins.Left = 17
         Margins.Top = 0
@@ -16665,12 +16673,14 @@ object MainForm: TMainForm
         Margins.Bottom = 17
         Align = alRight
         BevelOuter = bvNone
+        Color = clWhite
+        ParentBackground = False
         TabOrder = 3
         object Cap20: TShape
           AlignWithMargins = True
           Left = 0
           Top = 356
-          Width = 302
+          Width = 290
           Height = 19
           Margins.Left = 0
           Margins.Top = 5
@@ -16679,12 +16689,13 @@ object MainForm: TMainForm
           Align = alTop
           Brush.Color = 15918295
           Pen.Color = clSkyBlue
+          ExplicitWidth = 302
         end
         object Cap18: TShape
           AlignWithMargins = True
           Left = 0
           Top = 0
-          Width = 302
+          Width = 290
           Height = 19
           Margins.Left = 0
           Margins.Top = 0
@@ -16701,7 +16712,7 @@ object MainForm: TMainForm
           AlignWithMargins = True
           Left = 0
           Top = 29
-          Width = 302
+          Width = 290
           Height = 317
           Margins.Left = 0
           Margins.Top = 5
@@ -16712,11 +16723,12 @@ object MainForm: TMainForm
           Color = clWhite
           ParentBackground = False
           TabOrder = 0
+          ExplicitWidth = 302
           object sgPaidInfo: TStringGrid
             AlignWithMargins = True
             Left = 2
             Top = 2
-            Width = 298
+            Width = 286
             Height = 313
             Margins.Left = 2
             Margins.Top = 2
@@ -16737,6 +16749,7 @@ object MainForm: TMainForm
             OnMouseEnter = sgPaidInfoMouseEnter
             OnMouseWheelDown = sgPaidInfoMouseWheelDown
             OnMouseWheelUp = sgPaidInfoMouseWheelUp
+            ExplicitWidth = 298
             ColWidths = (
               10
               76)
@@ -16749,7 +16762,7 @@ object MainForm: TMainForm
           AlignWithMargins = True
           Left = 0
           Top = 385
-          Width = 302
+          Width = 290
           Height = 166
           Margins.Left = 0
           Margins.Top = 5
@@ -16760,11 +16773,12 @@ object MainForm: TMainForm
           Color = clWhite
           ParentBackground = False
           TabOrder = 1
+          ExplicitWidth = 302
           object sgPerson: TStringGrid
             AlignWithMargins = True
             Left = 2
             Top = 2
-            Width = 298
+            Width = 286
             Height = 162
             Margins.Left = 2
             Margins.Top = 2
@@ -16785,6 +16799,159 @@ object MainForm: TMainForm
             OnMouseEnter = sgPersonMouseEnter
             OnMouseWheelDown = sgPersonMouseWheelDown
             OnMouseWheelUp = sgPersonMouseWheelUp
+            ExplicitWidth = 298
+            ColWidths = (
+              10
+              76)
+            RowHeights = (
+              17
+              17)
+          end
+        end
+      end
+      object MostRightPanel: TPanel
+        AlignWithMargins = True
+        Left = 980
+        Top = 118
+        Width = 290
+        Height = 556
+        Margins.Left = 0
+        Margins.Top = 0
+        Margins.Right = 17
+        Margins.Bottom = 17
+        Align = alRight
+        BevelOuter = bvNone
+        Color = clWhite
+        ParentBackground = False
+        TabOrder = 4
+        ExplicitLeft = 967
+        object Cap25: TShape
+          AlignWithMargins = True
+          Left = 0
+          Top = 0
+          Width = 290
+          Height = 19
+          Margins.Left = 0
+          Margins.Top = 0
+          Margins.Right = 0
+          Margins.Bottom = 5
+          Align = alTop
+          Brush.Color = 15918295
+          Pen.Color = clSkyBlue
+          ExplicitLeft = 14
+          ExplicitTop = 20
+          ExplicitWidth = 581
+        end
+        object Cap26: TShape
+          AlignWithMargins = True
+          Left = 0
+          Top = 357
+          Width = 290
+          Height = 19
+          Margins.Left = 0
+          Margins.Top = 5
+          Margins.Right = 0
+          Margins.Bottom = 5
+          Align = alTop
+          Brush.Color = 15918295
+          Pen.Color = clSkyBlue
+          ExplicitTop = 356
+          ExplicitWidth = 297
+        end
+        object PanelEmpty: TPanel
+          AlignWithMargins = True
+          Left = 0
+          Top = 386
+          Width = 290
+          Height = 165
+          Margins.Left = 0
+          Margins.Top = 5
+          Margins.Right = 0
+          Margins.Bottom = 5
+          Align = alClient
+          BevelOuter = bvNone
+          Color = clWhite
+          ParentBackground = False
+          TabOrder = 0
+          ExplicitWidth = 303
+          object sgEmpty: TStringGrid
+            AlignWithMargins = True
+            Left = 2
+            Top = 2
+            Width = 286
+            Height = 161
+            Margins.Left = 2
+            Margins.Top = 2
+            Margins.Right = 2
+            Margins.Bottom = 2
+            Align = alClient
+            BorderStyle = bsNone
+            ColCount = 2
+            DefaultColWidth = 10
+            DefaultRowHeight = 17
+            RowCount = 2
+            GradientEndColor = 15527148
+            Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goThumbTracking]
+            PopupMenu = CommonPopupMenu
+            TabOrder = 0
+            Visible = False
+            OnDrawCell = sgGroup3DrawCell
+            OnKeyUp = sgGroup3KeyUp
+            OnMouseEnter = sgGroup3MouseEnter
+            OnMouseWheelDown = sgGroup3MouseWheelDown
+            OnMouseWheelUp = sgGroup3MouseWheelUp
+            ExplicitWidth = 284
+            ExplicitHeight = 487
+            ColWidths = (
+              10
+              76)
+            RowHeights = (
+              17
+              17)
+          end
+        end
+        object PanelControlStatus: TPanel
+          AlignWithMargins = True
+          Left = 0
+          Top = 29
+          Width = 290
+          Height = 318
+          Margins.Left = 0
+          Margins.Top = 5
+          Margins.Right = 0
+          Margins.Bottom = 5
+          Align = alTop
+          BevelOuter = bvNone
+          Color = clWhite
+          ParentBackground = False
+          TabOrder = 1
+          ExplicitWidth = 303
+          object sgControlStatus: TStringGrid
+            AlignWithMargins = True
+            Left = 2
+            Top = 2
+            Width = 286
+            Height = 314
+            Margins.Left = 2
+            Margins.Top = 2
+            Margins.Right = 2
+            Margins.Bottom = 2
+            Align = alClient
+            BorderStyle = bsNone
+            ColCount = 2
+            DefaultColWidth = 10
+            DefaultRowHeight = 17
+            RowCount = 2
+            GradientEndColor = 15527148
+            Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goThumbTracking]
+            PopupMenu = CommonPopupMenu
+            TabOrder = 0
+            OnDrawCell = sgControlStatusDrawCell
+            OnKeyUp = sgControlStatusKeyUp
+            OnMouseEnter = sgControlStatusMouseEnter
+            OnMouseWheelDown = sgControlStatusMouseWheelDown
+            OnMouseWheelUp = sgControlStatusMouseWheelUp
+            ExplicitWidth = 284
             ColWidths = (
               10
               76)

@@ -18,6 +18,7 @@ object SendForm: TSendForm
   Scaled = False
   OnCreate = FormCreate
   OnKeyPress = FormKeyPress
+  OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
   object PanelClient: TPanel
@@ -181,8 +182,10 @@ object SendForm: TSendForm
       Width = 97
       Height = 17
       Cursor = crHandPoint
+      TabStop = False
       Caption = 'Overdue only'
       TabOrder = 2
+      OnKeyUp = cbAddOverdueKeyUp
     end
     object PanelMessage: TPanel
       Left = 16
@@ -192,7 +195,7 @@ object SendForm: TSendForm
       BevelOuter = bvNone
       Color = clWhite
       ParentBackground = False
-      TabOrder = 1
+      TabOrder = 0
       object Text_Message: TMemo
         AlignWithMargins = True
         Left = 2
@@ -203,6 +206,7 @@ object SendForm: TSendForm
         Margins.Top = 2
         Margins.Right = 2
         Margins.Bottom = 2
+        TabStop = False
         Align = alClient
         BorderStyle = bsNone
         Color = clCream
@@ -215,6 +219,7 @@ object SendForm: TSendForm
         ParentFont = False
         ScrollBars = ssVertical
         TabOrder = 0
+        OnKeyUp = Text_MessageKeyUp
       end
     end
     object PanelSalutation: TPanel
@@ -225,7 +230,7 @@ object SendForm: TSendForm
       BevelOuter = bvNone
       Color = clWhite
       ParentBackground = False
-      TabOrder = 0
+      TabOrder = 1
       object Text_Salut: TMemo
         AlignWithMargins = True
         Left = 2
@@ -236,6 +241,7 @@ object SendForm: TSendForm
         Margins.Top = 2
         Margins.Right = 2
         Margins.Bottom = 2
+        TabStop = False
         Align = alClient
         BorderStyle = bsNone
         Color = clCream
@@ -249,6 +255,7 @@ object SendForm: TSendForm
         TabOrder = 0
         WantReturns = False
         WordWrap = False
+        OnKeyUp = Text_SalutKeyUp
       end
     end
   end

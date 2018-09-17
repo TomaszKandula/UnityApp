@@ -463,6 +463,20 @@ type
         const AppName      : string = 'AppName';
     end;
 
+    /// <summary>
+    ///     Contains description of all control statuses use in ERP system.
+    ///     TEXT field should be used to replace status code in open items list.
+    /// </summary>
+
+    TControlStatus = class(TDataTables)
+    {$TYPEINFO ON}
+    public
+        const Id          : string = 'Id';
+        const Code        : string = 'Code';
+        const Text        : string = 'Text';
+        const Description : string = 'Description';
+    end;
+
 
 implementation
 

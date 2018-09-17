@@ -63,12 +63,7 @@ type
         MasterPanel: TPanel;
         Text: TLabel;
         SimpleText: TLabel;
-        PanelHistoryGrid: TPanel;
-        PanelDailyCom: TPanel;
-        PanelGeneralCom: TPanel;
-        PanelOpenItemsGrid: TPanel;
         ImgLoadingWindow: TImage;
-        PanelCtrl: TPanel;
         btnQMStoggle: TSpeedButton;
         Text9: TLabel;
         Cust_MailGeneral: TEdit;
@@ -79,7 +74,11 @@ type
         btnSelectAll: TSpeedButton;
         btnLogNow: TSpeedButton;
         textStatus: TLabel;
-    btnLogMissingInv: TSpeedButton;
+        btnLogMissingInv: TSpeedButton;
+        HistoryGridBorders: TShape;
+        OpenItemsGridBorders: TShape;
+        DailyComBorders: TShape;
+        GeneralComBorders: TShape;
         procedure FormCreate(Sender: TObject);
         procedure FormActivate(Sender: TObject);
         procedure OpenItemsGridMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
@@ -120,6 +119,8 @@ type
         procedure HistoryGridMouseEnter(Sender: TObject);
         procedure DailyComMouseEnter(Sender: TObject);
         procedure GeneralComMouseEnter(Sender: TObject);
+        procedure DailyComKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure GeneralComKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     private
         var FHistoryGrid: boolean;
     public
@@ -370,7 +371,7 @@ begin
             Grid.ColWidths[Grid.ReturnColumn(TDaily.FIXCOMMENT, 1, 1)]:=sgRowHidden;
             Grid.SetColWidth(10, 20, 400);
             FHistoryGrid:=True;
-            PanelCtrl.Visible:=FHistoryGrid;
+            Grid.Visible:=FHistoryGrid;
         end
         else
         begin
@@ -561,7 +562,8 @@ begin
     try
         GetData;
         SetControls;
-        PanelCtrl.Visible:=FHistoryGrid;
+        HistoryGrid.Visible:=FHistoryGrid;
+
     except
         MainForm.MsgCall(mcWarn, 'Unexpected error has occured. Please close the window and try again.');
     end;
@@ -648,10 +650,6 @@ end;
 procedure TActionsForm.InitializePanels;
 begin
     PanelTop.PanelBorders(clWhite, clSkyBlue, clWhite, clWhite, clWhite);
-    PanelOpenItemsGrid.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    PanelHistoryGrid.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    PanelDailyCom.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    PanelGeneralCom.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
 end;
 
 /// <summary>
@@ -708,7 +706,9 @@ begin
         (GIFImage.Picture.Graphic as TGIFImage).Animate:=False;
         ImgLoadingWindow.Visible:=False;
         MasterPanel.Visible:=True;
-        PanelCtrl.Visible:=FHistoryGrid;
+
+        HistoryGrid.Visible:=FHistoryGrid;
+
     end;
 end;
 
@@ -800,8 +800,6 @@ begin
     // Skip heaer
     if ARow = 0 then Exit;
 
-    // -------------------------- NON-QMS MODE
-
     // Draw selected
     OpenItemsGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
 
@@ -829,11 +827,6 @@ begin
     then
         OpenItemsGrid.ColorValues(ARow, ACol, Rect, clRed, clBlack);
 
-    // -------------------------- QMS MODE
-
-    // only whole line can be selected
-
-
 end;
 
 /// <summary>
@@ -851,7 +844,7 @@ end;
 
 procedure TActionsForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-  if Key = ESC then Close;
+    if Key = ESC then Close;
 end;
 
 /// <summary>
@@ -909,7 +902,7 @@ end;
 
 procedure TActionsForm.OpenItemsGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if (Key = 67) and (Shift = [ssCtrl]) then OpenItemsGrid.CopyCutPaste(adCopy);
+    if (Key = 67) and (Shift = [ssCtrl]) then OpenItemsGrid.CopyCutPaste(adCopy);
 end;
 
 /// <summary>
@@ -918,7 +911,25 @@ end;
 
 procedure TActionsForm.HistoryGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if (Key = 67) and (Shift = [ssCtrl]) then HistoryGrid.CopyCutPaste(adCopy);
+    if (Key = 67) and (Shift = [ssCtrl]) then HistoryGrid.CopyCutPaste(adCopy);
+end;
+
+/// <summary>
+///     Set focus on General Comment edit box.
+/// </summary>
+
+procedure TActionsForm.DailyComKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+    if Key = VK_TAB then GeneralCom.SetFocus;
+end;
+
+/// <summary>
+///     Set focus on Daily Comment edit box.
+/// </summary>
+
+procedure TActionsForm.GeneralComKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+    if Key = VK_TAB then DailyCom.SetFocus;
 end;
 
 
@@ -1041,11 +1052,13 @@ begin
     begin
         PanelBottom.Visible:=True;
         PanelQMS.Visible:=False;
+        OpenItemsGrid.Options:=OpenItemsGrid.Options - [goRowSelect];
     end
     else
     begin
         PanelBottom.Visible:=False;
         PanelQMS.Visible:=True;
+        OpenItemsGrid.Options:=OpenItemsGrid.Options + [goRowSelect];
     end;
 end;
 
@@ -1082,6 +1095,7 @@ begin
         then Exit;
 
     MainForm.UpdateOpenItemsRefs(OpenItemsGrid);
+    MainForm.UpdateControlStatusRefs(MainForm.sgControlStatus);
     TTSendAccountStatement.Create(
         maDefined,
         'Account Statement',

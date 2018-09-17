@@ -40,7 +40,7 @@ object ViewMailerForm: TViewMailerForm
     Font.Style = []
     ParentBackground = False
     ParentFont = False
-    TabOrder = 0
+    TabOrder = 2
     object Text_Warn: TLabel
       Left = 16
       Top = 12
@@ -302,8 +302,10 @@ object ViewMailerForm: TViewMailerForm
       Width = 97
       Height = 17
       Cursor = crHandPoint
+      TabStop = False
       Caption = 'Overdue only'
-      TabOrder = 2
+      TabOrder = 3
+      OnKeyUp = cbAddOverdueKeyUp
     end
     object PanelMessage: TPanel
       Left = 16
@@ -313,7 +315,7 @@ object ViewMailerForm: TViewMailerForm
       BevelOuter = bvNone
       Color = clWhite
       ParentBackground = False
-      TabOrder = 1
+      TabOrder = 2
       object Text_Message: TMemo
         AlignWithMargins = True
         Left = 2
@@ -324,6 +326,7 @@ object ViewMailerForm: TViewMailerForm
         Margins.Top = 2
         Margins.Right = 2
         Margins.Bottom = 2
+        TabStop = False
         Align = alClient
         BorderStyle = bsNone
         Color = clCream
@@ -336,6 +339,7 @@ object ViewMailerForm: TViewMailerForm
         ParentFont = False
         ScrollBars = ssVertical
         TabOrder = 0
+        OnKeyUp = Text_MessageKeyUp
       end
     end
     object PanelSalutation: TPanel
@@ -346,7 +350,7 @@ object ViewMailerForm: TViewMailerForm
       BevelOuter = bvNone
       Color = clWhite
       ParentBackground = False
-      TabOrder = 0
+      TabOrder = 1
       object Text_Salut: TMemo
         AlignWithMargins = True
         Left = 2
@@ -357,6 +361,7 @@ object ViewMailerForm: TViewMailerForm
         Margins.Top = 2
         Margins.Right = 2
         Margins.Bottom = 2
+        TabStop = False
         Align = alClient
         BorderStyle = bsNone
         Color = clCream
@@ -370,6 +375,7 @@ object ViewMailerForm: TViewMailerForm
         TabOrder = 0
         WantReturns = False
         WordWrap = False
+        OnKeyUp = Text_SalutKeyUp
       end
     end
     object PanelSubject: TPanel
@@ -380,7 +386,7 @@ object ViewMailerForm: TViewMailerForm
       BevelOuter = bvNone
       Color = clWhite
       ParentBackground = False
-      TabOrder = 3
+      TabOrder = 0
       object Text_Subject: TMemo
         AlignWithMargins = True
         Left = 2
@@ -391,6 +397,7 @@ object ViewMailerForm: TViewMailerForm
         Margins.Top = 2
         Margins.Right = 2
         Margins.Bottom = 2
+        TabStop = False
         Align = alClient
         BorderStyle = bsNone
         Color = clCream
@@ -404,6 +411,7 @@ object ViewMailerForm: TViewMailerForm
         TabOrder = 0
         WantReturns = False
         WordWrap = False
+        OnKeyUp = Text_SubjectKeyUp
       end
     end
   end
@@ -421,7 +429,7 @@ object ViewMailerForm: TViewMailerForm
     BevelOuter = bvNone
     Color = clWhite
     ParentBackground = False
-    TabOrder = 2
+    TabOrder = 0
     object PanelEmailContainer: TPanel
       AlignWithMargins = True
       Left = 20
@@ -435,7 +443,7 @@ object ViewMailerForm: TViewMailerForm
       Align = alClient
       BevelOuter = bvNone
       Caption = 'PanelEmailContainer'
-      TabOrder = 0
+      TabOrder = 1
       object CustomerList: TListView
         AlignWithMargins = True
         Left = 5
@@ -453,6 +461,7 @@ object ViewMailerForm: TViewMailerForm
         GridLines = True
         ReadOnly = True
         TabOrder = 0
+        TabStop = False
         ViewStyle = vsReport
       end
     end
@@ -470,7 +479,7 @@ object ViewMailerForm: TViewMailerForm
       BevelOuter = bvNone
       Color = clWhite
       ParentBackground = False
-      TabOrder = 1
+      TabOrder = 0
       object Text4: TLabel
         Left = 18
         Top = 10
@@ -490,6 +499,8 @@ object ViewMailerForm: TViewMailerForm
         BevelOuter = bvNone
         Style = csOwnerDrawFixed
         TabOrder = 0
+        TabStop = False
+        OnKeyUp = EmailListKeyUp
       end
     end
   end

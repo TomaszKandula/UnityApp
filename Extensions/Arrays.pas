@@ -30,7 +30,7 @@ type
     TIntigers = array of integer;
 
     /// <remarks>
-    ///     This record definition allows to hold column numbers for given column name. This is necessary as column order may change.
+    ///     These records definition allows to hold column numbers for given column name. This is necessary as column order may change.
     ///     Normally we would use "ReturnColumn" extension method, but in case of multithreading, we must preset
     ///     them before many threads use them at the same time (VCL components are not thread safe).
     /// </remarks>
@@ -52,6 +52,14 @@ type
         CurAmCol:       integer;
         OpenCurAmCol:   integer;
     end;
+
+    TControlStatusRefs = record
+        Id:             integer;
+        Code:           integer;
+        Text:           integer;
+        Description:    integer;
+    end;
+
 
 
 implementation
