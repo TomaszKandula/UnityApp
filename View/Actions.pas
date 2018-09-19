@@ -584,6 +584,7 @@ begin
             SPACE,
             strNULL,
             strNULL,
+            strNULL,
             True
         );
         MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1), MainForm.sgAgeView.Row]:='';
@@ -617,6 +618,7 @@ begin
     TTGeneralComment.Create(
         CUID,
         GeneralCom.Text,
+        strNULL,
         strNULL,
         strNULL,
         strNULL,

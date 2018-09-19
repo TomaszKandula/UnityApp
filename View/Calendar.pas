@@ -122,6 +122,7 @@ begin
                            DateToStr(SelectedDate),
                            strNULL,
                            strNULL,
+                           strNULL,
                            False
                          );
   MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1), Row]:=DateToStr(SelectedDate);

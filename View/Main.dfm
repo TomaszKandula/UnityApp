@@ -1194,7 +1194,7 @@ object MainForm: TMainForm
     Margins.Top = 0
     Margins.Right = 10
     Margins.Bottom = 0
-    ActivePage = TabSheet1
+    ActivePage = TabSheet7
     Align = alClient
     DoubleBuffered = True
     Font.Charset = DEFAULT_CHARSET
@@ -16436,528 +16436,586 @@ object MainForm: TMainForm
           end
         end
       end
-      object LeftPanel: TPanel
+      object Tables: TPageControl
         AlignWithMargins = True
         Left = 17
         Top = 118
-        Width = 332
+        Width = 1253
         Height = 556
         Margins.Left = 17
         Margins.Top = 0
-        Margins.Right = 0
+        Margins.Right = 17
         Margins.Bottom = 17
+        ActivePage = Page8
         Align = alClient
-        BevelOuter = bvNone
-        Color = clWhite
         TabOrder = 1
-        ExplicitWidth = 429
-        object Cap16: TShape
-          AlignWithMargins = True
-          Left = 0
-          Top = 0
-          Width = 332
-          Height = 19
-          Margins.Left = 0
-          Margins.Top = 0
-          Margins.Right = 0
-          Margins.Bottom = 5
-          Align = alTop
-          Brush.Color = 15918295
-          Pen.Color = clSkyBlue
-          ExplicitLeft = 20
-          ExplicitTop = 20
-          ExplicitWidth = 679
-        end
-        object PanelCoCodes: TPanel
-          AlignWithMargins = True
-          Left = 0
-          Top = 29
-          Width = 332
-          Height = 527
-          Margins.Left = 0
-          Margins.Top = 5
-          Margins.Right = 0
-          Margins.Bottom = 0
-          Align = alClient
-          BevelOuter = bvNone
-          TabOrder = 0
-          ExplicitWidth = 614
-          object sgCoCodes: TStringGrid
+        object Page1: TTabSheet
+          Caption = 'Companies'
+          ExplicitWidth = 1243
+          ExplicitHeight = 189
+          object PanelCoCodes: TPanel
             AlignWithMargins = True
-            Left = 2
-            Top = 2
-            Width = 328
-            Height = 523
-            Margins.Left = 2
-            Margins.Top = 2
-            Margins.Right = 2
-            Margins.Bottom = 2
+            Left = 17
+            Top = 17
+            Width = 1211
+            Height = 494
+            Margins.Left = 17
+            Margins.Top = 17
+            Margins.Right = 17
+            Margins.Bottom = 17
             Align = alClient
-            BorderStyle = bsNone
-            ColCount = 2
-            DefaultColWidth = 10
-            DefaultRowHeight = 17
-            RowCount = 2
-            GradientEndColor = 15527148
-            Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
-            PopupMenu = CommonPopupMenu
+            BevelOuter = bvNone
             TabOrder = 0
-            OnDrawCell = sgCoCodesDrawCell
-            OnKeyUp = sgCoCodesKeyUp
-            OnMouseEnter = sgCoCodesMouseEnter
-            OnMouseWheelDown = sgCoCodesMouseWheelDown
-            OnMouseWheelUp = sgCoCodesMouseWheelUp
-            ExplicitWidth = 610
-            ColWidths = (
-              10
-              76)
-            RowHeights = (
-              17
-              17)
+            ExplicitLeft = 0
+            ExplicitTop = 29
+            ExplicitWidth = 332
+            ExplicitHeight = 237
+            object sgCoCodes: TStringGrid
+              AlignWithMargins = True
+              Left = 2
+              Top = 2
+              Width = 1207
+              Height = 490
+              Margins.Left = 2
+              Margins.Top = 2
+              Margins.Right = 2
+              Margins.Bottom = 2
+              Align = alClient
+              BorderStyle = bsNone
+              ColCount = 2
+              DefaultColWidth = 10
+              DefaultRowHeight = 17
+              RowCount = 2
+              GradientEndColor = 15527148
+              Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
+              PopupMenu = CommonPopupMenu
+              TabOrder = 0
+              OnDrawCell = sgCoCodesDrawCell
+              OnKeyUp = sgCoCodesKeyUp
+              OnMouseEnter = sgCoCodesMouseEnter
+              OnMouseWheelDown = sgCoCodesMouseWheelDown
+              OnMouseWheelUp = sgCoCodesMouseWheelUp
+              ExplicitWidth = 328
+              ExplicitHeight = 233
+              ColWidths = (
+                10
+                76)
+              RowHeights = (
+                17
+                17)
+            end
           end
         end
-      end
-      object RightPanel: TPanel
-        AlignWithMargins = True
-        Left = 673
-        Top = 118
-        Width = 290
-        Height = 556
-        Margins.Left = 0
-        Margins.Top = 0
-        Margins.Right = 17
-        Margins.Bottom = 17
-        Align = alRight
-        BevelOuter = bvNone
-        TabOrder = 2
-        ExplicitLeft = 660
-        object Cap17: TShape
-          AlignWithMargins = True
-          Left = 0
-          Top = 0
-          Width = 290
-          Height = 19
-          Margins.Left = 0
-          Margins.Top = 0
-          Margins.Right = 0
-          Margins.Bottom = 5
-          Align = alTop
-          Brush.Color = 15918295
-          Pen.Color = clSkyBlue
-          ExplicitLeft = 14
-          ExplicitTop = 20
-          ExplicitWidth = 581
-        end
-        object Cap19: TShape
-          AlignWithMargins = True
-          Left = 0
-          Top = 357
-          Width = 290
-          Height = 19
-          Margins.Left = 0
-          Margins.Top = 5
-          Margins.Right = 0
-          Margins.Bottom = 5
-          Align = alTop
-          Brush.Color = 15918295
-          Pen.Color = clSkyBlue
-          ExplicitTop = 356
-          ExplicitWidth = 297
-        end
-        object PanelPmtTerms: TPanel
-          AlignWithMargins = True
-          Left = 0
-          Top = 29
-          Width = 290
-          Height = 318
-          Margins.Left = 0
-          Margins.Top = 5
-          Margins.Right = 0
-          Margins.Bottom = 5
-          Align = alTop
-          BevelOuter = bvNone
-          TabOrder = 0
-          ExplicitWidth = 303
-          object sgPmtTerms: TStringGrid
+        object Page2: TTabSheet
+          Caption = 'Payment Terms'
+          ImageIndex = 1
+          ExplicitWidth = 1243
+          ExplicitHeight = 189
+          object PanelPmtTerms: TPanel
             AlignWithMargins = True
-            Left = 2
-            Top = 2
-            Width = 286
-            Height = 314
-            Margins.Left = 2
-            Margins.Top = 2
-            Margins.Right = 2
-            Margins.Bottom = 2
+            Left = 17
+            Top = 17
+            Width = 1211
+            Height = 494
+            Margins.Left = 17
+            Margins.Top = 17
+            Margins.Right = 17
+            Margins.Bottom = 17
             Align = alClient
-            BorderStyle = bsNone
-            ColCount = 2
-            DefaultColWidth = 10
-            DefaultRowHeight = 17
-            RowCount = 2
-            GradientEndColor = 15527148
-            Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goThumbTracking]
-            PopupMenu = CommonPopupMenu
+            BevelOuter = bvNone
             TabOrder = 0
-            OnDrawCell = sgPmtTermsDrawCell
-            OnKeyUp = sgPmtTermsKeyUp
-            OnMouseEnter = sgPmtTermsMouseEnter
-            OnMouseWheelDown = sgPmtTermsMouseWheelDown
-            OnMouseWheelUp = sgPmtTermsMouseWheelUp
-            ExplicitWidth = 299
-            ColWidths = (
-              10
-              76)
-            RowHeights = (
-              17
-              17)
+            ExplicitLeft = 0
+            ExplicitTop = 29
+            ExplicitWidth = 290
+            ExplicitHeight = 318
+            object sgPmtTerms: TStringGrid
+              AlignWithMargins = True
+              Left = 2
+              Top = 2
+              Width = 1207
+              Height = 490
+              Margins.Left = 2
+              Margins.Top = 2
+              Margins.Right = 2
+              Margins.Bottom = 2
+              Align = alClient
+              BorderStyle = bsNone
+              ColCount = 2
+              DefaultColWidth = 10
+              DefaultRowHeight = 17
+              RowCount = 2
+              GradientEndColor = 15527148
+              Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goThumbTracking]
+              PopupMenu = CommonPopupMenu
+              TabOrder = 0
+              OnDrawCell = sgPmtTermsDrawCell
+              OnKeyUp = sgPmtTermsKeyUp
+              OnMouseEnter = sgPmtTermsMouseEnter
+              OnMouseWheelDown = sgPmtTermsMouseWheelDown
+              OnMouseWheelUp = sgPmtTermsMouseWheelUp
+              ExplicitWidth = 286
+              ExplicitHeight = 314
+              ColWidths = (
+                10
+                76)
+              RowHeights = (
+                17
+                17)
+            end
           end
         end
-        object PanelGroup3: TPanel
-          AlignWithMargins = True
-          Left = 0
-          Top = 386
-          Width = 290
-          Height = 165
-          Margins.Left = 0
-          Margins.Top = 5
-          Margins.Right = 0
-          Margins.Bottom = 5
-          Align = alClient
-          BevelOuter = bvNone
-          TabOrder = 1
-          ExplicitWidth = 303
-          object sgGroup3: TStringGrid
+        object Page10: TTabSheet
+          Caption = 'Control Status'
+          ImageIndex = 9
+          object PanelControlStatus: TPanel
             AlignWithMargins = True
-            Left = 2
-            Top = 2
-            Width = 286
-            Height = 161
-            Margins.Left = 2
-            Margins.Top = 2
-            Margins.Right = 2
-            Margins.Bottom = 2
+            Left = 17
+            Top = 17
+            Width = 1211
+            Height = 494
+            Margins.Left = 17
+            Margins.Top = 17
+            Margins.Right = 17
+            Margins.Bottom = 17
             Align = alClient
-            BorderStyle = bsNone
-            ColCount = 2
-            DefaultColWidth = 10
-            DefaultRowHeight = 17
-            RowCount = 2
-            GradientEndColor = 15527148
-            Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goThumbTracking]
-            PopupMenu = CommonPopupMenu
+            BevelOuter = bvNone
+            Color = clWhite
+            ParentBackground = False
             TabOrder = 0
-            OnDrawCell = sgGroup3DrawCell
-            OnKeyUp = sgGroup3KeyUp
-            OnMouseEnter = sgGroup3MouseEnter
-            OnMouseWheelDown = sgGroup3MouseWheelDown
-            OnMouseWheelUp = sgGroup3MouseWheelUp
-            ExplicitWidth = 299
-            ColWidths = (
-              10
-              76)
-            RowHeights = (
-              17
-              17)
+            ExplicitLeft = 0
+            ExplicitTop = 5
+            ExplicitWidth = 1245
+            ExplicitHeight = 318
+            object sgControlStatus: TStringGrid
+              AlignWithMargins = True
+              Left = 2
+              Top = 2
+              Width = 1207
+              Height = 490
+              Margins.Left = 2
+              Margins.Top = 2
+              Margins.Right = 2
+              Margins.Bottom = 2
+              Align = alClient
+              BorderStyle = bsNone
+              ColCount = 2
+              DefaultColWidth = 10
+              DefaultRowHeight = 17
+              RowCount = 2
+              GradientEndColor = 15527148
+              Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goThumbTracking]
+              PopupMenu = CommonPopupMenu
+              TabOrder = 0
+              OnDrawCell = sgControlStatusDrawCell
+              OnKeyUp = sgControlStatusKeyUp
+              OnMouseEnter = sgControlStatusMouseEnter
+              OnMouseWheelDown = sgControlStatusMouseWheelDown
+              OnMouseWheelUp = sgControlStatusMouseWheelUp
+              ExplicitWidth = 1241
+              ExplicitHeight = 314
+              ColWidths = (
+                10
+                76)
+              RowHeights = (
+                17
+                17)
+            end
           end
         end
-      end
-      object MidPanel: TPanel
-        AlignWithMargins = True
-        Left = 366
-        Top = 118
-        Width = 290
-        Height = 556
-        Margins.Left = 17
-        Margins.Top = 0
-        Margins.Right = 17
-        Margins.Bottom = 17
-        Align = alRight
-        BevelOuter = bvNone
-        Color = clWhite
-        ParentBackground = False
-        TabOrder = 3
-        object Cap20: TShape
-          AlignWithMargins = True
-          Left = 0
-          Top = 356
-          Width = 290
-          Height = 19
-          Margins.Left = 0
-          Margins.Top = 5
-          Margins.Right = 0
-          Margins.Bottom = 5
-          Align = alTop
-          Brush.Color = 15918295
-          Pen.Color = clSkyBlue
-          ExplicitWidth = 302
-        end
-        object Cap18: TShape
-          AlignWithMargins = True
-          Left = 0
-          Top = 0
-          Width = 290
-          Height = 19
-          Margins.Left = 0
-          Margins.Top = 0
-          Margins.Right = 0
-          Margins.Bottom = 5
-          Align = alTop
-          Brush.Color = 15918295
-          Pen.Color = clSkyBlue
-          ExplicitLeft = 426
-          ExplicitTop = 20
-          ExplicitWidth = 399
-        end
-        object PanelPaidInfo: TPanel
-          AlignWithMargins = True
-          Left = 0
-          Top = 29
-          Width = 290
-          Height = 317
-          Margins.Left = 0
-          Margins.Top = 5
-          Margins.Right = 0
-          Margins.Bottom = 5
-          Align = alTop
-          BevelOuter = bvNone
-          Color = clWhite
-          ParentBackground = False
-          TabOrder = 0
-          ExplicitWidth = 302
-          object sgPaidInfo: TStringGrid
+        object Page3: TTabSheet
+          Caption = 'Paid Info'
+          ImageIndex = 2
+          ExplicitWidth = 1243
+          ExplicitHeight = 189
+          object PanelPaidInfo: TPanel
             AlignWithMargins = True
-            Left = 2
-            Top = 2
-            Width = 286
-            Height = 313
-            Margins.Left = 2
-            Margins.Top = 2
-            Margins.Right = 2
-            Margins.Bottom = 2
+            Left = 17
+            Top = 17
+            Width = 1211
+            Height = 494
+            Margins.Left = 17
+            Margins.Top = 17
+            Margins.Right = 17
+            Margins.Bottom = 17
             Align = alClient
-            BorderStyle = bsNone
-            ColCount = 2
-            DefaultColWidth = 10
-            DefaultRowHeight = 17
-            RowCount = 2
-            GradientEndColor = 15527148
-            Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goThumbTracking]
-            PopupMenu = CommonPopupMenu
+            BevelOuter = bvNone
+            Color = clWhite
+            ParentBackground = False
             TabOrder = 0
-            OnDrawCell = sgPaidInfoDrawCell
-            OnKeyUp = sgPaidInfoKeyUp
-            OnMouseEnter = sgPaidInfoMouseEnter
-            OnMouseWheelDown = sgPaidInfoMouseWheelDown
-            OnMouseWheelUp = sgPaidInfoMouseWheelUp
-            ExplicitWidth = 298
-            ColWidths = (
-              10
-              76)
-            RowHeights = (
-              17
-              17)
+            ExplicitLeft = 0
+            ExplicitTop = 5
+            ExplicitWidth = 1245
+            ExplicitHeight = 317
+            object sgPaidInfo: TStringGrid
+              AlignWithMargins = True
+              Left = 2
+              Top = 2
+              Width = 1207
+              Height = 490
+              Margins.Left = 2
+              Margins.Top = 2
+              Margins.Right = 2
+              Margins.Bottom = 2
+              Align = alClient
+              BorderStyle = bsNone
+              ColCount = 2
+              DefaultColWidth = 10
+              DefaultRowHeight = 17
+              RowCount = 2
+              GradientEndColor = 15527148
+              Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goThumbTracking]
+              PopupMenu = CommonPopupMenu
+              TabOrder = 0
+              OnDrawCell = sgPaidInfoDrawCell
+              OnKeyUp = sgPaidInfoKeyUp
+              OnMouseEnter = sgPaidInfoMouseEnter
+              OnMouseWheelDown = sgPaidInfoMouseWheelDown
+              OnMouseWheelUp = sgPaidInfoMouseWheelUp
+              ExplicitWidth = 1241
+              ExplicitHeight = 313
+              ColWidths = (
+                10
+                76)
+              RowHeights = (
+                17
+                17)
+            end
           end
         end
-        object PanelPerson: TPanel
-          AlignWithMargins = True
-          Left = 0
-          Top = 385
-          Width = 290
-          Height = 166
-          Margins.Left = 0
-          Margins.Top = 5
-          Margins.Right = 0
-          Margins.Bottom = 5
-          Align = alClient
-          BevelOuter = bvNone
-          Color = clWhite
-          ParentBackground = False
-          TabOrder = 1
-          ExplicitWidth = 302
-          object sgPerson: TStringGrid
+        object Page7: TTabSheet
+          Caption = 'Person Responsible'
+          ImageIndex = 6
+          ExplicitWidth = 1243
+          ExplicitHeight = 189
+          object PanelPersonResp: TPanel
             AlignWithMargins = True
-            Left = 2
-            Top = 2
-            Width = 286
-            Height = 162
-            Margins.Left = 2
-            Margins.Top = 2
-            Margins.Right = 2
-            Margins.Bottom = 2
+            Left = 17
+            Top = 17
+            Width = 1211
+            Height = 494
+            Margins.Left = 17
+            Margins.Top = 17
+            Margins.Right = 17
+            Margins.Bottom = 17
             Align = alClient
-            BorderStyle = bsNone
-            ColCount = 2
-            DefaultColWidth = 10
-            DefaultRowHeight = 17
-            RowCount = 2
-            GradientEndColor = 15527148
-            Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goThumbTracking]
-            PopupMenu = CommonPopupMenu
+            BevelOuter = bvNone
             TabOrder = 0
-            OnDrawCell = sgPersonDrawCell
-            OnKeyUp = sgPersonKeyUp
-            OnMouseEnter = sgPersonMouseEnter
-            OnMouseWheelDown = sgPersonMouseWheelDown
-            OnMouseWheelUp = sgPersonMouseWheelUp
-            ExplicitWidth = 298
-            ColWidths = (
-              10
-              76)
-            RowHeights = (
-              17
-              17)
+            ExplicitLeft = 25
+            ExplicitTop = 25
+            object sgPersonResp: TStringGrid
+              AlignWithMargins = True
+              Left = 2
+              Top = 2
+              Width = 1207
+              Height = 490
+              Margins.Left = 2
+              Margins.Top = 2
+              Margins.Right = 2
+              Margins.Bottom = 2
+              Align = alClient
+              BorderStyle = bsNone
+              ColCount = 2
+              DefaultColWidth = 10
+              DefaultRowHeight = 17
+              RowCount = 2
+              GradientEndColor = 15527148
+              Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
+              PopupMenu = CommonPopupMenu
+              TabOrder = 0
+              OnDrawCell = sgPersonRespDrawCell
+              OnKeyUp = sgPersonRespKeyUp
+              OnMouseEnter = sgPersonRespMouseEnter
+              OnMouseWheelDown = sgPersonRespMouseWheelDown
+              OnMouseWheelUp = sgPersonRespMouseWheelUp
+              ColWidths = (
+                10
+                76)
+              RowHeights = (
+                17
+                17)
+            end
           end
         end
-      end
-      object MostRightPanel: TPanel
-        AlignWithMargins = True
-        Left = 980
-        Top = 118
-        Width = 290
-        Height = 556
-        Margins.Left = 0
-        Margins.Top = 0
-        Margins.Right = 17
-        Margins.Bottom = 17
-        Align = alRight
-        BevelOuter = bvNone
-        Color = clWhite
-        ParentBackground = False
-        TabOrder = 4
-        ExplicitLeft = 967
-        object Cap25: TShape
-          AlignWithMargins = True
-          Left = 0
-          Top = 0
-          Width = 290
-          Height = 19
-          Margins.Left = 0
-          Margins.Top = 0
-          Margins.Right = 0
-          Margins.Bottom = 5
-          Align = alTop
-          Brush.Color = 15918295
-          Pen.Color = clSkyBlue
-          ExplicitLeft = 14
-          ExplicitTop = 20
-          ExplicitWidth = 581
-        end
-        object Cap26: TShape
-          AlignWithMargins = True
-          Left = 0
-          Top = 357
-          Width = 290
-          Height = 19
-          Margins.Left = 0
-          Margins.Top = 5
-          Margins.Right = 0
-          Margins.Bottom = 5
-          Align = alTop
-          Brush.Color = 15918295
-          Pen.Color = clSkyBlue
-          ExplicitTop = 356
-          ExplicitWidth = 297
-        end
-        object PanelEmpty: TPanel
-          AlignWithMargins = True
-          Left = 0
-          Top = 386
-          Width = 290
-          Height = 165
-          Margins.Left = 0
-          Margins.Top = 5
-          Margins.Right = 0
-          Margins.Bottom = 5
-          Align = alClient
-          BevelOuter = bvNone
-          Color = clWhite
-          ParentBackground = False
-          TabOrder = 0
-          ExplicitWidth = 303
-          object sgEmpty: TStringGrid
+        object Page6: TTabSheet
+          Caption = 'Sales Responsible'
+          ImageIndex = 5
+          ExplicitWidth = 1243
+          ExplicitHeight = 189
+          object PanelSalesResp: TPanel
             AlignWithMargins = True
-            Left = 2
-            Top = 2
-            Width = 286
-            Height = 161
-            Margins.Left = 2
-            Margins.Top = 2
-            Margins.Right = 2
-            Margins.Bottom = 2
+            Left = 17
+            Top = 17
+            Width = 1211
+            Height = 494
+            Margins.Left = 17
+            Margins.Top = 17
+            Margins.Right = 17
+            Margins.Bottom = 17
             Align = alClient
-            BorderStyle = bsNone
-            ColCount = 2
-            DefaultColWidth = 10
-            DefaultRowHeight = 17
-            RowCount = 2
-            GradientEndColor = 15527148
-            Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goThumbTracking]
-            PopupMenu = CommonPopupMenu
+            BevelOuter = bvNone
             TabOrder = 0
-            Visible = False
-            OnDrawCell = sgGroup3DrawCell
-            OnKeyUp = sgGroup3KeyUp
-            OnMouseEnter = sgGroup3MouseEnter
-            OnMouseWheelDown = sgGroup3MouseWheelDown
-            OnMouseWheelUp = sgGroup3MouseWheelUp
-            ExplicitWidth = 284
-            ExplicitHeight = 487
-            ColWidths = (
-              10
-              76)
-            RowHeights = (
-              17
-              17)
+            ExplicitLeft = 25
+            ExplicitTop = 25
+            object sgSalesResp: TStringGrid
+              AlignWithMargins = True
+              Left = 2
+              Top = 2
+              Width = 1207
+              Height = 490
+              Margins.Left = 2
+              Margins.Top = 2
+              Margins.Right = 2
+              Margins.Bottom = 2
+              Align = alClient
+              BorderStyle = bsNone
+              ColCount = 2
+              DefaultColWidth = 10
+              DefaultRowHeight = 17
+              RowCount = 2
+              GradientEndColor = 15527148
+              Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
+              PopupMenu = CommonPopupMenu
+              TabOrder = 0
+              OnDrawCell = sgSalesRespDrawCell
+              OnKeyUp = sgSalesRespKeyUp
+              OnMouseEnter = sgSalesRespMouseEnter
+              OnMouseWheelDown = sgSalesRespMouseWheelDown
+              OnMouseWheelUp = sgSalesRespMouseWheelUp
+              ColWidths = (
+                10
+                76)
+              RowHeights = (
+                17
+                17)
+            end
           end
         end
-        object PanelControlStatus: TPanel
-          AlignWithMargins = True
-          Left = 0
-          Top = 29
-          Width = 290
-          Height = 318
-          Margins.Left = 0
-          Margins.Top = 5
-          Margins.Right = 0
-          Margins.Bottom = 5
-          Align = alTop
-          BevelOuter = bvNone
-          Color = clWhite
-          ParentBackground = False
-          TabOrder = 1
-          ExplicitWidth = 303
-          object sgControlStatus: TStringGrid
+        object Page9: TTabSheet
+          Caption = 'Account Type'
+          ImageIndex = 8
+          ExplicitLeft = 2
+          ExplicitTop = 0
+          ExplicitWidth = 1243
+          ExplicitHeight = 189
+          object PanelAccountType: TPanel
             AlignWithMargins = True
-            Left = 2
-            Top = 2
-            Width = 286
-            Height = 314
-            Margins.Left = 2
-            Margins.Top = 2
-            Margins.Right = 2
-            Margins.Bottom = 2
+            Left = 17
+            Top = 17
+            Width = 1211
+            Height = 494
+            Margins.Left = 17
+            Margins.Top = 17
+            Margins.Right = 17
+            Margins.Bottom = 17
             Align = alClient
-            BorderStyle = bsNone
-            ColCount = 2
-            DefaultColWidth = 10
-            DefaultRowHeight = 17
-            RowCount = 2
-            GradientEndColor = 15527148
-            Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goThumbTracking]
-            PopupMenu = CommonPopupMenu
+            BevelOuter = bvNone
             TabOrder = 0
-            OnDrawCell = sgControlStatusDrawCell
-            OnKeyUp = sgControlStatusKeyUp
-            OnMouseEnter = sgControlStatusMouseEnter
-            OnMouseWheelDown = sgControlStatusMouseWheelDown
-            OnMouseWheelUp = sgControlStatusMouseWheelUp
-            ExplicitWidth = 284
-            ColWidths = (
-              10
-              76)
-            RowHeights = (
-              17
-              17)
+            ExplicitLeft = 25
+            ExplicitTop = 25
+            object sgAccountType: TStringGrid
+              AlignWithMargins = True
+              Left = 2
+              Top = 2
+              Width = 1207
+              Height = 490
+              Margins.Left = 2
+              Margins.Top = 2
+              Margins.Right = 2
+              Margins.Bottom = 2
+              Align = alClient
+              BorderStyle = bsNone
+              ColCount = 2
+              DefaultColWidth = 10
+              DefaultRowHeight = 17
+              RowCount = 2
+              GradientEndColor = 15527148
+              Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
+              PopupMenu = CommonPopupMenu
+              TabOrder = 0
+              OnDrawCell = sgAccountTypeDrawCell
+              OnKeyUp = sgAccountTypeKeyUp
+              OnMouseEnter = sgAccountTypeMouseEnter
+              OnMouseWheelDown = sgAccountTypeMouseWheelDown
+              OnMouseWheelUp = sgAccountTypeMouseWheelUp
+              ColWidths = (
+                10
+                76)
+              RowHeights = (
+                17
+                17)
+            end
+          end
+        end
+        object Page8: TTabSheet
+          Caption = 'Customer Group'
+          ImageIndex = 7
+          ExplicitWidth = 1243
+          ExplicitHeight = 189
+          object PanelCustomerGr: TPanel
+            AlignWithMargins = True
+            Left = 17
+            Top = 17
+            Width = 1211
+            Height = 494
+            Margins.Left = 17
+            Margins.Top = 17
+            Margins.Right = 17
+            Margins.Bottom = 17
+            Align = alClient
+            BevelOuter = bvNone
+            TabOrder = 0
+            ExplicitLeft = 25
+            ExplicitTop = 25
+            object sgCustomerGr: TStringGrid
+              AlignWithMargins = True
+              Left = 2
+              Top = 2
+              Width = 1207
+              Height = 490
+              Margins.Left = 2
+              Margins.Top = 2
+              Margins.Right = 2
+              Margins.Bottom = 2
+              Align = alClient
+              BorderStyle = bsNone
+              ColCount = 2
+              DefaultColWidth = 10
+              DefaultRowHeight = 17
+              RowCount = 2
+              GradientEndColor = 15527148
+              Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
+              PopupMenu = CommonPopupMenu
+              TabOrder = 0
+              OnDrawCell = sgCustomerGrDrawCell
+              OnKeyUp = sgCustomerGrKeyUp
+              OnMouseEnter = sgCustomerGrMouseEnter
+              OnMouseWheelDown = sgCustomerGrMouseWheelDown
+              OnMouseWheelUp = sgCustomerGrMouseWheelUp
+              ColWidths = (
+                10
+                76)
+              RowHeights = (
+                17
+                17)
+            end
+          end
+        end
+        object Page4: TTabSheet
+          Caption = 'Person'
+          ImageIndex = 3
+          ExplicitWidth = 1243
+          ExplicitHeight = 189
+          object PanelPerson: TPanel
+            AlignWithMargins = True
+            Left = 17
+            Top = 17
+            Width = 1211
+            Height = 494
+            Margins.Left = 17
+            Margins.Top = 17
+            Margins.Right = 17
+            Margins.Bottom = 17
+            Align = alClient
+            BevelOuter = bvNone
+            Color = clWhite
+            ParentBackground = False
+            TabOrder = 0
+            ExplicitLeft = 0
+            ExplicitTop = 58
+            ExplicitWidth = 290
+            ExplicitHeight = 106
+            object sgPerson: TStringGrid
+              AlignWithMargins = True
+              Left = 2
+              Top = 2
+              Width = 1207
+              Height = 490
+              Margins.Left = 2
+              Margins.Top = 2
+              Margins.Right = 2
+              Margins.Bottom = 2
+              Align = alClient
+              BorderStyle = bsNone
+              ColCount = 2
+              DefaultColWidth = 10
+              DefaultRowHeight = 17
+              RowCount = 2
+              GradientEndColor = 15527148
+              Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goThumbTracking]
+              PopupMenu = CommonPopupMenu
+              TabOrder = 0
+              OnDrawCell = sgPersonDrawCell
+              OnKeyUp = sgPersonKeyUp
+              OnMouseEnter = sgPersonMouseEnter
+              OnMouseWheelDown = sgPersonMouseWheelDown
+              OnMouseWheelUp = sgPersonMouseWheelUp
+              ExplicitWidth = 286
+              ExplicitHeight = 102
+              ColWidths = (
+                10
+                76)
+              RowHeights = (
+                17
+                17)
+            end
+          end
+        end
+        object Page5: TTabSheet
+          Caption = 'Group3'
+          ImageIndex = 4
+          ExplicitWidth = 1243
+          ExplicitHeight = 189
+          object PanelGroup3: TPanel
+            AlignWithMargins = True
+            Left = 17
+            Top = 17
+            Width = 1211
+            Height = 494
+            Margins.Left = 17
+            Margins.Top = 17
+            Margins.Right = 17
+            Margins.Bottom = 17
+            Align = alClient
+            BevelOuter = bvNone
+            TabOrder = 0
+            ExplicitLeft = 0
+            ExplicitTop = 5
+            ExplicitWidth = 1245
+            ExplicitHeight = 518
+            object sgGroup3: TStringGrid
+              AlignWithMargins = True
+              Left = 2
+              Top = 2
+              Width = 1207
+              Height = 490
+              Margins.Left = 2
+              Margins.Top = 2
+              Margins.Right = 2
+              Margins.Bottom = 2
+              Align = alClient
+              BorderStyle = bsNone
+              ColCount = 2
+              DefaultColWidth = 10
+              DefaultRowHeight = 17
+              RowCount = 2
+              GradientEndColor = 15527148
+              Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goThumbTracking]
+              PopupMenu = CommonPopupMenu
+              TabOrder = 0
+              OnDrawCell = sgGroup3DrawCell
+              OnKeyUp = sgGroup3KeyUp
+              OnMouseEnter = sgGroup3MouseEnter
+              OnMouseWheelDown = sgGroup3MouseWheelDown
+              OnMouseWheelUp = sgGroup3MouseWheelUp
+              ExplicitWidth = 1241
+              ExplicitHeight = 514
+              ColWidths = (
+                10
+                76)
+              RowHeights = (
+                17
+                17)
+            end
           end
         end
       end

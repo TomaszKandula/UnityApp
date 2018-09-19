@@ -141,6 +141,8 @@
         </DelphiCompile>
         <DCCReference Include="Model\Model.pas"/>
         <DCCReference Include="Model\SQL.pas"/>
+        <DCCReference Include="Extensions\Arrays.pas"/>
+        <DCCReference Include="Extensions\InterposerClasses.pas"/>
         <DCCReference Include="Logic\AgeView.pas"/>
         <DCCReference Include="Logic\Database.pas"/>
         <DCCReference Include="Logic\Mailer.pas"/>
@@ -151,8 +153,6 @@
         <DCCReference Include="Logic\Internet.pas"/>
         <DCCReference Include="Logic\ThreadUtilities.pas"/>
         <DCCReference Include="Logic\EventLogger.pas"/>
-        <DCCReference Include="Extensions\Arrays.pas"/>
-        <DCCReference Include="Extensions\InterposerClasses.pas"/>
         <DCCReference Include="View\About.pas">
             <Form>AboutForm</Form>
         </DCCReference>

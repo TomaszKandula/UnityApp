@@ -75,7 +75,7 @@ const
     GridImgFile :  string    = 'Unity.img';        // Application custom image(s)
     ReleaseFile :  string    = 'Release.zip';      // Release package
     ManifestFile:  string    = 'Unity.manifest';   // Manifest file on the server
-    CurrentMutex:  PWideChar = 'UNITY_10115';      // Mutex value, increase it with each release
+    CurrentMutex:  PWideChar = 'UNITY_10125';      // Mutex value, increase it with each release
 
     // --------------------------------------------------------------------------------------------------------------------------------------- SPLASH SCREEN //
 
@@ -487,29 +487,33 @@ const
 
     // ------------------------------------------------------------------------------------------------------------------------- MAPPED TABLES FROM DATABASE //
 
-    TblFxRates         = schCustomer + '.' + 'FxRates';
-    TblDaily           = schCustomer + '.' + 'DailyComment';
-    TblGeneral         = schCustomer + '.' + 'GeneralComment';
-    TblCompany         = schCustomer + '.' + 'CompanyData';
-    TblManagers        = schCustomer + '.' + 'Managers';
-    TblTeamleaders     = schCustomer + '.' + 'TeamLeaders';
-    TblControlStatus   = schCustomer + '.' + 'ControlStatus';
-    TblReminderLayouts = schCustomer + '.' + 'ReminderLayouts';
-    TblInvoices        = schCustomer + '.' + 'TrackerInvoices';
-    TblTracker         = schCustomer + '.' + 'TrackerData';
-    TblAddressbook     = schCustomer + '.' + 'AddressBook';
-    TblSnapshots       = schCustomer + '.' + 'Snapshots';
-    TblPaidinfo        = schCustomer + '.' + 'PaidInfo';
-    TblGroups          = schCustomer + '.' + 'Groups';
-    TblUAC             = schCustomer + '.' + 'UAC';
-    TblCurrencies      = schCommon   + '.' + 'Currencies';
-    TblAzureJobsReport = schCommon   + '.' + 'AzureJobsReport';
-    TblUnityEventLogs  = schCommon   + '.' + 'UnityEventLogs';
-    TblSSISMaster      = schErp      + '.' + 'SSISMaster';
-    TblOpenitems       = schErp      + '.' + 'OpenItems';
-    TblGroup3          = schErp      + '.' + 'Group3';
-    TblPmtterms        = schErp      + '.' + 'PaymentTerms';
-    TblPerson          = schErp      + '.' + 'Person';
+    TblFxRates           = schCustomer + '.' + 'FxRates';
+    TblDaily             = schCustomer + '.' + 'DailyComment';
+    TblGeneral           = schCustomer + '.' + 'GeneralComment';
+    TblCompany           = schCustomer + '.' + 'CompanyData';
+    TblManagers          = schCustomer + '.' + 'Managers';
+    TblTeamleaders       = schCustomer + '.' + 'TeamLeaders';
+    TblControlStatus     = schCustomer + '.' + 'ControlStatus';
+    TblReminderLayouts   = schCustomer + '.' + 'ReminderLayouts';
+    TblInvoices          = schCustomer + '.' + 'TrackerInvoices';
+    TblTracker           = schCustomer + '.' + 'TrackerData';
+    TblAddressbook       = schCustomer + '.' + 'AddressBook';
+    TblSnapshots         = schCustomer + '.' + 'Snapshots';
+    TblPaidinfo          = schCustomer + '.' + 'PaidInfo';
+    TblGroups            = schCustomer + '.' + 'Groups';
+    TblUAC               = schCustomer + '.' + 'UAC';
+    TblCurrencies        = schCommon   + '.' + 'Currencies';
+    TblAzureJobsReport   = schCommon   + '.' + 'AzureJobsReport';
+    TblUnityEventLogs    = schCommon   + '.' + 'UnityEventLogs';
+    TblSSISMaster        = schErp      + '.' + 'SSISMaster';
+    TblOpenitems         = schErp      + '.' + 'OpenItems';
+    TblGroup3            = schErp      + '.' + 'Group3';
+    TblPmtterms          = schErp      + '.' + 'PaymentTerms';
+    TblPerson            = schErp      + '.' + 'Person';
+    TblSalesResponsible  = schErp      + '.' + 'SalesResponsible';
+    TblCustomerGroup     = schErp      + '.' + 'CustomerGroup';
+    TblPersonResponsible = schErp      + '.' + 'PersonResponsible';
+    TblAccountType       = schErp      + '.' + 'AccountType';
 
     // TEMPLATES ------------------------------------------------------------------------------------------------------------------------------------------- //
 
@@ -526,8 +530,8 @@ const
                      '  <th class="col2">Invoice Date:</th>'  + #13#10 +
                      '  <th class="col3">Due date:</th>'      + #13#10 +
                      '  <th class="col4">Currency:</th>'      + #13#10 +
-                     '  <th class="col5">Amount:</th>'        + #13#10 +
-                     '  <th class="col6">O/S Amount:</th>'    + #13#10 +
+                     '  <th class="col5-h">Amount:</th>'      + #13#10 +
+                     '  <th class="col6-h">O/S Amount:</th>'  + #13#10 +
                      '  <th class="col7">Status:</th>'        + #13#10 +
                      '</tr>'                                  + #13#10 +
                      '  <!-- ROWS WITH DATA -->'              + #13#10 +

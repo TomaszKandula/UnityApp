@@ -10,52 +10,52 @@ program Unity;
 {$SetPEFlags $0020}
 
 uses
-  Forms,
-  Windows,
-  Messages,
-  Classes,
-  SysUtils,
-  StrUtils,
-  StdCtrls,
-  ShellApi,
-  IOUtils,
-  INIFiles,
-  CRC32u,
-  uCEFApplication,
-  System.Types,
-  System.Zip,
-  Model in 'Model\Model.pas',
-  SQL in 'Model\SQL.pas',
-  AgeView in 'Logic\AgeView.pas',
-  Database in 'Logic\Database.pas',
-  Mailer in 'Logic\Mailer.pas',
-  Settings in 'Logic\Settings.pas',
-  Transactions in 'Logic\Transactions.pas',
-  UAC in 'Logic\UAC.pas',
-  Worker in 'Logic\Worker.pas',
-  Internet in 'Logic\Internet.pas',
-  ThreadUtilities in 'Logic\ThreadUtilities.pas',
-  EventLogger in 'Logic\EventLogger.pas',
-  Arrays in 'Extensions\Arrays.pas',
-  InterposerClasses in 'Extensions\InterposerClasses.pas',
-  About in 'View\About.pas' {AboutForm},
-  Actions in 'View\Actions.pas' {ActionsForm},
-  Calendar in 'View\Calendar.pas' {CalendarForm},
-  Colors in 'View\Colors.pas' {ColorsForm},
-  EventLog in 'View\EventLog.pas' {EventForm},
-  Filter in 'View\Filter.pas' {FilterForm},
-  Invoices in 'View\Invoices.pas' {InvoicesForm},
-  Main in 'View\Main.pas' {MainForm},
-  PhoneList in 'View\PhoneList.pas' {PhoneListForm},
-  SendFeedback in 'View\SendFeedback.pas' {ReportForm},
-  AVSearch in 'View\AVSearch.pas' {SearchForm},
-  Send in 'View\Send.pas' {SendForm},
-  Splash in 'View\Splash.pas' {SplashForm},
-  Tracker in 'View\Tracker.pas' {TrackerForm},
-  Update in 'View\Update.pas' {UpdateForm},
-  MassMailer in 'View\MassMailer.pas' {ViewMailerForm},
-  ABSearch in 'View\ABSearch.pas' {ViewSearchForm},
-  Await in 'View\Await.pas' {AwaitForm};
+    Forms,
+    Windows,
+    Messages,
+    Classes,
+    SysUtils,
+    StrUtils,
+    StdCtrls,
+    ShellApi,
+    IOUtils,
+    INIFiles,
+    CRC32u,
+    uCEFApplication,
+    System.Types,
+    System.Zip,
+    Model in 'Model\Model.pas',
+    SQL in 'Model\SQL.pas',
+    Arrays in 'Extensions\Arrays.pas',
+    InterposerClasses in 'Extensions\InterposerClasses.pas',
+    AgeView in 'Logic\AgeView.pas',
+    Database in 'Logic\Database.pas',
+    Mailer in 'Logic\Mailer.pas',
+    Settings in 'Logic\Settings.pas',
+    Transactions in 'Logic\Transactions.pas',
+    UAC in 'Logic\UAC.pas',
+    Worker in 'Logic\Worker.pas',
+    Internet in 'Logic\Internet.pas',
+    ThreadUtilities in 'Logic\ThreadUtilities.pas',
+    EventLogger in 'Logic\EventLogger.pas',
+    About in 'View\About.pas' {AboutForm},
+    Actions in 'View\Actions.pas' {ActionsForm},
+    Calendar in 'View\Calendar.pas' {CalendarForm},
+    Colors in 'View\Colors.pas' {ColorsForm},
+    EventLog in 'View\EventLog.pas' {EventForm},
+    Filter in 'View\Filter.pas' {FilterForm},
+    Invoices in 'View\Invoices.pas' {InvoicesForm},
+    Main in 'View\Main.pas' {MainForm},
+    PhoneList in 'View\PhoneList.pas' {PhoneListForm},
+    SendFeedback in 'View\SendFeedback.pas' {ReportForm},
+    AVSearch in 'View\AVSearch.pas' {SearchForm},
+    Send in 'View\Send.pas' {SendForm},
+    Splash in 'View\Splash.pas' {SplashForm},
+    Tracker in 'View\Tracker.pas' {TrackerForm},
+    Update in 'View\Update.pas' {UpdateForm},
+    MassMailer in 'View\MassMailer.pas' {ViewMailerForm},
+    ABSearch in 'View\ABSearch.pas' {ViewSearchForm},
+    Await in 'View\Await.pas' {AwaitForm};
 
 type
     DWord = 0..$FFFFFFFF;
@@ -85,6 +85,7 @@ var
     PathReleaseMan:   string;
     PathEventLog:     string;
     PathAppDir:       string;
+    PackageDir:       string;
     WinUserName:      string;
     Manifest:         string;
     RegSettings:      TFormatSettings;
@@ -211,7 +212,7 @@ begin
                     RenameFile(FullPath, Zipped + '.del');
 
                 // Extract and create any folder if missing
-                    ZipRead.Extract(iCNT, DestDir, True);
+                ZipRead.Extract(iCNT, DestDir, True);
 
                 // Update screen
                 UpdateForm.Progress.Progress:=Trunc( ( (iCNT + 1) / ZipRead.FileCount ) * 100 );
@@ -389,6 +390,7 @@ begin
         PathReleaseMan :=Settings.GetReleaseManURL;
         PathEventLog   :=Settings.GetPathEventLog;
         PathAppDir     :=Settings.GetAppDir;
+        PackageDir     :=Settings.GetPackageDir;
         WinUserName    :=Settings.GetWinUserName;
     end;
 
@@ -462,11 +464,13 @@ begin
         UpdateForm.Update;
 
         // Get package from website
-        if Connection.Download(PathReleasePak, Settings.GetPackageDir + ReleaseFile) then
+        if Connection.Download(PathReleasePak, PackageDir + ReleaseFile) then
         begin
+            Settings:=nil;
             // Unzip the content, update settings file and execute new release
-            if UnzippReleaseFile(Settings.GetPackageDir + ReleaseFile, PathAppDir, PathEventLog) then
+            if UnzippReleaseFile(PackageDir + ReleaseFile, PathAppDir, PathEventLog) then
             begin
+                Settings:=TSettings.Create;
                 Settings.ReleaseDateTime:=Now;
                 Settings.ReleaseNumber:=StrToInt(GetManifestValue('Release', Manifest));
                 ShellExecute(Application.Handle, seOpen, PChar(Application.ExeName), nil, nil, SW_SHOWNORMAL);

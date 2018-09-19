@@ -184,17 +184,9 @@ type
         txtInfo1: TLabel;
         txtInfo3: TLabel;
         txtInfo2: TLabel;
-        Cap16: TShape;
-        Cap17: TShape;
-        Cap18: TShape;
         CSVExport: TSaveDialog;
         CSVImport: TOpenDialog;
-        Cap19: TShape;
-        Cap20: TShape;
-        LeftPanel: TPanel;
         ContentPanel7: TPanel;
-        RightPanel: TPanel;
-        MidPanel: TPanel;
         ContentPanel6: TPanel;
         ContentPanel1: TPanel;
         ContentPanel: TPanel;
@@ -428,13 +420,27 @@ type
         txtDebtorsReport: TLabel;
         txtControlStatusReport: TLabel;
         imgHideBar: TImage;
-        MostRightPanel: TPanel;
-        Cap25: TShape;
-        Cap26: TShape;
-        PanelEmpty: TPanel;
-        sgEmpty: TStringGrid;
         PanelControlStatus: TPanel;
         sgControlStatus: TStringGrid;
+    Tables: TPageControl;
+    Page1: TTabSheet;
+    Page2: TTabSheet;
+    Page3: TTabSheet;
+    Page4: TTabSheet;
+    Page5: TTabSheet;
+    Page6: TTabSheet;
+    Page7: TTabSheet;
+    Page8: TTabSheet;
+    Page9: TTabSheet;
+    Page10: TTabSheet;
+    PanelPersonResp: TPanel;
+    sgPersonResp: TStringGrid;
+    PanelSalesResp: TPanel;
+    sgSalesResp: TStringGrid;
+    PanelAccountType: TPanel;
+    sgAccountType: TStringGrid;
+    PanelCustomerGr: TPanel;
+    sgCustomerGr: TStringGrid;
         procedure FormCreate(Sender: TObject);
         procedure FormResize(Sender: TObject);
         procedure FormShow(Sender: TObject);
@@ -694,6 +700,26 @@ type
         procedure sgControlStatusMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure sgControlStatusMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure sgControlStatusDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+    procedure sgAccountTypeDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+    procedure sgPersonRespDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+    procedure sgSalesRespDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+    procedure sgCustomerGrDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+    procedure sgPersonRespKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure sgSalesRespKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure sgAccountTypeKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure sgCustomerGrKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure sgPersonRespMouseEnter(Sender: TObject);
+    procedure sgSalesRespMouseEnter(Sender: TObject);
+    procedure sgAccountTypeMouseEnter(Sender: TObject);
+    procedure sgCustomerGrMouseEnter(Sender: TObject);
+    procedure sgPersonRespMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+    procedure sgPersonRespMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+    procedure sgSalesRespMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+    procedure sgSalesRespMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+    procedure sgAccountTypeMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+    procedure sgAccountTypeMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+    procedure sgCustomerGrMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+    procedure sgCustomerGrMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
     private
         var pAllowClose:    boolean;
         var pStartTime:     TTime;
@@ -1589,6 +1615,10 @@ begin
     PanelSettingsValues.PanelBorders  (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
     PanelUAC.PanelBorders             (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
     PanelGroups.PanelBorders          (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+    PanelSalesResp.PanelBorders       (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+    PanelPersonResp.PanelBorders      (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+    PanelCustomerGr.PanelBorders      (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+    PanelAccountType.PanelBorders     (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
 end;
 
 /// <summary>
@@ -1610,6 +1640,10 @@ begin
     sgPmtTerms.SetColWidth      (10, 30, 400);
     sgGroups.SetColWidth        (10, 20, 400);
     sgUAC.SetColWidth           (10, 20, 400);
+    sgSalesResp.SetColWidth     (10, 20, 400);
+    sgPersonResp.SetColWidth    (10, 20, 400);
+    sgCustomerGr.SetColWidth    (10, 20, 400);
+    sgAccountType.SetColWidth   (10, 20, 400);
 end;
 
 /// <summary>
@@ -1632,6 +1666,10 @@ begin
     sgPmtTerms.SetRowHeight      (sgRowHeight, 25);
     sgGroups.SetRowHeight        (sgRowHeight, 25);
     sgUAC.SetRowHeight           (sgRowHeight, 25);
+    sgSalesResp.SetRowHeight     (sgRowHeight, 25);
+    sgPersonResp.SetRowHeight    (sgRowHeight, 25);
+    sgAccountType.SetRowHeight   (sgRowHeight, 25);
+    sgCustomerGr.SetRowHeight    (sgRowHeight, 25);
 end;
 
 /// <summary>
@@ -1654,6 +1692,10 @@ begin
     sgListValue.AutoThumbSize;
     sgUAC.AutoThumbSize;
     sgGroups.AutoThumbSize;
+    sgSalesResp.AutoThumbSize;
+    sgPersonResp.AutoThumbSize;
+    sgAccountType.AutoThumbSize;
+    sgCustomerGr.AutoThumbSize;
 end;
 
 /// <summary>
@@ -1676,6 +1718,10 @@ begin
     sgListValue.FHideFocusRect     :=True;
     sgUAC.FHideFocusRect           :=True;
     sgGroups.FHideFocusRect        :=True;
+    sgSalesResp.FHideFocusRect     :=True;
+    sgPersonResp.FHideFocusRect    :=True;
+    sgAccountType.FHideFocusRect   :=True;
+    sgCustomerGr.FHideFocusRect    :=True;
 end;
 
 /// <summary>
@@ -1953,12 +1999,6 @@ begin
     /// </summary>
 
     Cap15.ShapeText(10, 1, Settings.GetStringValue(TabSheetsCaps, 'TS7TXT01', 'EMPTY'), [fsBold]);
-    Cap16.ShapeText(10, 1, Settings.GetStringValue(TabSheetsCaps, 'TS7TXT02', 'EMPTY'), [fsBold]);
-    Cap17.ShapeText(10, 1, Settings.GetStringValue(TabSheetsCaps, 'TS7TXT03', 'EMPTY'), [fsBold]);
-    Cap18.ShapeText(10, 1, Settings.GetStringValue(TabSheetsCaps, 'TS7TXT04', 'EMPTY'), [fsBold]);
-    Cap19.ShapeText(10, 1, Settings.GetStringValue(TabSheetsCaps, 'TS7TXT05', 'EMPTY'), [fsBold]);
-    Cap20.ShapeText(10, 1, Settings.GetStringValue(TabSheetsCaps, 'TS7TXT06', 'EMPTY'), [fsBold]);
-    Cap25.ShapeText(10, 1, Settings.GetStringValue(TabSheetsCaps, 'TS7TXT07', 'EMPTY'), [fsBold]);
 
     /// <summary>
     ///     Settings captions.
@@ -2097,11 +2137,16 @@ begin
         TCompany.DIVISIONS,
         ORDER + TCompany.CO_CODE + ASC
     );
-    TTGeneralTables.Create(TblPmtterms,      sgPmtTerms);
-    TTGeneralTables.Create(TblPaidinfo,      sgPaidInfo);
-    TTGeneralTables.Create(TblGroup3,        sgGroup3);
-    TTGeneralTables.Create(TblPerson,        sgPerson);
-    TTGeneralTables.Create(TblControlStatus, sgCOntrolStatus);
+
+    TTGeneralTables.Create(TblPmtterms,         sgPmtTerms);
+    TTGeneralTables.Create(TblPaidinfo,         sgPaidInfo);
+    TTGeneralTables.Create(TblGroup3,           sgGroup3);
+    TTGeneralTables.Create(TblPerson,           sgPerson);
+    TTGeneralTables.Create(TblControlStatus,    sgCOntrolStatus);
+    TTGeneralTables.Create(TblSalesResponsible, sgSalesResp);
+    TTGeneralTables.Create(TblPersonResponsible,sgPersonResp);
+    TTGeneralTables.Create(TblAccountType,      sgAccountType);
+    TTGeneralTables.Create(TblCustomerGroup,    sgCustomerGr);
 
     // ------------------------------------------------------------------------------------------------------------------------------------------- FINISHING //
     OnCreateJob(spFinishing);
@@ -2924,6 +2969,7 @@ begin
                 sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUID, 1, 1), iCNT],
                 strNULL,
                 SPACE,
+                strNULL,
                 strNULL,
                 strNULL,
                 False
@@ -3905,6 +3951,26 @@ begin
     sgControlStatus.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
 end;
 
+procedure TMainForm.sgAccountTypeDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+begin
+    sgAccountType.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
+end;
+
+procedure TMainForm.sgPersonRespDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+begin
+    sgPersonResp.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
+end;
+
+procedure TMainForm.sgSalesRespDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+begin
+    sgSalesResp.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
+end;
+
+procedure TMainForm.sgCustomerGrDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+begin
+    sgCustomerGr.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
+end;
+
 
 // ------------------------------------------------------------------------------------------------------------------------ SETTING PANEL STRING GRID EVENTS //
 
@@ -4082,6 +4148,30 @@ begin
         sgControlStatus.CopyCutPaste(adCopy);
 end;
 
+procedure TMainForm.sgPersonRespKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+    if (Key = 67) and (Shift = [ssCtrl]) then
+        sgPersonResp.CopyCutPaste(adCopy);
+end;
+
+procedure TMainForm.sgSalesRespKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+    if (Key = 67) and (Shift = [ssCtrl]) then
+        sgSalesResp.CopyCutPaste(adCopy);
+end;
+
+procedure TMainForm.sgAccountTypeKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+    if (Key = 67) and (Shift = [ssCtrl]) then
+        sgAccountType.CopyCutPaste(adCopy);
+end;
+
+procedure TMainForm.sgCustomerGrKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+    if (Key = 67) and (Shift = [ssCtrl]) then
+        sgCustomerGr.CopyCutPaste(adCopy);
+end;
+
 /// <summary>
 ///     Edit selected age view columns.
 /// </summary>
@@ -4093,6 +4183,7 @@ procedure TMainForm.sgAgeViewKeyDown(Sender: TObject; var Key: Word; Shift: TShi
     const
         ctFree1    = 0;
         ctFree2    = 1;
+        ctFree3    = 3;
         ctFollowUp = 2;
 
     // Nested methods
@@ -4100,9 +4191,10 @@ procedure TMainForm.sgAgeViewKeyDown(Sender: TObject; var Key: Word; Shift: TShi
     // Modify data for given column
     procedure ModifyCell(CUIDRef: integer; ColumnType: integer; Text: string);
     begin
-        if ColumnType = ctFree1    then TTGeneralComment.Create(sgAgeView.Cells[CUIDRef, sgAgeView.Row], strNULL, strNULL, Text, strNULL, True);
-        if ColumnType = ctFree2    then TTGeneralComment.Create(sgAgeView.Cells[CUIDRef, sgAgeView.Row], strNULL, strNULL, strNULL, Text, True);
-        if ColumnType = ctFollowUp then TTGeneralComment.Create(sgAgeView.Cells[CUIDRef, sgAgeView.Row], strNULL, Text, strNULL, strNULL, True);
+        if ColumnType = ctFree1    then TTGeneralComment.Create(sgAgeView.Cells[CUIDRef, sgAgeView.Row], strNULL, strNULL, Text, strNULL, strNULL, True);
+        if ColumnType = ctFree2    then TTGeneralComment.Create(sgAgeView.Cells[CUIDRef, sgAgeView.Row], strNULL, strNULL, strNULL, Text, strNULL, True);
+        if ColumnType = ctFree3    then TTGeneralComment.Create(sgAgeView.Cells[CUIDRef, sgAgeView.Row], strNULL, strNULL, strNULL, strNULL, Text, True);
+        if ColumnType = ctFollowUp then TTGeneralComment.Create(sgAgeView.Cells[CUIDRef, sgAgeView.Row], strNULL, Text, strNULL, strNULL, strNULL, True);
     end;
 
     // Quit editing
@@ -4122,6 +4214,10 @@ begin
     and
         (
             sgAgeView.Col <> sgAgeView.ReturnColumn(TGeneral.Free2, 1, 1)
+        )
+    and
+        (
+            sgAgeView.Col <> sgAgeView.ReturnColumn(TGeneral.Free3, 1, 1)
         )
     then
         Exit;
@@ -4152,6 +4248,7 @@ begin
     // Quit editing and write to database
     if Key = VK_RETURN then
     begin
+
         Key:=0;
         QuitEditing;
 
@@ -4162,11 +4259,17 @@ begin
         // Free 2
         if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneral.Free2, 1, 1) then
             ModifyCell(sgAgeView.ReturnColumn(TSnapshots.CUID, 1, 1), ctFree2, sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]);
+
+        // Free 3
+        if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneral.Free3, 1, 1) then
+            ModifyCell(sgAgeView.ReturnColumn(TSnapshots.CUID, 1, 1), ctFree3, sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]);
+
     end;
 
     // Delete entry from database
     if Key = VK_DELETE then
     begin
+
         Key:=0;
 
         // Free 1
@@ -4182,6 +4285,14 @@ begin
             ModifyCell(sgAgeView.ReturnColumn(TSnapshots.CUID, 1, 1), ctFree2, '');
             sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]:='';
         end;
+
+        // Free 3
+        if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneral.Free3, 1, 1) then
+        begin
+            ModifyCell(sgAgeView.ReturnColumn(TSnapshots.CUID, 1, 1), ctFree3, '');
+            sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]:='';
+        end;
+
     end;
 
 end;
@@ -4694,6 +4805,30 @@ begin
         sgControlStatus.SetFocus;
 end;
 
+procedure TMainForm.sgPersonRespMouseEnter(Sender: TObject);
+begin
+    if (sgPersonResp.Enabled) and (sgPersonResp.Visible) then
+        sgPersonResp.SetFocus;
+end;
+
+procedure TMainForm.sgSalesRespMouseEnter(Sender: TObject);
+begin
+    if (sgSalesResp.Enabled) and (sgSalesResp.Visible) then
+        sgSalesResp.SetFocus;
+end;
+
+procedure TMainForm.sgAccountTypeMouseEnter(Sender: TObject);
+begin
+    if (sgAccountType.Enabled) and (sgAccountType.Visible) then
+        sgAccountType.SetFocus;
+end;
+
+procedure TMainForm.sgCustomerGrMouseEnter(Sender: TObject);
+begin
+    if (sgCustomerGr.Enabled) and (sgCustomerGr.Visible) then
+        sgCustomerGr.SetFocus;
+end;
+
 /// <summary>
 ///     Change standard behaviour of scroll bars on all string grids. The mouse weel on string grid component controls row selection instead of
 ///     moving up/down thumb on scroll bar. Below methods introduce mouse weel controlling scroll bar.
@@ -4893,6 +5028,62 @@ procedure TMainForm.sgControlStatusMouseWheelUp(Sender: TObject; Shift: TShiftSt
 begin
     Handled:=True;
     sgControlStatus.Perform(WM_VSCROLL, SB_LINEUP, 0);
+end;
+
+// PERSON RESP. | WHEEL DOWN
+procedure TMainForm.sgPersonRespMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+begin
+    Handled:=True;
+    sgPersonResp.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
+end;
+
+// PERSON RESP. | WHEEL UP
+procedure TMainForm.sgPersonRespMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+begin
+    Handled:=True;
+    sgPersonResp.Perform(WM_VSCROLL, SB_LINEUP, 0);
+end;
+
+// SALES RESP. | WHEEL DOWN
+procedure TMainForm.sgSalesRespMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+begin
+    Handled:=True;
+    sgSalesResp.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
+end;
+
+// SALES RESP. | WHEEL UP
+procedure TMainForm.sgSalesRespMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+begin
+    Handled:=True;
+    sgSalesResp.Perform(WM_VSCROLL, SB_LINEUP, 0);
+end;
+
+// ACCOUNT TYPE | WHEEL DOWN
+procedure TMainForm.sgAccountTypeMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+begin
+    Handled:=True;
+    sgAccountType.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
+end;
+
+// ACCOUNT TYPE | WHEEL UP
+procedure TMainForm.sgAccountTypeMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+begin
+    Handled:=True;
+    sgAccountType.Perform(WM_VSCROLL, SB_LINEUP, 0);
+end;
+
+// CUSTOMER GROUP | WHEEL UP
+procedure TMainForm.sgCustomerGrMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+begin
+    Handled:=True;
+    sgCustomerGr.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
+end;
+
+// CUSTOMER GROUP | WHEEL UP
+procedure TMainForm.sgCustomerGrMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+begin
+    Handled:=True;
+    sgCustomerGr.Perform(WM_VSCROLL, SB_LINEUP, 0);
 end;
 
 /// <summary>

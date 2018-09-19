@@ -145,6 +145,7 @@ type
         const FOLLOWUP    : string = 'FollowUp';
         const Free1       : string = 'Free1';
         const Free2       : string = 'Free2';
+        const Free3       : string = 'Free3';
 
         /// <remarks>
         ///     User friendly name for given columns.
@@ -195,6 +196,10 @@ type
         const AddTxt           : string = 'AddTxt';
         const ExtractDateStamp : string = 'ExtractDateStamp';
         const ProcessBatchKey  : string = 'ProcessBatchKey';
+        const SalesResponsible : string = 'SalesResponsible';
+        const CustomerGroup    : string = 'CustomerGroup';
+        const PersonResponsible: string = 'PersonResponsible';
+        const AccountType      : string = 'AccountType';
 
         /// <remarks>
         ///     CUID and PMTSTAT are additional columns calculated "on the fly".
@@ -211,65 +216,73 @@ type
     TSnapshots = class(TDataTables)
     {$TYPEINFO ON}
     public
-        const ID              : string = 'Id';  // Primary key
-        const GROUP_ID        : string = 'GroupId';
-        const AGE_DATE        : string = 'AgeDate';
-        const SNAPSHOT_DT     : string = 'SnapshotDt';
-        const CUSTOMER_NAME   : string = 'CustomerName';
-        const CUSTOMER_NUMBER : string = 'CustomerNumber';
-        const COUNTRY_CODE    : string = 'CountryCode';
-        const NOT_DUE         : string = 'NotDue';
-        const RANGE1          : string = 'Range1';
-        const RANGE2          : string = 'Range2';
-        const RANGE3          : string = 'Range3';
-        const RANGE4          : string = 'Range4';
-        const RANGE5          : string = 'Range5';
-        const RANGE6          : string = 'Range6';
-        const OVERDUE         : string = 'Overdue';
-        const TOTAL           : string = 'Total';
-        const CREDIT_LIMIT    : string = 'CreditLimit';
-        const EXCEEDED_AMOUNT : string = 'ExceededAmount';
-        const PAYMENT_TERMS   : string = 'PaymentTerms';
-        const AGENT           : string = 'Agent';
-        const DIVISION        : string = 'Division';
-        const CO_CODE         : string = 'CoCode';
-        const LEDGER_ISO      : string = 'LedgerIso';
-        const INF4            : string = 'Inf4';
-        const INF7            : string = 'Inf7';
-        const PERSON          : string = 'Person';
-        const GROUP3          : string = 'Group3';
-        const RISK_CLASS      : string = 'RiskClass';
-        const CUID            : string = 'Cuid';
+        const ID               : string = 'Id';  // Primary key
+        const GROUP_ID         : string = 'GroupId';
+        const AGE_DATE         : string = 'AgeDate';
+        const SNAPSHOT_DT      : string = 'SnapshotDt';
+        const CUSTOMER_NAME    : string = 'CustomerName';
+        const CUSTOMER_NUMBER  : string = 'CustomerNumber';
+        const COUNTRY_CODE     : string = 'CountryCode';
+        const NOT_DUE          : string = 'NotDue';
+        const RANGE1           : string = 'Range1';
+        const RANGE2           : string = 'Range2';
+        const RANGE3           : string = 'Range3';
+        const RANGE4           : string = 'Range4';
+        const RANGE5           : string = 'Range5';
+        const RANGE6           : string = 'Range6';
+        const OVERDUE          : string = 'Overdue';
+        const TOTAL            : string = 'Total';
+        const CREDIT_LIMIT     : string = 'CreditLimit';
+        const EXCEEDED_AMOUNT  : string = 'ExceededAmount';
+        const PAYMENT_TERMS    : string = 'PaymentTerms';
+        const AGENT            : string = 'Agent';
+        const DIVISION         : string = 'Division';
+        const CO_CODE          : string = 'CoCode';
+        const LEDGER_ISO       : string = 'LedgerIso';
+        const INF4             : string = 'Inf4';
+        const INF7             : string = 'Inf7';
+        const PERSON           : string = 'Person';
+        const GROUP3           : string = 'Group3';
+        const RISK_CLASS       : string = 'RiskClass';
+        const CUID             : string = 'Cuid';
+        const SalesResponsible : string = 'SalesResponsible';
+        const CustomerGroup    : string = 'CustomerGroup';
+        const PersonResponsible: string = 'PersonResponsible';
+        const AccountType      : string = 'AccountType';
 
         /// <remarks>
         ///     Temporary - reflects friendly column names in string grid.
         /// </remarks>
 
-        const fCUSTOMER_NAME   = 'Customer Name';
-        const fCUSTOMER_NUMBER = 'Customer Number';
-        const fNOT_DUE         = 'Not Due';
-        const fCOUNTRY_CODE    = 'Country Code';
-        const fRANGE1          = '1 - 7';
-        const fRANGE2          = '8 - 30';
-        const fRANGE3          = '31 - 60';
-        const fRANGE4          = '61 - 90';
-        const fRANGE5          = '91 - 120';
-        const fRANGE6          = '121 - oo';
-        const fTOTAL           = 'Total';
-        const fOVERDUE         = 'Overdue';
-        const fCREDIT_LIMIT    = 'Credit Limit';
-        const fEXCEEDED_AMOUNT = 'Exceeded Amount';
-        const fAGENT           = 'Agent';
-        const fCO_CODE         = 'Co Code';
-        const fPAYMENT_TERMS   = 'Payment Terms';
-        const fDIVISION        = 'Division';
-        const fLEDGER_ISO      = 'Ledger Iso';
-        const fINF4            = 'Inf4';
-        const fINF7            = 'Inf7';
-        const fPERSON          = 'Person';
-        const fGROUP3          = 'Group3';
-        const fRISK_CLASS      = 'Risk Class';
-        const fCUID            = 'Cuid';
+        const fCUSTOMER_NAME     = 'Customer Name';
+        const fCUSTOMER_NUMBER   = 'Customer Number';
+        const fNOT_DUE           = 'Not Due';
+        const fCOUNTRY_CODE      = 'Country Code';
+        const fRANGE1            = '1 - 7';
+        const fRANGE2            = '8 - 30';
+        const fRANGE3            = '31 - 60';
+        const fRANGE4            = '61 - 90';
+        const fRANGE5            = '91 - 120';
+        const fRANGE6            = '121 - oo';
+        const fTOTAL             = 'Total';
+        const fOVERDUE           = 'Overdue';
+        const fCREDIT_LIMIT      = 'Credit Limit';
+        const fEXCEEDED_AMOUNT   = 'Exceeded Amount';
+        const fAGENT             = 'Agent';
+        const fCO_CODE           = 'Co Code';
+        const fPAYMENT_TERMS     = 'Payment Terms';
+        const fDIVISION          = 'Division';
+        const fLEDGER_ISO        = 'Ledger Iso';
+        const fINF4              = 'Inf4';
+        const fINF7              = 'Inf7';
+        const fPERSON            = 'Person';
+        const fGROUP3            = 'Group3';
+        const fRISK_CLASS        = 'Risk Class';
+        const fCUID              = 'Cuid';
+        const fSalesResponsible  = 'Sales Responsible';
+        const fCustomerGroup     = 'Customer Group';
+        const fPersonResponsible = 'Person Responsible';
+        const fAccountType       = 'Account Type';
     end;
 
     /// <summary>

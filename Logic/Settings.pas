@@ -16,7 +16,7 @@ type
 
     ISettings = Interface(IInterface)
     ['{FF5CBEC3-2576-4E1C-954E-C892AB4A7CC1}']
-        // Methods
+        // Exposed methods
         function  Encode(ConfigType: integer): boolean;
         function  Decode(ConfigType: integer; ToMemory: boolean): boolean;
         function  ConfigToMemory: boolean;

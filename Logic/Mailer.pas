@@ -253,6 +253,7 @@ begin
             LBUName    :=DataBase.DataSet.Fields[TCompany.CONAME].Value;
             LBUAddress :=DataBase.DataSet.Fields[TCompany.COADDRESS].Value;
             Telephone  :=DataBase.DataSet.Fields[TCompany.Telephone].Value;
+
         end;
 
         Result:=True;
@@ -352,28 +353,36 @@ begin
             // Statement conditions
             if DocType = dcStatement then
             begin
-                if not(IsOverdue) then
+
+                // Exclude items with control status indicated by field "ReminderException5"
+                if OpenItems.Cells[MainForm.OpenItemsRefs.CtrlCol, iCNT] <> '514' {REM_EX5} then    // REFACTOR!!!
                 begin
-                    // All items
-                    if StrToFloatDef(OpenItems.Cells[MainForm.OpenItemsRefs.OpenAmCol, iCNT], 0) <> 0 then
-                    // Generate HTML table
-                    OpenItemsToHtmlTable(HTMLStat, OpenItems, iCNT);
-                end
-                else
-                begin
-                    // Allow only overdue invoices
-                    if
-                    (
-                        StrToFloatDef(OpenItems.Cells[MainForm.OpenItemsRefs.OpenAmCol, iCNT], 0) <> 0
-                    )
-                    and
-                    (
-                        StrToFloatDef(OpenItems.Cells[MainForm.OpenItemsRefs.PmtStatCol, iCNT], 0) < 0
-                    )
-                    then
-                    // Make
-                    OpenItemsToHtmlTable(HTMLStat, OpenItems, iCNT);
+
+                    if not(IsOverdue) then
+                    begin
+                        // All items
+                        if StrToFloatDef(OpenItems.Cells[MainForm.OpenItemsRefs.OpenAmCol, iCNT], 0) <> 0 then
+                            // Generate HTML table
+                            OpenItemsToHtmlTable(HTMLStat, OpenItems, iCNT);
+                    end
+                    else
+                    begin
+                        // Allow only overdue invoices
+                        if
+                        (
+                            StrToFloatDef(OpenItems.Cells[MainForm.OpenItemsRefs.OpenAmCol, iCNT], 0) <> 0
+                        )
+                        and
+                        (
+                            StrToFloatDef(OpenItems.Cells[MainForm.OpenItemsRefs.PmtStatCol, iCNT], 0) < 0
+                        )
+                        then
+                        // Make
+                        OpenItemsToHtmlTable(HTMLStat, OpenItems, iCNT);
+                    end;
+
                 end;
+
             end;
 
             // Reminder conditions
@@ -440,6 +449,12 @@ begin
         MailBody :=StringReplace(MailBody,   '{ADDR_LBU}',     LBUAddress, [rfReplaceAll]);
         MailBody :=StringReplace(MailBody,   '{EMAIL}',        MailFrom,   [rfReplaceAll]);
         MailBody :=StringReplace(MailBody,   '{TEL}',          Telephone,  [rfReplaceAll]);
+
+        // Custom template title (statement or reminder)
+        if IsOverdue then
+            MailBody:=StringReplace(MailBody, '{TITLE}', 'REMINDER', [rfReplaceAll])
+                else
+                    MailBody:=StringReplace(MailBody, '{TITLE}', 'STATEMENT', [rfReplaceAll]);
 
         // Custom salutation and the message
         if CustSalut <> '' then MailBody:=StringReplace(MailBody, '{SALUT}', CustSalut, [rfReplaceAll]);

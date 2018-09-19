@@ -229,10 +229,11 @@ type
         var FFollowUp:     string;
         var FFree1:        string;
         var FFree2:        string;
+        var FFree3:        string;
         var FEventLog:     boolean;
     public
         property    IDThd:  integer read FIDThd;
-        constructor Create(CUID: string; FixedComment: string; FollowUp: string; Free1: string; Free2: string; EventLog: boolean);
+        constructor Create(CUID: string; FixedComment: string; FollowUp: string; Free1: string; Free2: string; Free3: string; EventLog: boolean);
         destructor  Destroy; override;
     end;
 
@@ -1392,7 +1393,7 @@ end;
 // ----------------------------------------------------------------------------------------------------------------------------------- WRITE GENERAL COMMENT //
 
 
-constructor TTGeneralComment.Create(CUID: string; FixedComment: string; FollowUp: string; Free1: string; Free2: string; EventLog: boolean);
+constructor TTGeneralComment.Create(CUID: string; FixedComment: string; FollowUp: string; Free1: string; Free2: string; Free3: string; EventLog: boolean);
 begin
     inherited Create(False);
     FLock        :=TCriticalSection.Create;
@@ -1402,6 +1403,7 @@ begin
     FFollowUp    :=FollowUp;
     FFree1       :=Free1;
     FFree2       :=Free2;
+    FFree3       :=Free3;
     FEventLog    :=EventLog;
 end;
 
@@ -1458,6 +1460,12 @@ begin
                 begin
                     GenText.Columns.Add(TGeneral.Free2);
                     GenText.Values.Add(FFree2);
+                end;
+
+                if not(FFree3 = strNULL) then
+                begin
+                    GenText.Columns.Add(TGeneral.Free3);
+                    GenText.Values.Add(FFree3);
                 end;
 
                 // Execute
@@ -1523,6 +1531,17 @@ begin
                 else
                 begin
                     GenText.Columns.Add(TGeneral.Free2);
+                    GenText.Values.Add('');
+                end;
+
+                if not(FFree3 = strNULL) then
+                begin
+                    GenText.Columns.Add(TGeneral.Free3);
+                    GenText.Values.Add(FFree3);
+                end
+                else
+                begin
+                    GenText.Columns.Add(TGeneral.Free3);
                     GenText.Values.Add('');
                 end;
 
