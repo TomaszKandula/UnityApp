@@ -96,6 +96,15 @@ type
         var OpenThdId:  integer;
         var SqlColumns: TLists;
         var UpdatedRowsHolder: TIntigers;
+//        var PenWidthTop   :  integer;
+//        var PenWidthBottom:  integer;
+//        var PenWidthLeft  :  integer;
+//        var PenWidthRight :  integer;
+//        var PenColorTop   :  TColor;
+//        var PenColorBottom:  TColor;
+//        var PenColorLeft  :  TColor;
+//        var PenColorRight :  TColor;
+//        var mcBrushColor  :  TColor;
         procedure SetUpdatedRow(Row: integer);
         procedure RecordRowsAffected;
     published
@@ -118,13 +127,14 @@ type
         function  ImportCSV(DialogBox: TOpenDialog; Delimiter: string): boolean;
         function  ExportCSV(DialogBox: TSaveDialog; Delimiter: string): boolean;
         procedure SelectAll;
+//        procedure PanelBorders(FillColor, TopColor, BottomColor, LeftColor, RightColor: TColor);
     end;
 
     /// <summary>
     ///     Interposer class of TListView component. Extension, add ability to freeze itself.
     /// </summary>
 
-    TListView = class(Vcl.ComCtrls.TListView)
+    TListView = class(ComCtrls.TListView)
     published
         procedure Freeze(PaintWnd: boolean);
     end;
@@ -386,6 +396,7 @@ end;
 procedure TStringGrid.Paint;
 var
     FocusRect: TRect;
+    //R: TRect;
 begin
     inherited;
 
@@ -395,6 +406,49 @@ begin
         if DrawingStyle = gdsThemed then InflateRect(FocusRect, -1, -1);
         DrawFocusRect(Canvas.Handle, FocusRect);
     end;
+
+//    /// <remarks>
+//    ///     None of the given variables can be black.
+//    /// </remarks>
+//
+//    if (mcBrushColor   <> $00000000) and
+//       (PenColorTop    <> $00000000) and
+//       (PenColorBottom <> $00000000) and
+//       (PenColorLeft   <> $00000000) and
+//       (PenColorRight  <> $00000000) then
+//    begin
+//
+//        // Get dimensions
+//        R:=ClientRect;
+//
+//        // Fill background
+//        Canvas.Brush.Color:=mcBrushColor;
+//
+//        // Top border
+//        Canvas.Pen.Width:=PenWidthTop;
+//        Canvas.Pen.Color:=PenColorTop;
+//        Canvas.MoveTo(0,           0);
+//        Canvas.LineTo(R.Right - 0, 0);
+//
+//        // Bottom border
+//        Canvas.Pen.Width:=PenWidthBottom;
+//        Canvas.Pen.Color:=PenColorBottom;
+//        Canvas.MoveTo(1,           R.Bottom - 1 + 10);
+//        Canvas.LineTo(R.Right - 1, R.Bottom - 1 + 10);
+//
+//        // Left border
+//        Canvas.Pen.Width:=PenWidthLeft;
+//        Canvas.Pen.Color:=PenColorLeft;
+//        Canvas.MoveTo(0,            0);
+//        Canvas.LineTo(0, R.Bottom - 0);
+//
+//        // Right border
+//        Canvas.Pen.Width:=PenWidthRight;
+//        Canvas.Pen.Color:=PenColorLeft;
+//        Canvas.MoveTo(R.Right - 1,            1 + 10);
+//        Canvas.LineTo(R.Right - 1, R.Bottom - 1 + 10);
+//
+//    end;
 
 end;
 
@@ -1226,6 +1280,25 @@ begin
     GridRect.Bottom:=Self.RowCount;
     Self.Selection :=GridRect;
 end;
+
+/// <summary>
+///
+/// </summary>
+
+//procedure TStringGrid.PanelBorders(FillColor, TopColor, BottomColor, LeftColor, RightColor: TColor);
+//begin
+//    // Turn-off styles
+//    BorderStyle   :=bsNone;
+//    // Assign colors and draw
+//    mcBrushColor  :=FillColor;
+//    PenColorTop   :=TopColor;
+//    PenColorBottom:=BottomColor;
+//    PenColorLeft  :=LeftColor;
+//    PenColorRight :=RightColor;
+//    //
+//    PenWidthTop   :=2;
+//    PenWidthRight :=2;
+//end;
 
 /// <summary>
 ///     Allow to disable or enable component drawing.

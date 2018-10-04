@@ -321,12 +321,13 @@ type
     protected
         procedure Execute; override;
     private
-        var FTableName:  string;
-        var FColumns:    string;
-        var FDestGrid:   TStringGrid;
-        var FConditions: string;
+        var FTableName:   string;
+        var FColumns:     string;
+        var FDestGrid:    TStringGrid;
+        var FConditions:  string;
+        var FAutoRelease: boolean;
     public
-        constructor Create(TableName: string; DestGrid: TStringGrid; Columns: string = '' {=OPTION}; Conditions: string = '' {=OPTION});
+        constructor Create(TableName: string; DestGrid: TStringGrid; Columns: string = '' {OPTION}; Conditions: string = '' {OPTION}; AutoRelease: boolean = True {OPTION});
     end;
 
 
@@ -538,10 +539,7 @@ begin
     try
         StopWatch:=TStopWatch.StartNew;
         MainForm.ExecMessage(True, mcStatusBar, stLoading);
-        Synchronize(procedure
-        begin
-            MainForm.LoadingAnimation(MainForm.ImgLoadingAgeView, MainForm.sgAgeView, MainForm.PanelAgeView, AnimationON);
-        end);
+        //MainForm.ExecMessage(False, 28, 'ON');
 
         try
             // Sync
@@ -560,9 +558,15 @@ begin
                 AgeView.ComputeAndShowRCA(MainForm.sgAgeView);
                 AgeView.UpdateSummary;
                 AgeView.GetDetails(MainForm.DetailsGrid);
+
+                // Map data (source General Tables tabsheet)
                 AgeView.MapGroup3(MainForm.sgAgeView, MainForm.sgGroup3);
+                AgeView.MapTable1(MainForm.sgAgeView, MainForm.sgPersonResp);
+                AgeView.MapTable2(MainForm.sgAgeView, MainForm.sgSalesResp);
+                AgeView.MapTable3(MainForm.sgAgeView, MainForm.sgAccountType);
+                AgeView.MapTable4(MainForm.sgAgeView, MainForm.sgCustomerGr);
+
                 MainForm.sgAgeView.Repaint;
-                MainForm.LoadingAnimation(MainForm.ImgLoadingAgeView, MainForm.sgAgeView, MainForm.PanelAgeView, AnimationOFF);
             end);
 
         except
@@ -580,6 +584,9 @@ begin
 
         // Switch on all timers
         MainForm.SwitchTimers(tmEnabled);
+
+        //MainForm.ExecMessage(False, 28, 'OFF');
+
     end;
 
     // Release when finished
@@ -680,12 +687,7 @@ begin
     try
         StopWatch:=TStopWatch.StartNew;
         MainForm.ExecMessage(True, mcStatusBar, stDownloading);
-
-        // Show busy animation
-        Synchronize(procedure
-        begin
-            MainForm.LoadingAnimation(MainForm.ImgLoadingOpenItems, MainForm.sgOpenItems, MainForm.PanelOpenItems, AnimationON);
-        end);
+        MainForm.ExecMessage(False, 28, 'ON');
 
         try
             OpenItems.DestGrid   :=MainForm.sgOpenItems;
@@ -713,12 +715,14 @@ begin
         Synchronize(procedure
         begin
             OpenItems.DestGrid.SetColWidth(10, 20, 400);
-            MainForm.LoadingAnimation(MainForm.ImgLoadingOpenItems, MainForm.sgOpenItems, MainForm.PanelOpenItems, AnimationOFF);
         end);
 
         OpenItems.DestGrid.Freeze(False);
         OpenItems.Free;
         FLock.Release;
+
+        MainForm.ExecMessage(False, 28, 'OFF');
+
     end;
 
     // Release when finished
@@ -816,12 +820,13 @@ function TTAddressBook.Read: boolean;
 var
     DataTables: TDataTables;
 begin
+    MainForm.ExecMessage(False, 28, 'ON');
     DataTables:=TDataTables.Create(MainForm.DbConnect);
     try
         // Display busy animation
         Synchronize(procedure
         begin
-            MainForm.LoadingAnimation(MainForm.ImgLoadingAddressBook, MainForm.sgAddressBook, MainForm.PanelAddressBook, AnimationON);
+            //
         end);
 
         // Freeze StringGrid
@@ -829,7 +834,7 @@ begin
 
         // Column selection
         DataTables.Columns.Add(TAddressBook.USER_ALIAS);
-        DataTables.Columns.Add(TAddressBook.SCUID);       { CONSTRAINT UNIQUE }
+        DataTables.Columns.Add(TAddressBook.SCUID);
         DataTables.Columns.Add(TAddressBook.CUSTOMER_NUMBER);
         DataTables.Columns.Add(TAddressBook.CUSTOMER_NAME);
         DataTables.Columns.Add(TAddressBook.EMAILS);
@@ -854,12 +859,13 @@ begin
         Synchronize(procedure
         begin
             FGrid.SetColWidth(40, 10, 400);
-            MainForm.LoadingAnimation(MainForm.ImgLoadingAddressBook, MainForm.sgAddressBook, MainForm.PanelAddressBook, AnimationOFF);
         end);
 
         // Release StringGrid
         FGrid.Freeze(False);
     end;
+
+    MainForm.ExecMessage(False, 28, 'OFF');
 
 end;
 
@@ -871,6 +877,7 @@ var
 begin
     Result:=False;
     Book:=TDataTables.Create(MainForm.DbConnect);
+    MainForm.ExecMessage(False, 28, 'ON');
 
     try
         // Update from Address Book String Grid
@@ -942,6 +949,8 @@ begin
         Book.Free;
     end;
 
+    MainForm.ExecMessage(False, 28, 'OFF');
+
 end;
 
 function TTAddressBook.Add: boolean;
@@ -957,6 +966,8 @@ begin
     SetLength(AddrBook, 1, 11);
     jCNT:=0;
     Check:=0;
+
+    MainForm.ExecMessage(False, 28, 'ON');
 
     // Get data from String Grid
     Book:=TDataTables.Create(MainForm.DbConnect);
@@ -1020,16 +1031,19 @@ begin
 
                 if Book.RowsAffected > 0 then
                 begin
+                    MainForm.ExecMessage(False, 28, 'OFF');
                     MainForm.ExecMessage(False, mcInfo, 'Address Book has been successfully populated by selected item(s).');
                     Result:=True;
                 end
                 else
                 begin
+                    MainForm.ExecMessage(False, 28, 'OFF');
                     MainForm.ExecMessage(False, mcWarn, 'Cannot update Address Book. Please contact IT support.');
                 end;
             except
                 on E: Exception do
                 begin
+                    MainForm.ExecMessage(False, 28, 'OFF');
                     MainForm.ExecMessage(False, mcError, 'Cannot save selected item(s). Exception has been thrown: ' + E.Message);
                     MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Cannot write Address Book item(s) into database. Error: ' + E.Message);
                 end;
@@ -1043,6 +1057,8 @@ begin
     begin
         MainForm.ExecMessage(False, mcWarn, 'Selected customers are already in Address Book.');
     end;
+
+    MainForm.ExecMessage(False, 28, 'OFF');
 
 end;
 
@@ -1858,13 +1874,14 @@ end;
 // ------------------------------------------------------------------------------------------------------------------------------- LOAD ASYNC. GENERAL TABLE //
 
 
-constructor TTGeneralTables.Create(TableName: string; DestGrid: TStringGrid; Columns: string = '' {OPTION}; Conditions: string = '' {OPTION});
+constructor TTGeneralTables.Create(TableName: string; DestGrid: TStringGrid; Columns: string = '' {OPTION}; Conditions: string = '' {OPTION}; AutoRelease: boolean = True {OPTION});
 begin
     inherited Create(False);
-    FTableName :=TableName;
-    FDestGrid  :=DestGrid;
-    FColumns   :=Columns;
-    FConditions:=Conditions;
+    FTableName  :=TableName;
+    FDestGrid   :=DestGrid;
+    FColumns    :=Columns;
+    FConditions :=Conditions;
+    FAutoRelease:=AutoRelease;
 end;
 
 procedure TTGeneralTables.Execute;
@@ -1880,7 +1897,7 @@ begin
         try
             DataTables.CleanUp;
 
-            if  not(string.IsNullOrEmpty(FColumns)) then
+            if not(string.IsNullOrEmpty(FColumns)) then
                 DataTables.Columns.Text:=FColumns;
 
             if not(string.IsNullOrEmpty(FConditions)) then
@@ -1897,7 +1914,13 @@ begin
         DataTables.Free;
     end;
 
-    FreeOnTerminate:=True;
+    /// <remarks>
+    ///     Do not use FreeOnTerminate, manually destroy the object after the job is done.
+    ///     This allow to execute this thread in series with "WaitFor" method.
+    ///     By default, FreeOnTerminate is always ON, use option "False" to disable it.
+    /// </remarks>
+
+    FreeOnTerminate:=FAutoRelease;
 
 end;
 

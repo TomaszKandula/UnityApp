@@ -224,6 +224,11 @@ begin
     // Prepare custom message to the customer
     MessStr:=StringReplace(Text_Message.Text, CRLF, HTML_BR, [rfReplaceAll]);
 
+    /// <remarks>
+    ///     We have to always pre-sort Open Items list via Due Date before sending account statement or reminder.
+    ///     This is necessary to ensure that the HTML generator will make sorted list for the customer.
+    /// </remarks>
+
     // Sort Open Items via Due Date
     MainForm.sgOpenItems.MSort(MainForm.sgOpenItems.ReturnColumn(TOpenitems.PmtStat, 1 , 1), 2, True);
 

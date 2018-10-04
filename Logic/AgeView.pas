@@ -58,7 +58,14 @@ type
         procedure   ClearSummary;
         procedure   UpdateSummary;
         procedure   GetDetails(var Grid: TStringGrid);
+
+        // REFACTOR BELOW METHODS !!!
         procedure   MapGroup3(var Grid: TStringGrid; Source: TStringGrid);
+        procedure   MapTable1(var Grid: TStringGrid; Source: TStringGrid);
+        procedure   MapTable2(var Grid: TStringGrid; Source: TStringGrid);
+        procedure   MapTable3(var Grid: TStringGrid; Source: TStringGrid);
+        procedure   MapTable4(var Grid: TStringGrid; Source: TStringGrid);
+
         function    GetData(Code: string; Table: string; Entity: string): string;
         procedure   AgeViewMode(var Grid: TStringGrid; ModeBySection: string);
         procedure   QuickSortExt(var A: array of double; var L: array of integer; iLo, iHi: integer; ASC: boolean);
@@ -394,6 +401,10 @@ begin
 
 end;
 
+
+// REFACTOR !!!
+
+
 /// <summary>
 ///     Age view (ageing report snapshots) contains with numbers, we use Group3 with codes and descriptions to map age view data
 ///     so it is more meaningful to the user.
@@ -420,6 +431,86 @@ begin
             then
                 Grid.Cells[Grid.ReturnColumn(TSnapshots.fGROUP3, 1, 1), iCNT]:=Source.Cells[Source.ReturnColumn(TGroup3.DESCRIPTION, 1, 1), jCNT]
 end;
+
+procedure TAgeView.MapTable1(var Grid: TStringGrid; Source: TStringGrid);
+var
+    iCNT:  integer;
+    jCNT:  integer;
+begin
+    for iCNT:=1 to Grid.RowCount - 1 do
+        for jCNT:=1 to Source.RowCount - 1 do
+            if
+            (
+                Grid.Cells[Grid.ReturnColumn(TSnapshots.fPersonResponsible, 1, 1), iCNT] = Source.Cells[Source.ReturnColumn(TPersonResponsible.Id, 1, 1), jCNT]
+            )
+            and
+            (
+                MainForm.ConvertName(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCO_CODE, 1, 1), iCNT], 'F', 0) = Source.Cells[Source.ReturnColumn(TPersonResponsible.SourceDBName, 1, 1), jCNT]
+            )
+            then
+                Grid.Cells[Grid.ReturnColumn(TSnapshots.fPersonResponsible, 1, 1), iCNT]:=Source.Cells[Source.ReturnColumn(TPersonResponsible.ErpCode, 1, 1), jCNT]
+end;
+
+procedure TAgeView.MapTable2(var Grid: TStringGrid; Source: TStringGrid);
+var
+    iCNT:  integer;
+    jCNT:  integer;
+begin
+    for iCNT:=1 to Grid.RowCount - 1 do
+        for jCNT:=1 to Source.RowCount - 1 do
+            if
+            (
+                Grid.Cells[Grid.ReturnColumn(TSnapshots.fSalesResponsible, 1, 1), iCNT] = Source.Cells[Source.ReturnColumn(TSalesResponsible.Id, 1, 1), jCNT]
+            )
+            and
+            (
+                MainForm.ConvertName(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCO_CODE, 1, 1), iCNT], 'F', 0) = Source.Cells[Source.ReturnColumn(TSalesResponsible.SourceDBName, 1, 1), jCNT]
+            )
+            then
+                Grid.Cells[Grid.ReturnColumn(TSnapshots.fSalesResponsible, 1, 1), iCNT]:=Source.Cells[Source.ReturnColumn(TSalesResponsible.ErpCode, 1, 1), jCNT]
+end;
+
+procedure TAgeView.MapTable3(var Grid: TStringGrid; Source: TStringGrid);
+var
+    iCNT:  integer;
+    jCNT:  integer;
+begin
+    for iCNT:=1 to Grid.RowCount - 1 do
+        for jCNT:=1 to Source.RowCount - 1 do
+            if
+            (
+                Grid.Cells[Grid.ReturnColumn(TSnapshots.fAccountType, 1, 1), iCNT] = Source.Cells[Source.ReturnColumn(TAccountType.Id, 1, 1), jCNT]
+            )
+            and
+            (
+                MainForm.ConvertName(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCO_CODE, 1, 1), iCNT], 'F', 0) = Source.Cells[Source.ReturnColumn(TAccountType.SourceDBName, 1, 1), jCNT]
+            )
+            then
+                Grid.Cells[Grid.ReturnColumn(TSnapshots.fAccountType, 1, 1), iCNT]:=Source.Cells[Source.ReturnColumn(TAccountType.ErpCode, 1, 1), jCNT]
+end;
+
+procedure TAgeView.MapTable4(var Grid: TStringGrid; Source: TStringGrid);
+var
+    iCNT:  integer;
+    jCNT:  integer;
+begin
+    for iCNT:=1 to Grid.RowCount - 1 do
+        for jCNT:=1 to Source.RowCount - 1 do
+            if
+            (
+                Grid.Cells[Grid.ReturnColumn(TSnapshots.fCustomerGroup, 1, 1), iCNT] = Source.Cells[Source.ReturnColumn(TCustomerGroup.Id, 1, 1), jCNT]
+            )
+            and
+            (
+                MainForm.ConvertName(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCO_CODE, 1, 1), iCNT], 'F', 0) = Source.Cells[Source.ReturnColumn(TCustomerGroup.SourceDBName, 1, 1), jCNT]
+            )
+            then
+                Grid.Cells[Grid.ReturnColumn(TSnapshots.fCustomerGroup, 1, 1), iCNT]:=Source.Cells[Source.ReturnColumn(TCustomerGroup.ErpCode, 1, 1), jCNT]
+end;
+
+
+// ---------------------------------------- ^
+
 
 /// <summary>
 ///     Find match data in General Tables.

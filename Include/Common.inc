@@ -75,7 +75,7 @@ const
     GridImgFile :  string    = 'Unity.img';        // Application custom image(s)
     ReleaseFile :  string    = 'Release.zip';      // Release package
     ManifestFile:  string    = 'Unity.manifest';   // Manifest file on the server
-    CurrentMutex:  PWideChar = 'UNITY_10125';      // Mutex value, increase it with each release
+    CurrentMutex:  PWideChar = 'UNITY_10145';      // Mutex value, increase it with each release
 
     // --------------------------------------------------------------------------------------------------------------------------------------- SPLASH SCREEN //
 
@@ -357,7 +357,8 @@ const
     spConnecting = 'connecting to MS SQL Server..., please wait.';
     spUserAccess = 'getting user access details..., please wait.';
     spSnapshots  = 'loading default age view..., please wait.';
-    spDelegate   = 'delegating General Tables async load..., please wait.';
+    spGeneral    = 'loading General Tables..., please wait.';
+    spMapping    = 'loading Map Tables..., please wait.';
     spFinishing  = 'finishing..., please wait.';
 
     // COMPONENT RELATED ----------------------------------------------------------------------------------------------------------------------------------- //

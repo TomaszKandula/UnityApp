@@ -336,12 +336,9 @@ type
         Bevel1: TBevel;
         Bevel2: TBevel;
         Bevel3: TBevel;
-        PanelAgeView: TPanel;
-        ImgLoadingAgeView: TImage;
         PanelOpenItems: TPanel;
         ImgLoadingOpenItems: TImage;
         PanelAddressBook: TPanel;
-        ImgLoadingAddressBook: TImage;
         PanelInvoiceTracker: TPanel;
         ImgLoadingInvoiceTracker: TImage;
         PanelCoCodes: TPanel;
@@ -422,25 +419,26 @@ type
         imgHideBar: TImage;
         PanelControlStatus: TPanel;
         sgControlStatus: TStringGrid;
-    Tables: TPageControl;
-    Page1: TTabSheet;
-    Page2: TTabSheet;
-    Page3: TTabSheet;
-    Page4: TTabSheet;
-    Page5: TTabSheet;
-    Page6: TTabSheet;
-    Page7: TTabSheet;
-    Page8: TTabSheet;
-    Page9: TTabSheet;
-    Page10: TTabSheet;
-    PanelPersonResp: TPanel;
-    sgPersonResp: TStringGrid;
-    PanelSalesResp: TPanel;
-    sgSalesResp: TStringGrid;
-    PanelAccountType: TPanel;
-    sgAccountType: TStringGrid;
-    PanelCustomerGr: TPanel;
-    sgCustomerGr: TStringGrid;
+        Tables: TPageControl;
+        Page1: TTabSheet;
+        Page2: TTabSheet;
+        Page3: TTabSheet;
+        Page4: TTabSheet;
+        Page5: TTabSheet;
+        Page6: TTabSheet;
+        Page7: TTabSheet;
+        Page8: TTabSheet;
+        Page9: TTabSheet;
+        Page10: TTabSheet;
+        PanelPersonResp: TPanel;
+        sgPersonResp: TStringGrid;
+        PanelSalesResp: TPanel;
+        sgSalesResp: TStringGrid;
+        PanelAccountType: TPanel;
+        sgAccountType: TStringGrid;
+        PanelCustomerGr: TPanel;
+        sgCustomerGr: TStringGrid;
+        PanelAgeView: TPanel;
         procedure FormCreate(Sender: TObject);
         procedure FormResize(Sender: TObject);
         procedure FormShow(Sender: TObject);
@@ -700,26 +698,26 @@ type
         procedure sgControlStatusMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure sgControlStatusMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure sgControlStatusDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
-    procedure sgAccountTypeDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
-    procedure sgPersonRespDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
-    procedure sgSalesRespDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
-    procedure sgCustomerGrDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
-    procedure sgPersonRespKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure sgSalesRespKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure sgAccountTypeKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure sgCustomerGrKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure sgPersonRespMouseEnter(Sender: TObject);
-    procedure sgSalesRespMouseEnter(Sender: TObject);
-    procedure sgAccountTypeMouseEnter(Sender: TObject);
-    procedure sgCustomerGrMouseEnter(Sender: TObject);
-    procedure sgPersonRespMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-    procedure sgPersonRespMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-    procedure sgSalesRespMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-    procedure sgSalesRespMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-    procedure sgAccountTypeMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-    procedure sgAccountTypeMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-    procedure sgCustomerGrMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-    procedure sgCustomerGrMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+        procedure sgAccountTypeDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+        procedure sgPersonRespDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+        procedure sgSalesRespDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+        procedure sgCustomerGrDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+        procedure sgPersonRespKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure sgSalesRespKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure sgAccountTypeKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure sgCustomerGrKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure sgPersonRespMouseEnter(Sender: TObject);
+        procedure sgSalesRespMouseEnter(Sender: TObject);
+        procedure sgAccountTypeMouseEnter(Sender: TObject);
+        procedure sgCustomerGrMouseEnter(Sender: TObject);
+        procedure sgPersonRespMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+        procedure sgPersonRespMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+        procedure sgSalesRespMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+        procedure sgSalesRespMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+        procedure sgAccountTypeMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+        procedure sgAccountTypeMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+        procedure sgCustomerGrMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+        procedure sgCustomerGrMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
     private
         var pAllowClose:    boolean;
         var pStartTime:     TTime;
@@ -763,7 +761,6 @@ type
         procedure  CopyFile(const Source, Dest: string);
         procedure  ResetTabsheetButtons;
         procedure  UnfoldReportsTab(Header: TPanel; Panel: TPanel; ShouldHide: boolean = false);
-        procedure  LoadingAnimation(GIFImage: TImage; Grid: TStringGrid; GridPanel: TPanel; State: integer);
         procedure  SetPanelBorders;
         procedure  SetGridColumnWidths;
         procedure  SetGridRowHeights;
@@ -785,7 +782,7 @@ type
     ///     If library is written in Delphi, then Delphi types can be used as usual,
     ///     however, if library is written in 'C' or any other language, then
     ///     please use plain 'C' language types only, so instead of pascal 'string'
-    ///     type, please use 'pchar' type, etc., also, in case of c# language,
+    ///     type, please use silly 'pchar' type, etc., also, in case of c# language,
     ///     please refer to manual on 'making C# dll library for delphi usage'
     /// </remarks>
 
@@ -916,6 +913,21 @@ begin
             // Close Await window if e-mails have been processed by worker thread
             if (Msg.WParam = 27) and (PChar(Msg.LParam) = 'True') then
                 AwaitForm.Close;
+
+            // AWAIT WINDOW -------------------------------------------------------------------------------------------------------------------------------- //
+
+            if (Msg.WParam = 28) then
+            begin
+
+                // Turn busy window on
+                if (PCHar(Msg.LParam) = 'OFF') then
+                    AwaitForm.Close;
+
+                // Turn busy window off
+                if (PCHar(Msg.LParam) = 'ON') then
+                    AwaitForm.Show;
+
+            end;
 
         end;
 
@@ -1135,7 +1147,7 @@ begin
 end;
 
 /// <summary>
-///     Return key vaue for given list position.
+///     Return key value for given list position.
 /// </summary>
 
 function TMainForm.FindKey(OpenedSection: string; KeyPosition: integer): string;
@@ -1551,45 +1563,6 @@ begin
 end;
 
 /// <summary>
-///     Show/hide animation during loading data into string grid.
-/// </summary>
-
-procedure TMainForm.LoadingAnimation(GIFImage: TImage; Grid: TStringGrid; GridPanel: TPanel; State: Integer);
-begin
-
-    /// <remarks>
-    ///     Center property fails sometimes, thus to centralise the image we must manually set top/left values.
-    /// </remarks>
-
-    GIFImage.Center:=False;
-    GIFImage.Align:=alNone;
-    GIFImage.AutoSize:=True;
-
-    GIFImage.Top :=( ( GridPanel.Height - GridPanel.Top  ) div 2) - ( GIFImage.Height div 2 );
-    GIFImage.Left:=( ( GridPanel.Width  - GridPanel.Left ) div 2) - ( GIFImage.Width  div 2 );
-
-
-    case State of
-        AnimationON:
-        begin
-            Grid.Visible:=False;
-            GridPanel.DoubleBuffered:=True;
-            GIFImage.Visible:=True;
-            (GIFImage.Picture.Graphic as TGIFImage).Animate:=True;
-        end;
-
-        AnimationOFF:
-        begin
-            (GIFImage.Picture.Graphic as TGIFImage).Animate:=False;
-            GridPanel.DoubleBuffered:=False;
-            GIFImage.Visible:=False;
-            Grid.Visible:=True;
-        end;
-    end;
-
-end;
-
-/// <summary>
 ///     Draw custom border around panels.
 /// </summary>
 
@@ -1704,24 +1677,24 @@ end;
 
 procedure TMainForm.SetGridFocus;
 begin
-    sgAgeView.FHideFocusRect       :=True;
-    sgOpenItems.FHideFocusRect     :=True;
-    sgAddressBook.FHideFocusRect   :=True;
-    sgInvoiceTracker.FHideFocusRect:=True;
-    sgCoCodes.FHideFocusRect       :=True;
-    sgControlStatus.FHideFocusRect :=True;
-    sgPmtTerms.FHideFocusRect      :=True;
-    sgPaidInfo.FHideFocusRect      :=True;
-    sgPerson.FHideFocusRect        :=True;
-    sgGroup3.FHideFocusRect        :=True;
-    sgListSection.FHideFocusRect   :=True;
-    sgListValue.FHideFocusRect     :=True;
-    sgUAC.FHideFocusRect           :=True;
-    sgGroups.FHideFocusRect        :=True;
-    sgSalesResp.FHideFocusRect     :=True;
-    sgPersonResp.FHideFocusRect    :=True;
-    sgAccountType.FHideFocusRect   :=True;
-    sgCustomerGr.FHideFocusRect    :=True;
+//    sgAgeView.FHideFocusRect       :=True;
+//    sgOpenItems.FHideFocusRect     :=True;
+//    sgAddressBook.FHideFocusRect   :=True;
+//    sgInvoiceTracker.FHideFocusRect:=True;
+//    sgCoCodes.FHideFocusRect       :=True;
+//    sgControlStatus.FHideFocusRect :=True;
+//    sgPmtTerms.FHideFocusRect      :=True;
+//    sgPaidInfo.FHideFocusRect      :=True;
+//    sgPerson.FHideFocusRect        :=True;
+//    sgGroup3.FHideFocusRect        :=True;
+//    sgListSection.FHideFocusRect   :=True;
+//    sgListValue.FHideFocusRect     :=True;
+//    sgUAC.FHideFocusRect           :=True;
+//    sgGroups.FHideFocusRect        :=True;
+//    sgSalesResp.FHideFocusRect     :=True;
+//    sgPersonResp.FHideFocusRect    :=True;
+//    sgAccountType.FHideFocusRect   :=True;
+//    sgCustomerGr.FHideFocusRect    :=True;
 end;
 
 /// <summary>
@@ -1879,6 +1852,7 @@ var
     Transactions:  TTransactions;
     NowTime:       TTime;
     iCNT:          integer;
+    MapTable:      TTGeneralTables;
 begin
 
     LogText    :=TThreadFileLog.Create;
@@ -2086,6 +2060,60 @@ begin
       btnUpdateAB.Enabled           :=False;
     end;
 
+    // ------------------------------------------------------------------------------------------------------------------ ASYNC IN SERIES LOAD OF MAP TABLES //
+    OnCreateJob(spMapping);
+
+    MapTable:=TTGeneralTables.Create(TblSalesResponsible, sgSalesResp, '', '', False);
+    MapTable.WaitFor;
+    MapTable:=nil;
+
+    MapTable:=TTGeneralTables.Create(TblPersonResponsible, sgPersonResp, '', '', False);
+    MapTable.WaitFor;
+    MapTable:=nil;
+
+    MapTable:=TTGeneralTables.Create(TblAccountType, sgAccountType, '', '', False);
+    MapTable.WaitFor;
+    MapTable:=nil;
+
+    MapTable:=TTGeneralTables.Create(TblCustomerGroup, sgCustomerGr, '', '', False);
+    MapTable.WaitFor;
+    MapTable:=nil;
+
+    MapTable:=TTGeneralTables.Create(TblGroup3, sgGroup3, '', '', False);
+    MapTable.WaitFor;
+    MapTable:=nil;
+
+    // ------------------------------------------------------------------------------------------------------------------------ ASYNC LOAD OF GENERAL TABLES //
+    OnCreateJob(spGeneral);
+
+    TTGeneralTables.Create(
+        TblCompany,
+        sgCoCodes,
+        TCompany.CO_CODE + COMMA +
+        TCompany.BRANCH + COMMA +
+        TCompany.CONAME + COMMA +
+        TCompany.COADDRESS + COMMA +
+        TCompany.VATNO + COMMA +
+        TCompany.DUNS + COMMA +
+        TCompany.COUNTRY + COMMA +
+        TCompany.CITY + COMMA +
+        TCompany.FMANAGER + COMMA +
+        TCompany.Telephone + COMMA +
+        TCompany.COTYPE + COMMA +
+        TCompany.COCURRENCY + COMMA +
+        TCompany.INTEREST_RATE + COMMA +
+        TCompany.KPI_OVERDUE_TARGET + COMMA +
+        TCompany.KPI_UNALLOCATED_TARGET + COMMA +
+        TCompany.AGENTS + COMMA +
+        TCompany.DIVISIONS,
+        ORDER + TCompany.CO_CODE + ASC
+    );
+
+    TTGeneralTables.Create(TblPmtterms,      sgPmtTerms);
+    TTGeneralTables.Create(TblPaidinfo,      sgPaidInfo);
+    TTGeneralTables.Create(TblPerson,        sgPerson);
+    TTGeneralTables.Create(TblControlStatus, sgControlStatus);
+
     // ----------------------------------------------------------------------------------------------------------------------------- SYNC LOAD AGE SNAPSHOTS //
     OnCreateJob(spSnapshots);
 
@@ -2111,42 +2139,6 @@ begin
             Transactions.Free;
         end;
     end;
-
-    // ------------------------------------------------------------------------------------------------------------------------ ASYNC LOAD OF GENERAL TABLES //
-    OnCreateJob(spDelegate);
-
-    TTGeneralTables.Create(
-        TblCompany,
-        sgCoCodes,
-        TCompany.CO_CODE + COMMA +
-        TCompany.BRANCH + COMMA +
-        TCompany.CONAME + COMMA +
-        TCompany.COADDRESS + COMMA +
-        TCompany.VATNO + COMMA +
-        TCompany.DUNS + COMMA +
-        TCompany.COUNTRY + COMMA +
-        TCompany.CITY + COMMA +
-        TCompany.FMANAGER + COMMA +
-        TCompany.Telephone + COMMA +
-        TCompany.COTYPE + COMMA +
-        TCompany.COCURRENCY + COMMA +
-        TCompany.INTEREST_RATE + COMMA +
-        TCompany.KPI_OVERDUE_TARGET + COMMA +
-        TCompany.KPI_UNALLOCATED_TARGET + COMMA +
-        TCompany.AGENTS + COMMA +
-        TCompany.DIVISIONS,
-        ORDER + TCompany.CO_CODE + ASC
-    );
-
-    TTGeneralTables.Create(TblPmtterms,         sgPmtTerms);
-    TTGeneralTables.Create(TblPaidinfo,         sgPaidInfo);
-    TTGeneralTables.Create(TblGroup3,           sgGroup3);
-    TTGeneralTables.Create(TblPerson,           sgPerson);
-    TTGeneralTables.Create(TblControlStatus,    sgCOntrolStatus);
-    TTGeneralTables.Create(TblSalesResponsible, sgSalesResp);
-    TTGeneralTables.Create(TblPersonResponsible,sgPersonResp);
-    TTGeneralTables.Create(TblAccountType,      sgAccountType);
-    TTGeneralTables.Create(TblCustomerGroup,    sgCustomerGr);
 
     // ------------------------------------------------------------------------------------------------------------------------------------------- FINISHING //
     OnCreateJob(spFinishing);
@@ -3288,13 +3280,15 @@ begin
     if Action_HideSummary.Checked then
     begin
         Footer1.Visible:=False;
-        PanelAgeView.Margins.Bottom:=17;
+        //PanelAgeView.Margins.Bottom:=17;
+        //sgAgeViewShape.Margins.Bottom:=0;
         Action_HideSummary.Checked:=False;
     end
     else
     begin
         Footer1.Visible:=True;
-        PanelAgeView.Margins.Bottom:=0;
+        //PanelAgeView.Margins.Bottom:=0;
+        //sgAgeViewShape.Margins.Bottom:=12;
         Action_HideSummary.Checked:=True;
     end;
 end;
@@ -4729,104 +4723,104 @@ end;
 
 procedure TMainForm.sgAgeViewMouseEnter(Sender: TObject);
 begin
-    if (sgAgeView.Enabled) and (sgAgeView.Visible) then
-        sgAgeView.SetFocus;
+//    if (sgAgeView.Enabled) and (sgAgeView.Visible) then
+//        sgAgeView.SetFocus;
 end;
 
 procedure TMainForm.GroupListBoxMouseEnter(Sender: TObject);
 begin
-    if (GroupListBox.Enabled) and (GroupListBox.Visible) then
-        GroupListBox.SetFocus;
+//    if (GroupListBox.Enabled) and (GroupListBox.Visible) then
+//        GroupListBox.SetFocus;
 end;
 
 procedure TMainForm.GroupListDatesMouseEnter(Sender: TObject);
 begin
-    if (GroupListDates.Enabled) and (GroupListDates.Visible) then
-        GroupListDates.SetFocus;
+//    if (GroupListDates.Enabled) and (GroupListDates.Visible) then
+//        GroupListDates.SetFocus;
 end;
 
 procedure TMainForm.SortListBoxMouseEnter(Sender: TObject);
 begin
-    if (SortListBox.Enabled) and (SortListBox.Visible) then
-        SortListBox.SetFocus;
+//    if (SortListBox.Enabled) and (SortListBox.Visible) then
+//        SortListBox.SetFocus;
 end;
 
 procedure TMainForm.sgOpenItemsMouseEnter(Sender: TObject);
 begin
-    if (sgOpenItems.Enabled) and (sgOpenItems.Visible) then
-        sgOpenItems.SetFocus;
+//    if (sgOpenItems.Enabled) and (sgOpenItems.Visible) then
+//        sgOpenItems.SetFocus;
 end;
 
 procedure TMainForm.sgAddressBookMouseEnter(Sender: TObject);
 begin
-    if (sgAddressBook.Enabled) and (sgAddressBook.Visible) then
-        sgAddressBook.SetFocus;
+//    if (sgAddressBook.Enabled) and (sgAddressBook.Visible) then
+//        sgAddressBook.SetFocus;
 end;
 
 procedure TMainForm.sgInvoiceTrackerMouseEnter(Sender: TObject);
 begin
-    if (sgInvoiceTracker.Enabled) and (sgInvoiceTracker.Visible) then
-        sgInvoiceTracker.SetFocus;
+//    if (sgInvoiceTracker.Enabled) and (sgInvoiceTracker.Visible) then
+//        sgInvoiceTracker.SetFocus;
 end;
 
 procedure TMainForm.sgCoCodesMouseEnter(Sender: TObject);
 begin
-    if (sgCoCodes.Enabled) and (sgCoCodes.Visible) then
-        sgCoCodes.SetFocus;
+//    if (sgCoCodes.Enabled) and (sgCoCodes.Visible) then
+//        sgCoCodes.SetFocus;
 end;
 
 procedure TMainForm.sgPaidInfoMouseEnter(Sender: TObject);
 begin
-    if (sgPaidInfo.Enabled) and (sgPaidInfo.Visible) then
-        sgPaidInfo.SetFocus;
+//    if (sgPaidInfo.Enabled) and (sgPaidInfo.Visible) then
+//        sgPaidInfo.SetFocus;
 end;
 
 procedure TMainForm.sgPersonMouseEnter(Sender: TObject);
 begin
-    if (sgPerson.Enabled) and (sgPerson.Visible) then
-        sgPerson.SetFocus;
+//    if (sgPerson.Enabled) and (sgPerson.Visible) then
+//        sgPerson.SetFocus;
 end;
 
 procedure TMainForm.sgPmtTermsMouseEnter(Sender: TObject);
 begin
-    if (sgPmtTerms.Enabled) and (sgPmtTerms.Visible) then
-        sgPmtTerms.SetFocus;
+//    if (sgPmtTerms.Enabled) and (sgPmtTerms.Visible) then
+//        sgPmtTerms.SetFocus;
 end;
 
 procedure TMainForm.sgGroup3MouseEnter(Sender: TObject);
 begin
-    if (sgGroup3.Enabled) and (sgGroup3.Visible) then
-        sgGroup3.SetFocus;
+//    if (sgGroup3.Enabled) and (sgGroup3.Visible) then
+//        sgGroup3.SetFocus;
 end;
 
 procedure TMainForm.sgControlStatusMouseEnter(Sender: TObject);
 begin
-    if (sgControlStatus.Enabled) and (sgControlStatus.Visible) then
-        sgControlStatus.SetFocus;
+//    if (sgControlStatus.Enabled) and (sgControlStatus.Visible) then
+//        sgControlStatus.SetFocus;
 end;
 
 procedure TMainForm.sgPersonRespMouseEnter(Sender: TObject);
 begin
-    if (sgPersonResp.Enabled) and (sgPersonResp.Visible) then
-        sgPersonResp.SetFocus;
+//    if (sgPersonResp.Enabled) and (sgPersonResp.Visible) then
+//        sgPersonResp.SetFocus;
 end;
 
 procedure TMainForm.sgSalesRespMouseEnter(Sender: TObject);
 begin
-    if (sgSalesResp.Enabled) and (sgSalesResp.Visible) then
-        sgSalesResp.SetFocus;
+//    if (sgSalesResp.Enabled) and (sgSalesResp.Visible) then
+//        sgSalesResp.SetFocus;
 end;
 
 procedure TMainForm.sgAccountTypeMouseEnter(Sender: TObject);
 begin
-    if (sgAccountType.Enabled) and (sgAccountType.Visible) then
-        sgAccountType.SetFocus;
+//    if (sgAccountType.Enabled) and (sgAccountType.Visible) then
+//        sgAccountType.SetFocus;
 end;
 
 procedure TMainForm.sgCustomerGrMouseEnter(Sender: TObject);
 begin
-    if (sgCustomerGr.Enabled) and (sgCustomerGr.Visible) then
-        sgCustomerGr.SetFocus;
+//    if (sgCustomerGr.Enabled) and (sgCustomerGr.Visible) then
+//        sgCustomerGr.SetFocus;
 end;
 
 /// <summary>

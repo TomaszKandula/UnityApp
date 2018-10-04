@@ -87,6 +87,10 @@ begin
 
     TempStr:=StringReplace(Text_Message.Text, CRLF, HTML_BR, [rfReplaceAll]);
 
+    /// <remarks>
+    ///     UpdateOpenItemsRefs and UpdateControlStatusRefs must be executed before TTSendAccountStatement is called!
+    /// </remarks>
+
     MainForm.UpdateOpenItemsRefs(ActionsForm.OpenItemsGrid);
     MainForm.UpdateControlStatusRefs(MainForm.sgControlStatus);
     TTSendAccountStatement.Create(

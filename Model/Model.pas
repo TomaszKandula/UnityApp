@@ -330,6 +330,66 @@ type
     end;
 
     /// <summary>
+    ///
+    /// </summary>
+
+    TPersonResponsible = class(TDataTables)
+    {$TYPEINFO ON}
+    public
+        const Id              : string = 'Id';
+        const SourceDBName    : string = 'SourceDBName';
+        const ErpCode         : string = 'ErpCode';
+        const Description     : string = 'Description';
+        const ExtractDateStamp: string = 'ExtractDateStamp';
+        const ProcessBatchKey : string = 'ProcessBatchKey';
+    end;
+
+    /// <summary>
+    ///
+    /// </summary>
+
+    TSalesResponsible = class(TDataTables)
+    {$TYPEINFO ON}
+    public
+        const Id              : string = 'Id';
+        const SourceDBName    : string = 'SourceDBName';
+        const ErpCode         : string = 'ErpCode';
+        const Description     : string = 'Description';
+        const ExtractDateStamp: string = 'ExtractDateStamp';
+        const ProcessBatchKey : string = 'ProcessBatchKey';
+    end;
+
+    /// <summary>
+    ///
+    /// </summary>
+
+    TAccountType = class(TDataTables)
+    {$TYPEINFO ON}
+    public
+        const Id              : string = 'Id';
+        const SourceDBName    : string = 'SourceDBName';
+        const ErpCode         : string = 'ErpCode';
+        const Description     : string = 'Description';
+        const ExtractDateStamp: string = 'ExtractDateStamp';
+        const ProcessBatchKey : string = 'ProcessBatchKey';
+    end;
+
+    /// <summary>
+    ///
+    /// </summary>
+
+    TCustomerGroup = class(TDataTables)
+    {$TYPEINFO ON}
+    public
+        const Id              : string = 'Id';
+        const SourceDBName    : string = 'SourceDBName';
+        const ErpCode         : string = 'ErpCode';
+        const Description     : string = 'Description';
+        const ExtractDateStamp: string = 'ExtractDateStamp';
+        const ProcessBatchKey : string = 'ProcessBatchKey';
+    end;
+
+    /// <summary>
     ///     Feed from ERP. Contain all possible payment terms for each entity.
     /// </summary>
 

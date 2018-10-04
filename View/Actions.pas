@@ -63,7 +63,6 @@ type
         MasterPanel: TPanel;
         Text: TLabel;
         SimpleText: TLabel;
-        ImgLoadingWindow: TImage;
         btnQMStoggle: TSpeedButton;
         Text9: TLabel;
         Cust_MailGeneral: TEdit;
@@ -148,7 +147,6 @@ type
         procedure SaveDailyComment;
         procedure InitializePanels;
         procedure InitializeSpeedButtons;
-        procedure LoadingAnimation(GIFImage: TImage; State: integer);
     end;
 
 var
@@ -692,27 +690,27 @@ end;
 ///     Animation during data loading.
 /// </summary>
 
-procedure TActionsForm.LoadingAnimation(GIFImage: TImage; State: Integer);
-begin
-    if State = AnimationON then
-    begin
-        MasterPanel.Visible:=False;
-        ImgLoadingWindow.Visible:=True;
-        ActionsForm.DoubleBuffered:=False;
-        (GIFImage.Picture.Graphic as TGIFImage).Animate:=True;
-    end;
-
-    if State = AnimationOFF then
-    begin
-        ActionsForm.DoubleBuffered:=True;
-        (GIFImage.Picture.Graphic as TGIFImage).Animate:=False;
-        ImgLoadingWindow.Visible:=False;
-        MasterPanel.Visible:=True;
-
-        HistoryGrid.Visible:=FHistoryGrid;
-
-    end;
-end;
+//procedure TActionsForm.LoadingAnimation(GIFImage: TImage; State: Integer);
+//begin
+//    if State = AnimationON then
+//    begin
+//        MasterPanel.Visible:=False;
+//        ImgLoadingWindow.Visible:=True;
+//        ActionsForm.DoubleBuffered:=False;
+//        (GIFImage.Picture.Graphic as TGIFImage).Animate:=True;
+//    end;
+//
+//    if State = AnimationOFF then
+//    begin
+//        ActionsForm.DoubleBuffered:=True;
+//        (GIFImage.Picture.Graphic as TGIFImage).Animate:=False;
+//        ImgLoadingWindow.Visible:=False;
+//        MasterPanel.Visible:=True;
+//
+//        HistoryGrid.Visible:=FHistoryGrid;
+//
+//    end;
+//end;
 
 
 // --------------------------------------------------------------------------------------------------------------------------------------- MAIN CLASS EVENTS //
@@ -753,13 +751,13 @@ end;
 
 procedure TActionsForm.FormActivate(Sender: TObject);
 begin
-    LoadingAnimation(ImgLoadingWindow, AnimationON);
+    //LoadingAnimation(ImgLoadingWindow, AnimationON);
     if MainForm.IsConnected then
     begin
         GetData;
         SimpleText.Caption:=MainForm.OpenItemsUpdate;
         SetControls;
-        LoadingAnimation(ImgLoadingWindow, AnimationOFF);
+        //LoadingAnimation(ImgLoadingWindow, AnimationOFF);
     end
     else
     begin
@@ -775,8 +773,8 @@ end;
 
 procedure TActionsForm.FormDestroy(Sender: TObject);
 begin
-    MasterPanel.Visible:=False;
-    ImgLoadingWindow.Visible:=True;
+    //MasterPanel.Visible:=False;
+    //ImgLoadingWindow.Visible:=True;
 end;
 
 
@@ -943,42 +941,42 @@ end;
 
 procedure TActionsForm.Cust_PhoneMouseEnter(Sender: TObject);
 begin
-    if (Cust_Phone.Enabled) and (Cust_Phone.Visible) then Cust_Phone.SetFocus;
+//    if (Cust_Phone.Enabled) and (Cust_Phone.Visible) then Cust_Phone.SetFocus;
 end;
 
 procedure TActionsForm.Cust_PersonMouseEnter(Sender: TObject);
 begin
-    if (Cust_Person.Enabled) and (Cust_Person.Visible) then Cust_Person.SetFocus;
+//    if (Cust_Person.Enabled) and (Cust_Person.Visible) then Cust_Person.SetFocus;
 end;
 
 procedure TActionsForm.Cust_MailMouseEnter(Sender: TObject);
 begin
-    if (Cust_Mail.Enabled) and (Cust_Mail.Visible) then Cust_Mail.SetFocus;
+//    if (Cust_Mail.Enabled) and (Cust_Mail.Visible) then Cust_Mail.SetFocus;
 end;
 
 procedure TActionsForm.Cust_MailGeneralMouseEnter(Sender: TObject);
 begin
-    if (Cust_MailGeneral.Enabled) and (Cust_MailGeneral.Visible) then Cust_MailGeneral.SetFocus;
+//    if (Cust_MailGeneral.Enabled) and (Cust_MailGeneral.Visible) then Cust_MailGeneral.SetFocus;
 end;
 
 procedure TActionsForm.OpenItemsGridMouseEnter(Sender: TObject);
 begin
-    if (OpenItemsGrid.Enabled) and (OpenItemsGrid.Visible) then OpenItemsGrid.SetFocus;
+//    if (OpenItemsGrid.Enabled) and (OpenItemsGrid.Visible) then OpenItemsGrid.SetFocus;
 end;
 
 procedure TActionsForm.HistoryGridMouseEnter(Sender: TObject);
 begin
-    if (HistoryGrid.Enabled) and (HistoryGrid.Visible) then HistoryGrid.SetFocus;
+//    if (HistoryGrid.Enabled) and (HistoryGrid.Visible) then HistoryGrid.SetFocus;
 end;
 
 procedure TActionsForm.DailyComMouseEnter(Sender: TObject);
 begin
-    if (DailyCom.Enabled) and (DailyCom.Visible) then DailyCom.SetFocus;
+//    if (DailyCom.Enabled) and (DailyCom.Visible) then DailyCom.SetFocus;
 end;
 
 procedure TActionsForm.GeneralComMouseEnter(Sender: TObject);
 begin
-    if (GeneralCom.Enabled) and (GeneralCom.Visible) then GeneralCom.SetFocus;
+//    if (GeneralCom.Enabled) and (GeneralCom.Visible) then GeneralCom.SetFocus;
 end;
 
 

@@ -3,28 +3,36 @@
 
 unit Await;
 
+
 interface
+
 
 uses
     Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls,
-    Vcl.Imaging.GIFImg, Vcl.ExtCtrls;
+    Vcl.Imaging.GIFImg, Vcl.ExtCtrls, InterposerClasses;
+
 
 type
 
     /// <summary>
     ///     Allow to display busy status to the user during processing any "heavy duty task".
     /// </summary>
+
     /// <remarks>
-    ///     We doe not allow user to close the window. It is opened and closed by external event.
+    ///     We do not allow user to close the window. It is opened and closed by external event.
     /// </remarks>
 
     TAwaitForm = class(TForm)
         WaitImage: TImage;
         WaitText: TLabel;
+        PanelAwaitForm: TPanel;
+        PanelText: TPanel;
         procedure FormShow(Sender: TObject);
         procedure FormClose(Sender: TObject; var Action: TCloseAction);
         procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure FormCreate(Sender: TObject);
     end;
+
 
 var
     AwaitForm: TAwaitForm;
@@ -36,8 +44,19 @@ implementation
 uses
     MassMailer;
 
+
 {$R *.dfm}
 
+
+/// <summary>
+///     Create window with panel borders set to blue. Please note that this window does not have standard
+///     window shadow due to borderless type.
+/// </summary>
+
+procedure TAwaitForm.FormCreate(Sender: TObject);
+begin
+    PanelAwaitForm.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+end;
 
 
 /// <summary>
@@ -49,6 +68,7 @@ begin
     (WaitImage.Picture.Graphic as TGIFImage).Animate:=True;
 end;
 
+
 /// <summary>
 ///     If window is about to be closed, we disable GIF animation.
 /// </summary>
@@ -57,6 +77,7 @@ procedure TAwaitForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
     (WaitImage.Picture.Graphic as TGIFImage).Animate:=False;
 end;
+
 
 /// <remarks>
 ///     <ALT> + <F4> combination for window close is disabled.

@@ -2,7 +2,7 @@
     <PropertyGroup>
         <ProjectGuid>{AE8AD690-E11A-45C8-BADE-7942A7C3943A}</ProjectGuid>
         <MainSource>Unitylib.dpr</MainSource>
-        <ProjectVersion>18.2</ProjectVersion>
+        <ProjectVersion>18.4</ProjectVersion>
         <Base>True</Base>
         <Config Condition="'$(Config)'==''">Debug</Config>
         <AppType>Library</AppType>

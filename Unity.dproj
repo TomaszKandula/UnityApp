@@ -2,7 +2,7 @@
     <PropertyGroup>
         <ProjectGuid>{E6C141C3-C8D1-4F51-B78A-D33DAD0B438F}</ProjectGuid>
         <MainSource>Unity.dpr</MainSource>
-        <ProjectVersion>18.2</ProjectVersion>
+        <ProjectVersion>18.4</ProjectVersion>
         <Base>True</Base>
         <Config Condition="'$(Config)'==''">Debug</Config>
         <FrameworkType>VCL</FrameworkType>

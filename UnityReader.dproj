@@ -2,7 +2,7 @@
     <PropertyGroup>
         <ProjectGuid>{46CC73EF-8CA5-46CE-A7B9-481F487F4360}</ProjectGuid>
         <MainSource>UnityReader.dpr</MainSource>
-        <ProjectVersion>18.2</ProjectVersion>
+        <ProjectVersion>18.4</ProjectVersion>
         <Base>True</Base>
         <Config Condition="'$(Config)'==''">Debug</Config>
         <AppType>Application</AppType>
