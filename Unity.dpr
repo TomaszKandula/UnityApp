@@ -63,7 +63,7 @@ type
 
     /// <remarks>
     ///     Application constants are defined in main view throught "common.inc" file.
-    /// </remarks>>
+    /// </remarks>
 
 var
     StrWrite:         string;

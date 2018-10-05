@@ -1194,7 +1194,7 @@ object MainForm: TMainForm
     Margins.Top = 0
     Margins.Right = 10
     Margins.Bottom = 0
-    ActivePage = TabSheet3
+    ActivePage = TabSheet1
     Align = alClient
     DoubleBuffered = True
     Font.Charset = DEFAULT_CHARSET
@@ -2546,9 +2546,6 @@ object MainForm: TMainForm
         Align = alClient
         BevelOuter = bvNone
         TabOrder = 2
-        ExplicitLeft = 72
-        ExplicitWidth = 883
-        ExplicitHeight = 209
         object sgAgeView: TStringGrid
           AlignWithMargins = True
           Left = 2
@@ -2583,10 +2580,6 @@ object MainForm: TMainForm
           OnMouseEnter = sgAgeViewMouseEnter
           OnMouseWheelDown = sgAgeViewMouseWheelDown
           OnMouseWheelUp = sgAgeViewMouseWheelUp
-          ExplicitLeft = 20
-          ExplicitTop = 152
-          ExplicitWidth = 1247
-          ExplicitHeight = 401
           ColWidths = (
             40
             40
@@ -15943,5 +15936,11 @@ object MainForm: TMainForm
     OnTimer = ChromiumTimerTimer
     Left = 71
     Top = 648
+  end
+  object FirstAgeLoad: TTimer
+    Enabled = False
+    OnTimer = FirstAgeLoadTimer
+    Left = 586
+    Top = 703
   end
 end

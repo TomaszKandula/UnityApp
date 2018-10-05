@@ -539,7 +539,7 @@ begin
     try
         StopWatch:=TStopWatch.StartNew;
         MainForm.ExecMessage(True, mcStatusBar, stLoading);
-        //MainForm.ExecMessage(False, 28, 'ON');
+        MainForm.ExecMessage(False, scBusyOn, IntToStr(scAGEVIEW));
 
         try
             // Sync
@@ -585,7 +585,7 @@ begin
         // Switch on all timers
         MainForm.SwitchTimers(tmEnabled);
 
-        //MainForm.ExecMessage(False, 28, 'OFF');
+        MainForm.ExecMessage(False, scBusyOff, IntToStr(scAGEVIEW));
 
     end;
 
@@ -687,7 +687,6 @@ begin
     try
         StopWatch:=TStopWatch.StartNew;
         MainForm.ExecMessage(True, mcStatusBar, stDownloading);
-        MainForm.ExecMessage(False, 28, 'ON');
 
         try
             OpenItems.DestGrid   :=MainForm.sgOpenItems;
@@ -720,8 +719,6 @@ begin
         OpenItems.DestGrid.Freeze(False);
         OpenItems.Free;
         FLock.Release;
-
-        MainForm.ExecMessage(False, 28, 'OFF');
 
     end;
 
@@ -820,7 +817,7 @@ function TTAddressBook.Read: boolean;
 var
     DataTables: TDataTables;
 begin
-    MainForm.ExecMessage(False, 28, 'ON');
+    MainForm.ExecMessage(False, scBusyOn, IntToStr(scADDRESSBOOK));
     DataTables:=TDataTables.Create(MainForm.DbConnect);
     try
         // Display busy animation
@@ -865,7 +862,7 @@ begin
         FGrid.Freeze(False);
     end;
 
-    MainForm.ExecMessage(False, 28, 'OFF');
+    MainForm.ExecMessage(False, scBusyOff, IntToStr(scADDRESSBOOK));
 
 end;
 
@@ -877,7 +874,7 @@ var
 begin
     Result:=False;
     Book:=TDataTables.Create(MainForm.DbConnect);
-    MainForm.ExecMessage(False, 28, 'ON');
+    MainForm.ExecMessage(False, scBusy, scShow);
 
     try
         // Update from Address Book String Grid
@@ -949,7 +946,7 @@ begin
         Book.Free;
     end;
 
-    MainForm.ExecMessage(False, 28, 'OFF');
+    MainForm.ExecMessage(False, scBusy, scHide);
 
 end;
 
@@ -967,7 +964,7 @@ begin
     jCNT:=0;
     Check:=0;
 
-    MainForm.ExecMessage(False, 28, 'ON');
+    MainForm.ExecMessage(False, scBusy, scShow);
 
     // Get data from String Grid
     Book:=TDataTables.Create(MainForm.DbConnect);
@@ -1058,7 +1055,7 @@ begin
         MainForm.ExecMessage(False, mcWarn, 'Selected customers are already in Address Book.');
     end;
 
-    MainForm.ExecMessage(False, 28, 'OFF');
+    MainForm.ExecMessage(False, scBusy, scHide);
 
 end;
 

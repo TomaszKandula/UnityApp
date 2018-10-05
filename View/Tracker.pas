@@ -23,29 +23,28 @@ type
         LayoutList: TComboBox;
         TextReminder4: TLabeledEdit;
         Label5: TLabel;
-        Label7: TLabel;
         ErrorEmailFrom: TLabel;
         Exp_Rem2_Switch: TCheckBox;
         Exp_Rem3_Switch: TCheckBox;
-    GroupBoxMiddle: TGroupBox;
-    GroupBoxLeft: TGroupBox;
-    GroupBoxClient: TGroupBox;
+        GroupBoxMiddle: TGroupBox;
+        GroupBoxLeft: TGroupBox;
+        GroupBoxClient: TGroupBox;
         CustomerList: TListView;
         PanelBottom: TPanel;
         btnOK: TSpeedButton;
         btnCancel: TSpeedButton;
         PanelClient: TPanel;
-    LabeledEdit1: TLabeledEdit;
-    Memo: TMemo;
-    Help: TGroupBox;
-    btnApply: TSpeedButton;
+        Memo: TMemo;
+        Help: TGroupBox;
+        btnApply: TSpeedButton;
+        PanelCustomerList: TPanel;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
         procedure btnOKClick(Sender: TObject);
         procedure btnCancelClick(Sender: TObject);
-    procedure CustomerListSelectItem(Sender: TObject; Item: TListItem; Selected: Boolean);
+        procedure CustomerListSelectItem(Sender: TObject; Item: TListItem; Selected: Boolean);
     private
         var pTrackerGrid  :  TStringGrid;
         var pAgeGrid      :  TStringGrid;
@@ -378,6 +377,9 @@ begin
     //pTrackerGrid:=MainForm.sgInvoiceTracker;
     //UserAlias   :='*';
     //Display;
+
+    PanelCustomerList.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+
 end;
 
 procedure TTrackerForm.FormShow(Sender: TObject);

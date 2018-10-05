@@ -686,32 +686,6 @@ begin
     btnCallCustomer.Glyph.TransparentColor:=clWhite;
 end;
 
-/// <summary>
-///     Animation during data loading.
-/// </summary>
-
-//procedure TActionsForm.LoadingAnimation(GIFImage: TImage; State: Integer);
-//begin
-//    if State = AnimationON then
-//    begin
-//        MasterPanel.Visible:=False;
-//        ImgLoadingWindow.Visible:=True;
-//        ActionsForm.DoubleBuffered:=False;
-//        (GIFImage.Picture.Graphic as TGIFImage).Animate:=True;
-//    end;
-//
-//    if State = AnimationOFF then
-//    begin
-//        ActionsForm.DoubleBuffered:=True;
-//        (GIFImage.Picture.Graphic as TGIFImage).Animate:=False;
-//        ImgLoadingWindow.Visible:=False;
-//        MasterPanel.Visible:=True;
-//
-//        HistoryGrid.Visible:=FHistoryGrid;
-//
-//    end;
-//end;
-
 
 // --------------------------------------------------------------------------------------------------------------------------------------- MAIN CLASS EVENTS //
 
@@ -751,13 +725,11 @@ end;
 
 procedure TActionsForm.FormActivate(Sender: TObject);
 begin
-    //LoadingAnimation(ImgLoadingWindow, AnimationON);
     if MainForm.IsConnected then
     begin
         GetData;
         SimpleText.Caption:=MainForm.OpenItemsUpdate;
         SetControls;
-        //LoadingAnimation(ImgLoadingWindow, AnimationOFF);
     end
     else
     begin
@@ -773,8 +745,7 @@ end;
 
 procedure TActionsForm.FormDestroy(Sender: TObject);
 begin
-    //MasterPanel.Visible:=False;
-    //ImgLoadingWindow.Visible:=True;
+    { NO CODE }
 end;
 
 

@@ -96,15 +96,6 @@ type
         var OpenThdId:  integer;
         var SqlColumns: TLists;
         var UpdatedRowsHolder: TIntigers;
-//        var PenWidthTop   :  integer;
-//        var PenWidthBottom:  integer;
-//        var PenWidthLeft  :  integer;
-//        var PenWidthRight :  integer;
-//        var PenColorTop   :  TColor;
-//        var PenColorBottom:  TColor;
-//        var PenColorLeft  :  TColor;
-//        var PenColorRight :  TColor;
-//        var mcBrushColor  :  TColor;
         procedure SetUpdatedRow(Row: integer);
         procedure RecordRowsAffected;
     published
@@ -127,7 +118,8 @@ type
         function  ImportCSV(DialogBox: TOpenDialog; Delimiter: string): boolean;
         function  ExportCSV(DialogBox: TSaveDialog; Delimiter: string): boolean;
         procedure SelectAll;
-//        procedure PanelBorders(FillColor, TopColor, BottomColor, LeftColor, RightColor: TColor);
+        procedure HideGrids;
+        procedure ShowGrids;
     end;
 
     /// <summary>
@@ -546,6 +538,7 @@ begin
         end;
 
         ClipBoard.AsText:=TxtFromSel + CRLF;
+        MainForm.DebugMsg(ClipBoard.AsText);
 
     end;
 
@@ -1281,24 +1274,34 @@ begin
     Self.Selection :=GridRect;
 end;
 
+
 /// <summary>
-///
+///     Show all grids (along with header grids).
 /// </summary>
 
-//procedure TStringGrid.PanelBorders(FillColor, TopColor, BottomColor, LeftColor, RightColor: TColor);
-//begin
-//    // Turn-off styles
-//    BorderStyle   :=bsNone;
-//    // Assign colors and draw
-//    mcBrushColor  :=FillColor;
-//    PenColorTop   :=TopColor;
-//    PenColorBottom:=BottomColor;
-//    PenColorLeft  :=LeftColor;
-//    PenColorRight :=RightColor;
-//    //
-//    PenWidthTop   :=2;
-//    PenWidthRight :=2;
-//end;
+procedure TStringGrid.ShowGrids;
+begin
+    Self.Options:=Self.Options
+        + [goFixedVertLine]
+        + [goFixedHorzLine]
+        + [goVertLine]
+        + [goHorzLine];
+end;
+
+
+/// <summary>
+///     Hide all grids (along with header grids).
+/// </summary>
+
+procedure TStringGrid.HideGrids;
+begin
+    Self.Options:=Self.Options
+        - [goFixedVertLine]
+        - [goFixedHorzLine]
+        - [goVertLine]
+        - [goHorzLine];
+end;
+
 
 /// <summary>
 ///     Allow to disable or enable component drawing.

@@ -439,6 +439,7 @@ type
         PanelCustomerGr: TPanel;
         sgCustomerGr: TStringGrid;
         PanelAgeView: TPanel;
+        FirstAgeLoad: TTimer;
         procedure FormCreate(Sender: TObject);
         procedure FormResize(Sender: TObject);
         procedure FormShow(Sender: TObject);
@@ -718,6 +719,7 @@ type
         procedure sgAccountTypeMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure sgCustomerGrMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure sgCustomerGrMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+        procedure FirstAgeLoadTimer(Sender: TObject);
     private
         var pAllowClose:    boolean;
         var pStartTime:     TTime;
@@ -772,8 +774,9 @@ type
         function   SetNewPassword(Password: string): boolean;
         function   AddressBookExclusion: boolean;
         function   CheckIfDate(StrDate: string): boolean;
+        procedure  BusyScreen(State: integer; WorkingGrid: integer);
     protected
-        procedure Chromium_OnBeforePopup(Sender: TObject; const browser: ICefBrowser; const frame: ICefFrame; const targetUrl, targetFrameName: ustring; targetDisposition: TCefWindowOpenDisposition; userGesture: Boolean; const popupFeatures: TCefPopupFeatures; var windowInfo: TCefWindowInfo; var client: ICefClient; var settings: TCefBrowserSettings; var noJavascriptAccess: Boolean; var Result: Boolean);
+        procedure  Chromium_OnBeforePopup(Sender: TObject; const browser: ICefBrowser; const frame: ICefFrame; const targetUrl, targetFrameName: ustring; targetDisposition: TCefWindowOpenDisposition; userGesture: Boolean; const popupFeatures: TCefPopupFeatures; var windowInfo: TCefWindowInfo; var client: ICefClient; var settings: TCefBrowserSettings; var noJavascriptAccess: Boolean; var Result: Boolean);
         // Process all Windows messgaes
         procedure  WndProc(var msg: Messages.TMessage); override;
     end;
@@ -805,7 +808,9 @@ type
     function WTSRegisterSessionNotification(hWnd: HWND; dwFlags: DWORD): Boolean; stdcall; external Win32API name 'WTSRegisterSessionNotification';
     function WTSUnRegisterSessionNotification(hWnd: HWND):               Boolean; stdcall; external Win32API name 'WTSUnRegisterSessionNotification';
 
+
 {$I .\Include\Common.inc}
+
 
 var
     MainForm :  TMainForm;
@@ -916,17 +921,21 @@ begin
 
             // AWAIT WINDOW -------------------------------------------------------------------------------------------------------------------------------- //
 
-            if (Msg.WParam = 28) then
+            // Turn busy window off and make given component visible
+            if (Msg.WParam = scBusyOff {28}) then
+                BusyScreen(scBusyOff, StrToInt(PChar(Msg.LParam)));
+
+            // Turn busy window on and make given TStringGrid component invisible
+            if (Msg.WParam = scBusyOn {29}) then
+                BusyScreen(scBusyOn, StrToInt(PChar(Msg.LParam)));
+
+            // Show/Hide busy screen
+            if (Msg.WParam = scBusy {30}) then
             begin
-
-                // Turn busy window on
-                if (PCHar(Msg.LParam) = 'OFF') then
-                    AwaitForm.Close;
-
-                // Turn busy window off
-                if (PCHar(Msg.LParam) = 'ON') then
+                if (PChar(Msg.LParam)) = scShow then
                     AwaitForm.Show;
-
+                if (PChar(Msg.LParam)) = scHide then
+                    AwaitForm.Close;
             end;
 
         end;
@@ -1016,6 +1025,7 @@ begin
 
 end;
 
+
 /// <summary>
 ///     Get column reference on demand for Open Items string grid. The reason is, despite we do not change columns order
 ///     at run time programatically, it may be changed on server-side and that will be immediatelly reflected
@@ -1048,6 +1058,7 @@ begin
     OpenItemsRefs.PAreaCol    :=SourceGrid.ReturnColumn(TOpenitems.PArea,     1, 1);
 end;
 
+
 /// <summary>
 ///     Get column reference of Control Status table located in General Tables. Similarly to the "UpdateOpenItemsRefs" method, we use it
 ///     to decrease level of usage of ReturnColumn method.
@@ -1060,6 +1071,7 @@ begin
     ControlStatusRefs.Text       :=SourceGrid.ReturnColumn(TControlStatus.Text, 1, 1);
     ControlStatusRefs.Description:=SourceGrid.ReturnColumn(TControlStatus.Description, 1, 1);
 end;
+
 
 /// <summary>
 ///     Execute on "before popup" - ignore tab sheets and pop-ups.
@@ -1089,6 +1101,7 @@ begin
             );
 end;
 
+
 /// <summary>
 ///     Initialize connection with database server.
 /// </summary>
@@ -1115,6 +1128,7 @@ begin
         DataBase.Free;
     end;
 end;
+
 
 /// <summary>
 ///     Simple wrapper for PostMessage and SendMessage.
@@ -1146,6 +1160,7 @@ begin
     {$D+}
 end;
 
+
 /// <summary>
 ///     Return key value for given list position.
 /// </summary>
@@ -1169,6 +1184,7 @@ begin
 
 end;
 
+
 /// <summary>
 ///     Wrapper for calling moda or modless window.
 /// </summary>
@@ -1187,6 +1203,7 @@ begin
 
 end;
 
+
 /// <summary>
 ///     Wrapper for windows message boxes.
 /// </summary>
@@ -1201,6 +1218,7 @@ begin
     if WndType = mcQuestion1 then Result:=Application.MessageBox(PChar(WndText), PChar(APPCAPTION), MB_OKCANCEL + MB_ICONQUESTION);
     if WndType = mcQuestion2 then Result:=Application.MessageBox(PChar(WndText), PChar(APPCAPTION), MB_YESNO    + MB_ICONQUESTION);
 end;
+
 
 /// <summary>
 ///     Lock/unlock administrator panel on Settings tabsheet.
@@ -1283,6 +1301,7 @@ begin
 
 end;
 
+
 /// <summary>
 ///     Co name convertion.
 /// </summary>
@@ -1343,6 +1362,7 @@ begin
 
 end;
 
+
 /// <summary>
 ///     Return specific CoCode from the given group.
 /// </summary>
@@ -1364,6 +1384,7 @@ begin
     if CoPos = 4 then Result:=IntToStr(StrToInt(MidStr(GroupId, 16, 5)));
 
 end;
+
 
 /// <summary>
 ///     Find other details (currency, division, agents) for given company code. It searches age view string grid.
@@ -1393,6 +1414,7 @@ begin
 
 end;
 
+
 /// <summary>
 ///     Turn off or on given timers.
 /// </summary>
@@ -1415,6 +1437,7 @@ begin
     end;
 
 end;
+
 
 /// <summary>
 ///     oad desired image format to TImage component.
@@ -1440,6 +1463,7 @@ begin
 
 end;
 
+
 /// <summary>
 ///     Convert string date to date format.
 /// </summary>
@@ -1448,6 +1472,7 @@ function TMainForm.CDate(StrDate: string): TDate;
 begin
     Result:=StrToDateDef(StrDate, NULLDATE);
 end;
+
 
 /// <summary>
 ///     Execute chromium reader for reporting.
@@ -1471,6 +1496,7 @@ begin
     );
 
 end;
+
 
 /// <summary>
 ///     Copy file between locations.
@@ -1500,6 +1526,7 @@ begin
 
 end;
 
+
 /// <summary>
 ///     Switch off bold for all fonts used in top menu.
 /// </summary>
@@ -1527,6 +1554,7 @@ begin
     txtSettings.Font.Style    :=[];
     txtSettings.Font.Color    :=clBlack;
 end;
+
 
 /// <summary>
 ///     Check if header panel is already folded (based on its heigh) and unfold it back.
@@ -1562,6 +1590,7 @@ begin
 
 end;
 
+
 /// <summary>
 ///     Draw custom border around panels.
 /// </summary>
@@ -1594,6 +1623,7 @@ begin
     PanelAccountType.PanelBorders     (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
 end;
 
+
 /// <summary>
 ///     Set default column width for string grids.
 /// </summary>
@@ -1618,6 +1648,7 @@ begin
     sgCustomerGr.SetColWidth    (10, 20, 400);
     sgAccountType.SetColWidth   (10, 20, 400);
 end;
+
 
 /// <summary>
 ///     Set row height for string grids.
@@ -1645,6 +1676,7 @@ begin
     sgCustomerGr.SetRowHeight    (sgRowHeight, 25);
 end;
 
+
 /// <summary>
 ///     Set thumb size for scroll
 /// </summary>
@@ -1670,6 +1702,7 @@ begin
     sgAccountType.AutoThumbSize;
     sgCustomerGr.AutoThumbSize;
 end;
+
 
 /// <summary>
 ///     Switch off focusing on all grids.
@@ -1697,6 +1730,7 @@ begin
 //    sgCustomerGr.FHideFocusRect    :=True;
 end;
 
+
 /// <summary>
 ///     Convert to multiline string.
 /// </summary>
@@ -1705,6 +1739,7 @@ function TMainForm.Explode(Text: string; SourceDelim: char): string;
 begin
     Result:=StringReplace(Text, SourceDelim, CRLF, [rfReplaceAll]);
 end;
+
 
 /// <summary>
 ///     Convert multiline string to one line string.
@@ -1728,6 +1763,7 @@ begin
 
 end;
 
+
 /// <summary>
 ///     Validate password.
 /// </summary>
@@ -1750,6 +1786,7 @@ begin
                 Result:=TBcrypt.CheckPassword(Password, Hash, ReHashed);
 
 end;
+
 
 /// <summary>
 ///     Hash given password.
@@ -1775,6 +1812,7 @@ begin
     Result:=True;
 
 end;
+
 
 /// <summary>
 ///     Indicates editable columns.
@@ -1806,6 +1844,7 @@ begin
                 Result:=True;
 end;
 
+
 /// <summary>
 ///     validate string date.
 /// </summary>
@@ -1818,6 +1857,40 @@ begin
     Result:=True;
 
 end;
+
+
+/// <summary>
+///     Allow to display "await window" while making grid component invisible during time consuming task involving the component.
+/// </summary>
+
+procedure TMainForm.BusyScreen(State: integer; WorkingGrid: integer);
+var
+    Grid: TStringGrid;
+begin
+
+    Grid:=nil;
+
+    case WorkingGrid of
+        scAGEVIEW:     Grid:=MainForm.sgAgeView;
+        scOPENITEMS:   Grid:=MainForm.sgOpenItems;
+        scADDRESSBOOK: Grid:=MainForm.sgAddressBook;
+    end;
+
+    if (State = scBusyOn) and (Assigned(Grid)) then
+    begin
+        Grid.Visible:=False;
+        AwaitForm.Show;
+    end;
+
+    if (State = scBusyOff) and (Assigned(Grid)) then
+    begin
+        AwaitForm.Close;
+        Grid.ShowGrids;
+        Grid.Visible:=True;
+    end;
+
+end;
+
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------ START UP //
 
@@ -1849,7 +1922,6 @@ var
     AppVersion:    string;
     Settings:      ISettings;
     UserControl:   TUserControl;
-    Transactions:  TTransactions;
     NowTime:       TTime;
     iCNT:          integer;
     MapTable:      TTGeneralTables;
@@ -2114,32 +2186,6 @@ begin
     TTGeneralTables.Create(TblPerson,        sgPerson);
     TTGeneralTables.Create(TblControlStatus, sgControlStatus);
 
-    // ----------------------------------------------------------------------------------------------------------------------------- SYNC LOAD AGE SNAPSHOTS //
-    OnCreateJob(spSnapshots);
-
-    if not(string.IsNullOrEmpty(GroupListBox.Text)) and not(string.IsNullOrEmpty(GroupListDates.Text)) then
-    begin
-        GroupIdSel:=GroupList[GroupListBox.ItemIndex, 0];
-        GroupNmSel:=GroupList[GroupListBox.ItemIndex, 1];
-        AgeDateSel:=GroupListDates.Text;
-        sgAgeView.Enabled:=True;
-
-        Transactions:=TTransactions.Create(DbConnect);
-        try
-            OpenItemsUpdate:=Transactions.GetDateTime(gdDateTime);
-            OpenItemsStatus:=Transactions.GetStatus(OpenItemsUpdate);
-            if string.IsNullOrEmpty(OpenItemsUpdate) then
-            begin
-                MsgCall(mcWarn, 'Cannot find open items in database. Please contact IT support.');
-                TTReadAgeView.Create(thNullParameter, smRanges);
-            end
-            else
-                TTReadAgeView.Create(thCallOpenItems, smRanges);
-        finally
-            Transactions.Free;
-        end;
-    end;
-
     // ------------------------------------------------------------------------------------------------------------------------------------------- FINISHING //
     OnCreateJob(spFinishing);
 
@@ -2158,10 +2204,22 @@ begin
     LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Application version = ' + AppVersion);
     LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: User SID = ' + GetCurrentUserSid);
 
+    sgAddressBook.Visible:=False;
+    sgAgeView.HideGrids;
+
+    // Load default age view
+    if not(FirstAgeLoad.Enabled) then FirstAgeLoad.Enabled:=True;
+
 end;
+
 
 procedure TMainForm.FormShow(Sender: TObject);
 begin
+
+    // Initialize Chromium
+    ChromiumWindow.ChromiumBrowser.OnBeforePopup:=Chromium_OnBeforePopup;
+    if not(ChromiumWindow.CreateBrowser) then
+        ChromiumTimer.Enabled:=True;
 
     // Update thumb size
     FormResize(self);
@@ -2174,12 +2232,8 @@ begin
     SetGridRowHeights;
     (* SetGridThumbSizes; *)
 
-    // Initialize Chromium
-    ChromiumWindow.ChromiumBrowser.OnBeforePopup:=Chromium_OnBeforePopup;
-    if not(ChromiumWindow.CreateBrowser) then
-        ChromiumTimer.Enabled:=True;
-
 end;
+
 
 procedure TMainForm.FormResize(Sender: TObject);
 begin
@@ -2303,6 +2357,49 @@ end;
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------- TIMERS //
 
+
+/// <summary>
+///     Delayed load of default age snapshot. Make sure that it is disabled at startup. It can run only once when application main window
+///     is fully loaded and presented to the user.
+/// </summary>
+
+procedure TMainForm.FirstAgeLoadTimer(Sender: TObject);
+var
+    Transactions:  TTransactions;
+begin
+
+    if FirstAgeLoad.Enabled then
+    begin
+
+        // Load (sync) default age snapshot
+        if not(string.IsNullOrEmpty(GroupListBox.Text)) and not(string.IsNullOrEmpty(GroupListDates.Text)) then
+        begin
+            GroupIdSel:=GroupList[GroupListBox.ItemIndex, 0];
+            GroupNmSel:=GroupList[GroupListBox.ItemIndex, 1];
+            AgeDateSel:=GroupListDates.Text;
+            sgAgeView.Enabled:=True;
+
+            Transactions:=TTransactions.Create(DbConnect);
+            try
+                OpenItemsUpdate:=Transactions.GetDateTime(gdDateTime);
+                OpenItemsStatus:=Transactions.GetStatus(OpenItemsUpdate);
+                if string.IsNullOrEmpty(OpenItemsUpdate) then
+                begin
+                    MsgCall(mcWarn, 'Cannot find open items in database. Please contact IT support.');
+                    TTReadAgeView.Create(thNullParameter, smRanges);
+                end
+                else
+                    TTReadAgeView.Create(thCallOpenItems, smRanges);
+            finally
+                Transactions.Free;
+            end;
+        end;
+
+        FirstAgeLoad.Enabled:=False;
+
+    end;
+
+end;
 
 /// <summary>
 ///     Initiaize ChromiumWindow with time lag.
@@ -4200,6 +4297,10 @@ procedure TMainForm.sgAgeViewKeyDown(Sender: TObject; var Key: Word; Shift: TShi
 
 begin
 
+    // <CTRL> + <C>
+    if (Key = 67) and (Shift = [ssCtrl]) then
+        sgAgeView.CopyCutPaste(adCopy);
+
     // Allow editing only free columns
     if
         (
@@ -4297,10 +4398,6 @@ end;
 
 procedure TMainForm.sgAgeViewKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-
-    // <CTRL> + <C>
-    if (Key = 67) and (Shift = [ssCtrl]) then
-        sgAgeView.CopyCutPaste(adCopy);
 
     // <CTRL> + <A>
     if (Key = 65) and (Shift = [ssCtrl]) then
