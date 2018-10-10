@@ -6016,7 +6016,6 @@ procedure TMainForm.btnPassUpdateClick(Sender: TObject);
 begin
 
     // Check fields
-
     if
         (
             not(string.IsNullOrEmpty(EditCurrentPassword.Text))
@@ -6033,7 +6032,6 @@ begin
     begin
 
         // Check given password
-
         if not(CheckGivenPassword(EditPassword.Text)) then
         begin
             MsgCall(mcWarn, 'Incorrect password, please re-type it and try again.');
@@ -6041,7 +6039,6 @@ begin
         end;
 
         // Incorrent match
-
         if EditNewPassword.Text <> EditNewPasswordConfirmation.Text then
         begin
             MsgCall(mcWarn, 'New password and its confirmation does not match, please re-type it and try again.');
@@ -6050,7 +6047,6 @@ begin
         else
 
         // Hash and save
-
         begin
             if SetNewPassword(EditNewPassword.Text) then
             begin
@@ -6066,7 +6062,6 @@ begin
             else
 
             // Cannot hash and save
-
             begin
                 MsgCall(mcError, 'Cannot save new password. Please contact IT support.');
             end;
@@ -6077,7 +6072,6 @@ begin
     else
 
     // No fields can be empty
-
     begin
         MsgCall(mcWarn, 'Please provide with current password, new password and its confirmation.');
     end;
@@ -6098,7 +6092,6 @@ var
 begin
 
     // No password given
-
     if btnUnlock.Caption = 'Lock' then
     begin
         SetSettingsPanel(spLock);
@@ -6113,7 +6106,6 @@ begin
     else
 
     // Password is valid
-
     if CheckGivenPassword(EditPassword.Text) then
     begin
 
@@ -6167,7 +6159,6 @@ begin
     else
 
     // Invalid password
-
     begin
         MsgCall(mcWarn, 'Incorrect password, please re-type it and try again.');
         EditPassword.Text:='';
