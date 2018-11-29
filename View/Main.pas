@@ -440,6 +440,16 @@ type
         sgCustomerGr: TStringGrid;
         PanelAgeView: TPanel;
         FirstAgeLoad: TTimer;
+        Shape: TShape;
+        Action_Free3: TMenuItem;
+        N4: TMenuItem;
+        N12: TMenuItem;
+        N23: TMenuItem;
+        Action_SalesResp: TMenuItem;
+        Action_CustomerGrp: TMenuItem;
+        Action_PersonResp: TMenuItem;
+        Action_AccountType: TMenuItem;
+        N24: TMenuItem;
         procedure FormCreate(Sender: TObject);
         procedure FormResize(Sender: TObject);
         procedure FormShow(Sender: TObject);
@@ -720,6 +730,11 @@ type
         procedure sgCustomerGrMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure sgCustomerGrMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure FirstAgeLoadTimer(Sender: TObject);
+        procedure Action_Free3Click(Sender: TObject);
+        procedure Action_SalesRespClick(Sender: TObject);
+        procedure Action_CustomerGrpClick(Sender: TObject);
+        procedure Action_PersonRespClick(Sender: TObject);
+        procedure Action_AccountTypeClick(Sender: TObject);
     private
         var pAllowClose:    boolean;
         var pStartTime:     TTime;
@@ -1159,7 +1174,6 @@ begin
     end;
     {$D+}
 end;
-
 
 /// <summary>
 ///     Return key value for given list position.
@@ -2234,8 +2248,7 @@ begin
 
 end;
 
-
-procedure TMainForm.FormResize(Sender: TObject);
+procedure TMainForm.FormResize(Sender: TObject);
 begin
 
     /// <remarks>
@@ -2899,6 +2912,14 @@ begin
             Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.CUID, 1, 1), sgAgeView.Row]);
             Item.SubItems.Add(GetSCUID(sgAgeView.Row));
             Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME, 1, 1), sgAgeView.Row]);
+            Item.SubItems.Add('Not set');
+            Item.SubItems.Add('Not found');
+            Item.SubItems.Add('Not found');
+            Item.SubItems.Add('Not set');
+            Item.SubItems.Add('Not set');
+            Item.SubItems.Add('Not set');
+            Item.SubItems.Add('Not set');
+            Item.SubItems.Add('Not set');
         end
         // Many customers
         else
@@ -2912,6 +2933,14 @@ begin
                     Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.CUID, 1, 1), iCNT]);
                     Item.SubItems.Add(GetSCUID(iCNT));
                     Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME, 1, 1), iCNT]);
+                    Item.SubItems.Add('Not set');
+                    Item.SubItems.Add('Not found');
+                    Item.SubItems.Add('Not found');
+                    Item.SubItems.Add('Not set');
+                    Item.SubItems.Add('Not set');
+                    Item.SubItems.Add('Not set');
+                    Item.SubItems.Add('Not set');
+                    Item.SubItems.Add('Not set');
                 end;
             end;
         end;
@@ -3081,7 +3110,7 @@ end;
 ///     Below methods setups FilterForm properties and execute filter window.
 /// </summary>
 
-// Filter via INF7
+// Filter via INF7 (to be removed)
 procedure TMainForm.Action_INF7_FilterClick(Sender: TObject);
 begin
     FilterForm.FColName:=TSnapshots.fINF7;
@@ -3091,13 +3120,73 @@ begin
     WndCall(FilterForm, stModal);
 end;
 
-// Filter via INF4
+// Filter via INF4 (to be removed)
 procedure TMainForm.Action_INF4_FilterClick(Sender: TObject);
 begin
     FilterForm.FColName  :=TSnapshots.fINF4;
     FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=fltINF4;
+    WndCall(FilterForm, stModal);
+end;
+
+// Filter via GROUP 3 (to be removed)
+procedure TMainForm.Action_Gr3_FilterClick(Sender: TObject);
+begin
+    FilterForm.FColName  :=TSnapshots.fGROUP3;
+    FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
+    FilterForm.FGrid     :=MainForm.sgAgeView;
+    FilterForm.FFilterNum:=fltGR3;
+    WndCall(FilterForm, stModal);
+end;
+
+// Filter via Sales Responsible
+procedure TMainForm.Action_SalesRespClick(Sender: TObject);
+begin
+    FilterForm.FColName  :=TSnapshots.fSalesResponsible;
+    FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
+    FilterForm.FGrid     :=MainForm.sgAgeView;
+    FilterForm.FFilterNum:=fltSalesRep;
+    WndCall(FilterForm, stModal);
+end;
+
+// Filter vi Person Responsible
+procedure TMainForm.Action_PersonRespClick(Sender: TObject);
+begin
+    FilterForm.FColName  :=TSnapshots.fPersonResponsible;
+    FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
+    FilterForm.FGrid     :=MainForm.sgAgeView;
+    FilterForm.FFilterNum:=fltPersonRep;
+    WndCall(FilterForm, stModal);
+end;
+
+// Filter via Customer Group
+procedure TMainForm.Action_CustomerGrpClick(Sender: TObject);
+begin
+    FilterForm.FColName  :=TSnapshots.fCustomerGroup;
+    FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
+    FilterForm.FGrid     :=MainForm.sgAgeView;
+    FilterForm.FFilterNum:=fltCustGroup;
+    WndCall(FilterForm, stModal);
+end;
+
+// Filter via Account Type
+procedure TMainForm.Action_AccountTypeClick(Sender: TObject);
+begin
+    FilterForm.FColName  :=TSnapshots.fAccountType;
+    FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
+    FilterForm.FGrid     :=MainForm.sgAgeView;
+    FilterForm.FFilterNum:=fltAccType;
+    WndCall(FilterForm, stModal);
+end;
+
+// Filter via FOLLOW UP
+procedure TMainForm.Action_FollowUp_FilterClick(Sender: TObject);
+begin
+    FilterForm.FColName  :=TGeneral.fFOLLOWUP;
+    FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
+    FilterForm.FGrid     :=MainForm.sgAgeView;
+    FilterForm.FFilterNum:=fltFOLLOWUP;
     WndCall(FilterForm, stModal);
 end;
 
@@ -3131,27 +3220,7 @@ begin
     WndCall(FilterForm, stModal);
 end;
 
-// Filter via FOLLOW UP
-procedure TMainForm.Action_FollowUp_FilterClick(Sender: TObject);
-begin
-    FilterForm.FColName  :=TGeneral.fFOLLOWUP;
-    FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
-    FilterForm.FGrid     :=MainForm.sgAgeView;
-    FilterForm.FFilterNum:=fltFOLLOWUP;
-    WndCall(FilterForm, stModal);
-end;
-
-// Filter via GROUP 3
-procedure TMainForm.Action_Gr3_FilterClick(Sender: TObject);
-begin
-    FilterForm.FColName  :=TSnapshots.fGROUP3;
-    FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
-    FilterForm.FGrid     :=MainForm.sgAgeView;
-    FilterForm.FFilterNum:=fltGR3;
-    WndCall(FilterForm, stModal);
-end;
-
-// Filter via FREE1
+// Filter via FREE 1
 procedure TMainForm.Action_Free1Click(Sender: TObject);
 begin
     FilterForm.FColName  :=TGeneral.Free1;
@@ -3168,6 +3237,16 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=fltFree2;
+    WndCall(FilterForm, stModal);
+end;
+
+// Filter via FREE 3
+procedure TMainForm.Action_Free3Click(Sender: TObject);
+begin
+    FilterForm.FColName  :=TGeneral.Free3;
+    FilterForm.FOverdue  :=TSnapshots.fOVERDUE;
+    FilterForm.FGrid     :=MainForm.sgAgeView;
+    FilterForm.FFilterNum:=fltFree3;
     WndCall(FilterForm, stModal);
 end;
 
@@ -3487,31 +3566,31 @@ end;
 procedure TMainForm.Action_RemoveClick(Sender: TObject);
 begin
 
-    // Exit condition
-    if not(IsConnected) then
-    begin
-        MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
-        Exit;
-    end;
-
-    TrackerForm.CUID:=sgInvoiceTracker.Cells[sgInvoiceTracker.ReturnColumn(TTracker.CUID, 1, 1), sgInvoiceTracker.Row];
-
-    // R/W user can remove item
-    if (MainForm.AccessLevel = acReadWrite) and (UpperCase(MainForm.WinUserName) = UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
-        if MsgCall(mcQuestion2, 'Are you sure you want to remove selected customer?') = IDYES then
-            TrackerForm.Delete;
-
-    // R/W user cannot remove other item
-    if (MainForm.AccessLevel = acReadWrite) and (UpperCase(MainForm.WinUserName) <> UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
-        MsgCall(mcWarn, 'You cannot remove someone''s else item.');
-
-    // Administrator can remove any item
-    if (MainForm.AccessLevel = acADMIN) then
-        if MsgCall(mcQuestion2, 'Are you sure you want to remove selected customer?') = IDYES then
-            TrackerForm.Delete;
-
-    // Read only user cannot remove anything
-    if (MainForm.AccessLevel = acReadOnly) then MsgCall(mcWarn, 'You don''t have permission to remove items.');
+//    // Exit condition
+//    if not(IsConnected) then
+//    begin
+//        MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+//        Exit;
+//    end;
+//
+//    TrackerForm.CUID:=sgInvoiceTracker.Cells[sgInvoiceTracker.ReturnColumn(TTracker.CUID, 1, 1), sgInvoiceTracker.Row];
+//
+//    // R/W user can remove item
+//    if (MainForm.AccessLevel = acReadWrite) and (UpperCase(MainForm.WinUserName) = UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
+//        if MsgCall(mcQuestion2, 'Are you sure you want to remove selected customer?') = IDYES then
+//            TrackerForm.Delete;
+//
+//    // R/W user cannot remove other item
+//    if (MainForm.AccessLevel = acReadWrite) and (UpperCase(MainForm.WinUserName) <> UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
+//        MsgCall(mcWarn, 'You cannot remove someone''s else item.');
+//
+//    // Administrator can remove any item
+//    if (MainForm.AccessLevel = acADMIN) then
+//        if MsgCall(mcQuestion2, 'Are you sure you want to remove selected customer?') = IDYES then
+//            TrackerForm.Delete;
+//
+//    // Read only user cannot remove anything
+//    if (MainForm.AccessLevel = acReadOnly) then MsgCall(mcWarn, 'You don''t have permission to remove items.');
 
 end;
 
@@ -4406,6 +4485,9 @@ begin
         sgAgeView.CopyCutPaste(adCopy);
         MsgCall(mcInfo, 'The selected spreadsheet has been copied to clipboard.');
     end;
+
+    // temp
+    if ( Shift = [ssCtrl] ) and ( Key = 76 ) then btnMakeGroupAgeClick(self);
 
 end;
 

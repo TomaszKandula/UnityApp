@@ -1213,11 +1213,7 @@ object MainForm: TMainForm
       Highlighted = True
       ImageIndex = 8
       ParentDoubleBuffered = False
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
-      object ChromiumWindow: TChromiumWindow
+      object Shape: TShape
         AlignWithMargins = True
         Left = 17
         Top = 17
@@ -1227,6 +1223,23 @@ object MainForm: TMainForm
         Margins.Top = 17
         Margins.Right = 17
         Margins.Bottom = 17
+        Align = alClient
+        Pen.Color = clSkyBlue
+        ExplicitLeft = 88
+        ExplicitTop = 248
+        ExplicitWidth = 65
+        ExplicitHeight = 65
+      end
+      object ChromiumWindow: TChromiumWindow
+        AlignWithMargins = True
+        Left = 17
+        Top = 17
+        Width = 1253
+        Height = 657
+        Margins.Left = 20
+        Margins.Top = 20
+        Margins.Right = 20
+        Margins.Bottom = 20
         Color = clCream
         TabOrder = 0
         OnAfterCreated = ChromiumWindowAfterCreated
@@ -2540,13 +2553,13 @@ object MainForm: TMainForm
       object PanelAgeView: TPanel
         AlignWithMargins = True
         Left = 17
-        Top = 152
+        Top = 135
         Width = 1253
-        Height = 401
+        Height = 435
         Margins.Left = 17
-        Margins.Top = 17
+        Margins.Top = 0
         Margins.Right = 17
-        Margins.Bottom = 17
+        Margins.Bottom = 0
         Align = alClient
         BevelOuter = bvNone
         TabOrder = 2
@@ -2555,7 +2568,7 @@ object MainForm: TMainForm
           Left = 2
           Top = 2
           Width = 1249
-          Height = 397
+          Height = 431
           Margins.Left = 2
           Margins.Top = 2
           Margins.Right = 2
@@ -2624,10 +2637,6 @@ object MainForm: TMainForm
       Caption = 'OPEN ITEMS'
       Highlighted = True
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Header2: TPanel
         Left = 0
         Top = 0
@@ -6476,10 +6485,6 @@ object MainForm: TMainForm
       Caption = 'UNIDENTIFIED'
       Highlighted = True
       ImageIndex = 7
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Header6: TPanel
         Left = 0
         Top = 0
@@ -6543,10 +6548,6 @@ object MainForm: TMainForm
       Caption = 'ADDRESS BOOK'
       Highlighted = True
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Header3: TPanel
         Left = 0
         Top = 0
@@ -6814,10 +6815,6 @@ object MainForm: TMainForm
       Highlighted = True
       ImageIndex = 4
       OnShow = TabSheet4Show
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Header4: TPanel
         Left = 0
         Top = 0
@@ -6921,8 +6918,8 @@ object MainForm: TMainForm
           AlignWithMargins = True
           Left = 10
           Top = 10
-          Width = 200
-          Height = 200
+          Width = 1233
+          Height = 536
           Margins.Left = 10
           Margins.Top = 10
           Margins.Right = 10
@@ -10046,6 +10043,8 @@ object MainForm: TMainForm
           Visible = False
           ExplicitLeft = 456
           ExplicitTop = 240
+          ExplicitWidth = 200
+          ExplicitHeight = 200
         end
         object sgInvoiceTracker: TStringGrid
           AlignWithMargins = True
@@ -10098,10 +10097,6 @@ object MainForm: TMainForm
       ImageIndex = 8
       OnResize = TabSheet7Resize
       OnShow = TabSheet7Show
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Header7: TPanel
         Left = 0
         Top = 0
@@ -10207,10 +10202,6 @@ object MainForm: TMainForm
         TabOrder = 1
         object Page1: TTabSheet
           Caption = 'Companies'
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object PanelCoCodes: TPanel
             AlignWithMargins = True
             Left = 17
@@ -10261,10 +10252,6 @@ object MainForm: TMainForm
         object Page2: TTabSheet
           Caption = 'Payment Terms'
           ImageIndex = 1
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object PanelPmtTerms: TPanel
             AlignWithMargins = True
             Left = 17
@@ -10315,10 +10302,6 @@ object MainForm: TMainForm
         object Page10: TTabSheet
           Caption = 'Control Status'
           ImageIndex = 9
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object PanelControlStatus: TPanel
             AlignWithMargins = True
             Left = 17
@@ -10371,10 +10354,6 @@ object MainForm: TMainForm
         object Page3: TTabSheet
           Caption = 'Paid Info'
           ImageIndex = 2
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object PanelPaidInfo: TPanel
             AlignWithMargins = True
             Left = 17
@@ -10427,10 +10406,6 @@ object MainForm: TMainForm
         object Page7: TTabSheet
           Caption = 'Person Responsible'
           ImageIndex = 6
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object PanelPersonResp: TPanel
             AlignWithMargins = True
             Left = 17
@@ -10481,10 +10456,6 @@ object MainForm: TMainForm
         object Page6: TTabSheet
           Caption = 'Sales Responsible'
           ImageIndex = 5
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object PanelSalesResp: TPanel
             AlignWithMargins = True
             Left = 17
@@ -10535,10 +10506,6 @@ object MainForm: TMainForm
         object Page9: TTabSheet
           Caption = 'Account Type'
           ImageIndex = 8
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object PanelAccountType: TPanel
             AlignWithMargins = True
             Left = 17
@@ -10589,10 +10556,6 @@ object MainForm: TMainForm
         object Page8: TTabSheet
           Caption = 'Customer Group'
           ImageIndex = 7
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object PanelCustomerGr: TPanel
             AlignWithMargins = True
             Left = 17
@@ -10643,10 +10606,6 @@ object MainForm: TMainForm
         object Page4: TTabSheet
           Caption = 'Person'
           ImageIndex = 3
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object PanelPerson: TPanel
             AlignWithMargins = True
             Left = 17
@@ -10699,10 +10658,6 @@ object MainForm: TMainForm
         object Page5: TTabSheet
           Caption = 'Group3'
           ImageIndex = 4
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object PanelGroup3: TPanel
             AlignWithMargins = True
             Left = 17
@@ -10757,10 +10712,6 @@ object MainForm: TMainForm
       Highlighted = True
       ImageIndex = 6
       OnShow = TabSheet8Show
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Header8: TPanel
         Left = 0
         Top = 0
@@ -14351,6 +14302,36 @@ object MainForm: TMainForm
         Caption = 'INF4'
         OnClick = Action_INF4_FilterClick
       end
+      object Action_Gr3_Filter: TMenuItem
+        Caption = 'Group 3'
+        OnClick = Action_Gr3_FilterClick
+      end
+      object N24: TMenuItem
+        Caption = '-'
+      end
+      object Action_SalesResp: TMenuItem
+        Caption = 'Sales Responsible'
+        OnClick = Action_SalesRespClick
+      end
+      object Action_PersonResp: TMenuItem
+        Caption = 'Person Responsible'
+        OnClick = Action_PersonRespClick
+      end
+      object Action_CustomerGrp: TMenuItem
+        Caption = 'Customer Group'
+        OnClick = Action_CustomerGrpClick
+      end
+      object Action_AccountType: TMenuItem
+        Caption = 'Account Type'
+        OnClick = Action_AccountTypeClick
+      end
+      object N23: TMenuItem
+        Caption = '-'
+      end
+      object Action_FollowUp_Filter: TMenuItem
+        Caption = 'Follow Up'
+        OnClick = Action_FollowUp_FilterClick
+      end
       object Action_CoCode_Filter: TMenuItem
         Caption = 'Co Code'
         OnClick = Action_CoCode_FilterClick
@@ -14363,21 +14344,23 @@ object MainForm: TMainForm
         Caption = 'Division'
         OnClick = Action_Division_FilterClick
       end
-      object Action_FollowUp_Filter: TMenuItem
-        Caption = 'Follow Up'
-        OnClick = Action_FollowUp_FilterClick
-      end
-      object Action_Gr3_Filter: TMenuItem
-        Caption = 'Group 3'
-        OnClick = Action_Gr3_FilterClick
+      object N4: TMenuItem
+        Caption = '-'
       end
       object Action_Free1: TMenuItem
-        Caption = 'Free1'
+        Caption = 'Free 1'
         OnClick = Action_Free1Click
       end
       object Action_Free2: TMenuItem
-        Caption = 'Free2'
+        Caption = 'Free 2'
         OnClick = Action_Free2Click
+      end
+      object Action_Free3: TMenuItem
+        Caption = 'Free 3'
+        OnClick = Action_Free3Click
+      end
+      object N12: TMenuItem
+        Caption = '-'
       end
       object Action_Ranges: TMenuItem
         Caption = 'Ranges'

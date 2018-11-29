@@ -275,16 +275,9 @@ object ViewMailerForm: TViewMailerForm
       Font.Style = [fsBold]
       ParentFont = False
     end
-    object Text1: TLabel
-      Left = 18
-      Top = 151
-      Width = 90
-      Height = 13
-      Caption = 'Custom salutation:'
-    end
     object Text2: TLabel
       Left = 18
-      Top = 213
+      Top = 143
       Width = 85
       Height = 13
       Caption = 'Custom message:'
@@ -304,24 +297,24 @@ object ViewMailerForm: TViewMailerForm
       Cursor = crHandPoint
       TabStop = False
       Caption = 'Overdue only'
-      TabOrder = 3
+      TabOrder = 2
       OnKeyUp = cbAddOverdueKeyUp
     end
     object PanelMessage: TPanel
       Left = 16
-      Top = 232
+      Top = 162
       Width = 505
-      Height = 131
+      Height = 201
       BevelOuter = bvNone
       Color = clWhite
       ParentBackground = False
-      TabOrder = 2
+      TabOrder = 1
       object Text_Message: TMemo
         AlignWithMargins = True
         Left = 2
         Top = 2
         Width = 501
-        Height = 127
+        Height = 197
         Margins.Left = 2
         Margins.Top = 2
         Margins.Right = 2
@@ -340,42 +333,7 @@ object ViewMailerForm: TViewMailerForm
         ScrollBars = ssVertical
         TabOrder = 0
         OnKeyUp = Text_MessageKeyUp
-      end
-    end
-    object PanelSalutation: TPanel
-      Left = 16
-      Top = 170
-      Width = 505
-      Height = 25
-      BevelOuter = bvNone
-      Color = clWhite
-      ParentBackground = False
-      TabOrder = 1
-      object Text_Salut: TMemo
-        AlignWithMargins = True
-        Left = 2
-        Top = 2
-        Width = 501
-        Height = 21
-        Margins.Left = 2
-        Margins.Top = 2
-        Margins.Right = 2
-        Margins.Bottom = 2
-        TabStop = False
-        Align = alClient
-        BorderStyle = bsNone
-        Color = clCream
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clNavy
-        Font.Height = -11
-        Font.Name = 'Tahoma'
-        Font.Style = []
-        MaxLength = 255
-        ParentFont = False
-        TabOrder = 0
-        WantReturns = False
-        WordWrap = False
-        OnKeyUp = Text_SalutKeyUp
+        ExplicitHeight = 127
       end
     end
     object PanelSubject: TPanel
@@ -387,18 +345,11 @@ object ViewMailerForm: TViewMailerForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 0
-      object Text_Subject: TMemo
-        AlignWithMargins = True
-        Left = 2
-        Top = 2
+      object Text_Subject: TEdit
+        Left = 4
+        Top = 4
         Width = 501
-        Height = 21
-        Margins.Left = 2
-        Margins.Top = 2
-        Margins.Right = 2
-        Margins.Bottom = 2
-        TabStop = False
-        Align = alClient
+        Height = 20
         BorderStyle = bsNone
         Color = clCream
         Font.Charset = DEFAULT_CHARSET
@@ -406,11 +357,8 @@ object ViewMailerForm: TViewMailerForm
         Font.Height = -11
         Font.Name = 'Tahoma'
         Font.Style = []
-        MaxLength = 255
         ParentFont = False
         TabOrder = 0
-        WantReturns = False
-        WordWrap = False
         OnKeyUp = Text_SubjectKeyUp
       end
     end

@@ -457,7 +457,7 @@ begin
                     MailBody:=StringReplace(MailBody, '{TITLE}', 'STATEMENT', [rfReplaceAll]);
 
         // Custom salutation and the message
-        if CustSalut <> '' then MailBody:=StringReplace(MailBody, '{SALUT}', CustSalut, [rfReplaceAll]);
+        //if CustSalut <> '' then MailBody:=StringReplace(MailBody, '{SALUT}', CustSalut, [rfReplaceAll]);
         if CustMess  <> '' then MailBody:=StringReplace(MailBody, '{TEXT}',  CustMess,  [rfReplaceAll]);
 
         XMailer  :=MailFrom;

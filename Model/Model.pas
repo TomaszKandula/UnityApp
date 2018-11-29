@@ -10,7 +10,7 @@ uses
 
     /// <remarks>
     ///     Because we use ADODB and no other ORM, we encapsulate columns name under table name (class), so we have one point of reference
-    ///     and yet we can use it to build SQL statements much like LINQ.
+    ///     and yet we can use it to build own SQL statements much like LINQ allows.
     /// </remarks>
 
 type
@@ -428,7 +428,9 @@ type
         const INDV_REM4  : string = 'SendReminder4';
         const EXP_REM2   : string = 'ExceptionReminder2';
         const EXP_REM3   : string = 'ExceptionReminder3';
-        const LAYOUT_ID  : string = 'LayoutId'; // Foreign Key -> Primary Key in "REMINDER LAYOUTS" }
+        const SCUID      : string = 'Sciud';
+        const LAYOUT     : string = 'ReminderLayout';
+        const STATEMENT  : string = 'PreStatement';
     end;
 
     /// <summary>

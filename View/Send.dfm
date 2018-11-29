@@ -162,16 +162,9 @@ object SendForm: TSendForm
       Font.Style = [fsBold]
       ParentFont = False
     end
-    object Text1: TLabel
+    object Text_Custom_Message: TLabel
       Left = 18
-      Top = 92
-      Width = 90
-      Height = 13
-      Caption = 'Custom salutation:'
-    end
-    object Text2: TLabel
-      Left = 18
-      Top = 147
+      Top = 99
       Width = 85
       Height = 13
       Caption = 'Custom message:'
@@ -184,14 +177,14 @@ object SendForm: TSendForm
       Cursor = crHandPoint
       TabStop = False
       Caption = 'Overdue only'
-      TabOrder = 2
+      TabOrder = 1
       OnKeyUp = cbAddOverdueKeyUp
     end
     object PanelMessage: TPanel
       Left = 16
-      Top = 166
+      Top = 118
       Width = 505
-      Height = 123
+      Height = 171
       BevelOuter = bvNone
       Color = clWhite
       ParentBackground = False
@@ -201,7 +194,7 @@ object SendForm: TSendForm
         Left = 2
         Top = 2
         Width = 501
-        Height = 119
+        Height = 167
         Margins.Left = 2
         Margins.Top = 2
         Margins.Right = 2
@@ -220,42 +213,7 @@ object SendForm: TSendForm
         ScrollBars = ssVertical
         TabOrder = 0
         OnKeyUp = Text_MessageKeyUp
-      end
-    end
-    object PanelSalutation: TPanel
-      Left = 16
-      Top = 111
-      Width = 505
-      Height = 25
-      BevelOuter = bvNone
-      Color = clWhite
-      ParentBackground = False
-      TabOrder = 1
-      object Text_Salut: TMemo
-        AlignWithMargins = True
-        Left = 2
-        Top = 2
-        Width = 501
-        Height = 21
-        Margins.Left = 2
-        Margins.Top = 2
-        Margins.Right = 2
-        Margins.Bottom = 2
-        TabStop = False
-        Align = alClient
-        BorderStyle = bsNone
-        Color = clCream
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clNavy
-        Font.Height = -11
-        Font.Name = 'Tahoma'
-        Font.Style = []
-        MaxLength = 255
-        ParentFont = False
-        TabOrder = 0
-        WantReturns = False
-        WordWrap = False
-        OnKeyUp = Text_SalutKeyUp
+        ExplicitHeight = 119
       end
     end
   end

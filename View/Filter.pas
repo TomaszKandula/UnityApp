@@ -28,28 +28,40 @@ type
         procedure FormKeyPress(Sender: TObject; var Key: Char);
         procedure cbSelectAllClick(Sender: TObject);
         procedure btnRemoveClick(Sender: TObject);
-    procedure FilterListClick(Sender: TObject);
+        procedure FilterListClick(Sender: TObject);
+        procedure FilterListClickCheck(Sender: TObject);
     private
+        var CheckEvent :  boolean;
         // Holds values and theirs state
         var INF7       :  TLists;
         var INF4       :  TLists;
+        var Gr3        :  TLists;
+        var SalesResp  :  TLists;
+        var PersonResp :  TLists;
+        var CustomerGrp:  TLists;
+        var AccountType:  TLists;
+        var FollowUp   :  TLists;
         var CoCode     :  TLists;
         var Agent      :  TLists;
         var Division   :  TLists;
-        var FollowUp   :  TLists;
-        var Gr3        :  TLists;
         var Free1      :  TLists;
         var Free2      :  TLists;
+        var Free3      :  TLists;
         // Usage counter (how many times column was filtered)
-        var countINF7      : integer;
-        var countINF4      : integer;
-        var countCoCode    : integer;
-        var countAgent     : integer;
-        var countDivision  : integer;
-        var countFollowUp  : integer;
-        var countGr3       : integer;
-        var countFree1     : integer;
-        var countFree2     : integer;
+        var countINF7       : integer;
+        var countINF4       : integer;
+        var countGr3        : integer;
+        var countSalesResp  : integer;
+        var countPersonResp : integer;
+        var countCustomerGrp: integer;
+        var countAccountType: integer;
+        var countFollowUp   : integer;
+        var countCoCode     : integer;
+        var countAgent      : integer;
+        var countDivision   : integer;
+        var countFree1      : integer;
+        var countFree2      : integer;
+        var countFree3      : integer;
         // Global filter count
         var HowManyFlts    : integer;
     public
@@ -90,25 +102,35 @@ uses
 
 procedure TFilterForm.FilterClearAll;
 begin
-    SetLength(FilterForm.INF7,     1, 2);
-    SetLength(FilterForm.INF4,     1, 2);
-    SetLength(FilterForm.CoCode,   1, 2);
-    SetLength(FilterForm.Agent,    1, 2);
-    SetLength(FilterForm.Division, 1, 2);
-    SetLength(FilterForm.FollowUp, 1, 2);
-    SetLength(FilterForm.Gr3,      1, 2);
-    SetLength(FilterForm.Free1,    1, 2);
-    SetLength(FilterForm.Free2,    1, 2);
-    countINF7    :=0;
-    countINF4    :=0;
-    countCoCode  :=0;
-    countAgent   :=0;
-    countDivision:=0;
-    countFollowUp:=0;
-    countGr3     :=0;
-    countFree1   :=0;
-    countFree2   :=0;
-    HowManyFlts  :=0;
+    SetLength(FilterForm.INF7,        1, 2);
+    SetLength(FilterForm.INF4,        1, 2);
+    SetLength(FilterForm.Gr3,         1, 2);
+    SetLength(FilterForm.SalesResp,   1, 2);
+    SetLength(FilterForm.PersonResp,  1, 2);
+    SetLength(FilterForm.CustomerGrp, 1, 2);
+    SetLength(FilterForm.AccountType, 1, 2);
+    SetLength(FilterForm.FollowUp,    1, 2);
+    SetLength(FilterForm.CoCode,      1, 2);
+    SetLength(FilterForm.Agent,       1, 2);
+    SetLength(FilterForm.Division,    1, 2);
+    SetLength(FilterForm.Free1,       1, 2);
+    SetLength(FilterForm.Free2,       1, 2);
+    SetLength(FilterForm.Free3,       1, 2);
+    countINF7       :=0;
+    countINF4       :=0;
+    countGr3        :=0;
+    countSalesResp  :=0;
+    countPersonResp :=0;
+    countCustomerGrp:=0;
+    countAccountType:=0;
+    countFollowUp   :=0;
+    countCoCode     :=0;
+    countAgent      :=0;
+    countDivision   :=0;
+    countFree1      :=0;
+    countFree2      :=0;
+    countFree3      :=0;
+    HowManyFlts     :=0;
     InUse:=False;
 end;
 
@@ -146,15 +168,20 @@ begin
     if (FGrid <> nil) and (not(string.IsNullOrEmpty(FColName))) then
     begin
         FColNumber:=FGrid.ReturnColumn(FColName, 1, 1);
-        if FFilterNum = fltINF7     then FilterInit(INF7);
-        if FFilterNum = fltINF4     then FilterInit(INF4);
-        if FFilterNum = fltCoCode   then FilterInit(CoCode);
-        if FFilterNum = fltAgent    then FilterInit(Agent);
-        if FFilterNum = fltDIVISION then FilterInit(Division);
-        if FFilterNum = fltFOLLOWUP then FilterInit(FollowUp);
-        if FFilterNum = fltGR3      then FilterInit(Gr3);
-        if FFilterNum = fltFREE1    then FilterInit(Free1);
-        if FFilterNum = fltFREE2    then FilterInit(Free2);
+        if FFilterNum = fltINF7      then FilterInit(INF7);
+        if FFilterNum = fltINF4      then FilterInit(INF4);
+        if FFilterNum = fltGR3       then FilterInit(Gr3);
+        if FFilterNum = fltSalesRep  then FilterInit(SalesResp);
+        if FFilterNum = fltPersonRep then FilterInit(PersonResp);
+        if FFilterNum = fltCustGroup then FilterInit(CustomerGrp);
+        if FFilterNum = fltAccType   then FilterInit(AccountType);
+        if FFilterNum = fltFOLLOWUP  then FilterInit(FollowUp);
+        if FFilterNum = fltCoCode    then FilterInit(CoCode);
+        if FFilterNum = fltAgent     then FilterInit(Agent);
+        if FFilterNum = fltDIVISION  then FilterInit(Division);
+        if FFilterNum = fltFREE1     then FilterInit(Free1);
+        if FFilterNum = fltFREE2     then FilterInit(Free2);
+        if FFilterNum = fltFREE3     then FilterInit(Free3);
     end;
 end;
 
@@ -167,31 +194,44 @@ begin
 
     if Change = fltIncrement then
     begin
-        if (FFilterNum = fltINF7)     and (countINF7     = 0) then Inc(countINF7);
-        if (FFilterNum = fltINF4)     and (countINF4     = 0) then Inc(countINF4);
-        if (FFilterNum = fltCoCode)   and (countCoCode   = 0) then Inc(countCoCode);
-        if (FFilterNum = fltAgent)    and (countAgent    = 0) then Inc(countAgent);
-        if (FFilterNum = fltDIVISION) and (countDivision = 0) then Inc(countDivision);
-        if (FFilterNum = fltFOLLOWUP) and (countFollowUp = 0) then Inc(countFollowUp);
-        if (FFilterNum = fltGR3)      and (countGr3      = 0) then Inc(countGr3);
-        if (FFilterNum = fltFREE1)    and (countFree1    = 0) then Inc(countFree1);
-        if (FFilterNum = fltFREE2)    and (countFree2    = 0) then Inc(countFree2);
+        if (FFilterNum = fltINF7)      and (countINF7        = 0) then Inc(countINF7);
+        if (FFilterNum = fltINF4)      and (countINF4        = 0) then Inc(countINF4);
+        if (FFilterNum = fltGR3)       and (countGr3         = 0) then Inc(countGr3);
+        if (FFilterNum = fltSalesRep)  and (countSalesResp   = 0) then Inc(countSalesResp);
+        if (FFilterNum = fltPersonRep) and (countPersonResp  = 0) then Inc(countPersonResp);
+        if (FFilterNum = fltCustGroup) and (countCustomerGrp = 0) then Inc(countCustomerGrp);
+        if (FFilterNum = fltAccType)   and (countAccountType = 0) then Inc(countAccountType);
+        if (FFilterNum = fltFOLLOWUP)  and (countFollowUp    = 0) then Inc(countFollowUp);
+        if (FFilterNum = fltCoCode)    and (countCoCode      = 0) then Inc(countCoCode);
+        if (FFilterNum = fltAgent)     and (countAgent       = 0) then Inc(countAgent);
+        if (FFilterNum = fltDIVISION)  and (countDivision    = 0) then Inc(countDivision);
+        if (FFilterNum = fltFREE1)     and (countFree1       = 0) then Inc(countFree1);
+        if (FFilterNum = fltFREE2)     and (countFree2       = 0) then Inc(countFree2);
+        if (FFilterNum = fltFREE3)     and (countFree3       = 0) then Inc(countFree3);
     end;
 
     if Change = fltDecrement then
     begin
-        if (FFilterNum = fltINF7)     and (countINF7     > 0) then Dec(countINF7);
-        if (FFilterNum = fltINF4)     and (countINF4     > 0) then Dec(countINF4);
-        if (FFilterNum = fltCoCode)   and (countCoCode   > 0) then Dec(countCoCode);
-        if (FFilterNum = fltAgent)    and (countAgent    > 0) then Dec(countAgent);
-        if (FFilterNum = fltDIVISION) and (countDivision > 0) then Dec(countDivision);
-        if (FFilterNum = fltFOLLOWUP) and (countFollowUp > 0) then Dec(countFollowUp);
-        if (FFilterNum = fltGR3)      and (countGr3      > 0) then Dec(countGr3);
-        if (FFilterNum = fltFREE1)    and (countFree1    > 0) then Dec(countFree1);
-        if (FFilterNum = fltFREE2)    and (countFree2    > 0) then Dec(countFree2);
+        if (FFilterNum = fltINF7)      and (countINF7        > 0) then Dec(countINF7);
+        if (FFilterNum = fltINF4)      and (countINF4        > 0) then Dec(countINF4);
+        if (FFilterNum = fltGR3)       and (countGr3         > 0) then Dec(countGr3);
+        if (FFilterNum = fltSalesRep)  and (countSalesResp   > 0) then Dec(countSalesResp);
+        if (FFilterNum = fltPersonRep) and (countPersonResp  > 0) then Dec(countPersonResp);
+        if (FFilterNum = fltCustGroup) and (countCustomerGrp > 0) then Dec(countCustomerGrp);
+        if (FFilterNum = fltAccType)   and (countAccountType > 0) then Dec(countAccountType);
+        if (FFilterNum = fltFOLLOWUP)  and (countFollowUp    > 0) then Dec(countFollowUp);
+        if (FFilterNum = fltCoCode)    and (countCoCode      > 0) then Dec(countCoCode);
+        if (FFilterNum = fltAgent)     and (countAgent       > 0) then Dec(countAgent);
+        if (FFilterNum = fltDIVISION)  and (countDivision    > 0) then Dec(countDivision);
+        if (FFilterNum = fltFREE1)     and (countFree1       > 0) then Dec(countFree1);
+        if (FFilterNum = fltFREE2)     and (countFree2       > 0) then Dec(countFree2);
+        if (FFilterNum = fltFREE3)     and (countFree3       > 0) then Dec(countFree3);
     end;
 
-    HowManyFlts:=countINF7 + countINF4 + countCoCode + countAgent + countDivision + countFollowUp + countGr3 + countFree1 + countFree2;
+    HowManyFlts:=countINF7 + countINF4 + countGr3 +
+                 countSalesResp + countPersonResp + countCustomerGrp + countAccountType +
+                 countFollowUp + countCoCode + countAgent + countDivision +
+                 countFree1 + countFree2 + countFree3;
 
 end;
 
@@ -426,15 +466,20 @@ begin
     FilterPrep;
     FilterSelectCheck;
     btnRemove.Enabled:=False;
-    if (FFilterNum = fltINF7)     and (countINF7     > 0) then SetAndQuit;
-    if (FFilterNum = fltINF4)     and (countINF4     > 0) then SetAndQuit;
-    if (FFilterNum = fltCOCODE)   and (countCoCode   > 0) then SetAndQuit;
-    if (FFilterNum = fltAGENT)    and (countAgent    > 0) then SetAndQuit;
-    if (FFilterNum = fltDIVISION) and (countDivision > 0) then SetAndQuit;
-    if (FFilterNum = fltFOLLOWUP) and (countFollowUp > 0) then SetAndQuit;
-    if (FFilterNum = fltGR3)      and (countGr3      > 0) then SetAndQuit;
-    if (FFilterNum = fltFree1)    and (countFree1    > 0) then SetAndQuit;
-    if (FFilterNum = fltFree2)    and (countFree2    > 0) then SetAndQuit;
+    if (FFilterNum = fltINF7)      and (countINF7        > 0) then SetAndQuit;
+    if (FFilterNum = fltINF4)      and (countINF4        > 0) then SetAndQuit;
+    if (FFilterNum = fltGR3)       and (countGr3         > 0) then SetAndQuit;
+    if (FFilterNum = fltSalesRep)  and (countSalesResp   > 0) then SetAndQuit;
+    if (FFilterNum = fltPersonRep) and (countPersonResp  > 0) then SetAndQuit;
+    if (FFilterNum = fltCustGroup) and (countCustomerGrp > 0) then SetAndQuit;
+    if (FFilterNum = fltAccType)   and (countAccountType > 0) then SetAndQuit;
+    if (FFilterNum = fltFOLLOWUP)  and (countFollowUp    > 0) then SetAndQuit;
+    if (FFilterNum = fltCOCODE)    and (countCoCode      > 0) then SetAndQuit;
+    if (FFilterNum = fltAGENT)     and (countAgent       > 0) then SetAndQuit;
+    if (FFilterNum = fltDIVISION)  and (countDivision    > 0) then SetAndQuit;
+    if (FFilterNum = fltFree1)     and (countFree1       > 0) then SetAndQuit;
+    if (FFilterNum = fltFree2)     and (countFree2       > 0) then SetAndQuit;
+    if (FFilterNum = fltFree3)     and (countFree3       > 0) then SetAndQuit;
 end;
 
 
@@ -456,15 +501,20 @@ begin
             FGrid.Freeze(True);
 
             // Filter
-            if FFilterNum = fltINF7     then FilterNow(INF7);
-            if FFilterNum = fltINF4     then FilterNow(INF4);
-            if FFilterNum = fltCoCode   then FilterNow(CoCode);
-            if FFilterNum = fltAgent    then FilterNow(Agent);
-            if FFilterNum = fltDIVISION then FilterNow(Division);
-            if FFilterNum = fltFOLLOWUP then FilterNow(FollowUp);
-            if FFilterNum = fltGR3      then FilterNow(Gr3);
-            if FFilterNum = fltFREE1    then FilterNow(Free1);
-            if FFilterNum = fltFREE2    then FilterNow(Free2);
+            if FFilterNum = fltINF7      then FilterNow(INF7);
+            if FFilterNum = fltINF4      then FilterNow(INF4);
+            if FFilterNum = fltGR3       then FilterNow(Gr3);
+            if FFilterNum = fltSalesRep  then FilterNow(SalesResp);
+            if FFilterNum = fltPersonRep then FilterNow(PersonResp);
+            if FFilterNum = fltCustGroup then FilterNow(CustomerGrp);
+            if FFilterNum = fltAccType   then FilterNow(AccountType);
+            if FFilterNum = fltFOLLOWUP  then FilterNow(FollowUp);
+            if FFilterNum = fltCoCode    then FilterNow(CoCode);
+            if FFilterNum = fltAgent     then FilterNow(Agent);
+            if FFilterNum = fltDIVISION  then FilterNow(Division);
+            if FFilterNum = fltFREE1     then FilterNow(Free1);
+            if FFilterNum = fltFREE2     then FilterNow(Free2);
+            if FFilterNum = fltFREE3     then FilterNow(Free3);
 
             // Re-compute aging summary
             AgeView.ComputeAgeSummary(FGrid);
@@ -506,15 +556,20 @@ begin
             FGrid.Freeze(True);
 
             // Unfilter
-            if FFilterNum = fltINF7     then FilterRemove(INF7);
-            if FFilterNum = fltINF4     then FilterRemove(INF4);
-            if FFilterNum = fltCoCode   then FilterRemove(CoCode);
-            if FFilterNum = fltAgent    then FilterRemove(Agent);
-            if FFilterNum = fltDIVISION then FilterRemove(Division);
-            if FFilterNum = fltFOLLOWUP then FilterRemove(FollowUp);
-            if FFilterNum = fltGR3      then FilterRemove(Gr3);
-            if FFilterNum = fltFREE1    then FilterRemove(Free1);
-            if FFilterNum = fltFREE2    then FilterRemove(Free2);
+            if FFilterNum = fltINF7      then FilterRemove(INF7);
+            if FFilterNum = fltINF4      then FilterRemove(INF4);
+            if FFilterNum = fltGR3       then FilterRemove(Gr3);
+            if FFilterNum = fltSalesRep  then FilterRemove(SalesResp);
+            if FFilterNum = fltPersonRep then FilterRemove(PersonResp);
+            if FFilterNum = fltCustGroup then FilterRemove(CustomerGrp);
+            if FFilterNum = fltAccType   then FilterRemove(AccountType);
+            if FFilterNum = fltFOLLOWUP  then FilterRemove(FollowUp);
+            if FFilterNum = fltCoCode    then FilterRemove(CoCode);
+            if FFilterNum = fltAgent     then FilterRemove(Agent);
+            if FFilterNum = fltDIVISION  then FilterRemove(Division);
+            if FFilterNum = fltFREE1     then FilterRemove(Free1);
+            if FFilterNum = fltFREE2     then FilterRemove(Free2);
+            if FFilterNum = fltFREE3     then FilterRemove(Free3);
 
             // Re-compute aging summary
             AgeView.ComputeAgeSummary(FGrid);
@@ -554,14 +609,35 @@ begin
 
 end;
 
+/// <remarks>
+///
+/// </remarks>
+
 procedure TFilterForm.FilterListClick(Sender: TObject);
 begin
-    if FilterList.Checked[FilterList.ItemIndex] then
-        FilterList.Checked[FilterList.ItemIndex]:=False
-            else
-                FilterList.Checked[FilterList.ItemIndex]:=True;
+
+    if not(CheckEvent) then
+    begin
+
+        if FilterList.Checked[FilterList.ItemIndex] then
+            FilterList.Checked[FilterList.ItemIndex]:=False
+                else
+                    FilterList.Checked[FilterList.ItemIndex]:=True;
+
+    end;
+
+    CheckEvent:=False;
+
 end;
 
+/// <summary>
+///
+/// </summary>
+
+procedure TFilterForm.FilterListClickCheck(Sender: TObject);
+begin
+    CheckEvent:=True;
+end;
 
 // ----------------------------------------------------------------------------------------------------------------------------------------- KEYBOARD EVENTS //
 

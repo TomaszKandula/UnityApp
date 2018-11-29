@@ -161,6 +161,7 @@ object FilterForm: TFilterForm
         Margins.Right = 2
         Margins.Bottom = 2
         TabStop = False
+        OnClickCheck = FilterListClickCheck
         Align = alClient
         BorderStyle = bsNone
         ItemHeight = 13

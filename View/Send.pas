@@ -18,9 +18,7 @@ type
     TSendForm = class(TForm)
         btnCancel: TSpeedButton;
         btnSendEmail: TSpeedButton;
-        Text_Salut: TMemo;
-        Text1: TLabel;
-        Text2: TLabel;
+    Text_Custom_Message: TLabel;
         Text_Message: TMemo;
         Shape_Customer: TShape;
         Shape_Invoices: TShape;
@@ -36,7 +34,6 @@ type
         Text_Terms: TLabel;
         Text_Warn: TLabel;
         cbAddOverdue: TCheckBox;
-        PanelSalutation: TPanel;
         PanelMessage: TPanel;
         PanelClient: TPanel;
         PanelBottom: TPanel;
@@ -47,7 +44,7 @@ type
         procedure Text_SalutKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure Text_MessageKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure cbAddOverdueKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure FormShow(Sender: TObject);
+        procedure FormShow(Sender: TObject);
     private
         procedure ExecuteMailer;
     end;
@@ -76,7 +73,7 @@ procedure TSendForm.ExecuteMailer;
 var
     TempStr: string;
 begin
-    if (Text_Salut.Text = '') or (Text_Message.Text = '') then
+    if String.IsNullOrEmpty(Text_Message.Text) then
     begin
         MainForm.MsgCall(mcWarn, 'Please provide with custom message and salutation.');
         Exit;
@@ -96,7 +93,7 @@ begin
     TTSendAccountStatement.Create(
         maCustom,
         'Account Statement',
-        Text_Salut.Text,
+        strNull,
         TempStr,
         cbAddOverdue.Checked,
         ActionsForm.OpenItemsGrid,
@@ -121,13 +118,12 @@ var
 begin
     Settings:=TSettings.Create;
     SendForm.Caption:=Settings.GetStringValue(ApplicationDetails, 'WND_SEND', APPCAPTION);
-    PanelSalutation.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
     PanelMessage.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
 end;
 
 procedure TSendForm.FormShow(Sender: TObject);
 begin
-    Text_Salut.SetFocus;
+    Text_Message.SetFocus;
 end;
 
 
@@ -165,7 +161,7 @@ end;
 
 procedure TSendForm.cbAddOverdueKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-    if Key = VK_TAB then Text_Salut.SetFocus;
+    if Key = VK_TAB then Text_Message.SetFocus;
 end;
 
 

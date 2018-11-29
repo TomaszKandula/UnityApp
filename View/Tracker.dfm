@@ -20,6 +20,7 @@ object TrackerForm: TTrackerForm
   Scaled = False
   OnActivate = FormActivate
   OnCreate = FormCreate
+  OnDestroy = FormDestroy
   OnKeyPress = FormKeyPress
   OnShow = FormShow
   PixelsPerInch = 96
@@ -34,7 +35,6 @@ object TrackerForm: TTrackerForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
-    ExplicitTop = 667
     object btnOK: TSpeedButton
       Left = 776
       Top = 13
@@ -144,6 +144,7 @@ object TrackerForm: TTrackerForm
         FFFFFF7AB8631B85002D8F093493103794143794143493102E8F0914810078B7
         60FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0F7ED8DC27954A33638
         951538951553A3358DC279EFF6ECFFFFFFFFFFFFFFFFFFFFFFFF}
+      OnClick = btnApplyClick
     end
   end
   object PanelClient: TPanel
@@ -161,7 +162,6 @@ object TrackerForm: TTrackerForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 1
-    ExplicitHeight = 607
     object GroupBoxClient: TGroupBox
       Left = 16
       Top = 13
@@ -183,10 +183,6 @@ object TrackerForm: TTrackerForm
         Align = alClient
         BevelOuter = bvNone
         TabOrder = 0
-        ExplicitLeft = 184
-        ExplicitTop = 200
-        ExplicitWidth = 185
-        ExplicitHeight = 41
         object CustomerList: TListView
           AlignWithMargins = True
           Left = 15
@@ -208,11 +204,9 @@ object TrackerForm: TTrackerForm
           RowSelect = True
           TabOrder = 0
           ViewStyle = vsReport
+          OnKeyDown = CustomerListKeyDown
+          OnKeyUp = CustomerListKeyUp
           OnSelectItem = CustomerListSelectItem
-          ExplicitLeft = 16
-          ExplicitTop = 16
-          ExplicitWidth = 153
-          ExplicitHeight = 9
         end
       end
     end
@@ -251,7 +245,7 @@ object TrackerForm: TTrackerForm
         Height = 13
         Caption = 'E-mail address to be sent from:'
       end
-      object EmailFromList: TComboBox
+      object ListEmailFrom: TComboBox
         Left = 29
         Top = 106
         Width = 172
@@ -261,10 +255,16 @@ object TrackerForm: TTrackerForm
         BevelKind = bkFlat
         BevelOuter = bvNone
         Style = csOwnerDrawFixed
-        Color = clWhite
+        Color = clCream
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clNavy
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        ParentFont = False
         TabOrder = 1
       end
-      object LayoutList: TComboBox
+      object ListLayout: TComboBox
         Left = 29
         Top = 51
         Width = 172
@@ -275,6 +275,12 @@ object TrackerForm: TTrackerForm
         BevelOuter = bvNone
         Style = csOwnerDrawFixed
         Color = clCream
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clNavy
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        ParentFont = False
         TabOrder = 0
       end
     end
@@ -362,27 +368,29 @@ object TrackerForm: TTrackerForm
         TabOrder = 5
         Text = '0'
       end
-      object Exp_Rem2_Switch: TCheckBox
+      object Exp_Rem3_Switch: TCheckBox
         Left = 221
         Top = 134
         Width = 68
         Height = 17
+        Cursor = crHandPoint
         Caption = 'Enabled'
         Checked = True
         State = cbChecked
         TabOrder = 2
       end
-      object Exp_Rem3_Switch: TCheckBox
+      object Exp_Rem2_Switch: TCheckBox
         Left = 136
         Top = 133
         Width = 68
         Height = 17
+        Cursor = crHandPoint
         Caption = 'Enabled'
         Checked = True
         State = cbChecked
         TabOrder = 4
       end
-      object TLabeledEdit
+      object TextReminder0: TLabeledEdit
         Left = 37
         Top = 51
         Width = 41
@@ -437,8 +445,6 @@ object TrackerForm: TTrackerForm
           'Reminder 2 and 3 may be switched off.')
         ParentFont = False
         TabOrder = 0
-        ExplicitWidth = 227
-        ExplicitHeight = 110
       end
     end
   end

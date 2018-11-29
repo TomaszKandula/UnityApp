@@ -32,29 +32,25 @@ type
         Text_Footer: TLabel;
         Text_Invoices: TLabel;
         Text_Terms: TLabel;
-        Text1: TLabel;
         Text2: TLabel;
         cbAddOverdue: TCheckBox;
         PanelMessage: TPanel;
         Text_Message: TMemo;
-        PanelSalutation: TPanel;
-        Text_Salut: TMemo;
         PanelList: TPanel;
         CustomerList: TListView;
         PanelSubject: TPanel;
-        Text_Subject: TMemo;
         Text3: TLabel;
         EmailList: TComboBox;
         PanelEmailFrom: TPanel;
         Text4: TLabel;
         PanelEmailContainer: TPanel;
+        Text_Subject: TEdit;
         procedure btnCancelClick(Sender: TObject);
         procedure btnSendEmailClick(Sender: TObject);
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormClose(Sender: TObject; var Action: TCloseAction);
         procedure Text_SubjectKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-        procedure Text_SalutKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure Text_MessageKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure cbAddOverdueKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure EmailListKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -192,10 +188,6 @@ begin
         )
     or
         (
-            string.IsNullOrEmpty(Text_Salut.Text)
-        )
-    or
-        (
             string.IsNullOrEmpty(Text_Message.Text)
         )
     then
@@ -235,7 +227,7 @@ begin
     // Process listed customers in worker thread
     TTSendAccountStatements.Create(
         Text_Subject.Text,
-        Text_Salut.Text,
+        strNull,
         MessStr,
         cbAddOverdue.Checked,
         MainForm.sgOpenItems,
@@ -286,7 +278,6 @@ begin
     PanelEmailContainer.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
     PanelEmailFrom.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
     PanelSubject.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    PanelSalutation.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
     PanelMessage.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
 
 end;
@@ -351,11 +342,6 @@ end;
 
 
 procedure TViewMailerForm.Text_SubjectKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-begin
-    if Key = VK_TAB then Text_Salut.SetFocus;
-end;
-
-procedure TViewMailerForm.Text_SalutKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if Key = VK_TAB then Text_Message.SetFocus;
 end;

@@ -16,16 +16,16 @@ type
 
     TTrackerForm = class(TForm)
         Label6: TLabel;
-        EmailFromList: TComboBox;
+        ListEmailFrom: TComboBox;
         TextReminder1: TLabeledEdit;
         TextReminder2: TLabeledEdit;
         TextReminder3: TLabeledEdit;
-        LayoutList: TComboBox;
+        ListLayout: TComboBox;
         TextReminder4: TLabeledEdit;
         Label5: TLabel;
         ErrorEmailFrom: TLabel;
-        Exp_Rem2_Switch: TCheckBox;
         Exp_Rem3_Switch: TCheckBox;
+        Exp_Rem2_Switch: TCheckBox;
         GroupBoxMiddle: TGroupBox;
         GroupBoxLeft: TGroupBox;
         GroupBoxClient: TGroupBox;
@@ -38,38 +38,37 @@ type
         Help: TGroupBox;
         btnApply: TSpeedButton;
         PanelCustomerList: TPanel;
+        TextReminder0: TLabeledEdit;
         procedure FormCreate(Sender: TObject);
+        procedure FormDestroy(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
         procedure btnOKClick(Sender: TObject);
         procedure btnCancelClick(Sender: TObject);
         procedure CustomerListSelectItem(Sender: TObject; Item: TListItem; Selected: Boolean);
+        procedure btnApplyClick(Sender: TObject);
+        procedure CustomerListKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure CustomerListKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    protected
+        var Multiselect: TStringList;
+        var CtrlClicked: boolean;
     private
-        var pTrackerGrid  :  TStringGrid;
-        var pAgeGrid      :  TStringGrid;
+        var pTrackerGrid  : TStringGrid;
+        var pAgeGrid      : TStringGrid;
+        var pReminderMail : string;
+        var pStatementMail: string;
     public
-        var UserAlias :  string;
-        var CUID      :  string;
-        var SCUID     :  string;
-        var CoCode    :  string;
-        var Branch    :  string;
-        var CustNumber:  string;
-        var CustName  :  string;
-        var Layout    :  string;
-        var Indv_Rem1 :  string;
-        var Indv_Rem2 :  string;
-        var Indv_Rem3 :  string;
-        var Indv_Rem4 :  string;
-        var Exp_Rem2  :  string;
-        var Exp_Rem3  :  string;
-        property  TrackerGrid :  TStringGrid read pTrackerGrid;
-        property  AgeGrid     :  TStringGrid read pAgeGrid;
-        procedure Execute;
-        procedure Display;
-        procedure Add;
-        procedure Delete;
-        procedure GetData;
+        property  TrackerGrid  : TStringGrid read pTrackerGrid;
+        property  AgeGrid      : TStringGrid read pAgeGrid;
+        property  ReminderMail : string      read pReminderMail  write pReminderMail;
+        property  StatementMail: string      read pStatementMail write pStatementMail;
+        procedure GetSendFrom(List: TComboBox);
+        procedure GetEmailAddress(Scuid: string);
+        procedure SetEmailAddresses(List: TListView);
+        procedure GetLayouts(LayoutContainer: TComboBox);
+        procedure ApplyTimings(List: TListView);
+        procedure SaveToDb;
     end;
 
 var
@@ -88,233 +87,296 @@ uses
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
 
+
 /// <summary>
 ///
 /// </summary>
 
-procedure TTrackerForm.Execute;
+procedure TTrackerForm.GetSendFrom(List: TComboBox);
 var
-    Tables: TDataTables;
+    Database: TDataTables;
+    CoCode1:  string;
+    CoCode2:  string;
+    CoCode3:  string;
+    CoCode4:  string;
 begin
 
-    UserAlias:=UpperCase(MainForm.WinUserName);
-    Tables:=TDataTables.Create(MainForm.DbConnect);
+    // Get Co Codes that are opened (age view snapshot)
+    if MainForm.tcCOCODE1.Caption <> 'n/a' then CoCode1:=MainForm.tcCOCODE1.Caption;
+    if MainForm.tcCOCODE2.Caption <> 'n/a' then CoCode2:=MainForm.tcCOCODE2.Caption;
+    if MainForm.tcCOCODE3.Caption <> 'n/a' then CoCode3:=MainForm.tcCOCODE3.Caption;
+    if MainForm.tcCOCODE4.Caption <> 'n/a' then CoCode4:=MainForm.tcCOCODE4.Caption;
 
+    Database:=TDataTables.Create(MainForm.DbConnect);
     try
-        Tables.Columns.Add(TReminderLayouts.ID);
-        Tables.CustFilter:=WHERE + TReminderLayouts.LAYOUTNAME + EQUAL + QuotedStr(LayoutList.Text);
-        Tables.OpenTable(TblReminderLayouts);
-
-        if Tables.DataSet.RecordCount = 1 then
-            Layout:=Tables.DataSet.Fields[TReminderLayouts.ID].Value;
-
+        Database.Columns.Add(DISTINCT + TCompany.SEND_NOTE_FROM);
+        Database.CustFilter:=WHERE +
+                                TCompany.CO_CODE + EQUAL + QuotedStr(COCODE1) +
+                             _OR +
+                                TCompany.CO_CODE + EQUAL + QuotedStr(COCODE2) +
+                             _OR +
+                                TCompany.CO_CODE + EQUAL + QuotedStr(COCODE3) +
+                             _OR +
+                                TCompany.CO_CODE + EQUAL + QuotedStr(COCODE4);
+        Database.OpenTable(TblCompany);
+        if not(Database.DataSet.RecordCount = 0) then
+            Database.SqlToSimpleList(List, Database.DataSet)
+                else
+                    MainForm.MsgCall(mcWarn, 'Cannot find assigned email address to your organisation. Please contact IT support.');
     finally
-        Tables.Free;
+        Database.Free;
+
+        if List.Items.Count > 0 then
+        begin
+            ErrorEmailFrom.Visible:=False;
+            List.ItemIndex:=0;
+        end
+        else
+        begin
+            ErrorEmailFrom.Visible:=True;
+            List.Items.Clear;
+        end;
+
     end;
 
-    Indv_Rem1:=TextReminder1.Text;
-    Indv_Rem2:=TextReminder2.Text;
-    Indv_Rem3:=TextReminder3.Text;
-    Indv_Rem4:=TextReminder4.Text;
+end;
 
-    if Exp_Rem2_Switch.Checked then
-        Exp_Rem2:='1'
-            else
-                Exp_Rem2:='0';
 
-    if Exp_Rem3_Switch.Checked then
-        Exp_Rem3:='1'
-            else
-                Exp_Rem3:='0';
+/// <summary>
+///     Set email that should be used for sending statements and reminders.
+/// </summary>
 
-    // Disallow zero values
-    if (Indv_Rem1 = '0') or (Indv_Rem2 = '0') or (Indv_Rem3 = '0') or (Indv_Rem4 = '0') then
+procedure TTrackerForm.GetEmailAddress(Scuid: string);
+var
+    Database: TDataTables;
+begin
+
+    Database:=TDataTables.Create(MainForm.DbConnect);
+
+    try
+        Database.Columns.Add(TAddressBook.EMAILS);
+        Database.Columns.Add(TAddressBook.ESTATEMENTS);
+        Database.CustFilter:=WHERE + TAddressBook.SCUID + EQUAL + Scuid;
+        Database.OpenTable(TblAddressbook);
+
+        if Database.DataSet.RecordCount > 0 then
+        begin
+            ReminderMail:=MainForm.OleGetStr(Database.DataSet.Fields[TAddressBook.EMAILS].Value);
+            StatementMail:=MainForm.OleGetStr(Database.DataSet.Fields[TAddressBook.ESTATEMENTS].Value);
+        end;
+
+    finally
+        Database.Free;
+    end;
+
+end;
+
+
+/// <summary>
+///     Set email address used to send emails.
+/// </summary>
+
+procedure TTrackerForm.SetEmailAddresses(List: TListView);
+var
+    iCNT: integer;
+begin
+
+    if List.Items.Count > 0 then
     begin
-        MainForm.MsgCall(mcWarn, 'Zero values are disallowed. Please correct and try again.');
+        for iCNT:=0 to List.Items.Count - 1 do
+        begin
+
+            GetEmailAddress(List.Items[iCNT].SubItems[1]);
+
+            if not(string.IsNullOrEmpty(StatementMail)) then
+                List.Items[iCNT].SubItems[4]:=StatementMail;
+
+            if not(string.IsNullOrEmpty(ReminderMail)) then
+                List.Items[iCNT].SubItems[5]:=ReminderMail;
+
+        end;
+    end;
+
+end;
+
+
+/// <summary>
+///
+/// </summary>
+
+/// <remarks>
+///     Layout file format: "reminder_<team>_<country>_<number>.htm".
+///     Remove last six characters to display in list box.
+///     NOTE: We use TStringList as a middleman to remove duplicates.
+/// </remarks>
+
+procedure TTrackerForm.GetLayouts(LayoutContainer: TComboBox);
+var
+    Settings:   ISettings;
+    SearchRec:  TSearchRec;
+    LayoutLst:  TStringList;
+    LayoutFld:  string;
+    LayoutNam:  string;
+    iCNT:       integer;
+begin
+
+    Settings :=TSettings.Create;
+    LayoutFld:=Settings.GetLayoutDir;
+    LayoutLst:=TStringList.Create;
+
+    try
+
+        try
+
+            // Get files from local folder
+            if FindFirst(LayoutFld + 'r*.htm', faArchive, SearchRec) = 0 then
+            begin
+
+                LayoutLst.Sorted:=True;
+                LayoutLst.Duplicates:=dupIgnore;
+                repeat
+                    LayoutNam:=SearchRec.Name;
+                    LayoutNam:=LayoutNam.Substring(0, LayoutNam.Length - 6);
+                    LayoutLst.Add(LayoutNam);
+                until
+                    FindNext(SearchRec) <> 0;
+
+                FindClose(SearchRec);
+
+            end;
+
+            // Display
+            LayoutContainer.Clear;
+            for iCNT:=0 to LayoutLst.Count - 1 do
+                LayoutContainer.Items.Add(LayoutLst.Strings[iCNT]);
+
+            if LayoutContainer.Items.Count > 0 then
+                LayoutContainer.ItemIndex:=0;
+
+        except
+            on E: Exception do
+                MainForm.MsgCall(mcError, 'Cannot get list of layouts. Please contact IT support.');
+
+        end;
+
+    finally
+
+      LayoutLst.Free;
+
+    end;
+
+end;
+
+
+/// <summary>
+///
+/// </summary>
+
+procedure TTrackerForm.ApplyTimings(List: TListView);
+var
+    SelItem: integer;
+    iCNT:    integer;
+begin
+
+    // First reminder and legal notice cannot be zero
+    if (TextReminder1.Text = '0') or (TextReminder4.Text = '0') then
+    begin
+        MainForm.MsgCall(mcWarn, 'Please provide value for Reminder 1 and Legal Action different than zero.');
         Exit;
     end;
 
-    Add;
-    Close;
-
-end;
-
-/// <summary>
-///     Refresh invoice tracker list on application tab sheets (string grid component).
-/// </summary>
-
-procedure TTrackerForm.Display;
-(*
-var
-    TrackerItems: TDataTables;
-    Source:       TStringGrid;
-*)
-begin
-(*
-    TrackerItems:=TDataTables.Create(MainForm.DbConnect);
-    Source:=TrackerGrid;
-    try
-        TrackerGrid.Freeze(True);
-        TrackerItems.StrSQL:=EXECUTE + TrackerList + SPACE + QuotedStr(UserAlias);
-        TrackerItems.SqlToGrid(Source, TrackerItems.ExecSQL, False, True);
-    finally
-        TrackerItems.Free;
-        TrackerGrid.Freeze(False);
-    end;
-*)
-end;
-
-/// <summary>
-///     Ad new customer to the invoice list.
-/// </summary>
-
-procedure TTrackerForm.Add;
-var
-    TrackerItems: TDataTables;
-begin
-    TrackerItems:=TDataTables.Create(MainForm.DbConnect);
-
-    try
-
-        // Clean up and fill with new data
-        TrackerItems.CleanUp;
-        TrackerItems.Columns.Add(TTracker.USER_ALIAS);  TrackerItems.Values.Add(UserAlias);
-        TrackerItems.Columns.Add(TTracker.CUID);        TrackerItems.Values.Add(CUID);
-        TrackerItems.Columns.Add(TTracker.CO_CODE);     TrackerItems.Values.Add(CoCode);
-        TrackerItems.Columns.Add(TTracker.BRANCH);      TrackerItems.Values.Add(Branch);
-        TrackerItems.Columns.Add(TTracker.CUSTNAME);    TrackerItems.Values.Add(CustName);
-        TrackerItems.Columns.Add(TTracker.LAYOUT_ID);   TrackerItems.Values.Add(Layout);
-        TrackerItems.Columns.Add(TTracker.STAMP);       TrackerItems.Values.Add(DateTimeToStr(Now));
-        TrackerItems.Columns.Add(TTracker.INDV_REM1);   TrackerItems.Values.Add(Indv_Rem1);
-        TrackerItems.Columns.Add(TTracker.INDV_REM2);   TrackerItems.Values.Add(Indv_Rem2);
-        TrackerItems.Columns.Add(TTracker.INDV_REM3);   TrackerItems.Values.Add(Indv_Rem3);
-        TrackerItems.Columns.Add(TTracker.INDV_REM4);   TrackerItems.Values.Add(Indv_Rem4);
-        TrackerItems.Columns.Add(TTracker.EXP_REM2);    TrackerItems.Values.Add(Exp_Rem2);
-        TrackerItems.Columns.Add(TTracker.EXP_REM3);    TrackerItems.Values.Add(Exp_Rem3);
-
-        // Execute
-        if TrackerItems.InsertInto(TblTracker, ttExplicit) then
-            MainForm.MsgCall(mcInfo, 'Customer has been successfuly added to the Invoice Tracker.')
-                else
-                    MainForm.MsgCall(mcError, 'Cannot execute writing to database. Please contact with IT support.');
-
-    finally
-        TrackerItems.Free;
+    if (Exp_Rem2_Switch.Checked) and (TextReminder2.Text = '0') then
+    begin
+        MainForm.MsgCall(mcWarn, 'Please provide value for Reminder 2 different than zero.');
+        Exit;
     end;
 
-end;
+    if (Exp_Rem3_Switch.Checked) and (TextReminder3.Text = '0') then
+    begin
+        MainForm.MsgCall(mcWarn, 'Please provide value for Reminder 3 different than zero.');
+        Exit;
+    end;
 
-/// <summary>
-///     Delete given customer.
-/// </summary>
-
-procedure TTrackerForm.Delete;
-var
-    TrackerItems: TDataTables;
-    PrimaryTable: string;
-    ForeignTable: string;
-begin
-
-    TrackerItems:=TDataTables.Create(MainForm.DbConnect);
-
-    try
-        PrimaryTable:=DELETE_FROM + TblTracker  + WHERE + TTracker.CUID  + EQUAL + QuotedStr(CUID);  { HOLDS RECORDED CUSTOMERS }
-        ForeignTable:=DELETE_FROM + TblInvoices + WHERE + TInvoices.CUID + EQUAL + QuotedStr(CUID);  { HOLDS CUSTOMERS INVOICES }
-        TrackerItems.StrSQL:=ForeignTable + ';' + PrimaryTable;
-        TrackerItems.ExecSQL;
-        TrackerGrid.DeleteRowFrom(1, 1);
-  finally
-        TrackerItems.Free;
-  end;
-
-end;
-
-/// <summary>
-///     Retrieve and display data.
-/// </summary>
-
-procedure TTrackerForm.GetData;
-//var
-//    Tables: TDataTables;
-begin
-
-    Screen.Cursor:=crHourGlass;
-    CUID      :=AgeGrid.Cells[AgeGrid.ReturnColumn(TSnapshots.fCUID,            1, 1), AgeGrid.Row];
-    CoCode    :=AgeGrid.Cells[AgeGrid.ReturnColumn(TSnapshots.fCO_CODE,         1, 1), AgeGrid.Row];
-    Branch    :=AgeGrid.Cells[AgeGrid.ReturnColumn(TSnapshots.fAGENT,           1, 1), AgeGrid.Row];
-    CustName  :=AgeGrid.Cells[AgeGrid.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), AgeGrid.Row];
-    CustNumber:=AgeGrid.Cells[AgeGrid.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), AgeGrid.Row];
-    SCUID     :=CustNumber + MainForm.ConvertName(CoCode, 'F', 3);
-
-(*
-    Tables:=TDataTables.Create(MainForm.DbConnect);
-    try
-        // Get list of layouts
-        Tables.Columns.Add(TReminderLayouts.LAYOUTNAME);
-        Tables.OpenTable(TblReminderLayouts);
-
-        if Tables.DataSet.RecordCount > 0 then
+    // Applay only on selected customers
+    if Multiselect.Count > 0 then
+    begin
+        for iCNT:=0 to Multiselect.Count - 1 do
         begin
-            while not Tables.DataSet.EOF do
+            SelItem:=Multiselect.Strings[iCNT].ToInteger;
+            List.Items[SelItem].SubItems[3] :=ListEmailFrom.Text;
+            List.Items[SelItem].SubItems[6] :=TextReminder0.Text;
+            List.Items[SelItem].SubItems[7] :=TextReminder1.Text;
+            List.Items[SelItem].SubItems[8] :=TextReminder2.Text;
+            List.Items[SelItem].SubItems[9] :=TextReminder3.Text;
+            List.Items[SelItem].SubItems[10]:=TextReminder4.Text;
+        end;
+    end
+    // Apply on all listed customers
+    else
+    begin
+        if MainForm.MsgCall(mcQuestion2, 'You have not selected any customers, do you want Unity to apply proposed conditions for all listed items?') = mrYes then
+        begin
+            for iCNT:=0 to List.Items.Count - 1 do
             begin
-                LayoutList.Items.Add(Tables.DataSet.Fields[TReminderLayouts.LAYOUTNAME].Value);
-                Tables.DataSet.MoveNext;
+                List.Items[iCNT].SubItems[3] :=ListEmailFrom.Text;
+                List.Items[iCNT].SubItems[6] :=TextReminder0.Text;
+                List.Items[iCNT].SubItems[7] :=TextReminder1.Text;
+                List.Items[iCNT].SubItems[8] :=TextReminder2.Text;
+                List.Items[iCNT].SubItems[9] :=TextReminder3.Text;
+                List.Items[iCNT].SubItems[10]:=TextReminder4.Text;
             end;
-
-            LayoutList.ItemIndex:=0;
-
         end;
-
-        Tables.CleanUp;
-
-        // Get data from Address Book
-        Tables.CustFilter:=WHERE + TAddressBook.SCUID + EQUAL + QuotedStr(SCUID);
-        Tables.OpenTable(TblAddressbook);
-
-        if Tables.DataSet.RecordCount = 1 then { CUID/SCUDI IS UNIQUE }
-        begin
-            TextMailTo.Text:=Tables.DataSet.Fields[TAddressBook.EMAILS].Value;
-            TextStatTo.Text:=Tables.DataSet.Fields[TAddressBook.ESTATEMENTS].Value;
-        end;
-
-        Tables.CleanUp;
-
-        // Get data from company table
-        Tables.CustFilter:=WHERE +
-                                TCompany.CO_CODE +
-                           EQUAL +
-                                QuotedStr(CoCode) +
-                           _AND +
-                                TCompany.BRANCH +
-                           EQUAL +
-                                QuotedStr(Branch);
-
-        Tables.OpenTable(TblCompany);
-
-        if Tables.DataSet.RecordCount = 1 then
-        begin
-            TextLegalTo.Text:=Tables.DataSet.Fields[TCompany.LEGALTO].Value;
-            EmailFromList.Items.Add(Tables.DataSet.Fields[TCompany.SEND_NOTE_FROM].Value);
-            EmailFromList.ItemIndex:=0;
-        end;
-
-    finally
-        Tables.Free;
-
-        if Length(TextMailTo.Text)    > 5 then ErrorMailTo.Visible   :=False;
-        if Length(TextStatTo.Text)    > 5 then ErrorStatTo.Visible   :=False;
-        if Length(TextLegalTo.Text)   > 5 then ErrorLegalTo.Visible  :=False;
-        if Length(EmailFromList.Text) > 5 then ErrorEmailFrom.Visible:=False;
-        if not (ErrorLegalTo.Visible) and not (ErrorMailTo.Visible) and not (ErrorStatTo.Visible) then btnOK.Enabled:=True;
-
-        Screen.Cursor:=crDefault;
-
     end;
-*)
-
 
 end;
 
+
+/// <summary>
+///
+/// </summary>
+
+procedure TTrackerForm.SaveToDb;
+//var
+//    Database: TDataTables;
+begin
+//    Database:=TDataBase.Create(MainForm.DbConnect);
+//    Database.CleanUp;
+//
+//    Database.Columns.Add(TTracker.USER_ALIAS);
+//    Database.Columns.Add(TTracker.CUID);
+//    Database.Columns.Add(TTracker.CO_CODE);
+//    Database.Columns.Add(TTracker.BRANCH);
+//    Database.Columns.Add(TTracker.CUSTNAME);
+//    Database.Columns.Add(TTracker.STAMP);
+//    Database.Columns.Add(TTracker.INDV_REM1);
+//    Database.Columns.Add(TTracker.INDV_REM2);
+//    Database.Columns.Add(TTracker.INDV_REM3);
+//    Database.Columns.Add(TTracker.INDV_REM4);
+//    Database.Columns.Add(TTracker.EXP_REM2);
+//    Database.Columns.Add(TTracker.EXP_REM3);
+//    Database.Columns.Add(TTracker.SCUID);
+//    Database.Columns.Add(TTracker.LAYOUT);
+//    Database.Columns.Add(TTracker.STATEMENT);
+//
+//    Database.Values.Add(MainForm.WinUserName);
+//    Database.Values.Add();
+//    Database.Values.Add();
+//    Database.Values.Add();
+//    Database.Values.Add();
+//    Database.Values.Add();
+//    Database.Values.Add();
+//    Database.Values.Add();
+//    Database.Values.Add();
+//    Database.Values.Add();
+//    Database.Values.Add();
+//    Database.Values.Add();
+//    Database.Values.Add();
+//    Database.Values.Add();
+//    Database.Values.Add();
+
+
+
+end;
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------ START UP //
 
@@ -325,6 +387,7 @@ var
     lsColumns: TListColumn;
 begin
 
+    Multiselect:=TStringList.Create;
     Settings:=TSettings.Create;
     TrackerForm.Caption:=Settings.GetStringValue(ApplicationDetails, 'WND_TRACKER', APPCAPTION);
 
@@ -335,86 +398,106 @@ begin
     lsColumns.Caption:='LP';
     lsColumns.Width  :=40;
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Cuid';
+    lsColumns.Caption:='Cuid'; //0
     lsColumns.Width  :=80;
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Scuid';
+    lsColumns.Caption:='Scuid';//1
     lsColumns.Width  :=80;
     lsColumns:=CustomerList.Columns.Add;
     lsColumns.Caption:='Customer Name';
-    lsColumns.Width  :=150;
+    lsColumns.Width  :=150;    //2
 
     // From address book
     lsColumns:=CustomerList.Columns.Add;
     lsColumns.Caption:='Send from';
-    lsColumns.Width  :=100;
+    lsColumns.Width  :=100;    //3
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Statement To';
-    lsColumns.Width  :=100;
+    lsColumns.Caption:='Statement to';
+    lsColumns.Width  :=100;    //4
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Reminder To';
-    lsColumns.Width  :=100;
+    lsColumns.Caption:='Reminder to';
+    lsColumns.Width  :=100;    //5
 
     // Timings
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Timing 1';
-    lsColumns.Width  :=100;
+    lsColumns.Caption:='Pre-statement';
+    lsColumns.Width  :=100;    //6
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Timing 2';
-    lsColumns.Width  :=100;
+    lsColumns.Caption:='Reminder 1';
+    lsColumns.Width  :=100;    //7
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Timing 3';
-    lsColumns.Width  :=100;
+    lsColumns.Caption:='Reminder 2';
+    lsColumns.Width  :=100;    //8
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Timing 4';
-    lsColumns.Width  :=100;
+    lsColumns.Caption:='Reminder 3';
+    lsColumns.Width  :=100;    //9
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Timing 5';
-    lsColumns.Width  :=100;
-
-    // Load all invoice tracker items
-    //pAgeGrid    :=MainForm.sgAgeView;
-    //pTrackerGrid:=MainForm.sgInvoiceTracker;
-    //UserAlias   :='*';
-    //Display;
+    lsColumns.Caption:='Legal Action';
+    lsColumns.Width  :=100;    //10
 
     PanelCustomerList.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
 
 end;
 
+
+/// <summary>
+///
+/// </summary>
+
+procedure TTrackerForm.FormDestroy(Sender: TObject);
+begin
+    if Assigned(Multiselect) then
+        Multiselect.Free;
+end;
+
+
+/// <summary>
+///
+/// </summary>
+
 procedure TTrackerForm.FormShow(Sender: TObject);
 begin
-(*
-    LayoutList.Items.Clear;
-    EmailFromList.Items.Clear;
-    TextReminder1.Text    :='0';
-    TextReminder2.Text    :='0';
-    TextReminder3.Text    :='0';
-    TextReminder4.Text    :='0';
-    TextMailTo.Text       :='';
-    TextStatTo.Text       :='';
-    TextLegalTo.Text      :='';
-    ErrorMailTo.Visible   :=True;
-    ErrorStatTo.Visible   :=True;
-    ErrorLegalTo.Visible  :=True;
+    ListLayout.Clear;
+    ListEmailFrom.Clear;
     ErrorEmailFrom.Visible:=True;
-    btnOK.Enabled         :=False;
-*)
+    TextReminder0.Text:='0';
+    TextReminder1.Text:='0';
+    TextReminder2.Text:='0';
+    TextReminder3.Text:='0';
+    TextReminder4.Text:='0';
+    Exp_Rem2_Switch.Checked:=True;
+    Exp_Rem3_Switch.Checked:=True;
 end;
+
+
+/// <summary>
+///
+/// </summary>
 
 procedure TTrackerForm.FormActivate(Sender: TObject);
 begin
-//    GetData;
+    Screen.Cursor:=crSQLWait;
+    GetSendFrom(ListEmailFrom);
+    SetEmailAddresses(CustomerList);
+    GetLayouts(ListLayout);
+    Screen.Cursor:=crDefault;
 end;
 
 
 // ------------------------------------------------------------------------------------------------------------------------------------------ BUTTONS EVENTS //
 
 
+procedure TTrackerForm.btnApplyClick(Sender: TObject);
+begin
+    ApplyTimings(CustomerList);
+end;
+
+
 procedure TTrackerForm.btnOKClick(Sender: TObject);
 begin
-    Execute;
+    SaveToDb;
 end;
+
 
 procedure TTrackerForm.btnCancelClick(Sender: TObject);
 begin
@@ -425,9 +508,31 @@ end;
 // -------------------------------------------------------------------------------------------------------------------------------------------- MOUSE EVENTS //
 
 
+procedure TTrackerForm.CustomerListKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+    CtrlClicked:=True;
+end;
+
+
+procedure TTrackerForm.CustomerListKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+    CtrlClicked:=False;
+end;
+
+
 procedure TTrackerForm.CustomerListSelectItem(Sender: TObject; Item: TListItem; Selected: Boolean);
 begin
-    //
+
+    if not(CtrlClicked) and (Selected) then
+    begin
+        Multiselect.Clear;
+        Multiselect.Add(Item.Index.ToString);
+    end
+    else if (CtrlClicked) and (Selected) then
+        Multiselect.Add(Item.Index.ToString)
+    else
+        Multiselect.Clear;
+
 end;
 
 
@@ -441,3 +546,4 @@ end;
 
 
 end.
+

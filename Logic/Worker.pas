@@ -398,8 +398,8 @@ begin
     FIDThd:=CurrentThread.ThreadID;
 
     try
-        TrackerForm.UserAlias:=pUserAlias;
-        TrackerForm.Display;
+//        TrackerForm.UserAlias:=pUserAlias;
+//        TrackerForm.Display;
     except
         on E: Exception do
             MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Execution of this tread work has been stopped. Error has been thrown: ' + E.Message + ' (TInvoiceTracker).');
@@ -514,16 +514,16 @@ end;
 
 constructor TTReadAgeView.Create(ActionMode: integer; SortMode: integer);
 begin
-  inherited Create(False);
-  FLock :=TCriticalSection.Create;
-  FMode :=ActionMode;
-  FSort :=SortMode;
-  FIDThd:=0;
+    inherited Create(False);
+    FLock :=TCriticalSection.Create;
+    FMode :=ActionMode;
+    FSort :=SortMode;
+    FIDThd:=0;
 end;
 
 destructor TTReadAgeView.Destroy;
 begin
-  FLock.Free;
+    FLock.Free;
 end;
 
 Procedure TTReadAgeView.Execute;
@@ -670,7 +670,7 @@ end;
 
 destructor TTReadOpenItems.Destroy;
 begin
-  FLock.Free;
+    FLock.Free;
 end;
 
 procedure TTReadOpenItems.Execute;
@@ -874,7 +874,7 @@ var
 begin
     Result:=False;
     Book:=TDataTables.Create(MainForm.DbConnect);
-    MainForm.ExecMessage(False, scBusy, scShow);
+    //MainForm.ExecMessage(False, scBusy, scShow);
 
     try
         // Update from Address Book String Grid
@@ -946,7 +946,7 @@ begin
         Book.Free;
     end;
 
-    MainForm.ExecMessage(False, scBusy, scHide);
+    //MainForm.ExecMessage(False, scBusy, scHide);
 
 end;
 
@@ -964,7 +964,7 @@ begin
     jCNT:=0;
     Check:=0;
 
-    MainForm.ExecMessage(False, scBusy, scShow);
+    //MainForm.ExecMessage(False, scBusy, scShow);
 
     // Get data from String Grid
     Book:=TDataTables.Create(MainForm.DbConnect);
@@ -1055,7 +1055,7 @@ begin
         MainForm.ExecMessage(False, mcWarn, 'Selected customers are already in Address Book.');
     end;
 
-    MainForm.ExecMessage(False, scBusy, scHide);
+    //MainForm.ExecMessage(False, scBusy, scHide);
 
 end;
 

@@ -57,6 +57,7 @@ uses
     ABSearch in 'View\ABSearch.pas' {ViewSearchForm},
     Await in 'View\Await.pas' {AwaitForm};
 
+
 type
     DWord = 0..$FFFFFFFF;
     TDwmIsCompositionEnabledFunc = function(out pfEnabled: boolean): HRESULT; stdcall;
@@ -89,6 +90,7 @@ var
     WinUserName:      string;
     Manifest:         string;
     RegSettings:      TFormatSettings;
+
 
 {$R *.res}
 {$R 'binres.res' 'binres.rc'}

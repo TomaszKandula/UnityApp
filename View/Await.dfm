@@ -4,8 +4,8 @@ object AwaitForm: TAwaitForm
   BorderIcons = []
   BorderStyle = bsNone
   Caption = 'Unity'
-  ClientHeight = 251
-  ClientWidth = 517
+  ClientHeight = 197
+  ClientWidth = 420
   Color = clWhite
   DefaultMonitor = dmMainForm
   Font.Charset = DEFAULT_CHARSET
@@ -14,7 +14,7 @@ object AwaitForm: TAwaitForm
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
-  Position = poMainFormCenter
+  Position = poScreenCenter
   Scaled = False
   OnClose = FormClose
   OnCreate = FormCreate
@@ -25,20 +25,18 @@ object AwaitForm: TAwaitForm
   object PanelAwaitForm: TPanel
     Left = 0
     Top = 0
-    Width = 517
-    Height = 251
+    Width = 420
+    Height = 197
     Align = alClient
     TabOrder = 0
-    ExplicitLeft = 48
-    ExplicitTop = 80
-    ExplicitWidth = 257
-    ExplicitHeight = 113
+    ExplicitTop = -8
+    ExplicitWidth = 517
     object WaitImage: TImage
       AlignWithMargins = True
       Left = 4
       Top = 4
-      Width = 509
-      Height = 166
+      Width = 412
+      Height = 132
       Align = alClient
       AutoSize = True
       Center = True
@@ -434,32 +432,32 @@ object AwaitForm: TAwaitForm
         048092C14E00047EEE0CE00081D1A3098F2A154990E852A642A3AEC468E0C081
         05130758DDEAD0E05606411156B5CA00ABC0006101683D6080E08200016A3A24
         0077AA430370E5261C00B72D55B8696D06308B9180DE80003B}
-      ExplicitLeft = 1
-      ExplicitTop = -36
-      ExplicitWidth = 255
-      ExplicitHeight = 149
+      ExplicitWidth = 509
+      ExplicitHeight = 141
     end
     object PanelText: TPanel
       AlignWithMargins = True
       Left = 4
-      Top = 176
-      Width = 509
-      Height = 71
+      Top = 142
+      Width = 412
+      Height = 51
       Align = alBottom
       BevelOuter = bvNone
       Color = clWhite
       ParentBackground = False
       TabOrder = 0
+      ExplicitTop = 134
+      ExplicitWidth = 509
       object WaitText: TLabel
         AlignWithMargins = True
-        Left = 100
+        Left = 25
         Top = 10
-        Width = 309
-        Height = 28
-        Margins.Left = 100
+        Width = 362
+        Height = 41
+        Margins.Left = 25
         Margins.Top = 10
-        Margins.Right = 100
-        Margins.Bottom = 33
+        Margins.Right = 25
+        Margins.Bottom = 0
         Align = alClient
         Alignment = taCenter
         Caption = 'Processing request, please wait...'
@@ -469,10 +467,8 @@ object AwaitForm: TAwaitForm
         Font.Name = 'Verdana'
         Font.Style = []
         ParentFont = False
-        ExplicitLeft = 124
-        ExplicitTop = 8
-        ExplicitWidth = 257
-        ExplicitHeight = 25
+        ExplicitLeft = 100
+        ExplicitWidth = 229
       end
     end
   end

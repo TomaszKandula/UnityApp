@@ -75,7 +75,9 @@ const
     GridImgFile :  string    = 'Unity.img';        // Application custom image(s)
     ReleaseFile :  string    = 'Release.zip';      // Release package
     ManifestFile:  string    = 'Unity.manifest';   // Manifest file on the server
-    CurrentMutex:  PWideChar = 'UNITY_10151';      // Mutex value, increase it with each release
+    CurrentMutex:  PWideChar = 'UNITY_10162';      // Mutex value, increase it with each release*
+
+    // *Do not alow to run multiple instances of Unity due to lack of sessions
 
     // --------------------------------------------------------------------------------------------------------------------------------------- SPLASH SCREEN //
 
@@ -83,7 +85,6 @@ const
     spShow   = 1;
     spSplash = 100;
     spUpdate = 200;
-
 
     // SETTINGS FILE --------------------------------------------------------------------------------------------------------------------------------------- //
 
@@ -191,6 +192,11 @@ const
     fltFree2     = 8;
     fltIncrement = 10;
     fltDecrement = 11;
+    fltFree3     = 12;
+    fltSalesRep  = 13;
+    fltPersonRep = 14;
+    fltCustGroup = 15;
+    fltAccType   = 16;
 
     // --------------------------------------------------------------------------------------------------------------------------------------------- BRACKET //
 
