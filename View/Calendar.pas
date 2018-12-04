@@ -3,10 +3,26 @@
 
 unit Calendar;
 
+
 interface
 
+
 uses
-    Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, ComCtrls, ExtCtrls, StdCtrls, DateUtils, InterposerClasses;
+    Windows,
+    Messages,
+    SysUtils,
+    Variants,
+    Classes,
+    Graphics,
+    Controls,
+    Forms,
+    Dialogs,
+    ComCtrls,
+    ExtCtrls,
+    StdCtrls,
+    DateUtils,
+    InterposerClasses;
+
 
 type
 
@@ -49,7 +65,11 @@ implementation
 
 
 uses
-    Main, Model, Settings, Worker;
+    Main,
+    Model,
+    Settings,
+    Worker;
+
 
 {$R *.dfm}
 
@@ -89,6 +109,7 @@ begin
 
 end;
 
+
 /// <summary>
 ///     Check if today is weekend.
 /// </summary>
@@ -97,6 +118,7 @@ function TCalendarForm.IsWeekend(const DT: TDateTime): Boolean;
 begin
     Result:=SysUtils.DayOfWeek(DT) in [1, 7];
 end;
+
 
 /// <summary>
 ///     Move to next date, skip weekend.
@@ -109,6 +131,7 @@ begin
     while IsWeekend(Result) do
       Result:=Result + 1;
 end;
+
 
 /// <summary>
 ///     Set follow-up date and register it in general comment and update age view string grid.
@@ -147,6 +170,7 @@ begin
 
 end;
 
+
 procedure TCalendarForm.FormShow(Sender: TObject);
 begin
     MyCalendar.Date   :=Now;
@@ -169,6 +193,7 @@ begin
     DaysSeven.Checked :=False;
 end;
 
+
 /// <summary>
 ///     Set next day.
 /// </summary>
@@ -177,6 +202,7 @@ procedure TCalendarForm.DaysOneClick(Sender: TObject);
 begin
     MyCalendar.Date:=MakeMyDay(1);
 end;
+
 
 /// <summary>
 ///     Set next three days.
@@ -187,6 +213,7 @@ begin
     MyCalendar.Date:=MakeMyDay(3);
 end;
 
+
 /// <summary>
 ///     Set next sevenm days.
 /// </summary>
@@ -195,6 +222,7 @@ procedure TCalendarForm.DaysSevenClick(Sender: TObject);
 begin
     MyCalendar.Date:=MakeMyDay(7);
 end;
+
 
 /// <summary>
 ///     Confirm selected date.
@@ -235,3 +263,4 @@ end;
 
 
 end.
+

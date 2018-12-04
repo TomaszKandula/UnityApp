@@ -3,13 +3,60 @@
 
 unit Main;
 
+
 interface
 
+
 uses
-    Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, Menus, ComCtrls, Grids, ExtCtrls, StdCtrls, CheckLst, Buttons,
-    PNGImage, DBGrids, AppEvnts, ShellAPI, INIFiles, StrUtils, ValEdit, DateUtils, Clipbrd, DB, ADODB, ActiveX, CDO_TLB, Diagnostics, Math, Wininet, ComObj,
-    OleCtrls, SHDocVw, GIFImg, System.UITypes, Bcrypt, InterposerClasses, Arrays, EventLogger, System.ImageList, Vcl.ImgList, uCEFChromium, uCEFWindowParent,
-    uCEFChromiumWindow, uCEFTypes, uCEFInterfaces;
+    Windows,
+    Messages,
+    SysUtils,
+    Variants,
+    Classes,
+    Graphics,
+    Controls,
+    Forms,
+    Dialogs,
+    Menus,
+    ComCtrls,
+    Grids,
+    ExtCtrls,
+    StdCtrls,
+    CheckLst,
+    Buttons,
+    PNGImage,
+    DBGrids,
+    AppEvnts,
+    ShellAPI,
+    INIFiles,
+    StrUtils,
+    ValEdit,
+    DateUtils,
+    Clipbrd,
+    DB,
+    ADODB,
+    ActiveX,
+    CDO_TLB,
+    Diagnostics,
+    Math,
+    Wininet,
+    ComObj,
+    OleCtrls,
+    SHDocVw,
+    GIFImg,
+    System.UITypes,
+    Bcrypt,
+    InterposerClasses,
+    Arrays,
+    EventLogger,
+    System.ImageList,
+    Vcl.ImgList,
+    uCEFChromium,
+    uCEFWindowParent,
+    uCEFChromiumWindow,
+    uCEFTypes,
+    uCEFInterfaces;
+
 
 type
 
@@ -790,10 +837,31 @@ type
         function   AddressBookExclusion: boolean;
         function   CheckIfDate(StrDate: string): boolean;
         procedure  BusyScreen(State: integer; WorkingGrid: integer);
+        procedure  UpdateTrackerList(UserAlias: string);
+        procedure  DeleteFromTrackerList(CUID: string);
     protected
-        procedure  Chromium_OnBeforePopup(Sender: TObject; const browser: ICefBrowser; const frame: ICefFrame; const targetUrl, targetFrameName: ustring; targetDisposition: TCefWindowOpenDisposition; userGesture: Boolean; const popupFeatures: TCefPopupFeatures; var windowInfo: TCefWindowInfo; var client: ICefClient; var settings: TCefBrowserSettings; var noJavascriptAccess: Boolean; var Result: Boolean);
-        // Process all Windows messgaes
+
+        procedure  Chromium_OnBeforePopup(
+            Sender: TObject;
+            const browser: ICefBrowser;
+            const frame: ICefFrame;
+            const targetUrl, targetFrameName: ustring;
+            targetDisposition: TCefWindowOpenDisposition;
+            userGesture: Boolean;
+            const popupFeatures: TCefPopupFeatures;
+            var windowInfo: TCefWindowInfo;
+            var client: ICefClient;
+            var settings: TCefBrowserSettings;
+            var noJavascriptAccess: Boolean;
+            var Result: Boolean
+        );
+
+        /// <remarks>
+        ///     Process all Windows messgaes.
+        /// </remarks>
+
         procedure  WndProc(var msg: Messages.TMessage); override;
+
     end;
 
     /// <remarks>
@@ -835,8 +903,29 @@ implementation
 
 
 uses
-    Filter, Tracker, Invoices, Actions, Calendar, About, AVSearch, Worker, SQL, Model, Settings, Database, UAC, AgeView, Transactions, Colors, EventLog,
-    SendFeedback, ABSearch, MassMailer, Splash, Await, uCEFApplication;
+    Filter,
+    Tracker,
+    Invoices,
+    Actions,
+    Calendar,
+    About,
+    AVSearch,
+    Worker,
+    SQL,
+    Model,
+    Settings,
+    Database,
+    UAC,
+    AgeView,
+    Transactions,
+    Colors,
+    EventLog,
+    SendFeedback,
+    ABSearch,
+    MassMailer,
+    Splash,
+    Await,
+    uCEFApplication;
 
 
 {$R *.dfm}
@@ -1906,6 +1995,79 @@ begin
 end;
 
 
+// ----------------------------------------------------------------------------------------------------------------------------- UPDATE INVOICE TRACKER LIST //
+
+
+procedure TMainForm.UpdateTrackerList(UserAlias: string);
+var
+    TrackerData: TDataTables;
+begin
+    TrackerData:=TDataTables.Create(MainForm.DbConnect);
+    try
+
+        if not(String.IsNullOrEmpty(UserAlias)) then
+        begin
+            TrackerData.CustFilter:=WHERE + TTracker.USER_ALIAS + EQUAL + QuotedStr(UserAlias);
+        end;
+
+        TrackerData.Columns.Add(TTracker.CUID);
+        TrackerData.Columns.Add(TTracker.USER_ALIAS);
+        TrackerData.Columns.Add(TTracker.CUSTNAME);
+        TrackerData.Columns.Add(TTracker.STAMP);
+        TrackerData.Columns.Add(TTracker.INDV_REM1);
+        TrackerData.Columns.Add(TTracker.INDV_REM2);
+        TrackerData.Columns.Add(TTracker.INDV_REM3);
+        TrackerData.Columns.Add(TTracker.INDV_REM4);
+        TrackerData.Columns.Add(TTracker.LAYOUT);
+        TrackerData.Columns.Add(TTracker.SENDFROM);
+        TrackerData.Columns.Add(TTracker.STATEMENT);
+        TrackerData.Columns.Add(TTracker.STATEMENTTO);
+        TrackerData.Columns.Add(TTracker.REMINDERTO);
+
+        TrackerData.OpenTable(TblTracker);
+        TrackerData.SqlToGrid(sgInvoiceTracker, TrackerData.DataSet, False, True);
+
+        if sgInvoiceTracker.RowCount > 1 then
+        begin
+            sgInvoiceTracker.SetColWidth(10, 20, 400);
+            sgInvoiceTracker.Visible:=True;
+        end
+        else
+        begin
+            sgInvoiceTracker.Visible:=False;
+        end;
+
+    finally
+        TrackerData.Free;
+    end;
+end;
+
+
+// ------------------------------------------------------------------------------------------------------------------------------------------------  //
+
+
+procedure TMainForm.DeleteFromTrackerList(CUID: string);
+var
+    TrackerData:  TDataTables;
+    PrimaryTable: string;
+    ForeignTable: string;
+begin
+
+    TrackerData:=TDataTables.Create(MainForm.DbConnect);
+
+    try
+        PrimaryTable:=DELETE_FROM + TblTracker  + WHERE + TTracker.CUID  + EQUAL + QuotedStr(CUID);  { HOLDS RECORDED CUSTOMERS }
+        ForeignTable:=DELETE_FROM + TblInvoices + WHERE + TInvoices.CUID + EQUAL + QuotedStr(CUID);  { HOLDS CUSTOMERS INVOICES }
+        TrackerData.StrSQL:=ForeignTable + ';' + PrimaryTable;
+        TrackerData.ExecSQL;
+        sgInvoiceTracker.DeleteRowFrom(1, 1);
+    finally
+        TrackerData.Free;
+    end;
+
+end;
+
+
 // ------------------------------------------------------------------------------------------------------------------------------------------------ START UP //
 
 
@@ -2218,6 +2380,7 @@ begin
     LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Application version = ' + AppVersion);
     LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: User SID = ' + GetCurrentUserSid);
 
+    sgInvoiceTracker.Visible:=False;
     sgAddressBook.Visible:=False;
     sgAgeView.HideGrids;
 
@@ -2920,6 +3083,8 @@ begin
             Item.SubItems.Add('Not set');
             Item.SubItems.Add('Not set');
             Item.SubItems.Add('Not set');
+            Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCO_CODE, 1, 1), sgAgeView.Row]);
+            Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fAGENT, 1, 1), sgAgeView.Row]);
         end
         // Many customers
         else
@@ -2941,6 +3106,8 @@ begin
                     Item.SubItems.Add('Not set');
                     Item.SubItems.Add('Not set');
                     Item.SubItems.Add('Not set');
+                    Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCO_CODE, 1, 1), iCNT]);
+                    Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fAGENT, 1, 1), iCNT]);
                 end;
             end;
         end;
@@ -3566,31 +3733,39 @@ end;
 procedure TMainForm.Action_RemoveClick(Sender: TObject);
 begin
 
-//    // Exit condition
-//    if not(IsConnected) then
-//    begin
-//        MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
-//        Exit;
-//    end;
-//
-//    TrackerForm.CUID:=sgInvoiceTracker.Cells[sgInvoiceTracker.ReturnColumn(TTracker.CUID, 1, 1), sgInvoiceTracker.Row];
-//
-//    // R/W user can remove item
-//    if (MainForm.AccessLevel = acReadWrite) and (UpperCase(MainForm.WinUserName) = UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
-//        if MsgCall(mcQuestion2, 'Are you sure you want to remove selected customer?') = IDYES then
-//            TrackerForm.Delete;
-//
-//    // R/W user cannot remove other item
-//    if (MainForm.AccessLevel = acReadWrite) and (UpperCase(MainForm.WinUserName) <> UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
-//        MsgCall(mcWarn, 'You cannot remove someone''s else item.');
-//
-//    // Administrator can remove any item
-//    if (MainForm.AccessLevel = acADMIN) then
-//        if MsgCall(mcQuestion2, 'Are you sure you want to remove selected customer?') = IDYES then
-//            TrackerForm.Delete;
-//
-//    // Read only user cannot remove anything
-//    if (MainForm.AccessLevel = acReadOnly) then MsgCall(mcWarn, 'You don''t have permission to remove items.');
+    // Exit condition
+    if not(IsConnected) then
+    begin
+        MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+        Exit;
+    end;
+
+    // R/W user can remove item
+    if (MainForm.AccessLevel = acReadWrite) and (UpperCase(MainForm.WinUserName) = UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
+        if MsgCall(mcQuestion2, 'Are you sure you want to remove selected customer?') = IDYES then
+            DeleteFromTrackerList(
+                sgInvoiceTracker.Cells[
+                    sgInvoiceTracker.ReturnColumn(TTracker.CUID, 1, 1),
+                    sgInvoiceTracker.Row
+                ]
+            );
+
+    // R/W user cannot remove other item
+    if (MainForm.AccessLevel = acReadWrite) and (UpperCase(MainForm.WinUserName) <> UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
+        MsgCall(mcWarn, 'You cannot remove someone''s else item.');
+
+    // Administrator can remove any item
+    if (MainForm.AccessLevel = acADMIN) then
+        if MsgCall(mcQuestion2, 'Are you sure you want to remove selected customer?') = IDYES then
+            DeleteFromTrackerList(
+                sgInvoiceTracker.Cells[
+                    sgInvoiceTracker.ReturnColumn(TTracker.CUID, 1, 1),
+                    sgInvoiceTracker.Row
+                ]
+            );
+
+    // Read only user cannot remove anything
+    if (MainForm.AccessLevel = acReadOnly) then MsgCall(mcWarn, 'You don''t have permission to remove items.');
 
 end;
 
@@ -3622,7 +3797,7 @@ end;
 procedure TMainForm.Action_ShowAllClick(Sender: TObject);
 begin
     if IsConnected then
-        TTInvoiceTrackerRefresh.Create('*')
+        TTInvoiceTrackerRefresh.Create('')
             else
                 MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
 end;
@@ -3685,7 +3860,7 @@ end;
 
 procedure TMainForm.TabSheet4Show(Sender: TObject);
 begin
-    //TTInvoiceTrackerRefresh.Create('*');
+    TTInvoiceTrackerRefresh.Create('');
 end;
 
 { ------------------------------------------------------------------------------------------------------------ MAKE PAYMENT TERMS AND PAID INFO TABLES HEIGHT }

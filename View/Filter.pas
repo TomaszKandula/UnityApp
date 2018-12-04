@@ -3,11 +3,30 @@
 
 unit Filter;
 
+
 interface
 
+
 uses
-    Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, ExtCtrls, CheckLst, Buttons, pngimage, DBGrids, StrUtils,
-    InterposerClasses, Arrays;
+    Windows,
+    Messages,
+    SysUtils,
+    Variants,
+    Classes,
+    Graphics,
+    Controls,
+    Forms,
+    Dialogs,
+    StdCtrls,
+    ExtCtrls,
+    CheckLst,
+    Buttons,
+    pngimage,
+    DBGrids,
+    StrUtils,
+    InterposerClasses,
+    Arrays;
+
 
 type
 
@@ -88,7 +107,11 @@ implementation
 
 
 uses
-    Main, Settings, Model, AgeView;
+    Main,
+    Settings,
+    Model,
+    AgeView;
+
 
 {$R *.dfm}
 
@@ -134,6 +157,7 @@ begin
     InUse:=False;
 end;
 
+
 /// <summary>
 ///     Check if all items are selected.
 /// </summary>
@@ -158,6 +182,7 @@ begin
                 cbSelectAll.Checked:=False;
 
 end;
+
 
 /// <summary>
 ///     Prepare for filtering.
@@ -184,6 +209,7 @@ begin
         if FFilterNum = fltFREE3     then FilterInit(Free3);
     end;
 end;
+
 
 /// <summary>
 ///     Update filter count.
@@ -234,6 +260,7 @@ begin
                  countFree1 + countFree2 + countFree3;
 
 end;
+
 
 /// <summary>
 ///     Initialize filtering.
@@ -311,6 +338,7 @@ begin
     end;
 
 end;
+
 
 /// <summary>
 ///     Filter now.
@@ -392,6 +420,7 @@ begin
 
 end;
 
+
 /// <summary>
 ///     Clear given filter.
 /// </summary>
@@ -451,6 +480,7 @@ begin
     PanelListItems.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
     FilterClearAll;
 end;
+
 
 procedure TFilterForm.FormActivate(Sender: TObject);
 
@@ -534,6 +564,7 @@ begin
 
 end;
 
+
 procedure TFilterForm.btnRemoveClick(Sender: TObject);
 var
     AgeView: TAgeView;
@@ -589,6 +620,7 @@ begin
 
 end;
 
+
 procedure TFilterForm.cbSelectAllClick(Sender: TObject);
 var
     iCNT:  integer;
@@ -608,6 +640,7 @@ begin
     end;
 
 end;
+
 
 /// <remarks>
 ///
@@ -630,6 +663,7 @@ begin
 
 end;
 
+
 /// <summary>
 ///
 /// </summary>
@@ -638,6 +672,7 @@ procedure TFilterForm.FilterListClickCheck(Sender: TObject);
 begin
     CheckEvent:=True;
 end;
+
 
 // ----------------------------------------------------------------------------------------------------------------------------------------- KEYBOARD EVENTS //
 
@@ -649,3 +684,4 @@ end;
 
 
 end.
+

@@ -213,7 +213,6 @@ object SendForm: TSendForm
         ScrollBars = ssVertical
         TabOrder = 0
         OnKeyUp = Text_MessageKeyUp
-        ExplicitHeight = 119
       end
     end
   end

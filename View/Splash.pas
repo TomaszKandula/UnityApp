@@ -3,10 +3,26 @@
 
 unit Splash;
 
+
 interface
 
+
 uses
-    Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, ExtCtrls, Gauges, StdCtrls, pngimage, Main;
+    Windows,
+    Messages,
+    SysUtils,
+    Variants,
+    Classes,
+    Graphics,
+    Controls,
+    Forms,
+    Dialogs,
+    ExtCtrls,
+    Gauges,
+    StdCtrls,
+    pngimage,
+    Main;
+
 
 type
 
@@ -27,6 +43,7 @@ type
     protected
 //        procedure CreateParams(var Params: TCreateParams); override;
     end;
+
 
 var
   SplashForm: TSplashForm;
@@ -55,3 +72,4 @@ implementation
 
 
 end.
+

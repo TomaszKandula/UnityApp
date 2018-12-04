@@ -3,10 +3,24 @@
 
 unit Colors;
 
+
 interface
 
+
 uses
-    Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, ExtCtrls, Buttons, StdCtrls;
+    Windows,
+    Messages,
+    SysUtils,
+    Variants,
+    Classes,
+    Graphics,
+    Controls,
+    Forms,
+    Dialogs,
+    ExtCtrls,
+    Buttons,
+    StdCtrls;
+
 
 type
 
@@ -48,10 +62,14 @@ type
 var
     ColorsForm: TColorsForm;
 
+
 implementation
 
+
 uses
-    Main, Settings;
+    Main,
+    Settings;
+
 
 {$R *.dfm}
 
@@ -78,6 +96,7 @@ begin
     end;
 
 end;
+
 
 procedure TColorsForm.FormShow(Sender: TObject);
 begin
@@ -106,6 +125,7 @@ begin
     if ColorList1.Text = 'Background Color' then ColorBox1.Brush.Color:=Settings.TodayBColor;
 end;
 
+
 procedure TColorsForm.ColorList2Select(Sender: TObject);
 var
     Settings: TSettings;
@@ -115,6 +135,7 @@ begin
     if ColorList2.Text = 'Background Color' then ColorBox2.Brush.Color:=Settings.PastBColor;
 end;
 
+
 procedure TColorsForm.ColorList3Select(Sender: TObject);
 var
     Settings: TSettings;
@@ -123,6 +144,7 @@ begin
     if ColorList3.Text = 'Font Color'       then ColorBox3.Brush.Color:=Settings.FutureFColor;
     if ColorList3.Text = 'Background Color' then ColorBox3.Brush.Color:=Settings.FutureBColor;
 end;
+
 
 procedure TColorsForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
@@ -149,6 +171,7 @@ begin
     end;
 end;
 
+
 procedure TColorsForm.btnPastClick(Sender: TObject);
 var
     Settings: TSettings;
@@ -161,6 +184,7 @@ begin
         ColorBox2.Brush.Color:=ColorDialog.Color;
     end;
 end;
+
 
 procedure TColorsForm.btnFutureClick(Sender: TObject);
 var
@@ -177,3 +201,4 @@ end;
 
 
 end.
+

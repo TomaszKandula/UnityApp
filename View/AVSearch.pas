@@ -3,10 +3,25 @@
 
 unit AVSearch;
 
+
 interface
 
+
 uses
-    Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, ExtCtrls, Buttons, InterposerClasses;
+    Windows,
+    Messages,
+    SysUtils,
+    Variants,
+    Classes,
+    Graphics,
+    Controls,
+    Forms,
+    Dialogs,
+    StdCtrls,
+    ExtCtrls,
+    Buttons,
+    InterposerClasses;
+
 
 type
 
@@ -48,6 +63,7 @@ type
         procedure Search;
     end;
 
+
 var
     SearchForm: TSearchForm;
 
@@ -56,7 +72,10 @@ implementation
 
 
 uses
-    Main, Filter, Settings;
+    Main,
+    Filter,
+    Settings;
+
 
 {$R *.dfm}
 
@@ -268,10 +287,12 @@ begin
   if Key = VK_RETURN then btnSearchClick(Self);
 end;
 
+
 procedure TSearchForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
   if Key = ESC then Close;
 end;
+
 
 procedure TSearchForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
@@ -291,6 +312,7 @@ begin
   if (SColName <> '') and (SColNumber <> '') and (SGrid <> nil) then Search;
 end;
 
+
 procedure TSearchForm.btnUnhideClick(Sender: TObject);
 begin
   if (SColName <> '') and (SColNumber <> '') and (SGrid <> nil) then
@@ -302,3 +324,4 @@ end;
 
 
 end.
+

@@ -3,10 +3,28 @@
 
 unit Tracker;
 
+
 interface
 
+
 uses
-    Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, ExtCtrls, StdCtrls, Buttons, StrUtils, ADODB, ComCtrls, InterposerClasses;
+    Windows,
+    Messages,
+    SysUtils,
+    Variants,
+    Classes,
+    Graphics,
+    Controls,
+    Forms,
+    Dialogs,
+    ExtCtrls,
+    StdCtrls,
+    Buttons,
+    StrUtils,
+    ADODB,
+    ComCtrls,
+    InterposerClasses;
+
 
 type
 
@@ -39,6 +57,7 @@ type
         btnApply: TSpeedButton;
         PanelCustomerList: TPanel;
         TextReminder0: TLabeledEdit;
+    btnSelection: TSpeedButton;
         procedure FormCreate(Sender: TObject);
         procedure FormDestroy(Sender: TObject);
         procedure FormShow(Sender: TObject);
@@ -50,6 +69,7 @@ type
         procedure btnApplyClick(Sender: TObject);
         procedure CustomerListKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure CustomerListKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure btnSelectionClick(Sender: TObject);
     protected
         var Multiselect: TStringList;
         var CtrlClicked: boolean;
@@ -68,8 +88,9 @@ type
         procedure SetEmailAddresses(List: TListView);
         procedure GetLayouts(LayoutContainer: TComboBox);
         procedure ApplyTimings(List: TListView);
-        procedure SaveToDb;
+        procedure SaveToDb(List: TListView);
     end;
+
 
 var
     TrackerForm: TTrackerForm;
@@ -79,7 +100,12 @@ implementation
 
 
 uses
-    Main, SQL, Model, Worker, Settings, Database;
+    Main,
+    SQL,
+    Model,
+    Worker,
+    Settings,
+    Database;
 
 
 {$R *.dfm}
@@ -335,48 +361,108 @@ end;
 ///
 /// </summary>
 
-procedure TTrackerForm.SaveToDb;
-//var
-//    Database: TDataTables;
+procedure TTrackerForm.SaveToDb(List: TListView);
+var
+    TrackerData: TDataTables;
+    TempData:    TStringGrid;
+    iCNT:        integer;
+    Check:       integer;
 begin
-//    Database:=TDataBase.Create(MainForm.DbConnect);
-//    Database.CleanUp;
-//
-//    Database.Columns.Add(TTracker.USER_ALIAS);
-//    Database.Columns.Add(TTracker.CUID);
-//    Database.Columns.Add(TTracker.CO_CODE);
-//    Database.Columns.Add(TTracker.BRANCH);
-//    Database.Columns.Add(TTracker.CUSTNAME);
-//    Database.Columns.Add(TTracker.STAMP);
-//    Database.Columns.Add(TTracker.INDV_REM1);
-//    Database.Columns.Add(TTracker.INDV_REM2);
-//    Database.Columns.Add(TTracker.INDV_REM3);
-//    Database.Columns.Add(TTracker.INDV_REM4);
-//    Database.Columns.Add(TTracker.EXP_REM2);
-//    Database.Columns.Add(TTracker.EXP_REM3);
-//    Database.Columns.Add(TTracker.SCUID);
-//    Database.Columns.Add(TTracker.LAYOUT);
-//    Database.Columns.Add(TTracker.STATEMENT);
-//
-//    Database.Values.Add(MainForm.WinUserName);
-//    Database.Values.Add();
-//    Database.Values.Add();
-//    Database.Values.Add();
-//    Database.Values.Add();
-//    Database.Values.Add();
-//    Database.Values.Add();
-//    Database.Values.Add();
-//    Database.Values.Add();
-//    Database.Values.Add();
-//    Database.Values.Add();
-//    Database.Values.Add();
-//    Database.Values.Add();
-//    Database.Values.Add();
-//    Database.Values.Add();
 
+    Check:=0;
 
+    for iCNT:=0 to List.Items.Count - 1 do
+    begin
+        // Not found
+        if List.Items[iCNT].SubItems[4] = 'Not found' then Inc(Check);
+        if List.Items[iCNT].SubItems[5] = 'Not found' then Inc(Check);
+        // Not set
+        if List.Items[iCNT].SubItems[3]  = 'Not set' then Inc(Check);
+        if List.Items[iCNT].SubItems[6]  = 'Not set' then Inc(Check);
+        if List.Items[iCNT].SubItems[7]  = 'Not set' then Inc(Check);
+        if List.Items[iCNT].SubItems[8]  = 'Not set' then Inc(Check);
+        if List.Items[iCNT].SubItems[9]  = 'Not set' then Inc(Check);
+        if List.Items[iCNT].SubItems[10] = 'Not set' then Inc(Check);
+    end;
 
+    if Check > 0 then
+    begin
+        MainForm.MsgCall(mcWarn, 'Please make sure you that the list do not contain "not found" or "not set" items.');
+        Exit;
+    end;
+
+    TrackerData:=TDataTables.Create(MainForm.DbConnect);
+    TempData:=TStringGrid.Create(nil);
+    try
+        try
+            // Select database columns
+            TrackerData.CleanUp;
+            TrackerData.Columns.Add(TTracker.USER_ALIAS);
+            TrackerData.Columns.Add(TTracker.CUID);
+            TrackerData.Columns.Add(TTracker.CO_CODE);
+            TrackerData.Columns.Add(TTracker.BRANCH);
+            TrackerData.Columns.Add(TTracker.CUSTNAME);
+            TrackerData.Columns.Add(TTracker.STAMP);
+            TrackerData.Columns.Add(TTracker.INDV_REM1);
+            TrackerData.Columns.Add(TTracker.INDV_REM2);
+            TrackerData.Columns.Add(TTracker.INDV_REM3);
+            TrackerData.Columns.Add(TTracker.INDV_REM4);
+            TrackerData.Columns.Add(TTracker.SCUID);
+            TrackerData.Columns.Add(TTracker.LAYOUT);
+            TrackerData.Columns.Add(TTracker.STATEMENT);
+            TrackerData.Columns.Add(TTracker.SENDFROM);
+            TrackerData.Columns.Add(TTracker.STATEMENTTO);
+            TrackerData.Columns.Add(TTracker.REMINDERTO);
+
+            // Put ListView data to StringGrid
+            TempData.RowCount:=List.Items.Count;
+            TempData.ColCount:=TrackerData.Columns.Count + 1;
+            for iCNT:=0 to List.Items.Count - 1 do
+            begin
+                TempData.Cells[0,  iCNT]:='';                               // skip 1st row and 1st column
+                TempData.Cells[1,  iCNT]:=MainForm.WinUserName;             // user alias
+                TempData.Cells[2,  iCNT]:=List.Items[iCNT].SubItems[0];     // cuid
+                TempData.Cells[3,  iCNT]:=List.Items[iCNT].SubItems[11];    // co code
+                TempData.Cells[4,  iCNT]:=List.Items[iCNT].SubItems[12];    // branch/agent
+                TempData.Cells[5,  iCNT]:=List.Items[iCNT].SubItems[2];     // cust name
+                TempData.Cells[6,  iCNT]:=DateTimeToStr(Now);               // stamp
+                TempData.Cells[7,  iCNT]:=List.Items[iCNT].SubItems[7];     // reminder 1
+                TempData.Cells[8,  iCNT]:=List.Items[iCNT].SubItems[8];     // reminder 2
+                TempData.Cells[9,  iCNT]:=List.Items[iCNT].SubItems[9];     // reminder 3
+                TempData.Cells[10, iCNT]:=List.Items[iCNT].SubItems[10];    // reminder 4
+                TempData.Cells[11, iCNT]:=List.Items[iCNT].SubItems[1];     // scuid
+                TempData.Cells[12, iCNT]:=ListLayout.Text;                  // layout
+                TempData.Cells[13, iCNT]:=List.Items[iCNT].SubItems[6];     // pre-statement
+                TempData.Cells[14, iCNT]:=List.Items[iCNT].SubItems[3];     // send from
+                TempData.Cells[15, iCNT]:=List.Items[iCNT].SubItems[4];     // statement to
+                TempData.Cells[16, iCNT]:=List.Items[iCNT].SubItems[5];     // reminder to
+            end;
+
+            // Insert data to database
+            if TrackerData.InsertInto(TblTracker, ttExplicit, TempData, nil) then
+            begin
+                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Invoice tracker data updated.');
+                MainForm.MsgCall(mcInfo, 'Invoice Tracker has been updates successfully!');
+            end
+            else
+            begin
+                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Invoice tracker error, cannot perform transaction.');
+                MainForm.MsgCall(mcError, 'Cannot perform transaction. Please contact IT support.');
+            end;
+
+        except
+            on E: Exception do
+            begin
+                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Error has been thrown [Tracker_SaveToDb]: ' + E.Message);
+                MainForm.MsgCall(mcError, E.Message);
+            end;
+        end;
+    finally
+        TrackerData.Free;
+        TempData.Free;
+    end;
 end;
+
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------ START UP //
 
@@ -434,6 +520,14 @@ begin
     lsColumns:=CustomerList.Columns.Add;
     lsColumns.Caption:='Legal Action';
     lsColumns.Width  :=100;    //10
+
+    // Company details
+    lsColumns:=CustomerList.Columns.Add;
+    lsColumns.Caption:='Co Code';
+    lsColumns.Width  :=100;    //11
+    lsColumns:=CustomerList.Columns.Add;
+    lsColumns.Caption:='Agent';
+    lsColumns.Width  :=100;    //12
 
     PanelCustomerList.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
 
@@ -495,7 +589,7 @@ end;
 
 procedure TTrackerForm.btnOKClick(Sender: TObject);
 begin
-    SaveToDb;
+    SaveToDb(CustomerList);
 end;
 
 
@@ -517,6 +611,12 @@ end;
 procedure TTrackerForm.CustomerListKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     CtrlClicked:=False;
+end;
+
+
+procedure TTrackerForm.btnSelectionClick(Sender: TObject);
+begin
+    CustomerList.ClearSelection;
 end;
 
 

@@ -3,10 +3,26 @@
 
 unit ABSearch;
 
+
 interface
 
+
 uses
-    Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, Buttons, StdCtrls, ExtCtrls, StrUtils, InterposerClasses;
+    Windows,
+    Messages,
+    SysUtils,
+    Variants,
+    Classes,
+    Graphics,
+    Controls,
+    Forms,
+    Dialogs,
+    Buttons,
+    StdCtrls,
+    ExtCtrls,
+    StrUtils,
+    InterposerClasses;
+
 
 type
 
@@ -90,6 +106,7 @@ type
         { EMPTY }
     end;
 
+
 var
     ViewSearchForm: TViewSearchForm;
 
@@ -99,8 +116,12 @@ implementation
 
 {$R *.dfm}
 
+
 uses
-    Main, Settings, Worker, Model;
+    Main,
+    Settings,
+    Worker,
+    Model;
 
 
 // ------------------------------------------------------------------------------------------------------------------------------------------- CLASS HELPERS //
@@ -129,6 +150,7 @@ begin
     PanelDivision.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
 
 end;
+
 
 /// <summary>
 ///     Clear all and set default states before display to the user.
@@ -202,6 +224,7 @@ begin
     EditAgent.Color           :=clWhite;
     EditDivision.Color        :=clWhite;
 end;
+
 
 /// <summary>
 ///     Check if required fields are not empty and perform search.
@@ -331,6 +354,7 @@ begin
     Initialize;
 end;
 
+
 procedure TViewSearchForm.FormShow(Sender: TObject);
 begin
     ClearAll;
@@ -352,6 +376,7 @@ begin
                 CheckBoxNameEqual.Caption:='Equal';
 end;
 
+
 procedure TViewSearchForm.CheckBoxEmailEqualClick(Sender: TObject);
 begin
     if not(CheckBoxEmailEqual.Checked) then
@@ -359,6 +384,7 @@ begin
             else
                 CheckBoxEmailEqual.Caption:='Equal';
 end;
+
 
 procedure TViewSearchForm.CheckBoxEstatEqualClick(Sender: TObject);
 begin
@@ -368,6 +394,7 @@ begin
                 CheckBoxEstatEqual.Caption:='Equal';
 end;
 
+
 procedure TViewSearchForm.CheckBoxAliasEqualClick(Sender: TObject);
 begin
     if not(CheckBoxAliasEqual.Checked) then
@@ -375,6 +402,7 @@ begin
             else
                 CheckBoxAliasEqual.Caption:='Equal';
 end;
+
 
 /// <summary>
 ///     Change background color on check box change, reset the TEdit.
@@ -395,6 +423,7 @@ begin
     end;
 end;
 
+
 procedure TViewSearchForm.CheckBoxPhonesClick(Sender: TObject);
 begin
     if CheckBoxPhones.Checked then
@@ -409,6 +438,7 @@ begin
         EditPhones.Color:=clWhite;
     end;
 end;
+
 
 procedure TViewSearchForm.CheckBoxAgentClick(Sender: TObject);
 begin
@@ -425,6 +455,7 @@ begin
     end;
 end;
 
+
 procedure TViewSearchForm.CheckBoxCoCodeClick(Sender: TObject);
 begin
     if CheckBoxCoCode.Checked then
@@ -440,6 +471,7 @@ begin
     end;
 end;
 
+
 procedure TViewSearchForm.CheckBoxDivisionClick(Sender: TObject);
 begin
     if CheckBoxDivision.Checked then
@@ -454,6 +486,7 @@ begin
         EditDivision.Color:=clWhite;
     end;
 end;
+
 
 /// <remarks>
 ///     Additionally, alter another check boxes.
@@ -478,6 +511,7 @@ begin
     end
 end;
 
+
 procedure TViewSearchForm.CheckBoxEmailClick(Sender: TObject);
 begin
     if CheckBoxEmail.Checked then
@@ -497,6 +531,7 @@ begin
     end;
 end;
 
+
 procedure TViewSearchForm.CheckBoxEstatementClick(Sender: TObject);
 begin
     if CheckBoxEstatement.Checked then
@@ -515,6 +550,7 @@ begin
         CheckBoxEstatCase.Enabled:=False;
     end;
 end;
+
 
 procedure TViewSearchForm.CheckBoxUserAliasClick(Sender: TObject);
 begin
@@ -544,6 +580,7 @@ begin
     PerformSearch;
 end;
 
+
 procedure TViewSearchForm.btnCancelClick(Sender: TObject);
 begin
   Close;
@@ -551,3 +588,4 @@ end;
 
 
 end.
+

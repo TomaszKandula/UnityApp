@@ -14,7 +14,7 @@ object AwaitForm: TAwaitForm
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
-  Position = poScreenCenter
+  Position = poOwnerFormCenter
   Scaled = False
   OnClose = FormClose
   OnCreate = FormCreate
@@ -29,8 +29,6 @@ object AwaitForm: TAwaitForm
     Height = 197
     Align = alClient
     TabOrder = 0
-    ExplicitTop = -8
-    ExplicitWidth = 517
     object WaitImage: TImage
       AlignWithMargins = True
       Left = 4
@@ -432,8 +430,8 @@ object AwaitForm: TAwaitForm
         048092C14E00047EEE0CE00081D1A3098F2A154990E852A642A3AEC468E0C081
         05130758DDEAD0E05606411156B5CA00ABC0006101683D6080E08200016A3A24
         0077AA430370E5261C00B72D55B8696D06308B9180DE80003B}
-      ExplicitWidth = 509
-      ExplicitHeight = 141
+      ExplicitWidth = 218
+      ExplicitHeight = 149
     end
     object PanelText: TPanel
       AlignWithMargins = True
@@ -446,8 +444,6 @@ object AwaitForm: TAwaitForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 0
-      ExplicitTop = 134
-      ExplicitWidth = 509
       object WaitText: TLabel
         AlignWithMargins = True
         Left = 25
@@ -460,15 +456,15 @@ object AwaitForm: TAwaitForm
         Margins.Bottom = 0
         Align = alClient
         Alignment = taCenter
-        Caption = 'Processing request, please wait...'
+        Caption = 'Please wait...'
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
         Font.Height = -12
         Font.Name = 'Verdana'
         Font.Style = []
         ParentFont = False
-        ExplicitLeft = 100
-        ExplicitWidth = 229
+        ExplicitWidth = 85
+        ExplicitHeight = 14
       end
     end
   end

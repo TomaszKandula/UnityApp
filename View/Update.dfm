@@ -22,7 +22,7 @@ object UpdateForm: TUpdateForm
     Width = 704
     Height = 380
     Align = alClient
-    Pen.Color = clSkyBlue
+    Pen.Color = 6566857
     Pen.Width = 2
     ExplicitLeft = 8
     ExplicitWidth = 636
@@ -111,18 +111,18 @@ object UpdateForm: TUpdateForm
     Left = 175
     Top = 182
     Width = 346
-    Height = 21
+    Height = 31
     Pen.Color = clSkyBlue
   end
   object Progress: TGauge
-    Left = 177
-    Top = 184
-    Width = 342
-    Height = 17
+    Left = 178
+    Top = 185
+    Width = 340
+    Height = 25
     Cursor = crAppStart
     BorderStyle = bsNone
     Color = clWhite
-    ForeColor = 15918295
+    ForeColor = clSkyBlue
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlack
     Font.Height = -11
@@ -135,7 +135,7 @@ object UpdateForm: TUpdateForm
   end
   object Text2: TLabel
     Left = 238
-    Top = 233
+    Top = 241
     Width = 220
     Height = 16
     Caption = 'Do not turn off your computer.'

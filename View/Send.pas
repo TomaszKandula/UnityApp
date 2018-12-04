@@ -3,10 +3,24 @@
 
 unit Send;
 
+
 interface
 
+
 uses
-    Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, Buttons, ExtCtrls, InterposerClasses;
+    Windows,
+    Messages,
+    SysUtils,
+    Variants,
+    Classes,
+    Graphics,
+    Controls,
+    Forms,
+    Dialogs,
+    StdCtrls,
+    Buttons,
+    ExtCtrls,
+    InterposerClasses;
 
 
 type
@@ -49,6 +63,7 @@ type
         procedure ExecuteMailer;
     end;
 
+
 var
     SendForm: TSendForm;
 
@@ -57,7 +72,12 @@ implementation
 
 
 uses
-    Main, Settings, Worker, Actions, Model;
+    Main,
+    Settings,
+    Worker,
+    Actions,
+    Model;
+
 
 {$R *.dfm}
 
@@ -121,6 +141,7 @@ begin
     PanelMessage.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
 end;
 
+
 procedure TSendForm.FormShow(Sender: TObject);
 begin
     Text_Message.SetFocus;
@@ -134,6 +155,7 @@ procedure TSendForm.btnSendEmailClick(Sender: TObject);
 begin
     ExecuteMailer;
 end;
+
 
 procedure TSendForm.btnCancelClick(Sender: TObject);
 begin
@@ -149,15 +171,18 @@ begin
     if Key = ESC then Close;
 end;
 
+
 procedure TSendForm.Text_SalutKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if Key = VK_TAB then Text_Message.SetFocus;
 end;
 
+
 procedure TSendForm.Text_MessageKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if Key = VK_TAB then cbAddOverdue.SetFocus;
 end;
+
 
 procedure TSendForm.cbAddOverdueKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin

@@ -3,10 +3,26 @@
 
 unit MassMailer;
 
+
 interface
 
+
 uses
-    Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, ComCtrls, StdCtrls, ExtCtrls, Buttons, InterposerClasses;
+    Windows,
+    Messages,
+    SysUtils,
+    Variants,
+    Classes,
+    Graphics,
+    Controls,
+    Forms,
+    Dialogs,
+    ComCtrls,
+    StdCtrls,
+    ExtCtrls,
+    Buttons,
+    InterposerClasses;
+
 
 type
 
@@ -63,6 +79,7 @@ type
         procedure ExecuteMailer;
     end;
 
+
 var
     ViewMailerForm: TViewMailerForm;
 
@@ -71,7 +88,14 @@ implementation
 
 
 uses
-    Main, Settings, SQL, Model, Worker, Actions, Await;
+    Main,
+    Settings,
+    SQL,
+    Model,
+    Worker,
+    Actions,
+    Await;
+
 
 {$R *.dfm}
 
@@ -106,6 +130,7 @@ begin
 
 end;
 
+
 /// <summary>
 ///     Set email address used to send email.
 /// </summary>
@@ -129,6 +154,7 @@ begin
     end;
 
 end;
+
 
 /// <summary>
 ///     Get list of emails addresses that can be use to send message to the selected recipients.
@@ -170,6 +196,7 @@ begin
     end;
 
 end;
+
 
 /// <summary>
 ///     Execute worker thread to process the listed emails. Show busy window in main thread.
@@ -282,6 +309,7 @@ begin
 
 end;
 
+
 /// <summary>
 ///     Before the form is shown to the user, get all email addresses from database. This may take some time, so we display busy cursor.
 ///     We also switch off open items timer, so it wil not interfere when user sends the data.
@@ -313,6 +341,7 @@ begin
     MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Mass mailer opened, open items loader is now on hold.');
 end;
 
+
 /// <summary>
 ///     Turn on disabled timer for open items scanner.
 /// </summary>
@@ -332,6 +361,7 @@ begin
     ExecuteMailer;
 end;
 
+
 procedure TViewMailerForm.btnCancelClick(Sender: TObject);
 begin
     Close;
@@ -346,15 +376,18 @@ begin
     if Key = VK_TAB then Text_Message.SetFocus;
 end;
 
+
 procedure TViewMailerForm.Text_MessageKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if Key = VK_TAB then cbAddOverdue.SetFocus;
 end;
 
+
 procedure TViewMailerForm.cbAddOverdueKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if Key = VK_TAB then EmailList.SetFocus;
 end;
+
 
 procedure TViewMailerForm.EmailListKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
@@ -363,3 +396,4 @@ end;
 
 
 end.
+

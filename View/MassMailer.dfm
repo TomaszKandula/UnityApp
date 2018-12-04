@@ -333,7 +333,6 @@ object ViewMailerForm: TViewMailerForm
         ScrollBars = ssVertical
         TabOrder = 0
         OnKeyUp = Text_MessageKeyUp
-        ExplicitHeight = 127
       end
     end
     object PanelSubject: TPanel

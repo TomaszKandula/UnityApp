@@ -3,10 +3,27 @@
 
 unit About;
 
+
 interface
 
+
 uses
-    Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, ExtCtrls, ShellAPI, IniFiles, pngimage, Vcl.Buttons;
+    Windows,
+    Messages,
+    SysUtils,
+    Variants,
+    Classes,
+    Graphics,
+    Controls,
+    Forms,
+    Dialogs,
+    StdCtrls,
+    ExtCtrls,
+    ShellAPI,
+    IniFiles,
+    pngimage,
+    Vcl.Buttons;
+
 
 type
 
@@ -81,6 +98,7 @@ type
         ullAvailExtendedVirtual: Int64;
     end;
 
+
 var
     AboutForm: TAboutForm;
 
@@ -89,7 +107,9 @@ implementation
 
 
 uses
-    Main, Settings;
+    Main,
+    Settings;
+
 
 {$R *.dfm}
 
@@ -140,6 +160,7 @@ begin
     FreeLibrary(hKernel32);
 
 end;
+
 
 /// <summary>
 ///     Check if machine have a memory above 4GB.
@@ -198,6 +219,7 @@ begin
 
 end;
 
+
 /// <summary>
 ///     Update memory information on window show.
 /// </summary>
@@ -211,7 +233,7 @@ begin
     begin
         mem_32.dwLength:=sizeof(mem_32);
         GlobalMemoryStatus(mem_32);
-        txt_SYS.Caption:=GetOSVer(OSNumber) + ' (32-bit)';
+        txt_SYS.Caption:=GetOSVer(OSName) + ' (32-bit)';
         txt_MEM.Caption:=formatfloat('## ###', (mem_32.dwTotalPhys DIV 1048576)) + ' MB';
         txt_USG.Caption:=formatfloat('## ###', ((mem_32.dwTotalPhys-mem_32.dwAvailPhys) DIV 1048576)) + ' MB';
     end
@@ -219,7 +241,7 @@ begin
     begin
         mem_64.dwLength:=sizeof(mem_64);
         GlobalMemoryStatusEx(mem_64);
-        txt_SYS.Caption:=GetOSVer(OSNumber) + ' (64-bit)';
+        txt_SYS.Caption:=GetOSVer(OSName) + ' (64-bit)';
         txt_MEM.Caption:=formatfloat('## ###', ((mem_64.ullTotalPhys) DIV 1048576)) + ' MB';
         txt_USG.Caption:=formatfloat('## ###', ((mem_64.ullTotalPhys-mem_64.ullAvailPhys) DIV 1048576)) + ' MB';
     end;
@@ -243,15 +265,18 @@ begin
   Close;
 end;
 
+
 procedure TAboutForm.txtINQClick(Sender: TObject);
 begin
   ShellExecute(Self.Handle, nil, PChar('mailto: ' + txt_INQ.Caption), nil, nil, SW_NORMAL);
 end;
 
+
 procedure TAboutForm.txtITSClick(Sender: TObject);
 begin
   ShellExecute(Self.Handle, nil, PChar('mailto: ' + txt_ITS.Caption), nil, nil, SW_NORMAL);
 end;
+
 
 procedure TAboutForm.txtWEBClick(Sender: TObject);
 begin
@@ -260,3 +285,4 @@ end;
 
 
 end.
+

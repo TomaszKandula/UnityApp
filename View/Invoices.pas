@@ -3,10 +3,24 @@
 
 unit Invoices;
 
+
 interface
 
+
 uses
-    Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, Grids, ADODB, ComCtrls, InterposerClasses;
+    Windows,
+    Messages,
+    SysUtils,
+    Variants,
+    Classes,
+    Graphics,
+    Controls,
+    Forms,
+    Dialogs,
+    Grids,
+    ADODB,
+    ComCtrls,
+    InterposerClasses;
 
 
 type
@@ -35,7 +49,10 @@ Implementation
 
 
 uses
-    Main, Settings, SQL, Model;
+    Main,
+    Settings,
+    SQL,
+    Model;
 
 {$R *.dfm}
 
@@ -54,6 +71,7 @@ begin
     InvoicesGrid.SetRowHeight(sgRowHeight, 25);
 end;
 
+
 procedure TInvoicesForm.FormShow(Sender: TObject);
 begin
     InvoicesGrid.ClearAll(2, 1, 1, False);
@@ -61,10 +79,12 @@ begin
     InvoicesGrid.AutoThumbSize;
 end;
 
+
 procedure TInvoicesForm.FormResize(Sender: TObject);
 begin
     InvoicesGrid.AutoThumbSize;
 end;
+
 
 procedure TInvoicesForm.FormActivate(Sender: TObject);
 var
@@ -113,6 +133,7 @@ begin
     if (Key = 67) and (Shift = [ssCtrl]) then InvoicesGrid.CopyCutPaste(adCopy);
 end;
 
+
 procedure TInvoicesForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
     if Key = ESC then Close;
@@ -120,3 +141,4 @@ end;
 
 
 end.
+

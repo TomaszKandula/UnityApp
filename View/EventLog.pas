@@ -3,10 +3,25 @@
 
 unit EventLog;
 
+
 interface
 
+
 uses
-    Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, ExtCtrls, StdCtrls, ComCtrls, pngimage, InterposerCLasses;
+    Windows,
+    Messages,
+    SysUtils,
+    Variants,
+    Classes,
+    Graphics,
+    Controls,
+    Forms,
+    Dialogs,
+    ExtCtrls,
+    StdCtrls,
+    ComCtrls,
+    pngimage,
+    InterposerCLasses;
 
 
 type
@@ -35,8 +50,11 @@ var
 
 implementation
 
+
 uses
-    Main, Settings;
+    Main,
+    Settings;
+
 
 {$R *.dfm}
 
@@ -77,6 +95,7 @@ begin
     PanelEventMemo.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
 end;
 
+
 procedure TEventForm.FormShow(Sender: TObject);
 begin
     LoadEventLog;
@@ -95,6 +114,7 @@ begin
     end;
 end;
 
+
 procedure TEventForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
     if Key = ESC then Close;
@@ -102,3 +122,4 @@ end;
 
 
 end.
+

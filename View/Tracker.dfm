@@ -37,7 +37,7 @@ object TrackerForm: TTrackerForm
     TabOrder = 0
     object btnOK: TSpeedButton
       Left = 776
-      Top = 13
+      Top = 10
       Width = 75
       Height = 27
       Cursor = crHandPoint
@@ -74,11 +74,11 @@ object TrackerForm: TTrackerForm
     end
     object btnCancel: TSpeedButton
       Left = 864
-      Top = 13
+      Top = 10
       Width = 75
       Height = 27
       Cursor = crHandPoint
-      Caption = 'Cancel'
+      Caption = 'Close'
       Flat = True
       Glyph.Data = {
         36030000424D3603000000000000360000002800000010000000100000000100
@@ -111,7 +111,7 @@ object TrackerForm: TTrackerForm
     end
     object btnApply: TSpeedButton
       Left = 26
-      Top = 13
+      Top = 10
       Width = 111
       Height = 27
       Cursor = crHandPoint
@@ -145,6 +145,43 @@ object TrackerForm: TTrackerForm
         60FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0F7ED8DC27954A33638
         951538951553A3358DC279EFF6ECFFFFFFFFFFFFFFFFFFFFFFFF}
       OnClick = btnApplyClick
+    end
+    object btnSelection: TSpeedButton
+      Left = 180
+      Top = 10
+      Width = 111
+      Height = 27
+      Cursor = crHandPoint
+      Caption = 'Unselect all'
+      Flat = True
+      Glyph.Data = {
+        36030000424D3603000000000000360000002800000010000000100000000100
+        18000000000000030000C40E0000C40E00000000000000000000000000FFFFFF
+        606060606060FFFFFF000000FFFFFF606060606060FFFFFF000000FFFFFF6060
+        60606060FFFFFF000000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5F5F5FFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFFFFFFFFFFF5F5F5F5F5F5FFFFFFFFFFFFF60606060606060606060606060
+        6060606060606060606060606060606060FFFFFFFFFFFF5F5F5FFFFFFFFFFFFF
+        FFFFFF6060606060606060606060606060606060606060606060606060606060
+        60FFFFFFFFFFFFFFFFFF000000FFFFFFFFFFFF606060606060FFFFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFF606060606060FFFFFFFFFFFF000000FFFFFFFFFFFF
+        FFFFFF606060606060FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF6060606060
+        60FFFFFFFFFFFFFFFFFF5F5F5FFFFFFFFFFFFF606060606060FFFFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFF606060606060FFFFFFFFFFFF5F5F5F5F5F5FFFFFFF
+        FFFFFF606060606060FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF6060606060
+        60FFFFFFFFFFFF5F5F5FFFFFFFFFFFFFFFFFFF606060606060FFFFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFF606060606060FFFFFFFFFFFFFFFFFF000000FFFFFF
+        FFFFFF606060606060FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF6060606060
+        60FFFFFFFFFFFF000000FFFFFFFFFFFFFFFFFF60606060606060606060606060
+        6060606060606060606060606060606060FFFFFFFFFFFFFFFFFF5F5F5FFFFFFF
+        FFFFFF6060606060606060606060606060606060606060606060606060606060
+        60FFFFFFFFFFFF5F5F5F5F5F5FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5F5F5FFFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFFFFFFFFFFFFFFFFF000000FFFFFF606060606060FFFFFF000000FFFFFF60
+        6060606060FFFFFF000000FFFFFF606060606060FFFFFF000000}
+      OnClick = btnSelectionClick
     end
   end
   object PanelClient: TPanel
@@ -308,7 +345,7 @@ object TrackerForm: TTrackerForm
         Font.Style = []
         NumbersOnly = True
         ParentFont = False
-        TabOrder = 0
+        TabOrder = 2
         Text = '0'
       end
       object TextReminder2: TLabeledEdit
@@ -327,7 +364,7 @@ object TrackerForm: TTrackerForm
         Font.Style = []
         NumbersOnly = True
         ParentFont = False
-        TabOrder = 1
+        TabOrder = 3
         Text = '0'
       end
       object TextReminder3: TLabeledEdit
@@ -346,7 +383,7 @@ object TrackerForm: TTrackerForm
         Font.Style = []
         NumbersOnly = True
         ParentFont = False
-        TabOrder = 3
+        TabOrder = 4
         Text = '0'
       end
       object TextReminder4: TLabeledEdit
@@ -365,7 +402,7 @@ object TrackerForm: TTrackerForm
         Font.Style = []
         NumbersOnly = True
         ParentFont = False
-        TabOrder = 5
+        TabOrder = 1
         Text = '0'
       end
       object Exp_Rem3_Switch: TCheckBox
@@ -377,7 +414,7 @@ object TrackerForm: TTrackerForm
         Caption = 'Enabled'
         Checked = True
         State = cbChecked
-        TabOrder = 2
+        TabOrder = 6
       end
       object Exp_Rem2_Switch: TCheckBox
         Left = 136
@@ -388,7 +425,7 @@ object TrackerForm: TTrackerForm
         Caption = 'Enabled'
         Checked = True
         State = cbChecked
-        TabOrder = 4
+        TabOrder = 5
       end
       object TextReminder0: TLabeledEdit
         Left = 37
@@ -406,7 +443,7 @@ object TrackerForm: TTrackerForm
         Font.Style = []
         NumbersOnly = True
         ParentFont = False
-        TabOrder = 6
+        TabOrder = 0
         Text = '0'
       end
     end

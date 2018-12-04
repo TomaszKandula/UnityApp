@@ -815,7 +815,6 @@ procedure TAgeView.Make(OSAmount: double);  // REFACTOR TO REMOVE TIGHT COUPLING
     function bucket(pmtstat: integer; bias: integer): integer;
     begin
 
-
         /// <remarks>
         /// 'PMTSTAT' IS COUNTED BETWEEN DUE DATE AND CURRENT DATE, THUS IT MUST BE CORRECTED FOR CUTOFF DATE.
         /// EXAMPLE BEING:

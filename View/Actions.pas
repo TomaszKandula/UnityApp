@@ -3,11 +3,36 @@
 
 unit Actions;
 
+
 interface
 
+
 uses
-    Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,  Dialogs, Grids, Buttons, ExtCtrls, ComCtrls, StdCtrls, ADODB, StrUtils,
-    ShellApi, TLHelp32, pngimage, ImgList, GIFImg, Clipbrd, InterposerClasses, Arrays;
+    Windows,
+    Messages,
+    SysUtils,
+    Variants,
+    Classes,
+    Graphics,
+    Controls,
+    Forms,
+    Dialogs,
+    Grids,
+    Buttons,
+    ExtCtrls,
+    ComCtrls,
+    StdCtrls,
+    ADODB,
+    StrUtils,
+    ShellApi,
+    TLHelp32,
+    pngimage,
+    ImgList,
+    GIFImg,
+    Clipbrd,
+    InterposerClasses,
+    Arrays;
+
 
 type
 
@@ -149,6 +174,7 @@ type
         procedure InitializeSpeedButtons;
     end;
 
+
 var
     ActionsForm: TActionsForm;
 
@@ -157,7 +183,17 @@ implementation
 
 
 uses
-    Main, SQL, Model, Worker, Calendar, Settings, Mailer, Transactions, Send, PhoneList;
+    Main,
+    SQL,
+    Model,
+    Worker,
+    Calendar,
+    Settings,
+    Mailer,
+    Transactions,
+    Send,
+    PhoneList;
+
 
 {$R *.dfm}
 
@@ -205,6 +241,7 @@ begin
 
 end;
 
+
 /// <summary>
 ///     Get all relevant data.
 /// </summary>
@@ -236,6 +273,7 @@ begin
     end;
 
 end;
+
 
 /// <summary>
 ///     Get open items from source.
@@ -304,6 +342,7 @@ begin
 
 end;
 
+
 /// <summary>
 ///     Get customer details.
 /// </summary>
@@ -344,6 +383,7 @@ begin
 
 end;
 
+
 /// <summary>
 ///     Refresh history of daily comments.
 /// </summary>
@@ -382,6 +422,7 @@ begin
 
 end;
 
+
 /// <summary>
 ///     Refresh general comment column.
 /// </summary>
@@ -404,6 +445,7 @@ begin
     end;
 
 end;
+
 
 /// <summary>
 ///     Enable/disable controls.
@@ -445,6 +487,7 @@ begin
 
 end;
 
+
 /// <summary>
 ///     Prepare for new data load.
 /// </summary>
@@ -459,6 +502,7 @@ begin
     CoCode    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCO_CODE,         1, 1), MainForm.sgAgeView.Row];
     SCUID     :=CustNumber + MainForm.ConvertName(CoCode, 'F', 3);
 end;
+
 
 /// <summary>
 ///     Clear all details displayed on Action window.
@@ -477,6 +521,7 @@ begin
     DailyCom.Text       :='';
     GeneralCom.Text     :='';
 end;
+
 
 /// <summary>
 ///     Make phone call.
@@ -518,6 +563,7 @@ begin
     end;
 
 end;
+
 
 /// <summary>
 ///     oad next or previous customer.
@@ -568,6 +614,7 @@ begin
 
 end;
 
+
 /// <summary>
 ///     Clear follow-up from given customer.
 /// </summary>
@@ -589,6 +636,7 @@ begin
     end;
 end;
 
+
 /// <summary>
 ///     Save customer details in Address Book.
 /// </summary>
@@ -607,6 +655,7 @@ begin
     );
 end;
 
+
 /// <summary>
 ///     Save general comment into database.
 /// </summary>
@@ -623,6 +672,7 @@ begin
         True
     );
 end;
+
 
 /// <summary>
 ///     Save daily comment into database (use locking thread by default).
@@ -643,6 +693,7 @@ begin
     );
 end;
 
+
 /// <summary>
 ///     Draw panels borders.
 /// </summary>
@@ -651,6 +702,7 @@ procedure TActionsForm.InitializePanels;
 begin
     PanelTop.PanelBorders(clWhite, clSkyBlue, clWhite, clWhite, clWhite);
 end;
+
 
 /// <summary>
 ///     Applay transparency for all speed buttons.
@@ -714,14 +766,14 @@ begin
 
     //...
 
-
-
 end;
+
 
 procedure TActionsForm.FormShow(Sender: TObject);
 begin
     Initialize;
 end;
+
 
 procedure TActionsForm.FormActivate(Sender: TObject);
 begin
@@ -738,10 +790,12 @@ begin
     end;
 end;
 
+
 procedure TActionsForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
     CanClose:=True;
 end;
+
 
 procedure TActionsForm.FormDestroy(Sender: TObject);
 begin
@@ -760,6 +814,7 @@ procedure TActionsForm.HistoryGridDrawCell(Sender: TObject; ACol, ARow: Integer;
 begin
     HistoryGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
 end;
+
 
 /// <summary>
 ///     Color numbers and selection on string grid.
@@ -800,6 +855,7 @@ begin
 
 end;
 
+
 /// <summary>
 ///     Show data when user select item on history string gird.
 /// </summary>
@@ -817,6 +873,7 @@ procedure TActionsForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
     if Key = ESC then Close;
 end;
+
 
 /// <summary>
 ///     Save daily comment on <enter>. Allow to enter empty line when ALT + ENTER is pressed.
@@ -841,6 +898,7 @@ begin
 
     end;
 end;
+
 
 /// <summary>
 ///     Save general comment on <enter>. Allow to enter empty line when ALT + ENTER is pressed.
@@ -867,6 +925,7 @@ begin
 
 end;
 
+
 /// <summary>
 ///     String grid content to clipboard.
 /// </summary>
@@ -875,6 +934,7 @@ procedure TActionsForm.OpenItemsGridKeyDown(Sender: TObject; var Key: Word; Shif
 begin
     if (Key = 67) and (Shift = [ssCtrl]) then OpenItemsGrid.CopyCutPaste(adCopy);
 end;
+
 
 /// <summary>
 ///     String grid content to clipboard.
@@ -885,6 +945,7 @@ begin
     if (Key = 67) and (Shift = [ssCtrl]) then HistoryGrid.CopyCutPaste(adCopy);
 end;
 
+
 /// <summary>
 ///     Set focus on General Comment edit box.
 /// </summary>
@@ -893,6 +954,7 @@ procedure TActionsForm.DailyComKeyUp(Sender: TObject; var Key: Word; Shift: TShi
 begin
     if Key = VK_TAB then GeneralCom.SetFocus;
 end;
+
 
 /// <summary>
 ///     Set focus on Daily Comment edit box.
@@ -915,35 +977,42 @@ begin
 //    if (Cust_Phone.Enabled) and (Cust_Phone.Visible) then Cust_Phone.SetFocus;
 end;
 
+
 procedure TActionsForm.Cust_PersonMouseEnter(Sender: TObject);
 begin
 //    if (Cust_Person.Enabled) and (Cust_Person.Visible) then Cust_Person.SetFocus;
 end;
+
 
 procedure TActionsForm.Cust_MailMouseEnter(Sender: TObject);
 begin
 //    if (Cust_Mail.Enabled) and (Cust_Mail.Visible) then Cust_Mail.SetFocus;
 end;
 
+
 procedure TActionsForm.Cust_MailGeneralMouseEnter(Sender: TObject);
 begin
 //    if (Cust_MailGeneral.Enabled) and (Cust_MailGeneral.Visible) then Cust_MailGeneral.SetFocus;
 end;
+
 
 procedure TActionsForm.OpenItemsGridMouseEnter(Sender: TObject);
 begin
 //    if (OpenItemsGrid.Enabled) and (OpenItemsGrid.Visible) then OpenItemsGrid.SetFocus;
 end;
 
+
 procedure TActionsForm.HistoryGridMouseEnter(Sender: TObject);
 begin
 //    if (HistoryGrid.Enabled) and (HistoryGrid.Visible) then HistoryGrid.SetFocus;
 end;
 
+
 procedure TActionsForm.DailyComMouseEnter(Sender: TObject);
 begin
 //    if (DailyCom.Enabled) and (DailyCom.Visible) then DailyCom.SetFocus;
 end;
+
 
 procedure TActionsForm.GeneralComMouseEnter(Sender: TObject);
 begin
@@ -960,17 +1029,20 @@ begin
     OpenItemsGrid.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
 end;
 
+
 procedure TActionsForm.OpenItemsGridMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
     Handled:=True;
     OpenItemsGrid.Perform(WM_VSCROLL, SB_LINEUP, 0);
 end;
 
+
 procedure TActionsForm.HistoryGridMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
     Handled:=True;
     HistoryGrid.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
 end;
+
 
 procedure TActionsForm.HistoryGridMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
@@ -987,35 +1059,42 @@ begin
     MainForm.WndCall(PhoneListForm, 0);
 end;
 
+
 procedure TActionsForm.btnSaveCustDetailsClick(Sender: TObject);
 begin
     SaveCustomerDetails;
 end;
+
 
 procedure TActionsForm.btnCopyCustNameClick(Sender: TObject);
 begin
     ClipBoard.AsText:=Cust_Name.Caption;
 end;
 
+
 procedure TActionsForm.btnCopyCustNumberClick(Sender: TObject);
 begin
     ClipBoard.AsText:=Cust_Number.Caption;
 end;
+
 
 procedure TActionsForm.btnCopyPersonClick(Sender: TObject);
 begin
     ClipBoard.AsText:=Cust_Person.Text;
 end;
 
+
 procedure TActionsForm.btnCopyEmailClick(Sender: TObject);
 begin
     ClipBoard.AsText:=Cust_Mail.Text;
 end;
 
+
 procedure TActionsForm.btnCopyGeneralMailClick(Sender: TObject);
 begin
     Clipboard.AsText:=Cust_MailGeneral.Text;
 end;
+
 
 procedure TActionsForm.btnQMStoggleClick(Sender: TObject);
 begin
@@ -1033,15 +1112,18 @@ begin
     end;
 end;
 
+
 procedure TActionsForm.btnBackClick(Sender: TObject);
 begin
     LoadCustomer(loadPrev);
 end;
 
+
 procedure TActionsForm.btnNextClick(Sender: TObject);
 begin
     LoadCustomer(loadNext);
 end;
+
 
 procedure TActionsForm.btnSetFollowUpClick(Sender: TObject);
 begin
@@ -1049,15 +1131,18 @@ begin
     MainForm.WndCall(CalendarForm, 0);
 end;
 
+
 procedure TActionsForm.btnClearFollowUpClick(Sender: TObject);
 begin
     ClearFollowUp;
 end;
 
+
 procedure TActionsForm.btnCustomStatementClick(Sender: TObject);
 begin
     MainForm.WndCall(SendForm, 0);
 end;
+
 
 procedure TActionsForm.btnAutoStatementClick(Sender: TObject);
 begin
@@ -1084,6 +1169,7 @@ begin
 
 end;
 
+
 procedure TActionsForm.btnCallCustomerClick(Sender: TObject);
 begin
     MakePhoneCall;
@@ -1091,3 +1177,4 @@ end;
 
 
 end.
+

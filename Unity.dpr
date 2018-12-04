@@ -98,6 +98,7 @@ var
 
 // ------------------------------------------------------------------------------------------------------------------------------------------ HELPER METHODS //
 
+
 /// <summary>
 ///     Allocate assemblies names that we are looing for.
 ///     TODO: Subject for CRC32.
@@ -113,6 +114,7 @@ begin
     Assemblies[4]:=DLL5;
     Assemblies[5]:=LyncCall;
 end;
+
 
 /// <summary>
 ///     Extract given source file by provided ID number.
@@ -159,6 +161,7 @@ begin
 
 end;
 
+
 /// <summary>
 ///     Update splash form message and loading status.
 /// </summary>
@@ -180,6 +183,7 @@ begin
         LogText.Log(EventLogPath, Text);
 
 end;
+
 
 /// <summary>
 ///     Unpack "Release.pak" file.
@@ -238,6 +242,7 @@ begin
 
 end;
 
+
 /// <summary>
 ///     During the update, some files cannot be overwritten or removed, thus we change the name and copy new file(s) into the very same place.
 ///     This methods remove all of the "leftovers" from given folder.
@@ -264,6 +269,7 @@ begin
         LogText.Log(EventLogPath, '[Automatic updater]: Cleaning folder after previous update has been done (' + IntToStr(Check) + ' items removed).');
 
 end;
+
 
 /// <summary>
 ///     Parse content of manifest file and return requested Key value.
@@ -910,3 +916,4 @@ begin
     Application.Terminate;
 
 end.
+

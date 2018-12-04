@@ -3,10 +3,25 @@
 
 unit Update;
 
+
 interface
 
+
 uses
-    Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, ExtCtrls, GIFImg, Gauges;
+    Windows,
+    Messages,
+    SysUtils,
+    Variants,
+    Classes,
+    Graphics,
+    Controls,
+    Forms,
+    Dialogs,
+    StdCtrls,
+    ExtCtrls,
+    GIFImg,
+    Gauges;
+
 
 type
 
@@ -28,6 +43,7 @@ type
     protected
 //        procedure CreateParams(var Params: TCreateParams); override;
     end;
+
 
 var
     UpdateForm: TUpdateForm;
@@ -56,3 +72,4 @@ implementation
 
 
 end.
+

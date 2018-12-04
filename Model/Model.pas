@@ -3,14 +3,22 @@
 
 unit Model;
 
+
 interface
 
+
 uses
-    Main, SQL, Windows, Classes, SysUtils, StrUtils, ADODB;
+    Main,
+    SQL,
+    Windows,
+    Classes,
+    SysUtils,
+    StrUtils,
+    ADODB;
 
     /// <remarks>
     ///     Because we use ADODB and no other ORM, we encapsulate columns name under table name (class), so we have one point of reference
-    ///     and yet we can use it to build own SQL statements much like LINQ allows.
+    ///     and yet we can use it to build own SQL statements.
     /// </remarks>
 
 type
@@ -292,7 +300,7 @@ type
     TPaidinfo = class(TDataTables)
     {$TYPEINFO ON}
     public
-        const ID          : string = 'Id';  // Primary key
+        const ID          : string = 'Id';
         const ERP_CODE    : string = 'ErpCode';
         const DESCRIPTION : string = 'Description';
         const STAMP       : string = 'ExtractDateStamp';
@@ -306,7 +314,7 @@ type
     TPerson = class(TDataTables)
     {$TYPEINFO ON}
     public
-        const ID            : string = 'Id';    // Primary key
+        const ID            : string = 'Id';
         const ERP_CODE      : string = 'ErpCode';
         const DESCRIPTION   : string = 'Description';
         const STAMP         : string = 'ExtractDateStamp';
@@ -321,7 +329,7 @@ type
     TGroup3 = class(TDataTables)
     {$TYPEINFO ON}
     public
-        const ID            : string = 'Id';    // Primary key
+        const ID            : string = 'Id';
         const ERP_CODE      : string = 'ErpCode';
         const DESCRIPTION   : string = 'Description';
         const STAMP         : string = 'ExtractDateStamp';
@@ -396,7 +404,7 @@ type
     TPmtterms = class(TDataTables)
     {$TYPEINFO ON}
     public
-        const ID            : string = 'Id';    // Primary key
+        const ID            : string = 'Id';
         const ERP_CODE      : string = 'ErpCode';
         const DESCRIPTION   : string = 'Description';
         const I_MONTH       : string = 'Month';
@@ -426,11 +434,12 @@ type
         const INDV_REM2  : string = 'SendReminder2';
         const INDV_REM3  : string = 'SendReminder3';
         const INDV_REM4  : string = 'SendReminder4';
-        const EXP_REM2   : string = 'ExceptionReminder2';
-        const EXP_REM3   : string = 'ExceptionReminder3';
         const SCUID      : string = 'Sciud';
         const LAYOUT     : string = 'ReminderLayout';
         const STATEMENT  : string = 'PreStatement';
+        const SENDFROM   : string = 'SendFrom';
+        const STATEMENTTO: string = 'StatementTo';
+        const REMINDERTO : string = 'ReminderTo';
     end;
 
     /// <summary>
@@ -446,17 +455,6 @@ type
         const INVOICENO    : string = 'InvoiceNo';
         const INVOICESTATE : string = 'InvoiceState';
         const STAMP        : string = 'Stamp';
-    end;
-
-    /// <summary>
-    ///     List of layouts.
-    /// </summary>
-
-    TReminderLayouts = class(TDataTables)
-    {$TYPEINFO ON}
-    public
-        const ID           : string = 'Id'; // Primary Key
-        const LAYOUTNAME   : string = 'LayoutName';
     end;
 
     /// <summary>
@@ -557,3 +555,4 @@ implementation
 
 
 end.
+

@@ -3,10 +3,25 @@
 
 unit SendFeedback;
 
+
 interface
 
+
 uses
-    Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, StdCtrls, Buttons, ExtCtrls, InterposerClasses;
+    Windows,
+    Messages,
+    SysUtils,
+    Variants,
+    Classes,
+    Graphics,
+    Controls,
+    Forms,
+    Dialogs,
+    StdCtrls,
+    Buttons,
+    ExtCtrls,
+    InterposerClasses;
+
 
 type
 
@@ -42,7 +57,11 @@ implementation
 
 
 uses
-    Main, Mailer, Settings, Worker;
+    Main,
+    Mailer,
+    Settings,
+    Worker;
+
 
 {$R *.dfm}
 
@@ -83,6 +102,7 @@ begin
     end;
 
 end;
+
 
 /// <summary>
 ///     Send feedback with user comments.
@@ -193,6 +213,7 @@ begin
     TotalWords.Caption:=IntToStr(WordCount(ReportMemo.Text)) + ' / ' + IntToStr(ReportMemo.MaxLength);
 end;
 
+
 procedure TReportForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
     if Key = ESC then Close;
@@ -200,3 +221,4 @@ end;
 
 
 end.
+

@@ -3,10 +3,25 @@
 
 unit Worker;
 
+
 interface
 
+
 uses
-    Windows, Messages, SysUtils, Classes, Diagnostics, Graphics, ADODB, ComObj, ComCtrls, SyncObjs, Dialogs, DB, InterposerClasses, Arrays;
+    Windows,
+    Messages,
+    SysUtils,
+    Classes,
+    Diagnostics,
+    Graphics,
+    ADODB,
+    ComObj,
+    ComCtrls,
+    SyncObjs,
+    Dialogs,
+    DB,
+    InterposerClasses,
+    Arrays;
 
     /// <remarks>
     ///     Asynchronous methods executed within single thread classes. Most of the thread classes aquire lock, so they can be called
@@ -41,7 +56,7 @@ type
 
     TTInvoiceTrackerRefresh = class(TThread)
     protected
-        procedure   Execute; override;
+        procedure Execute; override;
     private
         var pUserAlias: string;
         var FIDThd    : integer;
@@ -138,11 +153,20 @@ type
         var FConditions: string;
     public
         property    IDThd:  integer read FIDThd;
-        constructor Create(ActionMode: integer; Grid: TStringGrid; SCUID, Contact, Estatement, Email, Phones: string; Conditions: string);
-        destructor  Destroy; override;
         function    Read     : boolean;
         function    Update   : boolean;
         function    Add      : boolean;
+        destructor  Destroy; override;
+        constructor Create(
+            ActionMode:     integer;
+            Grid:           TStringGrid;
+            SCUID:          string;
+            Contact:        string;
+            Estatement:     string;
+            Email:          string;
+            Phones:         string;
+            Conditions:     string
+        );
     end;
 
     /// <summary>
@@ -233,8 +257,16 @@ type
         var FEventLog:     boolean;
     public
         property    IDThd:  integer read FIDThd;
-        constructor Create(CUID: string; FixedComment: string; FollowUp: string; Free1: string; Free2: string; Free3: string; EventLog: boolean);
         destructor  Destroy; override;
+        constructor Create(
+            CUID:           string;
+            FixedComment:   string;
+            FollowUp:       string;
+            Free1:          string;
+            Free2:          string;
+            Free3:          string;
+            EventLog:       boolean
+        );
     end;
 
     /// <summary>
@@ -327,7 +359,13 @@ type
         var FConditions:  string;
         var FAutoRelease: boolean;
     public
-        constructor Create(TableName: string; DestGrid: TStringGrid; Columns: string = '' {OPTION}; Conditions: string = '' {OPTION}; AutoRelease: boolean = True {OPTION});
+        constructor Create(
+            TableName:      string;
+            DestGrid:       TStringGrid;
+            Columns:        string = '' {OPTION};
+            Conditions:     string = '' {OPTION};
+            AutoRelease:    boolean = True {OPTION}
+        );
     end;
 
 
@@ -335,7 +373,18 @@ implementation
 
 
 uses
-    Main, SQL, Model, DataBase, Settings, UAC, Mailer, AgeView, Transactions, Tracker, Actions, SendFeedback;
+    Main,
+    SQL,
+    Model,
+    DataBase,
+    Settings,
+    UAC,
+    Mailer,
+    AgeView,
+    Transactions,
+    Tracker,
+    Actions,
+    SendFeedback;
 
 
 // --------------------------------------------------------------------------------------------------------------------------------- CHECK SERVER CONNECTION //
@@ -398,8 +447,7 @@ begin
     FIDThd:=CurrentThread.ThreadID;
 
     try
-//        TrackerForm.UserAlias:=pUserAlias;
-//        TrackerForm.Display;
+        MainForm.UpdateTrackerList(pUserAlias);
     except
         on E: Exception do
             MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Execution of this tread work has been stopped. Error has been thrown: ' + E.Message + ' (TInvoiceTracker).');

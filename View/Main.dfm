@@ -1194,7 +1194,7 @@ object MainForm: TMainForm
     Margins.Top = 0
     Margins.Right = 10
     Margins.Bottom = 0
-    ActivePage = TabSheet1
+    ActivePage = TabSheet4
     Align = alClient
     DoubleBuffered = True
     Font.Charset = DEFAULT_CHARSET
@@ -10066,7 +10066,6 @@ object MainForm: TMainForm
           Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
           PopupMenu = TrackerPopup
           TabOrder = 0
-          Visible = False
           OnDblClick = sgInvoiceTrackerDblClick
           OnDrawCell = sgInvoiceTrackerDrawCell
           OnKeyUp = sgInvoiceTrackerKeyUp

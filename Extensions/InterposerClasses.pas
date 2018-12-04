@@ -3,11 +3,31 @@
 
 unit InterposerClasses;
 
+
 interface
 
+
 uses
-    Arrays, Grids, ExtCtrls, Messages, Controls, Graphics, Types, Dialogs, Forms, Winapi.Windows, Clipbrd, SysUtils, Math, Classes, ComObj, ComCtrls, Variants, StdCtrls,
+    Arrays,
+    Grids,
+    ExtCtrls,
+    Messages,
+    Controls,
+    Graphics,
+    Types,
+    Dialogs,
+    Forms,
+    Winapi.Windows,
+    Clipbrd,
+    SysUtils,
+    Math,
+    Classes,
+    ComObj,
+    ComCtrls,
+    Variants,
+    StdCtrls,
     CheckLst;
+
 
     /// <summary>
     ///     This unit contains all extensions of standard components introduced via interposer class.
@@ -136,7 +156,9 @@ implementation
 
 
 uses
-    Main, Settings, SQL;
+    Main,
+    Settings,
+    SQL;
 
 
 // --------------------------------------------------------------------------------------------------------------------------- EXTENSION OF 'TLISTBOX' CLASS //
@@ -177,6 +199,7 @@ begin
 
 end;
 
+
 procedure TEdit.SetAlignment(value: TAlignment);
 begin
     if FAlignment <> value then
@@ -196,11 +219,13 @@ begin
     Invalidate;
 end;
 
+
 procedure TShape.CMTextChanged(var Msg: TMessage);
 begin
     inherited;
     Invalidate;
 end;
+
 
 /// <summary>
 ///     Paint method with text function.
@@ -225,6 +250,7 @@ begin
     TextOut(Canvas.Handle, CaptionLeft, CaptionTop, PChar(Caption), Length(Caption));
 
 end;
+
 
 /// <summary>
 ///     Drwa text inside TShape component. Please note that font is fixed.
@@ -305,6 +331,7 @@ begin
 
 end;
 
+
 /// <summary>
 ///     Draw borders of the component.
 /// </summary>
@@ -357,6 +384,7 @@ begin
 
 end;
 
+
 /// <summary>
 ///     Register rows affected.
 /// </summary>
@@ -377,6 +405,7 @@ begin
     end;
 
 end;
+
 
 /// <summary>
 ///     Remove focus rectangle from selection.
@@ -443,6 +472,7 @@ begin
 //    end;
 
 end;
+
 
 /// <summary>
 ///     Implementation of "Copy, Cut, Past" functionality.
@@ -544,6 +574,7 @@ begin
 
 end;
 
+
 /// <summary>
 ///     Delete and escape behaviour for string grid.
 /// </summary>
@@ -553,6 +584,7 @@ begin
     if mode = adESC then EditorMode:=False;
     if mode = adDEL then Cells[pCol, pRow]:='';
 end;
+
 
 /// <summary>
 ///     Clear all content of string grid.
@@ -577,6 +609,7 @@ begin
     RowCount:=dfRows;
 
 end;
+
 
 /// <summary>
 ///     Delete selected row from given string grid.
@@ -635,6 +668,7 @@ begin
 
 end;
 
+
 /// <summary>
 ///     Selection colour.
 /// </summary>
@@ -679,6 +713,7 @@ begin
 
 end;
 
+
 /// <summary>
 ///     Font colors and numbers.
 /// </summary>
@@ -711,34 +746,54 @@ begin
 
 end;
 
+
 { ----------------------------------------------------------------------------------------------------------------------------------------- AUTO COLUMN WIDTH }
+
+/// <summary>
+///     Auto column width.
+/// </summary>
+
 procedure TStringGrid.SetColWidth(FirstDefault: integer; AddSpace: integer; Limit: integer);
 var
-  tblArray:  TIntigers;
-  iCNT:      integer;
-  jCNT:      integer;
-  NewWidth:  integer;
+    tblArray:  TIntigers;
+    iCNT:      integer;
+    jCNT:      integer;
+    NewWidth:  integer;
 begin
-  { ---------------------------------------------------------------------------------------------------------------------------------------------- INITIALIZE }
-  if Row > 0 then SetLength(tblArray, RowCount) else Exit;
-  ColWidths[0]:=FirstDefault;
-  { ---------------------------------------------------------------------------------------------------------------------------- ITERATE THROUGHT ALL COLUMNS }
-  for jCNT:=1 to ColCount - 1 do
-  begin
-    { ----------------------------------------------------------------------------------------------------- ITERATE THROUGHT ALL ROWS INCLUDING ACTUAL HEADER }
-    for iCNT:=0 to RowCount - 1 do tblArray[iCNT]:=Canvas.TextWidth(Cells[jCNT, iCNT]);
-    { ---------------------------------------------------------------------------------------------------------------------------------- RETURN HIGHEST VALUE }
-    if not (ColWidths[jCNT] = -1) then { SKIP HIDDEN COLUMNS }
+
+    if Row > 0 then
+        SetLength(tblArray, RowCount)
+            else
+                Exit;
+
+    ColWidths[0]:=FirstDefault;
+
+    // Iterate throught all the columns
+    for jCNT:=1 to ColCount - 1 do
     begin
-      NewWidth:=MaxIntValue(tblArray) + AddSpace;
-      if NewWidth < Limit then
-        ColWidths[jCNT]:=NewWidth
-          else
-            ColWidths[jCNT]:=Limit;
+
+        // Iterate throught all rows including actual header
+        for iCNT:=0 to RowCount - 1 do tblArray[iCNT]:=Canvas.TextWidth(Cells[jCNT, iCNT]);
+
+        // Return highest value
+        if not (ColWidths[jCNT] = -1) then { Skip hidden columns }
+        begin
+
+            NewWidth:=MaxIntValue(tblArray) + AddSpace;
+
+            if NewWidth < Limit then
+                ColWidths[jCNT]:=NewWidth
+                    else
+                        ColWidths[jCNT]:=Limit;
+
+        end;
+
     end;
-  end;
-  SetLength(tblArray, 1);
+
+    SetLength(tblArray, 1);
+
 end;
+
 
 /// <summary>
 ///     Set row height and header height (always first row).
@@ -749,6 +804,7 @@ begin
     DefaultRowHeight:=RowHeight;
     RowHeights[0]:=Header;
 end;
+
 
 /// <summary>
 ///     Merge sort implementation.
@@ -790,6 +846,7 @@ begin
     SetLength(List, 0);
 
 end;
+
 
 /// <summary>
 ///     Auto thumb size implementation.
@@ -835,6 +892,7 @@ begin
 
 end;
 
+
 /// <summary>
 ///     String grid column layout. It contains with two headers, one is displayed to the user (column title), and second
 ///     is used to hold original SQL column name, that other can refer and perform SQL queries.
@@ -868,8 +926,8 @@ begin
     // Encode
     Settings.Encode(AppConfig);
 
-
 end;
+
 
 /// <summary>
 ///     Load layout from application settings.
@@ -945,6 +1003,7 @@ begin
 
 end;
 
+
 /// <summary>
 ///     Return column number for given header (column title).
 /// </summary>
@@ -966,6 +1025,7 @@ begin
     end;
 
 end;
+
 
 /// <summary>
 ///     Export string grid content to Microsoft Excel file.
@@ -1087,6 +1147,7 @@ begin
 
 end;
 
+
 /// <summary>
 ///     Allow to disable or enable component drawing.
 /// </summary>
@@ -1109,6 +1170,7 @@ begin
     end;
 
 end;
+
 
 /// <summary>
 ///     Import from CSV file to string grid.
@@ -1192,6 +1254,7 @@ begin
 
 end;
 
+
 /// <summary>
 ///     Export to CSV (with given delimiter) all string grid content.
 /// </summary>
@@ -1258,6 +1321,7 @@ begin
     end;
 
 end;
+
 
 /// <summary>
 ///     Select all rows and columns (except first row which is presumbly a column title).
@@ -1328,3 +1392,4 @@ end;
 
 
 end.
+

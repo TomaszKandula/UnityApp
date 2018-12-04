@@ -3,10 +3,25 @@
 
 unit PhoneList;
 
+
 interface
 
+
 uses
-    Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms, Dialogs, ExtCtrls, Buttons, StdCtrls, InterposerClasses;
+    Windows,
+    Messages,
+    SysUtils,
+    Variants,
+    Classes,
+    Graphics,
+    Controls,
+    Forms,
+    Dialogs,
+    ExtCtrls,
+    Buttons,
+    StdCtrls,
+    InterposerClasses;
+
 
 type
 
@@ -29,15 +44,21 @@ type
         function  CheckPhoneList(List: TMemo): boolean;
     end;
 
+
 var
   PhoneListForm: TPhoneListForm;
 
+
 implementation
+
 
 {$R *.dfm}
 
+
 uses
-    Main, Actions, Settings;
+    Main,
+    Actions,
+    Settings;
 
 
 // ------------------------------------------------------------------------------------------------------------------------------------------- CLASS HELPERS //
@@ -87,6 +108,7 @@ begin
     PanelMemo.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
 end;
 
+
 /// <summary>
 ///     Clear all.
 /// </summary>
@@ -125,6 +147,7 @@ begin
 
 end;
 
+
 /// <summary>
 ///     Dismiss window.
 /// </summary>
@@ -137,6 +160,7 @@ end;
 
 // ----------------------------------------------------------------------------------------------------------------------------------------- KEYBOARD EVENTS //
 
+
 /// <summary>
 ///     Close window.
 /// </summary>
@@ -147,3 +171,4 @@ begin
 end;
 
 end.
+
