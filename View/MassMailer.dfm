@@ -17,6 +17,7 @@ object ViewMailerForm: TViewMailerForm
   Scaled = False
   OnClose = FormClose
   OnCreate = FormCreate
+  OnDestroy = FormDestroy
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
@@ -345,7 +346,7 @@ object ViewMailerForm: TViewMailerForm
       ParentBackground = False
       TabOrder = 0
       object Text_Subject: TEdit
-        Left = 4
+        Left = 2
         Top = 4
         Width = 501
         Height = 20
@@ -380,23 +381,25 @@ object ViewMailerForm: TViewMailerForm
     object PanelEmailContainer: TPanel
       AlignWithMargins = True
       Left = 20
-      Top = 93
+      Top = 20
       Width = 473
-      Height = 444
+      Height = 517
       Margins.Left = 20
-      Margins.Top = 10
+      Margins.Top = 20
       Margins.Right = 20
       Margins.Bottom = 20
       Align = alClient
       BevelOuter = bvNone
       Caption = 'PanelEmailContainer'
-      TabOrder = 1
+      TabOrder = 0
+      ExplicitTop = 93
+      ExplicitHeight = 444
       object CustomerList: TListView
         AlignWithMargins = True
         Left = 5
         Top = 5
         Width = 463
-        Height = 434
+        Height = 507
         Margins.Left = 5
         Margins.Top = 5
         Margins.Right = 5
@@ -410,44 +413,7 @@ object ViewMailerForm: TViewMailerForm
         TabOrder = 0
         TabStop = False
         ViewStyle = vsReport
-      end
-    end
-    object PanelEmailFrom: TPanel
-      AlignWithMargins = True
-      Left = 20
-      Top = 10
-      Width = 473
-      Height = 63
-      Margins.Left = 20
-      Margins.Top = 10
-      Margins.Right = 20
-      Margins.Bottom = 10
-      Align = alTop
-      BevelOuter = bvNone
-      Color = clWhite
-      ParentBackground = False
-      TabOrder = 0
-      object Text4: TLabel
-        Left = 18
-        Top = 10
-        Width = 178
-        Height = 13
-        Align = alCustom
-        Caption = 'Select email address to be sent from:'
-      end
-      object EmailList: TComboBox
-        Left = 18
-        Top = 29
-        Width = 178
-        Height = 22
-        Cursor = crHandPoint
-        BevelInner = bvLowered
-        BevelKind = bkFlat
-        BevelOuter = bvNone
-        Style = csOwnerDrawFixed
-        TabOrder = 0
-        TabStop = False
-        OnKeyUp = EmailListKeyUp
+        ExplicitHeight = 434
       end
     end
   end

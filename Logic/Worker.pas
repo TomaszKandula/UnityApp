@@ -281,36 +281,38 @@ type
         var FIDThd:        integer;
         var FLayout:       integer;
         var FSubject:      string;
-        var FSalut:        string;
         var FMess:         string;
         var FIsOverdue:    boolean;
         var FOpenItems:    TStringGrid;
-        var FSCUID:        string;
         var FCUID:         string;
+        var FSendFrom:     string;
         var FCustName:     string;
         var FCustNumber:   string;
-        var FCoCode:       string;
-        var FBranch:       string;
+        var FLBUName:      string;
+        var FLBUAddress:   string;
+        var FTelephone:    string;
+        var FBankDetails:  string;
         var FSeries:       boolean;
         var FItemNo:       integer;
     public
         property    IDThd:  integer read FIDThd;
         destructor  Destroy; override;
         constructor Create(
-            Layout:     integer;
-            Subject:    string;
-            Salut:      string;
-            Mess:       string;
-            IsOverdue:  boolean;
-            OpenItems:  TStringGrid;
-            SCUID:      string;
-            CUID:       string;
-            CustName:   string;
-            CustNumber: string;
-            CoCode:     string;
-            Branch:     string;
-            Series:     boolean = False;
-            ItemNo:     integer = 0
+            Layout:      integer;
+            Subject:     string;
+            Mess:        string;
+            IsOverdue:   boolean;
+            OpenItems:   TStringGrid;
+            CUID:        string;
+            SendFrom:    string;
+            CustName:    string;
+            CustNumber:  string;
+            LBUName:     string;
+            LBUAddress:  string;
+            Telephone:   string;
+            BankDetails: string;
+            Series:      boolean = False;
+            ItemNo:      integer = 0
         );
     end;
 
@@ -1637,39 +1639,41 @@ end;
 
 constructor TTSendAccountStatement.Create
 (
-    Layout:     integer;
-    Subject:    string;
-    Salut:      string;
-    Mess:       string;
-    IsOverdue:  boolean;
-    OpenItems:  TStringGrid;
-    SCUID:      string;
-    CUID:       string;
-    CustName:   string;
-    CustNumber: string;
-    CoCode:     string;
-    Branch:     string;
-    Series:     boolean = False;
-    ItemNo:     integer = 0
+    Layout:      integer;
+    Subject:     string;
+    Mess:        string;
+    IsOverdue:   boolean;
+    OpenItems:   TStringGrid;
+    CUID:        string;
+    SendFrom:    string;
+    CustName:    string;
+    CustNumber:  string;
+    LBUName:     string;
+    LBUAddress:  string;
+    Telephone:   string;
+    BankDetails: string;
+    Series:      boolean = False;
+    ItemNo:      integer = 0
 );
 begin
     inherited Create(False);
-    FLock      :=TCriticalSection.Create;
-    FIDThd     :=0;
-    FLayout    :=Layout;
-    FSubject   :=Subject;
-    FSalut     :=Salut;
-    FMess      :=Mess;
-    FIsOverdue :=IsOverdue;
-    FOpenItems :=OpenItems;
-    FCUID      :=CUID;
-    FSCUID     :=SCUID;
-    FCustName  :=CustName;
-    FCustNumber:=CustNumber;
-    FCoCode    :=CoCode;
-    FBranch    :=Branch;
-    FSeries    :=Series;
-    FItemNo    :=ItemNo;
+    FLock       :=TCriticalSection.Create;
+    FIDThd      :=0;
+    FLayout     :=Layout;
+    FSubject    :=Subject;
+    FMess       :=Mess;
+    FIsOverdue  :=IsOverdue;
+    FOpenItems  :=OpenItems;
+    FCUID       :=CUID;
+    FSendFrom   :=SendFrom;
+    FCustName   :=CustName;
+    FCustNumber :=CustNumber;
+    FSeries     :=Series;
+    FItemNo     :=ItemNo;
+    FLBUName    :=LBUName;
+    FLBUAddress :=LBUAddress;
+    FTelephone  :=Telephone;
+    FBankDetails:=BankDetails;
 end;
 
 destructor TTSendAccountStatement.Destroy;
@@ -1685,7 +1689,7 @@ var
 begin
     FIDThd:=CurrentThread.ThreadID;
     FLock.Acquire;
-    CurrentThread.Sleep(50);
+    CurrentThread.Sleep(15);
 
     try
         Statement:=TDocument.Create;
@@ -1696,15 +1700,16 @@ begin
             ///     Assign all the necessary parameters.
             /// </remarks>
 
-            Statement.CUID     :=FCUID;
-            Statement.SCUID    :=FSCUID;
-            Statement.CustName :=FCustName;
-            Statement.CoCode   :=FCoCode;
-            Statement.Branch   :=FBranch;
-            Statement.CustSalut:=FSalut;
-            Statement.CustMess :=FMess;
-            Statement.IsOverdue:=FIsOverdue;
-            Statement.OpenItems:=FOpenItems;
+            Statement.CUID       :=FCUID;
+            Statement.MailFrom   :=FSendFrom;
+            Statement.CustName   :=FCustName;
+            Statement.LBUName    :=FLBUName;
+            Statement.LBUAddress :=FLBUAddress;
+            Statement.Telephone  :=FTelephone;
+            Statement.BankDetails:=FBankDetails;
+            Statement.CustMess   :=FMess;
+            Statement.OpenItems  :=FOpenItems;
+            Statement.IsOverdue  :=FIsOverdue;
 
             Statement.MailSubject:=FSubject + ' - ' + FCustName + ' - ' + FCustNumber;
 
@@ -1712,7 +1717,7 @@ begin
             ///     Use dcStatement, do not change this flag.
             /// </remarks>
 
-            Statement.DocType  :=dcStatement;
+            Statement.DocType:=dcStatement;
 
             /// <remarks>
             ///     Load either fixed template or customizable template.
@@ -1741,13 +1746,35 @@ begin
 
                 if FLayout = maDefined then
                 begin
-                    CommThread:=TTDailyComment.Create(FCUID, False, False, 0, 'New account statement has been sent to the customer', False, True, False, True, False);
+                    CommThread:=TTDailyComment.Create(
+                        FCUID,
+                        False,
+                        False,
+                        0,
+                        'New account statement has been sent to the customer',
+                        False,
+                        True,
+                        False,
+                        True,
+                        False
+                    );
                     CommThread.WaitFor;
                 end;
 
                 if FLayout = maCustom  then
                 begin
-                    CommThread:=TTDailyComment.Create(FCUID, False, False, 0, 'New account statement has been sent to the customer', False, False, True, True, False);
+                    CommThread:=TTDailyComment.Create(
+                        FCUID,
+                        False,
+                        False,
+                        0,
+                        'New account statement has been sent to the customer',
+                        False,
+                        False,
+                        True,
+                        True,
+                        False
+                    );
                     CommThread.WaitFor;
                 end;
 
@@ -1874,25 +1901,27 @@ begin
                     Agent     :=FAgeView.Cells[FAgeView.ReturnColumn(TSnapshots.fAGENT, 1, 1), ListPos];
 
                     /// <remarks>
-                    ///     Execute worker thread and wait untill it finishes the work.
+                    ///     Execute worker thread and wait until it finishes the work. This may is due to limitness of multithreading capability,
+                    ///     user may want to send hundreds of emails and we do not want to create hundreds of threads. One worker thread is
+                    ///     enough to perform email sending wihtout blocking main thread (GUI).
                     /// </remarks>
 
-                    SendStat:=TTSendAccountStatement.Create(
-                        maCustom,
-                        FSubject,
-                        FSalut,
-                        FMess,
-                        FIsOverdue,
-                        FOpenItems,
-					    SCUID,
-                        CUID,
-                        CustName,
-                        CustNumber,
-                        CoCode,
-                        Agent,
-                        True,
-                        iCNT
-                    );
+//                    SendStat:=TTSendAccountStatement.Create(
+//                        maCustom,
+//                        FSubject,
+//                        FSalut,
+//                        FMess,
+//                        FIsOverdue,
+//                        FOpenItems,
+//					      SCUID,
+//                        CUID,
+//                        CustName,
+//                        CustNumber,
+//                        CoCode,
+//                        Agent,
+//                        True,
+//                        iCNT
+//                    );
                     SendStat.WaitFor;
 
                 end;

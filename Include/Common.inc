@@ -75,7 +75,7 @@ const
     GridImgFile :  string    = 'Unity.img';        // Application custom image(s)
     ReleaseFile :  string    = 'Release.zip';      // Release package
     ManifestFile:  string    = 'Unity.manifest';   // Manifest file on the server
-    CurrentMutex:  PWideChar = 'UNITY_10170';      // Mutex value, increase it with each release*
+    CurrentMutex:  PWideChar = 'UNITY_10171';      // Mutex value, increase it with each release*
 
     // *Do not alow to run multiple instances of Unity due to lack of sessions
 

@@ -32,7 +32,7 @@ type
     TSendForm = class(TForm)
         btnCancel: TSpeedButton;
         btnSendEmail: TSpeedButton;
-    Text_Custom_Message: TLabel;
+        Text_Custom_Message: TLabel;
         Text_Message: TMemo;
         Shape_Customer: TShape;
         Shape_Invoices: TShape;
@@ -113,16 +113,17 @@ begin
     TTSendAccountStatement.Create(
         maCustom,
         'Account Statement',
-        strNull,
         TempStr,
         cbAddOverdue.Checked,
         ActionsForm.OpenItemsGrid,
-        ActionsForm.SCUID,
-        MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUID,            1, 1), MainForm.sgAgeView.Row],
-        MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), MainForm.sgAgeView.Row],
-        MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), MainForm.sgAgeView.Row],
-        MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCO_CODE,         1, 1), MainForm.sgAgeView.Row],
-        MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fAGENT,           1, 1), MainForm.sgAgeView.Row]
+        ActionsForm.CUID,
+        ActionsForm.Lbu_SendFrom.Caption,
+        ActionsForm.CustName,
+        ActionsForm.CustNumber,
+        ActionsForm.Lbu_Name.Caption,
+        ActionsForm.Lbu_Address.Caption,
+        ActionsForm.Lbu_Phone.Caption,
+        ActionsForm.BanksHtml
     );
 
     Close;

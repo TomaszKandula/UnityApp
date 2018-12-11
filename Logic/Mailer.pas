@@ -16,17 +16,28 @@ type
 
     TMailer = class
     {$TYPEINFO ON}
+    private
+        var FidThd       : integer;
+        var FXMailer     : string;
+        var FMailFrom    : string;
+        var FMailTo      : string;
+        var FMailCc      : string;
+        var FMailBcc     : string;
+        var FMailRt      : string;
+        var FMailSubject : string;
+        var FMailBody    : string;
+        var FLogo        : string;
     public
-        var idThd       : integer;
-        var XMailer     : string;
-        var MailFrom    : string;
-        var MailTo      : string;
-        var MailCc      : string;
-        var MailBcc     : string;
-        var MailRt      : string;
-        var MailSubject : string;
-        var MailBody    : string;
-        var Logo        : string;
+        property idThd       : integer read FidThd       write FidThd;
+        property XMailer     : string  read FXMailer     write FXMailer;
+        property MailFrom    : string  read FMailFrom    write FMailFrom;
+        property MailTo      : string  read FMailTo      write FMailTo;
+        property MailCc      : string  read FMailCc      write FMailCc;
+        property MailBcc     : string  read FMailBcc     write FMailBcc;
+        property MailRt      : string  read FMailRt      write FMailRt;
+        property MailSubject : string  read FMailSubject write FMailSubject;
+        property MailBody    : string  read FMailBody    write FMailBody;
+        property Logo        : string  read FLogo        write FLogo;
     published
         function  SendEmail(oauth: integer) : boolean;
         function  SendNow: boolean;
@@ -38,39 +49,56 @@ type
 
     TDocument = class(TMailer)
     {$TYPEINFO ON}
+    protected
+        var HTMLStat:   string;
+    private
+        var FHTMLTable:   string;
+        var FHTMLTemp:    string;
+        var FHTMLRow:     string;
+        var FHTMLLayout:  string;
+        var FCustName:    string;
+        var FCustAddr:    string;
+        var FLBUName:     string;
+        var FLBUAddress:  string;
+        var FTelephone:   string;
+        var FBankDetails: string;
+        var FCustMess:    string;
+        var FIsOverdue:   boolean;
+        var FSourceGrid:  TStringGrid;
+        var FDocType:     integer;
+        var FCUID:        string;
+        var FREM_EX1:     string;
+        var FREM_EX2:     string;
+        var FREM_EX3:     string;
+        var FREM_EX4:     string;
+        var FREM_EX5:     string;
     public
-        var HTMLTable:   string;
-        var HTMLTemp:    string;
-        var HTMLRow:     string;
-        var HTMLStat:    string;
-        var HTMLLayout:  string;
-        var BankDetails: string;
-        var LBUName:     string;
-        var LBUAddress:  string;
-        var Telephone:   string;
-        var CustAddr:    string;
-        var CustName:    string;
-        var CUID:        string;
-        var SCUID:       string;
-        var CoCode:      string;
-        var Branch:      string;
-        var REM_EX1:     string;
-        var REM_EX2:     string;
-        var REM_EX3:     string;
-        var REM_EX4:     string;
-        var REM_EX5:     string;
-        var CustSalut:   string;
-        var CustMess:    string;
-        var IsOverdue:   boolean;
-        var SourceGrid:  TStringGrid;
-        var OpenItems:   TStringGrid;
-        var DocType:     integer;
+        var OpenItems:  TStringGrid;
+        property HTMLTable:   string      read FHTMLTable   write FHTMLTable;
+        property HTMLTemp:    string      read FHTMLTemp    write FHTMLTemp;
+        property HTMLRow:     string      read FHTMLRow     write FHTMLRow;
+        property HTMLLayout:  string      read FHTMLLayout  write FHTMLLayout;
+        property CustName:    string      read FCustName    write FCustName;
+        property CustAddr:    string      read FCustAddr    write FCustAddr;
+        property LBUName:     string      read FLBUName     write FLBUName;
+        property LBUAddress:  string      read FLBUAddress  write FLBUAddress;
+        property Telephone:   string      read FTelephone   write FTelephone;
+        property BankDetails: string      read FBankDetails write FBankDetails;
+        property CustMess:    string      read FCustMess    write FCustMess;
+        property IsOverdue:   boolean     read FIsOverdue   write FIsOverdue;
+        property SourceGrid:  TStringGrid read FSourceGrid  write FSourceGrid;
+        property DocType:     integer     read FDocType     write FDocType;
+        property CUID:        string      read FCUID        write FCUID;
+        property REM_EX1:     string      read FREM_EX1     write FREM_EX1;
+        property REM_EX2:     string      read FREM_EX2     write FREM_EX2;
+        property REM_EX3:     string      read FREM_EX3     write FREM_EX3;
+        property REM_EX4:     string      read FREM_EX4     write FREM_EX4;
+        property REM_EX5:     string      read FREM_EX5     write FREM_EX5;
     published
-        procedure   SaveOutput(FileName: string);
-        function    LoadTemplate(FileName: string): string;
-        function    GetData(Series: boolean = false {OPTION}): boolean;
-        procedure   BuildHTML;
-        function    SendDocument: boolean;
+        procedure SaveOutput(FileName: string);
+        function  LoadTemplate(FileName: string): string;
+        procedure BuildHTML;
+        function  SendDocument: boolean;
     end;
 
 
@@ -186,6 +214,7 @@ begin
     end;
 end;
 
+
 /// <summary>
 ///     Save generated email body to a file.
 /// </summary>
@@ -203,66 +232,6 @@ begin
     end;
 end;
 
-/// <summary>
-///     Get necessary details for sending email.
-/// </summary>
-
-function TDocument.GetData(Series: boolean = false {OPTION}): boolean;
-var
-    DataBase: TDataTables;
-begin
-
-    MailFrom :='';
-    MailTo   :='';
-    Telephone:='';
-
-    DataBase:=TDataTables.Create(MainForm.DbConnect);
-    try
-
-        /// <remarks>
-        ///     TODO: refactor, "mailto" for single/one-off account statement should be already available in Action Log parent window, so no need
-        ///     to "re-do it".
-        /// </remarks>
-
-        if not(Series) then
-        begin
-            // Get "MAILTO"
-            DataBase.CustFilter:=WHERE + TAddressBook.SCUID + EQUAL + QuotedStr(SCUID);
-            DataBase.OpenTable(TblAddressbook);
-            if DataBase.DataSet.RecordCount = 1 then MailTo:=DataBase.DataSet.Fields[TAddressBook.ESTATEMENTS].Value;
-        end;
-
-        // Get "Mail from", "Banks", "LBU address" AND "Telephone"
-        DataBase.CustFilter:=WHERE +
-                                TCompany.CO_CODE +
-                             EQUAL +
-                                QuotedStr(CoCode) +
-                             _AND +
-                                TCompany.BRANCH +
-                             EQUAL +
-                                QuotedStr(Branch);
-
-        DataBase.OpenTable(TblCompany);
-
-        if DataBase.DataSet.RecordCount = 1 then
-        begin
-
-            if not(Series) then MailFrom:=DataBase.DataSet.Fields[TCompany.SEND_NOTE_FROM].Value;
-
-            BankDetails:=DataBase.DataSet.Fields[TCompany.BANKDETAILS].Value;
-            LBUName    :=DataBase.DataSet.Fields[TCompany.CONAME].Value;
-            LBUAddress :=DataBase.DataSet.Fields[TCompany.COADDRESS].Value;
-            Telephone  :=DataBase.DataSet.Fields[TCompany.Telephone].Value;
-
-        end;
-
-        Result:=True;
-
-    finally
-        DataBase.Free;
-    end;
-
-end;
 
 /// <summary>
 ///     Generate HTML code containing open items.
@@ -431,47 +400,41 @@ end;
 /// </summary>
 
 function TDocument.SendDocument;
-//var RAND: integer; (* DEBUG *)
+var RAND: integer; (* DEBUG *)
 begin
-    Result:=False;
+    //Result:=False;
 
-    if GetData then
-    begin
+    BuildHTML;
 
-        BuildHTML;
+    // Put data into placeholders
+    HTMLTable:=StringReplace(HTMLTable,  '{ROWS}',         HTMLStat,   [rfReplaceAll]);
+    MailBody :=StringReplace(HTMLLayout, '{INVOICE_LIST}', HTMLTable,  [rfReplaceAll]);
+    MailBody :=StringReplace(MailBody,   '{ADDR_DATA}',    CustAddr,   [rfReplaceAll]);
+    MailBody :=StringReplace(MailBody,   '{BANKS}',        BankDetails,[rfReplaceAll]);
+    MailBody :=StringReplace(MailBody,   '{NAME_LBU}',     LBUName,    [rfReplaceAll]);
+    MailBody :=StringReplace(MailBody,   '{ADDR_LBU}',     LBUAddress, [rfReplaceAll]);
+    MailBody :=StringReplace(MailBody,   '{EMAIL}',        MailFrom,   [rfReplaceAll]);
+    MailBody :=StringReplace(MailBody,   '{TEL}',          Telephone,  [rfReplaceAll]);
 
-        // Put data into placeholders
-        HTMLTable:=StringReplace(HTMLTable,  '{ROWS}',         HTMLStat,   [rfReplaceAll]);
-        MailBody :=StringReplace(HTMLLayout, '{INVOICE_LIST}', HTMLTable,  [rfReplaceAll]);
-        MailBody :=StringReplace(MailBody,   '{ADDR_DATA}',    CustAddr,   [rfReplaceAll]);
-        MailBody :=StringReplace(MailBody,   '{BANKS}',        BankDetails,[rfReplaceAll]);
-        MailBody :=StringReplace(MailBody,   '{NAME_LBU}',     LBUName,    [rfReplaceAll]);
-        MailBody :=StringReplace(MailBody,   '{ADDR_LBU}',     LBUAddress, [rfReplaceAll]);
-        MailBody :=StringReplace(MailBody,   '{EMAIL}',        MailFrom,   [rfReplaceAll]);
-        MailBody :=StringReplace(MailBody,   '{TEL}',          Telephone,  [rfReplaceAll]);
+    // Custom template title (statement or reminder)
+    if IsOverdue then
+        MailBody:=StringReplace(MailBody, '{TITLE}', 'REMINDER', [rfReplaceAll])
+            else
+                MailBody:=StringReplace(MailBody, '{TITLE}', 'STATEMENT', [rfReplaceAll]);
 
-        // Custom template title (statement or reminder)
-        if IsOverdue then
-            MailBody:=StringReplace(MailBody, '{TITLE}', 'REMINDER', [rfReplaceAll])
-                else
-                    MailBody:=StringReplace(MailBody, '{TITLE}', 'STATEMENT', [rfReplaceAll]);
+    // Custom salutation and the message
+    if CustMess  <> '' then MailBody:=StringReplace(MailBody, '{TEXT}',  CustMess,  [rfReplaceAll]);
 
-        // Custom salutation and the message
-        //if CustSalut <> '' then MailBody:=StringReplace(MailBody, '{SALUT}', CustSalut, [rfReplaceAll]);
-        if CustMess  <> '' then MailBody:=StringReplace(MailBody, '{TEXT}',  CustMess,  [rfReplaceAll]);
+    XMailer  :=MailFrom;
+    MailCc   :=MailFrom;
+    MailBcc  :='';
+    MailRt   :='';
+    //Result   :=SendNow;
 
-        XMailer  :=MailFrom;
-        MailCc   :=MailFrom;
-        MailBcc  :='';
-        MailRt   :='';
-        Result   :=SendNow;
-
-        (* DEBUG *)
-        //RAND:=Random(100000);
-        //SaveOutput('i:\temp\test' + IntToStr(RAND) + '.html');
-        //Result:=True;
-
-    end;
+    (* DEBUG *)
+    RAND:=Random(100000);
+    SaveOutput('I:\temp\test' + IntToStr(RAND) + '.html');
+    Result:=True;
 
 end;
 

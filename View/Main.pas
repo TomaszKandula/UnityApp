@@ -1015,7 +1015,7 @@ begin
                 if Param > -1 then
                 begin
                     ViewMailerForm.CustomerList.Items[Param].SubItems[3]:='Sent';
-                    Dec(ViewMailerForm.ThreadCount);
+                    ViewMailerForm.ThreadCount:=ViewMailerForm.ThreadCount - 1;
                 end;
             end;
 
@@ -3151,29 +3151,33 @@ procedure TMainForm.Action_MassMailerClick(Sender: TObject);
 var
     iCNT:       integer;
     Item:       TListItem;
-    SCUID:      string;
-    CoCode:     string;
-    CustNumber: string;
-    CustName:   string;
 begin
 
     if IsConnected then
     begin
+
         ViewMailerForm.CustomerList.Clear;
 
         // One customer
         if (sgAgeView.Selection.Top - sgAgeView.Selection.Bottom) = 0 then
         begin
+            // Put it to the ListView
             Item:=ViewMailerForm.CustomerList.Items.Add;
             Item.Caption:=IntToStr(sgAgeView.Row);
-            CustName  :=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), sgAgeView.Row];
-            CustNumber:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), sgAgeView.Row];
-            CoCode    :=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCO_CODE,         1, 1), sgAgeView.Row];
-            SCUID     :=CustNumber + MainForm.ConvertName(CoCode, 'F', 3);
-            Item.SubItems.Add(SCUID);
-            Item.SubItems.Add(CustName);
-            Item.SubItems.Add('Not Found');
+            Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME, 1, 1), sgAgeView.Row]);
+            Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), sgAgeView.Row]);
+            Item.SubItems.Add('Not found!');
+            Item.SubItems.Add('Not found!');
             Item.SubItems.Add('No');
+            Item.SubItems.Add('n/a');
+            Item.SubItems.Add('n/a');
+            Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCO_CODE, 1, 1), sgAgeView.Row]);
+            Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fAGENT, 1, 1), sgAgeView.Row]);
+            Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUID, 1, 1), sgAgeView.Row]);
+            Item.SubItems.Add(
+                sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), sgAgeView.Row] +
+                MainForm.ConvertName(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCO_CODE, 1, 1), sgAgeView.Row], 'F', 3)
+            );
         end
         // Many customers
         else
@@ -3184,14 +3188,20 @@ begin
                 begin
                     Item:=ViewMailerForm.CustomerList.Items.Add;
                     Item.Caption:=IntToStr(iCNT);
-                    CustName  :=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), iCNT];
-                    CustNumber:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), iCNT];
-                    CoCode    :=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCO_CODE,         1, 1), iCNT];
-                    SCUID     :=CustNumber + MainForm.ConvertName(CoCode, 'F', 3);
-                    Item.SubItems.Add(SCUID);
-                    Item.SubItems.Add(CustName);
-                    Item.SubItems.Add('Not Found');
+                    Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME, 1, 1), iCNT]);
+                    Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), iCNT]);
+                    Item.SubItems.Add('Not found!');
+                    Item.SubItems.Add('Not found!');
                     Item.SubItems.Add('No');
+                    Item.SubItems.Add('n/a');
+                    Item.SubItems.Add('n/a');
+                    Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCO_CODE, 1, 1), iCNT]);
+                    Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fAGENT, 1, 1), iCNT]);
+                    Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUID, 1, 1), iCNT]);
+                    Item.SubItems.Add(
+                        sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), iCNT] +
+                        MainForm.ConvertName(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCO_CODE, 1, 1), iCNT], 'F', 3)
+                    );
                 end;
             end;
         end;

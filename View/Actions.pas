@@ -47,20 +47,19 @@ type
         btnCallCustomer: TSpeedButton;
         btnNext: TSpeedButton;
         GeneralCom: TMemo;
-        Text4: TLabel;
-        Text5: TLabel;
-        Text6: TLabel;
-        Text7: TLabel;
-        Text8: TLabel;
+        zText1: TLabel;
+        zText2: TLabel;
+        zText7: TLabel;
+        zText8: TLabel;
+        zText3: TLabel;
         Cust_Name: TLabel;
         Cust_Number: TLabel;
         btnAutoStatement: TSpeedButton;
-        PanelMiddle: TPanel;
-        PanelBottom: TPanel;
-        PanelTop: TPanel;
+        PanelGrid: TPanel;
+        PanelActions: TPanel;
+        PanelHeader: TPanel;
         Cust_Person: TEdit;
         Cust_Mail: TEdit;
-        ButtonPanel: TPanel;
         HistoryPanel: TPanel;
         HistoryTitle: TLabel;
         DailyPanel: TPanel;
@@ -71,7 +70,7 @@ type
         btnClearFollowUp: TSpeedButton;
         btnCustomStatement: TSpeedButton;
         Cust_Phone: TComboBox;
-        GroupCustomerDetails: TGroupBox;
+        GroupDetails: TGroupBox;
         btnSaveCustDetails: TSpeedButton;
         Cust_MailBack: TShape;
         Cust_PersonBack: TShape;
@@ -84,16 +83,13 @@ type
         btnCopyPerson: TSpeedButton;
         btnCopyEmail: TSpeedButton;
         PanelStatusBar: TPanel;
-        TextSave: TLabel;
         MasterPanel: TPanel;
         Text: TLabel;
         SimpleText: TLabel;
-        btnQMStoggle: TSpeedButton;
-        Text9: TLabel;
+        zText9: TLabel;
         Cust_MailGeneral: TEdit;
         Cust_MailGeneralBack: TShape;
         btnCopyGeneralMail: TSpeedButton;
-        PanelQMS: TPanel;
         cbStatusQms: TComboBox;
         btnSelectAll: TSpeedButton;
         btnLogNow: TSpeedButton;
@@ -103,6 +99,37 @@ type
         OpenItemsGridBorders: TShape;
         DailyComBorders: TShape;
         GeneralComBorders: TShape;
+        PanelComments: TPanel;
+        zText4: TLabel;
+        zText5: TLabel;
+        zText6: TLabel;
+        Lbu_NameBack: TShape;
+        Lbu_AddressBack: TShape;
+        Lbu_PhoneBack: TShape;
+        zText10: TLabel;
+        zText11: TLabel;
+        zText12: TLabel;
+        Lbu_CoCodeBack: TShape;
+        Lbu_SendFromBack: TShape;
+        CUID_LabelBack: TShape;
+        zText13: TLabel;
+        SCUID_LabelBack: TShape;
+        Lbu_Name: TLabel;
+        Lbu_Address: TLabel;
+        Lbu_Phone: TLabel;
+        Lbu_CoCode: TLabel;
+        Lbu_SendFrom: TLabel;
+        CUID_Label: TLabel;
+        SCUID_Label: TLabel;
+        btnCopyLbuName: TSpeedButton;
+        btnCopyLbuAddress: TSpeedButton;
+        btnCopyLbuPhone: TSpeedButton;
+        btnCopyCoCode: TSpeedButton;
+        btnCopySendFrom: TSpeedButton;
+        btnCopyUID: TSpeedButton;
+        SepLine1: TBevel;
+        SepLine3: TBevel;
+        SepLine2: TBevel;
         procedure FormCreate(Sender: TObject);
         procedure FormActivate(Sender: TObject);
         procedure OpenItemsGridMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
@@ -134,7 +161,6 @@ type
         procedure btnCopyEmailClick(Sender: TObject);
         procedure btnEditClick(Sender: TObject);
         procedure btnCopyGeneralMailClick(Sender: TObject);
-        procedure btnQMStoggleClick(Sender: TObject);
         procedure Cust_PhoneMouseEnter(Sender: TObject);
         procedure Cust_PersonMouseEnter(Sender: TObject);
         procedure Cust_MailMouseEnter(Sender: TObject);
@@ -145,15 +171,34 @@ type
         procedure GeneralComMouseEnter(Sender: TObject);
         procedure DailyComKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure GeneralComKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure btnCopyCoCodeClick(Sender: TObject);
+        procedure btnCopySendFromClick(Sender: TObject);
+        procedure btnCopyUIDClick(Sender: TObject);
+        procedure btnCopyLbuNameClick(Sender: TObject);
+        procedure btnCopyLbuAddressClick(Sender: TObject);
+        procedure btnCopyLbuPhoneClick(Sender: TObject);
+        procedure btnSelectAllClick(Sender: TObject);
+        procedure btnLogMissingInvClick(Sender: TObject);
+        procedure btnLogNowClick(Sender: TObject);
+    protected
+        var SrcColumns :  TIntigers;
     private
         var FHistoryGrid: boolean;
+        var FCUID       :  string;
+        var FSCUID      :  string;
+        var FBranch     :  string;
+        var FBanksHtml  :  string;
+        var FCoCode     :  string;
+        var FCustName   :  string;
+        var FCustNumber :  string;
     public
-        var CUID       :  string;
-        var SCUID      :  string;
-        var CoCode     :  string;
-        var CustName   :  string;
-        var CustNumber :  string;
-        var SrcColumns :  TIntigers;
+        property CUID       :  string read FCUID       write FCUID;
+        property SCUID      :  string read FSCUID      write FSCUID;
+        property Branch     :  string read FBranch     write FBranch;
+        property CoCode     :  string read FCoCode     write FCoCode;
+        property CustName   :  string read FCustName   write FCustName;
+        property CustNumber :  string read FCustNumber write FCustNumber;
+        property BanksHtml  :  string read FBanksHtml  write FBanksHtml;
     published
         function  GetRunningApps(SearchName: string): boolean;
         procedure GetData;
@@ -349,25 +394,27 @@ end;
 
 procedure TActionsForm.UpdateDetails(CustPerson: TEdit; CustMail: TEdit; CustMailGen: TEdit; CustPhone: TComboBox);
 var
-    AddrBook  : TDataTables;
-    Phones    : string;
+    Tables: TDataTables;
+    Phones: string;
 begin
 
-    AddrBook:=TDataTables.Create(MainForm.DbConnect);
+    Tables:=TDataTables.Create(MainForm.DbConnect);
     try
-        AddrBook.Columns.Add(TAddressBook.CONTACT);
-        AddrBook.Columns.Add(TAddressBook.EMAILS);
-        AddrBook.Columns.Add(TAddressBook.ESTATEMENTS);
-        AddrBook.Columns.Add(TAddressBook.PHONE_NUMBERS);
-        AddrBook.CustFilter:=WHERE + TAddressBook.SCUID + EQUAL + QuotedStr(SCUID);
-        AddrBook.OpenTable(TblAddressbook);
 
-        if AddrBook.DataSet.RecordCount = 1 then
+        // Get data from Address Book table
+        Tables.Columns.Add(TAddressBook.CONTACT);
+        Tables.Columns.Add(TAddressBook.EMAILS);
+        Tables.Columns.Add(TAddressBook.ESTATEMENTS);
+        Tables.Columns.Add(TAddressBook.PHONE_NUMBERS);
+        Tables.CustFilter:=WHERE + TAddressBook.SCUID + EQUAL + QuotedStr(SCUID);
+        Tables.OpenTable(TblAddressbook);
+
+        if Tables.DataSet.RecordCount = 1 then
         begin
-            CustPerson.Text :=MainForm.OleGetStr(AddrBook.DataSet.Fields[TAddressBook.CONTACT].Value);
-            CustMailGen.Text:=MainForm.OleGetStr(AddrBook.DataSet.Fields[TAddressBook.EMAILS].Value);
-            CustMail.Text   :=MainForm.OleGetStr(AddrBook.DataSet.Fields[TAddressBook.ESTATEMENTS].Value);
-            Phones          :=MainForm.OleGetStr(AddrBook.DataSet.Fields[TAddressBook.PHONE_NUMBERS].Value);
+            CustPerson.Text :=MainForm.OleGetStr(Tables.DataSet.Fields[TAddressBook.CONTACT].Value);
+            CustMailGen.Text:=MainForm.OleGetStr(Tables.DataSet.Fields[TAddressBook.EMAILS].Value);
+            CustMail.Text   :=MainForm.OleGetStr(Tables.DataSet.Fields[TAddressBook.ESTATEMENTS].Value);
+            Phones          :=MainForm.OleGetStr(Tables.DataSet.Fields[TAddressBook.PHONE_NUMBERS].Value);
 
             if (Phones <> '') or (Phones <> ' ') then
             begin
@@ -375,10 +422,37 @@ begin
                 CustPhone.Items.Text:=MainForm.Explode(Phones, deSemicolon);
                 CustPhone.ItemIndex:=0;
             end;
+
+        end;
+
+        Tables.CleanUp;
+        // Get data from Company Data table
+        Tables.Columns.Add(TCompany.CONAME);
+        Tables.Columns.Add(TCompany.COADDRESS);
+        Tables.Columns.Add(TCompany.Telephone);
+        Tables.Columns.Add(TCompany.SEND_NOTE_FROM);
+        Tables.Columns.Add(TCompany.BANKDETAILS);
+        Tables.CustFilter:=WHERE + TCompany.CO_CODE + EQUAL + QuotedStr(CoCode) + _AND + TCompany.BRANCH + EQUAL + QuotedStr(Branch);
+        Tables.OpenTable(TblCompany);
+
+        if Tables.DataSet.RecordCount = 1 then
+        begin
+            Lbu_Name.Caption    :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompany.CONAME].Value);
+            Lbu_Address.Caption :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompany.COADDRESS].Value);
+            Lbu_Phone.Caption   :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompany.Telephone].Value);
+            Lbu_SendFrom.Caption:=MainForm.OleGetStr(Tables.DataSet.Fields[TCompany.SEND_NOTE_FROM].Value);
+            BanksHtml           :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompany.BANKDETAILS].Value);
+        end
+        else
+        begin
+            Lbu_Name.Caption    :=unNotFound;
+            Lbu_Address.Caption :=unNotFound;
+            Lbu_Phone.Caption   :=unNotFound;
+            Lbu_SendFrom.Caption:=unNotFound;
         end;
 
     finally
-        AddrBook.Free;
+        Tables.Free;
     end;
 
 end;
@@ -500,7 +574,12 @@ begin
     CustName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), MainForm.sgAgeView.Row];
     CustNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), MainForm.sgAgeView.Row];
     CoCode    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCO_CODE,         1, 1), MainForm.sgAgeView.Row];
+    Branch    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fAGENT,           1, 1), MainForm.sgAgeView.Row];
     SCUID     :=CustNumber + MainForm.ConvertName(CoCode, 'F', 3);
+    // Display
+    CUID_Label.Caption:=CUID;
+    SCUID_Label.Caption:=SCUID;
+    Lbu_CoCode.Caption:=CoCode;
 end;
 
 
@@ -700,7 +779,7 @@ end;
 
 procedure TActionsForm.InitializePanels;
 begin
-    PanelTop.PanelBorders(clWhite, clSkyBlue, clWhite, clWhite, clWhite);
+    //PanelTop.PanelBorders(clWhite, clSkyBlue, clWhite, clWhite, clWhite);
 end;
 
 
@@ -712,30 +791,44 @@ procedure TActionsForm.InitializeSpeedButtons;
 begin
     btnEdit.Glyph.Transparent:=True;
     btnEdit.Glyph.TransparentColor:=clWhite;
-
     btnSaveCustDetails.Glyph.Transparent:=True;
     btnSaveCustDetails.Glyph.TransparentColor:=clWhite;
-
     btnBack.Glyph.Transparent:=True;
     btnBack.Glyph.TransparentColor:=clWhite;
-
     btnNext.Glyph.Transparent:=True;
     btnNext.Glyph.TransparentColor:=clWhite;
-
     btnSetFollowUp.Glyph.Transparent:=True;
     btnSetFollowUp.Glyph.TransparentColor:=clWhite;
-
     btnClearFollowUp.Glyph.Transparent:=True;
     btnClearFollowUp.Glyph.TransparentColor:=clWhite;
-
     btnCustomStatement.Glyph.Transparent:=True;
     btnCustomStatement.Glyph.TransparentColor:=clWhite;
-
     btnAutoStatement.Glyph.Transparent:=True;
     btnAutoStatement.Glyph.TransparentColor:=clWhite;
-
     btnCallCustomer.Glyph.Transparent:=True;
     btnCallCustomer.Glyph.TransparentColor:=clWhite;
+    btnCopyCustName.Glyph.Transparent:=True;
+    btnCopyCustName.Glyph.TransparentColor:=clWhite;
+    btnCopyCustNumber.Glyph.Transparent:=True;
+    btnCopyCustNumber.Glyph.TransparentColor:=clWhite;
+    btnCopyPerson.Glyph.Transparent:=True;
+    btnCopyPerson.Glyph.TransparentColor:=clWhite;
+    btnCopyEmail.Glyph.Transparent:=True;
+    btnCopyEmail.Glyph.TransparentColor:=clWhite;
+    btnCopyGeneralMail.Glyph.Transparent:=True;
+    btnCopyGeneralMail.Glyph.TransparentColor:=clWhite;
+    btnCopyLbuName.Glyph.Transparent:=True;
+    btnCopyLbuName.Glyph.TransparentColor:=clWhite;
+    btnCopyLbuAddress.Glyph.Transparent:=True;
+    btnCopyLbuAddress.Glyph.TransparentColor:=clWhite;
+    btnCopyLbuPhone.Glyph.Transparent:=True;
+    btnCopyLbuPhone.Glyph.TransparentColor:=clWhite;
+    btnCopyCoCode.Glyph.Transparent:=True;
+    btnCopyCoCode.Glyph.TransparentColor:=clWhite;
+    btnCopySendFrom.Glyph.Transparent:=True;
+    btnCopySendFrom.Glyph.TransparentColor:=clWhite;
+    btnCopyUID.Glyph.Transparent:=True;
+    btnCopyUID.Glyph.TransparentColor:=clWhite;
 end;
 
 
@@ -749,23 +842,16 @@ procedure TActionsForm.FormCreate(Sender: TObject);
 var
     Settings: ISettings;
 begin
-
     Settings:=TSettings.Create;
     ActionsForm.Caption:=Settings.GetStringValue(ApplicationDetails, 'WND_ACTIONS', APPCAPTION);
-
     SetLength(SrcColumns, 19);
-
     OpenItemsGrid.ColCount:=19;
     OpenItemsGrid.SetRowHeight(sgRowHeight, 25);
-
     HistoryGrid.ColCount:=11;
     HistoryGrid.SetRowHeight(sgRowHeight, 25);
-
+    HistoryGrid.Visible:=False;
     InitializePanels;
     InitializeSpeedButtons;
-
-    //...
-
 end;
 
 
@@ -1051,7 +1137,7 @@ begin
 end;
 
 
-// -------------------------------------------------------------------------------------------------------------------------------------------- BUTTON CALLS //
+// ---------------------------------------------------------------------------------------------------------------------------------- BUTTON CALLS | ACTIONS //
 
 
 procedure TActionsForm.btnEditClick(Sender: TObject);
@@ -1063,53 +1149,6 @@ end;
 procedure TActionsForm.btnSaveCustDetailsClick(Sender: TObject);
 begin
     SaveCustomerDetails;
-end;
-
-
-procedure TActionsForm.btnCopyCustNameClick(Sender: TObject);
-begin
-    ClipBoard.AsText:=Cust_Name.Caption;
-end;
-
-
-procedure TActionsForm.btnCopyCustNumberClick(Sender: TObject);
-begin
-    ClipBoard.AsText:=Cust_Number.Caption;
-end;
-
-
-procedure TActionsForm.btnCopyPersonClick(Sender: TObject);
-begin
-    ClipBoard.AsText:=Cust_Person.Text;
-end;
-
-
-procedure TActionsForm.btnCopyEmailClick(Sender: TObject);
-begin
-    ClipBoard.AsText:=Cust_Mail.Text;
-end;
-
-
-procedure TActionsForm.btnCopyGeneralMailClick(Sender: TObject);
-begin
-    Clipboard.AsText:=Cust_MailGeneral.Text;
-end;
-
-
-procedure TActionsForm.btnQMStoggleClick(Sender: TObject);
-begin
-    if PanelQMS.Visible then
-    begin
-        PanelBottom.Visible:=True;
-        PanelQMS.Visible:=False;
-        OpenItemsGrid.Options:=OpenItemsGrid.Options - [goRowSelect];
-    end
-    else
-    begin
-        PanelBottom.Visible:=False;
-        PanelQMS.Visible:=True;
-        OpenItemsGrid.Options:=OpenItemsGrid.Options + [goRowSelect];
-    end;
 end;
 
 
@@ -1156,15 +1195,16 @@ begin
         maDefined,
         'Account Statement',
         '',
-        '',
         False,
         OpenItemsGrid,
-        SCUID,
-        MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUID,            1, 1), MainForm.sgAgeView.Row],
-        MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), MainForm.sgAgeView.Row],
-        MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), MainForm.sgAgeView.Row],
-        MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCO_CODE,         1, 1), MainForm.sgAgeView.Row],
-        MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fAGENT,           1, 1), MainForm.sgAgeView.Row]
+        CUID,
+        Lbu_SendFrom.Caption,
+        CustName,
+        CustNumber,
+        Lbu_Name.Caption,
+        Lbu_Address.Caption,
+        Lbu_Phone.Caption,
+        BanksHtml
     );
 
 end;
@@ -1173,6 +1213,96 @@ end;
 procedure TActionsForm.btnCallCustomerClick(Sender: TObject);
 begin
     MakePhoneCall;
+end;
+
+
+// ------------------------------------------------------------------------------------------------------------------------ BUTTON CALLS | COPY TO CLIPBOARD //
+
+
+procedure TActionsForm.btnCopyCoCodeClick(Sender: TObject);
+begin
+    ClipBoard.AsText:=Lbu_CoCode.Caption;
+end;
+
+
+procedure TActionsForm.btnCopyCustNameClick(Sender: TObject);
+begin
+    ClipBoard.AsText:=Cust_Name.Caption;
+end;
+
+
+procedure TActionsForm.btnCopyCustNumberClick(Sender: TObject);
+begin
+    ClipBoard.AsText:=Cust_Number.Caption;
+end;
+
+
+procedure TActionsForm.btnCopyPersonClick(Sender: TObject);
+begin
+    ClipBoard.AsText:=Cust_Person.Text;
+end;
+
+
+procedure TActionsForm.btnCopySendFromClick(Sender: TObject);
+begin
+    ClipBoard.AsText:=Lbu_SendFrom.Caption;
+end;
+
+
+procedure TActionsForm.btnCopyUIDClick(Sender: TObject);
+begin
+    ClipBoard.AsText:=CUID_Label.Caption + TAB + SCUID_Label.Caption;
+end;
+
+
+procedure TActionsForm.btnCopyEmailClick(Sender: TObject);
+begin
+    ClipBoard.AsText:=Cust_Mail.Text;
+end;
+
+
+procedure TActionsForm.btnCopyGeneralMailClick(Sender: TObject);
+begin
+    Clipboard.AsText:=Cust_MailGeneral.Text;
+end;
+
+
+procedure TActionsForm.btnCopyLbuAddressClick(Sender: TObject);
+begin
+    ClipBoard.AsText:=Lbu_Address.Caption;
+end;
+
+
+procedure TActionsForm.btnCopyLbuNameClick(Sender: TObject);
+begin
+    ClipBoard.AsText:=Lbu_Name.Caption;
+end;
+
+
+procedure TActionsForm.btnCopyLbuPhoneClick(Sender: TObject);
+begin
+    ClipBoard.AsText:=Lbu_Phone.Caption;
+end;
+
+
+// -------------------------------------------------------------------------------------------------------------------------------------- BUTTON CALLS | QMS //
+
+
+procedure TActionsForm.btnSelectAllClick(Sender: TObject);
+begin
+    //
+end;
+
+
+procedure TActionsForm.btnLogMissingInvClick(Sender: TObject);
+begin
+    //
+end;
+
+
+procedure TActionsForm.btnLogNowClick(Sender: TObject);
+begin
+    //
 end;
 
 
