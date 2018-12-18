@@ -118,6 +118,7 @@ begin
         ActionsForm.OpenItemsGrid,
         ActionsForm.CUID,
         ActionsForm.Lbu_SendFrom.Caption,
+        ActionsForm.Cust_Mail.Text,
         ActionsForm.CustName,
         ActionsForm.CustNumber,
         ActionsForm.Lbu_Name.Caption,

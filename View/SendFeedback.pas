@@ -154,7 +154,7 @@ begin
         Mail.MailFrom   :=Mail.XMailer;
         Mail.MailCc     :=MainForm.WinUserName + '@' + Settings.GetStringValue(ApplicationDetails, 'MAIL_DOMAIN', '');
         Mail.MailBcc    :='';
-        Mail.MailSubject:='Unity Bug Report from User: ' + UpperCase(MainForm.WinUserName);
+        Mail.MailSubject:='Unity - User feedback (' + UpperCase(MainForm.WinUserName) + ')';
 
         // Plain text to HTML using template
         Transfer:=ReportMemo.Text;

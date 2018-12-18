@@ -550,6 +550,49 @@ type
         const Description : string = 'Description';
     end;
 
+    /// <summary>
+    ///
+    /// </summary>
+
+    TQmsReasons = class(TDataTables)
+    {$TYPEINFO ON}
+    published
+        const QmsReasons:  string = 'Customer.QmsReasons';
+    public
+        const Id:          string = 'Id';
+        const QueryReason: string = 'QueryReason';
+    end;
+
+    /// <summary>
+    ///
+    /// </summary>
+
+    TQmsLog = class(TDataTables)
+    {$TYPEINFO ON}
+    published
+        const QmsLog:       string = 'Customer.QmsLog';
+    public
+        const Id:           string = 'Id';
+	    const InvoNo:       string = 'InvoNo';
+	    const OpenAm:       string = 'OpenAm';
+	    const Am:           string = 'Am';
+	    const OpenCurAm:    string = 'OpenCurAm';
+	    const CurAm:        string = 'CurAm';
+	    const ISO:          string = 'ISO';
+	    const DueDt:        string = 'DueDt';
+	    const ValDt:        string = 'ValDt';
+	    const LogType:      string = 'LogType';
+	    const QueryReason:  string = 'QueryReason';
+        const QueryDesc:    string = 'QueryDesc';
+        const QueryStatus:  string = 'QueryStatus';
+        const FscComment:   string = 'FscComment';
+        const LbuComment:   string = 'LbuComment';
+        const Receiver:     string = 'Receiver';
+	    const UserAlias:    string = 'UserAlias';
+	    const Stamp:        string = 'Stamp';
+        const QueryUid:     string = 'QueryUid';
+    end;
+
 
 implementation
 

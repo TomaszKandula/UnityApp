@@ -55,7 +55,8 @@ uses
     Update in 'View\Update.pas' {UpdateForm},
     MassMailer in 'View\MassMailer.pas' {ViewMailerForm},
     ABSearch in 'View\ABSearch.pas' {ViewSearchForm},
-    Await in 'View\Await.pas' {AwaitForm};
+    Await in 'View\Await.pas' {AwaitForm},
+    Qms in 'View\Qms.pas' {QmsForm};
 
 
 type
@@ -307,7 +308,7 @@ end;
 
 begin
 
-    {$WARN SYMBOL_PLATFORM OFF}
+    {$WARN SYMBOL_PLATFORM OFF} { Windows only }
     ReportMemoryLeaksOnShutdown:=DebugHook <> 0;
     {$WARN SYMBOL_PLATFORM ON}
 
@@ -329,7 +330,7 @@ begin
     ///     Setup formats to user local settings.
     /// </summary>
 
-    {$WARN SYMBOL_PLATFORM OFF}
+    {$WARN SYMBOL_PLATFORM OFF} { Windows only }
     RegSettings:=TFormatSettings.Create(LOCALE_USER_DEFAULT);
     {$WARN SYMBOL_PLATFORM ON}
 
@@ -816,7 +817,7 @@ begin
     ///     to prevent showing up windows.
     /// </summary>
     /// <remarks>
-    ///     Use Status method with TextMode parameter set to False. It allows to log different text and to display different text during loading procedure.
+    ///     Use Status method with TextMode parameter set to False. It allows to log different text and to display different text during loading method.
     /// </remarks>
 
     Application.CreateForm(TAboutForm, AboutForm);
@@ -879,8 +880,12 @@ begin
     MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''AwaitForm'' has been created.');
     Status(35, AllTasks, 1, 'Application initialization: [VCL] AwaitForm has been loaded.', False, Settings.GetPathEventLog);
 
+    Application.CreateForm(TQmsForm, QmsForm);
+    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''QmsForm'' has been created.');
+    Status(36, AllTasks, 1, 'Application initialization: [VCL] QmsForm has been loaded.', False, Settings.GetPathEventLog);
+
     // Splash screen - 100%
-    Status(36, AllTasks, 500, 'Application is initialized.', False, Settings.GetPathEventLog);
+    Status(37, AllTasks, 500, 'Application is initialized.', False, Settings.GetPathEventLog);
 
     AnimateWindow(SplashForm.Handle, 500, AW_BLEND or AW_HIDE);
     Sleep(150);

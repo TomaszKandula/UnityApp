@@ -1,5 +1,5 @@
 
- {$I .\Include\Header.inc}
+{$I .\Include\Header.inc}
 
 unit Actions;
 
@@ -90,10 +90,7 @@ type
         Cust_MailGeneral: TEdit;
         Cust_MailGeneralBack: TShape;
         btnCopyGeneralMail: TSpeedButton;
-        cbStatusQms: TComboBox;
-        btnSelectAll: TSpeedButton;
         btnLogNow: TSpeedButton;
-        textStatus: TLabel;
         btnLogMissingInv: TSpeedButton;
         HistoryGridBorders: TShape;
         OpenItemsGridBorders: TShape;
@@ -130,13 +127,19 @@ type
         SepLine1: TBevel;
         SepLine3: TBevel;
         SepLine2: TBevel;
+        SepLine4: TBevel;
+        SepLine5: TBevel;
+        SepLine6: TBevel;
+        ItemDesc: TLabel;
+        imgInfo: TImage;
         procedure FormCreate(Sender: TObject);
+        procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
+        procedure FormDestroy(Sender: TObject);
         procedure OpenItemsGridMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure OpenItemsGridMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure OpenItemsGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
         procedure btnNextClick(Sender: TObject);
-        procedure FormShow(Sender: TObject);
         procedure btnAutoStatementClick(Sender: TObject);
         procedure HistoryGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
         procedure HistoryGridMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
@@ -145,7 +148,6 @@ type
         procedure OpenItemsGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure HistoryGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure btnCallCustomerClick(Sender: TObject);
-        procedure FormDestroy(Sender: TObject);
         procedure DailyComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure GeneralComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure btnSetFollowUpClick(Sender: TObject);
@@ -177,9 +179,28 @@ type
         procedure btnCopyLbuNameClick(Sender: TObject);
         procedure btnCopyLbuAddressClick(Sender: TObject);
         procedure btnCopyLbuPhoneClick(Sender: TObject);
-        procedure btnSelectAllClick(Sender: TObject);
         procedure btnLogMissingInvClick(Sender: TObject);
         procedure btnLogNowClick(Sender: TObject);
+        procedure btnBackMouseEnter(Sender: TObject);
+        procedure btnBackMouseLeave(Sender: TObject);
+        procedure btnNextMouseEnter(Sender: TObject);
+        procedure btnNextMouseLeave(Sender: TObject);
+        procedure btnSetFollowUpMouseEnter(Sender: TObject);
+        procedure btnSetFollowUpMouseLeave(Sender: TObject);
+        procedure btnClearFollowUpMouseEnter(Sender: TObject);
+        procedure btnClearFollowUpMouseLeave(Sender: TObject);
+        procedure btnLogMissingInvMouseEnter(Sender: TObject);
+        procedure btnLogMissingInvMouseLeave(Sender: TObject);
+        procedure btnLogNowMouseEnter(Sender: TObject);
+        procedure btnLogNowMouseLeave(Sender: TObject);
+        procedure btnCustomStatementMouseEnter(Sender: TObject);
+        procedure btnCustomStatementMouseLeave(Sender: TObject);
+        procedure btnAutoStatementMouseEnter(Sender: TObject);
+        procedure btnAutoStatementMouseLeave(Sender: TObject);
+        procedure btnCallCustomerMouseEnter(Sender: TObject);
+        procedure btnCallCustomerMouseLeave(Sender: TObject);
+        procedure btnSaveCustDetailsMouseEnter(Sender: TObject);
+        procedure btnSaveCustDetailsMouseLeave(Sender: TObject);
     protected
         var SrcColumns :  TIntigers;
     private
@@ -229,6 +250,7 @@ implementation
 
 uses
     Main,
+    Qms,
     SQL,
     Model,
     Worker,
@@ -392,6 +414,8 @@ end;
 ///     Get customer details.
 /// </summary>
 
+// make it async!!!
+
 procedure TActionsForm.UpdateDetails(CustPerson: TEdit; CustMail: TEdit; CustMailGen: TEdit; CustPhone: TComboBox);
 var
     Tables: TDataTables;
@@ -462,6 +486,8 @@ end;
 ///     Refresh history of daily comments.
 /// </summary>
 
+// make it async!!!
+
 procedure TActionsForm.UpdateHistory(var Grid: TStringGrid);
 var
     DailyText: TDataTables;
@@ -500,6 +526,8 @@ end;
 /// <summary>
 ///     Refresh general comment column.
 /// </summary>
+
+// make it async!!!
 
 procedure TActionsForm.UpdateGeneral(Text: TMemo);
 var
@@ -801,6 +829,10 @@ begin
     btnSetFollowUp.Glyph.TransparentColor:=clWhite;
     btnClearFollowUp.Glyph.Transparent:=True;
     btnClearFollowUp.Glyph.TransparentColor:=clWhite;
+    btnLogNow.Glyph.Transparent:=True;
+    btnLogNow.Glyph.TransparentColor:=clWhite;
+    btnLogMissingInv.Glyph.Transparent:=True;
+    btnLogMissingInv.Glyph.TransparentColor:=clWhite;
     btnCustomStatement.Glyph.Transparent:=True;
     btnCustomStatement.Glyph.TransparentColor:=clWhite;
     btnAutoStatement.Glyph.Transparent:=True;
@@ -852,6 +884,7 @@ begin
     HistoryGrid.Visible:=False;
     InitializePanels;
     InitializeSpeedButtons;
+    ItemDesc.Caption:='';
 end;
 
 
@@ -909,7 +942,7 @@ end;
 procedure TActionsForm.OpenItemsGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
 
-    // Skip heaer
+    // Skip header
     if ARow = 0 then Exit;
 
     // Draw selected
@@ -1137,6 +1170,129 @@ begin
 end;
 
 
+// ---------------------------------------------------------------------------------------------------------------------------------- MOUSE HOOVER | ACTIONS //
+
+
+procedure TActionsForm.btnBackMouseEnter(Sender: TObject);
+begin
+    ItemDesc.Caption:='Back to previous customer.';
+end;
+
+
+procedure TActionsForm.btnBackMouseLeave(Sender: TObject);
+begin
+    ItemDesc.Caption:='';
+end;
+
+
+procedure TActionsForm.btnNextMouseEnter(Sender: TObject);
+begin
+    ItemDesc.Caption:='Load next customer.';
+end;
+
+
+procedure TActionsForm.btnNextMouseLeave(Sender: TObject);
+begin
+    ItemDesc.Caption:='';
+end;
+
+
+procedure TActionsForm.btnSetFollowUpMouseEnter(Sender: TObject);
+begin
+    ItemDesc.Caption:='Add follow-up date.';
+end;
+
+
+procedure TActionsForm.btnSetFollowUpMouseLeave(Sender: TObject);
+begin
+    ItemDesc.Caption:='';
+end;
+
+
+procedure TActionsForm.btnClearFollowUpMouseEnter(Sender: TObject);
+begin
+    ItemDesc.Caption:='Remove existing follow-up date.';
+end;
+
+
+procedure TActionsForm.btnClearFollowUpMouseLeave(Sender: TObject);
+begin
+    ItemDesc.Caption:='';
+end;
+
+
+procedure TActionsForm.btnLogMissingInvMouseEnter(Sender: TObject);
+begin
+    ItemDesc.Caption:='QMS: Log missing invoice.';
+end;
+
+
+procedure TActionsForm.btnLogMissingInvMouseLeave(Sender: TObject);
+begin
+    ItemDesc.Caption:='';
+end;
+
+
+procedure TActionsForm.btnLogNowMouseEnter(Sender: TObject);
+begin
+    ItemDesc.Caption:='QMS: Log selected invoice(s).';
+end;
+
+
+procedure TActionsForm.btnLogNowMouseLeave(Sender: TObject);
+begin
+    ItemDesc.Caption:='';
+end;
+
+
+procedure TActionsForm.btnCustomStatementMouseEnter(Sender: TObject);
+begin
+    ItemDesc.Caption:='Send custom e-mail with account statement.';
+end;
+
+
+procedure TActionsForm.btnCustomStatementMouseLeave(Sender: TObject);
+begin
+    ItemDesc.Caption:='';
+end;
+
+
+procedure TActionsForm.btnAutoStatementMouseEnter(Sender: TObject);
+begin
+    ItemDesc.Caption:='Send account statement now.';
+end;
+
+
+procedure TActionsForm.btnAutoStatementMouseLeave(Sender: TObject);
+begin
+    ItemDesc.Caption:='';
+end;
+
+
+procedure TActionsForm.btnCallCustomerMouseEnter(Sender: TObject);
+begin
+    ItemDesc.Caption:='Call customer now.';
+end;
+
+
+procedure TActionsForm.btnCallCustomerMouseLeave(Sender: TObject);
+begin
+    ItemDesc.Caption:='';
+end;
+
+
+procedure TActionsForm.btnSaveCustDetailsMouseEnter(Sender: TObject);
+begin
+    ItemDesc.Caption:='Save changes in customer details.';
+end;
+
+
+procedure TActionsForm.btnSaveCustDetailsMouseLeave(Sender: TObject);
+begin
+    ItemDesc.Caption:='';
+end;
+
+
 // ---------------------------------------------------------------------------------------------------------------------------------- BUTTON CALLS | ACTIONS //
 
 
@@ -1199,6 +1355,7 @@ begin
         OpenItemsGrid,
         CUID,
         Lbu_SendFrom.Caption,
+        Cust_Mail.Text,
         CustName,
         CustNumber,
         Lbu_Name.Caption,
@@ -1288,21 +1445,17 @@ end;
 // -------------------------------------------------------------------------------------------------------------------------------------- BUTTON CALLS | QMS //
 
 
-procedure TActionsForm.btnSelectAllClick(Sender: TObject);
-begin
-    //
-end;
-
-
 procedure TActionsForm.btnLogMissingInvClick(Sender: TObject);
 begin
-    //
+    QmsForm.IsMissing:=True;
+    MainForm.WndCall(QmsForm, stModal);
 end;
 
 
 procedure TActionsForm.btnLogNowClick(Sender: TObject);
 begin
-    //
+    QmsForm.IsMissing:=False;
+    MainForm.WndCall(QmsForm, stModal);
 end;
 
 

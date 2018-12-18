@@ -1194,7 +1194,7 @@ object MainForm: TMainForm
     Margins.Top = 0
     Margins.Right = 10
     Margins.Bottom = 0
-    ActivePage = TabSheet4
+    ActivePage = TabSheet5
     Align = alClient
     DoubleBuffered = True
     Font.Charset = DEFAULT_CHARSET
@@ -6430,7 +6430,7 @@ object MainForm: TMainForm
           PopupMenu = CommonPopupMenu
           ShowHint = False
           TabOrder = 0
-          OnDrawCell = sgOpenItemsDrawCell
+          OnDrawCell = l
           OnKeyUp = sgOpenItemsKeyUp
           OnMouseEnter = sgOpenItemsMouseEnter
           OnMouseWheelDown = sgOpenItemsMouseWheelDown
@@ -10196,7 +10196,7 @@ object MainForm: TMainForm
         Margins.Top = 0
         Margins.Right = 17
         Margins.Bottom = 17
-        ActivePage = Page7
+        ActivePage = Page10
         Align = alClient
         TabOrder = 1
         object Page1: TTabSheet
@@ -11770,6 +11770,232 @@ object MainForm: TMainForm
         Color = 15527148
         ParentBackground = False
         TabOrder = 3
+      end
+    end
+    object TabSheet5: TTabSheet
+      Caption = 'QUERIES'
+      ImageIndex = 8
+      object Header5: TPanel
+        Left = 0
+        Top = 0
+        Width = 1287
+        Height = 118
+        Align = alTop
+        BevelOuter = bvNone
+        Color = clWhite
+        ParentBackground = False
+        TabOrder = 0
+        ExplicitTop = 8
+        object ContentPanel5: TPanel
+          AlignWithMargins = True
+          Left = 17
+          Top = 15
+          Width = 1032
+          Height = 91
+          Margins.Left = 17
+          Margins.Top = 15
+          Margins.Right = 0
+          Margins.Bottom = 12
+          Align = alLeft
+          BevelOuter = bvNone
+          Color = clWhite
+          ParentBackground = False
+          TabOrder = 0
+          object ShapeContent5: TShape
+            Left = 0
+            Top = 17
+            Width = 265
+            Height = 72
+            Pen.Color = clGradientInactiveCaption
+          end
+          object Cap62: TShape
+            Left = 0
+            Top = 0
+            Width = 265
+            Height = 19
+            Brush.Color = 15918295
+            Pen.Color = clSkyBlue
+          end
+        end
+      end
+      object PanelFSC: TPanel
+        AlignWithMargins = True
+        Left = 17
+        Top = 135
+        Width = 450
+        Height = 539
+        Margins.Left = 17
+        Margins.Top = 17
+        Margins.Right = 0
+        Margins.Bottom = 17
+        Align = alLeft
+        BevelOuter = bvNone
+        TabOrder = 1
+        object sgFSCview: TStringGrid
+          AlignWithMargins = True
+          Left = 2
+          Top = 2
+          Width = 446
+          Height = 535
+          Margins.Left = 2
+          Margins.Top = 2
+          Margins.Right = 2
+          Margins.Bottom = 2
+          Align = alClient
+          BorderStyle = bsNone
+          ColCount = 39
+          DefaultColWidth = 40
+          DefaultRowHeight = 17
+          RowCount = 2
+          GradientEndColor = 15527148
+          Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
+          ParentShowHint = False
+          PopupMenu = CommonPopupMenu
+          ShowHint = False
+          TabOrder = 0
+          OnKeyUp = sgOpenItemsKeyUp
+          OnMouseEnter = sgOpenItemsMouseEnter
+          OnMouseWheelDown = sgOpenItemsMouseWheelDown
+          OnMouseWheelUp = sgOpenItemsMouseWheelUp
+          ExplicitLeft = 92
+          ExplicitTop = 53
+          ExplicitWidth = 244
+          ExplicitHeight = 236
+          ColWidths = (
+            40
+            67
+            92
+            82
+            84
+            121
+            120
+            244
+            74
+            123
+            125
+            123
+            82
+            141
+            138
+            123
+            93
+            122
+            84
+            83
+            125
+            121
+            123
+            126
+            84
+            81
+            86
+            86
+            68
+            62
+            401
+            74
+            82
+            122
+            120
+            120
+            116
+            128
+            125)
+          RowHeights = (
+            17
+            17)
+        end
+      end
+      object PanelLBU: TPanel
+        AlignWithMargins = True
+        Left = 484
+        Top = 135
+        Width = 450
+        Height = 539
+        Margins.Left = 17
+        Margins.Top = 17
+        Margins.Right = 0
+        Margins.Bottom = 17
+        Align = alLeft
+        BevelOuter = bvNone
+        TabOrder = 2
+        ExplicitLeft = 467
+        ExplicitTop = 118
+        ExplicitHeight = 573
+        object sgLBUview: TStringGrid
+          AlignWithMargins = True
+          Left = 2
+          Top = 2
+          Width = 446
+          Height = 535
+          Margins.Left = 2
+          Margins.Top = 2
+          Margins.Right = 2
+          Margins.Bottom = 2
+          Align = alClient
+          BorderStyle = bsNone
+          ColCount = 39
+          DefaultColWidth = 40
+          DefaultRowHeight = 17
+          RowCount = 2
+          GradientEndColor = 15527148
+          Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
+          ParentShowHint = False
+          PopupMenu = CommonPopupMenu
+          ShowHint = False
+          TabOrder = 0
+          OnKeyUp = sgOpenItemsKeyUp
+          OnMouseEnter = sgOpenItemsMouseEnter
+          OnMouseWheelDown = sgOpenItemsMouseWheelDown
+          OnMouseWheelUp = sgOpenItemsMouseWheelUp
+          ExplicitLeft = 147
+          ExplicitTop = 120
+          ExplicitWidth = 303
+          ExplicitHeight = 252
+          ColWidths = (
+            40
+            67
+            92
+            82
+            84
+            121
+            120
+            244
+            74
+            123
+            125
+            123
+            82
+            141
+            138
+            123
+            93
+            122
+            84
+            83
+            125
+            121
+            123
+            126
+            84
+            81
+            86
+            86
+            68
+            62
+            401
+            74
+            82
+            122
+            120
+            120
+            116
+            128
+            125)
+          RowHeights = (
+            17
+            17)
+        end
       end
     end
   end
@@ -14503,6 +14729,7 @@ object MainForm: TMainForm
     end
     object Action_ViewOptions: TMenuItem
       Caption = 'Age View Options'
+      OnClick = Action_ViewOptionsClick
       object Action_BasicView: TMenuItem
         Caption = 'Basic view'
         OnClick = Action_BasicViewClick

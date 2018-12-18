@@ -207,6 +207,9 @@
         <DCCReference Include="View\Await.pas">
             <Form>AwaitForm</Form>
         </DCCReference>
+        <DCCReference Include="View\Qms.pas">
+            <Form>QmsForm</Form>
+        </DCCReference>
         <None Include="Include\Cef.inc"/>
         <None Include="Include\Common.inc"/>
         <None Include="Include\Header.inc"/>

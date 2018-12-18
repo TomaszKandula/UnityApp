@@ -286,6 +286,7 @@ type
         var FOpenItems:    TStringGrid;
         var FCUID:         string;
         var FSendFrom:     string;
+        var FMailTo:       string;
         var FCustName:     string;
         var FCustNumber:   string;
         var FLBUName:      string;
@@ -305,6 +306,7 @@ type
             OpenItems:   TStringGrid;
             CUID:        string;
             SendFrom:    string;
+            MailTo:      string;
             CustName:    string;
             CustNumber:  string;
             LBUName:     string;
@@ -327,22 +329,18 @@ type
         var FLock:         TCriticalSection;
         var FIDThd:        integer;
         var FSubject:      string;
-        var FSalut:        string;
         var FMess:         string;
         var FIsOverdue:    boolean;
         var FOpenItems:    TStringGrid;
-        var FAgeView:      TStringGrid;
         var FMailerList:   TListView;
     public
         property    IDThd: integer read FIDThd;
         destructor  Destroy; override;
         constructor Create(
             Subject:    string;
-            Salut:      string;
             Mess:       string;
             IsOverdue:  boolean;
             OpenItems:  TStringGrid;
-            AgeView:    TStringGrid;
             MailerList: TListView
         );
     end;
@@ -1646,6 +1644,7 @@ constructor TTSendAccountStatement.Create
     OpenItems:   TStringGrid;
     CUID:        string;
     SendFrom:    string;
+    MailTo:      string;
     CustName:    string;
     CustNumber:  string;
     LBUName:     string;
@@ -1666,6 +1665,7 @@ begin
     FOpenItems  :=OpenItems;
     FCUID       :=CUID;
     FSendFrom   :=SendFrom;
+    FMailTo     :=MailTo;
     FCustName   :=CustName;
     FCustNumber :=CustNumber;
     FSeries     :=Series;
@@ -1702,6 +1702,7 @@ begin
 
             Statement.CUID       :=FCUID;
             Statement.MailFrom   :=FSendFrom;
+            Statement.MailTo     :=FMailTo;
             Statement.CustName   :=FCustName;
             Statement.LBUName    :=FLBUName;
             Statement.LBUAddress :=FLBUAddress;
@@ -1816,11 +1817,9 @@ end;
 constructor TTSendAccountStatements.Create
 (
     Subject:    string;
-    Salut:      string;
     Mess:       string;
     IsOverdue:  boolean;
     OpenItems:  TStringGrid;
-    AgeView:    TStringGrid;
     MailerList: TListView
 );
 begin
@@ -1828,11 +1827,9 @@ begin
     FLock      :=TCriticalSection.Create;
     FIDThd     :=0;
     FSubject   :=Subject;
-    FSalut     :=Salut;
     FMess      :=Mess;
     FIsOverdue :=IsOverdue;
     FOpenItems :=OpenItems;
-    FAgeView   :=AgeView;
     FMailerList:=MailerList;
 end;
 
@@ -1845,13 +1842,6 @@ procedure TTSendAccountStatements.Execute;
 var
     Statement:  TDocument;
     iCNT:       integer;
-    SCUID:      string;
-    CUID:       string;
-    CustName:   string;
-    CustNumber: string;
-    CoCode:     string;
-    Agent:      string;
-    ListPos:    integer;
     SendStat:   TTSendAccountStatement;
 begin
     FIDThd:=CurrentThread.ThreadID;
@@ -1864,7 +1854,6 @@ begin
         /// </remarks>
 
         FOpenItems.Freeze(True);
-        FAgeView.Freeze(True);
         FMailerList.Freeze(True);
 
         Statement:=TDocument.Create;
@@ -1880,25 +1869,8 @@ begin
             for iCNT:=0 to FMailerList.Items.Count - 1 do
             begin
 
-                if FMailerList.Items[iCNT].SubItems[2] <> 'Not Found' then
+                if FMailerList.Items[iCNT].SubItems[3] <> 'Not found!' then
                 begin
-
-                    /// <remarks>
-                    ///     ListPos parameter refers to position of the customer on Age View (main application screen).
-                    /// </remarks>
-
-                    ListPos   :=StrToInt(FMailerList.Items[iCNT].Caption);
-
-                    /// <remarks>
-                    ///     Get rest of the data per listed customer.
-                    /// </remarks>
-
-                    SCUID     :=FMailerList.Items[iCNT].SubItems[0];
-                    CUID      :=FAgeView.Cells[FAgeView.ReturnColumn(TSnapshots.fCUID, 1, 1), ListPos];
-                    CustName  :=FAgeView.Cells[FAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME, 1, 1), ListPos];
-                    CustNumber:=FAgeView.Cells[FAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), ListPos];
-                    CoCode    :=FAgeView.Cells[FAgeView.ReturnColumn(TSnapshots.fCO_CODE, 1, 1), ListPos];
-                    Agent     :=FAgeView.Cells[FAgeView.ReturnColumn(TSnapshots.fAGENT, 1, 1), ListPos];
 
                     /// <remarks>
                     ///     Execute worker thread and wait until it finishes the work. This may is due to limitness of multithreading capability,
@@ -1906,22 +1878,24 @@ begin
                     ///     enough to perform email sending wihtout blocking main thread (GUI).
                     /// </remarks>
 
-//                    SendStat:=TTSendAccountStatement.Create(
-//                        maCustom,
-//                        FSubject,
-//                        FSalut,
-//                        FMess,
-//                        FIsOverdue,
-//                        FOpenItems,
-//					      SCUID,
-//                        CUID,
-//                        CustName,
-//                        CustNumber,
-//                        CoCode,
-//                        Agent,
-//                        True,
-//                        iCNT
-//                    );
+                    SendStat:=TTSendAccountStatement.Create(
+                        maCustom,
+                        FSubject,
+                        FMess,
+                        FIsOverdue,
+                        FOpenItems,
+                        FMailerList.Items[iCNT].SubItems[10], // cuid
+                        FMailerList.Items[iCNT].SubItems[2],  // send from
+                        FMailerList.Items[iCNT].SubItems[3],  // send to
+                        FMailerList.Items[iCNT].SubItems[0],  // cust name
+                        FMailerList.Items[iCNT].SubItems[1],  // cust number
+                        FMailerList.Items[iCNT].SubItems[5],  // lbu name
+                        FMailerList.Items[iCNT].SubItems[6],  // lbu address
+                        FMailerList.Items[iCNT].SubItems[7],  // lbu phone
+                        FMailerList.Items[iCNT].SubItems[12], // bank html
+                        True,
+                        iCNT
+                    );
                     SendStat.WaitFor;
 
                 end;
@@ -1935,7 +1909,6 @@ begin
 
     finally
         FOpenItems.Freeze(False);
-        FAgeView.Freeze(False);
         FMailerList.Freeze(False);
         FLock.Release;
     end;

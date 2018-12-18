@@ -57,7 +57,7 @@ type
         btnApply: TSpeedButton;
         PanelCustomerList: TPanel;
         TextReminder0: TLabeledEdit;
-    btnSelection: TSpeedButton;
+        btnSelection: TSpeedButton;
         procedure FormCreate(Sender: TObject);
         procedure FormDestroy(Sender: TObject);
         procedure FormShow(Sender: TObject);
@@ -69,7 +69,7 @@ type
         procedure btnApplyClick(Sender: TObject);
         procedure CustomerListKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure CustomerListKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure btnSelectionClick(Sender: TObject);
+        procedure btnSelectionClick(Sender: TObject);
     protected
         var Multiselect: TStringList;
         var CtrlClicked: boolean;
@@ -252,10 +252,11 @@ begin
 
     try
 
+        // Get files from local folder
         try
-
-            // Get files from local folder
+            {$WARN SYMBOL_PLATFORM OFF} { faArchives - Windows only }
             if FindFirst(LayoutFld + 'r*.htm', faArchive, SearchRec) = 0 then
+            {$WARN SYMBOL_PLATFORM ON}
             begin
 
                 LayoutLst.Sorted:=True;
@@ -416,30 +417,29 @@ begin
 
             // Put ListView data to StringGrid
             TempData.RowCount:=List.Items.Count;
-            TempData.ColCount:=TrackerData.Columns.Count + 1;
+            TempData.ColCount:=TrackerData.Columns.Count;
             for iCNT:=0 to List.Items.Count - 1 do
             begin
-                TempData.Cells[0,  iCNT]:='';                               // skip 1st row and 1st column
-                TempData.Cells[1,  iCNT]:=MainForm.WinUserName;             // user alias
-                TempData.Cells[2,  iCNT]:=List.Items[iCNT].SubItems[0];     // cuid
-                TempData.Cells[3,  iCNT]:=List.Items[iCNT].SubItems[11];    // co code
-                TempData.Cells[4,  iCNT]:=List.Items[iCNT].SubItems[12];    // branch/agent
-                TempData.Cells[5,  iCNT]:=List.Items[iCNT].SubItems[2];     // cust name
-                TempData.Cells[6,  iCNT]:=DateTimeToStr(Now);               // stamp
-                TempData.Cells[7,  iCNT]:=List.Items[iCNT].SubItems[7];     // reminder 1
-                TempData.Cells[8,  iCNT]:=List.Items[iCNT].SubItems[8];     // reminder 2
-                TempData.Cells[9,  iCNT]:=List.Items[iCNT].SubItems[9];     // reminder 3
-                TempData.Cells[10, iCNT]:=List.Items[iCNT].SubItems[10];    // reminder 4
-                TempData.Cells[11, iCNT]:=List.Items[iCNT].SubItems[1];     // scuid
-                TempData.Cells[12, iCNT]:=ListLayout.Text;                  // layout
-                TempData.Cells[13, iCNT]:=List.Items[iCNT].SubItems[6];     // pre-statement
-                TempData.Cells[14, iCNT]:=List.Items[iCNT].SubItems[3];     // send from
-                TempData.Cells[15, iCNT]:=List.Items[iCNT].SubItems[4];     // statement to
-                TempData.Cells[16, iCNT]:=List.Items[iCNT].SubItems[5];     // reminder to
+                TempData.Cells[0,  iCNT]:=MainForm.WinUserName;             // user alias
+                TempData.Cells[1,  iCNT]:=List.Items[iCNT].SubItems[0];     // cuid
+                TempData.Cells[2,  iCNT]:=List.Items[iCNT].SubItems[11];    // co code
+                TempData.Cells[3,  iCNT]:=List.Items[iCNT].SubItems[12];    // branch/agent
+                TempData.Cells[4,  iCNT]:=List.Items[iCNT].SubItems[2];     // cust name
+                TempData.Cells[5,  iCNT]:=DateTimeToStr(Now);               // stamp
+                TempData.Cells[6,  iCNT]:=List.Items[iCNT].SubItems[7];     // reminder 1
+                TempData.Cells[7,  iCNT]:=List.Items[iCNT].SubItems[8];     // reminder 2
+                TempData.Cells[8,  iCNT]:=List.Items[iCNT].SubItems[9];     // reminder 3
+                TempData.Cells[9,  iCNT]:=List.Items[iCNT].SubItems[10];    // reminder 4
+                TempData.Cells[10, iCNT]:=List.Items[iCNT].SubItems[1];     // scuid
+                TempData.Cells[11, iCNT]:=ListLayout.Text;                  // layout
+                TempData.Cells[12, iCNT]:=List.Items[iCNT].SubItems[6];     // pre-statement
+                TempData.Cells[13, iCNT]:=List.Items[iCNT].SubItems[3];     // send from
+                TempData.Cells[14, iCNT]:=List.Items[iCNT].SubItems[4];     // statement to
+                TempData.Cells[15, iCNT]:=List.Items[iCNT].SubItems[5];     // reminder to
             end;
 
             // Insert data to database
-            if TrackerData.InsertInto(TblTracker, ttExplicit, TempData, nil) then
+            if TrackerData.InsertInto(TblTracker, ttExplicit, TempData, nil, False) then
             begin
                 MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Invoice tracker data updated.');
                 MainForm.MsgCall(mcInfo, 'Invoice Tracker has been updates successfully!');

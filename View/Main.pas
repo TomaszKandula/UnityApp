@@ -497,6 +497,15 @@ type
         Action_PersonResp: TMenuItem;
         Action_AccountType: TMenuItem;
         N24: TMenuItem;
+        TabSheet5: TTabSheet;
+        Header5: TPanel;
+        ContentPanel5: TPanel;
+        ShapeContent5: TShape;
+        Cap62: TShape;
+        sgFSCview: TStringGrid;
+        sgLBUview: TStringGrid;
+        PanelFSC: TPanel;
+        PanelLBU: TPanel;
         procedure FormCreate(Sender: TObject);
         procedure FormResize(Sender: TObject);
         procedure FormShow(Sender: TObject);
@@ -565,7 +574,7 @@ type
         procedure sgPaidInfoMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure sgPersonMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure sgPersonMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-        procedure sgOpenItemsDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+        procedure l(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
         procedure OILoaderTimer(Sender: TObject);
         procedure GroupListBoxSelect(Sender: TObject);
         procedure btnMakeGroupClick(Sender: TObject);
@@ -782,11 +791,11 @@ type
         procedure Action_CustomerGrpClick(Sender: TObject);
         procedure Action_PersonRespClick(Sender: TObject);
         procedure Action_AccountTypeClick(Sender: TObject);
+        procedure Action_ViewOptionsClick(Sender: TObject);
     private
         var pAllowClose:    boolean;
         var pStartTime:     TTime;
     public
-        // Helpers
         var LogText:            TThreadFileLog;
         var WinUserName:        string;
         var EventLogPath:       string;
@@ -1014,7 +1023,7 @@ begin
                 Param:=StrToIntDef(PChar(Msg.LParam), -1);
                 if Param > -1 then
                 begin
-                    ViewMailerForm.CustomerList.Items[Param].SubItems[3]:='Sent';
+                    ViewMailerForm.CustomerList.Items[Param].SubItems[4]:='Sent';
                     ViewMailerForm.ThreadCount:=ViewMailerForm.ThreadCount - 1;
                 end;
             end;
@@ -1133,7 +1142,7 @@ end;
 /// <summary>
 ///     Get column reference on demand for Open Items string grid. The reason is, despite we do not change columns order
 ///     at run time programatically, it may be changed on server-side and that will be immediatelly reflected
-///     in Open Items string grid that serves the user and program as a fast source access.
+///     in Open Items string grid that serves the user and the application as the source of data.
 ///     Additional purpose of the code is - to get the columns at once instead using ReturnColumn multiple times in given
 ///     method, this increase the overall performance of the code and decreases complexity.
 /// </summary>
@@ -1697,14 +1706,12 @@ end;
 /// <summary>
 ///     Draw custom border around panels.
 /// </summary>
+/// <remarks>
+///     TPanel component must have properties such as BevelInner, BevelKind and BevelOuter and BorderStyle set to none.
+/// </remarks>
 
 procedure TMainForm.SetPanelBorders;
 begin
-
-    /// <remarks>
-    ///     TPanel component must have properties such as BevelInner, BevelKind and BevelOuter and BorderStyle set to none.
-    /// </remarks>
-
     AppHeader.PanelBorders            (clWhite, clSkyBlue, clWhite,   clWhite,   clWhite);
     PanelAgeView.PanelBorders         (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
     PanelOpenItems.PanelBorders       (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
@@ -1724,6 +1731,8 @@ begin
     PanelPersonResp.PanelBorders      (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
     PanelCustomerGr.PanelBorders      (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
     PanelAccountType.PanelBorders     (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+    PanelFSC.PanelBorders             (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+    PanelLBU.PanelBorders             (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
 end;
 
 
@@ -2043,7 +2052,7 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------  //
+// -------------------------------------------------------------------------------------------------------------------------------- DELETE FROM TRACKER LIST //
 
 
 procedure TMainForm.DeleteFromTrackerList(CUID: string);
@@ -2248,6 +2257,11 @@ begin
 
     Text21.Caption:=Settings.GetStringValue(AgingRanges,'RANGE1A','') + ' - ' + Settings.GetStringValue(AgingRanges,'RANGE3B','') + ':';
     Text22.Caption:=Settings.GetStringValue(AgingRanges,'RANGE4A','') + ' - ' + Settings.GetStringValue(AgingRanges,'RANGE6B','') + ':';
+
+    // ---------------------------------------------------------------------------------------------------------------------- TRANSPARENCY ON BUTTONS GLYPHS //
+
+    Action_QuickReporting.Bitmap.Transparent:=True;
+    Action_QuickReporting.Bitmap.TransparentColor:=clWhite;
 
     // ------------------------------------------------------------------------------------------------------------------------------- DATABASE CONNECTIVITY //
     OnCreateJob(spConnecting);
@@ -3122,6 +3136,11 @@ begin
 
 end;
 
+procedure TMainForm.Action_ViewOptionsClick(Sender: TObject);
+begin
+
+end;
+
 /// <summary>
 ///     Add customer(s) to address book.
 /// </summary>
@@ -3171,6 +3190,7 @@ begin
             Item.SubItems.Add('No');
             Item.SubItems.Add('n/a');
             Item.SubItems.Add('n/a');
+            Item.SubItems.Add('n/a');
             Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCO_CODE, 1, 1), sgAgeView.Row]);
             Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fAGENT, 1, 1), sgAgeView.Row]);
             Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUID, 1, 1), sgAgeView.Row]);
@@ -3178,6 +3198,7 @@ begin
                 sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), sgAgeView.Row] +
                 MainForm.ConvertName(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCO_CODE, 1, 1), sgAgeView.Row], 'F', 3)
             );
+            Item.SubItems.Add('empty');
         end
         // Many customers
         else
@@ -3195,6 +3216,7 @@ begin
                     Item.SubItems.Add('No');
                     Item.SubItems.Add('n/a');
                     Item.SubItems.Add('n/a');
+                    Item.SubItems.Add('n/a');
                     Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCO_CODE, 1, 1), iCNT]);
                     Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fAGENT, 1, 1), iCNT]);
                     Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUID, 1, 1), iCNT]);
@@ -3202,6 +3224,7 @@ begin
                         sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), iCNT] +
                         MainForm.ConvertName(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCO_CODE, 1, 1), iCNT], 'F', 3)
                     );
+                    Item.SubItems.Add('empty');
                 end;
             end;
         end;
@@ -3227,7 +3250,7 @@ begin
 
     Screen.Cursor:=crHourGlass;
     CalendarForm.CalendarMode:=cfGetDate;
-    MainForm.WndCall(CalendarForm, 0);
+    MainForm.WndCall(CalendarForm, stModal);
 
     // IF SELECTED MORE THAN ONE CUSTOMER, ASSIGN GIVEN DATE TO SELECTED CUSTOMERS
     if CalendarForm.SelectedDate <> NULLDATE then
@@ -3633,15 +3656,11 @@ begin
     if Action_HideSummary.Checked then
     begin
         Footer1.Visible:=False;
-        //PanelAgeView.Margins.Bottom:=17;
-        //sgAgeViewShape.Margins.Bottom:=0;
         Action_HideSummary.Checked:=False;
     end
     else
     begin
         Footer1.Visible:=True;
-        //PanelAgeView.Margins.Bottom:=0;
-        //sgAgeViewShape.Margins.Bottom:=12;
         Action_HideSummary.Checked:=True;
     end;
 end;
@@ -4191,7 +4210,7 @@ begin
 
 end;
 
-procedure TMainForm.sgOpenItemsDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+procedure TMainForm.l(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 var
     Col1: integer;
     Col2: integer;
@@ -5710,6 +5729,7 @@ begin
 
 end;
 
+
 procedure TMainForm.txtReportsClick(Sender: TObject);
 begin
     UnfoldReportsTab(AppHeader, btnReports);
@@ -5717,6 +5737,7 @@ begin
     txtReports.Font.Style:=[fsBold];
     txtReports.Font.Color:=$006433C9;
 end;
+
 
 procedure TMainForm.txtDebtorsClick(Sender: TObject);
 begin
@@ -5727,6 +5748,7 @@ begin
     txtDebtors.Font.Color:=$006433C9;
 end;
 
+
 procedure TMainForm.txtTrackerClick(Sender: TObject);
 begin
     UnfoldReportsTab(AppHeader, btnReports, True);
@@ -5735,6 +5757,7 @@ begin
     txtTracker.Font.Style:=[fsBold];
     txtTracker.Font.Color:=$006433C9;
 end;
+
 
 procedure TMainForm.txtAddressBookClick(Sender: TObject);
 begin
@@ -5745,6 +5768,7 @@ begin
     txtAddressBook.Font.Color:=$006433C9;
 end;
 
+
 procedure TMainForm.txtOpenItemsClick(Sender: TObject);
 begin
     UnfoldReportsTab(AppHeader, btnReports, True);
@@ -5754,15 +5778,26 @@ begin
     txtOpenItems.Font.Color:=$006433C9;
 end;
 
+
 procedure TMainForm.txtUnidentifiedClick(Sender: TObject);
 begin
-    MsgCall(mcInfo, 'This feature is not yet accessible. Please try later.');
+    UnfoldReportsTab(AppHeader, btnReports, True);
+    MyPages.ActivePage:=TabSheet6;
+    ResetTabsheetButtons;
+    txtUnidentified.Font.Style:=[fsBold];
+    txtUnidentified.Font.Color:=$006433C9;
 end;
+
 
 procedure TMainForm.txtQueriesClick(Sender: TObject);
 begin
-    MsgCall(mcInfo, 'This feature is not yet accessible. Please try later.');
+    UnfoldReportsTab(AppHeader, btnReports, True);
+    MyPages.ActivePage:=TabSheet5;
+    ResetTabsheetButtons;
+    txtQueries.Font.Style:=[fsBold];
+    txtQueries.Font.Color:=$006433C9;
 end;
+
 
 procedure TMainForm.txtTablesClick(Sender: TObject);
 begin
@@ -5772,6 +5807,7 @@ begin
     txtTables.Font.Style:=[fsBold];
     txtTables.Font.Color:=$006433C9;
 end;
+
 
 procedure TMainForm.txtSettingsClick(Sender: TObject);
 begin

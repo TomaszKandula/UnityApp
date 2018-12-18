@@ -64,7 +64,7 @@ const
 
     DelayStd    :  integer   = 10;                 // Splash screen: slown down a bit to display the message during startup
     DelayErr    :  integer   = 750;                // Splash screen: slown down significantly for user in case of error
-    AllTasks    :  integer   = 33;                 // Total number of all tasks on startup
+    AllTasks    :  integer   = 37;                 // Total number of all tasks on startup
     SELCOLOR    :  dword     = $00F2E4D7;          // Application color #1
     FONCOLOR    :  dword     = $006433C9;          // Application color #2
     CUSCOLOR    :  dword     = $00FFDBB7;          // Application color #3
@@ -75,9 +75,9 @@ const
     GridImgFile :  string    = 'Unity.img';        // Application custom image(s)
     ReleaseFile :  string    = 'Release.zip';      // Release package
     ManifestFile:  string    = 'Unity.manifest';   // Manifest file on the server
-    CurrentMutex:  PWideChar = 'UNITY_10171';      // Mutex value, increase it with each release*
+    CurrentMutex:  PWideChar = 'UNITY_10173';      // Mutex value, increase it with each release*
 
-    // *Do not alow to run multiple instances of Unity due to lack of sessions
+    // *Do not allow to run multiple instances of Unity due to lack of sessions
 
     // --------------------------------------------------------------------------------------------------------------------------------------- SPLASH SCREEN //
 
@@ -380,6 +380,13 @@ const
     spMapping    = 'loading Map Tables..., please wait.';
     spFinishing  = 'finishing..., please wait.';
 
+    // -------------------------------------------------------------------------------------------------------------------------------------- QUERY STATUSES //
+
+    qrOPEN     = 'OPEN';
+    qrPENDING  = 'PENDING';
+    qrREJECTED = 'REJECTED';
+    qrSOLVED   = 'SOLVED';
+
     // COMPONENT RELATED ----------------------------------------------------------------------------------------------------------------------------------- //
 
 
@@ -506,6 +513,8 @@ const
     TrackerList    = schCustomer + '.' + 'TrackerList';
 
     // ------------------------------------------------------------------------------------------------------------------------- MAPPED TABLES FROM DATABASE //
+
+    // refactor this - remove below constant and move it to the model !!!
 
     TblFxRates           = schCustomer + '.' + 'FxRates';
     TblDaily             = schCustomer + '.' + 'DailyComment';

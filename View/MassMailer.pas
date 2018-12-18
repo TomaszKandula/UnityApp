@@ -27,31 +27,6 @@ uses
 type
 
     /// <summary>
-    ///     Helper class encapsulating company data fields. Once SetCompanyData method is called, it scans
-    ///     Source and get relevant fields into separate StringLists that can be later accessed and used elsewhere.
-    /// </summary>
-
-    TCompanyData = class(TObject)
-    {$TYPEINFO ON}
-    private
-        var FLbuName:      TStringList;
-        var FLbuAddress:   TStringList;
-        var FLbuPhone:     TStringList;
-        var FLbuSendFrom:  TStringList;
-        var FLbuBanksHtml: TStringList;
-        procedure ClearAll;
-    public
-        property LbuName:      TStringList read FLbuName      write FLbuName;
-        property LbuAddress:   TStringList read FLbuAddress   write FLbuAddress;
-        property LbuPhone:     TStringList read FLbuPhone     write FLbuPhone;
-        property LbuSendFrom:  TStringList read FLbuSendFrom  write FLbuSendFrom;
-        property LbuBanksHtml: TStringList read FLbuBanksHtml write FLbuBanksHtml;
-        constructor Create;
-        destructor  Destroy; override;
-        procedure   SetCompanyData(Source: TListView);
-    end;
-
-    /// <summary>
     ///     View form class with helpers for mass mailer (separate window). Alow user to send emails to a selected customers with open items.
     /// </summary>
 
@@ -97,9 +72,9 @@ type
         var FThreadCount: integer;
         function  GetEmailAddress(Scuid: string): string;
         procedure SetEmailAddresses(List: TListView);
+        procedure UpdateCompanyData(Source: TListView);
         procedure ExecuteMailer;
     public
-        var CompanyData: TCompanyData;
         property ThreadCount: integer read FThreadCount write FThreadCount;
     end;
 
@@ -124,121 +99,7 @@ uses
 {$R *.dfm}
 
 
-// ---------------------------------------------------------------------------------------------------------------------------------- METHODS | HELPER CLASS //
-
-
-/// <summary>
-///
-/// </summary>
-
-constructor TCompanyData.Create;
-begin
-    if not(Assigned(FLbuName))      then FLbuName.Create;
-    if not(Assigned(FLbuAddress))   then FLbuAddress.Create;
-    if not(Assigned(FLbuPhone))     then FLbuPhone.Create;
-    if not(Assigned(FLbuSendFrom))  then FLbuSendFrom.Create;
-    if not(Assigned(FLbuBanksHtml)) then FLbuBanksHtml.Create;
-end;
-
-
-/// <summary>
-///
-/// </summary>
-
-destructor TCompanyData.Destroy;
-begin
-    if Assigned(FLbuName)      then FLbuName.Free;
-    if Assigned(FLbuAddress)   then FLbuAddress.Free;
-    if Assigned(FLbuPhone)     then FLbuPhone.Free;
-    if Assigned(FLbuSendFrom)  then FLbuSendFrom.Free;
-    if Assigned(FLbuBanksHtml) then FLbuBanksHtml.Free;
-    inherited;
-end;
-
-
-/// <summary>
-///
-/// </summary>
-
-procedure TCompanyData.ClearAll;
-begin
-    FLbuName.Clear;
-    FLbuAddress.Clear;
-    FLbuPhone.Clear;
-    FLbuSendFrom.Clear;
-    FLbuBanksHtml.Clear;
-end;
-
-
-/// <summary>
-///
-/// </summary>
-
-procedure TCompanyData.SetCompanyData(Source: TListView);
-var
-    Tables:  TDataTables;
-    iCNT:    integer;
-    CoCode:  string;
-    Branch:  string;
-begin
-    ClearAll;
-
-    Tables:=TDataTables.Create(MainForm.DbConnect);
-    try
-
-        if Source.Items.Count > 0 then
-        begin
-
-            Tables.Columns.Add(TCompany.CONAME);
-            Tables.Columns.Add(TCompany.COADDRESS);
-            Tables.Columns.Add(TCompany.Telephone);
-            Tables.Columns.Add(TCompany.SEND_NOTE_FROM);
-            Tables.Columns.Add(TCompany.BANKDETAILS);
-
-            for iCNT:=0 to Source.Items.Count - 1 do
-            begin
-                CoCode:=Source.Items[iCNT].SubItems[7];
-                Branch:=Source.Items[iCNT].SubItems[8];
-
-                Tables.ClearSQL;
-                Tables.CustFilter:=WHERE + TCompany.CO_CODE + EQUAL + QuotedStr(CoCode) + _AND + TCompany.BRANCH + EQUAL + QuotedStr(Branch);
-                Tables.OpenTable(TblCompany);
-
-                // Always add to the lists
-                if Tables.DataSet.RecordCount = 1 then
-                begin
-                    LbuName.Add(MainForm.OleGetStr(Tables.DataSet.Fields[TCompany.CONAME].Value));
-                    LbuAddress.Add(MainForm.OleGetStr(Tables.DataSet.Fields[TCompany.COADDRESS].Value));
-                    LbuPhone.Add(MainForm.OleGetStr(Tables.DataSet.Fields[TCompany.Telephone].Value));
-                    LbuSendFrom.Add(MainForm.OleGetStr(Tables.DataSet.Fields[TCompany.SEND_NOTE_FROM].Value));
-                    LbuBanksHtml.Add(MainForm.OleGetStr(Tables.DataSet.Fields[TCompany.BANKDETAILS].Value));
-                end
-                else
-                begin
-                    LbuName.Add(unNotFound);
-                    LbuAddress.Add(unNotFound);
-                    LbuPhone.Add(unNotFound);
-                    LbuSendFrom.Add(unNotFound);
-                    LbuBanksHtml.Add(unNotFound);
-                end;
-
-                // Update source fields
-                Source.Items[iCNT].SubItems[0]:=LbuName.Strings[iCNT];
-                Source.Items[iCNT].SubItems[5]:=LbuAddress.Strings[iCNT];
-                Source.Items[iCNT].SubItems[6]:=LbuPhone.Strings[iCNT];
-                Source.Items[iCNT].SubItems[2]:=LbuSendFrom.Strings[iCNT];
-
-            end;
-        end;
-
-    finally
-        Tables.Free;
-    end;
-
-end;
-
-
-// ------------------------------------------------------------------------------------------------------------------------------------ HELPERS | THIS CLASS //
+// ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
 
 
 /// <summary>
@@ -283,12 +144,73 @@ begin
     begin
         for iCNT:=0 to List.Items.Count - 1 do
         begin
-            EmailAddress:=GetEmailAddress(List.Items[iCNT].SubItems[10]);
+            EmailAddress:=GetEmailAddress(List.Items[iCNT].SubItems[11]);
 
             if not(string.IsNullOrEmpty(EmailAddress)) then
                 List.Items[iCNT].SubItems[3]:=EmailAddress
 
         end;
+    end;
+
+end;
+
+
+/// <summary>
+///
+/// </summary>
+
+procedure TViewMailerForm.UpdateCompanyData(Source: TListView);
+var
+    Tables:  TDataTables;
+    iCNT:    integer;
+    CoCode:  string;
+    Branch:  string;
+begin
+
+    Tables:=TDataTables.Create(MainForm.DbConnect);
+    try
+
+        if Source.Items.Count > 0 then
+        begin
+
+            Tables.Columns.Add(TCompany.CONAME);
+            Tables.Columns.Add(TCompany.COADDRESS);
+            Tables.Columns.Add(TCompany.Telephone);
+            Tables.Columns.Add(TCompany.SEND_NOTE_FROM);
+            Tables.Columns.Add(TCompany.BANKDETAILS);
+
+            for iCNT:=0 to Source.Items.Count - 1 do
+            begin
+                CoCode:=Source.Items[iCNT].SubItems[8];
+                Branch:=Source.Items[iCNT].SubItems[9];
+
+                Tables.ClearSQL;
+                Tables.CustFilter:=WHERE + TCompany.CO_CODE + EQUAL + QuotedStr(CoCode) + _AND + TCompany.BRANCH + EQUAL + QuotedStr(Branch);
+                Tables.OpenTable(TblCompany);
+
+                // Always add to the lists
+                if Tables.DataSet.RecordCount = 1 then
+                begin
+                    Source.Items[iCNT].SubItems[5] :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompany.CONAME].Value);
+                    Source.Items[iCNT].SubItems[6] :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompany.COADDRESS].Value);
+                    Source.Items[iCNT].SubItems[7] :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompany.Telephone].Value);
+                    Source.Items[iCNT].SubItems[2] :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompany.SEND_NOTE_FROM].Value);
+                    Source.Items[iCNT].SubItems[12]:=MainForm.OleGetStr(Tables.DataSet.Fields[TCompany.BANKDETAILS].Value);
+                end
+                else
+                begin
+                    Source.Items[iCNT].SubItems[5] :=unNotFound;
+                    Source.Items[iCNT].SubItems[6] :=unNotFound;
+                    Source.Items[iCNT].SubItems[7] :=unNotFound;
+                    Source.Items[iCNT].SubItems[2] :=unNotFound;
+                    Source.Items[iCNT].SubItems[12]:=unNotFound;
+                end;
+
+            end;
+        end;
+
+    finally
+        Tables.Free;
     end;
 
 end;
@@ -319,13 +241,6 @@ begin
         Exit;
     end;
 
-    // Check if EmailList contains "noreply" emailbox (default). if so, we should not allow to send from such email address.
-//    if AnsiPos(EmailList.Items[EmailList.ItemIndex], 'noreply') > 0 then
-//    begin
-//        MainForm.MsgCall(mcWarn, 'Cannot send e-mail from "noreply" email box. Please select other email address and try again.');
-//        Exit;
-//    end;
-
     // Ask user, they may press the button by mistake
     if MainForm.MsgCall(mcQuestion2, 'Are you absolutely sure you want to send it, right now?') = IDNO
         then
@@ -333,7 +248,7 @@ begin
 
     // Get item count for sendable emails
     for iCNT:=0 to CustomerList.Items.Count - 1 do
-        if CustomerList.Items[iCNT].SubItems[2] <> 'Not Found' then
+        if CustomerList.Items[iCNT].SubItems[3] <> 'Not found!' then
             ThreadCount:=ThreadCount + 1;
 
     // Prepare custom message to the customer
@@ -348,15 +263,13 @@ begin
     MainForm.sgOpenItems.MSort(MainForm.sgOpenItems.ReturnColumn(TOpenitems.PmtStat, 1 , 1), 2, True);
 
     // Process listed customers in worker thread
-//    TTSendAccountStatements.Create(
-//        Text_Subject.Text,
-//        strNull,
-//        MessStr,
-//        cbAddOverdue.Checked,
-//        MainForm.sgOpenItems,
-//        MainForm.sgAgeView,
-//        ViewMailerForm.CustomerList
-//    );
+    TTSendAccountStatements.Create(
+        Text_Subject.Text,
+        MessStr,
+        cbAddOverdue.Checked,
+        MainForm.sgOpenItems,
+        ViewMailerForm.CustomerList
+    );
 
     // Display await window
     MainForm.WndCall(AwaitForm, stModal);
@@ -377,9 +290,6 @@ var
     lsColumns:  TListColumn;
 begin
 
-    // Initialize string list
-    if not(Assigned(CompanyData)) then CompanyData:=TCompanyData.Create;
-
     // Set window caption
     Settings:=TSettings.Create;
     ViewMailerForm.Caption:=Settings.GetStringValue(ApplicationDetails, 'WND_MASSMAILER', APPCAPTION);
@@ -389,38 +299,44 @@ begin
     lsColumns.Caption:='Lp';              // Row number from Age View
     lsColumns.Width  :=40;
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Customer Name';   // From Age View
+    lsColumns.Caption:='Customer name';   // From Age View 0
     lsColumns.Width  :=150;
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Customer Number'; // From Age View
+    lsColumns.Caption:='Customer number'; // From Age View 1
     lsColumns.Width  :=100;
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Send from:';      // From Company Data
+    lsColumns.Caption:='Send from';       // From Company Data 2
     lsColumns.Width  :=100;
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Send To:';        // From Address Book
+    lsColumns.Caption:='Send to';         // From Address Book 3
     lsColumns.Width  :=100;
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Is sent?';        // Own indicator
+    lsColumns.Caption:='Is sent?';        // Own indicator 4
     lsColumns.Width  :=80;
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='LBU address';     // From Company Data
+    lsColumns.Caption:='LBU name';        // From Company Data 5
+    lsColumns.Width  :=80;
+    lsColumns:=CustomerList.Columns.Add;
+    lsColumns.Caption:='LBU address';     // From Company Data 6
     lsColumns.Width  :=150;
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='LBU telephone';   // From Compant Data
+    lsColumns.Caption:='LBU telephone';   // From Compant Data 7
     lsColumns.Width  :=100;
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Co Code';         // From Age View
+    lsColumns.Caption:='LBU number';      // From Age View 8
     lsColumns.Width  :=80;
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Branch';          // From Age View
+    lsColumns.Caption:='LBU agent';       // From Age View 9
     lsColumns.Width  :=80;
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='CUID';            // From Age View
+    lsColumns.Caption:='CUID';            // From Age View 10
     lsColumns.Width  :=80;
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='SCUID';           // Assembled from Age View data
+    lsColumns.Caption:='SCUID';           // Assembled from Age View data 11
     lsColumns.Width  :=80;
+    lsColumns:=CustomerList.Columns.Add;
+    lsColumns.Caption:='BanksHtml';       // From Company Data 12
+    lsColumns.Width  :=0;
 
     // Draw panel borders
     PanelEmailContainer.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
@@ -436,7 +352,7 @@ end;
 
 procedure TViewMailerForm.FormDestroy(Sender: TObject);
 begin
-    if Assigned(CompanyData) then CompanyData.Free;
+    //
 end;
 
 
@@ -456,7 +372,7 @@ begin
 
     // Get data
     SetEmailAddresses(CustomerList);
-    CompanyData.SetCompanyData(CustomerList);
+    UpdateCompanyData(CustomerList);
 
     // Default
     Screen.Cursor:=crDefault;

@@ -11,10 +11,19 @@ uses
 type
 
     /// <summary>
+    ///
+    /// </summary>
+
+    IMailer = Interface(IInterface)
+    ['{3D803B98-BE4F-49A4-A2B5-7F323772E5B4}']
+        function SendNow: boolean;
+    end;
+
+    /// <summary>
     ///     Base class responsible for sending email (using CDOSYS).
     /// </summary>
 
-    TMailer = class
+    TMailer = class(TInterfacedObject, IMailer) // change vars to methods for properties // add getter and setters instead of just variables
     {$TYPEINFO ON}
     private
         var FidThd       : integer;
@@ -38,9 +47,8 @@ type
         property MailSubject : string  read FMailSubject write FMailSubject;
         property MailBody    : string  read FMailBody    write FMailBody;
         property Logo        : string  read FLogo        write FLogo;
-    published
-        function  SendEmail(oauth: integer) : boolean;
-        function  SendNow: boolean;
+        function SendEmail(oauth: integer) : boolean;
+        function SendNow: boolean;
     end;
 
     /// <summary>
@@ -400,9 +408,8 @@ end;
 /// </summary>
 
 function TDocument.SendDocument;
-var RAND: integer; (* DEBUG *)
+//var RAND: integer; (* DEBUG *)
 begin
-    //Result:=False;
 
     BuildHTML;
 
@@ -429,12 +436,12 @@ begin
     MailCc   :=MailFrom;
     MailBcc  :='';
     MailRt   :='';
-    //Result   :=SendNow;
+    Result   :=SendNow;
 
     (* DEBUG *)
-    RAND:=Random(100000);
-    SaveOutput('I:\temp\test' + IntToStr(RAND) + '.html');
-    Result:=True;
+    //RAND:=Random(100000);
+    //SaveOutput('I:\temp\test' + IntToStr(RAND) + '.html');
+    //Result:=True;
 
 end;
 

@@ -48,9 +48,12 @@ type
         procedure FormShow(Sender: TObject);
         procedure MyCalendarClick(Sender: TObject);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
+    private
+        var FCalendarMode: integer;
+        var FSelectedDate: TDateTime;
     public
-        var CalendarMode: integer;
-        var SelectedDate: TDateTime;
+        property  CalendarMode: integer   read FCalendarMode write FCalendarMode;
+        property  SelectedDate: TDateTime read FSelectedDate write FSelectedDate;
         function  MakeMyDay(Increment: integer): TDate;
         function  IsWeekend(const DT: TDateTime): Boolean;
         function  GetCurrentWorkingDay(WhatDay: integer): boolean;

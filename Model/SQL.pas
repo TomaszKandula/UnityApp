@@ -3,15 +3,26 @@
 
 unit SQL;
 
+
 interface
 
+
 uses
-    SysUtils, Windows, Classes, ADODB, StrUtils, Variants, StdCtrls, InterposerClasses, Arrays;
+    SysUtils,
+    Windows,
+    Classes,
+    ADODB,
+    StrUtils,
+    Variants,
+    StdCtrls,
+    InterposerClasses,
+    Arrays;
+
 
 type
 
     /// <summary>
-    ///     Basic class for SQL handling, execute and generate SQL expressions.
+    ///     Base class for SQL handling, execute and generate SQL expressions.
     /// </summary>
 
     TMSSQL = class
@@ -29,7 +40,7 @@ type
         procedure   ClearSQL;
         function    CleanStr(Text: string; Quoted: boolean): string;
         function    ExecSQL: _Recordset;
-        function    ToSqlInsert(Table: TLists; Grid: TStringGrid; tblName: string; tblColumns: string): string;
+        function    ToSqlInsert(Table: TLists; Grid: TStringGrid; tblName: string; tblColumns: string; HeaderPresent: boolean = True {=OPTION}): string;
         function    SqlToGrid(var Grid: TStringGrid; RS: _Recordset; AutoNoCol: boolean; Headers: boolean): boolean;
         function    SqlToSimpleList(var List: TComboBox; RS: _Recordset): boolean;
     end;
@@ -41,15 +52,17 @@ type
     TDataTables = class(TMSSQL)
     {$TYPEINFO ON}
     private
-        var pConnStr :  string;
+        var FConnStr:     string;
+        var FidThd:       integer;
+        var FCustFilter:  string;
     public
-        var idThd          :  integer;
-        var CustFilter     :  string;
-        var DataSet        :  _Recordset;
-        var Columns        :  TStringList;
-        var Values         :  TStringList;
-        var Conditions     :  TStringList;
-        property   ConnStr : string read pConnStr;
+        var DataSet:          _Recordset;
+        var Columns:          TStringList;
+        var Values:           TStringList;
+        var Conditions:       TStringList;
+        property idThd:       integer  read FidThd      write FidThd;
+        property CustFilter:  string   read FCustFilter write FCustFilter;
+        property ConnStr:     string   read FConnStr;
     published
         constructor Create(Connector: TADOConnection); overload;
         destructor  Destroy; override;
@@ -57,7 +70,7 @@ type
         function    ColumnsToList(Holder: TStringList; Quoted: integer): string;
         procedure   CleanUp;
         function    OpenTable(TableName: string): boolean;
-        function    InsertInto(TableName: string; TransactionType: integer; ExtSourceGrid: TStringGrid = nil {=OPTION}; ExtSourceArray: TLists = nil {=OPTION}): boolean;
+        function    InsertInto(TableName: string; TransactionType: integer; ExtSourceGrid: TStringGrid = nil {=OPTION}; ExtSourceArray: TLists = nil {=OPTION}; HeaderPresent: boolean = True {=OPTION}): boolean;
         function    UpdateRecord(TableName: string; TransactionType: integer; SingleCondition: string = '' {=OPTIONAL} ): boolean;
         function    DeleteRecord(TableName: string; KeyName: string; KeyValue: string; TransactionType: integer): boolean;
     end;
@@ -105,6 +118,7 @@ begin
     RowsAffected:=0;
 end;
 
+
 /// <summary>
 ///     Remove characters that may negatively affect SQL expression.
 /// </summary>
@@ -118,6 +132,7 @@ begin
     if Quoted then Result:=QuotedStr(Text) else Result:=Text;
 end;
 
+
 /// <summary>
 ///     Execute dml, ddl, tcl and dcl statements.
 /// </summary>
@@ -126,7 +141,8 @@ end;
 ///     to insert more than 1000 records with single query statement, we can
 ///     split query into smaller chunks and execute "insert into [] values ()"
 ///     as many times as needed. Alternatively, instead of 'values' keyword we
-///     may use 'union all' and 'select' statement.
+///     may use 'union all' and 'select' statement to obtain ability to send
+///     as many rows as we want, this is the preferred method.
 /// </remarks>
 
 function TMSSQL.ExecSQL: _Recordset;
@@ -159,17 +175,20 @@ begin
 
 end;
 
+
 /// <summary>
-///     Transfer grid data to insert into statement.
+///     Transfer grid/array data to insert into statement. Note: if StringGrid is used, it assumes that header and list position exists,
+///     and therefore starts from "1, 1" instead of "0, 0" position. If no header and list position column is used, then use HeaderPresent
+//      flag set to false.
 /// </summary>
 /// <remarks>
 ///     This function build sql insert into expression with 'select' and 'union' keywords
 ///     and therefore 1000 record limit does not apply here.
 //      column name must not use quotes and names must be delaminated by comma.
-//      using multi-dimensional array
+//      It uses multi-dimensional array or StringGrid type.
 /// </remarks>
 
-function TMSSQL.ToSqlInsert(Table: TLists; Grid: TStringGrid; tblName: string; tblColumns: string): string; // REFACTOR!!!
+function TMSSQL.ToSqlInsert(Table: TLists; Grid: TStringGrid; tblName: string; tblColumns: string; HeaderPresent: boolean = True {=OPTION}): string;
 var
     iCNT    : integer;
     jCNT    : integer;
@@ -191,7 +210,7 @@ begin
 
     // Table and Grid cannot be nil or provided at the same time
     // We require only one of them
-    if (Table = nil)  and (Grid = nil) then Exit;
+    if (Table = nil)  and (Grid = nil)  then Exit;
     if (Table <> nil) and (Grid <> nil) then Exit;
 
     LEAD:=INSERT + SPACE + tblName + ' ( ' + tblColumns + ' ) ' + CRLF;
@@ -208,9 +227,19 @@ begin
     begin
         mRows:=Grid.RowCount - 1;
         mCols:=Grid.ColCount - 1;
+
         // Skipt first row in StringGrid (table header)
-        sRows:=1;
-        sCols:=1;
+        if HeaderPresent then
+        begin
+            sRows:=1;
+            sCols:=1;
+        end
+        else
+        begin
+            sRows:=0;
+            sCols:=0;
+        end;
+
     end;
 
     for iCNT:=sRows to mRows do
@@ -249,6 +278,7 @@ begin
     Result:=(LEAD + LINES);
 
 end;
+
 
 /// <summary>
 ///     Move recordset content to string grid with headers.
@@ -298,6 +328,7 @@ begin
 
 end;
 
+
 /// <summary>
 ///     Move one column to TComboBox component with no header.
 /// </summary>
@@ -340,14 +371,19 @@ end;
 
 constructor TDataTables.Create(Connector: TADOConnection);
 begin
-    idThd     :=0;
-    CustFilter:='';
-    DataSet   :=nil;
-    Columns   :=TStringList.Create;
-    Values    :=TStringList.Create;
-    Conditions:=TStringList.Create;
+    FidThd     :=0;
+    FCustFilter:='';
+    DataSet    :=nil;
+    Columns    :=TStringList.Create;
+    Values     :=TStringList.Create;
+    Conditions :=TStringList.Create;
     inherited;
 end;
+
+
+/// <summary>
+///
+/// </summary>
 
 destructor TDataTables.Destroy;
 begin
@@ -357,6 +393,7 @@ begin
     DataSet:=nil;
     inherited Destroy;
 end;
+
 
 /// <summary>
 ///     Helper method to surround string with brackets.
@@ -369,6 +406,7 @@ begin
     if BracketType = brSquare then Result:='[' + Expression + ']';
     if BracketType = brCurly  then Result:='{' + Expression + '}';
 end;
+
 
 /// <summary>
 ///     Transpose columns to rows.
@@ -401,6 +439,7 @@ begin
 
 end;
 
+
 /// <summary>
 ///     Clear all the list.
 /// </summary>
@@ -411,6 +450,7 @@ begin
     Values.Clear;
     Conditions.Clear;
 end;
+
 
 /// <summary>
 ///     Open table to recordset.
@@ -440,8 +480,9 @@ begin
 
 end;
 
+
 /// <summary>
-///     Insert single row into table.
+///     Insert row(s) into given table.
 /// </summary>
 /// <param name="TransactionType">
 ///     Integer, use flags:
@@ -452,7 +493,7 @@ end;
 ///                  transaction, it allows rollback in case of default.
 /// </param>
 
-function TDataTables.InsertInto(TableName: string; TransactionType: integer; ExtSourceGrid: TStringGrid = nil {=OPTION}; ExtSourceArray: TLists = nil {=OPTION}): boolean;
+function TDataTables.InsertInto(TableName: string; TransactionType: integer; ExtSourceGrid: TStringGrid = nil {=OPTION}; ExtSourceArray: TLists = nil {=OPTION}; HeaderPresent: boolean = True {=OPTION}): boolean;
 var
     Transact: string;
 begin
@@ -472,8 +513,8 @@ begin
                           BracketStr(ColumnsToList(Values, enQuotesOn), brRound);
             end;
 
-            if (ExtSourceGrid = nil)  and (ExtSourceArray <> nil) then StrSQL:=ToSqlInsert(ExtSourceArray, nil, TableName, ColumnsToList(Columns, enQuotesOff));
-            if (ExtSourceGrid <> nil) and (ExtSourceArray = nil)  then StrSQL:=ToSqlInsert(nil, ExtSourceGrid, TableName, ColumnsToList(Columns, enQuotesOff));
+            if (ExtSourceGrid = nil)  and (ExtSourceArray <> nil) then StrSQL:=ToSqlInsert(ExtSourceArray, nil, TableName, ColumnsToList(Columns, enQuotesOff), HeaderPresent);
+            if (ExtSourceGrid <> nil) and (ExtSourceArray = nil)  then StrSQL:=ToSqlInsert(nil, ExtSourceGrid, TableName, ColumnsToList(Columns, enQuotesOff), HeaderPresent);
 
             if TransactionType = ttExplicit then
             begin
@@ -498,6 +539,7 @@ begin
     end;
 
 end;
+
 
 /// <summary>
 ///     Perform update on given columns.
@@ -619,6 +661,7 @@ begin
 
 end;
 
+
 /// <summary>
 ///     Delete only single record from the given table.
 /// </summary>
@@ -661,3 +704,4 @@ end;
 
 
 end.
+

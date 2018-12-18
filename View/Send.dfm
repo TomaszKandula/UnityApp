@@ -4,7 +4,7 @@ object SendForm: TSendForm
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'Unity'
-  ClientHeight = 524
+  ClientHeight = 531
   ClientWidth = 559
   Color = 15527148
   Font.Charset = DEFAULT_CHARSET
@@ -26,7 +26,7 @@ object SendForm: TSendForm
     Left = 10
     Top = 10
     Width = 539
-    Height = 462
+    Height = 469
     Margins.Left = 10
     Margins.Top = 10
     Margins.Right = 10
@@ -36,9 +36,10 @@ object SendForm: TSendForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
+    ExplicitHeight = 462
     object Shape_Banks: TShape
       Left = 16
-      Top = 383
+      Top = 388
       Width = 505
       Height = 26
       Pen.Color = clMedGray
@@ -62,7 +63,7 @@ object SendForm: TSendForm
     end
     object Shape_Footer: TShape
       Left = 16
-      Top = 423
+      Top = 428
       Width = 505
       Height = 26
       Pen.Color = clMedGray
@@ -70,7 +71,7 @@ object SendForm: TSendForm
     end
     object Shape_Invoices: TShape
       Left = 16
-      Top = 303
+      Top = 308
       Width = 505
       Height = 26
       Pen.Color = clMedGray
@@ -78,7 +79,7 @@ object SendForm: TSendForm
     end
     object Shape_Terms: TShape
       Left = 16
-      Top = 343
+      Top = 348
       Width = 505
       Height = 26
       Pen.Color = clMedGray
@@ -86,7 +87,7 @@ object SendForm: TSendForm
     end
     object Text_Banks: TLabel
       Left = 22
-      Top = 389
+      Top = 394
       Width = 151
       Height = 13
       Caption = 'BANK ACCOUNTS (IF GIVEN)'
@@ -125,7 +126,7 @@ object SendForm: TSendForm
     end
     object Text_Footer: TLabel
       Left = 22
-      Top = 429
+      Top = 434
       Width = 43
       Height = 13
       Caption = 'FOOTER'
@@ -138,7 +139,7 @@ object SendForm: TSendForm
     end
     object Text_Invoices: TLabel
       Left = 22
-      Top = 308
+      Top = 313
       Width = 73
       Height = 13
       Caption = 'INVOICE LIST'
@@ -151,7 +152,7 @@ object SendForm: TSendForm
     end
     object Text_Terms: TLabel
       Left = 22
-      Top = 349
+      Top = 354
       Width = 93
       Height = 13
       Caption = 'PAYMENT TERMS'
@@ -171,7 +172,7 @@ object SendForm: TSendForm
     end
     object cbAddOverdue: TCheckBox
       Left = 424
-      Top = 307
+      Top = 312
       Width = 97
       Height = 17
       Cursor = crHandPoint
@@ -219,7 +220,7 @@ object SendForm: TSendForm
   object PanelBottom: TPanel
     AlignWithMargins = True
     Left = 0
-    Top = 482
+    Top = 489
     Width = 559
     Height = 42
     Margins.Left = 0
@@ -237,6 +238,7 @@ object SendForm: TSendForm
     ParentBackground = False
     ParentFont = False
     TabOrder = 1
+    ExplicitTop = 482
     object Text_Warn: TLabel
       Left = 16
       Top = 12
@@ -251,7 +253,7 @@ object SendForm: TSendForm
       ParentFont = False
     end
     object btnCancel: TSpeedButton
-      Left = 340
+      Left = 342
       Top = 8
       Width = 89
       Height = 25
@@ -289,7 +291,7 @@ object SendForm: TSendForm
       OnClick = btnCancelClick
     end
     object btnSendEmail: TSpeedButton
-      Left = 440
+      Left = 442
       Top = 8
       Width = 89
       Height = 25
