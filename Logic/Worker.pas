@@ -230,8 +230,8 @@ type
             CallEvent:      boolean;
             CallDuration:   integer;
             Comment:        string;
-            EmailReminder,
-            EmailAutoStat,
+            EmailReminder:  boolean;
+            EmailAutoStat:  boolean;
             EmailManuStat:  boolean;
             EventLog:       boolean;
             UpdateGrid:     boolean = true
@@ -520,7 +520,7 @@ begin
 
             // Send to SQL Server, update age date list and reload age view on main tabsheet
             begin
-                AgeView.Write(TblSnapshots, AgeView.ArrAgeView);
+                AgeView.Write(TSnapshots.Snapshots, AgeView.ArrAgeView);
                 Synchronize(procedure
                 begin
                     try
@@ -894,7 +894,7 @@ begin
         if FMode = adOpenForUser then
             DataTables.CustFilter:=FConditions;
 
-        DataTables.OpenTable(TblAddressbook);
+        DataTables.OpenTable(TAddressBook.AddressBook);
         Result:=DataTables.SqlToGrid(FGrid, DataTables.DataSet, True, True);
 
     finally
@@ -945,7 +945,7 @@ begin
                     Book.Values.Add(FGrid.Cells[FGrid.ReturnColumn(TAddressBook.ESTATEMENTS,   1, 1), FGrid.UpdatedRowsHolder[iCNT]]);
                 end;
 
-                Result:=Book.UpdateRecord(TblAddressbook, ttExplicit, Condition);
+                Result:=Book.UpdateRecord(TAddressBook.AddressBook, ttExplicit, Condition);
 
                 // Success
                 if Result then
@@ -982,7 +982,7 @@ begin
             Book.Values.Add(FEstatement);
             Book.Values.Add(FEmail);
 
-            Result:=Book.UpdateRecord(TblAddressbook, ttExplicit, Condition);
+            Result:=Book.UpdateRecord(TAddressBook.AddressBook, ttExplicit, Condition);
 
             // Ending
             if Result then
@@ -1031,7 +1031,7 @@ begin
                 Book.CleanUp;
                 Book.Columns.Add(TAddressBook.SCUID);
                 Book.CustFilter:=WHERE + TAddressBook.SCUID + EQUAL + QuotedStr(SCUID);
-                Book.OpenTable(TblAddressbook);
+                Book.OpenTable(TAddressBook.AddressBook);
 
                 // Add to array if not exists
                 if Book.DataSet.RecordCount = 0 then
@@ -1072,7 +1072,7 @@ begin
             Book.Columns.Add(TAddressBook.COCODE);
             try
 
-                Book.InsertInto(TblAddressbook, ttExplicit, nil, AddrBook);
+                Book.InsertInto(TAddressBook.AddressBook, ttExplicit, nil, AddrBook);
 
                 if Book.RowsAffected > 0 then
                 begin
@@ -1259,10 +1259,10 @@ begin
     try
         DailyText:=TDataTables.Create(MainForm.DbConnect);
         try
-            Condition:=TDaily.CUID + EQUAL + QuotedStr(FCUID) + _AND + TDaily.AGEDATE + EQUAL + QuotedStr(MainForm.AgeDateSel);
+            Condition:=TDailyComment.CUID + EQUAL + QuotedStr(FCUID) + _AND + TDailyComment.AGEDATE + EQUAL + QuotedStr(MainForm.AgeDateSel);
             DataCheckSum:=FCUID + StringReplace(MainForm.AgeDateSel, '-', '', [rfReplaceAll]);
             DailyText.CustFilter:=WHERE + Condition;
-            DailyText.OpenTable(TblDaily);
+            DailyText.OpenTable(TDailyComment.DailyComment);
 
             // Update exisiting comment
             if not (DailyText.DataSet.RecordCount = 0) then
@@ -1270,61 +1270,61 @@ begin
                 DailyText.CleanUp;
 
                 // Define columns, values and conditions
-                DailyText.Columns.Add(TDaily.STAMP);
+                DailyText.Columns.Add(TDailyComment.STAMP);
                 DailyText.Values.Add(DateTimeToStr(Now));
-                DailyText.Columns.Add(TDaily.USER_ALIAS);
+                DailyText.Columns.Add(TDailyComment.USER_ALIAS);
                 DailyText.Values.Add(UpperCase(MainForm.WinUserName));
 
                 if FEmail then
                 begin
-                    Email:=IntToStr(StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDaily.EMAIL].Value), 0));
-                    DailyText.Columns.Add(TDaily.EMAIL);
+                    Email:=IntToStr(StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDailyComment.EMAIL].Value), 0));
+                    DailyText.Columns.Add(TDailyComment.EMAIL);
                     DailyText.Values.Add(Email);
                 end;
 
                 // Call event and call duration always comes together
                 if FCallEvent then
                 begin
-                    CallEvent:=StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDaily.CALLEVENT].Value), 0);
+                    CallEvent:=StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDailyComment.CALLEVENT].Value), 0);
                     Inc(CallEvent);
-                    DailyText.Columns.Add(TDaily.CALLEVENT);
+                    DailyText.Columns.Add(TDailyComment.CALLEVENT);
                     DailyText.Values.Add(IntToStr(CallEvent));
-                    DailyText.Columns.Add(TDaily.CALLDURATION);
+                    DailyText.Columns.Add(TDailyComment.CALLDURATION);
                     DailyText.Values.Add(FCallDuration);
                 end;
 
                 if FEmailReminder then
                 begin
-                    EmailReminder:=StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDaily.EMAIL_Reminder].Value), 0);
+                    EmailReminder:=StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDailyComment.EMAIL_Reminder].Value), 0);
                     Inc(EmailReminder);
-                    DailyText.Columns.Add(TDaily.EMAIL_Reminder);
+                    DailyText.Columns.Add(TDailyComment.EMAIL_Reminder);
                     DailyText.Values.Add(IntToStr(EmailReminder));
                 end;
 
                 if FEmailAutoStat then
                 begin
-                    EmailAutoStat:=StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDaily.EMAIL_AutoStat].Value), 0);
+                    EmailAutoStat:=StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDailyComment.EMAIL_AutoStat].Value), 0);
                     Inc(EmailAutoStat);
-                    DailyText.Columns.Add(TDaily.EMAIL_AutoStat);
+                    DailyText.Columns.Add(TDailyComment.EMAIL_AutoStat);
                     DailyText.Values.Add(IntToStr(EmailAutoStat));
                 end;
 
                 if FEmailManuStat then
                 begin
-                    EmailManuStat:=StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDaily.EMAIL_ManuStat].Value), 0);
+                    EmailManuStat:=StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDailyComment.EMAIL_ManuStat].Value), 0);
                     Inc(EmailManuStat);
-                    DailyText.Columns.Add(TDaily.EMAIL_ManuStat);
+                    DailyText.Columns.Add(TDailyComment.EMAIL_ManuStat);
                     DailyText.Values.Add(IntToStr(EmailManuStat));
                 end;
 
                 if not(FFixedComment = '') then
                 begin
-                    DailyText.Columns.Add(TDaily.FIXCOMMENT);
+                    DailyText.Columns.Add(TDailyComment.FIXCOMMENT);
                     DailyText.Values.Add(FFixedComment);
                 end;
 
                 // Execute
-                if (DailyText.UpdateRecord(TblDaily, ttExplicit, Condition)) and (DailyText.RowsAffected > 0) then
+                if (DailyText.UpdateRecord(TDailyComment.DailyComment, ttExplicit, Condition)) and (DailyText.RowsAffected > 0) then
                 begin
 
                     // Refresh history grid
@@ -1349,77 +1349,77 @@ begin
                 DailyText.CleanUp;
 
                 // Define columns and values
-                DailyText.Columns.Add(TDaily.GROUP_ID);       DailyText.Values.Add(MainForm.GroupIdSel);
-                DailyText.Columns.Add(TDaily.CUID);           DailyText.Values.Add(FCUID);
-                DailyText.Columns.Add(TDaily.AGEDATE);        DailyText.Values.Add(MainForm.AgeDateSel);
-                DailyText.Columns.Add(TDaily.STAMP);          DailyText.Values.Add(DateTimeToStr(Now));
-                DailyText.Columns.Add(TDaily.USER_ALIAS);     DailyText.Values.Add(UpperCase(MainForm.WinUserName));
-                DailyText.Columns.Add(TDaily.DATACHECKSUM);   DailyText.Values.Add(DataCheckSum);
+                DailyText.Columns.Add(TDailyComment.GROUP_ID);       DailyText.Values.Add(MainForm.GroupIdSel);
+                DailyText.Columns.Add(TDailyComment.CUID);           DailyText.Values.Add(FCUID);
+                DailyText.Columns.Add(TDailyComment.AGEDATE);        DailyText.Values.Add(MainForm.AgeDateSel);
+                DailyText.Columns.Add(TDailyComment.STAMP);          DailyText.Values.Add(DateTimeToStr(Now));
+                DailyText.Columns.Add(TDailyComment.USER_ALIAS);     DailyText.Values.Add(UpperCase(MainForm.WinUserName));
+                DailyText.Columns.Add(TDailyComment.DATACHECKSUM);   DailyText.Values.Add(DataCheckSum);
 
                 if FEmail then
                 begin
-                    DailyText.Columns.Add(TDaily.EMAIL);
+                    DailyText.Columns.Add(TDailyComment.EMAIL);
                     DailyText.Values.Add('1');
                 end
                 else
                 begin
-                    DailyText.Columns.Add(TDaily.EMAIL);
+                    DailyText.Columns.Add(TDailyComment.EMAIL);
                     DailyText.Values.Add('0');
                 end;
 
                 if FEmailReminder then
                 begin
-                    DailyText.Columns.Add(TDaily.EMAIL_Reminder);
+                    DailyText.Columns.Add(TDailyComment.EMAIL_Reminder);
                     DailyText.Values.Add('1');
                 end
                 else
                 begin
-                    DailyText.Columns.Add(TDaily.EMAIL_Reminder);
+                    DailyText.Columns.Add(TDailyComment.EMAIL_Reminder);
                     DailyText.Values.Add('0');
                 end;
 
                 if FEmailAutoStat then
                 begin
-                    DailyText.Columns.Add(TDaily.EMAIL_AutoStat);
+                    DailyText.Columns.Add(TDailyComment.EMAIL_AutoStat);
                     DailyText.Values.Add('1');
                 end
                 else
                 begin
-                    DailyText.Columns.Add(TDaily.EMAIL_AutoStat);
+                    DailyText.Columns.Add(TDailyComment.EMAIL_AutoStat);
                     DailyText.Values.Add('0');
                 end;
 
                 if FEmailManuStat then
                 begin
-                    DailyText.Columns.Add(TDaily.EMAIL_ManuStat);
+                    DailyText.Columns.Add(TDailyComment.EMAIL_ManuStat);
                     DailyText.Values.Add('1');
                 end
                 else
                 begin
-                    DailyText.Columns.Add(TDaily.EMAIL_ManuStat);
+                    DailyText.Columns.Add(TDailyComment.EMAIL_ManuStat);
                     DailyText.Values.Add('0');
                 end;
 
                 if FCallEvent then
                 begin
-                    DailyText.Columns.Add(TDaily.CALLEVENT);
+                    DailyText.Columns.Add(TDailyComment.CALLEVENT);
                     DailyText.Values.Add('1');
-                    DailyText.Columns.Add(TDaily.CALLDURATION);
+                    DailyText.Columns.Add(TDailyComment.CALLDURATION);
                     DailyText.Values.Add(FCallDuration);
                 end
                 else
                 begin
-                    DailyText.Columns.Add(TDaily.CALLEVENT);
+                    DailyText.Columns.Add(TDailyComment.CALLEVENT);
                     DailyText.Values.Add('0');
-                    DailyText.Columns.Add(TDaily.CALLDURATION);
+                    DailyText.Columns.Add(TDailyComment.CALLDURATION);
                     DailyText.Values.Add('0');
                 end;
 
-                DailyText.Columns.Add(TDaily.FIXCOMMENT);
+                DailyText.Columns.Add(TDailyComment.FIXCOMMENT);
                 DailyText.Values.Add(FFixedComment);
 
                 // Execute
-                if (DailyText.InsertInto(TblDaily, ttExplicit)) and (DailyText.RowsAffected > 0) then
+                if (DailyText.InsertInto(TDailyComment.DailyComment, ttExplicit)) and (DailyText.RowsAffected > 0) then
                 begin
 
                     // Refresh history grid
@@ -1484,9 +1484,9 @@ begin
     try
         GenText:=TDataTables.Create(MainForm.DbConnect);
         try
-            Condition:=TGeneral.CUID + EQUAL + QuotedStr(FCUID);
+            Condition:=TGeneralComment.CUID + EQUAL + QuotedStr(FCUID);
             GenText.CustFilter:=WHERE + Condition;
-            GenText.OpenTable(TblGeneral);
+            GenText.OpenTable(TGeneralComment.GeneralComment);
 
             // Update
             if not (GenText.DataSet.RecordCount = 0) then
@@ -1494,43 +1494,43 @@ begin
                 GenText.CleanUp;
 
                 // Define columns, vaues and conditions
-                GenText.Columns.Add(TGeneral.STAMP);
+                GenText.Columns.Add(TGeneralComment.STAMP);
                 GenText.Values.Add(DateTimeToStr(Now));
-                GenText.Columns.Add(TGeneral.USER_ALIAS);
+                GenText.Columns.Add(TGeneralComment.USER_ALIAS);
                 GenText.Values.Add(UpperCase(MainForm.WinUserName));
 
                 if not(FFixedComment = strNULL) then
                 begin
-                    GenText.Columns.Add(TGeneral.FIXCOMMENT);
+                    GenText.Columns.Add(TGeneralComment.FIXCOMMENT);
                     GenText.Values.Add(FFixedComment);
                 end;
 
                 if not(FFollowUp = strNULL) then
                 begin
-                    GenText.Columns.Add(TGeneral.FOLLOWUP);
+                    GenText.Columns.Add(TGeneralComment.FOLLOWUP);
                     GenText.Values.Add(FFollowUp);
                 end;
 
                 if not(FFree1 = strNULL) then
                 begin
-                    GenText.Columns.Add(TGeneral.Free1);
+                    GenText.Columns.Add(TGeneralComment.Free1);
                     GenText.Values.Add(FFree1);
                 end;
 
                 if not(FFree2 = strNULL) then
                 begin
-                    GenText.Columns.Add(TGeneral.Free2);
+                    GenText.Columns.Add(TGeneralComment.Free2);
                     GenText.Values.Add(FFree2);
                 end;
 
                 if not(FFree3 = strNULL) then
                 begin
-                    GenText.Columns.Add(TGeneral.Free3);
+                    GenText.Columns.Add(TGeneralComment.Free3);
                     GenText.Values.Add(FFree3);
                 end;
 
                 // Execute
-                if (GenText.UpdateRecord(TblGeneral, ttExplicit, Condition)) and (GenText.RowsAffected > 0) then
+                if (GenText.UpdateRecord(TGeneralComment.GeneralComment, ttExplicit, Condition)) and (GenText.RowsAffected > 0) then
                 begin
                     if FEventLog then
                         MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: ''GeneralComment'' table has been updated (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(GenText.RowsAffected) + '.');
@@ -1547,67 +1547,67 @@ begin
             begin
                 GenText.CleanUp;
                 // Define columns and values
-                GenText.Columns.Add(TGeneral.CUID);       GenText.Values.Add(FCUID);
-                GenText.Columns.Add(TGeneral.STAMP);      GenText.Values.Add(DateTimeToStr(Now));
-                GenText.Columns.Add(TGeneral.USER_ALIAS); GenText.Values.Add(UpperCase(MainForm.WinUserName));
+                GenText.Columns.Add(TGeneralComment.CUID);       GenText.Values.Add(FCUID);
+                GenText.Columns.Add(TGeneralComment.STAMP);      GenText.Values.Add(DateTimeToStr(Now));
+                GenText.Columns.Add(TGeneralComment.USER_ALIAS); GenText.Values.Add(UpperCase(MainForm.WinUserName));
 
                 if not(FFixedComment = strNULL) then
                 begin
-                    GenText.Columns.Add(TGeneral.FIXCOMMENT);
+                    GenText.Columns.Add(TGeneralComment.FIXCOMMENT);
                     GenText.Values.Add(FFixedComment);
                 end
                 else
                 begin
-                    GenText.Columns.Add(TGeneral.FIXCOMMENT);
+                    GenText.Columns.Add(TGeneralComment.FIXCOMMENT);
                     GenText.Values.Add('');
                 end;
 
                 if not(FFollowUp = strNULL) then
                 begin
-                    GenText.Columns.Add(TGeneral.FOLLOWUP);
+                    GenText.Columns.Add(TGeneralComment.FOLLOWUP);
                     GenText.Values.Add(FFollowUp);
                 end
                 else
                 begin
-                    GenText.Columns.Add(TGeneral.FOLLOWUP);
+                    GenText.Columns.Add(TGeneralComment.FOLLOWUP);
                     GenText.Values.Add('');
                 end;
 
                 if not(FFree1 = strNULL) then
                 begin
-                    GenText.Columns.Add(TGeneral.Free1);
+                    GenText.Columns.Add(TGeneralComment.Free1);
                     GenText.Values.Add(FFree1);
                 end
                 else
                 begin
-                    GenText.Columns.Add(TGeneral.Free1);
+                    GenText.Columns.Add(TGeneralComment.Free1);
                     GenText.Values.Add('');
                 end;
 
                 if not(FFree2 = strNULL) then
                 begin
-                    GenText.Columns.Add(TGeneral.Free2);
+                    GenText.Columns.Add(TGeneralComment.Free2);
                     GenText.Values.Add(FFree2);
                 end
                 else
                 begin
-                    GenText.Columns.Add(TGeneral.Free2);
+                    GenText.Columns.Add(TGeneralComment.Free2);
                     GenText.Values.Add('');
                 end;
 
                 if not(FFree3 = strNULL) then
                 begin
-                    GenText.Columns.Add(TGeneral.Free3);
+                    GenText.Columns.Add(TGeneralComment.Free3);
                     GenText.Values.Add(FFree3);
                 end
                 else
                 begin
-                    GenText.Columns.Add(TGeneral.Free3);
+                    GenText.Columns.Add(TGeneralComment.Free3);
                     GenText.Values.Add('');
                 end;
 
                 // Execute
-                if (GenText.InsertInto(TblGeneral, ttExplicit)) and (GenText.RowsAffected > 0) then
+                if (GenText.InsertInto(TGeneralComment.GeneralComment, ttExplicit)) and (GenText.RowsAffected > 0) then
                 begin
                     if FEventLog then
                         MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: ''GeneralComment'' table has been posted (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(GenText.RowsAffected) + '.');

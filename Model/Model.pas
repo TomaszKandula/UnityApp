@@ -17,251 +17,200 @@ uses
     ADODB;
 
     /// <remarks>
-    ///     Because we use ADODB and no other ORM, we encapsulate columns name under table name (class), so we have one point of reference
-    ///     and yet we can use it to build own SQL statements.
+    ///     Because we use ADODB and no other ORM, we encapsulate columns name (fields) under table name (class), so we have one point of reference
+    ///     and yet we can use it to build our own SQL statement(s), although templates are preferred over manual SQL.
     /// </remarks>
 
 type
 
-    /// <summary>
-    ///     Company Data holds all the basic information about the certain entity.
-    /// </summary>
 
-    TCompany = class(TDataTables)
+    // ------------------------------------------------------------------------------------------------------------------------------------ SCHEMA: CUSTOMER //
+
+
+    TCompanyData = class(TDataTables)
     {$TYPEINFO ON}
+    published
+        const CompanyData = 'Customer.CompanyData';
     public
-        const ID                     : string = 'Id';   // Primary key
-        const CO_CODE                : string = 'CoCode';
-        const DBNAME                 : string = 'DbName';
-        const BRANCH                 : string = 'Branch';
-        const CONAME                 : string = 'CoName';
-        const COCURRENCY             : string = 'CoCurrency';
-        const COTYPE                 : string = 'CoType';
-        const COUNTRY                : string = 'Country';
-        const CITY                   : string = 'City';
-        const FMANAGER               : string = 'FinManager';
-        const INTEREST_RATE          : string = 'InterestRate';
-        const VATNO                  : string = 'VatNo';
-        const COADDRESS              : string = 'CoAddress';
-        const AGENTS                 : string = 'Agents';
-        const KPI_OVERDUE_TARGET     : string = 'KpiOverdueTarget';
-        const KPI_UNALLOCATED_TARGET : string = 'KpiUnallocatedTarget';
-        const SEND_NOTE_FROM         : string = 'SendNoteFrom';
-        const LEGALTO                : string = 'LegalTo';
-        const BANKDETAILS            : string = 'BankAccounts';
-        const STAT_EXCEPT            : string = 'StatementExcept';
-        const FIRST_STATEMENT        : string = 'FirstStatement';
-        const SECOND_STATEMENT       : string = 'SecondStatement';
-        const REM_EX1                : string = 'ReminderException1';
-        const REM_EX2                : string = 'ReminderException2';
-        const REM_EX3                : string = 'ReminderException3';
-        const REM_EX4                : string = 'ReminderException4';
-        const REM_EX5                : string = 'ReminderException5';
-        const DUNS                   : string = 'Duns';
-        const Telephone              : string = 'TelephoneNumbers';
-        const MAN_ID                 : string = 'IdManager';    // Foreign Key -> Primary Key in "MANAGERS"
-        const TL_ID                  : string = 'IdTeamleader'; // Foreign Key -> Primary Key in "TEAM LEADERS"
-        const DIVISIONS              : string = 'Divisions';
+        const ID                     = 'Id';
+        const CO_CODE                = 'CoCode';
+        const DBNAME                 = 'DbName';
+        const BRANCH                 = 'Branch';
+        const CONAME                 = 'CoName';
+        const COCURRENCY             = 'CoCurrency';
+        const COTYPE                 = 'CoType';
+        const COUNTRY                = 'Country';
+        const CITY                   = 'City';
+        const FMANAGER               = 'FinManager';
+        const INTEREST_RATE          = 'InterestRate';
+        const VATNO                  = 'VatNo';
+        const COADDRESS              = 'CoAddress';
+        const AGENTS                 = 'Agents';
+        const KPI_OVERDUE_TARGET     = 'KpiOverdueTarget';
+        const KPI_UNALLOCATED_TARGET = 'KpiUnallocatedTarget';
+        const SEND_NOTE_FROM         = 'SendNoteFrom';
+        const LEGALTO                = 'LegalTo';
+        const BANKDETAILS            = 'BankAccounts';
+        const STAT_EXCEPT            = 'StatementExcept';
+        const FIRST_STATEMENT        = 'FirstStatement';
+        const SECOND_STATEMENT       = 'SecondStatement';
+        const REM_EX1                = 'ReminderException1';
+        const REM_EX2                = 'ReminderException2';
+        const REM_EX3                = 'ReminderException3';
+        const REM_EX4                = 'ReminderException4';
+        const REM_EX5                = 'ReminderException5';
+        const DUNS                   = 'Duns';
+        const Telephone              = 'TelephoneNumbers';
+        const MAN_ID                 = 'IdManager';
+        const TL_ID                  = 'IdTeamleader';
+        const DIVISIONS              = 'Divisions';
     end;
-
-    /// <summary>
-    ///     Managers assigned to given entity.
-    /// </summary>
-
-    TManagers = class(TDataTables)  { MANY-TO-MANY }
-    {$TYPEINFO ON}
-    public
-        const ID        : string = 'Id';            // Primary Key <- Foreign Key from "COMPANY DATA" }
-        const ManagerAR : string = 'ManagerAR';
-        const ManagerAP : string = 'ManagerAP';
-        const ManagerGL : string = 'ManagerGL';
-    end;
-
-    /// <summary>
-    ///     Team Leaders assigned to given entity.
-    /// </summary>
-
-    TTeamleaders = class(TDataTables)  { MANY-TO-MANY }
-    {$TYPEINFO ON}
-    public
-        const ID  :  string = 'Id';                 // Primary Key <- Foreign Key "COMPANY DATA" }
-        const AP1 :  string = 'TeamleaderAp1';
-        const AP2 :  string = 'TeamleaderAp2';
-        const AR1 :  string = 'TeamleaderAr1';
-        const AR2 :  string = 'TeamleaderAr2';
-        const GL1 :  string = 'TeamleaderGl1';
-        const GL2 :  string = 'TeamleaderGl2';
-    end;
-
-    /// <summary>
-    ///     Address Book.
-    /// </summary>
 
     TAddressBook = class(TDataTables)
     {$TYPEINFO ON}
+    published
+        const AddressBook = 'Customer.AddressBook';
     public
-        const ID               : string = 'Id';     // Primary key
-        const USER_ALIAS       : string = 'UserAlias';
-        const SCUID            : string = 'Scuid';  // Constraint unique
-        const CUSTOMER_NUMBER  : string = 'CustomerNumber';
-        const CUSTOMER_NAME    : string = 'CustomerName';
-        const EMAILS           : string = 'Emails';
-        const PHONE_NUMBERS    : string = 'PhoneNumbers';
-        const CONTACT          : string = 'Contact';
-        const ESTATEMENTS      : string = 'Estatements';
-        const AGENT            : string = 'Agent';
-        const DIVISION         : string = 'Division';
-        const COCODE           : string = 'CoCode';
+        const ID              = 'Id';
+        const USER_ALIAS      = 'UserAlias';
+        const SCUID           = 'Scuid';
+        const CUSTOMER_NUMBER = 'CustomerNumber';
+        const CUSTOMER_NAME   = 'CustomerName';
+        const EMAILS          = 'Emails';
+        const PHONE_NUMBERS   = 'PhoneNumbers';
+        const CONTACT         = 'Contact';
+        const ESTATEMENTS     = 'Estatements';
+        const AGENT           = 'Agent';
+        const DIVISION        = 'Division';
+        const COCODE          = 'CoCode';
     end;
 
-    /// <summary>
-    ///     Daily comment table, holds all credit controller comment per customer.
-    ///     Aditionally, it also holds number of emails sent and calls performed per day per customer.
-    /// </summary>
-
-    TDaily = class(TDataTables)
+    TDailyComment = class(TDataTables)
     {$TYPEINFO ON}
+    published
+        const DailyComment = 'Customer.DailyComment';
     public
-        const ID            : string = 'Id';    // Primary key
-        const GROUP_ID      : string = 'GroupId';
-        const CUID          : string = 'Cuid';
-        const AGEDATE       : string = 'AgeDate';
-        const STAMP         : string = 'Stamp';
-        const USER_ALIAS    : string = 'UserAlias';
-        const EMAIL         : string = 'Email';
-        const CALLEVENT     : string = 'CallEvent';
-        const CALLDURATION  : string = 'CallDuration';
-        const FIXCOMMENT    : string = 'FixedComment';
-        const EMAIL_Reminder: string = 'EmailReminder';
-        const EMAIL_AutoStat: string = 'EmailAutoStat';
-        const EMAIL_ManuStat: string = 'EmailManuStat';
-        const DATACHECKSUM  : string = 'DataCheckSum';
+        const ID             = 'Id';
+        const GROUP_ID       = 'GroupId';
+        const CUID           = 'Cuid';
+        const AGEDATE        = 'AgeDate';
+        const STAMP          = 'Stamp';
+        const USER_ALIAS     = 'UserAlias';
+        const EMAIL          = 'Email';
+        const CALLEVENT      = 'CallEvent';
+        const CALLDURATION   = 'CallDuration';
+        const FIXCOMMENT     = 'FixedComment';
+        const EMAIL_Reminder = 'EmailReminder';
+        const EMAIL_AutoStat = 'EmailAutoStat';
+        const EMAIL_ManuStat = 'EmailManuStat';
+        const DATACHECKSUM   = 'DataCheckSum';
     end;
 
-    /// <summary>
-    ///     General purpose comment and folow-up table, it also contain FREE1 and FREE2 columns. Commentary is kept at the customer level.
-    /// </summary>
-
-    TGeneral = class(TDataTables)
+    TGeneralComment = class(TDataTables)
     {$TYPEINFO ON}
+    published
+        const GeneralComment = 'Customer.GeneralComment';
     public
-        const ID          : string = 'Id';      // Primary key
-        const CUID        : string = 'Cuid';    // Constraint unique
-        const STAMP       : string = 'Stamp';
-        const USER_ALIAS  : string = 'UserAlias';
-        const FIXCOMMENT  : string = 'FixedComment';
-        const FOLLOWUP    : string = 'FollowUp';
-        const Free1       : string = 'Free1';
-        const Free2       : string = 'Free2';
-        const Free3       : string = 'Free3';
-
-        /// <remarks>
-        ///     User friendly name for given columns.
-        /// </remarks>
-
-        const fFOLLOWUP   : string = 'Follow Up';
+        const ID         = 'Id';
+        const CUID       = 'Cuid';
+        const STAMP      = 'Stamp';
+        const USER_ALIAS = 'UserAlias';
+        const FIXCOMMENT = 'FixedComment';
+        const FOLLOWUP   = 'FollowUp';
+        const Free1      = 'Free1';
+        const Free2      = 'Free2';
+        const Free3      = 'Free3';
+        // User friendly name for given columns.
+        const fFOLLOWUP  = 'Follow Up';
     end;
-
-    /// <summary>
-    ///     Open items from ERP system. Feeded on regular basis.
-    /// </summary>
 
     TOpenitems = class(TDataTables)
     {$TYPEINFO ON}
+    published
+        const Openitems = 'Customer.Openitems';
     public
-        const ID               : string = 'Id';     // Primary key
-        const SourceDBName     : string = 'SourceDBName';
-        const CustNo           : string = 'CustNo';
-        const VoTp             : string = 'VoTp';
-        const OpenCurAm        : string = 'OpenCurAm';
-        const OpenAm           : string = 'OpenAm';
-        const Nm               : string = 'Nm';
-        const ISO              : string = 'ISO';
-        const CurAm            : string = 'CurAm';
-        const Am               : string = 'Am';
-        const InvoNo           : string = 'InvoNo';
-        const DueDt            : string = 'DueDt';
-        const Inf4             : string = 'Inf4';
-        const Inf7             : string = 'Inf7';
-        const CrLmt            : string = 'CrLmt';
-        const Ctry             : string = 'Ctry';
-        const CPmtTrm          : string = 'CPmtTrm';
-        const PdSts            : string = 'PdSts';
-        const Agent            : string = 'Agent';
-        const Ctrl             : string = 'Ctrl';
-        const Ad1              : string = 'Ad1';
-        const Ad2              : string = 'Ad2';
-        const Ad3              : string = 'Ad3';
-        const Pno              : string = 'Pno';
-        const PArea            : string = 'PArea';
-        const GenAcNo          : string = 'GenAcNo';
-        const ValDt            : string = 'ValDt';
-        const R1               : string = 'R1';
-        const Gr3              : string = 'Gr3';
-        const Txt              : string = 'Txt';
-        const R8               : string = 'R8';
-        const DirDeb           : string = 'DirDeb';
-        const AddTxt           : string = 'AddTxt';
-        const ExtractDateStamp : string = 'ExtractDateStamp';
-        const ProcessBatchKey  : string = 'ProcessBatchKey';
-        const SalesResponsible : string = 'SalesResponsible';
-        const CustomerGroup    : string = 'CustomerGroup';
-        const PersonResponsible: string = 'PersonResponsible';
-        const AccountType      : string = 'AccountType';
-
-        /// <remarks>
-        ///     CUID and PMTSTAT are additional columns calculated "on the fly".
-        /// </remarks>
-
-        const PmtStat          : string = 'PmtStat';
-        const CUID             : string = 'Cuid';
+        const ID                = 'Id';
+        const SourceDBName      = 'SourceDBName';
+        const CustNo            = 'CustNo';
+        const VoTp              = 'VoTp';
+        const OpenCurAm         = 'OpenCurAm';
+        const OpenAm            = 'OpenAm';
+        const Nm                = 'Nm';
+        const ISO               = 'ISO';
+        const CurAm             = 'CurAm';
+        const Am                = 'Am';
+        const InvoNo            = 'InvoNo';
+        const DueDt             = 'DueDt';
+        const Inf4              = 'Inf4';
+        const Inf7              = 'Inf7';
+        const CrLmt             = 'CrLmt';
+        const Ctry              = 'Ctry';
+        const CPmtTrm           = 'CPmtTrm';
+        const PdSts             = 'PdSts';
+        const Agent             = 'Agent';
+        const Ctrl              = 'Ctrl';
+        const Ad1               = 'Ad1';
+        const Ad2               = 'Ad2';
+        const Ad3               = 'Ad3';
+        const Pno               = 'Pno';
+        const PArea             = 'PArea';
+        const GenAcNo           = 'GenAcNo';
+        const ValDt             = 'ValDt';
+        const R1                = 'R1';
+        const Gr3               = 'Gr3';
+        const Txt               = 'Txt';
+        const R8                = 'R8';
+        const DirDeb            = 'DirDeb';
+        const AddTxt            = 'AddTxt';
+        const ExtractDateStamp  = 'ExtractDateStamp';
+        const ProcessBatchKey   = 'ProcessBatchKey';
+        const SalesResponsible  = 'SalesResponsible';
+        const CustomerGroup     = 'CustomerGroup';
+        const PersonResponsible = 'PersonResponsible';
+        const AccountType       = 'AccountType';
+        const PmtStat           = 'PmtStat';  // calculated "on the fly"
+        const CUID              = 'Cuid';     // calculated "on the fly"
     end;
-
-    /// <summary>
-    ///     Snapshots from open items. Performed on daily basis.
-    /// </summary>
 
     TSnapshots = class(TDataTables)
     {$TYPEINFO ON}
+    published
+        const Snapshots = 'Customer.Snapshots';
     public
-        const ID               : string = 'Id';  // Primary key
-        const GROUP_ID         : string = 'GroupId';
-        const AGE_DATE         : string = 'AgeDate';
-        const SNAPSHOT_DT      : string = 'SnapshotDt';
-        const CUSTOMER_NAME    : string = 'CustomerName';
-        const CUSTOMER_NUMBER  : string = 'CustomerNumber';
-        const COUNTRY_CODE     : string = 'CountryCode';
-        const NOT_DUE          : string = 'NotDue';
-        const RANGE1           : string = 'Range1';
-        const RANGE2           : string = 'Range2';
-        const RANGE3           : string = 'Range3';
-        const RANGE4           : string = 'Range4';
-        const RANGE5           : string = 'Range5';
-        const RANGE6           : string = 'Range6';
-        const OVERDUE          : string = 'Overdue';
-        const TOTAL            : string = 'Total';
-        const CREDIT_LIMIT     : string = 'CreditLimit';
-        const EXCEEDED_AMOUNT  : string = 'ExceededAmount';
-        const PAYMENT_TERMS    : string = 'PaymentTerms';
-        const AGENT            : string = 'Agent';
-        const DIVISION         : string = 'Division';
-        const CO_CODE          : string = 'CoCode';
-        const LEDGER_ISO       : string = 'LedgerIso';
-        const INF4             : string = 'Inf4';
-        const INF7             : string = 'Inf7';
-        const PERSON           : string = 'Person';
-        const GROUP3           : string = 'Group3';
-        const RISK_CLASS       : string = 'RiskClass';
-        const CUID             : string = 'Cuid';
-        const SalesResponsible : string = 'SalesResponsible';
-        const CustomerGroup    : string = 'CustomerGroup';
-        const PersonResponsible: string = 'PersonResponsible';
-        const AccountType      : string = 'AccountType';
-
-        /// <remarks>
-        ///     Temporary - reflects friendly column names in string grid.
-        /// </remarks>
-
+        const ID                = 'Id';
+        const GROUP_ID          = 'GroupId';
+        const AGE_DATE          = 'AgeDate';
+        const SNAPSHOT_DT       = 'SnapshotDt';
+        const CUSTOMER_NAME     = 'CustomerName';
+        const CUSTOMER_NUMBER   = 'CustomerNumber';
+        const COUNTRY_CODE      = 'CountryCode';
+        const NOT_DUE           = 'NotDue';
+        const RANGE1            = 'Range1';
+        const RANGE2            = 'Range2';
+        const RANGE3            = 'Range3';
+        const RANGE4            = 'Range4';
+        const RANGE5            = 'Range5';
+        const RANGE6            = 'Range6';
+        const OVERDUE           = 'Overdue';
+        const TOTAL             = 'Total';
+        const CREDIT_LIMIT      = 'CreditLimit';
+        const EXCEEDED_AMOUNT   = 'ExceededAmount';
+        const PAYMENT_TERMS     = 'PaymentTerms';
+        const AGENT             = 'Agent';
+        const DIVISION          = 'Division';
+        const CO_CODE           = 'CoCode';
+        const LEDGER_ISO        = 'LedgerIso';
+        const INF4              = 'Inf4';
+        const INF7              = 'Inf7';
+        const PERSON            = 'Person';
+        const GROUP3            = 'Group3';
+        const RISK_CLASS        = 'RiskClass';
+        const CUID              = 'Cuid';
+        const SalesResponsible  = 'SalesResponsible';
+        const CustomerGroup     = 'CustomerGroup';
+        const PersonResponsible = 'PersonResponsible';
+        const AccountType       = 'AccountType';
+        // Temporary - reflects friendly column names in string grid.
         const fCUSTOMER_NAME     = 'Customer Name';
         const fCUSTOMER_NUMBER   = 'Customer Number';
         const fNOT_DUE           = 'Not Due';
@@ -293,304 +242,269 @@ type
         const fAccountType       = 'Account Type';
     end;
 
-    /// <summary>
-    ///     Paid info, fixed for all enitities.
-    /// </summary>
-
     TPaidinfo = class(TDataTables)
     {$TYPEINFO ON}
+    published
+        const Paidinfo = 'Customer.Paidinfo';
     public
-        const ID          : string = 'Id';
-        const ERP_CODE    : string = 'ErpCode';
-        const DESCRIPTION : string = 'Description';
-        const STAMP       : string = 'ExtractDateStamp';
-        const KEY         : string = 'ProcessBatchKey';
+        const ID          = 'Id';
+        const ERP_CODE    = 'ErpCode';
+        const DESCRIPTION = 'Description';
+        const STAMP       = 'ExtractDateStamp';
+        const KEY         = 'ProcessBatchKey';
     end;
 
-    /// <summary>
-    ///     Feed from ERP. Contain all sales persons for each entity.
-    /// </summary>
-
-    TPerson = class(TDataTables)
+    TTrackerData = class(TDataTables)
     {$TYPEINFO ON}
+    published
+        const TrackerData = 'Customer.TrackerData';
     public
-        const ID            : string = 'Id';
-        const ERP_CODE      : string = 'ErpCode';
-        const DESCRIPTION   : string = 'Description';
-        const STAMP         : string = 'ExtractDateStamp';
-        const KEY           : string = 'ProcessBatchKey';
-        const COCODE        : string = 'Entity';
+        const ID          = 'Id';
+        const USER_ALIAS  = 'UserAlias';
+        const CUID        = 'Cuid';
+        const CO_CODE     = 'CoCode';
+        const BRANCH      = 'Branch';
+        const CUSTNAME    = 'CustomerName';
+        const STAMP       = 'Stamp';
+        const INDV_REM1   = 'SendReminder1';
+        const INDV_REM2   = 'SendReminder2';
+        const INDV_REM3   = 'SendReminder3';
+        const INDV_REM4   = 'SendReminder4';
+        const SCUID       = 'Sciud';
+        const LAYOUT      = 'ReminderLayout';
+        const STATEMENT   = 'PreStatement';
+        const SENDFROM    = 'SendFrom';
+        const STATEMENTTO = 'StatementTo';
+        const REMINDERTO  = 'ReminderTo';
     end;
 
-    /// <summary>
-    ///     Feed from ERP. Contain all sales managers for each entity.
-    /// </summary>
-
-    TGroup3 = class(TDataTables)
+    TTrackerInvoices = class(TDataTables)
     {$TYPEINFO ON}
+    published
+        const TrackerInvoices = 'Customer.TrackerInvoices';
     public
-        const ID            : string = 'Id';
-        const ERP_CODE      : string = 'ErpCode';
-        const DESCRIPTION   : string = 'Description';
-        const STAMP         : string = 'ExtractDateStamp';
-        const KEY           : string = 'ProcessBatchKey';
-        const COCODE        : string = 'Entity';
+        const ID           = 'Id';
+        const SK           = 'Sk';
+        const CUID         = 'Cuid';
+        const INVOICENO    = 'InvoiceNo';
+        const INVOICESTATE = 'InvoiceState';
+        const STAMP        = 'Stamp';
     end;
 
-    /// <summary>
-    ///
-    /// </summary>
-
-    TPersonResponsible = class(TDataTables)
+    TUAC = class(TDataTables)
     {$TYPEINFO ON}
+    published
+        const UAC = 'Customer.UAC';
     public
-        const Id              : string = 'Id';
-        const SourceDBName    : string = 'SourceDBName';
-        const ErpCode         : string = 'ErpCode';
-        const Description     : string = 'Description';
-        const ExtractDateStamp: string = 'ExtractDateStamp';
-        const ProcessBatchKey : string = 'ProcessBatchKey';
+        const ID           = 'Id';
+        const USERNAME     = 'UserName';
+        const ACCESS_LEVEL = 'AccessLevel';
+        const ACCESS_MODE  = 'AccessMode';
     end;
 
-    /// <summary>
-    ///
-    /// </summary>
-
-    TSalesResponsible = class(TDataTables)
+    TGroups = class(TDataTables)
     {$TYPEINFO ON}
+    published
+        const Groups = 'Customer.Groups';
     public
-        const Id              : string = 'Id';
-        const SourceDBName    : string = 'SourceDBName';
-        const ErpCode         : string = 'ErpCode';
-        const Description     : string = 'Description';
-        const ExtractDateStamp: string = 'ExtractDateStamp';
-        const ProcessBatchKey : string = 'ProcessBatchKey';
+        const ID         = 'Id';
+        const GROUP_ID   = 'GroupId';
+        const GROUP_NAME = 'GroupName';
+        const FID        = 'Fid';
     end;
-
-    /// <summary>
-    ///
-    /// </summary>
-
-    TAccountType = class(TDataTables)
-    {$TYPEINFO ON}
-    public
-        const Id              : string = 'Id';
-        const SourceDBName    : string = 'SourceDBName';
-        const ErpCode         : string = 'ErpCode';
-        const Description     : string = 'Description';
-        const ExtractDateStamp: string = 'ExtractDateStamp';
-        const ProcessBatchKey : string = 'ProcessBatchKey';
-    end;
-
-    /// <summary>
-    ///
-    /// </summary>
-
-    TCustomerGroup = class(TDataTables)
-    {$TYPEINFO ON}
-    public
-        const Id              : string = 'Id';
-        const SourceDBName    : string = 'SourceDBName';
-        const ErpCode         : string = 'ErpCode';
-        const Description     : string = 'Description';
-        const ExtractDateStamp: string = 'ExtractDateStamp';
-        const ProcessBatchKey : string = 'ProcessBatchKey';
-    end;
-
-    /// <summary>
-    ///     Feed from ERP. Contain all possible payment terms for each entity.
-    /// </summary>
-
-    TPmtterms = class(TDataTables)
-    {$TYPEINFO ON}
-    public
-        const ID            : string = 'Id';
-        const ERP_CODE      : string = 'ErpCode';
-        const DESCRIPTION   : string = 'Description';
-        const I_MONTH       : string = 'Month';
-        const I_DAYS        : string = 'Days';
-        const I_DAYS_NET    : string = 'DaysNet';
-        const I_USING       : string = 'Using';
-        const STAMP         : string = 'ExtractDateStamp';
-        const KEY           : string = 'ProcessBatchKey';
-        const COCODE        : string = 'Entity';
-    end;
-
-    /// <summary>
-    ///     Invoice Tracker working table.
-    /// </summary>
-
-    TTracker = class(TDataTables)
-    {$TYPEINFO ON}
-    public
-        const ID         : string = 'Id';   // Primary Key -> Foreign Key in "INVOICES"
-        const USER_ALIAS : string = 'UserAlias';
-        const CUID       : string = 'Cuid'; // Constraint unique
-        const CO_CODE    : string = 'CoCode';
-        const BRANCH     : string = 'Branch';
-        const CUSTNAME   : string = 'CustomerName';
-        const STAMP      : string = 'Stamp';
-        const INDV_REM1  : string = 'SendReminder1';
-        const INDV_REM2  : string = 'SendReminder2';
-        const INDV_REM3  : string = 'SendReminder3';
-        const INDV_REM4  : string = 'SendReminder4';
-        const SCUID      : string = 'Sciud';
-        const LAYOUT     : string = 'ReminderLayout';
-        const STATEMENT  : string = 'PreStatement';
-        const SENDFROM   : string = 'SendFrom';
-        const STATEMENTTO: string = 'StatementTo';
-        const REMINDERTO : string = 'ReminderTo';
-    end;
-
-    /// <summary>
-    ///     List of invoices that has been put in the reminder.
-    /// </summary>
-
-    TInvoices = class(TDataTables)
-    {$TYPEINFO ON}
-    public
-        const ID           : string = 'Id'; // Primary Key
-        const SK           : string = 'Sk'; // Foreign Key -> Primary Key in "TRACKER"
-        const CUID         : string = 'Cuid';
-        const INVOICENO    : string = 'InvoiceNo';
-        const INVOICESTATE : string = 'InvoiceState';
-        const STAMP        : string = 'Stamp';
-    end;
-
-    /// <summary>
-    ///     List of users and assigned group name and id.
-    /// </summary>
-
-    TUAC = class(TDataTables)  // change model!!!
-    {$TYPEINFO ON}
-    public
-        const ID           : string = 'Id'; // Primary Key -> Foreign Key in "GROUPS"
-        const USERNAME     : string = 'UserName';   // Constraint unique
-        const ACCESS_LEVEL : string = 'AccessLevel';
-        const ACCESS_MODE  : string = 'AccessMode';
-    end;
-
-    /// <summary>
-    ///     List of groups and assigned users.
-    /// </summary>
-
-    TGroups = class(TDataTables)  // change model!!!
-    {$TYPEINFO ON}
-    public
-        const ID            : string = 'Id';    // Primary Key
-        const GROUP_ID      : string = 'GroupId';
-        const GROUP_NAME    : string = 'GroupName';
-        const FID           : string = 'Fid';   // Foreign Key -> Primary Key in "UAC"
-    end;
-
-    /// <summary>
-    ///     Feed from ERP. List of current FX rates.
-    /// </summary>
-
-    TFxRates = class(TDataTables)
-    {$TYPEINFO ON}
-    public
-        const ID            : string = 'Id';    // Primary Key
-        const ISO           : string = 'Iso';
-        const EXRATE        : string = 'ExRate';
-        const KEY           : string = 'ProcessBatchKey';
-    end;
-
-    /// <summary>
-    ///     List of all possible currencies. Static/stand-alone table.
-    /// </summary>
-
-    TCurrencies = class(TDataTables)
-    {$TYPEINFO ON}
-    public
-        const Id           : string = 'Id';// Primary Key
-        const Iso          : string = 'Iso';
-        const CurrencyName : string = 'CurrencyName';
-    end;
-
-    /// <summary>
-    ///     Log table for ERP transfer (via SSIS).
-    /// </summary>
-
-    TSSISMaster = class(TDataTables)
-    {$TYPEINFO ON}
-    public
-        const ProcessBatchKey : string = 'ProcessBatchKey';
-        const StartDateTime   : string = 'StartDateTime';
-        const EndDateTime     : string = 'EndDateTime';
-        const StatusCode      : string = 'StatusCode';
-        const SystemCode      : string = 'SystemCode';
-    end;
-
-    /// <summary>
-    ///     Contains all user logs from application.
-    /// </summary>
-
-    TUnityEventLogs = class(TDataTables)
-    {$TYPEINFO ON}
-    public
-        const Id           : string = 'Id';
-        const UserAlias    : string = 'UserAlias';
-        const DateTimeStamp: string = 'DateTimeStamp';
-        const AppEventLog  : string = 'AppEventLog';
-        const AppName      : string = 'AppName';
-    end;
-
-    /// <summary>
-    ///     Contains description of all control statuses use in ERP system.
-    ///     TEXT field should be used to replace status code in open items list.
-    /// </summary>
 
     TControlStatus = class(TDataTables)
     {$TYPEINFO ON}
+    published
+        const ControlStatus = 'Customer.ControlStatus';
     public
-        const Id          : string = 'Id';
-        const Code        : string = 'Code';
-        const Text        : string = 'Text';
-        const Description : string = 'Description';
+        const Id          = 'Id';
+        const Code        = 'Code';
+        const Text        = 'Text';
+        const Description = 'Description';
     end;
-
-    /// <summary>
-    ///
-    /// </summary>
 
     TQmsReasons = class(TDataTables)
     {$TYPEINFO ON}
     published
-        const QmsReasons:  string = 'Customer.QmsReasons';
+        const QmsReasons = 'Customer.QmsReasons';
     public
-        const Id:          string = 'Id';
-        const QueryReason: string = 'QueryReason';
+        const Id          = 'Id';
+        const QueryReason = 'QueryReason';
     end;
-
-    /// <summary>
-    ///
-    /// </summary>
 
     TQmsLog = class(TDataTables)
     {$TYPEINFO ON}
     published
-        const QmsLog:       string = 'Customer.QmsLog';
+        const QmsLog = 'Customer.QmsLog';
     public
-        const Id:           string = 'Id';
-	    const InvoNo:       string = 'InvoNo';
-	    const OpenAm:       string = 'OpenAm';
-	    const Am:           string = 'Am';
-	    const OpenCurAm:    string = 'OpenCurAm';
-	    const CurAm:        string = 'CurAm';
-	    const ISO:          string = 'ISO';
-	    const DueDt:        string = 'DueDt';
-	    const ValDt:        string = 'ValDt';
-	    const LogType:      string = 'LogType';
-	    const QueryReason:  string = 'QueryReason';
-        const QueryDesc:    string = 'QueryDesc';
-        const QueryStatus:  string = 'QueryStatus';
-        const FscComment:   string = 'FscComment';
-        const LbuComment:   string = 'LbuComment';
-        const Receiver:     string = 'Receiver';
-	    const UserAlias:    string = 'UserAlias';
-	    const Stamp:        string = 'Stamp';
-        const QueryUid:     string = 'QueryUid';
+        const Id          = 'Id';
+	    const InvoNo      = 'InvoNo';
+	    const OpenAm      = 'OpenAm';
+	    const Am          = 'Am';
+	    const OpenCurAm   = 'OpenCurAm';
+	    const CurAm       = 'CurAm';
+	    const ISO         = 'ISO';
+	    const DueDt       = 'DueDt';
+	    const ValDt       = 'ValDt';
+	    const LogType     = 'LogType';
+	    const QueryReason = 'QueryReason';
+        const QueryDesc   = 'QueryDesc';
+        const QueryStatus = 'QueryStatus';
+        const FscComment  = 'FscComment';
+        const LbuComment  = 'LbuComment';
+        const Receiver    = 'Receiver';
+	    const UserAlias   = 'UserAlias';
+	    const Stamp       = 'Stamp';
+        const QueryUid    = 'QueryUid';
+    end;
+
+
+    // ----------------------------------------------------------------------------------------------------------------------------------------- SCHEMA: ERP //
+
+
+    TPerson = class(TDataTables)
+    {$TYPEINFO ON}
+    published
+        const Person = 'Erp.Person';
+    public
+        const ID          = 'Id';
+        const ERP_CODE    = 'ErpCode';
+        const DESCRIPTION = 'Description';
+        const STAMP       = 'ExtractDateStamp';
+        const KEY         = 'ProcessBatchKey';
+        const COCODE      = 'Entity';
+    end;
+
+    TGroup3 = class(TDataTables)
+    {$TYPEINFO ON}
+    published
+        const Group3 = 'Erp.Group3';
+    public
+        const ID          = 'Id';
+        const ERP_CODE    = 'ErpCode';
+        const DESCRIPTION = 'Description';
+        const STAMP       = 'ExtractDateStamp';
+        const KEY         = 'ProcessBatchKey';
+        const COCODE      = 'Entity';
+    end;
+
+    TPersonResponsible = class(TDataTables)
+    {$TYPEINFO ON}
+    published
+        const PersonResponsible = 'Erp.PersonResponsible';
+    public
+        const Id               = 'Id';
+        const SourceDBName     = 'SourceDBName';
+        const ErpCode          = 'ErpCode';
+        const Description      = 'Description';
+        const ExtractDateStamp = 'ExtractDateStamp';
+        const ProcessBatchKey  = 'ProcessBatchKey';
+    end;
+
+    TSalesResponsible = class(TDataTables)
+    {$TYPEINFO ON}
+    published
+        const SalesResponsible = 'Erp.SalesResponsible';
+    public
+        const Id               = 'Id';
+        const SourceDBName     = 'SourceDBName';
+        const ErpCode          = 'ErpCode';
+        const Description      = 'Description';
+        const ExtractDateStamp = 'ExtractDateStamp';
+        const ProcessBatchKey  = 'ProcessBatchKey';
+    end;
+
+    TAccountType = class(TDataTables)
+    {$TYPEINFO ON}
+    published
+        const AccountType = 'Erp.AccountType';
+    public
+        const Id               = 'Id';
+        const SourceDBName     = 'SourceDBName';
+        const ErpCode          = 'ErpCode';
+        const Description      = 'Description';
+        const ExtractDateStamp = 'ExtractDateStamp';
+        const ProcessBatchKey  = 'ProcessBatchKey';
+    end;
+
+    TCustomerGroup = class(TDataTables)
+    {$TYPEINFO ON}
+    published
+        const CustomerGroup = 'Erp.CustomerGroup';
+    public
+        const Id               = 'Id';
+        const SourceDBName     = 'SourceDBName';
+        const ErpCode          = 'ErpCode';
+        const Description      = 'Description';
+        const ExtractDateStamp = 'ExtractDateStamp';
+        const ProcessBatchKey  = 'ProcessBatchKey';
+    end;
+
+    TPaymentTerms = class(TDataTables)
+    {$TYPEINFO ON}
+    published
+        const PaymentTerms = 'Erp.PaymentTerms';
+    public
+        const ID          = 'Id';
+        const ERP_CODE    = 'ErpCode';
+        const DESCRIPTION = 'Description';
+        const I_MONTH     = 'Month';
+        const I_DAYS      = 'Days';
+        const I_DAYS_NET  = 'DaysNet';
+        const I_USING     = 'Using';
+        const STAMP       = 'ExtractDateStamp';
+        const KEY         = 'ProcessBatchKey';
+        const COCODE      = 'Entity';
+    end;
+
+    TFxRates = class(TDataTables)
+    {$TYPEINFO ON}
+    published
+        const FxRates = 'Erp.FxRates';
+    public
+        const ID     = 'Id';
+        const ISO    = 'Iso';
+        const EXRATE = 'ExRate';
+        const KEY    = 'ProcessBatchKey';
+    end;
+
+    TSSISMaster = class(TDataTables)
+    {$TYPEINFO ON}
+    published
+        const SSISMaster = 'Erp.SSISMaster';
+    public
+        const ProcessBatchKey = 'ProcessBatchKey';
+        const StartDateTime   = 'StartDateTime';
+        const EndDateTime     = 'EndDateTime';
+        const StatusCode      = 'StatusCode';
+        const SystemCode      = 'SystemCode';
+    end;
+
+
+    // -------------------------------------------------------------------------------------------------------------------------------------- SCHEMA: COMMON //
+
+
+    TCurrencies = class(TDataTables)
+    {$TYPEINFO ON}
+    published
+        const Currencies = 'Common.Currencies';
+    public
+        const Id           = 'Id';
+        const Iso          = 'Iso';
+        const CurrencyName = 'CurrencyName';
+    end;
+
+    TUnityEventLogs = class(TDataTables)
+    {$TYPEINFO ON}
+    published
+        const UnityEventLogs = 'Common.UnityEventLogs';
+    public
+        const Id            = 'Id';
+        const UserAlias     = 'UserAlias';
+        const DateTimeStamp = 'DateTimeStamp';
+        const AppEventLog   = 'AppEventLog';
+        const AppName       = 'AppName';
     end;
 
 

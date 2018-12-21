@@ -381,7 +381,7 @@ begin
         try
             Tables.CleanUp;
             Tables.CustFilter:=WHERE + TCurrencies.Iso + EQUAL + QuotedStr(ISO);
-            Tables.OpenTable(TblCurrencies);
+            Tables.OpenTable(TCurrencies.Currencies);
             if Tables.DataSet.RecordCount = 1 then
                 Result:=Tables.DataSet.Fields[TCurrencies.Id].Value;
         except
@@ -430,7 +430,7 @@ end;
 ///
 /// </summary>
 
-function TQmsForm.SendNotification(LbuEmail: string): boolean; // make async !!!
+function TQmsForm.SendNotification(LbuEmail: string): boolean; // make async !!! refactor!!!
 var
     Mail:     TMailer;
     Settings: ISettings;
@@ -532,7 +532,7 @@ begin
             begin
                 Tables.CleanUp;
                 Tables.Columns.Add(TCurrencies.Iso);
-                Tables.OpenTable(TblCurrencies);
+                Tables.OpenTable(TCurrencies.Currencies);
                 Tables.SqlToSimpleList(CurrencyList, Tables.DataSet);
                 if CurrencyList.Items.Count > 0 then CurrencyList.ItemIndex:=0;
             end;

@@ -118,7 +118,7 @@ begin
     try
         Database.Columns.Add(TAddressBook.ESTATEMENTS);
         Database.CustFilter:=WHERE + TAddressBook.SCUID + EQUAL + QuotedStr(Scuid);
-        Database.OpenTable(TblAddressbook);
+        Database.OpenTable(TAddressBook.AddressBook);
 
         if Database.DataSet.RecordCount > 0 then
             Result:=MainForm.OleGetStr(Database.DataSet.Fields[TAddressBook.ESTATEMENTS].Value)
@@ -173,11 +173,11 @@ begin
         if Source.Items.Count > 0 then
         begin
 
-            Tables.Columns.Add(TCompany.CONAME);
-            Tables.Columns.Add(TCompany.COADDRESS);
-            Tables.Columns.Add(TCompany.Telephone);
-            Tables.Columns.Add(TCompany.SEND_NOTE_FROM);
-            Tables.Columns.Add(TCompany.BANKDETAILS);
+            Tables.Columns.Add(TCompanyData.CONAME);
+            Tables.Columns.Add(TCompanyData.COADDRESS);
+            Tables.Columns.Add(TCompanyData.Telephone);
+            Tables.Columns.Add(TCompanyData.SEND_NOTE_FROM);
+            Tables.Columns.Add(TCompanyData.BANKDETAILS);
 
             for iCNT:=0 to Source.Items.Count - 1 do
             begin
@@ -185,17 +185,17 @@ begin
                 Branch:=Source.Items[iCNT].SubItems[9];
 
                 Tables.ClearSQL;
-                Tables.CustFilter:=WHERE + TCompany.CO_CODE + EQUAL + QuotedStr(CoCode) + _AND + TCompany.BRANCH + EQUAL + QuotedStr(Branch);
-                Tables.OpenTable(TblCompany);
+                Tables.CustFilter:=WHERE + TCompanyData.CO_CODE + EQUAL + QuotedStr(CoCode) + _AND + TCompanyData.BRANCH + EQUAL + QuotedStr(Branch);
+                Tables.OpenTable(TCompanyData.CompanyData);
 
                 // Always add to the lists
                 if Tables.DataSet.RecordCount = 1 then
                 begin
-                    Source.Items[iCNT].SubItems[5] :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompany.CONAME].Value);
-                    Source.Items[iCNT].SubItems[6] :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompany.COADDRESS].Value);
-                    Source.Items[iCNT].SubItems[7] :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompany.Telephone].Value);
-                    Source.Items[iCNT].SubItems[2] :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompany.SEND_NOTE_FROM].Value);
-                    Source.Items[iCNT].SubItems[12]:=MainForm.OleGetStr(Tables.DataSet.Fields[TCompany.BANKDETAILS].Value);
+                    Source.Items[iCNT].SubItems[5] :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.CONAME].Value);
+                    Source.Items[iCNT].SubItems[6] :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.COADDRESS].Value);
+                    Source.Items[iCNT].SubItems[7] :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.Telephone].Value);
+                    Source.Items[iCNT].SubItems[2] :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.SEND_NOTE_FROM].Value);
+                    Source.Items[iCNT].SubItems[12]:=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.BANKDETAILS].Value);
                 end
                 else
                 begin

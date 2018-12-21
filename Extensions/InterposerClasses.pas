@@ -107,19 +107,18 @@ type
     /// </summary>
 
     TStringGrid = class(Grids.TStringGrid)
-    private
-        { EMPTY }
     protected
         procedure Paint; override;
+    private
+        var FHideFocusRect: boolean;
+        var FOpenThdId:     integer;
     public
-        var FHideFocusRect: Boolean;
-        var OpenThdId:  integer;
         var SqlColumns: TLists;
         var UpdatedRowsHolder: TIntigers;
+        property  OpenThdId: integer read FOpenThdId write FOpenThdId;
+        property  HideFocusRect: boolean read FHideFocusRect write FHideFocusRect;
         procedure SetUpdatedRow(Row: integer);
         procedure RecordRowsAffected;
-    published
-        property  HideFocusRect:Boolean read FHideFocusRect write FHideFocusRect;
         procedure CopyCutPaste(mode: integer);
         procedure DelEsc(mode: integer; pCol, pRow: integer);
         procedure ClearAll(dfRows: integer; FixedRows: integer; FixedCols: integer; ZeroCol: boolean);

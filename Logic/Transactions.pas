@@ -59,7 +59,7 @@ begin
     );
 
     // Open column with function applied
-    OpenTable(TblSSISMaster);
+    OpenTable(TSSISMaster.SSISMaster);
 
     // Examine received data
     if (not (DataSet = nil)) and (DataSet.RecordCount = 1) then
@@ -86,7 +86,7 @@ begin
     CleanUp;
     Columns.Add(TSSISMaster.StatusCode);
     CustFilter:=WHERE + TSSISMaster.StartDateTime + EQUAL + QuotedStr(DateTime);
-    OpenTable(TblSSISMaster);
+    OpenTable(TSSISMaster.SSISMaster);
 
     if (not (DataSet = nil)) and (DataSet.RecordCount = 1) then
         Result:=VarToStr(DataSet.Fields.Item[TSSISMaster.StatusCode].Value);
@@ -275,40 +275,40 @@ begin
     CleanUp;
     Columns.Add(
         SUM +
-            BracketStr(TCompany.KPI_OVERDUE_TARGET, brRound) +
+            BracketStr(TCompanyData.KPI_OVERDUE_TARGET, brRound) +
         _AS +
-            QuotedStr(TCompany.KPI_OVERDUE_TARGET)
+            QuotedStr(TCompanyData.KPI_OVERDUE_TARGET)
     );
 
     Columns.Add(
         SUM +
-            BracketStr(TCompany.KPI_UNALLOCATED_TARGET, brRound) +
+            BracketStr(TCompanyData.KPI_UNALLOCATED_TARGET, brRound) +
             _AS +
-            QuotedStr(TCompany.KPI_UNALLOCATED_TARGET)
+            QuotedStr(TCompanyData.KPI_UNALLOCATED_TARGET)
     );
 
     CustFilter:=WHERE +
-                    TCompany.CO_CODE +
+                    TCompanyData.CO_CODE +
                 EQUAL +
                     QuotedStr(SettingGrid.Cells[0, 0]) +
                 _OR  +
-                    TCompany.CO_CODE +
+                    TCompanyData.CO_CODE +
                 EQUAL +
                     QuotedStr(SettingGrid.Cells[1, 0]) +
                 _OR  +
-                    TCompany.CO_CODE +
+                    TCompanyData.CO_CODE +
                 EQUAL +
                     QuotedStr(SettingGrid.Cells[2, 0]) +
                 _OR  +
-                    TCompany.CO_CODE +
+                    TCompanyData.CO_CODE +
                 EQUAL +
                     QuotedStr(SettingGrid.Cells[3, 0]);
 
-    OpenTable(TblCompany);
+    OpenTable(TCompanyData.CompanyData);
     if DataSet.RecordCount = 1 then
     begin
-        KPIOverdue:=StrToFloatDef(MainForm.OleGetStr(DataSet.Fields[TCompany.KPI_OVERDUE_TARGET].Value), 0);
-        KPIUnalloc:=StrToFloatDef(MainForm.OleGetStr(DataSet.Fields[TCompany.KPI_UNALLOCATED_TARGET].Value), 0);
+        KPIOverdue:=StrToFloatDef(MainForm.OleGetStr(DataSet.Fields[TCompanyData.KPI_OVERDUE_TARGET].Value), 0);
+        KPIUnalloc:=StrToFloatDef(MainForm.OleGetStr(DataSet.Fields[TCompanyData.KPI_UNALLOCATED_TARGET].Value), 0);
     end;
 
     { DISPLAY }

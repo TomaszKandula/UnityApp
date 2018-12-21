@@ -431,7 +431,7 @@ begin
         Tables.Columns.Add(TAddressBook.ESTATEMENTS);
         Tables.Columns.Add(TAddressBook.PHONE_NUMBERS);
         Tables.CustFilter:=WHERE + TAddressBook.SCUID + EQUAL + QuotedStr(SCUID);
-        Tables.OpenTable(TblAddressbook);
+        Tables.OpenTable(TAddressBook.AddressBook);
 
         if Tables.DataSet.RecordCount = 1 then
         begin
@@ -451,21 +451,21 @@ begin
 
         Tables.CleanUp;
         // Get data from Company Data table
-        Tables.Columns.Add(TCompany.CONAME);
-        Tables.Columns.Add(TCompany.COADDRESS);
-        Tables.Columns.Add(TCompany.Telephone);
-        Tables.Columns.Add(TCompany.SEND_NOTE_FROM);
-        Tables.Columns.Add(TCompany.BANKDETAILS);
-        Tables.CustFilter:=WHERE + TCompany.CO_CODE + EQUAL + QuotedStr(CoCode) + _AND + TCompany.BRANCH + EQUAL + QuotedStr(Branch);
-        Tables.OpenTable(TblCompany);
+        Tables.Columns.Add(TCompanyData.CONAME);
+        Tables.Columns.Add(TCompanyData.COADDRESS);
+        Tables.Columns.Add(TCompanyData.Telephone);
+        Tables.Columns.Add(TCompanyData.SEND_NOTE_FROM);
+        Tables.Columns.Add(TCompanyData.BANKDETAILS);
+        Tables.CustFilter:=WHERE + TCompanyData.CO_CODE + EQUAL + QuotedStr(CoCode) + _AND + TCompanyData.BRANCH + EQUAL + QuotedStr(Branch);
+        Tables.OpenTable(TCompanyData.CompanyData);
 
         if Tables.DataSet.RecordCount = 1 then
         begin
-            Lbu_Name.Caption    :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompany.CONAME].Value);
-            Lbu_Address.Caption :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompany.COADDRESS].Value);
-            Lbu_Phone.Caption   :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompany.Telephone].Value);
-            Lbu_SendFrom.Caption:=MainForm.OleGetStr(Tables.DataSet.Fields[TCompany.SEND_NOTE_FROM].Value);
-            BanksHtml           :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompany.BANKDETAILS].Value);
+            Lbu_Name.Caption    :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.CONAME].Value);
+            Lbu_Address.Caption :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.COADDRESS].Value);
+            Lbu_Phone.Caption   :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.Telephone].Value);
+            Lbu_SendFrom.Caption:=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.SEND_NOTE_FROM].Value);
+            BanksHtml           :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.BANKDETAILS].Value);
         end
         else
         begin
@@ -495,18 +495,18 @@ begin
 
     DailyText:=TDataTables.Create(MainForm.DbConnect);
     try
-        DailyText.Columns.Add(TDaily.AGEDATE);
-        DailyText.Columns.Add(TDaily.STAMP);
-        DailyText.Columns.Add(TDaily.USER_ALIAS);
-        DailyText.Columns.Add(TDaily.FIXCOMMENT);
-        DailyText.CustFilter:=WHERE + TDaily.CUID + EQUAL + QuotedStr(CUID);
-        DailyText.OpenTable(TblDaily);
-        DailyText.DataSet.Sort:=TDaily.STAMP + DESC;
+        DailyText.Columns.Add(TDailyComment.AGEDATE);
+        DailyText.Columns.Add(TDailyComment.STAMP);
+        DailyText.Columns.Add(TDailyComment.USER_ALIAS);
+        DailyText.Columns.Add(TDailyComment.FIXCOMMENT);
+        DailyText.CustFilter:=WHERE + TDailyComment.CUID + EQUAL + QuotedStr(CUID);
+        DailyText.OpenTable(TDailyComment.DailyComment);
+        DailyText.DataSet.Sort:=TDailyComment.STAMP + DESC;
 
         if not (DailyText.DataSet.EOF) then
         begin
             DailyText.SqlToGrid(Grid, DailyText.DataSet, False, True);
-            Grid.ColWidths[Grid.ReturnColumn(TDaily.FIXCOMMENT, 1, 1)]:=sgRowHidden;
+            Grid.ColWidths[Grid.ReturnColumn(TDailyComment.FIXCOMMENT, 1, 1)]:=sgRowHidden;
             Grid.SetColWidth(10, 20, 400);
             FHistoryGrid:=True;
             Grid.Visible:=FHistoryGrid;
@@ -536,11 +536,11 @@ begin
     GenText:=TDataTables.Create(MainForm.DbConnect);
 
     try
-        GenText.CustFilter:=WHERE + TGeneral.CUID + EQUAL + QuotedStr(CUID);
-        GenText.OpenTable(TblGeneral);
+        GenText.CustFilter:=WHERE + TGeneralComment.CUID + EQUAL + QuotedStr(CUID);
+        GenText.OpenTable(TGeneralComment.GeneralComment);
 
         if not (GenText.DataSet.EOF) then
-            Text.Text:=MainForm.OleGetStr(GenText.DataSet.Fields[TGeneral.FIXCOMMENT].Value);
+            Text.Text:=MainForm.OleGetStr(GenText.DataSet.Fields[TGeneralComment.FIXCOMMENT].Value);
 
     finally
         GenText.Free;
@@ -739,7 +739,7 @@ begin
             strNULL,
             True
         );
-        MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1), MainForm.sgAgeView.Row]:='';
+        MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneralComment.fFOLLOWUP, 1, 1), MainForm.sgAgeView.Row]:='';
     end;
 end;
 
@@ -981,7 +981,7 @@ end;
 
 procedure TActionsForm.HistoryGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
 begin
-    DailyCom.Text:=HistoryGrid.Cells[HistoryGrid.ReturnColumn(TDaily.FIXCOMMENT, 1, 1), ARow];
+    DailyCom.Text:=HistoryGrid.Cells[HistoryGrid.ReturnColumn(TDailyComment.FIXCOMMENT, 1, 1), ARow];
 end;
 
 

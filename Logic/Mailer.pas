@@ -332,7 +332,7 @@ begin
             begin
 
                 // Exclude items with control status indicated by field "ReminderException5"
-                if OpenItems.Cells[MainForm.OpenItemsRefs.CtrlCol, iCNT] <> '514' {REM_EX5} then    // REFACTOR!!!
+                if OpenItems.Cells[MainForm.OpenItemsRefs.CtrlCol, iCNT] <> REM_EX5 then  // REFACTOR!!!
                 begin
 
                     if not(IsOverdue) then

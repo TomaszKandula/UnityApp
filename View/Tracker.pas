@@ -135,16 +135,16 @@ begin
 
     Database:=TDataTables.Create(MainForm.DbConnect);
     try
-        Database.Columns.Add(DISTINCT + TCompany.SEND_NOTE_FROM);
+        Database.Columns.Add(DISTINCT + TCompanyData.SEND_NOTE_FROM);
         Database.CustFilter:=WHERE +
-                                TCompany.CO_CODE + EQUAL + QuotedStr(COCODE1) +
+                                TCompanyData.CO_CODE + EQUAL + QuotedStr(COCODE1) +
                              _OR +
-                                TCompany.CO_CODE + EQUAL + QuotedStr(COCODE2) +
+                                TCompanyData.CO_CODE + EQUAL + QuotedStr(COCODE2) +
                              _OR +
-                                TCompany.CO_CODE + EQUAL + QuotedStr(COCODE3) +
+                                TCompanyData.CO_CODE + EQUAL + QuotedStr(COCODE3) +
                              _OR +
-                                TCompany.CO_CODE + EQUAL + QuotedStr(COCODE4);
-        Database.OpenTable(TblCompany);
+                                TCompanyData.CO_CODE + EQUAL + QuotedStr(COCODE4);
+        Database.OpenTable(TCompanyData.CompanyData);
         if not(Database.DataSet.RecordCount = 0) then
             Database.SqlToSimpleList(List, Database.DataSet)
                 else
@@ -183,7 +183,7 @@ begin
         Database.Columns.Add(TAddressBook.EMAILS);
         Database.Columns.Add(TAddressBook.ESTATEMENTS);
         Database.CustFilter:=WHERE + TAddressBook.SCUID + EQUAL + Scuid;
-        Database.OpenTable(TblAddressbook);
+        Database.OpenTable(TAddressBook.AddressBook);
 
         if Database.DataSet.RecordCount > 0 then
         begin
@@ -398,22 +398,22 @@ begin
         try
             // Select database columns
             TrackerData.CleanUp;
-            TrackerData.Columns.Add(TTracker.USER_ALIAS);
-            TrackerData.Columns.Add(TTracker.CUID);
-            TrackerData.Columns.Add(TTracker.CO_CODE);
-            TrackerData.Columns.Add(TTracker.BRANCH);
-            TrackerData.Columns.Add(TTracker.CUSTNAME);
-            TrackerData.Columns.Add(TTracker.STAMP);
-            TrackerData.Columns.Add(TTracker.INDV_REM1);
-            TrackerData.Columns.Add(TTracker.INDV_REM2);
-            TrackerData.Columns.Add(TTracker.INDV_REM3);
-            TrackerData.Columns.Add(TTracker.INDV_REM4);
-            TrackerData.Columns.Add(TTracker.SCUID);
-            TrackerData.Columns.Add(TTracker.LAYOUT);
-            TrackerData.Columns.Add(TTracker.STATEMENT);
-            TrackerData.Columns.Add(TTracker.SENDFROM);
-            TrackerData.Columns.Add(TTracker.STATEMENTTO);
-            TrackerData.Columns.Add(TTracker.REMINDERTO);
+            TrackerData.Columns.Add(TTrackerData.USER_ALIAS);
+            TrackerData.Columns.Add(TTrackerData.CUID);
+            TrackerData.Columns.Add(TTrackerData.CO_CODE);
+            TrackerData.Columns.Add(TTrackerData.BRANCH);
+            TrackerData.Columns.Add(TTrackerData.CUSTNAME);
+            TrackerData.Columns.Add(TTrackerData.STAMP);
+            TrackerData.Columns.Add(TTrackerData.INDV_REM1);
+            TrackerData.Columns.Add(TTrackerData.INDV_REM2);
+            TrackerData.Columns.Add(TTrackerData.INDV_REM3);
+            TrackerData.Columns.Add(TTrackerData.INDV_REM4);
+            TrackerData.Columns.Add(TTrackerData.SCUID);
+            TrackerData.Columns.Add(TTrackerData.LAYOUT);
+            TrackerData.Columns.Add(TTrackerData.STATEMENT);
+            TrackerData.Columns.Add(TTrackerData.SENDFROM);
+            TrackerData.Columns.Add(TTrackerData.STATEMENTTO);
+            TrackerData.Columns.Add(TTrackerData.REMINDERTO);
 
             // Put ListView data to StringGrid
             TempData.RowCount:=List.Items.Count;
@@ -439,7 +439,7 @@ begin
             end;
 
             // Insert data to database
-            if TrackerData.InsertInto(TblTracker, ttExplicit, TempData, nil, False) then
+            if TrackerData.InsertInto(TTrackerData.TrackerData, ttExplicit, TempData, nil, False) then
             begin
                 MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Invoice tracker data updated.');
                 MainForm.MsgCall(mcInfo, 'Invoice Tracker has been updates successfully!');

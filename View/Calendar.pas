@@ -151,7 +151,7 @@ begin
                            strNULL,
                            False
                          );
-  MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneral.fFOLLOWUP, 1, 1), Row]:=DateToStr(SelectedDate);
+  MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneralComment.fFOLLOWUP, 1, 1), Row]:=DateToStr(SelectedDate);
 end;
 
 

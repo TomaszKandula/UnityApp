@@ -75,7 +75,7 @@ const
     GridImgFile :  string    = 'Unity.img';        // Application custom image(s)
     ReleaseFile :  string    = 'Release.zip';      // Release package
     ManifestFile:  string    = 'Unity.manifest';   // Manifest file on the server
-    CurrentMutex:  PWideChar = 'UNITY_10173';      // Mutex value, increase it with each release*
+    CurrentMutex:  PWideChar = 'UNITY_10175';      // Mutex value, increase it with each release*
 
     // *Do not allow to run multiple instances of Unity due to lack of sessions
 
@@ -387,6 +387,12 @@ const
     qrREJECTED = 'REJECTED';
     qrSOLVED   = 'SOLVED';
 
+    // ------------------------------------------------------------------------------------------------------------------------------------------------- QMS //
+
+    QmsFsc = 0;
+    QmsLbu = 1;
+
+
     // COMPONENT RELATED ----------------------------------------------------------------------------------------------------------------------------------- //
 
 
@@ -507,42 +513,11 @@ const
 
     // ----------------------------------------------------------------------------------------------------------------------------------- STORED PROCEDURES //
 
-    AgeViewExport  = schCustomer + '.' + 'AgeViewExport';
-    AgeViewReport  = schCustomer + '.' + 'AgeViewReport';
-    QueryOpenItems = schCustomer + '.' + 'QueryOpenItems';
-    TrackerList    = schCustomer + '.' + 'TrackerList';
+    AgeViewExport  = 'Customer.AgeViewExport';
+    AgeViewReport  = 'Customer.AgeViewReport';
+    QueryOpenItems = 'Customer.QueryOpenItems';
+    TrackerList    = 'Customer.TrackerList';
 
-    // ------------------------------------------------------------------------------------------------------------------------- MAPPED TABLES FROM DATABASE //
-
-    // refactor this - remove below constant and move it to the model !!!
-
-    TblFxRates           = schCustomer + '.' + 'FxRates';
-    TblDaily             = schCustomer + '.' + 'DailyComment';
-    TblGeneral           = schCustomer + '.' + 'GeneralComment';
-    TblCompany           = schCustomer + '.' + 'CompanyData';
-    TblManagers          = schCustomer + '.' + 'Managers';
-    TblTeamleaders       = schCustomer + '.' + 'TeamLeaders';
-    TblControlStatus     = schCustomer + '.' + 'ControlStatus';
-    TblReminderLayouts   = schCustomer + '.' + 'ReminderLayouts';
-    TblInvoices          = schCustomer + '.' + 'TrackerInvoices';
-    TblTracker           = schCustomer + '.' + 'TrackerData';
-    TblAddressbook       = schCustomer + '.' + 'AddressBook';
-    TblSnapshots         = schCustomer + '.' + 'Snapshots';
-    TblPaidinfo          = schCustomer + '.' + 'PaidInfo';
-    TblGroups            = schCustomer + '.' + 'Groups';
-    TblUAC               = schCustomer + '.' + 'UAC';
-    TblCurrencies        = schCommon   + '.' + 'Currencies';
-    TblAzureJobsReport   = schCommon   + '.' + 'AzureJobsReport';
-    TblUnityEventLogs    = schCommon   + '.' + 'UnityEventLogs';
-    TblSSISMaster        = schErp      + '.' + 'SSISMaster';
-    TblOpenitems         = schErp      + '.' + 'OpenItems';
-    TblGroup3            = schErp      + '.' + 'Group3';
-    TblPmtterms          = schErp      + '.' + 'PaymentTerms';
-    TblPerson            = schErp      + '.' + 'Person';
-    TblSalesResponsible  = schErp      + '.' + 'SalesResponsible';
-    TblCustomerGroup     = schErp      + '.' + 'CustomerGroup';
-    TblPersonResponsible = schErp      + '.' + 'PersonResponsible';
-    TblAccountType       = schErp      + '.' + 'AccountType';
 
     // TEMPLATES ------------------------------------------------------------------------------------------------------------------------------------------- //
 

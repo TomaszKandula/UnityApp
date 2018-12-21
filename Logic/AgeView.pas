@@ -525,7 +525,7 @@ begin
     if (Code = ' ') or (Code = '') or (Entity = ' ') or (Entity = '') then Exit;
     try
         // Group3 table
-        if Table = TblGroup3 then
+        if Table = TGroup3.Group3 then
         begin
             Field:=TGroup3.DESCRIPTION;
             CleanUp;
@@ -535,7 +535,7 @@ begin
         end;
 
         // Paid info table (indepenent from entity code
-        if Table = TblPaidinfo then
+        if Table = TPaidinfo.Paidinfo then
         begin
             Field:=TPaidinfo.DESCRIPTION;
             CleanUp;
@@ -545,17 +545,17 @@ begin
         end;
 
         // Payment terms table
-        if Table = TblPmtterms then
+        if Table = TPaymentTerms.PaymentTerms then
         begin
-            Field:=TPmtterms.DESCRIPTION;
+            Field:=TPaymentTerms.DESCRIPTION;
             CleanUp;
             Columns.Add(Field);
-            CustFilter:=WHERE + TPmtterms.ERP_CODE + EQUAL + QuotedStr(Code) + _AND + TPmtterms.COCODE + EQUAL + QuotedStr(Entity);
+            CustFilter:=WHERE + TPaymentTerms.ERP_CODE + EQUAL + QuotedStr(Code) + _AND + TPaymentTerms.COCODE + EQUAL + QuotedStr(Entity);
             OpenTable(Table);
         end;
 
         // Persons table
-        if Table = TblPerson then
+        if Table = TPerson.Person then
         begin
             Field:=TPerson.DESCRIPTION;
             CleanUp;

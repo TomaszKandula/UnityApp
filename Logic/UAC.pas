@@ -44,7 +44,7 @@ begin
 
     try
         CustFilter:=WHERE + TUAC.USERNAME + EQUAL + QuotedStr(UserName);
-        OpenTable(TblUAC);
+        OpenTable(TUAC.UAC);
 
         // USERNAME IS CONSTRAINED, THUS EXCEPTING ONLY ONE ROW IF FOUND
         if not DataSet.EOF then
@@ -75,7 +75,7 @@ begin
     try
         UserKey:=GetAccessData(adUserKeyID);
         CustFilter:=WHERE + TGroups.FID + EQUAL + QuotedStr(UserKey) + ORDER + TGroups.GROUP_NAME + ASC;
-        OpenTable(TblGroups);
+        OpenTable(TGroups.Groups);
 
         if DataSet.RecordCount > 0 then
         begin
@@ -116,7 +116,7 @@ begin
 
     Columns.Add(DISTINCT + TSnapshots.AGE_DATE);
     CustFilter:=WHERE + TSnapshots.GROUP_ID + EQUAL + QuotedStr(GroupID);
-    OpenTable(TblSnapshots);
+    OpenTable(TSnapshots.Snapshots);
 
     try
         AgeDatesBox.Clear;
