@@ -375,7 +375,7 @@ begin
     SrcColumns[14]:=OpenItemsSrc.ReturnColumn(TOpenitems.Ad3,       1, 1);
     SrcColumns[15]:=OpenItemsSrc.ReturnColumn(TOpenitems.Pno,       1, 1);
     SrcColumns[16]:=OpenItemsSrc.ReturnColumn(TOpenitems.PArea,     1, 1);
-    SrcColumns[17]:=OpenItemsSrc.ReturnColumn(TOpenitems.CUID,      1, 1);
+    SrcColumns[17]:=OpenItemsSrc.ReturnColumn(TOpenitems.Cuid,      1, 1);
 
     // Get headers
     for iCNT:=Low(SrcColumns) to High(SrcColumns) do
@@ -384,7 +384,7 @@ begin
     // Look for the same "CUID" and put it into source grid
     for iCNT:=1 to OpenItemsSrc.RowCount - 1 do
     begin
-        if OpenItemsSrc.Cells[MainForm.sgOpenItems.ReturnColumn(TOpenitems.CUID, 1, 1), iCNT] = CUID then
+        if OpenItemsSrc.Cells[MainForm.sgOpenItems.ReturnColumn(TOpenitems.Cuid, 1, 1), iCNT] = CUID then
         begin
 
             for jCNT:=Low(SrcColumns) to High(SrcColumns) do
@@ -402,7 +402,7 @@ begin
     OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.Ad3,   1, 1)]:=sgRowHidden;
     OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.Pno,   1, 1)]:=sgRowHidden;
     OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.PArea, 1, 1)]:=sgRowHidden;
-    OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.CUID,  1, 1)]:=sgRowHidden;
+    OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.Cuid,  1, 1)]:=sgRowHidden;
 
     // Sort via payment status
     OpenItemsDest.MSort(OpenItemsDest.ReturnColumn(TOpenitems.PmtStat, 1, 1), sdtINTEGER, True);
@@ -426,19 +426,19 @@ begin
     try
 
         // Get data from Address Book table
-        Tables.Columns.Add(TAddressBook.CONTACT);
-        Tables.Columns.Add(TAddressBook.EMAILS);
-        Tables.Columns.Add(TAddressBook.ESTATEMENTS);
-        Tables.Columns.Add(TAddressBook.PHONE_NUMBERS);
-        Tables.CustFilter:=WHERE + TAddressBook.SCUID + EQUAL + QuotedStr(SCUID);
+        Tables.Columns.Add(TAddressBook.Contact);
+        Tables.Columns.Add(TAddressBook.Emails);
+        Tables.Columns.Add(TAddressBook.Estatements);
+        Tables.Columns.Add(TAddressBook.PhoneNumbers);
+        Tables.CustFilter:=WHERE + TAddressBook.Scuid + EQUAL + QuotedStr(SCUID);
         Tables.OpenTable(TAddressBook.AddressBook);
 
         if Tables.DataSet.RecordCount = 1 then
         begin
-            CustPerson.Text :=MainForm.OleGetStr(Tables.DataSet.Fields[TAddressBook.CONTACT].Value);
-            CustMailGen.Text:=MainForm.OleGetStr(Tables.DataSet.Fields[TAddressBook.EMAILS].Value);
-            CustMail.Text   :=MainForm.OleGetStr(Tables.DataSet.Fields[TAddressBook.ESTATEMENTS].Value);
-            Phones          :=MainForm.OleGetStr(Tables.DataSet.Fields[TAddressBook.PHONE_NUMBERS].Value);
+            CustPerson.Text :=MainForm.OleGetStr(Tables.DataSet.Fields[TAddressBook.Contact].Value);
+            CustMailGen.Text:=MainForm.OleGetStr(Tables.DataSet.Fields[TAddressBook.Emails].Value);
+            CustMail.Text   :=MainForm.OleGetStr(Tables.DataSet.Fields[TAddressBook.Estatements].Value);
+            Phones          :=MainForm.OleGetStr(Tables.DataSet.Fields[TAddressBook.PhoneNumbers].Value);
 
             if (Phones <> '') or (Phones <> ' ') then
             begin
@@ -451,21 +451,21 @@ begin
 
         Tables.CleanUp;
         // Get data from Company Data table
-        Tables.Columns.Add(TCompanyData.CONAME);
-        Tables.Columns.Add(TCompanyData.COADDRESS);
-        Tables.Columns.Add(TCompanyData.Telephone);
-        Tables.Columns.Add(TCompanyData.SEND_NOTE_FROM);
-        Tables.Columns.Add(TCompanyData.BANKDETAILS);
-        Tables.CustFilter:=WHERE + TCompanyData.CO_CODE + EQUAL + QuotedStr(CoCode) + _AND + TCompanyData.BRANCH + EQUAL + QuotedStr(Branch);
+        Tables.Columns.Add(TCompanyData.CoName);
+        Tables.Columns.Add(TCompanyData.CoAddress);
+        Tables.Columns.Add(TCompanyData.TelephoneNumbers);
+        Tables.Columns.Add(TCompanyData.SendNoteFrom);
+        Tables.Columns.Add(TCompanyData.BankAccounts);
+        Tables.CustFilter:=WHERE + TCompanyData.CoCode + EQUAL + QuotedStr(CoCode) + _AND + TCompanyData.Branch + EQUAL + QuotedStr(Branch);
         Tables.OpenTable(TCompanyData.CompanyData);
 
         if Tables.DataSet.RecordCount = 1 then
         begin
-            Lbu_Name.Caption    :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.CONAME].Value);
-            Lbu_Address.Caption :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.COADDRESS].Value);
-            Lbu_Phone.Caption   :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.Telephone].Value);
-            Lbu_SendFrom.Caption:=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.SEND_NOTE_FROM].Value);
-            BanksHtml           :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.BANKDETAILS].Value);
+            Lbu_Name.Caption    :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.CoName].Value);
+            Lbu_Address.Caption :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.CoAddress].Value);
+            Lbu_Phone.Caption   :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.TelephoneNumbers].Value);
+            Lbu_SendFrom.Caption:=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.SendNoteFrom].Value);
+            BanksHtml           :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.BankAccounts].Value);
         end
         else
         begin
@@ -495,18 +495,18 @@ begin
 
     DailyText:=TDataTables.Create(MainForm.DbConnect);
     try
-        DailyText.Columns.Add(TDailyComment.AGEDATE);
-        DailyText.Columns.Add(TDailyComment.STAMP);
-        DailyText.Columns.Add(TDailyComment.USER_ALIAS);
-        DailyText.Columns.Add(TDailyComment.FIXCOMMENT);
-        DailyText.CustFilter:=WHERE + TDailyComment.CUID + EQUAL + QuotedStr(CUID);
+        DailyText.Columns.Add(TDailyComment.AgeDate);
+        DailyText.Columns.Add(TDailyComment.Stamp);
+        DailyText.Columns.Add(TDailyComment.UserAlias);
+        DailyText.Columns.Add(TDailyComment.FixedComment);
+        DailyText.CustFilter:=WHERE + TDailyComment.Cuid + EQUAL + QuotedStr(CUID);
         DailyText.OpenTable(TDailyComment.DailyComment);
-        DailyText.DataSet.Sort:=TDailyComment.STAMP + DESC;
+        DailyText.DataSet.Sort:=TDailyComment.Stamp + DESC;
 
         if not (DailyText.DataSet.EOF) then
         begin
             DailyText.SqlToGrid(Grid, DailyText.DataSet, False, True);
-            Grid.ColWidths[Grid.ReturnColumn(TDailyComment.FIXCOMMENT, 1, 1)]:=sgRowHidden;
+            Grid.ColWidths[Grid.ReturnColumn(TDailyComment.FixedComment, 1, 1)]:=sgRowHidden;
             Grid.SetColWidth(10, 20, 400);
             FHistoryGrid:=True;
             Grid.Visible:=FHistoryGrid;
@@ -536,11 +536,11 @@ begin
     GenText:=TDataTables.Create(MainForm.DbConnect);
 
     try
-        GenText.CustFilter:=WHERE + TGeneralComment.CUID + EQUAL + QuotedStr(CUID);
+        GenText.CustFilter:=WHERE + TGeneralComment.Cuid + EQUAL + QuotedStr(CUID);
         GenText.OpenTable(TGeneralComment.GeneralComment);
 
         if not (GenText.DataSet.EOF) then
-            Text.Text:=MainForm.OleGetStr(GenText.DataSet.Fields[TGeneralComment.FIXCOMMENT].Value);
+            Text.Text:=MainForm.OleGetStr(GenText.DataSet.Fields[TGeneralComment.FixedComment].Value);
 
     finally
         GenText.Free;
@@ -598,12 +598,12 @@ procedure TActionsForm.Initialize;
 begin
     ClearAll;
     // Assign data for selected row
-    CUID      :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUID,            1, 1), MainForm.sgAgeView.Row];
-    CustName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), MainForm.sgAgeView.Row];
-    CustNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), MainForm.sgAgeView.Row];
-    CoCode    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCO_CODE,         1, 1), MainForm.sgAgeView.Row];
-    Branch    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fAGENT,           1, 1), MainForm.sgAgeView.Row];
-    SCUID     :=CustNumber + MainForm.ConvertName(CoCode, 'F', 3);
+    CUID      :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCuid,            1, 1), MainForm.sgAgeView.Row];
+    CustName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCustomerName,   1, 1), MainForm.sgAgeView.Row];
+    CustNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCustomerNumber, 1, 1), MainForm.sgAgeView.Row];
+    CoCode    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCoCode,         1, 1), MainForm.sgAgeView.Row];
+    Branch    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fAgent,           1, 1), MainForm.sgAgeView.Row];
+    SCUID     :=CustNumber + MainForm.ConvertCoCode(CoCode, 'F', 3);
     // Display
     CUID_Label.Caption:=CUID;
     SCUID_Label.Caption:=SCUID;
@@ -688,7 +688,7 @@ procedure TActionsForm.LoadCustomer(Direction: integer);
         if
             (MainForm.sgAgeView.RowHeights[iterator] <> -1)
         and
-            (MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fOVERDUE, 1, 1), iterator] <> '0')
+            (MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fOverdue, 1, 1), iterator] <> '0')
         then
         begin
             MainForm.sgAgeView.Row:=iterator;
@@ -739,7 +739,7 @@ begin
             strNULL,
             True
         );
-        MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneralComment.fFOLLOWUP, 1, 1), MainForm.sgAgeView.Row]:='';
+        MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneralComment.fFollowUp, 1, 1), MainForm.sgAgeView.Row]:='';
     end;
 end;
 
@@ -981,7 +981,7 @@ end;
 
 procedure TActionsForm.HistoryGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
 begin
-    DailyCom.Text:=HistoryGrid.Cells[HistoryGrid.ReturnColumn(TDailyComment.FIXCOMMENT, 1, 1), ARow];
+    DailyCom.Text:=HistoryGrid.Cells[HistoryGrid.ReturnColumn(TDailyComment.FixedComment, 1, 1), ARow];
 end;
 
 

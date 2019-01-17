@@ -16,8 +16,10 @@ type
 
     TUserControl = class(TDataTables)
     {$TYPEINFO ON}
+    private
+        var FUserName: string;
     public
-        var UserName: string;
+        property UserName: string read FUserName write FUserName;
         function GetAccessData(DataType: integer): string;
         function GetGroupList(var List: TLists; GroupListBox: TComboBox): boolean;
         function GetAgeDates(AgeDatesBox: TComboBox; GroupID: string): boolean;
@@ -39,21 +41,23 @@ uses
 
 function TUserControl.GetAccessData(DataType: integer): string;
 begin
+
     Result:='';
     if UserName = '' then Exit;
 
     try
-        CustFilter:=WHERE + TUAC.USERNAME + EQUAL + QuotedStr(UserName);
+        CustFilter:=WHERE + TUAC.UserName + EQUAL + QuotedStr(UserName);
         OpenTable(TUAC.UAC);
 
-        // USERNAME IS CONSTRAINED, THUS EXCEPTING ONLY ONE ROW IF FOUND
+        // User name is unique, thus expecting only one row (if found)
         if not DataSet.EOF then
         begin
-            if DataType = adAccessLevel then Result:=DataSet.Fields.Item[TUAC.ACCESS_LEVEL].Value;
-            if DataType = adAccessMode  then Result:=DataSet.Fields.Item[TUAC.ACCESS_MODE].Value;
-            if DataType = adUserKeyID   then Result:=DataSet.Fields.Item[TUAC.ID].Value;
+            if DataType = adAccessLevel then Result:=DataSet.Fields.Item[TUAC.AccessLevel].Value;
+            if DataType = adAccessMode  then Result:=DataSet.Fields.Item[TUAC.AccessMode].Value;
+            if DataType = adUserKeyID   then Result:=DataSet.Fields.Item[TUAC.Id].Value;
             DataSet.Filter:=adFilterNone;
         end;
+
     except
         Result:='';
     end;
@@ -74,7 +78,7 @@ begin
 
     try
         UserKey:=GetAccessData(adUserKeyID);
-        CustFilter:=WHERE + TGroups.FID + EQUAL + QuotedStr(UserKey) + ORDER + TGroups.GROUP_NAME + ASC;
+        CustFilter:=WHERE + TGroups.Fid + EQUAL + QuotedStr(UserKey) + ORDER + TGroups.GroupName + ASC;
         OpenTable(TGroups.Groups);
 
         if DataSet.RecordCount > 0 then
@@ -82,8 +86,8 @@ begin
             SetLength(List, 2, 2);
             while not DataSet.EOF do
             begin
-                List[iCNT, 0]:=DataSet.Fields[TGroups.GROUP_ID].Value;
-                List[iCNT, 1]:=DataSet.Fields[TGroups.GROUP_NAME].Value;
+                List[iCNT, 0]:=DataSet.Fields[TGroups.GroupId].Value;
+                List[iCNT, 1]:=DataSet.Fields[TGroups.GroupName].Value;
                 inc(iCNT);
                 DataSet.MoveNext;
                 SetLength(List, iCNT + 1, 2);
@@ -114,8 +118,8 @@ begin
 
     Result:=True;
 
-    Columns.Add(DISTINCT + TSnapshots.AGE_DATE);
-    CustFilter:=WHERE + TSnapshots.GROUP_ID + EQUAL + QuotedStr(GroupID);
+    Columns.Add(DISTINCT + TSnapshots.AgeDate);
+    CustFilter:=WHERE + TSnapshots.GroupId + EQUAL + QuotedStr(GroupID);
     OpenTable(TSnapshots.Snapshots);
 
     try
@@ -126,7 +130,7 @@ begin
             while not DataSet.EOF do
             begin
                 // Make sure that we get "yyyy-mm-dd" format
-                Date:= FormatDateTime(gdDateFormat, DataSet.Fields[TSnapshots.AGE_DATE].Value);
+                Date:= FormatDateTime(gdDateFormat, DataSet.Fields[TSnapshots.AgeDate].Value);
                 AgeDatesBox.Items.Add(Date);
                 DataSet.MoveNext;
             end;

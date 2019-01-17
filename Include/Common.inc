@@ -75,7 +75,7 @@ const
     GridImgFile :  string    = 'Unity.img';        // Application custom image(s)
     ReleaseFile :  string    = 'Release.zip';      // Release package
     ManifestFile:  string    = 'Unity.manifest';   // Manifest file on the server
-    CurrentMutex:  PWideChar = 'UNITY_10175';      // Mutex value, increase it with each release*
+    CurrentMutex:  PWideChar = 'UNITY_10177';      // Mutex value, increase it with each release*
 
     // *Do not allow to run multiple instances of Unity due to lack of sessions
 
@@ -347,7 +347,7 @@ const
 
     // --------------------------------------------------------------------------------------------------------------------------------------- NO DATE VALUE //
 
-    NULLDATE        : TDateTime = 0;
+    NULLDATE : TDateTime = 0;
 
 
     // MESSAGES -------------------------------------------------------------------------------------------------------------------------------------------- //
@@ -444,7 +444,7 @@ const
     // ---------------------------------------------------------------------------------------------------------------------------------------- SQL KEYWORDS //
 
     /// <remarks>
-    ///     Use additional spaces in strings for easy concatenating.
+    /// Use additional spaces in strings for easy concatenating.
     /// </remarks>
 
     INSERT       : string = ' INSERT INTO ';

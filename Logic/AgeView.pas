@@ -158,25 +158,25 @@ begin
         if Grid.RowHeights[iCNT] <> sgRowHidden then
         begin
             // Not due and overdue ranges
-            ANotDue:=ANotDue + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fNOT_DUE, 1, 1), iCNT], 0);
-            ARange1:=ARange1 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRANGE1,  1, 1), iCNT], 0);
-            ARange2:=ARange2 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRANGE2,  1, 1), iCNT], 0);
-            ARange3:=ARange3 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRANGE3,  1, 1), iCNT], 0);
-            ARange4:=ARange4 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRANGE4,  1, 1), iCNT], 0);
-            ARange5:=ARange5 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRANGE5,  1, 1), iCNT], 0);
-            ARange6:=ARange6 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRANGE6,  1, 1), iCNT], 0);
+            ANotDue:=ANotDue + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fNotDue, 1, 1), iCNT], 0);
+            ARange1:=ARange1 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRange1,  1, 1), iCNT], 0);
+            ARange2:=ARange2 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRange2,  1, 1), iCNT], 0);
+            ARange3:=ARange3 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRange3,  1, 1), iCNT], 0);
+            ARange4:=ARange4 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRange4,  1, 1), iCNT], 0);
+            ARange5:=ARange5 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRange5,  1, 1), iCNT], 0);
+            ARange6:=ARange6 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRange6,  1, 1), iCNT], 0);
 
             // Total amount, ledger balance
-            Balance:=Balance + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fTOTAL, 1, 1), iCNT], 0);
+            Balance:=Balance + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fTotal, 1, 1), iCNT], 0);
 
             // Granted limit, sum of all assigned credit limits
-            Limits:=Limits + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCREDIT_LIMIT, 1, 1), iCNT], 0);
+            Limits:=Limits + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCreditLimit, 1, 1), iCNT], 0);
 
             // Exceeders
-            if StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fEXCEEDED_AMOUNT, 1, 1), iCNT], 0) < 0 then
+            if StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fExceededAmount, 1, 1), iCNT], 0) < 0 then
             begin
                 inc(Exceeders);
-                TotalExceed:=TotalExceed + Abs(StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fEXCEEDED_AMOUNT, 1, 1), iCNT], 0));
+                TotalExceed:=TotalExceed + Abs(StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fExceededAmount, 1, 1), iCNT], 0));
             end;
 
             inc(CustAll);
@@ -214,7 +214,7 @@ begin
             SetLength(ListPosition, Rows + 1);
             SetLength(TotalPerItem, Rows + 1);
             ListPosition[Rows]:=iCNT;
-            TotalPerItem[Rows]:=StrToFloatDef((Grid.Cells[Grid.ReturnColumn(TSnapshots.fTOTAL, 1, 1), iCNT]), 0);
+            TotalPerItem[Rows]:=StrToFloatDef((Grid.Cells[Grid.ReturnColumn(TSnapshots.fTotal, 1, 1), iCNT]), 0);
             inc(Rows);
         end;
     end;
@@ -230,21 +230,21 @@ begin
         // Risk Class 'A'
         if Count <= RCA then
         begin
-            Grid.Cells[Grid.ReturnColumn(TSnapshots.fRISK_CLASS, 1, 1), ListPosition[iCNT]]:='A';
+            Grid.Cells[Grid.ReturnColumn(TSnapshots.fRiskClass, 1, 1), ListPosition[iCNT]]:='A';
             inc(RCAcount);
         end;
 
         // Risk Class 'B'
         if (Count > RCA) and (Count <= RCA + RCB) then
         begin
-            Grid.Cells[Grid.ReturnColumn(TSnapshots.fRISK_CLASS, 1, 1), ListPosition[iCNT]]:='B';
+            Grid.Cells[Grid.ReturnColumn(TSnapshots.fRiskClass, 1, 1), ListPosition[iCNT]]:='B';
             inc(RCBcount);
         end;
 
         // Risk Class 'C'
         if Count > RCA + RCB then
         begin
-            Grid.Cells[Grid.ReturnColumn(TSnapshots.fRISK_CLASS, 1, 1), ListPosition[iCNT]]:='C';
+            Grid.Cells[Grid.ReturnColumn(TSnapshots.fRiskClass, 1, 1), ListPosition[iCNT]]:='C';
             inc(RCCcount);
         end;
     end;
@@ -376,10 +376,10 @@ begin
     if MainForm.tcCOCODE4.Caption = '0' then
         MainForm.tcCOCODE4.Font.Color:=clWhite else MainForm.tcCOCODE4.Font.Color:=clBlack;
 
-    Grid.Cells[0, 0]:=MainForm.tcCOCODE1.Caption; MainForm.Find(0);
-    Grid.Cells[1, 0]:=MainForm.tcCOCODE2.Caption; MainForm.Find(1);
-    Grid.Cells[2, 0]:=MainForm.tcCOCODE3.Caption; MainForm.Find(2);
-    Grid.Cells[3, 0]:=MainForm.tcCOCODE4.Caption; MainForm.Find(3);
+    Grid.Cells[0, 0]:=MainForm.tcCOCODE1.Caption; MainForm.FindCoData(0, MainForm.sgCompanyData, MainForm.sgCoCodes);
+    Grid.Cells[1, 0]:=MainForm.tcCOCODE2.Caption; MainForm.FindCoData(1, MainForm.sgCompanyData, MainForm.sgCoCodes);
+    Grid.Cells[2, 0]:=MainForm.tcCOCODE3.Caption; MainForm.FindCoData(2, MainForm.sgCompanyData, MainForm.sgCoCodes);
+    Grid.Cells[3, 0]:=MainForm.tcCOCODE4.Caption; MainForm.FindCoData(3, MainForm.sgCompanyData, MainForm.sgCoCodes);
 
     /// <remarks>
     ///     There should be always the same currency code for all stacked companies snapshots.
@@ -392,7 +392,7 @@ begin
         SL.Duplicates:=dupIgnore;
 
         for iCNT:=1 to MainForm.sgAgeView.RowCount - 1 do
-            SL.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fLEDGER_ISO, 1, 1), iCNT]);
+            SL.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fLedgerIso, 1, 1), iCNT]);
 
     finally
         MainForm.tcCURRENCY.Caption:=SL.Text;
@@ -422,14 +422,14 @@ begin
         for jCNT:=1 to Source.RowCount - 1 do
             if
             (
-                Grid.Cells[Grid.ReturnColumn(TSnapshots.fGROUP3, 1, 1), iCNT] = Source.Cells[Source.ReturnColumn(TGroup3.ERP_CODE, 1, 1), jCNT]
+                Grid.Cells[Grid.ReturnColumn(TSnapshots.fGroup3, 1, 1), iCNT] = Source.Cells[Source.ReturnColumn(TGroup3.ErpCode, 1, 1), jCNT]
             )
             and
             (
-                Grid.Cells[Grid.ReturnColumn(TSnapshots.fCO_CODE, 1, 1), iCNT] = Source.Cells[Source.ReturnColumn(TGroup3.COCODE, 1, 1), jCNT]
+                Grid.Cells[Grid.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT] = Source.Cells[Source.ReturnColumn(TGroup3.Entity, 1, 1), jCNT]
             )
             then
-                Grid.Cells[Grid.ReturnColumn(TSnapshots.fGROUP3, 1, 1), iCNT]:=Source.Cells[Source.ReturnColumn(TGroup3.DESCRIPTION, 1, 1), jCNT]
+                Grid.Cells[Grid.ReturnColumn(TSnapshots.fGroup3, 1, 1), iCNT]:=Source.Cells[Source.ReturnColumn(TGroup3.Description, 1, 1), jCNT]
 end;
 
 procedure TAgeView.MapTable1(var Grid: TStringGrid; Source: TStringGrid);
@@ -445,7 +445,7 @@ begin
             )
             and
             (
-                MainForm.ConvertName(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCO_CODE, 1, 1), iCNT], 'F', 0) = Source.Cells[Source.ReturnColumn(TPersonResponsible.SourceDBName, 1, 1), jCNT]
+                MainForm.ConvertCoCode(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT], 'F', 0) = Source.Cells[Source.ReturnColumn(TPersonResponsible.SourceDBName, 1, 1), jCNT]
             )
             then
                 Grid.Cells[Grid.ReturnColumn(TSnapshots.fPersonResponsible, 1, 1), iCNT]:=Source.Cells[Source.ReturnColumn(TPersonResponsible.ErpCode, 1, 1), jCNT]
@@ -464,7 +464,7 @@ begin
             )
             and
             (
-                MainForm.ConvertName(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCO_CODE, 1, 1), iCNT], 'F', 0) = Source.Cells[Source.ReturnColumn(TSalesResponsible.SourceDBName, 1, 1), jCNT]
+                MainForm.ConvertCoCode(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT], 'F', 0) = Source.Cells[Source.ReturnColumn(TSalesResponsible.SourceDBName, 1, 1), jCNT]
             )
             then
                 Grid.Cells[Grid.ReturnColumn(TSnapshots.fSalesResponsible, 1, 1), iCNT]:=Source.Cells[Source.ReturnColumn(TSalesResponsible.ErpCode, 1, 1), jCNT]
@@ -483,7 +483,7 @@ begin
             )
             and
             (
-                MainForm.ConvertName(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCO_CODE, 1, 1), iCNT], 'F', 0) = Source.Cells[Source.ReturnColumn(TAccountType.SourceDBName, 1, 1), jCNT]
+                MainForm.ConvertCoCode(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT], 'F', 0) = Source.Cells[Source.ReturnColumn(TAccountType.SourceDBName, 1, 1), jCNT]
             )
             then
                 Grid.Cells[Grid.ReturnColumn(TSnapshots.fAccountType, 1, 1), iCNT]:=Source.Cells[Source.ReturnColumn(TAccountType.ErpCode, 1, 1), jCNT]
@@ -502,7 +502,7 @@ begin
             )
             and
             (
-                MainForm.ConvertName(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCO_CODE, 1, 1), iCNT], 'F', 0) = Source.Cells[Source.ReturnColumn(TCustomerGroup.SourceDBName, 1, 1), jCNT]
+                MainForm.ConvertCoCode(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT], 'F', 0) = Source.Cells[Source.ReturnColumn(TCustomerGroup.SourceDBName, 1, 1), jCNT]
             )
             then
                 Grid.Cells[Grid.ReturnColumn(TSnapshots.fCustomerGroup, 1, 1), iCNT]:=Source.Cells[Source.ReturnColumn(TCustomerGroup.ErpCode, 1, 1), jCNT]
@@ -527,40 +527,40 @@ begin
         // Group3 table
         if Table = TGroup3.Group3 then
         begin
-            Field:=TGroup3.DESCRIPTION;
+            Field:=TGroup3.Description;
             CleanUp;
             Columns.Add(Field);
-            CustFilter:=WHERE + TGroup3.ERP_CODE + EQUAL + QuotedStr(Code) + _AND + TGroup3.COCODE + EQUAL + QuotedStr(Entity);
+            CustFilter:=WHERE + TGroup3.ErpCode + EQUAL + QuotedStr(Code) + _AND + TGroup3.Entity + EQUAL + QuotedStr(Entity);
             OpenTable(Table);
         end;
 
         // Paid info table (indepenent from entity code
         if Table = TPaidinfo.Paidinfo then
         begin
-            Field:=TPaidinfo.DESCRIPTION;
+            Field:=TPaidinfo.Description;
             CleanUp;
             Columns.Add(Field);
-            CustFilter:=WHERE + TPaidInfo.ERP_CODE + EQUAL + QuotedStr(Code);
+            CustFilter:=WHERE + TPaidInfo.ErpCode + EQUAL + QuotedStr(Code);
             OpenTable(Table);
         end;
 
         // Payment terms table
         if Table = TPaymentTerms.PaymentTerms then
         begin
-            Field:=TPaymentTerms.DESCRIPTION;
+            Field:=TPaymentTerms.Description;
             CleanUp;
             Columns.Add(Field);
-            CustFilter:=WHERE + TPaymentTerms.ERP_CODE + EQUAL + QuotedStr(Code) + _AND + TPaymentTerms.COCODE + EQUAL + QuotedStr(Entity);
+            CustFilter:=WHERE + TPaymentTerms.ErpCode + EQUAL + QuotedStr(Code) + _AND + TPaymentTerms.Entity + EQUAL + QuotedStr(Entity);
             OpenTable(Table);
         end;
 
         // Persons table
         if Table = TPerson.Person then
         begin
-            Field:=TPerson.DESCRIPTION;
+            Field:=TPerson.Description;
             CleanUp;
             Columns.Add(Field);
-            CustFilter:=WHERE + TPerson.ERP_CODE + EQUAL + QuotedStr(Code) + _AND + TPerson.COCODE + EQUAL + QuotedStr(Entity);
+            CustFilter:=WHERE + TPerson.ErpCode + EQUAL + QuotedStr(Code) + _AND + TPerson.Entity + EQUAL + QuotedStr(Entity);
             OpenTable(Table);
         end;
 
@@ -584,10 +584,10 @@ var
 begin
     Settings:=TSettings.Create;
     for iCNT:=0 to Grid.ColCount - 2 do
-        if Settings.GetStringValue(ModeBySection, MainForm.FindKey(ModeBySection, iCNT), 'True') = 'False' then
-            Grid.ColWidths[Grid.ReturnColumn(MainForm.FindKey(ModeBySection, iCNT), 1, 1)]:=-1
+        if Settings.GetStringValue(ModeBySection, Settings.FindSettingsKey(ModeBySection, iCNT), 'True') = 'False' then
+            Grid.ColWidths[Grid.ReturnColumn(Settings.FindSettingsKey(ModeBySection, iCNT), 1, 1)]:=-1
                 else
-                    Grid.ColWidths[Grid.ReturnColumn(MainForm.FindKey(ModeBySection, iCNT), 1, 1)]:=100;
+                    Grid.ColWidths[Grid.ReturnColumn(Settings.FindSettingsKey(ModeBySection, iCNT), 1, 1)]:=100;
 end;
 
 /// <summary>
@@ -920,10 +920,10 @@ begin
             ArrAgeView[avRow, 20]:=IntToStr((StrToInt(StringReplace(ArrAgeView[avRow, 20], 'F', '0', [rfReplaceAll]))));
 
             { LEDGER ISO }
-            if MainForm.DetailsGrid.Cells[0, 0] = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.DetailsGrid.Cells[0, 1];
-            if MainForm.DetailsGrid.Cells[1, 0] = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.DetailsGrid.Cells[1, 1];
-            if MainForm.DetailsGrid.Cells[2, 0] = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.DetailsGrid.Cells[2, 1];
-            if MainForm.DetailsGrid.Cells[3, 0] = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.DetailsGrid.Cells[3, 1];
+            if MainForm.sgCompanyData.Cells[0, 0] = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.sgCompanyData.Cells[0, 1];
+            if MainForm.sgCompanyData.Cells[1, 0] = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.sgCompanyData.Cells[1, 1];
+            if MainForm.sgCompanyData.Cells[2, 0] = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.sgCompanyData.Cells[2, 1];
+            if MainForm.sgCompanyData.Cells[3, 0] = ArrAgeView[avRow, 20] then ArrAgeView[avRow, 21]:=MainForm.sgCompanyData.Cells[3, 1];
 
             { COUNTERS }
             { MOVE COUNTER }
@@ -1030,34 +1030,34 @@ var
 begin
 
     { ASSIGN COLUMNS | ADD ALL BUT ID COLUMN }
-    Columns.Add(TSnapshots.GROUP_ID);
-    Columns.Add(TSnapshots.AGE_DATE);
-    Columns.Add(TSnapshots.SNAPSHOT_DT);
-    Columns.Add(TSnapshots.CUSTOMER_NAME);
-    Columns.Add(TSnapshots.CUSTOMER_NUMBER);
-    Columns.Add(TSnapshots.COUNTRY_CODE);
-    Columns.Add(TSnapshots.NOT_DUE);
-    Columns.Add(TSnapshots.RANGE1);
-    Columns.Add(TSnapshots.RANGE2);
-    Columns.Add(TSnapshots.RANGE3);
-    Columns.Add(TSnapshots.RANGE4);
-    Columns.Add(TSnapshots.RANGE5);
-    Columns.Add(TSnapshots.RANGE6);
-    Columns.Add(TSnapshots.OVERDUE);
-    Columns.Add(TSnapshots.TOTAL);
-    Columns.Add(TSnapshots.CREDIT_LIMIT);
-    Columns.Add(TSnapshots.EXCEEDED_AMOUNT);
-    Columns.Add(TSnapshots.PAYMENT_TERMS);
-    Columns.Add(TSnapshots.AGENT);
-    Columns.Add(TSnapshots.DIVISION);
-    Columns.Add(TSnapshots.CO_CODE);
-    Columns.Add(TSnapshots.LEDGER_ISO);
-    Columns.Add(TSnapshots.INF4);
-    Columns.Add(TSnapshots.INF7);
-    Columns.Add(TSnapshots.PERSON);
-    Columns.Add(TSnapshots.GROUP3);
-    Columns.Add(TSnapshots.RISK_CLASS);
-    Columns.Add(TSnapshots.CUID);
+    Columns.Add(TSnapshots.GroupId);
+    Columns.Add(TSnapshots.AgeDate);
+    Columns.Add(TSnapshots.SnapshotDt);
+    Columns.Add(TSnapshots.CustomerName);
+    Columns.Add(TSnapshots.CustomerNumber);
+    Columns.Add(TSnapshots.CountryCode);
+    Columns.Add(TSnapshots.NotDue);
+    Columns.Add(TSnapshots.Range1);
+    Columns.Add(TSnapshots.Range2);
+    Columns.Add(TSnapshots.Range3);
+    Columns.Add(TSnapshots.Range4);
+    Columns.Add(TSnapshots.Range5);
+    Columns.Add(TSnapshots.Range6);
+    Columns.Add(TSnapshots.Overdue);
+    Columns.Add(TSnapshots.Total);
+    Columns.Add(TSnapshots.CreditLimit);
+    Columns.Add(TSnapshots.ExceededAmount);
+    Columns.Add(TSnapshots.PaymentTerms);
+    Columns.Add(TSnapshots.Agent);
+    Columns.Add(TSnapshots.Division);
+    Columns.Add(TSnapshots.CoCode);
+    Columns.Add(TSnapshots.LedgerIso);
+    Columns.Add(TSnapshots.Inf4);
+    Columns.Add(TSnapshots.Inf7);
+    Columns.Add(TSnapshots.Person);
+    Columns.Add(TSnapshots.Group3);
+    Columns.Add(TSnapshots.RiskClass);
+    Columns.Add(TSnapshots.Cuid);
     Columns.Add(TSnapshots.SalesResponsible);
     Columns.Add(TSnapshots.CustomerGroup);
     Columns.Add(TSnapshots.PersonResponsible);
@@ -1065,7 +1065,7 @@ begin
 
     { DELETE STATEMENT | REMOVE OLD DATA }
     DeleteData:=DELETE_FROM + DestTable;
-    Condition:=TSnapshots.GROUP_ID + EQUAL + QuotedStr(SourceArray[0, 0]) + _AND + TSnapshots.AGE_DATE + EQUAL + QuotedStr(LeftStr(SourceArray[0, 1], 10));
+    Condition:=TSnapshots.GroupId + EQUAL + QuotedStr(SourceArray[0, 0]) + _AND + TSnapshots.AgeDate + EQUAL + QuotedStr(LeftStr(SourceArray[0, 1], 10));
 
     { INSERT STATEMENT | INSERT NEW DATA }
     Transaction:=TransactTemp;

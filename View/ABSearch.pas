@@ -316,17 +316,17 @@ begin
     if CheckBoxAliasCase.Checked then EqualLike:=EQUAL else EqualLike:=LIKE;
 
     // Attach "like" or "equal" and/or collate option
-    if EditName.Enabled       then StrEditName      :=TAddressBook.CUSTOMER_NAME   + EqualLike + QuotedStr(EditName.Text)       + Collate1 + _AND;
-    if EditEmail.Enabled      then StrEditEmail     :=TAddressBook.EMAILS          + EqualLike + QuotedStr(EditEmail.Text)      + Collate2 + _AND;
-    if EditEstatement.Enabled then StrEditEstatement:=TAddressBook.ESTATEMENTS     + EqualLike + QuotedStr(EditEstatement.Text) + Collate3 + _AND;
-    if EditUserAlias.Enabled  then StrEditUserAlias :=TAddressBook.USER_ALIAS      + EqualLike + QuotedStr(EditUserAlias.Text)  + Collate4 + _AND;
+    if EditName.Enabled       then StrEditName      :=TAddressBook.CustomerName   + EqualLike + QuotedStr(EditName.Text)       + Collate1 + _AND;
+    if EditEmail.Enabled      then StrEditEmail     :=TAddressBook.Emails          + EqualLike + QuotedStr(EditEmail.Text)      + Collate2 + _AND;
+    if EditEstatement.Enabled then StrEditEstatement:=TAddressBook.Estatements     + EqualLike + QuotedStr(EditEstatement.Text) + Collate3 + _AND;
+    if EditUserAlias.Enabled  then StrEditUserAlias :=TAddressBook.UserAlias      + EqualLike + QuotedStr(EditUserAlias.Text)  + Collate4 + _AND;
 
     // Do not use "like" and match case
-    if EditNumber.Enabled     then StrEditNumber    :=TAddressBook.CUSTOMER_NUMBER + EQUAL + QuotedStr(EditNumber.Text)     + _AND;
-    if EditPhones.Enabled     then StrEditPhones    :=TAddressBook.PHONE_NUMBERS   + EQUAL + QuotedStr(EditPhones.Text)     + _AND;
-    if EditCoCode.Enabled     then StrEditCoCode    :=TAddressBook.COCODE          + EQUAL + QuotedStr(EditCoCode.Text)     + _AND;
-    if EditAgent.Enabled      then StrEditAgent     :=TAddressBook.AGENT           + EQUAL + QuotedStr(EditAgent.Text)      + _AND;
-    if EditDivision.Enabled   then StrEditDivision  :=TAddressBook.DIVISION        + EQUAL + QuotedStr(EditDivision.Text)   + _AND;
+    if EditNumber.Enabled     then StrEditNumber    :=TAddressBook.CustomerNumber + EQUAL + QuotedStr(EditNumber.Text)     + _AND;
+    if EditPhones.Enabled     then StrEditPhones    :=TAddressBook.PhoneNumbers   + EQUAL + QuotedStr(EditPhones.Text)     + _AND;
+    if EditCoCode.Enabled     then StrEditCoCode    :=TAddressBook.CoCode          + EQUAL + QuotedStr(EditCoCode.Text)     + _AND;
+    if EditAgent.Enabled      then StrEditAgent     :=TAddressBook.Agent           + EQUAL + QuotedStr(EditAgent.Text)      + _AND;
+    if EditDivision.Enabled   then StrEditDivision  :=TAddressBook.Division        + EQUAL + QuotedStr(EditDivision.Text)   + _AND;
 
     // Build conditions
     Conditions:=StrEditNumber + StrEditName + StrEditEmail + StrEditEstatement + StrEditPhones + StrEditUserAlias + StrEditCoCode + StrEditAgent + StrEditDivision;

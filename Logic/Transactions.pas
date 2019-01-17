@@ -149,10 +149,10 @@ begin
     CmdType:=cmdText;
     StrSQL:=EXECUTE + QueryOpenItems                                           + SPACE +
               QuotedStr(GetDateTime(gdDateOnly))                               + COMMA +
-              QuotedStr(MainForm.ConvertName(SettingGrid.Cells[0, 0], 'F', 0)) + COMMA +
-              QuotedStr(MainForm.ConvertName(SettingGrid.Cells[1, 0], 'F', 0)) + COMMA +
-              QuotedStr(MainForm.ConvertName(SettingGrid.Cells[2, 0], 'F', 0)) + COMMA +
-              QuotedStr(MainForm.ConvertName(SettingGrid.Cells[3, 0], 'F', 0)) + COMMA +
+              QuotedStr(MainForm.ConvertCoCode(SettingGrid.Cells[0, 0], 'F', 0)) + COMMA +
+              QuotedStr(MainForm.ConvertCoCode(SettingGrid.Cells[1, 0], 'F', 0)) + COMMA +
+              QuotedStr(MainForm.ConvertCoCode(SettingGrid.Cells[2, 0], 'F', 0)) + COMMA +
+              QuotedStr(MainForm.ConvertCoCode(SettingGrid.Cells[3, 0], 'F', 0)) + COMMA +
               QuotedStr(CutOff)                                                + COMMA +
               QuotedStr(Agents)                                                + COMMA +
               QuotedStr(Divisions)                                             + COMMA +
@@ -161,7 +161,7 @@ begin
     Result:=SqlToGrid(DestGrid, ExecSQL, False, True);
 
     // Sort via CUID
-    DestGrid.MSort(DestGrid.ReturnColumn(TOpenitems.CUID, 1 , 1), 2, True);  //to be removed - to be done on SQL server
+    DestGrid.MSort(DestGrid.ReturnColumn(TOpenitems.Cuid, 1 , 1), 2, True);  //to be removed - to be done on SQL server
 
 end;
 
@@ -275,40 +275,40 @@ begin
     CleanUp;
     Columns.Add(
         SUM +
-            BracketStr(TCompanyData.KPI_OVERDUE_TARGET, brRound) +
+            BracketStr(TCompanyData.KpiOverdueTarget, brRound) +
         _AS +
-            QuotedStr(TCompanyData.KPI_OVERDUE_TARGET)
+            QuotedStr(TCompanyData.KpiOverdueTarget)
     );
 
     Columns.Add(
         SUM +
-            BracketStr(TCompanyData.KPI_UNALLOCATED_TARGET, brRound) +
+            BracketStr(TCompanyData.KpiUnallocatedTarget, brRound) +
             _AS +
-            QuotedStr(TCompanyData.KPI_UNALLOCATED_TARGET)
+            QuotedStr(TCompanyData.KpiUnallocatedTarget)
     );
 
     CustFilter:=WHERE +
-                    TCompanyData.CO_CODE +
+                    TCompanyData.CoCode +
                 EQUAL +
                     QuotedStr(SettingGrid.Cells[0, 0]) +
                 _OR  +
-                    TCompanyData.CO_CODE +
+                    TCompanyData.CoCode +
                 EQUAL +
                     QuotedStr(SettingGrid.Cells[1, 0]) +
                 _OR  +
-                    TCompanyData.CO_CODE +
+                    TCompanyData.CoCode +
                 EQUAL +
                     QuotedStr(SettingGrid.Cells[2, 0]) +
                 _OR  +
-                    TCompanyData.CO_CODE +
+                    TCompanyData.CoCode +
                 EQUAL +
                     QuotedStr(SettingGrid.Cells[3, 0]);
 
     OpenTable(TCompanyData.CompanyData);
     if DataSet.RecordCount = 1 then
     begin
-        KPIOverdue:=StrToFloatDef(MainForm.OleGetStr(DataSet.Fields[TCompanyData.KPI_OVERDUE_TARGET].Value), 0);
-        KPIUnalloc:=StrToFloatDef(MainForm.OleGetStr(DataSet.Fields[TCompanyData.KPI_UNALLOCATED_TARGET].Value), 0);
+        KPIOverdue:=StrToFloatDef(MainForm.OleGetStr(DataSet.Fields[TCompanyData.KpiOverdueTarget].Value), 0);
+        KPIUnalloc:=StrToFloatDef(MainForm.OleGetStr(DataSet.Fields[TCompanyData.KpiUnallocatedTarget].Value), 0);
     end;
 
     { DISPLAY }

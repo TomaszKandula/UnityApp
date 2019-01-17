@@ -151,7 +151,7 @@ begin
                            strNULL,
                            False
                          );
-  MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneralComment.fFOLLOWUP, 1, 1), Row]:=DateToStr(SelectedDate);
+  MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneralComment.fFollowUp, 1, 1), Row]:=DateToStr(SelectedDate);
 end;
 
 
@@ -239,7 +239,7 @@ begin
     begin
         SetFollowUp(
             CalendarForm.MyCalendar.Date,
-            MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCUID, 1, 1),
+            MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1),
             MainForm.sgAgeView.Row],
             MainForm.sgAgeView.Row
         );

@@ -1194,7 +1194,7 @@ object MainForm: TMainForm
     Margins.Top = 0
     Margins.Right = 10
     Margins.Bottom = 0
-    ActivePage = TabSheet5
+    ActivePage = TabSheet2
     Align = alClient
     DoubleBuffered = True
     Font.Charset = DEFAULT_CHARSET
@@ -1258,10 +1258,6 @@ object MainForm: TMainForm
       Font.Style = []
       Highlighted = True
       ParentFont = False
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Header1: TPanel
         Left = 0
         Top = 0
@@ -2645,10 +2641,6 @@ object MainForm: TMainForm
       Caption = 'OPEN ITEMS'
       Highlighted = True
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Header2: TPanel
         Left = 0
         Top = 0
@@ -3145,7 +3137,7 @@ object MainForm: TMainForm
               Font.Style = []
               ParentFont = False
             end
-            object DetailsGrid: TStringGrid
+            object sgCompanyData: TStringGrid
               Left = 113
               Top = 11
               Width = 207
@@ -3167,9 +3159,9 @@ object MainForm: TMainForm
               Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goDrawFocusSelected, goEditing, goTabs]
               ScrollBars = ssNone
               TabOrder = 0
-              OnDrawCell = DetailsGridDrawCell
-              OnKeyPress = DetailsGridKeyPress
-              OnKeyUp = DetailsGridKeyUp
+              OnDrawCell = sgCompanyDataDrawCell
+              OnKeyPress = sgCompanyDataKeyPress
+              OnKeyUp = sgCompanyDataKeyUp
               ColWidths = (
                 50
                 50
@@ -6497,10 +6489,6 @@ object MainForm: TMainForm
       Caption = 'UNIDENTIFIED'
       Highlighted = True
       ImageIndex = 7
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Header6: TPanel
         Left = 0
         Top = 0
@@ -10118,10 +10106,6 @@ object MainForm: TMainForm
       ImageIndex = 8
       OnResize = TabSheet7Resize
       OnShow = TabSheet7Show
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Header7: TPanel
         Left = 0
         Top = 0
@@ -10222,15 +10206,11 @@ object MainForm: TMainForm
         Margins.Top = 0
         Margins.Right = 17
         Margins.Bottom = 17
-        ActivePage = Page10
+        ActivePage = Page1
         Align = alClient
         TabOrder = 1
         object Page1: TTabSheet
           Caption = 'Companies'
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object PanelCoCodes: TPanel
             AlignWithMargins = True
             Left = 17
@@ -10335,10 +10315,6 @@ object MainForm: TMainForm
         object Page10: TTabSheet
           Caption = 'Control Status'
           ImageIndex = 9
-          ExplicitLeft = 0
-          ExplicitTop = 0
-          ExplicitWidth = 0
-          ExplicitHeight = 0
           object PanelControlStatus: TPanel
             AlignWithMargins = True
             Left = 17

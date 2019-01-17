@@ -96,15 +96,15 @@ begin
     InvoicesGrid.Freeze(True);
 
     try
-        CUID:=MainForm.sgInvoiceTracker.Cells[MainForm.sgInvoiceTracker.ReturnColumn(TTrackerData.CUID, 1, 1), MainForm.sgInvoiceTracker.Row];
+        CUID:=MainForm.sgInvoiceTracker.Cells[MainForm.sgInvoiceTracker.ReturnColumn(TTrackerData.Cuid, 1, 1), MainForm.sgInvoiceTracker.Row];
         Tables.StrSQL:=SELECT                      +
-                            TTrackerInvoices.INVOICENO    + COMMA +
-                            TTrackerInvoices.INVOICESTATE + COMMA +
-                            TTrackerInvoices.STAMP        +
+                            TTrackerInvoices.InvoiceNo    + COMMA +
+                            TTrackerInvoices.InvoiceState + COMMA +
+                            TTrackerInvoices.Stamp        +
                         FROM                       +
                             TTrackerInvoices.TrackerInvoices +
                         WHERE                      +
-                            TTrackerInvoices.CUID         +
+                            TTrackerInvoices.Cuid         +
                         EQUAL                      +
                             QuotedStr(CUID);
         Tables.SqlToGrid(InvoicesGrid, Tables.ExecSQL, False, True);

@@ -11,7 +11,7 @@ uses
 type
 
     /// <summary>
-    ///     "ISetting" interface exposes properties and methods for reading/writing application settings file and licence file.
+    /// "ISetting" interface exposes properties and methods for reading/writing application settings file and licence file.
     /// </summary>
 
     ISettings = Interface(IInterface)
@@ -30,6 +30,7 @@ type
         procedure GetSections(List: TStringList);
         procedure DeleteSection(SectionName: string);
         procedure DeleteKey(Section: string; Ident: string);
+        function  FindSettingsKey(Section: string; KeyPosition: integer): string;
         function  GetLastError     : integer;
         function  GetAppDir        : string;
         function  GetAppLog        : string;
@@ -140,8 +141,8 @@ type
         property FPathLicenceLic   : string    read pPathLicenceLic;
 
         // URL
-        property FReleasePakURL   : string    read pReleasePakURL;
-        property FReleaseManURL   : string    read pReleaseManURL;
+        property FReleasePakURL    : string    read pReleasePakURL;
+        property FReleaseManURL    : string    read pReleaseManURL;
         property FGetLayoutsURL    : string    read pGetLayoutsURL;
 
         // Directories
@@ -164,33 +165,34 @@ type
         destructor  Destroy; override;
 
         // Methods
-        function    Encode(ConfigType: integer): boolean;
-        function    Decode(ConfigType: integer; ToMemory: boolean): boolean;
-        function    ConfigToMemory: boolean;
-        function    GetLicenceValue(Section: string; Key: string): string;
-        function    GetStringValue(Section: string; Key: string; Default: string): string;
-        procedure   SetStringValue(Section: string; Key: string; Value: string);
-        function    GetIntegerValue(Section: string; Key: string; Default: integer): integer;
-        procedure   SetIntegerValue(Section: string; Key: string; Value: integer);
-        procedure   GetSectionValues(Section: string; var Values: TStringList);
-        procedure   GetSection(Section: string; var Keys: TStringList);
-        procedure   GetSections(List: TStringList);
-        procedure   DeleteSection(SectionName: string);
-        procedure   DeleteKey(Section: string; Ident: string);
-        function    GetLastError     : integer;
-        function    GetAppDir        : string;
-        function    GetLayoutDir     : string;
-        function    GetPackageDir    : string;
-        function    GetAppLog        : string;
-        function    GetWinUserName   : string;
-        function    GetWinTempFolder : string;
-        function    GetPathGridImage : string;
-        function    GetPathEventLog  : string;
-        function    GetPathAppCfg    : string;
-        function    GetPathLicenceLic: string;
-        function    GetReleasePakURL : string;
-        function    GetReleaseManURL : string;
-        function    GetLayoutsURL    : string;
+        function  Encode(ConfigType: integer): boolean;
+        function  Decode(ConfigType: integer; ToMemory: boolean): boolean;
+        function  ConfigToMemory: boolean;
+        function  GetLicenceValue(Section: string; Key: string): string;
+        function  GetStringValue(Section: string; Key: string; Default: string): string;
+        procedure SetStringValue(Section: string; Key: string; Value: string);
+        function  GetIntegerValue(Section: string; Key: string; Default: integer): integer;
+        procedure SetIntegerValue(Section: string; Key: string; Value: integer);
+        procedure GetSectionValues(Section: string; var Values: TStringList);
+        procedure GetSection(Section: string; var Keys: TStringList);
+        procedure GetSections(List: TStringList);
+        procedure DeleteSection(SectionName: string);
+        procedure DeleteKey(Section: string; Ident: string);
+        function  FindSettingsKey(Section: string; KeyPosition: integer): string;
+        function  GetLastError     : integer;
+        function  GetAppDir        : string;
+        function  GetLayoutDir     : string;
+        function  GetPackageDir    : string;
+        function  GetAppLog        : string;
+        function  GetWinUserName   : string;
+        function  GetWinTempFolder : string;
+        function  GetPathGridImage : string;
+        function  GetPathEventLog  : string;
+        function  GetPathAppCfg    : string;
+        function  GetPathLicenceLic: string;
+        function  GetReleasePakURL : string;
+        function  GetReleaseManURL : string;
+        function  GetLayoutsURL    : string;
     end;
 
 
@@ -204,19 +206,19 @@ constructor TSettings.Create;
 begin
 
     /// <remarks>
-    ///    General settings (config.cfg), containing all the necessary data for the application.
+    /// General settings (config.cfg), containing all the necessary data for the application.
     /// </remarks>
 
     TMIG:=TMemIniFile.Create('');
 
     /// <remarks>
-    ///    Licence details (unity.licx).
+    /// Licence details (unity.licx).
     /// </remarks>
 
     TMIL:=TMemIniFile.Create('');
 
     /// <summary>
-    ///     Holds list of all registered layouts.
+    /// Holds list of all registered layouts.
     /// </summary>
 
     List:=TStringList.Create;
@@ -238,7 +240,7 @@ begin
     pPathGridImage :=pAppDir + GridImgFile;
 
     /// <remarks>
-    ///    Return 404 error code if configuration file cannot be found.
+    /// Return 404 error code if configuration file cannot be found.
     /// </remarks>
 
     if FileExists(pPathAppCfg) then
@@ -249,7 +251,7 @@ begin
 end;
 
 /// <summary>
-///    Release all from memory. Call it before main form is destroyed.
+/// Release all from memory. Call it before main form is destroyed.
 /// </summary>
 
 destructor TSettings.Destroy;
@@ -265,7 +267,7 @@ end;
 
 
 /// <summary>
-///    Push config content to the memory.
+/// Push config content to the memory.
 /// </summary>
 
 function TSettings.ConfigToMemory: boolean;
@@ -299,8 +301,8 @@ end;
 // --------------------------------------------------------------------------------------------------------------------------------- GET RELEASE STATUS CODE //
 
 /// <summary>
-///     Get release number from release manifest hosted at:
-///     https://unityinfo.azurewebsites.net/release/package/unity.manifest
+/// Get release number from release manifest hosted at:
+/// https://unityinfo.azurewebsites.net/release/package/unity.manifest
 /// </summary>
 
 function TSettings.GetReleaseNumber: cardinal;
@@ -314,7 +316,7 @@ begin
 end;
 
 /// <summary>
-///     Set release number in settings file.
+/// Set release number in settings file.
 /// </summary>
 
 procedure TSettings.SetReleaseNumber(NewRelease: cardinal);
@@ -327,7 +329,7 @@ begin
 end;
 
 /// <summary>
-///     Pass layout list from settings file to a usable variable.
+/// Pass layout list from settings file to a usable variable.
 /// </summary>
 
 function TSettings.GetLayoutLists: TStringList;
@@ -336,7 +338,7 @@ begin
 end;
 
 /// <summary>
-///    Get update time and date registered in setting file.
+/// Get update time and date registered in setting file.
 /// </summary>
 
 function TSettings.GetReleaseDateTime: TDateTime;
@@ -351,7 +353,7 @@ begin
 end;
 
 /// <summary>
-///    Set new update time and date.
+/// Set new update time and date.
 /// </summary>
 
 procedure TSettings.SetReleaseDateTime(NewDateTime: TDateTime);
@@ -407,11 +409,11 @@ begin
             ComputeCRC32(rStream.Memory, rStream.Size, vCRC);
 
             /// <remarks>
-            ///    To convert into HEX or Decimal, use:
-            ///    <code>
-            ///        IntToHex(vCRC, 8);
-            ///        IntToStr(vCRC);
-            ///    </code>
+            /// To convert into HEX or Decimal, use:
+            /// <code>
+            ///    IntToHex(vCRC, 8);
+            ///    IntToStr(vCRC);
+            /// </code>
             /// </remarks>
 
             // Save last 8 bytes to stream
@@ -437,10 +439,10 @@ begin
             Result:=True;
 
             /// <remarks>
-            ///    To check stream size, use:
-            ///    <code>
-            ///        IntToStr(wStream.Size);
-            ///    </code>
+            /// To check stream size, use:
+            /// <code>
+            ///     IntToStr(wStream.Size);
+            /// </code>
             /// </remarks>
 
         except
@@ -457,8 +459,8 @@ begin
 end;
 
 /// <summary>
-///    Decoding method based on XOR and SHR with secret KEY. Routine remain the same, if the key is unchanged, then appling the same stream
-///    will shift the characters numbers back to theirs original values.
+/// Decoding method based on XOR and SHR with secret KEY. Routine remain the same, if the key is unchanged, then appling the same stream
+/// will shift the characters numbers back to theirs original values.
 /// </summary>
 
 function TSettings.Decode(ConfigType: integer; ToMemory: boolean): boolean;
@@ -549,7 +551,7 @@ begin
 end;
 
 
-// ----------------------------------------------------------------------------------------------------------- GETTERS AND SETTERS FOR REQUESTED SECTION/KEY //
+// ------------------------------------------------------------------------------------------------------------------------------------------ HELPER METHODS //
 
 
 function TSettings.GetLicenceValue(Section: string; Key: string): string;
@@ -613,6 +615,24 @@ procedure TSettings.DeleteKey(Section: string; Ident: string);
 begin
     if Assigned(TMIG) then
         TMIG.DeleteKey(Section, Ident);
+end;
+
+
+/// <summary>
+/// Return key value for given list position.
+/// </summary>
+
+function TSettings.FindSettingsKey(Section: string; KeyPosition: integer): string;
+var
+    SL: TStringList;
+begin
+    Result:=unNA;
+    SL:=TStringList.Create;
+    GetSection(Section, SL);
+    if KeyPosition > SL.Count then
+        Exit
+            else
+                Result:=LeftStr(SL.Strings[KeyPosition], AnsiPos('=', SL.Strings[KeyPosition]) - 1);
 end;
 
 

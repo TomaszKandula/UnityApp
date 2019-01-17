@@ -32,38 +32,38 @@ type
     published
         const CompanyData = 'Customer.CompanyData';
     public
-        const ID                     = 'Id';
-        const CO_CODE                = 'CoCode';
-        const DBNAME                 = 'DbName';
-        const BRANCH                 = 'Branch';
-        const CONAME                 = 'CoName';
-        const COCURRENCY             = 'CoCurrency';
-        const COTYPE                 = 'CoType';
-        const COUNTRY                = 'Country';
-        const CITY                   = 'City';
-        const FMANAGER               = 'FinManager';
-        const INTEREST_RATE          = 'InterestRate';
-        const VATNO                  = 'VatNo';
-        const COADDRESS              = 'CoAddress';
-        const AGENTS                 = 'Agents';
-        const KPI_OVERDUE_TARGET     = 'KpiOverdueTarget';
-        const KPI_UNALLOCATED_TARGET = 'KpiUnallocatedTarget';
-        const SEND_NOTE_FROM         = 'SendNoteFrom';
-        const LEGALTO                = 'LegalTo';
-        const BANKDETAILS            = 'BankAccounts';
-        const STAT_EXCEPT            = 'StatementExcept';
-        const FIRST_STATEMENT        = 'FirstStatement';
-        const SECOND_STATEMENT       = 'SecondStatement';
-        const REM_EX1                = 'ReminderException1';
-        const REM_EX2                = 'ReminderException2';
-        const REM_EX3                = 'ReminderException3';
-        const REM_EX4                = 'ReminderException4';
-        const REM_EX5                = 'ReminderException5';
-        const DUNS                   = 'Duns';
-        const Telephone              = 'TelephoneNumbers';
-        const MAN_ID                 = 'IdManager';
-        const TL_ID                  = 'IdTeamleader';
-        const DIVISIONS              = 'Divisions';
+        const Id                   = 'Id';
+        const CoCode               = 'CoCode';
+        const DbName               = 'DbName';
+        const Branch               = 'Branch';
+        const CoName               = 'CoName';
+        const CoCurrency           = 'CoCurrency';
+        const CoType               = 'CoType';
+        const Country              = 'Country';
+        const City                 = 'City';
+        const FinManager           = 'FinManager';
+        const InterestRate         = 'InterestRate';
+        const VatNo                = 'VatNo';
+        const CoAddress            = 'CoAddress';
+        const Agents               = 'Agents';
+        const KpiOverdueTarget     = 'KpiOverdueTarget';
+        const KpiUnallocatedTarget = 'KpiUnallocatedTarget';
+        const SendNoteFrom         = 'SendNoteFrom';
+        const LegalTo              = 'LegalTo';
+        const BankAccounts         = 'BankAccounts';
+        const StatementExcept      = 'StatementExcept';
+        const FirstStatement       = 'FirstStatement';
+        const SecondStatement      = 'SecondStatement';
+        const ReminderException1   = 'ReminderException1';
+        const ReminderException2   = 'ReminderException2';
+        const ReminderException3   = 'ReminderException3';
+        const ReminderException4   = 'ReminderException4';
+        const ReminderException5   = 'ReminderException5';
+        const Duns                 = 'Duns';
+        const TelephoneNumbers     = 'TelephoneNumbers';
+        const IdManager            = 'IdManager';
+        const IdTeamleader         = 'IdTeamleader';
+        const Divisions            = 'Divisions';
     end;
 
     TAddressBook = class(TDataTables)
@@ -71,18 +71,18 @@ type
     published
         const AddressBook = 'Customer.AddressBook';
     public
-        const ID              = 'Id';
-        const USER_ALIAS      = 'UserAlias';
-        const SCUID           = 'Scuid';
-        const CUSTOMER_NUMBER = 'CustomerNumber';
-        const CUSTOMER_NAME   = 'CustomerName';
-        const EMAILS          = 'Emails';
-        const PHONE_NUMBERS   = 'PhoneNumbers';
-        const CONTACT         = 'Contact';
-        const ESTATEMENTS     = 'Estatements';
-        const AGENT           = 'Agent';
-        const DIVISION        = 'Division';
-        const COCODE          = 'CoCode';
+        const Id             = 'Id';
+        const UserAlias      = 'UserAlias';
+        const Scuid          = 'Scuid';
+        const CustomerNumber = 'CustomerNumber';
+        const CustomerName   = 'CustomerName';
+        const Emails         = 'Emails';
+        const PhoneNumbers   = 'PhoneNumbers';
+        const Contact        = 'Contact';
+        const Estatements    = 'Estatements';
+        const Agent          = 'Agent';
+        const Division       = 'Division';
+        const CoCode         = 'CoCode';
     end;
 
     TDailyComment = class(TDataTables)
@@ -90,20 +90,20 @@ type
     published
         const DailyComment = 'Customer.DailyComment';
     public
-        const ID             = 'Id';
-        const GROUP_ID       = 'GroupId';
-        const CUID           = 'Cuid';
-        const AGEDATE        = 'AgeDate';
-        const STAMP          = 'Stamp';
-        const USER_ALIAS     = 'UserAlias';
-        const EMAIL          = 'Email';
-        const CALLEVENT      = 'CallEvent';
-        const CALLDURATION   = 'CallDuration';
-        const FIXCOMMENT     = 'FixedComment';
-        const EMAIL_Reminder = 'EmailReminder';
-        const EMAIL_AutoStat = 'EmailAutoStat';
-        const EMAIL_ManuStat = 'EmailManuStat';
-        const DATACHECKSUM   = 'DataCheckSum';
+        const Id            = 'Id';
+        const GroupId       = 'GroupId';
+        const Cuid          = 'Cuid';
+        const AgeDate       = 'AgeDate';
+        const Stamp         = 'Stamp';
+        const UserAlias     = 'UserAlias';
+        const Email         = 'Email';
+        const CallEvent     = 'CallEvent';
+        const CallDuration  = 'CallDuration';
+        const FixedComment  = 'FixedComment';
+        const EmailReminder = 'EmailReminder';
+        const EmailAutoStat = 'EmailAutoStat';
+        const EmailManuStat = 'EmailManuStat';
+        const DataCheckSum  = 'DataCheckSum';
     end;
 
     TGeneralComment = class(TDataTables)
@@ -111,17 +111,16 @@ type
     published
         const GeneralComment = 'Customer.GeneralComment';
     public
-        const ID         = 'Id';
-        const CUID       = 'Cuid';
-        const STAMP      = 'Stamp';
-        const USER_ALIAS = 'UserAlias';
-        const FIXCOMMENT = 'FixedComment';
-        const FOLLOWUP   = 'FollowUp';
-        const Free1      = 'Free1';
-        const Free2      = 'Free2';
-        const Free3      = 'Free3';
-        // User friendly name for given columns.
-        const fFOLLOWUP  = 'Follow Up';
+        const Id           = 'Id';
+        const Cuid         = 'Cuid';
+        const Stamp        = 'Stamp';
+        const UserAlias    = 'UserAlias';
+        const FixedComment = 'FixedComment';
+        const FollowUp     = 'FollowUp';
+        const Free1        = 'Free1';
+        const Free2        = 'Free2';
+        const Free3        = 'Free3';
+        const fFollowUp  = 'Follow Up'; // User friendly name for given columns
     end;
 
     TOpenitems = class(TDataTables)
@@ -129,7 +128,7 @@ type
     published
         const Openitems = 'Customer.Openitems';
     public
-        const ID                = 'Id';
+        const Id                = 'Id';
         const SourceDBName      = 'SourceDBName';
         const CustNo            = 'CustNo';
         const VoTp              = 'VoTp';
@@ -169,7 +168,7 @@ type
         const PersonResponsible = 'PersonResponsible';
         const AccountType       = 'AccountType';
         const PmtStat           = 'PmtStat';  // calculated "on the fly"
-        const CUID              = 'Cuid';     // calculated "on the fly"
+        const Cuid              = 'Cuid';     // calculated "on the fly"
     end;
 
     TSnapshots = class(TDataTables)
@@ -177,69 +176,72 @@ type
     published
         const Snapshots = 'Customer.Snapshots';
     public
-        const ID                = 'Id';
-        const GROUP_ID          = 'GroupId';
-        const AGE_DATE          = 'AgeDate';
-        const SNAPSHOT_DT       = 'SnapshotDt';
-        const CUSTOMER_NAME     = 'CustomerName';
-        const CUSTOMER_NUMBER   = 'CustomerNumber';
-        const COUNTRY_CODE      = 'CountryCode';
-        const NOT_DUE           = 'NotDue';
-        const RANGE1            = 'Range1';
-        const RANGE2            = 'Range2';
-        const RANGE3            = 'Range3';
-        const RANGE4            = 'Range4';
-        const RANGE5            = 'Range5';
-        const RANGE6            = 'Range6';
-        const OVERDUE           = 'Overdue';
-        const TOTAL             = 'Total';
-        const CREDIT_LIMIT      = 'CreditLimit';
-        const EXCEEDED_AMOUNT   = 'ExceededAmount';
-        const PAYMENT_TERMS     = 'PaymentTerms';
-        const AGENT             = 'Agent';
-        const DIVISION          = 'Division';
-        const CO_CODE           = 'CoCode';
-        const LEDGER_ISO        = 'LedgerIso';
-        const INF4              = 'Inf4';
-        const INF7              = 'Inf7';
-        const PERSON            = 'Person';
-        const GROUP3            = 'Group3';
-        const RISK_CLASS        = 'RiskClass';
-        const CUID              = 'Cuid';
+        const Id                = 'Id';
+        const GroupId           = 'GroupId';
+        const AgeDate           = 'AgeDate';
+        const SnapshotDt        = 'SnapshotDt';
+        const CustomerName      = 'CustomerName';
+        const CustomerNumber    = 'CustomerNumber';
+        const CountryCode       = 'CountryCode';
+        const NotDue            = 'NotDue';
+        const Range1            = 'Range1';
+        const Range2            = 'Range2';
+        const Range3            = 'Range3';
+        const Range4            = 'Range4';
+        const Range5            = 'Range5';
+        const Range6            = 'Range6';
+        const Overdue           = 'Overdue';
+        const Total             = 'Total';
+        const CreditLimit       = 'CreditLimit';
+        const ExceededAmount    = 'ExceededAmount';
+        const PaymentTerms      = 'PaymentTerms';
+        const Agent             = 'Agent';
+        const Division          = 'Division';
+        const CoCode            = 'CoCode';
+        const LedgerIso         = 'LedgerIso';
+        const Inf4              = 'Inf4';
+        const Inf7              = 'Inf7';
+        const Person            = 'Person';
+        const Group3            = 'Group3';
+        const RiskClass         = 'RiskClass';
+        const Cuid              = 'Cuid';
         const SalesResponsible  = 'SalesResponsible';
         const CustomerGroup     = 'CustomerGroup';
         const PersonResponsible = 'PersonResponsible';
         const AccountType       = 'AccountType';
-        // Temporary - reflects friendly column names in string grid.
-        const fCUSTOMER_NAME     = 'Customer Name';
-        const fCUSTOMER_NUMBER   = 'Customer Number';
-        const fNOT_DUE           = 'Not Due';
-        const fCOUNTRY_CODE      = 'Country Code';
-        const fRANGE1            = '1 - 7';
-        const fRANGE2            = '8 - 30';
-        const fRANGE3            = '31 - 60';
-        const fRANGE4            = '61 - 90';
-        const fRANGE5            = '91 - 120';
-        const fRANGE6            = '121 - oo';
-        const fTOTAL             = 'Total';
-        const fOVERDUE           = 'Overdue';
-        const fCREDIT_LIMIT      = 'Credit Limit';
-        const fEXCEEDED_AMOUNT   = 'Exceeded Amount';
-        const fAGENT             = 'Agent';
-        const fCO_CODE           = 'Co Code';
-        const fPAYMENT_TERMS     = 'Payment Terms';
-        const fDIVISION          = 'Division';
-        const fLEDGER_ISO        = 'Ledger Iso';
-        const fINF4              = 'Inf4';
-        const fINF7              = 'Inf7';
-        const fPERSON            = 'Person';
-        const fGROUP3            = 'Group3';
-        const fRISK_CLASS        = 'Risk Class';
-        const fCUID              = 'Cuid';
+
+        // Temporary - reflects friendly column names in string grid
+
+        const fCustomerName      = 'Customer Name';
+        const fCustomerNumber    = 'Customer Number';
+        const fNotDue            = 'Not Due';
+        const fCountryCode       = 'Country Code';
+        const fRange1            = '1 - 7';
+        const fRange2            = '8 - 30';
+        const fRange3            = '31 - 60';
+        const fRange4            = '61 - 90';
+        const fRange5            = '91 - 120';
+        const fRange6            = '121 - oo';
+        const fTotal             = 'Total';
+        const fOverdue           = 'Overdue';
+        const fCreditLimit       = 'Credit Limit';
+        const fExceededAmount    = 'Exceeded Amount';
+        const fAgent             = 'Agent';
+        const fCoCode            = 'Co Code';
+        const fPaymentTerms      = 'Payment Terms';
+        const fDivision          = 'Division';
+        const fLedgerIso         = 'Ledger Iso';
+        const fInf4              = 'Inf4';
+        const fInf7              = 'Inf7';
+        const fPerson            = 'Person';
+        const fGroup3            = 'Group3';
+        const fRiskClass         = 'Risk Class';
+        const fCuid              = 'Cuid';
         const fSalesResponsible  = 'Sales Responsible';
         const fCustomerGroup     = 'Customer Group';
         const fPersonResponsible = 'Person Responsible';
         const fAccountType       = 'Account Type';
+
     end;
 
     TPaidinfo = class(TDataTables)
@@ -247,11 +249,11 @@ type
     published
         const Paidinfo = 'Customer.Paidinfo';
     public
-        const ID          = 'Id';
-        const ERP_CODE    = 'ErpCode';
-        const DESCRIPTION = 'Description';
-        const STAMP       = 'ExtractDateStamp';
-        const KEY         = 'ProcessBatchKey';
+        const Id               = 'Id';
+        const ErpCode          = 'ErpCode';
+        const Description      = 'Description';
+        const ExtractDateStamp = 'ExtractDateStamp';
+        const ProcessBatchKey  = 'ProcessBatchKey';
     end;
 
     TTrackerData = class(TDataTables)
@@ -259,23 +261,23 @@ type
     published
         const TrackerData = 'Customer.TrackerData';
     public
-        const ID          = 'Id';
-        const USER_ALIAS  = 'UserAlias';
-        const CUID        = 'Cuid';
-        const CO_CODE     = 'CoCode';
-        const BRANCH      = 'Branch';
-        const CUSTNAME    = 'CustomerName';
-        const STAMP       = 'Stamp';
-        const INDV_REM1   = 'SendReminder1';
-        const INDV_REM2   = 'SendReminder2';
-        const INDV_REM3   = 'SendReminder3';
-        const INDV_REM4   = 'SendReminder4';
-        const SCUID       = 'Sciud';
-        const LAYOUT      = 'ReminderLayout';
-        const STATEMENT   = 'PreStatement';
-        const SENDFROM    = 'SendFrom';
-        const STATEMENTTO = 'StatementTo';
-        const REMINDERTO  = 'ReminderTo';
+        const Id             = 'Id';
+        const UserAlias      = 'UserAlias';
+        const Cuid           = 'Cuid';
+        const CoCode         = 'CoCode';
+        const Branch         = 'Branch';
+        const CustomerName   = 'CustomerName';
+        const Stamp          = 'Stamp';
+        const SendReminder1  = 'SendReminder1';
+        const SendReminder2  = 'SendReminder2';
+        const SendReminder3  = 'SendReminder3';
+        const SendReminder4  = 'SendReminder4';
+        const Sciud          = 'Sciud';
+        const ReminderLayout = 'ReminderLayout';
+        const PreStatement   = 'PreStatement';
+        const SendFrom       = 'SendFrom';
+        const StatementTo    = 'StatementTo';
+        const ReminderTo     = 'ReminderTo';
     end;
 
     TTrackerInvoices = class(TDataTables)
@@ -283,12 +285,12 @@ type
     published
         const TrackerInvoices = 'Customer.TrackerInvoices';
     public
-        const ID           = 'Id';
-        const SK           = 'Sk';
-        const CUID         = 'Cuid';
-        const INVOICENO    = 'InvoiceNo';
-        const INVOICESTATE = 'InvoiceState';
-        const STAMP        = 'Stamp';
+        const Id           = 'Id';
+        const Sk           = 'Sk';
+        const Cuid         = 'Cuid';
+        const InvoiceNo    = 'InvoiceNo';
+        const InvoiceState = 'InvoiceState';
+        const Stamp        = 'Stamp';
     end;
 
     TUAC = class(TDataTables)
@@ -296,10 +298,10 @@ type
     published
         const UAC = 'Customer.UAC';
     public
-        const ID           = 'Id';
-        const USERNAME     = 'UserName';
-        const ACCESS_LEVEL = 'AccessLevel';
-        const ACCESS_MODE  = 'AccessMode';
+        const Id          = 'Id';
+        const UserName    = 'UserName';
+        const AccessLevel = 'AccessLevel';
+        const AccessMode  = 'AccessMode';
     end;
 
     TGroups = class(TDataTables)
@@ -307,10 +309,10 @@ type
     published
         const Groups = 'Customer.Groups';
     public
-        const ID         = 'Id';
-        const GROUP_ID   = 'GroupId';
-        const GROUP_NAME = 'GroupName';
-        const FID        = 'Fid';
+        const Id        = 'Id';
+        const GroupId   = 'GroupId';
+        const GroupName = 'GroupName';
+        const Fid       = 'Fid';
     end;
 
     TControlStatus = class(TDataTables)
@@ -368,12 +370,12 @@ type
     published
         const Person = 'Erp.Person';
     public
-        const ID          = 'Id';
-        const ERP_CODE    = 'ErpCode';
-        const DESCRIPTION = 'Description';
-        const STAMP       = 'ExtractDateStamp';
-        const KEY         = 'ProcessBatchKey';
-        const COCODE      = 'Entity';
+        const Id               = 'Id';
+        const ErpCode          = 'ErpCode';
+        const Description      = 'Description';
+        const ExtractDateStamp = 'ExtractDateStamp';
+        const ProcessBatchKey  = 'ProcessBatchKey';
+        const Entity           = 'Entity';
     end;
 
     TGroup3 = class(TDataTables)
@@ -381,12 +383,12 @@ type
     published
         const Group3 = 'Erp.Group3';
     public
-        const ID          = 'Id';
-        const ERP_CODE    = 'ErpCode';
-        const DESCRIPTION = 'Description';
-        const STAMP       = 'ExtractDateStamp';
-        const KEY         = 'ProcessBatchKey';
-        const COCODE      = 'Entity';
+        const Id               = 'Id';
+        const ErpCode          = 'ErpCode';
+        const Description      = 'Description';
+        const ExtractDateStamp = 'ExtractDateStamp';
+        const ProcessBatchKey  = 'ProcessBatchKey';
+        const Entity           = 'Entity';
     end;
 
     TPersonResponsible = class(TDataTables)
@@ -446,16 +448,16 @@ type
     published
         const PaymentTerms = 'Erp.PaymentTerms';
     public
-        const ID          = 'Id';
-        const ERP_CODE    = 'ErpCode';
-        const DESCRIPTION = 'Description';
-        const I_MONTH     = 'Month';
-        const I_DAYS      = 'Days';
-        const I_DAYS_NET  = 'DaysNet';
-        const I_USING     = 'Using';
-        const STAMP       = 'ExtractDateStamp';
-        const KEY         = 'ProcessBatchKey';
-        const COCODE      = 'Entity';
+        const Id               = 'Id';
+        const ErpCode          = 'ErpCode';
+        const Description      = 'Description';
+        const Month            = 'Month';
+        const Days             = 'Days';
+        const DaysNet          = 'DaysNet';
+        const Using            = 'Using';
+        const ExtractDateStamp = 'ExtractDateStamp';
+        const ProcessBatchKey  = 'ProcessBatchKey';
+        const Entity           = 'Entity';
     end;
 
     TFxRates = class(TDataTables)
@@ -463,10 +465,10 @@ type
     published
         const FxRates = 'Erp.FxRates';
     public
-        const ID     = 'Id';
-        const ISO    = 'Iso';
-        const EXRATE = 'ExRate';
-        const KEY    = 'ProcessBatchKey';
+        const Id     = 'Id';
+        const Iso    = 'Iso';
+        const ExRate = 'ExRate';
+        const ProcessBatchKey    = 'ProcessBatchKey';
     end;
 
     TSSISMaster = class(TDataTables)

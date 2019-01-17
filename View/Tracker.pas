@@ -135,15 +135,15 @@ begin
 
     Database:=TDataTables.Create(MainForm.DbConnect);
     try
-        Database.Columns.Add(DISTINCT + TCompanyData.SEND_NOTE_FROM);
+        Database.Columns.Add(DISTINCT + TCompanyData.SendNoteFrom);
         Database.CustFilter:=WHERE +
-                                TCompanyData.CO_CODE + EQUAL + QuotedStr(COCODE1) +
+                                TCompanyData.CoCode + EQUAL + QuotedStr(COCODE1) +
                              _OR +
-                                TCompanyData.CO_CODE + EQUAL + QuotedStr(COCODE2) +
+                                TCompanyData.CoCode + EQUAL + QuotedStr(COCODE2) +
                              _OR +
-                                TCompanyData.CO_CODE + EQUAL + QuotedStr(COCODE3) +
+                                TCompanyData.CoCode + EQUAL + QuotedStr(COCODE3) +
                              _OR +
-                                TCompanyData.CO_CODE + EQUAL + QuotedStr(COCODE4);
+                                TCompanyData.CoCode + EQUAL + QuotedStr(COCODE4);
         Database.OpenTable(TCompanyData.CompanyData);
         if not(Database.DataSet.RecordCount = 0) then
             Database.SqlToSimpleList(List, Database.DataSet)
@@ -180,15 +180,15 @@ begin
     Database:=TDataTables.Create(MainForm.DbConnect);
 
     try
-        Database.Columns.Add(TAddressBook.EMAILS);
-        Database.Columns.Add(TAddressBook.ESTATEMENTS);
-        Database.CustFilter:=WHERE + TAddressBook.SCUID + EQUAL + Scuid;
+        Database.Columns.Add(TAddressBook.Emails);
+        Database.Columns.Add(TAddressBook.Estatements);
+        Database.CustFilter:=WHERE + TAddressBook.Scuid + EQUAL + Scuid;
         Database.OpenTable(TAddressBook.AddressBook);
 
         if Database.DataSet.RecordCount > 0 then
         begin
-            ReminderMail:=MainForm.OleGetStr(Database.DataSet.Fields[TAddressBook.EMAILS].Value);
-            StatementMail:=MainForm.OleGetStr(Database.DataSet.Fields[TAddressBook.ESTATEMENTS].Value);
+            ReminderMail:=MainForm.OleGetStr(Database.DataSet.Fields[TAddressBook.Emails].Value);
+            StatementMail:=MainForm.OleGetStr(Database.DataSet.Fields[TAddressBook.Estatements].Value);
         end;
 
     finally
@@ -398,22 +398,22 @@ begin
         try
             // Select database columns
             TrackerData.CleanUp;
-            TrackerData.Columns.Add(TTrackerData.USER_ALIAS);
-            TrackerData.Columns.Add(TTrackerData.CUID);
-            TrackerData.Columns.Add(TTrackerData.CO_CODE);
-            TrackerData.Columns.Add(TTrackerData.BRANCH);
-            TrackerData.Columns.Add(TTrackerData.CUSTNAME);
-            TrackerData.Columns.Add(TTrackerData.STAMP);
-            TrackerData.Columns.Add(TTrackerData.INDV_REM1);
-            TrackerData.Columns.Add(TTrackerData.INDV_REM2);
-            TrackerData.Columns.Add(TTrackerData.INDV_REM3);
-            TrackerData.Columns.Add(TTrackerData.INDV_REM4);
-            TrackerData.Columns.Add(TTrackerData.SCUID);
-            TrackerData.Columns.Add(TTrackerData.LAYOUT);
-            TrackerData.Columns.Add(TTrackerData.STATEMENT);
-            TrackerData.Columns.Add(TTrackerData.SENDFROM);
-            TrackerData.Columns.Add(TTrackerData.STATEMENTTO);
-            TrackerData.Columns.Add(TTrackerData.REMINDERTO);
+            TrackerData.Columns.Add(TTrackerData.UserAlias);
+            TrackerData.Columns.Add(TTrackerData.Cuid);
+            TrackerData.Columns.Add(TTrackerData.CoCode);
+            TrackerData.Columns.Add(TTrackerData.Branch);
+            TrackerData.Columns.Add(TTrackerData.CustomerName);
+            TrackerData.Columns.Add(TTrackerData.Stamp);
+            TrackerData.Columns.Add(TTrackerData.SendReminder1);
+            TrackerData.Columns.Add(TTrackerData.SendReminder2);
+            TrackerData.Columns.Add(TTrackerData.SendReminder3);
+            TrackerData.Columns.Add(TTrackerData.SendReminder4);
+            TrackerData.Columns.Add(TTrackerData.Sciud);
+            TrackerData.Columns.Add(TTrackerData.ReminderLayout);
+            TrackerData.Columns.Add(TTrackerData.PreStatement);
+            TrackerData.Columns.Add(TTrackerData.SendFrom);
+            TrackerData.Columns.Add(TTrackerData.StatementTo);
+            TrackerData.Columns.Add(TTrackerData.ReminderTo);
 
             // Put ListView data to StringGrid
             TempData.RowCount:=List.Items.Count;

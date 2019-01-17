@@ -196,7 +196,7 @@ end;
 
 procedure TReportForm.btnSendReportClick(Sender: TObject);
 begin
-    TTSendBugReport.Create;
+    TTSendUserFeedback.Create;
 end;
 
 procedure TReportForm.btnCancelClick(Sender: TObject);

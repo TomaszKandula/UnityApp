@@ -173,7 +173,7 @@ type
     ///     Send user feedback from ReportBug form.
     /// </summary>
 
-    TTSendBugReport = class(TThread)
+    TTSendUserFeedback = class(TThread)
     protected
         procedure Execute; override;
     private
@@ -605,7 +605,7 @@ begin
                 AgeView.ComputeAgeSummary(MainForm.sgAgeView);
                 AgeView.ComputeAndShowRCA(MainForm.sgAgeView);
                 AgeView.UpdateSummary;
-                AgeView.GetDetails(MainForm.DetailsGrid);
+                AgeView.GetDetails(MainForm.sgCompanyData);
 
                 // Map data (source General Tables tabsheet)
                 AgeView.MapGroup3(MainForm.sgAgeView, MainForm.sgGroup3);
@@ -738,7 +738,7 @@ begin
 
         try
             OpenItems.DestGrid   :=MainForm.sgOpenItems;
-            OpenItems.SettingGrid:=MainForm.DetailsGrid;
+            OpenItems.SettingGrid:=MainForm.sgCompanyData;
             OpenItems.DestGrid.Freeze(True);
 
             // Sync with GUI
@@ -878,17 +878,17 @@ begin
         FGrid.Freeze(True);
 
         // Column selection
-        DataTables.Columns.Add(TAddressBook.USER_ALIAS);
-        DataTables.Columns.Add(TAddressBook.SCUID);
-        DataTables.Columns.Add(TAddressBook.CUSTOMER_NUMBER);
-        DataTables.Columns.Add(TAddressBook.CUSTOMER_NAME);
-        DataTables.Columns.Add(TAddressBook.EMAILS);
-        DataTables.Columns.Add(TAddressBook.ESTATEMENTS);
-        DataTables.Columns.Add(TAddressBook.PHONE_NUMBERS);
-        DataTables.Columns.Add(TAddressBook.CONTACT);
-        DataTables.Columns.Add(TAddressBook.COCODE);
-        DataTables.Columns.Add(TAddressBook.AGENT);
-        DataTables.Columns.Add(TAddressBook.DIVISION);
+        DataTables.Columns.Add(TAddressBook.UserAlias);
+        DataTables.Columns.Add(TAddressBook.Scuid);
+        DataTables.Columns.Add(TAddressBook.CustomerNumber);
+        DataTables.Columns.Add(TAddressBook.CustomerName);
+        DataTables.Columns.Add(TAddressBook.Emails);
+        DataTables.Columns.Add(TAddressBook.Estatements);
+        DataTables.Columns.Add(TAddressBook.PhoneNumbers);
+        DataTables.Columns.Add(TAddressBook.Contact);
+        DataTables.Columns.Add(TAddressBook.CoCode);
+        DataTables.Columns.Add(TAddressBook.Agent);
+        DataTables.Columns.Add(TAddressBook.Division);
 
         // Filter by User Aliaus (if given)
         if FMode = adOpenForUser then
@@ -932,17 +932,17 @@ begin
             begin
                 for iCNT:=low(FGrid.UpdatedRowsHolder) to high(FGrid.UpdatedRowsHolder) do
                 begin
-                    Condition:=TAddressBook.SCUID + EQUAL + FGrid.Cells[FGrid.ReturnColumn(TAddressBook.SCUID, 1, 1), FGrid.UpdatedRowsHolder[iCNT]];
+                    Condition:=TAddressBook.Scuid + EQUAL + FGrid.Cells[FGrid.ReturnColumn(TAddressBook.Scuid, 1, 1), FGrid.UpdatedRowsHolder[iCNT]];
                     // Columns
-                    Book.Columns.Add(TAddressBook.EMAILS);
-                    Book.Columns.Add(TAddressBook.PHONE_NUMBERS);
-                    Book.Columns.Add(TAddressBook.CONTACT);
-                    Book.Columns.Add(TAddressBook.ESTATEMENTS);
+                    Book.Columns.Add(TAddressBook.Emails);
+                    Book.Columns.Add(TAddressBook.PhoneNumbers);
+                    Book.Columns.Add(TAddressBook.Contact);
+                    Book.Columns.Add(TAddressBook.Estatements);
                     // Values
-                    Book.Values.Add(FGrid.Cells[FGrid.ReturnColumn(TAddressBook.EMAILS,        1, 1), FGrid.UpdatedRowsHolder[iCNT]]);
-                    Book.Values.Add(FGrid.Cells[FGrid.ReturnColumn(TAddressBook.PHONE_NUMBERS, 1, 1), FGrid.UpdatedRowsHolder[iCNT]]);
-                    Book.Values.Add(FGrid.Cells[FGrid.ReturnColumn(TAddressBook.CONTACT,       1, 1), FGrid.UpdatedRowsHolder[iCNT]]);
-                    Book.Values.Add(FGrid.Cells[FGrid.ReturnColumn(TAddressBook.ESTATEMENTS,   1, 1), FGrid.UpdatedRowsHolder[iCNT]]);
+                    Book.Values.Add(FGrid.Cells[FGrid.ReturnColumn(TAddressBook.Emails,       1, 1), FGrid.UpdatedRowsHolder[iCNT]]);
+                    Book.Values.Add(FGrid.Cells[FGrid.ReturnColumn(TAddressBook.PhoneNumbers, 1, 1), FGrid.UpdatedRowsHolder[iCNT]]);
+                    Book.Values.Add(FGrid.Cells[FGrid.ReturnColumn(TAddressBook.Contact,      1, 1), FGrid.UpdatedRowsHolder[iCNT]]);
+                    Book.Values.Add(FGrid.Cells[FGrid.ReturnColumn(TAddressBook.Estatements,  1, 1), FGrid.UpdatedRowsHolder[iCNT]]);
                 end;
 
                 Result:=Book.UpdateRecord(TAddressBook.AddressBook, ttExplicit, Condition);
@@ -970,12 +970,12 @@ begin
         // Update from Action Log View
         if FGrid = nil then
         begin
-            Condition:=TAddressBook.SCUID + EQUAL + QuotedStr(FSCUID);
+            Condition:=TAddressBook.Scuid + EQUAL + QuotedStr(FSCUID);
             // Columns
-            Book.Columns.Add(TAddressBook.PHONE_NUMBERS);
-            Book.Columns.Add(TAddressBook.CONTACT);
-            Book.Columns.Add(TAddressBook.ESTATEMENTS);
-            Book.Columns.Add(TAddressBook.EMAILS);
+            Book.Columns.Add(TAddressBook.PhoneNumbers);
+            Book.Columns.Add(TAddressBook.Contact);
+            Book.Columns.Add(TAddressBook.Estatements);
+            Book.Columns.Add(TAddressBook.Emails);
             // Values
             Book.Values.Add(FPhones);
             Book.Values.Add(FContact);
@@ -1022,15 +1022,15 @@ begin
             if FGrid.RowHeights[iCNT] <> sgRowHidden then
             begin
                 // Build SCUID
-                SCUID:=FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), iCNT] +
-                    MainForm.ConvertName(
-                        FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fCO_CODE, 1, 1), iCNT],
+                SCUID:=FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fCustomerNumber, 1, 1), iCNT] +
+                    MainForm.ConvertCoCode(
+                        FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT],
                         'F',
                         3
                     );
                 Book.CleanUp;
-                Book.Columns.Add(TAddressBook.SCUID);
-                Book.CustFilter:=WHERE + TAddressBook.SCUID + EQUAL + QuotedStr(SCUID);
+                Book.Columns.Add(TAddressBook.Scuid);
+                Book.CustFilter:=WHERE + TAddressBook.Scuid + EQUAL + QuotedStr(SCUID);
                 Book.OpenTable(TAddressBook.AddressBook);
 
                 // Add to array if not exists
@@ -1039,11 +1039,11 @@ begin
                     Inc(Check);
                     AddrBook[jCNT,  0]:=UpperCase(MainForm.WinUserName);
                     AddrBook[jCNT,  1]:=SCUID;
-                    AddrBook[jCNT,  2]:=FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fCUSTOMER_NUMBER, 1, 1), iCNT];
-                    AddrBook[jCNT,  3]:=FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fCUSTOMER_NAME,   1, 1), iCNT];
-                    AddrBook[jCNT,  8]:=FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fAGENT,           1, 1), iCNT];
-                    AddrBook[jCNT,  9]:=FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fDIVISION,        1, 1), iCNT];
-                    AddrBook[jCNT, 10]:=FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fCO_CODE,         1, 1), iCNT];
+                    AddrBook[jCNT,  2]:=FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fCustomerNumber, 1, 1), iCNT];
+                    AddrBook[jCNT,  3]:=FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fCustomerName,   1, 1), iCNT];
+                    AddrBook[jCNT,  8]:=FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fAgent,           1, 1), iCNT];
+                    AddrBook[jCNT,  9]:=FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fDivision,        1, 1), iCNT];
+                    AddrBook[jCNT, 10]:=FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fCoCode,         1, 1), iCNT];
                     Inc(jCNT);
                     SetLength(AddrBook, jCNT + 1, 11);
                 end;
@@ -1059,17 +1059,17 @@ begin
     begin
         Book:=TDataTables.Create(MainForm.DbConnect);
         try
-            Book.Columns.Add(TAddressBook.USER_ALIAS);
-            Book.Columns.Add(TAddressBook.SCUID);
-            Book.Columns.Add(TAddressBook.CUSTOMER_NUMBER);
-            Book.Columns.Add(TAddressBook.CUSTOMER_NAME);
-            Book.Columns.Add(TAddressBook.EMAILS);
-            Book.Columns.Add(TAddressBook.PHONE_NUMBERS);
-            Book.Columns.Add(TAddressBook.CONTACT);
-            Book.Columns.Add(TAddressBook.ESTATEMENTS);
-            Book.Columns.Add(TAddressBook.AGENT);
-            Book.Columns.Add(TAddressBook.DIVISION);
-            Book.Columns.Add(TAddressBook.COCODE);
+            Book.Columns.Add(TAddressBook.UserAlias);
+            Book.Columns.Add(TAddressBook.Scuid);
+            Book.Columns.Add(TAddressBook.CustomerNumber);
+            Book.Columns.Add(TAddressBook.CustomerName);
+            Book.Columns.Add(TAddressBook.Emails);
+            Book.Columns.Add(TAddressBook.PhoneNumbers);
+            Book.Columns.Add(TAddressBook.Contact);
+            Book.Columns.Add(TAddressBook.Estatements);
+            Book.Columns.Add(TAddressBook.Agent);
+            Book.Columns.Add(TAddressBook.Division);
+            Book.Columns.Add(TAddressBook.CoCode);
             try
 
                 Book.InsertInto(TAddressBook.AddressBook, ttExplicit, nil, AddrBook);
@@ -1111,19 +1111,19 @@ end;
 // ------------------------------------------------------------------------------------------------------------------------------------------- USER FEEDBACK //
 
 
-constructor TTSendBugReport.Create;
+constructor TTSendUserFeedback.Create;
 begin
     inherited Create(False);
     FLock :=TCriticalSection.Create;
     FIDThd:=0;
 end;
 
-destructor TTSendBugReport.Destroy;
+destructor TTSendUserFeedback.Destroy;
 begin
     FLock.Free;
 end;
 
-procedure TTSendBugReport.Execute;
+procedure TTSendUserFeedback.Execute;
 begin
     FLock.Acquire;
     FIDThd:=GetCurrentThreadId;
@@ -1259,7 +1259,7 @@ begin
     try
         DailyText:=TDataTables.Create(MainForm.DbConnect);
         try
-            Condition:=TDailyComment.CUID + EQUAL + QuotedStr(FCUID) + _AND + TDailyComment.AGEDATE + EQUAL + QuotedStr(MainForm.AgeDateSel);
+            Condition:=TDailyComment.Cuid + EQUAL + QuotedStr(FCUID) + _AND + TDailyComment.AgeDate + EQUAL + QuotedStr(MainForm.AgeDateSel);
             DataCheckSum:=FCUID + StringReplace(MainForm.AgeDateSel, '-', '', [rfReplaceAll]);
             DailyText.CustFilter:=WHERE + Condition;
             DailyText.OpenTable(TDailyComment.DailyComment);
@@ -1270,56 +1270,56 @@ begin
                 DailyText.CleanUp;
 
                 // Define columns, values and conditions
-                DailyText.Columns.Add(TDailyComment.STAMP);
+                DailyText.Columns.Add(TDailyComment.Stamp);
                 DailyText.Values.Add(DateTimeToStr(Now));
-                DailyText.Columns.Add(TDailyComment.USER_ALIAS);
+                DailyText.Columns.Add(TDailyComment.UserAlias);
                 DailyText.Values.Add(UpperCase(MainForm.WinUserName));
 
                 if FEmail then
                 begin
-                    Email:=IntToStr(StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDailyComment.EMAIL].Value), 0));
-                    DailyText.Columns.Add(TDailyComment.EMAIL);
+                    Email:=IntToStr(StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDailyComment.Email].Value), 0));
+                    DailyText.Columns.Add(TDailyComment.Email);
                     DailyText.Values.Add(Email);
                 end;
 
                 // Call event and call duration always comes together
                 if FCallEvent then
                 begin
-                    CallEvent:=StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDailyComment.CALLEVENT].Value), 0);
+                    CallEvent:=StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDailyComment.CallEvent].Value), 0);
                     Inc(CallEvent);
-                    DailyText.Columns.Add(TDailyComment.CALLEVENT);
+                    DailyText.Columns.Add(TDailyComment.CallEvent);
                     DailyText.Values.Add(IntToStr(CallEvent));
-                    DailyText.Columns.Add(TDailyComment.CALLDURATION);
+                    DailyText.Columns.Add(TDailyComment.CallDuration);
                     DailyText.Values.Add(FCallDuration);
                 end;
 
                 if FEmailReminder then
                 begin
-                    EmailReminder:=StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDailyComment.EMAIL_Reminder].Value), 0);
+                    EmailReminder:=StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDailyComment.EmailReminder].Value), 0);
                     Inc(EmailReminder);
-                    DailyText.Columns.Add(TDailyComment.EMAIL_Reminder);
+                    DailyText.Columns.Add(TDailyComment.EmailReminder);
                     DailyText.Values.Add(IntToStr(EmailReminder));
                 end;
 
                 if FEmailAutoStat then
                 begin
-                    EmailAutoStat:=StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDailyComment.EMAIL_AutoStat].Value), 0);
+                    EmailAutoStat:=StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDailyComment.EmailAutoStat].Value), 0);
                     Inc(EmailAutoStat);
-                    DailyText.Columns.Add(TDailyComment.EMAIL_AutoStat);
+                    DailyText.Columns.Add(TDailyComment.EmailAutoStat);
                     DailyText.Values.Add(IntToStr(EmailAutoStat));
                 end;
 
                 if FEmailManuStat then
                 begin
-                    EmailManuStat:=StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDailyComment.EMAIL_ManuStat].Value), 0);
+                    EmailManuStat:=StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDailyComment.EmailManuStat].Value), 0);
                     Inc(EmailManuStat);
-                    DailyText.Columns.Add(TDailyComment.EMAIL_ManuStat);
+                    DailyText.Columns.Add(TDailyComment.EmailManuStat);
                     DailyText.Values.Add(IntToStr(EmailManuStat));
                 end;
 
                 if not(FFixedComment = '') then
                 begin
-                    DailyText.Columns.Add(TDailyComment.FIXCOMMENT);
+                    DailyText.Columns.Add(TDailyComment.FixedComment);
                     DailyText.Values.Add(FFixedComment);
                 end;
 
@@ -1349,73 +1349,73 @@ begin
                 DailyText.CleanUp;
 
                 // Define columns and values
-                DailyText.Columns.Add(TDailyComment.GROUP_ID);       DailyText.Values.Add(MainForm.GroupIdSel);
-                DailyText.Columns.Add(TDailyComment.CUID);           DailyText.Values.Add(FCUID);
-                DailyText.Columns.Add(TDailyComment.AGEDATE);        DailyText.Values.Add(MainForm.AgeDateSel);
-                DailyText.Columns.Add(TDailyComment.STAMP);          DailyText.Values.Add(DateTimeToStr(Now));
-                DailyText.Columns.Add(TDailyComment.USER_ALIAS);     DailyText.Values.Add(UpperCase(MainForm.WinUserName));
-                DailyText.Columns.Add(TDailyComment.DATACHECKSUM);   DailyText.Values.Add(DataCheckSum);
+                DailyText.Columns.Add(TDailyComment.GroupId);       DailyText.Values.Add(MainForm.GroupIdSel);
+                DailyText.Columns.Add(TDailyComment.Cuid);           DailyText.Values.Add(FCUID);
+                DailyText.Columns.Add(TDailyComment.AgeDate);        DailyText.Values.Add(MainForm.AgeDateSel);
+                DailyText.Columns.Add(TDailyComment.Stamp);          DailyText.Values.Add(DateTimeToStr(Now));
+                DailyText.Columns.Add(TDailyComment.UserAlias);     DailyText.Values.Add(UpperCase(MainForm.WinUserName));
+                DailyText.Columns.Add(TDailyComment.DataCheckSum);   DailyText.Values.Add(DataCheckSum);
 
                 if FEmail then
                 begin
-                    DailyText.Columns.Add(TDailyComment.EMAIL);
+                    DailyText.Columns.Add(TDailyComment.Email);
                     DailyText.Values.Add('1');
                 end
                 else
                 begin
-                    DailyText.Columns.Add(TDailyComment.EMAIL);
+                    DailyText.Columns.Add(TDailyComment.Email);
                     DailyText.Values.Add('0');
                 end;
 
                 if FEmailReminder then
                 begin
-                    DailyText.Columns.Add(TDailyComment.EMAIL_Reminder);
+                    DailyText.Columns.Add(TDailyComment.EmailReminder);
                     DailyText.Values.Add('1');
                 end
                 else
                 begin
-                    DailyText.Columns.Add(TDailyComment.EMAIL_Reminder);
+                    DailyText.Columns.Add(TDailyComment.EmailReminder);
                     DailyText.Values.Add('0');
                 end;
 
                 if FEmailAutoStat then
                 begin
-                    DailyText.Columns.Add(TDailyComment.EMAIL_AutoStat);
+                    DailyText.Columns.Add(TDailyComment.EmailAutoStat);
                     DailyText.Values.Add('1');
                 end
                 else
                 begin
-                    DailyText.Columns.Add(TDailyComment.EMAIL_AutoStat);
+                    DailyText.Columns.Add(TDailyComment.EmailAutoStat);
                     DailyText.Values.Add('0');
                 end;
 
                 if FEmailManuStat then
                 begin
-                    DailyText.Columns.Add(TDailyComment.EMAIL_ManuStat);
+                    DailyText.Columns.Add(TDailyComment.EmailManuStat);
                     DailyText.Values.Add('1');
                 end
                 else
                 begin
-                    DailyText.Columns.Add(TDailyComment.EMAIL_ManuStat);
+                    DailyText.Columns.Add(TDailyComment.EmailManuStat);
                     DailyText.Values.Add('0');
                 end;
 
                 if FCallEvent then
                 begin
-                    DailyText.Columns.Add(TDailyComment.CALLEVENT);
+                    DailyText.Columns.Add(TDailyComment.CallEvent);
                     DailyText.Values.Add('1');
-                    DailyText.Columns.Add(TDailyComment.CALLDURATION);
+                    DailyText.Columns.Add(TDailyComment.CallDuration);
                     DailyText.Values.Add(FCallDuration);
                 end
                 else
                 begin
-                    DailyText.Columns.Add(TDailyComment.CALLEVENT);
+                    DailyText.Columns.Add(TDailyComment.CallEvent);
                     DailyText.Values.Add('0');
-                    DailyText.Columns.Add(TDailyComment.CALLDURATION);
+                    DailyText.Columns.Add(TDailyComment.CallDuration);
                     DailyText.Values.Add('0');
                 end;
 
-                DailyText.Columns.Add(TDailyComment.FIXCOMMENT);
+                DailyText.Columns.Add(TDailyComment.FixedComment);
                 DailyText.Values.Add(FFixedComment);
 
                 // Execute
@@ -1484,7 +1484,7 @@ begin
     try
         GenText:=TDataTables.Create(MainForm.DbConnect);
         try
-            Condition:=TGeneralComment.CUID + EQUAL + QuotedStr(FCUID);
+            Condition:=TGeneralComment.Cuid + EQUAL + QuotedStr(FCUID);
             GenText.CustFilter:=WHERE + Condition;
             GenText.OpenTable(TGeneralComment.GeneralComment);
 
@@ -1494,20 +1494,20 @@ begin
                 GenText.CleanUp;
 
                 // Define columns, vaues and conditions
-                GenText.Columns.Add(TGeneralComment.STAMP);
+                GenText.Columns.Add(TGeneralComment.Stamp);
                 GenText.Values.Add(DateTimeToStr(Now));
-                GenText.Columns.Add(TGeneralComment.USER_ALIAS);
+                GenText.Columns.Add(TGeneralComment.UserAlias);
                 GenText.Values.Add(UpperCase(MainForm.WinUserName));
 
                 if not(FFixedComment = strNULL) then
                 begin
-                    GenText.Columns.Add(TGeneralComment.FIXCOMMENT);
+                    GenText.Columns.Add(TGeneralComment.FixedComment);
                     GenText.Values.Add(FFixedComment);
                 end;
 
                 if not(FFollowUp = strNULL) then
                 begin
-                    GenText.Columns.Add(TGeneralComment.FOLLOWUP);
+                    GenText.Columns.Add(TGeneralComment.FollowUp);
                     GenText.Values.Add(FFollowUp);
                 end;
 
@@ -1547,29 +1547,29 @@ begin
             begin
                 GenText.CleanUp;
                 // Define columns and values
-                GenText.Columns.Add(TGeneralComment.CUID);       GenText.Values.Add(FCUID);
-                GenText.Columns.Add(TGeneralComment.STAMP);      GenText.Values.Add(DateTimeToStr(Now));
-                GenText.Columns.Add(TGeneralComment.USER_ALIAS); GenText.Values.Add(UpperCase(MainForm.WinUserName));
+                GenText.Columns.Add(TGeneralComment.Cuid);       GenText.Values.Add(FCUID);
+                GenText.Columns.Add(TGeneralComment.Stamp);      GenText.Values.Add(DateTimeToStr(Now));
+                GenText.Columns.Add(TGeneralComment.UserAlias); GenText.Values.Add(UpperCase(MainForm.WinUserName));
 
                 if not(FFixedComment = strNULL) then
                 begin
-                    GenText.Columns.Add(TGeneralComment.FIXCOMMENT);
+                    GenText.Columns.Add(TGeneralComment.FixedComment);
                     GenText.Values.Add(FFixedComment);
                 end
                 else
                 begin
-                    GenText.Columns.Add(TGeneralComment.FIXCOMMENT);
+                    GenText.Columns.Add(TGeneralComment.FixedComment);
                     GenText.Values.Add('');
                 end;
 
                 if not(FFollowUp = strNULL) then
                 begin
-                    GenText.Columns.Add(TGeneralComment.FOLLOWUP);
+                    GenText.Columns.Add(TGeneralComment.FollowUp);
                     GenText.Values.Add(FFollowUp);
                 end
                 else
                 begin
-                    GenText.Columns.Add(TGeneralComment.FOLLOWUP);
+                    GenText.Columns.Add(TGeneralComment.FollowUp);
                     GenText.Values.Add('');
                 end;
 
@@ -1711,6 +1711,12 @@ begin
             Statement.CustMess   :=FMess;
             Statement.OpenItems  :=FOpenItems;
             Statement.IsOverdue  :=FIsOverdue;
+            // quick fix - to be refactored - data should be taken from the table
+            Statement.REM_EX1:='1';
+            Statement.REM_EX2:='102';
+            Statement.REM_EX3:='103';
+            Statement.REM_EX4:='104';
+            Statement.REM_EX5:='514';
 
             Statement.MailSubject:=FSubject + ' - ' + FCustName + ' - ' + FCustNumber;
 
