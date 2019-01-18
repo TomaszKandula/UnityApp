@@ -21,17 +21,18 @@ uses
     Dialogs,
     DB,
     InterposerClasses,
-    Arrays;
+    Arrays,
+    CustomTypes;
 
     /// <remarks>
-    ///     Asynchronous methods executed within single thread classes. Most of the thread classes aquire lock, so they can be called
-    ///     only once at a time. If necessary, remove lock aquisition.
+    /// Asynchronous methods executed within single thread classes. Most of the thread classes aquire lock, so they can be called
+    /// only once at a time. If necessary, remove lock aquisition.
     /// </remarks>
 
 type
 
     /// <summary>
-    ///     Check connection to database (to be executed on regular basis).
+    /// Check connection to database (to be executed on regular basis).
     /// </summary>
 
     TTCheckServerConnection = class(TThread)
@@ -40,7 +41,7 @@ type
     end;
 
     /// <summary>
-    ///     Invoice tracker scanner.
+    /// Invoice tracker scanner.
     /// </summary>
 
     TTInvoiceTrackerScanner = class(TThread)
@@ -51,7 +52,7 @@ type
     end;
 
     /// <summary>
-    ///     Invoice Tracker list refresh.
+    /// Invoice Tracker list refresh.
     /// </summary>
 
     TTInvoiceTrackerRefresh = class(TThread)
@@ -66,7 +67,7 @@ type
     end;
 
     /// <summary>
-    ///     Generate agev view (aging report).
+    /// Generate agev view (aging report).
     /// </summary>
 
     TTMakeAgeView = class(TThread)
@@ -83,7 +84,7 @@ type
     end;
 
     /// <summary>
-    ///     Read selected age view.
+    /// Read selected age view.
     /// </summary>
 
     TTReadAgeView = class(TThread)
@@ -101,7 +102,7 @@ type
     end;
 
     /// <summary>
-    ///     Check periodically if new open items are populated by SSIS from ERP system.
+    /// Check periodically if new open items are populated by SSIS from ERP system.
     /// </summary>
 
     TTOpenItemsScanner = class(TThread)
@@ -117,7 +118,7 @@ type
     end;
 
     /// <summary>
-    ///     Read open items from database table and put it into String Grid component.
+    /// Read open items from database table and put it into String Grid component.
     /// </summary>
 
     TTReadOpenItems = class(TThread)
@@ -134,7 +135,7 @@ type
     end;
 
     /// <summary>
-    ///     Read and write from/to Address Book string grid.
+    /// Read and write from/to Address Book string grid.
     /// </summary>
 
     TTAddressBook = class(TThread)
@@ -170,7 +171,7 @@ type
     end;
 
     /// <summary>
-    ///     Send user feedback from ReportBug form.
+    /// Send user feedback from ReportBug form.
     /// </summary>
 
     TTSendUserFeedback = class(TThread)
@@ -186,7 +187,7 @@ type
     end;
 
     /// <summary>
-    ///     Generate Excel report.
+    /// Generate Excel report.
     /// </summary>
 
     TTExcelExport = class(TThread)
@@ -202,7 +203,7 @@ type
     end;
 
     /// <summary>
-    ///     Write daily comment into database table.
+    /// Write daily comment into database table.
     /// </summary>
 
     TTDailyComment = class(TThread)
@@ -239,7 +240,7 @@ type
     end;
 
     /// <summary>
-    ///     Write general comment int database table.
+    /// Write general comment int database table.
     /// </summary>
 
     TTGeneralComment = class(TThread)
@@ -270,31 +271,31 @@ type
     end;
 
     /// <summary>
-    ///     Send single account statement.
+    /// Send single account statement.
     /// </summary>
 
     TTSendAccountStatement = class(TThread)
     protected
         procedure Execute; override;
     private
-        var FLock:         TCriticalSection;
-        var FIDThd:        integer;
-        var FLayout:       integer;
-        var FSubject:      string;
-        var FMess:         string;
-        var FIsOverdue:    boolean;
-        var FOpenItems:    TStringGrid;
-        var FCUID:         string;
-        var FSendFrom:     string;
-        var FMailTo:       string;
-        var FCustName:     string;
-        var FCustNumber:   string;
-        var FLBUName:      string;
-        var FLBUAddress:   string;
-        var FTelephone:    string;
-        var FBankDetails:  string;
-        var FSeries:       boolean;
-        var FItemNo:       integer;
+        var FLock:        TCriticalSection;
+        var FIDThd:       integer;
+        var FLayout:      integer;
+        var FSubject:     string;
+        var FMess:        string;
+        var FInvFilter:   TInvoiceFilter;
+        var FOpenItems:   TStringGrid;
+        var FCUID:        string;
+        var FSendFrom:    string;
+        var FMailTo:      string;
+        var FCustName:    string;
+        var FCustNumber:  string;
+        var FLBUName:     string;
+        var FLBUAddress:  string;
+        var FTelephone:   string;
+        var FBankDetails: string;
+        var FSeries:      boolean;
+        var FItemNo:      integer;
     public
         property    IDThd:  integer read FIDThd;
         destructor  Destroy; override;
@@ -302,7 +303,7 @@ type
             Layout:      integer;
             Subject:     string;
             Mess:        string;
-            IsOverdue:   boolean;
+            InvFilter:   TInvoiceFilter;
             OpenItems:   TStringGrid;
             CUID:        string;
             SendFrom:    string;
@@ -319,34 +320,34 @@ type
     end;
 
     /// <summary>
-    ///     Send multiple account statements to the selected customers (the source is TListView).
+    /// Send multiple account statements to the selected customers (the source is TListView).
     /// </summary>
 
     TTSendAccountStatements = class(TThread)
     protected
         procedure Execute; override;
     private
-        var FLock:         TCriticalSection;
-        var FIDThd:        integer;
-        var FSubject:      string;
-        var FMess:         string;
-        var FIsOverdue:    boolean;
-        var FOpenItems:    TStringGrid;
-        var FMailerList:   TListView;
+        var FLock:       TCriticalSection;
+        var FIDThd:      integer;
+        var FSubject:    string;
+        var FMess:       string;
+        var FInvFilter:  TInvoiceFilter;
+        var FOpenItems:  TStringGrid;
+        var FMailerList: TListView;
     public
         property    IDThd: integer read FIDThd;
         destructor  Destroy; override;
         constructor Create(
             Subject:    string;
             Mess:       string;
-            IsOverdue:  boolean;
+            InvFilter:  TInvoiceFilter;
             OpenItems:  TStringGrid;
             MailerList: TListView
         );
     end;
 
     /// <summary>
-    ///     Upload async. given general table. Use no locking.
+    /// Upload async. given general table. Use no locking.
     /// </summary>
 
     TTGeneralTables = class(TThread)
@@ -1640,7 +1641,7 @@ constructor TTSendAccountStatement.Create
     Layout:      integer;
     Subject:     string;
     Mess:        string;
-    IsOverdue:   boolean;
+    InvFilter:   TInvoiceFilter;
     OpenItems:   TStringGrid;
     CUID:        string;
     SendFrom:    string;
@@ -1661,7 +1662,7 @@ begin
     FLayout     :=Layout;
     FSubject    :=Subject;
     FMess       :=Mess;
-    FIsOverdue  :=IsOverdue;
+    FInvFilter  :=InvFilter;
     FOpenItems  :=OpenItems;
     FCUID       :=CUID;
     FSendFrom   :=SendFrom;
@@ -1710,7 +1711,7 @@ begin
             Statement.BankDetails:=FBankDetails;
             Statement.CustMess   :=FMess;
             Statement.OpenItems  :=FOpenItems;
-            Statement.IsOverdue  :=FIsOverdue;
+            Statement.InvFilter  :=FInvFilter;
             // quick fix - to be refactored - data should be taken from the table
             Statement.REM_EX1:='1';
             Statement.REM_EX2:='102';
@@ -1824,7 +1825,7 @@ constructor TTSendAccountStatements.Create
 (
     Subject:    string;
     Mess:       string;
-    IsOverdue:  boolean;
+    InvFilter:  TInvoiceFilter;
     OpenItems:  TStringGrid;
     MailerList: TListView
 );
@@ -1834,7 +1835,7 @@ begin
     FIDThd     :=0;
     FSubject   :=Subject;
     FMess      :=Mess;
-    FIsOverdue :=IsOverdue;
+    FInvFilter :=InvFilter;
     FOpenItems :=OpenItems;
     FMailerList:=MailerList;
 end;
@@ -1888,7 +1889,7 @@ begin
                         maCustom,
                         FSubject,
                         FMess,
-                        FIsOverdue,
+                        FInvFilter,
                         FOpenItems,
                         FMailerList.Items[iCNT].SubItems[10], // cuid
                         FMailerList.Items[iCNT].SubItems[2],  // send from

@@ -3,10 +3,25 @@
 
 unit Mailer;
 
+
 interface
 
+
 uses
-    SQL, Model, Settings, SysUtils, Windows, Messages, StdCtrls, Classes, StrUtils, Variants, CDO_TLB, InterposerClasses;
+    SQL,
+    Model,
+    Settings,
+    SysUtils,
+    Windows,
+    Messages,
+    StdCtrls,
+    Classes,
+    StrUtils,
+    Variants,
+    CDO_TLB,
+    InterposerClasses,
+    CustomTypes;
+
 
 type
 
@@ -71,7 +86,7 @@ type
         var FTelephone:   string;
         var FBankDetails: string;
         var FCustMess:    string;
-        var FIsOverdue:   boolean;
+        var FInvFilter:   TInvoiceFilter;
         var FSourceGrid:  TStringGrid;
         var FDocType:     integer;
         var FCUID:        string;
@@ -82,26 +97,26 @@ type
         var FREM_EX5:     string;
     public
         var OpenItems:  TStringGrid;
-        property HTMLTable:   string      read FHTMLTable   write FHTMLTable;
-        property HTMLTemp:    string      read FHTMLTemp    write FHTMLTemp;
-        property HTMLRow:     string      read FHTMLRow     write FHTMLRow;
-        property HTMLLayout:  string      read FHTMLLayout  write FHTMLLayout;
-        property CustName:    string      read FCustName    write FCustName;
-        property CustAddr:    string      read FCustAddr    write FCustAddr;
-        property LBUName:     string      read FLBUName     write FLBUName;
-        property LBUAddress:  string      read FLBUAddress  write FLBUAddress;
-        property Telephone:   string      read FTelephone   write FTelephone;
-        property BankDetails: string      read FBankDetails write FBankDetails;
-        property CustMess:    string      read FCustMess    write FCustMess;
-        property IsOverdue:   boolean     read FIsOverdue   write FIsOverdue;
-        property SourceGrid:  TStringGrid read FSourceGrid  write FSourceGrid;
-        property DocType:     integer     read FDocType     write FDocType;
-        property CUID:        string      read FCUID        write FCUID;
-        property REM_EX1:     string      read FREM_EX1     write FREM_EX1;
-        property REM_EX2:     string      read FREM_EX2     write FREM_EX2;
-        property REM_EX3:     string      read FREM_EX3     write FREM_EX3;
-        property REM_EX4:     string      read FREM_EX4     write FREM_EX4;
-        property REM_EX5:     string      read FREM_EX5     write FREM_EX5;
+        property HTMLTable:   string         read FHTMLTable   write FHTMLTable;
+        property HTMLTemp:    string         read FHTMLTemp    write FHTMLTemp;
+        property HTMLRow:     string         read FHTMLRow     write FHTMLRow;
+        property HTMLLayout:  string         read FHTMLLayout  write FHTMLLayout;
+        property CustName:    string         read FCustName    write FCustName;
+        property CustAddr:    string         read FCustAddr    write FCustAddr;
+        property LBUName:     string         read FLBUName     write FLBUName;
+        property LBUAddress:  string         read FLBUAddress  write FLBUAddress;
+        property Telephone:   string         read FTelephone   write FTelephone;
+        property BankDetails: string         read FBankDetails write FBankDetails;
+        property CustMess:    string         read FCustMess    write FCustMess;
+        property InvFilter:   TInvoiceFilter read FInvFilter   write FInvFilter;
+        property SourceGrid:  TStringGrid    read FSourceGrid  write FSourceGrid;
+        property DocType:     integer        read FDocType     write FDocType;
+        property CUID:        string         read FCUID        write FCUID;
+        property REM_EX1:     string         read FREM_EX1     write FREM_EX1;
+        property REM_EX2:     string         read FREM_EX2     write FREM_EX2;
+        property REM_EX3:     string         read FREM_EX3     write FREM_EX3;
+        property REM_EX4:     string         read FREM_EX4     write FREM_EX4;
+        property REM_EX5:     string         read FREM_EX5     write FREM_EX5;
     published
         procedure SaveOutput(FileName: string);
         function  LoadTemplate(FileName: string): string;
@@ -335,28 +350,28 @@ begin
                 if OpenItems.Cells[MainForm.OpenItemsRefs.CtrlCol, iCNT] <> REM_EX5 then  // REFACTOR!!!
                 begin
 
-                    if not(IsOverdue) then
-                    begin
-                        // All items
-                        if StrToFloatDef(OpenItems.Cells[MainForm.OpenItemsRefs.OpenAmCol, iCNT], 0) <> 0 then
-                            // Generate HTML table
-                            OpenItemsToHtmlTable(HTMLStat, OpenItems, iCNT);
-                    end
-                    else
-                    begin
-                        // Allow only overdue invoices
-                        if
-                        (
-                            StrToFloatDef(OpenItems.Cells[MainForm.OpenItemsRefs.OpenAmCol, iCNT], 0) <> 0
-                        )
-                        and
-                        (
-                            StrToFloatDef(OpenItems.Cells[MainForm.OpenItemsRefs.PmtStatCol, iCNT], 0) < 0
-                        )
-                        then
-                        // Make
-                        OpenItemsToHtmlTable(HTMLStat, OpenItems, iCNT);
-                    end;
+//                    if not(InvFilter) then
+//                    begin
+//                        // All items
+//                        if StrToFloatDef(OpenItems.Cells[MainForm.OpenItemsRefs.OpenAmCol, iCNT], 0) <> 0 then
+//                            // Generate HTML table
+//                            OpenItemsToHtmlTable(HTMLStat, OpenItems, iCNT);
+//                    end
+//                    else
+//                    begin
+//                        // Allow only overdue invoices
+//                        if
+//                        (
+//                            StrToFloatDef(OpenItems.Cells[MainForm.OpenItemsRefs.OpenAmCol, iCNT], 0) <> 0
+//                        )
+//                        and
+//                        (
+//                            StrToFloatDef(OpenItems.Cells[MainForm.OpenItemsRefs.PmtStatCol, iCNT], 0) < 0
+//                        )
+//                        then
+//                        // Make
+//                        OpenItemsToHtmlTable(HTMLStat, OpenItems, iCNT);
+//                    end;
 
                 end;
 
@@ -424,10 +439,10 @@ begin
     MailBody :=StringReplace(MailBody,   '{TEL}',          Telephone,  [rfReplaceAll]);
 
     // Custom template title (statement or reminder)
-    if IsOverdue then
-        MailBody:=StringReplace(MailBody, '{TITLE}', 'REMINDER', [rfReplaceAll])
-            else
-                MailBody:=StringReplace(MailBody, '{TITLE}', 'STATEMENT', [rfReplaceAll]);
+//    if InvFilter then
+//        MailBody:=StringReplace(MailBody, '{TITLE}', 'REMINDER', [rfReplaceAll])
+//            else
+//                MailBody:=StringReplace(MailBody, '{TITLE}', 'STATEMENT', [rfReplaceAll]);
 
     // Custom salutation and the message
     if CustMess  <> '' then MailBody:=StringReplace(MailBody, '{TEXT}',  CustMess,  [rfReplaceAll]);

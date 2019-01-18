@@ -2798,14 +2798,14 @@ begin
             end;
 
             // Not allowed for "RO" users
-            if AccessLevel = acReadOnly then
+            if AccessLevel = acReadOnly then // change it!!!
             begin
-                Action_Tracker.Enabled:=False;
-                Action_AddToBook.Enabled:=False;
-                ActionsForm.DailyCom.Enabled:=False;
-                ActionsForm.GeneralCom.Enabled:=False;
-                btnUpdateAB.Enabled:=False;
-                txtQueries.Enabled:=False;
+//                Action_Tracker.Enabled:=False;
+//                Action_AddToBook.Enabled:=False;
+//                ActionsForm.DailyCom.Enabled:=False;
+//                ActionsForm.GeneralCom.Enabled:=False;
+//                btnUpdateAB.Enabled:=False;
+//                txtQueries.Enabled:=False;
             end;
 
         except
@@ -2901,7 +2901,7 @@ begin
 
     try
 
-        NowTime   :=Now;
+        NowTime:=Now;
         FStartTime:=Now;
         FormatDateTime('hh:mm:ss', NowTime);
         FormatDateTime('hh:mm:ss', FStartTime);
@@ -2910,7 +2910,7 @@ begin
         StatBar_TXT2.Caption:=WinUserName;
         StatBar_TXT3.Caption:=DateToStr(Now);
 
-        UpTime.Enabled     :=True;
+        UpTime.Enabled:=True;
         CurrentTime.Enabled:=True;
 
         LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Application version = ' + AppVersion);

@@ -20,6 +20,7 @@
     <Transaction>1899/12/30 00:00:00.000.399,=D:\Projects\Unity Project\__Unity\Logic\Settings.pas</Transaction>
     <Transaction>1899/12/30 00:00:00.000.739,=D:\Projects\Unity Project\__Unity\View\Send.pas</Transaction>
     <Transaction>1899/12/30 00:00:00.000.833,=D:\Projects\Unity Project\__Unity\Model\SQL.pas</Transaction>
+    <Transaction>1899/12/30 00:00:00.000.339,=D:\Projects\Unity Project\__Unity\View\Tracker.pas</Transaction>
     <Transaction>1899/12/30 00:00:00.000.085,=D:\Projects\Unity Project\__Unity\Logic\AgeView.pas</Transaction>
     <Transaction>1899/12/30 00:00:00.000.416,=D:\Projects\Unity Project\__Unity\View\Search.pas</Transaction>
     <Transaction>1899/12/30 00:00:00.000.300,=D:\Projects\Unity Project\__Unity\Logic\Mailer.pas</Transaction>
@@ -31,9 +32,8 @@
     <Transaction>1899/12/30 00:00:00.000.036,D:\Projects\Unity Project\__Unity\View\Search.pas=D:\Projects\Unity Project\__Unity\View\AVSearch.pas</Transaction>
     <Transaction>1899/12/30 00:00:00.000.346,=D:\Projects\Unity Project\__Unity\View\Actions.pas</Transaction>
     <Transaction>1899/12/30 00:00:00.000.727,=D:\Projects\Unity Project\__Unity\Model\Model.pas</Transaction>
-    <Transaction>1899/12/30 00:00:00.000.984,=D:\Projects\Unity Project\__Unity\View\Splash.pas</Transaction>
     <Transaction>1899/12/30 00:00:00.000.179,=D:\Projects\Unity Project\__Unity\Logic\Database.pas</Transaction>
-    <Transaction>1899/12/30 00:00:00.000.339,=D:\Projects\Unity Project\__Unity\View\Tracker.pas</Transaction>
+    <Transaction>1899/12/30 00:00:00.000.984,=D:\Projects\Unity Project\__Unity\View\Splash.pas</Transaction>
     <Transaction>1899/12/30 00:00:00.000.698,D:\Projects\Unity Project\__Unity\Unity_10.dproj=D:\Projects\Unity Project\__Unity\Unity.dproj</Transaction>
     <Transaction>1899/12/30 00:00:00.000.295,=D:\Projects\Unity Project\__Unity\View\EventLog.pas</Transaction>
     <Transaction>1899/12/30 00:00:00.000.501,=D:\Projects\Unity Project\__Unity\Logic\Transactions.pas</Transaction>
@@ -43,15 +43,15 @@
     <Transaction>2018/08/02 13:55:38.000.358,=I:\Projects\Unity Project\__Unity\Extensions\InterposerClasses.pas</Transaction>
     <Transaction>2018/08/02 14:16:27.000.293,=I:\Projects\Unity Project\__Unity\Unit1.pas</Transaction>
     <Transaction>2018/08/02 14:16:53.000.545,I:\Projects\Unity Project\__Unity\Extensions\Arrays.pas=I:\Projects\Unity Project\__Unity\Unit1.pas</Transaction>
-    <Transaction>2018/08/04 10:20:01.000.599,I:\Projects\Unity Project\__Unity\View\ReportBug.pas=I:\Projects\Unity Project\__Unity\View\SendFeedback.pas</Transaction>
     <Transaction>2018/08/04 10:20:01.000.599,I:\Projects\Unity Project\__Unity\View\ReportBug.dfm=I:\Projects\Unity Project\__Unity\View\SendFeedback.dfm</Transaction>
+    <Transaction>2018/08/04 10:20:01.000.599,I:\Projects\Unity Project\__Unity\View\ReportBug.pas=I:\Projects\Unity Project\__Unity\View\SendFeedback.pas</Transaction>
     <Transaction>2018/08/04 15:11:25.000.742,=I:\Projects\Unity Project\__Unity\Unit1.pas</Transaction>
     <Transaction>2018/08/04 15:14:04.000.314,I:\Projects\Unity Project\__Unity\Unit1.pas=I:\Projects\Unity Project\__Unity\Logic\ThreadUtilities.pas</Transaction>
     <Transaction>2018/08/04 15:25:16.000.804,=I:\Projects\Unity Project\__Unity\Unit1.pas</Transaction>
     <Transaction>2018/08/04 15:25:27.000.918,I:\Projects\Unity Project\__Unity\Unit1.pas=I:\Projects\Unity Project\__Unity\Logic\EventLogger.pas</Transaction>
     <Transaction>2018/08/17 14:41:12.000.110,=I:\Projects\Unity Project\__Unity\Unit1.pas</Transaction>
-    <Transaction>2018/08/17 14:50:21.000.355,I:\Projects\Unity Project\__Unity\Unit1.dfm=I:\Projects\Unity Project\__Unity\View\Await.dfm</Transaction>
     <Transaction>2018/08/17 14:50:21.000.355,I:\Projects\Unity Project\__Unity\Unit1.pas=I:\Projects\Unity Project\__Unity\View\Await.pas</Transaction>
+    <Transaction>2018/08/17 14:50:21.000.355,I:\Projects\Unity Project\__Unity\Unit1.dfm=I:\Projects\Unity Project\__Unity\View\Await.dfm</Transaction>
     <Transaction>2018/09/18 16:27:12.000.506,=I:\Projects\Unity Project\__Unity\Unit1.pas</Transaction>
     <Transaction>2018/09/18 16:27:37.000.105,I:\Projects\Unity Project\__Unity\Logic\AutoUpdater.pas=I:\Projects\Unity Project\__Unity\Unit1.pas</Transaction>
     <Transaction>2018/09/18 20:01:48.000.656,I:\Projects\Unity Project\__Unity\Logic\AutoUpdater.pas=</Transaction>
@@ -59,11 +59,14 @@
     <Transaction>2018/12/13 16:12:35.000.341,=I:\Projects\Unity Project\__Unity\Unit1.pas</Transaction>
     <Transaction>2018/12/13 16:15:53.000.896,I:\Projects\Unity Project\__Unity\View\Qms.pas=I:\Projects\Unity Project\__Unity\Unit1.pas</Transaction>
     <Transaction>2018/12/13 16:15:53.000.896,I:\Projects\Unity Project\__Unity\View\Qms.dfm=I:\Projects\Unity Project\__Unity\Unit1.dfm</Transaction>
+    <Transaction>2019/01/18 16:36:07.461,=I:\Projects\Unity Project\__Unity\Unit1.pas</Transaction>
+    <Transaction>2019/01/18 16:38:56.217,I:\Projects\Unity Project\__Unity\Extensions\CustomTypes.pas=I:\Projects\Unity Project\__Unity\Unit1.pas</Transaction>
   </Transactions>
 	<ProjectSortOrder AutoSort="0" SortType="0">
     <File Path="Extensions"/>
     <File Path="Extensions\Arrays.pas"/>
     <File Path="Extensions\InterposerClasses.pas"/>
+    <File Path="Extensions\CustomTypes.pas"/>
     <File Path="Include"/>
     <File Path="Include\Common.inc"/>
     <File Path="Include\Header.inc"/>

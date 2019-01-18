@@ -20,7 +20,8 @@ uses
     StdCtrls,
     Buttons,
     ExtCtrls,
-    InterposerClasses;
+    InterposerClasses,
+    CustomTypes;
 
 
 type
@@ -47,18 +48,33 @@ type
         Text_Banks: TLabel;
         Text_Terms: TLabel;
         Text_Warn: TLabel;
-        cbAddOverdue: TCheckBox;
+        cbShowAll: TCheckBox;
         PanelMessage: TPanel;
         PanelClient: TPanel;
         PanelBottom: TPanel;
-        procedure btnCancelClick(Sender: TObject);
-        procedure btnSendEmailClick(Sender: TObject);
+        Shape_Options: TShape;
+        Text_Options: TLabel;
+        btnBeginDate: TSpeedButton;
+        btnEndDate: TSpeedButton;
+        Text_Begin: TLabel;
+        Text_End: TLabel;
+        cbOverdueOnly: TCheckBox;
+        cbNonOverdue: TCheckBox;
+        ValBeginDate: TLabel;
+        ValEndDate: TLabel;
         procedure FormCreate(Sender: TObject);
+        procedure FormShow(Sender: TObject);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
         procedure Text_SalutKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure Text_MessageKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-        procedure cbAddOverdueKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-        procedure FormShow(Sender: TObject);
+        procedure btnCancelClick(Sender: TObject);
+        procedure btnSendEmailClick(Sender: TObject);
+        procedure cbShowAllClick(Sender: TObject);
+        procedure cbOverdueOnlyClick(Sender: TObject);
+        procedure cbNonOverdueClick(Sender: TObject);
+    procedure cbShowAllKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure cbOverdueOnlyKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure cbNonOverdueKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     private
         procedure ExecuteMailer;
     end;
@@ -86,16 +102,22 @@ uses
 
 
 /// <summary>
-///     Send statement with open items.
+/// Send statement with open items.
 /// </summary>
 
 procedure TSendForm.ExecuteMailer;
 var
     TempStr: string;
+    InvFilter: TInvoiceFilter;
 begin
+
+    if cbShowAll.Checked     then InvFilter:=TInvoiceFilter.AllItems;
+    if cbOverdueOnly.Checked then InvFilter:=TInvoiceFilter.OvdOnly;
+    if cbNonOverdue.Checked  then InvFilter:=TInvoiceFilter.NonOvd;
+
     if String.IsNullOrEmpty(Text_Message.Text) then
     begin
-        MainForm.MsgCall(mcWarn, 'Please provide with custom message and salutation.');
+        MainForm.MsgCall(mcWarn, 'Please provide custom message and salutation.');
         Exit;
     end;
 
@@ -105,7 +127,7 @@ begin
     TempStr:=StringReplace(Text_Message.Text, CRLF, HTML_BR, [rfReplaceAll]);
 
     /// <remarks>
-    ///     UpdateOpenItemsRefs and UpdateControlStatusRefs must be executed before TTSendAccountStatement is called!
+    /// UpdateOpenItemsRefs and UpdateControlStatusRefs must be executed before TTSendAccountStatement is called!
     /// </remarks>
 
     MainForm.UpdateOpenItemsRefs(ActionsForm.OpenItemsGrid);
@@ -114,7 +136,7 @@ begin
         maCustom,
         'Account Statement',
         TempStr,
-        cbAddOverdue.Checked,
+        InvFilter,
         ActionsForm.OpenItemsGrid,
         ActionsForm.CUID,
         ActionsForm.Lbu_SendFrom.Caption,
@@ -128,6 +150,7 @@ begin
     );
 
     Close;
+
 end;
 
 
@@ -141,6 +164,11 @@ begin
     Settings:=TSettings.Create;
     SendForm.Caption:=Settings.GetStringValue(ApplicationDetails, 'WND_SEND', APPCAPTION);
     PanelMessage.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+    cbShowAll.Checked:=True;
+    cbOverdueOnly.Checked:=False;
+    cbNonOverdue.Checked:=False;
+    ValBeginDate.Caption:='';
+    ValEndDate.Caption:='';
 end;
 
 
@@ -151,6 +179,42 @@ end;
 
 
 // -------------------------------------------------------------------------------------------------------------------------------------------- MOUSE EVENTS //
+
+
+procedure TSendForm.cbShowAllClick(Sender: TObject);
+begin
+
+    if cbShowAll.Checked then
+    begin
+        cbOverdueOnly.Checked:=False;
+        cbNonOverdue.Checked:=False;
+    end;
+
+end;
+
+
+procedure TSendForm.cbOverdueOnlyClick(Sender: TObject);
+begin
+
+    if cbOverdueOnly.Checked then
+    begin
+        cbShowAll.Checked:=False;
+        cbNonOverdue.Checked:=False;
+    end;
+
+end;
+
+
+procedure TSendForm.cbNonOverdueClick(Sender: TObject);
+begin
+
+    if cbNonOverdue.Checked then
+    begin
+        cbShowAll.Checked:=False;
+        cbOverdueOnly.Checked:=False;
+    end;
+
+end;
 
 
 procedure TSendForm.btnSendEmailClick(Sender: TObject);
@@ -182,11 +246,23 @@ end;
 
 procedure TSendForm.Text_MessageKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-    if Key = VK_TAB then cbAddOverdue.SetFocus;
+    if Key = VK_TAB then cbShowAll.SetFocus;
 end;
 
 
-procedure TSendForm.cbAddOverdueKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TSendForm.cbShowAllKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+    if Key = VK_TAB then cbOverdueOnly.SetFocus;
+end;
+
+
+procedure TSendForm.cbOverdueOnlyKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+    if Key = VK_TAB then cbNonOverdue.SetFocus;
+end;
+
+
+procedure TSendForm.cbNonOverdueKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if Key = VK_TAB then Text_Message.SetFocus;
 end;

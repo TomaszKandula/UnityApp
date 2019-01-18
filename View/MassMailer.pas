@@ -21,7 +21,8 @@ uses
     StdCtrls,
     ExtCtrls,
     Buttons,
-    InterposerClasses;
+    InterposerClasses,
+    CustomTypes;
 
 
 type
@@ -224,7 +225,13 @@ procedure TViewMailerForm.ExecuteMailer;
 var
     iCNT:    integer;
     MessStr: string;
+    InvFilter: TInvoiceFilter;
 begin
+
+    if cbAddOverdue.Checked then
+        InvFilter:=TInvoiceFilter.OvdOnly
+    else
+        InvFilter:=TInvoiceFilter.AllItems;
 
     // Check fields
     if
@@ -266,7 +273,7 @@ begin
     TTSendAccountStatements.Create(
         Text_Subject.Text,
         MessStr,
-        cbAddOverdue.Checked,
+        InvFilter,
         MainForm.sgOpenItems,
         ViewMailerForm.CustomerList
     );

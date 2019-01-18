@@ -7,33 +7,33 @@ unit Arrays;
 interface
 
     /// <summary>
-    ///     This class defines different array and record types.
+    /// This class defines different array and record types.
     /// </summary>
 
 type
 
     /// <remarks>
-    ///     Reference to two dimensional string array.
+    /// Reference to two dimensional string array.
     /// </remarks>
 
-    TLists    = array of array of string;
+    TLists = array of array of string;
 
     /// <remarks>
-    ///     Reference to one dimensional string array.
+    /// Reference to one dimensional string array.
     /// </remarks>
 
-    TStrings  = array of string;
+    TStrings = array of string;
 
     /// <remarks>
-    ///     Reference to one dimensional integer array.
+    /// Reference to one dimensional integer array.
     /// </remarks>
 
     TIntigers = array of integer;
 
     /// <remarks>
-    ///     These records definition allows to hold column numbers for given column name. This is necessary as column order may change.
-    ///     Normally we would use "ReturnColumn" extension method, but in case of multithreading, we must preset
-    ///     them before many threads use them at the same time (VCL components are not thread safe).
+    /// These records definition allows to hold column numbers for given column name. This is necessary as column order may change.
+    /// Normally we would use "ReturnColumn" extension method, but in case of multithreading, we must preset
+    /// them before many threads use them at the same time (VCL components are not thread safe).
     /// </remarks>
 
     TOpenItemsRefs = record
@@ -64,6 +64,9 @@ type
 
 
 implementation
+
+
+    // Leave implementation section empty
 
 
 end.

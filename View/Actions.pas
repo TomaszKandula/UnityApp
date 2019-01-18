@@ -31,7 +31,8 @@ uses
     GIFImg,
     Clipbrd,
     InterposerClasses,
-    Arrays;
+    Arrays,
+    CustomTypes;
 
 
 type
@@ -1351,7 +1352,7 @@ begin
         maDefined,
         'Account Statement',
         '',
-        False,
+        TInvoiceFilter.AllItems,
         OpenItemsGrid,
         CUID,
         Lbu_SendFrom.Caption,

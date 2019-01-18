@@ -28,6 +28,7 @@ uses
     SQL in 'Model\SQL.pas',
     Arrays in 'Extensions\Arrays.pas',
     InterposerClasses in 'Extensions\InterposerClasses.pas',
+    CustomTypes in 'Extensions\CustomTypes.pas',
     AgeView in 'Logic\AgeView.pas',
     Database in 'Logic\Database.pas',
     Mailer in 'Logic\Mailer.pas',
@@ -57,7 +58,6 @@ uses
     ABSearch in 'View\ABSearch.pas' {ViewSearchForm},
     Await in 'View\Await.pas' {AwaitForm},
     Qms in 'View\Qms.pas' {QmsForm};
-
 
 type
     DWord = 0..$FFFFFFFF;
@@ -810,7 +810,7 @@ begin
     /// </remarks>
 
     Application.CreateForm(TMainForm, MainForm);
-    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] Initialization methods executed within main thread, ''MainForm'' has been created. Main process thread ID = ' + IntToStr(MainThreadID) + '.');
+  MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] Initialization methods executed within main thread, ''MainForm'' has been created. Main process thread ID = ' + IntToStr(MainThreadID) + '.');
 
     /// <summary>
     ///     Load all other forms and execute initialization methods. Similarly to MainForm, visible parameter of the forms must be set to false

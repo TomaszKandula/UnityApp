@@ -42,8 +42,6 @@ object ViewMailerForm: TViewMailerForm
     ParentBackground = False
     ParentFont = False
     TabOrder = 2
-    ExplicitTop = 577
-    ExplicitWidth = 1085
     object Text_Warn: TLabel
       Left = 16
       Top = 12
@@ -152,8 +150,6 @@ object ViewMailerForm: TViewMailerForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 1
-    ExplicitLeft = 538
-    ExplicitHeight = 557
     object Shape_Banks: TShape
       Left = 16
       Top = 461
@@ -382,8 +378,6 @@ object ViewMailerForm: TViewMailerForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
-    ExplicitWidth = 513
-    ExplicitHeight = 557
     object PanelEmailContainer: TPanel
       AlignWithMargins = True
       Left = 20
@@ -398,8 +392,6 @@ object ViewMailerForm: TViewMailerForm
       BevelOuter = bvNone
       Caption = 'PanelEmailContainer'
       TabOrder = 0
-      ExplicitWidth = 473
-      ExplicitHeight = 517
       object CustomerList: TListView
         AlignWithMargins = True
         Left = 5
@@ -419,8 +411,6 @@ object ViewMailerForm: TViewMailerForm
         TabOrder = 0
         TabStop = False
         ViewStyle = vsReport
-        ExplicitWidth = 463
-        ExplicitHeight = 507
       end
     end
   end
