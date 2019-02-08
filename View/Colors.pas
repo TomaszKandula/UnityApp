@@ -48,14 +48,14 @@ type
         ColorPreview1: TLabel;
         ColorPreview2: TLabel;
         ColorPreview3: TLabel;
+        procedure FormCreate(Sender: TObject);
+        procedure FormShow(Sender: TObject);
         procedure btnTodayClick(Sender: TObject);
         procedure btnPastClick(Sender: TObject);
         procedure btnFutureClick(Sender: TObject);
-        procedure FormCreate(Sender: TObject);
         procedure ColorList1Select(Sender: TObject);
         procedure ColorList2Select(Sender: TObject);
         procedure ColorList3Select(Sender: TObject);
-        procedure FormShow(Sender: TObject);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
     end;
 
@@ -82,19 +82,13 @@ uses
 /// </summary>
 
 procedure TColorsForm.FormCreate(Sender: TObject);
-var
-    Settings: ISettings;
 begin
-    Settings:=TSettings.Create;
-    ColorsForm.Caption:=Settings.GetStringValue(ApplicationDetails, 'WND_COLORS', APPCAPTION);
-
     if (ColorList1.Items.Count > 0) and (ColorList2.Items.Count > 0) and (ColorList3.Items.Count > 0) then
     begin
         ColorList1.ItemIndex:=0;
         ColorList2.ItemIndex:=0;
         ColorList3.ItemIndex:=0;
     end;
-
 end;
 
 

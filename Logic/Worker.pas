@@ -284,6 +284,8 @@ type
         var FSubject:     string;
         var FMess:        string;
         var FInvFilter:   TInvoiceFilter;
+        var FBeginDate:   string;
+        var FEndDate:     string;
         var FOpenItems:   TStringGrid;
         var FCUID:        string;
         var FSendFrom:    string;
@@ -304,6 +306,8 @@ type
             Subject:     string;
             Mess:        string;
             InvFilter:   TInvoiceFilter;
+            BeginDate:   string;
+            EndDate:     string;
             OpenItems:   TStringGrid;
             CUID:        string;
             SendFrom:    string;
@@ -332,6 +336,8 @@ type
         var FSubject:    string;
         var FMess:       string;
         var FInvFilter:  TInvoiceFilter;
+        var FBeginDate:  string;
+        var FEndDate:    string;
         var FOpenItems:  TStringGrid;
         var FMailerList: TListView;
     public
@@ -341,6 +347,8 @@ type
             Subject:    string;
             Mess:       string;
             InvFilter:  TInvoiceFilter;
+            BeginDate:  string;
+            EndDate:    string;
             OpenItems:  TStringGrid;
             MailerList: TListView
         );
@@ -1642,6 +1650,8 @@ constructor TTSendAccountStatement.Create
     Subject:     string;
     Mess:        string;
     InvFilter:   TInvoiceFilter;
+    BeginDate:   string;
+    EndDate:     string;
     OpenItems:   TStringGrid;
     CUID:        string;
     SendFrom:    string;
@@ -1663,6 +1673,8 @@ begin
     FSubject    :=Subject;
     FMess       :=Mess;
     FInvFilter  :=InvFilter;
+    FBeginDate  :=BeginDate;
+    FEndDate    :=EndDate;
     FOpenItems  :=OpenItems;
     FCUID       :=CUID;
     FSendFrom   :=SendFrom;
@@ -1698,7 +1710,7 @@ begin
         try
 
             /// <remarks>
-            ///     Assign all the necessary parameters.
+            /// Assign all the necessary parameters.
             /// </remarks>
 
             Statement.CUID       :=FCUID;
@@ -1712,6 +1724,9 @@ begin
             Statement.CustMess   :=FMess;
             Statement.OpenItems  :=FOpenItems;
             Statement.InvFilter  :=FInvFilter;
+            Statement.BeginWith  :=FBeginDate;
+            Statement.EndWith    :=FEndDate;
+
             // quick fix - to be refactored - data should be taken from the table
             Statement.REM_EX1:='1';
             Statement.REM_EX2:='102';
@@ -1722,17 +1737,11 @@ begin
             Statement.MailSubject:=FSubject + ' - ' + FCustName + ' - ' + FCustNumber;
 
             /// <remarks>
-            ///     Use dcStatement, do not change this flag.
-            /// </remarks>
-
-            Statement.DocType:=dcStatement;
-
-            /// <remarks>
-            ///     Load either fixed template or customizable template.
+            /// Load either fixed template or customizable template.
             /// </remarks>
             /// <param name="FLayout">
-            ///     Use maDefined for fully pre-defined template.
-            ///     Use maCustom for customised template. It requires FSalut, FMess and FSubject to be provided.
+            /// Use maDefined for fully pre-defined template.
+            /// Use maCustom for customised template. It requires FSalut, FMess and FSubject to be provided.
             /// </param>
 
             if FLayout = maDefined then
@@ -1742,14 +1751,14 @@ begin
                 Statement.HTMLLayout:=Statement.LoadTemplate(Settings.GetLayoutDir + Settings.GetStringValue(Layouts, 'SINGLE3', ''));
 
             /// <remarks>
-            ///     Send email with account statement.
+            /// Send email with account statement.
             /// </remarks>
 
             if Statement.SendDocument then
             begin
 
                 /// <summary>
-                ///     Register sent email either as manual statement or automatic statement.
+                /// Register sent email either as manual statement or automatic statement.
                 /// </summary>
 
                 if FLayout = maDefined then
@@ -1787,7 +1796,7 @@ begin
                 end;
 
                 /// <remarks>
-                ///     Either single email (manual by user) or executed by mass mailer (multiple emails).
+                /// Either single email (manual by user) or executed by mass mailer (multiple emails).
                 /// </remarks>
 
                 if not(FSeries) then
@@ -1826,6 +1835,8 @@ constructor TTSendAccountStatements.Create
     Subject:    string;
     Mess:       string;
     InvFilter:  TInvoiceFilter;
+    BeginDate:  string;
+    EndDate:    string;
     OpenItems:  TStringGrid;
     MailerList: TListView
 );
@@ -1836,6 +1847,8 @@ begin
     FSubject   :=Subject;
     FMess      :=Mess;
     FInvFilter :=InvFilter;
+    FBeginDate :=BeginDate;
+    FEndDate   :=EndDate;
     FOpenItems :=OpenItems;
     FMailerList:=MailerList;
 end;
@@ -1857,7 +1870,7 @@ begin
     try
 
         /// <remarks>
-        ///     Lock VCL during processing by worker thread.
+        /// Lock VCL during processing by worker thread.
         /// </remarks>
 
         FOpenItems.Freeze(True);
@@ -1867,7 +1880,7 @@ begin
         try
 
             /// <remarks>
-            ///     Update column references, as they depend on view from SQL which may be changed at runtime.
+            /// Update column references, as they depend on view from SQL which may be changed at runtime.
             /// </remarks>
 
             MainForm.UpdateOpenItemsRefs(MainForm.sgOpenItems);
@@ -1876,13 +1889,13 @@ begin
             for iCNT:=0 to FMailerList.Items.Count - 1 do
             begin
 
-                if FMailerList.Items[iCNT].SubItems[3] <> 'Not found!' then
+                if FMailerList.Items[iCNT].SubItems[4] <> 'Not found!' then
                 begin
 
                     /// <remarks>
-                    ///     Execute worker thread and wait until it finishes the work. This may is due to limitness of multithreading capability,
-                    ///     user may want to send hundreds of emails and we do not want to create hundreds of threads. One worker thread is
-                    ///     enough to perform email sending wihtout blocking main thread (GUI).
+                    /// Execute worker thread and wait until it finishes the work. This may is due to limitness of multithreading capability,
+                    /// user may want to send hundreds of emails and we do not want to create hundreds of threads. One worker thread is
+                    /// enough to perform email sending wihtout blocking main thread (GUI).
                     /// </remarks>
 
                     SendStat:=TTSendAccountStatement.Create(
@@ -1890,10 +1903,12 @@ begin
                         FSubject,
                         FMess,
                         FInvFilter,
+                        FBeginDate,
+                        FEndDate,
                         FOpenItems,
                         FMailerList.Items[iCNT].SubItems[10], // cuid
-                        FMailerList.Items[iCNT].SubItems[2],  // send from
-                        FMailerList.Items[iCNT].SubItems[3],  // send to
+                        FMailerList.Items[iCNT].SubItems[3],  // send from
+                        FMailerList.Items[iCNT].SubItems[4],  // send to
                         FMailerList.Items[iCNT].SubItems[0],  // cust name
                         FMailerList.Items[iCNT].SubItems[1],  // cust number
                         FMailerList.Items[iCNT].SubItems[5],  // lbu name
@@ -1969,9 +1984,9 @@ begin
     end;
 
     /// <remarks>
-    ///     Do not use FreeOnTerminate, manually destroy the object after the job is done.
-    ///     This allow to execute this thread in series with "WaitFor" method.
-    ///     By default, FreeOnTerminate is always ON, use option "False" to disable it.
+    /// Do not use FreeOnTerminate, manually destroy the object after the job is done.
+    /// This allow to execute this thread in series with "WaitFor" method.
+    /// By default, FreeOnTerminate is always ON, use option "False" to disable it.
     /// </remarks>
 
     FreeOnTerminate:=FAutoRelease;

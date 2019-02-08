@@ -30,14 +30,14 @@ uses
 
 
     /// <summary>
-    ///     This unit contains all extensions of standard components introduced via interposer class.
-    ///     There is no need to register component as we do not make new derived class.
+    /// This unit contains all extensions of standard components introduced via interposer class.
+    /// There is no need to register component as we do not make new derived class.
     /// </summary>
 
 type
 
     /// <remarks>
-    ///     Reference to TSTringGrid object, necessary for implementing "delete" function.
+    /// Reference to TSTringGrid object, necessary for implementing "delete" function.
     /// </remarks>
 
     TAbstractGrid = class(Grids.TStringGrid);
@@ -52,7 +52,7 @@ type
     end;
 
     /// <summary>
-    ///     Interposer class of TEdit. Extension.
+    /// Interposer class of TEdit. Extension.
     /// </summary>
 
     TEdit = Class(StdCtrls.TEdit)
@@ -64,7 +64,7 @@ type
     end;
 
     /// <summary>
-    ///     Interposer class of TShape component. Extension.
+    /// Interposer class of TShape component. Extension.
     /// </summary>
 
     TShape = class(ExtCtrls.TShape)
@@ -82,7 +82,7 @@ type
     end;
 
     /// <summary>
-    ///     Interposer class of TPanel component. Extension.
+    /// Interposer class of TPanel component. Extension.
     /// </summary>
 
     TPanel = class(ExtCtrls.TPanel)
@@ -103,7 +103,7 @@ type
     end;
 
     /// <summary>
-    ///     Interposer class of TStringGrid component. Extension.
+    /// Interposer class of TStringGrid component. Extension.
     /// </summary>
 
     TStringGrid = class(Grids.TStringGrid)
@@ -142,7 +142,7 @@ type
     end;
 
     /// <summary>
-    ///     Interposer class of TListView component. Extension, add ability to freeze itself.
+    /// Interposer class of TListView component. Extension, add ability to freeze itself.
     /// </summary>
 
     TListView = class(ComCtrls.TListView)
@@ -163,7 +163,7 @@ uses
 // --------------------------------------------------------------------------------------------------------------------------- EXTENSION OF 'TLISTBOX' CLASS //
 
 /// <summary>
-///     Allow to freeze component.
+/// Allow to freeze component.
 /// </summary>
 
 procedure TCheckListBox.Freeze(PaintWnd: Boolean);
@@ -352,9 +352,9 @@ end;
 
 
 /// <summary>
-///     Register rows for update. Keeps row number to be updated, eg. if data is held in string grid popuated from database table, then to build SQL batch
-///     with update statement, we must take all changed rowsby the user - once cell is changed we add row to the register. Later such information can be used
-///     to build SQL update expression.
+/// Register rows for update. Keeps row number to be updated, eg. if data is held in string grid popuated from database table, then to build SQL batch
+/// with update statement, we must take all rows changed by the user - once cell(s) is(are) changed we add row to the register. Later such information
+/// can be used to build SQL update expression.
 /// </summary>
 
 procedure TStringGrid.SetUpdatedRow(Row: integer);
@@ -385,7 +385,7 @@ end;
 
 
 /// <summary>
-///     Register rows affected.
+/// Register rows affected.
 /// </summary>
 
 procedure TStringGrid.RecordRowsAffected;
@@ -929,18 +929,18 @@ end;
 
 
 /// <summary>
-///     Load layout from application settings.
+/// Load layout from application settings.
 /// </summary>
 /// <remarks>
-///     'Colordername' and 'colwidthname' provide the section names for column order and column width.
-///     both sections must contains equal number of value keys. Each key contain column name used by
-///     string grid component (age view) that displays data from sql server database, thus column names
-///     are used to build sql query, this is because we use sql expressions to obtain initial output
-///     with filtering and/or sorting etc. Separate filtering to some extend is allowed in string grid
-///     however, separate sorting is not implemented to restrict user form "playing around"
-///     therefore, there is one place (server) where there is decided how to display data to user,
-///     this is part of automation and standard approach across all users, so the user is forced
-///     in certain direction by automation, and thus can obtain better results, etc.
+/// 'Colordername' and 'colwidthname' provide the section names for column order and column width.
+/// both sections must contains equal number of value keys. Each key contain column name used by
+/// string grid component (age view) that displays data from sql server database, thus column names
+/// are used to build sql query, this is because we use SQL expressions to obtain initial output
+/// with filtering and/or sorting etc. Separate filtering to some extend is allowed in string grid
+/// however, separate sorting is not implemented to restrict user form "playing around"
+/// therefore, there is one place (server) where there is decided how to display data to user,
+/// this is part of automation and standard approach across all users, so the user is forced
+/// in certain direction by automation, and thus can obtain better results, etc.
 /// </remarks>
 
 function TStringGrid.LoadLayout(var StrCol: string; ColWidthName: string; ColOrderName: string; ColNames: string; ColPrefix: string): boolean;

@@ -120,7 +120,7 @@ type
         const Free1        = 'Free1';
         const Free2        = 'Free2';
         const Free3        = 'Free3';
-        const fFollowUp  = 'Follow Up'; // User friendly name for given columns
+        const fFollowUp    = 'Follow Up'; // User friendly name for given columns
     end;
 
     TOpenitems = class(TDataTables)

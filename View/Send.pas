@@ -21,13 +21,13 @@ uses
     Buttons,
     ExtCtrls,
     InterposerClasses,
-    CustomTypes;
+    CustomTypes, Vcl.Imaging.pngimage;
 
 
 type
 
     /// <summary>
-    ///     View form class for custom statement.
+    /// View form class for custom statement.
     /// </summary>
 
     TSendForm = class(TForm)
@@ -54,12 +54,18 @@ type
         PanelBottom: TPanel;
         Shape_Options: TShape;
         Text_Options: TLabel;
-        btnBeginDate: TSpeedButton;
-        btnEndDate: TSpeedButton;
-        Text_Begin: TLabel;
-        Text_End: TLabel;
         cbOverdueOnly: TCheckBox;
         cbNonOverdue: TCheckBox;
+        PanelOption: TPanel;
+        btnBeginDate: TSpeedButton;
+        btnDelBegin: TSpeedButton;
+        btnDelEnd: TSpeedButton;
+        btnEndDate: TSpeedButton;
+        DueDateLabel: TLabel;
+        ImgCover: TImage;
+        Shape_Dates: TShape;
+        Text_Begin: TLabel;
+        Text_End: TLabel;
         ValBeginDate: TLabel;
         ValEndDate: TLabel;
         procedure FormCreate(Sender: TObject);
@@ -72,9 +78,13 @@ type
         procedure cbShowAllClick(Sender: TObject);
         procedure cbOverdueOnlyClick(Sender: TObject);
         procedure cbNonOverdueClick(Sender: TObject);
-    procedure cbShowAllKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure cbOverdueOnlyKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure cbNonOverdueKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure cbShowAllKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure cbOverdueOnlyKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure cbNonOverdueKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure btnBeginDateClick(Sender: TObject);
+        procedure btnEndDateClick(Sender: TObject);
+        procedure btnDelBeginClick(Sender: TObject);
+        procedure btnDelEndClick(Sender: TObject);
     private
         procedure ExecuteMailer;
     end;
@@ -89,6 +99,7 @@ implementation
 
 uses
     Main,
+    Calendar,
     Settings,
     Worker,
     Actions,
@@ -111,10 +122,6 @@ var
     InvFilter: TInvoiceFilter;
 begin
 
-    if cbShowAll.Checked     then InvFilter:=TInvoiceFilter.AllItems;
-    if cbOverdueOnly.Checked then InvFilter:=TInvoiceFilter.OvdOnly;
-    if cbNonOverdue.Checked  then InvFilter:=TInvoiceFilter.NonOvd;
-
     if String.IsNullOrEmpty(Text_Message.Text) then
     begin
         MainForm.MsgCall(mcWarn, 'Please provide custom message and salutation.');
@@ -124,10 +131,15 @@ begin
     if MainForm.MsgCall(mcQuestion2, 'Are you absolutely sure you want to send it, right now?') = IDNO then
         Exit;
 
+    InvFilter:=TInvoiceFilter.AllItems;
+    if cbShowAll.Checked     then InvFilter:=TInvoiceFilter.AllItems;
+    if cbOverdueOnly.Checked then InvFilter:=TInvoiceFilter.OvdOnly;
+    if cbNonOverdue.Checked  then InvFilter:=TInvoiceFilter.NonOvd;
+
     TempStr:=StringReplace(Text_Message.Text, CRLF, HTML_BR, [rfReplaceAll]);
 
     /// <remarks>
-    /// UpdateOpenItemsRefs and UpdateControlStatusRefs must be executed before TTSendAccountStatement is called!
+    /// UpdateOpenItemsRefs and UpdateControlStatusRefs must be executed before TTSendAccountStatement is called.
     /// </remarks>
 
     MainForm.UpdateOpenItemsRefs(ActionsForm.OpenItemsGrid);
@@ -137,6 +149,8 @@ begin
         'Account Statement',
         TempStr,
         InvFilter,
+        ValBeginDate.Caption,
+        ValEndDate.Caption,
         ActionsForm.OpenItemsGrid,
         ActionsForm.CUID,
         ActionsForm.Lbu_SendFrom.Caption,
@@ -158,11 +172,7 @@ end;
 
 
 procedure TSendForm.FormCreate(Sender: TObject);
-var
-    Settings: ISettings;
 begin
-    Settings:=TSettings.Create;
-    SendForm.Caption:=Settings.GetStringValue(ApplicationDetails, 'WND_SEND', APPCAPTION);
     PanelMessage.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
     cbShowAll.Checked:=True;
     cbOverdueOnly.Checked:=False;
@@ -188,7 +198,17 @@ begin
     begin
         cbOverdueOnly.Checked:=False;
         cbNonOverdue.Checked:=False;
+        ImgCover.Visible:=True;
     end;
+
+    if
+        not(cbShowAll.Checked)
+    and
+        not(cbOverdueOnly.Checked)
+    and
+        not(cbNonOverdue.Checked)
+    then
+        cbShowAll.Checked:=True;
 
 end;
 
@@ -200,7 +220,17 @@ begin
     begin
         cbShowAll.Checked:=False;
         cbNonOverdue.Checked:=False;
+        ImgCover.Visible:=True;
     end;
+
+    if
+        not(cbShowAll.Checked)
+    and
+        not(cbOverdueOnly.Checked)
+    and
+        not(cbNonOverdue.Checked)
+    then
+        cbOverdueOnly.Checked:=True;
 
 end;
 
@@ -212,8 +242,46 @@ begin
     begin
         cbShowAll.Checked:=False;
         cbOverdueOnly.Checked:=False;
+        ImgCover.Visible:=False;
     end;
 
+    if
+        not(cbShowAll.Checked)
+    and
+        not(cbOverdueOnly.Checked)
+    and
+        not(cbNonOverdue.Checked)
+    then
+        cbNonOverdue.Checked:=True;
+
+end;
+
+
+procedure TSendForm.btnDelBeginClick(Sender: TObject);
+begin
+    ValBeginDate.Caption:='';
+end;
+
+
+procedure TSendForm.btnDelEndClick(Sender: TObject);
+begin
+    ValEndDate.Caption:='';
+end;
+
+
+procedure TSendForm.btnBeginDateClick(Sender: TObject);
+begin
+    CalendarForm.CalendarMode:=cfGetDate;
+    MainForm.WndCall(CalendarForm, stModal);
+    ValBeginDate.Caption:=DateToStr(CalendarForm.SelectedDate);
+end;
+
+
+procedure TSendForm.btnEndDateClick(Sender: TObject);
+begin
+    CalendarForm.CalendarMode:=cfGetDate;
+    MainForm.WndCall(CalendarForm, stModal);
+    ValEndDate.Caption:=DateToStr(CalendarForm.SelectedDate);
 end;
 
 

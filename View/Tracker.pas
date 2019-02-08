@@ -469,13 +469,10 @@ end;
 
 procedure TTrackerForm.FormCreate(Sender: TObject);
 var
-    Settings:  ISettings;
     lsColumns: TListColumn;
 begin
 
     Multiselect:=TStringList.Create;
-    Settings:=TSettings.Create;
-    TrackerForm.Caption:=Settings.GetStringValue(ApplicationDetails, 'WND_TRACKER', APPCAPTION);
 
     // List view initialization
 

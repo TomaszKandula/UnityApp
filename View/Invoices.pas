@@ -33,9 +33,9 @@ type
         InvoicesGrid: TStringGrid;
         StatusBar: TStatusBar;
         procedure FormCreate(Sender: TObject);
+        procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
         procedure FormResize(Sender: TObject);
-        procedure FormShow(Sender: TObject);
         procedure InvoicesGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
         procedure InvoicesGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
@@ -61,11 +61,7 @@ uses
 
 
 procedure TInvoicesForm.FormCreate(Sender: TObject);
-var
-    Settings:  ISettings;
 begin
-    Settings:=TSettings.Create;
-    InvoicesForm.Caption:=Settings.GetStringValue(ApplicationDetails, 'WND_INVOICES', APPCAPTION);
     InvoicesGrid.RowCount:=2;
     InvoicesGrid.ColCount:=4;
     InvoicesGrid.SetRowHeight(sgRowHeight, 25);

@@ -44,8 +44,8 @@ type
         TextSearch: TLabel;
         PanelMain: TPanel;
         TextWarn: TLabel;
-        procedure btnSearchClick(Sender: TObject);
         procedure FormCreate(Sender: TObject);
+        procedure btnSearchClick(Sender: TObject);
         procedure FormClose(Sender: TObject; var Action: TCloseAction);
         procedure btnUnhideClick(Sender: TObject);
         procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -268,11 +268,7 @@ end;
 
 
 procedure TSearchForm.FormCreate(Sender: TObject);
-var
-    Settings:  ISettings;
 begin
-  Settings:=TSettings.Create;
-  SearchForm.Caption:=Settings.GetStringValue(ApplicationDetails, 'WND_AVSEARCH', APPCAPTION);
   PanelEditSearch.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
   SColName  :='';
   SColNumber:='';

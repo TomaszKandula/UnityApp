@@ -128,7 +128,7 @@ uses
 // ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
 
 
-function TQmsForm.InsertSingleInvoice: boolean;  // make async!!! refactor
+function TQmsForm.InsertSingleInvoice: boolean;  // make async!!! refactor  // only missing invoice
 var
     Tables: TDataTables;
     QueryUid: TGUID;
@@ -209,7 +209,7 @@ end;
 ///
 /// </summary>
 
-function TQmsForm.InsertManyInvoices(Source: TStringGrid): boolean; // make async !!!
+function TQmsForm.InsertManyInvoices(Source: TStringGrid): boolean; // make async !!! // only current invoices (one or more)
 var
     Tables:    TDataTables;
     TempData:  TStringGrid;
@@ -219,7 +219,7 @@ var
 begin
 
     Result:=False;
-    if (Source = nil) or (Source.Selection.Bottom - Source.Selection.Top = 0) then Exit;
+    if (Source = nil) {or (Source.Selection.Bottom - Source.Selection.Top = 0)} then Exit;
 
     Tables:=TDataTables.Create(MainForm.DbConnect);
     TempData:=TStringGrid.Create(nil);
@@ -247,7 +247,7 @@ begin
         Tables.Columns.Add(TQmsLog.Stamp);
         Tables.Columns.Add(TQmsLog.QueryUid);
 
-        // Move the data from open items grid in ActionLog window into the TempGrid
+        // Move the data from open items grid in ActionLog window into the TempGrid // check missing last row?
         TempData.RowCount:=Source.Selection.Bottom - Source.Selection.Top;
         TempData.ColCount:=Tables.Columns.Count;
         jCNT:=Source.Selection.Top;
@@ -314,13 +314,13 @@ begin
 
     if IsMissing then
     begin
-        if String.IsNullOrEmpty(EditInvoiceNo.Text)   then Inc(Checks);
-        if String.IsNullOrEmpty(EditOpenAmount.Text)  then Inc(Checks);
-        if String.IsNullOrEmpty(EditAmount.Text)      then Inc(Checks);
-        if String.IsNullOrEmpty(EditOpenCurrAm.Text)  then Inc(Checks);
-        if String.IsNullOrEmpty(EditCurrAmount.Text)  then Inc(Checks);
-        if String.IsNullOrEmpty(EditDueDate.Text)     then Inc(Checks);
-        if String.IsNullOrEmpty(EditValDate.Text)     then Inc(Checks);
+        if String.IsNullOrEmpty(EditInvoiceNo.Text)  then Inc(Checks);
+        if String.IsNullOrEmpty(EditOpenAmount.Text) then Inc(Checks);
+        if String.IsNullOrEmpty(EditAmount.Text)     then Inc(Checks);
+        if String.IsNullOrEmpty(EditOpenCurrAm.Text) then Inc(Checks);
+        if String.IsNullOrEmpty(EditCurrAmount.Text) then Inc(Checks);
+        if String.IsNullOrEmpty(EditDueDate.Text)    then Inc(Checks);
+        if String.IsNullOrEmpty(EditValDate.Text)    then Inc(Checks);
     end;
 
     Result:=Checks;

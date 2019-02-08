@@ -987,7 +987,7 @@ type
 
 
 var
-    MainForm :  TMainForm;
+    MainForm: TMainForm;
 
 
 implementation
@@ -1106,7 +1106,7 @@ begin
                 Param:=StrToIntDef(PChar(Msg.LParam), -1);
                 if Param > -1 then
                 begin
-                    ViewMailerForm.CustomerList.Items[Param].SubItems[4]:='Sent';
+                    ViewMailerForm.CustomerList.Items[Param].SubItems[2]:='Sent';
                     ViewMailerForm.ThreadCount:=ViewMailerForm.ThreadCount - 1;
                 end;
             end;
@@ -2171,6 +2171,9 @@ begin
 end;
 
 
+// ------------------------------------------------------------------------------------------------------------------------------------------------ QMS DEMO //
+
+
 /// <summary>
 ///
 /// </summary>
@@ -2730,7 +2733,7 @@ begin
         Text22.Caption:=Settings.GetStringValue(AgingRanges,'RANGE4A','') + ' - ' + Settings.GetStringValue(AgingRanges,'RANGE6B','') + ':';
 
         /// <summary>
-        /// Transparency on button glyphs.
+        /// Make sure that we have transparency on all button glyphs.
         /// </summary>
 
         SetButtonsGlyphs;
@@ -2782,10 +2785,6 @@ begin
             UserControl.GetGroupList(GroupList, GroupListBox);
             UserControl.GetAgeDates(GroupListDates, GroupList[0, 0]);
 
-            /// <remarks>
-            ///  Depending on access level, enable/disable features.
-            /// </remarks>
-
             {TODO -oTomek -cReplaceWith : ApprovalMatrix}
 
             // Restricted for "ADMINS"
@@ -2795,17 +2794,6 @@ begin
                 ReloadCover.Visible:=True;
                 ReloadCover.Cursor:=crNo;
                 GroupListDates.Enabled:=False;
-            end;
-
-            // Not allowed for "RO" users
-            if AccessLevel = acReadOnly then // change it!!!
-            begin
-//                Action_Tracker.Enabled:=False;
-//                Action_AddToBook.Enabled:=False;
-//                ActionsForm.DailyCom.Enabled:=False;
-//                ActionsForm.GeneralCom.Enabled:=False;
-//                btnUpdateAB.Enabled:=False;
-//                txtQueries.Enabled:=False;
             end;
 
         except
@@ -2963,7 +2951,7 @@ end;
 begin
 
     /// <remarks>
-    ///     Do not use it. Scroll thumb size is buggy in Windows.
+    /// Do not use it. Scroll thumb size is buggy in Windows.
     /// </remarks>
 
     // SetGridThumbSizes;
@@ -2971,7 +2959,7 @@ begin
 end;
 
 /// <summary>
-///     Load Unity Info web page.
+/// Load Unity Info web page.
 /// </summary>
 
 procedure TMainForm.ChromiumWindowAfterCreated(Sender: TObject);
@@ -2994,9 +2982,9 @@ end;
 
 
 /// <summary>
-///     Execute when application receives windows message on shutting down the system; or user press key combination of <ALT> + <Y>; or
-///     simply clicks close button on application caption bar. Standard behaviour of application close button is changed to minimisation
-///     of the application to system tray (removes icon from taskbar).
+/// Execute when application receives windows message on shutting down the system; or user press key combination of <ALT> + <Y>; or
+/// simply clicks close button on application caption bar. Standard behaviour of application close button is changed to minimisation
+/// of the application to system tray (removes icon from taskbar).
 /// </summary>
 
 procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -3052,7 +3040,7 @@ begin
 end;
 
 /// <summary>
-///     Save window position and layout; and disconnect from the server.
+/// Save window position and layout; and disconnect from the server.
 /// </summary>
 
 procedure TMainForm.FormDestroy(Sender: TObject);
@@ -3083,8 +3071,8 @@ end;
 
 
 /// <summary>
-///     Delayed load of default age snapshot. Make sure that it is disabled at startup. It can run only once when application main window
-///     is fully loaded and presented to the user.
+/// Delayed load of default age snapshot. Make sure that it is disabled at startup. It can run only once when application main window
+/// is fully loaded and presented to the user.
 /// </summary>
 
 procedure TMainForm.FirstAgeLoadTimer(Sender: TObject);
@@ -3126,7 +3114,7 @@ begin
 end;
 
 /// <summary>
-///     Initiaize ChromiumWindow with time lag.
+/// Initiaize ChromiumWindow with time lag.
 /// </summary>
 
 procedure TMainForm.ChromiumTimerTimer(Sender: TObject);
@@ -3137,7 +3125,7 @@ begin
 end;
 
 /// <summary>
-///     Count current follow-ups and display in notification baloon.
+/// Count current follow-ups and display in notification baloon.
 /// </summary>
 
 procedure TMainForm.FollowupPopupTimer(Sender: TObject);
@@ -3170,7 +3158,7 @@ begin
 end;
 
 /// <summary>
-///     Check internet connection on regular basis.
+/// Check internet connection on regular basis.
 /// </summary>
 
 procedure TMainForm.InetTimerTimer(Sender: TObject);
@@ -3179,7 +3167,7 @@ begin
 end;
 
 /// <summary>
-///     Call Invoice Tracker scanning method.
+/// Call Invoice Tracker scanning method.
 /// </summary>
 
 procedure TMainForm.InvoiceScanTimerTimer(Sender: TObject);
@@ -3188,7 +3176,7 @@ begin
 end;
 
 /// <summary>
-///     Autoloader for open items.
+/// Autoloader for open items.
 /// </summary>
 
 procedure TMainForm.OILoaderTimer(Sender: TObject);
@@ -3198,7 +3186,7 @@ begin
 end;
 
 /// <summary>
-///     Display current time.
+/// Display current time.
 /// </summary>
 
 procedure TMainForm.CurrentTimeTimer(Sender: TObject);
@@ -3207,7 +3195,7 @@ begin
 end;
 
 /// <summary>
-///     Display current uptime.
+/// Display current uptime.
 /// </summary>
 
 procedure TMainForm.UpTimeTimer(Sender: TObject);
@@ -3226,7 +3214,7 @@ end;
 
 
 /// <summary>
-///     Export entire grid content to CSV file.
+/// Export entire grid content to CSV file.
 /// </summary>
 
 procedure TMainForm.Action_ExportTransactionsClick(Sender: TObject);
@@ -3250,7 +3238,7 @@ begin
 end;
 
 /// <summary>
-///     Select all items on focused string grid.
+/// Select all items on focused string grid.
 /// </summary>
 
 procedure TMainForm.Action_SelectAllClick(Sender: TObject);
@@ -3274,7 +3262,7 @@ begin
 end;
 
 /// <summary>
-///     Copy to clipboard selected cells on focused string grid.
+/// Copy to clipboard selected cells on focused string grid.
 /// </summary>
 
 procedure TMainForm.Action_CopyToCBClick(Sender: TObject);
@@ -3298,7 +3286,7 @@ begin
 end;
 
 /// <summary>
-///     Set column width.
+/// Set column width.
 /// </summary>
 
 procedure TMainForm.Action_AutoColumnClick(Sender: TObject);
@@ -3326,7 +3314,7 @@ end;
 
 
 /// <summary>
-///     Address Book context menu.
+/// Address Book context menu.
 /// </summary>
 
 procedure TMainForm.BookPopupPopup(Sender: TObject);
@@ -3344,7 +3332,7 @@ begin
 end;
 
 /// <summary>
-///     Allow to cut/paste the data from cell(s) if selected column is marked for editing.
+/// Allow to cut/paste the data from cell(s) if selected column is marked for editing.
 /// </summary>
 
 procedure TMainForm.Action_CutClick(Sender: TObject);
@@ -3375,7 +3363,7 @@ begin
 end;
 
 /// <summary>
-///     Copy :)
+/// Copy.
 /// </summary>
 
 procedure TMainForm.Action_CopyClick(Sender: TObject);
@@ -3384,7 +3372,7 @@ begin
 end;
 
 /// <summary>
-///     Deete given SCUID from database.
+/// Delete given SCUID from database.
 /// </summary>
 
 procedure TMainForm.Action_DelRowClick(Sender: TObject);
@@ -3416,7 +3404,7 @@ begin
 end;
 
 /// <summary>
-///     Open search window.
+/// Open search window.
 /// </summary>
 
 procedure TMainForm.Action_SearchBookClick(Sender: TObject);
@@ -3425,7 +3413,7 @@ begin
 end;
 
 /// <summary>
-///     Show all entries in Address Book from database.
+/// Show all entries in Address Book from database.
 /// </summary>
 
 procedure TMainForm.Action_ShowAsIsClick(Sender: TObject);
@@ -3443,7 +3431,7 @@ begin
 end;
 
 /// <summary>
-///     Show Address Book entries
+/// Show Address Book entries
 /// </summary>
 
 procedure TMainForm.Action_ShowMyEntriesClick(Sender: TObject);
@@ -3461,7 +3449,7 @@ begin
 end;
 
 /// <summary>
-///     Set column width.
+/// Set column width.
 /// </summary>
 
 procedure TMainForm.Action_ColumnWidthClick(Sender: TObject);
@@ -3474,7 +3462,7 @@ end;
 
 
 /// <summary>
-///     Bring to front main application window.
+/// Bring to front main application window.
 /// </summary>
 
 procedure TMainForm.Action_ShowAppClick(Sender: TObject);
@@ -3485,7 +3473,7 @@ begin
 end;
 
 /// <summary>
-///     Hide main application window to task bar.
+/// Hide main application window to task bar.
 /// </summary>
 
 procedure TMainForm.Action_HideAppClick(Sender: TObject);
@@ -3495,7 +3483,7 @@ begin
 end;
 
 /// <summary>
-///     Allow to set stay on top.
+/// Allow to set stay on top.
 /// </summary>
 
 procedure TMainForm.Action_OnTopClick(Sender: TObject);
@@ -3513,7 +3501,7 @@ begin
 end;
 
 /// <summary>
-///     Show user feedback window.
+/// Show user feedback window.
 /// </summary>
 
 procedure TMainForm.Action_ReportClick(Sender: TObject);
@@ -3522,7 +3510,7 @@ begin
 end;
 
 /// <summary>
-///     Open help file with basic manual on application usage. Use external PDF file.
+/// Open help file with basic manual on application usage. Use external PDF file.
 /// </summary>
 
 procedure TMainForm.Action_HelpClick(Sender: TObject);
@@ -3531,7 +3519,7 @@ begin
 end;
 
 /// <summary>
-///     Display about window.
+/// Display about window.
 /// </summary>
 
 procedure TMainForm.Action_AboutClick(Sender: TObject);
@@ -3540,7 +3528,7 @@ begin
 end;
 
 /// <summary>
-///     Close button (disabled).
+/// Close button (disabled).
 /// </summary>
 
 procedure TMainForm.Action_CloseClick(Sender: TObject);
@@ -3553,7 +3541,7 @@ end;
 
 
 /// <summary>
-///     Execute before context menu is shown.
+/// Execute before context menu is shown.
 /// </summary>
 
 procedure TMainForm.AgeViewPopupPopup(Sender: TObject);
@@ -3571,7 +3559,7 @@ begin
 end;
 
 /// <summary>
-///     Execute Action Log window with Lync abilities.
+/// Execute Action Log window with Lync abilities.
 /// </summary>
 
 procedure TMainForm.Action_LyncCallClick(Sender: TObject);
@@ -3589,7 +3577,7 @@ begin
 end;
 
 /// <summary>
-///     Add item(s) to Invoice Tracker list.
+/// Add item(s) to Invoice Tracker list.
 /// </summary>
 
 procedure TMainForm.Action_TrackerClick(Sender: TObject);
@@ -3624,8 +3612,8 @@ begin
             Item.SubItems.Add(GetSCUID(sgAgeView.Row));
             Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCustomerName, 1, 1), sgAgeView.Row]);
             Item.SubItems.Add('Not set');
-            Item.SubItems.Add('Not found');
-            Item.SubItems.Add('Not found');
+            Item.SubItems.Add('Not found!');
+            Item.SubItems.Add('Not found!');
             Item.SubItems.Add('Not set');
             Item.SubItems.Add('Not set');
             Item.SubItems.Add('Not set');
@@ -3647,8 +3635,8 @@ begin
                     Item.SubItems.Add(GetSCUID(iCNT));
                     Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCustomerName, 1, 1), iCNT]);
                     Item.SubItems.Add('Not set');
-                    Item.SubItems.Add('Not found');
-                    Item.SubItems.Add('Not found');
+                    Item.SubItems.Add('Not found!');
+                    Item.SubItems.Add('Not found!');
                     Item.SubItems.Add('Not set');
                     Item.SubItems.Add('Not set');
                     Item.SubItems.Add('Not set');
@@ -3676,7 +3664,7 @@ begin
 end;
 
 /// <summary>
-///     Add customer(s) to address book.
+/// Add customer(s) to address book.
 /// </summary>
 
 procedure TMainForm.Action_AddToBookClick(Sender: TObject);
@@ -3697,7 +3685,7 @@ begin
 end;
 
 /// <summary>
-///     Add customer(s) to mass mailer.
+/// Add customer(s) to mass mailer.
 /// </summary>
 
 procedure TMainForm.Action_MassMailerClick(Sender: TObject);
@@ -3719,9 +3707,9 @@ begin
             Item.Caption:=IntToStr(sgAgeView.Row);
             Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCustomerName, 1, 1), sgAgeView.Row]);
             Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCustomerNumber, 1, 1), sgAgeView.Row]);
-            Item.SubItems.Add('Not found!');
-            Item.SubItems.Add('Not found!');
             Item.SubItems.Add('No');
+            Item.SubItems.Add('Not found!');
+            Item.SubItems.Add('Not found!');
             Item.SubItems.Add('n/a');
             Item.SubItems.Add('n/a');
             Item.SubItems.Add('n/a');
@@ -3745,9 +3733,9 @@ begin
                     Item.Caption:=IntToStr(iCNT);
                     Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCustomerName, 1, 1), iCNT]);
                     Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCustomerNumber, 1, 1), iCNT]);
-                    Item.SubItems.Add('Not found!');
-                    Item.SubItems.Add('Not found!');
                     Item.SubItems.Add('No');
+                    Item.SubItems.Add('Not found!');
+                    Item.SubItems.Add('Not found!');
                     Item.SubItems.Add('n/a');
                     Item.SubItems.Add('n/a');
                     Item.SubItems.Add('n/a');
@@ -3774,7 +3762,7 @@ begin
 end;
 
 /// <summary>
-///     Add follow-up to selected group of customers.
+/// Add follow-up to selected group of customers.
 /// </summary>
 
 procedure TMainForm.Action_AddFollowUpGroupClick(Sender: TObject);
@@ -3786,7 +3774,7 @@ begin
     CalendarForm.CalendarMode:=cfGetDate;
     MainForm.WndCall(CalendarForm, stModal);
 
-    // IF SELECTED MORE THAN ONE CUSTOMER, ASSIGN GIVEN DATE TO SELECTED CUSTOMERS
+    // If selected more than one customer, assign given date to selected customers
     if CalendarForm.SelectedDate <> NULLDATE then
     begin
         for iCNT:=sgAgeView.Selection.Top to sgAgeView.Selection.Bottom do
@@ -3802,7 +3790,7 @@ begin
 end;
 
 /// <summary>
-///     Remove selected follow-up.
+/// Remove selected follow-up.
 /// </summary>
 
 procedure TMainForm.Action_RemoveFollowUpsClick(Sender: TObject);
@@ -3841,7 +3829,7 @@ end;
 // ------------------------------------------------------------------------------------------------------------------------------------ FILTER AGE VIEW GRID //
 
 /// <summary>
-///     Below methods setups FilterForm properties and execute filter window.
+/// Below methods setups FilterForm properties and execute filter window.
 /// </summary>
 
 // Filter via INF7 (to be removed)
@@ -4062,7 +4050,7 @@ begin
 end;
 
 /// <summary>
-///     Allow to exclude non-overdue items.
+/// Allow to exclude non-overdue items.
 /// </summary>
 
 procedure TMainForm.Action_OverdueClick(Sender: TObject);
@@ -4075,7 +4063,7 @@ begin
 end;
 
 /// <summary>
-///     Display window for searching customer.
+/// Display window for searching customer.
 /// </summary>
 
 procedure TMainForm.Action_SearchClick(Sender: TObject);
@@ -4087,7 +4075,7 @@ begin
 end;
 
 /// <summary>
-///     Show payment term for selected customer.
+/// Show payment term for selected customer.
 /// </summary>
 
 procedure TMainForm.Action_PaymentTermClick(Sender: TObject);
@@ -4124,7 +4112,7 @@ begin
 end;
 
 /// <summary>
-///     Show assigned person term for selected customer.
+/// Show assigned person term for selected customer.
 /// </summary>
 
 procedure TMainForm.Action_PersonClick(Sender: TObject);
@@ -4161,10 +4149,10 @@ begin
 end;
 
 /// <summary>
-///     Export aging view (report) to Microsoft Excel file.
+/// Export aging view (report) to Microsoft Excel file.
 /// </summary>
 /// <remarks>
-///     Requires installed Microsopft Excel 2013 or higher.
+/// Requires installed Microsopft Excel 2013 or higher.
 /// </remarks>
 
 procedure TMainForm.Action_ToExceClick(Sender: TObject);
@@ -4173,7 +4161,7 @@ begin
 end;
 
 /// <summary>
-///     Export aging view (report) to CSV file. Delimiter is fixed on vertical pipe.
+/// Export aging view (report) to CSV file. Delimiter is fixed on vertical pipe.
 /// </summary>
 
 procedure TMainForm.Action_ExportCSVClick(Sender: TObject);
@@ -4182,7 +4170,7 @@ begin
 end;
 
 /// <summary>
-///     Hide or show aging summary displayed on the bottom of the page.
+/// Hide or show aging summary displayed on the bottom of the page.
 /// </summary>
 
 procedure TMainForm.Action_HideSummaryClick(Sender: TObject);
@@ -4200,7 +4188,7 @@ begin
 end;
 
 /// <summary>
-///     Auto column re-size.
+/// Auto column re-size.
 /// </summary>
 
 procedure TMainForm.Action_AutoColumnSizeClick(Sender: TObject);
@@ -4209,7 +4197,7 @@ begin
 end;
 
 /// <summary>
-///     Show only basic view defined in configuration file.
+/// Show only basic view defined in configuration file.
 /// </summary>
 
 procedure TMainForm.Action_BasicViewClick(Sender: TObject);
@@ -4233,7 +4221,7 @@ begin
 end;
 
 /// <summary>
-///     Show all available columns (defined in configuration file).
+/// Show all available columns (defined in configuration file).
 /// </summary>
 
 procedure TMainForm.Action_FullViewClick(Sender: TObject);
@@ -4257,7 +4245,7 @@ begin
 end;
 
 /// <summary>
-///     Display window to setup follow-up colors (font, background and foreground).
+/// Display window to setup follow-up colors (font, background and foreground).
 /// </summary>
 
 procedure TMainForm.Action_FollowUpColorsClick(Sender: TObject);
@@ -4266,7 +4254,7 @@ begin
 end;
 
 /// <summary>
-///     Row highlight (on/off).
+/// Row highlight (on/off).
 /// </summary>
 
 procedure TMainForm.Action_RowHighlightClick(Sender: TObject);
@@ -4290,7 +4278,7 @@ end;
 
 
 /// <summary>
-///     Remove selected customer from list.
+/// Remove selected customer from list.
 /// </summary>
 
 procedure TMainForm.Action_RemoveClick(Sender: TObject);
@@ -4333,7 +4321,7 @@ begin
 end;
 
 /// <summary>
-///     Show sent invoices for given CUID.
+/// Show sent invoices for given CUID.
 /// </summary>
 
 procedure TMainForm.Action_ShowRegisteredClick(Sender: TObject);
@@ -4342,7 +4330,7 @@ begin
 end;
 
 /// <summary>
-///     Show customers registered by logged user.
+/// Show customers registered by logged user.
 /// </summary>
 
 procedure TMainForm.Action_ShowMyClick(Sender: TObject);
@@ -4354,7 +4342,7 @@ begin
 end;
 
 /// <summary>
-///     Show all registered customers.
+/// Show all registered customers.
 /// </summary>
 
 procedure TMainForm.Action_ShowAllClick(Sender: TObject);
@@ -4370,7 +4358,7 @@ end;
 
 
 /// <summary>
-///     Show the application form when user double click application icon visible on system tray.
+/// Show the application form when user double click application icon visible on system tray.
 /// </summary>
 
 procedure TMainForm.TrayIconDblClick(Sender: TObject);
@@ -4383,7 +4371,7 @@ end;
 
 
 /// <summary>
-///     Update list for selected group of companies.
+/// Update list for selected group of companies.
 /// </summary>
 
 procedure TMainForm.GroupListBoxSelect(Sender: TObject);
@@ -4418,7 +4406,7 @@ end;
 
 
 /// <summary>
-///     Refresh all items registered with Invoice Tracer.
+/// Refresh all items registered with Invoice Tracer.
 /// </summary>
 
 procedure TMainForm.TabSheet4Show(Sender: TObject);
@@ -4428,7 +4416,7 @@ end;
 
 
 /// <summary>
-///   Refresh StringGrids for QMS (FSC view and LBU view).
+/// Refresh StringGrids for QMS (FSC view and LBU view).
 /// </summary>
 
 procedure TMainForm.TabSheet5Show(Sender: TObject);
@@ -4441,7 +4429,7 @@ end;
 // ------------------------------------------------------------------------------------------------------------ MAKE PAYMENT TERMS AND PAID INFO TABLES HEIGHT
 
 /// <summary>
-///     Setup tables height for payment term tabe and paid info table. General table is fixed.
+/// Setup tables height for payment term tabe and paid info table. General table is fixed.
 /// </summary>
 
 procedure TMainForm.TabSheet7Show(Sender: TObject);
@@ -4458,8 +4446,8 @@ end;
 
 
 /// <summary>
-///     Force lock settings panel. This is necessary, when administrator open settings panel and go to other tab without locking it. That prevents from
-///     leaving unlocked settings panel by mistake.
+/// Force lock settings panel. This is necessary, when administrator open settings panel and go to other tab without locking it. That prevents from
+/// leaving unlocked settings panel by mistake.
 /// </summary>
 
 procedure TMainForm.TabSheet8Show(Sender: TObject);
@@ -4472,7 +4460,7 @@ end;
 
 
 /// <summary>
-///     Force range select.
+/// Force range select.
 /// </summary>
 
 procedure TMainForm.sgAgeViewClick(Sender: TObject);
@@ -4485,7 +4473,7 @@ end;
 
 
 /// <summary>
-///     Move column and update SQL column array.
+/// Move column and update SQL column array.
 /// </summary>
 
 procedure TMainForm.sgAgeViewColumnMoved(Sender: TObject; FromIndex, ToIndex: Integer);
@@ -4502,9 +4490,9 @@ begin
             // Setting up dimensions
 
             /// <remarks>
-            ///     "High" method returns number of rows counting from zero
-            ///     while "setlength" method setup array counting from one
-            ///     therefore, we need to add one to match dimensions.
+            /// "High" method returns number of rows counting from zero
+            /// while "setlength" method setup array counting from one
+            /// therefore, we need to add one to match dimensions.
             /// </remarks>
 
             SqlRows:=high(sgAgeView.SqlColumns);
@@ -4515,7 +4503,7 @@ begin
             // Copy SQL array to temp array
 
             /// <remarks>
-            ///     Do not use "copy" method.
+            /// Do not use "copy" method.
             /// </remarks>
 
             for iCNT:=0 to TmpRows do
@@ -4523,22 +4511,18 @@ begin
                     Temp[iCNT, jCNT]:=sgAgeView.SqlColumns[iCNT, jCNT];
 
             // Update titles in SQL column array
-
             for iCNT:=0 to sgAgeView.ColCount - 1 do
                 sgAgeView.SqlColumns[iCNT, 1]:=sgAgeView.Cells[iCNT, 0];
 
             // Re-write other SQL columns from temp
-
             sgAgeView.SqlColumns[ToIndex, 0]:=Temp[FromIndex, 0];
 
             // Move column from right to left
-
             if FromIndex > ToIndex then
                 for iCNT:=ToIndex to (FromIndex - 1) do
                     sgAgeView.SqlColumns[iCNT + 1, 0]:=Temp[iCNT, 0];
 
             // Move from left to right
-
             if FromIndex < ToIndex then
                 for iCNT:=(FromIndex + 1) to ToIndex do
                     sgAgeView.SqlColumns[iCNT - 1, 0]:=Temp[iCNT, 0];
@@ -4557,7 +4541,7 @@ begin
 end;
 
 /// <summary>
-///     Display Action Log.
+/// Display Action Log.
 /// </summary>
 
 procedure TMainForm.sgAgeViewDblClick(Sender: TObject);
@@ -4566,7 +4550,7 @@ begin
 end;
 
 /// <summary>
-///     Allow or disallow edit cell in Address Book. First column are not editable.
+/// Allow or disallow edit cell in Address Book. First column are not editable.
 /// </summary>
 
 procedure TMainForm.sgAddressBookDblClick(Sender: TObject);
@@ -4580,7 +4564,7 @@ begin
 end;
 
 /// <summary>
-///     Disallow (quit) editing Address Book when user clicks on string grid component.
+/// Disallow (quit) editing Address Book when user clicks on string grid component.
 /// </summary>
 
 procedure TMainForm.sgAddressBookClick(Sender: TObject);
@@ -4589,7 +4573,7 @@ begin
 end;
 
 /// <summary>
-///     Display list of invoices sent by Invoice Tracker.
+/// Display list of invoices sent by Invoice Tracker.
 /// </summary>
 
 procedure TMainForm.sgInvoiceTrackerDblClick(Sender: TObject);
@@ -4652,22 +4636,22 @@ begin
     if ARow = 0 then Exit;
 
     // Find column numbers for given column name
-    Col1 :=sgAgeView.ReturnColumn(TSnapshots.fNotDue,         1, 1);
-    Col2 :=sgAgeView.ReturnColumn(TSnapshots.fRange1,          1, 1);
-    Col3 :=sgAgeView.ReturnColumn(TSnapshots.fRange2,          1, 1);
-    Col4 :=sgAgeView.ReturnColumn(TSnapshots.fRange3,          1, 1);
-    Col5 :=sgAgeView.ReturnColumn(TSnapshots.fRange4,          1, 1);
-    Col6 :=sgAgeView.ReturnColumn(TSnapshots.fRange5,          1, 1);
-    Col7 :=sgAgeView.ReturnColumn(TSnapshots.fRange6,          1, 1);
-    Col8 :=sgAgeView.ReturnColumn(TSnapshots.fOverdue,         1, 1);
-    Col9 :=sgAgeView.ReturnColumn(TSnapshots.fTotal,           1, 1);
-    Col10:=sgAgeView.ReturnColumn(TSnapshots.fCreditLimit,    1, 1);
-    Col11:=sgAgeView.ReturnColumn(TSnapshots.fExceededAmount, 1, 1);
-    Col12:=sgAgeView.ReturnColumn(TGeneralComment.fFollowUp,          1, 1);
-    Col13:=sgAgeView.ReturnColumn(TSnapshots.fCuid,            1, 1);
-    Col14:=sgAgeView.ReturnColumn(TSnapshots.fCustomerName,   1, 1);
-    Col15:=sgAgeView.ReturnColumn(TSnapshots.fRiskClass,      1, 1);
-    Col16:=sgInvoiceTracker.ReturnColumn(TTrackerData.Cuid,        1, 1);
+    Col1 :=sgAgeView.ReturnColumn(TSnapshots.fNotDue,        1, 1);
+    Col2 :=sgAgeView.ReturnColumn(TSnapshots.fRange1,        1, 1);
+    Col3 :=sgAgeView.ReturnColumn(TSnapshots.fRange2,        1, 1);
+    Col4 :=sgAgeView.ReturnColumn(TSnapshots.fRange3,        1, 1);
+    Col5 :=sgAgeView.ReturnColumn(TSnapshots.fRange4,        1, 1);
+    Col6 :=sgAgeView.ReturnColumn(TSnapshots.fRange5,        1, 1);
+    Col7 :=sgAgeView.ReturnColumn(TSnapshots.fRange6,        1, 1);
+    Col8 :=sgAgeView.ReturnColumn(TSnapshots.fOverdue,       1, 1);
+    Col9 :=sgAgeView.ReturnColumn(TSnapshots.fTotal,         1, 1);
+    Col10:=sgAgeView.ReturnColumn(TSnapshots.fCreditLimit,   1, 1);
+    Col11:=sgAgeView.ReturnColumn(TSnapshots.fExceededAmount,1, 1);
+    Col12:=sgAgeView.ReturnColumn(TGeneralComment.fFollowUp, 1, 1);
+    Col13:=sgAgeView.ReturnColumn(TSnapshots.fCuid,          1, 1);
+    Col14:=sgAgeView.ReturnColumn(TSnapshots.fCustomerName,  1, 1);
+    Col15:=sgAgeView.ReturnColumn(TSnapshots.fRiskClass,     1, 1);
+    Col16:=sgInvoiceTracker.ReturnColumn(TTrackerData.Cuid,  1, 1);
 
     // Draw selected row | skip headers
     sgAgeView.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
@@ -4745,10 +4729,10 @@ begin
         end;
 
         /// <remarks>
-        ///     Mark customers with picture, if it is registered on Invoice Tracker list.
-        ///     We loop through loaded list on another string grid component. Therefore,
-        ///     changes in database will not impact age view as long as Tracker List is
-        ///     not refreshed.
+        /// Mark customers with picture, if it is registered on Invoice Tracker list.
+        /// We loop through loaded list on another string grid component. Therefore,
+        /// changes in database will not impact age view as long as Tracker List is
+        /// not refreshed.
         /// </remarks>
 
         if ACol = Col14 then
@@ -4769,7 +4753,7 @@ begin
     end;
 
     /// <remarks>
-    ///     After all drawing (when cells not selected) is done, change font for numeric values. This shoud be executed always last.
+    /// After all drawing (when cells not selected) is done, change font for numeric values. This shoud be executed always last.
     /// </remarks>
 
     if (ACol = Col1)  or (ACol = Col2) or (ACol = Col3) or
@@ -4792,11 +4776,11 @@ begin
 
     if ARow = 0 then Exit;
 
-    Col1:=sgOpenItems.ReturnColumn(TOpenitems.OpenCurAm, 1, 1);
-    Col2:=sgOpenItems.ReturnColumn(TOpenitems.OpenAm,    1, 1);
-    Col3:=sgOpenItems.ReturnColumn(TOpenitems.CurAm,     1, 1);
-    Col4:=sgOpenItems.ReturnColumn(TOpenitems.Am,        1, 1);
-    Col5:=sgOpenItems.ReturnColumn(TOpenitems.PmtStat,   1, 1);
+    Col1:=sgOpenItems.ReturnColumn(TOpenitems.OpenCurAm,1, 1);
+    Col2:=sgOpenItems.ReturnColumn(TOpenitems.OpenAm,   1, 1);
+    Col3:=sgOpenItems.ReturnColumn(TOpenitems.CurAm,    1, 1);
+    Col4:=sgOpenItems.ReturnColumn(TOpenitems.Am,       1, 1);
+    Col5:=sgOpenItems.ReturnColumn(TOpenitems.PmtStat,  1, 1);
 
     // Selection
     MainForm.sgOpenItems.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
@@ -4949,7 +4933,7 @@ end;
 
 
 /// <summary>
-///     List all keys with theirs values.
+/// List all keys with theirs values.
 /// </summary>
 
 procedure TMainForm.sgListSectionSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
@@ -5006,7 +4990,7 @@ end;
 
 
 /// <summary>
-///     Assign <ALT> + <Y> to application close.
+/// Assign <ALT> + <Y> to application close.
 /// </summary>
 
 procedure TMainForm.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -5028,8 +5012,8 @@ begin
 end;
 
 /// <summary>
-///     Lock rows for editing. We autofill rows 1..3 so user is prevented from manipulation. Additionally, we allow only digits
-///     for CoCode cell.
+/// Lock rows for editing. We autofill rows 1..3 so user is prevented from manipulation. Additionally,
+/// we allow only digits for CoCode cell.
 /// </summary>
 
 procedure TMainForm.sgCompanyDataKeyPress(Sender: TObject; var Key: Char);
@@ -5044,7 +5028,7 @@ begin
 end;
 
 /// <summary>
-///     Invoke autofill. Find given company code in general table and return assigned currency, agent and division info.
+/// Invoke autofill. Find given company code in general table and return assigned currency, agent and division info.
 /// </summary>
 
 procedure TMainForm.sgCompanyDataKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -5056,7 +5040,7 @@ begin
 end;
 
 /// <summary>
-///     Allow only specific characters when naming the group for aging snapshot.
+/// Allow only specific characters when naming the group for aging snapshot.
 /// </summary>
 
 procedure TMainForm.EditGroupNameKeyPress(Sender: TObject; var Key: Char);
@@ -5070,7 +5054,7 @@ end;
 
 
 /// <remarks>
-///     Allow <CTRL> + <C> on all string grids.
+/// Allow <CTRL> + <C> on all string grids.
 /// </remarks>
 
 procedure TMainForm.sgOpenItemsKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -5146,10 +5130,10 @@ begin
 end;
 
 /// <summary>
-///     Edit selected age view columns.
+/// Edit selected age view columns.
 /// </summary>
 
-procedure TMainForm.sgAgeViewKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TMainForm.sgAgeViewKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);  // REFACTOR !!!
 
     // Nested common constants
 
@@ -5198,6 +5182,101 @@ begin
         )
     then
         Exit;
+
+    // <CTRL> + <V>
+    if (Key = 86) and (Shift = [ssCtrl]) then
+    begin
+
+        sgAgeView.CopyCutPaste(adPaste);
+        sgAgeView.RecordRowsAffected;
+
+        if sgAgeView.UpdatedRowsHolder = nil then Exit;
+        Screen.Cursor:=crHourGlass;
+
+        TThread.CreateAnonymousThread(procedure
+        var
+            iCNT: integer;
+            Data: TDataTables;
+        begin
+
+            Data:=TDataTables.Create(DbConnect);
+            try
+
+                Data.CmdType:=cmdText;
+                for iCNT:=Low(sgAgeView.UpdatedRowsHolder) to High(sgAgeView.UpdatedRowsHolder) do
+                begin
+
+                    if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneralComment.Free1, 1, 1) then
+                    begin
+                        Data.StrSQL:=
+                            EXECUTE +
+                                UpsertFreeColumns +
+                            SPACE +
+                                QuotedStr(WinUserName.ToUpper) +
+                            COMMA +
+                                QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), sgAgeView.UpdatedRowsHolder[iCNT]]) +
+                            COMMA +
+                                QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TGeneralComment.Free1, 1, 1), sgAgeView.UpdatedRowsHolder[iCNT]]) +
+                            COMMA +
+                                QuotedStr(strNULL) +
+                            COMMA +
+                                QuotedStr(strNULL) +
+                            COMMA +
+                                QuotedStr('1');
+                    end;
+
+                    if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneralComment.Free2, 1, 1) then
+                    begin
+                        Data.StrSQL:=
+                            EXECUTE +
+                                UpsertFreeColumns +
+                            SPACE +
+                                QuotedStr(WinUserName.ToUpper) +
+                            COMMA +
+                                QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), sgAgeView.UpdatedRowsHolder[iCNT]]) +
+                            COMMA +
+                                QuotedStr(strNULL) +
+                            COMMA +
+                                QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TGeneralComment.Free2, 1, 1), sgAgeView.UpdatedRowsHolder[iCNT]]) +
+                            COMMA +
+                                QuotedStr(strNULL) +
+                            COMMA +
+                                QuotedStr('2');
+                    end;
+
+                    if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneralComment.Free3, 1, 1) then
+                    begin
+                        Data.StrSQL:=
+                            EXECUTE +
+                                UpsertFreeColumns +
+                            SPACE +
+                                QuotedStr(WinUserName.ToUpper) +
+                            COMMA +
+                                QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), sgAgeView.UpdatedRowsHolder[iCNT]]) +
+                            COMMA +
+                                QuotedStr(strNULL) +
+                            COMMA +
+                                QuotedStr(strNULL) +
+                            COMMA +
+                                QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TGeneralComment.Free3, 1, 1), sgAgeView.UpdatedRowsHolder[iCNT]]) +
+                            COMMA +
+                                QuotedStr('3');
+                    end;
+
+                    Data.ExecSQL;
+
+                end;
+
+            finally
+                Data.Free;
+            end;
+
+        end).Start;
+
+        Screen.Cursor:=crDefault;
+        Exit;
+
+    end;
 
     // Disallows "keyboard arrows" when inplace editor is enabled
     if (sgAgeView.EditorMode) and ( (Key = VK_LEFT) or (Key = VK_RIGHT) or (Key = VK_UP) or (Key = VK_DOWN) ) then
@@ -5275,7 +5354,7 @@ begin
 end;
 
 /// <summary>
-///     Allow to copy selected area on age view string grid.
+/// Allow to copy selected area on age view string grid.
 /// </summary>
 
 procedure TMainForm.sgAgeViewKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -5299,7 +5378,7 @@ end;
 
 
 /// <summary>
-///     Allow to edit specific Address Book cells. Once edited, it will be saved to database if user click "Update" button.
+/// Allow to edit specific Address Book cells. Once edited, it will be saved to database if user click "Update" button.
 /// </summary>
 
 procedure TMainForm.sgAddressBookKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -5433,7 +5512,7 @@ begin
 end;
 
 /// <summary>
-///     Update section value of settings file (decoded config.cfg).
+/// Update section value of settings file (decoded config.cfg).
 /// </summary>
 
 procedure TMainForm.sgListSectionKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -5469,7 +5548,7 @@ begin
 end;
 
 /// <summary>
-///     Update value key of settings file (decoded config.cfg).
+/// Update value key of settings file (decoded config.cfg).
 /// </summary>
 
 procedure TMainForm.sgListValueKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -5499,7 +5578,7 @@ begin
 end;
 
 /// <summary>
-///     Unlock with given password settings panel.
+/// Unlock with given password settings panel.
 /// </summary>
 
 procedure TMainForm.EditPasswordKeyPress(Sender: TObject; var Key: Char);
@@ -5513,8 +5592,8 @@ end;
 
 
 /// <summary>
-///     Buttons (combined elements on common TPanel component) placed on application top panel "AppHeader".
-///     Providing the effect of text style/color change on mouse hoover.
+/// Buttons (combined elements on common TPanel component) placed on application top panel "AppHeader".
+/// Providing the effect of text style/color change on mouse hoover.
 /// </summary>
 
 procedure TMainForm.AppHeaderMouseEnter(Sender: TObject);
@@ -5669,7 +5748,7 @@ end;
 
 
 /// <summary>
-///     Extended button panel content. Introducing mouse hoover effect.
+/// Extended button panel content. Introducing mouse hoover effect.
 /// </summary>
 
 procedure TMainForm.txtOverdueItemsMouseEnter(Sender: TObject);
@@ -5721,7 +5800,7 @@ begin
 end;
 
 /// <summary>
-///     Set focus on the string grid.
+/// Set focus on the string grid.
 /// </summary>
 
 procedure TMainForm.sgAgeViewMouseEnter(Sender: TObject);
@@ -5827,8 +5906,8 @@ begin
 end;
 
 /// <summary>
-///     Change standard behaviour of scroll bars on all string grids. The mouse weel on string grid component controls row selection instead of
-///     moving up/down thumb on scroll bar. Below methods introduce mouse weel controlling scroll bar.
+/// Change standard behaviour of scroll bars on all string grids. The mouse weel on string grid component controls row selection instead of
+/// moving up/down thumb on scroll bar. Below methods introduce mouse weel controlling scroll bar.
 /// </summary>
 
 // AGE VIEW | WHEEL DOWN
@@ -6085,7 +6164,7 @@ end;
 
 
 /// <summary>
-///     Open items buttons - mouse hoover effect.
+/// Open items buttons - mouse hoover effect.
 /// </summary>
 
 procedure TMainForm.btnReloadMouseEnter(Sender: TObject);
@@ -6113,7 +6192,7 @@ begin
 end;
 
 /// <summary>
-///     Adress Book buttons - mouse hoover effect.
+/// Adress Book buttons - mouse hoover effect.
 /// </summary>
 
 procedure TMainForm.btnOpenABMouseEnter(Sender: TObject);
@@ -6166,7 +6245,7 @@ end;
 
 
 /// <summary>
-///     Settigs panel buttons - mouse hoover effect.
+/// Settigs panel buttons - mouse hoover effect.
 /// </summary>
 
 procedure TMainForm.imgKeyAddMouseEnter(Sender: TObject);
@@ -6289,7 +6368,7 @@ begin
 end;
 
 /// <summary>
-///     Settings panel - password edit boxes.
+/// Settings panel - password edit boxes.
 /// </summary>
 
 procedure TMainForm.btnPasswordPreviewMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -6307,7 +6386,7 @@ end;
 
 
 /// <summary>
-///     Application top bar/menu buttons.
+/// Application top bar/menu buttons.
 /// </summary>
 
 procedure TMainForm.AppHeaderClick(Sender: TObject);
@@ -6343,9 +6422,9 @@ begin
     txtStart.Font.Color:=$006433C9;
 
     /// <remarks>
-    ///     ChromiumWindow placed on TPageControl crashes application when the application starts maximised and
-    ///     ChromiumWindow completly fill the container. To overcome this, it is necessary to initialize and load
-    ///     given web page when ChromiumWindow is "small", and then re-size to fill the TabSheet at once.
+    /// ChromiumWindow placed on TPageControl crashes application when the application starts maximised and
+    /// ChromiumWindow completly fill the container. To overcome this, it is necessary to initialize and load
+    /// given web page when ChromiumWindow is "small", and then re-size to fill the TabSheet at once.
     /// </remarks>
 
     if ChromiumWindow.Align <> alClient then ChromiumWindow.Align:=alClient;
@@ -6442,7 +6521,7 @@ begin
 end;
 
 /// <summary>
-///     Extended list for Reports button.
+/// Extended list for Reports button.
 /// </summary>
 
 procedure TMainForm.txtOverdueItemsClick(Sender: TObject);
@@ -6498,7 +6577,7 @@ begin
 end;
 
 /// <summary>
-///     Age View, loading selected group ID.
+/// Age View, loading selected group ID.
 /// </summary>
 
 procedure TMainForm.btnLoadAgeViewClick(Sender: TObject);
@@ -6538,7 +6617,7 @@ begin
 end;
 
 /// <summary>
-///     Apply sorting on age view string grid.
+/// Apply sorting on age view string grid.
 /// </summary>
 
 procedure TMainForm.btnSortApplyClick(Sender: TObject);
@@ -6596,7 +6675,7 @@ begin
 end;
 
 /// <summary>
-///     Reload on open items list on demand.
+/// Reload on open items list on demand.
 /// </summary>
 
 procedure TMainForm.btnReloadClick(Sender: TObject);
@@ -6623,7 +6702,7 @@ begin
 end;
 
 /// <summary>
-///     Make snapshots for given selected group ID/name.
+/// Make snapshots for given selected group ID/name.
 /// </summary>
 
 procedure TMainForm.btnMakeGroupClick(Sender: TObject);
@@ -6664,7 +6743,7 @@ begin
 end;
 
 /// <summary>
-///     Make aging report (snapshot).
+/// Make aging report (snapshot).
 /// </summary>
 
 procedure TMainForm.btnMakeGroupAgeClick(Sender: TObject);
@@ -6682,7 +6761,7 @@ begin
 end;
 
 /// <summary>
-///     Address Book - open action.
+/// Address Book - open action.
 /// </summary>
 
 procedure TMainForm.btnOpenABClick(Sender: TObject);
@@ -6706,7 +6785,7 @@ begin
 end;
 
 /// <summary>
-///     Address Book - update records.
+/// Address Book - update records.
 /// </summary>
 
 procedure TMainForm.btnUpdateABClick(Sender: TObject);
@@ -6734,7 +6813,7 @@ begin
 end;
 
 /// <summary>
-///     Address Book - clear all content of populated string grid.
+/// Address Book - clear all content of populated string grid.
 /// </summary>
 
 procedure TMainForm.btnCloseABClick(Sender: TObject);
@@ -6748,7 +6827,7 @@ begin
 end;
 
 /// <summary>
-///     Address Book - export all content to CSV file.
+/// Address Book - export all content to CSV file.
 /// </summary>
 
 procedure TMainForm.btnExportABClick(Sender: TObject);
@@ -6827,7 +6906,7 @@ end;
 
 
 /// <summary>
-///     Settings panel - section list. Add new section.
+/// Settings panel - section list. Add new section.
 /// </summary>
 
 procedure TMainForm.imgSectionAddClick(Sender: TObject);
@@ -6845,7 +6924,7 @@ begin
 end;
 
 /// <summary>
-///     Settings panel - section list. Delete selected section.
+/// Settings panel - section list. Delete selected section.
 /// </summary>
 
 procedure TMainForm.imgSectionRemoveClick(Sender: TObject);
@@ -6872,7 +6951,7 @@ begin
 end;
 
 /// <summary>
-///     Settings panel - section list. Allow edit. We require separate action for administrator to prevent from mistake changes etc.
+/// Settings panel - section list. Allow edit. We require separate action for administrator to prevent from mistake changes etc.
 /// </summary>
 
 procedure TMainForm.imgAllowEditClick(Sender: TObject);
@@ -6895,7 +6974,7 @@ end;
 
 
 /// <summary>
-///     Settings panel - open event log in separate window.
+/// Settings panel - open event log in separate window.
 /// </summary>
 
 procedure TMainForm.imgEventLogClick(Sender: TObject);
@@ -6904,7 +6983,7 @@ begin
 end;
 
 /// <summary>
-///     Settings panel - section list. Add key to selected section.
+/// Settings panel - section list. Add key to selected section.
 /// </summary>
 
 procedure TMainForm.imgKeyAddClick(Sender: TObject);
@@ -6926,7 +7005,7 @@ begin
 end;
 
 /// <summary>
-///     Settings panel - remove key with value from selected section.
+/// Settings panel - remove key with value from selected section.
 /// </summary>
 
 procedure TMainForm.imgKeyRemoveClick(Sender: TObject);
@@ -6956,7 +7035,7 @@ begin
 end;
 
 /// <summary>
-///     Settings panel - save all values and keys.
+/// Settings panel - save all values and keys.
 /// </summary>
 
 procedure TMainForm.imgUpdateValuesClick(Sender: TObject);
@@ -6990,7 +7069,7 @@ begin
 end;
 
 /// <summary>
-///     Settings panel - save new password.
+/// Settings panel - save new password.
 /// </summary>
 
 procedure TMainForm.btnPassUpdateClick(Sender: TObject);
@@ -7060,7 +7139,7 @@ begin
 end;
 
 /// <summary>
-///     Settings panel - unlock panel with provided password.
+/// Settings panel - unlock panel with provided password.
 /// </summary>
 
 procedure TMainForm.btnUnlockClick(Sender: TObject);

@@ -41,9 +41,9 @@ type
         PanelListItems: TPanel;
         PanelBackground: TPanel;
         btnRemove: TSpeedButton;
-        procedure btnFilterClick(Sender: TObject);
         procedure FormCreate(Sender: TObject);
         procedure FormActivate(Sender: TObject);
+        procedure btnFilterClick(Sender: TObject);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
         procedure cbSelectAllClick(Sender: TObject);
         procedure btnRemoveClick(Sender: TObject);
@@ -472,11 +472,7 @@ end;
 
 
 procedure TFilterForm.FormCreate(Sender: TObject);
-var
-    Settings:  ISettings;
 begin
-    Settings:=TSettings.Create;
-    FilterForm.Caption:=Settings.GetStringValue(ApplicationDetails, 'WND_FILTER', APPCAPTION);
     PanelListItems.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
     FilterClearAll;
 end;

@@ -87,11 +87,7 @@ end;
 
 
 procedure TEventForm.FormCreate(Sender: TObject);
-var
-    Settings: ISettings;
 begin
-    Settings:=TSettings.Create;
-    EventForm.Caption:=Settings.GetStringValue(ApplicationDetails, 'WND_EVENTLOG', APPCAPTION);
     PanelEventMemo.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
 end;
 

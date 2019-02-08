@@ -199,9 +199,6 @@ var
 begin
 
     Settings:=TSettings.Create;
-
-    AboutForm.Caption:=Settings.GetStringValue(ApplicationDetails, 'WND_ABOUT', APPCAPTION);
-
     if FileExists(Settings.GetPathLicenceLic) then
     begin
         if Settings.Decode(LicData, True) then

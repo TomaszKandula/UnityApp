@@ -26,7 +26,7 @@ uses
 type
 
     /// <summary>
-    ///     View form class with helpers for dispaying phone list from Address Book.
+    /// View form class with helpers for dispaying phone list from Address Book.
     /// </summary>
 
     TPhoneListForm = class(TForm)
@@ -65,7 +65,7 @@ uses
 
 
 /// <summary>
-///     Check if given component (TMemo) holds only restricted characters.
+/// Check if given component (TMemo) holds only restricted characters.
 /// </summary>
 
 function TPhoneListForm.CheckPhoneList(List: TMemo): boolean;
@@ -96,21 +96,17 @@ end;
 
 
 /// <summary>
-///     Initialize and setup caption and the panel borders for TMemo component inside of it.
+/// Initialize and setup caption and the panel borders for TMemo component inside of it.
 /// </summary>
 
 procedure TPhoneListForm.FormCreate(Sender: TObject);
-var
-    Settings: ISettings;
 begin
-    Settings:=TSettings.Create;
-    ActionsForm.Caption:=Settings.GetStringValue(ApplicationDetails, 'WND_PHONELIST', APPCAPTION);
     PanelMemo.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
 end;
 
 
 /// <summary>
-///     Clear all.
+/// Clear all.
 /// </summary>
 
 procedure TPhoneListForm.FormShow(Sender: TObject);
@@ -124,7 +120,7 @@ end;
 
 
 /// <summary>
-///     Submit changes, check if only restricted characters are entered.
+/// Submit changes, check if only restricted characters are entered.
 /// </summary>
 
 procedure TPhoneListForm.btnSubmitClick(Sender: TObject);
@@ -149,7 +145,7 @@ end;
 
 
 /// <summary>
-///     Dismiss window.
+/// Dismiss window.
 /// </summary>
 
 procedure TPhoneListForm.btnCancelClick(Sender: TObject);
@@ -162,13 +158,14 @@ end;
 
 
 /// <summary>
-///     Close window.
+/// Close window.
 /// </summary>
 
 procedure TPhoneListForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
     if Key = ESC then Close;
 end;
+
 
 end.
 

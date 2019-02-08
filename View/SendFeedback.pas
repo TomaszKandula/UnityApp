@@ -39,9 +39,9 @@ type
         PanelReportMemo: TPanel;
         PanelArea: TPanel;
         PanelBottom: TPanel;
+        procedure FormCreate(Sender: TObject);
         procedure ReportMemoKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure btnSendReportClick(Sender: TObject);
-        procedure FormCreate(Sender: TObject);
         procedure btnCancelClick(Sender: TObject);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
     public
@@ -182,11 +182,7 @@ end;
 
 
 procedure TReportForm.FormCreate(Sender: TObject);
-var
-    Settings: ISettings;
 begin
-    Settings:=TSettings.Create;
-    ReportForm.Caption:=Settings.GetStringValue(ApplicationDetails, 'WND_SENDFEEDBACK', APPCAPTION);
     PanelReportMemo.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
 end;
 

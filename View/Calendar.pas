@@ -40,12 +40,12 @@ type
         PanelCalendar: TPanel;
         Text: TLabel;
         PanelClient: TPanel;
-        procedure MyCalendarDblClick(Sender: TObject);
         procedure FormCreate(Sender: TObject);
+        procedure FormShow(Sender: TObject);
+        procedure MyCalendarDblClick(Sender: TObject);
         procedure DaysOneClick(Sender: TObject);
         procedure DaysThreenClick(Sender: TObject);
         procedure DaysSevenClick(Sender: TObject);
-        procedure FormShow(Sender: TObject);
         procedure MyCalendarClick(Sender: TObject);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
     private
@@ -159,18 +159,10 @@ end;
 
 
 procedure TCalendarForm.FormCreate(Sender: TObject);
-var
-    Settings:  ISettings;
 begin
-
-    Settings:=TSettings.Create;
-    CalendarForm.Caption:=Settings.GetStringValue(ApplicationDetails, 'WND_CALENDAR', APPCAPTION);
-
     SelectedDate:=NULLDATE;
-
     PanelActions.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
     PanelCalendar.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-
 end;
 
 

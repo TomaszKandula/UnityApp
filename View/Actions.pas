@@ -133,6 +133,7 @@ type
         SepLine6: TBevel;
         ItemDesc: TLabel;
         imgInfo: TImage;
+        imgCoverSaveBtn: TImage;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
@@ -221,7 +222,6 @@ type
         property CustName   :  string read FCustName   write FCustName;
         property CustNumber :  string read FCustNumber write FCustNumber;
         property BanksHtml  :  string read FBanksHtml  write FBanksHtml;
-    published
         function  GetRunningApps(SearchName: string): boolean;
         procedure GetData;
         procedure UpdateOpenItems(OpenItemsDest, OpenItemsSrc: TStringGrid);
@@ -270,7 +270,7 @@ uses
 
 
 /// <summary>
-///     Check if application is running.
+/// Check if application is running.
 /// </summary>
 
 function TActionsForm.GetRunningApps(SearchName: string): boolean;
@@ -311,7 +311,7 @@ end;
 
 
 /// <summary>
-///     Get all relevant data.
+/// Get all relevant data.
 /// </summary>
 
 procedure TActionsForm.GetData;
@@ -344,7 +344,7 @@ end;
 
 
 /// <summary>
-///     Get open items from source.
+/// Get open items from source.
 /// </summary>
 
 procedure TActionsForm.UpdateOpenItems(OpenItemsDest: TStringGrid; OpenItemsSrc: TStringGrid);
@@ -412,7 +412,7 @@ end;
 
 
 /// <summary>
-///     Get customer details.
+/// Get customer details.
 /// </summary>
 
 // make it async!!!
@@ -484,7 +484,7 @@ end;
 
 
 /// <summary>
-///     Refresh history of daily comments.
+/// Refresh history of daily comments.
 /// </summary>
 
 // make it async!!!
@@ -525,7 +525,7 @@ end;
 
 
 /// <summary>
-///     Refresh general comment column.
+/// Refresh general comment column.
 /// </summary>
 
 // make it async!!!
@@ -551,13 +551,13 @@ end;
 
 
 /// <summary>
-///     Enable/disable controls.
+/// Enable/disable controls.
 /// </summary>
 
 procedure TActionsForm.SetControls;
 begin
 
-    // Disable save button if customer is not registered.
+    // Cover save button if customer is not registered.
     if
         (Cust_Person.Text = unNotFound)
     or
@@ -565,7 +565,9 @@ begin
     or
         (Cust_MailGeneral.Text = unNotFound)
     then
-        btnSaveCustDetails.Enabled:=False else btnSaveCustDetails.Enabled:=True;
+        imgCoverSaveBtn.Visible:=True
+            else
+                imgCoverSaveBtn.Visible:=False;
 
     // Disable text fields if customer is not registered.
     if Cust_Phone.Text = unNotFound then
@@ -581,7 +583,7 @@ begin
     if Cust_Person.Text = unNotFound then
         Cust_Person.Enabled:=False
             else
-                Cust_Person.Enabled     :=True;
+                Cust_Person.Enabled:=True;
 
     if Cust_MailGeneral.Text = unNotFound then
         Cust_MailGeneral.Enabled:=False
@@ -592,7 +594,7 @@ end;
 
 
 /// <summary>
-///     Prepare for new data load.
+/// Prepare for new data load.
 /// </summary>
 
 procedure TActionsForm.Initialize;
@@ -613,7 +615,7 @@ end;
 
 
 /// <summary>
-///     Clear all details displayed on Action window.
+/// Clear all details displayed on Action window.
 /// </summary>
 
 procedure TActionsForm.ClearAll;
@@ -632,7 +634,7 @@ end;
 
 
 /// <summary>
-///     Make phone call.
+/// Make phone call.
 /// </summary>
 
 procedure TActionsForm.MakePhoneCall;
@@ -642,21 +644,21 @@ begin
 
     Settings:=TSettings.Create;
 
-    // CHECK FOR 'LYNCCALL.EXE'
+    // Check for 'Lynccall.exe'
     if not FileExists(Settings.GetAppDir + LyncCall) then
     begin
         MainForm.MsgCall(mcError, APPCAPTION + ' cannot find ''lynccall.exe''. Please contact IT support.');
         Exit;
     end;
 
-    // CHECK IF LYNC/SKYPE IS RUNNING
+    // CHeck if Lync/Skype is running
     if not ActionsForm.GetRunningApps('lync.exe') then
     begin
         MainForm.MsgCall(mcError, APPCAPTION + ' cannot find running Microsoft Skype/Lync for Business. Please open it and try again.');
         Exit;
     end;
 
-    // RUN LYNC WITH GIVEN PHONE NUMBER
+    // Run Lync with given phone number
     ShellExecute(ActionsForm.Handle, 'open', PChar(Settings.GetAppDir + LyncCall), PChar(ActionsForm.Cust_Phone.Text), nil, SW_SHOWNORMAL);
 
     if ActionsForm.DailyCom.Text = '' then
@@ -674,7 +676,7 @@ end;
 
 
 /// <summary>
-///     oad next or previous customer.
+/// Load next or previous customer.
 /// </summary>
 
 procedure TActionsForm.LoadCustomer(Direction: integer);
@@ -724,7 +726,7 @@ end;
 
 
 /// <summary>
-///     Clear follow-up from given customer.
+/// Clear follow-up from given customer.
 /// </summary>
 
 procedure TActionsForm.ClearFollowUp;
@@ -746,7 +748,7 @@ end;
 
 
 /// <summary>
-///     Save customer details in Address Book.
+/// Save customer details in Address Book.
 /// </summary>
 
 procedure TActionsForm.SaveCustomerDetails;
@@ -765,7 +767,7 @@ end;
 
 
 /// <summary>
-///     Save general comment into database.
+/// Save general comment into database.
 /// </summary>
 
 procedure TActionsForm.SaveGeneralComment;
@@ -783,7 +785,7 @@ end;
 
 
 /// <summary>
-///     Save daily comment into database (use locking thread by default).
+/// Save daily comment into database (use locking thread by default).
 /// </summary>
 
 procedure TActionsForm.SaveDailyComment;
@@ -803,7 +805,7 @@ end;
 
 
 /// <summary>
-///     Draw panels borders.
+/// Draw panels borders.
 /// </summary>
 
 procedure TActionsForm.InitializePanels;
@@ -813,7 +815,7 @@ end;
 
 
 /// <summary>
-///     Applay transparency for all speed buttons.
+/// Applay transparency for all speed buttons.
 /// </summary>
 
 procedure TActionsForm.InitializeSpeedButtons;
@@ -872,11 +874,7 @@ end;
 
 
 procedure TActionsForm.FormCreate(Sender: TObject);
-var
-    Settings: ISettings;
 begin
-    Settings:=TSettings.Create;
-    ActionsForm.Caption:=Settings.GetStringValue(ApplicationDetails, 'WND_ACTIONS', APPCAPTION);
     SetLength(SrcColumns, 19);
     OpenItemsGrid.ColCount:=19;
     OpenItemsGrid.SetRowHeight(sgRowHeight, 25);
@@ -927,7 +925,7 @@ end;
 
 
 /// <summary>
-///     Draw selected row on string grid component.
+/// Draw selected row on string grid component.
 /// </summary>
 
 procedure TActionsForm.HistoryGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
@@ -937,7 +935,7 @@ end;
 
 
 /// <summary>
-///     Color numbers and selection on string grid.
+/// Color numbers and selection on string grid.
 /// </summary>
 
 procedure TActionsForm.OpenItemsGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
@@ -977,7 +975,7 @@ end;
 
 
 /// <summary>
-///     Show data when user select item on history string gird.
+/// Show data when user select item on history string gird.
 /// </summary>
 
 procedure TActionsForm.HistoryGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
@@ -996,7 +994,7 @@ end;
 
 
 /// <summary>
-///     Save daily comment on <enter>. Allow to enter empty line when ALT + ENTER is pressed.
+/// Save daily comment on <enter>. Allow to enter empty line when ALT + ENTER is pressed.
 /// </summary>
 
 procedure TActionsForm.DailyComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -1021,7 +1019,7 @@ end;
 
 
 /// <summary>
-///     Save general comment on <enter>. Allow to enter empty line when ALT + ENTER is pressed.
+/// Save general comment on <enter>. Allow to enter empty line when ALT + ENTER is pressed.
 /// </summary>
 
 procedure TActionsForm.GeneralComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -1047,7 +1045,7 @@ end;
 
 
 /// <summary>
-///     String grid content to clipboard.
+/// String grid content to clipboard.
 /// </summary>
 
 procedure TActionsForm.OpenItemsGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -1057,7 +1055,7 @@ end;
 
 
 /// <summary>
-///     String grid content to clipboard.
+/// String grid content to clipboard.
 /// </summary>
 
 procedure TActionsForm.HistoryGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -1067,7 +1065,7 @@ end;
 
 
 /// <summary>
-///     Set focus on General Comment edit box.
+/// Set focus on General Comment edit box.
 /// </summary>
 
 procedure TActionsForm.DailyComKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -1077,7 +1075,7 @@ end;
 
 
 /// <summary>
-///     Set focus on Daily Comment edit box.
+/// Set focus on Daily Comment edit box.
 /// </summary>
 
 procedure TActionsForm.GeneralComKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -1353,6 +1351,8 @@ begin
         'Account Statement',
         '',
         TInvoiceFilter.AllItems,
+        '',
+        '',
         OpenItemsGrid,
         CUID,
         Lbu_SendFrom.Caption,

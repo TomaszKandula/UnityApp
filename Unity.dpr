@@ -4,7 +4,7 @@
 program Unity;
 
 /// <remarks>
-///     Large address aware - allow 32-bit program to use more than 2GB (up to 4GB). If still not enough, then compile as a 64-bit.
+/// Large address aware - allow 32-bit program to use more than 2GB (up to 4GB). If still not enough, then compile as a 64-bit.
 /// </remarks>>
 
 {$SetPEFlags $0020}
@@ -64,7 +64,7 @@ type
     TDwmIsCompositionEnabledFunc = function(out pfEnabled: boolean): HRESULT; stdcall;
 
     /// <remarks>
-    ///     Application constants are defined in main view throught "common.inc" file.
+    /// Application constants are defined in main view throught "common.inc" file.
     /// </remarks>
 
 var
@@ -101,8 +101,8 @@ var
 
 
 /// <summary>
-///     Allocate assemblies names that we are looing for.
-///     TODO: Subject for CRC32.
+/// Allocate assemblies names that we are looing for.
+/// TODO: Subject for CRC32.
 /// </summary>
 
 procedure InitAssembliesRef;
@@ -118,15 +118,15 @@ end;
 
 
 /// <summary>
-///     Extract given source file by provided ID number.
+/// Extract given source file by provided ID number.
 /// </summary>
 /// <param name="ItemID">Integer.</param>
 /// <param name="FileName">String.</param>
 /// <param name="mode">Integer.</param>
 /// <returns>Boolean. Set to true if succeed.</returns>
 /// <remarks>
-///     10 RCDATA "Makefile\\config.cfg" default setting file.
-///     60 RCDATA "Makefile\\logon.log"  pre-defined event log file.
+/// 10 RCDATA "Makefile\\config.cfg" default setting file.
+/// 60 RCDATA "Makefile\\logon.log"  pre-defined event log file.
 /// </remarks>
 
 function Unpack(ItemID: integer; FileName: string; mode: integer): boolean;
@@ -164,10 +164,10 @@ end;
 
 
 /// <summary>
-///     Update splash form message and loading status.
+/// Update splash form message and loading status.
 /// </summary>
 /// <remarks>
-///     It requires "Splash Form" to be already initialized.
+/// It requires "Splash Form" to be already initialized.
 /// </remarks>
 
 procedure Status(Task: integer; Total: integer; Time: integer; Text: string; TextMode: boolean; EventLogPath: string);
@@ -187,10 +187,10 @@ end;
 
 
 /// <summary>
-///     Unpack "Release.pak" file.
+/// Unpack "Release.pak" file.
 /// </summary>
 /// <remarks>
-///     It requires "Update Form" to be already initialized.
+/// It requires "Update Form" to be already initialized.
 /// </remarks>
 
 function UnzippReleaseFile(FileName: string; DestDir: string; EventLogPath: string): boolean;
@@ -245,8 +245,8 @@ end;
 
 
 /// <summary>
-///     During the update, some files cannot be overwritten or removed, thus we change the name and copy new file(s) into the very same place.
-///     This methods remove all of the "leftovers" from given folder.
+/// During the update, some files cannot be overwritten or removed, thus we change the name and copy new file(s) into the very same place.
+/// This methods remove all of the "leftovers" from given folder.
 /// </summary>
 /// <param name="Directory">String, source.</param>
 /// <param name="Pattern">String, indicate what to remove, eg. *.png.</param>
@@ -273,7 +273,7 @@ end;
 
 
 /// <summary>
-///     Parse content of manifest file and return requested Key value.
+/// Parse content of manifest file and return requested Key value.
 /// </summary>
 
 function GetManifestValue(Key: string; Source: string): string;
@@ -313,7 +313,7 @@ begin
     {$WARN SYMBOL_PLATFORM ON}
 
     /// <summary>
-    ///     We allow only one instance of running program (no sessions).
+    /// We allow only one instance of running program (no sessions).
     /// </summary>
 
     Mutex:=CreateMutex(nil, True, CurrentMutex);
@@ -327,7 +327,7 @@ begin
     end;
 
     /// <summary>
-    ///     Setup formats to user local settings.
+    /// Setup formats to user local settings.
     /// </summary>
 
     {$WARN SYMBOL_PLATFORM OFF} { Windows only }
@@ -341,16 +341,16 @@ begin
     RegSettings.TimeSeparator       :=':';
     RegSettings.TimeAMString        :='AM';
     RegSettings.TimePMString        :='PM';
-    RegSettings.ShortTimeFormat     :='hh:mm:ss';
+    RegSettings.ShortTimeFormat     :='hh:mm tt';
     RegSettings.LongTimeFormat      :='hh:mm:ss';
     FormatSettings                  :=RegSettings;
     Application.UpdateFormatSettings:=False;
 
     /// <summary>
-    ///     Initialize interfaced objects for internet methods and settings file operations and event logging.
+    /// Initialize interfaced objects for internet methods and settings file operations and event logging.
     /// </summary>
     /// <remarks>
-    ///     Because LogText is re-introduced in MainForm, it has to be free before MainForm initialization.
+    /// Because LogText is re-introduced in MainForm, it has to be free before MainForm initialization.
     /// </remarks>
 
     Connection:=TConnectivity.Create;
@@ -358,7 +358,7 @@ begin
     LogText   :=TThreadFileLog.Create;
 
     /// <summary>
-    ///     Check internet connection.
+    /// Check internet connection.
     /// </summary>
 
     if not(Connection.IsInternetPresent) then
@@ -371,7 +371,7 @@ begin
     end;
 
     /// <summary>
-    ///     Get all necessary settings from configuration file before any possible update.
+    /// Get all necessary settings from configuration file before any possible update.
     /// </summary>
 
     ReleaseNumber:=0;
@@ -404,7 +404,7 @@ begin
     end;
 
     /// <summary>
-    ///     Check event log file. If it is missing, then unpack from EXE resources default file.
+    /// Check event log file. If it is missing, then unpack from EXE resources default file.
     /// </summary>
 
     if FileExists(PathEventLog) then
@@ -453,7 +453,7 @@ begin
         CreateDir(Settings.GetPackageDir);
 
     /// <summary>
-    ///     Check manifest and update if application release number is lower.
+    /// Check manifest and update if application release number is lower.
     /// </summary>
 
     Manifest:=Connection.GetResponseText(Settings.GetReleaseManURL);
@@ -507,7 +507,7 @@ begin
     end;
 
     /// <remarks>
-    ///     Splash screen requires updating to display the changed content.
+    /// Splash screen requires updating to display the changed content.
     /// </remarks>
 
     SplashForm:=TSplashForm.Create(nil);
@@ -518,7 +518,7 @@ begin
     SplashForm.Update;
 
     /// <summary>
-    ///     Check password. It is hashed with BCrypt and cannot be shorter than 60 characters.
+    /// Check password. It is hashed with BCrypt and cannot be shorter than 60 characters.
     /// </summary>
 
     if Length(Settings.GetStringValue(PasswordSection, 'HASH', '')) < 60 then
@@ -537,10 +537,10 @@ begin
     end;
 
     /// <summary>
-    ///     Check if licence file exists.
+    /// Check if licence file exists.
     /// </summary>
     /// <remarks>
-    ///     TODO: Extend this by adding CRC32 check.
+    /// TODO: Extend this by adding CRC32 check.
     /// </remarks>
 
     if not FileExists(Settings.GetPathLicenceLic) then
@@ -548,7 +548,7 @@ begin
         Status(2, AllTasks, DelayStd, 'Checking licence file... failed!', True, Settings.GetPathEventLog);
 
         /// <remarks>
-        ///     Check here ".LIC" file in case of Unity is shareware/limited commercial application.
+        /// Check here ".LIC" file in case of Unity is shareware/limited commercial application.
         /// </remarks>
 
         Application.MessageBox(
@@ -564,7 +564,7 @@ begin
     end;
 
     /// <summary>
-    ///     Check Windows version. We allow only Windows 7 (with Aero) or Windows 10 (and above).
+    /// Check Windows version. We allow only Windows 7 (with Aero) or Windows 10 (and above).
     /// </summary>
 
     if not StrToInt(GetOSVer(OSNumber)) >= 61 then
@@ -583,7 +583,7 @@ begin
     end;
 
     /// <summary>
-    ///     Areo must be enabled if program runs under Windows 7.
+    /// Areo must be enabled if program runs under Windows 7.
     /// </summary>
 
     if StrToInt(GetOSVer(OSNumber)) = 61 then
@@ -625,7 +625,7 @@ begin
     end;
 
    /// <summary>
-   ///      Check configuration file and deploy default if corrupted.
+   /// Check configuration file and deploy default if corrupted.
    /// </summary>
 
    Status(5, AllTasks, DelayStd, 'CRC32 check: ' + ConfigFile + '...', True, Settings.GetPathEventLog);
@@ -654,12 +654,12 @@ begin
     end;
 
     /// <summary>
-    ///     Check if assemlbies exists in main folder. All assemlbies must be present to run the program. We exclude from this list
-    ///     Chromium assemblies because it is not needed to run key features. Chromium is primarly used to display Tableau reports and
-    ///     Unity Info web page. This can be also displayed by external web browser.
+    /// Check if assemlbies exists in main folder. All assemlbies must be present to run the program. We exclude from this list
+    /// Chromium assemblies because it is not needed to run key features. Chromium is primarly used to display Tableau reports and
+    /// Unity Info web page. This can be also displayed by external web browser.
     /// </summary>
     /// <remarks>
-    ///     We do not check CRC32 correctness.
+    /// We do not check CRC32 correctness.
     /// </remarks>
 
     InitAssembliesRef;
@@ -685,7 +685,7 @@ begin
     LogText.Log(Settings.GetPathEventLog, 'End of checking resource and configuration files.');
 
     /// <summary>
-    ///     Synchronise all layouts listed in settings file.
+    /// Synchronise all layouts listed in settings file.
     /// </summary>
 
     Status(12, AllTasks, DelayStd, 'Synchronising layouts...', True, Settings.GetPathEventLog);
@@ -705,11 +705,11 @@ begin
     end;
 
     /// <summary>
-    ///     Initialize Chromium object before Chromium component is created within MainForm.
+    /// Initialize Chromium object before Chromium component is created within MainForm.
     /// </summary>
     /// <see cref="https://www.briskbard.com/index.php?lang=en&pageid=cef"/>
     /// <remarks>
-    ///     GlobalCEFApp is an instance of the TCEFApplication class an it simpliefies the Chromium initialization.
+    /// GlobalCEFApp is an instance of the TCEFApplication class an it simpliefies the Chromium initialization.
     /// </remarks>
 
     Status(13, AllTasks, DelayStd, 'Chromium initialization...', True, Settings.GetPathEventLog);
@@ -719,15 +719,15 @@ begin
     try
 
         /// <summary>
-        ///     Do not run Chromium inside Unity application, all HTML rendering should be subprocessed.
+        /// Do not run Chromium inside Unity application, all HTML rendering should be subprocessed.
         /// </summary>
 
         Status(14, AllTasks, DelayStd, 'Chromium initialization: assigning sub process...', True, Settings.GetPathEventLog);
         GlobalCEFApp.BrowserSubprocessPath:='SubProcess.exe';
 
         /// <summary>
-        ///     Because TApplication should be only initialized and run in the main process, we call GlobalCEFApp.StartMainProcess to check
-        ///     if we have main thread running. If not, we exit the program.
+        /// Because TApplication should be only initialized and run in the main process, we call GlobalCEFApp.StartMainProcess to check
+        /// if we have main thread running. If not, we exit the program.
         /// </summary>
 
         Status(15, AllTasks, DelayStd, 'Chromium initialization: starting main process...', True, Settings.GetPathEventLog);
@@ -735,28 +735,28 @@ begin
         try
 
             /// <remarks>
-            ///     Setup framework directory, explicitly to an absolute value. It ensures correct initialization.
+            /// Setup framework directory, explicitly to an absolute value. It ensures correct initialization.
             /// </remarks>
 
             GlobalCEFApp.FrameworkDirPath:=PathAppDir;
             Status(16, AllTasks, DelayStd, 'Chromium initialization: setup Framework...', True, Settings.GetPathEventLog);
 
             /// <remarks>
-            ///     Setup resources directory, explicitly to an absolute value. It ensures correct initialization.
+            /// Setup resources directory, explicitly to an absolute value. It ensures correct initialization.
             /// </remarks>
 
             GlobalCEFApp.ResourcesDirPath:=PathAppDir;
             Status(17, AllTasks, DelayStd, 'Chromium initialization: setup Resources...', True, Settings.GetPathEventLog);
 
             /// <remarks>
-            ///     Setup locales directory, explicitly to an absolute value. It ensures correct initialization.
+            /// Setup locales directory, explicitly to an absolute value. It ensures correct initialization.
             /// </remarks>
 
             GlobalCEFApp.LocalesDirPath:=PathAppDir + 'locales';
             Status(18, AllTasks, DelayStd, 'Chromium initialization: setup Locales...', True, Settings.GetPathEventLog);
 
             /// <remarks>
-            ///     Set the current application directory before loading the CEF3 libraries to avoid "CEF3 binaries missing !" error.
+            /// Set the current application directory before loading the CEF3 libraries to avoid "CEF3 binaries missing !" error.
             /// </remarks>
 
             GlobalCEFApp.SetCurrentDir:=True;
@@ -788,7 +788,7 @@ begin
     end;
 
     /// <summary>
-    ///     Start the application.
+    /// Start the application.
     /// </summary>
 
     Status(20, AllTasks, 50, 'Application initialization... ', False, Settings.GetPathEventLog);
@@ -797,27 +797,27 @@ begin
     Application.MainFormOnTaskbar:=False;
 
     /// <remarks>
-    ///     Release logger object. It will be re-introduced during MainForm initialization.
+    /// Release logger object. It will be re-introduced during MainForm initialization.
     /// </remarks>
 
     LogText.Free;
 
     /// <summary>
-    ///     Load Main Form and execute all of its initialization methods.
+    /// Load Main Form and execute all of its initialization methods.
     /// </summary>
     /// <remarks>
-    ///      Visible parameter must be set to false to prevent from showing the main application window while splash screen is still on.
+    /// Visible parameter must be set to false to prevent from showing the main application window while splash screen is still on.
     /// </remarks>
 
     Application.CreateForm(TMainForm, MainForm);
   MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] Initialization methods executed within main thread, ''MainForm'' has been created. Main process thread ID = ' + IntToStr(MainThreadID) + '.');
 
     /// <summary>
-    ///     Load all other forms and execute initialization methods. Similarly to MainForm, visible parameter of the forms must be set to false
-    ///     to prevent showing up windows.
+    /// Load all other forms and execute initialization methods. Similarly to MainForm, visible parameter of the forms must be set to false
+    /// to prevent showing up windows.
     /// </summary>
     /// <remarks>
-    ///     Use Status method with TextMode parameter set to False. It allows to log different text and to display different text during loading method.
+    /// Use Status method with TextMode parameter set to False. It allows to log different text and to display different text during loading method.
     /// </remarks>
 
     Application.CreateForm(TAboutForm, AboutForm);
@@ -892,7 +892,7 @@ begin
     SplashForm.Free;
 
     /// <summary>
-    ///     Setup last window position and show it to the user.
+    /// Setup last window position and show it to the user.
     /// </summary>
 
     if Settings.GetStringValue(ApplicationDetails,  'WINDOW_STATE', '') = 'wsNormal'    then MainForm.WindowState:=wsNormal;
@@ -902,20 +902,20 @@ begin
     MainForm.Show;
 
     /// <remarks>
-    ///     Show taskbar icon.
+    /// Show taskbar icon.
     /// </remarks>
 
     Application.MainFormOnTaskbar:=True;
     Application.Run;
 
     /// <summary>
-    ///     Destroy Chromium object when application.run exits.
+    /// Destroy Chromium object when application.run exits.
     /// </summary>
 
     GlobalCEFApp.Free;
 
     /// <remarks>
-    ///     Breaks the message loop in application.run class.
+    /// Breaks the message loop in application.run class.
     /// </remarks>
 
     Application.Terminate;
