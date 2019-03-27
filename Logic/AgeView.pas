@@ -804,7 +804,7 @@ procedure TAgeView.Make(OSAmount: double);  // REFACTOR TO REMOVE TIGHT COUPLING
         { DEFINES DESTINATION COLUMNS IN AGE VIEW ARRAY }
         avCol: array[0..16] of integer = (3, 4, 5,  15, 17, 18, 19, 20, 22, 23, 24, 25, 27, 28, 29, 30, 31);
 
-        { DEFINES BUCKET COLUMNS: NOT DUE, RANGE1..6, OVERDUE }
+        { DEFINES BUCKET COLUMNS (OUTPUT): NOT DUE, RANGE1..6, OVERDUE }
         rnCol: array[0..7 ] of integer = (6, 7, 8,  9,  10, 11, 12, 13);
 
         { DEFINES ALL COLUMNS WITH VALUES, TO BE REPLACED WITH '.' }

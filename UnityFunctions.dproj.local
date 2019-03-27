@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+	<Transactions>
+    <Transaction>2019/02/19 15:54:01.000.288,C:\Users\Tomek\Documents\Embarcadero\Studio\Projects\Project1.dproj=I:\Projects\Unity Project\__Unity\UnityFunctions.dproj</Transaction>
+    <Transaction>2019/02/19 16:53:57.000.165,=I:\Projects\Unity Project\__Unity\Model\SQL.pas</Transaction>
+    <Transaction>2019/02/19 16:55:38.000.148,=I:\Projects\Unity Project\__Unity\Model\Model.pas</Transaction>
+    <Transaction>2019/02/21 08:18:14.000.332,=I:\Projects\Unity Project\__Unity\Functions\Database.pas</Transaction>
+    <Transaction>2019/02/21 08:18:14.000.373,=I:\Projects\Unity Project\__Unity\Functions\Model.pas</Transaction>
+    <Transaction>2019/02/21 08:18:14.000.407,=I:\Projects\Unity Project\__Unity\Functions\SQL.pas</Transaction>
+    <Transaction>2019/02/21 08:20:02.000.117,=I:\Projects\Unity Project\__Unity\Functions\Arrays.pas</Transaction>
+    <Transaction>2019/02/21 08:20:02.000.149,=I:\Projects\Unity Project\__Unity\Functions\CustomTypes.pas</Transaction>
+    <Transaction>2019/02/21 08:20:02.000.180,=I:\Projects\Unity Project\__Unity\Functions\InterposerClasses.pas</Transaction>
+    <Transaction>2019/02/21 08:56:26.000.251,I:\Projects\Unity Project\__Unity\Functions\InterposerClasses.pas=</Transaction>
+    <Transaction>2019/02/22 10:30:38.000.339,=I:\Projects\Unity Project\__Unity\Functions\InterposerClasses.pas</Transaction>
+    <Transaction>2019/02/22 10:35:18.000.652,I:\Projects\Unity Project\__Unity\Functions\InterposerClasses.pas=</Transaction>
+  </Transactions>
+</BorlandProject>

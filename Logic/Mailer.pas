@@ -20,7 +20,8 @@ uses
     Variants,
     CDO_TLB,
     InterposerClasses,
-    CustomTypes;
+    CustomTypes,
+    System.Generics.Collections;
 
 
 type
@@ -50,20 +51,22 @@ type
         var FMailRt:      string;
         var FMailSubject: string;
         var FMailBody:    string;
-        var FLogo:        string;
+        var FAttachments: TList<string>;
     public
-        property idThd:       integer read FidThd       write FidThd;
-        property XMailer:     string  read FXMailer     write FXMailer;
-        property MailFrom:    string  read FMailFrom    write FMailFrom;
-        property MailTo:      string  read FMailTo      write FMailTo;
-        property MailCc:      string  read FMailCc      write FMailCc;
-        property MailBcc:     string  read FMailBcc     write FMailBcc;
-        property MailRt:      string  read FMailRt      write FMailRt;
-        property MailSubject: string  read FMailSubject write FMailSubject;
-        property MailBody:    string  read FMailBody    write FMailBody;
-        property Logo:        string  read FLogo        write FLogo;
+        property idThd:       integer       read FidThd       write FidThd;
+        property XMailer:     string        read FXMailer     write FXMailer;
+        property MailFrom:    string        read FMailFrom    write FMailFrom;
+        property MailTo:      string        read FMailTo      write FMailTo;
+        property MailCc:      string        read FMailCc      write FMailCc;
+        property MailBcc:     string        read FMailBcc     write FMailBcc;
+        property MailRt:      string        read FMailRt      write FMailRt;
+        property MailSubject: string        read FMailSubject write FMailSubject;
+        property MailBody:    string        read FMailBody    write FMailBody;
+        property Attachments: TList<string> read FAttachments write FAttachments;
         function SendEmail(oauth: integer) : boolean;
         function SendNow: boolean;
+        constructor Create;
+        destructor Destroy; override;
     end;
 
     /// <summary>
@@ -141,6 +144,18 @@ uses
 // -------------------------------------------------------------------------------------------------------------------------------------------- MAILER CLASS //
 
 
+constructor TMailer.Create;
+begin
+     FAttachments:=TList<string>.Create;
+end;
+
+
+destructor TMailer.Destroy;
+begin
+    if Assigned(FAttachments) then FAttachments.Free;
+end;
+
+
 /// <summary>
 /// Send email through CDOSYS.
 /// </summary>
@@ -150,6 +165,7 @@ var
     CdoMessage: CDO_TLB.IMessage;
     Schema:     string;
     Settings:   ISettings;
+    iCNT:       integer;
 begin
 
     Result:=False;
@@ -192,10 +208,19 @@ begin
     CdoMessage.Configuration.Fields.update;
 
     try
+
+        // Add attachments (if any)
+        if Attachments.Count > 0 then
+        begin
+            for iCNT:=0 to Attachments.Count - 1 do
+                CdoMessage.AddAttachment(Attachments.Items[iCNT],'','');
+        end;
+
         CdoMessage.BodyPart.Charset:='utf-8';
         CdoMessage.Send;
         Result:=True;
         MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: E-mail has been sent successfully.');
+
     except
         on E: Exception do
             MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Cannot send an e-mail. Error message has been thrown: ' + E.Message);
@@ -228,7 +253,7 @@ end;
 
 constructor TDocument.Create;
 begin
-    //
+    inherited;
 end;
 
 
@@ -334,6 +359,11 @@ function TDocument.BuildHTML: integer;
         HTMLTemp:=StringReplace(HTMLTemp, '{INV_AMT}', CurAmount, [rfReplaceAll]);
         HTMLTemp:=StringReplace(HTMLTemp, '{INV_OSA}', Amount,    [rfReplaceAll]);
 
+        /// <remarks>
+        /// Text on the invoice may be very long (but not more than 200 chars), decision was put hard limit of 32 chars.
+        /// </remarks>
+        HTMLTemp:=StringReplace(HTMLTemp, '{INV_TXT}', LeftStr(SG.Cells[MainForm.OpenItemsRefs.Text, ActualRow], 32), [rfReplaceAll]);
+
         // Replace control status number to description
         HTMLTemp:=StringReplace(
             HTMLTemp,
@@ -385,7 +415,7 @@ begin
             begin
 
                 // Include all items (account statement)
-                if InvFilter = TInvoiceFilter.AllItems then
+                if InvFilter = TInvoiceFilter.ShowAllItems then
                 begin
 
                     if
@@ -419,16 +449,16 @@ begin
             end;
 
             // We exclude invoices with 'control status' that is different than given number in the comapny table
-            if ( ( OpenItems.Cells[MainForm.OpenItemsRefs.CtrlCol, iCNT] <> REM_EX1) or
-                 ( OpenItems.Cells[MainForm.OpenItemsRefs.CtrlCol, iCNT] <> REM_EX2) or
-                 ( OpenItems.Cells[MainForm.OpenItemsRefs.CtrlCol, iCNT] <> REM_EX3) or
-                 ( OpenItems.Cells[MainForm.OpenItemsRefs.CtrlCol, iCNT] <> REM_EX4) or
+            if ( ( OpenItems.Cells[MainForm.OpenItemsRefs.CtrlCol, iCNT] <> REM_EX1) and
+                 ( OpenItems.Cells[MainForm.OpenItemsRefs.CtrlCol, iCNT] <> REM_EX2) and
+                 ( OpenItems.Cells[MainForm.OpenItemsRefs.CtrlCol, iCNT] <> REM_EX3) and
+                 ( OpenItems.Cells[MainForm.OpenItemsRefs.CtrlCol, iCNT] <> REM_EX4) and
                  ( OpenItems.Cells[MainForm.OpenItemsRefs.CtrlCol, iCNT] <> REM_EX5)
                )
             then
             begin
                 // Include only overdue items (payment reminder)
-                if InvFilter = TInvoiceFilter.OvdOnly then
+                if InvFilter = TInvoiceFilter.ReminderOvd then
                 begin
                     if
                         (
@@ -443,7 +473,7 @@ begin
                 end;
 
                 // Include all items with given due date range
-                if InvFilter = TInvoiceFilter.NonOvd then
+                if InvFilter = TInvoiceFilter.ReminderNonOvd then
                 begin
 
                     if
@@ -506,19 +536,19 @@ begin
 
     // Custom template title (statement or reminder)
     case InvFilter of
-        TInvoiceFilter.OvdOnly:  MailBody:=StringReplace(MailBody, '{TITLE}', 'REMINDER',  [rfReplaceAll]);
-        TInvoiceFilter.NonOvd:   MailBody:=StringReplace(MailBody, '{TITLE}', 'REMINDER',  [rfReplaceAll]);
-        TInvoiceFilter.AllItems: MailBody:=StringReplace(MailBody, '{TITLE}', 'STATEMENT', [rfReplaceAll]);
+        TInvoiceFilter.ReminderOvd:  MailBody:=StringReplace(MailBody, '{TITLE}', 'REMINDER',  [rfReplaceAll]);
+        TInvoiceFilter.ReminderNonOvd:   MailBody:=StringReplace(MailBody, '{TITLE}', 'REMINDER',  [rfReplaceAll]);
+        TInvoiceFilter.ShowAllItems: MailBody:=StringReplace(MailBody, '{TITLE}', 'STATEMENT', [rfReplaceAll]);
     end;
 
     // Custom salutation and the message
     if CustMess  <> '' then MailBody:=StringReplace(MailBody, '{TEXT}',  CustMess,  [rfReplaceAll]);
 
-    XMailer  :=MailFrom;
-    MailCc   :=MailFrom;
-    MailBcc  :='';
-    MailRt   :='';
-    Result   :=SendNow;
+    XMailer:=MailFrom;
+    MailCc :=MailFrom;
+    MailBcc:='';
+    MailRt :='';
+    Result :=SendNow;
 
     (* DEBUG *)
 //    RAND:=Random(100000);

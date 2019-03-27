@@ -155,8 +155,8 @@ implementation
 
 
 uses
-    Main,
-    Settings,
+    //Main,
+    //Settings,
     SQL;
 
 
@@ -400,12 +400,8 @@ begin
     else
     begin
         for iCNT:=Selection.Top to Selection.Bottom do
-            if RowHeights[iCNT] = sgRowHeight then
-                SetUpdatedRow(iCNT);
+            SetUpdatedRow(iCNT);
     end;
-
-
-    MainForm.DebugMsg('');
 
 end;
 
@@ -478,91 +474,63 @@ end;
 
 
 /// <summary>
-/// Implementation of "Copy, Cut, Past" functionality.
+///     Implementation of "Copy, Cut, Past" functionality.
 /// </summary>
 /// <param name="mode">Integer, use flag defined in common.inc.</param>
 
 procedure TStringGrid.CopyCutPaste(mode: integer);
 var
-    Grect:      TGridRect;
-    Clipbrd:    string;
-    RTop:       integer;
-    CLeft:      integer;
-    Sel:        TGridRect;
-    Row:        integer;
-    Col:        integer;
-    TxtFromSel: string;
-    NewRows:    integer;
-    NewCols:    integer;
-    RowCounter: integer;
-    iCNT:       integer;
-    TempClip:   TStringList;
+    Grect:       TGridRect;
+    S:           string;
+    CS:          string;
+    F:           string;
+    L:           integer;
+    R:           integer;
+    C:           integer;
+    RTop:        integer;
+    CLeft:       integer;
+    Sel:         TGridRect;
+    Row, Col:    integer;
+    TxtFromSel:  string;
+    RowNum:      integer;
 begin
 
     // Paste data into string grid
     if mode = adPaste then
     begin
+        GRect:=Selection;
+        L    :=GRect.Left;
+        R    :=GRect.Top;
+        RTop :=R;
+        CLeft:=L;
+        C    :=0;
+        S    :=ClipBoard.AsText;
+        R    :=R - 1;
 
-        // Get clipboard text
-        RowCounter:=0;
-        NewRows:=0;
-        NewCols:=0;
-        Clipbrd:=ClipBoard.AsText;
-
-        // Get dimension from clipboard text
-        for iCNT:=0 to Length(Clipbrd) do
+        // Go line by line
+        while Pos(CR, S) > 0 do
         begin
-            // Rows
-            if Clipbrd[iCNT] = CR then Inc(NewRows);
-            // Cols
-            if Clipbrd[iCNT] = TAB then Inc(NewCols);
-        end;
-
-        // We allow to paste only one column
-        if NewCols > 0 then Exit;
-
-        // Split into rows only
-        TempClip:=TStringList.Create;
-        try
-            TempClip.Delimiter:=CR;
-            TempClip.DelimitedText:=Clipbrd;
-
-            // Set start anchor of new selection
-            GRect:=Selection;
-            RTop :=GRect.Top;
-            CLeft:=GRect.Left;
-
-            // Look for end anchor of new selection
-            for iCNT:=RTop to RowCount - 1 do
+            R :=R + 1;
+            C :=L - 1;
+            CS:=Copy(S, 1, Pos(CR, S));
+            while Pos(TAB, CS) > 0 do
             begin
-
-                if RowHeights[iCNT] <> -1 then
-                begin
-
-                    // Paste into visible row
-                    Cells[CLeft, iCNT]:=TempClip.Strings[RowCounter];
-
-                    // Count visible cells starting from
-                    // given top position
-                    Inc(RowCounter);
-
-                    // Pass row index for last visible cell
-                    if RowCounter = NewRows then
-                    begin
-                        NewRows:=iCNT;
-                        Break;
-                    end;
-
-                end;
-
+                C:=C + 1;
+                if (C <= ColCount - 1) and (R <= RowCount - 1) then Cells[C, R]:=Copy(CS, 1, Pos(TAB, CS) - 1);
+                F:=Copy(CS, 1, Pos(TAB, CS) - 1);
+                Delete(CS,  1, Pos(TAB, CS));
             end;
 
-            // Display new selection for pasted values
-            Selection:=TGridRect(Rect(CLeft, RTop, CLeft + NewCols, NewRows));
+            if (C <= ColCount - 1) and (R <= RowCount - 1) then
+                Cells[C + 1, R]:=Copy(CS, 1, Pos(CR, CS) - 1);
 
-        finally
-            TempClip.Free;
+            Delete(S, 1,Pos(CR, S));
+
+            if Copy(S, 1, 1) = LF then
+                Delete(S, 1, 1);
         end;
+
+        Selection:=TGridRect(Rect(CLeft, RTop, C + 1, R));
 
     end;
 
@@ -571,43 +539,35 @@ begin
     begin
         Sel:=Selection;
         TxtFromSel:='';
+        RowNum:=Sel.Top;
 
-        // Go row by row
         for Row:=Sel.Top to Sel.Bottom do
         begin
-
-            // Skip hidden rows
-            if RowHeights[Row] <> -1 then
+            if RowHeights[RowNum] <> -1 then
             begin
-
-                // Go column by column
                 for Col:=Sel.Left to Sel.Right do
                 begin
+                    TxtFromSel:=TxtFromSel + Cells[Col, Row];
 
-                    // Skip hidden columns
-                    if ColWidths[Col] <> -1 then
-                    begin
-
-                        TxtFromSel:=TxtFromSel + Cells[Col, Row];
-
+                    if mode = adCut then
                         // Cut
-                        if mode = adCut then
-                            Cells[Col, Row]:='';
+                        Cells[Col, Row]:='';
 
-                        if Col < Sel.Right then
-                            TxtFromSel:=TxtFromSel + TAB;
-
-                    end;
-
+                    if Col < Sel.Right then
+                        TxtFromSel:=TxtFromSel + TAB;
                 end;
 
                 if Row < Sel.Bottom then
                     TxtFromSel:=TxtFromSel + CRLF;
+
             end;
+
+            inc(RowNum);
 
         end;
 
         ClipBoard.AsText:=TxtFromSel + CRLF;
+        MainForm.DebugMsg(ClipBoard.AsText);
 
     end;
 
@@ -1118,14 +1078,14 @@ begin
             XLApp.Workbooks.Add(xlWBatWorkSheet);
 
             /// <remarks>
-            /// Code insight may show false error for below lines of code:
+            ///     Code insight may show false error for below lines of code:
             /// </remarks>
             /// <code>
             ///     Sheet:=XLApp.Workbooks[1].WorkSheets[1];
             ///     XLApp.Workbooks[1].SaveAs(AFileName);
             /// </code>
             /// <remarks>
-            /// In such case, ignore it (test it on RAD Studio XE2 and Tokyo edition).
+            ///     In such case, ignore it (test it on RAD Studio XE2 and Tokyo edition).
             /// </remarks>
 
             Sheet:=XLApp.Workbooks[1].WorkSheets[1];

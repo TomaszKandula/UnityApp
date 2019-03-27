@@ -40,7 +40,7 @@ uses
 
 
 /// <summary>
-///     Get date and time from SSISMaster table.
+/// Get date and time from SSISMaster table.
 /// </summary>
 
 function TTransactions.GetDateTime(Return: integer): string;
@@ -77,7 +77,7 @@ begin
 end;
 
 /// <summary>
-///     Get status code from SSIS Master table for given datetime.
+/// Get status code from SSIS Master table for given datetime.
 /// </summary>
 
 function TTransactions.GetStatus(DateTime: string): string;
@@ -94,7 +94,7 @@ begin
 end;
 
 /// <summary>
-///     Load open items from database table into string grid.
+/// Load open items from database table into string grid.
 /// </summary>
 
 function TTransactions.LoadToGrid: boolean;
@@ -121,8 +121,8 @@ begin
     begin
 
         /// <remarks>
-        ///     To stack companies all agent information must be the same
-        ///     thus set agent per last found the same principle applies for division.
+        /// To stack companies all agent information must be the same
+        /// thus set agent per last found the same principle applies for division.
         /// </remarks>
 
         if SettingGrid.Cells[iCNT, 3] = 'OFF' then
@@ -140,10 +140,10 @@ begin
     end;
 
     /// <remarks>
-    ///     Do not use "cmdstoredproc" to execute stored procedure with adodb
-    ///     use ordinary "cmdtext" with "exec" statement just like you would
-    ///     use it in microsoft management studio. Alternatively, use firedac
-    ///     from embarcadero instead of adodb as it is more robust library.
+    /// Do not use "cmdstoredproc" to execute stored procedure with adodb
+    /// use ordinary "cmdtext" with "exec" statement just like you would
+    /// use it in Microsoft Management Studio. Alternatively, use firedac
+    /// from embarcadero instead of adodb as it is more robust library.
     /// </remarks>
 
     CmdType:=cmdText;
@@ -166,7 +166,7 @@ begin
 end;
 
 /// <summary>
-///     Look for voucher type in settings file where we define such.
+/// Look for voucher type in settings file where we define such.
 /// </summary>
 
 function TTransactions.IsVoType(VoType: string): boolean;
@@ -195,7 +195,7 @@ begin
 end;
 
 /// <summary>
-///     Clear all summary details.
+/// Clear all summary details.
 /// </summary>
 
 procedure TTransactions.ClearSummary;
@@ -212,7 +212,7 @@ begin
 end;
 
 /// <summary>
-///     Display updated summary of open items for the user.
+/// Display updated summary of open items for the user.
 /// </summary>
 
 procedure TTransactions.UpdateSummary;
@@ -263,7 +263,7 @@ begin
         // Unallocated payments
 
         /// <remarks>
-        ///     We take into consideration negative amounts and voucher that indicate bank postings.
+        /// We take into consideration negative amounts and voucher that indicate bank postings.
         /// </remarks>
 
         if (StrToFloat(DestGrid.Cells[5, iCNT]) < 0) and (DestGrid.Cells[3, iCNT] = VoucherNumber) then

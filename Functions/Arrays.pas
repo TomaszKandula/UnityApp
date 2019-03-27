@@ -34,7 +34,6 @@ type
     /// These records definition allows to hold column numbers for given column name. This is necessary as column order may change.
     /// Normally we would use "ReturnColumn" extension method, but in case of multithreading, we must preset
     /// them before many threads use them at the same time (VCL components are not thread safe).
-    /// Having record with fields simplify things.
     /// </remarks>
 
     TOpenItemsRefs = record
@@ -53,7 +52,6 @@ type
         ISOCol:         integer;
         CurAmCol:       integer;
         OpenCurAmCol:   integer;
-        Text:           integer;
     end;
 
     TControlStatusRefs = record

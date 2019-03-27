@@ -8,14 +8,13 @@ interface
 
 
 uses
+    Vcl.Grids,
+    Data.Win.ADODB,
     SysUtils,
-    Windows,
     Classes,
-    ADODB,
     StrUtils,
     Variants,
     StdCtrls,
-    InterposerClasses,
     Arrays;
 
 
@@ -27,14 +26,21 @@ type
 
     TMSSQL = class
     {$TYPEINFO ON}
+    private
+        var FParamList:    TLists;
+        var FStrSQL:       string;
+        var FADOCon:       TADOConnection;
+        var FCmdType:      TCommandType;
+        var FRowsAffected: integer;
+        var FLastErrorMsg: string;
     public
-        var FParamList  : TLists;
-        var StrSQL      : string;
-        var ADOCon      : TADOConnection;
-        var CmdType     : TCommandType;
-        var RowsAffected: integer;
-        var LastErrorMsg: string;
-    published
+        property ParamList:    TLists         read FParamList     write FParamList;
+        property StrSQL:       string         read FStrSQL        write FStrSQL;
+        property CmdType:      TCommandType   read FCmdType       write FCmdType;
+        property ADOCon:       TADOConnection read FADOCon;
+        property RowsAffected: integer        read FRowsAffected;
+        property LastErrorMsg: string         read FLastErrorMsg;
+    public
         constructor Create(Connector: TADOConnection);
         destructor  Destroy; override;
         procedure   ClearSQL;
@@ -79,8 +85,7 @@ type
 implementation
 
 
-uses
-    Main;
+{$I .\Functions\Common.inc}
 
 
 // MS SQL -------------------------------------------------------------------------------------------------------------------------------------------------- //
@@ -91,9 +96,9 @@ uses
 
 constructor TMSSQL.Create(Connector: TADOConnection);
 begin
-    StrSQL :='';
-    ADOCon :=Connector;
-    CmdType:=cmdText;
+    FStrSQL :='';
+    FADOCon :=Connector;
+    FCmdType:=cmdText;
     SetLength(FParamList, 1, 2);
 end;
 
@@ -113,9 +118,9 @@ end;
 
 procedure TMSSQL.ClearSQL;
 begin
-    StrSQL:='';
-    LastErrorMsg:='';
-    RowsAffected:=0;
+    FStrSQL:='';
+    FLastErrorMsg:='';
+    FRowsAffected:=0;
 end;
 
 
@@ -160,12 +165,12 @@ begin
         try
             Query.CommandType:=CmdType;
             Query.CommandText:=StrSQL;
-            RowsAffected:=0;
-            Result:=Query.Execute(RowsAffected, 0);
+            FRowsAffected:=0;
+            Result:=Query.Execute(FRowsAffected, 0);
         except
             on E: Exception do
             begin
-                LastErrorMsg:=E.Message;
+                FLastErrorMsg:=E.Message;
                 Result:=nil;
             end;
         end;
@@ -235,13 +240,11 @@ begin
         begin
             sRows:=1;
             sCols:=1;
-            //mRows:=Grid.RowCount - 1;
         end
         else
         begin
             sRows:=0;
             sCols:=0;
-            //mRows:=Grid.RowCount;
         end;
 
     end;
@@ -467,7 +470,7 @@ begin
 
     try
         if CustFilter =  '' then
-            StrSQL:=SELECT + ColumnsToList(Columns, enQuotesOff) + FROM + TableName;
+            FStrSQL:=SELECT + ColumnsToList(Columns, enQuotesOff) + FROM + TableName;
 
         if CustFilter <> '' then
 
@@ -475,13 +478,13 @@ begin
             /// Note: it requires "WHERE" clause.
             /// </remarks>
 
-            StrSQL:=SELECT + ColumnsToList(Columns, enQuotesOff) + FROM + TableName + CustFilter;
+            FStrSQL:=SELECT + ColumnsToList(Columns, enQuotesOff) + FROM + TableName + CustFilter;
 
         DataSet:=ExecSQL;
     except
         on E: Exception do
         begin
-            MainForm.LogText.Log(MainForm.EventLogPath, 'SQL: [OpenTable] Error occured: ' + E.Message);
+            //MainForm.LogText.Log(MainForm.EventLogPath, 'SQL: [OpenTable] Error occured: ' + E.Message);
             Result:=False;
         end;
     end;
@@ -515,14 +518,14 @@ begin
 
             if (not(string.IsNullOrEmpty(Values.Text))) and ( (ExtSourceGrid = nil) and (Pointer(ExtSourceArray) = nil) ) then
             begin
-                StrSQL:=INSERT +
+                FStrSQL:=INSERT +
                           TableName + SPACE + BracketStr(ColumnsToList(Columns, enQuotesOff), brRound) +
                         VAL +
                           BracketStr(ColumnsToList(Values, enQuotesOn), brRound);
             end;
 
-            if (ExtSourceGrid = nil)  and (ExtSourceArray <> nil) then StrSQL:=ToSqlInsert(ExtSourceArray, nil, TableName, ColumnsToList(Columns, enQuotesOff), HeaderPresent);
-            if (ExtSourceGrid <> nil) and (ExtSourceArray = nil)  then StrSQL:=ToSqlInsert(nil, ExtSourceGrid, TableName, ColumnsToList(Columns, enQuotesOff), HeaderPresent);
+            if (ExtSourceGrid = nil)  and (ExtSourceArray <> nil) then FStrSQL:=ToSqlInsert(ExtSourceArray, nil, TableName, ColumnsToList(Columns, enQuotesOff), HeaderPresent);
+            if (ExtSourceGrid <> nil) and (ExtSourceArray = nil)  then FStrSQL:=ToSqlInsert(nil, ExtSourceGrid, TableName, ColumnsToList(Columns, enQuotesOff), HeaderPresent);
 
             if TransactionType = ttExplicit then
             begin
@@ -534,20 +537,18 @@ begin
                 Transact:=StringReplace(Transact, '{ComplexInput}', SPACE,  [rfReplaceAll]);
                 Transact:=StringReplace(Transact, '{Begin}',        SPACE,  [rfReplaceAll]);
                 Transact:=StringReplace(Transact, '{End}',          SPACE,  [rfReplaceAll]);
-                StrSQL:=Transact;
+                FStrSQL:=Transact;
             end;
 
             ExecSQL;
-            if string.IsNullOrEmpty(LastErrorMsg) then Result:=True
-                else
-                    MainForm.LogText.Log(MainForm.EventLogPath, 'SQL: [InsertInto] Error occured: ' + LastErrorMsg);
+            if string.IsNullOrEmpty(LastErrorMsg) then Result:=True;
 
         end;
 
     except
         on E: Exception do
         begin
-            MainForm.LogText.Log(MainForm.EventLogPath, 'SQL: [InsertInto] Error occured: ' + E.Message);
+            //MainForm.LogText.Log(MainForm.EventLogPath, 'SQL: [InsertInto] Error occured: ' + E.Message);
             Result:=False;
         end;
     end;
@@ -651,7 +652,7 @@ begin
             Ends:=_END
         end;
 
-        StrSQL:=Temp;
+        FStrSQL:=Temp;
 
         if TransactionType = ttExplicit then
         begin
@@ -663,7 +664,7 @@ begin
             Transact:=StringReplace(Transact, '{ComplexInput}', SPACE,  [rfReplaceAll]);
             Transact:=StringReplace(Transact, '{Begin}',        Begins, [rfReplaceAll]);
             Transact:=StringReplace(Transact, '{End}',          Ends,   [rfReplaceAll]);
-            StrSQL  :=Transact;
+            FStrSQL :=Transact;
         end;
 
         ExecSQL;
@@ -672,7 +673,7 @@ begin
     except
         on E: Exception do
         begin
-            MainForm.LogText.Log(MainForm.EventLogPath, 'SQL: [InsertInto] Error occured: ' + E.Message);
+            //MainForm.LogText.Log(MainForm.EventLogPath, 'SQL: [InsertInto] Error occured: ' + E.Message);
             Result:=False;
         end;
     end;
@@ -696,7 +697,7 @@ begin
             then Exit;
 
     try
-        StrSQL:=DELETE_FROM + TableName + WHERE + KeyName + EQUAL + QuotedStr(KeyValue);
+        FStrSQL:=DELETE_FROM + TableName + WHERE + KeyName + EQUAL + QuotedStr(KeyValue);
 
         if TransactionType = ttExplicit then
         begin
@@ -708,7 +709,7 @@ begin
             Transact:=StringReplace(Transact, '{ComplexInput}', SPACE,  [rfReplaceAll]);
             Transact:=StringReplace(Transact, '{Begin}',        SPACE,  [rfReplaceAll]);
             Transact:=StringReplace(Transact, '{End}',          SPACE,  [rfReplaceAll]);
-            StrSQL  :=Transact;
+            FStrSQL :=Transact;
         end;
 
         ExecSQL;
@@ -717,7 +718,7 @@ begin
     except
         on E: Exception do
         begin
-            MainForm.LogText.Log(MainForm.EventLogPath, 'SQL: [DeleteRecord] Error occured: ' + E.Message);
+            //MainForm.LogText.Log(MainForm.EventLogPath, 'SQL: [DeleteRecord] Error occured: ' + E.Message);
             Result:=False;
         end;
     end;

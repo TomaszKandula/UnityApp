@@ -38,7 +38,7 @@ uses
 type
 
     /// <summary>
-    ///     View form class with helpers for Actions window.
+    /// View form class with helpers for Actions window.
     /// </summary>
 
     TActionsForm = class(TForm)
@@ -204,24 +204,24 @@ type
         procedure btnSaveCustDetailsMouseEnter(Sender: TObject);
         procedure btnSaveCustDetailsMouseLeave(Sender: TObject);
     protected
-        var SrcColumns :  TIntigers;
+        var SrcColumns:  TIntigers;
     private
         var FHistoryGrid: boolean;
-        var FCUID       :  string;
-        var FSCUID      :  string;
-        var FBranch     :  string;
-        var FBanksHtml  :  string;
-        var FCoCode     :  string;
-        var FCustName   :  string;
-        var FCustNumber :  string;
+        var FCUID:        string;
+        var FSCUID:       string;
+        var FBranch:      string;
+        var FBanksHtml:   string;
+        var FCoCode:      string;
+        var FCustName:    string;
+        var FCustNumber:  string;
     public
-        property CUID       :  string read FCUID       write FCUID;
-        property SCUID      :  string read FSCUID      write FSCUID;
-        property Branch     :  string read FBranch     write FBranch;
-        property CoCode     :  string read FCoCode     write FCoCode;
-        property CustName   :  string read FCustName   write FCustName;
-        property CustNumber :  string read FCustNumber write FCustNumber;
-        property BanksHtml  :  string read FBanksHtml  write FBanksHtml;
+        property CUID:       string read FCUID       write FCUID;
+        property SCUID:      string read FSCUID      write FSCUID;
+        property Branch:     string read FBranch     write FBranch;
+        property CoCode:     string read FCoCode     write FCoCode;
+        property CustName:   string read FCustName   write FCustName;
+        property CustNumber: string read FCustNumber write FCustNumber;
+        property BanksHtml:  string read FBanksHtml  write FBanksHtml;
         function  GetRunningApps(SearchName: string): boolean;
         procedure GetData;
         procedure UpdateOpenItems(OpenItemsDest, OpenItemsSrc: TStringGrid);
@@ -1350,7 +1350,7 @@ begin
         maDefined,
         'Account Statement',
         '',
-        TInvoiceFilter.AllItems,
+        TInvoiceFilter.ShowAllItems,
         '',
         '',
         OpenItemsGrid,

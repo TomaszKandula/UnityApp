@@ -1,14 +1,14 @@
 
-{$I \Include\Header.inc}
+{$I .\Include\Header.inc}
 
 library Unitylib;
 
 /// <remarks>
-///     Important note about 'dll' memory managament: sharemem must be the first unit in your library's 'uses' clause & your project's (select
-///     project-view source) 'uses' clause if your 'dll' exports any procedures or functions that pass strings as parameters or function results. This
-///     applies to all strings passed to and from your 'dll--even' those that are nested in records and classes. Sharemem is the interface unit to
-///     the 'borlndmm.dll' shared memory manager, which must be deployed along with your 'dll'. To avoid using 'borlndmm.dll', pass string information
-///     using 'pchar' or 'shortstring' parameters.
+/// Important note about 'dll' memory managament: "sharemem" must be the first unit in your library's 'uses' clause & your project's (select
+/// project-view source) 'uses' clause if your 'dll' exports any procedures or functions that pass strings as parameters or function results. This
+/// applies to all strings passed to and from your 'dll--even' those that are nested in records and classes. Sharemem is the interface unit to
+/// the 'borlndmm.dll' shared memory manager, which must be deployed along with your 'dll'. To avoid using 'borlndmm.dll', pass string information
+/// using 'pchar' or 'shortstring' parameters.
 /// </remarks>
 
 uses
@@ -17,7 +17,7 @@ uses
 {$R *.res}
 
 /// <para>
-///     Definition of constants, pointers and records for SID method
+/// Definition of constants, pointers and records for SID method
 /// </para>>
 
 const
@@ -35,7 +35,7 @@ type
 
 
 /// <summary>
-///     Heper method for "ObtainTextSid" method.
+/// Helper method for "ObtainTextSid" method.
 /// </summary>
 /// <returns>Boolean.</returns>>
 
@@ -109,7 +109,7 @@ end;
 
 
 /// <summary>
-///     Helper method for "GetCurrentUserSid" method.
+/// Helper method for "GetCurrentUserSid" method.
 /// </summary>
 
 function ObtainTextSid(hToken: THandle; pszSid: PChar; var dwBufferLen: DWORD): BOOL;
@@ -166,9 +166,9 @@ end;
 
 
 /// <summary>
-///     Sid is a data structure of variable length that identifies user, group, and computer accounts.
-///     every account on a network is issued a unique sid when the account is first created.
-///     internal processes in windows refer to an account's sid rather than the account's user or group name.
+/// Sid is a data structure of variable length that identifies user, group, and computer accounts.
+/// every account on a network is issued a unique sid when the account is first created.
+/// internal processes in windows refer to an account's sid rather than the account's user or group name.
 /// </summary>
 /// <returns>String with SID.</returns>
 
@@ -206,7 +206,7 @@ end;
 
 
 /// <summary>
-///     Get current version of running Microsoft Windows.
+/// Get current version of running Microsoft Windows.
 /// </summary>
 /// <param name="mode">Cardinal, use "0" to get O/S number or "1" to get O/S name.</param>
 /// <returns>String.</returns>
@@ -279,8 +279,8 @@ end;
 
 
 /// <summary>
-///     Simple wrapper of string replace. Function in style of C printf. It requires "%s" variable in the given text string.
-///     It automatically replaces break lines marked as "\n", "\r\n" and "\r".
+/// Simple wrapper of string replace. Function in style of C printf. It requires "%s" variable in the given text string.
+/// It automatically replaces break lines marked as "\n", "\r\n" and "\r".
 /// </summary>
 /// <param name="str">Text with "%s" variable.</param>
 /// <returns>String with given "%s" replaced by "str".</returns>
@@ -301,7 +301,7 @@ end;
 
 
 /// <summary>
-///     Put text into given logfile.
+/// Put text into given logfile.
 /// </summary>
 /// <param name="FileName"></param>
 /// <param name="Text"></param>
@@ -334,7 +334,7 @@ end;
 
 
 /// <summary>
-///     Merge Sort algorithm to be used with TStringGrid component directly (not arrays).
+/// Merge Sort algorithm to be used with TStringGrid component directly (not arrays).
 /// </summary>
 /// <param name="Grid">TStringGrid component.</param>
 /// <param name="Vals">Array of integer.</param>
@@ -345,7 +345,7 @@ end;
 procedure MergeSort(Grid: TStringGrid; var Vals: array of integer; sortcol, datatype: integer; ascending: boolean); stdcall;
 
     /// <remarks>
-    ///     Temporary shared local array for integers.
+    /// Temporary shared local array for integers.
     /// </remarks>
 
     var Avals:  array of integer;
@@ -355,7 +355,7 @@ procedure MergeSort(Grid: TStringGrid; var Vals: array of integer; sortcol, data
 
 
     /// <summary>
-    ///     Helper nested method for comparision.
+    /// Helper nested method for comparision.
     /// </summary>
 
     function compare(val1, val2: string): integer;
@@ -419,7 +419,7 @@ procedure MergeSort(Grid: TStringGrid; var Vals: array of integer; sortcol, data
 
 
     /// <summary>
-    ///     Heper nested merge method.
+    /// Heper nested merge method.
     /// </summary>
 
     procedure Merge(ALo, AMid, AHi: integer);
@@ -446,9 +446,9 @@ procedure MergeSort(Grid: TStringGrid; var Vals: array of integer; sortcol, data
         k:=ALo;
 
         /// <remarks>
-        ///     Compare upper half to copied version of the lower half and move
-        ///     the appropriate value (smallest for ascending, largest for descending) into
-        ///     the lower half positions, for equals use 'avals' to preserve original order.
+        /// Compare upper half to copied version of the lower half and move
+        /// the appropriate value (smallest for ascending, largest for descending) into
+        /// the lower half positions, for equals use 'avals' to preserve original order.
         /// </remarks>
 
         // Execute moving
@@ -480,7 +480,7 @@ procedure MergeSort(Grid: TStringGrid; var Vals: array of integer; sortcol, data
 
 
     /// <summary>
-    ///     Recursively split the value into two pieces and merge them back together as we unwind the recursion.
+    /// Recursively split the value into two pieces and merge them back together as we unwind the recursion.
     /// </summary>
 
     procedure PerformMergeSort(ALo, AHi:Integer);
@@ -509,10 +509,10 @@ end;
 
 
 /// <summary>
-///     Sorting algorithm (Quick Sort with pivot established between min and max value) with associated column,
-///     that allows to put sorted values into its original positions. It is used to sort data for some other
-///     computation that requires sorted input and unsorted table. In other words: sort, compute, put computed values
-///     back into unsorted table.
+/// Sorting algorithm (Quick Sort with pivot established between min and max value) with associated column,
+/// that allows to put sorted values into its original positions. It is used to sort data for some other
+/// computation that requires sorted input and unsorted table. In other words: sort, compute, put computed values
+/// back into unsorted table.
 /// </summary>
 /// <param name="A">Array of double (sorting).</param>
 /// <param name="L">Array of integer (original position)</param>
@@ -523,9 +523,9 @@ end;
 procedure QuickSort(var A: array of double; var L: array of integer; iLo, iHi: integer; ASC: boolean);
 
 /// <remarks>
-///     'A' variable holds numerical data to be sorted. 'L' variable is associated column with original list position. The second associated column follows
-///     'a' column, but it is not sorted. It allows to assign sorted values back to original list position after computation is done. This is to be used when
-///     sorting is necessary before applaying computation and after which we must put values back to its original positions.
+/// 'A' variable holds numerical data to be sorted. 'L' variable is associated column with original list position. The second associated column follows
+/// 'a' column, but it is not sorted. It allows to assign sorted values back to original list position after computation is done. This is to be used when
+/// sorting is necessary before applaying computation and after which we must put values back to its original positions.
 /// </remarks>
 
 var
@@ -585,7 +585,7 @@ end;
 
 
 /// <summary>
-///     Returns major, minor, release and build numbers.
+/// Returns major, minor, release and build numbers.
 /// </summary>
 /// <param name="V1">Word.</param>
 /// <param name="V2">Word.</param>
@@ -629,7 +629,7 @@ end;
 
 
 /// <summary>
-///     Returns current application version.
+/// Returns current application version.
 /// </summary>
 /// <returns>String with current number (format: major.minor.release.build).</returns>
 

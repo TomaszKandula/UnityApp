@@ -93,8 +93,8 @@ type
         property  LogQueryId: string  read FLogQueryId;
         property  IsMissing:  boolean read FIsMissing write FIsMissing;
         property  FileName:   string  read FFileName  write FFileName;
-        function  InsertSingleInvoice: boolean;
-        function  InsertManyInvoices(Source: TStringGrid): boolean;
+        function  InsertMissingInvoice: boolean;
+        function  InsertCurrentInvoices(Source: TStringGrid): boolean;
         function  ValidateFields: cardinal;
         procedure ClearAll;
         procedure AddAttachement;
@@ -128,7 +128,7 @@ uses
 // ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
 
 
-function TQmsForm.InsertSingleInvoice: boolean;  // make async!!! refactor  // only missing invoice
+function TQmsForm.InsertMissingInvoice: boolean;  // make async!!! refactor  // only missing invoice
 var
     Tables: TDataTables;
     QueryUid: TGUID;
@@ -195,7 +195,7 @@ begin
         begin
             FLogQueryId:=String.Empty;
             MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: [QMS] Cannot log missing invoice.');
-            MainForm.MsgCall(mcError, 'Cannot log missing invoice to database. Please contact IT support.');
+            MainForm.MsgCall(mcError, 'Cannot log missing invoice to database. Please check the log and contact IT support.');
         end;
 
     finally
@@ -209,17 +209,28 @@ end;
 ///
 /// </summary>
 
-function TQmsForm.InsertManyInvoices(Source: TStringGrid): boolean; // make async !!! // only current invoices (one or more)
+function TQmsForm.InsertCurrentInvoices(Source: TStringGrid): boolean; // make async !!! // only current invoices (one or more)
 var
-    Tables:    TDataTables;
-    TempData:  TStringGrid;
-    QueryUid:  TGUID;
-    iCNT:      integer;
-    jCNT:      integer;
+    Tables:     TDataTables;
+    TempData:   TStringGrid;
+    QueryUid:   TGUID;
+    iCNT:       integer;
+    jCNT:       integer;
+    UserFormat: TFormatSettings;
+    DueDate:    TDate;
+    ValDate:    TDate;
+    OpenAm:     string;
+    Am:         string;
+    OpenCurAm:  string;
+    CurAm:      string;
 begin
 
     Result:=False;
     if (Source = nil) {or (Source.Selection.Bottom - Source.Selection.Top = 0)} then Exit;
+
+    {$WARN SYMBOL_PLATFORM OFF}
+    UserFormat:=TFormatSettings.Create(LOCALE_USER_DEFAULT);
+    {$WARN SYMBOL_PLATFORM ON}
 
     Tables:=TDataTables.Create(MainForm.DbConnect);
     TempData:=TStringGrid.Create(nil);
@@ -247,20 +258,29 @@ begin
         Tables.Columns.Add(TQmsLog.Stamp);
         Tables.Columns.Add(TQmsLog.QueryUid);
 
-        // Move the data from open items grid in ActionLog window into the TempGrid // check missing last row?
-        TempData.RowCount:=Source.Selection.Bottom - Source.Selection.Top;
+        // Move the data from open items grid in ActionLog window into the TempGrid
+        TempData.RowCount:=(Source.Selection.Bottom - Source.Selection.Top) + 1;
         TempData.ColCount:=Tables.Columns.Count;
+
         jCNT:=Source.Selection.Top;
         for iCNT:=0 to TempData.RowCount do
         begin
-            TempData.Cells[0,  iCNT]:=Source.Cells[Source.ReturnColumn(TOpenitems.InvoNo,    1, 1), jCNT];
-            TempData.Cells[1,  iCNT]:=Source.Cells[Source.ReturnColumn(TOpenitems.OpenAm,    1, 1), jCNT];
-            TempData.Cells[2,  iCNT]:=Source.Cells[Source.ReturnColumn(TOpenitems.Am,        1, 1), jCNT];
-            TempData.Cells[3,  iCNT]:=Source.Cells[Source.ReturnColumn(TOpenitems.OpenCurAm, 1, 1), jCNT];
-            TempData.Cells[4,  iCNT]:=Source.Cells[Source.ReturnColumn(TOpenitems.CurAm,     1, 1), jCNT];
+
+            DueDate:=StrToDate(Source.Cells[Source.ReturnColumn(TOpenitems.DueDt, 1, 1), jCNT], UserFormat);
+            ValDate:=StrToDate(Source.Cells[Source.ReturnColumn(TOpenitems.ValDt, 1, 1), jCNT], UserFormat);
+            OpenAm:=Source.Cells[Source.ReturnColumn(TOpenitems.OpenAm, 1, 1), jCNT];
+            Am:=Source.Cells[Source.ReturnColumn(TOpenitems.Am, 1, 1), jCNT];
+            OpenCurAm:=Source.Cells[Source.ReturnColumn(TOpenitems.OpenCurAm, 1, 1), jCNT];
+            CurAm:=Source.Cells[Source.ReturnColumn(TOpenitems.CurAm, 1, 1), jCNT];
+
+            TempData.Cells[0,  iCNT]:=Source.Cells[Source.ReturnColumn(TOpenitems.InvoNo, 1, 1), jCNT];
+            TempData.Cells[1,  iCNT]:=StringReplace(OpenAm, ',', '.', [rfReplaceAll]);
+            TempData.Cells[2,  iCNT]:=StringReplace(Am, ',', '.', [rfReplaceAll]);
+            TempData.Cells[3,  iCNT]:=StringReplace(OpenCurAm, ',', '.', [rfReplaceAll]);
+            TempData.Cells[4,  iCNT]:=StringReplace(CurAm, ',', '.', [rfReplaceAll]);
             TempData.Cells[5,  iCNT]:=ReturnCurrencyId(Source.Cells[Source.ReturnColumn(TOpenitems.ISO, 1, 1), jCNT]).ToString;
-            TempData.Cells[6,  iCNT]:=Source.Cells[Source.ReturnColumn(TOpenitems.DueDt,     1, 1), jCNT];
-            TempData.Cells[7,  iCNT]:=Source.Cells[Source.ReturnColumn(TOpenitems.ValDt,     1, 1), jCNT];
+            TempData.Cells[6,  iCNT]:=DateToStr(DueDate, FormatSettings);
+            TempData.Cells[7,  iCNT]:=DateToStr(ValDate, FormatSettings);
             TempData.Cells[8,  iCNT]:=EditLogType.Text;
             TempData.Cells[9,  iCNT]:=ReturnQueryReasonId(EditQueryReason.Text).ToString;
             TempData.Cells[10, iCNT]:=QueryDesc.Text;
@@ -281,14 +301,13 @@ begin
             MainForm.MsgCall(mcInfo, 'Provided information has been logged successfully.');
             Result:=True;
             FLogQueryId:=QueryUid.ToString;
-            ClearAll;
             Close;
         end
         else
         begin
             FLogQueryId:=String.Empty;
-            MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: [QMS] Cannot log missing invoice(s).');
-            MainForm.MsgCall(mcError, 'Cannot log missing invoice(s) to database. Please contact IT support.');
+            MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: [QMS] Cannot log current invoice(s).');
+            MainForm.MsgCall(mcError, 'Cannot log current invoice(s) to database. Please check the log and contact IT support.');
         end;
     finally
         Tables.Free;
@@ -463,10 +482,12 @@ begin
 
         Mail.MailBody:='New query has been logged by ' +
                        UpperCase(MainForm.WinUserName) +
-                       ' with comment: ' + QueryDesc.Text +
+                       ' with comment: ' + QueryDesc.Lines.Text +
                        '. Query reason: ' + EditQueryReason.Text +
                        '. Query UID: ' +
                        LogQueryId + '.';
+
+        Mail.Attachments.Add(FileName);
         Result:=Mail.SendNow;
 
     finally
@@ -482,13 +503,9 @@ end;
 // ------------------------------------------------------------------------------------------------------------------------------------------------- STARTUP //
 
 
-/// <summary>
-///
-/// </summary>
-
 procedure TQmsForm.FormCreate(Sender: TObject);
 begin
-    //
+    // Do nothing
 end;
 
 
@@ -507,11 +524,15 @@ begin
     if IsMissing then
     begin
         MissingInvoiceBox.Enabled:=True;
+        MissingInvoiceBox.Visible:=True;
+        QmsForm.Height:=680;
         StatusLabel.Caption:='Log missing invoice with status:';
     end
     else
     begin
         MissingInvoiceBox.Enabled:=False;
+        MissingInvoiceBox.Visible:=False;
+        QmsForm.Height:=340;
         StatusLabel.Caption:='Log selected invoice(s) with status:';
     end;
 
@@ -640,11 +661,12 @@ begin
     Screen.Cursor:=crHourGlass;
 
     if IsMissing then
-        if InsertSingleInvoice then SendNotification(LbuEmailAddress.Text);
+        if InsertMissingInvoice then SendNotification(LbuEmailAddress.Text);
 
     if not(IsMissing) then
-        if InsertManyInvoices(ActionsForm.OpenItemsGrid) then SendNotification(LbuEmailAddress.Text);
+        if InsertCurrentInvoices(ActionsForm.OpenItemsGrid) then SendNotification(LbuEmailAddress.Text);
 
+    ClearAll;
     Screen.Cursor:=crDefault;
 
 end;

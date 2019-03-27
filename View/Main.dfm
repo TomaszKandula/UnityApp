@@ -1194,7 +1194,7 @@ object MainForm: TMainForm
     Margins.Top = 0
     Margins.Right = 10
     Margins.Bottom = 0
-    ActivePage = TabSheet5
+    ActivePage = TabSheet1
     Align = alClient
     DoubleBuffered = True
     Font.Charset = DEFAULT_CHARSET
@@ -6560,6 +6560,10 @@ object MainForm: TMainForm
       Caption = 'ADDRESS BOOK'
       Highlighted = True
       ImageIndex = 2
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Header3: TPanel
         Left = 0
         Top = 0
@@ -11838,6 +11842,10 @@ object MainForm: TMainForm
       Caption = 'QUERIES'
       ImageIndex = 8
       OnShow = TabSheet5Show
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object PanelFSC: TPanel
         AlignWithMargins = True
         Left = 17

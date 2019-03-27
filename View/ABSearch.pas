@@ -1,5 +1,5 @@
 
-{$I \Include\Header.inc}
+{$I .\Include\Header.inc}
 
 unit ABSearch;
 

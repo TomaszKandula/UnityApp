@@ -12,6 +12,9 @@
         <Projects Include="UnityReader.dproj">
             <Dependencies/>
         </Projects>
+        <Projects Include="UnityFunctions.dproj">
+            <Dependencies/>
+        </Projects>
     </ItemGroup>
     <ProjectExtensions>
         <Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -47,14 +50,23 @@
     <Target Name="UnityReader:Make">
         <MSBuild Projects="UnityReader.dproj" Targets="Make"/>
     </Target>
+    <Target Name="UnityFunctions">
+        <MSBuild Projects="UnityFunctions.dproj"/>
+    </Target>
+    <Target Name="UnityFunctions:Clean">
+        <MSBuild Projects="UnityFunctions.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="UnityFunctions:Make">
+        <MSBuild Projects="UnityFunctions.dproj" Targets="Make"/>
+    </Target>
     <Target Name="Build">
-        <CallTarget Targets="Unity;Unitylib;UnityReader"/>
+        <CallTarget Targets="Unity;Unitylib;UnityReader;UnityFunctions"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="Unity:Clean;Unitylib:Clean;UnityReader:Clean"/>
+        <CallTarget Targets="Unity:Clean;Unitylib:Clean;UnityReader:Clean;UnityFunctions:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="Unity:Make;Unitylib:Make;UnityReader:Make"/>
+        <CallTarget Targets="Unity:Make;Unitylib:Make;UnityReader:Make;UnityFunctions:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>

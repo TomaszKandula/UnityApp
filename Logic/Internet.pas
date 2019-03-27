@@ -92,22 +92,22 @@ begin
 
                     // OK
                     200:
-                        begin
-                            IsFinished:=True;
-                        end;
+                    begin
+                        IsFinished:=True;
+                    end;
 
                     // Found, redirect
                     302:
-                        begin
-                            Http.Open(ncsiGet, Http.GetResponseHeader('Location'), False);
-                        end;
+                    begin
+                        Http.Open(ncsiGet, Http.GetResponseHeader('Location'), False);
+                    end;
 
                     // Call original URL and send credentials
                     401:
-                        begin
-                            Http.Open(Mode, CallUrl, False);
-                            Http.SetAutoLogonPolicy(WINHTTP_AUTOLOGON_SECURITY_LEVEL_MEDIUM);
-                        end;
+                    begin
+                        Http.Open(Mode, CallUrl, False);
+                        Http.SetAutoLogonPolicy(WINHTTP_AUTOLOGON_SECURITY_LEVEL_MEDIUM);
+                    end;
 
                     // Any other response code
                     else

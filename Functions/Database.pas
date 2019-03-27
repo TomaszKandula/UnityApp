@@ -3,14 +3,11 @@
 
 unit Database;
 
+
 interface
 
+
 uses
-    Main,
-    Forms,
-    Windows,
-    Messages,
-    Settings,
     ADODB,
     Classes,
     SysUtils,
@@ -26,27 +23,30 @@ type
     TDataBase = class
     {$TYPEINFO ON}
     strict private
-        var ODBC_Driver    : string;
-        var OLEDB_Provider : string;
-        var OLEDB_PSI      : string;
-        var Common_MARS    : string;
-        var Common_TSC     : string;
-        var Common_Encrypt : string;
-        var Common_Server  : string;
+        var ODBC_Driver:     string;
+        var OLEDB_Provider:  string;
+        var OLEDB_PSI:       string;
+        var Common_MARS:     string;
+        var Common_TSC:      string;
+        var Common_Encrypt:  string;
+        var Common_Server:   string;
         var Common_Database: string;
         var Common_UserName: string;
         var Common_Password: string;
-        var Interval       : integer;
+        var Interval:        integer;
     private
-        var DBConnStr      : string;
-        var CmdTimeout     : integer;
-        var ConTimeout     : Integer;
-    published
-        /// <param name="ShowConnStr">
-        /// Boolean. Set to true if you want to display connection string in the event log.
-        /// </param>
-        constructor Create(ShowConnStr: boolean);
-        procedure   InitializeConnection(idThd: integer; ErrorShow: boolean; var ActiveConnection: TADOConnection);
+        var FDBConnStr:      string;
+        var FCmdTimeout:     integer;
+        var FConTimeout:     integer;
+        var FMsgConnStr:     string;
+        var FMsgInitStatus:  string;
+        var FMsgConnCheck:   string;
+    public
+        property MsgConnStr:    string read FMsgConnStr;
+        property MsgInitStatus: string read FMsgInitStatus;
+        property MsgConnCheck:  string read FMsgConnCheck;
+        constructor Create;
+        procedure   InitializeConnection(var ActiveConnection: TADOConnection);
         function    Check: integer;
     end;
 
@@ -54,39 +54,34 @@ type
 implementation
 
 
+{$I .\Functions\Common.inc}
+
+
 // ---------------------------------------------------------------------------------------------------------------------------------------- CREATE & RELEASE //
 
 
-constructor TDataBase.Create(ShowConnStr: boolean);
+constructor TDataBase.Create;
 var
-    Settings:    ISettings;
     dbConnNoPwd: string;
-    WhichActive: string;
 begin
 
-    // Get all data
-    Settings:=TSettings.Create;
-    WhichActive    :=Settings.GetStringValue(DatabaseSetup,  'ACTIVE'            , '');
-    ODBC_Driver    :=Settings.GetStringValue(DatabaseSetup,  'ODBC_Driver'       , '');
-    OLEDB_Provider :=Settings.GetStringValue(DatabaseSetup,  'OLEDB_Provider'    , '');
-    OLEDB_PSI      :=Settings.GetStringValue(DatabaseSetup,  'OLEDB_PSI'         , '');
-    Common_MARS    :=Settings.GetStringValue(DatabaseSetup,  'COMMON_MARS'       , '');
-    Common_TSC     :=Settings.GetStringValue(DatabaseSetup,  'COMMON_TSC'        , '');
-    Common_Encrypt :=Settings.GetStringValue(DatabaseSetup,  'COMMON_Encrypt'    , '');
-    Common_Server  :=Settings.GetStringValue(DatabaseSetup,  'COMMON_Server'     , '');
-    Common_Database:=Settings.GetStringValue(DatabaseSetup,  'COMMON_Database'   , '');
-    Common_UserName:=Settings.GetStringValue(DatabaseSetup,  'COMMON_UserName'   , '');
-    Common_Password:=Settings.GetStringValue(DatabaseSetup,  'COMMON_Password'   , '');
-    CmdTimeout     :=Settings.GetIntegerValue(DatabaseSetup, 'SERVER_CMD_TIMEOUT', 15);
-    ConTimeout     :=Settings.GetIntegerValue(DatabaseSetup, 'SERVER_CON_TIMEOUT', 15);
-    Interval       :=Settings.GetIntegerValue(TimersSettings,'NET_CONNETCTION'   , 5000);
-
-    // Set template string
-    if WhichActive = dbODBC  then dbConnNoPwd:=ConStrODBC;
-    if WhichActive = dbOLEDB then dbConnNoPwd:=ConStrOLEDB;
+    // Set all data
+    OLEDB_Provider :='SQLNCLI11';
+    OLEDB_PSI      :='False';
+    Common_MARS    :='No';
+    Common_TSC     :='No';
+    Common_Encrypt :='Yes';
+    Common_Server  :='citeam.database.windows.net,1433';
+    Common_Database:='1305_UnityDB';
+    Common_UserName:='unityaccess';
+    Common_Password:='Unity1984';
+    FCmdTimeout    :=15;
+    FConTimeout    :=15;
+    Interval       :=5000;
 
     // Replace tags for retrieved data (it ignores tags that are missing)
     // Passwordless connection string
+    dbConnNoPwd:=ConStrOLEDB;
     dbConnNoPwd:=ReplaceStr(dbConnNoPwd, '{ODBC_Driver}',      ODBC_Driver);
     dbConnNoPwd:=ReplaceStr(dbConnNoPwd, '{OLEDB_Provider}',   OLEDB_Provider);
     dbConnNoPwd:=ReplaceStr(dbConnNoPwd, '{OLEDB_PSI}',        OLEDB_PSI);
@@ -98,11 +93,8 @@ begin
     dbConnNoPwd:=ReplaceStr(dbConnNoPwd, '{Common_UserName}',  Common_UserName);
 
     // Connection string with password
-    DBConnStr:=ReplaceStr(dbConnNoPwd, '{Common_Password}', Common_Password);
-
-    // Show connection string in event log
-    if (ShowConnStr) and (DBConnStr <> '') then
-        MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Connection string built [show_no_password] = ' + dbConnNoPwd);
+    FDBConnStr:=ReplaceStr(dbConnNoPwd, '{Common_Password}', Common_Password);
+    FMsgConnStr:='Connection string built [show_no_password] = ' + dbConnNoPwd;
 
 end;
 
@@ -120,25 +112,7 @@ end;
 /// <param name="ErrorShow">Boolean. Set to true if you want to display error message on connection failure.</param>
 /// <param name="ActiveConnection">TADOConnection. Must be established a'priori and passed as a reference.</param>
 
-procedure TDataBase.InitializeConnection(idThd: integer; ErrorShow: boolean; var ActiveConnection: TADOConnection);
-
-    // --------------------------------------------------------------------------------------------------------------------------------------- NESTED METHOD //
-
-    procedure ErrorHandler(err_class: string; err_msg: string; should_quit: boolean; err_wnd: boolean);
-    begin
-
-        MainForm.LogText.Log(MainForm.EventLogPath, ERR_LOGTEXT + '[' + err_class + '] ' + err_msg + ' (' + IntToStr(ExitCode) + ').');
-
-        if err_wnd then
-            Application.MessageBox(PChar(ERR_MESSAGE), PChar(MainForm.CAPTION), MB_OK + MB_ICONWARNING);
-
-        if should_quit then
-            Application.Terminate;
-
-    end;
-
-// ---------------------------------------------------------------------------------------------------------------------------------------------- MAIN BLOCK //
-
+procedure TDataBase.InitializeConnection(var ActiveConnection: TADOConnection);
 begin
 
     if not (ActiveConnection = nil)
@@ -147,46 +121,36 @@ begin
     try
 
         // Connection settings
-        ActiveConnection.ConnectionString :=DBConnStr;
-        ActiveConnection.ConnectionTimeout:=ConTimeout;
-        ActiveConnection.CommandTimeout   :=CmdTimeout;
+        ActiveConnection.ConnectionString :=FDBConnStr;
+        ActiveConnection.ConnectionTimeout:=FConTimeout;
+        ActiveConnection.CommandTimeout   :=FCmdTimeout;
 
         /// <remarks>
         /// The connection is formed synchronously.
         /// </remarks>
 
         ActiveConnection.ConnectOptions:=coConnectUnspecified;
-
         ActiveConnection.KeepConnection:=True;
         ActiveConnection.LoginPrompt   :=False;
         ActiveConnection.Mode          :=cmReadWrite;
 
         /// <seealso cref="https://docs.microsoft.com/en-us/sql/ado/guide/data/the-significance-of-cursor-location"/>
-
         ActiveConnection.CursorLocation:=clUseClient;
 
         /// <seealso cref="https://technet.microsoft.com/en-us/library/ms189122(v=sql.105).aspx"/>
-
         ActiveConnection.IsolationLevel:=ilCursorStability;
 
         // Connect to given server
         try
             ActiveConnection.Connected:=True;
-            MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Server connection has been established successfully.');
+            FMsgInitStatus:='Server connection has been established successfully.';
         except
             on E: Exception do
-                ErrorHandler(E.ClassName, E.Message, False, ErrorShow);
+                FMsgInitStatus:=E.ClassName + ': ' + E.Message + ' (' + IntToStr(ExitCode) + ').';
         end;
 
     finally
-
-        // Check server connection on regular basis
-        if not MainForm.InetTimer.Enabled then
-        begin
-            MainForm.InetTimer.Interval:=Interval;
-            MainForm.InetTimer.Enabled:=True;
-        end;
-
+        //
     end;
 
 end;
@@ -216,9 +180,9 @@ begin
     ConCheck:=TADOConnection.Create(nil);
 
     // Assign parameters
-    ConCheck.ConnectionString :=DBConnStr;
-    ConCheck.ConnectionTimeout:=ConTimeout;
-    ConCheck.CommandTimeout   :=CmdTimeout;
+    ConCheck.ConnectionString :=FDBConnStr;
+    ConCheck.ConnectionTimeout:=FConTimeout;
+    ConCheck.CommandTimeout   :=FCmdTimeout;
     ConCheck.KeepConnection   :=False;
     ConCheck.LoginPrompt      :=False;
     ConCheck.Mode             :=cmRead;
@@ -244,12 +208,12 @@ begin
 
         if ConCheck.Connected then
         begin
-            MainForm.ExecMessage(False, conOK, strNULL);
+            FMsgConnCheck:='Connection is OK!';
             ConCheck.Close;
         end
         else
         begin
-            MainForm.ExecMessage(False, conERROR, strNULL);
+            FMsgConnCheck:='Connection has failed!';
         end;
 
         ConCheck.Free;
@@ -259,3 +223,4 @@ end;
 
 
 end.
+

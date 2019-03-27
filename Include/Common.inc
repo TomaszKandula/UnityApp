@@ -75,7 +75,7 @@ const
     GridImgFile :  string    = 'Unity.img';        // Application custom image(s)
     ReleaseFile :  string    = 'Release.zip';      // Release package
     ManifestFile:  string    = 'Unity.manifest';   // Manifest file on the server
-    CurrentMutex:  PWideChar = 'UNITY_10199';      // Mutex value, increase it with each release*
+    CurrentMutex:  PWideChar = 'UNITY_10220';      // Mutex value, increase it with each release*
 
     // *Do not allow to run multiple instances of Unity due to lack of sessions
 
@@ -538,6 +538,7 @@ const
                      '  <th class="col5-h">Amount:</th>'      + #13#10 +
                      '  <th class="col6-h">O/S Amount:</th>'  + #13#10 +
                      '  <th class="col7">Status:</th>'        + #13#10 +
+                     '  <th class="col8">Text:</th>'          + #13#10 +
                      '</tr>'                                  + #13#10 +
                      '  <!-- ROWS WITH DATA -->'              + #13#10 +
                      '{ROWS}'                                 + #13#10 +
@@ -551,6 +552,7 @@ const
                    '  <td class="col5">{INV_AMT}</td>'        + #13#10 +
                    '  <td class="col6">{INV_OSA}</td>'        + #13#10 +
                    '  <td class="col7">{INV_CRL}</td>'        + #13#10 +
+                   '  <td class="col8">{INV_TXT}</td>'        + #13#10 +
                    '</tr>'                                    + #13#10;
 
 

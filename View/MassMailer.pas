@@ -193,7 +193,7 @@ begin
     PanelSubject.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
     PanelMessage.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
 
-    ValBeginDate.Caption:='';
+    ValBeginDate.Caption:='2010-01-01';
     ValEndDate.Caption:='';
 
 end;
@@ -400,10 +400,10 @@ begin
             Exit;
 
     // Filtering options
-    InvFilter:=TInvoiceFilter.AllItems;
-    if cbShowAll.Checked     then InvFilter:=TInvoiceFilter.AllItems;
-    if cbOverdueOnly.Checked then InvFilter:=TInvoiceFilter.OvdOnly;
-    if cbNonOverdue.Checked  then InvFilter:=TInvoiceFilter.NonOvd;
+    InvFilter:=TInvoiceFilter.ShowAllItems;
+    if cbShowAll.Checked     then InvFilter:=TInvoiceFilter.ShowAllItems;
+    if cbOverdueOnly.Checked then InvFilter:=TInvoiceFilter.ReminderOvd;
+    if cbNonOverdue.Checked  then InvFilter:=TInvoiceFilter.ReminderNonOvd;
 
     // Get item count for sendable emails
     for iCNT:=0 to CustomerList.Items.Count - 1 do

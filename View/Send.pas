@@ -1,5 +1,5 @@
 
-{$I \Include\Header.inc}
+{$I .\Include\Header.inc}
 
 unit Send;
 
@@ -20,8 +20,9 @@ uses
     StdCtrls,
     Buttons,
     ExtCtrls,
+    Vcl.Imaging.pngimage,
     InterposerClasses,
-    CustomTypes, Vcl.Imaging.pngimage;
+    CustomTypes;
 
 
 type
@@ -131,10 +132,10 @@ begin
     if MainForm.MsgCall(mcQuestion2, 'Are you absolutely sure you want to send it, right now?') = IDNO then
         Exit;
 
-    InvFilter:=TInvoiceFilter.AllItems;
-    if cbShowAll.Checked     then InvFilter:=TInvoiceFilter.AllItems;
-    if cbOverdueOnly.Checked then InvFilter:=TInvoiceFilter.OvdOnly;
-    if cbNonOverdue.Checked  then InvFilter:=TInvoiceFilter.NonOvd;
+    InvFilter:=TInvoiceFilter.ShowAllItems;
+    if cbShowAll.Checked     then InvFilter:=TInvoiceFilter.ShowAllItems;
+    if cbOverdueOnly.Checked then InvFilter:=TInvoiceFilter.ReminderOvd;
+    if cbNonOverdue.Checked  then InvFilter:=TInvoiceFilter.ReminderNonOvd;
 
     TempStr:=StringReplace(Text_Message.Text, CRLF, HTML_BR, [rfReplaceAll]);
 
@@ -177,7 +178,7 @@ begin
     cbShowAll.Checked:=True;
     cbOverdueOnly.Checked:=False;
     cbNonOverdue.Checked:=False;
-    ValBeginDate.Caption:='';
+    ValBeginDate.Caption:='2010-01-01';
     ValEndDate.Caption:='';
 end;
 

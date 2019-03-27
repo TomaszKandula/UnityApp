@@ -5,7 +5,7 @@ program Unity;
 
 /// <remarks>
 /// Large address aware - allow 32-bit program to use more than 2GB (up to 4GB). If still not enough, then compile as a 64-bit.
-/// </remarks>>
+/// </remarks>
 
 {$SetPEFlags $0020}
 
@@ -279,7 +279,6 @@ end;
 function GetManifestValue(Key: string; Source: string): string;
 
     // Nested method
-
     function GetValue(Key: string): string;
     var
         iCNT:     integer;
@@ -810,7 +809,7 @@ begin
     /// </remarks>
 
     Application.CreateForm(TMainForm, MainForm);
-  MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] Initialization methods executed within main thread, ''MainForm'' has been created. Main process thread ID = ' + IntToStr(MainThreadID) + '.');
+    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] Initialization methods executed within main thread, ''MainForm'' has been created. Main process thread ID = ' + IntToStr(MainThreadID) + '.');
 
     /// <summary>
     /// Load all other forms and execute initialization methods. Similarly to MainForm, visible parameter of the forms must be set to false

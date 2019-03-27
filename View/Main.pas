@@ -1252,6 +1252,7 @@ begin
     OpenItemsRefs.Ad3Col      :=SourceGrid.ReturnColumn(TOpenitems.Ad3,       1, 1);
     OpenItemsRefs.PnoCol      :=SourceGrid.ReturnColumn(TOpenitems.Pno,       1, 1);
     OpenItemsRefs.PAreaCol    :=SourceGrid.ReturnColumn(TOpenitems.PArea,     1, 1);
+    OpenItemsRefs.Text        :=SourceGrid.ReturnColumn(TOpenitems.Txt,       1, 1);
 end;
 
 
@@ -1363,21 +1364,18 @@ end;
 
 
 /// <summary>
-/// Wrapper for calling moda or modless window.
+/// Wrapper for calling modal or modless window.
 /// </summary>
 
 function TMainForm.WndCall(WinForm: TForm; Mode: integer): integer;
 begin
     Result:=0;
-
     // Setup popups
     WinForm.PopupMode  :=pmAuto;
     WinForm.PopupParent:=MainForm;
-
     // Call window
     if Mode = stModal    then Result:=WinForm.ShowModal;
     if Mode = stModeless then WinForm.Show;
-
 end;
 
 
@@ -5165,7 +5163,11 @@ begin
 
     // <CTRL> + <C>
     if (Key = 67) and (Shift = [ssCtrl]) then
+    begin
         sgAgeView.CopyCutPaste(adCopy);
+        sgAgeView.UpdatedRowsHolder:=nil;
+        sgAgeView.RecordRowsAffected;
+    end;
 
     // Allow editing only free columns
     if
@@ -5188,7 +5190,6 @@ begin
     begin
 
         sgAgeView.CopyCutPaste(adPaste);
-        sgAgeView.RecordRowsAffected;
 
         if sgAgeView.UpdatedRowsHolder = nil then Exit;
         Screen.Cursor:=crHourGlass;
@@ -5327,6 +5328,102 @@ begin
     begin
 
         Key:=0;
+
+        // Mass delete (all selected range)
+        if (sgAgeView.Selection.Bottom - sgAgeView.Selection.Top) > 0 then
+        begin
+
+            Screen.Cursor:=crHourGlass;
+
+            TThread.CreateAnonymousThread(procedure
+            var
+                iCNT: integer;
+                Data: TDataTables;
+            begin
+
+                Data:=TDataTables.Create(DbConnect);
+                try
+
+                    Data.CmdType:=cmdText;
+                    for iCNT:=sgAgeView.Selection.Top to sgAgeView.Selection.Bottom do
+                    begin
+
+                        if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneralComment.Free1, 1, 1) then
+                        begin
+                            Data.StrSQL:=
+                                EXECUTE +
+                                    UpsertFreeColumns +
+                                SPACE +
+                                    QuotedStr(WinUserName.ToUpper) +
+                                COMMA +
+                                    QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), iCNT]) +
+                                COMMA +
+                                    QuotedStr(String.Empty) +
+                                COMMA +
+                                    QuotedStr(strNULL) +
+                                COMMA +
+                                    QuotedStr(strNULL) +
+                                COMMA +
+                                    QuotedStr('1');
+                            sgAgeView.Cells[sgAgeView.ReturnColumn(TGeneralComment.Free1, 1, 1), iCNT]:='';
+                        end;
+
+                        if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneralComment.Free2, 1, 1) then
+                        begin
+                            Data.StrSQL:=
+                                EXECUTE +
+                                    UpsertFreeColumns +
+                                SPACE +
+                                    QuotedStr(WinUserName.ToUpper) +
+                                COMMA +
+                                    QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), iCNT]) +
+                                COMMA +
+                                    QuotedStr(strNULL) +
+                                COMMA +
+                                    QuotedStr(String.Empty) +
+                                COMMA +
+                                    QuotedStr(strNULL) +
+                                COMMA +
+                                    QuotedStr('2');
+                            sgAgeView.Cells[sgAgeView.ReturnColumn(TGeneralComment.Free2, 1, 1), iCNT]:='';
+                        end;
+
+                        if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneralComment.Free3, 1, 1) then
+                        begin
+                            Data.StrSQL:=
+                                EXECUTE +
+                                    UpsertFreeColumns +
+                                SPACE +
+                                    QuotedStr(WinUserName.ToUpper) +
+                                COMMA +
+                                    QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), iCNT]) +
+                                COMMA +
+                                    QuotedStr(strNULL) +
+                                COMMA +
+                                    QuotedStr(strNULL) +
+                                COMMA +
+                                    QuotedStr(String.Empty) +
+                                COMMA +
+                                    QuotedStr('3');
+                            sgAgeView.Cells[sgAgeView.ReturnColumn(TGeneralComment.Free3, 1, 1), iCNT]:='';
+                        end;
+
+                        Data.ExecSQL;
+
+                    end;
+
+                finally
+                    Data.Free;
+                end;
+
+            end).Start;
+
+            Screen.Cursor:=crDefault;
+            Exit;
+
+        end;
+
+        // Single cell detele
 
         // Free 1
         if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneralComment.Free1, 1, 1) then

@@ -4,7 +4,7 @@ object QmsForm: TQmsForm
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'Unity'
-  ClientHeight = 650
+  ClientHeight = 651
   ClientWidth = 551
   Color = 15527148
   Font.Charset = DEFAULT_CHARSET
@@ -13,7 +13,7 @@ object QmsForm: TQmsForm
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
-  Position = poMainFormCenter
+  Position = poOwnerFormCenter
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnShow = FormShow
@@ -22,7 +22,7 @@ object QmsForm: TQmsForm
   object BottomPanel: TPanel
     AlignWithMargins = True
     Left = 0
-    Top = 601
+    Top = 602
     Width = 551
     Height = 49
     Margins.Left = 0
@@ -114,7 +114,7 @@ object QmsForm: TQmsForm
     Left = 10
     Top = 10
     Width = 531
-    Height = 581
+    Height = 582
     Margins.Left = 10
     Margins.Top = 10
     Margins.Right = 10
@@ -129,7 +129,7 @@ object QmsForm: TQmsForm
       Left = 10
       Top = 10
       Width = 511
-      Height = 561
+      Height = 562
       Margins.Left = 10
       Margins.Top = 10
       Margins.Right = 10
@@ -142,7 +142,7 @@ object QmsForm: TQmsForm
         Left = 22
         Top = 35
         Width = 467
-        Height = 334
+        Height = 335
         Margins.Left = 20
         Margins.Top = 20
         Margins.Right = 20
@@ -536,7 +536,7 @@ object QmsForm: TQmsForm
       object StatusPanel: TPanel
         AlignWithMargins = True
         Left = 12
-        Top = 379
+        Top = 380
         Width = 487
         Height = 170
         Margins.Left = 10

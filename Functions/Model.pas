@@ -8,17 +8,11 @@ interface
 
 
 uses
-    //Main,
-    SQL,
-    Windows,
-    Classes,
-    SysUtils,
-    StrUtils,
-    ADODB;
+    SQL;
 
     /// <remarks>
-    ///     Because we use ADODB and no other ORM, we encapsulate columns name (fields) under table name (class), so we have one point of reference
-    ///     and yet we can use it to build our own SQL statement(s), although templates are preferred over manual SQL.
+    /// Because we use ADODB and no other ORM, we encapsulate columns name (fields) under table name (class), so we have one point of reference
+    /// and yet we can use it to build our own SQL statement(s), although templates are preferred over manual SQL.
     /// </remarks>
 
 type
