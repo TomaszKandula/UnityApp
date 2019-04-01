@@ -1085,19 +1085,19 @@ begin
 
                 if Book.RowsAffected > 0 then
                 begin
-                    MainForm.ExecMessage(False, 28, 'OFF');
+                    MainForm.ExecMessage(False, scBusy, scHide);
                     MainForm.ExecMessage(False, mcInfo, 'Address Book has been successfully populated by selected item(s).');
                     Result:=True;
                 end
                 else
                 begin
-                    MainForm.ExecMessage(False, 28, 'OFF');
+                    MainForm.ExecMessage(False, scBusy, scHide);
                     MainForm.ExecMessage(False, mcWarn, 'Cannot update Address Book. Please contact IT support.');
                 end;
             except
                 on E: Exception do
                 begin
-                    MainForm.ExecMessage(False, 28, 'OFF');
+                    MainForm.ExecMessage(False, scBusy, scHide);
                     MainForm.ExecMessage(False, mcError, 'Cannot save selected item(s). Exception has been thrown: ' + E.Message);
                     MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Cannot write Address Book item(s) into database. Error: ' + E.Message);
                 end;

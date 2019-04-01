@@ -30,9 +30,6 @@ uses
 
 type
 
-    /// <summary>
-    ///     View form class with helpers for filter window. It is used to filter given string grid.
-    /// </summary>
 
     TFilterForm = class(TForm)
         btnFilter: TSpeedButton;
@@ -119,10 +116,6 @@ uses
 // ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
 
 
-/// <summary>
-///     Remove all fiters (reset arrays and assign 0).
-/// </summary>
-
 procedure TFilterForm.FilterClearAll;
 begin
     SetLength(FilterForm.INF7,        1, 2);
@@ -158,10 +151,6 @@ begin
 end;
 
 
-/// <summary>
-///     Check if all items are selected.
-/// </summary>
-
 procedure TFilterForm.FilterSelectCheck;
 var
     iCNT:  integer;
@@ -170,12 +159,12 @@ begin
 
     Check:=0;
 
-    // CHECK IF ITEM IS SELECTED
+    // Check if item is selected
     for iCNT:=0 to FilterList.Count - 1 do
         if FilterList.Checked[iCNT] = True then
             inc(Check);
 
-    // IF ALL SELECTED, THEN TICK
+    // If all selected, then tick
     if Check = FilterList.Count then
         cbSelectAll.Checked:=True
             else
@@ -183,10 +172,6 @@ begin
 
 end;
 
-
-/// <summary>
-///     Prepare for filtering.
-/// </summary>
 
 procedure TFilterForm.FilterPrep;
 begin
@@ -210,10 +195,6 @@ begin
     end;
 end;
 
-
-/// <summary>
-///     Update filter count.
-/// </summary>
 
 procedure TFilterForm.FilterCount(Change: integer);
 begin
@@ -261,10 +242,6 @@ begin
 
 end;
 
-
-/// <summary>
-///     Initialize filtering.
-/// </summary>
 
 procedure TFilterForm.FilterInit(var FFilter: TLists);
 var
@@ -339,10 +316,6 @@ begin
 
 end;
 
-
-/// <summary>
-///     Filter now.
-/// </summary>
 
 procedure TFilterForm.FilterNow(var FFilter: TLists);
 var
@@ -420,10 +393,6 @@ begin
 
 end;
 
-
-/// <summary>
-///     Clear given filter.
-/// </summary>
 
 procedure TFilterForm.FilterRemove(var FFilter: TLists);
 var
@@ -638,31 +607,30 @@ begin
 end;
 
 
-/// <remarks>
-///
-/// </remarks>
-
 procedure TFilterForm.FilterListClick(Sender: TObject);
 begin
 
-    if not(CheckEvent) then
-    begin
+    try
 
-        if FilterList.Checked[FilterList.ItemIndex] then
-            FilterList.Checked[FilterList.ItemIndex]:=False
-                else
-                    FilterList.Checked[FilterList.ItemIndex]:=True;
+        if not(CheckEvent) then
+        begin
 
+            if FilterList.Checked[FilterList.ItemIndex] then
+                FilterList.Checked[FilterList.ItemIndex]:=False
+                    else
+                        FilterList.Checked[FilterList.ItemIndex]:=True;
+
+        end;
+
+    except on
+        E: Exception do
+        // Nothing
     end;
 
     CheckEvent:=False;
 
 end;
 
-
-/// <summary>
-///
-/// </summary>
 
 procedure TFilterForm.FilterListClickCheck(Sender: TObject);
 begin

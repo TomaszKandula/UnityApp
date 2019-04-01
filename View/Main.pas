@@ -60,9 +60,6 @@ uses
 
 type
 
-    /// <summary>
-    /// Main form class, represents GUI/main application thread.
-    /// </summary>
 
     TMainForm = class(TForm)
         MyPages: TPageControl;
@@ -3656,10 +3653,12 @@ begin
 
 end;
 
+
 procedure TMainForm.Action_ViewOptionsClick(Sender: TObject);
 begin
 
 end;
+
 
 /// <summary>
 /// Add customer(s) to address book.
