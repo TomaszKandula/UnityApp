@@ -1213,6 +1213,10 @@ object MainForm: TMainForm
       Highlighted = True
       ImageIndex = 8
       ParentDoubleBuffered = False
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Shape: TShape
         AlignWithMargins = True
         Left = 17
@@ -2637,6 +2641,10 @@ object MainForm: TMainForm
       Caption = 'OPEN ITEMS'
       Highlighted = True
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Header2: TPanel
         Left = 0
         Top = 0
@@ -6485,6 +6493,10 @@ object MainForm: TMainForm
       Caption = 'UNIDENTIFIED'
       Highlighted = True
       ImageIndex = 7
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Header6: TPanel
         Left = 0
         Top = 0
@@ -6548,6 +6560,10 @@ object MainForm: TMainForm
       Caption = 'ADDRESS BOOK'
       Highlighted = True
       ImageIndex = 2
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Header3: TPanel
         Left = 0
         Top = 0
@@ -6815,6 +6831,10 @@ object MainForm: TMainForm
       Highlighted = True
       ImageIndex = 4
       OnShow = TabSheet4Show
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Header4: TPanel
         Left = 0
         Top = 0
@@ -6918,8 +6938,8 @@ object MainForm: TMainForm
           AlignWithMargins = True
           Left = 10
           Top = 10
-          Width = 1233
-          Height = 536
+          Width = 200
+          Height = 200
           Margins.Left = 10
           Margins.Top = 10
           Margins.Right = 10
@@ -10043,8 +10063,6 @@ object MainForm: TMainForm
           Visible = False
           ExplicitLeft = 456
           ExplicitTop = 240
-          ExplicitWidth = 200
-          ExplicitHeight = 200
         end
         object sgInvoiceTracker: TStringGrid
           AlignWithMargins = True
@@ -10096,6 +10114,10 @@ object MainForm: TMainForm
       ImageIndex = 8
       OnResize = TabSheet7Resize
       OnShow = TabSheet7Show
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Header7: TPanel
         Left = 0
         Top = 0
@@ -10201,6 +10223,10 @@ object MainForm: TMainForm
         TabOrder = 1
         object Page1: TTabSheet
           Caption = 'Companies'
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object PanelCoCodes: TPanel
             AlignWithMargins = True
             Left = 17
@@ -10251,6 +10277,10 @@ object MainForm: TMainForm
         object Page2: TTabSheet
           Caption = 'Payment Terms'
           ImageIndex = 1
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object PanelPmtTerms: TPanel
             AlignWithMargins = True
             Left = 17
@@ -10301,6 +10331,10 @@ object MainForm: TMainForm
         object Page10: TTabSheet
           Caption = 'Control Status'
           ImageIndex = 9
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object PanelControlStatus: TPanel
             AlignWithMargins = True
             Left = 17
@@ -10353,6 +10387,10 @@ object MainForm: TMainForm
         object Page3: TTabSheet
           Caption = 'Paid Info'
           ImageIndex = 2
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object PanelPaidInfo: TPanel
             AlignWithMargins = True
             Left = 17
@@ -10405,6 +10443,10 @@ object MainForm: TMainForm
         object Page7: TTabSheet
           Caption = 'Person Responsible'
           ImageIndex = 6
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object PanelPersonResp: TPanel
             AlignWithMargins = True
             Left = 17
@@ -10455,6 +10497,10 @@ object MainForm: TMainForm
         object Page6: TTabSheet
           Caption = 'Sales Responsible'
           ImageIndex = 5
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object PanelSalesResp: TPanel
             AlignWithMargins = True
             Left = 17
@@ -10505,6 +10551,10 @@ object MainForm: TMainForm
         object Page9: TTabSheet
           Caption = 'Account Type'
           ImageIndex = 8
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object PanelAccountType: TPanel
             AlignWithMargins = True
             Left = 17
@@ -10555,6 +10605,10 @@ object MainForm: TMainForm
         object Page8: TTabSheet
           Caption = 'Customer Group'
           ImageIndex = 7
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object PanelCustomerGr: TPanel
             AlignWithMargins = True
             Left = 17
@@ -10605,6 +10659,10 @@ object MainForm: TMainForm
         object Page4: TTabSheet
           Caption = 'Person'
           ImageIndex = 3
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object PanelPerson: TPanel
             AlignWithMargins = True
             Left = 17
@@ -10657,6 +10715,10 @@ object MainForm: TMainForm
         object Page5: TTabSheet
           Caption = 'Group3'
           ImageIndex = 4
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object PanelGroup3: TPanel
             AlignWithMargins = True
             Left = 17
@@ -10711,6 +10773,10 @@ object MainForm: TMainForm
       Highlighted = True
       ImageIndex = 6
       OnShow = TabSheet8Show
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Header8: TPanel
         Left = 0
         Top = 0
@@ -11776,6 +11842,10 @@ object MainForm: TMainForm
       Caption = 'QUERIES'
       ImageIndex = 8
       OnShow = TabSheet5Show
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object PanelFSC: TPanel
         AlignWithMargins = True
         Left = 17

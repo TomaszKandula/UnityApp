@@ -8,28 +8,25 @@ interface
 
 
 uses
-    Windows,
-    Messages,
-    SysUtils,
-    Variants,
-    Classes,
-    Graphics,
-    Controls,
-    Forms,
-    Dialogs,
-    StdCtrls,
-    ExtCtrls,
-    ShellAPI,
-    IniFiles,
-    pngimage,
-    Vcl.Buttons;
+    Winapi.Windows,
+    Winapi.Messages,
+    Winapi.ShellAPI,
+    System.SysUtils,
+    System.Variants,
+    System.Classes,
+    System.IniFiles,
+    Vcl.Graphics,
+    Vcl.Controls,
+    Vcl.Forms,
+    Vcl.Dialogs,
+    Vcl.StdCtrls,
+    Vcl.ExtCtrls,
+    Vcl.Buttons,
+    Vcl.Imaging.pngimage;
 
 
 type
 
-    /// <summary>
-    ///     View form class with helpers for About window.
-    /// </summary>
 
     TAboutForm = class(TForm)
         AppMain: TShape;
@@ -82,10 +79,6 @@ type
         function Is64BitOS: Boolean;
     end;
 
-    /// <summary>
-    ///     Memory data record.
-    /// </summary>
-
     TMemoryStatusEx = packed record
         dwLength:                DWORD;
         dwMemoryLoad:            DWORD;
@@ -118,7 +111,7 @@ uses
 
 
 /// <summary>
-///     Check if machine run on a 64-bit CPU.
+/// Check if machine run on a 64-bit CPU.
 /// </summary>
 
 function TAboutForm.Is64BitOS: Boolean;
@@ -131,13 +124,12 @@ var
 begin
 
     /// <remarks>
-    ///     We can check if the operating system is 64-bit by checking whether
-    ///     we are running under wow64 (we are 32-bit code). We must check if this
-    ///     function is implemented before we call it, because some older versions
-    ///     of kernel32.dll (eg. Windows 2000) don't know about it.
+    /// We can check if the operating system is 64-bit by checking whether
+    /// we are running under wow64 (we are 32-bit code). We must check if this
+    /// function is implemented before we call it, because some older versions
+    /// of kernel32.dll (eg. Windows 2000) don't know about it.
     /// </remarks>
     /// <see cref="http://msdn.microsoft.com/en-us/library/ms684139.aspx"/>
-
     Result:=false;
     hKernel32:=LoadLibrary('kernel32.dll');
 
@@ -163,7 +155,7 @@ end;
 
 
 /// <summary>
-///     Check if machine have a memory above 4GB.
+/// Check if machine have a memory above 4GB.
 /// </summary>
 
 function GlobalMemoryStatusEx(var lpBuffer: TMemoryStatusEx): BOOL; stdcall;
@@ -190,7 +182,7 @@ end;
 
 
 /// <summary>
-///     Get data from application settings file and licence file.
+/// Get data from application settings file and licence file.
 /// </summary>
 
 procedure TAboutForm.FormCreate(Sender: TObject);
@@ -218,7 +210,7 @@ end;
 
 
 /// <summary>
-///     Update memory information on window show.
+/// Update memory information on window show.
 /// </summary>
 
 procedure TAboutForm.FormShow(Sender: TObject);

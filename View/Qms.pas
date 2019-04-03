@@ -25,9 +25,6 @@ uses
 
 type
 
-    /// <summary>
-    ///
-    /// </summary>
 
     TQmsForm = class(TForm)
         MainFrame: TGroupBox;
@@ -128,7 +125,7 @@ uses
 // ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
 
 
-function TQmsForm.InsertMissingInvoice: boolean;  // make async!!! refactor  // only missing invoice
+function TQmsForm.InsertMissingInvoice: boolean;  {refactor / async}
 var
     Tables: TDataTables;
     QueryUid: TGUID;
@@ -205,11 +202,7 @@ begin
 end;
 
 
-/// <summary>
-///
-/// </summary>
-
-function TQmsForm.InsertCurrentInvoices(Source: TStringGrid): boolean; // make async !!! // only current invoices (one or more)
+function TQmsForm.InsertCurrentInvoices(Source: TStringGrid): boolean; {refactor / async}
 var
     Tables:     TDataTables;
     TempData:   TStringGrid;
@@ -219,6 +212,8 @@ var
     UserFormat: TFormatSettings;
     DueDate:    TDate;
     ValDate:    TDate;
+    DueDateStr: string;
+    ValDateStr: string;
     OpenAm:     string;
     Am:         string;
     OpenCurAm:  string;
@@ -226,7 +221,7 @@ var
 begin
 
     Result:=False;
-    if (Source = nil) {or (Source.Selection.Bottom - Source.Selection.Top = 0)} then Exit;
+    if Source = nil then Exit;
 
     {$WARN SYMBOL_PLATFORM OFF}
     UserFormat:=TFormatSettings.Create(LOCALE_USER_DEFAULT);
@@ -266,21 +261,32 @@ begin
         for iCNT:=0 to TempData.RowCount do
         begin
 
-            DueDate:=StrToDate(Source.Cells[Source.ReturnColumn(TOpenitems.DueDt, 1, 1), jCNT], UserFormat);
-            ValDate:=StrToDate(Source.Cells[Source.ReturnColumn(TOpenitems.ValDt, 1, 1), jCNT], UserFormat);
-            OpenAm:=Source.Cells[Source.ReturnColumn(TOpenitems.OpenAm, 1, 1), jCNT];
-            Am:=Source.Cells[Source.ReturnColumn(TOpenitems.Am, 1, 1), jCNT];
+            // Get and convert from user format to application format accepted by MSSQL
+            DueDate   :=StrToDate(Source.Cells[Source.ReturnColumn(TOpenitems.DueDt, 1, 1), jCNT], UserFormat);
+            ValDate   :=StrToDate(Source.Cells[Source.ReturnColumn(TOpenitems.ValDt, 1, 1), jCNT], UserFormat);
+            DueDateStr:=DateToStr(DueDate, FormatSettings);
+            ValDateStr:=DateToStr(ValDate, FormatSettings);
+
+            // Get amounts
+            OpenAm   :=Source.Cells[Source.ReturnColumn(TOpenitems.OpenAm, 1, 1), jCNT];
+            Am       :=Source.Cells[Source.ReturnColumn(TOpenitems.Am, 1, 1), jCNT];
             OpenCurAm:=Source.Cells[Source.ReturnColumn(TOpenitems.OpenCurAm, 1, 1), jCNT];
-            CurAm:=Source.Cells[Source.ReturnColumn(TOpenitems.CurAm, 1, 1), jCNT];
+            CurAm    :=Source.Cells[Source.ReturnColumn(TOpenitems.CurAm, 1, 1), jCNT];
+
+            // Replace decimal separator to point required by MSSQL
+            OpenAm   :=StringReplace(OpenAm, ',', '.', [rfReplaceAll]);
+            Am       :=StringReplace(Am, ',', '.', [rfReplaceAll]);
+            OpenCurAm:=StringReplace(OpenCurAm, ',', '.', [rfReplaceAll]);
+            CurAm    :=StringReplace(CurAm, ',', '.', [rfReplaceAll]);
 
             TempData.Cells[0,  iCNT]:=Source.Cells[Source.ReturnColumn(TOpenitems.InvoNo, 1, 1), jCNT];
-            TempData.Cells[1,  iCNT]:=StringReplace(OpenAm, ',', '.', [rfReplaceAll]);
-            TempData.Cells[2,  iCNT]:=StringReplace(Am, ',', '.', [rfReplaceAll]);
-            TempData.Cells[3,  iCNT]:=StringReplace(OpenCurAm, ',', '.', [rfReplaceAll]);
-            TempData.Cells[4,  iCNT]:=StringReplace(CurAm, ',', '.', [rfReplaceAll]);
+            TempData.Cells[1,  iCNT]:=OpenAm;
+            TempData.Cells[2,  iCNT]:=Am;
+            TempData.Cells[3,  iCNT]:=OpenCurAm;
+            TempData.Cells[4,  iCNT]:=CurAm;
             TempData.Cells[5,  iCNT]:=ReturnCurrencyId(Source.Cells[Source.ReturnColumn(TOpenitems.ISO, 1, 1), jCNT]).ToString;
-            TempData.Cells[6,  iCNT]:=DateToStr(DueDate, FormatSettings);
-            TempData.Cells[7,  iCNT]:=DateToStr(ValDate, FormatSettings);
+            TempData.Cells[6,  iCNT]:=DueDateStr;
+            TempData.Cells[7,  iCNT]:=ValDateStr;
             TempData.Cells[8,  iCNT]:=EditLogType.Text;
             TempData.Cells[9,  iCNT]:=ReturnQueryReasonId(EditQueryReason.Text).ToString;
             TempData.Cells[10, iCNT]:=QueryDesc.Text;
@@ -317,10 +323,6 @@ begin
 end;
 
 
-/// <summary>
-///
-/// </summary>
-
 function TQmsForm.ValidateFields: cardinal;
 var
     Checks: integer;
@@ -347,10 +349,6 @@ begin
 end;
 
 
-/// <summary>
-///
-/// </summary>
-
 procedure TQmsForm.ClearAll;
 begin
     EditInvoiceNo.Text:='';
@@ -364,10 +362,6 @@ begin
     QueryDesc.Text:='';
 end;
 
-
-/// <summary>
-///
-/// </summary>
 
 procedure TQmsForm.AddAttachement;
 begin
@@ -386,11 +380,7 @@ begin
 end;
 
 
-/// <summary>
-///
-/// </summary>
-
-function TQmsForm.ReturnCurrencyId(ISO: string): cardinal; // make async !!!
+function TQmsForm.ReturnCurrencyId(ISO: string): cardinal; {refactor / async}
 var
     Tables: TDataTables;
 begin
@@ -416,11 +406,7 @@ begin
 end;
 
 
-/// <summary>
-///
-/// </summary>
-
-function TQmsForm.ReturnQueryReasonId(QueryReason: string): cardinal; // make async !!!
+function TQmsForm.ReturnQueryReasonId(QueryReason: string): cardinal; {refactor / async}
 var
     Tables: TDataTables;
 begin
@@ -445,11 +431,7 @@ begin
 end;
 
 
-/// <summary>
-///
-/// </summary>
-
-function TQmsForm.SendNotification(LbuEmail: string): boolean; // make async !!! refactor!!!
+function TQmsForm.SendNotification(LbuEmail: string): boolean; {refactor / async}
 var
     Mail:     TMailer;
     Settings: ISettings;
@@ -509,11 +491,13 @@ begin
 end;
 
 
-/// <summary>
-///
-/// </summary>
+procedure TQmsForm.FormDestroy(Sender: TObject);
+begin
+    // Do nothing
+end;
 
-procedure TQmsForm.FormShow(Sender: TObject); // make it async!!! // refactor!!!
+
+procedure TQmsForm.FormShow(Sender: TObject); {refactor / async}
 var
     Tables: TDataTables;
 begin
@@ -579,16 +563,6 @@ begin
 end;
 
 
-/// <summary>
-///
-/// </summary>
-
-procedure TQmsForm.FormDestroy(Sender: TObject);
-begin
-    //
-end;
-
-
 // --------------------------------------------------------------------------------------------------------------------------------------- COMPONENTS EVENTS //
 
 
@@ -601,19 +575,11 @@ end;
 // -------------------------------------------------------------------------------------------------------------------------------------------- BUTTON CALLS //
 
 
-/// <summary>
-///
-/// </summary>
-
 procedure TQmsForm.btnAddAttcahementClick(Sender: TObject);
 begin
     AddAttachement;
 end;
 
-
-/// <summary>
-///
-/// </summary>
 
 procedure TQmsForm.btnAddDueDateClick(Sender: TObject);
 begin
@@ -623,10 +589,6 @@ begin
 end;
 
 
-/// <summary>
-///
-/// </summary>
-
 procedure TQmsForm.btnAddValDateClick(Sender: TObject);
 begin
     CalendarForm.CalendarMode:=cfGetDate;
@@ -635,19 +597,11 @@ begin
 end;
 
 
-/// <summary>
-///
-/// </summary>
-
 procedure TQmsForm.btnCancelClick(Sender: TObject);
 begin
     Close;
 end;
 
-
-/// <summary>
-///
-/// </summary>
 
 procedure TQmsForm.btnLogClick(Sender: TObject);
 begin

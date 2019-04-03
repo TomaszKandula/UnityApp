@@ -8,26 +8,23 @@ interface
 
 
 uses
-    Windows,
-    Messages,
-    SysUtils,
-    Variants,
-    Classes,
-    Graphics,
-    Controls,
-    Forms,
-    Dialogs,
-    StdCtrls,
-    ExtCtrls,
-    Buttons,
+    Winapi.Windows,
+    Winapi.Messages,
+    System.SysUtils,
+    System.Variants,
+    System.Classes,
+    Vcl.Graphics,
+    Vcl.Controls,
+    Vcl.Forms,
+    Vcl.Dialogs,
+    Vcl.StdCtrls,
+    Vcl.ExtCtrls,
+    Vcl.Buttons,
     InterposerClasses;
 
 
 type
 
-    /// <summary>
-    ///     View form class with helpers for Age View string grid search/find functionality.
-    /// </summary>
 
     TSearchForm = class(TForm)
         btnSearch: TSpeedButton;
@@ -84,12 +81,10 @@ uses
 
 
 /// <summary>
-///     Perform search routine for given string (can be a number or varchar).
+/// Perform search routine for given string (can be a number or varchar).
 /// </summary>
 
 procedure TSearchForm.Search;
-
-    // Common variables
 
     var
         IsNumber:      boolean;
@@ -97,8 +92,6 @@ procedure TSearchForm.Search;
         CompareValue:  string;
         iCNT:          integer;
         SearchColumn:  integer;
-
-    // Nested methods
 
     procedure SearchPartial_Prepare;
     begin
@@ -116,7 +109,7 @@ procedure TSearchForm.Search;
             mcInfo,
             'The item has been found (' + SGrid.Cells[SearchColumn, FoundRow] + ') for search pattern "' +
             SearchString + '". ' + CRLF +
-            'However, it is hidden by the filter. Remove filtering to unhide search item.'
+            'However, it is hidden by the filter. Remove filtering to unhide this item.'
         );
 
     end;
@@ -140,14 +133,14 @@ begin
     if not (CaseSensitive.Checked) then SearchString:=UpperCase(EditSearch.Text);
     if (CaseSensitive.Checked)     then SearchString:=EditSearch.Text;
 
-    // CANNOT BE EMPTY
+    // Cannot be empty
     if (SearchString = '') or (SearchString = SPACE) then
     begin
         MainForm.MsgCall(mcWarn, 'Cannot search empty string. Please provide with customer name or customer number and try again.');
         Exit;
     end;
 
-    // CHECK IF USER PROVIDED NUMBER
+    // Check if user provided number
     IsNumber:=True;
     try
         StrToInt64(EditSearch.Text);
@@ -155,18 +148,18 @@ begin
         IsNumber:=False;
     end;
 
-    // ASSIGN PROPER COLUMN NUMBER FROM AGE VIEW
+    // Assign proper column number from age view
     if (IsNumber)     then SearchColumn:=SGrid.ReturnColumn(SColNumber, 1, 1);
     if not (IsNumber) then SearchColumn:=SGrid.ReturnColumn(SColName,   1, 1);
 
-    // SEARCH DIRECTION | UP
+    // Search direction (up)
     if CheckUp.Checked then
     begin
         if (IsNext) and (FoundRow > SearchEnd) then FoundRow:=FoundRow - 1;
         SearchEnd:=1;
     end;
 
-    // SEARCH DIRECTION | DOWN
+    // Search direction (down)
     if CheckDown.Checked then
     begin
         if (IsNext) and (FoundRow < SearchEnd) then FoundRow:=FoundRow + 1;
@@ -175,7 +168,7 @@ begin
 
     SetLength(Groupping, 0);
 
-    // SEARCH UP
+    // Search up
     if CheckUp.Checked then
     begin
         for iCNT:=FoundRow downto SearchEnd do
@@ -185,7 +178,7 @@ begin
             if Pos(SearchString, CompareValue) > 0 then
             begin
                 FoundRow:=iCNT;
-                // EXIT ON FOUND GIVEN ITEM
+                // Exit on found given item
                 if not (ShowAll.Checked) then
                 begin
                     SearchPartial_NextBreak;
@@ -201,7 +194,7 @@ begin
         end;
     end;
 
-    // SEARCH DOWN
+    // Search down
     if CheckDown.Checked then
     begin
         for iCNT:=FoundRow to SearchEnd do
@@ -210,7 +203,7 @@ begin
             if Pos(SearchString, CompareValue) > 0 then
             begin
                 FoundRow:=iCNT;
-                // EXIT ON FOUND GIVEN ITEM
+                // Exit when found given item
                 if not (ShowAll.Checked) then
                 begin
                     SearchPartial_NextBreak;
@@ -226,7 +219,7 @@ begin
         end;
     end;
 
-    // HIGHLIGHT FOUND ROW
+    // Highlight found row
     if not (ShowAll.Checked) then
     begin
         if not (FoundRow = 0) then
@@ -238,10 +231,10 @@ begin
                 MainForm.MsgCall(mcInfo, 'Cannot find specified customer.');
     end;
 
-    // SHOW ALL FOUND
+    // Show all found
     if (ShowAll.Checked) then
     begin
-        // MAKE SURE THAT ALL ROWS ARE VISIBLE
+        // Make sure that all wors are visible
         SGrid.DefaultRowHeight:=sgRowHeight;
         if High(Groupping) > 0 then
         begin
@@ -269,9 +262,9 @@ end;
 
 procedure TSearchForm.FormCreate(Sender: TObject);
 begin
-  PanelEditSearch.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-  SColName  :='';
-  SColNumber:='';
+    PanelEditSearch.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+    SColName  :='';
+    SColNumber:='';
 end;
 
 
@@ -280,23 +273,23 @@ end;
 
 procedure TSearchForm.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  if Key = VK_RETURN then btnSearchClick(Self);
+    if Key = VK_RETURN then btnSearchClick(Self);
 end;
 
 
 procedure TSearchForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-  if Key = ESC then Close;
+    if Key = ESC then Close;
 end;
 
 
 procedure TSearchForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  FoundRow:=0;
-  IsNext:=False;
-  EditSearch.Text:='';
-  CheckUp.Checked:=False;
-  CheckDown.Checked:=True;
+    FoundRow:=0;
+    IsNext:=False;
+    EditSearch.Text:='';
+    CheckUp.Checked:=False;
+    CheckDown.Checked:=True;
 end;
 
 
@@ -305,17 +298,17 @@ end;
 
 procedure TSearchForm.btnSearchClick(Sender: TObject);
 begin
-  if (SColName <> '') and (SColNumber <> '') and (SGrid <> nil) then Search;
+    if (SColName <> '') and (SColNumber <> '') and (SGrid <> nil) then Search;
 end;
 
 
 procedure TSearchForm.btnUnhideClick(Sender: TObject);
 begin
-  if (SColName <> '') and (SColNumber <> '') and (SGrid <> nil) then
-  begin
-    MainForm.Action_RemoveFiltersClick(Self);
-    btnUnhide.Enabled:=False;
-  end;
+    if (SColName <> '') and (SColNumber <> '') and (SGrid <> nil) then
+    begin
+        MainForm.Action_RemoveFiltersClick(Self);
+        btnUnhide.Enabled:=False;
+    end;
 end;
 
 

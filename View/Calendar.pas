@@ -8,27 +8,26 @@ interface
 
 
 uses
-    Windows,
-    Messages,
-    SysUtils,
-    Variants,
-    Classes,
-    Graphics,
-    Controls,
-    Forms,
-    Dialogs,
-    ComCtrls,
-    ExtCtrls,
-    StdCtrls,
-    DateUtils,
+    Winapi.Windows,
+    Winapi.Messages,
+    System.Variants,
+    System.Classes,
+    System.DateUtils,
+    Vcl.Graphics,
+    Vcl.Controls,
+    Vcl.Forms,
+    Vcl.Dialogs,
+    Vcl.ComCtrls,
+    Vcl.ExtCtrls,
+    Vcl.StdCtrls,
     InterposerClasses;
 
 
 type
 
     /// <summary>
-    ///     View form class with helpers for calendar functionality, so the user will not have to put follow-up date
-    ///     manually on age view string grid.
+    /// View form with class helpers for calendar functionality, so the user will not have to
+    /// put follow-up date manually on age view string grid.
     /// </summary>
 
     TCalendarForm = class(TForm)
@@ -60,6 +59,7 @@ type
         procedure SetFollowUp(SelectedDate: TDate; SelectedCUID: string; Row: integer);
     end;
 
+
 var
     CalendarForm: TCalendarForm;
 
@@ -71,7 +71,8 @@ uses
     Main,
     Model,
     Settings,
-    Worker;
+    Worker,
+    SysUtils;
 
 
 {$R *.dfm}
@@ -81,7 +82,7 @@ uses
 
 
 /// <summary>
-///     Return working day in given month.
+/// Return working day in given month.
 /// </summary>
 
 function TCalendarForm.GetCurrentWorkingDay(WhatDay: Integer): boolean;
@@ -114,17 +115,17 @@ end;
 
 
 /// <summary>
-///     Check if today is weekend.
+/// Check if today is weekend.
 /// </summary>
 
 function TCalendarForm.IsWeekend(const DT: TDateTime): Boolean;
 begin
-    Result:=SysUtils.DayOfWeek(DT) in [1, 7];
+    Result:=System.SysUtils.DayOfWeek(DT) in [1, 7];
 end;
 
 
 /// <summary>
-///     Move to next date, skip weekend.
+/// Move to next date, skip weekend.
 /// </summary>
 
 function TCalendarForm.MakeMyDay(Increment: integer): TDate;
@@ -137,7 +138,7 @@ end;
 
 
 /// <summary>
-///     Set follow-up date and register it in general comment and update age view string grid.
+/// Set follow-up date and register it in general comment and update age view string grid.
 /// </summary>
 
 procedure TCalendarForm.SetFollowUp(SelectedDate: TDate; SelectedCUID: string; Row: integer);
@@ -178,7 +179,7 @@ end;
 // ------------------------------------------------------------------------------------------------------------------------------------------- BUTTON EVENTS //
 
 /// <summary>
-///     Reset all check boxes.
+/// Reset all check boxes.
 /// </summary>
 
 procedure TCalendarForm.MyCalendarClick(Sender: TObject);
@@ -190,7 +191,7 @@ end;
 
 
 /// <summary>
-///     Set next day.
+/// Set next day.
 /// </summary>
 
 procedure TCalendarForm.DaysOneClick(Sender: TObject);
@@ -200,7 +201,7 @@ end;
 
 
 /// <summary>
-///     Set next three days.
+/// Set next three days.
 /// </summary>
 
 procedure TCalendarForm.DaysThreenClick(Sender: TObject);
@@ -210,7 +211,7 @@ end;
 
 
 /// <summary>
-///     Set next sevenm days.
+/// Set next sevenm days.
 /// </summary>
 
 procedure TCalendarForm.DaysSevenClick(Sender: TObject);
@@ -220,7 +221,7 @@ end;
 
 
 /// <summary>
-///     Confirm selected date.
+/// Confirm selected date.
 /// </summary>
 
 procedure TCalendarForm.MyCalendarDblClick(Sender: TObject);

@@ -39,21 +39,12 @@ type
     /// <remarks>
     /// Reference to TSTringGrid object, necessary for implementing "delete" function.
     /// </remarks>
-
     TAbstractGrid = class(Grids.TStringGrid);
-
-    /// <summary>
-    ///
-    /// </summary>
 
     TCheckListBox = class(CheckLst.TCheckListBox)
     published
         procedure Freeze(PaintWnd: boolean);
     end;
-
-    /// <summary>
-    /// Interposer class of TEdit. Extension.
-    /// </summary>
 
     TEdit = Class(StdCtrls.TEdit)
     public
@@ -62,10 +53,6 @@ type
         procedure CreateParams(var params: TCreateParams); override;
         property  Alignment: TAlignment read FAlignment write SetAlignment;
     end;
-
-    /// <summary>
-    /// Interposer class of TShape component. Extension.
-    /// </summary>
 
     TShape = class(ExtCtrls.TShape)
     protected
@@ -80,10 +67,6 @@ type
         var CaptionLeft : integer;
         var CaptionTop  : integer;
     end;
-
-    /// <summary>
-    /// Interposer class of TPanel component. Extension.
-    /// </summary>
 
     TPanel = class(ExtCtrls.TPanel)
     protected
@@ -101,10 +84,6 @@ type
         var PenColorRight :  TColor;
         var mcBrushColor  :  TColor;
     end;
-
-    /// <summary>
-    /// Interposer class of TStringGrid component. Extension.
-    /// </summary>
 
     TStringGrid = class(Grids.TStringGrid)
     protected
@@ -140,10 +119,6 @@ type
         procedure HideGrids;
         procedure ShowGrids;
     end;
-
-    /// <summary>
-    /// Interposer class of TListView component. Extension, add ability to freeze itself.
-    /// </summary>
 
     TListView = class(ComCtrls.TListView)
     published
@@ -227,7 +202,7 @@ end;
 
 
 /// <summary>
-///     Paint method with text function.
+/// Paint method with text function.
 /// </summary>
 
 procedure TShape.Paint;
@@ -240,10 +215,10 @@ begin
     R:=ClientRect;
 
     /// <remarks>
-    ///     Alternative code:
+    /// Alternative code:
     /// </remarks>
     /// <code>
-    ///     DrawText(Canvas.Handle, PChar(Caption), -1, R, DT_VCENTER or DT_LEFT { DT_CENTER } or DT_SINGLELINE);
+    /// DrawText(Canvas.Handle, PChar(Caption), -1, R, DT_VCENTER or DT_LEFT { DT_CENTER } or DT_SINGLELINE);
     /// </code>
 
     TextOut(Canvas.Handle, CaptionLeft, CaptionTop, PChar(Caption), Length(Caption));
@@ -257,27 +232,20 @@ end;
 
 procedure TShape.ShapeText(Left, Top: integer; StrText: string; Format: TFontStyles);
 begin
-
     // Fixed
     Font.Name  :='Tahoma';
     Font.Size  :=10;
     Font.Color :=clBlack;
-
     // Non-fixed
     Font.Style :=Format;
     Caption    :=StrText;
     CaptionLeft:=Left;
     CaptionTop :=Top;
-
 end;
 
 
 // ----------------------------------------------------------------------------------------------------------------------------- EXTENSION OF 'TPANEL' CLASS //
 
-
-/// <summary>
-///     Painy method of TPanel class.
-/// </summary>
 
 procedure TPanel.Paint;
 var
@@ -286,7 +254,7 @@ begin
     inherited;
 
     /// <remarks>
-    ///     None of the given variables can be black.
+    /// None of the given variables can be black.
     /// </remarks>
 
     if (mcBrushColor   <> $00000000) and
@@ -329,11 +297,6 @@ begin
     end;
 
 end;
-
-
-/// <summary>
-///     Draw borders of the component.
-/// </summary>
 
 procedure TPanel.PanelBorders(FillColor, TopColor, BottomColor, LeftColor, RightColor: TColor);
 begin
@@ -384,10 +347,6 @@ begin
 end;
 
 
-/// <summary>
-/// Register rows affected.
-/// </summary>
-
 procedure TStringGrid.RecordRowsAffected;
 var
     iCNT: integer;
@@ -411,10 +370,10 @@ end;
 
 
 /// <summary>
-///     Remove focus rectangle from selection.
+/// Remove focus rectangle from selection.
 /// </summary>
 /// <remarks>
-///     It requires default drawing to be off.
+/// It requires default drawing to be off.
 /// </remarks>
 
 procedure TStringGrid.Paint;
@@ -614,20 +573,12 @@ begin
 end;
 
 
-/// <summary>
-///     Delete and escape behaviour for string grid.
-/// </summary>
-
 procedure TStringGrid.DelEsc(mode: integer; pCol, pRow: integer);
 begin
     if mode = adESC then EditorMode:=False;
     if mode = adDEL then Cells[pCol, pRow]:='';
 end;
 
-
-/// <summary>
-///     Clear all content of string grid.
-/// </summary>
 
 procedure TStringGrid.ClearAll(dfRows: integer; FixedRows: integer; FixedCols: integer; ZeroCol: boolean);
 var
@@ -650,10 +601,6 @@ begin
 end;
 
 
-/// <summary>
-///     Delete selected row from given string grid.
-/// </summary>
-
 procedure TStringGrid.DeleteRowFrom(FixedRow: integer; FixedCol: integer);
 var
     mySG:    TAbstractGrid;
@@ -670,7 +617,7 @@ begin
     if RowCount > FixedRow + 1 then
     begin
         // Remember selected row
-        sRow         :=Row;
+        sRow:=Row;
 
         // Selection
         myRect.Left  :=1;
@@ -679,12 +626,11 @@ begin
         myRect.Bottom:=Row;
 
         // Reference string grid to abstract string grid
-        Selection :=myRect;
+        Selection:=myRect;
 
         /// <remarks>
-        ///     Do not nil or free it.
+        /// Do not nil or free it.
         /// </remarks>
-
         mySG:=TAbstractGrid(Self);
         mySG.DeleteRow(sRow);
 
@@ -707,10 +653,6 @@ begin
 
 end;
 
-
-/// <summary>
-///     Selection colour.
-/// </summary>
 
 procedure TStringGrid.DrawSelected(ARow: integer; ACol: integer; State: TGridDrawState; Rect: TRect; FontColorSel: TColor; BrushColorSel: TColor; FontColor: TColor; BrushColor: TColor; Headers: boolean);
 var
@@ -753,10 +695,6 @@ begin
 end;
 
 
-/// <summary>
-///     Font colors and numbers.
-/// </summary>
-
 procedure TStringGrid.ColorValues(ARow: integer; ACol: integer; Rect: TRect; NegativeColor: TColor; PositiveColor: TColor);
 var
     MyCell:   string;
@@ -785,12 +723,6 @@ begin
 
 end;
 
-
-{ ----------------------------------------------------------------------------------------------------------------------------------------- AUTO COLUMN WIDTH }
-
-/// <summary>
-///     Auto column width.
-/// </summary>
 
 procedure TStringGrid.SetColWidth(FirstDefault: integer; AddSpace: integer; Limit: integer);
 var
@@ -834,10 +766,6 @@ begin
 end;
 
 
-/// <summary>
-///     Set row height and header height (always first row).
-/// </summary>
-
 procedure TStringGrid.SetRowHeight(RowHeight: Integer; Header: Integer);
 begin
     DefaultRowHeight:=RowHeight;
@@ -845,15 +773,11 @@ begin
 end;
 
 
-/// <summary>
-///     Merge sort implementation.
-/// </summary>
-
 procedure TStringGrid.MSort(const SortCol: integer; const DataType: integer; const Ascending: boolean);
 var
-    iCNT:      integer;
-    TempGrid:  TStringGrid;
-    List:      array of integer;
+    iCNT:     integer;
+    TempGrid: TStringGrid;
+    List:     array of integer;
 begin
     TempGrid:=TStringGrid.create(nil);
 
@@ -888,11 +812,11 @@ end;
 
 
 /// <summary>
-///     Auto thumb size implementation.
+/// Auto thumb size implementation.
 /// </summary>
 /// <remarks>
-///     Do not use it, string grid scrolls are bugged. Instead, use separate scroll component, or default string grid scroll behaviour with no
-///     auto thumb size.
+/// Do not use it, string grid scrolls are bugged. Instead, use separate scroll component, or default string grid scroll behaviour with no
+/// auto thumb size.
 /// </remarks>
 
 procedure TStringGrid.AutoThumbSize;
@@ -933,8 +857,8 @@ end;
 
 
 /// <summary>
-///     String grid column layout. It contains with two headers, one is displayed to the user (column title), and second
-///     is used to hold original SQL column name, that other can refer and perform SQL queries.
+/// String grid column layout. It contains with two headers, one is displayed to the user (column title), and second
+/// is used to hold original SQL column name, that other can refer and perform SQL queries.
 /// </summary>
 
 procedure TStringGrid.SaveLayout(ColWidthName: string; ColOrderName: string; ColNames: string; ColPrefix: string);
@@ -985,11 +909,11 @@ end;
 
 function TStringGrid.LoadLayout(var StrCol: string; ColWidthName: string; ColOrderName: string; ColNames: string; ColPrefix: string): boolean;
 var
-    Settings:       ISettings;
-    ColOrderSec:    TStringList;
-    ColWidthSec:    TStringList;
-    ColNamesSec:    TStringList;
-    iCNT:           integer;
+    Settings:    ISettings;
+    ColOrderSec: TStringList;
+    ColWidthSec: TStringList;
+    ColNamesSec: TStringList;
+    iCNT:        integer;
 begin
 
     // Check number of keys in given section
@@ -1013,7 +937,7 @@ begin
 
             for iCNT:=0 to Self.ColCount - 1 do
             begin
-                // Skip first coumn as it holds empty column (by design, we do not display ID in first column, etc.)
+                // Skip first column as it holds empty column (by design, we do not display ID in first column, etc.)
                 if iCNT > 0 then
                 begin
                     if iCNT < (Self.ColCount - 1) then
@@ -1043,10 +967,6 @@ begin
 end;
 
 
-/// <summary>
-///     Return column number for given header (column title).
-/// </summary>
-
 function TStringGrid.ReturnColumn(ColumnName: string; FixedCol: integer; FixedRow: integer): integer;
 var
     iCNT: integer;
@@ -1067,12 +987,12 @@ end;
 
 
 /// <summary>
-///     Export string grid content to Microsoft Excel file.
+/// Export string grid content to Microsoft Excel file.
 /// </summary>
 /// <remarks>
-///     User must have installed microsoft excel with vba installed before exporting string grid to excel file.
-///     otherwise error message "invalid string class" will occur.
-///     This method should be run in worker thread.
+/// User must have installed Microsoft Excel with VBA installed before exporting string grid to excel file.
+/// otherwise error message "invalid string class" will occur.
+/// This method should be run in worker thread.
 /// </remarks>
 
 function TStringGrid.ToExcel(ASheetName: string; AFileName: string): boolean;
@@ -1081,9 +1001,8 @@ var
     Row:        integer;
 
     /// <remarks>
-    ///     Offsets cannot be less than one.
+    /// Offsets cannot be less than one.
     /// </remarks>
-
     RowOffset:  integer;
     ColOffset:  integer;
 
@@ -1127,7 +1046,6 @@ begin
             /// <remarks>
             /// In such case, ignore it (test it on RAD Studio XE2 and Tokyo edition).
             /// </remarks>
-
             Sheet:=XLApp.Workbooks[1].WorkSheets[1];
             Sheet.Name:=ASheetName;
 
@@ -1188,21 +1106,21 @@ end;
 
 
 /// <summary>
-///     Allow to disable or enable component drawing.
+/// Allow to disable or enable component drawing.
 /// </summary>
 /// <param name="PaintWnd">
-///     Boolean, set True to disable painting.
+/// Boolean, set True to disable painting.
 /// </param>
 
 procedure TStringGrid.Freeze(PaintWnd: Boolean);
 begin
 
-    if (PaintWnd) then
+    if PaintWnd then
     begin
         with Self do SendMessage(Handle, WM_SETREDRAW, 0, 0);
     end;
 
-    if not (PaintWnd) then
+    if not PaintWnd then
     begin
         with Self do SendMessage(Handle, WM_SETREDRAW, 1, 0);
         Self.Repaint;
@@ -1210,10 +1128,6 @@ begin
 
 end;
 
-
-/// <summary>
-///     Import from CSV file to string grid.
-/// </summary>
 
 function TStringGrid.ImportCSV(DialogBox: TOpenDialog; Delimiter: string): boolean;
 var
@@ -1234,7 +1148,6 @@ begin
     begin
         MainForm.ExecMessage(True, mcStatusBar, stImportCSV);
         fPath  :=DialogBox.FileName;
-
         Data   :=TStringList.Create;
         Transit:=TStringList.Create;
 
@@ -1284,9 +1197,11 @@ begin
                 MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: Data has been imported successfully!');
                 MainForm.ExecMessage(False, mcInfo, 'Data has been imported successfully!');
             end;
+
             Data.Free;
             Transit.Free;
             MainForm.ExecMessage(True, mcStatusBar, stReady);
+
         end;
 
     end;
@@ -1295,7 +1210,7 @@ end;
 
 
 /// <summary>
-///     Export to CSV (with given delimiter) all string grid content.
+/// Export to CSV (with given delimiter) all string grid content.
 /// </summary>
 
 function TStringGrid.ExportCSV(DialogBox: TSaveDialog; Delimiter: string): boolean;
@@ -1363,7 +1278,7 @@ end;
 
 
 /// <summary>
-///     Select all rows and columns (except first row which is presumbly a column title).
+/// Select all rows and columns (except first row which is presumbly a column title).
 /// </summary>
 
 procedure TStringGrid.SelectAll;
@@ -1379,7 +1294,7 @@ end;
 
 
 /// <summary>
-///     Show all grids (along with header grids).
+/// Show all grids (along with header grids).
 /// </summary>
 
 procedure TStringGrid.ShowGrids;
@@ -1393,7 +1308,7 @@ end;
 
 
 /// <summary>
-///     Hide all grids (along with header grids).
+/// Hide all grids (along with header grids).
 /// </summary>
 
 procedure TStringGrid.HideGrids;
@@ -1407,21 +1322,21 @@ end;
 
 
 /// <summary>
-///     Allow to disable or enable component drawing.
+/// Allow to disable or enable component drawing.
 /// </summary>
 /// <param name="PaintWnd">
-///     Boolean, set True to disable painting.
+/// Boolean, set True to disable painting.
 /// </param>
 
 procedure TListView.Freeze(PaintWnd: Boolean);
 begin
 
-    if (PaintWnd) then
+    if PaintWnd then
     begin
         with Self do SendMessage(Handle, WM_SETREDRAW, 0, 0);
     end;
 
-    if not (PaintWnd) then
+    if not PaintWnd then
     begin
         with Self do SendMessage(Handle, WM_SETREDRAW, 1, 0);
         Self.Repaint;

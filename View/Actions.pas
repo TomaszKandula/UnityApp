@@ -8,28 +8,28 @@ interface
 
 
 uses
-    Windows,
-    Messages,
-    SysUtils,
-    Variants,
-    Classes,
-    Graphics,
-    Controls,
-    Forms,
-    Dialogs,
-    Grids,
-    Buttons,
-    ExtCtrls,
-    ComCtrls,
-    StdCtrls,
-    ADODB,
-    StrUtils,
-    ShellApi,
-    TLHelp32,
-    pngimage,
-    ImgList,
-    GIFImg,
-    Clipbrd,
+    Winapi.Windows,
+    Winapi.Messages,
+    Winapi.ShellApi,
+    Winapi.TLHelp32,
+    System.SysUtils,
+    System.Variants,
+    System.Classes,
+    System.StrUtils,
+    Vcl.Graphics,
+    Vcl.Controls,
+    Vcl.Forms,
+    Vcl.Dialogs,
+    Vcl.Grids,
+    Vcl.Buttons,
+    Vcl.ExtCtrls,
+    Vcl.ComCtrls,
+    Vcl.StdCtrls,
+    Vcl.Imaging.pngimage,
+    Vcl.ImgList,
+    Vcl.Imaging.GIFImg,
+    Vcl.Clipbrd,
+    Data.Win.ADODB,
     InterposerClasses,
     Arrays,
     CustomTypes;
@@ -37,9 +37,6 @@ uses
 
 type
 
-    /// <summary>
-    /// View form class with helpers for Actions window.
-    /// </summary>
 
     TActionsForm = class(TForm)
         OpenItemsGrid: TStringGrid;
@@ -269,10 +266,6 @@ uses
 // ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
 
 
-/// <summary>
-/// Check if application is running.
-/// </summary>
-
 function TActionsForm.GetRunningApps(SearchName: string): boolean;
 var
     PE:        TProcessEntry32;
@@ -310,10 +303,6 @@ begin
 end;
 
 
-/// <summary>
-/// Get all relevant data.
-/// </summary>
-
 procedure TActionsForm.GetData;
 begin
 
@@ -343,16 +332,14 @@ begin
 end;
 
 
-/// <summary>
-/// Get open items from source.
-/// </summary>
-
 procedure TActionsForm.UpdateOpenItems(OpenItemsDest: TStringGrid; OpenItemsSrc: TStringGrid);
 var
     iCNT  : integer;
     jCNT  : integer;
     kCNT  : integer;
 begin
+
+    {TODO -oTomek -cDatabase : Api call for data}
 
     kCNT:=1;
 
@@ -397,7 +384,7 @@ begin
         end;
     end;
 
-    // Hide hepers columns
+    // Hide helpers columns from string grid
     OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.Ad1,   1, 1)]:=sgRowHidden;
     OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.Ad2,   1, 1)]:=sgRowHidden;
     OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.Ad3,   1, 1)]:=sgRowHidden;
@@ -411,13 +398,7 @@ begin
 end;
 
 
-/// <summary>
-/// Get customer details.
-/// </summary>
-
-// make it async!!!
-
-procedure TActionsForm.UpdateDetails(CustPerson: TEdit; CustMail: TEdit; CustMailGen: TEdit; CustPhone: TComboBox);
+procedure TActionsForm.UpdateDetails(CustPerson: TEdit; CustMail: TEdit; CustMailGen: TEdit; CustPhone: TComboBox); {refactor / async}
 var
     Tables: TDataTables;
     Phones: string;
@@ -451,6 +432,7 @@ begin
         end;
 
         Tables.CleanUp;
+
         // Get data from Company Data table
         Tables.Columns.Add(TCompanyData.CoName);
         Tables.Columns.Add(TCompanyData.CoAddress);
@@ -483,13 +465,7 @@ begin
 end;
 
 
-/// <summary>
-/// Refresh history of daily comments.
-/// </summary>
-
-// make it async!!!
-
-procedure TActionsForm.UpdateHistory(var Grid: TStringGrid);
+procedure TActionsForm.UpdateHistory(var Grid: TStringGrid); {refactor / async}
 var
     DailyText: TDataTables;
 begin
@@ -524,13 +500,7 @@ begin
 end;
 
 
-/// <summary>
-/// Refresh general comment column.
-/// </summary>
-
-// make it async!!!
-
-procedure TActionsForm.UpdateGeneral(Text: TMemo);
+procedure TActionsForm.UpdateGeneral(Text: TMemo); {refactor / async}
 var
     GenText: TDataTables;
 begin
@@ -593,19 +563,15 @@ begin
 end;
 
 
-/// <summary>
-/// Prepare for new data load.
-/// </summary>
-
 procedure TActionsForm.Initialize;
 begin
     ClearAll;
     // Assign data for selected row
-    CUID      :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCuid,            1, 1), MainForm.sgAgeView.Row];
-    CustName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCustomerName,   1, 1), MainForm.sgAgeView.Row];
-    CustNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCustomerNumber, 1, 1), MainForm.sgAgeView.Row];
-    CoCode    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCoCode,         1, 1), MainForm.sgAgeView.Row];
-    Branch    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fAgent,           1, 1), MainForm.sgAgeView.Row];
+    CUID      :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCuid,          1, 1), MainForm.sgAgeView.Row];
+    CustName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCustomerName,  1, 1), MainForm.sgAgeView.Row];
+    CustNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCustomerNumber,1, 1), MainForm.sgAgeView.Row];
+    CoCode    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCoCode,        1, 1), MainForm.sgAgeView.Row];
+    Branch    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fAgent,         1, 1), MainForm.sgAgeView.Row];
     SCUID     :=CustNumber + MainForm.ConvertCoCode(CoCode, 'F', 3);
     // Display
     CUID_Label.Caption:=CUID;
@@ -613,10 +579,6 @@ begin
     Lbu_CoCode.Caption:=CoCode;
 end;
 
-
-/// <summary>
-/// Clear all details displayed on Action window.
-/// </summary>
 
 procedure TActionsForm.ClearAll;
 begin
@@ -632,10 +594,6 @@ begin
     GeneralCom.Text     :='';
 end;
 
-
-/// <summary>
-/// Make phone call.
-/// </summary>
 
 procedure TActionsForm.MakePhoneCall;
 var
@@ -675,16 +633,11 @@ begin
 end;
 
 
-/// <summary>
-/// Load next or previous customer.
-/// </summary>
-
 procedure TActionsForm.LoadCustomer(Direction: integer);
 
     var
         iCNT:  integer;
 
-    // NESTED METHOD
     function CheckRow(iterator: integer): boolean;
     begin
         Result:=True;
@@ -717,17 +670,12 @@ begin
         GetData;
         SetControls;
         HistoryGrid.Visible:=FHistoryGrid;
-
     except
         MainForm.MsgCall(mcWarn, 'Unexpected error has occured. Please close the window and try again.');
     end;
 
 end;
 
-
-/// <summary>
-/// Clear follow-up from given customer.
-/// </summary>
 
 procedure TActionsForm.ClearFollowUp;
 begin
@@ -747,10 +695,6 @@ begin
 end;
 
 
-/// <summary>
-/// Save customer details in Address Book.
-/// </summary>
-
 procedure TActionsForm.SaveCustomerDetails;
 begin
     TTAddressBook.Create(
@@ -765,10 +709,6 @@ begin
     );
 end;
 
-
-/// <summary>
-/// Save general comment into database.
-/// </summary>
 
 procedure TActionsForm.SaveGeneralComment;
 begin
@@ -804,13 +744,9 @@ begin
 end;
 
 
-/// <summary>
-/// Draw panels borders.
-/// </summary>
-
 procedure TActionsForm.InitializePanels;
 begin
-    //PanelTop.PanelBorders(clWhite, clSkyBlue, clWhite, clWhite, clWhite);
+    {PanelTop.PanelBorders(clWhite, clSkyBlue, clWhite, clWhite, clWhite);}
 end;
 
 
@@ -917,7 +853,7 @@ end;
 
 procedure TActionsForm.FormDestroy(Sender: TObject);
 begin
-    { NO CODE }
+    // Do nothing
 end;
 
 
@@ -1044,19 +980,11 @@ begin
 end;
 
 
-/// <summary>
-/// String grid content to clipboard.
-/// </summary>
-
 procedure TActionsForm.OpenItemsGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if (Key = 67) and (Shift = [ssCtrl]) then OpenItemsGrid.CopyCutPaste(adCopy);
 end;
 
-
-/// <summary>
-/// String grid content to clipboard.
-/// </summary>
 
 procedure TActionsForm.HistoryGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
@@ -1064,19 +992,11 @@ begin
 end;
 
 
-/// <summary>
-/// Set focus on General Comment edit box.
-/// </summary>
-
 procedure TActionsForm.DailyComKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if Key = VK_TAB then GeneralCom.SetFocus;
 end;
 
-
-/// <summary>
-/// Set focus on Daily Comment edit box.
-/// </summary>
 
 procedure TActionsForm.GeneralComKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin

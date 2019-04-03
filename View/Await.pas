@@ -26,11 +26,11 @@ uses
 type
 
     /// <summary>
-    ///     Allow to display busy status to the user during processing any "heavy duty task".
+    /// Allow to display busy status to the user during processing any "heavy duty task".
     /// </summary>
 
     /// <remarks>
-    ///     We do not allow user to close the window. It is opened and closed by external event.
+    /// We do not allow user to close the window. It is opened and closed by external event.
     /// </remarks>
 
     TAwaitForm = class(TForm)
@@ -60,8 +60,8 @@ uses
 
 
 /// <summary>
-///     Create window with panel borders set to blue. Please note that this window does not have standard
-///     window shadow due to borderless type.
+/// Create window with panel borders set to blue. Please note that this window does not have standard
+/// window shadow due to borderless type.
 /// </summary>
 
 procedure TAwaitForm.FormCreate(Sender: TObject);
@@ -71,7 +71,7 @@ end;
 
 
 /// <summary>
-///     Perform animation when window is about to be shown.
+/// Perform animation when window is about to be shown.
 /// </summary>
 
 procedure TAwaitForm.FormShow(Sender: TObject);
@@ -81,7 +81,7 @@ end;
 
 
 /// <summary>
-///     If window is about to be closed, we disable GIF animation.
+/// If window is about to be closed, we disable GIF animation.
 /// </summary>
 
 procedure TAwaitForm.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -91,16 +91,23 @@ end;
 
 
 /// <remarks>
-///     <ALT> + <F4> combination for window close is disabled.
+/// <ALT> + <F4> combination for window close is disabled.
 /// </remarks>
 
 procedure TAwaitForm.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-
-    if (Key=VK_F4) and (Shift=[ssALT]) then
+    if
+    (
+        Key=VK_F4
+    )
+    and
+    (
+        Shift=[ssALT]
+    )
+    then
         Key:=0;
-
 end;
 
 
 end.
+

@@ -8,27 +8,23 @@ interface
 
 
 uses
-    Windows,
-    Messages,
-    SysUtils,
-    Variants,
-    Classes,
-    Graphics,
-    Controls,
-    Forms,
-    Dialogs,
-    ExtCtrls,
-    StdCtrls,
-    ComCtrls,
-    pngimage,
-    InterposerCLasses;
+    Winapi.Windows,
+    Winapi.Messages,
+    System.SysUtils,
+    System.Variants,
+    System.Classes,
+    Vcl.Graphics,
+    Vcl.Controls,
+    Vcl.Forms,
+    Vcl.Dialogs,
+    Vcl.ExtCtrls,
+    Vcl.StdCtrls,
+    Vcl.ComCtrls,
+    Vcl.Imaging.pngimage,
+    InterposerClasses;
 
 
 type
-
-    /// <summary>
-    ///     View form class with helpers for displaying event log content in separate window.
-    /// </summary>
 
     TEventForm = class(TForm)
         EventMemo: TMemo;
@@ -43,6 +39,7 @@ type
     private
         procedure LoadEventLog;
     end;
+
 
 var
     EventForm: TEventForm;
@@ -61,10 +58,6 @@ uses
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
 
-
-/// <summary>
-///     Load event log from file, fixed path is provided by application settings class.
-/// </summary>
 
 procedure TEventForm.LoadEventLog;
 var

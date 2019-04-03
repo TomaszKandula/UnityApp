@@ -26,7 +26,7 @@ uses
 type
 
     /// <summary>
-    ///     View form class shown during update process. This window requires to be updated to display changed content.
+    /// Form shown during update process. This window requires to be updated to display changed content.
     /// </summary>
 
     TUpdateForm = class(TForm)
@@ -41,7 +41,7 @@ type
         Text2: TLabel;
         txtProgress: TLabel;
     protected
-//        procedure CreateParams(var Params: TCreateParams); override;
+        {procedure CreateParams(var Params: TCreateParams); override;}
     end;
 
 

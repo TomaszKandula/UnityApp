@@ -8,26 +8,26 @@ interface
 
 
 uses
-    Windows,
-    Messages,
-    SysUtils,
-    Variants,
-    Classes,
-    Graphics,
-    Controls,
-    Forms,
-    Dialogs,
-    ExtCtrls,
-    Buttons,
-    StdCtrls;
+    Winapi.Windows,
+    Winapi.Messages,
+    System.SysUtils,
+    System.Variants,
+    System.Classes,
+    Vcl.Graphics,
+    Vcl.Controls,
+    Vcl.Forms,
+    Vcl.Dialogs,
+    Vcl.ExtCtrls,
+    Vcl.Buttons,
+    Vcl.StdCtrls;
 
 
 type
 
     /// <summary>
-    ///     Colors view displays option for colouring follow-up column (String Grid component) that contains
-    ///     dates assigned by credit controller. This dates indicates when Credit Controller should get back
-    ///     to the customer, etc.
+    /// Colors view displays option for colouring follow-up column (String Grid component) that contains
+    /// dates assigned by credit controller. This dates indicates when Credit Controller should get back
+    /// to the customer, etc.
     /// </summary>
 
     TColorsForm = class(TForm)
@@ -59,6 +59,7 @@ type
         procedure FormKeyPress(Sender: TObject; var Key: Char);
     end;
 
+
 var
     ColorsForm: TColorsForm;
 
@@ -78,7 +79,7 @@ uses
 
 
 /// <summary>
-///     Setup caption and default colors for backgrounds and foregrounds.
+/// Setup caption and default colors for backgrounds and foregrounds.
 /// </summary>
 
 procedure TColorsForm.FormCreate(Sender: TObject);
@@ -107,7 +108,7 @@ end;
 
 
 /// <summary>
-///     Get colors from application settings file.
+/// Get colors from application settings file.
 /// </summary>
 
 procedure TColorsForm.ColorList1Select(Sender: TObject);
@@ -142,14 +143,14 @@ end;
 
 procedure TColorsForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-  if Key = ESC then Close;
+    if Key = ESC then Close;
 end;
 
 
 // -------------------------------------------------------------------------------------------------------------------------------------------- BUTTON CALLS //
 
 /// <summary>
-///     Set new colors into application settings file.
+/// Set new colors into application settings file.
 /// </summary>
 
 procedure TColorsForm.btnTodayClick(Sender: TObject);

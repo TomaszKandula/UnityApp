@@ -98,7 +98,7 @@ object UpdateForm: TUpdateForm
     Height = 13
     Cursor = crAppStart
     Caption = 
-      'Copyright '#169' 2016 - 2018 DFDS Polska Sp. z o.o. All rights reserv' +
+      'Copyright '#169' 2016 - 2019 DFDS Polska Sp. z o.o. All rights reserv' +
       'ed.'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlack

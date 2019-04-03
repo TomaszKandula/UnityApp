@@ -8,27 +8,24 @@ interface
 
 
 uses
-    Windows,
-    Messages,
-    SysUtils,
-    Variants,
-    Classes,
-    Graphics,
-    Controls,
-    Forms,
-    Dialogs,
-    Buttons,
-    StdCtrls,
-    ExtCtrls,
-    StrUtils,
+    Winapi.Windows,
+    Winapi.Messages,
+    System.SysUtils,
+    System.Variants,
+    System.Classes,
+    System.StrUtils,
+    Vcl.Graphics,
+    Vcl.Controls,
+    Vcl.Forms,
+    Vcl.Dialogs,
+    Vcl.Buttons,
+    Vcl.StdCtrls,
+    Vcl.ExtCtrls,
     InterposerClasses;
 
 
 type
 
-    /// <summary>
-    ///     Search view form class with helpers for Address Book string grid page.
-    /// </summary>
 
     TViewSearchForm = class(TForm)
         PanelClient: TPanel;
@@ -102,8 +99,6 @@ type
         procedure Initialize;
         procedure ClearAll;
         procedure PerformSearch;
-    public
-        { EMPTY }
     end;
 
 
@@ -127,10 +122,6 @@ uses
 // ------------------------------------------------------------------------------------------------------------------------------------------- CLASS HELPERS //
 
 
-/// <summary>
-///     Execute at form creation. Setup the caption and panel borders for TEdit components residing inside.
-/// </summary>
-
 procedure TViewSearchForm.Initialize;
 var
     Settings: ISettings;
@@ -151,10 +142,6 @@ begin
 
 end;
 
-
-/// <summary>
-///     Clear all and set default states before display to the user.
-/// </summary>
 
 procedure TViewSearchForm.ClearAll;
 begin
@@ -225,10 +212,6 @@ begin
     EditDivision.Color        :=clWhite;
 end;
 
-
-/// <summary>
-///     Check if required fields are not empty and perform search.
-/// </summary>
 
 procedure TViewSearchForm.PerformSearch;
 var
@@ -316,17 +299,17 @@ begin
     if CheckBoxAliasCase.Checked then EqualLike:=EQUAL else EqualLike:=LIKE;
 
     // Attach "like" or "equal" and/or collate option
-    if EditName.Enabled       then StrEditName      :=TAddressBook.CustomerName   + EqualLike + QuotedStr(EditName.Text)       + Collate1 + _AND;
-    if EditEmail.Enabled      then StrEditEmail     :=TAddressBook.Emails          + EqualLike + QuotedStr(EditEmail.Text)      + Collate2 + _AND;
-    if EditEstatement.Enabled then StrEditEstatement:=TAddressBook.Estatements     + EqualLike + QuotedStr(EditEstatement.Text) + Collate3 + _AND;
-    if EditUserAlias.Enabled  then StrEditUserAlias :=TAddressBook.UserAlias      + EqualLike + QuotedStr(EditUserAlias.Text)  + Collate4 + _AND;
+    if EditName.Enabled       then StrEditName      :=TAddressBook.CustomerName + EqualLike + QuotedStr(EditName.Text)       + Collate1 + _AND;
+    if EditEmail.Enabled      then StrEditEmail     :=TAddressBook.Emails       + EqualLike + QuotedStr(EditEmail.Text)      + Collate2 + _AND;
+    if EditEstatement.Enabled then StrEditEstatement:=TAddressBook.Estatements  + EqualLike + QuotedStr(EditEstatement.Text) + Collate3 + _AND;
+    if EditUserAlias.Enabled  then StrEditUserAlias :=TAddressBook.UserAlias    + EqualLike + QuotedStr(EditUserAlias.Text)  + Collate4 + _AND;
 
     // Do not use "like" and match case
     if EditNumber.Enabled     then StrEditNumber    :=TAddressBook.CustomerNumber + EQUAL + QuotedStr(EditNumber.Text)     + _AND;
     if EditPhones.Enabled     then StrEditPhones    :=TAddressBook.PhoneNumbers   + EQUAL + QuotedStr(EditPhones.Text)     + _AND;
-    if EditCoCode.Enabled     then StrEditCoCode    :=TAddressBook.CoCode          + EQUAL + QuotedStr(EditCoCode.Text)     + _AND;
-    if EditAgent.Enabled      then StrEditAgent     :=TAddressBook.Agent           + EQUAL + QuotedStr(EditAgent.Text)      + _AND;
-    if EditDivision.Enabled   then StrEditDivision  :=TAddressBook.Division        + EQUAL + QuotedStr(EditDivision.Text)   + _AND;
+    if EditCoCode.Enabled     then StrEditCoCode    :=TAddressBook.CoCode         + EQUAL + QuotedStr(EditCoCode.Text)     + _AND;
+    if EditAgent.Enabled      then StrEditAgent     :=TAddressBook.Agent          + EQUAL + QuotedStr(EditAgent.Text)      + _AND;
+    if EditDivision.Enabled   then StrEditDivision  :=TAddressBook.Division       + EQUAL + QuotedStr(EditDivision.Text)   + _AND;
 
     // Build conditions
     Conditions:=StrEditNumber + StrEditName + StrEditEmail + StrEditEstatement + StrEditPhones + StrEditUserAlias + StrEditCoCode + StrEditAgent + StrEditDivision;
@@ -343,6 +326,7 @@ begin
         '',
         WHERE + Conditions
     );
+
 end;
 
 
@@ -365,7 +349,7 @@ end;
 
 
 /// <summary>
-///     Change caption from default Equal to Like, to indicate change in search function.
+/// Change caption from default Equal to Like, to indicate change in search function.
 /// </summary>
 
 procedure TViewSearchForm.CheckBoxNameEqualClick(Sender: TObject);
@@ -405,7 +389,7 @@ end;
 
 
 /// <summary>
-///     Change background color on check box change, reset the TEdit.
+/// Change background color on check box change, reset the TEdit.
 /// </summary>
 
 procedure TViewSearchForm.CheckBoxNumberClick(Sender: TObject);
@@ -489,7 +473,7 @@ end;
 
 
 /// <remarks>
-///     Additionally, alter another check boxes.
+/// Alter another check boxes.
 /// </remarks>
 
 procedure TViewSearchForm.CheckBoxNameClick(Sender: TObject);

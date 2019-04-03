@@ -8,26 +8,23 @@ interface
 
 
 uses
-    Windows,
-    Messages,
-    SysUtils,
-    Variants,
-    Classes,
-    Graphics,
-    Controls,
-    Forms,
-    Dialogs,
-    Grids,
-    ADODB,
-    ComCtrls,
+    Winapi.Windows,
+    Winapi.Messages,
+    System.SysUtils,
+    System.Variants,
+    System.Classes,
+    Vcl.Graphics,
+    Vcl.Controls,
+    Vcl.Forms,
+    Vcl.Dialogs,
+    Vcl.Grids,
+    Vcl.ComCtrls,
+    Data.Win.ADODB,
     InterposerClasses;
 
 
 type
 
-    /// <summary>
-    ///     View form class with helpers for displaying invoices that has been automatically sent to the customer by Invoice Tracer.
-    /// </summary>
 
     TInvoicesForm = class(TForm)
         InvoicesGrid: TStringGrid;
@@ -40,6 +37,7 @@ type
         procedure InvoicesGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
     end;
+
 
 var
     InvoicesForm: TInvoicesForm;
@@ -93,15 +91,15 @@ begin
 
     try
         CUID:=MainForm.sgInvoiceTracker.Cells[MainForm.sgInvoiceTracker.ReturnColumn(TTrackerData.Cuid, 1, 1), MainForm.sgInvoiceTracker.Row];
-        Tables.StrSQL:=SELECT                      +
+        Tables.StrSQL:=SELECT                             +
                             TTrackerInvoices.InvoiceNo    + COMMA +
                             TTrackerInvoices.InvoiceState + COMMA +
                             TTrackerInvoices.Stamp        +
-                        FROM                       +
+                        FROM                              +
                             TTrackerInvoices.TrackerInvoices +
-                        WHERE                      +
-                            TTrackerInvoices.Cuid         +
-                        EQUAL                      +
+                        WHERE                                +
+                            TTrackerInvoices.Cuid            +
+                        EQUAL                                +
                             QuotedStr(CUID);
         Tables.SqlToGrid(InvoicesGrid, Tables.ExecSQL, False, True);
         InvoicesGrid.Freeze(False);
