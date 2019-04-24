@@ -201,7 +201,7 @@ type
         procedure btnSaveCustDetailsMouseEnter(Sender: TObject);
         procedure btnSaveCustDetailsMouseLeave(Sender: TObject);
     protected
-        var SrcColumns:  TIntigers;
+        var SrcColumns:  TAIntigers;
     private
         var FHistoryGrid: boolean;
         var FCUID:        string;
@@ -224,7 +224,8 @@ type
         procedure UpdateOpenItems(OpenItemsDest, OpenItemsSrc: TStringGrid);
         procedure UpdateDetails(CustPerson: TEdit; CustMail: TEdit; CustMailGen: TEdit; CustPhone: TComboBox);
         procedure UpdateHistory(var Grid: TStringGrid);
-        procedure UpdateGeneral(Text: TMemo);
+        procedure UpdateGeneral(var Text: TMemo);
+        procedure GetFirstComment(var Text: TMemo);
         procedure SetControls;
         procedure Initialize;
         procedure ClearAll;
@@ -367,7 +368,18 @@ begin
 
     // Get headers
     for iCNT:=Low(SrcColumns) to High(SrcColumns) do
+    begin
+
+        if SrcColumns[iCNT] = -100 then
+        begin
+            MainForm.MsgCall(mcWarn, 'There are no open items loaded. Please reload it or wait untill auto-load is complete and try again.');
+            Close;
+            Exit;
+        end;
+
         OpenItemsDest.Cells[iCNT + 1, 0]:=OpenItemsSrc.Cells[SrcColumns[iCNT], 0];
+
+    end;
 
     // Look for the same "CUID" and put it into source grid
     for iCNT:=1 to OpenItemsSrc.RowCount - 1 do
@@ -500,7 +512,7 @@ begin
 end;
 
 
-procedure TActionsForm.UpdateGeneral(Text: TMemo); {refactor / async}
+procedure TActionsForm.UpdateGeneral(var Text: TMemo); {refactor / async}
 var
     GenText: TDataTables;
 begin
@@ -517,6 +529,13 @@ begin
         GenText.Free;
     end;
 
+end;
+
+
+procedure TActionsForm.GetFirstComment(var Text: TMemo);
+begin
+    if not(Text.Visible) then Exit;
+    Text.Text:=HistoryGrid.Cells[HistoryGrid.ReturnColumn(TDailyComment.FixedComment, 1, 1), 1{fixed first row}];
 end;
 
 
@@ -670,6 +689,8 @@ begin
         GetData;
         SetControls;
         HistoryGrid.Visible:=FHistoryGrid;
+        GetFirstComment(DailyCom);
+        UpdateGeneral(GeneralCom);
     except
         MainForm.MsgCall(mcWarn, 'Unexpected error has occured. Please close the window and try again.');
     end;
@@ -836,6 +857,8 @@ begin
         GetData;
         SimpleText.Caption:=MainForm.OpenItemsUpdate;
         SetControls;
+        GetFirstComment(DailyCom);
+        UpdateGeneral(GeneralCom);
     end
     else
     begin
@@ -936,6 +959,12 @@ end;
 procedure TActionsForm.DailyComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
 
+    if MainForm.AccessLevel = 'RO' then
+    begin
+        MainForm.MsgCall(mcWarn, 'You do not have permission to write the comment.');
+        Exit;
+    end;
+
     // New line
     if ( (Key = VK_RETURN) and (Shift=[ssALT]) ) or ( (Key = VK_RETURN) and (Shift=[ssShift]) ) then
     begin
@@ -960,6 +989,12 @@ end;
 
 procedure TActionsForm.GeneralComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
+
+    if MainForm.AccessLevel = 'RO' then
+    begin
+        MainForm.MsgCall(mcWarn, 'You do not have permission to write the comment.');
+        Exit;
+    end;
 
     // New line
     if ( (Key = VK_RETURN) and (Shift=[ssALT]) ) or ( (Key = VK_RETURN) and (Shift=[ssShift]) ) then

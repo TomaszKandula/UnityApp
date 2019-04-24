@@ -3,19 +3,21 @@
 
 unit Database;
 
+
 interface
 
+
 uses
-    Main,
-    Forms,
-    Windows,
-    Messages,
-    Settings,
-    ADODB,
-    Classes,
-    SysUtils,
-    ComObj,
-    StrUtils;
+    Winapi.Windows,
+    Winapi.Messages,
+    System.Classes,
+    System.SysUtils,
+    System.StrUtils,
+    System.Win.ComObj,
+    Vcl.Forms,
+    Data.Win.ADODB,
+    Settings;
+
 
 type
 
@@ -43,7 +45,7 @@ type
         var ConTimeout     : Integer;
     published
         /// <param name="ShowConnStr">
-        /// Boolean. Set to true if you want to display connection string in the event log.
+        /// Boolean - set to true if you want to display connection string in the event log.
         /// </param>
         constructor Create(ShowConnStr: boolean);
         procedure   InitializeConnection(idThd: integer; ErrorShow: boolean; var ActiveConnection: TADOConnection);
@@ -52,6 +54,10 @@ type
 
 
 implementation
+
+
+uses
+    Main;
 
 
 // ---------------------------------------------------------------------------------------------------------------------------------------- CREATE & RELEASE //

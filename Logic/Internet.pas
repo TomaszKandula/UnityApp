@@ -6,17 +6,21 @@ unit Internet;
 interface
 
 uses
-    Main, WinHttp_TLB, Classes, SysUtils, ComObj, StrUtils, Variants, ActiveX, AxCtrls;
+    Winapi.ActiveX,
+    System.Classes,
+    System.SysUtils,
+    System.Win.ComObj,
+    System.StrUtils,
+    System.Variants,
+    Vcl.AxCtrls,
+    WinHttp_TLB;
 
     /// <remarks>
-    ///     Do not use WinInet API in service or service-like process as it requires human facing the application. Use WinHTTP instead.
+    /// Do not use WinInet API in service or service-like process as it requires human facing the application. Use WinHTTP instead.
     /// </remarks>
 
 type
 
-    /// <summary>
-    ///
-    /// </summary>
 
     IConnectivity = Interface(IInterface)
     ['{6C9DEA61-7E15-4FC0-8D66-B11E79F051DF}']
@@ -25,9 +29,6 @@ type
         function Download(const SourceUrl: string; DestFileName: String): Boolean;
     End;
 
-    /// <summary>
-    ///     Base class for checking internet connection.
-    /// </summary>
 
     TConnectivity = class(TInterfacedObject, IConnectivity)
     {$TYPEINFO ON}
@@ -44,13 +45,9 @@ type
 implementation
 
 
-/// <summary>
-///
-/// </summary>
-/// <param name="Server"></param>
-/// <param name="FileName"></param>
-/// <param name="Mode"></param>
-/// <returns>Integer. Http response code, we expects 200.</returns>
+uses
+    Main;
+
 
 function TConnectivity.CallServer(CallUrl: string; Mode: string; var HttpResponse: string): integer;
 var
@@ -132,8 +129,9 @@ begin
 
 end;
 
+
 /// <summary>
-///     Check Microsoft NCSI.
+/// Check Microsoft NCSI.
 /// </summary>
 /// <returns>Boolean. True if HTTP response is 200.</returns>
 
@@ -147,8 +145,9 @@ begin
                 Result:=False;
 end;
 
+
 /// <summary>
-///     Get the response text from given full URL. Used to extract plain text.
+/// Get the response text from given full URL. Used to extract plain text.
 /// </summary>
 
 function TConnectivity.GetResponseText(FullURL: string): string;
@@ -161,8 +160,9 @@ begin
                 Result:='';
 end;
 
+
 /// <summary>
-///     Download file from provided URL source.
+/// Download file from provided URL source.
 /// </summary>
 
 function TConnectivity.Download(const SourceUrl: string; DestFileName: String): Boolean;
@@ -213,3 +213,4 @@ end;
 
 
 end.
+

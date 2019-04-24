@@ -3,25 +3,26 @@
 
 unit EventLogger;
 
+
 interface
 
-uses
-    Windows, ThreadUtilities, System.Classes, SysUtils;
 
-    /// <remarks>
-    ///
-    /// </remarks>
+uses
+    Winapi.Windows,
+    System.Classes,
+    System.SysUtils,
+    ThreadUtilities;
 
 type
 
     /// <summary>
-    ///     Pointer to local record.
+    /// Pointer to local record.
     /// </summary>
 
     PLogRequest = ^TLogRequest;
 
     /// <summary>
-    ///     Local record holding filename and text to be written.
+    /// Local record holding filename and text to be written.
     /// </summary>
 
     TLogRequest = record
@@ -30,7 +31,7 @@ type
     end;
 
     /// <summary>
-    ///     ...
+    /// Logger.
     /// </summary>
 
     TThreadFileLog = class(TObject)
@@ -55,8 +56,8 @@ uses
 
 
 /// <summary>
-///     Local unit method for writing event log file. It also saves into variable.
-///     This method is upon thread queue, thus race condition does not apply here.
+/// Local unit method for writing event log file. It also saves into variable.
+/// This method is upon thread queue, thus race condition does not apply here.
 /// </summary>
 
 procedure LogToFile(const FileName, Text: String);
@@ -74,7 +75,7 @@ begin
     TextToLog:='#' + CurrentDate + ' (' + CurrentTime + '): ' + Text;
 
     /// <remarks>
-    ///     Event log file always contains all application events.
+    /// Event log file always contains all application events.
     /// </remarks>
 
     AssignFile(EventLog, FileName);
@@ -91,8 +92,8 @@ begin
     end;
 
     /// <remarks>
-    ///     CurrentEvents variable holds only current session events without application start up events.
-    ///     It is send to database on close event
+    /// CurrentEvents variable holds only current session events without application start up events.
+    /// It is send to database on close event
     /// </remarks>
 
     if Assigned(MainForm) then
@@ -108,6 +109,7 @@ constructor TThreadFileLog.Create();
 begin
     FThreadPool:=TThreadPool.Create(HandleLogRequest, 1);
 end;
+
 
 destructor TThreadFileLog.Destroy;
 begin
@@ -136,8 +138,8 @@ end;
 
 
 /// <summary>
-///     It creates new request, updates logger record with file name and text to be written,
-///     then it add it to a thread pool stack (to be executed).
+/// It creates new request, updates logger record with file name and text to be written,
+/// then it add it to a thread pool stack (to be executed).
 /// </summary>
 
 procedure TThreadFileLog.Log(const FileName, Text: string);
@@ -152,3 +154,4 @@ end;
 
 
 end.
+

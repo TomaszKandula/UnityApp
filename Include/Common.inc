@@ -1,8 +1,8 @@
 
 /// <summary>
-///     Below we provide all the application constants, so the project files do not use meaningless numbers
-///     or custom strings within the methods and arguments. For clarity, always put new constant under relevant section.
-// </summary>
+/// Below we provide all the application constants, so the project files do not use meaningless numbers
+/// or custom strings within the methods and arguments. For clarity, always put new constant under relevant section.
+/// </summary>
 
 const
 
@@ -75,7 +75,7 @@ const
     GridImgFile :  string    = 'Unity.img';        // Application custom image(s)
     ReleaseFile :  string    = 'Release.zip';      // Release package
     ManifestFile:  string    = 'Unity.manifest';   // Manifest file on the server
-    CurrentMutex:  PWideChar = 'UNITY_10222';      // Mutex value, increase it with each release*
+    CurrentMutex:  PWideChar = 'UNITY_10231';      // Mutex value, increase it with each release*
 
     // *Do not allow to run multiple instances of Unity due to lack of sessions
 

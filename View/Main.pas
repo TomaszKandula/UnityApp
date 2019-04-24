@@ -8,49 +8,49 @@ interface
 
 
 uses
-    Windows,
-    Messages,
-    SysUtils,
-    Variants,
-    Classes,
-    Graphics,
-    Controls,
-    Forms,
-    Dialogs,
-    Menus,
-    ComCtrls,
-    Grids,
-    ExtCtrls,
-    StdCtrls,
-    CheckLst,
-    Buttons,
-    PNGImage,
-    DBGrids,
-    AppEvnts,
-    ShellAPI,
-    INIFiles,
-    StrUtils,
-    ValEdit,
-    DateUtils,
-    Clipbrd,
-    DB,
-    ADODB,
-    ActiveX,
-    CDO_TLB,
-    Diagnostics,
-    Math,
-    Wininet,
-    ComObj,
-    OleCtrls,
-    SHDocVw,
-    GIFImg,
+    Winapi.Windows,
+    Winapi.Messages,
+    Winapi.ShellAPI,
+    Winapi.ActiveX,
+    Winapi.Wininet,
+    System.SysUtils,
+    System.Variants,
+    System.Classes,
+    System.INIFiles,
+    System.StrUtils,
+    System.DateUtils,
+    System.Diagnostics,
+    System.Math,
+    System.Win.ComObj,
     System.UITypes,
+    System.ImageList,
+    Vcl.Graphics,
+    Vcl.Controls,
+    Vcl.Forms,
+    Vcl.Dialogs,
+    Vcl.Menus,
+    Vcl.ComCtrls,
+    Vcl.Grids,
+    Vcl.ExtCtrls,
+    Vcl.StdCtrls,
+    Vcl.CheckLst,
+    Vcl.Buttons,
+    Vcl.Imaging.pngimage,
+    Vcl.DBGrids,
+    Vcl.AppEvnts,
+    Vcl.ValEdit,
+    Vcl.Clipbrd,
+    Vcl.OleCtrls,
+    Vcl.Imaging.GIFImg,
+    Vcl.ImgList,
+    Data.DB,
+    Data.Win.ADODB,
+    CDO_TLB,
+    SHDocVw,
     Bcrypt,
     InterposerClasses,
     Arrays,
     EventLogger,
-    System.ImageList,
-    Vcl.ImgList,
     uCEFChromium,
     uCEFWindowParent,
     uCEFChromiumWindow,
@@ -839,20 +839,20 @@ type
         procedure btnFscRejectClick(Sender: TObject);
         procedure btnLbuUpdateClick(Sender: TObject);
     private
-        var FAllowClose:        boolean;
-        var FStartTime:         TTime;
-        var FWinUserName:       string;
-        var FEventLogPath:      string;
-        var FGroupIdSel:        string;
-        var FGroupNmSel:        string;
-        var FAgeDateSel:        string;
-        var FOSAmount:          double;
-        var FAccessLevel:       string;
-        var FAccessMode:        string;
-        var FOpenItemsUpdate:   string;
-        var FOpenItemsStatus:   string;
-        var FIsConnected:       boolean;
-        var FCurrentEvents:     string;
+        var FAllowClose:      boolean;
+        var FStartTime:       TTime;
+        var FWinUserName:     string;
+        var FEventLogPath:    string;
+        var FGroupIdSel:      string;
+        var FGroupNmSel:      string;
+        var FAgeDateSel:      string;
+        var FOSAmount:        double;
+        var FAccessLevel:     string;
+        var FAccessMode:      string;
+        var FOpenItemsUpdate: string;
+        var FOpenItemsStatus: string;
+        var FIsConnected:     boolean;
+        var FCurrentEvents:   string;
         procedure ResetTabsheetButtons;
         procedure SetPanelBorders;
         procedure SetGridColumnWidths;
@@ -874,7 +874,7 @@ type
     public
         var LogText:           TThreadFileLog;
         var DbConnect:         TADOConnection;
-        var GroupList:         TLists;
+        var GroupList:         TALists;
         var GridPicture:       TImage;
         var OpenItemsRefs:     TOpenItemsRefs;
         var ControlStatusRefs: TControlStatusRefs;
@@ -911,7 +911,7 @@ type
         // Other helpers
         procedure SwitchTimers(state: integer);
         function  Explode(Text: string; SourceDelim: char): string;
-        function  Implode(Text: Classes.TStrings; TargetDelim: char): string;
+        function  Implode(Text: TStrings; TargetDelim: char): string;
 
         // Tracker helpers
         procedure UpdateTrackerList(UserAlias: string);
@@ -948,7 +948,7 @@ type
         /// Process all Windows messgaes.
         /// </remarks>
 
-        procedure  WndProc(var msg: Messages.TMessage); override;
+        procedure  WndProc(var msg: TMessage); override;
 
     end;
 
@@ -956,8 +956,8 @@ type
     /// If library is written in Delphi, then Delphi types can be used as usual,
     /// however, if library is written in 'C' or any other language, then
     /// please use plain 'C' language types only, so instead of pascal 'string'
-    /// type, please use silly 'pchar' type, etc., also, in case of c# language,
-    /// please refer to manual on 'making C# dll library for delphi usage'
+    /// type, please use funny 'pchar' type, etc., also, in case of c# language,
+    /// please refer to manual on 'making C# dll library for delphi usage'.
     /// </remarks>
 
     TMergeSort            = procedure(Grid: TStringgrid; var Vals: array of integer; sortcol, datatype: integer; ascending: boolean); stdcall;
@@ -1032,11 +1032,7 @@ end;
 // ---------------------------------------------------------------------------------------------------------------------------------------- WINDOWS MESSAGES //
 
 
-/// <summary>
-/// Listen to all Windows messages and react upon.
-/// </summary>
-
-procedure TMainForm.WndProc(var Msg: Messages.TMessage);
+procedure TMainForm.WndProc(var Msg: TMessage);
 var
     CUID:   string;
     Param:  integer;
@@ -1296,10 +1292,6 @@ begin
 end;
 
 
-/// <summary>
-/// Initialize connection with database server.
-/// </summary>
-
 procedure TMainForm.TryInitConnection;
 var
     DataBase: TDataBase;
@@ -1329,10 +1321,6 @@ begin
 end;
 
 
-/// <summary>
-/// Simple wrapper for PostMessage and SendMessage.
-/// </summary>
-
 procedure TMainForm.ExecMessage(IsPostType: boolean; YOUR_INT: Integer; YOUR_TEXT: string);
 begin
   if IsPostType     then PostMessage(MainForm.Handle, WM_GETINFO, YOUR_INT, LPARAM(PCHAR(YOUR_TEXT)));
@@ -1344,7 +1332,7 @@ end;
 
 
 /// <summary>
-/// Use this when dealing with database datasets/recordset results, field may be null and thus must be converted into string.
+/// Use this when dealing with database and/or datasets/recordset results, field may be null and thus must be converted into string type.
 /// </summary>
 
 function TMainForm.OleGetStr(RecordsetField: variant): string;
@@ -1353,16 +1341,12 @@ begin
     try
         OleGetStr:=RecordsetField;
     except
-        { CASE OF NULL FIELD }
+        {case of null field}
         OleGetStr:=VarToStr(RecordsetField);
     end;
     {$D+}
 end;
 
-
-/// <summary>
-/// Wrapper for calling modal or modless window.
-/// </summary>
 
 function TMainForm.WndCall(WinForm: TForm; Mode: integer): integer;
 begin
@@ -1375,10 +1359,6 @@ begin
     if Mode = stModeless then WinForm.Show;
 end;
 
-
-/// <summary>
-/// Wrapper for windows message boxes.
-/// </summary>
 
 function TMainForm.MsgCall(WndType: integer; WndText: string): integer;
 begin
@@ -1398,84 +1378,88 @@ end;
 
 procedure TMainForm.SetSettingsPanel(Mode: integer);
 begin
-    if Mode = spLock then
-    begin
-        // Visibility on
-        imgOFF.Visible:=True;
-        btnPassUpdate.Enabled:=False;
 
-        // Edit boxes
-        EditCurrentPassword.Enabled:=False;
-        EditNewPassword.Enabled:=False;
-        EditNewPasswordConfirmation.Enabled:=False;
-        EditCurrentPassword.Text:='';
-        EditNewPassword.Text:='';
-        EditNewPasswordConfirmation.Text:='';
-        EditPassword.Text:='';
+    case Mode of
 
-        // String grids
-        sgListSection.ClearAll(2, 0, 0, False);
-        sgListValue.ClearAll(2, 0, 0, False);
-        sgListSection.Row:=1;
-        sgListValue.Row:=1;
-        sgListSection.Visible:=False;
-        sgListValue.Visible:=False;
-        sgUAC.Visible:=False;
-        sgGroups.Visible:=False;
-        sgUAC.ClearAll(2, 0, 0, False);
-        sgGroups.ClearAll(2, 0, 0, False);
-        sgUAC.Row:=1;
-        sgGroups.Row:=1;
-        sgListSection.Enabled:=False;
-        sgListValue.Enabled:=False;
-        sgUAC.Enabled:=False;
-        sgGroups.Enabled:=False;
+        spLock:
+        begin
+            // Visibility on
+            imgOFF.Visible:=True;
+            btnPassUpdate.Enabled:=False;
 
-        btnUnlock.Caption:='Unlock';
-        EditPassword.SetFocus;
+            // Edit boxes
+            EditCurrentPassword.Enabled:=False;
+            EditNewPassword.Enabled:=False;
+            EditNewPasswordConfirmation.Enabled:=False;
+            EditCurrentPassword.Text:='';
+            EditNewPassword.Text:='';
+            EditNewPasswordConfirmation.Text:='';
+            EditPassword.Text:='';
 
-    end;
+            // String grids
+            sgListSection.ClearAll(2, 0, 0, False);
+            sgListValue.ClearAll(2, 0, 0, False);
+            sgListSection.Row:=1;
+            sgListValue.Row:=1;
+            sgListSection.Visible:=False;
+            sgListValue.Visible:=False;
+            sgUAC.Visible:=False;
+            sgGroups.Visible:=False;
+            sgUAC.ClearAll(2, 0, 0, False);
+            sgGroups.ClearAll(2, 0, 0, False);
+            sgUAC.Row:=1;
+            sgGroups.Row:=1;
+            sgListSection.Enabled:=False;
+            sgListValue.Enabled:=False;
+            sgUAC.Enabled:=False;
+            sgGroups.Enabled:=False;
 
-    if Mode = spUnLock then
-    begin
-        // Setup headers
-        sgListSection.Cols[0].Text:='Lp';
-        sgListSection.Cols[1].Text:='Sections';
-        sgListValue.Cols[0].Text  :='Lp';
-        sgListValue.Cols[1].Text  :='Key';
-        sgListValue.Cols[2].Text  :='Value';
+            btnUnlock.Caption:='Unlock';
+            EditPassword.SetFocus;
+        end;
 
-        // Credentials
-        btnPassUpdate.Enabled:=True;
-        EditCurrentPassword.Enabled:=True;
-        EditNewPassword.Enabled:=True;
-        EditNewPasswordConfirmation.Enabled:=True;
+        spUnLock:
+        begin
+            // Setup headers
+            sgListSection.Cols[0].Text:='Lp';
+            sgListSection.Cols[1].Text:='Sections';
+            sgListValue.Cols[0].Text  :='Lp';
+            sgListValue.Cols[1].Text  :='Key';
+            sgListValue.Cols[2].Text  :='Value';
 
-        // String grids
-        sgUAC.Enabled:=True;
-        sgGroups.Enabled:=True;
-        sgListSection.Enabled:=True;
-        sgListValue.Enabled:=True;
-        sgListSectionClick(self);
-        sgListSection.Row:=1;
-        sgListValue.Row:=1;
-        sgListSection.Visible:=True;
-        sgListValue.Visible:=True;
-        sgUAC.Visible:=True;
-        sgGroups.Visible:=True;
+            // Credentials
+            btnPassUpdate.Enabled:=True;
+            EditCurrentPassword.Enabled:=True;
+            EditNewPassword.Enabled:=True;
+            EditNewPasswordConfirmation.Enabled:=True;
 
-        // Transparency off
-        imgOFF.Visible:=False;
+            // String grids
+            sgUAC.Enabled:=True;
+            sgGroups.Enabled:=True;
+            sgListSection.Enabled:=True;
+            sgListValue.Enabled:=True;
+            sgListSectionClick(self);
+            sgListSection.Row:=1;
+            sgListValue.Row:=1;
+            sgListSection.Visible:=True;
+            sgListValue.Visible:=True;
+            sgUAC.Visible:=True;
+            sgGroups.Visible:=True;
 
-        btnUnlock.Caption:='Lock';
-        EditPassword.SetFocus;
+            // Transparency off
+            imgOFF.Visible:=False;
+
+            btnUnlock.Caption:='Lock';
+            EditPassword.SetFocus;
+        end;
+
     end;
 
 end;
 
 
 /// <summary>
-/// Convert supplied Company Code to numeric or alphanumeric.
+/// Convert supplied Company Code to numeric or alphanumeric representation.
 /// </summary>
 
 function TMainForm.ConvertCoCode(CoNumber: string; Prefix: string; mode: integer): string;
@@ -1535,32 +1519,25 @@ begin
 end;
 
 
-/// <summary>
-/// Return specific CoCode from the given group.
-/// </summary>
-
 function TMainForm.GetCoCode(CoPos: integer; GroupId: string): string;
 begin
-
     /// <remarks>
+    /// Return specific CoCode from the given group.
     /// Group id format: series of 4 groups of 5 digits, i.e.: '020470034000043' must be read as follows:
     /// 1. 1ST CO CODE: 02047 (2047)
     /// 2. 2ND CO CODE: 00340 (340)
     /// 3. 3RD CO CODE: 00043 (43)
     /// 4. 4TH CO CODE: 00000 (0)
     /// </remarks>
-
     if CoPos = 1 then Result:=IntToStr(StrToInt(MidStr(GroupId, 1,  5)));
     if CoPos = 2 then Result:=IntToStr(StrToInt(MidStr(GroupId, 6,  5)));
     if CoPos = 3 then Result:=IntToStr(StrToInt(MidStr(GroupId, 11, 5)));
     if CoPos = 4 then Result:=IntToStr(StrToInt(MidStr(GroupId, 16, 5)));
-
 end;
 
 
 /// <summary>
-/// Find comapny details such as currency, division, agents. It searches age view string grid.
-/// Open Items Tab helper.
+/// Find comapny details such as currency, division, agent. It scans age view string grid. Open Items Tab helper.
 /// </summary>
 
 procedure TMainForm.FindCoData(TargetColumn: integer; TargetGrid: TStringGrid; SourceGrid: TStringGrid);
@@ -1590,10 +1567,6 @@ begin
 end;
 
 
-/// <summary>
-/// Turn off or on given timers.
-/// </summary>
-
 procedure TMainForm.SwitchTimers(state: integer);
 begin
 
@@ -1613,10 +1586,6 @@ begin
 
 end;
 
-
-/// <summary>
-/// Load desired image format to TImage component.
-/// </summary>
 
 procedure TMainForm.LoadImageFromStream(Image: TImage; const FileName: string);
 var
@@ -1638,10 +1607,6 @@ begin
 
 end;
 
-
-/// <summary>
-/// Convert string date to date format.
-/// </summary>
 
 function TMainForm.CDate(StrDate: string): TDate;
 begin
@@ -1859,7 +1824,7 @@ end;
 
 
 /// <summary>
-/// Set thumb size for scroll
+/// Set thumb size for scroll.
 /// </summary>
 
 procedure TMainForm.SetGridThumbSizes;
@@ -1928,21 +1893,13 @@ begin
 end;
 
 
-/// <summary>
-/// Convert to multiline string.
-/// </summary>
-
 function TMainForm.Explode(Text: string; SourceDelim: char): string;
 begin
     Result:=StringReplace(Text, SourceDelim, CRLF, [rfReplaceAll]);
 end;
 
 
-/// <summary>
-/// Convert multiline string to one line string.
-/// </summary>
-
-function TMainForm.Implode(Text: Classes.TStrings; TargetDelim: char): string;
+function TMainForm.Implode(Text: TStrings; TargetDelim: char): string;
 var
     iCNT:  integer;
     Str:   string;
@@ -1961,10 +1918,6 @@ begin
 end;
 
 
-/// <summary>
-/// Validate password.
-/// </summary>
-
 function TMainForm.CheckGivenPassword(Password: string): boolean;
 var
     Settings: ISettings;
@@ -1980,10 +1933,6 @@ begin
                 Result:=TBcrypt.CheckPassword(Password, Hash, ReHashed);
 end;
 
-
-/// <summary>
-/// Hash given password.
-/// </summary>
 
 function TMainForm.SetNewPassword(Password: string): boolean;
 var
@@ -2038,10 +1987,6 @@ begin
 end;
 
 
-/// <summary>
-/// Validate string date.
-/// </summary>
-
 function TMainForm.CheckIfDate(StrDate: string): boolean;
 begin
   Result:=False;
@@ -2051,10 +1996,6 @@ begin
 
 end;
 
-
-/// <summary>
-/// Allow to display "await window" while making grid component invisible during time consuming task involving the component.
-/// </summary>
 
 procedure TMainForm.BusyScreen(State: integer; WorkingGrid: integer);
 var
@@ -2088,11 +2029,7 @@ end;
 // ----------------------------------------------------------------------------------------------------------------------------- UPDATE INVOICE TRACKER LIST //
 
 
-/// <summary>
-///
-/// </summary>
-
-procedure TMainForm.UpdateTrackerList(UserAlias: string); // make async!!!
+procedure TMainForm.UpdateTrackerList(UserAlias: string); {refactor / async}
 var
     TrackerData: TDataTables;
 begin
@@ -2140,11 +2077,7 @@ end;
 // -------------------------------------------------------------------------------------------------------------------------------- DELETE FROM TRACKER LIST //
 
 
-/// <summary>
-///
-/// </summary>
-
-procedure TMainForm.DeleteFromTrackerList(CUID: string); // make async!!!
+procedure TMainForm.DeleteFromTrackerList(CUID: string); {refactor / async}
 var
     TrackerData:  TDataTables;
     PrimaryTable: string;
@@ -2154,8 +2087,8 @@ begin
     TrackerData:=TDataTables.Create(MainForm.DbConnect);
 
     try
-        PrimaryTable:=DELETE_FROM + TTrackerData.TrackerData + WHERE + TTrackerData.Cuid  + EQUAL + QuotedStr(CUID);  { HOLDS RECORDED CUSTOMERS }
-        ForeignTable:=DELETE_FROM + TTrackerInvoices.TrackerInvoices + WHERE + TTrackerInvoices.Cuid + EQUAL + QuotedStr(CUID);  { HOLDS CUSTOMERS INVOICES }
+        PrimaryTable:=DELETE_FROM + TTrackerData.TrackerData + WHERE + TTrackerData.Cuid  + EQUAL + QuotedStr(CUID);  {HOLDS RECORDED CUSTOMERS}
+        ForeignTable:=DELETE_FROM + TTrackerInvoices.TrackerInvoices + WHERE + TTrackerInvoices.Cuid + EQUAL + QuotedStr(CUID);  {HOLDS CUSTOMERS INVOICES}
         TrackerData.StrSQL:=ForeignTable + ';' + PrimaryTable;
         TrackerData.ExecSQL;
         sgInvoiceTracker.DeleteRowFrom(1, 1);
@@ -2169,11 +2102,7 @@ end;
 // ------------------------------------------------------------------------------------------------------------------------------------------------ QMS DEMO //
 
 
-/// <summary>
-///
-/// </summary>
-
-procedure TMainForm.UpdateQmsViewFsc(Source: TStringGrid);  // make async!!!
+procedure TMainForm.UpdateQmsViewFsc(Source: TStringGrid); {refactor / async}
 var
     Tables: TDataTables;
 begin
@@ -2223,11 +2152,7 @@ begin
 end;
 
 
-/// <summary>
-///
-/// </summary>
-
-procedure TMainForm.UpdateQmsViewLbu(Source: TStringGrid);  // make async!!!
+procedure TMainForm.UpdateQmsViewLbu(Source: TStringGrid); {refactor / async}
 var
     Tables: TDataTables;
 begin
@@ -2277,11 +2202,7 @@ begin
 end;
 
 
-/// <summary>
-///
-/// </summary>
-
-procedure TMainForm.ShowItemDetails(ItemId: integer; Destination: integer); // refactor!!! make async!!!
+procedure TMainForm.ShowItemDetails(ItemId: integer; Destination: integer); {refactor / async}
 var
     Tables: TDataTables;
 begin
@@ -2330,10 +2251,6 @@ begin
 end;
 
 
-/// <summary>
-///
-/// </summary>
-
 procedure TMainForm.InitializeQms;
 begin
     ValueOpAmountFsc.Caption:='0,00';
@@ -2353,11 +2270,7 @@ begin
 end;
 
 
-/// <summary>
-///
-/// </summary>
-
-procedure TMainForm.UpdateStatus(DbItemId: integer; Status: string; Grid: TStringGrid; Mode: integer); // refactor!!!
+procedure TMainForm.UpdateStatus(DbItemId: integer; Status: string; Grid: TStringGrid; Mode: integer); {refactor}
 var
     Tables:      TDataTables;
     Mailer:      TMailer;
@@ -2440,11 +2353,7 @@ begin
 end;
 
 
-/// <summary>
-///
-/// </summary>
-
-procedure TMainForm.ApproveQuery(DbItemId: integer; Mode: integer); // refactor!!!
+procedure TMainForm.ApproveQuery(DbItemId: integer; Mode: integer); {refactor / async}
 var
     ItemStatus: string;
 begin
@@ -2505,11 +2414,7 @@ begin
 end;
 
 
-/// <summary>
-///
-/// </summary>
-
-procedure TMainForm.RejectQuery(DbItemId: integer; Mode: integer);  // refactor!!!
+procedure TMainForm.RejectQuery(DbItemId: integer; Mode: integer); {refactor / async}
 var
     ItemStatus: string;
 begin
@@ -2542,11 +2447,9 @@ end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
 
+
 // -------------------------------- NESTED BLOCK ---------------------------------- //
 
-/// <summary>
-/// Nested method for Splash Screen update with loading details.
-/// </summary>
 
 procedure OnCreateJob(Text: string);
 begin
@@ -2557,9 +2460,6 @@ begin
     end;
 end;
 
-/// <summary>
-/// Local variables, inaccessibe for OnCreateJob method.
-/// </summary>
 
 var
     AppVersion:  string;
@@ -2569,7 +2469,9 @@ var
     MapTable:    TTGeneralTables;
     iCNT:        integer;
 
+
 // ------------------------------------ MAIN BLOCK ------------------------------------ //
+
 
 begin
 
@@ -2593,11 +2495,7 @@ begin
         GridPicture.SetBounds(0, 0, 16, 16);
         LoadImageFromStream(GridPicture, Settings.GetPathGridImage);
 
-        /// <remarks>
-        /// Window position. Do not change Default Monitor and Position.
-        /// </remarks>
-
-        MainForm.DefaultMonitor:=dmDesktop;
+        MainForm.DefaultMonitor:=dmPrimary{dmDesktop};
         MainForm.Position      :=poDefaultSizeOnly;
         MainForm.Top           :=Settings.GetIntegerValue(ApplicationDetails, 'WINDOW_TOP',  0);
         MainForm.Left          :=Settings.GetIntegerValue(ApplicationDetails, 'WINDOW_LEFT', 0);
@@ -2942,20 +2840,15 @@ begin
 
 end;
 
+
 procedure TMainForm.FormResize(Sender: TObject);
 begin
-
     /// <remarks>
     /// Do not use it. Scroll thumb size is buggy in Windows.
     /// </remarks>
-
     // SetGridThumbSizes;
-
 end;
 
-/// <summary>
-/// Load Unity Info web page.
-/// </summary>
 
 procedure TMainForm.ChromiumWindowAfterCreated(Sender: TObject);
 var
@@ -3034,14 +2927,15 @@ begin
     end;
 end;
 
-/// <summary>
-/// Save window position and layout; and disconnect from the server.
-/// </summary>
 
 procedure TMainForm.FormDestroy(Sender: TObject);
 var
     Settings: ISettings;
 begin
+
+    /// <remarks>
+    /// Save window position and layout; and disconnect from the server.
+    /// </remarks>
 
     if sgAgeView.RowCount > 2 then
         sgAgeView.SaveLayout(ColumnWidthName, ColumnOrderName, ColumnNames, ColumnPrefix);
@@ -3108,6 +3002,7 @@ begin
 
 end;
 
+
 /// <summary>
 /// Initiaize ChromiumWindow with time lag.
 /// </summary>
@@ -3118,6 +3013,7 @@ begin
     if not(ChromiumWindow.CreateBrowser) and not(ChromiumWindow.Initialized) then
         ChromiumTimer.Enabled:=True
 end;
+
 
 /// <summary>
 /// Count current follow-ups and display in notification baloon.
@@ -3146,7 +3042,7 @@ begin
     begin
         TrayIcon.Visible:=True;
         TrayIcon.BalloonHint:='Hello, you have ' + IntToStr(Sum) + ' follow-up dates registered for today.' + CRLF +
-                              'Let''s bother some customers and collect some money money!' + CRLF;
+                              'Let''s bother some customers and collect some money honey!' + CRLF;
         TrayIcon.ShowBalloonHint;
     end;
 
@@ -4477,7 +4373,7 @@ procedure TMainForm.sgAgeViewColumnMoved(Sender: TObject; FromIndex, ToIndex: In
 var
     iCNT:    integer;
     jCNT:    integer;
-    Temp:    TLists;
+    Temp:    TALists;
     SqlRows: integer;
     TmpRows: integer;
 begin
@@ -5138,7 +5034,6 @@ procedure TMainForm.sgAgeViewKeyDown(Sender: TObject; var Key: Word; Shift: TShi
         ctFree3    = 3;
         ctFollowUp = 2;
 
-    // Modify data for given column
     procedure ModifyCell(CUIDRef: integer; ColumnType: integer; Text: string);
     begin
         if ColumnType = ctFree1    then TTGeneralComment.Create(sgAgeView.Cells[CUIDRef, sgAgeView.Row], strNULL, strNULL, Text, strNULL, strNULL, True);
@@ -5147,11 +5042,16 @@ procedure TMainForm.sgAgeViewKeyDown(Sender: TObject; var Key: Word; Shift: TShi
         if ColumnType = ctFollowUp then TTGeneralComment.Create(sgAgeView.Cells[CUIDRef, sgAgeView.Row], strNULL, Text, strNULL, strNULL, strNULL, True);
     end;
 
-    // Quit editing
     procedure QuitEditing;
     begin
         sgAgeView.Options:=sgAgeView.Options - [goEditing];
         sgAgeView.EditorMode:=False;
+    end;
+
+    procedure AllowEditing;
+    begin
+        sgAgeView.Options:=sgAgeView.Options + [goEditing];
+        sgAgeView.EditorMode:=True;
     end;
 
 begin
@@ -5162,6 +5062,7 @@ begin
         sgAgeView.CopyCutPaste(adCopy);
         sgAgeView.UpdatedRowsHolder:=nil;
         sgAgeView.RecordRowsAffected;
+        Exit;
     end;
 
     // Allow editing only free columns
@@ -5184,90 +5085,94 @@ begin
     if (Key = 86) and (Shift = [ssCtrl]) then
     begin
 
-        sgAgeView.CopyCutPaste(adPaste);
-
-        if sgAgeView.UpdatedRowsHolder = nil then Exit;
         Screen.Cursor:=crHourGlass;
 
-        TThread.CreateAnonymousThread(procedure
-        var
-            iCNT: integer;
-            Data: TDataTables;
+        sgAgeView.CopyCutPaste(adPaste); //!!!
+
+        if sgAgeView.UpdatedRowsHolder <> nil then
         begin
 
-            Data:=TDataTables.Create(DbConnect);
-            try
+            TThread.CreateAnonymousThread(procedure
+            var
+                iCNT: integer;
+                Data: TDataTables;
+            begin
 
-                Data.CmdType:=cmdText;
-                for iCNT:=Low(sgAgeView.UpdatedRowsHolder) to High(sgAgeView.UpdatedRowsHolder) do
-                begin
+                Data:=TDataTables.Create(DbConnect);
+                try
 
-                    if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneralComment.Free1, 1, 1) then
+                    Data.CmdType:=cmdText;
+                    for iCNT:=Low(sgAgeView.UpdatedRowsHolder) to High(sgAgeView.UpdatedRowsHolder) do
                     begin
-                        Data.StrSQL:=
-                            EXECUTE +
-                                UpsertFreeColumns +
-                            SPACE +
-                                QuotedStr(WinUserName.ToUpper) +
-                            COMMA +
-                                QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), sgAgeView.UpdatedRowsHolder[iCNT]]) +
-                            COMMA +
-                                QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TGeneralComment.Free1, 1, 1), sgAgeView.UpdatedRowsHolder[iCNT]]) +
-                            COMMA +
-                                QuotedStr(strNULL) +
-                            COMMA +
-                                QuotedStr(strNULL) +
-                            COMMA +
-                                QuotedStr('1');
+
+                        if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneralComment.Free1, 1, 1) then
+                        begin
+                            Data.StrSQL:=
+                                EXECUTE +
+                                    UpsertFreeColumns +
+                                SPACE +
+                                    QuotedStr(WinUserName.ToUpper) +
+                                COMMA +
+                                    QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), sgAgeView.UpdatedRowsHolder[iCNT]]) +
+                                COMMA +
+                                    QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TGeneralComment.Free1, 1, 1), sgAgeView.UpdatedRowsHolder[iCNT]]) +
+                                COMMA +
+                                    QuotedStr(strNULL) +
+                                COMMA +
+                                    QuotedStr(strNULL) +
+                                COMMA +
+                                    QuotedStr('1');
+                        end;
+
+                        if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneralComment.Free2, 1, 1) then
+                        begin
+                            Data.StrSQL:=
+                                EXECUTE +
+                                    UpsertFreeColumns +
+                                SPACE +
+                                    QuotedStr(WinUserName.ToUpper) +
+                                COMMA +
+                                    QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), sgAgeView.UpdatedRowsHolder[iCNT]]) +
+                                COMMA +
+                                    QuotedStr(strNULL) +
+                                COMMA +
+                                    QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TGeneralComment.Free2, 1, 1), sgAgeView.UpdatedRowsHolder[iCNT]]) +
+                                COMMA +
+                                    QuotedStr(strNULL) +
+                                COMMA +
+                                    QuotedStr('2');
+                        end;
+
+                        if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneralComment.Free3, 1, 1) then
+                        begin
+                            Data.StrSQL:=
+                                EXECUTE +
+                                    UpsertFreeColumns +
+                                SPACE +
+                                    QuotedStr(WinUserName.ToUpper) +
+                                COMMA +
+                                    QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), sgAgeView.UpdatedRowsHolder[iCNT]]) +
+                                COMMA +
+                                    QuotedStr(strNULL) +
+                                COMMA +
+                                    QuotedStr(strNULL) +
+                                COMMA +
+                                    QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TGeneralComment.Free3, 1, 1), sgAgeView.UpdatedRowsHolder[iCNT]]) +
+                                COMMA +
+                                    QuotedStr('3');
+                        end;
+
+                        Data.ExecSQL;
+
                     end;
 
-                    if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneralComment.Free2, 1, 1) then
-                    begin
-                        Data.StrSQL:=
-                            EXECUTE +
-                                UpsertFreeColumns +
-                            SPACE +
-                                QuotedStr(WinUserName.ToUpper) +
-                            COMMA +
-                                QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), sgAgeView.UpdatedRowsHolder[iCNT]]) +
-                            COMMA +
-                                QuotedStr(strNULL) +
-                            COMMA +
-                                QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TGeneralComment.Free2, 1, 1), sgAgeView.UpdatedRowsHolder[iCNT]]) +
-                            COMMA +
-                                QuotedStr(strNULL) +
-                            COMMA +
-                                QuotedStr('2');
-                    end;
-
-                    if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneralComment.Free3, 1, 1) then
-                    begin
-                        Data.StrSQL:=
-                            EXECUTE +
-                                UpsertFreeColumns +
-                            SPACE +
-                                QuotedStr(WinUserName.ToUpper) +
-                            COMMA +
-                                QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), sgAgeView.UpdatedRowsHolder[iCNT]]) +
-                            COMMA +
-                                QuotedStr(strNULL) +
-                            COMMA +
-                                QuotedStr(strNULL) +
-                            COMMA +
-                                QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TGeneralComment.Free3, 1, 1), sgAgeView.UpdatedRowsHolder[iCNT]]) +
-                            COMMA +
-                                QuotedStr('3');
-                    end;
-
-                    Data.ExecSQL;
-
+                finally
+                    Data.Free;
                 end;
 
-            finally
-                Data.Free;
-            end;
+            end).Start;
 
-        end).Start;
+        end;
 
         Screen.Cursor:=crDefault;
         Exit;
@@ -5283,11 +5188,11 @@ begin
     end;
 
     // Allow editing
-    if Key = VK_F2 then
+    if CharInSet(Char(Key), [#48..#57{A..Z}, #65..#90{a..z}, #97..#122{0..9}]) then
     begin
         Key:=0;
-        sgAgeView.Options:=sgAgeView.Options + [goEditing];
-        sgAgeView.EditorMode:=True;
+        AllowEditing;
+        Exit;
     end;
 
     // Quit editing
@@ -5295,6 +5200,7 @@ begin
     begin
         Key:=0;
         QuitEditing;
+        Exit;
     end;
 
     // Quit editing and write to database

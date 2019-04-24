@@ -9,9 +9,6 @@ interface
 
 type
 
-    /// <remarks>
-    ///
-    /// </remarks>
 
     TInvoiceFilter = (ReminderOvd, ReminderNonOvd, ShowAllItems);
 

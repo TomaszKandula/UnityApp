@@ -3,51 +3,61 @@
 
 unit AgeView;
 
+
 interface
 
+
 uses
-    Model, SQL, ADODB, StrUtils, SysUtils, Variants, Messages, Windows, Classes, Graphics, InterposerClasses, Arrays;
+    Winapi.Messages,
+    Winapi.Windows,
+    System.Classes,
+    System.StrUtils,
+    System.SysUtils,
+    System.Variants,
+    Vcl.Graphics,
+    Data.Win.ADODB,
+    Model,
+    SQL,
+    InterposerClasses,
+    Arrays;
+
 
 type
 
-    /// <summary>
-    ///     This class is responsible for loading age report snapshot and update summaries on age view.
-    /// </summary>
 
     TAgeView = class(TDataTables)
     {$TYPEINFO ON}
     public
         // Aging report
-        var ArrAgeView : TLists;
+        var ArrAgeView:  TALists;
         // Totals
-        var CustAll    : integer;
-        var CallsAll   : integer;
-        var EmailsAll  : integer;
+        var CustAll:     integer;
+        var CallsAll:    integer;
+        var EmailsAll:   integer;
         // Amounts
-        var ANotDue    : extended;
-        var ARange1    : extended;
-        var ARange2    : extended;
-        var ARange3    : extended;
-        var ARange4    : extended;
-        var ARange5    : extended;
-        var ARange6    : extended;
-        var Balance    : extended;
-        var Limits     : extended;
-        var Exceeders  : integer;
+        var ANotDue:     extended;
+        var ARange1:     extended;
+        var ARange2:     extended;
+        var ARange3:     extended;
+        var ARange4:     extended;
+        var ARange5:     extended;
+        var ARange6:     extended;
+        var Balance:     extended;
+        var Limits:      extended;
+        var Exceeders:   integer;
         var TotalExceed: extended;
-        var RCA        : extended;
-        var RCB        : extended;
-        var RCC        : extended;
-        var RCAcount   : cardinal;
-        var RCBcount   : cardinal;
-        var RCCcount   : cardinal;
-        var Class_A    : double;
-        var Class_B    : double;
-        var Class_C    : double;
+        var RCA:         extended;
+        var RCB:         extended;
+        var RCC:         extended;
+        var RCAcount:    cardinal;
+        var RCBcount:    cardinal;
+        var RCCcount:    cardinal;
+        var Class_A:     double;
+        var Class_B:     double;
+        var Class_C:     double;
         // Selection
-        var GroupID   : string;
-        var AgeDate   : string;
-    published
+        var GroupID: string;
+        var AgeDate: string;
         // Constructors/destructors
         constructor Create(Connector: TADOConnection); overload;
         destructor  Destroy; override;
@@ -70,8 +80,8 @@ type
         procedure   AgeViewMode(var Grid: TStringGrid; ModeBySection: string);
         procedure   QuickSortExt(var A: array of double; var L: array of integer; iLo, iHi: integer; ASC: boolean);
         procedure   Make(OSAmount: double);
-        procedure   Write(DestTable: string; SourceArray: TLists);
-        procedure   ExportToCSV(FileName: string; SourceArray: TLists);
+        procedure   Write(DestTable: string; SourceArray: TALists);
+        procedure   ExportToCSV(FileName: string; SourceArray: TALists);
     end;
 
 
@@ -83,6 +93,7 @@ uses
 
 
 // ---------------------------------------------------------------------------------------------------------------------------------------- CREATE & RELEASE //
+
 
 constructor TAgeView.Create(Connector: TADOConnection);
 var
@@ -108,6 +119,7 @@ begin
 
 end;
 
+
 destructor TAgeView.Destroy;
 begin
     ArrAgeView:=nil;
@@ -119,7 +131,7 @@ end;
 
 
 /// <summary>
-///     Load aging report (snapshot) into string grid.
+/// Load aging report (snapshot) into string grid.
 /// </summary>
 
 procedure TAgeView.Read(var Grid: TStringGrid; Mode: integer);
@@ -127,25 +139,26 @@ var
     StrCol: string;
 begin
 
-  // InitializeINITIALIZE
-  Grid.Freeze(True);
+    // Initialize
+    Grid.Freeze(True);
 
-  // Read grid layout to be passed as paremeter to SQL statement
-  Grid.LoadLayout(StrCol, ColumnWidthName, ColumnOrderName, ColumnNames, ColumnPrefix);
+    // Read grid layout to be passed as paremeter to SQL statement
+    Grid.LoadLayout(StrCol, ColumnWidthName, ColumnOrderName, ColumnNames, ColumnPrefix);
 
-  CmdType:=cmdText;
-  StrSQL:=EXECUTE + AgeViewReport + SPACE + QuotedStr(StrCol) + COMMA + QuotedStr(GroupID) + COMMA + QuotedStr(AgeDate) + COMMA + QuotedStr(IntToStr(Mode));
-  SqlToGrid(Grid, ExecSQL, False, False);
+    CmdType:=cmdText;
+    StrSQL:=EXECUTE + AgeViewReport + SPACE + QuotedStr(StrCol) + COMMA + QuotedStr(GroupID) + COMMA + QuotedStr(AgeDate) + COMMA + QuotedStr(IntToStr(Mode));
+    SqlToGrid(Grid, ExecSQL, False, False);
 
-  MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: SQL statement applied [' + StrSQL + '].');
+    MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: SQL statement applied [' + StrSQL + '].');
 
-  // Uninitialize
-  Grid.Freeze(False);
+    // Uninitialize
+    Grid.Freeze(False);
 
 end;
 
+
 /// <summary>
-///     Compute age summary.
+/// Compute age summary.
 /// </summary>
 
 procedure TAgeView.ComputeAgeSummary(Grid: TStringGrid);
@@ -159,12 +172,12 @@ begin
         begin
             // Not due and overdue ranges
             ANotDue:=ANotDue + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fNotDue, 1, 1), iCNT], 0);
-            ARange1:=ARange1 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRange1,  1, 1), iCNT], 0);
-            ARange2:=ARange2 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRange2,  1, 1), iCNT], 0);
-            ARange3:=ARange3 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRange3,  1, 1), iCNT], 0);
-            ARange4:=ARange4 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRange4,  1, 1), iCNT], 0);
-            ARange5:=ARange5 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRange5,  1, 1), iCNT], 0);
-            ARange6:=ARange6 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRange6,  1, 1), iCNT], 0);
+            ARange1:=ARange1 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRange1, 1, 1), iCNT], 0);
+            ARange2:=ARange2 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRange2, 1, 1), iCNT], 0);
+            ARange3:=ARange3 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRange3, 1, 1), iCNT], 0);
+            ARange4:=ARange4 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRange4, 1, 1), iCNT], 0);
+            ARange5:=ARange5 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRange5, 1, 1), iCNT], 0);
+            ARange6:=ARange6 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRange6, 1, 1), iCNT], 0);
 
             // Total amount, ledger balance
             Balance:=Balance + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fTotal, 1, 1), iCNT], 0);
@@ -186,8 +199,9 @@ begin
 
 end;
 
+
 /// <summary>
-///     Compute and assign risk classes to the string grid component (age view).
+/// Compute and assign risk classes to the string grid component (age view).
 /// </summary>
 
 procedure TAgeView.ComputeAndShowRCA(Grid: TStringGrid);
@@ -251,102 +265,105 @@ begin
 
 end;
 
+
 /// <summary>
-///     Clear all aging summary.
+/// Clear all aging summary.
 /// </summary>
 
 procedure TAgeView.ClearSummary;
 begin
-    MainForm.tcCOCODE1.Caption    :='n/a';
-    MainForm.tcCOCODE2.Caption    :='n/a';
-    MainForm.tcCOCODE3.Caption    :='n/a';
-    MainForm.tcCOCODE4.Caption    :='n/a';
-    MainForm.tcCURRENCY.Caption   :='n/a';
-    MainForm.tcTOTAL.Caption      :='0';
-    MainForm.valND.Caption        :='0';
-    MainForm.valR1.Caption        :='0';
-    MainForm.valR2.Caption        :='0';
-    MainForm.valR3.Caption        :='0';
-    MainForm.valR4.Caption        :='0';
-    MainForm.valR5.Caption        :='0';
-    MainForm.valR6.Caption        :='0';
-    MainForm.custRISKA.Caption    :='0';
-    MainForm.custRISKB.Caption    :='0';
-    MainForm.custRISKC.Caption    :='0';
-    MainForm.valTAMT.Caption      :='0';
-    MainForm.procND.Caption       :='0';
-    MainForm.procR1.Caption       :='0';
-    MainForm.procR2.Caption       :='0';
-    MainForm.procR3.Caption       :='0';
-    MainForm.procR4.Caption       :='0';
-    MainForm.procR5.Caption       :='0';
-    MainForm.procR6.Caption       :='0';
-    MainForm.valEXCEEDERS.Caption :='0';
-    MainForm.valTEXCEES.Caption   :='0';
-    MainForm.valTLIMITS.Caption   :='0';
-    MainForm.valTND.Caption       :='0';
-    MainForm.valPASTDUE.Caption   :='0';
-    MainForm.valDEFAULTED.Caption :='0';
+    MainForm.tcCOCODE1.Caption   :='n/a';
+    MainForm.tcCOCODE2.Caption   :='n/a';
+    MainForm.tcCOCODE3.Caption   :='n/a';
+    MainForm.tcCOCODE4.Caption   :='n/a';
+    MainForm.tcCURRENCY.Caption  :='n/a';
+    MainForm.tcTOTAL.Caption     :='0';
+    MainForm.valND.Caption       :='0';
+    MainForm.valR1.Caption       :='0';
+    MainForm.valR2.Caption       :='0';
+    MainForm.valR3.Caption       :='0';
+    MainForm.valR4.Caption       :='0';
+    MainForm.valR5.Caption       :='0';
+    MainForm.valR6.Caption       :='0';
+    MainForm.custRISKA.Caption   :='0';
+    MainForm.custRISKB.Caption   :='0';
+    MainForm.custRISKC.Caption   :='0';
+    MainForm.valTAMT.Caption     :='0';
+    MainForm.procND.Caption      :='0';
+    MainForm.procR1.Caption      :='0';
+    MainForm.procR2.Caption      :='0';
+    MainForm.procR3.Caption      :='0';
+    MainForm.procR4.Caption      :='0';
+    MainForm.procR5.Caption      :='0';
+    MainForm.procR6.Caption      :='0';
+    MainForm.valEXCEEDERS.Caption:='0';
+    MainForm.valTEXCEES.Caption  :='0';
+    MainForm.valTLIMITS.Caption  :='0';
+    MainForm.valTND.Caption      :='0';
+    MainForm.valPASTDUE.Caption  :='0';
+    MainForm.valDEFAULTED.Caption:='0';
 end;
 
+
 /// <summary>
-///     Update age view summary.
+/// Update age view summary.
 /// </summary>
 
 procedure TAgeView.UpdateSummary;
 begin
 
-    MainForm.tcTOTAL.Caption   :=IntToStr(CustAll);
+    MainForm.tcTOTAL.Caption:=IntToStr(CustAll);
 
     // Trade receivables summary
-    MainForm.valND.Caption     :=FormatFloat('#,##0.00', ANotDue);
-    MainForm.valR1.Caption     :=FormatFloat('#,##0.00', ARange1);
-    MainForm.valR2.Caption     :=FormatFloat('#,##0.00', ARange2);
-    MainForm.valR3.Caption     :=FormatFloat('#,##0.00', ARange3);
-    MainForm.valR4.Caption     :=FormatFloat('#,##0.00', ARange4);
-    MainForm.valR5.Caption     :=FormatFloat('#,##0.00', ARange5);
-    MainForm.valR6.Caption     :=FormatFloat('#,##0.00', ARange6);
-    MainForm.valTAMT.Caption   :=FormatFloat('#,##0.00', Balance);
+    MainForm.valND.Caption  :=FormatFloat('#,##0.00', ANotDue);
+    MainForm.valR1.Caption  :=FormatFloat('#,##0.00', ARange1);
+    MainForm.valR2.Caption  :=FormatFloat('#,##0.00', ARange2);
+    MainForm.valR3.Caption  :=FormatFloat('#,##0.00', ARange3);
+    MainForm.valR4.Caption  :=FormatFloat('#,##0.00', ARange4);
+    MainForm.valR5.Caption  :=FormatFloat('#,##0.00', ARange5);
+    MainForm.valR6.Caption  :=FormatFloat('#,##0.00', ARange6);
+    MainForm.valTAMT.Caption:=FormatFloat('#,##0.00', Balance);
 
     // Percentage
     if not (Balance = 0) then
     begin
-        MainForm.procND.Caption    :=FormatFloat('0.00', ( (ANotDue / Balance) * 100 )) + '%';
-        MainForm.procR1.Caption    :=FormatFloat('0.00', ( (ARange1 / Balance) * 100 )) + '%';
-        MainForm.procR2.Caption    :=FormatFloat('0.00', ( (ARange2 / Balance) * 100 )) + '%';
-        MainForm.procR3.Caption    :=FormatFloat('0.00', ( (ARange3 / Balance) * 100 )) + '%';
-        MainForm.procR4.Caption    :=FormatFloat('0.00', ( (ARange4 / Balance) * 100 )) + '%';
-        MainForm.procR5.Caption    :=FormatFloat('0.00', ( (ARange5 / Balance) * 100 )) + '%';
-        MainForm.procR6.Caption    :=FormatFloat('0.00', ( (ARange6 / Balance) * 100 )) + '%';
-        MainForm.procTAMT.Caption  :=FormatFloat('0.00', ( ( (ANotDue / Balance) +
-                                                             (ARange1 / Balance) +
-                                                             (ARange2 / Balance) +
-                                                             (ARange3 / Balance) +
-                                                             (ARange4 / Balance) +
-                                                             (ARange5 / Balance) +
-                                                             (ARange6 / Balance) ) * 100 ) ) + '%';
+        MainForm.procND.Caption  :=FormatFloat('0.00', ( (ANotDue / Balance) * 100 )) + '%';
+        MainForm.procR1.Caption  :=FormatFloat('0.00', ( (ARange1 / Balance) * 100 )) + '%';
+        MainForm.procR2.Caption  :=FormatFloat('0.00', ( (ARange2 / Balance) * 100 )) + '%';
+        MainForm.procR3.Caption  :=FormatFloat('0.00', ( (ARange3 / Balance) * 100 )) + '%';
+        MainForm.procR4.Caption  :=FormatFloat('0.00', ( (ARange4 / Balance) * 100 )) + '%';
+        MainForm.procR5.Caption  :=FormatFloat('0.00', ( (ARange5 / Balance) * 100 )) + '%';
+        MainForm.procR6.Caption  :=FormatFloat('0.00', ( (ARange6 / Balance) * 100 )) + '%';
+        MainForm.procTAMT.Caption:=FormatFloat('0.00', ( ( (ANotDue / Balance) +
+                                                           (ARange1 / Balance) +
+                                                           (ARange2 / Balance) +
+                                                           (ARange3 / Balance) +
+                                                           (ARange4 / Balance) +
+                                                           (ARange5 / Balance) +
+                                                           (ARange6 / Balance) ) * 100 ) ) + '%';
     end;
 
     // Risk classes
-    MainForm.valRISKA.Caption:=FormatFloat('#,##0.00', RCA);
-    MainForm.valRISKB.Caption:=FormatFloat('#,##0.00', RCB);
-    MainForm.valRISKC.Caption:=FormatFloat('#,##0.00', RCC);
+    MainForm.valRISKA.Caption :=FormatFloat('#,##0.00', RCA);
+    MainForm.valRISKB.Caption :=FormatFloat('#,##0.00', RCB);
+    MainForm.valRISKC.Caption :=FormatFloat('#,##0.00', RCC);
     MainForm.custRISKA.Caption:=IntToStr(RCAcount) + ' customers';
     MainForm.custRISKB.Caption:=IntToStr(RCBcount) + ' customers';
     MainForm.custRISKC.Caption:=IntToStr(RCCcount) + ' customers';
 
     // Exceeders and ranges
-    MainForm.valEXCEEDERS.Caption :=IntToStr(Exceeders);
-    MainForm.valTEXCEES.Caption   :=FormatFloat('#,##0.00', TotalExceed);
-    MainForm.valTLIMITS.Caption   :=FormatFloat('#,##0.00', Limits);
-    MainForm.valTND.Caption       :=MainForm.valND.Caption;
-    MainForm.valPASTDUE.Caption   :=FormatFloat('#,##0.00', (ARange1 + ARange2 + ARange3));
-    MainForm.valDEFAULTED.Caption :=FormatFloat('#,##0.00', (ARange4 + ARange5 + ARange6));
+    MainForm.valEXCEEDERS.Caption:=IntToStr(Exceeders);
+    MainForm.valTEXCEES.Caption  :=FormatFloat('#,##0.00', TotalExceed);
+    MainForm.valTLIMITS.Caption  :=FormatFloat('#,##0.00', Limits);
+    MainForm.valTND.Caption      :=MainForm.valND.Caption;
+    MainForm.valPASTDUE.Caption  :=FormatFloat('#,##0.00', (ARange1 + ARange2 + ARange3));
+    MainForm.valDEFAULTED.Caption:=FormatFloat('#,##0.00', (ARange4 + ARange5 + ARange6));
 
 end;
 
+
 /// <summary>
-///     Return company codes and currency assigned to a snapshot.
+/// Return company codes and currency assigned to a snapshot.
 /// </summary>
 
 procedure TAgeView.GetDetails(var Grid: TStringGrid);
@@ -382,7 +399,7 @@ begin
     Grid.Cells[3, 0]:=MainForm.tcCOCODE4.Caption; MainForm.FindCoData(3, MainForm.sgCompanyData, MainForm.sgCoCodes);
 
     /// <remarks>
-    ///     There should be always the same currency code for all stacked companies snapshots.
+    /// There should be always the same currency code for all stacked companies snapshots.
     /// </remarks>
 
     SL:=TStringList.Create;
@@ -406,11 +423,11 @@ end;
 
 
 /// <summary>
-///     Age view (ageing report snapshots) contains with numbers, we use Group3 with codes and descriptions to map age view data
-///     so it is more meaningful to the user.
+/// Age view (ageing report snapshots) contains with numbers, we use Group3 with codes and descriptions to map age view data
+/// so it is more meaningful to the user.
 /// </summary>
 /// <remarks>
-///     Do not run this method untill Group3 grid is populated.
+/// Do not run this method untill Group3 grid is populated.
 /// </remarks>
 
 procedure TAgeView.MapGroup3(var Grid: TStringGrid; Source: TStringGrid);
@@ -432,6 +449,7 @@ begin
                 Grid.Cells[Grid.ReturnColumn(TSnapshots.fGroup3, 1, 1), iCNT]:=Source.Cells[Source.ReturnColumn(TGroup3.Description, 1, 1), jCNT]
 end;
 
+
 procedure TAgeView.MapTable1(var Grid: TStringGrid; Source: TStringGrid);
 var
     iCNT:  integer;
@@ -450,6 +468,7 @@ begin
             then
                 Grid.Cells[Grid.ReturnColumn(TSnapshots.fPersonResponsible, 1, 1), iCNT]:=Source.Cells[Source.ReturnColumn(TPersonResponsible.ErpCode, 1, 1), jCNT]
 end;
+
 
 procedure TAgeView.MapTable2(var Grid: TStringGrid; Source: TStringGrid);
 var
@@ -470,6 +489,7 @@ begin
                 Grid.Cells[Grid.ReturnColumn(TSnapshots.fSalesResponsible, 1, 1), iCNT]:=Source.Cells[Source.ReturnColumn(TSalesResponsible.ErpCode, 1, 1), jCNT]
 end;
 
+
 procedure TAgeView.MapTable3(var Grid: TStringGrid; Source: TStringGrid);
 var
     iCNT:  integer;
@@ -488,6 +508,7 @@ begin
             then
                 Grid.Cells[Grid.ReturnColumn(TSnapshots.fAccountType, 1, 1), iCNT]:=Source.Cells[Source.ReturnColumn(TAccountType.ErpCode, 1, 1), jCNT]
 end;
+
 
 procedure TAgeView.MapTable4(var Grid: TStringGrid; Source: TStringGrid);
 var
@@ -509,11 +530,8 @@ begin
 end;
 
 
-// ---------------------------------------- ^
-
-
 /// <summary>
-///     Find match data in General Tables.
+/// Find match data in General Tables.
 /// </summary>
 
 function TAgeView.GetData(Code: string; Table: string; Entity: string): string;
@@ -573,8 +591,9 @@ begin
 
 end;
 
+
 /// <summary>
-///     Setup desired columns visibility.
+/// Setup desired columns visibility.
 /// </summary>
 
 procedure TAgeView.AgeViewMode(var Grid: TStringGrid; ModeBySection: string);
@@ -590,11 +609,12 @@ begin
                     Grid.ColWidths[Grid.ReturnColumn(Settings.FindSettingsKey(ModeBySection, iCNT), 1, 1)]:=100;
 end;
 
+
 /// <summary>
-///     Export array data to CSV file.
+/// Export array data to CSV file.
 /// </summary>
 
-procedure TAgeView.ExportToCSV(FileName: string; SourceArray: TLists);
+procedure TAgeView.ExportToCSV(FileName: string; SourceArray: TALists);
 var
     iCNT:    integer;
     jCNT:    integer;
@@ -876,7 +896,7 @@ begin
     // DATE AND TIME
 
     DatTim:=DateToStr(Now) + ' ' + TimeToStr(Now);
-    if SysUtils.DayOfWeek(Now) = 2 then
+    if System.SysUtils.DayOfWeek(Now) = 2 then
         bias:=3
             else
                 bias:=1;
@@ -1022,7 +1042,7 @@ begin
 end;
 
 { -------------------------------------------------------------------------------------------------------------------------- TRANSFER 'AGEVIEW' TO SQL SERVER }
-procedure TAgeView.Write(DestTable: string; SourceArray: TLists);
+procedure TAgeView.Write(DestTable: string; SourceArray: TALists);
 var
     Transaction:  string;
     DeleteData:   string;

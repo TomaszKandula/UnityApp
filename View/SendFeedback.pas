@@ -8,26 +8,23 @@ interface
 
 
 uses
-    Windows,
-    Messages,
-    SysUtils,
-    Variants,
-    Classes,
-    Graphics,
-    Controls,
-    Forms,
-    Dialogs,
-    StdCtrls,
-    Buttons,
-    ExtCtrls,
+    Winapi.Windows,
+    Winapi.Messages,
+    System.SysUtils,
+    SYstem.Variants,
+    System.Classes,
+    Vcl.Graphics,
+    Vcl.Controls,
+    Vcl.Forms,
+    Vcl.Dialogs,
+    Vcl.StdCtrls,
+    Vcl.Buttons,
+    Vcl.ExtCtrls,
     InterposerClasses;
 
 
 type
 
-    /// <summary>
-    ///     View form class with helpers for feedback window. Allow user to send report to the application support.
-    /// </summary>
 
     TReportForm = class(TForm)
         ReportMemo: TMemo;
@@ -48,6 +45,7 @@ type
         function WordCount(const InputStr: string): cardinal;
         function SendReport: boolean;
     end;
+
 
 var
     ReportForm: TReportForm;
@@ -70,7 +68,7 @@ uses
 
 
 /// <summary>
-///     Count words in TMemo component while user is writing.
+/// Count words in TMemo component while user is writing.
 /// </summary>
 
 function TReportForm.WordCount(const InputStr: string): cardinal;
@@ -105,7 +103,7 @@ end;
 
 
 /// <summary>
-///     Send feedback with user comments.
+/// Send feedback with user comments.
 /// </summary>
 
 function TReportForm.SendReport: boolean;

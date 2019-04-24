@@ -3,32 +3,24 @@
 
 unit ThreadUtilities;
 
+
 interface
 
-uses
-    Windows, SysUtils, Classes;
 
-    /// <remarks>
-    ///
-    /// </remarks>
+uses
+    Winapi.Windows,
+    System.SysUtils,
+    System.Classes;
+
 
 type
 
-    /// <summary>
-    ///
-    /// </summary>
 
     EThreadStackFinalized = class(Exception);
 
-    /// <summary>
-    ///
-    /// </summary>
 
     TSimpleThread = class;
 
-    /// <summary>
-    ///     Thread Safe Pointer Queue.
-    /// </summary>
 
     TThreadQueue = class
     private
@@ -43,15 +35,9 @@ type
         property    Finalized: Boolean read FFinalized;
     end;
 
-    /// <summary>
-    ///
-    /// </summary>
 
     TThreadExecuteEvent = procedure (Thread: TThread) of object;
 
-    /// <summary>
-    ///
-    /// </summary>
 
     TSimpleThread = class(TThread)
     private
@@ -62,15 +48,9 @@ type
         constructor Create(CreateSuspended: Boolean; ExecuteEvent: TThreadExecuteEvent; AFreeOnTerminate: Boolean);
     end;
 
-    /// <summary>
-    ///
-    /// </summary>
 
     TThreadPoolEvent = procedure (Data: Pointer; AThread: TThread) of Object;
 
-    /// <summary>
-    ///
-    /// </summary>
 
     TThreadPool = class(TObject)
     private
@@ -92,7 +72,7 @@ implementation
 
 
 /// <summary>
-///     Create IO Completion Queue.
+/// Create IO Completion Queue.
 /// </summary>
 
 constructor TThreadQueue.Create;
@@ -101,8 +81,9 @@ begin
     FFinalized:=False;
 end;
 
+
 /// <summary>
-///     Destroy Completion Queue.
+/// Destroy Completion Queue.
 /// </summary>
 
 destructor TThreadQueue.Destroy;
@@ -112,8 +93,9 @@ begin
     inherited;
 end;
 
+
 /// <summary>
-///     Post a finialize pointer on to the queue.
+/// Post a finialize pointer on to the queue.
 /// </summary>
 
 procedure TThreadQueue.Finalize;
@@ -122,8 +104,9 @@ begin
     FFinalized:=True;
 end;
 
+
 /// <summary>
-///     Pop will return false if the queue is completed.
+/// Pop will return false if the queue is completed.
 /// </summary>
 
 function TThreadQueue.Pop(var Data: Pointer): Boolean;
@@ -134,14 +117,14 @@ begin
     Result:=True;
 
     /// <remarks>
-    ///     Remove/Pop the first pointer from the queue or wait.
+    /// Remove/Pop the first pointer from the queue or wait.
     /// </remarks>
 
     if (not FFinalized) then
         GetQueuedCompletionStatus(FIOQueue, A, ULONG_PTR(Data), OL, INFINITE);
 
     /// <remarks>
-    ///     Check if we have finalized the queue for completion.
+    /// Check if we have finalized the queue for completion.
     /// </remarks>
 
     if (FFinalized) or (OL = Pointer($FFFFFFFF)) then
@@ -152,8 +135,9 @@ begin
     end;
 end;
 
+
 /// <summary>
-///     If stack is not finalized, add/push a pointer on to the end of the queue.
+/// If stack is not finalized, add/push a pointer on to the end of the queue.
 /// </summary>
 
 procedure TThreadQueue.Push(Data: Pointer);
@@ -189,6 +173,7 @@ begin
     FThreadQueue.Push(Data);
 end;
 
+
 constructor TThreadPool.Create(HandlePoolEvent: TThreadPoolEvent; MaxThreads: Integer);
 begin
     FHandlePoolEvent :=HandlePoolEvent;
@@ -199,6 +184,7 @@ begin
         FThreads.Add(TSimpleThread.Create(False, DoHandleThreadExecute, False));
 
 end;
+
 
 destructor TThreadPool.Destroy;
 var
@@ -222,6 +208,7 @@ begin
     inherited;
 end;
 
+
 procedure TThreadPool.DoHandleThreadExecute(Thread: TThread);
 var
     Data: Pointer;
@@ -231,7 +218,7 @@ begin
         try
             FHandlePoolEvent(Data, Thread);
         except
-            // Do nothing...
+            // Do nothing
         end;
     end;
 end;

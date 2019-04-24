@@ -3,11 +3,9 @@
 
 program Unity;
 
-/// <remarks>
-/// Large address aware - allow 32-bit program to use more than 2GB (up to 4GB). If still not enough, then compile as a 64-bit.
-/// </remarks>
 
 {$SetPEFlags $0020}
+
 
 uses
     Forms,
@@ -59,13 +57,11 @@ uses
     Await in 'View\Await.pas' {AwaitForm},
     Qms in 'View\Qms.pas' {QmsForm};
 
+
 type
     DWord = 0..$FFFFFFFF;
     TDwmIsCompositionEnabledFunc = function(out pfEnabled: boolean): HRESULT; stdcall;
 
-    /// <remarks>
-    /// Application constants are defined in main view throught "common.inc" file.
-    /// </remarks>
 
 var
     StrWrite:         string;
@@ -80,7 +76,7 @@ var
     Settings:         ISettings;
     LogText:          TThreadFileLog;
     Connection:       IConnectivity;
-    Assemblies:       TStrings;
+    Assemblies:       TAStrings;
     ChromiumExit:     boolean;
     ReleaseNumber:    cardinal;
     PathReleasePak:   string;
@@ -187,11 +183,8 @@ end;
 
 
 /// <summary>
-/// Unpack "Release.pak" file.
+/// Unpack "Release.pak" file. It requires "Update Form" to be already initialized.
 /// </summary>
-/// <remarks>
-/// It requires "Update Form" to be already initialized.
-/// </remarks>
 
 function UnzippReleaseFile(FileName: string; DestDir: string; EventLogPath: string): boolean;
 var
@@ -307,7 +300,7 @@ end;
 
 begin
 
-    {$WARN SYMBOL_PLATFORM OFF} { Windows only }
+    {$WARN SYMBOL_PLATFORM OFF} {Windows only}
     ReportMemoryLeaksOnShutdown:=DebugHook <> 0;
     {$WARN SYMBOL_PLATFORM ON}
 
@@ -329,7 +322,7 @@ begin
     /// Setup formats to user local settings.
     /// </summary>
 
-    {$WARN SYMBOL_PLATFORM OFF} { Windows only }
+    {$WARN SYMBOL_PLATFORM OFF} {Windows only}
     RegSettings:=TFormatSettings.Create(LOCALE_USER_DEFAULT);
     {$WARN SYMBOL_PLATFORM ON}
 

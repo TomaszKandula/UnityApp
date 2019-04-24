@@ -8,22 +8,22 @@ interface
 
 
 uses
-    Windows,
-    Messages,
-    SysUtils,
-    Variants,
-    Classes,
-    Graphics,
-    Controls,
-    Forms,
-    Dialogs,
-    StdCtrls,
-    ExtCtrls,
-    CheckLst,
-    Buttons,
-    pngimage,
-    DBGrids,
-    StrUtils,
+    Winapi.Windows,
+    Winapi.Messages,
+    System.SysUtils,
+    System.Variants,
+    System.Classes,
+    System.StrUtils,
+    Vcl.Graphics,
+    Vcl.Controls,
+    Vcl.Forms,
+    Vcl.Dialogs,
+    Vcl.StdCtrls,
+    Vcl.ExtCtrls,
+    Vcl.CheckLst,
+    Vcl.Buttons,
+    Vcl.Imaging.pngimage,
+    Vcl.DBGrids,
     InterposerClasses,
     Arrays;
 
@@ -49,20 +49,20 @@ type
     private
         var CheckEvent :  boolean;
         // Holds values and theirs state
-        var INF7       :  TLists;
-        var INF4       :  TLists;
-        var Gr3        :  TLists;
-        var SalesResp  :  TLists;
-        var PersonResp :  TLists;
-        var CustomerGrp:  TLists;
-        var AccountType:  TLists;
-        var FollowUp   :  TLists;
-        var CoCode     :  TLists;
-        var Agent      :  TLists;
-        var Division   :  TLists;
-        var Free1      :  TLists;
-        var Free2      :  TLists;
-        var Free3      :  TLists;
+        var INF7       :  TALists;
+        var INF4       :  TALists;
+        var Gr3        :  TALists;
+        var SalesResp  :  TALists;
+        var PersonResp :  TALists;
+        var CustomerGrp:  TALists;
+        var AccountType:  TALists;
+        var FollowUp   :  TALists;
+        var CoCode     :  TALists;
+        var Agent      :  TALists;
+        var Division   :  TALists;
+        var Free1      :  TALists;
+        var Free2      :  TALists;
+        var Free3      :  TALists;
         // Usage counter (how many times column was filtered)
         var countINF7       : integer;
         var countINF4       : integer;
@@ -91,10 +91,11 @@ type
         procedure FilterSelectCheck;
         procedure FilterPrep;
         procedure FilterCount(Change: integer);
-        procedure FilterInit(var FFilter: TLists);
-        procedure FilterNow(var FFilter: TLists);
-        procedure FilterRemove(var FFilter: TLists);
+        procedure FilterInit(var FFilter: TALists);
+        procedure FilterNow(var FFilter: TALists);
+        procedure FilterRemove(var FFilter: TALists);
     end;
+
 
 var
     FilterForm:  TFilterForm;
@@ -243,7 +244,7 @@ begin
 end;
 
 
-procedure TFilterForm.FilterInit(var FFilter: TLists);
+procedure TFilterForm.FilterInit(var FFilter: TALists);
 var
     iCNT:  integer;
     SL:    TStringList;
@@ -317,7 +318,7 @@ begin
 end;
 
 
-procedure TFilterForm.FilterNow(var FFilter: TLists);
+procedure TFilterForm.FilterNow(var FFilter: TALists);
 var
     iCNT:  integer;
     jCNT:  integer;
@@ -394,7 +395,7 @@ begin
 end;
 
 
-procedure TFilterForm.FilterRemove(var FFilter: TLists);
+procedure TFilterForm.FilterRemove(var FFilter: TALists);
 var
     iCNT:  integer;
     jCNT:  integer;
@@ -408,12 +409,12 @@ begin
         begin
             FilterList.Checked[iCNT]:=True;
 
-            for jCNT:=1 { SKIP HEADER } to FGrid.RowCount - 1 do
+            for jCNT:=1 {skip header} to FGrid.RowCount - 1 do
             begin
 
                 if (UpperCase(FFilter[iCNT, 0]) = UpperCase(FGrid.Cells[FColNumber, jCNT])) then
                 begin
-                { UNHIDE ROW }
+                {unhide row}
                     if
                     (
                         FFilter[iCNT, 1] = 'False'

@@ -8,28 +8,26 @@ interface
 
 
 uses
-    Windows,
-    Messages,
-    SysUtils,
-    Variants,
-    Classes,
-    Graphics,
-    Controls,
-    Forms,
-    Dialogs,
-    ComCtrls,
-    StdCtrls,
-    ExtCtrls,
-    Buttons,
+    Winapi.Windows,
+    Winapi.Messages,
+    System.SysUtils,
+    System.Variants,
+    System.Classes,
+    Vcl.Graphics,
+    Vcl.Controls,
+    Vcl.Forms,
+    Vcl.Dialogs,
+    Vcl.ComCtrls,
+    Vcl.StdCtrls,
+    Vcl.ExtCtrls,
+    Vcl.Buttons,
+    Vcl.Imaging.pngimage,
     InterposerClasses,
-    CustomTypes, Vcl.Imaging.pngimage;
+    CustomTypes;
 
 
 type
 
-    /// <summary>
-    /// View form class with helpers for mass mailer (separate window). Alow user to send emails to a selected customers with open items.
-    /// </summary>
 
     TViewMailerForm = class(TForm)
         PanelBottom: TPanel;
@@ -130,17 +128,12 @@ uses
 // -------------------------------------------------------------------------------------------------------------------------------------- START UP & RELEASE //
 
 
-/// <summary>
-/// Prepare window caption, window panels and list view object, so it can be later used as we do not make
-/// change in columns at runtime.
-/// </summary>
-
 procedure TViewMailerForm.FormCreate(Sender: TObject);
 var
     lsColumns:  TListColumn;
 begin
 
-    // List View
+    // Setup List View component
     lsColumns:=CustomerList.Columns.Add;
     lsColumns.Caption:='Lp';              // Row number from Age View
     lsColumns.Width  :=40;
@@ -150,19 +143,15 @@ begin
     lsColumns:=CustomerList.Columns.Add;
     lsColumns.Caption:='Customer number'; // From Age View 1
     lsColumns.Width  :=100;
-
     lsColumns:=CustomerList.Columns.Add;
     lsColumns.Caption:='Is sent?';        // Own indicator 4 (2)
     lsColumns.Width  :=80;
-
     lsColumns:=CustomerList.Columns.Add;
     lsColumns.Caption:='Send from';       // From Company Data 2 (3)
     lsColumns.Width  :=100;
-
     lsColumns:=CustomerList.Columns.Add;
     lsColumns.Caption:='Send to';         // From Address Book 3 (4)
     lsColumns.Width  :=100;
-
     lsColumns:=CustomerList.Columns.Add;
     lsColumns.Caption:='LBU name';        // From Company Data 5
     lsColumns.Width  :=80;
@@ -198,10 +187,6 @@ begin
 
 end;
 
-
-/// <summary>
-///
-/// </summary>
 
 procedure TViewMailerForm.FormDestroy(Sender: TObject);
 begin
@@ -254,10 +239,6 @@ end;
 // ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
 
 
-/// <summary>
-/// Get customer email address for given SCUID value.
-/// </summary>
-
 function TViewMailerForm.GetEmailAddress(Scuid: string): string;
 var
     Database: TDataTables;
@@ -282,10 +263,6 @@ begin
 end;
 
 
-/// <summary>
-/// Set email address used to send email.
-/// </summary>
-
 procedure TViewMailerForm.SetEmailAddresses(List: TListView);
 var
     EmailAddress: string;
@@ -306,10 +283,6 @@ begin
 
 end;
 
-
-/// <summary>
-///
-/// </summary>
 
 procedure TViewMailerForm.UpdateCompanyData(Source: TListView);
 var

@@ -8,41 +8,35 @@ interface
 
 
 uses
-    Windows,
-    Messages,
-    SysUtils,
-    Classes,
-    Diagnostics,
-    Graphics,
-    ADODB,
-    ComObj,
-    ComCtrls,
-    SyncObjs,
-    Dialogs,
-    DB,
+    Winapi.Windows,
+    Winapi.Messages,
+    System.SysUtils,
+    System.Classes,
+    System.Diagnostics,
+    System.Win.ComObj,
+    System.SyncObjs,
+    Vcl.Graphics,
+    Vcl.ComCtrls,
+    Vcl.Dialogs,
+    Data.Win.ADODB,
+    Data.DB,
     InterposerClasses,
     Arrays,
     CustomTypes;
 
     /// <remarks>
-    /// Asynchronous methods executed within single thread classes. Most of the thread classes aquire lock, so they can be called
-    /// only once at a time. If necessary, remove lock aquisition.
+    /// Asynchronous methods executed within single thread classes. Most of the thread classes aquire lock, so they cannot be called
+    /// more than once. If necessary, remove lock aquisition.
     /// </remarks>
 
 type
 
-    /// <summary>
-    /// Check connection to database (to be executed on regular basis).
-    /// </summary>
 
     TTCheckServerConnection = class(TThread)
     protected
         procedure Execute; override;
     end;
 
-    /// <summary>
-    /// Invoice tracker scanner.
-    /// </summary>
 
     TTInvoiceTrackerScanner = class(TThread)
     protected
@@ -51,9 +45,6 @@ type
         //...
     end;
 
-    /// <summary>
-    /// Invoice Tracker list refresh.
-    /// </summary>
 
     TTInvoiceTrackerRefresh = class(TThread)
     protected
@@ -66,9 +57,6 @@ type
         constructor Create(UserAlias: string);
     end;
 
-    /// <summary>
-    /// Generate agev view (aging report).
-    /// </summary>
 
     TTMakeAgeView = class(TThread)
     protected
@@ -83,9 +71,6 @@ type
         destructor  Destroy; override;
     end;
 
-    /// <summary>
-    /// Read selected age view.
-    /// </summary>
 
     TTReadAgeView = class(TThread)
     protected
@@ -101,9 +86,6 @@ type
         destructor  Destroy; override;
     end;
 
-    /// <summary>
-    /// Check periodically if new open items are populated by SSIS from ERP system.
-    /// </summary>
 
     TTOpenItemsScanner = class(TThread)
     protected
@@ -117,9 +99,6 @@ type
         destructor  Destroy; override;
     end;
 
-    /// <summary>
-    /// Read open items from database table and put it into String Grid component.
-    /// </summary>
 
     TTReadOpenItems = class(TThread)
     protected
@@ -134,9 +113,6 @@ type
         destructor  Destroy; override;
     end;
 
-    /// <summary>
-    /// Read and write from/to Address Book string grid.
-    /// </summary>
 
     TTAddressBook = class(TThread)
     protected
@@ -170,9 +146,6 @@ type
         );
     end;
 
-    /// <summary>
-    /// Send user feedback from ReportBug form.
-    /// </summary>
 
     TTSendUserFeedback = class(TThread)
     protected
@@ -186,9 +159,6 @@ type
         destructor  Destroy; override;
     end;
 
-    /// <summary>
-    /// Generate Excel report.
-    /// </summary>
 
     TTExcelExport = class(TThread)
     protected
@@ -202,9 +172,6 @@ type
         destructor  Destroy; override;
     end;
 
-    /// <summary>
-    /// Write daily comment into database table.
-    /// </summary>
 
     TTDailyComment = class(TThread)
     protected
@@ -222,6 +189,7 @@ type
         var FEmailManuStat: boolean;
         var FEventLog:      boolean;
         var FUpdateGrid:    boolean;
+        var FExtendComment: boolean;
     public
         property    IDThd:  integer read FIDThd;
         destructor  Destroy; override;
@@ -235,13 +203,11 @@ type
             EmailAutoStat:  boolean;
             EmailManuStat:  boolean;
             EventLog:       boolean;
-            UpdateGrid:     boolean = true
+            UpdateGrid:     boolean = true;
+            ExtendComment:  boolean = false
         );
     end;
 
-    /// <summary>
-    /// Write general comment int database table.
-    /// </summary>
 
     TTGeneralComment = class(TThread)
     protected
@@ -270,9 +236,6 @@ type
         );
     end;
 
-    /// <summary>
-    /// Send single account statement.
-    /// </summary>
 
     TTSendAccountStatement = class(TThread)
     protected
@@ -323,9 +286,6 @@ type
         );
     end;
 
-    /// <summary>
-    /// Send multiple account statements to the selected customers (the source is TListView).
-    /// </summary>
 
     TTSendAccountStatements = class(TThread)
     protected
@@ -354,9 +314,6 @@ type
         );
     end;
 
-    /// <summary>
-    /// Upload async. given general table. Use no locking.
-    /// </summary>
 
     TTGeneralTables = class(TThread)
     protected
@@ -369,11 +326,11 @@ type
         var FAutoRelease: boolean;
     public
         constructor Create(
-            TableName:      string;
-            DestGrid:       TStringGrid;
-            Columns:        string = '' {OPTION};
-            Conditions:     string = '' {OPTION};
-            AutoRelease:    boolean = True {OPTION}
+            TableName:   string;
+            DestGrid:    TStringGrid;
+            Columns:     string = ''    {Option};
+            Conditions:  string = ''    {Option};
+            AutoRelease: boolean = True {Option}
         );
     end;
 
@@ -451,6 +408,7 @@ begin
     pUserAlias:=UserAlias;
 end;
 
+
 procedure TTInvoiceTrackerRefresh.Execute;
 begin
     FIDThd:=CurrentThread.ThreadID;
@@ -479,19 +437,21 @@ begin
     FIDThd     :=0;
 end;
 
+
 destructor TTMakeAgeView.Destroy;
 begin
     FLock.Free;
 end;
 
+
 procedure TTMakeAgeView.Execute;
 var
-    THDMili:    extended;
-    THDSec:     extended;
-    StopWatch:  TStopWatch;
-    AgeView:    TAgeView;
-    UserCtrl:   TUserControl;
-    CanReload:  boolean;
+    THDMili:   extended;
+    THDSec:    extended;
+    StopWatch: TStopWatch;
+    AgeView:   TAgeView;
+    UserCtrl:  TUserControl;
+    CanReload: boolean;
 begin
 
     CanReload:=False;
@@ -578,10 +538,12 @@ begin
     FIDThd:=0;
 end;
 
+
 destructor TTReadAgeView.Destroy;
 begin
     FLock.Free;
 end;
+
 
 Procedure TTReadAgeView.Execute;
 var
@@ -666,10 +628,12 @@ begin
     FIDThd:=0;
 end;
 
+
 destructor TTOpenItemsScanner.Destroy;
 begin
     FLock.Free;
 end;
+
 
 procedure TTOpenItemsScanner.Execute;
 var
@@ -725,10 +689,12 @@ begin
     FIDThd:=0;
 end;
 
+
 destructor TTReadOpenItems.Destroy;
 begin
     FLock.Free;
 end;
+
 
 procedure TTReadOpenItems.Execute;
 var
@@ -810,10 +776,12 @@ begin
     FConditions:=Conditions;
 end;
 
+
 destructor TTAddressBook.Destroy;
 begin
     FLock.Free;
 end;
+
 
 procedure TTAddressBook.Execute;
 begin
@@ -870,41 +838,48 @@ begin
 
 end;
 
+
 function TTAddressBook.Read: boolean;
 var
     DataTables: TDataTables;
 begin
-    MainForm.ExecMessage(False, scBusyOn, IntToStr(scADDRESSBOOK));
+    Result:=True;
+    MainForm.ExecMessage(False, scBusyOn, scADDRESSBOOK.ToString);
     DataTables:=TDataTables.Create(MainForm.DbConnect);
     try
-        // Display busy animation
-        Synchronize(procedure
-        begin
-            //
-        end);
 
-        // Freeze StringGrid
-        FGrid.Freeze(True);
+        try
+            // Freeze StringGrid
+            FGrid.Freeze(True);
 
-        // Column selection
-        DataTables.Columns.Add(TAddressBook.UserAlias);
-        DataTables.Columns.Add(TAddressBook.Scuid);
-        DataTables.Columns.Add(TAddressBook.CustomerNumber);
-        DataTables.Columns.Add(TAddressBook.CustomerName);
-        DataTables.Columns.Add(TAddressBook.Emails);
-        DataTables.Columns.Add(TAddressBook.Estatements);
-        DataTables.Columns.Add(TAddressBook.PhoneNumbers);
-        DataTables.Columns.Add(TAddressBook.Contact);
-        DataTables.Columns.Add(TAddressBook.CoCode);
-        DataTables.Columns.Add(TAddressBook.Agent);
-        DataTables.Columns.Add(TAddressBook.Division);
+            // Column selection
+            DataTables.Columns.Add(TAddressBook.UserAlias);
+            DataTables.Columns.Add(TAddressBook.Scuid);
+            DataTables.Columns.Add(TAddressBook.CustomerNumber);
+            DataTables.Columns.Add(TAddressBook.CustomerName);
+            DataTables.Columns.Add(TAddressBook.Emails);
+            DataTables.Columns.Add(TAddressBook.Estatements);
+            DataTables.Columns.Add(TAddressBook.PhoneNumbers);
+            DataTables.Columns.Add(TAddressBook.Contact);
+            DataTables.Columns.Add(TAddressBook.CoCode);
+            DataTables.Columns.Add(TAddressBook.Agent);
+            DataTables.Columns.Add(TAddressBook.Division);
 
-        // Filter by User Aliaus (if given)
-        if FMode = adOpenForUser then
-            DataTables.CustFilter:=FConditions;
+            // Filter by User Alias (if given)
+            if FMode = adOpenForUser then
+                DataTables.CustFilter:=FConditions;
 
-        DataTables.OpenTable(TAddressBook.AddressBook);
-        Result:=DataTables.SqlToGrid(FGrid, DataTables.DataSet, True, True);
+            DataTables.OpenTable(TAddressBook.AddressBook);
+            if not(DataTables.SqlToGrid(FGrid, DataTables.DataSet, True, True)) then
+                MainForm.ExecMessage(False, mcWarn, 'No results found in the database.');
+
+        except
+            on E: Exception do
+            begin
+                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: ' + E.Message);
+                Result:=False;
+            end;
+        end;
 
     finally
         DataTables.Free;
@@ -919,9 +894,10 @@ begin
         FGrid.Freeze(False);
     end;
 
-    MainForm.ExecMessage(False, scBusyOff, IntToStr(scADDRESSBOOK));
+    MainForm.ExecMessage(False, scBusyOff, scADDRESSBOOK.ToString);
 
 end;
+
 
 function TTAddressBook.Update: boolean;
 var
@@ -1007,12 +983,13 @@ begin
 
 end;
 
+
 function TTAddressBook.Add: boolean;
 var
     iCNT:       integer;
     jCNT:       integer;
     SCUID:      string;
-    AddrBook:   TLists;
+    AddrBook:   TALists;
     Book:       TDataTables;
     Check:      cardinal;
 begin
@@ -1127,10 +1104,12 @@ begin
     FIDThd:=0;
 end;
 
+
 destructor TTSendUserFeedback.Destroy;
 begin
     FLock.Free;
 end;
+
 
 procedure TTSendUserFeedback.Execute;
 begin
@@ -1169,10 +1148,12 @@ begin
     FIDThd:=0;
 end;
 
+
 destructor TTExcelExport.Destroy;
 begin
     FLock.Free;
 end;
+
 
 procedure TTExcelExport.Execute;
 var
@@ -1219,16 +1200,17 @@ end;
 
 constructor TTDailyComment.Create
 (
-    CUID:           string;
-    Email:          boolean;
-    CallEvent:      boolean;
-    CallDuration:   integer;
-    Comment:        string;
+    CUID:          string;
+    Email:         boolean;
+    CallEvent:     boolean;
+    CallDuration:  integer;
+    Comment:       string;
     EmailReminder,
     EmailAutoStat,
-    EmailManuStat:  boolean;
-    EventLog:       boolean;
-    UpdateGrid:     boolean = true
+    EmailManuStat: boolean;
+    EventLog:      boolean;
+    UpdateGrid:    boolean = true;
+    ExtendComment: boolean = false
 );
 begin
     inherited Create(False);
@@ -1244,12 +1226,15 @@ begin
     FEmailManuStat:=EmailManuStat;
     FEventLog     :=EventLog;
     FUpdateGrid   :=UpdateGrid;
+    FExtendComment:=ExtendComment;
 end;
+
 
 destructor TTDailyComment.Destroy;
 begin
     FLock.Free;
 end;
+
 
 procedure TTDailyComment.Execute;
 var
@@ -1261,6 +1246,7 @@ var
     EmailAutoStat: integer;
     EmailManuStat: integer;
     DataCheckSum:  string;
+    CurrComment:   string;
 begin
     FIDThd:=CurrentThread.ThreadID;
     FLock.Acquire;
@@ -1276,6 +1262,11 @@ begin
             // Update exisiting comment
             if not (DailyText.DataSet.RecordCount = 0) then
             begin
+
+                // Allow to extend comment by adding to existing wording a new comment line
+                if FExtendComment then
+                    CurrComment:=DailyText.DataSet.Fields[TDailyComment.FixedComment].Value + CRLF;
+
                 DailyText.CleanUp;
 
                 // Define columns, values and conditions
@@ -1329,7 +1320,7 @@ begin
                 if not(FFixedComment = '') then
                 begin
                     DailyText.Columns.Add(TDailyComment.FixedComment);
-                    DailyText.Values.Add(FFixedComment);
+                    DailyText.Values.Add(CurrComment + FFixedComment);
                 end;
 
                 // Execute
@@ -1477,10 +1468,12 @@ begin
     FEventLog    :=EventLog;
 end;
 
+
 destructor TTGeneralComment.Destroy;
 begin
     FLock.Free;
 end;
+
 
 procedure TTGeneralComment.Execute;
 var
@@ -1556,8 +1549,8 @@ begin
             begin
                 GenText.CleanUp;
                 // Define columns and values
-                GenText.Columns.Add(TGeneralComment.Cuid);       GenText.Values.Add(FCUID);
-                GenText.Columns.Add(TGeneralComment.Stamp);      GenText.Values.Add(DateTimeToStr(Now));
+                GenText.Columns.Add(TGeneralComment.Cuid);      GenText.Values.Add(FCUID);
+                GenText.Columns.Add(TGeneralComment.Stamp);     GenText.Values.Add(DateTimeToStr(Now));
                 GenText.Columns.Add(TGeneralComment.UserAlias); GenText.Values.Add(UpperCase(MainForm.WinUserName));
 
                 if not(FFixedComment = strNULL) then
@@ -1689,10 +1682,12 @@ begin
     FBankDetails:=BankDetails;
 end;
 
+
 destructor TTSendAccountStatement.Destroy;
 begin
     FLock.Free;
 end;
+
 
 procedure TTSendAccountStatement.Execute;
 var
@@ -1768,12 +1763,13 @@ begin
                         False,
                         False,
                         0,
-                        'New account statement has been sent to the customer',
+                        'New communication has been sent to the customer',
                         False,
                         True,
                         False,
                         True,
-                        False
+                        False,
+                        True
                     );
                     CommThread.WaitFor;
                 end;
@@ -1785,12 +1781,13 @@ begin
                         False,
                         False,
                         0,
-                        'New account statement has been sent to the customer',
+                        'New communication has been sent to the customer',
                         False,
                         False,
                         True,
                         True,
-                        False
+                        False,
+                        True
                     );
                     CommThread.WaitFor;
                 end;
@@ -1853,10 +1850,12 @@ begin
     FMailerList:=MailerList;
 end;
 
+
 destructor TTSendAccountStatements.Destroy;
 begin
     FLock.Free;
 end;
+
 
 procedure TTSendAccountStatements.Execute;
 var
@@ -1952,6 +1951,7 @@ begin
     FConditions :=Conditions;
     FAutoRelease:=AutoRelease;
 end;
+
 
 procedure TTGeneralTables.Execute;
 var

@@ -8,27 +8,21 @@ interface
 
 
 uses
-    SQL,
-    Model,
-    Settings,
-    SysUtils,
-    Windows,
-    Messages,
-    StdCtrls,
-    Classes,
-    StrUtils,
-    Variants,
+    Winapi.Windows,
+    Winapi.Messages,
+    System.SysUtils,
+    System.Classes,
+    System.StrUtils,
+    System.Variants,
+    System.Generics.Collections,
+    Vcl.StdCtrls,
     CDO_TLB,
-    InterposerClasses,
     CustomTypes,
-    System.Generics.Collections;
+    InterposerClasses;
 
 
 type
 
-    /// <summary>
-    ///
-    /// </summary>
 
     IMailer = Interface(IInterface)
     ['{3D803B98-BE4F-49A4-A2B5-7F323772E5B4}']
@@ -36,7 +30,7 @@ type
     end;
 
     /// <summary>
-    /// Base class responsible for sending email (using CDOSYS).
+    /// Base class responsible for sending email using CDOSYS.
     /// </summary>
 
     TMailer = class(TInterfacedObject, IMailer)
@@ -135,10 +129,13 @@ implementation
 
 
 uses
+    Data.Win.ADODB,
     Main,
-    ADODB,
     Tracker,
-    Actions;
+    Actions,
+    SQL,
+    Model,
+    Settings;
 
 
 // -------------------------------------------------------------------------------------------------------------------------------------------- MAILER CLASS //
@@ -155,10 +152,6 @@ begin
     if Assigned(FAttachments) then FAttachments.Free;
 end;
 
-
-/// <summary>
-/// Send email through CDOSYS.
-/// </summary>
 
 function TMailer.SendEmail(oauth: integer): boolean;
 var
@@ -228,9 +221,6 @@ begin
 
 end;
 
-/// <summary>
-/// Send routine.
-/// </summary>
 
 function TMailer.SendNow: boolean;
 var
@@ -263,10 +253,6 @@ begin
 end;
 
 
-/// <summary>
-/// Lead template from file.
-/// </summary>
-
 function TDocument.LoadTemplate(FileName: string): string;
 var
     SL: TStringList;
@@ -281,10 +267,6 @@ begin
 end;
 
 
-/// <summary>
-/// Save generated email body to a file.
-/// </summary>
-
 procedure TDocument.SaveOutput(FileName: string);
 var
     SL: TStringList;
@@ -298,10 +280,6 @@ begin
     end;
 end;
 
-
-/// <summary>
-/// Generate HTML code containing open items.
-/// </summary>
 
 function TDocument.BuildHTML: integer;
 
@@ -512,9 +490,6 @@ begin
 
 end;
 
-/// <summary>
-/// Send statement/reminder on given email address.
-/// </summary>
 
 function TDocument.SendDocument;
 //var RAND: integer; (* DEBUG *)

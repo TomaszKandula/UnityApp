@@ -8,19 +8,19 @@ interface
 
 
 uses
-    Windows,
-    Messages,
-    SysUtils,
-    Variants,
-    Classes,
-    Graphics,
-    Controls,
-    Forms,
-    Dialogs,
-    ExtCtrls,
-    Gauges,
-    StdCtrls,
-    pngimage,
+    Winapi.Windows,
+    Winapi.Messages,
+    System.SysUtils,
+    System.Variants,
+    System.Classes,
+    Vcl.Graphics,
+    Vcl.Controls,
+    Vcl.Forms,
+    Vcl.Dialogs,
+    Vcl.ExtCtrls,
+    Vcl.Samples.Gauges,
+    Vcl.StdCtrls,
+    Vcl.Imaging.pngimage,
     Main;
 
 
@@ -41,7 +41,7 @@ type
         CentreText: TLabel;
         FireMonkey: TImage;
     protected
-//        procedure CreateParams(var Params: TCreateParams); override;
+        {procedure CreateParams(var Params: TCreateParams); override;}
     end;
 
 

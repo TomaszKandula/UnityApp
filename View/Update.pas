@@ -8,26 +8,23 @@ interface
 
 
 uses
-    Windows,
-    Messages,
-    SysUtils,
-    Variants,
-    Classes,
-    Graphics,
-    Controls,
-    Forms,
-    Dialogs,
-    StdCtrls,
-    ExtCtrls,
-    GIFImg,
-    Gauges;
+    Winapi.Windows,
+    Winapi.Messages,
+    System.SysUtils,
+    System.Variants,
+    System.Classes,
+    Vcl.Graphics,
+    Vcl.Controls,
+    Vcl.Forms,
+    Vcl.Dialogs,
+    Vcl.StdCtrls,
+    Vcl.ExtCtrls,
+    Vcl.imaging.GIFImg,
+    Vcl.Samples.Gauges;
 
 
 type
 
-    /// <summary>
-    /// Form shown during update process. This window requires to be updated to display changed content.
-    /// </summary>
 
     TUpdateForm = class(TForm)
         Background: TShape;

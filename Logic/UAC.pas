@@ -3,16 +3,25 @@
 
 unit UAC;
 
+
 interface
 
+
 uses
-    Arrays, InterposerClasses, Model, SQL, SysUtils, Windows, StdCtrls, Classes, ADODB, StrUtils, Variants;
+    Winapi.Windows,
+    System.SysUtils,
+    System.Classes,
+    System.StrUtils,
+    System.Variants,
+    Vcl.StdCtrls,
+    Data.Win.ADODB,
+    Arrays,
+    InterposerClasses,
+    Model,
+    SQL;
 
 type
 
-    /// <summary>
-    ///
-    /// </summary>
 
     TUserControl = class(TDataTables)
     {$TYPEINFO ON}
@@ -21,7 +30,7 @@ type
     public
         property UserName: string read FUserName write FUserName;
         function GetAccessData(DataType: integer): string;
-        function GetGroupList(var List: TLists; GroupListBox: TComboBox): boolean;
+        function GetGroupList(var List: TALists; GroupListBox: TComboBox): boolean;
         function GetAgeDates(AgeDatesBox: TComboBox; GroupID: string): boolean;
     end;
 
@@ -34,10 +43,6 @@ uses
 
 // --------------------------------------------------------------------------------------------------------------- READ THE ACCESS DATA FOR GIVEN USER ALIAS //
 
-
-/// <summary>
-///
-/// </summary>
 
 function TUserControl.GetAccessData(DataType: integer): string;
 begin
@@ -64,11 +69,8 @@ begin
 
 end;
 
-/// <summary>
-///     Read group ID and Group Name for given User Name.
-/// </summary>
 
-function TUserControl.GetGroupList(var List: TLists; GroupListBox: TComboBox): boolean;
+function TUserControl.GetGroupList(var List: TALists; GroupListBox: TComboBox): boolean;
 var
     iCNT:     integer;
     UserKey:  string;
@@ -107,9 +109,6 @@ begin
 
 end;
 
-/// <summary>
-///     Age dates for FOR selected groups ID.
-/// </summary>
 
 function TUserControl.GetAgeDates(AgeDatesBox: TComboBox; GroupID: string): boolean;
 var

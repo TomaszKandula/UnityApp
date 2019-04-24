@@ -8,26 +8,23 @@ interface
 
 
 uses
-    Windows,
-    Messages,
-    SysUtils,
-    Variants,
-    Classes,
-    Graphics,
-    Controls,
-    Forms,
-    Dialogs,
-    ExtCtrls,
-    Buttons,
-    StdCtrls,
+    Winapi.Windows,
+    Winapi.Messages,
+    System.SysUtils,
+    System.Variants,
+    System.Classes,
+    Vcl.Graphics,
+    Vcl.Controls,
+    Vcl.Forms,
+    Vcl.Dialogs,
+    Vcl.ExtCtrls,
+    Vcl.Buttons,
+    Vcl.StdCtrls,
     InterposerClasses;
 
 
 type
 
-    /// <summary>
-    /// View form class with helpers for dispaying phone list from Address Book.
-    /// </summary>
 
     TPhoneListForm = class(TForm)
         PhoneList: TMemo;
@@ -95,19 +92,11 @@ end;
 // ------------------------------------------------------------------------------------------------------------------------------------- MAIN THREAD METHODS //
 
 
-/// <summary>
-/// Initialize and setup caption and the panel borders for TMemo component inside of it.
-/// </summary>
-
 procedure TPhoneListForm.FormCreate(Sender: TObject);
 begin
     PanelMemo.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
 end;
 
-
-/// <summary>
-/// Clear all.
-/// </summary>
 
 procedure TPhoneListForm.FormShow(Sender: TObject);
 begin
@@ -118,10 +107,6 @@ end;
 
 // ------------------------------------------------------------------------------------------------------------------------------------------ BUTTONS EVENTS //
 
-
-/// <summary>
-/// Submit changes, check if only restricted characters are entered.
-/// </summary>
 
 procedure TPhoneListForm.btnSubmitClick(Sender: TObject);
 begin
@@ -144,10 +129,6 @@ begin
 end;
 
 
-/// <summary>
-/// Dismiss window.
-/// </summary>
-
 procedure TPhoneListForm.btnCancelClick(Sender: TObject);
 begin
     Close;
@@ -156,10 +137,6 @@ end;
 
 // ----------------------------------------------------------------------------------------------------------------------------------------- KEYBOARD EVENTS //
 
-
-/// <summary>
-/// Close window.
-/// </summary>
 
 procedure TPhoneListForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin

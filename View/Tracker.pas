@@ -8,29 +8,26 @@ interface
 
 
 uses
-    Windows,
-    Messages,
-    SysUtils,
-    Variants,
-    Classes,
-    Graphics,
-    Controls,
-    Forms,
-    Dialogs,
-    ExtCtrls,
-    StdCtrls,
-    Buttons,
-    StrUtils,
-    ADODB,
-    ComCtrls,
+    Winapi.Windows,
+    Winapi.Messages,
+    System.SysUtils,
+    System.Variants,
+    System.Classes,
+    System.StrUtils,
+    Vcl.Graphics,
+    Vcl.Controls,
+    Vcl.Forms,
+    Vcl.Dialogs,
+    Vcl.ExtCtrls,
+    Vcl.StdCtrls,
+    Vcl.Buttons,
+    Vcl.ComCtrls,
+    Data.Win.ADODB,
     InterposerClasses;
 
 
 type
 
-    /// <summary>
-    ///     View form class for registering customers to Invoice Tracker.
-    /// </summary>
 
     TTrackerForm = class(TForm)
         Label6: TLabel;
@@ -114,10 +111,6 @@ uses
 // ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
 
 
-/// <summary>
-///
-/// </summary>
-
 procedure TTrackerForm.GetSendFrom(List: TComboBox);
 var
     Database: TDataTables;
@@ -168,10 +161,6 @@ begin
 end;
 
 
-/// <summary>
-///     Set email that should be used for sending statements and reminders.
-/// </summary>
-
 procedure TTrackerForm.GetEmailAddress(Scuid: string);
 var
     Database: TDataTables;
@@ -198,10 +187,6 @@ begin
 end;
 
 
-/// <summary>
-///     Set email address used to send emails.
-/// </summary>
-
 procedure TTrackerForm.SetEmailAddresses(List: TListView);
 var
     iCNT: integer;
@@ -226,14 +211,10 @@ begin
 end;
 
 
-/// <summary>
-///
-/// </summary>
-
 /// <remarks>
-///     Layout file format: "reminder_<team>_<country>_<number>.htm".
-///     Remove last six characters to display in list box.
-///     NOTE: We use TStringList as a middleman to remove duplicates.
+/// Layout file format: "reminder_<team>_<country>_<number>.htm".
+/// Remove last six characters to display in list box.
+/// Note: We use TStringList as a middleman to remove duplicates.
 /// </remarks>
 
 procedure TTrackerForm.GetLayouts(LayoutContainer: TComboBox);
@@ -295,10 +276,6 @@ begin
 end;
 
 
-/// <summary>
-///
-/// </summary>
-
 procedure TTrackerForm.ApplyTimings(List: TListView);
 var
     SelItem: integer;
@@ -357,10 +334,6 @@ begin
 
 end;
 
-
-/// <summary>
-///
-/// </summary>
 
 procedure TTrackerForm.SaveToDb(List: TListView);
 var
@@ -531,20 +504,12 @@ begin
 end;
 
 
-/// <summary>
-///
-/// </summary>
-
 procedure TTrackerForm.FormDestroy(Sender: TObject);
 begin
     if Assigned(Multiselect) then
         Multiselect.Free;
 end;
 
-
-/// <summary>
-///
-/// </summary>
 
 procedure TTrackerForm.FormShow(Sender: TObject);
 begin
@@ -560,10 +525,6 @@ begin
     Exp_Rem3_Switch.Checked:=True;
 end;
 
-
-/// <summary>
-///
-/// </summary>
 
 procedure TTrackerForm.FormActivate(Sender: TObject);
 begin

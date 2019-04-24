@@ -29,22 +29,18 @@ uses
     CheckLst;
 
 
-    /// <summary>
-    /// This unit contains all extensions of standard components introduced via interposer class.
-    /// There is no need to register component as we do not make new derived class.
-    /// </summary>
-
 type
 
-    /// <remarks>
-    /// Reference to TSTringGrid object, necessary for implementing "delete" function.
-    /// </remarks>
+
+    // Reference to TSTringGrid object, necessary for implementing "delete" function.
     TAbstractGrid = class(Grids.TStringGrid);
+
 
     TCheckListBox = class(CheckLst.TCheckListBox)
     published
         procedure Freeze(PaintWnd: boolean);
     end;
+
 
     TEdit = Class(StdCtrls.TEdit)
     public
@@ -53,6 +49,7 @@ type
         procedure CreateParams(var params: TCreateParams); override;
         property  Alignment: TAlignment read FAlignment write SetAlignment;
     end;
+
 
     TShape = class(ExtCtrls.TShape)
     protected
@@ -67,6 +64,7 @@ type
         var CaptionLeft : integer;
         var CaptionTop  : integer;
     end;
+
 
     TPanel = class(ExtCtrls.TPanel)
     protected
@@ -85,6 +83,7 @@ type
         var mcBrushColor  :  TColor;
     end;
 
+
     TStringGrid = class(Grids.TStringGrid)
     protected
         procedure Paint; override;
@@ -92,8 +91,8 @@ type
         var FHideFocusRect: boolean;
         var FOpenThdId:     integer;
     public
-        var SqlColumns: TLists;
-        var UpdatedRowsHolder: TIntigers;
+        var SqlColumns: TALists;
+        var UpdatedRowsHolder: TAIntigers;
         property  OpenThdId: integer read FOpenThdId write FOpenThdId;
         property  HideFocusRect: boolean read FHideFocusRect write FHideFocusRect;
         procedure SetUpdatedRow(Row: integer);
@@ -120,6 +119,7 @@ type
         procedure ShowGrids;
     end;
 
+
     TListView = class(ComCtrls.TListView)
     published
         procedure Freeze(PaintWnd: boolean);
@@ -138,7 +138,7 @@ uses
 // --------------------------------------------------------------------------------------------------------------------------- EXTENSION OF 'TLISTBOX' CLASS //
 
 /// <summary>
-/// Allow to freeze component.
+/// Allow to freeze component during heavy duty task, or when we do not want to show control during updating.
 /// </summary>
 
 procedure TCheckListBox.Freeze(PaintWnd: Boolean);
@@ -227,7 +227,7 @@ end;
 
 
 /// <summary>
-///     Drwa text inside TShape component. Please note that font is fixed.
+/// Drwa text inside TShape component. Please note that font is fixed.
 /// </summary>
 
 procedure TShape.ShapeText(Left, Top: integer; StrText: string; Format: TFontStyles);
@@ -254,7 +254,7 @@ begin
     inherited;
 
     /// <remarks>
-    /// None of the given variables can be black.
+    /// None of the given variables can be coloured black.
     /// </remarks>
 
     if (mcBrushColor   <> $00000000) and
@@ -302,7 +302,7 @@ procedure TPanel.PanelBorders(FillColor, TopColor, BottomColor, LeftColor, Right
 begin
     // Turn-off styles
     BorderStyle   :=bsNone;
-    // assign colors and draw
+    // Assign colors and draw
     mcBrushColor  :=FillColor;
     PenColorTop   :=TopColor;
     PenColorBottom:=BottomColor;
@@ -499,7 +499,7 @@ begin
                 begin
 
                     // Paste into visible row
-                    Cells[CLeft, iCNT]:=TempClip.Strings[RowCounter];
+                    Cells[CLeft, iCNT]:=Clipbrd; //TempClip.Strings[RowCounter];
 
                     // Count visible cells starting from
                     // given top position
@@ -726,7 +726,7 @@ end;
 
 procedure TStringGrid.SetColWidth(FirstDefault: integer; AddSpace: integer; Limit: integer);
 var
-    tblArray:  TIntigers;
+    tblArray:  TAIntigers;
     iCNT:      integer;
     jCNT:      integer;
     NewWidth:  integer;
@@ -902,9 +902,9 @@ end;
 /// are used to build sql query, this is because we use SQL expressions to obtain initial output
 /// with filtering and/or sorting etc. Separate filtering to some extend is allowed in string grid
 /// however, separate sorting is not implemented to restrict user form "playing around"
-/// therefore, there is one place (server) where there is decided how to display data to user,
+/// therefore, there is one place (server) where there is decided how to display data to the user,
 /// this is part of automation and standard approach across all users, so the user is forced
-/// in certain direction by automation, and thus can obtain better results, etc.
+/// to work certain way, and thus we believe can obtain better results, etc.
 /// </remarks>
 
 function TStringGrid.LoadLayout(var StrCol: string; ColWidthName: string; ColOrderName: string; ColNames: string; ColPrefix: string): boolean;
@@ -1105,13 +1105,6 @@ begin
 end;
 
 
-/// <summary>
-/// Allow to disable or enable component drawing.
-/// </summary>
-/// <param name="PaintWnd">
-/// Boolean, set True to disable painting.
-/// </param>
-
 procedure TStringGrid.Freeze(PaintWnd: Boolean);
 begin
 
@@ -1208,10 +1201,6 @@ begin
 
 end;
 
-
-/// <summary>
-/// Export to CSV (with given delimiter) all string grid content.
-/// </summary>
 
 function TStringGrid.ExportCSV(DialogBox: TSaveDialog; Delimiter: string): boolean;
 var
@@ -1320,13 +1309,6 @@ begin
         - [goHorzLine];
 end;
 
-
-/// <summary>
-/// Allow to disable or enable component drawing.
-/// </summary>
-/// <param name="PaintWnd">
-/// Boolean, set True to disable painting.
-/// </param>
 
 procedure TListView.Freeze(PaintWnd: Boolean);
 begin

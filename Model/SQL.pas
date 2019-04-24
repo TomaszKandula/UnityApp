@@ -8,13 +8,13 @@ interface
 
 
 uses
-    SysUtils,
-    Windows,
-    Classes,
-    ADODB,
-    StrUtils,
-    Variants,
-    StdCtrls,
+    Winapi.Windows,
+    System.SysUtils,
+    System.Classes,
+    System.StrUtils,
+    System.Variants,
+    Vcl.StdCtrls,
+    Data.Win.ADODB,
     InterposerClasses,
     Arrays;
 
@@ -27,20 +27,26 @@ type
 
     TMSSQL = class
     {$TYPEINFO ON}
+    private
+        var FParamList:    TALists;
+        var FStrSQL:       string;
+        var FADOCon:       TADOConnection;
+        var FCmdType:      TCommandType;
+        var FRowsAffected: integer;
+        var FLastErrorMsg: string;
     public
-        var FParamList  : TLists;
-        var StrSQL      : string;
-        var ADOCon      : TADOConnection;
-        var CmdType     : TCommandType;
-        var RowsAffected: integer;
-        var LastErrorMsg: string;
-    published
+        property StrSQL:       string         read FStrSQL        write FStrSQL;
+        property CmdType:      TCommandType   read FCmdType       write FCmdType;
+        property ParamList:    TALists        read FParamList;
+        property ADOCon:       TADOConnection read FADOCon;
+        property RowsAffected: integer        read FRowsAffected;
+        property LastErrorMsg: string         read FLastErrorMsg;
         constructor Create(Connector: TADOConnection);
         destructor  Destroy; override;
         procedure   ClearSQL;
         function    CleanStr(Text: string; Quoted: boolean): string;
         function    ExecSQL: _Recordset;
-        function    ToSqlInsert(Table: TLists; Grid: TStringGrid; tblName: string; tblColumns: string; HeaderPresent: boolean = True {=OPTION}): string;
+        function    ToSqlInsert(Table: TALists; Grid: TStringGrid; tblName: string; tblColumns: string; HeaderPresent: boolean = True{Option}): string;
         function    SqlToGrid(var Grid: TStringGrid; RS: _Recordset; AutoNoCol: boolean; Headers: boolean): boolean;
         function    SqlToSimpleList(var List: TComboBox; RS: _Recordset): boolean;
     end;
@@ -56,22 +62,21 @@ type
         var FidThd:       integer;
         var FCustFilter:  string;
     public
-        var DataSet:          _Recordset;
-        var Columns:          TStringList;
-        var Values:           TStringList;
-        var Conditions:       TStringList;
+        var DataSet:    _Recordset;
+        var Columns:    TStringList;
+        var Values:     TStringList;
+        var Conditions: TStringList;
         property idThd:       integer  read FidThd      write FidThd;
         property CustFilter:  string   read FCustFilter write FCustFilter;
         property ConnStr:     string   read FConnStr;
-    published
         constructor Create(Connector: TADOConnection); overload;
         destructor  Destroy; override;
         function    BracketStr(Expression: string; BracketType: integer): string;
         function    ColumnsToList(Holder: TStringList; Quoted: integer): string;
         procedure   CleanUp;
         function    OpenTable(TableName: string): boolean;
-        function    InsertInto(TableName: string; TransactionType: integer; ExtSourceGrid: TStringGrid = nil {=OPTION}; ExtSourceArray: TLists = nil {=OPTION}; HeaderPresent: boolean = True {=OPTION}): boolean;
-        function    UpdateRecord(TableName: string; TransactionType: integer; SingleCondition: string = '' {=OPTIONAL} ): boolean;
+        function    InsertInto(TableName: string; TransactionType: integer; ExtSourceGrid: TStringGrid = nil{Option}; ExtSourceArray: TALists = nil{Option}; HeaderPresent: boolean = True{Option}): boolean;
+        function    UpdateRecord(TableName: string; TransactionType: integer; SingleCondition: string = ''{Option}): boolean;
         function    DeleteRecord(TableName: string; KeyName: string; KeyValue: string; TransactionType: integer): boolean;
     end;
 
@@ -91,15 +96,14 @@ uses
 
 constructor TMSSQL.Create(Connector: TADOConnection);
 begin
-    StrSQL :='';
-    ADOCon :=Connector;
-    CmdType:=cmdText;
+    FStrSQL :='';
+    FADOCon :=Connector;
+    FCmdType:=cmdText;
     SetLength(FParamList, 1, 2);
 end;
 
 destructor TMSSQL.Destroy;
 begin
-    (* EMPTY *)
     inherited;
 end;
 
@@ -113,9 +117,9 @@ end;
 
 procedure TMSSQL.ClearSQL;
 begin
-    StrSQL:='';
-    LastErrorMsg:='';
-    RowsAffected:=0;
+    FStrSQL:='';
+    FLastErrorMsg:='';
+    FRowsAffected:=0;
 end;
 
 
@@ -160,12 +164,12 @@ begin
         try
             Query.CommandType:=CmdType;
             Query.CommandText:=StrSQL;
-            RowsAffected:=0;
-            Result:=Query.Execute(RowsAffected, 0);
+            FRowsAffected:=0;
+            Result:=Query.Execute(FRowsAffected, 0);
         except
             on E: Exception do
             begin
-                LastErrorMsg:=E.Message;
+                FLastErrorMsg:=E.Message;
                 Result:=nil;
             end;
         end;
@@ -188,7 +192,7 @@ end;
 //  It uses multi-dimensional array or StringGrid type.
 /// </remarks>
 
-function TMSSQL.ToSqlInsert(Table: TLists; Grid: TStringGrid; tblName: string; tblColumns: string; HeaderPresent: boolean = True {=OPTION}): string;
+function TMSSQL.ToSqlInsert(Table: TALists; Grid: TStringGrid; tblName: string; tblColumns: string; HeaderPresent: boolean = True {=OPTION}): string;
 var
     iCNT:  integer;
     jCNT:  integer;
@@ -369,10 +373,6 @@ end;
 // ---------------------------------------------------------------------------------------------------------------------------------------- CREATE & RELEASE //
 
 
-/// <summary>
-/// Initialize class with three string lists holding columns, vaues and conditions (for WHERE clause etc.).
-/// </summary>
-
 constructor TDataTables.Create(Connector: TADOConnection);
 begin
     FidThd     :=0;
@@ -384,10 +384,6 @@ begin
     inherited;
 end;
 
-
-/// <summary>
-///
-/// </summary>
 
 destructor TDataTables.Destroy;
 begin
@@ -444,10 +440,6 @@ begin
 end;
 
 
-/// <summary>
-/// Clear all the list.
-/// </summary>
-
 procedure TDataTables.CleanUp;
 begin
     Columns.Clear;
@@ -467,7 +459,7 @@ begin
 
     try
         if CustFilter =  '' then
-            StrSQL:=SELECT + ColumnsToList(Columns, enQuotesOff) + FROM + TableName;
+            FStrSQL:=SELECT + ColumnsToList(Columns, enQuotesOff) + FROM + TableName;
 
         if CustFilter <> '' then
 
@@ -475,7 +467,7 @@ begin
             /// Note: it requires "WHERE" clause.
             /// </remarks>
 
-            StrSQL:=SELECT + ColumnsToList(Columns, enQuotesOff) + FROM + TableName + CustFilter;
+            FStrSQL:=SELECT + ColumnsToList(Columns, enQuotesOff) + FROM + TableName + CustFilter;
 
         DataSet:=ExecSQL;
     except
@@ -501,7 +493,7 @@ end;
 ///              transaction, it allows rollback in case of default.
 /// </param>
 
-function TDataTables.InsertInto(TableName: string; TransactionType: integer; ExtSourceGrid: TStringGrid = nil {=OPTION}; ExtSourceArray: TLists = nil {=OPTION}; HeaderPresent: boolean = True {=OPTION}): boolean;
+function TDataTables.InsertInto(TableName: string; TransactionType: integer; ExtSourceGrid: TStringGrid = nil{Option}; ExtSourceArray: TALists = nil{Option}; HeaderPresent: boolean = True {=OPTION}): boolean;
 var
     Transact: string;
 begin
@@ -515,26 +507,26 @@ begin
 
             if (not(string.IsNullOrEmpty(Values.Text))) and ( (ExtSourceGrid = nil) and (Pointer(ExtSourceArray) = nil) ) then
             begin
-                StrSQL:=INSERT +
+                FStrSQL:=INSERT +
                           TableName + SPACE + BracketStr(ColumnsToList(Columns, enQuotesOff), brRound) +
-                        VAL +
-                          BracketStr(ColumnsToList(Values, enQuotesOn), brRound);
+                         VAL +
+                           BracketStr(ColumnsToList(Values, enQuotesOn), brRound);
             end;
 
-            if (ExtSourceGrid = nil)  and (ExtSourceArray <> nil) then StrSQL:=ToSqlInsert(ExtSourceArray, nil, TableName, ColumnsToList(Columns, enQuotesOff), HeaderPresent);
-            if (ExtSourceGrid <> nil) and (ExtSourceArray = nil)  then StrSQL:=ToSqlInsert(nil, ExtSourceGrid, TableName, ColumnsToList(Columns, enQuotesOff), HeaderPresent);
+            if (ExtSourceGrid = nil)  and (ExtSourceArray <> nil) then FStrSQL:=ToSqlInsert(ExtSourceArray, nil, TableName, ColumnsToList(Columns, enQuotesOff), HeaderPresent);
+            if (ExtSourceGrid <> nil) and (ExtSourceArray = nil)  then FStrSQL:=ToSqlInsert(nil, ExtSourceGrid, TableName, ColumnsToList(Columns, enQuotesOff), HeaderPresent);
 
             if TransactionType = ttExplicit then
             begin
                 Transact:=TransactTemp;
-                Transact:=StringReplace(Transact, '{SWITCH}',       'OFF',  [rfReplaceAll]);
-                Transact:=StringReplace(Transact, '{SimpleInput}',  StrSQL, [rfReplaceAll]);
-                Transact:=StringReplace(Transact, '{CommonDelete}', SPACE,  [rfReplaceAll]);
-                Transact:=StringReplace(Transact, '{CommonSelect}', SPACE,  [rfReplaceAll]);
-                Transact:=StringReplace(Transact, '{ComplexInput}', SPACE,  [rfReplaceAll]);
-                Transact:=StringReplace(Transact, '{Begin}',        SPACE,  [rfReplaceAll]);
-                Transact:=StringReplace(Transact, '{End}',          SPACE,  [rfReplaceAll]);
-                StrSQL:=Transact;
+                Transact:=StringReplace(Transact, '{SWITCH}',       'OFF',   [rfReplaceAll]);
+                Transact:=StringReplace(Transact, '{SimpleInput}',  FStrSQL, [rfReplaceAll]);
+                Transact:=StringReplace(Transact, '{CommonDelete}', SPACE,   [rfReplaceAll]);
+                Transact:=StringReplace(Transact, '{CommonSelect}', SPACE,   [rfReplaceAll]);
+                Transact:=StringReplace(Transact, '{ComplexInput}', SPACE,   [rfReplaceAll]);
+                Transact:=StringReplace(Transact, '{Begin}',        SPACE,   [rfReplaceAll]);
+                Transact:=StringReplace(Transact, '{End}',          SPACE,   [rfReplaceAll]);
+                FStrSQL:=Transact;
             end;
 
             ExecSQL;
@@ -567,7 +559,7 @@ end;
 ///              transaction, it allows rollback in case of default.
 /// </param>
 
-function TDataTables.UpdateRecord(TableName: string; TransactionType: integer; SingleCondition: string = '' {=OPTIONAL}): boolean;
+function TDataTables.UpdateRecord(TableName: string; TransactionType: integer; SingleCondition: string = '' {Optional}): boolean;
 var
     iCNT:     integer;
     Temp:     string;
@@ -651,23 +643,23 @@ begin
             Ends:=_END
         end;
 
-        StrSQL:=Temp;
+        FStrSQL:=Temp;
 
         if TransactionType = ttExplicit then
         begin
             Transact:=TransactTemp;
-            Transact:=StringReplace(Transact, '{SWITCH}',       'OFF',  [rfReplaceAll]);
-            Transact:=StringReplace(Transact, '{CommonSelect}', Lock,   [rfReplaceAll]);
-            Transact:=StringReplace(Transact, '{SimpleInput}',  StrSQL, [rfReplaceAll]);
-            Transact:=StringReplace(Transact, '{CommonDelete}', SPACE,  [rfReplaceAll]);
-            Transact:=StringReplace(Transact, '{ComplexInput}', SPACE,  [rfReplaceAll]);
-            Transact:=StringReplace(Transact, '{Begin}',        Begins, [rfReplaceAll]);
-            Transact:=StringReplace(Transact, '{End}',          Ends,   [rfReplaceAll]);
-            StrSQL  :=Transact;
+            Transact:=StringReplace(Transact, '{SWITCH}',       'OFF',   [rfReplaceAll]);
+            Transact:=StringReplace(Transact, '{CommonSelect}', Lock,    [rfReplaceAll]);
+            Transact:=StringReplace(Transact, '{SimpleInput}',  FStrSQL, [rfReplaceAll]);
+            Transact:=StringReplace(Transact, '{CommonDelete}', SPACE,   [rfReplaceAll]);
+            Transact:=StringReplace(Transact, '{ComplexInput}', SPACE,   [rfReplaceAll]);
+            Transact:=StringReplace(Transact, '{Begin}',        Begins,  [rfReplaceAll]);
+            Transact:=StringReplace(Transact, '{End}',          Ends,    [rfReplaceAll]);
+            FStrSQL :=Transact;
         end;
 
         ExecSQL;
-        if string.IsNullOrEmpty(LastErrorMsg) then Result:=True;
+        if string.IsNullOrEmpty(FLastErrorMsg) then Result:=True;
 
     except
         on E: Exception do
@@ -696,23 +688,23 @@ begin
             then Exit;
 
     try
-        StrSQL:=DELETE_FROM + TableName + WHERE + KeyName + EQUAL + QuotedStr(KeyValue);
+        FStrSQL:=DELETE_FROM + TableName + WHERE + KeyName + EQUAL + QuotedStr(KeyValue);
 
         if TransactionType = ttExplicit then
         begin
             Transact:=TransactTemp;
-            Transact:=StringReplace(Transact, '{SWITCH}',       'ON',   [rfReplaceAll]);
-            Transact:=StringReplace(Transact, '{CommonDelete}', StrSQL, [rfReplaceAll]);
-            Transact:=StringReplace(Transact, '{CommonSelect}', SPACE,  [rfReplaceAll]);
-            Transact:=StringReplace(Transact, '{SimpleInput}',  SPACE,  [rfReplaceAll]);
-            Transact:=StringReplace(Transact, '{ComplexInput}', SPACE,  [rfReplaceAll]);
-            Transact:=StringReplace(Transact, '{Begin}',        SPACE,  [rfReplaceAll]);
-            Transact:=StringReplace(Transact, '{End}',          SPACE,  [rfReplaceAll]);
-            StrSQL  :=Transact;
+            Transact:=StringReplace(Transact, '{SWITCH}',       'ON',    [rfReplaceAll]);
+            Transact:=StringReplace(Transact, '{CommonDelete}', FStrSQL, [rfReplaceAll]);
+            Transact:=StringReplace(Transact, '{CommonSelect}', SPACE,   [rfReplaceAll]);
+            Transact:=StringReplace(Transact, '{SimpleInput}',  SPACE,   [rfReplaceAll]);
+            Transact:=StringReplace(Transact, '{ComplexInput}', SPACE,   [rfReplaceAll]);
+            Transact:=StringReplace(Transact, '{Begin}',        SPACE,   [rfReplaceAll]);
+            Transact:=StringReplace(Transact, '{End}',          SPACE,   [rfReplaceAll]);
+            FStrSQL :=Transact;
         end;
 
         ExecSQL;
-        if string.IsNullOrEmpty(LastErrorMsg) then Result:=True;
+        if string.IsNullOrEmpty(FLastErrorMsg) then Result:=True;
 
     except
         on E: Exception do

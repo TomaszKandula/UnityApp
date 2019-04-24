@@ -3,23 +3,31 @@
 
 unit Transactions;
 
+
 interface
 
+
 uses
-    InterposerClasses, Model, SQL, Variants, StrUtils, SysUtils, StdCtrls, Classes, Windows, Messages, ADODB;
+    Winapi.Windows,
+    Winapi.Messages,
+    System.Variants,
+    System.StrUtils,
+    System.SysUtils,
+    System.Classes,
+    Vcl.StdCtrls,
+    Data.Win.ADODB,
+    Model,
+    SQL,
+    InterposerClasses;
 
 type
 
-    /// <summary>
-    ///     Responsible for loading open items and displaying summary in Open Items tab sheet.
-    /// </summary>
 
     TTransactions = class(TDataTables)
     {$TYPEINFO ON}
     public
-        var DestGrid    :  TStringGrid;
-        var SettingGrid :  TStringGrid;
-    published
+        var DestGrid:    TStringGrid;
+        var SettingGrid: TStringGrid;
         function  GetDateTime(Return: integer): string;
         function  GetStatus(DateTime: string): string;
         function  LoadToGrid: boolean;
@@ -33,7 +41,8 @@ implementation
 
 
 uses
-    Main, Settings;
+    Main,
+    Settings;
 
 
 // ---------------------------------------------------------------------------------------------------------------------------------------- OPEN ITEMS CLASS //
@@ -76,6 +85,7 @@ begin
 
 end;
 
+
 /// <summary>
 /// Get status code from SSIS Master table for given datetime.
 /// </summary>
@@ -92,6 +102,7 @@ begin
         Result:=VarToStr(DataSet.Fields.Item[TSSISMaster.StatusCode].Value);
 
 end;
+
 
 /// <summary>
 /// Load open items from database table into string grid.
@@ -114,7 +125,7 @@ begin
     // Agent ON/OFF
 
     /// <remarks>
-    ///     SettingGrid has fixed dimensions.
+    /// SettingGrid has fixed dimensions.
     /// </remarks>
 
     for iCNT:=0 to 3 do
@@ -147,15 +158,15 @@ begin
     /// </remarks>
 
     CmdType:=cmdText;
-    StrSQL:=EXECUTE + QueryOpenItems                                           + SPACE +
-              QuotedStr(GetDateTime(gdDateOnly))                               + COMMA +
+    StrSQL:=EXECUTE + QueryOpenItems                                             + SPACE +
+              QuotedStr(GetDateTime(gdDateOnly))                                 + COMMA +
               QuotedStr(MainForm.ConvertCoCode(SettingGrid.Cells[0, 0], 'F', 0)) + COMMA +
               QuotedStr(MainForm.ConvertCoCode(SettingGrid.Cells[1, 0], 'F', 0)) + COMMA +
               QuotedStr(MainForm.ConvertCoCode(SettingGrid.Cells[2, 0], 'F', 0)) + COMMA +
               QuotedStr(MainForm.ConvertCoCode(SettingGrid.Cells[3, 0], 'F', 0)) + COMMA +
-              QuotedStr(CutOff)                                                + COMMA +
-              QuotedStr(Agents)                                                + COMMA +
-              QuotedStr(Divisions)                                             + COMMA +
+              QuotedStr(CutOff)                                                  + COMMA +
+              QuotedStr(Agents)                                                  + COMMA +
+              QuotedStr(Divisions)                                               + COMMA +
               QuotedStr(INF4);
 
     Result:=SqlToGrid(DestGrid, ExecSQL, False, True);
@@ -164,6 +175,7 @@ begin
     DestGrid.MSort(DestGrid.ReturnColumn(TOpenitems.Cuid, 1 , 1), 2, True);  //to be removed - to be done on SQL server
 
 end;
+
 
 /// <summary>
 /// Look for voucher type in settings file where we define such.
@@ -194,9 +206,6 @@ begin
 
 end;
 
-/// <summary>
-/// Clear all summary details.
-/// </summary>
 
 procedure TTransactions.ClearSummary;
 begin
@@ -210,6 +219,7 @@ begin
     MainForm.tcKPIoverdue.Caption    :='0';
     MainForm.tcKPIunallocated.Caption:='0';
 end;
+
 
 /// <summary>
 /// Display updated summary of open items for the user.
@@ -271,7 +281,7 @@ begin
 
     end;
 
-    { GET TOTAL SUM OF KPI TARGETS FOR ALL LOADED COMPANY CODES }
+    // Get total sum of KPI targets for all loaded company codes
     CleanUp;
     Columns.Add(
         SUM +
@@ -311,7 +321,7 @@ begin
         KPIUnalloc:=StrToFloatDef(MainForm.OleGetStr(DataSet.Fields[TCompanyData.KpiUnallocatedTarget].Value), 0);
     end;
 
-    { DISPLAY }
+    // Display
     MainForm.tcOpenItems.Caption     :=FormatFloat('### ###',  DestGrid.RowCount - 1);
     MainForm.tcInvoices.Caption      :=FormatFloat('### ###',  nInvoices);
     MainForm.tcOverdue.Caption       :=FormatFloat('### ###',  Overdue);
