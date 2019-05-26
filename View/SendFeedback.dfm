@@ -54,7 +54,7 @@ object ReportForm: TReportForm
         AlignWithMargins = True
         Left = 5
         Top = 5
-        Width = 466
+        Width = 162
         Height = 13
         Margins.Left = 5
         Margins.Top = 5
@@ -64,7 +64,6 @@ object ReportForm: TReportForm
         Caption = 'Your message to developer team:'
         Color = clWhite
         ParentColor = False
-        ExplicitWidth = 162
       end
       object PanelReportMemo: TPanel
         AlignWithMargins = True

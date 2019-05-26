@@ -1,7 +1,4 @@
-
-{$I .\Include\Header.inc}
-
-unit Database;
+unit DbHandler;
 
 
 interface
@@ -19,6 +16,9 @@ uses
     Settings;
 
 
+    // legacy code - to be removed after REST is implemented
+
+
 type
 
     /// <summary>
@@ -28,25 +28,22 @@ type
     TDataBase = class
     {$TYPEINFO ON}
     strict private
-        var ODBC_Driver    : string;
-        var OLEDB_Provider : string;
-        var OLEDB_PSI      : string;
-        var Common_MARS    : string;
-        var Common_TSC     : string;
-        var Common_Encrypt : string;
-        var Common_Server  : string;
+        var ODBC_Driver:     string;
+        var OLEDB_Provider:  string;
+        var OLEDB_PSI:       string;
+        var Common_MARS:     string;
+        var Common_TSC:      string;
+        var Common_Encrypt:  string;
+        var Common_Server:   string;
         var Common_Database: string;
         var Common_UserName: string;
         var Common_Password: string;
-        var Interval       : integer;
+        var Interval:        integer;
     private
-        var DBConnStr      : string;
-        var CmdTimeout     : integer;
-        var ConTimeout     : Integer;
+        var DBConnStr:  string;
+        var CmdTimeout: integer;
+        var ConTimeout: integer;
     published
-        /// <param name="ShowConnStr">
-        /// Boolean - set to true if you want to display connection string in the event log.
-        /// </param>
         constructor Create(ShowConnStr: boolean);
         procedure   InitializeConnection(idThd: integer; ErrorShow: boolean; var ActiveConnection: TADOConnection);
         function    Check: integer;
@@ -57,7 +54,28 @@ implementation
 
 
 uses
-    Main;
+    Main,
+    Helpers;
+
+
+const
+    ConStrOLEDB = 'Provider={OLEDB_Provider};'              +
+                  'Data Source={Common_Server};'            +
+                  'Initial catalog={Common_Database};'      +
+                  'Persist Security Info={OLEDB_PSI};'      +
+                  'MultipleActiveResultSets={Common_MARS};' +
+                  'Encrypt={Common_Encrypt};'               +
+                  'TrustServerCertificate={Common_TSC};'    +
+                  'User Id={Common_UserName};'              +
+                  'Password={Common_Password};';
+    ConStrODBC  = 'Driver={ODBC_Driver};'                   +
+                  'Server={Common_Server};'                 +
+                  'Database={Common_Database};'             +
+                  'MARS_Connection={Common_MARS};'          +
+                  'Encrypt={Common_Encrypt};'               +
+                  'TrustServerCertificate={Common_TSC};'    +
+                  'Uid={Common_UserName};'                  +
+                  'Pwd={Common_Password};';
 
 
 // ---------------------------------------------------------------------------------------------------------------------------------------- CREATE & RELEASE //
@@ -72,24 +90,24 @@ begin
 
     // Get all data
     Settings:=TSettings.Create;
-    WhichActive    :=Settings.GetStringValue(DatabaseSetup,  'ACTIVE'            , '');
-    ODBC_Driver    :=Settings.GetStringValue(DatabaseSetup,  'ODBC_Driver'       , '');
-    OLEDB_Provider :=Settings.GetStringValue(DatabaseSetup,  'OLEDB_Provider'    , '');
-    OLEDB_PSI      :=Settings.GetStringValue(DatabaseSetup,  'OLEDB_PSI'         , '');
-    Common_MARS    :=Settings.GetStringValue(DatabaseSetup,  'COMMON_MARS'       , '');
-    Common_TSC     :=Settings.GetStringValue(DatabaseSetup,  'COMMON_TSC'        , '');
-    Common_Encrypt :=Settings.GetStringValue(DatabaseSetup,  'COMMON_Encrypt'    , '');
-    Common_Server  :=Settings.GetStringValue(DatabaseSetup,  'COMMON_Server'     , '');
-    Common_Database:=Settings.GetStringValue(DatabaseSetup,  'COMMON_Database'   , '');
-    Common_UserName:=Settings.GetStringValue(DatabaseSetup,  'COMMON_UserName'   , '');
-    Common_Password:=Settings.GetStringValue(DatabaseSetup,  'COMMON_Password'   , '');
-    CmdTimeout     :=Settings.GetIntegerValue(DatabaseSetup, 'SERVER_CMD_TIMEOUT', 15);
-    ConTimeout     :=Settings.GetIntegerValue(DatabaseSetup, 'SERVER_CON_TIMEOUT', 15);
-    Interval       :=Settings.GetIntegerValue(TimersSettings,'NET_CONNETCTION'   , 5000);
+    WhichActive    :=Settings.GetStringValue(TConfigSections.DatabaseSetup,  'ACTIVE'            , '');
+    ODBC_Driver    :=Settings.GetStringValue(TConfigSections.DatabaseSetup,  'ODBC_Driver'       , '');
+    OLEDB_Provider :=Settings.GetStringValue(TConfigSections.DatabaseSetup,  'OLEDB_Provider'    , '');
+    OLEDB_PSI      :=Settings.GetStringValue(TConfigSections.DatabaseSetup,  'OLEDB_PSI'         , '');
+    Common_MARS    :=Settings.GetStringValue(TConfigSections.DatabaseSetup,  'COMMON_MARS'       , '');
+    Common_TSC     :=Settings.GetStringValue(TConfigSections.DatabaseSetup,  'COMMON_TSC'        , '');
+    Common_Encrypt :=Settings.GetStringValue(TConfigSections.DatabaseSetup,  'COMMON_Encrypt'    , '');
+    Common_Server  :=Settings.GetStringValue(TConfigSections.DatabaseSetup,  'COMMON_Server'     , '');
+    Common_Database:=Settings.GetStringValue(TConfigSections.DatabaseSetup,  'COMMON_Database'   , '');
+    Common_UserName:=Settings.GetStringValue(TConfigSections.DatabaseSetup,  'COMMON_UserName'   , '');
+    Common_Password:=Settings.GetStringValue(TConfigSections.DatabaseSetup,  'COMMON_Password'   , '');
+    CmdTimeout     :=Settings.GetIntegerValue(TConfigSections.DatabaseSetup, 'SERVER_CMD_TIMEOUT', 15);
+    ConTimeout     :=Settings.GetIntegerValue(TConfigSections.DatabaseSetup, 'SERVER_CON_TIMEOUT', 15);
+    Interval       :=Settings.GetIntegerValue(TConfigSections.TimersSettings,'NET_CONNETCTION'   , 5000);
 
     // Set template string
-    if WhichActive = dbODBC  then dbConnNoPwd:=ConStrODBC;
-    if WhichActive = dbOLEDB then dbConnNoPwd:=ConStrOLEDB;
+    if WhichActive = TADODB.dbODBC  then dbConnNoPwd:=ConStrODBC;
+    if WhichActive = TADODB.dbOLEDB then dbConnNoPwd:=ConStrOLEDB;
 
     // Replace tags for retrieved data (it ignores tags that are missing)
     // Passwordless connection string
@@ -133,10 +151,10 @@ procedure TDataBase.InitializeConnection(idThd: integer; ErrorShow: boolean; var
     procedure ErrorHandler(err_class: string; err_msg: string; should_quit: boolean; err_wnd: boolean);
     begin
 
-        MainForm.LogText.Log(MainForm.EventLogPath, ERR_LOGTEXT + '[' + err_class + '] ' + err_msg + ' (' + IntToStr(ExitCode) + ').');
+        MainForm.LogText.Log(MainForm.EventLogPath, TADODB.ERR_LOGTEXT + '[' + err_class + '] ' + err_msg + ' (' + IntToStr(ExitCode) + ').');
 
         if err_wnd then
-            Application.MessageBox(PChar(ERR_MESSAGE), PChar(MainForm.CAPTION), MB_OK + MB_ICONWARNING);
+            Application.MessageBox(PChar(TADODB.ERR_MESSAGE), PChar(MainForm.CAPTION), MB_OK + MB_ICONWARNING);
 
         if should_quit then
             Application.Terminate;
@@ -206,9 +224,9 @@ end;
 
 function TDataBase.Check: integer;
 var
-    EO:        EOleException;
-    ConCheck:  TADOConnection;
-    StrSQL:    string;
+    EO:       EOleException;
+    ConCheck: TADOConnection;
+    StrSQL:   string;
 begin
 
     Result:=0;
@@ -250,12 +268,12 @@ begin
 
         if ConCheck.Connected then
         begin
-            MainForm.ExecMessage(False, conOK, strNULL);
+            MainForm.ExecMessage(False, TMessaging.conOK, TNaVariants.NULL);
             ConCheck.Close;
         end
         else
         begin
-            MainForm.ExecMessage(False, conERROR, strNULL);
+            MainForm.ExecMessage(False, TMessaging.conERROR, TNaVariants.NULL);
         end;
 
         ConCheck.Free;
@@ -265,3 +283,4 @@ end;
 
 
 end.
+

@@ -1,6 +1,3 @@
-
-{$I .\Include\Header.inc}
-
 unit SendFeedback;
 
 
@@ -58,7 +55,8 @@ uses
     Main,
     Mailer,
     Settings,
-    Worker;
+    Worker,
+    Helpers;
 
 
 {$R *.dfm}
@@ -121,7 +119,7 @@ begin
 
     if ReportMemo.Text = '' then
     begin
-        MainForm.MsgCall(mcWarn, 'Cannot send empty report. Please write what feels right and then send.');
+        MainForm.MsgCall(TCommon.TMsgTypes.Warn, 'Cannot send empty report. Please write what feels right and then send.');
         Exit;
     end;
 
@@ -131,33 +129,33 @@ begin
 
     try
 
-        AppName:=Settings.GetStringValue(ApplicationDetails, 'VALUE', '');
+        AppName:=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'VALUE', '');
         AppVer :=GetBuildInfoAsString;
 
         // Get and set email details
-        if Settings.GetStringValue(MailerSetup, 'ACTIVE', '') = MailerNTLM  then
+        if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerNTLM  then
         begin
-            Mail.XMailer:=Settings.GetStringValue(MailerNTLM, 'FROM', '');
-            Mail.MailTo :=Settings.GetStringValue(MailerNTLM, 'TO', '');
-            Mail.MailRt :=Settings.GetStringValue(MailerNTLM, 'REPLY-TO', '');
+            Mail.XMailer:=Settings.GetStringValue(TConfigSections.MailerNTLM, 'FROM', '');
+            Mail.MailTo :=Settings.GetStringValue(TConfigSections.MailerNTLM, 'TO', '');
+            Mail.MailRt :=Settings.GetStringValue(TConfigSections.MailerNTLM, 'REPLY-TO', '');
         end;
 
-        if Settings.GetStringValue(MailerSetup, 'ACTIVE', '') = MailerBASIC then
+        if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerBASIC then
         begin
-            Mail.XMailer:=Settings.GetStringValue(MailerBASIC, 'FROM', '');
-            Mail.MailTo :=Settings.GetStringValue(MailerBASIC, 'TO', '');
-            Mail.MailRt :=Settings.GetStringValue(MailerBASIC, 'REPLY-TO', '');
+            Mail.XMailer:=Settings.GetStringValue(TConfigSections.MailerBASIC, 'FROM', '');
+            Mail.MailTo :=Settings.GetStringValue(TConfigSections.MailerBASIC, 'TO', '');
+            Mail.MailRt :=Settings.GetStringValue(TConfigSections.MailerBASIC, 'REPLY-TO', '');
         end;
 
         Mail.MailFrom   :=Mail.XMailer;
-        Mail.MailCc     :=MainForm.WinUserName + '@' + Settings.GetStringValue(ApplicationDetails, 'MAIL_DOMAIN', '');
+        Mail.MailCc     :=MainForm.WinUserName + '@' + Settings.GetStringValue(TConfigSections.ApplicationDetails, 'MAIL_DOMAIN', '');
         Mail.MailBcc    :='';
         Mail.MailSubject:='Unity - User feedback (' + UpperCase(MainForm.WinUserName) + ')';
 
         // Plain text to HTML using template
         Transfer:=ReportMemo.Text;
-        Transfer:=StringReplace(Transfer, CRLF, HTML_BR, [rfReplaceAll]);
-        HTMLBody:=Doc.LoadTemplate(Settings.GetLayoutDir + Settings.GetStringValue(Layouts, 'SENDFEEDBACK', '') + '.html');
+        Transfer:=StringReplace(Transfer, TUChars.CRLF, '<br>', [rfReplaceAll]);
+        HTMLBody:=Doc.LoadTemplate(Settings.GetLayoutDir + Settings.GetStringValue(TConfigSections.Layouts, 'SENDFEEDBACK', '') + '.html');
         HTMLBody:=StringReplace(HTMLBody, '{TEXT_HOLER}',  Transfer,       [rfReplaceAll]);
         HTMLBody:=StringReplace(HTMLBody, '{APPNAME}',     AppName,        [rfReplaceAll]);
         HTMLBody:=StringReplace(HTMLBody, '{BUILD}',       AppVer,         [rfReplaceAll]);
@@ -210,7 +208,7 @@ end;
 
 procedure TReportForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-    if Key = ESC then Close;
+    if Key = Char(VK_ESCAPE) then Close;
 end;
 
 

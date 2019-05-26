@@ -1,6 +1,3 @@
-
-{$I .\Include\Header.inc}
-
 unit EventLog;
 
 
@@ -106,7 +103,7 @@ end;
 
 procedure TEventForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-    if Key = ESC then Close;
+    if Key = Char(VK_ESCAPE) then Close;
 end;
 
 

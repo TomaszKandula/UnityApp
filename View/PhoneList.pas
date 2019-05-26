@@ -1,6 +1,3 @@
-
-{$I .\Include\Header.inc}
-
 unit PhoneList;
 
 
@@ -55,7 +52,8 @@ implementation
 uses
     Main,
     Actions,
-    Settings;
+    Settings,
+    Helpers;
 
 
 // ------------------------------------------------------------------------------------------------------------------------------------------- CLASS HELPERS //
@@ -113,7 +111,7 @@ begin
 
     if not(CheckPhoneList(PhoneList)) then
     begin
-        MainForm.MsgCall(mcWarn, 'Please remove letters before saving the list.' + CRLF + 'Only numbers and break line are allowed.');
+        MainForm.MsgCall(TCommon.TMsgTypes.Warn, 'Please remove letters before saving the list.' + TUChars.CRLF + 'Only numbers and break line are allowed.');
         Exit;
     end;
 
@@ -140,7 +138,7 @@ end;
 
 procedure TPhoneListForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-    if Key = ESC then Close;
+    if Key = Char(VK_ESCAPE) then Close;
 end;
 
 

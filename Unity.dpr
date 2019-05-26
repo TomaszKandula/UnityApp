@@ -1,6 +1,3 @@
-
-{$I .\Include\Header.inc}
-
 program Unity;
 
 
@@ -8,58 +5,69 @@ program Unity;
 
 
 uses
-    Forms,
-    Windows,
-    Messages,
-    Classes,
-    SysUtils,
-    StrUtils,
-    StdCtrls,
-    ShellApi,
-    IOUtils,
-    INIFiles,
-    CRC32u,
-    uCEFApplication,
+    System.Classes,
+    System.SysUtils,
+    System.StrUtils,
+    System.IOUtils,
+    System.INIFiles,
     System.Types,
     System.Zip,
-    Model in 'Model\Model.pas',
-    SQL in 'Model\SQL.pas',
-    Arrays in 'Extensions\Arrays.pas',
-    InterposerClasses in 'Extensions\InterposerClasses.pas',
-    CustomTypes in 'Extensions\CustomTypes.pas',
-    AgeView in 'Logic\AgeView.pas',
-    Database in 'Logic\Database.pas',
-    Mailer in 'Logic\Mailer.pas',
-    Settings in 'Logic\Settings.pas',
-    Transactions in 'Logic\Transactions.pas',
-    UAC in 'Logic\UAC.pas',
-    Worker in 'Logic\Worker.pas',
-    Internet in 'Logic\Internet.pas',
-    ThreadUtilities in 'Logic\ThreadUtilities.pas',
-    EventLogger in 'Logic\EventLogger.pas',
-    About in 'View\About.pas' {AboutForm},
-    Actions in 'View\Actions.pas' {ActionsForm},
-    Calendar in 'View\Calendar.pas' {CalendarForm},
-    Colors in 'View\Colors.pas' {ColorsForm},
-    EventLog in 'View\EventLog.pas' {EventForm},
-    Filter in 'View\Filter.pas' {FilterForm},
-    Invoices in 'View\Invoices.pas' {InvoicesForm},
-    Main in 'View\Main.pas' {MainForm},
-    PhoneList in 'View\PhoneList.pas' {PhoneListForm},
-    SendFeedback in 'View\SendFeedback.pas' {ReportForm},
-    AVSearch in 'View\AVSearch.pas' {SearchForm},
-    Send in 'View\Send.pas' {SendForm},
-    Splash in 'View\Splash.pas' {SplashForm},
-    Tracker in 'View\Tracker.pas' {TrackerForm},
-    Update in 'View\Update.pas' {UpdateForm},
-    MassMailer in 'View\MassMailer.pas' {ViewMailerForm},
-    ABSearch in 'View\ABSearch.pas' {ViewSearchForm},
-    Await in 'View\Await.pas' {AwaitForm},
-    Qms in 'View\Qms.pas' {QmsForm};
+    Winapi.Windows,
+    Winapi.Messages,
+    Winapi.ShellApi,
+    Vcl.Forms,
+    Vcl.StdCtrls,
+    CRC32u,
+    uCEFApplication,
+    DbModel                  in 'Model\DbModel.pas'{Legacy code/to be removed},
+    Customer.AddressBook     in 'Model\Json\RawTables\Customer.AddressBook.pas',
+    Customer.ControlStatus   in 'Model\Json\RawTables\Customer.ControlStatus.pas',
+    Customer.Snapshots       in 'Model\Json\RawTables\Customer.Snapshots.pas',
+    Customer.TrackerData     in 'Model\Json\RawTables\Customer.TrackerData.pas',
+    Customer.TrackerInvoices in 'Model\Json\RawTables\Customer.TrackerInvoices.pas',
+    Erp.AccountType          in 'Model\Json\RawTables\Erp.AccountType.pas',
+    Erp.CustomerGroup        in 'Model\Json\RawTables\Erp.CustomerGroup.pas',
+    Erp.Group3               in 'Model\Json\RawTables\Erp.Group3.pas',
+    Erp.PaidInfo             in 'Model\Json\RawTables\Erp.PaidInfo.pas',
+    Erp.PaymentTerms         in 'Model\Json\RawTables\Erp.PaymentTerms.pas',
+    Erp.Person               in 'Model\Json\RawTables\Erp.Person.pas',
+    Erp.PersonResponsible    in 'Model\Json\RawTables\Erp.PersonResponsible.pas',
+    Erp.SalesResponsible     in 'Model\Json\RawTables\Erp.SalesResponsible.pas',
+    InterposerClasses        in 'Extensions\InterposerClasses.pas',
+    Helpers                  in 'Extensions\Helpers.pas',
+    SqlHandler               in 'Logic\SqlHandler.pas',
+    DbHandler                in 'Logic\DbHandler.pas',
+    AgeView                  in 'Logic\AgeView.pas',
+    Mailer                   in 'Logic\Mailer.pas',
+    Settings                 in 'Logic\Settings.pas',
+    Transactions             in 'Logic\Transactions.pas',
+    UAC                      in 'Logic\UAC.pas',
+    Worker                   in 'Logic\Worker.pas',
+    Internet                 in 'Logic\Internet.pas',
+    ThreadUtilities          in 'Logic\ThreadUtilities.pas',
+    EventLogger              in 'Logic\EventLogger.pas',
+    About                    in 'View\About.pas' {AboutForm},
+    Actions                  in 'View\Actions.pas' {ActionsForm},
+    Calendar                 in 'View\Calendar.pas' {CalendarForm},
+    Colors                   in 'View\Colors.pas' {ColorsForm},
+    EventLog                 in 'View\EventLog.pas' {EventForm},
+    Filter                   in 'View\Filter.pas' {FilterForm},
+    Invoices                 in 'View\Invoices.pas' {InvoicesForm},
+    Main                     in 'View\Main.pas' {MainForm},
+    PhoneList                in 'View\PhoneList.pas' {PhoneListForm},
+    SendFeedback             in 'View\SendFeedback.pas' {ReportForm},
+    AVSearch                 in 'View\AVSearch.pas' {SearchForm},
+    Send                     in 'View\Send.pas' {SendForm},
+    Splash                   in 'View\Splash.pas' {SplashForm},
+    Tracker                  in 'View\Tracker.pas' {TrackerForm},
+    Update                   in 'View\Update.pas' {UpdateForm},
+    MassMailer               in 'View\MassMailer.pas' {ViewMailerForm},
+    ABSearch                 in 'View\ABSearch.pas' {ViewSearchForm},
+    Await                    in 'View\Await.pas' {AwaitForm},
+    Qms                      in 'View\Qms.pas' {QmsForm};
 
 
 type
-    DWord = 0..$FFFFFFFF;
     TDwmIsCompositionEnabledFunc = function(out pfEnabled: boolean): HRESULT; stdcall;
 
 
@@ -104,28 +112,28 @@ var
 procedure InitAssembliesRef;
 begin
     SetLength(Assemblies, 6);
-    Assemblies[0]:=DLL1;
-    Assemblies[1]:=DLL2;
-    Assemblies[2]:=DLL3;
-    Assemblies[3]:=DLL4;
-    Assemblies[4]:=DLL5;
-    Assemblies[5]:=LyncCall;
+    Assemblies[0]:=TSkypeAssemblies.LyncControls;
+    Assemblies[1]:=TSkypeAssemblies.LyncFramework;
+    Assemblies[2]:=TSkypeAssemblies.LyncModel;
+    Assemblies[3]:=TSkypeAssemblies.LyncUtils;
+    Assemblies[4]:=TSkypeAssemblies.OfficeUc;
+    Assemblies[5]:=TUnityApp.LyncCall;
 end;
 
 
 /// <summary>
 /// Extract given source file by provided ID number.
 /// </summary>
-/// <param name="ItemID">Integer.</param>
-/// <param name="FileName">String.</param>
-/// <param name="mode">Integer.</param>
-/// <returns>Boolean. Set to true if succeed.</returns>
+/// <param name="ItemID">Integer</param>
+/// <param name="FileName">String</param>
+/// <param name="ShouldStay">Boolean</param>
+/// <returns>Boolean. Set to true if succeed</returns>
 /// <remarks>
 /// 10 RCDATA "Makefile\\config.cfg" default setting file.
 /// 60 RCDATA "Makefile\\logon.log"  pre-defined event log file.
 /// </remarks>
 
-function Unpack(ItemID: integer; FileName: string; mode: integer): boolean;
+function Unpack(ItemID: integer; FileName: string; ShouldStay: boolean): boolean;
 var
     RS:  TResourceStream;
 begin
@@ -134,8 +142,8 @@ begin
 
     try
         RS.Position:=0;
-        if mode = 1 then
-            DeleteFile(FileName);
+        if not ShouldStay then
+            DeleteFile(PChar(FileName));
 
         try
             RS.SaveToFile(FileName);
@@ -144,7 +152,7 @@ begin
             begin
                 Application.MessageBox(
                     PCHar('Cannot extract file from resource container. Exception has been thrown: ' + E.Message),
-                    PChar(APPCAPTION), MB_OK + MB_ICONERROR
+                    PChar(TUnityApp.APPCAPTION), MB_OK + MB_ICONERROR
                 );
                 Exit;
             end;
@@ -231,7 +239,7 @@ begin
 
     finally
         ZipRead.Free;
-        DeleteFile(FileName);
+        DeleteFile(PChar(FileName));
     end;
 
 end;
@@ -241,9 +249,9 @@ end;
 /// During the update, some files cannot be overwritten or removed, thus we change the name and copy new file(s) into the very same place.
 /// This methods remove all of the "leftovers" from given folder.
 /// </summary>
-/// <param name="Directory">String, source.</param>
-/// <param name="Pattern">String, indicate what to remove, eg. *.png.</param>
-/// <param name="EventLogPath">String, points to event log.</param>
+/// <param name="Directory">Source</param>
+/// <param name="Pattern">Indicate what to remove, eg. *.png</param>
+/// <param name="EventLogPath">Points to event log</param>
 
 procedure DeleteFilesMatchingPattern(const Directory: string; const Pattern: string; EventLogPath: string);
 var
@@ -281,7 +289,7 @@ function GetManifestValue(Key: string; Source: string): string;
         StartPos:=AnsiPos(Key, Source);
 
         for iCNT:=StartPos to Length(Source) do
-            if Source[iCNT] = CR then
+            if Source[iCNT] = TUChars.CR then
                 Break;
 
         Result:=MidStr(Source, StartPos, (iCNT - StartPos)).Replace(Key, '').ToLower;
@@ -308,12 +316,12 @@ begin
     /// We allow only one instance of running program (no sessions).
     /// </summary>
 
-    Mutex:=CreateMutex(nil, True, CurrentMutex);
+    Mutex:=CreateMutex(nil, True, TUnityApp.CurrentMutex);
     if (Mutex = 0) or (GetLastError = ERROR_ALREADY_EXISTS) then
     begin
         Application.MessageBox(
-            PCHar(APPCAPTION + ' is already running. You can only have one instance at a time.'),
-            PChar(APPCAPTION), MB_OK + MB_ICONWARNING
+            PCHar(TUnityApp.APPCAPTION + ' is already running. You can only have one instance at a time.'),
+            PChar(TUnityApp.APPCAPTION), MB_OK + MB_ICONWARNING
         );
         ExitProcess(0);
     end;
@@ -356,8 +364,8 @@ begin
     if not(Connection.IsInternetPresent) then
     begin
         Application.MessageBox(
-            PCHar(APPCAPTION + ' cannot work off-line. Please check Internet connection or contact your network administrator. Program will be closed.'),
-            PChar(APPCAPTION), MB_OK + MB_ICONWARNING
+            PCHar(TUnityApp.APPCAPTION + ' cannot work off-line. Please check Internet connection or contact your network administrator. Program will be closed.'),
+            PChar(TUnityApp.APPCAPTION), MB_OK + MB_ICONWARNING
         );
         ExitProcess(0);
     end;
@@ -371,13 +379,13 @@ begin
     // Extract default config.cfg if it is missing
     if Settings.GetLastError = 404 then
     begin
-        if Unpack(10, Settings.GetPathAppCfg, DeleteOld) then
+        if Unpack(10, Settings.GetPathAppCfg, false) then
             Settings.ConfigToMemory
         else
         begin
             Application.MessageBox(
-                PCHar('Cannot extract missing configuration file. ' + APPCAPTION + ' will be closed. Please contact IT support.'),
-                PChar(APPCAPTION), MB_OK + MB_ICONERROR
+                PCHar('Cannot extract missing configuration file. ' + TUnityApp.APPCAPTION + ' will be closed. Please contact IT support.'),
+                PChar(TUnityApp.APPCAPTION), MB_OK + MB_ICONERROR
             );
             ExitProcess(0);
         end;
@@ -406,12 +414,12 @@ begin
     else
     begin
         // Otherwise extract default
-        if Unpack(60, PathEventLog, LeaveAsIs) then
+        if Unpack(60, PathEventLog, true) then
         begin
             // Put user logon name to log file (@ eof)
             FL:=TFileStream.Create(PathEventLog, fmOpenWrite);
             try
-                StrWrite:=WinUserName + '.' + CRLF + CRLF;
+                StrWrite:=WinUserName + '.' + TUChars.CRLF + TUChars.CRLF;
                 FL.Position:=FL.Size;
 
                 for iCNT:=1 to length(StrWrite) do
@@ -425,8 +433,8 @@ begin
         else
         begin
             Application.MessageBox(
-                PChar('Cannot create log file. ' + APPCAPTION + ' will be closed. Please contact IT support.'),
-                PChar(APPCAPTION), MB_OK + MB_ICONERROR
+                PChar('Cannot create log file. ' + TUnityApp.APPCAPTION + ' will be closed. Please contact IT support.'),
+                PChar(TUnityApp.APPCAPTION), MB_OK + MB_ICONERROR
             );
             ExitProcess(0);
         end;
@@ -465,30 +473,30 @@ begin
         UpdateForm.Update;
 
         // Get package from website
-        if Connection.Download(PathReleasePak, PackageDir + ReleaseFile) then
+        if Connection.Download(PathReleasePak, PackageDir + TUnityApp.ReleaseFile) then
         begin
             Settings:=nil;
             // Unzip the content, update settings file and execute new release
-            if UnzippReleaseFile(PackageDir + ReleaseFile, PathAppDir, PathEventLog) then
+            if UnzippReleaseFile(PackageDir + TUnityApp.ReleaseFile, PathAppDir, PathEventLog) then
             begin
                 Settings:=TSettings.Create;
                 Settings.ReleaseDateTime:=Now;
                 Settings.ReleaseNumber:=StrToInt(GetManifestValue('Release', Manifest));
-                ShellExecute(Application.Handle, seOpen, PChar(Application.ExeName), nil, nil, SW_SHOWNORMAL);
+                ShellExecute(Application.Handle, 'open', PChar(Application.ExeName), nil, nil, SW_SHOWNORMAL);
             end
             else
             begin
                 Application.MessageBox(
-                    PChar('Cannot unpack files. ' + APPCAPTION + ' will be closed. Please contact IT support.'),
-                    PChar(APPCAPTION), MB_OK + MB_ICONERROR
+                    PChar('Cannot unpack files. ' + TUnityApp.APPCAPTION + ' will be closed. Please contact IT support.'),
+                    PChar(TUnityApp.APPCAPTION), MB_OK + MB_ICONERROR
                 );
             end;
         end
         else
         begin
             Application.MessageBox(
-                PChar('Cannot download new release package. ' + APPCAPTION + ' will be closed. Please contact IT support.'),
-                PChar(APPCAPTION), MB_OK + MB_ICONERROR
+                PChar('Cannot download new release package. ' + TUnityApp.APPCAPTION + ' will be closed. Please contact IT support.'),
+                PChar(TUnityApp.APPCAPTION), MB_OK + MB_ICONERROR
             );
         end;
 
@@ -513,19 +521,19 @@ begin
     /// Check password. It is hashed with BCrypt and cannot be shorter than 60 characters.
     /// </summary>
 
-    if Length(Settings.GetStringValue(PasswordSection, 'HASH', '')) < 60 then
+    if Length(Settings.GetStringValue(TConfigSections.PasswordSection, 'HASH', '')) < 60 then
     begin
-        Status(1, AllTasks, DelayStd, 'Checking master password... failed!', True, Settings.GetPathEventLog);
+        Status(1, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Checking master password... failed!', True, Settings.GetPathEventLog);
         Application.MessageBox(
-            PCHar('Invalid master password has been found. ' + APPCAPTION + ' will be closed. Please contact IT Support.'),
-            PChar(APPCAPTION), MB_OK + MB_ICONERROR
+            PCHar('Invalid master password has been found. ' + TUnityApp.APPCAPTION + ' will be closed. Please contact IT Support.'),
+            PChar(TUnityApp.APPCAPTION), MB_OK + MB_ICONERROR
         );
         LogText.Log(Settings.GetPathEventLog, '[Critical Error]: Invaid master password has been found. Application has been terminated.');
         ExitProcess(0);
     end
     else
     begin
-        Status(1, AllTasks, DelayStd, 'Checking master password... OK.', True, Settings.GetPathEventLog);
+        Status(1, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Checking master password... OK.', True, Settings.GetPathEventLog);
     end;
 
     /// <summary>
@@ -537,52 +545,52 @@ begin
 
     if not FileExists(Settings.GetPathLicenceLic) then
     begin
-        Status(2, AllTasks, DelayStd, 'Checking licence file... failed!', True, Settings.GetPathEventLog);
+        Status(2, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Checking licence file... failed!', True, Settings.GetPathEventLog);
 
         /// <remarks>
         /// Check here ".LIC" file in case of Unity is shareware/limited commercial application.
         /// </remarks>
 
         Application.MessageBox(
-            PCHar('Cannot find licence file (' + LicenceFile + '). ' + APPCAPTION + ' will be closed. Please contact IT Support.'),
-            PChar(APPCAPTION), MB_OK + MB_ICONERROR
+            PCHar('Cannot find licence file (' + TUnityApp.LicenceFile + '). ' + TUnityApp.APPCAPTION + ' will be closed. Please contact IT Support.'),
+            PChar(TUnityApp.APPCAPTION), MB_OK + MB_ICONERROR
         );
         LogText.Log(Settings.GetPathEventLog, '[Critical Error]: No licence file has been found. Application has been terminated.');
         ExitProcess(0);
     end
     else
     begin
-        Status(2, AllTasks, DelayStd, 'Checking licence file... OK.', True, Settings.GetPathEventLog);
+        Status(2, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Checking licence file... OK.', True, Settings.GetPathEventLog);
     end;
 
     /// <summary>
     /// Check Windows version. We allow only Windows 7 (with Aero) or Windows 10 (and above).
     /// </summary>
 
-    if not StrToInt(GetOSVer(OSNumber)) >= 61 then
+    if not StrToInt(GetOSVer(False)) >= 61 then
     begin
-        Status(3, AllTasks, DelayStd, 'Checking operating system version... failed!', True, Settings.GetPathEventLog);
+        Status(3, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Checking operating system version... failed!', True, Settings.GetPathEventLog);
         Application.MessageBox(
-            PCHar(APPCAPTION + ' must be run under Windows 7 or higher. ' + APPCAPTION + ' will be closed. Please contact IT Support.'),
-            PChar(APPCAPTION), MB_OK + MB_ICONERROR
+            PCHar(TUnityApp.APPCAPTION + ' must be run under Windows 7 or higher. ' + TUnityApp.APPCAPTION + ' will be closed. Please contact IT Support.'),
+            PChar(TUnityApp.APPCAPTION), MB_OK + MB_ICONERROR
         );
         LogText.Log(Settings.GetPathEventLog, '[Critical Error]: Invalid Operating System. Application has been terminated.');
         ExitProcess(0);
     end
     else
     begin
-        Status(3, AllTasks, DelayStd, 'Checking operating system version... OK.', True, Settings.GetPathEventLog);
+        Status(3, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Checking operating system version... OK.', True, Settings.GetPathEventLog);
     end;
 
     /// <summary>
     /// Areo must be enabled if program runs under Windows 7.
     /// </summary>
 
-    if StrToInt(GetOSVer(OSNumber)) = 61 then
+    if StrToInt(GetOSVer(False)) = 61 then
     begin
 
         // Initialize
-        Status(4, AllTasks, DelayStd, 'Checking Windows 7 Aero composition... ', True, Settings.GetPathEventLog);
+        Status(4, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Checking Windows 7 Aero composition... ', True, Settings.GetPathEventLog);
         IsAeroEnabled:=False;
         ModuleHandle :=LoadLibrary(PChar(DWMI));
 
@@ -602,10 +610,10 @@ begin
         // Terminate if not switched on
         if IsAeroEnabled = False then
         begin
-            Status(4, AllTasks, DelayStd, 'Checking Windows 7 Aero composition... disabled!', True, Settings.GetPathEventLog);
+            Status(4, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Checking Windows 7 Aero composition... disabled!', True, Settings.GetPathEventLog);
             Application.MessageBox(
-                PChar('Aero is not enabled. ' + APPCAPTION + ' will be closed. Please contact IT Support.'),
-                PChar(APPCAPTION), MB_OK + MB_ICONERROR
+                PChar('Aero is not enabled. ' + TUnityApp.APPCAPTION + ' will be closed. Please contact IT Support.'),
+                PChar(TUnityApp.APPCAPTION), MB_OK + MB_ICONERROR
             );
             LogText.Log(Settings.GetPathEventLog, '[Critical Error]: Aero composition is disabled. Application has been terminated.');
             ExitProcess(0);
@@ -613,28 +621,28 @@ begin
     end
     else
     begin
-        Status(4, AllTasks, DelayStd, 'Checking Windows 7 Aero composition... OK.', True, Settings.GetPathEventLog);
+        Status(4, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Checking Windows 7 Aero composition... OK.', True, Settings.GetPathEventLog);
     end;
 
    /// <summary>
    /// Check configuration file and deploy default if corrupted.
    /// </summary>
 
-   Status(5, AllTasks, DelayStd, 'CRC32 check: ' + ConfigFile + '...', True, Settings.GetPathEventLog);
+   Status(5, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'CRC32 check: ' + TUnityApp.ConfigFile + '...', True, Settings.GetPathEventLog);
 
-   if not (Settings.Decode(AppConfig, False)) then
+   if not (Settings.Decode(TCommon.TUnityFiles.AppConfig, False)) then
     begin
-        Status(5, AllTasks, DelayErr, 'CRC32 check: ' + ConfigFile + '... corrupted! Extracting default file...', True, Settings.GetPathEventLog);
+        Status(5, TSplashScreen.AllTasks, TSplashScreen.DelayErr, 'CRC32 check: ' + TUnityApp.ConfigFile + '... corrupted! Extracting default file...', True, Settings.GetPathEventLog);
         try
-            Unpack(10, Settings.GetPathAppCfg, DeleteOld);
+            Unpack(10, Settings.GetPathAppCfg, false);
         except
             on E: Exception do
             begin
                 Application.MessageBox(
-                    PChar('Cannot extract config.cfg. ' + APPCAPTION + ' will be closed. Please contact IT Support.'),
-                    PChar(APPCAPTION), MB_OK + MB_ICONERROR
+                    PChar('Cannot extract config.cfg. ' + TUnityApp.APPCAPTION + ' will be closed. Please contact IT Support.'),
+                    PChar(TUnityApp.APPCAPTION), MB_OK + MB_ICONERROR
                 );
-                Status(5, AllTasks, DelayErr, 'CRC32 check: ' + ConfigFile + '..., unexpected error!', True, Settings.GetPathEventLog);
+                Status(5, TSplashScreen.AllTasks, TSplashScreen.DelayErr, 'CRC32 check: ' + TUnityApp.ConfigFile + '..., unexpected error!', True, Settings.GetPathEventLog);
                 LogText.Log(Settings.GetPathEventLog, '[Critical Error]: Cannot extract "config.cfg" from resources. Error has been thrown: ' + E.Message);
                 ExitProcess(0);
             end;
@@ -642,7 +650,7 @@ begin
     end
     else
     begin
-        Status(5, AllTasks, DelayStd, 'CRC32 check: ' + ConfigFile + '...OK.', True, Settings.GetPathEventLog);
+        Status(5, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'CRC32 check: ' + TUnityApp.ConfigFile + '...OK.', True, Settings.GetPathEventLog);
     end;
 
     /// <summary>
@@ -658,17 +666,17 @@ begin
 
     for iCNT:=0 to High(Assemblies) - 1 do
     begin
-        Status(iCNT + 6, AllTasks, DelayStd, 'Checking ' + Assemblies[iCNT] + '...', True, Settings.GetPathEventLog);
+        Status(iCNT + 6, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Checking ' + Assemblies[iCNT] + '...', True, Settings.GetPathEventLog);
 
         if FileExists(Settings.GetAppDir + Assemblies[iCNT]) then
         begin
-            Status(iCNT + 6, AllTasks, DelayStd, 'Checking ' + Assemblies[iCNT] + '... OK.', True, Settings.GetPathEventLog);
+            Status(iCNT + 6, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Checking ' + Assemblies[iCNT] + '... OK.', True, Settings.GetPathEventLog);
         end
         else
         begin
             Application.MessageBox(
                 PCHar('Cannot find ' + Assemblies[iCNT] + '. Please re-install application and/or contact IT support.'),
-                PChar(APPCAPTION), MB_OK + MB_ICONERROR
+                PChar(TUnityApp.APPCAPTION), MB_OK + MB_ICONERROR
             );
             ExitProcess(0);
         end;
@@ -680,19 +688,19 @@ begin
     /// Synchronise all layouts listed in settings file.
     /// </summary>
 
-    Status(12, AllTasks, DelayStd, 'Synchronising layouts...', True, Settings.GetPathEventLog);
+    Status(12, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Synchronising layouts...', True, Settings.GetPathEventLog);
 
     for iCNT:=0 to Settings.LayoutLists.Count - 1 do
     begin
         if Connection.Download(Settings.GetLayoutsURL + Settings.LayoutLists.Strings[iCNT], Settings.GetLayoutDir + Settings.LayoutLists.Strings[iCNT]) then
         begin
             LogText.Log(Settings.GetPathEventLog, Settings.LayoutLists.Strings[iCNT] + '... synchronised.');
-            Status(12, AllTasks, DelayStd, 'Synchronising layouts... ' + Settings.LayoutLists.Strings[iCNT] + ' [synchronised].', False, Settings.GetPathEventLog);
+            Status(12, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Synchronising layouts... ' + Settings.LayoutLists.Strings[iCNT] + ' [synchronised].', False, Settings.GetPathEventLog);
         end
         else
         begin
             LogText.Log(Settings.GetPathEventLog, Settings.LayoutLists.Strings[iCNT] + '... failed to download.');
-            Status(12, AllTasks, DelayStd, 'Synchronising layouts... ' + Settings.LayoutLists.Strings[iCNT] + ' [failed].', False, Settings.GetPathEventLog);
+            Status(12, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Synchronising layouts... ' + Settings.LayoutLists.Strings[iCNT] + ' [failed].', False, Settings.GetPathEventLog);
         end;
     end;
 
@@ -704,7 +712,7 @@ begin
     /// GlobalCEFApp is an instance of the TCEFApplication class an it simpliefies the Chromium initialization.
     /// </remarks>
 
-    Status(13, AllTasks, DelayStd, 'Chromium initialization...', True, Settings.GetPathEventLog);
+    Status(13, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Chromium initialization...', True, Settings.GetPathEventLog);
     GlobalCEFApp:=TCefApplication.Create;
     ChromiumExit:=False;
 
@@ -714,7 +722,7 @@ begin
         /// Do not run Chromium inside Unity application, all HTML rendering should be subprocessed.
         /// </summary>
 
-        Status(14, AllTasks, DelayStd, 'Chromium initialization: assigning sub process...', True, Settings.GetPathEventLog);
+        Status(14, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Chromium initialization: assigning sub process...', True, Settings.GetPathEventLog);
         GlobalCEFApp.BrowserSubprocessPath:='SubProcess.exe';
 
         /// <summary>
@@ -722,7 +730,7 @@ begin
         /// if we have main thread running. If not, we exit the program.
         /// </summary>
 
-        Status(15, AllTasks, DelayStd, 'Chromium initialization: starting main process...', True, Settings.GetPathEventLog);
+        Status(15, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Chromium initialization: starting main process...', True, Settings.GetPathEventLog);
 
         try
 
@@ -731,21 +739,21 @@ begin
             /// </remarks>
 
             GlobalCEFApp.FrameworkDirPath:=PathAppDir;
-            Status(16, AllTasks, DelayStd, 'Chromium initialization: setup Framework...', True, Settings.GetPathEventLog);
+            Status(16, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Chromium initialization: setup Framework...', True, Settings.GetPathEventLog);
 
             /// <remarks>
             /// Setup resources directory, explicitly to an absolute value. It ensures correct initialization.
             /// </remarks>
 
             GlobalCEFApp.ResourcesDirPath:=PathAppDir;
-            Status(17, AllTasks, DelayStd, 'Chromium initialization: setup Resources...', True, Settings.GetPathEventLog);
+            Status(17, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Chromium initialization: setup Resources...', True, Settings.GetPathEventLog);
 
             /// <remarks>
             /// Setup locales directory, explicitly to an absolute value. It ensures correct initialization.
             /// </remarks>
 
             GlobalCEFApp.LocalesDirPath:=PathAppDir + 'locales';
-            Status(18, AllTasks, DelayStd, 'Chromium initialization: setup Locales...', True, Settings.GetPathEventLog);
+            Status(18, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Chromium initialization: setup Locales...', True, Settings.GetPathEventLog);
 
             /// <remarks>
             /// Set the current application directory before loading the CEF3 libraries to avoid "CEF3 binaries missing !" error.
@@ -757,23 +765,23 @@ begin
             begin
                 Application.MessageBox(
                     PChar('Cannot detect main thread running. Program will be closed. Please contact IT support.'),
-                    PChar(APPCAPTION), MB_OK + MB_ICONERROR
+                    PChar(TUnityApp.APPCAPTION), MB_OK + MB_ICONERROR
                 );
                 ChromiumExit:=True;
             end;
         except
             on E: Exception do
-                Status(19, AllTasks, DelayStd, 'Chromium initialization failed, message received: ' + E.Message, False, Settings.GetPathEventLog);
+                Status(19, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Chromium initialization failed, message received: ' + E.Message, False, Settings.GetPathEventLog);
         end;
     finally
 
         if not(ChromiumExit) then
         begin
-            Status(19, AllTasks, DelayStd, 'Chromium initialization: GlobalCEFApp.StartMainProcess returned true.', True, Settings.GetPathEventLog)
+            Status(19, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Chromium initialization: GlobalCEFApp.StartMainProcess returned true.', True, Settings.GetPathEventLog)
         end
         else
         begin
-            Status(19, AllTasks, DelayStd, 'Chromium initialization failed, GlobalCEFApp.StartMainProcess returned false, no exception has been thrown.', False, Settings.GetPathEventLog);
+            Status(19, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Chromium initialization failed, GlobalCEFApp.StartMainProcess returned false, no exception has been thrown.', False, Settings.GetPathEventLog);
             ExitProcess(0);
         end;
 
@@ -783,9 +791,9 @@ begin
     /// Start the application.
     /// </summary>
 
-    Status(20, AllTasks, 50, 'Application initialization... ', False, Settings.GetPathEventLog);
+    Status(20, TSplashScreen.AllTasks, 50, 'Application initialization... ', False, Settings.GetPathEventLog);
     Application.Initialize;
-    Application.Title:=APPCAPTION;
+    Application.Title:=TUnityApp.APPCAPTION;
     Application.MainFormOnTaskbar:=False;
 
     /// <remarks>
@@ -814,70 +822,70 @@ begin
 
     Application.CreateForm(TAboutForm, AboutForm);
     MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''AboutForm'' has been created.');
-    Status(21, AllTasks, 1, 'Application initialization: [VCL] AboutForm has been loaded.', False, Settings.GetPathEventLog);
+    Status(21, TSplashScreen.AllTasks, 1, 'Application initialization: [VCL] AboutForm has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TSendForm, SendForm);
     MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''SendForm'' has been created.');
-    Status(22, AllTasks, 1, 'Application initialization: [VCL] SendForm has been loaded.', False, Settings.GetPathEventLog);
+    Status(22, TSplashScreen.AllTasks, 1, 'Application initialization: [VCL] SendForm has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TEventForm, EventForm);
     MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''EventForm'' has been created.');
-    Status(23, AllTasks, 1, 'Application initialization: [VCL] EventForm has been loaded.', False, Settings.GetPathEventLog);
+    Status(23, TSplashScreen.AllTasks, 1, 'Application initialization: [VCL] EventForm has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TColorsForm, ColorsForm);
     MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ColorsForm'' has been created.');
-    Status(24, AllTasks, 1, 'Application initialization: [VCL] ColorsForm has been loaded.', False, Settings.GetPathEventLog);
+    Status(24, TSplashScreen.AllTasks, 1, 'Application initialization: [VCL] ColorsForm has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TReportForm, ReportForm);
     MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ReportForm'' has been created.');
-    Status(25, AllTasks, 1, 'Application initialization: [VCL] ReportForm has been loaded.', False, Settings.GetPathEventLog);
+    Status(25, TSplashScreen.AllTasks, 1, 'Application initialization: [VCL] ReportForm has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TFilterForm, FilterForm);
     MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''FilterForm'' has been created.');
-    Status(26, AllTasks, 1, 'Application initialization: [VCL] FilterForm has been loaded.', False, Settings.GetPathEventLog);
+    Status(26, TSplashScreen.AllTasks, 1, 'Application initialization: [VCL] FilterForm has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TSearchForm, SearchForm);
     MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''SearchForm'' has been created.');
-    Status(27, AllTasks, 1, 'Application initialization: [VCL] SearchForm has been loaded.', False, Settings.GetPathEventLog);
+    Status(27, TSplashScreen.AllTasks, 1, 'Application initialization: [VCL] SearchForm has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TTrackerForm, TrackerForm);
     MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''TrackerForm'' has been created.');
-    Status(28, AllTasks, 1, 'Application initialization: [VCL] TrackerForm has been loaded.', False, Settings.GetPathEventLog);
+    Status(28, TSplashScreen.AllTasks, 1, 'Application initialization: [VCL] TrackerForm has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TActionsForm, ActionsForm);
     MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ActionsForm'' has been created.');
-    Status(29, AllTasks, 1, 'Application initialization: [VCL] ActionsForm has been loaded.', False, Settings.GetPathEventLog);
+    Status(29, TSplashScreen.AllTasks, 1, 'Application initialization: [VCL] ActionsForm has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TCalendarForm, CalendarForm);
     MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''CalendarForm'' has been created.');
-    Status(30, AllTasks, 1, 'Application initialization: [VCL] CalendarForm has been loaded.', False, Settings.GetPathEventLog);
+    Status(30, TSplashScreen.AllTasks, 1, 'Application initialization: [VCL] CalendarForm has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TInvoicesForm, InvoicesForm);
     MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''InvoicesForm'' has been created.');
-    Status(31, AllTasks, 1, 'Application initialization: [VCL] InvoicesForm has been loaded.', False, Settings.GetPathEventLog);
+    Status(31, TSplashScreen.AllTasks, 1, 'Application initialization: [VCL] InvoicesForm has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TPhoneListForm, PhoneListForm);
     MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''PhoneListForm'' has been created.');
-    Status(32, AllTasks, 1, 'Application initialization: [VCL] PhoneListForm has been loaded.', False, Settings.GetPathEventLog);
+    Status(32, TSplashScreen.AllTasks, 1, 'Application initialization: [VCL] PhoneListForm has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TViewSearchForm, ViewSearchForm);
     MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ViewSearchForm'' has been created.');
-    Status(33, AllTasks, 1, 'Application initialization: [VCL] ViewSearchForm has been loaded.', False, Settings.GetPathEventLog);
+    Status(33, TSplashScreen.AllTasks, 1, 'Application initialization: [VCL] ViewSearchForm has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TViewMailerForm, ViewMailerForm);
     MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ViewMailerForm'' has been created.');
-    Status(34, AllTasks, 1, 'Application initialization: [VCL] ViewMailerForm has been loaded.', False, Settings.GetPathEventLog);
+    Status(34, TSplashScreen.AllTasks, 1, 'Application initialization: [VCL] ViewMailerForm has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TAwaitForm, AwaitForm);
     MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''AwaitForm'' has been created.');
-    Status(35, AllTasks, 1, 'Application initialization: [VCL] AwaitForm has been loaded.', False, Settings.GetPathEventLog);
+    Status(35, TSplashScreen.AllTasks, 1, 'Application initialization: [VCL] AwaitForm has been loaded.', False, Settings.GetPathEventLog);
 
     Application.CreateForm(TQmsForm, QmsForm);
     MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''QmsForm'' has been created.');
-    Status(36, AllTasks, 1, 'Application initialization: [VCL] QmsForm has been loaded.', False, Settings.GetPathEventLog);
+    Status(36, TSplashScreen.AllTasks, 1, 'Application initialization: [VCL] QmsForm has been loaded.', False, Settings.GetPathEventLog);
 
     // Splash screen - 100%
-    Status(37, AllTasks, 500, 'Application is initialized.', False, Settings.GetPathEventLog);
+    Status(37, TSplashScreen.AllTasks, 500, 'Application is initialized.', False, Settings.GetPathEventLog);
 
     AnimateWindow(SplashForm.Handle, 500, AW_BLEND or AW_HIDE);
     Sleep(150);
@@ -887,28 +895,16 @@ begin
     /// Setup last window position and show it to the user.
     /// </summary>
 
-    if Settings.GetStringValue(ApplicationDetails,  'WINDOW_STATE', '') = 'wsNormal'    then MainForm.WindowState:=wsNormal;
-    if Settings.GetStringValue(ApplicationDetails,  'WINDOW_STATE', '') = 'wsMaximized' then MainForm.WindowState:=wsMaximized;
-    if Settings.GetStringValue(ApplicationDetails,  'WINDOW_STATE', '') = 'wsMinimized' then MainForm.WindowState:=wsMinimized;
+    if Settings.GetStringValue(TConfigSections.ApplicationDetails,  'WINDOW_STATE', '') = 'wsNormal'    then MainForm.WindowState:=wsNormal;
+    if Settings.GetStringValue(TConfigSections.ApplicationDetails,  'WINDOW_STATE', '') = 'wsMaximized' then MainForm.WindowState:=wsMaximized;
+    if Settings.GetStringValue(TConfigSections.ApplicationDetails,  'WINDOW_STATE', '') = 'wsMinimized' then MainForm.WindowState:=wsMinimized;
     MainForm.LogText.Log(Settings.GetPathEventLog, 'Initialization is completed. Application is running.');
     MainForm.Show;
-
-    /// <remarks>
-    /// Show taskbar icon.
-    /// </remarks>
 
     Application.MainFormOnTaskbar:=True;
     Application.Run;
 
-    /// <summary>
-    /// Destroy Chromium object when application.run exits.
-    /// </summary>
-
     GlobalCEFApp.Free;
-
-    /// <remarks>
-    /// Breaks the message loop in application.run class.
-    /// </remarks>
 
     Application.Terminate;
 

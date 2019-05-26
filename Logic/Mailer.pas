@@ -1,6 +1,4 @@
 
-{$I .\Include\Header.inc}
-
 unit Mailer;
 
 
@@ -17,8 +15,8 @@ uses
     System.Generics.Collections,
     Vcl.StdCtrls,
     CDO_TLB,
-    CustomTypes,
-    InterposerClasses;
+    InterposerClasses,
+    Helpers;
 
 
 type
@@ -57,7 +55,7 @@ type
         property MailSubject: string        read FMailSubject write FMailSubject;
         property MailBody:    string        read FMailBody    write FMailBody;
         property Attachments: TList<string> read FAttachments write FAttachments;
-        function SendEmail(oauth: integer) : boolean;
+        function SendEmail(oauth: TEmails.TAuthTypes) : boolean;
         function SendNow: boolean;
         constructor Create;
         destructor Destroy; override;
@@ -134,8 +132,37 @@ uses
     Tracker,
     Actions,
     SQL,
-    Model,
+    DbModel,
     Settings;
+
+
+const
+    CommonHTMLTable ='<table class="data">'                   + #13#10 +
+                     '<!-- HEADERS -->'                       + #13#10 +
+                     '<tr>'                                   + #13#10 +
+                     '  <!-- COLUMNS -->'                     + #13#10 +
+                     '  <th class="col1">Invoice No.:</th>'   + #13#10 +
+                     '  <th class="col2">Invoice Date:</th>'  + #13#10 +
+                     '  <th class="col3">Due date:</th>'      + #13#10 +
+                     '  <th class="col4">Currency:</th>'      + #13#10 +
+                     '  <th class="col5-h">Amount:</th>'      + #13#10 +
+                     '  <th class="col6-h">O/S Amount:</th>'  + #13#10 +
+                     '  <th class="col7">Status:</th>'        + #13#10 +
+                     '  <th class="col8">Text:</th>'          + #13#10 +
+                     '</tr>'                                  + #13#10 +
+                     '  <!-- ROWS WITH DATA -->'              + #13#10 +
+                     '{ROWS}'                                 + #13#10 +
+                     '</table>';
+    CommonHTMLRow ='<tr>'                                     + #13#10 +
+                   '  <td class="col1">{INV_NUM}</td>'        + #13#10 +
+                   '  <td class="col2">{INV_DAT}</td>'        + #13#10 +
+                   '  <td class="col3">{DUE_DAT}</td>'        + #13#10 +
+                   '  <td class="col4">{INV_CUR}</td>'        + #13#10 +
+                   '  <td class="col5">{INV_AMT}</td>'        + #13#10 +
+                   '  <td class="col6">{INV_OSA}</td>'        + #13#10 +
+                   '  <td class="col7">{INV_CRL}</td>'        + #13#10 +
+                   '  <td class="col8">{INV_TXT}</td>'        + #13#10 +
+                   '</tr>'                                    + #13#10;
 
 
 // -------------------------------------------------------------------------------------------------------------------------------------------- MAILER CLASS //
@@ -153,7 +180,7 @@ begin
 end;
 
 
-function TMailer.SendEmail(oauth: integer): boolean;
+function TMailer.SendEmail(oauth: TEmails.TAuthTypes): boolean;
 var
     CdoMessage: CDO_TLB.IMessage;
     Schema:     string;
@@ -178,23 +205,23 @@ begin
 
     Schema:='http://schemas.microsoft.com/cdo/configuration/';
 
-    if oauth = auNTLM then
+    if oauth = TEmails.TAuthTypes.cdoNTLM then
     begin
-      CdoMessage.Configuration.Fields.item[Schema + 'sendusing'       ].Value:=cdoSendUsingPort;
-      CdoMessage.Configuration.Fields.item[Schema + 'smtpauthenticate'].Value:=cdoNTLM;
-      CdoMessage.Configuration.Fields.item[Schema + 'smtpserver'      ].Value:=Settings.GetStringValue(MailerNTLM, 'SMTP', '');
-      CdoMessage.Configuration.Fields.item[Schema + 'smtpserverport'  ].Value:=Settings.GetStringValue(MailerNTLM, 'PORT', '');
+      CdoMessage.Configuration.Fields.item[Schema + 'sendusing'       ].Value:=TEmails.TAuthUsing.cdoSendUsingPort;
+      CdoMessage.Configuration.Fields.item[Schema + 'smtpauthenticate'].Value:=TEmails.TAuthTypes.cdoNTLM;
+      CdoMessage.Configuration.Fields.item[Schema + 'smtpserver'      ].Value:=Settings.GetStringValue(TConfigSections.MailerNTLM, 'SMTP', '');
+      CdoMessage.Configuration.Fields.item[Schema + 'smtpserverport'  ].Value:=Settings.GetStringValue(TConfigSections.MailerNTLM, 'PORT', '');
     end;
 
-    if oauth = auBASIC then
+    if oauth = TEmails.TAuthTypes.cdoBasic then
     begin
-      CdoMessage.Configuration.Fields.item[Schema + 'sendusing'       ].Value:=cdoSendUsingPort;
-      CdoMessage.Configuration.Fields.item[Schema + 'smtpauthenticate'].Value:=cdoBasic;
-      CdoMessage.Configuration.Fields.item[Schema + 'smtpserver'      ].Value:=Settings.GetStringValue(MailerBASIC, 'SMTP', '');
-      CdoMessage.Configuration.Fields.item[Schema + 'smtpserverport'  ].Value:=Settings.GetStringValue(MailerBASIC, 'PORT', '');
-      CdoMessage.Configuration.Fields.item[Schema + 'sendusername'    ].Value:=Settings.GetStringValue(MailerBASIC, 'USERNAME', '');
-      CdoMessage.Configuration.Fields.item[Schema + 'sendpassword'    ].Value:=Settings.GetStringValue(MailerBASIC, 'PASSWORD', '');
-      CdoMessage.Configuration.Fields.item[Schema + 'smtpusessl'      ].Value:=Settings.GetStringValue(MailerBASIC, 'SSL', '');
+      CdoMessage.Configuration.Fields.item[Schema + 'sendusing'       ].Value:=TEmails.TAuthUsing.cdoSendUsingPort;
+      CdoMessage.Configuration.Fields.item[Schema + 'smtpauthenticate'].Value:=TEmails.TAuthTypes.cdoBasic;
+      CdoMessage.Configuration.Fields.item[Schema + 'smtpserver'      ].Value:=Settings.GetStringValue(TConfigSections.MailerBASIC, 'SMTP', '');
+      CdoMessage.Configuration.Fields.item[Schema + 'smtpserverport'  ].Value:=Settings.GetStringValue(TConfigSections.MailerBASIC, 'PORT', '');
+      CdoMessage.Configuration.Fields.item[Schema + 'sendusername'    ].Value:=Settings.GetStringValue(TConfigSections.MailerBASIC, 'USERNAME', '');
+      CdoMessage.Configuration.Fields.item[Schema + 'sendpassword'    ].Value:=Settings.GetStringValue(TConfigSections.MailerBASIC, 'PASSWORD', '');
+      CdoMessage.Configuration.Fields.item[Schema + 'smtpusessl'      ].Value:=Settings.GetStringValue(TConfigSections.MailerBASIC, 'SSL', '');
     end;
 
     CdoMessage.Configuration.Fields.item[Schema + 'NNTPAccountName' ].Value:=XMailer;
@@ -229,11 +256,11 @@ begin
     Result:=False;
     Settings:=TSettings.Create;
 
-    if Settings.GetStringValue(MailerSetup, 'ACTIVE', '') = MailerNTLM then
-        Result:=SendEmail(auNTLM);
+    if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerNTLM then
+        Result:=SendEmail(TEmails.TAuthTypes.cdoNTLM);
 
-    if Settings.GetStringValue(MailerSetup, 'ACTIVE', '') = MailerBASIC then
-        Result:=SendEmail(auBASIC);
+    if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerBASIC then
+        Result:=SendEmail(TEmails.TAuthTypes.cdoBasic);
 
 end;
 
@@ -478,13 +505,13 @@ begin
     end;
 
     // Build customer address field
-    CustAddr:='<p class="p"><b>' + CustName + '</b><br />' + CRLF;
-    if (OpenItems.Cells[MainForm.OpenItemsRefs.Ad1Col,Pos] <> '') and (OpenItems.Cells[MainForm.OpenItemsRefs.Ad1Col,Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[MainForm.OpenItemsRefs.Ad1Col,Pos] + '<br />' + CRLF;
-    if (OpenItems.Cells[MainForm.OpenItemsRefs.Ad2Col,Pos] <> '') and (OpenItems.Cells[MainForm.OpenItemsRefs.Ad2Col,Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[MainForm.OpenItemsRefs.Ad2Col,Pos] + '<br />' + CRLF;
-    if (OpenItems.Cells[MainForm.OpenItemsRefs.Ad3Col,Pos] <> '') and (OpenItems.Cells[MainForm.OpenItemsRefs.Ad3Col,Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[MainForm.OpenItemsRefs.Ad3Col,Pos] + '<br />' + CRLF;
-    if (OpenItems.Cells[MainForm.OpenItemsRefs.PnoCol,Pos] <> '') and (OpenItems.Cells[MainForm.OpenItemsRefs.PnoCol,Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[MainForm.OpenItemsRefs.PnoCol,Pos] + '<br />' + CRLF;
-    if (OpenItems.Cells[MainForm.OpenItemsRefs.PAreaCol, Pos] <> '') and (OpenItems.Cells[MainForm.OpenItemsRefs.PAreaCol, Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[MainForm.OpenItemsRefs.PAreaCol, Pos] + '<br />' + CRLF;
-    CustAddr:=CustAddr + '</p>' + CRLF;
+    CustAddr:='<p class="p"><b>' + CustName + '</b><br />' + TUChars.CRLF;
+    if (OpenItems.Cells[MainForm.OpenItemsRefs.Ad1Col,Pos] <> '') and (OpenItems.Cells[MainForm.OpenItemsRefs.Ad1Col,Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[MainForm.OpenItemsRefs.Ad1Col,Pos] + '<br />' + TUChars.CRLF;
+    if (OpenItems.Cells[MainForm.OpenItemsRefs.Ad2Col,Pos] <> '') and (OpenItems.Cells[MainForm.OpenItemsRefs.Ad2Col,Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[MainForm.OpenItemsRefs.Ad2Col,Pos] + '<br />' + TUChars.CRLF;
+    if (OpenItems.Cells[MainForm.OpenItemsRefs.Ad3Col,Pos] <> '') and (OpenItems.Cells[MainForm.OpenItemsRefs.Ad3Col,Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[MainForm.OpenItemsRefs.Ad3Col,Pos] + '<br />' + TUChars.CRLF;
+    if (OpenItems.Cells[MainForm.OpenItemsRefs.PnoCol,Pos] <> '') and (OpenItems.Cells[MainForm.OpenItemsRefs.PnoCol,Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[MainForm.OpenItemsRefs.PnoCol,Pos] + '<br />' + TUChars.CRLF;
+    if (OpenItems.Cells[MainForm.OpenItemsRefs.PAreaCol, Pos] <> '') and (OpenItems.Cells[MainForm.OpenItemsRefs.PAreaCol, Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[MainForm.OpenItemsRefs.PAreaCol, Pos] + '<br />' + TUChars.CRLF;
+    CustAddr:=CustAddr + '</p>' + TUChars.CRLF;
 
     Result:=Items;
 

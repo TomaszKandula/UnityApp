@@ -74,7 +74,7 @@ object SplashForm: TSplashForm
     Width = 153
     Height = 16
     Cursor = crAppStart
-    Caption = 'Desktop Edition 2018'
+    Caption = 'Desktop Edition 2019'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlack
     Font.Height = -13

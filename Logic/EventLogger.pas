@@ -1,6 +1,3 @@
-
-{$I .\Include\Header.inc}
-
 unit EventLogger;
 
 
@@ -49,7 +46,8 @@ implementation
 
 
 uses
-    Main;
+    Main,
+    Helpers;
 
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------- LOGGER //
@@ -70,8 +68,8 @@ var
 begin
 
     GetDateTime:=Now;
-    CurrentDate:=FormatDateTime(gdDateFormat, GetDateTime);
-    CurrentTime:=FormatDateTime(gdTimeFormat, GetDateTime);
+    CurrentDate:=FormatDateTime(TDateTimeFormats.DateFormat, GetDateTime);
+    CurrentTime:=FormatDateTime(TDateTimeFormats.TimeFormat, GetDateTime);
     TextToLog:='#' + CurrentDate + ' (' + CurrentTime + '): ' + Text;
 
     /// <remarks>

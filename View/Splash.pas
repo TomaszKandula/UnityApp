@@ -1,6 +1,3 @@
-
-{$I .\Include\Header.inc}
-
 unit Splash;
 
 

@@ -1,6 +1,3 @@
-
-{$I .\Include\Header.inc}
-
 unit Calendar;
 
 
@@ -20,7 +17,8 @@ uses
     Vcl.ComCtrls,
     Vcl.ExtCtrls,
     Vcl.StdCtrls,
-    InterposerClasses;
+    InterposerClasses,
+    Helpers;
 
 
 type
@@ -48,10 +46,10 @@ type
         procedure MyCalendarClick(Sender: TObject);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
     private
-        var FCalendarMode: integer;
+        var FCalendarMode: TEnums.TCalendar;
         var FSelectedDate: TDateTime;
     public
-        property  CalendarMode: integer   read FCalendarMode write FCalendarMode;
+        property  CalendarMode: TEnums.TCalendar read FCalendarMode write FCalendarMode;
         property  SelectedDate: TDateTime read FSelectedDate write FSelectedDate;
         function  MakeMyDay(Increment: integer): TDate;
         function  IsWeekend(const DT: TDateTime): Boolean;
@@ -69,7 +67,7 @@ implementation
 
 uses
     Main,
-    Model,
+    DbModel,
     Settings,
     Worker,
     SysUtils;
@@ -145,11 +143,11 @@ procedure TCalendarForm.SetFollowUp(SelectedDate: TDate; SelectedCUID: string; R
 begin
   TTGeneralComment.Create(
                            SelectedCUID,
-                           strNULL,
+                           TNaVariants.NULL,
                            DateToStr(SelectedDate),
-                           strNULL,
-                           strNULL,
-                           strNULL,
+                           TNaVariants.NULL,
+                           TNaVariants.NULL,
+                           TNaVariants.NULL,
                            False
                          );
   MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneralComment.fFollowUp, 1, 1), Row]:=DateToStr(SelectedDate);
@@ -161,7 +159,7 @@ end;
 
 procedure TCalendarForm.FormCreate(Sender: TObject);
 begin
-    SelectedDate:=NULLDATE;
+    SelectedDate:=TDateTimeFormats.NullDate;
     PanelActions.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
     PanelCalendar.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
 end;
@@ -228,7 +226,7 @@ procedure TCalendarForm.MyCalendarDblClick(Sender: TObject);
 begin
 
     // Put selected date into database
-    if CalendarMode = cfDateToDB then
+    if CalendarMode = TEnums.TCalendar.cfDateToDB then
     begin
         SetFollowUp(
             CalendarForm.MyCalendar.Date,
@@ -240,7 +238,7 @@ begin
     end;
 
     // Just return selected date
-    if CalendarMode = cfGetDate then
+    if CalendarMode = TEnums.TCalendar.cfGetDate then
     begin
         SelectedDate:=CalendarForm.MyCalendar.Date;
         Close;
@@ -254,7 +252,7 @@ end;
 
 procedure TCalendarForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-    if Key = ESC then Close;
+    if Key = TUChars.ESC then Close;
 end;
 
 

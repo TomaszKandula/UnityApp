@@ -1,6 +1,3 @@
-
-{$I .\Include\Header.inc}
-
 unit Send;
 
 
@@ -22,7 +19,7 @@ uses
     Vcl.ExtCtrls,
     Vcl.Imaging.pngimage,
     InterposerClasses,
-    CustomTypes;
+    Helpers;
 
 
 type
@@ -101,7 +98,7 @@ uses
     Settings,
     Worker,
     Actions,
-    Model;
+    DbModel;
 
 
 {$R *.dfm}
@@ -118,11 +115,11 @@ begin
 
     if String.IsNullOrEmpty(Text_Message.Text) then
     begin
-        MainForm.MsgCall(mcWarn, 'Please provide custom message and salutation.');
+        MainForm.MsgCall(Warn, 'Please provide custom message and salutation.');
         Exit;
     end;
 
-    if MainForm.MsgCall(mcQuestion2, 'Are you absolutely sure you want to send it, right now?') = IDNO then
+    if MainForm.MsgCall(Question2, 'Are you absolutely sure you want to send it, right now?') = IDNO then
         Exit;
 
     InvFilter:=TInvoiceFilter.ShowAllItems;
@@ -130,7 +127,7 @@ begin
     if cbOverdueOnly.Checked then InvFilter:=TInvoiceFilter.ReminderOvd;
     if cbNonOverdue.Checked  then InvFilter:=TInvoiceFilter.ReminderNonOvd;
 
-    TempStr:=StringReplace(Text_Message.Text, CRLF, HTML_BR, [rfReplaceAll]);
+    TempStr:=StringReplace(Text_Message.Text, TUChars.CRLF, '<br>', [rfReplaceAll]);
 
     /// <remarks>
     /// UpdateOpenItemsRefs and UpdateControlStatusRefs must be executed before TTSendAccountStatement is called.
@@ -138,7 +135,7 @@ begin
     MainForm.UpdateOpenItemsRefs(ActionsForm.OpenItemsGrid);
     MainForm.UpdateControlStatusRefs(MainForm.sgControlStatus);
     TTSendAccountStatement.Create(
-        maCustom,
+        TDocuments.TMode.maCustom,
         'Account Statement',
         TempStr,
         InvFilter,
@@ -265,7 +262,7 @@ end;
 procedure TSendForm.btnBeginDateClick(Sender: TObject);
 begin
     CalendarForm.CalendarMode:=cfGetDate;
-    MainForm.WndCall(CalendarForm, stModal);
+    MainForm.WndCall(CalendarForm, Helpers.TWindows.TState.Modal);
     ValBeginDate.Caption:=DateToStr(CalendarForm.SelectedDate);
 end;
 
@@ -273,7 +270,7 @@ end;
 procedure TSendForm.btnEndDateClick(Sender: TObject);
 begin
     CalendarForm.CalendarMode:=cfGetDate;
-    MainForm.WndCall(CalendarForm, stModal);
+    MainForm.WndCall(CalendarForm, Modal);
     ValEndDate.Caption:=DateToStr(CalendarForm.SelectedDate);
 end;
 
@@ -295,7 +292,7 @@ end;
 
 procedure TSendForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-    if Key = ESC then Close;
+    if Key = Char(VK_ESCAPE) then Close;
 end;
 
 

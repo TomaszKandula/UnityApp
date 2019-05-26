@@ -1,6 +1,3 @@
-
-{$I .\Include\Header.inc}
-
 unit Invoices;
 
 
@@ -49,8 +46,10 @@ Implementation
 uses
     Main,
     Settings,
-    SQL,
-    Model;
+    SqlHandler,
+    DbModel,
+    Helpers;
+
 
 {$R *.dfm}
 
@@ -62,7 +61,7 @@ procedure TInvoicesForm.FormCreate(Sender: TObject);
 begin
     InvoicesGrid.RowCount:=2;
     InvoicesGrid.ColCount:=4;
-    InvoicesGrid.SetRowHeight(sgRowHeight, 25);
+    InvoicesGrid.SetRowHeight(InvoicesGrid.sgRowHeight, 25);
 end;
 
 
@@ -91,19 +90,19 @@ begin
 
     try
         CUID:=MainForm.sgInvoiceTracker.Cells[MainForm.sgInvoiceTracker.ReturnColumn(TTrackerData.Cuid, 1, 1), MainForm.sgInvoiceTracker.Row];
-        Tables.StrSQL:=SELECT                             +
-                            TTrackerInvoices.InvoiceNo    + COMMA +
-                            TTrackerInvoices.InvoiceState + COMMA +
+        Tables.StrSQL:=TSql.SELECT                             +
+                            TTrackerInvoices.InvoiceNo    + TUChars.COMMA +
+                            TTrackerInvoices.InvoiceState + TUChars.COMMA +
                             TTrackerInvoices.Stamp        +
-                        FROM                              +
+                        TSql.FROM                              +
                             TTrackerInvoices.TrackerInvoices +
-                        WHERE                                +
+                        TSql.WHERE                                +
                             TTrackerInvoices.Cuid            +
-                        EQUAL                                +
+                        TSql.EQUAL                                +
                             QuotedStr(CUID);
         Tables.SqlToGrid(InvoicesGrid, Tables.ExecSQL, False, True);
         InvoicesGrid.Freeze(False);
-      finally
+    finally
         Tables.Free;
     end;
 
@@ -115,7 +114,7 @@ end;
 
 procedure TInvoicesForm.InvoicesGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-  InvoicesGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
+  InvoicesGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, TUnityApp.SELCOLOR, clBlack, clWhite, True);
 end;
 
 
@@ -124,13 +123,13 @@ end;
 
 procedure TInvoicesForm.InvoicesGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-    if (Key = 67) and (Shift = [ssCtrl]) then InvoicesGrid.CopyCutPaste(adCopy);
+    if (Key = 67) and (Shift = [ssCtrl]) then InvoicesGrid.CopyCutPaste(TEnums.TActionTask.adCopy);
 end;
 
 
 procedure TInvoicesForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-    if Key = ESC then Close;
+    if Key = Char(VK_ESCAPE) then Close;
 end;
 
 

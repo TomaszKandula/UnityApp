@@ -1,6 +1,4 @@
 
-{$I .\Include\Header.inc}
-
 unit ThreadUtilities;
 
 

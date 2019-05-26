@@ -1,5 +1,0 @@
-Initial:      	02-12-2016 (ALPHA) 
-First Beta:	27-11-2017 (BETA)
-Last Beta:	__-__-2018 (BETA)
-RC:             __-__-2018
-RTM:            __-__-2018

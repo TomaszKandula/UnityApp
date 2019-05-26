@@ -1,6 +1,3 @@
-
-{$I .\Include\Header.inc}
-
 unit AgeView;
 
 
@@ -16,10 +13,10 @@ uses
     System.Variants,
     Vcl.Graphics,
     Data.Win.ADODB,
-    Model,
-    SQL,
+    DbModel,
+    SqlHandler,
     InterposerClasses,
-    Arrays;
+    Helpers;
 
 
 type
@@ -89,7 +86,8 @@ implementation
 
 
 uses
-    Main, Settings;
+    Main,
+    Settings;
 
 
 // ---------------------------------------------------------------------------------------------------------------------------------------- CREATE & RELEASE //
@@ -103,16 +101,16 @@ begin
 
     if FormatSettings.DecimalSeparator = ',' then
     begin
-        Class_A:=StrToFloat(Settings.GetStringValue(RiskClassDetails, 'CLASS_A_MAX', '0,80'));
-        Class_B:=StrToFloat(Settings.GetStringValue(RiskClassDetails, 'CLASS_B_MAX', '0,15'));
-        Class_C:=StrToFloat(Settings.GetStringValue(RiskClassDetails, 'CLASS_C_MAX', '0,05'));
+        Class_A:=StrToFloat(Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_A_MAX', '0,80'));
+        Class_B:=StrToFloat(Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_B_MAX', '0,15'));
+        Class_C:=StrToFloat(Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_C_MAX', '0,05'));
     end;
 
     if FormatSettings.DecimalSeparator = '.' then
     begin
-        Class_A:=StrToFloat(StringReplace(Settings.GetStringValue(RiskClassDetails, 'CLASS_A_MAX', '0,80'), ',', '.', [rfReplaceAll]));
-        Class_B:=StrToFloat(StringReplace(Settings.GetStringValue(RiskClassDetails, 'CLASS_B_MAX', '0,15'), ',', '.', [rfReplaceAll]));
-        Class_C:=StrToFloat(StringReplace(Settings.GetStringValue(RiskClassDetails, 'CLASS_C_MAX', '0,05'), ',', '.', [rfReplaceAll]));
+        Class_A:=StrToFloat(StringReplace(Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_A_MAX', '0,80'), ',', '.', [rfReplaceAll]));
+        Class_B:=StrToFloat(StringReplace(Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_B_MAX', '0,15'), ',', '.', [rfReplaceAll]));
+        Class_C:=StrToFloat(StringReplace(Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_C_MAX', '0,05'), ',', '.', [rfReplaceAll]));
     end;
 
     inherited;
@@ -143,10 +141,10 @@ begin
     Grid.Freeze(True);
 
     // Read grid layout to be passed as paremeter to SQL statement
-    Grid.LoadLayout(StrCol, ColumnWidthName, ColumnOrderName, ColumnNames, ColumnPrefix);
+    Grid.LoadLayout(StrCol, TConfigSections.ColumnWidthName, TConfigSections.ColumnOrderName, TConfigSections.ColumnNames, TConfigSections.ColumnPrefix);
 
     CmdType:=cmdText;
-    StrSQL:=EXECUTE + AgeViewReport + SPACE + QuotedStr(StrCol) + COMMA + QuotedStr(GroupID) + COMMA + QuotedStr(AgeDate) + COMMA + QuotedStr(IntToStr(Mode));
+    StrSQL:=TSql.EXECUTE + AgeViewReport + TUChars.SPACE + QuotedStr(StrCol) + TUChars.COMMA + QuotedStr(GroupID) + TUChars.COMMA + QuotedStr(AgeDate) + TUChars.COMMA + QuotedStr(Mode.ToString);
     SqlToGrid(Grid, ExecSQL, False, False);
 
     MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: SQL statement applied [' + StrSQL + '].');
@@ -168,7 +166,7 @@ begin
 
     for iCNT:=1 to Grid.RowCount - 1 do
     begin
-        if Grid.RowHeights[iCNT] <> sgRowHidden then
+        if Grid.RowHeights[iCNT] <> Grid.sgRowHidden then
         begin
             // Not due and overdue ranges
             ANotDue:=ANotDue + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fNotDue, 1, 1), iCNT], 0);
@@ -223,7 +221,7 @@ begin
     // Move totals and its positions into array
     for iCNT:=1 to Grid.RowCount do
     begin
-        if Grid.RowHeights[iCNT] <> sgRowHidden then
+        if Grid.RowHeights[iCNT] <> Grid.sgRowHidden then
         begin
             SetLength(ListPosition, Rows + 1);
             SetLength(TotalPerItem, Rows + 1);
@@ -538,7 +536,7 @@ function TAgeView.GetData(Code: string; Table: string; Entity: string): string;
 var
     Field:  string;
 begin
-    Result:=unUnassigned;
+    Result:=TNaVariants.Unassigned;
 
     if (Code = ' ') or (Code = '') or (Entity = ' ') or (Entity = '') then Exit;
     try
@@ -548,7 +546,7 @@ begin
             Field:=TGroup3.Description;
             CleanUp;
             Columns.Add(Field);
-            CustFilter:=WHERE + TGroup3.ErpCode + EQUAL + QuotedStr(Code) + _AND + TGroup3.Entity + EQUAL + QuotedStr(Entity);
+            CustFilter:=TSql.WHERE + TGroup3.ErpCode + TSql.EQUAL + QuotedStr(Code) + TSql._AND + TGroup3.Entity + TSql.EQUAL + QuotedStr(Entity);
             OpenTable(Table);
         end;
 
@@ -558,7 +556,7 @@ begin
             Field:=TPaidinfo.Description;
             CleanUp;
             Columns.Add(Field);
-            CustFilter:=WHERE + TPaidInfo.ErpCode + EQUAL + QuotedStr(Code);
+            CustFilter:=TSql.WHERE + TPaidInfo.ErpCode + TSql.EQUAL + QuotedStr(Code);
             OpenTable(Table);
         end;
 
@@ -568,7 +566,7 @@ begin
             Field:=TPaymentTerms.Description;
             CleanUp;
             Columns.Add(Field);
-            CustFilter:=WHERE + TPaymentTerms.ErpCode + EQUAL + QuotedStr(Code) + _AND + TPaymentTerms.Entity + EQUAL + QuotedStr(Entity);
+            CustFilter:=TSql.WHERE + TPaymentTerms.ErpCode + TSql.EQUAL + QuotedStr(Code) + TSql._AND + TPaymentTerms.Entity + TSql.EQUAL + QuotedStr(Entity);
             OpenTable(Table);
         end;
 
@@ -578,7 +576,7 @@ begin
             Field:=TPerson.Description;
             CleanUp;
             Columns.Add(Field);
-            CustFilter:=WHERE + TPerson.ErpCode + EQUAL + QuotedStr(Code) + _AND + TPerson.Entity + EQUAL + QuotedStr(Entity);
+            CustFilter:=TSql.WHERE + TPerson.ErpCode + TSql.EQUAL + QuotedStr(Code) + TSql._AND + TPerson.Entity + TSql.EQUAL + QuotedStr(Entity);
             OpenTable(Table);
         end;
 
@@ -931,10 +929,10 @@ begin
             { ALTERNATIONS }
 
             { REMOVE "TAB" CHARACTER IF FOUND IN CUSTOMER NAME }
-            ArrAgeView[avRow, 3]:=StringReplace(ArrAgeView[avRow, 3], TAB, '', [rfReplaceAll]);
+            ArrAgeView[avRow, 3]:=StringReplace(ArrAgeView[avRow, 3], TUChars.TAB, '', [rfReplaceAll]);
 
             { REPLACE SINGLE QUOTES TO DOUBLE QUOTES }
-            ArrAgeView[avRow, 3]:=StringReplace(ArrAgeView[avRow, 3], SingleQuote, DoubleQuote, [rfReplaceAll]);
+            ArrAgeView[avRow, 3]:=StringReplace(ArrAgeView[avRow, 3], TUChars.SingleQuote, TUChars.DoubleQuote, [rfReplaceAll]);
 
             { REMOVE FROM CO CODE "F" PREFIX }
             ArrAgeView[avRow, 20]:=IntToStr((StrToInt(StringReplace(ArrAgeView[avRow, 20], 'F', '0', [rfReplaceAll]))));
@@ -962,19 +960,19 @@ begin
     Settings:=TSettings.Create;
 
     { LOWER BOUNDS }
-    R1lo:=Settings.GetIntegerValue(AgingRanges, 'RANGE1A', 0);
-    R2lo:=Settings.GetIntegerValue(AgingRanges, 'RANGE2A', 0);
-    R3lo:=Settings.GetIntegerValue(AgingRanges, 'RANGE3A', 0);
-    R4lo:=Settings.GetIntegerValue(AgingRanges, 'RANGE4A', 0);
-    R5lo:=Settings.GetIntegerValue(AgingRanges, 'RANGE5A', 0);
-    R6lo:=Settings.GetIntegerValue(AgingRanges, 'RANGE6A', 0);
+    R1lo:=Settings.GetIntegerValue(TConfigSections.AgingRanges, 'RANGE1A', 0);
+    R2lo:=Settings.GetIntegerValue(TConfigSections.AgingRanges, 'RANGE2A', 0);
+    R3lo:=Settings.GetIntegerValue(TConfigSections.AgingRanges, 'RANGE3A', 0);
+    R4lo:=Settings.GetIntegerValue(TConfigSections.AgingRanges, 'RANGE4A', 0);
+    R5lo:=Settings.GetIntegerValue(TConfigSections.AgingRanges, 'RANGE5A', 0);
+    R6lo:=Settings.GetIntegerValue(TConfigSections.AgingRanges, 'RANGE6A', 0);
 
     { UPPER BOUNDS }
-    R1hi:=Settings.GetIntegerValue(AgingRanges, 'RANGE1B', 0);
-    R2hi:=Settings.GetIntegerValue(AgingRanges, 'RANGE2B', 0);
-    R3hi:=Settings.GetIntegerValue(AgingRanges, 'RANGE3B', 0);
-    R4hi:=Settings.GetIntegerValue(AgingRanges, 'RANGE4B', 0);
-    R5hi:=Settings.GetIntegerValue(AgingRanges, 'RANGE5B', 0);
+    R1hi:=Settings.GetIntegerValue(TConfigSections.AgingRanges, 'RANGE1B', 0);
+    R2hi:=Settings.GetIntegerValue(TConfigSections.AgingRanges, 'RANGE2B', 0);
+    R3hi:=Settings.GetIntegerValue(TConfigSections.AgingRanges, 'RANGE3B', 0);
+    R4hi:=Settings.GetIntegerValue(TConfigSections.AgingRanges, 'RANGE4B', 0);
+    R5hi:=Settings.GetIntegerValue(TConfigSections.AgingRanges, 'RANGE5B', 0);
 
     { POPULATE }
 
@@ -1084,24 +1082,24 @@ begin
     Columns.Add(TSnapshots.AccountType);
 
     { DELETE STATEMENT | REMOVE OLD DATA }
-    DeleteData:=DELETE_FROM + DestTable;
-    Condition:=TSnapshots.GroupId + EQUAL + QuotedStr(SourceArray[0, 0]) + _AND + TSnapshots.AgeDate + EQUAL + QuotedStr(LeftStr(SourceArray[0, 1], 10));
+    DeleteData:=TSql.DELETE_FROM + DestTable;
+    Condition:=TSnapshots.GroupId + TSql.EQUAL + QuotedStr(SourceArray[0, 0]) + TSql._AND + TSnapshots.AgeDate + TSql.EQUAL + QuotedStr(LeftStr(SourceArray[0, 1], 10));
 
     { INSERT STATEMENT | INSERT NEW DATA }
     Transaction:=TransactTemp;
-    Transaction:=StringReplace(Transaction, '{CommonSelect}', CommonSelect, [rfReplaceAll]);
-    Transaction:=StringReplace(Transaction, '{CommonDelete}', CommonDelete, [rfReplaceAll]);
-    Transaction:=StringReplace(Transaction, '{DestTable}',    DestTable,    [rfReplaceAll]);
-    Transaction:=StringReplace(Transaction, '{Condition}',    Condition,    [rfReplaceAll]);
-    Transaction:=StringReplace(Transaction, '{DeleteData}',   DeleteData,   [rfReplaceAll]);
-    Transaction:=StringReplace(Transaction, '{SimpleInput}',  SPACE,        [rfReplaceAll]);
-    Transaction:=StringReplace(Transaction, '{SWITCH}',       'OFF',        [rfReplaceAll]);
-    Transaction:=StringReplace(Transaction, '{Begin}',        SPACE,        [rfReplaceAll]);
-    Transaction:=StringReplace(Transaction, '{End}',          SPACE,        [rfReplaceAll]);
+    Transaction:=StringReplace(Transaction, '{CommonSelect}', CommonSelect,  [rfReplaceAll]);
+    Transaction:=StringReplace(Transaction, '{CommonDelete}', CommonDelete,  [rfReplaceAll]);
+    Transaction:=StringReplace(Transaction, '{DestTable}',    DestTable,     [rfReplaceAll]);
+    Transaction:=StringReplace(Transaction, '{Condition}',    Condition,     [rfReplaceAll]);
+    Transaction:=StringReplace(Transaction, '{DeleteData}',   DeleteData,    [rfReplaceAll]);
+    Transaction:=StringReplace(Transaction, '{SimpleInput}',  TUChars.SPACE, [rfReplaceAll]);
+    Transaction:=StringReplace(Transaction, '{SWITCH}',       'OFF',         [rfReplaceAll]);
+    Transaction:=StringReplace(Transaction, '{Begin}',        TUChars.SPACE, [rfReplaceAll]);
+    Transaction:=StringReplace(Transaction, '{End}',          TUChars.SPACE, [rfReplaceAll]);
     Transaction:=StringReplace(
         Transaction,
         '{ComplexInput}',
-        ToSqlInsert(SourceArray, nil, DestTable, ColumnsToList(Columns, enQuotesOff)),
+        ToSqlInsert(SourceArray, nil, DestTable, ColumnsToList(Columns, TEnums.TQuotes.Disabled)),
         [rfReplaceAll]
     );
 
@@ -1109,7 +1107,7 @@ begin
     StrSQL:=Transaction;
 
     try
-        MainForm.ExecMessage(False, mcStatusBar, stSQLupdate);
+        MainForm.ExecMessage(False, TMessaging.msStatusBar, TStatusBar.SQLupdate);
         ExecSQL;
     except
         on E: Exception do

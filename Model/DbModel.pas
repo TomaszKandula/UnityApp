@@ -1,29 +1,15 @@
-
-{$I .\Include\Header.inc}
-
-unit Model;
+unit DbModel;
 
 
 interface
 
 
 uses
-    Winapi.Windows,
-    System.Classes,
-    System.SysUtils,
-    System.StrUtils,
-    SQL,
-    ADODB;
+    SqlHandler;
 
-    /// <remarks>
-    /// Because we use ADODB and no other ORM, we encapsulate columns name (fields) under table name (class), so we have one point of reference
-    /// and yet we can use it to build our own SQL statement(s), although templates are preferred over manual SQL.
-    /// </remarks>
+    // legacy code - to be removed after REST is implemented
 
 type
-
-
-    // ------------------------------------------------------------------------------------------------------------------------------------ SCHEMA: CUSTOMER //
 
 
     TCompanyData = class(TDataTables)
@@ -361,9 +347,6 @@ type
     end;
 
 
-    // ----------------------------------------------------------------------------------------------------------------------------------------- SCHEMA: ERP //
-
-
     TPerson = class(TDataTables)
     {$TYPEINFO ON}
     published
@@ -481,9 +464,6 @@ type
         const StatusCode      = 'StatusCode';
         const SystemCode      = 'SystemCode';
     end;
-
-
-    // -------------------------------------------------------------------------------------------------------------------------------------- SCHEMA: COMMON //
 
 
     TCurrencies = class(TDataTables)

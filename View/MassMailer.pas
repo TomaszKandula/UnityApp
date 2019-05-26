@@ -1,6 +1,3 @@
-
-{$I .\Include\Header.inc}
-
 unit MassMailer;
 
 
@@ -23,7 +20,7 @@ uses
     Vcl.Buttons,
     Vcl.Imaging.pngimage,
     InterposerClasses,
-    CustomTypes;
+    Helpers;
 
 
 type
@@ -115,8 +112,8 @@ uses
     Main,
     Calendar,
     Settings,
-    SQL,
-    Model,
+    SqlHandler,
+    DbModel,
     Worker,
     Actions,
     Await;
@@ -206,7 +203,7 @@ begin
 
     // Display busy cursor and change status
     Screen.Cursor:=crSQLWait;
-    MainForm.ExecMessage(False, mcStatusBar, stProcessing);
+    MainForm.ExecMessage(False, TMessaging.msStatusBar, TStatusBar.Processing);
 
     // Get data
     SetEmailAddresses(CustomerList);
@@ -214,7 +211,7 @@ begin
 
     // Default
     Screen.Cursor:=crDefault;
-    MainForm.ExecMessage(False, mcStatusBar, stReady);
+    MainForm.ExecMessage(False, TMessaging.msStatusBar, TStatusBar.Ready);
 
     // Turn off open items timer
     MainForm.OILoader.Enabled:=False;
@@ -250,7 +247,7 @@ begin
 
     try
         Database.Columns.Add(TAddressBook.Estatements);
-        Database.CustFilter:=WHERE + TAddressBook.Scuid + EQUAL + QuotedStr(Scuid);
+        Database.CustFilter:=TSql.WHERE + TAddressBook.Scuid + TSql.EQUAL + QuotedStr(Scuid);
         Database.OpenTable(TAddressBook.AddressBook);
 
         if Database.DataSet.RecordCount > 0 then
@@ -310,7 +307,7 @@ begin
                 Branch:=Source.Items[iCNT].SubItems[9];
 
                 Tables.ClearSQL;
-                Tables.CustFilter:=WHERE + TCompanyData.CoCode + EQUAL + QuotedStr(CoCode) + _AND + TCompanyData.Branch + EQUAL + QuotedStr(Branch);
+                Tables.CustFilter:=TSql.WHERE + TCompanyData.CoCode + TSql.EQUAL + QuotedStr(CoCode) + TSql._AND + TCompanyData.Branch + TSql.EQUAL + QuotedStr(Branch);
                 Tables.OpenTable(TCompanyData.CompanyData);
 
                 // Always add to the lists
@@ -324,11 +321,11 @@ begin
                 end
                 else
                 begin
-                    Source.Items[iCNT].SubItems[5] :=unNotFound;
-                    Source.Items[iCNT].SubItems[6] :=unNotFound;
-                    Source.Items[iCNT].SubItems[7] :=unNotFound;
-                    Source.Items[iCNT].SubItems[3] :=unNotFound;
-                    Source.Items[iCNT].SubItems[12]:=unNotFound;
+                    Source.Items[iCNT].SubItems[5] :=TNaVariants.NotFound;
+                    Source.Items[iCNT].SubItems[6] :=TNaVariants.NotFound;
+                    Source.Items[iCNT].SubItems[7] :=TNaVariants.NotFound;
+                    Source.Items[iCNT].SubItems[3] :=TNaVariants.NotFound;
+                    Source.Items[iCNT].SubItems[12]:=TNaVariants.NotFound;
                 end;
 
             end;
@@ -363,12 +360,12 @@ begin
         )
     then
     begin
-        MainForm.MsgCall(mcWarn, 'Cannot send incomplete form. Please re-check it and try again.');
+        MainForm.MsgCall(Warn, 'Cannot send incomplete form. Please re-check it and try again.');
         Exit;
     end;
 
     // Ask user, they may press the button by mistake
-    if MainForm.MsgCall(mcQuestion2, 'Are you absolutely sure you want to send it, right now?') = IDNO
+    if MainForm.MsgCall(Question2, 'Are you absolutely sure you want to send it, right now?') = IDNO
         then
             Exit;
 
@@ -384,7 +381,7 @@ begin
             ThreadCount:=ThreadCount + 1;
 
     // Prepare custom message to the customer
-    MessStr:=StringReplace(Text_Message.Text, CRLF, HTML_BR, [rfReplaceAll]);
+    MessStr:=StringReplace(Text_Message.Text, TUChars.CRLF, '<br>', [rfReplaceAll]);
 
     /// <remarks>
     /// We have to always pre-sort Open Items list via Due Date before sending account statement or reminder.
@@ -406,7 +403,7 @@ begin
     );
 
     // Display await window
-    MainForm.WndCall(AwaitForm, stModal);
+    MainForm.WndCall(AwaitForm, TWindows.TState.Modal);
 
 end;
 
@@ -417,7 +414,7 @@ end;
 procedure TViewMailerForm.btnBeginDateClick(Sender: TObject);
 begin
     CalendarForm.CalendarMode:=cfGetDate;
-    MainForm.WndCall(CalendarForm, stModal);
+    MainForm.WndCall(CalendarForm, Modal);
     ValBeginDate.Caption:=DateToStr(CalendarForm.SelectedDate);
 end;
 
@@ -425,7 +422,7 @@ end;
 procedure TViewMailerForm.btnEndDateClick(Sender: TObject);
 begin
     CalendarForm.CalendarMode:=cfGetDate;
-    MainForm.WndCall(CalendarForm, stModal);
+    MainForm.WndCall(CalendarForm, Modal);
     ValEndDate.Caption:=DateToStr(CalendarForm.SelectedDate);
 end;
 
@@ -525,7 +522,7 @@ end;
 
 procedure TViewMailerForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-    if Key = ESC then Close;
+    if Key = Char(VK_ESCAPE) then Close;
 end;
 
 

@@ -1,6 +1,3 @@
-
-{$I .\Include\Header.inc}
-
 unit Internet;
 
 interface
@@ -46,7 +43,8 @@ implementation
 
 
 uses
-    Main;
+    Main,
+    Helpers;
 
 
 function TConnectivity.CallServer(CallUrl: string; Mode: string; var HttpResponse: string): integer;
@@ -70,7 +68,7 @@ begin
             Http.Option[WinHttpRequestOption_EnableRedirects]:=True;
             Http.Open(Mode, CallUrl, False);
 
-            while (not(IsFinished)) and (NoAttempts < MAX_CHECK_ATTEMPTS) do
+            while (not(IsFinished)) and (NoAttempts < TNCSI.MAX_CHECK_ATTEMPTS) do
             begin
                 Inc(NoAttempts);
                 HttpResponse:=EmptyStr;
@@ -79,10 +77,10 @@ begin
                 ReturnCode:=Http.Status;
                 ReturnText:=Http.StatusText;
 
-                if Mode = ncsiGet then
+                if Mode = TNCSI.ncsiGet then
                     HttpResponse:=Http.ResponseText;
 
-                if Mode = ncsiHead then
+                if Mode = TNCSI.ncsiHead then
                     HttpResponse:=Http.GetAllResponseHeaders;
 
                 case ReturnCode of
@@ -96,14 +94,14 @@ begin
                     // Found, redirect
                     302:
                     begin
-                        Http.Open(ncsiGet, Http.GetResponseHeader('Location'), False);
+                        Http.Open(TNCSI.ncsiGet, Http.GetResponseHeader('Location'), False);
                     end;
 
                     // Call original URL and send credentials
                     401:
                     begin
                         Http.Open(Mode, CallUrl, False);
-                        Http.SetAutoLogonPolicy(WINHTTP_AUTOLOGON_SECURITY_LEVEL_MEDIUM);
+                        Http.SetAutoLogonPolicy(TNCSI.WINHTTP_AUTOLOGON_SECURITY_LEVEL_MEDIUM);
                     end;
 
                     // Any other response code
@@ -139,7 +137,7 @@ function TConnectivity.IsInternetPresent: boolean;
 var
   Return: string;
 begin
-    if CallServer(ncsiWww + ncsiFile, ncsiGet, Return) = 200 then
+    if CallServer(TNCSI.ncsiWww + TNCSI.ncsiFile, TNCSI.ncsiGet, Return) = 200 then
         Result:=True
             else
                 Result:=False;
@@ -154,7 +152,7 @@ function TConnectivity.GetResponseText(FullURL: string): string;
 var
     Return: string;
 begin
-    if CallServer(FullURL, ncsiGet, Return) = 200 then
+    if CallServer(FullURL, TNCSI.ncsiGet, Return) = 200 then
         Result:=Return
             else
                 Result:='';

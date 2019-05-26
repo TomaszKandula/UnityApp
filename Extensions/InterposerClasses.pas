@@ -1,6 +1,3 @@
-
-{$I .\Include\Header.inc}
-
 unit InterposerClasses;
 
 
@@ -8,7 +5,6 @@ interface
 
 
 uses
-    Arrays,
     Grids,
     ExtCtrls,
     Messages,
@@ -26,7 +22,8 @@ uses
     ComCtrls,
     Variants,
     StdCtrls,
-    CheckLst;
+    CheckLst,
+    Helpers;
 
 
 type
@@ -91,14 +88,18 @@ type
         var FHideFocusRect: boolean;
         var FOpenThdId:     integer;
     public
+        const sgRowHeight = 19;
+        const sgRowHidden = -1;
+        const xlWBATWorksheet = -4167;
+        const xlWARN_MESSAGE  = 'Invalid class string';
         var SqlColumns: TALists;
         var UpdatedRowsHolder: TAIntigers;
         property  OpenThdId: integer read FOpenThdId write FOpenThdId;
         property  HideFocusRect: boolean read FHideFocusRect write FHideFocusRect;
         procedure SetUpdatedRow(Row: integer);
         procedure RecordRowsAffected;
-        procedure CopyCutPaste(mode: integer);
-        procedure DelEsc(mode: integer; pCol, pRow: integer);
+        procedure CopyCutPaste(Mode: TEnums.TActionTask; FirstColOnly: boolean = False{Option});
+        procedure DelEsc(Mode: TEnums.TActionTask; pCol, pRow: integer);
         procedure ClearAll(dfRows: integer; FixedRows: integer; FixedCols: integer; ZeroCol: boolean);
         procedure DeleteRowFrom(FixedRow: integer; FixedCol: integer);
         procedure DrawSelected(ARow: integer; ACol: integer; State: TGridDrawState; Rect: TRect; FontColorSel: TColor; BrushColorSel: TColor; FontColor: TColor; BrushColor: TColor; Headers: boolean);
@@ -132,7 +133,7 @@ implementation
 uses
     Main,
     Settings,
-    SQL;
+    SqlHandler;
 
 
 // --------------------------------------------------------------------------------------------------------------------------- EXTENSION OF 'TLISTBOX' CLASS //
@@ -441,7 +442,7 @@ end;
 /// </summary>
 /// <param name="mode">Integer, use flag defined in common.inc.</param>
 
-procedure TStringGrid.CopyCutPaste(mode: integer);
+procedure TStringGrid.CopyCutPaste(Mode: TEnums.TActionTask; FirstColOnly: boolean = False{Option});
 var
     Grect:      TGridRect;
     Clipbrd:    string;
@@ -455,11 +456,14 @@ var
     NewCols:    integer;
     RowCounter: integer;
     iCNT:       integer;
-    TempClip:   TStringList;
+    jCNT:       integer;
+    zCNT:       integer;
+    TempRows:   TStringList;
+    TempCols:   TStringList;
 begin
 
     // Paste data into string grid
-    if mode = adPaste then
+    if Mode = TEnums.TActionTask.adPaste then
     begin
 
         // Get clipboard text
@@ -471,20 +475,19 @@ begin
         // Get dimension from clipboard text
         for iCNT:=0 to Length(Clipbrd) do
         begin
-            // Rows
-            if Clipbrd[iCNT] = CR then Inc(NewRows);
-            // Cols
-            if Clipbrd[iCNT] = TAB then Inc(NewCols);
+            // Get number of columns in given row
+            if (Clipbrd[iCNT] = TUChars.TAB) and (NewRows = 0) then Inc(NewCols);
+            // Get number of total rows
+            if Clipbrd[iCNT] = TUChars.LF then Inc(NewRows);
         end;
 
-        // We allow to paste only one column
-        if NewCols > 0 then Exit;
-
-        // Split into rows only
-        TempClip:=TStringList.Create;
+        // Split into rows and cols
+        TempRows:=TStringList.Create;
+        TempCols:=TStringList.Create;
         try
-            TempClip.Delimiter:=CR;
-            TempClip.DelimitedText:=Clipbrd;
+            TempRows.StrictDelimiter:=True;
+            TempRows.Delimiter:=TUChars.LF;
+            TempRows.DelimitedText:=Clipbrd;
 
             // Set start anchor of new selection
             GRect:=Selection;
@@ -495,11 +498,37 @@ begin
             for iCNT:=RTop to RowCount - 1 do
             begin
 
+                // Paste into visible row
                 if RowHeights[iCNT] <> -1 then
                 begin
 
-                    // Paste into visible row
-                    Cells[CLeft, iCNT]:=Clipbrd; //TempClip.Strings[RowCounter];
+                    // Only one column
+                    if NewCols = 0 then
+                        Cells[CLeft, iCNT]:=TempRows.Strings[RowCounter];
+
+                    // Many columns
+                    if NewCols > 0 then
+                    begin
+
+                        for jCNT:=0 to NewCols do
+                        begin
+                            TempCols.StrictDelimiter:=True;
+                            TempCols.Delimiter:=TUChars.TAB;
+                            TempCols.DelimitedText:=TempRows.Strings[RowCounter];
+
+                            // Paste into columns
+                            for zCNT:=0 to TempCols.Count - 1 do
+                            begin
+                                Cells[CLeft + zCNT, iCNT]:=TempCols.Strings[zCNT];
+                                // Allow only first column to be pasted
+                                if FirstColOnly then Break;
+                            end;
+
+                        end;
+
+                        TempCols.Clear;
+
+                    end;
 
                     // Count visible cells starting from
                     // given top position
@@ -516,17 +545,21 @@ begin
 
             end;
 
+            // Allow only first column to be pasted
+            if FirstColOnly then NewCols:=0;
+
             // Display new selection for pasted values
             Selection:=TGridRect(Rect(CLeft, RTop, CLeft + NewCols, NewRows));
 
         finally
-            TempClip.Free;
+            TempRows.Free;
+            TempCols.Free;
         end;
 
     end;
 
     // Copy/Cut data from string grid
-    if (mode = adCopy) or (mode = adCut) then
+    if (Mode = TEnums.TActionTask.adCopy) or (Mode = TEnums.TActionTask.adCut) then
     begin
         Sel:=Selection;
         TxtFromSel:='';
@@ -550,33 +583,37 @@ begin
                         TxtFromSel:=TxtFromSel + Cells[Col, Row];
 
                         // Cut
-                        if mode = adCut then
+                        if Mode = TEnums.TActionTask.adCut then
                             Cells[Col, Row]:='';
 
                         if Col < Sel.Right then
-                            TxtFromSel:=TxtFromSel + TAB;
+                            TxtFromSel:=TxtFromSel + TUChars.TAB;
 
                     end;
 
                 end;
 
                 if Row < Sel.Bottom then
-                    TxtFromSel:=TxtFromSel + CRLF;
+                    TxtFromSel:=TxtFromSel + TUChars.CRLF;
             end;
 
         end;
 
-        ClipBoard.AsText:=TxtFromSel + CRLF;
+        ClipBoard.AsText:=TxtFromSel + TUChars.CRLF;
 
     end;
 
 end;
 
 
-procedure TStringGrid.DelEsc(mode: integer; pCol, pRow: integer);
+procedure TStringGrid.DelEsc(Mode: TEnums.TActionTask; pCol, pRow: integer);
 begin
-    if mode = adESC then EditorMode:=False;
-    if mode = adDEL then Cells[pCol, pRow]:='';
+
+    case Mode of
+        TEnums.TActionTask.adESC: EditorMode:=False;
+        TEnums.TActionTask.adDEL: Cells[pCol, pRow]:='';
+    end;
+
 end;
 
 
@@ -887,7 +924,7 @@ begin
     end;
 
     // Encode
-    Settings.Encode(AppConfig);
+    Settings.Encode(TCommon.TUnityFiles.AppConfig);
 
 end;
 
@@ -1018,8 +1055,8 @@ begin
         {TODO -oTomek -cTightCoupling : Refactor}
 
         // Assign command with stored procedure
-        DataTables.StrSQL:=EXECUTE + AgeViewExport + SPACE +
-                       QuotedStr(MainForm.GroupList[MainForm.GroupListBox.ItemIndex, 0]) + COMMA +
+        DataTables.StrSQL:=TSql.EXECUTE + DataTables.AgeViewExport + TUChars.SPACE +
+                       QuotedStr(MainForm.GroupList[MainForm.GroupListBox.ItemIndex, 0]) + TUChars.COMMA +
                        QuotedStr(MainForm.GroupListDates.Text);
         // Execute
         DataTables.SqlToGrid(Self, DataTables.ExecSQL, False, True);
@@ -1139,7 +1176,7 @@ begin
     // GET THE FILE PATH AND PARSE
     if DialogBox.Execute = True then
     begin
-        MainForm.ExecMessage(True, mcStatusBar, stImportCSV);
+        MainForm.ExecMessage(True, TMessaging.msStatusBar, TStatusBar.ImportCSV);
         fPath  :=DialogBox.FileName;
         Data   :=TStringList.Create;
         Transit:=TStringList.Create;
@@ -1179,7 +1216,7 @@ begin
                 on E: Exception do
                 begin
                     MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: CSV Import has failed: ' + ExtractFileName(fPath));
-                    MainForm.ExecMessage(False, mcError, 'CSV Import has failed. Please check the file and try again.');
+                    MainForm.ExecMessage(False, TMessaging.msError, 'CSV Import has failed. Please check the file and try again.');
                     IsError:=True;
                 end;
             end;
@@ -1188,12 +1225,12 @@ begin
             if not IsError then
             begin
                 MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: Data has been imported successfully!');
-                MainForm.ExecMessage(False, mcInfo, 'Data has been imported successfully!');
+                MainForm.ExecMessage(False, TMessaging.msInfo, 'Data has been imported successfully!');
             end;
 
             Data.Free;
             Transit.Free;
-            MainForm.ExecMessage(True, mcStatusBar, stReady);
+            MainForm.ExecMessage(True, TMessaging.msStatusBar, TStatusBar.Ready);
 
         end;
 
@@ -1219,7 +1256,7 @@ begin
 
     // Write to CSV file
     try
-        MainForm.ExecMessage(False, mcStatusBar, stExportCSV);
+        MainForm.ExecMessage(False, TMessaging.msStatusBar, TStatusBar.ExportCSV);
 
         // Add rows and columns with delimiter
         for iCNT:=1 to Self.RowCount - 1 do
@@ -1227,7 +1264,7 @@ begin
             for jCNT:= 1 to Self.ColCount - 1 do
             begin
                 CleanStr :=Self.Cells[jCNT, iCNT];
-                CleanStr :=StringReplace(CleanStr, CRLF, ' ', [rfReplaceAll]);
+                CleanStr :=StringReplace(CleanStr, TUChars.CRLF, ' ', [rfReplaceAll]);
                 MyStr    :=MyStr + CleanStr + Delimiter;
             end;
 
@@ -1248,7 +1285,7 @@ begin
             on E: Exception do
             begin
                 MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: Cannot saved file: ' + ExtractFileName(fPath));
-                MainForm.ExecMessage(False, mcError, 'Cannot save the file in the given location.');
+                MainForm.ExecMessage(False, TMessaging.msError, 'Cannot save the file in the given location.');
                 IsError:=True;
             end;
         end;
@@ -1257,10 +1294,10 @@ begin
         if not IsError then
         begin
             MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: Data has been exported successfully!');
-            MainForm.ExecMessage(False, mcInfo, 'Data have been exported successfully!');
+            MainForm.ExecMessage(False, TMessaging.msInfo, 'Data have been exported successfully!');
         end;
         CSVData.Free;
-        MainForm.ExecMessage(False, mcStatusBar, stReady);
+        MainForm.ExecMessage(False, TMessaging.msStatusBar, TStatusBar.Ready);
     end;
 
 end;

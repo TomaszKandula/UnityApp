@@ -5,19 +5,25 @@
 
 unit CRC32u;
 
+
 interface
 
+
 uses
-  SysUtils;
+    SysUtils;
+
 
 type
-   dWord=0..$FFFFFFFF;
+   DWord = 0..$FFFFFFFF;
+
 
 procedure ComputeCRC32(data:  pointer; dSize:  dWord; var vCRC:  dWord);
 function CRC32File(FileName:String): dWord;
 function CRC32FromString(S: String): dWord;
 
+
 implementation
+
 
 const
   table:  array[0..255] of dWord =
@@ -89,56 +95,73 @@ const
     $B3667A2E, $C4614AB8, $5D681B02, $2A6F2B94,
     $B40BBE37, $C30C8EA1, $5A05DF1B, $2D02EF8D);
 
+
 procedure ComputeCRC32(data:  pointer; dSize: dWord; var vCRC:  dWord);
 var
-  i:  dWord;
-  b:  ^byte;
+    i: dWord;
+    b: ^byte;
 begin
-  vCRC:=$FFFFFFFF;
-  b:=data;
-  {$I-}
-  for  i:=0 to dSize-1 do
+
+    vCRC:=$FFFFFFFF;
+    b:=data;
+
+    {$I-}
+    for  i:=0 to dSize-1 do
     begin
-      vCRC:=(vCRC shr 8)  xor table[b^ xor (vCRC and $000000FF)];
-      inc(b)
+        vCRC:=(vCRC shr 8)  xor table[b^ xor (vCRC and $000000FF)];
+        inc(b)
     end;
-  {$I+}
-  vCRC:=not vCRC;
+    {$I+}
+
+    vCRC:=not vCRC;
+
 end;
+
 
 function CRC32File(FileName:String):DWord;
 var
-  F: file;
-  BytesRead: dword;
-  Buffer: Array[1..65521] of byte;
-  i: Integer;
+    F: file;
+    BytesRead: dword;
+    Buffer: Array[1..65521] of byte;
+    i: Integer;
 begin
-  FileMode := 0;
-  Result := $ffffffff;
-  {$I-}
-  AssignFile(F, FileName); Reset(F, 1);
-  if IOResult = 0 then begin
-    repeat
-      BlockRead(F, Buffer, SizeOf(Buffer), BytesRead);
-      for i := 1 to BytesRead do
-        Result := (Result shr 8) xor Table[Buffer[i] xor (Result and $000000FF)];
-    until BytesRead = 0;
-  end;
-  CloseFile(F);
-  {$I+}
-  Result := not Result;
+
+    FileMode := 0;
+    Result := $ffffffff;
+
+    {$I-}
+    AssignFile(F, FileName); Reset(F, 1);
+    if IOResult = 0 then begin
+        repeat
+            BlockRead(F, Buffer, SizeOf(Buffer), BytesRead);
+            for i := 1 to BytesRead do
+                Result := (Result shr 8) xor Table[Buffer[i] xor (Result and $000000FF)];
+        until BytesRead = 0;
+    end;
+    CloseFile(F);
+    {$I+}
+
+    Result := not Result;
+
 end;
+
 
 function CRC32FromString(s: String): dWord;
 var
-  i: integer;
+    i: integer;
 begin
-  result:=$FFFFFFFF;
-  {$I-}
-  for i:=1 to Length(S) do
-    result:=(result shr 8) xor table[Byte(s[i]) xor (result and $000000FF)];
-  {$I+}
-  if result=0 then result:=1;
+
+    result:=$FFFFFFFF;
+
+    {$I-}
+    for i:=1 to Length(S) do
+        result:=(result shr 8) xor table[Byte(s[i]) xor (result and $000000FF)];
+    {$I+}
+
+    if result=0 then result:=1;
+
 end;
 
+
 end.
+

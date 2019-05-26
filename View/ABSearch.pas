@@ -1,6 +1,3 @@
-
-{$I .\Include\Header.inc}
-
 unit ABSearch;
 
 
@@ -116,7 +113,8 @@ uses
     Main,
     Settings,
     Worker,
-    Model;
+    DbModel,
+    Helpers;
 
 
 // ------------------------------------------------------------------------------------------------------------------------------------------- CLASS HELPERS //
@@ -128,7 +126,7 @@ var
 begin
 
     Settings:=TSettings.Create;
-    ViewSearchForm.Caption:=Settings.GetStringValue(ApplicationDetails, 'WND_ABSEARCH', APPCAPTION);
+    ViewSearchForm.Caption:=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'WND_ABSEARCH', TUnityApp.APPCAPTION);
 
     PanelEditNumber.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
     PanelEditName.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
@@ -234,13 +232,13 @@ begin
 
     if (EditName.Enabled) and (string.IsNullOrEmpty(EditName.Text)) then
     begin
-        MainForm.ExecMessage(False, mcWarn, 'Please provide with Customer Name.');
+        MainForm.ExecMessage(False, TMessaging.msWarn, 'Please provide with Customer Name.');
         Exit;
     end;
 
     if (EditNumber.Enabled) and (string.IsNullOrEmpty(EditNumber.Text)) then
     begin
-        MainForm.ExecMessage(False, mcWarn, 'Please provide with Customer Number.');
+        MainForm.ExecMessage(False, TMessaging.msWarn, 'Please provide with Customer Number.');
         Exit;
     end;
 
@@ -282,49 +280,49 @@ begin
         )
     then
     begin
-        MainForm.ExecMessage(False, mcWarn, 'Please provide with at least one condition.');
+        MainForm.ExecMessage(False, TMessaging.msWarn, 'Please provide with at least one condition.');
         Exit;
     end;
 
     // Match case
-    if CheckBoxNameCase.Checked  then Collate1:=MATCHCASE;
-    if CheckBoxEmailCase.Checked then Collate2:=MATCHCASE;
-    if CheckBoxEstatCase.Checked then Collate3:=MATCHCASE;
-    if CheckBoxAliasCase.Checked then Collate4:=MATCHCASE;
+    if CheckBoxNameCase.Checked  then Collate1:=TSql.MATCHCASE;
+    if CheckBoxEmailCase.Checked then Collate2:=TSql.MATCHCASE;
+    if CheckBoxEstatCase.Checked then Collate3:=TSql.MATCHCASE;
+    if CheckBoxAliasCase.Checked then Collate4:=TSql.MATCHCASE;
 
     // "Like" or "Equal"
-    if CheckBoxNameEqual.Checked then EqualLike:=EQUAL else EqualLike:=LIKE;
-    if CheckBoxEmailCase.Checked then EqualLike:=EQUAL else EqualLike:=LIKE;
-    if CheckBoxEstatCase.Checked then EqualLike:=EQUAL else EqualLike:=LIKE;
-    if CheckBoxAliasCase.Checked then EqualLike:=EQUAL else EqualLike:=LIKE;
+    if CheckBoxNameEqual.Checked then EqualLike:=TSql.EQUAL else EqualLike:=TSql.LIKE;
+    if CheckBoxEmailCase.Checked then EqualLike:=TSql.EQUAL else EqualLike:=TSql.LIKE;
+    if CheckBoxEstatCase.Checked then EqualLike:=TSql.EQUAL else EqualLike:=TSql.LIKE;
+    if CheckBoxAliasCase.Checked then EqualLike:=TSql.EQUAL else EqualLike:=TSql.LIKE;
 
     // Attach "like" or "equal" and/or collate option
-    if EditName.Enabled       then StrEditName      :=TAddressBook.CustomerName + EqualLike + QuotedStr(EditName.Text)       + Collate1 + _AND;
-    if EditEmail.Enabled      then StrEditEmail     :=TAddressBook.Emails       + EqualLike + QuotedStr(EditEmail.Text)      + Collate2 + _AND;
-    if EditEstatement.Enabled then StrEditEstatement:=TAddressBook.Estatements  + EqualLike + QuotedStr(EditEstatement.Text) + Collate3 + _AND;
-    if EditUserAlias.Enabled  then StrEditUserAlias :=TAddressBook.UserAlias    + EqualLike + QuotedStr(EditUserAlias.Text)  + Collate4 + _AND;
+    if EditName.Enabled       then StrEditName      :=TAddressBook.CustomerName + EqualLike + QuotedStr(EditName.Text)       + Collate1 + TSql._AND;
+    if EditEmail.Enabled      then StrEditEmail     :=TAddressBook.Emails       + EqualLike + QuotedStr(EditEmail.Text)      + Collate2 + TSql._AND;
+    if EditEstatement.Enabled then StrEditEstatement:=TAddressBook.Estatements  + EqualLike + QuotedStr(EditEstatement.Text) + Collate3 + TSql._AND;
+    if EditUserAlias.Enabled  then StrEditUserAlias :=TAddressBook.UserAlias    + EqualLike + QuotedStr(EditUserAlias.Text)  + Collate4 + TSql._AND;
 
     // Do not use "like" and match case
-    if EditNumber.Enabled     then StrEditNumber    :=TAddressBook.CustomerNumber + EQUAL + QuotedStr(EditNumber.Text)     + _AND;
-    if EditPhones.Enabled     then StrEditPhones    :=TAddressBook.PhoneNumbers   + EQUAL + QuotedStr(EditPhones.Text)     + _AND;
-    if EditCoCode.Enabled     then StrEditCoCode    :=TAddressBook.CoCode         + EQUAL + QuotedStr(EditCoCode.Text)     + _AND;
-    if EditAgent.Enabled      then StrEditAgent     :=TAddressBook.Agent          + EQUAL + QuotedStr(EditAgent.Text)      + _AND;
-    if EditDivision.Enabled   then StrEditDivision  :=TAddressBook.Division       + EQUAL + QuotedStr(EditDivision.Text)   + _AND;
+    if EditNumber.Enabled     then StrEditNumber    :=TAddressBook.CustomerNumber + TSql.EQUAL + QuotedStr(EditNumber.Text)     + TSql._AND;
+    if EditPhones.Enabled     then StrEditPhones    :=TAddressBook.PhoneNumbers   + TSql.EQUAL + QuotedStr(EditPhones.Text)     + TSql._AND;
+    if EditCoCode.Enabled     then StrEditCoCode    :=TAddressBook.CoCode         + TSql.EQUAL + QuotedStr(EditCoCode.Text)     + TSql._AND;
+    if EditAgent.Enabled      then StrEditAgent     :=TAddressBook.Agent          + TSql.EQUAL + QuotedStr(EditAgent.Text)      + TSql._AND;
+    if EditDivision.Enabled   then StrEditDivision  :=TAddressBook.Division       + TSql.EQUAL + QuotedStr(EditDivision.Text)   + TSql._AND;
 
     // Build conditions
     Conditions:=StrEditNumber + StrEditName + StrEditEmail + StrEditEstatement + StrEditPhones + StrEditUserAlias + StrEditCoCode + StrEditAgent + StrEditDivision;
-    Conditions:=LeftStr(Conditions, Length(Conditions) - Length(_AND));
+    Conditions:=LeftStr(Conditions, Length(Conditions) - Length(TSql._AND));
 
     // Execute, leave window opened
     TTAddressBook.Create(
-        adOpenForUser,
+        TEnums.TActionTask.adOpenForUser,
         MainForm.sgAddressBook,
         '',
         '',
         '',
         '',
         '',
-        WHERE + Conditions
+        TSql.WHERE + Conditions
     );
 
 end;

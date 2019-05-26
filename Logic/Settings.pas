@@ -1,6 +1,3 @@
-
-{$I .\Include\Header.inc}
-
 unit Settings;
 
 
@@ -18,7 +15,8 @@ uses
     System.INIFiles,
     Vcl.Forms,
     Vcl.Graphics,
-    CRC32u;
+    CRC32u,
+    Helpers;
 
 
 type
@@ -27,8 +25,8 @@ type
     ISettings = Interface(IInterface)
     ['{FF5CBEC3-2576-4E1C-954E-C892AB4A7CC1}']
         // Exposed methods
-        function  Encode(ConfigType: integer): boolean;
-        function  Decode(ConfigType: integer; ToMemory: boolean): boolean;
+        function  Encode(ConfigType: TCommon.TUnityFiles): boolean;
+        function  Decode(ConfigType: TCommon.TUnityFiles; ToMemory: boolean): boolean;
         function  ConfigToMemory: boolean;
         function  GetLicenceValue(Section: string; Key: string): string;
         function  GetStringValue(Section: string; Key: string; Default: string): string;
@@ -85,10 +83,6 @@ type
         property  FutureBColor   : TColor      read GetFutureBColor    write SetFutureBColor;
     end;
 
-    /// <summary>
-    /// Class constructor is responsibe for setting up variables with file paths and for the initialization of two separate
-    /// classes that keeps settings during program runtime.
-    /// </summary>
 
     TSettings = class(TInterfacedObject, ISettings)
     {$TYPEINFO ON}
@@ -157,8 +151,8 @@ type
         constructor Create;
         destructor  Destroy; override;
         // Methods
-        function  Encode(ConfigType: integer): boolean;
-        function  Decode(ConfigType: integer; ToMemory: boolean): boolean;
+        function  Encode(ConfigType: TCommon.TUnityFiles): boolean;
+        function  Decode(ConfigType: TCommon.TUnityFiles; ToMemory: boolean): boolean;
         function  ConfigToMemory: boolean;
         function  GetLicenceValue(Section: string; Key: string): string;
         function  GetStringValue(Section: string; Key: string; Default: string): string;
@@ -185,6 +179,34 @@ type
         function  GetReleasePakURL:  string;
         function  GetReleaseManURL:  string;
         function  GetLayoutsURL:     string;
+    end;
+
+
+    TConfigSections = class abstract
+        const ApplicationDetails = 'APPLICATION';
+        const PasswordSection    = 'PASSWORD';
+        const TabSheetsNames     = 'TABSHEETS_NAMES';
+        const RiskClassDetails   = 'RISK_CLASS_DETAILS';
+        const MailerNTLM         = 'MAILER_NTLM';
+        const MailerBASIC        = 'MAILER_BASIC';
+        const MailerSetup        = 'MAILER_SETUP';
+        const DatabaseSetup      = 'DATABASE_SETTINGS';
+        const OpenItemsData      = 'OPEN_ITEMS';
+        const AddressBookData    = 'ADDRESS_BOOK';
+        const GeneralTables      = 'GENERAL_TABLES';
+        const InvoiceTypes       = 'INVOICE_TYPES';
+        const TabSheetsCaps      = 'TABSHEETS_CAPTIONS';
+        const AgingRanges        = 'AGEVIEW_RANGES';
+        const AgingBasic         = 'AGEVIEW_BASIC';
+        const AgingFull          = 'AGEVIEW_FULL';
+        const Unallocated        = 'UNALLOCATED_DEFINITION';
+        const Layouts            = 'LAYOUTS';
+        const TimersSettings     = 'TIMERS_INTERVALS';
+        const FollowUpColors     = 'FOLLOWUPS_COLORS';
+        const ColumnPrefix       = 'COLUMN';
+        const ColumnWidthName    = 'COLUMNWIDTH';
+        const ColumnOrderName    = 'COLUMNORDER';
+        const ColumnNames        = 'COLUMNNAMES';
     end;
 
 
@@ -226,10 +248,10 @@ begin
 
     // Files
     pAppLog        :=pWinUserName + '.log';
-    pPathAppCfg    :=pAppDir + ConfigFile;
-    pPathLicenceLic:=pAppDir + LicenceFile;
+    pPathAppCfg    :=pAppDir + TUnityApp.ConfigFile;
+    pPathLicenceLic:=pAppDir + TUnityApp.LicenceFile;
     pPathEventLog  :=pAppDir + pAppLog;
-    pPathGridImage :=pAppDir + GridImgFile;
+    pPathGridImage :=pAppDir + TUnityApp.GridImgFile;
 
     /// <remarks>
     /// Return 404 error code if configuration file cannot be found.
@@ -269,12 +291,12 @@ begin
     begin
         Decode(AppConfig, True);
 
-        pReleasePakURL:=TMIG.ReadString(ApplicationDetails, 'UPDATE_PATH', '') + ReleaseFile;
-        pReleaseManURL:=TMIG.ReadString(ApplicationDetails, 'UPDATE_PATH', '') + ManifestFile;
+        pReleasePakURL:=TMIG.ReadString(TConfigSections.ApplicationDetails, 'UPDATE_PATH', '') + TUnityApp.ReleaseFile;
+        pReleaseManURL:=TMIG.ReadString(TConfigSections.ApplicationDetails, 'UPDATE_PATH', '') + TUnityApp.ManifestFile;
 
-        pGetLayoutsURL:=TMIG.ReadString(ApplicationDetails, 'LAYOUT_PATH', '');
+        pGetLayoutsURL:=TMIG.ReadString(TConfigSections.ApplicationDetails, 'LAYOUT_PATH', '');
 
-        GetSectionValues(Layouts, List);
+        GetSectionValues(TConfigSections.Layouts, List);
         for iCNT:=0 to List.Count - 1 do
         begin
             List.Strings[iCNT]:=MidStr(List.Strings[iCNT], AnsiPos('=', List.Strings[iCNT]) + 1, 255);
@@ -301,7 +323,7 @@ begin
 
     if Assigned(TMIG) then
     begin
-        Result:=StrToIntDef(TMIG.ReadString(ApplicationDetails, 'RELEASE_NUMBER', ''), 0);
+        Result:=StrToIntDef(TMIG.ReadString(TConfigSections.ApplicationDetails, 'RELEASE_NUMBER', ''), 0);
     end;
 end;
 
@@ -314,8 +336,8 @@ procedure TSettings.SetReleaseNumber(NewRelease: cardinal);
 begin
     if Assigned(TMIG) then
     begin
-        TMIG.WriteInteger(ApplicationDetails, 'RELEASE_NUMBER', NewRelease);
-        Encode(AppConfig);
+        TMIG.WriteInteger(TConfigSections.ApplicationDetails, 'RELEASE_NUMBER', NewRelease);
+        Encode(TCommon.TUnityFiles.AppConfig);
     end;
 end;
 
@@ -336,11 +358,11 @@ end;
 
 function TSettings.GetReleaseDateTime: TDateTime;
 begin
-    Result:=NULLDATE;
+    Result:=TDateTimeFormats.NullDate;
 
     if Assigned(TMIG) then
     begin
-        Result:=StrToDateTimeDef(TMIG.ReadString(ApplicationDetails, 'UPDATE_DATETIME', ''), NULLDATE);
+        Result:=StrToDateTimeDef(TMIG.ReadString(TConfigSections.ApplicationDetails, 'UPDATE_DATETIME', ''), TDateTimeFormats.NullDate);
     end;
 
 end;
@@ -354,8 +376,8 @@ procedure TSettings.SetReleaseDateTime(NewDateTime: TDateTime);
 begin
     if Assigned(TMIG) then
     begin
-        TMIG.WriteString(ApplicationDetails, 'UPDATE_DATETIME', DateTimeToStr(NewDateTime));
-        Encode(AppConfig);
+        TMIG.WriteString(TConfigSections.ApplicationDetails, 'UPDATE_DATETIME', DateTimeToStr(NewDateTime));
+        Encode(TCommon.TUnityFiles.AppConfig);
     end;
 end;
 
@@ -367,19 +389,19 @@ end;
 /// Encoding method based on XOR and SHR with secret KEY.
 /// </summary>
 
-function TSettings.Encode(ConfigType: integer): boolean;
+function TSettings.Encode(ConfigType: TCommon.TUnityFiles): boolean;
 var
     iCNT:        integer;
     wStream:     TMemoryStream;
     rStream:     TMemoryStream;
     hStream:     TStringList;
     buffer:      int64;
-    vCRC:        dWord;
+    vCRC:        DWord;
     sCRC:        string;
 begin
 
     // Do not allow to encode licence file
-    if ConfigType = LicData then
+    if ConfigType = TCommon.TUnityFiles.LicData then
     begin
         Result:=False;
         Exit;
@@ -393,7 +415,7 @@ begin
         try
 
             // Move file to memory
-            if ConfigType = AppConfig then
+            if ConfigType = TCommon.TUnityFiles.AppConfig then
                 TMIG.GetStrings(hStream);
 
             hStream.SaveToStream(rStream);
@@ -420,7 +442,7 @@ begin
             for iCNT:=0 to rStream.Size - 1 do
             begin
                 rStream.Read(buffer, 1);
-                buffer:=(buffer xor not (ord(DecryptKey shr iCNT)));
+                buffer:=(buffer xor not (ord(TUnityApp.DecryptKey shr iCNT)));
                 wStream.Write(buffer, 1);
             end;
 
@@ -458,7 +480,7 @@ end;
 /// will shift the characters numbers back to theirs original values.
 /// </summary>
 
-function TSettings.Decode(ConfigType: integer; ToMemory: boolean): boolean;
+function TSettings.Decode(ConfigType: TCommon.TUnityFiles; ToMemory: boolean): boolean;
 var
     iCNT:       integer;
     rStream:    TMemoryStream;
@@ -466,7 +488,7 @@ var
     hString:    TStringList;
     bytes:      TBytes;
     buffer:     int64;
-    vCRC:       dWord;
+    vCRC:       DWord;
     sCRC:       string;
 begin
 
@@ -480,17 +502,17 @@ begin
         try
 
             // Load to memory
-            if ConfigType = AppConfig  then
+            if ConfigType = TCommon.TUnityFiles.AppConfig  then
                 rStream.LoadFromFile(FPathAppCfg);
 
-            if ConfigType = LicData then
+            if ConfigType = TCommon.TUnityFiles.LicData then
                 rStream.LoadFromFile(FPathLicenceLic);
 
             // Decode byte by byte
             for iCNT:=0 to rStream.Size - 1 do
             begin
                 rStream.Read(buffer, 1);
-                buffer:=(buffer xor not (ord(DecryptKey shr iCNT)));
+                buffer:=(buffer xor not (ord(TUnityApp.DecryptKey shr iCNT)));
                 wStream.Write(buffer, 1);
             end;
 
@@ -514,10 +536,10 @@ begin
 
             if ToMemory then
             begin
-                if ConfigType = AppConfig then
+                if ConfigType = TCommon.TUnityFiles.AppConfig then
                     TMIG.SetStrings(hString);
 
-                if ConfigType = LicData then
+                if ConfigType = TCommon.TUnityFiles.LicData then
                         TMIL.SetStrings(hString);
 
                 Result:=True;
@@ -630,7 +652,7 @@ function TSettings.FindSettingsKey(Section: string; KeyPosition: integer): strin
 var
     SL: TStringList;
 begin
-    Result:=unNA;
+    Result:=TNaVariants.NA;
     SL:=TStringList.Create;
     GetSection(Section, SL);
     if KeyPosition > SL.Count then
@@ -740,7 +762,7 @@ begin
     if not(Assigned(TMIG)) then
         Exit
             else
-                Result:=TMIG.ReadInteger(FollowUpColors, 'TODAY_FCOLOR', 0);
+                Result:=TMIG.ReadInteger(TConfigSections.FollowUpColors, 'TODAY_FCOLOR', 0);
 end;
 
 
@@ -751,7 +773,7 @@ begin
     if not(Assigned(TMIG)) then
         Exit
             else
-                Result:=TMIG.ReadInteger(FollowUpColors, 'TODAY_BCOLOR', 0);
+                Result:=TMIG.ReadInteger(TConfigSections.FollowUpColors, 'TODAY_BCOLOR', 0);
 end;
 
 
@@ -762,7 +784,7 @@ begin
     if not(Assigned(TMIG)) then
         Exit
             else
-                Result:=TMIG.ReadInteger(FollowUpColors, 'PAST_FCOLOR', 0);
+                Result:=TMIG.ReadInteger(TConfigSections.FollowUpColors, 'PAST_FCOLOR', 0);
 end;
 
 
@@ -773,7 +795,7 @@ begin
     if not(Assigned(TMIG)) then
         Exit
             else
-                Result:=TMIG.ReadInteger(FollowUpColors, 'PAST_BCOLOR', 0);
+                Result:=TMIG.ReadInteger(TConfigSections.FollowUpColors, 'PAST_BCOLOR', 0);
 end;
 
 
@@ -784,7 +806,7 @@ begin
     if not(Assigned(TMIG)) then
         Exit
             else
-                Result:=TMIG.ReadInteger(FollowUpColors, 'FUTURE_FCOLOR', 0);
+                Result:=TMIG.ReadInteger(TConfigSections.FollowUpColors, 'FUTURE_FCOLOR', 0);
 end;
 
 
@@ -795,7 +817,7 @@ begin
     if not(Assigned(TMIG)) then
         Exit
             else
-                Result:=TMIG.ReadInteger(FollowUpColors, 'FUTURE_BCOLOR', 0);
+                Result:=TMIG.ReadInteger(TConfigSections.FollowUpColors, 'FUTURE_BCOLOR', 0);
 end;
 
 
@@ -806,7 +828,7 @@ end;
 procedure TSettings.SetTodayFColor(NewColor: TColor);
 begin
     if not(Assigned(TMIG)) then Exit;
-    TMIG.WriteInteger(FollowUpColors, 'TODAY_FCOLOR', NewColor);
+    TMIG.WriteInteger(TConfigSections.FollowUpColors, 'TODAY_FCOLOR', NewColor);
     Encode(AppConfig);
 end;
 
@@ -815,7 +837,7 @@ end;
 procedure TSettings.SetTodayBColor(NewColor: TColor);
 begin
     if not(Assigned(TMIG)) then Exit;
-    TMIG.WriteInteger(FollowUpColors, 'TODAY_BCOLOR', NewColor);
+    TMIG.WriteInteger(TConfigSections.FollowUpColors, 'TODAY_BCOLOR', NewColor);
     Encode(AppConfig);
 end;
 
@@ -824,7 +846,7 @@ end;
 procedure TSettings.SetPastFColor(NewColor: TColor);
 begin
     if not(Assigned(TMIG)) then Exit;
-    TMIG.WriteInteger(FollowUpColors, 'PAST_FCOLOR', NewColor);
+    TMIG.WriteInteger(TConfigSections.FollowUpColors, 'PAST_FCOLOR', NewColor);
     Encode(AppConfig);
 end;
 
@@ -833,7 +855,7 @@ end;
 procedure TSettings.SetPastBColor(NewColor: TColor);
 begin
     if not(Assigned(TMIG)) then Exit;
-    TMIG.WriteInteger(FollowUpColors, 'PAST_BCOLOR', NewColor);
+    TMIG.WriteInteger(TConfigSections.FollowUpColors, 'PAST_BCOLOR', NewColor);
     Encode(AppConfig);
 end;
 
@@ -842,7 +864,7 @@ end;
 procedure TSettings.SetFutureFColor(NewColor: TColor);
 begin
     if not(Assigned(TMIG)) then Exit;
-    TMIG.WriteInteger(FollowUpColors, 'FUTURE_FCOLOR', NewColor);
+    TMIG.WriteInteger(TConfigSections.FollowUpColors, 'FUTURE_FCOLOR', NewColor);
     Encode(AppConfig);
 end;
 
@@ -851,7 +873,7 @@ end;
 procedure TSettings.SetFutureBColor(NewColor: TColor);
 begin
     if not(Assigned(TMIG)) then Exit;
-    TMIG.WriteInteger(FollowUpColors, 'FUTURE_BCOLOR', NewColor);
+    TMIG.WriteInteger(TConfigSections.FollowUpColors, 'FUTURE_BCOLOR', NewColor);
     Encode(AppConfig);
 end;
 

@@ -1,6 +1,3 @@
-
-{$I .\Include\Header.inc}
-
 unit Actions;
 
 
@@ -31,8 +28,7 @@ uses
     Vcl.Clipbrd,
     Data.Win.ADODB,
     InterposerClasses,
-    Arrays,
-    CustomTypes;
+    Helpers;
 
 
 type
@@ -230,7 +226,7 @@ type
         procedure Initialize;
         procedure ClearAll;
         procedure MakePhoneCall;
-        procedure LoadCustomer(Direction: integer);
+        procedure LoadCustomer(GoNext: boolean);
         procedure ClearFollowUp;
         procedure SaveCustomerDetails;
         procedure SaveGeneralComment;
@@ -250,8 +246,8 @@ implementation
 uses
     Main,
     Qms,
-    SQL,
-    Model,
+    SqlHandler,
+    DbModel,
     Worker,
     Calendar,
     Settings,
@@ -372,7 +368,7 @@ begin
 
         if SrcColumns[iCNT] = -100 then
         begin
-            MainForm.MsgCall(mcWarn, 'There are no open items loaded. Please reload it or wait untill auto-load is complete and try again.');
+            MainForm.MsgCall(Warn, 'There are no open items loaded. Please reload it or wait untill auto-load is complete and try again.');
             Close;
             Exit;
         end;
@@ -397,15 +393,15 @@ begin
     end;
 
     // Hide helpers columns from string grid
-    OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.Ad1,   1, 1)]:=sgRowHidden;
-    OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.Ad2,   1, 1)]:=sgRowHidden;
-    OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.Ad3,   1, 1)]:=sgRowHidden;
-    OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.Pno,   1, 1)]:=sgRowHidden;
-    OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.PArea, 1, 1)]:=sgRowHidden;
-    OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.Cuid,  1, 1)]:=sgRowHidden;
+    OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.Ad1,   1, 1)]:=OpenItemsDest.sgRowHidden;
+    OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.Ad2,   1, 1)]:=OpenItemsDest.sgRowHidden;
+    OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.Ad3,   1, 1)]:=OpenItemsDest.sgRowHidden;
+    OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.Pno,   1, 1)]:=OpenItemsDest.sgRowHidden;
+    OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.PArea, 1, 1)]:=OpenItemsDest.sgRowHidden;
+    OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.Cuid,  1, 1)]:=OpenItemsDest.sgRowHidden;
 
     // Sort via payment status
-    OpenItemsDest.MSort(OpenItemsDest.ReturnColumn(TOpenitems.PmtStat, 1, 1), sdtINTEGER, True);
+    OpenItemsDest.MSort(OpenItemsDest.ReturnColumn(TOpenitems.PmtStat, 1, 1), TSorting.IntType, True);
 
 end;
 
@@ -424,7 +420,7 @@ begin
         Tables.Columns.Add(TAddressBook.Emails);
         Tables.Columns.Add(TAddressBook.Estatements);
         Tables.Columns.Add(TAddressBook.PhoneNumbers);
-        Tables.CustFilter:=WHERE + TAddressBook.Scuid + EQUAL + QuotedStr(SCUID);
+        Tables.CustFilter:=TSql.WHERE + TAddressBook.Scuid + TSql.EQUAL + QuotedStr(SCUID);
         Tables.OpenTable(TAddressBook.AddressBook);
 
         if Tables.DataSet.RecordCount = 1 then
@@ -437,7 +433,7 @@ begin
             if (Phones <> '') or (Phones <> ' ') then
             begin
                 CustPhone.Clear;
-                CustPhone.Items.Text:=MainForm.Explode(Phones, deSemicolon);
+                CustPhone.Items.Text:=MainForm.Explode(Phones, TDelimiters.Semicolon);
                 CustPhone.ItemIndex:=0;
             end;
 
@@ -451,7 +447,7 @@ begin
         Tables.Columns.Add(TCompanyData.TelephoneNumbers);
         Tables.Columns.Add(TCompanyData.SendNoteFrom);
         Tables.Columns.Add(TCompanyData.BankAccounts);
-        Tables.CustFilter:=WHERE + TCompanyData.CoCode + EQUAL + QuotedStr(CoCode) + _AND + TCompanyData.Branch + EQUAL + QuotedStr(Branch);
+        Tables.CustFilter:=TSql.WHERE + TCompanyData.CoCode + TSql.EQUAL + QuotedStr(CoCode) + TSql._AND + TCompanyData.Branch + TSql.EQUAL + QuotedStr(Branch);
         Tables.OpenTable(TCompanyData.CompanyData);
 
         if Tables.DataSet.RecordCount = 1 then
@@ -464,10 +460,10 @@ begin
         end
         else
         begin
-            Lbu_Name.Caption    :=unNotFound;
-            Lbu_Address.Caption :=unNotFound;
-            Lbu_Phone.Caption   :=unNotFound;
-            Lbu_SendFrom.Caption:=unNotFound;
+            Lbu_Name.Caption    :=TNaVariants.NotFound;
+            Lbu_Address.Caption :=TNaVariants.NotFound;
+            Lbu_Phone.Caption   :=TNaVariants.NotFound;
+            Lbu_SendFrom.Caption:=TNaVariants.NotFound;
         end;
 
     finally
@@ -488,14 +484,14 @@ begin
         DailyText.Columns.Add(TDailyComment.Stamp);
         DailyText.Columns.Add(TDailyComment.UserAlias);
         DailyText.Columns.Add(TDailyComment.FixedComment);
-        DailyText.CustFilter:=WHERE + TDailyComment.Cuid + EQUAL + QuotedStr(CUID);
+        DailyText.CustFilter:=TSql.WHERE + TDailyComment.Cuid + TSql.EQUAL + QuotedStr(CUID);
         DailyText.OpenTable(TDailyComment.DailyComment);
-        DailyText.DataSet.Sort:=TDailyComment.Stamp + DESC;
+        DailyText.DataSet.Sort:=TDailyComment.Stamp + TSql.DESC;
 
         if not (DailyText.DataSet.EOF) then
         begin
             DailyText.SqlToGrid(Grid, DailyText.DataSet, False, True);
-            Grid.ColWidths[Grid.ReturnColumn(TDailyComment.FixedComment, 1, 1)]:=sgRowHidden;
+            Grid.ColWidths[Grid.ReturnColumn(TDailyComment.FixedComment, 1, 1)]:=Grid.sgRowHidden;
             Grid.SetColWidth(10, 20, 400);
             FHistoryGrid:=True;
             Grid.Visible:=FHistoryGrid;
@@ -519,7 +515,7 @@ begin
     GenText:=TDataTables.Create(MainForm.DbConnect);
 
     try
-        GenText.CustFilter:=WHERE + TGeneralComment.Cuid + EQUAL + QuotedStr(CUID);
+        GenText.CustFilter:=TSql.WHERE + TGeneralComment.Cuid + TSql.EQUAL + QuotedStr(CUID);
         GenText.OpenTable(TGeneralComment.GeneralComment);
 
         if not (GenText.DataSet.EOF) then
@@ -533,9 +529,13 @@ end;
 
 
 procedure TActionsForm.GetFirstComment(var Text: TMemo);
+var
+    GetColumn: integer;
 begin
     if not(Text.Visible) then Exit;
-    Text.Text:=HistoryGrid.Cells[HistoryGrid.ReturnColumn(TDailyComment.FixedComment, 1, 1), 1{fixed first row}];
+    GetColumn:=HistoryGrid.ReturnColumn(TDailyComment.FixedComment, 1, 1);
+    if GetColumn <> -100 then
+        Text.Text:=HistoryGrid.Cells[GetColumn, 1{fixed first row}];
 end;
 
 
@@ -548,33 +548,33 @@ begin
 
     // Cover save button if customer is not registered.
     if
-        (Cust_Person.Text = unNotFound)
+        (Cust_Person.Text = TNaVariants.NotFound)
     or
-        (Cust_Mail.Text = unNotFound)
+        (Cust_Mail.Text = TNaVariants.NotFound)
     or
-        (Cust_MailGeneral.Text = unNotFound)
+        (Cust_MailGeneral.Text = TNaVariants.NotFound)
     then
         imgCoverSaveBtn.Visible:=True
             else
                 imgCoverSaveBtn.Visible:=False;
 
     // Disable text fields if customer is not registered.
-    if Cust_Phone.Text = unNotFound then
+    if Cust_Phone.Text = TNaVariants.NotFound then
         Cust_Phone.Enabled:=False
             else
                 Cust_Phone.Enabled:=True;
 
-    if Cust_Mail.Text = unNotFound then
+    if Cust_Mail.Text = TNaVariants.NotFound then
         Cust_Mail.Enabled:=False
             else
                 Cust_Mail.Enabled:=True;
 
-    if Cust_Person.Text = unNotFound then
+    if Cust_Person.Text = TNaVariants.NotFound then
         Cust_Person.Enabled:=False
             else
                 Cust_Person.Enabled:=True;
 
-    if Cust_MailGeneral.Text = unNotFound then
+    if Cust_MailGeneral.Text = TNaVariants.NotFound then
         Cust_MailGeneral.Enabled:=False
             else
                 Cust_MailGeneral.Enabled:=True;
@@ -601,13 +601,13 @@ end;
 
 procedure TActionsForm.ClearAll;
 begin
-    Cust_Name.Caption    :=unNotFound;
-    Cust_Number.Caption  :=unNotFound;
-    Cust_Person.Text     :=unNotFound;
-    Cust_Mail.Text       :=unNotFound;
-    Cust_MailGeneral.Text:=unNotFound;
+    Cust_Name.Caption    :=TNaVariants.NotFound;
+    Cust_Number.Caption  :=TNaVariants.NotFound;
+    Cust_Person.Text     :=TNaVariants.NotFound;
+    Cust_Mail.Text       :=TNaVariants.NotFound;
+    Cust_MailGeneral.Text:=TNaVariants.NotFound;
     Cust_Phone.Clear;
-    Cust_Phone.Items.Add(unNotFound);
+    Cust_Phone.Items.Add(TNaVariants.NotFound);
     Cust_Phone.ItemIndex:=0;
     DailyCom.Text       :='';
     GeneralCom.Text     :='';
@@ -622,21 +622,21 @@ begin
     Settings:=TSettings.Create;
 
     // Check for 'Lynccall.exe'
-    if not FileExists(Settings.GetAppDir + LyncCall) then
+    if not FileExists(Settings.GetAppDir + TUnityApp.LyncCall) then
     begin
-        MainForm.MsgCall(mcError, APPCAPTION + ' cannot find ''lynccall.exe''. Please contact IT support.');
+        MainForm.MsgCall(Error, TUnityApp.APPCAPTION + ' cannot find ''lynccall.exe''. Please contact IT support.');
         Exit;
     end;
 
     // CHeck if Lync/Skype is running
     if not ActionsForm.GetRunningApps('lync.exe') then
     begin
-        MainForm.MsgCall(mcError, APPCAPTION + ' cannot find running Microsoft Skype/Lync for Business. Please open it and try again.');
+        MainForm.MsgCall(Error, TUnityApp.APPCAPTION + ' cannot find running Microsoft Skype/Lync for Business. Please open it and try again.');
         Exit;
     end;
 
     // Run Lync with given phone number
-    ShellExecute(ActionsForm.Handle, 'open', PChar(Settings.GetAppDir + LyncCall), PChar(ActionsForm.Cust_Phone.Text), nil, SW_SHOWNORMAL);
+    ShellExecute(ActionsForm.Handle, 'open', PChar(Settings.GetAppDir + TUnityApp.LyncCall), PChar(ActionsForm.Cust_Phone.Text), nil, SW_SHOWNORMAL);
 
     if ActionsForm.DailyCom.Text = '' then
     begin
@@ -645,14 +645,14 @@ begin
     end
     else
     begin
-        ActionsForm.DailyCom.Text:=ActionsForm.DailyCom.Text + CRLF + 'Called customer today.';
+        ActionsForm.DailyCom.Text:=ActionsForm.DailyCom.Text + TUChars.CRLF + 'Called customer today.';
         SaveDailyComment;
     end;
 
 end;
 
 
-procedure TActionsForm.LoadCustomer(Direction: integer);
+procedure TActionsForm.LoadCustomer(GoNext: boolean);
 
     var
         iCNT:  integer;
@@ -674,12 +674,12 @@ procedure TActionsForm.LoadCustomer(Direction: integer);
 begin
 
     // To next (skip hiden)
-    if Direction = loadPrev then
+    if GoNext then
         for iCNT:=(MainForm.sgAgeView.Row - 1) Downto 1 do
             if not CheckRow(iCNT) then Break;
 
     // To previous (skip hiden)
-    if Direction = loadNext then
+    if not GoNext then
         for iCNT:=(MainForm.sgAgeView.Row + 1) to MainForm.sgAgeView.RowCount - 1 do
             if not CheckRow(iCNT) then Break;
 
@@ -692,7 +692,7 @@ begin
         GetFirstComment(DailyCom);
         UpdateGeneral(GeneralCom);
     except
-        MainForm.MsgCall(mcWarn, 'Unexpected error has occured. Please close the window and try again.');
+        MainForm.MsgCall(Warn, 'Unexpected error has occured. Please close the window and try again.');
     end;
 
 end;
@@ -700,15 +700,15 @@ end;
 
 procedure TActionsForm.ClearFollowUp;
 begin
-    if MainForm.MsgCall(mcQuestion2, 'Are you sure you want to clear this follow up?') = ID_YES then
+    if MainForm.MsgCall(Question2, 'Are you sure you want to clear this follow up?') = ID_YES then
     begin
         TTGeneralComment.Create(
             CUID,
-            strNULL,
-            SPACE,
-            strNULL,
-            strNULL,
-            strNULL,
+            TNaVariants.NULL,
+            TUChars.SPACE,
+            TNaVariants.NULL,
+            TNaVariants.NULL,
+            TNaVariants.NULL,
             True
         );
         MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneralComment.fFollowUp, 1, 1), MainForm.sgAgeView.Row]:='';
@@ -719,13 +719,13 @@ end;
 procedure TActionsForm.SaveCustomerDetails;
 begin
     TTAddressBook.Create(
-        adUpdate,
+        TEnums.TActionTask.adUpdate,
         nil,
         SCUID,
         Cust_Person.Text,
         Cust_Mail.Text,
         Cust_MailGeneral.Text,
-        MainForm.Implode(Cust_Phone.Items, deSemicolon),
+        MainForm.Implode(Cust_Phone.Items, TDelimiters.Semicolon),
         ''
     );
 end;
@@ -736,10 +736,10 @@ begin
     TTGeneralComment.Create(
         CUID,
         GeneralCom.Text,
-        strNULL,
-        strNULL,
-        strNULL,
-        strNULL,
+        TNaVariants.NULL,
+        TNaVariants.NULL,
+        TNaVariants.NULL,
+        TNaVariants.NULL,
         True
     );
 end;
@@ -834,9 +834,9 @@ procedure TActionsForm.FormCreate(Sender: TObject);
 begin
     SetLength(SrcColumns, 19);
     OpenItemsGrid.ColCount:=19;
-    OpenItemsGrid.SetRowHeight(sgRowHeight, 25);
+    OpenItemsGrid.SetRowHeight(OpenItemsGrid.sgRowHeight, 25);
     HistoryGrid.ColCount:=11;
-    HistoryGrid.SetRowHeight(sgRowHeight, 25);
+    HistoryGrid.SetRowHeight(OpenItemsGrid.sgRowHeight, 25);
     HistoryGrid.Visible:=False;
     InitializePanels;
     InitializeSpeedButtons;
@@ -862,7 +862,7 @@ begin
     end
     else
     begin
-        MainForm.MsgCall(mcError, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+        MainForm.MsgCall(Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
         Close;
     end;
 end;
@@ -889,7 +889,7 @@ end;
 
 procedure TActionsForm.HistoryGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-    HistoryGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
+    HistoryGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, TUnityApp.SELCOLOR, clBlack, clWhite, True);
 end;
 
 
@@ -904,7 +904,7 @@ begin
     if ARow = 0 then Exit;
 
     // Draw selected
-    OpenItemsGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, SELCOLOR, clBlack, clWhite, True);
+    OpenItemsGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, TUnityApp.SELCOLOR, clBlack, clWhite, True);
 
     // Draw certain color
     if
@@ -948,7 +948,7 @@ end;
 
 procedure TActionsForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-    if Key = ESC then Close;
+    if Key = Char(VK_ESCAPE) then Close;
 end;
 
 
@@ -961,14 +961,14 @@ begin
 
     if MainForm.AccessLevel = 'RO' then
     begin
-        MainForm.MsgCall(mcWarn, 'You do not have permission to write the comment.');
+        MainForm.MsgCall(Warn, 'You do not have permission to write the comment.');
         Exit;
     end;
 
     // New line
     if ( (Key = VK_RETURN) and (Shift=[ssALT]) ) or ( (Key = VK_RETURN) and (Shift=[ssShift]) ) then
     begin
-        DailyCom.Lines.Add(CRLF);
+        DailyCom.Lines.Add(TUChars.CRLF);
         Exit;
     end;
 
@@ -992,14 +992,14 @@ begin
 
     if MainForm.AccessLevel = 'RO' then
     begin
-        MainForm.MsgCall(mcWarn, 'You do not have permission to write the comment.');
+        MainForm.MsgCall(Warn, 'You do not have permission to write the comment.');
         Exit;
     end;
 
     // New line
     if ( (Key = VK_RETURN) and (Shift=[ssALT]) ) or ( (Key = VK_RETURN) and (Shift=[ssShift]) ) then
     begin
-        GeneralCom.Lines.Add(CRLF);
+        GeneralCom.Lines.Add(TUChars.CRLF);
         Exit;
     end;
 
@@ -1017,7 +1017,7 @@ end;
 
 procedure TActionsForm.OpenItemsGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-    if (Key = 67) and (Shift = [ssCtrl]) then OpenItemsGrid.CopyCutPaste(adCopy);
+    if (Key = 67) and (Shift = [ssCtrl]) then OpenItemsGrid.CopyCutPaste(TEnums.TActionTask.adCopy);
 end;
 
 
@@ -1252,7 +1252,7 @@ end;
 
 procedure TActionsForm.btnEditClick(Sender: TObject);
 begin
-    MainForm.WndCall(PhoneListForm, 0);
+    MainForm.WndCall(PhoneListForm, Helpers.TWindows.TState.Modal);
 end;
 
 
@@ -1264,20 +1264,20 @@ end;
 
 procedure TActionsForm.btnBackClick(Sender: TObject);
 begin
-    LoadCustomer(loadPrev);
+    LoadCustomer(false);
 end;
 
 
 procedure TActionsForm.btnNextClick(Sender: TObject);
 begin
-    LoadCustomer(loadNext);
+    LoadCustomer(true);
 end;
 
 
 procedure TActionsForm.btnSetFollowUpClick(Sender: TObject);
 begin
     CalendarForm.CalendarMode:=cfDateToDB;
-    MainForm.WndCall(CalendarForm, 0);
+    MainForm.WndCall(CalendarForm, Helpers.TWindows.TState.Modal);
 end;
 
 
@@ -1289,20 +1289,20 @@ end;
 
 procedure TActionsForm.btnCustomStatementClick(Sender: TObject);
 begin
-    MainForm.WndCall(SendForm, 0);
+    MainForm.WndCall(SendForm, Helpers.TWindows.TState.Modal);
 end;
 
 
 procedure TActionsForm.btnAutoStatementClick(Sender: TObject);
 begin
 
-    if MainForm.MsgCall(mcQuestion2, 'Are you absolutely sure you want to send it, right now?') = IDNO
+    if MainForm.MsgCall(Question2, 'Are you absolutely sure you want to send it, right now?') = IDNO
         then Exit;
 
     MainForm.UpdateOpenItemsRefs(OpenItemsGrid);
     MainForm.UpdateControlStatusRefs(MainForm.sgControlStatus);
     TTSendAccountStatement.Create(
-        maDefined,
+        TDocuments.TMode.maDefined,
         'Account Statement',
         '',
         TInvoiceFilter.ShowAllItems,
@@ -1364,7 +1364,7 @@ end;
 
 procedure TActionsForm.btnCopyUIDClick(Sender: TObject);
 begin
-    ClipBoard.AsText:=CUID_Label.Caption + TAB + SCUID_Label.Caption;
+    ClipBoard.AsText:=CUID_Label.Caption + TUChars.TAB + SCUID_Label.Caption;
 end;
 
 
@@ -1404,14 +1404,14 @@ end;
 procedure TActionsForm.btnLogMissingInvClick(Sender: TObject);
 begin
     QmsForm.IsMissing:=True;
-    MainForm.WndCall(QmsForm, stModal);
+    MainForm.WndCall(QmsForm, Modal);
 end;
 
 
 procedure TActionsForm.btnLogNowClick(Sender: TObject);
 begin
     QmsForm.IsMissing:=False;
-    MainForm.WndCall(QmsForm, stModal);
+    MainForm.WndCall(QmsForm, Modal);
 end;
 
 

@@ -1,6 +1,3 @@
-
-{$I .\Include\Header.inc}
-
 unit Qms;
 
 
@@ -111,12 +108,13 @@ implementation
 uses
     Main,
     Mailer,
-    SQL,
-    Model,
+    SqlHandler,
+    DbModel,
     Worker,
     Actions,
     Calendar,
-    Settings;
+    Settings,
+    Helpers;
 
 
 {$R *.dfm}
@@ -171,7 +169,7 @@ begin
         Tables.Values.Add(EditLogType.Text);
         Tables.Values.Add(ReturnQueryReasonId(EditQueryReason.Text).ToString);
         Tables.Values.Add(QueryDesc.Text);
-        Tables.Values.Add(qrOPEN);
+        Tables.Values.Add(TQms.Open);
         Tables.Values.Add(String.Empty);
         Tables.Values.Add(String.Empty);
         Tables.Values.Add(LbuEmailAddress.Text);
@@ -179,10 +177,10 @@ begin
         Tables.Values.Add(EditStamp.Text);
         Tables.Values.Add(QueryUid.ToString);
 
-        if Tables.InsertInto(TQmsLog.QmsLog, ttExplicit) then
+        if Tables.InsertInto(TQmsLog.QmsLog, True) then
         begin
             MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: [QMS] Missing invoice has been logged successfully.');
-            MainForm.MsgCall(mcInfo, 'Missing invoice has been logged successfully.');
+            MainForm.MsgCall(TCommon.TMsgTypes.Info, 'Missing invoice has been logged successfully.');
             FLogQueryId:=QueryUid.ToString;
             Result:=True;
             CLearAll;
@@ -192,7 +190,7 @@ begin
         begin
             FLogQueryId:=String.Empty;
             MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: [QMS] Cannot log missing invoice.');
-            MainForm.MsgCall(mcError, 'Cannot log missing invoice to database. Please check the log and contact IT support.');
+            MainForm.MsgCall(TCommon.TMsgTypes.Error, 'Cannot log missing invoice to database. Please check the log and contact IT support.');
         end;
 
     finally
@@ -290,7 +288,7 @@ begin
             TempData.Cells[8,  iCNT]:=EditLogType.Text;
             TempData.Cells[9,  iCNT]:=ReturnQueryReasonId(EditQueryReason.Text).ToString;
             TempData.Cells[10, iCNT]:=QueryDesc.Text;
-            TempData.Cells[11, iCNT]:=qrOPEN;
+            TempData.Cells[11, iCNT]:=TQms.Open;
             TempData.Cells[12, iCNT]:=String.Empty;
             TempData.Cells[13, iCNT]:=String.Empty;
             TempData.Cells[14, iCNT]:=LbuEmailAddress.Text;
@@ -301,10 +299,10 @@ begin
         end;
 
         // Send to server
-        if Tables.InsertInto(TQmsLog.QmsLog, ttExplicit, TempData, nil, False) then
+        if Tables.InsertInto(TQmsLog.QmsLog, True, TempData, nil, False) then
         begin
             MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: [QMS] Provided informatin has been logged successfully.');
-            MainForm.MsgCall(mcInfo, 'Provided information has been logged successfully.');
+            MainForm.MsgCall(Info, 'Provided information has been logged successfully.');
             Result:=True;
             FLogQueryId:=QueryUid.ToString;
             Close;
@@ -313,7 +311,7 @@ begin
         begin
             FLogQueryId:=String.Empty;
             MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: [QMS] Cannot log current invoice(s).');
-            MainForm.MsgCall(mcError, 'Cannot log current invoice(s) to database. Please check the log and contact IT support.');
+            MainForm.MsgCall(Error, 'Cannot log current invoice(s) to database. Please check the log and contact IT support.');
         end;
     finally
         Tables.Free;
@@ -370,12 +368,12 @@ begin
     if OpenDlgBox.Execute then
     begin
         FileName:=OpenDlgBox.FileName;
-        MainForm.MsgCall(mcInfo, 'The attachement has been added successfully!');
+        MainForm.MsgCall(Info, 'The attachement has been added successfully!');
     end
     else
     begin
         FileName:='';
-        MainForm.MsgCall(mcWarn, 'No attachement present.');
+        MainForm.MsgCall(Warn, 'No attachement present.');
     end;
 end;
 
@@ -389,7 +387,7 @@ begin
     try
         try
             Tables.CleanUp;
-            Tables.CustFilter:=WHERE + TCurrencies.Iso + EQUAL + QuotedStr(ISO);
+            Tables.CustFilter:=TSql.WHERE + TCurrencies.Iso + TSql.EQUAL + QuotedStr(ISO);
             Tables.OpenTable(TCurrencies.Currencies);
             if Tables.DataSet.RecordCount = 1 then
                 Result:=Tables.DataSet.Fields[TCurrencies.Id].Value;
@@ -397,7 +395,7 @@ begin
             on E: Exception do
             begin
                 MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: [QMS] Cannot execute SQL, error has been thrown: ' + E.Message);
-                MainForm.MsgCall(mcWarn, 'Unexpected error has occured: ' + E.Message + '. Please contact IT Support.');
+                MainForm.MsgCall(Warn, 'Unexpected error has occured: ' + E.Message + '. Please contact IT Support.');
             end;
         end;
     finally
@@ -414,7 +412,7 @@ begin
     Tables:=TDataTables.Create(MainForm.DbConnect);
     try
         try
-            Tables.CustFilter:=WHERE + TQmsReasons.QueryReason + EQUAL + QuotedStr(QueryReason);
+            Tables.CustFilter:=TSql.WHERE + TQmsReasons.QueryReason + TSql.EQUAL + QuotedStr(QueryReason);
             Tables.OpenTable(TQmsReasons.QmsReasons);
             if Tables.DataSet.RecordCount = 1 then
                 Result:=Tables.DataSet.Fields[TQmsReasons.Id].Value;
@@ -422,7 +420,7 @@ begin
             on E: Exception do
             begin
                 MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: [QMS] Cannot execute SQL, error has been thrown: ' + E.Message);
-                MainForm.MsgCall(mcWarn, 'Unexpected error has occured: ' + E.Message + '. Please contact IT Support.');
+                MainForm.MsgCall(Warn, 'Unexpected error has occured: ' + E.Message + '. Please contact IT Support.');
             end;
         end;
     finally
@@ -442,23 +440,23 @@ begin
     try
 
         // Get and set email details
-        if Settings.GetStringValue(MailerSetup, 'ACTIVE', '') = MailerNTLM  then
+        if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerNTLM  then
         begin
-            Mail.XMailer:=Settings.GetStringValue(MailerNTLM, 'FROM', '');
+            Mail.XMailer:=Settings.GetStringValue(TConfigSections.MailerNTLM, 'FROM', '');
             //Mail.MailTo :=Settings.GetStringValue(MailerNTLM, 'TO', '');
-            Mail.MailRt :=Settings.GetStringValue(MailerNTLM, 'REPLY-TO', '');
+            Mail.MailRt :=Settings.GetStringValue(TConfigSections.MailerNTLM, 'REPLY-TO', '');
         end;
 
-        if Settings.GetStringValue(MailerSetup, 'ACTIVE', '') = MailerBASIC then
+        if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerBASIC then
         begin
-            Mail.XMailer:=Settings.GetStringValue(MailerBASIC, 'FROM', '');
+            Mail.XMailer:=Settings.GetStringValue(TConfigSections.MailerBASIC, 'FROM', '');
             //Mail.MailTo :=Settings.GetStringValue(MailerBASIC, 'TO', '');
-            Mail.MailRt :=Settings.GetStringValue(MailerBASIC, 'REPLY-TO', '');
+            Mail.MailRt :=Settings.GetStringValue(TConfigSections.MailerBASIC, 'REPLY-TO', '');
         end;
 
         Mail.MailFrom   :=Mail.XMailer;
         Mail.MailTo     :=LbuEmail;
-        Mail.MailCc     :=MainForm.WinUserName + '@' + Settings.GetStringValue(ApplicationDetails, 'MAIL_DOMAIN', '');
+        Mail.MailCc     :=MainForm.WinUserName + '@' + Settings.GetStringValue(TConfigSections.ApplicationDetails, 'MAIL_DOMAIN', '');
         Mail.MailBcc    :='';
         Mail.MailSubject:='Unity [QMS]: New query';
 
@@ -546,7 +544,7 @@ begin
             on E: Exception do
             begin
                 MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: [QMS] Cannot execute SQL, error has been thrown: ' + E.Message);
-                MainForm.MsgCall(mcWarn, 'Unexpected error has occured: ' + E.Message + '. Please contact IT Support.');
+                MainForm.MsgCall(Warn, 'Unexpected error has occured: ' + E.Message + '. Please contact IT Support.');
             end;
         end;
     finally
@@ -583,17 +581,17 @@ end;
 
 procedure TQmsForm.btnAddDueDateClick(Sender: TObject);
 begin
-    CalendarForm.CalendarMode:=cfGetDate;
-    MainForm.WndCall(CalendarForm, stModal);
-    if CalendarForm.SelectedDate <> NULLDATE then EditDueDate.Text:=DateToStr(CalendarForm.SelectedDate);
+    CalendarForm.CalendarMode:=TEnums.TCalendar.cfGetDate;
+    MainForm.WndCall(CalendarForm, Helpers.TWindows.TState.Modal);
+    if CalendarForm.SelectedDate <> TDateTimeFormats.NullDate then EditDueDate.Text:=DateToStr(CalendarForm.SelectedDate);
 end;
 
 
 procedure TQmsForm.btnAddValDateClick(Sender: TObject);
 begin
-    CalendarForm.CalendarMode:=cfGetDate;
-    MainForm.WndCall(CalendarForm, stModal);
-    if CalendarForm.SelectedDate <> NULLDATE then EditValDate.Text:=DateToStr(CalendarForm.SelectedDate);
+    CalendarForm.CalendarMode:=TEnums.TCalendar.cfGetDate;
+    MainForm.WndCall(CalendarForm, Modal);
+    if CalendarForm.SelectedDate <> TDateTimeFormats.NullDate then EditValDate.Text:=DateToStr(CalendarForm.SelectedDate);
 end;
 
 
@@ -608,7 +606,7 @@ begin
 
     if ValidateFields > 0 then
     begin
-        MainForm.MsgCall(mcWarn, 'Please provide all required fields.');
+        MainForm.MsgCall(Warn, 'Please provide all required fields.');
         Exit;
     end;
 
@@ -631,25 +629,25 @@ end;
 
 procedure TQmsForm.EditAmountKeyPress(Sender: TObject; var Key: Char);
 begin
-    if not(CharInSet(Key, ['0'..'9', POINT, BACKSPACE])) then Key:=#0;
+    if not(CharInSet(Key, ['0'..'9',  TUChars.POINT, TUChars.BACKSPACE])) then Key:=#0;
 end;
 
 
 procedure TQmsForm.EditCurrAmountKeyPress(Sender: TObject; var Key: Char);
 begin
-    if not(CharInSet(Key, ['0'..'9', POINT, BACKSPACE])) then Key:=#0;
+    if not(CharInSet(Key, ['0'..'9', TUChars.POINT, TUChars.BACKSPACE])) then Key:=#0;
 end;
 
 
 procedure TQmsForm.EditOpenAmountKeyPress(Sender: TObject; var Key: Char);
 begin
-    if not(CharInSet(Key, ['0'..'9', POINT, BACKSPACE])) then Key:=#0;
+    if not(CharInSet(Key, ['0'..'9', TUChars.POINT, TUChars.BACKSPACE])) then Key:=#0;
 end;
 
 
 procedure TQmsForm.EditOpenCurrAmKeyPress(Sender: TObject; var Key: Char);
 begin
-    if not(CharInSet(Key, ['0'..'9', POINT, BACKSPACE])) then Key:=#0;
+    if not(CharInSet(Key, ['0'..'9', TUChars.POINT, TUChars.BACKSPACE])) then Key:=#0;
 end;
 
 

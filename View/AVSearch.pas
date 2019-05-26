@@ -1,6 +1,3 @@
-
-{$I .\Include\Header.inc}
-
 unit AVSearch;
 
 
@@ -71,7 +68,8 @@ implementation
 uses
     Main,
     Filter,
-    Settings;
+    Settings,
+    Helpers;
 
 
 {$R *.dfm}
@@ -106,9 +104,9 @@ procedure TSearchForm.Search;
 
         if SGrid.RowHeights[FoundRow] = -1 then
         MainForm.MsgCall(
-            mcInfo,
+            Info,
             'The item has been found (' + SGrid.Cells[SearchColumn, FoundRow] + ') for search pattern "' +
-            SearchString + '". ' + CRLF +
+            SearchString + '". ' + TUChars.CRLF +
             'However, it is hidden by the filter. Remove filtering to unhide this item.'
         );
 
@@ -134,9 +132,9 @@ begin
     if (CaseSensitive.Checked)     then SearchString:=EditSearch.Text;
 
     // Cannot be empty
-    if (SearchString = '') or (SearchString = SPACE) then
+    if (SearchString = '') or (SearchString = TUChars.SPACE) then
     begin
-        MainForm.MsgCall(mcWarn, 'Cannot search empty string. Please provide with customer name or customer number and try again.');
+        MainForm.MsgCall(Warn, 'Cannot search empty string. Please provide with customer name or customer number and try again.');
         Exit;
     end;
 
@@ -228,26 +226,26 @@ begin
             SGrid.Col:=SGrid.ReturnColumn(SColName, 1, 1);
         end
             else
-                MainForm.MsgCall(mcInfo, 'Cannot find specified customer.');
+                MainForm.MsgCall(Info, 'Cannot find specified customer.');
     end;
 
     // Show all found
     if (ShowAll.Checked) then
     begin
         // Make sure that all wors are visible
-        SGrid.DefaultRowHeight:=sgRowHeight;
+        SGrid.DefaultRowHeight:=SGrid.sgRowHeight;
         if High(Groupping) > 0 then
         begin
             for iCNT:=0 to SGrid.RowCount - 1 do
 
             if Groupping[iCNT] <> iCNT then
-                SGrid.RowHeights[iCNT]:=sgRowHidden;
+                SGrid.RowHeights[iCNT]:=SGrid.sgRowHidden;
 
             btnUnhide.Enabled:=True;
         end
         else
         begin
-            MainForm.MsgCall(mcInfo, 'Cannot find specified customer.');
+            MainForm.MsgCall(Info, 'Cannot find specified customer.');
             btnUnhide.Enabled:=False;
         end;
     end;
@@ -279,7 +277,7 @@ end;
 
 procedure TSearchForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-    if Key = ESC then Close;
+    if Key = Char(VK_ESCAPE) then Close;
 end;
 
 

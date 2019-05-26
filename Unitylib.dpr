@@ -1,7 +1,5 @@
-
-{$I .\Include\Header.inc}
-
 library Unitylib;
+
 
 /// <remarks>
 /// Important note about 'dll' memory managament: "sharemem" must be the first unit in your library's 'uses' clause & your project's (select
@@ -11,18 +9,21 @@ library Unitylib;
 /// using 'pchar' or 'shortstring' parameters.
 /// </remarks>
 
+
 uses
-    Windows, SysUtils, Classes, Grids;
+    Winapi.Windows,
+    System.SysUtils,
+    System.Classes,
+    Vcl.Grids;
+
 
 {$R *.res}
 
-/// <para>
-/// Definition of constants, pointers and records for SID method
-/// </para>>
 
 const
     HEAP_ZERO_MEMORY = $00000008;
     SID_REVISION     = 1;
+
 type
     PTokenUser = ^TTokenUser;
 
@@ -37,7 +38,7 @@ type
 /// <summary>
 /// Helper method for "ObtainTextSid" method.
 /// </summary>
-/// <returns>Boolean.</returns>>
+/// <returns>Boolean</returns>
 
 function ConvertSid(Sid: PSID; pszSidText: PChar; var dwBufferLen: DWORD): BOOL;
 var
@@ -170,7 +171,7 @@ end;
 /// every account on a network is issued a unique sid when the account is first created.
 /// internal processes in windows refer to an account's sid rather than the account's user or group name.
 /// </summary>
-/// <returns>String with SID.</returns>
+/// <returns>String with SID</returns>
 
 function GetCurrentUserSid: string; stdcall;
 var
@@ -208,15 +209,14 @@ end;
 /// <summary>
 /// Get current version of running Microsoft Windows.
 /// </summary>
-/// <param name="mode">Cardinal, use "0" to get O/S number or "1" to get O/S name.</param>
-/// <returns>String.</returns>
+/// <returns>String</returns>
 
-function GetOSVer(mode: cardinal): string; stdcall;
+function GetOSVer(CheckForOsName: boolean): string; stdcall;
 begin
 
     result:='0';
 
-    if mode = 0 then
+    if not CheckForOsName then
     begin
         case Win32MajorVersion of
         4:
@@ -244,7 +244,7 @@ begin
         end;
     end;
 
-    if mode = 1 then
+    if CheckForOsName then
     begin
         case Win32MajorVersion of
         4:
@@ -282,8 +282,8 @@ end;
 /// Simple wrapper of string replace. Function in style of C printf. It requires "%s" variable in the given text string.
 /// It automatically replaces break lines marked as "\n", "\r\n" and "\r".
 /// </summary>
-/// <param name="str">Text with "%s" variable.</param>
-/// <returns>String with given "%s" replaced by "str".</returns>
+/// <param name="str">Text with "%s" variable</param>
+/// <returns>String with given "%s" replaced by "str"</returns>
 
 function Printf(str: string): string;
 var
@@ -340,7 +340,7 @@ end;
 /// <param name="Vals">Array of integer.</param>
 /// <param name="sortcol">Integer, number of colunm to be sorted for given TStringGrid.</param>
 /// <param name="datatype">Integer, data type in sorted column (string, integer, floar).</param>
-/// <param name="ascending">Boolean. Set to "True" to get ascending sorting.</param>
+/// <param name="ascending">Boolean. Set to "True" to get ascending sorting</param>
 
 procedure MergeSort(Grid: TStringGrid; var Vals: array of integer; sortcol, datatype: integer; ascending: boolean); stdcall;
 
@@ -458,12 +458,14 @@ procedure MergeSort(Grid: TStringGrid; var Vals: array of integer; sortcol, data
             if ascending and (n >= 0) or ((not ascending) and (n <= 0)) then
             begin
                 Vals[k]:=AVals[i];
-                inc(i);inc(k);
+                inc(i);
+                inc(k);
             end
             else
             begin
                 Vals[k]:=Vals[j];
-                inc(k);inc(j);
+                inc(k);
+                inc(j);
             end;
         end;
 
@@ -516,9 +518,9 @@ end;
 /// </summary>
 /// <param name="A">Array of double (sorting).</param>
 /// <param name="L">Array of integer (original position)</param>
-/// <param name="iLo">Integer, pivot low (min. value).</param>
-/// <param name="iHi">Integer, pivot high (max. value).</param>
-/// <param name="ASC">Boolean, set true to sort ascending.</param>
+/// <param name="iLo">Integer, pivot low (min. value)</param>
+/// <param name="iHi">Integer, pivot high (max. value)</param>
+/// <param name="ASC">Boolean, set true to sort ascending</param>
 
 procedure QuickSort(var A: array of double; var L: array of integer; iLo, iHi: integer; ASC: boolean);
 
@@ -587,10 +589,10 @@ end;
 /// <summary>
 /// Returns major, minor, release and build numbers.
 /// </summary>
-/// <param name="V1">Word.</param>
-/// <param name="V2">Word.</param>
-/// <param name="V3">Word.</param>
-/// <param name="V4">Word.</param>
+/// <param name="V1">Word</param>
+/// <param name="V2">Word</param>
+/// <param name="V3">Word</param>
+/// <param name="V4">Word</param>
 
 procedure GetBuildInfo(var V1, V2, V3, V4: word);
 var
@@ -631,14 +633,14 @@ end;
 /// <summary>
 /// Returns current application version.
 /// </summary>
-/// <returns>String with current number (format: major.minor.release.build).</returns>
+/// <returns>String with current number (format: major.minor.release.build)</returns>
 
 function GetBuildInfoAsString: string;
 var
     V1, V2, V3, V4: word;
 begin
     GetBuildInfo(V1, V2, V3, V4);
-    Result := IntToStr(V1) + '.' + IntToStr(V2) + '.' + IntToStr(V3) + '.' + IntToStr(V4);
+    Result:=IntToStr(V1) + '.' + IntToStr(V2) + '.' + IntToStr(V3) + '.' + IntToStr(V4);
 end;
 
 

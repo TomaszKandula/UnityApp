@@ -1,6 +1,3 @@
-
-{$I .\Include\Header.inc}
-
 unit Transactions;
 
 
@@ -16,9 +13,10 @@ uses
     System.Classes,
     Vcl.StdCtrls,
     Data.Win.ADODB,
-    Model,
-    SQL,
-    InterposerClasses;
+    DbModel,
+    SqlHandler,
+    InterposerClasses,
+    Helpers;
 
 type
 
@@ -28,7 +26,7 @@ type
     public
         var DestGrid:    TStringGrid;
         var SettingGrid: TStringGrid;
-        function  GetDateTime(Return: integer): string;
+        function  GetDateTime(Return: TEnums.TCalendar): string;
         function  GetStatus(DateTime: string): string;
         function  LoadToGrid: boolean;
         function  IsVoType(VoType: string): boolean;
@@ -52,7 +50,7 @@ uses
 /// Get date and time from SSISMaster table.
 /// </summary>
 
-function TTransactions.GetDateTime(Return: integer): string;
+function TTransactions.GetDateTime(Return: TEnums.TCalendar): string;
 var
     Value:  string;
 begin
@@ -61,9 +59,9 @@ begin
 
     // Get latest date and time
     Columns.Add(
-        MAX +
-            BracketStr(TSSISMaster.StartDateTime, brRound) +
-        _AS +
+        TSql.MAX +
+            BracketStr(TSSISMaster.StartDateTime, TEnums.TBrackets.brRound) +
+        TSql._AS +
             QuotedStr(TSSISMaster.StartDateTime)
     );
 
@@ -73,12 +71,20 @@ begin
     // Examine received data
     if (not (DataSet = nil)) and (DataSet.RecordCount = 1) then
     begin
+
         Value:=VarToStr(DataSet.Fields.Item[TSSISMaster.StartDateTime].Value);
+
         if Value <> '' then
         begin
-            if Return = gdTimeOnly then Result:=FormatDateTime(gdTimeFormat,     VarToDateTime(Value));
-            if Return = gdDateOnly then Result:=FormatDateTime(gdDateFormat,     VarToDateTime(Value));
-            if Return = gdDateTime then Result:=FormatDateTime(gdDateTimeFormat, VarToDateTime(Value));
+
+            case Return of
+
+              TEnums.TCalendar.gdTimeOnly: Result:=FormatDateTime(TDateTimeFormats.TimeFormat, VarToDateTime(Value));
+              TEnums.TCalendar.gdDateOnly: Result:=FormatDateTime(TDateTimeFormats.DateFormat, VarToDateTime(Value));
+              TEnums.TCalendar.gdDateTime: Result:=FormatDateTime(TDateTimeFormats.DateTimeFormat, VarToDateTime(Value));
+
+            end;
+
         end;
 
     end;
@@ -95,7 +101,7 @@ begin
 
     CleanUp;
     Columns.Add(TSSISMaster.StatusCode);
-    CustFilter:=WHERE + TSSISMaster.StartDateTime + EQUAL + QuotedStr(DateTime);
+    CustFilter:=TSql.WHERE + TSSISMaster.StartDateTime + TSql.EQUAL + QuotedStr(DateTime);
     OpenTable(TSSISMaster.SSISMaster);
 
     if (not (DataSet = nil)) and (DataSet.RecordCount = 1) then
@@ -119,8 +125,8 @@ var
 begin
     Settings:=TSettings.Create;
     // Parameters for SQL stored procedure
-    CutOff:=IntToStr(Settings.GetIntegerValue(OpenItemsData, 'NRCUTOFFNUM', 0));
-    INF4:=Settings.GetStringValue(OpenItemsData, 'TXCUTOFFTXT', '');
+    CutOff:=IntToStr(Settings.GetIntegerValue(TConfigSections.OpenItemsData, 'NRCUTOFFNUM', 0));
+    INF4:=Settings.GetStringValue(TConfigSections.OpenItemsData, 'TXCUTOFFTXT', '');
 
     // Agent ON/OFF
 
@@ -158,15 +164,15 @@ begin
     /// </remarks>
 
     CmdType:=cmdText;
-    StrSQL:=EXECUTE + QueryOpenItems                                             + SPACE +
-              QuotedStr(GetDateTime(gdDateOnly))                                 + COMMA +
-              QuotedStr(MainForm.ConvertCoCode(SettingGrid.Cells[0, 0], 'F', 0)) + COMMA +
-              QuotedStr(MainForm.ConvertCoCode(SettingGrid.Cells[1, 0], 'F', 0)) + COMMA +
-              QuotedStr(MainForm.ConvertCoCode(SettingGrid.Cells[2, 0], 'F', 0)) + COMMA +
-              QuotedStr(MainForm.ConvertCoCode(SettingGrid.Cells[3, 0], 'F', 0)) + COMMA +
-              QuotedStr(CutOff)                                                  + COMMA +
-              QuotedStr(Agents)                                                  + COMMA +
-              QuotedStr(Divisions)                                               + COMMA +
+    StrSQL:=TSql.EXECUTE + QueryOpenItems                                        + TUChars.SPACE +
+              QuotedStr(GetDateTime(gdDateOnly))                                 + TUChars.COMMA +
+              QuotedStr(MainForm.ConvertCoCode(SettingGrid.Cells[0, 0], 'F', 0)) + TUChars.COMMA +
+              QuotedStr(MainForm.ConvertCoCode(SettingGrid.Cells[1, 0], 'F', 0)) + TUChars.COMMA +
+              QuotedStr(MainForm.ConvertCoCode(SettingGrid.Cells[2, 0], 'F', 0)) + TUChars.COMMA +
+              QuotedStr(MainForm.ConvertCoCode(SettingGrid.Cells[3, 0], 'F', 0)) + TUChars.COMMA +
+              QuotedStr(CutOff)                                                  + TUChars.COMMA +
+              QuotedStr(Agents)                                                  + TUChars.COMMA +
+              QuotedStr(Divisions)                                               + TUChars.COMMA +
               QuotedStr(INF4);
 
     Result:=SqlToGrid(DestGrid, ExecSQL, False, True);
@@ -193,7 +199,7 @@ begin
     Settings:=TSettings.Create;
 
     try
-        Settings.GetSectionValues(InvoiceTypes, tsVAL);
+        Settings.GetSectionValues(TConfigSections.InvoiceTypes, tsVAL);
         for iCNT:=0 to tsVAL.Count - 1 do
             if VoType = MidStr(tsVAL.Strings[iCNT], AnsiPos('=', tsVAL.Strings[iCNT]) + 1, 255) then
             begin
@@ -249,7 +255,7 @@ begin
     KPIUnalloc:=0;
 
     Settings:=TSettings.Create;
-    VoucherNumber:=Settings.GetStringValue(Unallocated, 'VOUCHER_NUM', '0');
+    VoucherNumber:=Settings.GetStringValue(TConfigSections.Unallocated, 'VOUCHER_NUM', '0');
 
     // Compute
     for iCNT:=1 to DestGrid.RowCount - 1 do
@@ -284,34 +290,34 @@ begin
     // Get total sum of KPI targets for all loaded company codes
     CleanUp;
     Columns.Add(
-        SUM +
+        TSql.SUM +
             BracketStr(TCompanyData.KpiOverdueTarget, brRound) +
-        _AS +
+        TSql._AS +
             QuotedStr(TCompanyData.KpiOverdueTarget)
     );
 
     Columns.Add(
-        SUM +
+        TSql.SUM +
             BracketStr(TCompanyData.KpiUnallocatedTarget, brRound) +
-            _AS +
+            TSql._AS +
             QuotedStr(TCompanyData.KpiUnallocatedTarget)
     );
 
-    CustFilter:=WHERE +
+    CustFilter:=TSql.WHERE +
                     TCompanyData.CoCode +
-                EQUAL +
+                TSql.EQUAL +
                     QuotedStr(SettingGrid.Cells[0, 0]) +
-                _OR  +
+                TSql._OR  +
                     TCompanyData.CoCode +
-                EQUAL +
+                TSql.EQUAL +
                     QuotedStr(SettingGrid.Cells[1, 0]) +
-                _OR  +
+                TSql._OR  +
                     TCompanyData.CoCode +
-                EQUAL +
+                TSql.EQUAL +
                     QuotedStr(SettingGrid.Cells[2, 0]) +
-                _OR  +
+                TSql._OR  +
                     TCompanyData.CoCode +
-                EQUAL +
+                TSql.EQUAL +
                     QuotedStr(SettingGrid.Cells[3, 0]);
 
     OpenTable(TCompanyData.CompanyData);

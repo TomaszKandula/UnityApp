@@ -33,8 +33,8 @@ object AwaitForm: TAwaitForm
       AlignWithMargins = True
       Left = 4
       Top = 4
-      Width = 412
-      Height = 132
+      Width = 218
+      Height = 149
       Align = alClient
       AutoSize = True
       Center = True
@@ -430,8 +430,6 @@ object AwaitForm: TAwaitForm
         048092C14E00047EEE0CE00081D1A3098F2A154990E852A642A3AEC468E0C081
         05130758DDEAD0E05606411156B5CA00ABC0006101683D6080E08200016A3A24
         0077AA430370E5261C00B72D55B8696D06308B9180DE80003B}
-      ExplicitWidth = 218
-      ExplicitHeight = 149
     end
     object PanelText: TPanel
       AlignWithMargins = True
@@ -448,8 +446,8 @@ object AwaitForm: TAwaitForm
         AlignWithMargins = True
         Left = 25
         Top = 10
-        Width = 362
-        Height = 41
+        Width = 85
+        Height = 14
         Margins.Left = 25
         Margins.Top = 10
         Margins.Right = 25
@@ -463,8 +461,6 @@ object AwaitForm: TAwaitForm
         Font.Name = 'Verdana'
         Font.Style = []
         ParentFont = False
-        ExplicitWidth = 85
-        ExplicitHeight = 14
       end
     end
   end

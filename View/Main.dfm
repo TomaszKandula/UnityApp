@@ -10114,6 +10114,10 @@ object MainForm: TMainForm
       ImageIndex = 8
       OnResize = TabSheet7Resize
       OnShow = TabSheet7Show
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Header7: TPanel
         Left = 0
         Top = 0
@@ -13528,10 +13532,10 @@ object MainForm: TMainForm
       object txtCreditLimitsReport: TLabel
         Left = 6
         Top = 57
-        Width = 58
+        Width = 50
         Height = 13
         Cursor = crHandPoint
-        Caption = 'Credit Limits'
+        Caption = 'Exceeders'
         OnClick = txtCreditLimitsReportClick
         OnMouseEnter = txtCreditLimitsReportMouseEnter
         OnMouseLeave = txtCreditLimitsReportMouseLeave
@@ -16753,5 +16757,22 @@ object MainForm: TMainForm
     OnTimer = FirstAgeLoadTimer
     Left = 586
     Top = 703
+  end
+  object RESTClient: TRESTClient
+    Params = <>
+    Left = 71
+    Top = 586
+  end
+  object RESTRequest: TRESTRequest
+    Client = RESTClient
+    Params = <>
+    Response = RESTResponse
+    SynchronizedEvents = False
+    Left = 143
+    Top = 586
+  end
+  object RESTResponse: TRESTResponse
+    Left = 223
+    Top = 586
   end
 end

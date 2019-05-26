@@ -1,6 +1,4 @@
 
-{$I .\Include\Header.inc}
-
 unit About;
 
 
@@ -101,7 +99,8 @@ implementation
 
 uses
     Main,
-    Settings;
+    Settings,
+    Helpers;
 
 
 {$R *.dfm}
@@ -222,7 +221,7 @@ begin
     begin
         mem_32.dwLength:=sizeof(mem_32);
         GlobalMemoryStatus(mem_32);
-        txt_SYS.Caption:=GetOSVer(OSName) + ' (32-bit)';
+        txt_SYS.Caption:=GetOSVer(True) + ' (32-bit)';
         txt_MEM.Caption:=formatfloat('## ###', (mem_32.dwTotalPhys DIV 1048576)) + ' MB';
         txt_USG.Caption:=formatfloat('## ###', ((mem_32.dwTotalPhys-mem_32.dwAvailPhys) DIV 1048576)) + ' MB';
     end
@@ -230,7 +229,7 @@ begin
     begin
         mem_64.dwLength:=sizeof(mem_64);
         GlobalMemoryStatusEx(mem_64);
-        txt_SYS.Caption:=GetOSVer(OSName) + ' (64-bit)';
+        txt_SYS.Caption:=GetOSVer(True) + ' (64-bit)';
         txt_MEM.Caption:=formatfloat('## ###', ((mem_64.ullTotalPhys) DIV 1048576)) + ' MB';
         txt_USG.Caption:=formatfloat('## ###', ((mem_64.ullTotalPhys-mem_64.ullAvailPhys) DIV 1048576)) + ' MB';
     end;
@@ -242,7 +241,7 @@ end;
 
 procedure TAboutForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-  if Key = ESC then Close;
+  if Key = Char(VK_ESCAPE) then Close;
 end;
 
 
@@ -251,25 +250,25 @@ end;
 
 procedure TAboutForm.btnCloseClick(Sender: TObject);
 begin
-  Close;
+    Close;
 end;
 
 
 procedure TAboutForm.txtINQClick(Sender: TObject);
 begin
-  ShellExecute(Self.Handle, nil, PChar('mailto: ' + txt_INQ.Caption), nil, nil, SW_NORMAL);
+    ShellExecute(Self.Handle, nil, PChar('mailto: ' + txt_INQ.Caption), nil, nil, SW_NORMAL);
 end;
 
 
 procedure TAboutForm.txtITSClick(Sender: TObject);
 begin
-  ShellExecute(Self.Handle, nil, PChar('mailto: ' + txt_ITS.Caption), nil, nil, SW_NORMAL);
+    ShellExecute(Self.Handle, nil, PChar('mailto: ' + txt_ITS.Caption), nil, nil, SW_NORMAL);
 end;
 
 
 procedure TAboutForm.txtWEBClick(Sender: TObject);
 begin
-  ShellExecute(Handle, 'open', PChar(txt_WEB.Caption), nil, nil, SW_SHOWNORMAL);
+    ShellExecute(Handle, 'open', PChar(txt_WEB.Caption), nil, nil, SW_SHOWNORMAL);
 end;
 
 

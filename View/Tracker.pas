@@ -1,6 +1,3 @@
-
-{$I .\Include\Header.inc}
-
 unit Tracker;
 
 
@@ -98,11 +95,12 @@ implementation
 
 uses
     Main,
-    SQL,
-    Model,
+    SqlHandler,
+    DbModel,
     Worker,
     Settings,
-    Database;
+    DbHandler,
+    Helpers;
 
 
 {$R *.dfm}
@@ -128,20 +126,20 @@ begin
 
     Database:=TDataTables.Create(MainForm.DbConnect);
     try
-        Database.Columns.Add(DISTINCT + TCompanyData.SendNoteFrom);
-        Database.CustFilter:=WHERE +
-                                TCompanyData.CoCode + EQUAL + QuotedStr(COCODE1) +
-                             _OR +
-                                TCompanyData.CoCode + EQUAL + QuotedStr(COCODE2) +
-                             _OR +
-                                TCompanyData.CoCode + EQUAL + QuotedStr(COCODE3) +
-                             _OR +
-                                TCompanyData.CoCode + EQUAL + QuotedStr(COCODE4);
+        Database.Columns.Add(TSql.DISTINCT + TCompanyData.SendNoteFrom);
+        Database.CustFilter:=TSql.WHERE +
+                                TCompanyData.CoCode + TSql.EQUAL + QuotedStr(COCODE1) +
+                             TSql._OR +
+                                TCompanyData.CoCode + TSql.EQUAL + QuotedStr(COCODE2) +
+                             TSql._OR +
+                                TCompanyData.CoCode + TSql.EQUAL + QuotedStr(COCODE3) +
+                             TSql._OR +
+                                TCompanyData.CoCode + TSql.EQUAL + QuotedStr(COCODE4);
         Database.OpenTable(TCompanyData.CompanyData);
         if not(Database.DataSet.RecordCount = 0) then
             Database.SqlToSimpleList(List, Database.DataSet)
                 else
-                    MainForm.MsgCall(mcWarn, 'Cannot find assigned email address to your organisation. Please contact IT support.');
+                    MainForm.MsgCall(TCommon.TMsgTypes.Warn, 'Cannot find assigned email address to your organisation. Please contact IT support.');
     finally
         Database.Free;
 
@@ -171,7 +169,7 @@ begin
     try
         Database.Columns.Add(TAddressBook.Emails);
         Database.Columns.Add(TAddressBook.Estatements);
-        Database.CustFilter:=WHERE + TAddressBook.Scuid + EQUAL + Scuid;
+        Database.CustFilter:=TSql.WHERE + TAddressBook.Scuid + TSql.EQUAL + Scuid;
         Database.OpenTable(TAddressBook.AddressBook);
 
         if Database.DataSet.RecordCount > 0 then
@@ -263,7 +261,7 @@ begin
 
         except
             on E: Exception do
-                MainForm.MsgCall(mcError, 'Cannot get list of layouts. Please contact IT support.');
+                MainForm.MsgCall(Error, 'Cannot get list of layouts. Please contact IT support.');
 
         end;
 
@@ -285,19 +283,19 @@ begin
     // First reminder and legal notice cannot be zero
     if (TextReminder1.Text = '0') or (TextReminder4.Text = '0') then
     begin
-        MainForm.MsgCall(mcWarn, 'Please provide value for Reminder 1 and Legal Action different than zero.');
+        MainForm.MsgCall(Warn, 'Please provide value for Reminder 1 and Legal Action different than zero.');
         Exit;
     end;
 
     if (Exp_Rem2_Switch.Checked) and (TextReminder2.Text = '0') then
     begin
-        MainForm.MsgCall(mcWarn, 'Please provide value for Reminder 2 different than zero.');
+        MainForm.MsgCall(Warn, 'Please provide value for Reminder 2 different than zero.');
         Exit;
     end;
 
     if (Exp_Rem3_Switch.Checked) and (TextReminder3.Text = '0') then
     begin
-        MainForm.MsgCall(mcWarn, 'Please provide value for Reminder 3 different than zero.');
+        MainForm.MsgCall(Warn, 'Please provide value for Reminder 3 different than zero.');
         Exit;
     end;
 
@@ -318,7 +316,7 @@ begin
     // Apply on all listed customers
     else
     begin
-        if MainForm.MsgCall(mcQuestion2, 'You have not selected any customers, do you want Unity to apply proposed conditions for all listed items?') = mrYes then
+        if MainForm.MsgCall(Question2, 'You have not selected any customers, do you want Unity to apply proposed conditions for all listed items?') = mrYes then
         begin
             for iCNT:=0 to List.Items.Count - 1 do
             begin
@@ -361,7 +359,7 @@ begin
 
     if Check > 0 then
     begin
-        MainForm.MsgCall(mcWarn, 'Please make sure you that the list do not contain "not found" or "not set" items.');
+        MainForm.MsgCall(Warn, 'Please make sure you that the list do not contain "not found" or "not set" items.');
         Exit;
     end;
 
@@ -412,22 +410,22 @@ begin
             end;
 
             // Insert data to database
-            if TrackerData.InsertInto(TTrackerData.TrackerData, ttExplicit, TempData, nil, False) then
+            if TrackerData.InsertInto(TTrackerData.TrackerData, True, TempData, nil, False) then
             begin
                 MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Invoice tracker data updated.');
-                MainForm.MsgCall(mcInfo, 'Invoice Tracker has been updates successfully!');
+                MainForm.MsgCall(Info, 'Invoice Tracker has been updates successfully!');
             end
             else
             begin
                 MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Invoice tracker error, cannot perform transaction.');
-                MainForm.MsgCall(mcError, 'Cannot perform transaction. Please contact IT support.');
+                MainForm.MsgCall(Error, 'Cannot perform transaction. Please contact IT support.');
             end;
 
         except
             on E: Exception do
             begin
                 MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Error has been thrown [Tracker_SaveToDb]: ' + E.Message);
-                MainForm.MsgCall(mcError, E.Message);
+                MainForm.MsgCall(Error, E.Message);
             end;
         end;
     finally
@@ -599,7 +597,7 @@ end;
 
 procedure TTrackerForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-    if Key = ESC then Close;
+    if Key = Char(VK_ESCAPE) then Close;
 end;
 
 
