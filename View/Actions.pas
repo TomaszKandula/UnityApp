@@ -199,27 +199,24 @@ type
     protected
         var SrcColumns:  TAIntigers;
     private
-        var FHistoryGrid: boolean;
-        var FCUID:        string;
-        var FSCUID:       string;
-        var FBranch:      string;
-        var FBanksHtml:   string;
-        var FCoCode:      string;
-        var FCustName:    string;
-        var FCustNumber:  string;
-    public
-        property CUID:       string read FCUID       write FCUID;
-        property SCUID:      string read FSCUID      write FSCUID;
-        property Branch:     string read FBranch     write FBranch;
-        property CoCode:     string read FCoCode     write FCoCode;
-        property CustName:   string read FCustName   write FCustName;
-        property CustNumber: string read FCustNumber write FCustNumber;
-        property BanksHtml:  string read FBanksHtml  write FBanksHtml;
-        function  GetRunningApps(SearchName: string): boolean;
+        type TOpenItemsTotal = record
+            OpenAm:     double;
+            Am:         double;
+            OpenCurAm:  double;
+            CurAm:      double;
+        end;
+        var FHistoryGrid:  boolean;
+        var FCUID:         string;
+        var FSCUID:        string;
+        var FBranch:       string;
+        var FBanksHtml:    string;
+        var FCoCode:       string;
+        var FCustName:     string;
+        var FCustNumber:   string;
         procedure GetData;
+        function  GetRunningApps(SearchName: string): boolean;
         procedure UpdateOpenItems(OpenItemsDest, OpenItemsSrc: TStringGrid);
         procedure UpdateDetails(CustPerson: TEdit; CustMail: TEdit; CustMailGen: TEdit; CustPhone: TComboBox);
-        procedure UpdateHistory(var Grid: TStringGrid);
         procedure UpdateGeneral(var Text: TMemo);
         procedure GetFirstComment(var Text: TMemo);
         procedure SetControls;
@@ -233,6 +230,16 @@ type
         procedure SaveDailyComment;
         procedure InitializePanels;
         procedure InitializeSpeedButtons;
+    public
+        var OpenItemsTotal: TOpenItemsTotal;
+        property CUID:         string read FCUID;
+        property SCUID:        string read FSCUID;
+        property Branch:       string read FBranch;
+        property CoCode:       string read FCoCode;
+        property CustName:     string read FCustName;
+        property CustNumber:   string read FCustNumber;
+        property BanksHtml:    string read FBanksHtml;
+        procedure UpdateHistory(var Grid: TStringGrid);
     end;
 
 
@@ -330,15 +337,16 @@ end;
 
 
 procedure TActionsForm.UpdateOpenItems(OpenItemsDest: TStringGrid; OpenItemsSrc: TStringGrid);
-var
-    iCNT  : integer;
-    jCNT  : integer;
-    kCNT  : integer;
 begin
 
     {TODO -oTomek -cDatabase : Api call for data}
 
-    kCNT:=1;
+    var kCNT: integer:=1;
+
+    OpenItemsTotal.OpenAm   :=0;
+    OpenItemsTotal.Am       :=0;
+    OpenItemsTotal.OpenCurAm:=0;
+    OpenItemsTotal.CurAm    :=0;
 
     // Get columns numbers from source open items string grid
     SrcColumns[0] :=OpenItemsSrc.ReturnColumn(TOpenitems.InvoNo,    1, 1);
@@ -363,7 +371,7 @@ begin
     SrcColumns[17]:=OpenItemsSrc.ReturnColumn(TOpenitems.Cuid,      1, 1);
 
     // Get headers
-    for iCNT:=Low(SrcColumns) to High(SrcColumns) do
+    for var iCNT: integer:=Low(SrcColumns) to High(SrcColumns) do
     begin
 
         if SrcColumns[iCNT] = -100 then
@@ -378,13 +386,19 @@ begin
     end;
 
     // Look for the same "CUID" and put it into source grid
-    for iCNT:=1 to OpenItemsSrc.RowCount - 1 do
+    for var iCNT: integer:=1 to OpenItemsSrc.RowCount - 1 do
     begin
         if OpenItemsSrc.Cells[MainForm.sgOpenItems.ReturnColumn(TOpenitems.Cuid, 1, 1), iCNT] = CUID then
         begin
 
-            for jCNT:=Low(SrcColumns) to High(SrcColumns) do
+            for var jCNT: integer:=Low(SrcColumns) to High(SrcColumns) do
                 OpenItemsDest.Cells[jCNT + 1, kCNT]:=OpenItemsSrc.Cells[SrcColumns[jCNT], iCNT];
+
+            // Aggregate open items
+            OpenItemsTotal.OpenAm   :=OpenItemsTotal.OpenAm    + (OpenItemsSrc.Cells[SrcColumns[3], iCNT]).ToDouble;
+            OpenItemsTotal.Am       :=OpenItemsTotal.Am        + (OpenItemsSrc.Cells[SrcColumns[4], iCNT]).ToDouble;
+            OpenItemsTotal.OpenCurAm:=OpenItemsTotal.OpenCurAm + (OpenItemsSrc.Cells[SrcColumns[5], iCNT]).ToDouble;
+            OpenItemsTotal.CurAm    :=OpenItemsTotal.CurAm     + (OpenItemsSrc.Cells[SrcColumns[6], iCNT]).ToDouble;
 
             inc(kCNT);
             OpenItemsDest.RowCount:=kCNT;
@@ -456,7 +470,7 @@ begin
             Lbu_Address.Caption :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.CoAddress].Value);
             Lbu_Phone.Caption   :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.TelephoneNumbers].Value);
             Lbu_SendFrom.Caption:=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.SendNoteFrom].Value);
-            BanksHtml           :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.BankAccounts].Value);
+            FBanksHtml          :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.BankAccounts].Value);
         end
         else
         begin
@@ -586,12 +600,12 @@ procedure TActionsForm.Initialize;
 begin
     ClearAll;
     // Assign data for selected row
-    CUID      :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCuid,          1, 1), MainForm.sgAgeView.Row];
-    CustName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCustomerName,  1, 1), MainForm.sgAgeView.Row];
-    CustNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCustomerNumber,1, 1), MainForm.sgAgeView.Row];
-    CoCode    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCoCode,        1, 1), MainForm.sgAgeView.Row];
-    Branch    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fAgent,         1, 1), MainForm.sgAgeView.Row];
-    SCUID     :=CustNumber + MainForm.ConvertCoCode(CoCode, 'F', 3);
+    FCUID      :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCuid,          1, 1), MainForm.sgAgeView.Row];
+    FCustName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCustomerName,  1, 1), MainForm.sgAgeView.Row];
+    FCustNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCustomerNumber,1, 1), MainForm.sgAgeView.Row];
+    FCoCode    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCoCode,        1, 1), MainForm.sgAgeView.Row];
+    FBranch    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fAgent,         1, 1), MainForm.sgAgeView.Row];
+    FSCUID     :=CustNumber + MainForm.ConvertCoCode(CoCode, 'F', 3);
     // Display
     CUID_Label.Caption:=CUID;
     SCUID_Label.Caption:=SCUID;
@@ -1264,13 +1278,13 @@ end;
 
 procedure TActionsForm.btnBackClick(Sender: TObject);
 begin
-    LoadCustomer(false);
+    LoadCustomer(true);
 end;
 
 
 procedure TActionsForm.btnNextClick(Sender: TObject);
 begin
-    LoadCustomer(true);
+    LoadCustomer(false);
 end;
 
 

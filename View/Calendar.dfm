@@ -14,7 +14,6 @@ object CalendarForm: TCalendarForm
   KeyPreview = True
   OldCreateOrder = False
   Position = poMainFormCenter
-  Scaled = False
   OnCreate = FormCreate
   OnKeyPress = FormKeyPress
   OnShow = FormShow
@@ -67,7 +66,7 @@ object CalendarForm: TCalendarForm
         CalColors.TitleBackColor = clSilver
         CalColors.TitleTextColor = clBlack
         CalColors.TrailingTextColor = clMaroon
-        Date = 43147.993425150460000000
+        Date = 43147.000000000000000000
         FirstDayOfWeek = dowMonday
         ParentShowHint = False
         ShowHint = True

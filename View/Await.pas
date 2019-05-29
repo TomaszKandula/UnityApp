@@ -32,9 +32,7 @@ type
 
     TAwaitForm = class(TForm)
         WaitImage: TImage;
-        WaitText: TLabel;
         PanelAwaitForm: TPanel;
-        PanelText: TPanel;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormClose(Sender: TObject; var Action: TCloseAction);

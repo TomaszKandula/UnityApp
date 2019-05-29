@@ -5,7 +5,7 @@ object ActionsForm: TActionsForm
   BorderStyle = bsSingle
   Caption = 'Unity'
   ClientHeight = 729
-  ClientWidth = 1261
+  ClientWidth = 1262
   Color = clWhite
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
@@ -16,7 +16,6 @@ object ActionsForm: TActionsForm
   KeyPreview = True
   OldCreateOrder = False
   Position = poMainFormCenter
-  Scaled = False
   OnActivate = FormActivate
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
@@ -28,18 +27,19 @@ object ActionsForm: TActionsForm
   object MasterPanel: TPanel
     Left = 0
     Top = 0
-    Width = 1261
+    Width = 1262
     Height = 729
     Align = alClient
     BevelOuter = bvNone
     Color = 15527148
     ParentBackground = False
     TabOrder = 0
+    ExplicitWidth = 1261
     object PanelActions: TPanel
       AlignWithMargins = True
       Left = 10
       Top = 627
-      Width = 1241
+      Width = 1242
       Height = 60
       Margins.Left = 10
       Margins.Top = 0
@@ -50,6 +50,7 @@ object ActionsForm: TActionsForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 2
+      ExplicitWidth = 1241
       object btnAutoStatement: TSpeedButton
         AlignWithMargins = True
         Left = 614
@@ -1452,7 +1453,7 @@ object ActionsForm: TActionsForm
         DefaultRowHeight = 17
         RowCount = 2
         GradientEndColor = 15527148
-        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goRowSelect, goThumbTracking]
+        Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goDrawFocusSelected, goColSizing, goRowSelect, goThumbTracking]
         PopupMenu = MainForm.CommonPopupMenu
         TabOrder = 0
         OnDrawCell = OpenItemsGridDrawCell
@@ -1488,7 +1489,7 @@ object ActionsForm: TActionsForm
       AlignWithMargins = True
       Left = 0
       Top = 697
-      Width = 1261
+      Width = 1262
       Height = 32
       Margins.Left = 0
       Margins.Top = 10
@@ -1499,6 +1500,7 @@ object ActionsForm: TActionsForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 0
+      ExplicitWidth = 1261
       object Text: TLabel
         Left = 14
         Top = 9
@@ -1524,7 +1526,7 @@ object ActionsForm: TActionsForm
       AlignWithMargins = True
       Left = 10
       Top = 10
-      Width = 903
+      Width = 904
       Height = 231
       Margins.Left = 0
       Margins.Top = 0
@@ -1536,11 +1538,12 @@ object ActionsForm: TActionsForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 3
+      ExplicitWidth = 903
       object GroupDetails: TGroupBox
         AlignWithMargins = True
         Left = 10
         Top = 10
-        Width = 883
+        Width = 884
         Height = 211
         Margins.Left = 10
         Margins.Top = 10
@@ -1549,6 +1552,7 @@ object ActionsForm: TActionsForm
         Align = alClient
         Caption = 'Details'
         TabOrder = 0
+        ExplicitWidth = 883
         object zText1: TLabel
           Left = 11
           Top = 32
@@ -2467,7 +2471,7 @@ object ActionsForm: TActionsForm
     end
     object PanelComments: TPanel
       AlignWithMargins = True
-      Left = 921
+      Left = 922
       Top = 10
       Width = 330
       Height = 607
@@ -2480,6 +2484,7 @@ object ActionsForm: TActionsForm
       Color = 15527148
       ParentBackground = False
       TabOrder = 4
+      ExplicitLeft = 921
       object DailyPanel: TPanel
         AlignWithMargins = True
         Left = 0
@@ -2499,7 +2504,7 @@ object ActionsForm: TActionsForm
           AlignWithMargins = True
           Left = 10
           Top = 5
-          Width = 91
+          Width = 315
           Height = 16
           Margins.Left = 10
           Margins.Top = 5
@@ -2515,6 +2520,7 @@ object ActionsForm: TActionsForm
           Font.Style = [fsUnderline]
           ParentColor = False
           ParentFont = False
+          ExplicitWidth = 91
         end
         object DailyComBorders: TShape
           AlignWithMargins = True
@@ -2583,7 +2589,7 @@ object ActionsForm: TActionsForm
           AlignWithMargins = True
           Left = 10
           Top = 5
-          Width = 108
+          Width = 315
           Height = 16
           Margins.Left = 10
           Margins.Top = 5
@@ -2599,6 +2605,7 @@ object ActionsForm: TActionsForm
           Font.Style = [fsUnderline]
           ParentColor = False
           ParentFont = False
+          ExplicitWidth = 108
         end
         object GeneralComBorders: TShape
           AlignWithMargins = True
@@ -2666,7 +2673,7 @@ object ActionsForm: TActionsForm
           AlignWithMargins = True
           Left = 10
           Top = 5
-          Width = 134
+          Width = 315
           Height = 16
           Margins.Left = 10
           Margins.Top = 5
@@ -2682,6 +2689,7 @@ object ActionsForm: TActionsForm
           Font.Style = [fsUnderline]
           ParentColor = False
           ParentFont = False
+          ExplicitWidth = 134
         end
         object HistoryGridBorders: TShape
           AlignWithMargins = True

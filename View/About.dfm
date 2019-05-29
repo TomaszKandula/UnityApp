@@ -18,7 +18,6 @@ object AboutForm: TAboutForm
   PopupMode = pmExplicit
   PopupParent = MainForm.Owner
   Position = poMainFormCenter
-  Scaled = False
   OnCreate = FormCreate
   OnKeyPress = FormKeyPress
   OnShow = FormShow
@@ -75,7 +74,7 @@ object AboutForm: TAboutForm
     Width = 327
     Height = 13
     Caption = 
-      'Copyright '#169' 2016 - 2018 DFDS Polska Sp. z o.o. All rights reserv' +
+      'Copyright '#169' 2016 - 2019 DFDS Polska Sp. z o.o. All rights reserv' +
       'ed.'
   end
   object Text13: TLabel

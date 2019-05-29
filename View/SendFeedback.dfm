@@ -15,7 +15,6 @@ object ReportForm: TReportForm
   KeyPreview = True
   OldCreateOrder = False
   Position = poScreenCenter
-  Scaled = False
   OnCreate = FormCreate
   OnKeyPress = FormKeyPress
   PixelsPerInch = 96
@@ -54,7 +53,7 @@ object ReportForm: TReportForm
         AlignWithMargins = True
         Left = 5
         Top = 5
-        Width = 162
+        Width = 466
         Height = 13
         Margins.Left = 5
         Margins.Top = 5
@@ -64,6 +63,7 @@ object ReportForm: TReportForm
         Caption = 'Your message to developer team:'
         Color = clWhite
         ParentColor = False
+        ExplicitWidth = 162
       end
       object PanelReportMemo: TPanel
         AlignWithMargins = True

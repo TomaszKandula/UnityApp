@@ -550,6 +550,7 @@ type
         RESTClient: TRESTClient;
         RESTRequest: TRESTRequest;
         RESTResponse: TRESTResponse;
+        Action_TurnRowHighlight: TMenuItem;
         procedure FormCreate(Sender: TObject);
         procedure FormResize(Sender: TObject);
         procedure FormShow(Sender: TObject);
@@ -844,6 +845,8 @@ type
         procedure btnFscApproveClick(Sender: TObject);
         procedure btnFscRejectClick(Sender: TObject);
         procedure btnLbuUpdateClick(Sender: TObject);
+        procedure Action_TurnRowHighlightClick(Sender: TObject);
+        procedure CommonPopupMenuPopup(Sender: TObject);
     private
         var FAllowClose:      boolean;
         var FStartTime:       TTime;
@@ -915,6 +918,7 @@ type
         function  GetCoCode(CoPos: integer; GroupId: string): string;
 
         // Other helpers
+        procedure TurnRowHighlight(Grid: TStringGrid; MenuItem: TMenuItem);
         procedure SwitchTimers(State: TCommon.TTimers);
         function  Explode(Text: string; SourceDelim: char): string;
         function  Implode(Text: TStrings; TargetDelim: char): string;
@@ -1583,6 +1587,25 @@ begin
             TargetGrid.Cells[TargetColumn, 2]:=TNaVariants.NA;
             TargetGrid.Cells[TargetColumn, 3]:=TNaVariants.NA;
         end;
+    end;
+
+end;
+
+
+procedure TMainForm.TurnRowHighlight(Grid: TStringGrid; MenuItem: TMenuItem);
+begin
+
+    if MenuItem.Checked then
+    begin
+        Grid.Options:=Grid.Options - [goRowSelect];
+        Grid.Options:=Grid.Options + [goRangeSelect];
+        MenuItem.Checked:=False;
+    end
+    else
+    begin
+        Grid.Options:=Grid.Options + [goRowSelect];
+        Grid.Options:=Grid.Options - [goRangeSelect];
+        MenuItem.Checked:=True;
     end;
 
 end;
@@ -3054,9 +3077,11 @@ end;
 // ------------------------------------------------------------------------------------------------------------------------------------- COMMON MENU ACTIONS //
 
 
-/// <summary>
-/// Export entire grid content to CSV file.
-/// </summary>
+procedure TMainForm.CommonPopupMenuPopup(Sender: TObject);
+begin
+    // Unused
+end;
+
 
 procedure TMainForm.Action_ExportTransactionsClick(Sender: TObject);
 begin
@@ -3079,10 +3104,6 @@ begin
 end;
 
 
-/// <summary>
-/// Select all items on focused string grid.
-/// </summary>
-
 procedure TMainForm.Action_SelectAllClick(Sender: TObject);
 begin
 
@@ -3103,10 +3124,6 @@ begin
 
 end;
 
-
-/// <summary>
-/// Copy to clipboard selected cells on focused string grid.
-/// </summary>
 
 procedure TMainForm.Action_CopyToCBClick(Sender: TObject);
 begin
@@ -3129,10 +3146,6 @@ begin
 end;
 
 
-/// <summary>
-/// Set column width.
-/// </summary>
-
 procedure TMainForm.Action_AutoColumnClick(Sender: TObject);
 begin
 
@@ -3151,6 +3164,12 @@ begin
     // String grid placed on action view
     if ActionsForm.OpenItemsGrid.Focused then ActionsForm.OpenItemsGrid.SetColWidth(10, 20, 400);
 
+end;
+
+
+procedure TMainForm.Action_TurnRowHighlightClick(Sender: TObject);
+begin
+    TurnRowHighlight(ActionsForm.OpenItemsGrid, Action_TurnRowHighlight);
 end;
 
 
@@ -4130,18 +4149,7 @@ end;
 
 procedure TMainForm.Action_RowHighlightClick(Sender: TObject);
 begin
-    if Action_RowHighlight.Checked then
-    begin
-        sgAgeView.Options:=sgAgeView.Options - [goRowSelect];
-        sgAgeView.Options:=sgAgeView.Options + [goRangeSelect];
-        Action_RowHighlight.Checked:=False;
-    end
-    else
-    begin
-        sgAgeView.Options:=sgAgeView.Options + [goRowSelect];
-        sgAgeView.Options:=sgAgeView.Options - [goRangeSelect];
-        Action_RowHighlight.Checked:=True;
-    end;
+    TurnRowHighlight(sgAgeView, Action_RowHighlight);
 end;
 
 

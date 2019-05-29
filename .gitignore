@@ -8,8 +8,14 @@ __recovery/
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
-[Ww]in64/
-[Ww]in32/
+[Ww]in32/*.zip
+[Ww]in32/[Bb]in/
+[Ww]in32/[Dd]ebug/
+[Ww]in32/[Rr]elease/
+[Ww]in64/*.zip
+[Ww]in64/[Bb]in/
+[Ww]in64/[Dd]ebug/
+[Ww]in64/[Rr]elease/
 x64/
 x86/
 bld/

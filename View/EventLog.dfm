@@ -16,7 +16,6 @@ object EventForm: TEventForm
   KeyPreview = True
   OldCreateOrder = False
   Position = poMainFormCenter
-  Scaled = False
   OnCreate = FormCreate
   OnKeyPress = FormKeyPress
   OnKeyUp = FormKeyUp
