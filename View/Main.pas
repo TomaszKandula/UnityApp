@@ -260,7 +260,7 @@ type
         procRISKB: TLabel;
         procRISKC: TLabel;
         Text36: TLabel;
-        GroupName: TLabel;
+        DataUpdated: TLabel;
         btnMakeGroup: TImage;
         Text83L1: TLabel;
         Text83L2: TLabel;
@@ -1413,7 +1413,7 @@ end;
 procedure TMainForm.SetSettingsPanel(IsLocked: boolean);
 begin
 
-    if not IsLocked then
+    if IsLocked then
     begin
         // Visibility on
         imgOFF.Visible:=True;
@@ -2482,7 +2482,7 @@ begin
     var Settings: ISettings:=TSettings.Create;
     try
         MainForm.Caption :=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'WND_MAIN', TUnityApp.APPCAPTION);
-        GroupName.Caption:=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'GROUP_NAME', 'n/a');
+        DataUpdated.Caption:='';
 
         WinUserName :=Settings.GetWinUserName;
         EventLogPath:=Settings.GetPathEventLog;
@@ -2866,7 +2866,6 @@ begin
         ChromiumWindow.CloseBrowser(True);
 
         ExecMessage(False, TMessaging.msStatusBar, 'Ending session...');
-        CurrentEvents:=CurrentEvents + '# -- SESSION END --';
 
         // Update user event log in database
         var UserLogs: TDataTables:=TDataTables.Create(DbConnect);
@@ -6916,10 +6915,6 @@ begin
 end;
 
 
-/// <summary>
-///
-/// </summary>
-
 procedure TMainForm.btnFscApproveClick(Sender: TObject);
 begin
 
@@ -6934,10 +6929,6 @@ begin
 end;
 
 
-/// <summary>
-///
-/// </summary>
-
 procedure TMainForm.btnFscRejectClick(Sender: TObject);
 begin
 
@@ -6951,10 +6942,6 @@ begin
 
 end;
 
-
-/// <summary>
-///
-/// </summary>
 
 procedure TMainForm.btnLbuUpdateClick(Sender: TObject);
 begin

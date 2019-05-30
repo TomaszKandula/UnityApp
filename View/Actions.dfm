@@ -20,6 +20,7 @@ object ActionsForm: TActionsForm
   OnCloseQuery = FormCloseQuery
   OnCreate = FormCreate
   OnDestroy = FormDestroy
+  OnKeyDown = FormKeyDown
   OnKeyPress = FormKeyPress
   OnShow = FormShow
   PixelsPerInch = 96
@@ -34,7 +35,6 @@ object ActionsForm: TActionsForm
     Color = 15527148
     ParentBackground = False
     TabOrder = 0
-    ExplicitWidth = 1261
     object PanelActions: TPanel
       AlignWithMargins = True
       Left = 10
@@ -50,7 +50,6 @@ object ActionsForm: TActionsForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 2
-      ExplicitWidth = 1241
       object btnAutoStatement: TSpeedButton
         AlignWithMargins = True
         Left = 614
@@ -1500,7 +1499,6 @@ object ActionsForm: TActionsForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 0
-      ExplicitWidth = 1261
       object Text: TLabel
         Left = 14
         Top = 9
@@ -1538,7 +1536,6 @@ object ActionsForm: TActionsForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 3
-      ExplicitWidth = 903
       object GroupDetails: TGroupBox
         AlignWithMargins = True
         Left = 10
@@ -1552,67 +1549,67 @@ object ActionsForm: TActionsForm
         Align = alClient
         Caption = 'Details'
         TabOrder = 0
-        ExplicitWidth = 883
+        ExplicitLeft = 18
         object zText1: TLabel
-          Left = 11
-          Top = 32
+          Left = 19
+          Top = 28
           Width = 80
           Height = 13
           Caption = 'Customer Name:'
         end
         object zText2: TLabel
-          Left = 11
-          Top = 60
+          Left = 19
+          Top = 57
           Width = 90
           Height = 13
           Caption = 'Customer Number:'
         end
         object zText7: TLabel
-          Left = 416
-          Top = 32
+          Left = 19
+          Top = 144
           Width = 78
           Height = 13
           Caption = 'Contact Person:'
         end
         object zText8: TLabel
-          Left = 416
-          Top = 60
+          Left = 19
+          Top = 115
           Width = 133
           Height = 13
           Caption = 'E-Mail address (statement):'
         end
         object zText3: TLabel
-          Left = 11
-          Top = 89
+          Left = 19
+          Top = 173
           Width = 86
           Height = 13
           Caption = 'Phone number(s):'
         end
         object Cust_MailBack: TShape
-          Left = 564
-          Top = 56
+          Left = 167
+          Top = 111
           Width = 279
           Height = 21
           Pen.Color = 15527148
         end
         object Cust_PersonBack: TShape
-          Left = 564
-          Top = 28
+          Left = 167
+          Top = 140
           Width = 279
           Height = 21
           Pen.Color = 15527148
         end
         object Cust_NumberBack: TShape
-          Left = 111
-          Top = 56
-          Width = 261
+          Left = 167
+          Top = 53
+          Width = 279
           Height = 21
           Pen.Color = 15527148
         end
         object Cust_Number: TLabel
-          Left = 117
-          Top = 60
-          Width = 250
+          Left = 172
+          Top = 57
+          Width = 261
           Height = 13
           AutoSize = False
           Caption = '{data}'
@@ -1630,16 +1627,16 @@ object ActionsForm: TActionsForm
           Layout = tlCenter
         end
         object Cust_NameBack: TShape
-          Left = 111
-          Top = 28
-          Width = 261
+          Left = 167
+          Top = 24
+          Width = 279
           Height = 21
           Pen.Color = 15527148
         end
         object Cust_Name: TLabel
-          Left = 117
-          Top = 32
-          Width = 250
+          Left = 172
+          Top = 28
+          Width = 261
           Height = 13
           Hint = 'Copy to Clipboard'
           AutoSize = False
@@ -1659,16 +1656,15 @@ object ActionsForm: TActionsForm
         end
         object btnEdit: TSpeedButton
           AlignWithMargins = True
-          Left = 280
-          Top = 81
-          Width = 68
+          Left = 326
+          Top = 168
+          Width = 30
           Height = 27
           Cursor = crHandPoint
           Margins.Left = 0
           Margins.Top = 0
           Margins.Right = 0
           Margins.Bottom = 0
-          Caption = 'Edit'
           Flat = True
           Glyph.Data = {
             36030000424D3603000000000000360000002800000010000000100000000100
@@ -1701,8 +1697,8 @@ object ActionsForm: TActionsForm
           OnClick = btnEditClick
         end
         object btnCopyCustName: TSpeedButton
-          Left = 378
-          Top = 28
+          Left = 452
+          Top = 24
           Width = 21
           Height = 21
           Cursor = crHandPoint
@@ -1740,8 +1736,8 @@ object ActionsForm: TActionsForm
           OnClick = btnCopyCustNameClick
         end
         object btnCopyCustNumber: TSpeedButton
-          Left = 378
-          Top = 56
+          Left = 452
+          Top = 53
           Width = 21
           Height = 21
           Cursor = crHandPoint
@@ -1779,8 +1775,8 @@ object ActionsForm: TActionsForm
           OnClick = btnCopyCustNumberClick
         end
         object btnCopyPerson: TSpeedButton
-          Left = 849
-          Top = 28
+          Left = 452
+          Top = 140
           Width = 21
           Height = 21
           Cursor = crHandPoint
@@ -1818,8 +1814,8 @@ object ActionsForm: TActionsForm
           OnClick = btnCopyPersonClick
         end
         object btnCopyEmail: TSpeedButton
-          Left = 849
-          Top = 56
+          Left = 452
+          Top = 111
           Width = 21
           Height = 21
           Cursor = crHandPoint
@@ -1857,22 +1853,22 @@ object ActionsForm: TActionsForm
           OnClick = btnCopyEmailClick
         end
         object zText9: TLabel
-          Left = 416
-          Top = 89
+          Left = 19
+          Top = 86
           Width = 120
           Height = 13
           Caption = 'E-Mail address (general):'
         end
         object Cust_MailGeneralBack: TShape
-          Left = 564
-          Top = 85
+          Left = 167
+          Top = 82
           Width = 279
           Height = 21
           Pen.Color = 15527148
         end
         object btnCopyGeneralMail: TSpeedButton
-          Left = 849
-          Top = 85
+          Left = 452
+          Top = 82
           Width = 21
           Height = 21
           Cursor = crHandPoint
@@ -1909,488 +1905,9 @@ object ActionsForm: TActionsForm
           ShowHint = True
           OnClick = btnCopyGeneralMailClick
         end
-        object zText4: TLabel
-          Left = 11
-          Top = 119
-          Width = 51
-          Height = 13
-          Caption = 'LBU name:'
-        end
-        object zText5: TLabel
-          Left = 11
-          Top = 147
-          Width = 63
-          Height = 13
-          Caption = 'LBU address:'
-        end
-        object zText6: TLabel
-          Left = 11
-          Top = 175
-          Width = 68
-          Height = 13
-          Caption = 'LBU phone(s):'
-        end
-        object Lbu_NameBack: TShape
-          Left = 111
-          Top = 115
-          Width = 261
-          Height = 21
-          Pen.Color = 15527148
-        end
-        object Lbu_AddressBack: TShape
-          Left = 111
-          Top = 143
-          Width = 261
-          Height = 21
-          Pen.Color = 15527148
-        end
-        object Lbu_PhoneBack: TShape
-          Left = 111
-          Top = 171
-          Width = 261
-          Height = 21
-          Pen.Color = 15527148
-        end
-        object zText10: TLabel
-          Left = 416
-          Top = 119
-          Width = 45
-          Height = 13
-          Caption = 'Co Code:'
-        end
-        object zText11: TLabel
-          Left = 416
-          Top = 147
-          Width = 114
-          Height = 13
-          Caption = 'Sending e-mail address:'
-        end
-        object zText12: TLabel
-          Left = 416
-          Top = 175
-          Width = 114
-          Height = 13
-          Caption = 'CUID / SCUID numbers:'
-        end
-        object Lbu_CoCodeBack: TShape
-          Left = 564
-          Top = 115
-          Width = 279
-          Height = 21
-          Pen.Color = 15527148
-        end
-        object Lbu_SendFromBack: TShape
-          Left = 564
-          Top = 143
-          Width = 279
-          Height = 21
-          Pen.Color = 15527148
-        end
-        object CUID_LabelBack: TShape
-          Left = 564
-          Top = 171
-          Width = 141
-          Height = 21
-          Pen.Color = 15527148
-        end
-        object zText13: TLabel
-          Left = 714
-          Top = 175
-          Width = 4
-          Height = 13
-          Caption = '/'
-        end
-        object SCUID_LabelBack: TShape
-          Left = 727
-          Top = 171
-          Width = 116
-          Height = 21
-          Pen.Color = 15527148
-        end
-        object Lbu_Name: TLabel
-          Left = 117
-          Top = 119
-          Width = 250
-          Height = 13
-          Hint = 'Copy to Clipboard'
-          AutoSize = False
-          Caption = '{data}'
-          Color = clWhite
-          Font.Charset = DEFAULT_CHARSET
-          Font.Color = clWindowText
-          Font.Height = -11
-          Font.Name = 'Tahoma'
-          Font.Style = [fsBold]
-          ParentColor = False
-          ParentFont = False
-          ParentShowHint = False
-          ShowHint = True
-          Transparent = False
-          Layout = tlCenter
-        end
-        object Lbu_Address: TLabel
-          Left = 117
-          Top = 147
-          Width = 250
-          Height = 13
-          Hint = 'Copy to Clipboard'
-          AutoSize = False
-          Caption = '{data}'
-          Color = clWhite
-          Font.Charset = DEFAULT_CHARSET
-          Font.Color = clWindowText
-          Font.Height = -11
-          Font.Name = 'Tahoma'
-          Font.Style = [fsBold]
-          ParentColor = False
-          ParentFont = False
-          ParentShowHint = False
-          ShowHint = True
-          Transparent = False
-          Layout = tlCenter
-        end
-        object Lbu_Phone: TLabel
-          Left = 117
-          Top = 175
-          Width = 250
-          Height = 13
-          Hint = 'Copy to Clipboard'
-          AutoSize = False
-          Caption = '{data}'
-          Color = clWhite
-          Font.Charset = DEFAULT_CHARSET
-          Font.Color = clWindowText
-          Font.Height = -11
-          Font.Name = 'Tahoma'
-          Font.Style = [fsBold]
-          ParentColor = False
-          ParentFont = False
-          ParentShowHint = False
-          ShowHint = True
-          Transparent = False
-          Layout = tlCenter
-        end
-        object Lbu_CoCode: TLabel
-          Left = 569
-          Top = 119
-          Width = 261
-          Height = 13
-          Hint = 'Copy to Clipboard'
-          AutoSize = False
-          Caption = '{data}'
-          Color = clWhite
-          Font.Charset = DEFAULT_CHARSET
-          Font.Color = clWindowText
-          Font.Height = -11
-          Font.Name = 'Tahoma'
-          Font.Style = [fsBold]
-          ParentColor = False
-          ParentFont = False
-          ParentShowHint = False
-          ShowHint = True
-          Transparent = False
-          Layout = tlCenter
-        end
-        object Lbu_SendFrom: TLabel
-          Left = 569
-          Top = 147
-          Width = 261
-          Height = 13
-          Hint = 'Copy to Clipboard'
-          AutoSize = False
-          Caption = '{data}'
-          Color = clWhite
-          Font.Charset = DEFAULT_CHARSET
-          Font.Color = clWindowText
-          Font.Height = -11
-          Font.Name = 'Tahoma'
-          Font.Style = [fsBold]
-          ParentColor = False
-          ParentFont = False
-          ParentShowHint = False
-          ShowHint = True
-          Transparent = False
-          Layout = tlCenter
-        end
-        object CUID_Label: TLabel
-          Left = 569
-          Top = 175
-          Width = 125
-          Height = 13
-          Hint = 'Copy to Clipboard'
-          AutoSize = False
-          Caption = '{data}'
-          Color = clWhite
-          Font.Charset = DEFAULT_CHARSET
-          Font.Color = clWindowText
-          Font.Height = -11
-          Font.Name = 'Tahoma'
-          Font.Style = [fsBold]
-          ParentColor = False
-          ParentFont = False
-          ParentShowHint = False
-          ShowHint = True
-          Transparent = False
-          Layout = tlCenter
-        end
-        object SCUID_Label: TLabel
-          Left = 732
-          Top = 175
-          Width = 101
-          Height = 13
-          Hint = 'Copy to Clipboard'
-          AutoSize = False
-          Caption = '{data}'
-          Color = clWhite
-          Font.Charset = DEFAULT_CHARSET
-          Font.Color = clWindowText
-          Font.Height = -11
-          Font.Name = 'Tahoma'
-          Font.Style = [fsBold]
-          ParentColor = False
-          ParentFont = False
-          ParentShowHint = False
-          ShowHint = True
-          Transparent = False
-          Layout = tlCenter
-        end
-        object btnCopyLbuName: TSpeedButton
-          Left = 378
-          Top = 115
-          Width = 21
-          Height = 21
-          Cursor = crHandPoint
-          Hint = 'Copy to Clipboard'
-          Flat = True
-          Glyph.Data = {
-            36030000424D3603000000000000360000002800000010000000100000000100
-            18000000000000030000C30E0000C30E00000000000000000000FFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF72
-            7272727272727272727272727272727272727272727272727272FFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFF727272FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF72
-            7272FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFF727272
-            727272727272727272727272FFFFFF727272FFFFFFB17D4AB17D4AB17D4AB17D
-            4AB17D4AFFFFFF727272FFFFFF727272FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF72
-            7272FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFF727272
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFFB17D4AB17D4AB17D4AB17D
-            4AB17D4AFFFFFF727272FFFFFF727272FFFFFFB17D4AB17D4AB17D4AFFFFFF72
-            7272FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFF727272
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFFB17D4AB17D4AFFFFFF7272
-            72727272727272727272FFFFFF727272FFFFFFB17D4AB17D4AB17D4AFFFFFF72
-            7272FFFFFFFFFFFFFFFFFFFFFFFF727272D6D6D67D7D7DE0E0E0FFFFFF727272
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFFFFFFFFFFFFFFFFFFFF7272
-            727D7D7DE0E0E0FFFFFFFFFFFF727272FFFFFFB17D4AB17D4AFFFFFFFFFFFF72
-            7272727272727272727272727272727272E0E0E0FFFFFFFFFFFFFFFFFF727272
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFFFFFFFFFFFFFFFFFFFF7272727D
-            7D7DE0E0E0FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272
-            727272727272727272727272727272E0E0E0FFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
-          ParentShowHint = False
-          ShowHint = True
-          OnClick = btnCopyLbuNameClick
-        end
-        object btnCopyLbuAddress: TSpeedButton
-          Left = 378
-          Top = 143
-          Width = 21
-          Height = 21
-          Cursor = crHandPoint
-          Hint = 'Copy to Clipboard'
-          Flat = True
-          Glyph.Data = {
-            36030000424D3603000000000000360000002800000010000000100000000100
-            18000000000000030000C30E0000C30E00000000000000000000FFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF72
-            7272727272727272727272727272727272727272727272727272FFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFF727272FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF72
-            7272FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFF727272
-            727272727272727272727272FFFFFF727272FFFFFFB17D4AB17D4AB17D4AB17D
-            4AB17D4AFFFFFF727272FFFFFF727272FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF72
-            7272FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFF727272
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFFB17D4AB17D4AB17D4AB17D
-            4AB17D4AFFFFFF727272FFFFFF727272FFFFFFB17D4AB17D4AB17D4AFFFFFF72
-            7272FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFF727272
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFFB17D4AB17D4AFFFFFF7272
-            72727272727272727272FFFFFF727272FFFFFFB17D4AB17D4AB17D4AFFFFFF72
-            7272FFFFFFFFFFFFFFFFFFFFFFFF727272D6D6D67D7D7DE0E0E0FFFFFF727272
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFFFFFFFFFFFFFFFFFFFF7272
-            727D7D7DE0E0E0FFFFFFFFFFFF727272FFFFFFB17D4AB17D4AFFFFFFFFFFFF72
-            7272727272727272727272727272727272E0E0E0FFFFFFFFFFFFFFFFFF727272
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFFFFFFFFFFFFFFFFFFFF7272727D
-            7D7DE0E0E0FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272
-            727272727272727272727272727272E0E0E0FFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
-          ParentShowHint = False
-          ShowHint = True
-          OnClick = btnCopyLbuAddressClick
-        end
-        object btnCopyLbuPhone: TSpeedButton
-          Left = 378
-          Top = 171
-          Width = 21
-          Height = 21
-          Cursor = crHandPoint
-          Hint = 'Copy to Clipboard'
-          Flat = True
-          Glyph.Data = {
-            36030000424D3603000000000000360000002800000010000000100000000100
-            18000000000000030000C30E0000C30E00000000000000000000FFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF72
-            7272727272727272727272727272727272727272727272727272FFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFF727272FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF72
-            7272FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFF727272
-            727272727272727272727272FFFFFF727272FFFFFFB17D4AB17D4AB17D4AB17D
-            4AB17D4AFFFFFF727272FFFFFF727272FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF72
-            7272FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFF727272
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFFB17D4AB17D4AB17D4AB17D
-            4AB17D4AFFFFFF727272FFFFFF727272FFFFFFB17D4AB17D4AB17D4AFFFFFF72
-            7272FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFF727272
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFFB17D4AB17D4AFFFFFF7272
-            72727272727272727272FFFFFF727272FFFFFFB17D4AB17D4AB17D4AFFFFFF72
-            7272FFFFFFFFFFFFFFFFFFFFFFFF727272D6D6D67D7D7DE0E0E0FFFFFF727272
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFFFFFFFFFFFFFFFFFFFF7272
-            727D7D7DE0E0E0FFFFFFFFFFFF727272FFFFFFB17D4AB17D4AFFFFFFFFFFFF72
-            7272727272727272727272727272727272E0E0E0FFFFFFFFFFFFFFFFFF727272
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFFFFFFFFFFFFFFFFFFFF7272727D
-            7D7DE0E0E0FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272
-            727272727272727272727272727272E0E0E0FFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
-          ParentShowHint = False
-          ShowHint = True
-          OnClick = btnCopyLbuPhoneClick
-        end
-        object btnCopyCoCode: TSpeedButton
-          Left = 849
-          Top = 115
-          Width = 21
-          Height = 21
-          Cursor = crHandPoint
-          Hint = 'Copy to Clipboard'
-          Flat = True
-          Glyph.Data = {
-            36030000424D3603000000000000360000002800000010000000100000000100
-            18000000000000030000C30E0000C30E00000000000000000000FFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF72
-            7272727272727272727272727272727272727272727272727272FFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFF727272FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF72
-            7272FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFF727272
-            727272727272727272727272FFFFFF727272FFFFFFB17D4AB17D4AB17D4AB17D
-            4AB17D4AFFFFFF727272FFFFFF727272FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF72
-            7272FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFF727272
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFFB17D4AB17D4AB17D4AB17D
-            4AB17D4AFFFFFF727272FFFFFF727272FFFFFFB17D4AB17D4AB17D4AFFFFFF72
-            7272FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFF727272
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFFB17D4AB17D4AFFFFFF7272
-            72727272727272727272FFFFFF727272FFFFFFB17D4AB17D4AB17D4AFFFFFF72
-            7272FFFFFFFFFFFFFFFFFFFFFFFF727272D6D6D67D7D7DE0E0E0FFFFFF727272
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFFFFFFFFFFFFFFFFFFFF7272
-            727D7D7DE0E0E0FFFFFFFFFFFF727272FFFFFFB17D4AB17D4AFFFFFFFFFFFF72
-            7272727272727272727272727272727272E0E0E0FFFFFFFFFFFFFFFFFF727272
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFFFFFFFFFFFFFFFFFFFF7272727D
-            7D7DE0E0E0FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272
-            727272727272727272727272727272E0E0E0FFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
-          ParentShowHint = False
-          ShowHint = True
-          OnClick = btnCopyCoCodeClick
-        end
-        object btnCopySendFrom: TSpeedButton
-          Left = 849
-          Top = 143
-          Width = 21
-          Height = 21
-          Cursor = crHandPoint
-          Hint = 'Copy to Clipboard'
-          Flat = True
-          Glyph.Data = {
-            36030000424D3603000000000000360000002800000010000000100000000100
-            18000000000000030000C30E0000C30E00000000000000000000FFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF72
-            7272727272727272727272727272727272727272727272727272FFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFF727272FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF72
-            7272FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFF727272
-            727272727272727272727272FFFFFF727272FFFFFFB17D4AB17D4AB17D4AB17D
-            4AB17D4AFFFFFF727272FFFFFF727272FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF72
-            7272FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFF727272
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFFB17D4AB17D4AB17D4AB17D
-            4AB17D4AFFFFFF727272FFFFFF727272FFFFFFB17D4AB17D4AB17D4AFFFFFF72
-            7272FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFF727272
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFFB17D4AB17D4AFFFFFF7272
-            72727272727272727272FFFFFF727272FFFFFFB17D4AB17D4AB17D4AFFFFFF72
-            7272FFFFFFFFFFFFFFFFFFFFFFFF727272D6D6D67D7D7DE0E0E0FFFFFF727272
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFFFFFFFFFFFFFFFFFFFF7272
-            727D7D7DE0E0E0FFFFFFFFFFFF727272FFFFFFB17D4AB17D4AFFFFFFFFFFFF72
-            7272727272727272727272727272727272E0E0E0FFFFFFFFFFFFFFFFFF727272
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFFFFFFFFFFFFFFFFFFFF7272727D
-            7D7DE0E0E0FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272
-            727272727272727272727272727272E0E0E0FFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
-          ParentShowHint = False
-          ShowHint = True
-          OnClick = btnCopySendFromClick
-        end
-        object btnCopyUID: TSpeedButton
-          Left = 849
-          Top = 171
-          Width = 21
-          Height = 21
-          Cursor = crHandPoint
-          Hint = 'Copy to Clipboard'
-          Flat = True
-          Glyph.Data = {
-            36030000424D3603000000000000360000002800000010000000100000000100
-            18000000000000030000C30E0000C30E00000000000000000000FFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF72
-            7272727272727272727272727272727272727272727272727272FFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFF727272FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF72
-            7272FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFF727272
-            727272727272727272727272FFFFFF727272FFFFFFB17D4AB17D4AB17D4AB17D
-            4AB17D4AFFFFFF727272FFFFFF727272FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF72
-            7272FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFF727272
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFFB17D4AB17D4AB17D4AB17D
-            4AB17D4AFFFFFF727272FFFFFF727272FFFFFFB17D4AB17D4AB17D4AFFFFFF72
-            7272FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFF727272
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFFB17D4AB17D4AFFFFFF7272
-            72727272727272727272FFFFFF727272FFFFFFB17D4AB17D4AB17D4AFFFFFF72
-            7272FFFFFFFFFFFFFFFFFFFFFFFF727272D6D6D67D7D7DE0E0E0FFFFFF727272
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFFFFFFFFFFFFFFFFFFFF7272
-            727D7D7DE0E0E0FFFFFFFFFFFF727272FFFFFFB17D4AB17D4AFFFFFFFFFFFF72
-            7272727272727272727272727272727272E0E0E0FFFFFFFFFFFFFFFFFF727272
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFF727272FFFFFFFFFFFFFFFFFFFFFFFF7272727D
-            7D7DE0E0E0FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF727272
-            727272727272727272727272727272E0E0E0FFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-            FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
-          ParentShowHint = False
-          ShowHint = True
-          OnClick = btnCopyUIDClick
-        end
         object Cust_Mail: TEdit
-          Left = 569
-          Top = 60
+          Left = 172
+          Top = 115
           Width = 261
           Height = 13
           TabStop = False
@@ -2409,8 +1926,8 @@ object ActionsForm: TActionsForm
           OnMouseEnter = Cust_MailMouseEnter
         end
         object Cust_Person: TEdit
-          Left = 569
-          Top = 32
+          Left = 172
+          Top = 144
           Width = 261
           Height = 13
           TabStop = False
@@ -2429,9 +1946,9 @@ object ActionsForm: TActionsForm
           OnMouseEnter = Cust_PersonMouseEnter
         end
         object Cust_Phone: TComboBox
-          Left = 111
-          Top = 85
-          Width = 156
+          Left = 167
+          Top = 169
+          Width = 146
           Height = 22
           Cursor = crHandPoint
           BevelInner = bvLowered
@@ -2448,8 +1965,8 @@ object ActionsForm: TActionsForm
             '{data}')
         end
         object Cust_MailGeneral: TEdit
-          Left = 569
-          Top = 89
+          Left = 172
+          Top = 86
           Width = 261
           Height = 13
           TabStop = False
@@ -2466,6 +1983,78 @@ object ActionsForm: TActionsForm
           TabOrder = 2
           Text = '{data}'
           OnMouseEnter = Cust_MailGeneralMouseEnter
+        end
+        object GroupOpenItems: TGroupBox
+          Left = 517
+          Top = 24
+          Width = 341
+          Height = 81
+          Caption = 'Total Open Items'
+          TabOrder = 4
+          object LabelOpenAm: TLabel
+            Left = 24
+            Top = 30
+            Width = 76
+            Height = 13
+            Caption = 'Unpaid amount:'
+          end
+          object LabelAmount: TLabel
+            Left = 24
+            Top = 49
+            Width = 71
+            Height = 13
+            Caption = 'Issued amount'
+          end
+          object ValueOpenAm: TLabel
+            Left = 120
+            Top = 30
+            Width = 62
+            Height = 13
+            Caption = '{OpenAm}'
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -11
+            Font.Name = 'Tahoma'
+            Font.Style = [fsBold]
+            ParentFont = False
+          end
+          object ValueAmount: TLabel
+            Left = 120
+            Top = 49
+            Width = 59
+            Height = 13
+            Caption = '{Amount}'
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -11
+            Font.Name = 'Tahoma'
+            Font.Style = [fsBold]
+            ParentFont = False
+          end
+        end
+        object GroupEmails: TGroupBox
+          Left = 517
+          Top = 109
+          Width = 341
+          Height = 81
+          Caption = 'E-mails'
+          TabOrder = 5
+          object cbUserInCopy: TCheckBox
+            Left = 24
+            Top = 29
+            Width = 145
+            Height = 17
+            Caption = 'Include me in the copy'
+            TabOrder = 0
+          end
+          object cbCtrlStatusOff: TCheckBox
+            Left = 24
+            Top = 52
+            Width = 185
+            Height = 17
+            Caption = 'Hide control status column'
+            TabOrder = 1
+          end
         end
       end
     end
@@ -2484,7 +2073,6 @@ object ActionsForm: TActionsForm
       Color = 15527148
       ParentBackground = False
       TabOrder = 4
-      ExplicitLeft = 921
       object DailyPanel: TPanel
         AlignWithMargins = True
         Left = 0

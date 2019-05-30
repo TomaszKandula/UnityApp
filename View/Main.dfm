@@ -1193,7 +1193,7 @@ object MainForm: TMainForm
     Margins.Top = 0
     Margins.Right = 10
     Margins.Bottom = 0
-    ActivePage = TabSheet1
+    ActivePage = TabSheet8
     Align = alClient
     DoubleBuffered = True
     Font.Charset = DEFAULT_CHARSET
@@ -1524,9 +1524,9 @@ object MainForm: TMainForm
           object Text36: TLabel
             Left = 16
             Top = 63
-            Width = 62
+            Width = 70
             Height = 13
-            Caption = 'Group name:'
+            Caption = 'Data updated:'
             Font.Charset = DEFAULT_CHARSET
             Font.Color = clBlack
             Font.Height = -11
@@ -1534,7 +1534,7 @@ object MainForm: TMainForm
             Font.Style = []
             ParentFont = False
           end
-          object GroupName: TLabel
+          object DataUpdated: TLabel
             Left = 114
             Top = 63
             Width = 20

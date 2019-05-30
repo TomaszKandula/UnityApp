@@ -143,13 +143,13 @@ begin
         ValEndDate.Caption,
         ActionsForm.OpenItemsGrid,
         ActionsForm.CUID,
-        ActionsForm.Lbu_SendFrom.Caption,
+        ActionsForm.LbuSendFrom,
         ActionsForm.Cust_Mail.Text,
         ActionsForm.CustName,
         ActionsForm.CustNumber,
-        ActionsForm.Lbu_Name.Caption,
-        ActionsForm.Lbu_Address.Caption,
-        ActionsForm.Lbu_Phone.Caption,
+        ActionsForm.LbuName,
+        ActionsForm.LbuAddress,
+        ActionsForm.LbuPhone,
         ActionsForm.BanksHtml
     );
 

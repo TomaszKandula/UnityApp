@@ -91,33 +91,6 @@ type
         DailyComBorders: TShape;
         GeneralComBorders: TShape;
         PanelComments: TPanel;
-        zText4: TLabel;
-        zText5: TLabel;
-        zText6: TLabel;
-        Lbu_NameBack: TShape;
-        Lbu_AddressBack: TShape;
-        Lbu_PhoneBack: TShape;
-        zText10: TLabel;
-        zText11: TLabel;
-        zText12: TLabel;
-        Lbu_CoCodeBack: TShape;
-        Lbu_SendFromBack: TShape;
-        CUID_LabelBack: TShape;
-        zText13: TLabel;
-        SCUID_LabelBack: TShape;
-        Lbu_Name: TLabel;
-        Lbu_Address: TLabel;
-        Lbu_Phone: TLabel;
-        Lbu_CoCode: TLabel;
-        Lbu_SendFrom: TLabel;
-        CUID_Label: TLabel;
-        SCUID_Label: TLabel;
-        btnCopyLbuName: TSpeedButton;
-        btnCopyLbuAddress: TSpeedButton;
-        btnCopyLbuPhone: TSpeedButton;
-        btnCopyCoCode: TSpeedButton;
-        btnCopySendFrom: TSpeedButton;
-        btnCopyUID: TSpeedButton;
         SepLine1: TBevel;
         SepLine3: TBevel;
         SepLine2: TBevel;
@@ -127,6 +100,14 @@ type
         ItemDesc: TLabel;
         imgInfo: TImage;
         imgCoverSaveBtn: TImage;
+        GroupOpenItems: TGroupBox;
+        LabelOpenAm: TLabel;
+        LabelAmount: TLabel;
+        ValueOpenAm: TLabel;
+        ValueAmount: TLabel;
+        GroupEmails: TGroupBox;
+        cbUserInCopy: TCheckBox;
+        cbCtrlStatusOff: TCheckBox;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
@@ -168,12 +149,6 @@ type
         procedure GeneralComMouseEnter(Sender: TObject);
         procedure DailyComKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure GeneralComKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-        procedure btnCopyCoCodeClick(Sender: TObject);
-        procedure btnCopySendFromClick(Sender: TObject);
-        procedure btnCopyUIDClick(Sender: TObject);
-        procedure btnCopyLbuNameClick(Sender: TObject);
-        procedure btnCopyLbuAddressClick(Sender: TObject);
-        procedure btnCopyLbuPhoneClick(Sender: TObject);
         procedure btnLogMissingInvClick(Sender: TObject);
         procedure btnLogNowClick(Sender: TObject);
         procedure btnBackMouseEnter(Sender: TObject);
@@ -196,6 +171,7 @@ type
         procedure btnCallCustomerMouseLeave(Sender: TObject);
         procedure btnSaveCustDetailsMouseEnter(Sender: TObject);
         procedure btnSaveCustDetailsMouseLeave(Sender: TObject);
+    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     protected
         var SrcColumns:  TAIntigers;
     private
@@ -213,7 +189,11 @@ type
         var FCoCode:       string;
         var FCustName:     string;
         var FCustNumber:   string;
-        procedure GetData;
+        var FLbuName:      string;
+        var FLbuAddress:   string;
+        var FLbuPhone:     string;
+        var FLbuSendFrom:  string;
+        procedure GetAndDisplay;
         function  GetRunningApps(SearchName: string): boolean;
         procedure UpdateOpenItems(OpenItemsDest, OpenItemsSrc: TStringGrid);
         procedure UpdateDetails(CustPerson: TEdit; CustMail: TEdit; CustMailGen: TEdit; CustPhone: TComboBox);
@@ -238,6 +218,10 @@ type
         property CoCode:       string read FCoCode;
         property CustName:     string read FCustName;
         property CustNumber:   string read FCustNumber;
+        property LbuName:      string read FLbuName;
+        property LbuAddress:   string read FLbuAddress;
+        property LbuPhone:     string read FLbuPhone;
+        property LbuSendFrom:  string read FLbuSendFrom;
         property BanksHtml:    string read FBanksHtml;
         procedure UpdateHistory(var Grid: TStringGrid);
     end;
@@ -271,23 +255,19 @@ uses
 
 
 function TActionsForm.GetRunningApps(SearchName: string): boolean;
-var
-    PE:        TProcessEntry32;
-    Snap:      THandle;
-    FileName:  string;
 begin
 
     Result:=False;
 
     // Take snapshots of running applications
-    PE.dwSize:=SizeOf(PE);
-    Snap:=CreateToolHelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    var PE: TProcessEntry32; PE.dwSize:=SizeOf(PE);
+    var Snap: THandle:=CreateToolHelp32Snapshot(TH32CS_SNAPPROCESS, 0);
 
     if Snap <> 0 then
     begin
         if Process32First(Snap, PE) then
         begin
-            FileName:=string(PE.szExeFile);
+            var FileName: string:=string(PE.szExeFile);
 
             // Go item by item  and stop if matched
             while Process32Next(Snap, PE) do
@@ -307,7 +287,7 @@ begin
 end;
 
 
-procedure TActionsForm.GetData;
+procedure TActionsForm.GetAndDisplay;
 begin
 
     Screen.Cursor:=crSQLWait;
@@ -317,20 +297,30 @@ begin
     HistoryGrid.ClearAll(2, 1, 1, False);
 
     try
+
         Cust_Name.Caption  :=CustName;
         Cust_Number.Caption:=CustNumber;
+
         UpdateOpenItems(OpenItemsGrid, MainForm.sgOpenItems);
         UpdateDetails(Cust_Person, Cust_Mail, Cust_MailGeneral, Cust_Phone);
         UpdateHistory(HistoryGrid);
         UpdateGeneral(GeneralCom);
+
+        ValueOpenAm.Caption:=FormatFloat('#,##0.00', OpenItemsTotal.OpenAm) + ' ' + MainForm.tcCURRENCY.Caption;
+        ValueAmount.Caption:=FormatFloat('#,##0.00', OpenItemsTotal.Am) + ' ' + MainForm.tcCURRENCY.Caption;
+
     finally
+
         OpenItemsGrid.AutoThumbSize;
         OpenItemsGrid.SetColWidth(10, 20, 400);
         OpenItemsGrid.Freeze(False);
+
         HistoryGrid.AutoThumbSize;
         HistoryGrid.SetColWidth(10, 20, 400);
         HistoryGrid.Freeze(False);
+
         Screen.Cursor:=crDefault;
+
     end;
 
 end;
@@ -421,12 +411,9 @@ end;
 
 
 procedure TActionsForm.UpdateDetails(CustPerson: TEdit; CustMail: TEdit; CustMailGen: TEdit; CustPhone: TComboBox); {refactor / async}
-var
-    Tables: TDataTables;
-    Phones: string;
 begin
 
-    Tables:=TDataTables.Create(MainForm.DbConnect);
+    var Tables: TDataTables:=TDataTables.Create(MainForm.DbConnect);
     try
 
         // Get data from Address Book table
@@ -439,6 +426,9 @@ begin
 
         if Tables.DataSet.RecordCount = 1 then
         begin
+
+            var Phones: string;
+
             CustPerson.Text :=MainForm.OleGetStr(Tables.DataSet.Fields[TAddressBook.Contact].Value);
             CustMailGen.Text:=MainForm.OleGetStr(Tables.DataSet.Fields[TAddressBook.Emails].Value);
             CustMail.Text   :=MainForm.OleGetStr(Tables.DataSet.Fields[TAddressBook.Estatements].Value);
@@ -466,19 +456,12 @@ begin
 
         if Tables.DataSet.RecordCount = 1 then
         begin
-            Lbu_Name.Caption    :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.CoName].Value);
-            Lbu_Address.Caption :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.CoAddress].Value);
-            Lbu_Phone.Caption   :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.TelephoneNumbers].Value);
-            Lbu_SendFrom.Caption:=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.SendNoteFrom].Value);
-            FBanksHtml          :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.BankAccounts].Value);
+            FLbuName    :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.CoName].Value);
+            FLbuAddress :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.CoAddress].Value);
+            FLbuPhone   :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.TelephoneNumbers].Value);
+            FLbuSendFrom:=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.SendNoteFrom].Value);
+            FBanksHtml  :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.BankAccounts].Value);
         end
-        else
-        begin
-            Lbu_Name.Caption    :=TNaVariants.NotFound;
-            Lbu_Address.Caption :=TNaVariants.NotFound;
-            Lbu_Phone.Caption   :=TNaVariants.NotFound;
-            Lbu_SendFrom.Caption:=TNaVariants.NotFound;
-        end;
 
     finally
         Tables.Free;
@@ -488,11 +471,9 @@ end;
 
 
 procedure TActionsForm.UpdateHistory(var Grid: TStringGrid); {refactor / async}
-var
-    DailyText: TDataTables;
 begin
 
-    DailyText:=TDataTables.Create(MainForm.DbConnect);
+    var DailyText: TDataTables:=TDataTables.Create(MainForm.DbConnect);
     try
         DailyText.Columns.Add(TDailyComment.AgeDate);
         DailyText.Columns.Add(TDailyComment.Stamp);
@@ -523,11 +504,9 @@ end;
 
 
 procedure TActionsForm.UpdateGeneral(var Text: TMemo); {refactor / async}
-var
-    GenText: TDataTables;
 begin
-    GenText:=TDataTables.Create(MainForm.DbConnect);
 
+    var GenText: TDataTables:=TDataTables.Create(MainForm.DbConnect);
     try
         GenText.CustFilter:=TSql.WHERE + TGeneralComment.Cuid + TSql.EQUAL + QuotedStr(CUID);
         GenText.OpenTable(TGeneralComment.GeneralComment);
@@ -543,13 +522,13 @@ end;
 
 
 procedure TActionsForm.GetFirstComment(var Text: TMemo);
-var
-    GetColumn: integer;
 begin
+
     if not(Text.Visible) then Exit;
-    GetColumn:=HistoryGrid.ReturnColumn(TDailyComment.FixedComment, 1, 1);
+    var GetColumn: integer:=HistoryGrid.ReturnColumn(TDailyComment.FixedComment, 1, 1);
     if GetColumn <> -100 then
         Text.Text:=HistoryGrid.Cells[GetColumn, 1{fixed first row}];
+
 end;
 
 
@@ -606,10 +585,6 @@ begin
     FCoCode    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCoCode,        1, 1), MainForm.sgAgeView.Row];
     FBranch    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fAgent,         1, 1), MainForm.sgAgeView.Row];
     FSCUID     :=CustNumber + MainForm.ConvertCoCode(CoCode, 'F', 3);
-    // Display
-    CUID_Label.Caption:=CUID;
-    SCUID_Label.Caption:=SCUID;
-    Lbu_CoCode.Caption:=CoCode;
 end;
 
 
@@ -629,13 +604,10 @@ end;
 
 
 procedure TActionsForm.MakePhoneCall;
-var
-    Settings:  ISettings;
 begin
 
-    Settings:=TSettings.Create;
-
     // Check for 'Lynccall.exe'
+    var Settings: ISettings:=TSettings.Create;
     if not FileExists(Settings.GetAppDir + TUnityApp.LyncCall) then
     begin
         MainForm.MsgCall(Error, TUnityApp.APPCAPTION + ' cannot find ''lynccall.exe''. Please contact IT support.');
@@ -668,9 +640,6 @@ end;
 
 procedure TActionsForm.LoadCustomer(GoNext: boolean);
 
-    var
-        iCNT:  integer;
-
     function CheckRow(iterator: integer): boolean;
     begin
         Result:=True;
@@ -689,18 +658,18 @@ begin
 
     // To next (skip hiden)
     if GoNext then
-        for iCNT:=(MainForm.sgAgeView.Row - 1) Downto 1 do
+        for var iCNT: integer:=(MainForm.sgAgeView.Row - 1) Downto 1 do
             if not CheckRow(iCNT) then Break;
 
     // To previous (skip hiden)
     if not GoNext then
-        for iCNT:=(MainForm.sgAgeView.Row + 1) to MainForm.sgAgeView.RowCount - 1 do
+        for var iCNT: integer:=(MainForm.sgAgeView.Row + 1) to MainForm.sgAgeView.RowCount - 1 do
             if not CheckRow(iCNT) then Break;
 
     // Get data
     Initialize;
     try
-        GetData;
+        GetAndDisplay;
         SetControls;
         HistoryGrid.Visible:=FHistoryGrid;
         GetFirstComment(DailyCom);
@@ -823,18 +792,6 @@ begin
     btnCopyEmail.Glyph.TransparentColor:=clWhite;
     btnCopyGeneralMail.Glyph.Transparent:=True;
     btnCopyGeneralMail.Glyph.TransparentColor:=clWhite;
-    btnCopyLbuName.Glyph.Transparent:=True;
-    btnCopyLbuName.Glyph.TransparentColor:=clWhite;
-    btnCopyLbuAddress.Glyph.Transparent:=True;
-    btnCopyLbuAddress.Glyph.TransparentColor:=clWhite;
-    btnCopyLbuPhone.Glyph.Transparent:=True;
-    btnCopyLbuPhone.Glyph.TransparentColor:=clWhite;
-    btnCopyCoCode.Glyph.Transparent:=True;
-    btnCopyCoCode.Glyph.TransparentColor:=clWhite;
-    btnCopySendFrom.Glyph.Transparent:=True;
-    btnCopySendFrom.Glyph.TransparentColor:=clWhite;
-    btnCopyUID.Glyph.Transparent:=True;
-    btnCopyUID.Glyph.TransparentColor:=clWhite;
 end;
 
 
@@ -868,7 +825,7 @@ procedure TActionsForm.FormActivate(Sender: TObject);
 begin
     if MainForm.IsConnected then
     begin
-        GetData;
+        GetAndDisplay;
         SimpleText.Caption:=MainForm.OpenItemsUpdate;
         SetControls;
         GetFirstComment(DailyCom);
@@ -960,6 +917,12 @@ end;
 // ----------------------------------------------------------------------------------------------------------------------------------------- KEYBOARD EVENTS //
 
 
+procedure TActionsForm.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+    if (Key = VK_F5) and (Shift=[ssCtrl]) then GetAndDisplay;
+end;
+
+
 procedure TActionsForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
     if Key = Char(VK_ESCAPE) then Close;
@@ -987,13 +950,8 @@ begin
     end;
 
     // Save to database
-    if (Key = VK_RETURN) then
-    begin
+    if ( (Key = VK_RETURN) and (DailyCom.Text <> '') ) then SaveDailyComment;
 
-        if DailyCom.Text <> '' then
-            SaveDailyComment;
-
-    end;
 end;
 
 
@@ -1018,14 +976,8 @@ begin
     end;
 
     // Save to database
-    if (Key = VK_RETURN) then
-    begin
-
-        if GeneralCom.Text <> '' then
-            SaveGeneralComment;
-
-    end;
-
+    if ( (Key = VK_RETURN) and (GeneralCom.Text <> '') ) then SaveGeneralComment;
+    
 end;
 
 
@@ -1324,13 +1276,13 @@ begin
         '',
         OpenItemsGrid,
         CUID,
-        Lbu_SendFrom.Caption,
+        LbuSendFrom,
         Cust_Mail.Text,
         CustName,
         CustNumber,
-        Lbu_Name.Caption,
-        Lbu_Address.Caption,
-        Lbu_Phone.Caption,
+        LbuName,
+        LbuAddress,
+        LbuPhone,
         BanksHtml
     );
 
@@ -1344,12 +1296,6 @@ end;
 
 
 // ------------------------------------------------------------------------------------------------------------------------ BUTTON CALLS | COPY TO CLIPBOARD //
-
-
-procedure TActionsForm.btnCopyCoCodeClick(Sender: TObject);
-begin
-    ClipBoard.AsText:=Lbu_CoCode.Caption;
-end;
 
 
 procedure TActionsForm.btnCopyCustNameClick(Sender: TObject);
@@ -1370,18 +1316,6 @@ begin
 end;
 
 
-procedure TActionsForm.btnCopySendFromClick(Sender: TObject);
-begin
-    ClipBoard.AsText:=Lbu_SendFrom.Caption;
-end;
-
-
-procedure TActionsForm.btnCopyUIDClick(Sender: TObject);
-begin
-    ClipBoard.AsText:=CUID_Label.Caption + TUChars.TAB + SCUID_Label.Caption;
-end;
-
-
 procedure TActionsForm.btnCopyEmailClick(Sender: TObject);
 begin
     ClipBoard.AsText:=Cust_Mail.Text;
@@ -1391,24 +1325,6 @@ end;
 procedure TActionsForm.btnCopyGeneralMailClick(Sender: TObject);
 begin
     Clipboard.AsText:=Cust_MailGeneral.Text;
-end;
-
-
-procedure TActionsForm.btnCopyLbuAddressClick(Sender: TObject);
-begin
-    ClipBoard.AsText:=Lbu_Address.Caption;
-end;
-
-
-procedure TActionsForm.btnCopyLbuNameClick(Sender: TObject);
-begin
-    ClipBoard.AsText:=Lbu_Name.Caption;
-end;
-
-
-procedure TActionsForm.btnCopyLbuPhoneClick(Sender: TObject);
-begin
-    ClipBoard.AsText:=Lbu_Phone.Caption;
 end;
 
 

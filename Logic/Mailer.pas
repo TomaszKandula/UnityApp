@@ -55,7 +55,7 @@ type
         property MailSubject: string        read FMailSubject write FMailSubject;
         property MailBody:    string        read FMailBody    write FMailBody;
         property Attachments: TList<string> read FAttachments write FAttachments;
-        function SendEmail(oauth: TEmails.TAuthTypes) : boolean;
+        function SendEmail(OAuth: TEmails.TAuthTypes): boolean;
         function SendNow: boolean;
         constructor Create;
         destructor Destroy; override;
@@ -68,29 +68,31 @@ type
     TDocument = class(TMailer)
     {$TYPEINFO ON}
     protected
-        var HTMLStat:   string;
+        var HTMLStat: string;
     private
-        var FHTMLTable:   string;
-        var FHTMLTemp:    string;
-        var FHTMLRow:     string;
-        var FHTMLLayout:  string;
-        var FCustName:    string;
-        var FCustAddr:    string;
-        var FLBUName:     string;
-        var FLBUAddress:  string;
-        var FTelephone:   string;
-        var FBankDetails: string;
-        var FCustMess:    string;
-        var FInvFilter:   TInvoiceFilter;
-        var FBeginWith:   string;
-        var FEndWith:     string;
-        var FSourceGrid:  TStringGrid;
-        var FCUID:        string;
-        var FREM_EX1:     string;
-        var FREM_EX2:     string;
-        var FREM_EX3:     string;
-        var FREM_EX4:     string;
-        var FREM_EX5:     string;
+        var FHTMLTable:       string;
+        var FHTMLTemp:        string;
+        var FHTMLRow:         string;
+        var FHTMLLayout:      string;
+        var FCustName:        string;
+        var FCustAddr:        string;
+        var FLBUName:         string;
+        var FLBUAddress:      string;
+        var FTelephone:       string;
+        var FBankDetails:     string;
+        var FCustMess:        string;
+        var FInvFilter:       TInvoiceFilter;
+        var FBeginWith:       string;
+        var FEndWith:         string;
+        var FSourceGrid:      TStringGrid;
+        var FCUID:            string;
+        var FREM_EX1:         string;
+        var FREM_EX2:         string;
+        var FREM_EX3:         string;
+        var FREM_EX4:         string;
+        var FREM_EX5:         string;
+        var FCommonHTMLTable: string;
+        var FCommonHTMLRow:   string;
     public
         var OpenItems:  TStringGrid;
         property HTMLTable:   string         read FHTMLTable   write FHTMLTable;
@@ -115,7 +117,7 @@ type
         property REM_EX4:     string         read FREM_EX4     write FREM_EX4;
         property REM_EX5:     string         read FREM_EX5     write FREM_EX5;
         procedure SaveOutput(FileName: string);
-        function  LoadTemplate(FileName: string): string;
+        function  LoadTemplate(FileName: string; CrlStatVisible: boolean = true): string;
         function  BuildHTML: integer;
         function  SendDocument: boolean;
         constructor Create;
@@ -136,35 +138,6 @@ uses
     Settings;
 
 
-const
-    CommonHTMLTable ='<table class="data">'                   + #13#10 +
-                     '<!-- HEADERS -->'                       + #13#10 +
-                     '<tr>'                                   + #13#10 +
-                     '  <!-- COLUMNS -->'                     + #13#10 +
-                     '  <th class="col1">Invoice No.:</th>'   + #13#10 +
-                     '  <th class="col2">Invoice Date:</th>'  + #13#10 +
-                     '  <th class="col3">Due date:</th>'      + #13#10 +
-                     '  <th class="col4">Currency:</th>'      + #13#10 +
-                     '  <th class="col5-h">Amount:</th>'      + #13#10 +
-                     '  <th class="col6-h">O/S Amount:</th>'  + #13#10 +
-                     '  <th class="col7">Status:</th>'        + #13#10 +
-                     '  <th class="col8">Text:</th>'          + #13#10 +
-                     '</tr>'                                  + #13#10 +
-                     '  <!-- ROWS WITH DATA -->'              + #13#10 +
-                     '{ROWS}'                                 + #13#10 +
-                     '</table>';
-    CommonHTMLRow ='<tr>'                                     + #13#10 +
-                   '  <td class="col1">{INV_NUM}</td>'        + #13#10 +
-                   '  <td class="col2">{INV_DAT}</td>'        + #13#10 +
-                   '  <td class="col3">{DUE_DAT}</td>'        + #13#10 +
-                   '  <td class="col4">{INV_CUR}</td>'        + #13#10 +
-                   '  <td class="col5">{INV_AMT}</td>'        + #13#10 +
-                   '  <td class="col6">{INV_OSA}</td>'        + #13#10 +
-                   '  <td class="col7">{INV_CRL}</td>'        + #13#10 +
-                   '  <td class="col8">{INV_TXT}</td>'        + #13#10 +
-                   '</tr>'                                    + #13#10;
-
-
 // -------------------------------------------------------------------------------------------------------------------------------------------- MAILER CLASS //
 
 
@@ -180,16 +153,12 @@ begin
 end;
 
 
-function TMailer.SendEmail(oauth: TEmails.TAuthTypes): boolean;
-var
-    CdoMessage: CDO_TLB.IMessage;
-    Schema:     string;
-    Settings:   ISettings;
-    iCNT:       integer;
+function TMailer.SendEmail(OAuth: TEmails.TAuthTypes): boolean;
 begin
 
     Result:=False;
-    CdoMessage:=CDO_TLB.CoMessage.Create;
+
+    var CdoMessage: CDO_TLB.IMessage:=CDO_TLB.CoMessage.Create;
     CdoMessage.From:=MailFrom;
     CdoMessage.To_ :=MailTo;
     CdoMessage.CC  :=MailCc;
@@ -201,9 +170,8 @@ begin
     CdoMessage.HTMLBody:=MailBody;
 
     // Configure
-    Settings:=TSettings.Create;
-
-    Schema:='http://schemas.microsoft.com/cdo/configuration/';
+    var Settings: ISettings:=TSettings.Create;
+    var Schema: string:='http://schemas.microsoft.com/cdo/configuration/';
 
     if oauth = TEmails.TAuthTypes.cdoNTLM then
     begin
@@ -232,7 +200,7 @@ begin
         // Add attachments (if any)
         if Attachments.Count > 0 then
         begin
-            for iCNT:=0 to Attachments.Count - 1 do
+            for var iCNT: integer:=0 to Attachments.Count - 1 do
                 CdoMessage.AddAttachment(Attachments.Items[iCNT],'','');
         end;
 
@@ -250,11 +218,10 @@ end;
 
 
 function TMailer.SendNow: boolean;
-var
-    Settings: ISettings;
 begin
+
     Result:=False;
-    Settings:=TSettings.Create;
+    var Settings: ISettings:=TSettings.Create;
 
     if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerNTLM then
         Result:=SendEmail(TEmails.TAuthTypes.cdoNTLM);
@@ -280,54 +247,69 @@ begin
 end;
 
 
-function TDocument.LoadTemplate(FileName: string): string;
-var
-    SL: TStringList;
+function TDocument.LoadTemplate(FileName: string; CrlStatVisible: boolean = true): string;
 begin
-    SL:=TStringList.Create;
+
+    var KeyName: string;
+    var Settings: ISettings:=TSettings.Create;
+    var SL: TStringList:=TStringList.Create;
     try
+
+        // Upload main template
         SL.LoadFromFile(FileName);
         Result:=SL.Text;
+
+        // Upload main table
+        KeyName:='SERVICE%TBL';
+        if not ActionsForm.cbCtrlStatusOff.Checked then KeyName:=KeyName.Replace('%', '1')
+            else KeyName:=KeyName.Replace('%', '2');
+
+        var HtmlTablePath: string:=Settings.GetLayoutDir + Settings.GetStringValue(TConfigSections.Layouts, KeyName, '');
+        SL.LoadFromFile(HtmlTablePath);
+        FCommonHTMLTable:=SL.Text;
+
+        // Upload main row
+        KeyName:='SERVICE%ROW';
+        if not ActionsForm.cbCtrlStatusOff.Checked then KeyName:=KeyName.Replace('%', '1')
+            else KeyName:=KeyName.Replace('%', '2');
+
+        var HtmlRowPath: string:=Settings.GetLayoutDir + Settings.GetStringValue(TConfigSections.Layouts, KeyName, '');
+        SL.LoadFromFile(HtmlRowPath);
+        FCommonHTMLRow:=SL.Text;
+
     finally
         SL.Free;
     end;
+
 end;
 
 
 procedure TDocument.SaveOutput(FileName: string);
-var
-    SL: TStringList;
 begin
-    SL:=TStringList.Create;
+
+    var SL: TStringList:=TStringList.Create;
     try
         SL.Text:=MailBody;
         SL.SaveToFile(FileName);
     finally
         SL.Free;
     end;
+
 end;
 
 
 function TDocument.BuildHTML: integer;
 
-    // Common variables
+    (* NESTED BLOCK *)
 
-    var
-        iCNT:      integer;
-        Pos:       integer;
-        Items:     integer;
-        LocalFrmt: TFormatSettings;
-        UnityFrmt: TFormatSettings;
+    var Pos:   integer;
+    var Items: integer;
 
-    // Nested methods
-
-    // Replace status code to text (short code description)
     function StatusCodeToText(TextCode: string; Source: TStringGrid): string;
-    var
-        iCNT: integer;
     begin
 
-        for iCNT:=1 to Source.RowCount do
+        // Replace status code to text (short code description)
+        for var iCNT: integer:=1 to Source.RowCount do
         begin
 
             if Source.Cells[MainForm.ControlStatusRefs.Code, iCNT] = TextCode then
@@ -340,12 +322,12 @@ function TDocument.BuildHTML: integer;
 
     end;
 
-    // Move open items to HTML template
     procedure OpenItemsToHtmlTable(var HtmlStatement: string; var SG: TStringGrid; ActualRow: Integer);
-    var
-        CurAmount: string;
-        Amount:    string;
     begin
+
+        // Move open items to HTML template
+        var CurAmount: string;
+        var Amount:    string;
 
         // Get outstanding amounts
         CurAmount:=SG.Cells[MainForm.OpenItemsRefs.CurAmCol, ActualRow];
@@ -382,9 +364,11 @@ function TDocument.BuildHTML: integer;
 
     end;
 
-    // Main block
 
 begin
+
+    var LocalFrmt: TFormatSettings;
+    var UnityFrmt: TFormatSettings;
 
     /// <remarks>
     /// We have two different date time format. First used by application is always the same:
@@ -404,11 +388,11 @@ begin
     Items:=0;
 
     // Get templates
-    HTMLTable:=CommonHTMLTable;
-    HTMLRow  :=CommonHTMLRow;
+    HTMLTable:=FCommonHTMLTable;
+    HTMLRow  :=FCommonHTMLRow;
 
     // Open items to HTML table
-    for iCNT:=1 to OpenItems.RowCount - 1 do
+    for var iCNT: integer:=1 to OpenItems.RowCount - 1 do
     begin
         if OpenItems.Cells[MainForm.OpenItemsRefs.CuidCol, iCNT] = CUID then
         begin
@@ -538,17 +522,23 @@ begin
 
     // Custom template title (statement or reminder)
     case InvFilter of
-        TInvoiceFilter.ReminderOvd:  MailBody:=StringReplace(MailBody, '{TITLE}', 'REMINDER',  [rfReplaceAll]);
-        TInvoiceFilter.ReminderNonOvd:   MailBody:=StringReplace(MailBody, '{TITLE}', 'REMINDER',  [rfReplaceAll]);
-        TInvoiceFilter.ShowAllItems: MailBody:=StringReplace(MailBody, '{TITLE}', 'STATEMENT', [rfReplaceAll]);
+        TInvoiceFilter.ReminderOvd:    MailBody:=StringReplace(MailBody, '{TITLE}', 'REMINDER',  [rfReplaceAll]);
+        TInvoiceFilter.ReminderNonOvd: MailBody:=StringReplace(MailBody, '{TITLE}', 'REMINDER',  [rfReplaceAll]);
+        TInvoiceFilter.ShowAllItems:   MailBody:=StringReplace(MailBody, '{TITLE}', 'STATEMENT', [rfReplaceAll]);
     end;
 
     // Custom salutation and the message
     if CustMess  <> '' then MailBody:=StringReplace(MailBody, '{TEXT}',  CustMess,  [rfReplaceAll]);
 
+    // Put user in CC
+    var Settings: ISettings:=TSettings.Create;
+    if ActionsForm.cbUserInCopy.Checked then
+        MailBcc:=MainForm.WinUserName + '@' + Settings.GetStringValue(TConfigSections.ApplicationDetails, 'MAIL_DOMAIN', '')
+    else
+        MailBcc:='';
+
     XMailer:=MailFrom;
     MailCc :=MailFrom;
-    MailBcc:='';
     MailRt :='';
     Result :=SendNow;
 
