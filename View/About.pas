@@ -103,6 +103,11 @@ uses
     Helpers;
 
 
+type
+    TIsWow64Process = function(Handle:THandle; var IsWow64: BOOL): BOOL; stdcall;
+    TFNGlobalMemoryStatusEx = function(var msx: TMemoryStatusEx): BOOL; stdcall;
+
+
 {$R *.dfm}
 
 
@@ -114,12 +119,6 @@ uses
 /// </summary>
 
 function TAboutForm.Is64BitOS: Boolean;
-type
-    TIsWow64Process = function(Handle:THandle; var IsWow64 : BOOL) : BOOL; stdcall;
-var
-    hKernel32:       integer;
-    IsWow64Process:  TIsWow64Process;
-    IsWow64:         BOOL;
 begin
 
     /// <remarks>
@@ -130,11 +129,13 @@ begin
     /// </remarks>
     /// <see cref="http://msdn.microsoft.com/en-us/library/ms684139.aspx"/>
     Result:=false;
-    hKernel32:=LoadLibrary('kernel32.dll');
 
+    var hKernel32: integer:=LoadLibrary('kernel32.dll');
     if (hKernel32 = 0) then
         RaiseLastOSError;
 
+    var IsWow64Process: TIsWow64Process;
+    var IsWow64: BOOL;
     @IsWow64Process:=GetProcAddress(hkernel32, 'IsWow64Process');
 
     if Assigned(IsWow64Process) then
@@ -158,21 +159,17 @@ end;
 /// </summary>
 
 function GlobalMemoryStatusEx(var lpBuffer: TMemoryStatusEx): BOOL; stdcall;
-type
-    TFNGlobalMemoryStatusEx = function(var msx: TMemoryStatusEx): BOOL; stdcall;
-var
-    FNGlobalMemoryStatusEx: TFNGlobalMemoryStatusEx;
 begin
 
-    FNGlobalMemoryStatusEx:= TFNGlobalMemoryStatusEx(GetProcAddress(GetModuleHandle(kernel32),'GlobalMemoryStatusEx'));
+    var FNGlobalMemoryStatusEx: TFNGlobalMemoryStatusEx:=TFNGlobalMemoryStatusEx(GetProcAddress(GetModuleHandle(kernel32),'GlobalMemoryStatusEx'));
 
     if not Assigned(FNGlobalMemoryStatusEx) then
     begin
         SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
         Result:=false;
     end
-        else
-            Result:=FNGlobalMemoryStatusEx(lpBuffer);
+    else
+        Result:=FNGlobalMemoryStatusEx(lpBuffer);
 
 end;
 
@@ -185,11 +182,9 @@ end;
 /// </summary>
 
 procedure TAboutForm.FormCreate(Sender: TObject);
-var
-    Settings: ISettings;
 begin
 
-    Settings:=TSettings.Create;
+    var Settings: ISettings:=TSettings.Create;
     if FileExists(Settings.GetPathLicenceLic) then
     begin
         if Settings.Decode(LicData, True) then
@@ -213,12 +208,11 @@ end;
 /// </summary>
 
 procedure TAboutForm.FormShow(Sender: TObject);
-var
-    mem_32:  TMemoryStatus;
-    mem_64:  TMemoryStatusEx;
 begin
+
     if Is64BitOs=false then
     begin
+        var mem_32: TMemoryStatus;
         mem_32.dwLength:=sizeof(mem_32);
         GlobalMemoryStatus(mem_32);
         txt_SYS.Caption:=GetOSVer(True) + ' (32-bit)';
@@ -227,12 +221,14 @@ begin
     end
     else
     begin
+        var mem_64: TMemoryStatusEx;
         mem_64.dwLength:=sizeof(mem_64);
         GlobalMemoryStatusEx(mem_64);
         txt_SYS.Caption:=GetOSVer(True) + ' (64-bit)';
         txt_MEM.Caption:=formatfloat('## ###', ((mem_64.ullTotalPhys) DIV 1048576)) + ' MB';
         txt_USG.Caption:=formatfloat('## ###', ((mem_64.ullTotalPhys-mem_64.ullAvailPhys) DIV 1048576)) + ' MB';
     end;
+
 end;
 
 

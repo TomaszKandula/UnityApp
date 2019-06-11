@@ -124,17 +124,15 @@ uses
 
 
 function TQmsForm.InsertMissingInvoice: boolean;  {refactor / async}
-var
-    Tables: TDataTables;
-    QueryUid: TGUID;
 begin
 
     Result:=False;
     if not(IsMissing) then Exit;
 
-    Tables:=TDataTables.Create(MainForm.DbConnect);
+    var Tables: TDataTables:=TDataTables.Create(MainForm.DbConnect);
     try
         // Generate GUID for new entry
+        var QueryUid: TGUID;
         CreateGUID(QueryUid);
 
         // Define target columns
@@ -201,34 +199,20 @@ end;
 
 
 function TQmsForm.InsertCurrentInvoices(Source: TStringGrid): boolean; {refactor / async}
-var
-    Tables:     TDataTables;
-    TempData:   TStringGrid;
-    QueryUid:   TGUID;
-    iCNT:       integer;
-    jCNT:       integer;
-    UserFormat: TFormatSettings;
-    DueDate:    TDate;
-    ValDate:    TDate;
-    DueDateStr: string;
-    ValDateStr: string;
-    OpenAm:     string;
-    Am:         string;
-    OpenCurAm:  string;
-    CurAm:      string;
 begin
 
     Result:=False;
     if Source = nil then Exit;
 
     {$WARN SYMBOL_PLATFORM OFF}
-    UserFormat:=TFormatSettings.Create(LOCALE_USER_DEFAULT);
+    var UserFormat: TFormatSettings:=TFormatSettings.Create(LOCALE_USER_DEFAULT);
     {$WARN SYMBOL_PLATFORM ON}
 
-    Tables:=TDataTables.Create(MainForm.DbConnect);
-    TempData:=TStringGrid.Create(nil);
+    var Tables: TDataTables:=TDataTables.Create(MainForm.DbConnect);
+    var TempData: TStringGrid:=TStringGrid.Create(nil);
     try
         // Generate GUID for new entry
+        var QueryUid: TGUID;
         CreateGUID(QueryUid);
 
         // Define target columns
@@ -255,21 +239,21 @@ begin
         TempData.RowCount:=(Source.Selection.Bottom - Source.Selection.Top) + 1;
         TempData.ColCount:=Tables.Columns.Count;
 
-        jCNT:=Source.Selection.Top;
-        for iCNT:=0 to TempData.RowCount do
+        var jCNT: integer:=Source.Selection.Top;
+        for var iCNT: integer:=0 to TempData.RowCount do
         begin
 
             // Get and convert from user format to application format accepted by MSSQL
-            DueDate   :=StrToDate(Source.Cells[Source.ReturnColumn(TOpenitems.DueDt, 1, 1), jCNT], UserFormat);
-            ValDate   :=StrToDate(Source.Cells[Source.ReturnColumn(TOpenitems.ValDt, 1, 1), jCNT], UserFormat);
-            DueDateStr:=DateToStr(DueDate, FormatSettings);
-            ValDateStr:=DateToStr(ValDate, FormatSettings);
+            var DueDate: TDate:=StrToDate(Source.Cells[Source.ReturnColumn(TOpenitems.DueDt, 1, 1), jCNT], UserFormat);
+            var ValDate: TDate:=StrToDate(Source.Cells[Source.ReturnColumn(TOpenitems.ValDt, 1, 1), jCNT], UserFormat);
+            var DueDateStr: string:=DateToStr(DueDate, FormatSettings);
+            var ValDateStr: string:=DateToStr(ValDate, FormatSettings);
 
             // Get amounts
-            OpenAm   :=Source.Cells[Source.ReturnColumn(TOpenitems.OpenAm, 1, 1), jCNT];
-            Am       :=Source.Cells[Source.ReturnColumn(TOpenitems.Am, 1, 1), jCNT];
-            OpenCurAm:=Source.Cells[Source.ReturnColumn(TOpenitems.OpenCurAm, 1, 1), jCNT];
-            CurAm    :=Source.Cells[Source.ReturnColumn(TOpenitems.CurAm, 1, 1), jCNT];
+            var OpenAm:    string:=Source.Cells[Source.ReturnColumn(TOpenitems.OpenAm, 1, 1), jCNT];
+            var Am:        string:=Source.Cells[Source.ReturnColumn(TOpenitems.Am, 1, 1), jCNT];
+            var OpenCurAm: string:=Source.Cells[Source.ReturnColumn(TOpenitems.OpenCurAm, 1, 1), jCNT];
+            var CurAm:     string:=Source.Cells[Source.ReturnColumn(TOpenitems.CurAm, 1, 1), jCNT];
 
             // Replace decimal separator to point required by MSSQL
             OpenAm   :=StringReplace(OpenAm, ',', '.', [rfReplaceAll]);
@@ -322,25 +306,20 @@ end;
 
 
 function TQmsForm.ValidateFields: cardinal;
-var
-    Checks: integer;
 begin
 
-    Checks:=0;
+    var Checks: integer:=0;
 
     if String.IsNullOrEmpty(LbuEmailAddress.Text) then Inc(Checks);
     if String.IsNullOrEmpty(QueryDesc.Text)       then Inc(Checks);
 
-    if IsMissing then
-    begin
-        if String.IsNullOrEmpty(EditInvoiceNo.Text)  then Inc(Checks);
-        if String.IsNullOrEmpty(EditOpenAmount.Text) then Inc(Checks);
-        if String.IsNullOrEmpty(EditAmount.Text)     then Inc(Checks);
-        if String.IsNullOrEmpty(EditOpenCurrAm.Text) then Inc(Checks);
-        if String.IsNullOrEmpty(EditCurrAmount.Text) then Inc(Checks);
-        if String.IsNullOrEmpty(EditDueDate.Text)    then Inc(Checks);
-        if String.IsNullOrEmpty(EditValDate.Text)    then Inc(Checks);
-    end;
+    if (IsMissing) and (String.IsNullOrEmpty(EditInvoiceNo.Text))  then Inc(Checks);
+    if (IsMissing) and (String.IsNullOrEmpty(EditOpenAmount.Text)) then Inc(Checks);
+    if (IsMissing) and (String.IsNullOrEmpty(EditAmount.Text))     then Inc(Checks);
+    if (IsMissing) and (String.IsNullOrEmpty(EditOpenCurrAm.Text)) then Inc(Checks);
+    if (IsMissing) and (String.IsNullOrEmpty(EditCurrAmount.Text)) then Inc(Checks);
+    if (IsMissing) and (String.IsNullOrEmpty(EditDueDate.Text))    then Inc(Checks);
+    if (IsMissing) and (String.IsNullOrEmpty(EditValDate.Text))    then Inc(Checks);
 
     Result:=Checks;
 
@@ -379,11 +358,11 @@ end;
 
 
 function TQmsForm.ReturnCurrencyId(ISO: string): cardinal; {refactor / async}
-var
-    Tables: TDataTables;
 begin
+
     Result:=0;
-    Tables:=TDataTables.Create(MainForm.DbConnect);
+
+    var Tables: TDataTables:=TDataTables.Create(MainForm.DbConnect);
     try
         try
             Tables.CleanUp;
@@ -401,15 +380,16 @@ begin
     finally
         Tables.Free;
     end;
+
 end;
 
 
 function TQmsForm.ReturnQueryReasonId(QueryReason: string): cardinal; {refactor / async}
-var
-    Tables: TDataTables;
 begin
+
     Result:=0;
-    Tables:=TDataTables.Create(MainForm.DbConnect);
+
+    var Tables: TDataTables:=TDataTables.Create(MainForm.DbConnect);
     try
         try
             Tables.CustFilter:=TSql.WHERE + TQmsReasons.QueryReason + TSql.EQUAL + QuotedStr(QueryReason);
@@ -426,17 +406,15 @@ begin
     finally
         Tables.Free;
     end;
+
 end;
 
 
 function TQmsForm.SendNotification(LbuEmail: string): boolean; {refactor / async}
-var
-    Mail:     TMailer;
-    Settings: ISettings;
 begin
 
-    Settings:=TSettings.Create;
-    Mail:=TMailer.Create;
+    var Settings: ISettings:=TSettings.Create;
+    var Mail: TMailer:=TMailer.Create;
     try
 
         // Get and set email details
@@ -496,13 +474,10 @@ end;
 
 
 procedure TQmsForm.FormShow(Sender: TObject); {refactor / async}
-var
-    Tables: TDataTables;
 begin
 
     Screen.Cursor:=crHourGlass;
 
-    //
     if IsMissing then
     begin
         MissingInvoiceBox.Enabled:=True;
@@ -518,8 +493,7 @@ begin
         StatusLabel.Caption:='Log selected invoice(s) with status:';
     end;
 
-    //
-    Tables:=TDataTables.Create(MainForm.DbConnect);
+    var Tables: TDataTables:=TDataTables.Create(MainForm.DbConnect);
     try
         try
             Tables.Columns.Add(TQmsReasons.QueryReason);
@@ -551,7 +525,6 @@ begin
         Tables.Free;
     end;
 
-    //
     if IsMissing then EditLogType.Text:='Missing' else EditLogType.Text:='Existing';
     EditUserAlias.Text:=MainForm.WinUserName;
     EditStamp.Text:=DateTimeToStr(Now);
@@ -581,17 +554,17 @@ end;
 
 procedure TQmsForm.btnAddDueDateClick(Sender: TObject);
 begin
-    CalendarForm.CalendarMode:=TEnums.TCalendar.cfGetDate;
+    CalendarForm.FCalendarMode:=TEnums.TCalendar.GetDate;
     MainForm.WndCall(CalendarForm, Helpers.TWindows.TState.Modal);
-    if CalendarForm.SelectedDate <> TDateTimeFormats.NullDate then EditDueDate.Text:=DateToStr(CalendarForm.SelectedDate);
+    if CalendarForm.FSelectedDate <> TDateTimeFormats.NullDate then EditDueDate.Text:=DateToStr(CalendarForm.FSelectedDate);
 end;
 
 
 procedure TQmsForm.btnAddValDateClick(Sender: TObject);
 begin
-    CalendarForm.CalendarMode:=TEnums.TCalendar.cfGetDate;
+    CalendarForm.FCalendarMode:=TEnums.TCalendar.GetDate;
     MainForm.WndCall(CalendarForm, Modal);
-    if CalendarForm.SelectedDate <> TDateTimeFormats.NullDate then EditValDate.Text:=DateToStr(CalendarForm.SelectedDate);
+    if CalendarForm.FSelectedDate <> TDateTimeFormats.NullDate then EditValDate.Text:=DateToStr(CalendarForm.FSelectedDate);
 end;
 
 
@@ -629,25 +602,25 @@ end;
 
 procedure TQmsForm.EditAmountKeyPress(Sender: TObject; var Key: Char);
 begin
-    if not(CharInSet(Key, ['0'..'9',  TUChars.POINT, TUChars.BACKSPACE])) then Key:=#0;
+    if not(CharInSet(Key, ['0'..'9',  TChars.POINT, TChars.BACKSPACE])) then Key:=#0;
 end;
 
 
 procedure TQmsForm.EditCurrAmountKeyPress(Sender: TObject; var Key: Char);
 begin
-    if not(CharInSet(Key, ['0'..'9', TUChars.POINT, TUChars.BACKSPACE])) then Key:=#0;
+    if not(CharInSet(Key, ['0'..'9', TChars.POINT, TChars.BACKSPACE])) then Key:=#0;
 end;
 
 
 procedure TQmsForm.EditOpenAmountKeyPress(Sender: TObject; var Key: Char);
 begin
-    if not(CharInSet(Key, ['0'..'9', TUChars.POINT, TUChars.BACKSPACE])) then Key:=#0;
+    if not(CharInSet(Key, ['0'..'9', TChars.POINT, TChars.BACKSPACE])) then Key:=#0;
 end;
 
 
 procedure TQmsForm.EditOpenCurrAmKeyPress(Sender: TObject; var Key: Char);
 begin
-    if not(CharInSet(Key, ['0'..'9', TUChars.POINT, TUChars.BACKSPACE])) then Key:=#0;
+    if not(CharInSet(Key, ['0'..'9', TChars.POINT, TChars.BACKSPACE])) then Key:=#0;
 end;
 
 

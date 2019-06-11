@@ -65,24 +65,22 @@ type
         procedure CustomerListKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure btnSelectionClick(Sender: TObject);
     protected
-        var Multiselect: TStringList;
-        var CtrlClicked: boolean;
+        var FMultiselect: TStringList;
+        var FCtrlClicked: boolean;
     private
-        var pTrackerGrid  : TStringGrid;
-        var pAgeGrid      : TStringGrid;
-        var pReminderMail : string;
-        var pStatementMail: string;
-    public
-        property  TrackerGrid  : TStringGrid read pTrackerGrid;
-        property  AgeGrid      : TStringGrid read pAgeGrid;
-        property  ReminderMail : string      read pReminderMail  write pReminderMail;
-        property  StatementMail: string      read pStatementMail write pStatementMail;
+        var FTrackerGrid  : TStringGrid;
+        var FAgeGrid      : TStringGrid;
         procedure GetSendFrom(List: TComboBox);
         procedure GetEmailAddress(Scuid: string);
         procedure SetEmailAddresses(List: TListView);
         procedure GetLayouts(LayoutContainer: TComboBox);
         procedure ApplyTimings(List: TListView);
         procedure SaveToDb(List: TListView);
+    public
+        var FReminderMail : string;
+        var FStatementMail: string;
+        property  TrackerGrid: TStringGrid read FTrackerGrid;
+        property  AgeGrid:     TStringGrid read FAgeGrid;
     end;
 
 
@@ -110,13 +108,12 @@ uses
 
 
 procedure TTrackerForm.GetSendFrom(List: TComboBox);
-var
-    Database: TDataTables;
-    CoCode1:  string;
-    CoCode2:  string;
-    CoCode3:  string;
-    CoCode4:  string;
 begin
+
+    var CoCode1:  string;
+    var CoCode2:  string;
+    var CoCode3:  string;
+    var CoCode4:  string;
 
     // Get Co Codes that are opened (age view snapshot)
     if MainForm.tcCOCODE1.Caption <> 'n/a' then CoCode1:=MainForm.tcCOCODE1.Caption;
@@ -124,7 +121,7 @@ begin
     if MainForm.tcCOCODE3.Caption <> 'n/a' then CoCode3:=MainForm.tcCOCODE3.Caption;
     if MainForm.tcCOCODE4.Caption <> 'n/a' then CoCode4:=MainForm.tcCOCODE4.Caption;
 
-    Database:=TDataTables.Create(MainForm.DbConnect);
+    var Database: TDataTables:=TDataTables.Create(MainForm.DbConnect);
     try
         Database.Columns.Add(TSql.DISTINCT + TCompanyData.SendNoteFrom);
         Database.CustFilter:=TSql.WHERE +
@@ -160,12 +157,9 @@ end;
 
 
 procedure TTrackerForm.GetEmailAddress(Scuid: string);
-var
-    Database: TDataTables;
 begin
 
-    Database:=TDataTables.Create(MainForm.DbConnect);
-
+    var Database: TDataTables:=TDataTables.Create(MainForm.DbConnect);
     try
         Database.Columns.Add(TAddressBook.Emails);
         Database.Columns.Add(TAddressBook.Estatements);
@@ -174,8 +168,8 @@ begin
 
         if Database.DataSet.RecordCount > 0 then
         begin
-            ReminderMail:=MainForm.OleGetStr(Database.DataSet.Fields[TAddressBook.Emails].Value);
-            StatementMail:=MainForm.OleGetStr(Database.DataSet.Fields[TAddressBook.Estatements].Value);
+            FReminderMail:=MainForm.OleGetStr(Database.DataSet.Fields[TAddressBook.Emails].Value);
+            FStatementMail:=MainForm.OleGetStr(Database.DataSet.Fields[TAddressBook.Estatements].Value);
         end;
 
     finally
@@ -186,23 +180,15 @@ end;
 
 
 procedure TTrackerForm.SetEmailAddresses(List: TListView);
-var
-    iCNT: integer;
 begin
 
     if List.Items.Count > 0 then
     begin
-        for iCNT:=0 to List.Items.Count - 1 do
+        for var iCNT: integer:=0 to List.Items.Count - 1 do
         begin
-
             GetEmailAddress(List.Items[iCNT].SubItems[1]);
-
-            if not(string.IsNullOrEmpty(StatementMail)) then
-                List.Items[iCNT].SubItems[4]:=StatementMail;
-
-            if not(string.IsNullOrEmpty(ReminderMail)) then
-                List.Items[iCNT].SubItems[5]:=ReminderMail;
-
+            if not(string.IsNullOrEmpty(FStatementMail)) then List.Items[iCNT].SubItems[4]:=FStatementMail;
+            if not(string.IsNullOrEmpty(FReminderMail)) then List.Items[iCNT].SubItems[5]:=FReminderMail;
         end;
     end;
 
@@ -216,30 +202,26 @@ end;
 /// </remarks>
 
 procedure TTrackerForm.GetLayouts(LayoutContainer: TComboBox);
-var
-    Settings:   ISettings;
-    SearchRec:  TSearchRec;
-    LayoutLst:  TStringList;
-    LayoutFld:  string;
-    LayoutNam:  string;
-    iCNT:       integer;
 begin
 
-    Settings :=TSettings.Create;
-    LayoutFld:=Settings.GetLayoutDir;
-    LayoutLst:=TStringList.Create;
-
+    var Settings: ISettings:=TSettings.Create;
+    var LayoutLst: TStringList:=TStringList.Create;
+    var LayoutFld: string:=Settings.GetLayoutDir;
     try
 
         // Get files from local folder
         try
+            var SearchRec:  TSearchRec;
             {$WARN SYMBOL_PLATFORM OFF} { faArchives - Windows only }
             if FindFirst(LayoutFld + 'r*.htm', faArchive, SearchRec) = 0 then
             {$WARN SYMBOL_PLATFORM ON}
             begin
 
+                var LayoutNam:  string;
+
                 LayoutLst.Sorted:=True;
                 LayoutLst.Duplicates:=dupIgnore;
+
                 repeat
                     LayoutNam:=SearchRec.Name;
                     LayoutNam:=LayoutNam.Substring(0, LayoutNam.Length - 6);
@@ -253,7 +235,7 @@ begin
 
             // Display
             LayoutContainer.Clear;
-            for iCNT:=0 to LayoutLst.Count - 1 do
+            for var iCNT: integer:=0 to LayoutLst.Count - 1 do
                 LayoutContainer.Items.Add(LayoutLst.Strings[iCNT]);
 
             if LayoutContainer.Items.Count > 0 then
@@ -275,9 +257,6 @@ end;
 
 
 procedure TTrackerForm.ApplyTimings(List: TListView);
-var
-    SelItem: integer;
-    iCNT:    integer;
 begin
 
     // First reminder and legal notice cannot be zero
@@ -300,11 +279,11 @@ begin
     end;
 
     // Applay only on selected customers
-    if Multiselect.Count > 0 then
+    if FMultiselect.Count > 0 then
     begin
-        for iCNT:=0 to Multiselect.Count - 1 do
+        for var iCNT: integer:=0 to FMultiselect.Count - 1 do
         begin
-            SelItem:=Multiselect.Strings[iCNT].ToInteger;
+            var SelItem: integer:=FMultiselect.Strings[iCNT].ToInteger;
             List.Items[SelItem].SubItems[3] :=ListEmailFrom.Text;
             List.Items[SelItem].SubItems[6] :=TextReminder0.Text;
             List.Items[SelItem].SubItems[7] :=TextReminder1.Text;
@@ -318,7 +297,7 @@ begin
     begin
         if MainForm.MsgCall(Question2, 'You have not selected any customers, do you want Unity to apply proposed conditions for all listed items?') = mrYes then
         begin
-            for iCNT:=0 to List.Items.Count - 1 do
+            for var iCNT: integer:=0 to List.Items.Count - 1 do
             begin
                 List.Items[iCNT].SubItems[3] :=ListEmailFrom.Text;
                 List.Items[iCNT].SubItems[6] :=TextReminder0.Text;
@@ -334,16 +313,10 @@ end;
 
 
 procedure TTrackerForm.SaveToDb(List: TListView);
-var
-    TrackerData: TDataTables;
-    TempData:    TStringGrid;
-    iCNT:        integer;
-    Check:       integer;
 begin
 
-    Check:=0;
-
-    for iCNT:=0 to List.Items.Count - 1 do
+    var Check: integer:=0;
+    for var iCNT: integer:=0 to List.Items.Count - 1 do
     begin
         // Not found
         if List.Items[iCNT].SubItems[4] = 'Not found' then Inc(Check);
@@ -363,8 +336,8 @@ begin
         Exit;
     end;
 
-    TrackerData:=TDataTables.Create(MainForm.DbConnect);
-    TempData:=TStringGrid.Create(nil);
+    var TrackerData: TDataTables:=TDataTables.Create(MainForm.DbConnect);
+    var TempData: TStringGrid:=TStringGrid.Create(nil);
     try
         try
             // Select database columns
@@ -389,7 +362,7 @@ begin
             // Put ListView data to StringGrid
             TempData.RowCount:=List.Items.Count;
             TempData.ColCount:=TrackerData.Columns.Count;
-            for iCNT:=0 to List.Items.Count - 1 do
+            for var iCNT: integer:=0 to List.Items.Count - 1 do
             begin
                 TempData.Cells[0,  iCNT]:=MainForm.WinUserName;             // user alias
                 TempData.Cells[1,  iCNT]:=List.Items[iCNT].SubItems[0];     // cuid
@@ -432,6 +405,7 @@ begin
         TrackerData.Free;
         TempData.Free;
     end;
+
 end;
 
 
@@ -439,11 +413,10 @@ end;
 
 
 procedure TTrackerForm.FormCreate(Sender: TObject);
-var
-    lsColumns: TListColumn;
 begin
 
-    Multiselect:=TStringList.Create;
+    var lsColumns: TListColumn;
+    FMultiselect:=TStringList.Create;
 
     // List view initialization
 
@@ -504,8 +477,7 @@ end;
 
 procedure TTrackerForm.FormDestroy(Sender: TObject);
 begin
-    if Assigned(Multiselect) then
-        Multiselect.Free;
+    if Assigned(FMultiselect) then FMultiselect.Free;
 end;
 
 
@@ -560,13 +532,13 @@ end;
 
 procedure TTrackerForm.CustomerListKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-    CtrlClicked:=True;
+    FCtrlClicked:=True;
 end;
 
 
 procedure TTrackerForm.CustomerListKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-    CtrlClicked:=False;
+    FCtrlClicked:=False;
 end;
 
 
@@ -579,15 +551,15 @@ end;
 procedure TTrackerForm.CustomerListSelectItem(Sender: TObject; Item: TListItem; Selected: Boolean);
 begin
 
-    if not(CtrlClicked) and (Selected) then
+    if not(FCtrlClicked) and (Selected) then
     begin
-        Multiselect.Clear;
-        Multiselect.Add(Item.Index.ToString);
+        FMultiselect.Clear;
+        FMultiselect.Add(Item.Index.ToString);
     end
-    else if (CtrlClicked) and (Selected) then
-        Multiselect.Add(Item.Index.ToString)
+    else if (FCtrlClicked) and (Selected) then
+        FMultiselect.Add(Item.Index.ToString)
     else
-        Multiselect.Clear;
+        FMultiselect.Clear;
 
 end;
 

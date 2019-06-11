@@ -125,6 +125,7 @@ begin
     SetLength(FParamList, 1, 2);
 end;
 
+
 destructor TMSSQL.Destroy;
 begin
     inherited;
@@ -153,9 +154,9 @@ end;
 function TMSSQL.CleanStr(Text: string; Quoted: boolean): string;
 begin
     Result:='';
-    Text:=StringReplace(Text, TUChars.TAB,   TUChars.SPACE, [rfReplaceAll]);
-    Text:=StringReplace(Text, TUChars.QUOTE, TUChars.SPACE, [rfReplaceAll]);
-    Text:=StringReplace(Text, TUChars.CRLF,  TUChars.SPACE, [rfReplaceAll]);
+    Text:=StringReplace(Text, TChars.TAB,   TChars.SPACE, [rfReplaceAll]);
+    Text:=StringReplace(Text, TChars.QUOTE, TChars.SPACE, [rfReplaceAll]);
+    Text:=StringReplace(Text, TChars.CRLF,  TChars.SPACE, [rfReplaceAll]);
     if Quoted then Result:=QuotedStr(Text) else Result:=Text;
 end;
 
@@ -173,17 +174,14 @@ end;
 /// </remarks>
 
 function TMSSQL.ExecSQL: _Recordset;
-var
-    Query: TADOCommand;
 begin
     Result:=nil;
 
     if not (Length(StrSQL)) > 0 then Exit;
 
-    Query:=TADOCommand.Create(nil);
-    Query.Connection:=ADOCon;
-
+    var Query: TADOCommand:=TADOCommand.Create(nil);
     try
+        Query.Connection:=ADOCon;
         try
             Query.CommandType:=CmdType;
             Query.CommandText:=StrSQL;
@@ -214,31 +212,19 @@ end;
 /// </remarks>
 
 function TMSSQL.ToSqlInsert(Table: TALists; Grid: TStringGrid; tblName: string; tblColumns: string; HeaderPresent: boolean = True{Option}): string;
-var
-    iCNT:  integer;
-    jCNT:  integer;
-    LEAD:  string;
-    LINE:  string;
-    LINES: string;
-    mRows: integer;
-    mCols: integer;
-    sRows: integer;
-    sCols: integer;
-    Clean: string;
 begin
 
-    mRows :=0;
-    mCols :=0;
-    sRows :=0;
-    sCols :=0;
     Result:='';
 
-    // Table and Grid cannot be nil or provided at the same time
+    var mRows: integer:=0;
+    var mCols: integer:=0;
+    var sRows: integer:=0;
+    var sCols: integer:=0;
+
+    // Table and Grid cannot be nil or be provided at the same time
     // We require only one of them
     if (Table = nil)  and (Grid = nil)  then Exit;
     if (Table <> nil) and (Grid <> nil) then Exit;
-
-    LEAD:=TSql.INSERT + TUChars.SPACE + tblName + ' ( ' + tblColumns + ' ) ' + TUChars.CRLF;
 
     if Table <> nil then
     begin
@@ -260,51 +246,54 @@ begin
         begin
             sRows:=1;
             sCols:=1;
-            //mRows:=Grid.RowCount - 1;
         end
         else
         begin
             sRows:=0;
             sCols:=0;
-            //mRows:=Grid.RowCount;
         end;
 
     end;
 
-    for iCNT:=sRows to mRows do
-    begin
-        LINE:=TSql.SELECT + TUChars.SPACE;
+    var Line:  string;
+    var Lines: string;
+    var Clean: string;
+    var Lead:  string:=TSql.INSERT + TChars.Space + tblName + ' ( ' + tblColumns + ' ) ' + TChars.CrLf;
 
-        for jCNT:=sCols to mCols do
+    for var iCNT: integer:=sRows to mRows do
+    begin
+        Line:=TSql.SELECT + TChars.SPACE;
+
+        for var jCNT: integer:=sCols to mCols do
         begin
 
-            // Clear data from characters that may injured SQL execution
+            // Clear data from characters that may negatively affect SQL execution
             if Table <> nil then Clean:=CleanStr(Table[iCNT, jCNT], True);
             if Grid  <> nil then Clean:=CleanStr(Grid.Cells[jCNT, iCNT], True);
 
-            if (jCNT <> mCols) then LINE:=LINE + Clean + TUChars.COMMA;
+            if (jCNT <> mCols) then Line:=Line + Clean + TChars.COMMA;
 
             if Table <> nil then
             begin
-                if (jCNT =  mCols) and (iCNT <> mRows) then LINE:=LINE + QuotedStr(Table[iCNT, jCNT]) + TUChars.SPACE + TSql.UNION + TUChars.CRLF;
-                if (jCNT =  mCols) and (iCNT =  mRows) then LINE:=LINE + QuotedStr(Table[iCNT, jCNT]) + TUChars.CRLF;
+                if (jCNT =  mCols) and (iCNT <> mRows) then Line:=Line + QuotedStr(Table[iCNT, jCNT]) + TChars.SPACE + TSql.UNION + TChars.CRLF;
+                if (jCNT =  mCols) and (iCNT =  mRows) then Line:=Line + QuotedStr(Table[iCNT, jCNT]) + TChars.CRLF;
             end;
 
             if Grid <> nil then
             begin
-                if (jCNT =  mCols) and (iCNT <> mRows) then LINE:=LINE + QuotedStr(Grid.Cells[jCNT, iCNT]) + TUChars.SPACE + TSql.UNION + TUChars.CRLF;
-                if (jCNT =  mCols) and (iCNT =  mRows) then LINE:=LINE + QuotedStr(Grid.Cells[jCNT, iCNT]) + TUChars.CRLF;
+                if (jCNT =  mCols) and (iCNT <> mRows) then Line:=Line + QuotedStr(Grid.Cells[jCNT, iCNT]) + TChars.SPACE + TSql.UNION + TChars.CRLF;
+                if (jCNT =  mCols) and (iCNT =  mRows) then Line:=Line + QuotedStr(Grid.Cells[jCNT, iCNT]) + TChars.CRLF;
             end;
 
         end;
 
-        LINES:=LINES + LINE;
-        LINE:='';
+        Lines:=Lines + Line;
+        Line:='';
 
     end;
 
     // Output SQL expression without transaction template
-    Result:=(LEAD + LINES);
+    Result:=(Lead + Lines);
 
 end;
 
@@ -314,12 +303,10 @@ end;
 /// </summary>
 
 function TMSSQL.SqlToGrid(var Grid: TStringGrid; RS: _Recordset; AutoNoCol: boolean; Headers: boolean): boolean;
-var
-    iCNT:  integer;
-    jCNT:  integer;
 begin
+
     Result:=False;
-    iCNT:=0;
+    var iCNT: integer:=0;
 
     // Exit condition
     if RS = nil then Exit;
@@ -334,7 +321,7 @@ begin
 
         while not RS.EOF do
         begin
-            for jCNT:=1 to RS.Fields.Count do
+            for var jCNT: integer:=1 to RS.Fields.Count do
             begin
                 // Headers
                 if (iCNT = 0) and (Headers) then Grid.Cells[jCNT, iCNT]:=VarToStr(RS.Fields[jCNT - 1].Name);
@@ -425,9 +412,9 @@ begin
     Result:='';
 
     case BracketType of
-        TEnums.TBrackets.brRound:  Result:='(' + Expression + ')';
-        TEnums.TBrackets.brSquare: Result:='[' + Expression + ']';
-        TEnums.TBrackets.brCurly:  Result:='{' + Expression + '}';
+        TEnums.TBrackets.Round:  Result:='(' + Expression + ')';
+        TEnums.TBrackets.Square: Result:='[' + Expression + ']';
+        TEnums.TBrackets.Curly:  Result:='{' + Expression + '}';
     end;
 
 end;
@@ -438,8 +425,6 @@ end;
 /// </summary>
 
 function TDataTables.ColumnsToList(Holder: TStringList; Quoted: TEnums.TQuotes): string;
-var
-    iCNT:   integer;
 begin
     Result:=TSql.ALL;
 
@@ -448,7 +433,7 @@ begin
     begin
         Result:='';
 
-        for iCNT:=0 to Holder.Count - 1 do if Result = '' then
+        for var iCNT: integer:=0 to Holder.Count - 1 do if Result = '' then
         begin
 
             case Quoted of
@@ -461,8 +446,8 @@ begin
         begin
 
             case Quoted of
-                TEnums.TQuotes.Disabled: Result:=Result + TUChars.COMMA + Holder.Strings[iCNT];
-                TEnums.TQuotes.Enabled:  Result:=Result + TUChars.COMMA + QuotedStr(Holder.Strings[iCNT]);
+                TEnums.TQuotes.Disabled: Result:=Result + TChars.COMMA + Holder.Strings[iCNT];
+                TEnums.TQuotes.Enabled:  Result:=Result + TChars.COMMA + QuotedStr(Holder.Strings[iCNT]);
             end;
 
         end;
@@ -525,12 +510,9 @@ end;
 /// </param>
 
 function TDataTables.InsertInto(TableName: string; IsExplicit: boolean; ExtSourceGrid: TStringGrid = nil{Option}; ExtSourceArray: TALists = nil{Option}; HeaderPresent: boolean = True {=OPTION}): boolean;
-var
-    Transact: string;
 begin
 
     Result:=False;
-
     try
 
         if not(string.IsNullOrEmpty(Columns.Text)) then
@@ -539,9 +521,9 @@ begin
             if (not(string.IsNullOrEmpty(Values.Text))) and ( (ExtSourceGrid = nil) and (Pointer(ExtSourceArray) = nil) ) then
             begin
                 FStrSQL:=TSql.INSERT +
-                          TableName + TUChars.SPACE + BracketStr(ColumnsToList(Columns, TEnums.TQuotes.Disabled), brRound) +
+                           TableName + TChars.SPACE + BracketStr(ColumnsToList(Columns, TEnums.TQuotes.Disabled), Round) +
                          TSql.VAL +
-                           BracketStr(ColumnsToList(Values, TEnums.TQuotes.Enabled), brRound);
+                           BracketStr(ColumnsToList(Values, TEnums.TQuotes.Enabled), Round);
             end;
 
             if (ExtSourceGrid = nil)  and (ExtSourceArray <> nil) then FStrSQL:=ToSqlInsert(ExtSourceArray, nil, TableName, ColumnsToList(Columns, TEnums.TQuotes.Disabled), HeaderPresent);
@@ -549,14 +531,15 @@ begin
 
             if IsExplicit then
             begin
+                var Transact: string;
                 Transact:=TransactTemp;
-                Transact:=StringReplace(Transact, '{SWITCH}',       'OFF',         [rfReplaceAll]);
-                Transact:=StringReplace(Transact, '{SimpleInput}',  FStrSQL,       [rfReplaceAll]);
-                Transact:=StringReplace(Transact, '{CommonDelete}', TUChars.SPACE, [rfReplaceAll]);
-                Transact:=StringReplace(Transact, '{CommonSelect}', TUChars.SPACE, [rfReplaceAll]);
-                Transact:=StringReplace(Transact, '{ComplexInput}', TUChars.SPACE, [rfReplaceAll]);
-                Transact:=StringReplace(Transact, '{Begin}',        TUChars.SPACE, [rfReplaceAll]);
-                Transact:=StringReplace(Transact, '{End}',          TUChars.SPACE, [rfReplaceAll]);
+                Transact:=StringReplace(Transact, '{SWITCH}',       'OFF',        [rfReplaceAll]);
+                Transact:=StringReplace(Transact, '{SimpleInput}',  FStrSQL,      [rfReplaceAll]);
+                Transact:=StringReplace(Transact, '{CommonDelete}', TChars.SPACE, [rfReplaceAll]);
+                Transact:=StringReplace(Transact, '{CommonSelect}', TChars.SPACE, [rfReplaceAll]);
+                Transact:=StringReplace(Transact, '{ComplexInput}', TChars.SPACE, [rfReplaceAll]);
+                Transact:=StringReplace(Transact, '{Begin}',        TChars.SPACE, [rfReplaceAll]);
+                Transact:=StringReplace(Transact, '{End}',          TChars.SPACE, [rfReplaceAll]);
                 FStrSQL:=Transact;
             end;
 
@@ -590,14 +573,6 @@ end;
 /// </param>
 
 function TDataTables.UpdateRecord(TableName: string; IsExplicit: boolean; SingleCondition: string = '' {Optional}): boolean;
-var
-    iCNT:     integer;
-    Temp:     string;
-    Transact: string;
-    Begins:   string;
-    Ends:     string;
-    Lock:     string;
-    AddComma: string;
 begin
 
     Result:=False;
@@ -607,6 +582,12 @@ begin
 
     // Execute update for each column
     try
+
+        var Temp:     string;
+        var Lock:     string;
+        var Begins:   string;
+        var Ends:     string;
+        var AddComma: string;
 
         if not(SingleCondition.Length) > 0 then
         begin
@@ -619,7 +600,7 @@ begin
             /// WARNING: This one will not lock table rows during the update!
             /// </remarks>
 
-            for iCNT:=0 to Columns.Count - 1 do
+            for var iCNT: integer:=0 to Columns.Count - 1 do
             begin
                 Temp:=Temp + (
                                 TSql._UPDATE +
@@ -630,38 +611,37 @@ begin
                                     QuotedStr(Values.Strings[iCNT]) +
                                 TSql.WHERE +
                                     Conditions.Strings[iCNT] + ';'
-                             ) + TUChars.CRLF;
+                             ) + TChars.CRLF;
             end;
 
         end
         else
-
-        /// <remarks>
-        /// Generates UPDATE statement with multiple columns and values, but with common condition, eg.:
-        ///     UPDATE Customer.DailyComment
-        ///	    SET
-		///         Stamp = '2018-07-31 22:52:29',
-		///         UserAlias = 'TOMEK',
-		///         FixedComment = 'test 55'
-        ///     WHERE Cuid = '870768307200' AND AgeDate = '2018-07-30';
-        /// It is possible to update one row with many columns and values at the time. Performs well with large number of columns.
-        /// </remarks>
-
         begin
 
-            Begins:=TSql._UPDATE + TableName + TUChars.LF + TSql._SET + TUChars.LF;
-            Ends:=TSql.WHERE + SingleCondition;
-            AddComma:=TUChars.COMMA;
+            /// <remarks>
+            /// Generates UPDATE statement with multiple columns and values, but with common condition, eg.:
+            ///     UPDATE Customer.DailyComment
+            ///	    SET
+		    ///         Stamp = '2018-07-31 22:52:29',
+	    	///         UserAlias = 'TOMEK',
+    		///         FixedComment = 'test 55'
+            ///     WHERE Cuid = '870768307200' AND AgeDate = '2018-07-30';
+            /// It is possible to update one row with many columns and values at the time. Performs well with large number of columns.
+            /// </remarks>
 
-            for iCNT:=0 to (Columns.Count - 1) do
+            Begins:=TSql._UPDATE + TableName + TChars.LF + TSql._SET + TChars.LF;
+            Ends:=TSql.WHERE + SingleCondition;
+            AddComma:=TChars.COMMA;
+
+            for var iCNT: integer:=0 to (Columns.Count - 1) do
             begin
-                if iCNT = (Columns.Count - 1) then AddComma:=TUChars.SPACE;
+                if iCNT = (Columns.Count - 1) then AddComma:=TChars.SPACE;
                 Temp:=Temp + (
                                 Columns.Strings[iCNT] +
                                 TSql.EQUAL +
                                 QuotedStr(Values.Strings[iCNT]) +
                                 AddComma +
-                                TUChars.LF
+                                TChars.LF
                              );
             end;
 
@@ -671,20 +651,22 @@ begin
             Lock:=StringReplace(Lock, '{Condition}', SingleCondition, [rfReplaceAll]);
             Begins:=TSql._BEGIN;
             Ends:=TSql._END
+
         end;
 
         FStrSQL:=Temp;
 
         if IsExplicit then
         begin
+            var Transact: string;
             Transact:=TransactTemp;
-            Transact:=StringReplace(Transact, '{SWITCH}',       'OFF',         [rfReplaceAll]);
-            Transact:=StringReplace(Transact, '{CommonSelect}', Lock,          [rfReplaceAll]);
-            Transact:=StringReplace(Transact, '{SimpleInput}',  FStrSQL,       [rfReplaceAll]);
-            Transact:=StringReplace(Transact, '{CommonDelete}', TUChars.SPACE, [rfReplaceAll]);
-            Transact:=StringReplace(Transact, '{ComplexInput}', TUChars.SPACE, [rfReplaceAll]);
-            Transact:=StringReplace(Transact, '{Begin}',        Begins,        [rfReplaceAll]);
-            Transact:=StringReplace(Transact, '{End}',          Ends,          [rfReplaceAll]);
+            Transact:=StringReplace(Transact, '{SWITCH}',       'OFF',        [rfReplaceAll]);
+            Transact:=StringReplace(Transact, '{CommonSelect}', Lock,         [rfReplaceAll]);
+            Transact:=StringReplace(Transact, '{SimpleInput}',  FStrSQL,      [rfReplaceAll]);
+            Transact:=StringReplace(Transact, '{CommonDelete}', TChars.SPACE, [rfReplaceAll]);
+            Transact:=StringReplace(Transact, '{ComplexInput}', TChars.SPACE, [rfReplaceAll]);
+            Transact:=StringReplace(Transact, '{Begin}',        Begins,       [rfReplaceAll]);
+            Transact:=StringReplace(Transact, '{End}',          Ends,         [rfReplaceAll]);
             FStrSQL :=Transact;
         end;
 
@@ -707,9 +689,8 @@ end;
 /// </summary>
 
 function TDataTables.DeleteRecord(TableName: string; KeyName: string; KeyValue: string; IsExplicit: boolean): boolean;
-var
-    Transact: string;
 begin
+
     Result:=False;
 
     if (string.IsNullOrEmpty(TableName))
@@ -722,14 +703,15 @@ begin
 
         if IsExplicit then
         begin
+            var Transact: string;
             Transact:=TransactTemp;
-            Transact:=StringReplace(Transact, '{SWITCH}',       'ON',          [rfReplaceAll]);
-            Transact:=StringReplace(Transact, '{CommonDelete}', FStrSQL,       [rfReplaceAll]);
-            Transact:=StringReplace(Transact, '{CommonSelect}', TUChars.SPACE, [rfReplaceAll]);
-            Transact:=StringReplace(Transact, '{SimpleInput}',  TUChars.SPACE, [rfReplaceAll]);
-            Transact:=StringReplace(Transact, '{ComplexInput}', TUChars.SPACE, [rfReplaceAll]);
-            Transact:=StringReplace(Transact, '{Begin}',        TUChars.SPACE, [rfReplaceAll]);
-            Transact:=StringReplace(Transact, '{End}',          TUChars.SPACE, [rfReplaceAll]);
+            Transact:=StringReplace(Transact, '{SWITCH}',       'ON',         [rfReplaceAll]);
+            Transact:=StringReplace(Transact, '{CommonDelete}', FStrSQL,      [rfReplaceAll]);
+            Transact:=StringReplace(Transact, '{CommonSelect}', TChars.SPACE, [rfReplaceAll]);
+            Transact:=StringReplace(Transact, '{SimpleInput}',  TChars.SPACE, [rfReplaceAll]);
+            Transact:=StringReplace(Transact, '{ComplexInput}', TChars.SPACE, [rfReplaceAll]);
+            Transact:=StringReplace(Transact, '{Begin}',        TChars.SPACE, [rfReplaceAll]);
+            Transact:=StringReplace(Transact, '{End}',          TChars.SPACE, [rfReplaceAll]);
             FStrSQL :=Transact;
         end;
 

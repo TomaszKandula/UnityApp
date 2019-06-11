@@ -24,6 +24,7 @@ uses
     InterposerClasses,
     Helpers;
 
+    // REDESING THIS COMPLETLY!!!!
 
 type
 
@@ -640,7 +641,7 @@ end;
 
 procedure TFilterForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-    if Key = TUChars.ESC then Close;
+    if Key = TChars.ESC then Close;
 end;
 
 

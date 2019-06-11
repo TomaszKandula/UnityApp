@@ -56,6 +56,10 @@ uses
     Helpers;
 
 
+const
+    Restricted = ['0'..'9', #10, #13];
+
+
 // ------------------------------------------------------------------------------------------------------------------------------------------- CLASS HELPERS //
 
 
@@ -64,18 +68,14 @@ uses
 /// </summary>
 
 function TPhoneListForm.CheckPhoneList(List: TMemo): boolean;
-const
-    Restricted = ['0'..'9', #10, #13];
-var
-    iCNT:  integer;
-    Str:   string;
-    Check: integer;
 begin
-    Result:=False;
-    Check:=0;
 
-    Str:=List.Text;
-    for iCNT:=0 to Str.Length do
+    Result:=False;
+
+    var Check: integer:=0;
+    var Str: string:=List.Text;
+
+    for var iCNT: integer:=0 to Str.Length do
     begin
         if CharInSet(Str[iCNT], Restricted)
             then
@@ -111,7 +111,7 @@ begin
 
     if not(CheckPhoneList(PhoneList)) then
     begin
-        MainForm.MsgCall(TCommon.TMsgTypes.Warn, 'Please remove letters before saving the list.' + TUChars.CRLF + 'Only numbers and break line are allowed.');
+        MainForm.MsgCall(TCommon.TMsgTypes.Warn, 'Please remove letters before saving the list.' + TChars.CRLF + 'Only numbers and break line are allowed.');
         Exit;
     end;
 
@@ -143,4 +143,5 @@ end;
 
 
 end.
+
 

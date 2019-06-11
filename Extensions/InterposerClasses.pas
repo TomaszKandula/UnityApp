@@ -5,23 +5,23 @@ interface
 
 
 uses
-    Grids,
-    ExtCtrls,
-    Messages,
-    Controls,
-    Graphics,
-    Types,
-    Dialogs,
-    Forms,
+    System.Math,
+    System.Types,
+    System.SysUtils,
+    System.Classes,
+    System.Win.ComObj,
+    System.Variants,
     Winapi.Windows,
-    Clipbrd,
-    SysUtils,
-    Math,
-    Classes,
-    ComObj,
-    ComCtrls,
-    Variants,
-    StdCtrls,
+    Winapi.Messages,
+    Vcl.Grids,
+    Vcl.ExtCtrls,
+    Vcl.Controls,
+    Vcl.Graphics,
+    Vcl.Dialogs,
+    Vcl.Forms,
+    Vcl.Clipbrd,
+    Vcl.ComCtrls,
+    Vcl.StdCtrls,
     CheckLst,
     Helpers;
 
@@ -30,7 +30,7 @@ type
 
 
     // Reference to TSTringGrid object, necessary for implementing "delete" function.
-    TAbstractGrid = class(Grids.TStringGrid);
+    TAbstractGrid = class(Vcl.Grids.TStringGrid);
 
 
     TCheckListBox = class(CheckLst.TCheckListBox)
@@ -39,7 +39,7 @@ type
     end;
 
 
-    TEdit = Class(StdCtrls.TEdit)
+    TEdit = Class(Vcl.StdCtrls.TEdit)
     public
         FAlignment: TAlignment;
         procedure SetAlignment(value: TAlignment);
@@ -48,7 +48,7 @@ type
     end;
 
 
-    TShape = class(ExtCtrls.TShape)
+    TShape = class(Vcl.ExtCtrls.TShape)
     protected
         procedure Paint; override;
         procedure CMFontChanged(var Msg: TMessage); message CM_FONTCHANGED;
@@ -63,7 +63,7 @@ type
     end;
 
 
-    TPanel = class(ExtCtrls.TPanel)
+    TPanel = class(Vcl.ExtCtrls.TPanel)
     protected
         procedure Paint; override;
     published
@@ -81,7 +81,7 @@ type
     end;
 
 
-    TStringGrid = class(Grids.TStringGrid)
+    TStringGrid = class(Vcl.Grids.TStringGrid)
     protected
         procedure Paint; override;
     private
@@ -121,7 +121,7 @@ type
     end;
 
 
-    TListView = class(ComCtrls.TListView)
+    TListView = class(Vcl.ComCtrls.TListView)
     published
         procedure Freeze(PaintWnd: boolean);
     end;
@@ -164,6 +164,7 @@ end;
 
 procedure TEdit.CreateParams(var Params: TCreateParams);
 begin
+
     inherited CreateParams(Params);
 
     case Alignment of
@@ -177,11 +178,13 @@ end;
 
 procedure TEdit.SetAlignment(value: TAlignment);
 begin
+
     if FAlignment <> value then
     begin
         FAlignment:=value;
         RecreateWnd;
     end;
+
 end;
 
 
@@ -207,13 +210,12 @@ end;
 /// </summary>
 
 procedure TShape.Paint;
-var
-    R: TRect;
 begin
+
     inherited;
+    var R: TRect:=ClientRect;
 
     Canvas.Font.Assign(Font);
-    R:=ClientRect;
 
     /// <remarks>
     /// Alternative code:
@@ -249,55 +251,52 @@ end;
 
 
 procedure TPanel.Paint;
-var
-    R: TRect;
 begin
+
     inherited;
 
     /// <remarks>
     /// None of the given variables can be coloured black.
     /// </remarks>
 
-    if (mcBrushColor   <> $00000000) and
-       (PenColorTop    <> $00000000) and
-       (PenColorBottom <> $00000000) and
-       (PenColorLeft   <> $00000000) and
-       (PenColorRight  <> $00000000) then
-    begin
+    if (mcBrushColor   = $00000000) and
+       (PenColorTop    = $00000000) and
+       (PenColorBottom = $00000000) and
+       (PenColorLeft   = $00000000) and
+       (PenColorRight  = $00000000) then Exit;
 
-        // Get dimensions
-        R:=ClientRect;
+    // Get dimensions
+    var R: TRect:=ClientRect;
 
-        // Fill background
-        Canvas.Brush.Color:=mcBrushColor;
+    // Fill background
+    Canvas.Brush.Color:=mcBrushColor;
 
-        // Top border
-        Canvas.Pen.Width:=PenWidthTop;
-        Canvas.Pen.Color:=PenColorTop;
-        Canvas.MoveTo(1,           1);
-        Canvas.LineTo(R.Right - 1, 1);
+    // Top border
+    Canvas.Pen.Width:=PenWidthTop;
+    Canvas.Pen.Color:=PenColorTop;
+    Canvas.MoveTo(1,           1);
+    Canvas.LineTo(R.Right - 1, 1);
 
-        // Bottom border
-        Canvas.Pen.Width:=PenWidthBottom;
-        Canvas.Pen.Color:=PenColorBottom;
-        Canvas.MoveTo(1,           R.Bottom - 1);
-        Canvas.LineTo(R.Right - 1, R.Bottom - 1);
+    // Bottom border
+    Canvas.Pen.Width:=PenWidthBottom;
+    Canvas.Pen.Color:=PenColorBottom;
+    Canvas.MoveTo(1,           R.Bottom - 1);
+    Canvas.LineTo(R.Right - 1, R.Bottom - 1);
 
-        // Left border
-        Canvas.Pen.Width:=PenWidthLeft;
-        Canvas.Pen.Color:=PenColorLeft;
-        Canvas.MoveTo(1,            1);
-        Canvas.LineTo(1, R.Bottom - 1);
+    // Left border
+    Canvas.Pen.Width:=PenWidthLeft;
+    Canvas.Pen.Color:=PenColorLeft;
+    Canvas.MoveTo(1,            1);
+    Canvas.LineTo(1, R.Bottom - 1);
 
-        // Right border
-        Canvas.Pen.Width:=PenWidthRight;
-        Canvas.Pen.Color:=PenColorLeft;
-        Canvas.MoveTo(R.Right - 1,            1);
-        Canvas.LineTo(R.Right - 1, R.Bottom - 1);
-
-    end;
+    // Right border
+    Canvas.Pen.Width:=PenWidthRight;
+    Canvas.Pen.Color:=PenColorLeft;
+    Canvas.MoveTo(R.Right - 1,            1);
+    Canvas.LineTo(R.Right - 1, R.Bottom - 1);
 
 end;
+
 
 procedure TPanel.PanelBorders(FillColor, TopColor, BottomColor, LeftColor, RightColor: TColor);
 begin
@@ -322,9 +321,9 @@ end;
 /// </summary>
 
 procedure TStringGrid.SetUpdatedRow(Row: integer);
-var
-    Rows: integer;
 begin
+
+    var Rows: integer;
 
     if Row = 0 then
     begin
@@ -349,8 +348,6 @@ end;
 
 
 procedure TStringGrid.RecordRowsAffected;
-var
-    iCNT: integer;
 begin
 
     if Selection.Top - Selection.Bottom = 0 then
@@ -359,107 +356,30 @@ begin
     end
     else
     begin
-        for iCNT:=Selection.Top to Selection.Bottom do
+        for var iCNT: integer:=Selection.Top to Selection.Bottom do
             if RowHeights[iCNT] = sgRowHeight then
                 SetUpdatedRow(iCNT);
     end;
 
-
-    MainForm.DebugMsg('');
-
 end;
 
 
-/// <summary>
-/// Remove focus rectangle from selection.
-/// </summary>
-/// <remarks>
-/// It requires default drawing to be off.
-/// </remarks>
-
 procedure TStringGrid.Paint;
-var
-    FocusRect: TRect;
-    //R: TRect;
 begin
+
     inherited;
 
     if HideFocusRect then
     begin
-        FocusRect:=CellRect(Col, Row);
+        var FocusRect: TRect:=CellRect(Col, Row);
         if DrawingStyle = gdsThemed then InflateRect(FocusRect, -1, -1);
         DrawFocusRect(Canvas.Handle, FocusRect);
     end;
 
-//    /// <remarks>
-//    ///     None of the given variables can be black.
-//    /// </remarks>
-//
-//    if (mcBrushColor   <> $00000000) and
-//       (PenColorTop    <> $00000000) and
-//       (PenColorBottom <> $00000000) and
-//       (PenColorLeft   <> $00000000) and
-//       (PenColorRight  <> $00000000) then
-//    begin
-//
-//        // Get dimensions
-//        R:=ClientRect;
-//
-//        // Fill background
-//        Canvas.Brush.Color:=mcBrushColor;
-//
-//        // Top border
-//        Canvas.Pen.Width:=PenWidthTop;
-//        Canvas.Pen.Color:=PenColorTop;
-//        Canvas.MoveTo(0,           0);
-//        Canvas.LineTo(R.Right - 0, 0);
-//
-//        // Bottom border
-//        Canvas.Pen.Width:=PenWidthBottom;
-//        Canvas.Pen.Color:=PenColorBottom;
-//        Canvas.MoveTo(1,           R.Bottom - 1 + 10);
-//        Canvas.LineTo(R.Right - 1, R.Bottom - 1 + 10);
-//
-//        // Left border
-//        Canvas.Pen.Width:=PenWidthLeft;
-//        Canvas.Pen.Color:=PenColorLeft;
-//        Canvas.MoveTo(0,            0);
-//        Canvas.LineTo(0, R.Bottom - 0);
-//
-//        // Right border
-//        Canvas.Pen.Width:=PenWidthRight;
-//        Canvas.Pen.Color:=PenColorLeft;
-//        Canvas.MoveTo(R.Right - 1,            1 + 10);
-//        Canvas.LineTo(R.Right - 1, R.Bottom - 1 + 10);
-//
-//    end;
-
 end;
 
 
-/// <summary>
-/// Implementation of "Copy, Cut, Past" functionality.
-/// </summary>
-/// <param name="mode">Integer, use flag defined in common.inc.</param>
-
 procedure TStringGrid.CopyCutPaste(Mode: TEnums.TActionTask; FirstColOnly: boolean = False{Option});
-var
-    Grect:      TGridRect;
-    Clipbrd:    string;
-    RTop:       integer;
-    CLeft:      integer;
-    Sel:        TGridRect;
-    Row:        integer;
-    Col:        integer;
-    TxtFromSel: string;
-    NewRows:    integer;
-    NewCols:    integer;
-    RowCounter: integer;
-    iCNT:       integer;
-    jCNT:       integer;
-    zCNT:       integer;
-    TempRows:   TStringList;
-    TempCols:   TStringList;
 begin
 
     // Paste data into string grid
@@ -467,35 +387,36 @@ begin
     begin
 
         // Get clipboard text
-        RowCounter:=0;
-        NewRows:=0;
-        NewCols:=0;
-        Clipbrd:=ClipBoard.AsText;
+        var RowCounter: integer:=0;
+        var NewRows:    integer:=0;
+        var NewCols:    integer:=0;
+        var Clipbrd:    string:=ClipBoard.AsText;
 
         // Get dimension from clipboard text
-        for iCNT:=0 to Length(Clipbrd) do
+        for var iCNT: integer:=0 to Length(Clipbrd) do
         begin
             // Get number of columns in given row
-            if (Clipbrd[iCNT] = TUChars.TAB) and (NewRows = 0) then Inc(NewCols);
+            if (Clipbrd[iCNT] = TChars.TAB) and (NewRows = 0) then Inc(NewCols);
             // Get number of total rows
-            if Clipbrd[iCNT] = TUChars.LF then Inc(NewRows);
+            if Clipbrd[iCNT] = TChars.LF then Inc(NewRows);
         end;
 
         // Split into rows and cols
-        TempRows:=TStringList.Create;
-        TempCols:=TStringList.Create;
+        var TempRows: TStringList:=TStringList.Create;
+        var TempCols: TStringList:=TStringList.Create;
         try
+
             TempRows.StrictDelimiter:=True;
-            TempRows.Delimiter:=TUChars.LF;
+            TempRows.Delimiter:=TChars.LF;
             TempRows.DelimitedText:=Clipbrd;
 
             // Set start anchor of new selection
-            GRect:=Selection;
-            RTop :=GRect.Top;
-            CLeft:=GRect.Left;
+            var Grect: TGridRect:=Selection;
+            var RTop:  integer:=GRect.Top;
+            var CLeft: integer:=GRect.Left;
 
             // Look for end anchor of new selection
-            for iCNT:=RTop to RowCount - 1 do
+            for var iCNT: integer:=RTop to RowCount - 1 do
             begin
 
                 // Paste into visible row
@@ -510,14 +431,15 @@ begin
                     if NewCols > 0 then
                     begin
 
-                        for jCNT:=0 to NewCols do
+                        for var jCNT: integer:=0 to NewCols do
                         begin
+
                             TempCols.StrictDelimiter:=True;
-                            TempCols.Delimiter:=TUChars.TAB;
+                            TempCols.Delimiter:=TChars.TAB;
                             TempCols.DelimitedText:=TempRows.Strings[RowCounter];
 
                             // Paste into columns
-                            for zCNT:=0 to TempCols.Count - 1 do
+                            for var zCNT: integer:=0 to TempCols.Count - 1 do
                             begin
                                 Cells[CLeft + zCNT, iCNT]:=TempCols.Strings[zCNT];
                                 // Allow only first column to be pasted
@@ -561,8 +483,11 @@ begin
     // Copy/Cut data from string grid
     if (Mode = TEnums.TActionTask.adCopy) or (Mode = TEnums.TActionTask.adCut) then
     begin
-        Sel:=Selection;
-        TxtFromSel:='';
+
+        var Sel: TGridRect:=Selection;
+        var TxtFromSel: string;
+        var Row: integer;
+        var Col: integer;
 
         // Go row by row
         for Row:=Sel.Top to Sel.Bottom do
@@ -587,19 +512,19 @@ begin
                             Cells[Col, Row]:='';
 
                         if Col < Sel.Right then
-                            TxtFromSel:=TxtFromSel + TUChars.TAB;
+                            TxtFromSel:=TxtFromSel + TChars.TAB;
 
                     end;
 
                 end;
 
                 if Row < Sel.Bottom then
-                    TxtFromSel:=TxtFromSel + TUChars.CRLF;
+                    TxtFromSel:=TxtFromSel + TChars.CRLF;
             end;
 
         end;
 
-        ClipBoard.AsText:=TxtFromSel + TUChars.CRLF;
+        ClipBoard.AsText:=TxtFromSel + TChars.CRLF;
 
     end;
 
@@ -610,27 +535,24 @@ procedure TStringGrid.DelEsc(Mode: TEnums.TActionTask; pCol, pRow: integer);
 begin
 
     case Mode of
-        TEnums.TActionTask.adESC: EditorMode:=False;
-        TEnums.TActionTask.adDEL: Cells[pCol, pRow]:='';
+        TEnums.TActionTask.adEscape: EditorMode:=False;
+        TEnums.TActionTask.adDelete: Cells[pCol, pRow]:='';
     end;
 
 end;
 
 
 procedure TStringGrid.ClearAll(dfRows: integer; FixedRows: integer; FixedCols: integer; ZeroCol: boolean);
-var
-    iCNT:    integer;
-    jCNT:    integer;
-    OffSet:  integer;
 begin
 
     if not Enabled then Exit;
 
+    var OffSet: integer;
     if ZeroCol then
         OffSet:=1 else OffSet:=0;
 
-    for iCNT:=FixedRows to Self.RowCount do
-        for jCNT:=(FixedCols - OffSet) to Self.ColCount do
+    for var iCNT: integer:=FixedRows to Self.RowCount do
+        for var jCNT: integer:=(FixedCols - OffSet) to Self.ColCount do
             Cells[jCNT, iCNT]:='';
 
     RowCount:=dfRows;
@@ -639,12 +561,6 @@ end;
 
 
 procedure TStringGrid.DeleteRowFrom(FixedRow: integer; FixedCol: integer);
-var
-    mySG:    TAbstractGrid;
-    myRect:  TGridRect;
-    sRow:    integer;
-    iCNT:    integer;
-    jCNT:    integer;
 begin
 
     // Disable drawing
@@ -653,10 +569,12 @@ begin
     // Check for last row.
     if RowCount > FixedRow + 1 then
     begin
+
         // Remember selected row
-        sRow:=Row;
+        var sRow: integer:=Row;
 
         // Selection
+        var myRect: TGridRect;
         myRect.Left  :=1;
         myRect.Right :=Col;
         myRect.Top   :=Row;
@@ -668,7 +586,7 @@ begin
         /// <remarks>
         /// Do not nil or free it.
         /// </remarks>
-        mySG:=TAbstractGrid(Self);
+        var mySG: TAbstractGrid:=TAbstractGrid(Self);
         mySG.DeleteRow(sRow);
 
         // Keep selection in place
@@ -678,7 +596,9 @@ begin
     else
     begin
         if RowCount = FixedRow + 1 then
-            for iCNT:=FixedRow to RowCount do for jCNT:=FixedCol to ColCount do Cells[jCNT, iCNT]:='';
+            for var iCNT: integer:=FixedRow to RowCount do
+                for var jCNT: integer:=FixedCol to ColCount do
+                    Cells[jCNT, iCNT]:='';
     end;
 
     // Enable drawing
@@ -692,14 +612,11 @@ end;
 
 
 procedure TStringGrid.DrawSelected(ARow: integer; ACol: integer; State: TGridDrawState; Rect: TRect; FontColorSel: TColor; BrushColorSel: TColor; FontColor: TColor; BrushColor: TColor; Headers: boolean);
-var
-    FixedColumn:  integer;
-    FixedRow:     integer;
 begin
 
     // Extend drawing on headers if false
-    FixedColumn:=0;
-    FixedRow   :=0;
+    var FixedColumn: integer:=0;
+    var FixedRow:    integer:=0;
 
     if not (Headers) then
     begin
@@ -733,14 +650,11 @@ end;
 
 
 procedure TStringGrid.ColorValues(ARow: integer; ACol: integer; Rect: TRect; NegativeColor: TColor; PositiveColor: TColor);
-var
-    MyCell:   string;
-    TestCell: string;
 begin
 
     // Get data
-    MyCell:=Cells[ACol, ARow];
-    TestCell:=MyCell;
+    var MyCell: string:=Cells[ACol, ARow];
+    var TestCell: string:=MyCell;
 
     // Remove decimal separator so it can be converted correctly
     if FormatSettings.ThousandSeparator = ',' then TestCell:=StringReplace(TestCell, ',', '', [rfReplaceAll]);
@@ -762,12 +676,10 @@ end;
 
 
 procedure TStringGrid.SetColWidth(FirstDefault: integer; AddSpace: integer; Limit: integer);
-var
-    tblArray:  TAIntigers;
-    iCNT:      integer;
-    jCNT:      integer;
-    NewWidth:  integer;
 begin
+
+    var tblArray: TAIntigers;
+    var NewWidth: integer;
 
     if Row > 0 then
         SetLength(tblArray, RowCount)
@@ -777,11 +689,11 @@ begin
     ColWidths[0]:=FirstDefault;
 
     // Iterate throught all the columns
-    for jCNT:=1 to ColCount - 1 do
+    for var jCNT: integer:=1 to ColCount - 1 do
     begin
 
         // Iterate throught all rows including actual header
-        for iCNT:=0 to RowCount - 1 do tblArray[iCNT]:=Canvas.TextWidth(Cells[jCNT, iCNT]);
+        for var iCNT: integer:=0 to RowCount - 1 do tblArray[iCNT]:=Canvas.TextWidth(Cells[jCNT, iCNT]);
 
         // Return highest value
         if not (ColWidths[jCNT] = -1) then { Skip hidden columns }
@@ -811,20 +723,17 @@ end;
 
 
 procedure TStringGrid.MSort(const SortCol: integer; const DataType: integer; const Ascending: boolean);
-var
-    iCNT:     integer;
-    TempGrid: TStringGrid;
-    List:     array of integer;
 begin
-    TempGrid:=TStringGrid.create(nil);
 
+    var List:  Helpers.TAIntigers;
+    var TempGrid: TStringGrid:=TStringGrid.create(nil);
     try
         TempGrid.RowCount :=RowCount;
         TempGrid.ColCount :=ColCount;
         TempGrid.FixedRows:=FixedRows;
         SetLength(List, RowCount - FixedRows);
 
-        for iCNT:= FixedRows to RowCount - 1 do
+        for var iCNT: integer:=FixedRows to RowCount - 1 do
         begin
             List[iCNT - FixedRows]:=iCNT;
             TempGrid.Rows[iCNT].Assign(Rows[iCNT]);
@@ -832,7 +741,7 @@ begin
 
         MergeSort(Self, List, SortCol, DataType, Ascending);
 
-        for iCNT:=0 to RowCount - FixedRows - 1 do
+        for var iCNT: integer:=0 to RowCount - FixedRows - 1 do
         begin
             Rows[iCNT + FixedRows].Assign(TempGrid.Rows[List[iCNT]]);
         end;
@@ -849,7 +758,7 @@ end;
 
 
 /// <summary>
-/// Auto thumb size implementation.
+/// Auto thumb size custom implementation.
 /// </summary>
 /// <remarks>
 /// Do not use it, string grid scrolls are bugged. Instead, use separate scroll component, or default string grid scroll behaviour with no
@@ -857,9 +766,9 @@ end;
 /// </remarks>
 
 procedure TStringGrid.AutoThumbSize;
-var
-    info:  TScrollInfo;
 begin
+
+    var info: TScrollInfo;
 
     // Read data
     Fillchar(info, SizeOf(info), 0);
@@ -888,7 +797,7 @@ begin
         //nPage:=Self.ColCount div Self.VisibleColCount;
     end;
 
-  SetScrollInfo(Self.Handle, SB_HORZ, info, True);
+    SetScrollInfo(Self.Handle, SB_HORZ, info, True);
 
 end;
 
@@ -899,25 +808,23 @@ end;
 /// </summary>
 
 procedure TStringGrid.SaveLayout(ColWidthName: string; ColOrderName: string; ColNames: string; ColPrefix: string);
-var
-    Settings:  ISettings;
-    iCNT:      integer;
 begin
-    Settings:=TSettings.Create;
+
+    var Settings: ISettings:=TSettings.Create;
 
     // Column width
-    for iCNT:=0 to Self.ColCount - 1 do
+    for var iCNT: integer:=0 to Self.ColCount - 1 do
     begin
         if iCNT = 0 then Settings.SetIntegerValue(ColWidthName, ColPrefix + IntToStr(iCNT), 10);
         if iCNT > 0 then Settings.SetIntegerValue(ColWidthName, ColPrefix + IntToStr(iCNT), Self.ColWidths[iCNT]);
     end;
 
     // SQL column name
-    for iCNT:=0 to Self.ColCount - 1 do
+    for var iCNT: integer:=0 to Self.ColCount - 1 do
         Settings.SetStringValue(ColOrderName, ColPrefix + IntToStr(iCNT), Self.SqlColumns[iCNT, 0]);
 
     // Column title
-    for iCNT:=0 to Self.ColCount - 1 do
+    for var iCNT: integer:=0 to Self.ColCount - 1 do
     begin
         if iCNT = 0 then Settings.SetStringValue(ColNames, ColPrefix + IntToStr(iCNT), '');
         if iCNT > 0 then Settings.SetStringValue(ColNames, ColPrefix + IntToStr(iCNT), Self.SqlColumns[iCNT, 1]);
@@ -945,23 +852,17 @@ end;
 /// </remarks>
 
 function TStringGrid.LoadLayout(var StrCol: string; ColWidthName: string; ColOrderName: string; ColNames: string; ColPrefix: string): boolean;
-var
-    Settings:    ISettings;
-    ColOrderSec: TStringList;
-    ColWidthSec: TStringList;
-    ColNamesSec: TStringList;
-    iCNT:        integer;
 begin
 
     // Check number of keys in given section
     Result:=False;
 
-    ColWidthSec:=TStringList.Create;
-    ColOrderSec:=TStringList.Create;
-    ColNamesSec:=TStringList.Create;
-
-    Settings:=TSettings.Create;
+    var ColOrderSec: TStringList:=TStringList.Create;
+    var ColWidthSec: TStringList:=TStringList.Create;
+    var ColNamesSec: TStringList:=TStringList.Create;
+    var Settings: ISettings:=TSettings.Create;
     try
+
         Settings.GetSection(ColWidthName, ColWidthSec);
         Settings.GetSection(ColOrderName, ColOrderSec);
         Settings.GetSection(ColNames, ColNamesSec);
@@ -972,7 +873,7 @@ begin
             Result:=True;
             SetLength(Self.SqlColumns, Self.ColCount, 2);
 
-            for iCNT:=0 to Self.ColCount - 1 do
+            for var iCNT: integer:=0 to Self.ColCount - 1 do
             begin
                 // Skip first column as it holds empty column (by design, we do not display ID in first column, etc.)
                 if iCNT > 0 then
@@ -995,6 +896,7 @@ begin
 
             end;
         end;
+
     finally
         ColWidthSec.Free;
         ColOrderSec.Free;
@@ -1005,13 +907,11 @@ end;
 
 
 function TStringGrid.ReturnColumn(ColumnName: string; FixedCol: integer; FixedRow: integer): integer;
-var
-    iCNT: integer;
 begin
-    // Out of bound by default
-    Result:=-100;
 
-    for iCNT:=FixedCol to ColCount - 1 do
+    Result:=-100; // Warning! Out of bound by default
+
+    for var iCNT: integer:=FixedCol to ColCount - 1 do
     begin
         if Cells[iCNT, FixedRow - 1] = ColumnName then
         begin
@@ -1033,30 +933,15 @@ end;
 /// </remarks>
 
 function TStringGrid.ToExcel(ASheetName: string; AFileName: string): boolean;
-var
-    Col:        integer;
-    Row:        integer;
-
-    /// <remarks>
-    /// Offsets cannot be less than one.
-    /// </remarks>
-    RowOffset:  integer;
-    ColOffset:  integer;
-
-    XLApp:      OLEVariant;
-    Sheet:      OLEVariant;
-    DataTables: TDataTables;
-
 begin
+
     Result:=False;
 
-    DataTables:=TDataTables.Create(MainForm.DbConnect);
+    var DataTables: TDataTables:=TDataTables.Create(MainForm.DbConnect);
     try
-        {TODO -oTomek -cTightCoupling : Refactor}
-
         // Assign command with stored procedure
-        DataTables.StrSQL:=TSql.EXECUTE + DataTables.AgeViewExport + TUChars.SPACE +
-                       QuotedStr(MainForm.GroupList[MainForm.GroupListBox.ItemIndex, 0]) + TUChars.COMMA +
+        DataTables.StrSQL:=TSql.EXECUTE + DataTables.AgeViewExport + TChars.SPACE +
+                       QuotedStr(MainForm.GroupList[MainForm.GroupListBox.ItemIndex, 0]) + TChars.COMMA +
                        QuotedStr(MainForm.GroupListDates.Text);
         // Execute
         DataTables.SqlToGrid(Self, DataTables.ExecSQL, False, True);
@@ -1066,38 +951,33 @@ begin
 
     // Initiate Excel application
     try
-        XLApp:=CreateOleObject('Excel.Application');
+
+        var XLApp: OLEVariant:=CreateOleObject('Excel.Application');
+        var Sheet: OLEVariant;
+
         try
+
             XLApp.Visible:=False;
             XLApp.Caption:='Unity For Debt Management - Data Export';
             XLApp.DisplayAlerts:=False;
             XLApp.Workbooks.Add(xlWBatWorkSheet);
 
-            /// <remarks>
-            /// Code insight may show false error for below lines of code:
-            /// </remarks>
-            /// <code>
-            ///     Sheet:=XLApp.Workbooks[1].WorkSheets[1];
-            ///     XLApp.Workbooks[1].SaveAs(AFileName);
-            /// </code>
-            /// <remarks>
-            /// In such case, ignore it (test it on RAD Studio XE2 and Tokyo edition).
-            /// </remarks>
             Sheet:=XLApp.Workbooks[1].WorkSheets[1];
             Sheet.Name:=ASheetName;
 
-            ColOffset:=1;
-            RowOffset:=1;
+            /// <remarks>Offsets cannot be less than one.</remarks>
+            var RowOffset: integer:=1;
+            var ColOffset: integer:=1;
 
             // To Excel sheet
-            for Col:=0 to Self.ColCount - 1 do
-                for Row:=0 to Self.RowCount - 1 do
+            for var Col: integer:=0 to Self.ColCount - 1 do
+                for var Row: integer:=0 to Self.RowCount - 1 do
                     // We mitt first string grid column
                     Sheet.Cells[Row + RowOffset, Col + ColOffset]:=Self.Cells[Col + 1, Row];
 
             // Simple formatting (this can be extended
-            for Col:=0 to Self.ColCount - 1 do Sheet.Columns[Col + ColOffset].ColumnWidth:=15;
-            for Row:=0 to Self.RowCount - 1 do Sheet.Rows[Row + RowOffset].RowHeight:=15;
+            for var Col: integer:=0 to Self.ColCount - 1 do Sheet.Columns[Col + ColOffset].ColumnWidth:=15;
+            for var Row: integer:=0 to Self.RowCount - 1 do Sheet.Rows[Row + RowOffset].RowHeight:=15;
 
             // Save to file
             XLApp.Workbooks[1].SaveAs(AFileName);
@@ -1107,6 +987,7 @@ begin
 
             if not VarIsEmpty(XLApp) then
             begin
+
                 XLApp.DisplayAlerts:=False;
                 XLApp.Quit;
                 XLAPP:=Unassigned;
@@ -1160,33 +1041,28 @@ end;
 
 
 function TStringGrid.ImportCSV(DialogBox: TOpenDialog; Delimiter: string): boolean;
-var
-    iCNT:       integer;
-    jCNT:       integer;
-    Count:      integer;
-    Data:       TStringList;
-    Transit:    TStringList;
-    fPath:      string;
-    IsError:    boolean;
 begin
-    Result :=False;
-    IsError:=False;
-    Count  :=0;
+
+    Result:=False;
+
+    var fPath:   string:=DialogBox.FileName;
+    var IsError: boolean:=False;
+    var Count:   integer:=0;
 
     // GET THE FILE PATH AND PARSE
     if DialogBox.Execute = True then
     begin
-        MainForm.ExecMessage(True, TMessaging.msStatusBar, TStatusBar.ImportCSV);
-        fPath  :=DialogBox.FileName;
-        Data   :=TStringList.Create;
-        Transit:=TStringList.Create;
 
+        MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.ImportCSV);
+
+        var Data:    TStringList:=TStringList.Create;
+        var Transit: TStringList:=TStringList.Create;
         try
             // Get data from file
             Data.LoadFromFile(fPath);
 
             // Get columns number
-            for iCNT:=0 to Length(Data[0]) do
+            for var iCNT: integer:=0 to Length(Data[0]) do
                 if copy(Data[0], iCNT, 1) = Delimiter then inc(Count);
 
             // Get rows number and setup offset
@@ -1198,12 +1074,12 @@ begin
 
             // Iterate through all rows
             try
-                for iCNT:= 0 to Data.Count - 1 do
+                for var iCNT: integer:= 0 to Data.Count - 1 do
                 begin
                     // Split string using given delimiter
                     Transit.DelimitedText:=Data[iCNT];
 
-                    for jCNT:=1 to Count do
+                    for var jCNT: integer:=1 to Count do
                         Self.Cells[jCNT, iCNT + 1]:=Transit[jCNT - 1];
 
                     Self.Cells[0, iCNT + 1]:=IntToStr((iCNT + 1));
@@ -1216,21 +1092,22 @@ begin
                 on E: Exception do
                 begin
                     MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: CSV Import has failed: ' + ExtractFileName(fPath));
-                    MainForm.ExecMessage(False, TMessaging.msError, 'CSV Import has failed. Please check the file and try again.');
+                    MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'CSV Import has failed. Please check the file and try again.');
                     IsError:=True;
                 end;
             end;
 
         finally
+
             if not IsError then
             begin
                 MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: Data has been imported successfully!');
-                MainForm.ExecMessage(False, TMessaging.msInfo, 'Data has been imported successfully!');
+                MainForm.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Data has been imported successfully!');
             end;
 
             Data.Free;
             Transit.Free;
-            MainForm.ExecMessage(True, TMessaging.msStatusBar, TStatusBar.Ready);
+            MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready);
 
         end;
 
@@ -1240,40 +1117,40 @@ end;
 
 
 function TStringGrid.ExportCSV(DialogBox: TSaveDialog; Delimiter: string): boolean;
-var
-    iCNT:       integer;
-    jCNT:       integer;
-    fPath:      string;
-    CSVData:    TStringList;
-    MyStr:      string;
-    CleanStr:   string;
-    IsError:    boolean;
 begin
 
     Result :=False;
-    IsError:=False;
-    CSVData:=TStringList.Create;
+    var IsError: boolean:=False;
 
     // Write to CSV file
+    var CSVData: TStringList:=TStringList.Create;
     try
-        MainForm.ExecMessage(False, TMessaging.msStatusBar, TStatusBar.ExportCSV);
+
+        var fPath:    string;
+        var MyStr:    string;
+        var CleanStr: string;
+
+        MainForm.ExecMessage(False, TMessaging.TWParams.StatusBar, TStatusBar.ExportCSV);
 
         // Add rows and columns with delimiter
-        for iCNT:=1 to Self.RowCount - 1 do
+        for var iCNT: integer:=1 to Self.RowCount - 1 do
         begin
-            for jCNT:= 1 to Self.ColCount - 1 do
+
+            for var jCNT: integer:= 1 to Self.ColCount - 1 do
             begin
                 CleanStr :=Self.Cells[jCNT, iCNT];
-                CleanStr :=StringReplace(CleanStr, TUChars.CRLF, ' ', [rfReplaceAll]);
+                CleanStr :=StringReplace(CleanStr, TChars.CRLF, ' ', [rfReplaceAll]);
                 MyStr    :=MyStr + CleanStr + Delimiter;
             end;
 
             CSVData.Add(MyStr);
             MyStr:='';
+
         end;
 
         // Save to file as plain text
         try
+
             if DialogBox.Execute then
             begin
                 CSVData.SaveToFile(DialogBox.FileName);
@@ -1281,23 +1158,27 @@ begin
             end
                 else
                     Exit;
+
         except
             on E: Exception do
             begin
                 MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: Cannot saved file: ' + ExtractFileName(fPath));
-                MainForm.ExecMessage(False, TMessaging.msError, 'Cannot save the file in the given location.');
+                MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot save the file in the given location.');
                 IsError:=True;
             end;
         end;
 
     finally
+
         if not IsError then
         begin
             MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: Data has been exported successfully!');
-            MainForm.ExecMessage(False, TMessaging.msInfo, 'Data have been exported successfully!');
+            MainForm.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Data have been exported successfully!');
         end;
+
         CSVData.Free;
-        MainForm.ExecMessage(False, TMessaging.msStatusBar, TStatusBar.Ready);
+        MainForm.ExecMessage(False, TMessaging.TWParams.StatusBar, TStatusBar.Ready);
+
     end;
 
 end;
@@ -1308,9 +1189,8 @@ end;
 /// </summary>
 
 procedure TStringGrid.SelectAll;
-var
-    GridRect: TGridRect;
 begin
+    var GridRect: TGridRect;
     GridRect.Left  :=1;
     GridRect.Top   :=1;
     GridRect.Right :=Self.ColCount;

@@ -16,6 +16,7 @@ uses
     InterposerClasses,
     Helpers;
 
+
 type
 
 
@@ -76,21 +77,20 @@ end;
 
 
 function TUserControl.GetGroupList(var List: TALists; GroupListBox: TComboBox): boolean;
-var
-    iCNT:     integer;
-    UserKey:  string;
 begin
-    Result:=True;
-    iCNT  :=0;
 
+    Result:=True;
     try
-        UserKey:=GetAccessData(UserKeyId);
+
+        var UserKey: string:=GetAccessData(UserKeyId);
         CustFilter:=TSql.WHERE + TGroups.Fid + TSql.EQUAL + QuotedStr(UserKey) + TSql.ORDER + TGroups.GroupName + TSql.ASC;
         OpenTable(TGroups.Groups);
 
         if DataSet.RecordCount > 0 then
         begin
             SetLength(List, 2, 2);
+
+            var iCNT: integer:=0;
             while not DataSet.EOF do
             begin
                 List[iCNT, 0]:=DataSet.Fields[TGroups.GroupId].Value;
@@ -106,6 +106,7 @@ begin
             GroupListBox.Clear;
             for iCNT:=0 to high(List) - 1 do GroupListBox.Items.Add(List[iCNT, 1]);
             GroupListBox.ItemIndex:=0;
+
         end;
 
     except
@@ -116,8 +117,6 @@ end;
 
 
 function TUserControl.GetAgeDates(AgeDatesBox: TComboBox; GroupID: string): boolean;
-var
-    Date: string;
 begin
 
     Result:=True;
@@ -134,7 +133,7 @@ begin
             while not DataSet.EOF do
             begin
                 // Make sure that we get "yyyy-mm-dd" format
-                Date:= FormatDateTime(TDateTimeFormats.DateFormat, DataSet.Fields[TSnapshots.AgeDate].Value);
+                var Date: string:=FormatDateTime(TDateTimeFormats.DateFormat, DataSet.Fields[TSnapshots.AgeDate].Value);
                 AgeDatesBox.Items.Add(Date);
                 DataSet.MoveNext;
             end;

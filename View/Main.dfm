@@ -1193,7 +1193,7 @@ object MainForm: TMainForm
     Margins.Top = 0
     Margins.Right = 10
     Margins.Bottom = 0
-    ActivePage = TabSheet8
+    ActivePage = TabSheet1
     Align = alClient
     DoubleBuffered = True
     Font.Charset = DEFAULT_CHARSET
@@ -1323,7 +1323,7 @@ object MainForm: TMainForm
           end
           object tcTOTAL: TLabel
             Left = 114
-            Top = 82
+            Top = 64
             Width = 7
             Height = 13
             Caption = '0'
@@ -1361,8 +1361,8 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object Text06: TLabel
-            Left = 16
-            Top = 82
+            Left = 15
+            Top = 64
             Width = 57
             Height = 13
             Caption = 'No of cust.:'
@@ -1522,8 +1522,8 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object Text36: TLabel
-            Left = 16
-            Top = 63
+            Left = 15
+            Top = 82
             Width = 70
             Height = 13
             Caption = 'Data updated:'
@@ -1536,7 +1536,7 @@ object MainForm: TMainForm
           end
           object DataUpdated: TLabel
             Left = 114
-            Top = 63
+            Top = 82
             Width = 20
             Height = 13
             Caption = 'n/a'

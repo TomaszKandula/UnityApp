@@ -1,4 +1,3 @@
-
 unit ThreadUtilities;
 
 
@@ -108,11 +107,11 @@ end;
 /// </summary>
 
 function TThreadQueue.Pop(var Data: Pointer): Boolean;
-var
-    A:  Cardinal;
-    OL: POverLapped;
 begin
+
     Result:=True;
+    var A:  Cardinal;
+    var OL: POverLapped;
 
     /// <remarks>
     /// Remove/Pop the first pointer from the queue or wait.
@@ -131,6 +130,7 @@ begin
         Result:=False;
         Finalize;
     end;
+
 end;
 
 
@@ -174,6 +174,7 @@ end;
 
 constructor TThreadPool.Create(HandlePoolEvent: TThreadPoolEvent; MaxThreads: Integer);
 begin
+
     FHandlePoolEvent :=HandlePoolEvent;
     FThreadQueue     :=TThreadQueue.Create;
     FThreads         :=TList.Create;
@@ -185,12 +186,11 @@ end;
 
 
 destructor TThreadPool.Destroy;
-var
-    iCNT: Integer;
 begin
+
     FThreadQueue.Finalize;
 
-    for iCNT:=0 to FThreads.Count-1 do
+    for var iCNT: integer:=0 to FThreads.Count-1 do
         TThread(FThreads[iCNT]).Terminate;
 
     while (FThreads.Count > 0) do
@@ -204,13 +204,14 @@ begin
     FThreads.Free;
 
     inherited;
+
 end;
 
 
 procedure TThreadPool.DoHandleThreadExecute(Thread: TThread);
-var
-    Data: Pointer;
 begin
+
+    var Data: Pointer;
     while FThreadQueue.Pop(Data) and (not TSimpleThread(Thread).Terminated) do
     begin
         try
@@ -219,6 +220,7 @@ begin
             // Do nothing
         end;
     end;
+
 end;
 
 

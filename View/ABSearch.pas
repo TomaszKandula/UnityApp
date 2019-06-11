@@ -93,9 +93,34 @@ type
         procedure CheckBoxEstatEqualClick(Sender: TObject);
         procedure CheckBoxAliasEqualClick(Sender: TObject);
     private
+        var FCollate1: string;
+        var FCollate2: string;
+        var FCollate3: string;
+        var FCollate4: string;
+        var FIsEqual:  string;
+        var FStrEditName:       string;
+        var FStrEditNumber:     string;
+        var FStrEditEmail:      string;
+        var FStrEditEstatement: string;
+        var FStrEditPhones:     string;
+        var FStrEditUserAlias:  string;
+        var FStrEditCoCode:     string;
+        var FStrEditAgent:      string;
+        var FStrEditDivision:   string;
         procedure Initialize;
         procedure ClearAll;
         procedure PerformSearch;
+        procedure MatchCase;
+        procedure IsEqual;
+        procedure AttachOption;
+        procedure UpdateOptions;
+        procedure ResetFields;
+        procedure ResetCheckboxes;
+        procedure ResetCheckboxCaptions;
+        procedure ResetCheckboxTicks;
+        procedure ResetCheckboxDisable;
+        procedure ResetFieldColors;
+        procedure ResetFieldTexts;
     end;
 
 
@@ -121,11 +146,9 @@ uses
 
 
 procedure TViewSearchForm.Initialize;
-var
-    Settings: ISettings;
 begin
 
-    Settings:=TSettings.Create;
+    var Settings: ISettings:=TSettings.Create;
     ViewSearchForm.Caption:=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'WND_ABSEARCH', TUnityApp.APPCAPTION);
 
     PanelEditNumber.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
@@ -143,102 +166,156 @@ end;
 
 procedure TViewSearchForm.ClearAll;
 begin
-    EditNumber.Enabled        :=True;
-    EditName.Enabled          :=False;
-    EditEmail.Enabled         :=False;
-    EditEstatement.Enabled    :=False;
-    EditPhones.Enabled        :=False;
-    EditUserAlias.Enabled     :=False;
-    EditCoCode.Enabled        :=False;
-    EditAgent.Enabled         :=False;
-    EditDivision.Enabled      :=False;
+    ResetFields;
+    ResetCheckboxes;
+    ResetFieldTexts;
+    ResetFieldColors;
+end;
 
-    CheckBoxNumber.Checked    :=True;
-    CheckBoxName.Checked      :=False;
-    CheckBoxEmail.Checked     :=False;
-    CheckBoxEstatement.Checked:=False;
-    CheckBoxPhones.Checked    :=False;
-    CheckBoxUserAlias.Checked :=False;
-    CheckBoxCoCode.Checked    :=False;
-    CheckBoxAgent.Checked     :=False;
-    CheckBoxDivision.Checked  :=False;
 
-    CheckBoxNameEqual.Checked :=True;
-    CheckBoxNameEqual.Caption :='Equal';
-    CheckBoxNameEqual.Enabled :=False;
+procedure TViewSearchForm.MatchCase;
+begin
+    if CheckBoxNameCase.Checked  then FCollate1:=TSql.MATCHCASE;
+    if CheckBoxEmailCase.Checked then FCollate2:=TSql.MATCHCASE;
+    if CheckBoxEstatCase.Checked then FCollate3:=TSql.MATCHCASE;
+    if CheckBoxAliasCase.Checked then FCollate4:=TSql.MATCHCASE;
+end;
 
-    CheckBoxEmailEqual.Checked:=True;
+
+procedure TViewSearchForm.IsEqual;
+begin
+    if CheckBoxNameEqual.Checked then FIsEqual:=TSql.EQUAL else FIsEqual:=TSql.LIKE;
+    if CheckBoxEmailCase.Checked then FIsEqual:=TSql.EQUAL else FIsEqual:=TSql.LIKE;
+    if CheckBoxEstatCase.Checked then FIsEqual:=TSql.EQUAL else FIsEqual:=TSql.LIKE;
+    if CheckBoxAliasCase.Checked then FIsEqual:=TSql.EQUAL else FIsEqual:=TSql.LIKE;
+end;
+
+
+procedure TViewSearchForm.AttachOption;
+begin
+    if EditName.Enabled       then FStrEditName      :=TAddressBook.CustomerName + FIsEqual + QuotedStr(EditName.Text)       + FCollate1 + TSql._AND;
+    if EditEmail.Enabled      then FStrEditEmail     :=TAddressBook.Emails       + FIsEqual + QuotedStr(EditEmail.Text)      + FCollate2 + TSql._AND;
+    if EditEstatement.Enabled then FStrEditEstatement:=TAddressBook.Estatements  + FIsEqual + QuotedStr(EditEstatement.Text) + FCollate3 + TSql._AND;
+    if EditUserAlias.Enabled  then FStrEditUserAlias :=TAddressBook.UserAlias    + FIsEqual + QuotedStr(EditUserAlias.Text)  + FCollate4 + TSql._AND;
+end;
+
+
+procedure TViewSearchForm.UpdateOptions;
+begin
+    if EditNumber.Enabled   then FStrEditNumber  :=TAddressBook.CustomerNumber + TSql.EQUAL + QuotedStr(EditNumber.Text)   + TSql._AND;
+    if EditPhones.Enabled   then FStrEditPhones  :=TAddressBook.PhoneNumbers   + TSql.EQUAL + QuotedStr(EditPhones.Text)   + TSql._AND;
+    if EditCoCode.Enabled   then FStrEditCoCode  :=TAddressBook.CoCode         + TSql.EQUAL + QuotedStr(EditCoCode.Text)   + TSql._AND;
+    if EditAgent.Enabled    then FStrEditAgent   :=TAddressBook.Agent          + TSql.EQUAL + QuotedStr(EditAgent.Text)    + TSql._AND;
+    if EditDivision.Enabled then FStrEditDivision:=TAddressBook.Division       + TSql.EQUAL + QuotedStr(EditDivision.Text) + TSql._AND;
+end;
+
+
+procedure TViewSearchForm.ResetFields;
+begin
+    EditNumber.Enabled:=True;
+    EditName.Enabled:=False;
+    EditEmail.Enabled:=False;
+    EditEstatement.Enabled:=False;
+    EditPhones.Enabled:=False;
+    EditUserAlias.Enabled:=False;
+    EditCoCode.Enabled:=False;
+    EditAgent.Enabled:=False;
+    EditDivision.Enabled:=False;
+end;
+
+
+procedure TViewSearchForm.ResetCheckboxes;
+begin
+    ResetCheckboxCaptions;
+    ResetCheckboxTicks;
+    ResetCheckboxDisable;
+end;
+
+
+procedure TViewSearchForm.ResetCheckboxCaptions;
+begin
+    CheckBoxNameEqual.Caption:='Equal';
     CheckBoxEmailEqual.Caption:='Equal';
-    CheckBoxEmailEqual.Enabled:=False;
-
-    CheckBoxEstatEqual.Checked:=True;
     CheckBoxEstatEqual.Caption:='Equal';
-    CheckBoxEstatEqual.Enabled:=False;
-
-    CheckBoxAliasEqual.Checked:=True;
     CheckBoxAliasEqual.Caption:='Equal';
-    CheckBoxAliasEqual.Enabled:=False;
+end;
 
-    CheckBoxAliasCase.Checked :=False;
-    CheckBoxNameCase.Checked  :=False;
-    CheckBoxEmailCase.Checked :=False;
-    CheckBoxEstatCase.Checked :=False;
 
-    CheckBoxNameCase.Enabled  :=False;
-    CheckBoxEmailCase.Enabled :=False;
-    CheckBoxEstatCase.Enabled :=False;
-    CheckBoxAliasCase.Enabled :=False;
+procedure TViewSearchForm.ResetCheckboxTicks;
+begin
+    CheckBoxAliasCase.Checked:=False;
+    CheckBoxNameCase.Checked:=False;
+    CheckBoxEmailCase.Checked:=False;
+    CheckBoxEstatCase.Checked:=False;
+    CheckBoxAliasEqual.Checked:=True;
+    CheckBoxEstatEqual.Checked:=True;
+    CheckBoxEmailEqual.Checked:=True;
+    CheckBoxNumber.Checked:=True;
+    CheckBoxName.Checked:=False;
+    CheckBoxEmail.Checked:=False;
+    CheckBoxEstatement.Checked:=False;
+    CheckBoxPhones.Checked:=False;
+    CheckBoxUserAlias.Checked:=False;
+    CheckBoxCoCode.Checked:=False;
+    CheckBoxAgent.Checked:=False;
+    CheckBoxDivision.Checked:=False;
+    CheckBoxNameEqual.Checked:=True;
+end;
 
-    EditNumber.Text           :='';
-    EditName.Text             :='';
-    EditEmail.Text            :='';
-    EditEstatement.Text       :='';
-    EditPhones.Text           :='';
-    EditUserAlias.Text        :='';
-    EditCoCode.Text           :='';
-    EditAgent.Text            :='';
-    EditDivision.Text         :='';
 
-    EditNumber.Color          :=clCream;
-    EditName.Color            :=clWhite;
-    EditEmail.Color           :=clWhite;
-    EditEstatement.Color      :=clWhite;
-    EditPhones.Color          :=clWhite;
-    EditUserAlias.Color       :=clWhite;
-    EditCoCode.Color          :=clWhite;
-    EditAgent.Color           :=clWhite;
-    EditDivision.Color        :=clWhite;
+procedure TViewSearchForm.ResetCheckboxDisable;
+begin
+    CheckBoxNameCase.Enabled := False;
+    CheckBoxEmailCase.Enabled := False;
+    CheckBoxEstatCase.Enabled := False;
+    CheckBoxAliasCase.Enabled := False;
+    CheckBoxAliasEqual.Enabled := False;
+    CheckBoxEstatEqual.Enabled := False;
+    CheckBoxEmailEqual.Enabled := False;
+    CheckBoxNameEqual.Enabled := False;
+end;
+
+
+procedure TViewSearchForm.ResetFieldColors;
+begin
+    EditNumber.Color:=clCream;
+    EditName.Color:=clWhite;
+    EditEmail.Color:=clWhite;
+    EditEstatement.Color:=clWhite;
+    EditPhones.Color:=clWhite;
+    EditUserAlias.Color:=clWhite;
+    EditCoCode.Color:=clWhite;
+    EditAgent.Color:=clWhite;
+    EditDivision.Color:=clWhite;
+end;
+
+
+procedure TViewSearchForm.ResetFieldTexts;
+begin
+    EditNumber.Text:='';
+    EditName.Text:='';
+    EditEmail.Text:='';
+    EditEstatement.Text:='';
+    EditPhones.Text:='';
+    EditUserAlias.Text:='';
+    EditCoCode.Text:='';
+    EditAgent.Text:='';
+    EditDivision.Text:='';
 end;
 
 
 procedure TViewSearchForm.PerformSearch;
-var
-    Conditions:         string;
-    StrEditName:        string;
-    StrEditNumber:      string;
-    StrEditEmail:       string;
-    StrEditEstatement:  string;
-    StrEditPhones:      string;
-    StrEditUserAlias:   string;
-    StrEditCoCode:      string;
-    StrEditAgent:       string;
-    StrEditDivision:    string;
-    EqualLike:          string;
-    Collate1:           string;
-    Collate2:           string;
-    Collate3:           string;
-    Collate4:           string;
 begin
 
     if (EditName.Enabled) and (string.IsNullOrEmpty(EditName.Text)) then
     begin
-        MainForm.ExecMessage(False, TMessaging.msWarn, 'Please provide with Customer Name.');
+        MainForm.ExecMessage(False, TMessaging.TWParams.MessageWarn, 'Please provide with Customer Name.');
         Exit;
     end;
 
     if (EditNumber.Enabled) and (string.IsNullOrEmpty(EditNumber.Text)) then
     begin
-        MainForm.ExecMessage(False, TMessaging.msWarn, 'Please provide with Customer Number.');
+        MainForm.ExecMessage(False, TMessaging.TWParams.MessageWarn, 'Please provide with Customer Number.');
         Exit;
     end;
 
@@ -280,37 +357,34 @@ begin
         )
     then
     begin
-        MainForm.ExecMessage(False, TMessaging.msWarn, 'Please provide with at least one condition.');
+        MainForm.ExecMessage(False, TMessaging.TWParams.MessageWarn, 'Please provide with at least one condition.');
         Exit;
     end;
 
     // Match case
-    if CheckBoxNameCase.Checked  then Collate1:=TSql.MATCHCASE;
-    if CheckBoxEmailCase.Checked then Collate2:=TSql.MATCHCASE;
-    if CheckBoxEstatCase.Checked then Collate3:=TSql.MATCHCASE;
-    if CheckBoxAliasCase.Checked then Collate4:=TSql.MATCHCASE;
+    MatchCase;
 
     // "Like" or "Equal"
-    if CheckBoxNameEqual.Checked then EqualLike:=TSql.EQUAL else EqualLike:=TSql.LIKE;
-    if CheckBoxEmailCase.Checked then EqualLike:=TSql.EQUAL else EqualLike:=TSql.LIKE;
-    if CheckBoxEstatCase.Checked then EqualLike:=TSql.EQUAL else EqualLike:=TSql.LIKE;
-    if CheckBoxAliasCase.Checked then EqualLike:=TSql.EQUAL else EqualLike:=TSql.LIKE;
+    IsEqual;
 
     // Attach "like" or "equal" and/or collate option
-    if EditName.Enabled       then StrEditName      :=TAddressBook.CustomerName + EqualLike + QuotedStr(EditName.Text)       + Collate1 + TSql._AND;
-    if EditEmail.Enabled      then StrEditEmail     :=TAddressBook.Emails       + EqualLike + QuotedStr(EditEmail.Text)      + Collate2 + TSql._AND;
-    if EditEstatement.Enabled then StrEditEstatement:=TAddressBook.Estatements  + EqualLike + QuotedStr(EditEstatement.Text) + Collate3 + TSql._AND;
-    if EditUserAlias.Enabled  then StrEditUserAlias :=TAddressBook.UserAlias    + EqualLike + QuotedStr(EditUserAlias.Text)  + Collate4 + TSql._AND;
+    AttachOption;
 
     // Do not use "like" and match case
-    if EditNumber.Enabled     then StrEditNumber    :=TAddressBook.CustomerNumber + TSql.EQUAL + QuotedStr(EditNumber.Text)     + TSql._AND;
-    if EditPhones.Enabled     then StrEditPhones    :=TAddressBook.PhoneNumbers   + TSql.EQUAL + QuotedStr(EditPhones.Text)     + TSql._AND;
-    if EditCoCode.Enabled     then StrEditCoCode    :=TAddressBook.CoCode         + TSql.EQUAL + QuotedStr(EditCoCode.Text)     + TSql._AND;
-    if EditAgent.Enabled      then StrEditAgent     :=TAddressBook.Agent          + TSql.EQUAL + QuotedStr(EditAgent.Text)      + TSql._AND;
-    if EditDivision.Enabled   then StrEditDivision  :=TAddressBook.Division       + TSql.EQUAL + QuotedStr(EditDivision.Text)   + TSql._AND;
+    UpdateOptions;
 
     // Build conditions
-    Conditions:=StrEditNumber + StrEditName + StrEditEmail + StrEditEstatement + StrEditPhones + StrEditUserAlias + StrEditCoCode + StrEditAgent + StrEditDivision;
+    var Conditions: string:=
+        FStrEditNumber +
+        FStrEditName +
+        FStrEditEmail +
+        FStrEditEstatement +
+        FStrEditPhones +
+        FStrEditUserAlias +
+        FStrEditCoCode +
+        FStrEditAgent +
+        FStrEditDivision;
+
     Conditions:=LeftStr(Conditions, Length(Conditions) - Length(TSql._AND));
 
     // Execute, leave window opened

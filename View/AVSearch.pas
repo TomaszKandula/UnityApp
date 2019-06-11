@@ -45,15 +45,14 @@ type
         procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
     private
-        var FoundRow   :  integer;
-        var IsNext     :  boolean;
-        var Groupping  :  array of integer;
+        var FFoundRow:  integer;
+        var FIsNext:    boolean;
+        var FGroupping: array of integer;
+        var FSearchEnd: integer;
     public
-        var SGrid     :  TStringGrid;
-        var SColName  :  string;
-        var SColNumber:  string;
-        var SearchEnd :  integer;
-    published
+        var FGrid:      TStringGrid;
+        var FColName:   string;
+        var FColNumber: string;
         procedure Search;
     end;
 
@@ -84,29 +83,28 @@ uses
 
 procedure TSearchForm.Search;
 
-    var
-        IsNumber:      boolean;
-        SearchString:  string;
-        CompareValue:  string;
-        iCNT:          integer;
-        SearchColumn:  integer;
+    var IsNumber:      boolean;
+    var SearchString:  string;
+    var CompareValue:  string;
+    var iCNT:          integer;
+    var SearchColumn:  integer;
 
     procedure SearchPartial_Prepare;
     begin
-        SetLength(Groupping, SGrid.RowCount);
-        if not (CaseSensitive.Checked) then CompareValue:=UpperCase(SGrid.Cells[SearchColumn, iCNT]);
-        if (CaseSensitive.Checked)     then CompareValue:=SGrid.Cells[SearchColumn, iCNT];
+        SetLength(FGroupping, FGrid.RowCount);
+        if not (CaseSensitive.Checked) then CompareValue:=UpperCase(FGrid.Cells[SearchColumn, iCNT]);
+        if (CaseSensitive.Checked)     then CompareValue:=FGrid.Cells[SearchColumn, iCNT];
     end;
 
     procedure SearchPartial_NextBreak;
     begin
-        IsNext:=True;
+        FIsNext:=True;
 
-        if SGrid.RowHeights[FoundRow] = -1 then
+        if FGrid.RowHeights[FFoundRow] = -1 then
         MainForm.MsgCall(
             Info,
-            'The item has been found (' + SGrid.Cells[SearchColumn, FoundRow] + ') for search pattern "' +
-            SearchString + '". ' + TUChars.CRLF +
+            'The item has been found (' + FGrid.Cells[SearchColumn, FFoundRow] + ') for search pattern "' +
+            SearchString + '". ' + TChars.CRLF +
             'However, it is hidden by the filter. Remove filtering to unhide this item.'
         );
 
@@ -118,21 +116,21 @@ procedure TSearchForm.Search;
         // Put corresponding rows into an array
         if (ShowAll.Checked) then
         begin
-            Groupping[iCNT]:=FoundRow;
-            IsNext:=False;
+            FGroupping[iCNT]:=FFoundRow;
+            FIsNext:=False;
         end;
 
     end;
 
 begin
 
-    SGrid.Freeze(True);
+    FGrid.Freeze(True);
     SearchColumn:=0;
     if not (CaseSensitive.Checked) then SearchString:=UpperCase(EditSearch.Text);
     if (CaseSensitive.Checked)     then SearchString:=EditSearch.Text;
 
     // Cannot be empty
-    if (SearchString = '') or (SearchString = TUChars.SPACE) then
+    if (SearchString = '') or (SearchString = TChars.SPACE) then
     begin
         MainForm.MsgCall(Warn, 'Cannot search empty string. Please provide with customer name or customer number and try again.');
         Exit;
@@ -147,35 +145,35 @@ begin
     end;
 
     // Assign proper column number from age view
-    if (IsNumber)     then SearchColumn:=SGrid.ReturnColumn(SColNumber, 1, 1);
-    if not (IsNumber) then SearchColumn:=SGrid.ReturnColumn(SColName,   1, 1);
+    if (IsNumber)     then SearchColumn:=FGrid.ReturnColumn(FColNumber, 1, 1);
+    if not (IsNumber) then SearchColumn:=FGrid.ReturnColumn(FColName,   1, 1);
 
     // Search direction (up)
     if CheckUp.Checked then
     begin
-        if (IsNext) and (FoundRow > SearchEnd) then FoundRow:=FoundRow - 1;
-        SearchEnd:=1;
+        if (FIsNext) and (FFoundRow > FSearchEnd) then FFoundRow:=FFoundRow - 1;
+        FSearchEnd:=1;
     end;
 
     // Search direction (down)
     if CheckDown.Checked then
     begin
-        if (IsNext) and (FoundRow < SearchEnd) then FoundRow:=FoundRow + 1;
-        SearchEnd:=SGrid.RowCount - 1;
+        if (FIsNext) and (FFoundRow < FSearchEnd) then FFoundRow:=FFoundRow + 1;
+        FSearchEnd:=FGrid.RowCount - 1;
     end;
 
-    SetLength(Groupping, 0);
+    SetLength(FGroupping, 0);
 
     // Search up
     if CheckUp.Checked then
     begin
-        for iCNT:=FoundRow downto SearchEnd do
+        for iCNT:=FFoundRow downto FSearchEnd do
         begin
             SearchPartial_Prepare;
 
             if Pos(SearchString, CompareValue) > 0 then
             begin
-                FoundRow:=iCNT;
+                FFoundRow:=iCNT;
                 // Exit on found given item
                 if not (ShowAll.Checked) then
                 begin
@@ -186,8 +184,8 @@ begin
             end
             else
             begin
-                IsNext  :=False;
-                FoundRow:=0;
+                FIsNext  :=False;
+                FFoundRow:=0;
             end;
         end;
     end;
@@ -195,12 +193,12 @@ begin
     // Search down
     if CheckDown.Checked then
     begin
-        for iCNT:=FoundRow to SearchEnd do
+        for iCNT:=FFoundRow to FSearchEnd do
         begin
             SearchPartial_Prepare;
             if Pos(SearchString, CompareValue) > 0 then
             begin
-                FoundRow:=iCNT;
+                FFoundRow:=iCNT;
                 // Exit when found given item
                 if not (ShowAll.Checked) then
                 begin
@@ -211,8 +209,8 @@ begin
             end
             else
             begin
-                IsNext  :=False;
-                FoundRow:=0;
+                FIsNext  :=False;
+                FFoundRow:=0;
             end;
         end;
     end;
@@ -220,10 +218,10 @@ begin
     // Highlight found row
     if not (ShowAll.Checked) then
     begin
-        if not (FoundRow = 0) then
+        if not (FFoundRow = 0) then
         begin
-            SGrid.Row:=FoundRow;
-            SGrid.Col:=SGrid.ReturnColumn(SColName, 1, 1);
+            FGrid.Row:=FFoundRow;
+            FGrid.Col:=FGrid.ReturnColumn(FColName, 1, 1);
         end
             else
                 MainForm.MsgCall(Info, 'Cannot find specified customer.');
@@ -233,13 +231,13 @@ begin
     if (ShowAll.Checked) then
     begin
         // Make sure that all wors are visible
-        SGrid.DefaultRowHeight:=SGrid.sgRowHeight;
-        if High(Groupping) > 0 then
+        FGrid.DefaultRowHeight:=FGrid.sgRowHeight;
+        if High(FGroupping) > 0 then
         begin
-            for iCNT:=0 to SGrid.RowCount - 1 do
+            for iCNT:=0 to FGrid.RowCount - 1 do
 
-            if Groupping[iCNT] <> iCNT then
-                SGrid.RowHeights[iCNT]:=SGrid.sgRowHidden;
+            if FGroupping[iCNT] <> iCNT then
+                FGrid.RowHeights[iCNT]:=FGrid.sgRowHidden;
 
             btnUnhide.Enabled:=True;
         end
@@ -250,7 +248,7 @@ begin
         end;
     end;
 
-    SGrid.Freeze(False);
+    FGrid.Freeze(False);
 
 end;
 
@@ -261,8 +259,8 @@ end;
 procedure TSearchForm.FormCreate(Sender: TObject);
 begin
     PanelEditSearch.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    SColName  :='';
-    SColNumber:='';
+    FColName  :='';
+    FColNumber:='';
 end;
 
 
@@ -283,8 +281,8 @@ end;
 
 procedure TSearchForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-    FoundRow:=0;
-    IsNext:=False;
+    FFoundRow:=0;
+    FIsNext:=False;
     EditSearch.Text:='';
     CheckUp.Checked:=False;
     CheckDown.Checked:=True;
@@ -296,13 +294,13 @@ end;
 
 procedure TSearchForm.btnSearchClick(Sender: TObject);
 begin
-    if (SColName <> '') and (SColNumber <> '') and (SGrid <> nil) then Search;
+    if (FColName <> '') and (FColNumber <> '') and (FGrid <> nil) then Search;
 end;
 
 
 procedure TSearchForm.btnUnhideClick(Sender: TObject);
 begin
-    if (SColName <> '') and (SColNumber <> '') and (SGrid <> nil) then
+    if (FColName <> '') and (FColNumber <> '') and (FGrid <> nil) then
     begin
         MainForm.Action_RemoveFiltersClick(Self);
         btnUnhide.Enabled:=False;

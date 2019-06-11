@@ -57,12 +57,9 @@ uses
 
 
 procedure TEventForm.LoadEventLog;
-var
-    Settings: ISettings;
 begin
 
-    Settings:=TSettings.Create;
-
+    var Settings: ISettings:=TSettings.Create;
     try
         EventMemo.Lines.LoadFromFile(Settings.GetPathEventLog);
     except

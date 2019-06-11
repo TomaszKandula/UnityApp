@@ -20,6 +20,8 @@ uses
     InterposerClasses,
     Helpers;
 
+    {TODO -oTomek -cGeneral: replace TThread with ITask}
+
     /// <remarks>
     /// Asynchronous methods executed within single thread classes. Most of the thread classes aquire lock, so they cannot be called
     /// more than once. If necessary, remove lock aquisition.
@@ -353,15 +355,12 @@ uses
 
 
 procedure TTCheckServerConnection.Execute;
-var
-    IDThd:       integer;
-    DataBase:    TDataBase;
 begin
 
-    DataBase:=TDataBase.Create(False);
-
+    var DataBase: TDataBase:=TDataBase.Create(False);
     try
-        IDThd:=TTCheckServerConnection.CurrentThread.ThreadID;
+
+        var IDThd: integer:=TTCheckServerConnection.CurrentThread.ThreadID;
         if (not(MainForm.IsConnected)) and (DataBase.Check = 0) then
         begin
             Synchronize(procedure
@@ -407,6 +406,7 @@ end;
 
 procedure TTInvoiceTrackerRefresh.Execute;
 begin
+
     FIDThd:=CurrentThread.ThreadID;
 
     try
@@ -459,7 +459,7 @@ begin
 
     try
         StopWatch:=TStopWatch.StartNew;
-        MainForm.ExecMessage(True, TMessaging.msStatusBar, TStatusBar.Generating);
+        MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Generating);
         MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']:' + TStatusBar.Generating);
 
         try
@@ -506,7 +506,7 @@ begin
         end;
 
     finally
-        MainForm.ExecMessage(True, TMessaging.msStatusBar, TStatusBar.Ready);
+        MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready);
         THDMili:=StopWatch.ElapsedMilliseconds;
         THDSec:=THDMili / 1000;
         MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Age View thread has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
@@ -517,7 +517,7 @@ begin
     // Release when finished
     FreeOnTerminate:=True;
     if CanReload then
-        TTReadAgeView.Create(TEnums.TLoading.thNullParameter, TSorting.smRanges);
+        TTReadAgeView.Create(TEnums.TLoading.NullParameter, TSorting.TMode.Ranges);
 
 end;
 
@@ -553,8 +553,8 @@ begin
     AgeView:=TAgeView.Create(MainForm.DbConnect);
     try
         StopWatch:=TStopWatch.StartNew;
-        MainForm.ExecMessage(True, TMessaging.msStatusBar, TStatusBar.Loading);
-        MainForm.ExecMessage(False, TMessaging.BusyScreenOn, IntToStr(TMessaging.scAGEVIEW));
+        MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Loading);
+        MainForm.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Show.ToString);
 
         try
             // Sync
@@ -590,7 +590,7 @@ begin
         end;
 
     finally
-        MainForm.ExecMessage(True, TMessaging.msStatusBar, TStatusBar.Ready);
+        MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready);
         THDMili:=StopWatch.ElapsedMilliseconds;
         THDSec:=THDMili / 1000;
         MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Thread for selected Group Id "' + AgeView.GroupID + '" has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
@@ -600,7 +600,7 @@ begin
         // Switch on all timers
         MainForm.SwitchTimers(TurnedOn);
 
-        MainForm.ExecMessage(False, TMessaging.BusyScreenOff, IntToStr(TMessaging.scAGEVIEW));
+        MainForm.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString);
 
     end;
 
@@ -608,8 +608,8 @@ begin
     FreeOnTerminate:=True;
 
     // Call open items if user select another age view
-    if FMode = thCallOpenItems then
-        TTReadOpenItems.Create(TEnums.TLoading.thNullParameter);
+    if FMode = CallOpenItems then
+        TTReadOpenItems.Create(TEnums.TLoading.NullParameter);
 
 end;
 
@@ -645,7 +645,7 @@ begin
 
     try
         try
-            ReadDateTime:=Transactions.GetDateTime(gdDateTime);
+            ReadDateTime:=Transactions.GetDateTime(DateTime);
             ReadStatus:=Transactions.GetStatus(ReadDateTime);
             if ( StrToDateTime(MainForm.OpenItemsUpdate) < StrToDateTime(ReadDateTime) ) and ( ReadStatus = 'Completed' ) then
             begin
@@ -669,7 +669,7 @@ begin
     // Release when finished
     FreeOnTerminate:=True;
     if CanMakeAge then
-        TTReadOpenItems.Create(TEnums.TLoading.thCallMakeAge);
+        TTReadOpenItems.Create(TEnums.TLoading.CallMakeAge);
 
 end;
 
@@ -705,7 +705,7 @@ begin
 
     try
         StopWatch:=TStopWatch.StartNew;
-        MainForm.ExecMessage(True, TMessaging.msStatusBar, TStatusBar.Downloading);
+        MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Downloading);
 
         try
             OpenItems.DestGrid   :=MainForm.sgOpenItems;
@@ -727,7 +727,7 @@ begin
         THDMili:=StopWatch.ElapsedMilliseconds;
         THDSec:=THDMili / 1000;
         MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(FIDThd) + ']: Open Items loading thread has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
-        MainForm.ExecMessage(True, TMessaging.msStatusBar, TStatusBar.Ready);
+        MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready);
 
         // Release VCL and set auto column width
         Synchronize(procedure
@@ -745,7 +745,7 @@ begin
     FreeOnTerminate:=True;
 
     // Make age view from open items and send to SQL Server
-    if FMode = thCallMakeAge then
+    if FMode = CallMakeAge then
     begin
         MainForm.cbDump.Checked:=False;
         TTMakeAgeView.Create(MainForm.OSAmount);
@@ -785,7 +785,7 @@ begin
     FLock.Acquire;
 
     try
-        MainForm.ExecMessage(True, TMessaging.msStatusBar, TStatusBar.Processing);
+        MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Processing);
 
         // Open
         if (FMode = TEnums.TActionTask.adOpenAll) or (FMode = TEnums.TActionTask.adOpenForUser) then
@@ -795,7 +795,7 @@ begin
                     else
                         begin
                             MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot open Address Book.');
-                            MainForm.ExecMessage(False, TMessaging.msError, 'Read function of Address Book has failed. Please contact IT support.');
+                            MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Read function of Address Book has failed. Please contact IT support.');
                         end;
         end;
 
@@ -825,7 +825,7 @@ begin
         end;
 
     finally
-        MainForm.ExecMessage(True, TMessaging.msStatusBar, TStatusBar.Ready);
+        MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready);
         FLock.Release;
     end;
 
@@ -840,7 +840,7 @@ var
     DataTables: TDataTables;
 begin
     Result:=True;
-    MainForm.ExecMessage(False, TMessaging.BusyScreenOn, TMessaging.scADDRESSBOOK.ToString);
+    MainForm.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Show.ToString);
     DataTables:=TDataTables.Create(MainForm.DbConnect);
     try
 
@@ -867,7 +867,7 @@ begin
 
             DataTables.OpenTable(TAddressBook.AddressBook);
             if not(DataTables.SqlToGrid(FGrid, DataTables.DataSet, True, True)) then
-                MainForm.ExecMessage(False, TMessaging.msWarn, 'No results found in the database.');
+                MainForm.ExecMessage(False, TMessaging.TWParams.MessageWarn, 'No results found in the database.');
 
         except
             on E: Exception do
@@ -890,7 +890,7 @@ begin
         FGrid.Freeze(False);
     end;
 
-    MainForm.ExecMessage(False, TMessaging.BusyScreenOff, TMessaging.scADDRESSBOOK.ToString);
+    MainForm.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString);
 
 end;
 
@@ -903,7 +903,6 @@ var
 begin
     Result:=False;
     Book:=TDataTables.Create(MainForm.DbConnect);
-    //MainForm.ExecMessage(False, TMessaging.BusyScreenMan, scShow);
 
     try
         // Update from Address Book String Grid
@@ -932,19 +931,19 @@ begin
                 if Result then
                 begin
                     FGrid.SetUpdatedRow(0);
-                    MainForm.ExecMessage(False, TMessaging.msInfo, 'Address Book has been updated succesfully!');
+                    MainForm.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Address Book has been updated succesfully!');
                 end
                 else
                 // Error during post
                 begin
-                    MainForm.ExecMessage(False, TMessaging.msError, 'Cannot update Address Book. Please contact IT support.');
+                    MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot update Address Book. Please contact IT support.');
                 end;
             end
             else
 
             // No changes within Address Book string grid
             begin
-                MainForm.ExecMessage(False, TMessaging.msWarn, 'Nothing to update. Please make changes first and try again.');
+                MainForm.ExecMessage(False, TMessaging.TWParams.MessageWarn, 'Nothing to update. Please make changes first and try again.');
             end;
         end;
 
@@ -967,15 +966,13 @@ begin
 
             // Ending
             if Result then
-                MainForm.ExecMessage(False, TMessaging.msInfo, 'Address Book has been updated succesfully!')
+                MainForm.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Address Book has been updated succesfully!')
                     else
-                        MainForm.ExecMessage(False, TMessaging.msError, 'Cannot update Address Book. Please contact IT support.');
+                        MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot update Address Book. Please contact IT support.');
         end;
     finally
         Book.Free;
     end;
-
-    //MainForm.ExecMessage(False, TMessaging.BusyScreenMan, scHide);
 
 end;
 
@@ -993,8 +990,6 @@ begin
     SetLength(AddrBook, 1, 11);
     jCNT:=0;
     Check:=0;
-
-    //MainForm.ExecMessage(False, TMessaging.BusyScreenMan, scShow);
 
     // Get data from String Grid
     Book:=TDataTables.Create(MainForm.DbConnect);
@@ -1058,20 +1053,20 @@ begin
 
                 if Book.RowsAffected > 0 then
                 begin
-                    MainForm.ExecMessage(False, TMessaging.BusyScreenMan, TMessaging.scHide.ToString);
-                    MainForm.ExecMessage(False, TMessaging.msInfo, 'Address Book has been successfully populated by selected item(s).');
+                    MainForm.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString);
+                    MainForm.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Address Book has been successfully populated by selected item(s).');
                     Result:=True;
                 end
                 else
                 begin
-                    MainForm.ExecMessage(False, TMessaging.BusyScreenMan, TMessaging.scHide.ToString);
-                    MainForm.ExecMessage(False, TMessaging.msWarn, 'Cannot update Address Book. Please contact IT support.');
+                    MainForm.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString);
+                    MainForm.ExecMessage(False, TMessaging.TWParams.MessageWarn, 'Cannot update Address Book. Please contact IT support.');
                 end;
             except
                 on E: Exception do
                 begin
-                    MainForm.ExecMessage(False, TMessaging.BusyScreenMan, TMessaging.scHide.ToString);
-                    MainForm.ExecMessage(False, TMessaging.msError, 'Cannot save selected item(s). Exception has been thrown: ' + E.Message);
+                    MainForm.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString);
+                    MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot save selected item(s). Exception has been thrown: ' + E.Message);
                     MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Cannot write Address Book item(s) into database. Error: ' + E.Message);
                 end;
             end;
@@ -1082,10 +1077,8 @@ begin
     end
     else
     begin
-        MainForm.ExecMessage(False, TMessaging.msWarn, 'Selected customers are already in Address Book.');
+        MainForm.ExecMessage(False, TMessaging.TWParams.MessageWarn, 'Selected customers are already in Address Book.');
     end;
-
-    //MainForm.ExecMessage(False, TMessaging.BusyScreenMan, scHide);
 
 end;
 
@@ -1115,13 +1108,13 @@ begin
     try
         if ReportForm.SendReport then
         begin
-            MainForm.ExecMessage(False, TMessaging.msInfo, 'Report has been sent successfully!');
+            MainForm.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Report has been sent successfully!');
             Synchronize(ReportForm.ReportMemo.Clear);
             MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Bug Report has been successfully sent by the user.');
         end
         else
         begin
-            MainForm.ExecMessage(False, TMessaging.msError, 'Cannot send Bug Report. Please contact IT support.');
+            MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot send Bug Report. Please contact IT support.');
             MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot send Bug Report.');
         end;
     finally
@@ -1160,7 +1153,7 @@ begin
     FLock.Acquire;
 
     try
-        MainForm.ExecMessage(True, TMessaging.msStatusBar, TStatusBar.ExportXLS);
+        MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.ExportXLS);
 
         // Open save dialog box (sync with GUI)
         Synchronize(procedure
@@ -1183,7 +1176,7 @@ begin
 
     finally
         FLock.Release;
-        MainForm.ExecMessage(True, TMessaging.msStatusBar, TStatusBar.Ready);
+        MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready);
     end;
 
     FreeOnTerminate:=True;
@@ -1261,7 +1254,7 @@ begin
 
                 // Allow to extend comment by adding to existing wording a new comment line
                 if FExtendComment then
-                    CurrComment:=DailyText.DataSet.Fields[TDailyComment.FixedComment].Value + TUChars.CRLF;
+                    CurrComment:=DailyText.DataSet.Fields[TDailyComment.FixedComment].Value + TChars.CRLF;
 
                 DailyText.CleanUp;
 
@@ -1335,7 +1328,7 @@ begin
                 else
                 begin
                     MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot update daily comment (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(DailyText.RowsAffected) + '. Error message received: ' + DailyText.LastErrorMsg + '.');
-                    MainForm.ExecMessage(False, TMessaging.msError, 'Cannot update daily comment into database.' +  TUChars.CRLF + 'Error message received: ' + DailyText.LastErrorMsg + TUChars.CRLF + 'Please contact IT support.');
+                    MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot update daily comment into database.' +  TChars.CRLF + 'Error message received: ' + DailyText.LastErrorMsg + TChars.CRLF + 'Please contact IT support.');
                 end;
             end
             else
@@ -1345,12 +1338,12 @@ begin
                 DailyText.CleanUp;
 
                 // Define columns and values
-                DailyText.Columns.Add(TDailyComment.GroupId);       DailyText.Values.Add(MainForm.GroupIdSel);
-                DailyText.Columns.Add(TDailyComment.Cuid);           DailyText.Values.Add(FCUID);
-                DailyText.Columns.Add(TDailyComment.AgeDate);        DailyText.Values.Add(MainForm.AgeDateSel);
-                DailyText.Columns.Add(TDailyComment.Stamp);          DailyText.Values.Add(DateTimeToStr(Now));
-                DailyText.Columns.Add(TDailyComment.UserAlias);     DailyText.Values.Add(UpperCase(MainForm.WinUserName));
-                DailyText.Columns.Add(TDailyComment.DataCheckSum);   DailyText.Values.Add(DataCheckSum);
+                DailyText.Columns.Add(TDailyComment.GroupId);      DailyText.Values.Add(MainForm.GroupIdSel);
+                DailyText.Columns.Add(TDailyComment.Cuid);         DailyText.Values.Add(FCUID);
+                DailyText.Columns.Add(TDailyComment.AgeDate);      DailyText.Values.Add(MainForm.AgeDateSel);
+                DailyText.Columns.Add(TDailyComment.Stamp);        DailyText.Values.Add(DateTimeToStr(Now));
+                DailyText.Columns.Add(TDailyComment.UserAlias);    DailyText.Values.Add(UpperCase(MainForm.WinUserName));
+                DailyText.Columns.Add(TDailyComment.DataCheckSum); DailyText.Values.Add(DataCheckSum);
 
                 if FEmail then
                 begin
@@ -1430,7 +1423,7 @@ begin
                 else
                 begin
                     MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot update daily comment (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(DailyText.RowsAffected) + '. Error message received: ' + DailyText.LastErrorMsg + '.');
-                    MainForm.ExecMessage(False, TMessaging.msError, 'Cannot post daily comment into database.' +  TUChars.CRLF + 'Error message received: ' + DailyText.LastErrorMsg + TUChars.CRLF + 'Please contact IT support.');
+                    MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot post daily comment into database.' +  TChars.CRLF + 'Error message received: ' + DailyText.LastErrorMsg + TChars.CRLF + 'Please contact IT support.');
                 end;
             end;
 
@@ -1536,7 +1529,7 @@ begin
                 else
                 begin
                     MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot update general comment (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(GenText.RowsAffected) + '. Error message received: ' + GenText.LastErrorMsg + '.');
-                    MainForm.ExecMessage(False, TMessaging.msError, 'Cannot update general comment into database.' +  TUChars.CRLF + 'Error message received: ' + GenText.LastErrorMsg + TUChars.CRLF + 'Please contact IT support.');
+                    MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot update general comment into database.' +  TChars.CRLF + 'Error message received: ' + GenText.LastErrorMsg + TChars.CRLF + 'Please contact IT support.');
                 end;
             end
             else
@@ -1613,7 +1606,7 @@ begin
                 else
                 begin
                     MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot update general comment (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(GenText.RowsAffected) + '. Error message received: ' + GenText.LastErrorMsg + '.');
-                    MainForm.ExecMessage(False, TMessaging.msError, 'Cannot update general comment into database.' +  TUChars.CRLF + 'Error message received: ' + GenText.LastErrorMsg + TUChars.CRLF + 'Please contact IT support.');
+                    MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot update general comment into database.' +  TChars.CRLF + 'Error message received: ' + GenText.LastErrorMsg + TChars.CRLF + 'Please contact IT support.');
                 end;
             end;
 
@@ -1735,10 +1728,10 @@ begin
             /// Use maCustom for customised template. It requires FSalut, FMess and FSubject to be provided.
             /// </param>
 
-            if FLayout = TDocuments.TMode.maDefined then
+            if FLayout = TDocuments.TMode.Defined then
                 Statement.HTMLLayout:=Statement.LoadTemplate(Settings.GetLayoutDir + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE2', ''));
 
-            if FLayout = TDocuments.TMode.maCustom then
+            if FLayout = TDocuments.TMode.Custom then
                 Statement.HTMLLayout:=Statement.LoadTemplate(Settings.GetLayoutDir + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE3', ''));
 
             /// <remarks>
@@ -1752,7 +1745,7 @@ begin
                 /// Register sent email either as manual statement or automatic statement.
                 /// </summary>
 
-                if FLayout = TDocuments.TMode.maDefined then
+                if FLayout = TDocuments.TMode.Defined then
                 begin
                     CommThread:=TTDailyComment.Create(
                         FCUID,
@@ -1770,7 +1763,7 @@ begin
                     CommThread.WaitFor;
                 end;
 
-                if FLayout = TDocuments.TMode.maCustom  then
+                if FLayout = TDocuments.TMode.Custom  then
                 begin
                     CommThread:=TTDailyComment.Create(
                         FCUID,
@@ -1794,17 +1787,17 @@ begin
 
                 if not(FSeries) then
                 begin
-                    MainForm.ExecMessage(False, TMessaging.msInfo, 'Account Statement has been sent successfully!');
+                    MainForm.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Account Statement has been sent successfully!');
                 end
                 else
                 begin
-                    MainForm.ExecMessage(False, TMessaging.mmMailerItem, IntToStr(FItemNo));
+                    MainForm.ExecMessage(False, TMessaging.TWParams.MailerReportItem, FItemNo.ToString);
                 end;
 
             end
             else
             begin
-                if not(FSeries) then MainForm.ExecMessage(False, TMessaging.msError, 'Account Statement cannot be sent. Please contact IT support.')
+                if not(FSeries) then MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Account Statement cannot be sent. Please contact IT support.')
             end;
 
         finally
@@ -1894,7 +1887,7 @@ begin
                     /// </remarks>
 
                     SendStat:=TTSendAccountStatement.Create(
-                        TDocuments.TMode.maCustom,
+                        TDocuments.TMode.Custom,
                         FSubject,
                         FMess,
                         FInvFilter,
@@ -1921,7 +1914,7 @@ begin
 
         finally
             Statement.Free;
-            MainForm.ExecMessage(False, TMessaging.mmAwaitClose, 'True');
+            MainForm.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString);
         end;
 
     finally

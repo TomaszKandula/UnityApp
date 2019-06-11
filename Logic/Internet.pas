@@ -1,6 +1,8 @@
 unit Internet;
 
+
 interface
+
 
 uses
     Winapi.ActiveX,
@@ -9,6 +11,7 @@ uses
     System.Win.ComObj,
     System.StrUtils,
     System.Variants,
+    System.Net.HttpClient,
     Vcl.AxCtrls,
     WinHttp_TLB;
 
@@ -33,6 +36,7 @@ type
         var ErrorMessage: string;
         function CallServer(CallUrl: string; Mode: string; var HttpResponse: string): integer;
     public
+        var FErrorMessage: string;
         function IsInternetPresent: boolean;
         function GetResponseText(FullURL: string): string;
         function Download(const SourceUrl: string; DestFileName: String): Boolean;
@@ -48,21 +52,17 @@ uses
 
 
 function TConnectivity.CallServer(CallUrl: string; Mode: string; var HttpResponse: string): integer;
-var
-    IsFinished:  boolean;
-    NoAttempts:  cardinal;
-    ReturnCode:  integer;
-    ReturnText:  string;
-    Http:        IWinHttpRequest;
 begin
-    NoAttempts:=0;
-    ReturnCode:=0;
-    IsFinished:=False;
+
     Result:=0;
+
+    var NoAttempts: cardinal:=0;
+    var ReturnCode: integer:=0;
+    var IsFinished: boolean:=False;
 
     if string.IsNullOrEmpty(CallUrl) then Exit;
 
-    Http:=CoWinHttpRequest.Create;
+    var Http: IWinHttpRequest:=CoWinHttpRequest.Create;
     try
         try
             Http.Option[WinHttpRequestOption_EnableRedirects]:=True;
@@ -73,9 +73,7 @@ begin
                 Inc(NoAttempts);
                 HttpResponse:=EmptyStr;
                 Http.Send(EmptyParam);
-
                 ReturnCode:=Http.Status;
-                ReturnText:=Http.StatusText;
 
                 if Mode = TNCSI.ncsiGet then
                     HttpResponse:=Http.ResponseText;
@@ -134,13 +132,15 @@ end;
 /// <returns>Boolean. True if HTTP response is 200.</returns>
 
 function TConnectivity.IsInternetPresent: boolean;
-var
-  Return: string;
 begin
+
+    var Return: string;
+
     if CallServer(TNCSI.ncsiWww + TNCSI.ncsiFile, TNCSI.ncsiGet, Return) = 200 then
         Result:=True
             else
                 Result:=False;
+
 end;
 
 
@@ -149,13 +149,15 @@ end;
 /// </summary>
 
 function TConnectivity.GetResponseText(FullURL: string): string;
-var
-    Return: string;
 begin
+
+    var Return: string;
+
     if CallServer(FullURL, TNCSI.ncsiGet, Return) = 200 then
         Result:=Return
             else
                 Result:='';
+
 end;
 
 
@@ -164,32 +166,24 @@ end;
 /// </summary>
 
 function TConnectivity.Download(const SourceUrl: string; DestFileName: String): Boolean;
-var
-   Http:        IWinHttpRequest;
-   wUrl:        WideString;
-   FileStream:  TFileStream;
-   HttpStream:  IStream;
-   OleStream:   TOleStream;
 begin
 
     Result:=False;
 
     try
-        wUrl:=SourceUrl;
-
-        Http:=CoWinHttpRequest.Create;
+        var wUrl: WideString:=SourceUrl;
+        var Http: IWinHttpRequest:=CoWinHttpRequest.Create;
+        Http.SetTimeouts(1500, 900000, 30000, 30000);
         Http.open('GET', wUrl, False);
         Http.send(EmptyParam);
 
         if Http.status = 200 then
         begin
             Result:=True;
-
-            HttpStream:=IUnknown(Http.ResponseStream) as IStream;
-            OleStream :=TOleStream.Create(HttpStream);
-
+            var HttpStream: IStream:=IUnknown(Http.ResponseStream) as IStream;
+            var OleStream: TOleStream:=TOleStream.Create(HttpStream);
             try
-                FileStream:=TFileStream.Create(DestFileName, fmCreate);
+                var FileStream: TFileStream:=TFileStream.Create(DestFileName, fmCreate);
                 try
                     OleStream.Position:=0;
                     FileStream.CopyFrom(OleStream, OleStream.Size);
@@ -204,7 +198,11 @@ begin
         end;
 
     except
-        Result:=False;
+        on E: Exception do
+        begin
+            FErrorMessage:=E.Message;
+            Result:=False;
+        end;
     end;
 
 end;

@@ -59,23 +59,18 @@ uses
 /// </summary>
 
 procedure LogToFile(const FileName, Text: String);
-var
-    CurrentDate:  string;
-    CurrentTime:  string;
-    GetDateTime:  TDateTime;
-    TextToLog:    string;
-    EventLog:     TextFile;
 begin
 
-    GetDateTime:=Now;
-    CurrentDate:=FormatDateTime(TDateTimeFormats.DateFormat, GetDateTime);
-    CurrentTime:=FormatDateTime(TDateTimeFormats.TimeFormat, GetDateTime);
-    TextToLog:='#' + CurrentDate + ' (' + CurrentTime + '): ' + Text;
+    var GetDateTime: TDateTime:=Now;
+    var CurrentDate: string:=FormatDateTime(TDateTimeFormats.DateFormat, GetDateTime);
+    var CurrentTime: string:=FormatDateTime(TDateTimeFormats.TimeFormat, GetDateTime);
+    var TextToLog:   string:='#' + CurrentDate + ' (' + CurrentTime + '): ' + Text;
 
     /// <remarks>
     /// Event log file always contains all application events.
     /// </remarks>
 
+    var EventLog: TextFile;
     AssignFile(EventLog, FileName);
 
     if not FileExists(FileName) then
@@ -120,10 +115,8 @@ end;
 
 
 procedure TThreadFileLog.HandleLogRequest(Data: Pointer; AThread: TThread);
-var
-    Request: PLogRequest;
 begin
-    Request:=Data;
+    var Request: PLogRequest:=Data;
     try
         LogToFile(Request^.FileName, Request^.LogText);
     finally
@@ -141,9 +134,8 @@ end;
 /// </summary>
 
 procedure TThreadFileLog.Log(const FileName, Text: string);
-var
-    Request: PLogRequest;
 begin
+    var Request: PLogRequest;
     New(Request);
     Request^.LogText :=Text;
     Request^.FileName:=FileName;

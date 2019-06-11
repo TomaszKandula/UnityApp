@@ -46,14 +46,11 @@ type
         procedure MyCalendarClick(Sender: TObject);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
     private
+        function MakeMyDay(Increment: integer): TDate;
+        function IsWeekend(const DT: TDateTime): Boolean;
+    public
         var FCalendarMode: TEnums.TCalendar;
         var FSelectedDate: TDateTime;
-    public
-        property  CalendarMode: TEnums.TCalendar read FCalendarMode write FCalendarMode;
-        property  SelectedDate: TDateTime read FSelectedDate write FSelectedDate;
-        function  MakeMyDay(Increment: integer): TDate;
-        function  IsWeekend(const DT: TDateTime): Boolean;
-        function  GetCurrentWorkingDay(WhatDay: integer): boolean;
         procedure SetFollowUp(SelectedDate: TDate; SelectedCUID: string; Row: integer);
     end;
 
@@ -79,52 +76,11 @@ uses
 // ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
 
 
-/// <summary>
-/// Return working day in given month.
-/// </summary>
-
-function TCalendarForm.GetCurrentWorkingDay(WhatDay: Integer): boolean;
-var
-    Anchor: TDate;
-    iCNT:   integer;
-begin
-
-    // Find working day for current month
-    Anchor:=EndOfAMonth(YearOf(Now), MonthOf(Now) - 1);
-
-    for iCNT:=1 to WhatDay do
-    begin
-        // If we have weekend, then move to next working day
-        if IsWeekend(Anchor) then
-            while IsWeekend(Anchor) do
-                Anchor:=Anchor + 1;
-
-        // Increase by one working day
-        Anchor:=Anchor + 1;
-    end;
-
-    // Compare
-    if Now = Anchor then
-        Result:=True
-            else
-                Result:=False;
-
-end;
-
-
-/// <summary>
-/// Check if today is weekend.
-/// </summary>
-
 function TCalendarForm.IsWeekend(const DT: TDateTime): Boolean;
 begin
     Result:=System.SysUtils.DayOfWeek(DT) in [1, 7];
 end;
 
-
-/// <summary>
-/// Move to next date, skip weekend.
-/// </summary>
 
 function TCalendarForm.MakeMyDay(Increment: integer): TDate;
 begin
@@ -159,7 +115,7 @@ end;
 
 procedure TCalendarForm.FormCreate(Sender: TObject);
 begin
-    SelectedDate:=TDateTimeFormats.NullDate;
+    FSelectedDate:=TDateTimeFormats.NullDate;
     PanelActions.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
     PanelCalendar.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
 end;
@@ -226,7 +182,7 @@ procedure TCalendarForm.MyCalendarDblClick(Sender: TObject);
 begin
 
     // Put selected date into database
-    if CalendarMode = TEnums.TCalendar.cfDateToDB then
+    if FCalendarMode = TEnums.TCalendar.DateToDB then
     begin
         SetFollowUp(
             CalendarForm.MyCalendar.Date,
@@ -238,9 +194,9 @@ begin
     end;
 
     // Just return selected date
-    if CalendarMode = TEnums.TCalendar.cfGetDate then
+    if FCalendarMode = TEnums.TCalendar.GetDate then
     begin
-        SelectedDate:=CalendarForm.MyCalendar.Date;
+        FSelectedDate:=CalendarForm.MyCalendar.Date;
         Close;
     end;
 
@@ -252,7 +208,7 @@ end;
 
 procedure TCalendarForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-    if Key = TUChars.ESC then Close;
+    if Key = TChars.ESC then Close;
 end;
 
 

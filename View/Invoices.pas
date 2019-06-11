@@ -80,25 +80,22 @@ end;
 
 
 procedure TInvoicesForm.FormActivate(Sender: TObject);
-var
-    Tables: TDataTables;
-    CUID :  string;
 begin
 
-    Tables:=TDataTables.Create(MainForm.DbConnect);
     InvoicesGrid.Freeze(True);
 
+    var Tables: TDataTables:=TDataTables.Create(MainForm.DbConnect);
     try
-        CUID:=MainForm.sgInvoiceTracker.Cells[MainForm.sgInvoiceTracker.ReturnColumn(TTrackerData.Cuid, 1, 1), MainForm.sgInvoiceTracker.Row];
+        var CUID: string:=MainForm.sgInvoiceTracker.Cells[MainForm.sgInvoiceTracker.ReturnColumn(TTrackerData.Cuid, 1, 1), MainForm.sgInvoiceTracker.Row];
         Tables.StrSQL:=TSql.SELECT                             +
-                            TTrackerInvoices.InvoiceNo    + TUChars.COMMA +
-                            TTrackerInvoices.InvoiceState + TUChars.COMMA +
+                            TTrackerInvoices.InvoiceNo    + TChars.COMMA +
+                            TTrackerInvoices.InvoiceState + TChars.COMMA +
                             TTrackerInvoices.Stamp        +
-                        TSql.FROM                              +
+                        TSql.FROM                            +
                             TTrackerInvoices.TrackerInvoices +
-                        TSql.WHERE                                +
+                        TSql.WHERE                           +
                             TTrackerInvoices.Cuid            +
-                        TSql.EQUAL                                +
+                        TSql.EQUAL                           +
                             QuotedStr(CUID);
         Tables.SqlToGrid(InvoicesGrid, Tables.ExecSQL, False, True);
         InvoicesGrid.Freeze(False);
@@ -114,7 +111,7 @@ end;
 
 procedure TInvoicesForm.InvoicesGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-  InvoicesGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, TUnityApp.SELCOLOR, clBlack, clWhite, True);
+  InvoicesGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, TUnityApp.SelectionColor, clBlack, clWhite, True);
 end;
 
 

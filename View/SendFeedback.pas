@@ -59,6 +59,10 @@ uses
     Helpers;
 
 
+const
+    ToSkip = [#0..#32, '.', ',', ';', '[', ']', '(', ')', '{', '}'];
+
+
 {$R *.dfm}
 
 
@@ -70,20 +74,15 @@ uses
 /// </summary>
 
 function TReportForm.WordCount(const InputStr: string): cardinal;
-const
-    ToSkip = [#0..#32, '.', ',', ';', '[', ']', '(', ')', '{', '}'];
-var
-    iCNT:       integer;
-    TextLength: integer;
-    FindWord:   boolean;
 begin
 
     Result:=0;
-    TextLength:=Length(InputStr);
-    FindWord:=False;
+
+    var TextLength: integer:=Length(InputStr);
+    var FindWord:   boolean:=False;
 
     // Count if word is found
-    for iCNT:=1 to TextLength do
+    for var iCNT: integer:=1 to TextLength do
     begin
         if not (CharInSet(InputStr[iCNT], ToSkip)) then
         begin
@@ -100,19 +99,7 @@ begin
 end;
 
 
-/// <summary>
-/// Send feedback with user comments.
-/// </summary>
-
 function TReportForm.SendReport: boolean;
-var
-    Mail:      TMailer;
-    Settings:  ISettings;
-    Doc:       TDocument;
-    HTMLBody:  string;
-    Transfer:  string;
-    AppName:   string;
-    AppVer:    string;
 begin
 
     Result:=False;
@@ -123,14 +110,14 @@ begin
         Exit;
     end;
 
-    Settings:=TSettings.Create;
-    Mail  :=TMailer.Create;
-    Doc   :=TDocument.Create;
+    var Settings: ISettings:=TSettings.Create;
+    var Mail: TMailer:=TMailer.Create;
+    var Doc: TDocument:=TDocument.Create;
 
     try
 
-        AppName:=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'VALUE', '');
-        AppVer :=GetBuildInfoAsString;
+        var AppName: string:=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'VALUE', '');
+        var AppVer: string:=GetBuildInfoAsString;
 
         // Get and set email details
         if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerNTLM  then
@@ -153,16 +140,16 @@ begin
         Mail.MailSubject:='Unity - User feedback (' + UpperCase(MainForm.WinUserName) + ')';
 
         // Plain text to HTML using template
-        Transfer:=ReportMemo.Text;
-        Transfer:=StringReplace(Transfer, TUChars.CRLF, '<br>', [rfReplaceAll]);
-        HTMLBody:=Doc.LoadTemplate(Settings.GetLayoutDir + Settings.GetStringValue(TConfigSections.Layouts, 'SENDFEEDBACK', '') + '.html');
+        var Transfer: string:=ReportMemo.Text;
+        Transfer:=StringReplace(Transfer, TChars.CRLF, '<br>', [rfReplaceAll]);
+
+        var HTMLBody: string:=Doc.LoadTemplate(Settings.GetLayoutDir + Settings.GetStringValue(TConfigSections.Layouts, 'SENDFEEDBACK', '') + '.html');
         HTMLBody:=StringReplace(HTMLBody, '{TEXT_HOLER}',  Transfer,       [rfReplaceAll]);
         HTMLBody:=StringReplace(HTMLBody, '{APPNAME}',     AppName,        [rfReplaceAll]);
         HTMLBody:=StringReplace(HTMLBody, '{BUILD}',       AppVer,         [rfReplaceAll]);
         HTMLBody:=StringReplace(HTMLBody, '{REPORT_DATE}', DateToStr(Now), [rfReplaceAll]);
         HTMLBody:=StringReplace(HTMLBody, '{REPORT_TIME}', TimeToStr(Now), [rfReplaceAll]);
 
-        // Assign and send
         Mail.MailBody:=HTMLBody;
         Result:=Mail.SendNow;
 

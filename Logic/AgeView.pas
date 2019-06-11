@@ -94,10 +94,9 @@ uses
 
 
 constructor TAgeView.Create(Connector: TADOConnection);
-var
-    Settings: ISettings;
 begin
-    Settings:=TSettings.Create;
+
+    var Settings: ISettings:=TSettings.Create;
 
     if FormatSettings.DecimalSeparator = ',' then
     begin
@@ -133,18 +132,17 @@ end;
 /// </summary>
 
 procedure TAgeView.Read(var Grid: TStringGrid; Mode: integer);
-var
-    StrCol: string;
 begin
 
     // Initialize
     Grid.Freeze(True);
 
     // Read grid layout to be passed as paremeter to SQL statement
+    var StrCol: string;
     Grid.LoadLayout(StrCol, TConfigSections.ColumnWidthName, TConfigSections.ColumnOrderName, TConfigSections.ColumnNames, TConfigSections.ColumnPrefix);
 
     CmdType:=cmdText;
-    StrSQL:=TSql.EXECUTE + AgeViewReport + TUChars.SPACE + QuotedStr(StrCol) + TUChars.COMMA + QuotedStr(GroupID) + TUChars.COMMA + QuotedStr(AgeDate) + TUChars.COMMA + QuotedStr(Mode.ToString);
+    StrSQL:=TSql.EXECUTE + AgeViewReport + TChars.SPACE + QuotedStr(StrCol) + TChars.COMMA + QuotedStr(GroupID) + TChars.COMMA + QuotedStr(AgeDate) + TChars.COMMA + QuotedStr(Mode.ToString);
     SqlToGrid(Grid, ExecSQL, False, False);
 
     MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: SQL statement applied [' + StrSQL + '].');
@@ -160,11 +158,9 @@ end;
 /// </summary>
 
 procedure TAgeView.ComputeAgeSummary(Grid: TStringGrid);
-var
-    iCNT: integer;
 begin
 
-    for iCNT:=1 to Grid.RowCount - 1 do
+    for var iCNT: integer:=1 to Grid.RowCount - 1 do
     begin
         if Grid.RowHeights[iCNT] <> Grid.sgRowHidden then
         begin
@@ -184,10 +180,10 @@ begin
             Limits:=Limits + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCreditLimit, 1, 1), iCNT], 0);
 
             // Exceeders
-            if StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fExceededAmount, 1, 1), iCNT], 0) < 0 then
+            if StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCreditBalance, 1, 1), iCNT], 0) < 0 then
             begin
                 inc(Exceeders);
-                TotalExceed:=TotalExceed + Abs(StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fExceededAmount, 1, 1), iCNT], 0));
+                TotalExceed:=TotalExceed + Abs(StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCreditBalance, 1, 1), iCNT], 0));
             end;
 
             inc(CustAll);
@@ -203,23 +199,21 @@ end;
 /// </summary>
 
 procedure TAgeView.ComputeAndShowRCA(Grid: TStringGrid);
-var
-    Rows        :  integer;
-    iCNT        :  integer;
-    Count       :  double;
-    TotalPerItem:  array of double;
-    ListPosition:  array of integer;
 begin
 
     if Balance = 0 then Exit;
-    Count:=0;
-    Rows :=0;
+
+    var TotalPerItem: Helpers.TADoubles;
+    var ListPosition: Helpers.TAIntigers;
+    var Count: double:=0;
+    var Rows: integer:=0;
+
     RCA:=Balance * Class_A;
     RCB:=Balance * Class_B;
     RCC:=Balance * Class_C;
 
     // Move totals and its positions into array
-    for iCNT:=1 to Grid.RowCount do
+    for var iCNT: integer:=1 to Grid.RowCount do
     begin
         if Grid.RowHeights[iCNT] <> Grid.sgRowHidden then
         begin
@@ -235,7 +229,7 @@ begin
     QuickSortExt(TotalPerItem, ListPosition, Low(TotalPerItem), High(TotalPerItem), False);
 
     // Compute and display RCA
-    for iCNT:=Low(ListPosition) to High(ListPosition) do
+    for var iCNT: integer:=Low(ListPosition) to High(ListPosition) do
     begin
         Count:=Count + TotalPerItem[iCNT];
 
@@ -365,9 +359,6 @@ end;
 /// </summary>
 
 procedure TAgeView.GetDetails(var Grid: TStringGrid);
-var
-    SL:    TStringList;
-    iCNT:  integer;
 begin
 
     // Clear grid
@@ -400,13 +391,13 @@ begin
     /// There should be always the same currency code for all stacked companies snapshots.
     /// </remarks>
 
-    SL:=TStringList.Create;
+    var SL: TStringList:=TStringList.Create;
     try
         SL.Clear;
         SL.Sorted:=True;
         SL.Duplicates:=dupIgnore;
 
-        for iCNT:=1 to MainForm.sgAgeView.RowCount - 1 do
+        for var iCNT: integer:=1 to MainForm.sgAgeView.RowCount - 1 do
             SL.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fLedgerIso, 1, 1), iCNT]);
 
     finally
@@ -429,12 +420,9 @@ end;
 /// </remarks>
 
 procedure TAgeView.MapGroup3(var Grid: TStringGrid; Source: TStringGrid);
-var
-    iCNT:  integer;
-    jCNT:  integer;
 begin
-    for iCNT:=1 to Grid.RowCount - 1 do
-        for jCNT:=1 to Source.RowCount - 1 do
+    for var iCNT: integer:=1 to Grid.RowCount - 1 do
+        for var jCNT: integer:=1 to Source.RowCount - 1 do
             if
             (
                 Grid.Cells[Grid.ReturnColumn(TSnapshots.fGroup3, 1, 1), iCNT] = Source.Cells[Source.ReturnColumn(TGroup3.ErpCode, 1, 1), jCNT]
@@ -449,12 +437,9 @@ end;
 
 
 procedure TAgeView.MapTable1(var Grid: TStringGrid; Source: TStringGrid);
-var
-    iCNT:  integer;
-    jCNT:  integer;
 begin
-    for iCNT:=1 to Grid.RowCount - 1 do
-        for jCNT:=1 to Source.RowCount - 1 do
+    for var iCNT: integer:=1 to Grid.RowCount - 1 do
+        for var jCNT: integer:=1 to Source.RowCount - 1 do
             if
             (
                 Grid.Cells[Grid.ReturnColumn(TSnapshots.fPersonResponsible, 1, 1), iCNT] = Source.Cells[Source.ReturnColumn(TPersonResponsible.Id, 1, 1), jCNT]
@@ -469,12 +454,9 @@ end;
 
 
 procedure TAgeView.MapTable2(var Grid: TStringGrid; Source: TStringGrid);
-var
-    iCNT:  integer;
-    jCNT:  integer;
 begin
-    for iCNT:=1 to Grid.RowCount - 1 do
-        for jCNT:=1 to Source.RowCount - 1 do
+    for var iCNT: integer:=1 to Grid.RowCount - 1 do
+        for var jCNT: integer:=1 to Source.RowCount - 1 do
             if
             (
                 Grid.Cells[Grid.ReturnColumn(TSnapshots.fSalesResponsible, 1, 1), iCNT] = Source.Cells[Source.ReturnColumn(TSalesResponsible.Id, 1, 1), jCNT]
@@ -489,12 +471,9 @@ end;
 
 
 procedure TAgeView.MapTable3(var Grid: TStringGrid; Source: TStringGrid);
-var
-    iCNT:  integer;
-    jCNT:  integer;
 begin
-    for iCNT:=1 to Grid.RowCount - 1 do
-        for jCNT:=1 to Source.RowCount - 1 do
+    for var iCNT: integer:=1 to Grid.RowCount - 1 do
+        for var jCNT: integer:=1 to Source.RowCount - 1 do
             if
             (
                 Grid.Cells[Grid.ReturnColumn(TSnapshots.fAccountType, 1, 1), iCNT] = Source.Cells[Source.ReturnColumn(TAccountType.Id, 1, 1), jCNT]
@@ -509,12 +488,9 @@ end;
 
 
 procedure TAgeView.MapTable4(var Grid: TStringGrid; Source: TStringGrid);
-var
-    iCNT:  integer;
-    jCNT:  integer;
 begin
-    for iCNT:=1 to Grid.RowCount - 1 do
-        for jCNT:=1 to Source.RowCount - 1 do
+    for var iCNT: integer:=1 to Grid.RowCount - 1 do
+        for var jCNT: integer:=1 to Source.RowCount - 1 do
             if
             (
                 Grid.Cells[Grid.ReturnColumn(TSnapshots.fCustomerGroup, 1, 1), iCNT] = Source.Cells[Source.ReturnColumn(TCustomerGroup.Id, 1, 1), jCNT]
@@ -533,10 +509,10 @@ end;
 /// </summary>
 
 function TAgeView.GetData(Code: string; Table: string; Entity: string): string;
-var
-    Field:  string;
 begin
+
     Result:=TNaVariants.Unassigned;
+    var Field: string;
 
     if (Code = ' ') or (Code = '') or (Entity = ' ') or (Entity = '') then Exit;
     try
@@ -595,12 +571,9 @@ end;
 /// </summary>
 
 procedure TAgeView.AgeViewMode(var Grid: TStringGrid; ModeBySection: string);
-var
-    Settings: ISettings;
-    iCNT:     integer;
 begin
-    Settings:=TSettings.Create;
-    for iCNT:=0 to Grid.ColCount - 2 do
+    var Settings: ISettings:=TSettings.Create;
+    for var iCNT: integer:=0 to Grid.ColCount - 2 do
         if Settings.GetStringValue(ModeBySection, Settings.FindSettingsKey(ModeBySection, iCNT), 'True') = 'False' then
             Grid.ColWidths[Grid.ReturnColumn(Settings.FindSettingsKey(ModeBySection, iCNT), 1, 1)]:=-1
                 else
@@ -613,19 +586,15 @@ end;
 /// </summary>
 
 procedure TAgeView.ExportToCSV(FileName: string; SourceArray: TALists);
-var
-    iCNT:    integer;
-    jCNT:    integer;
-    SL:      TStringList;
-    TempStr: string;
 begin
-    SL:=TStringList.Create;
-    SL.Clear;
 
+    var TempStr: string;
+    var SL: TStringList:=TStringList.Create;
     try
-        for iCNT:=0 to High(SourceArray) - 1 do
+        SL.Clear;
+        for var iCNT: integer:=0 to High(SourceArray) - 1 do
         begin
-            for jCNT:=0 to High(SourceArray[1]) do
+            for var jCNT: integer:=0 to High(SourceArray[1]) do
                 TempStr:=TempStr + SourceArray[iCNT, jCNT] + ';';
 
             SL.Add(TempStr);
@@ -639,7 +608,7 @@ begin
 end;
 
 
-// !!!!!!!!!!!!!!!!! TO BE REMOVED TO AZURE WEBJOBS !!!!!!!!!!!!!!!!!
+// !!!!!!!!!!!!!!!!! TO BE REMOVED TO AZURE WEBJOBS !!!!!!!!!!!!!!!!! DO NOT TOUCH IT WHILE IT WORKS :)
 
 
 { ------------------------------------------------------------------------------------------------------------------------------------------------ QUICK SORT }
@@ -929,10 +898,10 @@ begin
             { ALTERNATIONS }
 
             { REMOVE "TAB" CHARACTER IF FOUND IN CUSTOMER NAME }
-            ArrAgeView[avRow, 3]:=StringReplace(ArrAgeView[avRow, 3], TUChars.TAB, '', [rfReplaceAll]);
+            ArrAgeView[avRow, 3]:=StringReplace(ArrAgeView[avRow, 3], TChars.TAB, '', [rfReplaceAll]);
 
             { REPLACE SINGLE QUOTES TO DOUBLE QUOTES }
-            ArrAgeView[avRow, 3]:=StringReplace(ArrAgeView[avRow, 3], TUChars.SingleQuote, TUChars.DoubleQuote, [rfReplaceAll]);
+            ArrAgeView[avRow, 3]:=StringReplace(ArrAgeView[avRow, 3], TChars.SingleQuote, TChars.DoubleQuote, [rfReplaceAll]);
 
             { REMOVE FROM CO CODE "F" PREFIX }
             ArrAgeView[avRow, 20]:=IntToStr((StrToInt(StringReplace(ArrAgeView[avRow, 20], 'F', '0', [rfReplaceAll]))));
@@ -1092,10 +1061,10 @@ begin
     Transaction:=StringReplace(Transaction, '{DestTable}',    DestTable,     [rfReplaceAll]);
     Transaction:=StringReplace(Transaction, '{Condition}',    Condition,     [rfReplaceAll]);
     Transaction:=StringReplace(Transaction, '{DeleteData}',   DeleteData,    [rfReplaceAll]);
-    Transaction:=StringReplace(Transaction, '{SimpleInput}',  TUChars.SPACE, [rfReplaceAll]);
+    Transaction:=StringReplace(Transaction, '{SimpleInput}',  TChars.SPACE, [rfReplaceAll]);
     Transaction:=StringReplace(Transaction, '{SWITCH}',       'OFF',         [rfReplaceAll]);
-    Transaction:=StringReplace(Transaction, '{Begin}',        TUChars.SPACE, [rfReplaceAll]);
-    Transaction:=StringReplace(Transaction, '{End}',          TUChars.SPACE, [rfReplaceAll]);
+    Transaction:=StringReplace(Transaction, '{Begin}',        TChars.SPACE, [rfReplaceAll]);
+    Transaction:=StringReplace(Transaction, '{End}',          TChars.SPACE, [rfReplaceAll]);
     Transaction:=StringReplace(
         Transaction,
         '{ComplexInput}',
@@ -1107,7 +1076,7 @@ begin
     StrSQL:=Transaction;
 
     try
-        MainForm.ExecMessage(False, TMessaging.msStatusBar, TStatusBar.SQLupdate);
+        MainForm.ExecMessage(False, TMessaging.TWParams.StatusBar, TStatusBar.SQLupdate);
         ExecSQL;
     except
         on E: Exception do

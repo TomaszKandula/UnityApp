@@ -93,12 +93,12 @@ end;
 
 procedure TColorsForm.FormShow(Sender: TObject);
 begin
-  ColorList1.Items[ColorList1.ItemIndex];
-  ColorList2.Items[ColorList1.ItemIndex];
-  ColorList3.Items[ColorList1.ItemIndex];
-  ColorList1Select(Self);
-  ColorList2Select(Self);
-  ColorList3Select(Self);
+    ColorList1.Items[ColorList1.ItemIndex];
+    ColorList2.Items[ColorList1.ItemIndex];
+    ColorList3.Items[ColorList1.ItemIndex];
+    ColorList1Select(Self);
+    ColorList2Select(Self);
+    ColorList3Select(Self);
 end;
 
 
@@ -110,30 +110,24 @@ end;
 /// </summary>
 
 procedure TColorsForm.ColorList1Select(Sender: TObject);
-var
-    Settings: ISettings;
 begin
-    Settings:=TSettings.Create;
+    var Settings: ISettings:=TSettings.Create;
     if ColorList1.Text = 'Font Color'       then ColorBox1.Brush.Color:=Settings.TodayFColor;
     if ColorList1.Text = 'Background Color' then ColorBox1.Brush.Color:=Settings.TodayBColor;
 end;
 
 
 procedure TColorsForm.ColorList2Select(Sender: TObject);
-var
-    Settings: TSettings;
 begin
-    Settings:=TSettings.Create;
+    var Settings: TSettings:=TSettings.Create;
     if ColorList2.Text = 'Font Color'       then ColorBox2.Brush.Color:=Settings.PastFColor;
     if ColorList2.Text = 'Background Color' then ColorBox2.Brush.Color:=Settings.PastBColor;
 end;
 
 
 procedure TColorsForm.ColorList3Select(Sender: TObject);
-var
-    Settings: TSettings;
 begin
-    Settings:=TSettings.Create;
+    var Settings: TSettings:=TSettings.Create;
     if ColorList3.Text = 'Font Color'       then ColorBox3.Brush.Color:=Settings.FutureFColor;
     if ColorList3.Text = 'Background Color' then ColorBox3.Brush.Color:=Settings.FutureBColor;
 end;
@@ -152,12 +146,10 @@ end;
 /// </summary>
 
 procedure TColorsForm.btnTodayClick(Sender: TObject);
-var
-    Settings: TSettings;
 begin
     if ColorDialog.Execute then
     begin
-        Settings:=TSettings.Create;
+        var Settings: TSettings:=TSettings.Create;
         if ColorList1.Text = 'Font Color'       then Settings.TodayFColor:=ColorDialog.Color;
         if ColorList1.Text = 'Background Color' then Settings.TodayBColor:=ColorDialog.Color;
         ColorBox1.Brush.Color:=ColorDialog.Color;
@@ -166,12 +158,10 @@ end;
 
 
 procedure TColorsForm.btnPastClick(Sender: TObject);
-var
-    Settings: TSettings;
 begin
     if ColorDialog.Execute then
     begin
-        Settings:=TSettings.Create;
+        var Settings: TSettings:=TSettings.Create;
         if ColorList2.Text = 'Font Color'       then Settings.PastFColor:=ColorDialog.Color;
         if ColorList2.Text = 'Background Color' then Settings.PastBColor:=ColorDialog.Color;
         ColorBox2.Brush.Color:=ColorDialog.Color;
@@ -180,12 +170,10 @@ end;
 
 
 procedure TColorsForm.btnFutureClick(Sender: TObject);
-var
-    Settings: TSettings;
 begin
     if ColorDialog.Execute then
     begin
-        Settings:=TSettings.Create;
+        var Settings: TSettings:=TSettings.Create;
         if ColorList3.Text = 'Font Color'       then Settings.FutureFColor:=ColorDialog.Color;
         if ColorList3.Text = 'Background Color' then Settings.FutureBColor:=ColorDialog.Color;
         ColorBox3.Brush.Color:=ColorDialog.Color;

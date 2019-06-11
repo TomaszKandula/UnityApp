@@ -108,9 +108,6 @@ uses
 
 
 procedure TSendForm.ExecuteMailer;
-var
-    TempStr: string;
-    InvFilter: TInvoiceFilter;
 begin
 
     if String.IsNullOrEmpty(Text_Message.Text) then
@@ -122,12 +119,12 @@ begin
     if MainForm.MsgCall(Question2, 'Are you absolutely sure you want to send it, right now?') = IDNO then
         Exit;
 
-    InvFilter:=TInvoiceFilter.ShowAllItems;
+    var InvFilter: TInvoiceFilter:=TInvoiceFilter.ShowAllItems;
     if cbShowAll.Checked     then InvFilter:=TInvoiceFilter.ShowAllItems;
     if cbOverdueOnly.Checked then InvFilter:=TInvoiceFilter.ReminderOvd;
     if cbNonOverdue.Checked  then InvFilter:=TInvoiceFilter.ReminderNonOvd;
 
-    TempStr:=StringReplace(Text_Message.Text, TUChars.CRLF, '<br>', [rfReplaceAll]);
+    var TempStr: string:=StringReplace(Text_Message.Text, TChars.CRLF, '<br>', [rfReplaceAll]);
 
     /// <remarks>
     /// UpdateOpenItemsRefs and UpdateControlStatusRefs must be executed before TTSendAccountStatement is called.
@@ -135,7 +132,7 @@ begin
     MainForm.UpdateOpenItemsRefs(ActionsForm.OpenItemsGrid);
     MainForm.UpdateControlStatusRefs(MainForm.sgControlStatus);
     TTSendAccountStatement.Create(
-        TDocuments.TMode.maCustom,
+        TDocuments.TMode.Custom,
         'Account Statement',
         TempStr,
         InvFilter,
@@ -261,17 +258,17 @@ end;
 
 procedure TSendForm.btnBeginDateClick(Sender: TObject);
 begin
-    CalendarForm.CalendarMode:=cfGetDate;
+    CalendarForm.FCalendarMode:=GetDate;
     MainForm.WndCall(CalendarForm, Helpers.TWindows.TState.Modal);
-    ValBeginDate.Caption:=DateToStr(CalendarForm.SelectedDate);
+    ValBeginDate.Caption:=DateToStr(CalendarForm.FSelectedDate);
 end;
 
 
 procedure TSendForm.btnEndDateClick(Sender: TObject);
 begin
-    CalendarForm.CalendarMode:=cfGetDate;
+    CalendarForm.FCalendarMode:=GetDate;
     MainForm.WndCall(CalendarForm, Modal);
-    ValEndDate.Caption:=DateToStr(CalendarForm.SelectedDate);
+    ValEndDate.Caption:=DateToStr(CalendarForm.FSelectedDate);
 end;
 
 

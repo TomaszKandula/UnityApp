@@ -210,7 +210,7 @@ type
         const fTotal             = 'Total';
         const fOverdue           = 'Overdue';
         const fCreditLimit       = 'Credit Limit';
-        const fExceededAmount    = 'Exceeded Amount';
+        const fCreditBalance     = 'Credit Balance';
         const fAgent             = 'Agent';
         const fCoCode            = 'Co Code';
         const fPaymentTerms      = 'Payment Terms';

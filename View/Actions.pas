@@ -171,7 +171,7 @@ type
         procedure btnCallCustomerMouseLeave(Sender: TObject);
         procedure btnSaveCustDetailsMouseEnter(Sender: TObject);
         procedure btnSaveCustDetailsMouseLeave(Sender: TObject);
-    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     protected
         var SrcColumns:  TAIntigers;
     private
@@ -405,7 +405,7 @@ begin
     OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.Cuid,  1, 1)]:=OpenItemsDest.sgRowHidden;
 
     // Sort via payment status
-    OpenItemsDest.MSort(OpenItemsDest.ReturnColumn(TOpenitems.PmtStat, 1, 1), TSorting.IntType, True);
+    OpenItemsDest.MSort(OpenItemsDest.ReturnColumn(TOpenitems.PmtStat, 1, 1), TSorting.TDataType.TInteger, True);
 
 end;
 
@@ -631,7 +631,7 @@ begin
     end
     else
     begin
-        ActionsForm.DailyCom.Text:=ActionsForm.DailyCom.Text + TUChars.CRLF + 'Called customer today.';
+        ActionsForm.DailyCom.Text:=ActionsForm.DailyCom.Text + TChars.CRLF + 'Called customer today.';
         SaveDailyComment;
     end;
 
@@ -688,7 +688,7 @@ begin
         TTGeneralComment.Create(
             CUID,
             TNaVariants.NULL,
-            TUChars.SPACE,
+            TChars.SPACE,
             TNaVariants.NULL,
             TNaVariants.NULL,
             TNaVariants.NULL,
@@ -860,7 +860,7 @@ end;
 
 procedure TActionsForm.HistoryGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-    HistoryGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, TUnityApp.SELCOLOR, clBlack, clWhite, True);
+    HistoryGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, TUnityApp.SelectionColor, clBlack, clWhite, True);
 end;
 
 
@@ -875,7 +875,7 @@ begin
     if ARow = 0 then Exit;
 
     // Draw selected
-    OpenItemsGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, TUnityApp.SELCOLOR, clBlack, clWhite, True);
+    OpenItemsGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, TUnityApp.SelectionColor, clBlack, clWhite, True);
 
     // Draw certain color
     if
@@ -945,7 +945,7 @@ begin
     // New line
     if ( (Key = VK_RETURN) and (Shift=[ssALT]) ) or ( (Key = VK_RETURN) and (Shift=[ssShift]) ) then
     begin
-        DailyCom.Lines.Add(TUChars.CRLF);
+        DailyCom.Lines.Add(TChars.CRLF);
         Exit;
     end;
 
@@ -971,7 +971,7 @@ begin
     // New line
     if ( (Key = VK_RETURN) and (Shift=[ssALT]) ) or ( (Key = VK_RETURN) and (Shift=[ssShift]) ) then
     begin
-        GeneralCom.Lines.Add(TUChars.CRLF);
+        GeneralCom.Lines.Add(TChars.CRLF);
         Exit;
     end;
 
@@ -1242,7 +1242,7 @@ end;
 
 procedure TActionsForm.btnSetFollowUpClick(Sender: TObject);
 begin
-    CalendarForm.CalendarMode:=cfDateToDB;
+    CalendarForm.FCalendarMode:=DateToDB;
     MainForm.WndCall(CalendarForm, Helpers.TWindows.TState.Modal);
 end;
 
@@ -1268,7 +1268,7 @@ begin
     MainForm.UpdateOpenItemsRefs(OpenItemsGrid);
     MainForm.UpdateControlStatusRefs(MainForm.sgControlStatus);
     TTSendAccountStatement.Create(
-        TDocuments.TMode.maDefined,
+        TDocuments.TMode.Defined,
         'Account Statement',
         '',
         TInvoiceFilter.ShowAllItems,

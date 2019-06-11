@@ -33,7 +33,7 @@ uses
     Erp.Person               in 'Model\Json\RawTables\Erp.Person.pas',
     Erp.PersonResponsible    in 'Model\Json\RawTables\Erp.PersonResponsible.pas',
     Erp.SalesResponsible     in 'Model\Json\RawTables\Erp.SalesResponsible.pas',
-    InterposerClasses        in 'Extensions\InterposerClasses.pas',
+    InterposerClasses        in 'Extensions\InterposerClasses.pas'{Too lazy to build own components},
     Helpers                  in 'Extensions\Helpers.pas',
     SqlHandler               in 'Logic\SqlHandler.pas',
     DbHandler                in 'Logic\DbHandler.pas',
@@ -112,11 +112,11 @@ var
 procedure InitAssembliesRef;
 begin
     SetLength(Assemblies, 6);
-    Assemblies[0]:=TSkypeAssemblies.LyncControls;
-    Assemblies[1]:=TSkypeAssemblies.LyncFramework;
-    Assemblies[2]:=TSkypeAssemblies.LyncModel;
-    Assemblies[3]:=TSkypeAssemblies.LyncUtils;
-    Assemblies[4]:=TSkypeAssemblies.OfficeUc;
+    Assemblies[0]:=TLyncAssemblies.LyncControls;
+    Assemblies[1]:=TLyncAssemblies.LyncFramework;
+    Assemblies[2]:=TLyncAssemblies.LyncModel;
+    Assemblies[3]:=TLyncAssemblies.LyncUtils;
+    Assemblies[4]:=TLyncAssemblies.OfficeUc;
     Assemblies[5]:=TUnityApp.LyncCall;
 end;
 
@@ -152,7 +152,7 @@ begin
             begin
                 Application.MessageBox(
                     PCHar('Cannot extract file from resource container. Exception has been thrown: ' + E.Message),
-                    PChar(TUnityApp.APPCAPTION), MB_OK + MB_ICONERROR
+                    PChar(TUnityApp.AppCaption), MB_OK + MB_ICONERROR
                 );
                 Exit;
             end;
@@ -289,7 +289,7 @@ function GetManifestValue(Key: string; Source: string): string;
         StartPos:=AnsiPos(Key, Source);
 
         for iCNT:=StartPos to Length(Source) do
-            if Source[iCNT] = TUChars.CR then
+            if Source[iCNT] = TChars.CR then
                 Break;
 
         Result:=MidStr(Source, StartPos, (iCNT - StartPos)).Replace(Key, '').ToLower;
@@ -320,8 +320,8 @@ begin
     if (Mutex = 0) or (GetLastError = ERROR_ALREADY_EXISTS) then
     begin
         Application.MessageBox(
-            PCHar(TUnityApp.APPCAPTION + ' is already running. You can only have one instance at a time.'),
-            PChar(TUnityApp.APPCAPTION), MB_OK + MB_ICONWARNING
+            PCHar(TUnityApp.AppCaption + ' is already running. You can only have one instance at a time.'),
+            PChar(TUnityApp.AppCaption), MB_OK + MB_ICONWARNING
         );
         ExitProcess(0);
     end;
@@ -364,8 +364,8 @@ begin
     if not(Connection.IsInternetPresent) then
     begin
         Application.MessageBox(
-            PCHar(TUnityApp.APPCAPTION + ' cannot work off-line. Please check Internet connection or contact your network administrator. Program will be closed.'),
-            PChar(TUnityApp.APPCAPTION), MB_OK + MB_ICONWARNING
+            PCHar(TUnityApp.AppCaption + ' cannot work off-line. Please check Internet connection or contact your network administrator. Program will be closed.'),
+            PChar(TUnityApp.AppCaption), MB_OK + MB_ICONWARNING
         );
         ExitProcess(0);
     end;
@@ -384,8 +384,8 @@ begin
         else
         begin
             Application.MessageBox(
-                PCHar('Cannot extract missing configuration file. ' + TUnityApp.APPCAPTION + ' will be closed. Please contact IT support.'),
-                PChar(TUnityApp.APPCAPTION), MB_OK + MB_ICONERROR
+                PCHar('Cannot extract missing configuration file. ' + TUnityApp.AppCaption + ' will be closed. Please contact IT support.'),
+                PChar(TUnityApp.AppCaption), MB_OK + MB_ICONERROR
             );
             ExitProcess(0);
         end;
@@ -419,7 +419,7 @@ begin
             // Put user logon name to log file (@ eof)
             FL:=TFileStream.Create(PathEventLog, fmOpenWrite);
             try
-                StrWrite:=WinUserName + '.' + TUChars.CRLF + TUChars.CRLF;
+                StrWrite:=WinUserName + '.' + TChars.CRLF + TChars.CRLF;
                 FL.Position:=FL.Size;
 
                 for iCNT:=1 to length(StrWrite) do
@@ -433,8 +433,8 @@ begin
         else
         begin
             Application.MessageBox(
-                PChar('Cannot create log file. ' + TUnityApp.APPCAPTION + ' will be closed. Please contact IT support.'),
-                PChar(TUnityApp.APPCAPTION), MB_OK + MB_ICONERROR
+                PChar('Cannot create log file. ' + TUnityApp.AppCaption + ' will be closed. Please contact IT support.'),
+                PChar(TUnityApp.AppCaption), MB_OK + MB_ICONERROR
             );
             ExitProcess(0);
         end;
@@ -487,16 +487,16 @@ begin
             else
             begin
                 Application.MessageBox(
-                    PChar('Cannot unpack files. ' + TUnityApp.APPCAPTION + ' will be closed. Please contact IT support.'),
-                    PChar(TUnityApp.APPCAPTION), MB_OK + MB_ICONERROR
+                    PChar('Cannot unpack files. ' + TUnityApp.AppCaption + ' will be closed. Please contact IT support.'),
+                    PChar(TUnityApp.AppCaption), MB_OK + MB_ICONERROR
                 );
             end;
         end
         else
         begin
             Application.MessageBox(
-                PChar('Cannot download new release package. ' + TUnityApp.APPCAPTION + ' will be closed. Please contact IT support.'),
-                PChar(TUnityApp.APPCAPTION), MB_OK + MB_ICONERROR
+                PChar('Cannot download new release package. ' + TUnityApp.AppCaption + ' will be closed. Please contact IT support.'),
+                PChar(TUnityApp.AppCaption), MB_OK + MB_ICONERROR
             );
         end;
 
@@ -525,8 +525,8 @@ begin
     begin
         Status(1, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Checking master password... failed!', True, Settings.GetPathEventLog);
         Application.MessageBox(
-            PCHar('Invalid master password has been found. ' + TUnityApp.APPCAPTION + ' will be closed. Please contact IT Support.'),
-            PChar(TUnityApp.APPCAPTION), MB_OK + MB_ICONERROR
+            PCHar('Invalid master password has been found. ' + TUnityApp.AppCaption + ' will be closed. Please contact IT Support.'),
+            PChar(TUnityApp.AppCaption), MB_OK + MB_ICONERROR
         );
         LogText.Log(Settings.GetPathEventLog, '[Critical Error]: Invaid master password has been found. Application has been terminated.');
         ExitProcess(0);
@@ -552,8 +552,8 @@ begin
         /// </remarks>
 
         Application.MessageBox(
-            PCHar('Cannot find licence file (' + TUnityApp.LicenceFile + '). ' + TUnityApp.APPCAPTION + ' will be closed. Please contact IT Support.'),
-            PChar(TUnityApp.APPCAPTION), MB_OK + MB_ICONERROR
+            PCHar('Cannot find licence file (' + TUnityApp.LicenceFile + '). ' + TUnityApp.AppCaption + ' will be closed. Please contact IT Support.'),
+            PChar(TUnityApp.AppCaption), MB_OK + MB_ICONERROR
         );
         LogText.Log(Settings.GetPathEventLog, '[Critical Error]: No licence file has been found. Application has been terminated.');
         ExitProcess(0);
@@ -571,8 +571,8 @@ begin
     begin
         Status(3, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Checking operating system version... failed!', True, Settings.GetPathEventLog);
         Application.MessageBox(
-            PCHar(TUnityApp.APPCAPTION + ' must be run under Windows 7 or higher. ' + TUnityApp.APPCAPTION + ' will be closed. Please contact IT Support.'),
-            PChar(TUnityApp.APPCAPTION), MB_OK + MB_ICONERROR
+            PCHar(TUnityApp.AppCaption + ' must be run under Windows 7 or higher. ' + TUnityApp.AppCaption + ' will be closed. Please contact IT Support.'),
+            PChar(TUnityApp.AppCaption), MB_OK + MB_ICONERROR
         );
         LogText.Log(Settings.GetPathEventLog, '[Critical Error]: Invalid Operating System. Application has been terminated.');
         ExitProcess(0);
@@ -612,8 +612,8 @@ begin
         begin
             Status(4, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Checking Windows 7 Aero composition... disabled!', True, Settings.GetPathEventLog);
             Application.MessageBox(
-                PChar('Aero is not enabled. ' + TUnityApp.APPCAPTION + ' will be closed. Please contact IT Support.'),
-                PChar(TUnityApp.APPCAPTION), MB_OK + MB_ICONERROR
+                PChar('Aero is not enabled. ' + TUnityApp.AppCaption + ' will be closed. Please contact IT Support.'),
+                PChar(TUnityApp.AppCaption), MB_OK + MB_ICONERROR
             );
             LogText.Log(Settings.GetPathEventLog, '[Critical Error]: Aero composition is disabled. Application has been terminated.');
             ExitProcess(0);
@@ -639,8 +639,8 @@ begin
             on E: Exception do
             begin
                 Application.MessageBox(
-                    PChar('Cannot extract config.cfg. ' + TUnityApp.APPCAPTION + ' will be closed. Please contact IT Support.'),
-                    PChar(TUnityApp.APPCAPTION), MB_OK + MB_ICONERROR
+                    PChar('Cannot extract config.cfg. ' + TUnityApp.AppCaption + ' will be closed. Please contact IT Support.'),
+                    PChar(TUnityApp.AppCaption), MB_OK + MB_ICONERROR
                 );
                 Status(5, TSplashScreen.AllTasks, TSplashScreen.DelayErr, 'CRC32 check: ' + TUnityApp.ConfigFile + '..., unexpected error!', True, Settings.GetPathEventLog);
                 LogText.Log(Settings.GetPathEventLog, '[Critical Error]: Cannot extract "config.cfg" from resources. Error has been thrown: ' + E.Message);
@@ -676,7 +676,7 @@ begin
         begin
             Application.MessageBox(
                 PCHar('Cannot find ' + Assemblies[iCNT] + '. Please re-install application and/or contact IT support.'),
-                PChar(TUnityApp.APPCAPTION), MB_OK + MB_ICONERROR
+                PChar(TUnityApp.AppCaption), MB_OK + MB_ICONERROR
             );
             ExitProcess(0);
         end;
@@ -687,6 +687,8 @@ begin
     /// <summary>
     /// Synchronise all layouts listed in settings file.
     /// </summary>
+
+    // TODO - change to download zip and unzip !!!!
 
     Status(12, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Synchronising layouts...', True, Settings.GetPathEventLog);
 
@@ -765,7 +767,7 @@ begin
             begin
                 Application.MessageBox(
                     PChar('Cannot detect main thread running. Program will be closed. Please contact IT support.'),
-                    PChar(TUnityApp.APPCAPTION), MB_OK + MB_ICONERROR
+                    PChar(TUnityApp.AppCaption), MB_OK + MB_ICONERROR
                 );
                 ChromiumExit:=True;
             end;
@@ -793,7 +795,7 @@ begin
 
     Status(20, TSplashScreen.AllTasks, 50, 'Application initialization... ', False, Settings.GetPathEventLog);
     Application.Initialize;
-    Application.Title:=TUnityApp.APPCAPTION;
+    Application.Title:=TUnityApp.AppCaption;
     Application.MainFormOnTaskbar:=False;
 
     /// <remarks>
@@ -816,76 +818,26 @@ begin
     /// Load all other forms and execute initialization methods. Similarly to MainForm, visible parameter of the forms must be set to false
     /// to prevent showing up windows.
     /// </summary>
-    /// <remarks>
-    /// Use Status method with TextMode parameter set to False. It allows to log different text and to display different text during loading method.
-    /// </remarks>
 
     Application.CreateForm(TAboutForm, AboutForm);
-    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''AboutForm'' has been created.');
-    Status(21, TSplashScreen.AllTasks, 1, 'Application initialization: [VCL] AboutForm has been loaded.', False, Settings.GetPathEventLog);
-
     Application.CreateForm(TSendForm, SendForm);
-    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''SendForm'' has been created.');
-    Status(22, TSplashScreen.AllTasks, 1, 'Application initialization: [VCL] SendForm has been loaded.', False, Settings.GetPathEventLog);
-
     Application.CreateForm(TEventForm, EventForm);
-    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''EventForm'' has been created.');
-    Status(23, TSplashScreen.AllTasks, 1, 'Application initialization: [VCL] EventForm has been loaded.', False, Settings.GetPathEventLog);
-
     Application.CreateForm(TColorsForm, ColorsForm);
-    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ColorsForm'' has been created.');
-    Status(24, TSplashScreen.AllTasks, 1, 'Application initialization: [VCL] ColorsForm has been loaded.', False, Settings.GetPathEventLog);
-
     Application.CreateForm(TReportForm, ReportForm);
-    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ReportForm'' has been created.');
-    Status(25, TSplashScreen.AllTasks, 1, 'Application initialization: [VCL] ReportForm has been loaded.', False, Settings.GetPathEventLog);
-
     Application.CreateForm(TFilterForm, FilterForm);
-    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''FilterForm'' has been created.');
-    Status(26, TSplashScreen.AllTasks, 1, 'Application initialization: [VCL] FilterForm has been loaded.', False, Settings.GetPathEventLog);
-
     Application.CreateForm(TSearchForm, SearchForm);
-    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''SearchForm'' has been created.');
-    Status(27, TSplashScreen.AllTasks, 1, 'Application initialization: [VCL] SearchForm has been loaded.', False, Settings.GetPathEventLog);
-
     Application.CreateForm(TTrackerForm, TrackerForm);
-    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''TrackerForm'' has been created.');
-    Status(28, TSplashScreen.AllTasks, 1, 'Application initialization: [VCL] TrackerForm has been loaded.', False, Settings.GetPathEventLog);
-
     Application.CreateForm(TActionsForm, ActionsForm);
-    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ActionsForm'' has been created.');
-    Status(29, TSplashScreen.AllTasks, 1, 'Application initialization: [VCL] ActionsForm has been loaded.', False, Settings.GetPathEventLog);
-
     Application.CreateForm(TCalendarForm, CalendarForm);
-    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''CalendarForm'' has been created.');
-    Status(30, TSplashScreen.AllTasks, 1, 'Application initialization: [VCL] CalendarForm has been loaded.', False, Settings.GetPathEventLog);
-
     Application.CreateForm(TInvoicesForm, InvoicesForm);
-    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''InvoicesForm'' has been created.');
-    Status(31, TSplashScreen.AllTasks, 1, 'Application initialization: [VCL] InvoicesForm has been loaded.', False, Settings.GetPathEventLog);
-
     Application.CreateForm(TPhoneListForm, PhoneListForm);
-    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''PhoneListForm'' has been created.');
-    Status(32, TSplashScreen.AllTasks, 1, 'Application initialization: [VCL] PhoneListForm has been loaded.', False, Settings.GetPathEventLog);
-
     Application.CreateForm(TViewSearchForm, ViewSearchForm);
-    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ViewSearchForm'' has been created.');
-    Status(33, TSplashScreen.AllTasks, 1, 'Application initialization: [VCL] ViewSearchForm has been loaded.', False, Settings.GetPathEventLog);
-
     Application.CreateForm(TViewMailerForm, ViewMailerForm);
-    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''ViewMailerForm'' has been created.');
-    Status(34, TSplashScreen.AllTasks, 1, 'Application initialization: [VCL] ViewMailerForm has been loaded.', False, Settings.GetPathEventLog);
-
     Application.CreateForm(TAwaitForm, AwaitForm);
-    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''AwaitForm'' has been created.');
-    Status(35, TSplashScreen.AllTasks, 1, 'Application initialization: [VCL] AwaitForm has been loaded.', False, Settings.GetPathEventLog);
-
     Application.CreateForm(TQmsForm, QmsForm);
-    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] ''QmsForm'' has been created.');
-    Status(36, TSplashScreen.AllTasks, 1, 'Application initialization: [VCL] QmsForm has been loaded.', False, Settings.GetPathEventLog);
 
     // Splash screen - 100%
-    Status(37, TSplashScreen.AllTasks, 500, 'Application is initialized.', False, Settings.GetPathEventLog);
+    Status(21, TSplashScreen.AllTasks, 500, 'Application is initialized.', False, Settings.GetPathEventLog);
 
     AnimateWindow(SplashForm.Handle, 500, AW_BLEND or AW_HIDE);
     Sleep(150);

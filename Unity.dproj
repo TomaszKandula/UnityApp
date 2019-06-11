@@ -155,7 +155,9 @@
         <DCCReference Include="Model\Json\RawTables\Erp.Person.pas"/>
         <DCCReference Include="Model\Json\RawTables\Erp.PersonResponsible.pas"/>
         <DCCReference Include="Model\Json\RawTables\Erp.SalesResponsible.pas"/>
-        <DCCReference Include="Extensions\InterposerClasses.pas"/>
+        <DCCReference Include="Extensions\InterposerClasses.pas">
+            <Form>Too lazy to build own components</Form>
+        </DCCReference>
         <DCCReference Include="Extensions\Helpers.pas"/>
         <DCCReference Include="Logic\SqlHandler.pas"/>
         <DCCReference Include="Logic\DbHandler.pas"/>
@@ -286,7 +288,7 @@
             </Platforms>
             <ModelSupport>False</ModelSupport>
             <Deployment Version="3">
-                <DeployFile LocalName="Model\Json\DbQuery\Dummy.txt" Configuration="Debug" Class="ProjectFile">
+                <DeployFile LocalName="Include\Cef.inc" Configuration="Debug" Class="ProjectFile">
                     <Platform Name="Win32">
                         <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>
@@ -298,7 +300,7 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="Include\Cef.inc" Configuration="Debug" Class="ProjectFile">
+                <DeployFile LocalName="Model\Json\DbQuery\Dummy.txt" Configuration="Debug" Class="ProjectFile">
                     <Platform Name="Win32">
                         <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>

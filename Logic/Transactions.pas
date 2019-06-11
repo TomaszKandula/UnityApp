@@ -51,8 +51,6 @@ uses
 /// </summary>
 
 function TTransactions.GetDateTime(Return: TEnums.TCalendar): string;
-var
-    Value:  string;
 begin
 
     CleanUp;
@@ -60,7 +58,7 @@ begin
     // Get latest date and time
     Columns.Add(
         TSql.MAX +
-            BracketStr(TSSISMaster.StartDateTime, TEnums.TBrackets.brRound) +
+            BracketStr(TSSISMaster.StartDateTime, TEnums.TBrackets.Round) +
         TSql._AS +
             QuotedStr(TSSISMaster.StartDateTime)
     );
@@ -72,16 +70,15 @@ begin
     if (not (DataSet = nil)) and (DataSet.RecordCount = 1) then
     begin
 
-        Value:=VarToStr(DataSet.Fields.Item[TSSISMaster.StartDateTime].Value);
-
+        var Value: string:=VarToStr(DataSet.Fields.Item[TSSISMaster.StartDateTime].Value);
         if Value <> '' then
         begin
 
             case Return of
 
-              TEnums.TCalendar.gdTimeOnly: Result:=FormatDateTime(TDateTimeFormats.TimeFormat, VarToDateTime(Value));
-              TEnums.TCalendar.gdDateOnly: Result:=FormatDateTime(TDateTimeFormats.DateFormat, VarToDateTime(Value));
-              TEnums.TCalendar.gdDateTime: Result:=FormatDateTime(TDateTimeFormats.DateTimeFormat, VarToDateTime(Value));
+              TEnums.TCalendar.TimeOnly: Result:=FormatDateTime(TDateTimeFormats.TimeFormat, VarToDateTime(Value));
+              TEnums.TCalendar.DateOnly: Result:=FormatDateTime(TDateTimeFormats.DateFormat, VarToDateTime(Value));
+              TEnums.TCalendar.DateTime: Result:=FormatDateTime(TDateTimeFormats.DateTimeFormat, VarToDateTime(Value));
 
             end;
 
@@ -115,26 +112,20 @@ end;
 /// </summary>
 
 function TTransactions.LoadToGrid: boolean;
-var
-    Settings:    ISettings;
-    CutOff:      string;
-    INF4:        string;
-    Agents:      string;
-    Divisions:   string;
-    iCNT:        integer;
 begin
-    Settings:=TSettings.Create;
-    // Parameters for SQL stored procedure
-    CutOff:=IntToStr(Settings.GetIntegerValue(TConfigSections.OpenItemsData, 'NRCUTOFFNUM', 0));
-    INF4:=Settings.GetStringValue(TConfigSections.OpenItemsData, 'TXCUTOFFTXT', '');
 
-    // Agent ON/OFF
+    // Parameters for SQL stored procedure
+    var Settings:  ISettings:=TSettings.Create;
+    var CutOff:    string:=IntToStr(Settings.GetIntegerValue(TConfigSections.OpenItemsData, 'NRCUTOFFNUM', 0));
+    var INF4:      string:=Settings.GetStringValue(TConfigSections.OpenItemsData, 'TXCUTOFFTXT', '');
+    var Agents:    string;
+    var Divisions: string;
 
     /// <remarks>
     /// SettingGrid has fixed dimensions.
     /// </remarks>
 
-    for iCNT:=0 to 3 do
+    for var iCNT: integer:=0 to 3 do
     begin
 
         /// <remarks>
@@ -164,15 +155,15 @@ begin
     /// </remarks>
 
     CmdType:=cmdText;
-    StrSQL:=TSql.EXECUTE + QueryOpenItems                                        + TUChars.SPACE +
-              QuotedStr(GetDateTime(gdDateOnly))                                 + TUChars.COMMA +
-              QuotedStr(MainForm.ConvertCoCode(SettingGrid.Cells[0, 0], 'F', 0)) + TUChars.COMMA +
-              QuotedStr(MainForm.ConvertCoCode(SettingGrid.Cells[1, 0], 'F', 0)) + TUChars.COMMA +
-              QuotedStr(MainForm.ConvertCoCode(SettingGrid.Cells[2, 0], 'F', 0)) + TUChars.COMMA +
-              QuotedStr(MainForm.ConvertCoCode(SettingGrid.Cells[3, 0], 'F', 0)) + TUChars.COMMA +
-              QuotedStr(CutOff)                                                  + TUChars.COMMA +
-              QuotedStr(Agents)                                                  + TUChars.COMMA +
-              QuotedStr(Divisions)                                               + TUChars.COMMA +
+    StrSQL:=TSql.EXECUTE + QueryOpenItems                                        + TChars.SPACE +
+              QuotedStr(GetDateTime(DateOnly))                                   + TChars.COMMA +
+              QuotedStr(MainForm.ConvertCoCode(SettingGrid.Cells[0, 0], 'F', 0)) + TChars.COMMA +
+              QuotedStr(MainForm.ConvertCoCode(SettingGrid.Cells[1, 0], 'F', 0)) + TChars.COMMA +
+              QuotedStr(MainForm.ConvertCoCode(SettingGrid.Cells[2, 0], 'F', 0)) + TChars.COMMA +
+              QuotedStr(MainForm.ConvertCoCode(SettingGrid.Cells[3, 0], 'F', 0)) + TChars.COMMA +
+              QuotedStr(CutOff)                                                  + TChars.COMMA +
+              QuotedStr(Agents)                                                  + TChars.COMMA +
+              QuotedStr(Divisions)                                               + TChars.COMMA +
               QuotedStr(INF4);
 
     Result:=SqlToGrid(DestGrid, ExecSQL, False, True);
@@ -188,24 +179,23 @@ end;
 /// </summary>
 
 function TTransactions.IsVoType(VoType: string): boolean;
-var
-    Settings:  ISettings;
-    tsVAL:     TStringList;
-    iCNT :     integer;
 begin
 
-    Result  :=False;
-    tsVAL   :=TStringList.Create;
-    Settings:=TSettings.Create;
+    Result:=False;
 
+    var Settings: ISettings:=TSettings.Create;
+    var tsVAL: TStringList:=TStringList.Create;
     try
+
         Settings.GetSectionValues(TConfigSections.InvoiceTypes, tsVAL);
-        for iCNT:=0 to tsVAL.Count - 1 do
+
+        for var iCNT: integer:=0 to tsVAL.Count - 1 do
             if VoType = MidStr(tsVAL.Strings[iCNT], AnsiPos('=', tsVAL.Strings[iCNT]) + 1, 255) then
             begin
                 Result:=True;
                 break;
             end;
+
     finally
         tsVAL.Free;
     end;
@@ -232,36 +222,23 @@ end;
 /// </summary>
 
 procedure TTransactions.UpdateSummary;
-var
-    Settings        : ISettings;
-    iCNT            : integer;
-    nInvoices       : integer;
-    Overdue         : integer;
-    VoucherNumber   : string;
-    // Amounts
-    OverdueAmt      : double;
-    UNamt           : double;
-    KPIOverdue      : double;
-    KPIUnalloc      : double;
-    // O/S invoices only
-    InvoiceAmt      : double;
 begin
 
-    nInvoices :=0;
-    Overdue   :=0;
-    OverdueAmt:=0;
-    UNamt     :=0;
-    KPIOverdue:=0;
-    KPIUnalloc:=0;
+    var nInvoices:  integer:=0;
+    var Overdue:    integer:=0;
+    var OverdueAmt: double:=0;
+    var UNamt:      double:=0;
+    var KPIOverdue: double:=0;
+    var KPIUnalloc: double:=0;
 
-    Settings:=TSettings.Create;
-    VoucherNumber:=Settings.GetStringValue(TConfigSections.Unallocated, 'VOUCHER_NUM', '0');
+    var Settings: ISettings:=TSettings.Create;
+    var VoucherNumber: string:=Settings.GetStringValue(TConfigSections.Unallocated, 'VOUCHER_NUM', '0');
 
     // Compute
-    for iCNT:=1 to DestGrid.RowCount - 1 do
+    for var iCNT: integer:=1 to DestGrid.RowCount - 1 do
     begin
         // Get actual invoice open amount
-        InvoiceAmt:=StrToFloatDef(DestGrid.Cells[5, iCNT], 0);
+        var InvoiceAmt: double:=StrToFloatDef(DestGrid.Cells[5, iCNT], 0);
 
         // Aggregate invoice amount
         MainForm.OSAmount:=MainForm.OSAmount + InvoiceAmt;
@@ -291,14 +268,14 @@ begin
     CleanUp;
     Columns.Add(
         TSql.SUM +
-            BracketStr(TCompanyData.KpiOverdueTarget, brRound) +
+            BracketStr(TCompanyData.KpiOverdueTarget, Round) +
         TSql._AS +
             QuotedStr(TCompanyData.KpiOverdueTarget)
     );
 
     Columns.Add(
         TSql.SUM +
-            BracketStr(TCompanyData.KpiUnallocatedTarget, brRound) +
+            BracketStr(TCompanyData.KpiUnallocatedTarget, Round) +
             TSql._AS +
             QuotedStr(TCompanyData.KpiUnallocatedTarget)
     );

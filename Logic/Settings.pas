@@ -282,13 +282,13 @@ end;
 /// </summary>
 
 function TSettings.ConfigToMemory: boolean;
-var
-    iCNT: cardinal;
 begin
+
     Result:=False;
 
     if Assigned(TMIG) then
     begin
+
         Decode(AppConfig, True);
 
         pReleasePakURL:=TMIG.ReadString(TConfigSections.ApplicationDetails, 'UPDATE_PATH', '') + TUnityApp.ReleaseFile;
@@ -297,13 +297,14 @@ begin
         pGetLayoutsURL:=TMIG.ReadString(TConfigSections.ApplicationDetails, 'LAYOUT_PATH', '');
 
         GetSectionValues(TConfigSections.Layouts, List);
-        for iCNT:=0 to List.Count - 1 do
+        for var iCNT: integer:=0 to List.Count - 1 do
         begin
             List.Strings[iCNT]:=MidStr(List.Strings[iCNT], AnsiPos('=', List.Strings[iCNT]) + 1, 255);
         end;
 
         pGetLastError:=0;
         Result:=True;
+
     end;
 
 end;
@@ -319,12 +320,14 @@ end;
 
 function TSettings.GetReleaseNumber: cardinal;
 begin
+
     Result:=0;
 
     if Assigned(TMIG) then
     begin
         Result:=StrToIntDef(TMIG.ReadString(TConfigSections.ApplicationDetails, 'RELEASE_NUMBER', ''), 0);
     end;
+
 end;
 
 
@@ -390,15 +393,11 @@ end;
 /// </summary>
 
 function TSettings.Encode(ConfigType: TCommon.TUnityFiles): boolean;
-var
-    iCNT:        integer;
-    wStream:     TMemoryStream;
-    rStream:     TMemoryStream;
-    hStream:     TStringList;
-    buffer:      int64;
-    vCRC:        DWord;
-    sCRC:        string;
 begin
+
+    var buffer:  int64;
+    var vCRC:    DWord;
+    var sCRC:    string;
 
     // Do not allow to encode licence file
     if ConfigType = TCommon.TUnityFiles.LicData then
@@ -407,9 +406,9 @@ begin
         Exit;
     end;
 
-    rStream:=TMemoryStream.Create;
-    wStream:=TMemoryStream.Create;
-    hStream:=TStringList.Create;
+    var rStream: TMemoryStream:=TMemoryStream.Create;
+    var wStream: TMemoryStream:=TMemoryStream.Create;
+    var hStream: TStringList:=TStringList.Create;
 
     try
         try
@@ -439,7 +438,7 @@ begin
             rStream.Position:=0;
 
             // Encoding byte by byte
-            for iCNT:=0 to rStream.Size - 1 do
+            for var iCNT: integer:=0 to rStream.Size - 1 do
             begin
                 rStream.Read(buffer, 1);
                 buffer:=(buffer xor not (ord(TUnityApp.DecryptKey shr iCNT)));
@@ -481,23 +480,18 @@ end;
 /// </summary>
 
 function TSettings.Decode(ConfigType: TCommon.TUnityFiles; ToMemory: boolean): boolean;
-var
-    iCNT:       integer;
-    rStream:    TMemoryStream;
-    wStream:    TMemoryStream;
-    hString:    TStringList;
-    bytes:      TBytes;
-    buffer:     int64;
-    vCRC:       DWord;
-    sCRC:       string;
 begin
 
     Result:=False;
 
-    rStream:=TMemoryStream.Create;
-    wStream:=TMemoryStream.Create;
-    hString:=TStringList.Create;
+    var bytes:  TBytes;
+    var buffer: int64;
+    var vCRC:   DWord;
+    var sCRC:   string;
 
+    var rStream: TMemoryStream:=TMemoryStream.Create;
+    var wStream: TMemoryStream:=TMemoryStream.Create;
+    var hString: TStringList:=TStringList.Create;
     try
         try
 
@@ -509,7 +503,7 @@ begin
                 rStream.LoadFromFile(FPathLicenceLic);
 
             // Decode byte by byte
-            for iCNT:=0 to rStream.Size - 1 do
+            for var iCNT: integer:=0 to rStream.Size - 1 do
             begin
                 rStream.Read(buffer, 1);
                 buffer:=(buffer xor not (ord(TUnityApp.DecryptKey shr iCNT)));

@@ -126,9 +126,9 @@ uses
 
 
 procedure TViewMailerForm.FormCreate(Sender: TObject);
-var
-    lsColumns:  TListColumn;
 begin
+
+    var lsColumns: TListColumn;
 
     // Setup List View component
     lsColumns:=CustomerList.Columns.Add;
@@ -203,7 +203,7 @@ begin
 
     // Display busy cursor and change status
     Screen.Cursor:=crSQLWait;
-    MainForm.ExecMessage(False, TMessaging.msStatusBar, TStatusBar.Processing);
+    MainForm.ExecMessage(False, TMessaging.TWParams.StatusBar, TStatusBar.Processing);
 
     // Get data
     SetEmailAddresses(CustomerList);
@@ -211,7 +211,7 @@ begin
 
     // Default
     Screen.Cursor:=crDefault;
-    MainForm.ExecMessage(False, TMessaging.msStatusBar, TStatusBar.Ready);
+    MainForm.ExecMessage(False, TMessaging.TWParams.StatusBar, TStatusBar.Ready);
 
     // Turn off open items timer
     MainForm.OILoader.Enabled:=False;
@@ -237,14 +237,11 @@ end;
 
 
 function TViewMailerForm.GetEmailAddress(Scuid: string): string;
-var
-    Database: TDataTables;
 begin
 
     Result:='';
 
-    Database:=TDataTables.Create(MainForm.DbConnect);
-
+    var Database: TDataTables:=TDataTables.Create(MainForm.DbConnect);
     try
         Database.Columns.Add(TAddressBook.Estatements);
         Database.CustFilter:=TSql.WHERE + TAddressBook.Scuid + TSql.EQUAL + QuotedStr(Scuid);
@@ -261,14 +258,13 @@ end;
 
 
 procedure TViewMailerForm.SetEmailAddresses(List: TListView);
-var
-    EmailAddress: string;
-    iCNT: integer;
 begin
+
+    var EmailAddress: string;
 
     if List.Items.Count > 0 then
     begin
-        for iCNT:=0 to List.Items.Count - 1 do
+        for var iCNT: integer:=0 to List.Items.Count - 1 do
         begin
             EmailAddress:=GetEmailAddress(List.Items[iCNT].SubItems[11]);
 
@@ -282,14 +278,9 @@ end;
 
 
 procedure TViewMailerForm.UpdateCompanyData(Source: TListView);
-var
-    Tables:  TDataTables;
-    iCNT:    integer;
-    CoCode:  string;
-    Branch:  string;
 begin
 
-    Tables:=TDataTables.Create(MainForm.DbConnect);
+    var Tables: TDataTables:=TDataTables.Create(MainForm.DbConnect);
     try
 
         if Source.Items.Count > 0 then
@@ -301,10 +292,11 @@ begin
             Tables.Columns.Add(TCompanyData.SendNoteFrom);
             Tables.Columns.Add(TCompanyData.BankAccounts);
 
-            for iCNT:=0 to Source.Items.Count - 1 do
+            for var iCNT: integer:=0 to Source.Items.Count - 1 do
             begin
-                CoCode:=Source.Items[iCNT].SubItems[8];
-                Branch:=Source.Items[iCNT].SubItems[9];
+
+                var CoCode: string:=Source.Items[iCNT].SubItems[8];
+                var Branch: string:=Source.Items[iCNT].SubItems[9];
 
                 Tables.ClearSQL;
                 Tables.CustFilter:=TSql.WHERE + TCompanyData.CoCode + TSql.EQUAL + QuotedStr(CoCode) + TSql._AND + TCompanyData.Branch + TSql.EQUAL + QuotedStr(Branch);
@@ -343,10 +335,6 @@ end;
 /// </summary>
 
 procedure TViewMailerForm.ExecuteMailer;
-var
-    iCNT:    integer;
-    MessStr: string;
-    InvFilter: TInvoiceFilter;
 begin
 
     // Check fields
@@ -370,18 +358,18 @@ begin
             Exit;
 
     // Filtering options
-    InvFilter:=TInvoiceFilter.ShowAllItems;
+    var InvFilter: TInvoiceFilter:=TInvoiceFilter.ShowAllItems;
     if cbShowAll.Checked     then InvFilter:=TInvoiceFilter.ShowAllItems;
     if cbOverdueOnly.Checked then InvFilter:=TInvoiceFilter.ReminderOvd;
     if cbNonOverdue.Checked  then InvFilter:=TInvoiceFilter.ReminderNonOvd;
 
     // Get item count for sendable emails
-    for iCNT:=0 to CustomerList.Items.Count - 1 do
+    for var iCNT: integer:=0 to CustomerList.Items.Count - 1 do
         if CustomerList.Items[iCNT].SubItems[4] <> 'Not found!' then
             ThreadCount:=ThreadCount + 1;
 
     // Prepare custom message to the customer
-    MessStr:=StringReplace(Text_Message.Text, TUChars.CRLF, '<br>', [rfReplaceAll]);
+    var MessStr: string:=StringReplace(Text_Message.Text, TChars.CRLF, '<br>', [rfReplaceAll]);
 
     /// <remarks>
     /// We have to always pre-sort Open Items list via Due Date before sending account statement or reminder.
@@ -413,17 +401,17 @@ end;
 
 procedure TViewMailerForm.btnBeginDateClick(Sender: TObject);
 begin
-    CalendarForm.CalendarMode:=cfGetDate;
+    CalendarForm.FCalendarMode:=GetDate;
     MainForm.WndCall(CalendarForm, Modal);
-    ValBeginDate.Caption:=DateToStr(CalendarForm.SelectedDate);
+    ValBeginDate.Caption:=DateToStr(CalendarForm.FSelectedDate);
 end;
 
 
 procedure TViewMailerForm.btnEndDateClick(Sender: TObject);
 begin
-    CalendarForm.CalendarMode:=cfGetDate;
+    CalendarForm.FCalendarMode:=GetDate;
     MainForm.WndCall(CalendarForm, Modal);
-    ValEndDate.Caption:=DateToStr(CalendarForm.SelectedDate);
+    ValEndDate.Caption:=DateToStr(CalendarForm.FSelectedDate);
 end;
 
 

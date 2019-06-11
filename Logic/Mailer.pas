@@ -175,21 +175,21 @@ begin
 
     if oauth = TEmails.TAuthTypes.cdoNTLM then
     begin
-      CdoMessage.Configuration.Fields.item[Schema + 'sendusing'       ].Value:=TEmails.TAuthUsing.cdoSendUsingPort;
-      CdoMessage.Configuration.Fields.item[Schema + 'smtpauthenticate'].Value:=TEmails.TAuthTypes.cdoNTLM;
-      CdoMessage.Configuration.Fields.item[Schema + 'smtpserver'      ].Value:=Settings.GetStringValue(TConfigSections.MailerNTLM, 'SMTP', '');
-      CdoMessage.Configuration.Fields.item[Schema + 'smtpserverport'  ].Value:=Settings.GetStringValue(TConfigSections.MailerNTLM, 'PORT', '');
+        CdoMessage.Configuration.Fields.item[Schema + 'sendusing'       ].Value:=TEmails.TAuthUsing.cdoSendUsingPort;
+        CdoMessage.Configuration.Fields.item[Schema + 'smtpauthenticate'].Value:=TEmails.TAuthTypes.cdoNTLM;
+        CdoMessage.Configuration.Fields.item[Schema + 'smtpserver'      ].Value:=Settings.GetStringValue(TConfigSections.MailerNTLM, 'SMTP', '');
+        CdoMessage.Configuration.Fields.item[Schema + 'smtpserverport'  ].Value:=Settings.GetStringValue(TConfigSections.MailerNTLM, 'PORT', '');
     end;
 
     if oauth = TEmails.TAuthTypes.cdoBasic then
     begin
-      CdoMessage.Configuration.Fields.item[Schema + 'sendusing'       ].Value:=TEmails.TAuthUsing.cdoSendUsingPort;
-      CdoMessage.Configuration.Fields.item[Schema + 'smtpauthenticate'].Value:=TEmails.TAuthTypes.cdoBasic;
-      CdoMessage.Configuration.Fields.item[Schema + 'smtpserver'      ].Value:=Settings.GetStringValue(TConfigSections.MailerBASIC, 'SMTP', '');
-      CdoMessage.Configuration.Fields.item[Schema + 'smtpserverport'  ].Value:=Settings.GetStringValue(TConfigSections.MailerBASIC, 'PORT', '');
-      CdoMessage.Configuration.Fields.item[Schema + 'sendusername'    ].Value:=Settings.GetStringValue(TConfigSections.MailerBASIC, 'USERNAME', '');
-      CdoMessage.Configuration.Fields.item[Schema + 'sendpassword'    ].Value:=Settings.GetStringValue(TConfigSections.MailerBASIC, 'PASSWORD', '');
-      CdoMessage.Configuration.Fields.item[Schema + 'smtpusessl'      ].Value:=Settings.GetStringValue(TConfigSections.MailerBASIC, 'SSL', '');
+        CdoMessage.Configuration.Fields.item[Schema + 'sendusing'       ].Value:=TEmails.TAuthUsing.cdoSendUsingPort;
+        CdoMessage.Configuration.Fields.item[Schema + 'smtpauthenticate'].Value:=TEmails.TAuthTypes.cdoBasic;
+        CdoMessage.Configuration.Fields.item[Schema + 'smtpserver'      ].Value:=Settings.GetStringValue(TConfigSections.MailerBASIC, 'SMTP', '');
+        CdoMessage.Configuration.Fields.item[Schema + 'smtpserverport'  ].Value:=Settings.GetStringValue(TConfigSections.MailerBASIC, 'PORT', '');
+        CdoMessage.Configuration.Fields.item[Schema + 'sendusername'    ].Value:=Settings.GetStringValue(TConfigSections.MailerBASIC, 'USERNAME', '');
+        CdoMessage.Configuration.Fields.item[Schema + 'sendpassword'    ].Value:=Settings.GetStringValue(TConfigSections.MailerBASIC, 'PASSWORD', '');
+        CdoMessage.Configuration.Fields.item[Schema + 'smtpusessl'      ].Value:=Settings.GetStringValue(TConfigSections.MailerBASIC, 'SSL', '');
     end;
 
     CdoMessage.Configuration.Fields.item[Schema + 'NNTPAccountName' ].Value:=XMailer;
@@ -299,8 +299,6 @@ end;
 
 
 function TDocument.BuildHTML: integer;
-
-    (* NESTED BLOCK *)
 
     var Pos:   integer;
     var Items: integer;
@@ -489,13 +487,13 @@ begin
     end;
 
     // Build customer address field
-    CustAddr:='<p class="p"><b>' + CustName + '</b><br />' + TUChars.CRLF;
-    if (OpenItems.Cells[MainForm.OpenItemsRefs.Ad1Col,Pos] <> '') and (OpenItems.Cells[MainForm.OpenItemsRefs.Ad1Col,Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[MainForm.OpenItemsRefs.Ad1Col,Pos] + '<br />' + TUChars.CRLF;
-    if (OpenItems.Cells[MainForm.OpenItemsRefs.Ad2Col,Pos] <> '') and (OpenItems.Cells[MainForm.OpenItemsRefs.Ad2Col,Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[MainForm.OpenItemsRefs.Ad2Col,Pos] + '<br />' + TUChars.CRLF;
-    if (OpenItems.Cells[MainForm.OpenItemsRefs.Ad3Col,Pos] <> '') and (OpenItems.Cells[MainForm.OpenItemsRefs.Ad3Col,Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[MainForm.OpenItemsRefs.Ad3Col,Pos] + '<br />' + TUChars.CRLF;
-    if (OpenItems.Cells[MainForm.OpenItemsRefs.PnoCol,Pos] <> '') and (OpenItems.Cells[MainForm.OpenItemsRefs.PnoCol,Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[MainForm.OpenItemsRefs.PnoCol,Pos] + '<br />' + TUChars.CRLF;
-    if (OpenItems.Cells[MainForm.OpenItemsRefs.PAreaCol, Pos] <> '') and (OpenItems.Cells[MainForm.OpenItemsRefs.PAreaCol, Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[MainForm.OpenItemsRefs.PAreaCol, Pos] + '<br />' + TUChars.CRLF;
-    CustAddr:=CustAddr + '</p>' + TUChars.CRLF;
+    CustAddr:='<p class="p"><b>' + CustName + '</b><br />' + TChars.CRLF;
+    if (OpenItems.Cells[MainForm.OpenItemsRefs.Ad1Col,Pos] <> '') and (OpenItems.Cells[MainForm.OpenItemsRefs.Ad1Col,Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[MainForm.OpenItemsRefs.Ad1Col,Pos] + '<br />' + TChars.CRLF;
+    if (OpenItems.Cells[MainForm.OpenItemsRefs.Ad2Col,Pos] <> '') and (OpenItems.Cells[MainForm.OpenItemsRefs.Ad2Col,Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[MainForm.OpenItemsRefs.Ad2Col,Pos] + '<br />' + TChars.CRLF;
+    if (OpenItems.Cells[MainForm.OpenItemsRefs.Ad3Col,Pos] <> '') and (OpenItems.Cells[MainForm.OpenItemsRefs.Ad3Col,Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[MainForm.OpenItemsRefs.Ad3Col,Pos] + '<br />' + TChars.CRLF;
+    if (OpenItems.Cells[MainForm.OpenItemsRefs.PnoCol,Pos] <> '') and (OpenItems.Cells[MainForm.OpenItemsRefs.PnoCol,Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[MainForm.OpenItemsRefs.PnoCol,Pos] + '<br />' + TChars.CRLF;
+    if (OpenItems.Cells[MainForm.OpenItemsRefs.PAreaCol, Pos] <> '') and (OpenItems.Cells[MainForm.OpenItemsRefs.PAreaCol, Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[MainForm.OpenItemsRefs.PAreaCol, Pos] + '<br />' + TChars.CRLF;
+    CustAddr:=CustAddr + '</p>' + TChars.CRLF;
 
     Result:=Items;
 
@@ -544,7 +542,7 @@ begin
 
     (* DEBUG *)
 //    RAND:=Random(100000);
-//    SaveOutput('I:\temp\test' + IntToStr(RAND) + '.html');
+//    SaveOutput('I:\temp\' + IntToStr(RAND) + '.html');
 //    Result:=True;
 
 end;
