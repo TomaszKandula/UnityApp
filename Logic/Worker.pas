@@ -117,7 +117,7 @@ type
         procedure Execute; override;
     private
         var FLock:       TCriticalSection;
-        var FMode:       TEnums.TActionTask;
+        var FMode:       TEnums.TActions;
         var FGrid:       TStringGrid;
         var FIDThd:      integer;
         var FContact:    string;
@@ -133,7 +133,7 @@ type
         function    Add      : boolean;
         destructor  Destroy; override;
         constructor Create(
-            ActionMode:     TEnums.TActionTask;
+            ActionMode:     TEnums.TActions;
             Grid:           TStringGrid;
             SCUID:          string;
             Contact:        string;
@@ -241,7 +241,7 @@ type
     private
         var FLock:        TCriticalSection;
         var FIDThd:       integer;
-        var FLayout:      TDocuments.TMode;
+        var FLayout:      TEnums.TDocMode;
         var FSubject:     string;
         var FMess:        string;
         var FInvFilter:   TInvoiceFilter;
@@ -263,7 +263,7 @@ type
         property    IDThd:  integer read FIDThd;
         destructor  Destroy; override;
         constructor Create(
-            Layout:      TDocuments.TMode;
+            Layout:      TEnums.TDocMode;
             Subject:     string;
             Mess:        string;
             InvFilter:   TInvoiceFilter;
@@ -757,7 +757,7 @@ end;
 // --------------------------------------------------------------------------------------------------------------------------------------------- ADRESS BOOK //
 
 
-constructor TTAddressBook.Create(ActionMode: TEnums.TActionTask; Grid: TStringGrid; SCUID, Contact, Estatement, Email, Phones: string; Conditions: string);
+constructor TTAddressBook.Create(ActionMode: TEnums.TActions; Grid: TStringGrid; SCUID, Contact, Estatement, Email, Phones: string; Conditions: string);
 begin
     inherited Create(False);
     FLock      :=TCriticalSection.Create;
@@ -788,10 +788,10 @@ begin
         MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Processing);
 
         // Open
-        if (FMode = TEnums.TActionTask.adOpenAll) or (FMode = TEnums.TActionTask.adOpenForUser) then
+        if (FMode = TEnums.TActions.OpenAll) or (FMode = TEnums.TActions.OpenForUser) then
         begin
             if Read then
-                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Address Book has been opened successfully.')
+                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IDThd.ToString + ']: Address Book has been opened successfully.')
                     else
                         begin
                             MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot open Address Book.');
@@ -800,25 +800,25 @@ begin
         end;
 
         // Update
-        if FMode = TEnums.TActionTask.adUpdate then
+        if FMode = TEnums.TActions.Update then
         begin
             if Update then
-                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: The Address Book has been updated successfully.')
+                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IDThd.ToString + ']: The Address Book has been updated successfully.')
                     else
-                        MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot insert data to Address Book, either error occured or item already exist.');
+                        MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IDThd.ToString + ']: Cannot insert data to Address Book, either error occured or item already exist.');
         end;
 
         // Insert new recodrs
-        if FMode = TEnums.TActionTask.adInsert then
+        if FMode = TEnums.TActions.Insert then
         begin
             if Add then
-                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: The Address Book insertion has been executed successfully.')
+                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IDThd.ToString + ']: The Address Book insertion has been executed successfully.')
                     else
-                        MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot insert data to Address Book, either error occured or item already exist.');
+                        MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IDThd.ToString + ']: Cannot insert data to Address Book, either error occured or item already exist.');
         end;
 
         // Export
-        if FMode = TEnums.TActionTask.adExport then
+        if FMode = TEnums.TActions.Export then
         begin
             FGrid.OpenThdId:=IDThd;
             FGrid.ExportCSV(MainForm.CSVExport, '|');
@@ -862,7 +862,7 @@ begin
             DataTables.Columns.Add(TAddressBook.Division);
 
             // Filter by User Alias (if given)
-            if FMode = TEnums.TActionTask.adOpenForUser then
+            if FMode = TEnums.TActions.OpenForUser then
                 DataTables.CustFilter:=FConditions;
 
             DataTables.OpenTable(TAddressBook.AddressBook);
@@ -1490,31 +1490,31 @@ begin
                 GenText.Columns.Add(TGeneralComment.UserAlias);
                 GenText.Values.Add(UpperCase(MainForm.WinUserName));
 
-                if not(FFixedComment = TNaVariants.NULL) then
+                if not(FFixedComment = TUnknown.NULL) then
                 begin
                     GenText.Columns.Add(TGeneralComment.FixedComment);
                     GenText.Values.Add(FFixedComment);
                 end;
 
-                if not(FFollowUp = TNaVariants.NULL) then
+                if not(FFollowUp = TUnknown.NULL) then
                 begin
                     GenText.Columns.Add(TGeneralComment.FollowUp);
                     GenText.Values.Add(FFollowUp);
                 end;
 
-                if not(FFree1 = TNaVariants.Null) then
+                if not(FFree1 = TUnknown.Null) then
                 begin
                     GenText.Columns.Add(TGeneralComment.Free1);
                     GenText.Values.Add(FFree1);
                 end;
 
-                if not(FFree2 = TNaVariants.NULL) then
+                if not(FFree2 = TUnknown.NULL) then
                 begin
                     GenText.Columns.Add(TGeneralComment.Free2);
                     GenText.Values.Add(FFree2);
                 end;
 
-                if not(FFree3 = TNaVariants.Null) then
+                if not(FFree3 = TUnknown.Null) then
                 begin
                     GenText.Columns.Add(TGeneralComment.Free3);
                     GenText.Values.Add(FFree3);
@@ -1542,7 +1542,7 @@ begin
                 GenText.Columns.Add(TGeneralComment.Stamp);     GenText.Values.Add(DateTimeToStr(Now));
                 GenText.Columns.Add(TGeneralComment.UserAlias); GenText.Values.Add(UpperCase(MainForm.WinUserName));
 
-                if not(FFixedComment = TNaVariants.NULL) then
+                if not(FFixedComment = TUnknown.NULL) then
                 begin
                     GenText.Columns.Add(TGeneralComment.FixedComment);
                     GenText.Values.Add(FFixedComment);
@@ -1553,7 +1553,7 @@ begin
                     GenText.Values.Add('');
                 end;
 
-                if not(FFollowUp = TNaVariants.NULL) then
+                if not(FFollowUp = TUnknown.NULL) then
                 begin
                     GenText.Columns.Add(TGeneralComment.FollowUp);
                     GenText.Values.Add(FFollowUp);
@@ -1564,7 +1564,7 @@ begin
                     GenText.Values.Add('');
                 end;
 
-                if not(FFree1 = TNaVariants.NULL) then
+                if not(FFree1 = TUnknown.NULL) then
                 begin
                     GenText.Columns.Add(TGeneralComment.Free1);
                     GenText.Values.Add(FFree1);
@@ -1575,7 +1575,7 @@ begin
                     GenText.Values.Add('');
                 end;
 
-                if not(FFree2 = TNaVariants.NULL) then
+                if not(FFree2 = TUnknown.NULL) then
                 begin
                     GenText.Columns.Add(TGeneralComment.Free2);
                     GenText.Values.Add(FFree2);
@@ -1586,7 +1586,7 @@ begin
                     GenText.Values.Add('');
                 end;
 
-                if not(FFree3 = TNaVariants.NULL) then
+                if not(FFree3 = TUnknown.NULL) then
                 begin
                     GenText.Columns.Add(TGeneralComment.Free3);
                     GenText.Values.Add(FFree3);
@@ -1628,7 +1628,7 @@ end;
 
 constructor TTSendAccountStatement.Create
 (
-    Layout:      TDocuments.TMode;
+    Layout:      TEnums.TDocMode;
     Subject:     string;
     Mess:        string;
     InvFilter:   TInvoiceFilter;
@@ -1680,9 +1680,9 @@ end;
 
 procedure TTSendAccountStatement.Execute;
 var
-    Statement:   TDocument;
-    Settings:    ISettings;
-    CommThread:  TTDailyComment;
+    Statement:  TDocument;
+    Settings:   ISettings;
+    CommThread: TTDailyComment;
 begin
     FIDThd:=CurrentThread.ThreadID;
     FLock.Acquire;
@@ -1728,10 +1728,10 @@ begin
             /// Use maCustom for customised template. It requires FSalut, FMess and FSubject to be provided.
             /// </param>
 
-            if FLayout = TDocuments.TMode.Defined then
+            if FLayout = TEnums.TDocMode.Defined then
                 Statement.HTMLLayout:=Statement.LoadTemplate(Settings.GetLayoutDir + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE2', ''));
 
-            if FLayout = TDocuments.TMode.Custom then
+            if FLayout = TEnums.TDocMode.Custom then
                 Statement.HTMLLayout:=Statement.LoadTemplate(Settings.GetLayoutDir + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE3', ''));
 
             /// <remarks>
@@ -1745,7 +1745,7 @@ begin
                 /// Register sent email either as manual statement or automatic statement.
                 /// </summary>
 
-                if FLayout = TDocuments.TMode.Defined then
+                if FLayout = TEnums.TDocMode.Defined then
                 begin
                     CommThread:=TTDailyComment.Create(
                         FCUID,
@@ -1763,7 +1763,7 @@ begin
                     CommThread.WaitFor;
                 end;
 
-                if FLayout = TDocuments.TMode.Custom  then
+                if FLayout = TEnums.TDocMode.Custom  then
                 begin
                     CommThread:=TTDailyComment.Create(
                         FCUID,
@@ -1887,7 +1887,7 @@ begin
                     /// </remarks>
 
                     SendStat:=TTSendAccountStatement.Create(
-                        TDocuments.TMode.Custom,
+                        TEnums.TDocMode.Custom,
                         FSubject,
                         FMess,
                         FInvFilter,

@@ -132,7 +132,7 @@ begin
     MainForm.UpdateOpenItemsRefs(ActionsForm.OpenItemsGrid);
     MainForm.UpdateControlStatusRefs(MainForm.sgControlStatus);
     TTSendAccountStatement.Create(
-        TDocuments.TMode.Custom,
+        TEnums.TDocMode.Custom,
         'Account Statement',
         TempStr,
         InvFilter,
@@ -259,7 +259,7 @@ end;
 procedure TSendForm.btnBeginDateClick(Sender: TObject);
 begin
     CalendarForm.FCalendarMode:=GetDate;
-    MainForm.WndCall(CalendarForm, Helpers.TWindows.TState.Modal);
+    MainForm.WndCall(CalendarForm, Helpers.TEnums.TWindowState.Modal);
     ValBeginDate.Caption:=DateToStr(CalendarForm.FSelectedDate);
 end;
 

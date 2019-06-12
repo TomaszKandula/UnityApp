@@ -511,7 +511,7 @@ end;
 function TAgeView.GetData(Code: string; Table: string; Entity: string): string;
 begin
 
-    Result:=TNaVariants.Unassigned;
+    Result:=TUnknown.Unassigned;
     var Field: string;
 
     if (Code = ' ') or (Code = '') or (Entity = ' ') or (Entity = '') then Exit;

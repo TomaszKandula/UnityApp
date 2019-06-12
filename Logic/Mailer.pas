@@ -45,6 +45,8 @@ type
         var FMailBody:    string;
         var FAttachments: TList<string>;
     public
+        type TAuthTypes = (cdoAnonymous, cdoBasic, cdoNTLM);
+        type TAuthUsing = (cdoNone, cdoSendUsingPickup, cdoSendUsingPort, cdoSendUsingExchange);
         property idThd:       integer       read FidThd       write FidThd;
         property XMailer:     string        read FXMailer     write FXMailer;
         property MailFrom:    string        read FMailFrom    write FMailFrom;
@@ -55,7 +57,7 @@ type
         property MailSubject: string        read FMailSubject write FMailSubject;
         property MailBody:    string        read FMailBody    write FMailBody;
         property Attachments: TList<string> read FAttachments write FAttachments;
-        function SendEmail(OAuth: TEmails.TAuthTypes): boolean;
+        function SendEmail(OAuth: TAuthTypes): boolean;
         function SendNow: boolean;
         constructor Create;
         destructor Destroy; override;
@@ -153,7 +155,7 @@ begin
 end;
 
 
-function TMailer.SendEmail(OAuth: TEmails.TAuthTypes): boolean;
+function TMailer.SendEmail(OAuth: TMailer.TAuthTypes): boolean;
 begin
 
     Result:=False;
@@ -173,18 +175,18 @@ begin
     var Settings: ISettings:=TSettings.Create;
     var Schema: string:='http://schemas.microsoft.com/cdo/configuration/';
 
-    if oauth = TEmails.TAuthTypes.cdoNTLM then
+    if oauth = TAuthTypes.cdoNTLM then
     begin
-        CdoMessage.Configuration.Fields.item[Schema + 'sendusing'       ].Value:=TEmails.TAuthUsing.cdoSendUsingPort;
-        CdoMessage.Configuration.Fields.item[Schema + 'smtpauthenticate'].Value:=TEmails.TAuthTypes.cdoNTLM;
+        CdoMessage.Configuration.Fields.item[Schema + 'sendusing'       ].Value:=TAuthUsing.cdoSendUsingPort;
+        CdoMessage.Configuration.Fields.item[Schema + 'smtpauthenticate'].Value:=TAuthTypes.cdoNTLM;
         CdoMessage.Configuration.Fields.item[Schema + 'smtpserver'      ].Value:=Settings.GetStringValue(TConfigSections.MailerNTLM, 'SMTP', '');
         CdoMessage.Configuration.Fields.item[Schema + 'smtpserverport'  ].Value:=Settings.GetStringValue(TConfigSections.MailerNTLM, 'PORT', '');
     end;
 
-    if oauth = TEmails.TAuthTypes.cdoBasic then
+    if oauth = TAuthTypes.cdoBasic then
     begin
-        CdoMessage.Configuration.Fields.item[Schema + 'sendusing'       ].Value:=TEmails.TAuthUsing.cdoSendUsingPort;
-        CdoMessage.Configuration.Fields.item[Schema + 'smtpauthenticate'].Value:=TEmails.TAuthTypes.cdoBasic;
+        CdoMessage.Configuration.Fields.item[Schema + 'sendusing'       ].Value:=TAuthUsing.cdoSendUsingPort;
+        CdoMessage.Configuration.Fields.item[Schema + 'smtpauthenticate'].Value:=TAuthTypes.cdoBasic;
         CdoMessage.Configuration.Fields.item[Schema + 'smtpserver'      ].Value:=Settings.GetStringValue(TConfigSections.MailerBASIC, 'SMTP', '');
         CdoMessage.Configuration.Fields.item[Schema + 'smtpserverport'  ].Value:=Settings.GetStringValue(TConfigSections.MailerBASIC, 'PORT', '');
         CdoMessage.Configuration.Fields.item[Schema + 'sendusername'    ].Value:=Settings.GetStringValue(TConfigSections.MailerBASIC, 'USERNAME', '');
@@ -207,11 +209,11 @@ begin
         CdoMessage.BodyPart.Charset:='utf-8';
         CdoMessage.Send;
         Result:=True;
-        MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: E-mail has been sent successfully.');
+        MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + idThd.ToString + ']: E-mail has been sent successfully.');
 
     except
         on E: Exception do
-            MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Cannot send an e-mail. Error message has been thrown: ' + E.Message);
+            MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + idThd.ToString + ']: Cannot send an e-mail. Error message has been thrown: ' + E.Message);
     end;
 
 end;
@@ -219,16 +221,10 @@ end;
 
 function TMailer.SendNow: boolean;
 begin
-
     Result:=False;
     var Settings: ISettings:=TSettings.Create;
-
-    if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerNTLM then
-        Result:=SendEmail(TEmails.TAuthTypes.cdoNTLM);
-
-    if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerBASIC then
-        Result:=SendEmail(TEmails.TAuthTypes.cdoBasic);
-
+    if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerNTLM then Result:=SendEmail(TAuthTypes.cdoNTLM);
+    if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerBASIC then Result:=SendEmail(TAuthTypes.cdoBasic);
 end;
 
 

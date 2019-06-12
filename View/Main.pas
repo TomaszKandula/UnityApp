@@ -876,10 +876,6 @@ type
         function  CDate(StrDate: string): TDate;
         function  ShowReport(ReportNumber: cardinal): cardinal;
         procedure InitializeScreenSettings;
-        {procedure SetGridThumbSizes;}
-        {procedure SetGridFocus;}
-        {function  CheckIfDate(StrDate: string): boolean;}
-        {procedure CopyFile(const Source, Dest: string);}
     public
         var LogText:           TThreadFileLog;
         var DbConnect:         TADOConnection;
@@ -904,8 +900,8 @@ type
         procedure DebugMsg(const Msg: String);
         procedure TryInitConnection;
         procedure ExecMessage(IsPostType: boolean; IntValue: cardinal; TextValue: string);
-        function  WndCall(WinForm: TForm; Mode: Helpers.TWindows.TState): integer;
-        function  MsgCall(WndType: TCommon.TMsgTypes; WndText: string): integer;
+        function  WndCall(WinForm: TForm; Mode: Helpers.TEnums.TWindowState): integer;
+        function  MsgCall(WndType: TCommon.TMessage; WndText: string): integer;
         function  OleGetStr(RecordsetField: variant): string;
 
         // Column references
@@ -970,35 +966,10 @@ type
 
     end;
 
-    /// <remarks>
-    /// If library is written in Delphi, then Delphi types can be used as usual,
-    /// however, if library is written in 'C' or any other language, then
-    /// please use plain 'C' language types only, so instead of pascal 'string'
-    /// type, please use funny 'pchar' type, etc., also, in case of c# language,
-    /// please refer to manual on 'making C# dll library for delphi usage'.
-    /// Do not use own defined types.
-    /// </remarks>
 
-    TMergeSort            = procedure(Grid: TStringgrid; var Vals: array of integer; sortcol, datatype: integer; ascending: boolean); stdcall;
-    TPrintf               = function(text: string; s: string): string; stdcall;
-    TGetOSVer             = function(CheckForOsName: boolean): string; stdcall;
-    TGetCurrentUserSid    = function: string stdcall;
-    TGetBuildInfoAsString = function: string stdcall;
-
-    const Assembly = 'UnityLib.dll';
-
-    function  Printf(Text: string; s: string): string; stdcall; external Assembly;
-//    function  GetCurrentUserSid: string; stdcall; external Assembly;
-    function  GetOSVer(CheckForOsName: boolean): string; stdcall; external Assembly;
-    function  GetBuildInfoAsString: string; stdcall; external Assembly;
-    procedure MergeSort(grid: TStringgrid; var vals: array of integer; sortcol, datatype: integer; ascending: boolean); stdcall; external Assembly;
-
-    const DWMI:  string  = 'dwmapi.dll';
-    const CS_DROPSHADOW  = $00020000;
-    const WM_GETINFO = WM_USER + 120;
-    const WM_EXTINFO = WM_APP  + 150;
-    const NOTIFY_FOR_THIS_SESSION = $0;
-    const NOTIFY_FOR_ALL_SESSIONS = $1;
+const
+    WM_GETINFO = WM_USER + 120;
+    WM_EXTINFO = WM_APP  + 150;
 
 
 var
@@ -1140,11 +1111,11 @@ procedure TMainForm.CallbackMessageBox(PassMsg: TMessage);
 begin
 
     case PassMsg.WParam of
-        TMessaging.TWParams.MessageInfo:      MainForm.MsgCall(TCommon.TMsgTypes.Info,      PChar(PassMsg.LParam));
-        TMessaging.TWParams.MessageWarn:      MainForm.MsgCall(TCommon.TMsgTypes.Warn,      PChar(PassMsg.LParam));
-        TMessaging.TWParams.MessageError:     MainForm.MsgCall(TCommon.TMsgTypes.Error,     PChar(PassMsg.LParam));
-        TMessaging.TWParams.MessageQuestion1: MainForm.MsgCall(TCommon.TMsgTypes.Question1, PChar(PassMsg.LParam));
-        TMessaging.TWParams.MessageQuestion2: MainForm.MsgCall(TCommon.TMsgTypes.Question2, PChar(PassMsg.LParam));
+        TMessaging.TWParams.MessageInfo:      MainForm.MsgCall(TCommon.TMessage.Info,      PChar(PassMsg.LParam));
+        TMessaging.TWParams.MessageWarn:      MainForm.MsgCall(TCommon.TMessage.Warn,      PChar(PassMsg.LParam));
+        TMessaging.TWParams.MessageError:     MainForm.MsgCall(TCommon.TMessage.Error,     PChar(PassMsg.LParam));
+        TMessaging.TWParams.MessageQuestion1: MainForm.MsgCall(TCommon.TMessage.Question1, PChar(PassMsg.LParam));
+        TMessaging.TWParams.MessageQuestion2: MainForm.MsgCall(TCommon.TMessage.Question2, PChar(PassMsg.LParam));
     end;
 
 end;
@@ -1197,7 +1168,7 @@ begin
         // Windows query for shutdown
         WM_QUERYENDSESSION:
         begin
-            LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(PassMsg.Msg) + ' WM_QUERYENDSESSION. Windows is going to be shut down. Closing ' + TUnityApp.AppCaption + '...');
+            LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(PassMsg.Msg) + ' WM_QUERYENDSESSION. Windows is going to be shut down. Closing ' + TCommon.AppCaption + '...');
             FAllowClose:=True;
             PassMsg.Result:=1;
         end;
@@ -1223,7 +1194,7 @@ begin
                 DbConnect.Connected:=False;
                 DbConnect:=nil;
                 IsConnected:=False;
-                MainForm.ExecMessage(False, TMessaging.TWParams.ConnectionError, TNaVariants.NULL);
+                MainForm.ExecMessage(False, TMessaging.TWParams.ConnectionError, TUnknown.NULL);
                 LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(PassMsg.Msg) + ' WM_POWERBROADCAST with PBT_APMSUSPEND. Going into suspension mode, Unity is disconnected from server.');
             end;
 
@@ -1410,7 +1381,7 @@ begin
 end;
 
 
-function TMainForm.WndCall(WinForm: TForm; Mode: Helpers.TWindows.TState): integer;
+function TMainForm.WndCall(WinForm: TForm; Mode: Helpers.TEnums.TWindowState): integer;
 begin
 
     Result:=0;
@@ -1419,25 +1390,25 @@ begin
     WinForm.PopupParent:=MainForm;
 
     case Mode of
-        Helpers.TWindows.TState.Modal: Result:=WinForm.ShowModal;
-        Helpers.TWindows.TState.Modeless: WinForm.Show;
+        Helpers.TEnums.TWindowState.Modal: Result:=WinForm.ShowModal;
+        Helpers.TEnums.TWindowState.Modeless: WinForm.Show;
     end;
 
 end;
 
 
-function TMainForm.MsgCall(WndType: TCommon.TMsgTypes; WndText: string): integer;
+function TMainForm.MsgCall(WndType: TCommon.TMessage; WndText: string): integer;
 begin
 
     Result:=0;
     if WndText = '' then Exit;
 
     case WndType of
-        TCommon.TMsgTypes.Info:      Result:=Application.MessageBox(PChar(WndText), PChar(TUnityApp.APPCAPTION), MB_OK       + MB_ICONINFORMATION);
-        TCommon.TMsgTypes.Warn:      Result:=Application.MessageBox(PChar(WndText), PChar(TUnityApp.APPCAPTION), MB_OK       + MB_ICONWARNING);
-        TCommon.TMsgTypes.Error:     Result:=Application.MessageBox(PChar(WndText), PChar(TUnityApp.APPCAPTION), MB_OK       + MB_ICONERROR);
-        TCommon.TMsgTypes.Question1: Result:=Application.MessageBox(PChar(WndText), PChar(TUnityApp.APPCAPTION), MB_OKCANCEL + MB_ICONQUESTION);
-        TCommon.TMsgTypes.Question2: Result:=Application.MessageBox(PChar(WndText), PChar(TUnityApp.APPCAPTION), MB_YESNO    + MB_ICONQUESTION);
+        TCommon.TMessage.Info:      Result:=Application.MessageBox(PChar(WndText), PChar(TCommon.APPCAPTION), MB_OK       + MB_ICONINFORMATION);
+        TCommon.TMessage.Warn:      Result:=Application.MessageBox(PChar(WndText), PChar(TCommon.APPCAPTION), MB_OK       + MB_ICONWARNING);
+        TCommon.TMessage.Error:     Result:=Application.MessageBox(PChar(WndText), PChar(TCommon.APPCAPTION), MB_OK       + MB_ICONERROR);
+        TCommon.TMessage.Question1: Result:=Application.MessageBox(PChar(WndText), PChar(TCommon.APPCAPTION), MB_OKCANCEL + MB_ICONQUESTION);
+        TCommon.TMessage.Question2: Result:=Application.MessageBox(PChar(WndText), PChar(TCommon.APPCAPTION), MB_YESNO    + MB_ICONQUESTION);
     end;
 
 end;
@@ -1565,7 +1536,7 @@ begin
         begin
             if CoNumber[iCNT] <> '0' then
             begin
-                Result:=Copy(CoNumber, iCNT, MaxInt);
+                Result:=System.Copy(CoNumber, iCNT, MaxInt);
                 Exit;
             end;
         end;
@@ -1620,9 +1591,9 @@ begin
         end
         else
         begin
-            TargetGrid.Cells[TargetColumn, 1]:=TNaVariants.NA;
-            TargetGrid.Cells[TargetColumn, 2]:=TNaVariants.NA;
-            TargetGrid.Cells[TargetColumn, 3]:=TNaVariants.NA;
+            TargetGrid.Cells[TargetColumn, 1]:=TUnknown.NA;
+            TargetGrid.Cells[TargetColumn, 2]:=TUnknown.NA;
+            TargetGrid.Cells[TargetColumn, 3]:=TUnknown.NA;
         end;
     end;
 
@@ -1710,7 +1681,7 @@ begin
     Result:=ShellExecute(
         MainForm.Handle,
         'open',
-        PChar(Settings.GetAppDir + TUnityApp.UnityReader),
+        PChar(Settings.GetAppDir + TCommon.UnityReader),
         PChar(AppParam),
         nil,
         SW_SHOWNORMAL
@@ -2004,7 +1975,7 @@ begin
     // Save it
     var Settings: ISettings:=TSettings.Create;
     Settings.SetStringValue(TConfigSections.PasswordSection, 'HASH', HashPasswd);
-    Settings.Encode(TCommon.TUnityFiles.AppConfig);
+    Settings.Encode(TCommon.TFiles.AppConfig);
     Result:=True;
 
 end;
@@ -2372,11 +2343,11 @@ begin
         begin
 
             // Allow to resolve query
-            if MsgCall(TCommon.TMsgTypes.Question2, 'Are you sure you want to resolve this query?') = IDYES then
+            if MsgCall(TCommon.TMessage.Question2, 'Are you sure you want to resolve this query?') = IDYES then
             begin
                 UpdateStatus(DbItemId, 'RESOLVED', sgFSCview, FscView);
                 FSCComment.Clear;
-                MsgCall(TCommon.TMsgTypes.Info, 'Query has been resolved!');
+                MsgCall(TCommon.TMessage.Info, 'Query has been resolved!');
             end;
 
         end
@@ -2385,11 +2356,11 @@ begin
         begin
             UpdateStatus(DbItemId, 'RESOLVED', sgFSCview, FscView);
             FSCComment.Clear;
-            MsgCall(TCommon.TMsgTypes.Info, 'Query has been resolved!');
+            MsgCall(TCommon.TMessage.Info, 'Query has been resolved!');
         end
         else
         begin
-            MsgCall(TCommon.TMsgTypes.Warn, 'You can only resolve queries that are either pending or open.');
+            MsgCall(TCommon.TMessage.Warn, 'You can only resolve queries that are either pending or open.');
         end;
 
     end
@@ -2404,11 +2375,11 @@ begin
         begin
             UpdateStatus(DbItemId, 'PENDING', sgLBUview, FscView);
             LbuComment.Clear;
-            MsgCall(TCommon.TMsgTypes.Info, 'Query has been resolved!');
+            MsgCall(TCommon.TMessage.Info, 'Query has been resolved!');
         end
         else
         begin
-            MsgCall(TCommon.TMsgTypes.Warn, 'You can only update open queries.');
+            MsgCall(TCommon.TMessage.Warn, 'You can only update open queries.');
         end;
 
     end;
@@ -2488,7 +2459,7 @@ procedure TMainForm.FormCreate(Sender: TObject);
 begin
 
     LogText:=TThreadFileLog.Create;
-    var AppVersion: string:=GetBuildInfoAsString;
+    var AppVersion: string:=TCommon.GetBuildInfoAsString;
 
     CurrentEvents:='# -- SESSION START --';
     FAllowClose:=False;
@@ -2499,7 +2470,7 @@ begin
     InitializeScreenSettings;
     var Settings: ISettings:=TSettings.Create;
     try
-        MainForm.Caption :=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'WND_MAIN', TUnityApp.APPCAPTION);
+        MainForm.Caption :=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'WND_MAIN', TCommon.APPCAPTION);
         DataUpdated.Caption:='';
 
         WinUserName :=Settings.GetWinUserName;
@@ -2537,16 +2508,16 @@ begin
 
         if FormatSettings.DecimalSeparator = ',' then
         begin
-            procRISKA.Caption:=FloatToStr(StrToFloat(Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_A_MAX', TRiskClass.RiskClassA)) * 100) + '%';
-            procRISKB.Caption:=FloatToStr(StrToFloat(Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_B_MAX', TRiskClass.RiskClassB)) * 100) + '%';
-            procRISKC.Caption:=FloatToStr(StrToFloat(Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_C_MAX', TRiskClass.RiskClassC)) * 100) + '%';
+            procRISKA.Caption:=FloatToStr(StrToFloat(Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_A_MAX', TRiskClass.A)) * 100) + '%';
+            procRISKB.Caption:=FloatToStr(StrToFloat(Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_B_MAX', TRiskClass.B)) * 100) + '%';
+            procRISKC.Caption:=FloatToStr(StrToFloat(Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_C_MAX', TRiskClass.C)) * 100) + '%';
         end;
 
         if FormatSettings.DecimalSeparator = '.' then
         begin
-            procRISKA.Caption:=FloatToStr(StrToFloat(StringReplace(Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_A_MAX', TRiskClass.RiskClassA), ',', '.', [rfReplaceAll])) * 100) + '%';
-            procRISKB.Caption:=FloatToStr(StrToFloat(StringReplace(Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_B_MAX', TRiskClass.RiskClassB), ',', '.', [rfReplaceAll])) * 100) + '%';
-            procRISKC.Caption:=FloatToStr(StrToFloat(StringReplace(Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_C_MAX', TRiskClass.RiskClassC), ',', '.', [rfReplaceAll])) * 100) + '%';
+            procRISKA.Caption:=FloatToStr(StrToFloat(StringReplace(Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_A_MAX', TRiskClass.A), ',', '.', [rfReplaceAll])) * 100) + '%';
+            procRISKB.Caption:=FloatToStr(StrToFloat(StringReplace(Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_B_MAX', TRiskClass.B), ',', '.', [rfReplaceAll])) * 100) + '%';
+            procRISKC.Caption:=FloatToStr(StrToFloat(StringReplace(Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_C_MAX', TRiskClass.C), ',', '.', [rfReplaceAll])) * 100) + '%';
         end;
 
         /// <remarks>
@@ -2644,7 +2615,7 @@ begin
         on E: Exception do
         begin
             LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ISettings failed. Error occured: ' + E.Message);
-            MsgCall(TCommon.TMsgTypes.Error, 'An error occured [ISettings]: ' + E.Message + '. Please contact IT support. Application will be closed.');
+            MsgCall(TCommon.TMessage.Error, 'An error occured [ISettings]: ' + E.Message + '. Please contact IT support. Application will be closed.');
             ExitProcess(0);
         end;
     end;
@@ -2658,7 +2629,7 @@ begin
         on E: Exception do
         begin
             LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: TryInitConnection failed. Error occured: ' + E.Message);
-            MsgCall(TCommon.TMsgTypes.Error, 'An error occured [TryInitConnection]: ' + E.Message + '. Please contact IT support. Application will be closed.');
+            MsgCall(TCommon.TMessage.Error, 'An error occured [TryInitConnection]: ' + E.Message + '. Please contact IT support. Application will be closed.');
         end;
     end;
 
@@ -2675,7 +2646,7 @@ begin
             // Quit if username is not found
             if AccessLevel = '' then
             begin
-                MsgCall(TCommon.TMsgTypes.Error, 'Cannot find account for user alias: ' + UpperCase(WinUserName) + '. Please contact your administrator. Application will be closed.');
+                MsgCall(TCommon.TMessage.Error, 'Cannot find account for user alias: ' + UpperCase(WinUserName) + '. Please contact your administrator. Application will be closed.');
                 ExitProcess(0);
             end;
 
@@ -2702,7 +2673,7 @@ begin
             on E: Exception do
             begin
                 LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: TUserControl failed. Error occured: ' + E.Message);
-                MsgCall(TCommon.TMsgTypes.Error, 'An error occured [TUserControl][' + WinUserName + ']: ' + E.Message + '. Please contact IT support. Application will be closed.');
+                MsgCall(TCommon.TMessage.Error, 'An error occured [TUserControl][' + WinUserName + ']: ' + E.Message + '. Please contact IT support. Application will be closed.');
                 ExitProcess(0);
             end;
         end;
@@ -2737,7 +2708,7 @@ begin
             on E: Exception do
             begin
                 LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: TMapTable failed. Error occured: ' + E.Message);
-                MsgCall(TCommon.TMsgTypes.Error, 'An error occured [TMapTable]: ' + E.Message + '. Please contact IT support. Application will be closed.');
+                MsgCall(TCommon.TMessage.Error, 'An error occured [TMapTable]: ' + E.Message + '. Please contact IT support. Application will be closed.');
                 ExitProcess(0);
             end;
         end;
@@ -2759,7 +2730,7 @@ begin
         on E: Exception do
         begin
             LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: TTGeneralTables failed. Error occured: ' + E.Message);
-            MsgCall(TCommon.TMsgTypes.Error, 'An error occured [TTGeneralTables]: ' + E.Message + '. Please contact IT support. Application will be closed.');
+            MsgCall(TCommon.TMessage.Error, 'An error occured [TTGeneralTables]: ' + E.Message + '. Please contact IT support. Application will be closed.');
             ExitProcess(0);
         end;
     end;
@@ -2797,7 +2768,7 @@ begin
         on E: Exception do
         begin
             LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Invalid boot up. Error occured: ' + E.Message);
-            MsgCall(TCommon.TMsgTypes.Error, 'Cannot properly boot up the application. An error occured: ' + E.Message + '. Please contact IT support. Application will be closed.');
+            MsgCall(TCommon.TMessage.Error, 'Cannot properly boot up the application. An error occured: ' + E.Message + '. Please contact IT support. Application will be closed.');
             ExitProcess(0);
         end;
     end;
@@ -2927,7 +2898,7 @@ begin
     if MainForm.WindowState = wsMaximized then Settings.SetStringValue(TConfigSections.ApplicationDetails,  'WINDOW_STATE', 'wsMaximized');
     if MainForm.WindowState = wsMinimized then Settings.SetStringValue(TConfigSections.ApplicationDetails,  'WINDOW_STATE', 'wsMinimized');
 
-    Settings.Encode(TCommon.TUnityFiles.AppConfig);
+    Settings.Encode(TCommon.TFiles.AppConfig);
 
     LogText.Free;
     DbConnect.Close;
@@ -3140,19 +3111,19 @@ procedure TMainForm.Action_CopyToCBClick(Sender: TObject);
 begin
 
     // String grid placed on main view
-    if sgOpenItems.Focused   then sgOpenItems.CopyCutPaste(TEnums.TActionTask.adCopy);
-    if sgCoCodes.Focused     then sgCoCodes.CopyCutPaste(TEnums.TActionTask.adCopy);
-    if sgPaidInfo.Focused    then sgPaidInfo.CopyCutPaste(TEnums.TActionTask.adCopy);
-    if sgPerson.Focused      then sgPerson.CopyCutPaste(TEnums.TActionTask.adCopy);
-    if sgGroup3.Focused      then sgGroup3.CopyCutPaste(TEnums.TActionTask.adCopy);
-    if sgPmtTerms.Focused    then sgPmtTerms.CopyCutPaste(TEnums.TActionTask.adCopy);
-    if sgListValue.Focused   then sgListValue.CopyCutPaste(TEnums.TActionTask.adCopy);
-    if sgListSection.Focused then sgListSection.CopyCutPaste(TEnums.TActionTask.adCopy);
-    if sgGroups.Focused      then sgGroups.CopyCutPaste(TEnums.TActionTask.adCopy);
-    if sgUAC.Focused         then sgUAC.CopyCutPaste(TEnums.TActionTask.adCopy);
+    if sgOpenItems.Focused   then sgOpenItems.CopyCutPaste(TEnums.TActions.Copy);
+    if sgCoCodes.Focused     then sgCoCodes.CopyCutPaste(TEnums.TActions.Copy);
+    if sgPaidInfo.Focused    then sgPaidInfo.CopyCutPaste(TEnums.TActions.Copy);
+    if sgPerson.Focused      then sgPerson.CopyCutPaste(TEnums.TActions.Copy);
+    if sgGroup3.Focused      then sgGroup3.CopyCutPaste(TEnums.TActions.Copy);
+    if sgPmtTerms.Focused    then sgPmtTerms.CopyCutPaste(TEnums.TActions.Copy);
+    if sgListValue.Focused   then sgListValue.CopyCutPaste(TEnums.TActions.Copy);
+    if sgListSection.Focused then sgListSection.CopyCutPaste(TEnums.TActions.Copy);
+    if sgGroups.Focused      then sgGroups.CopyCutPaste(TEnums.TActions.Copy);
+    if sgUAC.Focused         then sgUAC.CopyCutPaste(TEnums.TActions.Copy);
 
     // String grid placed on action view
-    if ActionsForm.OpenItemsGrid.Focused then ActionsForm.OpenItemsGrid.CopyCutPaste(TEnums.TActionTask.adCopy);
+    if ActionsForm.OpenItemsGrid.Focused then ActionsForm.OpenItemsGrid.CopyCutPaste(TEnums.TActions.Copy);
 
 end;
 
@@ -3218,7 +3189,7 @@ begin
         Exit;
     end;
 
-    sgAddressBook.CopyCutPaste(TEnums.TActionTask.adCut);
+    sgAddressBook.CopyCutPaste(TEnums.TActions.Cut);
     sgAddressBook.RecordRowsAffected;
 
 end;
@@ -3233,7 +3204,7 @@ begin
     Exit;
   end;
 
-  sgAddressBook.CopyCutPaste(TEnums.TActionTask.adPaste);
+  sgAddressBook.CopyCutPaste(TEnums.TActions.Paste);
   sgAddressBook.RecordRowsAffected;
 
 end;
@@ -3245,7 +3216,7 @@ end;
 
 procedure TMainForm.Action_CopyClick(Sender: TObject);
 begin
-    sgAddressBook.CopyCutPaste(TEnums.TActionTask.adCopy);
+    sgAddressBook.CopyCutPaste(TEnums.TActions.Copy);
 end;
 
 
@@ -3256,7 +3227,7 @@ end;
 procedure TMainForm.Action_DelRowClick(Sender: TObject);
 begin
 
-    if MsgCall(TCommon.TMsgTypes.Question2, 'Are you sure you want to delete this customer?' + TChars.CRLF + 'This operation cannot be reverted.') = IDNO then Exit;
+    if MsgCall(TCommon.TMessage.Question2, 'Are you sure you want to delete this customer?' + TChars.CRLF + 'This operation cannot be reverted.') = IDNO then Exit;
 
     var DataTables: TDataTables:=TDataTables.Create(DbConnect);
     try
@@ -3286,7 +3257,7 @@ end;
 
 procedure TMainForm.Action_SearchBookClick(Sender: TObject);
 begin
-    WndCall(ViewSearchForm, TWindows.TState.Modeless);
+    WndCall(ViewSearchForm, Helpers.TEnums.TWindowState.Modeless);
 end;
 
 
@@ -3297,7 +3268,7 @@ end;
 procedure TMainForm.Action_ShowAsIsClick(Sender: TObject);
 begin
     TTAddressBook.Create(
-        TEnums.TActionTask.adOpenAll,
+        TEnums.TActions.OpenAll,
         sgAddressBook,
         '',
         '',
@@ -3316,7 +3287,7 @@ end;
 procedure TMainForm.Action_ShowMyEntriesClick(Sender: TObject);
 begin
     TTAddressBook.Create(
-        TEnums.TActionTask.adOpenForUser,
+        TEnums.TActions.OpenForUser,
         sgAddressBook,
         '',
         '',
@@ -3389,7 +3360,7 @@ end;
 
 procedure TMainForm.Action_ReportClick(Sender: TObject);
 begin
-    WndCall(ReportForm, TWindows.TState.Modal);
+    WndCall(ReportForm, Helpers.TEnums.TWindowState.Modal);
 end;
 
 
@@ -3409,7 +3380,7 @@ end;
 
 procedure TMainForm.Action_AboutClick(Sender: TObject);
 begin
-    WndCall(AboutForm, TWindows.TState.Modal);
+    WndCall(AboutForm, Helpers.TEnums.TWindowState.Modal);
 end;
 
 
@@ -3455,7 +3426,7 @@ begin
     if IsConnected then
     begin
         if MainForm.StatBar_TXT1.Caption = TStatusBar.Ready then
-            WndCall(ActionsForm, TWindows.TState.Modal)
+            WndCall(ActionsForm, Helpers.TEnums.TWindowState.Modal)
                 else
                     MainForm.MsgCall(Warn, 'Wait until "Ready" status and try again.');
     end
@@ -3473,14 +3444,13 @@ procedure TMainForm.Action_TrackerClick(Sender: TObject);
     function GetSCUID(position: integer): string;
     begin
         var CustNumber: string:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCustomerNumber, 1, 1), position];
-        var CoCode: string:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCoCode,         1, 1), position];
+        var CoCode: string:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1), position];
         Result:=CustNumber + MainForm.ConvertCoCode(CoCode, 'F', 3);
     end;
 
 begin
 
     var Item: TListItem;
-
     if IsConnected then
     begin
         TrackerForm.CustomerList.Clear;
@@ -3530,7 +3500,7 @@ begin
             end;
         end;
 
-        WndCall(TrackerForm, TWindows.TState.Modal);
+        WndCall(TrackerForm, Helpers.TEnums.TWindowState.Modal);
 
     end
     else
@@ -3555,7 +3525,7 @@ procedure TMainForm.Action_AddToBookClick(Sender: TObject);
 begin
     if IsConnected then
         TTAddressBook.Create(
-            TEnums.TActionTask.adInsert,
+            TEnums.TActions.Insert,
             sgAgeView,
             '',
             '',
@@ -3634,7 +3604,7 @@ begin
             end;
         end;
 
-        WndCall(ViewMailerForm, TWindows.TState.Modal);
+        WndCall(ViewMailerForm, Helpers.TEnums.TWindowState.Modal);
 
     end
     else
@@ -3654,7 +3624,7 @@ begin
 
     Screen.Cursor:=crHourGlass;
     CalendarForm.FCalendarMode:=TEnums.TCalendar.GetDate;
-    MainForm.WndCall(CalendarForm, TWindows.TState.Modal);
+    MainForm.WndCall(CalendarForm, Helpers.TEnums.TWindowState.Modal);
 
     // If selected more than one customer, assign given date to selected customers
     if CalendarForm.FSelectedDate <> TDateTimeFormats.NullDate then
@@ -3688,11 +3658,11 @@ begin
         begin
             TTGeneralComment.Create(
                 sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), iCNT],
-                TNaVariants.NULL,
+                TUnknown.NULL,
                 TChars.SPACE,
-                TNaVariants.NULL,
-                TNaVariants.NULL,
-                TNaVariants.NULL,
+                TUnknown.NULL,
+                TUnknown.NULL,
+                TUnknown.NULL,
                 False
             );
             MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneralComment.fFollowUp, 1, 1), iCNT]:=TChars.SPACE;
@@ -3721,7 +3691,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.Inf7;
-    WndCall(FilterForm, TWindows.TState.Modal);
+    WndCall(FilterForm, Helpers.TEnums.TWindowState.Modal);
 end;
 
 
@@ -3732,7 +3702,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.Inf4;
-    WndCall(FilterForm, TWindows.TState.Modal);
+    WndCall(FilterForm, Helpers.TEnums.TWindowState.Modal);
 end;
 
 
@@ -3743,7 +3713,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.Group3;
-    WndCall(FilterForm, TWindows.TState.Modal);
+    WndCall(FilterForm, Helpers.TEnums.TWindowState.Modal);
 end;
 
 
@@ -3754,7 +3724,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.SalesResponsible;
-    WndCall(FilterForm, TWindows.TState.Modal);
+    WndCall(FilterForm, Helpers.TEnums.TWindowState.Modal);
 end;
 
 
@@ -3765,7 +3735,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.PersonResponsible;
-    WndCall(FilterForm, TWindows.TState.Modal);
+    WndCall(FilterForm, Helpers.TEnums.TWindowState.Modal);
 end;
 
 
@@ -3776,7 +3746,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.CustomerGroup;
-    WndCall(FilterForm, TWindows.TState.Modal);
+    WndCall(FilterForm, Helpers.TEnums.TWindowState.Modal);
 end;
 
 
@@ -3787,7 +3757,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.AccountType;
-    WndCall(FilterForm, TWindows.TState.Modal);
+    WndCall(FilterForm, Helpers.TEnums.TWindowState.Modal);
 end;
 
 
@@ -3798,7 +3768,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.Follow;
-    WndCall(FilterForm, TWindows.TState.Modal);
+    WndCall(FilterForm, Helpers.TEnums.TWindowState.Modal);
 end;
 
 
@@ -3809,7 +3779,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.CoCode;
-    WndCall(FilterForm, TWindows.TState.Modal);
+    WndCall(FilterForm, Helpers.TEnums.TWindowState.Modal);
 end;
 
 
@@ -3820,7 +3790,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.Agent;
-    WndCall(FilterForm, TWindows.TState.Modal);
+    WndCall(FilterForm, Helpers.TEnums.TWindowState.Modal);
 end;
 
 
@@ -3831,7 +3801,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.Division;
-    WndCall(FilterForm, TWindows.TState.Modal);
+    WndCall(FilterForm, Helpers.TEnums.TWindowState.Modal);
 end;
 
 
@@ -3842,7 +3812,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.Free1;
-    WndCall(FilterForm, TWindows.TState.Modal);
+    WndCall(FilterForm, Helpers.TEnums.TWindowState.Modal);
 end;
 
 
@@ -3853,7 +3823,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.Free2;
-    WndCall(FilterForm, TWindows.TState.Modal);
+    WndCall(FilterForm, Helpers.TEnums.TWindowState.Modal);
 end;
 
 
@@ -3864,7 +3834,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.Free3;
-    WndCall(FilterForm, TWindows.TState.Modal);
+    WndCall(FilterForm, Helpers.TEnums.TWindowState.Modal);
 end;
 
 
@@ -3972,7 +3942,7 @@ begin
     SearchForm.FGrid     :=MainForm.sgAgeView;
     SearchForm.FColName  :=TSnapshots.fCustomerName;
     SearchForm.FColNumber:=TSnapshots.fCustomerNumber;
-    WndCall(SearchForm, TWindows.TState.Modeless);
+    WndCall(SearchForm, Helpers.TEnums.TWindowState.Modeless);
 end;
 
 
@@ -4150,7 +4120,7 @@ end;
 
 procedure TMainForm.Action_FollowUpColorsClick(Sender: TObject);
 begin
-    WndCall(ColorsForm, TWindows.TState.Modal);
+    WndCall(ColorsForm, Helpers.TEnums.TWindowState.Modal);
 end;
 
 
@@ -4183,7 +4153,7 @@ begin
 
     // R/W user can remove item
     if (MainForm.AccessLevel = TUserAccess.ReadWrite) and (UpperCase(MainForm.WinUserName) = UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
-        if MsgCall(TCommon.TMsgTypes.Question2, 'Are you sure you want to remove selected customer?') = IDYES then
+        if MsgCall(TCommon.TMessage.Question2, 'Are you sure you want to remove selected customer?') = IDYES then
             DeleteFromTrackerList(
                 sgInvoiceTracker.Cells[
                     sgInvoiceTracker.ReturnColumn(TTrackerData.Cuid, 1, 1),
@@ -4193,11 +4163,11 @@ begin
 
     // R/W user cannot remove other item
     if (MainForm.AccessLevel = TUserAccess.ReadWrite) and (UpperCase(MainForm.WinUserName) <> UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
-        MsgCall(TCommon.TMsgTypes.Warn, 'You cannot remove someone''s else item.');
+        MsgCall(TCommon.TMessage.Warn, 'You cannot remove someone''s else item.');
 
     // Administrator can remove any item
     if (MainForm.AccessLevel = TUserAccess.Admin) then
-        if MsgCall(TCommon.TMsgTypes.Question2, 'Are you sure you want to remove selected customer?') = IDYES then
+        if MsgCall(TCommon.TMessage.Question2, 'Are you sure you want to remove selected customer?') = IDYES then
             DeleteFromTrackerList(
                 sgInvoiceTracker.Cells[
                     sgInvoiceTracker.ReturnColumn(TTrackerData.Cuid, 1, 1),
@@ -4217,7 +4187,7 @@ end;
 
 procedure TMainForm.Action_ShowRegisteredClick(Sender: TObject);
 begin
-    WndCall(InvoicesForm, TWindows.TState.Modal);
+    WndCall(InvoicesForm, Helpers.TEnums.TWindowState.Modal);
 end;
 
 
@@ -4473,7 +4443,7 @@ end;
 procedure TMainForm.sgInvoiceTrackerDblClick(Sender: TObject);
 begin
     if IsConnected then
-        WndCall(InvoicesForm, TWindows.TState.Modal)
+        WndCall(InvoicesForm, Helpers.TEnums.TWindowState.Modal)
     else
         MsgCall(Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
 end;
@@ -4527,7 +4497,7 @@ begin
     var Col16: integer:=sgInvoiceTracker.ReturnColumn(TTrackerData.Cuid,  1, 1);
 
     // Draw selected row | skip headers
-    sgAgeView.DrawSelected(ARow, ACol, State, Rect, clBlack, TUnityApp.SelectionColor, clBlack, clWhite, True);
+    sgAgeView.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
 
     // Mark bold all customers marked with risk class "A"
     if (ACol = Col14) and (sgAgeView.Cells[Col15, ARow] = 'A') then
@@ -4578,8 +4548,8 @@ begin
         // Highlight risk class "A"
         if (ACol = Col15) and (sgAgeView.Cells[Col15, ARow] = 'A') then
         begin
-            sgAgeView.Canvas.Brush.Color:=TRiskClass.BClassA;
-            sgAgeView.Canvas.Font.Color :=TRiskClass.FClassA;
+            sgAgeView.Canvas.Brush.Color:=sgAgeView.FBackRed;
+            sgAgeView.Canvas.Font.Color :=sgAgeView.FFontWhite;
             sgAgeView.Canvas.FillRect(Rect);
             sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
         end;
@@ -4587,8 +4557,8 @@ begin
         // Highlight risk class "B"
         if (ACol = Col15) and (sgAgeView.Cells[Col15, ARow] = 'B') then
         begin
-            sgAgeView.Canvas.Brush.Color:=TRiskClass.BClassB;
-            sgAgeView.Canvas.Font.Color :=TRiskClass.FClassB;
+            sgAgeView.Canvas.Brush.Color:=sgAgeView.FBackYellow;
+            sgAgeView.Canvas.Font.Color :=sgAgeView.FFontBlack;
             sgAgeView.Canvas.FillRect(Rect);
             sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
         end;
@@ -4596,8 +4566,8 @@ begin
         // Highlight risk class "C"
         if (ACol = Col15) and (sgAgeView.Cells[Col15, ARow] = 'C') then
         begin
-            sgAgeView.Canvas.Brush.Color:=TRiskClass.BClassC;
-            sgAgeView.Canvas.Font.Color :=TRiskClass.FClassC;
+            sgAgeView.Canvas.Brush.Color:=sgAgeView.FBackGreen;
+            sgAgeView.Canvas.Font.Color :=sgAgeView.FFontWhite;
             sgAgeView.Canvas.FillRect(Rect);
             sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
         end;
@@ -4653,7 +4623,7 @@ begin
     var Col5: integer:=sgOpenItems.ReturnColumn(TOpenitems.PmtStat,  1, 1);
 
     // Selection
-    MainForm.sgOpenItems.DrawSelected(ARow, ACol, State, Rect, clBlack, TUnityApp.SelectionColor, clBlack, clWhite, True);
+    MainForm.sgOpenItems.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
 
     // Numeric values colors
     if
@@ -4693,109 +4663,109 @@ end;
 
 procedure TMainForm.sgAddressBookDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-    sgAddressBook.DrawSelected(ARow, ACol, State, Rect, clBlack, TUnityApp.SelectionColor, clBlack, clWhite, True);
+    sgAddressBook.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
 end;
 
 
 procedure TMainForm.sgInvoiceTrackerDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-    sgInvoiceTracker.DrawSelected(ARow, ACol, State, Rect, clBlack, TUnityApp.SelectionColor, clBlack, clWhite, True);
+    sgInvoiceTracker.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
 end;
 
 
 procedure TMainForm.sgCoCodesDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-    sgCoCodes.DrawSelected(ARow, ACol, State, Rect, clBlack, TUnityApp.SelectionColor, clBlack, clWhite, True);
+    sgCoCodes.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
 end;
 
 
 procedure TMainForm.sgPaidInfoDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-    sgPaidInfo.DrawSelected(ARow, ACol, State, Rect, clBlack, TUnityApp.SelectionColor, clBlack, clWhite, True);
+    sgPaidInfo.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
 end;
 
 
 procedure TMainForm.sgPmtTermsDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-    sgPmtTerms.DrawSelected(ARow, ACol, State, Rect, clBlack, TUnityApp.SelectionColor, clBlack, clWhite, True);
+    sgPmtTerms.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
 end;
 
 
 procedure TMainForm.sgPersonDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-    sgPerson.DrawSelected(ARow, ACol, State, Rect, clBlack, TUnityApp.SelectionColor, clBlack, clWhite, True);
+    sgPerson.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
 end;
 
 
 procedure TMainForm.sgGroup3DrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-    sgGroup3.DrawSelected(ARow, ACol, State, Rect, clBlack, TUnityApp.SelectionColor, clBlack, clWhite, True);
+    sgGroup3.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
 end;
 
 
 procedure TMainForm.sgListSectionDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-    sgListSection.DrawSelected(ARow, ACol, State, Rect, clBlack, TUnityApp.SelectionColor, clBlack, clWhite, True);
+    sgListSection.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
 end;
 
 
 procedure TMainForm.sgListValueDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-    sgListValue.DrawSelected(ARow, ACol, State, Rect, clBlack, TUnityApp.SelectionColor, clBlack, clWhite, True);
+    sgListValue.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
 end;
 
 
 procedure TMainForm.sgUACDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-    sgUAC.DrawSelected(ARow, ACol, State, Rect, clBlack, TUnityApp.SelectionColor, clBlack, clWhite, True);
+    sgUAC.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
 end;
 
 
 procedure TMainForm.sgGroupsDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-    sgGroups.DrawSelected(ARow, ACol, State, Rect, clBlack, TUnityApp.SelectionColor, clBlack, clWhite, True);
+    sgGroups.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
 end;
 
 
 procedure TMainForm.sgControlStatusDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-    sgControlStatus.DrawSelected(ARow, ACol, State, Rect, clBlack, TUnityApp.SelectionColor, clBlack, clWhite, True);
+    sgControlStatus.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
 end;
 
 
 procedure TMainForm.sgAccountTypeDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-    sgAccountType.DrawSelected(ARow, ACol, State, Rect, clBlack, TUnityApp.SelectionColor, clBlack, clWhite, True);
+    sgAccountType.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
 end;
 
 
 procedure TMainForm.sgPersonRespDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-    sgPersonResp.DrawSelected(ARow, ACol, State, Rect, clBlack, TUnityApp.SelectionColor, clBlack, clWhite, True);
+    sgPersonResp.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
 end;
 
 
 procedure TMainForm.sgSalesRespDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-    sgSalesResp.DrawSelected(ARow, ACol, State, Rect, clBlack, TUnityApp.SelectionColor, clBlack, clWhite, True);
+    sgSalesResp.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
 end;
 
 
 procedure TMainForm.sgCustomerGrDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-    sgCustomerGr.DrawSelected(ARow, ACol, State, Rect, clBlack, TUnityApp.SelectionColor, clBlack, clWhite, True);
+    sgCustomerGr.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
 end;
 
 
 procedure TMainForm.sgFSCviewDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-    sgFSCview.DrawSelected(ARow, ACol, State, Rect, clBlack, TUnityApp.SelectionColor, clBlack, clWhite, True);
+    sgFSCview.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
 end;
 
 
 procedure TMainForm.sgLBUviewDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-    sgLBUview.DrawSelected(ARow, ACol, State, Rect, clBlack, TUnityApp.SelectionColor, clBlack, clWhite, True);
+    sgLBUview.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
 end;
 
 
@@ -4865,7 +4835,7 @@ begin
     // Bind close application with <ALT> + <Y>
     if (Key=89) and (Shift=[ssALT]) then
     begin
-        if MsgCall(TCommon.TMsgTypes.Question1, 'Are you absolutely sure you want to exit the Unity?') = IDOK then
+        if MsgCall(TCommon.TMessage.Question1, 'Are you absolutely sure you want to exit the Unity?') = IDOK then
         begin
             FAllowClose:=True;
             Close;
@@ -4922,84 +4892,84 @@ end;
 procedure TMainForm.sgOpenItemsKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if (Key = 67) and (Shift = [ssCtrl]) then
-        sgOpenItems.CopyCutPaste(TEnums.TActionTask.adCopy);
+        sgOpenItems.CopyCutPaste(TEnums.TActions.Copy);
 end;
 
 
 procedure TMainForm.sgInvoiceTrackerKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if (Key = 67) and (Shift = [ssCtrl]) then
-        sgInvoiceTracker.CopyCutPaste(TEnums.TActionTask.adCopy);
+        sgInvoiceTracker.CopyCutPaste(TEnums.TActions.Copy);
 end;
 
 
 procedure TMainForm.sgCoCodesKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if (Key = 67) and (Shift = [ssCtrl]) then
-        sgCoCodes.CopyCutPaste(TEnums.TActionTask.adCopy);
+        sgCoCodes.CopyCutPaste(TEnums.TActions.Copy);
 end;
 
 
 procedure TMainForm.sgPaidInfoKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if (Key = 67) and (Shift = [ssCtrl]) then
-        sgPaidInfo.CopyCutPaste(TEnums.TActionTask.adCopy);
+        sgPaidInfo.CopyCutPaste(TEnums.TActions.Copy);
 end;
 
 
 procedure TMainForm.sgPmtTermsKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if (Key = 67) and (Shift = [ssCtrl]) then
-        sgPmtTerms.CopyCutPaste(TEnums.TActionTask.adCopy);
+        sgPmtTerms.CopyCutPaste(TEnums.TActions.Copy);
 end;
 
 
 procedure TMainForm.sgPersonKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if (Key = 67) and (Shift = [ssCtrl]) then
-        sgPerson.CopyCutPaste(TEnums.TActionTask.adCopy);
+        sgPerson.CopyCutPaste(TEnums.TActions.Copy);
 end;
 
 
 procedure TMainForm.sgGroup3KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if (Key = 67) and (Shift = [ssCtrl]) then
-        sgGroup3.CopyCutPaste(TEnums.TActionTask.adCopy);
+        sgGroup3.CopyCutPaste(TEnums.TActions.Copy);
 end;
 
 
 procedure TMainForm.sgControlStatusKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if (Key = 67) and (Shift = [ssCtrl]) then
-        sgControlStatus.CopyCutPaste(TEnums.TActionTask.adCopy);
+        sgControlStatus.CopyCutPaste(TEnums.TActions.Copy);
 end;
 
 
 procedure TMainForm.sgPersonRespKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if (Key = 67) and (Shift = [ssCtrl]) then
-        sgPersonResp.CopyCutPaste(TEnums.TActionTask.adCopy);
+        sgPersonResp.CopyCutPaste(TEnums.TActions.Copy);
 end;
 
 
 procedure TMainForm.sgSalesRespKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if (Key = 67) and (Shift = [ssCtrl]) then
-        sgSalesResp.CopyCutPaste(TEnums.TActionTask.adCopy);
+        sgSalesResp.CopyCutPaste(TEnums.TActions.Copy);
 end;
 
 
 procedure TMainForm.sgAccountTypeKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if (Key = 67) and (Shift = [ssCtrl]) then
-        sgAccountType.CopyCutPaste(TEnums.TActionTask.adCopy);
+        sgAccountType.CopyCutPaste(TEnums.TActions.Copy);
 end;
 
 
 procedure TMainForm.sgCustomerGrKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if (Key = 67) and (Shift = [ssCtrl]) then
-        sgCustomerGr.CopyCutPaste(TEnums.TActionTask.adCopy);
+        sgCustomerGr.CopyCutPaste(TEnums.TActions.Copy);
 end;
 
 
@@ -5017,10 +4987,10 @@ procedure TMainForm.sgAgeViewKeyDown(Sender: TObject; var Key: Word; Shift: TShi
 
     procedure ModifyCell(CUIDRef: integer; ColumnType: integer; Text: string);
     begin
-        if ColumnType = ctFree1    then TTGeneralComment.Create(sgAgeView.Cells[CUIDRef, sgAgeView.Row], TNaVariants.Null, TNaVariants.Null, Text, TNaVariants.Null, TNaVariants.Null, True);
-        if ColumnType = ctFree2    then TTGeneralComment.Create(sgAgeView.Cells[CUIDRef, sgAgeView.Row], TNaVariants.Null, TNaVariants.Null, TNaVariants.Null, Text, TNaVariants.Null, True);
-        if ColumnType = ctFree3    then TTGeneralComment.Create(sgAgeView.Cells[CUIDRef, sgAgeView.Row], TNaVariants.Null, TNaVariants.Null, TNaVariants.Null, TNaVariants.Null, Text, True);
-        if ColumnType = ctFollowUp then TTGeneralComment.Create(sgAgeView.Cells[CUIDRef, sgAgeView.Row], TNaVariants.Null, Text, TNaVariants.Null, TNaVariants.Null, TNaVariants.Null, True);
+        if ColumnType = ctFree1    then TTGeneralComment.Create(sgAgeView.Cells[CUIDRef, sgAgeView.Row], TUnknown.Null, TUnknown.Null, Text, TUnknown.Null, TUnknown.Null, True);
+        if ColumnType = ctFree2    then TTGeneralComment.Create(sgAgeView.Cells[CUIDRef, sgAgeView.Row], TUnknown.Null, TUnknown.Null, TUnknown.Null, Text, TUnknown.Null, True);
+        if ColumnType = ctFree3    then TTGeneralComment.Create(sgAgeView.Cells[CUIDRef, sgAgeView.Row], TUnknown.Null, TUnknown.Null, TUnknown.Null, TUnknown.Null, Text, True);
+        if ColumnType = ctFollowUp then TTGeneralComment.Create(sgAgeView.Cells[CUIDRef, sgAgeView.Row], TUnknown.Null, Text, TUnknown.Null, TUnknown.Null, TUnknown.Null, True);
     end;
 
     procedure QuitEditing;
@@ -5040,7 +5010,7 @@ begin
     // <CTRL> + <C>
     if (Key = 67) and (Shift = [ssCtrl]) then
     begin
-        sgAgeView.CopyCutPaste(TEnums.TActionTask.adCopy);
+        sgAgeView.CopyCutPaste(TEnums.TActions.Copy);
         sgAgeView.UpdatedRowsHolder:=nil;
         sgAgeView.RecordRowsAffected;
         Exit;
@@ -5068,7 +5038,7 @@ begin
 
         sgAgeView.Freeze(True);
         Screen.Cursor:=crHourGlass;
-        sgAgeView.CopyCutPaste(TEnums.TActionTask.adPaste, True);
+        sgAgeView.CopyCutPaste(TEnums.TActions.Paste, True);
         sgAgeView.UpdatedRowsHolder:=nil;
         sgAgeView.RecordRowsAffected;
 
@@ -5100,9 +5070,9 @@ begin
                                 TChars.COMMA +
                                     QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TGeneralComment.Free1, 1, 1), sgAgeView.UpdatedRowsHolder[iCNT]]) +
                                 TChars.COMMA +
-                                    QuotedStr(TNaVariants.Null) +
+                                    QuotedStr(TUnknown.Null) +
                                 TChars.COMMA +
-                                    QuotedStr(TNaVariants.Null) +
+                                    QuotedStr(TUnknown.Null) +
                                 TChars.COMMA +
                                     QuotedStr('1');
                         end;
@@ -5117,11 +5087,11 @@ begin
                                 TChars.COMMA +
                                     QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), sgAgeView.UpdatedRowsHolder[iCNT]]) +
                                 TChars.COMMA +
-                                    QuotedStr(TNaVariants.Null) +
+                                    QuotedStr(TUnknown.Null) +
                                 TChars.COMMA +
                                     QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TGeneralComment.Free2, 1, 1), sgAgeView.UpdatedRowsHolder[iCNT]]) +
                                 TChars.COMMA +
-                                    QuotedStr(TNaVariants.Null) +
+                                    QuotedStr(TUnknown.Null) +
                                 TChars.COMMA +
                                     QuotedStr('2');
                         end;
@@ -5136,9 +5106,9 @@ begin
                                 TChars.COMMA +
                                     QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), sgAgeView.UpdatedRowsHolder[iCNT]]) +
                                 TChars.COMMA +
-                                    QuotedStr(TNaVariants.Null) +
+                                    QuotedStr(TUnknown.Null) +
                                 TChars.COMMA +
-                                    QuotedStr(TNaVariants.Null) +
+                                    QuotedStr(TUnknown.Null) +
                                 TChars.COMMA +
                                     QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TGeneralComment.Free3, 1, 1), sgAgeView.UpdatedRowsHolder[iCNT]]) +
                                 TChars.COMMA +
@@ -5252,9 +5222,9 @@ begin
                                     TChars.COMMA +
                                         QuotedStr(String.Empty) +
                                     TChars.COMMA +
-                                        QuotedStr(TNaVariants.Null) +
+                                        QuotedStr(TUnknown.Null) +
                                     TChars.COMMA +
-                                        QuotedStr(TNaVariants.Null) +
+                                        QuotedStr(TUnknown.Null) +
                                     TChars.COMMA +
                                         QuotedStr('1');
                                 sgAgeView.Cells[sgAgeView.ReturnColumn(TGeneralComment.Free1, 1, 1), iCNT]:='';
@@ -5270,11 +5240,11 @@ begin
                                     TChars.COMMA +
                                         QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), iCNT]) +
                                     TChars.COMMA +
-                                        QuotedStr(TNaVariants.Null) +
+                                        QuotedStr(TUnknown.Null) +
                                     TChars.COMMA +
                                         QuotedStr(String.Empty) +
                                     TChars.COMMA +
-                                        QuotedStr(TNaVariants.Null) +
+                                        QuotedStr(TUnknown.Null) +
                                     TChars.COMMA +
                                         QuotedStr('2');
                                 sgAgeView.Cells[sgAgeView.ReturnColumn(TGeneralComment.Free2, 1, 1), iCNT]:='';
@@ -5290,9 +5260,9 @@ begin
                                     TChars.COMMA +
                                         QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), iCNT]) +
                                     TChars.COMMA +
-                                        QuotedStr(TNaVariants.Null) +
+                                        QuotedStr(TUnknown.Null) +
                                     TChars.COMMA +
-                                        QuotedStr(TNaVariants.Null) +
+                                        QuotedStr(TUnknown.Null) +
                                     TChars.COMMA +
                                         QuotedStr(String.Empty) +
                                     TChars.COMMA +
@@ -5359,7 +5329,7 @@ begin
     if (Key = 65) and (Shift = [ssCtrl]) then
     begin
         sgAgeView.SelectAll;
-        sgAgeView.CopyCutPaste(TEnums.TActionTask.adCopy);
+        sgAgeView.CopyCutPaste(TEnums.TActions.Copy);
         MsgCall(Info, 'The selected spreadsheet has been copied to clipboard.');
     end;
 
@@ -5430,14 +5400,14 @@ begin
 
         if Key = VK_RETURN then
         begin
-            sgAddressBook.DelEsc(TEnums.TActionTask.adEscape, sgAddressBook.Col, sgAddressBook.Row);
+            sgAddressBook.DelEsc(TEnums.TActions.Escape, sgAddressBook.Col, sgAddressBook.Row);
             sgAddressBook.Options:=sgAddressBook.Options - [goEditing];
             sgAddressBook.SetUpdatedRow(sgAddressBook.Row);
         end;
 
         if Key = VK_DELETE then
         begin
-            sgAddressBook.DelEsc(TEnums.TActionTask.adDelete, sgAddressBook.Col, sgAddressBook.Row);
+            sgAddressBook.DelEsc(TEnums.TActions.Delete, sgAddressBook.Col, sgAddressBook.Row);
             sgAddressBook.SetUpdatedRow(sgAddressBook.Row);
         end;
 
@@ -5486,22 +5456,22 @@ begin
 
     if Key = VK_ESCAPE then
     begin
-        sgAddressBook.DelEsc(TEnums.TActionTask.adEscape, sgAddressBook.Col, sgAddressBook.Row);
+        sgAddressBook.DelEsc(TEnums.TActions.Escape, sgAddressBook.Col, sgAddressBook.Row);
         sgAddressBook.Options:=sgAddressBook.Options - [goEditing];
     end;
 
     if (Key = 67) and (Shift = [ssCtrl]) then
-        sgAddressBook.CopyCutPaste(TEnums.TActionTask.adCopy);
+        sgAddressBook.CopyCutPaste(TEnums.TActions.Copy);
 
     if (Key = 86) and (Shift = [ssCtrl]) then
     begin
-        sgAddressBook.CopyCutPaste(TEnums.TActionTask.adPaste);
+        sgAddressBook.CopyCutPaste(TEnums.TActions.Paste);
         sgAddressBook.RecordRowsAffected;
     end;
 
     if (Key = 88) and (Shift = [ssCtrl]) then
     begin
-        sgAddressBook.CopyCutPaste(TEnums.TActionTask.adCut);
+        sgAddressBook.CopyCutPaste(TEnums.TActions.Cut);
         sgAddressBook.RecordRowsAffected;
     end;
 
@@ -5517,33 +5487,25 @@ begin
 
     if Text50.Font.Style = [fsBold] then
     begin
-
-        if (Key = 86) and (Shift = [ssCtrl]) then
-            sgListSection.CopyCutPaste(TEnums.TActionTask.adPaste);
-
-        if (Key = 88) and (Shift = [ssCtrl]) then
-            sgListSection.CopyCutPaste(TEnums.TActionTask.adCut);
+        if (Key = 86) and (Shift = [ssCtrl]) then sgListSection.CopyCutPaste(TEnums.TActions.Paste);
+        if (Key = 88) and (Shift = [ssCtrl]) then sgListSection.CopyCutPaste(TEnums.TActions.Cut);
     end;
 
-    if (Key = 67) and (Shift = [ssCtrl]) then
-        sgListSection.CopyCutPaste(TEnums.TActionTask.adCopy);
+    if (Key = 67) and (Shift = [ssCtrl]) then sgListSection.CopyCutPaste(TEnums.TActions.Copy);
+    if (Key = 46) and (Text50.Font.Style = [fsBold]) then sgListSection.DelEsc(TEnums.TActions.Delete, sgListSection.Col, sgListSection.Row);
 
-    if (Key = 46) and (Text50.Font.Style = [fsBold]) then
-        sgListSection.DelEsc(TEnums.TActionTask.adDelete, sgListSection.Col, sgListSection.Row);
 end;
 
 
 procedure TMainForm.sgListSectionKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-    if Key = VK_RETURN then
-        sgListSection.DelEsc(TEnums.TActionTask.adEscape, sgListSection.Col, sgListSection.Row);
+    if Key = VK_RETURN then sgListSection.DelEsc(TEnums.TActions.Escape, sgListSection.Col, sgListSection.Row);
 end;
 
 
 procedure TMainForm.sgListSectionKeyPress(Sender: TObject; var Key: Char);
 begin
-    if Key = TChars.CR { ENTER } then
-        sgListSection.Cells[1, sgListSection.Row]:=UpperCase(sgListSection.Cells[1, sgListSection.Row]);
+    if Key = TChars.CR then sgListSection.Cells[1, sgListSection.Row]:=UpperCase(sgListSection.Cells[1, sgListSection.Row]);
 end;
 
 
@@ -5556,26 +5518,19 @@ begin
 
     if Text50.Font.Style = [fsBold] then
     begin
-        if (Key = 86) and (Shift = [ssCtrl]) then
-            sgListValue.CopyCutPaste(TEnums.TActionTask.adPaste);
-
-        if (Key = 88) and (Shift = [ssCtrl]) then
-            sgListValue.CopyCutPaste(TEnums.TActionTask.adCut);
+        if (Key = 86) and (Shift = [ssCtrl]) then sgListValue.CopyCutPaste(TEnums.TActions.Paste);
+        if (Key = 88) and (Shift = [ssCtrl]) then sgListValue.CopyCutPaste(TEnums.TActions.Cut);
     end;
 
-    if (Key = 67) and (Shift = [ssCtrl]) then
-        sgListValue.CopyCutPaste(TEnums.TActionTask.adCopy);
-
-    if (Key = 46) and (Text50.Font.Style = [fsBold]) then
-        sgListValue.DelEsc(TEnums.TActionTask.adDelete, sgListValue.Col, sgListValue.Row);
+    if (Key = 67) and (Shift = [ssCtrl]) then sgListValue.CopyCutPaste(TEnums.TActions.Copy);
+    if (Key = 46) and (Text50.Font.Style = [fsBold]) then sgListValue.DelEsc(TEnums.TActions.Delete, sgListValue.Col, sgListValue.Row);
 
 end;
 
 
 procedure TMainForm.sgListValueKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-    if Key = VK_RETURN then
-        sgListValue.DelEsc(TEnums.TActionTask.adEscape, sgListValue.Col, sgListValue.Row);
+    if Key = VK_RETURN then sgListValue.DelEsc(TEnums.TActions.Escape, sgListValue.Col, sgListValue.Row);
 end;
 
 
@@ -5585,8 +5540,7 @@ end;
 
 procedure TMainForm.EditPasswordKeyPress(Sender: TObject; var Key: Char);
 begin
-    if Key = TChars.CR { ENTER } then
-        btnUnlockClick(self);
+    if Key = TChars.CR then btnUnlockClick(self);
 end;
 
 
@@ -6206,8 +6160,8 @@ end;
 
 procedure TMainForm.btnReloadMouseEnter(Sender: TObject);
 begin
-    Text54L1.Font.Color:=TUnityApp.FontColor;
-    Text54L2.Font.Color:=TUnityApp.FontColor;
+    Text54L1.Font.Color:=TCommon.FontColor;
+    Text54L2.Font.Color:=TCommon.FontColor;
 end;
 
 
@@ -6220,8 +6174,8 @@ end;
 
 procedure TMainForm.btnMakeGroupMouseEnter(Sender: TObject);
 begin
-    Text83L1.Font.Color:=TUnityApp.FontColor;
-    Text83L2.Font.Color:=TUnityApp.FontColor;
+    Text83L1.Font.Color:=TCommon.FontColor;
+    Text83L2.Font.Color:=TCommon.FontColor;
 end;
 
 
@@ -6235,7 +6189,7 @@ end;
 procedure TMainForm.btnOpenABMouseEnter(Sender: TObject);
 begin
     btnOpenAB.Cursor:=crHandPoint;
-    Text64.Font.Color:=TUnityApp.FontColor;
+    Text64.Font.Color:=TCommon.FontColor;
 end;
 
 
@@ -6249,7 +6203,7 @@ end;
 procedure TMainForm.btnUpdateABMouseEnter(Sender: TObject);
 begin
     btnUpdateAB.Cursor:=crHandPoint;
-    Text66.Font.Color:=TUnityApp.FontColor;
+    Text66.Font.Color:=TCommon.FontColor;
 end;
 
 
@@ -6263,7 +6217,7 @@ end;
 procedure TMainForm.btnCloseABMouseEnter(Sender: TObject);
 begin
     btnCloseAB.Cursor:=crHandPoint;
-    Text67.Font.Color:=TUnityApp.FontColor;
+    Text67.Font.Color:=TCommon.FontColor;
 end;
 
 
@@ -6277,7 +6231,7 @@ end;
 procedure TMainForm.btnExportABMouseEnter(Sender: TObject);
 begin
     btnExportAB.Cursor:=crHandPoint;
-    Text69.Font.Color:=TUnityApp.FontColor;
+    Text69.Font.Color:=TCommon.FontColor;
 end;
 
 
@@ -6291,7 +6245,7 @@ end;
 procedure TMainForm.imgKeyAddMouseEnter(Sender: TObject);
 begin
     imgKeyAdd.Cursor:=crHandPoint;
-    Text41.Font.Color:=TUnityApp.FontColor;
+    Text41.Font.Color:=TCommon.FontColor;
 end;
 
 
@@ -6305,7 +6259,7 @@ end;
 procedure TMainForm.imgKeyRemoveMouseEnter(Sender: TObject);
 begin
     imgKeyRemove.Cursor:=crHandPoint;
-    Text42.Font.Color:=TUnityApp.FontColor;
+    Text42.Font.Color:=TCommon.FontColor;
 end;
 
 
@@ -6319,7 +6273,7 @@ end;
 procedure TMainForm.imgUpdateValuesMouseEnter(Sender: TObject);
 begin
     imgUpdateValues.Cursor:=crHandPoint;
-    Text43.Font.Color:=TUnityApp.FontColor;
+    Text43.Font.Color:=TCommon.FontColor;
 end;
 
 
@@ -6333,7 +6287,7 @@ end;
 procedure TMainForm.imgSectionAddMouseEnter(Sender: TObject);
 begin
     imgSectionAdd.Cursor:=crHandPoint;
-    Text48.Font.Color:=TUnityApp.FontColor;
+    Text48.Font.Color:=TCommon.FontColor;
 end;
 
 
@@ -6347,7 +6301,7 @@ end;
 procedure TMainForm.imgSectionRemoveMouseEnter(Sender: TObject);
 begin
     imgSectionRemove.Cursor:=crHandPoint;
-    Text49.Font.Color:=TUnityApp.FontColor;
+    Text49.Font.Color:=TCommon.FontColor;
 end;
 
 
@@ -6361,7 +6315,7 @@ end;
 procedure TMainForm.imgAllowEditMouseEnter(Sender: TObject);
 begin
     imgAllowEdit.Cursor:=crHandPoint;
-    Text50.Font.Color:=TUnityApp.FontColor;
+    Text50.Font.Color:=TCommon.FontColor;
 end;
 
 
@@ -6375,7 +6329,7 @@ end;
 procedure TMainForm.imgEventLogMouseEnter(Sender: TObject);
 begin
     imgAllowEdit.Cursor:=crHandPoint;
-    Text51.Font.Color:=TUnityApp.FontColor;
+    Text51.Font.Color:=TCommon.FontColor;
 end;
 
 
@@ -6840,7 +6794,7 @@ begin
     begin
         sgAddressBook.SetUpdatedRow(0);
         TTAddressBook.Create(
-            TEnums.TActionTask.adOpenAll,
+            TEnums.TActions.OpenAll,
             sgAddressBook,
             '',
             '',
@@ -6871,7 +6825,7 @@ begin
 
     if IsConnected then
         TTAddressBook.Create(
-            TEnums.TActionTask.adUpdate,
+            TEnums.TActions.Update,
             sgAddressBook,
             '',
             '',
@@ -6892,7 +6846,7 @@ end;
 
 procedure TMainForm.btnCloseABClick(Sender: TObject);
 begin
-    if MsgCall(TCommon.TMsgTypes.Question2, 'Are you sure you want to close Address Book?') = IDYES then
+    if MsgCall(TCommon.TMessage.Question2, 'Are you sure you want to close Address Book?') = IDYES then
     begin
         sgAddressBook.SetUpdatedRow(0);
         sgAddressBook.ClearAll(2, 1, 1, True);
@@ -6910,11 +6864,11 @@ begin
 
     if not(sgAddressBook.Visible) then
     begin
-        MsgCall(TCommon.TMsgTypes.Warn, 'Please open Address Book first.');
+        MsgCall(TCommon.TMessage.Warn, 'Please open Address Book first.');
         Exit;
     end;
     TTAddressBook.Create(
-        TEnums.TActionTask.adExport,
+        TEnums.TActions.Export,
         sgAddressBook,
         '',
         '',
@@ -6932,7 +6886,7 @@ begin
 
     if String.IsNullOrEmpty(FSCComment.Text) then
     begin
-        MsgCall(TCommon.TMsgTypes.Warn, 'Please provide mandatory comment before accepting/declining selected query.');
+        MsgCall(TCommon.TMessage.Warn, 'Please provide mandatory comment before accepting/declining selected query.');
         Exit;
     end;
 
@@ -6946,7 +6900,7 @@ begin
 
     if String.IsNullOrEmpty(FSCComment.Text) then
     begin
-        MsgCall(TCommon.TMsgTypes.Warn, 'Please provide mandatory comment before accepting/declining selected query.');
+        MsgCall(TCommon.TMessage.Warn, 'Please provide mandatory comment before accepting/declining selected query.');
         Exit;
     end;
 
@@ -6960,7 +6914,7 @@ begin
 
     if String.IsNullOrEmpty(LBUComment.Text) then
     begin
-        MsgCall(TCommon.TMsgTypes.Warn, 'Please provide mandatory comment before accepting/declining selected query.');
+        MsgCall(TCommon.TMessage.Warn, 'Please provide mandatory comment before accepting/declining selected query.');
         Exit;
     end;
 
@@ -6993,13 +6947,13 @@ end;
 procedure TMainForm.imgSectionRemoveClick(Sender: TObject);
 begin
 
-    if MsgCall(TCommon.TMsgTypes.Question2, 'Are you sure you want to delete this section? It cannot be undone.') = IDNO then exit;
+    if MsgCall(TCommon.TMessage.Question2, 'Are you sure you want to delete this section? It cannot be undone.') = IDNO then exit;
     if sgListSection.RowCount = 1 then exit;
 
     // Remove given section
     var Settings: ISettings:=TSettings.Create;
     Settings.DeleteSection(sgListSection.Cells[1, sgListSection.Row]);
-    Settings.Encode(TCommon.TUnityFiles.AppConfig);
+    Settings.Encode(TCommon.TFiles.AppConfig);
 
     // Remove from string grid
     sgListSection.DeleteRowFrom(1, 1);
@@ -7040,7 +6994,7 @@ end;
 
 procedure TMainForm.imgEventLogClick(Sender: TObject);
 begin
-    WndCall(EventForm, TWindows.TState.Modeless);
+    WndCall(EventForm, Helpers.TEnums.TWindowState.Modeless);
 end;
 
 
@@ -7072,7 +7026,7 @@ end;
 procedure TMainForm.imgKeyRemoveClick(Sender: TObject);
 begin
 
-    if MsgCall(TCommon.TMsgTypes.Question2, 'Are you sure you want to delete this key? It cannot be undone.') = IDNO then Exit;
+    if MsgCall(TCommon.TMessage.Question2, 'Are you sure you want to delete this key? It cannot be undone.') = IDNO then Exit;
 
     // Check for last row
     if sgListValue.RowCount = 1 then
@@ -7081,7 +7035,7 @@ begin
     // Remove key
     var Settings: ISettings:=TSettings.Create;
     Settings.DeleteKey(sgListSection.Cells[1, sgListSection.Row], sgListValue.Cells[1, sgListValue.Row]);
-    Settings.Encode(TCommon.TUnityFiles.AppConfig);
+    Settings.Encode(TCommon.TFiles.AppConfig);
 
     // Remove from string grid list
     sgListValue.DeleteRowFrom(1, 1);
@@ -7100,7 +7054,7 @@ end;
 procedure TMainForm.imgUpdateValuesClick(Sender: TObject);
 begin
 
-    if MsgCall(TCommon.TMsgTypes.Question2, 'Are you sure you want to save all the changes? It cannot be undone.') = IDNO then exit;
+    if MsgCall(TCommon.TMessage.Question2, 'Are you sure you want to save all the changes? It cannot be undone.') = IDNO then exit;
 
     // Check if there is no empty keys
     for var iCNT: integer:= 1 to (sgListValue.RowCount - 1) do
@@ -7118,7 +7072,7 @@ begin
     for var iCNT: integer:= 1 to (sgListValue.RowCount - 1) do
         Settings.SetStringValue(sgListSection.Cells[1, sgListSection.Row], sgListValue.Cells[1, iCNT], sgListValue.Cells[2, iCNT]);
 
-    Settings.Encode(TCommon.TUnityFiles.AppConfig);
+    Settings.Encode(TCommon.TFiles.AppConfig);
 
     MsgCall(Info, 'All Keys and its values has been saved successfully.');
 

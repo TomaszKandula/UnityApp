@@ -106,7 +106,7 @@ begin
 
     if ReportMemo.Text = '' then
     begin
-        MainForm.MsgCall(TCommon.TMsgTypes.Warn, 'Cannot send empty report. Please write what feels right and then send.');
+        MainForm.MsgCall(TCommon.TMessage.Warn, 'Cannot send empty report. Please write what feels right and then send.');
         Exit;
     end;
 
@@ -117,7 +117,7 @@ begin
     try
 
         var AppName: string:=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'VALUE', '');
-        var AppVer: string:=GetBuildInfoAsString;
+        var AppVer: string:=TCommon.GetBuildInfoAsString;
 
         // Get and set email details
         if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerNTLM  then

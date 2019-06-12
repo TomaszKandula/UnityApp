@@ -149,7 +149,7 @@ procedure TViewSearchForm.Initialize;
 begin
 
     var Settings: ISettings:=TSettings.Create;
-    ViewSearchForm.Caption:=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'WND_ABSEARCH', TUnityApp.APPCAPTION);
+    ViewSearchForm.Caption:=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'WND_ABSEARCH', TCommon.APPCAPTION);
 
     PanelEditNumber.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
     PanelEditName.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
@@ -389,7 +389,7 @@ begin
 
     // Execute, leave window opened
     TTAddressBook.Create(
-        TEnums.TActionTask.adOpenForUser,
+        TEnums.TActions.OpenForUser,
         MainForm.sgAddressBook,
         '',
         '',

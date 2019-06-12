@@ -99,11 +99,11 @@ procedure TCalendarForm.SetFollowUp(SelectedDate: TDate; SelectedCUID: string; R
 begin
   TTGeneralComment.Create(
                            SelectedCUID,
-                           TNaVariants.NULL,
+                           TUnknown.NULL,
                            DateToStr(SelectedDate),
-                           TNaVariants.NULL,
-                           TNaVariants.NULL,
-                           TNaVariants.NULL,
+                           TUnknown.NULL,
+                           TUnknown.NULL,
+                           TUnknown.NULL,
                            False
                          );
   MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneralComment.fFollowUp, 1, 1), Row]:=DateToStr(SelectedDate);

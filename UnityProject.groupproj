@@ -6,9 +6,6 @@
         <Projects Include="Unity.dproj">
             <Dependencies/>
         </Projects>
-        <Projects Include="Unitylib.dproj">
-            <Dependencies/>
-        </Projects>
         <Projects Include="UnityReader.dproj">
             <Dependencies/>
         </Projects>
@@ -29,15 +26,6 @@
     <Target Name="Unity:Make">
         <MSBuild Projects="Unity.dproj" Targets="Make"/>
     </Target>
-    <Target Name="Unitylib">
-        <MSBuild Projects="Unitylib.dproj"/>
-    </Target>
-    <Target Name="Unitylib:Clean">
-        <MSBuild Projects="Unitylib.dproj" Targets="Clean"/>
-    </Target>
-    <Target Name="Unitylib:Make">
-        <MSBuild Projects="Unitylib.dproj" Targets="Make"/>
-    </Target>
     <Target Name="UnityReader">
         <MSBuild Projects="UnityReader.dproj"/>
     </Target>
@@ -48,13 +36,13 @@
         <MSBuild Projects="UnityReader.dproj" Targets="Make"/>
     </Target>
     <Target Name="Build">
-        <CallTarget Targets="Unity;Unitylib;UnityReader"/>
+        <CallTarget Targets="Unity;UnityReader"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="Unity:Clean;Unitylib:Clean;UnityReader:Clean"/>
+        <CallTarget Targets="Unity:Clean;UnityReader:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="Unity:Make;Unitylib:Make;UnityReader:Make"/>
+        <CallTarget Targets="Unity:Make;UnityReader:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>

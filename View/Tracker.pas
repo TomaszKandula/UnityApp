@@ -136,7 +136,7 @@ begin
         if not(Database.DataSet.RecordCount = 0) then
             Database.SqlToSimpleList(List, Database.DataSet)
                 else
-                    MainForm.MsgCall(TCommon.TMsgTypes.Warn, 'Cannot find assigned email address to your organisation. Please contact IT support.');
+                    MainForm.MsgCall(TCommon.TMessage.Warn, 'Cannot find assigned email address to your organisation. Please contact IT support.');
     finally
         Database.Free;
 

@@ -5,40 +5,32 @@ interface
 
 
 uses
-    Messages;
+    Winapi.Windows,
+    Winapi.Messages,
+    System.SysUtils,
+    System.Classes,
+    Vcl.Grids;
 
 
 type
 
-    /// <summary>
-    /// Defines different statement options.
-    /// </summary>
-
-    TInvoiceFilter = (ReminderOvd, ReminderNonOvd, ShowAllItems);
+    // -------------------------------------------------------------------------------------------------------------------------------------------- POINTERS //
 
     /// <remarks>
-    /// Reference to two dimensional string array.
+    /// Pointer reference for packed record.
     /// </remarks>
 
-    TALists = array of array of string;
+    PTokenUser = ^TTokenUser;
+
+    // --------------------------------------------------------------------------------------------------------------------------------------------- RECORDS //
 
     /// <remarks>
-    /// Reference to one dimensional string array.
+    /// Packed record for user SID in Windows environment.
     /// </remarks>
 
-    TAStrings = array of string;
-
-    /// <remarks>
-    /// Reference to one dimensional integer array.
-    /// </remarks>
-
-    TAIntigers = array of integer;
-
-    /// <remarks>
-    /// Reference to one dimensional double array.
-    /// </remarks>
-
-    TADoubles = array of double;
+    TTokenUser = packed record
+        User: TSidAndAttributes;
+    end;
 
     /// <remarks>
     /// This record definition allows to hold column numbers for given column name. This is necessary as column order may change.
@@ -70,21 +62,69 @@ type
     /// </remarks>
 
     TControlStatusRefs = record
-        Id:
-        integer;
+        Id:          integer;
         Code:        integer;
         Text:        integer;
         Description: integer;
     end;
 
+    // ---------------------------------------------------------------------------------------------------------------------------------------------- ARRAYS //
+
+    /// <remarks>
+    /// Reference to two dimensional string array.
+    /// </remarks>
+
+    TALists = array of array of string;
+
+    /// <remarks>
+    /// Reference to one dimensional string array.
+    /// </remarks>
+
+    TAStrings = array of string;
+
+    /// <remarks>
+    /// Reference to one dimensional integer array.
+    /// </remarks>
+
+    TAIntigers = array of integer;
+
+    /// <remarks>
+    /// Reference to one dimensional double array.
+    /// </remarks>
+
+    TADoubles = array of double;
+
+    /// <remarks>
+    /// Reference to one dimension char array with 261 elements for SID calculation.
+    /// </remarks>
+
+    TSidArray = array[0..260] of Char;
+
+    // ---------------------------------------------------------------------------------------------------------------------------------------- ENUMERATIONS //
+
     /// <summary>
-    /// For internal communication between threads and main thread (UI) we use defined numeric arguments.
+    /// Defines different statement options.
     /// </summary>
+
+    TInvoiceFilter = (ReminderOvd, ReminderNonOvd, ShowAllItems);
+
+    // -------------------------------------------------------------------------------------------------------------------------------------- STATIC CLASSES //
+
+   TEnums = class abstract
+        type TDocType     = (Reminder, Statement, Auto, Manual);
+        type TDocMode     = (Custom, Defined);
+        type TBrackets    = (Round, Square, Curly);
+        type TQuotes      = (Enabled, Disabled);
+        type TLoading     = (NullParameter, CallOpenItems, CallMakeAge);
+        type TCalendar    = (DateToDB, GetDate, TimeOnly, DateOnly, DateTime);
+        type TActions     = (OpenAll, OpenForUser, Insert, Update, Export, Import, Copy, Paste, Cut, Escape, Delete);
+        type TWindowState = (Modal, Modeless);
+    end;
 
     TMessaging = class abstract
 
-        // WParams
         type TWParams = class abstract
+        {WParams}
             const AwaitForm        = 1;
             const StatusBar        = 2;
             const MessageInfo      = 3;
@@ -97,38 +137,33 @@ type
             const MailerReportItem = 10;
         end;
 
-        // LParams for AwaitForm
         type TAwaitForm = class abstract
+        {LParams}
             const Show = 1;
             const Hide = 2;
         end;
 
     end;
 
-    /// <summary>
-    /// Predefined sorting options for string grid.
-    /// </summary>
-
     TSorting = class abstract
 
         type TDataType = class abstract
-            const TString:  integer = 0;
-            const TInteger: integer = 1;
-            const TFloat:   integer = 2;
+            const TString  = 0;
+            const TInteger = 1;
+            const TFloat   = 2;
         end;
 
         type TMode = class abstract
-            const Ranges:   integer = 0;
-            const FollowUp: integer = 1;
-            const Total:    integer = 2;
-            const Overdue:  integer = 3;
+            const Ranges   = 0;
+            const FollowUp = 1;
+            const Total    = 2;
+            const Overdue  = 3;
         end;
 
-    end;
+        class procedure QuickSort(var A: array of double; var L: array of integer; iLo, iHi: integer; ASC: boolean); static;
+        class procedure MergeSort(Grid: TStringGrid; var Vals: array of integer; sortcol, datatype: integer; ascending: boolean); static;
 
-    /// <summary>
-    /// Available columns for filtering.
-    /// </summary>
+    end;
 
     TFiltering = class abstract
         type TColumns = (
@@ -149,61 +184,28 @@ type
         );
     end;
 
-    /// <summary>
-    /// Application common types and constants.
-    /// </summary>
-
     TCommon = class abstract
-        type  TUnityFiles = (AppConfig, LicData);
-        type  TTimers     = (TurnedOn, TurnedOff);
-        type  TMsgTypes   = (Info, Warn, Error, Question1, Question2);
+        type  TFiles                    = (AppConfig, LicData);
+        type  TTimers                   = (TurnedOn, TurnedOff);
+        type  TMessage                  = (Info, Warn, Error, Question1, Question2);
+        const SelectionColor: integer   = $00F2E4D7;
+        const FontColor:      integer   = $006433C9;
+        const AltColor:       integer   = $00FFDBB7;
+        const DecryptKey:     integer   = 429496;
+        const AppCaption:     string    = 'Unity';
+        const UnityReader:    string    = 'UnityReader.exe';
+        const LicenceFile:    string    = 'Unity.lic';
+        const GridImgFile:    string    = 'Unity.img';
+        const ReleaseFile:    string    = 'Release.zip';
+        const LayoutPak:      string    = 'Layouts.zip';
+        const ManifestFile:   string    = 'Unity.manifest';
+        const CurrentMutex:   PWideChar = 'UNITY_10245';
+        const ConfigFile:     string    = 'Config.cfg';
+        class procedure       GetBuildInfo(var V1, V2, V3, V4: word); static;
+        class function        GetBuildInfoAsString: string; static;
+        class function        GetOSVer(CheckForOsName: boolean): string; static;
+        class procedure       LogText(FileName: string; Text: string); static;
     end;
-
-    /// <summary>
-    /// Predefined date and time formats.
-    /// </summary>
-
-    TDateTimeFormats = class abstract
-        const TimeFormat:     string = 'hh:mm:ss';
-        const DateFormat:     string = 'YYYY-MM-DD';
-        const DateTimeFormat: string = 'YYYY-MM-DD hh:mm:ss';
-        const NullDate:       TDateTime = 0;
-    end;
-
-    /// <summary>
-    /// Default string for no-data.
-    /// </summary>
-
-    TNaVariants = class abstract
-        const Null:       string = 'NULL';
-        const Unassigned: string = 'Unassigned item.';
-        const NA:         string = 'N/A';
-        const NotFound:   string = 'Not found!';
-    end;
-
-    /// <summary>
-    /// Application predefined constants.
-    /// </summary>
-
-    TUnityApp = class abstract
-        const SelectionColor = $00F2E4D7;
-        const FontColor      = $006433C9;
-        const AltColor       = $00FFDBB7;
-        const DecryptKey:   integer   = 429496;
-        const AppCaption:   string    = 'Unity';
-        const LyncCall:     string    = 'LyncCall.exe';
-        const UnityReader:  string    = 'UnityReader.exe';
-        const LicenceFile:  string    = 'Unity.lic';
-        const GridImgFile:  string    = 'Unity.img';
-        const ReleaseFile:  string    = 'Release.zip';
-        const ManifestFile: string    = 'Unity.manifest';
-        const CurrentMutex: PWideChar = 'UNITY_10240';
-        const ConfigFile:   string    = 'Config.cfg';
-    end;
-
-    /// <summary>
-    /// Predefined messages displayed during splash screen along with latency and task numbers.
-    /// </summary>
 
     TSplashScreen = class abstract
         const DelayStd       = 10;
@@ -218,35 +220,26 @@ type
         const Finishing      = 'finishing..., please wait.';
     end;
 
-    /// <summary>
-    /// Windows/WinApi related helpers including predefine windows message names (private and non-private).
-    /// </summary>
-
-    TWindows = class abstract
-        type  TState = (Modal, Modeless);
-        const DWMI = 'dwmapi.dll';
-        const CS_DROPSHADOW = $00020000;
-        const WM_GETINFO    = WM_USER + 120;
-        const WM_EXTINFO    = WM_APP  + 150;
-        const NOTIFY_FOR_THIS_SESSION = $0;
-        const NOTIFY_FOR_ALL_SESSIONS = $1;
+    TLyncLib = class abstract
+        const LyncControls  = 'Microsoft.Lync.Controls.dll';
+        const LyncFramework = 'Microsoft.Lync.Controls.Framework.dll';
+        const LyncModel     = 'Microsoft.Lync.Model.dll';
+        const LyncUtils     = 'Microsoft.Lync.Utilities.dll';
+        const OfficeUc      = 'Microsoft.Office.Uc.dll';
+        const LyncCall      = 'LyncCall.exe';
     end;
 
-    /// <summary>
-    /// List of external assemblies necessary for application.
-    /// </summary>
-
-    TLyncAssemblies = class abstract
-        const LyncControls:  string = 'Microsoft.Lync.Controls.dll';
-        const LyncFramework: string = 'Microsoft.Lync.Controls.Framework.dll';
-        const LyncModel:     string = 'Microsoft.Lync.Model.dll';
-        const LyncUtils:     string = 'Microsoft.Lync.Utilities.dll';
-        const OfficeUc:      string = 'Microsoft.Office.Uc.dll';
+    TStatusBar = class abstract
+        const Ready       = 'Ready';
+        const Processing  = 'Processing...';
+        const ExportXLS   = 'Exporting to Excel...';
+        const ExportCSV   = 'Exporting to CSV file...';
+        const ImportCSV   = 'Importing from CSV file...';
+        const Generating  = 'Generating age view...';
+        const Downloading = 'Downloading Open Items...';
+        const Loading     = 'Loading Aging Report...';
+        const SQLupdate   = 'Sending to SQL Server...';
     end;
-
-    /// <summary>
-    /// Characters definition.
-    /// </summary>
 
     TChars = class abstract
         const CrLf:        string = #13#10;
@@ -263,102 +256,39 @@ type
         const DoubleQuote: string = '''''';
     end;
 
-    /// <summary>
-    /// Predefined delimiters.
-    /// </summary>
-
     TDelimiters = class abstract
         const Semicolon = ';';
         const Comma     = ',';
         const Pipe      = '|';
     end;
 
-    /// <summary>
-    /// Email authentication.
-    /// </summary>
-
-    TEmails = class abstract
-        type TAuthTypes = (cdoAnonymous, cdoBasic, cdoNTLM);
-        type TAuthUsing = (cdoNone, cdoSendUsingPickup, cdoSendUsingPort, cdoSendUsingExchange);
-    end;
-
-    /// <summary>
-    /// Preddefined document options.
-    /// </summary>
-
-    TDocuments = class abstract
-        type TType = (Reminder, Statement, Auto, Manual);
-        type TMode = (Custom, Defined);
-    end;
-
-    /// <summary>
-    /// Predefined states for animations.
-    /// </summary>
-
-    TAnimation = class abstract
-        type TState = (AnimationON, AnimationOFF);
-    end;
-
-    /// <summary>
-    /// Various enumeration types.
-    /// </summary>
-
-    TEnums = class abstract
-        type TBrackets   = (Round, Square, Curly);
-        type TQuotes     = (Enabled, Disabled);
-        type TLoading    = (NullParameter, CallOpenItems, CallMakeAge);
-        type TCalendar   = (DateToDB, GetDate, TimeOnly, DateOnly, DateTime);
-        type TActionTask = (adOpenAll, adOpenForUser, adInsert, adUpdate, adExport, adImport, adCopy, adPaste, adCut, adEscape, adDelete);
-    end;
-
-    /// <summary>
-    /// Database ADODB shorthands.
-    /// </summary>
-
-    TAdoDb = class abstract
-        /// <seealso cref="https://docs.microsoft.com/en-us/sql/ado/reference/ado-api/filtergroupenum?view=sql-server-2017"/>
-        type  TFilters    = (adFilterNone, adFilterPendingRecords, adFilterAffectedRecords, adFilterFetchedRecords, adFilterConflictingRecords);
-        const dbOLEDB     = 'OLEDB';
-        const dbODBC      = 'ODBC';
-        const ERR_MESSAGE = 'Cannot connect with Microsoft SQL Server. Please re-check your server settings or contact IT support.';
-        const ERR_LOGTEXT = 'ADO connection error. Exception thrown: ';
-    end;
-
-    /// <summary>
-    /// Predefined status bar messages.
-    /// </summary>
-
-    TStatusBar = class abstract
-        const Ready       = 'Ready';
-        const Processing  = 'Processing...';
-        const ExportXLS   = 'Exporting to Excel...';
-        const ExportCSV   = 'Exporting to CSV file...';
-        const ImportCSV   = 'Importing from CSV file...';
-        const Generating  = 'Generating age view...';
-        const Downloading = 'Downloading Open Items...';
-        const Loading     = 'Loading Aging Report...';
-        const SQLupdate   = 'Sending to SQL Server...';
-    end;
-
-    /// <summary>
-    /// Risk Class default definitions. Do not change it.
-    /// </summary>
-
     TRiskClass = class abstract
-        const FClassA = 16777215;
-        const BClassA = 8421631;
-        const FClassC = 16777215;
-        const BClassC = 11316313;
-        const FClassB = 8404992;
-        const BClassB = 13434879;
-        const RiskClassA = '0,80';
-        const RiskClassB = '0,15';
-        const RiskClassC = '0,05';
+        const A = '0,80';
+        const B = '0,15';
+        const C = '0,05';
     end;
 
-    /// <summary>
-    /// Network Connectivity Status Indicator shorthands.
-    /// </summary>
+    TDateTimeFormats = class abstract
+        const TimeFormat     = 'hh:mm:ss';
+        const DateFormat     = 'YYYY-MM-DD';
+        const DateTimeFormat = 'YYYY-MM-DD hh:mm:ss';
+        const NullDate: TDateTime = 0;
+    end;
+
+    TUnknown = class abstract
+        const Null:       string = 'NULL';
+        const Unassigned: string = 'Unassigned item.';
+        const NA:         string = 'N/A';
+        const NotFound:   string = 'Not found!';
+    end;
+
+    TUserSid = class abstract
+        const HEAP_ZERO_MEMORY = $00000008;
+        const SID_REVISION     = 1;
+        class function ConvertSid(Sid: PSID; pszSidText: PChar; var dwBufferLen: DWORD): BOOL; static;
+        class function ObtainTextSid(hToken: THandle; pszSid: PChar; var dwBufferLen: DWORD): BOOL; static;
+        class function GetCurrentUserSid: string; static;
+    end;
 
     TNCSI = class abstract
         const HTTPREQUEST_SETCREDENTIALS_FOR_SERVER = 0;
@@ -373,9 +303,17 @@ type
         const ncsiHead: string = 'HEAD';
     end;
 
-    // ------------------------------------------------------------------------------------------------------------------------- LEGACY CODE - TO BE DELETED //
+    TAdoDb = class abstract
+    {Legacy class - to be removed}
+        type  TFilters    = (adFilterNone, adFilterPendingRecords, adFilterAffectedRecords, adFilterFetchedRecords, adFilterConflictingRecords);
+        const dbOLEDB     = 'OLEDB';
+        const dbODBC      = 'ODBC';
+        const ERR_MESSAGE = 'Cannot connect with Microsoft SQL Server. Please re-check your server settings or contact IT support.';
+        const ERR_LOGTEXT = 'ADO connection error. Exception thrown: ';
+    end;
 
     TUserAccess = class abstract
+    {Legacy class - to be removed}
         type TTypes = (AccessLevel, AccessMode, UserKeyId);
         const AccessFull  = 'FULL';
         const AccessBasic = 'BASIC';
@@ -385,6 +323,7 @@ type
     end;
 
     TQms = class abstract
+    {Legacy class - to be removed}
         const Open     = 'OPEN';
         const Pending  = 'PENDING';
         const Rejected = 'REJECTED';
@@ -392,6 +331,7 @@ type
     end;
 
     TSql = class abstract
+    {Legacy class - to be removed}
         const INSERT       = ' INSERT INTO ';
         const VAL          = ' VALUES ';
         const SELECT       = ' SELECT ';
@@ -427,6 +367,490 @@ type
 
 
 implementation
+
+
+// --------------------------------------------------------------------------------------------------------------------------------------------------------- //
+
+
+class function TUserSid.ConvertSid(Sid: PSID; pszSidText: PChar; var dwBufferLen: DWORD): BOOL;
+begin
+
+    Result:=False;
+
+    var dwSidRev: DWORD:=SID_REVISION;
+    if not IsValidSid(Sid) then Exit;
+
+    var psia: PSIDIdentifierAuthority:=GetSidIdentifierAuthority(Sid);
+    var dwSubAuthorities: DWORD:=GetSidSubAuthorityCount(Sid)^;
+    var dwSidSize: DWORD:=(15 + 12 + (12 * dwSubAuthorities) + 1) * SizeOf(Char);
+
+    // Set buffer and exit if insufficient
+    if (dwBufferLen < dwSidSize) then
+    begin
+        dwBufferLen:=dwSidSize;
+        SetLastError(ERROR_INSUFFICIENT_BUFFER);
+        Exit;
+    end;
+
+    // String format
+    StrFmt(pszSidText, 'S-%u-', [dwSidRev]);
+
+    // Set data
+    if (psia.Value[0] <> 0) or (psia.Value[1] <> 0) then
+        StrFmt(pszSidText + StrLen(pszSidText), '0x%.2x%.2x%.2x%.2x%.2x%.2x',
+	        [
+                psia.Value[0],
+                psia.Value[1],
+                psia.Value[2],
+                psia.Value[3],
+                psia.Value[4],
+                psia.Value[5]
+            ])
+    else
+        StrFmt(pszSidText + StrLen(pszSidText), '%u',
+            [
+                DWORD(psia.Value[5])        +
+                DWORD(psia.Value[4] shl 8)  +
+                DWORD(psia.Value[3] shl 16) +
+                DWORD(psia.Value[2] shl 24)
+            ]);
+
+    // Allocate memory for SID
+    dwSidSize:=StrLen(pszSidText);
+    for var dwCounter: DWORD:=0 to dwSubAuthorities - 1 do
+    begin
+        StrFmt(pszSidText + dwSidSize, '-%u', [GetSidSubAuthority(Sid, dwCounter)^]);
+        dwSidSize := StrLen(pszSidText);
+    end;
+
+    // Set true if no error occured
+    Result := True;
+
+end;
+
+
+// --------------------------------------------------------------------------------------------------------------------------------------------------------- //
+
+
+class function TUserSid.ObtainTextSid(hToken: THandle; pszSid: PChar; var dwBufferLen: DWORD): BOOL;
+begin
+
+    Result:=False;
+    var dwReturnLength: DWORD:=0;
+    var dwTokenUserLength: DWORD:=0;
+    var tic: TTokenInformationClass:=TokenUser;
+    var ptu: Pointer:=nil;
+
+    // Get text-sid
+    if not GetTokenInformation(hToken, tic, ptu, dwTokenUserLength, dwReturnLength) then
+    begin
+        if GetLastError = ERROR_INSUFFICIENT_BUFFER then
+        begin
+            ptu:=HeapAlloc(GetProcessHeap, HEAP_ZERO_MEMORY, dwReturnLength);
+
+            if ptu = nil then Exit;
+
+            dwTokenUserLength:=dwReturnLength;
+            dwReturnLength:=0;
+
+            if not GetTokenInformation(hToken, tic, ptu, dwTokenUserLength, dwReturnLength) then Exit;
+
+        end else Exit;
+    end;
+
+    // Try to convert SID, exit if failed
+    if not ConvertSid((PTokenUser(ptu).User).Sid, pszSid, dwBufferLen) then Exit;
+
+    // Release from memory
+    if not HeapFree(GetProcessHeap, 0, ptu) then Exit;
+
+    // Set true if no error occured
+    Result:=True;
+
+end;
+
+
+// --------------------------------------------------------------------------------------------------------------------------------------------------------- //
+
+
+class function TUserSid.GetCurrentUserSid: string;
+begin
+
+    var hAccessToken: THandle;
+    var bSuccess:     BOOL;
+    var dwBufferLen:  DWORD;
+    var szSid:        TSidArray;
+
+    Result:='';
+
+    // Get token
+    bSuccess:=OpenThreadToken(GetCurrentThread, TOKEN_QUERY, True, hAccessToken);
+
+    // Return error otherwise
+    if not bSuccess then
+        if GetLastError = ERROR_NO_TOKEN then
+            bSuccess:=OpenProcessToken(GetCurrentProcess, TOKEN_QUERY, hAccessToken);
+
+    // If succeed, then set proper SID
+    if bSuccess then
+    begin
+        ZeroMemory(@szSid, SizeOf(szSid));
+        dwBufferLen:=SizeOf(szSid);
+        if ObtainTextSid(hAccessToken, szSid, dwBufferLen) theN Result:=szSid;
+        CloseHandle(hAccessToken);
+    end;
+
+end;
+
+
+// --------------------------------------------------------------------------------------------------------------------------------------------------------- //
+
+
+class procedure TSorting.QuickSort(var A: array of double; var L: array of integer; iLo, iHi: integer; ASC: boolean);
+begin
+
+    /// <remarks>
+    /// 'A' variable holds numerical data to be sorted. 'L' variable is associated column with original list position. The second associated column follows
+    /// 'A' column, but it is not sorted. It allows to assign sorted values back to original list position after computation is done. This is to be used when
+    /// sorting is necessary before applaying computation and after which we must put values back to its original positions.
+    /// </remarks>
+
+    var Lo:    integer;
+    var Hi:    integer;
+    var Pivot: double;
+    var T1:    double;  {For sorting column}
+    var T2:    integer; {For associated column}
+
+    Lo:=iLo;
+    Hi:=iHi;
+    Pivot:=A[(Lo + Hi) div 2];
+
+    repeat
+
+        // Ascending
+        if ASC then begin
+            while A[Lo] < Pivot do Inc(Lo);
+            while A[Hi] > Pivot do Dec(Hi);
+        end;
+
+        // Descending
+        if not ASC then begin
+            while A[Lo] > Pivot do Inc(Lo);
+            while A[Hi] < Pivot do Dec(Hi);
+        end;
+
+        // Moving positions
+        if Lo <= Hi then begin
+            T1:=A[Lo];
+            T2:=L[Lo];
+
+            // Sorting column
+            A[Lo]:= A[Hi];
+            A[Hi]:= T1;
+
+            // Associated column
+            L[Lo]:= L[Hi];
+            L[Hi]:= T2;
+
+            // Move next
+            Inc(Lo);
+            Dec(Hi);
+
+        end;
+
+    until Lo > Hi;
+
+    if Hi > iLo then QuickSort(A, L, iLo, Hi, ASC);
+    if Lo < iHi then QuickSort(A, L, Lo, iHi, ASC);
+
+end;
+
+
+// --------------------------------------------------------------------------------------------------------------------------------------------------------- //
+
+
+class procedure TSorting.MergeSort(Grid: TStringGrid; var Vals: array of integer; sortcol, datatype: integer; ascending: boolean);
+
+    /// <remarks>
+    /// Temporary shared local array for integers.
+    /// </remarks>
+
+    var Avals:  array of integer;
+
+    /// <summary>
+    /// Helper nested method for comparision.
+    /// </summary>
+
+    function compare(val1, val2: string): integer;
+    begin
+
+        case datatype of
+
+            // String
+            0: result:=ANSIComparetext(val1, val2);
+
+            // Integers
+            1:
+            begin
+
+                var int1: int64:=strtointdef(val1, 0);
+                var int2: int64:=strtointdef(val2, 0);
+
+                if (int1 > int2) then result:= 1
+                else if int1 < int2 then result:= -1 else result:=0;
+
+            end;
+
+            // Floats (real numbers)
+            2:
+            begin
+
+                var errcode: integer;
+                var float1:  extended;
+                var float2:  extended;
+
+                val(val1, float1, errcode);
+
+                if errcode <> 0 then float1:=0;
+
+                val(val2, float2, errcode);
+
+                if errcode <> 0 then float2:=0;
+
+                if float1 > float2 then result:= 1
+                else if float1 < float2 then result:= -1 else result:=0;
+
+            end;
+
+            else result:=0;
+
+        end;
+    end;
+
+    /// <summary>
+    /// Heper nested merge method.
+    /// </summary>
+
+    procedure Merge(ALo, AMid, AHi: integer);
+    begin
+
+        var j: integer;
+        var k: integer;
+        var m: integer;
+        var n: integer;
+
+        var i: integer:=0;
+
+        // Copy lower half of "vals" into temporary array "avals"
+        SetLength(Avals, AMid - ALo + 1);
+        for j:=ALo to AMid do begin
+            AVals[i]:=Vals[j];
+            inc(i);
+        end;
+
+        // Initialize
+        i:=0;
+        j:=AMid + 1;
+        k:=ALo;
+
+        /// <remarks>
+        /// Compare upper half to copied version of the lower half and move
+        /// the appropriate value (smallest for ascending, largest for descending) into
+        /// the lower half positions, for equals use 'avals' to preserve original order.
+        /// </remarks>
+
+        // Execute moving
+        while ((k < j) and (j <= AHi)) do
+        begin
+            with grid do n:=compare(Cells[sortcol, Vals[j]], Cells[sortcol, AVals[i]]);
+            if ascending and (n >= 0) or ((not ascending) and (n <= 0)) then
+            begin
+                Vals[k]:=AVals[i];
+                inc(i);
+                inc(k);
+            end
+            else
+            begin
+                Vals[k]:=Vals[j];
+                inc(k);
+                inc(j);
+            end;
+        end;
+
+        // Copy any remaning, unsorted elements
+        for m:=k to j - 1 do begin
+            Vals[m]:=AVals[i];
+            inc(i);
+        end;
+
+    end;
+
+    /// <summary>
+    /// Recursively split the value into two pieces and merge them back together as we unwind the recursion.
+    /// </summary>
+
+    procedure PerformMergeSort(ALo, AHi:Integer);
+    begin
+
+        var AMid:Integer;
+
+        if (ALo < AHi) then
+        begin
+            AMid:=(ALo + AHi) shr 1;
+            PerformMergeSort(ALo, AMid);
+            PerformMergeSort(AMid + 1, AHi);
+            Merge(ALo, AMid, AHi);
+        end;
+
+    end;
+
+begin
+    PerformMergeSort(0, high(Vals));
+end;
+
+
+// --------------------------------------------------------------------------------------------------------------------------------------------------------- //
+
+
+class procedure TCommon.LogText(FileName: string; Text: string);
+begin
+
+    var cDateTime: TDateTime:=Now;
+    text:='#' + DateToStr(cDateTime) + ' (' + TimeToStr(cDateTime) + '): ' + Text + #13#10;
+
+    var FL: TFileStream:=TFileStream.Create(FileName, fmOpenWrite);
+    try
+        try
+            FL.Position:=FL.Size;
+            FL.WriteBuffer(UTF8String(Text)[1], Length(UTF8String(Text)));
+        except
+            // Do noting
+        end;
+    finally
+        FL.Free;
+    end;
+
+end;
+
+
+// --------------------------------------------------------------------------------------------------------------------------------------------------------- //
+
+
+class procedure TCommon.GetBuildInfo(var V1, V2, V3, V4: word);
+begin
+
+    var VerInfoSize:   DWORD;
+    var VerValueSize:  DWORD;
+    var Dummy:         DWORD;
+    var VerInfo:       Pointer;
+    var VerValue:      PVSFixedFileInfo;
+
+    VerInfoSize:=GetFileVersionInfoSize(PChar(ParamStr(0)), Dummy);
+
+    if VerInfoSize > 0 then begin
+        GetMem(VerInfo, VerInfoSize);
+        try
+            if GetFileVersionInfo(PChar(ParamStr(0)), 0, VerInfoSize, VerInfo) then
+            begin
+                VerQueryValue(VerInfo, '\', Pointer(VerValue), VerValueSize);
+                with VerValue^ do
+                begin
+                    V1:=dwFileVersionMS shr 16;
+                    V2:=dwFileVersionMS and $FFFF;
+                    V3:=dwFileVersionLS shr 16;
+                    V4:=dwFileVersionLS and $FFFF;
+                end;
+            end;
+        finally
+            FreeMem(VerInfo, VerInfoSize);
+        end;
+    end;
+
+end;
+
+
+// --------------------------------------------------------------------------------------------------------------------------------------------------------- //
+
+
+class function TCommon.GetBuildInfoAsString: string;
+begin
+
+    var V1: word;
+    var V2: word;
+    var V3: word;
+    var V4: word;
+
+    GetBuildInfo(V1, V2, V3, V4);
+    Result:=IntToStr(V1) + '.' + IntToStr(V2) + '.' + IntToStr(V3) + '.' + IntToStr(V4);
+
+end;
+
+
+// --------------------------------------------------------------------------------------------------------------------------------------------------------- //
+
+
+class function TCommon.GetOSVer(CheckForOsName: boolean): string;
+begin
+
+    result:='0';
+
+    if not CheckForOsName then
+    begin
+        case Win32MajorVersion of
+        4:
+            case Win32MinorVersion of
+                0:  result:='40';     { Windows 95    }
+                10: result:='41';     { Windows 98    }
+                90: result:='49';     { Windows ME    }
+            end;
+        5:
+            case Win32MinorVersion of
+                0: result:='50';      { Windows 2000  }
+                1: result:='51';      { Windows XP    }
+            end;
+        6:
+            case Win32MinorVersion of
+                0: result:='60';      { Windows Vista }
+                1: result:='61';      { Windows 7     }
+                2: result:='62';      { Windows 8     }
+                3: result:='63';      { Windows 8.1   }
+            end;
+        10:
+            case Win32MinorVersion of
+                0: result:='100';     { Windows 10    }
+            end;
+        end;
+    end;
+
+    if CheckForOsName then
+    begin
+        case Win32MajorVersion of
+        4:
+            case Win32MinorVersion of
+                0:  result:='Windows 95';
+                10: result:='Windows 98';
+                90: result:='Windows ME';
+            end;
+        5:
+            case Win32MinorVersion of
+                0: result:='Windows 2000';
+                1: result:='Windows XP';
+            end;
+        6:
+            case Win32MinorVersion of
+                0: result:='Windows Vista';
+                1: result:='Windows 7';
+                2: result:='Windows 8';
+                3: result:='Windows 8.1';
+            end;
+        10:
+            case Win32MinorVersion of
+                0: result:='Windows 10';
+            end;
+        end;
+    end;
+
+end;
 
 
 end.

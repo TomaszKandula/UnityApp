@@ -178,7 +178,7 @@ begin
         if Tables.InsertInto(TQmsLog.QmsLog, True) then
         begin
             MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: [QMS] Missing invoice has been logged successfully.');
-            MainForm.MsgCall(TCommon.TMsgTypes.Info, 'Missing invoice has been logged successfully.');
+            MainForm.MsgCall(TCommon.TMessage.Info, 'Missing invoice has been logged successfully.');
             FLogQueryId:=QueryUid.ToString;
             Result:=True;
             CLearAll;
@@ -188,7 +188,7 @@ begin
         begin
             FLogQueryId:=String.Empty;
             MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: [QMS] Cannot log missing invoice.');
-            MainForm.MsgCall(TCommon.TMsgTypes.Error, 'Cannot log missing invoice to database. Please check the log and contact IT support.');
+            MainForm.MsgCall(TCommon.TMessage.Error, 'Cannot log missing invoice to database. Please check the log and contact IT support.');
         end;
 
     finally
@@ -555,7 +555,7 @@ end;
 procedure TQmsForm.btnAddDueDateClick(Sender: TObject);
 begin
     CalendarForm.FCalendarMode:=TEnums.TCalendar.GetDate;
-    MainForm.WndCall(CalendarForm, Helpers.TWindows.TState.Modal);
+    MainForm.WndCall(CalendarForm, Helpers.TEnums.TWindowState.Modal);
     if CalendarForm.FSelectedDate <> TDateTimeFormats.NullDate then EditDueDate.Text:=DateToStr(CalendarForm.FSelectedDate);
 end;
 

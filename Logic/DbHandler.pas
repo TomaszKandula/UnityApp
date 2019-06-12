@@ -257,12 +257,12 @@ begin
 
         if ConCheck.Connected then
         begin
-            MainForm.ExecMessage(False, TMessaging.TWParams.ConnectionOk, TNaVariants.NULL);
+            MainForm.ExecMessage(False, TMessaging.TWParams.ConnectionOk, TUnknown.NULL);
             ConCheck.Close;
         end
         else
         begin
-            MainForm.ExecMessage(False, TMessaging.TWParams.ConnectionError, TNaVariants.NULL);
+            MainForm.ExecMessage(False, TMessaging.TWParams.ConnectionError, TUnknown.NULL);
         end;
 
         ConCheck.Free;

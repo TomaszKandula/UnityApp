@@ -313,11 +313,11 @@ begin
                 end
                 else
                 begin
-                    Source.Items[iCNT].SubItems[5] :=TNaVariants.NotFound;
-                    Source.Items[iCNT].SubItems[6] :=TNaVariants.NotFound;
-                    Source.Items[iCNT].SubItems[7] :=TNaVariants.NotFound;
-                    Source.Items[iCNT].SubItems[3] :=TNaVariants.NotFound;
-                    Source.Items[iCNT].SubItems[12]:=TNaVariants.NotFound;
+                    Source.Items[iCNT].SubItems[5] :=TUnknown.NotFound;
+                    Source.Items[iCNT].SubItems[6] :=TUnknown.NotFound;
+                    Source.Items[iCNT].SubItems[7] :=TUnknown.NotFound;
+                    Source.Items[iCNT].SubItems[3] :=TUnknown.NotFound;
+                    Source.Items[iCNT].SubItems[12]:=TUnknown.NotFound;
                 end;
 
             end;
@@ -391,7 +391,7 @@ begin
     );
 
     // Display await window
-    MainForm.WndCall(AwaitForm, TWindows.TState.Modal);
+    MainForm.WndCall(AwaitForm, Helpers.TEnums.TWindowState.Modal);
 
 end;
 

@@ -25,8 +25,8 @@ type
     ISettings = Interface(IInterface)
     ['{FF5CBEC3-2576-4E1C-954E-C892AB4A7CC1}']
         // Exposed methods
-        function  Encode(ConfigType: TCommon.TUnityFiles): boolean;
-        function  Decode(ConfigType: TCommon.TUnityFiles; ToMemory: boolean): boolean;
+        function  Encode(ConfigType: TCommon.TFiles): boolean;
+        function  Decode(ConfigType: TCommon.TFiles; ToMemory: boolean): boolean;
         function  ConfigToMemory: boolean;
         function  GetLicenceValue(Section: string; Key: string): string;
         function  GetStringValue(Section: string; Key: string; Default: string): string;
@@ -151,8 +151,8 @@ type
         constructor Create;
         destructor  Destroy; override;
         // Methods
-        function  Encode(ConfigType: TCommon.TUnityFiles): boolean;
-        function  Decode(ConfigType: TCommon.TUnityFiles; ToMemory: boolean): boolean;
+        function  Encode(ConfigType: TCommon.TFiles): boolean;
+        function  Decode(ConfigType: TCommon.TFiles; ToMemory: boolean): boolean;
         function  ConfigToMemory: boolean;
         function  GetLicenceValue(Section: string; Key: string): string;
         function  GetStringValue(Section: string; Key: string; Default: string): string;
@@ -165,7 +165,7 @@ type
         procedure DeleteSection(SectionName: string);
         procedure DeleteKey(Section: string; Ident: string);
         function  FindSettingsKey(Section: string; KeyPosition: integer): string;
-        function  GetLastError: integer;
+        function  GetLastError:      integer;
         function  GetAppDir:         string;
         function  GetLayoutDir:      string;
         function  GetPackageDir:     string;
@@ -248,10 +248,10 @@ begin
 
     // Files
     pAppLog        :=pWinUserName + '.log';
-    pPathAppCfg    :=pAppDir + TUnityApp.ConfigFile;
-    pPathLicenceLic:=pAppDir + TUnityApp.LicenceFile;
+    pPathAppCfg    :=pAppDir + TCommon.ConfigFile;
+    pPathLicenceLic:=pAppDir + TCommon.LicenceFile;
     pPathEventLog  :=pAppDir + pAppLog;
-    pPathGridImage :=pAppDir + TUnityApp.GridImgFile;
+    pPathGridImage :=pAppDir + TCommon.GridImgFile;
 
     /// <remarks>
     /// Return 404 error code if configuration file cannot be found.
@@ -291,8 +291,8 @@ begin
 
         Decode(AppConfig, True);
 
-        pReleasePakURL:=TMIG.ReadString(TConfigSections.ApplicationDetails, 'UPDATE_PATH', '') + TUnityApp.ReleaseFile;
-        pReleaseManURL:=TMIG.ReadString(TConfigSections.ApplicationDetails, 'UPDATE_PATH', '') + TUnityApp.ManifestFile;
+        pReleasePakURL:=TMIG.ReadString(TConfigSections.ApplicationDetails, 'UPDATE_PATH', '') + TCommon.ReleaseFile;
+        pReleaseManURL:=TMIG.ReadString(TConfigSections.ApplicationDetails, 'UPDATE_PATH', '') + TCommon.ManifestFile;
 
         pGetLayoutsURL:=TMIG.ReadString(TConfigSections.ApplicationDetails, 'LAYOUT_PATH', '');
 
@@ -340,7 +340,7 @@ begin
     if Assigned(TMIG) then
     begin
         TMIG.WriteInteger(TConfigSections.ApplicationDetails, 'RELEASE_NUMBER', NewRelease);
-        Encode(TCommon.TUnityFiles.AppConfig);
+        Encode(TCommon.TFiles.AppConfig);
     end;
 end;
 
@@ -380,7 +380,7 @@ begin
     if Assigned(TMIG) then
     begin
         TMIG.WriteString(TConfigSections.ApplicationDetails, 'UPDATE_DATETIME', DateTimeToStr(NewDateTime));
-        Encode(TCommon.TUnityFiles.AppConfig);
+        Encode(TCommon.TFiles.AppConfig);
     end;
 end;
 
@@ -392,7 +392,7 @@ end;
 /// Encoding method based on XOR and SHR with secret KEY.
 /// </summary>
 
-function TSettings.Encode(ConfigType: TCommon.TUnityFiles): boolean;
+function TSettings.Encode(ConfigType: TCommon.TFiles): boolean;
 begin
 
     var buffer:  int64;
@@ -400,7 +400,7 @@ begin
     var sCRC:    string;
 
     // Do not allow to encode licence file
-    if ConfigType = TCommon.TUnityFiles.LicData then
+    if ConfigType = TCommon.TFiles.LicData then
     begin
         Result:=False;
         Exit;
@@ -414,7 +414,7 @@ begin
         try
 
             // Move file to memory
-            if ConfigType = TCommon.TUnityFiles.AppConfig then
+            if ConfigType = TCommon.TFiles.AppConfig then
                 TMIG.GetStrings(hStream);
 
             hStream.SaveToStream(rStream);
@@ -441,7 +441,7 @@ begin
             for var iCNT: integer:=0 to rStream.Size - 1 do
             begin
                 rStream.Read(buffer, 1);
-                buffer:=(buffer xor not (ord(TUnityApp.DecryptKey shr iCNT)));
+                buffer:=(buffer xor not (ord(TCommon.DecryptKey shr iCNT)));
                 wStream.Write(buffer, 1);
             end;
 
@@ -479,7 +479,7 @@ end;
 /// will shift the characters numbers back to theirs original values.
 /// </summary>
 
-function TSettings.Decode(ConfigType: TCommon.TUnityFiles; ToMemory: boolean): boolean;
+function TSettings.Decode(ConfigType: TCommon.TFiles; ToMemory: boolean): boolean;
 begin
 
     Result:=False;
@@ -496,17 +496,17 @@ begin
         try
 
             // Load to memory
-            if ConfigType = TCommon.TUnityFiles.AppConfig  then
+            if ConfigType = TCommon.TFiles.AppConfig  then
                 rStream.LoadFromFile(FPathAppCfg);
 
-            if ConfigType = TCommon.TUnityFiles.LicData then
+            if ConfigType = TCommon.TFiles.LicData then
                 rStream.LoadFromFile(FPathLicenceLic);
 
             // Decode byte by byte
             for var iCNT: integer:=0 to rStream.Size - 1 do
             begin
                 rStream.Read(buffer, 1);
-                buffer:=(buffer xor not (ord(TUnityApp.DecryptKey shr iCNT)));
+                buffer:=(buffer xor not (ord(TCommon.DecryptKey shr iCNT)));
                 wStream.Write(buffer, 1);
             end;
 
@@ -530,10 +530,10 @@ begin
 
             if ToMemory then
             begin
-                if ConfigType = TCommon.TUnityFiles.AppConfig then
+                if ConfigType = TCommon.TFiles.AppConfig then
                     TMIG.SetStrings(hString);
 
-                if ConfigType = TCommon.TUnityFiles.LicData then
+                if ConfigType = TCommon.TFiles.LicData then
                         TMIL.SetStrings(hString);
 
                 Result:=True;
@@ -646,7 +646,7 @@ function TSettings.FindSettingsKey(Section: string; KeyPosition: integer): strin
 var
     SL: TStringList;
 begin
-    Result:=TNaVariants.NA;
+    Result:=TUnknown.NA;
     SL:=TStringList.Create;
     GetSection(Section, SL);
     if KeyPosition > SL.Count then

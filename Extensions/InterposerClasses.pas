@@ -92,14 +92,19 @@ type
         const sgRowHidden = -1;
         const xlWBATWorksheet = -4167;
         const xlWARN_MESSAGE  = 'Invalid class string';
+        const FFontWhite  = $00FFFFFF;
+        const FBackRed    = $00FF8080;
+        const FFontBlack  = $00000000;
+        const FBackYellow = $00FFFFCC;
+        const FBackGreen  = $0059ACAC;
         var SqlColumns: TALists;
         var UpdatedRowsHolder: TAIntigers;
         property  OpenThdId: integer read FOpenThdId write FOpenThdId;
         property  HideFocusRect: boolean read FHideFocusRect write FHideFocusRect;
         procedure SetUpdatedRow(Row: integer);
         procedure RecordRowsAffected;
-        procedure CopyCutPaste(Mode: TEnums.TActionTask; FirstColOnly: boolean = False{Option});
-        procedure DelEsc(Mode: TEnums.TActionTask; pCol, pRow: integer);
+        procedure CopyCutPaste(Mode: TEnums.TActions; FirstColOnly: boolean = False{Option});
+        procedure DelEsc(Mode: TEnums.TActions; pCol, pRow: integer);
         procedure ClearAll(dfRows: integer; FixedRows: integer; FixedCols: integer; ZeroCol: boolean);
         procedure DeleteRowFrom(FixedRow: integer; FixedCol: integer);
         procedure DrawSelected(ARow: integer; ACol: integer; State: TGridDrawState; Rect: TRect; FontColorSel: TColor; BrushColorSel: TColor; FontColor: TColor; BrushColor: TColor; Headers: boolean);
@@ -379,11 +384,11 @@ begin
 end;
 
 
-procedure TStringGrid.CopyCutPaste(Mode: TEnums.TActionTask; FirstColOnly: boolean = False{Option});
+procedure TStringGrid.CopyCutPaste(Mode: TEnums.TActions; FirstColOnly: boolean = False{Option});
 begin
 
     // Paste data into string grid
-    if Mode = TEnums.TActionTask.adPaste then
+    if Mode = TEnums.TActions.Paste then
     begin
 
         // Get clipboard text
@@ -481,7 +486,7 @@ begin
     end;
 
     // Copy/Cut data from string grid
-    if (Mode = TEnums.TActionTask.adCopy) or (Mode = TEnums.TActionTask.adCut) then
+    if (Mode = TEnums.TActions.Copy) or (Mode = TEnums.TActions.Cut) then
     begin
 
         var Sel: TGridRect:=Selection;
@@ -508,7 +513,7 @@ begin
                         TxtFromSel:=TxtFromSel + Cells[Col, Row];
 
                         // Cut
-                        if Mode = TEnums.TActionTask.adCut then
+                        if Mode = TEnums.TActions.Cut then
                             Cells[Col, Row]:='';
 
                         if Col < Sel.Right then
@@ -531,12 +536,12 @@ begin
 end;
 
 
-procedure TStringGrid.DelEsc(Mode: TEnums.TActionTask; pCol, pRow: integer);
+procedure TStringGrid.DelEsc(Mode: TEnums.TActions; pCol, pRow: integer);
 begin
 
     case Mode of
-        TEnums.TActionTask.adEscape: EditorMode:=False;
-        TEnums.TActionTask.adDelete: Cells[pCol, pRow]:='';
+        TEnums.TActions.Escape: EditorMode:=False;
+        TEnums.TActions.Delete: Cells[pCol, pRow]:='';
     end;
 
 end;
@@ -739,7 +744,7 @@ begin
             TempGrid.Rows[iCNT].Assign(Rows[iCNT]);
         end;
 
-        MergeSort(Self, List, SortCol, DataType, Ascending);
+        TSorting.MergeSort(Self, List, SortCol, DataType, Ascending);
 
         for var iCNT: integer:=0 to RowCount - FixedRows - 1 do
         begin
@@ -831,7 +836,7 @@ begin
     end;
 
     // Encode
-    Settings.Encode(TCommon.TUnityFiles.AppConfig);
+    Settings.Encode(TCommon.TFiles.AppConfig);
 
 end;
 
@@ -1063,7 +1068,7 @@ begin
 
             // Get columns number
             for var iCNT: integer:=0 to Length(Data[0]) do
-                if copy(Data[0], iCNT, 1) = Delimiter then inc(Count);
+                if System.Copy(Data[0], iCNT, 1) = Delimiter then inc(Count);
 
             // Get rows number and setup offset
             Self.RowCount:=Data.Count + 1;

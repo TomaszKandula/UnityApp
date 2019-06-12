@@ -111,7 +111,7 @@ end;
 
 procedure TInvoicesForm.InvoicesGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-  InvoicesGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, TUnityApp.SelectionColor, clBlack, clWhite, True);
+    InvoicesGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
 end;
 
 
@@ -120,7 +120,7 @@ end;
 
 procedure TInvoicesForm.InvoicesGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-    if (Key = 67) and (Shift = [ssCtrl]) then InvoicesGrid.CopyCutPaste(TEnums.TActionTask.adCopy);
+    if (Key = 67) and (Shift = [ssCtrl]) then InvoicesGrid.CopyCutPaste(TEnums.TActions.Copy);
 end;
 
 

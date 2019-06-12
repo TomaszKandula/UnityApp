@@ -111,7 +111,7 @@ begin
 
     if not(CheckPhoneList(PhoneList)) then
     begin
-        MainForm.MsgCall(TCommon.TMsgTypes.Warn, 'Please remove letters before saving the list.' + TChars.CRLF + 'Only numbers and break line are allowed.');
+        MainForm.MsgCall(TCommon.TMessage.Warn, 'Please remove letters before saving the list.' + TChars.CRLF + 'Only numbers and break line are allowed.');
         Exit;
     end;
 

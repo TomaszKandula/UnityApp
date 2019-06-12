@@ -541,33 +541,33 @@ begin
 
     // Cover save button if customer is not registered.
     if
-        (Cust_Person.Text = TNaVariants.NotFound)
+        (Cust_Person.Text = TUnknown.NotFound)
     or
-        (Cust_Mail.Text = TNaVariants.NotFound)
+        (Cust_Mail.Text = TUnknown.NotFound)
     or
-        (Cust_MailGeneral.Text = TNaVariants.NotFound)
+        (Cust_MailGeneral.Text = TUnknown.NotFound)
     then
         imgCoverSaveBtn.Visible:=True
             else
                 imgCoverSaveBtn.Visible:=False;
 
     // Disable text fields if customer is not registered.
-    if Cust_Phone.Text = TNaVariants.NotFound then
+    if Cust_Phone.Text = TUnknown.NotFound then
         Cust_Phone.Enabled:=False
             else
                 Cust_Phone.Enabled:=True;
 
-    if Cust_Mail.Text = TNaVariants.NotFound then
+    if Cust_Mail.Text = TUnknown.NotFound then
         Cust_Mail.Enabled:=False
             else
                 Cust_Mail.Enabled:=True;
 
-    if Cust_Person.Text = TNaVariants.NotFound then
+    if Cust_Person.Text = TUnknown.NotFound then
         Cust_Person.Enabled:=False
             else
                 Cust_Person.Enabled:=True;
 
-    if Cust_MailGeneral.Text = TNaVariants.NotFound then
+    if Cust_MailGeneral.Text = TUnknown.NotFound then
         Cust_MailGeneral.Enabled:=False
             else
                 Cust_MailGeneral.Enabled:=True;
@@ -590,13 +590,13 @@ end;
 
 procedure TActionsForm.ClearAll;
 begin
-    Cust_Name.Caption    :=TNaVariants.NotFound;
-    Cust_Number.Caption  :=TNaVariants.NotFound;
-    Cust_Person.Text     :=TNaVariants.NotFound;
-    Cust_Mail.Text       :=TNaVariants.NotFound;
-    Cust_MailGeneral.Text:=TNaVariants.NotFound;
+    Cust_Name.Caption    :=TUnknown.NotFound;
+    Cust_Number.Caption  :=TUnknown.NotFound;
+    Cust_Person.Text     :=TUnknown.NotFound;
+    Cust_Mail.Text       :=TUnknown.NotFound;
+    Cust_MailGeneral.Text:=TUnknown.NotFound;
     Cust_Phone.Clear;
-    Cust_Phone.Items.Add(TNaVariants.NotFound);
+    Cust_Phone.Items.Add(TUnknown.NotFound);
     Cust_Phone.ItemIndex:=0;
     DailyCom.Text       :='';
     GeneralCom.Text     :='';
@@ -608,21 +608,21 @@ begin
 
     // Check for 'Lynccall.exe'
     var Settings: ISettings:=TSettings.Create;
-    if not FileExists(Settings.GetAppDir + TUnityApp.LyncCall) then
+    if not FileExists(Settings.GetAppDir + TLyncLib.LyncCall) then
     begin
-        MainForm.MsgCall(Error, TUnityApp.APPCAPTION + ' cannot find ''lynccall.exe''. Please contact IT support.');
+        MainForm.MsgCall(Error, TCommon.APPCAPTION + ' cannot find ''lynccall.exe''. Please contact IT support.');
         Exit;
     end;
 
     // CHeck if Lync/Skype is running
     if not ActionsForm.GetRunningApps('lync.exe') then
     begin
-        MainForm.MsgCall(Error, TUnityApp.APPCAPTION + ' cannot find running Microsoft Skype/Lync for Business. Please open it and try again.');
+        MainForm.MsgCall(Error, TCommon.APPCAPTION + ' cannot find running Microsoft Skype/Lync for Business. Please open it and try again.');
         Exit;
     end;
 
     // Run Lync with given phone number
-    ShellExecute(ActionsForm.Handle, 'open', PChar(Settings.GetAppDir + TUnityApp.LyncCall), PChar(ActionsForm.Cust_Phone.Text), nil, SW_SHOWNORMAL);
+    ShellExecute(ActionsForm.Handle, 'open', PChar(Settings.GetAppDir + TLyncLib.LyncCall), PChar(ActionsForm.Cust_Phone.Text), nil, SW_SHOWNORMAL);
 
     if ActionsForm.DailyCom.Text = '' then
     begin
@@ -687,11 +687,11 @@ begin
     begin
         TTGeneralComment.Create(
             CUID,
-            TNaVariants.NULL,
+            TUnknown.NULL,
             TChars.SPACE,
-            TNaVariants.NULL,
-            TNaVariants.NULL,
-            TNaVariants.NULL,
+            TUnknown.NULL,
+            TUnknown.NULL,
+            TUnknown.NULL,
             True
         );
         MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneralComment.fFollowUp, 1, 1), MainForm.sgAgeView.Row]:='';
@@ -702,7 +702,7 @@ end;
 procedure TActionsForm.SaveCustomerDetails;
 begin
     TTAddressBook.Create(
-        TEnums.TActionTask.adUpdate,
+        TEnums.TActions.Update,
         nil,
         SCUID,
         Cust_Person.Text,
@@ -719,10 +719,10 @@ begin
     TTGeneralComment.Create(
         CUID,
         GeneralCom.Text,
-        TNaVariants.NULL,
-        TNaVariants.NULL,
-        TNaVariants.NULL,
-        TNaVariants.NULL,
+        TUnknown.NULL,
+        TUnknown.NULL,
+        TUnknown.NULL,
+        TUnknown.NULL,
         True
     );
 end;
@@ -860,7 +860,7 @@ end;
 
 procedure TActionsForm.HistoryGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-    HistoryGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, TUnityApp.SelectionColor, clBlack, clWhite, True);
+    HistoryGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
 end;
 
 
@@ -875,7 +875,7 @@ begin
     if ARow = 0 then Exit;
 
     // Draw selected
-    OpenItemsGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, TUnityApp.SelectionColor, clBlack, clWhite, True);
+    OpenItemsGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
 
     // Draw certain color
     if
@@ -983,13 +983,13 @@ end;
 
 procedure TActionsForm.OpenItemsGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-    if (Key = 67) and (Shift = [ssCtrl]) then OpenItemsGrid.CopyCutPaste(TEnums.TActionTask.adCopy);
+    if (Key = 67) and (Shift = [ssCtrl]) then OpenItemsGrid.CopyCutPaste(TEnums.TActions.Copy);
 end;
 
 
 procedure TActionsForm.HistoryGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-    if (Key = 67) and (Shift = [ssCtrl]) then HistoryGrid.CopyCutPaste(adCopy);
+    if (Key = 67) and (Shift = [ssCtrl]) then HistoryGrid.CopyCutPaste(TEnums.TActions.Copy);
 end;
 
 
@@ -1218,7 +1218,7 @@ end;
 
 procedure TActionsForm.btnEditClick(Sender: TObject);
 begin
-    MainForm.WndCall(PhoneListForm, Helpers.TWindows.TState.Modal);
+    MainForm.WndCall(PhoneListForm, Helpers.TEnums.TWindowState.Modal);
 end;
 
 
@@ -1243,7 +1243,7 @@ end;
 procedure TActionsForm.btnSetFollowUpClick(Sender: TObject);
 begin
     CalendarForm.FCalendarMode:=DateToDB;
-    MainForm.WndCall(CalendarForm, Helpers.TWindows.TState.Modal);
+    MainForm.WndCall(CalendarForm, Helpers.TEnums.TWindowState.Modal);
 end;
 
 
@@ -1255,7 +1255,7 @@ end;
 
 procedure TActionsForm.btnCustomStatementClick(Sender: TObject);
 begin
-    MainForm.WndCall(SendForm, Helpers.TWindows.TState.Modal);
+    MainForm.WndCall(SendForm, Helpers.TEnums.TWindowState.Modal);
 end;
 
 
@@ -1268,7 +1268,7 @@ begin
     MainForm.UpdateOpenItemsRefs(OpenItemsGrid);
     MainForm.UpdateControlStatusRefs(MainForm.sgControlStatus);
     TTSendAccountStatement.Create(
-        TDocuments.TMode.Defined,
+        TEnums.TDocMode.Defined,
         'Account Statement',
         '',
         TInvoiceFilter.ShowAllItems,
