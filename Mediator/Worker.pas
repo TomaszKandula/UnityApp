@@ -20,27 +20,30 @@ uses
     InterposerClasses,
     Helpers;
 
-    {TODO -oTomek -cGeneral: replace TThread with ITask}
-
-    /// <remarks>
-    /// Asynchronous methods executed within single thread classes. Most of the thread classes aquire lock, so they cannot be called
-    /// more than once. If necessary, remove lock aquisition.
-    /// </remarks>
 
 type
+
+    {TODO -oTomek -cGeneral: replace TThread with ITask, remove TCriticalSections}
+
+    IThreading = interface(IInterface)
+    ['{14BBF3F3-945A-4A61-94BA-6A2EE10530A2}']
+
+
+    end;
+
+    TThreading = class(TInterfacedObject, IThreading)
+    {$TYPEINFO ON}
+
+
+    end;
+
+
+    // ----------------------------------------------------------------------------------------------------------------------------------------------------- //
 
 
     TTCheckServerConnection = class(TThread)
     protected
         procedure Execute; override;
-    end;
-
-
-    TTInvoiceTrackerScanner = class(TThread)
-    protected
-        procedure Execute; override;
-    public
-        //...
     end;
 
 
@@ -382,15 +385,6 @@ begin
 
     FreeOnTerminate:=True;
 
-end;
-
-
-// ----------------------------------------------------------------------------------------------------------------------------------------- TRACKER SCANNER //
-
-
-procedure TTInvoiceTrackerScanner.Execute;
-begin
-    // to be done...
 end;
 
 

@@ -303,8 +303,13 @@ type
         const ncsiHead: string = 'HEAD';
     end;
 
+
+    // -----------------------------------
+    // LEGACY SECTION - TO BE REMOVED
+    // -----------------------------------
+
+
     TAdoDb = class abstract
-    {Legacy class - to be removed}
         type  TFilters    = (adFilterNone, adFilterPendingRecords, adFilterAffectedRecords, adFilterFetchedRecords, adFilterConflictingRecords);
         const dbOLEDB     = 'OLEDB';
         const dbODBC      = 'ODBC';
@@ -313,7 +318,6 @@ type
     end;
 
     TUserAccess = class abstract
-    {Legacy class - to be removed}
         type TTypes = (AccessLevel, AccessMode, UserKeyId);
         const AccessFull  = 'FULL';
         const AccessBasic = 'BASIC';
@@ -323,7 +327,6 @@ type
     end;
 
     TQms = class abstract
-    {Legacy class - to be removed}
         const Open     = 'OPEN';
         const Pending  = 'PENDING';
         const Rejected = 'REJECTED';
@@ -331,7 +334,6 @@ type
     end;
 
     TSql = class abstract
-    {Legacy class - to be removed}
         const INSERT       = ' INSERT INTO ';
         const VAL          = ' VALUES ';
         const SELECT       = ' SELECT ';
@@ -429,9 +431,6 @@ begin
 end;
 
 
-// --------------------------------------------------------------------------------------------------------------------------------------------------------- //
-
-
 class function TUserSid.ObtainTextSid(hToken: THandle; pszSid: PChar; var dwBufferLen: DWORD): BOOL;
 begin
 
@@ -468,9 +467,6 @@ begin
     Result:=True;
 
 end;
-
-
-// --------------------------------------------------------------------------------------------------------------------------------------------------------- //
 
 
 class function TUserSid.GetCurrentUserSid: string;
@@ -712,30 +708,6 @@ end;
 // --------------------------------------------------------------------------------------------------------------------------------------------------------- //
 
 
-class procedure TCommon.LogText(FileName: string; Text: string);
-begin
-
-    var cDateTime: TDateTime:=Now;
-    text:='#' + DateToStr(cDateTime) + ' (' + TimeToStr(cDateTime) + '): ' + Text + #13#10;
-
-    var FL: TFileStream:=TFileStream.Create(FileName, fmOpenWrite);
-    try
-        try
-            FL.Position:=FL.Size;
-            FL.WriteBuffer(UTF8String(Text)[1], Length(UTF8String(Text)));
-        except
-            // Do noting
-        end;
-    finally
-        FL.Free;
-    end;
-
-end;
-
-
-// --------------------------------------------------------------------------------------------------------------------------------------------------------- //
-
-
 class procedure TCommon.GetBuildInfo(var V1, V2, V3, V4: word);
 begin
 
@@ -769,9 +741,6 @@ begin
 end;
 
 
-// --------------------------------------------------------------------------------------------------------------------------------------------------------- //
-
-
 class function TCommon.GetBuildInfoAsString: string;
 begin
 
@@ -784,9 +753,6 @@ begin
     Result:=IntToStr(V1) + '.' + IntToStr(V2) + '.' + IntToStr(V3) + '.' + IntToStr(V4);
 
 end;
-
-
-// --------------------------------------------------------------------------------------------------------------------------------------------------------- //
 
 
 class function TCommon.GetOSVer(CheckForOsName: boolean): string;
@@ -848,6 +814,27 @@ begin
                 0: result:='Windows 10';
             end;
         end;
+    end;
+
+end;
+
+
+class procedure TCommon.LogText(FileName: string; Text: string);
+begin
+
+    var cDateTime: TDateTime:=Now;
+    text:='#' + DateToStr(cDateTime) + ' (' + TimeToStr(cDateTime) + '): ' + Text + #13#10;
+
+    var FL: TFileStream:=TFileStream.Create(FileName, fmOpenWrite);
+    try
+        try
+            FL.Position:=FL.Size;
+            FL.WriteBuffer(UTF8String(Text)[1], Length(UTF8String(Text)));
+        except
+            // Do noting
+        end;
+    finally
+        FL.Free;
     end;
 
 end;

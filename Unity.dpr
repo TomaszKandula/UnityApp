@@ -35,17 +35,17 @@ uses
     Erp.SalesResponsible     in 'Model\Json\RawTables\Erp.SalesResponsible.pas',
     InterposerClasses        in 'Extensions\InterposerClasses.pas'{Too lazy to build own components},
     Helpers                  in 'Extensions\Helpers.pas',
-    SqlHandler               in 'Logic\SqlHandler.pas',
-    DbHandler                in 'Logic\DbHandler.pas',
-    AgeView                  in 'Logic\AgeView.pas',
-    Mailer                   in 'Logic\Mailer.pas',
-    Settings                 in 'Logic\Settings.pas',
-    Transactions             in 'Logic\Transactions.pas',
-    UAC                      in 'Logic\UAC.pas',
-    Worker                   in 'Logic\Worker.pas',
-    Internet                 in 'Logic\Internet.pas',
-    ThreadUtilities          in 'Logic\ThreadUtilities.pas',
-    EventLogger              in 'Logic\EventLogger.pas',
+    SqlHandler               in 'Mediator\SqlHandler.pas',
+    DbHandler                in 'Mediator\DbHandler.pas',
+    AgeView                  in 'Mediator\AgeView.pas',
+    Mailer                   in 'Mediator\Mailer.pas',
+    Settings                 in 'Mediator\Settings.pas',
+    Transactions             in 'Mediator\Transactions.pas',
+    UAC                      in 'Mediator\UAC.pas',
+    Worker                   in 'Mediator\Worker.pas',
+    Internet                 in 'Mediator\Internet.pas',
+    ThreadUtilities          in 'Mediator\ThreadUtilities.pas',
+    EventLogger              in 'Mediator\EventLogger.pas',
     About                    in 'View\About.pas' {AboutForm},
     Actions                  in 'View\Actions.pas' {ActionsForm},
     Calendar                 in 'View\Calendar.pas' {CalendarForm},
@@ -85,10 +85,10 @@ const
 /// <summary>
 /// Extract given source file by provided ID number.
 /// </summary>
-/// <param name="ItemID">Integer</param>
-/// <param name="FileName">String</param>
-/// <param name="ShouldStay">Boolean</param>
-/// <returns>Boolean, true if succeed</returns>
+/// <param name="ItemID">Resource ID number (integer)</param>
+/// <param name="FileName">Resource filename (string)</param>
+/// <param name="ShouldStay">Delete before deploy new (boolean)</param>
+/// <returns>True if succeed (boolean)</returns>
 /// <remarks>
 /// 10 RCDATA "Makefile\\config.cfg" default setting file.
 /// 60 RCDATA "Makefile\\logon.log"  pre-defined event log file.
@@ -101,6 +101,7 @@ begin
 
     var RS: TResourceStream:=TResourceStream.CreateFromID(hInstance, ItemID, RT_RCDATA);
     try
+
         RS.Position:=0;
         if not ShouldStay then
             DeleteFile(PChar(FileName));
@@ -144,7 +145,7 @@ begin
 end;
 
 
-function UnzippLayoutsFile(FileName: string; DestDir: string; EventLogPath: string; var LogText: TThreadFileLog): boolean;
+function UnzippLayouts(FileName: string; DestDir: string; EventLogPath: string; var LogText: TThreadFileLog): boolean;
 begin
 
     Result:=False;
@@ -155,7 +156,6 @@ begin
 
         try
             ZipRead.Open(FileName, zmRead);
-            LogText.Log(EventLogPath, '[Unity]: unzipping layouts...');
 
             for var iCNT: integer:=0 to ZipRead.FileCount - 1 do
             begin
@@ -173,7 +173,7 @@ begin
 
         except
             on E: Exception do
-                LogText.Log(EventLogPath, '[Unity]: Unexpected error has been thrown: ' + E.Message);
+                LogText.Log(EventLogPath, 'Unexpected error has been thrown: ' + E.Message);
         end;
 
     finally
@@ -232,16 +232,13 @@ begin
 end;
 
 
-/// <summary>
-/// During the update, some files cannot be overwritten or removed, thus we change the name and copy new file(s) into the very same place.
-/// This methods remove all of the "leftovers" from given folder.
-/// </summary>
-/// <param name="Directory">Source</param>
-/// <param name="Pattern">Indicate what to remove, example: *.png</param>
-/// <param name="EventLogPath">Points to event log</param>
-
 procedure DeleteFilesMatchingPattern(const Directory: string; const Pattern: string; EventLogPath: string; var LogText: TThreadFileLog);
 begin
+
+    /// <remarks>
+    /// During the update, some files cannot be overwritten or removed, thus we change the name and copy new file(s) into the very same place.
+    /// This methods remove all of the "leftovers" from given folder.
+    /// </remarks>
 
     if not Assigned(LogText) then Exit;
 
@@ -260,10 +257,6 @@ begin
 
 end;
 
-
-/// <summary>
-/// Parse content of manifest file and return requested Key value.
-/// </summary>
 
 function GetManifestValue(Key: string; Source: string): string;
 
@@ -295,10 +288,7 @@ begin
     ReportMemoryLeaksOnShutdown:=DebugHook <> 0;
     {$WARN SYMBOL_PLATFORM ON}
 
-    /// <summary>
-    /// We allow only one instance of running program (no sessions).
-    /// </summary>
-
+    // We allow only one instance of running program (no sessions)
     var Mutex: integer:=CreateMutex(nil, True, TCommon.CurrentMutex);
     if (Mutex = 0) or (GetLastError = ERROR_ALREADY_EXISTS) then
     begin
@@ -308,10 +298,6 @@ begin
         );
         ExitProcess(0);
     end;
-
-    /// <summary>
-    /// Setup formats to user local settings.
-    /// </summary>
 
     {$WARN SYMBOL_PLATFORM OFF} {Windows only}
     var RegSettings: TFormatSettings:=TFormatSettings.Create(LOCALE_USER_DEFAULT);
@@ -329,20 +315,9 @@ begin
     FormatSettings                  :=RegSettings;
     Application.UpdateFormatSettings:=False;
 
-    /// <summary>
-    /// Initialize interfaced objects for internet methods and settings file operations and event logging.
-    /// </summary>
-    /// <remarks>
-    /// Because LogText is re-introduced in MainForm, it has to be free before MainForm initialization.
-    /// </remarks>
-
     var Connection: IConnectivity:=TConnectivity.Create;
     var Settings: ISettings:=TSettings.Create;
     var LogText: TThreadFileLog:=TThreadFileLog.Create;
-
-    /// <summary>
-    /// Check internet connection.
-    /// </summary>
 
     if not(Connection.IsInternetPresent) then
     begin
@@ -353,11 +328,14 @@ begin
         ExitProcess(0);
     end;
 
-    /// <summary>
-    /// Get all necessary settings from configuration file before any possible update.
-    /// </summary>
-
-    var ReleaseNumber: cardinal:=0;
+    // Get all necessary settings from configuration file before any possible update.
+    var ReleaseNumber:  cardinal:=0;
+    var PathReleasePak: string;
+    var PathReleaseMan: string;
+    var PathEventLog:   string;
+    var PathAppDir:     string;
+    var PackageDir:     string;
+    var WinUserName:    string;
 
     // Extract default config.cfg if it is missing
     if Settings.GetLastError = 404 then
@@ -372,36 +350,24 @@ begin
             );
             ExitProcess(0);
         end;
-    end;
-
-    var PathReleasePak: string;
-    var PathReleaseMan: string;
-    var PathEventLog:   string;
-    var PathAppDir:     string;
-    var PackageDir:     string;
-    var WinUserName:    string;
-
-    if Settings.GetLastError = 0 then
+    end
+    else if Settings.GetLastError = 0 then
     begin
-        ReleaseNumber  :=Settings.ReleaseNumber;
-        PathReleasePak :=Settings.GetReleasePakURL;
-        PathReleaseMan :=Settings.GetReleaseManURL;
-        PathEventLog   :=Settings.GetPathEventLog;
-        PathAppDir     :=Settings.GetAppDir;
-        PackageDir     :=Settings.GetPackageDir;
-        WinUserName    :=Settings.GetWinUserName;
+        ReleaseNumber :=Settings.ReleaseNumber;
+        PathReleasePak:=Settings.GetReleasePakURL;
+        PathReleaseMan:=Settings.GetReleaseManURL;
+        PathEventLog  :=Settings.GetPathEventLog;
+        PathAppDir    :=Settings.GetAppDir;
+        PackageDir    :=Settings.GetPackageDir;
+        WinUserName   :=Settings.GetWinUserName;
     end;
 
-    /// <summary>
-    /// Check event log file. If it is missing, then unpack from EXE resources default file.
-    /// </summary>
-
+    // Check event log file and unpack from EXE resources if it missing
     if FileExists(PathEventLog) then
     begin
         LogText.Log(PathEventLog, 'Starting application...');
     end
     else
-    {Otherwise extract default}
     begin
 
         if Unpack(60, PathEventLog, true) then
@@ -436,40 +402,40 @@ begin
         end;
     end;
 
-    // Force clean up remaining files after previous update
+
+    // ----------------------------------------------------------------------------------------------------------------------------------------------------- //
+
+
     DeleteFilesMatchingPattern(PathAppDir, '*.del', PathEventLog, LogText);
     DeleteFilesMatchingPattern(PathAppDir + 'locales\', '*.del', PathEventLog, LogText);
     DeleteFilesMatchingPattern(PathAppDir + 'swiftshader\', '*.del', PathEventLog, LogText);
 
-    // Check directories
-    if not(DirectoryExists(Settings.GetLayoutDir)) then CreateDir(Settings.GetLayoutDir);
+    if not(DirectoryExists(Settings.GetLayoutDir))  then CreateDir(Settings.GetLayoutDir);
     if not(DirectoryExists(Settings.GetPackageDir)) then CreateDir(Settings.GetPackageDir);
 
-    /// <summary>
-    /// Check manifest and update if application release number is lower.
-    /// </summary>
 
     var WndRect: TRect;
     var Manifest: string:=Connection.GetResponseText(Settings.GetReleaseManURL);
+
     if ( GetManifestValue('Status', Manifest) = 'update' ) and ( GetManifestValue('Release', Manifest) > ReleaseNumber.ToString ) then
     begin
 
-        // Update screen
+        // Display update screen centred
         UpdateForm:=TUpdateForm.Create(nil);
         SystemParametersInfo(SPI_GETWORKAREA, 0, @WndRect, 0);
         UpdateForm.Top :=((WndRect.Bottom - WndRect.Top ) div 2) - (UpdateForm.Height div 2);
         UpdateForm.Left:=((WndRect.Right  - WndRect.Left) div 2) - (UpdateForm.Width  div 2);
         AnimateWindow(UpdateForm.Handle, 500, AW_BLEND or AW_ACTIVATE);
-        UpdateForm.Update;
 
-        // Update message for the user
+        UpdateForm.Update;
         UpdateForm.txtProgress.Caption:='Downloading...';
         UpdateForm.Update;
 
-        // Get package from website
         if Connection.Download(PathReleasePak, PackageDir + TCommon.ReleaseFile) then
         begin
+
             Settings:=nil;
+
             // Unzip the content, update settings file and execute new release
             if UnzippReleaseFile(PackageDir + TCommon.ReleaseFile, PathAppDir, PathEventLog, LogText) then
             begin
@@ -499,10 +465,11 @@ begin
 
     end;
 
-    /// <remarks>
-    /// Splash screen requires updating to display the changed content.
-    /// </remarks>
 
+    // ----------------------------------------------------------------------------------------------------------------------------------------------------- //
+
+
+    // Regular splash screen
     SplashForm:=TSplashForm.Create(nil);
     SystemParametersInfo(SPI_GETWORKAREA, 0, @WndRect, 0);
     SplashForm.Top :=((WndRect.Bottom - WndRect.Top ) div 2) - (SplashForm.Height div 2);
@@ -510,10 +477,7 @@ begin
     AnimateWindow(SplashForm.Handle, 500, AW_BLEND or AW_ACTIVATE);
     SplashForm.Update;
 
-    /// <summary>
-    /// Check password. It is hashed with BCrypt and cannot be shorter than 60 characters.
-    /// </summary>
-
+    // Check password. It is hashed with BCrypt and cannot be shorter than 60 characters
     if Length(Settings.GetStringValue(TConfigSections.PasswordSection, 'HASH', '')) < 60 then
     begin
 
@@ -533,14 +497,10 @@ begin
         Status(1, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Checking master password... OK.', True, Settings.GetPathEventLog, LogText);
     end;
 
-    /// <summary>
-    /// Check here ".LIC" file in case of Unity is shareware/limited commercial application.
-    /// </summary>
-
-    {TODO -oTomek -cGeneral : Extend this by adding CRC32 check}
-
+    // Check here ".LIC" file in case of Unity is shareware/limited commercial application
     if not FileExists(Settings.GetPathLicenceLic) then
     begin
+        {TODO -oTomek -cGeneral : Extend this by adding CRC32 check}
 
         Status(2, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Checking licence file... failed!', True, Settings.GetPathEventLog, LogText);
 
@@ -557,10 +517,7 @@ begin
         Status(2, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Checking licence file... OK.', True, Settings.GetPathEventLog, LogText);
     end;
 
-    /// <summary>
-    /// Check Windows version. We allow only Windows 7 (with Aero) or Windows 10 (and above).
-    /// </summary>
-
+    // Check Windows version. We allow only Windows 7 (with Aero) or Windows 10 (and above)
     if not TCommon.GetOSVer(False).ToInteger >= 61 then
     begin
 
@@ -580,10 +537,7 @@ begin
         Status(3, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Checking operating system version... OK.', True, Settings.GetPathEventLog, LogText);
     end;
 
-    /// <summary>
-    /// Areo must be enabled if program runs under Windows 7.
-    /// </summary>
-
+    // Areo must be enabled if program runs under Windows 7
     if TCommon.GetOSVer(False).ToInteger = 61 then
     begin
 
@@ -608,7 +562,7 @@ begin
             end;
         end;
 
-        // Terminate if not switched on
+        // Terminate if not enabled
         if IsAeroEnabled = False then
         begin
 
@@ -629,10 +583,7 @@ begin
         Status(4, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Checking Windows 7 Aero composition... OK.', True, Settings.GetPathEventLog, LogText);
     end;
 
-   /// <summary>
-   /// Check configuration file and deploy default if corrupted.
-   /// </summary>
-
+   /// Check configuration file and deploy default if corrupted
    Status(5, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'CRC32 check: ' + TCommon.ConfigFile + '...', True, Settings.GetPathEventLog, LogText);
 
    if not (Settings.Decode(TCommon.TFiles.AppConfig, False)) then
@@ -664,11 +615,11 @@ begin
         Status(5, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'CRC32 check: ' + TCommon.ConfigFile + '...OK.', True, Settings.GetPathEventLog, LogText);
     end;
 
-    /// <summary>
+    /// <remarks>
     /// Check if all assemlbies exists in main folder. All of them must be present to run the program. We exclude from this list
     /// Chromium assemblies because it is not needed to run key features. Chromium is primarly used to display Tableau reports and
     /// Unity Info web page. In rare case, this can be also displayed by external web browser.
-    /// </summary>
+    /// </remarks>
 
     var Assemblies: TAStrings;
     SetLength(Assemblies, 6);
@@ -681,6 +632,7 @@ begin
 
     for var iCNT: integer:=0 to High(Assemblies) - 1 do
     begin
+
         Status(iCNT + 6, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Checking ' + Assemblies[iCNT] + '...', True, Settings.GetPathEventLog, LogText);
 
         if FileExists(Settings.GetAppDir + Assemblies[iCNT]) then
@@ -698,27 +650,28 @@ begin
             ExitProcess(0);
 
         end;
+
     end;
 
     LogText.Log(Settings.GetPathEventLog, 'End of checking resource and configuration files.');
 
-    /// <summary>
-    /// Synchronise all layouts listed in settings file.
-    /// </summary>
-
+    // Synchronise all layouts listed in settings file
     Status(12, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Synchronising layouts...', True, Settings.GetPathEventLog, LogText);
     Connection.Download(Settings.GetLayoutsURL + TCommon.LayoutPak, Settings.GetLayoutDir + TCommon.LayoutPak);
-    UnzippLayoutsFile(Settings.GetLayoutDir + TCommon.LayoutPak, Settings.GetLayoutDir, PathEventLog, LogText);
+    UnzippLayouts(Settings.GetLayoutDir + TCommon.LayoutPak, Settings.GetLayoutDir, PathEventLog, LogText);
 
-    /// <summary>
-    /// Initialize Chromium object before Chromium component is created within MainForm.
-    /// </summary>
-    /// <see cref="https://www.briskbard.com/index.php?lang=en&pageid=cef"/>
+
+    // ----------------------------------------------------------------------------------------------------------------------------------------------------- //
+
+
+    Status(13, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Chromium initialization...', True, Settings.GetPathEventLog, LogText);
+
     /// <remarks>
+    /// Initialize Chromium object before Chromium component is created within MainForm.
+    /// <see cref="https://www.briskbard.com/index.php?lang=en&pageid=cef"/>
     /// GlobalCEFApp is an instance of the TCEFApplication class an it simpliefies the Chromium initialization.
     /// </remarks>
 
-    Status(13, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Chromium initialization...', True, Settings.GetPathEventLog, LogText);
     GlobalCEFApp:=TCefApplication.Create;
     var ChromiumExit: boolean:=False;
 
@@ -778,10 +731,12 @@ begin
                 ChromiumExit:=True;
 
             end;
+
         except
             on E: Exception do
                 Status(19, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Chromium initialization failed, message received: ' + E.Message, False, Settings.GetPathEventLog, LogText);
         end;
+
     finally
 
         if not(ChromiumExit) then
@@ -811,20 +766,18 @@ begin
 
     LogText.Free;
 
-    /// <summary>
-    /// Load Main Form and execute all of its initialization methods.
-    /// </summary>
     /// <remarks>
+    /// Load Main Form and execute all of its initialization methods.
     /// Visible parameter must be set to false to prevent from showing the main application window while splash screen is still on.
     /// </remarks>
 
     Application.CreateForm(TMainForm, MainForm);
     MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] Initialization methods executed within main thread, ''MainForm'' has been created. Main process thread ID = ' + MainThreadID.ToString + '.');
 
-    /// <summary>
+    /// <remarks>
     /// Load all other forms and execute initialization methods. Similarly to MainForm, visible parameter of the forms must be set to false
     /// to prevent showing up windows.
-    /// </summary>
+    /// </remarks>
 
     Application.CreateForm(TAboutForm, AboutForm);
     Application.CreateForm(TSendForm, SendForm);

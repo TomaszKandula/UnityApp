@@ -1690,29 +1690,6 @@ begin
 end;
 
 
-//procedure TMainForm.CopyFile(const Source, Dest: string);
-//begin
-//
-//    var SourceStream: TFileStream:=TFileStream.Create(Source, fmOpenRead or fmShareDenyWrite);
-//    var DestStream:   TFileStream:=nil;
-//
-//    try
-//        DestStream:=TFileStream.Create(Dest, fmCreate or fmShareExclusive);
-//        DestStream.CopyFrom(SourceStream, SourceStream.Size);
-//
-//        {$WARN SYMBOL_PLATFORM OFF}
-//        // You may use platform independent: function FileSetDate(const FileName: string; Age: Integer): Integer; overload;
-//        FileSetDate(DestStream.Handle, FileGetDate(SourceStream.Handle));
-//        {$WARN SYMBOL_PLATFORM ON}
-//
-//    finally
-//        DestStream.Free;
-//        SourceStream.Free;
-//    end;
-//
-//end;
-
-
 /// <summary>
 /// Switch off bold for all fonts used in top menu.
 /// </summary>
@@ -1861,52 +1838,6 @@ begin
 end;
 
 
-//procedure TMainForm.SetGridThumbSizes;
-//begin
-//    sgAgeView.AutoThumbSize;
-//    sgOpenItems.AutoThumbSize;
-//    sgAddressBook.AutoThumbSize;
-//    sgInvoiceTracker.AutoThumbSize;
-//    sgCoCodes.AutoThumbSize;
-//    sgControlStatus.AutoThumbSize;
-//    sgPmtTerms.AutoThumbSize;
-//    sgPaidInfo.AutoThumbSize;
-//    sgPerson.AutoThumbSize;
-//    sgGroup3.AutoThumbSize;
-//    sgListSection.AutoThumbSize;
-//    sgListValue.AutoThumbSize;
-//    sgUAC.AutoThumbSize;
-//    sgGroups.AutoThumbSize;
-//    sgSalesResp.AutoThumbSize;
-//    sgPersonResp.AutoThumbSize;
-//    sgAccountType.AutoThumbSize;
-//    sgCustomerGr.AutoThumbSize;
-//end;
-
-
-//procedure TMainForm.SetGridFocus;
-//begin
-//    sgAgeView.FHideFocusRect       :=True;
-//    sgOpenItems.FHideFocusRect     :=True;
-//    sgAddressBook.FHideFocusRect   :=True;
-//    sgInvoiceTracker.FHideFocusRect:=True;
-//    sgCoCodes.FHideFocusRect       :=True;
-//    sgControlStatus.FHideFocusRect :=True;
-//    sgPmtTerms.FHideFocusRect      :=True;
-//    sgPaidInfo.FHideFocusRect      :=True;
-//    sgPerson.FHideFocusRect        :=True;
-//    sgGroup3.FHideFocusRect        :=True;
-//    sgListSection.FHideFocusRect   :=True;
-//    sgListValue.FHideFocusRect     :=True;
-//    sgUAC.FHideFocusRect           :=True;
-//    sgGroups.FHideFocusRect        :=True;
-//    sgSalesResp.FHideFocusRect     :=True;
-//    sgPersonResp.FHideFocusRect    :=True;
-//    sgAccountType.FHideFocusRect   :=True;
-//    sgCustomerGr.FHideFocusRect    :=True;
-//end;
-
-
 /// <summary>
 /// Make sure that the glyph styled buttons have proper transparency color set.
 /// </summary>
@@ -2012,13 +1943,6 @@ begin
         Result:=True;
 
 end;
-
-
-//function TMainForm.CheckIfDate(StrDate: string): boolean;
-//begin
-//    Result:=False;
-//    if StrToDateDef(StrDate, TDateTimeFormats.NullDate) <> TDateTimeFormats.NullDate then Result:=True;
-//end;
 
 
 // ----------------------------------------------------------------------------------------------------------------------------- UPDATE INVOICE TRACKER LIST //
@@ -2447,6 +2371,8 @@ end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
 
+    {TODO -oTomek -cGeneral : Make private helper method}
+
     procedure OnCreateJob(Text: string);
     begin
         if Assigned(SplashForm) then
@@ -2752,8 +2678,8 @@ begin
         UpTime.Enabled:=True;
         CurrentTime.Enabled:=True;
 
-        LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Application version = ' + AppVersion);
-        //LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: User SID = ' + GetCurrentUserSid);
+        LogText.Log(EventLogPath, 'Thread [' + MainThreadID.ToString + ']: Application version = ' + AppVersion);
+        LogText.Log(EventLogPath, 'Thread [' + MainThreadID.ToString + ']: User SID = ' + TUserSid.GetCurrentUserSid);
 
         sgInvoiceTracker.Visible:=False;
         sgAddressBook.Visible:=False;
@@ -2764,10 +2690,10 @@ begin
         // Load default age view
         if not(FirstAgeLoad.Enabled) then FirstAgeLoad.Enabled:=True;
 
-    except
-        on E: Exception do
+    except 
+		on E: Exception do
         begin
-            LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Invalid boot up. Error occured: ' + E.Message);
+            LogText.Log(EventLogPath, 'Thread [' + MainThreadID.ToString + ']: Invalid boot up. Error occured: ' + E.Message);
             MsgCall(TCommon.TMessage.Error, 'Cannot properly boot up the application. An error occured: ' + E.Message + '. Please contact IT support. Application will be closed.');
             ExitProcess(0);
         end;
@@ -2776,7 +2702,7 @@ begin
 end;
 
 
-procedure TMainForm.FormShow(Sender: TObject);
+procedure TMainForm.FormShow(Sender: TObject);
 begin
 
     // Initialize Chromium
@@ -2797,7 +2723,7 @@ begin
 end;
 
 
-procedure TMainForm.FormResize(Sender: TObject);
+procedure TMainForm.FormResize(Sender: TObject);
 begin
     /// <remarks>
     /// Do not use it. Scroll thumb size is buggy in Windows.
@@ -3017,7 +2943,7 @@ end;
 
 procedure TMainForm.InvoiceScanTimerTimer(Sender: TObject);
 begin
-    TTInvoiceTrackerScanner.Create(False);
+
 end;
 
 

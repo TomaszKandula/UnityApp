@@ -159,17 +159,17 @@
             <Form>Too lazy to build own components</Form>
         </DCCReference>
         <DCCReference Include="Extensions\Helpers.pas"/>
-        <DCCReference Include="Logic\SqlHandler.pas"/>
-        <DCCReference Include="Logic\DbHandler.pas"/>
-        <DCCReference Include="Logic\AgeView.pas"/>
-        <DCCReference Include="Logic\Mailer.pas"/>
-        <DCCReference Include="Logic\Settings.pas"/>
-        <DCCReference Include="Logic\Transactions.pas"/>
-        <DCCReference Include="Logic\UAC.pas"/>
-        <DCCReference Include="Logic\Worker.pas"/>
-        <DCCReference Include="Logic\Internet.pas"/>
-        <DCCReference Include="Logic\ThreadUtilities.pas"/>
-        <DCCReference Include="Logic\EventLogger.pas"/>
+        <DCCReference Include="Mediator\SqlHandler.pas"/>
+        <DCCReference Include="Mediator\DbHandler.pas"/>
+        <DCCReference Include="Mediator\AgeView.pas"/>
+        <DCCReference Include="Mediator\Mailer.pas"/>
+        <DCCReference Include="Mediator\Settings.pas"/>
+        <DCCReference Include="Mediator\Transactions.pas"/>
+        <DCCReference Include="Mediator\UAC.pas"/>
+        <DCCReference Include="Mediator\Worker.pas"/>
+        <DCCReference Include="Mediator\Internet.pas"/>
+        <DCCReference Include="Mediator\ThreadUtilities.pas"/>
+        <DCCReference Include="Mediator\EventLogger.pas"/>
         <DCCReference Include="View\About.pas">
             <Form>AboutForm</Form>
         </DCCReference>
@@ -288,7 +288,7 @@
             </Platforms>
             <ModelSupport>False</ModelSupport>
             <Deployment Version="3">
-                <DeployFile LocalName="Include\Cef.inc" Configuration="Debug" Class="ProjectFile">
+                <DeployFile LocalName="Model\Json\DbQuery\Dummy.txt" Configuration="Debug" Class="ProjectFile">
                     <Platform Name="Win32">
                         <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>
@@ -300,7 +300,7 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="Model\Json\DbQuery\Dummy.txt" Configuration="Debug" Class="ProjectFile">
+                <DeployFile LocalName="Include\Cef.inc" Configuration="Debug" Class="ProjectFile">
                     <Platform Name="Win32">
                         <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>
