@@ -1,0 +1,159 @@
+<html>
+  <!-- STYLE -->
+  <style type='text/css'>
+    /* MAIN SETUP OF THE EMAIL CONTENT */
+    body          { background: #FFFFFF; font-family: Verdana; font-size: 9pt;                       }  
+    .container    { background: #FFFFFF; width: 800px;                                               }
+    .main         { background: #FFFFFF; border: 1px solid #E2E2E2; text-align: left; padding: 15px; }    
+    .p            { font-family: Verdana; font-size: 9pt; line-height: 18px;                         }
+    
+    /* HEADER WITH LOGO AND ADDRESS */
+    .header       { padding: 15px; font-family: Verdana; font-size: 9pt;                  }
+    .col0-0       { width: 550px;                                                         }
+    .col0-1       { text-align: left;                                                     }
+    .col0-2       { text-align: left; line-height: 18px;                                  }
+    .col0-3       { font-size: 16pt; font-style: bold; text-align: center; padding: 15px; }
+
+    /* INVOICE LIST TABLE */
+    .data         { padding: 1px; font-size: 9pt; border: 1px solid #E2E2E2; background-color: #E2E2E2;     }
+    .col1         { width: 150px; border: 1px solid #E2E2E2; background-color: #FFFFFF; text-align: center; }
+    .col2         { width: 120px; border: 1px solid #E2E2E2; background-color: #FFFFFF; text-align: center; }
+    .col3         { width: 100px; border: 1px solid #E2E2E2; background-color: #FFFFFF; text-align: center; }
+    .col4         { width: 80px;  border: 1px solid #E2E2E2; background-color: #FFFFFF; text-align: center; }
+    .col5         { width: 120px; border: 1px solid #E2E2E2; background-color: #FFFFFF; text-align: center; }
+    .col6         { width: 120px; border: 1px solid #E2E2E2; background-color: #FFFFFF; text-align: center; }
+    
+    /* FOOTER */
+    .footer       { font-size: 7pt; }         
+  </style>
+  <!-- MAIN CONTENT -->
+  <body>
+    <table class='container'>
+      <tr>
+        <td class='main'>    
+          <!-- LOGO | TITLE | ADDRESS -->
+          <table class='header'>
+              <tr>
+              <td class="col0-0">
+                &nbsp;
+              </td>
+               <td class="col0-1">
+                <span>&nbsp;</span>
+				<img src="https://www.ar-analytics.com/images/dfds_logo.png" alt="DFDS logo">
+              </td>
+            </tr>
+            <tr>
+              <td class="col0-3" colspan="2">
+                REMINDER
+              </td>
+            </tr>
+            <tr>
+              <td class="col0-0">
+                &nbsp;
+              </td>
+              <td class="col0-2"> 
+<!-- AUTO GENERATED -->
+{ADDR_LBU}
+<!-- AUTO GENERATED -->
+              </td>
+            </tr>
+          </table>
+
+          <p class="p">Dear Finance Manager,</p>
+
+<!-- AUTO GENERATED -->
+{ADDR_DATA}
+<!-- AUTO GENERATED -->
+
+          <p class="p">Following invoices have passed three reminders notification. Unfortunately, up to this day these invoices remain unpaid:</p>
+
+<!-- AUTO GENERATED -->
+{INVOICE_LIST}
+<!-- AUTO GENERATED -->
+
+	      <p class="p">All of them are now subject to Collection Agency, unless you decide otherwise.</p>
+          <p class="p">Should you have any questions regarding this reminder, please do not hesitate to contact us via <b>{EMAIL}</b> <br> or on <b>{TEL}</b>.</p>
+          
+<!-- AUTO GENERATED -->
+{BANKS}
+<!-- AUTO GENERATED -->
+
+          <p class="p">
+            <a href='http://www.dfds.com' target='_blank'>www.dfds.com</a>
+          </p>
+      
+          <p class='footer'>DFDS Polska Spolka z ograniczona odpowiedzialnoscia registered at the District Court for the capital city of Warsaw in Warsaw, 12th Commercial Division of the National Business Register under number 0000446115, Tax Identification Number: 1080013990, Statistical Number: 146473840.</p>
+      
+        </td>      
+      </tr>
+    </table>    
+    
+  </body>
+</html>
+
+
+
+<html>
+  <!-- STYLE -->
+  <style type='text/css'>
+    /* MAIN SETUP OF THE EMAIL CONTENT */
+    body          { background: #FFFFFF; font-family: Verdana; font-size: 9pt; }  
+    .container    { background: #FFFFFF; width: 800px; }
+    .main         { background: #FFFFFF; border: 1px solid #FFFFFF; text-align: left; padding: 15px; }
+    /* GENERAL TABLE SETTINGS */
+    table         { padding: 5px; font-size: 9pt; border: 1px solid #E2E2E2; background-color: #E2E2E2; }
+    td            { border: 1px solid #E2E2E2; text-align: center; background-color: #FFFFFF; }
+    /* TABLE HEADERS */
+    th            { border: 1px solid #E2E2E2; background-color: #FFFFFF; }
+    /* TABLE COLUMNS */
+    .col1         { width: 150px; }
+    .col2         { width: 100px; }
+    .col3         { width: 100px; }
+    .col4         { width: 80px;  }
+    .col5         { width: 120px; }
+    .col6         { width: 120px; }
+    /* FOOTER */
+    .footer       { font-size: 7pt; }         
+  </style>
+  <!-- MAIN CONTENT -->
+  <body>
+    <table class='container'>
+      <tr>
+        <td class='main'>
+    
+          <p>Dear Finance Manager,</p>
+
+          <p>Following invoices have passed three reminders notification. Unfortunately, up to this day these invoices remain unpaid:</p>
+     
+<!-- AUTO GENERATED -->
+{INVOICE_LIST} 
+<!-- AUTO GENERATED -->
+       
+	      <p>All of them are now subject to Collection Agency, unless you decide otherwise.</p>
+		  
+          <p>Should there be any questions, please contact our Credit Control Team:</p>
+    
+          <p>DFDS Polska Sp. z o.o. <br />
+             ul. Roosevelta 18      <br />
+             60-829 Poznan          <br />
+             Poland                 <br /><br />
+             D:  +48 61 658 9000    <br />
+             F:  +48 61 658 9081    <br />
+          </p>
+
+<!-- AUTO GENERATED -->
+{BANKS}
+<!-- AUTO GENERATED -->
+
+          <p>
+            <a href='http://www.dfds.com' target='_blank'>www.dfds.com</a>
+          </p>
+      
+          <p class='footer'>DFDS Polska Spolka z ograniczona odpowiedzialnoscia registered at the District Court for the capital city of Warsaw in Warsaw, 12th Commercial Division of the National Business Register under number 0000446115, Tax Identification Number: 1080013990, Statistical Number: 146473840.</p>
+      
+        </td>      
+      </tr>
+    </table>    
+    
+  </body>
+</html>

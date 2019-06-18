@@ -26,7 +26,7 @@ uses
 type
 
 
-    TViewMailerForm = class(TForm)
+    TMassMailerForm = class(TForm)
         PanelBottom: TPanel;
         Text_Warn: TLabel;
         btnCancel: TSpeedButton;
@@ -101,11 +101,13 @@ type
     end;
 
 
-var
-    ViewMailerForm: TViewMailerForm;
+    function MassMailerForm: TMassMailerForm;
 
 
 implementation
+
+
+{$R *.dfm}
 
 
 uses
@@ -119,13 +121,20 @@ uses
     Await;
 
 
-{$R *.dfm}
+var vMassMailerForm: TMassMailerForm;
+
+
+function MassMailerForm: TMassMailerForm;
+begin
+    if not(Assigned(vMassMailerForm)) then Application.CreateForm(TMassMailerForm, vMassMailerForm);
+    Result:=vMassMailerForm;
+end;
 
 
 // -------------------------------------------------------------------------------------------------------------------------------------- START UP & RELEASE //
 
 
-procedure TViewMailerForm.FormCreate(Sender: TObject);
+procedure TMassMailerForm.FormCreate(Sender: TObject);
 begin
 
     var lsColumns: TListColumn;
@@ -185,7 +194,7 @@ begin
 end;
 
 
-procedure TViewMailerForm.FormDestroy(Sender: TObject);
+procedure TMassMailerForm.FormDestroy(Sender: TObject);
 begin
     //
 end;
@@ -196,7 +205,7 @@ end;
 /// We also switch off open items timer, so it wil not interfere when user sends the data.
 /// </summary>
 
-procedure TViewMailerForm.FormShow(Sender: TObject);
+procedure TMassMailerForm.FormShow(Sender: TObject);
 begin
     // Set focus on subject field
     Text_Subject.SetFocus;
@@ -226,7 +235,7 @@ end;
 /// Turn on disabled timer for open items scanner.
 /// </summary>
 
-procedure TViewMailerForm.FormClose(Sender: TObject; var Action: TCloseAction);
+procedure TMassMailerForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
     MainForm.OILoader.Enabled:=True;
     MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Mass mailer closed, open items loader is now enabled back again.');
@@ -236,7 +245,7 @@ end;
 // ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
 
 
-function TViewMailerForm.GetEmailAddress(Scuid: string): string;
+function TMassMailerForm.GetEmailAddress(Scuid: string): string;
 begin
 
     Result:='';
@@ -257,7 +266,7 @@ begin
 end;
 
 
-procedure TViewMailerForm.SetEmailAddresses(List: TListView);
+procedure TMassMailerForm.SetEmailAddresses(List: TListView);
 begin
 
     var EmailAddress: string;
@@ -277,7 +286,7 @@ begin
 end;
 
 
-procedure TViewMailerForm.UpdateCompanyData(Source: TListView);
+procedure TMassMailerForm.UpdateCompanyData(Source: TListView);
 begin
 
     var Tables: TDataTables:=TDataTables.Create(MainForm.DbConnect);
@@ -334,7 +343,7 @@ end;
 /// Execute worker thread to process the listed emails. Show busy window in main thread.
 /// </summary>
 
-procedure TViewMailerForm.ExecuteMailer;
+procedure TMassMailerForm.ExecuteMailer;
 begin
 
     // Check fields
@@ -387,7 +396,7 @@ begin
         ValBeginDate.Caption,
         ValEndDate.Caption,
         MainForm.sgOpenItems,
-        ViewMailerForm.CustomerList
+        MassMailerForm.CustomerList
     );
 
     // Display await window
@@ -399,7 +408,7 @@ end;
 // ------------------------------------------------------------------------------------------------------------------------------------------- BUTTON EVENTS //
 
 
-procedure TViewMailerForm.btnBeginDateClick(Sender: TObject);
+procedure TMassMailerForm.btnBeginDateClick(Sender: TObject);
 begin
     CalendarForm.FCalendarMode:=GetDate;
     MainForm.WndCall(CalendarForm, Modal);
@@ -407,7 +416,7 @@ begin
 end;
 
 
-procedure TViewMailerForm.btnEndDateClick(Sender: TObject);
+procedure TMassMailerForm.btnEndDateClick(Sender: TObject);
 begin
     CalendarForm.FCalendarMode:=GetDate;
     MainForm.WndCall(CalendarForm, Modal);
@@ -415,7 +424,7 @@ begin
 end;
 
 
-procedure TViewMailerForm.cbShowAllClick(Sender: TObject);
+procedure TMassMailerForm.cbShowAllClick(Sender: TObject);
 begin
 
     if cbShowAll.Checked then
@@ -437,7 +446,7 @@ begin
 end;
 
 
-procedure TViewMailerForm.cbOverdueOnlyClick(Sender: TObject);
+procedure TMassMailerForm.cbOverdueOnlyClick(Sender: TObject);
 begin
 
     if cbOverdueOnly.Checked then
@@ -459,7 +468,7 @@ begin
 end;
 
 
-procedure TViewMailerForm.cbNonOverdueClick(Sender: TObject);
+procedure TMassMailerForm.cbNonOverdueClick(Sender: TObject);
 begin
 
     if cbNonOverdue.Checked then
@@ -481,25 +490,25 @@ begin
 end;
 
 
-procedure TViewMailerForm.btnDelBeginClick(Sender: TObject);
+procedure TMassMailerForm.btnDelBeginClick(Sender: TObject);
 begin
     ValBeginDate.Caption:='';
 end;
 
 
-procedure TViewMailerForm.btnDelEndClick(Sender: TObject);
+procedure TMassMailerForm.btnDelEndClick(Sender: TObject);
 begin
     ValEndDate.Caption:='';
 end;
 
 
-procedure TViewMailerForm.btnSendEmailClick(Sender: TObject);
+procedure TMassMailerForm.btnSendEmailClick(Sender: TObject);
 begin
     ExecuteMailer;
 end;
 
 
-procedure TViewMailerForm.btnCancelClick(Sender: TObject);
+procedure TMassMailerForm.btnCancelClick(Sender: TObject);
 begin
     Close;
 end;
@@ -508,43 +517,43 @@ end;
 // ----------------------------------------------------------------------------------------------------------------------------------------- KEYBOARD EVENTS //
 
 
-procedure TViewMailerForm.FormKeyPress(Sender: TObject; var Key: Char);
+procedure TMassMailerForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
     if Key = Char(VK_ESCAPE) then Close;
 end;
 
 
-procedure TViewMailerForm.Text_SubjectKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TMassMailerForm.Text_SubjectKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if Key = VK_TAB then Text_Message.SetFocus;
 end;
 
 
-procedure TViewMailerForm.Text_MessageKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TMassMailerForm.Text_MessageKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if Key = VK_TAB then cbShowAll.SetFocus;
 end;
 
 
-procedure TViewMailerForm.cbShowAllKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TMassMailerForm.cbShowAllKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if Key = VK_TAB then cbOverdueOnly.SetFocus;
 end;
 
 
-procedure TViewMailerForm.cbOverdueOnlyKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TMassMailerForm.cbOverdueOnlyKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if Key = VK_TAB then cbNonOverdue.SetFocus;
 end;
 
 
-procedure TViewMailerForm.cbNonOverdueKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TMassMailerForm.cbNonOverdueKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if Key = VK_TAB then CustomerList.SetFocus;
 end;
 
 
-procedure TViewMailerForm.CustomerListKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TMassMailerForm.CustomerListKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if Key = VK_TAB then Text_Subject.SetFocus;
 end;

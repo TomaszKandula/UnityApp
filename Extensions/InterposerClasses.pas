@@ -86,17 +86,17 @@ type
         procedure Paint; override;
     private
         var FHideFocusRect: boolean;
-        var FOpenThdId:     integer;
+        var FOpenThdId:     integer;   // remove!
     public
         const sgRowHeight = 19;
         const sgRowHidden = -1;
         const xlWBATWorksheet = -4167;
         const xlWARN_MESSAGE  = 'Invalid class string';
         const FFontWhite  = $00FFFFFF;
-        const FBackRed    = $00FF8080;
+        const FBackRed    = $008080FF; //rgb FF8080 => bgr 8080FF
         const FFontBlack  = $00000000;
-        const FBackYellow = $00FFFFCC;
-        const FBackGreen  = $0059ACAC;
+        const FBackYellow = $00CCFFFF; //rgb FFFFCC => bgr CCFFFF
+        const FBackGreen  = $00ACAC59; //rgb 59ACAC => bgr ACAC59
         var SqlColumns: TALists;
         var UpdatedRowsHolder: TAIntigers;
         property  OpenThdId: integer read FOpenThdId write FOpenThdId;

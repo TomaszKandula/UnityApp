@@ -1,4 +1,4 @@
-unit SendFeedback;
+unit Feedback;
 
 
 interface
@@ -23,7 +23,7 @@ uses
 type
 
 
-    TReportForm = class(TForm)
+    TFeedbackForm = class(TForm)
         ReportMemo: TMemo;
         btnSendReport: TSpeedButton;
         Text2: TLabel;
@@ -44,11 +44,13 @@ type
     end;
 
 
-var
-    ReportForm: TReportForm;
+    function FeedbackForm: TFeedbackForm;
 
 
 implementation
+
+
+{$R *.dfm}
 
 
 uses
@@ -59,11 +61,18 @@ uses
     Helpers;
 
 
+var vFeedbackForm: TFeedbackForm;
+
+
 const
     ToSkip = [#0..#32, '.', ',', ';', '[', ']', '(', ')', '{', '}'];
 
 
-{$R *.dfm}
+function FeedbackForm: TFeedbackForm;
+begin
+    if not(Assigned(vFeedbackForm)) then Application.CreateForm(TFeedbackForm, vFeedbackForm);
+    Result:=vFeedbackForm;
+end;
 
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
@@ -73,7 +82,7 @@ const
 /// Count words in TMemo component while user is writing.
 /// </summary>
 
-function TReportForm.WordCount(const InputStr: string): cardinal;
+function TFeedbackForm.WordCount(const InputStr: string): cardinal;
 begin
 
     Result:=0;
@@ -99,7 +108,7 @@ begin
 end;
 
 
-function TReportForm.SendReport: boolean;
+function TFeedbackForm.SendReport: boolean;
 begin
 
     Result:=False;
@@ -164,7 +173,7 @@ end;
 // ------------------------------------------------------------------------------------------------------------------------------------------------ START UP //
 
 
-procedure TReportForm.FormCreate(Sender: TObject);
+procedure TFeedbackForm.FormCreate(Sender: TObject);
 begin
     PanelReportMemo.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
 end;
@@ -173,12 +182,12 @@ end;
 // ------------------------------------------------------------------------------------------------------------------------------------------- BUTTON EVENTS //
 
 
-procedure TReportForm.btnSendReportClick(Sender: TObject);
+procedure TFeedbackForm.btnSendReportClick(Sender: TObject);
 begin
     TTSendUserFeedback.Create;
 end;
 
-procedure TReportForm.btnCancelClick(Sender: TObject);
+procedure TFeedbackForm.btnCancelClick(Sender: TObject);
 begin
     Close;
 end;
@@ -187,13 +196,13 @@ end;
 // ----------------------------------------------------------------------------------------------------------------------------------------- KEYBOARD EVENTS //
 
 
-procedure TReportForm.ReportMemoKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TFeedbackForm.ReportMemoKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     TotalWords.Caption:=IntToStr(WordCount(ReportMemo.Text)) + ' / ' + IntToStr(ReportMemo.MaxLength);
 end;
 
 
-procedure TReportForm.FormKeyPress(Sender: TObject; var Key: Char);
+procedure TFeedbackForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
     if Key = Char(VK_ESCAPE) then Close;
 end;

@@ -98,11 +98,13 @@ type
     end;
 
 
-var
-    QmsForm: TQmsForm;
+    function QmsForm: TQmsForm;
 
 
 implementation
+
+
+{$R *.dfm}
 
 
 uses
@@ -117,7 +119,14 @@ uses
     Helpers;
 
 
-{$R *.dfm}
+var vQmsForm: TQmsForm;
+
+
+function QmsForm: TQmsForm;
+begin
+    if not(Assigned(vQmsForm)) then Application.CreateForm(TQmsForm, vQmsForm);
+    Result:=vQmsForm;
+end;
 
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //

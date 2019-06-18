@@ -64,6 +64,8 @@ begin
 
     var Http: IWinHttpRequest:=CoWinHttpRequest.Create;
     try
+
+        Http.SetTimeouts(30000, 900000, 30000, 30000);
         try
             Http.Option[WinHttpRequestOption_EnableRedirects]:=True;
             Http.Open(Mode, CallUrl, False);
@@ -173,7 +175,7 @@ begin
     try
         var wUrl: WideString:=SourceUrl;
         var Http: IWinHttpRequest:=CoWinHttpRequest.Create;
-        Http.SetTimeouts(1500, 900000, 30000, 30000);
+        Http.SetTimeouts(30000, 900000, 30000, 30000);
         Http.open('GET', wUrl, False);
         Http.send(EmptyParam);
 

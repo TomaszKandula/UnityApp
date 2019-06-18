@@ -547,12 +547,8 @@ type
         LabelDueDtLbu: TLabel;
         LabelValDtLbu: TLabel;
         LbuQueryDesc: TMemo;
-        RESTClient: TRESTClient;
-        RESTRequest: TRESTRequest;
-        RESTResponse: TRESTResponse;
         Action_TurnRowHighlight: TMenuItem;
         procedure FormCreate(Sender: TObject);
-        procedure FormResize(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure Action_HideAppClick(Sender: TObject);
         procedure Action_ShowAppClick(Sender: TObject);
@@ -848,6 +844,7 @@ type
         procedure Action_TurnRowHighlightClick(Sender: TObject);
         procedure CommonPopupMenuPopup(Sender: TObject);
     private
+        var AbUpdateFields:   TAddressBookUpdateFields;
         var FAllowClose:      boolean;
         var FStartTime:       TTime;
         var FWinUserName:     string;
@@ -876,6 +873,7 @@ type
         function  CDate(StrDate: string): TDate;
         function  ShowReport(ReportNumber: cardinal): cardinal;
         procedure InitializeScreenSettings;
+        procedure OnCreateJob(Text: string);
     public
         var LogText:           TThreadFileLog;
         var DbConnect:         TADOConnection;
@@ -904,7 +902,7 @@ type
         function  MsgCall(WndType: TCommon.TMessage; WndText: string): integer;
         function  OleGetStr(RecordsetField: variant): string;
 
-        // Column references
+        // Column helpers
         procedure UpdateOpenItemsRefs(SourceGrid: TStringGrid);
         procedure UpdateControlStatusRefs(SourceGrid: TStringGrid);
 
@@ -986,7 +984,7 @@ uses
     Actions,
     Calendar,
     About,
-    AVSearch,
+    GridSearch,
     Worker,
     SqlHandler,
     DbModel,
@@ -996,8 +994,8 @@ uses
     Transactions,
     Colors,
     EventLog,
-    SendFeedback,
-    ABSearch,
+    Feedback,
+    SqlSearch,
     MassMailer,
     Splash,
     Await,
@@ -1073,8 +1071,8 @@ begin
 
     if (PassMsg.WParam = TMessaging.TWParams.MailerReportItem) and (PassMsg.LParam > -1) then
     begin
-        ViewMailerForm.CustomerList.Items[PassMsg.LParam].SubItems[2]:='Sent';
-        ViewMailerForm.ThreadCount:=ViewMailerForm.ThreadCount - 1;
+        MassMailerForm.CustomerList.Items[PassMsg.LParam].SubItems[2]:='Sent';
+        MassMailerForm.ThreadCount:=MassMailerForm.ThreadCount - 1;
     end;
 
 end;
@@ -1564,10 +1562,10 @@ begin
     /// 3. 3RD CO CODE: 00043 (43)
     /// 4. 4TH CO CODE: 00000 (0)
     /// </remarks>
-    if CoPos = 1 then Result:=IntToStr(StrToInt(MidStr(GroupId, 1,  5)));
-    if CoPos = 2 then Result:=IntToStr(StrToInt(MidStr(GroupId, 6,  5)));
-    if CoPos = 3 then Result:=IntToStr(StrToInt(MidStr(GroupId, 11, 5)));
-    if CoPos = 4 then Result:=IntToStr(StrToInt(MidStr(GroupId, 16, 5)));
+    if CoPos = 1 then Result:=(MidStr(GroupId, 1,  5).ToInteger).toString;
+    if CoPos = 2 then Result:=(MidStr(GroupId, 6,  5).ToInteger).toString;
+    if CoPos = 3 then Result:=(MidStr(GroupId, 11, 5).ToInteger).toString;
+    if CoPos = 4 then Result:=(MidStr(GroupId, 16, 5).ToInteger).toString;
 end;
 
 
@@ -2362,26 +2360,20 @@ begin
 end;
 
 
+procedure TMainForm.OnCreateJob(Text: string);
+begin
+    if Assigned(SplashForm) then
+    begin
+        SplashForm.TextStatus.Caption:='Application initialization: ' + Text;
+        SplashForm.Update;
+    end;
+end;
+
+
 // ------------------------------------------------------------------------------------------------------------------------------------------------ START UP //
 
 
-/// <summary>
-/// Initialize application, load all settings, establish database connectivity.
-/// </summary>
-
 procedure TMainForm.FormCreate(Sender: TObject);
-
-    {TODO -oTomek -cGeneral : Make private helper method}
-
-    procedure OnCreateJob(Text: string);
-    begin
-        if Assigned(SplashForm) then
-        begin
-            SplashForm.TextStatus.Caption:='Application initialization: ' + Text;
-            SplashForm.Update;
-        end;
-    end;
-
 begin
 
     LogText:=TThreadFileLog.Create;
@@ -2390,7 +2382,10 @@ begin
     CurrentEvents:='# -- SESSION START --';
     FAllowClose:=False;
 
-    // -------------------------------------------------------------------------------------------------------------------------------- GET AND SET SETTINGS //
+    // --------------------------
+    // Settings
+    // --------------------------
+
     OnCreateJob(TSplashScreen.SettingUp);
 
     InitializeScreenSettings;
@@ -2410,23 +2405,9 @@ begin
         /// "InetTimer" is excluded from below list because it is controlled by "InitializeConnection" method.
         /// </remarks>
 
-        /// <remarks>
-        /// Default value 900000 miliseconds = 15 minutes.
-        /// </remarks>
-
-        InvoiceScanTimer.Interval:=Settings.GetIntegerValue(TConfigSections.TimersSettings, 'INVOICE_SCANNER', 900000);
-
-        /// <remarks>
-        /// Default value 1800000 miliseconds = 30 minutes.
-        /// </remarks>
-
-        FollowupPopup.Interval:=Settings.GetIntegerValue(TConfigSections.TimersSettings, 'FOLLOWUP_CHECKER', 1800000);
-
-        /// <remarks>
-        /// Default value 300000 miliseconds = 5 minutes.
-        /// </remarks>
-
-        OILoader.Interval:=Settings.GetIntegerValue(TConfigSections.TimersSettings, 'OI_LOADER', 300000);
+        InvoiceScanTimer.Interval:=Settings.GetIntegerValue(TConfigSections.TimersSettings, 'INVOICE_SCANNER', 900000{15 minutes});
+        FollowupPopup.Interval:=Settings.GetIntegerValue(TConfigSections.TimersSettings, 'FOLLOWUP_CHECKER', 1800000{30 minutes});
+        OILoader.Interval:=Settings.GetIntegerValue(TConfigSections.TimersSettings, 'OI_LOADER', 300000{5 minutes});
 
         /// <remarks>
         /// Get risk class values and convert default decimal separator.
@@ -2434,16 +2415,16 @@ begin
 
         if FormatSettings.DecimalSeparator = ',' then
         begin
-            procRISKA.Caption:=FloatToStr(StrToFloat(Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_A_MAX', TRiskClass.A)) * 100) + '%';
-            procRISKB.Caption:=FloatToStr(StrToFloat(Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_B_MAX', TRiskClass.B)) * 100) + '%';
-            procRISKC.Caption:=FloatToStr(StrToFloat(Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_C_MAX', TRiskClass.C)) * 100) + '%';
+            procRISKA.Caption:=((Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_A_MAX', TRiskClass.A)).ToExtended * 100).ToString + '%';
+            procRISKB.Caption:=((Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_B_MAX', TRiskClass.B)).ToExtended * 100).ToString + '%';
+            procRISKC.Caption:=((Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_C_MAX', TRiskClass.C)).ToExtended * 100).ToString + '%';
         end;
 
         if FormatSettings.DecimalSeparator = '.' then
         begin
-            procRISKA.Caption:=FloatToStr(StrToFloat(StringReplace(Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_A_MAX', TRiskClass.A), ',', '.', [rfReplaceAll])) * 100) + '%';
-            procRISKB.Caption:=FloatToStr(StrToFloat(StringReplace(Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_B_MAX', TRiskClass.B), ',', '.', [rfReplaceAll])) * 100) + '%';
-            procRISKC.Caption:=FloatToStr(StrToFloat(StringReplace(Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_C_MAX', TRiskClass.C), ',', '.', [rfReplaceAll])) * 100) + '%';
+            procRISKA.Caption:=((StringReplace(Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_A_MAX', TRiskClass.A), ',', '.', [rfReplaceAll])).ToExtended * 100).ToString + '%';
+            procRISKB.Caption:=((StringReplace(Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_B_MAX', TRiskClass.B), ',', '.', [rfReplaceAll])).ToExtended * 100).ToString + '%';
+            procRISKC.Caption:=((StringReplace(Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_C_MAX', TRiskClass.C), ',', '.', [rfReplaceAll])).ToExtended * 100).ToString + '%';
         end;
 
         /// <remarks>
@@ -2453,10 +2434,7 @@ begin
         for var iCNT: integer:=0 to MyPages.PageCount - 1 do MyPages.Pages[iCNT].TabVisible:=False;
         MyPages.ActivePage:=TabSheet1;
 
-        /// <summary>
-        /// Main form captions.
-        /// </summary>
-
+        // Captions for shapes holding controls
         Cap01.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT01', 'EMPTY'), [fsBold]);
         Cap02.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT02', 'EMPTY'), [fsBold]);
         Cap03.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT03', 'EMPTY'), [fsBold]);
@@ -2464,77 +2442,29 @@ begin
         Cap06.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT06', 'EMPTY'), [fsBold]);
         Cap07.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT07', 'EMPTY'), [fsBold]);
         Cap24.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT08', 'EMPTY'), [fsBold]);
-
-        /// <summary>
-        /// Open items captions.
-        /// </summary>
-
         Cap10.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS2TXT01', 'EMPTY'), [fsBold]);
         Cap11.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS2TXT02', 'EMPTY'), [fsBold]);
         Cap12.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS2TXT03', 'EMPTY'), [fsBold]);
-
-        /// <summary>
-        /// Address Book captions.
-        /// </summary>
-
         Cap13.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS3TXT01', 'EMPTY'), [fsBold]);
-
-        /// <summary>
-        /// Invoice tracker captions.
-        /// </summary>
-
         Cap43.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS4TXT01', 'EMPTY'), [fsBold]);
-
-        /// <summary>
-        /// Unidentified transactions.
-        /// </summary>
-
         Cap61.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS6TXT01', 'EMPTY'), [fsBold]);
-
-        /// <summary>
-        /// General tables captions.
-        /// </summary>
-
         Cap15.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS7TXT01', 'EMPTY'), [fsBold]);
-
-        /// <summary>
-        /// Settings captions.
-        /// </summary>
-
         Cap21.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS8TXT01', 'EMPTY'), [fsBold]);
         Cap22.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS8TXT02', 'EMPTY'), [fsBold]);
         Cap23.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS8TXT03', 'EMPTY'), [fsBold]);
         Cap27.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS8TXT04', 'EMPTY'), [fsBold]);
-
-        /// <summary>
-        /// QMS tabsheet.
-        /// </summary>
-
         Cap62.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS9TXT01', 'EMPTY'), [fsBold]);
         Cap63.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS9TXT02', 'EMPTY'), [fsBold]);
-
-        /// <summary>
-        /// Aging buckets displayed on Age View.
-        /// </summary>
-
         tR1.Caption:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE1A','') + ' - ' + Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE1B','');
         tR2.Caption:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE2A','') + ' - ' + Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE2B','');
         tR3.Caption:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE3A','') + ' - ' + Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE3B','');
         tR4.Caption:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE4A','') + ' - ' + Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE4B','');
         tR5.Caption:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE5A','') + ' - ' + Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE5B','');
         tR6.Caption:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE6A','') + ' - ' + Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE6B','');
-
-        /// <summary>
-        /// Age report summary.
-        /// </summary>
-
         Text21.Caption:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE1A','') + ' - ' + Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE3B','') + ':';
         Text22.Caption:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE4A','') + ' - ' + Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE6B','') + ':';
 
-        /// <summary>
-        /// Make sure that we have transparency on all button glyphs.
-        /// </summary>
-
+        // Make sure that we have transparency on all button glyphs
         SetButtonsGlyphs;
 
     except
@@ -2546,7 +2476,10 @@ begin
         end;
     end;
 
-    // ------------------------------------------------------------------------------------------------------------------------------- DATABASE CONNECTIVITY //
+    // --------------------------
+    // Database connectivity
+    // --------------------------
+
     OnCreateJob(TSplashScreen.Connecting);
 
     try
@@ -2559,7 +2492,10 @@ begin
         end;
     end;
 
-    // ---------------------------------------------------------------------------------------------------------------------------------------- GET UAC DATA //
+    // --------------------------
+    // User Access
+    // --------------------------
+
     OnCreateJob(TSplashScreen.GettingUsers);
 
     var UserControl: TUserControl:=TUserControl.Create(DbConnect);
@@ -2608,7 +2544,10 @@ begin
         UserControl.Free;
     end;
 
-    // ------------------------------------------------------------------------------------------------------------------ ASYNC IN SERIES LOAD OF MAP TABLES //
+    // --------------------------
+    // Load async helper tables
+    // --------------------------
+
     OnCreateJob(TSplashScreen.MappingTables);
 
     /// <remarks>
@@ -2642,7 +2581,10 @@ begin
         if Assigned(MapTable) then MapTable.Free;
     end;
 
-    // ------------------------------------------------------------------------------------------------------------------------ ASYNC LOAD OF GENERAL TABLES //
+    // --------------------------
+    // Load async general tables
+    // --------------------------
+
     OnCreateJob(TSplashScreen.GettingGeneral);
 
     try
@@ -2661,7 +2603,10 @@ begin
         end;
     end;
 
-    // ------------------------------------------------------------------------------------------------------------------------------------------- FINISHING //
+    // --------------------------
+    // Finilizing
+    // --------------------------
+
     OnCreateJob(TSplashScreen.Finishing);
 
     try
@@ -2681,16 +2626,15 @@ begin
         LogText.Log(EventLogPath, 'Thread [' + MainThreadID.ToString + ']: Application version = ' + AppVersion);
         LogText.Log(EventLogPath, 'Thread [' + MainThreadID.ToString + ']: User SID = ' + TUserSid.GetCurrentUserSid);
 
-        sgInvoiceTracker.Visible:=False;
-        sgAddressBook.Visible:=False;
+        {sgInvoiceTracker.Enabled:=False;}
+        {sgAddressBook.Enabled:=False;}
 
-        // Qms page
         InitializeQms;
-
-        // Load default age view
         if not(FirstAgeLoad.Enabled) then FirstAgeLoad.Enabled:=True;
 
-    except 
+        LogText.Log(EventLogPath, '[GUI] Initialization methods executed within main thread, ''MainForm'' has been created. Main process thread ID = ' + MainThreadID.ToString + '.');
+
+    except
 		on E: Exception do
         begin
             LogText.Log(EventLogPath, 'Thread [' + MainThreadID.ToString + ']: Invalid boot up. Error occured: ' + E.Message);
@@ -2709,26 +2653,15 @@ begin
     ChromiumWindow.ChromiumBrowser.OnBeforePopup:=Chromium_OnBeforePopup;
     if not(ChromiumWindow.CreateBrowser) then ChromiumTimer.Enabled:=True;
 
-    // Update thumb size
-    FormResize(self);
-
     // Draw panel borders
     SetPanelBorders;
 
     // Update grids width, height and thumb size
     SetGridColumnWidths;
     SetGridRowHeights;
-    (* SetGridThumbSizes; *)
 
-end;
+    LogText.Log(EventLogPath, 'Initialization is completed. Application is running.');
 
-
-procedure TMainForm.FormResize(Sender: TObject);
-begin
-    /// <remarks>
-    /// Do not use it. Scroll thumb size is buggy in Windows.
-    /// </remarks>
-    // SetGridThumbSizes;
 end;
 
 
@@ -2862,10 +2795,15 @@ begin
                 if string.IsNullOrEmpty(OpenItemsUpdate) then
                 begin
                     MsgCall(Warn, 'Cannot find open items in database. Please contact IT support.');
-                    TTReadAgeView.Create(NullParameter, TSorting.TMode.Ranges);
+                    var Job: IThreading:=TThreading.Create;
+                    Job.ReadAgeViewAsync(NullParameter, TSorting.TMode.Ranges);
                 end
                 else
-                    TTReadAgeView.Create(CallOpenItems, TSorting.TMode.Ranges);
+                begin
+                    var Job: IThreading:=TThreading.Create;
+                    Job.ReadAgeViewAsync(CallOpenItems, TSorting.TMode.Ranges);
+                end;
+
             finally
                 Transactions.Free;
             end;
@@ -2933,7 +2871,8 @@ end;
 
 procedure TMainForm.InetTimerTimer(Sender: TObject);
 begin
-    TTCheckServerConnection.Create(False);
+    var Job: IThreading:=TThreading.Create;
+    Job.CheckServerConnectionAsync;
 end;
 
 
@@ -2954,7 +2893,8 @@ end;
 procedure TMainForm.OILoaderTimer(Sender: TObject);
 begin
     LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Calling open items scanner...');
-    TTOpenItemsScanner.Create;
+    var Job: IThreading:=TThreading.Create;
+    Job.ScanOpenItemsAsync()
 end;
 
 
@@ -3183,7 +3123,7 @@ end;
 
 procedure TMainForm.Action_SearchBookClick(Sender: TObject);
 begin
-    WndCall(ViewSearchForm, Helpers.TEnums.TWindowState.Modeless);
+    WndCall(SqlSearchForm, Helpers.TEnums.TWindowState.Modeless);
 end;
 
 
@@ -3193,16 +3133,8 @@ end;
 
 procedure TMainForm.Action_ShowAsIsClick(Sender: TObject);
 begin
-    TTAddressBook.Create(
-        TEnums.TActions.OpenAll,
-        sgAddressBook,
-        '',
-        '',
-        '',
-        '',
-        '',
-        ''
-    );
+    var Job: IThreading:=TThreading.Create;
+    Job.OpenAddressBookAsync('', sgAddressBook);
 end;
 
 
@@ -3212,16 +3144,8 @@ end;
 
 procedure TMainForm.Action_ShowMyEntriesClick(Sender: TObject);
 begin
-    TTAddressBook.Create(
-        TEnums.TActions.OpenForUser,
-        sgAddressBook,
-        '',
-        '',
-        '',
-        '',
-        '',
-        TSql.WHERE + TAddressBook.UserAlias + TSql.EQUAL + QuotedStr(MainForm.WinUserName)
-    );
+    var Job: IThreading:=TThreading.Create;
+    Job.OpenAddressBookAsync(MainForm.WinUserName, sgAddressBook);
 end;
 
 
@@ -3286,7 +3210,7 @@ end;
 
 procedure TMainForm.Action_ReportClick(Sender: TObject);
 begin
-    WndCall(ReportForm, Helpers.TEnums.TWindowState.Modal);
+    WndCall(FeedbackForm, Helpers.TEnums.TWindowState.Modal);
 end;
 
 
@@ -3449,19 +3373,15 @@ end;
 
 procedure TMainForm.Action_AddToBookClick(Sender: TObject);
 begin
+
     if IsConnected then
-        TTAddressBook.Create(
-            TEnums.TActions.Insert,
-            sgAgeView,
-            '',
-            '',
-            '',
-            '',
-            '',
-            ''
-        )
+    begin
+        var Job: IThreading:=TThreading.Create;
+        Job.AddToAddressBookAsync(sgAgeView);
+    end
     else
-        MsgCall(Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+    MsgCall(Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+
 end;
 
 
@@ -3476,13 +3396,13 @@ begin
     if IsConnected then
     begin
 
-        ViewMailerForm.CustomerList.Clear;
+        MassMailerForm.CustomerList.Clear;
 
         // One customer
         if (sgAgeView.Selection.Top - sgAgeView.Selection.Bottom) = 0 then
         begin
             // Put it to the ListView
-            Item:=ViewMailerForm.CustomerList.Items.Add;
+            Item:=MassMailerForm.CustomerList.Items.Add;
             Item.Caption:=IntToStr(sgAgeView.Row);
             Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCustomerName, 1, 1), sgAgeView.Row]);
             Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCustomerNumber, 1, 1), sgAgeView.Row]);
@@ -3508,7 +3428,7 @@ begin
             begin
                 if sgAgeView.RowHeights[iCNT] <> sgAgeView.sgRowHidden then
                 begin
-                    Item:=ViewMailerForm.CustomerList.Items.Add;
+                    Item:=MassMailerForm.CustomerList.Items.Add;
                     Item.Caption:=IntToStr(iCNT);
                     Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCustomerName, 1, 1), iCNT]);
                     Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCustomerNumber, 1, 1), iCNT]);
@@ -3530,7 +3450,7 @@ begin
             end;
         end;
 
-        WndCall(ViewMailerForm, Helpers.TEnums.TWindowState.Modal);
+        WndCall(MassMailerForm, Helpers.TEnums.TWindowState.Modal);
 
     end
     else
@@ -3820,7 +3740,7 @@ begin
 end;
 
 
-// Filter via  REMOVE ALL FILTERS
+// Filter via REMOVE ALL FILTERS
 procedure TMainForm.Action_RemoveFiltersClick(Sender: TObject);
 begin
 
@@ -3865,10 +3785,10 @@ end;
 
 procedure TMainForm.Action_SearchClick(Sender: TObject);
 begin
-    SearchForm.FGrid     :=MainForm.sgAgeView;
-    SearchForm.FColName  :=TSnapshots.fCustomerName;
-    SearchForm.FColNumber:=TSnapshots.fCustomerNumber;
-    WndCall(SearchForm, Helpers.TEnums.TWindowState.Modeless);
+    GridSearchForm.FGrid     :=MainForm.sgAgeView;
+    GridSearchForm.FColName  :=TSnapshots.fCustomerName;
+    GridSearchForm.FColNumber:=TSnapshots.fCustomerNumber;
+    WndCall(GridSearchForm, Helpers.TEnums.TWindowState.Modeless);
 end;
 
 
@@ -4123,10 +4043,15 @@ end;
 
 procedure TMainForm.Action_ShowMyClick(Sender: TObject);
 begin
+
     if IsConnected then
-        TTInvoiceTrackerRefresh.Create(UpperCase(MainForm.WinUserName))
-            else
-                MsgCall(Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+    begin
+        var Job: IThreading:=TThreading.Create;
+        Job.RefreshInvoiceTrackerAsync(UpperCase(MainForm.WinUserName));
+    end
+    else
+        MsgCall(Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+
 end;
 
 
@@ -4137,7 +4062,10 @@ end;
 procedure TMainForm.Action_ShowAllClick(Sender: TObject);
 begin
     if IsConnected then
-        TTInvoiceTrackerRefresh.Create('')
+    begin
+        var Job: IThreading:=TThreading.Create;
+        Job.RefreshInvoiceTrackerAsync(EmptyStr);
+    end
     else
         MsgCall(Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
 end;
@@ -4198,7 +4126,8 @@ end;
 
 procedure TMainForm.TabSheet4Show(Sender: TObject);
 begin
-    TTInvoiceTrackerRefresh.Create('');
+    var Job: IThreading:=TThreading.Create;
+    Job.RefreshInvoiceTrackerAsync(EmptyStr);
 end;
 
 
@@ -6554,7 +6483,9 @@ begin
         MainForm.SwitchTimers(TurnedOff);
 
         // Load age view for selected group ID
-        TTReadAgeView.Create(CallOpenItems, TSorting.TMode.Ranges);
+        var Job: IThreading:=TThreading.Create;
+        Job.ReadAgeViewAsync(CallOpenItems, TSorting.TMode.Ranges);
+
     end
         else
             MsgCall(Warn, 'Cannot load selected group.');
@@ -6610,7 +6541,8 @@ begin
         MainForm.SwitchTimers(TurnedOff);
 
         // Load age view for selected group ID
-        TTReadAgeView.Create(NullParameter, SortListBox.ItemIndex);
+        var Job: IThreading:=TThreading.Create;
+        Job.ReadAgeViewAsync(NullParameter, SortListBox.ItemIndex);
 
     end
         else
@@ -6636,7 +6568,8 @@ begin
     StatBar_TXT1.Caption :=TStatusBar.Processing;
     if MainForm.AccessLevel = TUserAccess.Admin then
     begin
-        TTReadOpenItems.Create(NullParameter);
+        var Job: IThreading:=TThreading.Create;
+        Job.ReadOpenItemsAsync(NullParameter);
     end
     else
     begin
@@ -6698,13 +6631,19 @@ begin
 
     if (not(string.IsNullOrEmpty(EditGroupName.Text))) and (not(string.IsNullOrEmpty(EditGroupID.Text))) then
     begin
+
         // Start thread with no parameters passed to an object
         PanelGroupName.Visible:=False;
         ReloadCover.Visible   :=False;
-        TTMakeAgeView.Create(MainForm.OSAmount);
+
+        var Job: IThreading:=TThreading.Create;
+        Job.MakeAgeViewAsync(MainForm.OSAmount);
+
     end
-        else
-            MsgCall(Warn, 'Please enter group name and try again.' + TChars.CRLF + 'If you will use existing one, then it will be overwritten.');
+    else
+    begin
+        MsgCall(Warn, 'Please enter group name and try again.' + TChars.CRLF + 'If you will use existing one, then it will be overwritten.');
+    end;
 
 end;
 
@@ -6719,19 +6658,11 @@ begin
     if IsConnected then
     begin
         sgAddressBook.SetUpdatedRow(0);
-        TTAddressBook.Create(
-            TEnums.TActions.OpenAll,
-            sgAddressBook,
-            '',
-            '',
-            '',
-            '',
-            '',
-            ''
-        )
+        var Job: IThreading:=TThreading.Create;
+        Job.OpenAddressBookAsync('', sgAddressBook);
     end
-        else
-            MsgCall(Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+    else
+    MsgCall(Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
 
 end;
 
@@ -6750,18 +6681,12 @@ begin
     end;
 
     if IsConnected then
-        TTAddressBook.Create(
-            TEnums.TActions.Update,
-            sgAddressBook,
-            '',
-            '',
-            '',
-            '',
-            '',
-            ''
-        )
+    begin
+        var Job: IThreading:=TThreading.Create;
+        Job.UpdateAddressBookAsync(sgAddressBook, AbUpdateFields);
+    end
     else
-        MsgCall(Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+    MsgCall(Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
 
 end;
 
@@ -6793,16 +6718,9 @@ begin
         MsgCall(TCommon.TMessage.Warn, 'Please open Address Book first.');
         Exit;
     end;
-    TTAddressBook.Create(
-        TEnums.TActions.Export,
-        sgAddressBook,
-        '',
-        '',
-        '',
-        '',
-        '',
-        ''
-    );
+
+    sgAddressBook.OpenThdId:=0;
+    sgAddressBook.ExportCSV(MainForm.CSVExport, '|');
 
 end;
 

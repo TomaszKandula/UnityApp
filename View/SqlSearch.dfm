@@ -1,4 +1,4 @@
-object ViewSearchForm: TViewSearchForm
+object SqlSearchForm: TSqlSearchForm
   Left = 0
   Top = 0
   BorderStyle = bsToolWindow
@@ -48,16 +48,16 @@ object ViewSearchForm: TViewSearchForm
       object Text1: TLabel
         Left = 24
         Top = 59
-        Width = 27
+        Width = 33
         Height = 13
-        Caption = 'Name'
+        Caption = 'Name*'
       end
       object Text2: TLabel
         Left = 24
         Top = 32
-        Width = 37
+        Width = 43
         Height = 13
-        Caption = 'Number'
+        Caption = 'Number*'
       end
       object Text3: TLabel
         Left = 24
@@ -637,6 +637,21 @@ object ViewSearchForm: TViewSearchForm
       Spacing = 10
       OnClick = btnCancelClick
       ExplicitHeight = 27
+    end
+    object txtWarning: TLabel
+      Left = 20
+      Top = 18
+      Width = 242
+      Height = 13
+      Caption = '*You must use at least Name field or Number field.'
+      Color = clWhite
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = clRed
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentColor = False
+      ParentFont = False
     end
   end
 end

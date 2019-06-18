@@ -38,11 +38,13 @@ type
     end;
 
 
-var
-    EventForm: TEventForm;
+    function EventForm: TEventForm;
 
 
 implementation
+
+
+{$R *.dfm}
 
 
 uses
@@ -50,7 +52,14 @@ uses
     Settings;
 
 
-{$R *.dfm}
+var vEventForm: TEventForm;
+
+
+function EventForm: TEventForm;
+begin
+    if not(Assigned(vEventForm)) then Application.CreateForm(TEventForm, vEventForm);
+    Result:=vEventForm;
+end;
 
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //

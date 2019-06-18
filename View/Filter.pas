@@ -24,7 +24,7 @@ uses
     InterposerClasses,
     Helpers;
 
-    // REDESING THIS COMPLETLY!!!!
+    {TODO -oTomek -cGeneral : Redesign this completly}
 
 type
 
@@ -95,11 +95,13 @@ type
     end;
 
 
-var
-    FilterForm:  TFilterForm;
+    function FilterForm: TFilterForm;
 
 
 implementation
+
+
+{$R *.dfm}
 
 
 uses
@@ -109,7 +111,14 @@ uses
     AgeView;
 
 
-{$R *.dfm}
+var vFilterForm: TFilterForm;
+
+
+function FilterForm: TFilterForm;
+begin
+    if not(Assigned(vFilterForm)) then Application.CreateForm(TFilterForm, vFilterForm);
+    Result:=vFilterForm;
+end;
 
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
@@ -151,15 +160,12 @@ end;
 
 
 procedure TFilterForm.FilterSelectCheck;
-var
-    iCNT:  integer;
-    Check: integer;
 begin
 
-    Check:=0;
+    var Check: integer:=0;
 
     // Check if item is selected
-    for iCNT:=0 to FilterList.Count - 1 do
+    for var iCNT: integer:=0 to FilterList.Count - 1 do
         if FilterList.Checked[iCNT] = True then
             inc(Check);
 
@@ -242,9 +248,6 @@ end;
 
 
 procedure TFilterForm.FilterInit(var FFilter: TALists);
-var
-    iCNT:  integer;
-    SL:    TStringList;
 begin
 
     Screen.Cursor:=crHourGlass;
@@ -256,7 +259,7 @@ begin
         if FGrid.RowCount > 2 then
         begin
 
-            SL:=TStringList.Create;
+            var SL: TStringList:=TStringList.Create;
 
             try
                 SL.Sorted:=True;
@@ -264,22 +267,22 @@ begin
 
                 // If not previously filtered, then show all items
                 if (High(FFilter) = 0) and (InUse = False) then
-                    for iCNT:=1 to FGrid.RowCount - 1 do
+                    for var iCNT: integer:=1 to FGrid.RowCount - 1 do
                         SL.Add(FGrid.Cells[FColNumber, iCNT]);
 
                 // If not previously filtered by any other column, then show only visible items
                 if (High(FFilter) = 0) and (InUse = True) then
-                    for iCNT:=1 to FGrid.RowCount - 1 do
+                    for var iCNT: integer:=1 to FGrid.RowCount - 1 do
                         if FGrid.RowHeights[iCNT] = FGrid.sgRowHeight then
                             SL.Add(FGrid.Cells[FColNumber, iCNT]);
 
                 // If previosuly filtered, then upload items with filter state
                 if High(FFilter) > 0 then
-                    for iCNT:=0 to High(FFilter) - 1 do
+                    for var iCNT: integer:=0 to High(FFilter) - 1 do
                         SL.Add(FFilter[iCNT, 0]);
 
                 // Move to checkbox list
-                for iCNT:=0 to SL.Count - 1 do
+                for var iCNT: integer:=0 to SL.Count - 1 do
                     FilterList.Items.Add(SL.Strings[iCNT]);
 
             finally
@@ -290,7 +293,7 @@ begin
         // Tick or untick previously filtered
         FilterList.CheckAll(cbChecked, False, True);
 
-        for iCNT:=0 to High(FFilter) - 1 do
+        for var iCNT: integer:=0 to High(FFilter) - 1 do
         begin
 
             if FFilter[iCNT, 1] = 'False' then
@@ -316,13 +319,10 @@ end;
 
 
 procedure TFilterForm.FilterNow(var FFilter: TALists);
-var
-    iCNT:  integer;
-    jCNT:  integer;
 begin
 
     // Add to the list state (false or true)
-    for iCNT:=0 to FilterList.Count - 1 do
+    for var iCNT: integer:=0 to FilterList.Count - 1 do
     begin
         FFilter[iCNT, 0]:=FilterList.Items.Strings[iCNT];
         FFilter[iCNT, 1]:=BoolToStr(FilterList.Checked[iCNT], True);
@@ -333,8 +333,8 @@ begin
     FilterCount(True);
 
     // Filter selected items
-    for iCNT:=0 to High(FFilter) - 1 do
-        for jCNT:=1 { Skip header } to FGrid.RowCount - 1 do
+    for var iCNT: integer:=0 to High(FFilter) - 1 do
+        for var jCNT: integer:=1 { Skip header } to FGrid.RowCount - 1 do
         begin
 
             if (UpperCase(FFilter[iCNT, 0]) = UpperCase(FGrid.Cells[FColNumber, jCNT])) then
@@ -393,12 +393,9 @@ end;
 
 
 procedure TFilterForm.FilterRemove(var FFilter: TALists);
-var
-    iCNT:  integer;
-    jCNT:  integer;
 begin
 
-    for iCNT:=0 to high(FFilter) - 1 do
+    for var iCNT: integer:=0 to high(FFilter) - 1 do
     begin
         FilterList.ItemEnabled[iCNT]:=True;
 
@@ -406,7 +403,7 @@ begin
         begin
             FilterList.Checked[iCNT]:=True;
 
-            for jCNT:=1 {skip header} to FGrid.RowCount - 1 do
+            for var jCNT: integer:=1 {skip header} to FGrid.RowCount - 1 do
             begin
 
                 if (UpperCase(FFilter[iCNT, 0]) = UpperCase(FGrid.Cells[FColNumber, jCNT])) then
@@ -447,8 +444,6 @@ end;
 
 procedure TFilterForm.FormActivate(Sender: TObject);
 
-    (* NESTED METHOD *)
-
     procedure SetAndQuit;
     begin
         btnRemove.Enabled:=True;
@@ -480,16 +475,14 @@ end;
 
 
 procedure TFilterForm.btnFilterClick(Sender: TObject);
-var
-    AgeView: TAgeView;
 begin
 
     if FColNumber > 0 then
     begin
 
         Screen.Cursor:=crHourGlass;
-        AgeView:=TAgeView.Create(MainForm.DbConnect);
 
+        var AgeView: TAgeView:=TAgeView.Create(MainForm.DbConnect);
         try
             FGrid.Freeze(True);
 
@@ -529,8 +522,6 @@ end;
 
 
 procedure TFilterForm.btnRemoveClick(Sender: TObject);
-var
-    AgeView: TAgeView;
 begin
 
     if HowManyFlts < 2 then
@@ -543,8 +534,8 @@ begin
     begin
 
         Screen.Cursor:=crHourGlass;
-        AgeView:=TAgeView.Create(MainForm.DbConnect);
 
+        var AgeView: TAgeView:=TAgeView.Create(MainForm.DbConnect);
         try
 
             FGrid.Freeze(True);
@@ -585,19 +576,17 @@ end;
 
 
 procedure TFilterForm.cbSelectAllClick(Sender: TObject);
-var
-    iCNT:  integer;
 begin
 
     if cbSelectAll.Checked then
     begin
-        for iCNT:=0 to FilterList.Count - 1 do
+        for var iCNT: integer:=0 to FilterList.Count - 1 do
             if FilterList.ItemEnabled[iCNT] = True then
                     FilterList.Checked[iCNT]:=True
     end
     else
     begin
-        for iCNT:=0 to FilterList.Count - 1 do
+        for var iCNT: integer:=0 to FilterList.Count - 1 do
             if FilterList.ItemEnabled[iCNT] = True then
                 FilterList.Checked[iCNT]:=False;
     end;

@@ -19,7 +19,10 @@ uses
     Vcl.StdCtrls,
     CRC32u,
     uCEFApplication,
-    DbModel                  in 'Model\DbModel.pas'{Legacy code/to be removed},
+    InterposerClasses        in 'Extensions\InterposerClasses.pas' {Too lazy to build own components},
+    Helpers                  in 'Extensions\Helpers.pas',
+    Rest                     in 'Extensions\Rest.pas',
+    DbModel                  in 'Model\DbModel.pas' {Legacy code/to be removed},
     Customer.AddressBook     in 'Model\Json\RawTables\Customer.AddressBook.pas',
     Customer.ControlStatus   in 'Model\Json\RawTables\Customer.ControlStatus.pas',
     Customer.Snapshots       in 'Model\Json\RawTables\Customer.Snapshots.pas',
@@ -33,8 +36,6 @@ uses
     Erp.Person               in 'Model\Json\RawTables\Erp.Person.pas',
     Erp.PersonResponsible    in 'Model\Json\RawTables\Erp.PersonResponsible.pas',
     Erp.SalesResponsible     in 'Model\Json\RawTables\Erp.SalesResponsible.pas',
-    InterposerClasses        in 'Extensions\InterposerClasses.pas'{Too lazy to build own components},
-    Helpers                  in 'Extensions\Helpers.pas',
     SqlHandler               in 'Mediator\SqlHandler.pas',
     DbHandler                in 'Mediator\DbHandler.pas',
     AgeView                  in 'Mediator\AgeView.pas',
@@ -55,14 +56,14 @@ uses
     Invoices                 in 'View\Invoices.pas' {InvoicesForm},
     Main                     in 'View\Main.pas' {MainForm},
     PhoneList                in 'View\PhoneList.pas' {PhoneListForm},
-    SendFeedback             in 'View\SendFeedback.pas' {ReportForm},
-    AVSearch                 in 'View\AVSearch.pas' {SearchForm},
+    Feedback                 in 'View\Feedback.pas' {FeedbackForm},
+    GridSearch               in 'View\GridSearch.pas' {GridSearchForm},
     Send                     in 'View\Send.pas' {SendForm},
     Splash                   in 'View\Splash.pas' {SplashForm},
     Tracker                  in 'View\Tracker.pas' {TrackerForm},
     Update                   in 'View\Update.pas' {UpdateForm},
-    MassMailer               in 'View\MassMailer.pas' {ViewMailerForm},
-    ABSearch                 in 'View\ABSearch.pas' {ViewSearchForm},
+    MassMailer               in 'View\MassMailer.pas' {MassMailerForm},
+    SqlSearch                in 'View\SqlSearch.pas' {SqlSearchForm},
     Await                    in 'View\Await.pas' {AwaitForm},
     Qms                      in 'View\Qms.pas' {QmsForm};
 
@@ -288,16 +289,16 @@ begin
     ReportMemoryLeaksOnShutdown:=DebugHook <> 0;
     {$WARN SYMBOL_PLATFORM ON}
 
-    // We allow only one instance of running program (no sessions)
-    var Mutex: integer:=CreateMutex(nil, True, TCommon.CurrentMutex);
-    if (Mutex = 0) or (GetLastError = ERROR_ALREADY_EXISTS) then
-    begin
-        Application.MessageBox(
-            PCHar(TCommon.AppCaption + ' is already running. You can only have one instance at a time.'),
-            PChar(TCommon.AppCaption), MB_OK + MB_ICONWARNING
-        );
-        ExitProcess(0);
-    end;
+//    // We allow only one instance of running program (no sessions)
+//    var Mutex: integer:=CreateMutex(nil, True, TCommon.CurrentMutex);
+//    if (Mutex = 0) or (GetLastError = ERROR_ALREADY_EXISTS) then
+//    begin
+//        Application.MessageBox(
+//            PCHar(TCommon.AppCaption + ' is already running. You can only have one instance at a time.'),
+//            PChar(TCommon.AppCaption), MB_OK + MB_ICONWARNING
+//        );
+//        ExitProcess(0);
+//    end;
 
     {$WARN SYMBOL_PLATFORM OFF} {Windows only}
     var RegSettings: TFormatSettings:=TFormatSettings.Create(LOCALE_USER_DEFAULT);
@@ -328,7 +329,7 @@ begin
         ExitProcess(0);
     end;
 
-    // Get all necessary settings from configuration file before any possible update.
+    // Get all necessary settings from configuration file before any possible update
     var ReleaseNumber:  cardinal:=0;
     var PathReleasePak: string;
     var PathReleaseMan: string;
@@ -412,7 +413,6 @@ begin
 
     if not(DirectoryExists(Settings.GetLayoutDir))  then CreateDir(Settings.GetLayoutDir);
     if not(DirectoryExists(Settings.GetPackageDir)) then CreateDir(Settings.GetPackageDir);
-
 
     var WndRect: TRect;
     var Manifest: string:=Connection.GetResponseText(Settings.GetReleaseManURL);
@@ -583,7 +583,7 @@ begin
         Status(4, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Checking Windows 7 Aero composition... OK.', True, Settings.GetPathEventLog, LogText);
     end;
 
-   /// Check configuration file and deploy default if corrupted
+   // Check configuration file and deploy in case it is corrupted
    Status(5, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'CRC32 check: ' + TCommon.ConfigFile + '...', True, Settings.GetPathEventLog, LogText);
 
    if not (Settings.Decode(TCommon.TFiles.AppConfig, False)) then
@@ -677,17 +677,17 @@ begin
 
     try
 
-        /// <summary>
+        /// <remarks>
         /// Do not run Chromium inside Unity application, all HTML rendering should be subprocessed.
-        /// </summary>
+        /// </remarks>
 
         Status(14, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Chromium initialization: assigning sub process...', True, Settings.GetPathEventLog, LogText);
         GlobalCEFApp.BrowserSubprocessPath:='SubProcess.exe';
 
-        /// <summary>
+        /// <remarks>
         /// Because TApplication should be only initialized and run in the main process, we call GlobalCEFApp.StartMainProcess to check
         /// if we have main thread running. If not, we exit the program.
-        /// </summary>
+        /// </remarks>
 
         Status(15, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Chromium initialization: starting main process...', True, Settings.GetPathEventLog, LogText);
 
@@ -755,7 +755,7 @@ begin
     // ----------------------------------------------------------------------------------------------------------------------------------------------------- //
 
 
-    Status(20, TSplashScreen.AllTasks, 50, 'Application initialization... ', False, Settings.GetPathEventLog, LogText);
+    Status(20, TSplashScreen.AllTasks, TSplashScreen.DelayStd, 'Application initialization... ', False, Settings.GetPathEventLog, LogText);
     Application.Initialize;
     Application.Title:=TCommon.AppCaption;
     Application.MainFormOnTaskbar:=False;
@@ -769,35 +769,11 @@ begin
     /// <remarks>
     /// Load Main Form and execute all of its initialization methods.
     /// Visible parameter must be set to false to prevent from showing the main application window while splash screen is still on.
+    /// This is the only one form that is pre-loaded. All other forms are subject to lazy loading.
     /// </remarks>
 
     Application.CreateForm(TMainForm, MainForm);
-    MainForm.LogText.Log(Settings.GetPathEventLog, '[GUI] Initialization methods executed within main thread, ''MainForm'' has been created. Main process thread ID = ' + MainThreadID.ToString + '.');
-
-    /// <remarks>
-    /// Load all other forms and execute initialization methods. Similarly to MainForm, visible parameter of the forms must be set to false
-    /// to prevent showing up windows.
-    /// </remarks>
-
-    Application.CreateForm(TAboutForm, AboutForm);
-    Application.CreateForm(TSendForm, SendForm);
-    Application.CreateForm(TEventForm, EventForm);
-    Application.CreateForm(TColorsForm, ColorsForm);
-    Application.CreateForm(TReportForm, ReportForm);
-    Application.CreateForm(TFilterForm, FilterForm);
-    Application.CreateForm(TSearchForm, SearchForm);
-    Application.CreateForm(TTrackerForm, TrackerForm);
-    Application.CreateForm(TActionsForm, ActionsForm);
-    Application.CreateForm(TCalendarForm, CalendarForm);
-    Application.CreateForm(TInvoicesForm, InvoicesForm);
-    Application.CreateForm(TPhoneListForm, PhoneListForm);
-    Application.CreateForm(TViewSearchForm, ViewSearchForm);
-    Application.CreateForm(TViewMailerForm, ViewMailerForm);
-    Application.CreateForm(TAwaitForm, AwaitForm);
-    Application.CreateForm(TQmsForm, QmsForm);
-
-
-    // ----------------------------------------------------------------------------------------------------------------------------------------------------- //
+  // ----------------------------------------------------------------------------------------------------------------------------------------------------- //
 
 
     Status(21, TSplashScreen.AllTasks, 500, 'Application is initialized.', False, Settings.GetPathEventLog, LogText);
@@ -809,7 +785,6 @@ begin
     if Settings.GetStringValue(TConfigSections.ApplicationDetails,  'WINDOW_STATE', '') = 'wsMaximized' then MainForm.WindowState:=wsMaximized;
     if Settings.GetStringValue(TConfigSections.ApplicationDetails,  'WINDOW_STATE', '') = 'wsMinimized' then MainForm.WindowState:=wsMinimized;
 
-    MainForm.LogText.Log(Settings.GetPathEventLog, 'Initialization is completed. Application is running.');
     MainForm.Show;
     Application.MainFormOnTaskbar:=True;
     Application.Run;

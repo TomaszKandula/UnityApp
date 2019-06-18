@@ -1,4 +1,4 @@
-object ReportForm: TReportForm
+object FeedbackForm: TFeedbackForm
   Left = 0
   Top = 0
   BorderIcons = [biSystemMenu]

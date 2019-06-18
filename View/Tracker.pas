@@ -84,11 +84,13 @@ type
     end;
 
 
-var
-    TrackerForm: TTrackerForm;
+    function TrackerForm: TTrackerForm;
 
 
 implementation
+
+
+{$R *.dfm}
 
 
 uses
@@ -101,7 +103,14 @@ uses
     Helpers;
 
 
-{$R *.dfm}
+var vTrackerForm: TTrackerForm;
+
+
+function TrackerForm: TTrackerForm;
+begin
+    if not(Assigned(vTrackerForm)) then Application.CreateForm(TTrackerForm, vTrackerForm);
+    Result:=vTrackerForm;
+end;
 
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //

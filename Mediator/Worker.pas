@@ -12,6 +12,7 @@ uses
     System.Diagnostics,
     System.Win.ComObj,
     System.SyncObjs,
+    System.Threading,
     Vcl.Graphics,
     Vcl.ComCtrls,
     Vcl.Dialogs,
@@ -23,129 +24,38 @@ uses
 
 type
 
-    {TODO -oTomek -cGeneral: replace TThread with ITask, remove TCriticalSections}
-
     IThreading = interface(IInterface)
     ['{14BBF3F3-945A-4A61-94BA-6A2EE10530A2}']
-
-
+        procedure CheckServerConnectionAsync();
+        procedure RefreshInvoiceTrackerAsync(UserAlias: string);
+        procedure MakeAgeViewAsync(OpenAmount: double);
+        procedure ReadAgeViewAsync(ActionMode: TEnums.TLoading; SortMode: integer);
+        procedure ScanOpenItemsAsync();
+        procedure ReadOpenItemsAsync(ActionMode: TEnums.TLoading);
+        procedure OpenAddressBookAsync(UserAlias: string; SourceGrid: TStringGrid; OptionalCondition: string = '');
+        procedure UpdateAddressBookAsync(SourceGrid: TStringGrid; UpdateValues: TAddressBookUpdateFields);
+        procedure AddToAddressBookAsync(SourceGrid: TStringGrid);
     end;
 
     TThreading = class(TInterfacedObject, IThreading)
     {$TYPEINFO ON}
-
-
-    end;
-
-
-    // ----------------------------------------------------------------------------------------------------------------------------------------------------- //
-
-
-    TTCheckServerConnection = class(TThread)
     protected
-        procedure Execute; override;
-    end;
-
-
-    TTInvoiceTrackerRefresh = class(TThread)
-    protected
-        procedure Execute; override;
+        { Empty }
     private
-        var pUserAlias: string;
-        var FIDThd    : integer;
+        { Empty }
     public
-        property    IDThd:  integer read FIDThd;
-        constructor Create(UserAlias: string);
+        procedure CheckServerConnectionAsync();
+        procedure RefreshInvoiceTrackerAsync(UserAlias: string);
+        procedure MakeAgeViewAsync(OpenAmount: double);
+        procedure ReadAgeViewAsync(ActionMode: TEnums.TLoading; SortMode: integer);
+        procedure ScanOpenItemsAsync();
+        procedure ReadOpenItemsAsync(ActionMode: TEnums.TLoading);
+        procedure OpenAddressBookAsync(UserAlias: string; SourceGrid: TStringGrid; OptionalCondition: string = '');
+        procedure UpdateAddressBookAsync(SourceGrid: TStringGrid; UpdateValues: TAddressBookUpdateFields);
+        procedure AddToAddressBookAsync(SourceGrid: TStringGrid);
     end;
 
 
-    TTMakeAgeView = class(TThread)
-    protected
-        procedure Execute; override;
-        private
-        var FLock      : TCriticalSection;
-        var FIDThd     : integer;
-        var FOpenAmount: double;
-    public
-        property    IDThd:  integer read FIDThd;
-        constructor Create(OpenAmount: double);
-        destructor  Destroy; override;
-    end;
-
-
-    TTReadAgeView = class(TThread)
-    protected
-        procedure Execute; override;
-    private
-        var FLock:  TCriticalSection;
-        var FIDThd: integer;
-        var FMode:  TEnums.TLoading;
-        var FSort:  integer;
-    public
-        property    IDThd:  integer read FIDThd;
-        constructor Create(ActionMode: TEnums.TLoading; SortMode: integer);
-        destructor  Destroy; override;
-    end;
-
-
-    TTOpenItemsScanner = class(TThread)
-    protected
-        procedure Execute; override;
-    private
-        var FLock:  TCriticalSection;
-        var FIDThd: integer;
-    public
-        property    IDThd:  integer read FIDThd;
-        constructor Create;
-        destructor  Destroy; override;
-    end;
-
-
-    TTReadOpenItems = class(TThread)
-    protected
-        procedure Execute; override;
-    private
-        var FMode:  TEnums.TLoading;
-        var FLock:  TCriticalSection;
-        var FIDThd: integer;
-    public
-        property    IDThd:  integer read FIDThd;
-        constructor Create(ActionMode: TEnums.TLoading);
-        destructor  Destroy; override;
-    end;
-
-
-    TTAddressBook = class(TThread)
-    protected
-        procedure Execute; override;
-    private
-        var FLock:       TCriticalSection;
-        var FMode:       TEnums.TActions;
-        var FGrid:       TStringGrid;
-        var FIDThd:      integer;
-        var FContact:    string;
-        var FEstatement: string;
-        var FEmail:      string;
-        var FPhones:     string;
-        var FSCUID:      string;
-        var FConditions: string;
-    public
-        property    IDThd:  integer read FIDThd;
-        function    Read     : boolean;
-        function    Update   : boolean;
-        function    Add      : boolean;
-        destructor  Destroy; override;
-        constructor Create(
-            ActionMode:     TEnums.TActions;
-            Grid:           TStringGrid;
-            SCUID:          string;
-            Contact:        string;
-            Estatement:     string;
-            Email:          string;
-            Phones:         string;
-            Conditions:     string
-        );
-    end;
 
 
     TTSendUserFeedback = class(TThread)
@@ -351,730 +261,631 @@ uses
     Transactions,
     Tracker,
     Actions,
-    SendFeedback;
+    Feedback;
 
 
-// --------------------------------------------------------------------------------------------------------------------------------- CHECK SERVER CONNECTION //
+// ------------------------------------
+// Check connection with SQL Server
+// *Remove when SQL is replaced by API
+// ------------------------------------
 
-
-procedure TTCheckServerConnection.Execute;
+procedure TThreading.CheckServerConnectionAsync();
 begin
 
-    var DataBase: TDataBase:=TDataBase.Create(False);
-    try
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
 
-        var IDThd: integer:=TTCheckServerConnection.CurrentThread.ThreadID;
-        if (not(MainForm.IsConnected)) and (DataBase.Check = 0) then
-        begin
-            Synchronize(procedure
-            begin
-                MainForm.TryInitConnection;
-                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Connection with SQL Server database has been re-established.');
-            end);
-        end;
-
-        if DataBase.Check <> 0 then
-        begin
-            MainForm.IsConnected:=False;
-            MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Connection with SQL Server database has been lost, waiting to reconnect...');
-        end;
-
-    finally
-        DataBase.Free;
-    end;
-
-    FreeOnTerminate:=True;
-
-end;
-
-
-// --------------------------------------------------------------------------------------------------------------------------------- INVOICE TRACKER REFRESH //
-
-
-constructor TTInvoiceTrackerRefresh.Create(UserAlias: string);
-begin
-    inherited Create(False);
-    pUserAlias:=UserAlias;
-end;
-
-
-procedure TTInvoiceTrackerRefresh.Execute;
-begin
-
-    FIDThd:=CurrentThread.ThreadID;
-
-    try
-        MainForm.UpdateTrackerList(pUserAlias);
-    except
-        on E: Exception do
-            MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Execution of this tread work has been stopped. Error has been thrown: ' + E.Message + ' (TInvoiceTracker).');
-    end;
-
-    // Release when finished
-    FreeOnTerminate:=True;
-
-end;
-
-
-// ------------------------------------------------------------------------------------------------------------------------------------------- MAKE AGE VIEW //
-
-
-constructor TTMakeAgeView.Create(OpenAmount: double);
-begin
-    inherited Create(False);
-    FLock      :=TCriticalSection.Create;
-    FOpenAmount:=OpenAmount;
-    FIDThd     :=0;
-end;
-
-
-destructor TTMakeAgeView.Destroy;
-begin
-    FLock.Free;
-end;
-
-
-procedure TTMakeAgeView.Execute;
-var
-    THDMili:   extended;
-    THDSec:    extended;
-    StopWatch: TStopWatch;
-    AgeView:   TAgeView;
-    UserCtrl:  TUserControl;
-    CanReload: boolean;
-begin
-
-    CanReload:=False;
-    FIDThd:=CurrentThread.ThreadID;
-    FLock.Acquire;
-
-    AgeView :=TAgeView.Create(MainForm.DbConnect);
-    UserCtrl:=TUserControl.Create(MainForm.DbConnect);
-
-    try
-        StopWatch:=TStopWatch.StartNew;
-        MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Generating);
-        MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']:' + TStatusBar.Generating);
-
+        var DataBase: TDataBase:=TDataBase.Create(False);
         try
-            AgeView.idThd:=IDThd;
 
-            // Async
-            if MainForm.EditGroupID.Text = MainForm.GroupIdSel then AgeView.GroupID:=MainForm.GroupIdSel
-                else
-                    if MainForm.EditGroupID.Text <> '' then AgeView.GroupID:=MainForm.EditGroupID.Text
-                        else
-                            AgeView.GroupID:=MainForm.GroupIdSel;
-
-            // Generate aging
-            AgeView.Make(MainForm.OSAmount);
-
-            // CSV or server?
-            if MainForm.cbDump.Checked then
+            if (not(MainForm.IsConnected)) and (DataBase.Check = 0) then
             begin
-                if MainForm.CSVExport.Execute then
-                AgeView.ExportToCSV(MainForm.CSVExport.FileName, AgeView.ArrAgeView);
-            end
-            else
 
-            // Send to SQL Server, update age date list and reload age view on main tabsheet
-            begin
-                AgeView.Write(TSnapshots.Snapshots, AgeView.ArrAgeView);
-                Synchronize(procedure
+                TThread.Synchronize(nil, procedure
                 begin
-                    try
-                        UserCtrl.GetAgeDates(MainForm.GroupListDates, MainForm.GroupList[0, 0]);
-                        MainForm.AgeDateSel:=MainForm.GroupListDates.Text;
-                    finally
-                        UserCtrl.Free;
-                    end;
+                    MainForm.TryInitConnection;
+                    MainForm.LogText.Log(MainForm.EventLogPath, 'Connection with SQL Server database has been re-established.');
                 end);
 
-                CanReload:=True;
             end;
 
-
-        except
-            on E: Exception do
-                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot execute "TTMakeAgeView". Error has been thrown: ' + E.Message);
-        end;
-
-    finally
-        MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready);
-        THDMili:=StopWatch.ElapsedMilliseconds;
-        THDSec:=THDMili / 1000;
-        MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Age View thread has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
-        AgeView.Free;
-        FLock.Release;
-    end;
-
-    // Release when finished
-    FreeOnTerminate:=True;
-    if CanReload then
-        TTReadAgeView.Create(TEnums.TLoading.NullParameter, TSorting.TMode.Ranges);
-
-end;
-
-
-// ------------------------------------------------------------------------------------------------------------------------------------------- READ AGE VIEW //
-
-
-constructor TTReadAgeView.Create(ActionMode: TEnums.TLoading; SortMode: integer);
-begin
-    inherited Create(False);
-    FLock :=TCriticalSection.Create;
-    FMode :=ActionMode;
-    FSort :=SortMode;
-    FIDThd:=0;
-end;
-
-
-destructor TTReadAgeView.Destroy;
-begin
-    FLock.Free;
-end;
-
-
-Procedure TTReadAgeView.Execute;
-var
-    THDMili:    extended;
-    THDSec:     extended;
-    StopWatch:  TStopWatch;
-    AgeView:    TAgeView;
-begin
-    FIDThd:=CurrentThread.ThreadID;
-    FLock.Acquire;
-    AgeView:=TAgeView.Create(MainForm.DbConnect);
-    try
-        StopWatch:=TStopWatch.StartNew;
-        MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Loading);
-        MainForm.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Show.ToString);
-
-        try
-            // Sync
-            Synchronize(AgeView.ClearSummary);
-
-            // Async
-            AgeView.idThd  :=IDThd;
-            AgeView.GroupID:=MainForm.GroupIdSel;
-            AgeView.AgeDate:=MainForm.AgeDateSel;
-            AgeView.Read(MainForm.sgAgeView, FSort);
-
-            // Sync
-            Synchronize(procedure
+            if DataBase.Check <> 0 then
             begin
-                AgeView.ComputeAgeSummary(MainForm.sgAgeView);
-                AgeView.ComputeAndShowRCA(MainForm.sgAgeView);
-                AgeView.UpdateSummary;
-                AgeView.GetDetails(MainForm.sgCompanyData);
-
-                // Map data (source General Tables tabsheet)
-                AgeView.MapGroup3(MainForm.sgAgeView, MainForm.sgGroup3);
-                AgeView.MapTable1(MainForm.sgAgeView, MainForm.sgPersonResp);
-                AgeView.MapTable2(MainForm.sgAgeView, MainForm.sgSalesResp);
-                AgeView.MapTable3(MainForm.sgAgeView, MainForm.sgAccountType);
-                AgeView.MapTable4(MainForm.sgAgeView, MainForm.sgCustomerGr);
-
-                MainForm.sgAgeView.Repaint;
-            end);
-
-        except
-            on E: Exception do
-                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot execute "TTReadAgeView". Error has been thrown: ' + E.Message);
-        end;
-
-    finally
-        MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready);
-        THDMili:=StopWatch.ElapsedMilliseconds;
-        THDSec:=THDMili / 1000;
-        MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Thread for selected Group Id "' + AgeView.GroupID + '" has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
-        AgeView.Free;
-        FLock.Release;
-
-        // Switch on all timers
-        MainForm.SwitchTimers(TurnedOn);
-
-        MainForm.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString);
-
-    end;
-
-    // Release when finished
-    FreeOnTerminate:=True;
-
-    // Call open items if user select another age view
-    if FMode = CallOpenItems then
-        TTReadOpenItems.Create(TEnums.TLoading.NullParameter);
-
-end;
-
-
-// -------------------------------------------------------------------------------------------------------------------------------------- OPEN ITEMS SCANNER //
-
-
-constructor TTOpenItemsScanner.Create;
-begin
-    inherited Create(False);
-    FLock :=TCriticalSection.Create;
-    FIDThd:=0;
-end;
-
-
-destructor TTOpenItemsScanner.Destroy;
-begin
-    FLock.Free;
-end;
-
-
-procedure TTOpenItemsScanner.Execute;
-var
-    Transactions: TTransactions;
-    ReadDateTime: string;
-    ReadStatus:   string;
-    CanMakeAge:   boolean;
-begin
-    CanMakeAge:=False;
-    FIDThd:=CurrentThread.ThreadID;
-    FLock.Acquire;
-    Transactions:=TTransactions.Create(MainForm.DbConnect);
-
-    try
-        try
-            ReadDateTime:=Transactions.GetDateTime(DateTime);
-            ReadStatus:=Transactions.GetStatus(ReadDateTime);
-            if ( StrToDateTime(MainForm.OpenItemsUpdate) < StrToDateTime(ReadDateTime) ) and ( ReadStatus = 'Completed' ) then
-            begin
-                // Switch off all of the timers
-                MainForm.SwitchTimers(TurnedOff);
-
-                // Refresh open items and make new aging view
-                MainForm.OpenItemsUpdate:=ReadDateTime;
-                MainForm.OpenItemsStatus:='';
-                CanMakeAge:=True;
+                MainForm.IsConnected:=False;
+                MainForm.LogText.Log(MainForm.EventLogPath, 'Connection with SQL Server database has been lost, waiting to reconnect...');
             end;
-        except
-            on E: Exception do
-                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot execute "TTOpenItemsScanner". Error has been thrown: ' + E.Message);
+
+        finally
+            DataBase.Free;
         end;
-    finally
-        Transactions.Free;
-        FLock.Release;
-    end;
 
-    // Release when finished
-    FreeOnTerminate:=True;
-    if CanMakeAge then
-        TTReadOpenItems.Create(TEnums.TLoading.CallMakeAge);
+    end);
+
+    NewTask.Start;
 
 end;
 
 
-// ----------------------------------------------------------------------------------------------------------------------------------------- READ OPEN ITEMS //
+// ------------------------------------
+// Refresh invoice tracker list
+// *Remove when SQL is replaced by API
+// ------------------------------------
 
-
-constructor TTReadOpenItems.Create(ActionMode: TEnums.TLoading);
+procedure TThreading.RefreshInvoiceTrackerAsync(UserAlias: string);
 begin
-    inherited Create(False);
-    FLock :=TCriticalSection.Create;
-    FMode :=ActionMode;
-    FIDThd:=0;
-end;
-
-
-destructor TTReadOpenItems.Destroy;
-begin
-    FLock.Free;
-end;
-
-
-procedure TTReadOpenItems.Execute;
-var
-    THDMili:    extended;
-    THDSec:     extended;
-    StopWatch:  TStopWatch;
-    OpenItems:  TTransactions;
-begin
-    FIDThd:=CurrentThread.ThreadID;
-    FLock.Acquire;
-    OpenItems:=TTransactions.Create(MainForm.DbConnect);
 
     try
-        StopWatch:=TStopWatch.StartNew;
-        MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Downloading);
 
-        try
-            OpenItems.DestGrid   :=MainForm.sgOpenItems;
-            OpenItems.SettingGrid:=MainForm.sgCompanyData;
-            OpenItems.DestGrid.Freeze(True);
-
-            // Sync with GUI
-            Synchronize(OpenItems.ClearSummary);
-
-            // Async
-            OpenItems.LoadToGrid;
-            OpenItems.UpdateSummary;
-        except
-            on E: Exception do
-                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(FIDThd) + ']: Cannot execute "TTReadOpenItems". Error has been thorwn: ' + E.Message);
-        end;
-
-    finally
-        THDMili:=StopWatch.ElapsedMilliseconds;
-        THDSec:=THDMili / 1000;
-        MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(FIDThd) + ']: Open Items loading thread has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
-        MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready);
-
-        // Release VCL and set auto column width
-        Synchronize(procedure
+        var NewTask: ITask:=TTask.Create(procedure
         begin
-            OpenItems.DestGrid.SetColWidth(10, 20, 400);
+            MainForm.UpdateTrackerList(UserAlias)
         end);
 
-        OpenItems.DestGrid.Freeze(False);
-        OpenItems.Free;
-        FLock.Release;
+        NewTask.Start;
 
+    except
+        on E: Exception do
+            MainForm.LogText.Log(MainForm.EventLogPath, 'Execution of this tread work has been stopped. Error has been thrown: ' + E.Message + ' (TInvoiceTracker).');
     end;
 
-    // Release when finished
-    FreeOnTerminate:=True;
+end;
 
-    // Make age view from open items and send to SQL Server
-    if FMode = CallMakeAge then
+
+// ------------------------------------
+// Make aging report for main view
+// *Remove when SQL is replaced by API
+// ------------------------------------
+
+procedure TThreading.MakeAgeViewAsync(OpenAmount: double);
+begin
+
+    var NewTask: ITask:=TTask.Create(procedure
     begin
-        MainForm.cbDump.Checked:=False;
-        TTMakeAgeView.Create(MainForm.OSAmount);
-    end;
 
-end;
-
-
-// --------------------------------------------------------------------------------------------------------------------------------------------- ADRESS BOOK //
-
-
-constructor TTAddressBook.Create(ActionMode: TEnums.TActions; Grid: TStringGrid; SCUID, Contact, Estatement, Email, Phones: string; Conditions: string);
-begin
-    inherited Create(False);
-    FLock      :=TCriticalSection.Create;
-    FMode      :=ActionMode;
-    FGrid      :=Grid;
-    FContact   :=Contact;
-    FEstatement:=Estatement;
-    FEmail     :=Email;
-    FPhones    :=Phones;
-    FSCUID     :=SCUID;
-    FIDThd     :=0;
-    FConditions:=Conditions;
-end;
-
-
-destructor TTAddressBook.Destroy;
-begin
-    FLock.Free;
-end;
-
-
-procedure TTAddressBook.Execute;
-begin
-    FIDThd:=CurrentThread.ThreadID;
-    FLock.Acquire;
-
-    try
-        MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Processing);
-
-        // Open
-        if (FMode = TEnums.TActions.OpenAll) or (FMode = TEnums.TActions.OpenForUser) then
-        begin
-            if Read then
-                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IDThd.ToString + ']: Address Book has been opened successfully.')
-                    else
-                        begin
-                            MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot open Address Book.');
-                            MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Read function of Address Book has failed. Please contact IT support.');
-                        end;
-        end;
-
-        // Update
-        if FMode = TEnums.TActions.Update then
-        begin
-            if Update then
-                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IDThd.ToString + ']: The Address Book has been updated successfully.')
-                    else
-                        MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IDThd.ToString + ']: Cannot insert data to Address Book, either error occured or item already exist.');
-        end;
-
-        // Insert new recodrs
-        if FMode = TEnums.TActions.Insert then
-        begin
-            if Add then
-                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IDThd.ToString + ']: The Address Book insertion has been executed successfully.')
-                    else
-                        MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IDThd.ToString + ']: Cannot insert data to Address Book, either error occured or item already exist.');
-        end;
-
-        // Export
-        if FMode = TEnums.TActions.Export then
-        begin
-            FGrid.OpenThdId:=IDThd;
-            FGrid.ExportCSV(MainForm.CSVExport, '|');
-        end;
-
-    finally
-        MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready);
-        FLock.Release;
-    end;
-
-    // Release when finished
-    FreeOnTerminate:=True;
-
-end;
-
-
-function TTAddressBook.Read: boolean;
-var
-    DataTables: TDataTables;
-begin
-    Result:=True;
-    MainForm.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Show.ToString);
-    DataTables:=TDataTables.Create(MainForm.DbConnect);
-    try
+        var CanReload: boolean:=False;
+        var AgeView: TAgeView:=TAgeView.Create(MainForm.DbConnect);
+        var UserCtrl: TUserControl:=TUserControl.Create(MainForm.DbConnect);
+        var StopWatch: TStopWatch:=TStopWatch.StartNew;
 
         try
-            // Freeze StringGrid
-            FGrid.Freeze(True);
 
-            // Column selection
-            DataTables.Columns.Add(TAddressBook.UserAlias);
-            DataTables.Columns.Add(TAddressBook.Scuid);
-            DataTables.Columns.Add(TAddressBook.CustomerNumber);
-            DataTables.Columns.Add(TAddressBook.CustomerName);
-            DataTables.Columns.Add(TAddressBook.Emails);
-            DataTables.Columns.Add(TAddressBook.Estatements);
-            DataTables.Columns.Add(TAddressBook.PhoneNumbers);
-            DataTables.Columns.Add(TAddressBook.Contact);
-            DataTables.Columns.Add(TAddressBook.CoCode);
-            DataTables.Columns.Add(TAddressBook.Agent);
-            DataTables.Columns.Add(TAddressBook.Division);
+            MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Generating);
+            MainForm.LogText.Log(MainForm.EventLogPath, TStatusBar.Generating);
 
-            // Filter by User Alias (if given)
-            if FMode = TEnums.TActions.OpenForUser then
-                DataTables.CustFilter:=FConditions;
-
-            DataTables.OpenTable(TAddressBook.AddressBook);
-            if not(DataTables.SqlToGrid(FGrid, DataTables.DataSet, True, True)) then
-                MainForm.ExecMessage(False, TMessaging.TWParams.MessageWarn, 'No results found in the database.');
-
-        except
-            on E: Exception do
-            begin
-                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: ' + E.Message);
-                Result:=False;
-            end;
-        end;
-
-    finally
-        DataTables.Free;
-
-        // Set auto column width
-        Synchronize(procedure
-        begin
-            FGrid.SetColWidth(40, 10, 400);
-        end);
-
-        // Release StringGrid
-        FGrid.Freeze(False);
-    end;
-
-    MainForm.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString);
-
-end;
-
-
-function TTAddressBook.Update: boolean;
-var
-    Book:       TDataTables;
-    iCNT:       integer;
-    Condition:  string;
-begin
-    Result:=False;
-    Book:=TDataTables.Create(MainForm.DbConnect);
-
-    try
-        // Update from Address Book String Grid
-        if FGrid <> nil then
-        begin
-            if FGrid.UpdatedRowsHolder <> nil then
-            begin
-                for iCNT:=low(FGrid.UpdatedRowsHolder) to high(FGrid.UpdatedRowsHolder) do
-                begin
-                    Condition:=TAddressBook.Scuid + TSql.EQUAL + FGrid.Cells[FGrid.ReturnColumn(TAddressBook.Scuid, 1, 1), FGrid.UpdatedRowsHolder[iCNT]];
-                    // Columns
-                    Book.Columns.Add(TAddressBook.Emails);
-                    Book.Columns.Add(TAddressBook.PhoneNumbers);
-                    Book.Columns.Add(TAddressBook.Contact);
-                    Book.Columns.Add(TAddressBook.Estatements);
-                    // Values
-                    Book.Values.Add(FGrid.Cells[FGrid.ReturnColumn(TAddressBook.Emails,       1, 1), FGrid.UpdatedRowsHolder[iCNT]]);
-                    Book.Values.Add(FGrid.Cells[FGrid.ReturnColumn(TAddressBook.PhoneNumbers, 1, 1), FGrid.UpdatedRowsHolder[iCNT]]);
-                    Book.Values.Add(FGrid.Cells[FGrid.ReturnColumn(TAddressBook.Contact,      1, 1), FGrid.UpdatedRowsHolder[iCNT]]);
-                    Book.Values.Add(FGrid.Cells[FGrid.ReturnColumn(TAddressBook.Estatements,  1, 1), FGrid.UpdatedRowsHolder[iCNT]]);
-                end;
-
-                Result:=Book.UpdateRecord(TAddressBook.AddressBook, True, Condition);
-
-                // Success
-                if Result then
-                begin
-                    FGrid.SetUpdatedRow(0);
-                    MainForm.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Address Book has been updated succesfully!');
-                end
-                else
-                // Error during post
-                begin
-                    MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot update Address Book. Please contact IT support.');
-                end;
-            end
-            else
-
-            // No changes within Address Book string grid
-            begin
-                MainForm.ExecMessage(False, TMessaging.TWParams.MessageWarn, 'Nothing to update. Please make changes first and try again.');
-            end;
-        end;
-
-        // Update from Action Log View
-        if FGrid = nil then
-        begin
-            Condition:=TAddressBook.Scuid + TSql.EQUAL + QuotedStr(FSCUID);
-            // Columns
-            Book.Columns.Add(TAddressBook.PhoneNumbers);
-            Book.Columns.Add(TAddressBook.Contact);
-            Book.Columns.Add(TAddressBook.Estatements);
-            Book.Columns.Add(TAddressBook.Emails);
-            // Values
-            Book.Values.Add(FPhones);
-            Book.Values.Add(FContact);
-            Book.Values.Add(FEstatement);
-            Book.Values.Add(FEmail);
-
-            Result:=Book.UpdateRecord(TAddressBook.AddressBook, True, Condition);
-
-            // Ending
-            if Result then
-                MainForm.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Address Book has been updated succesfully!')
-                    else
-                        MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot update Address Book. Please contact IT support.');
-        end;
-    finally
-        Book.Free;
-    end;
-
-end;
-
-
-function TTAddressBook.Add: boolean;
-var
-    iCNT:       integer;
-    jCNT:       integer;
-    SCUID:      string;
-    AddrBook:   TALists;
-    Book:       TDataTables;
-    Check:      cardinal;
-begin
-    Result:=False;
-    SetLength(AddrBook, 1, 11);
-    jCNT:=0;
-    Check:=0;
-
-    // Get data from String Grid
-    Book:=TDataTables.Create(MainForm.DbConnect);
-    try
-        for iCNT:=FGrid.Selection.Top to FGrid.Selection.Bottom do
-        begin
-            if FGrid.RowHeights[iCNT] <> FGrid.sgRowHidden then
-            begin
-                // Build SCUID
-                SCUID:=FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fCustomerNumber, 1, 1), iCNT] +
-                    MainForm.ConvertCoCode(
-                        FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT],
-                        'F',
-                        3
-                    );
-                Book.CleanUp;
-                Book.Columns.Add(TAddressBook.Scuid);
-                Book.CustFilter:=TSql.WHERE + TAddressBook.Scuid + TSql.EQUAL + QuotedStr(SCUID);
-                Book.OpenTable(TAddressBook.AddressBook);
-
-                // Add to array if not exists
-                if Book.DataSet.RecordCount = 0 then
-                begin
-                    Inc(Check);
-                    AddrBook[jCNT,  0]:=UpperCase(MainForm.WinUserName);
-                    AddrBook[jCNT,  1]:=SCUID;
-                    AddrBook[jCNT,  2]:=FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fCustomerNumber,1, 1), iCNT];
-                    AddrBook[jCNT,  3]:=FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fCustomerName,  1, 1), iCNT];
-                    AddrBook[jCNT,  8]:=FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fAgent,         1, 1), iCNT];
-                    AddrBook[jCNT,  9]:=FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fDivision,      1, 1), iCNT];
-                    AddrBook[jCNT, 10]:=FGrid.Cells[FGrid.ReturnColumn(TSnapshots.fCoCode,        1, 1), iCNT];
-                    Inc(jCNT);
-                    SetLength(AddrBook, jCNT + 1, 11);
-                end;
-            end;
-        end;
-
-    finally
-        Book.Free;
-    end;
-
-    // Send to database
-    if Check > 0 then
-    begin
-        Book:=TDataTables.Create(MainForm.DbConnect);
-        try
-            Book.Columns.Add(TAddressBook.UserAlias);
-            Book.Columns.Add(TAddressBook.Scuid);
-            Book.Columns.Add(TAddressBook.CustomerNumber);
-            Book.Columns.Add(TAddressBook.CustomerName);
-            Book.Columns.Add(TAddressBook.Emails);
-            Book.Columns.Add(TAddressBook.PhoneNumbers);
-            Book.Columns.Add(TAddressBook.Contact);
-            Book.Columns.Add(TAddressBook.Estatements);
-            Book.Columns.Add(TAddressBook.Agent);
-            Book.Columns.Add(TAddressBook.Division);
-            Book.Columns.Add(TAddressBook.CoCode);
             try
 
-                Book.InsertInto(TAddressBook.AddressBook, True, nil, AddrBook);
+                // Async
+                if MainForm.EditGroupID.Text = MainForm.GroupIdSel then AgeView.GroupID:=MainForm.GroupIdSel
+                    else
+                        if MainForm.EditGroupID.Text <> '' then AgeView.GroupID:=MainForm.EditGroupID.Text
+                            else
+                                AgeView.GroupID:=MainForm.GroupIdSel;
 
-                if Book.RowsAffected > 0 then
+                // Generate aging
+                AgeView.Make(MainForm.OSAmount);
+
+                // CSV or server?
+                if MainForm.cbDump.Checked then
                 begin
-                    MainForm.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString);
-                    MainForm.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Address Book has been successfully populated by selected item(s).');
-                    Result:=True;
+                    if MainForm.CSVExport.Execute then
+                    AgeView.ExportToCSV(MainForm.CSVExport.FileName, AgeView.ArrAgeView);
                 end
                 else
                 begin
-                    MainForm.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString);
-                    MainForm.ExecMessage(False, TMessaging.TWParams.MessageWarn, 'Cannot update Address Book. Please contact IT support.');
+
+                    // Send to SQL Server, update age date list and reload age view on main tabsheet
+                    AgeView.Write(TSnapshots.Snapshots, AgeView.ArrAgeView);
+
+                    TThread.Synchronize(nil, procedure
+                    begin
+                        try
+                            UserCtrl.GetAgeDates(MainForm.GroupListDates, MainForm.GroupList[0, 0]);
+                            MainForm.AgeDateSel:=MainForm.GroupListDates.Text;
+                        finally
+                            UserCtrl.Free;
+                        end;
+                    end);
+
+                    CanReload:=True;
+
                 end;
+
             except
                 on E: Exception do
-                begin
-                    MainForm.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString);
-                    MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot save selected item(s). Exception has been thrown: ' + E.Message);
-                    MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Cannot write Address Book item(s) into database. Error: ' + E.Message);
-                end;
+                    MainForm.LogText.Log(MainForm.EventLogPath, 'Cannot execute [MakeAgeView]. Error has been thrown: ' + E.Message);
             end;
+
         finally
-            Book.Free;
-            AddrBook:=nil;
+
+            MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready);
+
+            var THDMili: extended:=StopWatch.ElapsedMilliseconds;
+            var THDSec:  extended:=THDMili / 1000;
+
+            MainForm.LogText.Log(MainForm.EventLogPath, 'Age View thread has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
+            AgeView.Free;
+
         end;
-    end
-    else
-    begin
-        MainForm.ExecMessage(False, TMessaging.TWParams.MessageWarn, 'Selected customers are already in Address Book.');
-    end;
+
+        if CanReload then ReadAgeViewAsync(TEnums.TLoading.NullParameter, TSorting.TMode.Ranges);
+
+    end);
+
+    NewTask.Start;
 
 end;
+
+
+// ------------------------------------
+// Load aging report for main view
+// *Change when SQL is replaced by API
+// ------------------------------------
+
+procedure TThreading.ReadAgeViewAsync(ActionMode: TEnums.TLoading; SortMode: integer);
+begin
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var AgeView: TAgeView:=TAgeView.Create(MainForm.DbConnect);
+        var StopWatch: TStopWatch:=TStopWatch.StartNew;
+        try
+
+            MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Loading);
+            MainForm.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Show.ToString);
+
+            try
+                // Sync
+                TThread.Synchronize(nil, AgeView.ClearSummary);
+
+                // Async
+                AgeView.idThd  :=0;
+                AgeView.GroupID:=MainForm.GroupIdSel;
+                AgeView.AgeDate:=MainForm.AgeDateSel;
+                AgeView.Read(MainForm.sgAgeView, SortMode);
+
+                // Sync
+                TThread.Synchronize(nil, procedure
+                begin
+
+                    AgeView.ComputeAgeSummary(MainForm.sgAgeView);
+                    AgeView.ComputeAndShowRCA(MainForm.sgAgeView);
+                    AgeView.UpdateSummary;
+                    AgeView.GetDetails(MainForm.sgCompanyData);
+
+                    // Map data (source General Tables tabsheet)
+                    AgeView.MapGroup3(MainForm.sgAgeView, MainForm.sgGroup3);
+                    AgeView.MapTable1(MainForm.sgAgeView, MainForm.sgPersonResp);
+                    AgeView.MapTable2(MainForm.sgAgeView, MainForm.sgSalesResp);
+                    AgeView.MapTable3(MainForm.sgAgeView, MainForm.sgAccountType);
+                    AgeView.MapTable4(MainForm.sgAgeView, MainForm.sgCustomerGr);
+
+                    MainForm.sgAgeView.Repaint;
+
+                end);
+
+            except
+                on E: Exception do
+                    MainForm.LogText.Log(MainForm.EventLogPath, 'Cannot execute [ReadAgeView]. Error has been thrown: ' + E.Message);
+            end;
+
+        finally
+
+            MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready);
+
+            var THDMili: extended:=StopWatch.ElapsedMilliseconds;
+            var THDSec:  extended:=THDMili / 1000;
+
+            MainForm.LogText.Log(MainForm.EventLogPath, 'Thread for selected Group Id "' + AgeView.GroupID + '" has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
+            AgeView.Free;
+
+            MainForm.SwitchTimers(TurnedOn);
+            MainForm.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString);
+
+        end;
+
+        if ActionMode = CallOpenItems then ReadOpenItemsAsync(TEnums.TLoading.NullParameter);
+
+    end);
+
+    NewTask.Start;
+
+end;
+
+
+// ------------------------------------
+// Load aging report for main view
+// *Change when SQL is replaced by API
+// ------------------------------------
+
+procedure TThreading.ScanOpenItemsAsync();
+begin
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var CanMakeAge: boolean:=False;
+        var Transactions: TTransactions:=TTransactions.Create(MainForm.DbConnect);
+        try
+
+            try
+
+                var ReadDateTime: string:=Transactions.GetDateTime(DateTime);
+                var ReadStatus:   string:=Transactions.GetStatus(ReadDateTime);
+
+                if ( StrToDateTime(MainForm.OpenItemsUpdate) < StrToDateTime(ReadDateTime) ) and ( ReadStatus = 'Completed' ) then
+                begin
+
+                    // Switch off all of the timers
+                    MainForm.SwitchTimers(TurnedOff);
+
+                    // Refresh open items and make new aging view
+                    MainForm.OpenItemsUpdate:=ReadDateTime;
+                    MainForm.OpenItemsStatus:='';
+                    CanMakeAge:=True;
+
+                end;
+
+            except
+                on E: Exception do
+                    MainForm.LogText.Log(MainForm.EventLogPath, 'Cannot execute [OpenItemsScanner]. Error has been thrown: ' + E.Message);
+            end;
+
+        finally
+            Transactions.Free;
+        end;
+
+        if CanMakeAge then ReadOpenItemsAsync(TEnums.TLoading.CallMakeAge);
+
+    end);
+
+    NewTask.Start;
+
+end;
+
+
+// ------------------------------------
+// Load open items into TStringGrid
+// *Change when SQL is replaced by API
+// ------------------------------------
+
+procedure TThreading.ReadOpenItemsAsync(ActionMode: TEnums.TLoading);
+begin
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var OpenItems: TTransactions:=TTransactions.Create(MainForm.DbConnect);
+        var StopWatch: TStopWatch:=TStopWatch.StartNew;
+        try
+
+            MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Downloading);
+            try
+
+                OpenItems.DestGrid   :=MainForm.sgOpenItems;
+                OpenItems.SettingGrid:=MainForm.sgCompanyData;
+                OpenItems.DestGrid.Freeze(True);
+
+                // Sync with GUI
+                TThread.Synchronize(nil, OpenItems.ClearSummary);
+
+                // Async
+                OpenItems.LoadToGrid;
+                OpenItems.UpdateSummary;
+
+            except
+                on E: Exception do
+                    MainForm.LogText.Log(MainForm.EventLogPath, 'Cannot execute [ReadOpenItems]. Error has been thorwn: ' + E.Message);
+            end;
+
+        finally
+
+            var THDMili: extended:=StopWatch.ElapsedMilliseconds;
+            var THDSec:  extended:=THDMili / 1000;
+
+            MainForm.LogText.Log(MainForm.EventLogPath, 'Open Items loading thread has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
+            MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready);
+
+            // Release VCL and set auto column width
+            TThread.Synchronize(nil, procedure
+            begin
+                OpenItems.DestGrid.SetColWidth(10, 20, 400);
+            end);
+
+            OpenItems.DestGrid.Freeze(False);
+            OpenItems.Free;
+
+        end;
+
+        // Make age view from open items and send to SQL Server
+        if ActionMode = CallMakeAge then
+        begin
+            MainForm.cbDump.Checked:=False;
+            MakeAgeViewAsync(MainForm.OSAmount);
+        end;
+
+    end);
+
+    NewTask.Start;
+
+end;
+
+
+// ------------------------------------
+// Load Address Book into TStringGrid
+// *Change when SQL is replaced by API
+// ------------------------------------
+
+procedure TThreading.OpenAddressBookAsync(UserAlias: string; SourceGrid: TStringGrid; OptionalCondition: string = '');
+begin
+
+    SourceGrid.Freeze(True);
+    MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Processing);
+    MainForm.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Show.ToString);
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var DataTables: TDataTables:=TDataTables.Create(MainForm.DbConnect);
+        try
+
+            try
+
+                DataTables.Columns.Add(TAddressBook.UserAlias);
+                DataTables.Columns.Add(TAddressBook.Scuid);
+                DataTables.Columns.Add(TAddressBook.CustomerNumber);
+                DataTables.Columns.Add(TAddressBook.CustomerName);
+                DataTables.Columns.Add(TAddressBook.Emails);
+                DataTables.Columns.Add(TAddressBook.Estatements);
+                DataTables.Columns.Add(TAddressBook.PhoneNumbers);
+                DataTables.Columns.Add(TAddressBook.Contact);
+                DataTables.Columns.Add(TAddressBook.CoCode);
+                DataTables.Columns.Add(TAddressBook.Agent);
+                DataTables.Columns.Add(TAddressBook.Division);
+
+                if String.IsNullOrEmpty(UserAlias) and not(String.IsNullOrEmpty(OptionalCondition)) then
+                    DataTables.CustFilter:=TSql.WHERE + OptionalCondition;
+
+                if not(String.IsNullOrEmpty(UserAlias)) and String.IsNullOrEmpty(OptionalCondition) then
+                    DataTables.CustFilter:=TSql.WHERE + TAddressBook.UserAlias + TSql.EQUAL + QuotedStr(UserAlias);
+
+                if not(String.IsNullOrEmpty(UserAlias)) and not(String.IsNullOrEmpty(OptionalCondition)) then
+                    DataTables.CustFilter:=TSql.WHERE + TAddressBook.UserAlias + TSql.EQUAL + QuotedStr(UserAlias) + TSql._AND + OptionalCondition;
+
+                DataTables.OpenTable(TAddressBook.AddressBook);
+
+                if not(DataTables.SqlToGrid(SourceGrid, DataTables.DataSet, True, True)) then
+                    MainForm.ExecMessage(False, TMessaging.TWParams.MessageWarn, 'No results found in the database.');
+
+            except
+                on E: Exception do
+                    MainForm.LogText.Log(MainForm.EventLogPath, E.Message);
+
+            end;
+
+        finally
+
+            DataTables.Free;
+
+            TThread.Synchronize(nil, procedure
+            begin
+                SourceGrid.SetColWidth(40, 10, 400);
+                SourceGrid.Freeze(False);
+                MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready);
+                MainForm.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString);
+            end);
+
+        end;
+
+    end);
+
+    NewTask.Start;
+
+end;
+
+
+// ------------------------------------
+// Update data in Address Book
+// *Change when SQL is replaced by API
+// ------------------------------------
+
+procedure TThreading.UpdateAddressBookAsync(SourceGrid: TStringGrid; UpdateValues: TAddressBookUpdateFields);
+begin
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var Book: TDataTables:=TDataTables.Create(MainForm.DbConnect);
+        try
+
+            // Update from Address Book String Grid
+            var Condition: string;
+            if SourceGrid <> nil then
+            begin
+
+                if SourceGrid.UpdatedRowsHolder <> nil then
+                begin
+
+                    for var iCNT: integer:=low(SourceGrid.UpdatedRowsHolder) to high(SourceGrid.UpdatedRowsHolder) do
+                    begin
+
+                        Condition:=TAddressBook.Scuid + TSql.EQUAL + SourceGrid.Cells[SourceGrid.ReturnColumn(TAddressBook.Scuid, 1, 1), SourceGrid.UpdatedRowsHolder[iCNT]];
+
+                        Book.Columns.Add(TAddressBook.Emails);
+                        Book.Columns.Add(TAddressBook.PhoneNumbers);
+                        Book.Columns.Add(TAddressBook.Contact);
+                        Book.Columns.Add(TAddressBook.Estatements);
+                        Book.Values.Add(SourceGrid.Cells[SourceGrid.ReturnColumn(TAddressBook.Emails,       1, 1), SourceGrid.UpdatedRowsHolder[iCNT]]);
+                        Book.Values.Add(SourceGrid.Cells[SourceGrid.ReturnColumn(TAddressBook.PhoneNumbers, 1, 1), SourceGrid.UpdatedRowsHolder[iCNT]]);
+                        Book.Values.Add(SourceGrid.Cells[SourceGrid.ReturnColumn(TAddressBook.Contact,      1, 1), SourceGrid.UpdatedRowsHolder[iCNT]]);
+                        Book.Values.Add(SourceGrid.Cells[SourceGrid.ReturnColumn(TAddressBook.Estatements,  1, 1), SourceGrid.UpdatedRowsHolder[iCNT]]);
+
+                    end;
+
+                    // Success
+                    if Book.UpdateRecord(TAddressBook.AddressBook, True, Condition) then
+                    begin
+                        SourceGrid.SetUpdatedRow(0);
+                        MainForm.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Address Book has been updated succesfully!');
+                    end
+                    else
+                    begin
+                        // Error during post
+                        MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot update Address Book. Please contact IT support.');
+                    end;
+
+                end
+                else
+                begin
+                    // No changes within Address Book string grid
+                    MainForm.ExecMessage(False, TMessaging.TWParams.MessageWarn, 'Nothing to update. Please make changes first and try again.');
+                end;
+
+            end;
+
+            // Update from Action Log View
+            if SourceGrid = nil then
+            begin
+
+                Condition:=TAddressBook.Scuid + TSql.EQUAL + QuotedStr(UpdateValues.Scuid);
+
+                Book.Columns.Add(TAddressBook.PhoneNumbers);
+                Book.Columns.Add(TAddressBook.Contact);
+                Book.Columns.Add(TAddressBook.Estatements);
+                Book.Columns.Add(TAddressBook.Emails);
+                Book.Values.Add(UpdateValues.Phones);
+                Book.Values.Add(UpdateValues.Contact);
+                Book.Values.Add(UpdateValues.Estatement);
+                Book.Values.Add(UpdateValues.Email);
+
+                if Book.UpdateRecord(TAddressBook.AddressBook, True, Condition) then
+                    MainForm.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Address Book has been updated succesfully!')
+                else
+                    MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot update Address Book. Please contact IT support.');
+
+            end;
+
+        finally
+            Book.Free;
+        end;
+
+    end);
+
+    NewTask.Start;
+
+end;
+
+
+// ------------------------------------
+// Add data to Address Book
+// *Change when SQL is replaced by API
+// ------------------------------------
+
+procedure TThreading.AddToAddressBookAsync(SourceGrid: TStringGrid);
+begin
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var jCNT: integer:=0;
+        var Check: cardinal:=0;
+        var AddrBook: TALists;
+        SetLength(AddrBook, 1, 11);
+
+        // Get data from String Grid
+        var Book: TDataTables:=TDataTables.Create(MainForm.DbConnect);
+        try
+
+            for var iCNT: integer:=SourceGrid.Selection.Top to SourceGrid.Selection.Bottom do
+            begin
+                if SourceGrid.RowHeights[iCNT] <> SourceGrid.sgRowHidden then
+                begin
+                    // Build SCUID
+                    var SCUID: string:=SourceGrid.Cells[SourceGrid.ReturnColumn(TSnapshots.fCustomerNumber, 1, 1), iCNT] +
+                        MainForm.ConvertCoCode(
+                            SourceGrid.Cells[SourceGrid.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT],
+                            'F',
+                            3
+                        );
+                    Book.CleanUp;
+                    Book.Columns.Add(TAddressBook.Scuid);
+                    Book.CustFilter:=TSql.WHERE + TAddressBook.Scuid + TSql.EQUAL + QuotedStr(SCUID);
+                    Book.OpenTable(TAddressBook.AddressBook);
+
+                    // Add to array if not exists
+                    if Book.DataSet.RecordCount = 0 then
+                    begin
+                        Inc(Check);
+                        AddrBook[jCNT,  0]:=UpperCase(MainForm.WinUserName);
+                        AddrBook[jCNT,  1]:=SCUID;
+                        AddrBook[jCNT,  2]:=SourceGrid.Cells[SourceGrid.ReturnColumn(TSnapshots.fCustomerNumber,1, 1), iCNT];
+                        AddrBook[jCNT,  3]:=SourceGrid.Cells[SourceGrid.ReturnColumn(TSnapshots.fCustomerName,  1, 1), iCNT];
+                        AddrBook[jCNT,  8]:=SourceGrid.Cells[SourceGrid.ReturnColumn(TSnapshots.fAgent,         1, 1), iCNT];
+                        AddrBook[jCNT,  9]:=SourceGrid.Cells[SourceGrid.ReturnColumn(TSnapshots.fDivision,      1, 1), iCNT];
+                        AddrBook[jCNT, 10]:=SourceGrid.Cells[SourceGrid.ReturnColumn(TSnapshots.fCoCode,        1, 1), iCNT];
+                        Inc(jCNT);
+                        SetLength(AddrBook, jCNT + 1, 11);
+                    end;
+                end;
+            end;
+
+        finally
+            Book.Free;
+        end;
+
+        // Send to database
+        if Check > 0 then
+        begin
+            Book:=TDataTables.Create(MainForm.DbConnect);
+            try
+                Book.Columns.Add(TAddressBook.UserAlias);
+                Book.Columns.Add(TAddressBook.Scuid);
+                Book.Columns.Add(TAddressBook.CustomerNumber);
+                Book.Columns.Add(TAddressBook.CustomerName);
+                Book.Columns.Add(TAddressBook.Emails);
+                Book.Columns.Add(TAddressBook.PhoneNumbers);
+                Book.Columns.Add(TAddressBook.Contact);
+                Book.Columns.Add(TAddressBook.Estatements);
+                Book.Columns.Add(TAddressBook.Agent);
+                Book.Columns.Add(TAddressBook.Division);
+                Book.Columns.Add(TAddressBook.CoCode);
+                try
+
+                    Book.InsertInto(TAddressBook.AddressBook, True, nil, AddrBook);
+
+                    if Book.RowsAffected > 0 then
+                    begin
+                        MainForm.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString);
+                        MainForm.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Address Book has been successfully populated by selected item(s).');
+                    end
+                    else
+                    begin
+                        MainForm.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString);
+                        MainForm.ExecMessage(False, TMessaging.TWParams.MessageWarn, 'Cannot update Address Book. Please contact IT support.');
+                    end;
+                except
+                    on E: Exception do
+                    begin
+                        MainForm.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString);
+                        MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot save selected item(s). Exception has been thrown: ' + E.Message);
+                        MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Cannot write Address Book item(s) into database. Error: ' + E.Message);
+                    end;
+                end;
+            finally
+                Book.Free;
+            end;
+        end
+        else
+        begin
+            MainForm.ExecMessage(False, TMessaging.TWParams.MessageWarn, 'Selected customers are already in Address Book.');
+        end;
+
+    end);
+
+    NewTask.Start;
+
+end;
+
 
 
 // ------------------------------------------------------------------------------------------------------------------------------------------- USER FEEDBACK //
@@ -1100,10 +911,10 @@ begin
     FIDThd:=GetCurrentThreadId;
 
     try
-        if ReportForm.SendReport then
+        if FeedbackForm.SendReport then
         begin
             MainForm.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Report has been sent successfully!');
-            Synchronize(ReportForm.ReportMemo.Clear);
+            Synchronize(FeedbackForm.ReportMemo.Clear);
             MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Bug Report has been successfully sent by the user.');
         end
         else

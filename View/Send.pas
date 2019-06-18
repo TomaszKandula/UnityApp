@@ -85,11 +85,13 @@ type
     end;
 
 
-var
-    SendForm: TSendForm;
+    function SendForm: TSendForm;
 
 
 implementation
+
+
+{$R *.dfm}
 
 
 uses
@@ -101,7 +103,14 @@ uses
     DbModel;
 
 
-{$R *.dfm}
+var vSendForm: TSendForm;
+
+
+function SendForm: TSendForm;
+begin
+    if not(Assigned(vSendForm)) then Application.CreateForm(TSendForm, vSendForm);
+    Result:=vSendForm;
+end;
 
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //

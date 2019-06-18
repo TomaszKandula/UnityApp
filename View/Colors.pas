@@ -58,11 +58,13 @@ type
     end;
 
 
-var
-    ColorsForm: TColorsForm;
+    function ColorsForm: TColorsForm;
 
 
 implementation
+
+
+{$R *.dfm}
 
 
 uses
@@ -70,7 +72,14 @@ uses
     Settings;
 
 
-{$R *.dfm}
+var vColorsForm: TColorsForm;
+
+
+function ColorsForm: TColorsForm;
+begin
+    if not(Assigned(vColorsForm)) then Application.CreateForm(TColorsForm, vColorsForm);
+    Result:=vColorsForm;
+end;
 
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------- STARTUP //

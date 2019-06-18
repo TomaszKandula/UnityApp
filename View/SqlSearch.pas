@@ -1,4 +1,4 @@
-unit ABSearch;
+unit SqlSearch;
 
 
 interface
@@ -24,7 +24,7 @@ uses
 type
 
 
-    TViewSearchForm = class(TForm)
+    TSqlSearchForm = class(TForm)
         PanelClient: TPanel;
         SearchBox: TGroupBox;
         PanelBottom: TPanel;
@@ -75,6 +75,7 @@ type
         CheckBoxEstatCase: TCheckBox;
         CheckBoxAliasEqual: TCheckBox;
         CheckBoxAliasCase: TCheckBox;
+    txtWarning: TLabel;
         procedure FormCreate(Sender: TObject);
         procedure btnCancelClick(Sender: TObject);
         procedure btnSearchClick(Sender: TObject);
@@ -124,8 +125,7 @@ type
     end;
 
 
-var
-    ViewSearchForm: TViewSearchForm;
+    function SqlSearchForm: TSqlSearchForm;
 
 
 implementation
@@ -142,14 +142,24 @@ uses
     Helpers;
 
 
+var vSqlSearchForm: TSqlSearchForm;
+
+
+function SqlSearchForm: TSqlSearchForm;
+begin
+    if not(Assigned(vSqlSearchForm)) then Application.CreateForm(TSqlSearchForm, vSqlSearchForm);
+    Result:=vSqlSearchForm;
+end;
+
+
 // ------------------------------------------------------------------------------------------------------------------------------------------- CLASS HELPERS //
 
 
-procedure TViewSearchForm.Initialize;
+procedure TSqlSearchForm.Initialize;
 begin
 
     var Settings: ISettings:=TSettings.Create;
-    ViewSearchForm.Caption:=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'WND_ABSEARCH', TCommon.APPCAPTION);
+    SqlSearchForm.Caption:=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'WND_ABSEARCH', TCommon.APPCAPTION);
 
     PanelEditNumber.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
     PanelEditName.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
@@ -164,7 +174,7 @@ begin
 end;
 
 
-procedure TViewSearchForm.ClearAll;
+procedure TSqlSearchForm.ClearAll;
 begin
     ResetFields;
     ResetCheckboxes;
@@ -173,7 +183,7 @@ begin
 end;
 
 
-procedure TViewSearchForm.MatchCase;
+procedure TSqlSearchForm.MatchCase;
 begin
     if CheckBoxNameCase.Checked  then FCollate1:=TSql.MATCHCASE;
     if CheckBoxEmailCase.Checked then FCollate2:=TSql.MATCHCASE;
@@ -182,7 +192,7 @@ begin
 end;
 
 
-procedure TViewSearchForm.IsEqual;
+procedure TSqlSearchForm.IsEqual;
 begin
     if CheckBoxNameEqual.Checked then FIsEqual:=TSql.EQUAL else FIsEqual:=TSql.LIKE;
     if CheckBoxEmailCase.Checked then FIsEqual:=TSql.EQUAL else FIsEqual:=TSql.LIKE;
@@ -191,7 +201,7 @@ begin
 end;
 
 
-procedure TViewSearchForm.AttachOption;
+procedure TSqlSearchForm.AttachOption;
 begin
     if EditName.Enabled       then FStrEditName      :=TAddressBook.CustomerName + FIsEqual + QuotedStr(EditName.Text)       + FCollate1 + TSql._AND;
     if EditEmail.Enabled      then FStrEditEmail     :=TAddressBook.Emails       + FIsEqual + QuotedStr(EditEmail.Text)      + FCollate2 + TSql._AND;
@@ -200,7 +210,7 @@ begin
 end;
 
 
-procedure TViewSearchForm.UpdateOptions;
+procedure TSqlSearchForm.UpdateOptions;
 begin
     if EditNumber.Enabled   then FStrEditNumber  :=TAddressBook.CustomerNumber + TSql.EQUAL + QuotedStr(EditNumber.Text)   + TSql._AND;
     if EditPhones.Enabled   then FStrEditPhones  :=TAddressBook.PhoneNumbers   + TSql.EQUAL + QuotedStr(EditPhones.Text)   + TSql._AND;
@@ -210,7 +220,7 @@ begin
 end;
 
 
-procedure TViewSearchForm.ResetFields;
+procedure TSqlSearchForm.ResetFields;
 begin
     EditNumber.Enabled:=True;
     EditName.Enabled:=False;
@@ -224,7 +234,7 @@ begin
 end;
 
 
-procedure TViewSearchForm.ResetCheckboxes;
+procedure TSqlSearchForm.ResetCheckboxes;
 begin
     ResetCheckboxCaptions;
     ResetCheckboxTicks;
@@ -232,7 +242,7 @@ begin
 end;
 
 
-procedure TViewSearchForm.ResetCheckboxCaptions;
+procedure TSqlSearchForm.ResetCheckboxCaptions;
 begin
     CheckBoxNameEqual.Caption:='Equal';
     CheckBoxEmailEqual.Caption:='Equal';
@@ -241,7 +251,7 @@ begin
 end;
 
 
-procedure TViewSearchForm.ResetCheckboxTicks;
+procedure TSqlSearchForm.ResetCheckboxTicks;
 begin
     CheckBoxAliasCase.Checked:=False;
     CheckBoxNameCase.Checked:=False;
@@ -263,20 +273,20 @@ begin
 end;
 
 
-procedure TViewSearchForm.ResetCheckboxDisable;
+procedure TSqlSearchForm.ResetCheckboxDisable;
 begin
-    CheckBoxNameCase.Enabled := False;
-    CheckBoxEmailCase.Enabled := False;
-    CheckBoxEstatCase.Enabled := False;
-    CheckBoxAliasCase.Enabled := False;
-    CheckBoxAliasEqual.Enabled := False;
-    CheckBoxEstatEqual.Enabled := False;
-    CheckBoxEmailEqual.Enabled := False;
-    CheckBoxNameEqual.Enabled := False;
+    CheckBoxNameCase.Enabled:=False;
+    CheckBoxEmailCase.Enabled:=False;
+    CheckBoxEstatCase.Enabled:=False;
+    CheckBoxAliasCase.Enabled:=False;
+    CheckBoxAliasEqual.Enabled:=False;
+    CheckBoxEstatEqual.Enabled:=False;
+    CheckBoxEmailEqual.Enabled:=False;
+    CheckBoxNameEqual.Enabled:=False;
 end;
 
 
-procedure TViewSearchForm.ResetFieldColors;
+procedure TSqlSearchForm.ResetFieldColors;
 begin
     EditNumber.Color:=clCream;
     EditName.Color:=clWhite;
@@ -290,7 +300,7 @@ begin
 end;
 
 
-procedure TViewSearchForm.ResetFieldTexts;
+procedure TSqlSearchForm.ResetFieldTexts;
 begin
     EditNumber.Text:='';
     EditName.Text:='';
@@ -304,7 +314,7 @@ begin
 end;
 
 
-procedure TViewSearchForm.PerformSearch;
+procedure TSqlSearchForm.PerformSearch;
 begin
 
     if (EditName.Enabled) and (string.IsNullOrEmpty(EditName.Text)) then
@@ -361,19 +371,11 @@ begin
         Exit;
     end;
 
-    // Match case
-    MatchCase;
+    MatchCase;      // Match case
+    IsEqual;        // "Like" or "Equal"
+    AttachOption;   // Attach "like" or "equal" and/or collate option
+    UpdateOptions;  // Do not use "like" and match case
 
-    // "Like" or "Equal"
-    IsEqual;
-
-    // Attach "like" or "equal" and/or collate option
-    AttachOption;
-
-    // Do not use "like" and match case
-    UpdateOptions;
-
-    // Build conditions
     var Conditions: string:=
         FStrEditNumber +
         FStrEditName +
@@ -387,17 +389,8 @@ begin
 
     Conditions:=LeftStr(Conditions, Length(Conditions) - Length(TSql._AND));
 
-    // Execute, leave window opened
-    TTAddressBook.Create(
-        TEnums.TActions.OpenForUser,
-        MainForm.sgAddressBook,
-        '',
-        '',
-        '',
-        '',
-        '',
-        TSql.WHERE + Conditions
-    );
+    var Job: IThreading:=TThreading.Create;
+    Job.OpenAddressBookAsync('', MainForm.sgAddressBook, Conditions);
 
 end;
 
@@ -405,13 +398,13 @@ end;
 // ------------------------------------------------------------------------------------------------------------------------------------------------- STARTUP //
 
 
-procedure TViewSearchForm.FormCreate(Sender: TObject);
+procedure TSqlSearchForm.FormCreate(Sender: TObject);
 begin
     Initialize;
 end;
 
 
-procedure TViewSearchForm.FormShow(Sender: TObject);
+procedure TSqlSearchForm.FormShow(Sender: TObject);
 begin
     ClearAll;
 end;
@@ -424,7 +417,7 @@ end;
 /// Change caption from default Equal to Like, to indicate change in search function.
 /// </summary>
 
-procedure TViewSearchForm.CheckBoxNameEqualClick(Sender: TObject);
+procedure TSqlSearchForm.CheckBoxNameEqualClick(Sender: TObject);
 begin
     if not(CheckBoxNameEqual.Checked) then
         CheckBoxNameEqual.Caption:='Like'
@@ -433,7 +426,7 @@ begin
 end;
 
 
-procedure TViewSearchForm.CheckBoxEmailEqualClick(Sender: TObject);
+procedure TSqlSearchForm.CheckBoxEmailEqualClick(Sender: TObject);
 begin
     if not(CheckBoxEmailEqual.Checked) then
         CheckBoxEmailEqual.Caption:='Like'
@@ -442,7 +435,7 @@ begin
 end;
 
 
-procedure TViewSearchForm.CheckBoxEstatEqualClick(Sender: TObject);
+procedure TSqlSearchForm.CheckBoxEstatEqualClick(Sender: TObject);
 begin
     if not(CheckBoxEstatEqual.Checked) then
         CheckBoxEstatEqual.Caption:='Like'
@@ -451,7 +444,7 @@ begin
 end;
 
 
-procedure TViewSearchForm.CheckBoxAliasEqualClick(Sender: TObject);
+procedure TSqlSearchForm.CheckBoxAliasEqualClick(Sender: TObject);
 begin
     if not(CheckBoxAliasEqual.Checked) then
         CheckBoxAliasEqual.Caption:='Like'
@@ -464,7 +457,7 @@ end;
 /// Change background color on check box change, reset the TEdit.
 /// </summary>
 
-procedure TViewSearchForm.CheckBoxNumberClick(Sender: TObject);
+procedure TSqlSearchForm.CheckBoxNumberClick(Sender: TObject);
 begin
     if CheckBoxNumber.Checked then
     begin
@@ -480,7 +473,7 @@ begin
 end;
 
 
-procedure TViewSearchForm.CheckBoxPhonesClick(Sender: TObject);
+procedure TSqlSearchForm.CheckBoxPhonesClick(Sender: TObject);
 begin
     if CheckBoxPhones.Checked then
     begin
@@ -496,7 +489,7 @@ begin
 end;
 
 
-procedure TViewSearchForm.CheckBoxAgentClick(Sender: TObject);
+procedure TSqlSearchForm.CheckBoxAgentClick(Sender: TObject);
 begin
     if CheckBoxAgent.Checked then
     begin
@@ -512,7 +505,7 @@ begin
 end;
 
 
-procedure TViewSearchForm.CheckBoxCoCodeClick(Sender: TObject);
+procedure TSqlSearchForm.CheckBoxCoCodeClick(Sender: TObject);
 begin
     if CheckBoxCoCode.Checked then
     begin
@@ -528,7 +521,7 @@ begin
 end;
 
 
-procedure TViewSearchForm.CheckBoxDivisionClick(Sender: TObject);
+procedure TSqlSearchForm.CheckBoxDivisionClick(Sender: TObject);
 begin
     if CheckBoxDivision.Checked then
     begin
@@ -548,7 +541,7 @@ end;
 /// Alter another check boxes.
 /// </remarks>
 
-procedure TViewSearchForm.CheckBoxNameClick(Sender: TObject);
+procedure TSqlSearchForm.CheckBoxNameClick(Sender: TObject);
 begin
     if CheckBoxName.Checked then
     begin
@@ -568,7 +561,7 @@ begin
 end;
 
 
-procedure TViewSearchForm.CheckBoxEmailClick(Sender: TObject);
+procedure TSqlSearchForm.CheckBoxEmailClick(Sender: TObject);
 begin
     if CheckBoxEmail.Checked then
     begin
@@ -588,7 +581,7 @@ begin
 end;
 
 
-procedure TViewSearchForm.CheckBoxEstatementClick(Sender: TObject);
+procedure TSqlSearchForm.CheckBoxEstatementClick(Sender: TObject);
 begin
     if CheckBoxEstatement.Checked then
     begin
@@ -608,7 +601,7 @@ begin
 end;
 
 
-procedure TViewSearchForm.CheckBoxUserAliasClick(Sender: TObject);
+procedure TSqlSearchForm.CheckBoxUserAliasClick(Sender: TObject);
 begin
     if CheckBoxUserAlias.Checked then
     begin
@@ -631,13 +624,13 @@ end;
 // ------------------------------------------------------------------------------------------------------------------------------------------- BUTTONS CALLS //
 
 
-procedure TViewSearchForm.btnSearchClick(Sender: TObject);
+procedure TSqlSearchForm.btnSearchClick(Sender: TObject);
 begin
     PerformSearch;
 end;
 
 
-procedure TViewSearchForm.btnCancelClick(Sender: TObject);
+procedure TSqlSearchForm.btnCancelClick(Sender: TObject);
 begin
   Close;
 end;

@@ -1549,7 +1549,6 @@ object ActionsForm: TActionsForm
         Align = alClient
         Caption = 'Details'
         TabOrder = 0
-        ExplicitLeft = 18
         object zText1: TLabel
           Left = 19
           Top = 28
@@ -1994,16 +1993,16 @@ object ActionsForm: TActionsForm
           object LabelOpenAm: TLabel
             Left = 24
             Top = 30
-            Width = 76
+            Width = 69
             Height = 13
-            Caption = 'Unpaid amount:'
+            Caption = 'Open amount:'
           end
           object LabelAmount: TLabel
             Left = 24
             Top = 49
-            Width = 71
+            Width = 37
             Height = 13
-            Caption = 'Issued amount'
+            Caption = 'Amount'
           end
           object ValueOpenAm: TLabel
             Left = 120
@@ -2092,7 +2091,7 @@ object ActionsForm: TActionsForm
           AlignWithMargins = True
           Left = 10
           Top = 5
-          Width = 91
+          Width = 315
           Height = 16
           Margins.Left = 10
           Margins.Top = 5
@@ -2108,6 +2107,7 @@ object ActionsForm: TActionsForm
           Font.Style = [fsUnderline]
           ParentColor = False
           ParentFont = False
+          ExplicitWidth = 91
         end
         object DailyComBorders: TShape
           AlignWithMargins = True
@@ -2176,7 +2176,7 @@ object ActionsForm: TActionsForm
           AlignWithMargins = True
           Left = 10
           Top = 5
-          Width = 108
+          Width = 315
           Height = 16
           Margins.Left = 10
           Margins.Top = 5
@@ -2192,6 +2192,7 @@ object ActionsForm: TActionsForm
           Font.Style = [fsUnderline]
           ParentColor = False
           ParentFont = False
+          ExplicitWidth = 108
         end
         object GeneralComBorders: TShape
           AlignWithMargins = True
@@ -2259,7 +2260,7 @@ object ActionsForm: TActionsForm
           AlignWithMargins = True
           Left = 10
           Top = 5
-          Width = 134
+          Width = 315
           Height = 16
           Margins.Left = 10
           Margins.Top = 5
@@ -2275,6 +2276,7 @@ object ActionsForm: TActionsForm
           Font.Style = [fsUnderline]
           ParentColor = False
           ParentFont = False
+          ExplicitWidth = 134
         end
         object HistoryGridBorders: TShape
           AlignWithMargins = True

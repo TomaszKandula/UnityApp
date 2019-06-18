@@ -36,11 +36,13 @@ type
     end;
 
 
-var
-    InvoicesForm: TInvoicesForm;
+    function InvoicesForm: TInvoicesForm;
 
 
 Implementation
+
+
+{$R *.dfm}
 
 
 uses
@@ -51,7 +53,14 @@ uses
     Helpers;
 
 
-{$R *.dfm}
+var vInvoicesForm: TInvoicesForm;
+
+
+function InvoicesForm: TInvoicesForm;
+begin
+    if not(Assigned(vInvoicesForm)) then Application.CreateForm(TInvoicesForm, vInvoicesForm);
+    Result:=vInvoicesForm;
+end;
 
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------ START UP //

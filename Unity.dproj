@@ -139,6 +139,11 @@
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
+        <DCCReference Include="Extensions\InterposerClasses.pas">
+            <Form>Too lazy to build own components</Form>
+        </DCCReference>
+        <DCCReference Include="Extensions\Helpers.pas"/>
+        <DCCReference Include="Extensions\Rest.pas"/>
         <DCCReference Include="Model\DbModel.pas">
             <Form>Legacy code/to be removed</Form>
         </DCCReference>
@@ -155,10 +160,6 @@
         <DCCReference Include="Model\Json\RawTables\Erp.Person.pas"/>
         <DCCReference Include="Model\Json\RawTables\Erp.PersonResponsible.pas"/>
         <DCCReference Include="Model\Json\RawTables\Erp.SalesResponsible.pas"/>
-        <DCCReference Include="Extensions\InterposerClasses.pas">
-            <Form>Too lazy to build own components</Form>
-        </DCCReference>
-        <DCCReference Include="Extensions\Helpers.pas"/>
         <DCCReference Include="Mediator\SqlHandler.pas"/>
         <DCCReference Include="Mediator\DbHandler.pas"/>
         <DCCReference Include="Mediator\AgeView.pas"/>
@@ -197,11 +198,11 @@
         <DCCReference Include="View\PhoneList.pas">
             <Form>PhoneListForm</Form>
         </DCCReference>
-        <DCCReference Include="View\SendFeedback.pas">
-            <Form>ReportForm</Form>
+        <DCCReference Include="View\Feedback.pas">
+            <Form>FeedbackForm</Form>
         </DCCReference>
-        <DCCReference Include="View\AVSearch.pas">
-            <Form>SearchForm</Form>
+        <DCCReference Include="View\GridSearch.pas">
+            <Form>GridSearchForm</Form>
         </DCCReference>
         <DCCReference Include="View\Send.pas">
             <Form>SendForm</Form>
@@ -216,10 +217,10 @@
             <Form>UpdateForm</Form>
         </DCCReference>
         <DCCReference Include="View\MassMailer.pas">
-            <Form>ViewMailerForm</Form>
+            <Form>MassMailerForm</Form>
         </DCCReference>
-        <DCCReference Include="View\ABSearch.pas">
-            <Form>ViewSearchForm</Form>
+        <DCCReference Include="View\SqlSearch.pas">
+            <Form>SqlSearchForm</Form>
         </DCCReference>
         <DCCReference Include="View\Await.pas">
             <Form>AwaitForm</Form>
@@ -288,15 +289,15 @@
             </Platforms>
             <ModelSupport>False</ModelSupport>
             <Deployment Version="3">
-                <DeployFile LocalName="Model\Json\DbQuery\Dummy.txt" Configuration="Debug" Class="ProjectFile">
+                <DeployFile LocalName="Win32\Bin\Unity.exe" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
-                        <RemoteDir>.\</RemoteDir>
+                        <RemoteName>Unity.exe</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="Win32\Debug\Unity.exe" Configuration="Debug" Class="ProjectOutput">
+                <DeployFile LocalName="Model\Json\DbQuery\Dummy.txt" Configuration="Debug" Class="ProjectFile">
                     <Platform Name="Win32">
-                        <RemoteName>Unity.exe</RemoteName>
+                        <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>

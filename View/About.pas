@@ -1,4 +1,3 @@
-
 unit About;
 
 
@@ -77,6 +76,7 @@ type
         function Is64BitOS: Boolean;
     end;
 
+
     TMemoryStatusEx = packed record
         dwLength:                DWORD;
         dwMemoryLoad:            DWORD;
@@ -90,11 +90,13 @@ type
     end;
 
 
-var
-    AboutForm: TAboutForm;
+    function AboutForm: TAboutForm;
 
 
 implementation
+
+
+{$R *.dfm}
 
 
 uses
@@ -108,15 +110,18 @@ type
     TFNGlobalMemoryStatusEx = function(var msx: TMemoryStatusEx): BOOL; stdcall;
 
 
-{$R *.dfm}
+var vAboutForm: TAboutForm;
+
+
+function AboutForm: TAboutForm;
+begin
+    if not(Assigned(vAboutForm)) then Application.CreateForm(TAboutForm, vAboutForm);
+    Result:=vAboutForm;
+end;
 
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
 
-
-/// <summary>
-/// Check if machine run on a 64-bit CPU.
-/// </summary>
 
 function TAboutForm.Is64BitOS: Boolean;
 begin
@@ -154,10 +159,6 @@ begin
 end;
 
 
-/// <summary>
-/// Check if machine have a memory above 4GB.
-/// </summary>
-
 function GlobalMemoryStatusEx(var lpBuffer: TMemoryStatusEx): BOOL; stdcall;
 begin
 
@@ -176,10 +177,6 @@ end;
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------- STARTUP //
 
-
-/// <summary>
-/// Get data from application settings file and licence file.
-/// </summary>
 
 procedure TAboutForm.FormCreate(Sender: TObject);
 begin
@@ -202,10 +199,6 @@ begin
 
 end;
 
-
-/// <summary>
-/// Update memory information on window show.
-/// </summary>
 
 procedure TAboutForm.FormShow(Sender: TObject);
 begin

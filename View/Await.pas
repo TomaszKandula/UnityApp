@@ -40,18 +40,27 @@ type
     end;
 
 
-var
-    AwaitForm: TAwaitForm;
+    function AwaitForm: TAwaitForm;
 
 
 implementation
+
+
+{$R *.dfm}
 
 
 uses
     MassMailer;
 
 
-{$R *.dfm}
+var vAwaitForm: TAwaitForm;
+
+
+function AwaitForm: TAwaitForm;
+begin
+    if not(Assigned(vAwaitForm)) then Application.CreateForm(TAwaitForm, vAwaitForm);
+    Result:=vAwaitForm;
+end;
 
 
 /// <summary>

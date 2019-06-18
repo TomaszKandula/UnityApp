@@ -39,8 +39,7 @@ type
     end;
 
 
-var
-  PhoneListForm: TPhoneListForm;
+    function PhoneListForm: TPhoneListForm;
 
 
 implementation
@@ -56,8 +55,18 @@ uses
     Helpers;
 
 
+var vPhoneListForm: TPhoneListForm;
+
+
 const
     Restricted = ['0'..'9', #10, #13];
+
+
+function PhoneListForm: TPhoneListForm;
+begin
+    if not(Assigned(vPhoneListForm)) then Application.CreateForm(TPhoneListForm, vPhoneListForm);
+    Result:=vPhoneListForm;
+end;
 
 
 // ------------------------------------------------------------------------------------------------------------------------------------------- CLASS HELPERS //

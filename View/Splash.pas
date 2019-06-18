@@ -43,7 +43,7 @@ type
 
 
 var
-  SplashForm: TSplashForm;
+    SplashForm: TSplashForm;
 
 
 implementation

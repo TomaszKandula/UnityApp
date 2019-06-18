@@ -23,10 +23,6 @@ uses
 
 type
 
-    /// <summary>
-    /// View form with class helpers for calendar functionality, so the user will not have to
-    /// put follow-up date manually on age view string grid.
-    /// </summary>
 
     TCalendarForm = class(TForm)
         MyCalendar: TMonthCalendar;
@@ -55,11 +51,13 @@ type
     end;
 
 
-var
-    CalendarForm: TCalendarForm;
+    function CalendarForm: TCalendarForm;
 
 
 implementation
+
+
+{$R *.dfm}
 
 
 uses
@@ -70,7 +68,14 @@ uses
     SysUtils;
 
 
-{$R *.dfm}
+var vCalendarForm: TCalendarForm;
+
+
+function CalendarForm: TCalendarForm;
+begin
+    if not(Assigned(vCalendarForm)) then Application.CreateForm(TCalendarForm, vCalendarForm);
+    Result:=vCalendarForm;
+end;
 
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //

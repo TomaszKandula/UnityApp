@@ -175,12 +175,8 @@ type
     protected
         var SrcColumns:  TAIntigers;
     private
-        type TOpenItemsTotal = record
-            OpenAm:     double;
-            Am:         double;
-            OpenCurAm:  double;
-            CurAm:      double;
-        end;
+        var AbUpdateFields: TAddressBookUpdateFields;
+        var OpenItemsTotal: TOpenItemsTotal;
         var FHistoryGrid:  boolean;
         var FCUID:         string;
         var FSCUID:        string;
@@ -211,7 +207,6 @@ type
         procedure InitializePanels;
         procedure InitializeSpeedButtons;
     public
-        var OpenItemsTotal: TOpenItemsTotal;
         property CUID:         string read FCUID;
         property SCUID:        string read FSCUID;
         property Branch:       string read FBranch;
@@ -227,11 +222,13 @@ type
     end;
 
 
-var
-    ActionsForm: TActionsForm;
+    function ActionsForm: TActionsForm;
 
 
 implementation
+
+
+{$R *.dfm}
 
 
 uses
@@ -248,7 +245,14 @@ uses
     PhoneList;
 
 
-{$R *.dfm}
+var vActionsForm: TActionsForm;
+
+
+function ActionsForm: TActionsForm;
+begin
+    if not(Assigned(vActionsForm)) then Application.CreateForm(TActionsForm, vActionsForm);
+    Result:=vActionsForm;
+end;
 
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
@@ -672,7 +676,7 @@ begin
         GetAndDisplay;
         SetControls;
         HistoryGrid.Visible:=FHistoryGrid;
-        GetFirstComment(DailyCom);
+        {GetFirstComment(DailyCom);}
         UpdateGeneral(GeneralCom);
     except
         MainForm.MsgCall(Warn, 'Unexpected error has occured. Please close the window and try again.');
@@ -701,16 +705,17 @@ end;
 
 procedure TActionsForm.SaveCustomerDetails;
 begin
-    TTAddressBook.Create(
-        TEnums.TActions.Update,
-        nil,
-        SCUID,
-        Cust_Person.Text,
-        Cust_Mail.Text,
-        Cust_MailGeneral.Text,
-        MainForm.Implode(Cust_Phone.Items, TDelimiters.Semicolon),
-        ''
-    );
+
+    var Job: IThreading:=TThreading.Create;
+
+    AbUpdateFields.Scuid     :=SCUID;
+    AbUpdateFields.Contact   :=Cust_Person.Text;
+    AbUpdateFields.Email     :=Cust_MailGeneral.Text;
+    AbUpdateFields.Estatement:=Cust_Mail.Text;
+    AbUpdateFields.Phones    :=MainForm.Implode(Cust_Phone.Items, TDelimiters.Semicolon);
+
+    Job.UpdateAddressBookAsync(nil, AbUpdateFields);
+
 end;
 
 

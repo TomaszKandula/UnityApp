@@ -1,4 +1,4 @@
-object ViewMailerForm: TViewMailerForm
+object MassMailerForm: TMassMailerForm
   Left = 0
   Top = 0
   BorderIcons = [biSystemMenu]

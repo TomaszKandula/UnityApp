@@ -28,8 +28,6 @@ object AwaitForm: TAwaitForm
     Height = 300
     Align = alClient
     TabOrder = 0
-    ExplicitWidth = 420
-    ExplicitHeight = 197
     object WaitImage: TImage
       AlignWithMargins = True
       Left = 4

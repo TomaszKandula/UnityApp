@@ -33,6 +33,29 @@ type
     end;
 
     /// <remarks>
+    ///
+    /// </remarks>
+
+    TAddressBookUpdateFields = record
+        Scuid:      string;
+        Phones:     string;
+        Contact:    string;
+        Estatement: string;
+        Email:      string;
+    end;
+
+    /// <remarks>
+    ///
+    /// </remarks>
+
+    type TOpenItemsTotal = record
+        OpenAm:     double;
+        Am:         double;
+        OpenCurAm:  double;
+        CurAm:      double;
+    end;
+
+    /// <remarks>
     /// This record definition allows to hold column numbers for given column name. This is necessary as column order may change.
     /// Normally we would use "ReturnColumn" extension method, but in case of multithreading, we must pre-set them before many threads
     /// use it at the same time (VCL components are not thread safe). Having record with fields simplify things.
@@ -110,6 +133,18 @@ type
 
     // -------------------------------------------------------------------------------------------------------------------------------------- STATIC CLASSES //
 
+    TRestAuth = class abstract
+    public
+        const apiUserName       = 'your_login';
+        const apiPassword       = 'your_password';
+        const restApiBaseUrl    = 'your_endpoint';
+        const restAccept        = 'application/json, text/plain; q=0.9, text/html;q=0.8,';
+        const restAcceptCharset = 'UTF-8, *;q=0.8';
+        const restContentType   = 'application/json';
+        const restEncoding      = 'UTF-8';
+        const restUserAgent     = 'Cheers RESTClient/1.0';
+    end;
+
    TEnums = class abstract
         type TDocType     = (Reminder, Statement, Auto, Manual);
         type TDocMode     = (Custom, Defined);
@@ -165,32 +200,13 @@ type
 
     end;
 
-    TFiltering = class abstract
-        type TColumns = (
-            Inf7,
-            Inf4,
-            CoCode,
-            Agent,
-            Division,
-            Follow,
-            Group3,
-            Free1,
-            Free2,
-            Free3,
-            SalesResponsible,
-            PersonResponsible,
-            CustomerGroup,
-            AccountType
-        );
-    end;
-
     TCommon = class abstract
         type  TFiles                    = (AppConfig, LicData);
         type  TTimers                   = (TurnedOn, TurnedOff);
         type  TMessage                  = (Info, Warn, Error, Question1, Question2);
-        const SelectionColor: integer   = $00F2E4D7;
-        const FontColor:      integer   = $006433C9;
-        const AltColor:       integer   = $00FFDBB7;
+        const SelectionColor: integer   = $00F2E4D7; // rgb D7E4F2 => bgr F2E4D7
+        const FontColor:      integer   = $006433C9; // rgb C93364 => bgr 6433C9
+        const AltColor:       integer   = $00FFDBB7; // rgb B7DBFF => bgr FFDBB7
         const DecryptKey:     integer   = 429496;
         const AppCaption:     string    = 'Unity';
         const UnityReader:    string    = 'UnityReader.exe';
@@ -199,7 +215,7 @@ type
         const ReleaseFile:    string    = 'Release.zip';
         const LayoutPak:      string    = 'Layouts.zip';
         const ManifestFile:   string    = 'Unity.manifest';
-        const CurrentMutex:   PWideChar = 'UNITY_10245';
+        const CurrentMutex:   PWideChar = 'UNITY_10255';
         const ConfigFile:     string    = 'Config.cfg';
         class procedure       GetBuildInfo(var V1, V2, V3, V4: word); static;
         class function        GetBuildInfoAsString: string; static;
@@ -308,6 +324,26 @@ type
     // LEGACY SECTION - TO BE REMOVED
     // -----------------------------------
 
+
+    TFiltering = class abstract
+    {To be removed after new filtering is made}
+        type TColumns = (
+            Inf7,
+            Inf4,
+            CoCode,
+            Agent,
+            Division,
+            Follow,
+            Group3,
+            Free1,
+            Free2,
+            Free3,
+            SalesResponsible,
+            PersonResponsible,
+            CustomerGroup,
+            AccountType
+        );
+    end;
 
     TAdoDb = class abstract
         type  TFilters    = (adFilterNone, adFilterPendingRecords, adFilterAffectedRecords, adFilterFetchedRecords, adFilterConflictingRecords);
