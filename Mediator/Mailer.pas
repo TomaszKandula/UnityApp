@@ -13,8 +13,8 @@ uses
     System.Variants,
     System.Generics.Collections,
     Vcl.StdCtrls,
+    Vcl.Grids,
     CDO_TLB,
-    InterposerClasses,
     Helpers,
     Statics;
 
@@ -63,7 +63,7 @@ type
 
     IDocument = Interface(IInterface)
     ['{C3D66D48-891B-438B-9EB6-F53B62E2FCAD}']
-        function LoadTemplate(FileName: string; CrlStatVisible: boolean = true): string;
+        function LoadTemplate(FileName: string): string;
         function SendDocument: boolean;
     End;
 
@@ -121,7 +121,7 @@ type
         property REM_EX3:     string         read FREM_EX3     write FREM_EX3;
         property REM_EX4:     string         read FREM_EX4     write FREM_EX4;
         property REM_EX5:     string         read FREM_EX5     write FREM_EX5;
-        function  LoadTemplate(FileName: string; CrlStatVisible: boolean = true): string;
+        function  LoadTemplate(FileName: string): string;
         function  SendDocument: boolean;
         constructor Create;
         destructor Destroy; override;
@@ -244,7 +244,7 @@ begin
 end;
 
 
-function TDocument.LoadTemplate(FileName: string; CrlStatVisible: boolean = true): string;
+function TDocument.LoadTemplate(FileName: string): string;
 begin
 
     var KeyName: string;

@@ -14,7 +14,6 @@ uses
 
 type
 
-    // -------------------------------------------------------------------------------------------------------------------------------------- STATIC CLASSES //
 
     TRestAuth = class abstract
     public
@@ -28,16 +27,6 @@ type
         const restUserAgent     = 'Cheers RESTClient/1.0';
     end;
 
-   TEnums = class abstract
-        type TDocType     = (Reminder, Statement, Auto, Manual);
-        type TDocMode     = (Custom, Defined);
-        type TBrackets    = (Round, Square, Curly);
-        type TQuotes      = (Enabled, Disabled);
-        type TLoading     = (NullParameter, CallOpenItems, CallMakeAge);
-        type TCalendar    = (DateToDB, GetDate, TimeOnly, DateOnly, DateTime);
-        type TActions     = (OpenAll, OpenForUser, Insert, Update, Export, Import, Copy, Paste, Cut, Escape, Delete);
-        type TWindowState = (Modal, Modeless);
-    end;
 
     TMessaging = class abstract
 
@@ -63,6 +52,7 @@ type
 
     end;
 
+
     TSorting = class abstract
 
         type TDataType = class abstract
@@ -82,6 +72,7 @@ type
         class procedure MergeSort(Grid: TStringGrid; var Vals: array of integer; sortcol, datatype: integer; ascending: boolean); static;
 
     end;
+
 
     TCommon = class abstract
     private
@@ -108,6 +99,7 @@ type
         class procedure LogText(FileName: string; Text: string); static;
     end;
 
+
     TSplashScreen = class abstract
         const DelayStd       = 10;
         const DelayErr       = 750;
@@ -121,6 +113,7 @@ type
         const Finishing      = 'finishing..., please wait.';
     end;
 
+
     TLyncLib = class abstract
         const LyncControls  = 'Microsoft.Lync.Controls.dll';
         const LyncFramework = 'Microsoft.Lync.Controls.Framework.dll';
@@ -129,6 +122,7 @@ type
         const OfficeUc      = 'Microsoft.Office.Uc.dll';
         const LyncCall      = 'LyncCall.exe';
     end;
+
 
     TStatusBar = class abstract
         const Ready       = 'Ready';
@@ -141,6 +135,7 @@ type
         const Loading     = 'Loading Aging Report...';
         const SQLupdate   = 'Sending to SQL Server...';
     end;
+
 
     TChars = class abstract
         const CrLf:        string = #13#10;
@@ -157,17 +152,20 @@ type
         const DoubleQuote: string = '''''';
     end;
 
+
     TDelimiters = class abstract
         const Semicolon = ';';
         const Comma     = ',';
         const Pipe      = '|';
     end;
 
+
     TRiskClass = class abstract
         const A = '0,80';
         const B = '0,15';
         const C = '0,05';
     end;
+
 
     TDateTimeFormats = class abstract
         const TimeFormat     = 'hh:mm:ss';
@@ -176,12 +174,14 @@ type
         const NullDate: TDateTime = 0;
     end;
 
+
     TUnknown = class abstract
         const Null:       string = 'NULL';
         const Unassigned: string = 'Unassigned item.';
         const NA:         string = 'N/A';
         const NotFound:   string = 'Not found!';
     end;
+
 
     TUserSid = class abstract
         const HEAP_ZERO_MEMORY = $00000008;
@@ -190,6 +190,7 @@ type
         class function ObtainTextSid(hToken: THandle; pszSid: PChar; var dwBufferLen: DWORD): BOOL; static;
         class function GetCurrentUserSid: string; static;
     end;
+
 
     TNCSI = class abstract
         const HTTPREQUEST_SETCREDENTIALS_FOR_SERVER = 0;
@@ -347,7 +348,7 @@ begin
     end;
 
     // Set true if no error occured
-    Result := True;
+    Result:=True;
 
 end;
 

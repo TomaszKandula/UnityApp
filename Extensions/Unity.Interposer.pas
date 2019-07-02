@@ -30,7 +30,9 @@ uses
 type
 
 
-    // Reference to TSTringGrid object, necessary for implementing "delete" function.
+    /// <remarks>
+    /// Reference to TSTringGrid object, necessary for implementing "delete" function.
+    /// </remarks>
     TAbstractGrid = class(Vcl.Grids.TStringGrid);
 
 
@@ -104,7 +106,7 @@ type
         property  HideFocusRect: boolean read FHideFocusRect write FHideFocusRect;
         procedure SetUpdatedRow(Row: integer);
         procedure RecordRowsAffected;
-        procedure CopyCutPaste(Mode: TEnums.TActions; FirstColOnly: boolean = False{Option});
+        procedure CopyCutPaste(Mode: TEnums.TActions; FirstColOnly: boolean = False);
         procedure DelEsc(Mode: TEnums.TActions; pCol, pRow: integer);
         procedure ClearAll(dfRows: integer; FixedRows: integer; FixedCols: integer; ZeroCol: boolean);
         procedure DeleteRowFrom(FixedRow: integer; FixedCol: integer);

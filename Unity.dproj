@@ -139,12 +139,14 @@
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
-        <DCCReference Include="Extensions\InterposerClasses.pas">
+        <DCCReference Include="Extensions\Unity.Interposer.pas">
             <Form>Instead of building own components</Form>
         </DCCReference>
-        <DCCReference Include="Extensions\Helpers.pas"/>
-        <DCCReference Include="Extensions\Rest.pas"/>
-        <DCCReference Include="Extensions\Statics.pas"/>
+        <DCCReference Include="Extensions\Unity.Rest.pas"/>
+        <DCCReference Include="Extensions\Unity.Enums.pas"/>
+        <DCCReference Include="Extensions\Unity.Arrays.pas"/>
+        <DCCReference Include="Extensions\Unity.Records.pas"/>
+        <DCCReference Include="Extensions\Unity.Statics.pas"/>
         <DCCReference Include="Model\DbModel.pas">
             <Form>Legacy code/to be removed</Form>
         </DCCReference>

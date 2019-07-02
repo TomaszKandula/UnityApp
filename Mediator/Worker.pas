@@ -1396,7 +1396,7 @@ begin
             Statement.Telephone  :=Fields.Telephone;
             Statement.BankDetails:=Fields.BankDetails;
             Statement.CustMess   :=Fields.Mess;
-            //Statement.OpenItems  :=Fields.OpenItems;
+            Statement.OpenItems  :=Fields.OpenItems;
             Statement.InvFilter  :=Fields.InvFilter;
             Statement.BeginWith  :=Fields.BeginDate;
             Statement.EndWith    :=Fields.EndDate;
@@ -1431,13 +1431,13 @@ begin
                 /// Register sent email either as manual statement or automatic statement.
                 /// </summary>
 
-                if Fields.Layout = TEnums.TDocMode.Defined then
+                if Fields.Layout = TDocMode.Defined then
                 begin
 
 
                 end;
 
-                if Fields.Layout = TEnums.TDocMode.Custom  then
+                if Fields.Layout = TDocMode.Custom  then
                 begin
 
 

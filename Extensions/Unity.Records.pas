@@ -1,4 +1,4 @@
-unit Helpers;
+unit Unity.Records;
 
 
 interface
@@ -10,62 +10,10 @@ uses
     System.SysUtils,
     System.Classes,
     Vcl.Grids,
-    Statics;
+    Unity.Enums;
 
 
 type
-
-    // ---------------------------------------------------------------------------------------------------------------------------------------- ENUMERATIONS //
-
-    /// <summary>
-    /// Defines different statement options.
-    /// </summary>
-
-    TInvoiceFilter = (ReminderOvd, ReminderNonOvd, ShowAllItems);
-
-    // -------------------------------------------------------------------------------------------------------------------------------------------- POINTERS //
-
-    /// <remarks>
-    /// Pointer reference for packed record.
-    /// </remarks>
-
-    PTokenUser = ^TTokenUser;
-
-    // ---------------------------------------------------------------------------------------------------------------------------------------------- ARRAYS //
-
-    /// <remarks>
-    /// Reference to two dimensional string array.
-    /// </remarks>
-
-    TALists = array of array of string;
-
-    /// <remarks>
-    /// Reference to one dimensional string array.
-    /// </remarks>
-
-    TAStrings = array of string;
-
-    /// <remarks>
-    /// Reference to one dimensional integer array.
-    /// </remarks>
-
-    TAIntigers = array of integer;
-
-    /// <remarks>
-    /// Reference to one dimensional double array.
-    /// </remarks>
-
-    TADoubles = array of double;
-
-    // --------------------------------------------------------------------------------------------------------------------------------------------- RECORDS //
-
-    /// <remarks>
-    /// Packed record for user SID in Windows environment.
-    /// </remarks>
-
-    TTokenUser = packed record
-        User: TSidAndAttributes;
-    end;
 
     /// <remarks>
     ///
@@ -116,13 +64,13 @@ type
     /// </remarks>
 
     TSendAccountStatementFields = record
-        Layout:      TEnums.TDocMode;
+        Layout:      TDocMode;
         Subject:     string;
         Mess:        string;
         InvFilter:   TInvoiceFilter;
         BeginDate:   string;
         EndDate:     string;
-        //OpenItems:   InterposerClasses.TStringGrid;
+        OpenItems:   TStringGrid;
         CUID:        string;
         SendFrom:    string;
         MailTo:      string;
