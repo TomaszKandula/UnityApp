@@ -16,7 +16,8 @@ uses
     DbModel,
     SqlHandler,
     InterposerClasses,
-    Helpers;
+    Helpers,
+    Statics;
 
 
 type
@@ -765,7 +766,7 @@ procedure TAgeView.Make(OSAmount: double);  // REFACTOR TO REMOVE TIGHT COUPLING
         R3hi:      integer;                   { EXAMPLE: 60  }
         R4hi:      integer;                   { EXAMPLE: 90  }
         R5hi:      integer;                   { EXAMPLE: 120 }
-        R6hi:      integer;                   { EXAMPLE: oo  }
+//        R6hi:      integer;                   { EXAMPLE: oo  }
 
         { BIAS }
         bias:      integer;
@@ -774,11 +775,11 @@ procedure TAgeView.Make(OSAmount: double);  // REFACTOR TO REMOVE TIGHT COUPLING
         DiscAmnt:  double;
 
         { RISK CLASS }
-        MyWallet:  array of double;           { CONTAIN WALLET SHARE VALUES  }
-        MyList:    array of integer;          { CONTAIN ASSOCIATED POSITIONS }
+//        MyWallet:  array of double;           { CONTAIN WALLET SHARE VALUES  }
+//        MyList:    array of integer;          { CONTAIN ASSOCIATED POSITIONS }
         RcHi:      double;                    { UPPER BOUND                  }
         RcLo:      double;                    { LOWER BOUND                  }
-        Count:     double;                    { SUMS WALLET SHARE            }
+//        Count:     double;                    { SUMS WALLET SHARE            }
 
         { SETTINGS }
         Settings:  ISettings;

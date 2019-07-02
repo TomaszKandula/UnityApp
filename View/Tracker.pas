@@ -100,7 +100,8 @@ uses
     Worker,
     Settings,
     DbHandler,
-    Helpers;
+    Helpers,
+    Statics;
 
 
 var vTrackerForm: TTrackerForm;

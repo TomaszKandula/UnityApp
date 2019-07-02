@@ -140,10 +140,11 @@
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
         <DCCReference Include="Extensions\InterposerClasses.pas">
-            <Form>Too lazy to build own components</Form>
+            <Form>Instead of building own components</Form>
         </DCCReference>
         <DCCReference Include="Extensions\Helpers.pas"/>
         <DCCReference Include="Extensions\Rest.pas"/>
+        <DCCReference Include="Extensions\Statics.pas"/>
         <DCCReference Include="Model\DbModel.pas">
             <Form>Legacy code/to be removed</Form>
         </DCCReference>

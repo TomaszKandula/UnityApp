@@ -28,7 +28,8 @@ uses
     Vcl.Clipbrd,
     Data.Win.ADODB,
     InterposerClasses,
-    Helpers;
+    Helpers,
+    Statics;
 
 
 type
@@ -176,6 +177,8 @@ type
         var SrcColumns:  TAIntigers;
     private
         var AbUpdateFields: TAddressBookUpdateFields;
+        var DailyCommentFields: TDailyCommentFields;
+        var GeneralCommentFields: TGeneralCommentFields;
         var OpenItemsTotal: TOpenItemsTotal;
         var FHistoryGrid:  boolean;
         var FCUID:         string;
@@ -689,16 +692,20 @@ procedure TActionsForm.ClearFollowUp;
 begin
     if MainForm.MsgCall(Question2, 'Are you sure you want to clear this follow up?') = ID_YES then
     begin
-        TTGeneralComment.Create(
-            CUID,
-            TUnknown.NULL,
-            TChars.SPACE,
-            TUnknown.NULL,
-            TUnknown.NULL,
-            TUnknown.NULL,
-            True
-        );
+
+        GeneralCommentFields.CUID        :=CUID;
+        GeneralCommentFields.FixedComment:=TUnknown.NULL;
+        GeneralCommentFields.FollowUp    :=TChars.SPACE;
+        GeneralCommentFields.Free1       :=TUnknown.NULL;
+        GeneralCommentFields.Free2       :=TUnknown.NULL;
+        GeneralCommentFields.Free3       :=TUnknown.NULL;
+        GeneralCommentFields.EventLog    :=True;
+
+        var Job: IThreading:=TThreading.Create;
+        Job.EditGeneralComment(GeneralCommentFields);
+
         MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneralComment.fFollowUp, 1, 1), MainForm.sgAgeView.Row]:='';
+
     end;
 end;
 
@@ -706,14 +713,13 @@ end;
 procedure TActionsForm.SaveCustomerDetails;
 begin
 
-    var Job: IThreading:=TThreading.Create;
-
     AbUpdateFields.Scuid     :=SCUID;
     AbUpdateFields.Contact   :=Cust_Person.Text;
     AbUpdateFields.Email     :=Cust_MailGeneral.Text;
     AbUpdateFields.Estatement:=Cust_Mail.Text;
     AbUpdateFields.Phones    :=MainForm.Implode(Cust_Phone.Items, TDelimiters.Semicolon);
 
+    var Job: IThreading:=TThreading.Create;
     Job.UpdateAddressBookAsync(nil, AbUpdateFields);
 
 end;
@@ -721,15 +727,18 @@ end;
 
 procedure TActionsForm.SaveGeneralComment;
 begin
-    TTGeneralComment.Create(
-        CUID,
-        GeneralCom.Text,
-        TUnknown.NULL,
-        TUnknown.NULL,
-        TUnknown.NULL,
-        TUnknown.NULL,
-        True
-    );
+
+    GeneralCommentFields.CUID        :=CUID;
+    GeneralCommentFields.FixedComment:=GeneralCom.Text;
+    GeneralCommentFields.FollowUp    :=TUnknown.NULL;
+    GeneralCommentFields.Free1       :=TUnknown.NULL;
+    GeneralCommentFields.Free2       :=TUnknown.NULL;
+    GeneralCommentFields.Free3       :=TUnknown.NULL;
+    GeneralCommentFields.EventLog    :=True;
+
+    var Job: IThreading:=TThreading.Create;
+    Job.EditGeneralComment(GeneralCommentFields);
+
 end;
 
 
@@ -739,17 +748,22 @@ end;
 
 procedure TActionsForm.SaveDailyComment;
 begin
-    TTDailyComment.Create(
-        CUID,
-        False,
-        False,
-        0,
-        DailyCom.Text,
-        False,
-        False,
-        False,
-        True
-    );
+
+    DailyCommentFields.CUID         :=CUID;
+    DailyCommentFields.Email        :=False;
+    DailyCommentFields.CallEvent    :=False;
+    DailyCommentFields.CallDuration :=0;
+    DailyCommentFields.Comment      :=DailyCom.Text;
+    DailyCommentFields.EmailReminder:=False;
+    DailyCommentFields.EmailAutoStat:=False;
+    DailyCommentFields.EmailManuStat:=False;
+    DailyCommentFields.EventLog     :=True;
+    DailyCommentFields.UpdateGrid   :=True;
+    DailyCommentFields.ExtendComment:=False;
+
+    var Job: IThreading:=TThreading.Create;
+    Job.EditDailyComment(DailyCommentFields);
+
 end;
 
 
@@ -1223,7 +1237,7 @@ end;
 
 procedure TActionsForm.btnEditClick(Sender: TObject);
 begin
-    MainForm.WndCall(PhoneListForm, Helpers.TEnums.TWindowState.Modal);
+    MainForm.WndCall(PhoneListForm, Statics.TEnums.TWindowState.Modal);
 end;
 
 
@@ -1248,7 +1262,7 @@ end;
 procedure TActionsForm.btnSetFollowUpClick(Sender: TObject);
 begin
     CalendarForm.FCalendarMode:=DateToDB;
-    MainForm.WndCall(CalendarForm, Helpers.TEnums.TWindowState.Modal);
+    MainForm.WndCall(CalendarForm, Statics.TEnums.TWindowState.Modal);
 end;
 
 
@@ -1260,7 +1274,7 @@ end;
 
 procedure TActionsForm.btnCustomStatementClick(Sender: TObject);
 begin
-    MainForm.WndCall(SendForm, Helpers.TEnums.TWindowState.Modal);
+    MainForm.WndCall(SendForm, Statics.TEnums.TWindowState.Modal);
 end;
 
 

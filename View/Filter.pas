@@ -22,7 +22,8 @@ uses
     Vcl.Imaging.pngimage,
     Vcl.DBGrids,
     InterposerClasses,
-    Helpers;
+    Helpers,
+    Statics;
 
     {TODO -oTomek -cGeneral : Redesign this completly}
 

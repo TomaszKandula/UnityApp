@@ -50,7 +50,8 @@ uses
     Settings,
     SqlHandler,
     DbModel,
-    Helpers;
+    Helpers,
+    Statics;
 
 
 var vInvoicesForm: TInvoicesForm;

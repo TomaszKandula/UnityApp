@@ -18,8 +18,7 @@ uses
     Vcl.Buttons,
     Vcl.ExtCtrls,
     Vcl.Imaging.pngimage,
-    InterposerClasses,
-    Helpers;
+    InterposerClasses;
 
 
 type
@@ -100,7 +99,9 @@ uses
     Settings,
     Worker,
     Actions,
-    DbModel;
+    DbModel,
+    Helpers,
+    Statics;
 
 
 var vSendForm: TSendForm;
@@ -268,7 +269,7 @@ end;
 procedure TSendForm.btnBeginDateClick(Sender: TObject);
 begin
     CalendarForm.FCalendarMode:=GetDate;
-    MainForm.WndCall(CalendarForm, Helpers.TEnums.TWindowState.Modal);
+    MainForm.WndCall(CalendarForm, Statics.TEnums.TWindowState.Modal);
     ValBeginDate.Caption:=DateToStr(CalendarForm.FSelectedDate);
 end;
 

@@ -58,7 +58,8 @@ uses
     Mailer,
     Settings,
     Worker,
-    Helpers;
+    Helpers,
+    Statics;
 
 
 var vFeedbackForm: TFeedbackForm;
@@ -184,7 +185,8 @@ end;
 
 procedure TFeedbackForm.btnSendReportClick(Sender: TObject);
 begin
-    TTSendUserFeedback.Create;
+    var Job: IThreading:=TThreading.Create;
+    Job.SendUserFeedback();
 end;
 
 procedure TFeedbackForm.btnCancelClick(Sender: TObject);

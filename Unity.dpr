@@ -5,6 +5,7 @@ program Unity;
 
 
 uses
+
     System.Classes,
     System.SysUtils,
     System.StrUtils,
@@ -19,9 +20,10 @@ uses
     Vcl.StdCtrls,
     CRC32u,
     uCEFApplication,
-    InterposerClasses        in 'Extensions\InterposerClasses.pas' {Too lazy to build own components},
+    InterposerClasses        in 'Extensions\InterposerClasses.pas' {Instead of building own components},
     Helpers                  in 'Extensions\Helpers.pas',
     Rest                     in 'Extensions\Rest.pas',
+    Statics                  in 'Extensions\Statics.pas',
     DbModel                  in 'Model\DbModel.pas' {Legacy code/to be removed},
     Customer.AddressBook     in 'Model\Json\RawTables\Customer.AddressBook.pas',
     Customer.ControlStatus   in 'Model\Json\RawTables\Customer.ControlStatus.pas',

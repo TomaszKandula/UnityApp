@@ -23,7 +23,8 @@ uses
     Vcl.ComCtrls,
     Vcl.StdCtrls,
     CheckLst,
-    Helpers;
+    Helpers,
+    Statics;
 
 
 type

@@ -13,7 +13,8 @@ uses
     Vcl.StdCtrls,
     Data.Win.ADODB,
     InterposerClasses,
-    Helpers;
+    Helpers,
+    Statics;
 
 
     // legacy code - to be removed after REST is implemented

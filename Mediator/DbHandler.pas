@@ -13,7 +13,8 @@ uses
     System.Win.ComObj,
     Vcl.Forms,
     Data.Win.ADODB,
-    Settings;
+    Settings,
+    Statics;
 
 
     // legacy code - to be removed after REST is implemented

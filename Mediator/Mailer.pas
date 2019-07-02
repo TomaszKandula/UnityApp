@@ -15,7 +15,8 @@ uses
     Vcl.StdCtrls,
     CDO_TLB,
     InterposerClasses,
-    Helpers;
+    Helpers,
+    Statics;
 
 
 type
@@ -26,9 +27,6 @@ type
         function SendNow: boolean;
     end;
 
-    /// <summary>
-    /// Base class responsible for sending email using CDOSYS.
-    /// </summary>
 
     TMailer = class(TInterfacedObject, IMailer)
     {$TYPEINFO ON}
@@ -62,11 +60,15 @@ type
         destructor Destroy; override;
     end;
 
-    /// <summary>
-    /// Class responsible for building account statement or reminder (generate HTML) and send it via emial.
-    /// </summary>
 
-    TDocument = class(TMailer)
+    IDocument = Interface(IInterface)
+    ['{C3D66D48-891B-438B-9EB6-F53B62E2FCAD}']
+        function LoadTemplate(FileName: string; CrlStatVisible: boolean = true): string;
+        function SendDocument: boolean;
+    End;
+
+
+    TDocument = class(TMailer, IDocument)
     {$TYPEINFO ON}
     protected
         var HTMLStat: string;
@@ -94,6 +96,8 @@ type
         var FREM_EX5:         string;
         var FCommonHTMLTable: string;
         var FCommonHTMLRow:   string;
+        procedure SaveOutput(FileName: string);
+        function  BuildHTML: integer;
     public
         var OpenItems:  TStringGrid;
         property HTMLTable:   string         read FHTMLTable   write FHTMLTable;
@@ -117,9 +121,7 @@ type
         property REM_EX3:     string         read FREM_EX3     write FREM_EX3;
         property REM_EX4:     string         read FREM_EX4     write FREM_EX4;
         property REM_EX5:     string         read FREM_EX5     write FREM_EX5;
-        procedure SaveOutput(FileName: string);
         function  LoadTemplate(FileName: string; CrlStatVisible: boolean = true): string;
-        function  BuildHTML: integer;
         function  SendDocument: boolean;
         constructor Create;
         destructor Destroy; override;

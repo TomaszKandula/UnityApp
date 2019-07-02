@@ -52,7 +52,8 @@ uses
     Main,
     Actions,
     Settings,
-    Helpers;
+    Helpers,
+    Statics;
 
 
 var vPhoneListForm: TPhoneListForm;

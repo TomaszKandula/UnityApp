@@ -75,7 +75,7 @@ type
         CheckBoxEstatCase: TCheckBox;
         CheckBoxAliasEqual: TCheckBox;
         CheckBoxAliasCase: TCheckBox;
-    txtWarning: TLabel;
+        txtWarning: TLabel;
         procedure FormCreate(Sender: TObject);
         procedure btnCancelClick(Sender: TObject);
         procedure btnSearchClick(Sender: TObject);
@@ -93,12 +93,16 @@ type
         procedure CheckBoxEmailEqualClick(Sender: TObject);
         procedure CheckBoxEstatEqualClick(Sender: TObject);
         procedure CheckBoxAliasEqualClick(Sender: TObject);
+        procedure FormKeyPress(Sender: TObject; var Key: Char);
     private
         var FCollate1: string;
         var FCollate2: string;
         var FCollate3: string;
         var FCollate4: string;
-        var FIsEqual:  string;
+        var FIsEqual1: string;
+        var FIsEqual2: string;
+        var FIsEqual3: string;
+        var FIsEqual4: string;
         var FStrEditName:       string;
         var FStrEditNumber:     string;
         var FStrEditEmail:      string;
@@ -139,7 +143,8 @@ uses
     Settings,
     Worker,
     DbModel,
-    Helpers;
+    Helpers,
+    Statics;
 
 
 var vSqlSearchForm: TSqlSearchForm;
@@ -194,19 +199,19 @@ end;
 
 procedure TSqlSearchForm.IsEqual;
 begin
-    if CheckBoxNameEqual.Checked then FIsEqual:=TSql.EQUAL else FIsEqual:=TSql.LIKE;
-    if CheckBoxEmailCase.Checked then FIsEqual:=TSql.EQUAL else FIsEqual:=TSql.LIKE;
-    if CheckBoxEstatCase.Checked then FIsEqual:=TSql.EQUAL else FIsEqual:=TSql.LIKE;
-    if CheckBoxAliasCase.Checked then FIsEqual:=TSql.EQUAL else FIsEqual:=TSql.LIKE;
+    if CheckBoxNameEqual.Checked  then FIsEqual1:=TSql.EQUAL else FIsEqual1:=TSql.LIKE;
+    if CheckBoxEmailEqual.Checked then FIsEqual2:=TSql.EQUAL else FIsEqual2:=TSql.LIKE;
+    if CheckBoxEstatEqual.Checked then FIsEqual3:=TSql.EQUAL else FIsEqual3:=TSql.LIKE;
+    if CheckBoxAliasEqual.Checked then FIsEqual4:=TSql.EQUAL else FIsEqual4:=TSql.LIKE;
 end;
 
 
 procedure TSqlSearchForm.AttachOption;
 begin
-    if EditName.Enabled       then FStrEditName      :=TAddressBook.CustomerName + FIsEqual + QuotedStr(EditName.Text)       + FCollate1 + TSql._AND;
-    if EditEmail.Enabled      then FStrEditEmail     :=TAddressBook.Emails       + FIsEqual + QuotedStr(EditEmail.Text)      + FCollate2 + TSql._AND;
-    if EditEstatement.Enabled then FStrEditEstatement:=TAddressBook.Estatements  + FIsEqual + QuotedStr(EditEstatement.Text) + FCollate3 + TSql._AND;
-    if EditUserAlias.Enabled  then FStrEditUserAlias :=TAddressBook.UserAlias    + FIsEqual + QuotedStr(EditUserAlias.Text)  + FCollate4 + TSql._AND;
+    if EditName.Enabled       then FStrEditName      :=TAddressBook.CustomerName + FIsEqual1 + QuotedStr(EditName.Text)       + FCollate1 + TSql._AND;
+    if EditEmail.Enabled      then FStrEditEmail     :=TAddressBook.Emails       + FIsEqual2 + QuotedStr(EditEmail.Text)      + FCollate2 + TSql._AND;
+    if EditEstatement.Enabled then FStrEditEstatement:=TAddressBook.Estatements  + FIsEqual3 + QuotedStr(EditEstatement.Text) + FCollate3 + TSql._AND;
+    if EditUserAlias.Enabled  then FStrEditUserAlias :=TAddressBook.UserAlias    + FIsEqual4 + QuotedStr(EditUserAlias.Text)  + FCollate4 + TSql._AND;
 end;
 
 
@@ -389,6 +394,8 @@ begin
 
     Conditions:=LeftStr(Conditions, Length(Conditions) - Length(TSql._AND));
 
+    MainForm.DebugMsg(Conditions);
+
     var Job: IThreading:=TThreading.Create;
     Job.OpenAddressBookAsync('', MainForm.sgAddressBook, Conditions);
 
@@ -468,6 +475,7 @@ begin
     begin
         EditNumber.Enabled:=False;
         EditNumber.Text:='';
+        FStrEditNumber:='';
         EditNumber.Color:=clWhite;
     end;
 end;
@@ -484,6 +492,7 @@ begin
     begin
         EditPhones.Enabled:=False;
         EditPhones.Text:='';
+        FStrEditPhones:='';
         EditPhones.Color:=clWhite;
     end;
 end;
@@ -500,6 +509,7 @@ begin
     begin
         EditAgent.Enabled:=False;
         EditAgent.Text:='';
+        FStrEditAgent:='';
         EditAgent.Color:=clWhite;
     end;
 end;
@@ -516,6 +526,7 @@ begin
     begin
         EditCoCode.Enabled:=False;
         EditCoCode.Text:='';
+        FStrEditCoCode:='';
         EditCoCode.Color:=clWhite;
     end;
 end;
@@ -532,6 +543,7 @@ begin
     begin
         EditDivision.Enabled:=False;
         EditDivision.Text:='';
+        FStrEditDivision:='';
         EditDivision.Color:=clWhite;
     end;
 end;
@@ -554,6 +566,7 @@ begin
     begin
         EditName.Enabled:=False;
         EditName.Text:='';
+        FStrEditName:='';
         EditName.Color:=clWhite;
         CheckBoxNameEqual.Enabled:=False;
         CheckBoxNameCase.Enabled:=False;
@@ -574,6 +587,7 @@ begin
     begin
         EditEmail.Enabled:=False;
         EditEmail.Text:='';
+        FStrEditEmail:='';
         EditEmail.Color:=clWhite;
         CheckBoxEmailEqual.Enabled:=False;
         CheckBoxEmailCase.Enabled:=False;
@@ -594,6 +608,7 @@ begin
     begin
         EditEstatement.Enabled:=False;
         EditEstatement.Text:='';
+        FStrEditEstatement:='';
         EditEstatement.Color:=clWhite;
         CheckBoxEstatEqual.Enabled:=False;
         CheckBoxEstatCase.Enabled:=False;
@@ -614,6 +629,7 @@ begin
     begin
         EditUserAlias.Enabled:=False;
         EditUserAlias.Text:='';
+        FStrEditUserAlias:='';
         EditUserAlias.Color:=clWhite;
         CheckBoxAliasEqual.Enabled:=False;
         CheckBoxAliasCase.Enabled:=False;
@@ -632,7 +648,16 @@ end;
 
 procedure TSqlSearchForm.btnCancelClick(Sender: TObject);
 begin
-  Close;
+    Close;
+end;
+
+
+// ----------------------------------------------------------------------------------------------------------------------------------------- KEYBOARD EVENTS //
+
+
+procedure TSqlSearchForm.FormKeyPress(Sender: TObject; var Key: Char);
+begin
+    if Key = Char(VK_ESCAPE) then Close;
 end;
 
 

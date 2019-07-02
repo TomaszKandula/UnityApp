@@ -50,6 +50,7 @@ implementation
 
 
 uses
+    Main,
     MassMailer;
 
 
@@ -63,30 +64,23 @@ begin
 end;
 
 
-/// <summary>
-/// Create window with panel borders set to blue. Please note that this window does not have standard
-/// window shadow due to borderless type.
-/// </summary>
-
 procedure TAwaitForm.FormCreate(Sender: TObject);
 begin
     PanelAwaitForm.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
 end;
 
 
-/// <summary>
-/// Perform animation when window is about to be shown.
-/// </summary>
-
 procedure TAwaitForm.FormShow(Sender: TObject);
 begin
+
+    // Make sure Await window is always displayed in the centre of main form
+    AwaitForm.Top :=MainForm.Top  + (MainForm.Height div 2) - (AwaitForm.Height div 2);
+    AwaitForm.Left:=MainForm.Left + (MainForm.Width  div 2) - (AwaitForm.Width  div 2);
+
     (WaitImage.Picture.Graphic as TGIFImage).Animate:=True;
+
 end;
 
-
-/// <summary>
-/// If window is about to be closed, we disable GIF animation.
-/// </summary>
 
 procedure TAwaitForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin

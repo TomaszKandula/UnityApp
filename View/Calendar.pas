@@ -18,7 +18,8 @@ uses
     Vcl.ExtCtrls,
     Vcl.StdCtrls,
     InterposerClasses,
-    Helpers;
+    Helpers,
+    Statics;
 
 
 type
@@ -42,6 +43,7 @@ type
         procedure MyCalendarClick(Sender: TObject);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
     private
+        var GeneralCommentFields: TGeneralCommentFields;
         function MakeMyDay(Increment: integer): TDate;
         function IsWeekend(const DT: TDateTime): Boolean;
     public
@@ -89,10 +91,13 @@ end;
 
 function TCalendarForm.MakeMyDay(Increment: integer): TDate;
 begin
-  Result:=Now + Increment;
-  if IsWeekend(Result) then
-    while IsWeekend(Result) do
-      Result:=Result + 1;
+
+    Result:=Now + Increment;
+
+    if IsWeekend(Result) then
+        while IsWeekend(Result) do
+            Result:=Result + 1;
+
 end;
 
 
@@ -102,16 +107,20 @@ end;
 
 procedure TCalendarForm.SetFollowUp(SelectedDate: TDate; SelectedCUID: string; Row: integer);
 begin
-  TTGeneralComment.Create(
-                           SelectedCUID,
-                           TUnknown.NULL,
-                           DateToStr(SelectedDate),
-                           TUnknown.NULL,
-                           TUnknown.NULL,
-                           TUnknown.NULL,
-                           False
-                         );
-  MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneralComment.fFollowUp, 1, 1), Row]:=DateToStr(SelectedDate);
+
+    GeneralCommentFields.CUID        :=SelectedCUID;
+    GeneralCommentFields.FixedComment:=TUnknown.NULL;
+    GeneralCommentFields.FollowUp    :=DateToStr(SelectedDate);
+    GeneralCommentFields.Free1       :=TUnknown.NULL;
+    GeneralCommentFields.Free2       :=TUnknown.NULL;
+    GeneralCommentFields.Free3       :=TUnknown.NULL;
+    GeneralCommentFields.EventLog    :=False;
+
+    var Job: IThreading:=TThreading.Create;
+    Job.EditGeneralComment(GeneralCommentFields);
+
+    MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneralComment.fFollowUp, 1, 1), Row]:=DateToStr(SelectedDate);
+
 end;
 
 

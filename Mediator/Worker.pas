@@ -19,10 +19,13 @@ uses
     Data.Win.ADODB,
     Data.DB,
     InterposerClasses,
-    Helpers;
+    SqlHandler,
+    Helpers,
+    Statics;
 
 
 type
+
 
     IThreading = interface(IInterface)
     ['{14BBF3F3-945A-4A61-94BA-6A2EE10530A2}']
@@ -35,14 +38,26 @@ type
         procedure OpenAddressBookAsync(UserAlias: string; SourceGrid: TStringGrid; OptionalCondition: string = '');
         procedure UpdateAddressBookAsync(SourceGrid: TStringGrid; UpdateValues: TAddressBookUpdateFields);
         procedure AddToAddressBookAsync(SourceGrid: TStringGrid);
+        procedure SendUserFeedback();
+        procedure ExcelExport();
+        procedure GeneralTables(TableName: string; DestGrid: TStringGrid; Columns: string = ''; Conditions: string = ''; AutoRelease: boolean = True);
+        procedure EditDailyComment(Fields: TDailyCommentFields);
+        procedure EditGeneralComment(Fields: TGeneralCommentFields);
+        procedure SendAccountStatement(Fields: TSendAccountStatementFields);
+        procedure SendAccountStatements(Fields: TSendAccountStatementFields);
     end;
+
 
     TThreading = class(TInterfacedObject, IThreading)
     {$TYPEINFO ON}
     protected
         { Empty }
     private
-        { Empty }
+        procedure FInsertDailyComment(var DailyText: TDataTables; var Fields: TDailyCommentFields);
+        procedure FUpdateDailyComment(var DailyText: TDataTables; var Fields: TDailyCommentFields; Condition: string);
+        procedure FInsertGeneralComment(var GenText: TDataTables; var Fields: TGeneralCommentFields);
+        procedure FUpdateGeneralComment(var GenText: TDataTables; var Fields: TGeneralCommentFields; Condition: string);
+        procedure FSendAccountStatement();
     public
         procedure CheckServerConnectionAsync();
         procedure RefreshInvoiceTrackerAsync(UserAlias: string);
@@ -53,98 +68,13 @@ type
         procedure OpenAddressBookAsync(UserAlias: string; SourceGrid: TStringGrid; OptionalCondition: string = '');
         procedure UpdateAddressBookAsync(SourceGrid: TStringGrid; UpdateValues: TAddressBookUpdateFields);
         procedure AddToAddressBookAsync(SourceGrid: TStringGrid);
-    end;
-
-
-
-
-    TTSendUserFeedback = class(TThread)
-    protected
-        procedure Execute; override;
-    private
-        var FLock:   TCriticalSection;
-        var FIDThd:  integer;
-    public
-        property    IDThd:  integer read FIDThd;
-        constructor Create;
-        destructor  Destroy; override;
-    end;
-
-
-    TTExcelExport = class(TThread)
-    protected
-        procedure Execute; override;
-    private
-        var FLock:   TCriticalSection;
-        var FIDThd:  integer;
-    public
-        property    IDThd:  integer read FIDThd;
-        constructor Create;
-        destructor  Destroy; override;
-    end;
-
-
-    TTDailyComment = class(TThread)
-    protected
-        procedure Execute; override;
-    private
-        var FLock:          TCriticalSection;
-        var FIDThd:         integer;
-        var FCUID:          string;
-        var FEmail:         boolean;
-        var FCallEvent:     boolean;
-        var FCallDuration:  string;
-        var FFixedComment:  string;
-        var FEmailReminder: boolean;
-        var FEmailAutoStat: boolean;
-        var FEmailManuStat: boolean;
-        var FEventLog:      boolean;
-        var FUpdateGrid:    boolean;
-        var FExtendComment: boolean;
-    public
-        property    IDThd:  integer read FIDThd;
-        destructor  Destroy; override;
-        constructor Create(
-            CUID:           string;
-            Email:          boolean;
-            CallEvent:      boolean;
-            CallDuration:   integer;
-            Comment:        string;
-            EmailReminder:  boolean;
-            EmailAutoStat:  boolean;
-            EmailManuStat:  boolean;
-            EventLog:       boolean;
-            UpdateGrid:     boolean = true;
-            ExtendComment:  boolean = false
-        );
-    end;
-
-
-    TTGeneralComment = class(TThread)
-    protected
-        procedure Execute; override;
-    private
-        var FLock:         TCriticalSection;
-        var FIDThd:        integer;
-        var FCUID:         string;
-        var FFixedComment: string;
-        var FFollowUp:     string;
-        var FFree1:        string;
-        var FFree2:        string;
-        var FFree3:        string;
-        var FEventLog:     boolean;
-    public
-        property    IDThd:  integer read FIDThd;
-        destructor  Destroy; override;
-        constructor Create(
-            CUID:           string;
-            FixedComment:   string;
-            FollowUp:       string;
-            Free1:          string;
-            Free2:          string;
-            Free3:          string;
-            EventLog:       boolean
-        );
+        procedure SendUserFeedback();
+        procedure ExcelExport();
+        procedure GeneralTables(TableName: string; DestGrid: TStringGrid; Columns: string = ''; Conditions: string = ''; AutoRelease: boolean = True);
+        procedure EditDailyComment(Fields: TDailyCommentFields);
+        procedure EditGeneralComment(Fields: TGeneralCommentFields);
+        procedure SendAccountStatement(Fields: TSendAccountStatementFields);
+        procedure SendAccountStatements(Fields: TSendAccountStatementFields);
     end;
 
 
@@ -226,34 +156,13 @@ type
     end;
 
 
-    TTGeneralTables = class(TThread)
-    protected
-        procedure Execute; override;
-    private
-        var FTableName:   string;
-        var FColumns:     string;
-        var FDestGrid:    TStringGrid;
-        var FConditions:  string;
-        var FAutoRelease: boolean;
-    public
-        constructor Create(
-            TableName:   string;
-            DestGrid:    TStringGrid;
-            Columns:     string = ''    {Option};
-            Conditions:  string = ''    {Option};
-            AutoRelease: boolean = True {Option}
-        );
-    end;
-
-
 implementation
 
 
 uses
     Main,
-    SqlHandler,
-    DbModel,
     DbHandler,
+    DbModel,
     Settings,
     UAC,
     Mailer,
@@ -838,6 +747,7 @@ begin
         begin
             Book:=TDataTables.Create(MainForm.DbConnect);
             try
+
                 Book.Columns.Add(TAddressBook.UserAlias);
                 Book.Columns.Add(TAddressBook.Scuid);
                 Book.Columns.Add(TAddressBook.CustomerNumber);
@@ -849,6 +759,7 @@ begin
                 Book.Columns.Add(TAddressBook.Agent);
                 Book.Columns.Add(TAddressBook.Division);
                 Book.Columns.Add(TAddressBook.CoCode);
+
                 try
 
                     Book.InsertInto(TAddressBook.AddressBook, True, nil, AddrBook);
@@ -863,6 +774,7 @@ begin
                         MainForm.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString);
                         MainForm.ExecMessage(False, TMessaging.TWParams.MessageWarn, 'Cannot update Address Book. Please contact IT support.');
                     end;
+
                 except
                     on E: Exception do
                     begin
@@ -870,6 +782,7 @@ begin
                         MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot save selected item(s). Exception has been thrown: ' + E.Message);
                         MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Cannot write Address Book item(s) into database. Error: ' + E.Message);
                     end;
+
                 end;
             finally
                 Book.Free;
@@ -887,545 +800,688 @@ begin
 end;
 
 
+// ------------------------------------
+// Send user feedback to predefine
+// email address in settings file
+// ------------------------------------
 
-// ------------------------------------------------------------------------------------------------------------------------------------------- USER FEEDBACK //
-
-
-constructor TTSendUserFeedback.Create;
+procedure TThreading.SendUserFeedback();
 begin
-    inherited Create(False);
-    FLock :=TCriticalSection.Create;
-    FIDThd:=0;
-end;
 
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
 
-destructor TTSendUserFeedback.Destroy;
-begin
-    FLock.Free;
-end;
-
-
-procedure TTSendUserFeedback.Execute;
-begin
-    FLock.Acquire;
-    FIDThd:=GetCurrentThreadId;
-
-    try
         if FeedbackForm.SendReport then
         begin
+            TThread.Synchronize(nil, FeedbackForm.ReportMemo.Clear);
             MainForm.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Report has been sent successfully!');
-            Synchronize(FeedbackForm.ReportMemo.Clear);
-            MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Bug Report has been successfully sent by the user.');
+            MainForm.LogText.Log(MainForm.EventLogPath, 'Feedback Report has been successfully sent by the user.');
         end
         else
         begin
-            MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot send Bug Report. Please contact IT support.');
-            MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot send Bug Report.');
+            MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot send Feedback Report. Please contact IT support.');
+            MainForm.LogText.Log(MainForm.EventLogPath, 'Cannot send Feedback Report.');
         end;
-    finally
-        FLock.Release;
+
+    end);
+
+    NewTask.Start;
+
+end;
+
+
+// -------------------------------------
+// Generate Excel report asynchronously
+// to not to block application usability
+// -------------------------------------
+
+procedure TThreading.ExcelExport();
+begin
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.ExportXLS);
+        try
+
+            var FileName: string;
+            TThread.Synchronize(nil, procedure
+            begin
+                if MainForm.XLExport.Execute then FileName:=MainForm.XLExport.FileName else FileName:='';
+            end);
+
+            var Temp: TStringGrid:=TStringGrid.Create(nil);
+            try
+                Temp.OpenThdId:=0;
+                Temp.ToExcel('Age Report', FileName);
+            finally
+                Temp.Free;
+            end;
+
+        finally
+            MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready);
+        end;
+
+    end);
+
+    NewTask.Start;
+
+end;
+
+
+// ------------------------------------
+// Load async. given general table.
+// ------------------------------------
+
+procedure TThreading.GeneralTables(TableName: string; DestGrid: TStringGrid; Columns: string = ''; Conditions: string = ''; AutoRelease: boolean = True);
+begin
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var DataTables: TDataTables:=TDataTables.Create(MainForm.DbConnect);
+        try
+            try
+                DataTables.CleanUp;
+
+                if not(string.IsNullOrEmpty(Columns)) then
+                    DataTables.Columns.Text:=Columns;
+
+                if not(string.IsNullOrEmpty(Conditions)) then
+                    DataTables.CustFilter:=Conditions;
+
+                if DataTables.OpenTable(TableName) then
+                    DataTables.SqlToGrid(DestGrid, DataTables.DataSet, False, True);
+
+            except
+                on E: Exception do
+                    MainForm.LogText.Log(MainForm.EventLogPath, 'Cannot load general table, error has been thrown: ' + E.Message);
+            end;
+        finally
+            DataTables.Free;
+        end;
+
+    end);
+
+    NewTask.Start();
+
+    if not(AutoRelease) then
+    begin
+
+        while NewTask.Status = TTaskStatus.Running do
+        begin
+           if (NewTask.Status = TTaskStatus.Completed) or (NewTask.Status = TTaskStatus.Canceled) then Break;
+        end;
+
     end;
 
-    // Release when finished
-    FreeOnTerminate:=True;
-
 end;
 
 
-// ----------------------------------------------------------------------------------------------------------------------------------------- EXPORT TO EXCEL //
+// ------------------------------------
+// Perform SQL "insert into" command
+// ------------------------------------
 
-
-constructor TTExcelExport.Create;
+procedure TThreading.FInsertDailyComment(var DailyText: TDataTables; var Fields: TDailyCommentFields);
 begin
-    inherited Create(False);
-    FLock :=TCriticalSection.Create;
-    FIDThd:=0;
-end;
 
+    if Fields.Email then
+    begin
+        DailyText.Columns.Add(TDailyComment.Email);
+        DailyText.Values.Add('1');
+    end
+    else
+    begin
+        DailyText.Columns.Add(TDailyComment.Email);
+        DailyText.Values.Add('0');
+    end;
 
-destructor TTExcelExport.Destroy;
-begin
-    FLock.Free;
-end;
+    if Fields.EmailReminder then
+    begin
+        DailyText.Columns.Add(TDailyComment.EmailReminder);
+        DailyText.Values.Add('1');
+    end
+    else
+    begin
+        DailyText.Columns.Add(TDailyComment.EmailReminder);
+        DailyText.Values.Add('0');
+    end;
 
+    if Fields.EmailAutoStat then
+    begin
+        DailyText.Columns.Add(TDailyComment.EmailAutoStat);
+        DailyText.Values.Add('1');
+    end
+    else
+    begin
+        DailyText.Columns.Add(TDailyComment.EmailAutoStat);
+        DailyText.Values.Add('0');
+    end;
 
-procedure TTExcelExport.Execute;
-var
-    FileName:  string;
-    Temp:      TStringGrid;
-begin
-    FIDThd:=CurrentThread.ThreadID;
-    FLock.Acquire;
+    if Fields.EmailManuStat then
+    begin
+        DailyText.Columns.Add(TDailyComment.EmailManuStat);
+        DailyText.Values.Add('1');
+    end
+    else
+    begin
+        DailyText.Columns.Add(TDailyComment.EmailManuStat);
+        DailyText.Values.Add('0');
+    end;
 
-    try
-        MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.ExportXLS);
+    if Fields.CallEvent then
+    begin
+        DailyText.Columns.Add(TDailyComment.CallEvent);
+        DailyText.Values.Add('1');
+        DailyText.Columns.Add(TDailyComment.CallDuration);
+        DailyText.Values.Add(Fields.CallDuration.ToString());
+    end
+    else
+    begin
+        DailyText.Columns.Add(TDailyComment.CallEvent);
+        DailyText.Values.Add('0');
+        DailyText.Columns.Add(TDailyComment.CallDuration);
+        DailyText.Values.Add('0');
+    end;
 
-        // Open save dialog box (sync with GUI)
-        Synchronize(procedure
+    DailyText.Columns.Add(TDailyComment.FixedComment);
+    DailyText.Values.Add(Fields.Comment);
+
+    if (DailyText.InsertInto(TDailyComment.DailyComment, True)) and (DailyText.RowsAffected > 0) then
+    begin
+
+        if Fields.UpdateGrid then TThread.Synchronize(nil, procedure
         begin
-            if MainForm.XLExport.Execute then
-                FileName:=MainForm.XLExport.FileName
-                    else
-                        FileName:='';
+            ActionsForm.UpdateHistory(ActionsForm.HistoryGrid);
         end);
 
-        // Generate and save
-        Temp:=TStringGrid.Create(nil);
-
-        try
-            Temp.OpenThdId:=IDThd;
-            Temp.ToExcel('Age Report', FileName);
-        finally
-            Temp.Free;
-        end;
-
-    finally
-        FLock.Release;
-        MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready);
+        if Fields.EventLog then
+            MainForm.LogText.Log(MainForm.EventLogPath, '"DailyComment" table has been posted (CUID: ' + Fields.CUID + '). Rows affected: ' + DailyText.RowsAffected.ToString() + '.');
+    end
+    else
+    begin
+        MainForm.LogText.Log(MainForm.EventLogPath, 'Cannot update daily comment (CUID: ' + Fields.CUID + '). Rows affected: ' + DailyText.RowsAffected.ToString() + '. Error message received: ' + DailyText.LastErrorMsg + '.');
+        MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot post daily comment into database.' +  TChars.CRLF + 'Error message received: ' + DailyText.LastErrorMsg + TChars.CRLF + 'Please contact IT support.');
     end;
 
-    FreeOnTerminate:=True;
+end;
+
+
+// ------------------------------------
+// Perform SQL "update" command
+// ------------------------------------
+
+procedure TThreading.FUpdateDailyComment(var DailyText: TDataTables; var Fields: TDailyCommentFields; Condition: string);
+begin
+
+    if Fields.Email then
+    begin
+        DailyText.Columns.Add(TDailyComment.Email);
+        DailyText.Values.Add(IntToStr(StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDailyComment.Email].Value), 0)));
+    end;
+
+    // Call event and call duration always comes together
+    if Fields.CallEvent then
+    begin
+
+        var LCallEvent: integer:=StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDailyComment.CallEvent].Value), 0);
+        Inc(LCallEvent);
+
+        DailyText.Columns.Add(TDailyComment.CallEvent);
+        DailyText.Values.Add(LCallEvent.ToString());
+
+        DailyText.Columns.Add(TDailyComment.CallDuration);
+        DailyText.Values.Add(Fields.CallDuration.ToString());
+
+    end;
+
+    if Fields.EmailReminder then
+    begin
+        var LEmailReminder: integer:=StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDailyComment.EmailReminder].Value), 0);
+        Inc(LEmailReminder);
+        DailyText.Columns.Add(TDailyComment.EmailReminder);
+        DailyText.Values.Add(LEmailReminder.ToString());
+    end;
+
+    if Fields.EmailAutoStat then
+    begin
+        var LEmailAutoStat: integer:=StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDailyComment.EmailAutoStat].Value), 0);
+        Inc(LEmailAutoStat);
+        DailyText.Columns.Add(TDailyComment.EmailAutoStat);
+        DailyText.Values.Add(LEmailAutoStat.ToString());
+    end;
+
+    if Fields.EmailManuStat then
+    begin
+        var LEmailManuStat: integer:=StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDailyComment.EmailManuStat].Value), 0);
+        Inc(LEmailManuStat);
+        DailyText.Columns.Add(TDailyComment.EmailManuStat);
+        DailyText.Values.Add(LEmailManuStat.ToString());
+    end;
+
+    if not(Fields.Comment = '') then
+    begin
+        DailyText.Columns.Add(TDailyComment.FixedComment);
+        DailyText.Values.Add(Fields.Comment);
+    end;
+
+    if (DailyText.UpdateRecord(TDailyComment.DailyComment, True, Condition)) and (DailyText.RowsAffected > 0) then
+    begin
+
+        if Fields.UpdateGrid then TThread.Synchronize(nil, procedure
+        begin
+            ActionsForm.UpdateHistory(ActionsForm.HistoryGrid);
+        end);
+
+        if Fields.EventLog then
+            MainForm.LogText.Log(MainForm.EventLogPath, '"DailyComment" table has been updated (CUID: ' + Fields.CUID + '). Rows affected: ' + DailyText.RowsAffected.ToString() + '.');
+    end
+    else
+    begin
+        MainForm.LogText.Log(MainForm.EventLogPath, 'Cannot update daily comment (CUID: ' + Fields.CUID + '). Rows affected: ' + DailyText.RowsAffected.ToString() + '. Error message received: ' + DailyText.LastErrorMsg + '.');
+        MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot update daily comment into database.' +  TChars.CRLF + 'Error message received: ' + DailyText.LastErrorMsg + TChars.CRLF + 'Please contact IT support.');
+    end;
 
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------- WRITE DAILY COMMENT //
+// ------------------------------------
+//
+// ------------------------------------
 
-
-constructor TTDailyComment.Create
-(
-    CUID:          string;
-    Email:         boolean;
-    CallEvent:     boolean;
-    CallDuration:  integer;
-    Comment:       string;
-    EmailReminder,
-    EmailAutoStat,
-    EmailManuStat: boolean;
-    EventLog:      boolean;
-    UpdateGrid:    boolean = true;
-    ExtendComment: boolean = false
-);
+procedure TThreading.EditDailyComment(Fields: TDailyCommentFields);
 begin
-    inherited Create(False);
-    FLock         :=TCriticalSection.Create;
-    FIDThd        :=0;
-    FCUID         :=CUID;
-    FEmail        :=Email;
-    FCallEvent    :=CallEvent;
-    FCallDuration :=IntToStr(CallDuration);
-    FFixedComment :=Comment;
-    FEmailReminder:=EmailReminder;
-    FEmailAutoStat:=EmailAutoStat;
-    FEmailManuStat:=EmailManuStat;
-    FEventLog     :=EventLog;
-    FUpdateGrid   :=UpdateGrid;
-    FExtendComment:=ExtendComment;
-end;
 
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
 
-destructor TTDailyComment.Destroy;
-begin
-    FLock.Free;
-end;
-
-
-procedure TTDailyComment.Execute;
-var
-    DailyText:     TDataTables;
-    Condition:     string;
-    Email:         string;
-    CallEvent:     integer;
-    EmailReminder: integer;
-    EmailAutoStat: integer;
-    EmailManuStat: integer;
-    DataCheckSum:  string;
-    CurrComment:   string;
-begin
-    FIDThd:=CurrentThread.ThreadID;
-    FLock.Acquire;
-
-    try
-        DailyText:=TDataTables.Create(MainForm.DbConnect);
+        var DailyText: TDataTables:=TDataTables.Create(MainForm.DbConnect);
         try
-            Condition:=TDailyComment.Cuid + TSql.EQUAL + QuotedStr(FCUID) + TSql._AND + TDailyComment.AgeDate + TSql.EQUAL + QuotedStr(MainForm.AgeDateSel);
-            DataCheckSum:=FCUID + StringReplace(MainForm.AgeDateSel, '-', '', [rfReplaceAll]);
+
+            var Condition:    string:=TDailyComment.Cuid + TSql.EQUAL + QuotedStr(Fields.CUID) + TSql._AND + TDailyComment.AgeDate + TSql.EQUAL + QuotedStr(MainForm.AgeDateSel);
+            var DataCheckSum: string:=Fields.CUID + StringReplace(MainForm.AgeDateSel, '-', '', [rfReplaceAll]);
+
             DailyText.CustFilter:=TSql.WHERE + Condition;
             DailyText.OpenTable(TDailyComment.DailyComment);
 
-            // Update exisiting comment
             if not (DailyText.DataSet.RecordCount = 0) then
             begin
 
+                // ------------------------
+                // Update exisiting comment
+                // ------------------------
+
                 // Allow to extend comment by adding to existing wording a new comment line
-                if FExtendComment then
-                    CurrComment:=DailyText.DataSet.Fields[TDailyComment.FixedComment].Value + TChars.CRLF;
+                if Fields.ExtendComment then
+                    Fields.Comment:=DailyText.DataSet.Fields[TDailyComment.FixedComment].Value + TChars.CRLF + Fields.Comment;
 
                 DailyText.CleanUp;
 
-                // Define columns, values and conditions
                 DailyText.Columns.Add(TDailyComment.Stamp);
                 DailyText.Values.Add(DateTimeToStr(Now));
+
                 DailyText.Columns.Add(TDailyComment.UserAlias);
                 DailyText.Values.Add(UpperCase(MainForm.WinUserName));
 
-                if FEmail then
-                begin
-                    Email:=IntToStr(StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDailyComment.Email].Value), 0));
-                    DailyText.Columns.Add(TDailyComment.Email);
-                    DailyText.Values.Add(Email);
-                end;
+                FUpdateDailyComment(DailyText, Fields, Condition);
 
-                // Call event and call duration always comes together
-                if FCallEvent then
-                begin
-                    CallEvent:=StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDailyComment.CallEvent].Value), 0);
-                    Inc(CallEvent);
-                    DailyText.Columns.Add(TDailyComment.CallEvent);
-                    DailyText.Values.Add(IntToStr(CallEvent));
-                    DailyText.Columns.Add(TDailyComment.CallDuration);
-                    DailyText.Values.Add(FCallDuration);
-                end;
-
-                if FEmailReminder then
-                begin
-                    EmailReminder:=StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDailyComment.EmailReminder].Value), 0);
-                    Inc(EmailReminder);
-                    DailyText.Columns.Add(TDailyComment.EmailReminder);
-                    DailyText.Values.Add(IntToStr(EmailReminder));
-                end;
-
-                if FEmailAutoStat then
-                begin
-                    EmailAutoStat:=StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDailyComment.EmailAutoStat].Value), 0);
-                    Inc(EmailAutoStat);
-                    DailyText.Columns.Add(TDailyComment.EmailAutoStat);
-                    DailyText.Values.Add(IntToStr(EmailAutoStat));
-                end;
-
-                if FEmailManuStat then
-                begin
-                    EmailManuStat:=StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDailyComment.EmailManuStat].Value), 0);
-                    Inc(EmailManuStat);
-                    DailyText.Columns.Add(TDailyComment.EmailManuStat);
-                    DailyText.Values.Add(IntToStr(EmailManuStat));
-                end;
-
-                if not(FFixedComment = '') then
-                begin
-                    DailyText.Columns.Add(TDailyComment.FixedComment);
-                    DailyText.Values.Add(CurrComment + FFixedComment);
-                end;
-
-                // Execute
-                if (DailyText.UpdateRecord(TDailyComment.DailyComment, True, Condition)) and (DailyText.RowsAffected > 0) then
-                begin
-
-                    // Refresh history grid
-                    Synchronize(procedure
-                    begin
-                        if FUpdateGrid then ActionsForm.UpdateHistory(ActionsForm.HistoryGrid);
-                    end);
-
-                    if FEventLog then
-                        MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: ''DailyComment'' table has been updated (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(DailyText.RowsAffected) + '.');
-                end
-                else
-                begin
-                    MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot update daily comment (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(DailyText.RowsAffected) + '. Error message received: ' + DailyText.LastErrorMsg + '.');
-                    MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot update daily comment into database.' +  TChars.CRLF + 'Error message received: ' + DailyText.LastErrorMsg + TChars.CRLF + 'Please contact IT support.');
-                end;
             end
             else
-
-            // Insert new record
             begin
+
+                // -----------------
+                // Insert new record
+                // -----------------
+
                 DailyText.CleanUp;
 
-                // Define columns and values
-                DailyText.Columns.Add(TDailyComment.GroupId);      DailyText.Values.Add(MainForm.GroupIdSel);
-                DailyText.Columns.Add(TDailyComment.Cuid);         DailyText.Values.Add(FCUID);
-                DailyText.Columns.Add(TDailyComment.AgeDate);      DailyText.Values.Add(MainForm.AgeDateSel);
-                DailyText.Columns.Add(TDailyComment.Stamp);        DailyText.Values.Add(DateTimeToStr(Now));
-                DailyText.Columns.Add(TDailyComment.UserAlias);    DailyText.Values.Add(UpperCase(MainForm.WinUserName));
-                DailyText.Columns.Add(TDailyComment.DataCheckSum); DailyText.Values.Add(DataCheckSum);
+                DailyText.Columns.Add(TDailyComment.GroupId);
+                DailyText.Values.Add(MainForm.GroupIdSel);
 
-                if FEmail then
-                begin
-                    DailyText.Columns.Add(TDailyComment.Email);
-                    DailyText.Values.Add('1');
-                end
-                else
-                begin
-                    DailyText.Columns.Add(TDailyComment.Email);
-                    DailyText.Values.Add('0');
-                end;
+                DailyText.Columns.Add(TDailyComment.Cuid);
+                DailyText.Values.Add(Fields.CUID);
 
-                if FEmailReminder then
-                begin
-                    DailyText.Columns.Add(TDailyComment.EmailReminder);
-                    DailyText.Values.Add('1');
-                end
-                else
-                begin
-                    DailyText.Columns.Add(TDailyComment.EmailReminder);
-                    DailyText.Values.Add('0');
-                end;
+                DailyText.Columns.Add(TDailyComment.AgeDate);
+                DailyText.Values.Add(MainForm.AgeDateSel);
 
-                if FEmailAutoStat then
-                begin
-                    DailyText.Columns.Add(TDailyComment.EmailAutoStat);
-                    DailyText.Values.Add('1');
-                end
-                else
-                begin
-                    DailyText.Columns.Add(TDailyComment.EmailAutoStat);
-                    DailyText.Values.Add('0');
-                end;
+                DailyText.Columns.Add(TDailyComment.Stamp);
+                DailyText.Values.Add(DateTimeToStr(Now));
 
-                if FEmailManuStat then
-                begin
-                    DailyText.Columns.Add(TDailyComment.EmailManuStat);
-                    DailyText.Values.Add('1');
-                end
-                else
-                begin
-                    DailyText.Columns.Add(TDailyComment.EmailManuStat);
-                    DailyText.Values.Add('0');
-                end;
+                DailyText.Columns.Add(TDailyComment.UserAlias);
+                DailyText.Values.Add(UpperCase(MainForm.WinUserName));
 
-                if FCallEvent then
-                begin
-                    DailyText.Columns.Add(TDailyComment.CallEvent);
-                    DailyText.Values.Add('1');
-                    DailyText.Columns.Add(TDailyComment.CallDuration);
-                    DailyText.Values.Add(FCallDuration);
-                end
-                else
-                begin
-                    DailyText.Columns.Add(TDailyComment.CallEvent);
-                    DailyText.Values.Add('0');
-                    DailyText.Columns.Add(TDailyComment.CallDuration);
-                    DailyText.Values.Add('0');
-                end;
+                DailyText.Columns.Add(TDailyComment.DataCheckSum);
+                DailyText.Values.Add(DataCheckSum);
 
-                DailyText.Columns.Add(TDailyComment.FixedComment);
-                DailyText.Values.Add(FFixedComment);
+                FInsertDailyComment(DailyText, Fields);
 
-                // Execute
-                if (DailyText.InsertInto(TDailyComment.DailyComment, True)) and (DailyText.RowsAffected > 0) then
-                begin
-
-                    // Refresh history grid
-                    Synchronize(procedure
-                    begin
-                        if FUpdateGrid then ActionsForm.UpdateHistory(ActionsForm.HistoryGrid);
-                    end);
-
-                    if FEventLog then
-                        MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: ''DailyComment'' table has been posted (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(DailyText.RowsAffected) + '.');
-                end
-                else
-                begin
-                    MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot update daily comment (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(DailyText.RowsAffected) + '. Error message received: ' + DailyText.LastErrorMsg + '.');
-                    MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot post daily comment into database.' +  TChars.CRLF + 'Error message received: ' + DailyText.LastErrorMsg + TChars.CRLF + 'Please contact IT support.');
-                end;
             end;
 
         finally
             DailyText.Free;
         end;
 
-    finally
-        FLock.Release;
+    end);
+
+    NewTask.Start();
+
+end;
+
+
+// ------------------------------------
+//
+// ------------------------------------
+
+procedure TThreading.FInsertGeneralComment(var GenText: TDataTables; var Fields: TGeneralCommentFields);
+begin
+
+    if not(Fields.FixedComment = TUnknown.NULL) then
+    begin
+        GenText.Columns.Add(TGeneralComment.FixedComment);
+        GenText.Values.Add(Fields.FixedComment);
+    end
+    else
+    begin
+        GenText.Columns.Add(TGeneralComment.FixedComment);
+        GenText.Values.Add('');
     end;
 
-    FreeOnTerminate:=True;
+    if not(Fields.FollowUp = TUnknown.NULL) then
+    begin
+        GenText.Columns.Add(TGeneralComment.FollowUp);
+        GenText.Values.Add(Fields.FollowUp);
+    end
+    else
+    begin
+        GenText.Columns.Add(TGeneralComment.FollowUp);
+        GenText.Values.Add('');
+    end;
+
+    if not(Fields.Free1 = TUnknown.NULL) then
+    begin
+        GenText.Columns.Add(TGeneralComment.Free1);
+        GenText.Values.Add(Fields.Free1);
+    end
+    else
+    begin
+        GenText.Columns.Add(TGeneralComment.Free1);
+        GenText.Values.Add('');
+    end;
+
+    if not(Fields.Free2 = TUnknown.NULL) then
+    begin
+        GenText.Columns.Add(TGeneralComment.Free2);
+        GenText.Values.Add(Fields.Free2);
+    end
+    else
+    begin
+        GenText.Columns.Add(TGeneralComment.Free2);
+        GenText.Values.Add('');
+    end;
+
+    if not(Fields.Free3 = TUnknown.NULL) then
+    begin
+        GenText.Columns.Add(TGeneralComment.Free3);
+        GenText.Values.Add(Fields.Free3);
+    end
+    else
+    begin
+        GenText.Columns.Add(TGeneralComment.Free3);
+        GenText.Values.Add('');
+    end;
+
+    if (GenText.InsertInto(TGeneralComment.GeneralComment, True)) and (GenText.RowsAffected > 0) then
+    begin
+        if Fields.EventLog then
+            MainForm.LogText.Log(MainForm.EventLogPath, '"GeneralComment" table has been posted (CUID: ' + Fields.CUID + '). Rows affected: ' + GenText.RowsAffected.ToString() + '.');
+    end
+    else
+    begin
+        MainForm.LogText.Log(MainForm.EventLogPath, 'Cannot update general comment (CUID: ' + Fields.CUID + '). Rows affected: ' + GenText.RowsAffected.ToString() + '. Error message received: ' + GenText.LastErrorMsg + '.');
+        MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot update general comment into database.' +  TChars.CRLF + 'Error message received: ' + GenText.LastErrorMsg + TChars.CRLF + 'Please contact IT support.');
+    end;
 
 end;
 
 
-// ----------------------------------------------------------------------------------------------------------------------------------- WRITE GENERAL COMMENT //
+// ------------------------------------
+//
+// ------------------------------------
 
-
-constructor TTGeneralComment.Create(CUID: string; FixedComment: string; FollowUp: string; Free1: string; Free2: string; Free3: string; EventLog: boolean);
+procedure TThreading.FUpdateGeneralComment(var GenText: TDataTables ;var Fields: TGeneralCommentFields; Condition: string);
 begin
-    inherited Create(False);
-    FLock        :=TCriticalSection.Create;
-    FIDThd       :=0;
-    FCUID        :=CUID;
-    FFixedComment:=FixedComment;
-    FFollowUp    :=FollowUp;
-    FFree1       :=Free1;
-    FFree2       :=Free2;
-    FFree3       :=Free3;
-    FEventLog    :=EventLog;
+
+    if not(Fields.FixedComment = TUnknown.NULL) then
+    begin
+        GenText.Columns.Add(TGeneralComment.FixedComment);
+        GenText.Values.Add(Fields.FixedComment);
+    end;
+
+    if not(Fields.FollowUp = TUnknown.NULL) then
+    begin
+        GenText.Columns.Add(TGeneralComment.FollowUp);
+        GenText.Values.Add(Fields.FollowUp);
+    end;
+
+    if not(Fields.Free1 = TUnknown.Null) then
+    begin
+        GenText.Columns.Add(TGeneralComment.Free1);
+        GenText.Values.Add(Fields.Free1);
+    end;
+
+    if not(Fields.Free2 = TUnknown.NULL) then
+    begin
+        GenText.Columns.Add(TGeneralComment.Free2);
+        GenText.Values.Add(Fields.Free2);
+    end;
+
+    if not(Fields.Free3 = TUnknown.Null) then
+    begin
+        GenText.Columns.Add(TGeneralComment.Free3);
+        GenText.Values.Add(Fields.Free3);
+    end;
+
+    if (GenText.UpdateRecord(TGeneralComment.GeneralComment, True, Condition)) and (GenText.RowsAffected > 0) then
+    begin
+        if Fields.EventLog then
+            MainForm.LogText.Log(MainForm.EventLogPath, '"GeneralComment" table has been updated (CUID: ' + Fields.CUID + '). Rows affected: ' + GenText.RowsAffected.ToString() + '.');
+    end
+    else
+    begin
+        MainForm.LogText.Log(MainForm.EventLogPath, 'Cannot update general comment (CUID: ' + Fields.CUID + '). Rows affected: ' + GenText.RowsAffected.ToString() + '. Error message received: ' + GenText.LastErrorMsg + '.');
+        MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot update general comment into database.' +  TChars.CRLF + 'Error message received: ' + GenText.LastErrorMsg + TChars.CRLF + 'Please contact IT support.');
+    end;
+
 end;
 
 
-destructor TTGeneralComment.Destroy;
+// ------------------------------------
+//
+// ------------------------------------
+
+procedure TThreading.EditGeneralComment(Fields: TGeneralCommentFields);
 begin
-    FLock.Free;
-end;
 
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
 
-procedure TTGeneralComment.Execute;
-var
-    GenText:   TDataTables;
-    Condition: string;
-begin
-    FIDThd:=CurrentThread.ThreadID;
-    FLock.Acquire;
-
-    try
-        GenText:=TDataTables.Create(MainForm.DbConnect);
+        var GenText: TDataTables:=TDataTables.Create(MainForm.DbConnect);
         try
-            Condition:=TGeneralComment.Cuid + TSql.EQUAL + QuotedStr(FCUID);
+
+            var Condition: string:=TGeneralComment.Cuid + TSql.EQUAL + QuotedStr(Fields.CUID);
             GenText.CustFilter:=TSql.WHERE + Condition;
             GenText.OpenTable(TGeneralComment.GeneralComment);
 
-            // Update
             if not (GenText.DataSet.RecordCount = 0) then
             begin
+
+                // -----------------
+                // Update record
+                // -----------------
+
                 GenText.CleanUp;
 
-                // Define columns, vaues and conditions
                 GenText.Columns.Add(TGeneralComment.Stamp);
                 GenText.Values.Add(DateTimeToStr(Now));
+
                 GenText.Columns.Add(TGeneralComment.UserAlias);
                 GenText.Values.Add(UpperCase(MainForm.WinUserName));
 
-                if not(FFixedComment = TUnknown.NULL) then
-                begin
-                    GenText.Columns.Add(TGeneralComment.FixedComment);
-                    GenText.Values.Add(FFixedComment);
-                end;
+                FUpdateGeneralComment(GenText, Fields, Condition);
 
-                if not(FFollowUp = TUnknown.NULL) then
-                begin
-                    GenText.Columns.Add(TGeneralComment.FollowUp);
-                    GenText.Values.Add(FFollowUp);
-                end;
-
-                if not(FFree1 = TUnknown.Null) then
-                begin
-                    GenText.Columns.Add(TGeneralComment.Free1);
-                    GenText.Values.Add(FFree1);
-                end;
-
-                if not(FFree2 = TUnknown.NULL) then
-                begin
-                    GenText.Columns.Add(TGeneralComment.Free2);
-                    GenText.Values.Add(FFree2);
-                end;
-
-                if not(FFree3 = TUnknown.Null) then
-                begin
-                    GenText.Columns.Add(TGeneralComment.Free3);
-                    GenText.Values.Add(FFree3);
-                end;
-
-                // Execute
-                if (GenText.UpdateRecord(TGeneralComment.GeneralComment, True, Condition)) and (GenText.RowsAffected > 0) then
-                begin
-                    if FEventLog then
-                        MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: ''GeneralComment'' table has been updated (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(GenText.RowsAffected) + '.');
-                end
-                else
-                begin
-                    MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot update general comment (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(GenText.RowsAffected) + '. Error message received: ' + GenText.LastErrorMsg + '.');
-                    MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot update general comment into database.' +  TChars.CRLF + 'Error message received: ' + GenText.LastErrorMsg + TChars.CRLF + 'Please contact IT support.');
-                end;
             end
             else
-
-            // Insert new
             begin
+
+                // -----------------
+                // Insert new record
+                // -----------------
+
                 GenText.CleanUp;
-                // Define columns and values
-                GenText.Columns.Add(TGeneralComment.Cuid);      GenText.Values.Add(FCUID);
-                GenText.Columns.Add(TGeneralComment.Stamp);     GenText.Values.Add(DateTimeToStr(Now));
-                GenText.Columns.Add(TGeneralComment.UserAlias); GenText.Values.Add(UpperCase(MainForm.WinUserName));
 
-                if not(FFixedComment = TUnknown.NULL) then
-                begin
-                    GenText.Columns.Add(TGeneralComment.FixedComment);
-                    GenText.Values.Add(FFixedComment);
-                end
-                else
-                begin
-                    GenText.Columns.Add(TGeneralComment.FixedComment);
-                    GenText.Values.Add('');
-                end;
+                GenText.Columns.Add(TGeneralComment.Cuid);
+                GenText.Values.Add(Fields.CUID);
 
-                if not(FFollowUp = TUnknown.NULL) then
-                begin
-                    GenText.Columns.Add(TGeneralComment.FollowUp);
-                    GenText.Values.Add(FFollowUp);
-                end
-                else
-                begin
-                    GenText.Columns.Add(TGeneralComment.FollowUp);
-                    GenText.Values.Add('');
-                end;
+                GenText.Columns.Add(TGeneralComment.Stamp);
+                GenText.Values.Add(DateTimeToStr(Now));
 
-                if not(FFree1 = TUnknown.NULL) then
-                begin
-                    GenText.Columns.Add(TGeneralComment.Free1);
-                    GenText.Values.Add(FFree1);
-                end
-                else
-                begin
-                    GenText.Columns.Add(TGeneralComment.Free1);
-                    GenText.Values.Add('');
-                end;
+                GenText.Columns.Add(TGeneralComment.UserAlias);
+                GenText.Values.Add(UpperCase(MainForm.WinUserName));
 
-                if not(FFree2 = TUnknown.NULL) then
-                begin
-                    GenText.Columns.Add(TGeneralComment.Free2);
-                    GenText.Values.Add(FFree2);
-                end
-                else
-                begin
-                    GenText.Columns.Add(TGeneralComment.Free2);
-                    GenText.Values.Add('');
-                end;
+                FInsertGeneralComment(GenText, Fields);
 
-                if not(FFree3 = TUnknown.NULL) then
-                begin
-                    GenText.Columns.Add(TGeneralComment.Free3);
-                    GenText.Values.Add(FFree3);
-                end
-                else
-                begin
-                    GenText.Columns.Add(TGeneralComment.Free3);
-                    GenText.Values.Add('');
-                end;
-
-                // Execute
-                if (GenText.InsertInto(TGeneralComment.GeneralComment, True)) and (GenText.RowsAffected > 0) then
-                begin
-                    if FEventLog then
-                        MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: ''GeneralComment'' table has been posted (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(GenText.RowsAffected) + '.');
-                end
-                else
-                begin
-                    MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot update general comment (CUID: ' + FCUID + '). Rows affected: ' + IntToStr(GenText.RowsAffected) + '. Error message received: ' + GenText.LastErrorMsg + '.');
-                    MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot update general comment into database.' +  TChars.CRLF + 'Error message received: ' + GenText.LastErrorMsg + TChars.CRLF + 'Please contact IT support.');
-                end;
             end;
 
         finally
             GenText.Free;
         end;
 
-    finally
-        FLock.Release;
-    end;
+    end);
 
-    FreeOnTerminate:=True;
+    NewTask.Start();
 
 end;
+
+
+// ------------------------------------
+//
+// ------------------------------------
+
+procedure TThreading.FSendAccountStatement();
+begin
+
+end;
+
+
+// ------------------------------------
+//
+// ------------------------------------
+
+procedure TThreading.SendAccountStatement(Fields: TSendAccountStatementFields);
+begin
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var Statement: TDocument:=TDocument.Create;
+        var Settings: ISettings:=TSettings.Create;
+        try
+
+            Statement.CUID       :=Fields.CUID;
+            Statement.MailFrom   :=Fields.SendFrom;
+            Statement.MailTo     :=Fields.MailTo;
+            Statement.CustName   :=Fields.CustName;
+            Statement.LBUName    :=Fields.LBUName;
+            Statement.LBUAddress :=Fields.LBUAddress;
+            Statement.Telephone  :=Fields.Telephone;
+            Statement.BankDetails:=Fields.BankDetails;
+            Statement.CustMess   :=Fields.Mess;
+            //Statement.OpenItems  :=Fields.OpenItems;
+            Statement.InvFilter  :=Fields.InvFilter;
+            Statement.BeginWith  :=Fields.BeginDate;
+            Statement.EndWith    :=Fields.EndDate;
+
+            // quick fix - to be refactored - data should be taken from the table
+            Statement.REM_EX1:='1';
+            Statement.REM_EX2:='102';
+            Statement.REM_EX3:='103';
+            Statement.REM_EX4:='104';
+            Statement.REM_EX5:='514';
+
+            Statement.MailSubject:=Fields.Subject + ' - ' + Fields.CustName + ' - ' + Fields.CustNumber;
+
+            /// <remarks>
+            /// Load either fixed template or customizable template.
+            /// </remarks>
+            /// <param name="FLayout">
+            /// Use maDefined for fully pre-defined template.
+            /// Use maCustom for customised template. It requires FSalut, FMess and FSubject to be provided.
+            /// </param>
+
+            if Fields.Layout = TEnums.TDocMode.Defined then
+                Statement.HTMLLayout:=Statement.LoadTemplate(Settings.GetLayoutDir + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE2', ''));
+
+            if Fields.Layout = TEnums.TDocMode.Custom then
+                Statement.HTMLLayout:=Statement.LoadTemplate(Settings.GetLayoutDir + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE3', ''));
+
+            if Statement.SendDocument then
+            begin
+
+                /// <summary>
+                /// Register sent email either as manual statement or automatic statement.
+                /// </summary>
+
+                if Fields.Layout = TEnums.TDocMode.Defined then
+                begin
+
+
+                end;
+
+                if Fields.Layout = TEnums.TDocMode.Custom  then
+                begin
+
+
+                end;
+
+                /// <remarks>
+                /// Either single email (manual by user) or executed by mass mailer (multiple emails).
+                /// </remarks>
+
+                if not(Fields.Series) then
+                begin
+                    MainForm.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Account Statement has been sent successfully!');
+                end
+                else
+                begin
+                    MainForm.ExecMessage(False, TMessaging.TWParams.MailerReportItem, Fields.ItemNo.ToString);
+                end;
+
+            end
+            else
+            begin
+                if not(Fields.Series) then MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Account Statement cannot be sent. Please contact IT support.')
+            end;
+
+        finally
+            Statement.Free;
+        end;
+
+    end);
+
+    NewTask.Start();
+
+end;
+
+
+// ------------------------------------
+//
+// ------------------------------------
+
+procedure TThreading.SendAccountStatements(Fields: TSendAccountStatementFields);
+begin
+
+end;
+
 
 
 // ---------------------------------------------------------------------------------------------------------------------------------- SEND ACCOUNT STATEMENT //
@@ -1487,8 +1543,9 @@ procedure TTSendAccountStatement.Execute;
 var
     Statement:  TDocument;
     Settings:   ISettings;
-    CommThread: TTDailyComment;
+//    CommThread: TTDailyComment;
 begin
+
     FIDThd:=CurrentThread.ThreadID;
     FLock.Acquire;
     CurrentThread.Sleep(15);
@@ -1552,38 +1609,74 @@ begin
 
                 if FLayout = TEnums.TDocMode.Defined then
                 begin
-                    CommThread:=TTDailyComment.Create(
-                        FCUID,
-                        False,
-                        False,
-                        0,
-                        'New communication has been sent to the customer',
-                        False,
-                        True,
-                        False,
-                        True,
-                        False,
-                        True
-                    );
-                    CommThread.WaitFor;
+
+//                    CommThread:=TTDailyComment.Create(
+//                        FCUID,
+//                        False,
+//                        False,
+//                        0,
+//                        'New communication has been sent to the customer',
+//                        False,
+//                        True,
+//                        False,
+//                        True,
+//                        False,
+//                        True
+//                    );
+//                    CommThread.WaitFor;
+
+//                    var Job: IThreading:=TThreading.Create;
+
+//                    Job.CUID         :=FCUID;
+//                    Job.Email        :=False;
+//                    Job.CallEvent    :=False;
+//                    Job.CallDuration :=0;
+//                    Job.Comment      :='New communication has been sent to the customer';
+//                    Job.EmailReminder:=False;
+//                    Job.EmailAutoStat:=True;
+//                    Job.EmailManuStat:=False;
+//                    Job.EventLog     :=True;
+//                    Job.UpdateGrid   :=False;
+//                    Job.ExtendComment:=True;
+
+//                    Job.EditDailyComment();
+
                 end;
 
                 if FLayout = TEnums.TDocMode.Custom  then
                 begin
-                    CommThread:=TTDailyComment.Create(
-                        FCUID,
-                        False,
-                        False,
-                        0,
-                        'New communication has been sent to the customer',
-                        False,
-                        False,
-                        True,
-                        True,
-                        False,
-                        True
-                    );
-                    CommThread.WaitFor;
+
+//                    CommThread:=TTDailyComment.Create(
+//                        FCUID,
+//                        False,
+//                        False,
+//                        0,
+//                        'New communication has been sent to the customer',
+//                        False,
+//                        False,
+//                        True,
+//                        True,
+//                        False,
+//                        True
+//                    );
+//                    CommThread.WaitFor;
+
+//                    var Job: IThreading:=TThreading.Create;
+
+//                    Job.CUID         :=FCUID;
+//                    Job.Email        :=False;
+//                    Job.CallEvent    :=False;
+//                    Job.CallDuration :=0;
+//                    Job.Comment      :='New communication has been sent to the customer';
+//                    Job.EmailReminder:=False;
+//                    Job.EmailAutoStat:=False;
+//                    Job.EmailManuStat:=True;
+//                    Job.EventLog     :=True;
+//                    Job.UpdateGrid   :=False;
+//                    Job.ExtendComment:=True;
+
+//                    Job.EditDailyComment();
+
                 end;
 
                 /// <remarks>
@@ -1729,61 +1822,6 @@ begin
     end;
 
     FreeOnTerminate:=True;
-
-end;
-
-
-// ------------------------------------------------------------------------------------------------------------------------------- LOAD ASYNC. GENERAL TABLE //
-
-
-constructor TTGeneralTables.Create(TableName: string; DestGrid: TStringGrid; Columns: string = '' {OPTION}; Conditions: string = '' {OPTION}; AutoRelease: boolean = True {OPTION});
-begin
-    inherited Create(False);
-    FTableName  :=TableName;
-    FDestGrid   :=DestGrid;
-    FColumns    :=Columns;
-    FConditions :=Conditions;
-    FAutoRelease:=AutoRelease;
-end;
-
-
-procedure TTGeneralTables.Execute;
-var
-    IDThd:       cardinal;
-    DataTables:  TDataTables;
-begin
-
-    IDThd:=TTGeneralTables.CurrentThread.ThreadID;
-    DataTables:=TDataTables.Create(MainForm.DbConnect);
-
-    try
-        try
-            DataTables.CleanUp;
-
-            if not(string.IsNullOrEmpty(FColumns)) then
-                DataTables.Columns.Text:=FColumns;
-
-            if not(string.IsNullOrEmpty(FConditions)) then
-                DataTables.CustFilter:=FConditions;
-
-            if DataTables.OpenTable(FTableName) then
-                DataTables.SqlToGrid(FDestGrid, DataTables.DataSet, False, True);
-
-        except
-            on E: Exception do
-                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(IDThd) + ']: Cannot load general table, error has been thrown: ' + E.Message);
-        end;
-    finally
-        DataTables.Free;
-    end;
-
-    /// <remarks>
-    /// Do not use FreeOnTerminate, manually destroy the object after the job is done.
-    /// This allow to execute this thread in series with "WaitFor" method.
-    /// By default, FreeOnTerminate is always ON, use option "False" to disable it.
-    /// </remarks>
-
-    FreeOnTerminate:=FAutoRelease;
 
 end;
 

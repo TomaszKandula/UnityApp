@@ -14,7 +14,8 @@ uses
     Data.Win.ADODB,
     SqlHandler,
     InterposerClasses,
-    Helpers;
+    Helpers,
+    Statics;
 
 
 type

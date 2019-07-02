@@ -48,7 +48,8 @@ implementation
 
 uses
     Main,
-    Helpers;
+    Helpers,
+    Statics;
 
 
 function TConnectivity.CallServer(CallUrl: string; Mode: string; var HttpResponse: string): integer;

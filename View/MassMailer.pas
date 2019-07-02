@@ -20,7 +20,8 @@ uses
     Vcl.Buttons,
     Vcl.Imaging.pngimage,
     InterposerClasses,
-    Helpers;
+    Helpers,
+    Statics;
 
 
 type
@@ -400,7 +401,7 @@ begin
     );
 
     // Display await window
-    MainForm.WndCall(AwaitForm, Helpers.TEnums.TWindowState.Modal);
+    MainForm.WndCall(AwaitForm, Statics.TEnums.TWindowState.Modal);
 
 end;
 

@@ -58,7 +58,8 @@ uses
     uCEFWinControl,
     EventLogger,
     InterposerClasses,
-    Helpers;
+    Helpers,
+    Statics;
 
 
 type
@@ -844,7 +845,9 @@ type
         procedure Action_TurnRowHighlightClick(Sender: TObject);
         procedure CommonPopupMenuPopup(Sender: TObject);
     private
-        var AbUpdateFields:   TAddressBookUpdateFields;
+        var AbUpdateFields: TAddressBookUpdateFields;
+        var DailyCommentFields: TDailyCommentFields;
+        var GeneralCommentFields: TGeneralCommentFields;
         var FAllowClose:      boolean;
         var FStartTime:       TTime;
         var FWinUserName:     string;
@@ -898,7 +901,7 @@ type
         procedure DebugMsg(const Msg: String);
         procedure TryInitConnection;
         procedure ExecMessage(IsPostType: boolean; IntValue: cardinal; TextValue: string);
-        function  WndCall(WinForm: TForm; Mode: Helpers.TEnums.TWindowState): integer;
+        function  WndCall(WinForm: TForm; Mode: Statics.TEnums.TWindowState): integer;
         function  MsgCall(WndType: TCommon.TMessage; WndText: string): integer;
         function  OleGetStr(RecordsetField: variant): string;
 
@@ -1142,17 +1145,22 @@ begin
     // Log time (seconds) in database "general comment" table
     if PassMsg.LParam > 0 then
     begin
-        TTDailyComment.Create(
-            sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), sgAgeView.Row],
-            False,
-            True,
-            PassMsg.LParam,
-            '',
-            False,
-            False,
-            False,
-            True
-        );
+
+        DailyCommentFields.CUID         :=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), sgAgeView.Row];
+        DailyCommentFields.Email        :=False;
+        DailyCommentFields.CallEvent    :=True;
+        DailyCommentFields.CallDuration :=PassMsg.LParam;
+        DailyCommentFields.Comment      :='';
+        DailyCommentFields.EmailReminder:=False;
+        DailyCommentFields.EmailAutoStat:=False;
+        DailyCommentFields.EmailManuStat:=False;
+        DailyCommentFields.EventLog     :=True;
+        DailyCommentFields.UpdateGrid   :=True;
+        DailyCommentFields.ExtendComment:=False;
+
+        var Job: IThreading:=TThreading.Create;
+        Job.EditDailyComment(DailyCommentFields);
+
     end;
 
 end;
@@ -1379,7 +1387,7 @@ begin
 end;
 
 
-function TMainForm.WndCall(WinForm: TForm; Mode: Helpers.TEnums.TWindowState): integer;
+function TMainForm.WndCall(WinForm: TForm; Mode: Statics.TEnums.TWindowState): integer;
 begin
 
     Result:=0;
@@ -1388,8 +1396,8 @@ begin
     WinForm.PopupParent:=MainForm;
 
     case Mode of
-        Helpers.TEnums.TWindowState.Modal: Result:=WinForm.ShowModal;
-        Helpers.TEnums.TWindowState.Modeless: WinForm.Show;
+        Statics.TEnums.TWindowState.Modal: Result:=WinForm.ShowModal;
+        Statics.TEnums.TWindowState.Modeless: WinForm.Show;
     end;
 
 end;
@@ -2545,60 +2553,31 @@ begin
     end;
 
     // --------------------------
-    // Load async helper tables
-    // --------------------------
-
-    OnCreateJob(TSplashScreen.MappingTables);
-
-    /// <remarks>
-    /// Note: asynchronous execution "in series" may seems a bit pointless, after all we call those methods to execute tasks outside main UI.
-    /// However, the reason is, the output is used by main UI at right quick for mapping purposes, so either we wait untill worker threads reports "job done",
-    /// or we execute them outside main UI (so application is not freezed) and continue when tasks are finished.
-    /// </remarks>
-
-    var MapTable: TTGeneralTables:=nil;
-    try
-        try
-            MapTable:=TTGeneralTables.Create(TSalesResponsible.SalesResponsible, sgSalesResp, '', '', False);
-            MapTable.WaitFor;
-            MapTable:=TTGeneralTables.Create(TPersonResponsible.PersonResponsible, sgPersonResp, '', '', False);
-            MapTable.WaitFor;
-            MapTable:=TTGeneralTables.Create(TAccountType.AccountType, sgAccountType, '', '', False);
-            MapTable.WaitFor;
-            MapTable:=TTGeneralTables.Create(TCustomerGroup.CustomerGroup, sgCustomerGr, '', '', False);
-            MapTable.WaitFor;
-            MapTable:=TTGeneralTables.Create(TGroup3.Group3, sgGroup3, '', '', False);
-            MapTable.WaitFor;
-        except
-            on E: Exception do
-            begin
-                LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: TMapTable failed. Error occured: ' + E.Message);
-                MsgCall(TCommon.TMessage.Error, 'An error occured [TMapTable]: ' + E.Message + '. Please contact IT support. Application will be closed.');
-                ExitProcess(0);
-            end;
-        end;
-    finally
-        if Assigned(MapTable) then MapTable.Free;
-    end;
-
-    // --------------------------
     // Load async general tables
     // --------------------------
 
-    OnCreateJob(TSplashScreen.GettingGeneral);
-
+    var GetTablesAsync: IThreading:=TThreading.Create;
     try
-        TTGeneralTables.Create(TCompanyData.CompanyData, sgCoCodes, TCompanyData.CoCode + TChars.COMMA + TCompanyData.Branch + TChars.COMMA + TCompanyData.CoName + TChars.COMMA + TCompanyData.CoAddress + TChars.COMMA + TCompanyData.VatNo + TChars.COMMA + TCompanyData.Duns + TChars.COMMA + TCompanyData.Country + TChars.COMMA + TCompanyData.City + TChars.COMMA + TCompanyData.FinManager + TChars.COMMA + TCompanyData.TelephoneNumbers + TChars.COMMA + TCompanyData.CoType + TChars.COMMA + TCompanyData.CoCurrency + TChars.COMMA + TCompanyData.InterestRate + TChars.COMMA + TCompanyData.KpiOverdueTarget + TChars.COMMA + TCompanyData.KpiUnallocatedTarget + TChars.COMMA + TCompanyData.Agents + TChars.COMMA + TCompanyData.Divisions, TSql.ORDER + TCompanyData.CoCode + TSql.ASC);
-        TTGeneralTables.Create(TPaymentTerms.PaymentTerms, sgPmtTerms);
-        TTGeneralTables.Create(TPaidinfo.Paidinfo, sgPaidInfo);
-        TTGeneralTables.Create(TPerson.Person, sgPerson);
-        TTGeneralTables.Create(TControlStatus.ControlStatus, sgControlStatus);
+
+        OnCreateJob(TSplashScreen.MappingTables);
+        GetTablesAsync.GeneralTables(TSalesResponsible.SalesResponsible, sgSalesResp);
+        GetTablesAsync.GeneralTables(TPersonResponsible.PersonResponsible, sgPersonResp);
+        GetTablesAsync.GeneralTables(TAccountType.AccountType, sgAccountType);
+        GetTablesAsync.GeneralTables(TCustomerGroup.CustomerGroup, sgCustomerGr);
+        GetTablesAsync.GeneralTables(TGroup3.Group3, sgGroup3);
+
+        OnCreateJob(TSplashScreen.GettingGeneral);
+        GetTablesAsync.GeneralTables(TCompanyData.CompanyData, sgCoCodes, TCompanyData.CoCode + TChars.COMMA + TCompanyData.Branch + TChars.COMMA + TCompanyData.CoName + TChars.COMMA + TCompanyData.CoAddress + TChars.COMMA + TCompanyData.VatNo + TChars.COMMA + TCompanyData.Duns + TChars.COMMA + TCompanyData.Country + TChars.COMMA + TCompanyData.City + TChars.COMMA + TCompanyData.FinManager + TChars.COMMA + TCompanyData.TelephoneNumbers + TChars.COMMA + TCompanyData.CoType + TChars.COMMA + TCompanyData.CoCurrency + TChars.COMMA + TCompanyData.InterestRate + TChars.COMMA + TCompanyData.KpiOverdueTarget + TChars.COMMA + TCompanyData.KpiUnallocatedTarget + TChars.COMMA + TCompanyData.Agents + TChars.COMMA + TCompanyData.Divisions, TSql.ORDER + TCompanyData.CoCode + TSql.ASC);
+        GetTablesAsync.GeneralTables(TPaymentTerms.PaymentTerms, sgPmtTerms);
+        GetTablesAsync.GeneralTables(TPaidinfo.Paidinfo, sgPaidInfo);
+        GetTablesAsync.GeneralTables(TPerson.Person, sgPerson);
+        GetTablesAsync.GeneralTables(TControlStatus.ControlStatus, sgControlStatus);
 
     except
         on E: Exception do
         begin
-            LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: TTGeneralTables failed. Error occured: ' + E.Message);
-            MsgCall(TCommon.TMessage.Error, 'An error occured [TTGeneralTables]: ' + E.Message + '. Please contact IT support. Application will be closed.');
+            LogText.Log(EventLogPath, 'General tables loading failed. Error occured: ' + E.Message);
+            MsgCall(TCommon.TMessage.Error, 'An error occured [GeneralTables]: ' + E.Message + '. Please contact IT support. Application will be closed.');
             ExitProcess(0);
         end;
     end;
@@ -2625,9 +2604,6 @@ begin
 
         LogText.Log(EventLogPath, 'Thread [' + MainThreadID.ToString + ']: Application version = ' + AppVersion);
         LogText.Log(EventLogPath, 'Thread [' + MainThreadID.ToString + ']: User SID = ' + TUserSid.GetCurrentUserSid);
-
-        {sgInvoiceTracker.Enabled:=False;}
-        {sgAddressBook.Enabled:=False;}
 
         InitializeQms;
         if not(FirstAgeLoad.Enabled) then FirstAgeLoad.Enabled:=True;
@@ -3123,7 +3099,7 @@ end;
 
 procedure TMainForm.Action_SearchBookClick(Sender: TObject);
 begin
-    WndCall(SqlSearchForm, Helpers.TEnums.TWindowState.Modeless);
+    WndCall(SqlSearchForm, Statics.TEnums.TWindowState.Modeless);
 end;
 
 
@@ -3210,7 +3186,7 @@ end;
 
 procedure TMainForm.Action_ReportClick(Sender: TObject);
 begin
-    WndCall(FeedbackForm, Helpers.TEnums.TWindowState.Modal);
+    WndCall(FeedbackForm, Statics.TEnums.TWindowState.Modal);
 end;
 
 
@@ -3230,7 +3206,7 @@ end;
 
 procedure TMainForm.Action_AboutClick(Sender: TObject);
 begin
-    WndCall(AboutForm, Helpers.TEnums.TWindowState.Modal);
+    WndCall(AboutForm, Statics.TEnums.TWindowState.Modal);
 end;
 
 
@@ -3276,7 +3252,7 @@ begin
     if IsConnected then
     begin
         if MainForm.StatBar_TXT1.Caption = TStatusBar.Ready then
-            WndCall(ActionsForm, Helpers.TEnums.TWindowState.Modal)
+            WndCall(ActionsForm, Statics.TEnums.TWindowState.Modal)
                 else
                     MainForm.MsgCall(Warn, 'Wait until "Ready" status and try again.');
     end
@@ -3350,7 +3326,7 @@ begin
             end;
         end;
 
-        WndCall(TrackerForm, Helpers.TEnums.TWindowState.Modal);
+        WndCall(TrackerForm, Statics.TEnums.TWindowState.Modal);
 
     end
     else
@@ -3450,7 +3426,7 @@ begin
             end;
         end;
 
-        WndCall(MassMailerForm, Helpers.TEnums.TWindowState.Modal);
+        WndCall(MassMailerForm, Statics.TEnums.TWindowState.Modal);
 
     end
     else
@@ -3470,7 +3446,7 @@ begin
 
     Screen.Cursor:=crHourGlass;
     CalendarForm.FCalendarMode:=TEnums.TCalendar.GetDate;
-    MainForm.WndCall(CalendarForm, Helpers.TEnums.TWindowState.Modal);
+    MainForm.WndCall(CalendarForm, Statics.TEnums.TWindowState.Modal);
 
     // If selected more than one customer, assign given date to selected customers
     if CalendarForm.FSelectedDate <> TDateTimeFormats.NullDate then
@@ -3502,16 +3478,30 @@ begin
 
         if sgAgeView.RowHeights[iCNT] <> sgAgeView.sgRowHidden then
         begin
-            TTGeneralComment.Create(
-                sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), iCNT],
-                TUnknown.NULL,
-                TChars.SPACE,
-                TUnknown.NULL,
-                TUnknown.NULL,
-                TUnknown.NULL,
-                False
-            );
+
+//            TTGeneralComment.Create(
+//                sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), iCNT],
+//                TUnknown.NULL,
+//                TChars.SPACE,
+//                TUnknown.NULL,
+//                TUnknown.NULL,
+//                TUnknown.NULL,
+//                False
+//            );
+
+            GeneralCommentFields.CUID        :=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), iCNT];
+            GeneralCommentFields.FixedComment:=TUnknown.NULL;
+            GeneralCommentFields.FollowUp    :=TChars.SPACE;
+            GeneralCommentFields.Free1       :=TUnknown.NULL;
+            GeneralCommentFields.Free2       :=TUnknown.NULL;
+            GeneralCommentFields.Free3       :=TUnknown.NULL;
+            GeneralCommentFields.EventLog    :=False;
+
+            var Job: IThreading:=TThreading.Create;
+            Job.EditGeneralComment(GeneralCommentFields);
+
             MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneralComment.fFollowUp, 1, 1), iCNT]:=TChars.SPACE;
+
         end;
 
     end;
@@ -3537,7 +3527,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.Inf7;
-    WndCall(FilterForm, Helpers.TEnums.TWindowState.Modal);
+    WndCall(FilterForm, Statics.TEnums.TWindowState.Modal);
 end;
 
 
@@ -3548,7 +3538,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.Inf4;
-    WndCall(FilterForm, Helpers.TEnums.TWindowState.Modal);
+    WndCall(FilterForm, Statics.TEnums.TWindowState.Modal);
 end;
 
 
@@ -3559,7 +3549,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.Group3;
-    WndCall(FilterForm, Helpers.TEnums.TWindowState.Modal);
+    WndCall(FilterForm, Statics.TEnums.TWindowState.Modal);
 end;
 
 
@@ -3570,7 +3560,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.SalesResponsible;
-    WndCall(FilterForm, Helpers.TEnums.TWindowState.Modal);
+    WndCall(FilterForm, Statics.TEnums.TWindowState.Modal);
 end;
 
 
@@ -3581,7 +3571,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.PersonResponsible;
-    WndCall(FilterForm, Helpers.TEnums.TWindowState.Modal);
+    WndCall(FilterForm, Statics.TEnums.TWindowState.Modal);
 end;
 
 
@@ -3592,7 +3582,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.CustomerGroup;
-    WndCall(FilterForm, Helpers.TEnums.TWindowState.Modal);
+    WndCall(FilterForm, Statics.TEnums.TWindowState.Modal);
 end;
 
 
@@ -3603,7 +3593,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.AccountType;
-    WndCall(FilterForm, Helpers.TEnums.TWindowState.Modal);
+    WndCall(FilterForm, Statics.TEnums.TWindowState.Modal);
 end;
 
 
@@ -3614,7 +3604,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.Follow;
-    WndCall(FilterForm, Helpers.TEnums.TWindowState.Modal);
+    WndCall(FilterForm, Statics.TEnums.TWindowState.Modal);
 end;
 
 
@@ -3625,7 +3615,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.CoCode;
-    WndCall(FilterForm, Helpers.TEnums.TWindowState.Modal);
+    WndCall(FilterForm, Statics.TEnums.TWindowState.Modal);
 end;
 
 
@@ -3636,7 +3626,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.Agent;
-    WndCall(FilterForm, Helpers.TEnums.TWindowState.Modal);
+    WndCall(FilterForm, Statics.TEnums.TWindowState.Modal);
 end;
 
 
@@ -3647,7 +3637,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.Division;
-    WndCall(FilterForm, Helpers.TEnums.TWindowState.Modal);
+    WndCall(FilterForm, Statics.TEnums.TWindowState.Modal);
 end;
 
 
@@ -3658,7 +3648,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.Free1;
-    WndCall(FilterForm, Helpers.TEnums.TWindowState.Modal);
+    WndCall(FilterForm, Statics.TEnums.TWindowState.Modal);
 end;
 
 
@@ -3669,7 +3659,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.Free2;
-    WndCall(FilterForm, Helpers.TEnums.TWindowState.Modal);
+    WndCall(FilterForm, Statics.TEnums.TWindowState.Modal);
 end;
 
 
@@ -3680,7 +3670,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.Free3;
-    WndCall(FilterForm, Helpers.TEnums.TWindowState.Modal);
+    WndCall(FilterForm, Statics.TEnums.TWindowState.Modal);
 end;
 
 
@@ -3788,7 +3778,7 @@ begin
     GridSearchForm.FGrid     :=MainForm.sgAgeView;
     GridSearchForm.FColName  :=TSnapshots.fCustomerName;
     GridSearchForm.FColNumber:=TSnapshots.fCustomerNumber;
-    WndCall(GridSearchForm, Helpers.TEnums.TWindowState.Modeless);
+    WndCall(GridSearchForm, Statics.TEnums.TWindowState.Modeless);
 end;
 
 
@@ -3871,7 +3861,8 @@ end;
 
 procedure TMainForm.Action_ToExceClick(Sender: TObject);
 begin
-    TTExcelExport.Create;
+    var Job: IThreading:=TThreading.Create;
+    Job.ExcelExport();
 end;
 
 
@@ -3966,7 +3957,7 @@ end;
 
 procedure TMainForm.Action_FollowUpColorsClick(Sender: TObject);
 begin
-    WndCall(ColorsForm, Helpers.TEnums.TWindowState.Modal);
+    WndCall(ColorsForm, Statics.TEnums.TWindowState.Modal);
 end;
 
 
@@ -4033,7 +4024,7 @@ end;
 
 procedure TMainForm.Action_ShowRegisteredClick(Sender: TObject);
 begin
-    WndCall(InvoicesForm, Helpers.TEnums.TWindowState.Modal);
+    WndCall(InvoicesForm, Statics.TEnums.TWindowState.Modal);
 end;
 
 
@@ -4298,7 +4289,7 @@ end;
 procedure TMainForm.sgInvoiceTrackerDblClick(Sender: TObject);
 begin
     if IsConnected then
-        WndCall(InvoicesForm, Helpers.TEnums.TWindowState.Modal)
+        WndCall(InvoicesForm, Statics.TEnums.TWindowState.Modal)
     else
         MsgCall(Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
 end;
@@ -4842,10 +4833,47 @@ procedure TMainForm.sgAgeViewKeyDown(Sender: TObject; var Key: Word; Shift: TShi
 
     procedure ModifyCell(CUIDRef: integer; ColumnType: integer; Text: string);
     begin
-        if ColumnType = ctFree1    then TTGeneralComment.Create(sgAgeView.Cells[CUIDRef, sgAgeView.Row], TUnknown.Null, TUnknown.Null, Text, TUnknown.Null, TUnknown.Null, True);
-        if ColumnType = ctFree2    then TTGeneralComment.Create(sgAgeView.Cells[CUIDRef, sgAgeView.Row], TUnknown.Null, TUnknown.Null, TUnknown.Null, Text, TUnknown.Null, True);
-        if ColumnType = ctFree3    then TTGeneralComment.Create(sgAgeView.Cells[CUIDRef, sgAgeView.Row], TUnknown.Null, TUnknown.Null, TUnknown.Null, TUnknown.Null, Text, True);
-        if ColumnType = ctFollowUp then TTGeneralComment.Create(sgAgeView.Cells[CUIDRef, sgAgeView.Row], TUnknown.Null, Text, TUnknown.Null, TUnknown.Null, TUnknown.Null, True);
+
+        case ColumnType of
+
+            ctFree1:
+            begin
+                GeneralCommentFields.CUID        :=sgAgeView.Cells[CUIDRef, sgAgeView.Row];
+                GeneralCommentFields.FixedComment:=TUnknown.Null;
+                GeneralCommentFields.FollowUp    :=TUnknown.Null;
+                GeneralCommentFields.Free1       :=Text;
+                GeneralCommentFields.Free2       :=TUnknown.Null;
+                GeneralCommentFields.Free3       :=TUnknown.Null;
+                GeneralCommentFields.EventLog    :=True;
+            end;
+
+            ctFree2:
+            begin
+                GeneralCommentFields.CUID        :=sgAgeView.Cells[CUIDRef, sgAgeView.Row];
+                GeneralCommentFields.FixedComment:=TUnknown.Null;
+                GeneralCommentFields.FollowUp    :=TUnknown.Null;
+                GeneralCommentFields.Free1       :=TUnknown.Null;
+                GeneralCommentFields.Free2       :=Text;
+                GeneralCommentFields.Free3       :=TUnknown.Null;
+                GeneralCommentFields.EventLog    :=True;
+            end;
+
+            ctFree3:
+            begin
+                GeneralCommentFields.CUID        :=sgAgeView.Cells[CUIDRef, sgAgeView.Row];
+                GeneralCommentFields.FixedComment:=TUnknown.Null;
+                GeneralCommentFields.FollowUp    :=TUnknown.Null;
+                GeneralCommentFields.Free1       :=TUnknown.Null;
+                GeneralCommentFields.Free2       :=TUnknown.Null;
+                GeneralCommentFields.Free3       :=Text;
+                GeneralCommentFields.EventLog    :=True;
+            end;
+
+        end;
+
+        var Job: IThreading:=TThreading.Create;
+        Job.EditGeneralComment(GeneralCommentFields);
+
     end;
 
     procedure QuitEditing;
@@ -6838,7 +6866,7 @@ end;
 
 procedure TMainForm.imgEventLogClick(Sender: TObject);
 begin
-    WndCall(EventForm, Helpers.TEnums.TWindowState.Modeless);
+    WndCall(EventForm, Statics.TEnums.TWindowState.Modeless);
 end;
 
 

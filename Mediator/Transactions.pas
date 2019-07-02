@@ -16,7 +16,9 @@ uses
     DbModel,
     SqlHandler,
     InterposerClasses,
-    Helpers;
+    Helpers,
+    Statics;
+
 
 type
 

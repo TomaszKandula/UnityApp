@@ -18,7 +18,8 @@ uses
     Vcl.ExtCtrls,
     Vcl.Buttons,
     InterposerClasses,
-    Helpers;
+    Helpers,
+    Statics;
 
 
 type

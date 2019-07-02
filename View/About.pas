@@ -102,7 +102,8 @@ implementation
 uses
     Main,
     Settings,
-    Helpers;
+    Helpers,
+    Statics;
 
 
 type

@@ -116,7 +116,8 @@ uses
     Actions,
     Calendar,
     Settings,
-    Helpers;
+    Helpers,
+    Statics;
 
 
 var vQmsForm: TQmsForm;
@@ -564,7 +565,7 @@ end;
 procedure TQmsForm.btnAddDueDateClick(Sender: TObject);
 begin
     CalendarForm.FCalendarMode:=TEnums.TCalendar.GetDate;
-    MainForm.WndCall(CalendarForm, Helpers.TEnums.TWindowState.Modal);
+    MainForm.WndCall(CalendarForm, Statics.TEnums.TWindowState.Modal);
     if CalendarForm.FSelectedDate <> TDateTimeFormats.NullDate then EditDueDate.Text:=DateToStr(CalendarForm.FSelectedDate);
 end;
 
