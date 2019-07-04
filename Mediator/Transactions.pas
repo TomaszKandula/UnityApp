@@ -15,9 +15,9 @@ uses
     Data.Win.ADODB,
     DbModel,
     SqlHandler,
-    InterposerClasses,
-    Helpers,
-    Statics;
+    Unity.Interposer,
+    Unity.Statics,
+    Unity.Enums;
 
 
 type
@@ -28,7 +28,7 @@ type
     public
         var DestGrid:    TStringGrid;
         var SettingGrid: TStringGrid;
-        function  GetDateTime(Return: TEnums.TCalendar): string;
+        function  GetDateTime(Return: TCalendar): string;
         function  GetStatus(DateTime: string): string;
         function  LoadToGrid: boolean;
         function  IsVoType(VoType: string): boolean;
@@ -52,7 +52,7 @@ uses
 /// Get date and time from SSISMaster table.
 /// </summary>
 
-function TTransactions.GetDateTime(Return: TEnums.TCalendar): string;
+function TTransactions.GetDateTime(Return: TCalendar): string;
 begin
 
     CleanUp;
@@ -60,7 +60,7 @@ begin
     // Get latest date and time
     Columns.Add(
         TSql.MAX +
-            BracketStr(TSSISMaster.StartDateTime, TEnums.TBrackets.Round) +
+            BracketStr(TSSISMaster.StartDateTime, TBrackets.Round) +
         TSql._AS +
             QuotedStr(TSSISMaster.StartDateTime)
     );
@@ -78,9 +78,9 @@ begin
 
             case Return of
 
-              TEnums.TCalendar.TimeOnly: Result:=FormatDateTime(TDateTimeFormats.TimeFormat, VarToDateTime(Value));
-              TEnums.TCalendar.DateOnly: Result:=FormatDateTime(TDateTimeFormats.DateFormat, VarToDateTime(Value));
-              TEnums.TCalendar.DateTime: Result:=FormatDateTime(TDateTimeFormats.DateTimeFormat, VarToDateTime(Value));
+              TCalendar.TimeOnly: Result:=FormatDateTime(TDateTimeFormats.TimeFormat, VarToDateTime(Value));
+              TCalendar.DateOnly: Result:=FormatDateTime(TDateTimeFormats.DateFormat, VarToDateTime(Value));
+              TCalendar.DateTime: Result:=FormatDateTime(TDateTimeFormats.DateTimeFormat, VarToDateTime(Value));
 
             end;
 

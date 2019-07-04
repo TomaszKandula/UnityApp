@@ -48,8 +48,7 @@ implementation
 
 uses
     Main,
-    Helpers,
-    Statics;
+    Unity.Statics;
 
 
 function TConnectivity.CallServer(CallUrl: string; Mode: string; var HttpResponse: string): integer;

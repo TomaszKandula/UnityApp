@@ -13,8 +13,7 @@ uses
     System.Win.ComObj,
     Vcl.Forms,
     Data.Win.ADODB,
-    Settings,
-    Statics;
+    Settings;
 
 
     // legacy code - to be removed after REST is implemented
@@ -56,7 +55,7 @@ implementation
 
 uses
     Main,
-    Helpers;
+    Unity.Statics;
 
 
 const

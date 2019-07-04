@@ -27,9 +27,10 @@ uses
     Vcl.Imaging.GIFImg,
     Vcl.Clipbrd,
     Data.Win.ADODB,
-    InterposerClasses,
-    Helpers,
-    Statics;
+    Unity.Interposer,
+    Unity.Statics,
+    Unity.Arrays,
+    Unity.Records;
 
 
 type
@@ -176,22 +177,23 @@ type
     protected
         var SrcColumns:  TAIntigers;
     private
-        var AbUpdateFields: TAddressBookUpdateFields;
-        var DailyCommentFields: TDailyCommentFields;
+        var AbUpdateFields:       TAddressBookUpdateFields;
+        var DailyCommentFields:   TDailyCommentFields;
         var GeneralCommentFields: TGeneralCommentFields;
-        var OpenItemsTotal: TOpenItemsTotal;
-        var FHistoryGrid:  boolean;
-        var FCUID:         string;
-        var FSCUID:        string;
-        var FBranch:       string;
-        var FBanksHtml:    string;
-        var FCoCode:       string;
-        var FCustName:     string;
-        var FCustNumber:   string;
-        var FLbuName:      string;
-        var FLbuAddress:   string;
-        var FLbuPhone:     string;
-        var FLbuSendFrom:  string;
+        var OpenItemsTotal:       TOpenItemsTotal;
+        var Fields:               TSendAccountStatementFields;
+        var FHistoryGrid:         boolean;
+        var FCUID:                string;
+        var FSCUID:               string;
+        var FBranch:              string;
+        var FBanksHtml:           string;
+        var FCoCode:              string;
+        var FCustName:            string;
+        var FCustNumber:          string;
+        var FLbuName:             string;
+        var FLbuAddress:          string;
+        var FLbuPhone:            string;
+        var FLbuSendFrom:         string;
         procedure GetAndDisplay;
         function  GetRunningApps(SearchName: string): boolean;
         procedure UpdateOpenItems(OpenItemsDest, OpenItemsSrc: TStringGrid);
@@ -245,7 +247,8 @@ uses
     Mailer,
     Transactions,
     Send,
-    PhoneList;
+    PhoneList,
+    Unity.Enums;
 
 
 var vActionsForm: TActionsForm;
@@ -1002,13 +1005,13 @@ end;
 
 procedure TActionsForm.OpenItemsGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-    if (Key = 67) and (Shift = [ssCtrl]) then OpenItemsGrid.CopyCutPaste(TEnums.TActions.Copy);
+    if (Key = 67) and (Shift = [ssCtrl]) then OpenItemsGrid.CopyCutPaste(TActions.Copy);
 end;
 
 
 procedure TActionsForm.HistoryGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-    if (Key = 67) and (Shift = [ssCtrl]) then HistoryGrid.CopyCutPaste(TEnums.TActions.Copy);
+    if (Key = 67) and (Shift = [ssCtrl]) then HistoryGrid.CopyCutPaste(TActions.Copy);
 end;
 
 
@@ -1237,7 +1240,7 @@ end;
 
 procedure TActionsForm.btnEditClick(Sender: TObject);
 begin
-    MainForm.WndCall(PhoneListForm, Statics.TEnums.TWindowState.Modal);
+    MainForm.WndCall(PhoneListForm, TWindowState.Modal);
 end;
 
 
@@ -1262,7 +1265,7 @@ end;
 procedure TActionsForm.btnSetFollowUpClick(Sender: TObject);
 begin
     CalendarForm.FCalendarMode:=DateToDB;
-    MainForm.WndCall(CalendarForm, Statics.TEnums.TWindowState.Modal);
+    MainForm.WndCall(CalendarForm, TWindowState.Modal);
 end;
 
 
@@ -1274,7 +1277,7 @@ end;
 
 procedure TActionsForm.btnCustomStatementClick(Sender: TObject);
 begin
-    MainForm.WndCall(SendForm, Statics.TEnums.TWindowState.Modal);
+    MainForm.WndCall(SendForm, TWindowState.Modal);
 end;
 
 
@@ -1286,24 +1289,28 @@ begin
 
     MainForm.UpdateOpenItemsRefs(OpenItemsGrid);
     MainForm.UpdateControlStatusRefs(MainForm.sgControlStatus);
-    TTSendAccountStatement.Create(
-        TEnums.TDocMode.Defined,
-        'Account Statement',
-        '',
-        TInvoiceFilter.ShowAllItems,
-        '',
-        '',
-        OpenItemsGrid,
-        CUID,
-        LbuSendFrom,
-        Cust_Mail.Text,
-        CustName,
-        CustNumber,
-        LbuName,
-        LbuAddress,
-        LbuPhone,
-        BanksHtml
-    );
+
+    Fields.Layout     :=TDocMode.Defined;
+    Fields.Subject    :='Account Statement';
+    Fields.Mess       :='';
+    Fields.InvFilter  :=TInvoiceFilter.ShowAllItems;
+    Fields.BeginDate  :='';
+    Fields.EndDate    :='';
+    Fields.OpenItems  :=OpenItemsGrid;
+    Fields.CUID       :=CUID;
+    Fields.SendFrom   :=LbuSendFrom;
+    Fields.MailTo     :=Cust_Mail.Text;
+    Fields.CustName   :=CustName;
+    Fields.CustNumber :=CustNumber;
+    Fields.LBUName    :=LbuName;
+    Fields.LBUAddress :=LbuAddress;
+    Fields.Telephone  :=LbuPhone;
+    Fields.BankDetails:=BanksHtml;
+    Fields.Series     :=False;
+    Fields.ItemNo     :=0;
+
+    var Job: IThreading:=TThreading.Create;
+    Job.SendAccountStatement(Fields);
 
 end;
 

@@ -13,9 +13,9 @@ uses
     Vcl.StdCtrls,
     Data.Win.ADODB,
     SqlHandler,
-    InterposerClasses,
-    Helpers,
-    Statics;
+    Unity.Interposer,
+    Unity.Statics,
+    Unity.Arrays;
 
 
 type

@@ -57,9 +57,11 @@ uses
     uCEFInterfaces,
     uCEFWinControl,
     EventLogger,
-    InterposerClasses,
-    Helpers,
-    Statics;
+    Unity.Interposer,
+    Unity.Arrays,
+    Unity.Enums,
+    Unity.Records,
+    Unity.Statics;
 
 
 type
@@ -901,7 +903,7 @@ type
         procedure DebugMsg(const Msg: String);
         procedure TryInitConnection;
         procedure ExecMessage(IsPostType: boolean; IntValue: cardinal; TextValue: string);
-        function  WndCall(WinForm: TForm; Mode: Statics.TEnums.TWindowState): integer;
+        function  WndCall(WinForm: TForm; Mode: TWindowState): integer;
         function  MsgCall(WndType: TCommon.TMessage; WndText: string): integer;
         function  OleGetStr(RecordsetField: variant): string;
 
@@ -1387,7 +1389,7 @@ begin
 end;
 
 
-function TMainForm.WndCall(WinForm: TForm; Mode: Statics.TEnums.TWindowState): integer;
+function TMainForm.WndCall(WinForm: TForm; Mode: TWindowState): integer;
 begin
 
     Result:=0;
@@ -1396,8 +1398,8 @@ begin
     WinForm.PopupParent:=MainForm;
 
     case Mode of
-        Statics.TEnums.TWindowState.Modal: Result:=WinForm.ShowModal;
-        Statics.TEnums.TWindowState.Modeless: WinForm.Show;
+        TWindowState.Modal: Result:=WinForm.ShowModal;
+        TWindowState.Modeless: WinForm.Show;
     end;
 
 end;
@@ -2580,6 +2582,7 @@ begin
             MsgCall(TCommon.TMessage.Error, 'An error occured [GeneralTables]: ' + E.Message + '. Please contact IT support. Application will be closed.');
             ExitProcess(0);
         end;
+
     end;
 
     // --------------------------
@@ -2953,19 +2956,19 @@ procedure TMainForm.Action_CopyToCBClick(Sender: TObject);
 begin
 
     // String grid placed on main view
-    if sgOpenItems.Focused   then sgOpenItems.CopyCutPaste(TEnums.TActions.Copy);
-    if sgCoCodes.Focused     then sgCoCodes.CopyCutPaste(TEnums.TActions.Copy);
-    if sgPaidInfo.Focused    then sgPaidInfo.CopyCutPaste(TEnums.TActions.Copy);
-    if sgPerson.Focused      then sgPerson.CopyCutPaste(TEnums.TActions.Copy);
-    if sgGroup3.Focused      then sgGroup3.CopyCutPaste(TEnums.TActions.Copy);
-    if sgPmtTerms.Focused    then sgPmtTerms.CopyCutPaste(TEnums.TActions.Copy);
-    if sgListValue.Focused   then sgListValue.CopyCutPaste(TEnums.TActions.Copy);
-    if sgListSection.Focused then sgListSection.CopyCutPaste(TEnums.TActions.Copy);
-    if sgGroups.Focused      then sgGroups.CopyCutPaste(TEnums.TActions.Copy);
-    if sgUAC.Focused         then sgUAC.CopyCutPaste(TEnums.TActions.Copy);
+    if sgOpenItems.Focused   then sgOpenItems.CopyCutPaste(TActions.Copy);
+    if sgCoCodes.Focused     then sgCoCodes.CopyCutPaste(TActions.Copy);
+    if sgPaidInfo.Focused    then sgPaidInfo.CopyCutPaste(TActions.Copy);
+    if sgPerson.Focused      then sgPerson.CopyCutPaste(TActions.Copy);
+    if sgGroup3.Focused      then sgGroup3.CopyCutPaste(TActions.Copy);
+    if sgPmtTerms.Focused    then sgPmtTerms.CopyCutPaste(TActions.Copy);
+    if sgListValue.Focused   then sgListValue.CopyCutPaste(TActions.Copy);
+    if sgListSection.Focused then sgListSection.CopyCutPaste(TActions.Copy);
+    if sgGroups.Focused      then sgGroups.CopyCutPaste(TActions.Copy);
+    if sgUAC.Focused         then sgUAC.CopyCutPaste(TActions.Copy);
 
     // String grid placed on action view
-    if ActionsForm.OpenItemsGrid.Focused then ActionsForm.OpenItemsGrid.CopyCutPaste(TEnums.TActions.Copy);
+    if ActionsForm.OpenItemsGrid.Focused then ActionsForm.OpenItemsGrid.CopyCutPaste(TActions.Copy);
 
 end;
 
@@ -3031,7 +3034,7 @@ begin
         Exit;
     end;
 
-    sgAddressBook.CopyCutPaste(TEnums.TActions.Cut);
+    sgAddressBook.CopyCutPaste(TActions.Cut);
     sgAddressBook.RecordRowsAffected;
 
 end;
@@ -3046,7 +3049,7 @@ begin
     Exit;
   end;
 
-  sgAddressBook.CopyCutPaste(TEnums.TActions.Paste);
+  sgAddressBook.CopyCutPaste(TActions.Paste);
   sgAddressBook.RecordRowsAffected;
 
 end;
@@ -3058,7 +3061,7 @@ end;
 
 procedure TMainForm.Action_CopyClick(Sender: TObject);
 begin
-    sgAddressBook.CopyCutPaste(TEnums.TActions.Copy);
+    sgAddressBook.CopyCutPaste(TActions.Copy);
 end;
 
 
@@ -3099,7 +3102,7 @@ end;
 
 procedure TMainForm.Action_SearchBookClick(Sender: TObject);
 begin
-    WndCall(SqlSearchForm, Statics.TEnums.TWindowState.Modeless);
+    WndCall(SqlSearchForm, TWindowState.Modeless);
 end;
 
 
@@ -3186,7 +3189,7 @@ end;
 
 procedure TMainForm.Action_ReportClick(Sender: TObject);
 begin
-    WndCall(FeedbackForm, Statics.TEnums.TWindowState.Modal);
+    WndCall(FeedbackForm, TWindowState.Modal);
 end;
 
 
@@ -3206,7 +3209,7 @@ end;
 
 procedure TMainForm.Action_AboutClick(Sender: TObject);
 begin
-    WndCall(AboutForm, Statics.TEnums.TWindowState.Modal);
+    WndCall(AboutForm, TWindowState.Modal);
 end;
 
 
@@ -3252,7 +3255,7 @@ begin
     if IsConnected then
     begin
         if MainForm.StatBar_TXT1.Caption = TStatusBar.Ready then
-            WndCall(ActionsForm, Statics.TEnums.TWindowState.Modal)
+            WndCall(ActionsForm, TWindowState.Modal)
                 else
                     MainForm.MsgCall(Warn, 'Wait until "Ready" status and try again.');
     end
@@ -3326,7 +3329,7 @@ begin
             end;
         end;
 
-        WndCall(TrackerForm, Statics.TEnums.TWindowState.Modal);
+        WndCall(TrackerForm, TWindowState.Modal);
 
     end
     else
@@ -3426,7 +3429,7 @@ begin
             end;
         end;
 
-        WndCall(MassMailerForm, Statics.TEnums.TWindowState.Modal);
+        WndCall(MassMailerForm, TWindowState.Modal);
 
     end
     else
@@ -3445,8 +3448,8 @@ procedure TMainForm.Action_AddFollowUpGroupClick(Sender: TObject);
 begin
 
     Screen.Cursor:=crHourGlass;
-    CalendarForm.FCalendarMode:=TEnums.TCalendar.GetDate;
-    MainForm.WndCall(CalendarForm, Statics.TEnums.TWindowState.Modal);
+    CalendarForm.FCalendarMode:=TCalendar.GetDate;
+    MainForm.WndCall(CalendarForm, TWindowState.Modal);
 
     // If selected more than one customer, assign given date to selected customers
     if CalendarForm.FSelectedDate <> TDateTimeFormats.NullDate then
@@ -3527,7 +3530,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.Inf7;
-    WndCall(FilterForm, Statics.TEnums.TWindowState.Modal);
+    WndCall(FilterForm, TWindowState.Modal);
 end;
 
 
@@ -3538,7 +3541,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.Inf4;
-    WndCall(FilterForm, Statics.TEnums.TWindowState.Modal);
+    WndCall(FilterForm, TWindowState.Modal);
 end;
 
 
@@ -3549,7 +3552,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.Group3;
-    WndCall(FilterForm, Statics.TEnums.TWindowState.Modal);
+    WndCall(FilterForm, TWindowState.Modal);
 end;
 
 
@@ -3560,7 +3563,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.SalesResponsible;
-    WndCall(FilterForm, Statics.TEnums.TWindowState.Modal);
+    WndCall(FilterForm, TWindowState.Modal);
 end;
 
 
@@ -3571,7 +3574,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.PersonResponsible;
-    WndCall(FilterForm, Statics.TEnums.TWindowState.Modal);
+    WndCall(FilterForm, TWindowState.Modal);
 end;
 
 
@@ -3582,7 +3585,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.CustomerGroup;
-    WndCall(FilterForm, Statics.TEnums.TWindowState.Modal);
+    WndCall(FilterForm, TWindowState.Modal);
 end;
 
 
@@ -3593,7 +3596,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.AccountType;
-    WndCall(FilterForm, Statics.TEnums.TWindowState.Modal);
+    WndCall(FilterForm, TWindowState.Modal);
 end;
 
 
@@ -3604,7 +3607,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.Follow;
-    WndCall(FilterForm, Statics.TEnums.TWindowState.Modal);
+    WndCall(FilterForm, TWindowState.Modal);
 end;
 
 
@@ -3615,7 +3618,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.CoCode;
-    WndCall(FilterForm, Statics.TEnums.TWindowState.Modal);
+    WndCall(FilterForm, TWindowState.Modal);
 end;
 
 
@@ -3626,7 +3629,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.Agent;
-    WndCall(FilterForm, Statics.TEnums.TWindowState.Modal);
+    WndCall(FilterForm, TWindowState.Modal);
 end;
 
 
@@ -3637,7 +3640,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.Division;
-    WndCall(FilterForm, Statics.TEnums.TWindowState.Modal);
+    WndCall(FilterForm, TWindowState.Modal);
 end;
 
 
@@ -3648,7 +3651,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.Free1;
-    WndCall(FilterForm, Statics.TEnums.TWindowState.Modal);
+    WndCall(FilterForm, TWindowState.Modal);
 end;
 
 
@@ -3659,7 +3662,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.Free2;
-    WndCall(FilterForm, Statics.TEnums.TWindowState.Modal);
+    WndCall(FilterForm, TWindowState.Modal);
 end;
 
 
@@ -3670,7 +3673,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.Free3;
-    WndCall(FilterForm, Statics.TEnums.TWindowState.Modal);
+    WndCall(FilterForm, TWindowState.Modal);
 end;
 
 
@@ -3778,7 +3781,7 @@ begin
     GridSearchForm.FGrid     :=MainForm.sgAgeView;
     GridSearchForm.FColName  :=TSnapshots.fCustomerName;
     GridSearchForm.FColNumber:=TSnapshots.fCustomerNumber;
-    WndCall(GridSearchForm, Statics.TEnums.TWindowState.Modeless);
+    WndCall(GridSearchForm, TWindowState.Modeless);
 end;
 
 
@@ -3957,7 +3960,7 @@ end;
 
 procedure TMainForm.Action_FollowUpColorsClick(Sender: TObject);
 begin
-    WndCall(ColorsForm, Statics.TEnums.TWindowState.Modal);
+    WndCall(ColorsForm, TWindowState.Modal);
 end;
 
 
@@ -4024,7 +4027,7 @@ end;
 
 procedure TMainForm.Action_ShowRegisteredClick(Sender: TObject);
 begin
-    WndCall(InvoicesForm, Statics.TEnums.TWindowState.Modal);
+    WndCall(InvoicesForm, TWindowState.Modal);
 end;
 
 
@@ -4289,7 +4292,7 @@ end;
 procedure TMainForm.sgInvoiceTrackerDblClick(Sender: TObject);
 begin
     if IsConnected then
-        WndCall(InvoicesForm, Statics.TEnums.TWindowState.Modal)
+        WndCall(InvoicesForm, TWindowState.Modal)
     else
         MsgCall(Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
 end;
@@ -4738,84 +4741,84 @@ end;
 procedure TMainForm.sgOpenItemsKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if (Key = 67) and (Shift = [ssCtrl]) then
-        sgOpenItems.CopyCutPaste(TEnums.TActions.Copy);
+        sgOpenItems.CopyCutPaste(TActions.Copy);
 end;
 
 
 procedure TMainForm.sgInvoiceTrackerKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if (Key = 67) and (Shift = [ssCtrl]) then
-        sgInvoiceTracker.CopyCutPaste(TEnums.TActions.Copy);
+        sgInvoiceTracker.CopyCutPaste(TActions.Copy);
 end;
 
 
 procedure TMainForm.sgCoCodesKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if (Key = 67) and (Shift = [ssCtrl]) then
-        sgCoCodes.CopyCutPaste(TEnums.TActions.Copy);
+        sgCoCodes.CopyCutPaste(TActions.Copy);
 end;
 
 
 procedure TMainForm.sgPaidInfoKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if (Key = 67) and (Shift = [ssCtrl]) then
-        sgPaidInfo.CopyCutPaste(TEnums.TActions.Copy);
+        sgPaidInfo.CopyCutPaste(TActions.Copy);
 end;
 
 
 procedure TMainForm.sgPmtTermsKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if (Key = 67) and (Shift = [ssCtrl]) then
-        sgPmtTerms.CopyCutPaste(TEnums.TActions.Copy);
+        sgPmtTerms.CopyCutPaste(TActions.Copy);
 end;
 
 
 procedure TMainForm.sgPersonKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if (Key = 67) and (Shift = [ssCtrl]) then
-        sgPerson.CopyCutPaste(TEnums.TActions.Copy);
+        sgPerson.CopyCutPaste(TActions.Copy);
 end;
 
 
 procedure TMainForm.sgGroup3KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if (Key = 67) and (Shift = [ssCtrl]) then
-        sgGroup3.CopyCutPaste(TEnums.TActions.Copy);
+        sgGroup3.CopyCutPaste(TActions.Copy);
 end;
 
 
 procedure TMainForm.sgControlStatusKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if (Key = 67) and (Shift = [ssCtrl]) then
-        sgControlStatus.CopyCutPaste(TEnums.TActions.Copy);
+        sgControlStatus.CopyCutPaste(TActions.Copy);
 end;
 
 
 procedure TMainForm.sgPersonRespKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if (Key = 67) and (Shift = [ssCtrl]) then
-        sgPersonResp.CopyCutPaste(TEnums.TActions.Copy);
+        sgPersonResp.CopyCutPaste(TActions.Copy);
 end;
 
 
 procedure TMainForm.sgSalesRespKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if (Key = 67) and (Shift = [ssCtrl]) then
-        sgSalesResp.CopyCutPaste(TEnums.TActions.Copy);
+        sgSalesResp.CopyCutPaste(TActions.Copy);
 end;
 
 
 procedure TMainForm.sgAccountTypeKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if (Key = 67) and (Shift = [ssCtrl]) then
-        sgAccountType.CopyCutPaste(TEnums.TActions.Copy);
+        sgAccountType.CopyCutPaste(TActions.Copy);
 end;
 
 
 procedure TMainForm.sgCustomerGrKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if (Key = 67) and (Shift = [ssCtrl]) then
-        sgCustomerGr.CopyCutPaste(TEnums.TActions.Copy);
+        sgCustomerGr.CopyCutPaste(TActions.Copy);
 end;
 
 
@@ -4893,7 +4896,7 @@ begin
     // <CTRL> + <C>
     if (Key = 67) and (Shift = [ssCtrl]) then
     begin
-        sgAgeView.CopyCutPaste(TEnums.TActions.Copy);
+        sgAgeView.CopyCutPaste(TActions.Copy);
         sgAgeView.UpdatedRowsHolder:=nil;
         sgAgeView.RecordRowsAffected;
         Exit;
@@ -4921,7 +4924,7 @@ begin
 
         sgAgeView.Freeze(True);
         Screen.Cursor:=crHourGlass;
-        sgAgeView.CopyCutPaste(TEnums.TActions.Paste, True);
+        sgAgeView.CopyCutPaste(TActions.Paste, True);
         sgAgeView.UpdatedRowsHolder:=nil;
         sgAgeView.RecordRowsAffected;
 
@@ -5212,7 +5215,7 @@ begin
     if (Key = 65) and (Shift = [ssCtrl]) then
     begin
         sgAgeView.SelectAll;
-        sgAgeView.CopyCutPaste(TEnums.TActions.Copy);
+        sgAgeView.CopyCutPaste(TActions.Copy);
         MsgCall(Info, 'The selected spreadsheet has been copied to clipboard.');
     end;
 
@@ -5283,14 +5286,14 @@ begin
 
         if Key = VK_RETURN then
         begin
-            sgAddressBook.DelEsc(TEnums.TActions.Escape, sgAddressBook.Col, sgAddressBook.Row);
+            sgAddressBook.DelEsc(TActions.Escape, sgAddressBook.Col, sgAddressBook.Row);
             sgAddressBook.Options:=sgAddressBook.Options - [goEditing];
             sgAddressBook.SetUpdatedRow(sgAddressBook.Row);
         end;
 
         if Key = VK_DELETE then
         begin
-            sgAddressBook.DelEsc(TEnums.TActions.Delete, sgAddressBook.Col, sgAddressBook.Row);
+            sgAddressBook.DelEsc(TActions.Delete, sgAddressBook.Col, sgAddressBook.Row);
             sgAddressBook.SetUpdatedRow(sgAddressBook.Row);
         end;
 
@@ -5339,22 +5342,22 @@ begin
 
     if Key = VK_ESCAPE then
     begin
-        sgAddressBook.DelEsc(TEnums.TActions.Escape, sgAddressBook.Col, sgAddressBook.Row);
+        sgAddressBook.DelEsc(TActions.Escape, sgAddressBook.Col, sgAddressBook.Row);
         sgAddressBook.Options:=sgAddressBook.Options - [goEditing];
     end;
 
     if (Key = 67) and (Shift = [ssCtrl]) then
-        sgAddressBook.CopyCutPaste(TEnums.TActions.Copy);
+        sgAddressBook.CopyCutPaste(TActions.Copy);
 
     if (Key = 86) and (Shift = [ssCtrl]) then
     begin
-        sgAddressBook.CopyCutPaste(TEnums.TActions.Paste);
+        sgAddressBook.CopyCutPaste(TActions.Paste);
         sgAddressBook.RecordRowsAffected;
     end;
 
     if (Key = 88) and (Shift = [ssCtrl]) then
     begin
-        sgAddressBook.CopyCutPaste(TEnums.TActions.Cut);
+        sgAddressBook.CopyCutPaste(TActions.Cut);
         sgAddressBook.RecordRowsAffected;
     end;
 
@@ -5370,19 +5373,19 @@ begin
 
     if Text50.Font.Style = [fsBold] then
     begin
-        if (Key = 86) and (Shift = [ssCtrl]) then sgListSection.CopyCutPaste(TEnums.TActions.Paste);
-        if (Key = 88) and (Shift = [ssCtrl]) then sgListSection.CopyCutPaste(TEnums.TActions.Cut);
+        if (Key = 86) and (Shift = [ssCtrl]) then sgListSection.CopyCutPaste(TActions.Paste);
+        if (Key = 88) and (Shift = [ssCtrl]) then sgListSection.CopyCutPaste(TActions.Cut);
     end;
 
-    if (Key = 67) and (Shift = [ssCtrl]) then sgListSection.CopyCutPaste(TEnums.TActions.Copy);
-    if (Key = 46) and (Text50.Font.Style = [fsBold]) then sgListSection.DelEsc(TEnums.TActions.Delete, sgListSection.Col, sgListSection.Row);
+    if (Key = 67) and (Shift = [ssCtrl]) then sgListSection.CopyCutPaste(TActions.Copy);
+    if (Key = 46) and (Text50.Font.Style = [fsBold]) then sgListSection.DelEsc(TActions.Delete, sgListSection.Col, sgListSection.Row);
 
 end;
 
 
 procedure TMainForm.sgListSectionKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-    if Key = VK_RETURN then sgListSection.DelEsc(TEnums.TActions.Escape, sgListSection.Col, sgListSection.Row);
+    if Key = VK_RETURN then sgListSection.DelEsc(TActions.Escape, sgListSection.Col, sgListSection.Row);
 end;
 
 
@@ -5401,19 +5404,19 @@ begin
 
     if Text50.Font.Style = [fsBold] then
     begin
-        if (Key = 86) and (Shift = [ssCtrl]) then sgListValue.CopyCutPaste(TEnums.TActions.Paste);
-        if (Key = 88) and (Shift = [ssCtrl]) then sgListValue.CopyCutPaste(TEnums.TActions.Cut);
+        if (Key = 86) and (Shift = [ssCtrl]) then sgListValue.CopyCutPaste(TActions.Paste);
+        if (Key = 88) and (Shift = [ssCtrl]) then sgListValue.CopyCutPaste(TActions.Cut);
     end;
 
-    if (Key = 67) and (Shift = [ssCtrl]) then sgListValue.CopyCutPaste(TEnums.TActions.Copy);
-    if (Key = 46) and (Text50.Font.Style = [fsBold]) then sgListValue.DelEsc(TEnums.TActions.Delete, sgListValue.Col, sgListValue.Row);
+    if (Key = 67) and (Shift = [ssCtrl]) then sgListValue.CopyCutPaste(TActions.Copy);
+    if (Key = 46) and (Text50.Font.Style = [fsBold]) then sgListValue.DelEsc(TActions.Delete, sgListValue.Col, sgListValue.Row);
 
 end;
 
 
 procedure TMainForm.sgListValueKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-    if Key = VK_RETURN then sgListValue.DelEsc(TEnums.TActions.Escape, sgListValue.Col, sgListValue.Row);
+    if Key = VK_RETURN then sgListValue.DelEsc(TActions.Escape, sgListValue.Col, sgListValue.Row);
 end;
 
 
@@ -6866,7 +6869,7 @@ end;
 
 procedure TMainForm.imgEventLogClick(Sender: TObject);
 begin
-    WndCall(EventForm, Statics.TEnums.TWindowState.Modeless);
+    WndCall(EventForm, TWindowState.Modeless);
 end;
 
 

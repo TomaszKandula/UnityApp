@@ -16,8 +16,7 @@ uses
     Vcl.Forms,
     Vcl.Graphics,
     CRC32u,
-    Helpers,
-    Statics;
+    Unity.Statics;
 
 
 type

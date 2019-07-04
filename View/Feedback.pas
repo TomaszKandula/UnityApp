@@ -17,7 +17,7 @@ uses
     Vcl.StdCtrls,
     Vcl.Buttons,
     Vcl.ExtCtrls,
-    InterposerClasses;
+    Unity.Interposer;
 
 
 type
@@ -58,8 +58,7 @@ uses
     Mailer,
     Settings,
     Worker,
-    Helpers,
-    Statics;
+    Unity.Statics;
 
 
 var vFeedbackForm: TFeedbackForm;

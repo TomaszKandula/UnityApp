@@ -15,9 +15,10 @@ uses
     Data.Win.ADODB,
     DbModel,
     SqlHandler,
-    InterposerClasses,
-    Helpers,
-    Statics;
+    Unity.Interposer,
+    Unity.Statics,
+    Unity.Arrays,
+    Unity.Enums;
 
 
 type
@@ -204,8 +205,8 @@ begin
 
     if Balance = 0 then Exit;
 
-    var TotalPerItem: Helpers.TADoubles;
-    var ListPosition: Helpers.TAIntigers;
+    var TotalPerItem: Unity.Arrays.TADoubles;
+    var ListPosition: Unity.Arrays.TAIntigers;
     var Count: double:=0;
     var Rows: integer:=0;
 
@@ -1069,7 +1070,7 @@ begin
     Transaction:=StringReplace(
         Transaction,
         '{ComplexInput}',
-        ToSqlInsert(SourceArray, nil, DestTable, ColumnsToList(Columns, TEnums.TQuotes.Disabled)),
+        ToSqlInsert(SourceArray, nil, DestTable, ColumnsToList(Columns, TQuotes.Disabled)),
         [rfReplaceAll]
     );
 

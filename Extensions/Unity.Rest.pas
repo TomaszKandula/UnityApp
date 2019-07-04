@@ -1,4 +1,4 @@
-unit Rest;
+unit Unity.Rest;
 
 
 interface
@@ -205,8 +205,7 @@ implementation
 
 
 uses
-    Helpers,
-    Statics;
+    Unity.Statics;
 
 
 // ---------------------------------------------------------------------------------------------------------------------------------------- CREATE & RELEASE //

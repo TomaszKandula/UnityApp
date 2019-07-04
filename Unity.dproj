@@ -163,8 +163,12 @@
         <DCCReference Include="Model\Json\RawTables\Erp.Person.pas"/>
         <DCCReference Include="Model\Json\RawTables\Erp.PersonResponsible.pas"/>
         <DCCReference Include="Model\Json\RawTables\Erp.SalesResponsible.pas"/>
-        <DCCReference Include="Mediator\SqlHandler.pas"/>
-        <DCCReference Include="Mediator\DbHandler.pas"/>
+        <DCCReference Include="Mediator\SqlHandler.pas">
+            <Form>Legacy code/to be removed</Form>
+        </DCCReference>
+        <DCCReference Include="Mediator\DbHandler.pas">
+            <Form>Legacy code/to be removed</Form>
+        </DCCReference>
         <DCCReference Include="Mediator\AgeView.pas"/>
         <DCCReference Include="Mediator\Mailer.pas"/>
         <DCCReference Include="Mediator\Settings.pas"/>

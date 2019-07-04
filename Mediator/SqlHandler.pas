@@ -12,9 +12,10 @@ uses
     System.Variants,
     Vcl.StdCtrls,
     Data.Win.ADODB,
-    InterposerClasses,
-    Helpers,
-    Statics;
+    Unity.Interposer,
+    Unity.Statics,
+    Unity.Arrays,
+    Unity.Enums;
 
 
     // legacy code - to be removed after REST is implemented
@@ -95,8 +96,8 @@ type
         property ConnStr:     string   read FConnStr;
         constructor Create(Connector: TADOConnection); overload;
         destructor  Destroy; override;
-        function    BracketStr(Expression: string; BracketType: TEnums.TBrackets): string;
-        function    ColumnsToList(Holder: TStringList; Quoted: TEnums.TQuotes): string;
+        function    BracketStr(Expression: string; BracketType: TBrackets): string;
+        function    ColumnsToList(Holder: TStringList; Quoted: TQuotes): string;
         procedure   CleanUp;
         function    OpenTable(TableName: string): boolean;
         function    InsertInto(TableName: string; IsExplicit: boolean; ExtSourceGrid: TStringGrid = nil{Option}; ExtSourceArray: TALists = nil{Option}; HeaderPresent: boolean = True{Option}): boolean;
@@ -408,14 +409,14 @@ end;
 /// Helper method to surround string with brackets.
 /// </summary>
 
-function TDataTables.BracketStr(Expression: string; BracketType: TEnums.TBrackets): string;
+function TDataTables.BracketStr(Expression: string; BracketType: TBrackets): string;
 begin
     Result:='';
 
     case BracketType of
-        TEnums.TBrackets.Round:  Result:='(' + Expression + ')';
-        TEnums.TBrackets.Square: Result:='[' + Expression + ']';
-        TEnums.TBrackets.Curly:  Result:='{' + Expression + '}';
+        TBrackets.Round:  Result:='(' + Expression + ')';
+        TBrackets.Square: Result:='[' + Expression + ']';
+        TBrackets.Curly:  Result:='{' + Expression + '}';
     end;
 
 end;
@@ -425,7 +426,7 @@ end;
 /// Transpose columns to rows.
 /// </summary>
 
-function TDataTables.ColumnsToList(Holder: TStringList; Quoted: TEnums.TQuotes): string;
+function TDataTables.ColumnsToList(Holder: TStringList; Quoted: TQuotes): string;
 begin
     Result:=TSql.ALL;
 
@@ -438,8 +439,8 @@ begin
         begin
 
             case Quoted of
-                TEnums.TQuotes.Disabled: Result:=Holder.Strings[iCNT];
-                TEnums.TQuotes.Enabled:  Result:=QuotedStr(Holder.Strings[iCNT]);
+                TQuotes.Disabled: Result:=Holder.Strings[iCNT];
+                TQuotes.Enabled:  Result:=QuotedStr(Holder.Strings[iCNT]);
             end;
 
         end
@@ -447,8 +448,8 @@ begin
         begin
 
             case Quoted of
-                TEnums.TQuotes.Disabled: Result:=Result + TChars.COMMA + Holder.Strings[iCNT];
-                TEnums.TQuotes.Enabled:  Result:=Result + TChars.COMMA + QuotedStr(Holder.Strings[iCNT]);
+                TQuotes.Disabled: Result:=Result + TChars.COMMA + Holder.Strings[iCNT];
+                TQuotes.Enabled:  Result:=Result + TChars.COMMA + QuotedStr(Holder.Strings[iCNT]);
             end;
 
         end;
@@ -477,7 +478,7 @@ begin
 
     try
         if CustFilter =  '' then
-            FStrSQL:=TSql.SELECT + ColumnsToList(Columns, TEnums.TQuotes.Disabled) + TSql.FROM + TableName;
+            FStrSQL:=TSql.SELECT + ColumnsToList(Columns, TQuotes.Disabled) + TSql.FROM + TableName;
 
         if CustFilter <> '' then
 
@@ -485,7 +486,7 @@ begin
             /// Note: it requires "WHERE" clause.
             /// </remarks>
 
-            FStrSQL:=TSql.SELECT + ColumnsToList(Columns, TEnums.TQuotes.Disabled) + TSql.FROM + TableName + CustFilter;
+            FStrSQL:=TSql.SELECT + ColumnsToList(Columns, TQuotes.Disabled) + TSql.FROM + TableName + CustFilter;
 
         DataSet:=ExecSQL;
     except
@@ -510,7 +511,7 @@ end;
 ///        transaction, it allows rollback in case of default.
 /// </param>
 
-function TDataTables.InsertInto(TableName: string; IsExplicit: boolean; ExtSourceGrid: TStringGrid = nil{Option}; ExtSourceArray: TALists = nil{Option}; HeaderPresent: boolean = True {=OPTION}): boolean;
+function TDataTables.InsertInto(TableName: string; IsExplicit: boolean; ExtSourceGrid: TStringGrid = nil; ExtSourceArray: TALists = nil; HeaderPresent: boolean = True): boolean;
 begin
 
     Result:=False;
@@ -522,13 +523,13 @@ begin
             if (not(string.IsNullOrEmpty(Values.Text))) and ( (ExtSourceGrid = nil) and (Pointer(ExtSourceArray) = nil) ) then
             begin
                 FStrSQL:=TSql.INSERT +
-                           TableName + TChars.SPACE + BracketStr(ColumnsToList(Columns, TEnums.TQuotes.Disabled), Round) +
+                           TableName + TChars.SPACE + BracketStr(ColumnsToList(Columns, TQuotes.Disabled), Round) +
                          TSql.VAL +
-                           BracketStr(ColumnsToList(Values, TEnums.TQuotes.Enabled), Round);
+                           BracketStr(ColumnsToList(Values, TQuotes.Enabled), Round);
             end;
 
-            if (ExtSourceGrid = nil)  and (ExtSourceArray <> nil) then FStrSQL:=ToSqlInsert(ExtSourceArray, nil, TableName, ColumnsToList(Columns, TEnums.TQuotes.Disabled), HeaderPresent);
-            if (ExtSourceGrid <> nil) and (ExtSourceArray = nil)  then FStrSQL:=ToSqlInsert(nil, ExtSourceGrid, TableName, ColumnsToList(Columns, TEnums.TQuotes.Disabled), HeaderPresent);
+            if (ExtSourceGrid = nil)  and (ExtSourceArray <> nil) then FStrSQL:=ToSqlInsert(ExtSourceArray, nil, TableName, ColumnsToList(Columns, TQuotes.Disabled), HeaderPresent);
+            if (ExtSourceGrid <> nil) and (ExtSourceArray = nil)  then FStrSQL:=ToSqlInsert(nil, ExtSourceGrid, TableName, ColumnsToList(Columns, TQuotes.Disabled), HeaderPresent);
 
             if IsExplicit then
             begin

@@ -1,4 +1,4 @@
-unit InterposerClasses;
+unit Unity.Interposer;
 
 
 interface
@@ -23,8 +23,9 @@ uses
     Vcl.ComCtrls,
     Vcl.StdCtrls,
     CheckLst,
-    Helpers,
-    Statics;
+    Unity.Arrays,
+    Unity.Enums,
+    Unity.Statics;
 
 
 type
@@ -106,8 +107,8 @@ type
         property  HideFocusRect: boolean read FHideFocusRect write FHideFocusRect;
         procedure SetUpdatedRow(Row: integer);
         procedure RecordRowsAffected;
-        procedure CopyCutPaste(Mode: TEnums.TActions; FirstColOnly: boolean = False);
-        procedure DelEsc(Mode: TEnums.TActions; pCol, pRow: integer);
+        procedure CopyCutPaste(Mode: TActions; FirstColOnly: boolean = False);
+        procedure DelEsc(Mode: TActions; pCol, pRow: integer);
         procedure ClearAll(dfRows: integer; FixedRows: integer; FixedCols: integer; ZeroCol: boolean);
         procedure DeleteRowFrom(FixedRow: integer; FixedCol: integer);
         procedure DrawSelected(ARow: integer; ACol: integer; State: TGridDrawState; Rect: TRect; FontColorSel: TColor; BrushColorSel: TColor; FontColor: TColor; BrushColor: TColor; Headers: boolean);
@@ -387,11 +388,11 @@ begin
 end;
 
 
-procedure TStringGrid.CopyCutPaste(Mode: TEnums.TActions; FirstColOnly: boolean = False{Option});
+procedure TStringGrid.CopyCutPaste(Mode: TActions; FirstColOnly: boolean = False{Option});
 begin
 
     // Paste data into string grid
-    if Mode = TEnums.TActions.Paste then
+    if Mode = TActions.Paste then
     begin
 
         // Get clipboard text
@@ -489,7 +490,7 @@ begin
     end;
 
     // Copy/Cut data from string grid
-    if (Mode = TEnums.TActions.Copy) or (Mode = TEnums.TActions.Cut) then
+    if (Mode = TActions.Copy) or (Mode = TActions.Cut) then
     begin
 
         var Sel: TGridRect:=Selection;
@@ -516,7 +517,7 @@ begin
                         TxtFromSel:=TxtFromSel + Cells[Col, Row];
 
                         // Cut
-                        if Mode = TEnums.TActions.Cut then
+                        if Mode = TActions.Cut then
                             Cells[Col, Row]:='';
 
                         if Col < Sel.Right then
@@ -539,12 +540,12 @@ begin
 end;
 
 
-procedure TStringGrid.DelEsc(Mode: TEnums.TActions; pCol, pRow: integer);
+procedure TStringGrid.DelEsc(Mode: TActions; pCol, pRow: integer);
 begin
 
     case Mode of
-        TEnums.TActions.Escape: EditorMode:=False;
-        TEnums.TActions.Delete: Cells[pCol, pRow]:='';
+        TActions.Escape: EditorMode:=False;
+        TActions.Delete: Cells[pCol, pRow]:='';
     end;
 
 end;
@@ -733,7 +734,7 @@ end;
 procedure TStringGrid.MSort(const SortCol: integer; const DataType: integer; const Ascending: boolean);
 begin
 
-    var List:  Helpers.TAIntigers;
+    var List:  TAIntigers;
     var TempGrid: TStringGrid:=TStringGrid.create(nil);
     try
         TempGrid.RowCount :=RowCount;

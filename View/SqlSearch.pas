@@ -18,7 +18,7 @@ uses
     Vcl.Buttons,
     Vcl.StdCtrls,
     Vcl.ExtCtrls,
-    InterposerClasses;
+    Unity.Interposer;
 
 
 type
@@ -143,8 +143,7 @@ uses
     Settings,
     Worker,
     DbModel,
-    Helpers,
-    Statics;
+    Unity.Statics;
 
 
 var vSqlSearchForm: TSqlSearchForm;

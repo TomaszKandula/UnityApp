@@ -18,10 +18,12 @@ uses
     Vcl.Dialogs,
     Data.Win.ADODB,
     Data.DB,
-    InterposerClasses,
     SqlHandler,
-    Helpers,
-    Statics;
+    Unity.Interposer,
+    Unity.Statics,
+    Unity.Enums,
+    Unity.Records,
+    Unity.Arrays;
 
 
 type
@@ -32,18 +34,18 @@ type
         procedure CheckServerConnectionAsync();
         procedure RefreshInvoiceTrackerAsync(UserAlias: string);
         procedure MakeAgeViewAsync(OpenAmount: double);
-        procedure ReadAgeViewAsync(ActionMode: TEnums.TLoading; SortMode: integer);
+        procedure ReadAgeViewAsync(ActionMode: TLoading; SortMode: integer);
         procedure ScanOpenItemsAsync();
-        procedure ReadOpenItemsAsync(ActionMode: TEnums.TLoading);
+        procedure ReadOpenItemsAsync(ActionMode: TLoading);
         procedure OpenAddressBookAsync(UserAlias: string; SourceGrid: TStringGrid; OptionalCondition: string = '');
         procedure UpdateAddressBookAsync(SourceGrid: TStringGrid; UpdateValues: TAddressBookUpdateFields);
         procedure AddToAddressBookAsync(SourceGrid: TStringGrid);
         procedure SendUserFeedback();
         procedure ExcelExport();
-        procedure GeneralTables(TableName: string; DestGrid: TStringGrid; Columns: string = ''; Conditions: string = ''; AutoRelease: boolean = True);
+        procedure GeneralTables(TableName: string; DestGrid: TStringGrid; Columns: string = ''; Conditions: string = ''; WaitToComplete: boolean = False);
         procedure EditDailyComment(Fields: TDailyCommentFields);
         procedure EditGeneralComment(Fields: TGeneralCommentFields);
-        procedure SendAccountStatement(Fields: TSendAccountStatementFields);
+        procedure SendAccountStatement(Fields: TSendAccountStatementFields; WaitToComplete: boolean = False);
         procedure SendAccountStatements(Fields: TSendAccountStatementFields);
     end;
 
@@ -57,103 +59,52 @@ type
         procedure FUpdateDailyComment(var DailyText: TDataTables; var Fields: TDailyCommentFields; Condition: string);
         procedure FInsertGeneralComment(var GenText: TDataTables; var Fields: TGeneralCommentFields);
         procedure FUpdateGeneralComment(var GenText: TDataTables; var Fields: TGeneralCommentFields; Condition: string);
-        procedure FSendAccountStatement();
     public
         procedure CheckServerConnectionAsync();
         procedure RefreshInvoiceTrackerAsync(UserAlias: string);
         procedure MakeAgeViewAsync(OpenAmount: double);
-        procedure ReadAgeViewAsync(ActionMode: TEnums.TLoading; SortMode: integer);
+        procedure ReadAgeViewAsync(ActionMode: TLoading; SortMode: integer);
         procedure ScanOpenItemsAsync();
-        procedure ReadOpenItemsAsync(ActionMode: TEnums.TLoading);
+        procedure ReadOpenItemsAsync(ActionMode: TLoading);
         procedure OpenAddressBookAsync(UserAlias: string; SourceGrid: TStringGrid; OptionalCondition: string = '');
         procedure UpdateAddressBookAsync(SourceGrid: TStringGrid; UpdateValues: TAddressBookUpdateFields);
         procedure AddToAddressBookAsync(SourceGrid: TStringGrid);
         procedure SendUserFeedback();
         procedure ExcelExport();
-        procedure GeneralTables(TableName: string; DestGrid: TStringGrid; Columns: string = ''; Conditions: string = ''; AutoRelease: boolean = True);
+        procedure GeneralTables(TableName: string; DestGrid: TStringGrid; Columns: string = ''; Conditions: string = ''; WaitToComplete: boolean = False);
         procedure EditDailyComment(Fields: TDailyCommentFields);
         procedure EditGeneralComment(Fields: TGeneralCommentFields);
-        procedure SendAccountStatement(Fields: TSendAccountStatementFields);
+        procedure SendAccountStatement(Fields: TSendAccountStatementFields; WaitToComplete: boolean = False);
         procedure SendAccountStatements(Fields: TSendAccountStatementFields);
     end;
 
 
-    TTSendAccountStatement = class(TThread)
-    protected
-        procedure Execute; override;
-    private
-        var FLock:        TCriticalSection;
-        var FIDThd:       integer;
-        var FLayout:      TEnums.TDocMode;
-        var FSubject:     string;
-        var FMess:        string;
-        var FInvFilter:   TInvoiceFilter;
-        var FBeginDate:   string;
-        var FEndDate:     string;
-        var FOpenItems:   TStringGrid;
-        var FCUID:        string;
-        var FSendFrom:    string;
-        var FMailTo:      string;
-        var FCustName:    string;
-        var FCustNumber:  string;
-        var FLBUName:     string;
-        var FLBUAddress:  string;
-        var FTelephone:   string;
-        var FBankDetails: string;
-        var FSeries:      boolean;
-        var FItemNo:      integer;
-    public
-        property    IDThd:  integer read FIDThd;
-        destructor  Destroy; override;
-        constructor Create(
-            Layout:      TEnums.TDocMode;
-            Subject:     string;
-            Mess:        string;
-            InvFilter:   TInvoiceFilter;
-            BeginDate:   string;
-            EndDate:     string;
-            OpenItems:   TStringGrid;
-            CUID:        string;
-            SendFrom:    string;
-            MailTo:      string;
-            CustName:    string;
-            CustNumber:  string;
-            LBUName:     string;
-            LBUAddress:  string;
-            Telephone:   string;
-            BankDetails: string;
-            Series:      boolean = False;
-            ItemNo:      integer = 0
-        );
-    end;
-
-
-    TTSendAccountStatements = class(TThread)
-    protected
-        procedure Execute; override;
-    private
-        var FLock:       TCriticalSection;
-        var FIDThd:      integer;
-        var FSubject:    string;
-        var FMess:       string;
-        var FInvFilter:  TInvoiceFilter;
-        var FBeginDate:  string;
-        var FEndDate:    string;
-        var FOpenItems:  TStringGrid;
-        var FMailerList: TListView;
-    public
-        property    IDThd: integer read FIDThd;
-        destructor  Destroy; override;
-        constructor Create(
-            Subject:    string;
-            Mess:       string;
-            InvFilter:  TInvoiceFilter;
-            BeginDate:  string;
-            EndDate:    string;
-            OpenItems:  TStringGrid;
-            MailerList: TListView
-        );
-    end;
+//    TTSendAccountStatements = class(TThread)
+//    protected
+//        procedure Execute; override;
+//    private
+//        var FLock:       TCriticalSection;
+//        var FIDThd:      integer;
+//        var FSubject:    string;
+//        var FMess:       string;
+//        var FInvFilter:  TInvoiceFilter;
+//        var FBeginDate:  string;
+//        var FEndDate:    string;
+//        var FOpenItems:  TStringGrid;
+//        var FMailerList: TListView;
+//    public
+//        property    IDThd: integer read FIDThd;
+//        destructor  Destroy; override;
+//        constructor Create(
+//            Subject:    string;
+//            Mess:       string;
+//            InvFilter:  TInvoiceFilter;
+//            BeginDate:  string;
+//            EndDate:    string;
+//            OpenItems:  TStringGrid;
+//            MailerList: TListView
+//        );
+//    end;
 
 
 implementation
@@ -316,7 +267,7 @@ begin
 
         end;
 
-        if CanReload then ReadAgeViewAsync(TEnums.TLoading.NullParameter, TSorting.TMode.Ranges);
+        if CanReload then ReadAgeViewAsync(TLoading.NullParameter, TSorting.TMode.Ranges);
 
     end);
 
@@ -330,7 +281,7 @@ end;
 // *Change when SQL is replaced by API
 // ------------------------------------
 
-procedure TThreading.ReadAgeViewAsync(ActionMode: TEnums.TLoading; SortMode: integer);
+procedure TThreading.ReadAgeViewAsync(ActionMode: TLoading; SortMode: integer);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
@@ -393,7 +344,7 @@ begin
 
         end;
 
-        if ActionMode = CallOpenItems then ReadOpenItemsAsync(TEnums.TLoading.NullParameter);
+        if ActionMode = CallOpenItems then ReadOpenItemsAsync(TLoading.NullParameter);
 
     end);
 
@@ -444,7 +395,7 @@ begin
             Transactions.Free;
         end;
 
-        if CanMakeAge then ReadOpenItemsAsync(TEnums.TLoading.CallMakeAge);
+        if CanMakeAge then ReadOpenItemsAsync(TLoading.CallMakeAge);
 
     end);
 
@@ -458,7 +409,7 @@ end;
 // *Change when SQL is replaced by API
 // ------------------------------------
 
-procedure TThreading.ReadOpenItemsAsync(ActionMode: TEnums.TLoading);
+procedure TThreading.ReadOpenItemsAsync(ActionMode: TLoading);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
@@ -873,7 +824,7 @@ end;
 // Load async. given general table.
 // ------------------------------------
 
-procedure TThreading.GeneralTables(TableName: string; DestGrid: TStringGrid; Columns: string = ''; Conditions: string = ''; AutoRelease: boolean = True);
+procedure TThreading.GeneralTables(TableName: string; DestGrid: TStringGrid; Columns: string = ''; Conditions: string = ''; WaitToComplete: boolean = False);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
@@ -904,16 +855,7 @@ begin
     end);
 
     NewTask.Start();
-
-    if not(AutoRelease) then
-    begin
-
-        while NewTask.Status = TTaskStatus.Running do
-        begin
-           if (NewTask.Status = TTaskStatus.Completed) or (NewTask.Status = TTaskStatus.Canceled) then Break;
-        end;
-
-    end;
+    if WaitToComplete then TTask.WaitForAny(NewTask);
 
 end;
 
@@ -1367,24 +1309,14 @@ end;
 //
 // ------------------------------------
 
-procedure TThreading.FSendAccountStatement();
-begin
-
-end;
-
-
-// ------------------------------------
-//
-// ------------------------------------
-
-procedure TThreading.SendAccountStatement(Fields: TSendAccountStatementFields);
+procedure TThreading.SendAccountStatement(Fields: TSendAccountStatementFields; WaitToComplete: boolean = False);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Statement: TDocument:=TDocument.Create;
         var Settings: ISettings:=TSettings.Create;
+        var Statement: TDocument:=TDocument.Create;
         try
 
             Statement.CUID       :=Fields.CUID;
@@ -1418,14 +1350,25 @@ begin
             /// Use maCustom for customised template. It requires FSalut, FMess and FSubject to be provided.
             /// </param>
 
-            if Fields.Layout = TEnums.TDocMode.Defined then
+            if Fields.Layout = TDocMode.Defined then
                 Statement.HTMLLayout:=Statement.LoadTemplate(Settings.GetLayoutDir + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE2', ''));
 
-            if Fields.Layout = TEnums.TDocMode.Custom then
+            if Fields.Layout = TDocMode.Custom then
                 Statement.HTMLLayout:=Statement.LoadTemplate(Settings.GetLayoutDir + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE3', ''));
 
             if Statement.SendDocument then
             begin
+
+                var DailyCommentFields: TDailyCommentFields;
+                DailyCommentFields.CUID         :=Fields.CUID;
+                DailyCommentFields.Email        :=False;
+                DailyCommentFields.CallEvent    :=False;
+                DailyCommentFields.CallDuration :=0;
+                DailyCommentFields.Comment      :='New communication has been sent to the customer.';
+                DailyCommentFields.UpdateGrid   :=not Fields.Series;
+                DailyCommentFields.EmailReminder:=False;
+                DailyCommentFields.EventLog     :=False;
+                DailyCommentFields.ExtendComment:=True;
 
                 /// <summary>
                 /// Register sent email either as manual statement or automatic statement.
@@ -1434,12 +1377,22 @@ begin
                 if Fields.Layout = TDocMode.Defined then
                 begin
 
+                    DailyCommentFields.EmailAutoStat:=True;
+                    DailyCommentFields.EmailManuStat:=False;
+
+                    var Job: IThreading:=TThreading.Create;
+                    Job.EditDailyComment(DailyCommentFields);
 
                 end;
 
-                if Fields.Layout = TDocMode.Custom  then
+                if Fields.Layout = TDocMode.Custom then
                 begin
 
+                    DailyCommentFields.EmailAutoStat:=False;
+                    DailyCommentFields.EmailManuStat:=True;
+
+                    var Job: IThreading:=TThreading.Create;
+                    Job.EditDailyComment(DailyCommentFields);
 
                 end;
 
@@ -1447,20 +1400,14 @@ begin
                 /// Either single email (manual by user) or executed by mass mailer (multiple emails).
                 /// </remarks>
 
-                if not(Fields.Series) then
-                begin
-                    MainForm.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Account Statement has been sent successfully!');
-                end
+                if Fields.Series then
+                    MainForm.ExecMessage(False, TMessaging.TWParams.MailerReportItem, Fields.ItemNo.ToString)
                 else
-                begin
-                    MainForm.ExecMessage(False, TMessaging.TWParams.MailerReportItem, Fields.ItemNo.ToString);
-                end;
+                    MainForm.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Account Statement has been sent successfully!');
 
             end
-            else
-            begin
-                if not(Fields.Series) then MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Account Statement cannot be sent. Please contact IT support.')
-            end;
+            else if not(Fields.Series) then
+                MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Account Statement cannot be sent. Please contact IT support.')
 
         finally
             Statement.Free;
@@ -1469,6 +1416,7 @@ begin
     end);
 
     NewTask.Start();
+    if WaitToComplete then TTask.WaitForAll(NewTask);
 
 end;
 
@@ -1480,350 +1428,160 @@ end;
 procedure TThreading.SendAccountStatements(Fields: TSendAccountStatementFields);
 begin
 
-end;
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
 
+        Fields.Series:=True;
+        Fields.ItemNo:=0;
 
+        var Job: IThreading:=TThreading.Create;
+        for var iCNT: integer:=0 to Fields.MailerList.Items.Count - 1 do
+        begin
 
-// ---------------------------------------------------------------------------------------------------------------------------------- SEND ACCOUNT STATEMENT //
-
-
-constructor TTSendAccountStatement.Create
-(
-    Layout:      TEnums.TDocMode;
-    Subject:     string;
-    Mess:        string;
-    InvFilter:   TInvoiceFilter;
-    BeginDate:   string;
-    EndDate:     string;
-    OpenItems:   TStringGrid;
-    CUID:        string;
-    SendFrom:    string;
-    MailTo:      string;
-    CustName:    string;
-    CustNumber:  string;
-    LBUName:     string;
-    LBUAddress:  string;
-    Telephone:   string;
-    BankDetails: string;
-    Series:      boolean = False;
-    ItemNo:      integer = 0
-);
-begin
-    inherited Create(False);
-    FLock       :=TCriticalSection.Create;
-    FIDThd      :=0;
-    FLayout     :=Layout;
-    FSubject    :=Subject;
-    FMess       :=Mess;
-    FInvFilter  :=InvFilter;
-    FBeginDate  :=BeginDate;
-    FEndDate    :=EndDate;
-    FOpenItems  :=OpenItems;
-    FCUID       :=CUID;
-    FSendFrom   :=SendFrom;
-    FMailTo     :=MailTo;
-    FCustName   :=CustName;
-    FCustNumber :=CustNumber;
-    FSeries     :=Series;
-    FItemNo     :=ItemNo;
-    FLBUName    :=LBUName;
-    FLBUAddress :=LBUAddress;
-    FTelephone  :=Telephone;
-    FBankDetails:=BankDetails;
-end;
-
-
-destructor TTSendAccountStatement.Destroy;
-begin
-    FLock.Free;
-end;
-
-
-procedure TTSendAccountStatement.Execute;
-var
-    Statement:  TDocument;
-    Settings:   ISettings;
-//    CommThread: TTDailyComment;
-begin
-
-    FIDThd:=CurrentThread.ThreadID;
-    FLock.Acquire;
-    CurrentThread.Sleep(15);
-
-    try
-        Statement:=TDocument.Create;
-        Settings :=TSettings.Create;
-        try
-
-            /// <remarks>
-            /// Assign all the necessary parameters.
-            /// </remarks>
-
-            Statement.CUID       :=FCUID;
-            Statement.MailFrom   :=FSendFrom;
-            Statement.MailTo     :=FMailTo;
-            Statement.CustName   :=FCustName;
-            Statement.LBUName    :=FLBUName;
-            Statement.LBUAddress :=FLBUAddress;
-            Statement.Telephone  :=FTelephone;
-            Statement.BankDetails:=FBankDetails;
-            Statement.CustMess   :=FMess;
-            Statement.OpenItems  :=FOpenItems;
-            Statement.InvFilter  :=FInvFilter;
-            Statement.BeginWith  :=FBeginDate;
-            Statement.EndWith    :=FEndDate;
-
-            // quick fix - to be refactored - data should be taken from the table
-            Statement.REM_EX1:='1';
-            Statement.REM_EX2:='102';
-            Statement.REM_EX3:='103';
-            Statement.REM_EX4:='104';
-            Statement.REM_EX5:='514';
-
-            Statement.MailSubject:=FSubject + ' - ' + FCustName + ' - ' + FCustNumber;
-
-            /// <remarks>
-            /// Load either fixed template or customizable template.
-            /// </remarks>
-            /// <param name="FLayout">
-            /// Use maDefined for fully pre-defined template.
-            /// Use maCustom for customised template. It requires FSalut, FMess and FSubject to be provided.
-            /// </param>
-
-            if FLayout = TEnums.TDocMode.Defined then
-                Statement.HTMLLayout:=Statement.LoadTemplate(Settings.GetLayoutDir + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE2', ''));
-
-            if FLayout = TEnums.TDocMode.Custom then
-                Statement.HTMLLayout:=Statement.LoadTemplate(Settings.GetLayoutDir + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE3', ''));
-
-            /// <remarks>
-            /// Send email with account statement.
-            /// </remarks>
-
-            if Statement.SendDocument then
+            if Fields.MailerList.Items[iCNT].SubItems[4] <> 'Not found!' then
             begin
 
-                /// <summary>
-                /// Register sent email either as manual statement or automatic statement.
-                /// </summary>
+                Fields.CUID       :=Fields.MailerList.Items[iCNT].SubItems[10]; // cuid
+                Fields.SendFrom   :=Fields.MailerList.Items[iCNT].SubItems[3];  // send from
+                Fields.MailTo     :=Fields.MailerList.Items[iCNT].SubItems[4];  // send to
+                Fields.CustName   :=Fields.MailerList.Items[iCNT].SubItems[0];  // cust name
+                Fields.CustNumber :=Fields.MailerList.Items[iCNT].SubItems[1];  // cust number
+                Fields.LBUName    :=Fields.MailerList.Items[iCNT].SubItems[5];  // lbu name
+                Fields.LBUAddress :=Fields.MailerList.Items[iCNT].SubItems[6];  // lbu address
+                Fields.Telephone  :=Fields.MailerList.Items[iCNT].SubItems[7];  // lbu phone
+                Fields.BankDetails:=Fields.MailerList.Items[iCNT].SubItems[12]; // bank html
+                Fields.ItemNo:=iCNT;
 
-                if FLayout = TEnums.TDocMode.Defined then
-                begin
-
-//                    CommThread:=TTDailyComment.Create(
-//                        FCUID,
-//                        False,
-//                        False,
-//                        0,
-//                        'New communication has been sent to the customer',
-//                        False,
-//                        True,
-//                        False,
-//                        True,
-//                        False,
-//                        True
-//                    );
-//                    CommThread.WaitFor;
-
-//                    var Job: IThreading:=TThreading.Create;
-
-//                    Job.CUID         :=FCUID;
-//                    Job.Email        :=False;
-//                    Job.CallEvent    :=False;
-//                    Job.CallDuration :=0;
-//                    Job.Comment      :='New communication has been sent to the customer';
-//                    Job.EmailReminder:=False;
-//                    Job.EmailAutoStat:=True;
-//                    Job.EmailManuStat:=False;
-//                    Job.EventLog     :=True;
-//                    Job.UpdateGrid   :=False;
-//                    Job.ExtendComment:=True;
-
-//                    Job.EditDailyComment();
-
-                end;
-
-                if FLayout = TEnums.TDocMode.Custom  then
-                begin
-
-//                    CommThread:=TTDailyComment.Create(
-//                        FCUID,
-//                        False,
-//                        False,
-//                        0,
-//                        'New communication has been sent to the customer',
-//                        False,
-//                        False,
-//                        True,
-//                        True,
-//                        False,
-//                        True
-//                    );
-//                    CommThread.WaitFor;
-
-//                    var Job: IThreading:=TThreading.Create;
-
-//                    Job.CUID         :=FCUID;
-//                    Job.Email        :=False;
-//                    Job.CallEvent    :=False;
-//                    Job.CallDuration :=0;
-//                    Job.Comment      :='New communication has been sent to the customer';
-//                    Job.EmailReminder:=False;
-//                    Job.EmailAutoStat:=False;
-//                    Job.EmailManuStat:=True;
-//                    Job.EventLog     :=True;
-//                    Job.UpdateGrid   :=False;
-//                    Job.ExtendComment:=True;
-
-//                    Job.EditDailyComment();
-
-                end;
-
-                /// <remarks>
-                /// Either single email (manual by user) or executed by mass mailer (multiple emails).
-                /// </remarks>
-
-                if not(FSeries) then
-                begin
-                    MainForm.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Account Statement has been sent successfully!');
-                end
-                else
-                begin
-                    MainForm.ExecMessage(False, TMessaging.TWParams.MailerReportItem, FItemNo.ToString);
-                end;
-
-            end
-            else
-            begin
-                if not(FSeries) then MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Account Statement cannot be sent. Please contact IT support.')
-            end;
-
-        finally
-            Statement.Free;
-        end;
-
-    finally
-        FLock.Release;
-    end;
-
-    FreeOnTerminate:=True;
-
-end;
-
-
-// --------------------------------------------------------------------------------------------------------------------------------- SEND ACCOUNT STATEMENTS //
-
-
-constructor TTSendAccountStatements.Create
-(
-    Subject:    string;
-    Mess:       string;
-    InvFilter:  TInvoiceFilter;
-    BeginDate:  string;
-    EndDate:    string;
-    OpenItems:  TStringGrid;
-    MailerList: TListView
-);
-begin
-    inherited Create(False);
-    FLock      :=TCriticalSection.Create;
-    FIDThd     :=0;
-    FSubject   :=Subject;
-    FMess      :=Mess;
-    FInvFilter :=InvFilter;
-    FBeginDate :=BeginDate;
-    FEndDate   :=EndDate;
-    FOpenItems :=OpenItems;
-    FMailerList:=MailerList;
-end;
-
-
-destructor TTSendAccountStatements.Destroy;
-begin
-    FLock.Free;
-end;
-
-
-procedure TTSendAccountStatements.Execute;
-var
-    Statement:  TDocument;
-    iCNT:       integer;
-    SendStat:   TTSendAccountStatement;
-begin
-    FIDThd:=CurrentThread.ThreadID;
-    FLock.Acquire;
-
-    try
-
-        /// <remarks>
-        /// Lock VCL during processing by worker thread.
-        /// </remarks>
-
-        FOpenItems.Freeze(True);
-        FMailerList.Freeze(True);
-
-        Statement:=TDocument.Create;
-        try
-
-            /// <remarks>
-            /// Update column references, as they depend on view from SQL which may be changed at runtime.
-            /// </remarks>
-
-            MainForm.UpdateOpenItemsRefs(MainForm.sgOpenItems);
-            MainForm.UpdateControlStatusRefs(MainForm.sgControlStatus);
-
-            for iCNT:=0 to FMailerList.Items.Count - 1 do
-            begin
-
-                if FMailerList.Items[iCNT].SubItems[4] <> 'Not found!' then
-                begin
-
-                    /// <remarks>
-                    /// Execute worker thread and wait until it finishes the work. This may is due to limitness of multithreading capability,
-                    /// user may want to send hundreds of emails and we do not want to create hundreds of threads. One worker thread is
-                    /// enough to perform email sending wihtout blocking main thread (GUI).
-                    /// </remarks>
-
-                    SendStat:=TTSendAccountStatement.Create(
-                        TEnums.TDocMode.Custom,
-                        FSubject,
-                        FMess,
-                        FInvFilter,
-                        FBeginDate,
-                        FEndDate,
-                        FOpenItems,
-                        FMailerList.Items[iCNT].SubItems[10], // cuid
-                        FMailerList.Items[iCNT].SubItems[3],  // send from
-                        FMailerList.Items[iCNT].SubItems[4],  // send to
-                        FMailerList.Items[iCNT].SubItems[0],  // cust name
-                        FMailerList.Items[iCNT].SubItems[1],  // cust number
-                        FMailerList.Items[iCNT].SubItems[5],  // lbu name
-                        FMailerList.Items[iCNT].SubItems[6],  // lbu address
-                        FMailerList.Items[iCNT].SubItems[7],  // lbu phone
-                        FMailerList.Items[iCNT].SubItems[12], // bank html
-                        True,
-                        iCNT
-                    );
-                    SendStat.WaitFor;
-
-                end;
+                Job.SendAccountStatement(Fields, True);
 
             end;
 
-        finally
-            Statement.Free;
-            MainForm.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString);
         end;
 
-    finally
-        FOpenItems.Freeze(False);
-        FMailerList.Freeze(False);
-        FLock.Release;
-    end;
+        MainForm.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString);
 
-    FreeOnTerminate:=True;
+    end);
+
+    NewTask.Start();
 
 end;
+
+
+//// --------------------------------------------------------------------------------------------------------------------------------- SEND ACCOUNT STATEMENTS //
+//
+//
+//constructor TTSendAccountStatements.Create
+//(
+//    Subject:    string;
+//    Mess:       string;
+//    InvFilter:  TInvoiceFilter;
+//    BeginDate:  string;
+//    EndDate:    string;
+//    OpenItems:  TStringGrid;
+//    MailerList: TListView
+//);
+//begin
+//    inherited Create(False);
+//    FLock      :=TCriticalSection.Create;
+//    FIDThd     :=0;
+//
+//    FSubject   :=Subject;
+//    FMess      :=Mess;
+//    FInvFilter :=InvFilter;
+//    FBeginDate :=BeginDate;
+//    FEndDate   :=EndDate;
+//    FOpenItems :=OpenItems;
+//    FMailerList:=MailerList;
+//
+//end;
+//
+//
+//destructor TTSendAccountStatements.Destroy;
+//begin
+//    FLock.Free;
+//end;
+//
+//
+//procedure TTSendAccountStatements.Execute;
+////var
+////    Statement:  TDocument;
+////    iCNT:       integer;
+////    SendStat:   TTSendAccountStatement;
+//begin
+////    FIDThd:=CurrentThread.ThreadID;
+////    FLock.Acquire;
+////
+////    try
+////
+////        /// <remarks>
+////        /// Lock VCL during processing by worker thread.
+////        /// </remarks>
+////
+////        FOpenItems.Freeze(True);
+////        FMailerList.Freeze(True);
+////
+////        Statement:=TDocument.Create;
+////        try
+////
+////            /// <remarks>
+////            /// Update column references, as they depend on view from SQL which may be changed at runtime.
+////            /// </remarks>
+////
+////            MainForm.UpdateOpenItemsRefs(MainForm.sgOpenItems);
+////            MainForm.UpdateControlStatusRefs(MainForm.sgControlStatus);
+////
+////            for iCNT:=0 to FMailerList.Items.Count - 1 do
+////            begin
+////
+////                if FMailerList.Items[iCNT].SubItems[4] <> 'Not found!' then
+////                begin
+////
+////                    /// <remarks>
+////                    /// Execute worker thread and wait until it finishes the work. This may is due to limitness of multithreading capability,
+////                    /// user may want to send hundreds of emails and we do not want to create hundreds of threads. One worker thread is
+////                    /// enough to perform email sending wihtout blocking main thread (GUI).
+////                    /// </remarks>
+////
+////                    SendStat:=TTSendAccountStatement.Create(
+////                        TDocMode.Custom,
+////                        FSubject,
+////                        FMess,
+////                        FInvFilter,
+////                        FBeginDate,
+////                        FEndDate,
+////                        FOpenItems,
+////                        FMailerList.Items[iCNT].SubItems[10], // cuid
+////                        FMailerList.Items[iCNT].SubItems[3],  // send from
+////                        FMailerList.Items[iCNT].SubItems[4],  // send to
+////                        FMailerList.Items[iCNT].SubItems[0],  // cust name
+////                        FMailerList.Items[iCNT].SubItems[1],  // cust number
+////                        FMailerList.Items[iCNT].SubItems[5],  // lbu name
+////                        FMailerList.Items[iCNT].SubItems[6],  // lbu address
+////                        FMailerList.Items[iCNT].SubItems[7],  // lbu phone
+////                        FMailerList.Items[iCNT].SubItems[12], // bank html
+////                        True,
+////                        iCNT
+////                    );
+////                    SendStat.WaitFor;
+////
+////                end;
+////
+////            end;
+////
+////        finally
+////            Statement.Free;
+////            MainForm.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString);
+////        end;
+////
+////    finally
+////        FOpenItems.Freeze(False);
+////        FMailerList.Freeze(False);
+////        FLock.Release;
+////    end;
+////
+////    FreeOnTerminate:=True;
+////
+//end;
 
 
 end.

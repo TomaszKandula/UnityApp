@@ -17,9 +17,10 @@ uses
     Vcl.ComCtrls,
     Vcl.ExtCtrls,
     Vcl.StdCtrls,
-    InterposerClasses,
-    Helpers,
-    Statics;
+    Unity.Interposer,
+    Unity.Statics,
+    Unity.Records,
+    Unity.Enums;
 
 
 type
@@ -47,7 +48,7 @@ type
         function MakeMyDay(Increment: integer): TDate;
         function IsWeekend(const DT: TDateTime): Boolean;
     public
-        var FCalendarMode: TEnums.TCalendar;
+        var FCalendarMode: TCalendar;
         var FSelectedDate: TDateTime;
         procedure SetFollowUp(SelectedDate: TDate; SelectedCUID: string; Row: integer);
     end;
@@ -196,7 +197,7 @@ procedure TCalendarForm.MyCalendarDblClick(Sender: TObject);
 begin
 
     // Put selected date into database
-    if FCalendarMode = TEnums.TCalendar.DateToDB then
+    if FCalendarMode = TCalendar.DateToDB then
     begin
         SetFollowUp(
             CalendarForm.MyCalendar.Date,
@@ -208,7 +209,7 @@ begin
     end;
 
     // Just return selected date
-    if FCalendarMode = TEnums.TCalendar.GetDate then
+    if FCalendarMode = TCalendar.GetDate then
     begin
         FSelectedDate:=CalendarForm.MyCalendar.Date;
         Close;

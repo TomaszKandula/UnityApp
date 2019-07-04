@@ -21,9 +21,9 @@ uses
     Vcl.Buttons,
     Vcl.Imaging.pngimage,
     Vcl.DBGrids,
-    InterposerClasses,
-    Helpers,
-    Statics;
+    Unity.Interposer,
+    Unity.Arrays,
+    Unity.Statics;
 
     {TODO -oTomek -cGeneral : Redesign this completly}
 

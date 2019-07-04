@@ -10,7 +10,8 @@ uses
     System.SysUtils,
     System.Classes,
     Vcl.Grids,
-    Unity.Enums;
+    Unity.Enums,
+    Unity.Interposer;
 
 
 type
@@ -82,6 +83,7 @@ type
         BankDetails: string;
         Series:      boolean;
         ItemNo:      integer;
+        MailerList:  TListView;
     end;
 
     /// <remarks>

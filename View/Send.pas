@@ -18,7 +18,8 @@ uses
     Vcl.Buttons,
     Vcl.ExtCtrls,
     Vcl.Imaging.pngimage,
-    InterposerClasses;
+    Unity.Interposer,
+    Unity.Records;
 
 
 type
@@ -80,6 +81,7 @@ type
         procedure btnDelBeginClick(Sender: TObject);
         procedure btnDelEndClick(Sender: TObject);
     private
+        var Fields: TSendAccountStatementFields;
         procedure ExecuteMailer;
     end;
 
@@ -100,8 +102,8 @@ uses
     Worker,
     Actions,
     DbModel,
-    Helpers,
-    Statics;
+    Unity.Statics,
+    Unity.Enums;
 
 
 var vSendForm: TSendForm;
@@ -141,24 +143,28 @@ begin
     /// </remarks>
     MainForm.UpdateOpenItemsRefs(ActionsForm.OpenItemsGrid);
     MainForm.UpdateControlStatusRefs(MainForm.sgControlStatus);
-    TTSendAccountStatement.Create(
-        TEnums.TDocMode.Custom,
-        'Account Statement',
-        TempStr,
-        InvFilter,
-        ValBeginDate.Caption,
-        ValEndDate.Caption,
-        ActionsForm.OpenItemsGrid,
-        ActionsForm.CUID,
-        ActionsForm.LbuSendFrom,
-        ActionsForm.Cust_Mail.Text,
-        ActionsForm.CustName,
-        ActionsForm.CustNumber,
-        ActionsForm.LbuName,
-        ActionsForm.LbuAddress,
-        ActionsForm.LbuPhone,
-        ActionsForm.BanksHtml
-    );
+
+    Fields.Layout     :=TDocMode.Custom;
+    Fields.Subject    :='Account Statement';
+    Fields.Mess       :=TempStr;
+    Fields.InvFilter  :=InvFilter;
+    Fields.BeginDate  :=ValBeginDate.Caption;
+    Fields.EndDate    :=ValEndDate.Caption;
+    Fields.OpenItems  :=ActionsForm.OpenItemsGrid;
+    Fields.CUID       :=ActionsForm.CUID;
+    Fields.SendFrom   :=ActionsForm.LbuSendFrom;
+    Fields.MailTo     :=ActionsForm.Cust_Mail.Text;
+    Fields.CustName   :=ActionsForm.CustName;
+    Fields.CustNumber :=ActionsForm.CustNumber;
+    Fields.LBUName    :=ActionsForm.LbuName;
+    Fields.LBUAddress :=ActionsForm.LbuAddress;
+    Fields.Telephone  :=ActionsForm.LbuPhone;
+    Fields.BankDetails:=ActionsForm.BanksHtml;
+    Fields.Series     :=False;
+    Fields.ItemNo     :=0;
+
+    var Job: IThreading:=TThreading.Create;
+    Job.SendAccountStatement(Fields);
 
     Close;
 
@@ -269,7 +275,7 @@ end;
 procedure TSendForm.btnBeginDateClick(Sender: TObject);
 begin
     CalendarForm.FCalendarMode:=GetDate;
-    MainForm.WndCall(CalendarForm, Statics.TEnums.TWindowState.Modal);
+    MainForm.WndCall(CalendarForm, TWindowState.Modal);
     ValBeginDate.Caption:=DateToStr(CalendarForm.FSelectedDate);
 end;
 

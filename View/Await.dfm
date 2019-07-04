@@ -32,8 +32,8 @@ object AwaitForm: TAwaitForm
       AlignWithMargins = True
       Left = 4
       Top = 4
-      Width = 392
-      Height = 292
+      Width = 200
+      Height = 200
       Align = alClient
       AutoSize = True
       Center = True
@@ -3150,8 +3150,6 @@ object AwaitForm: TAwaitForm
         821A8100B7C358208815A2510369C65803E1056D3108840001466001F7878359
         20810000053900036A00011C60042820053D30638E1210003B}
       Transparent = True
-      ExplicitWidth = 200
-      ExplicitHeight = 200
     end
   end
 end

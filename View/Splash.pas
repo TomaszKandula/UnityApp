@@ -36,7 +36,7 @@ type
         ShapeProgressBar: TShape;
         ShapeBackground: TShape;
         CentreText: TLabel;
-        FireMonkey: TImage;
+    Flutter: TImage;
     protected
         {procedure CreateParams(var Params: TCreateParams); override;}
     end;

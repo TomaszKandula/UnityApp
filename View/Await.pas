@@ -17,7 +17,7 @@ uses
     Vcl.StdCtrls,
     Vcl.Imaging.GIFImg,
     Vcl.ExtCtrls,
-    InterposerClasses;
+    Unity.Interposer;
 
 
 type

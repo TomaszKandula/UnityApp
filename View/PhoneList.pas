@@ -17,7 +17,7 @@ uses
     Vcl.ExtCtrls,
     Vcl.Buttons,
     Vcl.StdCtrls,
-    InterposerClasses;
+    Unity.Interposer;
 
 
 type
@@ -52,8 +52,7 @@ uses
     Main,
     Actions,
     Settings,
-    Helpers,
-    Statics;
+    Unity.Statics;
 
 
 var vPhoneListForm: TPhoneListForm;

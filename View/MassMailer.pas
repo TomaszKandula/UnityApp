@@ -19,9 +19,9 @@ uses
     Vcl.ExtCtrls,
     Vcl.Buttons,
     Vcl.Imaging.pngimage,
-    InterposerClasses,
-    Helpers,
-    Statics;
+    Unity.Interposer,
+    Unity.Statics,
+    Unity.Records;
 
 
 type
@@ -93,6 +93,7 @@ type
         procedure btnDelEndClick(Sender: TObject);
     private
         var FThreadCount: integer;
+        var Fields: TSendAccountStatementFields;
         function  GetEmailAddress(Scuid: string): string;
         procedure SetEmailAddresses(List: TListView);
         procedure UpdateCompanyData(Source: TListView);
@@ -119,7 +120,8 @@ uses
     DbModel,
     Worker,
     Actions,
-    Await;
+    Await,
+    Unity.Enums;
 
 
 var vMassMailerForm: TMassMailerForm;
@@ -390,18 +392,38 @@ begin
     MainForm.sgOpenItems.MSort(MainForm.sgOpenItems.ReturnColumn(TOpenitems.PmtStat, 1 , 1), 2, True);
 
     // Process listed customers in worker thread
-    TTSendAccountStatements.Create(
-        Text_Subject.Text,
-        MessStr,
-        InvFilter,
-        ValBeginDate.Caption,
-        ValEndDate.Caption,
-        MainForm.sgOpenItems,
-        MassMailerForm.CustomerList
-    );
+
+//    TTSendAccountStatements.Create(
+//        Text_Subject.Text,
+//        MessStr,
+//        InvFilter,
+//        ValBeginDate.Caption,
+//        ValEndDate.Caption,
+//        MainForm.sgOpenItems,
+//        MassMailerForm.CustomerList
+//    );
+
+    /// <remarks>
+    /// Update column references, as they depend on view from SQL which may be changed at runtime.
+    /// </remarks>
+
+    MainForm.UpdateOpenItemsRefs(MainForm.sgOpenItems);
+    MainForm.UpdateControlStatusRefs(MainForm.sgControlStatus);
+
+    Fields.Layout    :=TDocMode.Defined;
+    Fields.Subject   :=Text_Subject.Text;
+    Fields.Mess      :=MessStr;
+    Fields.InvFilter :=InvFilter;
+    Fields.BeginDate :=ValBeginDate.Caption;
+    Fields.EndDate   :=ValEndDate.Caption;
+    Fields.OpenItems :=MainForm.sgOpenItems;
+    Fields.MailerList:=MassMailerForm.CustomerList;
+
+    var Job: IThreading:=TThreading.Create;
+    Job.SendAccountStatements(Fields);
 
     // Display await window
-    MainForm.WndCall(AwaitForm, Statics.TEnums.TWindowState.Modal);
+    MainForm.WndCall(AwaitForm, TWindowState.Modal);
 
 end;
 

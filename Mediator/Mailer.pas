@@ -15,8 +15,9 @@ uses
     Vcl.StdCtrls,
     Vcl.Grids,
     CDO_TLB,
-    Helpers,
-    Statics;
+    Unity.Statics,
+    Unity.Enums,
+    Unity.Interposer;
 
 
 type
@@ -498,7 +499,7 @@ end;
 
 
 function TDocument.SendDocument;
-//var RAND: integer; (* DEBUG *)
+var RAND: integer; (* DEBUG *)
 begin
 
     // Do not send if we have no items (due to selected due date range by the user)
@@ -535,12 +536,12 @@ begin
     XMailer:=MailFrom;
     MailCc :=MailFrom;
     MailRt :='';
-    Result :=SendNow;
+    //Result :=SendNow;
 
     (* DEBUG *)
-//    RAND:=Random(100000);
-//    SaveOutput('I:\temp\' + IntToStr(RAND) + '.html');
-//    Result:=True;
+    RAND:=Random(100000);
+    SaveOutput('I:\temp\' + IntToStr(RAND) + '.html');
+    Result:=True;
 
 end;
 

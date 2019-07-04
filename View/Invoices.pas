@@ -17,7 +17,7 @@ uses
     Vcl.Grids,
     Vcl.ComCtrls,
     Data.Win.ADODB,
-    InterposerClasses;
+    Unity.Interposer;
 
 
 type
@@ -50,8 +50,8 @@ uses
     Settings,
     SqlHandler,
     DbModel,
-    Helpers,
-    Statics;
+    Unity.Statics,
+    Unity.Enums;
 
 
 var vInvoicesForm: TInvoicesForm;
@@ -130,7 +130,7 @@ end;
 
 procedure TInvoicesForm.InvoicesGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-    if (Key = 67) and (Shift = [ssCtrl]) then InvoicesGrid.CopyCutPaste(TEnums.TActions.Copy);
+    if (Key = 67) and (Shift = [ssCtrl]) then InvoicesGrid.CopyCutPaste(TActions.Copy);
 end;
 
 

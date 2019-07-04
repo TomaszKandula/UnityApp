@@ -17,7 +17,8 @@ uses
     Vcl.Buttons,
     Vcl.ExtCtrls,
     Vcl.StdCtrls,
-    InterposerClasses;
+    Unity.Interposer,
+    Unity.Enums;
 
 
 type
@@ -116,8 +117,7 @@ uses
     Actions,
     Calendar,
     Settings,
-    Helpers,
-    Statics;
+    Unity.Statics;
 
 
 var vQmsForm: TQmsForm;
@@ -564,15 +564,15 @@ end;
 
 procedure TQmsForm.btnAddDueDateClick(Sender: TObject);
 begin
-    CalendarForm.FCalendarMode:=TEnums.TCalendar.GetDate;
-    MainForm.WndCall(CalendarForm, Statics.TEnums.TWindowState.Modal);
+    CalendarForm.FCalendarMode:=TCalendar.GetDate;
+    MainForm.WndCall(CalendarForm, TWindowState.Modal);
     if CalendarForm.FSelectedDate <> TDateTimeFormats.NullDate then EditDueDate.Text:=DateToStr(CalendarForm.FSelectedDate);
 end;
 
 
 procedure TQmsForm.btnAddValDateClick(Sender: TObject);
 begin
-    CalendarForm.FCalendarMode:=TEnums.TCalendar.GetDate;
+    CalendarForm.FCalendarMode:=TCalendar.GetDate;
     MainForm.WndCall(CalendarForm, Modal);
     if CalendarForm.FSelectedDate <> TDateTimeFormats.NullDate then EditValDate.Text:=DateToStr(CalendarForm.FSelectedDate);
 end;

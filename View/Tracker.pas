@@ -20,7 +20,7 @@ uses
     Vcl.Buttons,
     Vcl.ComCtrls,
     Data.Win.ADODB,
-    InterposerClasses;
+    Unity.Interposer;
 
 
 type
@@ -100,8 +100,7 @@ uses
     Worker,
     Settings,
     DbHandler,
-    Helpers,
-    Statics;
+    Unity.Statics;
 
 
 var vTrackerForm: TTrackerForm;

@@ -25,7 +25,7 @@ uses
     Unity.Arrays             in 'Extensions\Unity.Arrays.pas',
     Unity.Records            in 'Extensions\Unity.Records.pas',
     Unity.Statics            in 'Extensions\Unity.Statics.pas',
-    DbModel                  in 'Model\DbModel.pas' {Legacy code/to be removed},
+    DbModel                  in 'Model\DbModel.pas'{Legacy code/to be removed},
     Customer.AddressBook     in 'Model\Json\RawTables\Customer.AddressBook.pas',
     Customer.ControlStatus   in 'Model\Json\RawTables\Customer.ControlStatus.pas',
     Customer.Snapshots       in 'Model\Json\RawTables\Customer.Snapshots.pas',
@@ -39,8 +39,8 @@ uses
     Erp.Person               in 'Model\Json\RawTables\Erp.Person.pas',
     Erp.PersonResponsible    in 'Model\Json\RawTables\Erp.PersonResponsible.pas',
     Erp.SalesResponsible     in 'Model\Json\RawTables\Erp.SalesResponsible.pas',
-    SqlHandler               in 'Mediator\SqlHandler.pas',
-    DbHandler                in 'Mediator\DbHandler.pas',
+    SqlHandler               in 'Mediator\SqlHandler.pas'{Legacy code/to be removed},
+    DbHandler                in 'Mediator\DbHandler.pas'{Legacy code/to be removed},
     AgeView                  in 'Mediator\AgeView.pas',
     Mailer                   in 'Mediator\Mailer.pas',
     Settings                 in 'Mediator\Settings.pas',
@@ -776,7 +776,9 @@ begin
     /// </remarks>
 
     Application.CreateForm(TMainForm, MainForm);
-  // ----------------------------------------------------------------------------------------------------------------------------------------------------- //
+
+
+    // ----------------------------------------------------------------------------------------------------------------------------------------------------- //
 
 
     Status(21, TSplashScreen.AllTasks, 500, 'Application is initialized.', False, Settings.GetPathEventLog, LogText);

@@ -102,8 +102,7 @@ implementation
 uses
     Main,
     Settings,
-    Helpers,
-    Statics;
+    Unity.Statics;
 
 
 type
