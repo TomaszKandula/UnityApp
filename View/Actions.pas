@@ -175,13 +175,13 @@ type
         procedure btnSaveCustDetailsMouseLeave(Sender: TObject);
         procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
     protected
-        var SrcColumns:  TAIntigers;
+        var FSrcColumns:           TAIntigers;
+        var FAbUpdateFields:       TAddressBookUpdateFields;
+        var FDailyCommentFields:   TDailyCommentFields;
+        var FGeneralCommentFields: TGeneralCommentFields;
+        var FOpenItemsTotal:       TOpenItemsTotal;
+        var FStatementFields:      TSendAccountStatementFields;
     private
-        var AbUpdateFields:       TAddressBookUpdateFields;
-        var DailyCommentFields:   TDailyCommentFields;
-        var GeneralCommentFields: TGeneralCommentFields;
-        var OpenItemsTotal:       TOpenItemsTotal;
-        var Fields:               TSendAccountStatementFields;
         var FHistoryGrid:         boolean;
         var FCUID:                string;
         var FSCUID:               string;
@@ -316,8 +316,8 @@ begin
         UpdateHistory(HistoryGrid);
         UpdateGeneral(GeneralCom);
 
-        ValueOpenAm.Caption:=FormatFloat('#,##0.00', OpenItemsTotal.OpenAm) + ' ' + MainForm.tcCURRENCY.Caption;
-        ValueAmount.Caption:=FormatFloat('#,##0.00', OpenItemsTotal.Am) + ' ' + MainForm.tcCURRENCY.Caption;
+        ValueOpenAm.Caption:=FormatFloat('#,##0.00', FOpenItemsTotal.OpenAm) + ' ' + MainForm.tcCURRENCY.Caption;
+        ValueAmount.Caption:=FormatFloat('#,##0.00', FOpenItemsTotal.Am) + ' ' + MainForm.tcCURRENCY.Caption;
 
     finally
 
@@ -343,67 +343,69 @@ begin
 
     var kCNT: integer:=1;
 
-    OpenItemsTotal.OpenAm   :=0;
-    OpenItemsTotal.Am       :=0;
-    OpenItemsTotal.OpenCurAm:=0;
-    OpenItemsTotal.CurAm    :=0;
+    FOpenItemsTotal.OpenAm   :=0;
+    FOpenItemsTotal.Am       :=0;
+    FOpenItemsTotal.OpenCurAm:=0;
+    FOpenItemsTotal.CurAm    :=0;
 
     // Get columns numbers from source open items string grid
-    SrcColumns[0] :=OpenItemsSrc.ReturnColumn(TOpenitems.InvoNo,    1, 1);
-    SrcColumns[1] :=OpenItemsSrc.ReturnColumn(TOpenitems.Txt,       1, 1);
-    SrcColumns[2] :=OpenItemsSrc.ReturnColumn(TOpenitems.AddTxt,    1, 1);
-    SrcColumns[3] :=OpenItemsSrc.ReturnColumn(TOpenitems.OpenAm,    1, 1);
-    SrcColumns[4] :=OpenItemsSrc.ReturnColumn(TOpenitems.Am,        1, 1);
-    SrcColumns[5] :=OpenItemsSrc.ReturnColumn(TOpenitems.OpenCurAm, 1, 1);
-    SrcColumns[6] :=OpenItemsSrc.ReturnColumn(TOpenitems.CurAm,     1, 1);
-    SrcColumns[7] :=OpenItemsSrc.ReturnColumn(TOpenitems.ISO,       1, 1);
-    SrcColumns[8] :=OpenItemsSrc.ReturnColumn(TOpenitems.DueDt,     1, 1);
-    SrcColumns[9] :=OpenItemsSrc.ReturnColumn(TOpenitems.ValDt,     1, 1);
-    SrcColumns[10]:=OpenItemsSrc.ReturnColumn(TOpenitems.Ctrl,      1, 1);
-    SrcColumns[11]:=OpenItemsSrc.ReturnColumn(TOpenitems.PmtStat,   1, 1);
+    FSrcColumns[0] :=OpenItemsSrc.ReturnColumn(TOpenitems.InvoNo,    1, 1);
+    FSrcColumns[1] :=OpenItemsSrc.ReturnColumn(TOpenitems.Txt,       1, 1);
+    FSrcColumns[2] :=OpenItemsSrc.ReturnColumn(TOpenitems.AddTxt,    1, 1);
+    FSrcColumns[3] :=OpenItemsSrc.ReturnColumn(TOpenitems.OpenAm,    1, 1);
+    FSrcColumns[4] :=OpenItemsSrc.ReturnColumn(TOpenitems.Am,        1, 1);
+    FSrcColumns[5] :=OpenItemsSrc.ReturnColumn(TOpenitems.OpenCurAm, 1, 1);
+    FSrcColumns[6] :=OpenItemsSrc.ReturnColumn(TOpenitems.CurAm,     1, 1);
+    FSrcColumns[7] :=OpenItemsSrc.ReturnColumn(TOpenitems.ISO,       1, 1);
+    FSrcColumns[8] :=OpenItemsSrc.ReturnColumn(TOpenitems.DueDt,     1, 1);
+    FSrcColumns[9] :=OpenItemsSrc.ReturnColumn(TOpenitems.ValDt,     1, 1);
+    FSrcColumns[10]:=OpenItemsSrc.ReturnColumn(TOpenitems.Ctrl,      1, 1);
+    FSrcColumns[11]:=OpenItemsSrc.ReturnColumn(TOpenitems.PmtStat,   1, 1);
 
     // Helper columns
-    SrcColumns[12]:=OpenItemsSrc.ReturnColumn(TOpenitems.Ad1,       1, 1);
-    SrcColumns[13]:=OpenItemsSrc.ReturnColumn(TOpenitems.Ad2,       1, 1);
-    SrcColumns[14]:=OpenItemsSrc.ReturnColumn(TOpenitems.Ad3,       1, 1);
-    SrcColumns[15]:=OpenItemsSrc.ReturnColumn(TOpenitems.Pno,       1, 1);
-    SrcColumns[16]:=OpenItemsSrc.ReturnColumn(TOpenitems.PArea,     1, 1);
-    SrcColumns[17]:=OpenItemsSrc.ReturnColumn(TOpenitems.Cuid,      1, 1);
+    FSrcColumns[12]:=OpenItemsSrc.ReturnColumn(TOpenitems.Ad1,       1, 1);
+    FSrcColumns[13]:=OpenItemsSrc.ReturnColumn(TOpenitems.Ad2,       1, 1);
+    FSrcColumns[14]:=OpenItemsSrc.ReturnColumn(TOpenitems.Ad3,       1, 1);
+    FSrcColumns[15]:=OpenItemsSrc.ReturnColumn(TOpenitems.Pno,       1, 1);
+    FSrcColumns[16]:=OpenItemsSrc.ReturnColumn(TOpenitems.PArea,     1, 1);
+    FSrcColumns[17]:=OpenItemsSrc.ReturnColumn(TOpenitems.Cuid,      1, 1);
 
     // Get headers
-    for var iCNT: integer:=Low(SrcColumns) to High(SrcColumns) do
+    for var iCNT: integer:=Low(FSrcColumns) to High(FSrcColumns) do
     begin
 
-        if SrcColumns[iCNT] = -100 then
+        if FSrcColumns[iCNT] = -100 then
         begin
             MainForm.MsgCall(Warn, 'There are no open items loaded. Please reload it or wait untill auto-load is complete and try again.');
             Close;
             Exit;
         end;
 
-        OpenItemsDest.Cells[iCNT + 1, 0]:=OpenItemsSrc.Cells[SrcColumns[iCNT], 0];
+        OpenItemsDest.Cells[iCNT + 1, 0]:=OpenItemsSrc.Cells[FSrcColumns[iCNT], 0];
 
     end;
 
     // Look for the same "CUID" and put it into source grid
     for var iCNT: integer:=1 to OpenItemsSrc.RowCount - 1 do
     begin
+
         if OpenItemsSrc.Cells[MainForm.sgOpenItems.ReturnColumn(TOpenitems.Cuid, 1, 1), iCNT] = CUID then
         begin
 
-            for var jCNT: integer:=Low(SrcColumns) to High(SrcColumns) do
-                OpenItemsDest.Cells[jCNT + 1, kCNT]:=OpenItemsSrc.Cells[SrcColumns[jCNT], iCNT];
+            for var jCNT: integer:=Low(FSrcColumns) to High(FSrcColumns) do
+                OpenItemsDest.Cells[jCNT + 1, kCNT]:=OpenItemsSrc.Cells[FSrcColumns[jCNT], iCNT];
 
             // Aggregate open items
-            OpenItemsTotal.OpenAm   :=OpenItemsTotal.OpenAm    + (OpenItemsSrc.Cells[SrcColumns[3], iCNT]).ToDouble;
-            OpenItemsTotal.Am       :=OpenItemsTotal.Am        + (OpenItemsSrc.Cells[SrcColumns[4], iCNT]).ToDouble;
-            OpenItemsTotal.OpenCurAm:=OpenItemsTotal.OpenCurAm + (OpenItemsSrc.Cells[SrcColumns[5], iCNT]).ToDouble;
-            OpenItemsTotal.CurAm    :=OpenItemsTotal.CurAm     + (OpenItemsSrc.Cells[SrcColumns[6], iCNT]).ToDouble;
+            FOpenItemsTotal.OpenAm   :=FOpenItemsTotal.OpenAm    + (OpenItemsSrc.Cells[FSrcColumns[3], iCNT]).ToDouble;
+            FOpenItemsTotal.Am       :=FOpenItemsTotal.Am        + (OpenItemsSrc.Cells[FSrcColumns[4], iCNT]).ToDouble;
+            FOpenItemsTotal.OpenCurAm:=FOpenItemsTotal.OpenCurAm + (OpenItemsSrc.Cells[FSrcColumns[5], iCNT]).ToDouble;
+            FOpenItemsTotal.CurAm    :=FOpenItemsTotal.CurAm     + (OpenItemsSrc.Cells[FSrcColumns[6], iCNT]).ToDouble;
 
             inc(kCNT);
             OpenItemsDest.RowCount:=kCNT;
 
         end;
+
     end;
 
     // Hide helpers columns from string grid
@@ -696,16 +698,16 @@ begin
     if MainForm.MsgCall(Question2, 'Are you sure you want to clear this follow up?') = ID_YES then
     begin
 
-        GeneralCommentFields.CUID        :=CUID;
-        GeneralCommentFields.FixedComment:=TUnknown.NULL;
-        GeneralCommentFields.FollowUp    :=TChars.SPACE;
-        GeneralCommentFields.Free1       :=TUnknown.NULL;
-        GeneralCommentFields.Free2       :=TUnknown.NULL;
-        GeneralCommentFields.Free3       :=TUnknown.NULL;
-        GeneralCommentFields.EventLog    :=True;
+        FGeneralCommentFields.CUID        :=CUID;
+        FGeneralCommentFields.FixedComment:=TUnknown.NULL;
+        FGeneralCommentFields.FollowUp    :=TChars.SPACE;
+        FGeneralCommentFields.Free1       :=TUnknown.NULL;
+        FGeneralCommentFields.Free2       :=TUnknown.NULL;
+        FGeneralCommentFields.Free3       :=TUnknown.NULL;
+        FGeneralCommentFields.EventLog    :=True;
 
         var Job: IThreading:=TThreading.Create;
-        Job.EditGeneralComment(GeneralCommentFields);
+        Job.EditGeneralComment(FGeneralCommentFields);
 
         MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneralComment.fFollowUp, 1, 1), MainForm.sgAgeView.Row]:='';
 
@@ -716,14 +718,14 @@ end;
 procedure TActionsForm.SaveCustomerDetails;
 begin
 
-    AbUpdateFields.Scuid     :=SCUID;
-    AbUpdateFields.Contact   :=Cust_Person.Text;
-    AbUpdateFields.Email     :=Cust_MailGeneral.Text;
-    AbUpdateFields.Estatement:=Cust_Mail.Text;
-    AbUpdateFields.Phones    :=MainForm.Implode(Cust_Phone.Items, TDelimiters.Semicolon);
+    FAbUpdateFields.Scuid     :=SCUID;
+    FAbUpdateFields.Contact   :=Cust_Person.Text;
+    FAbUpdateFields.Email     :=Cust_MailGeneral.Text;
+    FAbUpdateFields.Estatement:=Cust_Mail.Text;
+    FAbUpdateFields.Phones    :=MainForm.Implode(Cust_Phone.Items, TDelimiters.Semicolon);
 
     var Job: IThreading:=TThreading.Create;
-    Job.UpdateAddressBookAsync(nil, AbUpdateFields);
+    Job.UpdateAddressBookAsync(nil, FAbUpdateFields);
 
 end;
 
@@ -731,16 +733,16 @@ end;
 procedure TActionsForm.SaveGeneralComment;
 begin
 
-    GeneralCommentFields.CUID        :=CUID;
-    GeneralCommentFields.FixedComment:=GeneralCom.Text;
-    GeneralCommentFields.FollowUp    :=TUnknown.NULL;
-    GeneralCommentFields.Free1       :=TUnknown.NULL;
-    GeneralCommentFields.Free2       :=TUnknown.NULL;
-    GeneralCommentFields.Free3       :=TUnknown.NULL;
-    GeneralCommentFields.EventLog    :=True;
+    FGeneralCommentFields.CUID        :=CUID;
+    FGeneralCommentFields.FixedComment:=GeneralCom.Text;
+    FGeneralCommentFields.FollowUp    :=TUnknown.NULL;
+    FGeneralCommentFields.Free1       :=TUnknown.NULL;
+    FGeneralCommentFields.Free2       :=TUnknown.NULL;
+    FGeneralCommentFields.Free3       :=TUnknown.NULL;
+    FGeneralCommentFields.EventLog    :=True;
 
     var Job: IThreading:=TThreading.Create;
-    Job.EditGeneralComment(GeneralCommentFields);
+    Job.EditGeneralComment(FGeneralCommentFields);
 
 end;
 
@@ -752,20 +754,20 @@ end;
 procedure TActionsForm.SaveDailyComment;
 begin
 
-    DailyCommentFields.CUID         :=CUID;
-    DailyCommentFields.Email        :=False;
-    DailyCommentFields.CallEvent    :=False;
-    DailyCommentFields.CallDuration :=0;
-    DailyCommentFields.Comment      :=DailyCom.Text;
-    DailyCommentFields.EmailReminder:=False;
-    DailyCommentFields.EmailAutoStat:=False;
-    DailyCommentFields.EmailManuStat:=False;
-    DailyCommentFields.EventLog     :=True;
-    DailyCommentFields.UpdateGrid   :=True;
-    DailyCommentFields.ExtendComment:=False;
+    FDailyCommentFields.CUID         :=CUID;
+    FDailyCommentFields.Email        :=False;
+    FDailyCommentFields.CallEvent    :=False;
+    FDailyCommentFields.CallDuration :=0;
+    FDailyCommentFields.Comment      :=DailyCom.Text;
+    FDailyCommentFields.EmailReminder:=False;
+    FDailyCommentFields.EmailAutoStat:=False;
+    FDailyCommentFields.EmailManuStat:=False;
+    FDailyCommentFields.EventLog     :=True;
+    FDailyCommentFields.UpdateGrid   :=True;
+    FDailyCommentFields.ExtendComment:=False;
 
     var Job: IThreading:=TThreading.Create;
-    Job.EditDailyComment(DailyCommentFields);
+    Job.EditDailyComment(FDailyCommentFields);
 
 end;
 
@@ -825,7 +827,7 @@ end;
 
 procedure TActionsForm.FormCreate(Sender: TObject);
 begin
-    SetLength(SrcColumns, 19);
+    SetLength(FSrcColumns, 19);
     OpenItemsGrid.ColCount:=19;
     OpenItemsGrid.SetRowHeight(OpenItemsGrid.sgRowHeight, 25);
     HistoryGrid.ColCount:=11;
@@ -1290,27 +1292,27 @@ begin
     MainForm.UpdateOpenItemsRefs(OpenItemsGrid);
     MainForm.UpdateControlStatusRefs(MainForm.sgControlStatus);
 
-    Fields.Layout     :=TDocMode.Defined;
-    Fields.Subject    :='Account Statement';
-    Fields.Mess       :='';
-    Fields.InvFilter  :=TInvoiceFilter.ShowAllItems;
-    Fields.BeginDate  :='';
-    Fields.EndDate    :='';
-    Fields.OpenItems  :=OpenItemsGrid;
-    Fields.CUID       :=CUID;
-    Fields.SendFrom   :=LbuSendFrom;
-    Fields.MailTo     :=Cust_Mail.Text;
-    Fields.CustName   :=CustName;
-    Fields.CustNumber :=CustNumber;
-    Fields.LBUName    :=LbuName;
-    Fields.LBUAddress :=LbuAddress;
-    Fields.Telephone  :=LbuPhone;
-    Fields.BankDetails:=BanksHtml;
-    Fields.Series     :=False;
-    Fields.ItemNo     :=0;
+    FStatementFields.Layout     :=TDocMode.Defined;
+    FStatementFields.Subject    :='Account Statement';
+    FStatementFields.Mess       :='';
+    FStatementFields.InvFilter  :=TInvoiceFilter.ShowAllItems;
+    FStatementFields.BeginDate  :='';
+    FStatementFields.EndDate    :='';
+    FStatementFields.OpenItems  :=OpenItemsGrid;
+    FStatementFields.CUID       :=CUID;
+    FStatementFields.SendFrom   :=LbuSendFrom;
+    FStatementFields.MailTo     :=Cust_Mail.Text;
+    FStatementFields.CustName   :=CustName;
+    FStatementFields.CustNumber :=CustNumber;
+    FStatementFields.LBUName    :=LbuName;
+    FStatementFields.LBUAddress :=LbuAddress;
+    FStatementFields.Telephone  :=LbuPhone;
+    FStatementFields.BankDetails:=BanksHtml;
+    FStatementFields.Series     :=False;
+    FStatementFields.ItemNo     :=0;
 
     var Job: IThreading:=TThreading.Create;
-    Job.SendAccountStatement(Fields);
+    Job.SendAccountStatement(FStatementFields);
 
 end;
 

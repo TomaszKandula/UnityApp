@@ -79,34 +79,6 @@ type
     end;
 
 
-//    TTSendAccountStatements = class(TThread)
-//    protected
-//        procedure Execute; override;
-//    private
-//        var FLock:       TCriticalSection;
-//        var FIDThd:      integer;
-//        var FSubject:    string;
-//        var FMess:       string;
-//        var FInvFilter:  TInvoiceFilter;
-//        var FBeginDate:  string;
-//        var FEndDate:    string;
-//        var FOpenItems:  TStringGrid;
-//        var FMailerList: TListView;
-//    public
-//        property    IDThd: integer read FIDThd;
-//        destructor  Destroy; override;
-//        constructor Create(
-//            Subject:    string;
-//            Mess:       string;
-//            InvFilter:  TInvoiceFilter;
-//            BeginDate:  string;
-//            EndDate:    string;
-//            OpenItems:  TStringGrid;
-//            MailerList: TListView
-//        );
-//    end;
-
-
 implementation
 
 
@@ -1334,10 +1306,10 @@ begin
             Statement.EndWith    :=Fields.EndDate;
 
             // quick fix - to be refactored - data should be taken from the table
-            Statement.REM_EX1:='1';
-            Statement.REM_EX2:='102';
-            Statement.REM_EX3:='103';
-            Statement.REM_EX4:='104';
+            Statement.REM_EX1:='9999';
+            Statement.REM_EX2:='9999';
+            Statement.REM_EX3:='9999';
+            Statement.REM_EX4:='9999';
             Statement.REM_EX5:='514';
 
             Statement.MailSubject:=Fields.Subject + ' - ' + Fields.CustName + ' - ' + Fields.CustNumber;
@@ -1465,123 +1437,6 @@ begin
     NewTask.Start();
 
 end;
-
-
-//// --------------------------------------------------------------------------------------------------------------------------------- SEND ACCOUNT STATEMENTS //
-//
-//
-//constructor TTSendAccountStatements.Create
-//(
-//    Subject:    string;
-//    Mess:       string;
-//    InvFilter:  TInvoiceFilter;
-//    BeginDate:  string;
-//    EndDate:    string;
-//    OpenItems:  TStringGrid;
-//    MailerList: TListView
-//);
-//begin
-//    inherited Create(False);
-//    FLock      :=TCriticalSection.Create;
-//    FIDThd     :=0;
-//
-//    FSubject   :=Subject;
-//    FMess      :=Mess;
-//    FInvFilter :=InvFilter;
-//    FBeginDate :=BeginDate;
-//    FEndDate   :=EndDate;
-//    FOpenItems :=OpenItems;
-//    FMailerList:=MailerList;
-//
-//end;
-//
-//
-//destructor TTSendAccountStatements.Destroy;
-//begin
-//    FLock.Free;
-//end;
-//
-//
-//procedure TTSendAccountStatements.Execute;
-////var
-////    Statement:  TDocument;
-////    iCNT:       integer;
-////    SendStat:   TTSendAccountStatement;
-//begin
-////    FIDThd:=CurrentThread.ThreadID;
-////    FLock.Acquire;
-////
-////    try
-////
-////        /// <remarks>
-////        /// Lock VCL during processing by worker thread.
-////        /// </remarks>
-////
-////        FOpenItems.Freeze(True);
-////        FMailerList.Freeze(True);
-////
-////        Statement:=TDocument.Create;
-////        try
-////
-////            /// <remarks>
-////            /// Update column references, as they depend on view from SQL which may be changed at runtime.
-////            /// </remarks>
-////
-////            MainForm.UpdateOpenItemsRefs(MainForm.sgOpenItems);
-////            MainForm.UpdateControlStatusRefs(MainForm.sgControlStatus);
-////
-////            for iCNT:=0 to FMailerList.Items.Count - 1 do
-////            begin
-////
-////                if FMailerList.Items[iCNT].SubItems[4] <> 'Not found!' then
-////                begin
-////
-////                    /// <remarks>
-////                    /// Execute worker thread and wait until it finishes the work. This may is due to limitness of multithreading capability,
-////                    /// user may want to send hundreds of emails and we do not want to create hundreds of threads. One worker thread is
-////                    /// enough to perform email sending wihtout blocking main thread (GUI).
-////                    /// </remarks>
-////
-////                    SendStat:=TTSendAccountStatement.Create(
-////                        TDocMode.Custom,
-////                        FSubject,
-////                        FMess,
-////                        FInvFilter,
-////                        FBeginDate,
-////                        FEndDate,
-////                        FOpenItems,
-////                        FMailerList.Items[iCNT].SubItems[10], // cuid
-////                        FMailerList.Items[iCNT].SubItems[3],  // send from
-////                        FMailerList.Items[iCNT].SubItems[4],  // send to
-////                        FMailerList.Items[iCNT].SubItems[0],  // cust name
-////                        FMailerList.Items[iCNT].SubItems[1],  // cust number
-////                        FMailerList.Items[iCNT].SubItems[5],  // lbu name
-////                        FMailerList.Items[iCNT].SubItems[6],  // lbu address
-////                        FMailerList.Items[iCNT].SubItems[7],  // lbu phone
-////                        FMailerList.Items[iCNT].SubItems[12], // bank html
-////                        True,
-////                        iCNT
-////                    );
-////                    SendStat.WaitFor;
-////
-////                end;
-////
-////            end;
-////
-////        finally
-////            Statement.Free;
-////            MainForm.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString);
-////        end;
-////
-////    finally
-////        FOpenItems.Freeze(False);
-////        FMailerList.Freeze(False);
-////        FLock.Release;
-////    end;
-////
-////    FreeOnTerminate:=True;
-////
-//end;
 
 
 end.

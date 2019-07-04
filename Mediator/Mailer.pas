@@ -90,38 +90,46 @@ type
         var FEndWith:         string;
         var FSourceGrid:      TStringGrid;
         var FCUID:            string;
+        var FExclusions:      TArray<integer>;
+
+        // FREM_EX1..5 to be removed
         var FREM_EX1:         string;
         var FREM_EX2:         string;
         var FREM_EX3:         string;
         var FREM_EX4:         string;
         var FREM_EX5:         string;
+
         var FCommonHTMLTable: string;
         var FCommonHTMLRow:   string;
         procedure SaveOutput(FileName: string);
         function  BuildHTML: integer;
     public
         var OpenItems:  TStringGrid;
-        property HTMLTable:   string         read FHTMLTable   write FHTMLTable;
-        property HTMLTemp:    string         read FHTMLTemp    write FHTMLTemp;
-        property HTMLRow:     string         read FHTMLRow     write FHTMLRow;
-        property HTMLLayout:  string         read FHTMLLayout  write FHTMLLayout;
-        property CustName:    string         read FCustName    write FCustName;
-        property CustAddr:    string         read FCustAddr    write FCustAddr;
-        property LBUName:     string         read FLBUName     write FLBUName;
-        property LBUAddress:  string         read FLBUAddress  write FLBUAddress;
-        property Telephone:   string         read FTelephone   write FTelephone;
-        property BankDetails: string         read FBankDetails write FBankDetails;
-        property CustMess:    string         read FCustMess    write FCustMess;
-        property InvFilter:   TInvoiceFilter read FInvFilter   write FInvFilter;
-        property BeginWith:   string         read FBeginWith   write FBeginWith;
-        property EndWith:     string         read FEndWith     write FEndWith;
-        property SourceGrid:  TStringGrid    read FSourceGrid  write FSourceGrid;
-        property CUID:        string         read FCUID        write FCUID;
-        property REM_EX1:     string         read FREM_EX1     write FREM_EX1;
-        property REM_EX2:     string         read FREM_EX2     write FREM_EX2;
-        property REM_EX3:     string         read FREM_EX3     write FREM_EX3;
-        property REM_EX4:     string         read FREM_EX4     write FREM_EX4;
-        property REM_EX5:     string         read FREM_EX5     write FREM_EX5;
+        property HTMLTable:   string          read FHTMLTable   write FHTMLTable;
+        property HTMLTemp:    string          read FHTMLTemp    write FHTMLTemp;
+        property HTMLRow:     string          read FHTMLRow     write FHTMLRow;
+        property HTMLLayout:  string          read FHTMLLayout  write FHTMLLayout;
+        property CustName:    string          read FCustName    write FCustName;
+        property CustAddr:    string          read FCustAddr    write FCustAddr;
+        property LBUName:     string          read FLBUName     write FLBUName;
+        property LBUAddress:  string          read FLBUAddress  write FLBUAddress;
+        property Telephone:   string          read FTelephone   write FTelephone;
+        property BankDetails: string          read FBankDetails write FBankDetails;
+        property CustMess:    string          read FCustMess    write FCustMess;
+        property InvFilter:   TInvoiceFilter  read FInvFilter   write FInvFilter;
+        property BeginWith:   string          read FBeginWith   write FBeginWith;
+        property EndWith:     string          read FEndWith     write FEndWith;
+        property SourceGrid:  TStringGrid     read FSourceGrid  write FSourceGrid;
+        property CUID:        string          read FCUID        write FCUID;
+        property Exclusions:  TArray<integer> read FExclusions  write FExclusions;
+
+        // REM_EX1..5 to be removed
+        property REM_EX1:     string          read FREM_EX1     write FREM_EX1;
+        property REM_EX2:     string          read FREM_EX2     write FREM_EX2;
+        property REM_EX3:     string          read FREM_EX3     write FREM_EX3;
+        property REM_EX4:     string          read FREM_EX4     write FREM_EX4;
+        property REM_EX5:     string          read FREM_EX5     write FREM_EX5;
+
         function  LoadTemplate(FileName: string): string;
         function  SendDocument: boolean;
         constructor Create;
