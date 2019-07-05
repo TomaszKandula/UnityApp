@@ -110,7 +110,7 @@ implementation
 
 uses
     Main,
-    Mailer,
+    Sync.Documents,
     SqlHandler,
     DbModel,
     Worker,
@@ -424,43 +424,36 @@ function TQmsForm.SendNotification(LbuEmail: string): boolean; {refactor / async
 begin
 
     var Settings: ISettings:=TSettings.Create;
-    var Mail: TMailer:=TMailer.Create;
-    try
+    var Mail: IDocument:=TDocument.Create;
 
-        // Get and set email details
-        if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerNTLM  then
-        begin
-            Mail.XMailer:=Settings.GetStringValue(TConfigSections.MailerNTLM, 'FROM', '');
-            //Mail.MailTo :=Settings.GetStringValue(MailerNTLM, 'TO', '');
-            Mail.MailRt :=Settings.GetStringValue(TConfigSections.MailerNTLM, 'REPLY-TO', '');
-        end;
-
-        if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerBASIC then
-        begin
-            Mail.XMailer:=Settings.GetStringValue(TConfigSections.MailerBASIC, 'FROM', '');
-            //Mail.MailTo :=Settings.GetStringValue(MailerBASIC, 'TO', '');
-            Mail.MailRt :=Settings.GetStringValue(TConfigSections.MailerBASIC, 'REPLY-TO', '');
-        end;
-
-        Mail.MailFrom   :=Mail.XMailer;
-        Mail.MailTo     :=LbuEmail;
-        Mail.MailCc     :=MainForm.WinUserName + '@' + Settings.GetStringValue(TConfigSections.ApplicationDetails, 'MAIL_DOMAIN', '');
-        Mail.MailBcc    :='';
-        Mail.MailSubject:='Unity [QMS]: New query';
-
-        Mail.MailBody:='New query has been logged by ' +
-                       UpperCase(MainForm.WinUserName) +
-                       ' with comment: ' + QueryDesc.Lines.Text +
-                       '. Query reason: ' + EditQueryReason.Text +
-                       '. Query UID: ' +
-                       LogQueryId + '.';
-
-        Mail.Attachments.Add(FileName);
-        Result:=Mail.SendNow;
-
-    finally
-        Mail.Free;
+    // Get and set email details
+    if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerNTLM  then
+    begin
+        Mail.XMailer:=Settings.GetStringValue(TConfigSections.MailerNTLM, 'FROM', '');
+        Mail.MailRt :=Settings.GetStringValue(TConfigSections.MailerNTLM, 'REPLY-TO', '');
     end;
+
+    if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerBASIC then
+    begin
+        Mail.XMailer:=Settings.GetStringValue(TConfigSections.MailerBASIC, 'FROM', '');
+        Mail.MailRt :=Settings.GetStringValue(TConfigSections.MailerBASIC, 'REPLY-TO', '');
+    end;
+
+    Mail.MailFrom   :=Mail.XMailer;
+    Mail.MailTo     :=LbuEmail;
+    Mail.MailCc     :=MainForm.WinUserName + '@' + Settings.GetStringValue(TConfigSections.ApplicationDetails, 'MAIL_DOMAIN', '');
+    Mail.MailBcc    :='';
+    Mail.MailSubject:='Unity [QMS]: New query';
+
+    Mail.MailBody:='New query has been logged by ' +
+                   UpperCase(MainForm.WinUserName) +
+                   ' with comment: ' + QueryDesc.Lines.Text +
+                   '. Query reason: ' + EditQueryReason.Text +
+                   '. Query UID: ' +
+                   LogQueryId + '.';
+
+    Mail.Attachments.Add(FileName);
+    Result:=Mail.SendNow;
 
 end;
 

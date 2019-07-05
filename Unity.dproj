@@ -140,9 +140,8 @@
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
         <DCCReference Include="Extensions\Unity.Interposer.pas">
-            <Form>Instead of building own components</Form>
+            <Form>Components extensions</Form>
         </DCCReference>
-        <DCCReference Include="Extensions\Unity.Rest.pas"/>
         <DCCReference Include="Extensions\Unity.Enums.pas"/>
         <DCCReference Include="Extensions\Unity.Arrays.pas"/>
         <DCCReference Include="Extensions\Unity.Records.pas"/>
@@ -163,21 +162,37 @@
         <DCCReference Include="Model\Json\RawTables\Erp.Person.pas"/>
         <DCCReference Include="Model\Json\RawTables\Erp.PersonResponsible.pas"/>
         <DCCReference Include="Model\Json\RawTables\Erp.SalesResponsible.pas"/>
-        <DCCReference Include="Mediator\SqlHandler.pas">
+        <DCCReference Include="Logic\AccessLayer\SqlHandler.pas">
             <Form>Legacy code/to be removed</Form>
         </DCCReference>
-        <DCCReference Include="Mediator\DbHandler.pas">
+        <DCCReference Include="Logic\AccessLayer\DatabaseHandler.pas">
             <Form>Legacy code/to be removed</Form>
         </DCCReference>
-        <DCCReference Include="Mediator\AgeView.pas"/>
-        <DCCReference Include="Mediator\Mailer.pas"/>
-        <DCCReference Include="Mediator\Settings.pas"/>
-        <DCCReference Include="Mediator\Transactions.pas"/>
-        <DCCReference Include="Mediator\UAC.pas"/>
-        <DCCReference Include="Mediator\Worker.pas"/>
-        <DCCReference Include="Mediator\Internet.pas"/>
-        <DCCReference Include="Mediator\ThreadUtilities.pas"/>
-        <DCCReference Include="Mediator\EventLogger.pas"/>
+        <DCCReference Include="Logic\AccessLayer\AccountHandler.pas"/>
+        <DCCReference Include="Logic\AccessLayer\ConnectionHandler.pas"/>
+        <DCCReference Include="Logic\AccessLayer\RestHandler.pas"/>
+        <DCCReference Include="Logic\BusinessLayer\AgeView.pas">
+            <Form>Legacy code/to be removed</Form>
+        </DCCReference>
+        <DCCReference Include="Logic\BusinessLayer\Transactions.pas">
+            <Form>Legacy code/to be removed</Form>
+        </DCCReference>
+        <DCCReference Include="Logic\BusinessLayer\Sync.Mailer.pas"/>
+        <DCCReference Include="Logic\BusinessLayer\Sync.Documents.pas"/>
+        <DCCReference Include="Logic\BusinessLayer\Async.Utilities.pas"/>
+        <DCCReference Include="Logic\BusinessLayer\Async.Tracker.pas"/>
+        <DCCReference Include="Logic\BusinessLayer\Async.Qms.pas"/>
+        <DCCReference Include="Logic\BusinessLayer\Async.AddressBook.pas"/>
+        <DCCReference Include="Logic\BusinessLayer\Async.Debtors.pas"/>
+        <DCCReference Include="Logic\BusinessLayer\Async.OpenItems.pas"/>
+        <DCCReference Include="Logic\BusinessLayer\Async.Comments.pas"/>
+        <DCCReference Include="Logic\BusinessLayer\Async.Statements.pas">
+            <Form>/    Mailer                   in &apos;Logic\BusinessLayer\Mailer.pas&apos;,</Form>
+        </DCCReference>
+        <DCCReference Include="Logic\BusinessLayer\Worker.pas"/>
+        <DCCReference Include="Logic\Configuration\Settings.pas"/>
+        <DCCReference Include="Logic\Logger\ThreadUtilities.pas"/>
+        <DCCReference Include="Logic\Logger\EventLogger.pas"/>
         <DCCReference Include="View\About.pas">
             <Form>AboutForm</Form>
         </DCCReference>

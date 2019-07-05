@@ -4,6 +4,10 @@ unit Unity.Arrays;
 interface
 
 
+uses
+    System.Generics.Defaults;
+
+
 type
 
     /// <remarks>
@@ -30,8 +34,36 @@ type
 
     TADoubles = array of double;
 
+    /// <remarks>
+    /// Encapsulated in a class, function that checks whether an item is contained in an array.
+    /// </remarks>
+
+    TArrayUtils<T> = class
+    public
+        class function Contains(const x: T; const anArray: array of T): boolean;
+    end;
+
 
 implementation
+
+
+// -------------------------------------------------
+// Usage: TArrayUtils<integer>.Contains(3, [1,2,3]).
+// -------------------------------------------------
+
+class function TArrayUtils<T>.Contains(const x: T; const anArray: array of T): boolean;
+begin
+
+    var y: T;
+    var lComparer: IEqualityComparer<T>:=TEqualityComparer<T>.Default;
+
+    for y in anArray do
+        if lComparer.Equals(x, y) then
+            Exit(True);
+
+    Exit(False);
+
+end;
 
 
 end.

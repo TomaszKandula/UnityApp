@@ -60,22 +60,39 @@ type
         procedure FInsertGeneralComment(var GenText: TDataTables; var Fields: TGeneralCommentFields);
         procedure FUpdateGeneralComment(var GenText: TDataTables; var Fields: TGeneralCommentFields; Condition: string);
     public
+
+        // Utilities
         procedure CheckServerConnectionAsync();
+
+        // Tracker
         procedure RefreshInvoiceTrackerAsync(UserAlias: string);
+
+        // Debtors
         procedure MakeAgeViewAsync(OpenAmount: double);
         procedure ReadAgeViewAsync(ActionMode: TLoading; SortMode: integer);
+
+        // OpenItems
         procedure ScanOpenItemsAsync();
         procedure ReadOpenItemsAsync(ActionMode: TLoading);
+
+        // AddressBook
         procedure OpenAddressBookAsync(UserAlias: string; SourceGrid: TStringGrid; OptionalCondition: string = '');
         procedure UpdateAddressBookAsync(SourceGrid: TStringGrid; UpdateValues: TAddressBookUpdateFields);
         procedure AddToAddressBookAsync(SourceGrid: TStringGrid);
+
+        // Utilities
         procedure SendUserFeedback();
         procedure ExcelExport();
         procedure GeneralTables(TableName: string; DestGrid: TStringGrid; Columns: string = ''; Conditions: string = ''; WaitToComplete: boolean = False);
+
+        // Comments
         procedure EditDailyComment(Fields: TDailyCommentFields);
         procedure EditGeneralComment(Fields: TGeneralCommentFields);
+
+        // Statements
         procedure SendAccountStatement(Fields: TSendAccountStatementFields; WaitToComplete: boolean = False);
         procedure SendAccountStatements(Fields: TSendAccountStatementFields);
+
     end;
 
 
@@ -84,11 +101,11 @@ implementation
 
 uses
     Main,
-    DbHandler,
+    DatabaseHandler,
     DbModel,
     Settings,
-    UAC,
-    Mailer,
+    AccountHandler,
+    Sync.Documents,
     AgeView,
     Transactions,
     Tracker,
@@ -770,15 +787,20 @@ begin
             var FileName: string;
             TThread.Synchronize(nil, procedure
             begin
-                if MainForm.XLExport.Execute then FileName:=MainForm.XLExport.FileName else FileName:='';
+
+                if MainForm.XLExport.Execute then
+                    FileName:=MainForm.XLExport.FileName
+                        else FileName:='';
+
             end);
 
             var Temp: TStringGrid:=TStringGrid.Create(nil);
             try
-                Temp.OpenThdId:=0;
                 Temp.ToExcel('Age Report', FileName);
+
             finally
                 Temp.Free;
+
             end;
 
         finally
@@ -1288,102 +1310,97 @@ begin
     begin
 
         var Settings: ISettings:=TSettings.Create;
-        var Statement: TDocument:=TDocument.Create;
-        try
+        var Statement: IDocument:=TDocument.Create;
 
-            Statement.CUID       :=Fields.CUID;
-            Statement.MailFrom   :=Fields.SendFrom;
-            Statement.MailTo     :=Fields.MailTo;
-            Statement.CustName   :=Fields.CustName;
-            Statement.LBUName    :=Fields.LBUName;
-            Statement.LBUAddress :=Fields.LBUAddress;
-            Statement.Telephone  :=Fields.Telephone;
-            Statement.BankDetails:=Fields.BankDetails;
-            Statement.CustMess   :=Fields.Mess;
-            Statement.OpenItems  :=Fields.OpenItems;
-            Statement.InvFilter  :=Fields.InvFilter;
-            Statement.BeginWith  :=Fields.BeginDate;
-            Statement.EndWith    :=Fields.EndDate;
+        Statement.CUID       :=Fields.CUID;
+        Statement.MailFrom   :=Fields.SendFrom;
+        Statement.MailTo     :=Fields.MailTo;
+        Statement.CustName   :=Fields.CustName;
+        Statement.LBUName    :=Fields.LBUName;
+        Statement.LBUAddress :=Fields.LBUAddress;
+        Statement.Telephone  :=Fields.Telephone;
+        Statement.BankDetails:=Fields.BankDetails;
+        Statement.CustMess   :=Fields.Mess;
+        Statement.OpenItems  :=Fields.OpenItems;
+        Statement.InvFilter  :=Fields.InvFilter;
+        Statement.BeginWith  :=Fields.BeginDate;
+        Statement.EndWith    :=Fields.EndDate;
 
-            // quick fix - to be refactored - data should be taken from the table
-            Statement.REM_EX1:='9999';
-            Statement.REM_EX2:='9999';
-            Statement.REM_EX3:='9999';
-            Statement.REM_EX4:='9999';
-            Statement.REM_EX5:='514';
+        // quick fix - to be refactored - data should be taken from the table
+        Statement.REM_EX1:='9999';
+        Statement.REM_EX2:='9999';
+        Statement.REM_EX3:='9999';
+        Statement.REM_EX4:='9999';
+        Statement.REM_EX5:='514';
 
-            Statement.MailSubject:=Fields.Subject + ' - ' + Fields.CustName + ' - ' + Fields.CustNumber;
+        Statement.MailSubject:=Fields.Subject + ' - ' + Fields.CustName + ' - ' + Fields.CustNumber;
 
-            /// <remarks>
-            /// Load either fixed template or customizable template.
-            /// </remarks>
-            /// <param name="FLayout">
-            /// Use maDefined for fully pre-defined template.
-            /// Use maCustom for customised template. It requires FSalut, FMess and FSubject to be provided.
-            /// </param>
+        /// <remarks>
+        /// Load either fixed template or customizable template.
+        /// </remarks>
+        /// <param name="FLayout">
+        /// Use maDefined for fully pre-defined template.
+        /// Use maCustom for customised template. It requires FSalut, FMess and FSubject to be provided.
+        /// </param>
+
+        if Fields.Layout = TDocMode.Defined then
+            Statement.HTMLLayout:=Statement.LoadTemplate(Settings.GetLayoutDir + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE2', ''));
+
+        if Fields.Layout = TDocMode.Custom then
+            Statement.HTMLLayout:=Statement.LoadTemplate(Settings.GetLayoutDir + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE3', ''));
+
+        if Statement.SendDocument then
+        begin
+
+            var DailyCommentFields: TDailyCommentFields;
+            DailyCommentFields.CUID         :=Fields.CUID;
+            DailyCommentFields.Email        :=False;
+            DailyCommentFields.CallEvent    :=False;
+            DailyCommentFields.CallDuration :=0;
+            DailyCommentFields.Comment      :='New communication has been sent to the customer.';
+            DailyCommentFields.UpdateGrid   :=not Fields.Series;
+            DailyCommentFields.EmailReminder:=False;
+            DailyCommentFields.EventLog     :=False;
+            DailyCommentFields.ExtendComment:=True;
+
+            /// <summary>
+            /// Register sent email either as manual statement or automatic statement.
+            /// </summary>
 
             if Fields.Layout = TDocMode.Defined then
-                Statement.HTMLLayout:=Statement.LoadTemplate(Settings.GetLayoutDir + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE2', ''));
-
-            if Fields.Layout = TDocMode.Custom then
-                Statement.HTMLLayout:=Statement.LoadTemplate(Settings.GetLayoutDir + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE3', ''));
-
-            if Statement.SendDocument then
             begin
 
-                var DailyCommentFields: TDailyCommentFields;
-                DailyCommentFields.CUID         :=Fields.CUID;
-                DailyCommentFields.Email        :=False;
-                DailyCommentFields.CallEvent    :=False;
-                DailyCommentFields.CallDuration :=0;
-                DailyCommentFields.Comment      :='New communication has been sent to the customer.';
-                DailyCommentFields.UpdateGrid   :=not Fields.Series;
-                DailyCommentFields.EmailReminder:=False;
-                DailyCommentFields.EventLog     :=False;
-                DailyCommentFields.ExtendComment:=True;
+                DailyCommentFields.EmailAutoStat:=True;
+                DailyCommentFields.EmailManuStat:=False;
 
-                /// <summary>
-                /// Register sent email either as manual statement or automatic statement.
-                /// </summary>
+                var Job: IThreading:=TThreading.Create;
+                Job.EditDailyComment(DailyCommentFields);
 
-                if Fields.Layout = TDocMode.Defined then
-                begin
+            end;
 
-                    DailyCommentFields.EmailAutoStat:=True;
-                    DailyCommentFields.EmailManuStat:=False;
+            if Fields.Layout = TDocMode.Custom then
+            begin
 
-                    var Job: IThreading:=TThreading.Create;
-                    Job.EditDailyComment(DailyCommentFields);
+                DailyCommentFields.EmailAutoStat:=False;
+                DailyCommentFields.EmailManuStat:=True;
 
-                end;
+                var Job: IThreading:=TThreading.Create;
+                Job.EditDailyComment(DailyCommentFields);
 
-                if Fields.Layout = TDocMode.Custom then
-                begin
+            end;
 
-                    DailyCommentFields.EmailAutoStat:=False;
-                    DailyCommentFields.EmailManuStat:=True;
+            /// <remarks>
+            /// Either single email (manual by user) or executed by mass mailer (multiple emails).
+            /// </remarks>
 
-                    var Job: IThreading:=TThreading.Create;
-                    Job.EditDailyComment(DailyCommentFields);
+            if Fields.Series then
+                MainForm.ExecMessage(False, TMessaging.TWParams.MailerReportItem, Fields.ItemNo.ToString)
+            else
+                MainForm.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Account Statement has been sent successfully!');
 
-                end;
-
-                /// <remarks>
-                /// Either single email (manual by user) or executed by mass mailer (multiple emails).
-                /// </remarks>
-
-                if Fields.Series then
-                    MainForm.ExecMessage(False, TMessaging.TWParams.MailerReportItem, Fields.ItemNo.ToString)
-                else
-                    MainForm.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Account Statement has been sent successfully!');
-
-            end
-            else if not(Fields.Series) then
-                MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Account Statement cannot be sent. Please contact IT support.')
-
-        finally
-            Statement.Free;
-        end;
+        end
+        else if not(Fields.Series) then
+            MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Account Statement cannot be sent. Please contact IT support.')
 
     end);
 

@@ -90,7 +90,6 @@ type
         procedure Paint; override;
     private
         var FHideFocusRect: boolean;
-        var FOpenThdId:     integer;   // remove!
     public
         const sgRowHeight = 19;
         const sgRowHidden = -1;
@@ -103,7 +102,6 @@ type
         const FBackGreen  = $00ACAC59; //rgb 59ACAC => bgr ACAC59
         var SqlColumns: TALists;
         var UpdatedRowsHolder: TAIntigers;
-        property  OpenThdId: integer read FOpenThdId write FOpenThdId;
         property  HideFocusRect: boolean read FHideFocusRect write FHideFocusRect;
         procedure SetUpdatedRow(Row: integer);
         procedure RecordRowsAffected;
@@ -1004,7 +1002,7 @@ begin
 
                 if Result then
                 begin
-                    MainForm.LogText.Log(MainForm.EventLogPath, 'Thread: [' + IntToStr(OpenThdId) + ']: The data has been successfully transferred to Excel.');
+                    MainForm.LogText.Log(MainForm.EventLogPath, 'The data has been successfully transferred to Excel.');
                     SendMessage(MainForm.Handle, WM_GETINFO, 1, LPARAM(PCHAR('The data has been successfully transferred to Excel.')));
                 end;
 
@@ -1017,13 +1015,13 @@ begin
             if E.Message = xlWARN_MESSAGE then
             // Excel not found
             begin
-                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread: [' + IntToStr(OpenThdId) + ']: The data cannot be exported because Microsoft Excel cannot be found.');
+                MainForm.LogText.Log(MainForm.EventLogPath, 'The data cannot be exported because Microsoft Excel cannot be found.');
                 SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PCHAR('The data cannot be exported because Microsoft Excel cannot be found.')));
             end
             else
             // General message
             begin
-                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread: [' + IntToStr(OpenThdId) + ']: The data cannot be exported, error message has been thrown: ' + E.Message + '.');
+                MainForm.LogText.Log(MainForm.EventLogPath, 'The data cannot be exported, error message has been thrown: ' + E.Message + '.');
                 SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PCHAR('The data cannot be exported. Description received: ' + E.Message)));
             end;
         end;
@@ -1100,7 +1098,7 @@ begin
             except
                 on E: Exception do
                 begin
-                    MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: CSV Import has failed: ' + ExtractFileName(fPath));
+                    MainForm.LogText.Log(MainForm.EventLogPath, 'CSV Import has failed: ' + ExtractFileName(fPath));
                     MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'CSV Import has failed. Please check the file and try again.');
                     IsError:=True;
                 end;
@@ -1110,7 +1108,7 @@ begin
 
             if not IsError then
             begin
-                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: Data has been imported successfully!');
+                MainForm.LogText.Log(MainForm.EventLogPath, 'Data has been imported successfully!');
                 MainForm.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Data has been imported successfully!');
             end;
 
@@ -1171,7 +1169,7 @@ begin
         except
             on E: Exception do
             begin
-                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: Cannot saved file: ' + ExtractFileName(fPath));
+                MainForm.LogText.Log(MainForm.EventLogPath, 'Cannot saved file: ' + ExtractFileName(fPath));
                 MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot save the file in the given location.');
                 IsError:=True;
             end;
@@ -1181,7 +1179,7 @@ begin
 
         if not IsError then
         begin
-            MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(OpenThdId) + ']: Data has been exported successfully!');
+            MainForm.LogText.Log(MainForm.EventLogPath, 'Data has been exported successfully!');
             MainForm.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Data have been exported successfully!');
         end;
 

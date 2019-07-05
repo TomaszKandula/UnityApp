@@ -19,8 +19,7 @@ uses
     Vcl.StdCtrls,
     CRC32u,
     uCEFApplication,
-    Unity.Interposer         in 'Extensions\Unity.Interposer.pas'{Instead of building own components},
-    Unity.Rest               in 'Extensions\Unity.Rest.pas',
+    Unity.Interposer         in 'Extensions\Unity.Interposer.pas'{Components extensions},
     Unity.Enums              in 'Extensions\Unity.Enums.pas',
     Unity.Arrays             in 'Extensions\Unity.Arrays.pas',
     Unity.Records            in 'Extensions\Unity.Records.pas',
@@ -39,17 +38,29 @@ uses
     Erp.Person               in 'Model\Json\RawTables\Erp.Person.pas',
     Erp.PersonResponsible    in 'Model\Json\RawTables\Erp.PersonResponsible.pas',
     Erp.SalesResponsible     in 'Model\Json\RawTables\Erp.SalesResponsible.pas',
-    SqlHandler               in 'Mediator\SqlHandler.pas'{Legacy code/to be removed},
-    DbHandler                in 'Mediator\DbHandler.pas'{Legacy code/to be removed},
-    AgeView                  in 'Mediator\AgeView.pas',
-    Mailer                   in 'Mediator\Mailer.pas',
-    Settings                 in 'Mediator\Settings.pas',
-    Transactions             in 'Mediator\Transactions.pas',
-    UAC                      in 'Mediator\UAC.pas',
-    Worker                   in 'Mediator\Worker.pas',
-    Internet                 in 'Mediator\Internet.pas',
-    ThreadUtilities          in 'Mediator\ThreadUtilities.pas',
-    EventLogger              in 'Mediator\EventLogger.pas',
+    SqlHandler               in 'Logic\AccessLayer\SqlHandler.pas'{Legacy code/to be removed},
+    DatabaseHandler          in 'Logic\AccessLayer\DatabaseHandler.pas'{Legacy code/to be removed},
+    AccountHandler           in 'Logic\AccessLayer\AccountHandler.pas',
+    ConnectionHandler        in 'Logic\AccessLayer\ConnectionHandler.pas',
+    RestHandler              in 'Logic\AccessLayer\RestHandler.pas',
+    AgeView                  in 'Logic\BusinessLayer\AgeView.pas'{Legacy code/to be removed},
+    Transactions             in 'Logic\BusinessLayer\Transactions.pas'{Legacy code/to be removed},
+
+    Sync.Mailer              in 'Logic\BusinessLayer\Sync.Mailer.pas',
+    Sync.Documents           in 'Logic\BusinessLayer\Sync.Documents.pas',
+    Async.Utilities          in 'Logic\BusinessLayer\Async.Utilities.pas',
+    Async.Tracker            in 'Logic\BusinessLayer\Async.Tracker.pas',
+    Async.Qms                in 'Logic\BusinessLayer\Async.Qms.pas',
+    Async.AddressBook        in 'Logic\BusinessLayer\Async.AddressBook.pas',
+    Async.Debtors            in 'Logic\BusinessLayer\Async.Debtors.pas',
+    Async.OpenItems          in 'Logic\BusinessLayer\Async.OpenItems.pas',
+    Async.Comments           in 'Logic\BusinessLayer\Async.Comments.pas',
+    Async.Statements         in 'Logic\BusinessLayer\Async.Statements.pas',
+    Worker                   in 'Logic\BusinessLayer\Worker.pas',
+
+    Settings                 in 'Logic\Configuration\Settings.pas',
+    ThreadUtilities          in 'Logic\Logger\ThreadUtilities.pas',
+    EventLogger              in 'Logic\Logger\EventLogger.pas',
     About                    in 'View\About.pas' {AboutForm},
     Actions                  in 'View\Actions.pas' {ActionsForm},
     Calendar                 in 'View\Calendar.pas' {CalendarForm},
@@ -776,9 +787,7 @@ begin
     /// </remarks>
 
     Application.CreateForm(TMainForm, MainForm);
-
-
-    // ----------------------------------------------------------------------------------------------------------------------------------------------------- //
+  // ----------------------------------------------------------------------------------------------------------------------------------------------------- //
 
 
     Status(21, TSplashScreen.AllTasks, 500, 'Application is initialized.', False, Settings.GetPathEventLog, LogText);

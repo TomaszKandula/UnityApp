@@ -1,4 +1,4 @@
-unit Internet;
+unit ConnectionHandler;
 
 
 interface

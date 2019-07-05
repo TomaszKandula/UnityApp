@@ -99,7 +99,7 @@ uses
     DbModel,
     Worker,
     Settings,
-    DbHandler,
+    DatabaseHandler,
     Unity.Statics;
 
 

@@ -244,7 +244,7 @@ uses
     Worker,
     Calendar,
     Settings,
-    Mailer,
+    Sync.Documents,
     Transactions,
     Send,
     PhoneList,

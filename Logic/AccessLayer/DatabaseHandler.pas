@@ -1,4 +1,4 @@
-unit DbHandler;
+unit DatabaseHandler;
 
 
 interface

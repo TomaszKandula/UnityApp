@@ -880,12 +880,14 @@ type
         procedure InitializeScreenSettings;
         procedure OnCreateJob(Text: string);
     public
+
         var LogText:           TThreadFileLog;
         var DbConnect:         TADOConnection;
         var GroupList:         TALists;
         var GridPicture:       TImage;
         var OpenItemsRefs:     TOpenItemsRefs;
         var ControlStatusRefs: TControlStatusRefs;
+
         property WinUserName:     string  read FWinUserName     write FWinUserName;
         property EventLogPath:    string  read FEventLogPath    write FEventLogPath;
         property GroupIdSel:      string  read FGroupIdSel      write FGroupIdSel;
@@ -922,11 +924,11 @@ type
         function  Explode(Text: string; SourceDelim: char): string;
         function  Implode(Text: TStrings; TargetDelim: char): string;
 
-        // Tracker helpers
+        // Tracker helpers // remove from this class
         procedure UpdateTrackerList(UserAlias: string);
         procedure DeleteFromTrackerList(CUID: string);
 
-        // QMS helpers
+        // QMS helpers // remove from this class
         procedure UpdateQmsViewFsc(Source: TStringGrid);
         procedure UpdateQmsViewLbu(Source: TStringGrid);
         procedure ShowItemDetails(ItemId: integer; FscView: boolean);
@@ -993,8 +995,8 @@ uses
     Worker,
     SqlHandler,
     DbModel,
-    DbHandler,
-    UAC,
+    DatabaseHandler,
+    AccountHandler,
     AgeView,
     Transactions,
     Colors,
@@ -1004,7 +1006,7 @@ uses
     MassMailer,
     Splash,
     Await,
-    Mailer,
+    Sync.Documents,
     Settings,
     uCEFApplication;
 
@@ -2199,64 +2201,49 @@ begin
         Tables.Free;
     end;
 
-    // Update StringGrid
+    // Update grids
     Grid.Cells[Grid.ReturnColumn(TQmsLog.QueryStatus, 1, 1), Grid.Row]:=Status;
-
-    // Get Query Reason from grid
     var QueryReason: string:=Grid.Cells[Grid.ReturnColumn(TQmsLog.QueryReason, 1, 1), Grid.Row];
-
-    // Get Receiver email address
-    var LbuEmail: string:=Grid.Cells[Grid.ReturnColumn(TQmsLog.Receiver, 1, 1), Grid.Row];
-
-    // Get selected query id
-    var QueryUid: string:=Grid.Cells[Grid.ReturnColumn(TQmsLog.QueryUid, 1, 1), Grid.Row];
+    var LbuEmail:    string:=Grid.Cells[Grid.ReturnColumn(TQmsLog.Receiver, 1, 1), Grid.Row];
+    var QueryUid:    string:=Grid.Cells[Grid.ReturnColumn(TQmsLog.QueryUid, 1, 1), Grid.Row];
 
     // Send an email
-    var Mailer: TMailer:=TMailer.Create;
+    var Mailer: IDocument:=TDocument.Create;
     var Settings: ISettings:=TSettings.Create;
-    try
 
-        // Get and set email details
-        if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerNTLM  then
-        begin
-            Mailer.XMailer:=Settings.GetStringValue(TConfigSections.MailerNTLM, 'FROM', '');
-            //Mail.MailTo :=Settings.GetStringValue(MailerNTLM, 'TO', '');
-            Mailer.MailRt :=Settings.GetStringValue(TConfigSections.MailerNTLM, 'REPLY-TO', '');
-        end;
-
-        if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerBASIC then
-        begin
-            Mailer.XMailer:=Settings.GetStringValue(TConfigSections.MailerBASIC, 'FROM', '');
-            //Mail.MailTo :=Settings.GetStringValue(MailerBASIC, 'TO', '');
-            Mailer.MailRt :=Settings.GetStringValue(TConfigSections.MailerBASIC, 'REPLY-TO', '');
-        end;
-
-        // Get invoice number
-        var InvoiceNo: string:=Grid.Cells[Grid.ReturnColumn(TQmsLog.InvoNo, 1, 1) , Grid.Row];
-
-        // Get commentary
-        var Comment: string;
-        if FscView then Comment:=FSCComment.Text;
-        if not FscView then Comment:=LbuComment.Text;
-
-        Mailer.MailFrom   :=Mailer.XMailer;
-        Mailer.MailTo     :=LbuEmail;
-        Mailer.MailCc     :=MainForm.WinUserName + '@' + Settings.GetStringValue(TConfigSections.ApplicationDetails, 'MAIL_DOMAIN', '');
-        Mailer.MailBcc    :='';
-        Mailer.MailSubject:='Unity [QMS]: Query status has been changed';
-
-        Mailer.MailBody:='<p>Query status has been changed by ' +
-                         UpperCase(MainForm.WinUserName)        +
-                         ' with comment: '                      + Comment     +
-                         '.</p><p>Invoice number: '             + InvoiceNo   +
-                         '.</p><p>Query status: '               + Status      +
-                         '.</p><p>Query reason: '               + QueryReason +
-                         '.</p><p>Query UID: '                  + QueryUid;
-        Mailer.SendNow;
-
-    finally
-        Mailer.Free;
+    if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerNTLM  then
+    begin
+        Mailer.XMailer:=Settings.GetStringValue(TConfigSections.MailerNTLM, 'FROM', '');
+        Mailer.MailRt :=Settings.GetStringValue(TConfigSections.MailerNTLM, 'REPLY-TO', '');
     end;
+
+    if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerBASIC then
+    begin
+        Mailer.XMailer:=Settings.GetStringValue(TConfigSections.MailerBASIC, 'FROM', '');
+        Mailer.MailRt :=Settings.GetStringValue(TConfigSections.MailerBASIC, 'REPLY-TO', '');
+    end;
+
+    var InvoiceNo: string:=Grid.Cells[Grid.ReturnColumn(TQmsLog.InvoNo, 1, 1) , Grid.Row];
+
+    var Comment: string;
+
+    if FscView then Comment:=FSCComment.Text;
+    if not FscView then Comment:=LbuComment.Text;
+
+    Mailer.MailFrom   :=Mailer.XMailer;
+    Mailer.MailTo     :=LbuEmail;
+    Mailer.MailCc     :=MainForm.WinUserName + '@' + Settings.GetStringValue(TConfigSections.ApplicationDetails, 'MAIL_DOMAIN', '');
+    Mailer.MailBcc    :='';
+    Mailer.MailSubject:='Unity [QMS]: Query status has been changed';
+
+    Mailer.MailBody:='<p>Query status has been changed by ' +
+                     UpperCase(MainForm.WinUserName)        +
+                     ' with comment: '                      + Comment     +
+                     '.</p><p>Invoice number: '             + InvoiceNo   +
+                     '.</p><p>Query status: '               + Status      +
+                     '.</p><p>Query reason: '               + QueryReason +
+                     '.</p><p>Query UID: '                  + QueryUid;
+    Mailer.SendNow;
 
 end;
 
@@ -6750,7 +6737,6 @@ begin
         Exit;
     end;
 
-    sgAddressBook.OpenThdId:=0;
     sgAddressBook.ExportCSV(MainForm.CSVExport, '|');
 
 end;

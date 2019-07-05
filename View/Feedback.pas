@@ -55,7 +55,7 @@ implementation
 
 uses
     Main,
-    Mailer,
+    Sync.Documents,
     Settings,
     Worker,
     Unity.Statics;
@@ -120,52 +120,44 @@ begin
     end;
 
     var Settings: ISettings:=TSettings.Create;
-    var Mail: TMailer:=TMailer.Create;
-    var Doc: TDocument:=TDocument.Create;
+    var Mail: IDocument:=TDocument.Create;
 
-    try
+    var AppName: string:=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'VALUE', '');
+    var AppVer: string:=TCommon.GetBuildInfoAsString;
 
-        var AppName: string:=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'VALUE', '');
-        var AppVer: string:=TCommon.GetBuildInfoAsString;
-
-        // Get and set email details
-        if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerNTLM  then
-        begin
-            Mail.XMailer:=Settings.GetStringValue(TConfigSections.MailerNTLM, 'FROM', '');
-            Mail.MailTo :=Settings.GetStringValue(TConfigSections.MailerNTLM, 'TO', '');
-            Mail.MailRt :=Settings.GetStringValue(TConfigSections.MailerNTLM, 'REPLY-TO', '');
-        end;
-
-        if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerBASIC then
-        begin
-            Mail.XMailer:=Settings.GetStringValue(TConfigSections.MailerBASIC, 'FROM', '');
-            Mail.MailTo :=Settings.GetStringValue(TConfigSections.MailerBASIC, 'TO', '');
-            Mail.MailRt :=Settings.GetStringValue(TConfigSections.MailerBASIC, 'REPLY-TO', '');
-        end;
-
-        Mail.MailFrom   :=Mail.XMailer;
-        Mail.MailCc     :=MainForm.WinUserName + '@' + Settings.GetStringValue(TConfigSections.ApplicationDetails, 'MAIL_DOMAIN', '');
-        Mail.MailBcc    :='';
-        Mail.MailSubject:='Unity - User feedback (' + UpperCase(MainForm.WinUserName) + ')';
-
-        // Plain text to HTML using template
-        var Transfer: string:=ReportMemo.Text;
-        Transfer:=StringReplace(Transfer, TChars.CRLF, '<br>', [rfReplaceAll]);
-
-        var HTMLBody: string:=Doc.LoadTemplate(Settings.GetLayoutDir + Settings.GetStringValue(TConfigSections.Layouts, 'SENDFEEDBACK', '') + '.html');
-        HTMLBody:=StringReplace(HTMLBody, '{TEXT_HOLER}',  Transfer,       [rfReplaceAll]);
-        HTMLBody:=StringReplace(HTMLBody, '{APPNAME}',     AppName,        [rfReplaceAll]);
-        HTMLBody:=StringReplace(HTMLBody, '{BUILD}',       AppVer,         [rfReplaceAll]);
-        HTMLBody:=StringReplace(HTMLBody, '{REPORT_DATE}', DateToStr(Now), [rfReplaceAll]);
-        HTMLBody:=StringReplace(HTMLBody, '{REPORT_TIME}', TimeToStr(Now), [rfReplaceAll]);
-
-        Mail.MailBody:=HTMLBody;
-        Result:=Mail.SendNow;
-
-    finally
-        Mail.Free;
-        Doc.Free;
+    // Get and set email details
+    if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerNTLM  then
+    begin
+        Mail.XMailer:=Settings.GetStringValue(TConfigSections.MailerNTLM, 'FROM', '');
+        Mail.MailTo :=Settings.GetStringValue(TConfigSections.MailerNTLM, 'TO', '');
+        Mail.MailRt :=Settings.GetStringValue(TConfigSections.MailerNTLM, 'REPLY-TO', '');
     end;
+
+    if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerBASIC then
+    begin
+        Mail.XMailer:=Settings.GetStringValue(TConfigSections.MailerBASIC, 'FROM', '');
+        Mail.MailTo :=Settings.GetStringValue(TConfigSections.MailerBASIC, 'TO', '');
+        Mail.MailRt :=Settings.GetStringValue(TConfigSections.MailerBASIC, 'REPLY-TO', '');
+    end;
+
+    Mail.MailFrom   :=Mail.XMailer;
+    Mail.MailCc     :=MainForm.WinUserName + '@' + Settings.GetStringValue(TConfigSections.ApplicationDetails, 'MAIL_DOMAIN', '');
+    Mail.MailBcc    :='';
+    Mail.MailSubject:='Unity - User feedback (' + UpperCase(MainForm.WinUserName) + ')';
+
+    // Plain text to HTML using template
+    var Transfer: string:=ReportMemo.Text;
+    Transfer:=StringReplace(Transfer, TChars.CRLF, '<br>', [rfReplaceAll]);
+
+    var HTMLBody: string:=Mail.LoadTemplate(Settings.GetLayoutDir + Settings.GetStringValue(TConfigSections.Layouts, 'SENDFEEDBACK', '') + '.html');
+    HTMLBody:=StringReplace(HTMLBody, '{TEXT_HOLER}',  Transfer,       [rfReplaceAll]);
+    HTMLBody:=StringReplace(HTMLBody, '{APPNAME}',     AppName,        [rfReplaceAll]);
+    HTMLBody:=StringReplace(HTMLBody, '{BUILD}',       AppVer,         [rfReplaceAll]);
+    HTMLBody:=StringReplace(HTMLBody, '{REPORT_DATE}', DateToStr(Now), [rfReplaceAll]);
+    HTMLBody:=StringReplace(HTMLBody, '{REPORT_TIME}', TimeToStr(Now), [rfReplaceAll]);
+
+    Mail.MailBody:=HTMLBody;
+    Result:=Mail.SendNow;
 
 end;
 

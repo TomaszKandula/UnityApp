@@ -16,6 +16,8 @@ type
     TActions       = (OpenAll, OpenForUser, Insert, Update, Export, Import, Copy, Paste, Cut, Escape, Delete);
     TWindowState   = (Modal, Modeless);
     TInvoiceFilter = (ReminderOvd, ReminderNonOvd, ShowAllItems);
+    TAuthTypes     = (cdoAnonymous, cdoBasic, cdoNTLM);
+    TAuthUsing     = (cdoNone, cdoSendUsingPickup, cdoSendUsingPort, cdoSendUsingExchange);
 
 
 implementation
