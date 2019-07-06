@@ -13,6 +13,7 @@ uses
     System.Win.ComObj,
     System.SyncObjs,
     System.Threading,
+    System.Generics.Collections,
     Vcl.Graphics,
     Vcl.ComCtrls,
     Vcl.Dialogs,
@@ -31,20 +32,21 @@ type
 
     IThreading = interface(IInterface)
     ['{14BBF3F3-945A-4A61-94BA-6A2EE10530A2}']
-        procedure CheckServerConnectionAsync();
-        procedure RefreshInvoiceTrackerAsync(UserAlias: string);
+
         procedure MakeAgeViewAsync(OpenAmount: double);
         procedure ReadAgeViewAsync(ActionMode: TLoading; SortMode: integer);
+
         procedure ScanOpenItemsAsync();
         procedure ReadOpenItemsAsync(ActionMode: TLoading);
+
         procedure OpenAddressBookAsync(UserAlias: string; SourceGrid: TStringGrid; OptionalCondition: string = '');
         procedure UpdateAddressBookAsync(SourceGrid: TStringGrid; UpdateValues: TAddressBookUpdateFields);
         procedure AddToAddressBookAsync(SourceGrid: TStringGrid);
-        procedure SendUserFeedback();
-        procedure ExcelExport();
-        procedure GeneralTables(TableName: string; DestGrid: TStringGrid; Columns: string = ''; Conditions: string = ''; WaitToComplete: boolean = False);
+
+
         procedure EditDailyComment(Fields: TDailyCommentFields);
         procedure EditGeneralComment(Fields: TGeneralCommentFields);
+
         procedure SendAccountStatement(Fields: TSendAccountStatementFields; WaitToComplete: boolean = False);
         procedure SendAccountStatements(Fields: TSendAccountStatementFields);
     end;
@@ -61,11 +63,6 @@ type
         procedure FUpdateGeneralComment(var GenText: TDataTables; var Fields: TGeneralCommentFields; Condition: string);
     public
 
-        // Utilities
-        procedure CheckServerConnectionAsync();
-
-        // Tracker
-        procedure RefreshInvoiceTrackerAsync(UserAlias: string);
 
         // Debtors
         procedure MakeAgeViewAsync(OpenAmount: double);
@@ -79,11 +76,6 @@ type
         procedure OpenAddressBookAsync(UserAlias: string; SourceGrid: TStringGrid; OptionalCondition: string = '');
         procedure UpdateAddressBookAsync(SourceGrid: TStringGrid; UpdateValues: TAddressBookUpdateFields);
         procedure AddToAddressBookAsync(SourceGrid: TStringGrid);
-
-        // Utilities
-        procedure SendUserFeedback();
-        procedure ExcelExport();
-        procedure GeneralTables(TableName: string; DestGrid: TStringGrid; Columns: string = ''; Conditions: string = ''; WaitToComplete: boolean = False);
 
         // Comments
         procedure EditDailyComment(Fields: TDailyCommentFields);
@@ -112,72 +104,6 @@ uses
     Actions,
     Feedback;
 
-
-// ------------------------------------
-// Check connection with SQL Server
-// *Remove when SQL is replaced by API
-// ------------------------------------
-
-procedure TThreading.CheckServerConnectionAsync();
-begin
-
-    var NewTask: ITask:=TTask.Create(procedure
-    begin
-
-        var DataBase: TDataBase:=TDataBase.Create(False);
-        try
-
-            if (not(MainForm.IsConnected)) and (DataBase.Check = 0) then
-            begin
-
-                TThread.Synchronize(nil, procedure
-                begin
-                    MainForm.TryInitConnection;
-                    MainForm.LogText.Log(MainForm.EventLogPath, 'Connection with SQL Server database has been re-established.');
-                end);
-
-            end;
-
-            if DataBase.Check <> 0 then
-            begin
-                MainForm.IsConnected:=False;
-                MainForm.LogText.Log(MainForm.EventLogPath, 'Connection with SQL Server database has been lost, waiting to reconnect...');
-            end;
-
-        finally
-            DataBase.Free;
-        end;
-
-    end);
-
-    NewTask.Start;
-
-end;
-
-
-// ------------------------------------
-// Refresh invoice tracker list
-// *Remove when SQL is replaced by API
-// ------------------------------------
-
-procedure TThreading.RefreshInvoiceTrackerAsync(UserAlias: string);
-begin
-
-    try
-
-        var NewTask: ITask:=TTask.Create(procedure
-        begin
-            MainForm.UpdateTrackerList(UserAlias)
-        end);
-
-        NewTask.Start;
-
-    except
-        on E: Exception do
-            MainForm.LogText.Log(MainForm.EventLogPath, 'Execution of this tread work has been stopped. Error has been thrown: ' + E.Message + ' (TInvoiceTracker).');
-    end;
-
-end;
 
 
 // ------------------------------------
@@ -741,120 +667,6 @@ end;
 
 
 // ------------------------------------
-// Send user feedback to predefine
-// email address in settings file
-// ------------------------------------
-
-procedure TThreading.SendUserFeedback();
-begin
-
-    var NewTask: ITask:=TTask.Create(procedure
-    begin
-
-        if FeedbackForm.SendReport then
-        begin
-            TThread.Synchronize(nil, FeedbackForm.ReportMemo.Clear);
-            MainForm.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Report has been sent successfully!');
-            MainForm.LogText.Log(MainForm.EventLogPath, 'Feedback Report has been successfully sent by the user.');
-        end
-        else
-        begin
-            MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot send Feedback Report. Please contact IT support.');
-            MainForm.LogText.Log(MainForm.EventLogPath, 'Cannot send Feedback Report.');
-        end;
-
-    end);
-
-    NewTask.Start;
-
-end;
-
-
-// -------------------------------------
-// Generate Excel report asynchronously
-// to not to block application usability
-// -------------------------------------
-
-procedure TThreading.ExcelExport();
-begin
-
-    var NewTask: ITask:=TTask.Create(procedure
-    begin
-
-        MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.ExportXLS);
-        try
-
-            var FileName: string;
-            TThread.Synchronize(nil, procedure
-            begin
-
-                if MainForm.XLExport.Execute then
-                    FileName:=MainForm.XLExport.FileName
-                        else FileName:='';
-
-            end);
-
-            var Temp: TStringGrid:=TStringGrid.Create(nil);
-            try
-                Temp.ToExcel('Age Report', FileName);
-
-            finally
-                Temp.Free;
-
-            end;
-
-        finally
-            MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready);
-        end;
-
-    end);
-
-    NewTask.Start;
-
-end;
-
-
-// ------------------------------------
-// Load async. given general table.
-// ------------------------------------
-
-procedure TThreading.GeneralTables(TableName: string; DestGrid: TStringGrid; Columns: string = ''; Conditions: string = ''; WaitToComplete: boolean = False);
-begin
-
-    var NewTask: ITask:=TTask.Create(procedure
-    begin
-
-        var DataTables: TDataTables:=TDataTables.Create(MainForm.DbConnect);
-        try
-            try
-                DataTables.CleanUp;
-
-                if not(string.IsNullOrEmpty(Columns)) then
-                    DataTables.Columns.Text:=Columns;
-
-                if not(string.IsNullOrEmpty(Conditions)) then
-                    DataTables.CustFilter:=Conditions;
-
-                if DataTables.OpenTable(TableName) then
-                    DataTables.SqlToGrid(DestGrid, DataTables.DataSet, False, True);
-
-            except
-                on E: Exception do
-                    MainForm.LogText.Log(MainForm.EventLogPath, 'Cannot load general table, error has been thrown: ' + E.Message);
-            end;
-        finally
-            DataTables.Free;
-        end;
-
-    end);
-
-    NewTask.Start();
-    if WaitToComplete then TTask.WaitForAny(NewTask);
-
-end;
-
-
-// ------------------------------------
 // Perform SQL "insert into" command
 // ------------------------------------
 
@@ -1326,22 +1138,18 @@ begin
         Statement.BeginWith  :=Fields.BeginDate;
         Statement.EndWith    :=Fields.EndDate;
 
-        // quick fix - to be refactored - data should be taken from the table
-        Statement.REM_EX1:='9999';
-        Statement.REM_EX2:='9999';
-        Statement.REM_EX3:='9999';
-        Statement.REM_EX4:='9999';
-        Statement.REM_EX5:='514';
+        // Warning! Data should be taken from database. To be change after DB is restructured.
+        Statement.Exclusions:=TArray<Integer>.Create(514, 9999);
 
         Statement.MailSubject:=Fields.Subject + ' - ' + Fields.CustName + ' - ' + Fields.CustNumber;
 
-        /// <remarks>
-        /// Load either fixed template or customizable template.
-        /// </remarks>
-        /// <param name="FLayout">
-        /// Use maDefined for fully pre-defined template.
-        /// Use maCustom for customised template. It requires FSalut, FMess and FSubject to be provided.
-        /// </param>
+        // ------------------------------------------------------
+        // Load either fixed template or customizable template.
+        // Where param name "FLayout":
+        //   - maDefined for fully pre-defined template.
+        //   - maCustom for customised template.
+        // It requires FSalut, FMess and FSubject to be provided.
+        // ------------------------------------------------------
 
         if Fields.Layout = TDocMode.Defined then
             Statement.HTMLLayout:=Statement.LoadTemplate(Settings.GetLayoutDir + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE2', ''));

@@ -50,38 +50,28 @@ type
         procedure SetSourceGrid(NewValue:      TStringGrid);
         procedure SetCUID(NewValue:            string);
         procedure SetExclusions(NewValue:      TArray<integer>);
-        procedure SetREM_EX1(NewValue:         string);     {to be removed}
-        procedure SetREM_EX2(NewValue:         string);     {to be removed}
-        procedure SetREM_EX3(NewValue:         string);     {to be removed}
-        procedure SetREM_EX4(NewValue:         string);     {to be removed}
-        procedure SetREM_EX5(NewValue:         string);     {to be removed}
         procedure SetCommonHTMLTable(NewValue: string);
         procedure SetCommonHTMLRow(NewValue:   string);
-        function GetHTMLTable:       string;
-        function GetHTMLTemp:        string;
-        function GetHTMLRow:         string;
-        function GetHTMLLayout:      string;
-        function GetCustName:        string;
-        function GetCustAddr:        string;
-        function GetLBUName:         string;
-        function GetLBUAddress:      string;
-        function GetTelephone:       string;
-        function GetBankDetails:     string;
-        function GetCustMess:        string;
-        function GetInvFilter:       TInvoiceFilter;
-        function GetBeginWith:       string;
-        function GetEndWith:         string;
-        function GetOpenItems:       TStringGrid;
-        function GetSourceGrid:      TStringGrid;
-        function GetCUID:            string;
-        function GetExclusions:      TArray<integer>;
-        function GetREM_EX1:         string;    {to be removed}
-        function GetREM_EX2:         string;    {to be removed}
-        function GetREM_EX3:         string;    {to be removed}
-        function GetREM_EX4:         string;    {to be removed}
-        function GetREM_EX5:         string;    {to be removed}
-        function GetCommonHTMLTable: string;
-        function GetCommonHTMLRow:   string;
+        function  GetHTMLTable:       string;
+        function  GetHTMLTemp:        string;
+        function  GetHTMLRow:         string;
+        function  GetHTMLLayout:      string;
+        function  GetCustName:        string;
+        function  GetCustAddr:        string;
+        function  GetLBUName:         string;
+        function  GetLBUAddress:      string;
+        function  GetTelephone:       string;
+        function  GetBankDetails:     string;
+        function  GetCustMess:        string;
+        function  GetInvFilter:       TInvoiceFilter;
+        function  GetBeginWith:       string;
+        function  GetEndWith:         string;
+        function  GetOpenItems:       TStringGrid;
+        function  GetSourceGrid:      TStringGrid;
+        function  GetCUID:            string;
+        function  GetExclusions:      TArray<integer>;
+        function  GetCommonHTMLTable: string;
+        function  GetCommonHTMLRow:   string;
 
         // ----------------------------
         // Exposed properties.
@@ -105,11 +95,6 @@ type
         property SourceGrid:  TStringGrid     read GetSourceGrid  write SetSourceGrid;
         property CUID:        string          read GetCUID        write SetCUID;
         property Exclusions:  TArray<integer> read GetExclusions  write SetExclusions;
-        property REM_EX1:     string          read GetREM_EX1     write SetREM_EX1;     {to be removed}
-        property REM_EX2:     string          read GetREM_EX2     write SetREM_EX2;     {to be removed}
-        property REM_EX3:     string          read GetREM_EX3     write SetREM_EX3;     {to be removed}
-        property REM_EX4:     string          read GetREM_EX4     write SetREM_EX4;     {to be removed}
-        property REM_EX5:     string          read GetREM_EX5     write SetREM_EX5;     {to be removed}
 
         // ----------------------------
         // Exposed methods.
@@ -125,6 +110,8 @@ type
     {$TYPEINFO ON}
     protected
         var FHTMLStat: string;
+        var FPos:      integer;
+        var FItems:    integer;
     private
         var FHTMLTable:       string;
         var FHTMLTemp:        string;
@@ -144,11 +131,6 @@ type
         var FSourceGrid:      TStringGrid;
         var FCUID:            string;
         var FExclusions:      TArray<integer>;
-        var FREM_EX1:         string;   {to be removed}
-        var FREM_EX2:         string;   {to be removed}
-        var FREM_EX3:         string;   {to be removed}
-        var FREM_EX4:         string;   {to be removed}
-        var FREM_EX5:         string;   {to be removed}
         var FCommonHTMLTable: string;
         var FCommonHTMLRow:   string;
         procedure SetHTMLTable(NewValue:       string);
@@ -169,40 +151,32 @@ type
         procedure SetSourceGrid(NewValue:      TStringGrid);
         procedure SetCUID(NewValue:            string);
         procedure SetExclusions(NewValue:      TArray<integer>);
-        procedure SetREM_EX1(NewValue:         string);     {to be removed}
-        procedure SetREM_EX2(NewValue:         string);     {to be removed}
-        procedure SetREM_EX3(NewValue:         string);     {to be removed}
-        procedure SetREM_EX4(NewValue:         string);     {to be removed}
-        procedure SetREM_EX5(NewValue:         string);     {to be removed}
         procedure SetCommonHTMLTable(NewValue: string);
         procedure SetCommonHTMLRow(NewValue:   string);
-        function GetHTMLTable:       string;
-        function GetHTMLTemp:        string;
-        function GetHTMLRow:         string;
-        function GetHTMLLayout:      string;
-        function GetCustName:        string;
-        function GetCustAddr:        string;
-        function GetLBUName:         string;
-        function GetLBUAddress:      string;
-        function GetTelephone:       string;
-        function GetBankDetails:     string;
-        function GetCustMess:        string;
-        function GetInvFilter:       TInvoiceFilter;
-        function GetBeginWith:       string;
-        function GetEndWith:         string;
-        function GetOpenItems:       TStringGrid;
-        function GetSourceGrid:      TStringGrid;
-        function GetCUID:            string;
-        function GetExclusions:      TArray<integer>;
-        function GetREM_EX1:         string;    {to be removed}
-        function GetREM_EX2:         string;    {to be removed}
-        function GetREM_EX3:         string;    {to be removed}
-        function GetREM_EX4:         string;    {to be removed}
-        function GetREM_EX5:         string;    {to be removed}
-        function GetCommonHTMLTable: string;
-        function GetCommonHTMLRow:   string;
+        function  GetHTMLTable:       string;
+        function  GetHTMLTemp:        string;
+        function  GetHTMLRow:         string;
+        function  GetHTMLLayout:      string;
+        function  GetCustName:        string;
+        function  GetCustAddr:        string;
+        function  GetLBUName:         string;
+        function  GetLBUAddress:      string;
+        function  GetTelephone:       string;
+        function  GetBankDetails:     string;
+        function  GetCustMess:        string;
+        function  GetInvFilter:       TInvoiceFilter;
+        function  GetBeginWith:       string;
+        function  GetEndWith:         string;
+        function  GetOpenItems:       TStringGrid;
+        function  GetSourceGrid:      TStringGrid;
+        function  GetCUID:            string;
+        function  GetExclusions:      TArray<integer>;
+        function  GetCommonHTMLTable: string;
+        function  GetCommonHTMLRow:   string;
         procedure SaveOutput(FileName: string);
         function  BuildHTML: integer;
+        function  StatusCodeToText(TextCode: string; Source: TStringGrid): string;
+        procedure OpenItemsToHtmlTable(var HtmlStatement: string; var SG: TStringGrid; ActualRow: Integer);
     public
         property HTMLTable:   string          read GetHTMLTable;
         property HTMLTemp:    string          read GetHTMLTemp;
@@ -222,11 +196,6 @@ type
         property SourceGrid:  TStringGrid     read GetSourceGrid  write SetSourceGrid;
         property CUID:        string          read GetCUID        write SetCUID;
         property Exclusions:  TArray<integer> read GetExclusions  write SetExclusions;
-        property REM_EX1:     string          read GetREM_EX1     write SetREM_EX1;     {be removed}
-        property REM_EX2:     string          read GetREM_EX2     write SetREM_EX2;     {be removed}
-        property REM_EX3:     string          read GetREM_EX3     write SetREM_EX3;     {be removed}
-        property REM_EX4:     string          read GetREM_EX4     write SetREM_EX4;     {be removed}
-        property REM_EX5:     string          read GetREM_EX5     write SetREM_EX5;     {be removed}
         function  LoadTemplate(FileName: string): string;
         function  SendDocument: boolean;
         constructor Create;
@@ -270,30 +239,29 @@ end;
 
 
 // -------------------------------
-//
+// Load template html file.
 // -------------------------------
 
 function TDocument.LoadTemplate(FileName: string): string;
 begin
 
-    // -----------------------------------------
-    //
-    //
-    // -----------------------------------------
+    // -----------------------------------------------------------------------------
+    // Template is made out of two files that defines HTML table and single row.
+    // Note: we have two different tables,with Control Status column and without it.
+    // -----------------------------------------------------------------------------
 
     var KeyName: string;
     var Settings: ISettings:=TSettings.Create;
     var SL: TStringList:=TStringList.Create;
     try
 
-        // --------------------
-        // Upload main template
-        // --------------------
+        // ------------------------
+        // Upload table definition.
+        // ------------------------
 
         SL.LoadFromFile(FileName);
         Result:=SL.Text;
 
-        // Upload table definition
         KeyName:='SERVICE%TBL';
         if not ActionsForm.cbCtrlStatusOff.Checked then KeyName:=KeyName.Replace('%', '1')
             else KeyName:=KeyName.Replace('%', '2');
@@ -302,9 +270,9 @@ begin
         SL.LoadFromFile(HtmlTablePath);
         FCommonHTMLTable:=SL.Text;
 
-        // ---------------------
-        // Upload row definition
-        // ---------------------
+        // ----------------------
+        // Upload row definition.
+        // ----------------------
 
         KeyName:='SERVICE%ROW';
         if not ActionsForm.cbCtrlStatusOff.Checked then KeyName:=KeyName.Replace('%', '1')
@@ -322,7 +290,7 @@ end;
 
 
 // -------------------------------
-//
+// Save the email as HTML file.
 // -------------------------------
 
 procedure TDocument.SaveOutput(FileName: string);
@@ -339,126 +307,127 @@ begin
 end;
 
 
-// -------------------------------
-//
-// -------------------------------
+// ------------------------------------------
+// Replace status code with text description.
+// ------------------------------------------
 
-function TDocument.BuildHTML: integer;
+function TDocument.StatusCodeToText(TextCode: string; Source: TStringGrid): string;
+begin
 
-    var Pos:   integer;
-    var Items: integer;
-
-    function StatusCodeToText(TextCode: string; Source: TStringGrid): string;
+    // Replace status code to text (short code description)
+    for var iCNT: integer:=1 to Source.RowCount do
     begin
 
-        // Replace status code to text (short code description)
-        for var iCNT: integer:=1 to Source.RowCount do
+        if Source.Cells[MainForm.ControlStatusRefs.Code, iCNT] = TextCode then
         begin
-
-            if Source.Cells[MainForm.ControlStatusRefs.Code, iCNT] = TextCode then
-            begin
-                Result:=Source.Cells[MainForm.ControlStatusRefs.Text, iCNT];
-                Break;
-            end;
-
+            Result:=Source.Cells[MainForm.ControlStatusRefs.Text, iCNT];
+            Break;
         end;
 
     end;
 
-    procedure OpenItemsToHtmlTable(var HtmlStatement: string; var SG: TStringGrid; ActualRow: Integer);
-    begin
-
-        // Move open items to HTML template
-        var CurAmount: string;
-        var Amount:    string;
-
-        // Get outstanding amounts
-        CurAmount:=SG.Cells[MainForm.OpenItemsRefs.CurAmCol, ActualRow];
-        Amount   :=SG.Cells[MainForm.OpenItemsRefs.OpenCurAmCol, ActualRow];
-
-        // Format number (from 1000,00 to 1 000,00)
-        CurAmount:=FormatFloat('#,##0.00', StrToFloat(CurAmount));
-        Amount   :=FormatFloat('#,##0.00', StrToFloat(Amount));
-
-        // Generate HTML
-        FHTMLTemp:=HTMLRow;
-        FHTMLTemp:=StringReplace(FHTMLTemp, '{INV_NUM}', SG.Cells[MainForm.OpenItemsRefs.InvoNoCol, ActualRow], [rfReplaceAll]);
-        FHTMLTemp:=StringReplace(FHTMLTemp, '{INV_DAT}', SG.Cells[MainForm.OpenItemsRefs.ValDtCol,  ActualRow], [rfReplaceAll]);
-        FHTMLTemp:=StringReplace(FHTMLTemp, '{DUE_DAT}', SG.Cells[MainForm.OpenItemsRefs.DueDtCol,  ActualRow], [rfReplaceAll]);
-        FHTMLTemp:=StringReplace(FHTMLTemp, '{INV_CUR}', SG.Cells[MainForm.OpenItemsRefs.ISOCol,    ActualRow], [rfReplaceAll]);
-        FHTMLTemp:=StringReplace(FHTMLTemp, '{INV_AMT}', CurAmount, [rfReplaceAll]);
-        FHTMLTemp:=StringReplace(FHTMLTemp, '{INV_OSA}', Amount,    [rfReplaceAll]);
-
-        /// <remarks>
-        /// Text on the invoice may be very long (but not more than 200 chars), decision was put hard limit of 32 chars.
-        /// </remarks>
-        FHTMLTemp:=StringReplace(FHTMLTemp, '{INV_TXT}', LeftStr(SG.Cells[MainForm.OpenItemsRefs.Text, ActualRow], 32), [rfReplaceAll]);
-
-        // Replace control status number to description
-        FHTMLTemp:=StringReplace(
-            FHTMLTemp,
-            '{INV_CRL}',
-            StatusCodeToText(SG.Cells[MainForm.OpenItemsRefs.CtrlCol, ActualRow], MainForm.sgControlStatus),
-            [rfReplaceAll]
-        );
-
-        HtmlStatement:=HtmlStatement + FHTMLTemp;
-        Inc(Items);
-
-    end;
+end;
 
 
+// -----------------------------
+// Generate HTML for given item.
+// -----------------------------
+
+procedure TDocument.OpenItemsToHtmlTable(var HtmlStatement: string; var SG: TStringGrid; ActualRow: Integer);
 begin
+
+    // Get outstanding amounts
+    var CurAmount: string:=SG.Cells[MainForm.OpenItemsRefs.CurAmCol, ActualRow];
+    var Amount:    string:=SG.Cells[MainForm.OpenItemsRefs.OpenCurAmCol, ActualRow];
+
+    // Change format number from 1000,00 to 1 000,00
+    CurAmount:=FormatFloat('#,##0.00', StrToFloat(CurAmount));
+    Amount   :=FormatFloat('#,##0.00', StrToFloat(Amount));
+
+    // Generate HTML
+    FHTMLTemp:=HTMLRow;
+    FHTMLTemp:=StringReplace(FHTMLTemp, '{INV_NUM}', SG.Cells[MainForm.OpenItemsRefs.InvoNoCol, ActualRow], [rfReplaceAll]);
+    FHTMLTemp:=StringReplace(FHTMLTemp, '{INV_DAT}', SG.Cells[MainForm.OpenItemsRefs.ValDtCol,  ActualRow], [rfReplaceAll]);
+    FHTMLTemp:=StringReplace(FHTMLTemp, '{DUE_DAT}', SG.Cells[MainForm.OpenItemsRefs.DueDtCol,  ActualRow], [rfReplaceAll]);
+    FHTMLTemp:=StringReplace(FHTMLTemp, '{INV_CUR}', SG.Cells[MainForm.OpenItemsRefs.ISOCol,    ActualRow], [rfReplaceAll]);
+    FHTMLTemp:=StringReplace(FHTMLTemp, '{INV_AMT}', CurAmount, [rfReplaceAll]);
+    FHTMLTemp:=StringReplace(FHTMLTemp, '{INV_OSA}', Amount,    [rfReplaceAll]);
+
+    // Text on the invoice may be very long (but not more than 200 chars),
+    // the decision was to put hard limit of 32 chars.
+    var Text: string:=SG.Cells[MainForm.OpenItemsRefs.Text, ActualRow];
+    var Code: string:=SG.Cells[MainForm.OpenItemsRefs.CtrlCol, ActualRow];
+    FHTMLTemp:=StringReplace(FHTMLTemp, '{INV_TXT}', LeftStr(Text, 32), [rfReplaceAll]);
+    FHTMLTemp:=StringReplace(FHTMLTemp, '{INV_CRL}', StatusCodeToText(Code, MainForm.sgControlStatus), [rfReplaceAll]);
+
+    HtmlStatement:=HtmlStatement + FHTMLTemp;
+    Inc(FItems);
+
+end;
+
+
+// ------------------------------------
+// Build document for given open items.
+// ------------------------------------
+
+function TDocument.BuildHTML: integer;
+begin
+
+    // ------------------------------------------------------------------------------------------
+    // We have two different date time format. First used by application that is always the same:
+    //     Time: hh:mm:ss
+    //     Date: yyyy-mm-dd
+    // Second is local user format settings in Windows system that may vary. Data that comes from
+    // SQL database will be displayed accordingly to local user settings, so any conversion from
+    // string must use local settings and use application settings if further calculation is
+    // done on the data.
+    // ------------------------------------------------------------------------------------------
 
     var LocalFrmt: TFormatSettings;
     var UnityFrmt: TFormatSettings;
 
-    /// <remarks>
-    /// We have two different date time format. First used by application that is always the same:
-    ///     Time: hh:mm:ss
-    ///     Date: yyyy-mm-dd
-    /// Second is local user format settings in Windows system that may vary. Data that comes from
-    /// SQL database will be displayed accordingly to local user settings, so any conversion from
-    /// string must use local settings and use application settings if further calculation is
-    /// done on the data.
-    /// </remarks>
     {$WARN SYMBOL_PLATFORM OFF} { Windows only }
     LocalFrmt:=TFormatSettings.Create(LOCALE_USER_DEFAULT);
     {$WARN SYMBOL_PLATFORM ON}
     UnityFrmt:=FormatSettings;
 
-    Pos:=0;
-    Items:=0;
+    // ---------------------------------------------
+    // Build HTML with all open items for given CUID
+    // number and control statuses different than
+    // those defined by FExclusion array.
+    // ---------------------------------------------
 
-    // Get templates
+    FPos:=0;
+    FItems:=0;
+
     FHTMLTable:=FCommonHTMLTable;
     FHTMLRow  :=FCommonHTMLRow;
 
-    // Open items to HTML table
     for var iCNT: integer:=1 to OpenItems.RowCount - 1 do
     begin
-        if OpenItems.Cells[MainForm.OpenItemsRefs.CuidCol, iCNT] = CUID then
+
+        var CtrlStatus: integer:=(OpenItems.Cells[MainForm.OpenItemsRefs.CtrlCol, iCNT]).ToInteger();
+
+        if (OpenItems.Cells[MainForm.OpenItemsRefs.CuidCol, iCNT] = CUID) and (not TArrayUtils<integer>.Contains(CtrlStatus, FExclusions)) then
         begin
 
-            if Pos = 0 then Pos:=iCNT;
+            if FPos = 0 then FPos:=iCNT;
 
-            // Exclude items with control status indicated by field "ReminderException5"
-            if OpenItems.Cells[MainForm.OpenItemsRefs.CtrlCol, iCNT] <> REM_EX5 then
-            begin
+            case InvFilter of
 
-                // Include all items (account statement)
-                if InvFilter = TInvoiceFilter.ShowAllItems then
+                // --------------------------------------
+                // Include all items (account statement).
+                // --------------------------------------
+
+                TInvoiceFilter.ShowAllItems:
                 begin
 
-                    if
-                        (
-                            StrToFloatDef(OpenItems.Cells[MainForm.OpenItemsRefs.OpenAmCol, iCNT], 0) <> 0
-                        )
-                    then
+                    if (StrToFloatDef(OpenItems.Cells[MainForm.OpenItemsRefs.OpenAmCol, iCNT], 0) <> 0) then
                     begin
 
                         if not(String.IsNullOrEmpty(BeginWith)) and not(String.IsNullOrEmpty(EndWith)) then
                         begin
+
                             if
                                 (
                                     StrToDate(OpenItems.Cells[MainForm.OpenItemsRefs.DueDtCol, iCNT], LocalFrmt) >= StrToDate(BeginWith, UnityFrmt)
@@ -478,20 +447,13 @@ begin
 
                 end;
 
-            end;
+                // ----------------------------------------------
+                // Include only overdue items (payment reminder).
+                // ----------------------------------------------
 
-            // We exclude invoices with 'control status' that is different than given number in the comapny table
-            if ( ( OpenItems.Cells[MainForm.OpenItemsRefs.CtrlCol, iCNT] <> REM_EX1) and
-                 ( OpenItems.Cells[MainForm.OpenItemsRefs.CtrlCol, iCNT] <> REM_EX2) and
-                 ( OpenItems.Cells[MainForm.OpenItemsRefs.CtrlCol, iCNT] <> REM_EX3) and
-                 ( OpenItems.Cells[MainForm.OpenItemsRefs.CtrlCol, iCNT] <> REM_EX4) and
-                 ( OpenItems.Cells[MainForm.OpenItemsRefs.CtrlCol, iCNT] <> REM_EX5)
-               )
-            then
-            begin
-                // Include only overdue items (payment reminder)
-                if InvFilter = TInvoiceFilter.ReminderOvd then
+                TInvoiceFilter.ReminderOvd:
                 begin
+
                     if
                         (
                             StrToFloatDef(OpenItems.Cells[MainForm.OpenItemsRefs.OpenAmCol, iCNT], 0) <> 0
@@ -502,10 +464,14 @@ begin
                         )
                     then
                         OpenItemsToHtmlTable(FHTMLStat, FOpenItems, iCNT);
+
                 end;
 
-                // Include all items with given due date range
-                if InvFilter = TInvoiceFilter.ReminderNonOvd then
+                // --------------------------------------------
+                // Include all items with given due date range.
+                // --------------------------------------------
+
+                TInvoiceFilter.ReminderNonOvd:
                 begin
 
                     if
@@ -531,23 +497,34 @@ begin
 
     end;
 
-    // Build customer address field
+    // -----------------------------
+    // Build customer address field.
+    // -----------------------------
+
     CustAddr:='<p class="p"><b>' + CustName + '</b><br />' + TChars.CRLF;
-    if (OpenItems.Cells[MainForm.OpenItemsRefs.Ad1Col,Pos] <> '') and (OpenItems.Cells[MainForm.OpenItemsRefs.Ad1Col,Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[MainForm.OpenItemsRefs.Ad1Col,Pos] + '<br />' + TChars.CRLF;
-    if (OpenItems.Cells[MainForm.OpenItemsRefs.Ad2Col,Pos] <> '') and (OpenItems.Cells[MainForm.OpenItemsRefs.Ad2Col,Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[MainForm.OpenItemsRefs.Ad2Col,Pos] + '<br />' + TChars.CRLF;
-    if (OpenItems.Cells[MainForm.OpenItemsRefs.Ad3Col,Pos] <> '') and (OpenItems.Cells[MainForm.OpenItemsRefs.Ad3Col,Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[MainForm.OpenItemsRefs.Ad3Col,Pos] + '<br />' + TChars.CRLF;
-    if (OpenItems.Cells[MainForm.OpenItemsRefs.PnoCol,Pos] <> '') and (OpenItems.Cells[MainForm.OpenItemsRefs.PnoCol,Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[MainForm.OpenItemsRefs.PnoCol,Pos] + '<br />' + TChars.CRLF;
-    if (OpenItems.Cells[MainForm.OpenItemsRefs.PAreaCol, Pos] <> '') and (OpenItems.Cells[MainForm.OpenItemsRefs.PAreaCol, Pos] <> ' ') then CustAddr:=CustAddr + OpenItems.Cells[MainForm.OpenItemsRefs.PAreaCol, Pos] + '<br />' + TChars.CRLF;
+
+    var AddrFld1: string:=OpenItems.Cells[MainForm.OpenItemsRefs.Ad1Col,   FPos];
+    var AddrFld2: string:=OpenItems.Cells[MainForm.OpenItemsRefs.Ad2Col,   FPos];
+    var AddrFld3: string:=OpenItems.Cells[MainForm.OpenItemsRefs.Ad3Col,   FPos];
+    var PoCode:   string:=OpenItems.Cells[MainForm.OpenItemsRefs.PnoCol,   FPos];
+    var PoArea:   string:=OpenItems.Cells[MainForm.OpenItemsRefs.PAreaCol, FPos];
+
+    if not String.IsNullOrWhiteSpace(AddrFld1) then CustAddr:=CustAddr + AddrFld1 + '<br />' + TChars.CRLF;
+    if not String.IsNullOrWhiteSpace(AddrFld2) then CustAddr:=CustAddr + AddrFld2 + '<br />' + TChars.CRLF;
+    if not String.IsNullOrWhiteSpace(AddrFld3) then CustAddr:=CustAddr + AddrFld3 + '<br />' + TChars.CRLF;
+    if not String.IsNullOrWhiteSpace(PoCode)   then CustAddr:=CustAddr + PoCode   + '<br />' + TChars.CRLF;
+    if not String.IsNullOrWhiteSpace(PoArea)   then CustAddr:=CustAddr + PoArea   + '<br />' + TChars.CRLF;
+
     CustAddr:=CustAddr + '</p>' + TChars.CRLF;
 
-    Result:=Items;
+    Result:=FItems;
 
 end;
 
 
-// -------------------------------
-//
-// -------------------------------
+// -----------------------------------
+// Prepare and send account statement.
+// -----------------------------------
 
 function TDocument.SendDocument;
 var RAND: integer; (* DEBUG *)
@@ -569,13 +546,15 @@ begin
 
     // Custom template title (statement or reminder)
     case InvFilter of
+
         TInvoiceFilter.ReminderOvd:    MailBody:=StringReplace(MailBody, '{TITLE}', 'REMINDER',  [rfReplaceAll]);
         TInvoiceFilter.ReminderNonOvd: MailBody:=StringReplace(MailBody, '{TITLE}', 'REMINDER',  [rfReplaceAll]);
         TInvoiceFilter.ShowAllItems:   MailBody:=StringReplace(MailBody, '{TITLE}', 'STATEMENT', [rfReplaceAll]);
+
     end;
 
     // Custom salutation and the message
-    if CustMess  <> '' then MailBody:=StringReplace(MailBody, '{TEXT}',  CustMess,  [rfReplaceAll]);
+    if CustMess <> '' then MailBody:=StringReplace(MailBody, '{TEXT}', CustMess, [rfReplaceAll]);
 
     // Put user in CC
     var Settings: ISettings:=TSettings.Create;
@@ -709,36 +688,6 @@ begin
 end;
 
 
-function TDocument.GetREM_EX1: string{be removed};
-begin
-    Result:=FREM_EX1;
-end;
-
-
-function TDocument.GetREM_EX2: string{be removed};
-begin
-    Result:=FREM_EX2;
-end;
-
-
-function TDocument.GetREM_EX3: string{be removed};
-begin
-    Result:=FREM_EX3;
-end;
-
-
-function TDocument.GetREM_EX4: string{be removed};
-begin
-    Result:=FREM_EX4;
-end;
-
-
-function TDocument.GetREM_EX5: string{be removed};
-begin
-    Result:=FREM_EX5;
-end;
-
-
 function TDocument.GetCommonHTMLTable: string;
 begin
     Result:=FCommonHTMLTable;
@@ -860,36 +809,6 @@ end;
 procedure TDocument.SetExclusions(NewValue: TArray<integer>);
 begin
     FExclusions:=NewValue;
-end;
-
-
-procedure TDocument.SetREM_EX1(NewValue: string);{be removed}
-begin
-    FREM_EX1:=NewValue;
-end;
-
-
-procedure TDocument.SetREM_EX2(NewValue: string);{be removed}
-begin
-    FREM_EX2:=NewValue;
-end;
-
-
-procedure TDocument.SetREM_EX3(NewValue: string);{be removed}
-begin
-    FREM_EX3:=NewValue;
-end;
-
-
-procedure TDocument.SetREM_EX4(NewValue: string);{be removed}
-begin
-    FREM_EX4:=NewValue;
-end;
-
-
-procedure TDocument.SetREM_EX5(NewValue: string);{be removed}
-begin
-    FREM_EX5:=NewValue;
 end;
 
 

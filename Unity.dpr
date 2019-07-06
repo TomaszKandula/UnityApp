@@ -45,12 +45,12 @@ uses
     RestHandler              in 'Logic\AccessLayer\RestHandler.pas',
     AgeView                  in 'Logic\BusinessLayer\AgeView.pas'{Legacy code/to be removed},
     Transactions             in 'Logic\BusinessLayer\Transactions.pas'{Legacy code/to be removed},
-
     Sync.Mailer              in 'Logic\BusinessLayer\Sync.Mailer.pas',
     Sync.Documents           in 'Logic\BusinessLayer\Sync.Documents.pas',
+
     Async.Utilities          in 'Logic\BusinessLayer\Async.Utilities.pas',
     Async.Tracker            in 'Logic\BusinessLayer\Async.Tracker.pas',
-    Async.Qms                in 'Logic\BusinessLayer\Async.Qms.pas',
+    Async.Queries            in 'Logic\BusinessLayer\Async.Queries.pas',
     Async.AddressBook        in 'Logic\BusinessLayer\Async.AddressBook.pas',
     Async.Debtors            in 'Logic\BusinessLayer\Async.Debtors.pas',
     Async.OpenItems          in 'Logic\BusinessLayer\Async.OpenItems.pas',

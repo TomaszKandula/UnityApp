@@ -181,7 +181,7 @@
         <DCCReference Include="Logic\BusinessLayer\Sync.Documents.pas"/>
         <DCCReference Include="Logic\BusinessLayer\Async.Utilities.pas"/>
         <DCCReference Include="Logic\BusinessLayer\Async.Tracker.pas"/>
-        <DCCReference Include="Logic\BusinessLayer\Async.Qms.pas"/>
+        <DCCReference Include="Logic\BusinessLayer\Async.Queries.pas"/>
         <DCCReference Include="Logic\BusinessLayer\Async.AddressBook.pas"/>
         <DCCReference Include="Logic\BusinessLayer\Async.Debtors.pas"/>
         <DCCReference Include="Logic\BusinessLayer\Async.OpenItems.pas"/>

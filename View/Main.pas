@@ -924,19 +924,6 @@ type
         function  Explode(Text: string; SourceDelim: char): string;
         function  Implode(Text: TStrings; TargetDelim: char): string;
 
-        // Tracker helpers // remove from this class
-        procedure UpdateTrackerList(UserAlias: string);
-        procedure DeleteFromTrackerList(CUID: string);
-
-        // QMS helpers // remove from this class
-        procedure UpdateQmsViewFsc(Source: TStringGrid);
-        procedure UpdateQmsViewLbu(Source: TStringGrid);
-        procedure ShowItemDetails(ItemId: integer; FscView: boolean);
-        procedure InitializeQms;
-        procedure UpdateStatus(DbItemId: integer; Status: string; Grid: TStringGrid; FscView: boolean);
-        procedure ApproveQuery(DbItemId: integer; FscView: boolean);
-        procedure RejectQuery(DbItemId: integer; FscView: boolean);
-
     protected
 
         // Chromium
@@ -1007,6 +994,9 @@ uses
     Splash,
     Await,
     Sync.Documents,
+    Async.Utilities,
+    Async.Tracker,
+    Async.Queries,
     Settings,
     uCEFApplication;
 
@@ -1955,377 +1945,6 @@ begin
 end;
 
 
-// ----------------------------------------------------------------------------------------------------------------------------- UPDATE INVOICE TRACKER LIST //
-
-
-procedure TMainForm.UpdateTrackerList(UserAlias: string); {refactor / async}
-begin
-
-    var TrackerData: TDataTables:=TDataTables.Create(MainForm.DbConnect);
-    try
-
-        if not(String.IsNullOrEmpty(UserAlias)) then
-        begin
-            TrackerData.CustFilter:=TSql.WHERE + TTrackerData.UserAlias + TSql.EQUAL + QuotedStr(UserAlias);
-        end;
-
-        TrackerData.Columns.Add(TTrackerData.Cuid);
-        TrackerData.Columns.Add(TTrackerData.UserAlias);
-        TrackerData.Columns.Add(TTrackerData.CustomerName);
-        TrackerData.Columns.Add(TTrackerData.Stamp);
-        TrackerData.Columns.Add(TTrackerData.SendReminder1);
-        TrackerData.Columns.Add(TTrackerData.SendReminder2);
-        TrackerData.Columns.Add(TTrackerData.SendReminder3);
-        TrackerData.Columns.Add(TTrackerData.SendReminder4);
-        TrackerData.Columns.Add(TTrackerData.ReminderLayout);
-        TrackerData.Columns.Add(TTrackerData.SendFrom);
-        TrackerData.Columns.Add(TTrackerData.PreStatement);
-        TrackerData.Columns.Add(TTrackerData.StatementTo);
-        TrackerData.Columns.Add(TTrackerData.ReminderTo);
-
-        TrackerData.OpenTable(TTrackerData.TrackerData);
-        TrackerData.SqlToGrid(sgInvoiceTracker, TrackerData.DataSet, False, True);
-
-        if sgInvoiceTracker.RowCount > 1 then
-        begin
-            sgInvoiceTracker.SetColWidth(10, 20, 400);
-            sgInvoiceTracker.Visible:=True;
-        end
-        else
-        begin
-            sgInvoiceTracker.Visible:=False;
-        end;
-
-    finally
-        TrackerData.Free;
-    end;
-
-end;
-
-
-// -------------------------------------------------------------------------------------------------------------------------------- DELETE FROM TRACKER LIST //
-
-
-procedure TMainForm.DeleteFromTrackerList(CUID: string); {refactor / async}
-begin
-
-    var TrackerData: TDataTables:=TDataTables.Create(MainForm.DbConnect);
-    try
-        var PrimaryTable: string:=TSql.DELETE_FROM + TTrackerData.TrackerData + TSql.WHERE + TTrackerData.Cuid  + TSql.EQUAL + QuotedStr(CUID);  {HOLDS RECORDED CUSTOMERS}
-        var ForeignTable: string:=TSql.DELETE_FROM + TTrackerInvoices.TrackerInvoices + TSql.WHERE + TTrackerInvoices.Cuid + TSql.EQUAL + QuotedStr(CUID);  {HOLDS CUSTOMERS INVOICES}
-        TrackerData.StrSQL:=ForeignTable + ';' + PrimaryTable;
-        TrackerData.ExecSQL;
-        sgInvoiceTracker.DeleteRowFrom(1, 1);
-    finally
-        TrackerData.Free;
-    end;
-
-end;
-
-
-// ------------------------------------------------------------------------------------------------------------------------------------------------ QMS DEMO //
-
-
-procedure TMainForm.UpdateQmsViewFsc(Source: TStringGrid); {refactor / async}
-begin
-
-    var Tables: TDataTables:=TDataTables.Create(DbConnect);
-    try
-        Tables.StrSQL:=TSql.SELECT                     +
-                           TQmsLog.QmsLog         + TChars.POINT + TQmsLog.Id          + TChars.COMMA +
-                           TQmsLog.QmsLog         + TChars.POINT + TQmsLog.InvoNo      + TChars.COMMA +
-                           TCurrencies.Currencies + TChars.POINT + TCurrencies.Iso     + TChars.COMMA +
-                           TQmsLog.QmsLog         + TChars.POINT + TQmsLog.LogType     + TChars.COMMA +
-                           TQmsLog.QmsLog         + TChars.POINT + TQmsLog.QueryStatus + TChars.COMMA +
-                           TQmsReasons.QmsReasons + TChars.POINT + TQmsLog.QueryReason + TChars.COMMA +
-                           TQmsLog.QmsLog         + TChars.POINT + TQmsLog.Receiver    + TChars.COMMA +
-                           TQmsLog.QmsLog         + TChars.POINT + TQmsLog.UserAlias   + TChars.COMMA +
-                           TQmsLog.QmsLog         + TChars.POINT + TQmsLog.Stamp       + TChars.COMMA +
-                           TQmsLog.QmsLog         + TChars.POINT + TQmsLog.QueryUid    +
-                       TSql.FROM                  +
-                           TQmsLog.QmsLog         +
-                       TSql.LEFT_JOIN             +
-                           TQmsReasons.QmsReasons +
-                       TSql._ON                   +
-                           TQmsReasons.QmsReasons +
-                       TChars.POINT              +
-                           TQmsReasons.Id         +
-                       TSql.EQUAL                 +
-                           TQmsLog.QmsLog         +
-                       TChars.POINT              +
-                           TQmsLog.QueryReason    +
-                       TSql.LEFT_JOIN             +
-                           TCurrencies.Currencies +
-                       TSql._ON                   +
-                           TCurrencies.Currencies +
-                       TChars.POINT              +
-                           TCurrencies.Id         +
-                       TSql.EQUAL                 +
-                           TQmsLog.QmsLog         +
-                       TChars.POINT              +
-                           TQmsLog.ISO;
-        Tables.SqlToGrid(Source, Tables.ExecSQL, False, True);
-        Source.SetColWidth(10, 20, 400);
-        Source.SetRowHeight(Source.sgRowHeight, 25);
-    finally
-        Tables.Free;
-    end;
-
-end;
-
-
-procedure TMainForm.UpdateQmsViewLbu(Source: TStringGrid); {refactor / async}
-begin
-
-    var Tables: TDataTables:=TDataTables.Create(DbConnect);
-    try
-        Tables.StrSQL:=TSql.SELECT                     +
-                           TQmsLog.QmsLog         + TChars.POINT + TQmsLog.Id          + TChars.COMMA +
-                           TQmsLog.QmsLog         + TChars.POINT + TQmsLog.InvoNo      + TChars.COMMA +
-                           TCurrencies.Currencies + TChars.POINT + TCurrencies.Iso     + TChars.COMMA +
-                           TQmsLog.QmsLog         + TChars.POINT + TQmsLog.LogType     + TChars.COMMA +
-                           TQmsLog.QmsLog         + TChars.POINT + TQmsLog.QueryStatus + TChars.COMMA +
-                           TQmsReasons.QmsReasons + TChars.POINT + TQmsLog.QueryReason + TChars.COMMA +
-                           TQmsLog.QmsLog         + TChars.POINT + TQmsLog.Receiver    + TChars.COMMA +
-                           TQmsLog.QmsLog         + TChars.POINT + TQmsLog.UserAlias   + TChars.COMMA +
-                           TQmsLog.QmsLog         + TChars.POINT + TQmsLog.Stamp       + TChars.COMMA +
-                           TQmsLog.QmsLog         + TChars.POINT + TQmsLog.QueryUid    +
-                       TSql.FROM                       +
-                           TQmsLog.QmsLog         +
-                       TSql.LEFT_JOIN                  +
-                           TQmsReasons.QmsReasons +
-                       TSql._ON                        +
-                           TQmsReasons.QmsReasons +
-                       TChars.POINT                      +
-                           TQmsReasons.Id         +
-                       TSql.EQUAL                      +
-                           TQmsLog.QmsLog         +
-                       TChars.POINT                      +
-                           TQmsLog.QueryReason    +
-                       TSql.LEFT_JOIN                  +
-                           TCurrencies.Currencies +
-                       TSql._ON                        +
-                           TCurrencies.Currencies +
-                       TChars.POINT                      +
-                           TCurrencies.Id         +
-                       TSql.EQUAL                      +
-                           TQmsLog.QmsLog         +
-                       TChars.POINT                      +
-                           TQmsLog.ISO;
-        Tables.SqlToGrid(Source, Tables.ExecSQL, False, True);
-        Source.SetColWidth(10, 20, 400);
-        Source.SetRowHeight(Source.sgRowHeight, 25);
-    finally
-        Tables.Free;
-    end;
-
-end;
-
-
-procedure TMainForm.ShowItemDetails(ItemId: integer; FscView: boolean); {refactor / async}
-begin
-
-    var Tables: TDataTables:=TDataTables.Create(DbConnect);
-    try
-        Tables.Columns.Add(TQmsLog.OpenAm);
-        Tables.Columns.Add(TQmsLog.Am);
-        Tables.Columns.Add(TQmsLog.OpenCurAm);
-        Tables.Columns.Add(TQmsLog.CurAm);
-        Tables.Columns.Add(TQmsLog.DueDt);
-        Tables.Columns.Add(TQmsLog.ValDt);
-        Tables.Columns.Add(TQmsLog.QueryDesc);
-        Tables.Columns.Add(TQmsLog.FscComment);
-        Tables.CustFilter:=TSql.WHERE + TQmsLog.Id + TSql.EQUAL + QuotedStr(ItemId.ToString);
-        Tables.OpenTable(TQmsLog.QmsLog);
-
-        if FscView then
-        begin
-            ValueOpAmountFsc.Caption:=FormatFloat('#,##0.00', Tables.DataSet.Fields[TQmsLog.OpenAm].Value);
-            ValueAmountFsc.Caption  :=FormatFloat('#,##0.00', Tables.DataSet.Fields[TQmsLog.Am].Value);
-            ValueOpAmCurrFsc.Caption:=FormatFloat('#,##0.00', Tables.DataSet.Fields[TQmsLog.OpenCurAm].Value);
-            ValueAmCurrFsc.Caption  :=FormatFloat('#,##0.00', Tables.DataSet.Fields[TQmsLog.CurAm].Value);
-            ValueDueDtFsc.Caption   :=Tables.DataSet.Fields[TQmsLog.DueDt].Value;
-            ValueValDtFsc.Caption   :=Tables.DataSet.Fields[TQmsLog.ValDt].Value;
-            FscQueryDesc.Clear;
-            FscQueryDesc.Text       :=Tables.DataSet.Fields[TQmsLog.QueryDesc].Value;
-        end
-        else
-        begin
-            ValueOpAmountLbu.Caption:=FormatFloat('#,##0.00', Tables.DataSet.Fields[TQmsLog.OpenAm].Value);
-            ValueAmountLbu.Caption  :=FormatFloat('#,##0.00', Tables.DataSet.Fields[TQmsLog.Am].Value);
-            ValueOpAmCurrLbu.Caption:=FormatFloat('#,##0.00', Tables.DataSet.Fields[TQmsLog.OpenCurAm].Value);
-            ValueAmCurrLbu.Caption  :=FormatFloat('#,##0.00', Tables.DataSet.Fields[TQmsLog.CurAm].Value);
-            ValueDueDtLbu.Caption   :=Tables.DataSet.Fields[TQmsLog.DueDt].Value;
-            ValueValDtLbu.Caption   :=Tables.DataSet.Fields[TQmsLog.ValDt].Value;
-            LbuQueryDesc.Clear;
-            LbuQueryDesc.Text       :=Tables.DataSet.Fields[TQmsLog.QueryDesc].Value;
-        end;
-
-    finally
-        Tables.Free;
-    end;
-
-end;
-
-
-procedure TMainForm.InitializeQms;
-begin
-    ValueOpAmountFsc.Caption:='0,00';
-    ValueAmountFsc.Caption  :='0,00';
-    ValueOpAmCurrFsc.Caption:='0,00';
-    ValueAmCurrFsc.Caption  :='0,00';
-    ValueDueDtFsc.Caption   :='n/a';
-    ValueValDtFsc.Caption   :='n/a';
-    FscQueryDesc.Clear;
-    ValueOpAmountLbu.Caption:='0,00';
-    ValueAmountLbu.Caption  :='0,00';
-    ValueOpAmCurrLbu.Caption:='0,00';
-    ValueAmCurrLbu.Caption  :='0,00';
-    ValueDueDtLbu.Caption   :='n/a';
-    ValueValDtLbu.Caption   :='n/a';
-    LbuQueryDesc.Clear;
-end;
-
-
-procedure TMainForm.UpdateStatus(DbItemId: integer; Status: string; Grid: TStringGrid; FscView: boolean); {refactor}
-begin
-
-    // Update database
-    var Tables: TDataTables:=TDataTables.Create(DbConnect);
-    try
-        var Conditions: string:=TQmsLog.Id + TSql.EQUAL + QuotedStr(DbItemId.ToString);
-        Tables.Columns.Add(TQmsLog.QueryStatus);
-        Tables.Values.Add(Status);
-        Tables.UpdateRecord(TQmsLog.QmsLog, True, Conditions);
-    finally
-        Tables.Free;
-    end;
-
-    // Update grids
-    Grid.Cells[Grid.ReturnColumn(TQmsLog.QueryStatus, 1, 1), Grid.Row]:=Status;
-    var QueryReason: string:=Grid.Cells[Grid.ReturnColumn(TQmsLog.QueryReason, 1, 1), Grid.Row];
-    var LbuEmail:    string:=Grid.Cells[Grid.ReturnColumn(TQmsLog.Receiver, 1, 1), Grid.Row];
-    var QueryUid:    string:=Grid.Cells[Grid.ReturnColumn(TQmsLog.QueryUid, 1, 1), Grid.Row];
-
-    // Send an email
-    var Mailer: IDocument:=TDocument.Create;
-    var Settings: ISettings:=TSettings.Create;
-
-    if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerNTLM  then
-    begin
-        Mailer.XMailer:=Settings.GetStringValue(TConfigSections.MailerNTLM, 'FROM', '');
-        Mailer.MailRt :=Settings.GetStringValue(TConfigSections.MailerNTLM, 'REPLY-TO', '');
-    end;
-
-    if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerBASIC then
-    begin
-        Mailer.XMailer:=Settings.GetStringValue(TConfigSections.MailerBASIC, 'FROM', '');
-        Mailer.MailRt :=Settings.GetStringValue(TConfigSections.MailerBASIC, 'REPLY-TO', '');
-    end;
-
-    var InvoiceNo: string:=Grid.Cells[Grid.ReturnColumn(TQmsLog.InvoNo, 1, 1) , Grid.Row];
-
-    var Comment: string;
-
-    if FscView then Comment:=FSCComment.Text;
-    if not FscView then Comment:=LbuComment.Text;
-
-    Mailer.MailFrom   :=Mailer.XMailer;
-    Mailer.MailTo     :=LbuEmail;
-    Mailer.MailCc     :=MainForm.WinUserName + '@' + Settings.GetStringValue(TConfigSections.ApplicationDetails, 'MAIL_DOMAIN', '');
-    Mailer.MailBcc    :='';
-    Mailer.MailSubject:='Unity [QMS]: Query status has been changed';
-
-    Mailer.MailBody:='<p>Query status has been changed by ' +
-                     UpperCase(MainForm.WinUserName)        +
-                     ' with comment: '                      + Comment     +
-                     '.</p><p>Invoice number: '             + InvoiceNo   +
-                     '.</p><p>Query status: '               + Status      +
-                     '.</p><p>Query reason: '               + QueryReason +
-                     '.</p><p>Query UID: '                  + QueryUid;
-    Mailer.SendNow;
-
-end;
-
-
-procedure TMainForm.ApproveQuery(DbItemId: integer; FscView: boolean); {refactor / async}
-begin
-
-    // FSC actions
-    if FscView then
-    begin
-
-        // Check item status
-        var ItemStatus: string:=sgFSCview.Cells[sgFSCview.ReturnColumn(TQmsLog.QueryStatus, 1, 1), sgFSCview.Row];
-
-        if ItemStatus = 'OPEN' then
-        begin
-
-            // Allow to resolve query
-            if MsgCall(TCommon.TMessage.Question2, 'Are you sure you want to resolve this query?') = IDYES then
-            begin
-                UpdateStatus(DbItemId, 'RESOLVED', sgFSCview, FscView);
-                FSCComment.Clear;
-                MsgCall(TCommon.TMessage.Info, 'Query has been resolved!');
-            end;
-
-        end
-        else
-        if ItemStatus = 'PENDING' then
-        begin
-            UpdateStatus(DbItemId, 'RESOLVED', sgFSCview, FscView);
-            FSCComment.Clear;
-            MsgCall(TCommon.TMessage.Info, 'Query has been resolved!');
-        end
-        else
-        begin
-            MsgCall(TCommon.TMessage.Warn, 'You can only resolve queries that are either pending or open.');
-        end;
-
-    end
-    // LBU actions
-    else
-    begin
-
-        // Check item status
-        var ItemStatus: string:=sgLBUview.Cells[sgLBUview.ReturnColumn(TQmsLog.QueryStatus, 1, 1) , sgLBUview.Row];
-
-        if ItemStatus = 'OPEN' then
-        begin
-            UpdateStatus(DbItemId, 'PENDING', sgLBUview, FscView);
-            LbuComment.Clear;
-            MsgCall(TCommon.TMessage.Info, 'Query has been resolved!');
-        end
-        else
-        begin
-            MsgCall(TCommon.TMessage.Warn, 'You can only update open queries.');
-        end;
-
-    end;
-
-end;
-
-
-procedure TMainForm.RejectQuery(DbItemId: integer; FscView: boolean); {refactor / async}
-begin
-
-    if FscView then
-    begin
-
-        // Check item status
-        var ItemStatus: string:=sgFSCview.Cells[sgFSCview.ReturnColumn(TQmsLog.QueryStatus, 1, 1) , sgFSCview.Row];
-
-        if ItemStatus = 'PENDING' then
-        begin
-            UpdateStatus(DbItemId, 'OPEN', sgFSCview, FscView);
-            FscComment.Clear;
-        end;
-
-    end;
-
-end;
-
-
 procedure TMainForm.InitializeScreenSettings;
 begin
 
@@ -2545,22 +2164,22 @@ begin
     // Load async general tables
     // --------------------------
 
-    var GetTablesAsync: IThreading:=TThreading.Create;
+    var Utilities: IUtilities:=TUtilities.Create;
     try
 
         OnCreateJob(TSplashScreen.MappingTables);
-        GetTablesAsync.GeneralTables(TSalesResponsible.SalesResponsible, sgSalesResp);
-        GetTablesAsync.GeneralTables(TPersonResponsible.PersonResponsible, sgPersonResp);
-        GetTablesAsync.GeneralTables(TAccountType.AccountType, sgAccountType);
-        GetTablesAsync.GeneralTables(TCustomerGroup.CustomerGroup, sgCustomerGr);
-        GetTablesAsync.GeneralTables(TGroup3.Group3, sgGroup3);
+        Utilities.GeneralTables(TSalesResponsible.SalesResponsible, sgSalesResp);
+        Utilities.GeneralTables(TPersonResponsible.PersonResponsible, sgPersonResp);
+        Utilities.GeneralTables(TAccountType.AccountType, sgAccountType);
+        Utilities.GeneralTables(TCustomerGroup.CustomerGroup, sgCustomerGr);
+        Utilities.GeneralTables(TGroup3.Group3, sgGroup3);
 
         OnCreateJob(TSplashScreen.GettingGeneral);
-        GetTablesAsync.GeneralTables(TCompanyData.CompanyData, sgCoCodes, TCompanyData.CoCode + TChars.COMMA + TCompanyData.Branch + TChars.COMMA + TCompanyData.CoName + TChars.COMMA + TCompanyData.CoAddress + TChars.COMMA + TCompanyData.VatNo + TChars.COMMA + TCompanyData.Duns + TChars.COMMA + TCompanyData.Country + TChars.COMMA + TCompanyData.City + TChars.COMMA + TCompanyData.FinManager + TChars.COMMA + TCompanyData.TelephoneNumbers + TChars.COMMA + TCompanyData.CoType + TChars.COMMA + TCompanyData.CoCurrency + TChars.COMMA + TCompanyData.InterestRate + TChars.COMMA + TCompanyData.KpiOverdueTarget + TChars.COMMA + TCompanyData.KpiUnallocatedTarget + TChars.COMMA + TCompanyData.Agents + TChars.COMMA + TCompanyData.Divisions, TSql.ORDER + TCompanyData.CoCode + TSql.ASC);
-        GetTablesAsync.GeneralTables(TPaymentTerms.PaymentTerms, sgPmtTerms);
-        GetTablesAsync.GeneralTables(TPaidinfo.Paidinfo, sgPaidInfo);
-        GetTablesAsync.GeneralTables(TPerson.Person, sgPerson);
-        GetTablesAsync.GeneralTables(TControlStatus.ControlStatus, sgControlStatus);
+        Utilities.GeneralTables(TCompanyData.CompanyData, sgCoCodes, TCompanyData.CoCode + TChars.COMMA + TCompanyData.Branch + TChars.COMMA + TCompanyData.CoName + TChars.COMMA + TCompanyData.CoAddress + TChars.COMMA + TCompanyData.VatNo + TChars.COMMA + TCompanyData.Duns + TChars.COMMA + TCompanyData.Country + TChars.COMMA + TCompanyData.City + TChars.COMMA + TCompanyData.FinManager + TChars.COMMA + TCompanyData.TelephoneNumbers + TChars.COMMA + TCompanyData.CoType + TChars.COMMA + TCompanyData.CoCurrency + TChars.COMMA + TCompanyData.InterestRate + TChars.COMMA + TCompanyData.KpiOverdueTarget + TChars.COMMA + TCompanyData.KpiUnallocatedTarget + TChars.COMMA + TCompanyData.Agents + TChars.COMMA + TCompanyData.Divisions, TSql.ORDER + TCompanyData.CoCode + TSql.ASC);
+        Utilities.GeneralTables(TPaymentTerms.PaymentTerms, sgPmtTerms);
+        Utilities.GeneralTables(TPaidinfo.Paidinfo, sgPaidInfo);
+        Utilities.GeneralTables(TPerson.Person, sgPerson);
+        Utilities.GeneralTables(TControlStatus.ControlStatus, sgControlStatus);
 
     except
         on E: Exception do
@@ -2595,7 +2214,9 @@ begin
         LogText.Log(EventLogPath, 'Thread [' + MainThreadID.ToString + ']: Application version = ' + AppVersion);
         LogText.Log(EventLogPath, 'Thread [' + MainThreadID.ToString + ']: User SID = ' + TUserSid.GetCurrentUserSid);
 
-        InitializeQms;
+        var Queries: IQueries:=TQueries.Create;
+        Queries.InitializeQms;
+
         if not(FirstAgeLoad.Enabled) then FirstAgeLoad.Enabled:=True;
 
         LogText.Log(EventLogPath, '[GUI] Initialization methods executed within main thread, ''MainForm'' has been created. Main process thread ID = ' + MainThreadID.ToString + '.');
@@ -2837,8 +2458,8 @@ end;
 
 procedure TMainForm.InetTimerTimer(Sender: TObject);
 begin
-    var Job: IThreading:=TThreading.Create;
-    Job.CheckServerConnectionAsync;
+    var Utilities: IUtilities:=TUtilities.Create;
+    Utilities.CheckServerConnectionAsync;
 end;
 
 
@@ -3851,8 +3472,8 @@ end;
 
 procedure TMainForm.Action_ToExceClick(Sender: TObject);
 begin
-    var Job: IThreading:=TThreading.Create;
-    Job.ExcelExport();
+    var Utilities: IUtilities:=TUtilities.Create;
+    Utilities.ExcelExport();
 end;
 
 
@@ -3981,12 +3602,10 @@ begin
     // R/W user can remove item
     if (MainForm.AccessLevel = TUserAccess.ReadWrite) and (UpperCase(MainForm.WinUserName) = UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
         if MsgCall(TCommon.TMessage.Question2, 'Are you sure you want to remove selected customer?') = IDYES then
-            DeleteFromTrackerList(
-                sgInvoiceTracker.Cells[
-                    sgInvoiceTracker.ReturnColumn(TTrackerData.Cuid, 1, 1),
-                    sgInvoiceTracker.Row
-                ]
-            );
+        begin
+            var Tracker: ITracker:=TTracker.Create;
+            Tracker.DeleteFromTrackerList(sgInvoiceTracker.Cells[sgInvoiceTracker.ReturnColumn(TTrackerData.Cuid, 1, 1), sgInvoiceTracker.Row]);
+        end;
 
     // R/W user cannot remove other item
     if (MainForm.AccessLevel = TUserAccess.ReadWrite) and (UpperCase(MainForm.WinUserName) <> UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
@@ -3995,12 +3614,10 @@ begin
     // Administrator can remove any item
     if (MainForm.AccessLevel = TUserAccess.Admin) then
         if MsgCall(TCommon.TMessage.Question2, 'Are you sure you want to remove selected customer?') = IDYES then
-            DeleteFromTrackerList(
-                sgInvoiceTracker.Cells[
-                    sgInvoiceTracker.ReturnColumn(TTrackerData.Cuid, 1, 1),
-                    sgInvoiceTracker.Row
-                ]
-            );
+        begin
+            var Tracker: ITracker:=TTracker.Create;
+            Tracker.DeleteFromTrackerList(sgInvoiceTracker.Cells[sgInvoiceTracker.ReturnColumn(TTrackerData.Cuid, 1, 1), sgInvoiceTracker.Row]);
+        end;
 
     // Read only user cannot remove anything
     if (MainForm.AccessLevel = TUserAccess.ReadOnly) then MsgCall(Warn, 'You don''t have permission to remove items.');
@@ -4027,8 +3644,8 @@ begin
 
     if IsConnected then
     begin
-        var Job: IThreading:=TThreading.Create;
-        Job.RefreshInvoiceTrackerAsync(UpperCase(MainForm.WinUserName));
+        var Tracker: ITracker:=TTracker.Create;
+        Tracker.RefreshInvoiceTrackerAsync(UpperCase(MainForm.WinUserName));
     end
     else
         MsgCall(Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
@@ -4044,8 +3661,8 @@ procedure TMainForm.Action_ShowAllClick(Sender: TObject);
 begin
     if IsConnected then
     begin
-        var Job: IThreading:=TThreading.Create;
-        Job.RefreshInvoiceTrackerAsync(EmptyStr);
+        var Tracker: ITracker:=TTracker.Create;
+        Tracker.RefreshInvoiceTrackerAsync(EmptyStr);
     end
     else
         MsgCall(Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
@@ -4107,8 +3724,8 @@ end;
 
 procedure TMainForm.TabSheet4Show(Sender: TObject);
 begin
-    var Job: IThreading:=TThreading.Create;
-    Job.RefreshInvoiceTrackerAsync(EmptyStr);
+    var Tracker: ITracker:=TTracker.Create;
+    Tracker.RefreshInvoiceTrackerAsync(EmptyStr);
 end;
 
 
@@ -4118,8 +3735,9 @@ end;
 
 procedure TMainForm.TabSheet5Show(Sender: TObject);
 begin
-    UpdateQmsViewFsc(sgFSCview);
-    UpdateQmsViewLbu(sgLBUview);
+    var Queries: IQueries:=TQueries.Create;
+    Queries.UpdateQmsViewFsc(sgFSCview);
+    Queries.UpdateQmsViewLbu(sgLBUview);
 end;
 
 
@@ -4291,7 +3909,8 @@ end;
 
 procedure TMainForm.sgLBUviewClick(Sender: TObject);
 begin
-    ShowItemDetails(sgLBUview.Cells[sgLBUview.ReturnColumn(TQmsLog.Id, 1, 1), sgLBUview.Row].ToInteger, False);
+    var Queries: IQueries:=TQueries.Create;
+    Queries.ShowItemDetails(sgLBUview.Cells[sgLBUview.ReturnColumn(TQmsLog.Id, 1, 1), sgLBUview.Row].ToInteger, False);
 end;
 
 
@@ -4301,7 +3920,8 @@ end;
 
 procedure TMainForm.sgFSCviewClick(Sender: TObject);
 begin
-    ShowItemDetails(sgFSCview.Cells[sgFSCview.ReturnColumn(TQmsLog.Id, 1, 1), sgFSCview.Row].ToInteger, True);
+    var Queries: IQueries:=TQueries.Create;
+    Queries.ShowItemDetails(sgFSCview.Cells[sgFSCview.ReturnColumn(TQmsLog.Id, 1, 1), sgFSCview.Row].ToInteger, True);
 end;
 
 
@@ -6751,7 +6371,8 @@ begin
         Exit;
     end;
 
-    ApproveQuery(sgFSCView.Cells[sgFSCView.ReturnColumn(TQmsLog.Id, 1, 1), sgFSCView.Row].ToInteger, True);
+    var Queries: IQueries:=TQueries.Create;
+    Queries.ApproveQuery(sgFSCView.Cells[sgFSCView.ReturnColumn(TQmsLog.Id, 1, 1), sgFSCView.Row].ToInteger, True);
 
 end;
 
@@ -6765,7 +6386,8 @@ begin
         Exit;
     end;
 
-    RejectQuery(sgFSCView.Cells[sgFSCView.ReturnColumn(TQmsLog.Id, 1, 1), sgFSCView.Row].ToInteger, True);
+    var Queries: IQueries:=TQueries.Create;
+    Queries.RejectQuery(sgFSCView.Cells[sgFSCView.ReturnColumn(TQmsLog.Id, 1, 1), sgFSCView.Row].ToInteger, True);
 
 end;
 
@@ -6779,7 +6401,8 @@ begin
         Exit;
     end;
 
-    ApproveQuery(sgLBUView.Cells[sgLBUView.ReturnColumn(TQmsLog.Id, 1, 1), sgLBUView.Row].ToInteger, False);
+    var Queries: IQueries:=TQueries.Create;
+    Queries.ApproveQuery(sgLBUView.Cells[sgLBUView.ReturnColumn(TQmsLog.Id, 1, 1), sgLBUView.Row].ToInteger, False);
 
 end;
 

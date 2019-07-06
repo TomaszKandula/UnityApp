@@ -1256,6 +1256,10 @@ object MainForm: TMainForm
       Font.Style = []
       Highlighted = True
       ParentFont = False
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Header1: TPanel
         Left = 0
         Top = 0
@@ -10112,6 +10116,10 @@ object MainForm: TMainForm
       ImageIndex = 8
       OnResize = TabSheet7Resize
       OnShow = TabSheet7Show
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Header7: TPanel
         Left = 0
         Top = 0
@@ -12775,7 +12783,7 @@ object MainForm: TMainForm
       Left = 1289
       Top = 10
       Width = 16
-      Height = 42
+      Height = 16
       Cursor = crHandPoint
       Margins.Left = 5
       Margins.Top = 10
@@ -13260,7 +13268,6 @@ object MainForm: TMainForm
       OnClick = imgHideBarClick
       ExplicitLeft = 1294
       ExplicitTop = 5
-      ExplicitHeight = 16
     end
     object btnStart: TPanel
       Left = 17

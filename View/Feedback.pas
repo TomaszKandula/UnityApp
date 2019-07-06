@@ -58,6 +58,7 @@ uses
     Sync.Documents,
     Settings,
     Worker,
+    Async.Utilities,
     Unity.Statics;
 
 
@@ -176,8 +177,8 @@ end;
 
 procedure TFeedbackForm.btnSendReportClick(Sender: TObject);
 begin
-    var Job: IThreading:=TThreading.Create;
-    Job.SendUserFeedback();
+    var Utilities: IUtilities:=TUtilities.Create;
+    Utilities.SendUserFeedback();
 end;
 
 procedure TFeedbackForm.btnCancelClick(Sender: TObject);
