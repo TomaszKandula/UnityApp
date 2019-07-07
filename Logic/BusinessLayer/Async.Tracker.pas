@@ -1,5 +1,10 @@
 unit Async.Tracker;
 
+// ----------------------------------
+// Application logic, business layer.
+// Can be referenced by anyone.
+// Cannot hold references to View.
+// ----------------------------------
 
 interface
 
@@ -51,17 +56,17 @@ implementation   // refactor!!!
 
 
 uses
-    Main,
+    View.Main,
+    View.InvoiceTracker,
+    View.Actions,
+    View.UserFeedback,
     DatabaseHandler,
     DbModel,
     Settings,
     AccountHandler,
     Sync.Documents,
     AgeView,
-    Transactions,
-    Tracker,
-    Actions,
-    Feedback;
+    Transactions;
 
 
 // ------------------------------------

@@ -1,5 +1,10 @@
 unit Sync.Documents;
 
+// ----------------------------------
+// Application logic, business layer.
+// Can be referenced by anyone.
+// Cannot hold references to View.
+// ----------------------------------
 
 interface
 
@@ -207,10 +212,10 @@ implementation
 
 
 uses
+    View.Main,
+    View.InvoiceTracker,
+    View.Actions,
     Data.Win.ADODB,
-    Main,
-    Tracker,
-    Actions,
     SQL,
     DbModel,
     Settings;

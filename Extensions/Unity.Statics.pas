@@ -1,5 +1,10 @@
 unit Unity.Statics;
 
+// ----------------------------------------
+// Extension unit for application.
+// Can be referenced by anyone.
+// Cannot hold references to View or Logic.
+// ----------------------------------------
 
 interface
 

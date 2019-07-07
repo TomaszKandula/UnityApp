@@ -1,5 +1,10 @@
-unit Splash;
+unit View.SplashScreen;
 
+// ------------------------------------------------------------------------------
+// Application GUI / view that can have direct calls to logic layer interface.
+// Calls must have reference to callback method that is defined the same as
+// callback signature. All views except MainForm use Lazy Loading design pattern.
+// ------------------------------------------------------------------------------
 
 interface
 
@@ -17,8 +22,7 @@ uses
     Vcl.ExtCtrls,
     Vcl.Samples.Gauges,
     Vcl.StdCtrls,
-    Vcl.Imaging.pngimage,
-    Main;
+    Vcl.Imaging.pngimage;
 
 
 type
@@ -36,7 +40,7 @@ type
         ShapeProgressBar: TShape;
         ShapeBackground: TShape;
         CentreText: TLabel;
-    Flutter: TImage;
+        Flutter: TImage;
     protected
         {procedure CreateParams(var Params: TCreateParams); override;}
     end;

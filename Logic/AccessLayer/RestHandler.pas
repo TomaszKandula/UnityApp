@@ -1,5 +1,10 @@
 unit RestHandler;
 
+// ----------------------------------------
+// Application logic, access layers.
+// Can be referenced by anyone.
+// Cannot hold references to View.
+// ----------------------------------------
 
 interface
 

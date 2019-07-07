@@ -1,5 +1,10 @@
-unit Send;
+unit View.SendStatement;
 
+// ------------------------------------------------------------------------------
+// Application GUI / view that can have direct calls to logic layer interface.
+// Calls must have reference to callback method that is defined the same as
+// callback signature. All views except MainForm use Lazy Loading design pattern.
+// ------------------------------------------------------------------------------
 
 interface
 
@@ -96,14 +101,14 @@ implementation
 
 
 uses
-    Main,
-    Calendar,
+    View.Main,
+    View.Calendar,
+    View.Actions,
     Settings,
-    Worker,
-    Actions,
     DbModel,
     Unity.Statics,
-    Unity.Enums;
+    Unity.Enums,
+    Async.Statements;
 
 
 var vSendForm: TSendForm;
@@ -163,8 +168,8 @@ begin
     Fields.Series     :=False;
     Fields.ItemNo     :=0;
 
-    var Job: IThreading:=TThreading.Create;
-    Job.SendAccountStatement(Fields);
+    var Statements: IStatements:=TStatements.Create();
+    Statements.SendAccountStatement(Fields);
 
     Close;
 

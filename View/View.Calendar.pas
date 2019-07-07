@@ -1,5 +1,10 @@
-unit Calendar;
+unit View.Calendar;
 
+// ------------------------------------------------------------------------------
+// Application GUI / view that can have direct calls to logic layer interface.
+// Calls must have reference to callback method that is defined the same as
+// callback signature. All views except MainForm use Lazy Loading design pattern.
+// ------------------------------------------------------------------------------
 
 interface
 
@@ -64,11 +69,11 @@ implementation
 
 
 uses
-    Main,
+    System.SysUtils,
+    View.Main,
     DbModel,
     Settings,
-    Worker,
-    SysUtils;
+    Async.Comments;
 
 
 var vCalendarForm: TCalendarForm;
@@ -117,8 +122,8 @@ begin
     GeneralCommentFields.Free3       :=TUnknown.NULL;
     GeneralCommentFields.EventLog    :=False;
 
-    var Job: IThreading:=TThreading.Create;
-    Job.EditGeneralComment(GeneralCommentFields);
+    var Comments: IComments:=TComments.Create();
+    Comments.EditGeneralComment(GeneralCommentFields);
 
     MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneralComment.fFollowUp, 1, 1), Row]:=DateToStr(SelectedDate);
 

@@ -1,5 +1,10 @@
-unit MassMailer;
+unit View.MassMailer;
 
+// ------------------------------------------------------------------------------
+// Application GUI / view that can have direct calls to logic layer interface.
+// Calls must have reference to callback method that is defined the same as
+// callback signature. All views except MainForm use Lazy Loading design pattern.
+// ------------------------------------------------------------------------------
 
 interface
 
@@ -114,15 +119,15 @@ implementation
 
 
 uses
-    Main,
-    Calendar,
+    View.Main,
+    View.Calendar,
+    View.Actions,
+    View.AwaitScreen,
     Settings,
     SqlHandler,
     DbModel,
-    Worker,
-    Actions,
-    Await,
-    Unity.Enums;
+    Unity.Enums,
+    Async.Statements;
 
 
 var vMassMailerForm: TMassMailerForm;
@@ -408,8 +413,8 @@ begin
     FFields.OpenItems :=MainForm.sgOpenItems;
     FFields.MailerList:=MassMailerForm.CustomerList;
 
-    var Job: IThreading:=TThreading.Create;
-    Job.SendAccountStatements(FFields);
+    var Statements: IStatements:=TStatements.Create();
+    Statements.SendAccountStatements(FFields);
 
     // Display await window
     MainForm.WndCall(AwaitForm, TWindowState.Modal);

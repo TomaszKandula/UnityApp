@@ -1,5 +1,10 @@
 unit Transactions;
 
+// -----------------------------------
+// Application logic, business layers.
+// Can be referenced by anyone.
+// Cannot hold references to View.
+// -----------------------------------
 
 interface
 
@@ -41,7 +46,7 @@ implementation
 
 
 uses
-    Main,
+    View.Main,
     Settings;
 
 

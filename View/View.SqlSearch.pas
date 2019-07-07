@@ -1,5 +1,10 @@
-unit SqlSearch;
+unit View.SqlSearch;
 
+// ------------------------------------------------------------------------------
+// Application GUI / view that can have direct calls to logic layer interface.
+// Calls must have reference to callback method that is defined the same as
+// callback signature. All views except MainForm use Lazy Loading design pattern.
+// ------------------------------------------------------------------------------
 
 interface
 
@@ -139,11 +144,11 @@ implementation
 
 
 uses
-    Main,
+    View.Main,
     Settings,
-    Worker,
     DbModel,
-    Unity.Statics;
+    Unity.Statics,
+    Async.AddressBook;
 
 
 var vSqlSearchForm: TSqlSearchForm;
@@ -207,20 +212,20 @@ end;
 
 procedure TSqlSearchForm.AttachOption;
 begin
-    if EditName.Enabled       then FStrEditName      :=TAddressBook.CustomerName + FIsEqual1 + QuotedStr(EditName.Text)       + FCollate1 + TSql._AND;
-    if EditEmail.Enabled      then FStrEditEmail     :=TAddressBook.Emails       + FIsEqual2 + QuotedStr(EditEmail.Text)      + FCollate2 + TSql._AND;
-    if EditEstatement.Enabled then FStrEditEstatement:=TAddressBook.Estatements  + FIsEqual3 + QuotedStr(EditEstatement.Text) + FCollate3 + TSql._AND;
-    if EditUserAlias.Enabled  then FStrEditUserAlias :=TAddressBook.UserAlias    + FIsEqual4 + QuotedStr(EditUserAlias.Text)  + FCollate4 + TSql._AND;
+    if EditName.Enabled       then FStrEditName      :=DbModel.TAddressBook.CustomerName + FIsEqual1 + QuotedStr(EditName.Text)       + FCollate1 + TSql._AND;
+    if EditEmail.Enabled      then FStrEditEmail     :=DbModel.TAddressBook.Emails       + FIsEqual2 + QuotedStr(EditEmail.Text)      + FCollate2 + TSql._AND;
+    if EditEstatement.Enabled then FStrEditEstatement:=DbModel.TAddressBook.Estatements  + FIsEqual3 + QuotedStr(EditEstatement.Text) + FCollate3 + TSql._AND;
+    if EditUserAlias.Enabled  then FStrEditUserAlias :=DbModel.TAddressBook.UserAlias    + FIsEqual4 + QuotedStr(EditUserAlias.Text)  + FCollate4 + TSql._AND;
 end;
 
 
 procedure TSqlSearchForm.UpdateOptions;
 begin
-    if EditNumber.Enabled   then FStrEditNumber  :=TAddressBook.CustomerNumber + TSql.EQUAL + QuotedStr(EditNumber.Text)   + TSql._AND;
-    if EditPhones.Enabled   then FStrEditPhones  :=TAddressBook.PhoneNumbers   + TSql.EQUAL + QuotedStr(EditPhones.Text)   + TSql._AND;
-    if EditCoCode.Enabled   then FStrEditCoCode  :=TAddressBook.CoCode         + TSql.EQUAL + QuotedStr(EditCoCode.Text)   + TSql._AND;
-    if EditAgent.Enabled    then FStrEditAgent   :=TAddressBook.Agent          + TSql.EQUAL + QuotedStr(EditAgent.Text)    + TSql._AND;
-    if EditDivision.Enabled then FStrEditDivision:=TAddressBook.Division       + TSql.EQUAL + QuotedStr(EditDivision.Text) + TSql._AND;
+    if EditNumber.Enabled   then FStrEditNumber  :=DbModel.TAddressBook.CustomerNumber + TSql.EQUAL + QuotedStr(EditNumber.Text)   + TSql._AND;
+    if EditPhones.Enabled   then FStrEditPhones  :=DbModel.TAddressBook.PhoneNumbers   + TSql.EQUAL + QuotedStr(EditPhones.Text)   + TSql._AND;
+    if EditCoCode.Enabled   then FStrEditCoCode  :=DbModel.TAddressBook.CoCode         + TSql.EQUAL + QuotedStr(EditCoCode.Text)   + TSql._AND;
+    if EditAgent.Enabled    then FStrEditAgent   :=DbModel.TAddressBook.Agent          + TSql.EQUAL + QuotedStr(EditAgent.Text)    + TSql._AND;
+    if EditDivision.Enabled then FStrEditDivision:=DbModel.TAddressBook.Division       + TSql.EQUAL + QuotedStr(EditDivision.Text) + TSql._AND;
 end;
 
 
@@ -395,8 +400,8 @@ begin
 
     MainForm.DebugMsg(Conditions);
 
-    var Job: IThreading:=TThreading.Create;
-    Job.OpenAddressBookAsync('', MainForm.sgAddressBook, Conditions);
+    var AddressBook: IAddressBook:=TAddressBook.Create();
+    AddressBook.OpenAddressBookAsync('', MainForm.sgAddressBook, Conditions);
 
 end;
 

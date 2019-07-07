@@ -146,6 +146,7 @@
         <DCCReference Include="Extensions\Unity.Arrays.pas"/>
         <DCCReference Include="Extensions\Unity.Records.pas"/>
         <DCCReference Include="Extensions\Unity.Statics.pas"/>
+        <DCCReference Include="Extensions\Unity.Crc32.pas"/>
         <DCCReference Include="Model\DbModel.pas">
             <Form>Legacy code/to be removed</Form>
         </DCCReference>
@@ -169,7 +170,9 @@
             <Form>Legacy code/to be removed</Form>
         </DCCReference>
         <DCCReference Include="Logic\AccessLayer\AccountHandler.pas"/>
-        <DCCReference Include="Logic\AccessLayer\ConnectionHandler.pas"/>
+        <DCCReference Include="Logic\AccessLayer\ConnectionHandler.pas">
+            <Form>Legacy code/to be removed</Form>
+        </DCCReference>
         <DCCReference Include="Logic\AccessLayer\RestHandler.pas"/>
         <DCCReference Include="Logic\BusinessLayer\AgeView.pas">
             <Form>Legacy code/to be removed</Form>
@@ -186,69 +189,66 @@
         <DCCReference Include="Logic\BusinessLayer\Async.Debtors.pas"/>
         <DCCReference Include="Logic\BusinessLayer\Async.OpenItems.pas"/>
         <DCCReference Include="Logic\BusinessLayer\Async.Comments.pas"/>
-        <DCCReference Include="Logic\BusinessLayer\Async.Statements.pas">
-            <Form>/    Mailer                   in &apos;Logic\BusinessLayer\Mailer.pas&apos;,</Form>
-        </DCCReference>
-        <DCCReference Include="Logic\BusinessLayer\Worker.pas"/>
+        <DCCReference Include="Logic\BusinessLayer\Async.Statements.pas"/>
         <DCCReference Include="Logic\Configuration\Settings.pas"/>
         <DCCReference Include="Logic\Logger\ThreadUtilities.pas"/>
         <DCCReference Include="Logic\Logger\EventLogger.pas"/>
-        <DCCReference Include="View\About.pas">
-            <Form>AboutForm</Form>
-        </DCCReference>
-        <DCCReference Include="View\Actions.pas">
-            <Form>ActionsForm</Form>
-        </DCCReference>
-        <DCCReference Include="View\Calendar.pas">
-            <Form>CalendarForm</Form>
-        </DCCReference>
-        <DCCReference Include="View\Colors.pas">
-            <Form>ColorsForm</Form>
-        </DCCReference>
-        <DCCReference Include="View\EventLog.pas">
-            <Form>EventForm</Form>
-        </DCCReference>
-        <DCCReference Include="View\Filter.pas">
-            <Form>FilterForm</Form>
-        </DCCReference>
-        <DCCReference Include="View\Invoices.pas">
-            <Form>InvoicesForm</Form>
-        </DCCReference>
-        <DCCReference Include="View\Main.pas">
+        <DCCReference Include="View\View.Main.pas">
             <Form>MainForm</Form>
         </DCCReference>
-        <DCCReference Include="View\PhoneList.pas">
-            <Form>PhoneListForm</Form>
+        <DCCReference Include="View\View.About.pas">
+            <Form>AboutForm</Form>
         </DCCReference>
-        <DCCReference Include="View\Feedback.pas">
-            <Form>FeedbackForm</Form>
+        <DCCReference Include="View\View.Actions.pas">
+            <Form>ActionsForm</Form>
         </DCCReference>
-        <DCCReference Include="View\GridSearch.pas">
-            <Form>GridSearchForm</Form>
-        </DCCReference>
-        <DCCReference Include="View\Send.pas">
-            <Form>SendForm</Form>
-        </DCCReference>
-        <DCCReference Include="View\Splash.pas">
-            <Form>SplashForm</Form>
-        </DCCReference>
-        <DCCReference Include="View\Tracker.pas">
-            <Form>TrackerForm</Form>
-        </DCCReference>
-        <DCCReference Include="View\Update.pas">
-            <Form>UpdateForm</Form>
-        </DCCReference>
-        <DCCReference Include="View\MassMailer.pas">
-            <Form>MassMailerForm</Form>
-        </DCCReference>
-        <DCCReference Include="View\SqlSearch.pas">
-            <Form>SqlSearchForm</Form>
-        </DCCReference>
-        <DCCReference Include="View\Await.pas">
+        <DCCReference Include="View\View.AwaitScreen.pas">
             <Form>AwaitForm</Form>
         </DCCReference>
-        <DCCReference Include="View\Qms.pas">
+        <DCCReference Include="View\View.Calendar.pas">
+            <Form>CalendarForm</Form>
+        </DCCReference>
+        <DCCReference Include="View\View.ColorPicker.pas">
+            <Form>ColorsForm</Form>
+        </DCCReference>
+        <DCCReference Include="View\View.EventLog.pas">
+            <Form>EventForm</Form>
+        </DCCReference>
+        <DCCReference Include="View\View.UserFeedback.pas">
+            <Form>FeedbackForm</Form>
+        </DCCReference>
+        <DCCReference Include="View\View.GridFilter.pas">
+            <Form>FilterForm</Form>
+        </DCCReference>
+        <DCCReference Include="View\View.GridSearch.pas">
+            <Form>GridSearchForm</Form>
+        </DCCReference>
+        <DCCReference Include="View\View.InvoiceList.pas">
+            <Form>InvoicesForm</Form>
+        </DCCReference>
+        <DCCReference Include="View\View.MassMailer.pas">
+            <Form>MassMailerForm</Form>
+        </DCCReference>
+        <DCCReference Include="View\View.PhoneList.pas">
+            <Form>PhoneListForm</Form>
+        </DCCReference>
+        <DCCReference Include="View\View.Queries.pas">
             <Form>QmsForm</Form>
+        </DCCReference>
+        <DCCReference Include="View\View.SendStatement.pas">
+            <Form>SendForm</Form>
+        </DCCReference>
+        <DCCReference Include="View\View.SplashScreen.pas">
+            <Form>SplashForm</Form>
+        </DCCReference>
+        <DCCReference Include="View\View.SqlSearch.pas">
+            <Form>SqlSearchForm</Form>
+        </DCCReference>
+        <DCCReference Include="View\View.InvoiceTracker.pas">
+            <Form>TrackerForm</Form>
+        </DCCReference>
+        <DCCReference Include="View\View.UpdateScreen.pas">
+            <Form>UpdateForm</Form>
         </DCCReference>
         <None Include="Include\Cef.inc"/>
         <None Include="Model\Json\DbQuery\Dummy.txt"/>
@@ -317,13 +317,13 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="Model\Json\DbQuery\Dummy.txt" Configuration="Debug" Class="ProjectFile">
+                <DeployFile LocalName="Include\Cef.inc" Configuration="Debug" Class="ProjectFile">
                     <Platform Name="Win32">
                         <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="Include\Cef.inc" Configuration="Debug" Class="ProjectFile">
+                <DeployFile LocalName="Model\Json\DbQuery\Dummy.txt" Configuration="Debug" Class="ProjectFile">
                     <Platform Name="Win32">
                         <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>

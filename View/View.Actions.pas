@@ -1,5 +1,10 @@
-unit Actions;
+unit View.Actions;
 
+// ------------------------------------------------------------------------------
+// Application GUI / view that can have direct calls to logic layer interface.
+// Calls must have reference to callback method that is defined the same as
+// callback signature. All views except MainForm use Lazy Loading design pattern.
+// ------------------------------------------------------------------------------
 
 interface
 
@@ -237,18 +242,20 @@ implementation
 
 
 uses
-    Main,
-    Qms,
+    View.Main,
+    View.Queries,
+    View.Calendar,
+    View.SendStatement,
+    View.PhoneList,
     SqlHandler,
     DbModel,
-    Worker,
-    Calendar,
     Settings,
-    Sync.Documents,
     Transactions,
-    Send,
-    PhoneList,
-    Unity.Enums;
+    Sync.Documents,
+    Unity.Enums,
+    Async.AddressBook,
+    Async.Comments,
+    Async.Statements;
 
 
 var vActionsForm: TActionsForm;
@@ -349,26 +356,26 @@ begin
     FOpenItemsTotal.CurAm    :=0;
 
     // Get columns numbers from source open items string grid
-    FSrcColumns[0] :=OpenItemsSrc.ReturnColumn(TOpenitems.InvoNo,    1, 1);
-    FSrcColumns[1] :=OpenItemsSrc.ReturnColumn(TOpenitems.Txt,       1, 1);
-    FSrcColumns[2] :=OpenItemsSrc.ReturnColumn(TOpenitems.AddTxt,    1, 1);
-    FSrcColumns[3] :=OpenItemsSrc.ReturnColumn(TOpenitems.OpenAm,    1, 1);
-    FSrcColumns[4] :=OpenItemsSrc.ReturnColumn(TOpenitems.Am,        1, 1);
-    FSrcColumns[5] :=OpenItemsSrc.ReturnColumn(TOpenitems.OpenCurAm, 1, 1);
-    FSrcColumns[6] :=OpenItemsSrc.ReturnColumn(TOpenitems.CurAm,     1, 1);
-    FSrcColumns[7] :=OpenItemsSrc.ReturnColumn(TOpenitems.ISO,       1, 1);
-    FSrcColumns[8] :=OpenItemsSrc.ReturnColumn(TOpenitems.DueDt,     1, 1);
-    FSrcColumns[9] :=OpenItemsSrc.ReturnColumn(TOpenitems.ValDt,     1, 1);
-    FSrcColumns[10]:=OpenItemsSrc.ReturnColumn(TOpenitems.Ctrl,      1, 1);
-    FSrcColumns[11]:=OpenItemsSrc.ReturnColumn(TOpenitems.PmtStat,   1, 1);
+    FSrcColumns[0] :=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.InvoNo,    1, 1);
+    FSrcColumns[1] :=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.Txt,       1, 1);
+    FSrcColumns[2] :=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.AddTxt,    1, 1);
+    FSrcColumns[3] :=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.OpenAm,    1, 1);
+    FSrcColumns[4] :=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.Am,        1, 1);
+    FSrcColumns[5] :=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.OpenCurAm, 1, 1);
+    FSrcColumns[6] :=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.CurAm,     1, 1);
+    FSrcColumns[7] :=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.ISO,       1, 1);
+    FSrcColumns[8] :=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.DueDt,     1, 1);
+    FSrcColumns[9] :=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.ValDt,     1, 1);
+    FSrcColumns[10]:=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.Ctrl,      1, 1);
+    FSrcColumns[11]:=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.PmtStat,   1, 1);
 
     // Helper columns
-    FSrcColumns[12]:=OpenItemsSrc.ReturnColumn(TOpenitems.Ad1,       1, 1);
-    FSrcColumns[13]:=OpenItemsSrc.ReturnColumn(TOpenitems.Ad2,       1, 1);
-    FSrcColumns[14]:=OpenItemsSrc.ReturnColumn(TOpenitems.Ad3,       1, 1);
-    FSrcColumns[15]:=OpenItemsSrc.ReturnColumn(TOpenitems.Pno,       1, 1);
-    FSrcColumns[16]:=OpenItemsSrc.ReturnColumn(TOpenitems.PArea,     1, 1);
-    FSrcColumns[17]:=OpenItemsSrc.ReturnColumn(TOpenitems.Cuid,      1, 1);
+    FSrcColumns[12]:=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.Ad1,       1, 1);
+    FSrcColumns[13]:=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.Ad2,       1, 1);
+    FSrcColumns[14]:=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.Ad3,       1, 1);
+    FSrcColumns[15]:=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.Pno,       1, 1);
+    FSrcColumns[16]:=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.PArea,     1, 1);
+    FSrcColumns[17]:=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.Cuid,      1, 1);
 
     // Get headers
     for var iCNT: integer:=Low(FSrcColumns) to High(FSrcColumns) do
@@ -409,12 +416,12 @@ begin
     end;
 
     // Hide helpers columns from string grid
-    OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.Ad1,   1, 1)]:=OpenItemsDest.sgRowHidden;
-    OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.Ad2,   1, 1)]:=OpenItemsDest.sgRowHidden;
-    OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.Ad3,   1, 1)]:=OpenItemsDest.sgRowHidden;
-    OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.Pno,   1, 1)]:=OpenItemsDest.sgRowHidden;
-    OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.PArea, 1, 1)]:=OpenItemsDest.sgRowHidden;
-    OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(TOpenitems.Cuid,  1, 1)]:=OpenItemsDest.sgRowHidden;
+    OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(DbModel.TOpenitems.Ad1,   1, 1)]:=OpenItemsDest.sgRowHidden;
+    OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(DbModel.TOpenitems.Ad2,   1, 1)]:=OpenItemsDest.sgRowHidden;
+    OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(DbModel.TOpenitems.Ad3,   1, 1)]:=OpenItemsDest.sgRowHidden;
+    OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(DbModel.TOpenitems.Pno,   1, 1)]:=OpenItemsDest.sgRowHidden;
+    OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(DbModel.TOpenitems.PArea, 1, 1)]:=OpenItemsDest.sgRowHidden;
+    OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(DbModel.TOpenitems.Cuid,  1, 1)]:=OpenItemsDest.sgRowHidden;
 
     // Sort via payment status
     OpenItemsDest.MSort(OpenItemsDest.ReturnColumn(TOpenitems.PmtStat, 1, 1), TSorting.TDataType.TInteger, True);
@@ -429,22 +436,22 @@ begin
     try
 
         // Get data from Address Book table
-        Tables.Columns.Add(TAddressBook.Contact);
-        Tables.Columns.Add(TAddressBook.Emails);
-        Tables.Columns.Add(TAddressBook.Estatements);
-        Tables.Columns.Add(TAddressBook.PhoneNumbers);
-        Tables.CustFilter:=TSql.WHERE + TAddressBook.Scuid + TSql.EQUAL + QuotedStr(SCUID);
-        Tables.OpenTable(TAddressBook.AddressBook);
+        Tables.Columns.Add(DbModel.TAddressBook.Contact);
+        Tables.Columns.Add(DbModel.TAddressBook.Emails);
+        Tables.Columns.Add(DbModel.TAddressBook.Estatements);
+        Tables.Columns.Add(DbModel.TAddressBook.PhoneNumbers);
+        Tables.CustFilter:=TSql.WHERE + DbModel.TAddressBook.Scuid + TSql.EQUAL + QuotedStr(SCUID);
+        Tables.OpenTable(DbModel.TAddressBook.AddressBook);
 
         if Tables.DataSet.RecordCount = 1 then
         begin
 
             var Phones: string;
 
-            CustPerson.Text :=MainForm.OleGetStr(Tables.DataSet.Fields[TAddressBook.Contact].Value);
-            CustMailGen.Text:=MainForm.OleGetStr(Tables.DataSet.Fields[TAddressBook.Emails].Value);
-            CustMail.Text   :=MainForm.OleGetStr(Tables.DataSet.Fields[TAddressBook.Estatements].Value);
-            Phones          :=MainForm.OleGetStr(Tables.DataSet.Fields[TAddressBook.PhoneNumbers].Value);
+            CustPerson.Text :=MainForm.OleGetStr(Tables.DataSet.Fields[DbModel.TAddressBook.Contact].Value);
+            CustMailGen.Text:=MainForm.OleGetStr(Tables.DataSet.Fields[DbModel.TAddressBook.Emails].Value);
+            CustMail.Text   :=MainForm.OleGetStr(Tables.DataSet.Fields[DbModel.TAddressBook.Estatements].Value);
+            Phones          :=MainForm.OleGetStr(Tables.DataSet.Fields[DbModel.TAddressBook.PhoneNumbers].Value);
 
             if (Phones <> '') or (Phones <> ' ') then
             begin
@@ -706,8 +713,8 @@ begin
         FGeneralCommentFields.Free3       :=TUnknown.NULL;
         FGeneralCommentFields.EventLog    :=True;
 
-        var Job: IThreading:=TThreading.Create;
-        Job.EditGeneralComment(FGeneralCommentFields);
+        var Comments: IComments:=TComments.Create();
+        Comments.EditGeneralComment(FGeneralCommentFields);
 
         MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneralComment.fFollowUp, 1, 1), MainForm.sgAgeView.Row]:='';
 
@@ -724,8 +731,8 @@ begin
     FAbUpdateFields.Estatement:=Cust_Mail.Text;
     FAbUpdateFields.Phones    :=MainForm.Implode(Cust_Phone.Items, TDelimiters.Semicolon);
 
-    var Job: IThreading:=TThreading.Create;
-    Job.UpdateAddressBookAsync(nil, FAbUpdateFields);
+    var AddressBook: IAddressBook:=TAddressBook.Create();
+    AddressBook.UpdateAddressBookAsync(nil, FAbUpdateFields);
 
 end;
 
@@ -741,8 +748,8 @@ begin
     FGeneralCommentFields.Free3       :=TUnknown.NULL;
     FGeneralCommentFields.EventLog    :=True;
 
-    var Job: IThreading:=TThreading.Create;
-    Job.EditGeneralComment(FGeneralCommentFields);
+    var Comments: IComments:=TComments.Create();
+    Comments.EditGeneralComment(FGeneralCommentFields);
 
 end;
 
@@ -766,8 +773,8 @@ begin
     FDailyCommentFields.UpdateGrid   :=True;
     FDailyCommentFields.ExtendComment:=False;
 
-    var Job: IThreading:=TThreading.Create;
-    Job.EditDailyComment(FDailyCommentFields);
+    var Comments: IComments:=TComments.Create();
+    Comments.EditDailyComment(FDailyCommentFields);
 
 end;
 
@@ -1311,8 +1318,8 @@ begin
     FStatementFields.Series     :=False;
     FStatementFields.ItemNo     :=0;
 
-    var Job: IThreading:=TThreading.Create;
-    Job.SendAccountStatement(FStatementFields);
+    var Statements: IStatements:=TStatements.Create();
+    Statements.SendAccountStatement(FStatementFields);
 
 end;
 

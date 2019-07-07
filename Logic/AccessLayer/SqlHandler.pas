@@ -1,5 +1,10 @@
 unit SqlHandler;
 
+// ----------------------------------------
+// Application logic, access layers.
+// Can be referenced by anyone.
+// Cannot hold references to View.
+// ----------------------------------------
 
 interface
 
@@ -110,7 +115,7 @@ implementation
 
 
 uses
-    Main;
+    View.Main;
 
 
 // MS SQL -------------------------------------------------------------------------------------------------------------------------------------------------- //

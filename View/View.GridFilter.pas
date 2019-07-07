@@ -1,5 +1,10 @@
-unit Filter;
+unit View.GridFilter;
 
+// ------------------------------------------------------------------------------
+// Application GUI / view that can have direct calls to logic layer interface.
+// Calls must have reference to callback method that is defined the same as
+// callback signature. All views except MainForm use Lazy Loading design pattern.
+// ------------------------------------------------------------------------------
 
 interface
 
@@ -106,7 +111,7 @@ implementation
 
 
 uses
-    Main,
+    View.Main,
     Settings,
     DbModel,
     AgeView;

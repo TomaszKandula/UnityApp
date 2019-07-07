@@ -1,5 +1,10 @@
 unit Customer.ControlStatus;
 
+// ----------------------------------------
+// Database model for application.
+// Can be referenced by anyone.
+// Cannot hold references to View or Logic.
+// ----------------------------------------
 
 interface
 

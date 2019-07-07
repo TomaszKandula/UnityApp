@@ -1,5 +1,10 @@
-unit Feedback;
+unit View.UserFeedback;
 
+// ------------------------------------------------------------------------------
+// Application GUI / view that can have direct calls to logic layer interface.
+// Calls must have reference to callback method that is defined the same as
+// callback signature. All views except MainForm use Lazy Loading design pattern.
+// ------------------------------------------------------------------------------
 
 interface
 
@@ -54,10 +59,9 @@ implementation
 
 
 uses
-    Main,
-    Sync.Documents,
+    View.Main,
     Settings,
-    Worker,
+    Sync.Documents,
     Async.Utilities,
     Unity.Statics;
 

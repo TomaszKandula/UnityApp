@@ -1,5 +1,10 @@
-unit Main;
+unit View.Main;
 
+// ------------------------------------------------------------------------------
+// Application GUI / view that can have direct calls to logic layer interface.
+// Calls must have reference to callback method that is defined the same as
+// callback signature. All views except MainForm use Lazy Loading design pattern.
+// ------------------------------------------------------------------------------
 
 interface
 
@@ -972,32 +977,35 @@ implementation
 
 
 uses
-    Filter,
-    Tracker,
-    Invoices,
-    Actions,
-    Calendar,
-    About,
-    GridSearch,
-    Worker,
+    View.GridFilter,
+    View.InvoiceTracker,
+    View.InvoiceList,
+    View.Actions,
+    View.Calendar,
+    View.About,
+    View.GridSearch,
+    View.ColorPicker,
+    View.EventLog,
+    View.UserFeedback,
+    View.SqlSearch,
+    View.MassMailer,
+    View.SplashScreen,
+    View.AwaitScreen,
     SqlHandler,
     DbModel,
     DatabaseHandler,
     AccountHandler,
+    Settings,
     AgeView,
     Transactions,
-    Colors,
-    EventLog,
-    Feedback,
-    SqlSearch,
-    MassMailer,
-    Splash,
-    Await,
     Sync.Documents,
     Async.Utilities,
     Async.Tracker,
     Async.Queries,
-    Settings,
+    Async.Debtors,
+    Async.OpenItems,
+    Async.AddressBook,
+    Async.Comments,
     uCEFApplication;
 
 
@@ -1152,8 +1160,8 @@ begin
         DailyCommentFields.UpdateGrid   :=True;
         DailyCommentFields.ExtendComment:=False;
 
-        var Job: IThreading:=TThreading.Create;
-        Job.EditDailyComment(DailyCommentFields);
+        var Comments: IComments:=TComments.Create();
+        Comments.EditDailyComment(DailyCommentFields);
 
     end;
 
@@ -1239,22 +1247,22 @@ end;
 
 procedure TMainForm.UpdateOpenItemsRefs(SourceGrid: TStringGrid);
 begin
-    OpenItemsRefs.CuidCol     :=SourceGrid.ReturnColumn(TOpenitems.Cuid,      1, 1);
-    OpenItemsRefs.OpenAmCol   :=SourceGrid.ReturnColumn(TOpenitems.OpenAm,    1, 1);
-    OpenItemsRefs.PmtStatCol  :=SourceGrid.ReturnColumn(TOpenitems.PmtStat,   1, 1);
-    OpenItemsRefs.CtrlCol     :=SourceGrid.ReturnColumn(TOpenitems.Ctrl,      1, 1);
-    OpenItemsRefs.InvoNoCol   :=SourceGrid.ReturnColumn(TOpenitems.InvoNo,    1, 1);
-    OpenItemsRefs.ValDtCol    :=SourceGrid.ReturnColumn(TOpenitems.ValDt,     1, 1);
-    OpenItemsRefs.DueDtCol    :=SourceGrid.ReturnColumn(TOpenitems.DueDt,     1, 1);
-    OpenItemsRefs.ISOCol      :=SourceGrid.ReturnColumn(TOpenitems.ISO,       1, 1);
-    OpenItemsRefs.CurAmCol    :=SourceGrid.ReturnColumn(TOpenitems.CurAm,     1, 1);
-    OpenItemsRefs.OpenCurAmCol:=SourceGrid.ReturnColumn(TOpenitems.OpenCurAm, 1, 1);
-    OpenItemsRefs.Ad1Col      :=SourceGrid.ReturnColumn(TOpenitems.Ad1,       1, 1);
-    OpenItemsRefs.Ad2Col      :=SourceGrid.ReturnColumn(TOpenitems.Ad2,       1, 1);
-    OpenItemsRefs.Ad3Col      :=SourceGrid.ReturnColumn(TOpenitems.Ad3,       1, 1);
-    OpenItemsRefs.PnoCol      :=SourceGrid.ReturnColumn(TOpenitems.Pno,       1, 1);
-    OpenItemsRefs.PAreaCol    :=SourceGrid.ReturnColumn(TOpenitems.PArea,     1, 1);
-    OpenItemsRefs.Text        :=SourceGrid.ReturnColumn(TOpenitems.Txt,       1, 1);
+    OpenItemsRefs.CuidCol     :=SourceGrid.ReturnColumn(DbModel.TOpenitems.Cuid,      1, 1);
+    OpenItemsRefs.OpenAmCol   :=SourceGrid.ReturnColumn(DbModel.TOpenitems.OpenAm,    1, 1);
+    OpenItemsRefs.PmtStatCol  :=SourceGrid.ReturnColumn(DbModel.TOpenitems.PmtStat,   1, 1);
+    OpenItemsRefs.CtrlCol     :=SourceGrid.ReturnColumn(DbModel.TOpenitems.Ctrl,      1, 1);
+    OpenItemsRefs.InvoNoCol   :=SourceGrid.ReturnColumn(DbModel.TOpenitems.InvoNo,    1, 1);
+    OpenItemsRefs.ValDtCol    :=SourceGrid.ReturnColumn(DbModel.TOpenitems.ValDt,     1, 1);
+    OpenItemsRefs.DueDtCol    :=SourceGrid.ReturnColumn(DbModel.TOpenitems.DueDt,     1, 1);
+    OpenItemsRefs.ISOCol      :=SourceGrid.ReturnColumn(DbModel.TOpenitems.ISO,       1, 1);
+    OpenItemsRefs.CurAmCol    :=SourceGrid.ReturnColumn(DbModel.TOpenitems.CurAm,     1, 1);
+    OpenItemsRefs.OpenCurAmCol:=SourceGrid.ReturnColumn(DbModel.TOpenitems.OpenCurAm, 1, 1);
+    OpenItemsRefs.Ad1Col      :=SourceGrid.ReturnColumn(DbModel.TOpenitems.Ad1,       1, 1);
+    OpenItemsRefs.Ad2Col      :=SourceGrid.ReturnColumn(DbModel.TOpenitems.Ad2,       1, 1);
+    OpenItemsRefs.Ad3Col      :=SourceGrid.ReturnColumn(DbModel.TOpenitems.Ad3,       1, 1);
+    OpenItemsRefs.PnoCol      :=SourceGrid.ReturnColumn(DbModel.TOpenitems.Pno,       1, 1);
+    OpenItemsRefs.PAreaCol    :=SourceGrid.ReturnColumn(DbModel.TOpenitems.PArea,     1, 1);
+    OpenItemsRefs.Text        :=SourceGrid.ReturnColumn(DbModel.TOpenitems.Txt,       1, 1);
 end;
 
 
@@ -1921,19 +1929,19 @@ begin
 
     if
         (
-            sgAddressBook.Col = sgAddressBook.ReturnColumn(TAddressBook.Emails, 1, 1)
+            sgAddressBook.Col = sgAddressBook.ReturnColumn(DbModel.TAddressBook.Emails, 1, 1)
         )
     or
         (
-            sgAddressBook.Col = sgAddressBook.ReturnColumn(TAddressBook.PhoneNumbers, 1, 1)
+            sgAddressBook.Col = sgAddressBook.ReturnColumn(DbModel.TAddressBook.PhoneNumbers, 1, 1)
         )
     or
         (
-            sgAddressBook.Col = sgAddressBook.ReturnColumn(TAddressBook.Contact, 1, 1)
+            sgAddressBook.Col = sgAddressBook.ReturnColumn(DbModel.TAddressBook.Contact, 1, 1)
         )
     or
         (
-            sgAddressBook.Col = sgAddressBook.ReturnColumn(TAddressBook.Estatements, 1, 1)
+            sgAddressBook.Col = sgAddressBook.ReturnColumn(DbModel.TAddressBook.Estatements, 1, 1)
         )
     then
         // Do not exclude above columns from editing
@@ -2382,13 +2390,13 @@ begin
                 if string.IsNullOrEmpty(OpenItemsUpdate) then
                 begin
                     MsgCall(Warn, 'Cannot find open items in database. Please contact IT support.');
-                    var Job: IThreading:=TThreading.Create;
-                    Job.ReadAgeViewAsync(NullParameter, TSorting.TMode.Ranges);
+                    var Debtors: IDebtors:=TDebtors.Create;
+                    Debtors.ReadAgeViewAsync(NullParameter, TSorting.TMode.Ranges);
                 end
                 else
                 begin
-                    var Job: IThreading:=TThreading.Create;
-                    Job.ReadAgeViewAsync(CallOpenItems, TSorting.TMode.Ranges);
+                    var Debtors: IDebtors:=TDebtors.Create;
+                    Debtors.ReadAgeViewAsync(CallOpenItems, TSorting.TMode.Ranges);
                 end;
 
             finally
@@ -2458,7 +2466,7 @@ end;
 
 procedure TMainForm.InetTimerTimer(Sender: TObject);
 begin
-    var Utilities: IUtilities:=TUtilities.Create;
+    var Utilities: IUtilities:=TUtilities.Create();
     Utilities.CheckServerConnectionAsync;
 end;
 
@@ -2480,8 +2488,8 @@ end;
 procedure TMainForm.OILoaderTimer(Sender: TObject);
 begin
     LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Calling open items scanner...');
-    var Job: IThreading:=TThreading.Create;
-    Job.ScanOpenItemsAsync()
+    var OpenItems: IOpenItems:=TOpenItems.Create();
+    OpenItems.ScanOpenItemsAsync();
 end;
 
 
@@ -2685,7 +2693,7 @@ begin
     var DataTables: TDataTables:=TDataTables.Create(DbConnect);
     try
 
-        DataTables.DeleteRecord(TAddressBook.AddressBook, TAddressBook.Scuid, DataTables.CleanStr(sgAddressBook.Cells[2, sgAddressBook.Row], False), True);
+        DataTables.DeleteRecord(DbModel.TAddressBook.AddressBook, DbModel.TAddressBook.Scuid, DataTables.CleanStr(sgAddressBook.Cells[2, sgAddressBook.Row], False), True);
 
         if DataTables.RowsAffected > 0 then
         begin
@@ -2720,8 +2728,8 @@ end;
 
 procedure TMainForm.Action_ShowAsIsClick(Sender: TObject);
 begin
-    var Job: IThreading:=TThreading.Create;
-    Job.OpenAddressBookAsync('', sgAddressBook);
+    var AddressBook: IAddressBook:=TAddressBook.Create();
+    AddressBook.OpenAddressBookAsync('', sgAddressBook);
 end;
 
 
@@ -2731,8 +2739,8 @@ end;
 
 procedure TMainForm.Action_ShowMyEntriesClick(Sender: TObject);
 begin
-    var Job: IThreading:=TThreading.Create;
-    Job.OpenAddressBookAsync(MainForm.WinUserName, sgAddressBook);
+    var AddressBook: IAddressBook:=TAddressBook.Create();
+    AddressBook.OpenAddressBookAsync(MainForm.WinUserName, sgAddressBook);
 end;
 
 
@@ -2963,8 +2971,8 @@ begin
 
     if IsConnected then
     begin
-        var Job: IThreading:=TThreading.Create;
-        Job.AddToAddressBookAsync(sgAgeView);
+        var AddressBook: IAddressBook:=TAddressBook.Create();
+        AddressBook.AddToAddressBookAsync(sgAgeView);
     end
     else
     MsgCall(Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
@@ -3090,16 +3098,6 @@ begin
         if sgAgeView.RowHeights[iCNT] <> sgAgeView.sgRowHidden then
         begin
 
-//            TTGeneralComment.Create(
-//                sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), iCNT],
-//                TUnknown.NULL,
-//                TChars.SPACE,
-//                TUnknown.NULL,
-//                TUnknown.NULL,
-//                TUnknown.NULL,
-//                False
-//            );
-
             GeneralCommentFields.CUID        :=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), iCNT];
             GeneralCommentFields.FixedComment:=TUnknown.NULL;
             GeneralCommentFields.FollowUp    :=TChars.SPACE;
@@ -3108,8 +3106,8 @@ begin
             GeneralCommentFields.Free3       :=TUnknown.NULL;
             GeneralCommentFields.EventLog    :=False;
 
-            var Job: IThreading:=TThreading.Create;
-            Job.EditGeneralComment(GeneralCommentFields);
+            var Comments: IComments:=TComments.Create();
+            Comments.EditGeneralComment(GeneralCommentFields);
 
             MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneralComment.fFollowUp, 1, 1), iCNT]:=TChars.SPACE;
 
@@ -4072,11 +4070,11 @@ begin
 
     if ARow = 0 then Exit;
 
-    var Col1: integer:=sgOpenItems.ReturnColumn(TOpenitems.OpenCurAm,1, 1);
-    var Col2: integer:=sgOpenItems.ReturnColumn(TOpenitems.OpenAm,   1, 1);
-    var Col3: integer:=sgOpenItems.ReturnColumn(TOpenitems.CurAm,    1, 1);
-    var Col4: integer:=sgOpenItems.ReturnColumn(TOpenitems.Am,       1, 1);
-    var Col5: integer:=sgOpenItems.ReturnColumn(TOpenitems.PmtStat,  1, 1);
+    var Col1: integer:=sgOpenItems.ReturnColumn(DbModel.TOpenitems.OpenCurAm,1, 1);
+    var Col2: integer:=sgOpenItems.ReturnColumn(DbModel.TOpenitems.OpenAm,   1, 1);
+    var Col3: integer:=sgOpenItems.ReturnColumn(DbModel.TOpenitems.CurAm,    1, 1);
+    var Col4: integer:=sgOpenItems.ReturnColumn(DbModel.TOpenitems.Am,       1, 1);
+    var Col5: integer:=sgOpenItems.ReturnColumn(DbModel.TOpenitems.PmtStat,  1, 1);
 
     // Selection
     MainForm.sgOpenItems.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
@@ -4481,8 +4479,8 @@ procedure TMainForm.sgAgeViewKeyDown(Sender: TObject; var Key: Word; Shift: TShi
 
         end;
 
-        var Job: IThreading:=TThreading.Create;
-        Job.EditGeneralComment(GeneralCommentFields);
+        var Comments: IComments:=TComments.Create();
+        Comments.EditGeneralComment(GeneralCommentFields);
 
     end;
 
@@ -4925,19 +4923,19 @@ begin
     or
         (
             (
-                sgAddressBook.Col = sgAddressBook.ReturnColumn(TAddressBook.Emails, 1, 1)
+                sgAddressBook.Col = sgAddressBook.ReturnColumn(DbModel.TAddressBook.Emails, 1, 1)
             )
         or
             (
-                sgAddressBook.Col = sgAddressBook.ReturnColumn(TAddressBook.PhoneNumbers, 1, 1)
+                sgAddressBook.Col = sgAddressBook.ReturnColumn(DbModel.TAddressBook.PhoneNumbers, 1, 1)
             )
         or
             (
-                sgAddressBook.Col = sgAddressBook.ReturnColumn(TAddressBook.Contact, 1, 1)
+                sgAddressBook.Col = sgAddressBook.ReturnColumn(DbModel.TAddressBook.Contact, 1, 1)
             )
         or
             (
-                sgAddressBook.Col = sgAddressBook.ReturnColumn(TAddressBook.Estatements, 1, 1)
+                sgAddressBook.Col = sgAddressBook.ReturnColumn(DbModel.TAddressBook.Estatements, 1, 1)
             )
         )
     and
@@ -6121,8 +6119,8 @@ begin
         MainForm.SwitchTimers(TurnedOff);
 
         // Load age view for selected group ID
-        var Job: IThreading:=TThreading.Create;
-        Job.ReadAgeViewAsync(CallOpenItems, TSorting.TMode.Ranges);
+        var Debtors: IDebtors:=TDebtors.Create;
+        Debtors.ReadAgeViewAsync(CallOpenItems, TSorting.TMode.Ranges);
 
     end
         else
@@ -6179,8 +6177,8 @@ begin
         MainForm.SwitchTimers(TurnedOff);
 
         // Load age view for selected group ID
-        var Job: IThreading:=TThreading.Create;
-        Job.ReadAgeViewAsync(NullParameter, SortListBox.ItemIndex);
+        var Debtors: IDebtors:=TDebtors.Create;
+        Debtors.ReadAgeViewAsync(NullParameter, SortListBox.ItemIndex);
 
     end
         else
@@ -6206,8 +6204,8 @@ begin
     StatBar_TXT1.Caption :=TStatusBar.Processing;
     if MainForm.AccessLevel = TUserAccess.Admin then
     begin
-        var Job: IThreading:=TThreading.Create;
-        Job.ReadOpenItemsAsync(NullParameter);
+        var OpenItems: IOpenItems:=TOpenItems.Create();
+        OpenItems.ReadOpenItemsAsync(NullParameter);
     end
     else
     begin
@@ -6274,8 +6272,8 @@ begin
         PanelGroupName.Visible:=False;
         ReloadCover.Visible   :=False;
 
-        var Job: IThreading:=TThreading.Create;
-        Job.MakeAgeViewAsync(MainForm.OSAmount);
+        var Debtors: IDebtors:=TDebtors.Create;
+        Debtors.MakeAgeViewAsync(MainForm.OSAmount);
 
     end
     else
@@ -6296,8 +6294,8 @@ begin
     if IsConnected then
     begin
         sgAddressBook.SetUpdatedRow(0);
-        var Job: IThreading:=TThreading.Create;
-        Job.OpenAddressBookAsync('', sgAddressBook);
+        var AddressBook: IAddressBook:=TAddressBook.Create();
+        AddressBook.OpenAddressBookAsync('', sgAddressBook);
     end
     else
     MsgCall(Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
@@ -6320,8 +6318,8 @@ begin
 
     if IsConnected then
     begin
-        var Job: IThreading:=TThreading.Create;
-        Job.UpdateAddressBookAsync(sgAddressBook, AbUpdateFields);
+        var AddressBook: IAddressBook:=TAddressBook.Create();
+        AddressBook.UpdateAddressBookAsync(sgAddressBook, AbUpdateFields);
     end
     else
     MsgCall(Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');

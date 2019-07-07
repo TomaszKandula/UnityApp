@@ -1,5 +1,10 @@
 unit EventLogger;
 
+// ----------------------------------------
+// Application event logger.
+// Can be referenced by anyone.
+// Cannot hold references to View or Logic.
+// ----------------------------------------
 
 interface
 
@@ -46,7 +51,7 @@ implementation
 
 
 uses
-    Main,
+    View.Main,
     Unity.Statics;
 
 

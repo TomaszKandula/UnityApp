@@ -1,5 +1,10 @@
 unit Unity.Interposer;
 
+// ----------------------------------------
+// Extension unit for application.
+// Can be referenced by anyone.
+// Cannot hold references to View or Logic.
+// ----------------------------------------
 
 interface
 
@@ -138,7 +143,7 @@ implementation
 
 
 uses
-    Main,
+    View.Main,
     Settings,
     SqlHandler;
 

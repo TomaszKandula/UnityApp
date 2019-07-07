@@ -1,11 +1,15 @@
 unit Settings;
 
+// ----------------------------------------
+// Application configuration module.
+// Can be referenced by anyone.
+// Cannot hold references to View or Logic.
+// ----------------------------------------
 
 interface
 
 
 uses
-    Main,
     Winapi.Windows,
     Winapi.Messages,
     Winapi.ShellAPI,
@@ -15,7 +19,7 @@ uses
     System.INIFiles,
     Vcl.Forms,
     Vcl.Graphics,
-    CRC32u,
+    Unity.Crc32,
     Unity.Statics;
 
 
