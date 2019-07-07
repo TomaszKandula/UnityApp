@@ -60,9 +60,9 @@ implementation
 
 uses
     View.Main,
-    Settings,
     Sync.Documents,
     Async.Utilities,
+    Unity.Settings,
     Unity.Statics;
 
 

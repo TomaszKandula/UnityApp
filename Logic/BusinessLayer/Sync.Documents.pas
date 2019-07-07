@@ -216,9 +216,8 @@ uses
     View.InvoiceTracker,
     View.Actions,
     Data.Win.ADODB,
-    SQL,
     DbModel,
-    Settings;
+    Unity.Settings;
 
 
 // -------------------------------

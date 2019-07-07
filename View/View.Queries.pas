@@ -118,10 +118,10 @@ uses
     View.Actions,
     View.Calendar,
     Sync.Documents,
-    SqlHandler,
     DbModel,
-    Settings,
-    Unity.Statics;
+    Unity.Settings,
+    Unity.Statics,
+    Handler.Sql;
 
 
 var vQmsForm: TQmsForm;

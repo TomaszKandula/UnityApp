@@ -1,4 +1,4 @@
-unit Settings;
+unit Unity.Settings;
 
 // ----------------------------------------
 // Application configuration module.

@@ -24,7 +24,7 @@ uses
     Vcl.Dialogs,
     Data.Win.ADODB,
     Data.DB,
-    SqlHandler,
+    Handler.Sql,
     Unity.Interposer,
     Unity.Statics,
     Unity.Enums,
@@ -59,16 +59,16 @@ implementation
 
 uses
     View.Main,
-    DatabaseHandler,
-    DbModel,
-    Settings,
-    AccountHandler,
-    Sync.Documents,
-    AgeView,
-    Transactions,
     View.InvoiceTracker,
     View.Actions,
-    View.UserFeedback;
+    View.UserFeedback,
+    Handler.Account,
+    Handler.Database,
+    Unity.Settings,
+    Sync.Documents,
+    DbModel,
+    AgeView,
+    Transactions;
 
 
 // ------------------------------------

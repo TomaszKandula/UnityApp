@@ -163,17 +163,17 @@
         <DCCReference Include="Model\Json\RawTables\Erp.Person.pas"/>
         <DCCReference Include="Model\Json\RawTables\Erp.PersonResponsible.pas"/>
         <DCCReference Include="Model\Json\RawTables\Erp.SalesResponsible.pas"/>
-        <DCCReference Include="Logic\AccessLayer\SqlHandler.pas">
+        <DCCReference Include="Logic\AccessLayer\Handler.Sql.pas">
             <Form>Legacy code/to be removed</Form>
         </DCCReference>
-        <DCCReference Include="Logic\AccessLayer\DatabaseHandler.pas">
+        <DCCReference Include="Logic\AccessLayer\Handler.Database.pas">
             <Form>Legacy code/to be removed</Form>
         </DCCReference>
-        <DCCReference Include="Logic\AccessLayer\AccountHandler.pas"/>
-        <DCCReference Include="Logic\AccessLayer\ConnectionHandler.pas">
+        <DCCReference Include="Logic\AccessLayer\Handler.Account.pas"/>
+        <DCCReference Include="Logic\AccessLayer\Handler.Connection.pas">
             <Form>Legacy code/to be removed</Form>
         </DCCReference>
-        <DCCReference Include="Logic\AccessLayer\RestHandler.pas"/>
+        <DCCReference Include="Logic\AccessLayer\Handler.Rest.pas"/>
         <DCCReference Include="Logic\BusinessLayer\AgeView.pas">
             <Form>Legacy code/to be removed</Form>
         </DCCReference>
@@ -190,9 +190,9 @@
         <DCCReference Include="Logic\BusinessLayer\Async.OpenItems.pas"/>
         <DCCReference Include="Logic\BusinessLayer\Async.Comments.pas"/>
         <DCCReference Include="Logic\BusinessLayer\Async.Statements.pas"/>
-        <DCCReference Include="Logic\Configuration\Settings.pas"/>
-        <DCCReference Include="Logic\Logger\ThreadUtilities.pas"/>
-        <DCCReference Include="Logic\Logger\EventLogger.pas"/>
+        <DCCReference Include="Logic\Configuration\Unity.Settings.pas"/>
+        <DCCReference Include="Logic\Logger\Unity.ThreadUtilities.pas"/>
+        <DCCReference Include="Logic\Logger\Unity.EventLogger.pas"/>
         <DCCReference Include="View\View.Main.pas">
             <Form>MainForm</Form>
         </DCCReference>

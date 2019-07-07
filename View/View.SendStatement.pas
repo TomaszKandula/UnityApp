@@ -104,7 +104,7 @@ uses
     View.Main,
     View.Calendar,
     View.Actions,
-    Settings,
+    Unity.Settings,
     DbModel,
     Unity.Statics,
     Unity.Enums,

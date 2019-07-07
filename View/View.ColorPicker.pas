@@ -74,7 +74,7 @@ implementation
 
 uses
     View.Main,
-    Settings;
+    Unity.Settings;
 
 
 var vColorsForm: TColorsForm;

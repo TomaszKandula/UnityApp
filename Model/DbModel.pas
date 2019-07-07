@@ -10,7 +10,7 @@ interface
 
 
 uses
-    SqlHandler;
+    Handler.Sql;
 
     // legacy code - to be removed after REST is implemented
 

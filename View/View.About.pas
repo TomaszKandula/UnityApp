@@ -106,7 +106,7 @@ implementation
 
 uses
     View.Main,
-    Settings,
+    Unity.Settings,
     Unity.Statics;
 
 

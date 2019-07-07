@@ -56,7 +56,7 @@ implementation
 uses
     View.Main,
     View.Actions,
-    Settings,
+    Unity.Settings,
     Unity.Statics;
 
 

@@ -86,7 +86,7 @@ implementation
 uses
     View.Main,
     View.GridFilter,
-    Settings;
+    Unity.Settings;
 
 
 var vGridSearchForm: TGridSearchForm;

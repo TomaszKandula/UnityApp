@@ -1,4 +1,4 @@
-unit RestHandler;
+unit Handler.Rest;
 
 // ----------------------------------------
 // Application logic, access layers.

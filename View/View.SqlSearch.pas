@@ -145,7 +145,7 @@ implementation
 
 uses
     View.Main,
-    Settings,
+    Unity.Settings,
     DbModel,
     Unity.Statics,
     Async.AddressBook;

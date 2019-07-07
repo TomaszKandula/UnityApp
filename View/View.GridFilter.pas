@@ -112,7 +112,7 @@ implementation
 
 uses
     View.Main,
-    Settings,
+    Unity.Settings,
     DbModel,
     AgeView;
 

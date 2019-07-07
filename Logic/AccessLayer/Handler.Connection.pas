@@ -1,4 +1,4 @@
-unit ConnectionHandler;
+unit Handler.Connection;
 
 // ----------------------------------------
 // Application logic, access layers.

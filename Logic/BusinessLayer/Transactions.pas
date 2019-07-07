@@ -19,7 +19,7 @@ uses
     Vcl.StdCtrls,
     Data.Win.ADODB,
     DbModel,
-    SqlHandler,
+    Handler.Sql,
     Unity.Interposer,
     Unity.Statics,
     Unity.Enums;
@@ -47,7 +47,7 @@ implementation
 
 uses
     View.Main,
-    Settings;
+    Unity.Settings;
 
 
 // ---------------------------------------------------------------------------------------------------------------------------------------- OPEN ITEMS CLASS //

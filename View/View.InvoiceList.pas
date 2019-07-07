@@ -52,8 +52,8 @@ Implementation
 
 uses
     View.Main,
-    Settings,
-    SqlHandler,
+    Unity.Settings,
+    Handler.Sql,
     DbModel,
     Unity.Statics,
     Unity.Enums;

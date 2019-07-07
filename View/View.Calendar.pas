@@ -72,7 +72,7 @@ uses
     System.SysUtils,
     View.Main,
     DbModel,
-    Settings,
+    Unity.Settings,
     Async.Comments;
 
 

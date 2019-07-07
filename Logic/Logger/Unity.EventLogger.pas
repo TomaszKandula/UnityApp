@@ -1,4 +1,4 @@
-unit EventLogger;
+unit Unity.EventLogger;
 
 // ----------------------------------------
 // Application event logger.
@@ -13,7 +13,7 @@ uses
     Winapi.Windows,
     System.Classes,
     System.SysUtils,
-    ThreadUtilities;
+    Unity.ThreadUtilities;
 
 type
 

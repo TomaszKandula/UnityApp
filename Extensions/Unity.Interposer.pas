@@ -144,8 +144,8 @@ implementation
 
 uses
     View.Main,
-    Settings,
-    SqlHandler;
+    Unity.Settings,
+    Handler.Sql;
 
 
 // --------------------------------------------------------------------------------------------------------------------------- EXTENSION OF 'TLISTBOX' CLASS //

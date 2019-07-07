@@ -1,4 +1,4 @@
-unit DatabaseHandler;
+unit Handler.Database;
 
 // ----------------------------------------
 // Application logic, access layers.
@@ -18,7 +18,7 @@ uses
     System.Win.ComObj,
     Vcl.Forms,
     Data.Win.ADODB,
-    Settings;
+    Unity.Settings;
 
 
     // legacy code - to be removed after REST is implemented

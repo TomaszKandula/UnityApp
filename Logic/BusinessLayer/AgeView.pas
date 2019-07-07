@@ -19,7 +19,7 @@ uses
     Vcl.Graphics,
     Data.Win.ADODB,
     DbModel,
-    SqlHandler,
+    Handler.Sql,
     Unity.Interposer,
     Unity.Statics,
     Unity.Arrays,
@@ -94,7 +94,7 @@ implementation
 
 uses
     View.Main,
-    Settings;
+    Unity.Settings;
 
 
 // ---------------------------------------------------------------------------------------------------------------------------------------- CREATE & RELEASE //
