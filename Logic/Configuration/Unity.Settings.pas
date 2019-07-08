@@ -28,7 +28,47 @@ type
 
     ISettings = Interface(IInterface)
     ['{FF5CBEC3-2576-4E1C-954E-C892AB4A7CC1}']
-        // Exposed methods
+
+        // --------------------------------
+        // Undisclosed getters and setters.
+        // --------------------------------
+
+        procedure SetReleaseDateTime(NewDateTime: TDateTime);
+        procedure SetReleaseNumber(NewRelease:    cardinal);
+        procedure SetTodayFColor (NewColor:       TColor);
+        procedure SetTodayBColor (NewColor:       TColor);
+        procedure SetPastFColor  (NewColor:       TColor);
+        procedure SetPastBColor  (NewColor:       TColor);
+        procedure SetFutureFColor(NewColor:       TColor);
+        procedure SetFutureBColor(NewColor:       TColor);
+        function  GetReleaseDateTime: TDateTime;
+        function  GetReleaseNumber:   cardinal;
+        function  GetLayoutLists:     TStringList;
+        function  GetTodayFColor:     TColor;
+        function  GetTodayBColor:     TColor;
+        function  GetPastFColor:      TColor;
+        function  GetPastBColor:      TColor;
+        function  GetFutureFColor:    TColor;
+        function  GetFutureBColor:    TColor;
+
+        // -------------------
+        // Exposed properties.
+        // -------------------
+
+        property  LayoutLists:     TStringList read GetLayoutLists;
+        property  ReleaseNumber:   cardinal    read GetReleaseNumber   write SetReleaseNumber;
+        property  ReleaseDateTime: TDateTime   read GetReleaseDateTime write SetReleaseDateTime;
+        property  TodayFColor:     TColor      read GetTodayFColor     write SetTodayFColor;
+        property  TodayBColor:     TColor      read GetTodayBColor     write SetTodayBColor;
+        property  PastFColor:      TColor      read GetPastFColor      write SetPastFColor;
+        property  PastBColor:      TColor      read GetPastBColor      write SetPastBColor;
+        property  FutureFColor:    TColor      read GetFutureFColor    write SetFutureFColor;
+        property  FutureBColor:    TColor      read GetFutureBColor    write SetFutureBColor;
+
+        // ----------------
+        // Exposed methods.
+        // ----------------
+
         function  Encode(ConfigType: TCommon.TFiles): boolean;
         function  Decode(ConfigType: TCommon.TFiles; ToMemory: boolean): boolean;
         function  ConfigToMemory: boolean;
@@ -43,88 +83,85 @@ type
         procedure DeleteSection(SectionName: string);
         procedure DeleteKey(Section: string; Ident: string);
         function  FindSettingsKey(Section: string; KeyPosition: integer): string;
-        function  GetLastError     : integer;
-        function  GetAppDir        : string;
-        function  GetAppLog        : string;
-        function  GetLayoutDir     : string;
-        function  GetPackageDir    : string;
-        function  GetWinUserName   : string;
-        function  GetWinTempFolder : string;
-        function  GetPathGridImage : string;
-        function  GetPathEventLog  : string;
-        function  GetPathAppCfg    : string;
+        function  GetLastError:      integer;
+        function  GetAppDir:         string;
+        function  GetAppLog:         string;
+        function  GetLayoutDir:      string;
+        function  GetPackageDir:     string;
+        function  GetWinUserName:    string;
+        function  GetWinTempFolder:  string;
+        function  GetPathGridImage:  string;
+        function  GetPathEventLog:   string;
+        function  GetPathAppCfg:     string;
         function  GetPathLicenceLic: string;
-        function  GetReleasePakURL : string;
-        function  GetReleaseManURL : string;
-        function  GetLayoutsURL    : string;
-        // Property's methods (invisible under interface)
-        function  GetReleaseDateTime: TDateTime;
-        procedure SetReleaseDateTime(NewDateTime: TDateTime);
-        function  GetReleaseNumber: cardinal;
-        procedure SetReleaseNumber(NewRelease: cardinal);
-        function  GetLayoutLists: TStringList;
-        function  GetTodayFColor  : TColor;
-        function  GetTodayBColor  : TColor;
-        function  GetPastFColor   : TColor;
-        function  GetPastBColor   : TColor;
-        function  GetFutureFColor : TColor;
-        function  GetFutureBColor : TColor;
-        procedure SetTodayFColor (NewColor: TColor);
-        procedure SetTodayBColor (NewColor: TColor);
-        procedure SetPastFColor  (NewColor: TColor);
-        procedure SetPastBColor  (NewColor: TColor);
-        procedure SetFutureFColor(NewColor: TColor);
-        procedure SetFutureBColor(NewColor: TColor);
-        // Properties
-        property  LayoutLists    : TStringList read GetLayoutLists;
-        property  ReleaseNumber  : cardinal    read GetReleaseNumber   write SetReleaseNumber;
-        property  ReleaseDateTime: TDateTime   read GetReleaseDateTime write SetReleaseDateTime;
-        property  TodayFColor    : TColor      read GetTodayFColor     write SetTodayFColor;
-        property  TodayBColor    : TColor      read GetTodayBColor     write SetTodayBColor;
-        property  PastFColor     : TColor      read GetPastFColor      write SetPastFColor;
-        property  PastBColor     : TColor      read GetPastBColor      write SetPastBColor;
-        property  FutureFColor   : TColor      read GetFutureFColor    write SetFutureFColor;
-        property  FutureBColor   : TColor      read GetFutureBColor    write SetFutureBColor;
+        function  GetReleasePakURL:  string;
+        function  GetReleaseManURL:  string;
+        function  GetLayoutsURL:     string;
+
     end;
 
 
     TSettings = class(TInterfacedObject, ISettings)
     {$TYPEINFO ON}
     private
-        // TMemoryIni holding encoded settings
+
+        // ------------------------------------
+        // TMemoryIni holding encoded settings.
+        // ------------------------------------
+
         var TMIG: TMemIniFile;
         var TMIL: TMemIniFile;
         var List: TStringList;
         var pGetLastError:  integer;
         var pWinUserName:   string;
         var pPathGridImage: string;
-        // Directories
+
+        // --------------------
+        // Directories holders.
+        // --------------------
+
         var pAppLog:         string;
         var pPathEventLog:   string;
         var pPathAppCfg:     string;
         var pPathLicenceLic: string;
-        // Files
+
+        // -------------
+        // Files holder.
+        // -------------
+
         var pAppDir:        string;
         var pDirLayouts:    string;
         var pDirPackage:    string;
         var pWinTempFolder: string;
-        // URL
+
+        // -------------
+        // URLs holders.
+        // -------------
+
         var pReleasePakURL: string;
         var pReleaseManURL: string;
         var pGetLayoutsURL: string;
-        // Others
+
+        // --------
+        // Methods.
+        // --------
+
         function  GetReleaseDateTime: TDateTime;
         procedure SetReleaseDateTime(NewDateTime: TDateTime);
         function  GetReleaseNumber: cardinal;
         procedure SetReleaseNumber(NewRelease: cardinal);
         function  GetLayoutLists: TStringList;
-        // Getters and setters for "follow-up" colors saved in settings file
-        function  GetTodayFColor  : TColor;
-        function  GetTodayBColor  : TColor;
-        function  GetPastFColor   : TColor;
-        function  GetPastBColor   : TColor;
-        function  GetFutureFColor : TColor;
-        function  GetFutureBColor : TColor;
+
+        // ------------------------------------------------------------------
+        // Getters and setters for "follow-up" colors saved in settings file.
+        // ------------------------------------------------------------------
+
+        function  GetTodayFColor:  TColor;
+        function  GetTodayBColor:  TColor;
+        function  GetPastFColor:   TColor;
+        function  GetPastBColor:   TColor;
+        function  GetFutureFColor: TColor;
+        function  GetFutureBColor: TColor;
         procedure SetTodayFColor (NewColor: TColor);
         procedure SetTodayBColor (NewColor: TColor);
         procedure SetPastFColor  (NewColor: TColor);
@@ -154,7 +191,6 @@ type
         property FutureBColor:     TColor    read GetFutureBColor    write SetFutureBColor;
         constructor Create;
         destructor  Destroy; override;
-        // Methods
         function  Encode(ConfigType: TCommon.TFiles): boolean;
         function  Decode(ConfigType: TCommon.TFiles; ToMemory: boolean): boolean;
         function  ConfigToMemory: boolean;

@@ -300,17 +300,6 @@ begin
     ReportMemoryLeaksOnShutdown:=DebugHook <> 0;
     {$WARN SYMBOL_PLATFORM ON}
 
-//    // We allow only one instance of running program (no sessions)
-//    var Mutex: integer:=CreateMutex(nil, True, TCommon.CurrentMutex);
-//    if (Mutex = 0) or (GetLastError = ERROR_ALREADY_EXISTS) then
-//    begin
-//        Application.MessageBox(
-//            PCHar(TCommon.AppCaption + ' is already running. You can only have one instance at a time.'),
-//            PChar(TCommon.AppCaption), MB_OK + MB_ICONWARNING
-//        );
-//        ExitProcess(0);
-//    end;
-
     {$WARN SYMBOL_PLATFORM OFF} {Windows only}
     var RegSettings: TFormatSettings:=TFormatSettings.Create(LOCALE_USER_DEFAULT);
     {$WARN SYMBOL_PLATFORM ON}
@@ -784,7 +773,9 @@ begin
     /// </remarks>
 
     Application.CreateForm(TMainForm, MainForm);
-  // ----------------------------------------------------------------------------------------------------------------------------------------------------- //
+
+
+    // ----------------------------------------------------------------------------------------------------------------------------------------------------- //
 
 
     Status(21, TSplashScreen.AllTasks, 500, 'Application is initialized.', False, Settings.GetPathEventLog, LogText);

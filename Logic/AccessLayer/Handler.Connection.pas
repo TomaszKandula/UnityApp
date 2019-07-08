@@ -20,9 +20,9 @@ uses
     Vcl.AxCtrls,
     WinHttp_TLB;
 
-    /// <remarks>
-    /// Do not use WinInet API in service or service-like process as it requires human facing the application. Use WinHTTP instead.
-    /// </remarks>
+
+    // legacy code - to be removed after REST is implemented, do not modify
+
 
 type
 

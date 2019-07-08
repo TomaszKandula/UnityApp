@@ -1,10 +1,10 @@
 unit Handler.Rest;
 
-// ----------------------------------------
+// -----------------------------------
 // Application logic, access layers.
 // Can be referenced by anyone.
-// Cannot hold references to View.
-// ----------------------------------------
+// Cannot hold references to the View.
+// -----------------------------------
 
 interface
 
@@ -26,17 +26,33 @@ uses
 
 type
 
-    /// <summary>
-    /// Exposes properties and methods to deal with REST API, to obtain and send/receive data to/from WebApi service.
-    /// </summary>
 
     IRESTFul = Interface(IInterface)
     ['{3A64616D-26BE-44F8-80C8-F69DE813D439}']
-        // Exposed methods
-        function  Execute:    boolean;
-        procedure AddParameter(QueryName: string; ParamValue: string);
-        procedure ClearParameters;
-        // Property's methods invisible under interface (getters and setters)
+
+        // --------------------------------
+        // Undisclosed getters and setters.
+        // --------------------------------
+
+        procedure SetCustomBody(NewValue:                    string);
+        procedure SetClientAccept(NewValue:                  string);
+        procedure SetClientAcceptCharset(NewValue:           string);
+        procedure SetClientAllowCookies(NewValue:            boolean);
+        procedure SetClientAutoCreateParams(NewValue:        boolean);
+        procedure SetClientBaseURL(NewValue:                 string);
+        procedure SetClientContentType(NewValue:             string);
+        procedure SetClientFallbackCharsetEncoding(NewValue: string);
+        procedure SetClientHandleRedirects(NewValue:         boolean);
+        procedure SetClientRaiseExceptionOn500(NewValue:     boolean);
+        procedure SetClientSynchronizedEvents(NewValue:      boolean);
+        procedure SetClientUserAgent(NewValue:               string);
+        procedure SetRequestAccept(NewValue:                 string);
+        procedure SetRequestAcceptCharset(NewValue:          string);
+        procedure SetRequestAutoCreateParams(NewValue:       boolean);
+        procedure SetRequestHandleRedirects(NewValue:        boolean);
+        procedure SetRequestMethod(NewValue:                 TRESTRequestMethod);
+        procedure SetRequestSynchronizedEvents(NewValue:     boolean);
+        procedure SetRequestTimeout(NewValue:                integer);
         function  GetStatusCode:                    integer;
         function  GetCustomBody:                    string;
         function  GetContent:                       string;
@@ -61,26 +77,11 @@ type
         function  GetRequestMethod:                 TRESTRequestMethod;
         function  GetRequestSynchronizedEvents:     boolean;
         function  GetRequestTimeout:                integer;
-        procedure SetCustomBody(NewValue: string);
-        procedure SetClientAccept(NewValue: string);
-        procedure SetClientAcceptCharset(NewValue: string);
-        procedure SetClientAllowCookies(NewValue: boolean);
-        procedure SetClientAutoCreateParams(NewValue: boolean);
-        procedure SetClientBaseURL(NewValue: string);
-        procedure SetClientContentType(NewValue: string);
-        procedure SetClientFallbackCharsetEncoding(NewValue: string);
-        procedure SetClientHandleRedirects(NewValue: boolean);
-        procedure SetClientRaiseExceptionOn500(NewValue: boolean);
-        procedure SetClientSynchronizedEvents(NewValue: boolean);
-        procedure SetClientUserAgent(NewValue: string);
-        procedure SetRequestAccept(NewValue: string);
-        procedure SetRequestAcceptCharset(NewValue: string);
-        procedure SetRequestAutoCreateParams(NewValue: boolean);
-        procedure SetRequestHandleRedirects(NewValue: boolean);
-        procedure SetRequestMethod(NewValue: TRESTRequestMethod);
-        procedure SetRequestSynchronizedEvents(NewValue: boolean);
-        procedure SetRequestTimeout(NewValue: integer);
-        // Exposed properties
+
+        // --------------------------------
+        // Exposed properties.
+        // --------------------------------
+
         property StatusCode:                    integer            read GetStatusCode;
         property Content:                       string             read GetContent;
         property Headers:                       string             read GetHeaders;
@@ -105,77 +106,105 @@ type
         property RequestMethod:                 TRESTRequestMethod read GetRequestMethod                 write SetRequestMethod;
         property RequestSynchronizedEvents:     boolean            read GetRequestSynchronizedEvents     write SetRequestSynchronizedEvents;
         property RequestTimeout:                integer            read GetRequestTimeout                write SetRequestTimeout;
+
+        // --------------------------------
+        // Exposed methods.
+        // --------------------------------
+
+        function  Execute: boolean;
+        procedure AddParameter(QueryName: string; ParamValue: string);
+        procedure ClearParameters;
+
     end;
 
-    /// <summary>
-    /// Simple wrapper for REST Client, REST Response, REST Request and HTTPBasicAuthentication.
-    /// </summary>
 
     TRESTful = class(TInterfacedObject, IRESTFul)
     private
-        // Objects
-        var httpAuth:       THTTPBasicAuthenticator;
-        var restClient:     TRESTClient;
-        var restRequest:    TRESTRequest;
-        var restResponse:   TRESTResponse;
-        var queryList:      TList<string>;
-        var paramList:      TList<string>;
-        // Returned status code after execution
+
+        // --------
+        // Objects.
+        // --------
+
+        var httpAuth:     THTTPBasicAuthenticator;
+        var restClient:   TRESTClient;
+        var restRequest:  TRESTRequest;
+        var restResponse: TRESTResponse;
+        var queryList:    TList<string>;
+        var paramList:    TList<string>;
+
+        // -------------------------------------
+        // Returned status code after execution.
+        // -------------------------------------
+
         var FStatusCode: integer;
-        // REST response content
+
+        // ----------------------
+        // REST response content.
+        // ----------------------
+
         var FResponseContent: string;
-        // Custom body (POST, PUT)
+
+        // ------------------------
+        // Custom body (POST, PUT).
+        // ------------------------
+
         var FCustomBody: string;
-        // Property's getters
-        function GetStatusCode:                    integer;
-        function GetCustomBody:                    string;
-        function GetContent:                       string;
-        function GetHeaders:                       string;
-        function GethttpAuthUsername:              string;
-        function GethttpAuthPassword:              string;
-        function GetClientAccept:                  string;
-        function GetClientAcceptCharset:           string;
-        function GetClientAllowCookies:            boolean;
-        function GetClientAutoCreateParams:        boolean;
-        function GetClientBaseURL:                 string;
-        function GetClientContentType:             string;
-        function GetClientFallbackCharsetEncoding: string;
-        function GetClientHandleRedirects:         boolean;
-        function GetClientRaiseExceptionOn500:     boolean;
-        function GetClientSynchronizedEvents:      boolean;
-        function GetClientUserAgent:               string;
-        function GetRequestAccept:                 string;
-        function GetRequestAcceptCharset:          string;
-        function GetRequestAutoCreateParams:       boolean;
-        function GetRequestHandleRedirects:        boolean;
-        function GetRequestMethod:                 TRESTRequestMethod;
-        function GetRequestSynchronizedEvents:     boolean;
-        function GetRequestTimeout:                integer;
-        // Property's setters
-        procedure SetCustomBody(NewValue: string);
-        procedure SetClientAccept(NewValue: string);
-        procedure SetClientAcceptCharset(NewValue: string);
-        procedure SetClientAllowCookies(NewValue: boolean);
-        procedure SetClientAutoCreateParams(NewValue: boolean);
-        procedure SetClientBaseURL(NewValue: string);
-        procedure SetClientContentType(NewValue: string);
+
+        // --------------------------------
+        // Property's getters and setters.
+        // --------------------------------
+
+        procedure SetCustomBody(NewValue:                    string);
+        procedure SetClientAccept(NewValue:                  string);
+        procedure SetClientAcceptCharset(NewValue:           string);
+        procedure SetClientAllowCookies(NewValue:            boolean);
+        procedure SetClientAutoCreateParams(NewValue:        boolean);
+        procedure SetClientBaseURL(NewValue:                 string);
+        procedure SetClientContentType(NewValue:             string);
         procedure SetClientFallbackCharsetEncoding(NewValue: string);
-        procedure SetClientHandleRedirects(NewValue: boolean);
-        procedure SetClientRaiseExceptionOn500(NewValue: boolean);
-        procedure SetClientSynchronizedEvents(NewValue: boolean);
-        procedure SetClientUserAgent(NewValue: string);
-        procedure SetRequestAccept(NewValue: string);
-        procedure SetRequestAcceptCharset(NewValue: string);
-        procedure SetRequestAutoCreateParams(NewValue: boolean);
-        procedure SetRequestHandleRedirects(NewValue: boolean);
-        procedure SetRequestMethod(NewValue: TRESTRequestMethod);
-        procedure SetRequestSynchronizedEvents(NewValue: boolean);
-        procedure SetRequestTimeout(NewValue: integer);
-        // Trimming received response string
+        procedure SetClientHandleRedirects(NewValue:         boolean);
+        procedure SetClientRaiseExceptionOn500(NewValue:     boolean);
+        procedure SetClientSynchronizedEvents(NewValue:      boolean);
+        procedure SetClientUserAgent(NewValue:               string);
+        procedure SetRequestAccept(NewValue:                 string);
+        procedure SetRequestAcceptCharset(NewValue:          string);
+        procedure SetRequestAutoCreateParams(NewValue:       boolean);
+        procedure SetRequestHandleRedirects(NewValue:        boolean);
+        procedure SetRequestMethod(NewValue:                 TRESTRequestMethod);
+        procedure SetRequestSynchronizedEvents(NewValue:     boolean);
+        procedure SetRequestTimeout(NewValue:                integer);
+        function  GetStatusCode:                    integer;
+        function  GetCustomBody:                    string;
+        function  GetContent:                       string;
+        function  GetHeaders:                       string;
+        function  GethttpAuthUsername:              string;
+        function  GethttpAuthPassword:              string;
+        function  GetClientAccept:                  string;
+        function  GetClientAcceptCharset:           string;
+        function  GetClientAllowCookies:            boolean;
+        function  GetClientAutoCreateParams:        boolean;
+        function  GetClientBaseURL:                 string;
+        function  GetClientContentType:             string;
+        function  GetClientFallbackCharsetEncoding: string;
+        function  GetClientHandleRedirects:         boolean;
+        function  GetClientRaiseExceptionOn500:     boolean;
+        function  GetClientSynchronizedEvents:      boolean;
+        function  GetClientUserAgent:               string;
+        function  GetRequestAccept:                 string;
+        function  GetRequestAcceptCharset:          string;
+        function  GetRequestAutoCreateParams:       boolean;
+        function  GetRequestHandleRedirects:        boolean;
+        function  GetRequestMethod:                 TRESTRequestMethod;
+        function  GetRequestSynchronizedEvents:     boolean;
+        function  GetRequestTimeout:                integer;
+
+        // ----------------------------------
+        // Trimming received response string.
+        // ----------------------------------
+
         procedure TrimContent(var TextStr: string);
+
     public
-        constructor Create(UserName: string; Password: string);
-        destructor Destroy; override;
         property StatusCode:                    integer            read GetStatusCode;
         property Content:                       string             read GetContent;
         property Headers:                       string             read GetHeaders;
@@ -200,6 +229,8 @@ type
         property RequestMethod:                 TRESTRequestMethod read GetRequestMethod                 write SetRequestMethod;
         property RequestSynchronizedEvents:     boolean            read GetRequestSynchronizedEvents     write SetRequestSynchronizedEvents;
         property RequestTimeout:                integer            read GetRequestTimeout                write SetRequestTimeout;
+        constructor Create(UserName: string; Password: string);
+        destructor Destroy; override;
         function Execute: boolean;
         procedure AddParameter(QueryName: string; ParamValue: string);
         procedure ClearParameters;
@@ -616,7 +647,7 @@ end;
 
 procedure TRESTful.SetClientUserAgent(NewValue: string);
 begin
-    if Assigned(restClient) then restClient.UserAgent;
+    if Assigned(restClient) then restClient.UserAgent:=NewValue;
 end;
 
 

@@ -23,14 +23,11 @@ uses
     Unity.Enums;
 
 
-    // legacy code - to be removed after REST is implemented
+    // legacy code - to be removed after REST is implemented, do not modify
 
 
 type
 
-    /// <summary>
-    /// Base class for SQL handling, execute and generate SQL expressions.
-    /// </summary>
 
     TMSSQL = class
     {$TYPEINFO ON}
