@@ -1,9 +1,9 @@
-object SplashForm: TSplashForm
+object StartupForm: TStartupForm
   Left = 0
   Top = 0
   BorderStyle = bsNone
   Caption = 'Unity'
-  ClientHeight = 473
+  ClientHeight = 483
   ClientWidth = 843
   Color = clWhite
   Font.Charset = DEFAULT_CHARSET
@@ -20,12 +20,11 @@ object SplashForm: TSplashForm
     Left = 0
     Top = 0
     Width = 843
-    Height = 473
+    Height = 483
     Align = alClient
     Pen.Color = 6566857
     Pen.Width = 2
-    ExplicitLeft = -5
-    ExplicitTop = -2
+    ExplicitTop = 1
   end
   object ShapeProgressBar: TShape
     Left = 195
@@ -110,7 +109,7 @@ object SplashForm: TSplashForm
   object TextFooter2B: TLabel
     AlignWithMargins = True
     Left = 160
-    Top = 431
+    Top = 451
     Width = 529
     Height = 13
     Cursor = crAppStart
@@ -131,7 +130,7 @@ object SplashForm: TSplashForm
   object TextFooterA: TLabel
     AlignWithMargins = True
     Left = 223
-    Top = 413
+    Top = 433
     Width = 393
     Height = 13
     Cursor = crAppStart
@@ -184,8 +183,8 @@ object SplashForm: TSplashForm
     ParentFont = False
   end
   object CentreText: TLabel
-    Left = 341
-    Top = 349
+    Left = 336
+    Top = 360
     Width = 161
     Height = 16
     Cursor = crAppStart
@@ -200,7 +199,7 @@ object SplashForm: TSplashForm
   end
   object Flutter: TImage
     Left = 391
-    Top = 293
+    Top = 298
     Width = 50
     Height = 50
     Center = True
@@ -754,5 +753,18 @@ object SplashForm: TSplashForm
       002001810E0000000908740000004840A00300004002021D0000001210E80000
       009080400700008004FE03D1C8C9E70D64986E0000000049454E44AE426082}
     Stretch = True
+  end
+  object FlutterText: TLabel
+    Left = 357
+    Top = 382
+    Width = 119
+    Height = 16
+    Caption = 'With Google'#39's Flutter'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -13
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
   end
 end

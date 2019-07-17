@@ -1,15 +1,14 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
-        <ProjectGuid>{46CC73EF-8CA5-46CE-A7B9-481F487F4360}</ProjectGuid>
-        <MainSource>UnityReader.dpr</MainSource>
+        <ProjectGuid>{9056368F-E04F-4027-9109-046741D1512A}</ProjectGuid>
         <ProjectVersion>18.6</ProjectVersion>
-        <Base>True</Base>
-        <Config Condition="'$(Config)'==''">Release</Config>
-        <AppType>Application</AppType>
         <FrameworkType>VCL</FrameworkType>
-        <DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
+        <MainSource>UnityUpdater.dpr</MainSource>
+        <Base>True</Base>
+        <Config Condition="'$(Config)'==''">Debug</Config>
         <Platform Condition="'$(Platform)'==''">Win32</Platform>
         <TargetedPlatforms>1</TargetedPlatforms>
+        <AppType>Application</AppType>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
         <Base>true</Base>
@@ -47,7 +46,6 @@
         <Base>true</Base>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
-        <DCC_ImageBase>00400000</DCC_ImageBase>
         <DCC_DcuOutput>.\Build\$(Platform)\Dcu\$(Config)</DCC_DcuOutput>
         <DCC_ExeOutput>.\Build\$(Platform)\Bin</DCC_ExeOutput>
         <DCC_E>false</DCC_E>
@@ -55,50 +53,43 @@
         <DCC_S>false</DCC_S>
         <DCC_F>false</DCC_F>
         <DCC_K>false</DCC_K>
-        <SanitizedProjectName>UnityReader</SanitizedProjectName>
-        <DCC_Namespace>Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;System;Xml;Data;Datasnap;Web;Soap;Winapi;$(DCC_Namespace)</DCC_Namespace>
-        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <VerInfo_AutoGenVersion>true</VerInfo_AutoGenVersion>
-        <VerInfo_MajorVer>0</VerInfo_MajorVer>
-        <VerInfo_MinorVer>1</VerInfo_MinorVer>
-        <VerInfo_Build>7</VerInfo_Build>
-        <VerInfo_PreRelease>true</VerInfo_PreRelease>
-        <VerInfo_Locale>2057</VerInfo_Locale>
-        <VerInfo_Keys>CompanyName=Tomasz Kandula for DFDS Polska sp. z o.o.;FileDescription=Unity Reader (Chromium);FileVersion=0.1.0.7;InternalName=Unity Reader;LegalCopyright=Tomasz Kandula/DFDS Polska sp. z o.o.;LegalTrademarks=Tomasz Kandula/DFDS Polska sp. z o.o.;OriginalFilename=UnityReader.exe;ProductName=Unity for Debt Management;ProductVersion=1.0.0.0;Comments=Unity for Debt Management</VerInfo_Keys>
+        <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;$(DCC_Namespace)</DCC_Namespace>
+        <Icon_MainIcon>$(BDS)\bin\delphi_PROJECTICON.ico</Icon_MainIcon>
+        <UWP_DelphiLogo44>$(BDS)\bin\Artwork\Windows\UWP\delphi_UwpDefault_44.png</UWP_DelphiLogo44>
+        <UWP_DelphiLogo150>$(BDS)\bin\Artwork\Windows\UWP\delphi_UwpDefault_150.png</UWP_DelphiLogo150>
+        <SanitizedProjectName>UnityUpdater</SanitizedProjectName>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
-        <DCC_Namespace>System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
+        <DCC_UsePackage>DBXSqliteDriver;RESTComponents;bindcompdbx;IndyIPCommon;DBXInterBaseDriver;vcl;IndyIPServer;vclactnband;vclFireDAC;IndySystem;tethering;svnui;dsnapcon;FireDACADSDriver;FireDACMSAccDriver;fmxFireDAC;vclimg;TeeDB;FireDAC;vcltouch;vcldb;bindcompfmx;svn;FireDACSqliteDriver;FireDACPgDriver;ibmonitor;inetdb;FMXTee;soaprtl;DbxCommonDriver;FmxTeeUI;ibxpress;fmx;FireDACIBDriver;fmxdae;xmlrtl;soapmidas;ibxbindings;fmxobj;vclwinx;vclib;rtl;Tee;DbxClientDriver;CustomIPTransport;vcldsnap;dbexpress;IndyCore;vclx;bindcomp;appanalytics;dsnap;FireDACCommon;IndyIPClient;bindcompvcl;RESTBackendComponents;TeeUI;VCLRESTComponents;soapserver;dbxcds;VclSmp;adortl;vclie;CEF4Delphi_FMX;bindengine;DBXMySQLDriver;CloudService;dsnapxml;FireDACMySQLDriver;dbrtl;IndyProtocols;inetdbxpress;FireDACCommonODBC;FireDACCommonDriver;inet;fmxase;$(DCC_UsePackage)</DCC_UsePackage>
+        <DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
         <BT_BuildType>Debug</BT_BuildType>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName)</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
-        <Icon_MainIcon>UnityReader_Icon2.ico</Icon_MainIcon>
-        <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
-        <UWP_DelphiLogo44>$(BDS)\bin\Artwork\Windows\UWP\delphi_UwpDefault_44.png</UWP_DelphiLogo44>
-        <UWP_DelphiLogo150>$(BDS)\bin\Artwork\Windows\UWP\delphi_UwpDefault_150.png</UWP_DelphiLogo150>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win64)'!=''">
-        <Manifest_File>$(BDS)\bin\default_app.manifest</Manifest_File>
-        <Icon_MainIcon>UnityReader_Icon2.ico</Icon_MainIcon>
-        <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
-        <UWP_DelphiLogo44>$(BDS)\bin\Artwork\Windows\UWP\delphi_UwpDefault_44.png</UWP_DelphiLogo44>
-        <UWP_DelphiLogo150>$(BDS)\bin\Artwork\Windows\UWP\delphi_UwpDefault_150.png</UWP_DelphiLogo150>
+        <DCC_UsePackage>DBXSqliteDriver;RESTComponents;bindcompdbx;IndyIPCommon;DBXInterBaseDriver;vcl;IndyIPServer;vclactnband;vclFireDAC;IndySystem;tethering;dsnapcon;FireDACADSDriver;FireDACMSAccDriver;fmxFireDAC;vclimg;TeeDB;FireDAC;vcltouch;vcldb;bindcompfmx;FireDACSqliteDriver;FireDACPgDriver;ibmonitor;inetdb;FMXTee;soaprtl;DbxCommonDriver;FmxTeeUI;ibxpress;fmx;FireDACIBDriver;fmxdae;xmlrtl;soapmidas;ibxbindings;fmxobj;vclwinx;vclib;rtl;Tee;DbxClientDriver;CustomIPTransport;vcldsnap;dbexpress;IndyCore;vclx;bindcomp;appanalytics;dsnap;FireDACCommon;IndyIPClient;bindcompvcl;RESTBackendComponents;TeeUI;VCLRESTComponents;soapserver;dbxcds;VclSmp;adortl;vclie;CEF4Delphi_FMX;bindengine;DBXMySQLDriver;CloudService;dsnapxml;FireDACMySQLDriver;dbrtl;IndyProtocols;inetdbxpress;FireDACCommonODBC;FireDACCommonDriver;inet;fmxase;$(DCC_UsePackage)</DCC_UsePackage>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1)'!=''">
         <DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
+        <DCC_DebugDCUs>true</DCC_DebugDCUs>
         <DCC_Optimize>false</DCC_Optimize>
         <DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
+        <DCC_DebugInfoInExe>true</DCC_DebugInfoInExe>
+        <DCC_RemoteDebug>true</DCC_RemoteDebug>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
+        <DCC_RemoteDebug>false</DCC_RemoteDebug>
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
-        <VerInfo_MajorVer>1</VerInfo_MajorVer>
-        <VerInfo_MinorVer>0</VerInfo_MinorVer>
-        <VerInfo_Build>0</VerInfo_Build>
-        <VerInfo_Locale>1033</VerInfo_Locale>
-        <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=;ProgramID=com.embarcadero.$(MSBuildProjectName)</VerInfo_Keys>
-        <Icon_MainIcon>UnityReader_Icon.ico</Icon_MainIcon>
-        <AppDPIAwarenessMode>PerMonitor</AppDPIAwarenessMode>
+        <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
+        <DCC_Description>Unity for Debt Management</DCC_Description>
+        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
+        <VerInfo_Locale>2057</VerInfo_Locale>
+        <VerInfo_Keys>CompanyName=Tomasz Kandula/DFDS Polska Sp. z o.o.;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=Unity Updater;LegalCopyright=Tomasz Kandula/DFDS Polska Sp. z o.o.;LegalTrademarks=Tomasz Kandula/DFDS Polska Sp. z o.o.;OriginalFilename=UnityUpdater.exe;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=Unity Updater for Unity for Debt Management</VerInfo_Keys>
+        <Icon_MainIcon>UnityUpdater_Icon.ico</Icon_MainIcon>
+        <VerInfo_PreRelease>true</VerInfo_PreRelease>
+        <VerInfo_Debug>true</VerInfo_Debug>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
         <DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
@@ -108,18 +99,14 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
         <AppEnableRuntimeThemes>true</AppEnableRuntimeThemes>
-        <VerInfo_Keys>CompanyName=Tomasz Kandula/DFDS Polska Sp. z o.o.;FileDescription=$(MSBuildProjectName);FileVersion=0.1.0.7;InternalName=Unity Reader;LegalCopyright=Tomasz Kandula/DFDS Polska Sp. z o.o.;LegalTrademarks=Tomasz Kandula/DFDS Polska Sp. z o.o.;OriginalFilename=UnityReader.exe;ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=Unity Reader for Unity for Debt Management;ProgramID=com.unity.$(MSBuildProjectName)</VerInfo_Keys>
-        <Icon_MainIcon>UnityReader_Icon.ico</Icon_MainIcon>
-        <AppDPIAwarenessMode>PerMonitor</AppDPIAwarenessMode>
-        <VerInfo_Locale>1033</VerInfo_Locale>
-        <VerInfo_Debug>true</VerInfo_Debug>
+        <AppDPIAwarenessMode>PerMonitorV2</AppDPIAwarenessMode>
     </PropertyGroup>
     <ItemGroup>
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
-        <DCCReference Include="View\View.Reader.pas">
-            <Form>FormReader</Form>
+        <DCCReference Include="View\View.Updater.pas">
+            <Form>FormUpdater</Form>
             <FormType>dfm</FormType>
         </DCCReference>
         <BuildConfiguration Include="Release">
@@ -134,62 +121,23 @@
             <CfgParent>Base</CfgParent>
         </BuildConfiguration>
     </ItemGroup>
-    <Import Condition="Exists('$(BDS)\Bin\CodeGear.Delphi.Targets')" Project="$(BDS)\Bin\CodeGear.Delphi.Targets"/>
     <ProjectExtensions>
         <Borland.Personality>Delphi.Personality.12</Borland.Personality>
-        <Borland.ProjectType/>
+        <Borland.ProjectType>Application</Borland.ProjectType>
         <BorlandProject>
             <Delphi.Personality>
-                <VersionInfo>
-                    <VersionInfo Name="IncludeVerInfo">True</VersionInfo>
-                    <VersionInfo Name="AutoIncBuild">True</VersionInfo>
-                    <VersionInfo Name="MajorVer">0</VersionInfo>
-                    <VersionInfo Name="MinorVer">1</VersionInfo>
-                    <VersionInfo Name="Release">0</VersionInfo>
-                    <VersionInfo Name="Build">7</VersionInfo>
-                    <VersionInfo Name="Debug">False</VersionInfo>
-                    <VersionInfo Name="PreRelease">True</VersionInfo>
-                    <VersionInfo Name="Special">False</VersionInfo>
-                    <VersionInfo Name="Private">False</VersionInfo>
-                    <VersionInfo Name="DLL">False</VersionInfo>
-                    <VersionInfo Name="Locale">2057</VersionInfo>
-                    <VersionInfo Name="CodePage">1252</VersionInfo>
-                </VersionInfo>
-                <VersionInfoKeys>
-                    <VersionInfoKeys Name="CompanyName">Tomasz Kandula for DFDS Polska sp. z o.o.</VersionInfoKeys>
-                    <VersionInfoKeys Name="FileDescription">Unity Reader (Chromium)</VersionInfoKeys>
-                    <VersionInfoKeys Name="FileVersion">0.1.0.7</VersionInfoKeys>
-                    <VersionInfoKeys Name="InternalName">Unity Reader</VersionInfoKeys>
-                    <VersionInfoKeys Name="LegalCopyright">Tomasz Kandula/DFDS Polska sp. z o.o.</VersionInfoKeys>
-                    <VersionInfoKeys Name="LegalTrademarks">Tomasz Kandula/DFDS Polska sp. z o.o.</VersionInfoKeys>
-                    <VersionInfoKeys Name="OriginalFilename">UnityReader.exe</VersionInfoKeys>
-                    <VersionInfoKeys Name="ProductName">Unity for Debt Management</VersionInfoKeys>
-                    <VersionInfoKeys Name="ProductVersion">1.0.0.0</VersionInfoKeys>
-                    <VersionInfoKeys Name="Comments">Unity for Debt Management</VersionInfoKeys>
-                </VersionInfoKeys>
                 <Source>
-                    <Source Name="MainSource">UnityReader.dpr</Source>
+                    <Source Name="MainSource">UnityUpdater.dpr</Source>
                 </Source>
-                <Parameters/>
                 <Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\dcloffice2k260.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\dclofficexp260.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
                 </Excluded_Packages>
             </Delphi.Personality>
-            <Platforms>
-                <Platform value="Win32">True</Platform>
-                <Platform value="Win64">False</Platform>
-            </Platforms>
             <Deployment Version="3">
-                <DeployFile LocalName="Release\Win32\UnityReader.exe" Configuration="Release" Class="ProjectOutput">
+                <DeployFile LocalName="Win32\Debug\UnityUpdater.exe" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
-                        <RemoteName>UnityReader.exe</RemoteName>
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
-                <DeployFile LocalName="Debug\Win32\UnityReader.exe" Configuration="Debug" Class="ProjectOutput">
-                    <Platform Name="Win32">
-                        <RemoteName>UnityReader.exe</RemoteName>
+                        <RemoteName>UnityUpdater.exe</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
@@ -662,9 +610,14 @@
                 <ProjectRoot Platform="OSX64" Name="$(PROJECTNAME).app"/>
                 <ProjectRoot Platform="iOSSimulator" Name="$(PROJECTNAME).app"/>
             </Deployment>
+            <Platforms>
+                <Platform value="Win32">True</Platform>
+                <Platform value="Win64">False</Platform>
+            </Platforms>
         </BorlandProject>
         <ProjectFileVersion>12</ProjectFileVersion>
     </ProjectExtensions>
+    <Import Project="$(BDS)\Bin\CodeGear.Delphi.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Delphi.Targets')"/>
     <Import Project="$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj" Condition="Exists('$(APPDATA)\Embarcadero\$(BDSAPPDATABASEDIR)\$(PRODUCTVERSION)\UserTools.proj')"/>
     <Import Project="$(MSBuildProjectName).deployproj" Condition="Exists('$(MSBuildProjectName).deployproj')"/>
 </Project>

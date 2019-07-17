@@ -1,4 +1,4 @@
-unit Reader;
+unit View.Reader;
 
 
 interface
@@ -20,7 +20,8 @@ uses
     uCEFWindowParent,
     uCEFChromiumWindow,
     uCEFTypes,
-    uCEFInterfaces;
+    uCEFInterfaces,
+    uCEFWinControl;
 
 
 type
@@ -45,8 +46,8 @@ type
         var input: string;
     end;
 
-var
-    FormReader: TFormReader;
+
+    function FormReader(): TFormReader;
 
 
 implementation
@@ -59,7 +60,15 @@ uses
     uCEFApplication;
 
 
-// ---------------------------------------------------------------------------------------------------------------------------------------- WINDOWS MESSAGES //
+var
+    AFormReader: TFormReader;
+
+
+function FormReader(): TFormReader;
+begin
+    if not(Assigned(AFormReader)) then Application.CreateForm(TFormReader, AFormReader);
+    Result:=AFormReader;
+end;
 
 
 procedure TFormReader.WndProc(var Msg: Winapi.Messages.TMessage);
@@ -76,13 +85,6 @@ begin
 
 end;
 
-
-// --------------------------------------------------------------------------------------------------------------------------------------------- MAIN THREAD //
-
-
-/// <summary>
-/// Execute method statement on create event.
-/// </summary>
 
 procedure TFormReader.FormCreate(Sender: TObject);
 begin
@@ -122,9 +124,6 @@ begin
 end;
 
 
-// ---------------------------------------------------------------------------------------------------------------------------------------- COMPONENT EVENTS //
-
-
 /// <summary>
 /// Timer for Chromium component.
 /// </summary>
@@ -134,9 +133,6 @@ begin
     Timer.Enabled:=False;
     if not(ChromiumWindow.CreateBrowser) and not(ChromiumWindow.Initialized) then Timer.Enabled:=True;
 end;
-
-
-// -------------------------------------------------------------------------------------------------------------------------------------- CHROMIUM COMPONENT //
 
 
 /// <summary>

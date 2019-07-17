@@ -1,9 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <BorlandProject>
 	<Transactions>
+    <Transaction>1899/12/30 00:00:00.000.786,D:\Projects\Unity Project\__Unity\UnityReader_10.dproj=D:\Projects\Unity Project\__Unity\UnityReader.dproj</Transaction>
     <Transaction>1899/12/30 00:00:00.000.780,=D:\Projects\Unity Project\__Unity\View\Reader.pas</Transaction>
-    <Transaction>1899/12/30 00:00:00.000.421,D:\Projects\Unity Project\__Unity\UnityReader_10.dproj=D:\Projects\Unity Project\__Unity\UnityReader.dproj</Transaction>
-    <Transaction>1899/12/30 00:00:00.000.786,D:\Projects\Unity Project\__Unity\UnityReader.dproj=D:\Projects\Unity Project\__Unity\UnityReader_10.dproj</Transaction>
+    <Transaction>1899/12/30 00:00:00.000.421,D:\Projects\Unity Project\__Unity\UnityReader.dproj=D:\Projects\Unity Project\__Unity\UnityReader_10.dproj</Transaction>
     <Transaction>1899/12/30 00:00:00.000.439,D:\Projects\Unity Project\__Unity\Reader.pas=</Transaction>
+    <Transaction>2019/07/11 14:16:08.000.934,I:\Projects\Unity Project\__Unity\View\View.Reader.pas=I:\Projects\Unity Project\__Unity\View\Reader.pas</Transaction>
+    <Transaction>2019/07/11 14:16:08.000.934,I:\Projects\Unity Project\__Unity\View\View.Reader.dfm=I:\Projects\Unity Project\__Unity\View\Reader.dfm</Transaction>
   </Transactions>
 </BorlandProject>

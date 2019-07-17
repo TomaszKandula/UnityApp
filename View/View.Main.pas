@@ -3,7 +3,7 @@ unit View.Main;
 // -----------------------------------------------------------------------------
 // Application GUI / view that can have direct calls to logic layer interface.
 // Calls must have reference to callback method that have the same definition as
-// callback signature. All views except MainForm use Lazy Loading pattern.
+// callback signature. All views use Lazy Initialization pattern.
 // -----------------------------------------------------------------------------
 
 interface
@@ -852,23 +852,32 @@ type
         procedure Action_TurnRowHighlightClick(Sender: TObject);
         procedure CommonPopupMenuPopup(Sender: TObject);
     private
+
         var AbUpdateFields: TAddressBookUpdateFields;
         var DailyCommentFields: TDailyCommentFields;
         var GeneralCommentFields: TGeneralCommentFields;
         var FAllowClose:      boolean;
         var FStartTime:       TTime;
+
         var FWinUserName:     string;
         var FEventLogPath:    string;
+
         var FGroupIdSel:      string;
         var FGroupNmSel:      string;
         var FAgeDateSel:      string;
+
         var FOSAmount:        double;
+
         var FAccessLevel:     string;
         var FAccessMode:      string;
+
         var FOpenItemsUpdate: string;
         var FOpenItemsStatus: string;
+
         var FIsConnected:     boolean;
+
         var FCurrentEvents:   string;
+
         procedure ResetTabsheetButtons;
         procedure SetPanelBorders;
         procedure SetGridColumnWidths;
@@ -883,7 +892,7 @@ type
         function  CDate(StrDate: string): TDate;
         function  ShowReport(ReportNumber: cardinal): cardinal;
         procedure InitializeScreenSettings;
-        procedure OnCreateJob(Text: string);
+
     public
 
         var LogText:           TThreadFileLog;
@@ -964,16 +973,15 @@ type
     end;
 
 
-const
-    WM_GETINFO = WM_USER + 120;
-    WM_EXTINFO = WM_APP  + 150;
-
-
-var
-    MainForm: TMainForm;
+    function MainForm: TMainForm;
+    const WM_GETINFO = WM_USER + 120;
+    const WM_EXTINFO = WM_APP  + 150;
 
 
 implementation
+
+
+{$R *.dfm}
 
 
 uses
@@ -989,7 +997,6 @@ uses
     View.UserFeedback,
     View.SqlSearch,
     View.MassMailer,
-    View.SplashScreen,
     View.AwaitScreen,
     Handler.Sql,
     DbModel,
@@ -1009,7 +1016,15 @@ uses
     uCEFApplication;
 
 
-{$R *.dfm}
+var
+    VMainForm: TMainForm;
+
+
+function MainForm: TMainForm;
+begin
+    if not(Assigned(VMainForm)) then Application.CreateForm(TMainForm, VMainForm);
+    Result:=VMainForm;
+end;
 
 
 // ------------------------------------------------------------------------------------------------------------------------------------------ DEBUGER OUTPUT //
@@ -1978,19 +1993,9 @@ begin
     else
     begin
         MainForm.DefaultMonitor:=dmPrimary;
-        MainForm.Position      :=poDesktopCenter;
+        MainForm.Position:=poDesktopCenter;
     end;
 
-end;
-
-
-procedure TMainForm.OnCreateJob(Text: string);
-begin
-    if Assigned(SplashForm) then
-    begin
-        SplashForm.TextStatus.Caption:='Application initialization: ' + Text;
-        SplashForm.Update;
-    end;
 end;
 
 
@@ -2000,243 +2005,243 @@ end;
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
 
-    LogText:=TThreadFileLog.Create;
-    var AppVersion: string:=TCommon.GetBuildInfoAsString;
-
-    CurrentEvents:='# -- SESSION START --';
-    FAllowClose:=False;
-
-    // --------------------------
-    // Settings
-    // --------------------------
-
-    OnCreateJob(TSplashScreen.SettingUp);
-
-    InitializeScreenSettings;
-    var Settings: ISettings:=TSettings.Create;
-    try
-        MainForm.Caption :=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'WND_MAIN', TCommon.APPCAPTION);
-        DataUpdated.Caption:='';
-
-        WinUserName :=Settings.GetWinUserName;
-        EventLogPath:=Settings.GetPathEventLog;
-
-        GridPicture:=TImage.Create(MainForm);
-        GridPicture.SetBounds(0, 0, 16, 16);
-        LoadImageFromStream(GridPicture, Settings.GetPathGridImage);
-
-        /// <remarks>
-        /// "InetTimer" is excluded from below list because it is controlled by "InitializeConnection" method.
-        /// </remarks>
-
-        InvoiceScanTimer.Interval:=Settings.GetIntegerValue(TConfigSections.TimersSettings, 'INVOICE_SCANNER', 900000{15 minutes});
-        FollowupPopup.Interval:=Settings.GetIntegerValue(TConfigSections.TimersSettings, 'FOLLOWUP_CHECKER', 1800000{30 minutes});
-        OILoader.Interval:=Settings.GetIntegerValue(TConfigSections.TimersSettings, 'OI_LOADER', 300000{5 minutes});
-
-        /// <remarks>
-        /// Get risk class values and convert default decimal separator.
-        /// </remarks>
-
-        if FormatSettings.DecimalSeparator = ',' then
-        begin
-            procRISKA.Caption:=((Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_A_MAX', TRiskClass.A)).ToExtended * 100).ToString + '%';
-            procRISKB.Caption:=((Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_B_MAX', TRiskClass.B)).ToExtended * 100).ToString + '%';
-            procRISKC.Caption:=((Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_C_MAX', TRiskClass.C)).ToExtended * 100).ToString + '%';
-        end;
-
-        if FormatSettings.DecimalSeparator = '.' then
-        begin
-            procRISKA.Caption:=((StringReplace(Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_A_MAX', TRiskClass.A), ',', '.', [rfReplaceAll])).ToExtended * 100).ToString + '%';
-            procRISKB.Caption:=((StringReplace(Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_B_MAX', TRiskClass.B), ',', '.', [rfReplaceAll])).ToExtended * 100).ToString + '%';
-            procRISKC.Caption:=((StringReplace(Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_C_MAX', TRiskClass.C), ',', '.', [rfReplaceAll])).ToExtended * 100).ToString + '%';
-        end;
-
-        /// <remarks>
-        /// Hide all tabs on TPageControl component and set "Debtors" [TabSheet1] as starting page.
-        /// </remarks>
-
-        for var iCNT: integer:=0 to MyPages.PageCount - 1 do MyPages.Pages[iCNT].TabVisible:=False;
-        MyPages.ActivePage:=TabSheet1;
-
-        // Captions for shapes holding controls
-        Cap01.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT01', 'EMPTY'), [fsBold]);
-        Cap02.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT02', 'EMPTY'), [fsBold]);
-        Cap03.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT03', 'EMPTY'), [fsBold]);
-        Cap05.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT05', 'EMPTY'), [fsBold]);
-        Cap06.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT06', 'EMPTY'), [fsBold]);
-        Cap07.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT07', 'EMPTY'), [fsBold]);
-        Cap24.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT08', 'EMPTY'), [fsBold]);
-        Cap10.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS2TXT01', 'EMPTY'), [fsBold]);
-        Cap11.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS2TXT02', 'EMPTY'), [fsBold]);
-        Cap12.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS2TXT03', 'EMPTY'), [fsBold]);
-        Cap13.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS3TXT01', 'EMPTY'), [fsBold]);
-        Cap43.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS4TXT01', 'EMPTY'), [fsBold]);
-        Cap61.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS6TXT01', 'EMPTY'), [fsBold]);
-        Cap15.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS7TXT01', 'EMPTY'), [fsBold]);
-        Cap21.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS8TXT01', 'EMPTY'), [fsBold]);
-        Cap22.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS8TXT02', 'EMPTY'), [fsBold]);
-        Cap23.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS8TXT03', 'EMPTY'), [fsBold]);
-        Cap27.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS8TXT04', 'EMPTY'), [fsBold]);
-        Cap62.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS9TXT01', 'EMPTY'), [fsBold]);
-        Cap63.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS9TXT02', 'EMPTY'), [fsBold]);
-        tR1.Caption:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE1A','') + ' - ' + Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE1B','');
-        tR2.Caption:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE2A','') + ' - ' + Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE2B','');
-        tR3.Caption:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE3A','') + ' - ' + Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE3B','');
-        tR4.Caption:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE4A','') + ' - ' + Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE4B','');
-        tR5.Caption:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE5A','') + ' - ' + Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE5B','');
-        tR6.Caption:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE6A','') + ' - ' + Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE6B','');
-        Text21.Caption:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE1A','') + ' - ' + Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE3B','') + ':';
-        Text22.Caption:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE4A','') + ' - ' + Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE6B','') + ':';
-
-        // Make sure that we have transparency on all button glyphs
-        SetButtonsGlyphs;
-
-    except
-        on E: Exception do
-        begin
-            LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ISettings failed. Error occured: ' + E.Message);
-            MsgCall(TCommon.TMessage.Error, 'An error occured [ISettings]: ' + E.Message + '. Please contact IT support. Application will be closed.');
-            ExitProcess(0);
-        end;
-    end;
-
-    // --------------------------
-    // Database connectivity
-    // --------------------------
-
-    OnCreateJob(TSplashScreen.Connecting);
-
-    try
-        TryInitConnection;
-    except
-        on E: Exception do
-        begin
-            LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: TryInitConnection failed. Error occured: ' + E.Message);
-            MsgCall(TCommon.TMessage.Error, 'An error occured [TryInitConnection]: ' + E.Message + '. Please contact IT support. Application will be closed.');
-        end;
-    end;
-
-    // --------------------------
-    // User Access
-    // --------------------------
-
-    OnCreateJob(TSplashScreen.GettingUsers);
-
-    var UserControl: TUserControl:=TUserControl.Create(DbConnect);
-    try
-
-        try
-            UserControl.UserName:=WinUserName;
-            AccessLevel:=UserControl.GetAccessData(TUserAccess.TTypes.AccessLevel);
-
-            // Quit if username is not found
-            if AccessLevel = '' then
-            begin
-                MsgCall(TCommon.TMessage.Error, 'Cannot find account for user alias: ' + UpperCase(WinUserName) + '. Please contact your administrator. Application will be closed.');
-                ExitProcess(0);
-            end;
-
-            AccessMode:=UserControl.GetAccessData(TUserAccess.TTypes.AccessMode);
-
-            if AccessMode = TUserAccess.AccessFull  then Action_FullView.Checked :=True;
-            if AccessMode = TUserAccess.AccessBasic then Action_BasicView.Checked:=True;
-
-            UserControl.GetGroupList(GroupList, GroupListBox);
-            UserControl.GetAgeDates(GroupListDates, GroupList[0, 0]);
-
-            {TODO -oTomek -cReplaceWith : ApprovalMatrix}
-
-            // Restricted for "ADMINS"
-            if AccessLevel <> TUserAccess.Admin then
-            begin
-                sgCompanyData.Enabled:=False;
-                ReloadCover.Visible:=True;
-                ReloadCover.Cursor:=crNo;
-                GroupListDates.Enabled:=False;
-            end;
-
-        except
-            on E: Exception do
-            begin
-                LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: TUserControl failed. Error occured: ' + E.Message);
-                MsgCall(TCommon.TMessage.Error, 'An error occured [TUserControl][' + WinUserName + ']: ' + E.Message + '. Please contact IT support. Application will be closed.');
-                ExitProcess(0);
-            end;
-        end;
-
-    finally
-        UserControl.Free;
-    end;
-
-    // --------------------------
-    // Load async general tables
-    // --------------------------
-
-    var Utilities: IUtilities:=TUtilities.Create;
-    try
-
-        OnCreateJob(TSplashScreen.MappingTables);
-        Utilities.GeneralTables(TSalesResponsible.SalesResponsible, sgSalesResp);
-        Utilities.GeneralTables(TPersonResponsible.PersonResponsible, sgPersonResp);
-        Utilities.GeneralTables(TAccountType.AccountType, sgAccountType);
-        Utilities.GeneralTables(TCustomerGroup.CustomerGroup, sgCustomerGr);
-        Utilities.GeneralTables(TGroup3.Group3, sgGroup3);
-
-        OnCreateJob(TSplashScreen.GettingGeneral);
-        Utilities.GeneralTables(TCompanyData.CompanyData, sgCoCodes, TCompanyData.CoCode + TChars.COMMA + TCompanyData.Branch + TChars.COMMA + TCompanyData.CoName + TChars.COMMA + TCompanyData.CoAddress + TChars.COMMA + TCompanyData.VatNo + TChars.COMMA + TCompanyData.Duns + TChars.COMMA + TCompanyData.Country + TChars.COMMA + TCompanyData.City + TChars.COMMA + TCompanyData.FinManager + TChars.COMMA + TCompanyData.TelephoneNumbers + TChars.COMMA + TCompanyData.CoType + TChars.COMMA + TCompanyData.CoCurrency + TChars.COMMA + TCompanyData.InterestRate + TChars.COMMA + TCompanyData.KpiOverdueTarget + TChars.COMMA + TCompanyData.KpiUnallocatedTarget + TChars.COMMA + TCompanyData.Agents + TChars.COMMA + TCompanyData.Divisions, TSql.ORDER + TCompanyData.CoCode + TSql.ASC);
-        Utilities.GeneralTables(TPaymentTerms.PaymentTerms, sgPmtTerms);
-        Utilities.GeneralTables(TPaidinfo.Paidinfo, sgPaidInfo);
-        Utilities.GeneralTables(TPerson.Person, sgPerson);
-        Utilities.GeneralTables(TControlStatus.ControlStatus, sgControlStatus);
-
-    except
-        on E: Exception do
-        begin
-            LogText.Log(EventLogPath, 'General tables loading failed. Error occured: ' + E.Message);
-            MsgCall(TCommon.TMessage.Error, 'An error occured [GeneralTables]: ' + E.Message + '. Please contact IT support. Application will be closed.');
-            ExitProcess(0);
-        end;
-
-    end;
-
-    // --------------------------
-    // Finilizing
-    // --------------------------
-
-    OnCreateJob(TSplashScreen.Finishing);
-
-    try
-
-        var NowTime: TTime:=Now;
-        FStartTime:=Now;
-        FormatDateTime('hh:mm:ss', NowTime);
-        FormatDateTime('hh:mm:ss', FStartTime);
-
-        StatBar_TXT1.Caption:=TStatusBar.Ready;
-        StatBar_TXT2.Caption:=WinUserName;
-        StatBar_TXT3.Caption:=DateToStr(Now);
-
-        UpTime.Enabled:=True;
-        CurrentTime.Enabled:=True;
-
-        LogText.Log(EventLogPath, 'Thread [' + MainThreadID.ToString + ']: Application version = ' + AppVersion);
-        LogText.Log(EventLogPath, 'Thread [' + MainThreadID.ToString + ']: User SID = ' + TUserSid.GetCurrentUserSid);
-
-        var Queries: IQueries:=TQueries.Create;
-        Queries.InitializeQms;
-
-        if not(FirstAgeLoad.Enabled) then FirstAgeLoad.Enabled:=True;
-
-        LogText.Log(EventLogPath, '[GUI] Initialization methods executed within main thread, ''MainForm'' has been created. Main process thread ID = ' + MainThreadID.ToString + '.');
-
-    except
-		on E: Exception do
-        begin
-            LogText.Log(EventLogPath, 'Thread [' + MainThreadID.ToString + ']: Invalid boot up. Error occured: ' + E.Message);
-            MsgCall(TCommon.TMessage.Error, 'Cannot properly boot up the application. An error occured: ' + E.Message + '. Please contact IT support. Application will be closed.');
-            ExitProcess(0);
-        end;
-    end;
+//    LogText:=TThreadFileLog.Create;
+//    var AppVersion: string:=TCommon.GetBuildInfoAsString;
+//
+//    CurrentEvents:='# -- SESSION START --';
+//    FAllowClose:=False;
+//
+//    // --------------------------
+//    // Settings
+//    // --------------------------
+//
+//    OnCreateJob(TSplashScreen.SettingUp);
+//
+//    InitializeScreenSettings;
+//    var Settings: ISettings:=TSettings.Create;
+//    try
+//        MainForm.Caption :=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'WND_MAIN', TCommon.APPCAPTION);
+//        DataUpdated.Caption:='';
+//
+//        WinUserName :=Settings.GetWinUserName;
+//        EventLogPath:=Settings.GetPathEventLog;
+//
+//        GridPicture:=TImage.Create(MainForm);
+//        GridPicture.SetBounds(0, 0, 16, 16);
+//        LoadImageFromStream(GridPicture, Settings.GetPathGridImage);
+//
+//        /// <remarks>
+//        /// "InetTimer" is excluded from below list because it is controlled by "InitializeConnection" method.
+//        /// </remarks>
+//
+//        InvoiceScanTimer.Interval:=Settings.GetIntegerValue(TConfigSections.TimersSettings, 'INVOICE_SCANNER', 900000{15 minutes});
+//        FollowupPopup.Interval:=Settings.GetIntegerValue(TConfigSections.TimersSettings, 'FOLLOWUP_CHECKER', 1800000{30 minutes});
+//        OILoader.Interval:=Settings.GetIntegerValue(TConfigSections.TimersSettings, 'OI_LOADER', 300000{5 minutes});
+//
+//        /// <remarks>
+//        /// Get risk class values and convert default decimal separator.
+//        /// </remarks>
+//
+//        if FormatSettings.DecimalSeparator = ',' then
+//        begin
+//            procRISKA.Caption:=((Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_A_MAX', TRiskClass.A)).ToExtended * 100).ToString + '%';
+//            procRISKB.Caption:=((Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_B_MAX', TRiskClass.B)).ToExtended * 100).ToString + '%';
+//            procRISKC.Caption:=((Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_C_MAX', TRiskClass.C)).ToExtended * 100).ToString + '%';
+//        end;
+//
+//        if FormatSettings.DecimalSeparator = '.' then
+//        begin
+//            procRISKA.Caption:=((StringReplace(Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_A_MAX', TRiskClass.A), ',', '.', [rfReplaceAll])).ToExtended * 100).ToString + '%';
+//            procRISKB.Caption:=((StringReplace(Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_B_MAX', TRiskClass.B), ',', '.', [rfReplaceAll])).ToExtended * 100).ToString + '%';
+//            procRISKC.Caption:=((StringReplace(Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_C_MAX', TRiskClass.C), ',', '.', [rfReplaceAll])).ToExtended * 100).ToString + '%';
+//        end;
+//
+//        /// <remarks>
+//        /// Hide all tabs on TPageControl component and set "Debtors" [TabSheet1] as starting page.
+//        /// </remarks>
+//
+//        for var iCNT: integer:=0 to MyPages.PageCount - 1 do MyPages.Pages[iCNT].TabVisible:=False;
+//        MyPages.ActivePage:=TabSheet1;
+//
+//        // Captions for shapes holding controls
+//        Cap01.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT01', 'EMPTY'), [fsBold]);
+//        Cap02.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT02', 'EMPTY'), [fsBold]);
+//        Cap03.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT03', 'EMPTY'), [fsBold]);
+//        Cap05.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT05', 'EMPTY'), [fsBold]);
+//        Cap06.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT06', 'EMPTY'), [fsBold]);
+//        Cap07.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT07', 'EMPTY'), [fsBold]);
+//        Cap24.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT08', 'EMPTY'), [fsBold]);
+//        Cap10.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS2TXT01', 'EMPTY'), [fsBold]);
+//        Cap11.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS2TXT02', 'EMPTY'), [fsBold]);
+//        Cap12.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS2TXT03', 'EMPTY'), [fsBold]);
+//        Cap13.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS3TXT01', 'EMPTY'), [fsBold]);
+//        Cap43.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS4TXT01', 'EMPTY'), [fsBold]);
+//        Cap61.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS6TXT01', 'EMPTY'), [fsBold]);
+//        Cap15.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS7TXT01', 'EMPTY'), [fsBold]);
+//        Cap21.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS8TXT01', 'EMPTY'), [fsBold]);
+//        Cap22.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS8TXT02', 'EMPTY'), [fsBold]);
+//        Cap23.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS8TXT03', 'EMPTY'), [fsBold]);
+//        Cap27.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS8TXT04', 'EMPTY'), [fsBold]);
+//        Cap62.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS9TXT01', 'EMPTY'), [fsBold]);
+//        Cap63.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS9TXT02', 'EMPTY'), [fsBold]);
+//        tR1.Caption:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE1A','') + ' - ' + Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE1B','');
+//        tR2.Caption:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE2A','') + ' - ' + Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE2B','');
+//        tR3.Caption:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE3A','') + ' - ' + Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE3B','');
+//        tR4.Caption:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE4A','') + ' - ' + Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE4B','');
+//        tR5.Caption:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE5A','') + ' - ' + Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE5B','');
+//        tR6.Caption:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE6A','') + ' - ' + Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE6B','');
+//        Text21.Caption:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE1A','') + ' - ' + Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE3B','') + ':';
+//        Text22.Caption:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE4A','') + ' - ' + Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE6B','') + ':';
+//
+//        // Make sure that we have transparency on all button glyphs
+//        SetButtonsGlyphs;
+//
+//    except
+//        on E: Exception do
+//        begin
+//            LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ISettings failed. Error occured: ' + E.Message);
+//            MsgCall(TCommon.TMessage.Error, 'An error occured [ISettings]: ' + E.Message + '. Please contact IT support. Application will be closed.');
+//            ExitProcess(0);
+//        end;
+//    end;
+//
+//    // --------------------------
+//    // Database connectivity
+//    // --------------------------
+//
+//    OnCreateJob(TSplashScreen.Connecting);
+//
+//    try
+//        TryInitConnection;
+//    except
+//        on E: Exception do
+//        begin
+//            LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: TryInitConnection failed. Error occured: ' + E.Message);
+//            MsgCall(TCommon.TMessage.Error, 'An error occured [TryInitConnection]: ' + E.Message + '. Please contact IT support. Application will be closed.');
+//        end;
+//    end;
+//
+//    // --------------------------
+//    // User Access
+//    // --------------------------
+//
+//    OnCreateJob(TSplashScreen.GettingUsers);
+//
+//    var UserControl: TUserControl:=TUserControl.Create(DbConnect);
+//    try
+//
+//        try
+//            UserControl.UserName:=WinUserName;
+//            AccessLevel:=UserControl.GetAccessData(TUserAccess.TTypes.AccessLevel);
+//
+//            // Quit if username is not found
+//            if AccessLevel = '' then
+//            begin
+//                MsgCall(TCommon.TMessage.Error, 'Cannot find account for user alias: ' + UpperCase(WinUserName) + '. Please contact your administrator. Application will be closed.');
+//                ExitProcess(0);
+//            end;
+//
+//            AccessMode:=UserControl.GetAccessData(TUserAccess.TTypes.AccessMode);
+//
+//            if AccessMode = TUserAccess.AccessFull  then Action_FullView.Checked :=True;
+//            if AccessMode = TUserAccess.AccessBasic then Action_BasicView.Checked:=True;
+//
+//            UserControl.GetGroupList(GroupList, GroupListBox);
+//            UserControl.GetAgeDates(GroupListDates, GroupList[0, 0]);
+//
+//            {TODO -oTomek -cReplaceWith : ApprovalMatrix}
+//
+//            // Restricted for "ADMINS"
+//            if AccessLevel <> TUserAccess.Admin then
+//            begin
+//                sgCompanyData.Enabled:=False;
+//                ReloadCover.Visible:=True;
+//                ReloadCover.Cursor:=crNo;
+//                GroupListDates.Enabled:=False;
+//            end;
+//
+//        except
+//            on E: Exception do
+//            begin
+//                LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: TUserControl failed. Error occured: ' + E.Message);
+//                MsgCall(TCommon.TMessage.Error, 'An error occured [TUserControl][' + WinUserName + ']: ' + E.Message + '. Please contact IT support. Application will be closed.');
+//                ExitProcess(0);
+//            end;
+//        end;
+//
+//    finally
+//        UserControl.Free;
+//    end;
+//
+//    // --------------------------
+//    // Load async general tables
+//    // --------------------------
+//
+//    var Utilities: IUtilities:=TUtilities.Create;
+//    try
+//
+//        OnCreateJob(TSplashScreen.MappingTables);
+//        Utilities.GeneralTables(TSalesResponsible.SalesResponsible, sgSalesResp);
+//        Utilities.GeneralTables(TPersonResponsible.PersonResponsible, sgPersonResp);
+//        Utilities.GeneralTables(TAccountType.AccountType, sgAccountType);
+//        Utilities.GeneralTables(TCustomerGroup.CustomerGroup, sgCustomerGr);
+//        Utilities.GeneralTables(TGroup3.Group3, sgGroup3);
+//
+//        OnCreateJob(TSplashScreen.GettingGeneral);
+//        Utilities.GeneralTables(TCompanyData.CompanyData, sgCoCodes, TCompanyData.CoCode + TChars.COMMA + TCompanyData.Branch + TChars.COMMA + TCompanyData.CoName + TChars.COMMA + TCompanyData.CoAddress + TChars.COMMA + TCompanyData.VatNo + TChars.COMMA + TCompanyData.Duns + TChars.COMMA + TCompanyData.Country + TChars.COMMA + TCompanyData.City + TChars.COMMA + TCompanyData.FinManager + TChars.COMMA + TCompanyData.TelephoneNumbers + TChars.COMMA + TCompanyData.CoType + TChars.COMMA + TCompanyData.CoCurrency + TChars.COMMA + TCompanyData.InterestRate + TChars.COMMA + TCompanyData.KpiOverdueTarget + TChars.COMMA + TCompanyData.KpiUnallocatedTarget + TChars.COMMA + TCompanyData.Agents + TChars.COMMA + TCompanyData.Divisions, TSql.ORDER + TCompanyData.CoCode + TSql.ASC);
+//        Utilities.GeneralTables(TPaymentTerms.PaymentTerms, sgPmtTerms);
+//        Utilities.GeneralTables(TPaidinfo.Paidinfo, sgPaidInfo);
+//        Utilities.GeneralTables(TPerson.Person, sgPerson);
+//        Utilities.GeneralTables(TControlStatus.ControlStatus, sgControlStatus);
+//
+//    except
+//        on E: Exception do
+//        begin
+//            LogText.Log(EventLogPath, 'General tables loading failed. Error occured: ' + E.Message);
+//            MsgCall(TCommon.TMessage.Error, 'An error occured [GeneralTables]: ' + E.Message + '. Please contact IT support. Application will be closed.');
+//            ExitProcess(0);
+//        end;
+//
+//    end;
+//
+//    // --------------------------
+//    // Finilizing
+//    // --------------------------
+//
+//    OnCreateJob(TSplashScreen.Finishing);
+//
+//    try
+//
+//        var NowTime: TTime:=Now;
+//        FStartTime:=Now;
+//        FormatDateTime('hh:mm:ss', NowTime);
+//        FormatDateTime('hh:mm:ss', FStartTime);
+//
+//        StatBar_TXT1.Caption:=TStatusBar.Ready;
+//        StatBar_TXT2.Caption:=WinUserName;
+//        StatBar_TXT3.Caption:=DateToStr(Now);
+//
+//        UpTime.Enabled:=True;
+//        CurrentTime.Enabled:=True;
+//
+//        LogText.Log(EventLogPath, 'Thread [' + MainThreadID.ToString + ']: Application version = ' + AppVersion);
+//        LogText.Log(EventLogPath, 'Thread [' + MainThreadID.ToString + ']: User SID = ' + TUserSid.GetCurrentUserSid);
+//
+//        var Queries: IQueries:=TQueries.Create;
+//        Queries.InitializeQms;
+//
+//        if not(FirstAgeLoad.Enabled) then FirstAgeLoad.Enabled:=True;
+//
+//        LogText.Log(EventLogPath, '[GUI] Initialization methods executed within main thread, ''MainForm'' has been created. Main process thread ID = ' + MainThreadID.ToString + '.');
+//
+//    except
+//		on E: Exception do
+//        begin
+//            LogText.Log(EventLogPath, 'Thread [' + MainThreadID.ToString + ']: Invalid boot up. Error occured: ' + E.Message);
+//            MsgCall(TCommon.TMessage.Error, 'Cannot properly boot up the application. An error occured: ' + E.Message + '. Please contact IT support. Application will be closed.');
+//            ExitProcess(0);
+//        end;
+//    end;
 
 end;
 
@@ -2254,8 +2259,8 @@ begin
     // Update grids width, height and thumb size
     SetGridColumnWidths;
     SetGridRowHeights;
-
-    LogText.Log(EventLogPath, 'Initialization is completed. Application is running.');
+//
+//    LogText.Log(EventLogPath, 'Initialization is completed. Application is running.');
 
 end;
 
@@ -2304,31 +2309,31 @@ begin
 
         ExecMessage(False, TMessaging.TWParams.StatusBar, 'Ending session...');
 
-        // Update user event log in database
-        var UserLogs: TDataTables:=TDataTables.Create(DbConnect);
-        try
-
-            var Today: string:=FormatDateTime(TDateTimeFormats.DateTimeFormat, Now);
-
-            // Columns
-            UserLogs.Columns.Add(TUnityEventLogs.UserAlias);
-            UserLogs.Columns.Add(TUnityEventLogs.DateTimeStamp);
-            UserLogs.Columns.Add(TUnityEventLogs.AppEventLog);
-            UserLogs.Columns.Add(TUnityEventLogs.AppName);
-            // Values
-            UserLogs.Values.Add(WinUserName.ToUpper);
-            UserLogs.Values.Add(Today);
-            UserLogs.Values.Add(CurrentEvents);
-            UserLogs.Values.Add('Unity for Debt Management');
-            // Insert
-            UserLogs.InsertInto(TUnityEventLogs.UnityEventLogs, True);
-
-        finally
-            UserLogs.Free;
-        end;
+//        // Update user event log in database
+//        var UserLogs: TDataTables:=TDataTables.Create(DbConnect);
+//        try
+//
+//            var Today: string:=FormatDateTime(TDateTimeFormats.DateTimeFormat, Now);
+//
+//            // Columns
+//            UserLogs.Columns.Add(TUnityEventLogs.UserAlias);
+//            UserLogs.Columns.Add(TUnityEventLogs.DateTimeStamp);
+//            UserLogs.Columns.Add(TUnityEventLogs.AppEventLog);
+//            UserLogs.Columns.Add(TUnityEventLogs.AppName);
+//            // Values
+//            UserLogs.Values.Add(WinUserName.ToUpper);
+//            UserLogs.Values.Add(Today);
+//            UserLogs.Values.Add(CurrentEvents);
+//            UserLogs.Values.Add('Unity for Debt Management');
+//            // Insert
+//            UserLogs.InsertInto(TUnityEventLogs.UnityEventLogs, True);
+//
+//        finally
+//            UserLogs.Free;
+//        end;
 
         CurrentEvents:=EmptyStr;
-        LogText.Log(EventLogPath, 'Application closed.');
+//        LogText.Log(EventLogPath, 'Application closed.');
         CanClose:=True;
 
     end;
@@ -2342,21 +2347,25 @@ begin
     /// Save window position and layout; and disconnect from the server.
     /// </remarks>
 
-    if sgAgeView.RowCount > 2 then
-        sgAgeView.SaveLayout(TConfigSections.ColumnWidthName, TConfigSections.ColumnOrderName, TConfigSections.ColumnNames, TConfigSections.ColumnPrefix);
-
-    var Settings: ISettings:=TSettings.Create;
-    Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_TOP',  MainForm.Top);
-    Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_LEFT', MainForm.Left);
-    if MainForm.WindowState = wsNormal    then Settings.SetStringValue(TConfigSections.ApplicationDetails,  'WINDOW_STATE', 'wsNormal');
-    if MainForm.WindowState = wsMaximized then Settings.SetStringValue(TConfigSections.ApplicationDetails,  'WINDOW_STATE', 'wsMaximized');
-    if MainForm.WindowState = wsMinimized then Settings.SetStringValue(TConfigSections.ApplicationDetails,  'WINDOW_STATE', 'wsMinimized');
-
-    Settings.Encode(TCommon.TFiles.AppConfig);
-
-    LogText.Free;
-    DbConnect.Close;
-    DbConnect:=nil;
+//    if sgAgeView.RowCount > 2 then
+//        sgAgeView.SaveLayout(TConfigSections.ColumnWidthName, TConfigSections.ColumnOrderName, TConfigSections.ColumnNames, TConfigSections.ColumnPrefix);
+//
+//    var Settings: ISettings:=TSettings.Create;
+//    Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_TOP',  MainForm.Top);
+//    Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_LEFT', MainForm.Left);
+//    if MainForm.WindowState = wsNormal    then Settings.SetStringValue(TConfigSections.ApplicationDetails,  'WINDOW_STATE', 'wsNormal');
+//    if MainForm.WindowState = wsMaximized then Settings.SetStringValue(TConfigSections.ApplicationDetails,  'WINDOW_STATE', 'wsMaximized');
+//    if MainForm.WindowState = wsMinimized then Settings.SetStringValue(TConfigSections.ApplicationDetails,  'WINDOW_STATE', 'wsMinimized');
+//
+//    Settings.Encode(TCommon.TFiles.AppConfig);
+//
+//    LogText.Free;
+//
+//    if Assigned(DbConnect) then
+//    begin
+//        DbConnect.Close;
+//        DbConnect:=nil;
+//    end;
 
 end;
 
@@ -2659,14 +2668,14 @@ end;
 procedure TMainForm.Action_PasteClick(Sender: TObject);
 begin
 
-  if AddressBookExclusion then
-  begin
-    MsgCall(Warn, 'This column is locked for editing.');
-    Exit;
-  end;
+    if AddressBookExclusion then
+    begin
+        MsgCall(Warn, 'This column is locked for editing.');
+        Exit;
+    end;
 
-  sgAddressBook.CopyCutPaste(TActions.Paste);
-  sgAddressBook.RecordRowsAffected;
+    sgAddressBook.CopyCutPaste(TActions.Paste);
+    sgAddressBook.RecordRowsAffected;
 
 end;
 

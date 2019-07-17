@@ -109,38 +109,38 @@ type
         // TMemoryIni holding encoded settings.
         // ------------------------------------
 
-        var TMIG: TMemIniFile;
-        var TMIL: TMemIniFile;
-        var List: TStringList;
-        var pGetLastError:  integer;
-        var pWinUserName:   string;
-        var pPathGridImage: string;
+        var FTMIG: TMemIniFile;
+        var FTMIL: TMemIniFile;
+        var FList: TStringList;
+        var FGetLastError:  integer;
+        var FWinUserName:   string;
+        var FPathGridImage: string;
 
         // --------------------
         // Directories holders.
         // --------------------
 
-        var pAppLog:         string;
-        var pPathEventLog:   string;
-        var pPathAppCfg:     string;
-        var pPathLicenceLic: string;
+        var FAppLog:         string;
+        var FPathEventLog:   string;
+        var FPathAppCfg:     string;
+        var FPathLicenceLic: string;
 
         // -------------
         // Files holder.
         // -------------
 
-        var pAppDir:        string;
-        var pDirLayouts:    string;
-        var pDirPackage:    string;
-        var pWinTempFolder: string;
+        var FAppDir:        string;
+        var FDirLayouts:    string;
+        var FDirPackage:    string;
+        var FWinTempFolder: string;
 
         // -------------
         // URLs holders.
         // -------------
 
-        var pReleasePakURL: string;
-        var pReleaseManURL: string;
-        var pGetLayoutsURL: string;
+        var FReleasePakURL: string;
+        var FReleaseManURL: string;
+        var FGetLayoutsURL: string;
 
         // --------
         // Methods.
@@ -169,28 +169,8 @@ type
         procedure SetFutureFColor(NewColor: TColor);
         procedure SetFutureBColor(NewColor: TColor);
     public
-        property FWinUserName:     string    read pWinUserName;
-        property FAppLog:          string    read pAppLog;
-        property FPathGridImage:   string    read pPathGridImage;
-        property FPathEventLog:    string    read pPathEventLog;
-        property FPathAppCfg:      string    read pPathAppCfg;
-        property FPathLicenceLic:  string    read pPathLicenceLic;
-        property FReleasePakURL:   string    read pReleasePakURL;
-        property FReleaseManURL:   string    read pReleaseManURL;
-        property FGetLayoutsURL:   string    read pGetLayoutsURL;
-        property FAppDir:          string    read pAppDir;
-        property FDirLayouts:      string    read pDirLayouts;
-        property FDirPackage:      string    read pDirPackage;
-        property FWinTempFolder:   string    read pWinTempFolder;
-        property FReleaseDateTime: TDateTime read GetReleaseDateTime write SetReleaseDateTime;
-        property TodayFColor:      TColor    read GetTodayFColor     write SetTodayFColor;
-        property TodayBColor:      TColor    read GetTodayBColor     write SetTodayBColor;
-        property PastFColor:       TColor    read GetPastFColor      write SetPastFColor;
-        property PastBColor:       TColor    read GetPastBColor      write SetPastBColor;
-        property FutureFColor:     TColor    read GetFutureFColor    write SetFutureFColor;
-        property FutureBColor:     TColor    read GetFutureBColor    write SetFutureBColor;
         constructor Create;
-        destructor  Destroy; override;
+        destructor Destroy; override;
         function  Encode(ConfigType: TCommon.TFiles): boolean;
         function  Decode(ConfigType: TCommon.TFiles; ToMemory: boolean): boolean;
         function  ConfigToMemory: boolean;
@@ -219,6 +199,23 @@ type
         function  GetReleasePakURL:  string;
         function  GetReleaseManURL:  string;
         function  GetLayoutsURL:     string;
+        property WinUserName:     string    read FWinUserName;
+        property AppLog:          string    read FAppLog;
+        property PathGridImage:   string    read FPathGridImage;
+        property PathEventLog:    string    read FPathEventLog;
+        property PathAppCfg:      string    read FPathAppCfg;
+        property PathLicenceLic:  string    read FPathLicenceLic;
+        property AppDir:          string    read FAppDir;
+        property DirLayouts:      string    read FDirLayouts;
+        property DirPackage:      string    read FDirPackage;
+        property WinTempFolder:   string    read FWinTempFolder;
+        property ReleaseDateTime: TDateTime read GetReleaseDateTime write SetReleaseDateTime;
+        property TodayFColor:     TColor    read GetTodayFColor     write SetTodayFColor;
+        property TodayBColor:     TColor    read GetTodayBColor     write SetTodayBColor;
+        property PastFColor:      TColor    read GetPastFColor      write SetPastFColor;
+        property PastBColor:      TColor    read GetPastBColor      write SetPastBColor;
+        property FutureFColor:    TColor    read GetFutureFColor    write SetFutureFColor;
+        property FutureBColor:    TColor    read GetFutureBColor    write SetFutureBColor;
     end;
 
 
@@ -259,57 +256,63 @@ implementation
 constructor TSettings.Create;
 begin
 
-    /// <remarks>
-    /// General settings (config.cfg), containing all the necessary data for the application.
-    /// </remarks>
+    // -------------------------------------------------------------------------------------
+    // General settings (config.cfg), containing all the necessary data for the application.
+    // -------------------------------------------------------------------------------------
 
-    TMIG:=TMemIniFile.Create('');
+    FTMIG:=TMemIniFile.Create('');
 
-    /// <remarks>
-    /// Licence details (unity.licx).
-    /// </remarks>
+    // -----------------------------
+    // Licence details (unity.licx).
+    // -----------------------------
 
-    TMIL:=TMemIniFile.Create('');
+    FTMIL:=TMemIniFile.Create('');
 
-    /// <summary>
-    /// Holds list of all registered layouts.
-    /// </summary>
+    // -------------------------------------
+    // Holds list of all registered layouts.
+    // -------------------------------------
 
-    List:=TStringList.Create;
+    FList:=TStringList.Create;
 
-    // User Alias
-    pWinUserName   :=Trim(LowerCase(GetEnvironmentVariable('username')));
+    // -----------
+    // User Alias.
+    // -----------
 
-    // Directories
-    pAppDir        :=ExtractFileDir(Application.ExeName) + '\';
-    pDirLayouts    :=pAppDir + 'layouts\';
-    pDirPackage    :=pAppDir + 'package\';
-    pWinTempFolder :=GetEnvironmentVariable('TEMP');
+    FWinUserName   :=Trim(LowerCase(GetEnvironmentVariable('username')));
 
-    // Files
-    pAppLog        :=pWinUserName + '.log';
-    pPathAppCfg    :=pAppDir + TCommon.ConfigFile;
-    pPathLicenceLic:=pAppDir + TCommon.LicenceFile;
-    pPathEventLog  :=pAppDir + pAppLog;
-    pPathGridImage :=pAppDir + TCommon.GridImgFile;
+    // ------------
+    // Directories.
+    // ------------
 
-    /// <remarks>
-    /// Return 404 error code if configuration file cannot be found.
-    /// </remarks>
+    FAppDir        :=ExtractFileDir(Application.ExeName) + '\';
+    FDirLayouts    :=FAppDir + 'layouts\';
+    FDirPackage    :=FAppDir + 'package\';
+    FWinTempFolder :=GetEnvironmentVariable('TEMP');
 
-    if FileExists(pPathAppCfg) then
-        ConfigToMemory
-            else
-                pGetLastError:=404;
+    // ------
+    // Files.
+    // ------
+
+    FAppLog        :=FWinUserName + '.log';
+    FPathAppCfg    :=FAppDir + TCommon.ConfigFile;
+    FPathLicenceLic:=FAppDir + TCommon.LicenceFile;
+    FPathEventLog  :=FAppDir + FAppLog;
+    FPathGridImage :=FAppDir + TCommon.GridImgFile;
+
+    // ------------------------------------------------------------
+    // Return 404 error code if configuration file cannot be found.
+    // ------------------------------------------------------------
+
+    if FileExists(FPathAppCfg) then ConfigToMemory else FGetLastError:=404;
 
 end;
 
 
 destructor TSettings.Destroy;
 begin
-    TMIG.Free;
-    TMIL.Free;
-    List.Free;
+    FTMIG.Free;
+    FTMIL.Free;
+    FList.Free;
     inherited;
 end;
 
@@ -326,23 +329,23 @@ begin
 
     Result:=False;
 
-    if Assigned(TMIG) then
+    if Assigned(FTMIG) then
     begin
 
         Decode(AppConfig, True);
 
-        pReleasePakURL:=TMIG.ReadString(TConfigSections.ApplicationDetails, 'UPDATE_PATH', '') + TCommon.ReleaseFile;
-        pReleaseManURL:=TMIG.ReadString(TConfigSections.ApplicationDetails, 'UPDATE_PATH', '') + TCommon.ManifestFile;
+        FReleasePakURL:=FTMIG.ReadString(TConfigSections.ApplicationDetails, 'UPDATE_PATH', '') + TCommon.ReleaseFile;
+        FReleaseManURL:=FTMIG.ReadString(TConfigSections.ApplicationDetails, 'UPDATE_PATH', '') + TCommon.ManifestFile;
 
-        pGetLayoutsURL:=TMIG.ReadString(TConfigSections.ApplicationDetails, 'LAYOUT_PATH', '');
+        FGetLayoutsURL:=FTMIG.ReadString(TConfigSections.ApplicationDetails, 'LAYOUT_PATH', '');
 
-        GetSectionValues(TConfigSections.Layouts, List);
-        for var iCNT: integer:=0 to List.Count - 1 do
+        GetSectionValues(TConfigSections.Layouts, FList);
+        for var iCNT: integer:=0 to FList.Count - 1 do
         begin
-            List.Strings[iCNT]:=MidStr(List.Strings[iCNT], AnsiPos('=', List.Strings[iCNT]) + 1, 255);
+            FList.Strings[iCNT]:=MidStr(FList.Strings[iCNT], AnsiPos('=', FList.Strings[iCNT]) + 1, 255);
         end;
 
-        pGetLastError:=0;
+        FGetLastError:=0;
         Result:=True;
 
     end;
@@ -363,9 +366,9 @@ begin
 
     Result:=0;
 
-    if Assigned(TMIG) then
+    if Assigned(FTMIG) then
     begin
-        Result:=StrToIntDef(TMIG.ReadString(TConfigSections.ApplicationDetails, 'RELEASE_NUMBER', ''), 0);
+        Result:=StrToIntDef(FTMIG.ReadString(TConfigSections.ApplicationDetails, 'RELEASE_NUMBER', ''), 0);
     end;
 
 end;
@@ -377,9 +380,9 @@ end;
 
 procedure TSettings.SetReleaseNumber(NewRelease: cardinal);
 begin
-    if Assigned(TMIG) then
+    if Assigned(FTMIG) then
     begin
-        TMIG.WriteInteger(TConfigSections.ApplicationDetails, 'RELEASE_NUMBER', NewRelease);
+        FTMIG.WriteInteger(TConfigSections.ApplicationDetails, 'RELEASE_NUMBER', NewRelease);
         Encode(TCommon.TFiles.AppConfig);
     end;
 end;
@@ -391,7 +394,7 @@ end;
 
 function TSettings.GetLayoutLists: TStringList;
 begin
-    Result:=List;
+    Result:=FList;
 end;
 
 
@@ -401,12 +404,11 @@ end;
 
 function TSettings.GetReleaseDateTime: TDateTime;
 begin
+
     Result:=TDateTimeFormats.NullDate;
 
-    if Assigned(TMIG) then
-    begin
-        Result:=StrToDateTimeDef(TMIG.ReadString(TConfigSections.ApplicationDetails, 'UPDATE_DATETIME', ''), TDateTimeFormats.NullDate);
-    end;
+    if Assigned(FTMIG) then
+        Result:=StrToDateTimeDef(FTMIG.ReadString(TConfigSections.ApplicationDetails, 'UPDATE_DATETIME', ''), TDateTimeFormats.NullDate);
 
 end;
 
@@ -417,11 +419,13 @@ end;
 
 procedure TSettings.SetReleaseDateTime(NewDateTime: TDateTime);
 begin
-    if Assigned(TMIG) then
+
+    if Assigned(FTMIG) then
     begin
-        TMIG.WriteString(TConfigSections.ApplicationDetails, 'UPDATE_DATETIME', DateTimeToStr(NewDateTime));
+        FTMIG.WriteString(TConfigSections.ApplicationDetails, 'UPDATE_DATETIME', DateTimeToStr(NewDateTime));
         Encode(TCommon.TFiles.AppConfig);
     end;
+
 end;
 
 
@@ -455,7 +459,7 @@ begin
 
             // Move file to memory
             if ConfigType = TCommon.TFiles.AppConfig then
-                TMIG.GetStrings(hStream);
+                FTMIG.GetStrings(hStream);
 
             hStream.SaveToStream(rStream);
             rStream.Position:=0;
@@ -502,7 +506,7 @@ begin
 
         except
             Result:=False;
-            pGetLastError:=IOResult;
+            FGetLastError:=IOResult;
         end;
 
     finally;
@@ -571,17 +575,17 @@ begin
             if ToMemory then
             begin
                 if ConfigType = TCommon.TFiles.AppConfig then
-                    TMIG.SetStrings(hString);
+                    FTMIG.SetStrings(hString);
 
                 if ConfigType = TCommon.TFiles.LicData then
-                        TMIL.SetStrings(hString);
+                        FTMIL.SetStrings(hString);
 
                 Result:=True;
             end
             else
             begin
 
-                if sCRC =  IntToHex(vCRC, 8) then
+                if sCRC = IntToHex(vCRC, 8) then
                     Result:=True;
 
                 if sCRC <> IntToHex(vCRC, 8) then
@@ -591,7 +595,7 @@ begin
 
         except
             Result:=False;
-            pGetLastError:=IOResult;
+            FGetLastError:=IOResult;
         end;
     finally
         rStream.Free;
@@ -608,73 +612,73 @@ end;
 function TSettings.GetLicenceValue(Section: string; Key: string): string;
 begin
     Result:='n/a';
-    if Assigned(TMIL) then
-        Result:=TMIL.ReadString(Section, Key, 'n/a');
+    if Assigned(FTMIL) then
+        Result:=FTMIL.ReadString(Section, Key, 'n/a');
 end;
 
 
 function TSettings.GetStringValue(Section: string; Key: string; Default: string): string;
 begin
     Result:=Default;
-    if Assigned(TMIG) then
-        Result:=TMIG.ReadString(Section, Key, Default);
+    if Assigned(FTMIG) then
+        Result:=FTMIG.ReadString(Section, Key, Default);
 end;
 
 
 procedure TSettings.SetStringValue(Section: string; Key: string; Value: string);
 begin
-    if Assigned(TMIG) then
-        TMIG.WriteString(Section, Key, Value);
+    if Assigned(FTMIG) then
+        FTMIG.WriteString(Section, Key, Value);
 end;
 
 
 function TSettings.GetIntegerValue(Section: string; Key: string; Default: integer): integer;
 begin
     Result:=Default;
-    if Assigned(TMIG) then
-        Result:=TMIG.ReadInteger(Section, Key, Default);
+    if Assigned(FTMIG) then
+        Result:=FTMIG.ReadInteger(Section, Key, Default);
 end;
 
 
 procedure TSettings.SetIntegerValue(Section: string; Key: string; Value: integer);
 begin
-    if Assigned(TMIG) then
-        TMIG.WriteInteger(Section, Key, Value);
+    if Assigned(FTMIG) then
+        FTMIG.WriteInteger(Section, Key, Value);
 end;
 
 
 procedure TSettings.GetSectionValues(Section: string; var Values: TStringList);
 begin
-    if Assigned(TMIG) then
-        TMIG.ReadSectionValues(Section, Values);
+    if Assigned(FTMIG) then
+        FTMIG.ReadSectionValues(Section, Values);
 end;
 
 
 procedure TSettings.GetSection(Section: string; var Keys: TStringList);
 begin
-    if Assigned(TMIG) then
-        TMIG.ReadSection(Section, Keys);
+    if Assigned(FTMIG) then
+        FTMIG.ReadSection(Section, Keys);
 end;
 
 
 procedure TSettings.GetSections(List: TStringList);
 begin
-    if Assigned(TMIG) then
-        TMIG.ReadSections(List);
+    if Assigned(FTMIG) then
+        FTMIG.ReadSections(List);
 end;
 
 
 procedure TSettings.DeleteSection(SectionName: string);
 begin
-    if Assigned(TMIG) then
-        TMIG.EraseSection(SectionName);
+    if Assigned(FTMIG) then
+        FTMIG.EraseSection(SectionName);
 end;
 
 
 procedure TSettings.DeleteKey(Section: string; Ident: string);
 begin
-    if Assigned(TMIG) then
-        TMIG.DeleteKey(Section, Ident);
+    if Assigned(FTMIG) then
+        FTMIG.DeleteKey(Section, Ident);
 end;
 
 
@@ -683,11 +687,12 @@ end;
 /// </summary>
 
 function TSettings.FindSettingsKey(Section: string; KeyPosition: integer): string;
-var
-    SL: TStringList;
 begin
+
     Result:=TUnknown.NA;
-    SL:=TStringList.Create;
+
+    var SL: TStringList:=TStringList.Create;
+
     GetSection(Section, SL);
     if KeyPosition > SL.Count then
         Exit
@@ -701,7 +706,7 @@ end;
 
 function TSettings.GetLastError: integer;
 begin
-    Result:=pGetLastError;
+    Result:=FGetLastError;
 end;
 
 
@@ -793,10 +798,10 @@ end;
 function TSettings.GetTodayFColor: TColor;
 begin
     Result:=0;
-    if not(Assigned(TMIG)) then
+    if not(Assigned(FTMIG)) then
         Exit
             else
-                Result:=TMIG.ReadInteger(TConfigSections.FollowUpColors, 'TODAY_FCOLOR', 0);
+                Result:=FTMIG.ReadInteger(TConfigSections.FollowUpColors, 'TODAY_FCOLOR', 0);
 end;
 
 
@@ -804,10 +809,10 @@ end;
 function TSettings.GetTodayBColor: TColor;
 begin
     Result:=0;
-    if not(Assigned(TMIG)) then
+    if not(Assigned(FTMIG)) then
         Exit
             else
-                Result:=TMIG.ReadInteger(TConfigSections.FollowUpColors, 'TODAY_BCOLOR', 0);
+                Result:=FTMIG.ReadInteger(TConfigSections.FollowUpColors, 'TODAY_BCOLOR', 0);
 end;
 
 
@@ -815,10 +820,10 @@ end;
 function TSettings.GetPastFColor: TColor;
 begin
     Result:=0;
-    if not(Assigned(TMIG)) then
+    if not(Assigned(FTMIG)) then
         Exit
             else
-                Result:=TMIG.ReadInteger(TConfigSections.FollowUpColors, 'PAST_FCOLOR', 0);
+                Result:=FTMIG.ReadInteger(TConfigSections.FollowUpColors, 'PAST_FCOLOR', 0);
 end;
 
 
@@ -826,10 +831,10 @@ end;
 function TSettings.GetPastBColor: TColor;
 begin
     Result:=0;
-    if not(Assigned(TMIG)) then
+    if not(Assigned(FTMIG)) then
         Exit
             else
-                Result:=TMIG.ReadInteger(TConfigSections.FollowUpColors, 'PAST_BCOLOR', 0);
+                Result:=FTMIG.ReadInteger(TConfigSections.FollowUpColors, 'PAST_BCOLOR', 0);
 end;
 
 
@@ -837,10 +842,10 @@ end;
 function TSettings.GetFutureFColor: TColor;
 begin
     Result:=0;
-    if not(Assigned(TMIG)) then
+    if not(Assigned(FTMIG)) then
         Exit
             else
-                Result:=TMIG.ReadInteger(TConfigSections.FollowUpColors, 'FUTURE_FCOLOR', 0);
+                Result:=FTMIG.ReadInteger(TConfigSections.FollowUpColors, 'FUTURE_FCOLOR', 0);
 end;
 
 
@@ -848,10 +853,10 @@ end;
 function TSettings.GetFutureBColor: TColor;
 begin
     Result:=0;
-    if not(Assigned(TMIG)) then
+    if not(Assigned(FTMIG)) then
         Exit
             else
-                Result:=TMIG.ReadInteger(TConfigSections.FollowUpColors, 'FUTURE_BCOLOR', 0);
+                Result:=FTMIG.ReadInteger(TConfigSections.FollowUpColors, 'FUTURE_BCOLOR', 0);
 end;
 
 
@@ -861,8 +866,8 @@ end;
 // Font color
 procedure TSettings.SetTodayFColor(NewColor: TColor);
 begin
-    if not(Assigned(TMIG)) then Exit;
-    TMIG.WriteInteger(TConfigSections.FollowUpColors, 'TODAY_FCOLOR', NewColor);
+    if not(Assigned(FTMIG)) then Exit;
+    FTMIG.WriteInteger(TConfigSections.FollowUpColors, 'TODAY_FCOLOR', NewColor);
     Encode(AppConfig);
 end;
 
@@ -870,8 +875,8 @@ end;
 // Background color
 procedure TSettings.SetTodayBColor(NewColor: TColor);
 begin
-    if not(Assigned(TMIG)) then Exit;
-    TMIG.WriteInteger(TConfigSections.FollowUpColors, 'TODAY_BCOLOR', NewColor);
+    if not(Assigned(FTMIG)) then Exit;
+    FTMIG.WriteInteger(TConfigSections.FollowUpColors, 'TODAY_BCOLOR', NewColor);
     Encode(AppConfig);
 end;
 
@@ -879,8 +884,8 @@ end;
 // Font color
 procedure TSettings.SetPastFColor(NewColor: TColor);
 begin
-    if not(Assigned(TMIG)) then Exit;
-    TMIG.WriteInteger(TConfigSections.FollowUpColors, 'PAST_FCOLOR', NewColor);
+    if not(Assigned(FTMIG)) then Exit;
+    FTMIG.WriteInteger(TConfigSections.FollowUpColors, 'PAST_FCOLOR', NewColor);
     Encode(AppConfig);
 end;
 
@@ -888,8 +893,8 @@ end;
 // Background color
 procedure TSettings.SetPastBColor(NewColor: TColor);
 begin
-    if not(Assigned(TMIG)) then Exit;
-    TMIG.WriteInteger(TConfigSections.FollowUpColors, 'PAST_BCOLOR', NewColor);
+    if not(Assigned(FTMIG)) then Exit;
+    FTMIG.WriteInteger(TConfigSections.FollowUpColors, 'PAST_BCOLOR', NewColor);
     Encode(AppConfig);
 end;
 
@@ -897,8 +902,8 @@ end;
 // Font color
 procedure TSettings.SetFutureFColor(NewColor: TColor);
 begin
-    if not(Assigned(TMIG)) then Exit;
-    TMIG.WriteInteger(TConfigSections.FollowUpColors, 'FUTURE_FCOLOR', NewColor);
+    if not(Assigned(FTMIG)) then Exit;
+    FTMIG.WriteInteger(TConfigSections.FollowUpColors, 'FUTURE_FCOLOR', NewColor);
     Encode(AppConfig);
 end;
 
@@ -906,8 +911,8 @@ end;
 // Background color
 procedure TSettings.SetFutureBColor(NewColor: TColor);
 begin
-    if not(Assigned(TMIG)) then Exit;
-    TMIG.WriteInteger(TConfigSections.FollowUpColors, 'FUTURE_BCOLOR', NewColor);
+    if not(Assigned(FTMIG)) then Exit;
+    FTMIG.WriteInteger(TConfigSections.FollowUpColors, 'FUTURE_BCOLOR', NewColor);
     Encode(AppConfig);
 end;
 

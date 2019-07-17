@@ -1,6 +1,13 @@
 program UnityReader;
 
 
+// ----------------------------------------
+// UnityReader for Unity application
+// Copyright (C) 2018-2019 Tomasz Kandula
+// VCL/Win32 application for Windows 7 & 10
+// ----------------------------------------
+
+
 {$SetPEFlags $0020}
 
 
@@ -8,7 +15,7 @@ uses
     Winapi.Windows,
     Vcl.Forms,
     uCEFApplication,
-    Reader in 'View\Reader.pas' {FormReader};
+    View.Reader in 'View\View.Reader.pas' {FormReader};
 
 
 {$R *.res}
@@ -21,7 +28,10 @@ var
 
 begin
 
-    // Find Unity running
+    // -------------------
+    // Find Unity running.
+    // -------------------
+
     WindowHandle:=FindWindow(nil, PChar('Unity'));
 
     if not(IsWindow(WindowHandle)) then
@@ -30,22 +40,34 @@ begin
         ExitProcess(0);
     end;
 
-    // Require application parameter
+    // ------------------------------
+    // Require application parameter.
+    // ------------------------------
+
     if not(ParamCount = 0) then URLparam:=ParamStr(1);
 
-    // Initialize Chromium application
+    // --------------------------------
+    // Initialize Chromium application.
+    // --------------------------------
+
     GlobalCEFApp:=TCefApplication.Create;
     GlobalCEFApp.BrowserSubprocessPath:='SubProcess.exe';
 
-    // Start Unity Reader in main thread
+    // ----------------------------------
+    // Start Unity Reader in main thread.
+    // ----------------------------------
+
     if GlobalCEFApp.StartMainProcess then
     begin
+
         Application.Initialize;
         Application.MainFormOnTaskbar:=True;
         Application.Title:='Unity Reader';
-        Application.CreateForm(TFormReader, FormReader);
+        FormReader.Show;
+
         if not(URLparam = '') then FormReader.input:=URLparam;
         Application.Run;
+
     end;
 
     GlobalCEFApp.Free;

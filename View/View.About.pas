@@ -3,7 +3,7 @@ unit View.About;
 // ------------------------------------------------------------------------------
 // Application GUI / view that can have direct calls to logic layer interface.
 // Calls must have reference to callback method that is defined the same as
-// callback signature. All views except MainForm use Lazy Loading design pattern.
+// callback signature. All views use Lazy Initialization pattern.
 // ------------------------------------------------------------------------------
 
 interface
@@ -115,13 +115,14 @@ type
     TFNGlobalMemoryStatusEx = function(var msx: TMemoryStatusEx): BOOL; stdcall;
 
 
-var vAboutForm: TAboutForm;
+var
+    VAboutForm: TAboutForm;
 
 
 function AboutForm: TAboutForm;
 begin
-    if not(Assigned(vAboutForm)) then Application.CreateForm(TAboutForm, vAboutForm);
-    Result:=vAboutForm;
+    if not(Assigned(VAboutForm)) then Application.CreateForm(TAboutForm, VAboutForm);
+    Result:=VAboutForm;
 end;
 
 

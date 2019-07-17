@@ -9,6 +9,9 @@
         <Projects Include="UnityReader.dproj">
             <Dependencies/>
         </Projects>
+        <Projects Include="UnityUpdater.dproj">
+            <Dependencies/>
+        </Projects>
     </ItemGroup>
     <ProjectExtensions>
         <Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -35,14 +38,23 @@
     <Target Name="UnityReader:Make">
         <MSBuild Projects="UnityReader.dproj" Targets="Make"/>
     </Target>
+    <Target Name="UnityUpdater">
+        <MSBuild Projects="UnityUpdater.dproj"/>
+    </Target>
+    <Target Name="UnityUpdater:Clean">
+        <MSBuild Projects="UnityUpdater.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="UnityUpdater:Make">
+        <MSBuild Projects="UnityUpdater.dproj" Targets="Make"/>
+    </Target>
     <Target Name="Build">
-        <CallTarget Targets="Unity;UnityReader"/>
+        <CallTarget Targets="Unity;UnityReader;UnityUpdater"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="Unity:Clean;UnityReader:Clean"/>
+        <CallTarget Targets="Unity:Clean;UnityReader:Clean;UnityUpdater:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="Unity:Make;UnityReader:Make"/>
+        <CallTarget Targets="Unity:Make;UnityReader:Make;UnityUpdater:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>

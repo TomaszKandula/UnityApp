@@ -1,9 +1,9 @@
-unit View.SplashScreen;
+unit View.StartupScreen;
 
 // ------------------------------------------------------------------------------
 // Application GUI / view that can have direct calls to logic layer interface.
 // Calls must have reference to callback method that is defined the same as
-// callback signature. All views except MainForm use Lazy Loading design pattern.
+// callback signature. All views use Lazy Initialization pattern.
 // ------------------------------------------------------------------------------
 
 interface
@@ -28,7 +28,7 @@ uses
 type
 
 
-    TSplashForm = class(TForm)
+    TStartupForm = class(TForm)
         MainText2: TLabel;
         ProgressBar: TGauge;
         TextFooterA: TLabel;
@@ -42,12 +42,12 @@ type
         CentreText: TLabel;
         Flutter: TImage;
     protected
-        {procedure CreateParams(var Params: TCreateParams); override;}
+    FlutterText: TLabel;
+        procedure CreateParams(var Params: TCreateParams); override;
     end;
 
 
-var
-    SplashForm: TSplashForm;
+    function StartupForm: TStartupForm;
 
 
 implementation
@@ -56,20 +56,31 @@ implementation
 {$R *.dfm}
 
 
+var
+    VStartupForm: TStartupForm;
+
+
+function StartupForm: TStartupForm;
+begin
+    if not(Assigned(VStartupForm)) then Application.CreateForm(TStartupForm, VStartupForm);
+    Result:=VStartupForm;
+end;
+
+
 // ----------------------------------------------------------------------------------------------------------------------------------------------- APPERANCE //
 
 
-//procedure TSplashForm.CreateParams(var Params: TCreateParams);
-//begin
-//
-//    inherited CreateParams(Params);
-//
-//    with Params do begin
-//        Style:=WS_POPUP;
-//        WindowClass.style:=WindowClass.style or CS_DROPSHADOW;
-//    end;
-//
-//end;
+procedure TStartupForm.CreateParams(var Params: TCreateParams);
+begin
+
+    inherited CreateParams(Params);
+
+    with Params do begin
+        Style:=WS_POPUP;
+        WindowClass.style:=WindowClass.style or CS_DROPSHADOW;
+    end;
+
+end;
 
 
 end.

@@ -102,6 +102,7 @@ type
         class function  GetBuildInfoAsString: string; static;
         class function  GetOSVer(CheckForOsName: boolean): string; static;
         class procedure LogText(FileName: string; Text: string); static;
+        class function  Unpack(ItemID: integer; FileName: string; ShouldFileStay: boolean; var LastErrorMsg: string): boolean;
     end;
 
 
@@ -763,6 +764,51 @@ begin
         end;
     finally
         FL.Free;
+    end;
+
+end;
+
+
+/// <summary>
+/// Extract given source file by provided ID number.
+/// </summary>
+/// <param name="ItemID">Resource ID number (integer)</param>
+/// <param name="FileName">Resource filename (string)</param>
+/// <param name="ShouldStay">Delete before deploy new (boolean)</param>
+/// <returns>True if succeed (boolean)</returns>
+/// <remarks>
+/// 10 RCDATA "Makefile\\config.cfg" default setting file.
+/// 60 RCDATA "Makefile\\logon.log"  pre-defined event log file.
+/// </remarks>
+
+class function TCommon.Unpack(ItemID: integer; FileName: string; ShouldFileStay: boolean; var LastErrorMsg: string): boolean;
+begin
+
+    Result:=False;
+
+    var RS: TResourceStream:=TResourceStream.CreateFromID(hInstance, ItemID, RT_RCDATA);
+    try
+
+        RS.Position:=0;
+        if not ShouldFileStay then
+            DeleteFile(PChar(FileName));
+
+        try
+            RS.SaveToFile(FileName);
+
+        except
+            on E: Exception do
+            begin
+                LastErrorMsg:='Cannot extract file from resource container. Exception has been thrown: ' + E.Message;
+                Exit;
+            end;
+
+        end;
+
+        Result:=True;
+
+    finally
+        RS.free;
     end;
 
 end;

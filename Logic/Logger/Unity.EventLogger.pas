@@ -94,8 +94,8 @@ begin
     /// It is send to database on close event
     /// </remarks>
 
-    if Assigned(MainForm) then
-        MainForm.CurrentEvents:=MainForm.CurrentEvents + TextToLog;
+    //if Assigned(MainForm) then
+    //    MainForm.CurrentEvents:=MainForm.CurrentEvents + TextToLog;
 
 end;
 
