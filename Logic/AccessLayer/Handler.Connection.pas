@@ -10,14 +10,12 @@ interface
 
 
 uses
-    Winapi.ActiveX,
     System.Classes,
     System.SysUtils,
     System.Win.ComObj,
     System.StrUtils,
     System.Variants,
     System.Net.HttpClient,
-    Vcl.AxCtrls,
     WinHttp_TLB;
 
 
@@ -53,7 +51,9 @@ implementation
 
 uses
     View.Main,
-    Unity.Statics;
+    Vcl.AxCtrls,
+    Winapi.ActiveX,
+    Unity.NCSI;
 
 
 function TConnectivity.CallServer(CallUrl: string; Mode: string; var HttpResponse: string): integer;

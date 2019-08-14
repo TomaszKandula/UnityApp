@@ -23,7 +23,8 @@ uses
     Vcl.StdCtrls,
     Vcl.ComCtrls,
     Vcl.Imaging.pngimage,
-    Unity.Interposer;
+    Unity.Grid,
+    Unity.Panel;
 
 
 type

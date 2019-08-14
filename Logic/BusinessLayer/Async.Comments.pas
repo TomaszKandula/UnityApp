@@ -25,8 +25,7 @@ uses
     Data.Win.ADODB,
     Data.DB,
     Handler.Sql,
-    Unity.Interposer,
-    Unity.Statics,
+    Unity.Grid,
     Unity.Enums,
     Unity.Records,
     Unity.Arrays;
@@ -64,7 +63,12 @@ uses
     View.UserFeedback,
     Handler.Account,
     Handler.Database,
+    Unity.Sql,
+    Unity.Chars,
+    Unity.Helpers,
+    Unity.Unknown,
     Unity.Settings,
+    Unity.Messaging,
     Sync.Documents,
     DbModel,
     AgeView,
@@ -149,12 +153,12 @@ begin
         end);
 
         if Fields.EventLog then
-            MainForm.LogText.Log(MainForm.EventLogPath, '"DailyComment" table has been posted (CUID: ' + Fields.CUID + '). Rows affected: ' + DailyText.RowsAffected.ToString() + '.');
+            MainForm.FAppEvents.Log(MainForm.EventLogPath, '"DailyComment" table has been posted (CUID: ' + Fields.CUID + '). Rows affected: ' + DailyText.RowsAffected.ToString() + '.');
     end
     else
     begin
-        MainForm.LogText.Log(MainForm.EventLogPath, 'Cannot update daily comment (CUID: ' + Fields.CUID + '). Rows affected: ' + DailyText.RowsAffected.ToString() + '. Error message received: ' + DailyText.LastErrorMsg + '.');
-        MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot post daily comment into database.' +  TChars.CRLF + 'Error message received: ' + DailyText.LastErrorMsg + TChars.CRLF + 'Please contact IT support.');
+        MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Cannot update daily comment (CUID: ' + Fields.CUID + '). Rows affected: ' + DailyText.RowsAffected.ToString() + '. Error message received: ' + DailyText.LastErrorMsg + '.');
+        THelpers.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot post daily comment into database.' +  TChars.CRLF + 'Error message received: ' + DailyText.LastErrorMsg + TChars.CRLF + 'Please contact IT support.', MainForm);
     end;
 
 end;
@@ -170,14 +174,14 @@ begin
     if Fields.Email then
     begin
         DailyText.Columns.Add(TDailyComment.Email);
-        DailyText.Values.Add(IntToStr(StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDailyComment.Email].Value), 0)));
+        DailyText.Values.Add(IntToStr(StrToIntDef(THelpers.OleGetStr(DailyText.DataSet.Fields[TDailyComment.Email].Value), 0)));
     end;
 
     // Call event and call duration always comes together
     if Fields.CallEvent then
     begin
 
-        var LCallEvent: integer:=StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDailyComment.CallEvent].Value), 0);
+        var LCallEvent: integer:=StrToIntDef(THelpers.OleGetStr(DailyText.DataSet.Fields[TDailyComment.CallEvent].Value), 0);
         Inc(LCallEvent);
 
         DailyText.Columns.Add(TDailyComment.CallEvent);
@@ -190,7 +194,7 @@ begin
 
     if Fields.EmailReminder then
     begin
-        var LEmailReminder: integer:=StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDailyComment.EmailReminder].Value), 0);
+        var LEmailReminder: integer:=StrToIntDef(THelpers.OleGetStr(DailyText.DataSet.Fields[TDailyComment.EmailReminder].Value), 0);
         Inc(LEmailReminder);
         DailyText.Columns.Add(TDailyComment.EmailReminder);
         DailyText.Values.Add(LEmailReminder.ToString());
@@ -198,7 +202,7 @@ begin
 
     if Fields.EmailAutoStat then
     begin
-        var LEmailAutoStat: integer:=StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDailyComment.EmailAutoStat].Value), 0);
+        var LEmailAutoStat: integer:=StrToIntDef(THelpers.OleGetStr(DailyText.DataSet.Fields[TDailyComment.EmailAutoStat].Value), 0);
         Inc(LEmailAutoStat);
         DailyText.Columns.Add(TDailyComment.EmailAutoStat);
         DailyText.Values.Add(LEmailAutoStat.ToString());
@@ -206,7 +210,7 @@ begin
 
     if Fields.EmailManuStat then
     begin
-        var LEmailManuStat: integer:=StrToIntDef(MainForm.OleGetStr(DailyText.DataSet.Fields[TDailyComment.EmailManuStat].Value), 0);
+        var LEmailManuStat: integer:=StrToIntDef(THelpers.OleGetStr(DailyText.DataSet.Fields[TDailyComment.EmailManuStat].Value), 0);
         Inc(LEmailManuStat);
         DailyText.Columns.Add(TDailyComment.EmailManuStat);
         DailyText.Values.Add(LEmailManuStat.ToString());
@@ -227,12 +231,12 @@ begin
         end);
 
         if Fields.EventLog then
-            MainForm.LogText.Log(MainForm.EventLogPath, '"DailyComment" table has been updated (CUID: ' + Fields.CUID + '). Rows affected: ' + DailyText.RowsAffected.ToString() + '.');
+            MainForm.FAppEvents.Log(MainForm.EventLogPath, '"DailyComment" table has been updated (CUID: ' + Fields.CUID + '). Rows affected: ' + DailyText.RowsAffected.ToString() + '.');
     end
     else
     begin
-        MainForm.LogText.Log(MainForm.EventLogPath, 'Cannot update daily comment (CUID: ' + Fields.CUID + '). Rows affected: ' + DailyText.RowsAffected.ToString() + '. Error message received: ' + DailyText.LastErrorMsg + '.');
-        MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot update daily comment into database.' +  TChars.CRLF + 'Error message received: ' + DailyText.LastErrorMsg + TChars.CRLF + 'Please contact IT support.');
+        MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Cannot update daily comment (CUID: ' + Fields.CUID + '). Rows affected: ' + DailyText.RowsAffected.ToString() + '. Error message received: ' + DailyText.LastErrorMsg + '.');
+        THelpers.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot update daily comment into database.' +  TChars.CRLF + 'Error message received: ' + DailyText.LastErrorMsg + TChars.CRLF + 'Please contact IT support.', MainForm);
     end;
 
 end;
@@ -248,11 +252,11 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var DailyText: TDataTables:=TDataTables.Create(MainForm.DbConnect);
+        var DailyText: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
         try
 
-            var Condition:    string:=TDailyComment.Cuid + TSql.EQUAL + QuotedStr(Fields.CUID) + TSql._AND + TDailyComment.AgeDate + TSql.EQUAL + QuotedStr(MainForm.AgeDateSel);
-            var DataCheckSum: string:=Fields.CUID + StringReplace(MainForm.AgeDateSel, '-', '', [rfReplaceAll]);
+            var Condition:    string:=TDailyComment.Cuid + TSql.EQUAL + QuotedStr(Fields.CUID) + TSql._AND + TDailyComment.AgeDate + TSql.EQUAL + QuotedStr(MainForm.FAgeDateSel);
+            var DataCheckSum: string:=Fields.CUID + StringReplace(MainForm.FAgeDateSel, '-', '', [rfReplaceAll]);
 
             DailyText.CustFilter:=TSql.WHERE + Condition;
             DailyText.OpenTable(TDailyComment.DailyComment);
@@ -289,13 +293,13 @@ begin
                 DailyText.CleanUp;
 
                 DailyText.Columns.Add(TDailyComment.GroupId);
-                DailyText.Values.Add(MainForm.GroupIdSel);
+                DailyText.Values.Add(MainForm.FGroupIdSel);
 
                 DailyText.Columns.Add(TDailyComment.Cuid);
                 DailyText.Values.Add(Fields.CUID);
 
                 DailyText.Columns.Add(TDailyComment.AgeDate);
-                DailyText.Values.Add(MainForm.AgeDateSel);
+                DailyText.Values.Add(MainForm.FAgeDateSel);
 
                 DailyText.Columns.Add(TDailyComment.Stamp);
                 DailyText.Values.Add(DateTimeToStr(Now));
@@ -386,12 +390,12 @@ begin
     if (GenText.InsertInto(TGeneralComment.GeneralComment, True)) and (GenText.RowsAffected > 0) then
     begin
         if Fields.EventLog then
-            MainForm.LogText.Log(MainForm.EventLogPath, '"GeneralComment" table has been posted (CUID: ' + Fields.CUID + '). Rows affected: ' + GenText.RowsAffected.ToString() + '.');
+            MainForm.FAppEvents.Log(MainForm.EventLogPath, '"GeneralComment" table has been posted (CUID: ' + Fields.CUID + '). Rows affected: ' + GenText.RowsAffected.ToString() + '.');
     end
     else
     begin
-        MainForm.LogText.Log(MainForm.EventLogPath, 'Cannot update general comment (CUID: ' + Fields.CUID + '). Rows affected: ' + GenText.RowsAffected.ToString() + '. Error message received: ' + GenText.LastErrorMsg + '.');
-        MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot update general comment into database.' +  TChars.CRLF + 'Error message received: ' + GenText.LastErrorMsg + TChars.CRLF + 'Please contact IT support.');
+        MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Cannot update general comment (CUID: ' + Fields.CUID + '). Rows affected: ' + GenText.RowsAffected.ToString() + '. Error message received: ' + GenText.LastErrorMsg + '.');
+        THelpers.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot update general comment into database.' +  TChars.CRLF + 'Error message received: ' + GenText.LastErrorMsg + TChars.CRLF + 'Please contact IT support.', MainForm);
     end;
 
 end;
@@ -437,12 +441,12 @@ begin
     if (GenText.UpdateRecord(TGeneralComment.GeneralComment, True, Condition)) and (GenText.RowsAffected > 0) then
     begin
         if Fields.EventLog then
-            MainForm.LogText.Log(MainForm.EventLogPath, '"GeneralComment" table has been updated (CUID: ' + Fields.CUID + '). Rows affected: ' + GenText.RowsAffected.ToString() + '.');
+            MainForm.FAppEvents.Log(MainForm.EventLogPath, '"GeneralComment" table has been updated (CUID: ' + Fields.CUID + '). Rows affected: ' + GenText.RowsAffected.ToString() + '.');
     end
     else
     begin
-        MainForm.LogText.Log(MainForm.EventLogPath, 'Cannot update general comment (CUID: ' + Fields.CUID + '). Rows affected: ' + GenText.RowsAffected.ToString() + '. Error message received: ' + GenText.LastErrorMsg + '.');
-        MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot update general comment into database.' +  TChars.CRLF + 'Error message received: ' + GenText.LastErrorMsg + TChars.CRLF + 'Please contact IT support.');
+        MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Cannot update general comment (CUID: ' + Fields.CUID + '). Rows affected: ' + GenText.RowsAffected.ToString() + '. Error message received: ' + GenText.LastErrorMsg + '.');
+        THelpers.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot update general comment into database.' +  TChars.CRLF + 'Error message received: ' + GenText.LastErrorMsg + TChars.CRLF + 'Please contact IT support.', MainForm);
     end;
 
 end;
@@ -458,7 +462,7 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var GenText: TDataTables:=TDataTables.Create(MainForm.DbConnect);
+        var GenText: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
         try
 
             var Condition: string:=TGeneralComment.Cuid + TSql.EQUAL + QuotedStr(Fields.CUID);

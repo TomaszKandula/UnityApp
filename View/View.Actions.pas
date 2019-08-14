@@ -32,10 +32,9 @@ uses
     Vcl.Imaging.GIFImg,
     Vcl.Clipbrd,
     Data.Win.ADODB,
-    Unity.Interposer,
-    Unity.Statics,
     Unity.Arrays,
-    Unity.Records;
+    Unity.Records,
+    Unity.Grid;
 
 
 type
@@ -252,7 +251,15 @@ uses
     Unity.Settings,
     Transactions,
     Sync.Documents,
+    Unity.Sql,
+    Unity.Chars,
+    Unity.Helpers,
     Unity.Enums,
+    Unity.Sorting,
+    Unity.Delimiters,
+    Unity.Unknown,
+    Unity.LyncLib,
+    Unity.Common,
     Async.AddressBook,
     Async.Comments,
     Async.Statements;
@@ -383,7 +390,7 @@ begin
 
         if FSrcColumns[iCNT] = -100 then
         begin
-            MainForm.MsgCall(Warn, 'There are no open items loaded. Please reload it or wait untill auto-load is complete and try again.');
+            THelpers.MsgCall(Warn, 'There are no open items loaded. Please reload it or wait untill auto-load is complete and try again.');
             Close;
             Exit;
         end;
@@ -432,7 +439,7 @@ end;
 procedure TActionsForm.UpdateDetails(CustPerson: TEdit; CustMail: TEdit; CustMailGen: TEdit; CustPhone: TComboBox); {refactor / async}
 begin
 
-    var Tables: TDataTables:=TDataTables.Create(MainForm.DbConnect);
+    var Tables: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
     try
 
         // Get data from Address Book table
@@ -448,15 +455,15 @@ begin
 
             var Phones: string;
 
-            CustPerson.Text :=MainForm.OleGetStr(Tables.DataSet.Fields[DbModel.TAddressBook.Contact].Value);
-            CustMailGen.Text:=MainForm.OleGetStr(Tables.DataSet.Fields[DbModel.TAddressBook.Emails].Value);
-            CustMail.Text   :=MainForm.OleGetStr(Tables.DataSet.Fields[DbModel.TAddressBook.Estatements].Value);
-            Phones          :=MainForm.OleGetStr(Tables.DataSet.Fields[DbModel.TAddressBook.PhoneNumbers].Value);
+            CustPerson.Text :=THelpers.OleGetStr(Tables.DataSet.Fields[DbModel.TAddressBook.Contact].Value);
+            CustMailGen.Text:=THelpers.OleGetStr(Tables.DataSet.Fields[DbModel.TAddressBook.Emails].Value);
+            CustMail.Text   :=THelpers.OleGetStr(Tables.DataSet.Fields[DbModel.TAddressBook.Estatements].Value);
+            Phones          :=THelpers.OleGetStr(Tables.DataSet.Fields[DbModel.TAddressBook.PhoneNumbers].Value);
 
             if (Phones <> '') or (Phones <> ' ') then
             begin
                 CustPhone.Clear;
-                CustPhone.Items.Text:=MainForm.Explode(Phones, TDelimiters.Semicolon);
+                CustPhone.Items.Text:=THelpers.Explode(Phones, TDelimiters.Semicolon);
                 CustPhone.ItemIndex:=0;
             end;
 
@@ -475,11 +482,11 @@ begin
 
         if Tables.DataSet.RecordCount = 1 then
         begin
-            FLbuName    :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.CoName].Value);
-            FLbuAddress :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.CoAddress].Value);
-            FLbuPhone   :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.TelephoneNumbers].Value);
-            FLbuSendFrom:=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.SendNoteFrom].Value);
-            FBanksHtml  :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.BankAccounts].Value);
+            FLbuName    :=THelpers.OleGetStr(Tables.DataSet.Fields[TCompanyData.CoName].Value);
+            FLbuAddress :=THelpers.OleGetStr(Tables.DataSet.Fields[TCompanyData.CoAddress].Value);
+            FLbuPhone   :=THelpers.OleGetStr(Tables.DataSet.Fields[TCompanyData.TelephoneNumbers].Value);
+            FLbuSendFrom:=THelpers.OleGetStr(Tables.DataSet.Fields[TCompanyData.SendNoteFrom].Value);
+            FBanksHtml  :=THelpers.OleGetStr(Tables.DataSet.Fields[TCompanyData.BankAccounts].Value);
         end
 
     finally
@@ -492,7 +499,7 @@ end;
 procedure TActionsForm.UpdateHistory(var Grid: TStringGrid); {refactor / async}
 begin
 
-    var DailyText: TDataTables:=TDataTables.Create(MainForm.DbConnect);
+    var DailyText: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
     try
         DailyText.Columns.Add(TDailyComment.AgeDate);
         DailyText.Columns.Add(TDailyComment.Stamp);
@@ -525,13 +532,13 @@ end;
 procedure TActionsForm.UpdateGeneral(var Text: TMemo); {refactor / async}
 begin
 
-    var GenText: TDataTables:=TDataTables.Create(MainForm.DbConnect);
+    var GenText: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
     try
         GenText.CustFilter:=TSql.WHERE + TGeneralComment.Cuid + TSql.EQUAL + QuotedStr(CUID);
         GenText.OpenTable(TGeneralComment.GeneralComment);
 
         if not (GenText.DataSet.EOF) then
-            Text.Text:=MainForm.OleGetStr(GenText.DataSet.Fields[TGeneralComment.FixedComment].Value);
+            Text.Text:=THelpers.OleGetStr(GenText.DataSet.Fields[TGeneralComment.FixedComment].Value);
 
     finally
         GenText.Free;
@@ -627,21 +634,21 @@ begin
 
     // Check for 'Lynccall.exe'
     var Settings: ISettings:=TSettings.Create;
-    if not FileExists(Settings.GetAppDir + TLyncLib.LyncCall) then
+    if not FileExists(Settings.DirApplication + TLyncLib.LyncCall) then
     begin
-        MainForm.MsgCall(Error, TCommon.APPCAPTION + ' cannot find ''lynccall.exe''. Please contact IT support.');
+        THelpers.MsgCall(Error, TCommon.APPCAPTION + ' cannot find ''lynccall.exe''. Please contact IT support.');
         Exit;
     end;
 
     // CHeck if Lync/Skype is running
     if not ActionsForm.GetRunningApps('lync.exe') then
     begin
-        MainForm.MsgCall(Error, TCommon.APPCAPTION + ' cannot find running Microsoft Skype/Lync for Business. Please open it and try again.');
+        THelpers.MsgCall(Error, TCommon.APPCAPTION + ' cannot find running Microsoft Skype/Lync for Business. Please open it and try again.');
         Exit;
     end;
 
     // Run Lync with given phone number
-    ShellExecute(ActionsForm.Handle, 'open', PChar(Settings.GetAppDir + TLyncLib.LyncCall), PChar(ActionsForm.Cust_Phone.Text), nil, SW_SHOWNORMAL);
+    ShellExecute(ActionsForm.Handle, 'open', PChar(Settings.DirApplication + TLyncLib.LyncCall), PChar(ActionsForm.Cust_Phone.Text), nil, SW_SHOWNORMAL);
 
     if ActionsForm.DailyCom.Text = '' then
     begin
@@ -694,7 +701,7 @@ begin
         {GetFirstComment(DailyCom);}
         UpdateGeneral(GeneralCom);
     except
-        MainForm.MsgCall(Warn, 'Unexpected error has occured. Please close the window and try again.');
+        THelpers.MsgCall(Warn, 'Unexpected error has occured. Please close the window and try again.');
     end;
 
 end;
@@ -702,7 +709,8 @@ end;
 
 procedure TActionsForm.ClearFollowUp;
 begin
-    if MainForm.MsgCall(Question2, 'Are you sure you want to clear this follow up?') = ID_YES then
+
+    if THelpers.MsgCall(Question2, 'Are you sure you want to clear this follow up?') = ID_YES then
     begin
 
         FGeneralCommentFields.CUID        :=CUID;
@@ -719,6 +727,7 @@ begin
         MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneralComment.fFollowUp, 1, 1), MainForm.sgAgeView.Row]:='';
 
     end;
+
 end;
 
 
@@ -729,7 +738,7 @@ begin
     FAbUpdateFields.Contact   :=Cust_Person.Text;
     FAbUpdateFields.Email     :=Cust_MailGeneral.Text;
     FAbUpdateFields.Estatement:=Cust_Mail.Text;
-    FAbUpdateFields.Phones    :=MainForm.Implode(Cust_Phone.Items, TDelimiters.Semicolon);
+    FAbUpdateFields.Phones    :=THelpers.Implode(Cust_Phone.Items, TDelimiters.Semicolon);
 
     var AddressBook: IAddressBook:=TAddressBook.Create();
     AddressBook.UpdateAddressBookAsync(nil, FAbUpdateFields);
@@ -854,17 +863,17 @@ end;
 
 procedure TActionsForm.FormActivate(Sender: TObject);
 begin
-    if MainForm.IsConnected then
+    if MainForm.FIsConnected then
     begin
         GetAndDisplay;
-        SimpleText.Caption:=MainForm.OpenItemsUpdate;
+        SimpleText.Caption:=MainForm.FOpenItemsUpdate;
         SetControls;
         GetFirstComment(DailyCom);
         UpdateGeneral(GeneralCom);
     end
     else
     begin
-        MainForm.MsgCall(Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+        THelpers.MsgCall(Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
         Close;
     end;
 end;
@@ -967,9 +976,9 @@ end;
 procedure TActionsForm.DailyComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
 
-    if MainForm.AccessLevel = 'RO' then
+    if MainForm.FAccessLevel = 'RO' then
     begin
-        MainForm.MsgCall(Warn, 'You do not have permission to write the comment.');
+        THelpers.MsgCall(Warn, 'You do not have permission to write the comment.');
         Exit;
     end;
 
@@ -993,9 +1002,9 @@ end;
 procedure TActionsForm.GeneralComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
 
-    if MainForm.AccessLevel = 'RO' then
+    if MainForm.FAccessLevel = 'RO' then
     begin
-        MainForm.MsgCall(Warn, 'You do not have permission to write the comment.');
+        THelpers.MsgCall(Warn, 'You do not have permission to write the comment.');
         Exit;
     end;
 
@@ -1249,7 +1258,7 @@ end;
 
 procedure TActionsForm.btnEditClick(Sender: TObject);
 begin
-    MainForm.WndCall(PhoneListForm, TWindowState.Modal);
+    THelpers.WndCall(PhoneListForm, TWindowState.Modal);
 end;
 
 
@@ -1274,7 +1283,7 @@ end;
 procedure TActionsForm.btnSetFollowUpClick(Sender: TObject);
 begin
     CalendarForm.FCalendarMode:=DateToDB;
-    MainForm.WndCall(CalendarForm, TWindowState.Modal);
+    THelpers.WndCall(CalendarForm, TWindowState.Modal);
 end;
 
 
@@ -1286,18 +1295,18 @@ end;
 
 procedure TActionsForm.btnCustomStatementClick(Sender: TObject);
 begin
-    MainForm.WndCall(SendForm, TWindowState.Modal);
+    THelpers.WndCall(SendForm, TWindowState.Modal);
 end;
 
 
 procedure TActionsForm.btnAutoStatementClick(Sender: TObject);
 begin
 
-    if MainForm.MsgCall(Question2, 'Are you absolutely sure you want to send it, right now?') = IDNO
+    if THelpers.MsgCall(Question2, 'Are you absolutely sure you want to send it, right now?') = IDNO
         then Exit;
 
-    MainForm.UpdateOpenItemsRefs(OpenItemsGrid);
-    MainForm.UpdateControlStatusRefs(MainForm.sgControlStatus);
+    MainForm.UpdateFOpenItemsRefs(OpenItemsGrid);
+    MainForm.UpdateFControlStatusRefs(MainForm.sgControlStatus);
 
     FStatementFields.Layout     :=TDocMode.Defined;
     FStatementFields.Subject    :='Account Statement';
@@ -1369,14 +1378,14 @@ end;
 procedure TActionsForm.btnLogMissingInvClick(Sender: TObject);
 begin
     QmsForm.IsMissing:=True;
-    MainForm.WndCall(QmsForm, Modal);
+    THelpers.WndCall(QmsForm, Modal);
 end;
 
 
 procedure TActionsForm.btnLogNowClick(Sender: TObject);
 begin
     QmsForm.IsMissing:=False;
-    MainForm.WndCall(QmsForm, Modal);
+    THelpers.WndCall(QmsForm, Modal);
 end;
 
 

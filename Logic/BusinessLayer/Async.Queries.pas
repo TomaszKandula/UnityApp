@@ -25,8 +25,7 @@ uses
     Data.Win.ADODB,
     Data.DB,
     Handler.Sql,
-    Unity.Interposer,
-    Unity.Statics,
+    Unity.Grid,
     Unity.Enums,
     Unity.Records,
     Unity.Arrays;
@@ -71,18 +70,21 @@ uses
     View.Actions,
     View.UserFeedback,
     Handler.Database,
-    DbModel,
-    Unity.Settings,
     Handler.Account,
+    Unity.Sql,
+    Unity.Chars,
+    Unity.Helpers,
+    Unity.Settings,
     Sync.Documents,
-    AgeView,
-    Transactions;
+    Transactions,
+    DbModel,
+    AgeView;
 
 
 procedure TQueries.UpdateQmsViewFsc(Source: TStringGrid); {refactor / async}
 begin
 
-    var Tables: TDataTables:=TDataTables.Create(MainForm.DbConnect);
+    var Tables: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
     try
         Tables.StrSQL:=TSql.SELECT                     +
                            TQmsLog.QmsLog         + TChars.POINT + TQmsLog.Id          + TChars.COMMA +
@@ -130,7 +132,7 @@ end;
 procedure TQueries.UpdateQmsViewLbu(Source: TStringGrid); {refactor / async}
 begin
 
-    var Tables: TDataTables:=TDataTables.Create(MainForm.DbConnect);
+    var Tables: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
     try
         Tables.StrSQL:=TSql.SELECT                     +
                            TQmsLog.QmsLog         + TChars.POINT + TQmsLog.Id          + TChars.COMMA +
@@ -178,7 +180,7 @@ end;
 procedure TQueries.ShowItemDetails(ItemId: integer; FscView: boolean); {refactor / async}
 begin
 
-    var Tables: TDataTables:=TDataTables.Create(MainForm.DbConnect);
+    var Tables: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
     try
         Tables.Columns.Add(TQmsLog.OpenAm);
         Tables.Columns.Add(TQmsLog.Am);
@@ -244,7 +246,7 @@ procedure TQueries.UpdateStatus(DbItemId: integer; Status: string; Grid: TString
 begin
 
     // Update database
-    var Tables: TDataTables:=TDataTables.Create(MainForm.DbConnect);
+    var Tables: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
     try
         var Conditions: string:=TQmsLog.Id + TSql.EQUAL + QuotedStr(DbItemId.ToString);
         Tables.Columns.Add(TQmsLog.QueryStatus);
@@ -315,11 +317,11 @@ begin
         begin
 
             // Allow to resolve query
-            if MainForm.MsgCall(TCommon.TMessage.Question2, 'Are you sure you want to resolve this query?') = IDYES then
+            if THelpers.MsgCall(TAppMessage.Question2, 'Are you sure you want to resolve this query?') = IDYES then
             begin
                 UpdateStatus(DbItemId, 'RESOLVED', MainForm.sgFSCview, FscView);
                 MainForm.FSCComment.Clear;
-                MainForm.MsgCall(TCommon.TMessage.Info, 'Query has been resolved!');
+                THelpers.MsgCall(TAppMessage.Info, 'Query has been resolved!');
             end;
 
         end
@@ -328,11 +330,11 @@ begin
         begin
             UpdateStatus(DbItemId, 'RESOLVED', MainForm.sgFSCview, FscView);
             MainForm.FSCComment.Clear;
-            MainForm.MsgCall(TCommon.TMessage.Info, 'Query has been resolved!');
+            THelpers.MsgCall(TAppMessage.Info, 'Query has been resolved!');
         end
         else
         begin
-            MainForm.MsgCall(TCommon.TMessage.Warn, 'You can only resolve queries that are either pending or open.');
+            THelpers.MsgCall(TAppMessage.Warn, 'You can only resolve queries that are either pending or open.');
         end;
 
     end
@@ -347,11 +349,11 @@ begin
         begin
             UpdateStatus(DbItemId, 'PENDING', MainForm.sgLBUview, FscView);
             MainForm.LbuComment.Clear;
-            MainForm.MsgCall(TCommon.TMessage.Info, 'Query has been resolved!');
+            THelpers.MsgCall(TAppMessage.Info, 'Query has been resolved!');
         end
         else
         begin
-            MainForm.MsgCall(TCommon.TMessage.Warn, 'You can only update open queries.');
+            THelpers.MsgCall(TAppMessage.Warn, 'You can only update open queries.');
         end;
 
     end;

@@ -23,6 +23,9 @@ type
     TInvoiceFilter = (ReminderOvd, ReminderNonOvd, ShowAllItems);
     TAuthTypes     = (cdoAnonymous, cdoBasic, cdoNTLM);
     TAuthUsing     = (cdoNone, cdoSendUsingPickup, cdoSendUsingPort, cdoSendUsingExchange);
+    TAppFiles      = (Configuration, Licence);
+    TAppTimers     = (TurnedOn, TurnedOff);
+    TAppMessage    = (Info, Warn, Error, Question1, Question2);
 
 
 implementation

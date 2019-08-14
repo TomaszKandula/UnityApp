@@ -25,8 +25,7 @@ uses
     Data.Win.ADODB,
     Data.DB,
     Handler.Sql,
-    Unity.Interposer,
-    Unity.Statics,
+    Unity.Grid,
     Unity.Enums,
     Unity.Records,
     Unity.Arrays;
@@ -62,6 +61,7 @@ uses
     View.UserFeedback,
     Handler.Database,
     DbModel,
+    Unity.Sql,
     Unity.Settings,
     Handler.Account,
     Sync.Documents,
@@ -76,7 +76,7 @@ uses
 procedure TTracker.UpdateTrackerList(UserAlias: string);
 begin
 
-    var TrackerData: TDataTables:=TDataTables.Create(MainForm.DbConnect);
+    var TrackerData: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
     try
 
         if not(String.IsNullOrEmpty(UserAlias)) then
@@ -125,7 +125,7 @@ end;
 procedure TTracker.DeleteFromTrackerList(CUID: string);
 begin
 
-    var TrackerData: TDataTables:=TDataTables.Create(MainForm.DbConnect);
+    var TrackerData: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
     try
 
         var PrimaryTable: string:=TSql.DELETE_FROM + TTrackerData.TrackerData + TSql.WHERE + TTrackerData.Cuid  + TSql.EQUAL + QuotedStr(CUID);  {HOLDS RECORDED CUSTOMERS}
@@ -164,7 +164,7 @@ begin
 
     except
         on E: Exception do
-            MainForm.LogText.Log(MainForm.EventLogPath, 'Execution of this tread work has been stopped. Error has been thrown: ' + E.Message + ' (TInvoiceTracker).');
+            MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Execution of this tread work has been stopped. Error has been thrown: ' + E.Message + ' (TInvoiceTracker).');
     end;
 
 end;

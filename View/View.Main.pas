@@ -62,11 +62,12 @@ uses
     uCEFInterfaces,
     uCEFWinControl,
     Unity.EventLogger,
-    Unity.Interposer,
+    Unity.Grid,
+    Unity.Shape,
+    Unity.Panel,
     Unity.Arrays,
     Unity.Enums,
-    Unity.Records,
-    Unity.Statics;
+    Unity.Records;
 
 
 type
@@ -851,96 +852,68 @@ type
         procedure btnLbuUpdateClick(Sender: TObject);
         procedure Action_TurnRowHighlightClick(Sender: TObject);
         procedure CommonPopupMenuPopup(Sender: TObject);
+        procedure TrayIconClick(Sender: TObject);
     private
-
-        var AbUpdateFields: TAddressBookUpdateFields;
-        var DailyCommentFields: TDailyCommentFields;
-        var GeneralCommentFields: TGeneralCommentFields;
-        var FAllowClose:      boolean;
-        var FStartTime:       TTime;
-
-        var FWinUserName:     string;
-        var FEventLogPath:    string;
-
-        var FGroupIdSel:      string;
-        var FGroupNmSel:      string;
-        var FAgeDateSel:      string;
-
-        var FOSAmount:        double;
-
-        var FAccessLevel:     string;
-        var FAccessMode:      string;
-
-        var FOpenItemsUpdate: string;
-        var FOpenItemsStatus: string;
-
-        var FIsConnected:     boolean;
-
-        var FCurrentEvents:   string;
-
+        var FAllowClose:           boolean;
+        var FEventLogPath:         string;
+        var FWinUserName:          string;
+        var FAbUpdateFields:       TAddressBookUpdateFields;
+        var FDailyCommentFields:   TDailyCommentFields;
+        var FGeneralCommentFields: TGeneralCommentFields;
         procedure ResetTabsheetButtons;
         procedure SetPanelBorders;
         procedure SetGridColumnWidths;
         procedure SetGridRowHeights;
         procedure SetButtonsGlyphs;
+        procedure SetSettingsPanel(IsLocked: boolean);
         procedure UnfoldReportsTab(Header: TPanel; Panel: TPanel; ShouldHide: boolean = false);
+        procedure InitializeScreenSettings;
         function  CheckGivenPassword(Password: string): boolean;
         function  SetNewPassword(Password: string): boolean;
         function  AddressBookExclusion: boolean;
-        procedure SetSettingsPanel(IsLocked: boolean);
-        procedure LoadImageFromStream(Image: TImage; const FileName: string);
         function  CDate(StrDate: string): TDate;
         function  ShowReport(ReportNumber: cardinal): cardinal;
-        procedure InitializeScreenSettings;
-
     public
 
-        var LogText:           TThreadFileLog;
-        var DbConnect:         TADOConnection;
-        var GroupList:         TALists;
-        var GridPicture:       TImage;
-        var OpenItemsRefs:     TOpenItemsRefs;
-        var ControlStatusRefs: TControlStatusRefs;
-
-        property WinUserName:     string  read FWinUserName     write FWinUserName;
-        property EventLogPath:    string  read FEventLogPath    write FEventLogPath;
-        property GroupIdSel:      string  read FGroupIdSel      write FGroupIdSel;
-        property GroupNmSel:      string  read FGroupNmSel      write FGroupNmSel;
-        property AgeDateSel:      string  read FAgeDateSel      write FAgeDateSel;
-        property OSAmount:        double  read FOSAmount        write FOSAmount;
-        property AccessLevel:     string  read FAccessLevel     write FAccessLevel;
-        property AccessMode:      string  read FAccessMode      write FAccessMode;
-        property OpenItemsUpdate: string  read FOpenItemsUpdate write FOpenItemsUpdate;
-        property OpenItemsStatus: string  read FOpenItemsStatus write FOpenItemsStatus;
-        property IsConnected:     boolean read FIsConnected     write FIsConnected;
-        property CurrentEvents:   string  read FCurrentEvents   write FCurrentEvents;
-
-        // System helpers
-        procedure DebugMsg(const Msg: String);
+        // Legacy code, to be removed -- CUT
+        var FGroupIdSel:      string;
+        var FGroupNmSel:      string;
+        var FAgeDateSel:      string;
+        var FAccessLevel:     string;
+        var FAccessMode:      string;
+        var FOpenItemsUpdate: string;
+        var FOpenItemsStatus: string;
+        var FOSAmount:        double;
+        var FIsConnected:     boolean;
+        var FCurrentEvents:   string;
         procedure TryInitConnection;
-        procedure ExecMessage(IsPostType: boolean; IntValue: cardinal; TextValue: string);
-        function  WndCall(WinForm: TForm; Mode: TWindowState): integer;
-        function  MsgCall(WndType: TCommon.TMessage; WndText: string): integer;
-        function  OleGetStr(RecordsetField: variant): string;
-
-        // Column helpers
-        procedure UpdateOpenItemsRefs(SourceGrid: TStringGrid);
-        procedure UpdateControlStatusRefs(SourceGrid: TStringGrid);
-
-        // Data helpers
         procedure FindCoData(TargetColumn: integer; TargetGrid: TStringGrid; SourceGrid: TStringGrid);
         function  ConvertCoCode(CoNumber: string; Prefix: string; mode: integer): string;
         function  GetCoCode(CoPos: integer; GroupId: string): string;
+        // Legacy code, to be removed -- CUT
 
-        // Other helpers
-        procedure TurnRowHighlight(Grid: TStringGrid; MenuItem: TMenuItem);
-        procedure SwitchTimers(State: TCommon.TTimers);
-        function  Explode(Text: string; SourceDelim: char): string;
-        function  Implode(Text: TStrings; TargetDelim: char): string;
+        var FStartTime:         TTime;
+        var FAppEvents:         TThreadFileLog;
+        var FDbConnect:         TADOConnection;
+        var FGroupList:         TALists;
+        var FGridPicture:       TImage;
+        var FOpenItemsRefs:     TFOpenItemsRefs;
+        var FControlStatusRefs: TFControlStatusRefs;
+
+        property WinUserName: string read FWinUserName;
+        property EventLogPath: string read FEventLogPath;
+
+        procedure InitMainWnd(SessionId: string);
+        procedure UpdateFOpenItemsRefs(SourceGrid: TStringGrid);
+        procedure UpdateFControlStatusRefs(SourceGrid: TStringGrid);
+        procedure SwitchTimers(State: TAppTimers);
 
     protected
 
-        // Chromium
+        // -------------------
+        // Chromium component.
+        // -------------------
+
         procedure NotifyMoveOrResizeStarted;
         procedure ChromiumModalLoopOn(PassMsg: TMessage);
         procedure ChromiumModalLoopOff(PassMsg: TMessage);
@@ -959,23 +932,27 @@ type
             var Result: Boolean
         );
 
-        // Process Windows messgaes
+        // -----------------
+        // Windows messages.
+        // -----------------
+
+        // Legacy code, to be removed -- CUT
         procedure CallbackAwaitForm(PassMsg: TMessage);
         procedure CallbackMassMailer(PassMsg: TMessage);
         procedure CallbackStatusBar(PassMsg: TMessage);
         procedure CallbackMessageBox(PassMsg: TMessage);
+        procedure WndMessagesInternal(PassMsg: TMessage);
+        // Legacy code, to be removed -- CUT
+
         procedure WndProc(var msg: TMessage); override;
         procedure WndMessagesChromium(PassMsg: TMessage);
-        procedure WndMessagesInternal(PassMsg: TMessage);
-        procedure WndMessagesExternal(PassMsg: TMessage);
         procedure WndMessagesWindows(PassMsg: TMessage);
+        procedure WndMessagesExternal(PassMsg: TMessage);
 
     end;
 
 
     function MainForm: TMainForm;
-    const WM_GETINFO = WM_USER + 120;
-    const WM_EXTINFO = WM_APP  + 150;
 
 
 implementation
@@ -998,13 +975,25 @@ uses
     View.SqlSearch,
     View.MassMailer,
     View.AwaitScreen,
-    Handler.Sql,
-    DbModel,
-    Handler.Database,
-    Handler.Account,
+    View.StartupScreen,
+    Unity.Sql,
+    Unity.Messaging,
+    Unity.UserAccess,
+    Unity.Filtering,
+    Unity.Chars,
+    Unity.Helpers,
+    Unity.Common,
+    Unity.Unknown,
+    Unity.StatusBar,
+    Unity.DateTimeFormats,
+    Unity.Sorting,
+    Handler.Sql{legacy},
+    DbModel{legacy},
+    Handler.Database{legacy},
+    Handler.Account{legacy},
     Unity.Settings,
-    AgeView,
-    Transactions,
+    AgeView{legacy},
+    Transactions{legacy},
     Sync.Documents,
     Async.Utilities,
     Async.Tracker,
@@ -1024,15 +1013,6 @@ function MainForm: TMainForm;
 begin
     if not(Assigned(VMainForm)) then Application.CreateForm(TMainForm, VMainForm);
     Result:=VMainForm;
-end;
-
-
-// ------------------------------------------------------------------------------------------------------------------------------------------ DEBUGER OUTPUT //
-
-
-procedure TMainForm.DebugMsg(const Msg: String);
-begin
-    OutputDebugString(PChar(Msg));
 end;
 
 
@@ -1129,11 +1109,11 @@ procedure TMainForm.CallbackMessageBox(PassMsg: TMessage);
 begin
 
     case PassMsg.WParam of
-        TMessaging.TWParams.MessageInfo:      MainForm.MsgCall(TCommon.TMessage.Info,      PChar(PassMsg.LParam));
-        TMessaging.TWParams.MessageWarn:      MainForm.MsgCall(TCommon.TMessage.Warn,      PChar(PassMsg.LParam));
-        TMessaging.TWParams.MessageError:     MainForm.MsgCall(TCommon.TMessage.Error,     PChar(PassMsg.LParam));
-        TMessaging.TWParams.MessageQuestion1: MainForm.MsgCall(TCommon.TMessage.Question1, PChar(PassMsg.LParam));
-        TMessaging.TWParams.MessageQuestion2: MainForm.MsgCall(TCommon.TMessage.Question2, PChar(PassMsg.LParam));
+        TMessaging.TWParams.MessageInfo:      THelpers.MsgCall(TAppMessage.Info,      PChar(PassMsg.LParam));
+        TMessaging.TWParams.MessageWarn:      THelpers.MsgCall(TAppMessage.Warn,      PChar(PassMsg.LParam));
+        TMessaging.TWParams.MessageError:     THelpers.MsgCall(TAppMessage.Error,     PChar(PassMsg.LParam));
+        TMessaging.TWParams.MessageQuestion1: THelpers.MsgCall(TAppMessage.Question1, PChar(PassMsg.LParam));
+        TMessaging.TWParams.MessageQuestion2: THelpers.MsgCall(TAppMessage.Question2, PChar(PassMsg.LParam));
     end;
 
 end;
@@ -1142,8 +1122,8 @@ end;
 procedure TMainForm.WndMessagesInternal(PassMsg: TMessage);
 begin
 
-    if PassMsg.Msg <> WM_GETINFO then Exit;
-    DebugMsg('WM_GETINFO RECEIVED');
+    if PassMsg.Msg <> THelpers.WM_GETINFO then Exit;
+    OutputDebugString(PChar('WM_GETINFO RECEIVED'));
 
     CallbackMessageBox(PassMsg);
     CallbackStatusBar(PassMsg);
@@ -1156,27 +1136,27 @@ end;
 procedure TMainForm.WndMessagesExternal(PassMsg: TMessage);
 begin
 
-    if PassMsg.Msg <> WM_EXTINFO then Exit;
-    DebugMsg('WM_EXTINFO RECEIVED');
+    if PassMsg.Msg <> THelpers.WM_EXTINFO then Exit;
+    OutputDebugString(PChar('WM_EXTINFO RECEIVED'));
 
     // Log time (seconds) in database "general comment" table
     if PassMsg.LParam > 0 then
     begin
 
-        DailyCommentFields.CUID         :=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), sgAgeView.Row];
-        DailyCommentFields.Email        :=False;
-        DailyCommentFields.CallEvent    :=True;
-        DailyCommentFields.CallDuration :=PassMsg.LParam;
-        DailyCommentFields.Comment      :='';
-        DailyCommentFields.EmailReminder:=False;
-        DailyCommentFields.EmailAutoStat:=False;
-        DailyCommentFields.EmailManuStat:=False;
-        DailyCommentFields.EventLog     :=True;
-        DailyCommentFields.UpdateGrid   :=True;
-        DailyCommentFields.ExtendComment:=False;
+        FDailyCommentFields.CUID         :=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), sgAgeView.Row];
+        FDailyCommentFields.Email        :=False;
+        FDailyCommentFields.CallEvent    :=True;
+        FDailyCommentFields.CallDuration :=PassMsg.LParam;
+        FDailyCommentFields.Comment      :='';
+        FDailyCommentFields.EmailReminder:=False;
+        FDailyCommentFields.EmailAutoStat:=False;
+        FDailyCommentFields.EmailManuStat:=False;
+        FDailyCommentFields.EventLog     :=True;
+        FDailyCommentFields.UpdateGrid   :=True;
+        FDailyCommentFields.ExtendComment:=False;
 
         var Comments: IComments:=TComments.Create();
-        Comments.EditDailyComment(DailyCommentFields);
+        Comments.EditDailyComment(FDailyCommentFields);
 
     end;
 
@@ -1191,7 +1171,7 @@ begin
         // Windows query for shutdown
         WM_QUERYENDSESSION:
         begin
-            LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(PassMsg.Msg) + ' WM_QUERYENDSESSION. Windows is going to be shut down. Closing ' + TCommon.AppCaption + '...');
+            FAppEvents.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(PassMsg.Msg) + ' WM_QUERYENDSESSION. Windows is going to be shut down. Closing ' + TCommon.AppCaption + '...');
             FAllowClose:=True;
             PassMsg.Result:=1;
         end;
@@ -1199,7 +1179,7 @@ begin
         // Windows is shutting down
         WM_ENDSESSION:
         begin
-            LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(PassMsg.Msg) + ' WM_ENDSESSION. Windows is shutting down...');
+            FAppEvents.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(PassMsg.Msg) + ' WM_ENDSESSION. Windows is shutting down...');
             FAllowClose:=True;
         end;
 
@@ -1214,11 +1194,11 @@ begin
                 SwitchTimers(TurnedOff);
                 // Disconnect
                 InetTimer.Enabled:=False;
-                DbConnect.Connected:=False;
-                DbConnect:=nil;
-                IsConnected:=False;
-                MainForm.ExecMessage(False, TMessaging.TWParams.ConnectionError, TUnknown.NULL);
-                LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(PassMsg.Msg) + ' WM_POWERBROADCAST with PBT_APMSUSPEND. Going into suspension mode, Unity is disconnected from server.');
+                FDbConnect.Connected:=False;
+                FDbConnect:=nil;
+                FIsConnected:=False;
+                THelpers.ExecMessage(False, TMessaging.TWParams.ConnectionError, TUnknown.NULL, MainForm);
+                FAppEvents.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(PassMsg.Msg) + ' WM_POWERBROADCAST with PBT_APMSUSPEND. Going into suspension mode, Unity is disconnected from server.');
             end;
 
             // Operation is resuming automatically from a low-power state
@@ -1227,7 +1207,7 @@ begin
             begin
                 // Turn on timer responsible for periodic connection check
                 InetTimer.Enabled:=True;
-                LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(PassMsg.Msg) + ' WM_POWERBROADCAST with PBT_APMRESUMEAUTOMATIC. Windows has resumed after being suspended.');
+                FAppEvents.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(PassMsg.Msg) + ' WM_POWERBROADCAST with PBT_APMRESUMEAUTOMATIC. Windows has resumed after being suspended.');
             end;
 
         end;
@@ -1247,6 +1227,20 @@ begin
 end;
 
 
+procedure TMainForm.InitMainWnd(SessionId: string);
+begin
+
+    FEventLogPath:=SessionId;
+
+    var Settings: ISettings:=TSettings.Create();
+    FWinUserName:=Settings.WinUserName;
+
+    StatBar_TXT1.Caption:=TStatusBar.Ready;
+    StatBar_TXT2.Caption:=FWinUserName;
+
+end;
+
+
 /// <summary>
 /// Get column reference on demand for Open Items string grid. The reason is, despite we do not change columns order
 /// at run time programatically, it may be changed on server-side and that will be immediatelly reflected
@@ -1260,38 +1254,38 @@ end;
 /// we have decided to update the data in Open Items table few times a day (on regular basis).
 /// </remarks>
 
-procedure TMainForm.UpdateOpenItemsRefs(SourceGrid: TStringGrid);
+procedure TMainForm.UpdateFOpenItemsRefs(SourceGrid: TStringGrid);
 begin
-    OpenItemsRefs.CuidCol     :=SourceGrid.ReturnColumn(DbModel.TOpenitems.Cuid,      1, 1);
-    OpenItemsRefs.OpenAmCol   :=SourceGrid.ReturnColumn(DbModel.TOpenitems.OpenAm,    1, 1);
-    OpenItemsRefs.PmtStatCol  :=SourceGrid.ReturnColumn(DbModel.TOpenitems.PmtStat,   1, 1);
-    OpenItemsRefs.CtrlCol     :=SourceGrid.ReturnColumn(DbModel.TOpenitems.Ctrl,      1, 1);
-    OpenItemsRefs.InvoNoCol   :=SourceGrid.ReturnColumn(DbModel.TOpenitems.InvoNo,    1, 1);
-    OpenItemsRefs.ValDtCol    :=SourceGrid.ReturnColumn(DbModel.TOpenitems.ValDt,     1, 1);
-    OpenItemsRefs.DueDtCol    :=SourceGrid.ReturnColumn(DbModel.TOpenitems.DueDt,     1, 1);
-    OpenItemsRefs.ISOCol      :=SourceGrid.ReturnColumn(DbModel.TOpenitems.ISO,       1, 1);
-    OpenItemsRefs.CurAmCol    :=SourceGrid.ReturnColumn(DbModel.TOpenitems.CurAm,     1, 1);
-    OpenItemsRefs.OpenCurAmCol:=SourceGrid.ReturnColumn(DbModel.TOpenitems.OpenCurAm, 1, 1);
-    OpenItemsRefs.Ad1Col      :=SourceGrid.ReturnColumn(DbModel.TOpenitems.Ad1,       1, 1);
-    OpenItemsRefs.Ad2Col      :=SourceGrid.ReturnColumn(DbModel.TOpenitems.Ad2,       1, 1);
-    OpenItemsRefs.Ad3Col      :=SourceGrid.ReturnColumn(DbModel.TOpenitems.Ad3,       1, 1);
-    OpenItemsRefs.PnoCol      :=SourceGrid.ReturnColumn(DbModel.TOpenitems.Pno,       1, 1);
-    OpenItemsRefs.PAreaCol    :=SourceGrid.ReturnColumn(DbModel.TOpenitems.PArea,     1, 1);
-    OpenItemsRefs.Text        :=SourceGrid.ReturnColumn(DbModel.TOpenitems.Txt,       1, 1);
+    FOpenItemsRefs.CuidCol     :=SourceGrid.ReturnColumn(DbModel.TOpenitems.Cuid,      1, 1);
+    FOpenItemsRefs.OpenAmCol   :=SourceGrid.ReturnColumn(DbModel.TOpenitems.OpenAm,    1, 1);
+    FOpenItemsRefs.PmtStatCol  :=SourceGrid.ReturnColumn(DbModel.TOpenitems.PmtStat,   1, 1);
+    FOpenItemsRefs.CtrlCol     :=SourceGrid.ReturnColumn(DbModel.TOpenitems.Ctrl,      1, 1);
+    FOpenItemsRefs.InvoNoCol   :=SourceGrid.ReturnColumn(DbModel.TOpenitems.InvoNo,    1, 1);
+    FOpenItemsRefs.ValDtCol    :=SourceGrid.ReturnColumn(DbModel.TOpenitems.ValDt,     1, 1);
+    FOpenItemsRefs.DueDtCol    :=SourceGrid.ReturnColumn(DbModel.TOpenitems.DueDt,     1, 1);
+    FOpenItemsRefs.ISOCol      :=SourceGrid.ReturnColumn(DbModel.TOpenitems.ISO,       1, 1);
+    FOpenItemsRefs.CurAmCol    :=SourceGrid.ReturnColumn(DbModel.TOpenitems.CurAm,     1, 1);
+    FOpenItemsRefs.OpenCurAmCol:=SourceGrid.ReturnColumn(DbModel.TOpenitems.OpenCurAm, 1, 1);
+    FOpenItemsRefs.Ad1Col      :=SourceGrid.ReturnColumn(DbModel.TOpenitems.Ad1,       1, 1);
+    FOpenItemsRefs.Ad2Col      :=SourceGrid.ReturnColumn(DbModel.TOpenitems.Ad2,       1, 1);
+    FOpenItemsRefs.Ad3Col      :=SourceGrid.ReturnColumn(DbModel.TOpenitems.Ad3,       1, 1);
+    FOpenItemsRefs.PnoCol      :=SourceGrid.ReturnColumn(DbModel.TOpenitems.Pno,       1, 1);
+    FOpenItemsRefs.PAreaCol    :=SourceGrid.ReturnColumn(DbModel.TOpenitems.PArea,     1, 1);
+    FOpenItemsRefs.Text        :=SourceGrid.ReturnColumn(DbModel.TOpenitems.Txt,       1, 1);
 end;
 
 
 /// <summary>
-/// Get column reference of Control Status table located in General Tables. Similarly to the "UpdateOpenItemsRefs" method,
+/// Get column reference of Control Status table located in General Tables. Similarly to the "UpdateFOpenItemsRefs" method,
 /// we use it to decrease level of usage of ReturnColumn method.
 /// </summary>
 
-procedure TMainForm.UpdateControlStatusRefs(SourceGrid: TStringGrid);
+procedure TMainForm.UpdateFControlStatusRefs(SourceGrid: TStringGrid);
 begin
-    ControlStatusRefs.Id         :=SourceGrid.ReturnColumn(TControlStatus.Id,   1, 1);
-    ControlStatusRefs.Code       :=SourceGrid.ReturnColumn(TControlStatus.Code, 1, 1);
-    ControlStatusRefs.Text       :=SourceGrid.ReturnColumn(TControlStatus.Text, 1, 1);
-    ControlStatusRefs.Description:=SourceGrid.ReturnColumn(TControlStatus.Description, 1, 1);
+    FControlStatusRefs.Id         :=SourceGrid.ReturnColumn(TControlStatus.Id,   1, 1);
+    FControlStatusRefs.Code       :=SourceGrid.ReturnColumn(TControlStatus.Code, 1, 1);
+    FControlStatusRefs.Text       :=SourceGrid.ReturnColumn(TControlStatus.Text, 1, 1);
+    FControlStatusRefs.Description:=SourceGrid.ReturnColumn(TControlStatus.Description, 1, 1);
 end;
 
 
@@ -1327,22 +1321,19 @@ end;
 procedure TMainForm.TryInitConnection;
 begin
 
-    DbConnect:=TADOConnection.Create(nil);
-
-    var DataBase: TDataBase;
-    DataBase :=TDataBase.Create(True);
-
+    FDbConnect:=TADOConnection.Create(nil);
+    var DataBase:=TDataBase.Create(True);
     try
 
         if DataBase.Check = 0 then
         begin
-            DataBase.InitializeConnection(MainThreadID, True, DbConnect);
-            IsConnected:=True;
+            DataBase.InitializeConnection(MainThreadID, True, FDbConnect);
+            FIsConnected:=True;
             SwitchTimers(TurnedOn);
         end
         else
         begin
-            IsConnected:=False;
+            FIsConnected:=False;
             SwitchTimers(TurnedOff);
         end;
 
@@ -1353,88 +1344,7 @@ begin
 end;
 
 
-procedure TMainForm.ExecMessage(IsPostType: boolean; IntValue: cardinal; TextValue: string);
-begin
-
-    var IntValueAlt: integer:=0;
-
-    if TryStrToInt(TextValue, IntValueAlt) then
-    begin
-
-        case IsPostType of
-
-            True:  PostMessage(MainForm.Handle, WM_GETINFO, IntValue, LPARAM(IntValueAlt));
-            False: SendMessage(MainForm.Handle, WM_GETINFO, IntValue, LPARAM(IntValueAlt));
-
-        end;
-
-    end
-    else
-    begin
-
-        case IsPostType of
-
-            True:  PostMessage(MainForm.Handle, WM_GETINFO, IntValue, LPARAM(PCHAR(TextValue)));
-            False: SendMessage(MainForm.Handle, WM_GETINFO, IntValue, LPARAM(PCHAR(TextValue)));
-
-        end;
-
-    end;
-
-end;
-
-
 // ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
-
-
-/// <summary>
-/// Use this when dealing with database and/or datasets/recordset results, field may be null and thus must be converted into string type.
-/// </summary>
-
-function TMainForm.OleGetStr(RecordsetField: variant): string;
-begin
-    {$D-}
-    try
-        OleGetStr:=RecordsetField;
-    except
-        {case of null field}
-        OleGetStr:=VarToStr(RecordsetField);
-    end;
-    {$D+}
-end;
-
-
-function TMainForm.WndCall(WinForm: TForm; Mode: TWindowState): integer;
-begin
-
-    Result:=0;
-
-    WinForm.PopupMode  :=pmAuto;
-    WinForm.PopupParent:=MainForm;
-
-    case Mode of
-        TWindowState.Modal: Result:=WinForm.ShowModal;
-        TWindowState.Modeless: WinForm.Show;
-    end;
-
-end;
-
-
-function TMainForm.MsgCall(WndType: TCommon.TMessage; WndText: string): integer;
-begin
-
-    Result:=0;
-    if WndText = '' then Exit;
-
-    case WndType of
-        TCommon.TMessage.Info:      Result:=Application.MessageBox(PChar(WndText), PChar(TCommon.APPCAPTION), MB_OK       + MB_ICONINFORMATION);
-        TCommon.TMessage.Warn:      Result:=Application.MessageBox(PChar(WndText), PChar(TCommon.APPCAPTION), MB_OK       + MB_ICONWARNING);
-        TCommon.TMessage.Error:     Result:=Application.MessageBox(PChar(WndText), PChar(TCommon.APPCAPTION), MB_OK       + MB_ICONERROR);
-        TCommon.TMessage.Question1: Result:=Application.MessageBox(PChar(WndText), PChar(TCommon.APPCAPTION), MB_OKCANCEL + MB_ICONQUESTION);
-        TCommon.TMessage.Question2: Result:=Application.MessageBox(PChar(WndText), PChar(TCommon.APPCAPTION), MB_YESNO    + MB_ICONQUESTION);
-    end;
-
-end;
 
 
 /// <summary>
@@ -1623,26 +1533,7 @@ begin
 end;
 
 
-procedure TMainForm.TurnRowHighlight(Grid: TStringGrid; MenuItem: TMenuItem);
-begin
-
-    if MenuItem.Checked then
-    begin
-        Grid.Options:=Grid.Options - [goRowSelect];
-        Grid.Options:=Grid.Options + [goRangeSelect];
-        MenuItem.Checked:=False;
-    end
-    else
-    begin
-        Grid.Options:=Grid.Options + [goRowSelect];
-        Grid.Options:=Grid.Options - [goRangeSelect];
-        MenuItem.Checked:=True;
-    end;
-
-end;
-
-
-procedure TMainForm.SwitchTimers(State: TCommon.TTimers);
+procedure TMainForm.SwitchTimers(State: TAppTimers);
 begin
 
     case State of
@@ -1661,25 +1552,6 @@ begin
             OILoader.Enabled        :=False;
         end;
 
-    end;
-
-end;
-
-
-procedure TMainForm.LoadImageFromStream(Image: TImage; const FileName: string);
-begin
-
-    var FS: TFileStream:=TFileStream.Create(FileName, fmOpenRead);
-    FS.Position:=0;
-
-    var WIC: TWICImage:=TWICImage.Create;
-
-    try
-        WIC.LoadFromStream(FS);
-        Image.Picture.Assign(WIC);
-    finally
-        WIC.Free;
-        FS.Free;
     end;
 
 end;
@@ -1704,7 +1576,7 @@ begin
     Result:=ShellExecute(
         MainForm.Handle,
         'open',
-        PChar(Settings.GetAppDir + TCommon.UnityReader),
+        PChar(Settings.DirApplication + TCommon.UnityReader),
         PChar(AppParam),
         nil,
         SW_SHOWNORMAL
@@ -1874,30 +1746,6 @@ begin
 end;
 
 
-function TMainForm.Explode(Text: string; SourceDelim: char): string;
-begin
-    Result:=StringReplace(Text, SourceDelim, TChars.CRLF, [rfReplaceAll]);
-end;
-
-
-function TMainForm.Implode(Text: TStrings; TargetDelim: char): string;
-begin
-
-    var Str: string;
-
-    for var iCNT: integer:=0 to Text.Count do
-    begin
-        if iCNT < Text.Count then
-            Str:=Str + Text.Strings[iCNT] + TargetDelim
-                else
-                    Str:=Str + Text.Strings[iCNT];
-    end;
-
-    Result:=Str;
-
-end;
-
-
 function TMainForm.CheckGivenPassword(Password: string): boolean;
 begin
 
@@ -1929,7 +1777,7 @@ begin
     // Save it
     var Settings: ISettings:=TSettings.Create;
     Settings.SetStringValue(TConfigSections.PasswordSection, 'HASH', HashPasswd);
-    Settings.Encode(TCommon.TFiles.AppConfig);
+    Settings.Encode(TAppFiles.Configuration);
     Result:=True;
 
 end;
@@ -1982,11 +1830,12 @@ begin
         MainForm.Position      :=poDefault;
         MainForm.Top           :=LastTopPos;
 
-        /// <remarks>
-        /// To prevent displaying program window out of the screen area,
-        /// we check whether last saved window position fits the desktop area,
-        /// and then setup the Left property.
-        /// </remarks>
+        // ------------------------------------------------------------------
+        // To prevent displaying program window out of the screen area,
+        // we check whether last saved window position fits the desktop area,
+        // and then setup the "Left" property.
+        // ------------------------------------------------------------------
+
         if (LastLeftPos > 0) and (LastLeftPos < (Screen.DesktopWidth - MainForm.Width)) then MainForm.Left:=LastLeftPos;
 
     end
@@ -2005,243 +1854,16 @@ end;
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
 
-//    LogText:=TThreadFileLog.Create;
-//    var AppVersion: string:=TCommon.GetBuildInfoAsString;
-//
-//    CurrentEvents:='# -- SESSION START --';
-//    FAllowClose:=False;
-//
-//    // --------------------------
-//    // Settings
-//    // --------------------------
-//
-//    OnCreateJob(TSplashScreen.SettingUp);
-//
-//    InitializeScreenSettings;
-//    var Settings: ISettings:=TSettings.Create;
-//    try
-//        MainForm.Caption :=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'WND_MAIN', TCommon.APPCAPTION);
-//        DataUpdated.Caption:='';
-//
-//        WinUserName :=Settings.GetWinUserName;
-//        EventLogPath:=Settings.GetPathEventLog;
-//
-//        GridPicture:=TImage.Create(MainForm);
-//        GridPicture.SetBounds(0, 0, 16, 16);
-//        LoadImageFromStream(GridPicture, Settings.GetPathGridImage);
-//
-//        /// <remarks>
-//        /// "InetTimer" is excluded from below list because it is controlled by "InitializeConnection" method.
-//        /// </remarks>
-//
-//        InvoiceScanTimer.Interval:=Settings.GetIntegerValue(TConfigSections.TimersSettings, 'INVOICE_SCANNER', 900000{15 minutes});
-//        FollowupPopup.Interval:=Settings.GetIntegerValue(TConfigSections.TimersSettings, 'FOLLOWUP_CHECKER', 1800000{30 minutes});
-//        OILoader.Interval:=Settings.GetIntegerValue(TConfigSections.TimersSettings, 'OI_LOADER', 300000{5 minutes});
-//
-//        /// <remarks>
-//        /// Get risk class values and convert default decimal separator.
-//        /// </remarks>
-//
-//        if FormatSettings.DecimalSeparator = ',' then
-//        begin
-//            procRISKA.Caption:=((Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_A_MAX', TRiskClass.A)).ToExtended * 100).ToString + '%';
-//            procRISKB.Caption:=((Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_B_MAX', TRiskClass.B)).ToExtended * 100).ToString + '%';
-//            procRISKC.Caption:=((Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_C_MAX', TRiskClass.C)).ToExtended * 100).ToString + '%';
-//        end;
-//
-//        if FormatSettings.DecimalSeparator = '.' then
-//        begin
-//            procRISKA.Caption:=((StringReplace(Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_A_MAX', TRiskClass.A), ',', '.', [rfReplaceAll])).ToExtended * 100).ToString + '%';
-//            procRISKB.Caption:=((StringReplace(Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_B_MAX', TRiskClass.B), ',', '.', [rfReplaceAll])).ToExtended * 100).ToString + '%';
-//            procRISKC.Caption:=((StringReplace(Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_C_MAX', TRiskClass.C), ',', '.', [rfReplaceAll])).ToExtended * 100).ToString + '%';
-//        end;
-//
-//        /// <remarks>
-//        /// Hide all tabs on TPageControl component and set "Debtors" [TabSheet1] as starting page.
-//        /// </remarks>
-//
-//        for var iCNT: integer:=0 to MyPages.PageCount - 1 do MyPages.Pages[iCNT].TabVisible:=False;
-//        MyPages.ActivePage:=TabSheet1;
-//
-//        // Captions for shapes holding controls
-//        Cap01.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT01', 'EMPTY'), [fsBold]);
-//        Cap02.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT02', 'EMPTY'), [fsBold]);
-//        Cap03.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT03', 'EMPTY'), [fsBold]);
-//        Cap05.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT05', 'EMPTY'), [fsBold]);
-//        Cap06.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT06', 'EMPTY'), [fsBold]);
-//        Cap07.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT07', 'EMPTY'), [fsBold]);
-//        Cap24.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT08', 'EMPTY'), [fsBold]);
-//        Cap10.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS2TXT01', 'EMPTY'), [fsBold]);
-//        Cap11.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS2TXT02', 'EMPTY'), [fsBold]);
-//        Cap12.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS2TXT03', 'EMPTY'), [fsBold]);
-//        Cap13.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS3TXT01', 'EMPTY'), [fsBold]);
-//        Cap43.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS4TXT01', 'EMPTY'), [fsBold]);
-//        Cap61.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS6TXT01', 'EMPTY'), [fsBold]);
-//        Cap15.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS7TXT01', 'EMPTY'), [fsBold]);
-//        Cap21.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS8TXT01', 'EMPTY'), [fsBold]);
-//        Cap22.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS8TXT02', 'EMPTY'), [fsBold]);
-//        Cap23.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS8TXT03', 'EMPTY'), [fsBold]);
-//        Cap27.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS8TXT04', 'EMPTY'), [fsBold]);
-//        Cap62.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS9TXT01', 'EMPTY'), [fsBold]);
-//        Cap63.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS9TXT02', 'EMPTY'), [fsBold]);
-//        tR1.Caption:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE1A','') + ' - ' + Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE1B','');
-//        tR2.Caption:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE2A','') + ' - ' + Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE2B','');
-//        tR3.Caption:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE3A','') + ' - ' + Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE3B','');
-//        tR4.Caption:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE4A','') + ' - ' + Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE4B','');
-//        tR5.Caption:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE5A','') + ' - ' + Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE5B','');
-//        tR6.Caption:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE6A','') + ' - ' + Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE6B','');
-//        Text21.Caption:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE1A','') + ' - ' + Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE3B','') + ':';
-//        Text22.Caption:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE4A','') + ' - ' + Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE6B','') + ':';
-//
-//        // Make sure that we have transparency on all button glyphs
-//        SetButtonsGlyphs;
-//
-//    except
-//        on E: Exception do
-//        begin
-//            LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ISettings failed. Error occured: ' + E.Message);
-//            MsgCall(TCommon.TMessage.Error, 'An error occured [ISettings]: ' + E.Message + '. Please contact IT support. Application will be closed.');
-//            ExitProcess(0);
-//        end;
-//    end;
-//
-//    // --------------------------
-//    // Database connectivity
-//    // --------------------------
-//
-//    OnCreateJob(TSplashScreen.Connecting);
-//
-//    try
-//        TryInitConnection;
-//    except
-//        on E: Exception do
-//        begin
-//            LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: TryInitConnection failed. Error occured: ' + E.Message);
-//            MsgCall(TCommon.TMessage.Error, 'An error occured [TryInitConnection]: ' + E.Message + '. Please contact IT support. Application will be closed.');
-//        end;
-//    end;
-//
-//    // --------------------------
-//    // User Access
-//    // --------------------------
-//
-//    OnCreateJob(TSplashScreen.GettingUsers);
-//
-//    var UserControl: TUserControl:=TUserControl.Create(DbConnect);
-//    try
-//
-//        try
-//            UserControl.UserName:=WinUserName;
-//            AccessLevel:=UserControl.GetAccessData(TUserAccess.TTypes.AccessLevel);
-//
-//            // Quit if username is not found
-//            if AccessLevel = '' then
-//            begin
-//                MsgCall(TCommon.TMessage.Error, 'Cannot find account for user alias: ' + UpperCase(WinUserName) + '. Please contact your administrator. Application will be closed.');
-//                ExitProcess(0);
-//            end;
-//
-//            AccessMode:=UserControl.GetAccessData(TUserAccess.TTypes.AccessMode);
-//
-//            if AccessMode = TUserAccess.AccessFull  then Action_FullView.Checked :=True;
-//            if AccessMode = TUserAccess.AccessBasic then Action_BasicView.Checked:=True;
-//
-//            UserControl.GetGroupList(GroupList, GroupListBox);
-//            UserControl.GetAgeDates(GroupListDates, GroupList[0, 0]);
-//
-//            {TODO -oTomek -cReplaceWith : ApprovalMatrix}
-//
-//            // Restricted for "ADMINS"
-//            if AccessLevel <> TUserAccess.Admin then
-//            begin
-//                sgCompanyData.Enabled:=False;
-//                ReloadCover.Visible:=True;
-//                ReloadCover.Cursor:=crNo;
-//                GroupListDates.Enabled:=False;
-//            end;
-//
-//        except
-//            on E: Exception do
-//            begin
-//                LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: TUserControl failed. Error occured: ' + E.Message);
-//                MsgCall(TCommon.TMessage.Error, 'An error occured [TUserControl][' + WinUserName + ']: ' + E.Message + '. Please contact IT support. Application will be closed.');
-//                ExitProcess(0);
-//            end;
-//        end;
-//
-//    finally
-//        UserControl.Free;
-//    end;
-//
-//    // --------------------------
-//    // Load async general tables
-//    // --------------------------
-//
-//    var Utilities: IUtilities:=TUtilities.Create;
-//    try
-//
-//        OnCreateJob(TSplashScreen.MappingTables);
-//        Utilities.GeneralTables(TSalesResponsible.SalesResponsible, sgSalesResp);
-//        Utilities.GeneralTables(TPersonResponsible.PersonResponsible, sgPersonResp);
-//        Utilities.GeneralTables(TAccountType.AccountType, sgAccountType);
-//        Utilities.GeneralTables(TCustomerGroup.CustomerGroup, sgCustomerGr);
-//        Utilities.GeneralTables(TGroup3.Group3, sgGroup3);
-//
-//        OnCreateJob(TSplashScreen.GettingGeneral);
-//        Utilities.GeneralTables(TCompanyData.CompanyData, sgCoCodes, TCompanyData.CoCode + TChars.COMMA + TCompanyData.Branch + TChars.COMMA + TCompanyData.CoName + TChars.COMMA + TCompanyData.CoAddress + TChars.COMMA + TCompanyData.VatNo + TChars.COMMA + TCompanyData.Duns + TChars.COMMA + TCompanyData.Country + TChars.COMMA + TCompanyData.City + TChars.COMMA + TCompanyData.FinManager + TChars.COMMA + TCompanyData.TelephoneNumbers + TChars.COMMA + TCompanyData.CoType + TChars.COMMA + TCompanyData.CoCurrency + TChars.COMMA + TCompanyData.InterestRate + TChars.COMMA + TCompanyData.KpiOverdueTarget + TChars.COMMA + TCompanyData.KpiUnallocatedTarget + TChars.COMMA + TCompanyData.Agents + TChars.COMMA + TCompanyData.Divisions, TSql.ORDER + TCompanyData.CoCode + TSql.ASC);
-//        Utilities.GeneralTables(TPaymentTerms.PaymentTerms, sgPmtTerms);
-//        Utilities.GeneralTables(TPaidinfo.Paidinfo, sgPaidInfo);
-//        Utilities.GeneralTables(TPerson.Person, sgPerson);
-//        Utilities.GeneralTables(TControlStatus.ControlStatus, sgControlStatus);
-//
-//    except
-//        on E: Exception do
-//        begin
-//            LogText.Log(EventLogPath, 'General tables loading failed. Error occured: ' + E.Message);
-//            MsgCall(TCommon.TMessage.Error, 'An error occured [GeneralTables]: ' + E.Message + '. Please contact IT support. Application will be closed.');
-//            ExitProcess(0);
-//        end;
-//
-//    end;
-//
-//    // --------------------------
-//    // Finilizing
-//    // --------------------------
-//
-//    OnCreateJob(TSplashScreen.Finishing);
-//
-//    try
-//
-//        var NowTime: TTime:=Now;
-//        FStartTime:=Now;
-//        FormatDateTime('hh:mm:ss', NowTime);
-//        FormatDateTime('hh:mm:ss', FStartTime);
-//
-//        StatBar_TXT1.Caption:=TStatusBar.Ready;
-//        StatBar_TXT2.Caption:=WinUserName;
-//        StatBar_TXT3.Caption:=DateToStr(Now);
-//
-//        UpTime.Enabled:=True;
-//        CurrentTime.Enabled:=True;
-//
-//        LogText.Log(EventLogPath, 'Thread [' + MainThreadID.ToString + ']: Application version = ' + AppVersion);
-//        LogText.Log(EventLogPath, 'Thread [' + MainThreadID.ToString + ']: User SID = ' + TUserSid.GetCurrentUserSid);
-//
-//        var Queries: IQueries:=TQueries.Create;
-//        Queries.InitializeQms;
-//
-//        if not(FirstAgeLoad.Enabled) then FirstAgeLoad.Enabled:=True;
-//
-//        LogText.Log(EventLogPath, '[GUI] Initialization methods executed within main thread, ''MainForm'' has been created. Main process thread ID = ' + MainThreadID.ToString + '.');
-//
-//    except
-//		on E: Exception do
-//        begin
-//            LogText.Log(EventLogPath, 'Thread [' + MainThreadID.ToString + ']: Invalid boot up. Error occured: ' + E.Message);
-//            MsgCall(TCommon.TMessage.Error, 'Cannot properly boot up the application. An error occured: ' + E.Message + '. Please contact IT support. Application will be closed.');
-//            ExitProcess(0);
-//        end;
-//    end;
+    FAppEvents:=TThreadFileLog.Create;
+
+    for var iCNT:=0 to MyPages.PageCount - 1 do
+        MyPages.Pages[iCNT].TabVisible:=False;
+
+    MyPages.ActivePage:=TabSheet1;
+
+    SetButtonsGlyphs;
+    InitializeScreenSettings;
+    FAllowClose:=False;
 
 end;
 
@@ -2259,8 +1881,6 @@ begin
     // Update grids width, height and thumb size
     SetGridColumnWidths;
     SetGridRowHeights;
-//
-//    LogText.Log(EventLogPath, 'Initialization is completed. Application is running.');
 
 end;
 
@@ -2275,7 +1895,7 @@ begin
         ChromiumWindow.LoadURL(WideString(URL));
     except
         on E: exception do
-            LogText.Log(EventLogPath, '[Chromium] Cannot load URL: ' + URL + '. The error has been thrown: ' + E.Message);
+            FAppEvents.Log(EventLogPath, '[Chromium] Cannot load URL: ' + URL + '. The error has been thrown: ' + E.Message);
     end;
 
 end;
@@ -2293,7 +1913,7 @@ end;
 procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
 
-    // Go minimize and hide from taskbar | do not close
+    // Go minimize and hide from taskbar, do not close
     if not FAllowClose then
     begin
         CanClose:=False;
@@ -2307,10 +1927,10 @@ begin
         Visible:=False;
         ChromiumWindow.CloseBrowser(True);
 
-        ExecMessage(False, TMessaging.TWParams.StatusBar, 'Ending session...');
+        THelpers.ExecMessage(False, TMessaging.TWParams.StatusBar, 'Ending session...', Self);
 
 //        // Update user event log in database
-//        var UserLogs: TDataTables:=TDataTables.Create(DbConnect);
+//        var UserLogs: TDataTables:=TDataTables.Create(FDbConnect);
 //        try
 //
 //            var Today: string:=FormatDateTime(TDateTimeFormats.DateTimeFormat, Now);
@@ -2332,8 +1952,8 @@ begin
 //            UserLogs.Free;
 //        end;
 
-        CurrentEvents:=EmptyStr;
-//        LogText.Log(EventLogPath, 'Application closed.');
+        FCurrentEvents:=EmptyStr;
+//        FAppEvents.Log(EventLogPath, 'Application closed.');
         CanClose:=True;
 
     end;
@@ -2342,6 +1962,8 @@ end;
 
 procedure TMainForm.FormDestroy(Sender: TObject);
 begin
+
+    FAppEvents.Free;
 
     /// <remarks>
     /// Save window position and layout; and disconnect from the server.
@@ -2359,12 +1981,12 @@ begin
 //
 //    Settings.Encode(TCommon.TFiles.AppConfig);
 //
-//    LogText.Free;
+//    FAppEvents.Free;
 //
-//    if Assigned(DbConnect) then
+//    if Assigned(FDbConnect) then
 //    begin
-//        DbConnect.Close;
-//        DbConnect:=nil;
+//        FDbConnect.Close;
+//        FDbConnect:=nil;
 //    end;
 
 end;
@@ -2387,18 +2009,18 @@ begin
         // Load (sync) default age snapshot
         if not(string.IsNullOrEmpty(GroupListBox.Text)) and not(string.IsNullOrEmpty(GroupListDates.Text)) then
         begin
-            GroupIdSel:=GroupList[GroupListBox.ItemIndex, 0];
-            GroupNmSel:=GroupList[GroupListBox.ItemIndex, 1];
-            AgeDateSel:=GroupListDates.Text;
+            FGroupIdSel:=FGroupList[GroupListBox.ItemIndex, 0];
+            FGroupNmSel:=FGroupList[GroupListBox.ItemIndex, 1];
+            FAgeDateSel:=GroupListDates.Text;
             sgAgeView.Enabled:=True;
 
-            var Transactions: TTransactions:=TTransactions.Create(DbConnect);
+            var Transactions: TTransactions:=TTransactions.Create(FDbConnect);
             try
-                OpenItemsUpdate:=Transactions.GetDateTime(DateTime);
-                OpenItemsStatus:=Transactions.GetStatus(OpenItemsUpdate);
-                if string.IsNullOrEmpty(OpenItemsUpdate) then
+                FOpenItemsUpdate:=Transactions.GetDateTime(DateTime);
+                FOpenItemsStatus:=Transactions.GetStatus(FOpenItemsUpdate);
+                if string.IsNullOrEmpty(FOpenItemsUpdate) then
                 begin
-                    MsgCall(Warn, 'Cannot find open items in database. Please contact IT support.');
+                    THelpers.MsgCall(TAppMessage.Warn, 'Cannot find open items in database. Please contact IT support.');
                     var Debtors: IDebtors:=TDebtors.Create;
                     Debtors.ReadAgeViewAsync(NullParameter, TSorting.TMode.Ranges);
                 end
@@ -2486,7 +2108,7 @@ end;
 
 procedure TMainForm.InvoiceScanTimerTimer(Sender: TObject);
 begin
-
+    {Do nothing}
 end;
 
 
@@ -2496,7 +2118,7 @@ end;
 
 procedure TMainForm.OILoaderTimer(Sender: TObject);
 begin
-    LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Calling open items scanner...');
+    FAppEvents.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Calling open items scanner...');
     var OpenItems: IOpenItems:=TOpenItems.Create();
     OpenItems.ScanOpenItemsAsync();
 end;
@@ -2524,6 +2146,8 @@ end;
 
 
 // --------------------------------------------------------------------------------------------------------------------------------------------- POPUP MENUS //
+
+
 
 
 // ------------------------------------------------------------------------------------------------------------------------------------- COMMON MENU ACTIONS //
@@ -2621,7 +2245,7 @@ end;
 
 procedure TMainForm.Action_TurnRowHighlightClick(Sender: TObject);
 begin
-    TurnRowHighlight(ActionsForm.OpenItemsGrid, Action_TurnRowHighlight);
+    THelpers.TurnRowHighlight(ActionsForm.OpenItemsGrid, Action_TurnRowHighlight);
 end;
 
 
@@ -2655,7 +2279,7 @@ begin
 
     if AddressBookExclusion then
     begin
-        MsgCall(Warn, 'This column is locked for editing.');
+        THelpers.MsgCall(TAppMessage.Warn, 'This column is locked for editing.');
         Exit;
     end;
 
@@ -2670,7 +2294,7 @@ begin
 
     if AddressBookExclusion then
     begin
-        MsgCall(Warn, 'This column is locked for editing.');
+        THelpers.MsgCall(TAppMessage.Warn, 'This column is locked for editing.');
         Exit;
     end;
 
@@ -2697,9 +2321,9 @@ end;
 procedure TMainForm.Action_DelRowClick(Sender: TObject);
 begin
 
-    if MsgCall(TCommon.TMessage.Question2, 'Are you sure you want to delete this customer?' + TChars.CRLF + 'This operation cannot be reverted.') = IDNO then Exit;
+    if THelpers.MsgCall(TAppMessage.Question2, 'Are you sure you want to delete this customer?' + TChars.CRLF + 'This operation cannot be reverted.') = IDNO then Exit;
 
-    var DataTables: TDataTables:=TDataTables.Create(DbConnect);
+    var DataTables: TDataTables:=TDataTables.Create(FDbConnect);
     try
 
         DataTables.DeleteRecord(DbModel.TAddressBook.AddressBook, DbModel.TAddressBook.Scuid, DataTables.CleanStr(sgAddressBook.Cells[2, sgAddressBook.Row], False), True);
@@ -2710,8 +2334,8 @@ begin
         end
         else
         begin
-            LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Cannot delete selected row (rows affected: ' + IntToStr(DataTables.RowsAffected) + ').');
-            MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot delete selected row. Please contact IT support.');
+            FAppEvents.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Cannot delete selected row (rows affected: ' + IntToStr(DataTables.RowsAffected) + ').');
+            THelpers.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot delete selected row. Please contact IT support.', Self);
         end;
 
     finally
@@ -2727,7 +2351,7 @@ end;
 
 procedure TMainForm.Action_SearchBookClick(Sender: TObject);
 begin
-    WndCall(SqlSearchForm, TWindowState.Modeless);
+    THelpers.WndCall(SqlSearchForm, TWindowState.Modeless);
 end;
 
 
@@ -2814,7 +2438,7 @@ end;
 
 procedure TMainForm.Action_ReportClick(Sender: TObject);
 begin
-    WndCall(FeedbackForm, TWindowState.Modal);
+    THelpers.WndCall(FeedbackForm, TWindowState.Modal);
 end;
 
 
@@ -2834,7 +2458,7 @@ end;
 
 procedure TMainForm.Action_AboutClick(Sender: TObject);
 begin
-    WndCall(AboutForm, TWindowState.Modal);
+    THelpers.WndCall(AboutForm, TWindowState.Modal);
 end;
 
 
@@ -2859,7 +2483,7 @@ procedure TMainForm.AgeViewPopupPopup(Sender: TObject);
 begin
 
     // Only admins and rw users can use addressbook and invoice tracker
-    if AccessLevel = TUserAccess.ReadOnly then Exit;
+    if FAccessLevel = TUserAccess.ReadOnly then Exit;
 
     // Enable or disable filter removal
     if FilterForm.InUse then
@@ -2877,15 +2501,15 @@ end;
 procedure TMainForm.Action_LyncCallClick(Sender: TObject);
 begin
 
-    if IsConnected then
+    if FIsConnected then
     begin
         if MainForm.StatBar_TXT1.Caption = TStatusBar.Ready then
-            WndCall(ActionsForm, TWindowState.Modal)
+            THelpers.WndCall(ActionsForm, TWindowState.Modal)
                 else
-                    MainForm.MsgCall(Warn, 'Wait until "Ready" status and try again.');
+                    THelpers.MsgCall(TAppMessage.Warn, 'Wait until "Ready" status and try again.');
     end
         else
-            MsgCall(Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+            THelpers.MsgCall(TAppMessage.Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
 end;
 
 
@@ -2905,7 +2529,7 @@ procedure TMainForm.Action_TrackerClick(Sender: TObject);
 begin
 
     var Item: TListItem;
-    if IsConnected then
+    if FIsConnected then
     begin
         TrackerForm.CustomerList.Clear;
 
@@ -2954,12 +2578,12 @@ begin
             end;
         end;
 
-        WndCall(TrackerForm, TWindowState.Modal);
+        THelpers.WndCall(TrackerForm, TWindowState.Modal);
 
     end
     else
     begin
-        MsgCall(Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+        THelpers.MsgCall(TAppMessage.Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
     end;
 
 end;
@@ -2978,13 +2602,13 @@ end;
 procedure TMainForm.Action_AddToBookClick(Sender: TObject);
 begin
 
-    if IsConnected then
+    if FIsConnected then
     begin
         var AddressBook: IAddressBook:=TAddressBook.Create();
         AddressBook.AddToAddressBookAsync(sgAgeView);
     end
     else
-    MsgCall(Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+    THelpers.MsgCall(TAppMessage.Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
 
 end;
 
@@ -2997,7 +2621,7 @@ procedure TMainForm.Action_MassMailerClick(Sender: TObject);
 begin
 
     var Item: TListItem;
-    if IsConnected then
+    if FIsConnected then
     begin
 
         MassMailerForm.CustomerList.Clear;
@@ -3054,12 +2678,12 @@ begin
             end;
         end;
 
-        WndCall(MassMailerForm, TWindowState.Modal);
+        THelpers.WndCall(MassMailerForm, TWindowState.Modal);
 
     end
     else
     begin
-        MsgCall(Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+        THelpers.MsgCall(TAppMessage.Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
     end;
 
 end;
@@ -3074,7 +2698,7 @@ begin
 
     Screen.Cursor:=crHourGlass;
     CalendarForm.FCalendarMode:=TCalendar.GetDate;
-    MainForm.WndCall(CalendarForm, TWindowState.Modal);
+    THelpers.WndCall(CalendarForm, TWindowState.Modal);
 
     // If selected more than one customer, assign given date to selected customers
     if CalendarForm.FSelectedDate <> TDateTimeFormats.NullDate then
@@ -3084,7 +2708,7 @@ begin
             if sgAgeView.RowHeights[iCNT] <> sgAgeView.sgRowHidden then
                 CalendarForm.SetFollowUp(CalendarForm.FSelectedDate, sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), iCNT], iCNT);
 
-            LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ''GeneralComment'' table with column FollowUp has been updated with ' + DateToStr(CalendarForm.FSelectedDate) + ' for multiple items.');
+            FAppEvents.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ''GeneralComment'' table with column FollowUp has been updated with ' + DateToStr(CalendarForm.FSelectedDate) + ' for multiple items.');
     end;
 
     Screen.Cursor:=crDefault;
@@ -3107,16 +2731,16 @@ begin
         if sgAgeView.RowHeights[iCNT] <> sgAgeView.sgRowHidden then
         begin
 
-            GeneralCommentFields.CUID        :=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), iCNT];
-            GeneralCommentFields.FixedComment:=TUnknown.NULL;
-            GeneralCommentFields.FollowUp    :=TChars.SPACE;
-            GeneralCommentFields.Free1       :=TUnknown.NULL;
-            GeneralCommentFields.Free2       :=TUnknown.NULL;
-            GeneralCommentFields.Free3       :=TUnknown.NULL;
-            GeneralCommentFields.EventLog    :=False;
+            FGeneralCommentFields.CUID        :=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), iCNT];
+            FGeneralCommentFields.FixedComment:=TUnknown.NULL;
+            FGeneralCommentFields.FollowUp    :=TChars.SPACE;
+            FGeneralCommentFields.Free1       :=TUnknown.NULL;
+            FGeneralCommentFields.Free2       :=TUnknown.NULL;
+            FGeneralCommentFields.Free3       :=TUnknown.NULL;
+            FGeneralCommentFields.EventLog    :=False;
 
             var Comments: IComments:=TComments.Create();
-            Comments.EditGeneralComment(GeneralCommentFields);
+            Comments.EditGeneralComment(FGeneralCommentFields);
 
             MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneralComment.fFollowUp, 1, 1), iCNT]:=TChars.SPACE;
 
@@ -3124,7 +2748,7 @@ begin
 
     end;
 
-    LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ''GeneralComment'' table with column FollowUp has been updated with removal for multiple items.');
+    FAppEvents.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ''GeneralComment'' table with column FollowUp has been updated with removal for multiple items.');
 
     Screen.Cursor:=crDefault;
 
@@ -3145,7 +2769,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.Inf7;
-    WndCall(FilterForm, TWindowState.Modal);
+    THelpers.WndCall(FilterForm, TWindowState.Modal);
 end;
 
 
@@ -3156,7 +2780,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.Inf4;
-    WndCall(FilterForm, TWindowState.Modal);
+    THelpers.WndCall(FilterForm, TWindowState.Modal);
 end;
 
 
@@ -3167,7 +2791,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.Group3;
-    WndCall(FilterForm, TWindowState.Modal);
+    THelpers.WndCall(FilterForm, TWindowState.Modal);
 end;
 
 
@@ -3178,7 +2802,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.SalesResponsible;
-    WndCall(FilterForm, TWindowState.Modal);
+    THelpers.WndCall(FilterForm, TWindowState.Modal);
 end;
 
 
@@ -3189,7 +2813,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.PersonResponsible;
-    WndCall(FilterForm, TWindowState.Modal);
+    THelpers.WndCall(FilterForm, TWindowState.Modal);
 end;
 
 
@@ -3200,7 +2824,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.CustomerGroup;
-    WndCall(FilterForm, TWindowState.Modal);
+    THelpers.WndCall(FilterForm, TWindowState.Modal);
 end;
 
 
@@ -3211,7 +2835,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.AccountType;
-    WndCall(FilterForm, TWindowState.Modal);
+    THelpers.WndCall(FilterForm, TWindowState.Modal);
 end;
 
 
@@ -3222,7 +2846,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.Follow;
-    WndCall(FilterForm, TWindowState.Modal);
+    THelpers.WndCall(FilterForm, TWindowState.Modal);
 end;
 
 
@@ -3233,7 +2857,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.CoCode;
-    WndCall(FilterForm, TWindowState.Modal);
+    THelpers.WndCall(FilterForm, TWindowState.Modal);
 end;
 
 
@@ -3244,7 +2868,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.Agent;
-    WndCall(FilterForm, TWindowState.Modal);
+    THelpers.WndCall(FilterForm, TWindowState.Modal);
 end;
 
 
@@ -3255,7 +2879,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.Division;
-    WndCall(FilterForm, TWindowState.Modal);
+    THelpers.WndCall(FilterForm, TWindowState.Modal);
 end;
 
 
@@ -3266,7 +2890,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.Free1;
-    WndCall(FilterForm, TWindowState.Modal);
+    THelpers.WndCall(FilterForm, TWindowState.Modal);
 end;
 
 
@@ -3277,7 +2901,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.Free2;
-    WndCall(FilterForm, TWindowState.Modal);
+    THelpers.WndCall(FilterForm, TWindowState.Modal);
 end;
 
 
@@ -3288,7 +2912,7 @@ begin
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TFiltering.TColumns.Free3;
-    WndCall(FilterForm, TWindowState.Modal);
+    THelpers.WndCall(FilterForm, TWindowState.Modal);
 end;
 
 
@@ -3360,7 +2984,7 @@ begin
     FilterForm.FilterClearAll;
 
     // Re-compute aging summary
-    var AgeView: TAgeView:=TAgeView.Create(MainForm.DbConnect);
+    var AgeView: TAgeView:=TAgeView.Create(MainForm.FDbConnect);
     try
         AgeView.ComputeAgeSummary(MainForm.sgAgeView);
         AgeView.ComputeAndShowRCA(MainForm.sgAgeView);
@@ -3396,7 +3020,7 @@ begin
     GridSearchForm.FGrid     :=MainForm.sgAgeView;
     GridSearchForm.FColName  :=TSnapshots.fCustomerName;
     GridSearchForm.FColNumber:=TSnapshots.fCustomerNumber;
-    WndCall(GridSearchForm, TWindowState.Modeless);
+    THelpers.WndCall(GridSearchForm, TWindowState.Modeless);
 end;
 
 
@@ -3407,11 +3031,11 @@ end;
 procedure TMainForm.Action_PaymentTermClick(Sender: TObject);
 begin
 
-    var AgeView: TAgeView:=TAgeView.Create(DbConnect);
+    var AgeView: TAgeView:=TAgeView.Create(FDbConnect);
     try
 
-        MsgCall(
-            Info,
+        THelpers.MsgCall(
+            TAppMessage.Info,
             'Payment term: ' +
             AgeView.GetData(
                 sgAgeView.Cells[
@@ -3442,11 +3066,11 @@ end;
 procedure TMainForm.Action_PersonClick(Sender: TObject);
 begin
 
-    var AgeView: TAgeView:=TAgeView.Create(DbConnect);
+    var AgeView: TAgeView:=TAgeView.Create(FDbConnect);
     try
 
-        MsgCall(
-            Info,
+        THelpers.MsgCall(
+            TAppMessage.Info,
             'Person assigned: ' +
             AgeView.GetData(
                 sgAgeView.Cells[
@@ -3530,7 +3154,7 @@ end;
 procedure TMainForm.Action_BasicViewClick(Sender: TObject);
 begin
 
-    var AgeView: TAgeView:=TAgeView.Create(DbConnect);
+    var AgeView: TAgeView:=TAgeView.Create(FDbConnect);
     try
         AgeView.AgeViewMode(mainForm.sgAgeView, TConfigSections.AgingBasic);
     finally
@@ -3553,7 +3177,7 @@ end;
 procedure TMainForm.Action_FullViewClick(Sender: TObject);
 begin
 
-    var AgeView: TAgeView:=TAgeView.Create(DbConnect);
+    var AgeView: TAgeView:=TAgeView.Create(FDbConnect);
     try
         AgeView.AgeViewMode(mainForm.sgAgeView, TConfigSections.AgingFull);
     finally
@@ -3575,7 +3199,7 @@ end;
 
 procedure TMainForm.Action_FollowUpColorsClick(Sender: TObject);
 begin
-    WndCall(ColorsForm, TWindowState.Modal);
+    THelpers.WndCall(ColorsForm, TWindowState.Modal);
 end;
 
 
@@ -3585,7 +3209,7 @@ end;
 
 procedure TMainForm.Action_RowHighlightClick(Sender: TObject);
 begin
-    TurnRowHighlight(sgAgeView, Action_RowHighlight);
+    THelpers.TurnRowHighlight(sgAgeView, Action_RowHighlight);
 end;
 
 
@@ -3600,34 +3224,34 @@ procedure TMainForm.Action_RemoveClick(Sender: TObject);
 begin
 
     // Exit condition
-    if not(IsConnected) then
+    if not(FIsConnected) then
     begin
-        MsgCall(Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+        THelpers.MsgCall(Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
         Exit;
     end;
 
     // R/W user can remove item
-    if (MainForm.AccessLevel = TUserAccess.ReadWrite) and (UpperCase(MainForm.WinUserName) = UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
-        if MsgCall(TCommon.TMessage.Question2, 'Are you sure you want to remove selected customer?') = IDYES then
+    if (MainForm.FAccessLevel = TUserAccess.ReadWrite) and (UpperCase(MainForm.WinUserName) = UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
+        if THelpers.MsgCall(TAppMessage.Question2, 'Are you sure you want to remove selected customer?') = IDYES then
         begin
             var Tracker: ITracker:=TTracker.Create;
             Tracker.DeleteFromTrackerList(sgInvoiceTracker.Cells[sgInvoiceTracker.ReturnColumn(TTrackerData.Cuid, 1, 1), sgInvoiceTracker.Row]);
         end;
 
     // R/W user cannot remove other item
-    if (MainForm.AccessLevel = TUserAccess.ReadWrite) and (UpperCase(MainForm.WinUserName) <> UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
-        MsgCall(TCommon.TMessage.Warn, 'You cannot remove someone''s else item.');
+    if (MainForm.FAccessLevel = TUserAccess.ReadWrite) and (UpperCase(MainForm.WinUserName) <> UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
+        THelpers.MsgCall(TAppMessage.Warn, 'You cannot remove someone''s else item.');
 
     // Administrator can remove any item
-    if (MainForm.AccessLevel = TUserAccess.Admin) then
-        if MsgCall(TCommon.TMessage.Question2, 'Are you sure you want to remove selected customer?') = IDYES then
+    if (MainForm.FAccessLevel = TUserAccess.Admin) then
+        if THelpers.MsgCall(TAppMessage.Question2, 'Are you sure you want to remove selected customer?') = IDYES then
         begin
             var Tracker: ITracker:=TTracker.Create;
             Tracker.DeleteFromTrackerList(sgInvoiceTracker.Cells[sgInvoiceTracker.ReturnColumn(TTrackerData.Cuid, 1, 1), sgInvoiceTracker.Row]);
         end;
 
     // Read only user cannot remove anything
-    if (MainForm.AccessLevel = TUserAccess.ReadOnly) then MsgCall(Warn, 'You don''t have permission to remove items.');
+    if (MainForm.FAccessLevel = TUserAccess.ReadOnly) then THelpers.MsgCall(TAppMessage.Warn, 'You don''t have permission to remove items.');
 
 end;
 
@@ -3638,7 +3262,7 @@ end;
 
 procedure TMainForm.Action_ShowRegisteredClick(Sender: TObject);
 begin
-    WndCall(InvoicesForm, TWindowState.Modal);
+    THelpers.WndCall(InvoicesForm, TWindowState.Modal);
 end;
 
 
@@ -3649,13 +3273,13 @@ end;
 procedure TMainForm.Action_ShowMyClick(Sender: TObject);
 begin
 
-    if IsConnected then
+    if FIsConnected then
     begin
         var Tracker: ITracker:=TTracker.Create;
         Tracker.RefreshInvoiceTrackerAsync(UpperCase(MainForm.WinUserName));
     end
     else
-        MsgCall(Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+        THelpers.MsgCall(TAppMessage.Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
 
 end;
 
@@ -3666,13 +3290,13 @@ end;
 
 procedure TMainForm.Action_ShowAllClick(Sender: TObject);
 begin
-    if IsConnected then
+    if FIsConnected then
     begin
         var Tracker: ITracker:=TTracker.Create;
         Tracker.RefreshInvoiceTrackerAsync(EmptyStr);
     end
     else
-        MsgCall(Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+        THelpers.MsgCall(TAppMessage.Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
 end;
 
 
@@ -3683,8 +3307,20 @@ end;
 /// Show the application form when user double click application icon visible on system tray.
 /// </summary>
 
+procedure TMainForm.TrayIconClick(Sender: TObject);
+begin
+
+    if not View.StartupScreen.StartupForm.IsAppInitialized then
+        TrayIcon.PopupMenu:=nil
+    else
+        TrayIcon.PopupMenu:=PopupMenu;
+
+end;
+
+
 procedure TMainForm.TrayIconDblClick(Sender: TObject);
 begin
+    if not View.StartupScreen.StartupForm.IsAppInitialized then Exit();
     MainForm.Action_ShowAppClick(self);
 end;
 
@@ -3699,20 +3335,20 @@ end;
 procedure TMainForm.GroupListBoxSelect(Sender: TObject);
 begin
 
-    if not(IsConnected) then
+    if not(FIsConnected) then
     begin
-        MsgCall(Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+        THelpers.MsgCall(TAppMessage.Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
         Exit;
     end;
 
-    var UserControl: TUserControl:=TUserControl.Create(DbConnect);
+    var UserControl: TUserControl:=TUserControl.Create(FDbConnect);
     try
         UserControl.UserName:=WinUserName;
 
-        if not (UserControl.GetAgeDates(GroupListDates, GroupList[GroupListBox.ItemIndex, 0])) then
+        if not (UserControl.GetAgeDates(GroupListDates, FGroupList[GroupListBox.ItemIndex, 0])) then
         begin
-            MsgCall(Error, 'Cannot list age dates for selected group. Please contact IT support.');
-            LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: "GetAgeDates" returned false. Cannot get list of age dates for selected group (' + GroupList[GroupListBox.ItemIndex, 0] + ').');
+            THelpers.MsgCall(TAppMessage.Error, 'Cannot list age dates for selected group. Please contact IT support.');
+            FAppEvents.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: "GetAgeDates" returned false. Cannot get list of age dates for selected group (' + FGroupList[GroupListBox.ItemIndex, 0] + ').');
         end;
 
     finally
@@ -3853,7 +3489,7 @@ begin
                     sgAgeView.SqlColumns[iCNT - 1, 0]:=Temp[iCNT, 0];
         except
             on E: Exception do
-                MainForm.MsgCall(Warn, 'Unexpected error has occured. Description: ' + E.Message + '. Please contact IT support.')
+                THelpers.MsgCall(TAppMessage.Warn, 'Unexpected error has occured. Description: ' + E.Message + '. Please contact IT support.')
         end;
 
     finally
@@ -3903,10 +3539,10 @@ end;
 
 procedure TMainForm.sgInvoiceTrackerDblClick(Sender: TObject);
 begin
-    if IsConnected then
-        WndCall(InvoicesForm, TWindowState.Modal)
+    if FIsConnected then
+        THelpers.WndCall(InvoicesForm, TWindowState.Modal)
     else
-        MsgCall(Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+        THelpers.MsgCall(TAppMessage.Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
 end;
 
 
@@ -4052,7 +3688,7 @@ begin
             begin
                 if AgeViewCUID = sgInvoiceTracker.Cells[Col16, iCNT] then
                 begin
-                    sgAgeView.Canvas.Draw(Rect.Left + Width - 32, Rect.Top, GridPicture.Picture.Graphic);
+                    sgAgeView.Canvas.Draw(Rect.Left + Width - 32, Rect.Top, FGridPicture.Picture.Graphic);
                     Break;
                 end;
             end;
@@ -4298,7 +3934,7 @@ begin
     // Bind close application with <ALT> + <Y>
     if (Key=89) and (Shift=[ssALT]) then
     begin
-        if MsgCall(TCommon.TMessage.Question1, 'Are you absolutely sure you want to exit the Unity?') = IDOK then
+        if THelpers.MsgCall(TAppMessage.Question1, 'Are you absolutely sure you want to exit the Unity?') = IDOK then
         begin
             FAllowClose:=True;
             Close;
@@ -4455,41 +4091,41 @@ procedure TMainForm.sgAgeViewKeyDown(Sender: TObject; var Key: Word; Shift: TShi
 
             ctFree1:
             begin
-                GeneralCommentFields.CUID        :=sgAgeView.Cells[CUIDRef, sgAgeView.Row];
-                GeneralCommentFields.FixedComment:=TUnknown.Null;
-                GeneralCommentFields.FollowUp    :=TUnknown.Null;
-                GeneralCommentFields.Free1       :=Text;
-                GeneralCommentFields.Free2       :=TUnknown.Null;
-                GeneralCommentFields.Free3       :=TUnknown.Null;
-                GeneralCommentFields.EventLog    :=True;
+                FGeneralCommentFields.CUID        :=sgAgeView.Cells[CUIDRef, sgAgeView.Row];
+                FGeneralCommentFields.FixedComment:=TUnknown.Null;
+                FGeneralCommentFields.FollowUp    :=TUnknown.Null;
+                FGeneralCommentFields.Free1       :=Text;
+                FGeneralCommentFields.Free2       :=TUnknown.Null;
+                FGeneralCommentFields.Free3       :=TUnknown.Null;
+                FGeneralCommentFields.EventLog    :=True;
             end;
 
             ctFree2:
             begin
-                GeneralCommentFields.CUID        :=sgAgeView.Cells[CUIDRef, sgAgeView.Row];
-                GeneralCommentFields.FixedComment:=TUnknown.Null;
-                GeneralCommentFields.FollowUp    :=TUnknown.Null;
-                GeneralCommentFields.Free1       :=TUnknown.Null;
-                GeneralCommentFields.Free2       :=Text;
-                GeneralCommentFields.Free3       :=TUnknown.Null;
-                GeneralCommentFields.EventLog    :=True;
+                FGeneralCommentFields.CUID        :=sgAgeView.Cells[CUIDRef, sgAgeView.Row];
+                FGeneralCommentFields.FixedComment:=TUnknown.Null;
+                FGeneralCommentFields.FollowUp    :=TUnknown.Null;
+                FGeneralCommentFields.Free1       :=TUnknown.Null;
+                FGeneralCommentFields.Free2       :=Text;
+                FGeneralCommentFields.Free3       :=TUnknown.Null;
+                FGeneralCommentFields.EventLog    :=True;
             end;
 
             ctFree3:
             begin
-                GeneralCommentFields.CUID        :=sgAgeView.Cells[CUIDRef, sgAgeView.Row];
-                GeneralCommentFields.FixedComment:=TUnknown.Null;
-                GeneralCommentFields.FollowUp    :=TUnknown.Null;
-                GeneralCommentFields.Free1       :=TUnknown.Null;
-                GeneralCommentFields.Free2       :=TUnknown.Null;
-                GeneralCommentFields.Free3       :=Text;
-                GeneralCommentFields.EventLog    :=True;
+                FGeneralCommentFields.CUID        :=sgAgeView.Cells[CUIDRef, sgAgeView.Row];
+                FGeneralCommentFields.FixedComment:=TUnknown.Null;
+                FGeneralCommentFields.FollowUp    :=TUnknown.Null;
+                FGeneralCommentFields.Free1       :=TUnknown.Null;
+                FGeneralCommentFields.Free2       :=TUnknown.Null;
+                FGeneralCommentFields.Free3       :=Text;
+                FGeneralCommentFields.EventLog    :=True;
             end;
 
         end;
 
         var Comments: IComments:=TComments.Create();
-        Comments.EditGeneralComment(GeneralCommentFields);
+        Comments.EditGeneralComment(FGeneralCommentFields);
 
     end;
 
@@ -4551,7 +4187,7 @@ begin
                 Data: TDataTables;
             begin
 
-                Data:=TDataTables.Create(DbConnect);
+                Data:=TDataTables.Create(FDbConnect);
                 try
 
                     Data.CmdType:=cmdText;
@@ -4699,7 +4335,7 @@ begin
                 Data: TDataTables;
             begin
 
-                Data:=TDataTables.Create(DbConnect);
+                Data:=TDataTables.Create(FDbConnect);
                 try
 
                     Data.CmdType:=cmdText;
@@ -4830,7 +4466,7 @@ begin
     begin
         sgAgeView.SelectAll;
         sgAgeView.CopyCutPaste(TActions.Copy);
-        MsgCall(Info, 'The selected spreadsheet has been copied to clipboard.');
+        THelpers.MsgCall(TAppMessage.Info, 'The selected spreadsheet has been copied to clipboard.');
     end;
 
     // temp
@@ -4894,7 +4530,7 @@ begin
 
         if AddressBookExclusion then
         begin
-            MsgCall(Warn, 'This column is locked for editing.');
+            THelpers.MsgCall(TAppMessage.Warn, 'This column is locked for editing.');
             Exit;
         end;
 
@@ -4919,9 +4555,9 @@ end;
 procedure TMainForm.sgAddressBookKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
 
-    if AccessLevel = TUserAccess.ReadOnly then
+    if FAccessLevel = TUserAccess.ReadOnly then
     begin
-        MsgCall(Warn, 'You don''t have permission to edit Address Book records.');
+        THelpers.MsgCall(TAppMessage.Warn, 'You don''t have permission to edit Address Book records.');
         Exit;
     end;
 
@@ -6039,8 +5675,8 @@ begin
 
     if not(Return > 32) then
     begin
-        MsgCall(Warn, 'Cannot execute report. Please contact with IT support.');
-        LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
+        THelpers.MsgCall(TAppMessage.Warn, 'Cannot execute report. Please contact with IT support.');
+        FAppEvents.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
     end;
 
     UnfoldReportsTab(AppHeader, btnReports);
@@ -6055,8 +5691,8 @@ begin
 
     if not(Return > 32) then
     begin
-        MsgCall(Warn, 'Cannot execute report. Please contact with IT support.');
-        LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
+        THelpers.MsgCall(TAppMessage.Warn, 'Cannot execute report. Please contact with IT support.');
+        FAppEvents.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
     end;
 
     UnfoldReportsTab(AppHeader, btnReports);
@@ -6071,8 +5707,8 @@ begin
 
     if not(Return > 32) then
     begin
-        MsgCall(Warn, 'Cannot execute report. Please contact with IT support.');
-        LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
+        THelpers.MsgCall(TAppMessage.Warn, 'Cannot execute report. Please contact with IT support.');
+        FAppEvents.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
     end;
 
     UnfoldReportsTab(AppHeader, btnReports);
@@ -6087,8 +5723,8 @@ begin
 
     if not(Return > 32) then
     begin
-        MsgCall(Warn, 'Cannot execute report. Please contact with IT support.');
-        LogText.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
+        THelpers.MsgCall(TAppMessage.Warn, 'Cannot execute report. Please contact with IT support.');
+        FAppEvents.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
     end;
 
     UnfoldReportsTab(AppHeader, btnReports);
@@ -6106,7 +5742,7 @@ begin
     // Wait until "Ready" status
     if not (StatBar_TXT1.Caption = TStatusBar.Ready) then
     begin
-        MsgCall(Warn, 'Please wait until "Ready" status and try again.');
+        THelpers.MsgCall(TAppMessage.Warn, 'Please wait until "Ready" status and try again.');
         Exit;
     end;
 
@@ -6114,9 +5750,9 @@ begin
     begin
 
         // Remember user's choice, automation will follow
-        GroupIdSel:=GroupList[GroupListBox.ItemIndex, 0];
-        GroupNmSel:=GroupList[GroupListBox.ItemIndex, 1];
-        AgeDateSel:=GroupListDates.Text;
+        FGroupIdSel:=FGroupList[GroupListBox.ItemIndex, 0];
+        FGroupNmSel:=FGroupList[GroupListBox.ItemIndex, 1];
+        FAgeDateSel:=GroupListDates.Text;
 
         // Remove filters
         for var iCNT: integer:=1 to sgAgeView.RowCount - 1 do
@@ -6133,7 +5769,7 @@ begin
 
     end
         else
-            MsgCall(Warn, 'Cannot load selected group.');
+            THelpers.MsgCall(TAppMessage.Warn, 'Cannot load selected group.');
 end;
 
 
@@ -6165,16 +5801,16 @@ begin
 
     if not (StatBar_TXT1.Caption = TStatusBar.Ready) then
     begin
-        MsgCall(Warn, 'Please wait until "Ready" status and try again.');
+        THelpers.MsgCall(TAppMessage.Warn, 'Please wait until "Ready" status and try again.');
         Exit;
     end;
 
     if (not(string.IsNullOrEmpty(GroupListBox.Text))) and (not(string.IsNullOrEmpty(GroupListDates.Text))) then
     begin
         // Remember user's choice, automation will follow
-        GroupIdSel:=GroupList[GroupListBox.ItemIndex, 0];
-        GroupNmSel:=GroupList[GroupListBox.ItemIndex, 1];
-        AgeDateSel:=GroupListDates.Text;
+        FGroupIdSel:=FGroupList[GroupListBox.ItemIndex, 0];
+        FGroupNmSel:=FGroupList[GroupListBox.ItemIndex, 1];
+        FAgeDateSel:=GroupListDates.Text;
 
         // Remove filters
         for var iCNT: integer:=1 to sgAgeView.RowCount - 1 do
@@ -6191,7 +5827,7 @@ begin
 
     end
         else
-            MsgCall(Warn, 'Cannot load selected group.');
+            THelpers.MsgCall(TAppMessage.Warn, 'Cannot load selected group.');
 
 end;
 
@@ -6203,15 +5839,15 @@ end;
 procedure TMainForm.btnReloadClick(Sender: TObject);
 begin
 
-    if not(IsConnected) then
+    if not(FIsConnected) then
     begin
-        MsgCall(Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+        THelpers.MsgCall(TAppMessage.Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
         Exit;
     end;
 
     // Only administrator is allowed
     StatBar_TXT1.Caption :=TStatusBar.Processing;
-    if MainForm.AccessLevel = TUserAccess.Admin then
+    if MainForm.FAccessLevel = TUserAccess.Admin then
     begin
         var OpenItems: IOpenItems:=TOpenItems.Create();
         OpenItems.ReadOpenItemsAsync(NullParameter);
@@ -6219,7 +5855,7 @@ begin
     else
     begin
         StatBar_TXT1.Caption:=TStatusBar.Ready;
-        LogText.Log(EventLogPath, '[Open Items]: User have no R/W access, process halted.');
+        FAppEvents.Log(EventLogPath, '[Open Items]: User have no R/W access, process halted.');
     end;
 
 end;
@@ -6234,9 +5870,9 @@ begin
 
     cbDump.Checked:=False;
 
-    if not(IsConnected) then
+    if not(FIsConnected) then
     begin
-        MsgCall(Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+        THelpers.MsgCall(TAppMessage.Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
         Exit;
     end;
 
@@ -6244,7 +5880,7 @@ begin
         Exit;
 
     // Only administrator is allowed
-    if MainForm.AccessLevel = TUserAccess.Admin then
+    if MainForm.FAccessLevel = TUserAccess.Admin then
     begin
         if PanelGroupName.Visible then
         begin
@@ -6254,14 +5890,14 @@ begin
         begin
             PanelGroupName.Visible:=True;
             // Suggest the same group name and group ID
-            EditGroupName.Text:=GroupNmSel;
-            EditGroupID.Text  :=GroupIdSel;
+            EditGroupName.Text:=FGroupNmSel;
+            EditGroupID.Text  :=FGroupIdSel;
         end
     end
     else
     begin
         StatBar_TXT1.Caption:='Insufficient UAC level.';
-        LogText.Log(EventLogPath, '[Make Group]: User have no R/W access, process halted.');
+        FAppEvents.Log(EventLogPath, '[Make Group]: User have no R/W access, process halted.');
     end;
 
 end;
@@ -6282,12 +5918,12 @@ begin
         ReloadCover.Visible   :=False;
 
         var Debtors: IDebtors:=TDebtors.Create;
-        Debtors.MakeAgeViewAsync(MainForm.OSAmount);
+        Debtors.MakeAgeViewAsync(MainForm.FOSAmount);
 
     end
     else
     begin
-        MsgCall(Warn, 'Please enter group name and try again.' + TChars.CRLF + 'If you will use existing one, then it will be overwritten.');
+        THelpers.MsgCall(TAppMessage.Warn, 'Please enter group name and try again.' + TChars.CRLF + 'If you will use existing one, then it will be overwritten.');
     end;
 
 end;
@@ -6300,14 +5936,14 @@ end;
 procedure TMainForm.btnOpenABClick(Sender: TObject);
 begin
 
-    if IsConnected then
+    if FIsConnected then
     begin
         sgAddressBook.SetUpdatedRow(0);
         var AddressBook: IAddressBook:=TAddressBook.Create();
         AddressBook.OpenAddressBookAsync('', sgAddressBook);
     end
     else
-    MsgCall(Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+    THelpers.MsgCall(TAppMessage.Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
 
 end;
 
@@ -6321,17 +5957,17 @@ begin
 
     if not(sgAddressBook.Visible) then
     begin
-        MsgCall(Warn, 'Please open Address Book first.');
+        THelpers.MsgCall(TAppMessage.Warn, 'Please open Address Book first.');
         Exit;
     end;
 
-    if IsConnected then
+    if FIsConnected then
     begin
         var AddressBook: IAddressBook:=TAddressBook.Create();
-        AddressBook.UpdateAddressBookAsync(sgAddressBook, AbUpdateFields);
+        AddressBook.UpdateAddressBookAsync(sgAddressBook, FAbUpdateFields);
     end
     else
-    MsgCall(Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+    THelpers.MsgCall(TAppMessage.Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
 
 end;
 
@@ -6342,7 +5978,7 @@ end;
 
 procedure TMainForm.btnCloseABClick(Sender: TObject);
 begin
-    if MsgCall(TCommon.TMessage.Question2, 'Are you sure you want to close Address Book?') = IDYES then
+    if THelpers.MsgCall(TAppMessage.Question2, 'Are you sure you want to close Address Book?') = IDYES then
     begin
         sgAddressBook.SetUpdatedRow(0);
         sgAddressBook.ClearAll(2, 1, 1, True);
@@ -6360,7 +5996,7 @@ begin
 
     if not(sgAddressBook.Visible) then
     begin
-        MsgCall(TCommon.TMessage.Warn, 'Please open Address Book first.');
+        THelpers.MsgCall(TAppMessage.Warn, 'Please open Address Book first.');
         Exit;
     end;
 
@@ -6374,7 +6010,7 @@ begin
 
     if String.IsNullOrEmpty(FSCComment.Text) then
     begin
-        MsgCall(TCommon.TMessage.Warn, 'Please provide mandatory comment before accepting/declining selected query.');
+        THelpers.MsgCall(TAppMessage.Warn, 'Please provide mandatory comment before accepting/declining selected query.');
         Exit;
     end;
 
@@ -6389,7 +6025,7 @@ begin
 
     if String.IsNullOrEmpty(FSCComment.Text) then
     begin
-        MsgCall(TCommon.TMessage.Warn, 'Please provide mandatory comment before accepting/declining selected query.');
+        THelpers.MsgCall(TAppMessage.Warn, 'Please provide mandatory comment before accepting/declining selected query.');
         Exit;
     end;
 
@@ -6404,7 +6040,7 @@ begin
 
     if String.IsNullOrEmpty(LBUComment.Text) then
     begin
-        MsgCall(TCommon.TMessage.Warn, 'Please provide mandatory comment before accepting/declining selected query.');
+        THelpers.MsgCall(TAppMessage.Warn, 'Please provide mandatory comment before accepting/declining selected query.');
         Exit;
     end;
 
@@ -6438,13 +6074,13 @@ end;
 procedure TMainForm.imgSectionRemoveClick(Sender: TObject);
 begin
 
-    if MsgCall(TCommon.TMessage.Question2, 'Are you sure you want to delete this section? It cannot be undone.') = IDNO then exit;
+    if THelpers.MsgCall(TAppMessage.Question2, 'Are you sure you want to delete this section? It cannot be undone.') = IDNO then exit;
     if sgListSection.RowCount = 1 then exit;
 
     // Remove given section
     var Settings: ISettings:=TSettings.Create;
     Settings.DeleteSection(sgListSection.Cells[1, sgListSection.Row]);
-    Settings.Encode(TCommon.TFiles.AppConfig);
+    Settings.Encode(TAppFiles.Configuration);
 
     // Remove from string grid
     sgListSection.DeleteRowFrom(1, 1);
@@ -6485,7 +6121,7 @@ end;
 
 procedure TMainForm.imgEventLogClick(Sender: TObject);
 begin
-    WndCall(EventForm, TWindowState.Modeless);
+    THelpers.WndCall(EventForm, TWindowState.Modeless);
 end;
 
 
@@ -6517,7 +6153,7 @@ end;
 procedure TMainForm.imgKeyRemoveClick(Sender: TObject);
 begin
 
-    if MsgCall(TCommon.TMessage.Question2, 'Are you sure you want to delete this key? It cannot be undone.') = IDNO then Exit;
+    if THelpers.MsgCall(TAppMessage.Question2, 'Are you sure you want to delete this key? It cannot be undone.') = IDNO then Exit;
 
     // Check for last row
     if sgListValue.RowCount = 1 then
@@ -6526,7 +6162,7 @@ begin
     // Remove key
     var Settings: ISettings:=TSettings.Create;
     Settings.DeleteKey(sgListSection.Cells[1, sgListSection.Row], sgListValue.Cells[1, sgListValue.Row]);
-    Settings.Encode(TCommon.TFiles.AppConfig);
+    Settings.Encode(TAppFiles.Configuration);
 
     // Remove from string grid list
     sgListValue.DeleteRowFrom(1, 1);
@@ -6545,14 +6181,14 @@ end;
 procedure TMainForm.imgUpdateValuesClick(Sender: TObject);
 begin
 
-    if MsgCall(TCommon.TMessage.Question2, 'Are you sure you want to save all the changes? It cannot be undone.') = IDNO then exit;
+    if THelpers.MsgCall(TAppMessage.Question2, 'Are you sure you want to save all the changes? It cannot be undone.') = IDNO then exit;
 
     // Check if there is no empty keys
     for var iCNT: integer:= 1 to (sgListValue.RowCount - 1) do
     begin
         if string.IsNullOrEmpty(sgListValue.Cells[1, iCNT]) then
         begin
-            MsgCall(Warn, 'Cannot save. At least one key has no label.');
+            THelpers.MsgCall(TAppMessage.Warn, 'Cannot save. At least one key has no label.');
             Exit;
         end;
     end;
@@ -6563,9 +6199,9 @@ begin
     for var iCNT: integer:= 1 to (sgListValue.RowCount - 1) do
         Settings.SetStringValue(sgListSection.Cells[1, sgListSection.Row], sgListValue.Cells[1, iCNT], sgListValue.Cells[2, iCNT]);
 
-    Settings.Encode(TCommon.TFiles.AppConfig);
+    Settings.Encode(TAppFiles.Configuration);
 
-    MsgCall(Info, 'All Keys and its values has been saved successfully.');
+    THelpers.MsgCall(TAppMessage.Info, 'All Keys and its values has been saved successfully.');
 
 end;
 
@@ -6596,14 +6232,14 @@ begin
         // Check given password
         if not(CheckGivenPassword(EditPassword.Text)) then
         begin
-            MsgCall(Warn, 'Incorrect password, please re-type it and try again.');
+            THelpers.MsgCall(TAppMessage.Warn, 'Incorrect password, please re-type it and try again.');
             Exit;
         end;
 
         // Incorrent match
         if EditNewPassword.Text <> EditNewPasswordConfirmation.Text then
         begin
-            MsgCall(Warn, 'New password and its confirmation does not match, please re-type it and try again.');
+            THelpers.MsgCall(TAppMessage.Warn, 'New password and its confirmation does not match, please re-type it and try again.');
             Exit;
         end
         else
@@ -6612,7 +6248,7 @@ begin
         begin
             if SetNewPassword(EditNewPassword.Text) then
             begin
-                MsgCall(Info, 'New password has been saved.');
+                THelpers.MsgCall(TAppMessage.Info, 'New password has been saved.');
                 btnPassUpdate.Enabled:=False;
                 EditCurrentPassword.Enabled:=False;
                 EditNewPassword.Enabled:=False;
@@ -6625,7 +6261,7 @@ begin
 
             // Cannot hash and save
             begin
-                MsgCall(Error, 'Cannot save new password. Please contact IT support.');
+                THelpers.MsgCall(TAppMessage.Error, 'Cannot save new password. Please contact IT support.');
             end;
 
         end;
@@ -6635,7 +6271,7 @@ begin
 
     // No fields can be empty
     begin
-        MsgCall(Warn, 'Please provide with current password, new password and its confirmation.');
+        THelpers.MsgCall(TAppMessage.Warn, 'Please provide with current password, new password and its confirmation.');
     end;
 
 end;
@@ -6657,7 +6293,7 @@ begin
 
     if EditPassword.Text = '' then
     begin
-        MsgCall(Warn, 'Please provide with password.');
+        THelpers.MsgCall(TAppMessage.Warn, 'Please provide with password.');
         Exit;
     end
     else
@@ -6693,7 +6329,7 @@ begin
         end;
 
         // Get UAC and groups
-        var UserAcc: TDataTables:=TDataTables.Create(DbConnect);
+        var UserAcc: TDataTables:=TDataTables.Create(FDbConnect);
         try
             UserAcc.OpenTable(TUAC.UAC);
             UserAcc.SqlToGrid(sgUAC, UserAcc.ExecSQL, False, True);
@@ -6719,7 +6355,7 @@ begin
 
     // Invalid password
     begin
-        MsgCall(Warn, 'Incorrect password, please re-type it and try again.');
+        THelpers.MsgCall(TAppMessage.Warn, 'Incorrect password, please re-type it and try again.');
         EditPassword.Text:='';
     end;
 

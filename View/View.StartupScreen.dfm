@@ -14,6 +14,10 @@ object StartupForm: TStartupForm
   OldCreateOrder = False
   Position = poScreenCenter
   Scaled = False
+  OnActivate = FormActivate
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
   object ShapeBackground: TShape
@@ -24,6 +28,7 @@ object StartupForm: TStartupForm
     Align = alClient
     Pen.Color = 6566857
     Pen.Width = 2
+    OnMouseDown = ShapeBackgroundMouseDown
     ExplicitTop = 1
   end
   object ShapeProgressBar: TShape
@@ -38,7 +43,6 @@ object StartupForm: TStartupForm
     Top = 72
     Width = 24
     Height = 35
-    Cursor = crAppStart
     Caption = 'U'
     Color = 6566857
     Font.Charset = DEFAULT_CHARSET
@@ -56,7 +60,6 @@ object StartupForm: TStartupForm
     Top = 72
     Width = 424
     Height = 35
-    Cursor = crAppStart
     Caption = 'nity for Debt Management'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = 6566857
@@ -72,7 +75,6 @@ object StartupForm: TStartupForm
     Top = 113
     Width = 153
     Height = 16
-    Cursor = crAppStart
     Caption = 'Desktop Edition 2019'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlack
@@ -88,7 +90,6 @@ object StartupForm: TStartupForm
     Top = 229
     Width = 443
     Height = 25
-    Cursor = crAppStart
     Margins.Left = 2
     Margins.Top = 2
     Margins.Right = 2
@@ -112,7 +113,6 @@ object StartupForm: TStartupForm
     Top = 451
     Width = 529
     Height = 13
-    Cursor = crAppStart
     Margins.Left = 15
     Margins.Top = 0
     Margins.Right = 15
@@ -133,7 +133,6 @@ object StartupForm: TStartupForm
     Top = 433
     Width = 393
     Height = 13
-    Cursor = crAppStart
     Margins.Left = 15
     Margins.Top = 5
     Margins.Right = 15
@@ -148,27 +147,12 @@ object StartupForm: TStartupForm
     Font.Style = []
     ParentFont = False
   end
-  object TextProgress: TLabel
-    Left = 412
-    Top = 234
-    Width = 17
-    Height = 13
-    Alignment = taCenter
-    Caption = '0%'
-    Font.Charset = DEFAULT_CHARSET
-    Font.Color = clBlack
-    Font.Height = -11
-    Font.Name = 'Tahoma'
-    Font.Style = []
-    ParentFont = False
-  end
   object TextStatus: TLabel
     AlignWithMargins = True
     Left = 197
     Top = 207
     Width = 4
     Height = 13
-    Cursor = crAppStart
     Margins.Left = 0
     Margins.Top = 5
     Margins.Right = 0
@@ -187,7 +171,6 @@ object StartupForm: TStartupForm
     Top = 360
     Width = 161
     Height = 16
-    Cursor = crAppStart
     Caption = 'Android and iOS ready'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlack
@@ -757,14 +740,42 @@ object StartupForm: TStartupForm
   object FlutterText: TLabel
     Left = 357
     Top = 382
-    Width = 119
+    Width = 117
     Height = 16
-    Caption = 'With Google'#39's Flutter'
+    Caption = 'with Google'#39's Flutter'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
     Font.Height = -13
     Font.Name = 'Tahoma'
     Font.Style = []
     ParentFont = False
+  end
+  object ShapeHide: TShape
+    Left = 811
+    Top = 8
+    Width = 24
+    Height = 24
+    Pen.Color = 6566857
+    Pen.Width = 2
+  end
+  object LabelHide: TLabel
+    Left = 818
+    Top = 12
+    Width = 10
+    Height = 15
+    Hint = 'Minimize'
+    AutoSize = False
+    Caption = '-'
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = 6566857
+    Font.Height = -21
+    Font.Name = 'Tahoma'
+    Font.Style = [fsBold]
+    ParentFont = False
+    ParentShowHint = False
+    ShowHint = True
+    OnClick = LabelHideClick
+    OnMouseEnter = LabelHideMouseEnter
+    OnMouseLeave = LabelHideMouseLeave
   end
 end

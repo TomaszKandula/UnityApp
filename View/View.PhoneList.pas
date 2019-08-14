@@ -22,7 +22,9 @@ uses
     Vcl.ExtCtrls,
     Vcl.Buttons,
     Vcl.StdCtrls,
-    Unity.Interposer;
+    Unity.Enums,
+    Unity.Grid,
+    Unity.Panel;
 
 
 type
@@ -56,8 +58,9 @@ implementation
 uses
     View.Main,
     View.Actions,
-    Unity.Settings,
-    Unity.Statics;
+    Unity.Chars,
+    Unity.Helpers,
+    Unity.Settings;
 
 
 var vPhoneListForm: TPhoneListForm;
@@ -125,7 +128,7 @@ begin
 
     if not(CheckPhoneList(PhoneList)) then
     begin
-        MainForm.MsgCall(TCommon.TMessage.Warn, 'Please remove letters before saving the list.' + TChars.CRLF + 'Only numbers and break line are allowed.');
+        THelpers.MsgCall(TAppMessage.Warn, 'Please remove letters before saving the list.' + TChars.CRLF + 'Only numbers and break line are allowed.');
         Exit;
     end;
 

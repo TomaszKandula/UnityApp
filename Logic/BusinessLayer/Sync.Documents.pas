@@ -20,10 +20,9 @@ uses
     Vcl.StdCtrls,
     Vcl.Grids,
     CDO_TLB,
-    Unity.Statics,
     Unity.Enums,
     Unity.Arrays,
-    Unity.Interposer,
+    Unity.Grid,
     Sync.Mailer;
 
 
@@ -217,6 +216,7 @@ uses
     View.Actions,
     Data.Win.ADODB,
     DbModel,
+    Unity.Chars,
     Unity.Settings;
 
 
@@ -270,7 +270,7 @@ begin
         if not ActionsForm.cbCtrlStatusOff.Checked then KeyName:=KeyName.Replace('%', '1')
             else KeyName:=KeyName.Replace('%', '2');
 
-        var HtmlTablePath: string:=Settings.GetLayoutDir + Settings.GetStringValue(TConfigSections.Layouts, KeyName, '');
+        var HtmlTablePath: string:=Settings.DirLayouts + Settings.GetStringValue(TConfigSections.Layouts, KeyName, '');
         SL.LoadFromFile(HtmlTablePath);
         FCommonHTMLTable:=SL.Text;
 
@@ -282,7 +282,7 @@ begin
         if not ActionsForm.cbCtrlStatusOff.Checked then KeyName:=KeyName.Replace('%', '1')
             else KeyName:=KeyName.Replace('%', '2');
 
-        var HtmlRowPath: string:=Settings.GetLayoutDir + Settings.GetStringValue(TConfigSections.Layouts, KeyName, '');
+        var HtmlRowPath: string:=Settings.DirLayouts + Settings.GetStringValue(TConfigSections.Layouts, KeyName, '');
         SL.LoadFromFile(HtmlRowPath);
         FCommonHTMLRow:=SL.Text;
 
@@ -322,9 +322,9 @@ begin
     for var iCNT: integer:=1 to Source.RowCount do
     begin
 
-        if Source.Cells[MainForm.ControlStatusRefs.Code, iCNT] = TextCode then
+        if Source.Cells[MainForm.FControlStatusRefs.Code, iCNT] = TextCode then
         begin
-            Result:=Source.Cells[MainForm.ControlStatusRefs.Text, iCNT];
+            Result:=Source.Cells[MainForm.FControlStatusRefs.Text, iCNT];
             Break;
         end;
 
@@ -341,8 +341,8 @@ procedure TDocument.OpenItemsToHtmlTable(var HtmlStatement: string; var SG: TStr
 begin
 
     // Get outstanding amounts
-    var CurAmount: string:=SG.Cells[MainForm.OpenItemsRefs.CurAmCol, ActualRow];
-    var Amount:    string:=SG.Cells[MainForm.OpenItemsRefs.OpenCurAmCol, ActualRow];
+    var CurAmount: string:=SG.Cells[MainForm.FOpenItemsRefs.CurAmCol, ActualRow];
+    var Amount:    string:=SG.Cells[MainForm.FOpenItemsRefs.OpenCurAmCol, ActualRow];
 
     // Change format number from 1000,00 to 1 000,00
     CurAmount:=FormatFloat('#,##0.00', StrToFloat(CurAmount));
@@ -350,17 +350,17 @@ begin
 
     // Generate HTML
     FHTMLTemp:=HTMLRow;
-    FHTMLTemp:=StringReplace(FHTMLTemp, '{INV_NUM}', SG.Cells[MainForm.OpenItemsRefs.InvoNoCol, ActualRow], [rfReplaceAll]);
-    FHTMLTemp:=StringReplace(FHTMLTemp, '{INV_DAT}', SG.Cells[MainForm.OpenItemsRefs.ValDtCol,  ActualRow], [rfReplaceAll]);
-    FHTMLTemp:=StringReplace(FHTMLTemp, '{DUE_DAT}', SG.Cells[MainForm.OpenItemsRefs.DueDtCol,  ActualRow], [rfReplaceAll]);
-    FHTMLTemp:=StringReplace(FHTMLTemp, '{INV_CUR}', SG.Cells[MainForm.OpenItemsRefs.ISOCol,    ActualRow], [rfReplaceAll]);
+    FHTMLTemp:=StringReplace(FHTMLTemp, '{INV_NUM}', SG.Cells[MainForm.FOpenItemsRefs.InvoNoCol, ActualRow], [rfReplaceAll]);
+    FHTMLTemp:=StringReplace(FHTMLTemp, '{INV_DAT}', SG.Cells[MainForm.FOpenItemsRefs.ValDtCol,  ActualRow], [rfReplaceAll]);
+    FHTMLTemp:=StringReplace(FHTMLTemp, '{DUE_DAT}', SG.Cells[MainForm.FOpenItemsRefs.DueDtCol,  ActualRow], [rfReplaceAll]);
+    FHTMLTemp:=StringReplace(FHTMLTemp, '{INV_CUR}', SG.Cells[MainForm.FOpenItemsRefs.ISOCol,    ActualRow], [rfReplaceAll]);
     FHTMLTemp:=StringReplace(FHTMLTemp, '{INV_AMT}', CurAmount, [rfReplaceAll]);
     FHTMLTemp:=StringReplace(FHTMLTemp, '{INV_OSA}', Amount,    [rfReplaceAll]);
 
     // Text on the invoice may be very long (but not more than 200 chars),
     // the decision was to put hard limit of 32 chars.
-    var Text: string:=SG.Cells[MainForm.OpenItemsRefs.Text, ActualRow];
-    var Code: string:=SG.Cells[MainForm.OpenItemsRefs.CtrlCol, ActualRow];
+    var Text: string:=SG.Cells[MainForm.FOpenItemsRefs.Text, ActualRow];
+    var Code: string:=SG.Cells[MainForm.FOpenItemsRefs.CtrlCol, ActualRow];
     FHTMLTemp:=StringReplace(FHTMLTemp, '{INV_TXT}', LeftStr(Text, 32), [rfReplaceAll]);
     FHTMLTemp:=StringReplace(FHTMLTemp, '{INV_CRL}', StatusCodeToText(Code, MainForm.sgControlStatus), [rfReplaceAll]);
 
@@ -410,9 +410,9 @@ begin
     for var iCNT: integer:=1 to OpenItems.RowCount - 1 do
     begin
 
-        var CtrlStatus: integer:=(OpenItems.Cells[MainForm.OpenItemsRefs.CtrlCol, iCNT]).ToInteger();
+        var CtrlStatus: integer:=(OpenItems.Cells[MainForm.FOpenItemsRefs.CtrlCol, iCNT]).ToInteger();
 
-        if (OpenItems.Cells[MainForm.OpenItemsRefs.CuidCol, iCNT] = CUID) and (not TArrayUtils<integer>.Contains(CtrlStatus, FExclusions)) then
+        if (OpenItems.Cells[MainForm.FOpenItemsRefs.CuidCol, iCNT] = CUID) and (not TArrayUtils<integer>.Contains(CtrlStatus, FExclusions)) then
         begin
 
             if FPos = 0 then FPos:=iCNT;
@@ -426,7 +426,7 @@ begin
                 TInvoiceFilter.ShowAllItems:
                 begin
 
-                    if (StrToFloatDef(OpenItems.Cells[MainForm.OpenItemsRefs.OpenAmCol, iCNT], 0) <> 0) then
+                    if (StrToFloatDef(OpenItems.Cells[MainForm.FOpenItemsRefs.OpenAmCol, iCNT], 0) <> 0) then
                     begin
 
                         if not(String.IsNullOrEmpty(BeginWith)) and not(String.IsNullOrEmpty(EndWith)) then
@@ -434,11 +434,11 @@ begin
 
                             if
                                 (
-                                    StrToDate(OpenItems.Cells[MainForm.OpenItemsRefs.DueDtCol, iCNT], LocalFrmt) >= StrToDate(BeginWith, UnityFrmt)
+                                    StrToDate(OpenItems.Cells[MainForm.FOpenItemsRefs.DueDtCol, iCNT], LocalFrmt) >= StrToDate(BeginWith, UnityFrmt)
                                 )
                             and
                                 (
-                                    StrToDate(OpenItems.Cells[MainForm.OpenItemsRefs.DueDtCol, iCNT], LocalFrmt) <= StrToDate(EndWith, UnityFrmt)
+                                    StrToDate(OpenItems.Cells[MainForm.FOpenItemsRefs.DueDtCol, iCNT], LocalFrmt) <= StrToDate(EndWith, UnityFrmt)
                                 )
                             then
                                 OpenItemsToHtmlTable(FHTMLStat, FOpenItems, iCNT);
@@ -460,11 +460,11 @@ begin
 
                     if
                         (
-                            StrToFloatDef(OpenItems.Cells[MainForm.OpenItemsRefs.OpenAmCol, iCNT], 0) <> 0
+                            StrToFloatDef(OpenItems.Cells[MainForm.FOpenItemsRefs.OpenAmCol, iCNT], 0) <> 0
                         )
                     and
                         (
-                            StrToFloatDef(OpenItems.Cells[MainForm.OpenItemsRefs.PmtStatCol, iCNT], 0) < 0
+                            StrToFloatDef(OpenItems.Cells[MainForm.FOpenItemsRefs.PmtStatCol, iCNT], 0) < 0
                         )
                     then
                         OpenItemsToHtmlTable(FHTMLStat, FOpenItems, iCNT);
@@ -480,15 +480,15 @@ begin
 
                     if
                         (
-                            StrToFloatDef(OpenItems.Cells[MainForm.OpenItemsRefs.OpenAmCol, iCNT], 0) <> 0
+                            StrToFloatDef(OpenItems.Cells[MainForm.FOpenItemsRefs.OpenAmCol, iCNT], 0) <> 0
                         )
                     and
                         (
-                            StrToDate(OpenItems.Cells[MainForm.OpenItemsRefs.DueDtCol, iCNT], LocalFrmt) >= StrToDate(BeginWith, UnityFrmt)
+                            StrToDate(OpenItems.Cells[MainForm.FOpenItemsRefs.DueDtCol, iCNT], LocalFrmt) >= StrToDate(BeginWith, UnityFrmt)
                         )
                     and
                         (
-                            StrToDate(OpenItems.Cells[MainForm.OpenItemsRefs.DueDtCol, iCNT], LocalFrmt) <= StrToDate(EndWith, UnityFrmt)
+                            StrToDate(OpenItems.Cells[MainForm.FOpenItemsRefs.DueDtCol, iCNT], LocalFrmt) <= StrToDate(EndWith, UnityFrmt)
                         )
                     then
                         OpenItemsToHtmlTable(FHTMLStat, FOpenItems, iCNT);
@@ -507,11 +507,11 @@ begin
 
     CustAddr:='<p class="p"><b>' + CustName + '</b><br />' + TChars.CRLF;
 
-    var AddrFld1: string:=OpenItems.Cells[MainForm.OpenItemsRefs.Ad1Col,   FPos];
-    var AddrFld2: string:=OpenItems.Cells[MainForm.OpenItemsRefs.Ad2Col,   FPos];
-    var AddrFld3: string:=OpenItems.Cells[MainForm.OpenItemsRefs.Ad3Col,   FPos];
-    var PoCode:   string:=OpenItems.Cells[MainForm.OpenItemsRefs.PnoCol,   FPos];
-    var PoArea:   string:=OpenItems.Cells[MainForm.OpenItemsRefs.PAreaCol, FPos];
+    var AddrFld1: string:=OpenItems.Cells[MainForm.FOpenItemsRefs.Ad1Col,   FPos];
+    var AddrFld2: string:=OpenItems.Cells[MainForm.FOpenItemsRefs.Ad2Col,   FPos];
+    var AddrFld3: string:=OpenItems.Cells[MainForm.FOpenItemsRefs.Ad3Col,   FPos];
+    var PoCode:   string:=OpenItems.Cells[MainForm.FOpenItemsRefs.PnoCol,   FPos];
+    var PoArea:   string:=OpenItems.Cells[MainForm.FOpenItemsRefs.PAreaCol, FPos];
 
     if not String.IsNullOrWhiteSpace(AddrFld1) then CustAddr:=CustAddr + AddrFld1 + '<br />' + TChars.CRLF;
     if not String.IsNullOrWhiteSpace(AddrFld2) then CustAddr:=CustAddr + AddrFld2 + '<br />' + TChars.CRLF;

@@ -23,7 +23,8 @@ uses
     Vcl.Buttons,
     Vcl.ExtCtrls,
     Vcl.Imaging.pngimage,
-    Unity.Interposer,
+    Unity.Grid,
+    Unity.Panel,
     Unity.Records;
 
 
@@ -104,10 +105,11 @@ uses
     View.Main,
     View.Calendar,
     View.Actions,
-    Unity.Settings,
     DbModel,
-    Unity.Statics,
     Unity.Enums,
+    Unity.Chars,
+    Unity.Helpers,
+    Unity.Settings,
     Async.Statements;
 
 
@@ -129,11 +131,11 @@ begin
 
     if String.IsNullOrEmpty(Text_Message.Text) then
     begin
-        MainForm.MsgCall(Warn, 'Please provide custom message and salutation.');
+        THelpers.MsgCall(Warn, 'Please provide custom message and salutation.');
         Exit;
     end;
 
-    if MainForm.MsgCall(Question2, 'Are you absolutely sure you want to send it, right now?') = IDNO then
+    if THelpers.MsgCall(Question2, 'Are you absolutely sure you want to send it, right now?') = IDNO then
         Exit;
 
     var InvFilter: TInvoiceFilter:=TInvoiceFilter.ShowAllItems;
@@ -144,10 +146,10 @@ begin
     var TempStr: string:=StringReplace(Text_Message.Text, TChars.CRLF, '<br>', [rfReplaceAll]);
 
     /// <remarks>
-    /// UpdateOpenItemsRefs and UpdateControlStatusRefs must be executed before TTSendAccountStatement is called.
+    /// UpdateFOpenItemsRefs and UpdateFControlStatusRefs must be executed before TTSendAccountStatement is called.
     /// </remarks>
-    MainForm.UpdateOpenItemsRefs(ActionsForm.OpenItemsGrid);
-    MainForm.UpdateControlStatusRefs(MainForm.sgControlStatus);
+    MainForm.UpdateFOpenItemsRefs(ActionsForm.OpenItemsGrid);
+    MainForm.UpdateFControlStatusRefs(MainForm.sgControlStatus);
 
     Fields.Layout     :=TDocMode.Custom;
     Fields.Subject    :='Account Statement';
@@ -280,7 +282,7 @@ end;
 procedure TSendForm.btnBeginDateClick(Sender: TObject);
 begin
     CalendarForm.FCalendarMode:=GetDate;
-    MainForm.WndCall(CalendarForm, TWindowState.Modal);
+    THelpers.WndCall(CalendarForm, TWindowState.Modal);
     ValBeginDate.Caption:=DateToStr(CalendarForm.FSelectedDate);
 end;
 
@@ -288,7 +290,7 @@ end;
 procedure TSendForm.btnEndDateClick(Sender: TObject);
 begin
     CalendarForm.FCalendarMode:=GetDate;
-    MainForm.WndCall(CalendarForm, Modal);
+    THelpers.WndCall(CalendarForm, Modal);
     ValEndDate.Caption:=DateToStr(CalendarForm.FSelectedDate);
 end;
 

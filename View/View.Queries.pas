@@ -22,7 +22,7 @@ uses
     Vcl.Buttons,
     Vcl.ExtCtrls,
     Vcl.StdCtrls,
-    Unity.Interposer,
+    Unity.Grid,
     Unity.Enums;
 
 
@@ -119,8 +119,13 @@ uses
     View.Calendar,
     Sync.Documents,
     DbModel,
+    //Unity.Chars,
+    Unity.Sql,
+    Unity.Qms,
+    Unity.Chars,
+    Unity.Helpers,
     Unity.Settings,
-    Unity.Statics,
+    Unity.DateTimeFormats,
     Handler.Sql;
 
 
@@ -143,7 +148,7 @@ begin
     Result:=False;
     if not(IsMissing) then Exit;
 
-    var Tables: TDataTables:=TDataTables.Create(MainForm.DbConnect);
+    var Tables: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
     try
         // Generate GUID for new entry
         var QueryUid: TGUID;
@@ -191,8 +196,8 @@ begin
 
         if Tables.InsertInto(TQmsLog.QmsLog, True) then
         begin
-            MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: [QMS] Missing invoice has been logged successfully.');
-            MainForm.MsgCall(TCommon.TMessage.Info, 'Missing invoice has been logged successfully.');
+            MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: [QMS] Missing invoice has been logged successfully.');
+            THelpers.MsgCall(TAppMessage.Info, 'Missing invoice has been logged successfully.');
             FLogQueryId:=QueryUid.ToString;
             Result:=True;
             CLearAll;
@@ -201,8 +206,8 @@ begin
         else
         begin
             FLogQueryId:=String.Empty;
-            MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: [QMS] Cannot log missing invoice.');
-            MainForm.MsgCall(TCommon.TMessage.Error, 'Cannot log missing invoice to database. Please check the log and contact IT support.');
+            MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: [QMS] Cannot log missing invoice.');
+            THelpers.MsgCall(TAppMessage.Error, 'Cannot log missing invoice to database. Please check the log and contact IT support.');
         end;
 
     finally
@@ -222,7 +227,7 @@ begin
     var UserFormat: TFormatSettings:=TFormatSettings.Create(LOCALE_USER_DEFAULT);
     {$WARN SYMBOL_PLATFORM ON}
 
-    var Tables: TDataTables:=TDataTables.Create(MainForm.DbConnect);
+    var Tables: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
     var TempData: TStringGrid:=TStringGrid.Create(nil);
     try
         // Generate GUID for new entry
@@ -299,8 +304,8 @@ begin
         // Send to server
         if Tables.InsertInto(TQmsLog.QmsLog, True, TempData, nil, False) then
         begin
-            MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: [QMS] Provided informatin has been logged successfully.');
-            MainForm.MsgCall(Info, 'Provided information has been logged successfully.');
+            MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: [QMS] Provided informatin has been logged successfully.');
+            THelpers.MsgCall(Info, 'Provided information has been logged successfully.');
             Result:=True;
             FLogQueryId:=QueryUid.ToString;
             Close;
@@ -308,8 +313,8 @@ begin
         else
         begin
             FLogQueryId:=String.Empty;
-            MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: [QMS] Cannot log current invoice(s).');
-            MainForm.MsgCall(Error, 'Cannot log current invoice(s) to database. Please check the log and contact IT support.');
+            MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: [QMS] Cannot log current invoice(s).');
+            THelpers.MsgCall(Error, 'Cannot log current invoice(s) to database. Please check the log and contact IT support.');
         end;
     finally
         Tables.Free;
@@ -361,12 +366,12 @@ begin
     if OpenDlgBox.Execute then
     begin
         FileName:=OpenDlgBox.FileName;
-        MainForm.MsgCall(Info, 'The attachement has been added successfully!');
+        THelpers.MsgCall(Info, 'The attachement has been added successfully!');
     end
     else
     begin
         FileName:='';
-        MainForm.MsgCall(Warn, 'No attachement present.');
+        THelpers.MsgCall(Warn, 'No attachement present.');
     end;
 end;
 
@@ -376,7 +381,7 @@ begin
 
     Result:=0;
 
-    var Tables: TDataTables:=TDataTables.Create(MainForm.DbConnect);
+    var Tables: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
     try
         try
             Tables.CleanUp;
@@ -387,8 +392,8 @@ begin
         except
             on E: Exception do
             begin
-                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: [QMS] Cannot execute SQL, error has been thrown: ' + E.Message);
-                MainForm.MsgCall(Warn, 'Unexpected error has occured: ' + E.Message + '. Please contact IT Support.');
+                MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: [QMS] Cannot execute SQL, error has been thrown: ' + E.Message);
+                THelpers.MsgCall(Warn, 'Unexpected error has occured: ' + E.Message + '. Please contact IT Support.');
             end;
         end;
     finally
@@ -403,7 +408,7 @@ begin
 
     Result:=0;
 
-    var Tables: TDataTables:=TDataTables.Create(MainForm.DbConnect);
+    var Tables: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
     try
         try
             Tables.CustFilter:=TSql.WHERE + TQmsReasons.QueryReason + TSql.EQUAL + QuotedStr(QueryReason);
@@ -413,8 +418,8 @@ begin
         except
             on E: Exception do
             begin
-                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: [QMS] Cannot execute SQL, error has been thrown: ' + E.Message);
-                MainForm.MsgCall(Warn, 'Unexpected error has occured: ' + E.Message + '. Please contact IT Support.');
+                MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: [QMS] Cannot execute SQL, error has been thrown: ' + E.Message);
+                THelpers.MsgCall(Warn, 'Unexpected error has occured: ' + E.Message + '. Please contact IT Support.');
             end;
         end;
     finally
@@ -500,7 +505,7 @@ begin
         StatusLabel.Caption:='Log selected invoice(s) with status:';
     end;
 
-    var Tables: TDataTables:=TDataTables.Create(MainForm.DbConnect);
+    var Tables: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
     try
         try
             Tables.Columns.Add(TQmsReasons.QueryReason);
@@ -524,8 +529,8 @@ begin
         except
             on E: Exception do
             begin
-                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: [QMS] Cannot execute SQL, error has been thrown: ' + E.Message);
-                MainForm.MsgCall(Warn, 'Unexpected error has occured: ' + E.Message + '. Please contact IT Support.');
+                MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: [QMS] Cannot execute SQL, error has been thrown: ' + E.Message);
+                THelpers.MsgCall(Warn, 'Unexpected error has occured: ' + E.Message + '. Please contact IT Support.');
             end;
         end;
     finally
@@ -562,7 +567,7 @@ end;
 procedure TQmsForm.btnAddDueDateClick(Sender: TObject);
 begin
     CalendarForm.FCalendarMode:=TCalendar.GetDate;
-    MainForm.WndCall(CalendarForm, TWindowState.Modal);
+    THelpers.WndCall(CalendarForm, TWindowState.Modal);
     if CalendarForm.FSelectedDate <> TDateTimeFormats.NullDate then EditDueDate.Text:=DateToStr(CalendarForm.FSelectedDate);
 end;
 
@@ -570,7 +575,7 @@ end;
 procedure TQmsForm.btnAddValDateClick(Sender: TObject);
 begin
     CalendarForm.FCalendarMode:=TCalendar.GetDate;
-    MainForm.WndCall(CalendarForm, Modal);
+    THelpers.WndCall(CalendarForm, Modal);
     if CalendarForm.FSelectedDate <> TDateTimeFormats.NullDate then EditValDate.Text:=DateToStr(CalendarForm.FSelectedDate);
 end;
 
@@ -586,7 +591,7 @@ begin
 
     if ValidateFields > 0 then
     begin
-        MainForm.MsgCall(Warn, 'Please provide all required fields.');
+        THelpers.MsgCall(Warn, 'Please provide all required fields.');
         Exit;
     end;
 

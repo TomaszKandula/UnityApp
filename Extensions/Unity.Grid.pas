@@ -1,4 +1,4 @@
-unit Unity.Interposer;
+unit Unity.Grid;
 
 // ----------------------------------------
 // Extension unit for application.
@@ -10,86 +10,18 @@ interface
 
 
 uses
-    System.Math,
-    System.Types,
-    System.SysUtils,
-    System.Classes,
-    System.Win.ComObj,
-    System.Variants,
     Winapi.Windows,
-    Winapi.Messages,
     Vcl.Grids,
-    Vcl.ExtCtrls,
-    Vcl.Controls,
     Vcl.Graphics,
     Vcl.Dialogs,
-    Vcl.Forms,
-    Vcl.Clipbrd,
-    Vcl.ComCtrls,
-    Vcl.StdCtrls,
-    CheckLst,
     Unity.Arrays,
-    Unity.Enums,
-    Unity.Statics;
+    Unity.Enums;
 
 
 type
 
 
-    /// <remarks>
-    /// Reference to TSTringGrid object, necessary for implementing "delete" function.
-    /// </remarks>
     TAbstractGrid = class(Vcl.Grids.TStringGrid);
-
-
-    TCheckListBox = class(CheckLst.TCheckListBox)
-    published
-        procedure Freeze(PaintWnd: boolean);
-    end;
-
-
-    TEdit = Class(Vcl.StdCtrls.TEdit)
-    public
-        FAlignment: TAlignment;
-        procedure SetAlignment(value: TAlignment);
-        procedure CreateParams(var params: TCreateParams); override;
-        property  Alignment: TAlignment read FAlignment write SetAlignment;
-    end;
-
-
-    TShape = class(Vcl.ExtCtrls.TShape)
-    protected
-        procedure Paint; override;
-        procedure CMFontChanged(var Msg: TMessage); message CM_FONTCHANGED;
-        procedure CMTextChanged(var Msg: TMessage); message CM_TEXTCHANGED;
-    published
-        property  Caption;
-        property  Font;
-        procedure ShapeText(Left, Top: integer; StrText: string; Format: TFontStyles);
-    public
-        var CaptionLeft : integer;
-        var CaptionTop  : integer;
-    end;
-
-
-    TPanel = class(Vcl.ExtCtrls.TPanel)
-    protected
-        procedure Paint; override;
-    published
-        procedure PanelBorders(FillColor, TopColor, BottomColor, LeftColor, RightColor: TColor);
-    public
-        var PenWidthTop   :  integer;
-        var PenWidthBottom:  integer;
-        var PenWidthLeft  :  integer;
-        var PenWidthRight :  integer;
-        var PenColorTop   :  TColor;
-        var PenColorBottom:  TColor;
-        var PenColorLeft  :  TColor;
-        var PenColorRight :  TColor;
-        var mcBrushColor  :  TColor;
-    end;
-
-
     TStringGrid = class(Vcl.Grids.TStringGrid)
     protected
         procedure Paint; override;
@@ -133,197 +65,26 @@ type
     end;
 
 
-    TListView = class(Vcl.ComCtrls.TListView)
-    published
-        procedure Freeze(PaintWnd: boolean);
-    end;
-
-
 implementation
 
 
 uses
-    View.Main,
+    System.Math,
+    System.SysUtils,
+    System.Classes,
+    System.Win.ComObj,
+    System.Variants,
+    Winapi.Messages,
+    Vcl.Clipbrd,
+    View.Main, // <-- remove!  (used by excel,csv)
+    Unity.Chars,
+    Unity.StatusBar,
+    Unity.Helpers,
+    Unity.Messaging,
+    Unity.Sql,
+    Unity.Sorting,
     Unity.Settings,
     Handler.Sql;
-
-
-// --------------------------------------------------------------------------------------------------------------------------- EXTENSION OF 'TLISTBOX' CLASS //
-
-/// <summary>
-/// Allow to freeze component during heavy duty task, or when we do not want to show control during updating.
-/// </summary>
-
-procedure TCheckListBox.Freeze(PaintWnd: Boolean);
-begin
-
-    if (PaintWnd) then
-    begin
-        with Self do SendMessage(Handle, WM_SETREDRAW, 0, 0);
-    end;
-
-    if not (PaintWnd) then
-    begin
-        with Self do SendMessage(Handle, WM_SETREDRAW, 1, 0);
-        Self.Repaint;
-    end;
-
-end;
-
-
-// ------------------------------------------------------------------------------------------------------------------------------ EXTENSION OF 'TEDIT' CLASS //
-
-
-procedure TEdit.CreateParams(var Params: TCreateParams);
-begin
-
-    inherited CreateParams(Params);
-
-    case Alignment of
-        taLeftJustify:  Params.Style:=Params.Style or ES_LEFT   and not ES_MULTILINE;
-        taRightJustify: Params.Style:=Params.Style or ES_RIGHT  and not ES_MULTILINE;
-        taCenter:       Params.Style:=Params.Style or ES_CENTER and not ES_MULTILINE;
-    end;
-
-end;
-
-
-procedure TEdit.SetAlignment(value: TAlignment);
-begin
-
-    if FAlignment <> value then
-    begin
-        FAlignment:=value;
-        RecreateWnd;
-    end;
-
-end;
-
-
-// ----------------------------------------------------------------------------------------------------------------------------- EXTENSION OF 'TSHAPE' CLASS //
-
-
-procedure TShape.CMFontChanged(var Msg: TMessage);
-begin
-    inherited;
-    Invalidate;
-end;
-
-
-procedure TShape.CMTextChanged(var Msg: TMessage);
-begin
-    inherited;
-    Invalidate;
-end;
-
-
-/// <summary>
-/// Paint method with text function.
-/// </summary>
-
-procedure TShape.Paint;
-begin
-
-    inherited;
-    var R: TRect:=ClientRect;
-
-    Canvas.Font.Assign(Font);
-
-    /// <remarks>
-    /// Alternative code:
-    /// </remarks>
-    /// <code>
-    /// DrawText(Canvas.Handle, PChar(Caption), -1, R, DT_VCENTER or DT_LEFT { DT_CENTER } or DT_SINGLELINE);
-    /// </code>
-
-    TextOut(Canvas.Handle, CaptionLeft, CaptionTop, PChar(Caption), Length(Caption));
-
-end;
-
-
-/// <summary>
-/// Drwa text inside TShape component. Please note that font is fixed.
-/// </summary>
-
-procedure TShape.ShapeText(Left, Top: integer; StrText: string; Format: TFontStyles);
-begin
-    // Fixed
-    Font.Name  :='Tahoma';
-    Font.Size  :=10;
-    Font.Color :=clBlack;
-    // Non-fixed
-    Font.Style :=Format;
-    Caption    :=StrText;
-    CaptionLeft:=Left;
-    CaptionTop :=Top;
-end;
-
-
-// ----------------------------------------------------------------------------------------------------------------------------- EXTENSION OF 'TPANEL' CLASS //
-
-
-procedure TPanel.Paint;
-begin
-
-    inherited;
-
-    /// <remarks>
-    /// None of the given variables can be coloured black.
-    /// </remarks>
-
-    if (mcBrushColor   = $00000000) and
-       (PenColorTop    = $00000000) and
-       (PenColorBottom = $00000000) and
-       (PenColorLeft   = $00000000) and
-       (PenColorRight  = $00000000) then Exit;
-
-    // Get dimensions
-    var R: TRect:=ClientRect;
-
-    // Fill background
-    Canvas.Brush.Color:=mcBrushColor;
-
-    // Top border
-    Canvas.Pen.Width:=PenWidthTop;
-    Canvas.Pen.Color:=PenColorTop;
-    Canvas.MoveTo(1,           1);
-    Canvas.LineTo(R.Right - 1, 1);
-
-    // Bottom border
-    Canvas.Pen.Width:=PenWidthBottom;
-    Canvas.Pen.Color:=PenColorBottom;
-    Canvas.MoveTo(1,           R.Bottom - 1);
-    Canvas.LineTo(R.Right - 1, R.Bottom - 1);
-
-    // Left border
-    Canvas.Pen.Width:=PenWidthLeft;
-    Canvas.Pen.Color:=PenColorLeft;
-    Canvas.MoveTo(1,            1);
-    Canvas.LineTo(1, R.Bottom - 1);
-
-    // Right border
-    Canvas.Pen.Width:=PenWidthRight;
-    Canvas.Pen.Color:=PenColorLeft;
-    Canvas.MoveTo(R.Right - 1,            1);
-    Canvas.LineTo(R.Right - 1, R.Bottom - 1);
-
-end;
-
-
-procedure TPanel.PanelBorders(FillColor, TopColor, BottomColor, LeftColor, RightColor: TColor);
-begin
-    // Turn-off styles
-    BorderStyle   :=bsNone;
-    // Assign colors and draw
-    mcBrushColor  :=FillColor;
-    PenColorTop   :=TopColor;
-    PenColorBottom:=BottomColor;
-    PenColorLeft  :=LeftColor;
-    PenColorRight :=RightColor;
-end;
-
-
-// ------------------------------------------------------------------------------------------------------------------------ EXTENSION OF 'TSTRINGGRID' CLASS //
 
 
 /// <summary>
@@ -843,7 +604,7 @@ begin
     end;
 
     // Encode
-    Settings.Encode(TCommon.TFiles.AppConfig);
+    Settings.Encode(TAppFiles.Configuration);
 
 end;
 
@@ -949,11 +710,11 @@ begin
 
     Result:=False;
 
-    var DataTables: TDataTables:=TDataTables.Create(MainForm.DbConnect);
+    var DataTables: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
     try
         // Assign command with stored procedure
         DataTables.StrSQL:=TSql.EXECUTE + DataTables.AgeViewExport + TChars.SPACE +
-                       QuotedStr(MainForm.GroupList[MainForm.GroupListBox.ItemIndex, 0]) + TChars.COMMA +
+                       QuotedStr(MainForm.FGroupList[MainForm.GroupListBox.ItemIndex, 0]) + TChars.COMMA +
                        QuotedStr(MainForm.GroupListDates.Text);
         // Execute
         DataTables.SqlToGrid(Self, DataTables.ExecSQL, False, True);
@@ -1007,8 +768,8 @@ begin
 
                 if Result then
                 begin
-                    MainForm.LogText.Log(MainForm.EventLogPath, 'The data has been successfully transferred to Excel.');
-                    SendMessage(MainForm.Handle, WM_GETINFO, 1, LPARAM(PCHAR('The data has been successfully transferred to Excel.')));
+                    MainForm.FAppEvents.Log(MainForm.EventLogPath, 'The data has been successfully transferred to Excel.');
+                    THelpers.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'The data has been successfully transferred to Excel.', MainForm);
                 end;
 
             end;
@@ -1020,14 +781,14 @@ begin
             if E.Message = xlWARN_MESSAGE then
             // Excel not found
             begin
-                MainForm.LogText.Log(MainForm.EventLogPath, 'The data cannot be exported because Microsoft Excel cannot be found.');
-                SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PCHAR('The data cannot be exported because Microsoft Excel cannot be found.')));
+                MainForm.FAppEvents.Log(MainForm.EventLogPath, 'The data cannot be exported because Microsoft Excel cannot be found.');
+                THelpers.ExecMessage(False, TMessaging.TWParams.MessageError, 'The data cannot be exported because Microsoft Excel cannot be found.', MainForm);
             end
             else
             // General message
             begin
-                MainForm.LogText.Log(MainForm.EventLogPath, 'The data cannot be exported, error message has been thrown: ' + E.Message + '.');
-                SendMessage(MainForm.Handle, WM_GETINFO, 2, LPARAM(PCHAR('The data cannot be exported. Description received: ' + E.Message)));
+                MainForm.FAppEvents.Log(MainForm.EventLogPath, 'The data cannot be exported, error message has been thrown: ' + E.Message + '.');
+                THelpers.ExecMessage(False, TMessaging.TWParams.MessageError, 'The data cannot be exported. Description received: ' + E.Message, MainForm);
             end;
         end;
     end;
@@ -1065,7 +826,7 @@ begin
     if DialogBox.Execute = True then
     begin
 
-        MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.ImportCSV);
+        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.ImportCSV, MainForm);
 
         var Data:    TStringList:=TStringList.Create;
         var Transit: TStringList:=TStringList.Create;
@@ -1103,8 +864,8 @@ begin
             except
                 on E: Exception do
                 begin
-                    MainForm.LogText.Log(MainForm.EventLogPath, 'CSV Import has failed: ' + ExtractFileName(fPath));
-                    MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'CSV Import has failed. Please check the file and try again.');
+                    MainForm.FAppEvents.Log(MainForm.EventLogPath, 'CSV Import has failed: ' + ExtractFileName(fPath));
+                    THelpers.ExecMessage(False, TMessaging.TWParams.MessageError, 'CSV Import has failed. Please check the file and try again.', MainForm);
                     IsError:=True;
                 end;
             end;
@@ -1113,13 +874,13 @@ begin
 
             if not IsError then
             begin
-                MainForm.LogText.Log(MainForm.EventLogPath, 'Data has been imported successfully!');
-                MainForm.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Data has been imported successfully!');
+                MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Data has been imported successfully!');
+                THelpers.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Data has been imported successfully!', MainForm);
             end;
 
             Data.Free;
             Transit.Free;
-            MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready);
+            THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
 
         end;
 
@@ -1142,7 +903,7 @@ begin
         var MyStr:    string;
         var CleanStr: string;
 
-        MainForm.ExecMessage(False, TMessaging.TWParams.StatusBar, TStatusBar.ExportCSV);
+        THelpers.ExecMessage(False, TMessaging.TWParams.StatusBar, TStatusBar.ExportCSV, MainForm);
 
         // Add rows and columns with delimiter
         for var iCNT: integer:=1 to Self.RowCount - 1 do
@@ -1174,8 +935,8 @@ begin
         except
             on E: Exception do
             begin
-                MainForm.LogText.Log(MainForm.EventLogPath, 'Cannot saved file: ' + ExtractFileName(fPath));
-                MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot save the file in the given location.');
+                MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Cannot saved file: ' + ExtractFileName(fPath));
+                THelpers.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot save the file in the given location.', MainForm);
                 IsError:=True;
             end;
         end;
@@ -1184,12 +945,12 @@ begin
 
         if not IsError then
         begin
-            MainForm.LogText.Log(MainForm.EventLogPath, 'Data has been exported successfully!');
-            MainForm.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Data have been exported successfully!');
+            MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Data has been exported successfully!');
+            THelpers.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Data have been exported successfully!', MainForm);
         end;
 
         CSVData.Free;
-        MainForm.ExecMessage(False, TMessaging.TWParams.StatusBar, TStatusBar.Ready);
+        THelpers.ExecMessage(False, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
 
     end;
 
@@ -1236,23 +997,6 @@ begin
         - [goFixedHorzLine]
         - [goVertLine]
         - [goHorzLine];
-end;
-
-
-procedure TListView.Freeze(PaintWnd: Boolean);
-begin
-
-    if PaintWnd then
-    begin
-        with Self do SendMessage(Handle, WM_SETREDRAW, 0, 0);
-    end;
-
-    if not PaintWnd then
-    begin
-        with Self do SendMessage(Handle, WM_SETREDRAW, 1, 0);
-        Self.Repaint;
-    end;
-
 end;
 
 

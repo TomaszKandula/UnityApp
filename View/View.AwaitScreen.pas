@@ -22,7 +22,8 @@ uses
     Vcl.StdCtrls,
     Vcl.Imaging.GIFImg,
     Vcl.ExtCtrls,
-    Unity.Interposer;
+    Unity.Grid,
+    Unity.Panel;
 
 
 type

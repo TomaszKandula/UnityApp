@@ -22,8 +22,9 @@ uses
     Vcl.StdCtrls,
     Vcl.ExtCtrls,
     Vcl.Buttons,
-    Unity.Interposer,
-    Unity.Statics,
+    Unity.Enums,
+    Unity.Grid,
+    Unity.Panel,
     Unity.Arrays;
 
 
@@ -86,6 +87,8 @@ implementation
 uses
     View.Main,
     View.GridFilter,
+    Unity.Chars,
+    Unity.Helpers,
     Unity.Settings;
 
 
@@ -145,7 +148,7 @@ begin
     FIsNext:=True;
 
     if FGrid.RowHeights[FFoundRow] = -1 then
-    MainForm.MsgCall(
+    THelpers.MsgCall(
         Info,
         'The item has been found (' + FGrid.Cells[FSearchColumn, FFoundRow] + ') for search pattern "' +
         FSearchString + '". ' + TChars.CRLF +
@@ -165,7 +168,7 @@ begin
 
     if (FSearchString = '') or (FSearchString = TChars.SPACE) then
     begin
-        MainForm.MsgCall(Warn, 'Cannot search empty string. Please provide with customer name or customer number and try again.');
+        THelpers.MsgCall(Warn, 'Cannot search empty string. Please provide with customer name or customer number and try again.');
         Exit;
     end;
 
@@ -267,7 +270,7 @@ begin
             FGrid.Col:=FGrid.ReturnColumn(FColName, 1, 1);
         end
             else
-                MainForm.MsgCall(Info, 'Cannot find specified customer.');
+                THelpers.MsgCall(Info, 'Cannot find specified customer.');
 
     end
     else
@@ -288,7 +291,7 @@ begin
         end
         else
         begin
-            MainForm.MsgCall(Info, 'Cannot find specified customer.');
+            THelpers.MsgCall(Info, 'Cannot find specified customer.');
             btnUnhide.Enabled:=False;
         end;
 

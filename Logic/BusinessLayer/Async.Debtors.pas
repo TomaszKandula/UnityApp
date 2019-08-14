@@ -25,8 +25,7 @@ uses
     Data.Win.ADODB,
     Data.DB,
     Handler.Sql,
-    Unity.Interposer,
-    Unity.Statics,
+    Unity.Grid,
     Unity.Enums,
     Unity.Records,
     Unity.Arrays;
@@ -59,12 +58,16 @@ uses
     View.UserFeedback,
     Handler.Database,
     DbModel,
+    Unity.Helpers,
     Unity.Settings,
+    Unity.Messaging,
+    Unity.StatusBar,
+    Unity.Sorting,
     Handler.Account,
     Sync.Documents,
+    Async.OpenItems,
     AgeView,
-    Transactions,
-    Async.OpenItems;
+    Transactions;
 
 
 // ------------------------------------
@@ -79,26 +82,26 @@ begin
     begin
 
         var CanReload: boolean:=False;
-        var AgeView: TAgeView:=TAgeView.Create(MainForm.DbConnect);
-        var UserCtrl: TUserControl:=TUserControl.Create(MainForm.DbConnect);
+        var AgeView: TAgeView:=TAgeView.Create(MainForm.FDbConnect);
+        var UserCtrl: TUserControl:=TUserControl.Create(MainForm.FDbConnect);
         var StopWatch: TStopWatch:=TStopWatch.StartNew;
 
         try
 
-            MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Generating);
-            MainForm.LogText.Log(MainForm.EventLogPath, TStatusBar.Generating);
+            THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Generating, MainForm);
+            MainForm.FAppEvents.Log(MainForm.EventLogPath, TStatusBar.Generating);
 
             try
 
                 // Async
-                if MainForm.EditGroupID.Text = MainForm.GroupIdSel then AgeView.GroupID:=MainForm.GroupIdSel
+                if MainForm.EditGroupID.Text = MainForm.FGroupIdSel then AgeView.GroupID:=MainForm.FGroupIdSel
                     else
                         if MainForm.EditGroupID.Text <> '' then AgeView.GroupID:=MainForm.EditGroupID.Text
                             else
-                                AgeView.GroupID:=MainForm.GroupIdSel;
+                                AgeView.GroupID:=MainForm.FGroupIdSel;
 
                 // Generate aging
-                AgeView.Make(MainForm.OSAmount);
+                AgeView.Make(MainForm.FOSAmount);
 
                 // CSV or server?
                 if MainForm.cbDump.Checked then
@@ -115,8 +118,8 @@ begin
                     TThread.Synchronize(nil, procedure
                     begin
                         try
-                            UserCtrl.GetAgeDates(MainForm.GroupListDates, MainForm.GroupList[0, 0]);
-                            MainForm.AgeDateSel:=MainForm.GroupListDates.Text;
+                            UserCtrl.GetAgeDates(MainForm.GroupListDates, MainForm.FGroupList[0, 0]);
+                            MainForm.FAgeDateSel:=MainForm.GroupListDates.Text;
                         finally
                             UserCtrl.Free;
                         end;
@@ -128,17 +131,17 @@ begin
 
             except
                 on E: Exception do
-                    MainForm.LogText.Log(MainForm.EventLogPath, 'Cannot execute [MakeAgeView]. Error has been thrown: ' + E.Message);
+                    MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Cannot execute [MakeAgeView]. Error has been thrown: ' + E.Message);
             end;
 
         finally
 
-            MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready);
+            THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
 
             var THDMili: extended:=StopWatch.ElapsedMilliseconds;
             var THDSec:  extended:=THDMili / 1000;
 
-            MainForm.LogText.Log(MainForm.EventLogPath, 'Age View thread has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
+            MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Age View thread has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
             AgeView.Free;
 
         end;
@@ -163,12 +166,12 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var AgeView: TAgeView:=TAgeView.Create(MainForm.DbConnect);
+        var AgeView: TAgeView:=TAgeView.Create(MainForm.FDbConnect);
         var StopWatch: TStopWatch:=TStopWatch.StartNew;
         try
 
-            MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Loading);
-            MainForm.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Show.ToString);
+            THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Loading, MainForm);
+            THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Show.ToString, MainForm);
 
             try
                 // Sync
@@ -176,8 +179,8 @@ begin
 
                 // Async
                 AgeView.idThd  :=0;
-                AgeView.GroupID:=MainForm.GroupIdSel;
-                AgeView.AgeDate:=MainForm.AgeDateSel;
+                AgeView.GroupID:=MainForm.FGroupIdSel;
+                AgeView.AgeDate:=MainForm.FAgeDateSel;
                 AgeView.Read(MainForm.sgAgeView, SortMode);
 
                 // Sync
@@ -202,21 +205,21 @@ begin
 
             except
                 on E: Exception do
-                    MainForm.LogText.Log(MainForm.EventLogPath, 'Cannot execute [ReadAgeView]. Error has been thrown: ' + E.Message);
+                    MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Cannot execute [ReadAgeView]. Error has been thrown: ' + E.Message);
             end;
 
         finally
 
-            MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready);
+            THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
 
             var THDMili: extended:=StopWatch.ElapsedMilliseconds;
             var THDSec:  extended:=THDMili / 1000;
 
-            MainForm.LogText.Log(MainForm.EventLogPath, 'Thread for selected Group Id "' + AgeView.GroupID + '" has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
+            MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Thread for selected Group Id "' + AgeView.GroupID + '" has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
             AgeView.Free;
 
             MainForm.SwitchTimers(TurnedOn);
-            MainForm.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString);
+            THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
 
         end;
 

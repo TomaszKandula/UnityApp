@@ -140,14 +140,48 @@
         <DelphiCompile Include="$(MainSource)">
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
-        <DCCReference Include="Extensions\Unity.Interposer.pas">
-            <Form>Components extensions</Form>
+        <DCCReference Include="Extensions\Unity.ChkListBox.pas">
+            <Form>Component extension</Form>
         </DCCReference>
-        <DCCReference Include="Extensions\Unity.Enums.pas"/>
-        <DCCReference Include="Extensions\Unity.Arrays.pas"/>
-        <DCCReference Include="Extensions\Unity.Records.pas"/>
-        <DCCReference Include="Extensions\Unity.Statics.pas"/>
-        <DCCReference Include="Extensions\Unity.Crc32.pas"/>
+        <DCCReference Include="Extensions\Unity.Edit.pas">
+            <Form>Component extension</Form>
+        </DCCReference>
+        <DCCReference Include="Extensions\Unity.Panel.pas">
+            <Form>Component extension</Form>
+        </DCCReference>
+        <DCCReference Include="Extensions\Unity.Shape.pas">
+            <Form>Component extension</Form>
+        </DCCReference>
+        <DCCReference Include="Extensions\Unity.Grid.pas">
+            <Form>Component extension</Form>
+        </DCCReference>
+        <DCCReference Include="Extensions\Unity.ListView.pas">
+            <Form>Component extension</Form>
+        </DCCReference>
+        <DCCReference Include="Helpers\Unity.Crc32.pas"/>
+        <DCCReference Include="Helpers\Types\Unity.Enums.pas"/>
+        <DCCReference Include="Helpers\Types\Unity.Arrays.pas"/>
+        <DCCReference Include="Helpers\Types\Unity.Records.pas"/>
+        <DCCReference Include="Helpers\Statics\Unity.AdoDb.pas"/>
+        <DCCReference Include="Helpers\Statics\Unity.Chars.pas"/>
+        <DCCReference Include="Helpers\Statics\Unity.Delimiters.pas"/>
+        <DCCReference Include="Helpers\Statics\Unity.DateTimeFormats.pas"/>
+        <DCCReference Include="Helpers\Statics\Unity.LyncLib.pas"/>
+        <DCCReference Include="Helpers\Statics\Unity.Messaging.pas"/>
+        <DCCReference Include="Helpers\Statics\Unity.NCSI.pas"/>
+        <DCCReference Include="Helpers\Statics\Unity.Qms.pas"/>
+        <DCCReference Include="Helpers\Statics\Unity.RestAuth.pas"/>
+        <DCCReference Include="Helpers\Statics\Unity.RiskClass.pas"/>
+        <DCCReference Include="Helpers\Statics\Unity.SplashScreen.pas"/>
+        <DCCReference Include="Helpers\Statics\Unity.StatusBar.pas"/>
+        <DCCReference Include="Helpers\Statics\Unity.Unknown.pas"/>
+        <DCCReference Include="Helpers\Statics\Unity.Sql.pas"/>
+        <DCCReference Include="Helpers\Statics\Unity.Helpers.pas"/>
+        <DCCReference Include="Helpers\Statics\Unity.Common.pas"/>
+        <DCCReference Include="Helpers\Statics\Unity.Sorting.pas"/>
+        <DCCReference Include="Helpers\Statics\Unity.Filtering.pas"/>
+        <DCCReference Include="Helpers\Statics\Unity.UserAccess.pas"/>
+        <DCCReference Include="Helpers\Statics\Unity.UserSid.pas"/>
         <DCCReference Include="Model\DbModel.pas">
             <Form>Legacy code/to be removed</Form>
         </DCCReference>
@@ -309,6 +343,12 @@
             </Platforms>
             <ModelSupport>False</ModelSupport>
             <Deployment Version="3">
+                <DeployFile LocalName="Model\Json\DbQuery\Dummy.txt" Configuration="Debug" Class="ProjectFile">
+                    <Platform Name="Win32">
+                        <RemoteDir>.\</RemoteDir>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
                 <DeployFile LocalName="Build\Win32\Bin\Unity.exe" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
                         <RemoteName>Unity.exe</RemoteName>
@@ -316,12 +356,6 @@
                     </Platform>
                 </DeployFile>
                 <DeployFile LocalName="Include\Cef.inc" Configuration="Debug" Class="ProjectFile">
-                    <Platform Name="Win32">
-                        <RemoteDir>.\</RemoteDir>
-                        <Overwrite>true</Overwrite>
-                    </Platform>
-                </DeployFile>
-                <DeployFile LocalName="Model\Json\DbQuery\Dummy.txt" Configuration="Debug" Class="ProjectFile">
                     <Platform Name="Win32">
                         <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>

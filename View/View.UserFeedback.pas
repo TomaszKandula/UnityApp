@@ -22,7 +22,9 @@ uses
     Vcl.StdCtrls,
     Vcl.Buttons,
     Vcl.ExtCtrls,
-    Unity.Interposer;
+    Unity.Enums,
+    Unity.Grid,
+    Unity.Panel;
 
 
 type
@@ -62,8 +64,10 @@ uses
     View.Main,
     Sync.Documents,
     Async.Utilities,
-    Unity.Settings,
-    Unity.Statics;
+    Unity.Chars,
+    Unity.Common,
+    Unity.Helpers,
+    Unity.Settings;
 
 
 var vFeedbackForm: TFeedbackForm;
@@ -120,7 +124,7 @@ begin
 
     if ReportMemo.Text = '' then
     begin
-        MainForm.MsgCall(TCommon.TMessage.Warn, 'Cannot send empty report. Please write what feels right and then send.');
+        THelpers.MsgCall(TAppMessage.Warn, 'Cannot send empty report. Please write what feels right and then send.');
         Exit;
     end;
 
@@ -154,7 +158,7 @@ begin
     var Transfer: string:=ReportMemo.Text;
     Transfer:=StringReplace(Transfer, TChars.CRLF, '<br>', [rfReplaceAll]);
 
-    var HTMLBody: string:=Mail.LoadTemplate(Settings.GetLayoutDir + Settings.GetStringValue(TConfigSections.Layouts, 'SENDFEEDBACK', '') + '.html');
+    var HTMLBody: string:=Mail.LoadTemplate(Settings.DirLayouts + Settings.GetStringValue(TConfigSections.Layouts, 'SENDFEEDBACK', '') + '.html');
     HTMLBody:=StringReplace(HTMLBody, '{TEXT_HOLER}',  Transfer,       [rfReplaceAll]);
     HTMLBody:=StringReplace(HTMLBody, '{APPNAME}',     AppName,        [rfReplaceAll]);
     HTMLBody:=StringReplace(HTMLBody, '{BUILD}',       AppVer,         [rfReplaceAll]);

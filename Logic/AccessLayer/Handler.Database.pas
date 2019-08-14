@@ -59,8 +59,11 @@ implementation
 
 
 uses
-    View.Main,
-    Unity.Statics;
+    Unity.Unknown,
+    Unity.Messaging,
+    Unity.Helpers,
+    Unity.AdoDb,
+    View.Main;
 
 
 const
@@ -130,7 +133,7 @@ begin
 
     // Show connection string in event log
     if (ShowConnStr) and (DbConnStr <> '') then
-        MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Connection string built [show_no_password] = ' + DbConnNoPwd);
+        //MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Connection string built [show_no_password] = ' + DbConnNoPwd);
 
 end;
 
@@ -153,7 +156,7 @@ procedure TDataBase.InitializeConnection(idThd: integer; ErrorShow: boolean; var
     procedure ErrorHandler(err_class: string; err_msg: string; should_quit: boolean; err_wnd: boolean);
     begin
 
-        MainForm.LogText.Log(MainForm.EventLogPath, TADODB.ERR_LOGTEXT + '[' + err_class + '] ' + err_msg + ' (' + IntToStr(ExitCode) + ').');
+        MainForm.FAppEvents.Log(MainForm.EventLogPath, TADODB.ERR_LOGTEXT + '[' + err_class + '] ' + err_msg + ' (' + IntToStr(ExitCode) + ').');
 
         if err_wnd then
             Application.MessageBox(PChar(TADODB.ERR_MESSAGE), PChar(MainForm.CAPTION), MB_OK + MB_ICONWARNING);
@@ -193,7 +196,7 @@ begin
         // Connect to given server
         try
             ActiveConnection.Connected:=True;
-            MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Server connection has been established successfully.');
+            //MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Server connection has been established successfully.');
         except
             on E: Exception do
                 ErrorHandler(E.ClassName, E.Message, False, ErrorShow);
@@ -225,7 +228,7 @@ begin
     Result:=0;
 
     /// <remarks>
-    /// It is not enough to establish connection, we must check if query can be executed. Therefore, we use simplist query
+    /// It is not enough to establish connection, we must check if query can be executed. Therefore, we use simplest query
     /// to check if we can connect to the database and send/receive data.
     /// </remarks>
 
@@ -262,12 +265,12 @@ begin
 
         if ConCheck.Connected then
         begin
-            MainForm.ExecMessage(False, TMessaging.TWParams.ConnectionOk, TUnknown.NULL);
+            THelpers.ExecMessage(False, TMessaging.TWParams.ConnectionOk, TUnknown.NULL, MainForm);
             ConCheck.Close;
         end
         else
         begin
-            MainForm.ExecMessage(False, TMessaging.TWParams.ConnectionError, TUnknown.NULL);
+            THelpers.ExecMessage(False, TMessaging.TWParams.ConnectionError, TUnknown.NULL, MainForm);
         end;
 
         ConCheck.Free;

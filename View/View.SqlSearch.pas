@@ -23,7 +23,8 @@ uses
     Vcl.Buttons,
     Vcl.StdCtrls,
     Vcl.ExtCtrls,
-    Unity.Interposer;
+    Unity.Grid,
+    Unity.Panel;
 
 
 type
@@ -145,9 +146,12 @@ implementation
 
 uses
     View.Main,
+    Unity.Sql,
+    Unity.Common,
     Unity.Settings,
+    Unity.Helpers,
+    Unity.Messaging,
     DbModel,
-    Unity.Statics,
     Async.AddressBook;
 
 
@@ -328,13 +332,13 @@ begin
 
     if (EditName.Enabled) and (string.IsNullOrEmpty(EditName.Text)) then
     begin
-        MainForm.ExecMessage(False, TMessaging.TWParams.MessageWarn, 'Please provide with Customer Name.');
+        THelpers.ExecMessage(False, TMessaging.TWParams.MessageWarn, 'Please provide with Customer Name.', MainForm);
         Exit;
     end;
 
     if (EditNumber.Enabled) and (string.IsNullOrEmpty(EditNumber.Text)) then
     begin
-        MainForm.ExecMessage(False, TMessaging.TWParams.MessageWarn, 'Please provide with Customer Number.');
+        THelpers.ExecMessage(False, TMessaging.TWParams.MessageWarn, 'Please provide with Customer Number.', MainForm);
         Exit;
     end;
 
@@ -376,7 +380,7 @@ begin
         )
     then
     begin
-        MainForm.ExecMessage(False, TMessaging.TWParams.MessageWarn, 'Please provide with at least one condition.');
+        THelpers.ExecMessage(False, TMessaging.TWParams.MessageWarn, 'Please provide with at least one condition.', MainForm);
         Exit;
     end;
 
@@ -398,7 +402,7 @@ begin
 
     Conditions:=LeftStr(Conditions, Length(Conditions) - Length(TSql._AND));
 
-    MainForm.DebugMsg(Conditions);
+    OutputDebugString(PChar(Conditions));
 
     var AddressBook: IAddressBook:=TAddressBook.Create();
     AddressBook.OpenAddressBookAsync('', MainForm.sgAddressBook, Conditions);

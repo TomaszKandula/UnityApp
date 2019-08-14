@@ -10,13 +10,9 @@ interface
 
 
 uses
-    Winapi.Windows,
-    Winapi.Messages,
-    System.SysUtils,
-    System.Classes,
-    Vcl.Grids,
     Unity.Enums,
-    Unity.Interposer;
+    Unity.Grid,
+    Unity.ListView;
 
 
 type
@@ -95,7 +91,7 @@ type
     ///
     /// </remarks>
 
-    type TOpenItemsTotal = record
+    TOpenItemsTotal = record
         OpenAm:     double;
         Am:         double;
         OpenCurAm:  double;
@@ -108,7 +104,7 @@ type
     /// use it at the same time (VCL components are not thread safe). Having record with fields simplify things.
     /// </remarks>
 
-    TOpenItemsRefs = record
+    TFOpenItemsRefs = record
         Ad1Col:       integer;
         Ad2Col:       integer;
         Ad3Col:       integer;
@@ -131,7 +127,7 @@ type
     /// This record define column numbers for given field, so we do not have to use each time "ReturnColumn".
     /// </remarks>
 
-    TControlStatusRefs = record
+    TFControlStatusRefs = record
         Id:          integer;
         Code:        integer;
         Text:        integer;

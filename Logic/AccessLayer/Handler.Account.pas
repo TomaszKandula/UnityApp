@@ -10,16 +10,10 @@ interface
 
 
 uses
-    Winapi.Windows,
     System.SysUtils,
-    System.Classes,
-    System.StrUtils,
-    System.Variants,
     Vcl.StdCtrls,
-    Data.Win.ADODB,
     Handler.Sql,
-    Unity.Interposer,
-    Unity.Statics,
+    Unity.UserAccess,
     Unity.Arrays;
 
 
@@ -36,7 +30,7 @@ type
     public
         property UserName: string read FUserName write FUserName;
         function GetAccessData(DataType: TUserAccess.TTypes): string;
-        function GetGroupList(var List: TALists; GroupListBox: TComboBox): boolean;
+        function GetFGroupList(var List: TALists; FGroupListBox: TComboBox): boolean;
         function GetAgeDates(AgeDatesBox: TComboBox; GroupID: string): boolean;
     end;
 
@@ -45,6 +39,9 @@ implementation
 
 
 uses
+    Unity.DateTimeFormats,
+    Unity.AdoDb,
+    Unity.Sql,
     View.Main,
     DbModel;
 
@@ -85,7 +82,7 @@ begin
 end;
 
 
-function TUserControl.GetGroupList(var List: TALists; GroupListBox: TComboBox): boolean;
+function TUserControl.GetFGroupList(var List: TALists; FGroupListBox: TComboBox): boolean;
 begin
 
     Result:=True;
@@ -112,9 +109,9 @@ begin
             DataSet.Filter:=adFilterNone;
 
             // Into ComboBox list
-            GroupListBox.Clear;
-            for iCNT:=0 to high(List) - 1 do GroupListBox.Items.Add(List[iCNT, 1]);
-            GroupListBox.ItemIndex:=0;
+            FGroupListBox.Clear;
+            for iCNT:=0 to high(List) - 1 do FGroupListBox.Items.Add(List[iCNT, 1]);
+            FGroupListBox.ItemIndex:=0;
 
         end;
 

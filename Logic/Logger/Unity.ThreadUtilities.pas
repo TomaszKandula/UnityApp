@@ -222,7 +222,7 @@ begin
         try
             FHandlePoolEvent(Data, Thread);
         except
-            // Do nothing
+            {Do nothing}
         end;
     end;
 

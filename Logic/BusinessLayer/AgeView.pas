@@ -20,8 +20,7 @@ uses
     Data.Win.ADODB,
     DbModel,
     Handler.Sql,
-    Unity.Interposer,
-    Unity.Statics,
+    Unity.Grid,
     Unity.Arrays,
     Unity.Enums;
 
@@ -93,8 +92,14 @@ implementation
 
 
 uses
-    View.Main,
-    Unity.Settings;
+    Unity.StatusBar,
+    Unity.Messaging,
+    Unity.Helpers,
+    Unity.Unknown,
+    Unity.Chars,
+    Unity.Sql,
+    Unity.Settings,
+    View.Main;
 
 
 // ---------------------------------------------------------------------------------------------------------------------------------------- CREATE & RELEASE //
@@ -152,7 +157,7 @@ begin
     StrSQL:=TSql.EXECUTE + AgeViewReport + TChars.SPACE + QuotedStr(StrCol) + TChars.COMMA + QuotedStr(GroupID) + TChars.COMMA + QuotedStr(AgeDate) + TChars.COMMA + QuotedStr(Mode.ToString);
     SqlToGrid(Grid, ExecSQL, False, False);
 
-    MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: SQL statement applied [' + StrSQL + '].');
+    MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: SQL statement applied [' + StrSQL + '].');
 
     // Uninitialize
     Grid.Freeze(False);
@@ -372,10 +377,10 @@ begin
     Grid.ClearAll(4, 0, 0, False);
 
     // Get co codes from selected group (Group ID)
-    MainForm.tcCOCODE1.Caption:=MainForm.GetCoCode(1, MainForm.GroupIdSel);
-    MainForm.tcCOCODE2.Caption:=MainForm.GetCoCode(2, MainForm.GroupIdSel);
-    MainForm.tcCOCODE3.Caption:=MainForm.GetCoCode(3, MainForm.GroupIdSel);
-    MainForm.tcCOCODE4.Caption:=MainForm.GetCoCode(4, MainForm.GroupIdSel);
+    MainForm.tcCOCODE1.Caption:=MainForm.GetCoCode(1, MainForm.FGroupIdSel);
+    MainForm.tcCOCODE2.Caption:=MainForm.GetCoCode(2, MainForm.FGroupIdSel);
+    MainForm.tcCOCODE3.Caption:=MainForm.GetCoCode(3, MainForm.FGroupIdSel);
+    MainForm.tcCOCODE4.Caption:=MainForm.GetCoCode(4, MainForm.FGroupIdSel);
 
     if MainForm.tcCOCODE1.Caption = '0' then
         MainForm.tcCOCODE1.Font.Color:=clWhite else MainForm.tcCOCODE1.Font.Color:=clBlack;
@@ -564,7 +569,7 @@ begin
         end;
 
         if DataSet.RecordCount = 1 then
-            Result:=MainForm.OleGetStr(DataSet.Fields[Field].Value);
+            Result:=THelpers.OleGetStr(DataSet.Fields[Field].Value);
 
     except
         Result:='';
@@ -1083,14 +1088,14 @@ begin
     StrSQL:=Transaction;
 
     try
-        MainForm.ExecMessage(False, TMessaging.TWParams.StatusBar, TStatusBar.SQLupdate);
+        THelpers.ExecMessage(False, TMessaging.TWParams.StatusBar, TStatusBar.SQLupdate, MainForm);
         ExecSQL;
     except
         on E: Exception do
-            MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Cannot send to server. Error has been thrown: ' + E.Message);
+            MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Cannot send to server. Error has been thrown: ' + E.Message);
     end;
 
-    MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Age View transferred to Microsoft SQL Server. Rows affected: ' + RowsAffected.ToString + '.');
+    MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Age View transferred to Microsoft SQL Server. Rows affected: ' + RowsAffected.ToString + '.');
 
 end;
 

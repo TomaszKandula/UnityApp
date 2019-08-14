@@ -20,8 +20,7 @@ uses
     Data.Win.ADODB,
     DbModel,
     Handler.Sql,
-    Unity.Interposer,
-    Unity.Statics,
+    Unity.Grid,
     Unity.Enums;
 
 
@@ -47,6 +46,10 @@ implementation
 
 uses
     View.Main,
+    Unity.Sql,
+    Unity.Chars,
+    Unity.Helpers,
+    Unity.DateTimeFormats,
     Unity.Settings;
 
 
@@ -212,7 +215,7 @@ end;
 
 procedure TTransactions.ClearSummary;
 begin
-    MainForm.OSAmount                :=0;
+    MainForm.FOSAmount               :=0;
     MainForm.tcOpenItems.Caption     :='0';
     MainForm.tcOverdue.Caption       :='0';
     MainForm.tcInvoices.Caption      :='0';
@@ -248,7 +251,7 @@ begin
         var InvoiceAmt: double:=StrToFloatDef(DestGrid.Cells[5, iCNT], 0);
 
         // Aggregate invoice amount
-        MainForm.OSAmount:=MainForm.OSAmount + InvoiceAmt;
+        MainForm.FOSAmount:=MainForm.FOSAmount + InvoiceAmt;
 
         { DEPENDS ON INVOICE TYPE DEFINED IN THE GENERAL SETTINGS }
         if IsVoType(DestGrid.Cells[3, iCNT]) = True then inc(nInvoices);
@@ -307,15 +310,15 @@ begin
     OpenTable(TCompanyData.CompanyData);
     if DataSet.RecordCount = 1 then
     begin
-        KPIOverdue:=StrToFloatDef(MainForm.OleGetStr(DataSet.Fields[TCompanyData.KpiOverdueTarget].Value), 0);
-        KPIUnalloc:=StrToFloatDef(MainForm.OleGetStr(DataSet.Fields[TCompanyData.KpiUnallocatedTarget].Value), 0);
+        KPIOverdue:=StrToFloatDef(THelpers.OleGetStr(DataSet.Fields[TCompanyData.KpiOverdueTarget].Value), 0);
+        KPIUnalloc:=StrToFloatDef(THelpers.OleGetStr(DataSet.Fields[TCompanyData.KpiUnallocatedTarget].Value), 0);
     end;
 
     // Display
     MainForm.tcOpenItems.Caption     :=FormatFloat('### ###',  DestGrid.RowCount - 1);
     MainForm.tcInvoices.Caption      :=FormatFloat('### ###',  nInvoices);
     MainForm.tcOverdue.Caption       :=FormatFloat('### ###',  Overdue);
-    MainForm.tcOSAmt.Caption         :=FormatFloat('#,##0.00', MainForm.OSAmount);
+    MainForm.tcOSAmt.Caption         :=FormatFloat('#,##0.00', MainForm.FOSAmount);
     MainForm.tcOvdAmt.Caption        :=FormatFloat('#,##0.00', OverdueAmt);
     MainForm.tcUNAmt.Caption         :=FormatFloat('#,##0.00', abs(UNamt));
     MainForm.tcKPIoverdue.Caption    :=FormatFloat('#,##0.00', KPIOverdue);

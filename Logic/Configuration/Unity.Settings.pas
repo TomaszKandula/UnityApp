@@ -19,8 +19,7 @@ uses
     System.INIFiles,
     Vcl.Forms,
     Vcl.Graphics,
-    Unity.Crc32,
-    Unity.Statics;
+    Unity.Enums;
 
 
 type
@@ -43,19 +42,36 @@ type
         procedure SetFutureBColor(NewColor:       TColor);
         function  GetReleaseDateTime: TDateTime;
         function  GetReleaseNumber:   cardinal;
-        function  GetLayoutLists:     TStringList;
         function  GetTodayFColor:     TColor;
         function  GetTodayBColor:     TColor;
         function  GetPastFColor:      TColor;
         function  GetPastBColor:      TColor;
         function  GetFutureFColor:    TColor;
         function  GetFutureBColor:    TColor;
+        function  GetWinUserName:     string;
+        function  GetPathGridImage:   string;
+        function  GetPathEventLog:    string;
+        function  GetPathConfig:      string;
+        function  GetPathLicence:     string;
+        function  GetDirApplication:  string;
+        function  GetDirLayouts:      string;
+        function  GetDirPackage:      string;
+        function  GetDirWinTemp:      string;
+        function  GetNewSessioId:     string;
 
         // -------------------
         // Exposed properties.
         // -------------------
 
-        property  LayoutLists:     TStringList read GetLayoutLists;
+        property  WinUserName:     string      read GetWinUserName;
+        property  PathGridImage:   string      read GetPathGridImage;
+        property  PathEventLog:    string      read GetPathEventLog;
+        property  PathConfig:      string      read GetPathConfig;
+        property  PathLicence:     string      read GetPathLicence;
+        property  DirApplication:  string      read GetDirApplication;
+        property  DirLayouts:      string      read GetDirLayouts;
+        property  DirPackage:      string      read GetDirPackage;
+        property  DirWinTemp:      string      read GetDirWinTemp;
         property  ReleaseNumber:   cardinal    read GetReleaseNumber   write SetReleaseNumber;
         property  ReleaseDateTime: TDateTime   read GetReleaseDateTime write SetReleaseDateTime;
         property  TodayFColor:     TColor      read GetTodayFColor     write SetTodayFColor;
@@ -64,13 +80,14 @@ type
         property  PastBColor:      TColor      read GetPastBColor      write SetPastBColor;
         property  FutureFColor:    TColor      read GetFutureFColor    write SetFutureFColor;
         property  FutureBColor:    TColor      read GetFutureBColor    write SetFutureBColor;
+        property  NewSessioId:     string      read GetNewSessioId;
 
         // ----------------
         // Exposed methods.
         // ----------------
 
-        function  Encode(ConfigType: TCommon.TFiles): boolean;
-        function  Decode(ConfigType: TCommon.TFiles; ToMemory: boolean): boolean;
+        function  Encode(ConfigType: TAppFiles): boolean;
+        function  Decode(ConfigType: TAppFiles; ToMemory: boolean): boolean;
         function  ConfigToMemory: boolean;
         function  GetLicenceValue(Section: string; Key: string): string;
         function  GetStringValue(Section: string; Key: string; Default: string): string;
@@ -83,79 +100,32 @@ type
         procedure DeleteSection(SectionName: string);
         procedure DeleteKey(Section: string; Ident: string);
         function  FindSettingsKey(Section: string; KeyPosition: integer): string;
-        function  GetLastError:      integer;
-        function  GetAppDir:         string;
-        function  GetAppLog:         string;
-        function  GetLayoutDir:      string;
-        function  GetPackageDir:     string;
-        function  GetWinUserName:    string;
-        function  GetWinTempFolder:  string;
-        function  GetPathGridImage:  string;
-        function  GetPathEventLog:   string;
-        function  GetPathAppCfg:     string;
-        function  GetPathLicenceLic: string;
-        function  GetReleasePakURL:  string;
-        function  GetReleaseManURL:  string;
-        function  GetLayoutsURL:     string;
-
+        function  MakeNewSessionFile(SessionId: string): string;
     end;
 
 
     TSettings = class(TInterfacedObject, ISettings)
     {$TYPEINFO ON}
     private
-
-        // ------------------------------------
-        // TMemoryIni holding encoded settings.
-        // ------------------------------------
-
-        var FTMIG: TMemIniFile;
-        var FTMIL: TMemIniFile;
-        var FList: TStringList;
-        var FGetLastError:  integer;
-        var FWinUserName:   string;
-        var FPathGridImage: string;
-
-        // --------------------
-        // Directories holders.
-        // --------------------
-
-        var FAppLog:         string;
+        var FTMIG:           TMemIniFile;
+        var FTMIL:           TMemIniFile;
+        var FWinUserName:    string;
+        var FPathGridImage:  string;
         var FPathEventLog:   string;
-        var FPathAppCfg:     string;
-        var FPathLicenceLic: string;
-
-        // -------------
-        // Files holder.
-        // -------------
-
-        var FAppDir:        string;
-        var FDirLayouts:    string;
-        var FDirPackage:    string;
-        var FWinTempFolder: string;
-
-        // -------------
-        // URLs holders.
-        // -------------
-
-        var FReleasePakURL: string;
-        var FReleaseManURL: string;
-        var FGetLayoutsURL: string;
-
-        // --------
-        // Methods.
-        // --------
-
+        var FPathConfig:     string;
+        var FPathLicence:    string;
+        var FDirApplication: string;
+        var FDirLayouts:     string;
+        var FDirPackage:     string;
+        var FDirSessions:    string;
+        var FDirWinTemp:     string;
+        var FUrlReleasePak:  string;
+        var FUrlReleaseMan:  string;
+        var FUrlLayoutsLst:  string;
         function  GetReleaseDateTime: TDateTime;
         procedure SetReleaseDateTime(NewDateTime: TDateTime);
         function  GetReleaseNumber: cardinal;
         procedure SetReleaseNumber(NewRelease: cardinal);
-        function  GetLayoutLists: TStringList;
-
-        // ------------------------------------------------------------------
-        // Getters and setters for "follow-up" colors saved in settings file.
-        // ------------------------------------------------------------------
-
         function  GetTodayFColor:  TColor;
         function  GetTodayBColor:  TColor;
         function  GetPastFColor:   TColor;
@@ -168,11 +138,21 @@ type
         procedure SetPastBColor  (NewColor: TColor);
         procedure SetFutureFColor(NewColor: TColor);
         procedure SetFutureBColor(NewColor: TColor);
+        function  GetWinUserName:     string;
+        function  GetPathGridImage:   string;
+        function  GetPathEventLog:    string;
+        function  GetPathConfig:      string;
+        function  GetPathLicence:     string;
+        function  GetDirApplication:  string;
+        function  GetDirLayouts:      string;
+        function  GetDirPackage:      string;
+        function  GetDirWinTemp:      string;
+        function  GetNewSessioId:     string;
     public
         constructor Create;
         destructor Destroy; override;
-        function  Encode(ConfigType: TCommon.TFiles): boolean;
-        function  Decode(ConfigType: TCommon.TFiles; ToMemory: boolean): boolean;
+        function  Encode(ConfigType: TAppFiles): boolean;
+        function  Decode(ConfigType: TAppFiles; ToMemory: boolean): boolean;
         function  ConfigToMemory: boolean;
         function  GetLicenceValue(Section: string; Key: string): string;
         function  GetStringValue(Section: string; Key: string; Default: string): string;
@@ -185,30 +165,17 @@ type
         procedure DeleteSection(SectionName: string);
         procedure DeleteKey(Section: string; Ident: string);
         function  FindSettingsKey(Section: string; KeyPosition: integer): string;
-        function  GetLastError:      integer;
-        function  GetAppDir:         string;
-        function  GetLayoutDir:      string;
-        function  GetPackageDir:     string;
-        function  GetAppLog:         string;
-        function  GetWinUserName:    string;
-        function  GetWinTempFolder:  string;
-        function  GetPathGridImage:  string;
-        function  GetPathEventLog:   string;
-        function  GetPathAppCfg:     string;
-        function  GetPathLicenceLic: string;
-        function  GetReleasePakURL:  string;
-        function  GetReleaseManURL:  string;
-        function  GetLayoutsURL:     string;
-        property WinUserName:     string    read FWinUserName;
-        property AppLog:          string    read FAppLog;
-        property PathGridImage:   string    read FPathGridImage;
-        property PathEventLog:    string    read FPathEventLog;
-        property PathAppCfg:      string    read FPathAppCfg;
-        property PathLicenceLic:  string    read FPathLicenceLic;
-        property AppDir:          string    read FAppDir;
-        property DirLayouts:      string    read FDirLayouts;
-        property DirPackage:      string    read FDirPackage;
-        property WinTempFolder:   string    read FWinTempFolder;
+        function  MakeNewSessionFile(SessionId: string): string;
+        property WinUserName:     string    read GetWinUserName;
+        property PathGridImage:   string    read GetPathGridImage;
+        property PathEventLog:    string    read GetPathEventLog;
+        property PathConfig:      string    read GetPathConfig;
+        property PathLicence:     string    read GetPathLicence;
+        property DirApplication:  string    read GetDirApplication;
+        property DirLayouts:      string    read GetDirLayouts;
+        property DirPackage:      string    read GetDirPackage;
+        property DirWinTemp:      string    read GetDirWinTemp;
+        property NewSessioId:     string    read GetNewSessioId;
         property ReleaseDateTime: TDateTime read GetReleaseDateTime write SetReleaseDateTime;
         property TodayFColor:     TColor    read GetTodayFColor     write SetTodayFColor;
         property TodayBColor:     TColor    read GetTodayBColor     write SetTodayBColor;
@@ -250,60 +217,34 @@ type
 implementation
 
 
+uses
+    Unity.Crc32,
+    Unity.Common,
+    Unity.Unknown,
+    Unity.Chars,
+    Unity.DateTimeFormats;
+
+
 // ---------------------------------------------------------------------------------------------------------------------------------------- CREATE & RELEASE //
 
 
 constructor TSettings.Create;
 begin
 
-    // -------------------------------------------------------------------------------------
-    // General settings (config.cfg), containing all the necessary data for the application.
-    // -------------------------------------------------------------------------------------
-
     FTMIG:=TMemIniFile.Create('');
-
-    // -----------------------------
-    // Licence details (unity.licx).
-    // -----------------------------
-
     FTMIL:=TMemIniFile.Create('');
 
-    // -------------------------------------
-    // Holds list of all registered layouts.
-    // -------------------------------------
-
-    FList:=TStringList.Create;
-
-    // -----------
-    // User Alias.
-    // -----------
-
     FWinUserName   :=Trim(LowerCase(GetEnvironmentVariable('username')));
+    FDirWinTemp    :=GetEnvironmentVariable('TEMP');
+    FDirApplication:=ExtractFileDir(Application.ExeName) + '\';
+    FDirLayouts    :=FDirApplication + 'layouts\';
+    FDirPackage    :=FDirApplication + 'package\';
+    FDirSessions   :=FDirApplication + 'sessions\';
+    FPathConfig    :=FDirApplication + TCommon.ConfigFile;
+    FPathLicence   :=FDirApplication + TCommon.LicenceFile;
+    FPathGridImage :=FDirApplication + TCommon.GridImgFile;
 
-    // ------------
-    // Directories.
-    // ------------
-
-    FAppDir        :=ExtractFileDir(Application.ExeName) + '\';
-    FDirLayouts    :=FAppDir + 'layouts\';
-    FDirPackage    :=FAppDir + 'package\';
-    FWinTempFolder :=GetEnvironmentVariable('TEMP');
-
-    // ------
-    // Files.
-    // ------
-
-    FAppLog        :=FWinUserName + '.log';
-    FPathAppCfg    :=FAppDir + TCommon.ConfigFile;
-    FPathLicenceLic:=FAppDir + TCommon.LicenceFile;
-    FPathEventLog  :=FAppDir + FAppLog;
-    FPathGridImage :=FAppDir + TCommon.GridImgFile;
-
-    // ------------------------------------------------------------
-    // Return 404 error code if configuration file cannot be found.
-    // ------------------------------------------------------------
-
-    if FileExists(FPathAppCfg) then ConfigToMemory else FGetLastError:=404;
+    if FileExists(FPathConfig) then ConfigToMemory;
 
 end;
 
@@ -312,7 +253,6 @@ destructor TSettings.Destroy;
 begin
     FTMIG.Free;
     FTMIL.Free;
-    FList.Free;
     inherited;
 end;
 
@@ -331,99 +271,11 @@ begin
 
     if Assigned(FTMIG) then
     begin
-
-        Decode(AppConfig, True);
-
-        FReleasePakURL:=FTMIG.ReadString(TConfigSections.ApplicationDetails, 'UPDATE_PATH', '') + TCommon.ReleaseFile;
-        FReleaseManURL:=FTMIG.ReadString(TConfigSections.ApplicationDetails, 'UPDATE_PATH', '') + TCommon.ManifestFile;
-
-        FGetLayoutsURL:=FTMIG.ReadString(TConfigSections.ApplicationDetails, 'LAYOUT_PATH', '');
-
-        GetSectionValues(TConfigSections.Layouts, FList);
-        for var iCNT: integer:=0 to FList.Count - 1 do
-        begin
-            FList.Strings[iCNT]:=MidStr(FList.Strings[iCNT], AnsiPos('=', FList.Strings[iCNT]) + 1, 255);
-        end;
-
-        FGetLastError:=0;
+        Decode(Configuration, True);
+        FUrlReleasePak:=FTMIG.ReadString(TConfigSections.ApplicationDetails, 'UPDATE_PATH', '') + TCommon.ReleaseFile;
+        FUrlReleaseMan:=FTMIG.ReadString(TConfigSections.ApplicationDetails, 'UPDATE_PATH', '') + TCommon.ManifestFile;
+        FUrlLayoutsLst:=FTMIG.ReadString(TConfigSections.ApplicationDetails, 'LAYOUT_PATH', '');
         Result:=True;
-
-    end;
-
-end;
-
-
-// --------------------------------------------------------------------------------------------------------------------------------- GET RELEASE STATUS CODE //
-
-
-/// <summary>
-/// Get release number from release manifest hosted at:
-/// https://unityinfo.azurewebsites.net/release/package/unity.manifest
-/// </summary>
-
-function TSettings.GetReleaseNumber: cardinal;
-begin
-
-    Result:=0;
-
-    if Assigned(FTMIG) then
-    begin
-        Result:=StrToIntDef(FTMIG.ReadString(TConfigSections.ApplicationDetails, 'RELEASE_NUMBER', ''), 0);
-    end;
-
-end;
-
-
-/// <summary>
-/// Set release number in settings file.
-/// </summary>
-
-procedure TSettings.SetReleaseNumber(NewRelease: cardinal);
-begin
-    if Assigned(FTMIG) then
-    begin
-        FTMIG.WriteInteger(TConfigSections.ApplicationDetails, 'RELEASE_NUMBER', NewRelease);
-        Encode(TCommon.TFiles.AppConfig);
-    end;
-end;
-
-
-/// <summary>
-/// Pass layout list from settings file to a usable variable.
-/// </summary>
-
-function TSettings.GetLayoutLists: TStringList;
-begin
-    Result:=FList;
-end;
-
-
-/// <summary>
-/// Get update time and date registered in setting file.
-/// </summary>
-
-function TSettings.GetReleaseDateTime: TDateTime;
-begin
-
-    Result:=TDateTimeFormats.NullDate;
-
-    if Assigned(FTMIG) then
-        Result:=StrToDateTimeDef(FTMIG.ReadString(TConfigSections.ApplicationDetails, 'UPDATE_DATETIME', ''), TDateTimeFormats.NullDate);
-
-end;
-
-
-/// <summary>
-/// Set new update time and date.
-/// </summary>
-
-procedure TSettings.SetReleaseDateTime(NewDateTime: TDateTime);
-begin
-
-    if Assigned(FTMIG) then
-    begin
-        FTMIG.WriteString(TConfigSections.ApplicationDetails, 'UPDATE_DATETIME', DateTimeToStr(NewDateTime));
-        Encode(TCommon.TFiles.AppConfig);
     end;
 
 end;
@@ -436,15 +288,15 @@ end;
 /// Encoding method based on XOR and SHR with secret KEY.
 /// </summary>
 
-function TSettings.Encode(ConfigType: TCommon.TFiles): boolean;
+function TSettings.Encode(ConfigType: TAppFiles): boolean;
 begin
 
-    var buffer:  int64;
-    var vCRC:    DWord;
-    var sCRC:    string;
+    var buffer: int64;
+    var vCRC:   DWord;
+    var sCRC:   string;
 
     // Do not allow to encode licence file
-    if ConfigType = TCommon.TFiles.LicData then
+    if ConfigType = TAppFiles.Licence then
     begin
         Result:=False;
         Exit;
@@ -458,7 +310,7 @@ begin
         try
 
             // Move file to memory
-            if ConfigType = TCommon.TFiles.AppConfig then
+            if ConfigType = TAppFiles.Configuration then
                 FTMIG.GetStrings(hStream);
 
             hStream.SaveToStream(rStream);
@@ -492,8 +344,8 @@ begin
             // Save to file
             wStream.Position:=0;
 
-            if ConfigType = AppConfig then
-                wStream.SaveToFile(FPathAppCfg);
+            if ConfigType = Configuration then
+                wStream.SaveToFile(FPathConfig);
 
             Result:=True;
 
@@ -506,7 +358,6 @@ begin
 
         except
             Result:=False;
-            FGetLastError:=IOResult;
         end;
 
     finally;
@@ -523,7 +374,7 @@ end;
 /// will shift the characters numbers back to theirs original values.
 /// </summary>
 
-function TSettings.Decode(ConfigType: TCommon.TFiles; ToMemory: boolean): boolean;
+function TSettings.Decode(ConfigType: TAppFiles; ToMemory: boolean): boolean;
 begin
 
     Result:=False;
@@ -540,11 +391,11 @@ begin
         try
 
             // Load to memory
-            if ConfigType = TCommon.TFiles.AppConfig  then
-                rStream.LoadFromFile(FPathAppCfg);
+            if ConfigType = TAppFiles.Configuration  then
+                rStream.LoadFromFile(FPathConfig);
 
-            if ConfigType = TCommon.TFiles.LicData then
-                rStream.LoadFromFile(FPathLicenceLic);
+            if ConfigType = TAppFiles.Licence then
+                rStream.LoadFromFile(FPathLicence);
 
             // Decode byte by byte
             for var iCNT: integer:=0 to rStream.Size - 1 do
@@ -574,13 +425,15 @@ begin
 
             if ToMemory then
             begin
-                if ConfigType = TCommon.TFiles.AppConfig then
+
+                if ConfigType = TAppFiles.Configuration then
                     FTMIG.SetStrings(hString);
 
-                if ConfigType = TCommon.TFiles.LicData then
+                if ConfigType = TAppFiles.Licence then
                         FTMIL.SetStrings(hString);
 
                 Result:=True;
+
             end
             else
             begin
@@ -595,8 +448,8 @@ begin
 
         except
             Result:=False;
-            FGetLastError:=IOResult;
         end;
+
     finally
         rStream.Free;
         wStream.Free;
@@ -682,10 +535,6 @@ begin
 end;
 
 
-/// <summary>
-/// Return key value for given list position.
-/// </summary>
-
 function TSettings.FindSettingsKey(Section: string; KeyPosition: integer): string;
 begin
 
@@ -693,6 +542,7 @@ begin
 
     var SL: TStringList:=TStringList.Create;
 
+    // Return key value for given list position.
     GetSection(Section, SL);
     if KeyPosition > SL.Count then
         Exit
@@ -701,48 +551,130 @@ begin
 end;
 
 
-// --------------------------------------------------------------------------------------------------------------------------------------- GET SETTINGS DATA //
-
-
-function TSettings.GetLastError: integer;
+function TSettings.MakeNewSessionFile(SessionId: string): string;
 begin
-    Result:=FGetLastError;
+
+    // Create file: <UserAlias>.<GUID>.log
+    SessionId:=SessionId.Replace('{','').Replace('}','').Replace('-','').ToLower();
+    var EventLog:=FDirSessions + FWinUserName + '.' + SessionId + '.log';
+
+    var FL: TFileStream:=TFileStream.Create(EventLog, fmCreate);
+    try
+
+        var StrWrite: string:=FWinUserName + ' @ ' + DateToStr(Now) + ' (' + TimeToStr(Now) + ').' + TChars.CRLF + TChars.CRLF;
+        FL.Position:=FL.Size;
+
+        for var iCNT: integer:=1 to length(StrWrite) do
+            FL.Write(StrWrite[iCNT], 1);
+
+    finally
+        FL.Free;
+        Result:=EventLog;
+    end;
+
 end;
 
 
-function TSettings.GetAppDir: string;
+// ------------------------------------------------------------------------------------------------------------------------------------------------- GETTERS //
+
+
+
+function TSettings.GetReleaseNumber: cardinal;
 begin
-    Result:=FAppDir;
+
+    Result:=0;
+
+    // Get release number from release manifest hosted at:
+    // https://unityinfo.azurewebsites.net/release/package/unity.manifest
+    if Assigned(FTMIG) then
+    begin
+        Result:=StrToIntDef(FTMIG.ReadString(TConfigSections.ApplicationDetails, 'RELEASE_NUMBER', ''), 0);
+    end;
+
 end;
 
 
-function TSettings.GetLayoutDir: string;
+function TSettings.GetReleaseDateTime: TDateTime;
 begin
-    Result:=FDirLayouts;
+
+    Result:=TDateTimeFormats.NullDate;
+
+    // Get update time and date registered in setting file.
+    if Assigned(FTMIG) then
+        Result:=StrToDateTimeDef(FTMIG.ReadString(TConfigSections.ApplicationDetails, 'UPDATE_DATETIME', ''), TDateTimeFormats.NullDate);
+
 end;
 
 
-function TSettings.GetPackageDir: string;
+function TSettings.GetTodayFColor: TColor;
 begin
-    Result:=FDirPackage;
+    // Font color
+    Result:=0;
+    if not(Assigned(FTMIG)) then
+        Exit
+            else
+                Result:=FTMIG.ReadInteger(TConfigSections.FollowUpColors, 'TODAY_FCOLOR', 0);
 end;
 
 
-function TSettings.GetAppLog: string;
+function TSettings.GetTodayBColor: TColor;
 begin
-    Result:=FAppLog;
+    // Background color
+    Result:=0;
+    if not(Assigned(FTMIG)) then
+        Exit
+            else
+                Result:=FTMIG.ReadInteger(TConfigSections.FollowUpColors, 'TODAY_BCOLOR', 0);
+end;
+
+
+function TSettings.GetPastFColor: TColor;
+begin
+    // Font color
+    Result:=0;
+    if not(Assigned(FTMIG)) then
+        Exit
+            else
+                Result:=FTMIG.ReadInteger(TConfigSections.FollowUpColors, 'PAST_FCOLOR', 0);
+end;
+
+
+function TSettings.GetPastBColor: TColor;
+begin
+    // Background color
+    Result:=0;
+    if not(Assigned(FTMIG)) then
+        Exit
+            else
+                Result:=FTMIG.ReadInteger(TConfigSections.FollowUpColors, 'PAST_BCOLOR', 0);
+end;
+
+
+function TSettings.GetFutureFColor: TColor;
+begin
+    // Font color
+    Result:=0;
+    if not(Assigned(FTMIG)) then
+        Exit
+            else
+                Result:=FTMIG.ReadInteger(TConfigSections.FollowUpColors, 'FUTURE_FCOLOR', 0);
+end;
+
+
+function TSettings.GetFutureBColor: TColor;
+begin
+    // Background color
+    Result:=0;
+    if not(Assigned(FTMIG)) then
+        Exit
+            else
+                Result:=FTMIG.ReadInteger(TConfigSections.FollowUpColors, 'FUTURE_BCOLOR', 0);
 end;
 
 
 function TSettings.GetWinUserName: string;
 begin
     Result:=FWinUserName;
-end;
-
-
-function TSettings.GetWinTempFolder: string;
-begin
-    Result:=FWinTempFolder;
 end;
 
 
@@ -758,162 +690,128 @@ begin
 end;
 
 
-function TSettings.GetPathAppCfg: string;
+function TSettings.GetPathConfig: string;
 begin
-    Result:=FPathAppCfg;
+    Result:=FPathConfig;
 end;
 
 
-function TSettings.GetPathLicenceLic: string;
+function TSettings.GetPathLicence: string;
 begin
-    Result:=FPathLicenceLic;
+    Result:=FPathLicence;
 end;
 
 
-function TSettings.GetReleasePakURL: string;
+function TSettings.GetDirApplication: string;
 begin
-    Result:=FReleasePakURL;
+    Result:=FDirApplication;
 end;
 
 
-function TSettings.GetReleaseManURL: string;
+function TSettings.GetDirLayouts: string;
 begin
-    Result:=FReleaseManURL;
+    Result:=FDirLayouts;
 end;
 
 
-function TSettings.GetLayoutsURL: string;
+function TSettings.GetDirPackage: string;
 begin
-    Result:=FGetLayoutsURL;
+    Result:=FDirPackage;
 end;
 
 
-// ---------------------------------------------------------------------------------------------------------------- GETTERS AND SETTERS FOR FOLLOW-UP COLORS //
-
-
-// GETTERS ------------------------------------------------------------------------------------------------------------------------------------------------- //
-
-
-// Font color
-function TSettings.GetTodayFColor: TColor;
+function TSettings.GetDirWinTemp: string;
 begin
-    Result:=0;
-    if not(Assigned(FTMIG)) then
-        Exit
-            else
-                Result:=FTMIG.ReadInteger(TConfigSections.FollowUpColors, 'TODAY_FCOLOR', 0);
+    Result:=FDirWinTemp;
 end;
 
 
-// Background color
-function TSettings.GetTodayBColor: TColor;
+function TSettings.GetNewSessioId: string;
 begin
-    Result:=0;
-    if not(Assigned(FTMIG)) then
-        Exit
-            else
-                Result:=FTMIG.ReadInteger(TConfigSections.FollowUpColors, 'TODAY_BCOLOR', 0);
+    Result:=TGUID.NewGuid.ToString();
 end;
 
 
-// Font color
-function TSettings.GetPastFColor: TColor;
+// ------------------------------------------------------------------------------------------------------------------------------------------------- SETTERS //
+
+
+procedure TSettings.SetReleaseNumber(NewRelease: cardinal);
 begin
-    Result:=0;
-    if not(Assigned(FTMIG)) then
-        Exit
-            else
-                Result:=FTMIG.ReadInteger(TConfigSections.FollowUpColors, 'PAST_FCOLOR', 0);
+
+    // Set release number in settings file.
+    if Assigned(FTMIG) then
+    begin
+        FTMIG.WriteInteger(TConfigSections.ApplicationDetails, 'RELEASE_NUMBER', NewRelease);
+        Encode(TAppFiles.Configuration);
+    end;
+
 end;
 
 
-// Background color
-function TSettings.GetPastBColor: TColor;
+procedure TSettings.SetReleaseDateTime(NewDateTime: TDateTime);
 begin
-    Result:=0;
-    if not(Assigned(FTMIG)) then
-        Exit
-            else
-                Result:=FTMIG.ReadInteger(TConfigSections.FollowUpColors, 'PAST_BCOLOR', 0);
+
+    // Set new update time and date.
+    if Assigned(FTMIG) then
+    begin
+        FTMIG.WriteString(TConfigSections.ApplicationDetails, 'UPDATE_DATETIME', DateTimeToStr(NewDateTime));
+        Encode(TAppFiles.Configuration);
+    end;
+
 end;
 
 
-// Font color
-function TSettings.GetFutureFColor: TColor;
-begin
-    Result:=0;
-    if not(Assigned(FTMIG)) then
-        Exit
-            else
-                Result:=FTMIG.ReadInteger(TConfigSections.FollowUpColors, 'FUTURE_FCOLOR', 0);
-end;
-
-
-// Background color
-function TSettings.GetFutureBColor: TColor;
-begin
-    Result:=0;
-    if not(Assigned(FTMIG)) then
-        Exit
-            else
-                Result:=FTMIG.ReadInteger(TConfigSections.FollowUpColors, 'FUTURE_BCOLOR', 0);
-end;
-
-
-// SETTERS ------------------------------------------------------------------------------------------------------------------------------------------------- //
-
-
-// Font color
 procedure TSettings.SetTodayFColor(NewColor: TColor);
 begin
+    // Font color
     if not(Assigned(FTMIG)) then Exit;
     FTMIG.WriteInteger(TConfigSections.FollowUpColors, 'TODAY_FCOLOR', NewColor);
-    Encode(AppConfig);
+    Encode(Configuration);
 end;
 
 
-// Background color
 procedure TSettings.SetTodayBColor(NewColor: TColor);
 begin
+    // Background color
     if not(Assigned(FTMIG)) then Exit;
     FTMIG.WriteInteger(TConfigSections.FollowUpColors, 'TODAY_BCOLOR', NewColor);
-    Encode(AppConfig);
+    Encode(Configuration);
 end;
 
 
-// Font color
 procedure TSettings.SetPastFColor(NewColor: TColor);
 begin
+    // Font color
     if not(Assigned(FTMIG)) then Exit;
     FTMIG.WriteInteger(TConfigSections.FollowUpColors, 'PAST_FCOLOR', NewColor);
-    Encode(AppConfig);
+    Encode(Configuration);
 end;
 
 
-// Background color
 procedure TSettings.SetPastBColor(NewColor: TColor);
 begin
+    // Background color
     if not(Assigned(FTMIG)) then Exit;
     FTMIG.WriteInteger(TConfigSections.FollowUpColors, 'PAST_BCOLOR', NewColor);
-    Encode(AppConfig);
+    Encode(Configuration);
 end;
 
 
-// Font color
 procedure TSettings.SetFutureFColor(NewColor: TColor);
 begin
+    // Font color
     if not(Assigned(FTMIG)) then Exit;
     FTMIG.WriteInteger(TConfigSections.FollowUpColors, 'FUTURE_FCOLOR', NewColor);
-    Encode(AppConfig);
+    Encode(Configuration);
 end;
 
 
-// Background color
 procedure TSettings.SetFutureBColor(NewColor: TColor);
 begin
+    // Background color
     if not(Assigned(FTMIG)) then Exit;
     FTMIG.WriteInteger(TConfigSections.FollowUpColors, 'FUTURE_BCOLOR', NewColor);
-    Encode(AppConfig);
+    Encode(Configuration);
 end;
 
 

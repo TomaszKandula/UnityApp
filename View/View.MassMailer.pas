@@ -24,8 +24,9 @@ uses
     Vcl.ExtCtrls,
     Vcl.Buttons,
     Vcl.Imaging.pngimage,
-    Unity.Interposer,
-    Unity.Statics,
+    Unity.Grid,
+    Unity.Panel,
+    Unity.ListView,
     Unity.Records;
 
 
@@ -123,10 +124,16 @@ uses
     View.Calendar,
     View.Actions,
     View.AwaitScreen,
-    Unity.Settings,
     Handler.Sql,
     DbModel,
     Unity.Enums,
+    Unity.Helpers,
+    Unity.Settings,
+    Unity.Messaging,
+    Unity.Sql,
+    Unity.StatusBar,
+    Unity.Unknown,
+    Unity.Chars,
     Async.Statements;
 
 
@@ -216,12 +223,13 @@ end;
 
 procedure TMassMailerForm.FormShow(Sender: TObject);
 begin
+
     // Set focus on subject field
     Text_Subject.SetFocus;
 
     // Display busy cursor and change status
     Screen.Cursor:=crSQLWait;
-    MainForm.ExecMessage(False, TMessaging.TWParams.StatusBar, TStatusBar.Processing);
+    THelpers.ExecMessage(False, TMessaging.TWParams.StatusBar, TStatusBar.Processing, MainForm);
 
     // Get data
     SetEmailAddresses(CustomerList);
@@ -229,14 +237,15 @@ begin
 
     // Default
     Screen.Cursor:=crDefault;
-    MainForm.ExecMessage(False, TMessaging.TWParams.StatusBar, TStatusBar.Ready);
+    THelpers.ExecMessage(False, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
 
     // Turn off open items timer
     MainForm.OILoader.Enabled:=False;
 
     // Log it to event log. As long as Mass Mailer is opened, we do not process
     // any open items/age view snapshots
-    MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Mass mailer opened, open items loader is now on hold.');
+    MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Mass mailer opened, open items loader is now on hold.');
+
 end;
 
 
@@ -247,7 +256,7 @@ end;
 procedure TMassMailerForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
     MainForm.OILoader.Enabled:=True;
-    MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Mass mailer closed, open items loader is now enabled back again.');
+    MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Mass mailer closed, open items loader is now enabled back again.');
 end;
 
 
@@ -259,14 +268,14 @@ begin
 
     Result:='';
 
-    var Database: TDataTables:=TDataTables.Create(MainForm.DbConnect);
+    var Database: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
     try
         Database.Columns.Add(TAddressBook.Estatements);
         Database.CustFilter:=TSql.WHERE + TAddressBook.Scuid + TSql.EQUAL + QuotedStr(Scuid);
         Database.OpenTable(TAddressBook.AddressBook);
 
         if Database.DataSet.RecordCount > 0 then
-            Result:=MainForm.OleGetStr(Database.DataSet.Fields[TAddressBook.Estatements].Value)
+            Result:=THelpers.OleGetStr(Database.DataSet.Fields[TAddressBook.Estatements].Value)
 
     finally
         Database.Free;
@@ -298,7 +307,7 @@ end;
 procedure TMassMailerForm.UpdateCompanyData(Source: TListView);
 begin
 
-    var Tables: TDataTables:=TDataTables.Create(MainForm.DbConnect);
+    var Tables: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
     try
 
         if Source.Items.Count > 0 then
@@ -323,11 +332,11 @@ begin
                 // Always add to the lists
                 if Tables.DataSet.RecordCount = 1 then
                 begin
-                    Source.Items[iCNT].SubItems[5] :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.CoName].Value);
-                    Source.Items[iCNT].SubItems[6] :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.CoAddress].Value);
-                    Source.Items[iCNT].SubItems[7] :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.TelephoneNumbers].Value);
-                    Source.Items[iCNT].SubItems[3] :=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.SendNoteFrom].Value);
-                    Source.Items[iCNT].SubItems[12]:=MainForm.OleGetStr(Tables.DataSet.Fields[TCompanyData.BankAccounts].Value);
+                    Source.Items[iCNT].SubItems[5] :=THelpers.OleGetStr(Tables.DataSet.Fields[TCompanyData.CoName].Value);
+                    Source.Items[iCNT].SubItems[6] :=THelpers.OleGetStr(Tables.DataSet.Fields[TCompanyData.CoAddress].Value);
+                    Source.Items[iCNT].SubItems[7] :=THelpers.OleGetStr(Tables.DataSet.Fields[TCompanyData.TelephoneNumbers].Value);
+                    Source.Items[iCNT].SubItems[3] :=THelpers.OleGetStr(Tables.DataSet.Fields[TCompanyData.SendNoteFrom].Value);
+                    Source.Items[iCNT].SubItems[12]:=THelpers.OleGetStr(Tables.DataSet.Fields[TCompanyData.BankAccounts].Value);
                 end
                 else
                 begin
@@ -366,12 +375,12 @@ begin
         )
     then
     begin
-        MainForm.MsgCall(Warn, 'Cannot send incomplete form. Please re-check it and try again.');
+        THelpers.MsgCall(Warn, 'Cannot send incomplete form. Please re-check it and try again.');
         Exit;
     end;
 
     // Ask user, they may press the button by mistake
-    if MainForm.MsgCall(Question2, 'Are you absolutely sure you want to send it, right now?') = IDNO
+    if THelpers.MsgCall(Question2, 'Are you absolutely sure you want to send it, right now?') = IDNO
         then
             Exit;
 
@@ -401,8 +410,8 @@ begin
     /// Update column references, as they depend on view from SQL which may be changed at runtime.
     /// </remarks>
 
-    MainForm.UpdateOpenItemsRefs(MainForm.sgOpenItems);
-    MainForm.UpdateControlStatusRefs(MainForm.sgControlStatus);
+    MainForm.UpdateFOpenItemsRefs(MainForm.sgOpenItems);
+    MainForm.UpdateFControlStatusRefs(MainForm.sgControlStatus);
 
     FFields.Layout    :=TDocMode.Defined;
     FFields.Subject   :=Text_Subject.Text;
@@ -417,7 +426,7 @@ begin
     Statements.SendAccountStatements(FFields);
 
     // Display await window
-    MainForm.WndCall(AwaitForm, TWindowState.Modal);
+    THelpers.WndCall(AwaitForm, TWindowState.Modal);
 
 end;
 
@@ -428,7 +437,7 @@ end;
 procedure TMassMailerForm.btnBeginDateClick(Sender: TObject);
 begin
     CalendarForm.FCalendarMode:=GetDate;
-    MainForm.WndCall(CalendarForm, Modal);
+    THelpers.WndCall(CalendarForm, Modal);
     ValBeginDate.Caption:=DateToStr(CalendarForm.FSelectedDate);
 end;
 
@@ -436,7 +445,7 @@ end;
 procedure TMassMailerForm.btnEndDateClick(Sender: TObject);
 begin
     CalendarForm.FCalendarMode:=GetDate;
-    MainForm.WndCall(CalendarForm, Modal);
+    THelpers.WndCall(CalendarForm, Modal);
     ValEndDate.Caption:=DateToStr(CalendarForm.FSelectedDate);
 end;
 

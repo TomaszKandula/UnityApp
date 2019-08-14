@@ -22,8 +22,8 @@ uses
     Vcl.ComCtrls,
     Vcl.ExtCtrls,
     Vcl.StdCtrls,
-    Unity.Interposer,
-    Unity.Statics,
+    Unity.Grid,
+    Unity.Panel,
     Unity.Records,
     Unity.Enums;
 
@@ -49,7 +49,7 @@ type
         procedure MyCalendarClick(Sender: TObject);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
     private
-        var GeneralCommentFields: TGeneralCommentFields;
+        var FGeneralCommentFields: TGeneralCommentFields;
         function MakeMyDay(Increment: integer): TDate;
         function IsWeekend(const DT: TDateTime): Boolean;
     public
@@ -72,6 +72,9 @@ uses
     System.SysUtils,
     View.Main,
     DbModel,
+    Unity.Chars,
+    Unity.Unknown,
+    Unity.DateTimeFormats,
     Unity.Settings,
     Async.Comments;
 
@@ -114,16 +117,16 @@ end;
 procedure TCalendarForm.SetFollowUp(SelectedDate: TDate; SelectedCUID: string; Row: integer);
 begin
 
-    GeneralCommentFields.CUID        :=SelectedCUID;
-    GeneralCommentFields.FixedComment:=TUnknown.NULL;
-    GeneralCommentFields.FollowUp    :=DateToStr(SelectedDate);
-    GeneralCommentFields.Free1       :=TUnknown.NULL;
-    GeneralCommentFields.Free2       :=TUnknown.NULL;
-    GeneralCommentFields.Free3       :=TUnknown.NULL;
-    GeneralCommentFields.EventLog    :=False;
+    FGeneralCommentFields.CUID        :=SelectedCUID;
+    FGeneralCommentFields.FixedComment:=TUnknown.NULL;
+    FGeneralCommentFields.FollowUp    :=DateToStr(SelectedDate);
+    FGeneralCommentFields.Free1       :=TUnknown.NULL;
+    FGeneralCommentFields.Free2       :=TUnknown.NULL;
+    FGeneralCommentFields.Free3       :=TUnknown.NULL;
+    FGeneralCommentFields.EventLog    :=False;
 
     var Comments: IComments:=TComments.Create();
-    Comments.EditGeneralComment(GeneralCommentFields);
+    Comments.EditGeneralComment(FGeneralCommentFields);
 
     MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneralComment.fFollowUp, 1, 1), Row]:=DateToStr(SelectedDate);
 

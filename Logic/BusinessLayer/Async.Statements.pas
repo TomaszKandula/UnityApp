@@ -25,8 +25,7 @@ uses
     Data.Win.ADODB,
     Data.DB,
     Handler.Sql,
-    Unity.Interposer,
-    Unity.Statics,
+    Unity.Grid,
     Unity.Enums,
     Unity.Records,
     Unity.Arrays;
@@ -60,7 +59,9 @@ uses
     View.UserFeedback,
     Handler.Database,
     Handler.Account,
+    Unity.Helpers,
     Unity.Settings,
+    Unity.Messaging,
     Sync.Documents,
     Async.Comments,
     DbModel,
@@ -109,24 +110,24 @@ begin
         // ------------------------------------------------------
 
         if Fields.Layout = TDocMode.Defined then
-            Statement.HTMLLayout:=Statement.LoadTemplate(Settings.GetLayoutDir + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE2', ''));
+            Statement.HTMLLayout:=Statement.LoadTemplate(Settings.DirLayouts + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE2', ''));
 
         if Fields.Layout = TDocMode.Custom then
-            Statement.HTMLLayout:=Statement.LoadTemplate(Settings.GetLayoutDir + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE3', ''));
+            Statement.HTMLLayout:=Statement.LoadTemplate(Settings.DirLayouts + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE3', ''));
 
         if Statement.SendDocument then
         begin
 
-            var DailyCommentFields: TDailyCommentFields;
-            DailyCommentFields.CUID         :=Fields.CUID;
-            DailyCommentFields.Email        :=False;
-            DailyCommentFields.CallEvent    :=False;
-            DailyCommentFields.CallDuration :=0;
-            DailyCommentFields.Comment      :='New communication has been sent to the customer.';
-            DailyCommentFields.UpdateGrid   :=not Fields.Series;
-            DailyCommentFields.EmailReminder:=False;
-            DailyCommentFields.EventLog     :=False;
-            DailyCommentFields.ExtendComment:=True;
+            var FDailyCommentFields: TDailyCommentFields;
+            FDailyCommentFields.CUID         :=Fields.CUID;
+            FDailyCommentFields.Email        :=False;
+            FDailyCommentFields.CallEvent    :=False;
+            FDailyCommentFields.CallDuration :=0;
+            FDailyCommentFields.Comment      :='New communication has been sent to the customer.';
+            FDailyCommentFields.UpdateGrid   :=not Fields.Series;
+            FDailyCommentFields.EmailReminder:=False;
+            FDailyCommentFields.EventLog     :=False;
+            FDailyCommentFields.ExtendComment:=True;
 
             /// <summary>
             /// Register sent email either as manual statement or automatic statement.
@@ -135,22 +136,22 @@ begin
             if Fields.Layout = TDocMode.Defined then
             begin
 
-                DailyCommentFields.EmailAutoStat:=True;
-                DailyCommentFields.EmailManuStat:=False;
+                FDailyCommentFields.EmailAutoStat:=True;
+                FDailyCommentFields.EmailManuStat:=False;
 
                 var Comments: IComments:=TComments.Create();
-                Comments.EditDailyComment(DailyCommentFields);
+                Comments.EditDailyComment(FDailyCommentFields);
 
             end;
 
             if Fields.Layout = TDocMode.Custom then
             begin
 
-                DailyCommentFields.EmailAutoStat:=False;
-                DailyCommentFields.EmailManuStat:=True;
+                FDailyCommentFields.EmailAutoStat:=False;
+                FDailyCommentFields.EmailManuStat:=True;
 
                 var Comments: IComments:=TComments.Create();
-                Comments.EditDailyComment(DailyCommentFields);
+                Comments.EditDailyComment(FDailyCommentFields);
 
             end;
 
@@ -159,13 +160,13 @@ begin
             /// </remarks>
 
             if Fields.Series then
-                MainForm.ExecMessage(False, TMessaging.TWParams.MailerReportItem, Fields.ItemNo.ToString)
+                THelpers.ExecMessage(False, TMessaging.TWParams.MailerReportItem, Fields.ItemNo.ToString, MainForm)
             else
-                MainForm.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Account Statement has been sent successfully!');
+                THelpers.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Account Statement has been sent successfully!', MainForm);
 
         end
         else if not(Fields.Series) then
-            MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Account Statement cannot be sent. Please contact IT support.')
+            THelpers.ExecMessage(False, TMessaging.TWParams.MessageError, 'Account Statement cannot be sent. Please contact IT support.', MainForm)
 
     end);
 
@@ -211,7 +212,7 @@ begin
 
         end;
 
-        MainForm.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString);
+        THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
 
     end);
 

@@ -25,7 +25,9 @@ uses
     Vcl.Buttons,
     Vcl.ComCtrls,
     Data.Win.ADODB,
-    Unity.Interposer;
+    Unity.Enums,
+    Unity.Grid,
+    Unity.Panel;
 
 
 type
@@ -102,9 +104,10 @@ uses
     View.Main,
     Handler.Sql,
     DbModel,
+    Unity.Helpers,
+    Unity.Sql,
     Unity.Settings,
-    Handler.Database,
-    Unity.Statics;
+    Handler.Database;
 
 
 var vTrackerForm: TTrackerForm;
@@ -134,7 +137,7 @@ begin
     if MainForm.tcCOCODE3.Caption <> 'n/a' then CoCode3:=MainForm.tcCOCODE3.Caption;
     if MainForm.tcCOCODE4.Caption <> 'n/a' then CoCode4:=MainForm.tcCOCODE4.Caption;
 
-    var Database: TDataTables:=TDataTables.Create(MainForm.DbConnect);
+    var Database: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
     try
         Database.Columns.Add(TSql.DISTINCT + TCompanyData.SendNoteFrom);
         Database.CustFilter:=TSql.WHERE +
@@ -149,7 +152,7 @@ begin
         if not(Database.DataSet.RecordCount = 0) then
             Database.SqlToSimpleList(List, Database.DataSet)
                 else
-                    MainForm.MsgCall(TCommon.TMessage.Warn, 'Cannot find assigned email address to your organisation. Please contact IT support.');
+                    THelpers.MsgCall(TAppMessage.Warn, 'Cannot find assigned email address to your organisation. Please contact IT support.');
     finally
         Database.Free;
 
@@ -172,7 +175,7 @@ end;
 procedure TTrackerForm.GetEmailAddress(Scuid: string);
 begin
 
-    var Database: TDataTables:=TDataTables.Create(MainForm.DbConnect);
+    var Database: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
     try
         Database.Columns.Add(TAddressBook.Emails);
         Database.Columns.Add(TAddressBook.Estatements);
@@ -181,8 +184,8 @@ begin
 
         if Database.DataSet.RecordCount > 0 then
         begin
-            FReminderMail:=MainForm.OleGetStr(Database.DataSet.Fields[TAddressBook.Emails].Value);
-            FStatementMail:=MainForm.OleGetStr(Database.DataSet.Fields[TAddressBook.Estatements].Value);
+            FReminderMail:=THelpers.OleGetStr(Database.DataSet.Fields[TAddressBook.Emails].Value);
+            FStatementMail:=THelpers.OleGetStr(Database.DataSet.Fields[TAddressBook.Estatements].Value);
         end;
 
     finally
@@ -219,7 +222,7 @@ begin
 
     var Settings: ISettings:=TSettings.Create;
     var LayoutLst: TStringList:=TStringList.Create;
-    var LayoutFld: string:=Settings.GetLayoutDir;
+    var LayoutFld: string:=Settings.DirLayouts;
     try
 
         // Get files from local folder
@@ -256,7 +259,7 @@ begin
 
         except
             on E: Exception do
-                MainForm.MsgCall(Error, 'Cannot get list of layouts. Please contact IT support.');
+                THelpers.MsgCall(Error, 'Cannot get list of layouts. Please contact IT support.');
 
         end;
 
@@ -275,19 +278,19 @@ begin
     // First reminder and legal notice cannot be zero
     if (TextReminder1.Text = '0') or (TextReminder4.Text = '0') then
     begin
-        MainForm.MsgCall(Warn, 'Please provide value for Reminder 1 and Legal Action different than zero.');
+        THelpers.MsgCall(Warn, 'Please provide value for Reminder 1 and Legal Action different than zero.');
         Exit;
     end;
 
     if (Exp_Rem2_Switch.Checked) and (TextReminder2.Text = '0') then
     begin
-        MainForm.MsgCall(Warn, 'Please provide value for Reminder 2 different than zero.');
+        THelpers.MsgCall(Warn, 'Please provide value for Reminder 2 different than zero.');
         Exit;
     end;
 
     if (Exp_Rem3_Switch.Checked) and (TextReminder3.Text = '0') then
     begin
-        MainForm.MsgCall(Warn, 'Please provide value for Reminder 3 different than zero.');
+        THelpers.MsgCall(Warn, 'Please provide value for Reminder 3 different than zero.');
         Exit;
     end;
 
@@ -308,7 +311,7 @@ begin
     // Apply on all listed customers
     else
     begin
-        if MainForm.MsgCall(Question2, 'You have not selected any customers, do you want Unity to apply proposed conditions for all listed items?') = mrYes then
+        if THelpers.MsgCall(Question2, 'You have not selected any customers, do you want Unity to apply proposed conditions for all listed items?') = mrYes then
         begin
             for var iCNT: integer:=0 to List.Items.Count - 1 do
             begin
@@ -345,11 +348,11 @@ begin
 
     if Check > 0 then
     begin
-        MainForm.MsgCall(Warn, 'Please make sure you that the list do not contain "not found" or "not set" items.');
+        THelpers.MsgCall(Warn, 'Please make sure you that the list do not contain "not found" or "not set" items.');
         Exit;
     end;
 
-    var TrackerData: TDataTables:=TDataTables.Create(MainForm.DbConnect);
+    var TrackerData: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
     var TempData: TStringGrid:=TStringGrid.Create(nil);
     try
         try
@@ -398,20 +401,20 @@ begin
             // Insert data to database
             if TrackerData.InsertInto(TTrackerData.TrackerData, True, TempData, nil, False) then
             begin
-                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Invoice tracker data updated.');
-                MainForm.MsgCall(Info, 'Invoice Tracker has been updates successfully!');
+                MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Invoice tracker data updated.');
+                THelpers.MsgCall(Info, 'Invoice Tracker has been updates successfully!');
             end
             else
             begin
-                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Invoice tracker error, cannot perform transaction.');
-                MainForm.MsgCall(Error, 'Cannot perform transaction. Please contact IT support.');
+                MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Invoice tracker error, cannot perform transaction.');
+                THelpers.MsgCall(Error, 'Cannot perform transaction. Please contact IT support.');
             end;
 
         except
             on E: Exception do
             begin
-                MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Error has been thrown [Tracker_SaveToDb]: ' + E.Message);
-                MainForm.MsgCall(Error, E.Message);
+                MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Error has been thrown [Tracker_SaveToDb]: ' + E.Message);
+                THelpers.MsgCall(Error, E.Message);
             end;
         end;
     finally

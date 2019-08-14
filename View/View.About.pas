@@ -106,8 +106,9 @@ implementation
 
 uses
     View.Main,
-    Unity.Settings,
-    Unity.Statics;
+    Unity.Enums,
+    Unity.Common,
+    Unity.Settings;
 
 
 type
@@ -188,9 +189,10 @@ procedure TAboutForm.FormCreate(Sender: TObject);
 begin
 
     var Settings: ISettings:=TSettings.Create;
-    if FileExists(Settings.GetPathLicenceLic) then
+    if FileExists(Settings.PathLicence) then
     begin
-        if Settings.Decode(LicData, True) then
+
+        if Settings.Decode(TAppFiles.Licence, True) then
         begin
             txt_VER.Caption:=TCommon.GetBuildInfoAsString;
             txt_EDT.Caption:=Settings.GetLicenceValue('VERSION', 'Edition');
@@ -201,6 +203,7 @@ begin
             txt_WEB.Caption:=Settings.GetLicenceValue('DETAILS', 'WebAddr');
             txt_PRO.Caption:=Settings.GetLicenceValue('DETAILS', 'Author');
         end;
+
     end;
 
 end;

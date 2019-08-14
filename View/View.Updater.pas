@@ -13,7 +13,10 @@ uses
     Vcl.Graphics,
     Vcl.Controls,
     Vcl.Forms,
-    Vcl.Dialogs, Vcl.Samples.Gauges, Vcl.StdCtrls, Vcl.ExtCtrls;
+    Vcl.Dialogs,
+    Vcl.Samples.Gauges,
+    Vcl.StdCtrls,
+    Vcl.ExtCtrls;
 
 
 type

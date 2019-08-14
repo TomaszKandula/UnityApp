@@ -1211,6 +1211,10 @@ object MainForm: TMainForm
       Highlighted = True
       ImageIndex = 8
       ParentDoubleBuffered = False
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Shape: TShape
         AlignWithMargins = True
         Left = 17
@@ -1252,6 +1256,10 @@ object MainForm: TMainForm
       Font.Style = []
       Highlighted = True
       ParentFont = False
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Header1: TPanel
         Left = 0
         Top = 0
@@ -2635,6 +2643,10 @@ object MainForm: TMainForm
       Caption = 'OPEN ITEMS'
       Highlighted = True
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Header2: TPanel
         Left = 0
         Top = 0
@@ -6483,6 +6495,10 @@ object MainForm: TMainForm
       Caption = 'UNIDENTIFIED'
       Highlighted = True
       ImageIndex = 7
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Header6: TPanel
         Left = 0
         Top = 0
@@ -6546,6 +6562,10 @@ object MainForm: TMainForm
       Caption = 'ADDRESS BOOK'
       Highlighted = True
       ImageIndex = 2
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Header3: TPanel
         Left = 0
         Top = 0
@@ -6813,6 +6833,10 @@ object MainForm: TMainForm
       Highlighted = True
       ImageIndex = 4
       OnShow = TabSheet4Show
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Header4: TPanel
         Left = 0
         Top = 0
@@ -6916,8 +6940,8 @@ object MainForm: TMainForm
           AlignWithMargins = True
           Left = 10
           Top = 10
-          Width = 1233
-          Height = 536
+          Width = 200
+          Height = 200
           Margins.Left = 10
           Margins.Top = 10
           Margins.Right = 10
@@ -10041,8 +10065,6 @@ object MainForm: TMainForm
           Visible = False
           ExplicitLeft = 456
           ExplicitTop = 240
-          ExplicitWidth = 200
-          ExplicitHeight = 200
         end
         object sgInvoiceTracker: TStringGrid
           AlignWithMargins = True
@@ -10094,6 +10116,10 @@ object MainForm: TMainForm
       ImageIndex = 8
       OnResize = TabSheet7Resize
       OnShow = TabSheet7Show
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Header7: TPanel
         Left = 0
         Top = 0
@@ -10199,6 +10225,10 @@ object MainForm: TMainForm
         TabOrder = 1
         object Page1: TTabSheet
           Caption = 'Companies'
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object PanelCoCodes: TPanel
             AlignWithMargins = True
             Left = 17
@@ -10249,6 +10279,10 @@ object MainForm: TMainForm
         object Page2: TTabSheet
           Caption = 'Payment Terms'
           ImageIndex = 1
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object PanelPmtTerms: TPanel
             AlignWithMargins = True
             Left = 17
@@ -10299,6 +10333,10 @@ object MainForm: TMainForm
         object Page10: TTabSheet
           Caption = 'Control Status'
           ImageIndex = 9
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object PanelControlStatus: TPanel
             AlignWithMargins = True
             Left = 17
@@ -10351,6 +10389,10 @@ object MainForm: TMainForm
         object Page3: TTabSheet
           Caption = 'Paid Info'
           ImageIndex = 2
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object PanelPaidInfo: TPanel
             AlignWithMargins = True
             Left = 17
@@ -10403,6 +10445,10 @@ object MainForm: TMainForm
         object Page7: TTabSheet
           Caption = 'Person Responsible'
           ImageIndex = 6
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object PanelPersonResp: TPanel
             AlignWithMargins = True
             Left = 17
@@ -10453,6 +10499,10 @@ object MainForm: TMainForm
         object Page6: TTabSheet
           Caption = 'Sales Responsible'
           ImageIndex = 5
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object PanelSalesResp: TPanel
             AlignWithMargins = True
             Left = 17
@@ -10503,6 +10553,10 @@ object MainForm: TMainForm
         object Page9: TTabSheet
           Caption = 'Account Type'
           ImageIndex = 8
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object PanelAccountType: TPanel
             AlignWithMargins = True
             Left = 17
@@ -10553,6 +10607,10 @@ object MainForm: TMainForm
         object Page8: TTabSheet
           Caption = 'Customer Group'
           ImageIndex = 7
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object PanelCustomerGr: TPanel
             AlignWithMargins = True
             Left = 17
@@ -10603,6 +10661,10 @@ object MainForm: TMainForm
         object Page4: TTabSheet
           Caption = 'Person'
           ImageIndex = 3
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object PanelPerson: TPanel
             AlignWithMargins = True
             Left = 17
@@ -10655,6 +10717,10 @@ object MainForm: TMainForm
         object Page5: TTabSheet
           Caption = 'Group3'
           ImageIndex = 4
+          ExplicitLeft = 0
+          ExplicitTop = 0
+          ExplicitWidth = 0
+          ExplicitHeight = 0
           object PanelGroup3: TPanel
             AlignWithMargins = True
             Left = 17
@@ -10709,6 +10775,10 @@ object MainForm: TMainForm
       Highlighted = True
       ImageIndex = 6
       OnShow = TabSheet8Show
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object Header8: TPanel
         Left = 0
         Top = 0
@@ -11774,6 +11844,10 @@ object MainForm: TMainForm
       Caption = 'QUERIES'
       ImageIndex = 8
       OnShow = TabSheet5Show
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object PanelFSC: TPanel
         AlignWithMargins = True
         Left = 17
@@ -12709,7 +12783,7 @@ object MainForm: TMainForm
       Left = 1289
       Top = 10
       Width = 16
-      Height = 42
+      Height = 16
       Cursor = crHandPoint
       Margins.Left = 5
       Margins.Top = 10
@@ -13194,7 +13268,6 @@ object MainForm: TMainForm
       OnClick = imgHideBarClick
       ExplicitLeft = 1294
       ExplicitTop = 5
-      ExplicitHeight = 16
     end
     object btnStart: TPanel
       Left = 17
@@ -14630,8 +14703,8 @@ object MainForm: TMainForm
   end
   object PopupMenu: TPopupMenu
     MenuAnimation = [maLeftToRight]
-    Left = 392
-    Top = 650
+    Left = 280
+    Top = 482
     object Action_ShowApp: TMenuItem
       Caption = 'Show'
       Default = True
@@ -14804,39 +14877,39 @@ object MainForm: TMainForm
   object CurrentTime: TTimer
     Enabled = False
     OnTimer = CurrentTimeTimer
-    Left = 256
-    Top = 648
+    Left = 368
+    Top = 320
   end
   object UpTime: TTimer
     Enabled = False
     OnTimer = UpTimeTimer
-    Left = 200
-    Top = 704
+    Left = 272
+    Top = 392
   end
   object CSVExport: TSaveDialog
     DefaultExt = '*.csv'
     Filter = 'CSV (Delimited)|*.csv'
-    Left = 376
-    Top = 704
+    Left = 584
+    Top = 328
   end
   object CSVImport: TOpenDialog
     DefaultExt = '*.csv'
     Filter = 'CSV (Delimited)|*.csv'
-    Left = 432
-    Top = 704
+    Left = 504
+    Top = 392
   end
   object OILoader: TTimer
     Enabled = False
     Interval = 10000
     OnTimer = OILoaderTimer
-    Left = 144
-    Top = 648
+    Left = 192
+    Top = 320
   end
   object AgeViewPopup: TPopupMenu
     MenuAnimation = [maLeftToRight]
     OnPopup = AgeViewPopupPopup
-    Left = 320
-    Top = 648
+    Left = 192
+    Top = 480
     object Action_LyncCall: TMenuItem
       Bitmap.Data = {
         36030000424D3603000000000000360000002800000010000000100000000100
@@ -15233,8 +15306,8 @@ object MainForm: TMainForm
   end
   object TrackerPopup: TPopupMenu
     MenuAnimation = [maLeftToRight]
-    Left = 464
-    Top = 648
+    Left = 232
+    Top = 544
     object Action_ShowRegistered: TMenuItem
       Bitmap.Data = {
         36030000424D3603000000000000360000002800000010000000100000000100
@@ -16453,29 +16526,30 @@ object MainForm: TMainForm
       00}
     PopupMenu = PopupMenu
     Visible = True
+    OnClick = TrayIconClick
     OnDblClick = TrayIconDblClick
-    Left = 256
-    Top = 704
+    Left = 88
+    Top = 488
   end
   object InvoiceScanTimer: TTimer
     Enabled = False
     Interval = 900000
     OnTimer = InvoiceScanTimerTimer
-    Left = 72
-    Top = 704
+    Left = 88
+    Top = 384
   end
   object InetTimer: TTimer
     Enabled = False
     Interval = 60000
     OnTimer = InetTimerTimer
-    Left = 200
-    Top = 648
+    Left = 280
+    Top = 320
   end
   object BookPopup: TPopupMenu
     MenuAnimation = [maLeftToRight]
     OnPopup = BookPopupPopup
-    Left = 480
-    Top = 704
+    Left = 360
+    Top = 480
     object Action_Cut: TMenuItem
       Bitmap.Data = {
         36030000424D3603000000000000360000002800000010000000100000000100
@@ -16609,14 +16683,14 @@ object MainForm: TMainForm
   object XLExport: TSaveDialog
     DefaultExt = '*.xlsx'
     Filter = 'XLSX (Microsoft Excel)|*.xlsx'
-    Left = 320
-    Top = 704
+    Left = 512
+    Top = 328
   end
   object CommonPopupMenu: TPopupMenu
     MenuAnimation = [maLeftToRight]
     OnPopup = CommonPopupMenuPopup
-    Left = 520
-    Top = 648
+    Left = 328
+    Top = 544
     object Action_ExportTransactions: TMenuItem
       Caption = 'Export to CSV'
       OnClick = Action_ExportTransactionsClick
@@ -16672,23 +16746,23 @@ object MainForm: TMainForm
     Enabled = False
     Interval = 1800000
     OnTimer = FollowupPopupTimer
-    Left = 144
-    Top = 704
+    Left = 184
+    Top = 392
   end
   object Chromium: TChromium
-    Left = 527
-    Top = 704
+    Left = 583
+    Top = 392
   end
   object ChromiumTimer: TTimer
     Enabled = False
     OnTimer = ChromiumTimerTimer
-    Left = 71
-    Top = 648
+    Left = 95
+    Top = 320
   end
   object FirstAgeLoad: TTimer
     Enabled = False
     OnTimer = FirstAgeLoadTimer
-    Left = 586
-    Top = 703
+    Left = 362
+    Top = 391
   end
 end

@@ -26,9 +26,12 @@ uses
     Vcl.Buttons,
     Vcl.Imaging.pngimage,
     Vcl.DBGrids,
-    Unity.Interposer,
-    Unity.Arrays,
-    Unity.Statics;
+    Unity.Grid,
+    Unity.ListView,
+    Unity.ChkListBox,
+    Unity.Panel,
+    Unity.Filtering,
+    Unity.Arrays;
 
     {TODO -oTomek -cGeneral : Redesign this completly}
 
@@ -112,6 +115,7 @@ implementation
 
 uses
     View.Main,
+    Unity.Chars,
     Unity.Settings,
     DbModel,
     AgeView;
@@ -488,7 +492,7 @@ begin
 
         Screen.Cursor:=crHourGlass;
 
-        var AgeView: TAgeView:=TAgeView.Create(MainForm.DbConnect);
+        var AgeView: TAgeView:=TAgeView.Create(MainForm.FDbConnect);
         try
             FGrid.Freeze(True);
 
@@ -541,7 +545,7 @@ begin
 
         Screen.Cursor:=crHourGlass;
 
-        var AgeView: TAgeView:=TAgeView.Create(MainForm.DbConnect);
+        var AgeView: TAgeView:=TAgeView.Create(MainForm.FDbConnect);
         try
 
             FGrid.Freeze(True);

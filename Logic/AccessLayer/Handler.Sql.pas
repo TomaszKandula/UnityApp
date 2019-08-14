@@ -17,8 +17,7 @@ uses
     System.Variants,
     Vcl.StdCtrls,
     Data.Win.ADODB,
-    Unity.Interposer,
-    Unity.Statics,
+    Unity.Grid,
     Unity.Arrays,
     Unity.Enums;
 
@@ -112,6 +111,8 @@ implementation
 
 
 uses
+    Unity.Sql,
+    Unity.Chars,
     View.Main;
 
 
@@ -494,7 +495,7 @@ begin
     except
         on E: Exception do
         begin
-            MainForm.LogText.Log(MainForm.EventLogPath, 'SQL: [OpenTable] Error occured: ' + E.Message);
+            MainForm.FAppEvents.Log(MainForm.EventLogPath, 'SQL: [OpenTable] Error occured: ' + E.Message);
             Result:=False;
         end;
     end;
@@ -550,14 +551,14 @@ begin
             ExecSQL;
             if string.IsNullOrEmpty(LastErrorMsg) then Result:=True
                 else
-                    MainForm.LogText.Log(MainForm.EventLogPath, 'SQL: [InsertInto] Error occured: ' + LastErrorMsg);
+                    MainForm.FAppEvents.Log(MainForm.EventLogPath, 'SQL: [InsertInto] Error occured: ' + LastErrorMsg);
 
         end;
 
     except
         on E: Exception do
         begin
-            MainForm.LogText.Log(MainForm.EventLogPath, 'SQL: [InsertInto] Error occured: ' + E.Message);
+            MainForm.FAppEvents.Log(MainForm.EventLogPath, 'SQL: [InsertInto] Error occured: ' + E.Message);
             Result:=False;
         end;
     end;
@@ -680,7 +681,7 @@ begin
     except
         on E: Exception do
         begin
-            MainForm.LogText.Log(MainForm.EventLogPath, 'SQL: [InsertInto] Error occured: ' + E.Message);
+            MainForm.FAppEvents.Log(MainForm.EventLogPath, 'SQL: [InsertInto] Error occured: ' + E.Message);
             Result:=False;
         end;
     end;
@@ -725,7 +726,7 @@ begin
     except
         on E: Exception do
         begin
-            MainForm.LogText.Log(MainForm.EventLogPath, 'SQL: [DeleteRecord] Error occured: ' + E.Message);
+            MainForm.FAppEvents.Log(MainForm.EventLogPath, 'SQL: [DeleteRecord] Error occured: ' + E.Message);
             Result:=False;
         end;
     end;

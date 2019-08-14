@@ -22,7 +22,7 @@ uses
     Vcl.Grids,
     Vcl.ComCtrls,
     Data.Win.ADODB,
-    Unity.Interposer;
+    Unity.Grid;
 
 
 type
@@ -52,10 +52,12 @@ Implementation
 
 uses
     View.Main,
+    Unity.Common,
+    Unity.Chars,
+    Unity.Sql,
     Unity.Settings,
     Handler.Sql,
     DbModel,
-    Unity.Statics,
     Unity.Enums;
 
 
@@ -99,7 +101,7 @@ begin
 
     InvoicesGrid.Freeze(True);
 
-    var Tables: TDataTables:=TDataTables.Create(MainForm.DbConnect);
+    var Tables: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
     try
         var CUID: string:=MainForm.sgInvoiceTracker.Cells[MainForm.sgInvoiceTracker.ReturnColumn(TTrackerData.Cuid, 1, 1), MainForm.sgInvoiceTracker.Row];
         Tables.StrSQL:=TSql.SELECT                             +

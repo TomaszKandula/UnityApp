@@ -25,8 +25,7 @@ uses
     Data.Win.ADODB,
     Data.DB,
     Handler.Sql,
-    Unity.Interposer,
-    Unity.Statics,
+    Unity.Grid,
     Unity.Enums,
     Unity.Records,
     Unity.Arrays;
@@ -62,7 +61,11 @@ uses
     View.UserFeedback,
     Handler.Database,
     Handler.Account,
+    Unity.Sql,
+    Unity.Helpers,
     Unity.Settings,
+    Unity.Messaging,
+    Unity.StatusBar,
     Sync.Documents,
     DbModel,
     AgeView,
@@ -78,13 +81,13 @@ procedure TAddressBook.OpenAddressBookAsync(UserAlias: string; SourceGrid: TStri
 begin
 
     SourceGrid.Freeze(True);
-    MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Processing);
-    MainForm.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Show.ToString);
+    THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Processing, MainForm);
+    THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Show.ToString, MainForm);
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var DataTables: TDataTables:=TDataTables.Create(MainForm.DbConnect);
+        var DataTables: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
         try
 
             try
@@ -113,11 +116,11 @@ begin
                 DataTables.OpenTable(DbModel.TAddressBook.AddressBook);
 
                 if not(DataTables.SqlToGrid(SourceGrid, DataTables.DataSet, True, True)) then
-                    MainForm.ExecMessage(False, TMessaging.TWParams.MessageWarn, 'No results found in the database.');
+                    THelpers.ExecMessage(False, TMessaging.TWParams.MessageWarn, 'No results found in the database.', MainForm);
 
             except
                 on E: Exception do
-                    MainForm.LogText.Log(MainForm.EventLogPath, E.Message);
+                    MainForm.FAppEvents.Log(MainForm.EventLogPath, E.Message);
 
             end;
 
@@ -129,8 +132,8 @@ begin
             begin
                 SourceGrid.SetColWidth(40, 10, 400);
                 SourceGrid.Freeze(False);
-                MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready);
-                MainForm.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString);
+                THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
+                THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
             end);
 
         end;
@@ -153,7 +156,7 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Book: TDataTables:=TDataTables.Create(MainForm.DbConnect);
+        var Book: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
         try
 
             // Update from Address Book String Grid
@@ -184,19 +187,19 @@ begin
                     if Book.UpdateRecord(DbModel.TAddressBook.AddressBook, True, Condition) then
                     begin
                         SourceGrid.SetUpdatedRow(0);
-                        MainForm.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Address Book has been updated succesfully!');
+                        THelpers.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Address Book has been updated succesfully!', MainForm);
                     end
                     else
                     begin
                         // Error during post
-                        MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot update Address Book. Please contact IT support.');
+                        THelpers.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot update Address Book. Please contact IT support.', MainForm);
                     end;
 
                 end
                 else
                 begin
                     // No changes within Address Book string grid
-                    MainForm.ExecMessage(False, TMessaging.TWParams.MessageWarn, 'Nothing to update. Please make changes first and try again.');
+                    THelpers.ExecMessage(False, TMessaging.TWParams.MessageWarn, 'Nothing to update. Please make changes first and try again.', MainForm);
                 end;
 
             end;
@@ -217,9 +220,9 @@ begin
                 Book.Values.Add(UpdateValues.Email);
 
                 if Book.UpdateRecord(DbModel.TAddressBook.AddressBook, True, Condition) then
-                    MainForm.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Address Book has been updated succesfully!')
+                    THelpers.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Address Book has been updated succesfully!', MainForm)
                 else
-                    MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot update Address Book. Please contact IT support.');
+                    THelpers.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot update Address Book. Please contact IT support.', MainForm);
 
             end;
 
@@ -251,7 +254,7 @@ begin
         SetLength(AddrBook, 1, 11);
 
         // Get data from String Grid
-        var Book: TDataTables:=TDataTables.Create(MainForm.DbConnect);
+        var Book: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
         try
 
             for var iCNT: integer:=SourceGrid.Selection.Top to SourceGrid.Selection.Bottom do
@@ -294,7 +297,7 @@ begin
         // Send to database
         if Check > 0 then
         begin
-            Book:=TDataTables.Create(MainForm.DbConnect);
+            Book:=TDataTables.Create(MainForm.FDbConnect);
             try
 
                 Book.Columns.Add(DbModel.TAddressBook.UserAlias);
@@ -315,21 +318,21 @@ begin
 
                     if Book.RowsAffected > 0 then
                     begin
-                        MainForm.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString);
-                        MainForm.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Address Book has been successfully populated by selected item(s).');
+                        THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
+                        THelpers.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Address Book has been successfully populated by selected item(s).', MainForm);
                     end
                     else
                     begin
-                        MainForm.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString);
-                        MainForm.ExecMessage(False, TMessaging.TWParams.MessageWarn, 'Cannot update Address Book. Please contact IT support.');
+                        THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
+                        THelpers.ExecMessage(False, TMessaging.TWParams.MessageWarn, 'Cannot update Address Book. Please contact IT support.', MainForm);
                     end;
 
                 except
                     on E: Exception do
                     begin
-                        MainForm.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString);
-                        MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot save selected item(s). Exception has been thrown: ' + E.Message);
-                        MainForm.LogText.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Cannot write Address Book item(s) into database. Error: ' + E.Message);
+                        THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
+                        THelpers.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot save selected item(s). Exception has been thrown: ' + E.Message, MainForm);
+                        MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Cannot write Address Book item(s) into database. Error: ' + E.Message);
                     end;
 
                 end;
@@ -339,7 +342,7 @@ begin
         end
         else
         begin
-            MainForm.ExecMessage(False, TMessaging.TWParams.MessageWarn, 'Selected customers are already in Address Book.');
+            THelpers.ExecMessage(False, TMessaging.TWParams.MessageWarn, 'Selected customers are already in Address Book.', MainForm);
         end;
 
     end);

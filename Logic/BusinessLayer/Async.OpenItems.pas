@@ -25,8 +25,7 @@ uses
     Data.Win.ADODB,
     Data.DB,
     Handler.Sql,
-    Unity.Interposer,
-    Unity.Statics,
+    Unity.Grid,
     Unity.Enums,
     Unity.Records,
     Unity.Arrays;
@@ -62,6 +61,9 @@ uses
     Handler.Database,
     DbModel,
     Unity.Settings,
+    Unity.Helpers,
+    Unity.Messaging,
+    Unity.StatusBar,
     Handler.Account,
     Sync.Documents,
     AgeView,
@@ -81,7 +83,7 @@ begin
     begin
 
         var CanMakeAge: boolean:=False;
-        var Transactions: TTransactions:=TTransactions.Create(MainForm.DbConnect);
+        var Transactions: TTransactions:=TTransactions.Create(MainForm.FDbConnect);
         try
 
             try
@@ -89,22 +91,22 @@ begin
                 var ReadDateTime: string:=Transactions.GetDateTime(DateTime);
                 var ReadStatus:   string:=Transactions.GetStatus(ReadDateTime);
 
-                if ( StrToDateTime(MainForm.OpenItemsUpdate) < StrToDateTime(ReadDateTime) ) and ( ReadStatus = 'Completed' ) then
+                if ( StrToDateTime(MainForm.FOpenItemsUpdate) < StrToDateTime(ReadDateTime) ) and ( ReadStatus = 'Completed' ) then
                 begin
 
                     // Switch off all of the timers
                     MainForm.SwitchTimers(TurnedOff);
 
                     // Refresh open items and make new aging view
-                    MainForm.OpenItemsUpdate:=ReadDateTime;
-                    MainForm.OpenItemsStatus:='';
+                    MainForm.FOpenItemsUpdate:=ReadDateTime;
+                    MainForm.FOpenItemsStatus:='';
                     CanMakeAge:=True;
 
                 end;
 
             except
                 on E: Exception do
-                    MainForm.LogText.Log(MainForm.EventLogPath, 'Cannot execute [OpenItemsScanner]. Error has been thrown: ' + E.Message);
+                    MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Cannot execute [OpenItemsScanner]. Error has been thrown: ' + E.Message);
             end;
 
         finally
@@ -131,11 +133,11 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var OpenItems: TTransactions:=TTransactions.Create(MainForm.DbConnect);
+        var OpenItems: TTransactions:=TTransactions.Create(MainForm.FDbConnect);
         var StopWatch: TStopWatch:=TStopWatch.StartNew;
         try
 
-            MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Downloading);
+            THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Downloading, MainForm);
             try
 
                 OpenItems.DestGrid   :=MainForm.sgOpenItems;
@@ -151,7 +153,7 @@ begin
 
             except
                 on E: Exception do
-                    MainForm.LogText.Log(MainForm.EventLogPath, 'Cannot execute [ReadOpenItems]. Error has been thorwn: ' + E.Message);
+                    MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Cannot execute [ReadOpenItems]. Error has been thorwn: ' + E.Message);
             end;
 
         finally
@@ -159,8 +161,8 @@ begin
             var THDMili: extended:=StopWatch.ElapsedMilliseconds;
             var THDSec:  extended:=THDMili / 1000;
 
-            MainForm.LogText.Log(MainForm.EventLogPath, 'Open Items loading thread has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
-            MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready);
+            MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Open Items loading thread has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
+            THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
 
             // Release VCL and set auto column width
             TThread.Synchronize(nil, procedure
@@ -180,7 +182,7 @@ begin
             MainForm.cbDump.Checked:=False;
 
             var Debtors: IDebtors:=TDebtors.Create();
-            Debtors.MakeAgeViewAsync(MainForm.OSAmount);
+            Debtors.MakeAgeViewAsync(MainForm.FOSAmount);
 
         end;
 

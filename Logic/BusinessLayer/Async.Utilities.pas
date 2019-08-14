@@ -25,8 +25,7 @@ uses
     Data.Win.ADODB,
     Data.DB,
     Handler.Sql,
-    Unity.Interposer,
-    Unity.Statics,
+    Unity.Grid,
     Unity.Enums,
     Unity.Records,
     Unity.Arrays;
@@ -64,7 +63,10 @@ uses
     View.UserFeedback,
     Handler.Database,
     Handler.Account,
+    Unity.Helpers,
+    Unity.Messaging,
     Unity.Settings,
+    Unity.StatusBar,
     Sync.Documents,
     DbModel,
     AgeView,
@@ -85,21 +87,21 @@ begin
         var DataBase: TDataBase:=TDataBase.Create(False);
         try
 
-            if (not(MainForm.IsConnected)) and (DataBase.Check = 0) then
+            if (not(MainForm.FIsConnected)) and (DataBase.Check = 0) then
             begin
 
                 TThread.Synchronize(nil, procedure
                 begin
                     MainForm.TryInitConnection;
-                    MainForm.LogText.Log(MainForm.EventLogPath, 'Connection with SQL Server database has been re-established.');
+                    MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Connection with SQL Server database has been re-established.');
                 end);
 
             end;
 
             if DataBase.Check <> 0 then
             begin
-                MainForm.IsConnected:=False;
-                MainForm.LogText.Log(MainForm.EventLogPath, 'Connection with SQL Server database has been lost, waiting to reconnect...');
+                MainForm.FIsConnected:=False;
+                MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Connection with SQL Server database has been lost, waiting to reconnect...');
             end;
 
         finally
@@ -126,13 +128,13 @@ begin
         if FeedbackForm.SendReport then
         begin
             TThread.Synchronize(nil, FeedbackForm.ReportMemo.Clear);
-            MainForm.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Report has been sent successfully!');
-            MainForm.LogText.Log(MainForm.EventLogPath, 'Feedback Report has been successfully sent by the user.');
+            THelpers.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Report has been sent successfully!', MainForm);
+            MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Feedback Report has been successfully sent by the user.');
         end
         else
         begin
-            MainForm.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot send Feedback Report. Please contact IT support.');
-            MainForm.LogText.Log(MainForm.EventLogPath, 'Cannot send Feedback Report.');
+            THelpers.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot send Feedback Report. Please contact IT support.', MainForm);
+            MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Cannot send Feedback Report.');
         end;
 
     end);
@@ -153,7 +155,7 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.ExportXLS);
+        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.ExportXLS, MainForm);
         try
 
             var FileName: string;
@@ -176,7 +178,7 @@ begin
             end;
 
         finally
-            MainForm.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready);
+            THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
         end;
 
     end);
@@ -196,7 +198,7 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var DataTables: TDataTables:=TDataTables.Create(MainForm.DbConnect);
+        var DataTables: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
         try
             try
                 DataTables.CleanUp;
@@ -212,7 +214,7 @@ begin
 
             except
                 on E: Exception do
-                    MainForm.LogText.Log(MainForm.EventLogPath, 'Cannot load general table, error has been thrown: ' + E.Message);
+                    //MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Cannot load general table, error has been thrown: ' + E.Message);
             end;
         finally
             DataTables.Free;
