@@ -1321,7 +1321,9 @@ end;
 procedure TMainForm.TryInitConnection;
 begin
 
-    FDbConnect:=TADOConnection.Create(nil);
+    if not Assigned(FDbConnect) then
+        FDbConnect:=TADOConnection.Create(nil);
+
     var DataBase:=TDataBase.Create(True);
     try
 
@@ -1856,14 +1858,14 @@ begin
 
     FAppEvents:=TThreadFileLog.Create;
 
-    for var iCNT:=0 to MyPages.PageCount - 1 do
-        MyPages.Pages[iCNT].TabVisible:=False;
-
-    MyPages.ActivePage:=TabSheet1;
-
-    SetButtonsGlyphs;
-    InitializeScreenSettings;
-    FAllowClose:=False;
+//    for var iCNT:=0 to MyPages.PageCount - 1 do
+//        MyPages.Pages[iCNT].TabVisible:=False;
+//
+//    MyPages.ActivePage:=TabSheet1;
+//
+//    SetButtonsGlyphs;
+//    InitializeScreenSettings;
+//    FAllowClose:=False;
 
 end;
 

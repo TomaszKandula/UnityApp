@@ -30,7 +30,7 @@ type
     public
         property UserName: string read FUserName write FUserName;
         function GetAccessData(DataType: TUserAccess.TTypes): string;
-        function GetFGroupList(var List: TALists; FGroupListBox: TComboBox): boolean;
+        function GetGroupList(var List: TALists; FGroupListBox: TComboBox): boolean;
         function GetAgeDates(AgeDatesBox: TComboBox; GroupID: string): boolean;
     end;
 
@@ -82,7 +82,7 @@ begin
 end;
 
 
-function TUserControl.GetFGroupList(var List: TALists; FGroupListBox: TComboBox): boolean;
+function TUserControl.GetGroupList(var List: TALists; FGroupListBox: TComboBox): boolean;
 begin
 
     Result:=True;

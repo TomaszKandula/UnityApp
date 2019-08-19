@@ -78,9 +78,9 @@ type
         function  GetRequestSynchronizedEvents:     boolean;
         function  GetRequestTimeout:                integer;
 
-        // --------------------------------
+        // -------------------
         // Exposed properties.
-        // --------------------------------
+        // -------------------
 
         property StatusCode:                    integer            read GetStatusCode;
         property Content:                       string             read GetContent;
@@ -107,9 +107,9 @@ type
         property RequestSynchronizedEvents:     boolean            read GetRequestSynchronizedEvents     write SetRequestSynchronizedEvents;
         property RequestTimeout:                integer            read GetRequestTimeout                write SetRequestTimeout;
 
-        // --------------------------------
+        // ----------------
         // Exposed methods.
-        // --------------------------------
+        // ----------------
 
         function  Execute: boolean;
         procedure AddParameter(QueryName: string; ParamValue: string);
@@ -120,10 +120,6 @@ type
 
     TRESTful = class(TInterfacedObject, IRESTFul)
     private
-
-        // --------
-        // Objects.
-        // --------
 
         var httpAuth:     THTTPBasicAuthenticator;
         var restClient:   TRESTClient;
@@ -144,15 +140,15 @@ type
 
         var FResponseContent: string;
 
-        // ------------------------
-        // Custom body (POST, PUT).
-        // ------------------------
+        // ------------------------------------------
+        // Custom body for http methods POST and PUT.
+        // ------------------------------------------
 
         var FCustomBody: string;
 
-        // --------------------------------
+        // -------------------------------
         // Property's getters and setters.
-        // --------------------------------
+        // -------------------------------
 
         procedure SetCustomBody(NewValue:                    string);
         procedure SetClientAccept(NewValue:                  string);
@@ -205,6 +201,7 @@ type
         procedure TrimContent(var TextStr: string);
 
     public
+
         property StatusCode:                    integer            read GetStatusCode;
         property Content:                       string             read GetContent;
         property Headers:                       string             read GetHeaders;
@@ -229,11 +226,14 @@ type
         property RequestMethod:                 TRESTRequestMethod read GetRequestMethod                 write SetRequestMethod;
         property RequestSynchronizedEvents:     boolean            read GetRequestSynchronizedEvents     write SetRequestSynchronizedEvents;
         property RequestTimeout:                integer            read GetRequestTimeout                write SetRequestTimeout;
+
         constructor Create(UserName: string; Password: string);
         destructor Destroy; override;
+
         function Execute: boolean;
         procedure AddParameter(QueryName: string; ParamValue: string);
         procedure ClearParameters;
+
     end;
 
 
@@ -254,22 +254,18 @@ uses
 constructor TRESTful.Create(UserName: string; Password: string);
 begin
 
-    // Objects
     httpAuth    :=THTTPBasicAuthenticator.Create(UserName, Password);
     restClient  :=TRESTClient.Create('');
     restResponse:=TRESTResponse.Create(nil);
     restRequest :=TRESTRequest.Create(nil);
 
-    // Assignements
     restClient.Authenticator:=httpAuth;
     restRequest.Client:=restClient;
     restRequest.Response:=restResponse;
 
-    // Lists for GET and DELETE methods containing query string
     queryList:=TList<string>.Create;
     paramList:=TList<string>.Create;
 
-    // Setting up client object
     ClientAccept                 :=TRestAuth.restAccept;
     ClientAcceptCharset          :=TRestAuth.restAcceptCharset;
     ClientAllowCookies           :=True;
@@ -282,7 +278,6 @@ begin
     ClientSynchronizedEvents     :=True;
     ClientUserAgent              :=TRestAuth.restUserAgent;
 
-    // Setting up request object
     RequestAccept            :=restClient.Accept;
     RequestAcceptCharset     :=restClient.AcceptCharset;
     RequestAutoCreateParams  :=restClient.AutoCreateParams;
@@ -313,36 +308,43 @@ begin
 
     Result:=False;
 
-    // GET and DELETE
+    // ---------------
+    // GET and DELETE.
+    // ---------------
+
     if (restRequest.Method = TRESTRequestMethod.rmGET) or (restRequest.Method = TRESTRequestMethod.rmDELETE) then
     begin
 
-        // Check if we have parameters
         if ((queryList.Count > 0) and (paramList.Count > 0)) and (queryList.Count = paramList.Count) then
         begin
-
             restRequest.Params.Clear;
-
             for var iCNT: integer:=0 to queryList.Count - 1 do
                 restRequest.AddParameter(queryList.Items[iCNT], paramList.Items[iCNT]);
-
         end;
 
     end;
 
-    // POST and PUT
+    // -------------
+    // POST and PUT.
+    // -------------
+
     if (restRequest.Method = TRESTRequestMethod.rmPOST) or (restRequest.Method = TRESTRequestMethod.rmPUT) then
     begin
 
         if not(String.IsNullOrEmpty(CustomBody)) then
         begin
-            // Replace single quotes into '\"' and add single quote to begin and end of custom body
-            // This is necessary because WebApi in the .NetCore server defines content as string object instead of
-            // raw string, but is has no problem with POCO.
+
+            // ---------------------------------------------------------------------------------------------
+            // Replace single quotes into '\"' and add single quote to begin and end of custom body. This is
+            // necessary if your endpoints (WebApi / NetCore) defines content as string object instead of
+            // raw string. This is not needed if endpoints uses POCO already.
+            // ---------------------------------------------------------------------------------------------
+
             CustomBody:=CustomBody.Replace('"', '\"');
             CustomBody:='"' + CustomBody + '"';
             restRequest.Body.ClearBody;
             restRequest.Body.Add(GetCustomBody, TRESTContentType.ctAPPLICATION_JSON);
+
         end
         else
         begin
@@ -351,7 +353,6 @@ begin
 
     end;
 
-    // Execute
     try
 
         restRequest.Execute;
@@ -361,10 +362,13 @@ begin
 
             FStatusCode:=restResponse.StatusCode;
 
-            // Remove from recieved string content any \" leaving just single quote
-            // This is necessary because WebApi in the .NetCore server defines content as string object instead of
-            // raw string (POCO works with no problem), so it adds quotes to the start and end of the content,
-            // thus require further treatment on quotes inside string.
+            // ---------------------------------------------------------------------------------------------------
+            // Remove from recieved string content any '\"' leaving just single quote. This is necessary if your
+            // endpoints (WebApi / NetCore) defines content as string object instead of raw string, so it adds
+            // quotes to the start and end of the content, thus require further treatment on quotes inside string.
+            // This is not needed if endpoints uses POCO already.
+            // ---------------------------------------------------------------------------------------------------
+
             FResponseContent:=restResponse.Content.Replace('\"','"');
 
             // Remove single leading/ending quote
@@ -376,7 +380,7 @@ begin
 
     except
         on E: Exception do
-            { exception here }
+            {Exception goes here}
 
     end;
 
@@ -415,17 +419,14 @@ end;
 /// <summary>
 /// Replace first and last character (single quote) for empty char.
 /// </summary>
+/// <remarks>
+/// WARNING! JAVA starts counting string characters from zero, while Delphi and Swift count it from one.
+/// </remarks>
 
 procedure TRESTful.TrimContent(var TextStr: string);
 begin
-
-    /// <remarks>
-    /// WARNING! JAVA starts couting string characters from zero, while Delphi and Swift count it from one.
-    /// </remarks>
-
     if TextStr[1] = #34 then TextStr[1]:=#32;
     if TextStr[TextStr.Length - 1] = #34 then TextStr[TextStr.Length - 1]:=#32;
-
 end;
 
 
@@ -572,7 +573,7 @@ end;
 
 function TRESTful.GetRequestTimeout: integer;
 begin
-    if Assigned(restRequest) then Result:=restRequest.Timeout else Result:=30000 { 30 seconds };
+    if Assigned(restRequest) then Result:=restRequest.Timeout else Result:=30000 {30 seconds};
 end;
 
 

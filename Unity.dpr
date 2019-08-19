@@ -228,11 +228,11 @@ begin
     Application.Title:=TCommon.AppCaption;
     Application.MainFormOnTaskbar:=True;
 
-    // -------------------------------------------------------------
-    // Call startup screen view to display splash screen and process
+    // ------------------------------------------------------------
+    // Call startup view to display splash screen and process
     // the initial loading of settings and database support tables.
     // It will automatically handle MainForm screen.
-    // -------------------------------------------------------------
+    // ------------------------------------------------------------
 
     StartupForm.SetSessionLog(SessionEventLog);
     StartupForm.Show();

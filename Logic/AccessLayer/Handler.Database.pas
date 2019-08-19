@@ -205,11 +205,11 @@ begin
     finally
 
         // Check server connection on regular basis
-        if not MainForm.InetTimer.Enabled then
-        begin
-            MainForm.InetTimer.Interval:=Interval;
-            MainForm.InetTimer.Enabled:=True;
-        end;
+//        if not MainForm.InetTimer.Enabled then
+//        begin
+//            MainForm.InetTimer.Interval:=Interval;
+//            MainForm.InetTimer.Enabled:=True;
+//        end;
 
     end;
 

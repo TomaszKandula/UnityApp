@@ -24,6 +24,8 @@ uses
     Vcl.Samples.Gauges,
     Vcl.StdCtrls,
     Vcl.Imaging.pngimage,
+    Vcl.Imaging.jpeg,
+    Data.Win.ADODB,
     Unity.EventLogger;
 
 
@@ -34,17 +36,18 @@ type
         MainText2: TLabel;
         ProgressBar: TGauge;
         TextFooterA: TLabel;
-        TextFooter2B: TLabel;
+        TextFooterB: TLabel;
         MainText1: TLabel;
         TextStatus: TLabel;
-        SubText: TLabel;
-        ShapeProgressBar: TShape;
+        TextSubtitle: TLabel;
+        ShapeFooter: TShape;
         ShapeBackground: TShape;
-        CentreText: TLabel;
-        Flutter: TImage;
-        FlutterText: TLabel;
         ShapeHide: TShape;
         LabelHide: TLabel;
+        imgDFDS: TImage;
+        imgSHIP: TImage;
+        LabelVersion: TLabel;
+        ShapeLine: TShape;
         procedure FormCreate(Sender: TObject);
         procedure FormDestroy(Sender: TObject);
         procedure FormShow(Sender: TObject);
@@ -54,24 +57,22 @@ type
         procedure LabelHideClick(Sender: TObject);
         procedure ShapeBackgroundMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     protected
+        var LastErrorMsg: string;
+        var DbConnection: TADOConnection;
         procedure CreateParams(var Params: TCreateParams); override;
-        type ExecResult = record
-            LastError: string;
-
-        end;
     private
         var FIsAppInitialized: boolean;
         var FCurrentSessionLog: string;
         procedure AnimateProgressBar(AniFrom: integer; AniTo: integer; ProgressBar: TGauge; Speed: cardinal = 5);
         procedure ChangeProgressBar(ProgressTarget: integer; Text: string; var ProgressBar: TGauge);
-        function GetScreenDataSync(): string;
-        function GetDbConnectionSync(): string;
-        function GetUserAccountSync(): string;
-        function GetGeneralTablesSync(): string;
-        function GetFinalizationSync(): string;
+        procedure ExitAppSync();
+        procedure ApplicationStart();
+        function GetScreenDataSync(): boolean;
+        function GetDbConnectionSync(): boolean;
+        function GetUserAccountSync(): boolean;
+        function GetGeneralTablesSync(): boolean;
     public
         property IsAppInitialized: boolean read FIsAppInitialized;
-        procedure ApplicationStart();
         procedure SetSessionLog(SessionEventLog: string);
     end;
 
@@ -97,6 +98,7 @@ uses
     Unity.UserSid,
     Async.Utilities,
     Async.Queries,
+    Handler.Database,
     Handler.Account,
     View.Main,
     DbModel;
@@ -104,6 +106,7 @@ uses
 
 var
     VStartupForm: TStartupForm;
+    MainAppForm: View.Main.TMainForm;
 
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------- STARTUP //
@@ -130,7 +133,8 @@ end;
 
 procedure TStartupForm.FormShow(Sender: TObject);
 begin
-    TextStatus.Caption:='Loading, please wait...';
+    TextStatus.Caption:='';
+    LabelVersion.Caption:='Version ' + TCommon.GetBuildInfoAsString + '.';
 end;
 
 
@@ -172,7 +176,7 @@ end;
 
 procedure TStartupForm.LabelHideMouseEnter(Sender: TObject);
 begin
-    ShapeHide.Brush.Color:=$006433C9;
+    ShapeHide.Brush.Color:=$00EDE6DD;
     LabelHide.Font.Color:=$FFFFFF;
 end;
 
@@ -180,7 +184,7 @@ end;
 procedure TStartupForm.LabelHideMouseLeave(Sender: TObject);
 begin
     ShapeHide.Brush.Color:=$FFFFFF;
-    LabelHide.Font.Color:=$006433C9;
+    LabelHide.Font.Color:=$00EDE6DD;
 end;
 
 
@@ -223,6 +227,8 @@ end;
 procedure TStartupForm.ChangeProgressBar(ProgressTarget: integer; Text: string; var ProgressBar: TGauge);
 begin
     AnimateProgressBar(ProgressBar.Progress, ProgressTarget, ProgressBar);
+    TextStatus.Caption:=Text;
+    Update();
 end;
 
 
@@ -232,32 +238,140 @@ begin
 end;
 
 
+procedure TStartupForm.ExitAppSync();
+begin
+
+    TTask.CurrentTask.Cancel();
+    TThread.Synchronize(nil, procedure
+    begin
+        ExitProcess(0);
+    end);
+
+end;
+
+
 /// <summary>
 /// Load settings and update MainForm properties and variables before it gets shown to the user.
 /// Initialize SQL database with persistent connection (this will be replaced by the REST service).
 /// </summary>
+/// <remarks>
+/// We may operate on visual components from worker thread instead of main thread. Although, VCL is not
+/// thread safe we should refrain from doing that, but as long as we do not display visual content/update
+/// its visual state, we can safely perform operations on VCLs.
+/// </remarks>
 
 procedure TStartupForm.ApplicationStart();
 begin
 
     if FIsAppInitialized then Exit();
+
+    if not Assigned(MainAppForm) then
+        MainAppForm:=View.Main.MainForm;
+
     if not String.IsNullOrEmpty(FCurrentSessionLog) then
         View.Main.MainForm.InitMainWnd(FCurrentSessionLog);
 
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
 
+        // -------------------------------
+        // Get captions from app settings.
+        // -------------------------------
 
+        Sleep(50);
+        ChangeProgressBar(5, 'Initializing...', ProgressBar);
 
-    FIsAppInitialized:=True;
-    AnimateWindow(StartupForm.Handle, 500, AW_BLEND or AW_HIDE);
-    MainForm.Show();
+        if not GetScreenDataSync() then
+        begin
+            View.Main.MainForm.FAppEvents.Log(FCurrentSessionLog, 'Critical error has occured [GetScreenDataSync]: ' + LastErrorMsg);
+            THelpers.MsgCall(TAppMessage.Error, 'An error has occured [GetScreenDataSync]: ' + LastErrorMsg + '. Please contact IT support. Application will be closed.');
+            ExitAppSync();
+        end else
+        begin
+            View.Main.MainForm.FAppEvents.Log(FCurrentSessionLog, 'Unity has been boot up.');
+            ChangeProgressBar(15, 'Initializing... done.', ProgressBar);
+        end;
+
+        // -----------------------------------------
+        // Establish persistent database connection.
+        // -----------------------------------------
+
+        Sleep(250);
+        ChangeProgressBar(20, 'Connecting to database...', ProgressBar);
+
+        if not GetDbConnectionSync() then
+        begin
+            View.Main.MainForm.FAppEvents.Log(FCurrentSessionLog, 'Critical error has occured [GetDbConnectionSync]: ' + LastErrorMsg);
+            THelpers.MsgCall(TAppMessage.Error, 'An error occured [GetDbConnectionSync]: ' + LastErrorMsg + '. Please contact IT support. Application will be closed.');
+            ExitAppSync();
+        end else
+        begin
+            View.Main.MainForm.FDbConnect:=DbConnection;
+            View.Main.MainForm.FAppEvents.Log(FCurrentSessionLog, 'Persistant connection with SQL database has been established.');
+            ChangeProgressBar(33, 'Connecting to database... done.', ProgressBar);
+        end;
+
+        // ----------------------
+        // Find the user account.
+        // ----------------------
+
+        Sleep(250);
+        ChangeProgressBar(40, 'Getting user account details...', ProgressBar);
+
+        if not GetUserAccountSync() then
+        begin
+            View.Main.MainForm.FAppEvents.Log(FCurrentSessionLog, 'Critical error has occured [GetUserAccountSync]: ' + LastErrorMsg);
+            THelpers.MsgCall(TAppMessage.Error, 'An error occured [GetUserAccountSync]: ' + LastErrorMsg + '. Please contact your administrator. Application will be closed.');
+            ExitAppSync();
+        end else
+        begin
+            View.Main.MainForm.FAppEvents.Log(FCurrentSessionLog, 'User access has been established.');
+            ChangeProgressBar(66, 'Getting user account details... done.', ProgressBar);
+        end;
+
+        // -------------------------------
+        // Load all helper general tables.
+        // -------------------------------
+
+        Sleep(250);
+        ChangeProgressBar(75, 'Loading general tables...', ProgressBar);
+
+        if not GetGeneralTablesSync() then
+        begin
+            View.Main.MainForm.FAppEvents.Log(FCurrentSessionLog, 'Critical error occured [GetGeneralTablesSync]: ' + LastErrorMsg);
+            THelpers.MsgCall(TAppMessage.Error, 'An error has occured [GetGeneralTablesSync]: ' + LastErrorMsg + '. Please contact IT support. Application will be closed.');
+            ExitAppSync();
+        end else
+        begin
+            View.Main.MainForm.FAppEvents.Log(FCurrentSessionLog, 'General tables has been loaded.');
+            ChangeProgressBar(90, 'Loading general tables... done.', ProgressBar);
+        end;
+
+        // ----------------------------------------
+        // Hide startup view and display main view.
+        // ----------------------------------------
+
+        Sleep(500);
+        ChangeProgressBar(100, 'Finalization...', ProgressBar);
+
+        TThread.Synchronize(nil, procedure
+        begin
+            FIsAppInitialized:=True;
+            AnimateWindow(StartupForm.Handle, 750, AW_BLEND or AW_HIDE);
+            MainForm.Show();
+        end);
+
+    end);
+
+    NewTask.Start();
 
 end;
 
 
-function TStartupForm.GetScreenDataSync(): string;
+function TStartupForm.GetScreenDataSync(): boolean;
 begin
 
-    Result:='';
+    Result:=True;
 
     var Settings: ISettings:=TSettings.Create();
     try
@@ -266,24 +380,24 @@ begin
         // Application captions.
         // ---------------------
 
-        View.Main.MainForm.Caption:=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'WND_MAIN', TCommon.APPCAPTION);
-        View.Main.MainForm.DataUpdated.Caption:='';
+        MainAppForm.Caption:=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'WND_MAIN', TCommon.APPCAPTION);
+        MainAppForm.DataUpdated.Caption:='';
 
         // ----------------------------------
         // Icon used in main aging view grid.
         // ----------------------------------
 
-        View.Main.MainForm.FGridPicture:=TImage.Create(MainForm);
-        View.Main.MainForm.FGridPicture.SetBounds(0, 0, 16, 16);
+        MainAppForm.FGridPicture:=TImage.Create(MainForm);
+        MainAppForm.FGridPicture.SetBounds(0, 0, 16, 16);
         THelpers.LoadImageFromStream(View.Main.MainForm.FGridPicture, Settings.GetPathGridImage);
 
         // ---------------------------------------------------------------------
         // Setup timers, some of them may be removed after introducing REST API.
         // ---------------------------------------------------------------------
 
-        View.Main.MainForm.InvoiceScanTimer.Interval:=Settings.GetIntegerValue(TConfigSections.TimersSettings, 'INVOICE_SCANNER', 900000{15 minutes});
-        View.Main.MainForm.FollowupPopup.Interval:=Settings.GetIntegerValue(TConfigSections.TimersSettings, 'FOLLOWUP_CHECKER', 1800000{30 minutes});
-        View.Main.MainForm.OILoader.Interval:=Settings.GetIntegerValue(TConfigSections.TimersSettings, 'OI_LOADER', 300000{5 minutes});
+        MainAppForm.InvoiceScanTimer.Interval:=Settings.GetIntegerValue(TConfigSections.TimersSettings, 'INVOICE_SCANNER', 900000{15 minutes});
+        MainAppForm.FollowupPopup.Interval:=Settings.GetIntegerValue(TConfigSections.TimersSettings, 'FOLLOWUP_CHECKER', 1800000{30 minutes});
+        MainAppForm.OILoader.Interval:=Settings.GetIntegerValue(TConfigSections.TimersSettings, 'OI_LOADER', 300000{5 minutes});
 
         // ---------------------------------------------
         // Setup risk classes with proper number format.
@@ -300,9 +414,9 @@ begin
             var RiskClassB:=((getRiskClassB).ToExtended * 100).ToString + '%';
             var RiskClassC:=((getRiskClassC).ToExtended * 100).ToString + '%';
 
-            View.Main.MainForm.procRISKA.Caption:=RiskClassA;
-            View.Main.MainForm.procRISKB.Caption:=RiskClassB;
-            View.Main.MainForm.procRISKC.Caption:=RiskClassC;
+            MainAppForm.procRISKA.Caption:=RiskClassA;
+            MainAppForm.procRISKB.Caption:=RiskClassB;
+            MainAppForm.procRISKC.Caption:=RiskClassC;
 
         end else if FormatSettings.DecimalSeparator = '.' then
         begin
@@ -315,9 +429,9 @@ begin
             var RiskClassB:=((StringReplace(getRiskClassB, ',', '.', [rfReplaceAll])).ToExtended * 100).ToString + '%';
             var RiskClassC:=((StringReplace(getRiskClassC, ',', '.', [rfReplaceAll])).ToExtended * 100).ToString + '%';
 
-            View.Main.MainForm.procRISKA.Caption:=RiskClassA;
-            View.Main.MainForm.procRISKB.Caption:=RiskClassB;
-            View.Main.MainForm.procRISKC.Caption:=RiskClassC;
+            MainAppForm.procRISKA.Caption:=RiskClassA;
+            MainAppForm.procRISKB.Caption:=RiskClassB;
+            MainAppForm.procRISKC.Caption:=RiskClassC;
 
         end;
 
@@ -325,26 +439,26 @@ begin
         // Tabsheet captions and aging ranges.
         // -----------------------------------
 
-        View.Main.MainForm.Cap01.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT01', 'EMPTY'), [fsBold]);
-        View.Main.MainForm.Cap02.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT02', 'EMPTY'), [fsBold]);
-        View.Main.MainForm.Cap03.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT03', 'EMPTY'), [fsBold]);
-        View.Main.MainForm.Cap05.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT05', 'EMPTY'), [fsBold]);
-        View.Main.MainForm.Cap06.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT06', 'EMPTY'), [fsBold]);
-        View.Main.MainForm.Cap07.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT07', 'EMPTY'), [fsBold]);
-        View.Main.MainForm.Cap24.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT08', 'EMPTY'), [fsBold]);
-        View.Main.MainForm.Cap10.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS2TXT01', 'EMPTY'), [fsBold]);
-        View.Main.MainForm.Cap11.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS2TXT02', 'EMPTY'), [fsBold]);
-        View.Main.MainForm.Cap12.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS2TXT03', 'EMPTY'), [fsBold]);
-        View.Main.MainForm.Cap13.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS3TXT01', 'EMPTY'), [fsBold]);
-        View.Main.MainForm.Cap43.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS4TXT01', 'EMPTY'), [fsBold]);
-        View.Main.MainForm.Cap61.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS6TXT01', 'EMPTY'), [fsBold]);
-        View.Main.MainForm.Cap15.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS7TXT01', 'EMPTY'), [fsBold]);
-        View.Main.MainForm.Cap21.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS8TXT01', 'EMPTY'), [fsBold]);
-        View.Main.MainForm.Cap22.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS8TXT02', 'EMPTY'), [fsBold]);
-        View.Main.MainForm.Cap23.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS8TXT03', 'EMPTY'), [fsBold]);
-        View.Main.MainForm.Cap27.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS8TXT04', 'EMPTY'), [fsBold]);
-        View.Main.MainForm.Cap62.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS9TXT01', 'EMPTY'), [fsBold]);
-        View.Main.MainForm.Cap63.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS9TXT02', 'EMPTY'), [fsBold]);
+        MainAppForm.Cap01.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT01', 'EMPTY'), [fsBold]);
+        MainAppForm.Cap02.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT02', 'EMPTY'), [fsBold]);
+        MainAppForm.Cap03.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT03', 'EMPTY'), [fsBold]);
+        MainAppForm.Cap05.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT05', 'EMPTY'), [fsBold]);
+        MainAppForm.Cap06.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT06', 'EMPTY'), [fsBold]);
+        MainAppForm.Cap07.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT07', 'EMPTY'), [fsBold]);
+        MainAppForm.Cap24.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT08', 'EMPTY'), [fsBold]);
+        MainAppForm.Cap10.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS2TXT01', 'EMPTY'), [fsBold]);
+        MainAppForm.Cap11.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS2TXT02', 'EMPTY'), [fsBold]);
+        MainAppForm.Cap12.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS2TXT03', 'EMPTY'), [fsBold]);
+        MainAppForm.Cap13.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS3TXT01', 'EMPTY'), [fsBold]);
+        MainAppForm.Cap43.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS4TXT01', 'EMPTY'), [fsBold]);
+        MainAppForm.Cap61.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS6TXT01', 'EMPTY'), [fsBold]);
+        MainAppForm.Cap15.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS7TXT01', 'EMPTY'), [fsBold]);
+        MainAppForm.Cap21.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS8TXT01', 'EMPTY'), [fsBold]);
+        MainAppForm.Cap22.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS8TXT02', 'EMPTY'), [fsBold]);
+        MainAppForm.Cap23.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS8TXT03', 'EMPTY'), [fsBold]);
+        MainAppForm.Cap27.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS8TXT04', 'EMPTY'), [fsBold]);
+        MainAppForm.Cap62.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS9TXT01', 'EMPTY'), [fsBold]);
+        MainAppForm.Cap63.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS9TXT02', 'EMPTY'), [fsBold]);
 
         var getRange1A:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE1A','');
         var getRange2A:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE2A','');
@@ -360,107 +474,110 @@ begin
         var getRange5B:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE5B','');
         var getRange6B:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE6B','');
 
-        View.Main.MainForm.tR1.Caption:=getRange1A + ' - ' + getRange1B;
-        View.Main.MainForm.tR2.Caption:=getRange2A + ' - ' + getRange2B;
-        View.Main.MainForm.tR3.Caption:=getRange3A + ' - ' + getRange3B;
-        View.Main.MainForm.tR4.Caption:=getRange4A + ' - ' + getRange4B;
-        View.Main.MainForm.tR5.Caption:=getRange5A + ' - ' + getRange5B;
-        View.Main.MainForm.tR6.Caption:=getRange6A + ' - ' + getRange6B;
+        MainAppForm.tR1.Caption:=getRange1A + ' - ' + getRange1B;
+        MainAppForm.tR2.Caption:=getRange2A + ' - ' + getRange2B;
+        MainAppForm.tR3.Caption:=getRange3A + ' - ' + getRange3B;
+        MainAppForm.tR4.Caption:=getRange4A + ' - ' + getRange4B;
+        MainAppForm.tR5.Caption:=getRange5A + ' - ' + getRange5B;
+        MainAppForm.tR6.Caption:=getRange6A + ' - ' + getRange6B;
 
-        View.Main.MainForm.Text21.Caption:=getRange1A + ' - ' + getRange3B + ':';
-        View.Main.MainForm.Text22.Caption:=getRange4A + ' - ' + getRange6B + ':';
-
-//        View.Main.MainForm.FAppEvents.Log(FCurrentSessionLog, 'Unity has been boot up...');
-//        View.Main.MainForm.FAppEvents.Log(FCurrentSessionLog, 'Initialization...');
-//        ChangeProgressBar(10, 'Initialization...', ProgressBar);
+        MainAppForm.Text21.Caption:=getRange1A + ' - ' + getRange3B + ':';
+        MainAppForm.Text22.Caption:=getRange4A + ' - ' + getRange6B + ':';
 
     except
-        on E: Exception do Result:=E.Message;
-//        begin
-//            View.Main.MainForm.FAppEvents.Log(FCurrentSessionLog, 'Critical error has occured [ApplicationStart.Captions]: ' + E.Message);
-//            THelpers.MsgCall(TAppMessage.Error, 'An error has occured [ApplicationStart.Captions]: ' + E.Message + '. Please contact IT support. Application will be closed.');
-//            ExitProcess(0);
-//        end;
+        on E: Exception do
+        begin
+            LastErrorMsg:=E.Message;
+            Result:=False;
+        end;
 
     end;
 
 end;
 
 
-function TStartupForm.GetDbConnectionSync(): string;
+function TStartupForm.GetDbConnectionSync(): boolean;
 begin
 
-    Result:='';
+    Result:=True;
 
     try
 
-        View.Main.MainForm.TryInitConnection;
-        //View.Main.MainForm.FAppEvents.Log(FCurrentSessionLog, 'Persistant connection with SQL database has been established...');
-        //ChangeProgressBar(25, 'Database connectivity...', ProgressBar);
+        DbConnection:=TADOConnection.Create(nil);
+        var DataBase:=TDataBase.Create(False);
+        try
+
+            if DataBase.Check = 0 then
+            begin
+                DataBase.InitializeConnection(MainThreadID, False, DbConnection);
+                MainAppForm.FIsConnected:=True;
+            end;
+
+        finally
+            DataBase.Free();
+        end;
 
     except
-        on E: Exception do Result:=E.Message;
-//        begin
-//            View.Main.MainForm.FAppEvents.Log(FCurrentSessionLog, 'Critical error has occured [ApplicationStart.TryInitConnection]: ' + E.Message);
-//            THelpers.MsgCall(TAppMessage.Error, 'An error occured [ApplicationStart.TryInitConnection]: ' + E.Message + '. Please contact IT support. Application will be closed.');
-//            ExitProcess(0);
-//        end;
+        on E: Exception do
+        begin
+            LastErrorMsg:=E.Message;
+            Result:=False;
+        end;
 
     end;
 
 end;
 
 
-function TStartupForm.GetUserAccountSync(): string;
+function TStartupForm.GetUserAccountSync(): boolean;
 begin
 
-    Result:='';
+    Result:=True;
 
     var UserControl: TUserControl:=TUserControl.Create(View.Main.MainForm.FDbConnect);
     try
 
         try
 
-            UserControl.UserName:=View.Main.MainForm.WinUserName;
-            View.Main.MainForm.FAccessLevel:=UserControl.GetAccessData(TUserAccess.TTypes.AccessLevel);
+            UserControl.UserName:=MainAppForm.WinUserName;
+            MainAppForm.FAccessLevel:=UserControl.GetAccessData(TUserAccess.TTypes.AccessLevel);
 
             // Quit if username is not found
-            if View.Main.MainForm.FAccessLevel = '' then
+            if MainAppForm.FAccessLevel = '' then
             begin
-//                THelpers.MsgCall(TAppMessage.Error, 'Cannot find account for user alias: ' + UpperCase(View.Main.MainForm.WinUserName) + '. Please contact your administrator. Application will be closed.');
-//                ExitProcess(0);
-            end;
-
-            View.Main.MainForm.FAccessMode:=UserControl.GetAccessData(TUserAccess.TTypes.AccessMode);
-            if View.Main.MainForm.FAccessMode = TUserAccess.AccessFull  then View.Main.MainForm.Action_FullView.Checked:=True;
-            if View.Main.MainForm.FAccessMode = TUserAccess.AccessBasic then View.Main.MainForm.Action_BasicView.Checked:=True;
-
-            UserControl.GetFGroupList(View.Main.MainForm.FGroupList, View.Main.MainForm.GroupListBox);
-            UserControl.GetAgeDates(View.Main.MainForm.GroupListDates, View.Main.MainForm.FGroupList[0, 0]);
-
-            {TODO -oTomek -cReplaceWith : ApprovalMatrix}
-
-            // Restricted for "ADMINS"
-            if View.Main.MainForm.FAccessLevel <> TUserAccess.Admin then
+                LastErrorMsg:='Cannot find account for user alias ' + UpperCase(MainAppForm.WinUserName);
+                Result:=False;
+            end else
             begin
-                View.Main.MainForm.sgCompanyData.Enabled:=False;
-                View.Main.MainForm.ReloadCover.Visible:=True;
-                View.Main.MainForm.ReloadCover.Cursor:=crNo;
-                View.Main.MainForm.GroupListDates.Enabled:=False;
+
+                MainAppForm.FAccessMode:=UserControl.GetAccessData(TUserAccess.TTypes.AccessMode);
+//                if View.Main.MainForm.FAccessMode = TUserAccess.AccessFull  then View.Main.MainForm.Action_FullView.Checked:=True;
+//                if View.Main.MainForm.FAccessMode = TUserAccess.AccessBasic then View.Main.MainForm.Action_BasicView.Checked:=True;
+//
+//                UserControl.GetFGroupList(View.Main.MainForm.FGroupList, View.Main.MainForm.GroupListBox);
+//                UserControl.GetAgeDates(View.Main.MainForm.GroupListDates, View.Main.MainForm.FGroupList[0, 0]);
+//
+//                {TODO -oTomek -cReplaceWith : ApprovalMatrix}
+//
+//                // Restricted for "ADMINS"
+//                if View.Main.MainForm.FAccessLevel <> TUserAccess.Admin then
+//                begin
+//                    View.Main.MainForm.sgCompanyData.Enabled:=False;
+//                    View.Main.MainForm.ReloadCover.Visible:=True;
+//                    View.Main.MainForm.ReloadCover.Cursor:=crNo;
+//                    View.Main.MainForm.GroupListDates.Enabled:=False;
+//                end;
+
             end;
 
         except
-            on E: Exception do Result:=E.Message;
-//            begin
-//                View.Main.MainForm.FAppEvents.Log(FCurrentSessionLog, 'Critical error occured [ApplicationStart.TUserControl]: ' + E.Message);
-//                THelpers.MsgCall(TAppMessage.Error, 'An error occured [ApplicationStart.TUserControl][' + View.Main.MainForm.WinUserName + ']: ' + E.Message + '. Please contact IT support. Application will be closed.');
-//                ExitProcess(0);
-//            end;
+            on E: Exception do
+            begin
+                LastErrorMsg:=E.Message;
+                Result:=False;
+            end;
 
         end;
-
-//        View.Main.MainForm.FAppEvents.Log(FCurrentSessionLog, 'User access has been established...');
-//        ChangeProgressBar(33, 'User access has been established...', ProgressBar);
 
     finally
         UserControl.Free;
@@ -469,77 +586,32 @@ begin
 end;
 
 
-function TStartupForm.GetGeneralTablesSync(): string;
+function TStartupForm.GetGeneralTablesSync(): boolean;
 begin
 
-    Result:='';
+    Result:=True;
 
     var Utilities: IUtilities:=TUtilities.Create();
     try
 
-        Utilities.GeneralTables(TSalesResponsible.SalesResponsible, View.Main.MainForm.sgSalesResp);
-        Utilities.GeneralTables(TPersonResponsible.PersonResponsible, View.Main.MainForm.sgPersonResp);
-        Utilities.GeneralTables(TAccountType.AccountType, View.Main.MainForm.sgAccountType);
-        Utilities.GeneralTables(TCustomerGroup.CustomerGroup, View.Main.MainForm.sgCustomerGr);
-        Utilities.GeneralTables(TGroup3.Group3, View.Main.MainForm.sgGroup3);
+        Utilities.GeneralTables(TSalesResponsible.SalesResponsible, MainAppForm.sgSalesResp);
+        Utilities.GeneralTables(TPersonResponsible.PersonResponsible, MainAppForm.sgPersonResp);
+        Utilities.GeneralTables(TAccountType.AccountType, MainAppForm.sgAccountType);
+        Utilities.GeneralTables(TCustomerGroup.CustomerGroup, MainAppForm.sgCustomerGr);
+        Utilities.GeneralTables(TGroup3.Group3, MainAppForm.sgGroup3);
 
-        Utilities.GeneralTables(TCompanyData.CompanyData, View.Main.MainForm.sgCoCodes, TCompanyData.CoCode + TChars.COMMA + TCompanyData.Branch + TChars.COMMA + TCompanyData.CoName + TChars.COMMA + TCompanyData.CoAddress + TChars.COMMA + TCompanyData.VatNo + TChars.COMMA + TCompanyData.Duns + TChars.COMMA + TCompanyData.Country + TChars.COMMA + TCompanyData.City + TChars.COMMA + TCompanyData.FinManager + TChars.COMMA + TCompanyData.TelephoneNumbers + TChars.COMMA + TCompanyData.CoType + TChars.COMMA + TCompanyData.CoCurrency + TChars.COMMA + TCompanyData.InterestRate + TChars.COMMA + TCompanyData.KpiOverdueTarget + TChars.COMMA + TCompanyData.KpiUnallocatedTarget + TChars.COMMA + TCompanyData.Agents + TChars.COMMA + TCompanyData.Divisions, TSql.ORDER + TCompanyData.CoCode + TSql.ASC);
-        Utilities.GeneralTables(TPaymentTerms.PaymentTerms, View.Main.MainForm.sgPmtTerms);
-        Utilities.GeneralTables(TPaidinfo.Paidinfo, View.Main.MainForm.sgPaidInfo);
-        Utilities.GeneralTables(TPerson.Person, View.Main.MainForm.sgPerson);
-        Utilities.GeneralTables(TControlStatus.ControlStatus, View.Main.MainForm.sgControlStatus);
-
-        //View.Main.MainForm.FAppEvents.Log(FCurrentSessionLog, 'General tables has been loaded...');
-        //ChangeProgressBar(75, 'General tables has been loaded...', ProgressBar);
+        Utilities.GeneralTables(TCompanyData.CompanyData, MainAppForm.sgCoCodes, TCompanyData.CoCode + TChars.COMMA + TCompanyData.Branch + TChars.COMMA + TCompanyData.CoName + TChars.COMMA + TCompanyData.CoAddress + TChars.COMMA + TCompanyData.VatNo + TChars.COMMA + TCompanyData.Duns + TChars.COMMA + TCompanyData.Country + TChars.COMMA + TCompanyData.City + TChars.COMMA + TCompanyData.FinManager + TChars.COMMA + TCompanyData.TelephoneNumbers + TChars.COMMA + TCompanyData.CoType + TChars.COMMA + TCompanyData.CoCurrency + TChars.COMMA + TCompanyData.InterestRate + TChars.COMMA + TCompanyData.KpiOverdueTarget + TChars.COMMA + TCompanyData.KpiUnallocatedTarget + TChars.COMMA + TCompanyData.Agents + TChars.COMMA + TCompanyData.Divisions, TSql.ORDER + TCompanyData.CoCode + TSql.ASC);
+        Utilities.GeneralTables(TPaymentTerms.PaymentTerms, MainAppForm.sgPmtTerms);
+        Utilities.GeneralTables(TPaidinfo.Paidinfo, MainAppForm.sgPaidInfo);
+        Utilities.GeneralTables(TPerson.Person, MainAppForm.sgPerson);
+        Utilities.GeneralTables(TControlStatus.ControlStatus, MainAppForm.sgControlStatus);
 
     except
-        on E: Exception do Result:=E.Message;
-//        begin
-//            View.Main.MainForm.FAppEvents.Log(FCurrentSessionLog, 'Critical error occured [ApplicationStart.GeneralTables]: ' + E.Message);
-//            THelpers.MsgCall(TAppMessage.Error, 'An error has occured [ApplicationStart.GeneralTables]: ' + E.Message + '. Please contact IT support. Application will be closed.');
-//            ExitProcess(0);
-//        end;
-
-    end;
-
-end;
-
-
-function TStartupForm.GetFinalizationSync(): string;
-begin
-
-    Result:='';
-
-    try
-
-        var NowTime: TTime:=Now;
-        View.Main.MainForm.FStartTime:=Now;
-
-        FormatDateTime('hh:mm:ss', NowTime);
-        FormatDateTime('hh:mm:ss', View.Main.MainForm.FStartTime);
-
-        View.Main.MainForm.StatBar_TXT3.Caption:=DateToStr(Now);
-        View.Main.MainForm.UpTime.Enabled:=True;
-        View.Main.MainForm.CurrentTime.Enabled:=True;
-
-        View.Main.MainForm.FAppEvents.Log(FCurrentSessionLog, 'Main thread [' + MainThreadID.ToString + ']: Application version = ' + TCommon.GetBuildInfoAsString);
-        View.Main.MainForm.FAppEvents.Log(FCurrentSessionLog, 'Main thread [' + MainThreadID.ToString + ']: User SID = ' + TUserSid.GetCurrentUserSid);
-
-        //if not(View.Main.MainForm.FirstAgeLoad.Enabled) then View.Main.MainForm.FirstAgeLoad.Enabled:=True;
-
-        //var Queries: IQueries:=TQueries.Create;
-        //Queries.InitializeQms;
-
-        //View.Main.MainForm.FAppEvents.Log(FCurrentSessionLog, 'Finalization... all has been started.');
-        //ChangeProgressBar(100, 'Finalization... all has been started.', ProgressBar);
-
-    except
-		on E: Exception do Result:=E.Message;
-//        begin
-//            View.Main.MainForm.FAppEvents.Log(FCurrentSessionLog, 'Critical error occured [ApplicationStart.Finalization]: ' + E.Message);
-//            THelpers.MsgCall(TAppMessage.Error, 'An error occured [ApplicationStart.Finalization]: ' + E.Message + '. Please contact IT support. Application will be closed.');
-//            ExitProcess(0);
-//        end;
+        on E: Exception do
+        begin
+            LastErrorMsg:=E.Message;
+            Result:=False;
+        end;
 
     end;
 
