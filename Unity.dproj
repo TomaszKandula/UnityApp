@@ -158,6 +158,9 @@
         <DCCReference Include="Extensions\Unity.ListView.pas">
             <Form>Component extension</Form>
         </DCCReference>
+        <DCCReference Include="Extensions\Unity.ComboBox.pas">
+            <Form>Component extension</Form>
+        </DCCReference>
         <DCCReference Include="Helpers\Unity.Crc32.pas"/>
         <DCCReference Include="Helpers\Types\Unity.Enums.pas"/>
         <DCCReference Include="Helpers\Types\Unity.Arrays.pas"/>

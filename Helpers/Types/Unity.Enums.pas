@@ -26,6 +26,7 @@ type
     TAppFiles      = (Configuration, Licence);
     TAppTimers     = (TurnedOn, TurnedOff);
     TAppMessage    = (Info, Warn, Error, Question1, Question2);
+    TListSelection = (First, Last);
 
 
 implementation

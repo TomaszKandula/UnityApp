@@ -44,10 +44,11 @@ type
         ShapeBackground: TShape;
         ShapeHide: TShape;
         LabelHide: TLabel;
-        imgDFDS: TImage;
-        imgSHIP: TImage;
+        imgDfds: TImage;
+        imgShip: TImage;
         LabelVersion: TLabel;
         ShapeLine: TShape;
+        imgCover: TImage;
         procedure FormCreate(Sender: TObject);
         procedure FormDestroy(Sender: TObject);
         procedure FormShow(Sender: TObject);
@@ -269,7 +270,7 @@ begin
         MainAppForm:=View.Main.MainForm;
 
     if not String.IsNullOrEmpty(FCurrentSessionLog) then
-        View.Main.MainForm.InitMainWnd(FCurrentSessionLog);
+        MainAppForm.InitMainWnd(FCurrentSessionLog);
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
@@ -283,12 +284,12 @@ begin
 
         if not GetScreenDataSync() then
         begin
-            View.Main.MainForm.FAppEvents.Log(FCurrentSessionLog, 'Critical error has occured [GetScreenDataSync]: ' + LastErrorMsg);
+            MainAppForm.FAppEvents.Log(FCurrentSessionLog, 'Critical error has occured [GetScreenDataSync]: ' + LastErrorMsg);
             THelpers.MsgCall(TAppMessage.Error, 'An error has occured [GetScreenDataSync]: ' + LastErrorMsg + '. Please contact IT support. Application will be closed.');
             ExitAppSync();
         end else
         begin
-            View.Main.MainForm.FAppEvents.Log(FCurrentSessionLog, 'Unity has been boot up.');
+            MainAppForm.FAppEvents.Log(FCurrentSessionLog, 'Unity has been boot up.');
             ChangeProgressBar(15, 'Initializing... done.', ProgressBar);
         end;
 
@@ -301,13 +302,13 @@ begin
 
         if not GetDbConnectionSync() then
         begin
-            View.Main.MainForm.FAppEvents.Log(FCurrentSessionLog, 'Critical error has occured [GetDbConnectionSync]: ' + LastErrorMsg);
+            MainAppForm.FAppEvents.Log(FCurrentSessionLog, 'Critical error has occured [GetDbConnectionSync]: ' + LastErrorMsg);
             THelpers.MsgCall(TAppMessage.Error, 'An error occured [GetDbConnectionSync]: ' + LastErrorMsg + '. Please contact IT support. Application will be closed.');
             ExitAppSync();
         end else
         begin
-            View.Main.MainForm.FDbConnect:=DbConnection;
-            View.Main.MainForm.FAppEvents.Log(FCurrentSessionLog, 'Persistant connection with SQL database has been established.');
+            MainAppForm.FDbConnect:=DbConnection;
+            MainAppForm.FAppEvents.Log(FCurrentSessionLog, 'Persistant connection with SQL database has been established.');
             ChangeProgressBar(33, 'Connecting to database... done.', ProgressBar);
         end;
 
@@ -320,12 +321,12 @@ begin
 
         if not GetUserAccountSync() then
         begin
-            View.Main.MainForm.FAppEvents.Log(FCurrentSessionLog, 'Critical error has occured [GetUserAccountSync]: ' + LastErrorMsg);
+            MainAppForm.FAppEvents.Log(FCurrentSessionLog, 'Critical error has occured [GetUserAccountSync]: ' + LastErrorMsg);
             THelpers.MsgCall(TAppMessage.Error, 'An error occured [GetUserAccountSync]: ' + LastErrorMsg + '. Please contact your administrator. Application will be closed.');
             ExitAppSync();
         end else
         begin
-            View.Main.MainForm.FAppEvents.Log(FCurrentSessionLog, 'User access has been established.');
+            MainAppForm.FAppEvents.Log(FCurrentSessionLog, 'User access has been established.');
             ChangeProgressBar(66, 'Getting user account details... done.', ProgressBar);
         end;
 
@@ -338,12 +339,12 @@ begin
 
         if not GetGeneralTablesSync() then
         begin
-            View.Main.MainForm.FAppEvents.Log(FCurrentSessionLog, 'Critical error occured [GetGeneralTablesSync]: ' + LastErrorMsg);
+            MainAppForm.FAppEvents.Log(FCurrentSessionLog, 'Critical error occured [GetGeneralTablesSync]: ' + LastErrorMsg);
             THelpers.MsgCall(TAppMessage.Error, 'An error has occured [GetGeneralTablesSync]: ' + LastErrorMsg + '. Please contact IT support. Application will be closed.');
             ExitAppSync();
         end else
         begin
-            View.Main.MainForm.FAppEvents.Log(FCurrentSessionLog, 'General tables has been loaded.');
+            MainAppForm.FAppEvents.Log(FCurrentSessionLog, 'General tables has been loaded.');
             ChangeProgressBar(90, 'Loading general tables... done.', ProgressBar);
         end;
 
@@ -351,14 +352,15 @@ begin
         // Hide startup view and display main view.
         // ----------------------------------------
 
-        Sleep(500);
+        Sleep(50);
         ChangeProgressBar(100, 'Finalization...', ProgressBar);
 
+        Sleep(1450);
         TThread.Synchronize(nil, procedure
         begin
             FIsAppInitialized:=True;
             AnimateWindow(StartupForm.Handle, 750, AW_BLEND or AW_HIDE);
-            MainForm.Show();
+            MainAppForm.Show();
         end);
 
     end);
@@ -509,7 +511,7 @@ begin
 
             if DataBase.Check = 0 then
             begin
-                DataBase.InitializeConnection(MainThreadID, False, DbConnection);
+                DataBase.InitializeConnection(False, DbConnection);
                 MainAppForm.FIsConnected:=True;
             end;
 
@@ -532,9 +534,11 @@ end;
 function TStartupForm.GetUserAccountSync(): boolean;
 begin
 
+    {TODO -oTomek -cReplaceWith : new account system}
+
     Result:=True;
 
-    var UserControl: TUserControl:=TUserControl.Create(View.Main.MainForm.FDbConnect);
+    var UserControl: TUserControl:=TUserControl.Create(MainAppForm.FDbConnect);
     try
 
         try
@@ -549,25 +553,11 @@ begin
                 Result:=False;
             end else
             begin
-
                 MainAppForm.FAccessMode:=UserControl.GetAccessData(TUserAccess.TTypes.AccessMode);
-//                if View.Main.MainForm.FAccessMode = TUserAccess.AccessFull  then View.Main.MainForm.Action_FullView.Checked:=True;
-//                if View.Main.MainForm.FAccessMode = TUserAccess.AccessBasic then View.Main.MainForm.Action_BasicView.Checked:=True;
-//
-//                UserControl.GetFGroupList(View.Main.MainForm.FGroupList, View.Main.MainForm.GroupListBox);
-//                UserControl.GetAgeDates(View.Main.MainForm.GroupListDates, View.Main.MainForm.FGroupList[0, 0]);
-//
-//                {TODO -oTomek -cReplaceWith : ApprovalMatrix}
-//
-//                // Restricted for "ADMINS"
-//                if View.Main.MainForm.FAccessLevel <> TUserAccess.Admin then
-//                begin
-//                    View.Main.MainForm.sgCompanyData.Enabled:=False;
-//                    View.Main.MainForm.ReloadCover.Visible:=True;
-//                    View.Main.MainForm.ReloadCover.Cursor:=crNo;
-//                    View.Main.MainForm.GroupListDates.Enabled:=False;
-//                end;
-
+                if MainAppForm.FAccessMode = TUserAccess.AccessFull  then MainAppForm.Action_FullView.Checked:=True;
+                if MainAppForm.FAccessMode = TUserAccess.AccessBasic then MainAppForm.Action_BasicView.Checked:=True;
+                UserControl.GetGroupList(MainAppForm.FGroupList);
+                UserControl.GetAgeDates(MainAppForm.FAgeDateList, MainAppForm.FGroupList[0, 0]);
             end;
 
         except

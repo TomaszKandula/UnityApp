@@ -65,6 +65,7 @@ uses
     Unity.Grid,
     Unity.Shape,
     Unity.Panel,
+    Unity.ComboBox,
     Unity.Arrays,
     Unity.Enums,
     Unity.Records;
@@ -559,6 +560,7 @@ type
         Action_TurnRowHighlight: TMenuItem;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
+        procedure FormActivate(Sender: TObject);
         procedure Action_HideAppClick(Sender: TObject);
         procedure Action_ShowAppClick(Sender: TObject);
         procedure Action_HelpClick(Sender: TObject);
@@ -875,7 +877,7 @@ type
         function  ShowReport(ReportNumber: cardinal): cardinal;
     public
 
-        // Legacy code, to be removed -- CUT
+        // Legacy code, to be removed [start]
         var FGroupIdSel:      string;
         var FGroupNmSel:      string;
         var FAgeDateSel:      string;
@@ -890,19 +892,23 @@ type
         procedure FindCoData(TargetColumn: integer; TargetGrid: TStringGrid; SourceGrid: TStringGrid);
         function  ConvertCoCode(CoNumber: string; Prefix: string; mode: integer): string;
         function  GetCoCode(CoPos: integer; GroupId: string): string;
-        // Legacy code, to be removed -- CUT
+        procedure CallbackAwaitForm(PassMsg: TMessage);
+        procedure CallbackMassMailer(PassMsg: TMessage);
+        procedure CallbackStatusBar(PassMsg: TMessage);
+        procedure CallbackMessageBox(PassMsg: TMessage);
+        procedure WndMessagesInternal(PassMsg: TMessage);
+        // Legacy code, to be removed [end]
 
         var FStartTime:         TTime;
         var FAppEvents:         TThreadFileLog;
         var FDbConnect:         TADOConnection;
         var FGroupList:         TALists;
+        var FAgeDateList:       TALists;
         var FGridPicture:       TImage;
         var FOpenItemsRefs:     TFOpenItemsRefs;
         var FControlStatusRefs: TFControlStatusRefs;
-
         property WinUserName: string read FWinUserName;
         property EventLogPath: string read FEventLogPath;
-
         procedure InitMainWnd(SessionId: string);
         procedure UpdateFOpenItemsRefs(SourceGrid: TStringGrid);
         procedure UpdateFControlStatusRefs(SourceGrid: TStringGrid);
@@ -935,14 +941,6 @@ type
         // -----------------
         // Windows messages.
         // -----------------
-
-        // Legacy code, to be removed -- CUT
-        procedure CallbackAwaitForm(PassMsg: TMessage);
-        procedure CallbackMassMailer(PassMsg: TMessage);
-        procedure CallbackStatusBar(PassMsg: TMessage);
-        procedure CallbackMessageBox(PassMsg: TMessage);
-        procedure WndMessagesInternal(PassMsg: TMessage);
-        // Legacy code, to be removed -- CUT
 
         procedure WndProc(var msg: TMessage); override;
         procedure WndMessagesChromium(PassMsg: TMessage);
@@ -987,6 +985,7 @@ uses
     Unity.StatusBar,
     Unity.DateTimeFormats,
     Unity.Sorting,
+    Unity.UserSid,
     Handler.Sql{legacy},
     DbModel{legacy},
     Handler.Database{legacy},
@@ -1016,37 +1015,145 @@ begin
 end;
 
 
-// ---------------------------------------------------------------------------------------------------------------------------------------- WINDOWS MESSAGES //
+/// LEGACY CODE - TO BE REMOVED [START]
 
 
-procedure TMainForm.NotifyMoveOrResizeStarted;
-begin
-    if (ChromiumWindow <> nil) then ChromiumWindow.NotifyMoveOrResizeStarted;
-end;
-
-
-procedure TMainForm.ChromiumModalLoopOn(PassMsg: TMessage);
-begin
-    if (PassMsg.wParam = 0) and (GlobalCEFApp <> nil) then GlobalCEFApp.OsmodalLoop:=True;
-end;
-
-
-procedure TMainForm.ChromiumModalLoopOff(PassMsg: TMessage);
-begin
-    if (PassMsg.wParam = 0) and (GlobalCEFApp <> nil) then GlobalCEFApp.OsmodalLoop:=False;
-end;
-
-
-procedure TMainForm.WndMessagesChromium(PassMsg: TMessage);
+procedure TMainForm.TryInitConnection;
 begin
 
-    case PassMsg.Msg of
-        WM_MOVE:          NotifyMoveOrResizeStarted;
-        WM_MOVING:        NotifyMoveOrResizeStarted;
-        WM_ENTERMENULOOP: ChromiumModalLoopOn(PassMsg);
-        WM_EXITMENULOOP:  ChromiumModalLoopOff(PassMsg);
+    if not Assigned(FDbConnect) then
+        FDbConnect:=TADOConnection.Create(nil);
+
+    var DataBase:=TDataBase.Create(True);
+    try
+
+        if DataBase.Check = 0 then
+        begin
+
+            if DataBase.InitializeConnection(True, FDbConnect) then
+            begin
+
+                // Check server connection on regular basis
+                if not InetTimer.Enabled then
+                begin
+                    InetTimer.Interval:=DataBase.Interval;
+                    InetTimer.Enabled:=True;
+                end;
+
+            end;
+
+            FAppEvents.Log(EventLogPath, '[TryInitConnection]: Server connection has been established successfully.');
+            FIsConnected:=True;
+            SwitchTimers(TurnedOn);
+
+        end
+        else
+        begin
+            FIsConnected:=False;
+            SwitchTimers(TurnedOff);
+        end;
+
+    finally
+        DataBase.Free;
     end;
 
+end;
+
+
+procedure TMainForm.FindCoData(TargetColumn: integer; TargetGrid: TStringGrid; SourceGrid: TStringGrid);
+begin
+
+    if SourceGrid.RowCount = 0 then Exit;
+
+    for var iCNT: integer:=1 to SourceGrid.RowCount - 1 do
+    begin
+        if TargetGrid.Cells[TargetColumn, 0] = SourceGrid.Cells[SourceGrid.ReturnColumn(TCompanyData.CoCode, 1, 1), iCNT] then
+        begin
+            TargetGrid.Cells[TargetColumn, 1]:=SourceGrid.Cells[SourceGrid.ReturnColumn(TCompanyData.CoCurrency, 1, 1), iCNT];
+            TargetGrid.Cells[TargetColumn, 2]:=SourceGrid.Cells[SourceGrid.ReturnColumn(TCompanyData.Divisions,  1, 1), iCNT];
+            TargetGrid.Cells[TargetColumn, 3]:=SourceGrid.Cells[SourceGrid.ReturnColumn(TCompanyData.Agents,     1, 1), iCNT];
+            Break;
+        end
+        else
+        begin
+            TargetGrid.Cells[TargetColumn, 1]:=TUnknown.NA;
+            TargetGrid.Cells[TargetColumn, 2]:=TUnknown.NA;
+            TargetGrid.Cells[TargetColumn, 3]:=TUnknown.NA;
+        end;
+    end;
+
+end;
+
+
+function TMainForm.ConvertCoCode(CoNumber: string; Prefix: string; mode: integer): string;
+begin
+
+    Result:= '';
+
+    /// <remarks>
+    /// Used only for open items and aging view.
+    /// </remarks>
+
+    // Allow to convert '2020' to 'F2020', etc.
+    if mode = 0 then
+    begin
+        if Length(CoNumber) = 4 then Result:=Prefix + CoNumber;
+        if Length(CoNumber) = 3 then Result:=Prefix + '0'  + CoNumber;
+        if Length(CoNumber) = 2 then Result:=Prefix + '00' + CoNumber;
+    end;
+
+    /// <remarks>
+    /// Used only to build GroupID.
+    /// </remarks>
+
+    // Converts from 2020 to 02020, 340 to 00340 and so on.
+    if mode = 1 then
+    begin
+        if Length(CoNumber) = 4 then Result:='0'   + CoNumber;
+        if Length(CoNumber) = 3 then Result:='00'  + CoNumber;
+        if Length(CoNumber) = 2 then Result:='000' + CoNumber;
+        if Length(CoNumber) = 1 then Result:='00000';
+    end;
+
+    // Converts from 02020 to 2020.
+    if mode = 2 then
+    begin
+        for var iCNT: integer:= 1 to Length(CoNumber) do
+        begin
+            if CoNumber[iCNT] <> '0' then
+            begin
+                Result:=System.Copy(CoNumber, iCNT, MaxInt);
+                Exit;
+            end;
+        end;
+    end;
+
+    // Converts from 2020 to 2020, 340 to 0340... .
+    if mode = 3 then
+    begin
+        if Length(CoNumber) = 4 then Result:=CoNumber;
+        if Length(CoNumber) = 3 then Result:='0'   + CoNumber;
+        if Length(CoNumber) = 2 then Result:='00'  + CoNumber;
+        if Length(CoNumber) = 1 then Result:='000' + CoNumber;
+    end;
+
+end;
+
+
+function TMainForm.GetCoCode(CoPos: integer; GroupId: string): string;
+begin
+    /// <remarks>
+    /// Return specific CoCode from the given group.
+    /// Group id format: series of 4 groups of 5 digits, i.e.: '020470034000043' must be read as follows:
+    /// 1. 1ST CO CODE: 02047 (2047)
+    /// 2. 2ND CO CODE: 00340 (340)
+    /// 3. 3RD CO CODE: 00043 (43)
+    /// 4. 4TH CO CODE: 00000 (0)
+    /// </remarks>
+    if CoPos = 1 then Result:=(MidStr(GroupId, 1,  5).ToInteger).toString;
+    if CoPos = 2 then Result:=(MidStr(GroupId, 6,  5).ToInteger).toString;
+    if CoPos = 3 then Result:=(MidStr(GroupId, 11, 5).ToInteger).toString;
+    if CoPos = 4 then Result:=(MidStr(GroupId, 16, 5).ToInteger).toString;
 end;
 
 
@@ -1129,6 +1236,43 @@ begin
     CallbackStatusBar(PassMsg);
     CallbackAwaitForm(PassMsg);
     CallbackMassMailer(PassMsg);
+
+end;
+
+
+/// LEGACY CODE - TO BE REMOVED [END]
+
+
+// ---------------------------------------------------------------------------------------------------------------------------------------- WINDOWS MESSAGES //
+
+
+procedure TMainForm.NotifyMoveOrResizeStarted;
+begin
+    if (ChromiumWindow <> nil) then ChromiumWindow.NotifyMoveOrResizeStarted;
+end;
+
+
+procedure TMainForm.ChromiumModalLoopOn(PassMsg: TMessage);
+begin
+    if (PassMsg.wParam = 0) and (GlobalCEFApp <> nil) then GlobalCEFApp.OsmodalLoop:=True;
+end;
+
+
+procedure TMainForm.ChromiumModalLoopOff(PassMsg: TMessage);
+begin
+    if (PassMsg.wParam = 0) and (GlobalCEFApp <> nil) then GlobalCEFApp.OsmodalLoop:=False;
+end;
+
+
+procedure TMainForm.WndMessagesChromium(PassMsg: TMessage);
+begin
+
+    case PassMsg.Msg of
+        WM_MOVE:          NotifyMoveOrResizeStarted;
+        WM_MOVING:        NotifyMoveOrResizeStarted;
+        WM_ENTERMENULOOP: ChromiumModalLoopOn(PassMsg);
+        WM_EXITMENULOOP:  ChromiumModalLoopOff(PassMsg);
+    end;
 
 end;
 
@@ -1227,6 +1371,9 @@ begin
 end;
 
 
+// ------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZATION //
+
+
 procedure TMainForm.InitMainWnd(SessionId: string);
 begin
 
@@ -1235,8 +1382,16 @@ begin
     var Settings: ISettings:=TSettings.Create();
     FWinUserName:=Settings.WinUserName;
 
+    FStartTime:=Now();
+    FormatDateTime('hh:mm:ss', Now());
+    FormatDateTime('hh:mm:ss', Now());
+
     StatBar_TXT1.Caption:=TStatusBar.Ready;
     StatBar_TXT2.Caption:=FWinUserName;
+    StatBar_TXT3.Caption:=DateToStr(Now);
+
+    FAppEvents.Log(EventLogPath, 'Application version = ' + TCommon.GetBuildInfoAsString);
+    FAppEvents.Log(EventLogPath, 'User SID = ' + TUserSid.GetCurrentUserSid);
 
 end;
 
@@ -1315,34 +1470,6 @@ begin
                     WOD_NEW_WINDOW
                 ]
             );
-end;
-
-
-procedure TMainForm.TryInitConnection;
-begin
-
-    if not Assigned(FDbConnect) then
-        FDbConnect:=TADOConnection.Create(nil);
-
-    var DataBase:=TDataBase.Create(True);
-    try
-
-        if DataBase.Check = 0 then
-        begin
-            DataBase.InitializeConnection(MainThreadID, True, FDbConnect);
-            FIsConnected:=True;
-            SwitchTimers(TurnedOn);
-        end
-        else
-        begin
-            FIsConnected:=False;
-            SwitchTimers(TurnedOff);
-        end;
-
-    finally
-        DataBase.Free;
-    end;
-
 end;
 
 
@@ -1425,111 +1552,6 @@ begin
 
         btnUnlock.Caption:='Lock';
         EditPassword.SetFocus;
-    end;
-
-end;
-
-
-/// <summary>
-/// Convert supplied Company Code to numeric or alphanumeric representation.
-/// </summary>
-
-function TMainForm.ConvertCoCode(CoNumber: string; Prefix: string; mode: integer): string;
-begin
-
-    Result:= '';
-
-    /// <remarks>
-    /// Used only for open items and aging view.
-    /// </remarks>
-
-    // Allow to convert '2020' to 'F2020', etc.
-    if mode = 0 then
-    begin
-        if Length(CoNumber) = 4 then Result:=Prefix + CoNumber;
-        if Length(CoNumber) = 3 then Result:=Prefix + '0'  + CoNumber;
-        if Length(CoNumber) = 2 then Result:=Prefix + '00' + CoNumber;
-    end;
-
-    /// <remarks>
-    /// Used only to build GroupID.
-    /// </remarks>
-
-    // Converts from 2020 to 02020, 340 to 00340 and so on.
-    if mode = 1 then
-    begin
-        if Length(CoNumber) = 4 then Result:='0'   + CoNumber;
-        if Length(CoNumber) = 3 then Result:='00'  + CoNumber;
-        if Length(CoNumber) = 2 then Result:='000' + CoNumber;
-        if Length(CoNumber) = 1 then Result:='00000';
-    end;
-
-    // Converts from 02020 to 2020.
-    if mode = 2 then
-    begin
-        for var iCNT: integer:= 1 to Length(CoNumber) do
-        begin
-            if CoNumber[iCNT] <> '0' then
-            begin
-                Result:=System.Copy(CoNumber, iCNT, MaxInt);
-                Exit;
-            end;
-        end;
-    end;
-
-    // Converts from 2020 to 2020, 340 to 0340... .
-    if mode = 3 then
-    begin
-        if Length(CoNumber) = 4 then Result:=CoNumber;
-        if Length(CoNumber) = 3 then Result:='0'   + CoNumber;
-        if Length(CoNumber) = 2 then Result:='00'  + CoNumber;
-        if Length(CoNumber) = 1 then Result:='000' + CoNumber;
-    end;
-
-end;
-
-
-function TMainForm.GetCoCode(CoPos: integer; GroupId: string): string;
-begin
-    /// <remarks>
-    /// Return specific CoCode from the given group.
-    /// Group id format: series of 4 groups of 5 digits, i.e.: '020470034000043' must be read as follows:
-    /// 1. 1ST CO CODE: 02047 (2047)
-    /// 2. 2ND CO CODE: 00340 (340)
-    /// 3. 3RD CO CODE: 00043 (43)
-    /// 4. 4TH CO CODE: 00000 (0)
-    /// </remarks>
-    if CoPos = 1 then Result:=(MidStr(GroupId, 1,  5).ToInteger).toString;
-    if CoPos = 2 then Result:=(MidStr(GroupId, 6,  5).ToInteger).toString;
-    if CoPos = 3 then Result:=(MidStr(GroupId, 11, 5).ToInteger).toString;
-    if CoPos = 4 then Result:=(MidStr(GroupId, 16, 5).ToInteger).toString;
-end;
-
-
-/// <summary>
-/// Find comapny details such as currency, division, agent. It scans age view string grid. Open Items Tab helper.
-/// </summary>
-
-procedure TMainForm.FindCoData(TargetColumn: integer; TargetGrid: TStringGrid; SourceGrid: TStringGrid);
-begin
-
-    if SourceGrid.RowCount = 0 then Exit;
-
-    for var iCNT: integer:=1 to SourceGrid.RowCount - 1 do
-    begin
-        if TargetGrid.Cells[TargetColumn, 0] = SourceGrid.Cells[SourceGrid.ReturnColumn(TCompanyData.CoCode, 1, 1), iCNT] then
-        begin
-            TargetGrid.Cells[TargetColumn, 1]:=SourceGrid.Cells[SourceGrid.ReturnColumn(TCompanyData.CoCurrency, 1, 1), iCNT];
-            TargetGrid.Cells[TargetColumn, 2]:=SourceGrid.Cells[SourceGrid.ReturnColumn(TCompanyData.Divisions,  1, 1), iCNT];
-            TargetGrid.Cells[TargetColumn, 3]:=SourceGrid.Cells[SourceGrid.ReturnColumn(TCompanyData.Agents,     1, 1), iCNT];
-            Break;
-        end
-        else
-        begin
-            TargetGrid.Cells[TargetColumn, 1]:=TUnknown.NA;
-            TargetGrid.Cells[TargetColumn, 2]:=TUnknown.NA;
-            TargetGrid.Cells[TargetColumn, 3]:=TUnknown.NA;
-        end;
     end;
 
 end;
@@ -1855,35 +1877,50 @@ end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
-
     FAppEvents:=TThreadFileLog.Create;
-
-//    for var iCNT:=0 to MyPages.PageCount - 1 do
-//        MyPages.Pages[iCNT].TabVisible:=False;
-//
-//    MyPages.ActivePage:=TabSheet1;
-//
-//    SetButtonsGlyphs;
-//    InitializeScreenSettings;
-//    FAllowClose:=False;
-
+    FAllowClose:=False;
+    //InitializeScreenSettings;
 end;
 
 
 procedure TMainForm.FormShow(Sender: TObject);
 begin
 
-    // Initialize Chromium
     ChromiumWindow.ChromiumBrowser.OnBeforePopup:=Chromium_OnBeforePopup;
     if not(ChromiumWindow.CreateBrowser) then ChromiumTimer.Enabled:=True;
 
-    // Draw panel borders
-    SetPanelBorders;
+    for var iCNT:=0 to MyPages.PageCount - 1 do MyPages.Pages[iCNT].TabVisible:=False;
+    MyPages.ActivePage:=TabSheet1;
 
-    // Update grids width, height and thumb size
+    SetPanelBorders;
     SetGridColumnWidths;
     SetGridRowHeights;
+    SetButtonsGlyphs;
 
+    UpTime.Enabled:=True;
+    CurrentTime.Enabled:=True;
+
+    var Queries: IQueries:=TQueries.Create;
+    Queries.InitializeQms;
+
+    if FAccessLevel <> TUserAccess.Admin then
+    begin
+        sgCompanyData.Enabled:=False;
+        ReloadCover.Visible:=True;
+        ReloadCover.Cursor:=crNo;
+        GroupListDates.Enabled:=False;
+    end;
+
+    GroupListBox.ListToComboBox(FGroupList, 1, TListSelection.First);
+    GroupListDates.ListToComboBox(FAgeDateList, 0, TListSelection.Last);
+    if not(FirstAgeLoad.Enabled) then FirstAgeLoad.Enabled:=True;
+
+end;
+
+
+procedure TMainForm.FormActivate(Sender: TObject);
+begin
+    {Do nothing}
 end;
 
 
@@ -3345,13 +3382,14 @@ begin
 
     var UserControl: TUserControl:=TUserControl.Create(FDbConnect);
     try
-        UserControl.UserName:=WinUserName;
 
-        if not (UserControl.GetAgeDates(GroupListDates, FGroupList[GroupListBox.ItemIndex, 0])) then
+        UserControl.UserName:=WinUserName;
+        if not UserControl.GetAgeDates(MainForm.FAgeDateList, MainForm.FGroupList[GroupListBox.ItemIndex, 0]) then
         begin
             THelpers.MsgCall(TAppMessage.Error, 'Cannot list age dates for selected group. Please contact IT support.');
             FAppEvents.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: "GetAgeDates" returned false. Cannot get list of age dates for selected group (' + FGroupList[GroupListBox.ItemIndex, 0] + ').');
         end;
+        GroupListDates.ListToComboBox(FAgeDateList, 0, TListSelection.Last);
 
     finally
         UserControl.Free;

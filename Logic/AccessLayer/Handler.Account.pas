@@ -30,8 +30,8 @@ type
     public
         property UserName: string read FUserName write FUserName;
         function GetAccessData(DataType: TUserAccess.TTypes): string;
-        function GetGroupList(var List: TALists; FGroupListBox: TComboBox): boolean;
-        function GetAgeDates(AgeDatesBox: TComboBox; GroupID: string): boolean;
+        function GetGroupList(var List: TALists): boolean;
+        function GetAgeDates(var List: TALists; GroupID: string): boolean;
     end;
 
 
@@ -82,7 +82,7 @@ begin
 end;
 
 
-function TUserControl.GetGroupList(var List: TALists; FGroupListBox: TComboBox): boolean;
+function TUserControl.GetGroupList(var List: TALists): boolean;
 begin
 
     Result:=True;
@@ -94,24 +94,18 @@ begin
 
         if DataSet.RecordCount > 0 then
         begin
-            SetLength(List, 2, 2);
 
-            var iCNT: integer:=0;
+            SetLength(List, 2, 2);
+            var iCNT:=0;
+
             while not DataSet.EOF do
             begin
                 List[iCNT, 0]:=DataSet.Fields[TGroups.GroupId].Value;
                 List[iCNT, 1]:=DataSet.Fields[TGroups.GroupName].Value;
-                inc(iCNT);
+                Inc(iCNT);
                 DataSet.MoveNext;
                 SetLength(List, iCNT + 1, 2);
             end;
-
-            DataSet.Filter:=adFilterNone;
-
-            // Into ComboBox list
-            FGroupListBox.Clear;
-            for iCNT:=0 to high(List) - 1 do FGroupListBox.Items.Add(List[iCNT, 1]);
-            FGroupListBox.ItemIndex:=0;
 
         end;
 
@@ -122,7 +116,7 @@ begin
 end;
 
 
-function TUserControl.GetAgeDates(AgeDatesBox: TComboBox; GroupID: string): boolean;
+function TUserControl.GetAgeDates(var List: TALists; GroupID: string): boolean;
 begin
 
     Result:=True;
@@ -132,20 +126,22 @@ begin
     OpenTable(TSnapshots.Snapshots);
 
     try
-        AgeDatesBox.Clear;
 
         if DataSet.RecordCount > 0 then
         begin
+
+            SetLength(List, 2, 1);
+            var iCNT:=0;
+
             while not DataSet.EOF do
             begin
                 // Make sure that we get "yyyy-mm-dd" format
                 var Date: string:=FormatDateTime(TDateTimeFormats.DateFormat, DataSet.Fields[TSnapshots.AgeDate].Value);
-                AgeDatesBox.Items.Add(Date);
+                List[iCNT, 0]:=Date;
+                Inc(iCNT);
                 DataSet.MoveNext;
+                SetLength(List, iCNT + 1, 1);
             end;
-
-            // Display last date from the sorted list
-            AgeDatesBox.ItemIndex:=AgeDatesBox.Items.Count - 1;
 
         end;
 
@@ -157,3 +153,4 @@ end;
 
 
 end.
+

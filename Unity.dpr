@@ -32,6 +32,7 @@ uses
     Unity.Shape                 in 'Extensions\Unity.Shape.pas'{Component extension},
     Unity.Grid                  in 'Extensions\Unity.Grid.pas'{Component extension},
     Unity.ListView              in 'Extensions\Unity.ListView.pas'{Component extension},
+    Unity.ComboBox              in 'Extensions\Unity.ComboBox.pas'{Component extension},
     Unity.Crc32                 in 'Helpers\Unity.Crc32.pas',
     Unity.Enums                 in 'Helpers\Types\Unity.Enums.pas',
     Unity.Arrays                in 'Helpers\Types\Unity.Arrays.pas',
