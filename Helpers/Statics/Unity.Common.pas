@@ -17,7 +17,7 @@ type
         class procedure GetBuildInfo(var V1, V2, V3, V4: word); static;
     public
         type  TInputMethod = reference to procedure;
-        const SelectionColor: integer   = $00F2E4D7; // rgb D7E4F2 => bgr F2E4D7
+        const SelectionColor: integer   = $00E3B268; // rgb D7E4F2 => bgr F2E4D7
         const FontColor:      integer   = $006433C9; // rgb C93364 => bgr 6433C9
         const AltColor:       integer   = $00FFDBB7; // rgb B7DBFF => bgr FFDBB7
         const DecryptKey:     integer   = 429496;

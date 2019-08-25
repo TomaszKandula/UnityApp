@@ -32,7 +32,7 @@ object ActionsForm: TActionsForm
     Height = 729
     Align = alClient
     BevelOuter = bvNone
-    Color = 15527148
+    Color = 15855854
     ParentBackground = False
     TabOrder = 0
     object PanelActions: TPanel
@@ -1427,7 +1427,7 @@ object ActionsForm: TActionsForm
         Margins.Right = 10
         Margins.Bottom = 10
         Align = alClient
-        Pen.Color = clSkyBlue
+        Pen.Color = 14922344
         ExplicitLeft = 72
         ExplicitTop = 80
         ExplicitWidth = 65
@@ -2091,7 +2091,7 @@ object ActionsForm: TActionsForm
           AlignWithMargins = True
           Left = 10
           Top = 5
-          Width = 91
+          Width = 315
           Height = 16
           Margins.Left = 10
           Margins.Top = 5
@@ -2107,6 +2107,7 @@ object ActionsForm: TActionsForm
           Font.Style = [fsUnderline]
           ParentColor = False
           ParentFont = False
+          ExplicitWidth = 91
         end
         object DailyComBorders: TShape
           AlignWithMargins = True
@@ -2119,7 +2120,7 @@ object ActionsForm: TActionsForm
           Margins.Right = 10
           Margins.Bottom = 10
           Align = alClient
-          Pen.Color = clSkyBlue
+          Pen.Color = 14922344
           ExplicitLeft = 120
           ExplicitTop = 56
           ExplicitWidth = 65
@@ -2175,7 +2176,7 @@ object ActionsForm: TActionsForm
           AlignWithMargins = True
           Left = 10
           Top = 5
-          Width = 108
+          Width = 315
           Height = 16
           Margins.Left = 10
           Margins.Top = 5
@@ -2191,6 +2192,7 @@ object ActionsForm: TActionsForm
           Font.Style = [fsUnderline]
           ParentColor = False
           ParentFont = False
+          ExplicitWidth = 108
         end
         object GeneralComBorders: TShape
           AlignWithMargins = True
@@ -2203,7 +2205,7 @@ object ActionsForm: TActionsForm
           Margins.Right = 10
           Margins.Bottom = 10
           Align = alClient
-          Pen.Color = clSkyBlue
+          Pen.Color = 14922344
           ExplicitLeft = 235
           ExplicitTop = 105
           ExplicitWidth = 65
@@ -2258,7 +2260,7 @@ object ActionsForm: TActionsForm
           AlignWithMargins = True
           Left = 10
           Top = 5
-          Width = 134
+          Width = 315
           Height = 16
           Margins.Left = 10
           Margins.Top = 5
@@ -2274,6 +2276,7 @@ object ActionsForm: TActionsForm
           Font.Style = [fsUnderline]
           ParentColor = False
           ParentFont = False
+          ExplicitWidth = 134
         end
         object HistoryGridBorders: TShape
           AlignWithMargins = True
@@ -2286,7 +2289,7 @@ object ActionsForm: TActionsForm
           Margins.Right = 10
           Margins.Bottom = 10
           Align = alClient
-          Pen.Color = clSkyBlue
+          Pen.Color = 14922344
           ExplicitLeft = 201
           ExplicitTop = 45
           ExplicitWidth = 65

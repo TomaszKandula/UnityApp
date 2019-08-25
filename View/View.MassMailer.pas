@@ -200,9 +200,9 @@ begin
     lsColumns.Width  :=0;
 
     // Draw panel borders
-    PanelEmailContainer.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    PanelSubject.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    PanelMessage.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+    PanelEmailContainer.PanelBorders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelSubject.PanelBorders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelMessage.PanelBorders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
 
     ValBeginDate.Caption:='2010-01-01';
     ValEndDate.Caption:='';

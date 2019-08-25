@@ -22,6 +22,7 @@ uses
     System.StrUtils,
     System.DateUtils,
     System.Diagnostics,
+    System.Threading,
     System.Math,
     System.Win.ComObj,
     System.UITypes,
@@ -300,8 +301,6 @@ type
         N8: TMenuItem;
         InetTimer: TTimer;
         StatBar_TXT7: TLabel;
-        InnerPanel8Right: TPanel;
-        Cap27: TShape;
         N9: TMenuItem;
         Action_FilterINF7: TMenuItem;
         N5: TMenuItem;
@@ -317,7 +316,6 @@ type
         sgGroup3: TStringGrid;
         sgPmtTerms: TStringGrid;
         Action_AutoColumnSize: TMenuItem;
-        InnerPanelTop: TPanel;
         SplitLine2: TBevel;
         Action_Search: TMenuItem;
         BookPopup: TPopupMenu;
@@ -362,12 +360,9 @@ type
         custRISKB: TLabel;
         custRISKC: TLabel;
         Action_FollowUpColors: TMenuItem;
-        ShapeList2: TShape;
         SplitLine3: TBevel;
         imgEventLog: TImage;
         Text51: TLabel;
-        sgGroups: TStringGrid;
-        sgUAC: TStringGrid;
         Action_INF7_Filter: TMenuItem;
         Action_CoCode_Filter: TMenuItem;
         Action_Agent_Filter: TMenuItem;
@@ -405,14 +400,12 @@ type
         PanelGroup3: TPanel;
         PanelSettingsSections: TPanel;
         PanelSettingsValues: TPanel;
-        PanelUAC: TPanel;
-        PanelGroups: TPanel;
         btnUnlock: TSpeedButton;
         btnPassUpdate: TSpeedButton;
         Action_AddFollowUpGroup: TMenuItem;
         Action_RemoveFollowUps: TMenuItem;
         Cap24: TShape;
-        Shape2: TShape;
+    hShapeSorting: TShape;
         Action_MassMailer: TMenuItem;
         btnPasswordPreview: TSpeedButton;
         hShapeEye: TShape;
@@ -468,7 +461,6 @@ type
         txtSettings: TLabel;
         ChromiumWindow: TChromiumWindow;
         Chromium: TChromium;
-        ChromiumTimer: TTimer;
         txtOverdueItems: TLabel;
         txtCreditLimitsReport: TLabel;
         txtDebtorsReport: TLabel;
@@ -496,7 +488,6 @@ type
         PanelCustomerGr: TPanel;
         sgCustomerGr: TStringGrid;
         PanelAgeView: TPanel;
-        FirstAgeLoad: TTimer;
         Shape: TShape;
         Action_Free3: TMenuItem;
         N4: TMenuItem;
@@ -709,12 +700,6 @@ type
         procedure Action_Agent_FilterClick(Sender: TObject);
         procedure Action_Division_FilterClick(Sender: TObject);
         procedure Action_FollowUp_FilterClick(Sender: TObject);
-        procedure sgUACDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
-        procedure sgUACMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-        procedure sgUACMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-        procedure sgGroupsDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
-        procedure sgGroupsMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-        procedure sgGroupsMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure Action_INF4_FilterClick(Sender: TObject);
         procedure Action_Gr3_FilterClick(Sender: TObject);
         procedure Action_HideSummaryClick(Sender: TObject);
@@ -784,7 +769,6 @@ type
         procedure btnTablesMouseLeave(Sender: TObject);
         procedure btnSettingsMouseEnter(Sender: TObject);
         procedure btnSettingsMouseLeave(Sender: TObject);
-        procedure ChromiumTimerTimer(Sender: TObject);
         procedure ChromiumWindowAfterCreated(Sender: TObject);
         procedure txtStartClick(Sender: TObject);
         procedure txtReportsClick(Sender: TObject);
@@ -837,7 +821,6 @@ type
         procedure sgAccountTypeMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure sgCustomerGrMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure sgCustomerGrMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-        procedure FirstAgeLoadTimer(Sender: TObject);
         procedure Action_Free3Click(Sender: TObject);
         procedure Action_SalesRespClick(Sender: TObject);
         procedure Action_CustomerGrpClick(Sender: TObject);
@@ -856,6 +839,7 @@ type
         procedure CommonPopupMenuPopup(Sender: TObject);
         procedure TrayIconClick(Sender: TObject);
     private
+        var FHadFirstLoad:         boolean;
         var FAllowClose:           boolean;
         var FEventLogPath:         string;
         var FWinUserName:          string;
@@ -907,9 +891,11 @@ type
         var FGridPicture:       TImage;
         var FOpenItemsRefs:     TFOpenItemsRefs;
         var FControlStatusRefs: TFControlStatusRefs;
-        property WinUserName: string read FWinUserName;
+        property WinUserName:  string read FWinUserName;
         property EventLogPath: string read FEventLogPath;
         procedure InitMainWnd(SessionId: string);
+        procedure SetupMainWnd();
+        procedure StartMainWnd();
         procedure UpdateFOpenItemsRefs(SourceGrid: TStringGrid);
         procedure UpdateFControlStatusRefs(SourceGrid: TStringGrid);
         procedure SwitchTimers(State: TAppTimers);
@@ -1396,6 +1382,105 @@ begin
 end;
 
 
+procedure TMainForm.SetupMainWnd();
+begin
+
+    if FHadFirstLoad then Exit();
+
+    ChromiumWindow.ChromiumBrowser.OnBeforePopup:=Chromium_OnBeforePopup;
+    if not ChromiumWindow.Initialized then ChromiumWindow.CreateBrowser();
+
+    for var iCNT:=0 to MyPages.PageCount - 1 do MyPages.Pages[iCNT].TabVisible:=False;
+        MyPages.ActivePage:=TabSheet1;
+
+    SetPanelBorders;
+    SetGridColumnWidths;
+    SetGridRowHeights;
+    SetButtonsGlyphs;
+
+    UpTime.Enabled:=True;
+    CurrentTime.Enabled:=True;
+
+    var Queries: IQueries:=TQueries.Create;
+    Queries.InitializeQms;
+
+    if FAccessLevel <> TUserAccess.Admin then
+    begin
+        sgCompanyData.Enabled:=False;
+        ReloadCover.Visible:=True;
+        ReloadCover.Cursor:=crNo;
+        GroupListDates.Enabled:=False;
+    end;
+
+    GroupListBox.ListToComboBox(FGroupList, 1, TListSelection.First);
+    GroupListDates.ListToComboBox(FAgeDateList, 0, TListSelection.Last);
+
+end;
+
+
+procedure TMainForm.StartMainWnd();
+begin
+
+    if not FHadFirstLoad then
+    begin
+
+        var NewTask: ITask:=TTask.Create(procedure
+        begin
+
+            // Delay
+            Sleep(2500);
+
+            TThread.Synchronize(nil, procedure
+            begin
+
+                // Load (async) default age snapshot
+                if not(string.IsNullOrEmpty(GroupListBox.Text)) and not(string.IsNullOrEmpty(GroupListDates.Text)) then
+                begin
+
+                    FGroupIdSel:=FGroupList[GroupListBox.ItemIndex, 0];
+                    FGroupNmSel:=FGroupList[GroupListBox.ItemIndex, 1];
+                    FAgeDateSel:=GroupListDates.Text;
+                    sgAgeView.Enabled:=True;
+
+                    var Transactions: TTransactions:=TTransactions.Create(FDbConnect);
+                    try
+
+                        FOpenItemsUpdate:=Transactions.GetDateTime(DateTime);
+                        FOpenItemsStatus:=Transactions.GetStatus(FOpenItemsUpdate);
+
+                        if string.IsNullOrEmpty(FOpenItemsUpdate) then
+                        begin
+
+                            THelpers.MsgCall(TAppMessage.Warn, 'Cannot find open items in database. Please contact IT support.');
+                            var Debtors: IDebtors:=TDebtors.Create;
+                            Debtors.ReadAgeViewAsync(NullParameter, TSorting.TMode.Ranges);
+
+                        end
+                        else
+                        begin
+
+                            var Debtors: IDebtors:=TDebtors.Create;
+                            Debtors.ReadAgeViewAsync(CallOpenItems, TSorting.TMode.Ranges);
+
+                        end;
+
+                    finally
+                        Transactions.Free;
+                    end;
+                end;
+
+            end);
+
+        end);
+
+        NewTask.Start();
+        FHadFirstLoad:=True;
+
+    end;
+
+end;
+
+
 /// <summary>
 /// Get column reference on demand for Open Items string grid. The reason is, despite we do not change columns order
 /// at run time programatically, it may be changed on server-side and that will be immediatelly reflected
@@ -1485,6 +1570,7 @@ begin
 
     if IsLocked then
     begin
+
         // Visibility on
         imgOFF.Visible:=True;
         btnPassUpdate.Enabled:=False;
@@ -1505,22 +1591,16 @@ begin
         sgListValue.Row:=1;
         sgListSection.Visible:=False;
         sgListValue.Visible:=False;
-        sgUAC.Visible:=False;
-        sgGroups.Visible:=False;
-        sgUAC.ClearAll(2, 0, 0, False);
-        sgGroups.ClearAll(2, 0, 0, False);
-        sgUAC.Row:=1;
-        sgGroups.Row:=1;
         sgListSection.Enabled:=False;
         sgListValue.Enabled:=False;
-        sgUAC.Enabled:=False;
-        sgGroups.Enabled:=False;
 
         btnUnlock.Caption:='Unlock';
         EditPassword.SetFocus;
+
     end
     else
     begin
+
         // Setup headers
         sgListSection.Cols[0].Text:='Lp';
         sgListSection.Cols[1].Text:='Sections';
@@ -1535,8 +1615,6 @@ begin
         EditNewPasswordConfirmation.Enabled:=True;
 
         // String grids
-        sgUAC.Enabled:=True;
-        sgGroups.Enabled:=True;
         sgListSection.Enabled:=True;
         sgListValue.Enabled:=True;
         sgListSectionClick(self);
@@ -1544,14 +1622,13 @@ begin
         sgListValue.Row:=1;
         sgListSection.Visible:=True;
         sgListValue.Visible:=True;
-        sgUAC.Visible:=True;
-        sgGroups.Visible:=True;
 
         // Transparency off
         imgOFF.Visible:=False;
 
         btnUnlock.Caption:='Lock';
         EditPassword.SetFocus;
+
     end;
 
 end;
@@ -1682,33 +1759,31 @@ end;
 
 procedure TMainForm.SetPanelBorders;
 begin
-    AppHeader.PanelBorders            (clWhite, clSkyBlue, clWhite,   clWhite,   clWhite);
-    PanelAgeView.PanelBorders         (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    PanelOpenItems.PanelBorders       (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    PanelAddressBook.PanelBorders     (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    PanelInvoiceTracker.PanelBorders  (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    PanelCoCodes.PanelBorders         (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    PanelControlStatus.PanelBorders   (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    PanelPaidInfo.PanelBorders        (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    PanelPerson.PanelBorders          (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    PanelPmtTerms.PanelBorders        (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    PanelGroup3.PanelBorders          (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    PanelSettingsSections.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    PanelSettingsValues.PanelBorders  (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    PanelUAC.PanelBorders             (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    PanelGroups.PanelBorders          (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    PanelSalesResp.PanelBorders       (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    PanelPersonResp.PanelBorders      (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    PanelCustomerGr.PanelBorders      (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    PanelAccountType.PanelBorders     (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    PanelFSC.PanelBorders             (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    PanelLBU.PanelBorders             (clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    PanelLBUGrid.PanelBorders         (clWhite, $00ECECEC, $00ECECEC, $00ECECEC, $00ECECEC);
-    PanelFSCGrid.PanelBorders         (clWhite, $00ECECEC, $00ECECEC, $00ECECEC, $00ECECEC);
-    PanelFscComment.PanelBorders      (clWhite, $00ECECEC, $00ECECEC, $00ECECEC, $00ECECEC);
-    PanelLbuComment.PanelBorders      (clWhite, $00ECECEC, $00ECECEC, $00ECECEC, $00ECECEC);
-    PanelFscDetails.PanelBorders      (clWhite, $00ECECEC, $00ECECEC, $00ECECEC, $00ECECEC);
-    PanelLbuDetails.PanelBorders      (clWhite, $00ECECEC, $00ECECEC, $00ECECEC, $00ECECEC);
+    AppHeader.PanelBorders            (clWhite, $00E3B268, clWhite,   clWhite,   clWhite);
+    PanelAgeView.PanelBorders         (clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelOpenItems.PanelBorders       (clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelAddressBook.PanelBorders     (clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelInvoiceTracker.PanelBorders  (clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelCoCodes.PanelBorders         (clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelControlStatus.PanelBorders   (clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelPaidInfo.PanelBorders        (clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelPerson.PanelBorders          (clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelPmtTerms.PanelBorders        (clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelGroup3.PanelBorders          (clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelSettingsSections.PanelBorders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelSettingsValues.PanelBorders  (clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelSalesResp.PanelBorders       (clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelPersonResp.PanelBorders      (clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelCustomerGr.PanelBorders      (clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelAccountType.PanelBorders     (clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelFSC.PanelBorders             (clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelLBU.PanelBorders             (clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelLBUGrid.PanelBorders         (clWhite, $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
+    PanelFSCGrid.PanelBorders         (clWhite, $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
+    PanelFscComment.PanelBorders      (clWhite, $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
+    PanelLbuComment.PanelBorders      (clWhite, $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
+    PanelFscDetails.PanelBorders      (clWhite, $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
+    PanelLbuDetails.PanelBorders      (clWhite, $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
 end;
 
 
@@ -1725,8 +1800,6 @@ begin
     sgPerson.SetColWidth        (10, 30, 400);
     sgGroup3.SetColWidth        (10, 30, 400);
     sgPmtTerms.SetColWidth      (10, 30, 400);
-    sgGroups.SetColWidth        (10, 20, 400);
-    sgUAC.SetColWidth           (10, 20, 400);
     sgSalesResp.SetColWidth     (10, 20, 400);
     sgPersonResp.SetColWidth    (10, 20, 400);
     sgCustomerGr.SetColWidth    (10, 20, 400);
@@ -1748,8 +1821,6 @@ begin
     sgPerson.SetRowHeight        (sgPerson.sgRowHeight,         25);
     sgGroup3.SetRowHeight        (sgGroup3.sgRowHeight,         25);
     sgPmtTerms.SetRowHeight      (sgPmtTerms.sgRowHeight,       25);
-    sgGroups.SetRowHeight        (sgGroups.sgRowHeight,         25);
-    sgUAC.SetRowHeight           (sgUAC.sgRowHeight,            25);
     sgSalesResp.SetRowHeight     (sgSalesResp.sgRowHeight,      25);
     sgPersonResp.SetRowHeight    (sgPersonResp.sgRowHeight,     25);
     sgAccountType.SetRowHeight   (sgAccountType.sgRowHeight,    25);
@@ -1847,11 +1918,10 @@ begin
     begin
 
         var Settings: ISettings:=TSettings.Create;
-        var LastTopPos:=Settings.GetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_TOP',  0);
+        var LastTopPos:=Settings.GetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_TOP', 0);
         var LastLeftPos: integer:=Settings.GetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_LEFT', 0);
 
         MainForm.DefaultMonitor:=dmDesktop;
-        MainForm.Position      :=poDefault;
         MainForm.Top           :=LastTopPos;
 
         // ------------------------------------------------------------------
@@ -1877,6 +1947,7 @@ end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
+    // Calls after main form constructor
     FAppEvents:=TThreadFileLog.Create;
     FAllowClose:=False;
     //InitializeScreenSettings;
@@ -1885,42 +1956,15 @@ end;
 
 procedure TMainForm.FormShow(Sender: TObject);
 begin
-
-    ChromiumWindow.ChromiumBrowser.OnBeforePopup:=Chromium_OnBeforePopup;
-    if not(ChromiumWindow.CreateBrowser) then ChromiumTimer.Enabled:=True;
-
-    for var iCNT:=0 to MyPages.PageCount - 1 do MyPages.Pages[iCNT].TabVisible:=False;
-    MyPages.ActivePage:=TabSheet1;
-
-    SetPanelBorders;
-    SetGridColumnWidths;
-    SetGridRowHeights;
-    SetButtonsGlyphs;
-
-    UpTime.Enabled:=True;
-    CurrentTime.Enabled:=True;
-
-    var Queries: IQueries:=TQueries.Create;
-    Queries.InitializeQms;
-
-    if FAccessLevel <> TUserAccess.Admin then
-    begin
-        sgCompanyData.Enabled:=False;
-        ReloadCover.Visible:=True;
-        ReloadCover.Cursor:=crNo;
-        GroupListDates.Enabled:=False;
-    end;
-
-    GroupListBox.ListToComboBox(FGroupList, 1, TListSelection.First);
-    GroupListDates.ListToComboBox(FAgeDateList, 0, TListSelection.Last);
-    if not(FirstAgeLoad.Enabled) then FirstAgeLoad.Enabled:=True;
-
+    // Execurte before window is show
+    SetupMainWnd();
 end;
 
 
 procedure TMainForm.FormActivate(Sender: TObject);
 begin
-    {Do nothing}
+    // Execute after window is shown
+    StartMainWnd();
 end;
 
 
@@ -2035,65 +2079,6 @@ end;
 
 
 /// <summary>
-/// Delayed load of default age snapshot. Make sure that it is disabled at startup. It can run only once when application main window
-/// is fully loaded and presented to the user.
-/// </summary>
-
-procedure TMainForm.FirstAgeLoadTimer(Sender: TObject);
-begin
-
-    if FirstAgeLoad.Enabled then
-    begin
-
-        // Load (sync) default age snapshot
-        if not(string.IsNullOrEmpty(GroupListBox.Text)) and not(string.IsNullOrEmpty(GroupListDates.Text)) then
-        begin
-            FGroupIdSel:=FGroupList[GroupListBox.ItemIndex, 0];
-            FGroupNmSel:=FGroupList[GroupListBox.ItemIndex, 1];
-            FAgeDateSel:=GroupListDates.Text;
-            sgAgeView.Enabled:=True;
-
-            var Transactions: TTransactions:=TTransactions.Create(FDbConnect);
-            try
-                FOpenItemsUpdate:=Transactions.GetDateTime(DateTime);
-                FOpenItemsStatus:=Transactions.GetStatus(FOpenItemsUpdate);
-                if string.IsNullOrEmpty(FOpenItemsUpdate) then
-                begin
-                    THelpers.MsgCall(TAppMessage.Warn, 'Cannot find open items in database. Please contact IT support.');
-                    var Debtors: IDebtors:=TDebtors.Create;
-                    Debtors.ReadAgeViewAsync(NullParameter, TSorting.TMode.Ranges);
-                end
-                else
-                begin
-                    var Debtors: IDebtors:=TDebtors.Create;
-                    Debtors.ReadAgeViewAsync(CallOpenItems, TSorting.TMode.Ranges);
-                end;
-
-            finally
-                Transactions.Free;
-            end;
-        end;
-
-        FirstAgeLoad.Enabled:=False;
-
-    end;
-
-end;
-
-
-/// <summary>
-/// Initiaize ChromiumWindow with time lag.
-/// </summary>
-
-procedure TMainForm.ChromiumTimerTimer(Sender: TObject);
-begin
-    ChromiumTimer.Enabled:=False;
-    if not(ChromiumWindow.CreateBrowser) and not(ChromiumWindow.Initialized) then
-        ChromiumTimer.Enabled:=True
-end;
-
-
-/// <summary>
 /// Count current follow-ups and display in notification baloon.
 /// </summary>
 
@@ -2187,8 +2172,6 @@ end;
 // --------------------------------------------------------------------------------------------------------------------------------------------- POPUP MENUS //
 
 
-
-
 // ------------------------------------------------------------------------------------------------------------------------------------- COMMON MENU ACTIONS //
 
 
@@ -2210,8 +2193,6 @@ begin
     if sgPmtTerms.Focused    then sgPmtTerms.ExportCSV(CSVExport, '|');
     if sgListValue.Focused   then sgListValue.ExportCSV(CSVExport, '|');
     if sgListSection.Focused then sgListSection.ExportCSV(CSVExport, '|');
-    if sgGroups.Focused      then sgGroups.ExportCSV(CSVExport, '|');
-    if sgUAC.Focused         then sgUAC.ExportCSV(CSVExport, '|');
 
     // String grid placed on action view
     if ActionsForm.OpenItemsGrid.Focused then ActionsForm.OpenItemsGrid.ExportCSV(CSVExport, '|');
@@ -2231,8 +2212,6 @@ begin
     if sgPmtTerms.Focused    then sgPmtTerms.SelectAll;
     if sgListValue.Focused   then sgListValue.SelectAll;
     if sgListSection.Focused then sgListSection.SelectAll;
-    if sgGroups.Focused      then sgGroups.SelectAll;
-    if sgUAC.Focused         then sgUAC.SelectAll;
 
     // String grid placed on action view
     if ActionsForm.OpenItemsGrid.Focused then ActionsForm.OpenItemsGrid.SelectAll;
@@ -2252,8 +2231,6 @@ begin
     if sgPmtTerms.Focused    then sgPmtTerms.CopyCutPaste(TActions.Copy);
     if sgListValue.Focused   then sgListValue.CopyCutPaste(TActions.Copy);
     if sgListSection.Focused then sgListSection.CopyCutPaste(TActions.Copy);
-    if sgGroups.Focused      then sgGroups.CopyCutPaste(TActions.Copy);
-    if sgUAC.Focused         then sgUAC.CopyCutPaste(TActions.Copy);
 
     // String grid placed on action view
     if ActionsForm.OpenItemsGrid.Focused then ActionsForm.OpenItemsGrid.CopyCutPaste(TActions.Copy);
@@ -2273,8 +2250,6 @@ begin
     if sgPmtTerms.Focused    then sgPmtTerms.SetColWidth(10, 20, 400);
     if sgListValue.Focused   then sgListValue.SetColWidth(25, 20, 400);
     if sgListSection.Focused then sgListSection.SetColWidth(25, 20, 400);
-    if sgGroups.Focused      then sgGroups.SetColWidth(10, 20, 400);
-    if sgUAC.Focused         then sgUAC.SetColWidth(10, 20, 400);
 
     // String grid placed on action view
     if ActionsForm.OpenItemsGrid.Focused then ActionsForm.OpenItemsGrid.SetColWidth(10, 20, 400);
@@ -3636,7 +3611,7 @@ begin
     var Col16: integer:=sgInvoiceTracker.ReturnColumn(TTrackerData.Cuid,  1, 1);
 
     // Draw selected row | skip headers
-    sgAgeView.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
+    sgAgeView.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True);
 
     // Mark bold all customers marked with risk class "A"
     if (ACol = Col14) and (sgAgeView.Cells[Col15, ARow] = 'A') then
@@ -3762,7 +3737,7 @@ begin
     var Col5: integer:=sgOpenItems.ReturnColumn(DbModel.TOpenitems.PmtStat,  1, 1);
 
     // Selection
-    MainForm.sgOpenItems.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
+    MainForm.sgOpenItems.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True);
 
     // Numeric values colors
     if
@@ -3796,115 +3771,103 @@ end;
 
 procedure TMainForm.sgCompanyDataDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-    sgCompanyData.DrawSelected(ARow, ACol, State, Rect, clBlack, clCream, clBlack, clCream, False);
+    sgCompanyData.DrawSelected(ARow, ACol, State, Rect, clWhite, clCream, clBlack, clCream, False);
 end;
 
 
 procedure TMainForm.sgAddressBookDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-    sgAddressBook.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
+    sgAddressBook.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True);
 end;
 
 
 procedure TMainForm.sgInvoiceTrackerDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-    sgInvoiceTracker.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
+    sgInvoiceTracker.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True);
 end;
 
 
 procedure TMainForm.sgCoCodesDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-    sgCoCodes.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
+    sgCoCodes.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True);
 end;
 
 
 procedure TMainForm.sgPaidInfoDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-    sgPaidInfo.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
+    sgPaidInfo.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True);
 end;
 
 
 procedure TMainForm.sgPmtTermsDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-    sgPmtTerms.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
+    sgPmtTerms.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True);
 end;
 
 
 procedure TMainForm.sgPersonDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-    sgPerson.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
+    sgPerson.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True);
 end;
 
 
 procedure TMainForm.sgGroup3DrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-    sgGroup3.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
+    sgGroup3.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True);
 end;
 
 
 procedure TMainForm.sgListSectionDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-    sgListSection.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
+    sgListSection.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True);
 end;
 
 
 procedure TMainForm.sgListValueDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-    sgListValue.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
-end;
-
-
-procedure TMainForm.sgUACDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
-begin
-    sgUAC.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
-end;
-
-
-procedure TMainForm.sgGroupsDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
-begin
-    sgGroups.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
+    sgListValue.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True);
 end;
 
 
 procedure TMainForm.sgControlStatusDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-    sgControlStatus.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
+    sgControlStatus.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True);
 end;
 
 
 procedure TMainForm.sgAccountTypeDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-    sgAccountType.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
+    sgAccountType.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True);
 end;
 
 
 procedure TMainForm.sgPersonRespDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-    sgPersonResp.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
+    sgPersonResp.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True);
 end;
 
 
 procedure TMainForm.sgSalesRespDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-    sgSalesResp.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
+    sgSalesResp.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True);
 end;
 
 
 procedure TMainForm.sgCustomerGrDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-    sgCustomerGr.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
+    sgCustomerGr.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True);
 end;
 
 
 procedure TMainForm.sgFSCviewDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-    sgFSCview.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
+    sgFSCview.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True);
 end;
 
 
 procedure TMainForm.sgLBUviewDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-    sgLBUview.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
+    sgLBUview.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True);
 end;
 
 
@@ -4727,8 +4690,8 @@ procedure TMainForm.AppHeaderMouseEnter(Sender: TObject);
 begin
     if AppHeader.Height = 13 then
     begin
-        AppHeader.Color:=clSkyBlue;
-        AppHeader.PanelBorders(clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+        AppHeader.Color:=$00E3B268;
+        AppHeader.PanelBorders($00E3B268, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
     end;
 end;
 
@@ -5219,38 +5182,6 @@ begin
 end;
 
 
-// UAC | WHEEL DOWN
-procedure TMainForm.sgUACMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-begin
-    Handled:=True;
-    sgUAC.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
-end;
-
-
-// UAC | WHEE UP
-procedure TMainForm.sgUACMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-begin
-    Handled:=True;
-    sgUAC.Perform(WM_VSCROLL, SB_LINEUP, 0);
-end;
-
-
-// GROUPS | WHEEL DOWN
-procedure TMainForm.sgGroupsMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-begin
-    Handled:=True;
-    sgGroups.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
-end;
-
-
-// GROUPS | WHEEL UP
-procedure TMainForm.sgGroupsMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-begin
-    Handled:=True;
-    sgGroups.Perform(WM_VSCROLL, SB_LINEUP, 0);
-end;
-
-
 // CONTROL STATUS | WHEEL DOWN
 procedure TMainForm.sgControlStatusMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
@@ -5582,7 +5513,7 @@ begin
         AppHeader.Height:=57;
         AppHeader.Cursor:=crDefault;
         AppHeader.Color:=clWhite;
-        AppHeader.PanelBorders(clWhite, clSkyBlue, clWhite, clWhite, clWhite);
+        AppHeader.PanelBorders(clWhite, $00E3B268, clWhite, clWhite, clWhite);
     end;
 end;
 
@@ -6368,24 +6299,9 @@ begin
             List.Free;
         end;
 
-        // Get UAC and groups
-        var UserAcc: TDataTables:=TDataTables.Create(FDbConnect);
-        try
-            UserAcc.OpenTable(TUAC.UAC);
-            UserAcc.SqlToGrid(sgUAC, UserAcc.ExecSQL, False, True);
-            UserAcc.OpenTable(TGroups.Groups);
-            UserAcc.SqlToGrid(sgGroups, UserAcc.ExecSQL, False, True);
-        finally
-            UserAcc.Free;
-            sgUAC.SetColWidth   (10, 20, 400);
-            sgGroups.SetColWidth(10, 20, 400);
-        end;
-
         // Grids dimensions
         sgListValue.SetColWidth(25, 30, 400);
         sgListSection.SetColWidth(25, 30, 400);
-        sgUAC.SetColWidth(10, 20, 400);
-        sgGroups.SetColWidth(10, 20, 400);
 
         // CLear edit box from provided password
         EditPassword.Text:='';

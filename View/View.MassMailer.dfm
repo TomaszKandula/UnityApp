@@ -6,7 +6,7 @@ object MassMailerForm: TMassMailerForm
   Caption = 'Unity'
   ClientHeight = 755
   ClientWidth = 1257
-  Color = 15527148
+  Color = 15855854
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11

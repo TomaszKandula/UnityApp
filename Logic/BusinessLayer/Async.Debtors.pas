@@ -83,7 +83,6 @@ begin
 
         var CanReload: boolean:=False;
         var AgeView: TAgeView:=TAgeView.Create(MainForm.FDbConnect);
-//        var UserCtrl: TUserControl:=TUserControl.Create(MainForm.FDbConnect);
         var StopWatch: TStopWatch:=TStopWatch.StartNew;
 
         try
@@ -114,19 +113,6 @@ begin
 
                     // Send to SQL Server, update age date list and reload age view on main tabsheet
                     AgeView.Write(TSnapshots.Snapshots, AgeView.ArrAgeView);
-
-                    TThread.Synchronize(nil, procedure
-                    begin
-
-//                        try
-//                            UserCtrl.GetAgeDates(MainForm.GroupListDates, MainForm.FGroupList[0, 0]);
-//                            MainForm.FAgeDateSel:=MainForm.GroupListDates.Text;
-//                        finally
-//                            UserCtrl.Free;
-//                        end;
-
-                    end);
-
                     CanReload:=True;
 
                 end;
@@ -180,7 +166,7 @@ begin
                 TThread.Synchronize(nil, AgeView.ClearSummary);
 
                 // Async
-                AgeView.idThd  :=0;
+                AgeView.idThd:=0;
                 AgeView.GroupID:=MainForm.FGroupIdSel;
                 AgeView.AgeDate:=MainForm.FAgeDateSel;
                 AgeView.Read(MainForm.sgAgeView, SortMode);

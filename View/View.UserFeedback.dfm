@@ -6,7 +6,7 @@ object FeedbackForm: TFeedbackForm
   Caption = 'Unity'
   ClientHeight = 456
   ClientWidth = 506
-  Color = 15527148
+  Color = 15855854
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -53,7 +53,7 @@ object FeedbackForm: TFeedbackForm
         AlignWithMargins = True
         Left = 5
         Top = 5
-        Width = 162
+        Width = 466
         Height = 13
         Margins.Left = 5
         Margins.Top = 5
@@ -63,6 +63,7 @@ object FeedbackForm: TFeedbackForm
         Caption = 'Your message to developer team:'
         Color = clWhite
         ParentColor = False
+        ExplicitWidth = 162
       end
       object PanelReportMemo: TPanel
         AlignWithMargins = True

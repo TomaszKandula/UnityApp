@@ -174,15 +174,15 @@ begin
     var Settings: ISettings:=TSettings.Create;
     SqlSearchForm.Caption:=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'WND_ABSEARCH', TCommon.APPCAPTION);
 
-    PanelEditNumber.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    PanelEditName.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    PanelEmail.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    PanelEstatement.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    PanelPhones.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    PanelUserAlias.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    PanelCoCode.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    PanelAgent.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    PanelDivision.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+    PanelEditNumber.PanelBorders(clWhite, clWhite, $00E3B268, clWhite, clWhite);
+    PanelEditName.PanelBorders(clWhite, clWhite, $00E3B268, clWhite, clWhite);
+    PanelEmail.PanelBorders(clWhite, clWhite, $00E3B268, clWhite, clWhite);
+    PanelEstatement.PanelBorders(clWhite, clWhite, $00E3B268, clWhite, clWhite);
+    PanelPhones.PanelBorders(clWhite, clWhite, $00E3B268, clWhite, clWhite);
+    PanelUserAlias.PanelBorders(clWhite, clWhite, $00E3B268, clWhite, clWhite);
+    PanelCoCode.PanelBorders(clWhite, clWhite, $00E3B268, clWhite, clWhite);
+    PanelAgent.PanelBorders(clWhite, clWhite, $00E3B268, clWhite, clWhite);
+    PanelDivision.PanelBorders(clWhite, clWhite, $00E3B268, clWhite, clWhite);
 
 end;
 

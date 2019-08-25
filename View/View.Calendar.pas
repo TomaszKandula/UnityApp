@@ -139,8 +139,8 @@ end;
 procedure TCalendarForm.FormCreate(Sender: TObject);
 begin
     FSelectedDate:=TDateTimeFormats.NullDate;
-    PanelActions.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    PanelCalendar.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+    PanelActions.PanelBorders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelCalendar.PanelBorders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
 end;
 
 

@@ -109,7 +109,7 @@ end;
 
 procedure TPhoneListForm.FormCreate(Sender: TObject);
 begin
-    PanelMemo.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+    PanelMemo.PanelBorders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
 end;
 
 

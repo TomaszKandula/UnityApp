@@ -6,7 +6,7 @@ object ColorsForm: TColorsForm
   Caption = 'Unity'
   ClientHeight = 337
   ClientWidth = 313
-  Color = 15527148
+  Color = 15855854
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
@@ -31,7 +31,7 @@ object ColorsForm: TColorsForm
     Margins.Right = 5
     Margins.Bottom = 5
     Align = alClient
-    Pen.Color = clSkyBlue
+    Pen.Color = 14922344
     ExplicitTop = -106
     ExplicitWidth = 528
     ExplicitHeight = 459

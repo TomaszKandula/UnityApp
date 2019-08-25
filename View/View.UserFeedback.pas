@@ -176,7 +176,7 @@ end;
 
 procedure TFeedbackForm.FormCreate(Sender: TObject);
 begin
-    PanelReportMemo.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+    PanelReportMemo.PanelBorders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
 end;
 
 

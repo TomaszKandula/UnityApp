@@ -5,7 +5,7 @@ object GridSearchForm: TGridSearchForm
   Caption = 'Unity - Search'
   ClientHeight = 250
   ClientWidth = 398
-  Color = 15527148
+  Color = 15855854
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11

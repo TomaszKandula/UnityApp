@@ -32,7 +32,6 @@ type
 
     TAboutForm = class(TForm)
         AppMain: TShape;
-        Shape1: TShape;
         Shape2: TShape;
         Shape3: TShape;
         Shape4: TShape;
@@ -41,7 +40,6 @@ type
         Text03: TLabel;
         Text05: TLabel;
         Text07: TLabel;
-        LineHor3: TBevel;
         Text08: TLabel;
         Text10: TLabel;
         Text11: TLabel;
@@ -61,15 +59,12 @@ type
         txt_STA: TLabel;
         Text15: TLabel;
         txt_WEB: TLabel;
-        LineHor2: TBevel;
-        LineHor1: TBevel;
         Text16: TLabel;
         txt_PRO: TLabel;
-        Image1: TImage;
-        Image2: TImage;
-        Image4: TImage;
-        TechLabel: TLabel;
         btnClose: TSpeedButton;
+        Shape1: TShape;
+        Shape5: TShape;
+        Shape6: TShape;
         procedure FormCreate(Sender: TObject);
         procedure txtINQClick(Sender: TObject);
         procedure txtITSClick(Sender: TObject);

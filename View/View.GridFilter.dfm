@@ -7,7 +7,7 @@ object FilterForm: TFilterForm
   Caption = 'Unity'
   ClientHeight = 408
   ClientWidth = 249
-  Color = 15527148
+  Color = 15855854
   DoubleBuffered = True
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText

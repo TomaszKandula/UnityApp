@@ -5,7 +5,7 @@ object EventForm: TEventForm
   Caption = 'Unity'
   ClientHeight = 674
   ClientWidth = 1062
-  Color = 15527148
+  Color = 15855854
   Constraints.MinHeight = 400
   Constraints.MinWidth = 400
   Font.Charset = DEFAULT_CHARSET

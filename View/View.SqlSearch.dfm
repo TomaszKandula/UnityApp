@@ -5,7 +5,7 @@ object SqlSearchForm: TSqlSearchForm
   Caption = 'Unity'
   ClientHeight = 405
   ClientWidth = 683
-  Color = 15527148
+  Color = 15855854
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11

@@ -486,7 +486,7 @@ begin
     lsColumns.Caption:='Agent';
     lsColumns.Width  :=100;    //12
 
-    PanelCustomerList.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+    PanelCustomerList.PanelBorders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
 
 end;
 
