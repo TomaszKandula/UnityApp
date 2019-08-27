@@ -14,6 +14,7 @@ uses
     Vcl.Grids,
     Vcl.Graphics,
     Vcl.Dialogs,
+    Data.Win.ADODB,
     Unity.Arrays,
     Unity.Enums;
 
@@ -27,6 +28,9 @@ type
         procedure Paint; override;
     private
         var FHideFocusRect: boolean;
+        var FToExcelResult: string;
+        var FCsvImportResult: string;
+        var FCsvExportResult: string;
     public
         const sgRowHeight = 19;
         const sgRowHidden = -1;
@@ -40,6 +44,9 @@ type
         var SqlColumns: TALists;
         var UpdatedRowsHolder: TAIntigers;
         property  HideFocusRect: boolean read FHideFocusRect write FHideFocusRect;
+        property  ToExcelResult: string read FToExcelResult;
+        property  CsvImportResult: string read FCsvImportResult;
+        property  CsvExportResult: string read FCsvExportResult;
         procedure SetUpdatedRow(Row: integer);
         procedure RecordRowsAffected;
         procedure CopyCutPaste(Mode: TActions; FirstColOnly: boolean = False);
@@ -55,8 +62,8 @@ type
         procedure SaveLayout(ColWidthName: string; ColOrderName: string; ColNames: string; ColPrefix: string);
         function  LoadLayout(var StrCol: string; ColWidthName: string; ColOrderName: string; ColNames: string; ColPrefix: string): boolean;
         function  ReturnColumn(ColumnName: string; FixedCol: integer; FixedRow: integer): integer;
-        function  ToExcel(ASheetName, AFileName: string): Boolean;
         procedure Freeze(PaintWnd: boolean);
+        function  ToExcel(ASheetName, AFileName: string; GroupId: string; AgeDate: string; ActiveConn: TADOConnection): boolean;
         function  ImportCSV(DialogBox: TOpenDialog; Delimiter: string): boolean;
         function  ExportCSV(DialogBox: TSaveDialog; Delimiter: string): boolean;
         procedure SelectAll;
@@ -76,7 +83,6 @@ uses
     System.Variants,
     Winapi.Messages,
     Vcl.Clipbrd,
-    View.Main, // <-- remove!  (used by excel,csv)
     Unity.Chars,
     Unity.StatusBar,
     Unity.Helpers,
@@ -696,6 +702,23 @@ begin
 end;
 
 
+procedure TStringGrid.Freeze(PaintWnd: Boolean);
+begin
+
+    if PaintWnd then
+    begin
+        with Self do SendMessage(Handle, WM_SETREDRAW, 0, 0);
+    end;
+
+    if not PaintWnd then
+    begin
+        with Self do SendMessage(Handle, WM_SETREDRAW, 1, 0);
+        Self.Repaint;
+    end;
+
+end;
+
+
 /// <summary>
 /// Export string grid content to Microsoft Excel file.
 /// </summary>
@@ -705,18 +728,14 @@ end;
 /// This method should be run in worker thread.
 /// </remarks>
 
-function TStringGrid.ToExcel(ASheetName: string; AFileName: string): boolean;
+function TStringGrid.ToExcel(ASheetName: string; AFileName: string; GroupId: string; AgeDate: string; ActiveConn: TADOConnection): boolean;
 begin
 
     Result:=False;
 
-    var DataTables: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
+    var DataTables: TDataTables:=TDataTables.Create(ActiveConn);
     try
-        // Assign command with stored procedure
-        DataTables.StrSQL:=TSql.EXECUTE + DataTables.AgeViewExport + TChars.SPACE +
-                       QuotedStr(MainForm.FGroupList[MainForm.GroupListBox.ItemIndex, 0]) + TChars.COMMA +
-                       QuotedStr(MainForm.GroupListDates.Text);
-        // Execute
+        DataTables.StrSQL:=TSql.EXECUTE + DataTables.AgeViewExport + TChars.SPACE + QuotedStr(GroupId) + TChars.COMMA + QuotedStr(AgeDate);
         DataTables.SqlToGrid(Self, DataTables.ExecSQL, False, True);
     finally
         DataTables.Free;
@@ -767,10 +786,7 @@ begin
                 Sheet:=Unassigned;
 
                 if Result then
-                begin
-                    MainForm.FAppEvents.Log(MainForm.EventLogPath, 'The data has been successfully transferred to Excel.');
-                    THelpers.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'The data has been successfully transferred to Excel.', MainForm);
-                end;
+                    FToExcelResult:='The data has been successfully transferred to Excel.';
 
             end;
         end;
@@ -779,35 +795,11 @@ begin
         on E: Exception do
         begin
             if E.Message = xlWARN_MESSAGE then
-            // Excel not found
-            begin
-                MainForm.FAppEvents.Log(MainForm.EventLogPath, 'The data cannot be exported because Microsoft Excel cannot be found.');
-                THelpers.ExecMessage(False, TMessaging.TWParams.MessageError, 'The data cannot be exported because Microsoft Excel cannot be found.', MainForm);
-            end
+                FToExcelResult:='The data cannot be exported because Microsoft Excel cannot be found.'
             else
-            // General message
-            begin
-                MainForm.FAppEvents.Log(MainForm.EventLogPath, 'The data cannot be exported, error message has been thrown: ' + E.Message + '.');
-                THelpers.ExecMessage(False, TMessaging.TWParams.MessageError, 'The data cannot be exported. Description received: ' + E.Message, MainForm);
-            end;
+                FToExcelResult:='The data cannot be exported, error message has been thrown: ' + E.Message;
         end;
-    end;
 
-end;
-
-
-procedure TStringGrid.Freeze(PaintWnd: Boolean);
-begin
-
-    if PaintWnd then
-    begin
-        with Self do SendMessage(Handle, WM_SETREDRAW, 0, 0);
-    end;
-
-    if not PaintWnd then
-    begin
-        with Self do SendMessage(Handle, WM_SETREDRAW, 1, 0);
-        Self.Repaint;
     end;
 
 end;
@@ -825,8 +817,6 @@ begin
     // GET THE FILE PATH AND PARSE
     if DialogBox.Execute = True then
     begin
-
-        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.ImportCSV, MainForm);
 
         var Data:    TStringList:=TStringList.Create;
         var Transit: TStringList:=TStringList.Create;
@@ -864,8 +854,7 @@ begin
             except
                 on E: Exception do
                 begin
-                    MainForm.FAppEvents.Log(MainForm.EventLogPath, 'CSV Import has failed: ' + ExtractFileName(fPath));
-                    THelpers.ExecMessage(False, TMessaging.TWParams.MessageError, 'CSV Import has failed. Please check the file and try again.', MainForm);
+                    FCsvImportResult:='CSV Import has failed: ' + ExtractFileName(fPath);
                     IsError:=True;
                 end;
             end;
@@ -873,14 +862,10 @@ begin
         finally
 
             if not IsError then
-            begin
-                MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Data has been imported successfully!');
-                THelpers.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Data has been imported successfully!', MainForm);
-            end;
+                FCsvImportResult:='Data has been imported successfully!';
 
             Data.Free;
             Transit.Free;
-            THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
 
         end;
 
@@ -902,8 +887,6 @@ begin
         var fPath:    string;
         var MyStr:    string;
         var CleanStr: string;
-
-        THelpers.ExecMessage(False, TMessaging.TWParams.StatusBar, TStatusBar.ExportCSV, MainForm);
 
         // Add rows and columns with delimiter
         for var iCNT: integer:=1 to Self.RowCount - 1 do
@@ -935,8 +918,7 @@ begin
         except
             on E: Exception do
             begin
-                MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Cannot saved file: ' + ExtractFileName(fPath));
-                THelpers.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot save the file in the given location.', MainForm);
+                FCsvExportResult:='Cannot saved file: ' + ExtractFileName(fPath);
                 IsError:=True;
             end;
         end;
@@ -944,13 +926,9 @@ begin
     finally
 
         if not IsError then
-        begin
-            MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Data has been exported successfully!');
-            THelpers.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Data have been exported successfully!', MainForm);
-        end;
+            FCsvExportResult:='Data has been exported successfully!';
 
         CSVData.Free;
-        THelpers.ExecMessage(False, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
 
     end;
 

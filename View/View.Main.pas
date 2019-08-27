@@ -405,7 +405,7 @@ type
         Action_AddFollowUpGroup: TMenuItem;
         Action_RemoveFollowUps: TMenuItem;
         Cap24: TShape;
-    hShapeSorting: TShape;
+        hShapeSorting: TShape;
         Action_MassMailer: TMenuItem;
         btnPasswordPreview: TSpeedButton;
         hShapeEye: TShape;
@@ -3118,7 +3118,8 @@ end;
 procedure TMainForm.Action_ToExceClick(Sender: TObject);
 begin
     var Utilities: IUtilities:=TUtilities.Create;
-    Utilities.ExcelExport();
+    Utilities.ActiveConnection:=MainForm.FDbConnect;
+    Utilities.ExcelExport(MainForm.FGroupList[MainForm.GroupListBox.ItemIndex, 0], MainForm.GroupListDates.Text);
 end;
 
 

@@ -36,19 +36,43 @@ type
 
     IUtilities = interface(IInterface)
     ['{0B054CF4-86F7-4770-957B-3026BE491B5A}']
+
+        // --------------------------------
+        // Undisclosed getters and setters.
+        // --------------------------------
+
+        function  FGetActiveConnection: TADOConnection;
+        procedure FSetActiveConnection(NewValue: TADOConnection);
+
+        // -------------------
+        // Exposed properties.
+        // -------------------
+
+        property ActiveConnection: TADOConnection read FGetActiveConnection write FSetActiveConnection;
+
+        // ----------------
+        // Exposed methods.
+        // ----------------
+
         procedure CheckServerConnectionAsync();
         procedure SendUserFeedback();
-        procedure ExcelExport();
+        procedure ExcelExport(GroupId: string; AgeDate: string);
         procedure GeneralTables(TableName: string; DestGrid: TStringGrid; Columns: string = ''; Conditions: string = ''; WaitToComplete: boolean = False);
+
     end;
 
 
     TUtilities = class(TInterfacedObject, IUtilities)
     {$TYPEINFO ON}
+    private
+        var FActiveConnection: TADOConnection;
+        function FGetActiveConnection: TADOConnection;
+        procedure FSetActiveConnection(NewValue: TADOConnection);
     public
+        property ActiveConnection: TADOConnection read FGetActiveConnection;
         procedure CheckServerConnectionAsync();
         procedure SendUserFeedback();
-        procedure ExcelExport();
+        procedure ExcelExport(GroupId: string; AgeDate: string);
         procedure GeneralTables(TableName: string; DestGrid: TStringGrid; Columns: string = ''; Conditions: string = ''; WaitToComplete: boolean = False);
     end;
 
@@ -57,10 +81,8 @@ implementation
 
 
 uses
-    View.Main,
-    View.InvoiceTracker,
-    View.Actions,
-    View.UserFeedback,
+    View.Main, // <== remove
+    View.UserFeedback, // <== remove
     Handler.Database,
     Handler.Account,
     Unity.Helpers,
@@ -149,8 +171,10 @@ end;
 // to not to block application usability
 // -------------------------------------
 
-procedure TUtilities.ExcelExport();
+procedure TUtilities.ExcelExport(GroupId: string; AgeDate: string);
 begin
+
+    if not Assigned(FActiveConnection) then Exit();
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
@@ -161,20 +185,16 @@ begin
             var FileName: string;
             TThread.Synchronize(nil, procedure
             begin
-
                 if MainForm.XLExport.Execute then
                     FileName:=MainForm.XLExport.FileName
                         else FileName:='';
-
             end);
 
             var Temp: TStringGrid:=TStringGrid.Create(nil);
             try
-                Temp.ToExcel('Age Report', FileName);
-
+                Temp.ToExcel('Age Report', FileName, GroupId, AgeDate, FActiveConnection);
             finally
                 Temp.Free;
-
             end;
 
         finally
@@ -225,6 +245,21 @@ begin
     NewTask.Start();
     if WaitToComplete then TTask.WaitForAny(NewTask);
 
+end;
+
+
+// ------------------------------------------------------------------------------------------------------------------------------------------- RETURN VALUES //
+
+
+function TUtilities.FGetActiveConnection: TADOConnection;
+begin
+    Result:=FActiveConnection;
+end;
+
+
+procedure TUtilities.FSetActiveConnection(NewValue: TADOConnection);
+begin
+    FActiveConnection:=NewValue;
 end;
 
 

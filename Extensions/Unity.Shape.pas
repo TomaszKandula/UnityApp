@@ -27,7 +27,7 @@ type
     published
         property  Caption;
         property  Font;
-        procedure ShapeText(Left, Top: integer; StrText: string; Format: TFontStyles);
+        procedure ShapeText(Left: integer; Top: integer; StrText: string; Format: TFontStyles; FontName: string; FontSize: integer; FontColor: TColor);
     public
         var CaptionLeft : integer;
         var CaptionTop  : integer;
@@ -83,13 +83,11 @@ end;
 /// Drwa text inside TShape component. Please note that font is fixed.
 /// </summary>
 
-procedure TShape.ShapeText(Left, Top: integer; StrText: string; Format: TFontStyles);
+procedure TShape.ShapeText(Left: integer; Top: integer; StrText: string; Format: TFontStyles; FontName: string; FontSize: integer; FontColor: TColor);
 begin
-    // Fixed
-    Font.Name  :='Tahoma';
-    Font.Size  :=10;
-    Font.Color :=clBlack;
-    // Non-fixed
+    Font.Name  :=FontName;
+    Font.Size  :=FontSize;
+    Font.Color :=FontColor;
     Font.Style :=Format;
     Caption    :=StrText;
     CaptionLeft:=Left;
