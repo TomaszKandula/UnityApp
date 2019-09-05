@@ -72,6 +72,7 @@ type
         function GetDbConnectionSync(): boolean;
         function GetUserAccountSync(): boolean;
         function GetGeneralTablesSync(): boolean;
+        function GetHtmlLayoutsSync(UrlLayoutPak: string; DirLayoutPak: string; LayoutDir: string): boolean;
     public
         property IsAppInitialized: boolean read FIsAppInitialized;
         procedure SetSessionLog(SessionEventLog: string);
@@ -101,6 +102,7 @@ uses
     Async.Queries,
     Handler.Database,
     Handler.Account,
+    Handler.Connection,
     View.Main,
     DbModel;
 
@@ -327,7 +329,26 @@ begin
         end else
         begin
             MainAppForm.FAppEvents.Log(FCurrentSessionLog, 'User access has been established.');
-            ChangeProgressBar(66, 'Getting user account details... done.', ProgressBar);
+            ChangeProgressBar(50, 'Getting user account details... done.', ProgressBar);
+        end;
+
+        // --------------------------------------
+        // Load/Sync all html layouts for emails.
+        // --------------------------------------
+
+        Sleep(250);
+        ChangeProgressBar(66, 'Synchronizing email templates...', ProgressBar);
+
+        var Settings: ISettings:=TSettings.Create();
+        if not GetHtmlLayoutsSync(Settings.UrlLayoutsLst + TCommon.LayoutPak, Settings.DirLayouts + TCommon.LayoutPak, Settings.DirLayouts) then
+        begin
+            MainAppForm.FAppEvents.Log(FCurrentSessionLog, 'Critical error has occured [GetHtmlLayoutsSync]: ' + LastErrorMsg);
+            THelpers.MsgCall(TAppMessage.Error, 'An error occured [GetHtmlLayoutsSync]: ' + LastErrorMsg + '. Please contact your administrator. Application will be closed.');
+            ExitAppSync();
+        end else
+        begin
+            MainAppForm.FAppEvents.Log(FCurrentSessionLog, 'Html layouts has been synchronized.');
+            ChangeProgressBar(75, 'Synchronizing email templates... done.', ProgressBar);
         end;
 
         // -------------------------------
@@ -335,7 +356,7 @@ begin
         // -------------------------------
 
         Sleep(250);
-        ChangeProgressBar(75, 'Loading general tables...', ProgressBar);
+        ChangeProgressBar(85, 'Loading general tables...', ProgressBar);
 
         if not GetGeneralTablesSync() then
         begin
@@ -345,7 +366,7 @@ begin
         end else
         begin
             MainAppForm.FAppEvents.Log(FCurrentSessionLog, 'General tables has been loaded.');
-            ChangeProgressBar(90, 'Loading general tables... done.', ProgressBar);
+            ChangeProgressBar(95, 'Loading general tables... done.', ProgressBar);
         end;
 
         // ----------------------------------------
@@ -594,6 +615,29 @@ begin
         Utilities.GeneralTables(TPaidinfo.Paidinfo, MainAppForm.sgPaidInfo);
         Utilities.GeneralTables(TPerson.Person, MainAppForm.sgPerson);
         Utilities.GeneralTables(TControlStatus.ControlStatus, MainAppForm.sgControlStatus);
+
+    except
+        on E: Exception do
+        begin
+            LastErrorMsg:=E.Message;
+            Result:=False;
+        end;
+
+    end;
+
+end;
+
+
+function TStartupForm.GetHtmlLayoutsSync(UrlLayoutPak: string; DirLayoutPak: string; LayoutDir: string): boolean;
+begin
+
+    Result:=True;
+
+    var Connection: IConnectivity:=TConnectivity.Create();
+    try
+
+        Connection.Download(UrlLayoutPak, DirLayoutPak);
+        TCommon.UnzippLayouts(DirLayoutPak, LayoutDir);
 
     except
         on E: Exception do

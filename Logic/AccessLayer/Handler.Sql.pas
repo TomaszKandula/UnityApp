@@ -180,6 +180,7 @@ end;
 
 function TMSSQL.ExecSQL: _Recordset;
 begin
+
     Result:=nil;
 
     if not (Length(StrSQL)) > 0 then Exit;

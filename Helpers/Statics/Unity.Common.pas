@@ -33,7 +33,8 @@ type
         class procedure ExecWithDelay(Delay: integer; AnonymousMethod: TInputMethod); static;
         class function GetBuildInfoAsString: string; static;
         class function GetOSVer(CheckForOsName: boolean): string; static;
-        class function Unpack(ItemID: integer; FileName: string; ShouldFileStay: boolean; var LastErrorMsg: string): boolean;
+        class function Unpack(ItemID: integer; FileName: string; ShouldFileStay: boolean; var LastErrorMsg: string): boolean; static;
+        class function UnzippLayouts(FileName: string; DestDir: string): boolean; static;
     end;
 
 
@@ -42,6 +43,7 @@ implementation
 
 uses
     Winapi.Windows,
+    System.Zip,
     System.SysUtils,
     System.Classes;
 
@@ -186,7 +188,6 @@ end;
 /// <returns>True if succeed (boolean)</returns>
 /// <remarks>
 /// 10 RCDATA "Makefile\\config.cfg" default setting file.
-/// 60 RCDATA "Makefile\\logon.log"  pre-defined event log file.
 /// </remarks>
 
 class function TCommon.Unpack(ItemID: integer; FileName: string; ShouldFileStay: boolean; var LastErrorMsg: string): boolean;
@@ -217,6 +218,44 @@ begin
 
     finally
         RS.free;
+    end;
+
+end;
+
+
+class function TCommon.UnzippLayouts(FileName: string; DestDir: string): boolean;
+begin
+
+    Result:=False;
+
+    var ZipRead: TZipFile:=TZipFile.Create;
+    try
+
+        try
+            ZipRead.Open(FileName, zmRead);
+
+            for var iCNT: integer:=0 to ZipRead.FileCount - 1 do
+            begin
+
+                var Zipped:   string:=ZipRead.FileName[iCNT];
+                var FullPath: string:=DestDir + Zipped;
+
+                // Extract and create any folder if missing
+                ZipRead.Extract(iCNT, DestDir, True);
+                //LogText.Log(EventLogPath, 'Extracting: ' + Zipped + '.');
+
+            end;
+
+            Result:=True;
+
+        except
+            on E: Exception do
+                //LogText.Log(EventLogPath, 'Unexpected error has been thrown: ' + E.Message);
+        end;
+
+    finally
+        ZipRead.Free;
+        DeleteFile(PChar(FileName));
     end;
 
 end;

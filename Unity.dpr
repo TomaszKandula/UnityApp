@@ -41,7 +41,6 @@ uses
     Unity.Chars                 in 'Helpers\Statics\Unity.Chars.pas',
     Unity.Delimiters            in 'Helpers\Statics\Unity.Delimiters.pas',
     Unity.DateTimeFormats       in 'Helpers\Statics\Unity.DateTimeFormats.pas',
-    Unity.LyncLib               in 'Helpers\Statics\Unity.LyncLib.pas',
     Unity.Messaging             in 'Helpers\Statics\Unity.Messaging.pas',
     Unity.NCSI                  in 'Helpers\Statics\Unity.NCSI.pas',
     Unity.Qms                   in 'Helpers\Statics\Unity.Qms.pas',
@@ -57,6 +56,7 @@ uses
     Unity.Filtering             in 'Helpers\Statics\Unity.Filtering.pas',
     Unity.UserAccess            in 'Helpers\Statics\Unity.UserAccess.pas',
     Unity.UserSid               in 'Helpers\Statics\Unity.UserSid.pas',
+    Unity.Utilities             in 'Helpers\Statics\Unity.Utilities.pas',
     DbModel                     in 'Model\DbModel.pas'{Legacy code/to be removed},
     Customer.AddressBook        in 'Model\Json\RawTables\Customer.AddressBook.pas',
     Customer.ControlStatus      in 'Model\Json\RawTables\Customer.ControlStatus.pas',
@@ -139,11 +139,33 @@ begin
     FormatSettings                  :=RegSettings;
     Application.UpdateFormatSettings:=False;
 
+    // -------------------------------------------
+    // Open settings file and decode its contents.
+    // -------------------------------------------
+
+    var Settings: ISettings:=TSettings.Create();
+    if not Settings.CheckConfigFile then
+    begin
+
+        var LastErrorMsg: string;
+        if TCommon.Unpack(10, Settings.PathConfig, false, LastErrorMsg) then Settings.ConfigToMemory
+        else begin
+
+            Application.MessageBox(
+                PCHar(LastErrorMsg + TCommon.AppCaption + ' will be closed. Please contact IT support.'),
+                PChar(TCommon.AppCaption), MB_OK + MB_ICONERROR
+            );
+
+            ExitProcess(0);
+
+        end;
+
+    end;
+
     // --------------------------------------------------
     // Set the new session file and return its full path.
     // --------------------------------------------------
 
-    var Settings: ISettings:=TSettings.Create();
     var SessionEventLog:=Settings.MakeNewSessionFile(Settings.NewSessioId);
 
     // -------------------------------------------------------------------------------------------------------
@@ -157,9 +179,9 @@ begin
 
     try
 
-        // -----------------------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------------------
         // Do not run Chromium inside Unity application, all HTML rendering should be subprocessed.
-        // -----------------------------------------------------------------------------------------
+        // ----------------------------------------------------------------------------------------
 
         GlobalCEFApp.BrowserSubprocessPath:='SubProcess.exe';
         var PathAppDir: string:=ExtractFileDir(Application.ExeName) + '\';
@@ -229,18 +251,17 @@ begin
     Application.Title:=TCommon.AppCaption;
     Application.MainFormOnTaskbar:=True;
 
-    // ------------------------------------------------------------
-    // Call startup view to display splash screen and process
-    // the initial loading of settings and database support tables.
-    // It will automatically handle MainForm screen.
-    // ------------------------------------------------------------
+    // ----------------------------------------------------------
+    // Call startup view to display splash screen and process the
+    // initial loading of settings and database support tables.
+    // It will automatically handle main application window.
+    // ----------------------------------------------------------
 
     StartupForm.SetSessionLog(SessionEventLog);
     StartupForm.Show();
 
     Application.Run;
     GlobalCEFApp.Free;
-    Application.Terminate;
 
 end.
 

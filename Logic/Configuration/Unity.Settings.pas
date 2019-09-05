@@ -58,29 +58,37 @@ type
         function  GetDirPackage:      string;
         function  GetDirWinTemp:      string;
         function  GetNewSessioId:     string;
+        function  GetUrlReleasePak:   string;
+        function  GetUrlReleaseMan:   string;
+        function  GetUrlLayoutsLst:   string;
+        function  ConfigFileOK:       boolean;
 
         // -------------------
         // Exposed properties.
         // -------------------
 
-        property  WinUserName:     string      read GetWinUserName;
-        property  PathGridImage:   string      read GetPathGridImage;
-        property  PathEventLog:    string      read GetPathEventLog;
-        property  PathConfig:      string      read GetPathConfig;
-        property  PathLicence:     string      read GetPathLicence;
-        property  DirApplication:  string      read GetDirApplication;
-        property  DirLayouts:      string      read GetDirLayouts;
-        property  DirPackage:      string      read GetDirPackage;
-        property  DirWinTemp:      string      read GetDirWinTemp;
-        property  ReleaseNumber:   cardinal    read GetReleaseNumber   write SetReleaseNumber;
-        property  ReleaseDateTime: TDateTime   read GetReleaseDateTime write SetReleaseDateTime;
-        property  TodayFColor:     TColor      read GetTodayFColor     write SetTodayFColor;
-        property  TodayBColor:     TColor      read GetTodayBColor     write SetTodayBColor;
-        property  PastFColor:      TColor      read GetPastFColor      write SetPastFColor;
-        property  PastBColor:      TColor      read GetPastBColor      write SetPastBColor;
-        property  FutureFColor:    TColor      read GetFutureFColor    write SetFutureFColor;
-        property  FutureBColor:    TColor      read GetFutureBColor    write SetFutureBColor;
-        property  NewSessioId:     string      read GetNewSessioId;
+        property  WinUserName:     string    read GetWinUserName;
+        property  PathGridImage:   string    read GetPathGridImage;
+        property  PathEventLog:    string    read GetPathEventLog;
+        property  PathConfig:      string    read GetPathConfig;
+        property  PathLicence:     string    read GetPathLicence;
+        property  DirApplication:  string    read GetDirApplication;
+        property  DirLayouts:      string    read GetDirLayouts;
+        property  DirPackage:      string    read GetDirPackage;
+        property  DirWinTemp:      string    read GetDirWinTemp;
+        property  UrlReleasePak:   string    read GetUrlReleasePak;
+        property  UrlReleaseMan:   string    read GetUrlReleaseMan;
+        property  UrlLayoutsLst:   string    read GetUrlLayoutsLst;
+        property  ReleaseNumber:   cardinal  read GetReleaseNumber   write SetReleaseNumber;
+        property  ReleaseDateTime: TDateTime read GetReleaseDateTime write SetReleaseDateTime;
+        property  TodayFColor:     TColor    read GetTodayFColor     write SetTodayFColor;
+        property  TodayBColor:     TColor    read GetTodayBColor     write SetTodayBColor;
+        property  PastFColor:      TColor    read GetPastFColor      write SetPastFColor;
+        property  PastBColor:      TColor    read GetPastBColor      write SetPastBColor;
+        property  FutureFColor:    TColor    read GetFutureFColor    write SetFutureFColor;
+        property  FutureBColor:    TColor    read GetFutureBColor    write SetFutureBColor;
+        property  NewSessioId:     string    read GetNewSessioId;
+        property  CheckConfigFile: boolean   read ConfigFileOK;
 
         // ----------------
         // Exposed methods.
@@ -107,21 +115,22 @@ type
     TSettings = class(TInterfacedObject, ISettings)
     {$TYPEINFO ON}
     private
-        var FTMIG:           TMemIniFile;
-        var FTMIL:           TMemIniFile;
-        var FWinUserName:    string;
-        var FPathGridImage:  string;
-        var FPathEventLog:   string;
-        var FPathConfig:     string;
-        var FPathLicence:    string;
-        var FDirApplication: string;
-        var FDirLayouts:     string;
-        var FDirPackage:     string;
-        var FDirSessions:    string;
-        var FDirWinTemp:     string;
-        var FUrlReleasePak:  string;
-        var FUrlReleaseMan:  string;
-        var FUrlLayoutsLst:  string;
+        var FTMIG:             TMemIniFile;
+        var FTMIL:             TMemIniFile;
+        var FWinUserName:      string;
+        var FPathGridImage:    string;
+        var FPathEventLog:     string;
+        var FPathConfig:       string;
+        var FPathLicence:      string;
+        var FDirApplication:   string;
+        var FDirLayouts:       string;
+        var FDirPackage:       string;
+        var FDirSessions:      string;
+        var FDirWinTemp:       string;
+        var FUrlReleasePak:    string;
+        var FUrlReleaseMan:    string;
+        var FUrlLayoutsLst:    string;
+        var FConfigFileOK:     boolean;
         function  GetReleaseDateTime: TDateTime;
         procedure SetReleaseDateTime(NewDateTime: TDateTime);
         function  GetReleaseNumber: cardinal;
@@ -148,6 +157,10 @@ type
         function  GetDirPackage:      string;
         function  GetDirWinTemp:      string;
         function  GetNewSessioId:     string;
+        function  GetUrlReleasePak:   string;
+        function  GetUrlReleaseMan:   string;
+        function  GetUrlLayoutsLst:   string;
+        function  ConfigFileOK:       boolean;
     public
         constructor Create;
         destructor Destroy; override;
@@ -176,6 +189,10 @@ type
         property DirPackage:      string    read GetDirPackage;
         property DirWinTemp:      string    read GetDirWinTemp;
         property NewSessioId:     string    read GetNewSessioId;
+        property UrlReleasePak:   string    read GetUrlReleasePak;
+        property UrlReleaseMan:   string    read GetUrlReleaseMan;
+        property UrlLayoutsLst:   string    read GetUrlLayoutsLst;
+        property CheckConfigFile: boolean   read ConfigFileOK;
         property ReleaseDateTime: TDateTime read GetReleaseDateTime write SetReleaseDateTime;
         property TodayFColor:     TColor    read GetTodayFColor     write SetTodayFColor;
         property TodayBColor:     TColor    read GetTodayBColor     write SetTodayBColor;
@@ -244,7 +261,7 @@ begin
     FPathLicence   :=FDirApplication + TCommon.LicenceFile;
     FPathGridImage :=FDirApplication + TCommon.GridImgFile;
 
-    if FileExists(FPathConfig) then ConfigToMemory;
+    if FileExists(FPathConfig) then ConfigToMemory else FConfigFileOK:=False;
 
 end;
 
@@ -271,7 +288,7 @@ begin
 
     if Assigned(FTMIG) then
     begin
-        Decode(Configuration, True);
+        FConfigFileOK:=Decode(Configuration, True);
         FUrlReleasePak:=FTMIG.ReadString(TConfigSections.ApplicationDetails, 'UPDATE_PATH', '') + TCommon.ReleaseFile;
         FUrlReleaseMan:=FTMIG.ReadString(TConfigSections.ApplicationDetails, 'UPDATE_PATH', '') + TCommon.ManifestFile;
         FUrlLayoutsLst:=FTMIG.ReadString(TConfigSections.ApplicationDetails, 'LAYOUT_PATH', '');
@@ -729,6 +746,30 @@ end;
 function TSettings.GetNewSessioId: string;
 begin
     Result:=TGUID.NewGuid.ToString();
+end;
+
+
+function TSettings.GetUrlReleasePak: string;
+begin
+    Result:=FUrlReleasePak;
+end;
+
+
+function TSettings.GetUrlReleaseMan: string;
+begin
+    Result:=FUrlReleaseMan;
+end;
+
+
+function TSettings.GetUrlLayoutsLst: string;
+begin
+    Result:=FUrlLayoutsLst;
+end;
+
+
+function TSettings.ConfigFileOK: boolean;
+begin
+    Result:=FConfigFileOK;
 end;
 
 

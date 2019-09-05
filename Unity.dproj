@@ -169,7 +169,6 @@
         <DCCReference Include="Helpers\Statics\Unity.Chars.pas"/>
         <DCCReference Include="Helpers\Statics\Unity.Delimiters.pas"/>
         <DCCReference Include="Helpers\Statics\Unity.DateTimeFormats.pas"/>
-        <DCCReference Include="Helpers\Statics\Unity.LyncLib.pas"/>
         <DCCReference Include="Helpers\Statics\Unity.Messaging.pas"/>
         <DCCReference Include="Helpers\Statics\Unity.NCSI.pas"/>
         <DCCReference Include="Helpers\Statics\Unity.Qms.pas"/>
@@ -185,6 +184,7 @@
         <DCCReference Include="Helpers\Statics\Unity.Filtering.pas"/>
         <DCCReference Include="Helpers\Statics\Unity.UserAccess.pas"/>
         <DCCReference Include="Helpers\Statics\Unity.UserSid.pas"/>
+        <DCCReference Include="Helpers\Statics\Unity.Utilities.pas"/>
         <DCCReference Include="Model\DbModel.pas">
             <Form>Legacy code/to be removed</Form>
         </DCCReference>
@@ -346,7 +346,7 @@
             </Platforms>
             <ModelSupport>False</ModelSupport>
             <Deployment Version="3">
-                <DeployFile LocalName="Include\Cef.inc" Configuration="Debug" Class="ProjectFile">
+                <DeployFile LocalName="Model\Json\DbQuery\Dummy.txt" Configuration="Debug" Class="ProjectFile">
                     <Platform Name="Win32">
                         <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>
@@ -358,7 +358,7 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="Model\Json\DbQuery\Dummy.txt" Configuration="Debug" Class="ProjectFile">
+                <DeployFile LocalName="Include\Cef.inc" Configuration="Debug" Class="ProjectFile">
                     <Platform Name="Win32">
                         <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>

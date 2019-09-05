@@ -871,7 +871,6 @@ type
         var FOpenItemsStatus: string;
         var FOSAmount:        double;
         var FIsConnected:     boolean;
-        var FCurrentEvents:   string;
         procedure TryInitConnection;
         procedure FindCoData(TargetColumn: integer; TargetGrid: TStringGrid; SourceGrid: TStringGrid);
         function  ConvertCoCode(CoNumber: string; Prefix: string; mode: integer): string;
@@ -893,7 +892,7 @@ type
         var FControlStatusRefs: TFControlStatusRefs;
         property WinUserName:  string read FWinUserName;
         property EventLogPath: string read FEventLogPath;
-        procedure InitMainWnd(SessionId: string);
+        procedure InitMainWnd(SessionFile: string);
         procedure SetupMainWnd();
         procedure StartMainWnd();
         procedure UpdateFOpenItemsRefs(SourceGrid: TStringGrid);
@@ -972,6 +971,7 @@ uses
     Unity.DateTimeFormats,
     Unity.Sorting,
     Unity.UserSid,
+    Unity.Utilities,
     Handler.Sql{legacy},
     DbModel{legacy},
     Handler.Database{legacy},
@@ -1360,10 +1360,10 @@ end;
 // ------------------------------------------------------------------------------------------------------------------------------------------ INITIALIZATION //
 
 
-procedure TMainForm.InitMainWnd(SessionId: string);
+procedure TMainForm.InitMainWnd(SessionFile: string);
 begin
 
-    FEventLogPath:=SessionId;
+    FEventLogPath:=SessionFile;
 
     var Settings: ISettings:=TSettings.Create();
     FWinUserName:=Settings.WinUserName;
@@ -1989,88 +1989,96 @@ end;
 
 /// <summary>
 /// Execute when application receives windows message on shutting down the system; or user press key combination of <ALT> + <Y>; or
-/// simply clicks close button on application caption bar. Standard behaviour of application close button is changed to minimisation
+/// simply clicks close button on application caption bar. Standard behaviour of application on close button is changed to minimisation
 /// of the application to system tray (removes icon from taskbar).
 /// </summary>
 
 procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
 
-    // Go minimize and hide from taskbar, do not close
-    if not FAllowClose then
-    begin
-        CanClose:=False;
-        ShowWindow(Handle, SW_MINIMIZE);
-        Hide();
-    end
-    else
-    // Shutdown application
-    begin
+    case FAllowClose of
 
-        Visible:=False;
-        ChromiumWindow.CloseBrowser(True);
+        // ------------------------------------------------
+        // Go minimize and hide from taskbar, do not close.
+        // ------------------------------------------------
 
-        THelpers.ExecMessage(False, TMessaging.TWParams.StatusBar, 'Ending session...', Self);
+        False:
+        begin
+            CanClose:=False;
+            ShowWindow(Handle, SW_MINIMIZE);
+            Hide();
+        end;
 
-//        // Update user event log in database
-//        var UserLogs: TDataTables:=TDataTables.Create(FDbConnect);
-//        try
-//
-//            var Today: string:=FormatDateTime(TDateTimeFormats.DateTimeFormat, Now);
-//
-//            // Columns
-//            UserLogs.Columns.Add(TUnityEventLogs.UserAlias);
-//            UserLogs.Columns.Add(TUnityEventLogs.DateTimeStamp);
-//            UserLogs.Columns.Add(TUnityEventLogs.AppEventLog);
-//            UserLogs.Columns.Add(TUnityEventLogs.AppName);
-//            // Values
-//            UserLogs.Values.Add(WinUserName.ToUpper);
-//            UserLogs.Values.Add(Today);
-//            UserLogs.Values.Add(CurrentEvents);
-//            UserLogs.Values.Add('Unity for Debt Management');
-//            // Insert
-//            UserLogs.InsertInto(TUnityEventLogs.UnityEventLogs, True);
-//
-//        finally
-//            UserLogs.Free;
-//        end;
+        // ---------------------
+        // Shutdown application.
+        // ---------------------
 
-        FCurrentEvents:=EmptyStr;
-//        FAppEvents.Log(EventLogPath, 'Application closed.');
-        CanClose:=True;
+        True:
+        begin
+
+            Visible:=False;
+            ChromiumWindow.CloseBrowser(True);
+
+            // ----------------------------------
+            // Update user event log in database.
+            // ----------------------------------
+
+            var UserLogs: TDataTables:=TDataTables.Create(FDbConnect);
+            try
+
+                var Today: string:=FormatDateTime(TDateTimeFormats.DateTimeFormat, Now);
+
+                UserLogs.Columns.Add(TUnityEventLogs.UserAlias);
+                UserLogs.Columns.Add(TUnityEventLogs.DateTimeStamp);
+                UserLogs.Columns.Add(TUnityEventLogs.AppEventLog);
+                UserLogs.Columns.Add(TUnityEventLogs.AppName);
+                UserLogs.Values.Add(WinUserName.ToUpper);
+                UserLogs.Values.Add(Today);
+                UserLogs.Values.Add(Unity.Utilities.TUtilities.LoadFileToStr(EventLogPath));
+                UserLogs.Values.Add('Unity Cadiz.');
+                UserLogs.InsertInto(TUnityEventLogs.UnityEventLogs, True);
+
+            finally
+                UserLogs.Free;
+            end;
+
+            FAllowClose:=False;
+            CanClose:=not FAllowClose;
+            StartupForm.Close();
+
+        end;
 
     end;
+
 end;
 
 
 procedure TMainForm.FormDestroy(Sender: TObject);
 begin
 
+    // ----------------------------------------------------------------
+    // Save window position and layout; and disconnect from the server.
+    // ----------------------------------------------------------------
+
+    if sgAgeView.RowCount > 2 then
+        sgAgeView.SaveLayout(TConfigSections.ColumnWidthName, TConfigSections.ColumnOrderName, TConfigSections.ColumnNames, TConfigSections.ColumnPrefix);
+
+    var Settings: ISettings:=TSettings.Create;
+    Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_TOP',  MainForm.Top);
+    Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_LEFT', MainForm.Left);
+
+    if MainForm.WindowState = wsNormal    then Settings.SetStringValue(TConfigSections.ApplicationDetails,  'WINDOW_STATE', 'wsNormal');
+    if MainForm.WindowState = wsMaximized then Settings.SetStringValue(TConfigSections.ApplicationDetails,  'WINDOW_STATE', 'wsMaximized');
+    if MainForm.WindowState = wsMinimized then Settings.SetStringValue(TConfigSections.ApplicationDetails,  'WINDOW_STATE', 'wsMinimized');
+
+    Settings.Encode(TAppFiles.Configuration);
     FAppEvents.Free;
 
-    /// <remarks>
-    /// Save window position and layout; and disconnect from the server.
-    /// </remarks>
-
-//    if sgAgeView.RowCount > 2 then
-//        sgAgeView.SaveLayout(TConfigSections.ColumnWidthName, TConfigSections.ColumnOrderName, TConfigSections.ColumnNames, TConfigSections.ColumnPrefix);
-//
-//    var Settings: ISettings:=TSettings.Create;
-//    Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_TOP',  MainForm.Top);
-//    Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_LEFT', MainForm.Left);
-//    if MainForm.WindowState = wsNormal    then Settings.SetStringValue(TConfigSections.ApplicationDetails,  'WINDOW_STATE', 'wsNormal');
-//    if MainForm.WindowState = wsMaximized then Settings.SetStringValue(TConfigSections.ApplicationDetails,  'WINDOW_STATE', 'wsMaximized');
-//    if MainForm.WindowState = wsMinimized then Settings.SetStringValue(TConfigSections.ApplicationDetails,  'WINDOW_STATE', 'wsMinimized');
-//
-//    Settings.Encode(TCommon.TFiles.AppConfig);
-//
-//    FAppEvents.Free;
-//
-//    if Assigned(FDbConnect) then
-//    begin
-//        FDbConnect.Close;
-//        FDbConnect:=nil;
-//    end;
+    if Assigned(FDbConnect) then
+    begin
+        FDbConnect.Close;
+        FDbConnect.Free;
+    end;
 
 end;
 
@@ -3926,23 +3934,31 @@ end;
 
 
 /// <summary>
-/// Assign <ALT> + <Y> to application close.
+/// Assign <ALT> + <Y> to application close event.
 /// </summary>
 
 procedure TMainForm.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
 
-    // Turn off standard <ALT> + <F4>
+    // -------------------------------
+    // Turn off standard <ALT> + <F4>.
+    // -------------------------------
+
     if (Key=VK_F4) and (Shift=[ssALT]) then Key:=0;
 
-    // Bind close application with <ALT> + <Y>
+    // ----------------------------------------
+    // Bind close application with <ALT> + <Y>.
+    // ----------------------------------------
+
     if (Key=89) and (Shift=[ssALT]) then
     begin
-        if THelpers.MsgCall(TAppMessage.Question1, 'Are you absolutely sure you want to exit the Unity?') = IDOK then
+
+        if THelpers.MsgCall(TAppMessage.Question1, 'Are you sure you want to exit the Unity?') = IDOK then
         begin
             FAllowClose:=True;
-            Close;
+            MainForm.Close();
         end;
+
     end;
 
 end;

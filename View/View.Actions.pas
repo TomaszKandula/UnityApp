@@ -258,7 +258,6 @@ uses
     Unity.Sorting,
     Unity.Delimiters,
     Unity.Unknown,
-    Unity.LyncLib,
     Unity.Common,
     Async.AddressBook,
     Async.Comments,
@@ -634,7 +633,7 @@ begin
 
     // Check for 'Lynccall.exe'
     var Settings: ISettings:=TSettings.Create;
-    if not FileExists(Settings.DirApplication + TLyncLib.LyncCall) then
+    if not FileExists(Settings.DirApplication + 'LyncCall.exe') then
     begin
         THelpers.MsgCall(Error, TCommon.APPCAPTION + ' cannot find ''lynccall.exe''. Please contact IT support.');
         Exit;
@@ -648,7 +647,7 @@ begin
     end;
 
     // Run Lync with given phone number
-    ShellExecute(ActionsForm.Handle, 'open', PChar(Settings.DirApplication + TLyncLib.LyncCall), PChar(ActionsForm.Cust_Phone.Text), nil, SW_SHOWNORMAL);
+    ShellExecute(ActionsForm.Handle, 'open', PChar(Settings.DirApplication + 'LyncCall.exe'), PChar(ActionsForm.Cust_Phone.Text), nil, SW_SHOWNORMAL);
 
     if ActionsForm.DailyCom.Text = '' then
     begin
