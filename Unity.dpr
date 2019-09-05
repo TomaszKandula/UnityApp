@@ -148,7 +148,7 @@ begin
     begin
 
         var LastErrorMsg: string;
-        if TCommon.Unpack(10, Settings.PathConfig, false, LastErrorMsg) then Settings.ConfigToMemory
+        if TCore.Unpack(10, Settings.PathConfig, false, LastErrorMsg) then Settings.ConfigToMemory
         else begin
 
             Application.MessageBox(
@@ -251,11 +251,11 @@ begin
     Application.Title:=TCommon.AppCaption;
     Application.MainFormOnTaskbar:=True;
 
-    // ----------------------------------------------------------
-    // Call startup view to display splash screen and process the
-    // initial loading of settings and database support tables.
-    // It will automatically handle main application window.
-    // ----------------------------------------------------------
+    // -------------------------------------------------------------------
+    // Call startup view to display splash screen and process the initial
+    // settings loading and database support tables. It will automatically
+    // handle main user window.
+    // -------------------------------------------------------------------
 
     StartupForm.SetSessionLog(SessionEventLog);
     StartupForm.Show();

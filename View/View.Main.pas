@@ -1376,7 +1376,7 @@ begin
     StatBar_TXT2.Caption:=FWinUserName;
     StatBar_TXT3.Caption:=DateToStr(Now);
 
-    FAppEvents.Log(EventLogPath, 'Application version = ' + TCommon.GetBuildInfoAsString);
+    FAppEvents.Log(EventLogPath, 'Application version = ' + TCore.GetBuildInfoAsString);
     FAppEvents.Log(EventLogPath, 'User SID = ' + TUserSid.GetCurrentUserSid);
 
 end;
@@ -1428,7 +1428,7 @@ begin
         begin
 
             // Delay
-            Sleep(2500);
+            Sleep(1500);
 
             TThread.Synchronize(nil, procedure
             begin
@@ -1957,14 +1957,14 @@ end;
 procedure TMainForm.FormShow(Sender: TObject);
 begin
     // Execurte before window is show
-    SetupMainWnd();
+    if StartupForm.IsAppInitialized then SetupMainWnd();
 end;
 
 
 procedure TMainForm.FormActivate(Sender: TObject);
 begin
     // Execute after window is shown
-    StartMainWnd();
+    if StartupForm.IsAppInitialized then StartMainWnd();
 end;
 
 
@@ -2034,13 +2034,33 @@ begin
                 UserLogs.Columns.Add(TUnityEventLogs.AppName);
                 UserLogs.Values.Add(WinUserName.ToUpper);
                 UserLogs.Values.Add(Today);
-                UserLogs.Values.Add(Unity.Utilities.TUtilities.LoadFileToStr(EventLogPath));
+                UserLogs.Values.Add(TCore.LoadFileToStr(EventLogPath));
                 UserLogs.Values.Add('Unity Cadiz.');
                 UserLogs.InsertInto(TUnityEventLogs.UnityEventLogs, True);
 
             finally
                 UserLogs.Free;
+                FDbConnect.Close;
+                if Assigned(FDbConnect) then FreeAndNil(FDbConnect);
             end;
+
+            // --------------------------------
+            // Save window position and layout.
+            // --------------------------------
+
+            if sgAgeView.RowCount > 2 then
+                sgAgeView.SaveLayout(TConfigSections.ColumnWidthName, TConfigSections.ColumnOrderName, TConfigSections.ColumnNames, TConfigSections.ColumnPrefix);
+
+            var Settings: ISettings:=TSettings.Create;
+            Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_TOP',  MainForm.Top);
+            Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_LEFT', MainForm.Left);
+
+            if MainForm.WindowState = wsNormal    then Settings.SetStringValue(TConfigSections.ApplicationDetails,  'WINDOW_STATE', 'wsNormal');
+            if MainForm.WindowState = wsMaximized then Settings.SetStringValue(TConfigSections.ApplicationDetails,  'WINDOW_STATE', 'wsMaximized');
+            if MainForm.WindowState = wsMinimized then Settings.SetStringValue(TConfigSections.ApplicationDetails,  'WINDOW_STATE', 'wsMinimized');
+
+            Settings.Encode(TAppFiles.Configuration);
+            FAppEvents.Free;
 
             FAllowClose:=False;
             CanClose:=not FAllowClose;
@@ -2055,31 +2075,7 @@ end;
 
 procedure TMainForm.FormDestroy(Sender: TObject);
 begin
-
-    // ----------------------------------------------------------------
-    // Save window position and layout; and disconnect from the server.
-    // ----------------------------------------------------------------
-
-    if sgAgeView.RowCount > 2 then
-        sgAgeView.SaveLayout(TConfigSections.ColumnWidthName, TConfigSections.ColumnOrderName, TConfigSections.ColumnNames, TConfigSections.ColumnPrefix);
-
-    var Settings: ISettings:=TSettings.Create;
-    Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_TOP',  MainForm.Top);
-    Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_LEFT', MainForm.Left);
-
-    if MainForm.WindowState = wsNormal    then Settings.SetStringValue(TConfigSections.ApplicationDetails,  'WINDOW_STATE', 'wsNormal');
-    if MainForm.WindowState = wsMaximized then Settings.SetStringValue(TConfigSections.ApplicationDetails,  'WINDOW_STATE', 'wsMaximized');
-    if MainForm.WindowState = wsMinimized then Settings.SetStringValue(TConfigSections.ApplicationDetails,  'WINDOW_STATE', 'wsMinimized');
-
-    Settings.Encode(TAppFiles.Configuration);
-    FAppEvents.Free;
-
-    if Assigned(FDbConnect) then
-    begin
-        FDbConnect.Close;
-        FDbConnect.Free;
-    end;
-
+    {Do nothing}
 end;
 
 

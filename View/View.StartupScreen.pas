@@ -98,6 +98,7 @@ uses
     Unity.Sql,
     Unity.Chars,
     Unity.UserSid,
+    Unity.Utilities,
     Async.Utilities,
     Async.Queries,
     Handler.Database,
@@ -137,7 +138,7 @@ end;
 procedure TStartupForm.FormShow(Sender: TObject);
 begin
     TextStatus.Caption:='';
-    LabelVersion.Caption:='Version ' + TCommon.GetBuildInfoAsString + '.';
+    LabelVersion.Caption:='Version ' + TCore.GetBuildInfoAsString + '.';
 end;
 
 
@@ -637,7 +638,7 @@ begin
     try
 
         Connection.Download(UrlLayoutPak, DirLayoutPak);
-        TCommon.UnzippLayouts(DirLayoutPak, LayoutDir);
+        TCore.UnzippLayouts(DirLayoutPak, LayoutDir);
 
     except
         on E: Exception do

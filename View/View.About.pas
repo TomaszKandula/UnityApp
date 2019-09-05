@@ -103,7 +103,8 @@ uses
     View.Main,
     Unity.Enums,
     Unity.Common,
-    Unity.Settings;
+    Unity.Settings,
+    Unity.Utilities;
 
 
 type
@@ -189,7 +190,7 @@ begin
 
         if Settings.Decode(TAppFiles.Licence, True) then
         begin
-            txt_VER.Caption:=TCommon.GetBuildInfoAsString;
+            txt_VER.Caption:=TCore.GetBuildInfoAsString;
             txt_EDT.Caption:=Settings.GetLicenceValue('VERSION', 'Edition');
             txt_LIC.Caption:=Settings.GetLicenceValue('LICENCE', 'Type');
             txt_STA.Caption:=Settings.GetLicenceValue('LICENCE', 'Status');
@@ -212,7 +213,7 @@ begin
         var mem_32: TMemoryStatus;
         mem_32.dwLength:=sizeof(mem_32);
         GlobalMemoryStatus(mem_32);
-        txt_SYS.Caption:=TCommon.GetOSVer(True) + ' (32-bit)';
+        txt_SYS.Caption:=TCore.GetOSVer(True) + ' (32-bit)';
         txt_MEM.Caption:=formatfloat('## ###', (mem_32.dwTotalPhys DIV 1048576)) + ' MB';
         txt_USG.Caption:=formatfloat('## ###', ((mem_32.dwTotalPhys-mem_32.dwAvailPhys) DIV 1048576)) + ' MB';
     end
@@ -221,7 +222,7 @@ begin
         var mem_64: TMemoryStatusEx;
         mem_64.dwLength:=sizeof(mem_64);
         GlobalMemoryStatusEx(mem_64);
-        txt_SYS.Caption:=TCommon.GetOSVer(True) + ' (64-bit)';
+        txt_SYS.Caption:=TCore.GetOSVer(True) + ' (64-bit)';
         txt_MEM.Caption:=formatfloat('## ###', ((mem_64.ullTotalPhys) DIV 1048576)) + ' MB';
         txt_USG.Caption:=formatfloat('## ###', ((mem_64.ullTotalPhys-mem_64.ullAvailPhys) DIV 1048576)) + ' MB';
     end;

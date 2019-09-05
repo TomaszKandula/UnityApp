@@ -578,9 +578,14 @@ begin
     var FL: TFileStream:=TFileStream.Create(EventLog, fmCreate);
     try
 
-        var StrWrite: string:=FWinUserName + ' @ ' + DateToStr(Now) + ' (' + TimeToStr(Now) + ').' + TChars.CRLF + TChars.CRLF;
-        FL.Position:=FL.Size;
+        var StrWrite: string:=
+            'User `' + FWinUserName + '` @ ' +
+            DateToStr(Now) + ' (' + TimeToStr(Now) + '). Session signature: ' +
+            SessionId +
+            TChars.CRLF +
+            TChars.CRLF;
 
+        FL.Position:=FL.Size;
         for var iCNT: integer:=1 to length(StrWrite) do
             FL.Write(StrWrite[iCNT], 1);
 

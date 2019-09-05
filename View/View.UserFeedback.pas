@@ -67,7 +67,8 @@ uses
     Unity.Chars,
     Unity.Common,
     Unity.Helpers,
-    Unity.Settings;
+    Unity.Settings,
+    Unity.Utilities;
 
 
 var vFeedbackForm: TFeedbackForm;
@@ -132,7 +133,7 @@ begin
     var Mail: IDocument:=TDocument.Create;
 
     var AppName: string:=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'VALUE', '');
-    var AppVer: string:=TCommon.GetBuildInfoAsString;
+    var AppVer: string:=TCore.GetBuildInfoAsString;
 
     // Get and set email details
     if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerNTLM  then
