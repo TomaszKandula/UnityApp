@@ -1,11 +1,10 @@
-
 unit View.ColorPicker;
 
-// ------------------------------------------------------------------------------
-// Application GUI / view that can have direct calls to logic layer interface.
-// Calls must have reference to callback method that is defined the same as
-// callback signature. All views use Lazy Initialization pattern.
-// ------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------
+// This is application view (GUI) that can have direct calls to logic layer interface(s).
+// Calls must carry reference(s) to callback method that is defined the same as callback
+// signature. All views must use Lazy Initialization pattern.
+// --------------------------------------------------------------------------------------
 
 interface
 
@@ -90,9 +89,9 @@ end;
 // ------------------------------------------------------------------------------------------------------------------------------------------------- STARTUP //
 
 
-/// <summary>
-/// Setup caption and default colors for backgrounds and foregrounds.
-/// </summary>
+// -----------------------------------------------------------------
+// Setup caption and default colors for backgrounds and foregrounds.
+// -----------------------------------------------------------------
 
 procedure TColorsForm.FormCreate(Sender: TObject);
 begin
@@ -119,9 +118,9 @@ end;
 // ---------------------------------------------------------------------------------------------------------------------------------------- COMPONENT EVENTS //
 
 
-/// <summary>
-/// Get colors from application settings file.
-/// </summary>
+// ------------------------------------------
+// Get colors from application settings file.
+// ------------------------------------------
 
 procedure TColorsForm.ColorList1Select(Sender: TObject);
 begin
@@ -155,9 +154,10 @@ end;
 
 // -------------------------------------------------------------------------------------------------------------------------------------------- BUTTON CALLS //
 
-/// <summary>
-/// Set new colors into application settings file.
-/// </summary>
+
+// ----------------------------------------------
+// Set new colors into application settings file.
+// ----------------------------------------------
 
 procedure TColorsForm.btnTodayClick(Sender: TObject);
 begin

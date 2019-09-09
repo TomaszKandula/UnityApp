@@ -1,10 +1,9 @@
 unit Async.AddressBook;
 
-// ----------------------------------
-// Application logic, business layer.
-// Can be referenced by anyone.
-// Cannot hold references to View.
-// ----------------------------------
+// -------------------------------------------------------
+// Application logic (business layer). Anyone can call it.
+// Cannot hold references to Views.
+// -------------------------------------------------------
 
 interface
 
@@ -33,6 +32,12 @@ uses
 
 type
 
+
+    // --------------------
+    // Callback signatures.
+    // --------------------
+
+    //...
 
     IAddressBook = interface(IInterface)
     ['{56D68733-5DF0-4D44-9A66-69CB5DE587E4}']

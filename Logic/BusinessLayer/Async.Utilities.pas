@@ -1,10 +1,9 @@
 unit Async.Utilities;
 
-// ----------------------------------
-// Application logic, business layer.
-// Can be referenced by anyone.
-// Cannot hold references to View.
-// ----------------------------------
+// -------------------------------------------------------
+// Application logic (business layer). Anyone can call it.
+// Cannot hold references to Views.
+// -------------------------------------------------------
 
 interface
 
@@ -33,6 +32,12 @@ uses
 
 type
 
+
+    // --------------------
+    // Callback signatures.
+    // --------------------
+
+    //...
 
     IUtilities = interface(IInterface)
     ['{0B054CF4-86F7-4770-957B-3026BE491B5A}']

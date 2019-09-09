@@ -1,10 +1,9 @@
 unit Async.OpenItems;
 
-// ----------------------------------
-// Application logic, business layer.
-// Can be referenced by anyone.
-// Cannot hold references to View.
-// ----------------------------------
+// -------------------------------------------------------
+// Application logic (business layer). Anyone can call it.
+// Cannot hold references to Views.
+// -------------------------------------------------------
 
 interface
 
@@ -33,6 +32,12 @@ uses
 
 type
 
+
+    // --------------------
+    // Callback signatures.
+    // --------------------
+
+    //...
 
     IOpenItems = interface(IInterface)
     ['{CD6AC138-D2A4-4C6B-A3F1-07F904BA44B1}']

@@ -1,10 +1,9 @@
 unit Async.Statements;
 
-// ----------------------------------
-// Application logic, business layer.
-// Can be referenced by anyone.
-// Cannot hold references to View.
-// ----------------------------------
+// -------------------------------------------------------
+// Application logic (business layer). Anyone can call it.
+// Cannot hold references to Views.
+// -------------------------------------------------------
 
 interface
 
@@ -33,6 +32,12 @@ uses
 
 type
 
+
+    // --------------------
+    // Callback signatures.
+    // --------------------
+
+    //...
 
     IStatements = interface(IInterface)
     ['{14BBF3F3-945A-4A61-94BA-6A2EE10530A2}']

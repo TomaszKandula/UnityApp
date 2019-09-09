@@ -1,10 +1,10 @@
 unit View.InvoiceList;
 
-// ------------------------------------------------------------------------------
-// Application GUI / view that can have direct calls to logic layer interface.
-// Calls must have reference to callback method that is defined the same as
-// callback signature. All views use Lazy Initialization pattern.
-// ------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------
+// This is application view (GUI) that can have direct calls to logic layer interface(s).
+// Calls must carry reference(s) to callback method that is defined the same as callback
+// signature. All views must use Lazy Initialization pattern.
+// --------------------------------------------------------------------------------------
 
 interface
 
@@ -29,6 +29,7 @@ type
 
 
     TInvoicesForm = class(TForm)
+    public
         InvoicesGrid: TStringGrid;
         StatusBar: TStatusBar;
         procedure FormCreate(Sender: TObject);
@@ -38,6 +39,13 @@ type
         procedure InvoicesGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
         procedure InvoicesGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
+
+        // ------------------
+        // Callbacks methods.
+        // ------------------
+
+        //...
+
     end;
 
 

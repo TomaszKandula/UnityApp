@@ -1,10 +1,10 @@
 unit View.PhoneList;
 
-// ------------------------------------------------------------------------------
-// Application GUI / view that can have direct calls to logic layer interface.
-// Calls must have reference to callback method that is defined the same as
-// callback signature. All views use Lazy Initialization pattern.
-// ------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------
+// This is application view (GUI) that can have direct calls to logic layer interface(s).
+// Calls must carry reference(s) to callback method that is defined the same as callback
+// signature. All views must use Lazy Initialization pattern.
+// --------------------------------------------------------------------------------------
 
 interface
 
@@ -43,6 +43,13 @@ type
         procedure FormKeyPress(Sender: TObject; var Key: Char);
     private
         function  CheckPhoneList(List: TMemo): boolean;
+
+        // ------------------
+        // Callbacks methods.
+        // ------------------
+
+        //...
+
     end;
 
 

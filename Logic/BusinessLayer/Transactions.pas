@@ -1,10 +1,9 @@
 unit Transactions;
 
-// -----------------------------------
-// Application logic, business layers.
-// Can be referenced by anyone.
-// Cannot hold references to View.
-// -----------------------------------
+// -------------------------------------------------------
+// Application logic (business layer). Anyone can call it.
+// Cannot hold references to Views.
+// -------------------------------------------------------
 
 interface
 
@@ -26,6 +25,12 @@ uses
 
 type
 
+
+    // --------------------
+    // Callback signatures.
+    // --------------------
+
+    //...
 
     TTransactions = class(TDataTables)
     {$TYPEINFO ON}

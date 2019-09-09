@@ -1,10 +1,9 @@
 unit Async.Tracker;
 
-// ----------------------------------
-// Application logic, business layer.
-// Can be referenced by anyone.
-// Cannot hold references to View.
-// ----------------------------------
+// -------------------------------------------------------
+// Application logic (business layer). Anyone can call it.
+// Cannot hold references to Views.
+// -------------------------------------------------------
 
 interface
 
@@ -33,6 +32,12 @@ uses
 
 type
 
+
+    // --------------------
+    // Callback signatures.
+    // --------------------
+
+    //...
 
     ITracker = interface(IInterface)
     ['{1EE8D593-A574-4265-B3CE-1A03CFB9B0B9}']

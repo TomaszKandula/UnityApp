@@ -1,11 +1,24 @@
 program Unity;
 
 
-// ----------------------------------------
-// Unity for Debt Management application
-// Copyright (C) 2018-2019 Tomasz Kandula
-// VCL/Win32 application for Windows 7 & 10
-// ----------------------------------------
+// =============================================================
+// Application full name:  Unity for Debt Management.
+// Application shortname:  Unity.
+// Major version name:     Cadiz.
+// -------------------------------------------------------------
+// Introduced:             2016 (concept).
+// First test release:     2017-07-10.
+// Last stable release:    2019-08-01.
+// -------------------------------------------------------------
+// Target system:          Windows 7 & 10 application.
+// Framework used:         VCL (created by Borland).
+// Win32 API direct calls: Yes.
+// Require web services:   Yes, cloud based (Azure).
+// Active Directory:       Yes.
+// -------------------------------------------------------------
+// Copyright (C) 2018-2019 Tomasz Kandula/DFDS Polska sp. z o.o.
+// All rights reserved.
+// =============================================================
 
 
 {$SetPEFlags $0020}
@@ -26,13 +39,13 @@ uses
     Vcl.Forms,
     Vcl.StdCtrls,
     uCEFApplication,
-    Unity.ChkListBox            in 'Extensions\Unity.ChkListBox.pas'{Component extension},
-    Unity.Edit                  in 'Extensions\Unity.Edit.pas'{Component extension},
-    Unity.Panel                 in 'Extensions\Unity.Panel.pas'{Component extension},
-    Unity.Shape                 in 'Extensions\Unity.Shape.pas'{Component extension},
-    Unity.Grid                  in 'Extensions\Unity.Grid.pas'{Component extension},
-    Unity.ListView              in 'Extensions\Unity.ListView.pas'{Component extension},
-    Unity.ComboBox              in 'Extensions\Unity.ComboBox.pas'{Component extension},
+    Unity.ChkListBox            in 'Extensions\Unity.ChkListBox.pas',
+    Unity.Edit                  in 'Extensions\Unity.Edit.pas',
+    Unity.Panel                 in 'Extensions\Unity.Panel.pas',
+    Unity.Shape                 in 'Extensions\Unity.Shape.pas',
+    Unity.Grid                  in 'Extensions\Unity.Grid.pas',
+    Unity.ListView              in 'Extensions\Unity.ListView.pas',
+    Unity.ComboBox              in 'Extensions\Unity.ComboBox.pas',
     Unity.Crc32                 in 'Helpers\Unity.Crc32.pas',
     Unity.Enums                 in 'Helpers\Types\Unity.Enums.pas',
     Unity.Arrays                in 'Helpers\Types\Unity.Arrays.pas',
@@ -57,7 +70,7 @@ uses
     Unity.UserAccess            in 'Helpers\Statics\Unity.UserAccess.pas',
     Unity.UserSid               in 'Helpers\Statics\Unity.UserSid.pas',
     Unity.Utilities             in 'Helpers\Statics\Unity.Utilities.pas',
-    DbModel                     in 'Model\DbModel.pas'{Legacy code/to be removed},
+    DbModel {Legacy}            in 'Model\DbModel.pas',
     Customer.AddressBook        in 'Model\Json\RawTables\Customer.AddressBook.pas',
     Customer.ControlStatus      in 'Model\Json\RawTables\Customer.ControlStatus.pas',
     Customer.Snapshots          in 'Model\Json\RawTables\Customer.Snapshots.pas',
@@ -71,13 +84,13 @@ uses
     Erp.Person                  in 'Model\Json\RawTables\Erp.Person.pas',
     Erp.PersonResponsible       in 'Model\Json\RawTables\Erp.PersonResponsible.pas',
     Erp.SalesResponsible        in 'Model\Json\RawTables\Erp.SalesResponsible.pas',
-    Handler.Sql                 in 'Logic\AccessLayer\Handler.Sql.pas'{Legacy code/to be removed},
-    Handler.Database            in 'Logic\AccessLayer\Handler.Database.pas'{Legacy code/to be removed},
+    Handler.Sql {Legacy}        in 'Logic\AccessLayer\Handler.Sql.pas',
+    Handler.Database {Legacy}   in 'Logic\AccessLayer\Handler.Database.pas',
     Handler.Account             in 'Logic\AccessLayer\Handler.Account.pas',
-    Handler.Connection          in 'Logic\AccessLayer\Handler.Connection.pas'{Legacy code/to be removed},
+    Handler.Connection {Legacy} in 'Logic\AccessLayer\Handler.Connection.pas',
     Handler.Rest                in 'Logic\AccessLayer\Handler.Rest.pas',
-    AgeView                     in 'Logic\BusinessLayer\AgeView.pas'{Legacy code/to be removed},
-    Transactions                in 'Logic\BusinessLayer\Transactions.pas'{Legacy code/to be removed},
+    AgeView  {Legacy}           in 'Logic\BusinessLayer\AgeView.pas',
+    Transactions {Legacy}       in 'Logic\BusinessLayer\Transactions.pas',
     Sync.Mailer                 in 'Logic\BusinessLayer\Sync.Mailer.pas',
     Sync.Documents              in 'Logic\BusinessLayer\Sync.Documents.pas',
     Async.Utilities             in 'Logic\BusinessLayer\Async.Utilities.pas',
@@ -106,7 +119,7 @@ uses
     View.PhoneList              in 'View\View.PhoneList.pas' {PhoneListForm},
     View.Queries                in 'View\View.Queries.pas' {QmsForm},
     View.SendStatement          in 'View\View.SendStatement.pas' {SendForm},
-    View.StartupScreen          in 'View\View.StartupScreen.pas' {StartupForm},
+    View.Startup                in 'View\View.Startup.pas' {StartupForm},
     View.SqlSearch              in 'View\View.SqlSearch.pas' {SqlSearchForm},
     View.InvoiceTracker         in 'View\View.InvoiceTracker.pas' {TrackerForm};
 

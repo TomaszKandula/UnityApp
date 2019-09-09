@@ -1,10 +1,9 @@
 unit Sync.Documents;
 
-// ----------------------------------
-// Application logic, business layer.
-// Can be referenced by anyone.
-// Cannot hold references to View.
-// ----------------------------------
+// -------------------------------------------------------
+// Application logic (business layer). Anyone can call it.
+// Cannot hold references to Views.
+// -------------------------------------------------------
 
 interface
 
@@ -28,6 +27,12 @@ uses
 
 type
 
+
+    // --------------------
+    // Callback signatures.
+    // --------------------
+
+    //...
 
     IDocument = Interface(IMailer)
     ['{C3D66D48-891B-438B-9EB6-F53B62E2FCAD}']

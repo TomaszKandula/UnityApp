@@ -1,10 +1,9 @@
 unit Sync.Mailer;
 
-// ----------------------------------
-// Application logic, business layer.
-// Can be referenced by anyone.
-// Cannot hold references to View.
-// ----------------------------------
+// -------------------------------------------------------
+// Application logic (business layer). Anyone can call it.
+// Cannot hold references to Views.
+// -------------------------------------------------------
 
 interface
 
@@ -27,6 +26,12 @@ uses
 
 type
 
+
+    // --------------------
+    // Callback signatures.
+    // --------------------
+
+    //...
 
     IMailer = Interface(IInterface)
     ['{3D803B98-BE4F-49A4-A2B5-7F323772E5B4}']

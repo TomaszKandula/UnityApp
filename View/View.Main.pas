@@ -1,10 +1,10 @@
 unit View.Main;
 
-// -----------------------------------------------------------------------------
-// Application GUI / view that can have direct calls to logic layer interface.
-// Calls must have reference to callback method that have the same definition as
-// callback signature. All views use Lazy Initialization pattern.
-// -----------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------
+// This is application view (GUI) that can have direct calls to logic layer interface(s).
+// Calls must carry reference(s) to callback method that is defined the same as callback
+// signature. All views must use Lazy Initialization pattern.
+// --------------------------------------------------------------------------------------
 
 interface
 
@@ -899,6 +899,12 @@ type
         procedure UpdateFControlStatusRefs(SourceGrid: TStringGrid);
         procedure SwitchTimers(State: TAppTimers);
 
+        // ------------------
+        // Callbacks methods.
+        // ------------------
+
+        //...
+
     protected
 
         // -------------------
@@ -958,7 +964,7 @@ uses
     View.SqlSearch,
     View.MassMailer,
     View.AwaitScreen,
-    View.StartupScreen,
+    View.Startup,
     Unity.Sql,
     Unity.Messaging,
     Unity.UserAccess,
@@ -1950,7 +1956,7 @@ begin
     // Calls after main form constructor
     FAppEvents:=TThreadFileLog.Create;
     FAllowClose:=False;
-    //InitializeScreenSettings;
+    InitializeScreenSettings;
 end;
 
 
@@ -2016,7 +2022,6 @@ begin
         True:
         begin
 
-            Visible:=False;
             ChromiumWindow.CloseBrowser(True);
 
             // ----------------------------------
@@ -3329,7 +3334,7 @@ end;
 procedure TMainForm.TrayIconClick(Sender: TObject);
 begin
 
-    if not View.StartupScreen.StartupForm.IsAppInitialized then
+    if not View.Startup.StartupForm.IsAppInitialized then
         TrayIcon.PopupMenu:=nil
     else
         TrayIcon.PopupMenu:=PopupMenu;
@@ -3339,7 +3344,7 @@ end;
 
 procedure TMainForm.TrayIconDblClick(Sender: TObject);
 begin
-    if not View.StartupScreen.StartupForm.IsAppInitialized then Exit();
+    if not View.Startup.StartupForm.IsAppInitialized then Exit();
     MainForm.Action_ShowAppClick(self);
 end;
 
