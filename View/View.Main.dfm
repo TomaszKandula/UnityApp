@@ -15036,18 +15036,6 @@ object MainForm: TMainForm
     object Action_ViewOptions: TMenuItem
       Caption = 'Age View Options'
       OnClick = Action_ViewOptionsClick
-      object Action_BasicView: TMenuItem
-        Caption = 'Basic view'
-        Enabled = False
-        OnClick = Action_BasicViewClick
-      end
-      object Action_FullView: TMenuItem
-        Caption = 'Full view'
-        OnClick = Action_FullViewClick
-      end
-      object N22: TMenuItem
-        Caption = '-'
-      end
       object Action_RowHighlight: TMenuItem
         Caption = 'Row highlight'
         OnClick = Action_RowHighlightClick

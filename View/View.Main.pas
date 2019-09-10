@@ -328,9 +328,7 @@ type
         Action_ShowAsIs: TMenuItem;
         Action_ShowMyEntries: TMenuItem;
         Action_ToExce: TMenuItem;
-        Action_BasicView: TMenuItem;
         N13: TMenuItem;
-        Action_FullView: TMenuItem;
         XLExport: TSaveDialog;
         tR6: TLabel;
         valR6: TLabel;
@@ -424,7 +422,6 @@ type
         Action_Free2: TMenuItem;
         Action_ViewOptions: TMenuItem;
         N16: TMenuItem;
-        N22: TMenuItem;
         Action_ShowDetails: TMenuItem;
         Action_QuickReporting: TMenuItem;
         SortListBox: TComboBox;
@@ -674,8 +671,6 @@ type
         procedure Action_ShowMyEntriesClick(Sender: TObject);
         procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
         procedure Action_ToExceClick(Sender: TObject);
-        procedure Action_BasicViewClick(Sender: TObject);
-        procedure Action_FullViewClick(Sender: TObject);
         procedure sgAgeViewColumnMoved(Sender: TObject; FromIndex, ToIndex: Integer);
         procedure Action_SearchBookClick(Sender: TObject);
         procedure Action_OverdueClick(Sender: TObject);
@@ -3176,52 +3171,6 @@ end;
 procedure TMainForm.Action_AutoColumnSizeClick(Sender: TObject);
 begin
     MainForm.sgAgeView.SetColWidth(10, 20, 400);
-end;
-
-
-/// <summary>
-/// Show only basic view defined in configuration file.
-/// </summary>
-
-procedure TMainForm.Action_BasicViewClick(Sender: TObject);
-begin
-
-//    var AgeView: TAgeView:=TAgeView.Create(FDbConnect);
-//    try
-//        AgeView.AgeViewMode(mainForm.sgAgeView, TConfigSections.AgingBasic);
-//    finally
-//        AgeView.Free;
-//    end;
-//
-//    Action_AutoColumnSizeClick(Self);
-//
-//    // Tick
-//    Action_BasicView.Checked:=True;
-//    Action_FullView.Checked :=False;
-
-end;
-
-
-/// <summary>
-/// Show all available columns (defined in configuration file).
-/// </summary>
-
-procedure TMainForm.Action_FullViewClick(Sender: TObject);
-begin
-
-    var AgeView: TAgeView:=TAgeView.Create(FDbConnect);
-    try
-        AgeView.AgeViewMode(mainForm.sgAgeView, TConfigSections.AgingFull);
-    finally
-        AgeView.Free;
-    end;
-
-    Action_AutoColumnSizeClick(Self);
-
-    // Tick
-    Action_BasicView.Checked:=False;
-    Action_FullView.Checked :=True;
-
 end;
 
 

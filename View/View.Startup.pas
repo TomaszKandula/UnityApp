@@ -575,7 +575,6 @@ begin
             end else
             begin
                 MainAppForm.FAccessMode:=UserControl.GetAccessData(TUserAccess.TTypes.AccessMode);
-                MainAppForm.Action_FullView.Checked:=True;
                 UserControl.GetGroupList(MainAppForm.FGroupList);
                 UserControl.GetAgeDates(MainAppForm.FAgeDateList, MainAppForm.FGroupList[0, 0]);
             end;
