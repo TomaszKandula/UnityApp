@@ -77,19 +77,6 @@ type
     end;
 
 
-    TMemoryStatusEx = packed record
-        dwLength:                DWORD;
-        dwMemoryLoad:            DWORD;
-        ullTotalPhys:            Int64;
-        ullAvailPhys:            Int64;
-        ullTotalPageFile:        Int64;
-        ullAvailPageFile:        Int64;
-        ullTotalVirtual:         Int64;
-        ullAvailVirtual:         Int64;
-        ullAvailExtendedVirtual: Int64;
-    end;
-
-
     function AboutForm: TAboutForm;
 
 
@@ -108,6 +95,18 @@ uses
 
 
 type
+    TMemoryStatusEx = packed record
+        dwLength:                DWORD;
+        dwMemoryLoad:            DWORD;
+        ullTotalPhys:            Int64;
+        ullAvailPhys:            Int64;
+        ullTotalPageFile:        Int64;
+        ullAvailPageFile:        Int64;
+        ullTotalVirtual:         Int64;
+        ullAvailVirtual:         Int64;
+        ullAvailExtendedVirtual: Int64;
+    end;
+
     TIsWow64Process = function(Handle:THandle; var IsWow64: BOOL): BOOL; stdcall;
     TFNGlobalMemoryStatusEx = function(var msx: TMemoryStatusEx): BOOL; stdcall;
 

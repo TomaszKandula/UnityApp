@@ -1923,12 +1923,16 @@ begin
     if Screen.MonitorCount > 1 then
     begin
 
-        var Settings: ISettings:=TSettings.Create;
-        var LastTopPos:=Settings.GetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_TOP', 0);
-        var LastLeftPos: integer:=Settings.GetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_LEFT', 0);
+        var Settings:  ISettings:=TSettings.Create;
+        var LastTopPos :=Settings.GetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_TOP', 24);
+        var LastLeftPos:=Settings.GetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_LEFT', 24);
+        var LastWidth  :=Settings.GetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_WIDTH', 1024);
+        var LastHeight :=Settings.GetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_HEIGHT', 1024);
 
         MainForm.DefaultMonitor:=dmDesktop;
-        MainForm.Top           :=LastTopPos;
+        MainForm.Top   :=LastTopPos;
+        MainForm.Width :=LastWidth;
+        MainForm.Height:=LastHeight;
 
         // ------------------------------------------------------------------
         // To prevent displaying program window out of the screen area,
@@ -2059,10 +2063,14 @@ begin
             var Settings: ISettings:=TSettings.Create;
             Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_TOP',  MainForm.Top);
             Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_LEFT', MainForm.Left);
+            Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_WIDTH', MainForm.Width);
+            Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_HEIGHT', MainForm.Height);
 
-            if MainForm.WindowState = wsNormal    then Settings.SetStringValue(TConfigSections.ApplicationDetails,  'WINDOW_STATE', 'wsNormal');
-            if MainForm.WindowState = wsMaximized then Settings.SetStringValue(TConfigSections.ApplicationDetails,  'WINDOW_STATE', 'wsMaximized');
-            if MainForm.WindowState = wsMinimized then Settings.SetStringValue(TConfigSections.ApplicationDetails,  'WINDOW_STATE', 'wsMinimized');
+            case MainForm.WindowState of
+                wsNormal:    Settings.SetStringValue(TConfigSections.ApplicationDetails, 'WINDOW_STATE', 'wsNormal');
+                wsMaximized: Settings.SetStringValue(TConfigSections.ApplicationDetails, 'WINDOW_STATE', 'wsMaximized');
+                wsMinimized: Settings.SetStringValue(TConfigSections.ApplicationDetails, 'WINDOW_STATE', 'wsMinimized');
+            end;
 
             Settings.Encode(TAppFiles.Configuration);
             FAppEvents.Free;
@@ -3178,18 +3186,18 @@ end;
 procedure TMainForm.Action_BasicViewClick(Sender: TObject);
 begin
 
-    var AgeView: TAgeView:=TAgeView.Create(FDbConnect);
-    try
-        AgeView.AgeViewMode(mainForm.sgAgeView, TConfigSections.AgingBasic);
-    finally
-        AgeView.Free;
-    end;
-
-    Action_AutoColumnSizeClick(Self);
-
-    // Tick
-    Action_BasicView.Checked:=True;
-    Action_FullView.Checked :=False;
+//    var AgeView: TAgeView:=TAgeView.Create(FDbConnect);
+//    try
+//        AgeView.AgeViewMode(mainForm.sgAgeView, TConfigSections.AgingBasic);
+//    finally
+//        AgeView.Free;
+//    end;
+//
+//    Action_AutoColumnSizeClick(Self);
+//
+//    // Tick
+//    Action_BasicView.Checked:=True;
+//    Action_FullView.Checked :=False;
 
 end;
 

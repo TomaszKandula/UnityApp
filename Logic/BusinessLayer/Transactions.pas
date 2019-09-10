@@ -131,8 +131,8 @@ begin
 
     // Parameters for SQL stored procedure
     var Settings:  ISettings:=TSettings.Create;
-    var CutOff:    string:=IntToStr(Settings.GetIntegerValue(TConfigSections.OpenItemsData, 'NRCUTOFFNUM', 0));
-    var INF4:      string:=Settings.GetStringValue(TConfigSections.OpenItemsData, 'TXCUTOFFTXT', '');
+    var CutOff:    string:='71150';  //IntToStr(Settings.GetIntegerValue(TConfigSections.OpenItemsData, 'NRCUTOFFNUM', 0));
+    var INF4:      string:='cards';  //Settings.GetStringValue(TConfigSections.OpenItemsData, 'TXCUTOFFTXT', '');
     var Agents:    string;
     var Divisions: string;
 
@@ -165,8 +165,8 @@ begin
     /// <remarks>
     /// Do not use "cmdstoredproc" to execute stored procedure with adodb
     /// use ordinary "cmdtext" with "exec" statement just like you would
-    /// use it in Microsoft Management Studio. Alternatively, use firedac
-    /// from embarcadero instead of adodb as it is more robust library.
+    /// use it in Microsoft SQL Management Studio. Alternatively, use
+    /// firedac from embarcadero instead of adodb as it is more robust library.
     /// </remarks>
 
     CmdType:=cmdText;
@@ -184,7 +184,7 @@ begin
     Result:=SqlToGrid(DestGrid, ExecSQL, False, True);
 
     // Sort via CUID
-    DestGrid.MSort(DestGrid.ReturnColumn(TOpenitems.Cuid, 1 , 1), 2, True);  //to be removed - to be done on SQL server
+    DestGrid.MSort(DestGrid.ReturnColumn(TOpenitems.Cuid, 1 , 1), 2, True);
 
 end;
 

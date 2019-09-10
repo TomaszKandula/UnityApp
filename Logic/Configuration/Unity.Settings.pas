@@ -212,22 +212,19 @@ type
         const MailerBASIC        = 'MAILER_BASIC';
         const MailerSetup        = 'MAILER_SETUP';
         const DatabaseSetup      = 'DATABASE_SETTINGS';
-        const OpenItemsData      = 'OPEN_ITEMS';
-        const AddressBookData    = 'ADDRESS_BOOK';
-        const GeneralTables      = 'GENERAL_TABLES';
         const InvoiceTypes       = 'INVOICE_TYPES';
         const TabSheetsCaps      = 'TABSHEETS_CAPTIONS';
-        const AgingRanges        = 'AGEVIEW_RANGES';
-        const AgingBasic         = 'AGEVIEW_BASIC';
-        const AgingFull          = 'AGEVIEW_FULL';
         const Unallocated        = 'UNALLOCATED_DEFINITION';
-        const Layouts            = 'LAYOUTS';
+        const Layouts            = 'EMAIL_LAYOUTS';
         const TimersSettings     = 'TIMERS_INTERVALS';
         const FollowUpColors     = 'FOLLOWUPS_COLORS';
+        const AgingFull          = 'AGEVIEW_COLUMNS';
+        const AgingRanges        = 'AGEVIEW_BUCKETS';
         const ColumnPrefix       = 'COLUMN';
         const ColumnWidthName    = 'COLUMNWIDTH';
         const ColumnOrderName    = 'COLUMNORDER';
         const ColumnNames        = 'COLUMNNAMES';
+        const RestApi            = 'REST_API';
     end;
 
 

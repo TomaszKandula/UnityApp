@@ -787,8 +787,8 @@ procedure TAgeView.Make(OSAmount: double);  // REFACTOR TO REMOVE TIGHT COUPLING
         { RISK CLASS }
 //        MyWallet:  array of double;           { CONTAIN WALLET SHARE VALUES  }
 //        MyList:    array of integer;          { CONTAIN ASSOCIATED POSITIONS }
-        RcHi:      double;                    { UPPER BOUND                  }
-        RcLo:      double;                    { LOWER BOUND                  }
+//        RcHi:      double;                    { UPPER BOUND                  }
+//        RcLo:      double;                    { LOWER BOUND                  }
 //        Count:     double;                    { SUMS WALLET SHARE            }
 
         { SETTINGS }
@@ -863,8 +863,8 @@ procedure TAgeView.Make(OSAmount: double);  // REFACTOR TO REMOVE TIGHT COUPLING
 begin
 
     // INITIALIZE
-    RcLo :=0;
-    RcHi :=0;
+    //RcLo :=0;
+    //RcHi :=0;
     avRow:=0;
     SetLength(ArrAgeView, 1, 32);  // MAKE 1 ROW AND 1..32 COLUMNS
 

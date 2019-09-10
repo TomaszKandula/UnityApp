@@ -15038,6 +15038,7 @@ object MainForm: TMainForm
       OnClick = Action_ViewOptionsClick
       object Action_BasicView: TMenuItem
         Caption = 'Basic view'
+        Enabled = False
         OnClick = Action_BasicViewClick
       end
       object Action_FullView: TMenuItem
