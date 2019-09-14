@@ -98,6 +98,7 @@ uses
     Unity.Chars,
     Unity.Sql,
     Unity.Settings,
+    Unity.EventLogger,
     View.Main;
 
 
@@ -156,7 +157,7 @@ begin
     StrSQL:=TSql.EXECUTE + AgeViewReport + TChars.SPACE + QuotedStr(StrCol) + TChars.COMMA + QuotedStr(GroupID) + TChars.COMMA + QuotedStr(AgeDate) + TChars.COMMA + QuotedStr(Mode.ToString);
     SqlToGrid(Grid, ExecSQL, False, False);
 
-    MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: SQL statement applied [' + StrSQL + '].');
+    ThreadFileLog.Log('Thread [' + IntToStr(idThd) + ']: SQL statement applied [' + StrSQL + '].');
 
     // Uninitialize
     Grid.Freeze(False);
@@ -1091,10 +1092,10 @@ begin
         ExecSQL;
     except
         on E: Exception do
-            MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Cannot send to server. Error has been thrown: ' + E.Message);
+            ThreadFileLog.Log('Thread [' + IntToStr(idThd) + ']: Cannot send to server. Error has been thrown: ' + E.Message);
     end;
 
-    MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(idThd) + ']: Age View transferred to Microsoft SQL Server. Rows affected: ' + RowsAffected.ToString + '.');
+    ThreadFileLog.Log('Thread [' + IntToStr(idThd) + ']: Age View transferred to Microsoft SQL Server. Rows affected: ' + RowsAffected.ToString + '.');
 
 end;
 

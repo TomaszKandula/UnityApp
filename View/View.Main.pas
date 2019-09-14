@@ -3,7 +3,7 @@ unit View.Main;
 // --------------------------------------------------------------------------------------
 // This is application view (GUI) that can have direct calls to logic layer interface(s).
 // Calls must carry reference(s) to callback method that is defined the same as callback
-// signature. All views must use Lazy Initialization pattern.
+// signature. All views use Lazy Initialization pattern.
 // --------------------------------------------------------------------------------------
 
 interface
@@ -62,7 +62,6 @@ uses
     uCEFTypes,
     uCEFInterfaces,
     uCEFWinControl,
-    Unity.EventLogger,
     Unity.Grid,
     Unity.Shape,
     Unity.Panel,
@@ -878,7 +877,6 @@ type
         // Legacy code, to be removed [end]
 
         var FStartTime:         TTime;
-        var FAppEvents:         TThreadFileLog;
         var FDbConnect:         TADOConnection;
         var FGroupList:         TALists;
         var FAgeDateList:       TALists;
@@ -977,6 +975,7 @@ uses
     DbModel{legacy},
     Handler.Database{legacy},
     Handler.Account{legacy},
+    Unity.EventLogger,
     Unity.Settings,
     AgeView{legacy},
     Transactions{legacy},
@@ -1029,7 +1028,7 @@ begin
 
             end;
 
-            FAppEvents.Log(EventLogPath, '[TryInitConnection]: Server connection has been established successfully.');
+            ThreadFileLog.Log('[TryInitConnection]: Server connection has been established successfully.');
             FIsConnected:=True;
             SwitchTimers(TurnedOn);
 
@@ -1302,7 +1301,7 @@ begin
         // Windows query for shutdown
         WM_QUERYENDSESSION:
         begin
-            FAppEvents.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(PassMsg.Msg) + ' WM_QUERYENDSESSION. Windows is going to be shut down. Closing ' + TCommon.AppCaption + '...');
+            ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(PassMsg.Msg) + ' WM_QUERYENDSESSION. Windows is going to be shut down. Closing ' + TCommon.AppCaption + '...');
             FAllowClose:=True;
             PassMsg.Result:=1;
         end;
@@ -1310,7 +1309,7 @@ begin
         // Windows is shutting down
         WM_ENDSESSION:
         begin
-            FAppEvents.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(PassMsg.Msg) + ' WM_ENDSESSION. Windows is shutting down...');
+            ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(PassMsg.Msg) + ' WM_ENDSESSION. Windows is shutting down...');
             FAllowClose:=True;
         end;
 
@@ -1329,7 +1328,7 @@ begin
                 FDbConnect:=nil;
                 FIsConnected:=False;
                 THelpers.ExecMessage(False, TMessaging.TWParams.ConnectionError, TUnknown.NULL, MainForm);
-                FAppEvents.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(PassMsg.Msg) + ' WM_POWERBROADCAST with PBT_APMSUSPEND. Going into suspension mode, Unity is disconnected from server.');
+                ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(PassMsg.Msg) + ' WM_POWERBROADCAST with PBT_APMSUSPEND. Going into suspension mode, Unity is disconnected from server.');
             end;
 
             // Operation is resuming automatically from a low-power state
@@ -1338,7 +1337,7 @@ begin
             begin
                 // Turn on timer responsible for periodic connection check
                 InetTimer.Enabled:=True;
-                FAppEvents.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(PassMsg.Msg) + ' WM_POWERBROADCAST with PBT_APMRESUMEAUTOMATIC. Windows has resumed after being suspended.');
+                ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(PassMsg.Msg) + ' WM_POWERBROADCAST with PBT_APMRESUMEAUTOMATIC. Windows has resumed after being suspended.');
             end;
 
         end;
@@ -1364,7 +1363,7 @@ end;
 procedure TMainForm.InitMainWnd(SessionFile: string);
 begin
 
-    FEventLogPath:=SessionFile;
+    ThreadFileLog.LogFileName:=SessionFile;
 
     var Settings: ISettings:=TSettings.Create();
     FWinUserName:=Settings.WinUserName;
@@ -1377,8 +1376,8 @@ begin
     StatBar_TXT2.Caption:=FWinUserName;
     StatBar_TXT3.Caption:=DateToStr(Now);
 
-    FAppEvents.Log(EventLogPath, 'Application version = ' + TCore.GetBuildInfoAsString);
-    FAppEvents.Log(EventLogPath, 'User SID = ' + TUserSid.GetCurrentUserSid);
+    ThreadFileLog.Log('Application version = ' + TCore.GetBuildInfoAsString);
+    ThreadFileLog.Log('User SID = ' + TUserSid.GetCurrentUserSid);
 
 end;
 
@@ -1451,18 +1450,14 @@ begin
 
                         if string.IsNullOrEmpty(FOpenItemsUpdate) then
                         begin
-
                             THelpers.MsgCall(TAppMessage.Warn, 'Cannot find open items in database. Please contact IT support.');
                             var Debtors: IDebtors:=TDebtors.Create;
                             Debtors.ReadAgeViewAsync(NullParameter, TSorting.TMode.Ranges);
-
                         end
                         else
                         begin
-
                             var Debtors: IDebtors:=TDebtors.Create;
                             Debtors.ReadAgeViewAsync(CallOpenItems, TSorting.TMode.Ranges);
-
                         end;
 
                     finally
@@ -1952,10 +1947,8 @@ end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
-    // Calls after main form constructor
-    FAppEvents:=TThreadFileLog.Create;
     FAllowClose:=False;
-    InitializeScreenSettings;
+    //InitializeScreenSettings;
 end;
 
 
@@ -1983,7 +1976,7 @@ begin
         ChromiumWindow.LoadURL(WideString(URL));
     except
         on E: exception do
-            FAppEvents.Log(EventLogPath, '[Chromium] Cannot load URL: ' + URL + '. The error has been thrown: ' + E.Message);
+            ThreadFileLog.Log('[Chromium] Cannot load URL: ' + URL + '. The error has been thrown: ' + E.Message);
     end;
 
 end;
@@ -2038,7 +2031,7 @@ begin
                 UserLogs.Columns.Add(TUnityEventLogs.AppName);
                 UserLogs.Values.Add(WinUserName.ToUpper);
                 UserLogs.Values.Add(Today);
-                UserLogs.Values.Add(TCore.LoadFileToStr(EventLogPath));
+                UserLogs.Values.Add(TCore.LoadFileToStr(ThreadFileLog.LogFileName));
                 UserLogs.Values.Add('Unity Cadiz.');
                 UserLogs.InsertInto(TUnityEventLogs.UnityEventLogs, True);
 
@@ -2068,7 +2061,6 @@ begin
             end;
 
             Settings.Encode(TAppFiles.Configuration);
-            FAppEvents.Free;
 
             FAllowClose:=False;
             CanClose:=not FAllowClose;
@@ -2083,7 +2075,7 @@ end;
 
 procedure TMainForm.FormDestroy(Sender: TObject);
 begin
-    {Do nothing}
+    //ThreadFileLog.Free;
 end;
 
 
@@ -2154,7 +2146,7 @@ end;
 
 procedure TMainForm.OILoaderTimer(Sender: TObject);
 begin
-    FAppEvents.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Calling open items scanner...');
+    ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: Calling open items scanner...');
     var OpenItems: IOpenItems:=TOpenItems.Create();
     OpenItems.ScanOpenItemsAsync();
 end;
@@ -2360,7 +2352,7 @@ begin
         end
         else
         begin
-            FAppEvents.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Cannot delete selected row (rows affected: ' + IntToStr(DataTables.RowsAffected) + ').');
+            ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: Cannot delete selected row (rows affected: ' + IntToStr(DataTables.RowsAffected) + ').');
             THelpers.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot delete selected row. Please contact IT support.', Self);
         end;
 
@@ -2734,7 +2726,7 @@ begin
             if sgAgeView.RowHeights[iCNT] <> sgAgeView.sgRowHidden then
                 CalendarForm.SetFollowUp(CalendarForm.FSelectedDate, sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), iCNT], iCNT);
 
-            FAppEvents.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ''GeneralComment'' table with column FollowUp has been updated with ' + DateToStr(CalendarForm.FSelectedDate) + ' for multiple items.');
+            ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: ''GeneralComment'' table with column FollowUp has been updated with ' + DateToStr(CalendarForm.FSelectedDate) + ' for multiple items.');
     end;
 
     Screen.Cursor:=crDefault;
@@ -2774,7 +2766,7 @@ begin
 
     end;
 
-    FAppEvents.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ''GeneralComment'' table with column FollowUp has been updated with removal for multiple items.');
+    ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: ''GeneralComment'' table with column FollowUp has been updated with removal for multiple items.');
 
     Screen.Cursor:=crDefault;
 
@@ -3329,7 +3321,7 @@ begin
         if not UserControl.GetAgeDates(MainForm.FAgeDateList, MainForm.FGroupList[GroupListBox.ItemIndex, 0]) then
         begin
             THelpers.MsgCall(TAppMessage.Error, 'Cannot list age dates for selected group. Please contact IT support.');
-            FAppEvents.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: "GetAgeDates" returned false. Cannot get list of age dates for selected group (' + FGroupList[GroupListBox.ItemIndex, 0] + ').');
+            ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: "GetAgeDates" returned false. Cannot get list of age dates for selected group (' + FGroupList[GroupListBox.ItemIndex, 0] + ').');
         end;
         GroupListDates.ListToComboBox(FAgeDateList, 0, TListSelection.Last);
 
@@ -5622,7 +5614,7 @@ begin
     if not(Return > 32) then
     begin
         THelpers.MsgCall(TAppMessage.Warn, 'Cannot execute report. Please contact with IT support.');
-        FAppEvents.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
+        ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
     end;
 
     UnfoldReportsTab(AppHeader, btnReports);
@@ -5638,7 +5630,7 @@ begin
     if not(Return > 32) then
     begin
         THelpers.MsgCall(TAppMessage.Warn, 'Cannot execute report. Please contact with IT support.');
-        FAppEvents.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
+        ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
     end;
 
     UnfoldReportsTab(AppHeader, btnReports);
@@ -5654,7 +5646,7 @@ begin
     if not(Return > 32) then
     begin
         THelpers.MsgCall(TAppMessage.Warn, 'Cannot execute report. Please contact with IT support.');
-        FAppEvents.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
+        ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
     end;
 
     UnfoldReportsTab(AppHeader, btnReports);
@@ -5670,7 +5662,7 @@ begin
     if not(Return > 32) then
     begin
         THelpers.MsgCall(TAppMessage.Warn, 'Cannot execute report. Please contact with IT support.');
-        FAppEvents.Log(EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
+        ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
     end;
 
     UnfoldReportsTab(AppHeader, btnReports);
@@ -5801,7 +5793,7 @@ begin
     else
     begin
         StatBar_TXT1.Caption:=TStatusBar.Ready;
-        FAppEvents.Log(EventLogPath, '[Open Items]: User have no R/W access, process halted.');
+        ThreadFileLog.Log('[Open Items]: User have no R/W access, process halted.');
     end;
 
 end;
@@ -5843,7 +5835,7 @@ begin
     else
     begin
         StatBar_TXT1.Caption:='Insufficient UAC level.';
-        FAppEvents.Log(EventLogPath, '[Make Group]: User have no R/W access, process halted.');
+        ThreadFileLog.Log('[Make Group]: User have no R/W access, process halted.');
     end;
 
 end;

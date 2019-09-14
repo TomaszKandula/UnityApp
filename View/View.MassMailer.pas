@@ -141,6 +141,7 @@ uses
     Unity.StatusBar,
     Unity.Unknown,
     Unity.Chars,
+    Unity.EventLogger,
     Async.Statements;
 
 
@@ -251,7 +252,7 @@ begin
 
     // Log it to event log. As long as Mass Mailer is opened, we do not process
     // any open items/age view snapshots
-    MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Mass mailer opened, open items loader is now on hold.');
+    ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: Mass mailer opened, open items loader is now on hold.');
 
 end;
 
@@ -263,7 +264,7 @@ end;
 procedure TMassMailerForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
     MainForm.OILoader.Enabled:=True;
-    MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Mass mailer closed, open items loader is now enabled back again.');
+    ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: Mass mailer closed, open items loader is now enabled back again.');
 end;
 
 

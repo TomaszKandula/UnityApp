@@ -64,6 +64,7 @@ uses
     Unity.Messaging,
     Unity.Helpers,
     Unity.AdoDb,
+    Unity.EventLogger,
     View.Main;
 
 
@@ -157,7 +158,7 @@ function TDataBase.InitializeConnection(ErrorShow: boolean; var ActiveConnection
     procedure ErrorHandler(err_class: string; err_msg: string; should_quit: boolean; err_wnd: boolean);
     begin
 
-        MainForm.FAppEvents.Log(MainForm.EventLogPath, TADODB.ERR_LOGTEXT + '[' + err_class + '] ' + err_msg + ' (' + IntToStr(ExitCode) + ').');
+        ThreadFileLog.Log(TADODB.ERR_LOGTEXT + '[' + err_class + '] ' + err_msg + ' (' + IntToStr(ExitCode) + ').');
 
         if err_wnd then
             Application.MessageBox(PChar(TADODB.ERR_MESSAGE), PChar(MainForm.CAPTION), MB_OK + MB_ICONWARNING);

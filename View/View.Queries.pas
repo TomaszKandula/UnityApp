@@ -132,6 +132,7 @@ uses
     Unity.Helpers,
     Unity.Settings,
     Unity.DateTimeFormats,
+    Unity.EventLogger,
     Handler.Sql;
 
 
@@ -202,7 +203,7 @@ begin
 
         if Tables.InsertInto(TQmsLog.QmsLog, True) then
         begin
-            MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: [QMS] Missing invoice has been logged successfully.');
+            ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: [QMS] Missing invoice has been logged successfully.');
             THelpers.MsgCall(TAppMessage.Info, 'Missing invoice has been logged successfully.');
             FLogQueryId:=QueryUid.ToString;
             Result:=True;
@@ -212,7 +213,7 @@ begin
         else
         begin
             FLogQueryId:=String.Empty;
-            MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: [QMS] Cannot log missing invoice.');
+            ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: [QMS] Cannot log missing invoice.');
             THelpers.MsgCall(TAppMessage.Error, 'Cannot log missing invoice to database. Please check the log and contact IT support.');
         end;
 
@@ -310,7 +311,7 @@ begin
         // Send to server
         if Tables.InsertInto(TQmsLog.QmsLog, True, TempData, nil, False) then
         begin
-            MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: [QMS] Provided informatin has been logged successfully.');
+            ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: [QMS] Provided informatin has been logged successfully.');
             THelpers.MsgCall(Info, 'Provided information has been logged successfully.');
             Result:=True;
             FLogQueryId:=QueryUid.ToString;
@@ -319,7 +320,7 @@ begin
         else
         begin
             FLogQueryId:=String.Empty;
-            MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: [QMS] Cannot log current invoice(s).');
+            ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: [QMS] Cannot log current invoice(s).');
             THelpers.MsgCall(Error, 'Cannot log current invoice(s) to database. Please check the log and contact IT support.');
         end;
     finally
@@ -398,7 +399,7 @@ begin
         except
             on E: Exception do
             begin
-                MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: [QMS] Cannot execute SQL, error has been thrown: ' + E.Message);
+                ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: [QMS] Cannot execute SQL, error has been thrown: ' + E.Message);
                 THelpers.MsgCall(Warn, 'Unexpected error has occured: ' + E.Message + '. Please contact IT Support.');
             end;
         end;
@@ -424,7 +425,7 @@ begin
         except
             on E: Exception do
             begin
-                MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: [QMS] Cannot execute SQL, error has been thrown: ' + E.Message);
+                ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: [QMS] Cannot execute SQL, error has been thrown: ' + E.Message);
                 THelpers.MsgCall(Warn, 'Unexpected error has occured: ' + E.Message + '. Please contact IT Support.');
             end;
         end;
@@ -535,7 +536,7 @@ begin
         except
             on E: Exception do
             begin
-                MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: [QMS] Cannot execute SQL, error has been thrown: ' + E.Message);
+                ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: [QMS] Cannot execute SQL, error has been thrown: ' + E.Message);
                 THelpers.MsgCall(Warn, 'Unexpected error has occured: ' + E.Message + '. Please contact IT Support.');
             end;
         end;

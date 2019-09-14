@@ -94,6 +94,7 @@ uses
     Unity.Messaging,
     Unity.Settings,
     Unity.StatusBar,
+    Unity.EventLogger,
     Sync.Documents,
     DbModel,
     AgeView,
@@ -120,7 +121,7 @@ begin
                 TThread.Synchronize(nil, procedure
                 begin
                     MainForm.TryInitConnection;
-                    MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Connection with SQL Server database has been re-established.');
+                    ThreadFileLog.Log('Connection with SQL Server database has been re-established.');
                 end);
 
             end;
@@ -128,7 +129,7 @@ begin
             if DataBase.Check <> 0 then
             begin
                 MainForm.FIsConnected:=False;
-                MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Connection with SQL Server database has been lost, waiting to reconnect...');
+                ThreadFileLog.Log('Connection with SQL Server database has been lost, waiting to reconnect...');
             end;
 
         finally
@@ -156,12 +157,12 @@ begin
         begin
             TThread.Synchronize(nil, FeedbackForm.ReportMemo.Clear);
             THelpers.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Report has been sent successfully!', MainForm);
-            MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Feedback Report has been successfully sent by the user.');
+            ThreadFileLog.Log('Feedback Report has been successfully sent by the user.');
         end
         else
         begin
             THelpers.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot send Feedback Report. Please contact IT support.', MainForm);
-            MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Cannot send Feedback Report.');
+            ThreadFileLog.Log('Cannot send Feedback Report.');
         end;
 
     end);

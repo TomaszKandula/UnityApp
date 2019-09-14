@@ -68,6 +68,7 @@ uses
     DbModel,
     Unity.Sql,
     Unity.Settings,
+    Unity.EventLogger,
     Handler.Account,
     Sync.Documents,
     AgeView,
@@ -169,7 +170,7 @@ begin
 
     except
         on E: Exception do
-            MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Execution of this tread work has been stopped. Error has been thrown: ' + E.Message + ' (TInvoiceTracker).');
+            ThreadFileLog.Log('Execution of this tread work has been stopped. Error has been thrown: ' + E.Message + ' (TInvoiceTracker).');
     end;
 
 end;

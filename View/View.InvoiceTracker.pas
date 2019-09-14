@@ -114,6 +114,7 @@ uses
     Unity.Helpers,
     Unity.Sql,
     Unity.Settings,
+    Unity.EventLogger,
     Handler.Database;
 
 
@@ -408,19 +409,19 @@ begin
             // Insert data to database
             if TrackerData.InsertInto(TTrackerData.TrackerData, True, TempData, nil, False) then
             begin
-                MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Invoice tracker data updated.');
+                ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: Invoice tracker data updated.');
                 THelpers.MsgCall(Info, 'Invoice Tracker has been updates successfully!');
             end
             else
             begin
-                MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Invoice tracker error, cannot perform transaction.');
+                ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: Invoice tracker error, cannot perform transaction.');
                 THelpers.MsgCall(Error, 'Cannot perform transaction. Please contact IT support.');
             end;
 
         except
             on E: Exception do
             begin
-                MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Error has been thrown [Tracker_SaveToDb]: ' + E.Message);
+                ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: Error has been thrown [Tracker_SaveToDb]: ' + E.Message);
                 THelpers.MsgCall(Error, E.Message);
             end;
         end;

@@ -1,10 +1,15 @@
 unit Unity.EventLogger;
 
-// ----------------------------------------
-// Application event logger.
-// Can be referenced by anyone.
+// ------------------------------------------------------------
+// Application event logger. Can be referenced by anyone.
 // Cannot hold references to View or Logic.
-// ----------------------------------------
+// Note:
+//     We do use only one instance of the class for application
+//     life time because we must handle parallel calls and save
+//     application events to one session file. Therefore, it is
+//     necessary to use threadpools and queues where multiple
+//     instances cannot be used.
+// ------------------------------------------------------------
 
 interface
 
@@ -41,6 +46,7 @@ type
 
     TThreadFileLog = class(TObject)
     private
+        var FLogFileName: string;
         var FThreadPool: TThreadPool;
         var FSessionEventLines: TList<string>;
         procedure HandleLogRequest(Data: Pointer; AThread: TThread);
@@ -48,9 +54,14 @@ type
     public
         constructor Create();
         destructor Destroy(); override;
-        property  SessionEventLines: TList<string> read GetSessionEventLines;
-        procedure Log(const FileName, Text: string);
+        property SessionEventLines: TList<string> read GetSessionEventLines;
+        property LogFileName: string read FLogFileName write FLogFileName;
+        procedure Log(Text: string);
     end;
+
+
+    function ThreadFileLog(): TThreadFileLog;
+    procedure DestroyThreadFileLog();
 
 
 implementation
@@ -61,6 +72,23 @@ uses
     Unity.DateTimeFormats;
 
 
+var
+    VThreadFileLog: TThreadFileLog;
+
+
+function ThreadFileLog(): TThreadFileLog;
+begin
+    if not(Assigned(VThreadFileLog)) then VThreadFileLog:=TThreadFileLog.Create();
+    Result:=VThreadFileLog;
+end;
+
+
+procedure DestroyThreadFileLog();
+begin
+    if Assigned(VThreadFileLog) then FreeAndNil(VThreadFileLog);
+end;
+
+
 // -------------------------------------------------------------------------------------------------------------------------------------------------- LOGGER //
 
 
@@ -68,6 +96,10 @@ uses
 /// Local unit method for writing event log file. This method is upon thread queue,
 /// thus race condition does not apply here.
 /// </summary>
+/// <remarks>
+/// This method is perfectly encapsulated as it is invisible only outside of the module.
+/// Only module class can access it.
+/// </remarks>
 
 procedure LogToFile(const FileName, Text: String);
 begin
@@ -135,7 +167,7 @@ end;
 // --------------------------------------------------------------------------------------------------------------------------------------------------------- //
 
 
-procedure TThreadFileLog.Log(const FileName, Text: string);
+procedure TThreadFileLog.Log(Text: string);
 begin
 
     var GetDateTime: TDateTime:=Now;
@@ -147,7 +179,7 @@ begin
     New(Request);
 
     Request^.LogText:=TextToLog;
-    Request^.FileName:=FileName;
+    Request^.FileName:=FLogFileName;
 
     FSessionEventLines.Add(TextToLog);
     FThreadPool.Add(Request);

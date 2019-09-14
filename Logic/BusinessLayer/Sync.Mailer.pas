@@ -138,7 +138,8 @@ uses
     View.Actions,
     Data.Win.ADODB,
     DbModel,
-    Unity.Settings;
+    Unity.Settings,
+    Unity.EventLogger;
 
 
 // -------------------------------
@@ -219,11 +220,11 @@ begin
         CdoMessage.BodyPart.Charset:='utf-8';
         CdoMessage.Send;
         Result:=True;
-        MainForm.FAppEvents.Log(MainForm.EventLogPath, 'E-mail has been sent successfully.');
+        ThreadFileLog.Log('E-mail has been sent successfully.');
 
     except
         on E: Exception do
-            MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Cannot send an e-mail. Error message has been thrown: ' + E.Message);
+            ThreadFileLog.Log('Cannot send an e-mail. Error message has been thrown: ' + E.Message);
     end;
 
 end;

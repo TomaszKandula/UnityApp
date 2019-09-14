@@ -69,6 +69,7 @@ uses
     Unity.Helpers,
     Unity.Messaging,
     Unity.StatusBar,
+    Unity.EventLogger,
     Handler.Account,
     Sync.Documents,
     AgeView,
@@ -111,7 +112,7 @@ begin
 
             except
                 on E: Exception do
-                    MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Cannot execute [OpenItemsScanner]. Error has been thrown: ' + E.Message);
+                    ThreadFileLog.Log('Cannot execute [OpenItemsScanner]. Error has been thrown: ' + E.Message);
             end;
 
         finally
@@ -158,7 +159,7 @@ begin
 
             except
                 on E: Exception do
-                    MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Cannot execute [ReadOpenItems]. Error has been thorwn: ' + E.Message);
+                    ThreadFileLog.Log('Cannot execute [ReadOpenItems]. Error has been thorwn: ' + E.Message);
             end;
 
         finally
@@ -166,7 +167,7 @@ begin
             var THDMili: extended:=StopWatch.ElapsedMilliseconds;
             var THDSec:  extended:=THDMili / 1000;
 
-            MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Open Items loading thread has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
+            ThreadFileLog.Log('Open Items loading thread has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
             THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
 
             // Release VCL and set auto column width

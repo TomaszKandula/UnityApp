@@ -17,13 +17,20 @@ uses
     System.SysUtils,
     System.Classes,
     System.INIFiles,
+    Data.Win.ADODB,
     Vcl.Forms,
     Vcl.Graphics,
+    Unity.EventLogger,
     Unity.Enums;
 
 
 type
 
+
+    /// <summary>
+    /// This interface exposes methods and properties for handling application settings
+    /// encoded in configuration file.
+    /// </summary>
 
     ISettings = Interface(IInterface)
     ['{FF5CBEC3-2576-4E1C-954E-C892AB4A7CC1}']
@@ -111,6 +118,10 @@ type
         function  MakeNewSessionFile(SessionId: string): string;
     end;
 
+
+    /// <summary>
+    /// This class exposes methods and properties for configuration handling.
+    /// </summary>
 
     TSettings = class(TInterfacedObject, ISettings)
     {$TYPEINFO ON}
@@ -202,6 +213,10 @@ type
         property FutureBColor:    TColor    read GetFutureBColor    write SetFutureBColor;
     end;
 
+
+    /// <summary>
+    /// This constants class defines configuration fields.
+    /// </summary>
 
     TConfigSections = class abstract
         const ApplicationDetails = 'APPLICATION';

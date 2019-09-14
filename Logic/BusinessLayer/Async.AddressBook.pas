@@ -60,10 +60,10 @@ implementation
 
 
 uses
-    View.Main,
-    View.InvoiceTracker,
-    View.Actions,
-    View.UserFeedback,
+    View.Main,            // delete this ref!
+    View.InvoiceTracker,  // delete this ref!
+    View.Actions,         // delete this ref!
+    View.UserFeedback,    // delete this ref!
     Handler.Database,
     Handler.Account,
     Unity.Sql,
@@ -71,6 +71,7 @@ uses
     Unity.Settings,
     Unity.Messaging,
     Unity.StatusBar,
+    Unity.EventLogger,
     Sync.Documents,
     DbModel,
     AgeView,
@@ -125,7 +126,7 @@ begin
 
             except
                 on E: Exception do
-                    MainForm.FAppEvents.Log(MainForm.EventLogPath, E.Message);
+                    ThreadFileLog.Log(E.Message);
 
             end;
 
@@ -337,7 +338,7 @@ begin
                     begin
                         THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
                         THelpers.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot save selected item(s). Exception has been thrown: ' + E.Message, MainForm);
-                        MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Thread [' + IntToStr(MainThreadID) + ']: Cannot write Address Book item(s) into database. Error: ' + E.Message);
+                        ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: Cannot write Address Book item(s) into database. Error: ' + E.Message);
                     end;
 
                 end;

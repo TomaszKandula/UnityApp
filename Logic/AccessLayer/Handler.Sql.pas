@@ -113,6 +113,7 @@ implementation
 uses
     Unity.Sql,
     Unity.Chars,
+    Unity.EventLogger,
     View.Main;
 
 
@@ -496,7 +497,7 @@ begin
     except
         on E: Exception do
         begin
-            MainForm.FAppEvents.Log(MainForm.EventLogPath, 'SQL: [OpenTable] Error occured: ' + E.Message);
+            ThreadFileLog.Log('SQL: [OpenTable] Error occured: ' + E.Message);
             Result:=False;
         end;
     end;
@@ -552,14 +553,14 @@ begin
             ExecSQL;
             if string.IsNullOrEmpty(LastErrorMsg) then Result:=True
                 else
-                    MainForm.FAppEvents.Log(MainForm.EventLogPath, 'SQL: [InsertInto] Error occured: ' + LastErrorMsg);
+                    ThreadFileLog.Log('SQL: [InsertInto] Error occured: ' + LastErrorMsg);
 
         end;
 
     except
         on E: Exception do
         begin
-            MainForm.FAppEvents.Log(MainForm.EventLogPath, 'SQL: [InsertInto] Error occured: ' + E.Message);
+            ThreadFileLog.Log('SQL: [InsertInto] Error occured: ' + E.Message);
             Result:=False;
         end;
     end;
@@ -682,7 +683,7 @@ begin
     except
         on E: Exception do
         begin
-            MainForm.FAppEvents.Log(MainForm.EventLogPath, 'SQL: [InsertInto] Error occured: ' + E.Message);
+            ThreadFileLog.Log('SQL: [InsertInto] Error occured: ' + E.Message);
             Result:=False;
         end;
     end;
@@ -727,7 +728,7 @@ begin
     except
         on E: Exception do
         begin
-            MainForm.FAppEvents.Log(MainForm.EventLogPath, 'SQL: [DeleteRecord] Error occured: ' + E.Message);
+            ThreadFileLog.Log('SQL: [DeleteRecord] Error occured: ' + E.Message);
             Result:=False;
         end;
     end;

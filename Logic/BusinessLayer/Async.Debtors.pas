@@ -68,6 +68,7 @@ uses
     Unity.Messaging,
     Unity.StatusBar,
     Unity.Sorting,
+    Unity.EventLogger,
     Handler.Account,
     Sync.Documents,
     Async.OpenItems,
@@ -93,7 +94,7 @@ begin
         try
 
             THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Generating, MainForm);
-            MainForm.FAppEvents.Log(MainForm.EventLogPath, TStatusBar.Generating);
+            ThreadFileLog.Log(TStatusBar.Generating);
 
             try
 
@@ -124,7 +125,7 @@ begin
 
             except
                 on E: Exception do
-                    MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Cannot execute [MakeAgeView]. Error has been thrown: ' + E.Message);
+                    ThreadFileLog.Log('Cannot execute [MakeAgeView]. Error has been thrown: ' + E.Message);
             end;
 
         finally
@@ -134,7 +135,7 @@ begin
             var THDMili: extended:=StopWatch.ElapsedMilliseconds;
             var THDSec:  extended:=THDMili / 1000;
 
-            MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Age View thread has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
+            ThreadFileLog.Log('Age View thread has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
             AgeView.Free;
 
         end;
@@ -198,7 +199,7 @@ begin
 
             except
                 on E: Exception do
-                    MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Cannot execute [ReadAgeView]. Error has been thrown: ' + E.Message);
+                    ThreadFileLog.Log('Cannot execute [ReadAgeView]. Error has been thrown: ' + E.Message);
             end;
 
         finally
@@ -208,7 +209,7 @@ begin
             var THDMili: extended:=StopWatch.ElapsedMilliseconds;
             var THDSec:  extended:=THDMili / 1000;
 
-            MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Thread for selected Group Id "' + AgeView.GroupID + '" has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
+            ThreadFileLog.Log('Thread for selected Group Id "' + AgeView.GroupID + '" has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
             AgeView.Free;
 
             MainForm.SwitchTimers(TurnedOn);

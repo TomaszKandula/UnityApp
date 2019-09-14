@@ -25,8 +25,7 @@ uses
     Vcl.StdCtrls,
     Vcl.Imaging.pngimage,
     Vcl.Imaging.jpeg,
-    Data.Win.ADODB,
-    Unity.EventLogger;
+    Data.Win.ADODB;
 
 
 type
@@ -59,7 +58,7 @@ type
         procedure ShapeBackgroundMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     protected
         var LastErrorMsg: string;
-        var DbConnection: TADOConnection;
+        var DbConnection: TADOConnection; {for sql server connection check on startup}
         procedure CreateParams(var Params: TCreateParams); override;
     private
         var FIsAppInitialized: boolean;
@@ -79,7 +78,7 @@ type
     end;
 
 
-    function StartupForm: TStartupForm;
+    function StartupForm(): TStartupForm;
 
 
 implementation
@@ -99,6 +98,7 @@ uses
     Unity.Chars,
     Unity.UserSid,
     Unity.Utilities,
+    Unity.EventLogger,
     Async.Utilities,
     Async.Queries,
     Handler.Database,
@@ -116,7 +116,7 @@ var
 // ------------------------------------------------------------------------------------------------------------------------------------------------- STARTUP //
 
 
-function StartupForm: TStartupForm;
+function StartupForm(): TStartupForm;
 begin
     if not(Assigned(VStartupForm)) then Application.CreateForm(TStartupForm, VStartupForm);
     Result:=VStartupForm;
@@ -131,7 +131,7 @@ end;
 
 procedure TStartupForm.FormDestroy(Sender: TObject);
 begin
-    {Do nothing}
+    DestroyThreadFileLog();
 end;
 
 
@@ -287,12 +287,12 @@ begin
 
         if not GetScreenDataSync() then
         begin
-            MainAppForm.FAppEvents.Log(FCurrentSessionLog, 'Critical error has occured [GetScreenDataSync]: ' + LastErrorMsg);
+            ThreadFileLog.Log('Critical error has occured [GetScreenDataSync]: ' + LastErrorMsg);
             THelpers.MsgCall(TAppMessage.Error, 'An error has occured [GetScreenDataSync]: ' + LastErrorMsg + '. Please contact IT support. Application will be closed.');
             ExitAppSync();
         end else
         begin
-            MainAppForm.FAppEvents.Log(FCurrentSessionLog, 'Unity has been boot up.');
+            ThreadFileLog.Log('Unity has been boot up.');
             ChangeProgressBar(15, 'Initializing... done.', ProgressBar);
         end;
 
@@ -305,13 +305,13 @@ begin
 
         if not GetDbConnectionSync() then
         begin
-            MainAppForm.FAppEvents.Log(FCurrentSessionLog, 'Critical error has occured [GetDbConnectionSync]: ' + LastErrorMsg);
+            ThreadFileLog.Log('Critical error has occured [GetDbConnectionSync]: ' + LastErrorMsg);
             THelpers.MsgCall(TAppMessage.Error, 'An error occured [GetDbConnectionSync]: ' + LastErrorMsg + '. Please contact IT support. Application will be closed.');
             ExitAppSync();
         end else
         begin
             MainAppForm.FDbConnect:=DbConnection;
-            MainAppForm.FAppEvents.Log(FCurrentSessionLog, 'Persistant connection with SQL database has been established.');
+            ThreadFileLog.Log('Persistant connection with SQL database has been established.');
             ChangeProgressBar(33, 'Connecting to database... done.', ProgressBar);
         end;
 
@@ -324,12 +324,12 @@ begin
 
         if not GetUserAccountSync() then
         begin
-            MainAppForm.FAppEvents.Log(FCurrentSessionLog, 'Critical error has occured [GetUserAccountSync]: ' + LastErrorMsg);
+            ThreadFileLog.Log('Critical error has occured [GetUserAccountSync]: ' + LastErrorMsg);
             THelpers.MsgCall(TAppMessage.Error, 'An error occured [GetUserAccountSync]: ' + LastErrorMsg + '. Please contact your administrator. Application will be closed.');
             ExitAppSync();
         end else
         begin
-            MainAppForm.FAppEvents.Log(FCurrentSessionLog, 'User access has been established.');
+            ThreadFileLog.Log('User access has been established.');
             ChangeProgressBar(50, 'Getting user account details... done.', ProgressBar);
         end;
 
@@ -343,12 +343,12 @@ begin
         var Settings: ISettings:=TSettings.Create();
         if not GetHtmlLayoutsSync(Settings.UrlLayoutsLst + TCommon.LayoutPak, Settings.DirLayouts + TCommon.LayoutPak, Settings.DirLayouts) then
         begin
-            MainAppForm.FAppEvents.Log(FCurrentSessionLog, 'Critical error has occured [GetHtmlLayoutsSync]: ' + LastErrorMsg);
+            ThreadFileLog.Log('Critical error has occured [GetHtmlLayoutsSync]: ' + LastErrorMsg);
             THelpers.MsgCall(TAppMessage.Error, 'An error occured [GetHtmlLayoutsSync]: ' + LastErrorMsg + '. Please contact your administrator. Application will be closed.');
             ExitAppSync();
         end else
         begin
-            MainAppForm.FAppEvents.Log(FCurrentSessionLog, 'Html layouts has been synchronized.');
+            ThreadFileLog.Log('Html layouts has been synchronized.');
             ChangeProgressBar(75, 'Synchronizing email templates... done.', ProgressBar);
         end;
 
@@ -361,12 +361,12 @@ begin
 
         if not GetGeneralTablesSync() then
         begin
-            MainAppForm.FAppEvents.Log(FCurrentSessionLog, 'Critical error occured [GetGeneralTablesSync]: ' + LastErrorMsg);
+            ThreadFileLog.Log('Critical error occured [GetGeneralTablesSync]: ' + LastErrorMsg);
             THelpers.MsgCall(TAppMessage.Error, 'An error has occured [GetGeneralTablesSync]: ' + LastErrorMsg + '. Please contact IT support. Application will be closed.');
             ExitAppSync();
         end else
         begin
-            MainAppForm.FAppEvents.Log(FCurrentSessionLog, 'General tables has been loaded.');
+            ThreadFileLog.Log('General tables has been loaded.');
             ChangeProgressBar(95, 'Loading general tables... done.', ProgressBar);
         end;
 

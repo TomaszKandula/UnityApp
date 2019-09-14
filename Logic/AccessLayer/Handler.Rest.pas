@@ -1,7 +1,7 @@
 unit Handler.Rest;
 
 // -----------------------------------
-// Application logic, access layers.
+// Application logic, access layer.
 // Can be referenced by anyone.
 // Cannot hold references to the View.
 // -----------------------------------
