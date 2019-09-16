@@ -377,10 +377,10 @@ begin
     Grid.ClearAll(4, 0, 0, False);
 
     // Get co codes from selected group (Group ID)
-    MainForm.tcCOCODE1.Caption:=MainForm.GetCoCode(1, MainForm.FGroupIdSel);
-    MainForm.tcCOCODE2.Caption:=MainForm.GetCoCode(2, MainForm.FGroupIdSel);
-    MainForm.tcCOCODE3.Caption:=MainForm.GetCoCode(3, MainForm.FGroupIdSel);
-    MainForm.tcCOCODE4.Caption:=MainForm.GetCoCode(4, MainForm.FGroupIdSel);
+    MainForm.tcCOCODE1.Caption:=THelpers.GetCoCode(1, MainForm.FGroupIdSel);
+    MainForm.tcCOCODE2.Caption:=THelpers.GetCoCode(2, MainForm.FGroupIdSel);
+    MainForm.tcCOCODE3.Caption:=THelpers.GetCoCode(3, MainForm.FGroupIdSel);
+    MainForm.tcCOCODE4.Caption:=THelpers.GetCoCode(4, MainForm.FGroupIdSel);
 
     if MainForm.tcCOCODE1.Caption = '0' then
         MainForm.tcCOCODE1.Font.Color:=clWhite else MainForm.tcCOCODE1.Font.Color:=clBlack;
@@ -394,10 +394,10 @@ begin
     if MainForm.tcCOCODE4.Caption = '0' then
         MainForm.tcCOCODE4.Font.Color:=clWhite else MainForm.tcCOCODE4.Font.Color:=clBlack;
 
-    Grid.Cells[0, 0]:=MainForm.tcCOCODE1.Caption; MainForm.FindCoData(0, MainForm.sgCompanyData, MainForm.sgCoCodes);
-    Grid.Cells[1, 0]:=MainForm.tcCOCODE2.Caption; MainForm.FindCoData(1, MainForm.sgCompanyData, MainForm.sgCoCodes);
-    Grid.Cells[2, 0]:=MainForm.tcCOCODE3.Caption; MainForm.FindCoData(2, MainForm.sgCompanyData, MainForm.sgCoCodes);
-    Grid.Cells[3, 0]:=MainForm.tcCOCODE4.Caption; MainForm.FindCoData(3, MainForm.sgCompanyData, MainForm.sgCoCodes);
+    Grid.Cells[0, 0]:=MainForm.tcCOCODE1.Caption; THelpers.FindCoData(0, MainForm.sgCompanyData, MainForm.sgCoCodes);
+    Grid.Cells[1, 0]:=MainForm.tcCOCODE2.Caption; THelpers.FindCoData(1, MainForm.sgCompanyData, MainForm.sgCoCodes);
+    Grid.Cells[2, 0]:=MainForm.tcCOCODE3.Caption; THelpers.FindCoData(2, MainForm.sgCompanyData, MainForm.sgCoCodes);
+    Grid.Cells[3, 0]:=MainForm.tcCOCODE4.Caption; THelpers.FindCoData(3, MainForm.sgCompanyData, MainForm.sgCoCodes);
 
     /// <remarks>
     /// There should be always the same currency code for all stacked companies snapshots.
@@ -458,7 +458,7 @@ begin
             )
             and
             (
-                MainForm.ConvertCoCode(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT], 'F', 0) = Source.Cells[Source.ReturnColumn(TPersonResponsible.SourceDBName, 1, 1), jCNT]
+                THelpers.ConvertCoCode(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT], 'F', 0) = Source.Cells[Source.ReturnColumn(TPersonResponsible.SourceDBName, 1, 1), jCNT]
             )
             then
                 Grid.Cells[Grid.ReturnColumn(TSnapshots.fPersonResponsible, 1, 1), iCNT]:=Source.Cells[Source.ReturnColumn(TPersonResponsible.ErpCode, 1, 1), jCNT]
@@ -475,7 +475,7 @@ begin
             )
             and
             (
-                MainForm.ConvertCoCode(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT], 'F', 0) = Source.Cells[Source.ReturnColumn(TSalesResponsible.SourceDBName, 1, 1), jCNT]
+                THelpers.ConvertCoCode(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT], 'F', 0) = Source.Cells[Source.ReturnColumn(TSalesResponsible.SourceDBName, 1, 1), jCNT]
             )
             then
                 Grid.Cells[Grid.ReturnColumn(TSnapshots.fSalesResponsible, 1, 1), iCNT]:=Source.Cells[Source.ReturnColumn(TSalesResponsible.ErpCode, 1, 1), jCNT]
@@ -492,7 +492,7 @@ begin
             )
             and
             (
-                MainForm.ConvertCoCode(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT], 'F', 0) = Source.Cells[Source.ReturnColumn(TAccountType.SourceDBName, 1, 1), jCNT]
+                THelpers.ConvertCoCode(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT], 'F', 0) = Source.Cells[Source.ReturnColumn(TAccountType.SourceDBName, 1, 1), jCNT]
             )
             then
                 Grid.Cells[Grid.ReturnColumn(TSnapshots.fAccountType, 1, 1), iCNT]:=Source.Cells[Source.ReturnColumn(TAccountType.ErpCode, 1, 1), jCNT]
@@ -509,7 +509,7 @@ begin
             )
             and
             (
-                MainForm.ConvertCoCode(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT], 'F', 0) = Source.Cells[Source.ReturnColumn(TCustomerGroup.SourceDBName, 1, 1), jCNT]
+                THelpers.ConvertCoCode(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT], 'F', 0) = Source.Cells[Source.ReturnColumn(TCustomerGroup.SourceDBName, 1, 1), jCNT]
             )
             then
                 Grid.Cells[Grid.ReturnColumn(TSnapshots.fCustomerGroup, 1, 1), iCNT]:=Source.Cells[Source.ReturnColumn(TCustomerGroup.ErpCode, 1, 1), jCNT]

@@ -37,22 +37,25 @@ type
     // Callback signatures.
     // --------------------
 
-    //...
+    TOpenAddressBook   = procedure(ReturnedData: TStringGrid; LastError: TLastError) of object;
+    TUpdateAddressBook = procedure(LastError: TLastError) of object;
+    TAddToAddressBook  = procedure(LastError: TLastError) of object;
+
 
     IAddressBook = interface(IInterface)
     ['{56D68733-5DF0-4D44-9A66-69CB5DE587E4}']
-        procedure OpenAddressBookAsync(UserAlias: string; SourceGrid: TStringGrid; OptionalCondition: string = '');
-        procedure UpdateAddressBookAsync(SourceGrid: TStringGrid; UpdateValues: TAddressBookUpdateFields);
-        procedure AddToAddressBookAsync(SourceGrid: TStringGrid);
+        procedure OpenAddressBookAsync(UserAlias: string; Callback: TOpenAddressBook; OptionalCondition: string = '');
+        procedure UpdateAddressBookAsync(SourceGrid: TStringGrid; UpdateValues: TAddressBookUpdateFields; Callback: TUpdateAddressBook);
+        procedure AddToAddressBookAsync(SourceGrid: TStringGrid; Callback: TAddToAddressBook);
     end;
 
 
     TAddressBook = class(TInterfacedObject, IAddressBook)
     {$TYPEINFO ON}
     public
-        procedure OpenAddressBookAsync(UserAlias: string; SourceGrid: TStringGrid; OptionalCondition: string = '');
-        procedure UpdateAddressBookAsync(SourceGrid: TStringGrid; UpdateValues: TAddressBookUpdateFields);
-        procedure AddToAddressBookAsync(SourceGrid: TStringGrid);
+        procedure OpenAddressBookAsync(UserAlias: string; Callback: TOpenAddressBook; OptionalCondition: string = '');
+        procedure UpdateAddressBookAsync(SourceGrid: TStringGrid; UpdateValues: TAddressBookUpdateFields; Callback: TUpdateAddressBook);
+        procedure AddToAddressBookAsync(SourceGrid: TStringGrid; Callback: TAddToAddressBook);
     end;
 
 
@@ -60,10 +63,7 @@ implementation
 
 
 uses
-    View.Main,            // delete this ref!
-    View.InvoiceTracker,  // delete this ref!
-    View.Actions,         // delete this ref!
-    View.UserFeedback,    // delete this ref!
+    View.Main, // delete this ref!
     Handler.Database,
     Handler.Account,
     Unity.Sql,
@@ -83,16 +83,14 @@ uses
 // *Change when SQL is replaced by API
 // ------------------------------------
 
-procedure TAddressBook.OpenAddressBookAsync(UserAlias: string; SourceGrid: TStringGrid; OptionalCondition: string = '');
+procedure TAddressBook.OpenAddressBookAsync(UserAlias: string; Callback: TOpenAddressBook; OptionalCondition: string = '');
 begin
-
-    SourceGrid.Freeze(True);
-    THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Processing, MainForm);
-    THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Show.ToString, MainForm);
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
+        var LastError: TLastError;
+        var ReturnedData:=TStringGrid.Create(nil);
         var DataTables: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
         try
 
@@ -121,28 +119,35 @@ begin
 
                 DataTables.OpenTable(DbModel.TAddressBook.AddressBook);
 
-                if not(DataTables.SqlToGrid(SourceGrid, DataTables.DataSet, True, True)) then
-                    THelpers.ExecMessage(False, TMessaging.TWParams.MessageWarn, 'No results found in the database.', MainForm);
+                if not(DataTables.SqlToGrid(ReturnedData, DataTables.DataSet, True, True)) then
+                begin
+                    LastError.IsSucceeded:=False;
+                    LastError.ErrorMessage:='No results found in the database.';
+                end
+                else
+                begin
+                    LastError.IsSucceeded:=True;
+                end;
 
             except
                 on E: Exception do
+                begin
+                    LastError.ErrorMessage:=E.Message;
+                    LastError.IsSucceeded:=False;
                     ThreadFileLog.Log(E.Message);
+                end;
 
             end;
 
         finally
-
             DataTables.Free;
-
-            TThread.Synchronize(nil, procedure
-            begin
-                SourceGrid.SetColWidth(40, 10, 400);
-                SourceGrid.Freeze(False);
-                THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
-                THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
-            end);
-
         end;
+
+        TThread.Synchronize(nil, procedure
+        begin
+            Callback(ReturnedData, LastError);
+            if Assigned(ReturnedData) then ReturnedData.Free();
+        end);
 
     end);
 
@@ -156,12 +161,13 @@ end;
 // *Change when SQL is replaced by API
 // ------------------------------------
 
-procedure TAddressBook.UpdateAddressBookAsync(SourceGrid: TStringGrid; UpdateValues: TAddressBookUpdateFields);
+procedure TAddressBook.UpdateAddressBookAsync(SourceGrid: TStringGrid; UpdateValues: TAddressBookUpdateFields; Callback: TUpdateAddressBook);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
+        var LastError: TLastError;
         var Book: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
         try
 
@@ -193,19 +199,20 @@ begin
                     if Book.UpdateRecord(DbModel.TAddressBook.AddressBook, True, Condition) then
                     begin
                         SourceGrid.SetUpdatedRow(0);
-                        THelpers.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Address Book has been updated succesfully!', MainForm);
+                        LastError.IsSucceeded:=True;
+                        LastError.ErrorMessage:='Address Book has been updated succesfully!';
                     end
                     else
                     begin
-                        // Error during post
-                        THelpers.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot update Address Book. Please contact IT support.', MainForm);
+                        LastError.IsSucceeded:=False;
+                        LastError.ErrorMessage:='Cannot update Address Book. Please contact IT support.';
                     end;
 
                 end
                 else
                 begin
-                    // No changes within Address Book string grid
-                    THelpers.ExecMessage(False, TMessaging.TWParams.MessageWarn, 'Nothing to update. Please make changes first and try again.', MainForm);
+                    LastError.IsSucceeded:=False;
+                    LastError.ErrorMessage:='Cannot update nothing. Please make changes first and try again.';
                 end;
 
             end;
@@ -226,15 +233,26 @@ begin
                 Book.Values.Add(UpdateValues.Email);
 
                 if Book.UpdateRecord(DbModel.TAddressBook.AddressBook, True, Condition) then
-                    THelpers.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Address Book has been updated succesfully!', MainForm)
+                begin
+                    LastError.IsSucceeded:=True;
+                    LastError.ErrorMessage:='Address Book has been updated succesfully!';
+                end
                 else
-                    THelpers.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot update Address Book. Please contact IT support.', MainForm);
+                begin
+                    LastError.IsSucceeded:=False;
+                    LastError.ErrorMessage:='Cannot update Address Book. Please contact IT support.';
+                end;
 
             end;
 
         finally
             Book.Free;
         end;
+
+        TThread.Synchronize(nil, procedure
+        begin
+            Callback(LastError);
+        end);
 
     end);
 
@@ -248,7 +266,7 @@ end;
 // *Change when SQL is replaced by API
 // ------------------------------------
 
-procedure TAddressBook.AddToAddressBookAsync(SourceGrid: TStringGrid);
+procedure TAddressBook.AddToAddressBookAsync(SourceGrid: TStringGrid; Callback: TAddToAddressBook);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
@@ -257,6 +275,7 @@ begin
         var jCNT: integer:=0;
         var Check: cardinal:=0;
         var AddrBook: TALists;
+        var LastError: TLastError;
         SetLength(AddrBook, 1, 11);
 
         // Get data from String Grid
@@ -265,15 +284,18 @@ begin
 
             for var iCNT: integer:=SourceGrid.Selection.Top to SourceGrid.Selection.Bottom do
             begin
+
                 if SourceGrid.RowHeights[iCNT] <> SourceGrid.sgRowHidden then
                 begin
+
                     // Build SCUID
                     var SCUID: string:=SourceGrid.Cells[SourceGrid.ReturnColumn(TSnapshots.fCustomerNumber, 1, 1), iCNT] +
-                        MainForm.ConvertCoCode(
+                        THelpers.ConvertCoCode(
                             SourceGrid.Cells[SourceGrid.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT],
                             'F',
                             3
                         );
+
                     Book.CleanUp;
                     Book.Columns.Add(DbModel.TAddressBook.Scuid);
                     Book.CustFilter:=TSql.WHERE + DbModel.TAddressBook.Scuid + TSql.EQUAL + QuotedStr(SCUID);
@@ -293,7 +315,9 @@ begin
                         Inc(jCNT);
                         SetLength(AddrBook, jCNT + 1, 11);
                     end;
+
                 end;
+
             end;
 
         finally
@@ -303,6 +327,7 @@ begin
         // Send to database
         if Check > 0 then
         begin
+
             Book:=TDataTables.Create(MainForm.FDbConnect);
             try
 
@@ -324,32 +349,40 @@ begin
 
                     if Book.RowsAffected > 0 then
                     begin
-                        THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
-                        THelpers.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Address Book has been successfully populated by selected item(s).', MainForm);
+                        LastError.IsSucceeded:=True;
+                        LastError.ErrorMessage:='Address Book has been successfully populated by selected item(s).';
                     end
                     else
                     begin
-                        THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
-                        THelpers.ExecMessage(False, TMessaging.TWParams.MessageWarn, 'Cannot update Address Book. Please contact IT support.', MainForm);
+                        LastError.IsSucceeded:=False;
+                        LastError.ErrorMessage:='Cannot update Address Book. Please contact IT support.';
                     end;
 
                 except
                     on E: Exception do
                     begin
-                        THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
-                        THelpers.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot save selected item(s). Exception has been thrown: ' + E.Message, MainForm);
-                        ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: Cannot write Address Book item(s) into database. Error: ' + E.Message);
+                        LastError.IsSucceeded:=False;
+                        LastError.ErrorMessage:='Cannot save selected item(s). Exception has been thrown: ' + E.Message;
+                        ThreadFileLog.Log('Cannot write Address Book item(s) into database. Error: ' + E.Message);
                     end;
 
                 end;
+
             finally
                 Book.Free;
             end;
+
         end
         else
         begin
-            THelpers.ExecMessage(False, TMessaging.TWParams.MessageWarn, 'Selected customers are already in Address Book.', MainForm);
+            LastError.IsSucceeded:=True;
+            LastError.ErrorMessage:='Selected customers are already in Address Book.';
         end;
+
+        TThread.Synchronize(nil, procedure
+        begin
+            Callback(LastError);
+        end);
 
     end);
 

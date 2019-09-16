@@ -228,13 +228,6 @@ type
         property LbuSendFrom:  string read FLbuSendFrom;
         property BanksHtml:    string read FBanksHtml;
         procedure UpdateHistory(var Grid: TStringGrid);
-
-        // ------------------
-        // Callbacks methods.
-        // ------------------
-
-        //...
-
     end;
 
 
@@ -616,7 +609,7 @@ begin
     FCustNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCustomerNumber,1, 1), MainForm.sgAgeView.Row];
     FCoCode    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCoCode,        1, 1), MainForm.sgAgeView.Row];
     FBranch    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fAgent,         1, 1), MainForm.sgAgeView.Row];
-    FSCUID     :=CustNumber + MainForm.ConvertCoCode(CoCode, 'F', 3);
+    FSCUID     :=CustNumber + THelpers.ConvertCoCode(CoCode, 'F', 3);
 end;
 
 
@@ -747,7 +740,7 @@ begin
     FAbUpdateFields.Phones    :=THelpers.Implode(Cust_Phone.Items, TDelimiters.Semicolon);
 
     var AddressBook: IAddressBook:=TAddressBook.Create();
-    AddressBook.UpdateAddressBookAsync(nil, FAbUpdateFields);
+    AddressBook.UpdateAddressBookAsync(nil, FAbUpdateFields, MainForm.UpdateAddressBookAsync_Callback);
 
 end;
 

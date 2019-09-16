@@ -18,6 +18,17 @@ uses
 type
 
     /// <remarks>
+    /// Definition of last error that occured during the processing, Returned Code field is present for failed REST calls (status code returned).
+    /// </remarks>
+
+    TLastError = record
+        ErrorMessage: string;
+        ErrorNumber:  integer;
+        IsSucceeded:  boolean;
+        ReturnedCode: integer;
+    end;
+
+    /// <remarks>
     ///
     /// </remarks>
 
@@ -88,7 +99,7 @@ type
     end;
 
     /// <remarks>
-    ///
+    /// Holds open items total amounts for ledger currency and other currency.
     /// </remarks>
 
     TOpenItemsTotal = record
@@ -99,7 +110,7 @@ type
     end;
 
     /// <remarks>
-    /// This record definition allows to hold column numbers for given column name. This is necessary as column order may change.
+    /// This record definition holds column numbers for given column name. This is necessary as column order may change.
     /// Normally we would use "ReturnColumn" extension method, but in case of multithreading, we must pre-set them before many threads
     /// use it at the same time (VCL components are not thread safe). Having record with fields simplify things.
     /// </remarks>
@@ -124,7 +135,7 @@ type
     end;
 
     /// <remarks>
-    /// This record define column numbers for given field, so we do not have to use each time "ReturnColumn".
+    /// This record defines column numbers for given field, so we do not have to call "ReturnColumn" method each time.
     /// </remarks>
 
     TFControlStatusRefs = record

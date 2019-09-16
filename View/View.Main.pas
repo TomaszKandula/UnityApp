@@ -835,8 +835,7 @@ type
     private
         var FHadFirstLoad:         boolean;
         var FAllowClose:           boolean;
-        var FEventLogPath:         string;
-        var FWinUserName:          string;
+        var FWinUserName:          string; // remove from view!
         var FAbUpdateFields:       TAddressBookUpdateFields;
         var FDailyCommentFields:   TDailyCommentFields;
         var FGeneralCommentFields: TGeneralCommentFields;
@@ -851,9 +850,9 @@ type
         function  CheckGivenPassword(Password: string): boolean;
         function  SetNewPassword(Password: string): boolean;
         function  AddressBookExclusion: boolean;
-        function  CDate(StrDate: string): TDate;
         function  ShowReport(ReportNumber: cardinal): cardinal;
     public
+
 
         // Legacy code, to be removed [start]
         var FGroupIdSel:      string;
@@ -866,9 +865,8 @@ type
         var FOSAmount:        double;
         var FIsConnected:     boolean;
         procedure TryInitConnection;
-        procedure FindCoData(TargetColumn: integer; TargetGrid: TStringGrid; SourceGrid: TStringGrid);
-        function  ConvertCoCode(CoNumber: string; Prefix: string; mode: integer): string;
-        function  GetCoCode(CoPos: integer; GroupId: string): string;
+
+        // replace by callbacks from async methods
         procedure CallbackAwaitForm(PassMsg: TMessage);
         procedure CallbackMassMailer(PassMsg: TMessage);
         procedure CallbackStatusBar(PassMsg: TMessage);
@@ -876,15 +874,16 @@ type
         procedure WndMessagesInternal(PassMsg: TMessage);
         // Legacy code, to be removed [end]
 
+
         var FStartTime:         TTime;
-        var FDbConnect:         TADOConnection;
+        var FDbConnect:         TADOConnection; // remove from view!
         var FGroupList:         TALists;
         var FAgeDateList:       TALists;
         var FGridPicture:       TImage;
         var FOpenItemsRefs:     TFOpenItemsRefs;
         var FControlStatusRefs: TFControlStatusRefs;
-        property WinUserName:  string read FWinUserName;
-        property EventLogPath: string read FEventLogPath;
+        property WinUserName:  string read FWinUserName; // remove from view!
+
         procedure InitMainWnd(SessionFile: string);
         procedure SetupMainWnd();
         procedure StartMainWnd();
@@ -892,11 +891,20 @@ type
         procedure UpdateFControlStatusRefs(SourceGrid: TStringGrid);
         procedure SwitchTimers(State: TAppTimers);
 
-        // ------------------
-        // Callbacks methods.
-        // ------------------
+        // --------------------------------
+        // Callbacks for Async.AddressBook.
+        // --------------------------------
+
+        procedure OpenAddressBookAsync_Callback(ReturnedData: TStringGrid; LastError: TLastError);
+        procedure UpdateAddressBookAsync_Callback(LastError: TLastError);
+        procedure AddToAddressBookAsync_Callback(LastError: TLastError);
+
+        // -----------------------------
+        // Callbacks for Async.Comments.
+        // -----------------------------
 
         //...
+
 
     protected
 
@@ -1001,7 +1009,77 @@ begin
 end;
 
 
-/// LEGACY CODE - TO BE REMOVED [START]
+// ----------------------------------------------------------------------------------------------------------------------------------------------- CALLBACKS //
+
+
+// -----------------------------------
+// Async.AddressBook callback methods.
+// -----------------------------------
+
+
+procedure TMainForm.OpenAddressBookAsync_Callback(ReturnedData: TStringGrid; LastError: TLastError);
+begin
+
+    if not LastError.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
+        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
+        THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
+        Exit();
+    end;
+
+    sgAddressBook.Freeze(True);
+
+    sgAddressBook.RowCount:=ReturnedData.RowCount;
+    sgAddressBook.ColCount:=ReturnedData.ColCount;
+
+    for var iCNT:=0 to ReturnedData.RowCount - 1 do
+        for var jCNT:=0 to ReturnedData.ColCount - 1 do
+            sgAddressBook.Cells[jCNT, iCNT]:=ReturnedData.Cells[jCNT, iCNT];
+
+    sgAddressBook.SetColWidth(40, 10, 400);
+    sgAddressBook.Freeze(False);
+
+    THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
+    THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
+
+end;
+
+
+procedure TMainForm.UpdateAddressBookAsync_Callback(LastError: TLastError);
+begin
+
+    case LastError.IsSucceeded of
+        True:  THelpers.MsgCall(TAppMessage.Info, LastError.ErrorMessage);
+        False: THelpers.MsgCall(TAppMessage.Warn, LastError.ErrorMessage);
+    end;
+
+end;
+
+
+procedure TMainForm.AddToAddressBookAsync_Callback(LastError: TLastError);
+begin
+
+    THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
+
+    case LastError.IsSucceeded of
+        True:  THelpers.MsgCall(TAppMessage.Info, LastError.ErrorMessage);
+        False: THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
+    end;
+
+end;
+
+
+// --------------------------------
+// Async.Comments callback methods.
+// --------------------------------
+
+//...
+
+
+
+
+// ------------------------------------------------------------------------------------------------------------------------ LEGACY CODE - TO BE REMOVED [START]
 
 
 procedure TMainForm.TryInitConnection;
@@ -1043,103 +1121,6 @@ begin
         DataBase.Free;
     end;
 
-end;
-
-
-procedure TMainForm.FindCoData(TargetColumn: integer; TargetGrid: TStringGrid; SourceGrid: TStringGrid);
-begin
-
-    if SourceGrid.RowCount = 0 then Exit;
-
-    for var iCNT: integer:=1 to SourceGrid.RowCount - 1 do
-    begin
-        if TargetGrid.Cells[TargetColumn, 0] = SourceGrid.Cells[SourceGrid.ReturnColumn(TCompanyData.CoCode, 1, 1), iCNT] then
-        begin
-            TargetGrid.Cells[TargetColumn, 1]:=SourceGrid.Cells[SourceGrid.ReturnColumn(TCompanyData.CoCurrency, 1, 1), iCNT];
-            TargetGrid.Cells[TargetColumn, 2]:=SourceGrid.Cells[SourceGrid.ReturnColumn(TCompanyData.Divisions,  1, 1), iCNT];
-            TargetGrid.Cells[TargetColumn, 3]:=SourceGrid.Cells[SourceGrid.ReturnColumn(TCompanyData.Agents,     1, 1), iCNT];
-            Break;
-        end
-        else
-        begin
-            TargetGrid.Cells[TargetColumn, 1]:=TUnknown.NA;
-            TargetGrid.Cells[TargetColumn, 2]:=TUnknown.NA;
-            TargetGrid.Cells[TargetColumn, 3]:=TUnknown.NA;
-        end;
-    end;
-
-end;
-
-
-function TMainForm.ConvertCoCode(CoNumber: string; Prefix: string; mode: integer): string;
-begin
-
-    Result:= '';
-
-    /// <remarks>
-    /// Used only for open items and aging view.
-    /// </remarks>
-
-    // Allow to convert '2020' to 'F2020', etc.
-    if mode = 0 then
-    begin
-        if Length(CoNumber) = 4 then Result:=Prefix + CoNumber;
-        if Length(CoNumber) = 3 then Result:=Prefix + '0'  + CoNumber;
-        if Length(CoNumber) = 2 then Result:=Prefix + '00' + CoNumber;
-    end;
-
-    /// <remarks>
-    /// Used only to build GroupID.
-    /// </remarks>
-
-    // Converts from 2020 to 02020, 340 to 00340 and so on.
-    if mode = 1 then
-    begin
-        if Length(CoNumber) = 4 then Result:='0'   + CoNumber;
-        if Length(CoNumber) = 3 then Result:='00'  + CoNumber;
-        if Length(CoNumber) = 2 then Result:='000' + CoNumber;
-        if Length(CoNumber) = 1 then Result:='00000';
-    end;
-
-    // Converts from 02020 to 2020.
-    if mode = 2 then
-    begin
-        for var iCNT: integer:= 1 to Length(CoNumber) do
-        begin
-            if CoNumber[iCNT] <> '0' then
-            begin
-                Result:=System.Copy(CoNumber, iCNT, MaxInt);
-                Exit;
-            end;
-        end;
-    end;
-
-    // Converts from 2020 to 2020, 340 to 0340... .
-    if mode = 3 then
-    begin
-        if Length(CoNumber) = 4 then Result:=CoNumber;
-        if Length(CoNumber) = 3 then Result:='0'   + CoNumber;
-        if Length(CoNumber) = 2 then Result:='00'  + CoNumber;
-        if Length(CoNumber) = 1 then Result:='000' + CoNumber;
-    end;
-
-end;
-
-
-function TMainForm.GetCoCode(CoPos: integer; GroupId: string): string;
-begin
-    /// <remarks>
-    /// Return specific CoCode from the given group.
-    /// Group id format: series of 4 groups of 5 digits, i.e.: '020470034000043' must be read as follows:
-    /// 1. 1ST CO CODE: 02047 (2047)
-    /// 2. 2ND CO CODE: 00340 (340)
-    /// 3. 3RD CO CODE: 00043 (43)
-    /// 4. 4TH CO CODE: 00000 (0)
-    /// </remarks>
-    if CoPos = 1 then Result:=(MidStr(GroupId, 1,  5).ToInteger).toString;
-    if CoPos = 2 then Result:=(MidStr(GroupId, 6,  5).ToInteger).toString;
-    if CoPos = 3 then Result:=(MidStr(GroupId, 11, 5).ToInteger).toString;
-    if CoPos = 4 then Result:=(MidStr(GroupId, 16, 5).ToInteger).toString;
 end;
 
 
@@ -1226,7 +1207,7 @@ begin
 end;
 
 
-/// LEGACY CODE - TO BE REMOVED [END]
+// -------------------------------------------------------------------------------------------------------------------------- LEGACY CODE - TO BE REMOVED [END]
 
 
 // ---------------------------------------------------------------------------------------------------------------------------------------- WINDOWS MESSAGES //
@@ -1365,8 +1346,8 @@ begin
 
     ThreadFileLog.LogFileName:=SessionFile;
 
-    var Settings: ISettings:=TSettings.Create();
-    FWinUserName:=Settings.WinUserName;
+    var Settings: ISettings:=TSettings.Create(); // remove from view!
+    FWinUserName:=Settings.WinUserName; // remove from view!
 
     FStartTime:=Now();
     FormatDateTime('hh:mm:ss', Now());
@@ -1651,12 +1632,6 @@ begin
 
     end;
 
-end;
-
-
-function TMainForm.CDate(StrDate: string): TDate;
-begin
-    Result:=StrToDateDef(StrDate, TDateTimeFormats.NullDate);
 end;
 
 
@@ -2093,7 +2068,7 @@ begin
     for var iCNT: integer:=1 to sgAgeView.RowCount - 1 do
         if
             (
-                CDate(sgAgeView.Cells[sgAgeView.ReturnColumn(TGeneralComment.fFollowUp, 1, 1), iCNT]) = CDate(StatBar_TXT3.Caption)
+                THelpers.CDate(sgAgeView.Cells[sgAgeView.ReturnColumn(TGeneralComment.fFollowUp, 1, 1), iCNT]) = THelpers.CDate(StatBar_TXT3.Caption)
             )
         and
         (
@@ -2379,8 +2354,13 @@ end;
 
 procedure TMainForm.Action_ShowAsIsClick(Sender: TObject);
 begin
+
+    THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Processing, MainForm);
+    THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Show.ToString, MainForm);
+
     var AddressBook: IAddressBook:=TAddressBook.Create();
-    AddressBook.OpenAddressBookAsync('', sgAddressBook);
+    AddressBook.OpenAddressBookAsync('', OpenAddressBookAsync_Callback);
+
 end;
 
 
@@ -2390,8 +2370,13 @@ end;
 
 procedure TMainForm.Action_ShowMyEntriesClick(Sender: TObject);
 begin
+
+    THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Processing, MainForm);
+    THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Show.ToString, MainForm);
+
     var AddressBook: IAddressBook:=TAddressBook.Create();
-    AddressBook.OpenAddressBookAsync(MainForm.WinUserName, sgAddressBook);
+    AddressBook.OpenAddressBookAsync(MainForm.WinUserName, OpenAddressBookAsync_Callback);
+
 end;
 
 
@@ -2541,7 +2526,7 @@ procedure TMainForm.Action_TrackerClick(Sender: TObject);
     begin
         var CustNumber: string:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCustomerNumber, 1, 1), position];
         var CoCode: string:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1), position];
-        Result:=CustNumber + MainForm.ConvertCoCode(CoCode, 'F', 3);
+        Result:=CustNumber + THelpers.ConvertCoCode(CoCode, 'F', 3);
     end;
 
 begin
@@ -2623,7 +2608,7 @@ begin
     if FIsConnected then
     begin
         var AddressBook: IAddressBook:=TAddressBook.Create();
-        AddressBook.AddToAddressBookAsync(sgAgeView);
+        AddressBook.AddToAddressBookAsync(sgAgeView, AddToAddressBookAsync_Callback);
     end
     else
     THelpers.MsgCall(TAppMessage.Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
@@ -2663,7 +2648,7 @@ begin
             Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), sgAgeView.Row]);
             Item.SubItems.Add(
                 sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCustomerNumber, 1, 1), sgAgeView.Row] +
-                MainForm.ConvertCoCode(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1), sgAgeView.Row], 'F', 3)
+                THelpers.ConvertCoCode(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1), sgAgeView.Row], 'F', 3)
             );
             Item.SubItems.Add('empty');
         end
@@ -2689,7 +2674,7 @@ begin
                     Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), iCNT]);
                     Item.SubItems.Add(
                         sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCustomerNumber, 1, 1), iCNT] +
-                        MainForm.ConvertCoCode(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT], 'F', 3)
+                        THelpers.ConvertCoCode(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT], 'F', 3)
                     );
                     Item.SubItems.Add('empty');
                 end;
@@ -3585,13 +3570,13 @@ begin
     begin
 
         // Highlight follow-up column
-        if not (CDate(sgAgeView.Cells[ACol, ARow]) = 0) then
+        if not (THelpers.CDate(sgAgeView.Cells[ACol, ARow]) = 0) then
         begin
 
             var Settings: ISettings:=TSettings.Create;
 
             // Future days
-            if (ACol = Col12) and (CDate(sgAgeView.Cells[ACol, ARow]) > CDate(StatBar_TXT3.Caption)) then
+            if (ACol = Col12) and (THelpers.CDate(sgAgeView.Cells[ACol, ARow]) > THelpers.CDate(StatBar_TXT3.Caption)) then
             begin
                 sgAgeView.Canvas.Brush.Color:=Settings.FutureBColor;
                 sgAgeView.Canvas.Font.Color :=Settings.FutureFColor;
@@ -3600,7 +3585,7 @@ begin
             end;
 
             // Today
-            if (ACol = Col12) and (CDate(sgAgeView.Cells[ACol, ARow]) = CDate(StatBar_TXT3.Caption)) then
+            if (ACol = Col12) and (THelpers.CDate(sgAgeView.Cells[ACol, ARow]) = THelpers.CDate(StatBar_TXT3.Caption)) then
             begin
                 sgAgeView.Canvas.Brush.Color:=Settings.TodayBColor;
                 sgAgeView.Canvas.Font.Color :=Settings.TodayFColor;
@@ -3609,7 +3594,7 @@ begin
             end;
 
             // Past days
-            if (ACol = Col12) and (CDate(sgAgeView.Cells[ACol, ARow]) < CDate(StatBar_TXT3.Caption)) then
+            if (ACol = Col12) and (THelpers.CDate(sgAgeView.Cells[ACol, ARow]) < THelpers.CDate(StatBar_TXT3.Caption)) then
             begin
                 sgAgeView.Canvas.Brush.Color:=Settings.PastBColor;
                 sgAgeView.Canvas.Font.Color :=Settings.PastFColor;
@@ -3937,10 +3922,10 @@ end;
 
 procedure TMainForm.sgCompanyDataKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-    if sgCompanyData.Col = 0 then FindCoData(sgCompanyData.Col, sgCompanyData, sgCoCodes);
-    if sgCompanyData.Col = 1 then FindCoData(sgCompanyData.Col, sgCompanyData, sgCoCodes);
-    if sgCompanyData.Col = 2 then FindCoData(sgCompanyData.Col, sgCompanyData, sgCoCodes);
-    if sgCompanyData.Col = 3 then FindCoData(sgCompanyData.Col, sgCompanyData, sgCoCodes);
+    if sgCompanyData.Col = 0 then THelpers.FindCoData(sgCompanyData.Col, sgCompanyData, sgCoCodes);
+    if sgCompanyData.Col = 1 then THelpers.FindCoData(sgCompanyData.Col, sgCompanyData, sgCoCodes);
+    if sgCompanyData.Col = 2 then THelpers.FindCoData(sgCompanyData.Col, sgCompanyData, sgCoCodes);
+    if sgCompanyData.Col = 3 then THelpers.FindCoData(sgCompanyData.Col, sgCompanyData, sgCoCodes);
 end;
 
 
@@ -5877,8 +5862,13 @@ begin
     if FIsConnected then
     begin
         sgAddressBook.SetUpdatedRow(0);
+
+        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Processing, MainForm);
+        THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Show.ToString, MainForm);
+
         var AddressBook: IAddressBook:=TAddressBook.Create();
-        AddressBook.OpenAddressBookAsync('', sgAddressBook);
+        AddressBook.OpenAddressBookAsync('', OpenAddressBookAsync_Callback);
+
     end
     else
     THelpers.MsgCall(TAppMessage.Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
@@ -5902,7 +5892,7 @@ begin
     if FIsConnected then
     begin
         var AddressBook: IAddressBook:=TAddressBook.Create();
-        AddressBook.UpdateAddressBookAsync(sgAddressBook, FAbUpdateFields);
+        AddressBook.UpdateAddressBookAsync(sgAddressBook, FAbUpdateFields, UpdateAddressBookAsync_Callback);
     end
     else
     THelpers.MsgCall(TAppMessage.Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
@@ -5916,12 +5906,13 @@ end;
 
 procedure TMainForm.btnCloseABClick(Sender: TObject);
 begin
+
     if THelpers.MsgCall(TAppMessage.Question2, 'Are you sure you want to close Address Book?') = IDYES then
     begin
         sgAddressBook.SetUpdatedRow(0);
         sgAddressBook.ClearAll(2, 1, 1, True);
-        sgAddressBook.Visible:=False;
     end;
+
 end;
 
 

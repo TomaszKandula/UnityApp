@@ -172,10 +172,10 @@ begin
     CmdType:=cmdText;
     StrSQL:=TSql.EXECUTE + QueryOpenItems                                        + TChars.SPACE +
               QuotedStr(GetDateTime(DateOnly))                                   + TChars.COMMA +
-              QuotedStr(MainForm.ConvertCoCode(SettingGrid.Cells[0, 0], 'F', 0)) + TChars.COMMA +
-              QuotedStr(MainForm.ConvertCoCode(SettingGrid.Cells[1, 0], 'F', 0)) + TChars.COMMA +
-              QuotedStr(MainForm.ConvertCoCode(SettingGrid.Cells[2, 0], 'F', 0)) + TChars.COMMA +
-              QuotedStr(MainForm.ConvertCoCode(SettingGrid.Cells[3, 0], 'F', 0)) + TChars.COMMA +
+              QuotedStr(THelpers.ConvertCoCode(SettingGrid.Cells[0, 0], 'F', 0)) + TChars.COMMA +
+              QuotedStr(THelpers.ConvertCoCode(SettingGrid.Cells[1, 0], 'F', 0)) + TChars.COMMA +
+              QuotedStr(THelpers.ConvertCoCode(SettingGrid.Cells[2, 0], 'F', 0)) + TChars.COMMA +
+              QuotedStr(THelpers.ConvertCoCode(SettingGrid.Cells[3, 0], 'F', 0)) + TChars.COMMA +
               QuotedStr(CutOff)                                                  + TChars.COMMA +
               QuotedStr(Agents)                                                  + TChars.COMMA +
               QuotedStr(Divisions)                                               + TChars.COMMA +

@@ -59,7 +59,6 @@ uses
     Unity.Qms                   in 'Helpers\Statics\Unity.Qms.pas',
     Unity.RestAuth              in 'Helpers\Statics\Unity.RestAuth.pas',
     Unity.RiskClass             in 'Helpers\Statics\Unity.RiskClass.pas',
-    Unity.SplashScreen          in 'Helpers\Statics\Unity.SplashScreen.pas',
     Unity.StatusBar             in 'Helpers\Statics\Unity.StatusBar.pas',
     Unity.Unknown               in 'Helpers\Statics\Unity.Unknown.pas',
     Unity.Sql                   in 'Helpers\Statics\Unity.Sql.pas',

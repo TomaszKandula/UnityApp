@@ -23,6 +23,7 @@ uses
     Vcl.Buttons,
     Vcl.StdCtrls,
     Vcl.ExtCtrls,
+    Unity.Records,
     Unity.Grid,
     Unity.Panel;
 
@@ -132,13 +133,6 @@ type
         procedure ResetCheckboxDisable;
         procedure ResetFieldColors;
         procedure ResetFieldTexts;
-
-        // ------------------
-        // Callbacks methods.
-        // ------------------
-
-        //...
-
     end;
 
 
@@ -412,7 +406,7 @@ begin
     OutputDebugString(PChar(Conditions));
 
     var AddressBook: IAddressBook:=TAddressBook.Create();
-    AddressBook.OpenAddressBookAsync('', MainForm.sgAddressBook, Conditions);
+    AddressBook.OpenAddressBookAsync('', MainForm.OpenAddressBookAsync_Callback, Conditions);
 
 end;
 

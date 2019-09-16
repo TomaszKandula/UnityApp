@@ -51,7 +51,6 @@ type
     public
         procedure ScanOpenItemsAsync();
         procedure ReadOpenItemsAsync(ActionMode: TLoading);
-
     end;
 
 

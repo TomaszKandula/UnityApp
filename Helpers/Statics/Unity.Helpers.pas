@@ -34,8 +34,12 @@ type
         class function  WndCall(WinForm: TForm; Mode: TWindowState): integer; static;
         class function  MsgCall(WndType: TAppMessage; WndText: string): integer; static;
         class function  OleGetStr(RecordsetField: variant): string; static;
+        class function  CDate(StrDate: string): TDate; static;
         class function  Explode(Text: string; SourceDelim: char): string; static;
         class function  Implode(Text: TStrings; TargetDelim: char): string; static;
+        class procedure FindCoData(TargetColumn: integer; TargetGrid: TStringGrid; SourceGrid: TStringGrid); static;
+        class function  ConvertCoCode(CoNumber: string; Prefix: string; mode: integer): string; static;
+        class function  GetCoCode(CoPos: integer; GroupId: string): string; static;
     end;
 
 
@@ -44,8 +48,12 @@ implementation
 
 uses
     System.SysUtils,
+    System.StrUtils,
     System.Variants,
     Vcl.Graphics,
+    DbModel,
+    Unity.DateTimeFormats,
+    Unity.Unknown,
     Unity.Chars,
     Unity.Common;
 
@@ -169,6 +177,12 @@ begin
 end;
 
 
+class function THelpers.CDate(StrDate: string): TDate;
+begin
+    Result:=StrToDateDef(StrDate, TDateTimeFormats.NullDate);
+end;
+
+
 class function THelpers.Explode(Text: string; SourceDelim: char): string;
 begin
     Result:=StringReplace(Text, SourceDelim, TChars.CRLF, [rfReplaceAll]);
@@ -189,6 +203,108 @@ begin
     end;
 
     Result:=Str;
+
+end;
+
+
+{Legacy}
+class procedure THelpers.FindCoData(TargetColumn: integer; TargetGrid: TStringGrid; SourceGrid: TStringGrid);
+begin
+
+    if SourceGrid.RowCount = 0 then Exit;
+
+    for var iCNT: integer:=1 to SourceGrid.RowCount - 1 do
+    begin
+        if TargetGrid.Cells[TargetColumn, 0] = SourceGrid.Cells[SourceGrid.ReturnColumn(TCompanyData.CoCode, 1, 1), iCNT] then
+        begin
+            TargetGrid.Cells[TargetColumn, 1]:=SourceGrid.Cells[SourceGrid.ReturnColumn(TCompanyData.CoCurrency, 1, 1), iCNT];
+            TargetGrid.Cells[TargetColumn, 2]:=SourceGrid.Cells[SourceGrid.ReturnColumn(TCompanyData.Divisions,  1, 1), iCNT];
+            TargetGrid.Cells[TargetColumn, 3]:=SourceGrid.Cells[SourceGrid.ReturnColumn(TCompanyData.Agents,     1, 1), iCNT];
+            Break;
+        end
+        else
+        begin
+            TargetGrid.Cells[TargetColumn, 1]:=TUnknown.NA;
+            TargetGrid.Cells[TargetColumn, 2]:=TUnknown.NA;
+            TargetGrid.Cells[TargetColumn, 3]:=TUnknown.NA;
+        end;
+    end;
+
+end;
+
+
+{Legacy}
+class function THelpers.ConvertCoCode(CoNumber: string; Prefix: string; mode: integer): string;
+begin
+
+    Result:= '';
+
+    /// <remarks>
+    /// Used only for open items and aging view.
+    /// </remarks>
+
+    // Allow to convert '2020' to 'F2020', etc.
+    if mode = 0 then
+    begin
+        if Length(CoNumber) = 4 then Result:=Prefix + CoNumber;
+        if Length(CoNumber) = 3 then Result:=Prefix + '0'  + CoNumber;
+        if Length(CoNumber) = 2 then Result:=Prefix + '00' + CoNumber;
+    end;
+
+    /// <remarks>
+    /// Used only to build GroupID.
+    /// </remarks>
+
+    // Converts from 2020 to 02020, 340 to 00340 and so on.
+    if mode = 1 then
+    begin
+        if Length(CoNumber) = 4 then Result:='0'   + CoNumber;
+        if Length(CoNumber) = 3 then Result:='00'  + CoNumber;
+        if Length(CoNumber) = 2 then Result:='000' + CoNumber;
+        if Length(CoNumber) = 1 then Result:='00000';
+    end;
+
+    // Converts from 02020 to 2020.
+    if mode = 2 then
+    begin
+        for var iCNT: integer:= 1 to Length(CoNumber) do
+        begin
+            if CoNumber[iCNT] <> '0' then
+            begin
+                Result:=System.Copy(CoNumber, iCNT, MaxInt);
+                Exit;
+            end;
+        end;
+    end;
+
+    // Converts from 2020 to 2020, 340 to 0340... .
+    if mode = 3 then
+    begin
+        if Length(CoNumber) = 4 then Result:=CoNumber;
+        if Length(CoNumber) = 3 then Result:='0'   + CoNumber;
+        if Length(CoNumber) = 2 then Result:='00'  + CoNumber;
+        if Length(CoNumber) = 1 then Result:='000' + CoNumber;
+    end;
+
+end;
+
+
+{Legacy}
+class function THelpers.GetCoCode(CoPos: integer; GroupId: string): string;
+begin
+
+    /// <remarks>
+    /// Return specific CoCode from the given group.
+    /// Group id format: series of 4 groups of 5 digits, i.e.: '020470034000043' must be read as follows:
+    /// 1. 1ST CO CODE: 02047 (2047)
+    /// 2. 2ND CO CODE: 00340 (340)
+    /// 3. 3RD CO CODE: 00043 (43)
+    /// 4. 4TH CO CODE: 00000 (0)
+    /// </remarks>
+    if CoPos = 1 then Result:=(MidStr(GroupId, 1,  5).ToInteger).toString;
+    if CoPos = 2 then Result:=(MidStr(GroupId, 6,  5).ToInteger).toString;
+    if CoPos = 3 then Result:=(MidStr(GroupId, 11, 5).ToInteger).toString;
+    if CoPos = 4 then Result:=(MidStr(GroupId, 16, 5).ToInteger).toString;
 
 end;
 
