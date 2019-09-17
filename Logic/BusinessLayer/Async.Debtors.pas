@@ -69,6 +69,7 @@ uses
     Unity.StatusBar,
     Unity.Sorting,
     Unity.EventLogger,
+    Unity.SessionService,
     Handler.Account,
     Sync.Documents,
     Async.OpenItems,
@@ -88,7 +89,7 @@ begin
     begin
 
         var CanReload: boolean:=False;
-        var AgeView: TAgeView:=TAgeView.Create(MainForm.FDbConnect);
+        var AgeView: TAgeView:=TAgeView.Create(SessionService.FDbConnect);
         var StopWatch: TStopWatch:=TStopWatch.StartNew;
 
         try
@@ -160,7 +161,7 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var AgeView: TAgeView:=TAgeView.Create(MainForm.FDbConnect);
+        var AgeView: TAgeView:=TAgeView.Create(SessionService.FDbConnect);
         var StopWatch: TStopWatch:=TStopWatch.StartNew;
         try
 

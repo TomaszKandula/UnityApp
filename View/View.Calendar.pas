@@ -126,7 +126,7 @@ begin
     FGeneralCommentFields.EventLog    :=False;
 
     var Comments: IComments:=TComments.Create();
-    Comments.EditGeneralComment(FGeneralCommentFields);
+    Comments.EditGeneralComment(FGeneralCommentFields, MainForm.EditGeneralComment_Callback);
 
     MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneralComment.fFollowUp, 1, 1), Row]:=DateToStr(SelectedDate);
 

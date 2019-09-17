@@ -64,7 +64,7 @@ type
         function  GetDirLayouts:      string;
         function  GetDirPackage:      string;
         function  GetDirWinTemp:      string;
-        function  GetNewSessioId:     string;
+        function  GetNewSessionId:    string;
         function  GetUrlReleasePak:   string;
         function  GetUrlReleaseMan:   string;
         function  GetUrlLayoutsLst:   string;
@@ -94,7 +94,7 @@ type
         property  PastBColor:      TColor    read GetPastBColor      write SetPastBColor;
         property  FutureFColor:    TColor    read GetFutureFColor    write SetFutureFColor;
         property  FutureBColor:    TColor    read GetFutureBColor    write SetFutureBColor;
-        property  NewSessioId:     string    read GetNewSessioId;
+        property  NewSessionId:    string    read GetNewSessionId;
         property  CheckConfigFile: boolean   read ConfigFileOK;
 
         // ----------------
@@ -115,6 +115,7 @@ type
         procedure DeleteSection(SectionName: string);
         procedure DeleteKey(Section: string; Ident: string);
         function  FindSettingsKey(Section: string; KeyPosition: integer): string;
+        procedure MakeNewSessionId();
         function  MakeNewSessionFile(SessionId: string): string;
     end;
 
@@ -128,6 +129,7 @@ type
     private
         var FTMIG:             TMemIniFile;
         var FTMIL:             TMemIniFile;
+        var FLastSessionId:    string;
         var FWinUserName:      string;
         var FPathGridImage:    string;
         var FPathEventLog:     string;
@@ -167,7 +169,7 @@ type
         function  GetDirLayouts:      string;
         function  GetDirPackage:      string;
         function  GetDirWinTemp:      string;
-        function  GetNewSessioId:     string;
+        function  GetNewSessionId:    string;
         function  GetUrlReleasePak:   string;
         function  GetUrlReleaseMan:   string;
         function  GetUrlLayoutsLst:   string;
@@ -189,6 +191,7 @@ type
         procedure DeleteSection(SectionName: string);
         procedure DeleteKey(Section: string; Ident: string);
         function  FindSettingsKey(Section: string; KeyPosition: integer): string;
+        procedure MakeNewSessionId();
         function  MakeNewSessionFile(SessionId: string): string;
         property WinUserName:     string    read GetWinUserName;
         property PathGridImage:   string    read GetPathGridImage;
@@ -199,7 +202,7 @@ type
         property DirLayouts:      string    read GetDirLayouts;
         property DirPackage:      string    read GetDirPackage;
         property DirWinTemp:      string    read GetDirWinTemp;
-        property NewSessioId:     string    read GetNewSessioId;
+        property NewSessioId:     string    read GetNewSessionId;
         property UrlReleasePak:   string    read GetUrlReleasePak;
         property UrlReleaseMan:   string    read GetUrlReleaseMan;
         property UrlLayoutsLst:   string    read GetUrlLayoutsLst;
@@ -580,11 +583,16 @@ begin
 end;
 
 
+procedure TSettings.MakeNewSessionId();
+begin
+    FLastSessionId:=TGUID.NewGuid.ToString().Replace('{','').Replace('}','').Replace('-','').ToLower();
+end;
+
+
 function TSettings.MakeNewSessionFile(SessionId: string): string;
 begin
 
     // Create file: <UserAlias>.<GUID>.log
-    SessionId:=SessionId.Replace('{','').Replace('}','').Replace('-','').ToLower();
     var EventLog:=FDirSessions + FWinUserName + '.' + SessionId + '.log';
 
     var FL: TFileStream:=TFileStream.Create(EventLog, fmCreate);
@@ -760,9 +768,9 @@ begin
 end;
 
 
-function TSettings.GetNewSessioId: string;
+function TSettings.GetNewSessionId: string;
 begin
-    Result:=TGUID.NewGuid.ToString();
+    Result:=FLastSessionId;
 end;
 
 

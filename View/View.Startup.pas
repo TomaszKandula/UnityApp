@@ -99,6 +99,7 @@ uses
     Unity.UserSid,
     Unity.Utilities,
     Unity.EventLogger,
+    Unity.SessionService,
     Async.Utilities,
     Async.Queries,
     Handler.Database,
@@ -310,7 +311,7 @@ begin
             ExitAppSync();
         end else
         begin
-            MainAppForm.FDbConnect:=DbConnection;
+            SessionService.FDbConnect:=DbConnection;
             ThreadFileLog.Log('Persistant connection with SQL database has been established.');
             ChangeProgressBar(33, 'Connecting to database... done.', ProgressBar);
         end;
@@ -559,18 +560,18 @@ begin
 
     Result:=True;
 
-    var UserControl: TUserControl:=TUserControl.Create(MainAppForm.FDbConnect);
+    var UserControl: TUserControl:=TUserControl.Create(SessionService.FDbConnect);
     try
 
         try
 
-            UserControl.UserName:=MainAppForm.WinUserName;
+            UserControl.UserName:=SessionService.SessionUser;
             MainAppForm.FAccessLevel:=UserControl.GetAccessData(TUserAccess.TTypes.AccessLevel);
 
             // Quit if username is not found
             if MainAppForm.FAccessLevel = '' then
             begin
-                LastErrorMsg:='Cannot find account for user alias ' + UpperCase(MainAppForm.WinUserName);
+                LastErrorMsg:='Cannot find account for user alias ' + UpperCase(SessionService.SessionUser);
                 Result:=False;
             end else
             begin

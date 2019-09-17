@@ -142,6 +142,7 @@ uses
     Unity.Unknown,
     Unity.Chars,
     Unity.EventLogger,
+    Unity.SessionService,
     Async.Statements;
 
 
@@ -276,7 +277,7 @@ begin
 
     Result:='';
 
-    var Database: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
+    var Database: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
     try
         Database.Columns.Add(TAddressBook.Estatements);
         Database.CustFilter:=TSql.WHERE + TAddressBook.Scuid + TSql.EQUAL + QuotedStr(Scuid);
@@ -315,7 +316,7 @@ end;
 procedure TMassMailerForm.UpdateCompanyData(Source: TListView);
 begin
 
-    var Tables: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
+    var Tables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
     try
 
         if Source.Items.Count > 0 then

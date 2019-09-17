@@ -75,7 +75,8 @@ uses
     Unity.Common,
     Unity.Helpers,
     Unity.Settings,
-    Unity.Utilities;
+    Unity.Utilities,
+    Unity.SessionService;
 
 
 var vFeedbackForm: TFeedbackForm;
@@ -158,9 +159,9 @@ begin
     end;
 
     Mail.MailFrom   :=Mail.XMailer;
-    Mail.MailCc     :=MainForm.WinUserName + '@' + Settings.GetStringValue(TConfigSections.ApplicationDetails, 'MAIL_DOMAIN', '');
+    Mail.MailCc     :=SessionService.SessionUser + '@' + Settings.GetStringValue(TConfigSections.ApplicationDetails, 'MAIL_DOMAIN', '');
     Mail.MailBcc    :='';
-    Mail.MailSubject:='Unity - User feedback (' + UpperCase(MainForm.WinUserName) + ')';
+    Mail.MailSubject:='Unity - User feedback (' + UpperCase(SessionService.SessionUser) + ')';
 
     // Plain text to HTML using template
     var Transfer: string:=ReportMemo.Text;

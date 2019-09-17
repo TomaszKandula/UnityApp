@@ -249,6 +249,7 @@ uses
     Handler.Sql,
     DbModel,
     Unity.Settings,
+    Unity.SessionService,
     Transactions,
     Sync.Documents,
     Unity.Sql,
@@ -438,7 +439,7 @@ end;
 procedure TActionsForm.UpdateDetails(CustPerson: TEdit; CustMail: TEdit; CustMailGen: TEdit; CustPhone: TComboBox); {refactor / async}
 begin
 
-    var Tables: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
+    var Tables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
     try
 
         // Get data from Address Book table
@@ -498,7 +499,7 @@ end;
 procedure TActionsForm.UpdateHistory(var Grid: TStringGrid); {refactor / async}
 begin
 
-    var DailyText: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
+    var DailyText: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
     try
         DailyText.Columns.Add(TDailyComment.AgeDate);
         DailyText.Columns.Add(TDailyComment.Stamp);
@@ -531,7 +532,7 @@ end;
 procedure TActionsForm.UpdateGeneral(var Text: TMemo); {refactor / async}
 begin
 
-    var GenText: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
+    var GenText: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
     try
         GenText.CustFilter:=TSql.WHERE + TGeneralComment.Cuid + TSql.EQUAL + QuotedStr(CUID);
         GenText.OpenTable(TGeneralComment.GeneralComment);
@@ -721,7 +722,7 @@ begin
         FGeneralCommentFields.EventLog    :=True;
 
         var Comments: IComments:=TComments.Create();
-        Comments.EditGeneralComment(FGeneralCommentFields);
+        Comments.EditGeneralComment(FGeneralCommentFields, MainForm.EditGeneralComment_Callback);
 
         MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneralComment.fFollowUp, 1, 1), MainForm.sgAgeView.Row]:='';
 
@@ -757,7 +758,7 @@ begin
     FGeneralCommentFields.EventLog    :=True;
 
     var Comments: IComments:=TComments.Create();
-    Comments.EditGeneralComment(FGeneralCommentFields);
+    Comments.EditGeneralComment(FGeneralCommentFields, MainForm.EditGeneralComment_Callback);
 
 end;
 
@@ -782,7 +783,7 @@ begin
     FDailyCommentFields.ExtendComment:=False;
 
     var Comments: IComments:=TComments.Create();
-    Comments.EditDailyComment(FDailyCommentFields);
+    Comments.EditDailyComment(FDailyCommentFields, MainForm.EditDailyComment_Callback);
 
 end;
 

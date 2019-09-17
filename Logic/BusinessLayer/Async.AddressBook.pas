@@ -63,7 +63,6 @@ implementation
 
 
 uses
-    View.Main, // delete this ref!
     Handler.Database,
     Handler.Account,
     Unity.Sql,
@@ -72,6 +71,7 @@ uses
     Unity.Messaging,
     Unity.StatusBar,
     Unity.EventLogger,
+    Unity.SessionService,
     Sync.Documents,
     DbModel,
     AgeView,
@@ -91,7 +91,7 @@ begin
 
         var LastError: TLastError;
         var ReturnedData:=TStringGrid.Create(nil);
-        var DataTables: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
+        var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
         try
 
             try
@@ -168,7 +168,7 @@ begin
     begin
 
         var LastError: TLastError;
-        var Book: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
+        var Book: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
         try
 
             // Update from Address Book String Grid
@@ -279,7 +279,7 @@ begin
         SetLength(AddrBook, 1, 11);
 
         // Get data from String Grid
-        var Book: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
+        var Book: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
         try
 
             for var iCNT: integer:=SourceGrid.Selection.Top to SourceGrid.Selection.Bottom do
@@ -305,7 +305,7 @@ begin
                     if Book.DataSet.RecordCount = 0 then
                     begin
                         Inc(Check);
-                        AddrBook[jCNT,  0]:=UpperCase(MainForm.WinUserName);
+                        AddrBook[jCNT,  0]:=UpperCase(SessionService.SessionUser);
                         AddrBook[jCNT,  1]:=SCUID;
                         AddrBook[jCNT,  2]:=SourceGrid.Cells[SourceGrid.ReturnColumn(DbModel.TSnapshots.fCustomerNumber,1, 1), iCNT];
                         AddrBook[jCNT,  3]:=SourceGrid.Cells[SourceGrid.ReturnColumn(DbModel.TSnapshots.fCustomerName,  1, 1), iCNT];
@@ -328,7 +328,7 @@ begin
         if Check > 0 then
         begin
 
-            Book:=TDataTables.Create(MainForm.FDbConnect);
+            Book:=TDataTables.Create(SessionService.FDbConnect);
             try
 
                 Book.Columns.Add(DbModel.TAddressBook.UserAlias);

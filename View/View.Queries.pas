@@ -101,13 +101,6 @@ type
         function  ReturnCurrencyId(ISO: string): cardinal;
         function  ReturnQueryReasonId(QueryReason: string): cardinal;
         function  SendNotification(LbuEmail: string): boolean;
-
-        // ------------------
-        // Callbacks methods.
-        // ------------------
-
-        //...
-
     end;
 
 
@@ -133,6 +126,7 @@ uses
     Unity.Settings,
     Unity.DateTimeFormats,
     Unity.EventLogger,
+    Unity.SessionService,
     Handler.Sql;
 
 
@@ -155,7 +149,7 @@ begin
     Result:=False;
     if not(IsMissing) then Exit;
 
-    var Tables: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
+    var Tables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
     try
         // Generate GUID for new entry
         var QueryUid: TGUID;
@@ -234,7 +228,7 @@ begin
     var UserFormat: TFormatSettings:=TFormatSettings.Create(LOCALE_USER_DEFAULT);
     {$WARN SYMBOL_PLATFORM ON}
 
-    var Tables: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
+    var Tables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
     var TempData: TStringGrid:=TStringGrid.Create(nil);
     try
         // Generate GUID for new entry
@@ -388,7 +382,7 @@ begin
 
     Result:=0;
 
-    var Tables: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
+    var Tables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
     try
         try
             Tables.CleanUp;
@@ -415,7 +409,7 @@ begin
 
     Result:=0;
 
-    var Tables: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
+    var Tables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
     try
         try
             Tables.CustFilter:=TSql.WHERE + TQmsReasons.QueryReason + TSql.EQUAL + QuotedStr(QueryReason);
@@ -457,12 +451,12 @@ begin
 
     Mail.MailFrom   :=Mail.XMailer;
     Mail.MailTo     :=LbuEmail;
-    Mail.MailCc     :=MainForm.WinUserName + '@' + Settings.GetStringValue(TConfigSections.ApplicationDetails, 'MAIL_DOMAIN', '');
+    Mail.MailCc     :=SessionService.SessionUser + '@' + Settings.GetStringValue(TConfigSections.ApplicationDetails, 'MAIL_DOMAIN', '');
     Mail.MailBcc    :='';
     Mail.MailSubject:='Unity [QMS]: New query';
 
     Mail.MailBody:='New query has been logged by ' +
-                   UpperCase(MainForm.WinUserName) +
+                   UpperCase(SessionService.SessionUser) +
                    ' with comment: ' + QueryDesc.Lines.Text +
                    '. Query reason: ' + EditQueryReason.Text +
                    '. Query UID: ' +
@@ -512,7 +506,7 @@ begin
         StatusLabel.Caption:='Log selected invoice(s) with status:';
     end;
 
-    var Tables: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
+    var Tables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
     try
         try
             Tables.Columns.Add(TQmsReasons.QueryReason);
@@ -545,7 +539,7 @@ begin
     end;
 
     if IsMissing then EditLogType.Text:='Missing' else EditLogType.Text:='Existing';
-    EditUserAlias.Text:=MainForm.WinUserName;
+    EditUserAlias.Text:=SessionService.SessionUser;
     EditStamp.Text:=DateTimeToStr(Now);
 
     Screen.Cursor:=crDefault;

@@ -222,6 +222,7 @@
         <DCCReference Include="Logic\BusinessLayer\Async.Comments.pas"/>
         <DCCReference Include="Logic\BusinessLayer\Async.Statements.pas"/>
         <DCCReference Include="Logic\Configuration\Unity.Settings.pas"/>
+        <DCCReference Include="Logic\Configuration\Unity.SessionService.pas"/>
         <DCCReference Include="Logic\Logger\Unity.ThreadUtilities.pas"/>
         <DCCReference Include="Logic\Logger\Unity.EventLogger.pas"/>
         <DCCReference Include="View\View.Main.pas">

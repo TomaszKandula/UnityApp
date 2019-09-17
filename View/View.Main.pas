@@ -835,7 +835,6 @@ type
     private
         var FHadFirstLoad:         boolean;
         var FAllowClose:           boolean;
-        var FWinUserName:          string; // remove from view!
         var FAbUpdateFields:       TAddressBookUpdateFields;
         var FDailyCommentFields:   TDailyCommentFields;
         var FGeneralCommentFields: TGeneralCommentFields;
@@ -865,24 +864,24 @@ type
         var FOSAmount:        double;
         var FIsConnected:     boolean;
         procedure TryInitConnection;
+        // Legacy code, to be removed [end]
 
-        // replace by callbacks from async methods
+        // replace by callbacks from async methods [start]
         procedure CallbackAwaitForm(PassMsg: TMessage);
         procedure CallbackMassMailer(PassMsg: TMessage);
         procedure CallbackStatusBar(PassMsg: TMessage);
         procedure CallbackMessageBox(PassMsg: TMessage);
         procedure WndMessagesInternal(PassMsg: TMessage);
-        // Legacy code, to be removed [end]
+        // replace by callbacks from async methods [end]
+
 
 
         var FStartTime:         TTime;
-        var FDbConnect:         TADOConnection; // remove from view!
         var FGroupList:         TALists;
         var FAgeDateList:       TALists;
         var FGridPicture:       TImage;
         var FOpenItemsRefs:     TFOpenItemsRefs;
         var FControlStatusRefs: TFControlStatusRefs;
-        property WinUserName:  string read FWinUserName; // remove from view!
 
         procedure InitMainWnd(SessionFile: string);
         procedure SetupMainWnd();
@@ -903,7 +902,8 @@ type
         // Callbacks for Async.Comments.
         // -----------------------------
 
-        //...
+        procedure EditDailyComment_Callback(LastError: TLastError);
+        procedure EditGeneralComment_Callback(LastError: TLastError);
 
 
     protected
@@ -985,6 +985,7 @@ uses
     Handler.Account{legacy},
     Unity.EventLogger,
     Unity.Settings,
+    Unity.SessionService,
     AgeView{legacy},
     Transactions{legacy},
     Sync.Documents,
@@ -1074,9 +1075,31 @@ end;
 // Async.Comments callback methods.
 // --------------------------------
 
-//...
+
+procedure TMainForm.EditDailyComment_Callback(LastError: TLastError);
+begin
+
+    if not LastError.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
+        Exit();
+    end;
+
+    ActionsForm.UpdateHistory(ActionsForm.HistoryGrid);
+
+end;
 
 
+procedure TMainForm.EditGeneralComment_Callback(LastError: TLastError);
+begin
+
+    if not LastError.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
+        Exit();
+    end;
+
+end;
 
 
 // ------------------------------------------------------------------------------------------------------------------------ LEGACY CODE - TO BE REMOVED [START]
@@ -1085,8 +1108,8 @@ end;
 procedure TMainForm.TryInitConnection;
 begin
 
-    if not Assigned(FDbConnect) then
-        FDbConnect:=TADOConnection.Create(nil);
+    if not Assigned(SessionService.FDbConnect) then
+        SessionService.FDbConnect:=TADOConnection.Create(nil);
 
     var DataBase:=TDataBase.Create(True);
     try
@@ -1094,7 +1117,7 @@ begin
         if DataBase.Check = 0 then
         begin
 
-            if DataBase.InitializeConnection(True, FDbConnect) then
+            if DataBase.InitializeConnection(True, SessionService.FDbConnect) then
             begin
 
                 // Check server connection on regular basis
@@ -1124,6 +1147,7 @@ begin
 end;
 
 
+{remove}
 procedure TMainForm.CallbackAwaitForm(PassMsg: TMessage);
 begin
 
@@ -1140,6 +1164,7 @@ begin
 end;
 
 
+{remove}
 procedure TMainForm.CallbackMassMailer(PassMsg: TMessage);
 begin
 
@@ -1152,6 +1177,7 @@ begin
 end;
 
 
+{remove}
 procedure TMainForm.CallbackStatusBar(PassMsg: TMessage);
 begin
 
@@ -1179,6 +1205,7 @@ begin
 end;
 
 
+{remove}
 procedure TMainForm.CallbackMessageBox(PassMsg: TMessage);
 begin
 
@@ -1267,7 +1294,7 @@ begin
         FDailyCommentFields.ExtendComment:=False;
 
         var Comments: IComments:=TComments.Create();
-        Comments.EditDailyComment(FDailyCommentFields);
+        Comments.EditDailyComment(FDailyCommentFields, MainForm.EditDailyComment_Callback);
 
     end;
 
@@ -1305,8 +1332,8 @@ begin
                 SwitchTimers(TurnedOff);
                 // Disconnect
                 InetTimer.Enabled:=False;
-                FDbConnect.Connected:=False;
-                FDbConnect:=nil;
+                SessionService.FDbConnect.Connected:=False;
+                SessionService.FDbConnect:=nil;
                 FIsConnected:=False;
                 THelpers.ExecMessage(False, TMessaging.TWParams.ConnectionError, TUnknown.NULL, MainForm);
                 ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(PassMsg.Msg) + ' WM_POWERBROADCAST with PBT_APMSUSPEND. Going into suspension mode, Unity is disconnected from server.');
@@ -1346,15 +1373,12 @@ begin
 
     ThreadFileLog.LogFileName:=SessionFile;
 
-    var Settings: ISettings:=TSettings.Create(); // remove from view!
-    FWinUserName:=Settings.WinUserName; // remove from view!
-
     FStartTime:=Now();
     FormatDateTime('hh:mm:ss', Now());
     FormatDateTime('hh:mm:ss', Now());
 
     StatBar_TXT1.Caption:=TStatusBar.Ready;
-    StatBar_TXT2.Caption:=FWinUserName;
+    StatBar_TXT2.Caption:=SessionService.SessionUser;
     StatBar_TXT3.Caption:=DateToStr(Now);
 
     ThreadFileLog.Log('Application version = ' + TCore.GetBuildInfoAsString);
@@ -1423,7 +1447,7 @@ begin
                     FAgeDateSel:=GroupListDates.Text;
                     sgAgeView.Enabled:=True;
 
-                    var Transactions: TTransactions:=TTransactions.Create(FDbConnect);
+                    var Transactions: TTransactions:=TTransactions.Create(SessionService.FDbConnect);
                     try
 
                         FOpenItemsUpdate:=Transactions.GetDateTime(DateTime);
@@ -1995,7 +2019,7 @@ begin
             // Update user event log in database.
             // ----------------------------------
 
-            var UserLogs: TDataTables:=TDataTables.Create(FDbConnect);
+            var UserLogs: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
             try
 
                 var Today: string:=FormatDateTime(TDateTimeFormats.DateTimeFormat, Now);
@@ -2004,7 +2028,7 @@ begin
                 UserLogs.Columns.Add(TUnityEventLogs.DateTimeStamp);
                 UserLogs.Columns.Add(TUnityEventLogs.AppEventLog);
                 UserLogs.Columns.Add(TUnityEventLogs.AppName);
-                UserLogs.Values.Add(WinUserName.ToUpper);
+                UserLogs.Values.Add(SessionService.SessionUser.ToUpper);
                 UserLogs.Values.Add(Today);
                 UserLogs.Values.Add(TCore.LoadFileToStr(ThreadFileLog.LogFileName));
                 UserLogs.Values.Add('Unity Cadiz.');
@@ -2012,8 +2036,8 @@ begin
 
             finally
                 UserLogs.Free;
-                FDbConnect.Close;
-                if Assigned(FDbConnect) then FreeAndNil(FDbConnect);
+                SessionService.FDbConnect.Close;
+                if Assigned(SessionService.FDbConnect) then FreeAndNil(SessionService.FDbConnect);
             end;
 
             // --------------------------------
@@ -2073,11 +2097,11 @@ begin
         and
         (
            (
-                UpperCase(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fInf7, 1, 1), iCNT]) = UpperCase(WinUserName)
+                UpperCase(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fInf7, 1, 1), iCNT]) = UpperCase(SessionService.SessionUser)
            )
             or
            (
-                UpperCase(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fPersonResponsible, 1, 1), iCNT]) = UpperCase(WinUserName)
+                UpperCase(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fPersonResponsible, 1, 1), iCNT]) = UpperCase(SessionService.SessionUser)
            )
         )
         then
@@ -2252,7 +2276,7 @@ end;
 procedure TMainForm.BookPopupPopup(Sender: TObject);
 begin
 
-    Action_ShowMyEntries.Caption:='Show ' + UpperCase(MainForm.WinUserName) + ' entries';
+    Action_ShowMyEntries.Caption:='Show ' + UpperCase(SessionService.SessionUser) + ' entries';
 
     // Check if user select a range (We allow to delete only one line at the time)
     if (sgAddressBook.Selection.Bottom - sgAddressBook.Selection.Top) > 0 then
@@ -2316,7 +2340,7 @@ begin
 
     if THelpers.MsgCall(TAppMessage.Question2, 'Are you sure you want to delete this customer?' + TChars.CRLF + 'This operation cannot be reverted.') = IDNO then Exit;
 
-    var DataTables: TDataTables:=TDataTables.Create(FDbConnect);
+    var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
     try
 
         DataTables.DeleteRecord(DbModel.TAddressBook.AddressBook, DbModel.TAddressBook.Scuid, DataTables.CleanStr(sgAddressBook.Cells[2, sgAddressBook.Row], False), True);
@@ -2375,7 +2399,7 @@ begin
     THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Show.ToString, MainForm);
 
     var AddressBook: IAddressBook:=TAddressBook.Create();
-    AddressBook.OpenAddressBookAsync(MainForm.WinUserName, OpenAddressBookAsync_Callback);
+    AddressBook.OpenAddressBookAsync(SessionService.SessionUser, OpenAddressBookAsync_Callback);
 
 end;
 
@@ -2743,7 +2767,7 @@ begin
             FGeneralCommentFields.EventLog    :=False;
 
             var Comments: IComments:=TComments.Create();
-            Comments.EditGeneralComment(FGeneralCommentFields);
+            Comments.EditGeneralComment(FGeneralCommentFields, MainForm.EditGeneralComment_Callback);
 
             MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneralComment.fFollowUp, 1, 1), iCNT]:=TChars.SPACE;
 
@@ -2987,7 +3011,7 @@ begin
     FilterForm.FilterClearAll;
 
     // Re-compute aging summary
-    var AgeView: TAgeView:=TAgeView.Create(MainForm.FDbConnect);
+    var AgeView: TAgeView:=TAgeView.Create(SessionService.FDbConnect);
     try
         AgeView.ComputeAgeSummary(MainForm.sgAgeView);
         AgeView.ComputeAndShowRCA(MainForm.sgAgeView);
@@ -3034,7 +3058,7 @@ end;
 procedure TMainForm.Action_PaymentTermClick(Sender: TObject);
 begin
 
-    var AgeView: TAgeView:=TAgeView.Create(FDbConnect);
+    var AgeView: TAgeView:=TAgeView.Create(SessionService.FDbConnect);
     try
 
         THelpers.MsgCall(
@@ -3069,7 +3093,7 @@ end;
 procedure TMainForm.Action_PersonClick(Sender: TObject);
 begin
 
-    var AgeView: TAgeView:=TAgeView.Create(FDbConnect);
+    var AgeView: TAgeView:=TAgeView.Create(SessionService.FDbConnect);
     try
 
         THelpers.MsgCall(
@@ -3107,7 +3131,7 @@ end;
 procedure TMainForm.Action_ToExceClick(Sender: TObject);
 begin
     var Utilities: IUtilities:=TUtilities.Create;
-    Utilities.ActiveConnection:=MainForm.FDbConnect;
+    Utilities.ActiveConnection:=SessionService.FDbConnect;
     Utilities.ExcelExport(MainForm.FGroupList[MainForm.GroupListBox.ItemIndex, 0], MainForm.GroupListDates.Text);
 end;
 
@@ -3189,7 +3213,7 @@ begin
     end;
 
     // R/W user can remove item
-    if (MainForm.FAccessLevel = TUserAccess.ReadWrite) and (UpperCase(MainForm.WinUserName) = UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
+    if (MainForm.FAccessLevel = TUserAccess.ReadWrite) and (UpperCase(SessionService.SessionUser) = UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
         if THelpers.MsgCall(TAppMessage.Question2, 'Are you sure you want to remove selected customer?') = IDYES then
         begin
             var Tracker: ITracker:=TTracker.Create;
@@ -3197,7 +3221,7 @@ begin
         end;
 
     // R/W user cannot remove other item
-    if (MainForm.FAccessLevel = TUserAccess.ReadWrite) and (UpperCase(MainForm.WinUserName) <> UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
+    if (MainForm.FAccessLevel = TUserAccess.ReadWrite) and (UpperCase(SessionService.SessionUser) <> UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
         THelpers.MsgCall(TAppMessage.Warn, 'You cannot remove someone''s else item.');
 
     // Administrator can remove any item
@@ -3234,7 +3258,7 @@ begin
     if FIsConnected then
     begin
         var Tracker: ITracker:=TTracker.Create;
-        Tracker.RefreshInvoiceTrackerAsync(UpperCase(MainForm.WinUserName));
+        Tracker.RefreshInvoiceTrackerAsync(UpperCase(SessionService.SessionUser));
     end
     else
         THelpers.MsgCall(TAppMessage.Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
@@ -3299,10 +3323,10 @@ begin
         Exit;
     end;
 
-    var UserControl: TUserControl:=TUserControl.Create(FDbConnect);
+    var UserControl: TUserControl:=TUserControl.Create(SessionService.FDbConnect);
     try
 
-        UserControl.UserName:=WinUserName;
+        UserControl.UserName:=SessionService.SessionUser;
         if not UserControl.GetAgeDates(MainForm.FAgeDateList, MainForm.FGroupList[GroupListBox.ItemIndex, 0]) then
         begin
             THelpers.MsgCall(TAppMessage.Error, 'Cannot list age dates for selected group. Please contact IT support.');
@@ -4080,7 +4104,7 @@ procedure TMainForm.sgAgeViewKeyDown(Sender: TObject; var Key: Word; Shift: TShi
         end;
 
         var Comments: IComments:=TComments.Create();
-        Comments.EditGeneralComment(FGeneralCommentFields);
+        Comments.EditGeneralComment(FGeneralCommentFields, MainForm.EditGeneralComment_Callback);
 
     end;
 
@@ -4142,7 +4166,7 @@ begin
                 Data: TDataTables;
             begin
 
-                Data:=TDataTables.Create(FDbConnect);
+                Data:=TDataTables.Create(SessionService.FDbConnect);
                 try
 
                     Data.CmdType:=cmdText;
@@ -4155,7 +4179,7 @@ begin
                                 TSql.EXECUTE +
                                     Data.UpsertFreeColumns +
                                 TChars.SPACE +
-                                    QuotedStr(WinUserName.ToUpper) +
+                                    QuotedStr(SessionService.SessionUser.ToUpper) +
                                 TChars.COMMA +
                                     QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), sgAgeView.UpdatedRowsHolder[iCNT]]) +
                                 TChars.COMMA +
@@ -4174,7 +4198,7 @@ begin
                                 TSql.EXECUTE +
                                     Data.UpsertFreeColumns +
                                 TChars.SPACE +
-                                    QuotedStr(WinUserName.ToUpper) +
+                                    QuotedStr(SessionService.SessionUser.ToUpper) +
                                 TChars.COMMA +
                                     QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), sgAgeView.UpdatedRowsHolder[iCNT]]) +
                                 TChars.COMMA +
@@ -4193,7 +4217,7 @@ begin
                                 TSql.EXECUTE +
                                     Data.UpsertFreeColumns +
                                 TChars.SPACE +
-                                    QuotedStr(WinUserName.ToUpper) +
+                                    QuotedStr(SessionService.SessionUser.ToUpper) +
                                 TChars.COMMA +
                                     QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), sgAgeView.UpdatedRowsHolder[iCNT]]) +
                                 TChars.COMMA +
@@ -4290,7 +4314,7 @@ begin
                 Data: TDataTables;
             begin
 
-                Data:=TDataTables.Create(FDbConnect);
+                Data:=TDataTables.Create(SessionService.FDbConnect);
                 try
 
                     Data.CmdType:=cmdText;
@@ -4307,7 +4331,7 @@ begin
                                     TSql.EXECUTE +
                                         Data.UpsertFreeColumns +
                                     TChars.SPACE +
-                                        QuotedStr(WinUserName.ToUpper) +
+                                        QuotedStr(SessionService.SessionUser.ToUpper) +
                                     TChars.COMMA +
                                         QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), iCNT]) +
                                     TChars.COMMA +
@@ -4327,7 +4351,7 @@ begin
                                     TSql.EXECUTE +
                                         Data.UpsertFreeColumns +
                                     TChars.SPACE +
-                                        QuotedStr(WinUserName.ToUpper) +
+                                        QuotedStr(SessionService.SessionUser.ToUpper) +
                                     TChars.COMMA +
                                         QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), iCNT]) +
                                     TChars.COMMA +
@@ -4347,7 +4371,7 @@ begin
                                     TSQL.EXECUTE +
                                         Data.UpsertFreeColumns +
                                     TChars.SPACE +
-                                        QuotedStr(WinUserName.ToUpper) +
+                                        QuotedStr(SessionService.SessionUser.ToUpper) +
                                     TChars.COMMA +
                                         QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), iCNT]) +
                                     TChars.COMMA +

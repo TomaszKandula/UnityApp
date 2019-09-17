@@ -124,6 +124,7 @@ uses
     View.Main,
     Unity.Chars,
     Unity.Settings,
+    Unity.SessionService,
     DbModel,
     AgeView;
 
@@ -499,7 +500,7 @@ begin
 
         Screen.Cursor:=crHourGlass;
 
-        var AgeView: TAgeView:=TAgeView.Create(MainForm.FDbConnect);
+        var AgeView: TAgeView:=TAgeView.Create(SessionService.FDbConnect);
         try
             FGrid.Freeze(True);
 
@@ -552,7 +553,7 @@ begin
 
         Screen.Cursor:=crHourGlass;
 
-        var AgeView: TAgeView:=TAgeView.Create(MainForm.FDbConnect);
+        var AgeView: TAgeView:=TAgeView.Create(SessionService.FDbConnect);
         try
 
             FGrid.Freeze(True);

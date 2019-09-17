@@ -222,7 +222,8 @@ uses
     Data.Win.ADODB,
     DbModel,
     Unity.Chars,
-    Unity.Settings;
+    Unity.Settings,
+    Unity.SessionService;
 
 
 // -------------------------------
@@ -568,7 +569,7 @@ begin
     // Put user in CC
     var Settings: ISettings:=TSettings.Create;
     if ActionsForm.cbUserInCopy.Checked then
-        MailBcc:=MainForm.WinUserName + '@' + Settings.GetStringValue(TConfigSections.ApplicationDetails, 'MAIL_DOMAIN', '')
+        MailBcc:=SessionService.SessionUser + '@' + Settings.GetStringValue(TConfigSections.ApplicationDetails, 'MAIL_DOMAIN', '')
     else
         MailBcc:='';
 

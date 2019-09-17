@@ -115,6 +115,7 @@ uses
     Unity.Sql,
     Unity.Settings,
     Unity.EventLogger,
+    Unity.SessionService,
     Handler.Database;
 
 
@@ -145,7 +146,7 @@ begin
     if MainForm.tcCOCODE3.Caption <> 'n/a' then CoCode3:=MainForm.tcCOCODE3.Caption;
     if MainForm.tcCOCODE4.Caption <> 'n/a' then CoCode4:=MainForm.tcCOCODE4.Caption;
 
-    var Database: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
+    var Database: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
     try
         Database.Columns.Add(TSql.DISTINCT + TCompanyData.SendNoteFrom);
         Database.CustFilter:=TSql.WHERE +
@@ -183,7 +184,7 @@ end;
 procedure TTrackerForm.GetEmailAddress(Scuid: string);
 begin
 
-    var Database: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
+    var Database: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
     try
         Database.Columns.Add(TAddressBook.Emails);
         Database.Columns.Add(TAddressBook.Estatements);
@@ -360,7 +361,7 @@ begin
         Exit;
     end;
 
-    var TrackerData: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
+    var TrackerData: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
     var TempData: TStringGrid:=TStringGrid.Create(nil);
     try
         try
@@ -388,7 +389,7 @@ begin
             TempData.ColCount:=TrackerData.Columns.Count;
             for var iCNT: integer:=0 to List.Items.Count - 1 do
             begin
-                TempData.Cells[0,  iCNT]:=MainForm.WinUserName;             // user alias
+                TempData.Cells[0,  iCNT]:=SessionService.SessionUser;       // user alias
                 TempData.Cells[1,  iCNT]:=List.Items[iCNT].SubItems[0];     // cuid
                 TempData.Cells[2,  iCNT]:=List.Items[iCNT].SubItems[11];    // co code
                 TempData.Cells[3,  iCNT]:=List.Items[iCNT].SubItems[12];    // branch/agent

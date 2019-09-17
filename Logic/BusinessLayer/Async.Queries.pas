@@ -80,6 +80,7 @@ uses
     Unity.Chars,
     Unity.Helpers,
     Unity.Settings,
+    Unity.SessionService,
     Sync.Documents,
     Transactions,
     DbModel,
@@ -89,7 +90,7 @@ uses
 procedure TQueries.UpdateQmsViewFsc(Source: TStringGrid); {refactor / async}
 begin
 
-    var Tables: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
+    var Tables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
     try
         Tables.StrSQL:=TSql.SELECT                     +
                            TQmsLog.QmsLog         + TChars.POINT + TQmsLog.Id          + TChars.COMMA +
@@ -137,7 +138,7 @@ end;
 procedure TQueries.UpdateQmsViewLbu(Source: TStringGrid); {refactor / async}
 begin
 
-    var Tables: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
+    var Tables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
     try
         Tables.StrSQL:=TSql.SELECT                     +
                            TQmsLog.QmsLog         + TChars.POINT + TQmsLog.Id          + TChars.COMMA +
@@ -185,7 +186,7 @@ end;
 procedure TQueries.ShowItemDetails(ItemId: integer; FscView: boolean); {refactor / async}
 begin
 
-    var Tables: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
+    var Tables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
     try
         Tables.Columns.Add(TQmsLog.OpenAm);
         Tables.Columns.Add(TQmsLog.Am);
@@ -251,7 +252,7 @@ procedure TQueries.UpdateStatus(DbItemId: integer; Status: string; Grid: TString
 begin
 
     // Update database
-    var Tables: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
+    var Tables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
     try
         var Conditions: string:=TQmsLog.Id + TSql.EQUAL + QuotedStr(DbItemId.ToString);
         Tables.Columns.Add(TQmsLog.QueryStatus);
@@ -292,12 +293,12 @@ begin
 
     Mailer.MailFrom   :=Mailer.XMailer;
     Mailer.MailTo     :=LbuEmail;
-    Mailer.MailCc     :=MainForm.WinUserName + '@' + Settings.GetStringValue(TConfigSections.ApplicationDetails, 'MAIL_DOMAIN', '');
+    Mailer.MailCc     :=SessionService.SessionUser + '@' + Settings.GetStringValue(TConfigSections.ApplicationDetails, 'MAIL_DOMAIN', '');
     Mailer.MailBcc    :='';
     Mailer.MailSubject:='Unity [QMS]: Query status has been changed';
 
     Mailer.MailBody:='<p>Query status has been changed by ' +
-                     UpperCase(MainForm.WinUserName)        +
+                     UpperCase(SessionService.SessionUser)  +
                      ' with comment: '                      + Comment     +
                      '.</p><p>Invoice number: '             + InvoiceNo   +
                      '.</p><p>Query status: '               + Status      +

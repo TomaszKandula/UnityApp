@@ -69,6 +69,7 @@ uses
     Unity.Sql,
     Unity.Settings,
     Unity.EventLogger,
+    Unity.SessionService,
     Handler.Account,
     Sync.Documents,
     AgeView,
@@ -82,7 +83,7 @@ uses
 procedure TTracker.UpdateTrackerList(UserAlias: string);
 begin
 
-    var TrackerData: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
+    var TrackerData: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
     try
 
         if not(String.IsNullOrEmpty(UserAlias)) then
@@ -131,7 +132,7 @@ end;
 procedure TTracker.DeleteFromTrackerList(CUID: string);
 begin
 
-    var TrackerData: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
+    var TrackerData: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
     try
 
         var PrimaryTable: string:=TSql.DELETE_FROM + TTrackerData.TrackerData + TSql.WHERE + TTrackerData.Cuid  + TSql.EQUAL + QuotedStr(CUID);  {HOLDS RECORDED CUSTOMERS}

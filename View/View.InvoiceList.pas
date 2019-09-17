@@ -64,6 +64,7 @@ uses
     Unity.Chars,
     Unity.Sql,
     Unity.Settings,
+    Unity.SessionService,
     Handler.Sql,
     DbModel,
     Unity.Enums;
@@ -109,7 +110,7 @@ begin
 
     InvoicesGrid.Freeze(True);
 
-    var Tables: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
+    var Tables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
     try
         var CUID: string:=MainForm.sgInvoiceTracker.Cells[MainForm.sgInvoiceTracker.ReturnColumn(TTrackerData.Cuid, 1, 1), MainForm.sgInvoiceTracker.Row];
         Tables.StrSQL:=TSql.SELECT                             +

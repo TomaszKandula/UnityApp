@@ -36,25 +36,27 @@ type
     // Callback signatures.
     // --------------------
 
-    //...
+    TEditDailyComment   = procedure(LastError: TLastError) of object;
+    TEditGeneralComment = procedure(LastError: TLastError) of object;
+
 
     IComments = interface(IInterface)
     ['{1B3127BB-EC78-4177-A286-C138E02709D3}']
-        procedure EditDailyComment(Fields: TDailyCommentFields);
-        procedure EditGeneralComment(Fields: TGeneralCommentFields);
+        procedure EditDailyComment(Fields: TDailyCommentFields; Callback: TEditDailyComment);
+        procedure EditGeneralComment(Fields: TGeneralCommentFields; Callback: TEditGeneralComment);
     end;
 
 
     TComments = class(TInterfacedObject, IComments)
     {$TYPEINFO ON}
     private
-        procedure FInsertDailyComment(var DailyText: TDataTables; var Fields: TDailyCommentFields);
-        procedure FUpdateDailyComment(var DailyText: TDataTables; var Fields: TDailyCommentFields; Condition: string);
-        procedure FInsertGeneralComment(var GenText: TDataTables; var Fields: TGeneralCommentFields);
-        procedure FUpdateGeneralComment(var GenText: TDataTables; var Fields: TGeneralCommentFields; Condition: string);
+        procedure FInsertDailyComment(var DailyText: TDataTables; var Fields: TDailyCommentFields; var LastError: TLastError);
+        procedure FUpdateDailyComment(var DailyText: TDataTables; var Fields: TDailyCommentFields; Condition: string; var LastError: TLastError);
+        procedure FInsertGeneralComment(var GenText: TDataTables; var Fields: TGeneralCommentFields; var LastError: TLastError);
+        procedure FUpdateGeneralComment(var GenText: TDataTables; var Fields: TGeneralCommentFields; Condition: string; var LastError: TLastError);
     public
-        procedure EditDailyComment(Fields: TDailyCommentFields);
-        procedure EditGeneralComment(Fields: TGeneralCommentFields);
+        procedure EditDailyComment(Fields: TDailyCommentFields; Callback: TEditDailyComment);
+        procedure EditGeneralComment(Fields: TGeneralCommentFields; Callback: TEditGeneralComment);
     end;
 
 
@@ -62,10 +64,7 @@ implementation
 
 
 uses
-    View.Main,
-    View.InvoiceTracker,
-    View.Actions,
-    View.UserFeedback,
+    View.Main, // <del this ref!!!
     Handler.Account,
     Handler.Database,
     Unity.Sql,
@@ -75,6 +74,7 @@ uses
     Unity.Settings,
     Unity.Messaging,
     Unity.EventLogger,
+    Unity.SessionService,
     Sync.Documents,
     DbModel,
     AgeView,
@@ -85,7 +85,7 @@ uses
 // Perform SQL "insert into" command
 // ------------------------------------
 
-procedure TComments.FInsertDailyComment(var DailyText: TDataTables; var Fields: TDailyCommentFields);
+procedure TComments.FInsertDailyComment(var DailyText: TDataTables; var Fields: TDailyCommentFields; var LastError: TLastError);
 begin
 
     if Fields.Email then
@@ -152,19 +152,19 @@ begin
 
     if (DailyText.InsertInto(TDailyComment.DailyComment, True)) and (DailyText.RowsAffected > 0) then
     begin
-
-        if Fields.UpdateGrid then TThread.Synchronize(nil, procedure
-        begin
-            ActionsForm.UpdateHistory(ActionsForm.HistoryGrid);
-        end);
-
-        if Fields.EventLog then
-            ThreadFileLog.Log('"DailyComment" table has been posted (CUID: ' + Fields.CUID + '). Rows affected: ' + DailyText.RowsAffected.ToString() + '.');
+        LastError.IsSucceeded:=True;
+        LastError.ErrorMessage:='"DailyComment" table has been posted (CUID: ' + Fields.CUID + '). Rows affected: ' + DailyText.RowsAffected.ToString() + '.';
+        if Fields.EventLog then ThreadFileLog.Log(LastError.ErrorMessage);
+//        if Fields.UpdateGrid then TThread.Synchronize(nil, procedure
+//        begin
+//            ActionsForm.UpdateHistory(ActionsForm.HistoryGrid);
+//        end);
     end
     else
     begin
+        LastError.IsSucceeded:=False;
+        LastError.ErrorMessage:='Cannot post daily comment into database.' +  TChars.CRLF + 'Error message received: ' + DailyText.LastErrorMsg + TChars.CRLF + 'Please contact IT support.';
         ThreadFileLog.Log('Cannot update daily comment (CUID: ' + Fields.CUID + '). Rows affected: ' + DailyText.RowsAffected.ToString() + '. Error message received: ' + DailyText.LastErrorMsg + '.');
-        THelpers.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot post daily comment into database.' +  TChars.CRLF + 'Error message received: ' + DailyText.LastErrorMsg + TChars.CRLF + 'Please contact IT support.', MainForm);
     end;
 
 end;
@@ -174,7 +174,7 @@ end;
 // Perform SQL "update" command
 // ------------------------------------
 
-procedure TComments.FUpdateDailyComment(var DailyText: TDataTables; var Fields: TDailyCommentFields; Condition: string);
+procedure TComments.FUpdateDailyComment(var DailyText: TDataTables; var Fields: TDailyCommentFields; Condition: string; var LastError: TLastError);
 begin
 
     if Fields.Email then
@@ -230,19 +230,19 @@ begin
 
     if (DailyText.UpdateRecord(TDailyComment.DailyComment, True, Condition)) and (DailyText.RowsAffected > 0) then
     begin
-
-        if Fields.UpdateGrid then TThread.Synchronize(nil, procedure
-        begin
-            ActionsForm.UpdateHistory(ActionsForm.HistoryGrid);
-        end);
-
-        if Fields.EventLog then
-            ThreadFileLog.Log('"DailyComment" table has been updated (CUID: ' + Fields.CUID + '). Rows affected: ' + DailyText.RowsAffected.ToString() + '.');
+        LastError.IsSucceeded:=True;
+        LastError.ErrorMessage:='"DailyComment" table has been updated (CUID: ' + Fields.CUID + '). Rows affected: ' + DailyText.RowsAffected.ToString() + '.';
+        if Fields.EventLog then ThreadFileLog.Log(LastError.ErrorMessage);
+//        if Fields.UpdateGrid then TThread.Synchronize(nil, procedure
+//        begin
+//            ActionsForm.UpdateHistory(ActionsForm.HistoryGrid);
+//        end);
     end
     else
     begin
+        LastError.IsSucceeded:=False;
+        LastError.ErrorMessage:='Cannot update daily comment (CUID: ' + Fields.CUID + '). Rows affected: ' + DailyText.RowsAffected.ToString() + '. Error message received: ' + DailyText.LastErrorMsg + '.';
         ThreadFileLog.Log('Cannot update daily comment (CUID: ' + Fields.CUID + '). Rows affected: ' + DailyText.RowsAffected.ToString() + '. Error message received: ' + DailyText.LastErrorMsg + '.');
-        THelpers.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot update daily comment into database.' +  TChars.CRLF + 'Error message received: ' + DailyText.LastErrorMsg + TChars.CRLF + 'Please contact IT support.', MainForm);
     end;
 
 end;
@@ -252,13 +252,14 @@ end;
 //
 // ------------------------------------
 
-procedure TComments.EditDailyComment(Fields: TDailyCommentFields);
+procedure TComments.EditDailyComment(Fields: TDailyCommentFields; Callback: TEditDailyComment);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var DailyText: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
+        var LastError: TLastError;
+        var DailyText: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
         try
 
             var Condition:    string:=TDailyComment.Cuid + TSql.EQUAL + QuotedStr(Fields.CUID) + TSql._AND + TDailyComment.AgeDate + TSql.EQUAL + QuotedStr(MainForm.FAgeDateSel);
@@ -270,9 +271,9 @@ begin
             if not (DailyText.DataSet.RecordCount = 0) then
             begin
 
-                // ------------------------
-                // Update exisiting comment
-                // ------------------------
+                // -------------------------
+                // Update exisiting comment.
+                // -------------------------
 
                 // Allow to extend comment by adding to existing wording a new comment line
                 if Fields.ExtendComment then
@@ -284,17 +285,17 @@ begin
                 DailyText.Values.Add(DateTimeToStr(Now));
 
                 DailyText.Columns.Add(TDailyComment.UserAlias);
-                DailyText.Values.Add(UpperCase(MainForm.WinUserName));
+                DailyText.Values.Add(UpperCase(SessionService.SessionUser));
 
-                FUpdateDailyComment(DailyText, Fields, Condition);
+                FUpdateDailyComment(DailyText, Fields, Condition, LastError);
 
             end
             else
             begin
 
-                // -----------------
-                // Insert new record
-                // -----------------
+                // ------------------
+                // Insert new record.
+                // ------------------
 
                 DailyText.CleanUp;
 
@@ -311,18 +312,23 @@ begin
                 DailyText.Values.Add(DateTimeToStr(Now));
 
                 DailyText.Columns.Add(TDailyComment.UserAlias);
-                DailyText.Values.Add(UpperCase(MainForm.WinUserName));
+                DailyText.Values.Add(UpperCase(SessionService.SessionUser));
 
                 DailyText.Columns.Add(TDailyComment.DataCheckSum);
                 DailyText.Values.Add(DataCheckSum);
 
-                FInsertDailyComment(DailyText, Fields);
+                FInsertDailyComment(DailyText, Fields, LastError);
 
             end;
 
         finally
             DailyText.Free;
         end;
+
+        TThread.Synchronize(nil, procedure
+        begin
+            Callback(LastError);
+        end);
 
     end);
 
@@ -335,7 +341,7 @@ end;
 //
 // ------------------------------------
 
-procedure TComments.FInsertGeneralComment(var GenText: TDataTables; var Fields: TGeneralCommentFields);
+procedure TComments.FInsertGeneralComment(var GenText: TDataTables; var Fields: TGeneralCommentFields; var LastError: TLastError);
 begin
 
     if not(Fields.FixedComment = TUnknown.NULL) then
@@ -395,13 +401,15 @@ begin
 
     if (GenText.InsertInto(TGeneralComment.GeneralComment, True)) and (GenText.RowsAffected > 0) then
     begin
-        if Fields.EventLog then
-            ThreadFileLog.Log('"GeneralComment" table has been posted (CUID: ' + Fields.CUID + '). Rows affected: ' + GenText.RowsAffected.ToString() + '.');
+        LastError.IsSucceeded:=True;
+        LastError.ErrorMessage:='"GeneralComment" table has been posted (CUID: ' + Fields.CUID + '). Rows affected: ' + GenText.RowsAffected.ToString() + '.';
+        if Fields.EventLog then ThreadFileLog.Log('"GeneralComment" table has been posted (CUID: ' + Fields.CUID + '). Rows affected: ' + GenText.RowsAffected.ToString() + '.');
     end
     else
     begin
+        LastError.IsSucceeded:=False;
+        LastError.ErrorMessage:='Cannot update general comment (CUID: ' + Fields.CUID + '). Rows affected: ' + GenText.RowsAffected.ToString() + '. Error message received: ' + GenText.LastErrorMsg + '.';
         ThreadFileLog.Log('Cannot update general comment (CUID: ' + Fields.CUID + '). Rows affected: ' + GenText.RowsAffected.ToString() + '. Error message received: ' + GenText.LastErrorMsg + '.');
-        THelpers.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot update general comment into database.' +  TChars.CRLF + 'Error message received: ' + GenText.LastErrorMsg + TChars.CRLF + 'Please contact IT support.', MainForm);
     end;
 
 end;
@@ -411,7 +419,7 @@ end;
 //
 // ------------------------------------
 
-procedure TComments.FUpdateGeneralComment(var GenText: TDataTables ;var Fields: TGeneralCommentFields; Condition: string);
+procedure TComments.FUpdateGeneralComment(var GenText: TDataTables ;var Fields: TGeneralCommentFields; Condition: string; var LastError: TLastError);
 begin
 
     if not(Fields.FixedComment = TUnknown.NULL) then
@@ -446,13 +454,15 @@ begin
 
     if (GenText.UpdateRecord(TGeneralComment.GeneralComment, True, Condition)) and (GenText.RowsAffected > 0) then
     begin
-        if Fields.EventLog then
-            ThreadFileLog.Log('"GeneralComment" table has been updated (CUID: ' + Fields.CUID + '). Rows affected: ' + GenText.RowsAffected.ToString() + '.');
+        LastError.IsSucceeded:=True;
+        LastError.ErrorMessage:='"GeneralComment" table has been updated (CUID: ' + Fields.CUID + '). Rows affected: ' + GenText.RowsAffected.ToString() + '.';
+        if Fields.EventLog then ThreadFileLog.Log('"GeneralComment" table has been updated (CUID: ' + Fields.CUID + '). Rows affected: ' + GenText.RowsAffected.ToString() + '.');
     end
     else
     begin
+        LastError.IsSucceeded:=False;
+        LastError.ErrorMessage:='Cannot update general comment (CUID: ' + Fields.CUID + '). Rows affected: ' + GenText.RowsAffected.ToString() + '. Error message received: ' + GenText.LastErrorMsg + '.';
         ThreadFileLog.Log('Cannot update general comment (CUID: ' + Fields.CUID + '). Rows affected: ' + GenText.RowsAffected.ToString() + '. Error message received: ' + GenText.LastErrorMsg + '.');
-        THelpers.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot update general comment into database.' +  TChars.CRLF + 'Error message received: ' + GenText.LastErrorMsg + TChars.CRLF + 'Please contact IT support.', MainForm);
     end;
 
 end;
@@ -462,13 +472,14 @@ end;
 //
 // ------------------------------------
 
-procedure TComments.EditGeneralComment(Fields: TGeneralCommentFields);
+procedure TComments.EditGeneralComment(Fields: TGeneralCommentFields; Callback: TEditGeneralComment);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var GenText: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
+        var LastError: TLastError;
+        var GenText: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
         try
 
             var Condition: string:=TGeneralComment.Cuid + TSql.EQUAL + QuotedStr(Fields.CUID);
@@ -478,9 +489,9 @@ begin
             if not (GenText.DataSet.RecordCount = 0) then
             begin
 
-                // -----------------
-                // Update record
-                // -----------------
+                // --------------
+                // Update record.
+                // --------------
 
                 GenText.CleanUp;
 
@@ -488,17 +499,17 @@ begin
                 GenText.Values.Add(DateTimeToStr(Now));
 
                 GenText.Columns.Add(TGeneralComment.UserAlias);
-                GenText.Values.Add(UpperCase(MainForm.WinUserName));
+                GenText.Values.Add(UpperCase(SessionService.SessionUser));
 
-                FUpdateGeneralComment(GenText, Fields, Condition);
+                FUpdateGeneralComment(GenText, Fields, Condition, LastError);
 
             end
             else
             begin
 
-                // -----------------
-                // Insert new record
-                // -----------------
+                // ------------------
+                // Insert new record.
+                // ------------------
 
                 GenText.CleanUp;
 
@@ -509,15 +520,20 @@ begin
                 GenText.Values.Add(DateTimeToStr(Now));
 
                 GenText.Columns.Add(TGeneralComment.UserAlias);
-                GenText.Values.Add(UpperCase(MainForm.WinUserName));
+                GenText.Values.Add(UpperCase(SessionService.SessionUser));
 
-                FInsertGeneralComment(GenText, Fields);
+                FInsertGeneralComment(GenText, Fields, LastError);
 
             end;
 
         finally
             GenText.Free;
         end;
+
+        TThread.Synchronize(nil, procedure
+        begin
+            Callback(LastError);
+        end);
 
     end);
 

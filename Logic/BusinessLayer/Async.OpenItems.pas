@@ -69,6 +69,7 @@ uses
     Unity.Messaging,
     Unity.StatusBar,
     Unity.EventLogger,
+    Unity.SessionService,
     Handler.Account,
     Sync.Documents,
     AgeView,
@@ -88,7 +89,7 @@ begin
     begin
 
         var CanMakeAge: boolean:=False;
-        var Transactions: TTransactions:=TTransactions.Create(MainForm.FDbConnect);
+        var Transactions: TTransactions:=TTransactions.Create(SessionService.FDbConnect);
         try
 
             try
@@ -138,7 +139,7 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var OpenItems: TTransactions:=TTransactions.Create(MainForm.FDbConnect);
+        var OpenItems: TTransactions:=TTransactions.Create(SessionService.FDbConnect);
         var StopWatch: TStopWatch:=TStopWatch.StartNew;
         try
 

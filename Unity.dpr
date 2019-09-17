@@ -101,6 +101,7 @@ uses
     Async.Comments              in 'Logic\BusinessLayer\Async.Comments.pas',
     Async.Statements            in 'Logic\BusinessLayer\Async.Statements.pas',
     Unity.Settings              in 'Logic\Configuration\Unity.Settings.pas',
+    Unity.SessionService        in 'Logic\Configuration\Unity.SessionService.pas',
     Unity.ThreadUtilities       in 'Logic\Logger\Unity.ThreadUtilities.pas',
     Unity.EventLogger           in 'Logic\Logger\Unity.EventLogger.pas',
     View.Main                   in 'View\View.Main.pas' {MainForm},
@@ -174,11 +175,13 @@ begin
 
     end;
 
-    // --------------------------------------------------
-    // Set the new session file and return its full path.
-    // --------------------------------------------------
+    // -------------------------------------------------
+    // Initialize new session service that holds session
+    // data throughout the application lifetime.
+    // -------------------------------------------------
 
-    var SessionEventLog:=Settings.MakeNewSessionFile(Settings.NewSessioId);
+    Settings.MakeNewSessionId();
+    SessionService.InitializeSession(Settings.WinUserName, Settings.NewSessionId, Settings.MakeNewSessionFile(Settings.NewSessionId));
 
     // -------------------------------------------------------------------------------------------------------
     // Initialize Chromium object before Chromium component is created within MainForm.
@@ -269,10 +272,11 @@ begin
     // handle main user window.
     // -------------------------------------------------------------------
 
-    StartupForm.SetSessionLog(SessionEventLog);
+    StartupForm.SetSessionLog(SessionService.SessionLog);
     StartupForm.Show();
 
     Application.Run;
+    DestroySessionService();
     GlobalCEFApp.Free;
 
 end.

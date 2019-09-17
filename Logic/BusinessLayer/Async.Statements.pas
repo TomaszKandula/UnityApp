@@ -145,7 +145,7 @@ begin
                 FDailyCommentFields.EmailManuStat:=False;
 
                 var Comments: IComments:=TComments.Create();
-                Comments.EditDailyComment(FDailyCommentFields);
+                Comments.EditDailyComment(FDailyCommentFields, MainForm.EditDailyComment_Callback);
 
             end;
 
@@ -156,7 +156,7 @@ begin
                 FDailyCommentFields.EmailManuStat:=True;
 
                 var Comments: IComments:=TComments.Create();
-                Comments.EditDailyComment(FDailyCommentFields);
+                Comments.EditDailyComment(FDailyCommentFields, MainForm.EditDailyComment_Callback);
 
             end;
 

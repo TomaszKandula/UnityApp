@@ -95,6 +95,7 @@ uses
     Unity.Settings,
     Unity.StatusBar,
     Unity.EventLogger,
+    Unity.SessionService,
     Sync.Documents,
     DbModel,
     AgeView,
@@ -224,7 +225,7 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var DataTables: TDataTables:=TDataTables.Create(MainForm.FDbConnect);
+        var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
         try
             try
                 DataTables.CleanUp;
