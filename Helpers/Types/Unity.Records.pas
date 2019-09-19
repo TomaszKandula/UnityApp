@@ -45,6 +45,8 @@ type
     /// </remarks>
 
     TDailyCommentFields = record
+        GroupIdSel:     string;
+        AgeDateSel:     string;
         CUID:           string;
         Email:          boolean;
         CallEvent:      boolean;

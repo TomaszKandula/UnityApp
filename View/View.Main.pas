@@ -832,85 +832,11 @@ type
         procedure Action_TurnRowHighlightClick(Sender: TObject);
         procedure CommonPopupMenuPopup(Sender: TObject);
         procedure TrayIconClick(Sender: TObject);
-    private
-        var FHadFirstLoad:         boolean;
-        var FAllowClose:           boolean;
-        var FAbUpdateFields:       TAddressBookUpdateFields;
-        var FDailyCommentFields:   TDailyCommentFields;
-        var FGeneralCommentFields: TGeneralCommentFields;
-        procedure ResetTabsheetButtons;
-        procedure SetPanelBorders;
-        procedure SetGridColumnWidths;
-        procedure SetGridRowHeights;
-        procedure SetButtonsGlyphs;
-        procedure SetSettingsPanel(IsLocked: boolean);
-        procedure UnfoldReportsTab(Header: TPanel; Panel: TPanel; ShouldHide: boolean = false);
-        procedure InitializeScreenSettings;
-        function  CheckGivenPassword(Password: string): boolean;
-        function  SetNewPassword(Password: string): boolean;
-        function  AddressBookExclusion: boolean;
-        function  ShowReport(ReportNumber: cardinal): cardinal;
-    public
-
-
-        // Legacy code, to be removed [start]
-        var FGroupIdSel:      string;
-        var FGroupNmSel:      string;
-        var FAgeDateSel:      string;
-        var FAccessLevel:     string;
-        var FAccessMode:      string;
-        var FOpenItemsUpdate: string;
-        var FOpenItemsStatus: string;
-        var FOSAmount:        double;
-        var FIsConnected:     boolean;
-        procedure TryInitConnection;
-        // Legacy code, to be removed [end]
-
-        // replace by callbacks from async methods [start]
-        procedure CallbackAwaitForm(PassMsg: TMessage);
-        procedure CallbackMassMailer(PassMsg: TMessage);
-        procedure CallbackStatusBar(PassMsg: TMessage);
-        procedure CallbackMessageBox(PassMsg: TMessage);
-        procedure WndMessagesInternal(PassMsg: TMessage);
-        // replace by callbacks from async methods [end]
-
-
-
-        var FStartTime:         TTime;
-        var FGroupList:         TALists;
-        var FAgeDateList:       TALists;
-        var FGridPicture:       TImage;
-        var FOpenItemsRefs:     TFOpenItemsRefs;
-        var FControlStatusRefs: TFControlStatusRefs;
-
-        procedure InitMainWnd(SessionFile: string);
-        procedure SetupMainWnd();
-        procedure StartMainWnd();
-        procedure UpdateFOpenItemsRefs(SourceGrid: TStringGrid);
-        procedure UpdateFControlStatusRefs(SourceGrid: TStringGrid);
-        procedure SwitchTimers(State: TAppTimers);
-
-        // --------------------------------
-        // Callbacks for Async.AddressBook.
-        // --------------------------------
-
-        procedure OpenAddressBookAsync_Callback(ReturnedData: TStringGrid; LastError: TLastError);
-        procedure UpdateAddressBookAsync_Callback(LastError: TLastError);
-        procedure AddToAddressBookAsync_Callback(LastError: TLastError);
-
-        // -----------------------------
-        // Callbacks for Async.Comments.
-        // -----------------------------
-
-        procedure EditDailyComment_Callback(LastError: TLastError);
-        procedure EditGeneralComment_Callback(LastError: TLastError);
-
-
     protected
 
-        // -------------------
-        // Chromium component.
-        // -------------------
+        // --------------------------------------------------------------------------------
+        // Chromium component. Do not modify, rather follow Chromium implementation manual.
+        // --------------------------------------------------------------------------------
 
         procedure NotifyMoveOrResizeStarted;
         procedure ChromiumModalLoopOn(PassMsg: TMessage);
@@ -938,6 +864,137 @@ type
         procedure WndMessagesChromium(PassMsg: TMessage);
         procedure WndMessagesWindows(PassMsg: TMessage);
         procedure WndMessagesExternal(PassMsg: TMessage);
+
+    private
+
+        var CustAll:     integer;
+        var ANotDue:     extended;
+        var ARange1:     extended;
+        var ARange2:     extended;
+        var ARange3:     extended;
+        var ARange4:     extended;
+        var ARange5:     extended;
+        var ARange6:     extended;
+        var Balance:     extended;
+        var Limits:      extended;
+        var Exceeders:   integer;
+        var TotalExceed: extended;
+        var RCA:         extended;
+        var RCB:         extended;
+        var RCC:         extended;
+        var RCAcount:    cardinal;
+        var RCBcount:    cardinal;
+        var RCCcount:    cardinal;
+
+        var FHadFirstLoad:         boolean;
+        var FAllowClose:           boolean;
+        var FAbUpdateFields:       TAddressBookUpdateFields;
+        var FDailyCommentFields:   TDailyCommentFields;
+        var FGeneralCommentFields: TGeneralCommentFields;
+
+        procedure ResetTabsheetButtons;
+        procedure SetPanelBorders;
+        procedure SetGridColumnWidths;
+        procedure SetGridRowHeights;
+        procedure SetButtonsGlyphs;
+        procedure SetSettingsPanel(IsLocked: boolean);
+        procedure UnfoldReportsTab(Header: TPanel; Panel: TPanel; ShouldHide: boolean = false);
+        procedure InitializeScreenSettings;
+        function  CheckGivenPassword(Password: string): boolean;
+        function  SetNewPassword(Password: string): boolean;
+        function  AddressBookExclusion: boolean;
+        function  ShowReport(ReportNumber: cardinal): cardinal;
+
+        procedure ClearAgeSummary();
+        procedure GetDetails(var Grid: TStringGrid);
+        procedure AgeViewMode(var Grid: TStringGrid; ModeBySection: string);
+
+        procedure MapGroup3(var Grid: TStringGrid; Source: TStringGrid);
+        procedure MapTable1(var Grid: TStringGrid; Source: TStringGrid);
+        procedure MapTable2(var Grid: TStringGrid; Source: TStringGrid);
+        procedure MapTable3(var Grid: TStringGrid; Source: TStringGrid);
+        procedure MapTable4(var Grid: TStringGrid; Source: TStringGrid);
+
+        function GetData(Code: string; Table: string; Entity: string): string;
+
+        function IsVoType(VoType: string): boolean;
+
+    public
+
+        // Legacy code, to be removed [start]
+        var FGroupIdSel:      string;
+        var FGroupNmSel:      string;
+        var FAgeDateSel:      string;
+        var FAccessLevel:     string;
+        var FAccessMode:      string;
+        var FOpenItemsUpdate: string;
+        var FOpenItemsStatus: string;
+        var FOSAmount:        double;
+        var FIsConnected:     boolean;
+        procedure TryInitConnection;
+        // Legacy code, to be removed [end]
+
+        // replace by callbacks from async methods [start]
+        procedure CallbackAwaitForm(PassMsg: TMessage);
+        procedure CallbackMassMailer(PassMsg: TMessage);
+        procedure CallbackStatusBar(PassMsg: TMessage);
+        procedure CallbackMessageBox(PassMsg: TMessage);
+        procedure WndMessagesInternal(PassMsg: TMessage);
+        // replace by callbacks from async methods [end]
+
+
+        var Class_A:     double;
+        var Class_B:     double;
+        var Class_C:     double;
+
+        var FStartTime:         TTime;
+        var FGroupList:         TALists;
+        var FAgeDateList:       TALists;
+        var FGridPicture:       TImage;
+        var FOpenItemsRefs:     TFOpenItemsRefs;
+        var FControlStatusRefs: TFControlStatusRefs;
+
+        procedure UpdateAgeSummary();
+        procedure ComputeAgeSummary(Grid: TStringGrid);
+        procedure ComputeRiskClass(Grid: TStringGrid);
+
+        procedure UpdateOpenItemsSummary();
+        procedure ClearOpenItemsSummary();
+
+        procedure InitMainWnd(SessionFile: string);
+        procedure SetupMainWnd();
+        procedure StartMainWnd();
+        procedure UpdateFOpenItemsRefs(SourceGrid: TStringGrid);
+        procedure UpdateFControlStatusRefs(SourceGrid: TStringGrid);
+        procedure SwitchTimers(State: TAppTimers);
+
+        // --------------------------------
+        // Callbacks for Async.AddressBook.
+        // --------------------------------
+
+        procedure OpenAddressBookAsync_Callback(ReturnedData: TStringGrid; LastError: TLastError);
+        procedure UpdateAddressBookAsync_Callback(LastError: TLastError);
+        procedure AddToAddressBookAsync_Callback(LastError: TLastError);
+
+        // -----------------------------
+        // Callbacks for Async.Comments.
+        // -----------------------------
+
+        procedure EditDailyComment_Callback(LastError: TLastError);
+        procedure EditGeneralComment_Callback(LastError: TLastError);
+
+        // ----------------------------
+        // Callbacks for Async.Debtors.
+        // ----------------------------
+
+        procedure MakeAgeViewAsync_Callback(LastError: TLastError);
+        procedure ReadAgeViewAsync_Callback(ActionMode: TLoading; ReturnedData: TStringGrid; LastError: TLastError);
+
+        // ------------------------------
+        // Callbacks for Async.OpenItems.
+        // ------------------------------
+
+        //...
 
     end;
 
@@ -1100,6 +1157,98 @@ begin
     end;
 
 end;
+
+
+// -------------------------------
+// Async.Debtors callback methods.
+// -------------------------------
+
+
+procedure TMainForm.MakeAgeViewAsync_Callback(LastError: TLastError);
+begin
+
+
+
+end;
+
+
+procedure TMainForm.ReadAgeViewAsync_Callback(ActionMode: TLoading; ReturnedData: TStringGrid; LastError: TLastError);
+begin
+
+    // --------------
+    // Error handler.
+    // --------------
+
+    if not LastError.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
+        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
+        THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
+        Exit();
+    end;
+
+    // ---------------------
+    // Update age view grid.
+    // ---------------------
+
+    MainForm.sgAgeView.SqlColumns:=ReturnedData.SqlColumns;
+    MainForm.sgAgeView.RowCount  :=ReturnedData.RowCount;
+    MainForm.sgAgeView.ColCount  :=ReturnedData.ColCount;
+
+    for var iCNT:=0 to ReturnedData.RowCount - 1 do
+        for var jCNT:=0 to ReturnedData.ColCount - 1 do
+            MainForm.sgAgeView.Cells[jCNT, iCNT]:=ReturnedData.Cells[jCNT, iCNT];
+
+    // -------------------------
+    // Update aging information.
+    // -------------------------
+
+    MainForm.ComputeAgeSummary(MainForm.sgAgeView);
+    MainForm.ComputeRiskClass(MainForm.sgAgeView);
+    MainForm.UpdateAgeSummary;
+    MainForm.GetDetails(MainForm.sgCompanyData);
+
+    // ---------------------------------------------------------------
+    // Get descriptions from helper tables for given age view columns.
+    // The helper grid names corresponds to age view columns.
+    // ---------------------------------------------------------------
+
+    MainForm.MapGroup3(MainForm.sgAgeView, MainForm.sgGroup3);
+    MainForm.MapTable1(MainForm.sgAgeView, MainForm.sgPersonResp);
+    MainForm.MapTable2(MainForm.sgAgeView, MainForm.sgSalesResp);
+    MainForm.MapTable3(MainForm.sgAgeView, MainForm.sgAccountType);
+    MainForm.MapTable4(MainForm.sgAgeView, MainForm.sgCustomerGr);
+
+    // -------------------------------------
+    // Unlock the component and repaint VCL.
+    // -------------------------------------
+
+    MainForm.sgAgeView.Freeze(False);
+    MainForm.AgeViewMode(MainForm.sgAgeView, 'FULL');
+    MainForm.SwitchTimers(TurnedOn);
+    THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
+    THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
+
+    // ----------------------------------------------------
+    // Call open items loading after aging is presented.
+    // Do not load open items if age view cannot be loaded.
+    // ----------------------------------------------------
+
+    if ActionMode = TLoading.CallOpenItems then
+    begin
+        var OpenItems: IOpenItems:=TOpenItems.Create();
+        OpenItems.ReadOpenItemsAsync(TLoading.NullParameter);
+    end;
+
+end;
+
+
+// ---------------------------------
+// Async.OpenItems callback methods.
+// ---------------------------------
+
+
+//...
 
 
 // ------------------------------------------------------------------------------------------------------------------------ LEGACY CODE - TO BE REMOVED [START]
@@ -1281,6 +1430,8 @@ begin
     if PassMsg.LParam > 0 then
     begin
 
+        FDailyCommentFields.GroupIdSel   :=FGroupIdSel;
+        FDailyCommentFields.AgeDateSel   :=FAgeDateSel;
         FDailyCommentFields.CUID         :=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), sgAgeView.Row];
         FDailyCommentFields.Email        :=False;
         FDailyCommentFields.CallEvent    :=True;
@@ -1453,16 +1604,21 @@ begin
                         FOpenItemsUpdate:=Transactions.GetDateTime(DateTime);
                         FOpenItemsStatus:=Transactions.GetStatus(FOpenItemsUpdate);
 
+                        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Loading, MainForm);
+                        THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Show.ToString, MainForm);
+                        MainForm.ClearAgeSummary();
+                        MainForm.sgAgeView.Freeze(True);
+
                         if string.IsNullOrEmpty(FOpenItemsUpdate) then
                         begin
                             THelpers.MsgCall(TAppMessage.Warn, 'Cannot find open items in database. Please contact IT support.');
                             var Debtors: IDebtors:=TDebtors.Create;
-                            Debtors.ReadAgeViewAsync(NullParameter, TSorting.TMode.Ranges);
+                            Debtors.ReadAgeViewAsync(TLoading.NullParameter, TSorting.TMode.Ranges, MainForm.FGroupIdSel, MainForm.FAgeDateSel, MainForm.ReadAgeViewAsync_Callback);
                         end
                         else
                         begin
                             var Debtors: IDebtors:=TDebtors.Create;
-                            Debtors.ReadAgeViewAsync(CallOpenItems, TSorting.TMode.Ranges);
+                            Debtors.ReadAgeViewAsync(TLoading.CallOpenItems, TSorting.TMode.Ranges, MainForm.FGroupIdSel, MainForm.FAgeDateSel, MainForm.ReadAgeViewAsync_Callback);
                         end;
 
                     finally
@@ -1677,6 +1833,609 @@ begin
         nil,
         SW_SHOWNORMAL
     );
+
+end;
+
+
+procedure TMainForm.ClearAgeSummary();
+begin
+    MainForm.tcCOCODE1.Caption   :='n/a';
+    MainForm.tcCOCODE2.Caption   :='n/a';
+    MainForm.tcCOCODE3.Caption   :='n/a';
+    MainForm.tcCOCODE4.Caption   :='n/a';
+    MainForm.tcCURRENCY.Caption  :='n/a';
+    MainForm.tcTOTAL.Caption     :='0';
+    MainForm.valND.Caption       :='0';
+    MainForm.valR1.Caption       :='0';
+    MainForm.valR2.Caption       :='0';
+    MainForm.valR3.Caption       :='0';
+    MainForm.valR4.Caption       :='0';
+    MainForm.valR5.Caption       :='0';
+    MainForm.valR6.Caption       :='0';
+    MainForm.custRISKA.Caption   :='0';
+    MainForm.custRISKB.Caption   :='0';
+    MainForm.custRISKC.Caption   :='0';
+    MainForm.valTAMT.Caption     :='0';
+    MainForm.procND.Caption      :='0';
+    MainForm.procR1.Caption      :='0';
+    MainForm.procR2.Caption      :='0';
+    MainForm.procR3.Caption      :='0';
+    MainForm.procR4.Caption      :='0';
+    MainForm.procR5.Caption      :='0';
+    MainForm.procR6.Caption      :='0';
+    MainForm.valEXCEEDERS.Caption:='0';
+    MainForm.valTEXCEES.Caption  :='0';
+    MainForm.valTLIMITS.Caption  :='0';
+    MainForm.valTND.Caption      :='0';
+    MainForm.valPASTDUE.Caption  :='0';
+    MainForm.valDEFAULTED.Caption:='0';
+end;
+
+
+procedure TMainForm.UpdateAgeSummary();
+begin
+
+    MainForm.tcTOTAL.Caption:=IntToStr(CustAll);
+
+    // --------------------------
+    // Trade receivables summary.
+    // --------------------------
+
+    MainForm.valND.Caption  :=FormatFloat('#,##0.00', ANotDue);
+    MainForm.valR1.Caption  :=FormatFloat('#,##0.00', ARange1);
+    MainForm.valR2.Caption  :=FormatFloat('#,##0.00', ARange2);
+    MainForm.valR3.Caption  :=FormatFloat('#,##0.00', ARange3);
+    MainForm.valR4.Caption  :=FormatFloat('#,##0.00', ARange4);
+    MainForm.valR5.Caption  :=FormatFloat('#,##0.00', ARange5);
+    MainForm.valR6.Caption  :=FormatFloat('#,##0.00', ARange6);
+    MainForm.valTAMT.Caption:=FormatFloat('#,##0.00', Balance);
+
+    if not (Balance = 0) then
+    begin
+        MainForm.procND.Caption  :=FormatFloat('0.00', ( (ANotDue / Balance) * 100 )) + '%';
+        MainForm.procR1.Caption  :=FormatFloat('0.00', ( (ARange1 / Balance) * 100 )) + '%';
+        MainForm.procR2.Caption  :=FormatFloat('0.00', ( (ARange2 / Balance) * 100 )) + '%';
+        MainForm.procR3.Caption  :=FormatFloat('0.00', ( (ARange3 / Balance) * 100 )) + '%';
+        MainForm.procR4.Caption  :=FormatFloat('0.00', ( (ARange4 / Balance) * 100 )) + '%';
+        MainForm.procR5.Caption  :=FormatFloat('0.00', ( (ARange5 / Balance) * 100 )) + '%';
+        MainForm.procR6.Caption  :=FormatFloat('0.00', ( (ARange6 / Balance) * 100 )) + '%';
+        MainForm.procTAMT.Caption:=FormatFloat('0.00', ( ( (ANotDue / Balance) +
+                                                           (ARange1 / Balance) +
+                                                           (ARange2 / Balance) +
+                                                           (ARange3 / Balance) +
+                                                           (ARange4 / Balance) +
+                                                           (ARange5 / Balance) +
+                                                           (ARange6 / Balance) ) * 100 ) ) + '%';
+    end;
+
+    // --------------------
+    // Update risk classes.
+    // --------------------
+
+    MainForm.valRISKA.Caption :=FormatFloat('#,##0.00', RCA);
+    MainForm.valRISKB.Caption :=FormatFloat('#,##0.00', RCB);
+    MainForm.valRISKC.Caption :=FormatFloat('#,##0.00', RCC);
+    MainForm.custRISKA.Caption:=IntToStr(RCAcount) + ' customers';
+    MainForm.custRISKB.Caption:=IntToStr(RCBcount) + ' customers';
+    MainForm.custRISKC.Caption:=IntToStr(RCCcount) + ' customers';
+
+    // ----------------------------
+    // Update exceeders and ranges.
+    // ----------------------------
+
+    MainForm.valEXCEEDERS.Caption:=IntToStr(Exceeders);
+    MainForm.valTEXCEES.Caption  :=FormatFloat('#,##0.00', TotalExceed);
+    MainForm.valTLIMITS.Caption  :=FormatFloat('#,##0.00', Limits);
+    MainForm.valTND.Caption      :=MainForm.valND.Caption;
+    MainForm.valPASTDUE.Caption  :=FormatFloat('#,##0.00', (ARange1 + ARange2 + ARange3));
+    MainForm.valDEFAULTED.Caption:=FormatFloat('#,##0.00', (ARange4 + ARange5 + ARange6));
+
+end;
+
+
+procedure TMainForm.ComputeAgeSummary(Grid: TStringGrid);
+begin
+
+    for var iCNT: integer:=1 to Grid.RowCount - 1 do
+    if Grid.RowHeights[iCNT] <> Grid.sgRowHidden then
+    begin
+
+        // ---------------------------
+        // Not due and overdue ranges.
+        // ---------------------------
+
+        ANotDue:=ANotDue + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fNotDue, 1, 1), iCNT], 0);
+        ARange1:=ARange1 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRange1, 1, 1), iCNT], 0);
+        ARange2:=ARange2 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRange2, 1, 1), iCNT], 0);
+        ARange3:=ARange3 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRange3, 1, 1), iCNT], 0);
+        ARange4:=ARange4 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRange4, 1, 1), iCNT], 0);
+        ARange5:=ARange5 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRange5, 1, 1), iCNT], 0);
+        ARange6:=ARange6 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRange6, 1, 1), iCNT], 0);
+
+        // -----------------------------
+        // Total amount, ledger balance.
+        // -----------------------------
+
+        Balance:=Balance + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fTotal, 1, 1), iCNT], 0);
+
+        // -------------------------------------------------
+        // Granted limit, sum of all assigned credit limits.
+        // -------------------------------------------------
+
+        Limits:=Limits + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCreditLimit, 1, 1), iCNT], 0);
+
+        // ------------------
+        // Compute exceeders.
+        // ------------------
+
+        if StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCreditBalance, 1, 1), iCNT], 0) < 0 then
+        begin
+            inc(Exceeders);
+            TotalExceed:=TotalExceed + Abs(StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCreditBalance, 1, 1), iCNT], 0));
+        end;
+
+        inc(CustAll);
+
+    end;
+
+end;
+
+
+procedure TMainForm.ComputeRiskClass(Grid: TStringGrid);
+begin
+
+    if Balance = 0 then Exit;
+
+    var TotalPerItem: Unity.Arrays.TADoubles;
+    var ListPosition: Unity.Arrays.TAIntigers;
+    var Count: double:=0;
+    var Rows: integer:=0;
+
+    RCA:=Balance * Class_A;
+    RCB:=Balance * Class_B;
+    RCC:=Balance * Class_C;
+
+    // Move totals and its positions into array
+    for var iCNT: integer:=1 to Grid.RowCount do
+    if Grid.RowHeights[iCNT] <> Grid.sgRowHidden then
+    begin
+        SetLength(ListPosition, Rows + 1);
+        SetLength(TotalPerItem, Rows + 1);
+        ListPosition[Rows]:=iCNT;
+        TotalPerItem[Rows]:=StrToFloatDef((Grid.Cells[Grid.ReturnColumn(TSnapshots.fTotal, 1, 1), iCNT]), 0);
+        inc(Rows);
+    end;
+
+    // Sort via total value
+    THelpers.QuickSortExt(TotalPerItem, ListPosition, Low(TotalPerItem), High(TotalPerItem), False);
+
+    // Compute and display RCA
+    for var iCNT: integer:=Low(ListPosition) to High(ListPosition) do
+    begin
+
+        Count:=Count + TotalPerItem[iCNT];
+
+        // Risk Class 'A'
+        if Count <= RCA then
+        begin
+            Grid.Cells[Grid.ReturnColumn(TSnapshots.fRiskClass, 1, 1), ListPosition[iCNT]]:='A';
+            inc(RCAcount);
+        end;
+
+        // Risk Class 'B'
+        if (Count > RCA) and (Count <= RCA + RCB) then
+        begin
+            Grid.Cells[Grid.ReturnColumn(TSnapshots.fRiskClass, 1, 1), ListPosition[iCNT]]:='B';
+            inc(RCBcount);
+        end;
+
+        // Risk Class 'C'
+        if Count > RCA + RCB then
+        begin
+            Grid.Cells[Grid.ReturnColumn(TSnapshots.fRiskClass, 1, 1), ListPosition[iCNT]]:='C';
+            inc(RCCcount);
+        end;
+
+    end;
+
+end;
+
+
+procedure TMainForm.GetDetails(var Grid: TStringGrid);
+begin
+
+    // Clear grid
+    Grid.ClearAll(4, 0, 0, False);
+
+    // Get co codes from selected group (Group ID)
+    MainForm.tcCOCODE1.Caption:=THelpers.GetCoCode(1, MainForm.FGroupIdSel);
+    MainForm.tcCOCODE2.Caption:=THelpers.GetCoCode(2, MainForm.FGroupIdSel);
+    MainForm.tcCOCODE3.Caption:=THelpers.GetCoCode(3, MainForm.FGroupIdSel);
+    MainForm.tcCOCODE4.Caption:=THelpers.GetCoCode(4, MainForm.FGroupIdSel);
+
+    if MainForm.tcCOCODE1.Caption = '0' then
+        MainForm.tcCOCODE1.Font.Color:=clWhite else MainForm.tcCOCODE1.Font.Color:=clBlack;
+
+    if MainForm.tcCOCODE2.Caption = '0' then
+        MainForm.tcCOCODE2.Font.Color:=clWhite else MainForm.tcCOCODE2.Font.Color:=clBlack;
+
+    if MainForm.tcCOCODE3.Caption = '0' then
+        MainForm.tcCOCODE3.Font.Color:=clWhite else MainForm.tcCOCODE3.Font.Color:=clBlack;
+
+    if MainForm.tcCOCODE4.Caption = '0' then
+        MainForm.tcCOCODE4.Font.Color:=clWhite else MainForm.tcCOCODE4.Font.Color:=clBlack;
+
+    Grid.Cells[0, 0]:=MainForm.tcCOCODE1.Caption; THelpers.FindCoData(0, MainForm.sgCompanyData, MainForm.sgCoCodes);
+    Grid.Cells[1, 0]:=MainForm.tcCOCODE2.Caption; THelpers.FindCoData(1, MainForm.sgCompanyData, MainForm.sgCoCodes);
+    Grid.Cells[2, 0]:=MainForm.tcCOCODE3.Caption; THelpers.FindCoData(2, MainForm.sgCompanyData, MainForm.sgCoCodes);
+    Grid.Cells[3, 0]:=MainForm.tcCOCODE4.Caption; THelpers.FindCoData(3, MainForm.sgCompanyData, MainForm.sgCoCodes);
+
+    /// <remarks>
+    /// There should be always the same currency code for all stacked companies snapshots.
+    /// </remarks>
+
+    var SL: TStringList:=TStringList.Create;
+    try
+        SL.Clear;
+        SL.Sorted:=True;
+        SL.Duplicates:=dupIgnore;
+
+        for var iCNT: integer:=1 to MainForm.sgAgeView.RowCount - 1 do
+            SL.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fLedgerIso, 1, 1), iCNT]);
+
+    finally
+        MainForm.tcCURRENCY.Caption:=SL.Text;
+        SL.Free;
+    end;
+
+end;
+
+
+procedure TMainForm.AgeViewMode(var Grid: TStringGrid; ModeBySection: string);
+begin
+
+    var Settings: ISettings:=TSettings.Create;
+
+    for var iCNT: integer:=0 to Grid.ColCount - 2 do
+    if Settings.GetStringValue(ModeBySection, Settings.FindSettingsKey(ModeBySection, iCNT), 'True') = 'False' then
+        Grid.ColWidths[Grid.ReturnColumn(Settings.FindSettingsKey(ModeBySection, iCNT), 1, 1)]:=-1
+    else
+        Grid.ColWidths[Grid.ReturnColumn(Settings.FindSettingsKey(ModeBySection, iCNT), 1, 1)]:=100;
+
+end;
+
+
+procedure TMainForm.MapGroup3(var Grid: TStringGrid; Source: TStringGrid);
+begin
+
+    for var iCNT: integer:=1 to Grid.RowCount - 1 do
+        for var jCNT: integer:=1 to Source.RowCount - 1 do
+        if
+        (
+            Grid.Cells[Grid.ReturnColumn(TSnapshots.fGroup3, 1, 1), iCNT] = Source.Cells[Source.ReturnColumn(TGroup3.ErpCode, 1, 1), jCNT]
+        )
+        and
+        (
+            Grid.Cells[Grid.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT] = Source.Cells[Source.ReturnColumn(TGroup3.Entity, 1, 1), jCNT]
+        )
+        then
+            Grid.Cells[Grid.ReturnColumn(TSnapshots.fGroup3, 1, 1), iCNT]:=Source.Cells[Source.ReturnColumn(TGroup3.Description, 1, 1), jCNT]
+
+end;
+
+
+procedure TMainForm.MapTable1(var Grid: TStringGrid; Source: TStringGrid);
+begin
+
+    for var iCNT: integer:=1 to Grid.RowCount - 1 do
+        for var jCNT: integer:=1 to Source.RowCount - 1 do
+        if
+        (
+            Grid.Cells[Grid.ReturnColumn(TSnapshots.fPersonResponsible, 1, 1), iCNT] = Source.Cells[Source.ReturnColumn(TPersonResponsible.Id, 1, 1), jCNT]
+        )
+        and
+        (
+            THelpers.ConvertCoCode(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT], 'F', 0) = Source.Cells[Source.ReturnColumn(TPersonResponsible.SourceDBName, 1, 1), jCNT]
+        )
+        then
+            Grid.Cells[Grid.ReturnColumn(TSnapshots.fPersonResponsible, 1, 1), iCNT]:=Source.Cells[Source.ReturnColumn(TPersonResponsible.ErpCode, 1, 1), jCNT]
+
+end;
+
+
+procedure TMainForm.MapTable2(var Grid: TStringGrid; Source: TStringGrid);
+begin
+
+    for var iCNT: integer:=1 to Grid.RowCount - 1 do
+        for var jCNT: integer:=1 to Source.RowCount - 1 do
+        if
+        (
+            Grid.Cells[Grid.ReturnColumn(TSnapshots.fSalesResponsible, 1, 1), iCNT] = Source.Cells[Source.ReturnColumn(TSalesResponsible.Id, 1, 1), jCNT]
+        )
+        and
+        (
+            THelpers.ConvertCoCode(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT], 'F', 0) = Source.Cells[Source.ReturnColumn(TSalesResponsible.SourceDBName, 1, 1), jCNT]
+        )
+        then
+            Grid.Cells[Grid.ReturnColumn(TSnapshots.fSalesResponsible, 1, 1), iCNT]:=Source.Cells[Source.ReturnColumn(TSalesResponsible.ErpCode, 1, 1), jCNT]
+
+end;
+
+
+procedure TMainForm.MapTable3(var Grid: TStringGrid; Source: TStringGrid);
+begin
+
+    for var iCNT: integer:=1 to Grid.RowCount - 1 do
+        for var jCNT: integer:=1 to Source.RowCount - 1 do
+        if
+        (
+            Grid.Cells[Grid.ReturnColumn(TSnapshots.fAccountType, 1, 1), iCNT] = Source.Cells[Source.ReturnColumn(TAccountType.Id, 1, 1), jCNT]
+        )
+        and
+        (
+            THelpers.ConvertCoCode(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT], 'F', 0) = Source.Cells[Source.ReturnColumn(TAccountType.SourceDBName, 1, 1), jCNT]
+        )
+        then
+            Grid.Cells[Grid.ReturnColumn(TSnapshots.fAccountType, 1, 1), iCNT]:=Source.Cells[Source.ReturnColumn(TAccountType.ErpCode, 1, 1), jCNT]
+
+end;
+
+
+procedure TMainForm.MapTable4(var Grid: TStringGrid; Source: TStringGrid);
+begin
+
+    for var iCNT: integer:=1 to Grid.RowCount - 1 do
+        for var jCNT: integer:=1 to Source.RowCount - 1 do
+        if
+        (
+            Grid.Cells[Grid.ReturnColumn(TSnapshots.fCustomerGroup, 1, 1), iCNT] = Source.Cells[Source.ReturnColumn(TCustomerGroup.Id, 1, 1), jCNT]
+        )
+        and
+        (
+            THelpers.ConvertCoCode(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT], 'F', 0) = Source.Cells[Source.ReturnColumn(TCustomerGroup.SourceDBName, 1, 1), jCNT]
+        )
+        then
+            Grid.Cells[Grid.ReturnColumn(TSnapshots.fCustomerGroup, 1, 1), iCNT]:=Source.Cells[Source.ReturnColumn(TCustomerGroup.ErpCode, 1, 1), jCNT]
+
+end;
+
+
+/// <summary>
+/// Find match data in General Tables.
+/// </summary>
+
+function TMainForm.GetData(Code: string; Table: string; Entity: string): string;
+begin
+
+    Result:=TUnknown.Unassigned;
+    var Field: string;
+
+    if (Code = ' ') or (Code = '') or (Entity = ' ') or (Entity = '') then Exit;
+
+    var DataTables:=TDataTables.Create(SessionService.FDbConnect);
+    try
+
+        try
+
+            // -------------
+            // Group3 table.
+            // -------------
+
+            if Table = TGroup3.Group3 then
+            begin
+                Field:=TGroup3.Description;
+                DataTables.CleanUp;
+                DataTables.Columns.Add(Field);
+                DataTables.CustFilter:=TSql.WHERE + TGroup3.ErpCode + TSql.EQUAL + QuotedStr(Code) + TSql._AND + TGroup3.Entity + TSql.EQUAL + QuotedStr(Entity);
+                DataTables.OpenTable(Table);
+            end;
+
+            // ----------------------------------------------
+            // Paid info table (indepenent from entity code).
+            // ----------------------------------------------
+
+            if Table = TPaidinfo.Paidinfo then
+            begin
+                Field:=TPaidinfo.Description;
+                DataTables.CleanUp;
+                DataTables.Columns.Add(Field);
+                DataTables.CustFilter:=TSql.WHERE + TPaidInfo.ErpCode + TSql.EQUAL + QuotedStr(Code);
+                DataTables.OpenTable(Table);
+            end;
+
+            // --------------------
+            // Payment terms table.
+            // --------------------
+
+            if Table = TPaymentTerms.PaymentTerms then
+            begin
+                Field:=TPaymentTerms.Description;
+                DataTables.CleanUp;
+                DataTables.Columns.Add(Field);
+                DataTables.CustFilter:=TSql.WHERE + TPaymentTerms.ErpCode + TSql.EQUAL + QuotedStr(Code) + TSql._AND + TPaymentTerms.Entity + TSql.EQUAL + QuotedStr(Entity);
+                DataTables.OpenTable(Table);
+            end;
+
+            // --------------
+            // Persons table.
+            // --------------
+
+            if Table = TPerson.Person then
+            begin
+                Field:=TPerson.Description;
+                DataTables.CleanUp;
+                DataTables.Columns.Add(Field);
+                DataTables.CustFilter:=TSql.WHERE + TPerson.ErpCode + TSql.EQUAL + QuotedStr(Code) + TSql._AND + TPerson.Entity + TSql.EQUAL + QuotedStr(Entity);
+                DataTables.OpenTable(Table);
+            end;
+
+            if DataTables.DataSet.RecordCount = 1 then
+                Result:=THelpers.OleGetStr(DataTables.DataSet.Fields[Field].Value);
+
+        except
+            Result:='';
+        end;
+
+    finally
+        DataTables.Free;
+    end;
+
+end;
+
+
+procedure TMainForm.ClearOpenItemsSummary();
+begin
+    MainForm.FOSAmount               :=0;
+    MainForm.tcOpenItems.Caption     :='0';
+    MainForm.tcOverdue.Caption       :='0';
+    MainForm.tcInvoices.Caption      :='0';
+    MainForm.tcOSAmt.Caption         :='0';
+    MainForm.tcUNamt.Caption         :='0';
+    MainForm.tcOvdAmt.Caption        :='0';
+    MainForm.tcKPIoverdue.Caption    :='0';
+    MainForm.tcKPIunallocated.Caption:='0';
+end;
+
+
+procedure TMainForm.UpdateOpenItemsSummary();
+begin
+
+    var nInvoices:  integer:=0;
+    var Overdue:    integer:=0;
+    var OverdueAmt: double:=0;
+    var UNamt:      double:=0;
+    var KPIOverdue: double:=0;
+    var KPIUnalloc: double:=0;
+
+    var Settings: ISettings:=TSettings.Create;
+    var VoucherNumber: string:=Settings.GetStringValue(TConfigSections.Unallocated, 'VOUCHER_NUM', '0');
+
+    for var iCNT: integer:=1 to DestGrid.RowCount - 1 do
+    begin
+
+        // -------------------------------
+        // Get actual invoice open amount.
+        // -------------------------------
+
+        var InvoiceAmt: double:=StrToFloatDef(DestGrid.Cells[5, iCNT], 0);
+
+        // -------------------------
+        // Aggregate invoice amount.
+        // -------------------------
+
+        MainForm.FOSAmount:=MainForm.FOSAmount + InvoiceAmt;
+
+        // --------------------------------------------------------
+        // Depends on invoice type defined in the general settings.
+        // --------------------------------------------------------
+
+        if IsVoType(DestGrid.Cells[3, iCNT]) = True then inc(nInvoices);
+
+        // ----------------------------------------------
+        // Count all overdue invoices and thiers amounts.
+        // ----------------------------------------------
+
+        if (StrToIntDef(DestGrid.Cells[33, iCNT], 0) < 0) and (IsVoType(DestGrid.Cells[3, iCNT]) = True) then
+        begin
+            inc(Overdue);
+            OverdueAmt:=OverdueAmt + StrToFloatDef(DestGrid.Cells[5, iCNT], 0);
+        end;
+
+        // ---------------------------------------------------------
+        // For unallocated payments we take into consideration
+        // negative amounts and voucher that indicate bank postings.
+        // ---------------------------------------------------------
+
+        if (StrToFloat(DestGrid.Cells[5, iCNT]) < 0) and (DestGrid.Cells[3, iCNT] = VoucherNumber) then
+            UNamt:=UNamt + StrToFloatDef(DestGrid.Cells[5, iCNT], 0);
+
+    end;
+
+    // ----------------------------------------------------------
+    // Get total sum of KPI targets for all loaded company codes.
+    // ----------------------------------------------------------
+
+    var DataTables:=TDataTables.Create(SessionService.FDbConnect);
+    try
+
+        DataTables.CleanUp;
+        DataTables.Columns.Add(
+            TSql.SUM +
+                BracketStr(TCompanyData.KpiOverdueTarget, Round) +
+            TSql._AS +
+                QuotedStr(TCompanyData.KpiOverdueTarget)
+        );
+
+        DataTables.Columns.Add(
+            TSql.SUM +
+                BracketStr(TCompanyData.KpiUnallocatedTarget, Round) +
+                TSql._AS +
+                QuotedStr(TCompanyData.KpiUnallocatedTarget)
+        );
+
+        DataTables.CustFilter:=
+            TSql.WHERE +
+                TCompanyData.CoCode +
+            TSql.EQUAL +
+                QuotedStr(SettingGrid.Cells[0, 0]) +
+            TSql._OR  +
+                TCompanyData.CoCode +
+            TSql.EQUAL +
+                QuotedStr(SettingGrid.Cells[1, 0]) +
+            TSql._OR  +
+                TCompanyData.CoCode +
+            TSql.EQUAL +
+                QuotedStr(SettingGrid.Cells[2, 0]) +
+            TSql._OR  +
+                TCompanyData.CoCode +
+            TSql.EQUAL +
+                QuotedStr(SettingGrid.Cells[3, 0]);
+
+        DataTables.OpenTable(TCompanyData.CompanyData);
+
+        if DataTables.DataSet.RecordCount = 1 then
+        begin
+            KPIOverdue:=StrToFloatDef(THelpers.OleGetStr(DataTables.DataSet.Fields[TCompanyData.KpiOverdueTarget].Value), 0);
+            KPIUnalloc:=StrToFloatDef(THelpers.OleGetStr(DataTables.DataSet.Fields[TCompanyData.KpiUnallocatedTarget].Value), 0);
+        end;
+
+    finally
+        DataTables.Free();
+    end;
+
+    MainForm.tcOpenItems.Caption     :=FormatFloat('### ###',  DestGrid.RowCount - 1);
+    MainForm.tcInvoices.Caption      :=FormatFloat('### ###',  nInvoices);
+    MainForm.tcOverdue.Caption       :=FormatFloat('### ###',  Overdue);
+    MainForm.tcOSAmt.Caption         :=FormatFloat('#,##0.00', MainForm.FOSAmount);
+    MainForm.tcOvdAmt.Caption        :=FormatFloat('#,##0.00', OverdueAmt);
+    MainForm.tcUNAmt.Caption         :=FormatFloat('#,##0.00', abs(UNamt));
+    MainForm.tcKPIoverdue.Caption    :=FormatFloat('#,##0.00', KPIOverdue);
+    MainForm.tcKPIUnallocated.Caption:=FormatFloat('#,##0.00', KPIUnalloc);
+
+end;
+
+
+function TMainForm.IsVoType(VoType: string): boolean;
+begin
+
+    Result:=False;
+
+    var Settings: ISettings:=TSettings.Create;
+    var tsVAL: TStringList:=TStringList.Create;
+    try
+
+        Settings.GetSectionValues(TConfigSections.InvoiceTypes, tsVAL);
+
+        for var iCNT: integer:=0 to tsVAL.Count - 1 do
+        if VoType = MidStr(tsVAL.Strings[iCNT], AnsiPos('=', tsVAL.Strings[iCNT]) + 1, 255) then
+        begin
+            Result:=True;
+            break;
+        end;
+
+    finally
+        tsVAL.Free;
+    end;
 
 end;
 
@@ -1947,7 +2706,7 @@ end;
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
     FAllowClose:=False;
-    //InitializeScreenSettings;
+    InitializeScreenSettings;
 end;
 
 
@@ -3011,14 +3770,9 @@ begin
     FilterForm.FilterClearAll;
 
     // Re-compute aging summary
-    var AgeView: TAgeView:=TAgeView.Create(SessionService.FDbConnect);
-    try
-        AgeView.ComputeAgeSummary(MainForm.sgAgeView);
-        AgeView.ComputeAndShowRCA(MainForm.sgAgeView);
-        AgeView.UpdateSummary;
-    finally
-        AgeView.Free;
-    end;
+    MainForm.ComputeAgeSummary(MainForm.sgAgeView);
+    MainForm.ComputeRiskClass(MainForm.sgAgeView);
+    MainForm.UpdateAgeSummary;
 
     sgAgeView.Freeze(False);
 
@@ -3064,7 +3818,7 @@ begin
         THelpers.MsgCall(
             TAppMessage.Info,
             'Payment term: ' +
-            AgeView.GetData(
+            MainForm.GetData(
                 sgAgeView.Cells[
                     sgAgeView.ReturnColumn(TSnapshots.fPaymentTerms, 1, 1),
                     sgAgeView.Row
@@ -3099,7 +3853,7 @@ begin
         THelpers.MsgCall(
             TAppMessage.Info,
             'Person assigned: ' +
-            AgeView.GetData(
+            MainForm.GetData(
                 sgAgeView.Cells[
                     sgAgeView.ReturnColumn(TSnapshots.fPerson, 1, 1),
                     sgAgeView.Row
@@ -5711,8 +6465,13 @@ begin
         MainForm.SwitchTimers(TurnedOff);
 
         // Load age view for selected group ID
+        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Loading, MainForm);
+        THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Show.ToString, MainForm);
+        MainForm.ClearAgeSummary();
+        MainForm.sgAgeView.Freeze(True);
+
         var Debtors: IDebtors:=TDebtors.Create;
-        Debtors.ReadAgeViewAsync(CallOpenItems, TSorting.TMode.Ranges);
+        Debtors.ReadAgeViewAsync(CallOpenItems, TSorting.TMode.Ranges, MainForm.FGroupIdSel, MainForm.FAgeDateSel, MainForm.ReadAgeViewAsync_Callback);
 
     end
         else
@@ -5769,8 +6528,13 @@ begin
         MainForm.SwitchTimers(TurnedOff);
 
         // Load age view for selected group ID
+        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Loading, MainForm);
+        THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Show.ToString, MainForm);
+        MainForm.ClearAgeSummary();
+        MainForm.sgAgeView.Freeze(True);
+
         var Debtors: IDebtors:=TDebtors.Create;
-        Debtors.ReadAgeViewAsync(NullParameter, SortListBox.ItemIndex);
+        Debtors.ReadAgeViewAsync(NullParameter, SortListBox.ItemIndex, MainForm.FGroupIdSel, MainForm.FAgeDateSel, MainForm.ReadAgeViewAsync_Callback);
 
     end
         else
@@ -5865,7 +6629,7 @@ begin
         ReloadCover.Visible   :=False;
 
         var Debtors: IDebtors:=TDebtors.Create;
-        Debtors.MakeAgeViewAsync(MainForm.FOSAmount);
+        Debtors.MakeAgeViewAsync(MainForm.FOSAmount, MainForm.MakeAgeViewAsync_Callback);
 
     end
     else

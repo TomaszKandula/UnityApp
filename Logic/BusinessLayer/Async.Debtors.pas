@@ -36,20 +36,22 @@ type
     // Callback signatures.
     // --------------------
 
-    //...
+    TMakeAgeViewAsync = procedure(LastError: TLastError) of object;
+    TReadAgeViewAsync = procedure(ActionMode: TLoading; ReturnedData: TStringGrid; LastError: TLastError) of object;
+
 
     IDebtors = interface(IInterface)
     ['{194FE2BE-386E-499E-93FB-0299DA53A70A}']
-        procedure MakeAgeViewAsync(OpenAmount: double);
-        procedure ReadAgeViewAsync(ActionMode: TLoading; SortMode: integer);
+        procedure MakeAgeViewAsync(OpenAmount: double; Callback: TMakeAgeViewAsync);
+        procedure ReadAgeViewAsync(ActionMode: TLoading; SortMode: integer; GroupIdSel: string; AgeDateSel: string; Callback: TReadAgeViewAsync);
     end;
 
 
     TDebtors = class(TInterfacedObject, IDebtors)
     {$TYPEINFO ON}
     public
-        procedure MakeAgeViewAsync(OpenAmount: double);
-        procedure ReadAgeViewAsync(ActionMode: TLoading; SortMode: integer);
+        procedure MakeAgeViewAsync(OpenAmount: double; Callback: TMakeAgeViewAsync);
+        procedure ReadAgeViewAsync(ActionMode: TLoading; SortMode: integer; GroupIdSel: string; AgeDateSel: string; Callback: TReadAgeViewAsync);
     end;
 
 
@@ -57,10 +59,10 @@ implementation
 
 
 uses
-    View.Main,
-    View.InvoiceTracker,
-    View.Actions,
-    View.UserFeedback,
+    View.Main,             // remove!
+    View.InvoiceTracker,   // remove!
+    View.Actions,          // remove!
+    View.UserFeedback,     // remove!
     Handler.Database,
     DbModel,
     Unity.Helpers,
@@ -70,6 +72,8 @@ uses
     Unity.Sorting,
     Unity.EventLogger,
     Unity.SessionService,
+    Unity.Chars,
+    Unity.Sql,
     Handler.Account,
     Sync.Documents,
     Async.OpenItems,
@@ -82,12 +86,13 @@ uses
 // *Remove when SQL is replaced by API
 // ------------------------------------
 
-procedure TDebtors.MakeAgeViewAsync(OpenAmount: double);
+procedure TDebtors.MakeAgeViewAsync(OpenAmount: double; Callback: TMakeAgeViewAsync);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
+        var LastError: TLastError;
         var CanReload: boolean:=False;
         var AgeView: TAgeView:=TAgeView.Create(SessionService.FDbConnect);
         var StopWatch: TStopWatch:=TStopWatch.StartNew;
@@ -113,7 +118,7 @@ begin
                 if MainForm.cbDump.Checked then
                 begin
                     if MainForm.CSVExport.Execute then
-                    AgeView.ExportToCSV(MainForm.CSVExport.FileName, AgeView.ArrAgeView);
+                    THelpers.ExportToCSV(MainForm.CSVExport.FileName, AgeView.ArrAgeView);
                 end
                 else
                 begin
@@ -141,7 +146,12 @@ begin
 
         end;
 
-        if CanReload then ReadAgeViewAsync(TLoading.NullParameter, TSorting.TMode.Ranges);
+        if CanReload then //ReadAgeViewAsync(TLoading.NullParameter, TSorting.TMode.Ranges, MainForm.FGroupIdSel, MainForm.FAgeDateSel, MainForm.ReadAgeViewAsync_Callback);
+
+        TThread.Synchronize(nil, procedure
+        begin
+            Callback(LastError);
+        end);
 
     end);
 
@@ -155,76 +165,68 @@ end;
 // *Change when SQL is replaced by API
 // ------------------------------------
 
-procedure TDebtors.ReadAgeViewAsync(ActionMode: TLoading; SortMode: integer);
+procedure TDebtors.ReadAgeViewAsync(ActionMode: TLoading; SortMode: integer; GroupIdSel: string; AgeDateSel: string; Callback: TReadAgeViewAsync);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var AgeView: TAgeView:=TAgeView.Create(SessionService.FDbConnect);
-        var StopWatch: TStopWatch:=TStopWatch.StartNew;
+        var LastError: TLastError;
+        var Grid: TStringGrid:=TStringGrid.Create(nil);
+        var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
         try
 
-            THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Loading, MainForm);
-            THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Show.ToString, MainForm);
-
+            LastError.IsSucceeded:=True;
             try
-                // Sync
-                TThread.Synchronize(nil, AgeView.ClearSummary);
 
-                // Async
-                AgeView.idThd:=0;
-                AgeView.GroupID:=MainForm.FGroupIdSel;
-                AgeView.AgeDate:=MainForm.FAgeDateSel;
-                AgeView.Read(MainForm.sgAgeView, SortMode);
+                var StrCol: string;
+                var CheckColumns:=Grid.LoadLayout(StrCol, TConfigSections.ColumnWidthName, TConfigSections.ColumnOrderName, TConfigSections.ColumnNames, TConfigSections.ColumnPrefix);
 
-                // Sync
-                TThread.Synchronize(nil, procedure
+                if not CheckColumns then
+                begin
+                    LastError.IsSucceeded:=False;
+                    LastError.ErrorMessage:='[ReadAgeViewAsync] Cannot load columns. Please contact IT support.';
+                    ThreadFileLog.Log('[ReadAgeViewAsync] Cannot load columns. Please contact IT support.');
+                end
+                else
                 begin
 
-                    AgeView.ComputeAgeSummary(MainForm.sgAgeView);
-                    AgeView.ComputeAndShowRCA(MainForm.sgAgeView);
-                    AgeView.UpdateSummary;
-                    AgeView.GetDetails(MainForm.sgCompanyData);
+                    DataTables.CmdType:=cmdText;
+                    DataTables.StrSQL:=
+                        TSql.EXECUTE             +
+                        'Customer.AgeViewReport' +
+                        TChars.SPACE             +
+                        QuotedStr(StrCol)        +
+                        TChars.COMMA             +
+                        QuotedStr(GroupIdSel)    +
+                        TChars.COMMA             +
+                        QuotedStr(AgeDateSel)    +
+                        TChars.COMMA             +
+                        QuotedStr(SortMode.ToString);
 
-                    // Map data (source General Tables tabsheet)
-                    AgeView.MapGroup3(MainForm.sgAgeView, MainForm.sgGroup3);
-                    AgeView.MapTable1(MainForm.sgAgeView, MainForm.sgPersonResp);
-                    AgeView.MapTable2(MainForm.sgAgeView, MainForm.sgSalesResp);
-                    AgeView.MapTable3(MainForm.sgAgeView, MainForm.sgAccountType);
-                    AgeView.MapTable4(MainForm.sgAgeView, MainForm.sgCustomerGr);
+                    DataTables.SqlToGrid(Grid, DataTables.ExecSQL, False, False);
+                    ThreadFileLog.Log('SQL statement applied [' + DataTables.StrSQL + '].');
 
-                    MainForm.sgAgeView.Repaint;
-
-                end);
+                end;
 
             except
                 on E: Exception do
-                    ThreadFileLog.Log('Cannot execute [ReadAgeView]. Error has been thrown: ' + E.Message);
+                begin
+                    LastError.IsSucceeded:=False;
+                    LastError.ErrorMessage:='[ReadAgeViewAsync] Cannot execute. Error has been thrown: ' + E.Message;
+                    ThreadFileLog.Log('[ReadAgeViewAsync] Cannot execute. Error has been thrown: ' + E.Message);
+                end;
+
             end;
 
         finally
-
-            THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
-
-            var THDMili: extended:=StopWatch.ElapsedMilliseconds;
-            var THDSec:  extended:=THDMili / 1000;
-
-            ThreadFileLog.Log('Thread for selected Group Id "' + AgeView.GroupID + '" has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
-            AgeView.Free;
-
-            MainForm.SwitchTimers(TurnedOn);
-            THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
-
+            DataTables.Free;
         end;
 
-        if ActionMode = CallOpenItems then
+        TThread.Synchronize(nil, procedure
         begin
-
-            var OpenItems: IOpenItems:=TOpenItems.Create();
-            OpenItems.ReadOpenItemsAsync(TLoading.NullParameter);
-
-        end;
+            Callback(ActionMode, Grid, LastError);
+        end);
 
     end);
 

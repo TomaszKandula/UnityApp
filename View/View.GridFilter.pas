@@ -101,13 +101,6 @@ type
         procedure FilterInit(var FFilter: TALists);
         procedure FilterNow(var FFilter: TALists);
         procedure FilterRemove(var FFilter: TALists);
-
-        // ------------------
-        // Callbacks methods.
-        // ------------------
-
-        //...
-
     end;
 
 
@@ -499,8 +492,6 @@ begin
     begin
 
         Screen.Cursor:=crHourGlass;
-
-        var AgeView: TAgeView:=TAgeView.Create(SessionService.FDbConnect);
         try
             FGrid.Freeze(True);
 
@@ -521,14 +512,13 @@ begin
             if (FFilterNum = TFiltering.TColumns.Free3)             then FilterNow(Free3);
 
             // Re-compute aging summary
-            AgeView.ComputeAgeSummary(FGrid);
-            AgeView.ComputeAndShowRCA(FGrid);
-            AgeView.UpdateSummary;
+            MainForm.ComputeAgeSummary(FGrid);
+            MainForm.ComputeRiskClass(FGrid);
+            MainForm.UpdateAgeSummary();
 
         finally
-            AgeView.Free;
-            FGrid.Repaint;
             FGrid.Freeze(False);
+            FGrid.Repaint;
             Screen.Cursor:=crDefault;
         end;
 
@@ -552,8 +542,6 @@ begin
     begin
 
         Screen.Cursor:=crHourGlass;
-
-        var AgeView: TAgeView:=TAgeView.Create(SessionService.FDbConnect);
         try
 
             FGrid.Freeze(True);
@@ -575,14 +563,13 @@ begin
             if (FFilterNum = TFiltering.TColumns.Free3)             then FilterRemove(Free3);
 
             // Re-compute aging summary
-            AgeView.ComputeAgeSummary(FGrid);
-            AgeView.ComputeAndShowRCA(FGrid);
-            AgeView.UpdateSummary;
+            MainForm.ComputeAgeSummary(FGrid);
+            MainForm.ComputeRiskClass(FGrid);
+            MainForm.UpdateAgeSummary();
 
         finally
-            AgeView.Free;
-            FGrid.Repaint;
             FGrid.Freeze(False);
+            FGrid.Repaint;
             Screen.Cursor:=crDefault;
         end;
 

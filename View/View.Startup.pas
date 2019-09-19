@@ -443,6 +443,10 @@ begin
             MainAppForm.procRISKB.Caption:=RiskClassB;
             MainAppForm.procRISKC.Caption:=RiskClassC;
 
+            MainAppForm.Class_A:=StrToFloat(getRiskClassA);
+            MainAppForm.Class_B:=StrToFloat(getRiskClassB);
+            MainAppForm.Class_C:=StrToFloat(getRiskClassC);
+
         end else if FormatSettings.DecimalSeparator = '.' then
         begin
 
@@ -457,6 +461,10 @@ begin
             MainAppForm.procRISKA.Caption:=RiskClassA;
             MainAppForm.procRISKB.Caption:=RiskClassB;
             MainAppForm.procRISKC.Caption:=RiskClassC;
+
+            MainAppForm.Class_A:=StrToFloat(getRiskClassA.Replace(',','.'));
+            MainAppForm.Class_B:=StrToFloat(getRiskClassB.Replace(',','.'));
+            MainAppForm.Class_C:=StrToFloat(getRiskClassC.Replace(',','.'));
 
         end;
 

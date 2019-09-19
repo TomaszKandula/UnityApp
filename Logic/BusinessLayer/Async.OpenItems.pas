@@ -37,7 +37,9 @@ type
     // Callback signatures.
     // --------------------
 
-    //...
+    //TScanOpenItemsAsync = procedure(LastError: TLastError) of object;
+    //TReadOpenItemsAsync = procedure(LastError: TLastError) of object;
+
 
     IOpenItems = interface(IInterface)
     ['{CD6AC138-D2A4-4C6B-A3F1-07F904BA44B1}']
@@ -151,11 +153,11 @@ begin
                 OpenItems.DestGrid.Freeze(True);
 
                 // Sync with GUI
-                TThread.Synchronize(nil, OpenItems.ClearSummary);
+                TThread.Synchronize(nil, MainForm.ClearOpenItemsSummary);
 
                 // Async
                 OpenItems.LoadToGrid;
-                OpenItems.UpdateSummary;
+                MainForm.UpdateOpenItemsSummary();
 
             except
                 on E: Exception do
@@ -188,7 +190,7 @@ begin
             MainForm.cbDump.Checked:=False;
 
             var Debtors: IDebtors:=TDebtors.Create();
-            Debtors.MakeAgeViewAsync(MainForm.FOSAmount);
+            Debtors.MakeAgeViewAsync(MainForm.FOSAmount, MainForm.MakeAgeViewAsync_Callback);
 
         end;
 

@@ -19,7 +19,8 @@ uses
     Vcl.Grids,
     Unity.Enums,
     Unity.EventLogger,
-    Unity.Grid;
+    Unity.Grid,
+    Unity.Arrays;
 
 
 type
@@ -40,6 +41,8 @@ type
         class procedure FindCoData(TargetColumn: integer; TargetGrid: TStringGrid; SourceGrid: TStringGrid); static;
         class function  ConvertCoCode(CoNumber: string; Prefix: string; mode: integer): string; static;
         class function  GetCoCode(CoPos: integer; GroupId: string): string; static;
+        class procedure QuickSortExt(var A: array of double; var L: array of integer; iLo, iHi: integer; ASC: boolean); static;
+        class procedure ExportToCSV(FileName: string; SourceArray: TALists); static;
     end;
 
 
@@ -305,6 +308,90 @@ begin
     if CoPos = 2 then Result:=(MidStr(GroupId, 6,  5).ToInteger).toString;
     if CoPos = 3 then Result:=(MidStr(GroupId, 11, 5).ToInteger).toString;
     if CoPos = 4 then Result:=(MidStr(GroupId, 16, 5).ToInteger).toString;
+
+end;
+
+
+class procedure THelpers.QuickSortExt(var A: array of double; var L: array of integer; iLo, iHi: integer; ASC: boolean);
+{ "A" VARIABLE HOLDS NUMERICAL DATA TO BE SORTED. "L" VARIABLE IS "ASSOCIATED" COLUMN WITH ORIGINAL LIST POSITION. THE SECOND ASSOCIATED COLUMN FOLLOWS }
+{ "A" COLUMN, BUT IT IS NOT SORTED. IT ALLOWS TO ASSIGN SORTED VALUES BACK TO ORIGINAL LIST POSITION AFTER COMPUTATION IS DONE. THIS IS TO BE USED WHEN }
+{ SORTING IS NECESSARY BEFORE APPLAYING COMPUTATION AND AFTER WHICH WE MUST PUT VALUES BACK TO ITS ORIGINAL POSITIONS.                                  }
+var
+    Lo:     integer;
+    Hi:     integer;
+    Pivot:  double;
+    T1:     double;   { FOR SORTING COLUMN    }
+    T2:     integer;  { FOR ASSOCIATED COLUMN }
+begin
+
+    Lo:=iLo;
+    Hi:=iHi;
+    Pivot:=A[(Lo + Hi) div 2];
+
+    repeat
+
+        { ASCENDING }
+        if ASC then
+        begin
+            while A[Lo] < Pivot do Inc(Lo);
+            while A[Hi] > Pivot do Dec(Hi);
+        end;
+
+        { DESCENDING }
+        if not ASC then
+        begin
+            while A[Lo] > Pivot do Inc(Lo);
+            while A[Hi] < Pivot do Dec(Hi);
+        end;
+
+        { MOVING POSITIONS }
+        if Lo <= Hi then
+        begin
+
+            T1:=A[Lo];
+            T2:=L[Lo];
+
+            { SORTING COLUMN }
+            A[Lo]:= A[Hi];
+            A[Hi]:= T1;
+
+            { ASSOCIATED COLUMN }
+            L[Lo]:= L[Hi];
+            L[Hi]:= T2;
+
+            { MOVE NEXT }
+            Inc(Lo);
+            Dec(Hi);
+
+        end;
+
+    until Lo > Hi;
+
+    if Hi > iLo then QuickSortExt(A, L, iLo, Hi, ASC);
+    if Lo < iHi then QuickSortExt(A, L, Lo, iHi, ASC);
+
+end;
+
+
+class procedure THelpers.ExportToCSV(FileName: string; SourceArray: TALists);
+begin
+
+    var TempStr: string;
+    var SL: TStringList:=TStringList.Create;
+    try
+        SL.Clear;
+        for var iCNT: integer:=0 to High(SourceArray) - 1 do
+        begin
+            for var jCNT: integer:=0 to High(SourceArray[1]) do
+                TempStr:=TempStr + SourceArray[iCNT, jCNT] + ';';
+
+            SL.Add(TempStr);
+            TempStr:='';
+        end;
+        SL.SaveToFile(FileName);
+    finally
+        SL.Free;
+    end;
 
 end;
 

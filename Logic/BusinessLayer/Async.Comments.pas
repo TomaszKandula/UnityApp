@@ -64,7 +64,6 @@ implementation
 
 
 uses
-    View.Main, // <del this ref!!!
     Handler.Account,
     Handler.Database,
     Unity.Sql,
@@ -155,10 +154,6 @@ begin
         LastError.IsSucceeded:=True;
         LastError.ErrorMessage:='"DailyComment" table has been posted (CUID: ' + Fields.CUID + '). Rows affected: ' + DailyText.RowsAffected.ToString() + '.';
         if Fields.EventLog then ThreadFileLog.Log(LastError.ErrorMessage);
-//        if Fields.UpdateGrid then TThread.Synchronize(nil, procedure
-//        begin
-//            ActionsForm.UpdateHistory(ActionsForm.HistoryGrid);
-//        end);
     end
     else
     begin
@@ -233,10 +228,6 @@ begin
         LastError.IsSucceeded:=True;
         LastError.ErrorMessage:='"DailyComment" table has been updated (CUID: ' + Fields.CUID + '). Rows affected: ' + DailyText.RowsAffected.ToString() + '.';
         if Fields.EventLog then ThreadFileLog.Log(LastError.ErrorMessage);
-//        if Fields.UpdateGrid then TThread.Synchronize(nil, procedure
-//        begin
-//            ActionsForm.UpdateHistory(ActionsForm.HistoryGrid);
-//        end);
     end
     else
     begin
@@ -262,8 +253,8 @@ begin
         var DailyText: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
         try
 
-            var Condition:    string:=TDailyComment.Cuid + TSql.EQUAL + QuotedStr(Fields.CUID) + TSql._AND + TDailyComment.AgeDate + TSql.EQUAL + QuotedStr(MainForm.FAgeDateSel);
-            var DataCheckSum: string:=Fields.CUID + StringReplace(MainForm.FAgeDateSel, '-', '', [rfReplaceAll]);
+            var Condition:    string:=TDailyComment.Cuid + TSql.EQUAL + QuotedStr(Fields.CUID) + TSql._AND + TDailyComment.AgeDate + TSql.EQUAL + QuotedStr(Fields.AgeDateSel);
+            var DataCheckSum: string:=Fields.CUID + StringReplace(Fields.AgeDateSel, '-', '', [rfReplaceAll]);
 
             DailyText.CustFilter:=TSql.WHERE + Condition;
             DailyText.OpenTable(TDailyComment.DailyComment);
@@ -300,13 +291,13 @@ begin
                 DailyText.CleanUp;
 
                 DailyText.Columns.Add(TDailyComment.GroupId);
-                DailyText.Values.Add(MainForm.FGroupIdSel);
+                DailyText.Values.Add(Fields.GroupIdSel);
 
                 DailyText.Columns.Add(TDailyComment.Cuid);
                 DailyText.Values.Add(Fields.CUID);
 
                 DailyText.Columns.Add(TDailyComment.AgeDate);
-                DailyText.Values.Add(MainForm.FAgeDateSel);
+                DailyText.Values.Add(Fields.AgeDateSel);
 
                 DailyText.Columns.Add(TDailyComment.Stamp);
                 DailyText.Values.Add(DateTimeToStr(Now));

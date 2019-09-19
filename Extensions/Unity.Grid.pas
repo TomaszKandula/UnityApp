@@ -627,53 +627,63 @@ end;
 /// however, separate sorting is not implemented to restrict user form "playing around"
 /// therefore, there is one place (server) where there is decided how to display data to the user,
 /// this is part of automation and standard approach across all users, so the user is forced
-/// to work certain way, and thus we believe can obtain better results, etc.
+/// to work certain way, and thus in management view user shall obtain better results, etc.
 /// </remarks>
 
 function TStringGrid.LoadLayout(var StrCol: string; ColWidthName: string; ColOrderName: string; ColNames: string; ColPrefix: string): boolean;
 begin
 
     // Check number of keys in given section
-    Result:=False;
-
     var ColOrderSec: TStringList:=TStringList.Create;
     var ColWidthSec: TStringList:=TStringList.Create;
     var ColNamesSec: TStringList:=TStringList.Create;
     var Settings: ISettings:=TSettings.Create;
     try
 
-        Settings.GetSection(ColWidthName, ColWidthSec);
-        Settings.GetSection(ColOrderName, ColOrderSec);
-        Settings.GetSection(ColNames, ColNamesSec);
+        try
 
-        if (ColWidthSec.Count = ColOrderSec.Count) and (ColWidthSec.Count = ColNamesSec.Count) then
-        begin
-            Self.ColCount:=ColWidthSec.Count;
-            Result:=True;
-            SetLength(Self.SqlColumns, Self.ColCount, 2);
+            Settings.GetSection(ColWidthName, ColWidthSec);
+            Settings.GetSection(ColOrderName, ColOrderSec);
+            Settings.GetSection(ColNames, ColNamesSec);
 
-            for var iCNT: integer:=0 to Self.ColCount - 1 do
+            if (ColWidthSec.Count = ColOrderSec.Count) and (ColWidthSec.Count = ColNamesSec.Count) then
             begin
-                // Skip first column as it holds empty column (by design, we do not display ID in first column, etc.)
-                if iCNT > 0 then
+
+                Self.ColCount:=ColWidthSec.Count;
+                SetLength(Self.SqlColumns, Self.ColCount, 2);
+
+                for var iCNT: integer:=0 to Self.ColCount - 1 do
                 begin
-                    if iCNT < (Self.ColCount - 1) then
-                        StrCol:=StrCol + Settings.GetStringValue(ColOrderName, ColPrefix + IntToStr(iCNT), '') + ','
-                            else
-                                StrCol:=StrCol + Settings.GetStringValue(ColOrderName, ColPrefix + IntToStr(iCNT), '') + ' ';
 
-                    // Store SQL column name and user friendly column name (column title) into helper array
-                    Self.SqlColumns[iCNT, 0]:=Settings.GetStringValue(ColOrderName, ColPrefix + IntToStr(iCNT), '');
-                    Self.SqlColumns[iCNT, 1]:=Settings.GetStringValue(ColNames, ColPrefix + IntToStr(iCNT), '');
+                    // Skip first column as it holds empty column (by design, we do not display ID in first column, etc.)
+                    if iCNT > 0 then
+                    begin
 
-                    // Display only column title
-                    Self.Cells[iCNT, 0]:=Settings.GetStringValue(ColNames, ColPrefix + IntToStr(iCNT), '');
+                        if iCNT < (Self.ColCount - 1) then
+                            StrCol:=StrCol + Settings.GetStringValue(ColOrderName, ColPrefix + IntToStr(iCNT), '') + ','
+                                else
+                                    StrCol:=StrCol + Settings.GetStringValue(ColOrderName, ColPrefix + IntToStr(iCNT), '') + ' ';
+
+                        // Store SQL column name and user friendly column name (column title) into helper array
+                        Self.SqlColumns[iCNT, 0]:=Settings.GetStringValue(ColOrderName, ColPrefix + IntToStr(iCNT), '');
+                        Self.SqlColumns[iCNT, 1]:=Settings.GetStringValue(ColNames, ColPrefix + IntToStr(iCNT), '');
+
+                        // Display only column title
+                        Self.Cells[iCNT, 0]:=Settings.GetStringValue(ColNames, ColPrefix + IntToStr(iCNT), '');
+
+                    end;
+
+                    // Assign saved width
+                    Self.ColWidths[iCNT]:=Settings.GetIntegerValue(ColWidthName, ColPrefix + IntToStr(iCNT), 100);
+
                 end;
 
-                // Assign saved width
-                Self.ColWidths[iCNT]:=Settings.GetIntegerValue(ColWidthName, ColPrefix + IntToStr(iCNT), 100);
-
             end;
+
+            Result:=True;
+
+        except
+            Result:=False;
         end;
 
     finally
