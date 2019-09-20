@@ -236,7 +236,7 @@ type
         const Layouts            = 'EMAIL_LAYOUTS';
         const TimersSettings     = 'TIMERS_INTERVALS';
         const FollowUpColors     = 'FOLLOWUPS_COLORS';
-        const AgingFull          = 'AGEVIEW_COLUMNS';
+        const AgingColumns       = 'AGEVIEW_COLUMNS';
         const AgingRanges        = 'AGEVIEW_BUCKETS';
         const ColumnPrefix       = 'COLUMN';
         const ColumnWidthName    = 'COLUMNWIDTH';

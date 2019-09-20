@@ -83,8 +83,7 @@ uses
     Unity.SessionService,
     Sync.Documents,
     Transactions,
-    DbModel,
-    AgeView;
+    DbModel;
 
 
 procedure TQueries.UpdateQmsViewFsc(Source: TStringGrid); {refactor / async}

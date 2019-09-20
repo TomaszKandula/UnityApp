@@ -209,7 +209,6 @@
         <DCCReference Include="Logic\AccessLayer\Handler.Account.pas"/>
         <DCCReference Include="Logic\AccessLayer\Handler.Connection.pas"/>
         <DCCReference Include="Logic\AccessLayer\Handler.Rest.pas"/>
-        <DCCReference Include="Logic\BusinessLayer\AgeView.pas"/>
         <DCCReference Include="Logic\BusinessLayer\Transactions.pas"/>
         <DCCReference Include="Logic\BusinessLayer\Sync.Mailer.pas"/>
         <DCCReference Include="Logic\BusinessLayer\Sync.Documents.pas"/>

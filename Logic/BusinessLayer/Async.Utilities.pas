@@ -98,7 +98,6 @@ uses
     Unity.SessionService,
     Sync.Documents,
     DbModel,
-    AgeView,
     Transactions;
 
 

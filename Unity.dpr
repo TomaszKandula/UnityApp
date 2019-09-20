@@ -88,7 +88,6 @@ uses
     Handler.Account             in 'Logic\AccessLayer\Handler.Account.pas',
     Handler.Connection          in 'Logic\AccessLayer\Handler.Connection.pas',
     Handler.Rest                in 'Logic\AccessLayer\Handler.Rest.pas',
-    AgeView                     in 'Logic\BusinessLayer\AgeView.pas',
     Transactions                in 'Logic\BusinessLayer\Transactions.pas',
     Sync.Mailer                 in 'Logic\BusinessLayer\Sync.Mailer.pas',
     Sync.Documents              in 'Logic\BusinessLayer\Sync.Documents.pas',

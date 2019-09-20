@@ -70,7 +70,6 @@ uses
     Sync.Documents,
     Async.Comments,
     DbModel,
-    AgeView,
     Transactions;
 
 

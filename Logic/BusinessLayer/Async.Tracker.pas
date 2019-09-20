@@ -72,7 +72,6 @@ uses
     Unity.SessionService,
     Handler.Account,
     Sync.Documents,
-    AgeView,
     Transactions;
 
 

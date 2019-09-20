@@ -74,7 +74,6 @@ uses
     Unity.SessionService,
     Handler.Account,
     Sync.Documents,
-    AgeView,
     Transactions,
     Async.Debtors;
 
@@ -148,8 +147,8 @@ begin
             THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Downloading, MainForm);
             try
 
-                OpenItems.DestGrid   :=MainForm.sgOpenItems;
-                OpenItems.SettingGrid:=MainForm.sgCompanyData;
+                OpenItems.DestGrid   :=MainForm.sgOpenItems;  // !!
+                OpenItems.SettingGrid:=MainForm.sgCompanyData; // !!
                 OpenItems.DestGrid.Freeze(True);
 
                 // Sync with GUI
@@ -157,7 +156,7 @@ begin
 
                 // Async
                 OpenItems.LoadToGrid;
-                MainForm.UpdateOpenItemsSummary();
+                MainForm.UpdateOpenItemsSummary(MainForm.sgOpenItems); // !!!
 
             except
                 on E: Exception do
@@ -183,16 +182,16 @@ begin
 
         end;
 
-        // Make age view from open items and send to SQL Server
-        if ActionMode = CallMakeAge then
-        begin
-
-            MainForm.cbDump.Checked:=False;
-
-            var Debtors: IDebtors:=TDebtors.Create();
-            Debtors.MakeAgeViewAsync(MainForm.FOSAmount, MainForm.MakeAgeViewAsync_Callback);
-
-        end;
+//        // Make age view from open items and send to SQL Server
+//        if ActionMode = CallMakeAge then
+//        begin
+//
+//            MainForm.cbDump.Checked:=False;
+//
+//            var Debtors: IDebtors:=TDebtors.Create();
+//            Debtors.MakeAgeViewAsync(MainForm.FOSAmount, MainForm.MakeAgeViewAsync_Callback);
+//
+//        end;
 
     end);
 

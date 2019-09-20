@@ -856,9 +856,9 @@ type
             var Result: Boolean
         );
 
-        // -----------------
-        // Windows messages.
-        // -----------------
+        // -------------------------
+        // Process Windows messages.
+        // -------------------------
 
         procedure WndProc(var msg: TMessage); override;
         procedure WndMessagesChromium(PassMsg: TMessage);
@@ -916,7 +916,6 @@ type
         procedure MapTable4(var Grid: TStringGrid; Source: TStringGrid);
 
         function GetData(Code: string; Table: string; Entity: string): string;
-
         function IsVoType(VoType: string): boolean;
 
     public
@@ -955,10 +954,10 @@ type
         var FControlStatusRefs: TFControlStatusRefs;
 
         procedure UpdateAgeSummary();
-        procedure ComputeAgeSummary(Grid: TStringGrid);
-        procedure ComputeRiskClass(Grid: TStringGrid);
+        procedure ComputeAgeSummary(var Grid: TStringGrid);
+        procedure ComputeRiskClass(var Grid: TStringGrid);
 
-        procedure UpdateOpenItemsSummary();
+        procedure UpdateOpenItemsSummary(var Grid: TStringGrid);
         procedure ClearOpenItemsSummary();
 
         procedure InitMainWnd(SessionFile: string);
@@ -987,7 +986,8 @@ type
         // Callbacks for Async.Debtors.
         // ----------------------------
 
-        procedure MakeAgeViewAsync_Callback(LastError: TLastError);
+        procedure MakeAgeViewSQLAsync_Callback(LastError: TLastError);
+        procedure MakeAgeViewCSVAsync_Callback(LastError: TLastError);
         procedure ReadAgeViewAsync_Callback(ActionMode: TLoading; ReturnedData: TStringGrid; LastError: TLastError);
 
         // ------------------------------
@@ -1043,7 +1043,6 @@ uses
     Unity.EventLogger,
     Unity.Settings,
     Unity.SessionService,
-    AgeView{legacy},
     Transactions{legacy},
     Sync.Documents,
     Async.Utilities,
@@ -1095,8 +1094,8 @@ begin
         for var jCNT:=0 to ReturnedData.ColCount - 1 do
             sgAddressBook.Cells[jCNT, iCNT]:=ReturnedData.Cells[jCNT, iCNT];
 
-    sgAddressBook.SetColWidth(40, 10, 400);
     sgAddressBook.Freeze(False);
+    sgAddressBook.SetColWidth(40, 10, 400);
 
     THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
     THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
@@ -1164,10 +1163,43 @@ end;
 // -------------------------------
 
 
-procedure TMainForm.MakeAgeViewAsync_Callback(LastError: TLastError);
+procedure TMainForm.MakeAgeViewSQLAsync_Callback(LastError: TLastError);
 begin
 
+    if not LastError.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
+        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
+        THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
+        Exit();
+    end;
 
+    // --------------------------------
+    // Load newly generated aging view.
+    // --------------------------------
+
+    THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Loading, MainForm);
+    MainForm.sgAgeView.Freeze(True);
+
+    var Debtors: IDebtors:=TDebtors.Create;
+    Debtors.ReadAgeViewAsync(TLoading.NullParameter, TSorting.TMode.Ranges, MainForm.FGroupIdSel, MainForm.FAgeDateSel, MainForm.ReadAgeViewAsync_Callback);
+
+end;
+
+
+procedure TMainForm.MakeAgeViewCSVAsync_Callback(LastError: TLastError);
+begin
+
+    if not LastError.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
+        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
+        THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
+        Exit();
+    end;
+
+    THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
+    THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
 
 end;
 
@@ -1203,6 +1235,7 @@ begin
     // Update aging information.
     // -------------------------
 
+    MainForm.ClearAgeSummary();
     MainForm.ComputeAgeSummary(MainForm.sgAgeView);
     MainForm.ComputeRiskClass(MainForm.sgAgeView);
     MainForm.UpdateAgeSummary;
@@ -1224,7 +1257,7 @@ begin
     // -------------------------------------
 
     MainForm.sgAgeView.Freeze(False);
-    MainForm.AgeViewMode(MainForm.sgAgeView, 'FULL');
+    MainForm.AgeViewMode(MainForm.sgAgeView, TConfigSections.AgingColumns);
     MainForm.SwitchTimers(TurnedOn);
     THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
     THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
@@ -1457,46 +1490,70 @@ begin
 
     case PassMsg.Msg of
 
-        // Windows query for shutdown
+        // ---------------------------
+        // Windows query for shutdown.
+        // ---------------------------
+
         WM_QUERYENDSESSION:
         begin
-            ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(PassMsg.Msg) + ' WM_QUERYENDSESSION. Windows is going to be shut down. Closing ' + TCommon.AppCaption + '...');
+            ThreadFileLog.Log('Windows Message detected: ' + IntToStr(PassMsg.Msg) + ' WM_QUERYENDSESSION. Windows is going to be shut down. Closing ' + TCommon.AppCaption + '...');
             FAllowClose:=True;
             PassMsg.Result:=1;
         end;
 
-        // Windows is shutting down
+        // -------------------------
+        // Windows is shutting down.
+        // -------------------------
+
         WM_ENDSESSION:
         begin
-            ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(PassMsg.Msg) + ' WM_ENDSESSION. Windows is shutting down...');
+            ThreadFileLog.Log('Windows Message detected: ' + IntToStr(PassMsg.Msg) + ' WM_ENDSESSION. Windows is shutting down...');
             FAllowClose:=True;
         end;
 
-        // Power-management event has occurred (resume or susspend)
+        // ---------------------------------------------------------
+        // Power-management event has occurred (resume or susspend).
+        // ---------------------------------------------------------
+
         WM_POWERBROADCAST:
         case PassMsg.WParam of
 
-            // System is suspending operation
+            // -------------------------------
+            // System is suspending operation.
+            // -------------------------------
+
             PBT_APMSUSPEND:
             begin
-                // Turn off timers
+
+                // -------------------------------
+                // Turn off timers and disconnect.
+                // -------------------------------
+
                 SwitchTimers(TurnedOff);
-                // Disconnect
                 InetTimer.Enabled:=False;
                 SessionService.FDbConnect.Connected:=False;
                 SessionService.FDbConnect:=nil;
                 FIsConnected:=False;
                 THelpers.ExecMessage(False, TMessaging.TWParams.ConnectionError, TUnknown.NULL, MainForm);
-                ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(PassMsg.Msg) + ' WM_POWERBROADCAST with PBT_APMSUSPEND. Going into suspension mode, Unity is disconnected from server.');
+                ThreadFileLog.Log('Windows Message detected: ' + IntToStr(PassMsg.Msg) + ' WM_POWERBROADCAST with PBT_APMSUSPEND. Going into suspension mode, Unity is disconnected from server.');
+
             end;
 
-            // Operation is resuming automatically from a low-power state
-            // This message is sent every time the system resumes
+            // -----------------------------------------------------------
+            // Operation is resuming automatically from a low-power state.
+            // This message is sent every time the system resumes.
+            // -----------------------------------------------------------
+
             PBT_APMRESUMEAUTOMATIC:
             begin
-                // Turn on timer responsible for periodic connection check
+
+                // --------------------------------------------------------
+                // Turn on timer responsible for periodic connection check.
+                // --------------------------------------------------------
+
                 InetTimer.Enabled:=True;
-                ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: Windows Message detected: ' + IntToStr(PassMsg.Msg) + ' WM_POWERBROADCAST with PBT_APMRESUMEAUTOMATIC. Windows has resumed after being suspended.');
+                ThreadFileLog.Log('Windows Message detected: ' + IntToStr(PassMsg.Msg) + ' WM_POWERBROADCAST with PBT_APMRESUMEAUTOMATIC. Windows has resumed after being suspended.');
+
             end;
 
         end;
@@ -1839,6 +1896,34 @@ end;
 
 procedure TMainForm.ClearAgeSummary();
 begin
+
+    // ------------------------
+    // Clear private variables.
+    // ------------------------
+
+    CustAll    :=0;
+    ANotDue    :=0;
+    ARange1    :=0;
+    ARange2    :=0;
+    ARange3    :=0;
+    ARange4    :=0;
+    ARange5    :=0;
+    ARange6    :=0;
+    Balance    :=0;
+    Limits     :=0;
+    Exceeders  :=0;
+    TotalExceed:=0;
+    RCA        :=0;
+    RCB        :=0;
+    RCC        :=0;
+    RCAcount   :=0;
+    RCBcount   :=0;
+    RCCcount   :=0;
+
+    // ---------------------------
+    // Clear formatted aging data.
+    // ---------------------------
+
     MainForm.tcCOCODE1.Caption   :='n/a';
     MainForm.tcCOCODE2.Caption   :='n/a';
     MainForm.tcCOCODE3.Caption   :='n/a';
@@ -1869,6 +1954,7 @@ begin
     MainForm.valTND.Caption      :='0';
     MainForm.valPASTDUE.Caption  :='0';
     MainForm.valDEFAULTED.Caption:='0';
+
 end;
 
 
@@ -1933,7 +2019,7 @@ begin
 end;
 
 
-procedure TMainForm.ComputeAgeSummary(Grid: TStringGrid);
+procedure TMainForm.ComputeAgeSummary(var Grid: TStringGrid);
 begin
 
     for var iCNT: integer:=1 to Grid.RowCount - 1 do
@@ -1981,7 +2067,7 @@ begin
 end;
 
 
-procedure TMainForm.ComputeRiskClass(Grid: TStringGrid);
+procedure TMainForm.ComputeRiskClass(var Grid: TStringGrid);
 begin
 
     if Balance = 0 then Exit;
@@ -2297,7 +2383,7 @@ begin
 end;
 
 
-procedure TMainForm.UpdateOpenItemsSummary();
+procedure TMainForm.UpdateOpenItemsSummary(var Grid: TStringGrid);
 begin
 
     var nInvoices:  integer:=0;
@@ -2310,14 +2396,14 @@ begin
     var Settings: ISettings:=TSettings.Create;
     var VoucherNumber: string:=Settings.GetStringValue(TConfigSections.Unallocated, 'VOUCHER_NUM', '0');
 
-    for var iCNT: integer:=1 to DestGrid.RowCount - 1 do
+    for var iCNT: integer:=1 to Grid.RowCount - 1 do
     begin
 
         // -------------------------------
         // Get actual invoice open amount.
         // -------------------------------
 
-        var InvoiceAmt: double:=StrToFloatDef(DestGrid.Cells[5, iCNT], 0);
+        var InvoiceAmt: double:=StrToFloatDef(Grid.Cells[5, iCNT], 0);
 
         // -------------------------
         // Aggregate invoice amount.
@@ -2329,16 +2415,16 @@ begin
         // Depends on invoice type defined in the general settings.
         // --------------------------------------------------------
 
-        if IsVoType(DestGrid.Cells[3, iCNT]) = True then inc(nInvoices);
+        if IsVoType(Grid.Cells[3, iCNT]) = True then inc(nInvoices);
 
         // ----------------------------------------------
         // Count all overdue invoices and thiers amounts.
         // ----------------------------------------------
 
-        if (StrToIntDef(DestGrid.Cells[33, iCNT], 0) < 0) and (IsVoType(DestGrid.Cells[3, iCNT]) = True) then
+        if (StrToIntDef(Grid.Cells[33, iCNT], 0) < 0) and (IsVoType(Grid.Cells[3, iCNT]) = True) then
         begin
             inc(Overdue);
-            OverdueAmt:=OverdueAmt + StrToFloatDef(DestGrid.Cells[5, iCNT], 0);
+            OverdueAmt:=OverdueAmt + StrToFloatDef(Grid.Cells[5, iCNT], 0);
         end;
 
         // ---------------------------------------------------------
@@ -2346,8 +2432,8 @@ begin
         // negative amounts and voucher that indicate bank postings.
         // ---------------------------------------------------------
 
-        if (StrToFloat(DestGrid.Cells[5, iCNT]) < 0) and (DestGrid.Cells[3, iCNT] = VoucherNumber) then
-            UNamt:=UNamt + StrToFloatDef(DestGrid.Cells[5, iCNT], 0);
+        if (StrToFloat(Grid.Cells[5, iCNT]) < 0) and (Grid.Cells[3, iCNT] = VoucherNumber) then
+            UNamt:=UNamt + StrToFloatDef(Grid.Cells[5, iCNT], 0);
 
     end;
 
@@ -2355,55 +2441,55 @@ begin
     // Get total sum of KPI targets for all loaded company codes.
     // ----------------------------------------------------------
 
-    var DataTables:=TDataTables.Create(SessionService.FDbConnect);
-    try
+//    var DataTables:=TDataTables.Create(SessionService.FDbConnect);
+//    try
+//
+//        DataTables.CleanUp;
+//        DataTables.Columns.Add(
+//            TSql.SUM +
+//                BracketStr(TCompanyData.KpiOverdueTarget, Round) +
+//            TSql._AS +
+//                QuotedStr(TCompanyData.KpiOverdueTarget)
+//        );
+//
+//        DataTables.Columns.Add(
+//            TSql.SUM +
+//                BracketStr(TCompanyData.KpiUnallocatedTarget, Round) +
+//                TSql._AS +
+//                QuotedStr(TCompanyData.KpiUnallocatedTarget)
+//        );
+//
+//        DataTables.CustFilter:=
+//            TSql.WHERE +
+//                TCompanyData.CoCode +
+//            TSql.EQUAL +
+//                QuotedStr(SettingGrid.Cells[0, 0]) +
+//            TSql._OR  +
+//                TCompanyData.CoCode +
+//            TSql.EQUAL +
+//                QuotedStr(SettingGrid.Cells[1, 0]) +
+//            TSql._OR  +
+//                TCompanyData.CoCode +
+//            TSql.EQUAL +
+//                QuotedStr(SettingGrid.Cells[2, 0]) +
+//            TSql._OR  +
+//                TCompanyData.CoCode +
+//            TSql.EQUAL +
+//                QuotedStr(SettingGrid.Cells[3, 0]);
+//
+//        DataTables.OpenTable(TCompanyData.CompanyData);
+//
+//        if DataTables.DataSet.RecordCount = 1 then
+//        begin
+//            KPIOverdue:=StrToFloatDef(THelpers.OleGetStr(DataTables.DataSet.Fields[TCompanyData.KpiOverdueTarget].Value), 0);
+//            KPIUnalloc:=StrToFloatDef(THelpers.OleGetStr(DataTables.DataSet.Fields[TCompanyData.KpiUnallocatedTarget].Value), 0);
+//        end;
+//
+//    finally
+//        DataTables.Free();
+//    end;
 
-        DataTables.CleanUp;
-        DataTables.Columns.Add(
-            TSql.SUM +
-                BracketStr(TCompanyData.KpiOverdueTarget, Round) +
-            TSql._AS +
-                QuotedStr(TCompanyData.KpiOverdueTarget)
-        );
-
-        DataTables.Columns.Add(
-            TSql.SUM +
-                BracketStr(TCompanyData.KpiUnallocatedTarget, Round) +
-                TSql._AS +
-                QuotedStr(TCompanyData.KpiUnallocatedTarget)
-        );
-
-        DataTables.CustFilter:=
-            TSql.WHERE +
-                TCompanyData.CoCode +
-            TSql.EQUAL +
-                QuotedStr(SettingGrid.Cells[0, 0]) +
-            TSql._OR  +
-                TCompanyData.CoCode +
-            TSql.EQUAL +
-                QuotedStr(SettingGrid.Cells[1, 0]) +
-            TSql._OR  +
-                TCompanyData.CoCode +
-            TSql.EQUAL +
-                QuotedStr(SettingGrid.Cells[2, 0]) +
-            TSql._OR  +
-                TCompanyData.CoCode +
-            TSql.EQUAL +
-                QuotedStr(SettingGrid.Cells[3, 0]);
-
-        DataTables.OpenTable(TCompanyData.CompanyData);
-
-        if DataTables.DataSet.RecordCount = 1 then
-        begin
-            KPIOverdue:=StrToFloatDef(THelpers.OleGetStr(DataTables.DataSet.Fields[TCompanyData.KpiOverdueTarget].Value), 0);
-            KPIUnalloc:=StrToFloatDef(THelpers.OleGetStr(DataTables.DataSet.Fields[TCompanyData.KpiUnallocatedTarget].Value), 0);
-        end;
-
-    finally
-        DataTables.Free();
-    end;
-
-    MainForm.tcOpenItems.Caption     :=FormatFloat('### ###',  DestGrid.RowCount - 1);
+    MainForm.tcOpenItems.Caption     :=FormatFloat('### ###',  Grid.RowCount - 1);
     MainForm.tcInvoices.Caption      :=FormatFloat('### ###',  nInvoices);
     MainForm.tcOverdue.Caption       :=FormatFloat('### ###',  Overdue);
     MainForm.tcOSAmt.Caption         :=FormatFloat('#,##0.00', MainForm.FOSAmount);
@@ -2904,7 +2990,7 @@ end;
 
 procedure TMainForm.OILoaderTimer(Sender: TObject);
 begin
-    ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: Calling open items scanner...');
+    ThreadFileLog.Log('Calling open items scanner...');
     var OpenItems: IOpenItems:=TOpenItems.Create();
     OpenItems.ScanOpenItemsAsync();
 end;
@@ -3110,7 +3196,7 @@ begin
         end
         else
         begin
-            ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: Cannot delete selected row (rows affected: ' + IntToStr(DataTables.RowsAffected) + ').');
+            ThreadFileLog.Log('Cannot delete selected row (rows affected: ' + IntToStr(DataTables.RowsAffected) + ').');
             THelpers.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot delete selected row. Please contact IT support.', Self);
         end;
 
@@ -3494,7 +3580,7 @@ begin
             if sgAgeView.RowHeights[iCNT] <> sgAgeView.sgRowHidden then
                 CalendarForm.SetFollowUp(CalendarForm.FSelectedDate, sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), iCNT], iCNT);
 
-            ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: ''GeneralComment'' table with column FollowUp has been updated with ' + DateToStr(CalendarForm.FSelectedDate) + ' for multiple items.');
+            ThreadFileLog.Log('GeneralComment table with column FollowUp has been updated with ' + DateToStr(CalendarForm.FSelectedDate) + ' for multiple items.');
     end;
 
     Screen.Cursor:=crDefault;
@@ -3534,7 +3620,7 @@ begin
 
     end;
 
-    ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: ''GeneralComment'' table with column FollowUp has been updated with removal for multiple items.');
+    ThreadFileLog.Log('GeneralComment table with column FollowUp has been updated with removal for multiple items.');
 
     Screen.Cursor:=crDefault;
 
@@ -3812,30 +3898,21 @@ end;
 procedure TMainForm.Action_PaymentTermClick(Sender: TObject);
 begin
 
-    var AgeView: TAgeView:=TAgeView.Create(SessionService.FDbConnect);
-    try
-
-        THelpers.MsgCall(
-            TAppMessage.Info,
-            'Payment term: ' +
-            MainForm.GetData(
-                sgAgeView.Cells[
-                    sgAgeView.ReturnColumn(TSnapshots.fPaymentTerms, 1, 1),
-                    sgAgeView.Row
-                ],
-                TPaymentTerms.PaymentTerms,
-                sgAgeView.Cells[
-                    sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1),
-                    sgAgeView.Row
-                ]
-            )
-        );
-
-    finally
-
-        AgeView.Free;
-
-    end;
+    THelpers.MsgCall(
+        TAppMessage.Info,
+        'Payment term: ' +
+        MainForm.GetData(
+            sgAgeView.Cells[
+                sgAgeView.ReturnColumn(TSnapshots.fPaymentTerms, 1, 1),
+                sgAgeView.Row
+            ],
+            TPaymentTerms.PaymentTerms,
+            sgAgeView.Cells[
+                sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1),
+                sgAgeView.Row
+            ]
+        )
+    );
 
 end;
 
@@ -3847,30 +3924,21 @@ end;
 procedure TMainForm.Action_PersonClick(Sender: TObject);
 begin
 
-    var AgeView: TAgeView:=TAgeView.Create(SessionService.FDbConnect);
-    try
-
-        THelpers.MsgCall(
-            TAppMessage.Info,
-            'Person assigned: ' +
-            MainForm.GetData(
-                sgAgeView.Cells[
-                    sgAgeView.ReturnColumn(TSnapshots.fPerson, 1, 1),
-                    sgAgeView.Row
-                ],
-                TPerson.Person,
-                sgAgeView.Cells[
-                    sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1),
-                    sgAgeView.Row
-                ]
-            )
-        );
-
-    finally
-
-        AgeView.Free;
-
-    end;
+    THelpers.MsgCall(
+        TAppMessage.Info,
+       'Person assigned: ' +
+        MainForm.GetData(
+            sgAgeView.Cells[
+                sgAgeView.ReturnColumn(TSnapshots.fPerson, 1, 1),
+                sgAgeView.Row
+            ],
+            TPerson.Person,
+            sgAgeView.Cells[
+                sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1),
+                sgAgeView.Row
+            ]
+        )
+    );
 
 end;
 
@@ -4084,7 +4152,7 @@ begin
         if not UserControl.GetAgeDates(MainForm.FAgeDateList, MainForm.FGroupList[GroupListBox.ItemIndex, 0]) then
         begin
             THelpers.MsgCall(TAppMessage.Error, 'Cannot list age dates for selected group. Please contact IT support.');
-            ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: "GetAgeDates" returned false. Cannot get list of age dates for selected group (' + FGroupList[GroupListBox.ItemIndex, 0] + ').');
+            ThreadFileLog.Log('GetAgeDates returned false. Cannot get list of age dates for selected group (' + FGroupList[GroupListBox.ItemIndex, 0] + ').');
         end;
         GroupListDates.ListToComboBox(FAgeDateList, 0, TListSelection.Last);
 
@@ -6377,7 +6445,7 @@ begin
     if not(Return > 32) then
     begin
         THelpers.MsgCall(TAppMessage.Warn, 'Cannot execute report. Please contact with IT support.');
-        ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
+        ThreadFileLog.Log('ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
     end;
 
     UnfoldReportsTab(AppHeader, btnReports);
@@ -6393,7 +6461,7 @@ begin
     if not(Return > 32) then
     begin
         THelpers.MsgCall(TAppMessage.Warn, 'Cannot execute report. Please contact with IT support.');
-        ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
+        ThreadFileLog.Log('ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
     end;
 
     UnfoldReportsTab(AppHeader, btnReports);
@@ -6409,7 +6477,7 @@ begin
     if not(Return > 32) then
     begin
         THelpers.MsgCall(TAppMessage.Warn, 'Cannot execute report. Please contact with IT support.');
-        ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
+        ThreadFileLog.Log('ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
     end;
 
     UnfoldReportsTab(AppHeader, btnReports);
@@ -6425,7 +6493,7 @@ begin
     if not(Return > 32) then
     begin
         THelpers.MsgCall(TAppMessage.Warn, 'Cannot execute report. Please contact with IT support.');
-        ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
+        ThreadFileLog.Log('ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
     end;
 
     UnfoldReportsTab(AppHeader, btnReports);
@@ -6624,18 +6692,28 @@ begin
     if (not(string.IsNullOrEmpty(EditGroupName.Text))) and (not(string.IsNullOrEmpty(EditGroupID.Text))) then
     begin
 
-        // Start thread with no parameters passed to an object
+        // ----------------------------------------------------
+        // Start thread with no parameters passed to an object.
+        // ----------------------------------------------------
+
         PanelGroupName.Visible:=False;
         ReloadCover.Visible   :=False;
 
-        var Debtors: IDebtors:=TDebtors.Create;
-        Debtors.MakeAgeViewAsync(MainForm.FOSAmount, MainForm.MakeAgeViewAsync_Callback);
+        var SelectedGroupId: string;
+
+        if MainForm.EditGroupID.Text = MainForm.FGroupIdSel then SelectedGroupId:=MainForm.FGroupIdSel
+            else if MainForm.EditGroupID.Text <> '' then SelectedGroupId:=MainForm.EditGroupID.Text
+                 else SelectedGroupId:=MainForm.FGroupIdSel;
+
+        var Debtors: IDebtors:=TDebtors.Create();
+        if not MainForm.cbDump.Checked then
+            Debtors.MakeAgeViewSQLAsync(MainForm.FOSAmount, SelectedGroupId, MainForm.sgOpenItems, MainForm.MakeAgeViewSQLAsync_Callback)
+        else
+            Debtors.MakeAgeViewCSVAsync(MainForm.FOSAmount, SelectedGroupId, MainForm.sgOpenItems, MainForm.MakeAgeViewCSVAsync_Callback);
 
     end
     else
-    begin
-        THelpers.MsgCall(TAppMessage.Warn, 'Please enter group name and try again.' + TChars.CRLF + 'If you will use existing one, then it will be overwritten.');
-    end;
+    THelpers.MsgCall(TAppMessage.Warn, 'Please enter group name and try again.' + TChars.CRLF + 'If you will use existing one, then it will be overwritten.');
 
 end;
 

@@ -118,8 +118,7 @@ uses
     Unity.Chars,
     Unity.Settings,
     Unity.SessionService,
-    DbModel,
-    AgeView;
+    DbModel;
 
 
 var vFilterForm: TFilterForm;
