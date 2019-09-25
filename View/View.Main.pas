@@ -946,12 +946,12 @@ type
         var Class_B: double;
         var Class_C: double;
 
-        var FStartTime:         TTime;
-        var FGroupList:         TALists;
-        var FAgeDateList:       TALists;
-        var FGridPicture:       TImage;
-        var FOpenItemsRefs:     TFOpenItemsRefs;
-        var FControlStatusRefs: TFControlStatusRefs;
+        var FStartTime:      TTime;
+        var FGroupList:      TALists;
+        var FAgeDateList:    TALists;
+        var FGridPicture:    TImage;
+        var FOpenItemsRefs:  TFOpenItemsRefs;
+        var FCtrlStatusRefs: TFControlStatusRefs;
 
         procedure UpdateAgeSummary();
         procedure ComputeAgeSummary(var Grid: TStringGrid);
@@ -1043,7 +1043,6 @@ uses
     Unity.EventLogger,
     Unity.Settings,
     Unity.SessionService,
-    Transactions{legacy},
     Sync.Documents,
     Async.Utilities,
     Async.Tracker,
@@ -1230,8 +1229,6 @@ begin
     for var iCNT:=0 to ReturnedData.RowCount - 1 do
         for var jCNT:=0 to ReturnedData.ColCount - 1 do
             MainForm.sgAgeView.Cells[jCNT, iCNT]:=ReturnedData.Cells[jCNT, iCNT];
-
-    ReturnedData:=nil;
 
     // -------------------------
     // Update aging information.
@@ -1657,32 +1654,33 @@ begin
                     FAgeDateSel:=GroupListDates.Text;
                     sgAgeView.Enabled:=True;
 
-                    var Transactions: TTransactions:=TTransactions.Create(SessionService.FDbConnect);
-                    try
+//                    var Transactions: TTransactions:=TTransactions.Create(SessionService.FDbConnect);
+//                    try
+//
+//                        FOpenItemsUpdate:=Transactions.FGetDateTime(DateTime);
+//                        FOpenItemsStatus:=Transactions.FGetStatus(FOpenItemsUpdate);
+//
+//                        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Loading, MainForm);
+//                        THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Show.ToString, MainForm);
+//                        MainForm.ClearAgeSummary();
+//                        MainForm.sgAgeView.Freeze(True);
+//
+//                        if string.IsNullOrEmpty(FOpenItemsUpdate) then
+//                        begin
+//                            THelpers.MsgCall(TAppMessage.Warn, 'Cannot find open items in database. Please contact IT support.');
+//                            var Debtors: IDebtors:=TDebtors.Create;
+//                            Debtors.ReadAgeViewAsync(TLoading.NullParameter, TSorting.TMode.Ranges, MainForm.FGroupIdSel, MainForm.FAgeDateSel, MainForm.ReadAgeViewAsync_Callback);
+//                        end
+//                        else
+//                        begin
+//                            var Debtors: IDebtors:=TDebtors.Create;
+//                            Debtors.ReadAgeViewAsync(TLoading.CallOpenItems, TSorting.TMode.Ranges, MainForm.FGroupIdSel, MainForm.FAgeDateSel, MainForm.ReadAgeViewAsync_Callback);
+//                        end;
+//
+//                    finally
+//                        Transactions.Free;
+//                    end;
 
-                        FOpenItemsUpdate:=Transactions.GetDateTime(DateTime);
-                        FOpenItemsStatus:=Transactions.GetStatus(FOpenItemsUpdate);
-
-                        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Loading, MainForm);
-                        THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Show.ToString, MainForm);
-                        MainForm.ClearAgeSummary();
-                        MainForm.sgAgeView.Freeze(True);
-
-                        if string.IsNullOrEmpty(FOpenItemsUpdate) then
-                        begin
-                            THelpers.MsgCall(TAppMessage.Warn, 'Cannot find open items in database. Please contact IT support.');
-                            var Debtors: IDebtors:=TDebtors.Create;
-                            Debtors.ReadAgeViewAsync(TLoading.NullParameter, TSorting.TMode.Ranges, MainForm.FGroupIdSel, MainForm.FAgeDateSel, MainForm.ReadAgeViewAsync_Callback);
-                        end
-                        else
-                        begin
-                            var Debtors: IDebtors:=TDebtors.Create;
-                            Debtors.ReadAgeViewAsync(TLoading.CallOpenItems, TSorting.TMode.Ranges, MainForm.FGroupIdSel, MainForm.FAgeDateSel, MainForm.ReadAgeViewAsync_Callback);
-                        end;
-
-                    finally
-                        Transactions.Free;
-                    end;
                 end;
 
             end);
@@ -1738,10 +1736,10 @@ end;
 
 procedure TMainForm.UpdateFControlStatusRefs(SourceGrid: TStringGrid);
 begin
-    FControlStatusRefs.Id         :=SourceGrid.ReturnColumn(TControlStatus.Id,   1, 1);
-    FControlStatusRefs.Code       :=SourceGrid.ReturnColumn(TControlStatus.Code, 1, 1);
-    FControlStatusRefs.Text       :=SourceGrid.ReturnColumn(TControlStatus.Text, 1, 1);
-    FControlStatusRefs.Description:=SourceGrid.ReturnColumn(TControlStatus.Description, 1, 1);
+    FCtrlStatusRefs.Id         :=SourceGrid.ReturnColumn(TControlStatus.Id,   1, 1);
+    FCtrlStatusRefs.Code       :=SourceGrid.ReturnColumn(TControlStatus.Code, 1, 1);
+    FCtrlStatusRefs.Text       :=SourceGrid.ReturnColumn(TControlStatus.Text, 1, 1);
+    FCtrlStatusRefs.Description:=SourceGrid.ReturnColumn(TControlStatus.Description, 1, 1);
 end;
 
 

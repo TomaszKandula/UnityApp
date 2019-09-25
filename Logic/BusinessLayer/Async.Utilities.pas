@@ -97,8 +97,7 @@ uses
     Unity.EventLogger,
     Unity.SessionService,
     Sync.Documents,
-    DbModel,
-    Transactions;
+    DbModel;
 
 
 // ------------------------------------

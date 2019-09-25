@@ -64,11 +64,10 @@ implementation
 
 uses
     System.StrUtils,
-    Handler.Database,
-    Handler.Account,
-    Handler.Sql,
-    DbModel,
-    Transactions,
+    Handler.Database{legacy},
+    Handler.Account{legacy},
+    Handler.Sql{legacy},
+    DbModel{legacy},
     Unity.Helpers,
     Unity.Settings,
     Unity.Messaging,
@@ -78,8 +77,7 @@ uses
     Unity.SessionService,
     Unity.Chars,
     Unity.Sql,
-    Sync.Documents,
-    Async.OpenItems;
+    Sync.Documents;
 
 
 // ------------------------------------

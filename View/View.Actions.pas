@@ -250,7 +250,6 @@ uses
     DbModel,
     Unity.Settings,
     Unity.SessionService,
-    Transactions,
     Sync.Documents,
     Unity.Sql,
     Unity.Chars,

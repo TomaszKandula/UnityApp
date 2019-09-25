@@ -58,10 +58,10 @@ implementation
 
 
 uses
-    View.Main,
-    View.InvoiceTracker,
-    View.Actions,
-    View.UserFeedback,
+    View.Main,           // remove!
+    View.InvoiceTracker, // remove!
+    View.Actions,        // remove!
+    View.UserFeedback,   // remove!
     Handler.Database,
     Handler.Account,
     Unity.Helpers,
@@ -69,8 +69,7 @@ uses
     Unity.Messaging,
     Sync.Documents,
     Async.Comments,
-    DbModel,
-    Transactions;
+    DbModel;
 
 
 // ------------------------------------

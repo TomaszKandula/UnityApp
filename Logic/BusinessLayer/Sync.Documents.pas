@@ -216,9 +216,9 @@ implementation
 
 
 uses
-    View.Main,
-    View.InvoiceTracker,
-    View.Actions,
+    View.Main,            // remove!!
+    View.InvoiceTracker,  // remove!!
+    View.Actions,         // remove!!
     Data.Win.ADODB,
     DbModel,
     Unity.Chars,
@@ -328,9 +328,9 @@ begin
     for var iCNT: integer:=1 to Source.RowCount do
     begin
 
-        if Source.Cells[MainForm.FControlStatusRefs.Code, iCNT] = TextCode then
+        if Source.Cells[MainForm.FCtrlStatusRefs.Code, iCNT] = TextCode then
         begin
-            Result:=Source.Cells[MainForm.FControlStatusRefs.Text, iCNT];
+            Result:=Source.Cells[MainForm.FCtrlStatusRefs.Text, iCNT];
             Break;
         end;
 

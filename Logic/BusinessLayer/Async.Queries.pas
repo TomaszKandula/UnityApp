@@ -70,10 +70,10 @@ implementation  // refactor!!!
 
 
 uses
-    View.Main,
-    View.InvoiceTracker,
-    View.Actions,
-    View.UserFeedback,
+    View.Main,           // remove!
+    View.InvoiceTracker, // remove!
+    View.Actions,        // remove!
+    View.UserFeedback,   // remove!
     Handler.Database,
     Handler.Account,
     Unity.Sql,
@@ -82,7 +82,6 @@ uses
     Unity.Settings,
     Unity.SessionService,
     Sync.Documents,
-    Transactions,
     DbModel;
 
 

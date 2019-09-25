@@ -71,8 +71,7 @@ uses
     Unity.EventLogger,
     Unity.SessionService,
     Handler.Account,
-    Sync.Documents,
-    Transactions;
+    Sync.Documents;
 
 
 // ------------------------------------
