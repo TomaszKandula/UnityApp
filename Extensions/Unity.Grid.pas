@@ -540,8 +540,8 @@ end;
 /// Auto thumb size custom implementation.
 /// </summary>
 /// <remarks>
-/// Do not use it, string grid scrolls are bugged. Instead, use separate scroll component, or default string grid scroll behaviour with no
-/// auto thumb size.
+/// Do not use it, string grid scrolls are bugged. Instead, use separate scroll component,
+/// or default string grid scroll behaviour with no auto thumb size.
 /// </remarks>
 
 procedure TStringGrid.AutoThumbSize;
@@ -661,8 +661,8 @@ begin
 
                         if iCNT < (Self.ColCount - 1) then
                             StrCol:=StrCol + Settings.GetStringValue(ColOrderName, ColPrefix + IntToStr(iCNT), '') + ','
-                                else
-                                    StrCol:=StrCol + Settings.GetStringValue(ColOrderName, ColPrefix + IntToStr(iCNT), '') + ' ';
+                        else
+                            StrCol:=StrCol + Settings.GetStringValue(ColOrderName, ColPrefix + IntToStr(iCNT), '') + ' ';
 
                         // Store SQL column name and user friendly column name (column title) into helper array
                         Self.SqlColumns[iCNT, 0]:=Settings.GetStringValue(ColOrderName, ColPrefix + IntToStr(iCNT), '');

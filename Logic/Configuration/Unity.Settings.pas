@@ -573,13 +573,19 @@ begin
     Result:=TUnknown.NA;
 
     var SL: TStringList:=TStringList.Create;
+    try
 
-    // Return key value for given list position.
-    GetSection(Section, SL);
-    if KeyPosition > SL.Count then
-        Exit
-            else
-                Result:=LeftStr(SL.Strings[KeyPosition], AnsiPos('=', SL.Strings[KeyPosition]) - 1);
+        // Return key name for given list position.
+        GetSection(Section, SL);
+        if KeyPosition > SL.Count then
+            Exit
+        else
+            Result:=SL.Strings[KeyPosition];
+
+    finally
+        SL.Free();
+    end;
+
 end;
 
 

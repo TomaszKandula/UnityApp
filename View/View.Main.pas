@@ -907,13 +907,13 @@ type
 
         procedure ClearAgeSummary();
         procedure GetDetails(var Grid: TStringGrid);
-        procedure AgeViewMode(var Grid: TStringGrid; ModeBySection: string);
+        procedure LoadColumnWidth(var Grid: TStringGrid);
 
-        procedure MapGroup3(var Grid: TStringGrid; Source: TStringGrid);
-        procedure MapTable1(var Grid: TStringGrid; Source: TStringGrid);
-        procedure MapTable2(var Grid: TStringGrid; Source: TStringGrid);
-        procedure MapTable3(var Grid: TStringGrid; Source: TStringGrid);
-        procedure MapTable4(var Grid: TStringGrid; Source: TStringGrid);
+        procedure MapGroup3(var Grid: TStringGrid; var Source: TStringGrid);
+        procedure MapTable1(var Grid: TStringGrid; var Source: TStringGrid);
+        procedure MapTable2(var Grid: TStringGrid; var Source: TStringGrid);
+        procedure MapTable3(var Grid: TStringGrid; var Source: TStringGrid);
+        procedure MapTable4(var Grid: TStringGrid; var Source: TStringGrid);
 
         function GetData(Code: string; Table: string; Entity: string): string;
         function IsVoType(VoType: string): boolean;
@@ -942,9 +942,9 @@ type
         // replace by callbacks from async methods [end]
 
 
-        var Class_A:     double;
-        var Class_B:     double;
-        var Class_C:     double;
+        var Class_A: double;
+        var Class_B: double;
+        var Class_C: double;
 
         var FStartTime:         TTime;
         var FGroupList:         TALists;
@@ -1231,6 +1231,8 @@ begin
         for var jCNT:=0 to ReturnedData.ColCount - 1 do
             MainForm.sgAgeView.Cells[jCNT, iCNT]:=ReturnedData.Cells[jCNT, iCNT];
 
+    ReturnedData:=nil;
+
     // -------------------------
     // Update aging information.
     // -------------------------
@@ -1256,8 +1258,8 @@ begin
     // Unlock the component and repaint VCL.
     // -------------------------------------
 
+    MainForm.LoadColumnWidth(MainForm.sgAgeView);
     MainForm.sgAgeView.Freeze(False);
-    MainForm.AgeViewMode(MainForm.sgAgeView, TConfigSections.AgingColumns);
     MainForm.SwitchTimers(TurnedOn);
     THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
     THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
@@ -2177,21 +2179,18 @@ begin
 end;
 
 
-procedure TMainForm.AgeViewMode(var Grid: TStringGrid; ModeBySection: string);
+procedure TMainForm.LoadColumnWidth(var Grid: TStringGrid);
 begin
 
     var Settings: ISettings:=TSettings.Create;
-
-    for var iCNT: integer:=0 to Grid.ColCount - 2 do
-    if Settings.GetStringValue(ModeBySection, Settings.FindSettingsKey(ModeBySection, iCNT), 'True') = 'False' then
-        Grid.ColWidths[Grid.ReturnColumn(Settings.FindSettingsKey(ModeBySection, iCNT), 1, 1)]:=-1
-    else
-        Grid.ColWidths[Grid.ReturnColumn(Settings.FindSettingsKey(ModeBySection, iCNT), 1, 1)]:=100;
+    for var iCNT: integer:=0 to Grid.ColCount - 1 do
+        //OutputDebugString(PChar(Settings.GetStringValue('COLUMNWIDTH', Settings.FindSettingsKey('COLUMNWIDTH', iCNT), '')));
+        Grid.ColWidths[iCNT]:=Settings.GetStringValue('COLUMNWIDTH', Settings.FindSettingsKey('COLUMNWIDTH', iCNT), '').ToInteger;
 
 end;
 
 
-procedure TMainForm.MapGroup3(var Grid: TStringGrid; Source: TStringGrid);
+procedure TMainForm.MapGroup3(var Grid: TStringGrid; var Source: TStringGrid);
 begin
 
     for var iCNT: integer:=1 to Grid.RowCount - 1 do
@@ -2210,7 +2209,7 @@ begin
 end;
 
 
-procedure TMainForm.MapTable1(var Grid: TStringGrid; Source: TStringGrid);
+procedure TMainForm.MapTable1(var Grid: TStringGrid; var Source: TStringGrid);
 begin
 
     for var iCNT: integer:=1 to Grid.RowCount - 1 do
@@ -2229,7 +2228,7 @@ begin
 end;
 
 
-procedure TMainForm.MapTable2(var Grid: TStringGrid; Source: TStringGrid);
+procedure TMainForm.MapTable2(var Grid: TStringGrid; var Source: TStringGrid);
 begin
 
     for var iCNT: integer:=1 to Grid.RowCount - 1 do
@@ -2248,7 +2247,7 @@ begin
 end;
 
 
-procedure TMainForm.MapTable3(var Grid: TStringGrid; Source: TStringGrid);
+procedure TMainForm.MapTable3(var Grid: TStringGrid; var Source: TStringGrid);
 begin
 
     for var iCNT: integer:=1 to Grid.RowCount - 1 do
@@ -2267,7 +2266,7 @@ begin
 end;
 
 
-procedure TMainForm.MapTable4(var Grid: TStringGrid; Source: TStringGrid);
+procedure TMainForm.MapTable4(var Grid: TStringGrid; var Source: TStringGrid);
 begin
 
     for var iCNT: integer:=1 to Grid.RowCount - 1 do
@@ -2437,57 +2436,9 @@ begin
 
     end;
 
-    // ----------------------------------------------------------
-    // Get total sum of KPI targets for all loaded company codes.
-    // ----------------------------------------------------------
-
-//    var DataTables:=TDataTables.Create(SessionService.FDbConnect);
-//    try
-//
-//        DataTables.CleanUp;
-//        DataTables.Columns.Add(
-//            TSql.SUM +
-//                BracketStr(TCompanyData.KpiOverdueTarget, Round) +
-//            TSql._AS +
-//                QuotedStr(TCompanyData.KpiOverdueTarget)
-//        );
-//
-//        DataTables.Columns.Add(
-//            TSql.SUM +
-//                BracketStr(TCompanyData.KpiUnallocatedTarget, Round) +
-//                TSql._AS +
-//                QuotedStr(TCompanyData.KpiUnallocatedTarget)
-//        );
-//
-//        DataTables.CustFilter:=
-//            TSql.WHERE +
-//                TCompanyData.CoCode +
-//            TSql.EQUAL +
-//                QuotedStr(SettingGrid.Cells[0, 0]) +
-//            TSql._OR  +
-//                TCompanyData.CoCode +
-//            TSql.EQUAL +
-//                QuotedStr(SettingGrid.Cells[1, 0]) +
-//            TSql._OR  +
-//                TCompanyData.CoCode +
-//            TSql.EQUAL +
-//                QuotedStr(SettingGrid.Cells[2, 0]) +
-//            TSql._OR  +
-//                TCompanyData.CoCode +
-//            TSql.EQUAL +
-//                QuotedStr(SettingGrid.Cells[3, 0]);
-//
-//        DataTables.OpenTable(TCompanyData.CompanyData);
-//
-//        if DataTables.DataSet.RecordCount = 1 then
-//        begin
-//            KPIOverdue:=StrToFloatDef(THelpers.OleGetStr(DataTables.DataSet.Fields[TCompanyData.KpiOverdueTarget].Value), 0);
-//            KPIUnalloc:=StrToFloatDef(THelpers.OleGetStr(DataTables.DataSet.Fields[TCompanyData.KpiUnallocatedTarget].Value), 0);
-//        end;
-//
-//    finally
-//        DataTables.Free();
-//    end;
+    // ---------------------------------------
+    // Display calculated summary to the user.
+    // ---------------------------------------
 
     MainForm.tcOpenItems.Caption     :=FormatFloat('### ###',  Grid.RowCount - 1);
     MainForm.tcInvoices.Caption      :=FormatFloat('### ###',  nInvoices);
@@ -2858,57 +2809,74 @@ begin
         True:
         begin
 
+            SwitchTimers(TAppTimers.TurnedOff);
             ChromiumWindow.CloseBrowser(True);
-
-            // ----------------------------------
-            // Update user event log in database.
-            // ----------------------------------
 
             var UserLogs: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
             try
 
-                var Today: string:=FormatDateTime(TDateTimeFormats.DateTimeFormat, Now);
+                try
 
-                UserLogs.Columns.Add(TUnityEventLogs.UserAlias);
-                UserLogs.Columns.Add(TUnityEventLogs.DateTimeStamp);
-                UserLogs.Columns.Add(TUnityEventLogs.AppEventLog);
-                UserLogs.Columns.Add(TUnityEventLogs.AppName);
-                UserLogs.Values.Add(SessionService.SessionUser.ToUpper);
-                UserLogs.Values.Add(Today);
-                UserLogs.Values.Add(TCore.LoadFileToStr(ThreadFileLog.LogFileName));
-                UserLogs.Values.Add('Unity Cadiz.');
-                UserLogs.InsertInto(TUnityEventLogs.UnityEventLogs, True);
+                    // ----------------------------------
+                    // Update user event log in database.
+                    // ----------------------------------
+
+                    var Today: string:=FormatDateTime(TDateTimeFormats.DateTimeFormat, Now);
+
+                    UserLogs.Columns.Add(TUnityEventLogs.UserAlias);
+                    UserLogs.Columns.Add(TUnityEventLogs.DateTimeStamp);
+                    UserLogs.Columns.Add(TUnityEventLogs.AppEventLog);
+                    UserLogs.Columns.Add(TUnityEventLogs.AppName);
+                    UserLogs.Values.Add(SessionService.SessionUser.ToUpper);
+                    UserLogs.Values.Add(Today);
+                    UserLogs.Values.Add(TCore.LoadFileToStr(ThreadFileLog.LogFileName));
+                    UserLogs.Values.Add('Unity Cadiz.');
+                    UserLogs.InsertInto(TUnityEventLogs.UnityEventLogs, True);
+
+                    // -------------------------------------
+                    // Save last window position and layout.
+                    // -------------------------------------
+
+                    if sgAgeView.RowCount > 2 then
+                        sgAgeView.SaveLayout(TConfigSections.ColumnWidthName, TConfigSections.ColumnOrderName, TConfigSections.ColumnNames, TConfigSections.ColumnPrefix);
+
+                    var Settings: ISettings:=TSettings.Create;
+                    Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_TOP',  MainForm.Top);
+                    Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_LEFT', MainForm.Left);
+                    Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_WIDTH', MainForm.Width);
+                    Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_HEIGHT', MainForm.Height);
+
+                    case MainForm.WindowState of
+                        wsNormal:    Settings.SetStringValue(TConfigSections.ApplicationDetails, 'WINDOW_STATE', 'wsNormal');
+                        wsMaximized: Settings.SetStringValue(TConfigSections.ApplicationDetails, 'WINDOW_STATE', 'wsMaximized');
+                        wsMinimized: Settings.SetStringValue(TConfigSections.ApplicationDetails, 'WINDOW_STATE', 'wsMinimized');
+                    end;
+
+                    Settings.Encode(TAppFiles.Configuration);
+
+                    // --------------------------------------------
+                    // Close database connection and allow to quit.
+                    // --------------------------------------------
+
+                    if Assigned(SessionService.FDbConnect) then
+                    begin
+                        SessionService.FDbConnect.Close;
+                        FreeAndNil(SessionService.FDbConnect);
+                    end;
+
+                    FAllowClose:=False;
+                    CanClose:=not FAllowClose;
+                    StartupForm.Close();
+
+                except on
+                    E: Exception do
+                        THelpers.MsgCall(TAppMessage.Error, 'An error occured during exiting the application. Message: ' + E.Message);
+
+                end;
 
             finally
                 UserLogs.Free;
-                SessionService.FDbConnect.Close;
-                if Assigned(SessionService.FDbConnect) then FreeAndNil(SessionService.FDbConnect);
             end;
-
-            // --------------------------------
-            // Save window position and layout.
-            // --------------------------------
-
-            if sgAgeView.RowCount > 2 then
-                sgAgeView.SaveLayout(TConfigSections.ColumnWidthName, TConfigSections.ColumnOrderName, TConfigSections.ColumnNames, TConfigSections.ColumnPrefix);
-
-            var Settings: ISettings:=TSettings.Create;
-            Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_TOP',  MainForm.Top);
-            Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_LEFT', MainForm.Left);
-            Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_WIDTH', MainForm.Width);
-            Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_HEIGHT', MainForm.Height);
-
-            case MainForm.WindowState of
-                wsNormal:    Settings.SetStringValue(TConfigSections.ApplicationDetails, 'WINDOW_STATE', 'wsNormal');
-                wsMaximized: Settings.SetStringValue(TConfigSections.ApplicationDetails, 'WINDOW_STATE', 'wsMaximized');
-                wsMinimized: Settings.SetStringValue(TConfigSections.ApplicationDetails, 'WINDOW_STATE', 'wsMinimized');
-            end;
-
-            Settings.Encode(TAppFiles.Configuration);
-
-            FAllowClose:=False;
-            CanClose:=not FAllowClose;
-            StartupForm.Close();
 
         end;
 
@@ -2919,7 +2887,7 @@ end;
 
 procedure TMainForm.FormDestroy(Sender: TObject);
 begin
-    //ThreadFileLog.Free;
+    {Do nothing}
 end;
 
 
@@ -6707,9 +6675,9 @@ begin
 
         var Debtors: IDebtors:=TDebtors.Create();
         if not MainForm.cbDump.Checked then
-            Debtors.MakeAgeViewSQLAsync(MainForm.FOSAmount, SelectedGroupId, MainForm.sgOpenItems, MainForm.MakeAgeViewSQLAsync_Callback)
+            Debtors.MakeAgeViewSQLAsync(MainForm.FOSAmount, SelectedGroupId, MainForm.sgOpenItems, MainForm.sgCompanyData, MainForm.MakeAgeViewSQLAsync_Callback)
         else
-            Debtors.MakeAgeViewCSVAsync(MainForm.FOSAmount, SelectedGroupId, MainForm.sgOpenItems, MainForm.MakeAgeViewCSVAsync_Callback);
+            Debtors.MakeAgeViewCSVAsync(MainForm.FOSAmount, SelectedGroupId, MainForm.sgOpenItems, MainForm.sgCompanyData, MainForm.MakeAgeViewCSVAsync_Callback);
 
     end
     else

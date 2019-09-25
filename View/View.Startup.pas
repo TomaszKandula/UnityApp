@@ -31,7 +31,7 @@ uses
 type
 
 
-    TStartupForm {main application window} = class(TForm)
+    TStartupForm {representing main application window} = class(TForm)
         MainText2: TLabel;
         ProgressBar: TGauge;
         TextFooterA: TLabel;
@@ -133,6 +133,7 @@ end;
 procedure TStartupForm.FormDestroy(Sender: TObject);
 begin
     DestroyThreadFileLog();
+    DestroySessionService();
 end;
 
 
