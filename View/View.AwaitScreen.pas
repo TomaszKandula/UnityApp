@@ -31,7 +31,6 @@ type
     /// <summary>
     /// Allow to display busy status to the user during processing any "heavy duty task".
     /// </summary>
-
     /// <remarks>
     /// We do not allow user to close the window. It is opened and closed by external event.
     /// </remarks>
@@ -39,6 +38,7 @@ type
     TAwaitForm = class(TForm)
         WaitImage: TImage;
         PanelAwaitForm: TPanel;
+        WaitText: TLabel;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -83,6 +83,7 @@ begin
     AwaitForm.Top :=MainForm.Top  + (MainForm.Height div 2) - (AwaitForm.Height div 2);
     AwaitForm.Left:=MainForm.Left + (MainForm.Width  div 2) - (AwaitForm.Width  div 2);
 
+    (WaitImage.Picture.Graphic as TGIFImage).AnimationSpeed:=33;
     (WaitImage.Picture.Graphic as TGIFImage).Animate:=True;
 
 end;

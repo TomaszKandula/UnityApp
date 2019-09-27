@@ -37,28 +37,29 @@ type
     // Callback signatures.
     // --------------------
 
-    TScanOpenItemsAsync = procedure(LastError: TLastError) of object;
-    TReadOpenItemsAsync = procedure(LastError: TLastError) of object;
+    TScanOpenItemsAsync = procedure(CanMakeAge: boolean; ReadDateTime: string; LastError: TLastError) of object;
+    TReadOpenItemsAsync = procedure(ActionMode: TLoading; LastError: TLastError) of object;
 
 
     IOpenItems = interface(IInterface)
     ['{CD6AC138-D2A4-4C6B-A3F1-07F904BA44B1}']
-        procedure ScanOpenItemsAsync();
-        procedure ReadOpenItemsAsync(ActionMode: TLoading);
+        function GetDateTime(Return: TCalendar): string;
+        function GetStatus(DateTime: string): string;
+        procedure ScanOpenItemsAsync(OpenItemsUpdate: string; Callback: TScanOpenItemsAsync);
+        procedure ReadOpenItemsAsync(ActionMode: TLoading; OpenItemsGrid: TStringGrid; SettingsGrid: TStringGrid; Callback: TReadOpenItemsAsync);
     end;
 
 
     TOpenItems = class(TInterfacedObject, IOpenItems)
     {$TYPEINFO ON}
     private
-        var FDestGrid:    TStringGrid;
-        var FSettingGrid: TStringGrid;
-        function FGetDateTime(Return: TCalendar): string;
-        function FGetStatus(DateTime: string): string;
-        function FLoadToGrid: boolean;
+        function FLoadToGrid(OpenItemsGrid: TStringGrid; SettingsGrid: TStringGrid): boolean;
+        procedure FUpdateSummary(var Grid: TStringGrid);
     public
-        procedure ScanOpenItemsAsync();
-        procedure ReadOpenItemsAsync(ActionMode: TLoading);
+        function GetDateTime(Return: TCalendar): string;
+        function GetStatus(DateTime: string): string;
+        procedure ScanOpenItemsAsync(OpenItemsUpdate: string; Callback: TScanOpenItemsAsync);
+        procedure ReadOpenItemsAsync(ActionMode: TLoading; OpenItemsGrid: TStringGrid; SettingsGrid: TStringGrid; Callback: TReadOpenItemsAsync);
     end;
 
 
@@ -67,26 +68,22 @@ implementation
 
 uses
     System.Variants,
-    View.Main,
-    View.InvoiceTracker,
-    View.Actions,
-    View.UserFeedback,
-    Handler.Sql,
-    Handler.Database,
-    DbModel,
+    Handler.Account{legacy},
+    Handler.Sql{legacy},
+    Handler.Database{legacy},
+    DbModel{legacy},
     Unity.Settings,
     Unity.Helpers,
     Unity.Messaging,
     Unity.StatusBar,
     Unity.EventLogger,
     Unity.SessionService,
-    Handler.Account,
-    Sync.Documents,
-    Async.Debtors,
     Unity.Sql,
     Unity.Chars,
     Unity.DateTimeFormats,
-    Unity.Unknown;
+    Unity.Unknown,
+    Sync.Documents,
+    Async.Debtors;
 
 
 // ------------------------------------
@@ -94,44 +91,41 @@ uses
 // *Change when SQL is replaced by API
 // ------------------------------------
 
-procedure TOpenItems.ScanOpenItemsAsync();
+procedure TOpenItems.ScanOpenItemsAsync(OpenItemsUpdate: string; Callback: TScanOpenItemsAsync);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
+        var ReadStatus: string;
+        var ReadDateTime: string;
+        var LastError: TLastError;
         var CanMakeAge: boolean:=False;
-//        var Transactions: TTransactions:=TTransactions.Create(SessionService.FDbConnect);
-//        try
-//
-//            try
-//
-//                var ReadDateTime: string:=FGetDateTime(DateTime);
-//                var ReadStatus:   string:=FGetStatus(ReadDateTime);
-//
-//                if ( StrToDateTime(MainForm.FOpenItemsUpdate) < StrToDateTime(ReadDateTime) ) and ( ReadStatus = 'Completed' ) then
-//                begin
-//
-//                    // Switch off all of the timers
-//                    MainForm.SwitchTimers(TurnedOff);
-//
-//                    // Refresh open items and make new aging view
-//                    MainForm.FOpenItemsUpdate:=ReadDateTime;
-//                    MainForm.FOpenItemsStatus:='';
-//                    CanMakeAge:=True;
-//
-//                end;
-//
-//            except
-//                on E: Exception do
-//                    ThreadFileLog.Log('Cannot execute [OpenItemsScanner]. Error has been thrown: ' + E.Message);
-//            end;
-//
-//        finally
-//            Transactions.Free;
-//        end;
 
-        if CanMakeAge then ReadOpenItemsAsync(TLoading.CallMakeAge);
+        try
+
+            ReadDateTime:=GetDateTime(DateTime);
+            ReadStatus:=GetStatus(ReadDateTime);
+
+            if ( StrToDateTime(OpenItemsUpdate) < StrToDateTime(ReadDateTime) )
+                and ( ReadStatus = 'Completed' ) then CanMakeAge:=True;
+
+            LastError.IsSucceeded:=True;
+
+        except
+            on E: Exception do
+            begin
+                LastError.IsSucceeded:=False;
+                LastError.ErrorMessage:='[ScanOpenItemsAsync] Cannot execute. Error has been thrown: ' + E.Message;
+                ThreadFileLog.Log('[ScanOpenItemsAsync] Cannot execute. Error has been thrown: ' + E.Message);
+            end;
+
+        end;
+
+        TThread.Synchronize(nil, procedure
+        begin
+            Callback(CanMakeAge, ReadDateTime, LastError);
+        end);
 
     end);
 
@@ -145,63 +139,32 @@ end;
 // *Change when SQL is replaced by API
 // ------------------------------------
 
-procedure TOpenItems.ReadOpenItemsAsync(ActionMode: TLoading);
+procedure TOpenItems.ReadOpenItemsAsync(ActionMode: TLoading; OpenItemsGrid: TStringGrid; SettingsGrid: TStringGrid; Callback: TReadOpenItemsAsync);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        //var OpenItems: TTransactions:=TTransactions.Create(SessionService.FDbConnect);
-        //var StopWatch: TStopWatch:=TStopWatch.StartNew;
+        var LastError: TLastError;
         try
 
-            THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Downloading, MainForm);
-            try
+            FLoadToGrid(OpenItemsGrid, SettingsGrid);
+            LastError.IsSucceeded:=True;
 
-                FDestGrid   :=MainForm.sgOpenItems;  // !!
-                FSettingGrid:=MainForm.sgCompanyData; // !!
-                FDestGrid.Freeze(True);
-
-                // Sync with GUI
-                TThread.Synchronize(nil, MainForm.ClearOpenItemsSummary);
-
-                // Async
-                FLoadToGrid;
-                MainForm.UpdateOpenItemsSummary(MainForm.sgOpenItems); // !!!
-
-            except
-                on E: Exception do
-                    ThreadFileLog.Log('Cannot execute [ReadOpenItems]. Error has been thorwn: ' + E.Message);
+        except
+            on E: Exception do
+            begin
+                LastError.IsSucceeded:=False;
+                LastError.ErrorMessage:='[ReadOpenItemsAsync] Cannot execute. Error has been thrown: ' + E.Message;
+                ThreadFileLog.Log('[ReadOpenItemsAsync] Cannot execute. Error has been thrown: ' + E.Message);
             end;
-
-        finally
-
-//            var THDMili: extended:=StopWatch.ElapsedMilliseconds;
-//            var THDSec:  extended:=THDMili / 1000;
-
-//            ThreadFileLog.Log('Open Items loading thread has been executed within ' + FormatFloat('0', THDMili) + ' milliseconds (' + FormatFloat('0.00', THDSec) + ' seconds).');
-//            THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
-
-            // Release VCL and set auto column width
-//            TThread.Synchronize(nil, procedure
-//            begin
-//                DestGrid.SetColWidth(10, 20, 400);
-//            end);
-
-            FDestGrid.Freeze(False);
 
         end;
 
-//        // Make age view from open items and send to SQL Server
-//        if ActionMode = CallMakeAge then
-//        begin
-//
-//            MainForm.cbDump.Checked:=False;
-//
-//            var Debtors: IDebtors:=TDebtors.Create();
-//            Debtors.MakeAgeViewAsync(MainForm.FOSAmount, MainForm.MakeAgeViewAsync_Callback);
-//
-//        end;
+        TThread.Synchronize(nil, procedure
+        begin
+            Callback(ActionMode, LastError);
+        end);
 
     end);
 
@@ -213,11 +176,7 @@ end;
 // --------------------------------------------------------------------------------------------------------------------------------------------------------- //
 
 
-/// <summary>
-/// Get date and time from SSISMaster table.
-/// </summary>
-
-function TOpenItems.FGetDateTime(Return: TCalendar): string;
+function TOpenItems.GetDateTime(Return: TCalendar): string;
 begin
 
     var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
@@ -225,7 +184,10 @@ begin
 
         DataTables.CleanUp;
 
-        // Get latest date and time
+        // -------------------------
+        // Get latest date and time.
+        // -------------------------
+
         DataTables.Columns.Add
         (
             TSql.MAX +
@@ -234,10 +196,12 @@ begin
                 QuotedStr(TSSISMaster.StartDateTime)
         );
 
-        // Open column with function applied
         DataTables.OpenTable(TSSISMaster.SSISMaster);
 
-        // Examine received data
+        // ----------------------
+        // Examine received data.
+        // ----------------------
+
         if (not (DataTables.DataSet = nil)) and (DataTables.DataSet.RecordCount = 1) then
         begin
 
@@ -265,11 +229,7 @@ begin
 end;
 
 
-/// <summary>
-/// Get status code from SSIS Master table for given datetime.
-/// </summary>
-
-function TOpenItems.FGetStatus(DateTime: string): string;
+function TOpenItems.GetStatus(DateTime: string): string;
 begin
 
     var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
@@ -291,11 +251,7 @@ begin
 end;
 
 
-/// <summary>
-/// Load open items from database table into string grid.
-/// </summary>
-
-function TOpenItems.FLoadToGrid: boolean;
+function TOpenItems.FLoadToGrid(OpenItemsGrid: TStringGrid; SettingsGrid: TStringGrid): boolean;
 begin
 
     // Parameters for SQL stored procedure
@@ -320,16 +276,16 @@ begin
             /// thus set agent per last found the same principle applies for division.
             /// </remarks>
 
-            if FSettingGrid.Cells[iCNT, 3] = 'OFF' then
+            if SettingsGrid.Cells[iCNT, 3] = 'OFF' then
                 Agents:='OFF';
 
-            if FSettingGrid.Cells[iCNT, 3] = 'ON' then
+            if SettingsGrid.Cells[iCNT, 3] = 'ON' then
                 Agents:='ON';
 
-            if FSettingGrid.Cells[iCNT, 2] = 'OFF' then
+            if SettingsGrid.Cells[iCNT, 2] = 'OFF' then
                 Divisions:='OFF';
 
-            if FSettingGrid.Cells[iCNT, 2] = 'ON'  then
+            if SettingsGrid.Cells[iCNT, 2] = 'ON'  then
                 Divisions:='ON';
 
         end;
@@ -342,24 +298,85 @@ begin
         /// </remarks>
 
         DataTables.CmdType:=cmdText;
-        DataTables.StrSQL:=TSql.EXECUTE + ''                                          + TChars.SPACE +
-                  QuotedStr(FGetDateTime(DateOnly))                                   + TChars.COMMA +
-                  QuotedStr(THelpers.ConvertCoCode(FSettingGrid.Cells[0, 0], 'F', 0)) + TChars.COMMA +
-                  QuotedStr(THelpers.ConvertCoCode(FSettingGrid.Cells[1, 0], 'F', 0)) + TChars.COMMA +
-                  QuotedStr(THelpers.ConvertCoCode(FSettingGrid.Cells[2, 0], 'F', 0)) + TChars.COMMA +
-                  QuotedStr(THelpers.ConvertCoCode(FSettingGrid.Cells[3, 0], 'F', 0)) + TChars.COMMA +
+        DataTables.StrSQL:=TSql.EXECUTE + 'Customer.QueryOpenItemsAlt'                + TChars.SPACE +
+                  QuotedStr(GetDateTime(DateOnly))                                    + TChars.COMMA +
+                  QuotedStr(THelpers.ConvertCoCode(SettingsGrid.Cells[0, 0], 'F', 0)) + TChars.COMMA +
+                  QuotedStr(THelpers.ConvertCoCode(SettingsGrid.Cells[1, 0], 'F', 0)) + TChars.COMMA +
+                  QuotedStr(THelpers.ConvertCoCode(SettingsGrid.Cells[2, 0], 'F', 0)) + TChars.COMMA +
+                  QuotedStr(THelpers.ConvertCoCode(SettingsGrid.Cells[3, 0], 'F', 0)) + TChars.COMMA +
                   QuotedStr(CutOff)                                                   + TChars.COMMA +
                   QuotedStr(Agents)                                                   + TChars.COMMA +
                   QuotedStr(Divisions)                                                + TChars.COMMA +
                   QuotedStr(INF4);
 
-        Result:=DataTables.SqlToGrid(FDestGrid, DataTables.ExecSQL, False, True);
+        // ----------------------------------------------------
+        // Move received data to locked visual component async.
+        // ----------------------------------------------------
 
-        // Sort via CUID
-        FDestGrid.MSort(FDestGrid.ReturnColumn(DbModel.TOpenitems.Cuid, 1 , 1), 2, True);
+        Result:=DataTables.SqlToGrid(OpenItemsGrid, DataTables.ExecSQL, False, True);
 
     finally
         DataTables.Free();
+    end;
+
+end;
+
+
+procedure TOpenItems.FUpdateSummary(var Grid: TStringGrid);
+begin
+
+    var nInvoices:   integer:=0;
+    var Overdue:     integer:=0;
+    var OverdueAmt:  double :=0;
+    var UNamt:       double :=0;
+    var TotalAmount: double :=0;
+
+    var Settings: ISettings:=TSettings.Create;
+    var VoucherNumber: string:=Settings.GetStringValue(TConfigSections.Unallocated, 'VOUCHER_NUM', '0');
+
+    var VoTpCol:=Grid.ReturnColumn(DbModel.TOpenitems.VoTp, 1, 1);
+    var OpenAmCol:=Grid.ReturnColumn(DbModel.TOpenitems.OpenAm, 1, 1);
+    var PmtStatCol:=Grid.ReturnColumn(DbModel.TOpenitems.PmtStat, 1, 1);
+
+    for var iCNT: integer:=1 to Grid.RowCount - 1 do
+    begin
+
+        // -------------------------------
+        // Get actual invoice open amount.
+        // -------------------------------
+
+        var InvoiceAmt: double:=StrToFloatDef(Grid.Cells[OpenAmCol, iCNT], 0);
+
+        // -------------------------
+        // Aggregate invoice amount.
+        // -------------------------
+
+        TotalAmount:=TotalAmount + InvoiceAmt;
+
+        // --------------------------------------------------------
+        // Depends on invoice type defined in the general settings.
+        // --------------------------------------------------------
+
+        if IsVoType(Grid.Cells[VoTpCol, iCNT]) = True then inc(nInvoices);
+
+        // ----------------------------------------------
+        // Count all overdue invoices and thiers amounts.
+        // ----------------------------------------------
+
+        if (StrToIntDef(Grid.Cells[PmtStatCol, iCNT], 0) < 0) and (IsVoType(Grid.Cells[VoTpCol, iCNT]) = True) then
+        begin
+            inc(Overdue);
+            OverdueAmt:=OverdueAmt + StrToFloatDef(Grid.Cells[OpenAmCol, iCNT], 0);
+        end;
+
+        // ---------------------------------------------------------
+        // For unallocated payments we take into consideration
+        // negative amounts and voucher that indicate bank postings.
+        // ---------------------------------------------------------
+
+        if (StrToFloat(Grid.Cells[OpenAmCol, iCNT]) < 0) and (Grid.Cells[VoTpCol, iCNT] = VoucherNumber) then
+            UNamt:=UNamt + StrToFloatDef(Grid.Cells[OpenAmCol, iCNT], 0);
+
     end;
 
 end;

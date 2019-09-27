@@ -257,10 +257,6 @@ type
         Text72: TLabel;
         Text73: TLabel;
         OILoader: TTimer;
-        Text80: TLabel;
-        Text81: TLabel;
-        tcKPIoverdue: TLabel;
-        tcKPIUnallocated: TLabel;
         Text82: TLabel;
         tcOvdAmt: TLabel;
         GroupListBox: TComboBox;
@@ -994,7 +990,8 @@ type
         // Callbacks for Async.OpenItems.
         // ------------------------------
 
-        //...
+        procedure ScanOpenItemsAsync_Callback(CanMakeAge: boolean; ReadDateTime: string; LastError: TLastError);
+        procedure ReadOpenItemsAsync_Callback(ActionMode: TLoading; LastError: TLastError);
 
     end;
 
@@ -1072,7 +1069,6 @@ end;
 // Async.AddressBook callback methods.
 // -----------------------------------
 
-
 procedure TMainForm.OpenAddressBookAsync_Callback(ReturnedData: TStringGrid; LastError: TLastError);
 begin
 
@@ -1130,7 +1126,6 @@ end;
 // Async.Comments callback methods.
 // --------------------------------
 
-
 procedure TMainForm.EditDailyComment_Callback(LastError: TLastError);
 begin
 
@@ -1160,7 +1155,6 @@ end;
 // -------------------------------
 // Async.Debtors callback methods.
 // -------------------------------
-
 
 procedure TMainForm.MakeAgeViewSQLAsync_Callback(LastError: TLastError);
 begin
@@ -1206,10 +1200,6 @@ end;
 procedure TMainForm.ReadAgeViewAsync_Callback(ActionMode: TLoading; ReturnedData: TStringGrid; LastError: TLastError);
 begin
 
-    // --------------
-    // Error handler.
-    // --------------
-
     if not LastError.IsSucceeded then
     begin
         THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
@@ -1222,13 +1212,21 @@ begin
     // Update age view grid.
     // ---------------------
 
-    MainForm.sgAgeView.SqlColumns:=ReturnedData.SqlColumns;
-    MainForm.sgAgeView.RowCount  :=ReturnedData.RowCount;
-    MainForm.sgAgeView.ColCount  :=ReturnedData.ColCount;
+    MainForm.sgAgeView.Freeze(True);
+    try
 
-    for var iCNT:=0 to ReturnedData.RowCount - 1 do
-        for var jCNT:=0 to ReturnedData.ColCount - 1 do
-            MainForm.sgAgeView.Cells[jCNT, iCNT]:=ReturnedData.Cells[jCNT, iCNT];
+        MainForm.sgAgeView.SqlColumns:=ReturnedData.SqlColumns;
+        MainForm.sgAgeView.RowCount  :=ReturnedData.RowCount;
+        MainForm.sgAgeView.ColCount  :=ReturnedData.ColCount;
+
+        for var iCNT:=0 to ReturnedData.RowCount - 1 do
+            for var jCNT:=0 to ReturnedData.ColCount - 1 do
+                MainForm.sgAgeView.Cells[jCNT, iCNT]:=ReturnedData.Cells[jCNT, iCNT];
+
+    finally
+        MainForm.sgAgeView.Freeze(False);
+        ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Age View updated.');
+    end;
 
     // -------------------------
     // Update aging information.
@@ -1239,6 +1237,7 @@ begin
     MainForm.ComputeRiskClass(MainForm.sgAgeView);
     MainForm.UpdateAgeSummary;
     MainForm.GetDetails(MainForm.sgCompanyData);
+    ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Age View summary information updated.');
 
     // ---------------------------------------------------------------
     // Get descriptions from helper tables for given age view columns.
@@ -1250,16 +1249,18 @@ begin
     MainForm.MapTable2(MainForm.sgAgeView, MainForm.sgSalesResp);
     MainForm.MapTable3(MainForm.sgAgeView, MainForm.sgAccountType);
     MainForm.MapTable4(MainForm.sgAgeView, MainForm.sgCustomerGr);
+    ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Mapping performed.');
 
     // -------------------------------------
     // Unlock the component and repaint VCL.
     // -------------------------------------
 
     MainForm.LoadColumnWidth(MainForm.sgAgeView);
-    MainForm.sgAgeView.Freeze(False);
     MainForm.SwitchTimers(TurnedOn);
     THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
     THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
+    ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: VCL unlocked and repainted.');
+
 
     // ----------------------------------------------------
     // Call open items loading after aging is presented.
@@ -1268,8 +1269,16 @@ begin
 
     if ActionMode = TLoading.CallOpenItems then
     begin
+
+        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Downloading, MainForm);
+        ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Calling method "ReadOpenItemsAsync".');
+
+        MainForm.ClearOpenItemsSummary();
+        MainForm.sgOpenItems.Freeze(True);
+
         var OpenItems: IOpenItems:=TOpenItems.Create();
-        OpenItems.ReadOpenItemsAsync(TLoading.NullParameter);
+        OpenItems.ReadOpenItemsAsync(TLoading.NullParameter, MainForm.sgOpenItems, MainForm.sgCompanyData, ReadOpenItemsAsync_Callback);
+
     end;
 
 end;
@@ -1279,8 +1288,78 @@ end;
 // Async.OpenItems callback methods.
 // ---------------------------------
 
+procedure TMainForm.ScanOpenItemsAsync_Callback(CanMakeAge: boolean; ReadDateTime: string; LastError: TLastError);
+begin
 
-//...
+    if not LastError.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
+        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
+        THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
+        Exit();
+    end;
+
+    MainForm.FOpenItemsUpdate:=ReadDateTime;
+    MainForm.FOpenItemsStatus:='';
+
+    if CanMakeAge then
+    begin
+
+        // -----------------------------------------------------
+        // Get latest open items and allow to make aging report.
+        // -----------------------------------------------------
+
+        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Downloading, MainForm);
+        MainForm.ClearOpenItemsSummary();
+        MainForm.sgOpenItems.Freeze(True);
+
+        ThreadFileLog.Log('[ReadOpenItemsAsync_Callback]: Calling method "MakeAgeViewSQLAsync".');
+        var OpenItems: IOpenItems:=TOpenItems.Create();
+        OpenItems.ReadOpenItemsAsync(TLoading.CallMakeAge, MainForm.sgOpenItems, MainForm.sgCompanyData, ReadOpenItemsAsync_Callback);
+
+    end
+    else
+    begin
+        ThreadFileLog.Log('[ScanOpenItemsAsync_Callback]: Open Items check result is "nothing to update".');
+    end;
+
+end;
+
+
+procedure TMainForm.ReadOpenItemsAsync_Callback(ActionMode: TLoading; LastError: TLastError);
+begin
+
+    MainForm.sgOpenItems.Freeze(False);
+
+    if not LastError.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
+        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
+        THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
+        Exit();
+    end;
+
+    MainForm.UpdateOpenItemsSummary(MainForm.sgOpenItems);  // make async!
+    MainForm.sgOpenItems.SetColWidth(10, 20, 400);
+    THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
+
+    // -----------------------------------------------------
+    // Make age view from open items and send to SQL Server.
+    // -----------------------------------------------------
+
+    if ActionMode = CallMakeAge then
+    begin
+
+        MainForm.cbDump.Checked:=False;
+        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Generating, MainForm);
+
+        ThreadFileLog.Log('[ReadOpenItemsAsync_Callback]: Calling method "MakeAgeViewSQLAsync".');
+        var Debtors: IDebtors:=TDebtors.Create();
+        Debtors.MakeAgeViewSQLAsync(MainForm.FOSAmount, MainForm.FGroupIdSel, MainForm.sgOpenItems, MainForm.sgCompanyData, MainForm.MakeAgeViewSQLAsync_Callback);
+
+    end;
+
+end;
 
 
 // ------------------------------------------------------------------------------------------------------------------------ LEGACY CODE - TO BE REMOVED [START]
@@ -1654,32 +1733,26 @@ begin
                     FAgeDateSel:=GroupListDates.Text;
                     sgAgeView.Enabled:=True;
 
-//                    var Transactions: TTransactions:=TTransactions.Create(SessionService.FDbConnect);
-//                    try
-//
-//                        FOpenItemsUpdate:=Transactions.FGetDateTime(DateTime);
-//                        FOpenItemsStatus:=Transactions.FGetStatus(FOpenItemsUpdate);
-//
-//                        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Loading, MainForm);
-//                        THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Show.ToString, MainForm);
-//                        MainForm.ClearAgeSummary();
-//                        MainForm.sgAgeView.Freeze(True);
-//
-//                        if string.IsNullOrEmpty(FOpenItemsUpdate) then
-//                        begin
-//                            THelpers.MsgCall(TAppMessage.Warn, 'Cannot find open items in database. Please contact IT support.');
-//                            var Debtors: IDebtors:=TDebtors.Create;
-//                            Debtors.ReadAgeViewAsync(TLoading.NullParameter, TSorting.TMode.Ranges, MainForm.FGroupIdSel, MainForm.FAgeDateSel, MainForm.ReadAgeViewAsync_Callback);
-//                        end
-//                        else
-//                        begin
-//                            var Debtors: IDebtors:=TDebtors.Create;
-//                            Debtors.ReadAgeViewAsync(TLoading.CallOpenItems, TSorting.TMode.Ranges, MainForm.FGroupIdSel, MainForm.FAgeDateSel, MainForm.ReadAgeViewAsync_Callback);
-//                        end;
-//
-//                    finally
-//                        Transactions.Free;
-//                    end;
+                    var OpenItems: IOpenItems:=TOpenItems.Create();
+
+                    FOpenItemsUpdate:=OpenItems.GetDateTime(DateTime);
+                    FOpenItemsStatus:=OpenItems.GetStatus(FOpenItemsUpdate);
+
+                    THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Loading, MainForm);
+                    THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Show.ToString, MainForm);
+                    MainForm.ClearAgeSummary();
+
+                    if string.IsNullOrEmpty(FOpenItemsUpdate) then
+                    begin
+                        THelpers.MsgCall(TAppMessage.Warn, 'Cannot find open items in database. Please contact IT support.');
+                        var Debtors: IDebtors:=TDebtors.Create;
+                        Debtors.ReadAgeViewAsync(TLoading.NullParameter, TSorting.TMode.Ranges, MainForm.FGroupIdSel, MainForm.FAgeDateSel, MainForm.ReadAgeViewAsync_Callback);
+                    end
+                    else
+                    begin
+                        var Debtors: IDebtors:=TDebtors.Create;
+                        Debtors.ReadAgeViewAsync(TLoading.CallOpenItems, TSorting.TMode.Ranges, MainForm.FGroupIdSel, MainForm.FAgeDateSel, MainForm.ReadAgeViewAsync_Callback);
+                    end;
 
                 end;
 
@@ -2375,20 +2448,16 @@ begin
     MainForm.tcOSAmt.Caption         :='0';
     MainForm.tcUNamt.Caption         :='0';
     MainForm.tcOvdAmt.Caption        :='0';
-    MainForm.tcKPIoverdue.Caption    :='0';
-    MainForm.tcKPIunallocated.Caption:='0';
 end;
 
 
-procedure TMainForm.UpdateOpenItemsSummary(var Grid: TStringGrid);
+procedure TMainForm.UpdateOpenItemsSummary(var Grid: TStringGrid);   // make async!!
 begin
 
     var nInvoices:  integer:=0;
     var Overdue:    integer:=0;
     var OverdueAmt: double:=0;
     var UNamt:      double:=0;
-    var KPIOverdue: double:=0;
-    var KPIUnalloc: double:=0;
 
     var Settings: ISettings:=TSettings.Create;
     var VoucherNumber: string:=Settings.GetStringValue(TConfigSections.Unallocated, 'VOUCHER_NUM', '0');
@@ -2444,13 +2513,11 @@ begin
     MainForm.tcOSAmt.Caption         :=FormatFloat('#,##0.00', MainForm.FOSAmount);
     MainForm.tcOvdAmt.Caption        :=FormatFloat('#,##0.00', OverdueAmt);
     MainForm.tcUNAmt.Caption         :=FormatFloat('#,##0.00', abs(UNamt));
-    MainForm.tcKPIoverdue.Caption    :=FormatFloat('#,##0.00', KPIOverdue);
-    MainForm.tcKPIUnallocated.Caption:=FormatFloat('#,##0.00', KPIUnalloc);
 
 end;
 
 
-function TMainForm.IsVoType(VoType: string): boolean;
+function TMainForm.IsVoType(VoType: string): boolean; // to helpers
 begin
 
     Result:=False;
@@ -2958,7 +3025,7 @@ procedure TMainForm.OILoaderTimer(Sender: TObject);
 begin
     ThreadFileLog.Log('Calling open items scanner...');
     var OpenItems: IOpenItems:=TOpenItems.Create();
-    OpenItems.ScanOpenItemsAsync();
+    OpenItems.ScanOpenItemsAsync(MainForm.FOpenItemsUpdate, ScanOpenItemsAsync_Callback);
 end;
 
 
@@ -6502,7 +6569,6 @@ begin
         THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Loading, MainForm);
         THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Show.ToString, MainForm);
         MainForm.ClearAgeSummary();
-        MainForm.sgAgeView.Freeze(True);
 
         var Debtors: IDebtors:=TDebtors.Create;
         Debtors.ReadAgeViewAsync(CallOpenItems, TSorting.TMode.Ranges, MainForm.FGroupIdSel, MainForm.FAgeDateSel, MainForm.ReadAgeViewAsync_Callback);
@@ -6591,11 +6657,13 @@ begin
     end;
 
     // Only administrator is allowed
-    StatBar_TXT1.Caption :=TStatusBar.Processing;
     if MainForm.FAccessLevel = TUserAccess.Admin then
     begin
+        StatBar_TXT1.Caption :=TStatusBar.Downloading;
+        MainForm.ClearOpenItemsSummary();
+        MainForm.sgOpenItems.Freeze(True);
         var OpenItems: IOpenItems:=TOpenItems.Create();
-        OpenItems.ReadOpenItemsAsync(NullParameter);
+        OpenItems.ReadOpenItemsAsync(NullParameter, MainForm.sgOpenItems, MainForm.sgCompanyData, ReadOpenItemsAsync_Callback);
     end
     else
     begin
@@ -6627,17 +6695,19 @@ begin
     // Only administrator is allowed
     if MainForm.FAccessLevel = TUserAccess.Admin then
     begin
-        if PanelGroupName.Visible then
+
+        if PanelGroupName.Enabled then
         begin
-            PanelGroupName.Visible:=False;
+            PanelGroupName.Enabled:=False;
         end
         else
         begin
-            PanelGroupName.Visible:=True;
+            PanelGroupName.Enabled:=True;
             // Suggest the same group name and group ID
             EditGroupName.Text:=FGroupNmSel;
             EditGroupID.Text  :=FGroupIdSel;
         end
+
     end
     else
     begin

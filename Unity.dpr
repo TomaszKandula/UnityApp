@@ -10,6 +10,9 @@ program Unity;
 // First test release:     2017-07-10.                           //
 // Last stable release:    2019-08-01 (production).              //
 // ------------------------------------------------------------- //
+// IDE:                    RAD Studio.                           //
+// Language:               Delphi 10.3.1.                        //
+// ------------------------------------------------------------- //
 // Target system:          Windows 7 & 10 application.           //
 // Framework used:         VCL (created by Borland).             //
 // Win32 API direct calls: Yes.                                  //
