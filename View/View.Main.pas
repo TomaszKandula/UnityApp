@@ -1233,10 +1233,10 @@ begin
     // -------------------------
 
     MainForm.ClearAgeSummary();
-    MainForm.ComputeAgeSummary(MainForm.sgAgeView);
-    MainForm.ComputeRiskClass(MainForm.sgAgeView);
-    MainForm.UpdateAgeSummary;
-    MainForm.GetDetails(MainForm.sgCompanyData);
+    MainForm.ComputeAgeSummary(MainForm.sgAgeView);     // make async!
+    MainForm.ComputeRiskClass(MainForm.sgAgeView);      // make async!
+    MainForm.UpdateAgeSummary;                          // make async!
+    MainForm.GetDetails(MainForm.sgCompanyData);        // make async!
     ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Age View summary information updated.');
 
     // ---------------------------------------------------------------
@@ -2255,7 +2255,7 @@ begin
 
     var Settings: ISettings:=TSettings.Create;
     for var iCNT: integer:=0 to Grid.ColCount - 1 do
-        //OutputDebugString(PChar(Settings.GetStringValue('COLUMNWIDTH', Settings.FindSettingsKey('COLUMNWIDTH', iCNT), '')));
+        {OutputDebugString(PChar(Settings.GetStringValue('COLUMNWIDTH', Settings.FindSettingsKey('COLUMNWIDTH', iCNT), '')));}
         Grid.ColWidths[iCNT]:=Settings.GetStringValue('COLUMNWIDTH', Settings.FindSettingsKey('COLUMNWIDTH', iCNT), '').ToInteger;
 
 end;
