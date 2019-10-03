@@ -357,13 +357,13 @@ begin
         // Depends on invoice type defined in the general settings.
         // --------------------------------------------------------
 
-        if IsVoType(Grid.Cells[VoTpCol, iCNT]) = True then inc(nInvoices);
+        if THelpers.IsVoType(Grid.Cells[VoTpCol, iCNT]) = True then inc(nInvoices);
 
         // ----------------------------------------------
         // Count all overdue invoices and thiers amounts.
         // ----------------------------------------------
 
-        if (StrToIntDef(Grid.Cells[PmtStatCol, iCNT], 0) < 0) and (IsVoType(Grid.Cells[VoTpCol, iCNT]) = True) then
+        if (StrToIntDef(Grid.Cells[PmtStatCol, iCNT], 0) < 0) and (THelpers.IsVoType(Grid.Cells[VoTpCol, iCNT]) = True) then
         begin
             inc(Overdue);
             OverdueAmt:=OverdueAmt + StrToFloatDef(Grid.Cells[OpenAmCol, iCNT], 0);

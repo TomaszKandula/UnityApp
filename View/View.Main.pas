@@ -912,7 +912,6 @@ type
         procedure MapTable4(var Grid: TStringGrid; var Source: TStringGrid);
 
         function GetData(Code: string; Table: string; Entity: string): string;
-        function IsVoType(VoType: string): boolean;
 
     public
 
@@ -2481,13 +2480,13 @@ begin
         // Depends on invoice type defined in the general settings.
         // --------------------------------------------------------
 
-        if IsVoType(Grid.Cells[3, iCNT]) = True then inc(nInvoices);
+        if THelpers.IsVoType(Grid.Cells[3, iCNT]) = True then inc(nInvoices);
 
         // ----------------------------------------------
         // Count all overdue invoices and thiers amounts.
         // ----------------------------------------------
 
-        if (StrToIntDef(Grid.Cells[33, iCNT], 0) < 0) and (IsVoType(Grid.Cells[3, iCNT]) = True) then
+        if (StrToIntDef(Grid.Cells[33, iCNT], 0) < 0) and (THelpers.IsVoType(Grid.Cells[3, iCNT]) = True) then
         begin
             inc(Overdue);
             OverdueAmt:=OverdueAmt + StrToFloatDef(Grid.Cells[5, iCNT], 0);
@@ -2507,37 +2506,12 @@ begin
     // Display calculated summary to the user.
     // ---------------------------------------
 
-    MainForm.tcOpenItems.Caption     :=FormatFloat('### ###',  Grid.RowCount - 1);
-    MainForm.tcInvoices.Caption      :=FormatFloat('### ###',  nInvoices);
-    MainForm.tcOverdue.Caption       :=FormatFloat('### ###',  Overdue);
-    MainForm.tcOSAmt.Caption         :=FormatFloat('#,##0.00', MainForm.FOSAmount);
-    MainForm.tcOvdAmt.Caption        :=FormatFloat('#,##0.00', OverdueAmt);
-    MainForm.tcUNAmt.Caption         :=FormatFloat('#,##0.00', abs(UNamt));
-
-end;
-
-
-function TMainForm.IsVoType(VoType: string): boolean; // to helpers
-begin
-
-    Result:=False;
-
-    var Settings: ISettings:=TSettings.Create;
-    var tsVAL: TStringList:=TStringList.Create;
-    try
-
-        Settings.GetSectionValues(TConfigSections.InvoiceTypes, tsVAL);
-
-        for var iCNT: integer:=0 to tsVAL.Count - 1 do
-        if VoType = MidStr(tsVAL.Strings[iCNT], AnsiPos('=', tsVAL.Strings[iCNT]) + 1, 255) then
-        begin
-            Result:=True;
-            break;
-        end;
-
-    finally
-        tsVAL.Free;
-    end;
+    MainForm.tcOpenItems.Caption     :=FormatFloat('### ###',  Grid.RowCount - 1); // vcl
+    MainForm.tcInvoices.Caption      :=FormatFloat('### ###',  nInvoices);         // local
+    MainForm.tcOverdue.Caption       :=FormatFloat('### ###',  Overdue);           // local
+    MainForm.tcOSAmt.Caption         :=FormatFloat('#,##0.00', MainForm.FOSAmount);// vcl
+    MainForm.tcOvdAmt.Caption        :=FormatFloat('#,##0.00', OverdueAmt);        // local
+    MainForm.tcUNAmt.Caption         :=FormatFloat('#,##0.00', abs(UNamt));        // local
 
 end;
 

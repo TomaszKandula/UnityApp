@@ -43,6 +43,7 @@ type
         class function  GetCoCode(CoPos: integer; GroupId: string): string; static;
         class procedure QuickSortExt(var A: array of double; var L: array of integer; iLo, iHi: integer; ASC: boolean); static;
         class procedure ExportToCSV(FileName: string; SourceArray: TALists); static;
+        class function  IsVoType(VoType: string): boolean; static;
     end;
 
 
@@ -58,7 +59,8 @@ uses
     Unity.DateTimeFormats,
     Unity.Unknown,
     Unity.Chars,
-    Unity.Common;
+    Unity.Common,
+    Unity.Settings;
 
 
 class procedure THelpers.ExecMessage(IsPostType: boolean; IntValue: cardinal; TextValue: string; Form: TForm);
@@ -391,6 +393,31 @@ begin
         SL.SaveToFile(FileName);
     finally
         SL.Free;
+    end;
+
+end;
+
+
+class function THelpers.IsVoType(VoType: string): boolean;
+begin
+
+    Result:=False;
+
+    var Settings: ISettings:=TSettings.Create;
+    var tsVAL: TStringList:=TStringList.Create;
+    try
+
+        Settings.GetSectionValues(TConfigSections.InvoiceTypes, tsVAL);
+
+        for var iCNT: integer:=0 to tsVAL.Count - 1 do
+        if VoType = MidStr(tsVAL.Strings[iCNT], AnsiPos('=', tsVAL.Strings[iCNT]) + 1, 255) then
+        begin
+            Result:=True;
+            break;
+        end;
+
+    finally
+        tsVAL.Free;
     end;
 
 end;
