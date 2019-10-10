@@ -71,7 +71,7 @@ type
         function GetDbConnectionSync(): boolean;
         function GetUserAccountSync(): boolean;
         function GetGeneralTablesSync(): boolean;
-        function GetHtmlLayoutsSync(UrlLayoutPak: string; DirLayoutPak: string; LayoutDir: string): boolean;
+        function GetHtmlLayoutsSync(UrlLayoutPak: string; FileLayoutPak: string; LayoutDir: string): boolean;
     public
         property IsAppInitialized: boolean read FIsAppInitialized;
         procedure SetSessionLog(SessionEventLog: string);
@@ -102,6 +102,9 @@ uses
     Unity.SessionService,
     Async.Utilities,
     Async.Queries,
+    REST.Types,
+    System.Net.HttpClient,
+    Handler.Rest,
     Handler.Database,
     Handler.Account,
     Handler.Connection,
@@ -637,16 +640,25 @@ begin
 end;
 
 
-function TStartupForm.GetHtmlLayoutsSync(UrlLayoutPak: string; DirLayoutPak: string; LayoutDir: string): boolean;
+function TStartupForm.GetHtmlLayoutsSync(UrlLayoutPak: string; FileLayoutPak: string; LayoutDir: string): boolean;
 begin
 
     Result:=True;
 
-    var Connection: IConnectivity:=TConnectivity.Create();
+    var HttpResponse: IHttpResponse;
+    var HttpClient: THttpClient:=THTTPClient.Create();
+    var FileStream: TFileStream:=TFileStream.Create(FileLayoutPak, fmCreate);
     try
 
-        Connection.Download(UrlLayoutPak, DirLayoutPak);
-        TCore.UnzippLayouts(DirLayoutPak, LayoutDir);
+        try
+            HttpResponse:=HttpClient.Get(UrlLayoutPak);
+            FileStream.CopyFrom(HttpResponse.ContentStream, HttpResponse.ContentLength);
+        finally
+            HttpClient.Free();
+            FileStream.Free();
+        end;
+
+        TCore.UnzippLayouts(FileLayoutPak, LayoutDir);
 
     except
         on E: Exception do

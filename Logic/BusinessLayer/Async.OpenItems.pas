@@ -38,7 +38,7 @@ type
     // --------------------
 
     TScanOpenItemsAsync = procedure(CanMakeAge: boolean; ReadDateTime: string; LastError: TLastError) of object;
-    TReadOpenItemsAsync = procedure(ActionMode: TLoading; LastError: TLastError) of object;
+    TReadOpenItemsAsync = procedure(ActionMode: TLoading; OpenItemsData: TOpenItemsPayLoad; LastError: TLastError) of object;
 
 
     IOpenItems = interface(IInterface)
@@ -54,7 +54,7 @@ type
     {$TYPEINFO ON}
     private
         function FLoadToGrid(OpenItemsGrid: TStringGrid; SettingsGrid: TStringGrid): boolean;
-        procedure FUpdateSummary(var Grid: TStringGrid);
+        procedure FCalculateOpenItems(var InputGrid: TStringGrid; var OutputData: TOpenItemsPayLoad);
     public
         function GetDateTime(Return: TCalendar): string;
         function GetStatus(DateTime: string): string;
@@ -134,10 +134,10 @@ begin
 end;
 
 
-// ------------------------------------
+// -----------------------------------
 // Load open items into TStringGrid
 // *Change when SQL is replaced by API
-// ------------------------------------
+// -----------------------------------
 
 procedure TOpenItems.ReadOpenItemsAsync(ActionMode: TLoading; OpenItemsGrid: TStringGrid; SettingsGrid: TStringGrid; Callback: TReadOpenItemsAsync);
 begin
@@ -146,9 +146,12 @@ begin
     begin
 
         var LastError: TLastError;
+        var OpenItemsData: TOpenItemsPayLoad;
+
         try
 
             FLoadToGrid(OpenItemsGrid, SettingsGrid);
+            FCalculateOpenItems(OpenItemsGrid, OpenItemsData);
             LastError.IsSucceeded:=True;
 
         except
@@ -163,7 +166,7 @@ begin
 
         TThread.Synchronize(nil, procedure
         begin
-            Callback(ActionMode, LastError);
+            Callback(ActionMode, OpenItemsData, LastError);
         end);
 
     end);
@@ -322,51 +325,45 @@ begin
 end;
 
 
-procedure TOpenItems.FUpdateSummary(var Grid: TStringGrid);
+procedure TOpenItems.FCalculateOpenItems(var InputGrid: TStringGrid; var OutputData: TOpenItemsPayLoad);
 begin
-
-    var nInvoices:   integer:=0;
-    var Overdue:     integer:=0;
-    var OverdueAmt:  double :=0;
-    var UNamt:       double :=0;
-    var TotalAmount: double :=0;
 
     var Settings: ISettings:=TSettings.Create;
     var VoucherNumber: string:=Settings.GetStringValue(TConfigSections.Unallocated, 'VOUCHER_NUM', '0');
 
-    var VoTpCol:=Grid.ReturnColumn(DbModel.TOpenitems.VoTp, 1, 1);
-    var OpenAmCol:=Grid.ReturnColumn(DbModel.TOpenitems.OpenAm, 1, 1);
-    var PmtStatCol:=Grid.ReturnColumn(DbModel.TOpenitems.PmtStat, 1, 1);
+    var VoTpCol   :=InputGrid.ReturnColumn(DbModel.TOpenitems.VoTp, 1, 1);
+    var OpenAmCol :=InputGrid.ReturnColumn(DbModel.TOpenitems.OpenAm, 1, 1);
+    var PmtStatCol:=InputGrid.ReturnColumn(DbModel.TOpenitems.PmtStat, 1, 1);
 
-    for var iCNT: integer:=1 to Grid.RowCount - 1 do
+    for var iCNT: integer:=1 to InputGrid.RowCount - 1 do
     begin
 
         // -------------------------------
         // Get actual invoice open amount.
         // -------------------------------
 
-        var InvoiceAmt: double:=StrToFloatDef(Grid.Cells[OpenAmCol, iCNT], 0);
+        var InvoiceAmt: double:=StrToFloatDef(InputGrid.Cells[OpenAmCol, iCNT], 0);
 
         // -------------------------
         // Aggregate invoice amount.
         // -------------------------
 
-        TotalAmount:=TotalAmount + InvoiceAmt;
+        OutputData.OsAmount:=OutputData.OsAmount + InvoiceAmt;
 
         // --------------------------------------------------------
         // Depends on invoice type defined in the general settings.
         // --------------------------------------------------------
 
-        if THelpers.IsVoType(Grid.Cells[VoTpCol, iCNT]) = True then inc(nInvoices);
+        if THelpers.IsVoType(InputGrid.Cells[VoTpCol, iCNT]) = True then inc(OutputData.NumOfInvoices);
 
         // ----------------------------------------------
         // Count all overdue invoices and thiers amounts.
         // ----------------------------------------------
 
-        if (StrToIntDef(Grid.Cells[PmtStatCol, iCNT], 0) < 0) and (THelpers.IsVoType(Grid.Cells[VoTpCol, iCNT]) = True) then
+        if (StrToIntDef(InputGrid.Cells[PmtStatCol, iCNT], 0) < 0) and (THelpers.IsVoType(InputGrid.Cells[VoTpCol, iCNT]) = True) then
         begin
-            inc(Overdue);
-            OverdueAmt:=OverdueAmt + StrToFloatDef(Grid.Cells[OpenAmCol, iCNT], 0);
+            inc(OutputData.OverdueItems);
+            OutputData.OvdAmount:=OutputData.OvdAmount + StrToFloatDef(InputGrid.Cells[OpenAmCol, iCNT], 0);
         end;
 
         // ---------------------------------------------------------
@@ -374,10 +371,13 @@ begin
         // negative amounts and voucher that indicate bank postings.
         // ---------------------------------------------------------
 
-        if (StrToFloat(Grid.Cells[OpenAmCol, iCNT]) < 0) and (Grid.Cells[VoTpCol, iCNT] = VoucherNumber) then
-            UNamt:=UNamt + StrToFloatDef(Grid.Cells[OpenAmCol, iCNT], 0);
+        if (StrToFloat(InputGrid.Cells[OpenAmCol, iCNT]) < 0) and (InputGrid.Cells[VoTpCol, iCNT] = VoucherNumber) then
+            OutputData.UnallocatedAmt:=OutputData.UnallocatedAmt + StrToFloatDef(InputGrid.Cells[OpenAmCol, iCNT], 0);
 
     end;
+
+    OutputData.UnallocatedAmt:=Abs(OutputData.UnallocatedAmt);
+    OutputData.TotalItems:=InputGrid.RowCount - 1;
 
 end;
 

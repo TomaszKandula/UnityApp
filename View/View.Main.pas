@@ -902,7 +902,7 @@ type
         function  ShowReport(ReportNumber: cardinal): cardinal;
 
         procedure ClearAgeSummary();
-        procedure GetDetails(var Grid: TStringGrid);
+        procedure GetDetails(var Grid: TStringGrid); // make async?
         procedure LoadColumnWidth(var Grid: TStringGrid);
 
         procedure MapGroup3(var Grid: TStringGrid; var Source: TStringGrid);
@@ -949,10 +949,9 @@ type
         var FCtrlStatusRefs: TFControlStatusRefs;
 
         procedure UpdateAgeSummary();
-        procedure ComputeAgeSummary(var Grid: TStringGrid);
+        procedure ComputeAgeSummary(var Grid: TStringGrid);  // make async?
         procedure ComputeRiskClass(var Grid: TStringGrid);
 
-        procedure UpdateOpenItemsSummary(var Grid: TStringGrid);
         procedure ClearOpenItemsSummary();
 
         procedure InitMainWnd(SessionFile: string);
@@ -990,7 +989,7 @@ type
         // ------------------------------
 
         procedure ScanOpenItemsAsync_Callback(CanMakeAge: boolean; ReadDateTime: string; LastError: TLastError);
-        procedure ReadOpenItemsAsync_Callback(ActionMode: TLoading; LastError: TLastError);
+        procedure ReadOpenItemsAsync_Callback(ActionMode: TLoading; OpenItemsData: TOpenItemsPayLoad; LastError: TLastError);
 
     end;
 
@@ -1190,6 +1189,11 @@ begin
         Exit();
     end;
 
+
+    //...
+
+
+
     THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
     THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
 
@@ -1233,9 +1237,12 @@ begin
 
     MainForm.ClearAgeSummary();
     MainForm.ComputeAgeSummary(MainForm.sgAgeView);     // make async!
-    MainForm.ComputeRiskClass(MainForm.sgAgeView);      // make async!
-    MainForm.UpdateAgeSummary;                          // make async!
-    MainForm.GetDetails(MainForm.sgCompanyData);        // make async!
+
+    MainForm.ComputeRiskClass(MainForm.sgAgeView);
+    MainForm.UpdateAgeSummary;
+
+    MainForm.GetDetails(MainForm.sgCompanyData);        // make async?
+
     ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Age View summary information updated.');
 
     // ---------------------------------------------------------------
@@ -1325,7 +1332,7 @@ begin
 end;
 
 
-procedure TMainForm.ReadOpenItemsAsync_Callback(ActionMode: TLoading; LastError: TLastError);
+procedure TMainForm.ReadOpenItemsAsync_Callback(ActionMode: TLoading; OpenItemsData: TOpenItemsPayLoad; LastError: TLastError);
 begin
 
     MainForm.sgOpenItems.Freeze(False);
@@ -1338,7 +1345,14 @@ begin
         Exit();
     end;
 
-    MainForm.UpdateOpenItemsSummary(MainForm.sgOpenItems);  // make async!
+    MainForm.tcOpenItems.Caption:=FormatFloat('### ###',  OpenItemsData.TotalItems);
+    MainForm.tcInvoices.Caption :=FormatFloat('### ###',  OpenItemsData.NumOfInvoices);
+    MainForm.tcOverdue.Caption  :=FormatFloat('### ###',  OpenItemsData.OverdueItems);
+    MainForm.tcOSAmt.Caption    :=FormatFloat('#,##0.00', OpenItemsData.OsAmount);
+    MainForm.tcOvdAmt.Caption   :=FormatFloat('#,##0.00', OpenItemsData.OvdAmount);
+    MainForm.tcUNAmt.Caption    :=FormatFloat('#,##0.00', OpenItemsData.UnallocatedAmt);
+    MainForm.FOSAmount          :=OpenItemsData.OsAmount;
+
     MainForm.sgOpenItems.SetColWidth(10, 20, 400);
     THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
 
@@ -2091,7 +2105,7 @@ begin
 end;
 
 
-procedure TMainForm.ComputeAgeSummary(var Grid: TStringGrid);
+procedure TMainForm.ComputeAgeSummary(var Grid: TStringGrid); // make async!
 begin
 
     for var iCNT: integer:=1 to Grid.RowCount - 1 do
@@ -2447,72 +2461,6 @@ begin
     MainForm.tcOSAmt.Caption         :='0';
     MainForm.tcUNamt.Caption         :='0';
     MainForm.tcOvdAmt.Caption        :='0';
-end;
-
-
-procedure TMainForm.UpdateOpenItemsSummary(var Grid: TStringGrid);   // make async!!
-begin
-
-    var nInvoices:  integer:=0;
-    var Overdue:    integer:=0;
-    var OverdueAmt: double:=0;
-    var UNamt:      double:=0;
-
-    var Settings: ISettings:=TSettings.Create;
-    var VoucherNumber: string:=Settings.GetStringValue(TConfigSections.Unallocated, 'VOUCHER_NUM', '0');
-
-    for var iCNT: integer:=1 to Grid.RowCount - 1 do
-    begin
-
-        // -------------------------------
-        // Get actual invoice open amount.
-        // -------------------------------
-
-        var InvoiceAmt: double:=StrToFloatDef(Grid.Cells[5, iCNT], 0);
-
-        // -------------------------
-        // Aggregate invoice amount.
-        // -------------------------
-
-        MainForm.FOSAmount:=MainForm.FOSAmount + InvoiceAmt;
-
-        // --------------------------------------------------------
-        // Depends on invoice type defined in the general settings.
-        // --------------------------------------------------------
-
-        if THelpers.IsVoType(Grid.Cells[3, iCNT]) = True then inc(nInvoices);
-
-        // ----------------------------------------------
-        // Count all overdue invoices and thiers amounts.
-        // ----------------------------------------------
-
-        if (StrToIntDef(Grid.Cells[33, iCNT], 0) < 0) and (THelpers.IsVoType(Grid.Cells[3, iCNT]) = True) then
-        begin
-            inc(Overdue);
-            OverdueAmt:=OverdueAmt + StrToFloatDef(Grid.Cells[5, iCNT], 0);
-        end;
-
-        // ---------------------------------------------------------
-        // For unallocated payments we take into consideration
-        // negative amounts and voucher that indicate bank postings.
-        // ---------------------------------------------------------
-
-        if (StrToFloat(Grid.Cells[5, iCNT]) < 0) and (Grid.Cells[3, iCNT] = VoucherNumber) then
-            UNamt:=UNamt + StrToFloatDef(Grid.Cells[5, iCNT], 0);
-
-    end;
-
-    // ---------------------------------------
-    // Display calculated summary to the user.
-    // ---------------------------------------
-
-    MainForm.tcOpenItems.Caption     :=FormatFloat('### ###',  Grid.RowCount - 1); // vcl
-    MainForm.tcInvoices.Caption      :=FormatFloat('### ###',  nInvoices);         // local
-    MainForm.tcOverdue.Caption       :=FormatFloat('### ###',  Overdue);           // local
-    MainForm.tcOSAmt.Caption         :=FormatFloat('#,##0.00', MainForm.FOSAmount);// vcl
-    MainForm.tcOvdAmt.Caption        :=FormatFloat('#,##0.00', OverdueAmt);        // local
-    MainForm.tcUNAmt.Caption         :=FormatFloat('#,##0.00', abs(UNamt));        // local
-
 end;
 
 

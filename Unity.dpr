@@ -89,7 +89,6 @@ uses
     Handler.Sql                 in 'Logic\AccessLayer\Handler.Sql.pas',
     Handler.Database            in 'Logic\AccessLayer\Handler.Database.pas',
     Handler.Account             in 'Logic\AccessLayer\Handler.Account.pas',
-    Handler.Connection          in 'Logic\AccessLayer\Handler.Connection.pas',
     Handler.Rest                in 'Logic\AccessLayer\Handler.Rest.pas',
     Sync.Mailer                 in 'Logic\BusinessLayer\Sync.Mailer.pas',
     Sync.Documents              in 'Logic\BusinessLayer\Sync.Documents.pas',

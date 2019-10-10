@@ -1,10 +1,12 @@
 unit Unity.Records;
 
-// ----------------------------------------
+// ---------------------------------------------------------------------
 // Extension unit for application.
-// Can be referenced by anyone.
-// Cannot hold references to View or Logic.
-// ----------------------------------------
+// Can be referenced by anyone. Cannot hold references to View or Logic.
+// Use records instead of classes because we use them only to group
+// specific types of data ("variable of variables") to pass where it
+// needs to be passed as a parameter.
+// ---------------------------------------------------------------------
 
 interface
 
@@ -18,7 +20,8 @@ uses
 type
 
     /// <remarks>
-    /// Definition of last error that occured during the processing, Returned Code field is present for failed REST calls (status code returned).
+    /// Group variables that holds last error that occured during the processing,
+    /// Returned Code field is present for failed REST calls (status code returned).
     /// </remarks>
 
     TLastError = record
@@ -29,7 +32,7 @@ type
     end;
 
     /// <remarks>
-    ///
+    /// Carries a group of variables to be updated in AddressBook table.
     /// </remarks>
 
     TAddressBookUpdateFields = record
@@ -41,7 +44,7 @@ type
     end;
 
     /// <remarks>
-    ///
+    /// Carries a group of variables for update in DailyComments table.
     /// </remarks>
 
     TDailyCommentFields = record
@@ -61,7 +64,7 @@ type
     end;
 
     /// <remarks>
-    ///
+    /// Carries a group of variables for update in GeneralComment table.
     /// </remarks>
 
     TGeneralCommentFields = record
@@ -75,7 +78,7 @@ type
     end;
 
     /// <remarks>
-    ///
+    /// Carries a group of variables for update information about sent account statement.
     /// </remarks>
 
     TSendAccountStatementFields = record
@@ -101,7 +104,20 @@ type
     end;
 
     /// <remarks>
-    /// Holds open items total amounts for ledger currency and other currency.
+    /// Carries a group of variables for update open items summary.
+    /// </remarks>
+
+    TOpenItemsPayLoad = record
+        TotalItems:     integer;
+        OverdueItems:   integer;
+        NumOfInvoices:  integer;
+        OsAmount:       double;
+        OvdAmount:      double;
+        UnallocatedAmt: double;
+    end;
+
+    /// <remarks>
+    /// Carries a group of variables for open items summary with ledger currency and other currency.
     /// </remarks>
 
     TOpenItemsTotal = record
@@ -112,7 +128,7 @@ type
     end;
 
     /// <remarks>
-    /// This record definition holds column numbers for given column name. This is necessary as column order may change.
+    /// Carries a definition of columns' numbers for given column name. This is necessary as column order may change.
     /// Normally we would use "ReturnColumn" extension method, but in case of multithreading, we must pre-set them before many threads
     /// use it at the same time (VCL components are not thread safe). Having record with fields simplify things.
     /// </remarks>
@@ -137,7 +153,7 @@ type
     end;
 
     /// <remarks>
-    /// This record defines column numbers for given field, so we do not have to call "ReturnColumn" method each time.
+    /// Carries a group of variables for "ReturnColumn" method.
     /// </remarks>
 
     TFControlStatusRefs = record

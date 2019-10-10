@@ -34,25 +34,7 @@ type
         // Undisclosed getters and setters.
         // --------------------------------
 
-        procedure SetCustomBody(NewValue:                    string);
-        procedure SetClientAccept(NewValue:                  string);
-        procedure SetClientAcceptCharset(NewValue:           string);
-        procedure SetClientAllowCookies(NewValue:            boolean);
-        procedure SetClientAutoCreateParams(NewValue:        boolean);
-        procedure SetClientBaseURL(NewValue:                 string);
-        procedure SetClientContentType(NewValue:             string);
-        procedure SetClientFallbackCharsetEncoding(NewValue: string);
-        procedure SetClientHandleRedirects(NewValue:         boolean);
-        procedure SetClientRaiseExceptionOn500(NewValue:     boolean);
-        procedure SetClientSynchronizedEvents(NewValue:      boolean);
-        procedure SetClientUserAgent(NewValue:               string);
-        procedure SetRequestAccept(NewValue:                 string);
-        procedure SetRequestAcceptCharset(NewValue:          string);
-        procedure SetRequestAutoCreateParams(NewValue:       boolean);
-        procedure SetRequestHandleRedirects(NewValue:        boolean);
-        procedure SetRequestMethod(NewValue:                 TRESTRequestMethod);
-        procedure SetRequestSynchronizedEvents(NewValue:     boolean);
-        procedure SetRequestTimeout(NewValue:                integer);
+        function  GetExecuteError:                  string;
         function  GetStatusCode:                    integer;
         function  GetCustomBody:                    string;
         function  GetContent:                       string;
@@ -77,11 +59,31 @@ type
         function  GetRequestMethod:                 TRESTRequestMethod;
         function  GetRequestSynchronizedEvents:     boolean;
         function  GetRequestTimeout:                integer;
+        procedure SetCustomBody(NewValue: string);
+        procedure SetClientAccept(NewValue: string);
+        procedure SetClientAcceptCharset(NewValue: string);
+        procedure SetClientAllowCookies(NewValue: boolean);
+        procedure SetClientAutoCreateParams(NewValue: boolean);
+        procedure SetClientBaseURL(NewValue: string);
+        procedure SetClientContentType(NewValue: string);
+        procedure SetClientFallbackCharsetEncoding(NewValue: string);
+        procedure SetClientHandleRedirects(NewValue: boolean);
+        procedure SetClientRaiseExceptionOn500(NewValue: boolean);
+        procedure SetClientSynchronizedEvents(NewValue: boolean);
+        procedure SetClientUserAgent(NewValue: string);
+        procedure SetRequestAccept(NewValue: string);
+        procedure SetRequestAcceptCharset(NewValue: string);
+        procedure SetRequestAutoCreateParams(NewValue: boolean);
+        procedure SetRequestHandleRedirects(NewValue: boolean);
+        procedure SetRequestMethod(NewValue: TRESTRequestMethod);
+        procedure SetRequestSynchronizedEvents(NewValue: boolean);
+        procedure SetRequestTimeout(NewValue: integer);
 
         // -------------------
         // Exposed properties.
         // -------------------
 
+        property ExecuteError:                  string             read GetExecuteError;
         property StatusCode:                    integer            read GetStatusCode;
         property Content:                       string             read GetContent;
         property Headers:                       string             read GetHeaders;
@@ -121,34 +123,50 @@ type
     TRESTful = class(TInterfacedObject, IRESTFul)
     private
 
-        var httpAuth:     THTTPBasicAuthenticator;
-        var restClient:   TRESTClient;
-        var restRequest:  TRESTRequest;
-        var restResponse: TRESTResponse;
-        var queryList:    TList<string>;
-        var paramList:    TList<string>;
-
-        // -------------------------------------
-        // Returned status code after execution.
-        // -------------------------------------
-
-        var FStatusCode: integer;
-
-        // ----------------------
-        // REST response content.
-        // ----------------------
-
+        var httpAuth:         THTTPBasicAuthenticator;
+        var restClient:       TRESTClient;
+        var restRequest:      TRESTRequest;
+        var restResponse:     TRESTResponse;
+        var queryList:        TList<string>;
+        var paramList:        TList<string>;
+        var FStatusCode:      integer;
         var FResponseContent: string;
+        var FCustomBody:      string;
+        var FExecuteError:    string;
 
-        // ------------------------------------------
-        // Custom body for http methods POST and PUT.
-        // ------------------------------------------
+        // -------------------
+        // Property's getters.
+        // -------------------
 
-        var FCustomBody: string;
+        function GetExecuteError:                  string;
+        function GetStatusCode:                    integer;
+        function GetCustomBody:                    string;
+        function GetContent:                       string;
+        function GetHeaders:                       string;
+        function GethttpAuthUsername:              string;
+        function GethttpAuthPassword:              string;
+        function GetClientAccept:                  string;
+        function GetClientAcceptCharset:           string;
+        function GetClientAllowCookies:            boolean;
+        function GetClientAutoCreateParams:        boolean;
+        function GetClientBaseURL:                 string;
+        function GetClientContentType:             string;
+        function GetClientFallbackCharsetEncoding: string;
+        function GetClientHandleRedirects:         boolean;
+        function GetClientRaiseExceptionOn500:     boolean;
+        function GetClientSynchronizedEvents:      boolean;
+        function GetClientUserAgent:               string;
+        function GetRequestAccept:                 string;
+        function GetRequestAcceptCharset:          string;
+        function GetRequestAutoCreateParams:       boolean;
+        function GetRequestHandleRedirects:        boolean;
+        function GetRequestMethod:                 TRESTRequestMethod;
+        function GetRequestSynchronizedEvents:     boolean;
+        function GetRequestTimeout:                integer;
 
-        // -------------------------------
-        // Property's getters and setters.
-        // -------------------------------
+        // -------------------
+        // Property's setters.
+        // -------------------
 
         procedure SetCustomBody(NewValue:                    string);
         procedure SetClientAccept(NewValue:                  string);
@@ -169,30 +187,6 @@ type
         procedure SetRequestMethod(NewValue:                 TRESTRequestMethod);
         procedure SetRequestSynchronizedEvents(NewValue:     boolean);
         procedure SetRequestTimeout(NewValue:                integer);
-        function  GetStatusCode:                    integer;
-        function  GetCustomBody:                    string;
-        function  GetContent:                       string;
-        function  GetHeaders:                       string;
-        function  GethttpAuthUsername:              string;
-        function  GethttpAuthPassword:              string;
-        function  GetClientAccept:                  string;
-        function  GetClientAcceptCharset:           string;
-        function  GetClientAllowCookies:            boolean;
-        function  GetClientAutoCreateParams:        boolean;
-        function  GetClientBaseURL:                 string;
-        function  GetClientContentType:             string;
-        function  GetClientFallbackCharsetEncoding: string;
-        function  GetClientHandleRedirects:         boolean;
-        function  GetClientRaiseExceptionOn500:     boolean;
-        function  GetClientSynchronizedEvents:      boolean;
-        function  GetClientUserAgent:               string;
-        function  GetRequestAccept:                 string;
-        function  GetRequestAcceptCharset:          string;
-        function  GetRequestAutoCreateParams:       boolean;
-        function  GetRequestHandleRedirects:        boolean;
-        function  GetRequestMethod:                 TRESTRequestMethod;
-        function  GetRequestSynchronizedEvents:     boolean;
-        function  GetRequestTimeout:                integer;
 
         // ----------------------------------
         // Trimming received response string.
@@ -201,7 +195,9 @@ type
         procedure TrimContent(var TextStr: string);
 
     public
-
+        constructor Create(UserName: string; Password: string);
+        destructor Destroy; override;
+        property ExecuteError:                  string             read GetExecuteError;
         property StatusCode:                    integer            read GetStatusCode;
         property Content:                       string             read GetContent;
         property Headers:                       string             read GetHeaders;
@@ -226,14 +222,9 @@ type
         property RequestMethod:                 TRESTRequestMethod read GetRequestMethod                 write SetRequestMethod;
         property RequestSynchronizedEvents:     boolean            read GetRequestSynchronizedEvents     write SetRequestSynchronizedEvents;
         property RequestTimeout:                integer            read GetRequestTimeout                write SetRequestTimeout;
-
-        constructor Create(UserName: string; Password: string);
-        destructor Destroy; override;
-
         function Execute: boolean;
         procedure AddParameter(QueryName: string; ParamValue: string);
         procedure ClearParameters;
-
     end;
 
 
@@ -334,11 +325,11 @@ begin
         if not(String.IsNullOrEmpty(CustomBody)) then
         begin
 
-            // ---------------------------------------------------------------------------------------------
-            // Replace single quotes into '\"' and add single quote to begin and end of custom body. This is
-            // necessary if your endpoints (WebApi / NetCore) defines content as string object instead of
-            // raw string. This is not needed if endpoints uses POCO already.
-            // ---------------------------------------------------------------------------------------------
+            // -----------------------------------------------------------------------------------------------
+            // Replace single quotes into '\"' and add single quote to begin and end of custom body
+            // This is necessary because WebApi on .NetCore server defines content as string object instead of
+            // raw string or POCO.
+            // -----------------------------------------------------------------------------------------------
 
             CustomBody:=CustomBody.Replace('"', '\"');
             CustomBody:='"' + CustomBody + '"';
@@ -362,17 +353,26 @@ begin
 
             FStatusCode:=restResponse.StatusCode;
 
-            // ---------------------------------------------------------------------------------------------------
-            // Remove from recieved string content any '\"' leaving just single quote. This is necessary if your
-            // endpoints (WebApi / NetCore) defines content as string object instead of raw string, so it adds
-            // quotes to the start and end of the content, thus require further treatment on quotes inside string.
-            // This is not needed if endpoints uses POCO already.
-            // ---------------------------------------------------------------------------------------------------
+            if (not String.IsNullOrEmpty(restResponse.Content)) and (not String.IsNullOrWhiteSpace(restResponse.Content)) then
+            begin
 
-            FResponseContent:=restResponse.Content.Replace('\"','"');
+                // -----------------------------------------------------------------------------------------------
+                // Remove from recieved string content any \" leaving just single quote. This is necessary in case
+                // WebServer returns content as string object instead of raw string or POCO, or by mistake returns
+                // content serialized twice (it adds quotes to the start and end of the content), in such case it
+                // requires further treatment on quotes inside string.
+                // -----------------------------------------------------------------------------------------------
 
-            // Remove single leading/ending quote
-            TrimContent(FResponseContent);
+                FResponseContent:=restResponse.Content;
+                FResponseContent:=FResponseContent.Replace('\"','"');
+
+                // -----------------------------------
+                // Remove single leading/ending quote.
+                // -----------------------------------
+
+                TrimContent(FResponseContent);
+
+            end;
 
             Result:=True;
 
@@ -380,7 +380,7 @@ begin
 
     except
         on E: Exception do
-            {Exception goes here}
+            FExecuteError:=E.Message;
 
     end;
 
@@ -431,6 +431,12 @@ end;
 
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------- GETTERS //
+
+
+function TRESTful.GetExecuteError: string;
+begin
+    Result:=FExecuteError;
+end;
 
 
 function TRESTful.GetStatusCode: integer;

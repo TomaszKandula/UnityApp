@@ -131,7 +131,24 @@ end;
 procedure TDebtors.MakeAgeViewCSVAsync(OpenAmount: double; GroupID: string; SourceGrid: TStringGrid; CompanyData: TStringGrid; Callback: TMakeAgeViewAsync);
 begin
 
-    //...
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        //FMakeAgeView(OpenAmount, GroupID, SourceGrid, CompanyData);
+
+
+
+
+
+
+        TThread.Synchronize(nil, procedure
+        begin
+
+        end);
+
+    end);
+
+    NewTask.Start;
 
 end;
 
@@ -473,12 +490,9 @@ begin
 
 end;
 
+
 // ------------------------------------------------------------------------------------------------------------------------ TRANSFER 'AGEVIEW' TO SQL SERVER //
 procedure TDebtors.FWriteAgeView(DestTable: string; GroupID: string; SourceArray: TALists);
-var
-    Transaction: string;
-    DeleteData:  string;
-    Condition:   string;
 begin
 
     var DataTables:=TDataTables.Create(SessionService.FDbConnect);
@@ -520,11 +534,11 @@ begin
             DataTables.Columns.Add(TSnapshots.AccountType);
 
             // Delete statement (to remove old data)
-            DeleteData:=TSql.DELETE_FROM + DestTable;
-            Condition:=TSnapshots.GroupId + TSql.EQUAL + QuotedStr(SourceArray[0, 0]) + TSql._AND + TSnapshots.AgeDate + TSql.EQUAL + QuotedStr(LeftStr(SourceArray[0, 1], 10));
+            var DeleteData:=TSql.DELETE_FROM + DestTable;
+            var Condition:=TSnapshots.GroupId + TSql.EQUAL + QuotedStr(SourceArray[0, 0]) + TSql._AND + TSnapshots.AgeDate + TSql.EQUAL + QuotedStr(LeftStr(SourceArray[0, 1], 10));
 
             // Insert statement for new data
-            Transaction:=DataTables.TransactTemp;
+            var Transaction:=DataTables.TransactTemp;
             Transaction:=StringReplace(Transaction, '{CommonSelect}', DataTables.CommonSelect, [rfReplaceAll]);
             Transaction:=StringReplace(Transaction, '{CommonDelete}', DataTables.CommonDelete, [rfReplaceAll]);
             Transaction:=StringReplace(Transaction, '{DestTable}',    DestTable,     [rfReplaceAll]);
