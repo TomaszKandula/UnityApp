@@ -55,6 +55,7 @@ implementation
 
 uses
     View.Main,
+    Unity.SessionService,
     Unity.Settings;
 
 
@@ -74,9 +75,8 @@ end;
 procedure TEventForm.LoadEventLog;
 begin
 
-    var Settings: ISettings:=TSettings.Create;
     try
-        EventMemo.Lines.LoadFromFile(Settings.GetPathEventLog);
+        EventMemo.Lines.LoadFromFile(SessionService.SessionLog);
     except
         on E: Exception do
             EventMemo.Lines.Text:='Cannot load event log file. Error has been thorwn: ' + E.Message;

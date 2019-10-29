@@ -53,9 +53,8 @@ uses
     IPPeerClient,
     REST.Client,
     REST.Types,
-    CDO_TLB,
     SHDocVw,
-    Bcrypt,
+    BCrypt,
     uCEFChromium,
     uCEFWindowParent,
     uCEFChromiumWindow,
@@ -902,7 +901,7 @@ type
         function  ShowReport(ReportNumber: cardinal): cardinal;
 
         procedure ClearAgeSummary();
-        procedure GetDetails(var Grid: TStringGrid); // make async?
+        procedure UpdateOpenItemsDetails(var Grid: TStringGrid);
         procedure LoadColumnWidth(var Grid: TStringGrid);
 
         procedure MapGroup3(var Grid: TStringGrid; var Source: TStringGrid);
@@ -981,7 +980,7 @@ type
         // ----------------------------
 
         procedure MakeAgeViewSQLAsync_Callback(LastError: TLastError);
-        procedure MakeAgeViewCSVAsync_Callback(LastError: TLastError);
+        procedure MakeAgeViewCSVAsync_Callback(CsvContent: TStringList; LastError: TLastError);
         procedure ReadAgeViewAsync_Callback(ActionMode: TLoading; ReturnedData: TStringGrid; LastError: TLastError);
 
         // ------------------------------
@@ -1075,6 +1074,7 @@ begin
         THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
         THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
         THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
+        ThreadFileLog.Log('[OpenAddressBookAsync_Callback]: Error has been thrown "' + LastError.ErrorMessage + '".');
         Exit();
     end;
 
@@ -1092,6 +1092,7 @@ begin
 
     THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
     THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
+    ThreadFileLog.Log('[OpenAddressBookAsync_Callback]: Address Book has been opened.');
 
 end;
 
@@ -1100,8 +1101,19 @@ procedure TMainForm.UpdateAddressBookAsync_Callback(LastError: TLastError);
 begin
 
     case LastError.IsSucceeded of
-        True:  THelpers.MsgCall(TAppMessage.Info, LastError.ErrorMessage);
-        False: THelpers.MsgCall(TAppMessage.Warn, LastError.ErrorMessage);
+
+        True:
+        begin
+            THelpers.MsgCall(TAppMessage.Info, LastError.ErrorMessage);
+            ThreadFileLog.Log('[UpdateAddressBookAsync_Callback]: Address Book updated.');
+        end;
+
+        False:
+        begin
+            THelpers.MsgCall(TAppMessage.Warn, LastError.ErrorMessage);
+            ThreadFileLog.Log('[UpdateAddressBookAsync_Callback]: Adddress Book has thrown an error "' + LastError.ErrorMessage + '".');
+        end;
+
     end;
 
 end;
@@ -1113,8 +1125,19 @@ begin
     THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
 
     case LastError.IsSucceeded of
-        True:  THelpers.MsgCall(TAppMessage.Info, LastError.ErrorMessage);
-        False: THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
+
+        True:
+        begin
+            THelpers.MsgCall(TAppMessage.Info, LastError.ErrorMessage);
+            ThreadFileLog.Log('[AddToAddressBookAsync_Callback]: Item has been added to Adddress Book.');
+        end;
+
+        False:
+        begin
+            THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
+            ThreadFileLog.Log('[AddToAddressBookAsync_Callback]: Adddress Book has thrown an error "' + LastError.ErrorMessage + '".');
+        end;
+
     end;
 
 end;
@@ -1130,10 +1153,12 @@ begin
     if not LastError.IsSucceeded then
     begin
         THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
+        ThreadFileLog.Log('[EditDailyComment_Callback]: Error has been thrown "' + LastError.ErrorMessage + '".');
         Exit();
     end;
 
     ActionsForm.UpdateHistory(ActionsForm.HistoryGrid);
+    ThreadFileLog.Log('[EditDailyComment_Callback]: Calling "UpdateHistory".');
 
 end;
 
@@ -1144,6 +1169,7 @@ begin
     if not LastError.IsSucceeded then
     begin
         THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
+        ThreadFileLog.Log('[EditGeneralComment_Callback]: Error has been thrown "' + LastError.ErrorMessage + '".');
         Exit();
     end;
 
@@ -1162,6 +1188,7 @@ begin
         THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
         THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
         THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
+        ThreadFileLog.Log('[MakeAgeViewSQLAsync_Callback]: Error has been thrown "' + LastError.ErrorMessage + '".');
         Exit();
     end;
 
@@ -1174,28 +1201,40 @@ begin
 
     var Debtors: IDebtors:=TDebtors.Create;
     Debtors.ReadAgeViewAsync(TLoading.NullParameter, TSorting.TMode.Ranges, MainForm.FGroupIdSel, MainForm.FAgeDateSel, MainForm.ReadAgeViewAsync_Callback);
+    ThreadFileLog.Log('[MakeAgeViewSQLAsync_Callback]: Aging has been generated, loading to AgeView...');
 
 end;
 
 
-procedure TMainForm.MakeAgeViewCSVAsync_Callback(LastError: TLastError);
+procedure TMainForm.MakeAgeViewCSVAsync_Callback(CsvContent: TStringList; LastError: TLastError);
 begin
+
+    EditGroupName.Enabled:=False;
+    EditGroupID.Enabled:=False;
+    cbDump.Enabled:=False;
+    EditGroupName.Text:='';
+    EditGroupID.Text  :='';
+    cbDump.Checked:=False;
 
     if not LastError.IsSucceeded then
     begin
         THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
         THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
         THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
+        ThreadFileLog.Log('[MakeAgeViewCSVAsync_Callback]: Error has been thrown "' + LastError.ErrorMessage + '".');
         Exit();
     end;
 
+    // ---------------------------
+    // Put CSV aging data to file.
+    // ---------------------------
 
-    //...
-
-
+    if CSVExport.Execute then
+        CsvContent.SaveToFile(CSVExport.FileName);
 
     THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
     THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
+    ThreadFileLog.Log('[MakeAgeViewCSVAsync_Callback]: Aging has been saved to CSV file.');
 
 end;
 
@@ -1208,6 +1247,7 @@ begin
         THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
         THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
         THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
+        ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Error has been thrown "' + LastError.ErrorMessage + '".');
         Exit();
     end;
 
@@ -1236,12 +1276,11 @@ begin
     // -------------------------
 
     MainForm.ClearAgeSummary();
-    MainForm.ComputeAgeSummary(MainForm.sgAgeView);     // make async!
+    MainForm.ComputeAgeSummary(MainForm.sgAgeView); // make async!
 
     MainForm.ComputeRiskClass(MainForm.sgAgeView);
     MainForm.UpdateAgeSummary;
-
-    MainForm.GetDetails(MainForm.sgCompanyData);        // make async?
+    MainForm.UpdateOpenItemsDetails(MainForm.sgCompanyData);
 
     ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Age View summary information updated.');
 
@@ -1266,7 +1305,6 @@ begin
     THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
     THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
     ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: VCL unlocked and repainted.');
-
 
     // ----------------------------------------------------
     // Call open items loading after aging is presented.
@@ -1302,6 +1340,7 @@ begin
         THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
         THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
         THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
+        ThreadFileLog.Log('[ScanOpenItemsAsync_Callback]: Error has been thrown "' + LastError.ErrorMessage + '".');
         Exit();
     end;
 
@@ -1342,6 +1381,7 @@ begin
         THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
         THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
         THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
+        ThreadFileLog.Log('[ReadOpenItemsAsync_Callback]: Error has been thrown "' + LastError.ErrorMessage + '".');
         Exit();
     end;
 
@@ -2213,7 +2253,7 @@ begin
 end;
 
 
-procedure TMainForm.GetDetails(var Grid: TStringGrid);
+procedure TMainForm.UpdateOpenItemsDetails(var Grid: TStringGrid);
 begin
 
     // Clear grid
@@ -6603,8 +6643,6 @@ end;
 procedure TMainForm.btnMakeGroupClick(Sender: TObject);
 begin
 
-    cbDump.Checked:=False;
-
     if not(FIsConnected) then
     begin
         THelpers.MsgCall(TAppMessage.Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
@@ -6617,19 +6655,12 @@ begin
     // Only administrator is allowed
     if MainForm.FAccessLevel = TUserAccess.Admin then
     begin
-
-        if PanelGroupName.Enabled then
-        begin
-            PanelGroupName.Enabled:=False;
-        end
-        else
-        begin
-            PanelGroupName.Enabled:=True;
-            // Suggest the same group name and group ID
-            EditGroupName.Text:=FGroupNmSel;
-            EditGroupID.Text  :=FGroupIdSel;
-        end
-
+        EditGroupName.Enabled:=True;
+        EditGroupID.Enabled:=True;
+        cbDump.Enabled:=True;
+        btnMakeGroupAge.Enabled:=True;
+        EditGroupName.Text:=FGroupNmSel;
+        EditGroupID.Text:=FGroupIdSel;
     end
     else
     begin
@@ -6653,9 +6684,6 @@ begin
         // ----------------------------------------------------
         // Start thread with no parameters passed to an object.
         // ----------------------------------------------------
-
-        PanelGroupName.Visible:=False;
-        ReloadCover.Visible   :=False;
 
         var SelectedGroupId: string;
 

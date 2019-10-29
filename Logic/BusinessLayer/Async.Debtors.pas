@@ -35,14 +35,15 @@ type
     // Callback signatures.
     // --------------------
 
-    TMakeAgeViewAsync = procedure(LastError: TLastError) of object;
-    TReadAgeViewAsync = procedure(ActionMode: TLoading; ReturnedData: TStringGrid; LastError: TLastError) of object;
+    TMakeAgeViewSQLAsync = procedure(LastError: TLastError) of object;
+    TMakeAgeViewCSVAsync = procedure(CsvContent: TStringList; LastError: TLastError) of object;
+    TReadAgeViewAsync    = procedure(ActionMode: TLoading; ReturnedData: TStringGrid; LastError: TLastError) of object;
 
 
     IDebtors = interface(IInterface)
     ['{194FE2BE-386E-499E-93FB-0299DA53A70A}']
-        procedure MakeAgeViewSQLAsync(OpenAmount: double; GroupID: string; SourceGrid: TStringGrid; CompanyData: TStringGrid; Callback: TMakeAgeViewAsync);
-        procedure MakeAgeViewCSVAsync(OpenAmount: double; GroupID: string; SourceGrid: TStringGrid; CompanyData: TStringGrid; Callback: TMakeAgeViewAsync);
+        procedure MakeAgeViewSQLAsync(OpenAmount: double; GroupID: string; SourceGrid: TStringGrid; CompanyData: TStringGrid; Callback: TMakeAgeViewSQLAsync);
+        procedure MakeAgeViewCSVAsync(OpenAmount: double; GroupID: string; SourceGrid: TStringGrid; CompanyData: TStringGrid; Callback: TMakeAgeViewCSVAsync);
         procedure ReadAgeViewAsync(ActionMode: TLoading; SortMode: integer; GroupIdSel: string; AgeDateSel: string; Callback: TReadAgeViewAsync);
     end;
 
@@ -53,8 +54,8 @@ type
         function FMakeAgeView(OSAmount: double; GroupID: string; SourceGrid: TStringGrid; CompanyData: TStringGrid): TALists;
         procedure FWriteAgeView(DestTable: string; GroupID: string; SourceArray: TALists);
     public
-        procedure MakeAgeViewSQLAsync(OpenAmount: double; GroupID: string; SourceGrid: TStringGrid; CompanyData: TStringGrid; Callback: TMakeAgeViewAsync);
-        procedure MakeAgeViewCSVAsync(OpenAmount: double; GroupID: string; SourceGrid: TStringGrid; CompanyData: TStringGrid; Callback: TMakeAgeViewAsync);
+        procedure MakeAgeViewSQLAsync(OpenAmount: double; GroupID: string; SourceGrid: TStringGrid; CompanyData: TStringGrid; Callback: TMakeAgeViewSQLAsync);
+        procedure MakeAgeViewCSVAsync(OpenAmount: double; GroupID: string; SourceGrid: TStringGrid; CompanyData: TStringGrid; Callback: TMakeAgeViewCSVAsync);
         procedure ReadAgeViewAsync(ActionMode: TLoading; SortMode: integer; GroupIdSel: string; AgeDateSel: string; Callback: TReadAgeViewAsync);
     end;
 
@@ -85,14 +86,13 @@ uses
 // *Remove when SQL is replaced by API.
 // ------------------------------------
 
-procedure TDebtors.MakeAgeViewSQLAsync(OpenAmount: double; GroupID: string; SourceGrid: TStringGrid; CompanyData: TStringGrid; Callback: TMakeAgeViewAsync);
+procedure TDebtors.MakeAgeViewSQLAsync(OpenAmount: double; GroupID: string; SourceGrid: TStringGrid; CompanyData: TStringGrid; Callback: TMakeAgeViewSQLAsync);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
         var LastError: TLastError;
-        LastError.IsSucceeded:=True;
         try
 
             FWriteAgeView(
@@ -100,6 +100,8 @@ begin
                 GroupID,
                 FMakeAgeView(OpenAmount, GroupID, SourceGrid, CompanyData)
             );
+
+            LastError.IsSucceeded:=True;
 
         except
             on E: Exception do
@@ -128,22 +130,19 @@ end;
 // *Remove when SQL is replaced by API.
 // ------------------------------------
 
-procedure TDebtors.MakeAgeViewCSVAsync(OpenAmount: double; GroupID: string; SourceGrid: TStringGrid; CompanyData: TStringGrid; Callback: TMakeAgeViewAsync);
+procedure TDebtors.MakeAgeViewCSVAsync(OpenAmount: double; GroupID: string; SourceGrid: TStringGrid; CompanyData: TStringGrid; Callback: TMakeAgeViewCSVAsync);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        //FMakeAgeView(OpenAmount, GroupID, SourceGrid, CompanyData);
-
-
-
-
-
+        var LastError: TLastError;
+        var AgingForCSV: TALists:=FMakeAgeView(OpenAmount, GroupID, SourceGrid, CompanyData);
+        LastError.IsSucceeded:=True;
 
         TThread.Synchronize(nil, procedure
         begin
-
+            Callback(THelpers.ExportToCSV(AgingForCsv, ''), LastError);
         end);
 
     end);
@@ -279,11 +278,11 @@ function TDebtors.FMakeAgeView(OSAmount: double; GroupID: string; SourceGrid: TS
 
     const
 
-        // --------------------------------------------------------
-        // Warning! Below must be aligned with open items source
-        //          and destination table in database for age view.
-        //          Please refer to the manual.
-        // --------------------------------------------------------
+        // ----------------------------------------------------------
+        // Warning! | Below must be aligned with open items source
+        // Tight    | and destination table in database for age view.
+        // Coupling | Please refer to the manual.
+        // ----------------------------------------------------------
 
         // Defines source columns to be transferred to age view 'as is'
         oiCol: array[0..16] of integer = (6, 2, 15, 14, 16, 18, 27, 1,  12, 13, 30, 28, 34, 35, 36, 37, 38);

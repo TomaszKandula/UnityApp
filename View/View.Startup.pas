@@ -107,7 +107,6 @@ uses
     Handler.Rest,
     Handler.Database,
     Handler.Account,
-    Handler.Connection,
     View.Main,
     DbModel;
 

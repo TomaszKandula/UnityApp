@@ -42,7 +42,7 @@ type
         class function  ConvertCoCode(CoNumber: string; Prefix: string; mode: integer): string; static;
         class function  GetCoCode(CoPos: integer; GroupId: string): string; static;
         class procedure QuickSortExt(var A: array of double; var L: array of integer; iLo, iHi: integer; ASC: boolean); static;
-        class procedure ExportToCSV(FileName: string; SourceArray: TALists); static;
+        class function  ExportToCSV(SourceArray: TALists; FileName: string = ''): TStringList; static;
         class function  IsVoType(VoType: string): boolean; static;
     end;
 
@@ -375,23 +375,31 @@ begin
 end;
 
 
-class procedure THelpers.ExportToCSV(FileName: string; SourceArray: TALists);
+class function THelpers.ExportToCSV(SourceArray: TALists; FileName: string = ''): TStringList;
 begin
 
     var TempStr: string;
     var SL: TStringList:=TStringList.Create;
     try
+
         SL.Clear;
+
         for var iCNT: integer:=0 to High(SourceArray) - 1 do
         begin
+
             for var jCNT: integer:=0 to High(SourceArray[1]) do
                 TempStr:=TempStr + SourceArray[iCNT, jCNT] + ';';
 
             SL.Add(TempStr);
             TempStr:='';
+
         end;
-        SL.SaveToFile(FileName);
+
+        if FileName <> '' then
+            SL.SaveToFile(FileName);
+
     finally
+        Result:=SL;
         SL.Free;
     end;
 

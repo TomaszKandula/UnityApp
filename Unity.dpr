@@ -1,27 +1,39 @@
 program Unity;
 
 
-// ============================================================= //
-// Application full name:  Unity for Debt Management.            //
-// Application shortname:  Unity.                                //
-// Major version name:     Cadiz.                                //
-// ------------------------------------------------------------- //
-// Introduced:             Mid 2016 (concept).                   //
-// First test release:     2017-07-10.                           //
-// Last stable release:    2019-08-01 (production).              //
-// ------------------------------------------------------------- //
-// IDE:                    RAD Studio.                           //
-// Language:               Delphi 10.3.1.                        //
-// ------------------------------------------------------------- //
-// Target system:          Windows 7 & 10 application.           //
-// Framework used:         VCL (created by Borland).             //
-// Win32 API direct calls: Yes.                                  //
-// Require web services:   Yes, cloud based (Azure).             //
-// Active Directory:       Yes.                                  //
-// ------------------------------------------------------------- //
-// Copyright (C) 2018-2019 Tomasz Kandula/DFDS Polska sp. z o.o. //
-// All rights reserved.                                          //
-// ============================================================= //
+// ====================================================================== //
+// Application full name:  Unity for Debt Management.                     //
+// Application shortname:  Unity.                                         //
+// Major version name:     Cadiz.                                         //
+// ---------------------------------------------------------------------- //
+// Introduced:             Mid 2016 (concept).                            //
+// First test release:     2017-07-10.                                    //
+// Last stable release:    2019-08-01 (production).                       //
+// ---------------------------------------------------------------------- //
+// IDE:                    RAD Studio (2019).                             //
+// Language:               Delphi* 10.3.2.                                //
+// ---------------------------------------------------------------------- //
+// Target system:          Windows 10 application.                        //
+// Framework used:         VCL (created by Borland).                      //
+// Win32 API direct calls: Yes.                                           //
+// Require web services:   Yes, cloud based (Azure).                      //
+// Active Directory:       Yes.                                           //
+// Chromium engine:        CEF4Delphi.                                    //
+// ---------------------------------------------------------------------- //
+// Copyright (C) 2018-2019 Tomasz Kandula/DFDS Polska sp. z o.o.          //
+// All rights reserved.                                                   //
+// ====================================================================== //
+// *Delphi language in version 10.3.x uses inline variables               //
+// and therefore it is not backward compatibile with older versions.      //
+// ====================================================================== //
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,        //
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF     //
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. //
+// IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR      //
+// OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,  //
+// ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR  //
+// OTHER DEALINGS IN THE SOFTWARE.                                        //
+// =======================================================================//
 
 
 {$SetPEFlags $0020}
@@ -152,9 +164,9 @@ begin
     FormatSettings                  :=RegSettings;
     Application.UpdateFormatSettings:=False;
 
-    // -------------------------------------------
-    // Open settings file and decode its contents.
-    // -------------------------------------------
+    // ------------------------------------------
+    // Open settings file and decode its content.
+    // ------------------------------------------
 
     var Settings: ISettings:=TSettings.Create();
     if not Settings.CheckConfigFile then

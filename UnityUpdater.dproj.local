@@ -5,9 +5,9 @@
     <Transaction>2019/04/02 15:57:20.000.319,=C:\Users\Tomek\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
     <Transaction>2019/05/23 17:05:24.000.057,=C:\Users\Tomek\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
     <Transaction>2019/07/11 15:27:58.000.200,=C:\Users\Tomek\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
-    <Transaction>2019/07/11 15:30:13.000.450,C:\Users\Tomek\Documents\Embarcadero\Studio\Projects\Unit1.dfm=I:\Projects\Unity Project\__Unity\View\View.Updater.dfm</Transaction>
-    <Transaction>2019/07/11 15:30:13.000.450,C:\Users\Tomek\Documents\Embarcadero\Studio\Projects\Unit1.pas=I:\Projects\Unity Project\__Unity\View\View.Updater.pas</Transaction>
-    <Transaction>2019/07/11 15:30:48.000.850,C:\Users\Tomek\Documents\Embarcadero\Studio\Projects\Project1.dproj=I:\Projects\Unity Project\__Unity\UnityUpdater.dproj</Transaction>
+    <Transaction>2019/07/11 15:30:13.000.450,I:\Projects\Unity Project\__Unity\View\View.Updater.dfm=C:\Users\Tomek\Documents\Embarcadero\Studio\Projects\Unit1.dfm</Transaction>
+    <Transaction>2019/07/11 15:30:13.000.450,I:\Projects\Unity Project\__Unity\View\View.Updater.pas=C:\Users\Tomek\Documents\Embarcadero\Studio\Projects\Unit1.pas</Transaction>
+    <Transaction>2019/07/11 15:30:48.000.850,I:\Projects\Unity Project\__Unity\UnityUpdater.dproj=C:\Users\Tomek\Documents\Embarcadero\Studio\Projects\Project1.dproj</Transaction>
   </Transactions>
 	<ActiveMobileDevice>
 		<NoProfile iOSSimulator="iPhone5"/>
