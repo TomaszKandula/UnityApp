@@ -2,8 +2,8 @@ unit View.MassMailer;
 
 // --------------------------------------------------------------------------------------
 // This is application view (GUI) that can have direct calls to logic layer interface(s).
-// Calls must carry reference(s) to callback method that is defined the same as callback
-// signature. All views must use Lazy Initialization pattern.
+// Calls must carry reference(s) to callback method that is defined same as callback
+// signature (delegate). All views use lazy initialization pattern.
 // --------------------------------------------------------------------------------------
 
 interface
@@ -97,9 +97,8 @@ type
         procedure FormKeyPress(Sender: TObject; var Key: Char);
         procedure btnDelBeginClick(Sender: TObject);
         procedure btnDelEndClick(Sender: TObject);
-    protected
+    strict private
         var FFields: TSendAccountStatementFields;
-    private
         var FThreadCount: integer;
         function  GetEmailAddress(Scuid: string): string;
         procedure SetEmailAddresses(List: TListView);
@@ -107,13 +106,6 @@ type
         procedure ExecuteMailer;
     public
         property ThreadCount: integer read FThreadCount write FThreadCount;
-
-        // ------------------
-        // Callbacks methods.
-        // ------------------
-
-        //...
-
     end;
 
 

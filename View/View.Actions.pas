@@ -2,8 +2,8 @@ unit View.Actions;
 
 // --------------------------------------------------------------------------------------
 // This is application view (GUI) that can have direct calls to logic layer interface(s).
-// Calls must carry reference(s) to callback method that is defined the same as callback
-// signature. All views must use Lazy Initialization pattern.
+// Calls must carry reference(s) to callback method that is defined same as callback
+// signature (delegate). All views use lazy initialization pattern.
 // --------------------------------------------------------------------------------------
 
 interface
@@ -178,26 +178,25 @@ type
         procedure btnSaveCustDetailsMouseEnter(Sender: TObject);
         procedure btnSaveCustDetailsMouseLeave(Sender: TObject);
         procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-    protected
+    strict private
+        var FHistoryGrid:          boolean;
+        var FCUID:                 string;
+        var FSCUID:                string;
+        var FBranch:               string;
+        var FBanksHtml:            string;
+        var FCoCode:               string;
+        var FCustName:             string;
+        var FCustNumber:           string;
+        var FLbuName:              string;
+        var FLbuAddress:           string;
+        var FLbuPhone:             string;
+        var FLbuSendFrom:          string;
         var FSrcColumns:           TAIntigers;
         var FAbUpdateFields:       TAddressBookUpdateFields;
         var FDailyCommentFields:   TDailyCommentFields;
         var FGeneralCommentFields: TGeneralCommentFields;
         var FOpenItemsTotal:       TOpenItemsTotal;
         var FStatementFields:      TSendAccountStatementFields;
-    private
-        var FHistoryGrid:         boolean;
-        var FCUID:                string;
-        var FSCUID:               string;
-        var FBranch:              string;
-        var FBanksHtml:           string;
-        var FCoCode:              string;
-        var FCustName:            string;
-        var FCustNumber:          string;
-        var FLbuName:             string;
-        var FLbuAddress:          string;
-        var FLbuPhone:            string;
-        var FLbuSendFrom:         string;
         procedure GetAndDisplay;
         function  GetRunningApps(SearchName: string): boolean;
         procedure UpdateOpenItems(OpenItemsDest, OpenItemsSrc: TStringGrid);

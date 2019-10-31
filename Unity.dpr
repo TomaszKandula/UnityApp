@@ -20,7 +20,7 @@ program Unity;
 // Active Directory:       Yes.                                           //
 // Chromium engine:        CEF4Delphi.                                    //
 // ---------------------------------------------------------------------- //
-// Copyright (C) 2018-2019 Tomasz Kandula/DFDS Polska sp. z o.o.          //
+// Copyright (C) 2016-2019 Tomasz Kandula/DFDS Polska sp. z o.o.          //
 // All rights reserved.                                                   //
 // ====================================================================== //
 // *Delphi language in version 10.3.x uses inline variables               //
@@ -129,6 +129,7 @@ uses
     View.InvoiceList            in 'View\View.InvoiceList.pas' {InvoicesForm},
     View.MassMailer             in 'View\View.MassMailer.pas' {MassMailerForm},
     View.PhoneList              in 'View\View.PhoneList.pas' {PhoneListForm},
+	View.Reports                in 'View\View.Reports.pas' {ReportsForm},
     View.Queries                in 'View\View.Queries.pas' {QmsForm},
     View.SendStatement          in 'View\View.SendStatement.pas' {SendForm},
     View.Startup                in 'View\View.Startup.pas' {StartupForm},

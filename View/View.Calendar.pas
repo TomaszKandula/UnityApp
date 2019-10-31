@@ -2,8 +2,8 @@ unit View.Calendar;
 
 // --------------------------------------------------------------------------------------
 // This is application view (GUI) that can have direct calls to logic layer interface(s).
-// Calls must carry reference(s) to callback method that is defined the same as callback
-// signature. All views must use Lazy Initialization pattern.
+// Calls must carry reference(s) to callback method that is defined same as callback
+// signature (delegate). All views use lazy initialization pattern.
 // --------------------------------------------------------------------------------------
 
 interface
@@ -48,7 +48,7 @@ type
         procedure DaysSevenClick(Sender: TObject);
         procedure MyCalendarClick(Sender: TObject);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
-    private
+    strict private
         var FGeneralCommentFields: TGeneralCommentFields;
         function MakeMyDay(Increment: integer): TDate;
         function IsWeekend(const DT: TDateTime): Boolean;

@@ -2,8 +2,8 @@ unit View.GridFilter;
 
 // --------------------------------------------------------------------------------------
 // This is application view (GUI) that can have direct calls to logic layer interface(s).
-// Calls must carry reference(s) to callback method that is defined the same as callback
-// signature. All views must use Lazy Initialization pattern.
+// Calls must carry reference(s) to callback method that is defined same as callback
+// signature (delegate). All views use lazy initialization pattern.
 // --------------------------------------------------------------------------------------
 
 interface
@@ -53,7 +53,7 @@ type
         procedure btnRemoveClick(Sender: TObject);
         procedure FilterListClick(Sender: TObject);
         procedure FilterListClickCheck(Sender: TObject);
-    private
+    strict private
         var CheckEvent :  boolean;
         // Holds values and theirs state
         var INF7       :  TALists;

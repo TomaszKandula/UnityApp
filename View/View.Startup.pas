@@ -2,8 +2,8 @@ unit View.Startup;
 
 // --------------------------------------------------------------------------------------
 // This is application view (GUI) that can have direct calls to logic layer interface(s).
-// Calls must carry reference(s) to callback method that is defined the same as callback
-// signature. All views must use Lazy Initialization pattern.
+// Calls must carry reference(s) to callback method that is defined same as callback
+// signature (delegate). All views use lazy initialization pattern.
 // --------------------------------------------------------------------------------------
 
 interface
@@ -57,10 +57,10 @@ type
         procedure LabelHideClick(Sender: TObject);
         procedure ShapeBackgroundMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     protected
+        procedure CreateParams(var Params: TCreateParams); override;
+    strict private
         var LastErrorMsg: string;
         var DbConnection: TADOConnection; {for sql server connection check on startup}
-        procedure CreateParams(var Params: TCreateParams); override;
-    private
         var FIsAppInitialized: boolean;
         var FCurrentSessionLog: string;
         procedure AnimateProgressBar(AniFrom: integer; AniTo: integer; ProgressBar: TGauge; Speed: cardinal = 5);
@@ -264,8 +264,8 @@ end;
 /// </summary>
 /// <remarks>
 /// We may operate on visual components from worker thread instead of main thread. Although, VCL is not
-/// thread safe we should refrain from doing that, but as long as we do not display visual content/update
-/// its visual state, we can safely perform operations on VCLs.
+/// thread safe we should refrain from doing that, but as long as we do not display visual content and/or
+/// update its visual state, we can safely perform operations on VCLs from worker thread.
 /// </remarks>
 
 procedure TStartupForm.ApplicationStart();

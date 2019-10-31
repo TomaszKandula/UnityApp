@@ -1,15 +1,15 @@
 unit Unity.EventLogger;
 
-// ------------------------------------------------------------
+// ---------------------------------------------------------------
 // Application event logger. Can be referenced by anyone.
 // Cannot hold references to View or Logic.
 // Note:
-//     We do use only one instance of the class for application
+//     We do use only one instance of the class during application
 //     life time because we must handle parallel calls and save
 //     application events to one session file. Therefore, it is
 //     necessary to use threadpools and queues where multiple
 //     instances cannot be used.
-// ------------------------------------------------------------
+// ---------------------------------------------------------------
 
 interface
 

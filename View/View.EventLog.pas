@@ -2,8 +2,8 @@ unit View.EventLog;
 
 // --------------------------------------------------------------------------------------
 // This is application view (GUI) that can have direct calls to logic layer interface(s).
-// Calls must carry reference(s) to callback method that is defined the same as callback
-// signature. All views must use Lazy Initialization pattern.
+// Calls must carry reference(s) to callback method that is defined same as callback
+// signature (delegate). All views use lazy initialization pattern.
 // --------------------------------------------------------------------------------------
 
 interface
@@ -39,7 +39,7 @@ type
         procedure FormShow(Sender: TObject);
         procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
-    private
+    strict private
         procedure LoadEventLog;
     end;
 

@@ -13,6 +13,7 @@ uses
     System.Classes,
     Winapi.Messages,
     Winapi.Windows,
+    Winapi.ShellAPI,
     Vcl.ExtCtrls,
     Vcl.Forms,
     Vcl.Menus,
@@ -44,6 +45,7 @@ type
         class procedure QuickSortExt(var A: array of double; var L: array of integer; iLo, iHi: integer; ASC: boolean); static;
         class function  ExportToCSV(SourceArray: TALists; FileName: string = ''): TStringList; static;
         class function  IsVoType(VoType: string): boolean; static;
+        class function  ShowReport(ReportNumber: cardinal; CurrentForm: TForm): cardinal; static;
     end;
 
 
@@ -427,6 +429,24 @@ begin
     finally
         tsVAL.Free;
     end;
+
+end;
+
+
+class function THelpers.ShowReport(ReportNumber: cardinal; CurrentForm: TForm): cardinal;
+begin
+
+    var Settings: ISettings:=TSettings.Create;
+    var AppParam: string:=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'REPORT_Report' + IntToStr(ReportNumber), 'about:blank');
+
+    Result:=ShellExecute(
+        CurrentForm.Handle,
+        'open',
+        PChar(Settings.DirApplication + TCommon.UnityReader),
+        PChar(AppParam),
+        nil,
+        SW_SHOWNORMAL
+    );
 
 end;
 

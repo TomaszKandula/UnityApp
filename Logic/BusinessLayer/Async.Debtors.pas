@@ -107,7 +107,7 @@ begin
             on E: Exception do
             begin
                 LastError.IsSucceeded:=False;
-                LastError.ErrorMessage:='[MakeAgeViewSQLAsync] Cannot execute. Error has been thrown: ' + E.Message;
+                LastError.ErrorMessage:='[MakeAgeViewSQLAsync]: Cannot execute. Error has been thrown: ' + E.Message;
                 ThreadFileLog.Log(LastError.ErrorMessage);
             end;
 
@@ -136,13 +136,42 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var LastError: TLastError;
-        var AgingForCSV: TALists:=FMakeAgeView(OpenAmount, GroupID, SourceGrid, CompanyData);
-        LastError.IsSucceeded:=True;
+        var LastError:   TLastError;
+        var AgingForCSV: TALists;
+        var AgingInList: TStringList:=TStringList.Create();
+        try
+
+            AgingForCSV:=FMakeAgeView(OpenAmount, GroupID, SourceGrid, CompanyData);
+
+            var TempStr: string;
+            for var iCNT: integer:=0 to High(AgingForCSV) - 1 do
+            begin
+
+                for var jCNT: integer:=0 to High(AgingForCSV[1]) do
+                    TempStr:=TempStr + AgingForCSV[iCNT, jCNT] + ';';
+
+                AgingInList.Add(TempStr);
+                TempStr:='';
+
+            end;
+
+            SetLength(AgingForCSV, 0);
+            LastError.IsSucceeded:=True;
+
+        except
+            on E: Exception do
+            begin
+                LastError.IsSucceeded:=False;
+                LastError.ErrorMessage:='[MakeAgeViewCSVAsync]: Cannot execute. Error has been thrown: ' + E.Message;
+                ThreadFileLog.Log(LastError.ErrorMessage);
+            end;
+
+        end;
 
         TThread.Synchronize(nil, procedure
         begin
-            Callback(THelpers.ExportToCSV(AgingForCsv, ''), LastError);
+            Callback(AgingInList, LastError);
+            if Assigned(AgingInList) then AgingInList.Free();
         end);
 
     end);
@@ -177,8 +206,8 @@ begin
                 if not CheckColumns then
                 begin
                     LastError.IsSucceeded:=False;
-                    LastError.ErrorMessage:='[ReadAgeViewAsync] Cannot load columns. Please contact IT support.';
-                    ThreadFileLog.Log('[ReadAgeViewAsync] Cannot load columns. Please contact IT support.');
+                    LastError.ErrorMessage:='[ReadAgeViewAsync]: Cannot load columns. Please contact IT support.';
+                    ThreadFileLog.Log('[ReadAgeViewAsync]: Cannot load columns. Please contact IT support.');
                 end
                 else
                 begin
@@ -205,8 +234,8 @@ begin
                 on E: Exception do
                 begin
                     LastError.IsSucceeded:=False;
-                    LastError.ErrorMessage:='[ReadAgeViewAsync] Cannot execute. Error has been thrown: ' + E.Message;
-                    ThreadFileLog.Log('[ReadAgeViewAsync] Cannot execute. Error has been thrown: ' + E.Message);
+                    LastError.ErrorMessage:='[ReadAgeViewAsync]: Cannot execute. Error has been thrown: ' + E.Message;
+                    ThreadFileLog.Log('[ReadAgeViewAsync]: Cannot execute. Error has been thrown: ' + E.Message);
                 end;
 
             end;
@@ -302,13 +331,13 @@ function TDebtors.FMakeAgeView(OSAmount: double; GroupID: string; SourceGrid: TS
         // --------------------------------------------------------------------------------------------------
         // 'Pmtstat' is counted between due date and current date, thus it must be corrected for cutoff date.
         // example being:
-        //   On monday we make aging for Friday, threrfore bias equals 3 and cut-off is 'cdatetime' - 3.
-        //   non-monday goes with bias = 1, thus i.e. Wednesday - 1.
+        //   On monday we make aging for Friday, therefore bias equals 3 and cut-off is 'CDateTime' - 3.
+        //   non-Monday goes with bias = 1, thus i.e. Wednesday - 1.
         //   However, open item column 'payment status' contains with calculation:
         //     'pmtstat' = Due date - Today, thus:
         //     'pmtstat' = 2017-10-10 - 2017-10-23 = -13 (overdue).
         //   Cut-off date is 2017-10-23 (Monday) - 3 = 2017-10-20 (Friday).
-        //   This is why we compute 'pmtstat' = -13 + 3 = -10 (between 8 and 30).
+        //   This is why we compute 'pmtstat' this way: -13 + 3 = -10 (between 8 and 30).
         // --------------------------------------------------------------------------------------------------
 
         pmtstat:=pmtstat + bias;

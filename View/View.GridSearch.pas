@@ -2,8 +2,8 @@ unit View.GridSearch;
 
 // --------------------------------------------------------------------------------------
 // This is application view (GUI) that can have direct calls to logic layer interface(s).
-// Calls must carry reference(s) to callback method that is defined the same as callback
-// signature. All views must use Lazy Initialization pattern.
+// Calls must carry reference(s) to callback method that is defined same as callback
+// signature (delegate). All views use lazy initialization pattern.
 // --------------------------------------------------------------------------------------
 
 interface
@@ -52,7 +52,7 @@ type
         procedure btnUnhideClick(Sender: TObject);
         procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
-    private
+    strict private
         var FFoundRow:     integer;
         var FIsNext:       boolean;
         var FGroupping:    TAIntigers;

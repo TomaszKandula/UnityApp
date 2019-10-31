@@ -2,8 +2,8 @@ unit View.AwaitScreen;
 
 // --------------------------------------------------------------------------------------
 // This is application view (GUI) that can have direct calls to logic layer interface(s).
-// Calls must carry reference(s) to callback method that is defined the same as callback
-// signature. All views must use Lazy Initialization pattern.
+// Calls must carry reference(s) to callback method that is defined same as callback
+// signature (delegate). All views use lazy initialization pattern.
 // --------------------------------------------------------------------------------------
 
 interface
@@ -72,14 +72,25 @@ end;
 
 procedure TAwaitForm.FormCreate(Sender: TObject);
 begin
+
     PanelAwaitForm.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+
+    // ------------------------------------------------------
+    // Mandatory form settings for manual window positioning.
+    // ------------------------------------------------------
+
+    Position:=poDesigned; (* The form appears positioned on the screen and with the same height and width as it had at design time. *)
+    DefaultMonitor:=dmActiveForm; (* The form appears on the same monitor as the currently active form. *)
+    FormStyle:=fsStayOnTop; (* Always on top of the current window. Note: do not display any dialogs before closing this window. *)
+
 end;
 
 
 procedure TAwaitForm.FormShow(Sender: TObject);
 begin
 
-    // Make sure Await window is always displayed in the centre of main form
+
+    // Make sure the window is always displayed in the centre of main form
     AwaitForm.Top :=MainForm.Top  + (MainForm.Height div 2) - (AwaitForm.Height div 2);
     AwaitForm.Left:=MainForm.Left + (MainForm.Width  div 2) - (AwaitForm.Width  div 2);
 

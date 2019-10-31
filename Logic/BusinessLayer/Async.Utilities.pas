@@ -37,7 +37,9 @@ type
     // Callback signatures.
     // --------------------
 
-    //...
+    TCheckGivenPassword = procedure(LastError: TLastError) of object;
+    TSetNewPassword     = procedure(LastError: TLastError) of object;
+
 
     IUtilities = interface(IInterface)
     ['{0B054CF4-86F7-4770-957B-3026BE491B5A}']
@@ -63,7 +65,8 @@ type
         procedure SendUserFeedback();
         procedure ExcelExport(GroupId: string; AgeDate: string);
         procedure GeneralTables(TableName: string; DestGrid: TStringGrid; Columns: string = ''; Conditions: string = ''; WaitToComplete: boolean = False);
-
+        procedure CheckGivenPassword(Password: string; Callback: TCheckGivenPassword);
+        procedure SetNewPassword(CurrentPassword: string; NewPassword: string; Callback: TSetNewPassword);
     end;
 
 
@@ -79,6 +82,8 @@ type
         procedure SendUserFeedback();
         procedure ExcelExport(GroupId: string; AgeDate: string);
         procedure GeneralTables(TableName: string; DestGrid: TStringGrid; Columns: string = ''; Conditions: string = ''; WaitToComplete: boolean = False);
+        procedure CheckGivenPassword(Password: string; Callback: TCheckGivenPassword);
+        procedure SetNewPassword(CurrentPassword: string; NewPassword: string; Callback: TSetNewPassword);
     end;
 
 
@@ -97,6 +102,7 @@ uses
     Unity.EventLogger,
     Unity.SessionService,
     Sync.Documents,
+    Bcrypt,
     DbModel;
 
 
@@ -249,6 +255,138 @@ begin
 
     NewTask.Start();
     if WaitToComplete then TTask.WaitForAny(NewTask);
+
+end;
+
+
+procedure TUtilities.CheckGivenPassword(Password: string; Callback: TCheckGivenPassword);
+begin
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var LastError: TLastError;
+        try
+
+            var ReHashed: boolean;
+            var Settings: ISettings:=TSettings.Create;
+            var Hash: string:=Settings.GetStringValue(TConfigSections.PasswordSection, 'HASH', '');
+
+            if Hash = '' then
+            begin
+                LastError.IsSucceeded:=False;
+                LastError.ErrorMessage:='[CheckGivenPassword]: Missing hash value, check settings file. Please contact IT Support.';
+                ThreadFileLog.Log(LastError.ErrorMessage);
+            end
+            else
+            begin
+
+                LastError.IsSucceeded:=TBcrypt.CheckPassword(Password, Hash, ReHashed);
+
+                if LastError.IsSucceeded then
+                begin
+                    LastError.ErrorMessage:='Administrator password has been validaded.';
+                    ThreadFileLog.Log('[CheckGivenPassword]: Administrator password has been validaded.');
+                end
+                else
+                begin
+                    LastError.ErrorMessage:='Incorrect password, please re-type it and try again';
+                    ThreadFileLog.Log('[CheckGivenPassword]: Administrator password is invalid.');
+                end;
+
+            end;
+
+        except
+            on E: Exception do
+            begin
+                LastError.IsSucceeded:=False;
+                LastError.ErrorMessage:='[CheckGivenPassword]: Cannot execute. Error has been thrown: ' + E.Message;
+                ThreadFileLog.Log(LastError.ErrorMessage);
+            end;
+
+        end;
+
+        TThread.Synchronize(nil, procedure
+        begin
+            Callback(LastError);
+        end);
+
+    end);
+
+    NewTask.Start();
+
+end;
+
+
+procedure TUtilities.SetNewPassword(CurrentPassword: string; NewPassword: string; Callback: TSetNewPassword);
+begin
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var LastError: TLastError;
+        try
+
+            if (CurrentPassword = String.Empty) or (NewPassword = String.Empty) then
+            begin
+                LastError.IsSucceeded:=False;
+                LastError.ErrorMessage:='Please provide current password and new password.';
+                ThreadFileLog.Log('[SetNewPassword]: User have not provided current password/new password.');
+            end
+            else
+            begin
+
+                // -----------------------
+                // Check current password.
+                // -----------------------
+
+                var ReHashed: boolean;
+                var Settings: ISettings:=TSettings.Create;
+                var Hash: string:=Settings.GetStringValue(TConfigSections.PasswordSection, 'HASH', '');
+
+                if TBcrypt.CheckPassword(CurrentPassword, Hash, ReHashed) then
+                begin
+
+                    // ------------------------------
+                    // Setup newly provided password.
+                    // ------------------------------
+
+                    var HashPasswd: string:=TBcrypt.HashPassword(NewPassword);
+
+                    Settings.SetStringValue(TConfigSections.PasswordSection, 'HASH', HashPasswd);
+                    Settings.Encode(TAppFiles.Configuration);
+
+                    LastError.IsSucceeded:=True;
+                    ThreadFileLog.Log('[SetNewPassword]: New administrator password has been setup.');
+
+                end
+                else
+                begin
+                    LastError.IsSucceeded:=False;
+                    LastError.ErrorMessage:='Incorrect password, please re-type it and try again.';
+                    ThreadFileLog.Log('[SetNewPassword]: provided current password is incorrect.');
+                end;
+
+            end;
+
+        except
+            on E: Exception do
+            begin
+                LastError.IsSucceeded:=False;
+                LastError.ErrorMessage:='[SetNewPassword]: Cannot execute. Error has been thrown: ' + E.Message;
+                ThreadFileLog.Log(LastError.ErrorMessage);
+            end;
+
+        end;
+
+        TThread.Synchronize(nil, procedure
+        begin
+            Callback(LastError);
+        end);
+
+    end);
+
+    NewTask.Start();
 
 end;
 

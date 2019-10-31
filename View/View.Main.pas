@@ -2,8 +2,8 @@ unit View.Main;
 
 // --------------------------------------------------------------------------------------
 // This is application view (GUI) that can have direct calls to logic layer interface(s).
-// Calls must carry reference(s) to callback method that is defined the same as callback
-// signature. All views use Lazy Initialization pattern.
+// Calls must carry reference(s) to callback method that is defined same as callback
+// signature (delegate). All views use lazy initialization pattern.
 // --------------------------------------------------------------------------------------
 
 interface
@@ -51,10 +51,7 @@ uses
     Data.Bind.Components,
     Data.Bind.ObjectScope,
     IPPeerClient,
-    REST.Client,
-    REST.Types,
     SHDocVw,
-    BCrypt,
     uCEFChromium,
     uCEFWindowParent,
     uCEFChromiumWindow,
@@ -273,7 +270,6 @@ type
         PanelGroupName: TPanel;
         btnMakeGroupAge: TSpeedButton;
         EditGroupName: TLabeledEdit;
-        ReloadCover: TImage;
         sgAgeView: TStringGrid;
         cbDump: TCheckBox;
         sgInvoiceTracker: TStringGrid;
@@ -452,10 +448,6 @@ type
         txtSettings: TLabel;
         ChromiumWindow: TChromiumWindow;
         Chromium: TChromium;
-        txtOverdueItems: TLabel;
-        txtCreditLimitsReport: TLabel;
-        txtDebtorsReport: TLabel;
-        txtControlStatusReport: TLabel;
         imgHideBar: TImage;
         PanelControlStatus: TPanel;
         sgControlStatus: TStringGrid;
@@ -769,18 +761,6 @@ type
         procedure txtQueriesClick(Sender: TObject);
         procedure txtTablesClick(Sender: TObject);
         procedure txtSettingsClick(Sender: TObject);
-        procedure txtOverdueItemsClick(Sender: TObject);
-        procedure txtCreditLimitsReportClick(Sender: TObject);
-        procedure txtDebtorsReportClick(Sender: TObject);
-        procedure txtControlStatusReportClick(Sender: TObject);
-        procedure txtOverdueItemsMouseEnter(Sender: TObject);
-        procedure txtOverdueItemsMouseLeave(Sender: TObject);
-        procedure txtCreditLimitsReportMouseEnter(Sender: TObject);
-        procedure txtCreditLimitsReportMouseLeave(Sender: TObject);
-        procedure txtDebtorsReportMouseEnter(Sender: TObject);
-        procedure txtDebtorsReportMouseLeave(Sender: TObject);
-        procedure txtControlStatusReportMouseEnter(Sender: TObject);
-        procedure txtControlStatusReportMouseLeave(Sender: TObject);
         procedure AppHeaderClick(Sender: TObject);
         procedure imgHideBarClick(Sender: TObject);
         procedure AppHeaderMouseEnter(Sender: TObject);
@@ -831,6 +811,7 @@ type
 
         // --------------------------------------------------------------------------------
         // Chromium component. Do not modify, rather follow Chromium implementation manual.
+        // See more: https://github.com/salvadordf/CEF4Delphi.
         // --------------------------------------------------------------------------------
 
         procedure NotifyMoveOrResizeStarted;
@@ -860,7 +841,7 @@ type
         procedure WndMessagesWindows(PassMsg: TMessage);
         procedure WndMessagesExternal(PassMsg: TMessage);
 
-    private
+    strict private
 
         var CustAll:     integer;
         var ANotDue:     extended;
@@ -887,18 +868,13 @@ type
         var FDailyCommentFields:   TDailyCommentFields;
         var FGeneralCommentFields: TGeneralCommentFields;
 
-        procedure ResetTabsheetButtons;
         procedure SetPanelBorders;
         procedure SetGridColumnWidths;
         procedure SetGridRowHeights;
         procedure SetButtonsGlyphs;
         procedure SetSettingsPanel(IsLocked: boolean);
-        procedure UnfoldReportsTab(Header: TPanel; Panel: TPanel; ShouldHide: boolean = false);
         procedure InitializeScreenSettings;
-        function  CheckGivenPassword(Password: string): boolean;
-        function  SetNewPassword(Password: string): boolean;
         function  AddressBookExclusion: boolean;
-        function  ShowReport(ReportNumber: cardinal): cardinal;
 
         procedure ClearAgeSummary();
         procedure UpdateOpenItemsDetails(var Grid: TStringGrid);
@@ -947,6 +923,8 @@ type
         var FOpenItemsRefs:  TFOpenItemsRefs;
         var FCtrlStatusRefs: TFControlStatusRefs;
 
+        procedure ResetTabsheetButtons;
+
         procedure UpdateAgeSummary();
         procedure ComputeAgeSummary(var Grid: TStringGrid);  // make async?
         procedure ComputeRiskClass(var Grid: TStringGrid);
@@ -990,6 +968,13 @@ type
         procedure ScanOpenItemsAsync_Callback(CanMakeAge: boolean; ReadDateTime: string; LastError: TLastError);
         procedure ReadOpenItemsAsync_Callback(ActionMode: TLoading; OpenItemsData: TOpenItemsPayLoad; LastError: TLastError);
 
+        // ------------------------------
+        // Callbacks for Async.Utilities.
+        // ------------------------------
+
+        procedure CheckGivenPassword_Callback(LastError: TLastError);
+        procedure SetNewPassword_Callback(LastError: TLastError);
+
     end;
 
 
@@ -1017,6 +1002,7 @@ uses
     View.MassMailer,
     View.AwaitScreen,
     View.Startup,
+    View.Reports,
     Unity.Sql,
     Unity.Messaging,
     Unity.UserAccess,
@@ -1415,6 +1401,83 @@ begin
 end;
 
 
+// ---------------------------------
+// Async.Utilities callback methods.
+// ---------------------------------
+
+procedure TMainForm.CheckGivenPassword_Callback(LastError: TLastError);
+begin
+
+    if not LastError.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
+        ThreadFileLog.Log('[CheckGivenPassword_Callback]: Error has been thrown "' + LastError.ErrorMessage + '".');
+        Exit();
+    end;
+
+    // Enable controls
+    SetSettingsPanel(False);
+
+    // Populate string grids
+    var List: TStringList:=TStringList.Create();
+    var Settings: ISettings:=TSettings.Create();
+
+    try
+
+        Settings.GetSections(List);
+        sgListSection.RowCount:=List.Count;
+        var jCNT: integer:=1;
+
+        for var iCNT: integer:=0 to List.Count - 1 do
+        begin
+
+            if List.Strings[iCNT] <> TConfigSections.PasswordSection then
+            begin
+                sgListSection.Cells[0, jCNT]:=IntToStr(jCNT);
+                sgListSection.Cells[1, jCNT]:=List.Strings[iCNT];
+                inc(jCNT);
+            end;
+
+        end;
+
+    finally
+        List.Free;
+    end;
+
+    // Grids dimensions
+    sgListValue.SetColWidth(25, 30, 400);
+    sgListSection.SetColWidth(25, 30, 400);
+
+    // Clear edit box from provided password
+    EditPassword.Text:='';
+
+end;
+
+
+procedure TMainForm.SetNewPassword_Callback(LastError: TLastError);
+begin
+
+    if not LastError.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
+        ThreadFileLog.Log('[SetNewPassword_Callback]: Error has been thrown "' + LastError.ErrorMessage + '".');
+        Exit();
+    end;
+
+    THelpers.MsgCall(TAppMessage.Info, 'New password has been saved.');
+
+    btnPassUpdate.Enabled:=False;
+    EditCurrentPassword.Enabled:=False;
+    EditNewPassword.Enabled:=False;
+    EditNewPasswordConfirmation.Enabled:=False;
+
+    EditCurrentPassword.Text:='';
+    EditNewPassword.Text:='';
+    EditNewPasswordConfirmation.Text:='';
+
+end;
+
+
 // ------------------------------------------------------------------------------------------------------------------------ LEGACY CODE - TO BE REMOVED [START]
 
 
@@ -1751,8 +1814,6 @@ begin
     if FAccessLevel <> TUserAccess.Admin then
     begin
         sgCompanyData.Enabled:=False;
-        ReloadCover.Visible:=True;
-        ReloadCover.Cursor:=crNo;
         GroupListDates.Enabled:=False;
     end;
 
@@ -1994,28 +2055,6 @@ begin
         end;
 
     end;
-
-end;
-
-
-/// <summary>
-/// Execute chromium reader for reporting.
-/// </summary>
-
-function TMainForm.ShowReport(ReportNumber: cardinal): cardinal;
-begin
-
-    var Settings: ISettings:=TSettings.Create;
-    var AppParam: string:=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'REPORT_Report' + IntToStr(ReportNumber), 'about:blank');
-
-    Result:=ShellExecute(
-        MainForm.Handle,
-        'open',
-        PChar(Settings.DirApplication + TCommon.UnityReader),
-        PChar(AppParam),
-        nil,
-        SW_SHOWNORMAL
-    );
 
 end;
 
@@ -2534,41 +2573,6 @@ end;
 
 
 /// <summary>
-/// Check if header panel is already folded (based on its heigh) and unfold it back.
-/// </summary>
-/// <remarks>
-/// To display additional content, we extend button panel. Header panel that contains
-/// button panels must be also extended.
-/// </remarks>
-
-procedure TMainForm.UnfoldReportsTab(Header: TPanel; Panel: TPanel; ShouldHide: boolean = false);
-begin
-
-    if not(ShouldHide) then
-    begin
-        if Panel.Height > 32 then
-        begin
-            // Fold
-            Panel.Height:=32;
-            Header.Height:=57;
-        end
-    else
-        begin
-            // Unfold
-            Panel.Height:=116;
-            Header.Height:=Panel.Height + 13;
-        end;
-    end
-    else
-    begin
-        Panel.Height:=32;
-        Header.Height:=57;
-    end;
-
-end;
-
-
-/// <summary>
 /// Draw custom border around panels.
 /// </summary>
 /// <remarks>
@@ -2659,43 +2663,6 @@ begin
 end;
 
 
-function TMainForm.CheckGivenPassword(Password: string): boolean;
-begin
-
-    Result:=False;
-
-    var Hash:     string;
-    var ReHashed: boolean;
-    var Settings: ISettings:=TSettings.Create;
-
-    Hash:=Settings.GetStringValue(TConfigSections.PasswordSection, 'HASH', '');
-    if Hash = '' then
-        Exit
-            else
-                Result:=TBcrypt.CheckPassword(Password, Hash, ReHashed);
-
-end;
-
-
-function TMainForm.SetNewPassword(Password: string): boolean;
-begin
-
-    // Exit condition
-    Result:=False;
-    if Password = '' then Exit;
-
-    // Generate hash and salt it
-    var HashPasswd: string:=TBcrypt.HashPassword(Password);
-
-    // Save it
-    var Settings: ISettings:=TSettings.Create;
-    Settings.SetStringValue(TConfigSections.PasswordSection, 'HASH', HashPasswd);
-    Settings.Encode(TAppFiles.Configuration);
-    Result:=True;
-
-end;
-
-
 /// <summary>
 /// Indicates editable columns. Use it to examin if user should be able to edit selected cell in StrigGrid component.
 /// </summary>
@@ -2771,6 +2738,7 @@ procedure TMainForm.FormCreate(Sender: TObject);
 begin
     FAllowClose:=False;
     InitializeScreenSettings;
+    MyPages.ActivePage:=TabSheet1;
 end;
 
 
@@ -3969,16 +3937,20 @@ end;
 
 procedure TMainForm.Action_HideSummaryClick(Sender: TObject);
 begin
+
     if Action_HideSummary.Checked then
     begin
+        PanelAgeView.Margins.Bottom:=12;
         Footer1.Visible:=False;
         Action_HideSummary.Checked:=False;
     end
     else
     begin
+        PanelAgeView.Margins.Bottom:=0;
         Footer1.Visible:=True;
         Action_HideSummary.Checked:=True;
     end;
+
 end;
 
 
@@ -5630,65 +5602,6 @@ begin
 end;
 
 
-// ---------------------------------------------------------------------------------------------------------------------------- MOUSE EVENTS | HOOVER EFFECT //
-
-
-procedure TMainForm.txtOverdueItemsMouseEnter(Sender: TObject);
-begin
-    txtOverdueItems.Font.Color:=$006433C9;
-    txtOverdueItems.Font.Style:=[fsUnderline];
-end;
-
-
-procedure TMainForm.txtOverdueItemsMouseLeave(Sender: TObject);
-begin
-    txtOverdueItems.Font.Color:=0;
-    txtOverdueItems.Font.Style:=[];
-end;
-
-
-procedure TMainForm.txtCreditLimitsReportMouseEnter(Sender: TObject);
-begin
-    txtCreditLimitsReport.Font.Color:=$006433C9;
-    txtCreditLimitsReport.Font.Style:=[fsUnderline];
-end;
-
-
-procedure TMainForm.txtCreditLimitsReportMouseLeave(Sender: TObject);
-begin
-    txtCreditLimitsReport.Font.Color:=0;
-    txtCreditLimitsReport.Font.Style:=[];
-end;
-
-
-procedure TMainForm.txtDebtorsReportMouseEnter(Sender: TObject);
-begin
-    txtDebtorsReport.Font.Color:=$006433C9;
-    txtDebtorsReport.Font.Style:=[fsUnderline];
-end;
-
-
-procedure TMainForm.txtDebtorsReportMouseLeave(Sender: TObject);
-begin
-    txtDebtorsReport.Font.Color:=0;
-    txtDebtorsReport.Font.Style:=[];
-end;
-
-
-procedure TMainForm.txtControlStatusReportMouseEnter(Sender: TObject);
-begin
-    txtControlStatusReport.Font.Color:=$006433C9;
-    txtControlStatusReport.Font.Style:=[fsUnderline];
-end;
-
-
-procedure TMainForm.txtControlStatusReportMouseLeave(Sender: TObject);
-begin
-    txtControlStatusReport.Font.Color:=0;
-    txtControlStatusReport.Font.Style:=[];
-end;
-
-
 // ------------------------------------------------------------------------------------------------------------------------------- MOUSE EVENTS | GRID FOCUS //
 
 
@@ -6302,7 +6215,6 @@ procedure TMainForm.AppHeaderClick(Sender: TObject);
 begin
     if AppHeader.Height = 13 then
     begin
-        UnfoldReportsTab(AppHeader, btnReports, True);
         AppHeader.Height:=57;
         AppHeader.Cursor:=crDefault;
         AppHeader.Color:=clWhite;
@@ -6315,7 +6227,6 @@ procedure TMainForm.imgHideBarClick(Sender: TObject);
 begin
     if AppHeader.Height > 13 then
     begin
-        UnfoldReportsTab(AppHeader, btnReports, True);
         AppHeader.Height:=13;
         AppHeader.Cursor:=crHandPoint;
         AppHeader.Color:=clWhite;
@@ -6326,35 +6237,24 @@ end;
 
 procedure TMainForm.txtStartClick(Sender: TObject);
 begin
-    UnfoldReportsTab(AppHeader, btnReports, True);
     MyPages.ActivePage:=TabSheet9;
     ResetTabsheetButtons;
     txtStart.Font.Style:=[fsBold];
     txtStart.Font.Color:=$006433C9;
-
-    /// <remarks>
-    /// ChromiumWindow placed on TPageControl crashes application when the application starts maximised and
-    /// ChromiumWindow completly fill the container. To overcome this, it is necessary to initialize and load
-    /// given web page when ChromiumWindow is "small", and then re-size to fill the TabSheet at once.
-    /// </remarks>
-
-    if ChromiumWindow.Align <> alClient then ChromiumWindow.Align:=alClient;
-
 end;
 
 
 procedure TMainForm.txtReportsClick(Sender: TObject);
 begin
-    UnfoldReportsTab(AppHeader, btnReports);
     ResetTabsheetButtons;
     txtReports.Font.Style:=[fsBold];
     txtReports.Font.Color:=$006433C9;
+    THelpers.WndCall(ReportsForm, TWindowState.Modal);
 end;
 
 
 procedure TMainForm.txtDebtorsClick(Sender: TObject);
 begin
-    UnfoldReportsTab(AppHeader, btnReports, True);
     MyPages.ActivePage:=TabSheet1;
     ResetTabsheetButtons;
     txtDebtors.Font.Style:=[fsBold];
@@ -6364,7 +6264,6 @@ end;
 
 procedure TMainForm.txtTrackerClick(Sender: TObject);
 begin
-    UnfoldReportsTab(AppHeader, btnReports, True);
     MyPages.ActivePage:=TabSheet4;
     ResetTabsheetButtons;
     txtTracker.Font.Style:=[fsBold];
@@ -6374,7 +6273,6 @@ end;
 
 procedure TMainForm.txtAddressBookClick(Sender: TObject);
 begin
-    UnfoldReportsTab(AppHeader, btnReports, True);
     MyPages.ActivePage:=TabSheet3;
     ResetTabsheetButtons;
     txtAddressBook.Font.Style:=[fsBold];
@@ -6384,7 +6282,6 @@ end;
 
 procedure TMainForm.txtOpenItemsClick(Sender: TObject);
 begin
-    UnfoldReportsTab(AppHeader, btnReports, True);
     MyPages.ActivePage:=TabSheet2;
     ResetTabsheetButtons;
     txtOpenItems.Font.Style:=[fsBold];
@@ -6394,7 +6291,6 @@ end;
 
 procedure TMainForm.txtUnidentifiedClick(Sender: TObject);
 begin
-    UnfoldReportsTab(AppHeader, btnReports, True);
     MyPages.ActivePage:=TabSheet6;
     ResetTabsheetButtons;
     txtUnidentified.Font.Style:=[fsBold];
@@ -6404,7 +6300,6 @@ end;
 
 procedure TMainForm.txtQueriesClick(Sender: TObject);
 begin
-    UnfoldReportsTab(AppHeader, btnReports, True);
     MyPages.ActivePage:=TabSheet5;
     ResetTabsheetButtons;
     txtQueries.Font.Style:=[fsBold];
@@ -6414,7 +6309,6 @@ end;
 
 procedure TMainForm.txtTablesClick(Sender: TObject);
 begin
-    UnfoldReportsTab(AppHeader, btnReports, True);
     MyPages.ActivePage:=TabSheet7;
     ResetTabsheetButtons;
     txtTables.Font.Style:=[fsBold];
@@ -6424,75 +6318,10 @@ end;
 
 procedure TMainForm.txtSettingsClick(Sender: TObject);
 begin
-    UnfoldReportsTab(AppHeader, btnReports, True);
     MyPages.ActivePage:=TabSheet8;
     ResetTabsheetButtons;
     txtSettings.Font.Style:=[fsBold];
     txtSettings.Font.Color:=$006433C9;
-end;
-
-
-procedure TMainForm.txtOverdueItemsClick(Sender: TObject);
-begin
-
-    var Return: cardinal:=ShowReport(1);
-
-    if not(Return > 32) then
-    begin
-        THelpers.MsgCall(TAppMessage.Warn, 'Cannot execute report. Please contact with IT support.');
-        ThreadFileLog.Log('ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
-    end;
-
-    UnfoldReportsTab(AppHeader, btnReports);
-
-end;
-
-
-procedure TMainForm.txtCreditLimitsReportClick(Sender: TObject);
-begin
-
-    var Return: cardinal:=ShowReport(2);
-
-    if not(Return > 32) then
-    begin
-        THelpers.MsgCall(TAppMessage.Warn, 'Cannot execute report. Please contact with IT support.');
-        ThreadFileLog.Log('ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
-    end;
-
-    UnfoldReportsTab(AppHeader, btnReports);
-
-end;
-
-
-procedure TMainForm.txtDebtorsReportClick(Sender: TObject);
-begin
-
-    var Return: cardinal:=ShowReport(3);
-
-    if not(Return > 32) then
-    begin
-        THelpers.MsgCall(TAppMessage.Warn, 'Cannot execute report. Please contact with IT support.');
-        ThreadFileLog.Log('ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
-    end;
-
-    UnfoldReportsTab(AppHeader, btnReports);
-
-end;
-
-
-procedure TMainForm.txtControlStatusReportClick(Sender: TObject);
-begin
-
-    var Return: cardinal:=ShowReport(4);
-
-    if not(Return > 32) then
-    begin
-        THelpers.MsgCall(TAppMessage.Warn, 'Cannot execute report. Please contact with IT support.');
-        ThreadFileLog.Log('ShellExecute returned ' + IntToStr(Return) + '. Report cannot be displayed.');
-    end;
-
-    UnfoldReportsTab(AppHeader, btnReports);
-
 end;
 
 
@@ -6641,6 +6470,27 @@ end;
 /// </summary>
 
 procedure TMainForm.btnMakeGroupClick(Sender: TObject);
+
+    procedure FieldsState(IsEnabled: boolean);
+    begin
+
+        EditGroupName.Enabled:=IsEnabled;
+        EditGroupID.Enabled:=IsEnabled;
+        btnMakeGroupAge.Enabled:=IsEnabled;
+
+        if IsEnabled then
+        begin
+            EditGroupName.Text:=FGroupNmSel;
+            EditGroupID.Text:=FGroupIdSel;
+        end
+        else
+        begin
+            EditGroupName.Text:='';
+            EditGroupID.Text:='';
+        end;
+
+    end;
+
 begin
 
     if not(FIsConnected) then
@@ -6652,20 +6502,24 @@ begin
     if sgOpenItems.RowCount < 2 then
         Exit;
 
-    // Only administrator is allowed
-    if MainForm.FAccessLevel = TUserAccess.Admin then
-    begin
-        EditGroupName.Enabled:=True;
-        EditGroupID.Enabled:=True;
-        cbDump.Enabled:=True;
-        btnMakeGroupAge.Enabled:=True;
-        EditGroupName.Text:=FGroupNmSel;
-        EditGroupID.Text:=FGroupIdSel;
-    end
-    else
+    if MainForm.FAccessLevel <> TUserAccess.Admin then
     begin
         StatBar_TXT1.Caption:='Insufficient UAC level.';
         ThreadFileLog.Log('[Make Group]: User have no R/W access, process halted.');
+        Exit();
+    end;
+
+    if cbDump.Enabled then
+    begin
+        cbDump.Enabled:=False;
+        FieldsState(False);
+        Exit();
+    end
+    else
+    begin
+        cbDump.Enabled:=True;
+        FieldsState(True);
+        Exit();
     end;
 
 end;
@@ -6994,7 +6848,6 @@ end;
 procedure TMainForm.btnPassUpdateClick(Sender: TObject);
 begin
 
-    // Check fields
     if
         (
             not(string.IsNullOrEmpty(EditCurrentPassword.Text))
@@ -7010,47 +6863,17 @@ begin
     then
     begin
 
-        // Check given password
-        if not(CheckGivenPassword(EditPassword.Text)) then
-        begin
-            THelpers.MsgCall(TAppMessage.Warn, 'Incorrect password, please re-type it and try again.');
-            Exit;
-        end;
-
-        // Incorrent match
         if EditNewPassword.Text <> EditNewPasswordConfirmation.Text then
         begin
             THelpers.MsgCall(TAppMessage.Warn, 'New password and its confirmation does not match, please re-type it and try again.');
             Exit;
-        end
-        else
-
-        // Hash and save
-        begin
-            if SetNewPassword(EditNewPassword.Text) then
-            begin
-                THelpers.MsgCall(TAppMessage.Info, 'New password has been saved.');
-                btnPassUpdate.Enabled:=False;
-                EditCurrentPassword.Enabled:=False;
-                EditNewPassword.Enabled:=False;
-                EditNewPasswordConfirmation.Enabled:=False;
-                EditCurrentPassword.Text:='';
-                EditNewPassword.Text:='';
-                EditNewPasswordConfirmation.Text:='';
-            end
-            else
-
-            // Cannot hash and save
-            begin
-                THelpers.MsgCall(TAppMessage.Error, 'Cannot save new password. Please contact IT support.');
-            end;
-
         end;
+
+        var Utilities: IUtilities:=TUtilities.Create();
+        Utilities.SetNewPassword(EditCurrentPassword.Text, EditNewPassword.Text, SetNewPassword_Callback);
 
     end
     else
-
-    // No fields can be empty
     begin
         THelpers.MsgCall(TAppMessage.Warn, 'Please provide with current password, new password and its confirmation.');
     end;
@@ -7065,64 +6888,21 @@ end;
 procedure TMainForm.btnUnlockClick(Sender: TObject);
 begin
 
-    // No password given
     if btnUnlock.Caption = 'Lock' then
     begin
         SetSettingsPanel(True);
         Exit;
     end;
 
-    if EditPassword.Text = '' then
+    if String.IsNullOrEmpty(EditPassword.Text) then
     begin
         THelpers.MsgCall(TAppMessage.Warn, 'Please provide with password.');
         Exit;
     end
     else
-
-    // Password is valid
-    if CheckGivenPassword(EditPassword.Text) then
     begin
-
-        // Enable controls
-        SetSettingsPanel(False);
-
-        // Populate string grids
-        var List: TStringList:=TStringList.Create();
-        var Settings: ISettings:=TSettings.Create;
-
-        try
-            Settings.GetSections(List);
-            sgListSection.RowCount:=List.Count;
-            var jCNT: integer:=1;
-
-            for var iCNT: integer:=0 to List.Count - 1 do
-            begin
-                if List.Strings[iCNT] <> TConfigSections.PasswordSection then
-                begin
-                    sgListSection.Cells[0, jCNT]:=IntToStr(jCNT);
-                    sgListSection.Cells[1, jCNT]:=List.Strings[iCNT];
-                    inc(jCNT);
-                end;
-            end;
-
-        finally
-            List.Free;
-        end;
-
-        // Grids dimensions
-        sgListValue.SetColWidth(25, 30, 400);
-        sgListSection.SetColWidth(25, 30, 400);
-
-        // CLear edit box from provided password
-        EditPassword.Text:='';
-
-    end
-    else
-
-    // Invalid password
-    begin
-        THelpers.MsgCall(TAppMessage.Warn, 'Incorrect password, please re-type it and try again.');
-        EditPassword.Text:='';
+        var Utilities: IUtilities:=TUtilities.Create();
+        Utilities.CheckGivenPassword(EditPassword.Text, CheckGivenPassword_Callback);
     end;
 
 end;

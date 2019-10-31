@@ -7,14 +7,14 @@ object AwaitForm: TAwaitForm
   ClientHeight = 126
   ClientWidth = 460
   Color = clWhite
-  DefaultMonitor = dmMainForm
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
+  FormStyle = fsStayOnTop
   OldCreateOrder = False
-  Position = poOwnerFormCenter
+  Position = poDesigned
   OnClose = FormClose
   OnCreate = FormCreate
   OnKeyDown = FormKeyDown
@@ -28,7 +28,6 @@ object AwaitForm: TAwaitForm
     Height = 126
     Align = alClient
     TabOrder = 0
-    ExplicitWidth = 449
     object WaitImage: TImage
       AlignWithMargins = True
       Left = 0
@@ -177,7 +176,7 @@ object AwaitForm: TAwaitForm
     end
     object WaitText: TLabel
       Left = 152
-      Top = 46
+      Top = 48
       Width = 260
       Height = 25
       Caption = 'Processing..., please wait.'

@@ -2,8 +2,8 @@ unit View.Queries;
 
 // --------------------------------------------------------------------------------------
 // This is application view (GUI) that can have direct calls to logic layer interface(s).
-// Calls must carry reference(s) to callback method that is defined the same as callback
-// signature. All views must use Lazy Initialization pattern.
+// Calls must carry reference(s) to callback method that is defined same as callback
+// signature (delegate). All views use lazy initialization pattern.
 // --------------------------------------------------------------------------------------
 
 interface
@@ -85,7 +85,7 @@ type
         procedure EditCurrAmountKeyPress(Sender: TObject; var Key: Char);
         procedure EditAmountKeyPress(Sender: TObject; var Key: Char);
         procedure btnAddAttcahementClick(Sender: TObject);
-    private
+    strict private
         var FIsMissing:  boolean;
         var FFileName:   string;
         var FLogQueryId: string;

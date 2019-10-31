@@ -2,8 +2,8 @@ unit View.ColorPicker;
 
 // --------------------------------------------------------------------------------------
 // This is application view (GUI) that can have direct calls to logic layer interface(s).
-// Calls must carry reference(s) to callback method that is defined the same as callback
-// signature. All views must use Lazy Initialization pattern.
+// Calls must carry reference(s) to callback method that is defined same as callback
+// signature (delegate). All views use lazy initialization pattern.
 // --------------------------------------------------------------------------------------
 
 interface
@@ -95,12 +95,14 @@ end;
 
 procedure TColorsForm.FormCreate(Sender: TObject);
 begin
+
     if (ColorList1.Items.Count > 0) and (ColorList2.Items.Count > 0) and (ColorList3.Items.Count > 0) then
     begin
         ColorList1.ItemIndex:=0;
         ColorList2.ItemIndex:=0;
         ColorList3.ItemIndex:=0;
     end;
+
 end;
 
 
@@ -161,6 +163,7 @@ end;
 
 procedure TColorsForm.btnTodayClick(Sender: TObject);
 begin
+
     if ColorDialog.Execute then
     begin
         var Settings: TSettings:=TSettings.Create;
@@ -168,11 +171,13 @@ begin
         if ColorList1.Text = 'Background Color' then Settings.TodayBColor:=ColorDialog.Color;
         ColorBox1.Brush.Color:=ColorDialog.Color;
     end;
+
 end;
 
 
 procedure TColorsForm.btnPastClick(Sender: TObject);
 begin
+
     if ColorDialog.Execute then
     begin
         var Settings: TSettings:=TSettings.Create;
@@ -180,11 +185,13 @@ begin
         if ColorList2.Text = 'Background Color' then Settings.PastBColor:=ColorDialog.Color;
         ColorBox2.Brush.Color:=ColorDialog.Color;
     end;
+
 end;
 
 
 procedure TColorsForm.btnFutureClick(Sender: TObject);
 begin
+
     if ColorDialog.Execute then
     begin
         var Settings: TSettings:=TSettings.Create;
@@ -192,6 +199,7 @@ begin
         if ColorList3.Text = 'Background Color' then Settings.FutureBColor:=ColorDialog.Color;
         ColorBox3.Brush.Color:=ColorDialog.Color;
     end;
+
 end;
 
 

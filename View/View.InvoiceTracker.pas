@@ -2,8 +2,8 @@ unit View.InvoiceTracker;
 
 // --------------------------------------------------------------------------------------
 // This is application view (GUI) that can have direct calls to logic layer interface(s).
-// Calls must carry reference(s) to callback method that is defined the same as callback
-// signature. All views must use Lazy Initialization pattern.
+// Calls must carry reference(s) to callback method that is defined same as callback
+// signature (delegate). All views use lazy initialization pattern.
 // --------------------------------------------------------------------------------------
 
 interface
@@ -71,12 +71,11 @@ type
         procedure CustomerListKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure CustomerListKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure btnSelectionClick(Sender: TObject);
-    protected
+    strict private
         var FMultiselect: TStringList;
         var FCtrlClicked: boolean;
-    private
-        var FTrackerGrid  : TStringGrid;
-        var FAgeGrid      : TStringGrid;
+        var FTrackerGrid: TStringGrid;
+        var FAgeGrid:     TStringGrid;
         procedure GetSendFrom(List: TComboBox);
         procedure GetEmailAddress(Scuid: string);
         procedure SetEmailAddresses(List: TListView);
@@ -88,13 +87,6 @@ type
         var FStatementMail: string;
         property  TrackerGrid: TStringGrid read FTrackerGrid;
         property  AgeGrid:     TStringGrid read FAgeGrid;
-
-        // ------------------
-        // Callbacks methods.
-        // ------------------
-
-        //...
-
     end;
 
 
