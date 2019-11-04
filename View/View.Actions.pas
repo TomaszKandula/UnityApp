@@ -915,7 +915,7 @@ begin
     if ARow = 0 then Exit;
 
     // Draw selected
-    OpenItemsGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
+    OpenItemsGrid.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True);
 
     // Draw certain color
     if
@@ -939,7 +939,10 @@ begin
             ACol = OpenItemsGrid.ReturnColumn(TOpenitems.PmtStat, 1, 1)
         )
     then
-        OpenItemsGrid.ColorValues(ARow, ACol, Rect, clRed, clBlack);
+    begin
+        if gdSelected in State then OpenItemsGrid.ColorValues(ARow, ACol, Rect, clRed, clWhite)
+            else OpenItemsGrid.ColorValues(ARow, ACol, Rect, clRed, clBlack);
+    end;
 
 end;
 

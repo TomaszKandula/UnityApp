@@ -37,140 +37,152 @@ type
     // Callback signatures.
     // --------------------
 
-    //...
+    TRefreshInvoiceTracker = procedure(InvoiceList: TStringGrid; LastError: TLastError) of object;
+    TDeleteFromTrackerList = procedure(LastError: TLastError) of object;
 
     ITracker = interface(IInterface)
     ['{1EE8D593-A574-4265-B3CE-1A03CFB9B0B9}']
-        procedure RefreshInvoiceTrackerAsync(UserAlias: string);
-        procedure DeleteFromTrackerList(CUID: string);
+        procedure RefreshInvoiceTrackerAsync(UserAlias: string; Callback: TRefreshInvoiceTracker);
+        procedure DeleteFromTrackerListAsync(CUID: string; Callback: TDeleteFromTrackerList);
     end;
 
 
     TTracker = class(TInterfacedObject, ITracker)
     {$TYPEINFO ON}
-    private
-        procedure UpdateTrackerList(UserAlias: string);
     public
-        procedure RefreshInvoiceTrackerAsync(UserAlias: string);
-        procedure DeleteFromTrackerList(CUID: string);
+        procedure RefreshInvoiceTrackerAsync(UserAlias: string; Callback: TRefreshInvoiceTracker);
+        procedure DeleteFromTrackerListAsync(CUID: string; Callback: TDeleteFromTrackerList);
     end;
 
 
-implementation   // refactor!!!
+implementation
 
 
 uses
-    View.Main,
-    View.InvoiceTracker,
-    View.Actions,
-    View.UserFeedback,
     Handler.Database,
     DbModel,
     Unity.Sql,
     Unity.Settings,
     Unity.EventLogger,
-    Unity.SessionService,
-    Handler.Account,
-    Sync.Documents;
+    Unity.SessionService;
 
 
-// ------------------------------------
-//
-// ------------------------------------
+// -----------------------------------------
+// Remove invoice from tracker list.
+// *Change this when SQL is replaced by API.
+// -----------------------------------------
 
-procedure TTracker.UpdateTrackerList(UserAlias: string);
+procedure TTracker.DeleteFromTrackerListAsync(CUID: string; Callback: TDeleteFromTrackerList);
 begin
 
-    var TrackerData: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
-    try
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
 
-        if not(String.IsNullOrEmpty(UserAlias)) then
-        begin
-            TrackerData.CustFilter:=TSql.WHERE + TTrackerData.UserAlias + TSql.EQUAL + QuotedStr(UserAlias);
+        var LastError: TLastError;
+        try
+
+            var TrackerData: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
+            try
+
+                // Recorded customers
+                var PrimaryTable: string:=TSql.DELETE_FROM + TTrackerData.TrackerData + TSql.WHERE + TTrackerData.Cuid  + TSql.EQUAL + QuotedStr(CUID);
+                // Recorded invoices
+                var ForeignTable: string:=TSql.DELETE_FROM + TTrackerInvoices.TrackerInvoices + TSql.WHERE + TTrackerInvoices.Cuid + TSql.EQUAL + QuotedStr(CUID);
+
+                TrackerData.StrSQL:=ForeignTable + ';' + PrimaryTable;
+                TrackerData.ExecSQL;
+
+            finally
+                TrackerData.Free;
+            end;
+
+            LastError.IsSucceeded:=True;
+
+        except
+            on E: Exception do
+            begin
+                LastError.IsSucceeded:=False;
+                LastError.ErrorMessage:='[DeleteFromTrackerListAsync]: Cannot execute. Error has been thrown: ' + E.Message;
+                ThreadFileLog.Log(LastError.ErrorMessage);
+            end;
+
         end;
 
-        TrackerData.Columns.Add(TTrackerData.Cuid);
-        TrackerData.Columns.Add(TTrackerData.UserAlias);
-        TrackerData.Columns.Add(TTrackerData.CustomerName);
-        TrackerData.Columns.Add(TTrackerData.Stamp);
-        TrackerData.Columns.Add(TTrackerData.SendReminder1);
-        TrackerData.Columns.Add(TTrackerData.SendReminder2);
-        TrackerData.Columns.Add(TTrackerData.SendReminder3);
-        TrackerData.Columns.Add(TTrackerData.SendReminder4);
-        TrackerData.Columns.Add(TTrackerData.ReminderLayout);
-        TrackerData.Columns.Add(TTrackerData.SendFrom);
-        TrackerData.Columns.Add(TTrackerData.PreStatement);
-        TrackerData.Columns.Add(TTrackerData.StatementTo);
-        TrackerData.Columns.Add(TTrackerData.ReminderTo);
-
-        TrackerData.OpenTable(TTrackerData.TrackerData);
-        TrackerData.SqlToGrid(MainForm.sgInvoiceTracker, TrackerData.DataSet, False, True);
-
-        if MainForm.sgInvoiceTracker.RowCount > 1 then
+        TThread.Synchronize(nil, procedure
         begin
-            MainForm.sgInvoiceTracker.SetColWidth(10, 20, 400);
-            MainForm.sgInvoiceTracker.Visible:=True;
-        end
-        else
-        begin
-            MainForm.sgInvoiceTracker.Visible:=False;
-        end;
-
-    finally
-        TrackerData.Free;
-    end;
-
-end;
-
-
-// ------------------------------------
-//
-// ------------------------------------
-
-procedure TTracker.DeleteFromTrackerList(CUID: string);
-begin
-
-    var TrackerData: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
-    try
-
-        var PrimaryTable: string:=TSql.DELETE_FROM + TTrackerData.TrackerData + TSql.WHERE + TTrackerData.Cuid  + TSql.EQUAL + QuotedStr(CUID);  {HOLDS RECORDED CUSTOMERS}
-        var ForeignTable: string:=TSql.DELETE_FROM + TTrackerInvoices.TrackerInvoices + TSql.WHERE + TTrackerInvoices.Cuid + TSql.EQUAL + QuotedStr(CUID);  {HOLDS CUSTOMERS INVOICES}
-
-        TrackerData.StrSQL:=ForeignTable + ';' + PrimaryTable;
-        TrackerData.ExecSQL;
-
-        MainForm.sgInvoiceTracker.DeleteRowFrom(1, 1);
-
-    finally
-
-        TrackerData.Free;
-
-    end;
-
-end;
-
-
-// ------------------------------------
-// Refresh invoice tracker list
-// *Remove when SQL is replaced by API
-// ------------------------------------
-
-procedure TTracker.RefreshInvoiceTrackerAsync(UserAlias: string);
-begin
-
-    try
-
-        var NewTask: ITask:=TTask.Create(procedure
-        begin
-            UpdateTrackerList(UserAlias)
+            Callback(LastError);
         end);
 
-        NewTask.Start;
+    end);
 
-    except
-        on E: Exception do
-            ThreadFileLog.Log('Execution of this tread work has been stopped. Error has been thrown: ' + E.Message + ' (TInvoiceTracker).');
-    end;
+    NewTask.Start;
+
+end;
+
+
+// ------------------------------------
+// Refresh invoice tracker list.
+// *Remove when SQL is replaced by API.
+// ------------------------------------
+
+procedure TTracker.RefreshInvoiceTrackerAsync(UserAlias: string; Callback: TRefreshInvoiceTracker);
+begin
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var LastError: TLastError;
+        var InvoiceList: TStringGrid:=TStringGrid.Create(nil);
+        try
+
+            var TrackerData: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
+            try
+
+                if not(String.IsNullOrEmpty(UserAlias)) then
+                    TrackerData.CustFilter:=TSql.WHERE + TTrackerData.UserAlias + TSql.EQUAL + QuotedStr(UserAlias);
+
+                TrackerData.Columns.Add(TTrackerData.Cuid);
+                TrackerData.Columns.Add(TTrackerData.UserAlias);
+                TrackerData.Columns.Add(TTrackerData.CustomerName);
+                TrackerData.Columns.Add(TTrackerData.Stamp);
+                TrackerData.Columns.Add(TTrackerData.SendReminder1);
+                TrackerData.Columns.Add(TTrackerData.SendReminder2);
+                TrackerData.Columns.Add(TTrackerData.SendReminder3);
+                TrackerData.Columns.Add(TTrackerData.SendReminder4);
+                TrackerData.Columns.Add(TTrackerData.ReminderLayout);
+                TrackerData.Columns.Add(TTrackerData.SendFrom);
+                TrackerData.Columns.Add(TTrackerData.PreStatement);
+                TrackerData.Columns.Add(TTrackerData.StatementTo);
+                TrackerData.Columns.Add(TTrackerData.ReminderTo);
+
+                TrackerData.OpenTable(TTrackerData.TrackerData);
+                TrackerData.SqlToGrid(InvoiceList, TrackerData.DataSet, False, True);
+
+            finally
+                TrackerData.Free;
+            end;
+
+            LastError.IsSucceeded:=True;
+
+        except
+            on E: Exception do
+            begin
+                LastError.IsSucceeded:=False;
+                LastError.ErrorMessage:='[DeleteFromTrackerListAsync]: Cannot execute. Error has been thrown: ' + E.Message;
+                ThreadFileLog.Log(LastError.ErrorMessage);
+            end;
+
+        end;
+
+        TThread.Synchronize(nil, procedure
+        begin
+            Callback(InvoiceList, LastError);
+            if Assigned(InvoiceList) then InvoiceList.Free();
+        end);
+
+    end);
+
+    NewTask.Start;
 
 end;
 

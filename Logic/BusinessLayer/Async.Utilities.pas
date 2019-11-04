@@ -37,53 +37,38 @@ type
     // Callback signatures.
     // --------------------
 
+    TCheckServerConn    = procedure(IsConnected: boolean; LastError: TLastError) of object;
+    TSendUserFeedback   = procedure(LastError: TLastError) of object;
+    TExcelExport        = procedure(LastError: TLastError) of object;
+    TGeneralTables      = procedure(LastError: TLastError) of object;
     TCheckGivenPassword = procedure(LastError: TLastError) of object;
     TSetNewPassword     = procedure(LastError: TLastError) of object;
 
-
     IUtilities = interface(IInterface)
     ['{0B054CF4-86F7-4770-957B-3026BE491B5A}']
-
-        // --------------------------------
-        // Undisclosed getters and setters.
-        // --------------------------------
-
-        function  FGetActiveConnection: TADOConnection;
-        procedure FSetActiveConnection(NewValue: TADOConnection);
-
-        // -------------------
-        // Exposed properties.
-        // -------------------
-
-        property ActiveConnection: TADOConnection read FGetActiveConnection write FSetActiveConnection;
 
         // ----------------
         // Exposed methods.
         // ----------------
 
-        procedure CheckServerConnectionAsync();
-        procedure SendUserFeedback();
-        procedure ExcelExport(GroupId: string; AgeDate: string);
-        procedure GeneralTables(TableName: string; DestGrid: TStringGrid; Columns: string = ''; Conditions: string = ''; WaitToComplete: boolean = False);
-        procedure CheckGivenPassword(Password: string; Callback: TCheckGivenPassword);
-        procedure SetNewPassword(CurrentPassword: string; NewPassword: string; Callback: TSetNewPassword);
-    end;
+        procedure CheckServerConnAsync(IsConnected: boolean; Callback: TCheckServerConn);
+        procedure SendFeedbackAsync(Text: string; Callback: TSendUserFeedback);
+        procedure ExcelExportAsync(GroupId: string; AgeDate: string; FileName: string; Callback: TExcelExport);
+        procedure GeneralTablesAsync(TableName: string; DestGrid: TStringGrid; Callback: TGeneralTables; Columns: string = ''; Conditions: string = ''; WaitToComplete: boolean = False);
+        procedure CheckGivenPasswordAsync(Password: string; Callback: TCheckGivenPassword);
+        procedure SetNewPasswordAsync(CurrentPassword: string; NewPassword: string; Callback: TSetNewPassword);
 
+    end;
 
     TUtilities = class(TInterfacedObject, IUtilities)
     {$TYPEINFO ON}
-    private
-        var FActiveConnection: TADOConnection;
-        function FGetActiveConnection: TADOConnection;
-        procedure FSetActiveConnection(NewValue: TADOConnection);
     public
-        property ActiveConnection: TADOConnection read FGetActiveConnection;
-        procedure CheckServerConnectionAsync();
-        procedure SendUserFeedback();
-        procedure ExcelExport(GroupId: string; AgeDate: string);
-        procedure GeneralTables(TableName: string; DestGrid: TStringGrid; Columns: string = ''; Conditions: string = ''; WaitToComplete: boolean = False);
-        procedure CheckGivenPassword(Password: string; Callback: TCheckGivenPassword);
-        procedure SetNewPassword(CurrentPassword: string; NewPassword: string; Callback: TSetNewPassword);
+        procedure CheckServerConnAsync(IsConnected: boolean; Callback: TCheckServerConn);
+        procedure SendFeedbackAsync(Text: string; Callback: TSendUserFeedback);
+        procedure ExcelExportAsync(GroupId: string; AgeDate: string; FileName: string; Callback: TExcelExport);
+        procedure GeneralTablesAsync(TableName: string; DestGrid: TStringGrid; Callback: TGeneralTables; Columns: string = ''; Conditions: string = ''; WaitToComplete: boolean = False);
+        procedure CheckGivenPasswordAsync(Password: string; Callback: TCheckGivenPassword);
+        procedure SetNewPasswordAsync(CurrentPassword: string; NewPassword: string; Callback: TSetNewPassword);
     end;
 
 
@@ -91,8 +76,6 @@ implementation
 
 
 uses
-    View.Main, // <== remove
-    View.UserFeedback, // <== remove
     Handler.Database,
     Handler.Account,
     Unity.Helpers,
@@ -101,6 +84,9 @@ uses
     Unity.StatusBar,
     Unity.EventLogger,
     Unity.SessionService,
+    Unity.Chars,
+    Unity.Common,
+    Unity.Utilities,
     Sync.Documents,
     Bcrypt,
     DbModel;
@@ -111,35 +97,53 @@ uses
 // *Remove when SQL is replaced by API
 // ------------------------------------
 
-procedure TUtilities.CheckServerConnectionAsync();
+procedure TUtilities.CheckServerConnAsync(IsConnected: boolean; Callback: TCheckServerConn);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var DataBase: TDataBase:=TDataBase.Create(False);
+        var FIsConnected: boolean;
+        var LastError: TLastError;
         try
 
-            if (not(MainForm.FIsConnected)) and (DataBase.Check = 0) then
-            begin
+            var DataBase: TDataBase:=TDataBase.Create(False);
+            try
 
-                TThread.Synchronize(nil, procedure
+                if (not(IsConnected)) and (DataBase.Check = 0) then
                 begin
-                    MainForm.TryInitConnection;
-                    ThreadFileLog.Log('Connection with SQL Server database has been re-established.');
-                end);
+                    FIsConnected:=True;
+                    LastError.IsSucceeded:=True;
+                    LastError.ErrorMessage:='[CheckServerConnAsync]: Connection with SQL Server database has been re-established.';
+                    ThreadFileLog.Log(LastError.ErrorMessage);
+                end;
 
+                if DataBase.Check <> 0 then
+                begin
+                    FIsConnected:=False;
+                    LastError.IsSucceeded:=True;
+                    LastError.ErrorMessage:='[CheckServerConnAsync]: Connection with SQL Server database has been lost, waiting to reconnect... .';
+                    ThreadFileLog.Log(LastError.ErrorMessage);
+                end;
+
+            finally
+                DataBase.Free;
             end;
 
-            if DataBase.Check <> 0 then
+        except
+            on E: Exception do
             begin
-                MainForm.FIsConnected:=False;
-                ThreadFileLog.Log('Connection with SQL Server database has been lost, waiting to reconnect...');
+                LastError.IsSucceeded:=False;
+                LastError.ErrorMessage:='[CheckServerConnAsync]: Cannot execute. Error has been thrown: ' + E.Message;
+                ThreadFileLog.Log(LastError.ErrorMessage);
             end;
 
-        finally
-            DataBase.Free;
         end;
+
+        TThread.Synchronize(nil, procedure
+        begin
+            Callback(FIsConnected, LastError);
+        end);
 
     end);
 
@@ -147,28 +151,93 @@ begin
 
 end;
 
+
 // ------------------------------------
 // Send user feedback to predefine
 // email address in settings file
 // ------------------------------------
 
-procedure TUtilities.SendUserFeedback();
+procedure TUtilities.SendFeedbackAsync(Text: string; Callback: TSendUserFeedback);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        if FeedbackForm.SendReport then
-        begin
-            TThread.Synchronize(nil, FeedbackForm.ReportMemo.Clear);
-            THelpers.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Report has been sent successfully!', MainForm);
-            ThreadFileLog.Log('Feedback Report has been successfully sent by the user.');
-        end
-        else
-        begin
-            THelpers.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot send Feedback Report. Please contact IT support.', MainForm);
-            ThreadFileLog.Log('Cannot send Feedback Report.');
+        var LastError: TLastError;
+        try
+
+            var Settings: ISettings:=TSettings.Create;
+            var Mail: IDocument:=TDocument.Create;
+
+            var AppName: string:=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'VALUE', '');
+            var AppVer: string:=TCore.GetBuildInfoAsString;
+
+            // --------------------------
+            // Get and set email details.
+            // --------------------------
+
+            if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerNTLM  then
+            begin
+                Mail.XMailer:=Settings.GetStringValue(TConfigSections.MailerNTLM, 'FROM',     '');
+                Mail.MailTo :=Settings.GetStringValue(TConfigSections.MailerNTLM, 'TO',       '');
+                Mail.MailRt :=Settings.GetStringValue(TConfigSections.MailerNTLM, 'REPLY-TO', '');
+            end;
+
+            if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerBASIC then
+            begin
+                Mail.XMailer:=Settings.GetStringValue(TConfigSections.MailerBASIC, 'FROM',     '');
+                Mail.MailTo :=Settings.GetStringValue(TConfigSections.MailerBASIC, 'TO',       '');
+                Mail.MailRt :=Settings.GetStringValue(TConfigSections.MailerBASIC, 'REPLY-TO', '');
+            end;
+
+            Mail.MailFrom   :=Mail.XMailer;
+            Mail.MailCc     :=SessionService.SessionUser + '@' + Settings.GetStringValue(TConfigSections.ApplicationDetails, 'MAIL_DOMAIN', '');
+            Mail.MailBcc    :='';
+            Mail.MailSubject:='Unity - User feedback (' + UpperCase(SessionService.SessionUser) + ')';
+
+            // ----------------------------------
+            // Plain text to HTML using template.
+            // ----------------------------------
+
+            var Transfer: string:=Text;
+            Transfer:=StringReplace(Transfer, TChars.CRLF, '<br>', [rfReplaceAll]);
+
+            var HTMLBody: string:=Mail.LoadTemplate(Settings.DirLayouts + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE4', ''));
+            HTMLBody:=StringReplace(HTMLBody, '{TEXT_HOLER}',  Transfer,       [rfReplaceAll]);
+            HTMLBody:=StringReplace(HTMLBody, '{APPNAME}',     AppName,        [rfReplaceAll]);
+            HTMLBody:=StringReplace(HTMLBody, '{BUILD}',       AppVer,         [rfReplaceAll]);
+            HTMLBody:=StringReplace(HTMLBody, '{REPORT_DATE}', DateToStr(Now), [rfReplaceAll]);
+            HTMLBody:=StringReplace(HTMLBody, '{REPORT_TIME}', TimeToStr(Now), [rfReplaceAll]);
+
+            Mail.MailBody:=HTMLBody;
+
+            if Mail.SendNow then
+            begin
+                LastError.IsSucceeded:=True;
+                LastError.ErrorMessage:='[SendFeedbackAsync]: User feedback has been sent.';
+                ThreadFileLog.Log(LastError.ErrorMessage);
+            end
+            else
+            begin
+                LastError.IsSucceeded:=False;
+                LastError.ErrorMessage:='[SendFeedbackAsync]: Cannot send email. Please contact IT Support.';
+                ThreadFileLog.Log(LastError.ErrorMessage);
+            end;
+
+        except
+            on E: Exception do
+            begin
+                LastError.IsSucceeded:=False;
+                LastError.ErrorMessage:='[SendFeedbackAsync]: Cannot execute. Error has been thrown: ' + E.Message;
+                ThreadFileLog.Log(LastError.ErrorMessage);
+            end;
+
         end;
+
+        TThread.Synchronize(nil, procedure
+        begin
+            Callback(LastError);
+        end);
 
     end);
 
@@ -182,35 +251,38 @@ end;
 // to not to block application usability
 // -------------------------------------
 
-procedure TUtilities.ExcelExport(GroupId: string; AgeDate: string);
+procedure TUtilities.ExcelExportAsync(GroupId: string; AgeDate: string; FileName: string; Callback: TExcelExport);
 begin
-
-    if not Assigned(FActiveConnection) then Exit();
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.ExportXLS, MainForm);
+        var LastError: TLastError;
         try
-
-            var FileName: string;
-            TThread.Synchronize(nil, procedure
-            begin
-                if MainForm.XLExport.Execute then
-                    FileName:=MainForm.XLExport.FileName
-                        else FileName:='';
-            end);
 
             var Temp: TStringGrid:=TStringGrid.Create(nil);
             try
-                Temp.ToExcel('Age Report', FileName, GroupId, AgeDate, FActiveConnection);
+                Temp.ToExcel('Age Report', FileName, GroupId, AgeDate, SessionService.FDbConnect);
             finally
                 Temp.Free;
             end;
 
-        finally
-            THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
+            LastError.IsSucceeded:=True;
+
+        except
+            on E: Exception do
+            begin
+                LastError.IsSucceeded:=False;
+                LastError.ErrorMessage:='[ExcelExportAsync]: Cannot execute. Error has been thrown: ' + LastError.ErrorMessage;
+                ThreadFileLog.Log(LastError.ErrorMessage);
+            end;
+
         end;
+
+        TThread.Synchronize(nil, procedure
+        begin
+            Callback(LastError);
+        end);
 
     end);
 
@@ -219,19 +291,22 @@ begin
 end;
 
 
-// ------------------------------------
+// --------------------------------
 // Load async. given general table.
-// ------------------------------------
+// --------------------------------
 
-procedure TUtilities.GeneralTables(TableName: string; DestGrid: TStringGrid; Columns: string = ''; Conditions: string = ''; WaitToComplete: boolean = False);
+procedure TUtilities.GeneralTablesAsync(TableName: string; DestGrid: TStringGrid; Callback: TGeneralTables; Columns: string = ''; Conditions: string = ''; WaitToComplete: boolean = False);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
+        var LastError: TLastError;
         try
+
+            var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
             try
+
                 DataTables.CleanUp;
 
                 if not(string.IsNullOrEmpty(Columns)) then
@@ -243,13 +318,26 @@ begin
                 if DataTables.OpenTable(TableName) then
                     DataTables.SqlToGrid(DestGrid, DataTables.DataSet, False, True);
 
-            except
-                on E: Exception do
-                    //MainForm.FAppEvents.Log(MainForm.EventLogPath, 'Cannot load general table, error has been thrown: ' + E.Message);
+            finally
+                DataTables.Free;
             end;
-        finally
-            DataTables.Free;
+
+            LastError.IsSucceeded:=True;
+
+        except
+            on E: Exception do
+            begin
+                LastError.IsSucceeded:=False;
+                LastError.ErrorMessage:='[GeneralTablesAsync]: Cannot execute. Error has been thrown: ' + LastError.ErrorMessage;
+                ThreadFileLog.Log(LastError.ErrorMessage);
+            end;
+
         end;
+
+        TThread.Synchronize(nil, procedure
+        begin
+            Callback(LastError);
+        end);
 
     end);
 
@@ -259,7 +347,11 @@ begin
 end;
 
 
-procedure TUtilities.CheckGivenPassword(Password: string; Callback: TCheckGivenPassword);
+// ------------------------
+// Check supplied password.
+// ------------------------
+
+procedure TUtilities.CheckGivenPasswordAsync(Password: string; Callback: TCheckGivenPassword);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
@@ -285,13 +377,13 @@ begin
 
                 if LastError.IsSucceeded then
                 begin
-                    LastError.ErrorMessage:='Administrator password has been validaded.';
-                    ThreadFileLog.Log('[CheckGivenPassword]: Administrator password has been validaded.');
+                    LastError.ErrorMessage:='[CheckGivenPassword]: Administrator password has been validaded.';
+                    ThreadFileLog.Log(LastError.ErrorMessage);
                 end
                 else
                 begin
-                    LastError.ErrorMessage:='Incorrect password, please re-type it and try again';
-                    ThreadFileLog.Log('[CheckGivenPassword]: Administrator password is invalid.');
+                    LastError.ErrorMessage:='[CheckGivenPassword]: Incorrect password, please re-type it and try again';
+                    ThreadFileLog.Log(LastError.ErrorMessage);
                 end;
 
             end;
@@ -318,7 +410,12 @@ begin
 end;
 
 
-procedure TUtilities.SetNewPassword(CurrentPassword: string; NewPassword: string; Callback: TSetNewPassword);
+// -------------------------------------------------------------
+// Set new administrator password. This is local admin password,
+// that works only for given program installed on local machine.
+// -------------------------------------------------------------
+
+procedure TUtilities.SetNewPasswordAsync(CurrentPassword: string; NewPassword: string; Callback: TSetNewPassword);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
@@ -388,21 +485,6 @@ begin
 
     NewTask.Start();
 
-end;
-
-
-// ------------------------------------------------------------------------------------------------------------------------------------------- RETURN VALUES //
-
-
-function TUtilities.FGetActiveConnection: TADOConnection;
-begin
-    Result:=FActiveConnection;
-end;
-
-
-procedure TUtilities.FSetActiveConnection(NewValue: TADOConnection);
-begin
-    FActiveConnection:=NewValue;
 end;
 
 

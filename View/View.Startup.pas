@@ -615,17 +615,17 @@ begin
     var Utilities: IUtilities:=TUtilities.Create();
     try
 
-        Utilities.GeneralTables(TSalesResponsible.SalesResponsible, MainAppForm.sgSalesResp);
-        Utilities.GeneralTables(TPersonResponsible.PersonResponsible, MainAppForm.sgPersonResp);
-        Utilities.GeneralTables(TAccountType.AccountType, MainAppForm.sgAccountType);
-        Utilities.GeneralTables(TCustomerGroup.CustomerGroup, MainAppForm.sgCustomerGr);
-        Utilities.GeneralTables(TGroup3.Group3, MainAppForm.sgGroup3);
+        Utilities.GeneralTablesAsync(TSalesResponsible.SalesResponsible, MainAppForm.sgSalesResp, MainForm.GeneralTables_Callback);
+        Utilities.GeneralTablesAsync(TPersonResponsible.PersonResponsible, MainAppForm.sgPersonResp, MainForm.GeneralTables_Callback);
+        Utilities.GeneralTablesAsync(TAccountType.AccountType, MainAppForm.sgAccountType, MainForm.GeneralTables_Callback);
+        Utilities.GeneralTablesAsync(TCustomerGroup.CustomerGroup, MainAppForm.sgCustomerGr, MainForm.GeneralTables_Callback);
+        Utilities.GeneralTablesAsync(TGroup3.Group3, MainAppForm.sgGroup3, MainForm.GeneralTables_Callback);
 
-        Utilities.GeneralTables(TCompanyData.CompanyData, MainAppForm.sgCoCodes, TCompanyData.CoCode + TChars.COMMA + TCompanyData.Branch + TChars.COMMA + TCompanyData.CoName + TChars.COMMA + TCompanyData.CoAddress + TChars.COMMA + TCompanyData.VatNo + TChars.COMMA + TCompanyData.Duns + TChars.COMMA + TCompanyData.Country + TChars.COMMA + TCompanyData.City + TChars.COMMA + TCompanyData.FinManager + TChars.COMMA + TCompanyData.TelephoneNumbers + TChars.COMMA + TCompanyData.CoType + TChars.COMMA + TCompanyData.CoCurrency + TChars.COMMA + TCompanyData.InterestRate + TChars.COMMA + TCompanyData.KpiOverdueTarget + TChars.COMMA + TCompanyData.KpiUnallocatedTarget + TChars.COMMA + TCompanyData.Agents + TChars.COMMA + TCompanyData.Divisions, TSql.ORDER + TCompanyData.CoCode + TSql.ASC);
-        Utilities.GeneralTables(TPaymentTerms.PaymentTerms, MainAppForm.sgPmtTerms);
-        Utilities.GeneralTables(TPaidinfo.Paidinfo, MainAppForm.sgPaidInfo);
-        Utilities.GeneralTables(TPerson.Person, MainAppForm.sgPerson);
-        Utilities.GeneralTables(TControlStatus.ControlStatus, MainAppForm.sgControlStatus);
+        Utilities.GeneralTablesAsync(TCompanyData.CompanyData, MainAppForm.sgCoCodes, MainForm.GeneralTables_Callback, TCompanyData.CoCode + TChars.COMMA + TCompanyData.Branch + TChars.COMMA + TCompanyData.CoName + TChars.COMMA + TCompanyData.CoAddress + TChars.COMMA + TCompanyData.VatNo + TChars.COMMA + TCompanyData.Duns + TChars.COMMA + TCompanyData.Country + TChars.COMMA + TCompanyData.City + TChars.COMMA + TCompanyData.FinManager + TChars.COMMA + TCompanyData.TelephoneNumbers + TChars.COMMA + TCompanyData.CoType + TChars.COMMA + TCompanyData.CoCurrency + TChars.COMMA + TCompanyData.InterestRate + TChars.COMMA + TCompanyData.KpiOverdueTarget + TChars.COMMA + TCompanyData.KpiUnallocatedTarget + TChars.COMMA + TCompanyData.Agents + TChars.COMMA + TCompanyData.Divisions, TSql.ORDER + TCompanyData.CoCode + TSql.ASC);
+        Utilities.GeneralTablesAsync(TPaymentTerms.PaymentTerms, MainAppForm.sgPmtTerms, MainForm.GeneralTables_Callback);
+        Utilities.GeneralTablesAsync(TPaidinfo.Paidinfo, MainAppForm.sgPaidInfo, MainForm.GeneralTables_Callback);
+        Utilities.GeneralTablesAsync(TPerson.Person, MainAppForm.sgPerson, MainForm.GeneralTables_Callback);
+        Utilities.GeneralTablesAsync(TControlStatus.ControlStatus, MainAppForm.sgControlStatus, MainForm.GeneralTables_Callback);
 
     except
         on E: Exception do

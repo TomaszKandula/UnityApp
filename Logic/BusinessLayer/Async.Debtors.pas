@@ -35,16 +35,16 @@ type
     // Callback signatures.
     // --------------------
 
-    TMakeAgeViewSQLAsync = procedure(LastError: TLastError) of object;
-    TMakeAgeViewCSVAsync = procedure(CsvContent: TStringList; LastError: TLastError) of object;
-    TReadAgeViewAsync    = procedure(ActionMode: TLoading; ReturnedData: TStringGrid; LastError: TLastError) of object;
+    TMakeAgeViewSQL = procedure(LastError: TLastError) of object;
+    TMakeAgeViewCSV = procedure(CsvContent: TStringList; LastError: TLastError) of object;
+    TReadAgeView    = procedure(ActionMode: TLoading; ReturnedData: TStringGrid; LastError: TLastError) of object;
 
 
     IDebtors = interface(IInterface)
     ['{194FE2BE-386E-499E-93FB-0299DA53A70A}']
-        procedure MakeAgeViewSQLAsync(OpenAmount: double; GroupID: string; SourceGrid: TStringGrid; CompanyData: TStringGrid; Callback: TMakeAgeViewSQLAsync);
-        procedure MakeAgeViewCSVAsync(OpenAmount: double; GroupID: string; SourceGrid: TStringGrid; CompanyData: TStringGrid; Callback: TMakeAgeViewCSVAsync);
-        procedure ReadAgeViewAsync(ActionMode: TLoading; SortMode: integer; GroupIdSel: string; AgeDateSel: string; Callback: TReadAgeViewAsync);
+        procedure MakeAgeViewSQLAsync(OpenAmount: double; GroupID: string; SourceGrid: TStringGrid; CompanyData: TStringGrid; Callback: TMakeAgeViewSQL);
+        procedure MakeAgeViewCSVAsync(OpenAmount: double; GroupID: string; SourceGrid: TStringGrid; CompanyData: TStringGrid; Callback: TMakeAgeViewCSV);
+        procedure ReadAgeViewAsync(ActionMode: TLoading; SortMode: integer; GroupIdSel: string; AgeDateSel: string; Callback: TReadAgeView);
     end;
 
 
@@ -54,9 +54,9 @@ type
         function FMakeAgeView(OSAmount: double; GroupID: string; SourceGrid: TStringGrid; CompanyData: TStringGrid): TALists;
         procedure FWriteAgeView(DestTable: string; GroupID: string; SourceArray: TALists);
     public
-        procedure MakeAgeViewSQLAsync(OpenAmount: double; GroupID: string; SourceGrid: TStringGrid; CompanyData: TStringGrid; Callback: TMakeAgeViewSQLAsync);
-        procedure MakeAgeViewCSVAsync(OpenAmount: double; GroupID: string; SourceGrid: TStringGrid; CompanyData: TStringGrid; Callback: TMakeAgeViewCSVAsync);
-        procedure ReadAgeViewAsync(ActionMode: TLoading; SortMode: integer; GroupIdSel: string; AgeDateSel: string; Callback: TReadAgeViewAsync);
+        procedure MakeAgeViewSQLAsync(OpenAmount: double; GroupID: string; SourceGrid: TStringGrid; CompanyData: TStringGrid; Callback: TMakeAgeViewSQL);
+        procedure MakeAgeViewCSVAsync(OpenAmount: double; GroupID: string; SourceGrid: TStringGrid; CompanyData: TStringGrid; Callback: TMakeAgeViewCSV);
+        procedure ReadAgeViewAsync(ActionMode: TLoading; SortMode: integer; GroupIdSel: string; AgeDateSel: string; Callback: TReadAgeView);
     end;
 
 
@@ -86,7 +86,7 @@ uses
 // *Remove when SQL is replaced by API.
 // ------------------------------------
 
-procedure TDebtors.MakeAgeViewSQLAsync(OpenAmount: double; GroupID: string; SourceGrid: TStringGrid; CompanyData: TStringGrid; Callback: TMakeAgeViewSQLAsync);
+procedure TDebtors.MakeAgeViewSQLAsync(OpenAmount: double; GroupID: string; SourceGrid: TStringGrid; CompanyData: TStringGrid; Callback: TMakeAgeViewSQL);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
@@ -130,7 +130,7 @@ end;
 // *Remove when SQL is replaced by API.
 // ------------------------------------
 
-procedure TDebtors.MakeAgeViewCSVAsync(OpenAmount: double; GroupID: string; SourceGrid: TStringGrid; CompanyData: TStringGrid; Callback: TMakeAgeViewCSVAsync);
+procedure TDebtors.MakeAgeViewCSVAsync(OpenAmount: double; GroupID: string; SourceGrid: TStringGrid; CompanyData: TStringGrid; Callback: TMakeAgeViewCSV);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
@@ -186,7 +186,7 @@ end;
 // *Change when SQL is replaced by API.
 // ------------------------------------
 
-procedure TDebtors.ReadAgeViewAsync(ActionMode: TLoading; SortMode: integer; GroupIdSel: string; AgeDateSel: string; Callback: TReadAgeViewAsync);
+procedure TDebtors.ReadAgeViewAsync(ActionMode: TLoading; SortMode: integer; GroupIdSel: string; AgeDateSel: string; Callback: TReadAgeView);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
@@ -207,7 +207,7 @@ begin
                 begin
                     LastError.IsSucceeded:=False;
                     LastError.ErrorMessage:='[ReadAgeViewAsync]: Cannot load columns. Please contact IT support.';
-                    ThreadFileLog.Log('[ReadAgeViewAsync]: Cannot load columns. Please contact IT support.');
+                    ThreadFileLog.Log(LastError.ErrorMessage);
                 end
                 else
                 begin
@@ -235,7 +235,7 @@ begin
                 begin
                     LastError.IsSucceeded:=False;
                     LastError.ErrorMessage:='[ReadAgeViewAsync]: Cannot execute. Error has been thrown: ' + E.Message;
-                    ThreadFileLog.Log('[ReadAgeViewAsync]: Cannot execute. Error has been thrown: ' + E.Message);
+                    ThreadFileLog.Log(LastError.ErrorMessage);
                 end;
 
             end;

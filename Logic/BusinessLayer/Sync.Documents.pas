@@ -27,12 +27,6 @@ uses
 type
 
 
-    // --------------------
-    // Callback signatures.
-    // --------------------
-
-    //...
-
     IDocument = Interface(IMailer)
     ['{C3D66D48-891B-438B-9EB6-F53B62E2FCAD}']
 
@@ -81,9 +75,9 @@ type
         function  GetCommonHTMLTable: string;
         function  GetCommonHTMLRow:   string;
 
-        // ----------------------------
+        // -------------------
         // Exposed properties.
-        // ----------------------------
+        // -------------------
 
         property HTMLTable:   string          read GetHTMLTable;
         property HTMLTemp:    string          read GetHTMLTemp;
@@ -104,9 +98,9 @@ type
         property CUID:        string          read GetCUID        write SetCUID;
         property Exclusions:  TArray<integer> read GetExclusions  write SetExclusions;
 
-        // ----------------------------
+        // ----------------
         // Exposed methods.
-        // ----------------------------
+        // ----------------
 
         function LoadTemplate(FileName: string): string;
         function SendDocument: boolean;
@@ -120,7 +114,7 @@ type
         var FHTMLStat: string;
         var FPos:      integer;
         var FItems:    integer;
-    private
+    strict private
         var FHTMLTable:       string;
         var FHTMLTemp:        string;
         var FHTMLRow:         string;
@@ -200,7 +194,7 @@ type
         property InvFilter:   TInvoiceFilter  read GetInvFilter   write SetInvFilter;
         property BeginWith:   string          read GetBeginWith   write SetBeginWith;
         property EndWith:     string          read GetEndWith     write SetEndWith;
-        property OpenItems:  TStringGrid      read GetOpenItems   write SetOpenItems;
+        property OpenItems:   TStringGrid     read GetOpenItems   write SetOpenItems;
         property SourceGrid:  TStringGrid     read GetSourceGrid  write SetSourceGrid;
         property CUID:        string          read GetCUID        write SetCUID;
         property Exclusions:  TArray<integer> read GetExclusions  write SetExclusions;
@@ -215,9 +209,8 @@ implementation
 
 
 uses
-    View.Main,            // remove!!
-    View.InvoiceTracker,  // remove!!
-    View.Actions,         // remove!!
+    View.Main,      // remove!!
+    View.Actions,   // remove!!
     Data.Win.ADODB,
     DbModel,
     Unity.Chars,

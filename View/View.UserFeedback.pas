@@ -24,7 +24,8 @@ uses
     Vcl.ExtCtrls,
     Unity.Enums,
     Unity.Grid,
-    Unity.Panel;
+    Unity.Panel,
+    Unity.Records;
 
 
 type
@@ -45,9 +46,10 @@ type
         procedure btnSendReportClick(Sender: TObject);
         procedure btnCancelClick(Sender: TObject);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
-    public
+    strict private
         function WordCount(const InputStr: string): cardinal;
-        function SendReport: boolean;
+    public
+        procedure SendFeedbackAsync_Callback(LastError: TLastError);
     end;
 
 
@@ -62,21 +64,15 @@ implementation
 
 uses
     View.Main,
-    Sync.Documents,
     Async.Utilities,
-    Unity.Chars,
-    Unity.Common,
-    Unity.Helpers,
-    Unity.Settings,
-    Unity.Utilities,
-    Unity.SessionService;
-
-
-var vFeedbackForm: TFeedbackForm;
+    Unity.Helpers;
 
 
 const
     ToSkip = [#0..#32, '.', ',', ';', '[', ']', '(', ')', '{', '}'];
+
+
+var vFeedbackForm: TFeedbackForm;
 
 
 function FeedbackForm: TFeedbackForm;
@@ -90,7 +86,7 @@ end;
 
 
 /// <summary>
-/// Count words in TMemo component while user is writing.
+/// Count words in TMemo component while user is typing.
 /// </summary>
 
 function TFeedbackForm.WordCount(const InputStr: string): cardinal;
@@ -101,74 +97,42 @@ begin
     var TextLength: integer:=Length(InputStr);
     var FindWord:   boolean:=False;
 
-    // Count if word is found
     for var iCNT: integer:=1 to TextLength do
     begin
+
         if not (CharInSet(InputStr[iCNT], ToSkip)) then
         begin
-        if not FindWord then
+
+            if not FindWord then
             begin
                 FindWord:=True;
                 Inc(Result);
             end;
+
         end
-            else
-                FindWord:=False;
+        else
+        begin
+            FindWord:=False;
+        end;
+
     end;
 
 end;
 
 
-function TFeedbackForm.SendReport: boolean;
+// ----------------------------------------------------------------------------------------------------------------------------------------------- CALLBACKS //
+
+
+procedure TFeedbackForm.SendFeedbackAsync_Callback(LastError: TLastError);
 begin
 
-    Result:=False;
-
-    if ReportMemo.Text = '' then
+    if not LastError.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Warn, 'Cannot send empty report. Please write what feels right and then send.');
-        Exit;
+        THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
+        Exit();
     end;
 
-    var Settings: ISettings:=TSettings.Create;
-    var Mail: IDocument:=TDocument.Create;
-
-    var AppName: string:=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'VALUE', '');
-    var AppVer: string:=TCore.GetBuildInfoAsString;
-
-    // Get and set email details
-    if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerNTLM  then
-    begin
-        Mail.XMailer:=Settings.GetStringValue(TConfigSections.MailerNTLM, 'FROM', '');
-        Mail.MailTo :=Settings.GetStringValue(TConfigSections.MailerNTLM, 'TO', '');
-        Mail.MailRt :=Settings.GetStringValue(TConfigSections.MailerNTLM, 'REPLY-TO', '');
-    end;
-
-    if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerBASIC then
-    begin
-        Mail.XMailer:=Settings.GetStringValue(TConfigSections.MailerBASIC, 'FROM', '');
-        Mail.MailTo :=Settings.GetStringValue(TConfigSections.MailerBASIC, 'TO', '');
-        Mail.MailRt :=Settings.GetStringValue(TConfigSections.MailerBASIC, 'REPLY-TO', '');
-    end;
-
-    Mail.MailFrom   :=Mail.XMailer;
-    Mail.MailCc     :=SessionService.SessionUser + '@' + Settings.GetStringValue(TConfigSections.ApplicationDetails, 'MAIL_DOMAIN', '');
-    Mail.MailBcc    :='';
-    Mail.MailSubject:='Unity - User feedback (' + UpperCase(SessionService.SessionUser) + ')';
-
-    // Plain text to HTML using template
-    var Transfer: string:=ReportMemo.Text;
-    Transfer:=StringReplace(Transfer, TChars.CRLF, '<br>', [rfReplaceAll]);
-
-    var HTMLBody: string:=Mail.LoadTemplate(Settings.DirLayouts + Settings.GetStringValue(TConfigSections.Layouts, 'SENDFEEDBACK', '') + '.html');
-    HTMLBody:=StringReplace(HTMLBody, '{TEXT_HOLER}',  Transfer,       [rfReplaceAll]);
-    HTMLBody:=StringReplace(HTMLBody, '{APPNAME}',     AppName,        [rfReplaceAll]);
-    HTMLBody:=StringReplace(HTMLBody, '{BUILD}',       AppVer,         [rfReplaceAll]);
-    HTMLBody:=StringReplace(HTMLBody, '{REPORT_DATE}', DateToStr(Now), [rfReplaceAll]);
-    HTMLBody:=StringReplace(HTMLBody, '{REPORT_TIME}', TimeToStr(Now), [rfReplaceAll]);
-
-    Mail.MailBody:=HTMLBody;
-    Result:=Mail.SendNow;
+    THelpers.MsgCall(TAppMessage.Info, 'Report has been sent successfully!');
 
 end;
 
@@ -187,8 +151,16 @@ end;
 
 procedure TFeedbackForm.btnSendReportClick(Sender: TObject);
 begin
+
+    if ReportMemo.Text = '' then
+    begin
+        THelpers.MsgCall(TAppMessage.Warn, 'Cannot send empty report. Please write what feels right and then send.');
+        Exit;
+    end;
+
     var Utilities: IUtilities:=TUtilities.Create;
-    Utilities.SendUserFeedback();
+    Utilities.SendFeedbackAsync(ReportMemo.Text, SendFeedbackAsync_Callback);
+
 end;
 
 procedure TFeedbackForm.btnCancelClick(Sender: TObject);

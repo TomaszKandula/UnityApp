@@ -21,6 +21,7 @@ uses
     Vcl.Dialogs,
     Vcl.ExtCtrls,
     Vcl.StdCtrls,
+    Vcl.ComCtrls,
     Unity.Panel;
 
 
@@ -64,6 +65,8 @@ type
         procedure Report3DebtorsClick(Sender: TObject);
         procedure Report4StatusClick(Sender: TObject);
         procedure ScrollBoxMouseWheel(Sender: TObject; Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
+    public
+        var FSetLastSelection: TTabSheet;
     end;
 
 
@@ -100,7 +103,7 @@ end;
 
 procedure TReportsForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-    MainForm.ResetTabsheetButtons();
+    MainForm.SetActiveTabsheet(FSetLastSelection);
 end;
 
 

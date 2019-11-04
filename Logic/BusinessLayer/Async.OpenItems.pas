@@ -37,16 +37,16 @@ type
     // Callback signatures.
     // --------------------
 
-    TScanOpenItemsAsync = procedure(CanMakeAge: boolean; ReadDateTime: string; LastError: TLastError) of object;
-    TReadOpenItemsAsync = procedure(ActionMode: TLoading; OpenItemsData: TOpenItemsPayLoad; LastError: TLastError) of object;
+    TScanOpenItems = procedure(CanMakeAge: boolean; ReadDateTime: string; LastError: TLastError) of object;
+    TReadOpenItems = procedure(ActionMode: TLoading; OpenItemsData: TOpenItemsPayLoad; LastError: TLastError) of object;
 
 
     IOpenItems = interface(IInterface)
     ['{CD6AC138-D2A4-4C6B-A3F1-07F904BA44B1}']
         function GetDateTime(Return: TCalendar): string;
         function GetStatus(DateTime: string): string;
-        procedure ScanOpenItemsAsync(OpenItemsUpdate: string; Callback: TScanOpenItemsAsync);
-        procedure ReadOpenItemsAsync(ActionMode: TLoading; OpenItemsGrid: TStringGrid; SettingsGrid: TStringGrid; Callback: TReadOpenItemsAsync);
+        procedure ScanOpenItemsAsync(OpenItemsUpdate: string; Callback: TScanOpenItems);
+        procedure ReadOpenItemsAsync(ActionMode: TLoading; OpenItemsGrid: TStringGrid; SettingsGrid: TStringGrid; Callback: TReadOpenItems);
     end;
 
 
@@ -58,8 +58,8 @@ type
     public
         function GetDateTime(Return: TCalendar): string;
         function GetStatus(DateTime: string): string;
-        procedure ScanOpenItemsAsync(OpenItemsUpdate: string; Callback: TScanOpenItemsAsync);
-        procedure ReadOpenItemsAsync(ActionMode: TLoading; OpenItemsGrid: TStringGrid; SettingsGrid: TStringGrid; Callback: TReadOpenItemsAsync);
+        procedure ScanOpenItemsAsync(OpenItemsUpdate: string; Callback: TScanOpenItems);
+        procedure ReadOpenItemsAsync(ActionMode: TLoading; OpenItemsGrid: TStringGrid; SettingsGrid: TStringGrid; Callback: TReadOpenItems);
     end;
 
 
@@ -91,7 +91,7 @@ uses
 // *Change when SQL is replaced by API
 // ------------------------------------
 
-procedure TOpenItems.ScanOpenItemsAsync(OpenItemsUpdate: string; Callback: TScanOpenItemsAsync);
+procedure TOpenItems.ScanOpenItemsAsync(OpenItemsUpdate: string; Callback: TScanOpenItems);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
@@ -117,7 +117,7 @@ begin
             begin
                 LastError.IsSucceeded:=False;
                 LastError.ErrorMessage:='[ScanOpenItemsAsync] Cannot execute. Error has been thrown: ' + E.Message;
-                ThreadFileLog.Log('[ScanOpenItemsAsync] Cannot execute. Error has been thrown: ' + E.Message);
+                ThreadFileLog.Log(LastError.ErrorMessage);
             end;
 
         end;
@@ -139,7 +139,7 @@ end;
 // *Change when SQL is replaced by API
 // -----------------------------------
 
-procedure TOpenItems.ReadOpenItemsAsync(ActionMode: TLoading; OpenItemsGrid: TStringGrid; SettingsGrid: TStringGrid; Callback: TReadOpenItemsAsync);
+procedure TOpenItems.ReadOpenItemsAsync(ActionMode: TLoading; OpenItemsGrid: TStringGrid; SettingsGrid: TStringGrid; Callback: TReadOpenItems);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
@@ -159,7 +159,7 @@ begin
             begin
                 LastError.IsSucceeded:=False;
                 LastError.ErrorMessage:='[ReadOpenItemsAsync] Cannot execute. Error has been thrown: ' + E.Message;
-                ThreadFileLog.Log('[ReadOpenItemsAsync] Cannot execute. Error has been thrown: ' + E.Message);
+                ThreadFileLog.Log(LastError.ErrorMessage);
             end;
 
         end;

@@ -923,7 +923,8 @@ type
         var FOpenItemsRefs:  TFOpenItemsRefs;
         var FCtrlStatusRefs: TFControlStatusRefs;
 
-        procedure ResetTabsheetButtons;
+        procedure SetActiveTabsheet(TabSheet: TTabSheet);
+        procedure ResetTabsheetButtons();
 
         procedure UpdateAgeSummary();
         procedure ComputeAgeSummary(var Grid: TStringGrid);  // make async?
@@ -974,6 +975,16 @@ type
 
         procedure CheckGivenPassword_Callback(LastError: TLastError);
         procedure SetNewPassword_Callback(LastError: TLastError);
+        procedure CheckServerConnAsync_Callback(IsConnected: boolean; LastError: TLastError);
+        procedure ExcelExport_Callback(LastError: TLastError);
+        procedure GeneralTables_Callback(LastError: TLastError);
+
+        // ----------------------------
+        // Callbacks for Async.Tracker.
+        // ----------------------------
+
+        procedure RefreshInvoiceTracker_Callback(InvoiceList: TStringGrid; LastError: TLastError);
+        procedure DeleteFromTrackerList_Callback(LastError: TLastError);
 
     end;
 
@@ -1445,8 +1456,8 @@ begin
     end;
 
     // Grids dimensions
-    sgListValue.SetColWidth(25, 30, 400);
-    sgListSection.SetColWidth(25, 30, 400);
+    {sgListValue.SetColWidth(25, 30, 400);}
+    {sgListSection.SetColWidth(25, 30, 400);}
 
     // Clear edit box from provided password
     EditPassword.Text:='';
@@ -1474,6 +1485,107 @@ begin
     EditCurrentPassword.Text:='';
     EditNewPassword.Text:='';
     EditNewPasswordConfirmation.Text:='';
+
+end;
+
+
+procedure TMainForm.CheckServerConnAsync_Callback(IsConnected: boolean; LastError: TLastError);
+begin
+
+    if not LastError.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
+        Exit();
+    end;
+
+    case IsConnected of
+        True:  MainForm.TryInitConnection();
+        False: MainForm.FIsConnected:=False;
+    end;
+
+end;
+
+
+procedure TMainForm.ExcelExport_Callback(LastError: TLastError);
+begin
+
+    THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
+
+    if not LastError.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
+        Exit();
+    end;
+
+    THelpers.MsgCall(TAppMessage.Info, 'Data has been exported successfully!');
+
+end;
+
+
+procedure TMainForm.GeneralTables_Callback(LastError: TLastError);
+begin
+
+    if not LastError.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
+        Exit();
+    end;
+
+end;
+
+
+// --------------------------------
+// Async.Tracker callbacks methods.
+// --------------------------------
+
+procedure TMainForm.RefreshInvoiceTracker_Callback(InvoiceList: TStringGrid; LastError: TLastError);
+begin
+
+    if not LastError.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
+        Exit();
+    end;
+
+    MainForm.sgInvoiceTracker.Freeze(True);
+    try
+
+        MainForm.sgInvoiceTracker.SqlColumns:=InvoiceList.SqlColumns;
+        MainForm.sgInvoiceTracker.RowCount  :=InvoiceList.RowCount;
+        MainForm.sgInvoiceTracker.ColCount  :=InvoiceList.ColCount;
+
+        for var iCNT:=0 to InvoiceList.RowCount - 1 do
+            for var jCNT:=0 to InvoiceList.ColCount - 1 do
+                MainForm.sgInvoiceTracker.Cells[jCNT, iCNT]:=InvoiceList.Cells[jCNT, iCNT];
+
+    finally
+        MainForm.sgInvoiceTracker.Freeze(False);
+        ThreadFileLog.Log('[RefreshInvoiceTracker_Callback]: Invoice Tracker list updated.');
+    end;
+
+    if MainForm.sgInvoiceTracker.RowCount > 1 then
+    begin
+        MainForm.sgInvoiceTracker.SetColWidth(10, 20, 400);
+        MainForm.sgInvoiceTracker.Visible:=True;
+    end
+    else
+    begin
+        MainForm.sgInvoiceTracker.Visible:=False;
+    end;
+
+end;
+
+
+procedure TMainForm.DeleteFromTrackerList_Callback(LastError: TLastError);
+begin
+
+    if not LastError.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
+        Exit();
+    end;
+
+    MainForm.sgInvoiceTracker.DeleteRowFrom(1, 1);
 
 end;
 
@@ -2543,6 +2655,70 @@ begin
 end;
 
 
+procedure TMainForm.SetActiveTabsheet(TabSheet: TTabSheet);
+begin
+
+    ResetTabsheetButtons();
+
+    if TabSheet = TabSheet1 then
+    begin
+        txtDebtors.Font.Style:=[fsBold];
+        txtDebtors.Font.Color:=$006433C9;
+    end;
+
+    if TabSheet = TabSheet2 then
+    begin
+        txtOpenItems.Font.Style:=[fsBold];
+        txtOpenItems.Font.Color:=$006433C9;
+    end;
+
+    if TabSheet = TabSheet3 then
+    begin
+        txtAddressBook.Font.Style:=[fsBold];
+        txtAddressBook.Font.Color:=$006433C9;
+    end;
+
+    if TabSheet = TabSheet4 then
+    begin
+        txtTracker.Font.Style:=[fsBold];
+        txtTracker.Font.Color:=$006433C9;
+    end;
+
+    if TabSheet = TabSheet5 then
+    begin
+        txtQueries.Font.Style:=[fsBold];
+        txtQueries.Font.Color:=$006433C9;
+    end;
+
+    if TabSheet = TabSheet6 then
+    begin
+        txtUnidentified.Font.Style:=[fsBold];
+        txtUnidentified.Font.Color:=$006433C9;
+    end;
+
+    if TabSheet = TabSheet7 then
+    begin
+        txtTables.Font.Style:=[fsBold];
+        txtTables.Font.Color:=$006433C9;
+    end;
+
+    if TabSheet = TabSheet8 then
+    begin
+            txtSettings.Font.Style:=[fsBold];
+            txtSettings.Font.Color:=$006433C9;
+    end;
+
+    if TabSheet = TabSheet9 then
+    begin
+        txtStart.Font.Style:=[fsBold];
+        txtStart.Font.Color:=$006433C9;
+    end;
+
+    MyPages.ActivePage:=TabSheet;
+
+end;
+
+
 /// <summary>
 /// Switch off bold for all fonts used in top menu.
 /// </summary>
@@ -2613,8 +2789,8 @@ procedure TMainForm.SetGridColumnWidths;
 begin
     sgOpenItems.SetColWidth     (10, 20, 400);
     sgAddressBook.SetColWidth   (10, 20, 400);
-    sgListValue.SetColWidth     (25, 20, 400);
-    sgListSection.SetColWidth   (25, 20, 400);
+    {sgListValue.SetColWidth     (25, 20, 400);}
+    {sgListSection.SetColWidth   (25, 20, 400);}
     sgInvoiceTracker.SetColWidth(10, 20, 400);
     sgCoCodes.SetColWidth       (10, 30, 400);
     sgControlStatus.SetColWidth (10, 30, 400);
@@ -2738,7 +2914,7 @@ procedure TMainForm.FormCreate(Sender: TObject);
 begin
     FAllowClose:=False;
     InitializeScreenSettings;
-    MyPages.ActivePage:=TabSheet1;
+    SetActiveTabsheet(TabSheet9);
 end;
 
 
@@ -2933,7 +3109,7 @@ end;
 procedure TMainForm.InetTimerTimer(Sender: TObject);
 begin
     var Utilities: IUtilities:=TUtilities.Create();
-    Utilities.CheckServerConnectionAsync;
+    Utilities.CheckServerConnAsync(MainForm.FIsConnected, CheckServerConnAsync_Callback);
 end;
 
 
@@ -3059,8 +3235,8 @@ begin
     if sgPerson.Focused      then sgPerson.SetColWidth(10, 20, 400);
     if sgGroup3.Focused      then sgGroup3.SetColWidth(10, 20, 400);
     if sgPmtTerms.Focused    then sgPmtTerms.SetColWidth(10, 20, 400);
-    if sgListValue.Focused   then sgListValue.SetColWidth(25, 20, 400);
-    if sgListSection.Focused then sgListSection.SetColWidth(25, 20, 400);
+    {if sgListValue.Focused   then sgListValue.SetColWidth(25, 20, 400);}
+    {if sgListSection.Focused then sgListSection.SetColWidth(25, 20, 400);}
 
     // String grid placed on action view
     if ActionsForm.OpenItemsGrid.Focused then ActionsForm.OpenItemsGrid.SetColWidth(10, 20, 400);
@@ -3915,9 +4091,15 @@ end;
 
 procedure TMainForm.Action_ToExceClick(Sender: TObject);
 begin
+
+    THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.ExportXLS, MainForm);
+
+    var FileName: string;
+    if MainForm.XLExport.Execute then FileName:=MainForm.XLExport.FileName else FileName:='';
+
     var Utilities: IUtilities:=TUtilities.Create;
-    Utilities.ActiveConnection:=SessionService.FDbConnect;
-    Utilities.ExcelExport(MainForm.FGroupList[MainForm.GroupListBox.ItemIndex, 0], MainForm.GroupListDates.Text);
+    Utilities.ExcelExportAsync(MainForm.FGroupList[MainForm.GroupListBox.ItemIndex, 0], MainForm.GroupListDates.Text, FileName, ExcelExport_Callback);
+
 end;
 
 
@@ -4006,7 +4188,7 @@ begin
         if THelpers.MsgCall(TAppMessage.Question2, 'Are you sure you want to remove selected customer?') = IDYES then
         begin
             var Tracker: ITracker:=TTracker.Create;
-            Tracker.DeleteFromTrackerList(sgInvoiceTracker.Cells[sgInvoiceTracker.ReturnColumn(TTrackerData.Cuid, 1, 1), sgInvoiceTracker.Row]);
+            Tracker.DeleteFromTrackerListAsync(sgInvoiceTracker.Cells[sgInvoiceTracker.ReturnColumn(TTrackerData.Cuid, 1, 1), sgInvoiceTracker.Row], DeleteFromTrackerList_Callback);
         end;
 
     // R/W user cannot remove other item
@@ -4018,7 +4200,7 @@ begin
         if THelpers.MsgCall(TAppMessage.Question2, 'Are you sure you want to remove selected customer?') = IDYES then
         begin
             var Tracker: ITracker:=TTracker.Create;
-            Tracker.DeleteFromTrackerList(sgInvoiceTracker.Cells[sgInvoiceTracker.ReturnColumn(TTrackerData.Cuid, 1, 1), sgInvoiceTracker.Row]);
+            Tracker.DeleteFromTrackerListAsync(sgInvoiceTracker.Cells[sgInvoiceTracker.ReturnColumn(TTrackerData.Cuid, 1, 1), sgInvoiceTracker.Row], DeleteFromTrackerList_Callback);
         end;
 
     // Read only user cannot remove anything
@@ -4047,7 +4229,7 @@ begin
     if FIsConnected then
     begin
         var Tracker: ITracker:=TTracker.Create;
-        Tracker.RefreshInvoiceTrackerAsync(UpperCase(SessionService.SessionUser));
+        Tracker.RefreshInvoiceTrackerAsync(UpperCase(SessionService.SessionUser), RefreshInvoiceTracker_Callback);
     end
     else
         THelpers.MsgCall(TAppMessage.Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
@@ -4064,7 +4246,7 @@ begin
     if FIsConnected then
     begin
         var Tracker: ITracker:=TTracker.Create;
-        Tracker.RefreshInvoiceTrackerAsync(EmptyStr);
+        Tracker.RefreshInvoiceTrackerAsync(EmptyStr, RefreshInvoiceTracker_Callback);
     end
     else
         THelpers.MsgCall(TAppMessage.Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
@@ -4140,7 +4322,7 @@ end;
 procedure TMainForm.TabSheet4Show(Sender: TObject);
 begin
     var Tracker: ITracker:=TTracker.Create;
-    Tracker.RefreshInvoiceTrackerAsync(EmptyStr);
+    Tracker.RefreshInvoiceTrackerAsync(EmptyStr, RefreshInvoiceTracker_Callback);
 end;
 
 
@@ -4470,7 +4652,7 @@ begin
     end;
 
     /// <remarks>
-    /// After all drawing (when cells not selected) is done, change font for numeric values. This shoud be executed always last.
+    /// After all drawing (when cells are not selected) is done, change font only for numeric values. This shoud be executed always last.
     /// </remarks>
 
     if (ACol = Col1)  or (ACol = Col2) or (ACol = Col3) or
@@ -4478,7 +4660,10 @@ begin
        (ACol = Col7)  or (ACol = Col8) or (ACol = Col9) or
        (ACol = Col10) or (ACol = Col11)
     then
-        sgAgeView.ColorValues(ARow, ACol, Rect, clRed, clBlack);
+    begin
+        if gdSelected in State then sgAgeView.ColorValues(ARow, ACol, Rect, clRed, clWhite)
+            else sgAgeView.ColorValues(ARow, ACol, Rect, clRed, clBlack);
+    end;
 
 end;
 
@@ -4518,7 +4703,10 @@ begin
             ACol = Col5
         )
     then
-        MainForm.sgOpenItems.ColorValues(ARow, ACol, Rect, clRed, clBlack);
+    begin
+        if gdSelected in State then sgOpenItems.ColorValues(ARow, ACol, Rect, clRed, clWhite)
+            else sgOpenItems.ColorValues(ARow, ACol, Rect, clRed, clBlack);
+    end;
 
 end;
 
@@ -4672,7 +4860,7 @@ begin
     finally
         Keys.Free;
         Values.Free;
-        sgListValue.SetColWidth(25, 30, 400);
+        {sgListValue.SetColWidth(25, 30, 400);}
     end;
 
 end;
@@ -6237,15 +6425,13 @@ end;
 
 procedure TMainForm.txtStartClick(Sender: TObject);
 begin
-    MyPages.ActivePage:=TabSheet9;
-    ResetTabsheetButtons;
-    txtStart.Font.Style:=[fsBold];
-    txtStart.Font.Color:=$006433C9;
+    SetActiveTabsheet(TabSheet9);
 end;
 
 
 procedure TMainForm.txtReportsClick(Sender: TObject);
 begin
+    ReportsForm.FSetLastSelection:=MyPages.ActivePage;
     ResetTabsheetButtons;
     txtReports.Font.Style:=[fsBold];
     txtReports.Font.Color:=$006433C9;
@@ -6255,73 +6441,49 @@ end;
 
 procedure TMainForm.txtDebtorsClick(Sender: TObject);
 begin
-    MyPages.ActivePage:=TabSheet1;
-    ResetTabsheetButtons;
-    txtDebtors.Font.Style:=[fsBold];
-    txtDebtors.Font.Color:=$006433C9;
+    SetActiveTabsheet(TabSheet1);
 end;
 
 
 procedure TMainForm.txtTrackerClick(Sender: TObject);
 begin
-    MyPages.ActivePage:=TabSheet4;
-    ResetTabsheetButtons;
-    txtTracker.Font.Style:=[fsBold];
-    txtTracker.Font.Color:=$006433C9;
+    SetActiveTabsheet(TabSheet4);
 end;
 
 
 procedure TMainForm.txtAddressBookClick(Sender: TObject);
 begin
-    MyPages.ActivePage:=TabSheet3;
-    ResetTabsheetButtons;
-    txtAddressBook.Font.Style:=[fsBold];
-    txtAddressBook.Font.Color:=$006433C9;
+    SetActiveTabsheet(TabSheet3);
 end;
 
 
 procedure TMainForm.txtOpenItemsClick(Sender: TObject);
 begin
-    MyPages.ActivePage:=TabSheet2;
-    ResetTabsheetButtons;
-    txtOpenItems.Font.Style:=[fsBold];
-    txtOpenItems.Font.Color:=$006433C9;
+    SetActiveTabsheet(TabSheet2);
 end;
 
 
 procedure TMainForm.txtUnidentifiedClick(Sender: TObject);
 begin
-    MyPages.ActivePage:=TabSheet6;
-    ResetTabsheetButtons;
-    txtUnidentified.Font.Style:=[fsBold];
-    txtUnidentified.Font.Color:=$006433C9;
+    SetActiveTabsheet(TabSheet6);
 end;
 
 
 procedure TMainForm.txtQueriesClick(Sender: TObject);
 begin
-    MyPages.ActivePage:=TabSheet5;
-    ResetTabsheetButtons;
-    txtQueries.Font.Style:=[fsBold];
-    txtQueries.Font.Color:=$006433C9;
+    SetActiveTabsheet(TabSheet5);
 end;
 
 
 procedure TMainForm.txtTablesClick(Sender: TObject);
 begin
-    MyPages.ActivePage:=TabSheet7;
-    ResetTabsheetButtons;
-    txtTables.Font.Style:=[fsBold];
-    txtTables.Font.Color:=$006433C9;
+    SetActiveTabsheet(TabSheet7);
 end;
 
 
 procedure TMainForm.txtSettingsClick(Sender: TObject);
 begin
-    MyPages.ActivePage:=TabSheet8;
-    ResetTabsheetButtons;
-    txtSettings.Font.Style:=[fsBold];
-    txtSettings.Font.Color:=$006433C9;
+    SetActiveTabsheet(TabSheet8);
 end;
 
 
@@ -6870,7 +7032,7 @@ begin
         end;
 
         var Utilities: IUtilities:=TUtilities.Create();
-        Utilities.SetNewPassword(EditCurrentPassword.Text, EditNewPassword.Text, SetNewPassword_Callback);
+        Utilities.SetNewPasswordAsync(EditCurrentPassword.Text, EditNewPassword.Text, SetNewPassword_Callback);
 
     end
     else
@@ -6902,7 +7064,7 @@ begin
     else
     begin
         var Utilities: IUtilities:=TUtilities.Create();
-        Utilities.CheckGivenPassword(EditPassword.Text, CheckGivenPassword_Callback);
+        Utilities.CheckGivenPasswordAsync(EditPassword.Text, CheckGivenPassword_Callback);
     end;
 
 end;
