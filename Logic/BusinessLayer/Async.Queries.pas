@@ -267,8 +267,8 @@ begin
     var QueryUid:    string:=Grid.Cells[Grid.ReturnColumn(TQmsLog.QueryUid, 1, 1), Grid.Row];
 
     // Send an email
-    var Mailer: IDocument:=TDocument.Create;
     var Settings: ISettings:=TSettings.Create;
+    var Mailer: IDocument:=TDocument.Create;
 
     if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerNTLM  then
     begin

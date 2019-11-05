@@ -1308,27 +1308,34 @@ begin
     if THelpers.MsgCall(Question2, 'Are you absolutely sure you want to send it, right now?') = IDNO
         then Exit;
 
-    MainForm.UpdateFOpenItemsRefs(OpenItemsGrid);
+    // ---------------------------------------------------------------------
+    // UpdateFOpenItemsRefs and UpdateFCtrStatusRefs must be executed before
+    // TTSendAccountStatement is called.
+    // ---------------------------------------------------------------------
+
+    MainForm.UpdateFOpenItemsRefs(ActionsForm.OpenItemsGrid);
     MainForm.UpdateFControlStatusRefs(MainForm.sgControlStatus);
 
-    FStatementFields.Layout     :=TDocMode.Defined;
-    FStatementFields.Subject    :='Account Statement';
-    FStatementFields.Mess       :='';
-    FStatementFields.InvFilter  :=TInvoiceFilter.ShowAllItems;
-    FStatementFields.BeginDate  :='';
-    FStatementFields.EndDate    :='';
-    FStatementFields.OpenItems  :=OpenItemsGrid;
-    FStatementFields.CUID       :=CUID;
-    FStatementFields.SendFrom   :=LbuSendFrom;
-    FStatementFields.MailTo     :=Cust_Mail.Text;
-    FStatementFields.CustName   :=CustName;
-    FStatementFields.CustNumber :=CustNumber;
-    FStatementFields.LBUName    :=LbuName;
-    FStatementFields.LBUAddress :=LbuAddress;
-    FStatementFields.Telephone  :=LbuPhone;
-    FStatementFields.BankDetails:=BanksHtml;
-    FStatementFields.Series     :=False;
-    FStatementFields.ItemNo     :=0;
+    FStatementFields.Layout      :=TDocMode.Defined;
+    FStatementFields.Subject     :='Account Statement';
+    FStatementFields.Mess        :='';
+    FStatementFields.InvFilter   :=TInvoiceFilter.ShowAllItems;
+    FStatementFields.BeginDate   :='';
+    FStatementFields.EndDate     :='';
+    FStatementFields.OpenItems   :=OpenItemsGrid;
+    FStatementFields.CUID        :=CUID;
+    FStatementFields.SendFrom    :=LbuSendFrom;
+    FStatementFields.MailTo      :=Cust_Mail.Text;
+    FStatementFields.CustName    :=CustName;
+    FStatementFields.CustNumber  :=CustNumber;
+    FStatementFields.LBUName     :=LbuName;
+    FStatementFields.LBUAddress  :=LbuAddress;
+    FStatementFields.Telephone   :=LbuPhone;
+    FStatementFields.BankDetails :=BanksHtml;
+    FStatementFields.Series      :=False;
+    FStatementFields.ItemNo      :=0;
+    FStatementFields.IsCtrlStatus:=ActionsForm.cbCtrlStatusOff.Checked;
+    FStatementFields.IsUserInCopy:=ActionsForm.cbUserInCopy.Checked;
 
     var Statements: IStatements:=TStatements.Create();
     Statements.SendAccountStatement(FStatementFields);

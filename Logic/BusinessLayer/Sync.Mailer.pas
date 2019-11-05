@@ -53,9 +53,9 @@ type
         function GetMailBody:    string;
         function GetAttachments: TList<string>;
 
-        // ----------------------------
+        // -------------------
         // Exposed properties.
-        // ----------------------------
+        // -------------------
 
         property XMailer:     string        read GetXMailer     write SetXMailer;
         property MailFrom:    string        read GetMailFrom    write SetMailFrom;
@@ -67,9 +67,9 @@ type
         property MailBody:    string        read GetMailBody    write SetMailBody;
         property Attachments: TList<string> read GetAttachments write SetAttachments;
 
-        // ----------------------------
+        // ----------------
         // Exposed methods.
-        // ----------------------------
+        // ----------------
 
         function SendNow: boolean;
 
@@ -133,19 +133,11 @@ uses
     Unity.EventLogger;
 
 
-// -------------------------------
-// Initialize.
-// -------------------------------
-
 constructor TMailer.Create;
 begin
      FAttachments:=TList<string>.Create;
 end;
 
-
-// -------------------------------
-// Release object.
-// -------------------------------
 
 destructor TMailer.Destroy;
 begin
@@ -153,9 +145,9 @@ begin
 end;
 
 
-// -------------------------------
+// ---------------------------
 // Send an email using CDOSYS.
-// -------------------------------
+// ---------------------------
 
 function TMailer.SendEmail(OAuth: TAuthTypes): boolean;
 begin
@@ -237,10 +229,9 @@ begin
 end;
 
 
-// -------------------------------
+// -------------------
 // Property's getters.
-// -------------------------------
-
+// -------------------
 
 function TMailer.GetXMailer: string;
 begin
@@ -296,9 +287,9 @@ begin
 end;
 
 
-// -------------------------------
+// -------------------
 // Property's setters.
-// -------------------------------
+// -------------------
 
 
 procedure TMailer.SetXMailer(NewValue: string);

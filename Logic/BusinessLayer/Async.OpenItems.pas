@@ -88,7 +88,7 @@ uses
 
 // ------------------------------------
 // Load aging report for main view
-// *Change when SQL is replaced by API
+// *Change when SQL is replaced by API.
 // ------------------------------------
 
 procedure TOpenItems.ScanOpenItemsAsync(OpenItemsUpdate: string; Callback: TScanOpenItems);
@@ -134,10 +134,10 @@ begin
 end;
 
 
-// -----------------------------------
+// ------------------------------------
 // Load open items into TStringGrid
-// *Change when SQL is replaced by API
-// -----------------------------------
+// *Change when SQL is replaced by API.
+// ------------------------------------
 
 procedure TOpenItems.ReadOpenItemsAsync(ActionMode: TLoading; OpenItemsGrid: TStringGrid; SettingsGrid: TStringGrid; Callback: TReadOpenItems);
 begin

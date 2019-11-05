@@ -29,6 +29,7 @@ uses
     Unity.Records,
     Unity.Arrays;
 
+
 type
 
 
@@ -39,13 +40,16 @@ type
     TEditDailyComment   = procedure(LastError: TLastError) of object;
     TEditGeneralComment = procedure(LastError: TLastError) of object;
 
+    // ---------------------------------------------------------------
+    // Note: callback may be optional and therefore nil by default.
+    // We provide callback only if we want to update visual component.
+    // ---------------------------------------------------------------
 
     IComments = interface(IInterface)
     ['{1B3127BB-EC78-4177-A286-C138E02709D3}']
-        procedure EditDailyComment(Fields: TDailyCommentFields; Callback: TEditDailyComment);
-        procedure EditGeneralComment(Fields: TGeneralCommentFields; Callback: TEditGeneralComment);
+        procedure EditDailyComment(Fields: TDailyCommentFields; Callback: TEditDailyComment = nil);
+        procedure EditGeneralComment(Fields: TGeneralCommentFields; Callback: TEditGeneralComment = nil);
     end;
-
 
     TComments = class(TInterfacedObject, IComments)
     {$TYPEINFO ON}
@@ -55,8 +59,8 @@ type
         procedure FInsertGeneralComment(var GenText: TDataTables; var Fields: TGeneralCommentFields; var LastError: TLastError);
         procedure FUpdateGeneralComment(var GenText: TDataTables; var Fields: TGeneralCommentFields; Condition: string; var LastError: TLastError);
     public
-        procedure EditDailyComment(Fields: TDailyCommentFields; Callback: TEditDailyComment);
-        procedure EditGeneralComment(Fields: TGeneralCommentFields; Callback: TEditGeneralComment);
+        procedure EditDailyComment(Fields: TDailyCommentFields; Callback: TEditDailyComment = nil);
+        procedure EditGeneralComment(Fields: TGeneralCommentFields; Callback: TEditGeneralComment = nil);
     end;
 
 
@@ -78,9 +82,9 @@ uses
     DbModel;
 
 
-// ------------------------------------
-// Perform SQL "insert into" command
-// ------------------------------------
+// ----------------------------------
+// Perform SQL "insert into" command.
+// ----------------------------------
 
 procedure TComments.FInsertDailyComment(var DailyText: TDataTables; var Fields: TDailyCommentFields; var LastError: TLastError);
 begin
@@ -163,9 +167,9 @@ begin
 end;
 
 
-// ------------------------------------
-// Perform SQL "update" command
-// ------------------------------------
+// -----------------------------
+// Perform SQL "update" command.
+// -----------------------------
 
 procedure TComments.FUpdateDailyComment(var DailyText: TDataTables; var Fields: TDailyCommentFields; Condition: string; var LastError: TLastError);
 begin
@@ -237,11 +241,11 @@ begin
 end;
 
 
-// ------------------------------------
-//
-// ------------------------------------
+// ------------------------------------------
+// Perform update or insert of daily comment.
+// ------------------------------------------
 
-procedure TComments.EditDailyComment(Fields: TDailyCommentFields; Callback: TEditDailyComment);
+procedure TComments.EditDailyComment(Fields: TDailyCommentFields; Callback: TEditDailyComment = nil);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
@@ -316,7 +320,7 @@ begin
 
         TThread.Synchronize(nil, procedure
         begin
-            Callback(LastError);
+            if Assigned(Callback) then Callback(LastError);
         end);
 
     end);
@@ -326,9 +330,9 @@ begin
 end;
 
 
-// ------------------------------------
-//
-// ------------------------------------
+// ---------------------------------------------
+// Subroutine for inserting new general comment.
+// ---------------------------------------------
 
 procedure TComments.FInsertGeneralComment(var GenText: TDataTables; var Fields: TGeneralCommentFields; var LastError: TLastError);
 begin
@@ -404,9 +408,9 @@ begin
 end;
 
 
-// ------------------------------------
-//
-// ------------------------------------
+// --------------------------------------
+// Subroutine for update general comment.
+// --------------------------------------
 
 procedure TComments.FUpdateGeneralComment(var GenText: TDataTables ;var Fields: TGeneralCommentFields; Condition: string; var LastError: TLastError);
 begin
@@ -457,11 +461,11 @@ begin
 end;
 
 
-// ------------------------------------
-//
-// ------------------------------------
+// --------------------------------------------
+// Perform update or insert of general comment.
+// --------------------------------------------
 
-procedure TComments.EditGeneralComment(Fields: TGeneralCommentFields; Callback: TEditGeneralComment);
+procedure TComments.EditGeneralComment(Fields: TGeneralCommentFields; Callback: TEditGeneralComment = nil);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
@@ -521,7 +525,7 @@ begin
 
         TThread.Synchronize(nil, procedure
         begin
-            Callback(LastError);
+            if Assigned(Callback) then Callback(LastError);
         end);
 
     end);

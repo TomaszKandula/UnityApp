@@ -94,7 +94,7 @@ uses
 
 // ------------------------------------
 // Check connection with SQL Server
-// *Remove when SQL is replaced by API
+// *Remove when SQL is replaced by API.
 // ------------------------------------
 
 procedure TUtilities.CheckServerConnAsync(IsConnected: boolean; Callback: TCheckServerConn);
@@ -152,10 +152,10 @@ begin
 end;
 
 
-// ------------------------------------
+// -------------------------------
 // Send user feedback to predefine
-// email address in settings file
-// ------------------------------------
+// email address in settings file.
+// -------------------------------
 
 procedure TUtilities.SendFeedbackAsync(Text: string; Callback: TSendUserFeedback);
 begin
@@ -166,8 +166,8 @@ begin
         var LastError: TLastError;
         try
 
-            var Settings: ISettings:=TSettings.Create;
-            var Mail: IDocument:=TDocument.Create;
+            var Settings: ISettings:=TSettings.Create();
+            var Mail: IDocument:=TDocument.Create();
 
             var AppName: string:=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'VALUE', '');
             var AppVer: string:=TCore.GetBuildInfoAsString;
@@ -202,7 +202,7 @@ begin
             var Transfer: string:=Text;
             Transfer:=StringReplace(Transfer, TChars.CRLF, '<br>', [rfReplaceAll]);
 
-            var HTMLBody: string:=Mail.LoadTemplate(Settings.DirLayouts + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE4', ''));
+            var HTMLBody: string:=Mail.LoadTemplate(Settings.DirLayouts + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE4', ''), False);
             HTMLBody:=StringReplace(HTMLBody, '{TEXT_HOLER}',  Transfer,       [rfReplaceAll]);
             HTMLBody:=StringReplace(HTMLBody, '{APPNAME}',     AppName,        [rfReplaceAll]);
             HTMLBody:=StringReplace(HTMLBody, '{BUILD}',       AppVer,         [rfReplaceAll]);
@@ -246,10 +246,10 @@ begin
 end;
 
 
-// -------------------------------------
+// --------------------------------------
 // Generate Excel report asynchronously
-// to not to block application usability
-// -------------------------------------
+// to not to block application usability.
+// --------------------------------------
 
 procedure TUtilities.ExcelExportAsync(GroupId: string; AgeDate: string; FileName: string; Callback: TExcelExport);
 begin

@@ -257,7 +257,10 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------ GENERATE AGING //
+// ----------------------
+// Generate aging report.
+// ----------------------
+
 function TDebtors.FMakeAgeView(OSAmount: double; GroupID: string; SourceGrid: TStringGrid; CompanyData: TStringGrid): TALists;
 
     var
@@ -519,7 +522,10 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------ TRANSFER 'AGEVIEW' TO SQL SERVER //
+// ----------------------------------
+// Transefer 'AgeView' to SQL server.
+// ----------------------------------
+
 procedure TDebtors.FWriteAgeView(DestTable: string; GroupID: string; SourceArray: TALists);
 begin
 

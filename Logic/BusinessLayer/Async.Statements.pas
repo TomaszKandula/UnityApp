@@ -37,7 +37,6 @@ type
     // Callback signatures.
     // --------------------
 
-    //...
 
     IStatements = interface(IInterface)
     ['{14BBF3F3-945A-4A61-94BA-6A2EE10530A2}']
@@ -58,10 +57,7 @@ implementation
 
 
 uses
-    View.Main,           // remove!
-    View.InvoiceTracker, // remove!
-    View.Actions,        // remove!
-    View.UserFeedback,   // remove!
+    View.Main,  // remove!
     Handler.Database,
     Handler.Account,
     Unity.Helpers,
@@ -72,9 +68,9 @@ uses
     DbModel;
 
 
-// ------------------------------------
-//
-// ------------------------------------
+// ---------------------------------------------
+// Send single account statement asynchronously.
+// ---------------------------------------------
 
 procedure TStatements.SendAccountStatement(Fields: TSendAccountStatementFields; WaitToComplete: boolean = False);
 begin
@@ -82,8 +78,8 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Settings: ISettings:=TSettings.Create;
-        var Statement: IDocument:=TDocument.Create;
+        var Settings: ISettings:=TSettings.Create();
+        var Statement: IDocument:=TDocument.Create();
 
         Statement.CUID       :=Fields.CUID;
         Statement.MailFrom   :=Fields.SendFrom;
@@ -94,12 +90,25 @@ begin
         Statement.Telephone  :=Fields.Telephone;
         Statement.BankDetails:=Fields.BankDetails;
         Statement.CustMess   :=Fields.Mess;
-        Statement.OpenItems  :=Fields.OpenItems;
         Statement.InvFilter  :=Fields.InvFilter;
         Statement.BeginWith  :=Fields.BeginDate;
         Statement.EndWith    :=Fields.EndDate;
 
+        // ----------------------------------------------------------
+        // Assign source of open items and control statuses alongside
+        // with theirs column references.
+        // ----------------------------------------------------------
+
+        Statement.OpenItems     :=Fields.OpenItems;
+        Statement.OpenItemsRefs :=MainForm.FOpenItemsRefs;
+
+        Statement.ControlStatus :=MainForm.sgControlStatus;
+        Statement.CtrlStatusRefs:=MainForm.FCtrlStatusRefs;
+
+        // -----------------------------------------------------------------------------------
         // Warning! Data should be taken from database. To be change after DB is restructured.
+        // -----------------------------------------------------------------------------------
+
         Statement.Exclusions:=TArray<Integer>.Create(514, 9999);
 
         Statement.MailSubject:=Fields.Subject + ' - ' + Fields.CustName + ' - ' + Fields.CustNumber;
@@ -113,12 +122,12 @@ begin
         // ------------------------------------------------------
 
         if Fields.Layout = TDocMode.Defined then
-            Statement.HTMLLayout:=Statement.LoadTemplate(Settings.DirLayouts + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE2', ''));
+            Statement.HTMLLayout:=Statement.LoadTemplate(Settings.DirLayouts + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE2', ''), Fields.IsCtrlStatus);
 
         if Fields.Layout = TDocMode.Custom then
-            Statement.HTMLLayout:=Statement.LoadTemplate(Settings.DirLayouts + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE3', ''));
+            Statement.HTMLLayout:=Statement.LoadTemplate(Settings.DirLayouts + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE3', ''), Fields.IsCtrlStatus);
 
-        if Statement.SendDocument then
+        if Statement.SendDocument(Fields.IsUserInCopy) then
         begin
 
             var FDailyCommentFields: TDailyCommentFields;
@@ -132,9 +141,9 @@ begin
             FDailyCommentFields.EventLog     :=False;
             FDailyCommentFields.ExtendComment:=True;
 
-            /// <summary>
-            /// Register sent email either as manual statement or automatic statement.
-            /// </summary>
+            // ----------------------------------------------------------------------
+            // Register sent email either as manual statement or automatic statement.
+            // ----------------------------------------------------------------------
 
             if Fields.Layout = TDocMode.Defined then
             begin
@@ -143,7 +152,7 @@ begin
                 FDailyCommentFields.EmailManuStat:=False;
 
                 var Comments: IComments:=TComments.Create();
-                Comments.EditDailyComment(FDailyCommentFields, MainForm.EditDailyComment_Callback);
+                Comments.EditDailyComment(FDailyCommentFields, nil);
 
             end;
 
@@ -154,22 +163,22 @@ begin
                 FDailyCommentFields.EmailManuStat:=True;
 
                 var Comments: IComments:=TComments.Create();
-                Comments.EditDailyComment(FDailyCommentFields, MainForm.EditDailyComment_Callback);
+                Comments.EditDailyComment(FDailyCommentFields, nil);
 
             end;
 
-            /// <remarks>
-            /// Either single email (manual by user) or executed by mass mailer (multiple emails).
-            /// </remarks>
+            // ----------------------------------------------------------------------------------
+            // Either single email (manual by user) or executed by mass mailer (multiple emails).
+            // ----------------------------------------------------------------------------------
 
-            if Fields.Series then
-                THelpers.ExecMessage(False, TMessaging.TWParams.MailerReportItem, Fields.ItemNo.ToString, MainForm)
-            else
-                THelpers.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Account Statement has been sent successfully!', MainForm);
+            case Fields.Series of
+                True:   THelpers.ExecMessage(False, TMessaging.TWParams.MailerReportItem, Fields.ItemNo.ToString, MainForm);
+                False:  THelpers.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Account Statement has been sent successfully!', MainForm);
+            end;
 
         end
         else if not(Fields.Series) then
-            THelpers.ExecMessage(False, TMessaging.TWParams.MessageError, 'Account Statement cannot be sent. Please contact IT support.', MainForm)
+        THelpers.ExecMessage(False, TMessaging.TWParams.MessageError, 'Account Statement cannot be sent. Please contact IT support.', MainForm);
 
     end);
 
@@ -179,9 +188,9 @@ begin
 end;
 
 
-// ------------------------------------
-//
-// ------------------------------------
+// ---------------------------------------
+// Send account statements asynchronously.
+// ---------------------------------------
 
 procedure TStatements.SendAccountStatements(Fields: TSendAccountStatementFields);
 begin

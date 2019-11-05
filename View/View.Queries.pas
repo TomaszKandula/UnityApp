@@ -433,8 +433,8 @@ end;
 function TQmsForm.SendNotification(LbuEmail: string): boolean; {refactor / async}
 begin
 
-    var Settings: ISettings:=TSettings.Create;
-    var Mail: IDocument:=TDocument.Create;
+    var Settings: ISettings:=TSettings.Create();
+    var Mail: IDocument:=TDocument.Create();
 
     // Get and set email details
     if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerNTLM  then

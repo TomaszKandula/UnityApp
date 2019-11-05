@@ -921,7 +921,7 @@ type
         var FAgeDateList:    TALists;
         var FGridPicture:    TImage;
         var FOpenItemsRefs:  TFOpenItemsRefs;
-        var FCtrlStatusRefs: TFControlStatusRefs;
+        var FCtrlStatusRefs: TFCtrlStatusRefs;
 
         procedure SetActiveTabsheet(TabSheet: TTabSheet);
         procedure ResetTabsheetButtons();

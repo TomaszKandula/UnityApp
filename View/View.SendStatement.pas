@@ -86,16 +86,9 @@ type
         procedure btnEndDateClick(Sender: TObject);
         procedure btnDelBeginClick(Sender: TObject);
         procedure btnDelEndClick(Sender: TObject);
-    private
+    strict private
         var Fields: TSendAccountStatementFields;
         procedure ExecuteMailer;
-
-        // ------------------
-        // Callbacks methods.
-        // ------------------
-
-        //...
-
     end;
 
 
@@ -152,30 +145,34 @@ begin
 
     var TempStr: string:=StringReplace(Text_Message.Text, TChars.CRLF, '<br>', [rfReplaceAll]);
 
-    /// <remarks>
-    /// UpdateFOpenItemsRefs and UpdateFControlStatusRefs must be executed before TTSendAccountStatement is called.
-    /// </remarks>
+    // ----------------------------------------------------------------------
+    // UpdateFOpenItemsRefs and UpdateFCtrlStatusRefs must be executed before
+    // TTSendAccountStatement is called.
+    // ----------------------------------------------------------------------
+
     MainForm.UpdateFOpenItemsRefs(ActionsForm.OpenItemsGrid);
     MainForm.UpdateFControlStatusRefs(MainForm.sgControlStatus);
 
-    Fields.Layout     :=TDocMode.Custom;
-    Fields.Subject    :='Account Statement';
-    Fields.Mess       :=TempStr;
-    Fields.InvFilter  :=InvFilter;
-    Fields.BeginDate  :=ValBeginDate.Caption;
-    Fields.EndDate    :=ValEndDate.Caption;
-    Fields.OpenItems  :=ActionsForm.OpenItemsGrid;
-    Fields.CUID       :=ActionsForm.CUID;
-    Fields.SendFrom   :=ActionsForm.LbuSendFrom;
-    Fields.MailTo     :=ActionsForm.Cust_Mail.Text;
-    Fields.CustName   :=ActionsForm.CustName;
-    Fields.CustNumber :=ActionsForm.CustNumber;
-    Fields.LBUName    :=ActionsForm.LbuName;
-    Fields.LBUAddress :=ActionsForm.LbuAddress;
-    Fields.Telephone  :=ActionsForm.LbuPhone;
-    Fields.BankDetails:=ActionsForm.BanksHtml;
-    Fields.Series     :=False;
-    Fields.ItemNo     :=0;
+    Fields.Layout      :=TDocMode.Custom;
+    Fields.Subject     :='Account Statement';
+    Fields.Mess        :=TempStr;
+    Fields.InvFilter   :=InvFilter;
+    Fields.BeginDate   :=ValBeginDate.Caption;
+    Fields.EndDate     :=ValEndDate.Caption;
+    Fields.OpenItems   :=ActionsForm.OpenItemsGrid;
+    Fields.CUID        :=ActionsForm.CUID;
+    Fields.SendFrom    :=ActionsForm.LbuSendFrom;
+    Fields.MailTo      :=ActionsForm.Cust_Mail.Text;
+    Fields.CustName    :=ActionsForm.CustName;
+    Fields.CustNumber  :=ActionsForm.CustNumber;
+    Fields.LBUName     :=ActionsForm.LbuName;
+    Fields.LBUAddress  :=ActionsForm.LbuAddress;
+    Fields.Telephone   :=ActionsForm.LbuPhone;
+    Fields.BankDetails :=ActionsForm.BanksHtml;
+    Fields.Series      :=False;
+    Fields.ItemNo      :=0;
+    Fields.IsCtrlStatus:=ActionsForm.cbCtrlStatusOff.Checked;
+    Fields.IsUserInCopy:=ActionsForm.cbUserInCopy.Checked;
 
     var Statements: IStatements:=TStatements.Create();
     Statements.SendAccountStatement(Fields);

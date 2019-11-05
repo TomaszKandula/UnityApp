@@ -82,25 +82,27 @@ type
     /// </remarks>
 
     TSendAccountStatementFields = record
-        Layout:      TDocMode;
-        Subject:     string;
-        Mess:        string;
-        InvFilter:   TInvoiceFilter;
-        BeginDate:   string;
-        EndDate:     string;
-        OpenItems:   TStringGrid;
-        CUID:        string;
-        SendFrom:    string;
-        MailTo:      string;
-        CustName:    string;
-        CustNumber:  string;
-        LBUName:     string;
-        LBUAddress:  string;
-        Telephone:   string;
-        BankDetails: string;
-        Series:      boolean;
-        ItemNo:      integer;
-        MailerList:  TListView;
+        Layout:       TDocMode;
+        Subject:      string;
+        Mess:         string;
+        InvFilter:    TInvoiceFilter;
+        BeginDate:    string;
+        EndDate:      string;
+        OpenItems:    TStringGrid;
+        CUID:         string;
+        SendFrom:     string;
+        MailTo:       string;
+        CustName:     string;
+        CustNumber:   string;
+        LBUName:      string;
+        LBUAddress:   string;
+        Telephone:    string;
+        BankDetails:  string;
+        Series:       boolean;
+        ItemNo:       integer;
+        MailerList:   TListView;
+        IsCtrlStatus: boolean;
+        IsUserInCopy: boolean;
     end;
 
     /// <remarks>
@@ -156,7 +158,7 @@ type
     /// Carries a group of variables for "ReturnColumn" method.
     /// </remarks>
 
-    TFControlStatusRefs = record
+    TFCtrlStatusRefs = record
         Id:          integer;
         Code:        integer;
         Text:        integer;

@@ -78,7 +78,7 @@ uses
 
 // ------------------------------------
 // Load Address Book into TStringGrid
-// *Change when SQL is replaced by API
+// *Change when SQL is replaced by API.
 // ------------------------------------
 
 procedure TAddressBook.OpenAddressBookAsync(UserAlias: string; Callback: TOpenAddressBook; OptionalCondition: string = '');
@@ -156,7 +156,7 @@ end;
 
 // ------------------------------------
 // Update data in Address Book
-// *Change when SQL is replaced by API
+// *Change when SQL is replaced by API.
 // ------------------------------------
 
 procedure TAddressBook.UpdateAddressBookAsync(SourceGrid: TStringGrid; UpdateValues: TAddressBookUpdateFields; Callback: TUpdateAddressBook);
@@ -261,7 +261,7 @@ end;
 
 // ------------------------------------
 // Add data to Address Book
-// *Change when SQL is replaced by API
+// *Change when SQL is replaced by API.
 // ------------------------------------
 
 procedure TAddressBook.AddToAddressBookAsync(SourceGrid: TStringGrid; Callback: TAddToAddressBook);
