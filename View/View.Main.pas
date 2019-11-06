@@ -906,7 +906,6 @@ type
 
         // replace by callbacks from async methods [start]
         procedure CallbackAwaitForm(PassMsg: TMessage);
-        procedure CallbackMassMailer(PassMsg: TMessage);
         procedure CallbackStatusBar(PassMsg: TMessage);
         procedure CallbackMessageBox(PassMsg: TMessage);
         procedure WndMessagesInternal(PassMsg: TMessage);
@@ -944,48 +943,48 @@ type
         // Callbacks for Async.AddressBook.
         // --------------------------------
 
-        procedure OpenAddressBookAsync_Callback(ReturnedData: TStringGrid; LastError: TLastError);
-        procedure UpdateAddressBookAsync_Callback(LastError: TLastError);
-        procedure AddToAddressBookAsync_Callback(LastError: TLastError);
+        procedure OpenAddressBookAsync_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
+        procedure UpdateAddressBookAsync_Callback(CallResponse: TCallResponse);
+        procedure AddToAddressBookAsync_Callback(CallResponse: TCallResponse);
 
         // -----------------------------
         // Callbacks for Async.Comments.
         // -----------------------------
 
-        procedure EditDailyComment_Callback(LastError: TLastError);
-        procedure EditGeneralComment_Callback(LastError: TLastError);
+        procedure EditDailyComment_Callback(CallResponse: TCallResponse);
+        procedure EditGeneralComment_Callback(CallResponse: TCallResponse);
 
         // ----------------------------
         // Callbacks for Async.Debtors.
         // ----------------------------
 
-        procedure MakeAgeViewSQLAsync_Callback(LastError: TLastError);
-        procedure MakeAgeViewCSVAsync_Callback(CsvContent: TStringList; LastError: TLastError);
-        procedure ReadAgeViewAsync_Callback(ActionMode: TLoading; ReturnedData: TStringGrid; LastError: TLastError);
+        procedure MakeAgeViewSQLAsync_Callback(CallResponse: TCallResponse);
+        procedure MakeAgeViewCSVAsync_Callback(CsvContent: TStringList; CallResponse: TCallResponse);
+        procedure ReadAgeViewAsync_Callback(ActionMode: TLoading; ReturnedData: TStringGrid; CallResponse: TCallResponse);
 
         // ------------------------------
         // Callbacks for Async.OpenItems.
         // ------------------------------
 
-        procedure ScanOpenItemsAsync_Callback(CanMakeAge: boolean; ReadDateTime: string; LastError: TLastError);
-        procedure ReadOpenItemsAsync_Callback(ActionMode: TLoading; OpenItemsData: TOpenItemsPayLoad; LastError: TLastError);
+        procedure ScanOpenItemsAsync_Callback(CanMakeAge: boolean; ReadDateTime: string; CallResponse: TCallResponse);
+        procedure ReadOpenItemsAsync_Callback(ActionMode: TLoading; OpenItemsData: TOpenItemsPayLoad; CallResponse: TCallResponse);
 
         // ------------------------------
         // Callbacks for Async.Utilities.
         // ------------------------------
 
-        procedure CheckGivenPassword_Callback(LastError: TLastError);
-        procedure SetNewPassword_Callback(LastError: TLastError);
-        procedure CheckServerConnAsync_Callback(IsConnected: boolean; LastError: TLastError);
-        procedure ExcelExport_Callback(LastError: TLastError);
-        procedure GeneralTables_Callback(LastError: TLastError);
+        procedure CheckGivenPassword_Callback(CallResponse: TCallResponse);
+        procedure SetNewPassword_Callback(CallResponse: TCallResponse);
+        procedure CheckServerConnAsync_Callback(IsConnected: boolean; CallResponse: TCallResponse);
+        procedure ExcelExport_Callback(CallResponse: TCallResponse);
+        procedure GeneralTables_Callback(CallResponse: TCallResponse);
 
         // ----------------------------
         // Callbacks for Async.Tracker.
         // ----------------------------
 
-        procedure RefreshInvoiceTracker_Callback(InvoiceList: TStringGrid; LastError: TLastError);
-        procedure DeleteFromTrackerList_Callback(LastError: TLastError);
+        procedure RefreshInvoiceTracker_Callback(InvoiceList: TStringGrid; CallResponse: TCallResponse);
+        procedure DeleteFromTrackerList_Callback(CallResponse: TCallResponse);
 
     end;
 
@@ -1064,15 +1063,15 @@ end;
 // Async.AddressBook callback methods.
 // -----------------------------------
 
-procedure TMainForm.OpenAddressBookAsync_Callback(ReturnedData: TStringGrid; LastError: TLastError);
+procedure TMainForm.OpenAddressBookAsync_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
 begin
 
-    if not LastError.IsSucceeded then
+    if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
         THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
         THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
-        ThreadFileLog.Log('[OpenAddressBookAsync_Callback]: Error has been thrown "' + LastError.ErrorMessage + '".');
+        ThreadFileLog.Log('[OpenAddressBookAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
 
@@ -1095,21 +1094,21 @@ begin
 end;
 
 
-procedure TMainForm.UpdateAddressBookAsync_Callback(LastError: TLastError);
+procedure TMainForm.UpdateAddressBookAsync_Callback(CallResponse: TCallResponse);
 begin
 
-    case LastError.IsSucceeded of
+    case CallResponse.IsSucceeded of
 
         True:
         begin
-            THelpers.MsgCall(TAppMessage.Info, LastError.ErrorMessage);
+            THelpers.MsgCall(TAppMessage.Info, CallResponse.LastMessage);
             ThreadFileLog.Log('[UpdateAddressBookAsync_Callback]: Address Book updated.');
         end;
 
         False:
         begin
-            THelpers.MsgCall(TAppMessage.Warn, LastError.ErrorMessage);
-            ThreadFileLog.Log('[UpdateAddressBookAsync_Callback]: Adddress Book has thrown an error "' + LastError.ErrorMessage + '".');
+            THelpers.MsgCall(TAppMessage.Warn, CallResponse.LastMessage);
+            ThreadFileLog.Log('[UpdateAddressBookAsync_Callback]: Adddress Book has thrown an error "' + CallResponse.LastMessage + '".');
         end;
 
     end;
@@ -1117,23 +1116,23 @@ begin
 end;
 
 
-procedure TMainForm.AddToAddressBookAsync_Callback(LastError: TLastError);
+procedure TMainForm.AddToAddressBookAsync_Callback(CallResponse: TCallResponse);
 begin
 
     THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
 
-    case LastError.IsSucceeded of
+    case CallResponse.IsSucceeded of
 
         True:
         begin
-            THelpers.MsgCall(TAppMessage.Info, LastError.ErrorMessage);
+            THelpers.MsgCall(TAppMessage.Info, CallResponse.LastMessage);
             ThreadFileLog.Log('[AddToAddressBookAsync_Callback]: Item has been added to Adddress Book.');
         end;
 
         False:
         begin
-            THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
-            ThreadFileLog.Log('[AddToAddressBookAsync_Callback]: Adddress Book has thrown an error "' + LastError.ErrorMessage + '".');
+            THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+            ThreadFileLog.Log('[AddToAddressBookAsync_Callback]: Adddress Book has thrown an error "' + CallResponse.LastMessage + '".');
         end;
 
     end;
@@ -1145,13 +1144,13 @@ end;
 // Async.Comments callback methods.
 // --------------------------------
 
-procedure TMainForm.EditDailyComment_Callback(LastError: TLastError);
+procedure TMainForm.EditDailyComment_Callback(CallResponse: TCallResponse);
 begin
 
-    if not LastError.IsSucceeded then
+    if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
-        ThreadFileLog.Log('[EditDailyComment_Callback]: Error has been thrown "' + LastError.ErrorMessage + '".');
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        ThreadFileLog.Log('[EditDailyComment_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
 
@@ -1161,13 +1160,13 @@ begin
 end;
 
 
-procedure TMainForm.EditGeneralComment_Callback(LastError: TLastError);
+procedure TMainForm.EditGeneralComment_Callback(CallResponse: TCallResponse);
 begin
 
-    if not LastError.IsSucceeded then
+    if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
-        ThreadFileLog.Log('[EditGeneralComment_Callback]: Error has been thrown "' + LastError.ErrorMessage + '".');
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        ThreadFileLog.Log('[EditGeneralComment_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
 
@@ -1178,15 +1177,15 @@ end;
 // Async.Debtors callback methods.
 // -------------------------------
 
-procedure TMainForm.MakeAgeViewSQLAsync_Callback(LastError: TLastError);
+procedure TMainForm.MakeAgeViewSQLAsync_Callback(CallResponse: TCallResponse);
 begin
 
-    if not LastError.IsSucceeded then
+    if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
         THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
         THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
-        ThreadFileLog.Log('[MakeAgeViewSQLAsync_Callback]: Error has been thrown "' + LastError.ErrorMessage + '".');
+        ThreadFileLog.Log('[MakeAgeViewSQLAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
 
@@ -1204,7 +1203,7 @@ begin
 end;
 
 
-procedure TMainForm.MakeAgeViewCSVAsync_Callback(CsvContent: TStringList; LastError: TLastError);
+procedure TMainForm.MakeAgeViewCSVAsync_Callback(CsvContent: TStringList; CallResponse: TCallResponse);
 begin
 
     EditGroupName.Enabled:=False;
@@ -1214,12 +1213,12 @@ begin
     EditGroupID.Text  :='';
     cbDump.Checked:=False;
 
-    if not LastError.IsSucceeded then
+    if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
         THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
         THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
-        ThreadFileLog.Log('[MakeAgeViewCSVAsync_Callback]: Error has been thrown "' + LastError.ErrorMessage + '".');
+        ThreadFileLog.Log('[MakeAgeViewCSVAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
 
@@ -1237,15 +1236,15 @@ begin
 end;
 
 
-procedure TMainForm.ReadAgeViewAsync_Callback(ActionMode: TLoading; ReturnedData: TStringGrid; LastError: TLastError);
+procedure TMainForm.ReadAgeViewAsync_Callback(ActionMode: TLoading; ReturnedData: TStringGrid; CallResponse: TCallResponse);
 begin
 
-    if not LastError.IsSucceeded then
+    if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
         THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
         THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
-        ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Error has been thrown "' + LastError.ErrorMessage + '".');
+        ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
 
@@ -1330,15 +1329,15 @@ end;
 // Async.OpenItems callback methods.
 // ---------------------------------
 
-procedure TMainForm.ScanOpenItemsAsync_Callback(CanMakeAge: boolean; ReadDateTime: string; LastError: TLastError);
+procedure TMainForm.ScanOpenItemsAsync_Callback(CanMakeAge: boolean; ReadDateTime: string; CallResponse: TCallResponse);
 begin
 
-    if not LastError.IsSucceeded then
+    if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
         THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
         THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
-        ThreadFileLog.Log('[ScanOpenItemsAsync_Callback]: Error has been thrown "' + LastError.ErrorMessage + '".');
+        ThreadFileLog.Log('[ScanOpenItemsAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
 
@@ -1369,17 +1368,17 @@ begin
 end;
 
 
-procedure TMainForm.ReadOpenItemsAsync_Callback(ActionMode: TLoading; OpenItemsData: TOpenItemsPayLoad; LastError: TLastError);
+procedure TMainForm.ReadOpenItemsAsync_Callback(ActionMode: TLoading; OpenItemsData: TOpenItemsPayLoad; CallResponse: TCallResponse);
 begin
 
     MainForm.sgOpenItems.Freeze(False);
 
-    if not LastError.IsSucceeded then
+    if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
         THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
         THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
-        ThreadFileLog.Log('[ReadOpenItemsAsync_Callback]: Error has been thrown "' + LastError.ErrorMessage + '".');
+        ThreadFileLog.Log('[ReadOpenItemsAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
 
@@ -1417,13 +1416,13 @@ end;
 // Async.Utilities callback methods.
 // ---------------------------------
 
-procedure TMainForm.CheckGivenPassword_Callback(LastError: TLastError);
+procedure TMainForm.CheckGivenPassword_Callback(CallResponse: TCallResponse);
 begin
 
-    if not LastError.IsSucceeded then
+    if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
-        ThreadFileLog.Log('[CheckGivenPassword_Callback]: Error has been thrown "' + LastError.ErrorMessage + '".');
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        ThreadFileLog.Log('[CheckGivenPassword_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
 
@@ -1466,13 +1465,13 @@ begin
 end;
 
 
-procedure TMainForm.SetNewPassword_Callback(LastError: TLastError);
+procedure TMainForm.SetNewPassword_Callback(CallResponse: TCallResponse);
 begin
 
-    if not LastError.IsSucceeded then
+    if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
-        ThreadFileLog.Log('[SetNewPassword_Callback]: Error has been thrown "' + LastError.ErrorMessage + '".');
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        ThreadFileLog.Log('[SetNewPassword_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
 
@@ -1490,12 +1489,12 @@ begin
 end;
 
 
-procedure TMainForm.CheckServerConnAsync_Callback(IsConnected: boolean; LastError: TLastError);
+procedure TMainForm.CheckServerConnAsync_Callback(IsConnected: boolean; CallResponse: TCallResponse);
 begin
 
-    if not LastError.IsSucceeded then
+    if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
         Exit();
     end;
 
@@ -1507,14 +1506,14 @@ begin
 end;
 
 
-procedure TMainForm.ExcelExport_Callback(LastError: TLastError);
+procedure TMainForm.ExcelExport_Callback(CallResponse: TCallResponse);
 begin
 
     THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
 
-    if not LastError.IsSucceeded then
+    if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
         Exit();
     end;
 
@@ -1523,12 +1522,12 @@ begin
 end;
 
 
-procedure TMainForm.GeneralTables_Callback(LastError: TLastError);
+procedure TMainForm.GeneralTables_Callback(CallResponse: TCallResponse);
 begin
 
-    if not LastError.IsSucceeded then
+    if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
         Exit();
     end;
 
@@ -1539,12 +1538,12 @@ end;
 // Async.Tracker callbacks methods.
 // --------------------------------
 
-procedure TMainForm.RefreshInvoiceTracker_Callback(InvoiceList: TStringGrid; LastError: TLastError);
+procedure TMainForm.RefreshInvoiceTracker_Callback(InvoiceList: TStringGrid; CallResponse: TCallResponse);
 begin
 
-    if not LastError.IsSucceeded then
+    if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
         Exit();
     end;
 
@@ -1577,12 +1576,12 @@ begin
 end;
 
 
-procedure TMainForm.DeleteFromTrackerList_Callback(LastError: TLastError);
+procedure TMainForm.DeleteFromTrackerList_Callback(CallResponse: TCallResponse);
 begin
 
-    if not LastError.IsSucceeded then
+    if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
         Exit();
     end;
 
@@ -1654,19 +1653,6 @@ end;
 
 
 {remove}
-procedure TMainForm.CallbackMassMailer(PassMsg: TMessage);
-begin
-
-    if (PassMsg.WParam = TMessaging.TWParams.MailerReportItem) and (PassMsg.LParam > -1) then
-    begin
-        MassMailerForm.CustomerList.Items[PassMsg.LParam].SubItems[2]:='Sent';
-        MassMailerForm.ThreadCount:=MassMailerForm.ThreadCount - 1;
-    end;
-
-end;
-
-
-{remove}
 procedure TMainForm.CallbackStatusBar(PassMsg: TMessage);
 begin
 
@@ -1718,7 +1704,6 @@ begin
     CallbackMessageBox(PassMsg);
     CallbackStatusBar(PassMsg);
     CallbackAwaitForm(PassMsg);
-    CallbackMassMailer(PassMsg);
 
 end;
 

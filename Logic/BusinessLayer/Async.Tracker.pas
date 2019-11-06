@@ -37,8 +37,8 @@ type
     // Callback signatures.
     // --------------------
 
-    TRefreshInvoiceTracker = procedure(InvoiceList: TStringGrid; LastError: TLastError) of object;
-    TDeleteFromTrackerList = procedure(LastError: TLastError) of object;
+    TRefreshInvoiceTracker = procedure(InvoiceList: TStringGrid; CallResponse: TCallResponse) of object;
+    TDeleteFromTrackerList = procedure(CallResponse: TCallResponse) of object;
 
     ITracker = interface(IInterface)
     ['{1EE8D593-A574-4265-B3CE-1A03CFB9B0B9}']
@@ -78,7 +78,7 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var LastError: TLastError;
+        var CallResponse: TCallResponse;
         try
 
             var TrackerData: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
@@ -96,21 +96,21 @@ begin
                 TrackerData.Free;
             end;
 
-            LastError.IsSucceeded:=True;
+            CallResponse.IsSucceeded:=True;
 
         except
             on E: Exception do
             begin
-                LastError.IsSucceeded:=False;
-                LastError.ErrorMessage:='[DeleteFromTrackerListAsync]: Cannot execute. Error has been thrown: ' + E.Message;
-                ThreadFileLog.Log(LastError.ErrorMessage);
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[DeleteFromTrackerListAsync]: Cannot execute. Error has been thrown: ' + E.Message;
+                ThreadFileLog.Log(CallResponse.LastMessage);
             end;
 
         end;
 
         TThread.Synchronize(nil, procedure
         begin
-            Callback(LastError);
+            Callback(CallResponse);
         end);
 
     end);
@@ -131,7 +131,7 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var LastError: TLastError;
+        var CallResponse: TCallResponse;
         var InvoiceList: TStringGrid:=TStringGrid.Create(nil);
         try
 
@@ -162,21 +162,21 @@ begin
                 TrackerData.Free;
             end;
 
-            LastError.IsSucceeded:=True;
+            CallResponse.IsSucceeded:=True;
 
         except
             on E: Exception do
             begin
-                LastError.IsSucceeded:=False;
-                LastError.ErrorMessage:='[DeleteFromTrackerListAsync]: Cannot execute. Error has been thrown: ' + E.Message;
-                ThreadFileLog.Log(LastError.ErrorMessage);
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[DeleteFromTrackerListAsync]: Cannot execute. Error has been thrown: ' + E.Message;
+                ThreadFileLog.Log(CallResponse.LastMessage);
             end;
 
         end;
 
         TThread.Synchronize(nil, procedure
         begin
-            Callback(InvoiceList, LastError);
+            Callback(InvoiceList, CallResponse);
             if Assigned(InvoiceList) then InvoiceList.Free();
         end);
 

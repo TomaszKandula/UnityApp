@@ -98,14 +98,15 @@ type
         procedure btnDelBeginClick(Sender: TObject);
         procedure btnDelEndClick(Sender: TObject);
     strict private
-        var FFields: TAccountStatementPayLoad;
-        var FThreadCount: integer;
+        var FPayLoad: TAccountStatementPayLoad;
+        var FItemCount: integer;
         function  GetEmailAddress(Scuid: string): string;
         procedure SetEmailAddresses(List: TListView);
         procedure UpdateCompanyData(Source: TListView);
         procedure ExecuteMailer;
     public
-        property ThreadCount: integer read FThreadCount write FThreadCount;
+        property ItemCount: integer read FItemCount write FItemCount;
+        procedure SendAccountStatements_Callback(ProcessingItemNo: integer; CallResponse: TCallResponse);
     end;
 
 
@@ -365,7 +366,6 @@ end;
 procedure TMassMailerForm.ExecuteMailer;
 begin
 
-    // Check fields
     if
         (
             string.IsNullOrEmpty(Text_Subject.Text)
@@ -380,54 +380,102 @@ begin
         Exit;
     end;
 
-    // Ask user, they may press the button by mistake
+    // -----------------------------------------------
+    // Ask user, they may press the button by mistake.
+    // -----------------------------------------------
+
     if THelpers.MsgCall(Question2, 'Are you absolutely sure you want to send it, right now?') = IDNO
         then
             Exit;
 
-    // Filtering options
+    // ------------------
+    // Filtering options.
+    // ------------------
+
     var InvFilter: TInvoiceFilter:=TInvoiceFilter.ShowAllItems;
     if cbShowAll.Checked     then InvFilter:=TInvoiceFilter.ShowAllItems;
     if cbOverdueOnly.Checked then InvFilter:=TInvoiceFilter.ReminderOvd;
     if cbNonOverdue.Checked  then InvFilter:=TInvoiceFilter.ReminderNonOvd;
 
-    // Get item count for sendable emails
+    // -----------------------------------
+    // Get item count for sendable emails.
+    // -----------------------------------
+
     for var iCNT: integer:=0 to CustomerList.Items.Count - 1 do
         if CustomerList.Items[iCNT].SubItems[4] <> 'Not found!' then
-            ThreadCount:=ThreadCount + 1;
+            ItemCount:=ItemCount + 1;
 
-    // Prepare custom message to the customer
+    // ---------------------------------------
+    // Prepare custom message to the customer.
+    // ---------------------------------------
+
     var MessStr: string:=StringReplace(Text_Message.Text, TChars.CRLF, '<br>', [rfReplaceAll]);
 
-    /// <remarks>
-    /// We have to always pre-sort Open Items list via Due Date before sending account statement or reminder.
-    /// This is necessary to ensure that the HTML generator will make sorted list for the customer.
-    /// </remarks>
+    // -----------------------------------------------------------------------------------------------------
+    // We have to always pre-sort Open Items list via Due Date before sending account statement or reminder.
+    // This is necessary to ensure that the HTML generator will make sorted list for the customer.
+    // -----------------------------------------------------------------------------------------------------
 
-    // Sort Open Items via Due Date
+    // -----------------------------
+    // Sort Open Items via Due Date.
+    // -----------------------------
+
     MainForm.sgOpenItems.MSort(MainForm.sgOpenItems.ReturnColumn(TOpenitems.PmtStat, 1 , 1), 2, True);
 
-    /// <remarks>
+    // -------------------------------------------------------------------------------------------
     /// Update column references, as they depend on view from SQL which may be changed at runtime.
-    /// </remarks>
+    // -------------------------------------------------------------------------------------------
 
     MainForm.UpdateFOpenItemsRefs(MainForm.sgOpenItems);
     MainForm.UpdateFControlStatusRefs(MainForm.sgControlStatus);
 
-    FFields.Layout    :=TDocMode.Defined;
-    FFields.Subject   :=Text_Subject.Text;
-    FFields.Mess      :=MessStr;
-    FFields.InvFilter :=InvFilter;
-    FFields.BeginDate :=ValBeginDate.Caption;
-    FFields.EndDate   :=ValEndDate.Caption;
-    FFields.OpenItems :=MainForm.sgOpenItems;
-    FFields.MailerList:=MassMailerForm.CustomerList;
+    FPayLoad.Layout        :=TDocMode.Defined;
+    FPayLoad.Subject       :=Text_Subject.Text;
+    FPayLoad.Mess          :=MessStr;
+    FPayLoad.InvFilter     :=InvFilter;
+    FPayLoad.BeginDate     :=ValBeginDate.Caption;
+    FPayLoad.EndDate       :=ValEndDate.Caption;
+    FPayLoad.MailerList    :=MassMailerForm.CustomerList;
+    FPayLoad.OpenItems     :=MainForm.sgOpenItems;
+    FPayLoad.OpenItemsRefs :=MainForm.FOpenItemsRefs;
+    FPayLoad.ControlStatus :=MainForm.sgControlStatus;
+    FPayLoad.CtrlStatusRefs:=MainForm.FCtrlStatusRefs;
 
     var Statements: IStatements:=TStatements.Create();
-    Statements.SendAccountStatements(FFields);
+    Statements.SendAccountStatements(FPayLoad, SendAccountStatements_Callback);
 
-    // Display await window
+    // ---------------------
+    // Display await window.
+    // ---------------------
+
     THelpers.WndCall(AwaitForm, TWindowState.Modal);
+
+end;
+
+
+// ----------------------------------------------------------------------------------------------------------------------------------------------- CALLBACKS //
+
+
+procedure TMassMailerForm.SendAccountStatements_Callback(ProcessingItemNo: integer; CallResponse: TCallResponse);
+begin
+
+    THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
+
+    if not CallResponse.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        Exit();
+    end;
+
+    if (ProcessingItemNo > -1) and (CallResponse.LastMessage <> 'Processed.') then
+    begin
+        CustomerList.Items[ProcessingItemNo].SubItems[2]:='Sent';
+        ItemCount:=MassMailerForm.ItemCount - 1;
+    end
+    else if CallResponse.LastMessage = 'Processed.' then
+    begin
+        THelpers.MsgCall(TAppMessage.Info, 'All listed items have been processed.');
+    end;
 
 end;
 

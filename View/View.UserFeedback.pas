@@ -49,7 +49,7 @@ type
     strict private
         function WordCount(const InputStr: string): cardinal;
     public
-        procedure SendFeedbackAsync_Callback(LastError: TLastError);
+        procedure SendFeedbackAsync_Callback(CallResponse: TCallResponse);
     end;
 
 
@@ -123,12 +123,12 @@ end;
 // ----------------------------------------------------------------------------------------------------------------------------------------------- CALLBACKS //
 
 
-procedure TFeedbackForm.SendFeedbackAsync_Callback(LastError: TLastError);
+procedure TFeedbackForm.SendFeedbackAsync_Callback(CallResponse: TCallResponse);
 begin
 
-    if not LastError.IsSucceeded then
+    if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
         Exit();
     end;
 

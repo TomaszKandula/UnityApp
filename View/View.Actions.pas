@@ -227,7 +227,7 @@ type
         property LbuSendFrom:  string read FLbuSendFrom;
         property BanksHtml:    string read FBanksHtml;
         procedure UpdateHistory(var Grid: TStringGrid);
-        procedure SendAccountStatement_Callback(ProcessingItemNo: integer; LastError: TLastError);
+        procedure SendAccountStatement_Callback(ProcessingItemNo: integer; CallResponse: TCallResponse);
     end;
 
 
@@ -839,16 +839,16 @@ end;
 // ----------------------------------------------------------------------------------------------------------------------------------------------- CALLBACKS //
 
 
-procedure TActionsForm.SendAccountStatement_Callback(ProcessingItemNo: integer; LastError: TLastError);
+procedure TActionsForm.SendAccountStatement_Callback(ProcessingItemNo: integer; CallResponse: TCallResponse);
 begin
 
-    if not LastError.IsSucceeded then
+    if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
         Exit();
     end;
 
-    THelpers.MsgCall(TAppMessage.Info, LastError.ErrorMessage);
+    THelpers.MsgCall(TAppMessage.Info, CallResponse.LastMessage);
 
 end;
 

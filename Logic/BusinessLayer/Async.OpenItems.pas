@@ -37,8 +37,8 @@ type
     // Callback signatures.
     // --------------------
 
-    TScanOpenItems = procedure(CanMakeAge: boolean; ReadDateTime: string; LastError: TLastError) of object;
-    TReadOpenItems = procedure(ActionMode: TLoading; OpenItemsData: TOpenItemsPayLoad; LastError: TLastError) of object;
+    TScanOpenItems = procedure(CanMakeAge: boolean; ReadDateTime: string; CallResponse: TCallResponse) of object;
+    TReadOpenItems = procedure(ActionMode: TLoading; OpenItemsData: TOpenItemsPayLoad; CallResponse: TCallResponse) of object;
 
 
     IOpenItems = interface(IInterface)
@@ -99,7 +99,7 @@ begin
 
         var ReadStatus: string;
         var ReadDateTime: string;
-        var LastError: TLastError;
+        var CallResponse: TCallResponse;
         var CanMakeAge: boolean:=False;
 
         try
@@ -110,21 +110,21 @@ begin
             if ( StrToDateTime(OpenItemsUpdate) < StrToDateTime(ReadDateTime) )
                 and ( ReadStatus = 'Completed' ) then CanMakeAge:=True;
 
-            LastError.IsSucceeded:=True;
+            CallResponse.IsSucceeded:=True;
 
         except
             on E: Exception do
             begin
-                LastError.IsSucceeded:=False;
-                LastError.ErrorMessage:='[ScanOpenItemsAsync] Cannot execute. Error has been thrown: ' + E.Message;
-                ThreadFileLog.Log(LastError.ErrorMessage);
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[ScanOpenItemsAsync] Cannot execute. Error has been thrown: ' + E.Message;
+                ThreadFileLog.Log(CallResponse.LastMessage);
             end;
 
         end;
 
         TThread.Synchronize(nil, procedure
         begin
-            Callback(CanMakeAge, ReadDateTime, LastError);
+            Callback(CanMakeAge, ReadDateTime, CallResponse);
         end);
 
     end);
@@ -145,28 +145,28 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var LastError: TLastError;
+        var CallResponse: TCallResponse;
         var OpenItemsData: TOpenItemsPayLoad;
 
         try
 
             FLoadToGrid(OpenItemsGrid, SettingsGrid);
             FCalculateOpenItems(OpenItemsGrid, OpenItemsData);
-            LastError.IsSucceeded:=True;
+            CallResponse.IsSucceeded:=True;
 
         except
             on E: Exception do
             begin
-                LastError.IsSucceeded:=False;
-                LastError.ErrorMessage:='[ReadOpenItemsAsync] Cannot execute. Error has been thrown: ' + E.Message;
-                ThreadFileLog.Log(LastError.ErrorMessage);
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[ReadOpenItemsAsync] Cannot execute. Error has been thrown: ' + E.Message;
+                ThreadFileLog.Log(CallResponse.LastMessage);
             end;
 
         end;
 
         TThread.Synchronize(nil, procedure
         begin
-            Callback(ActionMode, OpenItemsData, LastError);
+            Callback(ActionMode, OpenItemsData, CallResponse);
         end);
 
     end);

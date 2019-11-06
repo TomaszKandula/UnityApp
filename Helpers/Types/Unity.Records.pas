@@ -31,8 +31,8 @@ type
     /// given requested. Returned Code field is present for failed REST calls (status code returned).
     /// </remarks>
 
-    TLastError = record
-        ErrorMessage: string;
+    TCallResponse = record
+        LastMessage:  string;
         ErrorNumber:  integer;
         IsSucceeded:  boolean;
         ReturnedCode: integer;

@@ -38,13 +38,14 @@ type
     // --------------------
 
 
-    TSendAccountStatement = procedure(ProcessingItemNo: integer; LastError: TLastError) of object;
+    TSendAccountStatement  = procedure(ProcessingItemNo: integer; CallResponse: TCallResponse) of object;
+    TSendAccountStatements = procedure(ProcessingItemNo: integer; CallResponse: TCallResponse) of object;
 
 
     IStatements = interface(IInterface)
     ['{14BBF3F3-945A-4A61-94BA-6A2EE10530A2}']
         procedure SendAccountStatement(PayLoad: TAccountStatementPayLoad; Callback: TSendAccountStatement; WaitToComplete: boolean = False);
-        procedure SendAccountStatements(PayLoad: TAccountStatementPayLoad);
+        procedure SendAccountStatements(PayLoad: TAccountStatementPayLoad; Callback: TSendAccountStatements);
     end;
 
 
@@ -52,7 +53,7 @@ type
     {$TYPEINFO ON}
     public
         procedure SendAccountStatement(PayLoad: TAccountStatementPayLoad; Callback: TSendAccountStatement; WaitToComplete: boolean = False);
-        procedure SendAccountStatements(PayLoad: TAccountStatementPayLoad);
+        procedure SendAccountStatements(PayLoad: TAccountStatementPayLoad; Callback: TSendAccountStatements);
     end;
 
 
@@ -82,11 +83,14 @@ begin
     begin
 
         var ProcessingItemNo:=-1;
-        var LastError: TLastError;
+        var CallResponse: TCallResponse;
         try
 
             var Settings: ISettings:=TSettings.Create();
             var Statement: IDocument:=TDocument.Create();
+
+            Statement.Exclusions:=TArray<Integer>.Create(514, 9999); // Warning! Data should be taken from database. To be change after DB is restructured.
+            Statement.MailSubject:=PayLoad.Subject + ' - ' + PayLoad.CustName + ' - ' + PayLoad.CustNumber;
 
             Statement.CUID       :=PayLoad.CUID;
             Statement.MailFrom   :=PayLoad.SendFrom;
@@ -112,12 +116,6 @@ begin
             Statement.ControlStatus :=PayLoad.ControlStatus;
             Statement.CtrlStatusRefs:=PayLoad.CtrlStatusRefs;
 
-            // -----------------------------------------------------------------------------------
-            // Warning! Data should be taken from database. To be change after DB is restructured.
-            // -----------------------------------------------------------------------------------
-
-            Statement.Exclusions:=TArray<Integer>.Create(514, 9999);
-
             // ------------------------------------------------------
             // Load either fixed template or customizable template.
             // Where param name "FLayout":
@@ -125,8 +123,6 @@ begin
             //   - maCustom for customised template.
             // It requires FSalut, FMess and FSubject to be provided.
             // ------------------------------------------------------
-
-            Statement.MailSubject:=PayLoad.Subject + ' - ' + PayLoad.CustName + ' - ' + PayLoad.CustNumber;
 
             if PayLoad.Layout = TDocMode.Defined then
                 Statement.HTMLLayout:=Statement.LoadTemplate(Settings.DirLayouts + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE2', ''), PayLoad.IsCtrlStatus);
@@ -184,14 +180,14 @@ begin
                     True:
                     begin
                         ProcessingItemNo:=PayLoad.ItemNo;
-                        LastError.IsSucceeded:=True;
-                        LastError.ErrorMessage:='Item processed.';
+                        CallResponse.IsSucceeded:=True;
+                        CallResponse.LastMessage:='Item processed.';
                     end;
 
                     False:
                     begin
-                        LastError.IsSucceeded:=True;
-                        LastError.ErrorMessage:='Account Statement has been sent successfully!';
+                        CallResponse.IsSucceeded:=True;
+                        CallResponse.LastMessage:='Account Statement has been sent successfully!';
                     end;
 
                 end;
@@ -199,24 +195,24 @@ begin
             end
             else if not(PayLoad.Series) then
             begin
-                LastError.IsSucceeded:=False;
-                LastError.ErrorMessage:='[SendAccountStatement]: Account Statement cannot be sent. Please contact IT support.';
-                ThreadFileLog.Log(LastError.ErrorMessage);
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[SendAccountStatement]: Account Statement cannot be sent. Please contact IT support.';
+                ThreadFileLog.Log(CallResponse.LastMessage);
             end;
 
         except
             on E: Exception do
             begin
-                LastError.IsSucceeded:=False;
-                LastError.ErrorMessage:='[SendAccountStatement]: Cannot execute. Error has been thrown: ' + E.Message;
-                ThreadFileLog.Log(LastError.ErrorMessage);
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[SendAccountStatement]: Cannot execute. Error has been thrown: ' + E.Message;
+                ThreadFileLog.Log(CallResponse.LastMessage);
             end;
 
         end;
 
         TThread.Synchronize(nil, procedure
         begin
-            Callback(ProcessingItemNo, LastError);
+            Callback(ProcessingItemNo, CallResponse);
         end);
 
     end);
@@ -231,7 +227,7 @@ end;
 // Send account statements asynchronously.
 // ---------------------------------------
 
-procedure TStatements.SendAccountStatements(PayLoad: TAccountStatementPayLoad);
+procedure TStatements.SendAccountStatements(PayLoad: TAccountStatementPayLoad; Callback: TSendAccountStatements);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
@@ -240,30 +236,50 @@ begin
         PayLoad.Series:=True;
         PayLoad.ItemNo:=0;
 
-        for var iCNT: integer:=0 to PayLoad.MailerList.Items.Count - 1 do
-        begin
+        var CallResponse: TCallResponse;
+        try
 
-            if PayLoad.MailerList.Items[iCNT].SubItems[4] <> 'Not found!' then
+            for var iCNT: integer:=0 to PayLoad.MailerList.Items.Count - 1 do
             begin
 
-                PayLoad.CUID       :=PayLoad.MailerList.Items[iCNT].SubItems[10]; // cuid
-                PayLoad.SendFrom   :=PayLoad.MailerList.Items[iCNT].SubItems[3];  // send from
-                PayLoad.MailTo     :=PayLoad.MailerList.Items[iCNT].SubItems[4];  // send to
-                PayLoad.CustName   :=PayLoad.MailerList.Items[iCNT].SubItems[0];  // cust name
-                PayLoad.CustNumber :=PayLoad.MailerList.Items[iCNT].SubItems[1];  // cust number
-                PayLoad.LBUName    :=PayLoad.MailerList.Items[iCNT].SubItems[5];  // lbu name
-                PayLoad.LBUAddress :=PayLoad.MailerList.Items[iCNT].SubItems[6];  // lbu address
-                PayLoad.Telephone  :=PayLoad.MailerList.Items[iCNT].SubItems[7];  // lbu phone
-                PayLoad.BankDetails:=PayLoad.MailerList.Items[iCNT].SubItems[12]; // bank html
-                PayLoad.ItemNo     :=iCNT;
+                if PayLoad.MailerList.Items[iCNT].SubItems[4] <> 'Not found!' then
+                begin
 
-                //SendAccountStatement(PayLoad, True);
+                    PayLoad.CUID       :=PayLoad.MailerList.Items[iCNT].SubItems[10]; // cuid
+                    PayLoad.SendFrom   :=PayLoad.MailerList.Items[iCNT].SubItems[3];  // send from
+                    PayLoad.MailTo     :=PayLoad.MailerList.Items[iCNT].SubItems[4];  // send to
+                    PayLoad.CustName   :=PayLoad.MailerList.Items[iCNT].SubItems[0];  // cust name
+                    PayLoad.CustNumber :=PayLoad.MailerList.Items[iCNT].SubItems[1];  // cust number
+                    PayLoad.LBUName    :=PayLoad.MailerList.Items[iCNT].SubItems[5];  // lbu name
+                    PayLoad.LBUAddress :=PayLoad.MailerList.Items[iCNT].SubItems[6];  // lbu address
+                    PayLoad.Telephone  :=PayLoad.MailerList.Items[iCNT].SubItems[7];  // lbu phone
+                    PayLoad.BankDetails:=PayLoad.MailerList.Items[iCNT].SubItems[12]; // bank html
+                    PayLoad.ItemNo     :=iCNT;
 
+                    SendAccountStatement(PayLoad, Callback, True);
+
+                end;
+
+            end;
+
+            CallResponse.IsSucceeded:=True;
+            CallResponse.LastMessage:='Processed.';
+            ThreadFileLog.Log('[SendAccountStatements]: Listed items have been processed successfully!');
+
+        except
+            on E: Exception do
+            begin
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[SendAccountStatements]: Cannot execute. Error has been thrown: ' + E.Message;
+                ThreadFileLog.Log(CallResponse.LastMessage);
             end;
 
         end;
 
-        //THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
+        TThread.Synchronize(nil, procedure
+        begin
+            Callback(PayLoad.ItemNo, CallResponse);
+        end);
 
     end);
 

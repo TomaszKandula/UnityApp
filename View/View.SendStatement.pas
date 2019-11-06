@@ -90,7 +90,7 @@ type
         var FPayLoad: TAccountStatementPayLoad;
         procedure ExecuteMailer();
     public
-        procedure SendAccountStatement_Callback(ProcessingItemNo: integer; LastError: TLastError);
+        procedure SendAccountStatement_Callback(ProcessingItemNo: integer; CallResponse: TCallResponse);
     end;
 
 
@@ -195,16 +195,16 @@ end;
 // ----------------------------------------------------------------------------------------------------------------------------------------------- CALLBACKS //
 
 
-procedure TSendForm.SendAccountStatement_Callback(ProcessingItemNo: integer; LastError: TLastError);
+procedure TSendForm.SendAccountStatement_Callback(ProcessingItemNo: integer; CallResponse: TCallResponse);
 begin
 
-    if not LastError.IsSucceeded then
+    if not CallResponse.IsSucceeded then
     begin
-        THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
         Exit();
     end;
 
-    THelpers.MsgCall(TAppMessage.Info, LastError.ErrorMessage);
+    THelpers.MsgCall(TAppMessage.Info, CallResponse.LastMessage);
 
 end;
 

@@ -35,9 +35,9 @@ type
     // Callback signatures.
     // --------------------
 
-    TMakeAgeViewSQL = procedure(LastError: TLastError) of object;
-    TMakeAgeViewCSV = procedure(CsvContent: TStringList; LastError: TLastError) of object;
-    TReadAgeView    = procedure(ActionMode: TLoading; ReturnedData: TStringGrid; LastError: TLastError) of object;
+    TMakeAgeViewSQL = procedure(LastError: TCallResponse) of object;
+    TMakeAgeViewCSV = procedure(CsvContent: TStringList; LastError: TCallResponse) of object;
+    TReadAgeView    = procedure(ActionMode: TLoading; ReturnedData: TStringGrid; LastError: TCallResponse) of object;
 
 
     IDebtors = interface(IInterface)
@@ -92,7 +92,7 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var LastError: TLastError;
+        var CallResponse: TCallResponse;
         try
 
             FWriteAgeView(
@@ -101,21 +101,21 @@ begin
                 FMakeAgeView(OpenAmount, GroupID, SourceGrid, CompanyData)
             );
 
-            LastError.IsSucceeded:=True;
+            CallResponse.IsSucceeded:=True;
 
         except
             on E: Exception do
             begin
-                LastError.IsSucceeded:=False;
-                LastError.ErrorMessage:='[MakeAgeViewSQLAsync]: Cannot execute. Error has been thrown: ' + E.Message;
-                ThreadFileLog.Log(LastError.ErrorMessage);
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[MakeAgeViewSQLAsync]: Cannot execute. Error has been thrown: ' + E.Message;
+                ThreadFileLog.Log(CallResponse.LastMessage);
             end;
 
         end;
 
         TThread.Synchronize(nil, procedure
         begin
-            Callback(LastError);
+            Callback(CallResponse);
         end);
 
     end);
@@ -136,9 +136,9 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var LastError:   TLastError;
-        var AgingForCSV: TALists;
-        var AgingInList: TStringList:=TStringList.Create();
+        var CallResponse: TCallResponse;
+        var AgingForCSV:  TALists;
+        var AgingInList:  TStringList:=TStringList.Create();
         try
 
             AgingForCSV:=FMakeAgeView(OpenAmount, GroupID, SourceGrid, CompanyData);
@@ -156,21 +156,21 @@ begin
             end;
 
             SetLength(AgingForCSV, 0);
-            LastError.IsSucceeded:=True;
+            CallResponse.IsSucceeded:=True;
 
         except
             on E: Exception do
             begin
-                LastError.IsSucceeded:=False;
-                LastError.ErrorMessage:='[MakeAgeViewCSVAsync]: Cannot execute. Error has been thrown: ' + E.Message;
-                ThreadFileLog.Log(LastError.ErrorMessage);
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[MakeAgeViewCSVAsync]: Cannot execute. Error has been thrown: ' + E.Message;
+                ThreadFileLog.Log(CallResponse.LastMessage);
             end;
 
         end;
 
         TThread.Synchronize(nil, procedure
         begin
-            Callback(AgingInList, LastError);
+            Callback(AgingInList, CallResponse);
             if Assigned(AgingInList) then AgingInList.Free();
         end);
 
@@ -192,12 +192,12 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var LastError: TLastError;
+        var CallResponse: TCallResponse;
         var Grid: TStringGrid:=TStringGrid.Create(nil);
         var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
         try
 
-            LastError.IsSucceeded:=True;
+            CallResponse.IsSucceeded:=True;
             try
 
                 var StrCol: string;
@@ -205,9 +205,9 @@ begin
 
                 if not CheckColumns then
                 begin
-                    LastError.IsSucceeded:=False;
-                    LastError.ErrorMessage:='[ReadAgeViewAsync]: Cannot load columns. Please contact IT support.';
-                    ThreadFileLog.Log(LastError.ErrorMessage);
+                    CallResponse.IsSucceeded:=False;
+                    CallResponse.LastMessage:='[ReadAgeViewAsync]: Cannot load columns. Please contact IT support.';
+                    ThreadFileLog.Log(CallResponse.LastMessage);
                 end
                 else
                 begin
@@ -233,9 +233,9 @@ begin
             except
                 on E: Exception do
                 begin
-                    LastError.IsSucceeded:=False;
-                    LastError.ErrorMessage:='[ReadAgeViewAsync]: Cannot execute. Error has been thrown: ' + E.Message;
-                    ThreadFileLog.Log(LastError.ErrorMessage);
+                    CallResponse.IsSucceeded:=False;
+                    CallResponse.LastMessage:='[ReadAgeViewAsync]: Cannot execute. Error has been thrown: ' + E.Message;
+                    ThreadFileLog.Log(CallResponse.LastMessage);
                 end;
 
             end;
@@ -246,7 +246,7 @@ begin
 
         TThread.Synchronize(nil, procedure
         begin
-            Callback(ActionMode, Grid, LastError);
+            Callback(ActionMode, Grid, CallResponse);
             if Assigned(Grid) then Grid.Free();
         end);
 

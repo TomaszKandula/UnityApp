@@ -37,12 +37,12 @@ type
     // Callback signatures.
     // --------------------
 
-    TCheckServerConn    = procedure(IsConnected: boolean; LastError: TLastError) of object;
-    TSendUserFeedback   = procedure(LastError: TLastError) of object;
-    TExcelExport        = procedure(LastError: TLastError) of object;
-    TGeneralTables      = procedure(LastError: TLastError) of object;
-    TCheckGivenPassword = procedure(LastError: TLastError) of object;
-    TSetNewPassword     = procedure(LastError: TLastError) of object;
+    TCheckServerConn    = procedure(IsConnected: boolean; CallResponse: TCallResponse) of object;
+    TSendUserFeedback   = procedure(CallResponse: TCallResponse) of object;
+    TExcelExport        = procedure(CallResponse: TCallResponse) of object;
+    TGeneralTables      = procedure(CallResponse: TCallResponse) of object;
+    TCheckGivenPassword = procedure(CallResponse: TCallResponse) of object;
+    TSetNewPassword     = procedure(CallResponse: TCallResponse) of object;
 
     IUtilities = interface(IInterface)
     ['{0B054CF4-86F7-4770-957B-3026BE491B5A}']
@@ -104,7 +104,7 @@ begin
     begin
 
         var FIsConnected: boolean;
-        var LastError: TLastError;
+        var CallResponse: TCallResponse;
         try
 
             var DataBase: TDataBase:=TDataBase.Create(False);
@@ -113,17 +113,17 @@ begin
                 if (not(IsConnected)) and (DataBase.Check = 0) then
                 begin
                     FIsConnected:=True;
-                    LastError.IsSucceeded:=True;
-                    LastError.ErrorMessage:='[CheckServerConnAsync]: Connection with SQL Server database has been re-established.';
-                    ThreadFileLog.Log(LastError.ErrorMessage);
+                    CallResponse.IsSucceeded:=True;
+                    CallResponse.LastMessage:='[CheckServerConnAsync]: Connection with SQL Server database has been re-established.';
+                    ThreadFileLog.Log(CallResponse.LastMessage);
                 end;
 
                 if DataBase.Check <> 0 then
                 begin
                     FIsConnected:=False;
-                    LastError.IsSucceeded:=True;
-                    LastError.ErrorMessage:='[CheckServerConnAsync]: Connection with SQL Server database has been lost, waiting to reconnect... .';
-                    ThreadFileLog.Log(LastError.ErrorMessage);
+                    CallResponse.IsSucceeded:=True;
+                    CallResponse.LastMessage:='[CheckServerConnAsync]: Connection with SQL Server database has been lost, waiting to reconnect... .';
+                    ThreadFileLog.Log(CallResponse.LastMessage);
                 end;
 
             finally
@@ -133,16 +133,16 @@ begin
         except
             on E: Exception do
             begin
-                LastError.IsSucceeded:=False;
-                LastError.ErrorMessage:='[CheckServerConnAsync]: Cannot execute. Error has been thrown: ' + E.Message;
-                ThreadFileLog.Log(LastError.ErrorMessage);
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[CheckServerConnAsync]: Cannot execute. Error has been thrown: ' + E.Message;
+                ThreadFileLog.Log(CallResponse.LastMessage);
             end;
 
         end;
 
         TThread.Synchronize(nil, procedure
         begin
-            Callback(FIsConnected, LastError);
+            Callback(FIsConnected, CallResponse);
         end);
 
     end);
@@ -163,7 +163,7 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var LastError: TLastError;
+        var CallResponse: TCallResponse;
         try
 
             var Settings: ISettings:=TSettings.Create();
@@ -213,30 +213,30 @@ begin
 
             if Mail.SendNow then
             begin
-                LastError.IsSucceeded:=True;
-                LastError.ErrorMessage:='[SendFeedbackAsync]: User feedback has been sent.';
-                ThreadFileLog.Log(LastError.ErrorMessage);
+                CallResponse.IsSucceeded:=True;
+                CallResponse.LastMessage:='[SendFeedbackAsync]: User feedback has been sent.';
+                ThreadFileLog.Log(CallResponse.LastMessage);
             end
             else
             begin
-                LastError.IsSucceeded:=False;
-                LastError.ErrorMessage:='[SendFeedbackAsync]: Cannot send email. Please contact IT Support.';
-                ThreadFileLog.Log(LastError.ErrorMessage);
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[SendFeedbackAsync]: Cannot send email. Please contact IT Support.';
+                ThreadFileLog.Log(CallResponse.LastMessage);
             end;
 
         except
             on E: Exception do
             begin
-                LastError.IsSucceeded:=False;
-                LastError.ErrorMessage:='[SendFeedbackAsync]: Cannot execute. Error has been thrown: ' + E.Message;
-                ThreadFileLog.Log(LastError.ErrorMessage);
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[SendFeedbackAsync]: Cannot execute. Error has been thrown: ' + E.Message;
+                ThreadFileLog.Log(CallResponse.LastMessage);
             end;
 
         end;
 
         TThread.Synchronize(nil, procedure
         begin
-            Callback(LastError);
+            Callback(CallResponse);
         end);
 
     end);
@@ -257,7 +257,7 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var LastError: TLastError;
+        var CallResponse: TCallResponse;
         try
 
             var Temp: TStringGrid:=TStringGrid.Create(nil);
@@ -267,21 +267,21 @@ begin
                 Temp.Free;
             end;
 
-            LastError.IsSucceeded:=True;
+            CallResponse.IsSucceeded:=True;
 
         except
             on E: Exception do
             begin
-                LastError.IsSucceeded:=False;
-                LastError.ErrorMessage:='[ExcelExportAsync]: Cannot execute. Error has been thrown: ' + LastError.ErrorMessage;
-                ThreadFileLog.Log(LastError.ErrorMessage);
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[ExcelExportAsync]: Cannot execute. Error has been thrown: ' + CallResponse.LastMessage;
+                ThreadFileLog.Log(CallResponse.LastMessage);
             end;
 
         end;
 
         TThread.Synchronize(nil, procedure
         begin
-            Callback(LastError);
+            Callback(CallResponse);
         end);
 
     end);
@@ -301,7 +301,7 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var LastError: TLastError;
+        var CallResponse: TCallResponse;
         try
 
             var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
@@ -322,21 +322,21 @@ begin
                 DataTables.Free;
             end;
 
-            LastError.IsSucceeded:=True;
+            CallResponse.IsSucceeded:=True;
 
         except
             on E: Exception do
             begin
-                LastError.IsSucceeded:=False;
-                LastError.ErrorMessage:='[GeneralTablesAsync]: Cannot execute. Error has been thrown: ' + LastError.ErrorMessage;
-                ThreadFileLog.Log(LastError.ErrorMessage);
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[GeneralTablesAsync]: Cannot execute. Error has been thrown: ' + CallResponse.LastMessage;
+                ThreadFileLog.Log(CallResponse.LastMessage);
             end;
 
         end;
 
         TThread.Synchronize(nil, procedure
         begin
-            Callback(LastError);
+            Callback(CallResponse);
         end);
 
     end);
@@ -357,7 +357,7 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var LastError: TLastError;
+        var CallResponse: TCallResponse;
         try
 
             var ReHashed: boolean;
@@ -366,24 +366,24 @@ begin
 
             if Hash = '' then
             begin
-                LastError.IsSucceeded:=False;
-                LastError.ErrorMessage:='[CheckGivenPassword]: Missing hash value, check settings file. Please contact IT Support.';
-                ThreadFileLog.Log(LastError.ErrorMessage);
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[CheckGivenPassword]: Missing hash value, check settings file. Please contact IT Support.';
+                ThreadFileLog.Log(CallResponse.LastMessage);
             end
             else
             begin
 
-                LastError.IsSucceeded:=TBcrypt.CheckPassword(Password, Hash, ReHashed);
+                CallResponse.IsSucceeded:=TBcrypt.CheckPassword(Password, Hash, ReHashed);
 
-                if LastError.IsSucceeded then
+                if CallResponse.IsSucceeded then
                 begin
-                    LastError.ErrorMessage:='[CheckGivenPassword]: Administrator password has been validaded.';
-                    ThreadFileLog.Log(LastError.ErrorMessage);
+                    CallResponse.LastMessage:='[CheckGivenPassword]: Administrator password has been validaded.';
+                    ThreadFileLog.Log(CallResponse.LastMessage);
                 end
                 else
                 begin
-                    LastError.ErrorMessage:='[CheckGivenPassword]: Incorrect password, please re-type it and try again';
-                    ThreadFileLog.Log(LastError.ErrorMessage);
+                    CallResponse.LastMessage:='[CheckGivenPassword]: Incorrect password, please re-type it and try again';
+                    ThreadFileLog.Log(CallResponse.LastMessage);
                 end;
 
             end;
@@ -391,16 +391,16 @@ begin
         except
             on E: Exception do
             begin
-                LastError.IsSucceeded:=False;
-                LastError.ErrorMessage:='[CheckGivenPassword]: Cannot execute. Error has been thrown: ' + E.Message;
-                ThreadFileLog.Log(LastError.ErrorMessage);
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[CheckGivenPassword]: Cannot execute. Error has been thrown: ' + E.Message;
+                ThreadFileLog.Log(CallResponse.LastMessage);
             end;
 
         end;
 
         TThread.Synchronize(nil, procedure
         begin
-            Callback(LastError);
+            Callback(CallResponse);
         end);
 
     end);
@@ -421,13 +421,13 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var LastError: TLastError;
+        var CallResponse: TCallResponse;
         try
 
             if (CurrentPassword = String.Empty) or (NewPassword = String.Empty) then
             begin
-                LastError.IsSucceeded:=False;
-                LastError.ErrorMessage:='Please provide current password and new password.';
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='Please provide current password and new password.';
                 ThreadFileLog.Log('[SetNewPassword]: User have not provided current password/new password.');
             end
             else
@@ -453,14 +453,14 @@ begin
                     Settings.SetStringValue(TConfigSections.PasswordSection, 'HASH', HashPasswd);
                     Settings.Encode(TAppFiles.Configuration);
 
-                    LastError.IsSucceeded:=True;
+                    CallResponse.IsSucceeded:=True;
                     ThreadFileLog.Log('[SetNewPassword]: New administrator password has been setup.');
 
                 end
                 else
                 begin
-                    LastError.IsSucceeded:=False;
-                    LastError.ErrorMessage:='Incorrect password, please re-type it and try again.';
+                    CallResponse.IsSucceeded:=False;
+                    CallResponse.LastMessage:='Incorrect password, please re-type it and try again.';
                     ThreadFileLog.Log('[SetNewPassword]: provided current password is incorrect.');
                 end;
 
@@ -469,16 +469,16 @@ begin
         except
             on E: Exception do
             begin
-                LastError.IsSucceeded:=False;
-                LastError.ErrorMessage:='[SetNewPassword]: Cannot execute. Error has been thrown: ' + E.Message;
-                ThreadFileLog.Log(LastError.ErrorMessage);
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[SetNewPassword]: Cannot execute. Error has been thrown: ' + E.Message;
+                ThreadFileLog.Log(CallResponse.LastMessage);
             end;
 
         end;
 
         TThread.Synchronize(nil, procedure
         begin
-            Callback(LastError);
+            Callback(CallResponse);
         end);
 
     end);

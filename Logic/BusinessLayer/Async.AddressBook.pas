@@ -37,9 +37,9 @@ type
     // Callback signatures.
     // --------------------
 
-    TOpenAddressBook   = procedure(ReturnedData: TStringGrid; LastError: TLastError) of object;
-    TUpdateAddressBook = procedure(LastError: TLastError) of object;
-    TAddToAddressBook  = procedure(LastError: TLastError) of object;
+    TOpenAddressBook   = procedure(ReturnedData: TStringGrid; CallResponse: TCallResponse) of object;
+    TUpdateAddressBook = procedure(CallResponse: TCallResponse) of object;
+    TAddToAddressBook  = procedure(CallResponse: TCallResponse) of object;
 
 
     IAddressBook = interface(IInterface)
@@ -87,7 +87,7 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var LastError: TLastError;
+        var CallResponse: TCallResponse;
         var ReturnedData:=TStringGrid.Create(nil);
         var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
         try
@@ -119,19 +119,19 @@ begin
 
                 if not(DataTables.SqlToGrid(ReturnedData, DataTables.DataSet, True, True)) then
                 begin
-                    LastError.IsSucceeded:=False;
-                    LastError.ErrorMessage:='No results found in the database.';
+                    CallResponse.IsSucceeded:=False;
+                    CallResponse.LastMessage:='No results found in the database.';
                 end
                 else
                 begin
-                    LastError.IsSucceeded:=True;
+                    CallResponse.IsSucceeded:=True;
                 end;
 
             except
                 on E: Exception do
                 begin
-                    LastError.ErrorMessage:=E.Message;
-                    LastError.IsSucceeded:=False;
+                    CallResponse.LastMessage:=E.Message;
+                    CallResponse.IsSucceeded:=False;
                     ThreadFileLog.Log(E.Message);
                 end;
 
@@ -143,7 +143,7 @@ begin
 
         TThread.Synchronize(nil, procedure
         begin
-            Callback(ReturnedData, LastError);
+            Callback(ReturnedData, CallResponse);
             if Assigned(ReturnedData) then ReturnedData.Free();
         end);
 
@@ -165,7 +165,7 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var LastError: TLastError;
+        var CallResponse: TCallResponse;
         var Book: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
         try
 
@@ -197,20 +197,20 @@ begin
                     if Book.UpdateRecord(DbModel.TAddressBook.AddressBook, True, Condition) then
                     begin
                         SourceGrid.SetUpdatedRow(0);
-                        LastError.IsSucceeded:=True;
-                        LastError.ErrorMessage:='Address Book has been updated succesfully!';
+                        CallResponse.IsSucceeded:=True;
+                        CallResponse.LastMessage:='Address Book has been updated succesfully!';
                     end
                     else
                     begin
-                        LastError.IsSucceeded:=False;
-                        LastError.ErrorMessage:='Cannot update Address Book. Please contact IT support.';
+                        CallResponse.IsSucceeded:=False;
+                        CallResponse.LastMessage:='Cannot update Address Book. Please contact IT support.';
                     end;
 
                 end
                 else
                 begin
-                    LastError.IsSucceeded:=False;
-                    LastError.ErrorMessage:='Cannot update nothing. Please make changes first and try again.';
+                    CallResponse.IsSucceeded:=False;
+                    CallResponse.LastMessage:='Cannot update nothing. Please make changes first and try again.';
                 end;
 
             end;
@@ -232,13 +232,13 @@ begin
 
                 if Book.UpdateRecord(DbModel.TAddressBook.AddressBook, True, Condition) then
                 begin
-                    LastError.IsSucceeded:=True;
-                    LastError.ErrorMessage:='Address Book has been updated succesfully!';
+                    CallResponse.IsSucceeded:=True;
+                    CallResponse.LastMessage:='Address Book has been updated succesfully!';
                 end
                 else
                 begin
-                    LastError.IsSucceeded:=False;
-                    LastError.ErrorMessage:='Cannot update Address Book. Please contact IT support.';
+                    CallResponse.IsSucceeded:=False;
+                    CallResponse.LastMessage:='Cannot update Address Book. Please contact IT support.';
                 end;
 
             end;
@@ -249,7 +249,7 @@ begin
 
         TThread.Synchronize(nil, procedure
         begin
-            Callback(LastError);
+            Callback(CallResponse);
         end);
 
     end);
@@ -273,7 +273,7 @@ begin
         var jCNT: integer:=0;
         var Check: cardinal:=0;
         var AddrBook: TALists;
-        var LastError: TLastError;
+        var CallResponse: TCallResponse;
         SetLength(AddrBook, 1, 11);
 
         // Get data from String Grid
@@ -347,20 +347,20 @@ begin
 
                     if Book.RowsAffected > 0 then
                     begin
-                        LastError.IsSucceeded:=True;
-                        LastError.ErrorMessage:='Address Book has been successfully populated by selected item(s).';
+                        CallResponse.IsSucceeded:=True;
+                        CallResponse.LastMessage:='Address Book has been successfully populated by selected item(s).';
                     end
                     else
                     begin
-                        LastError.IsSucceeded:=False;
-                        LastError.ErrorMessage:='Cannot update Address Book. Please contact IT support.';
+                        CallResponse.IsSucceeded:=False;
+                        CallResponse.LastMessage:='Cannot update Address Book. Please contact IT support.';
                     end;
 
                 except
                     on E: Exception do
                     begin
-                        LastError.IsSucceeded:=False;
-                        LastError.ErrorMessage:='Cannot save selected item(s). Exception has been thrown: ' + E.Message;
+                        CallResponse.IsSucceeded:=False;
+                        CallResponse.LastMessage:='Cannot save selected item(s). Exception has been thrown: ' + E.Message;
                         ThreadFileLog.Log('Cannot write Address Book item(s) into database. Error: ' + E.Message);
                     end;
 
@@ -373,13 +373,13 @@ begin
         end
         else
         begin
-            LastError.IsSucceeded:=True;
-            LastError.ErrorMessage:='Selected customers are already in Address Book.';
+            CallResponse.IsSucceeded:=True;
+            CallResponse.LastMessage:='Selected customers are already in Address Book.';
         end;
 
         TThread.Synchronize(nil, procedure
         begin
-            Callback(LastError);
+            Callback(CallResponse);
         end);
 
     end);
