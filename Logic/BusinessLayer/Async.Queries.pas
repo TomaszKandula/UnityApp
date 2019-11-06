@@ -66,14 +66,12 @@ type
     end;
 
 
-implementation  // refactor!!!
+implementation
 
 
 uses
     View.Main,           // remove!
-    View.InvoiceTracker, // remove!
     View.Actions,        // remove!
-    View.UserFeedback,   // remove!
     Handler.Database,
     Handler.Account,
     Unity.Sql,

@@ -196,7 +196,7 @@ type
         var FDailyCommentFields:   TDailyCommentFields;
         var FGeneralCommentFields: TGeneralCommentFields;
         var FOpenItemsTotal:       TOpenItemsTotal;
-        var FStatementFields:      TSendAccountStatementFields;
+        var FPayLoad:              TAccountStatementPayLoad;
         procedure GetAndDisplay;
         function  GetRunningApps(SearchName: string): boolean;
         procedure UpdateOpenItems(OpenItemsDest, OpenItemsSrc: TStringGrid);
@@ -227,6 +227,7 @@ type
         property LbuSendFrom:  string read FLbuSendFrom;
         property BanksHtml:    string read FBanksHtml;
         procedure UpdateHistory(var Grid: TStringGrid);
+        procedure SendAccountStatement_Callback(ProcessingItemNo: integer; LastError: TLastError);
     end;
 
 
@@ -835,7 +836,21 @@ begin
 end;
 
 
-// --------------------------------------------------------------------------------------------------------------------------------------- MAIN CLASS EVENTS //
+// ----------------------------------------------------------------------------------------------------------------------------------------------- CALLBACKS //
+
+
+procedure TActionsForm.SendAccountStatement_Callback(ProcessingItemNo: integer; LastError: TLastError);
+begin
+
+    if not LastError.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
+        Exit();
+    end;
+
+    THelpers.MsgCall(TAppMessage.Info, LastError.ErrorMessage);
+
+end;
 
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------- STARTUP //
@@ -1310,35 +1325,43 @@ begin
 
     // ---------------------------------------------------------------------
     // UpdateFOpenItemsRefs and UpdateFCtrStatusRefs must be executed before
-    // TTSendAccountStatement is called.
+    // SendAccountStatement is called.
     // ---------------------------------------------------------------------
 
     MainForm.UpdateFOpenItemsRefs(ActionsForm.OpenItemsGrid);
     MainForm.UpdateFControlStatusRefs(MainForm.sgControlStatus);
 
-    FStatementFields.Layout      :=TDocMode.Defined;
-    FStatementFields.Subject     :='Account Statement';
-    FStatementFields.Mess        :='';
-    FStatementFields.InvFilter   :=TInvoiceFilter.ShowAllItems;
-    FStatementFields.BeginDate   :='';
-    FStatementFields.EndDate     :='';
-    FStatementFields.OpenItems   :=OpenItemsGrid;
-    FStatementFields.CUID        :=CUID;
-    FStatementFields.SendFrom    :=LbuSendFrom;
-    FStatementFields.MailTo      :=Cust_Mail.Text;
-    FStatementFields.CustName    :=CustName;
-    FStatementFields.CustNumber  :=CustNumber;
-    FStatementFields.LBUName     :=LbuName;
-    FStatementFields.LBUAddress  :=LbuAddress;
-    FStatementFields.Telephone   :=LbuPhone;
-    FStatementFields.BankDetails :=BanksHtml;
-    FStatementFields.Series      :=False;
-    FStatementFields.ItemNo      :=0;
-    FStatementFields.IsCtrlStatus:=ActionsForm.cbCtrlStatusOff.Checked;
-    FStatementFields.IsUserInCopy:=ActionsForm.cbUserInCopy.Checked;
+    // --------------------------------
+    // Prepare PayLoad for the request.
+    // --------------------------------
+
+    FPayLoad.Layout        :=TDocMode.Defined;
+    FPayLoad.Subject       :='Account Statement';
+    FPayLoad.Mess          :='';
+    FPayLoad.InvFilter     :=TInvoiceFilter.ShowAllItems;
+    FPayLoad.BeginDate     :='';
+    FPayLoad.EndDate       :='';
+    FPayLoad.OpenItems     :=OpenItemsGrid;
+    FPayLoad.CUID          :=CUID;
+    FPayLoad.SendFrom      :=LbuSendFrom;
+    FPayLoad.MailTo        :=Cust_Mail.Text;
+    FPayLoad.CustName      :=CustName;
+    FPayLoad.CustNumber    :=CustNumber;
+    FPayLoad.LBUName       :=LbuName;
+    FPayLoad.LBUAddress    :=LbuAddress;
+    FPayLoad.Telephone     :=LbuPhone;
+    FPayLoad.BankDetails   :=BanksHtml;
+    FPayLoad.Series        :=False;
+    FPayLoad.ItemNo        :=0;
+    FPayLoad.OpenItems     :=ActionsForm.OpenItemsGrid;
+    FPayLoad.OpenItemsRefs :=MainForm.FOpenItemsRefs;
+    FPayLoad.ControlStatus :=MainForm.sgControlStatus;
+    FPayLoad.CtrlStatusRefs:=MainForm.FCtrlStatusRefs;
+    FPayLoad.IsCtrlStatus  :=ActionsForm.cbCtrlStatusOff.Checked;
+    FPayLoad.IsUserInCopy  :=ActionsForm.cbUserInCopy.Checked;
 
     var Statements: IStatements:=TStatements.Create();
-    Statements.SendAccountStatement(FStatementFields);
+    Statements.SendAccountStatement(FPayLoad, SendAccountStatement_Callback);
 
 end;
 

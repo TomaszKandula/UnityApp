@@ -22,6 +22,7 @@ uses
     Unity.Arrays,
     Unity.Grid,
     Unity.Records,
+    Unity.References,
     Sync.Mailer;
 
 
@@ -616,7 +617,7 @@ begin
 
     (* DEBUG *)
     RAND:=Random(100000);
-    SaveOutput('I:\temp\' + IntToStr(RAND) + '.html');
+    SaveOutput('I:\Temp\TestEmails\' + IntToStr(RAND) + '.html');
     Result:=True;
 
 end;

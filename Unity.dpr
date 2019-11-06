@@ -65,6 +65,7 @@ uses
     Unity.Enums                 in 'Helpers\Types\Unity.Enums.pas',
     Unity.Arrays                in 'Helpers\Types\Unity.Arrays.pas',
     Unity.Records               in 'Helpers\Types\Unity.Records.pas',
+	Unity.References            in 'Helpers\Types\Unity.References.pas',
     Unity.AdoDb                 in 'Helpers\Statics\Unity.AdoDb.pas',
     Unity.Chars                 in 'Helpers\Statics\Unity.Chars.pas',
     Unity.Delimiters            in 'Helpers\Statics\Unity.Delimiters.pas',

@@ -87,12 +87,14 @@ type
         procedure btnDelBeginClick(Sender: TObject);
         procedure btnDelEndClick(Sender: TObject);
     strict private
-        var Fields: TSendAccountStatementFields;
-        procedure ExecuteMailer;
+        var FPayLoad: TAccountStatementPayLoad;
+        procedure ExecuteMailer();
+    public
+        procedure SendAccountStatement_Callback(ProcessingItemNo: integer; LastError: TLastError);
     end;
 
 
-    function SendForm: TSendForm;
+    function SendForm(): TSendForm;
 
 
 implementation
@@ -116,7 +118,7 @@ uses
 var vSendForm: TSendForm;
 
 
-function SendForm: TSendForm;
+function SendForm(): TSendForm;
 begin
     if not(Assigned(vSendForm)) then Application.CreateForm(TSendForm, vSendForm);
     Result:=vSendForm;
@@ -132,13 +134,14 @@ begin
     if String.IsNullOrEmpty(Text_Message.Text) then
     begin
         THelpers.MsgCall(Warn, 'Please provide custom message and salutation.');
-        Exit;
+        Exit();
     end;
 
     if THelpers.MsgCall(Question2, 'Are you absolutely sure you want to send it, right now?') = IDNO then
-        Exit;
+        Exit();
 
     var InvFilter: TInvoiceFilter:=TInvoiceFilter.ShowAllItems;
+
     if cbShowAll.Checked     then InvFilter:=TInvoiceFilter.ShowAllItems;
     if cbOverdueOnly.Checked then InvFilter:=TInvoiceFilter.ReminderOvd;
     if cbNonOverdue.Checked  then InvFilter:=TInvoiceFilter.ReminderNonOvd;
@@ -147,37 +150,61 @@ begin
 
     // ----------------------------------------------------------------------
     // UpdateFOpenItemsRefs and UpdateFCtrlStatusRefs must be executed before
-    // TTSendAccountStatement is called.
+    // SendAccountStatement is called.
     // ----------------------------------------------------------------------
 
     MainForm.UpdateFOpenItemsRefs(ActionsForm.OpenItemsGrid);
     MainForm.UpdateFControlStatusRefs(MainForm.sgControlStatus);
 
-    Fields.Layout      :=TDocMode.Custom;
-    Fields.Subject     :='Account Statement';
-    Fields.Mess        :=TempStr;
-    Fields.InvFilter   :=InvFilter;
-    Fields.BeginDate   :=ValBeginDate.Caption;
-    Fields.EndDate     :=ValEndDate.Caption;
-    Fields.OpenItems   :=ActionsForm.OpenItemsGrid;
-    Fields.CUID        :=ActionsForm.CUID;
-    Fields.SendFrom    :=ActionsForm.LbuSendFrom;
-    Fields.MailTo      :=ActionsForm.Cust_Mail.Text;
-    Fields.CustName    :=ActionsForm.CustName;
-    Fields.CustNumber  :=ActionsForm.CustNumber;
-    Fields.LBUName     :=ActionsForm.LbuName;
-    Fields.LBUAddress  :=ActionsForm.LbuAddress;
-    Fields.Telephone   :=ActionsForm.LbuPhone;
-    Fields.BankDetails :=ActionsForm.BanksHtml;
-    Fields.Series      :=False;
-    Fields.ItemNo      :=0;
-    Fields.IsCtrlStatus:=ActionsForm.cbCtrlStatusOff.Checked;
-    Fields.IsUserInCopy:=ActionsForm.cbUserInCopy.Checked;
+    // --------------------------------
+    // Prepare PayLoad for the request.
+    // --------------------------------
+
+    FPayLoad.Layout        :=TDocMode.Custom;
+    FPayLoad.Subject       :='Account Statement';
+    FPayLoad.Mess          :=TempStr;
+    FPayLoad.InvFilter     :=InvFilter;
+    FPayLoad.BeginDate     :=ValBeginDate.Caption;
+    FPayLoad.EndDate       :=ValEndDate.Caption;
+    FPayLoad.CUID          :=ActionsForm.CUID;
+    FPayLoad.SendFrom      :=ActionsForm.LbuSendFrom;
+    FPayLoad.MailTo        :=ActionsForm.Cust_Mail.Text;
+    FPayLoad.CustName      :=ActionsForm.CustName;
+    FPayLoad.CustNumber    :=ActionsForm.CustNumber;
+    FPayLoad.LBUName       :=ActionsForm.LbuName;
+    FPayLoad.LBUAddress    :=ActionsForm.LbuAddress;
+    FPayLoad.Telephone     :=ActionsForm.LbuPhone;
+    FPayLoad.BankDetails   :=ActionsForm.BanksHtml;
+    FPayLoad.Series        :=False;
+    FPayLoad.ItemNo        :=0;
+    FPayLoad.OpenItems     :=ActionsForm.OpenItemsGrid;
+    FPayLoad.OpenItemsRefs :=MainForm.FOpenItemsRefs;
+    FPayLoad.ControlStatus :=MainForm.sgControlStatus;
+    FPayLoad.CtrlStatusRefs:=MainForm.FCtrlStatusRefs;
+    FPayLoad.IsCtrlStatus  :=ActionsForm.cbCtrlStatusOff.Checked;
+    FPayLoad.IsUserInCopy  :=ActionsForm.cbUserInCopy.Checked;
 
     var Statements: IStatements:=TStatements.Create();
-    Statements.SendAccountStatement(Fields);
+    Statements.SendAccountStatement(FPayLoad, SendAccountStatement_Callback);
 
     Close;
+
+end;
+
+
+// ----------------------------------------------------------------------------------------------------------------------------------------------- CALLBACKS //
+
+
+procedure TSendForm.SendAccountStatement_Callback(ProcessingItemNo: integer; LastError: TLastError);
+begin
+
+    if not LastError.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, LastError.ErrorMessage);
+        Exit();
+    end;
+
+    THelpers.MsgCall(TAppMessage.Info, LastError.ErrorMessage);
 
 end;
 

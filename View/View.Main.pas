@@ -64,7 +64,8 @@ uses
     Unity.ComboBox,
     Unity.Arrays,
     Unity.Enums,
-    Unity.Records;
+    Unity.Records,
+    Unity.References;
 
 
 type

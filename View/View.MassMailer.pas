@@ -98,7 +98,7 @@ type
         procedure btnDelBeginClick(Sender: TObject);
         procedure btnDelEndClick(Sender: TObject);
     strict private
-        var FFields: TSendAccountStatementFields;
+        var FFields: TAccountStatementPayLoad;
         var FThreadCount: integer;
         function  GetEmailAddress(Scuid: string): string;
         procedure SetEmailAddresses(List: TListView);

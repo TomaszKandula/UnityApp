@@ -38,18 +38,21 @@ type
     // --------------------
 
 
+    TSendAccountStatement = procedure(ProcessingItemNo: integer; LastError: TLastError) of object;
+
+
     IStatements = interface(IInterface)
     ['{14BBF3F3-945A-4A61-94BA-6A2EE10530A2}']
-        procedure SendAccountStatement(Fields: TSendAccountStatementFields; WaitToComplete: boolean = False);
-        procedure SendAccountStatements(Fields: TSendAccountStatementFields);
+        procedure SendAccountStatement(PayLoad: TAccountStatementPayLoad; Callback: TSendAccountStatement; WaitToComplete: boolean = False);
+        procedure SendAccountStatements(PayLoad: TAccountStatementPayLoad);
     end;
 
 
     TStatements = class(TInterfacedObject, IStatements)
     {$TYPEINFO ON}
     public
-        procedure SendAccountStatement(Fields: TSendAccountStatementFields; WaitToComplete: boolean = False);
-        procedure SendAccountStatements(Fields: TSendAccountStatementFields);
+        procedure SendAccountStatement(PayLoad: TAccountStatementPayLoad; Callback: TSendAccountStatement; WaitToComplete: boolean = False);
+        procedure SendAccountStatements(PayLoad: TAccountStatementPayLoad);
     end;
 
 
@@ -57,12 +60,12 @@ implementation
 
 
 uses
-    View.Main,  // remove!
     Handler.Database,
     Handler.Account,
     Unity.Helpers,
     Unity.Settings,
     Unity.Messaging,
+    Unity.EventLogger,
     Sync.Documents,
     Async.Comments,
     DbModel;
@@ -72,113 +75,149 @@ uses
 // Send single account statement asynchronously.
 // ---------------------------------------------
 
-procedure TStatements.SendAccountStatement(Fields: TSendAccountStatementFields; WaitToComplete: boolean = False);
+procedure TStatements.SendAccountStatement(PayLoad: TAccountStatementPayLoad; Callback: TSendAccountStatement; WaitToComplete: boolean = False);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Settings: ISettings:=TSettings.Create();
-        var Statement: IDocument:=TDocument.Create();
+        var ProcessingItemNo:=-1;
+        var LastError: TLastError;
+        try
 
-        Statement.CUID       :=Fields.CUID;
-        Statement.MailFrom   :=Fields.SendFrom;
-        Statement.MailTo     :=Fields.MailTo;
-        Statement.CustName   :=Fields.CustName;
-        Statement.LBUName    :=Fields.LBUName;
-        Statement.LBUAddress :=Fields.LBUAddress;
-        Statement.Telephone  :=Fields.Telephone;
-        Statement.BankDetails:=Fields.BankDetails;
-        Statement.CustMess   :=Fields.Mess;
-        Statement.InvFilter  :=Fields.InvFilter;
-        Statement.BeginWith  :=Fields.BeginDate;
-        Statement.EndWith    :=Fields.EndDate;
+            var Settings: ISettings:=TSettings.Create();
+            var Statement: IDocument:=TDocument.Create();
 
-        // ----------------------------------------------------------
-        // Assign source of open items and control statuses alongside
-        // with theirs column references.
-        // ----------------------------------------------------------
+            Statement.CUID       :=PayLoad.CUID;
+            Statement.MailFrom   :=PayLoad.SendFrom;
+            Statement.MailTo     :=PayLoad.MailTo;
+            Statement.CustName   :=PayLoad.CustName;
+            Statement.LBUName    :=PayLoad.LBUName;
+            Statement.LBUAddress :=PayLoad.LBUAddress;
+            Statement.Telephone  :=PayLoad.Telephone;
+            Statement.BankDetails:=PayLoad.BankDetails;
+            Statement.CustMess   :=PayLoad.Mess;
+            Statement.InvFilter  :=PayLoad.InvFilter;
+            Statement.BeginWith  :=PayLoad.BeginDate;
+            Statement.EndWith    :=PayLoad.EndDate;
 
-        Statement.OpenItems     :=Fields.OpenItems;
-        Statement.OpenItemsRefs :=MainForm.FOpenItemsRefs;
+            // ----------------------------------------------------------
+            // Assign source of open items and control statuses alongside
+            // with theirs column references.
+            // ----------------------------------------------------------
 
-        Statement.ControlStatus :=MainForm.sgControlStatus;
-        Statement.CtrlStatusRefs:=MainForm.FCtrlStatusRefs;
+            Statement.OpenItems     :=PayLoad.OpenItems;
+            Statement.OpenItemsRefs :=PayLoad.OpenItemsRefs;
 
-        // -----------------------------------------------------------------------------------
-        // Warning! Data should be taken from database. To be change after DB is restructured.
-        // -----------------------------------------------------------------------------------
+            Statement.ControlStatus :=PayLoad.ControlStatus;
+            Statement.CtrlStatusRefs:=PayLoad.CtrlStatusRefs;
 
-        Statement.Exclusions:=TArray<Integer>.Create(514, 9999);
+            // -----------------------------------------------------------------------------------
+            // Warning! Data should be taken from database. To be change after DB is restructured.
+            // -----------------------------------------------------------------------------------
 
-        Statement.MailSubject:=Fields.Subject + ' - ' + Fields.CustName + ' - ' + Fields.CustNumber;
+            Statement.Exclusions:=TArray<Integer>.Create(514, 9999);
 
-        // ------------------------------------------------------
-        // Load either fixed template or customizable template.
-        // Where param name "FLayout":
-        //   - maDefined for fully pre-defined template.
-        //   - maCustom for customised template.
-        // It requires FSalut, FMess and FSubject to be provided.
-        // ------------------------------------------------------
+            // ------------------------------------------------------
+            // Load either fixed template or customizable template.
+            // Where param name "FLayout":
+            //   - maDefined for fully pre-defined template.
+            //   - maCustom for customised template.
+            // It requires FSalut, FMess and FSubject to be provided.
+            // ------------------------------------------------------
 
-        if Fields.Layout = TDocMode.Defined then
-            Statement.HTMLLayout:=Statement.LoadTemplate(Settings.DirLayouts + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE2', ''), Fields.IsCtrlStatus);
+            Statement.MailSubject:=PayLoad.Subject + ' - ' + PayLoad.CustName + ' - ' + PayLoad.CustNumber;
 
-        if Fields.Layout = TDocMode.Custom then
-            Statement.HTMLLayout:=Statement.LoadTemplate(Settings.DirLayouts + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE3', ''), Fields.IsCtrlStatus);
+            if PayLoad.Layout = TDocMode.Defined then
+                Statement.HTMLLayout:=Statement.LoadTemplate(Settings.DirLayouts + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE2', ''), PayLoad.IsCtrlStatus);
 
-        if Statement.SendDocument(Fields.IsUserInCopy) then
+            if PayLoad.Layout = TDocMode.Custom then
+                Statement.HTMLLayout:=Statement.LoadTemplate(Settings.DirLayouts + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE3', ''), PayLoad.IsCtrlStatus);
+
+            if Statement.SendDocument(PayLoad.IsUserInCopy) then
+            begin
+
+                var FDailyCommentFields: TDailyCommentFields;
+                FDailyCommentFields.CUID         :=PayLoad.CUID;
+                FDailyCommentFields.Email        :=False;
+                FDailyCommentFields.CallEvent    :=False;
+                FDailyCommentFields.CallDuration :=0;
+                FDailyCommentFields.Comment      :='New communication has been sent to the customer.';
+                FDailyCommentFields.UpdateGrid   :=not PayLoad.Series;
+                FDailyCommentFields.EmailReminder:=False;
+                FDailyCommentFields.EventLog     :=False;
+                FDailyCommentFields.ExtendComment:=True;
+
+                // ----------------------------------------------------------------------
+                // Register sent email either as manual statement or automatic statement.
+                // ----------------------------------------------------------------------
+
+                if PayLoad.Layout = TDocMode.Defined then
+                begin
+
+                    FDailyCommentFields.EmailAutoStat:=True;
+                    FDailyCommentFields.EmailManuStat:=False;
+
+                    var Comments: IComments:=TComments.Create();
+                    Comments.EditDailyComment(FDailyCommentFields, nil);
+
+                end;
+
+                if PayLoad.Layout = TDocMode.Custom then
+                begin
+
+                    FDailyCommentFields.EmailAutoStat:=False;
+                    FDailyCommentFields.EmailManuStat:=True;
+
+                    var Comments: IComments:=TComments.Create();
+                    Comments.EditDailyComment(FDailyCommentFields, nil);
+
+                end;
+
+                // -------------------------------------------------------
+                // We send either single email (customized by the user) or
+                // executed by mass mailer (multiple emails).
+                // -------------------------------------------------------
+
+                case PayLoad.Series of
+
+                    True:
+                    begin
+                        ProcessingItemNo:=PayLoad.ItemNo;
+                        LastError.IsSucceeded:=True;
+                        LastError.ErrorMessage:='Item processed.';
+                    end;
+
+                    False:
+                    begin
+                        LastError.IsSucceeded:=True;
+                        LastError.ErrorMessage:='Account Statement has been sent successfully!';
+                    end;
+
+                end;
+
+            end
+            else if not(PayLoad.Series) then
+            begin
+                LastError.IsSucceeded:=False;
+                LastError.ErrorMessage:='[SendAccountStatement]: Account Statement cannot be sent. Please contact IT support.';
+                ThreadFileLog.Log(LastError.ErrorMessage);
+            end;
+
+        except
+            on E: Exception do
+            begin
+                LastError.IsSucceeded:=False;
+                LastError.ErrorMessage:='[SendAccountStatement]: Cannot execute. Error has been thrown: ' + E.Message;
+                ThreadFileLog.Log(LastError.ErrorMessage);
+            end;
+
+        end;
+
+        TThread.Synchronize(nil, procedure
         begin
-
-            var FDailyCommentFields: TDailyCommentFields;
-            FDailyCommentFields.CUID         :=Fields.CUID;
-            FDailyCommentFields.Email        :=False;
-            FDailyCommentFields.CallEvent    :=False;
-            FDailyCommentFields.CallDuration :=0;
-            FDailyCommentFields.Comment      :='New communication has been sent to the customer.';
-            FDailyCommentFields.UpdateGrid   :=not Fields.Series;
-            FDailyCommentFields.EmailReminder:=False;
-            FDailyCommentFields.EventLog     :=False;
-            FDailyCommentFields.ExtendComment:=True;
-
-            // ----------------------------------------------------------------------
-            // Register sent email either as manual statement or automatic statement.
-            // ----------------------------------------------------------------------
-
-            if Fields.Layout = TDocMode.Defined then
-            begin
-
-                FDailyCommentFields.EmailAutoStat:=True;
-                FDailyCommentFields.EmailManuStat:=False;
-
-                var Comments: IComments:=TComments.Create();
-                Comments.EditDailyComment(FDailyCommentFields, nil);
-
-            end;
-
-            if Fields.Layout = TDocMode.Custom then
-            begin
-
-                FDailyCommentFields.EmailAutoStat:=False;
-                FDailyCommentFields.EmailManuStat:=True;
-
-                var Comments: IComments:=TComments.Create();
-                Comments.EditDailyComment(FDailyCommentFields, nil);
-
-            end;
-
-            // ----------------------------------------------------------------------------------
-            // Either single email (manual by user) or executed by mass mailer (multiple emails).
-            // ----------------------------------------------------------------------------------
-
-            case Fields.Series of
-                True:   THelpers.ExecMessage(False, TMessaging.TWParams.MailerReportItem, Fields.ItemNo.ToString, MainForm);
-                False:  THelpers.ExecMessage(False, TMessaging.TWParams.MessageInfo, 'Account Statement has been sent successfully!', MainForm);
-            end;
-
-        end
-        else if not(Fields.Series) then
-        THelpers.ExecMessage(False, TMessaging.TWParams.MessageError, 'Account Statement cannot be sent. Please contact IT support.', MainForm);
+            Callback(ProcessingItemNo, LastError);
+        end);
 
     end);
 
@@ -192,39 +231,39 @@ end;
 // Send account statements asynchronously.
 // ---------------------------------------
 
-procedure TStatements.SendAccountStatements(Fields: TSendAccountStatementFields);
+procedure TStatements.SendAccountStatements(PayLoad: TAccountStatementPayLoad);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        Fields.Series:=True;
-        Fields.ItemNo:=0;
+        PayLoad.Series:=True;
+        PayLoad.ItemNo:=0;
 
-        for var iCNT: integer:=0 to Fields.MailerList.Items.Count - 1 do
+        for var iCNT: integer:=0 to PayLoad.MailerList.Items.Count - 1 do
         begin
 
-            if Fields.MailerList.Items[iCNT].SubItems[4] <> 'Not found!' then
+            if PayLoad.MailerList.Items[iCNT].SubItems[4] <> 'Not found!' then
             begin
 
-                Fields.CUID       :=Fields.MailerList.Items[iCNT].SubItems[10]; // cuid
-                Fields.SendFrom   :=Fields.MailerList.Items[iCNT].SubItems[3];  // send from
-                Fields.MailTo     :=Fields.MailerList.Items[iCNT].SubItems[4];  // send to
-                Fields.CustName   :=Fields.MailerList.Items[iCNT].SubItems[0];  // cust name
-                Fields.CustNumber :=Fields.MailerList.Items[iCNT].SubItems[1];  // cust number
-                Fields.LBUName    :=Fields.MailerList.Items[iCNT].SubItems[5];  // lbu name
-                Fields.LBUAddress :=Fields.MailerList.Items[iCNT].SubItems[6];  // lbu address
-                Fields.Telephone  :=Fields.MailerList.Items[iCNT].SubItems[7];  // lbu phone
-                Fields.BankDetails:=Fields.MailerList.Items[iCNT].SubItems[12]; // bank html
-                Fields.ItemNo:=iCNT;
+                PayLoad.CUID       :=PayLoad.MailerList.Items[iCNT].SubItems[10]; // cuid
+                PayLoad.SendFrom   :=PayLoad.MailerList.Items[iCNT].SubItems[3];  // send from
+                PayLoad.MailTo     :=PayLoad.MailerList.Items[iCNT].SubItems[4];  // send to
+                PayLoad.CustName   :=PayLoad.MailerList.Items[iCNT].SubItems[0];  // cust name
+                PayLoad.CustNumber :=PayLoad.MailerList.Items[iCNT].SubItems[1];  // cust number
+                PayLoad.LBUName    :=PayLoad.MailerList.Items[iCNT].SubItems[5];  // lbu name
+                PayLoad.LBUAddress :=PayLoad.MailerList.Items[iCNT].SubItems[6];  // lbu address
+                PayLoad.Telephone  :=PayLoad.MailerList.Items[iCNT].SubItems[7];  // lbu phone
+                PayLoad.BankDetails:=PayLoad.MailerList.Items[iCNT].SubItems[12]; // bank html
+                PayLoad.ItemNo     :=iCNT;
 
-                SendAccountStatement(Fields, True);
+                //SendAccountStatement(PayLoad, True);
 
             end;
 
         end;
 
-        THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
+        //THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
 
     end);
 
