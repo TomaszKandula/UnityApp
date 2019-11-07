@@ -33,34 +33,70 @@ uses
 type
 
 
-    // --------------------
-    // Callback signatures.
-    // --------------------
+    /// <summary>
+    /// Callback signature (delegate) for updating (insert/update actions) daily comment.
+    /// </summary>
+    TEditDailyComment = procedure(CallResponse: TCallResponse) of object;
 
-    TEditDailyComment   = procedure(CallResponse: TCallResponse) of object;
+    /// <summary>
+    /// Callback signature (delegate) for updating (insert/update actions) general comment.
+    /// </summary>
     TEditGeneralComment = procedure(CallResponse: TCallResponse) of object;
 
-    // ---------------------------------------------------------------
-    // Note: callback may be optional and therefore nil by default.
-    // We provide callback only if we want to update visual component.
-    // ---------------------------------------------------------------
 
     IComments = interface(IInterface)
     ['{1B3127BB-EC78-4177-A286-C138E02709D3}']
-        procedure EditDailyComment(Fields: TDailyCommentFields; Callback: TEditDailyComment = nil);
-        procedure EditGeneralComment(Fields: TGeneralCommentFields; Callback: TEditGeneralComment = nil);
+
+        /// <summary>
+        /// Allow to async. update daily comment (either insert or update). Requires to pass database table fields as payload.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
+        procedure EditDailyComment(PayLoad: TDailyCommentFields; Callback: TEditDailyComment = nil);
+
+        /// <summary>
+        /// Allow to async. update general comment (either insert or update). Requires to pass database table fields as payload.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
+        procedure EditGeneralComment(PayLoad: TGeneralCommentFields; Callback: TEditGeneralComment = nil);
+
     end;
+
 
     TComments = class(TInterfacedObject, IComments)
     {$TYPEINFO ON}
     private
-        procedure FInsertDailyComment(var DailyText: TDataTables; var Fields: TDailyCommentFields; var CallResponse: TCallResponse);
-        procedure FUpdateDailyComment(var DailyText: TDataTables; var Fields: TDailyCommentFields; Condition: string; var CallResponse: TCallResponse);
-        procedure FInsertGeneralComment(var GenText: TDataTables; var Fields: TGeneralCommentFields; var CallResponse: TCallResponse);
-        procedure FUpdateGeneralComment(var GenText: TDataTables; var Fields: TGeneralCommentFields; Condition: string; var CallResponse: TCallResponse);
+        procedure FInsertDailyComment(var DailyText: TDataTables; var PayLoad: TDailyCommentFields; var CallResponse: TCallResponse);
+        procedure FUpdateDailyComment(var DailyText: TDataTables; var PayLoad: TDailyCommentFields; Condition: string; var CallResponse: TCallResponse);
+        procedure FInsertGeneralComment(var GenText: TDataTables; var PayLoad: TGeneralCommentFields; var CallResponse: TCallResponse);
+        procedure FUpdateGeneralComment(var GenText: TDataTables; var PayLoad: TGeneralCommentFields; Condition: string; var CallResponse: TCallResponse);
     public
-        procedure EditDailyComment(Fields: TDailyCommentFields; Callback: TEditDailyComment = nil);
-        procedure EditGeneralComment(Fields: TGeneralCommentFields; Callback: TEditGeneralComment = nil);
+
+        /// <summary>
+        /// Allow to async. update daily comment (either insert or update). Requires to pass database table fields as payload.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// Note: this method defines callback as nil be default.
+        /// </remarks>
+        procedure EditDailyComment(PayLoad: TDailyCommentFields; Callback: TEditDailyComment = nil);
+
+        /// <summary>
+        /// Allow to async. update general comment (either insert or update). Requires to pass database table fields as payload.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// Note: this method defines callback as nil be default.
+        /// </remarks>
+        procedure EditGeneralComment(PayLoad: TGeneralCommentFields; Callback: TEditGeneralComment = nil);
+
     end;
 
 
@@ -86,10 +122,10 @@ uses
 // Perform SQL "insert into" command.
 // ----------------------------------
 
-procedure TComments.FInsertDailyComment(var DailyText: TDataTables; var Fields: TDailyCommentFields; var CallResponse: TCallResponse);
+procedure TComments.FInsertDailyComment(var DailyText: TDataTables; var PayLoad: TDailyCommentFields; var CallResponse: TCallResponse);
 begin
 
-    if Fields.Email then
+    if PayLoad.Email then
     begin
         DailyText.Columns.Add(TDailyComment.Email);
         DailyText.Values.Add('1');
@@ -100,7 +136,7 @@ begin
         DailyText.Values.Add('0');
     end;
 
-    if Fields.EmailReminder then
+    if PayLoad.EmailReminder then
     begin
         DailyText.Columns.Add(TDailyComment.EmailReminder);
         DailyText.Values.Add('1');
@@ -111,7 +147,7 @@ begin
         DailyText.Values.Add('0');
     end;
 
-    if Fields.EmailAutoStat then
+    if PayLoad.EmailAutoStat then
     begin
         DailyText.Columns.Add(TDailyComment.EmailAutoStat);
         DailyText.Values.Add('1');
@@ -122,7 +158,7 @@ begin
         DailyText.Values.Add('0');
     end;
 
-    if Fields.EmailManuStat then
+    if PayLoad.EmailManuStat then
     begin
         DailyText.Columns.Add(TDailyComment.EmailManuStat);
         DailyText.Values.Add('1');
@@ -133,12 +169,12 @@ begin
         DailyText.Values.Add('0');
     end;
 
-    if Fields.CallEvent then
+    if PayLoad.CallEvent then
     begin
         DailyText.Columns.Add(TDailyComment.CallEvent);
         DailyText.Values.Add('1');
         DailyText.Columns.Add(TDailyComment.CallDuration);
-        DailyText.Values.Add(Fields.CallDuration.ToString());
+        DailyText.Values.Add(PayLoad.CallDuration.ToString());
     end
     else
     begin
@@ -149,19 +185,19 @@ begin
     end;
 
     DailyText.Columns.Add(TDailyComment.FixedComment);
-    DailyText.Values.Add(Fields.Comment);
+    DailyText.Values.Add(PayLoad.Comment);
 
     if (DailyText.InsertInto(TDailyComment.DailyComment, True)) and (DailyText.RowsAffected > 0) then
     begin
         CallResponse.IsSucceeded:=True;
-        CallResponse.LastMessage:='"DailyComment" table has been posted (CUID: ' + Fields.CUID + '). Rows affected: ' + DailyText.RowsAffected.ToString() + '.';
-        if Fields.EventLog then ThreadFileLog.Log(CallResponse.LastMessage);
+        CallResponse.LastMessage:='"DailyComment" table has been posted (CUID: ' + PayLoad.CUID + '). Rows affected: ' + DailyText.RowsAffected.ToString() + '.';
+        if PayLoad.EventLog then ThreadFileLog.Log(CallResponse.LastMessage);
     end
     else
     begin
         CallResponse.IsSucceeded:=False;
         CallResponse.LastMessage:='Cannot post daily comment into database.' +  TChars.CRLF + 'Error message received: ' + DailyText.LastErrorMsg + TChars.CRLF + 'Please contact IT support.';
-        ThreadFileLog.Log('Cannot update daily comment (CUID: ' + Fields.CUID + '). Rows affected: ' + DailyText.RowsAffected.ToString() + '. Error message received: ' + DailyText.LastErrorMsg + '.');
+        ThreadFileLog.Log('Cannot update daily comment (CUID: ' + PayLoad.CUID + '). Rows affected: ' + DailyText.RowsAffected.ToString() + '. Error message received: ' + DailyText.LastErrorMsg + '.');
     end;
 
 end;
@@ -171,17 +207,17 @@ end;
 // Perform SQL "update" command.
 // -----------------------------
 
-procedure TComments.FUpdateDailyComment(var DailyText: TDataTables; var Fields: TDailyCommentFields; Condition: string; var CallResponse: TCallResponse);
+procedure TComments.FUpdateDailyComment(var DailyText: TDataTables; var PayLoad: TDailyCommentFields; Condition: string; var CallResponse: TCallResponse);
 begin
 
-    if Fields.Email then
+    if PayLoad.Email then
     begin
         DailyText.Columns.Add(TDailyComment.Email);
         DailyText.Values.Add(IntToStr(StrToIntDef(THelpers.OleGetStr(DailyText.DataSet.Fields[TDailyComment.Email].Value), 0)));
     end;
 
     // Call event and call duration always comes together
-    if Fields.CallEvent then
+    if PayLoad.CallEvent then
     begin
 
         var LCallEvent: integer:=StrToIntDef(THelpers.OleGetStr(DailyText.DataSet.Fields[TDailyComment.CallEvent].Value), 0);
@@ -191,11 +227,11 @@ begin
         DailyText.Values.Add(LCallEvent.ToString());
 
         DailyText.Columns.Add(TDailyComment.CallDuration);
-        DailyText.Values.Add(Fields.CallDuration.ToString());
+        DailyText.Values.Add(PayLoad.CallDuration.ToString());
 
     end;
 
-    if Fields.EmailReminder then
+    if PayLoad.EmailReminder then
     begin
         var LEmailReminder: integer:=StrToIntDef(THelpers.OleGetStr(DailyText.DataSet.Fields[TDailyComment.EmailReminder].Value), 0);
         Inc(LEmailReminder);
@@ -203,7 +239,7 @@ begin
         DailyText.Values.Add(LEmailReminder.ToString());
     end;
 
-    if Fields.EmailAutoStat then
+    if PayLoad.EmailAutoStat then
     begin
         var LEmailAutoStat: integer:=StrToIntDef(THelpers.OleGetStr(DailyText.DataSet.Fields[TDailyComment.EmailAutoStat].Value), 0);
         Inc(LEmailAutoStat);
@@ -211,7 +247,7 @@ begin
         DailyText.Values.Add(LEmailAutoStat.ToString());
     end;
 
-    if Fields.EmailManuStat then
+    if PayLoad.EmailManuStat then
     begin
         var LEmailManuStat: integer:=StrToIntDef(THelpers.OleGetStr(DailyText.DataSet.Fields[TDailyComment.EmailManuStat].Value), 0);
         Inc(LEmailManuStat);
@@ -219,23 +255,23 @@ begin
         DailyText.Values.Add(LEmailManuStat.ToString());
     end;
 
-    if not(Fields.Comment = '') then
+    if not(PayLoad.Comment = '') then
     begin
         DailyText.Columns.Add(TDailyComment.FixedComment);
-        DailyText.Values.Add(Fields.Comment);
+        DailyText.Values.Add(PayLoad.Comment);
     end;
 
     if (DailyText.UpdateRecord(TDailyComment.DailyComment, True, Condition)) and (DailyText.RowsAffected > 0) then
     begin
         CallResponse.IsSucceeded:=True;
-        CallResponse.LastMessage:='"DailyComment" table has been updated (CUID: ' + Fields.CUID + '). Rows affected: ' + DailyText.RowsAffected.ToString() + '.';
-        if Fields.EventLog then ThreadFileLog.Log(CallResponse.LastMessage);
+        CallResponse.LastMessage:='"DailyComment" table has been updated (CUID: ' + PayLoad.CUID + '). Rows affected: ' + DailyText.RowsAffected.ToString() + '.';
+        if PayLoad.EventLog then ThreadFileLog.Log(CallResponse.LastMessage);
     end
     else
     begin
         CallResponse.IsSucceeded:=False;
-        CallResponse.LastMessage:='Cannot update daily comment (CUID: ' + Fields.CUID + '). Rows affected: ' + DailyText.RowsAffected.ToString() + '. Error message received: ' + DailyText.LastErrorMsg + '.';
-        ThreadFileLog.Log('Cannot update daily comment (CUID: ' + Fields.CUID + '). Rows affected: ' + DailyText.RowsAffected.ToString() + '. Error message received: ' + DailyText.LastErrorMsg + '.');
+        CallResponse.LastMessage:='Cannot update daily comment (CUID: ' + PayLoad.CUID + '). Rows affected: ' + DailyText.RowsAffected.ToString() + '. Error message received: ' + DailyText.LastErrorMsg + '.';
+        ThreadFileLog.Log('Cannot update daily comment (CUID: ' + PayLoad.CUID + '). Rows affected: ' + DailyText.RowsAffected.ToString() + '. Error message received: ' + DailyText.LastErrorMsg + '.');
     end;
 
 end;
@@ -245,18 +281,18 @@ end;
 // Perform update or insert of daily comment.
 // ------------------------------------------
 
-procedure TComments.EditDailyComment(Fields: TDailyCommentFields; Callback: TEditDailyComment = nil);
+procedure TComments.EditDailyComment(PayLoad: TDailyCommentFields; Callback: TEditDailyComment = nil);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var LastError: TCallResponse;
+        var CallResponse: TCallResponse;
         var DailyText: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
         try
 
-            var Condition:    string:=TDailyComment.Cuid + TSql.EQUAL + QuotedStr(Fields.CUID) + TSql._AND + TDailyComment.AgeDate + TSql.EQUAL + QuotedStr(Fields.AgeDateSel);
-            var DataCheckSum: string:=Fields.CUID + StringReplace(Fields.AgeDateSel, '-', '', [rfReplaceAll]);
+            var Condition:    string:=TDailyComment.Cuid + TSql.EQUAL + QuotedStr(PayLoad.CUID) + TSql._AND + TDailyComment.AgeDate + TSql.EQUAL + QuotedStr(PayLoad.AgeDateSel);
+            var DataCheckSum: string:=PayLoad.CUID + StringReplace(PayLoad.AgeDateSel, '-', '', [rfReplaceAll]);
 
             DailyText.CustFilter:=TSql.WHERE + Condition;
             DailyText.OpenTable(TDailyComment.DailyComment);
@@ -269,8 +305,8 @@ begin
                 // -------------------------
 
                 // Allow to extend comment by adding to existing wording a new comment line
-                if Fields.ExtendComment then
-                    Fields.Comment:=DailyText.DataSet.Fields[TDailyComment.FixedComment].Value + TChars.CRLF + Fields.Comment;
+                if PayLoad.ExtendComment then
+                    PayLoad.Comment:=DailyText.DataSet.Fields[TDailyComment.FixedComment].Value + TChars.CRLF + PayLoad.Comment;
 
                 DailyText.CleanUp;
 
@@ -280,7 +316,7 @@ begin
                 DailyText.Columns.Add(TDailyComment.UserAlias);
                 DailyText.Values.Add(UpperCase(SessionService.SessionUser));
 
-                FUpdateDailyComment(DailyText, Fields, Condition, LastError);
+                FUpdateDailyComment(DailyText, PayLoad, Condition, CallResponse);
 
             end
             else
@@ -293,13 +329,13 @@ begin
                 DailyText.CleanUp;
 
                 DailyText.Columns.Add(TDailyComment.GroupId);
-                DailyText.Values.Add(Fields.GroupIdSel);
+                DailyText.Values.Add(PayLoad.GroupIdSel);
 
                 DailyText.Columns.Add(TDailyComment.Cuid);
-                DailyText.Values.Add(Fields.CUID);
+                DailyText.Values.Add(PayLoad.CUID);
 
                 DailyText.Columns.Add(TDailyComment.AgeDate);
-                DailyText.Values.Add(Fields.AgeDateSel);
+                DailyText.Values.Add(PayLoad.AgeDateSel);
 
                 DailyText.Columns.Add(TDailyComment.Stamp);
                 DailyText.Values.Add(DateTimeToStr(Now));
@@ -310,7 +346,7 @@ begin
                 DailyText.Columns.Add(TDailyComment.DataCheckSum);
                 DailyText.Values.Add(DataCheckSum);
 
-                FInsertDailyComment(DailyText, Fields, LastError);
+                FInsertDailyComment(DailyText, PayLoad, CallResponse);
 
             end;
 
@@ -320,7 +356,7 @@ begin
 
         TThread.Synchronize(nil, procedure
         begin
-            if Assigned(Callback) then Callback(LastError);
+            if Assigned(Callback) then Callback(CallResponse);
         end);
 
     end);
@@ -334,13 +370,13 @@ end;
 // Subroutine for inserting new general comment.
 // ---------------------------------------------
 
-procedure TComments.FInsertGeneralComment(var GenText: TDataTables; var Fields: TGeneralCommentFields; var CallResponse: TCallResponse);
+procedure TComments.FInsertGeneralComment(var GenText: TDataTables; var PayLoad: TGeneralCommentFields; var CallResponse: TCallResponse);
 begin
 
-    if not(Fields.FixedComment = TUnknown.NULL) then
+    if not(PayLoad.FixedComment = TUnknown.NULL) then
     begin
         GenText.Columns.Add(TGeneralComment.FixedComment);
-        GenText.Values.Add(Fields.FixedComment);
+        GenText.Values.Add(PayLoad.FixedComment);
     end
     else
     begin
@@ -348,10 +384,10 @@ begin
         GenText.Values.Add('');
     end;
 
-    if not(Fields.FollowUp = TUnknown.NULL) then
+    if not(PayLoad.FollowUp = TUnknown.NULL) then
     begin
         GenText.Columns.Add(TGeneralComment.FollowUp);
-        GenText.Values.Add(Fields.FollowUp);
+        GenText.Values.Add(PayLoad.FollowUp);
     end
     else
     begin
@@ -359,10 +395,10 @@ begin
         GenText.Values.Add('');
     end;
 
-    if not(Fields.Free1 = TUnknown.NULL) then
+    if not(PayLoad.Free1 = TUnknown.NULL) then
     begin
         GenText.Columns.Add(TGeneralComment.Free1);
-        GenText.Values.Add(Fields.Free1);
+        GenText.Values.Add(PayLoad.Free1);
     end
     else
     begin
@@ -370,10 +406,10 @@ begin
         GenText.Values.Add('');
     end;
 
-    if not(Fields.Free2 = TUnknown.NULL) then
+    if not(PayLoad.Free2 = TUnknown.NULL) then
     begin
         GenText.Columns.Add(TGeneralComment.Free2);
-        GenText.Values.Add(Fields.Free2);
+        GenText.Values.Add(PayLoad.Free2);
     end
     else
     begin
@@ -381,10 +417,10 @@ begin
         GenText.Values.Add('');
     end;
 
-    if not(Fields.Free3 = TUnknown.NULL) then
+    if not(PayLoad.Free3 = TUnknown.NULL) then
     begin
         GenText.Columns.Add(TGeneralComment.Free3);
-        GenText.Values.Add(Fields.Free3);
+        GenText.Values.Add(PayLoad.Free3);
     end
     else
     begin
@@ -395,14 +431,14 @@ begin
     if (GenText.InsertInto(TGeneralComment.GeneralComment, True)) and (GenText.RowsAffected > 0) then
     begin
         CallResponse.IsSucceeded:=True;
-        CallResponse.LastMessage:='"GeneralComment" table has been posted (CUID: ' + Fields.CUID + '). Rows affected: ' + GenText.RowsAffected.ToString() + '.';
-        if Fields.EventLog then ThreadFileLog.Log('"GeneralComment" table has been posted (CUID: ' + Fields.CUID + '). Rows affected: ' + GenText.RowsAffected.ToString() + '.');
+        CallResponse.LastMessage:='"GeneralComment" table has been posted (CUID: ' + PayLoad.CUID + '). Rows affected: ' + GenText.RowsAffected.ToString() + '.';
+        if PayLoad.EventLog then ThreadFileLog.Log('"GeneralComment" table has been posted (CUID: ' + PayLoad.CUID + '). Rows affected: ' + GenText.RowsAffected.ToString() + '.');
     end
     else
     begin
         CallResponse.IsSucceeded:=False;
-        CallResponse.LastMessage:='Cannot update general comment (CUID: ' + Fields.CUID + '). Rows affected: ' + GenText.RowsAffected.ToString() + '. Error message received: ' + GenText.LastErrorMsg + '.';
-        ThreadFileLog.Log('Cannot update general comment (CUID: ' + Fields.CUID + '). Rows affected: ' + GenText.RowsAffected.ToString() + '. Error message received: ' + GenText.LastErrorMsg + '.');
+        CallResponse.LastMessage:='Cannot update general comment (CUID: ' + PayLoad.CUID + '). Rows affected: ' + GenText.RowsAffected.ToString() + '. Error message received: ' + GenText.LastErrorMsg + '.';
+        ThreadFileLog.Log('Cannot update general comment (CUID: ' + PayLoad.CUID + '). Rows affected: ' + GenText.RowsAffected.ToString() + '. Error message received: ' + GenText.LastErrorMsg + '.');
     end;
 
 end;
@@ -412,50 +448,50 @@ end;
 // Subroutine for update general comment.
 // --------------------------------------
 
-procedure TComments.FUpdateGeneralComment(var GenText: TDataTables ;var Fields: TGeneralCommentFields; Condition: string; var CallResponse: TCallResponse);
+procedure TComments.FUpdateGeneralComment(var GenText: TDataTables; var PayLoad: TGeneralCommentFields; Condition: string; var CallResponse: TCallResponse);
 begin
 
-    if not(Fields.FixedComment = TUnknown.NULL) then
+    if not(PayLoad.FixedComment = TUnknown.NULL) then
     begin
         GenText.Columns.Add(TGeneralComment.FixedComment);
-        GenText.Values.Add(Fields.FixedComment);
+        GenText.Values.Add(PayLoad.FixedComment);
     end;
 
-    if not(Fields.FollowUp = TUnknown.NULL) then
+    if not(PayLoad.FollowUp = TUnknown.NULL) then
     begin
         GenText.Columns.Add(TGeneralComment.FollowUp);
-        GenText.Values.Add(Fields.FollowUp);
+        GenText.Values.Add(PayLoad.FollowUp);
     end;
 
-    if not(Fields.Free1 = TUnknown.Null) then
+    if not(PayLoad.Free1 = TUnknown.Null) then
     begin
         GenText.Columns.Add(TGeneralComment.Free1);
-        GenText.Values.Add(Fields.Free1);
+        GenText.Values.Add(PayLoad.Free1);
     end;
 
-    if not(Fields.Free2 = TUnknown.NULL) then
+    if not(PayLoad.Free2 = TUnknown.NULL) then
     begin
         GenText.Columns.Add(TGeneralComment.Free2);
-        GenText.Values.Add(Fields.Free2);
+        GenText.Values.Add(PayLoad.Free2);
     end;
 
-    if not(Fields.Free3 = TUnknown.Null) then
+    if not(PayLoad.Free3 = TUnknown.Null) then
     begin
         GenText.Columns.Add(TGeneralComment.Free3);
-        GenText.Values.Add(Fields.Free3);
+        GenText.Values.Add(PayLoad.Free3);
     end;
 
     if (GenText.UpdateRecord(TGeneralComment.GeneralComment, True, Condition)) and (GenText.RowsAffected > 0) then
     begin
         CallResponse.IsSucceeded:=True;
-        CallResponse.LastMessage:='"GeneralComment" table has been updated (CUID: ' + Fields.CUID + '). Rows affected: ' + GenText.RowsAffected.ToString() + '.';
-        if Fields.EventLog then ThreadFileLog.Log('"GeneralComment" table has been updated (CUID: ' + Fields.CUID + '). Rows affected: ' + GenText.RowsAffected.ToString() + '.');
+        CallResponse.LastMessage:='"GeneralComment" table has been updated (CUID: ' + PayLoad.CUID + '). Rows affected: ' + GenText.RowsAffected.ToString() + '.';
+        if PayLoad.EventLog then ThreadFileLog.Log('"GeneralComment" table has been updated (CUID: ' + PayLoad.CUID + '). Rows affected: ' + GenText.RowsAffected.ToString() + '.');
     end
     else
     begin
         CallResponse.IsSucceeded:=False;
-        CallResponse.LastMessage:='Cannot update general comment (CUID: ' + Fields.CUID + '). Rows affected: ' + GenText.RowsAffected.ToString() + '. Error message received: ' + GenText.LastErrorMsg + '.';
-        ThreadFileLog.Log('Cannot update general comment (CUID: ' + Fields.CUID + '). Rows affected: ' + GenText.RowsAffected.ToString() + '. Error message received: ' + GenText.LastErrorMsg + '.');
+        CallResponse.LastMessage:='Cannot update general comment (CUID: ' + PayLoad.CUID + '). Rows affected: ' + GenText.RowsAffected.ToString() + '. Error message received: ' + GenText.LastErrorMsg + '.';
+        ThreadFileLog.Log('Cannot update general comment (CUID: ' + PayLoad.CUID + '). Rows affected: ' + GenText.RowsAffected.ToString() + '. Error message received: ' + GenText.LastErrorMsg + '.');
     end;
 
 end;
@@ -465,7 +501,7 @@ end;
 // Perform update or insert of general comment.
 // --------------------------------------------
 
-procedure TComments.EditGeneralComment(Fields: TGeneralCommentFields; Callback: TEditGeneralComment = nil);
+procedure TComments.EditGeneralComment(PayLoad: TGeneralCommentFields; Callback: TEditGeneralComment = nil);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
@@ -475,7 +511,7 @@ begin
         var GenText: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
         try
 
-            var Condition: string:=TGeneralComment.Cuid + TSql.EQUAL + QuotedStr(Fields.CUID);
+            var Condition: string:=TGeneralComment.Cuid + TSql.EQUAL + QuotedStr(PayLoad.CUID);
             GenText.CustFilter:=TSql.WHERE + Condition;
             GenText.OpenTable(TGeneralComment.GeneralComment);
 
@@ -494,7 +530,7 @@ begin
                 GenText.Columns.Add(TGeneralComment.UserAlias);
                 GenText.Values.Add(UpperCase(SessionService.SessionUser));
 
-                FUpdateGeneralComment(GenText, Fields, Condition, CallResponse);
+                FUpdateGeneralComment(GenText, PayLoad, Condition, CallResponse);
 
             end
             else
@@ -507,7 +543,7 @@ begin
                 GenText.CleanUp;
 
                 GenText.Columns.Add(TGeneralComment.Cuid);
-                GenText.Values.Add(Fields.CUID);
+                GenText.Values.Add(PayLoad.CUID);
 
                 GenText.Columns.Add(TGeneralComment.Stamp);
                 GenText.Values.Add(DateTimeToStr(Now));
@@ -515,7 +551,7 @@ begin
                 GenText.Columns.Add(TGeneralComment.UserAlias);
                 GenText.Values.Add(UpperCase(SessionService.SessionUser));
 
-                FInsertGeneralComment(GenText, Fields, CallResponse);
+                FInsertGeneralComment(GenText, PayLoad, CallResponse);
 
             end;
 

@@ -33,29 +33,80 @@ uses
 type
 
 
-    // --------------------
-    // Callback signatures.
-    // --------------------
+    /// <summary>
+    /// Callback signature (delegate) for address book open action.
+    /// </summary>
+    TOpenAddressBook = procedure(ReturnedData: TStringGrid; CallResponse: TCallResponse) of object;
 
-    TOpenAddressBook   = procedure(ReturnedData: TStringGrid; CallResponse: TCallResponse) of object;
+    /// <summary>
+    /// Callback signature (delegate) for address book update action.
+    /// </summary>
     TUpdateAddressBook = procedure(CallResponse: TCallResponse) of object;
-    TAddToAddressBook  = procedure(CallResponse: TCallResponse) of object;
+
+    /// <summary>
+    /// Callback signature (delegate) for address book insert action.
+    /// </summary>
+    TAddToAddressBook = procedure(CallResponse: TCallResponse) of object;
 
 
     IAddressBook = interface(IInterface)
     ['{56D68733-5DF0-4D44-9A66-69CB5DE587E4}']
+
+        /// <summary>
+        /// Load async. address book content and return it via given callback method that is always executed in main thread.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
         procedure OpenAddressBookAsync(UserAlias: string; Callback: TOpenAddressBook; OptionalCondition: string = '');
+
+        /// <summary>
+        /// Update async. address book content and notify via given callback method that is always executed in main thread.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
         procedure UpdateAddressBookAsync(SourceGrid: TStringGrid; UpdateValues: TAddressBookUpdateFields; Callback: TUpdateAddressBook);
+
+        /// <summary>
+        /// Insert async. address book new data and return notify via given callback method that is always executed in main thread.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
         procedure AddToAddressBookAsync(SourceGrid: TStringGrid; Callback: TAddToAddressBook);
+
     end;
 
 
     TAddressBook = class(TInterfacedObject, IAddressBook)
     {$TYPEINFO ON}
     public
+
+        /// <summary>
+        /// Load async. address book content and return it via given callback method that is always executed in main thread.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
         procedure OpenAddressBookAsync(UserAlias: string; Callback: TOpenAddressBook; OptionalCondition: string = '');
+
+        /// <summary>
+        /// Update async. address book content and notify via given callback method that is always executed in main thread.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
         procedure UpdateAddressBookAsync(SourceGrid: TStringGrid; UpdateValues: TAddressBookUpdateFields; Callback: TUpdateAddressBook);
+
+        /// <summary>
+        /// Insert async. address book new data and return notify via given callback method that is always executed in main thread.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for Callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
         procedure AddToAddressBookAsync(SourceGrid: TStringGrid; Callback: TAddToAddressBook);
+
     end;
 
 
@@ -143,7 +194,7 @@ begin
 
         TThread.Synchronize(nil, procedure
         begin
-            Callback(ReturnedData, CallResponse);
+            if Assigned(Callback) then Callback(ReturnedData, CallResponse);
             if Assigned(ReturnedData) then ReturnedData.Free();
         end);
 
@@ -249,7 +300,7 @@ begin
 
         TThread.Synchronize(nil, procedure
         begin
-            Callback(CallResponse);
+            if Assigned(Callback) then Callback(CallResponse);
         end);
 
     end);
@@ -379,7 +430,7 @@ begin
 
         TThread.Synchronize(nil, procedure
         begin
-            Callback(CallResponse);
+            if Assigned(Callback) then Callback(CallResponse);
         end);
 
     end);

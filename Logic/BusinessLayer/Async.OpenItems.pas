@@ -33,20 +33,54 @@ uses
 type
 
 
-    // --------------------
-    // Callback signatures.
-    // --------------------
-
+    /// <summary>
+    /// Callback signature (delegate) for scanning SSIS master table to check if open items have been updated.
+    /// </summary>
     TScanOpenItems = procedure(CanMakeAge: boolean; ReadDateTime: string; CallResponse: TCallResponse) of object;
+
+    /// <summary>
+    /// Callback signature (delegate) for reading open items. Payload returned contains summary data from loaded invoices.
+    /// </summary>
     TReadOpenItems = procedure(ActionMode: TLoading; OpenItemsData: TOpenItemsPayLoad; CallResponse: TCallResponse) of object;
 
 
     IOpenItems = interface(IInterface)
     ['{CD6AC138-D2A4-4C6B-A3F1-07F904BA44B1}']
-        function GetDateTime(Return: TCalendar): string;
-        function GetStatus(DateTime: string): string;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        ///
+        /// </remarks>
+        function GetDateTime(Return: TCalendar): string; // make it async!
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        ///
+        /// </remarks>
+        function GetStatus(DateTime: string): string; // make it async!
+
+        /// <summary>
+        /// Allow to async. check SSIS master table to check if open items have been updated.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
         procedure ScanOpenItemsAsync(OpenItemsUpdate: string; Callback: TScanOpenItems);
+
+        /// <summary>
+        /// Allow to async. load current open items from SQL database.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
         procedure ReadOpenItemsAsync(ActionMode: TLoading; OpenItemsGrid: TStringGrid; SettingsGrid: TStringGrid; Callback: TReadOpenItems);
+
     end;
 
 
@@ -56,10 +90,41 @@ type
         function FLoadToGrid(OpenItemsGrid: TStringGrid; SettingsGrid: TStringGrid): boolean;
         procedure FCalculateOpenItems(var InputGrid: TStringGrid; var OutputData: TOpenItemsPayLoad);
     public
-        function GetDateTime(Return: TCalendar): string;
-        function GetStatus(DateTime: string): string;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        ///
+        /// </remarks>
+        function GetDateTime(Return: TCalendar): string; // make it async!
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        ///
+        /// </remarks>
+        function GetStatus(DateTime: string): string; // make it async!
+
+        /// <summary>
+        /// Allow to async. check SSIS master table to check if open items have been updated.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
         procedure ScanOpenItemsAsync(OpenItemsUpdate: string; Callback: TScanOpenItems);
+
+        /// <summary>
+        /// Allow to async. load current open items from SQL database.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
         procedure ReadOpenItemsAsync(ActionMode: TLoading; OpenItemsGrid: TStringGrid; SettingsGrid: TStringGrid; Callback: TReadOpenItems);
+
     end;
 
 
@@ -86,10 +151,10 @@ uses
     Async.Debtors;
 
 
-// ------------------------------------
-// Load aging report for main view
+// ------------------------------------------------
+// Scan SSIS master table for refreshed open items.
 // *Change when SQL is replaced by API.
-// ------------------------------------
+// ------------------------------------------------
 
 procedure TOpenItems.ScanOpenItemsAsync(OpenItemsUpdate: string; Callback: TScanOpenItems);
 begin
@@ -124,7 +189,7 @@ begin
 
         TThread.Synchronize(nil, procedure
         begin
-            Callback(CanMakeAge, ReadDateTime, CallResponse);
+            if Assigned(Callback) then Callback(CanMakeAge, ReadDateTime, CallResponse);
         end);
 
     end);
@@ -166,7 +231,7 @@ begin
 
         TThread.Synchronize(nil, procedure
         begin
-            Callback(ActionMode, OpenItemsData, CallResponse);
+            if Assigned(Callback) then Callback(ActionMode, OpenItemsData, CallResponse);
         end);
 
     end);

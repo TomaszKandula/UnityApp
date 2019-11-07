@@ -33,27 +33,71 @@ uses
 type
 
 
-    // --------------------
-    // Callback signatures.
-    // --------------------
+    /// <summary>
+    /// Callback signature (delegate) for returning information from sending single account statement.
+    /// </summary>
+    TSendAccountStatement = procedure(ProcessingItemNo: integer; CallResponse: TCallResponse) of object;
 
-
-    TSendAccountStatement  = procedure(ProcessingItemNo: integer; CallResponse: TCallResponse) of object;
+    /// <summary>
+    /// Callback signature (delegate) for returning information from sending many account statements.
+    /// </summary>
     TSendAccountStatements = procedure(ProcessingItemNo: integer; CallResponse: TCallResponse) of object;
 
 
     IStatements = interface(IInterface)
     ['{14BBF3F3-945A-4A61-94BA-6A2EE10530A2}']
+
+        /// <summary>
+        /// Allow to async. send single account statemnent. It requires to pass payload with invoice data. Note that method
+        /// can be executed async. without waiting to complete the task, thus it can be executed many times in parallel.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// It is not recommended to use it nil in this method.
+        /// </remarks>
         procedure SendAccountStatement(PayLoad: TAccountStatementPayLoad; Callback: TSendAccountStatement; WaitToComplete: boolean = False);
+
+        /// <summary>
+        /// Allow to async. send many account statemnents. It requires to pass payload with invoice data. It uses SendAccountStatement
+        /// method so it can be also executed async. without waiting to complete the task, thus it allows parallel execution.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// It is not recommended to use it nil in this method.
+        /// </remarks>
         procedure SendAccountStatements(PayLoad: TAccountStatementPayLoad; Callback: TSendAccountStatements);
+
     end;
 
 
     TStatements = class(TInterfacedObject, IStatements)
     {$TYPEINFO ON}
     public
+
+        /// <summary>
+        /// Allow to async. send single account statemnent. It requires to pass payload with invoice data. Note that method
+        /// can be executed async. without waiting to complete the task, thus it can be executed many times in parallel.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// It is not recommended to use it nil in this method.
+        /// </remarks>
         procedure SendAccountStatement(PayLoad: TAccountStatementPayLoad; Callback: TSendAccountStatement; WaitToComplete: boolean = False);
+
+        /// <summary>
+        /// Allow to async. send many account statemnents. It requires to pass payload with invoice data. It uses SendAccountStatement
+        /// method so it can be also executed async. without waiting to complete the task, thus it allows parallel execution.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// It is not recommended to use it nil in this method.
+        /// </remarks>
         procedure SendAccountStatements(PayLoad: TAccountStatementPayLoad; Callback: TSendAccountStatements);
+
     end;
 
 
@@ -89,7 +133,7 @@ begin
             var Settings: ISettings:=TSettings.Create();
             var Statement: IDocument:=TDocument.Create();
 
-            Statement.Exclusions:=TArray<Integer>.Create(514, 9999); // Warning! Data should be taken from database. To be change after DB is restructured.
+            Statement.Exclusions:=TArray<Integer>.Create(514, 9999); // Warning! Data should be taken from database.
             Statement.MailSubject:=PayLoad.Subject + ' - ' + PayLoad.CustName + ' - ' + PayLoad.CustNumber;
 
             Statement.CUID       :=PayLoad.CUID;
@@ -143,6 +187,7 @@ begin
                 FDailyCommentFields.EmailReminder:=False;
                 FDailyCommentFields.EventLog     :=False;
                 FDailyCommentFields.ExtendComment:=True;
+                //FDailyCommentFields.AgeDateSel   :=
 
                 // ----------------------------------------------------------------------
                 // Register sent email either as manual statement or automatic statement.
@@ -212,7 +257,7 @@ begin
 
         TThread.Synchronize(nil, procedure
         begin
-            Callback(ProcessingItemNo, CallResponse);
+            if Assigned(Callback) then Callback(ProcessingItemNo, CallResponse);
         end);
 
     end);
@@ -278,7 +323,7 @@ begin
 
         TThread.Synchronize(nil, procedure
         begin
-            Callback(PayLoad.ItemNo, CallResponse);
+            if Assigned(Callback) then Callback(PayLoad.ItemNo, CallResponse);
         end);
 
     end);

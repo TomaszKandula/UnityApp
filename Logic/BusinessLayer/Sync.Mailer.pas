@@ -27,58 +27,215 @@ uses
 type
 
 
+    /// <summary>
+    /// This interface exposes methods and properties allowing to configure fields and send email via CDOSYS using basic auth or NTLM.
+    /// </summary>
     IMailer = Interface(IInterface)
     ['{3D803B98-BE4F-49A4-A2B5-7F323772E5B4}']
 
-        // ----------------------------
-        // Undisclosed getters/setters.
-        // ----------------------------
+        /// <summary>
+        /// Deprecated field.
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed setter under interface.
+        /// </remarks>
+        procedure SetXMailer(NewValue: string);
 
-        procedure SetXMailer(NewValue:     string);
-        procedure SetMailFrom(NewValue:    string);
-        procedure SetMailTo(NewValue:      string);
-        procedure SetMailCc(NewValue:      string);
-        procedure SetMailBcc(NewValue:     string);
-        procedure SetMailRt(NewValue:      string);
+        /// <summary>
+        /// Setting new email "from" field.
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed setter under interface.
+        /// </remarks>
+        procedure SetMailFrom(NewValue: string);
+
+        /// <summary>
+        /// Setting new email "to" field.
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed setter under interface.
+        /// </remarks>
+        procedure SetMailTo(NewValue: string);
+
+        /// <summary>
+        /// Setting new email carbon copy field.
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed setter under interface.
+        /// </remarks>
+        procedure SetMailCc(NewValue: string);
+
+        /// <summary>
+        /// Setting new email blind carbon copy field.
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed setter under interface.
+        /// </remarks>
+        procedure SetMailBcc(NewValue: string);
+
+        /// <summary>
+        /// Setting new email "reply-to" field.
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed setter under interface.
+        /// </remarks>
+        procedure SetMailRt(NewValue: string);
+
+        /// <summary>
+        /// Setting new email subject field.
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed setter under interface.
+        /// </remarks>
         procedure SetMailSubject(NewValue: string);
-        procedure SetMailBody(NewValue:    string);
+
+        /// <summary>
+        /// Setting new email body field.
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed setter under interface.
+        /// </remarks>
+        procedure SetMailBody(NewValue: string);
+
+        /// <summary>
+        /// Setting new list of file paths of the files to be attched to the email.
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed setter under interface.
+        /// </remarks>
         procedure SetAttachments(NewValue: TList<string>);
-        function GetXMailer:     string;
-        function GetMailFrom:    string;
-        function GetMailTo:      string;
-        function GetMailCc:      string;
-        function GetMailBcc:     string;
-        function GetMailRt:      string;
-        function GetMailSubject: string;
-        function GetMailBody:    string;
-        function GetAttachments: TList<string>;
 
-        // -------------------
-        // Exposed properties.
-        // -------------------
+        /// <summary>
+        /// Deprecated field.
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed getter under interface.
+        /// </remarks>
+        function GetXMailer(): string;
 
-        property XMailer:     string        read GetXMailer     write SetXMailer;
-        property MailFrom:    string        read GetMailFrom    write SetMailFrom;
-        property MailTo:      string        read GetMailTo      write SetMailTo;
-        property MailCc:      string        read GetMailCc      write SetMailCc;
-        property MailBcc:     string        read GetMailBcc     write SetMailBcc;
-        property MailRt:      string        read GetMailRt      write SetMailRt;
-        property MailSubject: string        read GetMailSubject write SetMailSubject;
-        property MailBody:    string        read GetMailBody    write SetMailBody;
+        /// <summary>
+        /// Returns email "from" field.
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed getter under interface.
+        /// </remarks>
+        function GetMailFrom(): string;
+
+        /// <summary>
+        /// Returns email "to" field.
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed getter under interface.
+        /// </remarks>
+        function GetMailTo(): string;
+
+        /// <summary>
+        /// Returns email carbon copy field.
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed getter under interface.
+        /// </remarks>
+        function GetMailCc(): string;
+
+        /// <summary>
+        /// Returns email blind carbon copy field.
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed getter under interface.
+        /// </remarks>
+        function GetMailBcc(): string;
+
+        /// <summary>
+        /// Returns email reply-to field.
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed getter under interface.
+        /// </remarks>
+        function GetMailRt(): string;
+
+        /// <summary>
+        /// returns email subject.
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed getter under interface.
+        /// </remarks>
+        function GetMailSubject(): string;
+
+        /// <summary>
+        /// Returns email body.
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed getter under interface.
+        /// </remarks>
+        function GetMailBody(): string;
+
+        /// <summary>
+        /// Returns list of the attachements.
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed getter under interface.
+        /// </remarks>
+        function GetAttachments(): TList<string>;
+
+        /// <summary>
+        /// Deprecated field.
+        /// </summary>
+        property XMailer: string read GetXMailer write SetXMailer;
+
+        /// <summary>
+        /// Addresser (sender) field.
+        /// </summary>
+        property MailFrom: string read GetMailFrom write SetMailFrom;
+
+        /// <summary>
+        /// Addressee field.
+        /// </summary>
+        property MailTo: string read GetMailTo write SetMailTo;
+
+        /// <summary>
+        /// Carbon copy field.
+        /// </summary>
+        property MailCc: string read GetMailCc write SetMailCc;
+
+        /// <summary>
+        /// Blind carbon copy field.
+        /// </summary>
+        property MailBcc: string read GetMailBcc write SetMailBcc;
+
+        /// <summary>
+        /// Reply-To field.
+        /// </summary>
+        property MailRt: string read GetMailRt write SetMailRt;
+
+        /// <summary>
+        /// Subject of the email.
+        /// </summary>
+        property MailSubject: string read GetMailSubject write SetMailSubject;
+
+        /// <summary>
+        /// Body content of the email.
+        /// </summary>
+        property MailBody: string read GetMailBody write SetMailBody;
+
+        /// <summary>
+        /// List of paths to files to be attached to the email.
+        /// </summary>
         property Attachments: TList<string> read GetAttachments write SetAttachments;
 
-        // ----------------
-        // Exposed methods.
-        // ----------------
-
-        function SendNow: boolean;
+        /// <summary>
+        /// Send email if the settings fields are configured properly.
+        /// </summary>
+        function SendNow(): boolean;
 
     end;
 
 
+    /// <summary>
+    /// This class exposes methods and properties allowing to configure fields and send email via CDOSYS using basic auth or NTLM.
+    /// </summary>
     TMailer = class(TInterfacedObject, IMailer)
     {$TYPEINFO ON}
-    private
+    strict private
         var FXMailer:     string;
         var FMailFrom:    string;
         var FMailTo:      string;
@@ -97,29 +254,78 @@ type
         procedure SetMailSubject(NewValue: string);
         procedure SetMailBody(NewValue:    string);
         procedure SetAttachments(NewValue: TList<string>);
-        function GetXMailer:     string;
-        function GetMailFrom:    string;
-        function GetMailTo:      string;
-        function GetMailCc:      string;
-        function GetMailBcc:     string;
-        function GetMailRt:      string;
-        function GetMailSubject: string;
-        function GetMailBody:    string;
-        function GetAttachments: TList<string>;
+        function GetXMailer():     string;
+        function GetMailFrom():    string;
+        function GetMailTo():      string;
+        function GetMailCc():      string;
+        function GetMailBcc():     string;
+        function GetMailRt():      string;
+        function GetMailSubject(): string;
+        function GetMailBody():    string;
+        function GetAttachments(): TList<string>;
         function SendEmail(OAuth: TAuthTypes): boolean;
     public
-        property XMailer:     string        read GetXMailer     write SetXMailer;
-        property MailFrom:    string        read GetMailFrom    write SetMailFrom;
-        property MailTo:      string        read GetMailTo      write SetMailTo;
-        property MailCc:      string        read GetMailCc      write SetMailCc;
-        property MailBcc:     string        read GetMailBcc     write SetMailBcc;
-        property MailRt:      string        read GetMailRt      write SetMailRt;
-        property MailSubject: string        read GetMailSubject write SetMailSubject;
-        property MailBody:    string        read GetMailBody    write SetMailBody;
+
+        /// <summary>
+        /// Deprecated field.
+        /// </summary>
+        property XMailer: string read GetXMailer write SetXMailer;
+
+        /// <summary>
+        /// Addresser (sender) field.
+        /// </summary>
+        property MailFrom: string read GetMailFrom write SetMailFrom;
+
+        /// <summary>
+        /// Addressee field.
+        /// </summary>
+        property MailTo: string read GetMailTo write SetMailTo;
+
+        /// <summary>
+        /// Carbon copy field.
+        /// </summary>
+        property MailCc: string read GetMailCc write SetMailCc;
+
+        /// <summary>
+        /// Blind carbon copy field.
+        /// </summary>
+        property MailBcc: string read GetMailBcc write SetMailBcc;
+
+        /// <summary>
+        /// Reply-To field.
+        /// </summary>
+        property MailRt: string read GetMailRt write SetMailRt;
+
+        /// <summary>
+        /// Subject of the email.
+        /// </summary>
+        property MailSubject: string read GetMailSubject write SetMailSubject;
+
+        /// <summary>
+        /// Body content of the email.
+        /// </summary>
+        property MailBody: string read GetMailBody write SetMailBody;
+
+        /// <summary>
+        /// List of paths to files to be attached to the email.
+        /// </summary>
         property Attachments: TList<string> read GetAttachments write SetAttachments;
-        function SendNow: boolean;
-        constructor Create;
-        destructor Destroy; override;
+
+        /// <summary>
+        /// Send email used configured fields.
+        /// </summary>
+        function SendNow(): boolean;
+
+        /// <summary>
+        /// Create TList for FAttachements when class is instantiated.
+        /// </summary>
+        constructor Create();
+
+        /// <summary>
+        /// Release FAttachments.
+        /// </summary>
+        destructor Destroy(); override;
+
     end;
 
 
@@ -133,21 +339,17 @@ uses
     Unity.EventLogger;
 
 
-constructor TMailer.Create;
+constructor TMailer.Create();
 begin
-     FAttachments:=TList<string>.Create;
+     FAttachments:=TList<string>.Create();
 end;
 
 
-destructor TMailer.Destroy;
+destructor TMailer.Destroy();
 begin
-    if Assigned(FAttachments) then FAttachments.Free;
+    if Assigned(FAttachments) then FAttachments.Free();
 end;
 
-
-// ---------------------------
-// Send an email using CDOSYS.
-// ---------------------------
 
 function TMailer.SendEmail(OAuth: TAuthTypes): boolean;
 begin
@@ -213,83 +415,79 @@ begin
 end;
 
 
-// ---------------------------------
-// Simple wrapper for email sending.
-// ---------------------------------
-
-function TMailer.SendNow: boolean;
+function TMailer.SendNow(): boolean;
 begin
 
     Result:=False;
     var Settings: ISettings:=TSettings.Create;
 
-    if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerNTLM then Result:=SendEmail(TAuthTypes.cdoNTLM);
-    if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerBASIC then Result:=SendEmail(TAuthTypes.cdoBasic);
+    if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerNTLM then
+        Result:=SendEmail(TAuthTypes.cdoNTLM);
+
+    if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerBASIC then
+        Result:=SendEmail(TAuthTypes.cdoBasic);
 
 end;
 
 
-// -------------------
-// Property's getters.
-// -------------------
+// ------------------------------------------------------------------------------------------------------------------------------------------------- GETTERS //
 
-function TMailer.GetXMailer: string;
+
+function TMailer.GetXMailer(): string;
 begin
     Result:=FXMailer;
 end;
 
 
-function TMailer.GetMailFrom: string;
+function TMailer.GetMailFrom(): string;
 begin
     Result:=FMailFrom;
 end;
 
 
-function TMailer.GetMailTo: string;
+function TMailer.GetMailTo(): string;
 begin
     Result:=FMailTo;
 end;
 
 
-function TMailer.GetMailCc: string;
+function TMailer.GetMailCc(): string;
 begin
     Result:=FMailCc;
 end;
 
 
-function TMailer.GetMailBcc: string;
+function TMailer.GetMailBcc(): string;
 begin
     Result:=FMailBcc;
 end;
 
 
-function TMailer.GetMailRt: string;
+function TMailer.GetMailRt(): string;
 begin
     Result:=FMailRt;
 end;
 
 
-function TMailer.GetMailSubject: string;
+function TMailer.GetMailSubject(): string;
 begin
     Result:=FMailSubject;
 end;
 
 
-function TMailer.GetMailBody: string;
+function TMailer.GetMailBody(): string;
 begin
     Result:=FMailBody;
 end;
 
 
-function TMailer.GetAttachments: TList<string>;
+function TMailer.GetAttachments(): TList<string>;
 begin
     Result:=FAttachments;
 end;
 
 
-// -------------------
-// Property's setters.
-// -------------------
+// ------------------------------------------------------------------------------------------------------------------------------------------------- SETTERS //
 
 
 procedure TMailer.SetXMailer(NewValue: string);

@@ -5,8 +5,8 @@ unit Unity.Records;
 // Can be referenced by anyone. Cannot hold references to View or Logic.
 // We use records instead of classes because we only use them to group
 // specific types of data ("variable of variables") to pass where it
-// needs to be passed as a parameter. It acts usually as a pay load
-// for both requests and responses.
+// needs to be passed as a parameter. It acts usually as a payload for
+// both "request to" and "response from".
 // ---------------------------------------------------------------------
 
 interface
@@ -26,11 +26,10 @@ uses
 
 type
 
-    /// <remarks>
+    /// <summary>
     /// Group of variables that carries last response that have been returned after processing
     /// given requested. Returned Code field is present for failed REST calls (status code returned).
-    /// </remarks>
-
+    /// </summary>
     TCallResponse = record
         LastMessage:  string;
         ErrorNumber:  integer;
@@ -38,10 +37,9 @@ type
         ReturnedCode: integer;
     end;
 
-    /// <remarks>
+    /// <summary>
     /// Carries a group of variables to be updated in AddressBook table.
-    /// </remarks>
-
+    /// </summary>
     TAddressBookUpdateFields = record
         Scuid:      string;
         Phones:     string;
@@ -50,10 +48,9 @@ type
         Email:      string;
     end;
 
-    /// <remarks>
+    /// <summary>
     /// Carries a group of variables for update in DailyComments table.
-    /// </remarks>
-
+    /// </summary>
     TDailyCommentFields = record
         GroupIdSel:     string;
         AgeDateSel:     string;
@@ -70,10 +67,9 @@ type
         ExtendComment:  boolean;
     end;
 
-    /// <remarks>
+    /// <summary>
     /// Carries a group of variables for update in GeneralComment table.
-    /// </remarks>
-
+    /// </summary>
     TGeneralCommentFields = record
         CUID:         string;
         FixedComment: string;
@@ -84,10 +80,9 @@ type
         EventLog:     boolean;
     end;
 
-    /// <remarks>
+    /// <summary>
     /// Carries a group of variables with information necessary to process emails with current account statement(s).
-    /// </remarks>
-
+    /// </summary>
     TAccountStatementPayLoad = record
         Layout:         TDocMode;
         Subject:        string;
@@ -115,10 +110,9 @@ type
         IsUserInCopy:   boolean;
     end;
 
-    /// <remarks>
+    /// <summary>
     /// Carries a group of variables for update open items summary.
-    /// </remarks>
-
+    /// </summary>
     TOpenItemsPayLoad = record
         TotalItems:     integer;
         OverdueItems:   integer;
@@ -128,10 +122,9 @@ type
         UnallocatedAmt: double;
     end;
 
-    /// <remarks>
+    /// <summary>
     /// Carries a group of variables for open items summary with ledger currency and other currency.
-    /// </remarks>
-
+    /// </summary>
     TOpenItemsTotal = record
         OpenAm:     double;
         Am:         double;

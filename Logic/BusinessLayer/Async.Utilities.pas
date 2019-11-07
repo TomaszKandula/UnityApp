@@ -33,42 +33,157 @@ uses
 type
 
 
-    // --------------------
-    // Callback signatures.
-    // --------------------
+    /// <summary>
+    /// Callback signature (delegate) for getting results for checking SQL connection.
+    /// </summary>
+    TCheckServerConn = procedure(IsConnected: boolean; CallResponse: TCallResponse) of object;
 
-    TCheckServerConn    = procedure(IsConnected: boolean; CallResponse: TCallResponse) of object;
-    TSendUserFeedback   = procedure(CallResponse: TCallResponse) of object;
-    TExcelExport        = procedure(CallResponse: TCallResponse) of object;
-    TGeneralTables      = procedure(CallResponse: TCallResponse) of object;
+    /// <summary>
+    /// Callback signature (delegate) for getting results from sending user email with feedback message.
+    /// </summary>
+    TSendUserFeedback = procedure(CallResponse: TCallResponse) of object;
+
+    /// <summary>
+    /// Callback signature (delegate) for getting results from exporting data grid to Excel file.
+    /// </summary>
+    TExcelExport = procedure(CallResponse: TCallResponse) of object;
+
+    /// <summary>
+    /// Callback signature (delegate) for getting results from updating general tables.
+    /// </summary>
+    TGeneralTables = procedure(CallResponse: TCallResponse) of object;
+
+    /// <summary>
+    /// Callback signature (delegate) for getting results from checking supplied local administrator password.
+    /// </summary>
     TCheckGivenPassword = procedure(CallResponse: TCallResponse) of object;
-    TSetNewPassword     = procedure(CallResponse: TCallResponse) of object;
+
+    /// <summary>
+    /// Callback signature (delegate) for getting results from setting new local administrator password.
+    /// </summary>
+    TSetNewPassword = procedure(CallResponse: TCallResponse) of object;
+
 
     IUtilities = interface(IInterface)
     ['{0B054CF4-86F7-4770-957B-3026BE491B5A}']
 
-        // ----------------
-        // Exposed methods.
-        // ----------------
-
+        /// <summary>
+        /// Async. checking connection with SQL database.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
         procedure CheckServerConnAsync(IsConnected: boolean; Callback: TCheckServerConn);
+
+        /// <summary>
+        /// Async. sending email to CI Team with user feedback.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
         procedure SendFeedbackAsync(Text: string; Callback: TSendUserFeedback);
+
+        /// <summary>
+        /// Allow to async. export data grid to Excel file.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
         procedure ExcelExportAsync(GroupId: string; AgeDate: string; FileName: string; Callback: TExcelExport);
+
+        /// <summary>
+        /// Allow to async. load general tables to provided TStringGrids. This method can be executed without waiting to complete
+        /// the task, thus allowing parallel execution.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
         procedure GeneralTablesAsync(TableName: string; DestGrid: TStringGrid; Callback: TGeneralTables; Columns: string = ''; Conditions: string = ''; WaitToComplete: boolean = False);
+
+        /// <summary>
+        /// Allow to async. check provided local administrator password.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
         procedure CheckGivenPasswordAsync(Password: string; Callback: TCheckGivenPassword);
+
+        /// <summary>
+        /// Allow to async. setup newly provided local administrator password.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
         procedure SetNewPasswordAsync(CurrentPassword: string; NewPassword: string; Callback: TSetNewPassword);
 
     end;
 
+
     TUtilities = class(TInterfacedObject, IUtilities)
     {$TYPEINFO ON}
     public
+
+        /// <summary>
+        /// Async. checking connection with SQL database.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
         procedure CheckServerConnAsync(IsConnected: boolean; Callback: TCheckServerConn);
+
+        /// <summary>
+        /// Async. sending email to CI Team with user feedback.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
         procedure SendFeedbackAsync(Text: string; Callback: TSendUserFeedback);
+
+        /// <summary>
+        /// Allow to async. export data grid to Excel file.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
         procedure ExcelExportAsync(GroupId: string; AgeDate: string; FileName: string; Callback: TExcelExport);
+
+        /// <summary>
+        /// Allow to async. load general tables to provided TStringGrids. This method can be executed without waiting to complete
+        /// the task, thus allowing parallel execution.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
         procedure GeneralTablesAsync(TableName: string; DestGrid: TStringGrid; Callback: TGeneralTables; Columns: string = ''; Conditions: string = ''; WaitToComplete: boolean = False);
+
+        /// <summary>
+        /// Allow to async. check provided local administrator password.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
         procedure CheckGivenPasswordAsync(Password: string; Callback: TCheckGivenPassword);
+
+        /// <summary>
+        /// Allow to async. setup newly provided local administrator password.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
         procedure SetNewPasswordAsync(CurrentPassword: string; NewPassword: string; Callback: TSetNewPassword);
+
     end;
 
 
@@ -142,7 +257,7 @@ begin
 
         TThread.Synchronize(nil, procedure
         begin
-            Callback(FIsConnected, CallResponse);
+            if Assigned(Callback) then Callback(FIsConnected, CallResponse);
         end);
 
     end);
@@ -236,7 +351,7 @@ begin
 
         TThread.Synchronize(nil, procedure
         begin
-            Callback(CallResponse);
+            if Assigned(Callback) then Callback(CallResponse);
         end);
 
     end);
@@ -281,7 +396,7 @@ begin
 
         TThread.Synchronize(nil, procedure
         begin
-            Callback(CallResponse);
+            if Assigned(Callback) then Callback(CallResponse);
         end);
 
     end);
@@ -336,7 +451,7 @@ begin
 
         TThread.Synchronize(nil, procedure
         begin
-            Callback(CallResponse);
+            if Assigned(Callback) then Callback(CallResponse);
         end);
 
     end);
@@ -400,7 +515,7 @@ begin
 
         TThread.Synchronize(nil, procedure
         begin
-            Callback(CallResponse);
+            if Assigned(Callback) then Callback(CallResponse);
         end);
 
     end);
@@ -478,7 +593,7 @@ begin
 
         TThread.Synchronize(nil, procedure
         begin
-            Callback(CallResponse);
+            if Assigned(Callback) then Callback(CallResponse);
         end);
 
     end);

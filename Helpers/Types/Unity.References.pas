@@ -5,8 +5,8 @@ unit Unity.References;
 // Can be referenced by anyone. Cannot hold references to View or Logic.
 // We use records instead of classes because we only use them to group
 // specific types of data ("variable of variables") to pass where it
-// needs to be passed as a parameter. It acts usually as a pay load
-// for both requests and responses.
+// needs to be passed as a parameter. It acts usually as a pay load for
+// both "request to" and "response from".
 // ---------------------------------------------------------------------
 
 interface
@@ -27,7 +27,6 @@ type
     /// Normally we would use "ReturnColumn" extension method, but in case of multithreading, we must pre-set them before many threads
     /// use it at the same time (VCL components are not thread safe). Having record with fields simplify things.
     /// </remarks>
-
     TFOpenItemsRefs = record
         Ad1Col:       integer;
         Ad2Col:       integer;
@@ -55,7 +54,6 @@ type
     /// Normally we would use "ReturnColumn" extension method, but in case of multithreading, we must pre-set them before many threads
     /// use it at the same time (VCL components are not thread safe). Having record with fields simplify things.
     /// </remarks>
-
     TFCtrlStatusRefs = record
         Id:          integer;
         Code:        integer;

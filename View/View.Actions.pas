@@ -352,8 +352,6 @@ end;
 procedure TActionsForm.UpdateOpenItems(OpenItemsDest: TStringGrid; OpenItemsSrc: TStringGrid);
 begin
 
-    {TODO -oTomek -cDatabase : Api call for data}
-
     var kCNT: integer:=1;
 
     FOpenItemsTotal.OpenAm   :=0;

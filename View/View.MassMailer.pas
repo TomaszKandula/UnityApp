@@ -467,10 +467,15 @@ begin
         Exit();
     end;
 
-    if (ProcessingItemNo > -1) and (CallResponse.LastMessage <> 'Processed.') then
+    if CallResponse.LastMessage <> 'Processed.' then
     begin
-        CustomerList.Items[ProcessingItemNo].SubItems[2]:='Sent';
-        ItemCount:=MassMailerForm.ItemCount - 1;
+
+        if ProcessingItemNo > -1 then
+        begin
+            CustomerList.Items[ProcessingItemNo].SubItems[2]:='Sent';
+            ItemCount:=MassMailerForm.ItemCount - 1;
+        end
+
     end
     else if CallResponse.LastMessage = 'Processed.' then
     begin

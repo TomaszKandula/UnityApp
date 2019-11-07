@@ -1,10 +1,9 @@
 unit Unity.Panel;
 
-// ----------------------------------------
-// Extension unit for application.
-// Can be referenced by anyone.
+// ------------------------------------------------------------
+// Extension unit for application. Can be referenced by anyone.
 // Cannot hold references to View or Logic.
-// ----------------------------------------
+// ------------------------------------------------------------
 
 interface
 
@@ -20,9 +19,7 @@ type
     TPanel = class(Vcl.ExtCtrls.TPanel)
     protected
         procedure Paint; override;
-    published
-        procedure PanelBorders(FillColor, TopColor, BottomColor, LeftColor, RightColor: TColor);
-    public
+    private
         var PenWidthTop   :  integer;
         var PenWidthBottom:  integer;
         var PenWidthLeft  :  integer;
@@ -32,6 +29,8 @@ type
         var PenColorLeft  :  TColor;
         var PenColorRight :  TColor;
         var mcBrushColor  :  TColor;
+    public
+        procedure PanelBorders(FillColor, TopColor, BottomColor, LeftColor, RightColor: TColor);
     end;
 
 

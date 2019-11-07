@@ -28,23 +28,56 @@ uses
     Unity.Records,
     Unity.Arrays;
 
+
 type
 
 
-    // --------------------
-    // Callback signatures.
-    // --------------------
+    /// <summary>
+    /// Callback signature (delegate) for processing age report to SQL database.
+    /// </summary>
+    TMakeAgeViewSQL = procedure(CallResponse: TCallResponse) of object;
 
-    TMakeAgeViewSQL = procedure(LastError: TCallResponse) of object;
-    TMakeAgeViewCSV = procedure(CsvContent: TStringList; LastError: TCallResponse) of object;
-    TReadAgeView    = procedure(ActionMode: TLoading; ReturnedData: TStringGrid; LastError: TCallResponse) of object;
+    /// <summary>
+    /// Callback signature (delegate) for processing age report to CSV file on disk.
+    /// </summary>
+    TMakeAgeViewCSV = procedure(CsvContent: TStringList; CallResponse: TCallResponse) of object;
+
+    /// <summary>
+    /// Callback signature (delegate) for reading current age report from SQL database.
+    /// </summary>
+    TReadAgeView = procedure(ActionMode: TLoading; ReturnedData: TStringGrid; CallResponse: TCallResponse) of object;
 
 
     IDebtors = interface(IInterface)
     ['{194FE2BE-386E-499E-93FB-0299DA53A70A}']
+
+        /// <summary>
+        /// Allow to async. generate age report using current open items. Notification is always executed in main thread
+        /// as long as callback is provided. The resulting age report is saved in SQL database.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
         procedure MakeAgeViewSQLAsync(OpenAmount: double; GroupID: string; SourceGrid: TStringGrid; CompanyData: TStringGrid; Callback: TMakeAgeViewSQL);
+
+        /// <summary>
+        /// Allow to async. generate age report using current open items. Notification is always executed in main thread
+        /// as long as callback is provided. The resulting age report is saved in CSV file.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
         procedure MakeAgeViewCSVAsync(OpenAmount: double; GroupID: string; SourceGrid: TStringGrid; CompanyData: TStringGrid; Callback: TMakeAgeViewCSV);
+
+        /// <summary>
+        /// Allow to read async. current age report from SQL database. Notification is always executed in main thread
+        /// as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
         procedure ReadAgeViewAsync(ActionMode: TLoading; SortMode: integer; GroupIdSel: string; AgeDateSel: string; Callback: TReadAgeView);
+
     end;
 
 
@@ -54,9 +87,34 @@ type
         function FMakeAgeView(OSAmount: double; GroupID: string; SourceGrid: TStringGrid; CompanyData: TStringGrid): TALists;
         procedure FWriteAgeView(DestTable: string; GroupID: string; SourceArray: TALists);
     public
+
+        /// <summary>
+        /// Allow to async. generate age report using current open items. Notification is always executed in main thread
+        /// as long as callback is provided. The resulting age report is saved in SQL database.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
         procedure MakeAgeViewSQLAsync(OpenAmount: double; GroupID: string; SourceGrid: TStringGrid; CompanyData: TStringGrid; Callback: TMakeAgeViewSQL);
+
+        /// <summary>
+        /// Allow to async. generate age report using current open items. Notification is always executed in main thread
+        /// as long as callback is provided. The resulting age report is saved in CSV file.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
         procedure MakeAgeViewCSVAsync(OpenAmount: double; GroupID: string; SourceGrid: TStringGrid; CompanyData: TStringGrid; Callback: TMakeAgeViewCSV);
+
+        /// <summary>
+        /// Allow to read async. current age report from SQL database. Notification is always executed in main thread
+        /// as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
         procedure ReadAgeViewAsync(ActionMode: TLoading; SortMode: integer; GroupIdSel: string; AgeDateSel: string; Callback: TReadAgeView);
+
     end;
 
 
@@ -115,7 +173,7 @@ begin
 
         TThread.Synchronize(nil, procedure
         begin
-            Callback(CallResponse);
+            if Assigned(Callback) then Callback(CallResponse);
         end);
 
     end);
@@ -170,7 +228,7 @@ begin
 
         TThread.Synchronize(nil, procedure
         begin
-            Callback(AgingInList, CallResponse);
+            if Assigned(Callback) then Callback(AgingInList, CallResponse);
             if Assigned(AgingInList) then AgingInList.Free();
         end);
 
@@ -246,7 +304,7 @@ begin
 
         TThread.Synchronize(nil, procedure
         begin
-            Callback(ActionMode, Grid, CallResponse);
+            if Assigned(Callback) then Callback(ActionMode, Grid, CallResponse);
             if Assigned(Grid) then Grid.Free();
         end);
 

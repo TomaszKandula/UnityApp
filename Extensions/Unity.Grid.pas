@@ -1,10 +1,9 @@
 unit Unity.Grid;
 
-// ----------------------------------------
-// Extension unit for application.
-// Can be referenced by anyone.
+// ------------------------------------------------------------
+// Extension unit for application. Can be referenced by anyone.
 // Cannot hold references to View or Logic.
-// ----------------------------------------
+// ------------------------------------------------------------
 
 interface
 
@@ -22,11 +21,19 @@ uses
 type
 
 
+    /// <summary>
+    ///
+    /// </summary>
     TAbstractGrid = class(Vcl.Grids.TStringGrid);
+
+
+    /// <summary>
+    ///
+    /// </summary>
     TStringGrid = class(Vcl.Grids.TStringGrid)
     protected
         procedure Paint; override;
-    private
+    strict private
         var FHideFocusRect: boolean;
         var FToExcelResult: string;
         var FCsvImportResult: string;

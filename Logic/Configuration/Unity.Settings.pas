@@ -1,10 +1,9 @@
 unit Unity.Settings;
 
-// ----------------------------------------
-// Application configuration module.
-// Can be referenced by anyone.
+// --------------------------------------------------------------
+// Application configuration module. Can be referenced by anyone.
 // Cannot hold references to View or Logic.
-// ----------------------------------------
+// --------------------------------------------------------------
 
 interface
 
@@ -31,152 +30,565 @@ type
     /// This interface exposes methods and properties for handling application settings
     /// encoded in configuration file.
     /// </summary>
-
     ISettings = Interface(IInterface)
     ['{FF5CBEC3-2576-4E1C-954E-C892AB4A7CC1}']
 
-        // --------------------------------
-        // Undisclosed getters and setters.
-        // --------------------------------
-
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed setter under interface definition.
+        /// </remarks>
         procedure SetReleaseDateTime(NewDateTime: TDateTime);
-        procedure SetReleaseNumber(NewRelease:    cardinal);
-        procedure SetTodayFColor (NewColor:       TColor);
-        procedure SetTodayBColor (NewColor:       TColor);
-        procedure SetPastFColor  (NewColor:       TColor);
-        procedure SetPastBColor  (NewColor:       TColor);
-        procedure SetFutureFColor(NewColor:       TColor);
-        procedure SetFutureBColor(NewColor:       TColor);
-        function  GetReleaseDateTime: TDateTime;
-        function  GetReleaseNumber:   cardinal;
-        function  GetTodayFColor:     TColor;
-        function  GetTodayBColor:     TColor;
-        function  GetPastFColor:      TColor;
-        function  GetPastBColor:      TColor;
-        function  GetFutureFColor:    TColor;
-        function  GetFutureBColor:    TColor;
-        function  GetWinUserName:     string;
-        function  GetPathGridImage:   string;
-        function  GetPathEventLog:    string;
-        function  GetPathConfig:      string;
-        function  GetPathLicence:     string;
-        function  GetDirApplication:  string;
-        function  GetDirLayouts:      string;
-        function  GetDirPackage:      string;
-        function  GetDirWinTemp:      string;
-        function  GetNewSessionId:    string;
-        function  GetUrlReleasePak:   string;
-        function  GetUrlReleaseMan:   string;
-        function  GetUrlLayoutsLst:   string;
-        function  ConfigFileOK:       boolean;
 
-        // -------------------
-        // Exposed properties.
-        // -------------------
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed setter under interface definition.
+        /// </remarks>
+        procedure SetReleaseNumber(NewRelease: cardinal);
 
-        property  WinUserName:     string    read GetWinUserName;
-        property  PathGridImage:   string    read GetPathGridImage;
-        property  PathEventLog:    string    read GetPathEventLog;
-        property  PathConfig:      string    read GetPathConfig;
-        property  PathLicence:     string    read GetPathLicence;
-        property  DirApplication:  string    read GetDirApplication;
-        property  DirLayouts:      string    read GetDirLayouts;
-        property  DirPackage:      string    read GetDirPackage;
-        property  DirWinTemp:      string    read GetDirWinTemp;
-        property  UrlReleasePak:   string    read GetUrlReleasePak;
-        property  UrlReleaseMan:   string    read GetUrlReleaseMan;
-        property  UrlLayoutsLst:   string    read GetUrlLayoutsLst;
-        property  ReleaseNumber:   cardinal  read GetReleaseNumber   write SetReleaseNumber;
-        property  ReleaseDateTime: TDateTime read GetReleaseDateTime write SetReleaseDateTime;
-        property  TodayFColor:     TColor    read GetTodayFColor     write SetTodayFColor;
-        property  TodayBColor:     TColor    read GetTodayBColor     write SetTodayBColor;
-        property  PastFColor:      TColor    read GetPastFColor      write SetPastFColor;
-        property  PastBColor:      TColor    read GetPastBColor      write SetPastBColor;
-        property  FutureFColor:    TColor    read GetFutureFColor    write SetFutureFColor;
-        property  FutureBColor:    TColor    read GetFutureBColor    write SetFutureBColor;
-        property  NewSessionId:    string    read GetNewSessionId;
-        property  CheckConfigFile: boolean   read ConfigFileOK;
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed setter under interface definition.
+        /// </remarks>
+        procedure SetTodayFColor(NewColor: TColor);
 
-        // ----------------
-        // Exposed methods.
-        // ----------------
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed setter under interface definition.
+        /// </remarks>
+        procedure SetTodayBColor(NewColor: TColor);
 
-        function  Encode(ConfigType: TAppFiles): boolean;
-        function  Decode(ConfigType: TAppFiles; ToMemory: boolean): boolean;
-        function  ConfigToMemory: boolean;
-        function  GetLicenceValue(Section: string; Key: string): string;
-        function  GetStringValue(Section: string; Key: string; Default: string): string;
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed setter under interface definition.
+        /// </remarks>
+        procedure SetPastFColor(NewColor: TColor);
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed setter under interface definition.
+        /// </remarks>
+        procedure SetPastBColor(NewColor: TColor);
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed setter under interface definition.
+        /// </remarks>
+        procedure SetFutureFColor(NewColor: TColor);
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed setter under interface definition.
+        /// </remarks>
+        procedure SetFutureBColor(NewColor: TColor);
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed getter under interface definition.
+        /// </remarks>
+        function GetReleaseDateTime(): TDateTime;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed getter under interface definition.
+        /// </remarks>
+        function GetReleaseNumber(): cardinal;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed getter under interface definition.
+        /// </remarks>
+        function GetTodayFColor(): TColor;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed getter under interface definition.
+        /// </remarks>
+        function GetTodayBColor(): TColor;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed getter under interface definition.
+        /// </remarks>
+        function GetPastFColor(): TColor;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed getter under interface definition.
+        /// </remarks>
+        function GetPastBColor(): TColor;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed getter under interface definition.
+        /// </remarks>
+        function GetFutureFColor(): TColor;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed getter under interface definition.
+        /// </remarks>
+        function GetFutureBColor(): TColor;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed getter under interface definition.
+        /// </remarks>
+        function GetWinUserName(): string;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed getter under interface definition.
+        /// </remarks>
+        function GetPathGridImage(): string;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed getter under interface definition.
+        /// </remarks>
+        function GetPathEventLog(): string;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed getter under interface definition.
+        /// </remarks>
+        function GetPathConfig(): string;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed getter under interface definition.
+        /// </remarks>
+        function GetPathLicence(): string;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed getter under interface definition.
+        /// </remarks>
+        function GetDirApplication(): string;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed getter under interface definition.
+        /// </remarks>
+        function GetDirLayouts(): string;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed getter under interface definition.
+        /// </remarks>
+        function GetDirPackage(): string;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed getter under interface definition.
+        /// </remarks>
+        function GetDirWinTemp(): string;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed getter under interface definition.
+        /// </remarks>
+        function GetNewSessionId(): string;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed getter under interface definition.
+        /// </remarks>
+        function GetUrlReleasePak(): string;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed getter under interface definition.
+        /// </remarks>
+        function GetUrlReleaseMan(): string;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed getter under interface definition.
+        /// </remarks>
+        function GetUrlLayoutsLst(): string;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Undisclosed getter under interface definition.
+        /// </remarks>
+        function ConfigFileOK(): boolean;
+
+        /// <summary>
+        /// Returns user alias from Microsoft Windows environment.
+        /// </summary>
+        /// <remarks>
+        /// Exposed property under interface.
+        /// </remarks>
+        property WinUserName: string read GetWinUserName;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Exposed property under interface.
+        /// </remarks>
+        property PathGridImage: string read GetPathGridImage;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Exposed property under interface.
+        /// </remarks>
+        property PathEventLog: string read GetPathEventLog;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Exposed property under interface.
+        /// </remarks>
+        property PathConfig: string read GetPathConfig;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Exposed property under interface.
+        /// </remarks>
+        property PathLicence: string read GetPathLicence;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Exposed property under interface.
+        /// </remarks>
+        property DirApplication: string read GetDirApplication;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Exposed property under interface.
+        /// </remarks>
+        property DirLayouts: string read GetDirLayouts;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Exposed property under interface.
+        /// </remarks>
+        property DirPackage: string read GetDirPackage;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Exposed property under interface.
+        /// </remarks>
+        property DirWinTemp: string read GetDirWinTemp;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Exposed property under interface.
+        /// </remarks>
+        property UrlReleasePak: string read GetUrlReleasePak;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Exposed property under interface.
+        /// </remarks>
+        property UrlReleaseMan: string read GetUrlReleaseMan;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Exposed property under interface.
+        /// </remarks>
+        property UrlLayoutsLst: string read GetUrlLayoutsLst;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Exposed property under interface.
+        /// </remarks>
+        property ReleaseNumber: cardinal read GetReleaseNumber write SetReleaseNumber;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Exposed property under interface.
+        /// </remarks>
+        property ReleaseDateTime: TDateTime read GetReleaseDateTime write SetReleaseDateTime;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Exposed property under interface.
+        /// </remarks>
+        property TodayFColor: TColor read GetTodayFColor write SetTodayFColor;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Exposed property under interface.
+        /// </remarks>
+        property TodayBColor: TColor read GetTodayBColor write SetTodayBColor;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Exposed property under interface.
+        /// </remarks>
+        property PastFColor: TColor read GetPastFColor write SetPastFColor;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Exposed property under interface.
+        /// </remarks>
+        property PastBColor: TColor read GetPastBColor write SetPastBColor;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Exposed property under interface.
+        /// </remarks>
+        property FutureFColor: TColor read GetFutureFColor write SetFutureFColor;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Exposed property under interface.
+        /// </remarks>
+        property FutureBColor: TColor read GetFutureBColor write SetFutureBColor;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Exposed property under interface.
+        /// </remarks>
+        property NewSessionId: string read GetNewSessionId;
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        /// Exposed property under interface.
+        /// </remarks>
+        property CheckConfigFile: boolean read ConfigFileOK;
+
+        /// <summary>
+        /// Encoding method based on XOR and SHR with secret KEY.
+        /// </summary>
+        function Encode(ConfigType: TAppFiles): boolean;
+
+        /// <summary>
+        /// Decoding method based on XOR and SHR with secret KEY. Routine remain the same, if the key is unchanged, then appling the same stream
+        /// will shift the characters numbers back to theirs original values.
+        /// </summary>
+        function Decode(ConfigType: TAppFiles; ToMemory: boolean): boolean;
+
+        /// <summary>
+        /// Push config content to the memory.
+        /// </summary>
+        function ConfigToMemory(): boolean;
+
+        /// <summary>
+        ///
+        /// </summary>
+        function GetLicenceValue(Section: string; Key: string): string;
+
+        /// <summary>
+        ///
+        /// </summary>
+        function GetStringValue(Section: string; Key: string; Default: string): string;
+
+        /// <summary>
+        ///
+        /// </summary>
         procedure SetStringValue(Section: string; Key: string; Value: string);
+
+        /// <summary>
+        ///
+        /// </summary>
         function  GetIntegerValue(Section: string; Key: string; Default: integer): integer;
+
+        /// <summary>
+        ///
+        /// </summary>
         procedure SetIntegerValue(Section: string; Key: string; Value: integer);
+
+        /// <summary>
+        ///
+        /// </summary>
         procedure GetSectionValues(Section: string; var Values: TStringList);
+
+        /// <summary>
+        ///
+        /// </summary>
         procedure GetSection(Section: string; var Keys: TStringList);
+
+        /// <summary>
+        ///
+        /// </summary>
         procedure GetSections(List: TStringList);
+
+        /// <summary>
+        ///
+        /// </summary>
         procedure DeleteSection(SectionName: string);
+
+        /// <summary>
+        ///
+        /// </summary>
         procedure DeleteKey(Section: string; Ident: string);
+
+        /// <summary>
+        ///
+        /// </summary>
         function  FindSettingsKey(Section: string; KeyPosition: integer): string;
+
+        /// <summary>
+        ///
+        /// </summary>
         procedure MakeNewSessionId();
+
+        /// <summary>
+        ///
+        /// </summary>
         function  MakeNewSessionFile(SessionId: string): string;
+
     end;
 
 
     /// <summary>
     /// This class exposes methods and properties for configuration handling.
     /// </summary>
-
     TSettings = class(TInterfacedObject, ISettings)
     {$TYPEINFO ON}
-    private
-        var FTMIG:             TMemIniFile;
-        var FTMIL:             TMemIniFile;
-        var FLastSessionId:    string;
-        var FWinUserName:      string;
-        var FPathGridImage:    string;
-        var FPathEventLog:     string;
-        var FPathConfig:       string;
-        var FPathLicence:      string;
-        var FDirApplication:   string;
-        var FDirLayouts:       string;
-        var FDirPackage:       string;
-        var FDirSessions:      string;
-        var FDirWinTemp:       string;
-        var FUrlReleasePak:    string;
-        var FUrlReleaseMan:    string;
-        var FUrlLayoutsLst:    string;
-        var FConfigFileOK:     boolean;
-        function  GetReleaseDateTime: TDateTime;
+    strict private
+        var FTMIG:           TMemIniFile;
+        var FTMIL:           TMemIniFile;
+        var FLastSessionId:  string;
+        var FWinUserName:    string;
+        var FPathGridImage:  string;
+        var FPathEventLog:   string;
+        var FPathConfig:     string;
+        var FPathLicence:    string;
+        var FDirApplication: string;
+        var FDirLayouts:     string;
+        var FDirPackage:     string;
+        var FDirSessions:    string;
+        var FDirWinTemp:     string;
+        var FUrlReleasePak:  string;
+        var FUrlReleaseMan:  string;
+        var FUrlLayoutsLst:  string;
+        var FConfigFileOK:   boolean;
+        function  GetReleaseDateTime(): TDateTime;
         procedure SetReleaseDateTime(NewDateTime: TDateTime);
-        function  GetReleaseNumber: cardinal;
+        function  GetReleaseNumber(): cardinal;
         procedure SetReleaseNumber(NewRelease: cardinal);
-        function  GetTodayFColor:  TColor;
-        function  GetTodayBColor:  TColor;
-        function  GetPastFColor:   TColor;
-        function  GetPastBColor:   TColor;
-        function  GetFutureFColor: TColor;
-        function  GetFutureBColor: TColor;
-        procedure SetTodayFColor (NewColor: TColor);
-        procedure SetTodayBColor (NewColor: TColor);
-        procedure SetPastFColor  (NewColor: TColor);
-        procedure SetPastBColor  (NewColor: TColor);
+        function  GetTodayFColor(): TColor;
+        function  GetTodayBColor(): TColor;
+        function  GetPastFColor(): TColor;
+        function  GetPastBColor(): TColor;
+        function  GetFutureFColor(): TColor;
+        function  GetFutureBColor(): TColor;
+        procedure SetTodayFColor(NewColor: TColor);
+        procedure SetTodayBColor(NewColor: TColor);
+        procedure SetPastFColor(NewColor: TColor);
+        procedure SetPastBColor(NewColor: TColor);
         procedure SetFutureFColor(NewColor: TColor);
         procedure SetFutureBColor(NewColor: TColor);
-        function  GetWinUserName:     string;
-        function  GetPathGridImage:   string;
-        function  GetPathEventLog:    string;
-        function  GetPathConfig:      string;
-        function  GetPathLicence:     string;
-        function  GetDirApplication:  string;
-        function  GetDirLayouts:      string;
-        function  GetDirPackage:      string;
-        function  GetDirWinTemp:      string;
-        function  GetNewSessionId:    string;
-        function  GetUrlReleasePak:   string;
-        function  GetUrlReleaseMan:   string;
-        function  GetUrlLayoutsLst:   string;
-        function  ConfigFileOK:       boolean;
+        function  GetWinUserName(): string;
+        function  GetPathGridImage(): string;
+        function  GetPathEventLog(): string;
+        function  GetPathConfig(): string;
+        function  GetPathLicence(): string;
+        function  GetDirApplication(): string;
+        function  GetDirLayouts(): string;
+        function  GetDirPackage(): string;
+        function  GetDirWinTemp(): string;
+        function  GetNewSessionId(): string;
+        function  GetUrlReleasePak(): string;
+        function  GetUrlReleaseMan(): string;
+        function  GetUrlLayoutsLst(): string;
+        function  ConfigFileOK(): boolean;
     public
-        constructor Create;
-        destructor Destroy; override;
+        constructor Create();
+        destructor Destroy(); override;
         function  Encode(ConfigType: TAppFiles): boolean;
         function  Decode(ConfigType: TAppFiles; ToMemory: boolean): boolean;
         function  ConfigToMemory: boolean;
@@ -218,9 +630,8 @@ type
 
 
     /// <summary>
-    /// This constants class defines configuration fields.
+    /// This class of constants defines all fields in configuration file.
     /// </summary>
-
     TConfigSections = class abstract
         const ApplicationDetails = 'APPLICATION';
         const PasswordSection    = 'PASSWORD';
@@ -260,7 +671,7 @@ uses
 // ---------------------------------------------------------------------------------------------------------------------------------------- CREATE & RELEASE //
 
 
-constructor TSettings.Create;
+constructor TSettings.Create();
 begin
 
     FTMIG:=TMemIniFile.Create('');
@@ -276,25 +687,21 @@ begin
     FPathLicence   :=FDirApplication + TCommon.LicenceFile;
     FPathGridImage :=FDirApplication + TCommon.GridImgFile;
 
-    if FileExists(FPathConfig) then ConfigToMemory else FConfigFileOK:=False;
+    if FileExists(FPathConfig) then ConfigToMemory() else FConfigFileOK:=False;
 
 end;
 
 
-destructor TSettings.Destroy;
+destructor TSettings.Destroy();
 begin
-    FTMIG.Free;
-    FTMIL.Free;
+    FTMIG.Free();
+    FTMIL.Free();
     inherited;
 end;
 
 
 // ------------------------------------------------------------------------------------------------------------------------------------------- CONFIGURATION //
 
-
-/// <summary>
-/// Push config content to the memory.
-/// </summary>
 
 function TSettings.ConfigToMemory: boolean;
 begin
@@ -316,10 +723,6 @@ end;
 // --------------------------------------------------------------------------------------------------------------------------------------- ENCRYPT & DECRYPT //
 
 
-/// <summary>
-/// Encoding method based on XOR and SHR with secret KEY.
-/// </summary>
-
 function TSettings.Encode(ConfigType: TAppFiles): boolean;
 begin
 
@@ -327,45 +730,50 @@ begin
     var vCRC:   DWord;
     var sCRC:   string;
 
-    // Do not allow to encode licence file
+    // ------------------------------------
+    // Do not allow to encode licence file.
+    // ------------------------------------
     if ConfigType = TAppFiles.Licence then
     begin
         Result:=False;
-        Exit;
+        Exit();
     end;
 
-    var rStream: TMemoryStream:=TMemoryStream.Create;
-    var wStream: TMemoryStream:=TMemoryStream.Create;
-    var hStream: TStringList:=TStringList.Create;
+    var rStream: TMemoryStream:=TMemoryStream.Create();
+    var wStream: TMemoryStream:=TMemoryStream.Create();
+    var hStream: TStringList:=TStringList.Create();
 
     try
         try
 
-            // Move file to memory
+            // --------------------
+            // Move file to memory.
+            // --------------------
             if ConfigType = TAppFiles.Configuration then
                 FTMIG.GetStrings(hStream);
 
             hStream.SaveToStream(rStream);
             rStream.Position:=0;
 
-            // Compute CRC32 checksum (between $00000000 and $FFFFFFF)
+            // --------------------------------------------------------
+            // Compute CRC32 checksum (between $00000000 and $FFFFFFF).
+            // --------------------------------------------------------
             ComputeCRC32(rStream.Memory, rStream.Size, vCRC);
 
-            /// <remarks>
-            /// To convert into HEX or Decimal, use:
-            /// <code>
-            ///    IntToHex(vCRC, 8);
-            ///    IntToStr(vCRC);
-            /// </code>
-            /// </remarks>
-
-            // Save last 8 bytes to stream
+            // -------------------------------------------------------
+            // To convert into HEX or Decimal, use:
+            //    IntToHex(vCRC, 8); (* Save last 8 bytes to stream *)
+            //    IntToStr(vCRC);
+            // -------------------------------------------------------
             sCRC:=IntToHex(vCRC, 8);
+
             rStream.Position:=rStream.Size;
             rStream.WriteBuffer(UTF8String(sCRC)[1], Length(UTF8String(sCRC)));
             rStream.Position:=0;
 
-            // Encoding byte by byte
+            // ----------------------
+            // Encoding byte by byte.
+            // ----------------------
             for var iCNT: integer:=0 to rStream.Size - 1 do
             begin
                 rStream.Read(buffer, 1);
@@ -373,7 +781,11 @@ begin
                 wStream.Write(buffer, 1);
             end;
 
-            // Save to file
+            // --------------------------------------------------
+            // Save encoded data to the given configuration file.
+            // Note: to check stream size, use:
+            //    IntToStr(wStream.Size).
+            // --------------------------------------------------
             wStream.Position:=0;
 
             if ConfigType = Configuration then
@@ -381,30 +793,18 @@ begin
 
             Result:=True;
 
-            /// <remarks>
-            /// To check stream size, use:
-            /// <code>
-            ///     IntToStr(wStream.Size);
-            /// </code>
-            /// </remarks>
-
         except
             Result:=False;
         end;
 
     finally;
-        rStream.Free;
-        wStream.Free;
-        hStream.Free;
+        rStream.Free();
+        wStream.Free();
+        hStream.Free();
     end;
 
 end;
 
-
-/// <summary>
-/// Decoding method based on XOR and SHR with secret KEY. Routine remain the same, if the key is unchanged, then appling the same stream
-/// will shift the characters numbers back to theirs original values.
-/// </summary>
 
 function TSettings.Decode(ConfigType: TAppFiles; ToMemory: boolean): boolean;
 begin
@@ -422,14 +822,18 @@ begin
     try
         try
 
-            // Load to memory
+            // ----------------------------
+            // Load encoded file to memory.
+            // ----------------------------
             if ConfigType = TAppFiles.Configuration  then
                 rStream.LoadFromFile(FPathConfig);
 
             if ConfigType = TAppFiles.Licence then
                 rStream.LoadFromFile(FPathLicence);
 
-            // Decode byte by byte
+            // --------------------
+            // Decode byte by byte.
+            // --------------------
             for var iCNT: integer:=0 to rStream.Size - 1 do
             begin
                 rStream.Read(buffer, 1);
@@ -439,16 +843,17 @@ begin
 
             wStream.Position:=wStream.Size - 8;
 
-            // Read last 8 bytes of embedded CRC32 checksum
+            // ----------------------------------------------------------------------------
+            // Read last 8 bytes of embedded CRC32 checksum.
+            // Note: if using test file from drive, please use sCRC method instead of vCRC.
+            // ----------------------------------------------------------------------------
             SetLength(bytes, wStream.Size - (wStream.Size - 8));
             wStream.Read(bytes[0], wStream.Size - (wStream.Size - 8));
             sCRC:=TEncoding.UTF8.GetString(bytes);
 
-            /// <remarks>
-            /// If using test file from drive, please use sCRC method instead of vCRC.
-            /// </remarks>
-
-            // Compute CRC32 checksum (between $00000000 and $FFFFFFF)
+            // --------------------------------------------------------
+            // Compute CRC32 checksum (between $00000000 and $FFFFFFF).
+            // --------------------------------------------------------
             wStream.Position:=0;
             wStream.SetSize(wStream.Size - 8);
             ComputeCRC32(wStream.Memory, wStream.Size, vCRC);
@@ -575,7 +980,9 @@ begin
     var SL: TStringList:=TStringList.Create;
     try
 
+        // ----------------------------------------
         // Return key name for given list position.
+        // ----------------------------------------
         GetSection(Section, SL);
         if KeyPosition > SL.Count then
             Exit
@@ -598,7 +1005,9 @@ end;
 function TSettings.MakeNewSessionFile(SessionId: string): string;
 begin
 
-    // Create file: <UserAlias>.<GUID>.log
+    // ------------------------------------
+    // Create file: <UserAlias>.<GUID>.log.
+    // ------------------------------------
     var EventLog:=FDirSessions + FWinUserName + '.' + SessionId + '.log';
 
     var FL: TFileStream:=TFileStream.Create(EventLog, fmCreate);
@@ -626,14 +1035,15 @@ end;
 // ------------------------------------------------------------------------------------------------------------------------------------------------- GETTERS //
 
 
-
 function TSettings.GetReleaseNumber: cardinal;
 begin
 
     Result:=0;
 
+    // -------------------------------------------------------------------
     // Get release number from release manifest hosted at:
-    // https://unityinfo.azurewebsites.net/release/package/unity.manifest
+    // https://unityinfo.azurewebsites.net/release/package/unity.manifest.
+    // -------------------------------------------------------------------
     if Assigned(FTMIG) then
     begin
         Result:=StrToIntDef(FTMIG.ReadString(TConfigSections.ApplicationDetails, 'RELEASE_NUMBER', ''), 0);
@@ -647,7 +1057,9 @@ begin
 
     Result:=TDateTimeFormats.NullDate;
 
+    // ----------------------------------------------------
     // Get update time and date registered in setting file.
+    // ----------------------------------------------------
     if Assigned(FTMIG) then
         Result:=StrToDateTimeDef(FTMIG.ReadString(TConfigSections.ApplicationDetails, 'UPDATE_DATETIME', ''), TDateTimeFormats.NullDate);
 
@@ -656,7 +1068,6 @@ end;
 
 function TSettings.GetTodayFColor: TColor;
 begin
-    // Font color
     Result:=0;
     if not(Assigned(FTMIG)) then
         Exit
@@ -667,7 +1078,6 @@ end;
 
 function TSettings.GetTodayBColor: TColor;
 begin
-    // Background color
     Result:=0;
     if not(Assigned(FTMIG)) then
         Exit
@@ -678,7 +1088,6 @@ end;
 
 function TSettings.GetPastFColor: TColor;
 begin
-    // Font color
     Result:=0;
     if not(Assigned(FTMIG)) then
         Exit
@@ -689,7 +1098,6 @@ end;
 
 function TSettings.GetPastBColor: TColor;
 begin
-    // Background color
     Result:=0;
     if not(Assigned(FTMIG)) then
         Exit
@@ -700,7 +1108,6 @@ end;
 
 function TSettings.GetFutureFColor: TColor;
 begin
-    // Font color
     Result:=0;
     if not(Assigned(FTMIG)) then
         Exit
@@ -711,7 +1118,6 @@ end;
 
 function TSettings.GetFutureBColor: TColor;
 begin
-    // Background color
     Result:=0;
     if not(Assigned(FTMIG)) then
         Exit
@@ -810,7 +1216,9 @@ end;
 procedure TSettings.SetReleaseNumber(NewRelease: cardinal);
 begin
 
+    // ------------------------------------
     // Set release number in settings file.
+    // ------------------------------------
     if Assigned(FTMIG) then
     begin
         FTMIG.WriteInteger(TConfigSections.ApplicationDetails, 'RELEASE_NUMBER', NewRelease);
@@ -823,7 +1231,9 @@ end;
 procedure TSettings.SetReleaseDateTime(NewDateTime: TDateTime);
 begin
 
+    // -----------------------------
     // Set new update time and date.
+    // -----------------------------
     if Assigned(FTMIG) then
     begin
         FTMIG.WriteString(TConfigSections.ApplicationDetails, 'UPDATE_DATETIME', DateTimeToStr(NewDateTime));
@@ -835,7 +1245,6 @@ end;
 
 procedure TSettings.SetTodayFColor(NewColor: TColor);
 begin
-    // Font color
     if not(Assigned(FTMIG)) then Exit;
     FTMIG.WriteInteger(TConfigSections.FollowUpColors, 'TODAY_FCOLOR', NewColor);
     Encode(Configuration);
@@ -844,7 +1253,6 @@ end;
 
 procedure TSettings.SetTodayBColor(NewColor: TColor);
 begin
-    // Background color
     if not(Assigned(FTMIG)) then Exit;
     FTMIG.WriteInteger(TConfigSections.FollowUpColors, 'TODAY_BCOLOR', NewColor);
     Encode(Configuration);
@@ -853,7 +1261,6 @@ end;
 
 procedure TSettings.SetPastFColor(NewColor: TColor);
 begin
-    // Font color
     if not(Assigned(FTMIG)) then Exit;
     FTMIG.WriteInteger(TConfigSections.FollowUpColors, 'PAST_FCOLOR', NewColor);
     Encode(Configuration);
@@ -862,7 +1269,6 @@ end;
 
 procedure TSettings.SetPastBColor(NewColor: TColor);
 begin
-    // Background color
     if not(Assigned(FTMIG)) then Exit;
     FTMIG.WriteInteger(TConfigSections.FollowUpColors, 'PAST_BCOLOR', NewColor);
     Encode(Configuration);
@@ -871,7 +1277,6 @@ end;
 
 procedure TSettings.SetFutureFColor(NewColor: TColor);
 begin
-    // Font color
     if not(Assigned(FTMIG)) then Exit;
     FTMIG.WriteInteger(TConfigSections.FollowUpColors, 'FUTURE_FCOLOR', NewColor);
     Encode(Configuration);
@@ -880,7 +1285,6 @@ end;
 
 procedure TSettings.SetFutureBColor(NewColor: TColor);
 begin
-    // Background color
     if not(Assigned(FTMIG)) then Exit;
     FTMIG.WriteInteger(TConfigSections.FollowUpColors, 'FUTURE_BCOLOR', NewColor);
     Encode(Configuration);

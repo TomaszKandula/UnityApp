@@ -1,10 +1,9 @@
 unit Unity.Arrays;
 
-// ----------------------------------------
-// Extension unit for application.
-// Can be referenced by anyone.
+// ------------------------------------------------------------
+// Extension unit for application. Can be referenced by anyone.
 // Cannot hold references to View or Logic.
-// ----------------------------------------
+// ------------------------------------------------------------
 
 interface
 
@@ -15,34 +14,29 @@ uses
 
 type
 
-    /// <remarks>
+    /// <summary>
     /// Reference to two dimensional string array.
-    /// </remarks>
-
+    /// </summary>
     TALists = array of array of string;
 
-    /// <remarks>
+    /// <summary>
     /// Reference to one dimensional string array.
-    /// </remarks>
-
+    /// </summary>
     TAStrings = array of string;
 
-    /// <remarks>
+    /// <summary>
     /// Reference to one dimensional integer array.
-    /// </remarks>
-
+    /// </summary>
     TAIntigers = array of integer;
 
-    /// <remarks>
+    /// <summary>
     /// Reference to one dimensional double array.
-    /// </remarks>
-
+    /// </summary>
     TADoubles = array of double;
 
-    /// <remarks>
+    /// <summary>
     /// Encapsulated in a class, function that checks whether an item is contained in an array.
-    /// </remarks>
-
+    /// </summary>
     TArrayUtils<T> = class
     public
         class function Contains(const x: T; const anArray: array of T): boolean;

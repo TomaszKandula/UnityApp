@@ -1,10 +1,9 @@
 unit Unity.Crc32;
 
-// ----------------------------------------
-// Extension unit for application.
-// Can be referenced by anyone.
+// ------------------------------------------------------------
+// Extension unit for application. Can be referenced by anyone.
 // Cannot hold references to View or Logic.
-// ----------------------------------------
+// ------------------------------------------------------------
 
 interface
 

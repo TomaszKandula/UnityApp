@@ -1,5 +1,9 @@
 unit Unity.ComboBox;
 
+// ------------------------------------------------------------
+// Extension unit for application. Can be referenced by anyone.
+// Cannot hold references to View or Logic.
+// ------------------------------------------------------------
 
 interface
 
@@ -13,9 +17,17 @@ uses
 type
 
 
+    /// <summary>
+    /// Extended version of Vcl.StdCtrls.TComboBox visual component.
+    /// </summary>
     TComboBox = class(Vcl.StdCtrls.TComboBox)
     public
+
+        /// <summary>
+        /// Simple wrapper of method to put two dimensional string array into combo box.
+        /// </summary>
         procedure ListToComboBox(List: TALists; ColumnNo: cardinal; Position: TListSelection);
+
     end;
 
 

@@ -1,10 +1,9 @@
 unit Unity.Edit;
 
-// ----------------------------------------
-// Extension unit for application.
-// Can be referenced by anyone.
+// ------------------------------------------------------------
+// Extension unit for application. Can be referenced by anyone.
 // Cannot hold references to View or Logic.
-// ----------------------------------------
+// ------------------------------------------------------------
 
 interface
 
@@ -20,10 +19,17 @@ type
 
     TEdit = Class(Vcl.StdCtrls.TEdit)
     public
-        FAlignment: TAlignment;
-        procedure SetAlignment(value: TAlignment);
-        procedure CreateParams(var params: TCreateParams); override;
+
+        var FAlignment: TAlignment;
+
         property  Alignment: TAlignment read FAlignment write SetAlignment;
+
+
+        procedure SetAlignment(value: TAlignment);
+
+
+        procedure CreateParams(var params: TCreateParams); override;
+
     end;
 
 

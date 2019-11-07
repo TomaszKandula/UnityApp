@@ -1,10 +1,9 @@
 unit Unity.ListView;
 
-// ----------------------------------------
-// Extension unit for application.
-// Can be referenced by anyone.
+// ------------------------------------------------------------
+// Extension unit for application. Can be referenced by anyone.
 // Cannot hold references to View or Logic.
-// ----------------------------------------
+// ------------------------------------------------------------
 
 interface
 
@@ -16,9 +15,17 @@ uses
 type
 
 
+    /// <summary>
+    ///
+    /// </summary>
     TListView = class(Vcl.ComCtrls.TListView)
     published
+
+        /// <summary>
+        ///
+        /// </summary>
         procedure Freeze(PaintWnd: boolean);
+
     end;
 
 
