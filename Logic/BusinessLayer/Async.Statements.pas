@@ -51,23 +51,25 @@ type
         /// Allow to async. send single account statemnent. It requires to pass payload with invoice data. Note that method
         /// can be executed async. without waiting to complete the task, thus it can be executed many times in parallel.
         /// Notification is always executed in main thread as long as callback is provided.
+        /// Please note that the AgeDate is required argument, this is the age report date that user put comment for.
         /// </summary>
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
-        /// It is not recommended to use it nil in this method.
+        /// It is not recommended to use nil in this method.
         /// </remarks>
-        procedure SendAccountStatement(PayLoad: TAccountStatementPayLoad; Callback: TSendAccountStatement; WaitToComplete: boolean = False);
+        procedure SendAccountStatement(AgeDate: string; PayLoad: TAccountStatementPayLoad; Callback: TSendAccountStatement; WaitToComplete: boolean = False);
 
         /// <summary>
         /// Allow to async. send many account statemnents. It requires to pass payload with invoice data. It uses SendAccountStatement
         /// method so it can be also executed async. without waiting to complete the task, thus it allows parallel execution.
         /// Notification is always executed in main thread as long as callback is provided.
+        /// Please note that the AgeDate is required argument, this is the age report date that user put comment for.
         /// </summary>
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
-        /// It is not recommended to use it nil in this method.
+        /// It is not recommended to use nil in this method.
         /// </remarks>
-        procedure SendAccountStatements(PayLoad: TAccountStatementPayLoad; Callback: TSendAccountStatements);
+        procedure SendAccountStatements(AgeDate: string; PayLoad: TAccountStatementPayLoad; Callback: TSendAccountStatements);
 
     end;
 
@@ -80,23 +82,25 @@ type
         /// Allow to async. send single account statemnent. It requires to pass payload with invoice data. Note that method
         /// can be executed async. without waiting to complete the task, thus it can be executed many times in parallel.
         /// Notification is always executed in main thread as long as callback is provided.
+        /// Please note that the AgeDate is required argument, this is the age report date that user put comment for.
         /// </summary>
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
-        /// It is not recommended to use it nil in this method.
+        /// It is not recommended to use nil in this method.
         /// </remarks>
-        procedure SendAccountStatement(PayLoad: TAccountStatementPayLoad; Callback: TSendAccountStatement; WaitToComplete: boolean = False);
+        procedure SendAccountStatement(AgeDate: string; PayLoad: TAccountStatementPayLoad; Callback: TSendAccountStatement; WaitToComplete: boolean = False);
 
         /// <summary>
         /// Allow to async. send many account statemnents. It requires to pass payload with invoice data. It uses SendAccountStatement
         /// method so it can be also executed async. without waiting to complete the task, thus it allows parallel execution.
         /// Notification is always executed in main thread as long as callback is provided.
+        /// Please note that the AgeDate is required argument, this is the age report date that user put comment for.
         /// </summary>
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
-        /// It is not recommended to use it nil in this method.
+        /// It is not recommended to use nil in this method.
         /// </remarks>
-        procedure SendAccountStatements(PayLoad: TAccountStatementPayLoad; Callback: TSendAccountStatements);
+        procedure SendAccountStatements(AgeDate: string; PayLoad: TAccountStatementPayLoad; Callback: TSendAccountStatements);
 
     end;
 
@@ -120,7 +124,7 @@ uses
 // Send single account statement asynchronously.
 // ---------------------------------------------
 
-procedure TStatements.SendAccountStatement(PayLoad: TAccountStatementPayLoad; Callback: TSendAccountStatement; WaitToComplete: boolean = False);
+procedure TStatements.SendAccountStatement(AgeDate: string; PayLoad: TAccountStatementPayLoad; Callback: TSendAccountStatement; WaitToComplete: boolean = False);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
@@ -187,7 +191,7 @@ begin
                 FDailyCommentFields.EmailReminder:=False;
                 FDailyCommentFields.EventLog     :=False;
                 FDailyCommentFields.ExtendComment:=True;
-                //FDailyCommentFields.AgeDateSel   :=
+                FDailyCommentFields.AgeDateSel   :=AgeDate;
 
                 // ----------------------------------------------------------------------
                 // Register sent email either as manual statement or automatic statement.
@@ -272,7 +276,7 @@ end;
 // Send account statements asynchronously.
 // ---------------------------------------
 
-procedure TStatements.SendAccountStatements(PayLoad: TAccountStatementPayLoad; Callback: TSendAccountStatements);
+procedure TStatements.SendAccountStatements(AgeDate: string; PayLoad: TAccountStatementPayLoad; Callback: TSendAccountStatements);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
@@ -301,7 +305,7 @@ begin
                     PayLoad.BankDetails:=PayLoad.MailerList.Items[iCNT].SubItems[12]; // bank html
                     PayLoad.ItemNo     :=iCNT;
 
-                    SendAccountStatement(PayLoad, Callback, True);
+                    SendAccountStatement(AgeDate, PayLoad, Callback, True);
 
                 end;
 

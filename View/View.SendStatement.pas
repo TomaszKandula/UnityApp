@@ -185,7 +185,7 @@ begin
     FPayLoad.IsUserInCopy  :=ActionsForm.cbUserInCopy.Checked;
 
     var Statements: IStatements:=TStatements.Create();
-    Statements.SendAccountStatement(FPayLoad, SendAccountStatement_Callback);
+    Statements.SendAccountStatement(MainForm.FAgeDateSel, FPayLoad, SendAccountStatement_Callback);
 
     Close;
 

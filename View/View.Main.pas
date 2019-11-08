@@ -1947,8 +1947,8 @@ begin
 
                     var OpenItems: IOpenItems:=TOpenItems.Create();
 
-                    FOpenItemsUpdate:=OpenItems.GetDateTime(DateTime);
-                    FOpenItemsStatus:=OpenItems.GetStatus(FOpenItemsUpdate);
+                    FOpenItemsUpdate:=OpenItems.GetDateTimeAwaited(DateTime);
+                    FOpenItemsStatus:=OpenItems.GetStatusAwaited(FOpenItemsUpdate);
 
                     THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Loading, MainForm);
                     THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Show.ToString, MainForm);

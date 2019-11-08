@@ -48,20 +48,20 @@ type
     ['{CD6AC138-D2A4-4C6B-A3F1-07F904BA44B1}']
 
         /// <summary>
-        ///
+        /// Returns latest open items date and time of SSIS data extract (query SSIS master database table).
         /// </summary>
         /// <remarks>
-        ///
+        /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function GetDateTime(Return: TCalendar): string; // make it async!
+        function GetDateTimeAwaited(Return: TCalendar): string;
 
         /// <summary>
-        ///
+        /// Returns status code from SSIS master table for given date and time.
         /// </summary>
         /// <remarks>
-        ///
+        /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function GetStatus(DateTime: string): string; // make it async!
+        function GetStatusAwaited(DateTime: string): string;
 
         /// <summary>
         /// Allow to async. check SSIS master table to check if open items have been updated.
@@ -92,20 +92,20 @@ type
     public
 
         /// <summary>
-        ///
+        /// Returns latest open items date and time of SSIS data extract (query SSIS master database table).
         /// </summary>
         /// <remarks>
-        ///
+        /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function GetDateTime(Return: TCalendar): string; // make it async!
+        function GetDateTimeAwaited(Return: TCalendar): string;
 
         /// <summary>
-        ///
+        /// Returns status code from SSIS master table for given date and time.
         /// </summary>
         /// <remarks>
-        ///
+        /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function GetStatus(DateTime: string): string; // make it async!
+        function GetStatusAwaited(DateTime: string): string;
 
         /// <summary>
         /// Allow to async. check SSIS master table to check if open items have been updated.
@@ -169,8 +169,8 @@ begin
 
         try
 
-            ReadDateTime:=GetDateTime(DateTime);
-            ReadStatus:=GetStatus(ReadDateTime);
+            ReadDateTime:=GetDateTimeAwaited(DateTime);
+            ReadStatus:=GetStatusAwaited(ReadDateTime);
 
             if ( StrToDateTime(OpenItemsUpdate) < StrToDateTime(ReadDateTime) )
                 and ( ReadStatus = 'Completed' ) then CanMakeAge:=True;
@@ -181,7 +181,7 @@ begin
             on E: Exception do
             begin
                 CallResponse.IsSucceeded:=False;
-                CallResponse.LastMessage:='[ScanOpenItemsAsync] Cannot execute. Error has been thrown: ' + E.Message;
+                CallResponse.LastMessage:='[ScanOpenItemsAsync]: Cannot execute. Error has been thrown: ' + E.Message;
                 ThreadFileLog.Log(CallResponse.LastMessage);
             end;
 
@@ -223,7 +223,7 @@ begin
             on E: Exception do
             begin
                 CallResponse.IsSucceeded:=False;
-                CallResponse.LastMessage:='[ReadOpenItemsAsync] Cannot execute. Error has been thrown: ' + E.Message;
+                CallResponse.LastMessage:='[ReadOpenItemsAsync]: Cannot execute. Error has been thrown: ' + E.Message;
                 ThreadFileLog.Log(CallResponse.LastMessage);
             end;
 
@@ -244,76 +244,98 @@ end;
 // --------------------------------------------------------------------------------------------------------------------------------------------------------- //
 
 
-function TOpenItems.GetDateTime(Return: TCalendar): string;
+function TOpenItems.GetDateTimeAwaited(Return: TCalendar): string;
 begin
 
-    var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
-    try
+    var NewResult: string;
 
-        DataTables.CleanUp;
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
 
-        // -------------------------
-        // Get latest date and time.
-        // -------------------------
+        var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
+        try
 
-        DataTables.Columns.Add
-        (
-            TSql.MAX +
-                DataTables.BracketStr(TSSISMaster.StartDateTime, TBrackets.Round) +
-            TSql._AS +
-                QuotedStr(TSSISMaster.StartDateTime)
-        );
+            DataTables.CleanUp;
 
-        DataTables.OpenTable(TSSISMaster.SSISMaster);
+            // -------------------------
+            // Get latest date and time.
+            // -------------------------
 
-        // ----------------------
-        // Examine received data.
-        // ----------------------
+            DataTables.Columns.Add
+            (
+                TSql.MAX +
+                    DataTables.BracketStr(TSSISMaster.StartDateTime, TBrackets.Round) +
+                TSql._AS +
+                    QuotedStr(TSSISMaster.StartDateTime)
+            );
 
-        if (not (DataTables.DataSet = nil)) and (DataTables.DataSet.RecordCount = 1) then
-        begin
+            DataTables.OpenTable(TSSISMaster.SSISMaster);
 
-            var Value: string:=VarToStr(DataTables.DataSet.Fields.Item[TSSISMaster.StartDateTime].Value);
+            // ----------------------
+            // Examine received data.
+            // ----------------------
 
-            if Value <> '' then
+            if (not (DataTables.DataSet = nil)) and (DataTables.DataSet.RecordCount = 1) then
             begin
 
-                case Return of
+                var Value: string:=VarToStr(DataTables.DataSet.Fields.Item[TSSISMaster.StartDateTime].Value);
 
-                    TCalendar.TimeOnly: Result:=FormatDateTime(TDateTimeFormats.TimeFormat, VarToDateTime(Value));
-                    TCalendar.DateOnly: Result:=FormatDateTime(TDateTimeFormats.DateFormat, VarToDateTime(Value));
-                    TCalendar.DateTime: Result:=FormatDateTime(TDateTimeFormats.DateTimeFormat, VarToDateTime(Value));
+                if Value <> '' then
+                begin
+
+                    case Return of
+
+                        TCalendar.TimeOnly: NewResult:=FormatDateTime(TDateTimeFormats.TimeFormat, VarToDateTime(Value));
+                        TCalendar.DateOnly: NewResult:=FormatDateTime(TDateTimeFormats.DateFormat, VarToDateTime(Value));
+                        TCalendar.DateTime: NewResult:=FormatDateTime(TDateTimeFormats.DateTimeFormat, VarToDateTime(Value));
+
+                    end;
 
                 end;
 
             end;
 
+        finally
+            DataTables.Free();
         end;
 
-    finally
-        DataTables.Free();
-    end;
+    end);
+
+    NewTask.Start();
+    TTask.WaitForAll(NewTask);
+    Result:=NewResult;
 
 end;
 
 
-function TOpenItems.GetStatus(DateTime: string): string;
+function TOpenItems.GetStatusAwaited(DateTime: string): string;
 begin
 
-    var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
-    try
+    var NewResult: string;
 
-        DataTables.CleanUp();
-        DataTables.Columns.Add(TSSISMaster.StatusCode);
-        DataTables.CustFilter:=TSql.WHERE + TSSISMaster.StartDateTime + TSql.EQUAL + QuotedStr(DateTime);
-        DataTables.OpenTable(TSSISMaster.SSISMaster);
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
 
-        if (not (DataTables.DataSet = nil)) and (DataTables.DataSet.RecordCount = 1) then
-            Result:=VarToStr(DataTables.DataSet.Fields.Item[TSSISMaster.StatusCode].Value);
+        var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
+        try
 
-    finally
-        DataTables.Free();
-    end;
+            DataTables.CleanUp();
+            DataTables.Columns.Add(TSSISMaster.StatusCode);
+            DataTables.CustFilter:=TSql.WHERE + TSSISMaster.StartDateTime + TSql.EQUAL + QuotedStr(DateTime);
+            DataTables.OpenTable(TSSISMaster.SSISMaster);
+
+            if (not (DataTables.DataSet = nil)) and (DataTables.DataSet.RecordCount = 1) then
+                NewResult:=VarToStr(DataTables.DataSet.Fields.Item[TSSISMaster.StatusCode].Value);
+
+        finally
+            DataTables.Free();
+        end;
+
+    end);
+
+    NewTask.Start();
+    TTask.WaitForAll(NewTask);
+    Result:=NewResult;
 
 end;
 
@@ -366,7 +388,7 @@ begin
 
         DataTables.CmdType:=cmdText;
         DataTables.StrSQL:=TSql.EXECUTE + 'Customer.QueryOpenItemsAlt'                + TChars.SPACE +
-                  QuotedStr(GetDateTime(DateOnly))                                    + TChars.COMMA +
+                  QuotedStr(GetDateTimeAwaited(DateOnly))                             + TChars.COMMA +
                   QuotedStr(THelpers.ConvertCoCode(SettingsGrid.Cells[0, 0], 'F', 0)) + TChars.COMMA +
                   QuotedStr(THelpers.ConvertCoCode(SettingsGrid.Cells[1, 0], 'F', 0)) + TChars.COMMA +
                   QuotedStr(THelpers.ConvertCoCode(SettingsGrid.Cells[2, 0], 'F', 0)) + TChars.COMMA +

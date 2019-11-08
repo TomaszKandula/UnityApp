@@ -413,7 +413,7 @@ begin
 
     // -----------------------------------------------------------------------------------------------------
     // We have to always pre-sort Open Items list via Due Date before sending account statement or reminder.
-    // This is necessary to ensure that the HTML generator will make sorted list for the customer.
+    // This is necessary to ensure that the HTML generator will generate list for the customer.
     // -----------------------------------------------------------------------------------------------------
 
     // -----------------------------
@@ -442,7 +442,7 @@ begin
     FPayLoad.CtrlStatusRefs:=MainForm.FCtrlStatusRefs;
 
     var Statements: IStatements:=TStatements.Create();
-    Statements.SendAccountStatements(FPayLoad, SendAccountStatements_Callback);
+    Statements.SendAccountStatements(MainForm.FAgeDateSel, FPayLoad, SendAccountStatements_Callback);
 
     // ---------------------
     // Display await window.
