@@ -200,20 +200,28 @@ type
         procedure GetAndDisplay;
         function  GetRunningApps(SearchName: string): boolean;
         procedure UpdateOpenItems(OpenItemsDest, OpenItemsSrc: TStringGrid);
-        procedure UpdateDetails(CustPerson: TEdit; CustMail: TEdit; CustMailGen: TEdit; CustPhone: TComboBox);
+        procedure UpdateCustDetails();
+        procedure UpdateCompanyDetails();
         procedure UpdateGeneral(var Text: TMemo);
+        procedure UpdateHistory(var HistoryGrid: TStringGrid);
         procedure GetFirstComment(var Text: TMemo);
-        procedure SetControls;
-        procedure Initialize;
-        procedure ClearAll;
-        procedure MakePhoneCall;
+        procedure SetControls();
+        procedure Initialize();
+        procedure ClearAll();
+        procedure MakePhoneCall();
         procedure LoadCustomer(GoNext: boolean);
-        procedure ClearFollowUp;
-        procedure SaveCustomerDetails;
-        procedure SaveGeneralComment;
-        procedure SaveDailyComment;
-        procedure InitializePanels;
-        procedure InitializeSpeedButtons;
+        procedure ClearFollowUp();
+        procedure SaveCustomerDetails();
+        procedure SaveGeneralComment();
+        procedure SaveDailyComment();
+        procedure InitializePanels();
+        procedure InitializeSpeedButtons();
+        procedure SendAccountStatement_Callback(ProcessingItemNo: integer; CallResponse: TCallResponse);
+        procedure UpdateAddressBook_Callback(CallResponse: TCallResponse);
+        procedure EditGeneralComment_Callback(CallResponse: TCallResponse);
+        procedure EditDailyComment_Callback(CallResponse: TCallResponse);
+        procedure GetCustomerDetails_Callback(CustPerson: string; CustMailGen: string; CustMailStat: string; CustPhones: string; CallResponse: TCallResponse);
+        procedure GetCompanyDetails_Callback(LbuName: string; LbuAddress: string; LbuPhone: string; LbuEmail: string; BanksData: string; CallResponse: TCallResponse);
     public
         property CUID:         string read FCUID;
         property SCUID:        string read FSCUID;
@@ -226,12 +234,10 @@ type
         property LbuPhone:     string read FLbuPhone;
         property LbuSendFrom:  string read FLbuSendFrom;
         property BanksHtml:    string read FBanksHtml;
-        procedure UpdateHistory(var Grid: TStringGrid);
-        procedure SendAccountStatement_Callback(ProcessingItemNo: integer; CallResponse: TCallResponse);
     end;
 
 
-    function ActionsForm: TActionsForm;
+    function ActionsForm(): TActionsForm;
 
 
 implementation
@@ -246,12 +252,10 @@ uses
     View.Calendar,
     View.SendStatement,
     View.PhoneList,
-    Handler.Sql,
-    DbModel,
+    DbModel{Legacy},
+    Sync.Documents,
     Unity.Settings,
     Unity.SessionService,
-    Sync.Documents,
-    Unity.Sql,
     Unity.Chars,
     Unity.Helpers,
     Unity.Enums,
@@ -259,6 +263,8 @@ uses
     Unity.Delimiters,
     Unity.Unknown,
     Unity.Common,
+    Unity.EventLogger,
+    Async.Utilities,
     Async.AddressBook,
     Async.Comments,
     Async.Statements;
@@ -267,7 +273,7 @@ uses
 var vActionsForm: TActionsForm;
 
 
-function ActionsForm: TActionsForm;
+function ActionsForm(): TActionsForm;
 begin
     if not(Assigned(vActionsForm)) then Application.CreateForm(TActionsForm, vActionsForm);
     Result:=vActionsForm;
@@ -310,7 +316,7 @@ begin
 end;
 
 
-procedure TActionsForm.GetAndDisplay;
+procedure TActionsForm.GetAndDisplay();
 begin
 
     Screen.Cursor:=crSQLWait;
@@ -325,7 +331,8 @@ begin
         Cust_Number.Caption:=CustNumber;
 
         UpdateOpenItems(OpenItemsGrid, MainForm.sgOpenItems);
-        UpdateDetails(Cust_Person, Cust_Mail, Cust_MailGeneral, Cust_Phone);
+        UpdateCustDetails();
+        UpdateCompanyDetails();
         UpdateHistory(HistoryGrid);
         UpdateGeneral(GeneralCom);
 
@@ -433,114 +440,51 @@ begin
 end;
 
 
-procedure TActionsForm.UpdateDetails(CustPerson: TEdit; CustMail: TEdit; CustMailGen: TEdit; CustPhone: TComboBox); {refactor / async}
+procedure TActionsForm.UpdateCustDetails();
+begin
+    var AddressBook: IAddressBook:=TAddressBook.Create();
+    AddressBook.GetCustomerDetailsAsync(SCUID, GetCustomerDetails_Callback);
+end;
+
+
+procedure TActionsForm.UpdateCompanyDetails();
+begin
+    var Utilities: IUtilities:=TUtilities.Create();
+    Utilities.GetCompanyDetailsAsync(CoCode, Branch, GetCompanyDetails_Callback);
+end;
+
+
+procedure TActionsForm.UpdateHistory(var HistoryGrid: TStringGrid);
 begin
 
-    var Tables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
+    var Comments: IComments:=TComments.Create();
+    var ReturnedGrid:=Comments.GetDailyCommentsAwaited(CUID);
     try
 
-        // Get data from Address Book table
-        Tables.Columns.Add(DbModel.TAddressBook.Contact);
-        Tables.Columns.Add(DbModel.TAddressBook.Emails);
-        Tables.Columns.Add(DbModel.TAddressBook.Estatements);
-        Tables.Columns.Add(DbModel.TAddressBook.PhoneNumbers);
-        Tables.CustFilter:=TSql.WHERE + DbModel.TAddressBook.Scuid + TSql.EQUAL + QuotedStr(SCUID);
-        Tables.OpenTable(DbModel.TAddressBook.AddressBook);
+        HistoryGrid.SqlColumns:=ReturnedGrid.SqlColumns;
+        HistoryGrid.RowCount  :=ReturnedGrid.RowCount;
+        HistoryGrid.ColCount  :=ReturnedGrid.ColCount;
 
-        if Tables.DataSet.RecordCount = 1 then
-        begin
+        for var iCNT:=0 to ReturnedGrid.RowCount - 1 do
+            for var jCNT:=0 to ReturnedGrid.ColCount - 1 do
+                HistoryGrid.Cells[jCNT, iCNT]:=ReturnedGrid.Cells[jCNT, iCNT];
 
-            var Phones: string;
-
-            CustPerson.Text :=THelpers.OleGetStr(Tables.DataSet.Fields[DbModel.TAddressBook.Contact].Value);
-            CustMailGen.Text:=THelpers.OleGetStr(Tables.DataSet.Fields[DbModel.TAddressBook.Emails].Value);
-            CustMail.Text   :=THelpers.OleGetStr(Tables.DataSet.Fields[DbModel.TAddressBook.Estatements].Value);
-            Phones          :=THelpers.OleGetStr(Tables.DataSet.Fields[DbModel.TAddressBook.PhoneNumbers].Value);
-
-            if (Phones <> '') or (Phones <> ' ') then
-            begin
-                CustPhone.Clear;
-                CustPhone.Items.Text:=THelpers.Explode(Phones, TDelimiters.Semicolon);
-                CustPhone.ItemIndex:=0;
-            end;
-
-        end;
-
-        Tables.CleanUp;
-
-        // Get data from Company Data table
-        Tables.Columns.Add(TCompanyData.CoName);
-        Tables.Columns.Add(TCompanyData.CoAddress);
-        Tables.Columns.Add(TCompanyData.TelephoneNumbers);
-        Tables.Columns.Add(TCompanyData.SendNoteFrom);
-        Tables.Columns.Add(TCompanyData.BankAccounts);
-        Tables.CustFilter:=TSql.WHERE + TCompanyData.CoCode + TSql.EQUAL + QuotedStr(CoCode) + TSql._AND + TCompanyData.Branch + TSql.EQUAL + QuotedStr(Branch);
-        Tables.OpenTable(TCompanyData.CompanyData);
-
-        if Tables.DataSet.RecordCount = 1 then
-        begin
-            FLbuName    :=THelpers.OleGetStr(Tables.DataSet.Fields[TCompanyData.CoName].Value);
-            FLbuAddress :=THelpers.OleGetStr(Tables.DataSet.Fields[TCompanyData.CoAddress].Value);
-            FLbuPhone   :=THelpers.OleGetStr(Tables.DataSet.Fields[TCompanyData.TelephoneNumbers].Value);
-            FLbuSendFrom:=THelpers.OleGetStr(Tables.DataSet.Fields[TCompanyData.SendNoteFrom].Value);
-            FBanksHtml  :=THelpers.OleGetStr(Tables.DataSet.Fields[TCompanyData.BankAccounts].Value);
-        end
+        HistoryGrid.ColWidths[HistoryGrid.ReturnColumn(TDailyComment.FixedComment, 1, 1)]:=HistoryGrid.sgRowHidden;
+        HistoryGrid.SetColWidth(10, 20, 400);
+        FHistoryGrid:=True;
+        HistoryGrid.Visible:=FHistoryGrid;
 
     finally
-        Tables.Free;
+        if Assigned(ReturnedGrid) then ReturnedGrid.Free();
     end;
 
 end;
 
 
-procedure TActionsForm.UpdateHistory(var Grid: TStringGrid); {refactor / async}
+procedure TActionsForm.UpdateGeneral(var Text: TMemo);
 begin
-
-    var DailyText: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
-    try
-        DailyText.Columns.Add(TDailyComment.AgeDate);
-        DailyText.Columns.Add(TDailyComment.Stamp);
-        DailyText.Columns.Add(TDailyComment.UserAlias);
-        DailyText.Columns.Add(TDailyComment.FixedComment);
-        DailyText.CustFilter:=TSql.WHERE + TDailyComment.Cuid + TSql.EQUAL + QuotedStr(CUID);
-        DailyText.OpenTable(TDailyComment.DailyComment);
-        DailyText.DataSet.Sort:=TDailyComment.Stamp + TSql.DESC;
-
-        if not (DailyText.DataSet.EOF) then
-        begin
-            DailyText.SqlToGrid(Grid, DailyText.DataSet, False, True);
-            Grid.ColWidths[Grid.ReturnColumn(TDailyComment.FixedComment, 1, 1)]:=Grid.sgRowHidden;
-            Grid.SetColWidth(10, 20, 400);
-            FHistoryGrid:=True;
-            Grid.Visible:=FHistoryGrid;
-        end
-        else
-        begin
-            FHistoryGrid:=False;
-        end;
-
-    finally
-        DailyText.Free;
-    end;
-
-end;
-
-
-procedure TActionsForm.UpdateGeneral(var Text: TMemo); {refactor / async}
-begin
-
-    var GenText: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
-    try
-        GenText.CustFilter:=TSql.WHERE + TGeneralComment.Cuid + TSql.EQUAL + QuotedStr(CUID);
-        GenText.OpenTable(TGeneralComment.GeneralComment);
-
-        if not (GenText.DataSet.EOF) then
-            Text.Text:=THelpers.OleGetStr(GenText.DataSet.Fields[TGeneralComment.FixedComment].Value);
-
-    finally
-        GenText.Free;
-    end;
-
+    var Comments: IComments:=TComments.Create();
+    Text.Text:=Comments.GetGeneralCommentAwaited(CUID);
 end;
 
 
@@ -555,11 +499,7 @@ begin
 end;
 
 
-/// <summary>
-/// Enable/disable controls.
-/// </summary>
-
-procedure TActionsForm.SetControls;
+procedure TActionsForm.SetControls();
 begin
 
     // Cover save button if customer is not registered.
@@ -598,10 +538,9 @@ begin
 end;
 
 
-procedure TActionsForm.Initialize;
+procedure TActionsForm.Initialize();
 begin
-    ClearAll;
-    // Assign data for selected row
+    ClearAll();
     FCUID      :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCuid,          1, 1), MainForm.sgAgeView.Row];
     FCustName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCustomerName,  1, 1), MainForm.sgAgeView.Row];
     FCustNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCustomerNumber,1, 1), MainForm.sgAgeView.Row];
@@ -611,22 +550,26 @@ begin
 end;
 
 
-procedure TActionsForm.ClearAll;
+procedure TActionsForm.ClearAll();
 begin
+
     Cust_Name.Caption    :=TUnknown.NotFound;
     Cust_Number.Caption  :=TUnknown.NotFound;
     Cust_Person.Text     :=TUnknown.NotFound;
     Cust_Mail.Text       :=TUnknown.NotFound;
     Cust_MailGeneral.Text:=TUnknown.NotFound;
+
     Cust_Phone.Clear;
     Cust_Phone.Items.Add(TUnknown.NotFound);
     Cust_Phone.ItemIndex:=0;
+
     DailyCom.Text       :='';
     GeneralCom.Text     :='';
+
 end;
 
 
-procedure TActionsForm.MakePhoneCall;
+procedure TActionsForm.MakePhoneCall();
 begin
 
     // Check for 'Lynccall.exe'
@@ -693,10 +636,8 @@ begin
     Initialize;
     try
         GetAndDisplay;
-        SetControls;
         HistoryGrid.Visible:=FHistoryGrid;
         {GetFirstComment(DailyCom);}
-        UpdateGeneral(GeneralCom);
     except
         THelpers.MsgCall(Warn, 'Unexpected error has occured. Please close the window and try again.');
     end;
@@ -704,7 +645,7 @@ begin
 end;
 
 
-procedure TActionsForm.ClearFollowUp;
+procedure TActionsForm.ClearFollowUp();
 begin
 
     if THelpers.MsgCall(Question2, 'Are you sure you want to clear this follow up?') = ID_YES then
@@ -719,7 +660,7 @@ begin
         FGeneralCommentFields.EventLog    :=True;
 
         var Comments: IComments:=TComments.Create();
-        Comments.EditGeneralComment(FGeneralCommentFields, MainForm.EditGeneralComment_Callback);
+        Comments.EditGeneralComment(FGeneralCommentFields, EditGeneralComment_Callback);
 
         MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneralComment.fFollowUp, 1, 1), MainForm.sgAgeView.Row]:='';
 
@@ -728,7 +669,7 @@ begin
 end;
 
 
-procedure TActionsForm.SaveCustomerDetails;
+procedure TActionsForm.SaveCustomerDetails();
 begin
 
     FAbUpdateFields.Scuid     :=SCUID;
@@ -738,12 +679,12 @@ begin
     FAbUpdateFields.Phones    :=THelpers.Implode(Cust_Phone.Items, TDelimiters.Semicolon);
 
     var AddressBook: IAddressBook:=TAddressBook.Create();
-    AddressBook.UpdateAddressBookAsync(nil, FAbUpdateFields, MainForm.UpdateAddressBookAsync_Callback);
+    AddressBook.UpdateAddressBookAsync(nil, FAbUpdateFields, UpdateAddressBook_Callback);
 
 end;
 
 
-procedure TActionsForm.SaveGeneralComment;
+procedure TActionsForm.SaveGeneralComment();
 begin
 
     FGeneralCommentFields.CUID        :=CUID;
@@ -755,16 +696,12 @@ begin
     FGeneralCommentFields.EventLog    :=True;
 
     var Comments: IComments:=TComments.Create();
-    Comments.EditGeneralComment(FGeneralCommentFields, MainForm.EditGeneralComment_Callback);
+    Comments.EditGeneralComment(FGeneralCommentFields, EditGeneralComment_Callback);
 
 end;
 
 
-/// <summary>
-/// Save daily comment into database (use locking thread by default).
-/// </summary>
-
-procedure TActionsForm.SaveDailyComment;
+procedure TActionsForm.SaveDailyComment();
 begin
 
     FDailyCommentFields.GroupIdSel   :=MainForm.FGroupIdSel;
@@ -782,22 +719,18 @@ begin
     FDailyCommentFields.ExtendComment:=False;
 
     var Comments: IComments:=TComments.Create();
-    Comments.EditDailyComment(FDailyCommentFields, MainForm.EditDailyComment_Callback);
+    Comments.EditDailyComment(FDailyCommentFields, EditDailyComment_Callback);
 
 end;
 
 
-procedure TActionsForm.InitializePanels;
+procedure TActionsForm.InitializePanels();
 begin
     {PanelTop.PanelBorders(clWhite, clSkyBlue, clWhite, clWhite, clWhite);}
 end;
 
 
-/// <summary>
-/// Applay transparency for all speed buttons.
-/// </summary>
-
-procedure TActionsForm.InitializeSpeedButtons;
+procedure TActionsForm.InitializeSpeedButtons();
 begin
     btnEdit.Glyph.Transparent:=True;
     btnEdit.Glyph.TransparentColor:=clWhite;
@@ -851,6 +784,105 @@ begin
 end;
 
 
+procedure TActionsForm.UpdateAddressBook_Callback(CallResponse: TCallResponse);
+begin
+
+    case CallResponse.IsSucceeded of
+
+        True:
+        begin
+            THelpers.MsgCall(TAppMessage.Info, CallResponse.LastMessage);
+            ThreadFileLog.Log('[UpdateAddressBookAsync_Callback]: Address Book updated.');
+        end;
+
+        False:
+        begin
+            THelpers.MsgCall(TAppMessage.Warn, CallResponse.LastMessage);
+            ThreadFileLog.Log('[UpdateAddressBookAsync_Callback]: Adddress Book has thrown an error "' + CallResponse.LastMessage + '".');
+        end;
+
+    end;
+
+end;
+
+
+procedure TActionsForm.EditGeneralComment_Callback(CallResponse: TCallResponse);
+begin
+
+    if not CallResponse.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        ThreadFileLog.Log('[EditGeneralComment_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+        Exit();
+    end;
+
+end;
+
+
+procedure TActionsForm.EditDailyComment_Callback(CallResponse: TCallResponse);
+begin
+
+    if not CallResponse.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        ThreadFileLog.Log('[EditDailyComment_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+        Exit();
+    end;
+
+    UpdateHistory(HistoryGrid);
+    ThreadFileLog.Log('[EditDailyComment_Callback]: Calling "UpdateHistory".');
+
+end;
+
+
+procedure TActionsForm.GetCustomerDetails_Callback(CustPerson: string; CustMailGen: string; CustMailStat: string; CustPhones: string; CallResponse: TCallResponse);
+begin
+
+    if not CallResponse.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        ThreadFileLog.Log(CallResponse.LastMessage);
+        Exit();
+    end;
+
+    var Phones: string;
+
+    Cust_Person.Text     :=CustPerson;
+    Cust_MailGeneral.Text:=CustMailGen;
+    Cust_Mail.Text       :=CustMailStat;
+    Phones               :=CustPhones;
+
+    if (Phones <> '') or (Phones <> ' ') then
+    begin
+        Cust_Phone.Clear();
+        Cust_Phone.Items.Text:=THelpers.Explode(Phones, TDelimiters.Semicolon);
+        Cust_Phone.ItemIndex:=0;
+    end;
+
+    SetControls();
+
+end;
+
+
+procedure TActionsForm.GetCompanyDetails_Callback(LbuName: string; LbuAddress: string; LbuPhone: string; LbuEmail: string; BanksData: string; CallResponse: TCallResponse);
+begin
+
+    if not CallResponse.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        ThreadFileLog.Log(CallResponse.LastMessage);
+        Exit();
+    end;
+
+    FLbuName    :=LbuName;
+    FLbuAddress :=LbuAddress;
+    FLbuPhone   :=LbuPhone;
+    FLbuSendFrom:=LbuEmail;
+    FBanksHtml  :=BanksData;
+
+end;
+
+
 // ------------------------------------------------------------------------------------------------------------------------------------------------- STARTUP //
 
 
@@ -870,25 +902,25 @@ end;
 
 procedure TActionsForm.FormShow(Sender: TObject);
 begin
-    Initialize;
+    Initialize();
 end;
 
 
 procedure TActionsForm.FormActivate(Sender: TObject);
 begin
+
     if MainForm.FIsConnected then
     begin
-        GetAndDisplay;
+        GetAndDisplay();
         SimpleText.Caption:=MainForm.FOpenItemsUpdate;
-        SetControls;
         GetFirstComment(DailyCom);
-        UpdateGeneral(GeneralCom);
     end
     else
     begin
         THelpers.MsgCall(Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
         Close;
     end;
+
 end;
 
 
@@ -900,26 +932,18 @@ end;
 
 procedure TActionsForm.FormDestroy(Sender: TObject);
 begin
-    // Do nothing
+    {Do nothing}
 end;
 
 
 // ---------------------------------------------------------------------------------------------------------------------------------------- COMPONENT EVENTS //
 
 
-/// <summary>
-/// Draw selected row on string grid component.
-/// </summary>
-
 procedure TActionsForm.HistoryGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
     HistoryGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
 end;
 
-
-/// <summary>
-/// Color numbers and selection on string grid.
-/// </summary>
 
 procedure TActionsForm.OpenItemsGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
@@ -960,10 +984,6 @@ begin
 end;
 
 
-/// <summary>
-/// Show data when user select item on history string gird.
-/// </summary>
-
 procedure TActionsForm.HistoryGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
 begin
     DailyCom.Text:=HistoryGrid.Cells[HistoryGrid.ReturnColumn(TDailyComment.FixedComment, 1, 1), ARow];
@@ -975,7 +995,7 @@ end;
 
 procedure TActionsForm.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-    if (Key = VK_F5) and (Shift=[ssCtrl]) then GetAndDisplay;
+    if (Key = VK_F5) and (Shift=[ssCtrl]) then GetAndDisplay();
 end;
 
 
@@ -984,10 +1004,6 @@ begin
     if Key = Char(VK_ESCAPE) then Close;
 end;
 
-
-/// <summary>
-/// Save daily comment on <enter>. Allow to enter empty line when ALT + ENTER is pressed.
-/// </summary>
 
 procedure TActionsForm.DailyComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
@@ -1006,14 +1022,10 @@ begin
     end;
 
     // Save to database
-    if ( (Key = VK_RETURN) and (DailyCom.Text <> '') ) then SaveDailyComment;
+    if ( (Key = VK_RETURN) and (DailyCom.Text <> '') ) then SaveDailyComment();
 
 end;
 
-
-/// <summary>
-/// Save general comment on <enter>. Allow to enter empty line when ALT + ENTER is pressed.
-/// </summary>
 
 procedure TActionsForm.GeneralComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
@@ -1032,7 +1044,7 @@ begin
     end;
 
     // Save to database
-    if ( (Key = VK_RETURN) and (GeneralCom.Text <> '') ) then SaveGeneralComment;
+    if ( (Key = VK_RETURN) and (GeneralCom.Text <> '') ) then SaveGeneralComment();
     
 end;
 
@@ -1051,13 +1063,13 @@ end;
 
 procedure TActionsForm.DailyComKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-    if Key = VK_TAB then GeneralCom.SetFocus;
+    if Key = VK_TAB then GeneralCom.SetFocus();
 end;
 
 
 procedure TActionsForm.GeneralComKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-    if Key = VK_TAB then DailyCom.SetFocus;
+    if Key = VK_TAB then DailyCom.SetFocus();
 end;
 
 
@@ -1280,7 +1292,7 @@ end;
 
 procedure TActionsForm.btnSaveCustDetailsClick(Sender: TObject);
 begin
-    SaveCustomerDetails;
+    SaveCustomerDetails();
 end;
 
 
@@ -1305,7 +1317,7 @@ end;
 
 procedure TActionsForm.btnClearFollowUpClick(Sender: TObject);
 begin
-    ClearFollowUp;
+    ClearFollowUp();
 end;
 
 
@@ -1366,7 +1378,7 @@ end;
 
 procedure TActionsForm.btnCallCustomerClick(Sender: TObject);
 begin
-    MakePhoneCall;
+    MakePhoneCall();
 end;
 
 

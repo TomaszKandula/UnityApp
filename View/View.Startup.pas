@@ -25,7 +25,8 @@ uses
     Vcl.StdCtrls,
     Vcl.Imaging.pngimage,
     Vcl.Imaging.jpeg,
-    Data.Win.ADODB;
+    Data.Win.ADODB,
+    Unity.Records;
 
 
 type
@@ -72,6 +73,7 @@ type
         function GetUserAccountSync(): boolean;
         function GetGeneralTablesSync(): boolean;
         function GetHtmlLayoutsSync(UrlLayoutPak: string; FileLayoutPak: string; LayoutDir: string): boolean;
+        procedure GeneralTables_Callback(CallResponse: TCallResponse);
     public
         property IsAppInitialized: boolean read FIsAppInitialized;
         procedure SetSessionLog(SessionEventLog: string);
@@ -446,9 +448,9 @@ begin
             MainAppForm.procRISKB.Caption:=RiskClassB;
             MainAppForm.procRISKC.Caption:=RiskClassC;
 
-            MainAppForm.Class_A:=StrToFloat(getRiskClassA);
-            MainAppForm.Class_B:=StrToFloat(getRiskClassB);
-            MainAppForm.Class_C:=StrToFloat(getRiskClassC);
+            MainAppForm.FClass_A:=StrToFloat(getRiskClassA);
+            MainAppForm.FClass_B:=StrToFloat(getRiskClassB);
+            MainAppForm.FClass_C:=StrToFloat(getRiskClassC);
 
         end else if FormatSettings.DecimalSeparator = '.' then
         begin
@@ -465,9 +467,9 @@ begin
             MainAppForm.procRISKB.Caption:=RiskClassB;
             MainAppForm.procRISKC.Caption:=RiskClassC;
 
-            MainAppForm.Class_A:=StrToFloat(getRiskClassA.Replace(',','.'));
-            MainAppForm.Class_B:=StrToFloat(getRiskClassB.Replace(',','.'));
-            MainAppForm.Class_C:=StrToFloat(getRiskClassC.Replace(',','.'));
+            MainAppForm.FClass_A:=StrToFloat(getRiskClassA.Replace(',','.'));
+            MainAppForm.FClass_B:=StrToFloat(getRiskClassB.Replace(',','.'));
+            MainAppForm.FClass_C:=StrToFloat(getRiskClassC.Replace(',','.'));
 
         end;
 
@@ -567,7 +569,7 @@ end;
 function TStartupForm.GetUserAccountSync(): boolean;
 begin
 
-    {TODO -oTomek -cReplaceWith : new account system}
+    {TODO -oTomek -cReplaceWith : new user account mgt}
 
     Result:=True;
 
@@ -615,17 +617,16 @@ begin
     var Utilities: IUtilities:=TUtilities.Create();
     try
 
-        Utilities.GeneralTablesAsync(TSalesResponsible.SalesResponsible, MainAppForm.sgSalesResp, MainForm.GeneralTables_Callback);
-        Utilities.GeneralTablesAsync(TPersonResponsible.PersonResponsible, MainAppForm.sgPersonResp, MainForm.GeneralTables_Callback);
-        Utilities.GeneralTablesAsync(TAccountType.AccountType, MainAppForm.sgAccountType, MainForm.GeneralTables_Callback);
-        Utilities.GeneralTablesAsync(TCustomerGroup.CustomerGroup, MainAppForm.sgCustomerGr, MainForm.GeneralTables_Callback);
-        Utilities.GeneralTablesAsync(TGroup3.Group3, MainAppForm.sgGroup3, MainForm.GeneralTables_Callback);
-
-        Utilities.GeneralTablesAsync(TCompanyData.CompanyData, MainAppForm.sgCoCodes, MainForm.GeneralTables_Callback, TCompanyData.CoCode + TChars.COMMA + TCompanyData.Branch + TChars.COMMA + TCompanyData.CoName + TChars.COMMA + TCompanyData.CoAddress + TChars.COMMA + TCompanyData.VatNo + TChars.COMMA + TCompanyData.Duns + TChars.COMMA + TCompanyData.Country + TChars.COMMA + TCompanyData.City + TChars.COMMA + TCompanyData.FinManager + TChars.COMMA + TCompanyData.TelephoneNumbers + TChars.COMMA + TCompanyData.CoType + TChars.COMMA + TCompanyData.CoCurrency + TChars.COMMA + TCompanyData.InterestRate + TChars.COMMA + TCompanyData.KpiOverdueTarget + TChars.COMMA + TCompanyData.KpiUnallocatedTarget + TChars.COMMA + TCompanyData.Agents + TChars.COMMA + TCompanyData.Divisions, TSql.ORDER + TCompanyData.CoCode + TSql.ASC);
-        Utilities.GeneralTablesAsync(TPaymentTerms.PaymentTerms, MainAppForm.sgPmtTerms, MainForm.GeneralTables_Callback);
-        Utilities.GeneralTablesAsync(TPaidinfo.Paidinfo, MainAppForm.sgPaidInfo, MainForm.GeneralTables_Callback);
-        Utilities.GeneralTablesAsync(TPerson.Person, MainAppForm.sgPerson, MainForm.GeneralTables_Callback);
-        Utilities.GeneralTablesAsync(TControlStatus.ControlStatus, MainAppForm.sgControlStatus, MainForm.GeneralTables_Callback);
+        Utilities.GeneralTablesAsync(TSalesResponsible.SalesResponsible, MainAppForm.sgSalesResp, GeneralTables_Callback);
+        Utilities.GeneralTablesAsync(TPersonResponsible.PersonResponsible, MainAppForm.sgPersonResp, GeneralTables_Callback);
+        Utilities.GeneralTablesAsync(TAccountType.AccountType, MainAppForm.sgAccountType, GeneralTables_Callback);
+        Utilities.GeneralTablesAsync(TCustomerGroup.CustomerGroup, MainAppForm.sgCustomerGr, GeneralTables_Callback);
+        Utilities.GeneralTablesAsync(TGroup3.Group3, MainAppForm.sgGroup3, GeneralTables_Callback);
+        Utilities.GeneralTablesAsync(TCompanyData.CompanyData, MainAppForm.sgCoCodes, GeneralTables_Callback);
+        Utilities.GeneralTablesAsync(TPaymentTerms.PaymentTerms, MainAppForm.sgPmtTerms, GeneralTables_Callback);
+        Utilities.GeneralTablesAsync(TPaidinfo.Paidinfo, MainAppForm.sgPaidInfo, GeneralTables_Callback);
+        Utilities.GeneralTablesAsync(TPerson.Person, MainAppForm.sgPerson, GeneralTables_Callback);
+        Utilities.GeneralTablesAsync(TControlStatus.ControlStatus, MainAppForm.sgControlStatus, GeneralTables_Callback);
 
     except
         on E: Exception do
@@ -666,6 +667,21 @@ begin
             Result:=False;
         end;
 
+    end;
+
+end;
+
+
+// ----------------------------------------------------------------------------------------------------------------------------------------------- CALLBACKS //
+
+
+procedure TStartupForm.GeneralTables_Callback(CallResponse: TCallResponse);
+begin
+
+    if not CallResponse.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        Exit();
     end;
 
 end;

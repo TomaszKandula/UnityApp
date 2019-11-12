@@ -101,15 +101,15 @@ type
         procedure CheckBoxEstatEqualClick(Sender: TObject);
         procedure CheckBoxAliasEqualClick(Sender: TObject);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
-    private
-        var FCollate1: string;
-        var FCollate2: string;
-        var FCollate3: string;
-        var FCollate4: string;
-        var FIsEqual1: string;
-        var FIsEqual2: string;
-        var FIsEqual3: string;
-        var FIsEqual4: string;
+    strict private
+        var FCollate1:          string;
+        var FCollate2:          string;
+        var FCollate3:          string;
+        var FCollate4:          string;
+        var FIsEqual1:          string;
+        var FIsEqual2:          string;
+        var FIsEqual3:          string;
+        var FIsEqual4:          string;
         var FStrEditName:       string;
         var FStrEditNumber:     string;
         var FStrEditEmail:      string;
@@ -119,20 +119,21 @@ type
         var FStrEditCoCode:     string;
         var FStrEditAgent:      string;
         var FStrEditDivision:   string;
-        procedure Initialize;
-        procedure ClearAll;
-        procedure PerformSearch;
-        procedure MatchCase;
-        procedure IsEqual;
-        procedure AttachOption;
-        procedure UpdateOptions;
-        procedure ResetFields;
-        procedure ResetCheckboxes;
-        procedure ResetCheckboxCaptions;
-        procedure ResetCheckboxTicks;
-        procedure ResetCheckboxDisable;
-        procedure ResetFieldColors;
-        procedure ResetFieldTexts;
+        procedure Initialize();
+        procedure ClearAll();
+        procedure PerformSearch();
+        procedure MatchCase();
+        procedure IsEqual();
+        procedure AttachOption();
+        procedure UpdateOptions();
+        procedure ResetFields();
+        procedure ResetCheckboxes();
+        procedure ResetCheckboxCaptions();
+        procedure ResetCheckboxTicks();
+        procedure ResetCheckboxDisable();
+        procedure ResetFieldColors();
+        procedure ResetFieldTexts();
+        procedure OpenAddressBookAsync_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
     end;
 
 
@@ -146,13 +147,16 @@ implementation
 
 
 uses
+    DbModel,
     View.Main,
     Unity.Sql,
     Unity.Common,
     Unity.Settings,
     Unity.Helpers,
+    Unity.Enums,
     Unity.Messaging,
-    DbModel,
+    Unity.StatusBar,
+    Unity.EventLogger,
     Async.AddressBook;
 
 
@@ -169,7 +173,7 @@ end;
 // ------------------------------------------------------------------------------------------------------------------------------------------- CLASS HELPERS //
 
 
-procedure TSqlSearchForm.Initialize;
+procedure TSqlSearchForm.Initialize();
 begin
 
     var Settings: ISettings:=TSettings.Create;
@@ -188,7 +192,7 @@ begin
 end;
 
 
-procedure TSqlSearchForm.ClearAll;
+procedure TSqlSearchForm.ClearAll();
 begin
     ResetFields;
     ResetCheckboxes;
@@ -197,7 +201,7 @@ begin
 end;
 
 
-procedure TSqlSearchForm.MatchCase;
+procedure TSqlSearchForm.MatchCase();
 begin
     if CheckBoxNameCase.Checked  then FCollate1:=TSql.MATCHCASE;
     if CheckBoxEmailCase.Checked then FCollate2:=TSql.MATCHCASE;
@@ -206,7 +210,7 @@ begin
 end;
 
 
-procedure TSqlSearchForm.IsEqual;
+procedure TSqlSearchForm.IsEqual();
 begin
     if CheckBoxNameEqual.Checked  then FIsEqual1:=TSql.EQUAL else FIsEqual1:=TSql.LIKE;
     if CheckBoxEmailEqual.Checked then FIsEqual2:=TSql.EQUAL else FIsEqual2:=TSql.LIKE;
@@ -215,7 +219,7 @@ begin
 end;
 
 
-procedure TSqlSearchForm.AttachOption;
+procedure TSqlSearchForm.AttachOption();
 begin
     if EditName.Enabled       then FStrEditName      :=DbModel.TAddressBook.CustomerName + FIsEqual1 + QuotedStr(EditName.Text)       + FCollate1 + TSql._AND;
     if EditEmail.Enabled      then FStrEditEmail     :=DbModel.TAddressBook.Emails       + FIsEqual2 + QuotedStr(EditEmail.Text)      + FCollate2 + TSql._AND;
@@ -224,7 +228,7 @@ begin
 end;
 
 
-procedure TSqlSearchForm.UpdateOptions;
+procedure TSqlSearchForm.UpdateOptions();
 begin
     if EditNumber.Enabled   then FStrEditNumber  :=DbModel.TAddressBook.CustomerNumber + TSql.EQUAL + QuotedStr(EditNumber.Text)   + TSql._AND;
     if EditPhones.Enabled   then FStrEditPhones  :=DbModel.TAddressBook.PhoneNumbers   + TSql.EQUAL + QuotedStr(EditPhones.Text)   + TSql._AND;
@@ -234,7 +238,7 @@ begin
 end;
 
 
-procedure TSqlSearchForm.ResetFields;
+procedure TSqlSearchForm.ResetFields();
 begin
     EditNumber.Enabled:=True;
     EditName.Enabled:=False;
@@ -248,7 +252,7 @@ begin
 end;
 
 
-procedure TSqlSearchForm.ResetCheckboxes;
+procedure TSqlSearchForm.ResetCheckboxes();
 begin
     ResetCheckboxCaptions;
     ResetCheckboxTicks;
@@ -256,7 +260,7 @@ begin
 end;
 
 
-procedure TSqlSearchForm.ResetCheckboxCaptions;
+procedure TSqlSearchForm.ResetCheckboxCaptions();
 begin
     CheckBoxNameEqual.Caption:='Equal';
     CheckBoxEmailEqual.Caption:='Equal';
@@ -265,7 +269,7 @@ begin
 end;
 
 
-procedure TSqlSearchForm.ResetCheckboxTicks;
+procedure TSqlSearchForm.ResetCheckboxTicks();
 begin
     CheckBoxAliasCase.Checked:=False;
     CheckBoxNameCase.Checked:=False;
@@ -287,7 +291,7 @@ begin
 end;
 
 
-procedure TSqlSearchForm.ResetCheckboxDisable;
+procedure TSqlSearchForm.ResetCheckboxDisable();
 begin
     CheckBoxNameCase.Enabled:=False;
     CheckBoxEmailCase.Enabled:=False;
@@ -300,7 +304,7 @@ begin
 end;
 
 
-procedure TSqlSearchForm.ResetFieldColors;
+procedure TSqlSearchForm.ResetFieldColors();
 begin
     EditNumber.Color:=clCream;
     EditName.Color:=clWhite;
@@ -314,7 +318,7 @@ begin
 end;
 
 
-procedure TSqlSearchForm.ResetFieldTexts;
+procedure TSqlSearchForm.ResetFieldTexts();
 begin
     EditNumber.Text:='';
     EditName.Text:='';
@@ -328,7 +332,7 @@ begin
 end;
 
 
-procedure TSqlSearchForm.PerformSearch;
+procedure TSqlSearchForm.PerformSearch();
 begin
 
     if (EditName.Enabled) and (string.IsNullOrEmpty(EditName.Text)) then
@@ -406,7 +410,44 @@ begin
     OutputDebugString(PChar(Conditions));
 
     var AddressBook: IAddressBook:=TAddressBook.Create();
-    AddressBook.OpenAddressBookAsync('', MainForm.OpenAddressBookAsync_Callback, Conditions);
+    AddressBook.OpenAddressBookAsync('', OpenAddressBookAsync_Callback, Conditions);
+
+end;
+
+
+// ----------------------------------------------------------------------------------------------------------------------------------------------- CALLBACKS //
+
+
+procedure TSqlSearchForm.OpenAddressBookAsync_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
+begin
+
+    if not CallResponse.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
+        THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
+        ThreadFileLog.Log('[OpenAddressBookAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+        Exit();
+    end;
+
+    MainForm.sgAddressBook.Freeze(True);
+    try
+
+        MainForm.sgAddressBook.RowCount:=ReturnedData.RowCount;
+        MainForm.sgAddressBook.ColCount:=ReturnedData.ColCount;
+
+        for var iCNT:=0 to ReturnedData.RowCount - 1 do
+            for var jCNT:=0 to ReturnedData.ColCount - 1 do
+                MainForm.sgAddressBook.Cells[jCNT, iCNT]:=ReturnedData.Cells[jCNT, iCNT];
+
+    finally
+        MainForm.sgAddressBook.Freeze(False);
+        MainForm.sgAddressBook.SetColWidth(40, 10, 400);
+    end;
+
+    THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
+    THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
+    ThreadFileLog.Log('[OpenAddressBookAsync_Callback]: Address Book has been opened.');
 
 end;
 

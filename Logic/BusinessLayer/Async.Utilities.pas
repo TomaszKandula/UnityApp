@@ -23,7 +23,6 @@ uses
     Vcl.Dialogs,
     Data.Win.ADODB,
     Data.DB,
-    Handler.Sql,
     Unity.Grid,
     Unity.Enums,
     Unity.Records,
@@ -52,6 +51,11 @@ type
     /// Callback signature (delegate) for getting results from updating general tables.
     /// </summary>
     TGeneralTables = procedure(CallResponse: TCallResponse) of object;
+
+    /// <summary>
+    /// Callback signature (delegate) for getting results from query basic company data.
+    /// </summary>
+    TGetCompanyDetails = procedure(LbuName: string; LbuAddress: string; LbuPhone: string; LbuEmail: string; BanksData: string; CallResponse: TCallResponse) of object;
 
     /// <summary>
     /// Callback signature (delegate) for getting results from checking supplied local administrator password.
@@ -105,6 +109,15 @@ type
         procedure GeneralTablesAsync(TableName: string; DestGrid: TStringGrid; Callback: TGeneralTables; Columns: string = ''; Conditions: string = ''; WaitToComplete: boolean = False);
 
         /// <summary>
+        /// Allow to load async. some company data like name, address, phone etc.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil (not recommended) for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
+        procedure GetCompanyDetailsAsync(CoCode: string; Branch: string; Callback: TGetCompanyDetails);
+
+        /// <summary>
         /// Allow to async. check provided local administrator password.
         /// Notification is always executed in main thread as long as callback is provided.
         /// </summary>
@@ -114,7 +127,7 @@ type
         procedure CheckGivenPasswordAsync(Password: string; Callback: TCheckGivenPassword);
 
         /// <summary>
-        /// Allow to async. setup newly provided local administrator password.
+        /// Allow to async. setup newly provided local administrator password that works only for given program installed on local machine.
         /// Notification is always executed in main thread as long as callback is provided.
         /// </summary>
         /// <remarks>
@@ -167,6 +180,15 @@ type
         procedure GeneralTablesAsync(TableName: string; DestGrid: TStringGrid; Callback: TGeneralTables; Columns: string = ''; Conditions: string = ''; WaitToComplete: boolean = False);
 
         /// <summary>
+        /// Allow to load async. some company data like name, address, phone etc.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil (not recommended) for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
+        procedure GetCompanyDetailsAsync(CoCode: string; Branch: string; Callback: TGetCompanyDetails);
+
+        /// <summary>
         /// Allow to async. check provided local administrator password.
         /// Notification is always executed in main thread as long as callback is provided.
         /// </summary>
@@ -176,7 +198,7 @@ type
         procedure CheckGivenPasswordAsync(Password: string; Callback: TCheckGivenPassword);
 
         /// <summary>
-        /// Allow to async. setup newly provided local administrator password.
+        /// Allow to async. setup newly provided local administrator password that works only for given program installed on local machine.
         /// Notification is always executed in main thread as long as callback is provided.
         /// </summary>
         /// <remarks>
@@ -191,8 +213,10 @@ implementation
 
 
 uses
-    Handler.Database,
-    Handler.Account,
+    Handler.Database{Legacy},
+    Handler.Account{Legacy},
+    Handler.Sql{Legacy},
+    Unity.Sql,
     Unity.Helpers,
     Unity.Messaging,
     Unity.Settings,
@@ -204,13 +228,8 @@ uses
     Unity.Utilities,
     Sync.Documents,
     Bcrypt,
-    DbModel;
+    DbModel{Legacy};
 
-
-// ------------------------------------
-// Check connection with SQL Server
-// *Remove when SQL is replaced by API.
-// ------------------------------------
 
 procedure TUtilities.CheckServerConnAsync(IsConnected: boolean; Callback: TCheckServerConn);
 begin
@@ -266,11 +285,6 @@ begin
 
 end;
 
-
-// -------------------------------
-// Send user feedback to predefine
-// email address in settings file.
-// -------------------------------
 
 procedure TUtilities.SendFeedbackAsync(Text: string; Callback: TSendUserFeedback);
 begin
@@ -361,11 +375,6 @@ begin
 end;
 
 
-// --------------------------------------
-// Generate Excel report asynchronously
-// to not to block application usability.
-// --------------------------------------
-
 procedure TUtilities.ExcelExportAsync(GroupId: string; AgeDate: string; FileName: string; Callback: TExcelExport);
 begin
 
@@ -405,10 +414,6 @@ begin
 
 end;
 
-
-// --------------------------------
-// Load async. given general table.
-// --------------------------------
 
 procedure TUtilities.GeneralTablesAsync(TableName: string; DestGrid: TStringGrid; Callback: TGeneralTables; Columns: string = ''; Conditions: string = ''; WaitToComplete: boolean = False);
 begin
@@ -462,9 +467,62 @@ begin
 end;
 
 
-// ------------------------
-// Check supplied password.
-// ------------------------
+procedure TUtilities.GetCompanyDetailsAsync(CoCode: string; Branch: string; Callback: TGetCompanyDetails);
+begin
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var LbuName:    string;
+        var LbuAddress: string;
+        var LbuPhone:   string;
+        var LbuEmail:   string;
+        var BanksData:  string;
+
+        var CallResponse: TCallResponse;
+        var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
+        try
+
+            DataTables.Columns.Add(TCompanyData.CoName);
+            DataTables.Columns.Add(TCompanyData.CoAddress);
+            DataTables.Columns.Add(TCompanyData.TelephoneNumbers);
+            DataTables.Columns.Add(TCompanyData.SendNoteFrom);
+            DataTables.Columns.Add(TCompanyData.BankAccounts);
+            DataTables.CustFilter:=TSql.WHERE + TCompanyData.CoCode + TSql.EQUAL + QuotedStr(CoCode) + TSql._AND + TCompanyData.Branch + TSql.EQUAL + QuotedStr(Branch);
+            DataTables.OpenTable(TCompanyData.CompanyData);
+
+            if DataTables.DataSet.RecordCount = 1 then
+            begin
+                LbuName   :=THelpers.OleGetStr(DataTables.DataSet.Fields[TCompanyData.CoName].Value);
+                LbuAddress:=THelpers.OleGetStr(DataTables.DataSet.Fields[TCompanyData.CoAddress].Value);
+                LbuPhone  :=THelpers.OleGetStr(DataTables.DataSet.Fields[TCompanyData.TelephoneNumbers].Value);
+                LbuEmail  :=THelpers.OleGetStr(DataTables.DataSet.Fields[TCompanyData.SendNoteFrom].Value);
+                BanksData :=THelpers.OleGetStr(DataTables.DataSet.Fields[TCompanyData.BankAccounts].Value);
+            end;
+
+            CallResponse.IsSucceeded:=True;
+
+        except
+            on E: Exception do
+            begin
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[GetCompanyDetailsAsync]: Cannot execute. Error has been thrown: ' + E.Message;
+                ThreadFileLog.Log(CallResponse.LastMessage);
+            end;
+
+        end;
+
+        TThread.Synchronize(nil, procedure
+        begin
+            if Assigned(Callback) then Callback(LbuName, LbuAddress, LbuPhone, LbuEmail, BanksData, CallResponse);
+        end);
+
+    end);
+
+    NewTask.Start();
+
+end;
+
 
 procedure TUtilities.CheckGivenPasswordAsync(Password: string; Callback: TCheckGivenPassword);
 begin
@@ -524,11 +582,6 @@ begin
 
 end;
 
-
-// -------------------------------------------------------------
-// Set new administrator password. This is local admin password,
-// that works only for given program installed on local machine.
-// -------------------------------------------------------------
 
 procedure TUtilities.SetNewPasswordAsync(CurrentPassword: string; NewPassword: string; Callback: TSetNewPassword);
 begin

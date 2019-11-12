@@ -33,7 +33,7 @@ program Unity;
 // OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,  //
 // ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR  //
 // OTHER DEALINGS IN THE SOFTWARE.                                        //
-// =======================================================================//
+// ====================================================================== //
 
 
 {$SetPEFlags $0020}
@@ -289,7 +289,7 @@ begin
     StartupForm.SetSessionLog(SessionService.SessionLog);
     StartupForm.Show();
 
-    Application.Run;
+    Application.Run;{Starts event loop}
     DestroySessionService();
     GlobalCEFApp.Free;
 

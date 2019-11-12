@@ -52,6 +52,7 @@ type
         var FGeneralCommentFields: TGeneralCommentFields;
         function MakeMyDay(Increment: integer): TDate;
         function IsWeekend(const DT: TDateTime): Boolean;
+        procedure EditGeneralComment_Callback(CallResponse: TCallResponse);
     public
         var FCalendarMode: TCalendar;
         var FSelectedDate: TDateTime;
@@ -74,7 +75,9 @@ uses
     DbModel,
     Unity.Chars,
     Unity.Unknown,
+    Unity.Helpers,
     Unity.DateTimeFormats,
+    Unity.EventLogger,
     Unity.Settings,
     Async.Comments;
 
@@ -126,9 +129,25 @@ begin
     FGeneralCommentFields.EventLog    :=False;
 
     var Comments: IComments:=TComments.Create();
-    Comments.EditGeneralComment(FGeneralCommentFields, MainForm.EditGeneralComment_Callback);
+    Comments.EditGeneralComment(FGeneralCommentFields, EditGeneralComment_Callback);
 
     MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneralComment.fFollowUp, 1, 1), Row]:=DateToStr(SelectedDate);
+
+end;
+
+
+// ----------------------------------------------------------------------------------------------------------------------------------------------- CALLBACKS //
+
+
+procedure TCalendarForm.EditGeneralComment_Callback(CallResponse: TCallResponse);
+begin
+
+    if not CallResponse.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        ThreadFileLog.Log('[EditGeneralComment_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+        Exit();
+    end;
 
 end;
 

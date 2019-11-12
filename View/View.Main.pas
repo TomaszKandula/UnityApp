@@ -809,12 +809,14 @@ type
         procedure CommonPopupMenuPopup(Sender: TObject);
         procedure TrayIconClick(Sender: TObject);
     protected
-
+        procedure WndProc(var msg: TMessage); override;
+        procedure WndMessagesChromium(PassMsg: TMessage);
+        procedure WndMessagesWindows(PassMsg: TMessage);
+        procedure WndMessagesExternal(PassMsg: TMessage);
         // --------------------------------------------------------------------------------
         // Chromium component. Do not modify, rather follow Chromium implementation manual.
         // See more: https://github.com/salvadordf/CEF4Delphi.
         // --------------------------------------------------------------------------------
-
         procedure NotifyMoveOrResizeStarted;
         procedure ChromiumModalLoopOn(PassMsg: TMessage);
         procedure ChromiumModalLoopOff(PassMsg: TMessage);
@@ -832,18 +834,7 @@ type
             var noJavascriptAccess: Boolean;
             var Result: Boolean
         );
-
-        // -------------------------
-        // Process Windows messages.
-        // -------------------------
-
-        procedure WndProc(var msg: TMessage); override;
-        procedure WndMessagesChromium(PassMsg: TMessage);
-        procedure WndMessagesWindows(PassMsg: TMessage);
-        procedure WndMessagesExternal(PassMsg: TMessage);
-
     strict private
-
         var CustAll:     integer;
         var ANotDue:     extended;
         var ARange1:     extended;
@@ -862,13 +853,11 @@ type
         var RCAcount:    cardinal;
         var RCBcount:    cardinal;
         var RCCcount:    cardinal;
-
-        var FHadFirstLoad:         boolean;
-        var FAllowClose:           boolean;
+        var FHadFirstLoad: boolean;
+        var FAllowClose:   boolean;
         var FAbUpdateFields:       TAddressBookUpdateFields;
         var FDailyCommentFields:   TDailyCommentFields;
         var FGeneralCommentFields: TGeneralCommentFields;
-
         procedure SetPanelBorders;
         procedure SetGridColumnWidths;
         procedure SetGridRowHeights;
@@ -876,21 +865,32 @@ type
         procedure SetSettingsPanel(IsLocked: boolean);
         procedure InitializeScreenSettings;
         function  AddressBookExclusion: boolean;
-
         procedure ClearAgeSummary();
         procedure UpdateOpenItemsDetails(var Grid: TStringGrid);
         procedure LoadColumnWidth(var Grid: TStringGrid);
-
         procedure MapGroup3(var Grid: TStringGrid; var Source: TStringGrid);
         procedure MapTable1(var Grid: TStringGrid; var Source: TStringGrid);
         procedure MapTable2(var Grid: TStringGrid; var Source: TStringGrid);
         procedure MapTable3(var Grid: TStringGrid; var Source: TStringGrid);
         procedure MapTable4(var Grid: TStringGrid; var Source: TStringGrid);
+        function GetData(Code: string; Table: string; Entity: string): string; // make async + spit into awaited functions (1)
 
-        function GetData(Code: string; Table: string; Entity: string): string;
+        procedure OpenAddressBookAsync_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
+        procedure UpdateAddressBookAsync_Callback(CallResponse: TCallResponse);
+        procedure AddToAddressBookAsync_Callback(CallResponse: TCallResponse);
+        procedure MakeAgeViewSQLAsync_Callback(CallResponse: TCallResponse);
+        procedure MakeAgeViewCSVAsync_Callback(CsvContent: TStringList; CallResponse: TCallResponse);
+        procedure ReadAgeViewAsync_Callback(ActionMode: TLoading; ReturnedData: TStringGrid; CallResponse: TCallResponse);
+        procedure ScanOpenItemsAsync_Callback(CanMakeAge: boolean; ReadDateTime: string; CallResponse: TCallResponse);
+        procedure ReadOpenItemsAsync_Callback(ActionMode: TLoading; OpenItemsData: TOpenItemsPayLoad; CallResponse: TCallResponse);
+        procedure CheckGivenPassword_Callback(CallResponse: TCallResponse);
+        procedure SetNewPassword_Callback(CallResponse: TCallResponse);
+        procedure CheckServerConnAsync_Callback(IsConnected: boolean; CallResponse: TCallResponse);
+        procedure ExcelExport_Callback(CallResponse: TCallResponse);
+        procedure RefreshInvoiceTracker_Callback(InvoiceList: TStringGrid; CallResponse: TCallResponse);
+        procedure DeleteFromTrackerList_Callback(CallResponse: TCallResponse);
 
-    public
-
+    public // remove!!!
         // Legacy code, to be removed [start]
         var FGroupIdSel:      string;
         var FGroupNmSel:      string;
@@ -903,89 +903,34 @@ type
         var FIsConnected:     boolean;
         procedure TryInitConnection;
         // Legacy code, to be removed [end]
-
-        // replace by callbacks from async methods [start]
+        // replace by callbacks from async methods [start] (3)
         procedure CallbackAwaitForm(PassMsg: TMessage);
         procedure CallbackStatusBar(PassMsg: TMessage);
         procedure CallbackMessageBox(PassMsg: TMessage);
         procedure WndMessagesInternal(PassMsg: TMessage);
         // replace by callbacks from async methods [end]
-
-
-        var Class_A: double;
-        var Class_B: double;
-        var Class_C: double;
-
+    public
+        var FClass_A:        double;
+        var FClass_B:        double;
+        var FClass_C:        double;
         var FStartTime:      TTime;
-        var FGroupList:      TALists;
+        var FGroupList:      TALists{Legacy};
         var FAgeDateList:    TALists;
         var FGridPicture:    TImage;
         var FOpenItemsRefs:  TFOpenItemsRefs;
         var FCtrlStatusRefs: TFCtrlStatusRefs;
-
         procedure SetActiveTabsheet(TabSheet: TTabSheet);
         procedure ResetTabsheetButtons();
-
         procedure UpdateAgeSummary();
-        procedure ComputeAgeSummary(var Grid: TStringGrid);  // make async?
+        procedure ComputeAgeSummary(var Grid: TStringGrid);  // make async! (2)
         procedure ComputeRiskClass(var Grid: TStringGrid);
-
         procedure ClearOpenItemsSummary();
-
         procedure InitMainWnd(SessionFile: string);
         procedure SetupMainWnd();
         procedure StartMainWnd();
         procedure UpdateFOpenItemsRefs(SourceGrid: TStringGrid);
         procedure UpdateFControlStatusRefs(SourceGrid: TStringGrid);
         procedure SwitchTimers(State: TAppTimers);
-
-        // --------------------------------
-        // Callbacks for Async.AddressBook.
-        // --------------------------------
-
-        procedure OpenAddressBookAsync_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
-        procedure UpdateAddressBookAsync_Callback(CallResponse: TCallResponse);
-        procedure AddToAddressBookAsync_Callback(CallResponse: TCallResponse);
-
-        // -----------------------------
-        // Callbacks for Async.Comments.
-        // -----------------------------
-
-        procedure EditDailyComment_Callback(CallResponse: TCallResponse);
-        procedure EditGeneralComment_Callback(CallResponse: TCallResponse);
-
-        // ----------------------------
-        // Callbacks for Async.Debtors.
-        // ----------------------------
-
-        procedure MakeAgeViewSQLAsync_Callback(CallResponse: TCallResponse);
-        procedure MakeAgeViewCSVAsync_Callback(CsvContent: TStringList; CallResponse: TCallResponse);
-        procedure ReadAgeViewAsync_Callback(ActionMode: TLoading; ReturnedData: TStringGrid; CallResponse: TCallResponse);
-
-        // ------------------------------
-        // Callbacks for Async.OpenItems.
-        // ------------------------------
-
-        procedure ScanOpenItemsAsync_Callback(CanMakeAge: boolean; ReadDateTime: string; CallResponse: TCallResponse);
-        procedure ReadOpenItemsAsync_Callback(ActionMode: TLoading; OpenItemsData: TOpenItemsPayLoad; CallResponse: TCallResponse);
-
-        // ------------------------------
-        // Callbacks for Async.Utilities.
-        // ------------------------------
-
-        procedure CheckGivenPassword_Callback(CallResponse: TCallResponse);
-        procedure SetNewPassword_Callback(CallResponse: TCallResponse);
-        procedure CheckServerConnAsync_Callback(IsConnected: boolean; CallResponse: TCallResponse);
-        procedure ExcelExport_Callback(CallResponse: TCallResponse);
-        procedure GeneralTables_Callback(CallResponse: TCallResponse);
-
-        // ----------------------------
-        // Callbacks for Async.Tracker.
-        // ----------------------------
-
-        procedure RefreshInvoiceTracker_Callback(InvoiceList: TStringGrid; CallResponse: TCallResponse);
-        procedure DeleteFromTrackerList_Callback(CallResponse: TCallResponse);
-
     end;
 
 
@@ -1135,39 +1080,6 @@ begin
             ThreadFileLog.Log('[AddToAddressBookAsync_Callback]: Adddress Book has thrown an error "' + CallResponse.LastMessage + '".');
         end;
 
-    end;
-
-end;
-
-
-// --------------------------------
-// Async.Comments callback methods.
-// --------------------------------
-
-procedure TMainForm.EditDailyComment_Callback(CallResponse: TCallResponse);
-begin
-
-    if not CallResponse.IsSucceeded then
-    begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
-        ThreadFileLog.Log('[EditDailyComment_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
-        Exit();
-    end;
-
-    ActionsForm.UpdateHistory(ActionsForm.HistoryGrid);
-    ThreadFileLog.Log('[EditDailyComment_Callback]: Calling "UpdateHistory".');
-
-end;
-
-
-procedure TMainForm.EditGeneralComment_Callback(CallResponse: TCallResponse);
-begin
-
-    if not CallResponse.IsSucceeded then
-    begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
-        ThreadFileLog.Log('[EditGeneralComment_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
-        Exit();
     end;
 
 end;
@@ -1522,18 +1434,6 @@ begin
 end;
 
 
-procedure TMainForm.GeneralTables_Callback(CallResponse: TCallResponse);
-begin
-
-    if not CallResponse.IsSucceeded then
-    begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
-        Exit();
-    end;
-
-end;
-
-
 // --------------------------------
 // Async.Tracker callbacks methods.
 // --------------------------------
@@ -1770,7 +1670,7 @@ begin
         FDailyCommentFields.ExtendComment:=False;
 
         var Comments: IComments:=TComments.Create();
-        Comments.EditDailyComment(FDailyCommentFields, MainForm.EditDailyComment_Callback);
+        Comments.EditDailyComment(FDailyCommentFields, nil);
 
     end;
 
@@ -2285,8 +2185,7 @@ end;
 procedure TMainForm.ComputeAgeSummary(var Grid: TStringGrid); // make async!
 begin
 
-    for var iCNT: integer:=1 to Grid.RowCount - 1 do
-    if Grid.RowHeights[iCNT] <> Grid.sgRowHidden then
+    for var iCNT: integer:=1 to Grid.RowCount - 1 do if Grid.RowHeights[iCNT] <> Grid.sgRowHidden then
     begin
 
         // ---------------------------
@@ -2340,9 +2239,9 @@ begin
     var Count: double:=0;
     var Rows: integer:=0;
 
-    RCA:=Balance * Class_A;
-    RCB:=Balance * Class_B;
-    RCC:=Balance * Class_C;
+    RCA:=Balance * FClass_A;
+    RCB:=Balance * FClass_B;
+    RCC:=Balance * FClass_C;
 
     // Move totals and its positions into array
     for var iCNT: integer:=1 to Grid.RowCount do
@@ -3737,7 +3636,7 @@ begin
             FGeneralCommentFields.EventLog    :=False;
 
             var Comments: IComments:=TComments.Create();
-            Comments.EditGeneralComment(FGeneralCommentFields, MainForm.EditGeneralComment_Callback);
+            Comments.EditGeneralComment(FGeneralCommentFields, nil);
 
             MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneralComment.fFollowUp, 1, 1), iCNT]:=TChars.SPACE;
 
@@ -5067,7 +4966,7 @@ procedure TMainForm.sgAgeViewKeyDown(Sender: TObject; var Key: Word; Shift: TShi
         end;
 
         var Comments: IComments:=TComments.Create();
-        Comments.EditGeneralComment(FGeneralCommentFields, MainForm.EditGeneralComment_Callback);
+        Comments.EditGeneralComment(FGeneralCommentFields, nil);
 
     end;
 

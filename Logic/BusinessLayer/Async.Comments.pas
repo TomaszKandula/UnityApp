@@ -43,6 +43,11 @@ type
     /// </summary>
     TEditGeneralComment = procedure(CallResponse: TCallResponse) of object;
 
+    /// <summary>
+    /// Callback signature (delegate) for getting results for daily comments list.
+    /// </summary>
+    TGetDailyComments = procedure(ReturnedGrid: TStringGrid; CallResponse: TCallResponse) of object;
+
 
     IComments = interface(IInterface)
     ['{1B3127BB-EC78-4177-A286-C138E02709D3}']
@@ -64,6 +69,22 @@ type
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
         procedure EditGeneralComment(PayLoad: TGeneralCommentFields; Callback: TEditGeneralComment = nil);
+
+        /// <summary>
+        /// Allow to async. retrive general comment for given customer (via CUID number). There is no separate notification.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        function GetGeneralCommentAwaited(CUID: string): string;
+
+        /// <summary>
+        /// Allow to async. retrieve daily comments for given customer (via CUID number). There is no separate notification.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        function GetDailyCommentsAwaited(CUID: string): TStringGrid;
 
     end;
 
@@ -96,6 +117,22 @@ type
         /// Note: this method defines callback as nil be default.
         /// </remarks>
         procedure EditGeneralComment(PayLoad: TGeneralCommentFields; Callback: TEditGeneralComment = nil);
+
+        /// <summary>
+        /// Allow to async. retrive general comment for given customer (via CUID number). There is no separate notification.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        function GetGeneralCommentAwaited(CUID: string): string;
+
+        /// <summary>
+        /// Allow to async. retrieve daily comments for given customer (via CUID number). There is no separate notification.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        function GetDailyCommentsAwaited(CUID: string): TStringGrid;
 
     end;
 
@@ -567,6 +604,91 @@ begin
     end);
 
     NewTask.Start();
+
+end;
+
+
+function TComments.GetGeneralCommentAwaited(CUID: string): string;
+begin
+
+    var NewResult: string;
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var GenText: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
+        try
+
+            try
+
+                GenText.CustFilter:=TSql.WHERE + TGeneralComment.Cuid + TSql.EQUAL + QuotedStr(CUID);
+                GenText.OpenTable(TGeneralComment.GeneralComment);
+
+                if not (GenText.DataSet.EOF) then
+                    NewResult:=THelpers.OleGetStr(GenText.DataSet.Fields[TGeneralComment.FixedComment].Value);
+
+            except
+                on E: Exception do
+                    ThreadFileLog.Log('[GetGeneralCommentAwaited]: ' + E.Message);
+
+            end;
+
+        finally
+            GenText.Free;
+        end;
+
+    end);
+
+    NewTask.Start();
+    TTask.WaitForAll(NewTask);
+
+    {Under ARC / do not manually release it}
+    Result:=NewResult;
+
+end;
+
+
+function TComments.GetDailyCommentsAwaited(CUID: string): TStringGrid;
+begin
+
+    var NewResult: TStringGrid:=TStringGrid.Create(nil);
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var DailyText: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
+        try
+
+            try
+
+                DailyText.Columns.Add(TDailyComment.AgeDate);
+                DailyText.Columns.Add(TDailyComment.Stamp);
+                DailyText.Columns.Add(TDailyComment.UserAlias);
+                DailyText.Columns.Add(TDailyComment.FixedComment);
+
+                DailyText.CustFilter:=TSql.WHERE + TDailyComment.Cuid + TSql.EQUAL + QuotedStr(CUID);
+                DailyText.OpenTable(TDailyComment.DailyComment);
+                DailyText.DataSet.Sort:=TDailyComment.Stamp + TSql.DESC;
+
+                if not (DailyText.DataSet.EOF) then DailyText.SqlToGrid(NewResult, DailyText.DataSet, False, True);
+
+            except
+                on E: Exception do
+                    ThreadFileLog.Log('[GetDailyCommentsAwaited]: ' + E.Message);
+
+            end;
+
+        finally
+            DailyText.Free;
+        end;
+
+    end);
+
+    NewTask.Start();
+    TTask.WaitForAll(NewTask);
+
+    {Under ARC / do not manually release it}
+    Result:=NewResult;
 
 end;
 

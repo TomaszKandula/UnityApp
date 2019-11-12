@@ -34,19 +34,24 @@ type
 
 
     /// <summary>
-    /// Callback signature (delegate) for address book open action.
+    /// Callback signature (delegate) for getting results of address book open action.
     /// </summary>
     TOpenAddressBook = procedure(ReturnedData: TStringGrid; CallResponse: TCallResponse) of object;
 
     /// <summary>
-    /// Callback signature (delegate) for address book update action.
+    /// Callback signature (delegate) for getting results of address book update action.
     /// </summary>
     TUpdateAddressBook = procedure(CallResponse: TCallResponse) of object;
 
     /// <summary>
-    /// Callback signature (delegate) for address book insert action.
+    /// Callback signature (delegate) for getting results of address book insert action.
     /// </summary>
     TAddToAddressBook = procedure(CallResponse: TCallResponse) of object;
+
+    /// <summary>
+    /// Callback signature (delegate) for getting results of address book read action.
+    /// </summary>
+    TGetCustomerDetails = procedure(CustPerson: string; CustMailGen: string; CustMailStat: string; CustPhones: string; CallResponse: TCallResponse) of object;
 
 
     IAddressBook = interface(IInterface)
@@ -69,12 +74,20 @@ type
         procedure UpdateAddressBookAsync(SourceGrid: TStringGrid; UpdateValues: TAddressBookUpdateFields; Callback: TUpdateAddressBook);
 
         /// <summary>
-        /// Insert async. address book new data and return notify via given callback method that is always executed in main thread.
+        /// Insert async. address book new data and notify via given callback method that is always executed in main thread.
         /// </summary>
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
         procedure AddToAddressBookAsync(SourceGrid: TStringGrid; Callback: TAddToAddressBook);
+
+        /// <summary>
+        /// Load async. address book customer data only and notify via given callback method that is always executed in main thread.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil (not recommended) for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
+        procedure GetCustomerDetailsAsync(SCUID: string; Callback: TGetCustomerDetails);
 
     end;
 
@@ -100,12 +113,20 @@ type
         procedure UpdateAddressBookAsync(SourceGrid: TStringGrid; UpdateValues: TAddressBookUpdateFields; Callback: TUpdateAddressBook);
 
         /// <summary>
-        /// Insert async. address book new data and return notify via given callback method that is always executed in main thread.
+        /// Insert async. address book new data and notify via given callback method that is always executed in main thread.
         /// </summary>
         /// <remarks>
         /// Provide nil for Callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
         procedure AddToAddressBookAsync(SourceGrid: TStringGrid; Callback: TAddToAddressBook);
+
+        /// <summary>
+        /// Load async. address book customer data only and notify via given callback method that is always executed in main thread.
+        /// </summary>
+        /// <remarks>
+        /// Provide nil (not recommended) for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// </remarks>
+        procedure GetCustomerDetailsAsync(SCUID: string; Callback: TGetCustomerDetails);
 
     end;
 
@@ -181,15 +202,15 @@ begin
             except
                 on E: Exception do
                 begin
-                    CallResponse.LastMessage:=E.Message;
+                    CallResponse.LastMessage:='Cannot execute. Error has been thrown: ' + E.Message;
                     CallResponse.IsSucceeded:=False;
-                    ThreadFileLog.Log(E.Message);
+                    ThreadFileLog.Log('[OpenAddressBookAsync]: Cannot execute. Error has been thrown: ' + E.Message);
                 end;
 
             end;
 
         finally
-            DataTables.Free;
+            DataTables.Free();
         end;
 
         TThread.Synchronize(nil, procedure
@@ -200,7 +221,7 @@ begin
 
     end);
 
-    NewTask.Start;
+    NewTask.Start();
 
 end;
 
@@ -295,7 +316,7 @@ begin
             end;
 
         finally
-            Book.Free;
+            Book.Free();
         end;
 
         TThread.Synchronize(nil, procedure
@@ -305,7 +326,7 @@ begin
 
     end);
 
-    NewTask.Start;
+    NewTask.Start();
 
 end;
 
@@ -345,7 +366,7 @@ begin
                             3
                         );
 
-                    Book.CleanUp;
+                    Book.CleanUp();
                     Book.Columns.Add(DbModel.TAddressBook.Scuid);
                     Book.CustFilter:=TSql.WHERE + DbModel.TAddressBook.Scuid + TSql.EQUAL + QuotedStr(SCUID);
                     Book.OpenTable(DbModel.TAddressBook.AddressBook);
@@ -370,7 +391,7 @@ begin
             end;
 
         finally
-            Book.Free;
+            Book.Free();
         end;
 
         // Send to database
@@ -412,13 +433,13 @@ begin
                     begin
                         CallResponse.IsSucceeded:=False;
                         CallResponse.LastMessage:='Cannot save selected item(s). Exception has been thrown: ' + E.Message;
-                        ThreadFileLog.Log('Cannot write Address Book item(s) into database. Error: ' + E.Message);
+                        ThreadFileLog.Log('[AddToAddressBookAsync]: Cannot write Address Book item(s) into database. Error: ' + E.Message);
                     end;
 
                 end;
 
             finally
-                Book.Free;
+                Book.Free();
             end;
 
         end
@@ -435,7 +456,67 @@ begin
 
     end);
 
-    NewTask.Start;
+    NewTask.Start();
+
+end;
+
+
+procedure TAddressBook.GetCustomerDetailsAsync(SCUID: string; Callback: TGetCustomerDetails);
+begin
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var CallResponse: TCallResponse;
+        var CustPerson:   string;
+        var CustMailGen:  string;
+        var CustMailStat: string;
+        var CustPhones:   string;
+
+        var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
+        try
+
+            try
+
+                DataTables.Columns.Add(DbModel.TAddressBook.Contact);
+                DataTables.Columns.Add(DbModel.TAddressBook.Emails);
+                DataTables.Columns.Add(DbModel.TAddressBook.Estatements);
+                DataTables.Columns.Add(DbModel.TAddressBook.PhoneNumbers);
+                DataTables.CustFilter:=TSql.WHERE + DbModel.TAddressBook.Scuid + TSql.EQUAL + QuotedStr(SCUID);
+                DataTables.OpenTable(DbModel.TAddressBook.AddressBook);
+
+                if DataTables.DataSet.RecordCount = 1 then
+                begin
+                    CustPerson  :=THelpers.OleGetStr(DataTables.DataSet.Fields[DbModel.TAddressBook.Contact].Value);
+                    CustMailGen :=THelpers.OleGetStr(DataTables.DataSet.Fields[DbModel.TAddressBook.Emails].Value);
+                    CustMailStat:=THelpers.OleGetStr(DataTables.DataSet.Fields[DbModel.TAddressBook.Estatements].Value);
+                    CustPhones  :=THelpers.OleGetStr(DataTables.DataSet.Fields[DbModel.TAddressBook.PhoneNumbers].Value);
+                end;
+
+                CallResponse.IsSucceeded:=True;
+
+            except
+                on E: Exception do
+                begin
+                    CallResponse.LastMessage:='Cannot execute. Error has been thrown: ' + E.Message;
+                    CallResponse.IsSucceeded:=False;
+                    ThreadFileLog.Log('[GetCustomerDetailsAsync]: Cannot execute. Error has been thrown: ' + E.Message);
+                end;
+
+            end;
+
+        finally
+            DataTables.Free();
+        end;
+
+        TThread.Synchronize(nil, procedure
+        begin
+            if Assigned(Callback) then Callback(CustPerson, CustMailGen, CustMailStat, CustPhones, CallResponse);
+        end);
+
+    end);
+
+    NewTask.Start();
 
 end;
 
