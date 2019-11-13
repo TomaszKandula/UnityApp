@@ -1,10 +1,10 @@
 # Unity for Debt Management - release manifest
 # Latest release date and time:
-$Date=2019-06-17
-$Time=11:00:00
+$Date=2019-11-13
+$Time=11:55:00
 
 # Release package status
 $Status=Update
-$Release=74
+$Release=76
 
 # EOF

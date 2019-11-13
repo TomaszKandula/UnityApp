@@ -3,7 +3,6 @@ object MainForm: TMainForm
   Left = 100
   Top = 100
   VertScrollBar.Style = ssFlat
-  BorderIcons = [biSystemMenu, biMaximize]
   Caption = 'Unity for Debt Management'
   ClientHeight = 831
   ClientWidth = 1315

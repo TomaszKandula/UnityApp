@@ -467,7 +467,7 @@ begin
 end;
 
 
-procedure TUtilities.GetCompanyDetailsAsync(CoCode: string; Branch: string; Callback: TGetCompanyDetails);
+procedure TUtilities.GetCompanyDetailsAsync(CoCode: string; Branch: string; Callback: TGetCompanyDetails); // make it awaited
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
@@ -483,33 +483,39 @@ begin
         var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
         try
 
-            DataTables.Columns.Add(TCompanyData.CoName);
-            DataTables.Columns.Add(TCompanyData.CoAddress);
-            DataTables.Columns.Add(TCompanyData.TelephoneNumbers);
-            DataTables.Columns.Add(TCompanyData.SendNoteFrom);
-            DataTables.Columns.Add(TCompanyData.BankAccounts);
-            DataTables.CustFilter:=TSql.WHERE + TCompanyData.CoCode + TSql.EQUAL + QuotedStr(CoCode) + TSql._AND + TCompanyData.Branch + TSql.EQUAL + QuotedStr(Branch);
-            DataTables.OpenTable(TCompanyData.CompanyData);
+            try
 
-            if DataTables.DataSet.RecordCount = 1 then
-            begin
-                LbuName   :=THelpers.OleGetStr(DataTables.DataSet.Fields[TCompanyData.CoName].Value);
-                LbuAddress:=THelpers.OleGetStr(DataTables.DataSet.Fields[TCompanyData.CoAddress].Value);
-                LbuPhone  :=THelpers.OleGetStr(DataTables.DataSet.Fields[TCompanyData.TelephoneNumbers].Value);
-                LbuEmail  :=THelpers.OleGetStr(DataTables.DataSet.Fields[TCompanyData.SendNoteFrom].Value);
-                BanksData :=THelpers.OleGetStr(DataTables.DataSet.Fields[TCompanyData.BankAccounts].Value);
+                DataTables.Columns.Add(TCompanyData.CoName);
+                DataTables.Columns.Add(TCompanyData.CoAddress);
+                DataTables.Columns.Add(TCompanyData.TelephoneNumbers);
+                DataTables.Columns.Add(TCompanyData.SendNoteFrom);
+                DataTables.Columns.Add(TCompanyData.BankAccounts);
+                DataTables.CustFilter:=TSql.WHERE + TCompanyData.CoCode + TSql.EQUAL + QuotedStr(CoCode) + TSql._AND + TCompanyData.Branch + TSql.EQUAL + QuotedStr(Branch);
+                DataTables.OpenTable(TCompanyData.CompanyData);
+
+                if DataTables.DataSet.RecordCount = 1 then
+                begin
+                    LbuName   :=THelpers.OleGetStr(DataTables.DataSet.Fields[TCompanyData.CoName].Value);
+                    LbuAddress:=THelpers.OleGetStr(DataTables.DataSet.Fields[TCompanyData.CoAddress].Value);
+                    LbuPhone  :=THelpers.OleGetStr(DataTables.DataSet.Fields[TCompanyData.TelephoneNumbers].Value);
+                    LbuEmail  :=THelpers.OleGetStr(DataTables.DataSet.Fields[TCompanyData.SendNoteFrom].Value);
+                    BanksData :=THelpers.OleGetStr(DataTables.DataSet.Fields[TCompanyData.BankAccounts].Value);
+                end;
+
+                CallResponse.IsSucceeded:=True;
+
+            except
+                on E: Exception do
+                begin
+                    CallResponse.IsSucceeded:=False;
+                    CallResponse.LastMessage:='[GetCompanyDetailsAsync]: Cannot execute. Error has been thrown: ' + E.Message;
+                    ThreadFileLog.Log(CallResponse.LastMessage);
+                end;
+
             end;
 
-            CallResponse.IsSucceeded:=True;
-
-        except
-            on E: Exception do
-            begin
-                CallResponse.IsSucceeded:=False;
-                CallResponse.LastMessage:='[GetCompanyDetailsAsync]: Cannot execute. Error has been thrown: ' + E.Message;
-                ThreadFileLog.Log(CallResponse.LastMessage);
-            end;
-
+        finally
+            DataTables.Free();
         end;
 
         TThread.Synchronize(nil, procedure

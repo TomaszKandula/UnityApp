@@ -178,6 +178,7 @@ type
         procedure btnSaveCustDetailsMouseEnter(Sender: TObject);
         procedure btnSaveCustDetailsMouseLeave(Sender: TObject);
         procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure FormClose(Sender: TObject; var Action: TCloseAction);
     strict private
         var FHistoryGrid:          boolean;
         var FCUID:                 string;
@@ -197,25 +198,27 @@ type
         var FGeneralCommentFields: TGeneralCommentFields;
         var FOpenItemsTotal:       TOpenItemsTotal;
         var FPayLoad:              TAccountStatementPayLoad;
-        procedure GetAndDisplay;
+        var FIsDataLoaded:         boolean;
         function  GetRunningApps(SearchName: string): boolean;
-        procedure UpdateOpenItems(OpenItemsDest, OpenItemsSrc: TStringGrid);
-        procedure UpdateCustDetails();
-        procedure UpdateCompanyDetails();
+        procedure GetOpenItems(OpenItemsDest, OpenItemsSrc: TStringGrid);
         procedure UpdateGeneral(var Text: TMemo);
         procedure UpdateHistory(var HistoryGrid: TStringGrid);
         procedure GetFirstComment(var Text: TMemo);
-        procedure SetControls();
+        procedure UpdateCustDetails();
+        procedure UpdateCompanyDetails();
+        procedure UpdateOpenItems();
+        procedure UpdateData();
+        procedure InitializePanels();
+        procedure InitializeSpeedButtons();
         procedure Initialize();
         procedure ClearAll();
+        procedure SetControls();
         procedure MakePhoneCall();
         procedure LoadCustomer(GoNext: boolean);
         procedure ClearFollowUp();
         procedure SaveCustomerDetails();
         procedure SaveGeneralComment();
         procedure SaveDailyComment();
-        procedure InitializePanels();
-        procedure InitializeSpeedButtons();
         procedure SendAccountStatement_Callback(ProcessingItemNo: integer; CallResponse: TCallResponse);
         procedure UpdateAddressBook_Callback(CallResponse: TCallResponse);
         procedure EditGeneralComment_Callback(CallResponse: TCallResponse);
@@ -316,47 +319,30 @@ begin
 end;
 
 
-procedure TActionsForm.GetAndDisplay();
+procedure TActionsForm.UpdateOpenItems();
 begin
 
-    Screen.Cursor:=crSQLWait;
-    OpenItemsGrid.Freeze(True);
-    OpenItemsGrid.ClearAll(2, 1, 1, False);
-    HistoryGrid.Freeze(True);
-    HistoryGrid.ClearAll(2, 1, 1, False);
+    SimpleText.Caption :=MainForm.FOpenItemsUpdate;
+    Cust_Name.Caption  :=CustName;
+    Cust_Number.Caption:=CustNumber;
 
-    try
-
-        Cust_Name.Caption  :=CustName;
-        Cust_Number.Caption:=CustNumber;
-
-        UpdateOpenItems(OpenItemsGrid, MainForm.sgOpenItems);
-        UpdateCustDetails();
-        UpdateCompanyDetails();
-        UpdateHistory(HistoryGrid);
-        UpdateGeneral(GeneralCom);
-
-        ValueOpenAm.Caption:=FormatFloat('#,##0.00', FOpenItemsTotal.OpenAm) + ' ' + MainForm.tcCURRENCY.Caption;
-        ValueAmount.Caption:=FormatFloat('#,##0.00', FOpenItemsTotal.Am) + ' ' + MainForm.tcCURRENCY.Caption;
-
-    finally
-
-        OpenItemsGrid.AutoThumbSize;
-        OpenItemsGrid.SetColWidth(10, 20, 400);
-        OpenItemsGrid.Freeze(False);
-
-        HistoryGrid.AutoThumbSize;
-        HistoryGrid.SetColWidth(10, 20, 400);
-        HistoryGrid.Freeze(False);
-
-        Screen.Cursor:=crDefault;
-
-    end;
+    GetOpenItems(OpenItemsGrid, MainForm.sgOpenItems);
+    ValueOpenAm.Caption:=FormatFloat('#,##0.00', FOpenItemsTotal.OpenAm) + ' ' + MainForm.tcCURRENCY.Caption;
+    ValueAmount.Caption:=FormatFloat('#,##0.00', FOpenItemsTotal.Am) + ' ' + MainForm.tcCURRENCY.Caption;
 
 end;
 
 
-procedure TActionsForm.UpdateOpenItems(OpenItemsDest: TStringGrid; OpenItemsSrc: TStringGrid);
+procedure TActionsForm.UpdateData();
+begin
+    UpdateHistory(HistoryGrid);
+    UpdateGeneral(GeneralCom);
+    UpdateCustDetails();
+    UpdateCompanyDetails();
+end;
+
+
+procedure TActionsForm.GetOpenItems(OpenItemsDest: TStringGrid; OpenItemsSrc: TStringGrid);
 begin
 
     var kCNT: integer:=1;
@@ -540,7 +526,6 @@ end;
 
 procedure TActionsForm.Initialize();
 begin
-    ClearAll();
     FCUID      :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCuid,          1, 1), MainForm.sgAgeView.Row];
     FCustName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCustomerName,  1, 1), MainForm.sgAgeView.Row];
     FCustNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCustomerNumber,1, 1), MainForm.sgAgeView.Row];
@@ -563,8 +548,11 @@ begin
     Cust_Phone.Items.Add(TUnknown.NotFound);
     Cust_Phone.ItemIndex:=0;
 
-    DailyCom.Text       :='';
-    GeneralCom.Text     :='';
+    DailyCom.Text  :='';
+    GeneralCom.Text:='';
+
+    HistoryGrid.ClearAll(2, 1, 1, True);
+    OpenItemsGrid.ClearAll(2, 1, 1, True);
 
 end;
 
@@ -622,25 +610,40 @@ procedure TActionsForm.LoadCustomer(GoNext: boolean);
 
 begin
 
-    // To next (skip hiden)
+    Screen.Cursor:=crSQLWait;
+
+    // -------------------------------------------------
+    // Move grid cursor to next item (skip hidden rows).
+    // -------------------------------------------------
+
     if GoNext then
         for var iCNT: integer:=(MainForm.sgAgeView.Row - 1) Downto 1 do
             if not CheckRow(iCNT) then Break;
 
-    // To previous (skip hiden)
+    // -----------------------------------------------------
+    // Move grid cursor to previous item (skip hidden rows).
+    // -----------------------------------------------------
+
     if not GoNext then
         for var iCNT: integer:=(MainForm.sgAgeView.Row + 1) to MainForm.sgAgeView.RowCount - 1 do
             if not CheckRow(iCNT) then Break;
 
-    // Get data
-    Initialize;
-    try
-        GetAndDisplay;
-        HistoryGrid.Visible:=FHistoryGrid;
-        {GetFirstComment(DailyCom);}
-    except
-        THelpers.MsgCall(Warn, 'Unexpected error has occured. Please close the window and try again.');
-    end;
+    THelpers.ExecWithDelay(250, procedure
+    begin
+
+        Initialize();
+        UpdateOpenItems();
+        //UpdateData();
+
+        UpdateHistory(HistoryGrid);
+        UpdateGeneral(GeneralCom);
+
+        //UpdateCustDetails(); // awaited?
+        //UpdateCompanyDetails(); // awaited?
+
+        Screen.Cursor:=crDefault;
+
+    end);
 
 end;
 
@@ -902,30 +905,61 @@ end;
 
 procedure TActionsForm.FormShow(Sender: TObject);
 begin
-    Initialize();
+    {Do nothing}
 end;
 
 
 procedure TActionsForm.FormActivate(Sender: TObject);
 begin
 
-    if MainForm.FIsConnected then
-    begin
-        GetAndDisplay();
-        SimpleText.Caption:=MainForm.FOpenItemsUpdate;
-        GetFirstComment(DailyCom);
-    end
-    else
+    if not MainForm.FIsConnected then
     begin
         THelpers.MsgCall(Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
-        Close;
+        Close();
+    end;
+
+    if not FIsDataLoaded then
+    begin
+
+        Screen.Cursor:=crSQLWait;
+        OpenItemsGrid.Freeze(True);
+        HistoryGrid.Freeze(True);
+
+        THelpers.ExecWithDelay(500, procedure
+        begin
+
+            Initialize();
+            UpdateOpenItems();
+            UpdateData();
+
+            OpenItemsGrid.Freeze(False);
+            OpenItemsGrid.AutoThumbSize;
+            OpenItemsGrid.SetColWidth(10, 20, 400);
+
+            HistoryGrid.Freeze(False);
+            HistoryGrid.AutoThumbSize;
+            HistoryGrid.SetColWidth(10, 20, 400);
+
+            GetFirstComment(DailyCom);
+            Screen.Cursor:=crDefault;
+            FIsDataLoaded:=True;
+
+        end);
+
     end;
 
 end;
 
 
+procedure TActionsForm.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+    FIsDataLoaded:=False;
+end;
+
+
 procedure TActionsForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
+    ClearAll();
     CanClose:=True;
 end;
 
@@ -995,7 +1029,7 @@ end;
 
 procedure TActionsForm.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-    if (Key = VK_F5) and (Shift=[ssCtrl]) then GetAndDisplay();
+    {if (Key = VK_F5) and (Shift=[ssCtrl]) then}
 end;
 
 

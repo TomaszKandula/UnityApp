@@ -363,7 +363,7 @@ begin
                 // Insert new record.
                 // ------------------
 
-                DailyText.CleanUp;
+                DailyText.CleanUp();
 
                 DailyText.Columns.Add(TDailyComment.GroupId);
                 DailyText.Values.Add(PayLoad.GroupIdSel);
@@ -388,7 +388,7 @@ begin
             end;
 
         finally
-            DailyText.Free;
+            DailyText.Free();
         end;
 
         TThread.Synchronize(nil, procedure
@@ -559,7 +559,7 @@ begin
                 // Update record.
                 // --------------
 
-                GenText.CleanUp;
+                GenText.CleanUp();
 
                 GenText.Columns.Add(TGeneralComment.Stamp);
                 GenText.Values.Add(DateTimeToStr(Now));
@@ -593,7 +593,7 @@ begin
             end;
 
         finally
-            GenText.Free;
+            GenText.Free();
         end;
 
         TThread.Synchronize(nil, procedure
@@ -634,7 +634,7 @@ begin
             end;
 
         finally
-            GenText.Free;
+            GenText.Free();
         end;
 
     end);
@@ -642,7 +642,7 @@ begin
     NewTask.Start();
     TTask.WaitForAll(NewTask);
 
-    {Under ARC / do not manually release it}
+    {If under ARC / do not manually release it}
     Result:=NewResult;
 
 end;
@@ -679,7 +679,7 @@ begin
             end;
 
         finally
-            DailyText.Free;
+            DailyText.Free();
         end;
 
     end);
@@ -687,7 +687,7 @@ begin
     NewTask.Start();
     TTask.WaitForAll(NewTask);
 
-    {Under ARC / do not manually release it}
+    {If under ARC / do not manually release it}
     Result:=NewResult;
 
 end;

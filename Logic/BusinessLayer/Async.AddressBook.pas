@@ -461,7 +461,7 @@ begin
 end;
 
 
-procedure TAddressBook.GetCustomerDetailsAsync(SCUID: string; Callback: TGetCustomerDetails);
+procedure TAddressBook.GetCustomerDetailsAsync(SCUID: string; Callback: TGetCustomerDetails); // make it awaited
 begin
 
     var NewTask: ITask:=TTask.Create(procedure

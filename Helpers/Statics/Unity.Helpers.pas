@@ -27,9 +27,16 @@ uses
 type
 
 
+    /// <remarks>
+    /// Define custom type for anonymous method to be passed as parameter.
+    /// </remarks>
+    TInputMethod = reference to procedure;
+
+
     THelpers = class abstract
         const WM_GETINFO = WM_USER + 120;
         const WM_EXTINFO = WM_APP  + 150;
+        class procedure ExecWithDelay(Delay: integer; AnonymousMethod: TInputMethod); static;
         class procedure ExecMessage(IsPostType: boolean; IntValue: cardinal; TextValue: string; Form: TForm); static;
         class procedure LoadImageFromStream(var Image: TImage; const FileName: string); static;
         class procedure TurnRowHighlight(var Grid: TStringGrid; var MenuItem: TMenuItem); static;
@@ -63,6 +70,26 @@ uses
     Unity.Chars,
     Unity.Common,
     Unity.Settings;
+
+
+class procedure THelpers.ExecWithDelay(Delay: integer; AnonymousMethod: TInputMethod);
+begin
+
+    TThread.CreateAnonymousThread(procedure
+    begin
+
+        Sleep(Delay);
+
+        TThread.Synchronize(nil, procedure
+        begin
+
+            AnonymousMethod;
+
+        end);
+
+    end).Start;
+
+end;
 
 
 class procedure THelpers.ExecMessage(IsPostType: boolean; IntValue: cardinal; TextValue: string; Form: TForm);
