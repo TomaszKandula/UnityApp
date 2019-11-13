@@ -38,6 +38,27 @@ type
     end;
 
     /// <summary>
+    /// Carries a group of variables to be received back when query by awaited async. task.
+    /// </summary>
+    TCompanyDetails = record
+        LbuName:    string;
+        LbuAddress: string;
+        LbuPhone:   string;
+        LbuEmail:   string;
+        LbuBanks:   string;
+    end;
+
+    /// <summary>
+    /// Carries a group of variables to be received back when query by awaited async. task.
+    /// </summary>
+    TCustomerDetails = record
+        CustPerson:   string;
+        CustMailGen:  string;
+        CustMailStat: string;
+        CustPhones:   string;
+    end;
+
+    /// <summary>
     /// Carries a group of variables to be updated in AddressBook table.
     /// </summary>
     TAddressBookUpdateFields = record

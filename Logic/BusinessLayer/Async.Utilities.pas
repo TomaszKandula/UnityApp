@@ -109,13 +109,12 @@ type
         procedure GeneralTablesAsync(TableName: string; DestGrid: TStringGrid; Callback: TGeneralTables; Columns: string = ''; Conditions: string = ''; WaitToComplete: boolean = False);
 
         /// <summary>
-        /// Allow to load async. some company data like name, address, phone etc.
-        /// Notification is always executed in main thread as long as callback is provided.
+        /// Allow to load async. some company data like name, address, phone etc. There is no separate notification.
         /// </summary>
         /// <remarks>
-        /// Provide nil (not recommended) for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        procedure GetCompanyDetailsAsync(CoCode: string; Branch: string; Callback: TGetCompanyDetails);
+        function GetCompanyDetailsAwaited(CoCode: string; Branch: string): TCompanyDetails;
 
         /// <summary>
         /// Allow to async. check provided local administrator password.
@@ -180,13 +179,12 @@ type
         procedure GeneralTablesAsync(TableName: string; DestGrid: TStringGrid; Callback: TGeneralTables; Columns: string = ''; Conditions: string = ''; WaitToComplete: boolean = False);
 
         /// <summary>
-        /// Allow to load async. some company data like name, address, phone etc.
-        /// Notification is always executed in main thread as long as callback is provided.
+        /// Allow to load async. some company data like name, address, phone etc. There is no separate notification.
         /// </summary>
         /// <remarks>
-        /// Provide nil (not recommended) for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        procedure GetCompanyDetailsAsync(CoCode: string; Branch: string; Callback: TGetCompanyDetails);
+        function GetCompanyDetailsAwaited(CoCode: string; Branch: string): TCompanyDetails;
 
         /// <summary>
         /// Allow to async. check provided local administrator password.
@@ -467,9 +465,10 @@ begin
 end;
 
 
-procedure TUtilities.GetCompanyDetailsAsync(CoCode: string; Branch: string; Callback: TGetCompanyDetails); // make it awaited
+function TUtilities.GetCompanyDetailsAwaited(CoCode: string; Branch: string): TCompanyDetails;
 begin
 
+    var CompanyDetails: TCompanyDetails;
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
@@ -495,11 +494,11 @@ begin
 
                 if DataTables.DataSet.RecordCount = 1 then
                 begin
-                    LbuName   :=THelpers.OleGetStr(DataTables.DataSet.Fields[TCompanyData.CoName].Value);
-                    LbuAddress:=THelpers.OleGetStr(DataTables.DataSet.Fields[TCompanyData.CoAddress].Value);
-                    LbuPhone  :=THelpers.OleGetStr(DataTables.DataSet.Fields[TCompanyData.TelephoneNumbers].Value);
-                    LbuEmail  :=THelpers.OleGetStr(DataTables.DataSet.Fields[TCompanyData.SendNoteFrom].Value);
-                    BanksData :=THelpers.OleGetStr(DataTables.DataSet.Fields[TCompanyData.BankAccounts].Value);
+                    CompanyDetails.LbuName   :=THelpers.OleGetStr(DataTables.DataSet.Fields[TCompanyData.CoName].Value);
+                    CompanyDetails.LbuAddress:=THelpers.OleGetStr(DataTables.DataSet.Fields[TCompanyData.CoAddress].Value);
+                    CompanyDetails.LbuPhone  :=THelpers.OleGetStr(DataTables.DataSet.Fields[TCompanyData.TelephoneNumbers].Value);
+                    CompanyDetails.LbuEmail  :=THelpers.OleGetStr(DataTables.DataSet.Fields[TCompanyData.SendNoteFrom].Value);
+                    CompanyDetails.LbuBanks  :=THelpers.OleGetStr(DataTables.DataSet.Fields[TCompanyData.BankAccounts].Value);
                 end;
 
                 CallResponse.IsSucceeded:=True;
@@ -518,14 +517,13 @@ begin
             DataTables.Free();
         end;
 
-        TThread.Synchronize(nil, procedure
-        begin
-            if Assigned(Callback) then Callback(LbuName, LbuAddress, LbuPhone, LbuEmail, BanksData, CallResponse);
-        end);
-
     end);
 
     NewTask.Start();
+    TTask.WaitForAll(NewTask);
+
+    {If under ARC / do not manually release it}
+    Result:=CompanyDetails;
 
 end;
 

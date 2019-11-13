@@ -223,8 +223,6 @@ type
         procedure UpdateAddressBook_Callback(CallResponse: TCallResponse);
         procedure EditGeneralComment_Callback(CallResponse: TCallResponse);
         procedure EditDailyComment_Callback(CallResponse: TCallResponse);
-        procedure GetCustomerDetails_Callback(CustPerson: string; CustMailGen: string; CustMailStat: string; CustPhones: string; CallResponse: TCallResponse);
-        procedure GetCompanyDetails_Callback(LbuName: string; LbuAddress: string; LbuPhone: string; LbuEmail: string; BanksData: string; CallResponse: TCallResponse);
     public
         property CUID:         string read FCUID;
         property SCUID:        string read FSCUID;
@@ -428,15 +426,43 @@ end;
 
 procedure TActionsForm.UpdateCustDetails();
 begin
+
     var AddressBook: IAddressBook:=TAddressBook.Create();
-    AddressBook.GetCustomerDetailsAsync(SCUID, GetCustomerDetails_Callback);
+    var CustomerDetails: TCustomerDetails;
+    CustomerDetails:=AddressBook.GetCustomerDetailsAwaited(SCUID);
+
+    var Phones: string;
+
+    Cust_Person.Text     :=CustomerDetails.CustPerson;
+    Cust_MailGeneral.Text:=CustomerDetails.CustMailGen;
+    Cust_Mail.Text       :=CustomerDetails.CustMailStat;
+    Phones               :=CustomerDetails.CustPhones;
+
+    if (Phones <> '') or (Phones <> ' ') then
+    begin
+        Cust_Phone.Clear();
+        Cust_Phone.Items.Text:=THelpers.Explode(Phones, TDelimiters.Semicolon);
+        Cust_Phone.ItemIndex:=0;
+    end;
+
+    SetControls();
+
 end;
 
 
 procedure TActionsForm.UpdateCompanyDetails();
 begin
+
     var Utilities: IUtilities:=TUtilities.Create();
-    Utilities.GetCompanyDetailsAsync(CoCode, Branch, GetCompanyDetails_Callback);
+    var CompanyDetails: TCompanyDetails;
+    CompanyDetails:=Utilities.GetCompanyDetailsAwaited(CoCode, Branch);
+
+    FLbuName    :=CompanyDetails.LbuName;
+    FLbuAddress :=CompanyDetails.LbuAddress;
+    FLbuPhone   :=CompanyDetails.LbuPhone;
+    FLbuSendFrom:=CompanyDetails.LbuEmail;
+    FBanksHtml  :=CompanyDetails.LbuBanks;
+
 end;
 
 
@@ -628,21 +654,16 @@ begin
         for var iCNT: integer:=(MainForm.sgAgeView.Row + 1) to MainForm.sgAgeView.RowCount - 1 do
             if not CheckRow(iCNT) then Break;
 
+    // --------------------------------
+    // Load data for selected customer.
+    // --------------------------------
+
     THelpers.ExecWithDelay(250, procedure
     begin
-
         Initialize();
         UpdateOpenItems();
-        //UpdateData();
-
-        UpdateHistory(HistoryGrid);
-        UpdateGeneral(GeneralCom);
-
-        //UpdateCustDetails(); // awaited?
-        //UpdateCompanyDetails(); // awaited?
-
+        UpdateData();
         Screen.Cursor:=crDefault;
-
     end);
 
 end;
@@ -834,54 +855,6 @@ begin
 
     UpdateHistory(HistoryGrid);
     ThreadFileLog.Log('[EditDailyComment_Callback]: Calling "UpdateHistory".');
-
-end;
-
-
-procedure TActionsForm.GetCustomerDetails_Callback(CustPerson: string; CustMailGen: string; CustMailStat: string; CustPhones: string; CallResponse: TCallResponse);
-begin
-
-    if not CallResponse.IsSucceeded then
-    begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
-        ThreadFileLog.Log(CallResponse.LastMessage);
-        Exit();
-    end;
-
-    var Phones: string;
-
-    Cust_Person.Text     :=CustPerson;
-    Cust_MailGeneral.Text:=CustMailGen;
-    Cust_Mail.Text       :=CustMailStat;
-    Phones               :=CustPhones;
-
-    if (Phones <> '') or (Phones <> ' ') then
-    begin
-        Cust_Phone.Clear();
-        Cust_Phone.Items.Text:=THelpers.Explode(Phones, TDelimiters.Semicolon);
-        Cust_Phone.ItemIndex:=0;
-    end;
-
-    SetControls();
-
-end;
-
-
-procedure TActionsForm.GetCompanyDetails_Callback(LbuName: string; LbuAddress: string; LbuPhone: string; LbuEmail: string; BanksData: string; CallResponse: TCallResponse);
-begin
-
-    if not CallResponse.IsSucceeded then
-    begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
-        ThreadFileLog.Log(CallResponse.LastMessage);
-        Exit();
-    end;
-
-    FLbuName    :=LbuName;
-    FLbuAddress :=LbuAddress;
-    FLbuPhone   :=LbuPhone;
-    FLbuSendFrom:=LbuEmail;
-    FBanksHtml  :=BanksData;
 
 end;
 

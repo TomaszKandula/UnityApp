@@ -48,11 +48,6 @@ type
     /// </summary>
     TAddToAddressBook = procedure(CallResponse: TCallResponse) of object;
 
-    /// <summary>
-    /// Callback signature (delegate) for getting results of address book read action.
-    /// </summary>
-    TGetCustomerDetails = procedure(CustPerson: string; CustMailGen: string; CustMailStat: string; CustPhones: string; CallResponse: TCallResponse) of object;
-
 
     IAddressBook = interface(IInterface)
     ['{56D68733-5DF0-4D44-9A66-69CB5DE587E4}']
@@ -82,12 +77,12 @@ type
         procedure AddToAddressBookAsync(SourceGrid: TStringGrid; Callback: TAddToAddressBook);
 
         /// <summary>
-        /// Load async. address book customer data only and notify via given callback method that is always executed in main thread.
+        /// Load async. address book customer data only for given SCUID. There is no separate notification.
         /// </summary>
         /// <remarks>
-        /// Provide nil (not recommended) for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        procedure GetCustomerDetailsAsync(SCUID: string; Callback: TGetCustomerDetails);
+        function GetCustomerDetailsAwaited(SCUID: string): TCustomerDetails;
 
     end;
 
@@ -121,12 +116,12 @@ type
         procedure AddToAddressBookAsync(SourceGrid: TStringGrid; Callback: TAddToAddressBook);
 
         /// <summary>
-        /// Load async. address book customer data only and notify via given callback method that is always executed in main thread.
+        /// Load async. address book customer data only for given SCUID. There is no separate notification.
         /// </summary>
         /// <remarks>
-        /// Provide nil (not recommended) for callback parameter if you want to execute async. method without returning any results to main thread.
+        /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        procedure GetCustomerDetailsAsync(SCUID: string; Callback: TGetCustomerDetails);
+        function GetCustomerDetailsAwaited(SCUID: string): TCustomerDetails;
 
     end;
 
@@ -461,18 +456,14 @@ begin
 end;
 
 
-procedure TAddressBook.GetCustomerDetailsAsync(SCUID: string; Callback: TGetCustomerDetails); // make it awaited
+function TAddressBook.GetCustomerDetailsAwaited(SCUID: string): TCustomerDetails;
 begin
 
+    var CustomerDetails: TCustomerDetails;
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
         var CallResponse: TCallResponse;
-        var CustPerson:   string;
-        var CustMailGen:  string;
-        var CustMailStat: string;
-        var CustPhones:   string;
-
         var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
         try
 
@@ -487,10 +478,10 @@ begin
 
                 if DataTables.DataSet.RecordCount = 1 then
                 begin
-                    CustPerson  :=THelpers.OleGetStr(DataTables.DataSet.Fields[DbModel.TAddressBook.Contact].Value);
-                    CustMailGen :=THelpers.OleGetStr(DataTables.DataSet.Fields[DbModel.TAddressBook.Emails].Value);
-                    CustMailStat:=THelpers.OleGetStr(DataTables.DataSet.Fields[DbModel.TAddressBook.Estatements].Value);
-                    CustPhones  :=THelpers.OleGetStr(DataTables.DataSet.Fields[DbModel.TAddressBook.PhoneNumbers].Value);
+                    CustomerDetails.CustPerson  :=THelpers.OleGetStr(DataTables.DataSet.Fields[DbModel.TAddressBook.Contact].Value);
+                    CustomerDetails.CustMailGen :=THelpers.OleGetStr(DataTables.DataSet.Fields[DbModel.TAddressBook.Emails].Value);
+                    CustomerDetails.CustMailStat:=THelpers.OleGetStr(DataTables.DataSet.Fields[DbModel.TAddressBook.Estatements].Value);
+                    CustomerDetails.CustPhones  :=THelpers.OleGetStr(DataTables.DataSet.Fields[DbModel.TAddressBook.PhoneNumbers].Value);
                 end;
 
                 CallResponse.IsSucceeded:=True;
@@ -509,14 +500,13 @@ begin
             DataTables.Free();
         end;
 
-        TThread.Synchronize(nil, procedure
-        begin
-            if Assigned(Callback) then Callback(CustPerson, CustMailGen, CustMailStat, CustPhones, CallResponse);
-        end);
-
     end);
 
     NewTask.Start();
+    TTask.WaitForAll(NewTask);
+
+    {If under ARC / do not manually release it}
+    Result:=CustomerDetails;
 
 end;
 
