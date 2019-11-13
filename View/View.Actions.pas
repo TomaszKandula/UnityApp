@@ -638,6 +638,9 @@ begin
 
     Screen.Cursor:=crSQLWait;
 
+    DailyCom.Text   :='';
+    GeneralCom.Text :='';
+
     // -------------------------------------------------
     // Move grid cursor to next item (skip hidden rows).
     // -------------------------------------------------
@@ -864,15 +867,32 @@ end;
 
 procedure TActionsForm.FormCreate(Sender: TObject);
 begin
+
+    InitializePanels;
+    InitializeSpeedButtons;
+
     SetLength(FSrcColumns, 19);
     OpenItemsGrid.ColCount:=19;
     OpenItemsGrid.SetRowHeight(OpenItemsGrid.sgRowHeight, 25);
+
     HistoryGrid.ColCount:=11;
     HistoryGrid.SetRowHeight(OpenItemsGrid.sgRowHeight, 25);
     HistoryGrid.Visible:=False;
-    InitializePanels;
-    InitializeSpeedButtons;
+
+    Cust_Name.Caption    :=TUnknown.NotFound;
+    Cust_Number.Caption  :=TUnknown.NotFound;
+    Cust_Person.Text     :=TUnknown.NotFound;
+    Cust_Mail.Text       :=TUnknown.NotFound;
+    Cust_MailGeneral.Text:=TUnknown.NotFound;
+
+    Cust_Phone.Clear;
+    Cust_Phone.Items.Add(TUnknown.NotFound);
+    Cust_Phone.ItemIndex:=0;
+
     ItemDesc.Caption:='';
+    DailyCom.Text   :='';
+    GeneralCom.Text :='';
+
 end;
 
 

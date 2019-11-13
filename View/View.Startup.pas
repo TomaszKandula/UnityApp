@@ -603,7 +603,7 @@ begin
         end;
 
     finally
-        UserControl.Free;
+        UserControl.Free();
     end;
 
 end;
@@ -646,8 +646,8 @@ begin
     Result:=True;
 
     var HttpResponse: IHttpResponse;
-    var HttpClient: THttpClient:=THTTPClient.Create();
-    var FileStream: TFileStream:=TFileStream.Create(FileLayoutPak, fmCreate);
+    var HttpClient:   THttpClient:=THTTPClient.Create();
+    var FileStream:   TFileStream:=TFileStream.Create(FileLayoutPak, fmCreate);
     try
 
         try

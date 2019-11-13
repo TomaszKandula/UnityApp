@@ -90,7 +90,7 @@ type
         procedure SendFeedbackAsync(Text: string; Callback: TSendUserFeedback);
 
         /// <summary>
-        /// Allow to async. export data grid to Excel file.
+        /// Allow to async. export data grid to Excel file. Requires installed Microsopft Excel 2013 or higher.
         /// Notification is always executed in main thread as long as callback is provided.
         /// </summary>
         /// <remarks>
@@ -160,7 +160,7 @@ type
         procedure SendFeedbackAsync(Text: string; Callback: TSendUserFeedback);
 
         /// <summary>
-        /// Allow to async. export data grid to Excel file.
+        /// Allow to async. export data grid to Excel file. Requires installed Microsopft Excel 2013 or higher.
         /// Notification is always executed in main thread as long as callback is provided.
         /// </summary>
         /// <remarks>

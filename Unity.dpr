@@ -175,7 +175,7 @@ begin
     begin
 
         var LastErrorMsg: string;
-        if TCore.Unpack(10, Settings.PathConfig, false, LastErrorMsg) then Settings.ConfigToMemory
+        if TCore.Unpack(10, Settings.PathConfig, false, LastErrorMsg) then Settings.ConfigToMemory()
         else begin
 
             Application.MessageBox(
@@ -203,7 +203,7 @@ begin
     // GlobalCEFApp is an instance of the TCEFApplication class an it simpliefies the Chromium initialization.
     // -------------------------------------------------------------------------------------------------------
 
-    GlobalCEFApp:=TCefApplication.Create;
+    GlobalCEFApp:=TCefApplication.Create();
     var ChromiumExit: boolean:=False;
 
     try
@@ -276,7 +276,7 @@ begin
 
     end;
 
-    Application.Initialize;
+    Application.Initialize();
     Application.Title:=TCommon.AppCaption;
     Application.MainFormOnTaskbar:=True;
 
@@ -291,7 +291,7 @@ begin
 
     Application.Run;{Starts event loop}
     DestroySessionService();
-    GlobalCEFApp.Free;
+    GlobalCEFApp.Free();
 
 end.
 
