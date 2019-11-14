@@ -117,6 +117,14 @@ type
         function GetCompanyDetailsAwaited(CoCode: string; Branch: string): TCompanyDetails;
 
         /// <summary>
+        /// Allow to load async. list of emails for given CoCodes. There is no separate notification.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        function GetCompanyEmailsAwaited(CoCodes: TStringList): TStringList;
+
+        /// <summary>
         /// Allow to async. check provided local administrator password.
         /// Notification is always executed in main thread as long as callback is provided.
         /// </summary>
@@ -185,6 +193,14 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function GetCompanyDetailsAwaited(CoCode: string; Branch: string): TCompanyDetails;
+
+        /// <summary>
+        /// Allow to load async. list of emails for given CoCodes. There is no separate notification.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        function GetCompanyEmailsAwaited(CoCodes: TStringList): TStringList;
 
         /// <summary>
         /// Allow to async. check provided local administrator password.
@@ -524,6 +540,60 @@ begin
 
     {If under ARC / do not manually release it}
     Result:=CompanyDetails;
+
+end;
+
+
+function TUtilities.GetCompanyEmailsAwaited(CoCodes: TStringList): TStringList;
+begin
+
+    var EmailList:=TStringList.Create();
+    if CoCodes.Count = 0 then Exit();
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
+        try
+
+            try
+
+                DataTables.Columns.Add(TSql.DISTINCT + TCompanyData.SendNoteFrom);
+
+                var CoCodeList: string;
+                for var iCNT:=0 to CoCodes.Count - 1 do
+                begin
+
+                    if iCNT < (CoCodes.Count - 1) then
+                        CoCodeList:=CoCodeList + TCompanyData.CoCode + TSql.EQUAL + QuotedStr(CoCodes.Strings[iCNT]) + TSql._OR
+                    else
+                        CoCodeList:=CoCodeList + TCompanyData.CoCode + TSql.EQUAL + QuotedStr(CoCodes.Strings[iCNT]);
+
+                end;
+
+                DataTables.CustFilter:=TSql.WHERE + CoCodeList;
+
+                DataTables.OpenTable(TCompanyData.CompanyData);
+
+                // dataset to stringlist
+
+            except
+                on E: Exception do
+                    ThreadFileLog.Log('[GetCompanyEmailsAwaited]: Cannot execute. Error has been thrown: ' + E.Message);
+
+            end;
+
+        finally
+            DataTables.Free();
+        end;
+
+    end);
+
+    NewTask.Start();
+    TTask.WaitForAll(NewTask);
+
+    {If under ARC / do not manually release it}
+    Result:=EmailList;
 
 end;
 

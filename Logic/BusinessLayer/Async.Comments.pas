@@ -155,10 +155,6 @@ uses
     DbModel;
 
 
-// ----------------------------------
-// Perform SQL "insert into" command.
-// ----------------------------------
-
 procedure TComments.FInsertDailyComment(var DailyText: TDataTables; var PayLoad: TDailyCommentFields; var CallResponse: TCallResponse);
 begin
 
@@ -240,10 +236,6 @@ begin
 end;
 
 
-// -----------------------------
-// Perform SQL "update" command.
-// -----------------------------
-
 procedure TComments.FUpdateDailyComment(var DailyText: TDataTables; var PayLoad: TDailyCommentFields; Condition: string; var CallResponse: TCallResponse);
 begin
 
@@ -313,10 +305,6 @@ begin
 
 end;
 
-
-// ------------------------------------------
-// Perform update or insert of daily comment.
-// ------------------------------------------
 
 procedure TComments.EditDailyComment(PayLoad: TDailyCommentFields; Callback: TEditDailyComment = nil);
 begin
@@ -403,10 +391,6 @@ begin
 end;
 
 
-// ---------------------------------------------
-// Subroutine for inserting new general comment.
-// ---------------------------------------------
-
 procedure TComments.FInsertGeneralComment(var GenText: TDataTables; var PayLoad: TGeneralCommentFields; var CallResponse: TCallResponse);
 begin
 
@@ -481,10 +465,6 @@ begin
 end;
 
 
-// --------------------------------------
-// Subroutine for update general comment.
-// --------------------------------------
-
 procedure TComments.FUpdateGeneralComment(var GenText: TDataTables; var PayLoad: TGeneralCommentFields; Condition: string; var CallResponse: TCallResponse);
 begin
 
@@ -533,10 +513,6 @@ begin
 
 end;
 
-
-// --------------------------------------------
-// Perform update or insert of general comment.
-// --------------------------------------------
 
 procedure TComments.EditGeneralComment(PayLoad: TGeneralCommentFields; Callback: TEditGeneralComment = nil);
 begin

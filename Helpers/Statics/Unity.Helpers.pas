@@ -34,6 +34,7 @@ type
 
 
     THelpers = class abstract
+    public
         const WM_GETINFO = WM_USER + 120;
         const WM_EXTINFO = WM_APP  + 150;
         class procedure ExecWithDelay(Delay: integer; AnonymousMethod: TInputMethod); static;
@@ -53,6 +54,7 @@ type
         class function  ExportToCSV(SourceArray: TALists; FileName: string = ''): TStringList; static;
         class function  IsVoType(VoType: string): boolean; static;
         class function  ShowReport(ReportNumber: cardinal; CurrentForm: TForm): cardinal; static;
+        class function  ReturnCoCodesList(var SourceGrid: TStringGrid; const SourceCol: integer; HasHeader: boolean = False): TStringList; stdcall;
     end;
 
 
@@ -474,6 +476,36 @@ begin
         nil,
         SW_SHOWNORMAL
     );
+
+end;
+
+
+class function THelpers.ReturnCoCodesList(var SourceGrid: TStringGrid; const SourceCol: integer; HasHeader: boolean = False): TStringList;
+begin
+
+    if (not Assigned(SourceGrid)) or (not SourceCol > 0 ) then Exit();
+
+    var StartRowValue:=0;
+    if HasHeader then StartRowValue:=1;
+
+    var UniqueList:=TStringList.Create();
+    try
+
+        UniqueList.Sorted:=True;
+        UniqueList.Duplicates:=TDuplicates.dupIgnore;
+
+        for var iCNT:=StartRowValue to SourceGrid.RowCount - 1 do
+        begin
+            var Data: string:=SourceGrid.Cells[SourceCol, iCNT];
+            if not String.IsNullOrWhitespace(Data) then UniqueList.Add(Data);
+        end;
+
+        Result:=TStringList.Create();
+        Result.AddStrings(UniqueList);
+
+    finally
+        UniqueList.Free();
+    end;
 
 end;
 

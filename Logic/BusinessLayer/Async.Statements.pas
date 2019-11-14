@@ -120,10 +120,6 @@ uses
     DbModel;
 
 
-// ---------------------------------------------
-// Send single account statement asynchronously.
-// ---------------------------------------------
-
 procedure TStatements.SendAccountStatement(AgeDate: string; PayLoad: TAccountStatementPayLoad; Callback: TSendAccountStatement; WaitToComplete: boolean = False);
 begin
 
@@ -271,10 +267,6 @@ begin
 
 end;
 
-
-// ---------------------------------------
-// Send account statements asynchronously.
-// ---------------------------------------
 
 procedure TStatements.SendAccountStatements(AgeDate: string; PayLoad: TAccountStatementPayLoad; Callback: TSendAccountStatements);
 begin

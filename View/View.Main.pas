@@ -809,6 +809,7 @@ type
         procedure CommonPopupMenuPopup(Sender: TObject);
         procedure TrayIconClick(Sender: TObject);
     protected
+        procedure CreateParams(var Params: TCreateParams); override;
         procedure WndProc(var msg: TMessage); override;
         procedure WndMessagesChromium(PassMsg: TMessage);
         procedure WndMessagesWindows(PassMsg: TMessage);
@@ -988,14 +989,28 @@ uses
     uCEFApplication;
 
 
-var
-    VMainForm: TMainForm;
+var VMainForm: TMainForm;
 
 
 function MainForm(): TMainForm;
 begin
     if not(Assigned(VMainForm)) then Application.CreateForm(TMainForm, VMainForm);
     Result:=VMainForm;
+end;
+
+
+procedure TMainForm.CreateParams(var Params: TCreateParams);
+begin
+
+    // --------------------------------------------
+    // Assign task bar icon to this form,
+    // so it will behave like application MainForm.
+    // --------------------------------------------
+
+    inherited
+    CreateParams(Params);
+    Params.ExStyle:=Params.ExStyle or WS_EX_APPWINDOW;
+
 end;
 
 
@@ -1490,7 +1505,7 @@ end;
 
 // ------------------------------------------------------------------------------------------------------------------------ LEGACY CODE - TO BE REMOVED [START]
 
-
+{remove}
 procedure TMainForm.TryInitConnection;
 begin
 
@@ -1592,7 +1607,7 @@ begin
 
 end;
 
-
+{remove}
 procedure TMainForm.WndMessagesInternal(PassMsg: TMessage);
 begin
 

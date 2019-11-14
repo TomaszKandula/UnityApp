@@ -73,11 +73,11 @@ type
         procedure FormKeyPress(Sender: TObject; var Key: Char);
         procedure btnCloseClick(Sender: TObject);
     strict private
-        function Is64BitOS: Boolean;
+        function Is64BitOS(): Boolean;
     end;
 
 
-    function AboutForm: TAboutForm;
+    function AboutForm(): TAboutForm;
 
 
 implementation
@@ -115,7 +115,7 @@ var
     VAboutForm: TAboutForm;
 
 
-function AboutForm: TAboutForm;
+function AboutForm(): TAboutForm;
 begin
     if not(Assigned(VAboutForm)) then Application.CreateForm(TAboutForm, VAboutForm);
     Result:=VAboutForm;
@@ -125,7 +125,7 @@ end;
 // ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
 
 
-function TAboutForm.Is64BitOS: Boolean;
+function TAboutForm.Is64BitOS(): Boolean;
 begin
 
     /// <remarks>
@@ -138,8 +138,7 @@ begin
     Result:=false;
 
     var hKernel32: integer:=LoadLibrary('kernel32.dll');
-    if (hKernel32 = 0) then
-        RaiseLastOSError;
+    if (hKernel32 = 0) then RaiseLastOSError();
 
     var IsWow64Process: TIsWow64Process;
     var IsWow64: BOOL;
@@ -147,13 +146,16 @@ begin
 
     if Assigned(IsWow64Process) then
     begin
+
         IsWow64:=false;
+
         if (IsWow64Process(GetCurrentProcess, IsWow64)) then
         begin
             Result:=IsWow64;
         end
-            else
-                RaiseLastOSError;
+        else
+        RaiseLastOSError();
+
     end;
 
     FreeLibrary(hKernel32);
@@ -183,7 +185,7 @@ end;
 procedure TAboutForm.FormCreate(Sender: TObject);
 begin
 
-    var Settings: ISettings:=TSettings.Create;
+    var Settings: ISettings:=TSettings.Create();
     if FileExists(Settings.PathLicence) then
     begin
 
@@ -234,16 +236,16 @@ end;
 
 procedure TAboutForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-  if Key = Char(VK_ESCAPE) then Close;
+    if Key = Char(VK_ESCAPE) then Close();
 end;
 
 
-// -------------------------------------------------------------------------------------------------------------------------------------------- BUTTON CALLS //
+// -------------------------------------------------------------------------------------------------------------------------------------------- CLICK EVENTS //
 
 
 procedure TAboutForm.btnCloseClick(Sender: TObject);
 begin
-    Close;
+    Close();
 end;
 
 

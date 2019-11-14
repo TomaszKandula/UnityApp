@@ -46,7 +46,7 @@ type
     end;
 
 
-    function PhoneListForm: TPhoneListForm;
+    function PhoneListForm(): TPhoneListForm;
 
 
 implementation
@@ -70,22 +70,22 @@ const
     Restricted = ['0'..'9', #10, #13];
 
 
-function PhoneListForm: TPhoneListForm;
+function PhoneListForm(): TPhoneListForm;
 begin
     if not(Assigned(vPhoneListForm)) then Application.CreateForm(TPhoneListForm, vPhoneListForm);
     Result:=vPhoneListForm;
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------- CLASS HELPERS //
+// ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
 
-
-/// <summary>
-/// Check if given component (TMemo) holds only restricted characters.
-/// </summary>
 
 function TPhoneListForm.CheckPhoneList(List: TMemo): boolean;
 begin
+
+    // ------------------------------------------------------------------
+    // Check if given component (TMemo) holds only restricted characters.
+    // ------------------------------------------------------------------
 
     Result:=False;
 
@@ -104,7 +104,7 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------- MAIN THREAD METHODS //
+// ------------------------------------------------------------------------------------------------------------------------------------------------- STARTUP //
 
 
 procedure TPhoneListForm.FormCreate(Sender: TObject);
@@ -115,12 +115,12 @@ end;
 
 procedure TPhoneListForm.FormShow(Sender: TObject);
 begin
-    PhoneList.Lines.Clear;
+    PhoneList.Lines.Clear();
     PhoneList.Lines.AddStrings(ActionsForm.Cust_Phone.Items);
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------ BUTTONS EVENTS //
+// -------------------------------------------------------------------------------------------------------------------------------------------- CLICK EVENTS //
 
 
 procedure TPhoneListForm.btnSubmitClick(Sender: TObject);
@@ -129,24 +129,24 @@ begin
     if not(CheckPhoneList(PhoneList)) then
     begin
         THelpers.MsgCall(TAppMessage.Warn, 'Please remove letters before saving the list.' + TChars.CRLF + 'Only numbers and break line are allowed.');
-        Exit;
+        Exit();
     end;
 
-    ActionsForm.Cust_Phone.Items.Clear;
+    ActionsForm.Cust_Phone.Items.Clear();
     ActionsForm.Cust_Phone.Items.AddStrings(PhoneList.Lines);
 
     if ActionsForm.Cust_Phone.Items.Count > 0
         then
             ActionsForm.Cust_Phone.ItemIndex:=0;
 
-    Close;
+    Close();
 
 end;
 
 
 procedure TPhoneListForm.btnCancelClick(Sender: TObject);
 begin
-    Close;
+    Close();
 end;
 
 
@@ -155,7 +155,7 @@ end;
 
 procedure TPhoneListForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-    if Key = Char(VK_ESCAPE) then Close;
+    if Key = Char(VK_ESCAPE) then Close();
 end;
 
 

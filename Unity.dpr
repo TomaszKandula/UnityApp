@@ -113,6 +113,7 @@ uses
     Async.OpenItems             in 'Logic\BusinessLayer\Async.OpenItems.pas',
     Async.Comments              in 'Logic\BusinessLayer\Async.Comments.pas',
     Async.Statements            in 'Logic\BusinessLayer\Async.Statements.pas',
+	Async.InvoiceTracker        in 'Logic\BusinessLayer\Async.InvoiceTracker.pas',
     Unity.Settings              in 'Logic\Configuration\Unity.Settings.pas',
     Unity.SessionService        in 'Logic\Configuration\Unity.SessionService.pas',
     Unity.ThreadUtilities       in 'Logic\Logger\Unity.ThreadUtilities.pas',
@@ -281,9 +282,13 @@ begin
     Application.MainFormOnTaskbar:=True;
 
     // -------------------------------------------------------------------
-    // Call startup view to display splash screen and process the initial
-    // settings loading and database support tables. It will automatically
-    // handle main user window.
+    // Call startup view to display splash screen and process loading of
+    // various assets and/or data (including database supporting tables).
+    // It will automatically handle main user window.
+    // Warning! Main application window (mian form) is View.Startup, and
+    // therefore the user main form (View.Main) must have taskbar icon
+    // re-assigned to it, so it can act as a main window of the Windows
+    // application.
     // -------------------------------------------------------------------
 
     StartupForm.SetSessionLog(SessionService.SessionLog);

@@ -21,6 +21,7 @@ object InvoicesForm: TInvoicesForm
   PopupParent = MainForm.Owner
   Position = poMainFormCenter
   OnActivate = FormActivate
+  OnClose = FormClose
   OnCreate = FormCreate
   OnKeyPress = FormKeyPress
   OnResize = FormResize

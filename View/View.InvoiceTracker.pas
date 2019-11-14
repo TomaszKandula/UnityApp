@@ -25,7 +25,6 @@ uses
     Vcl.Buttons,
     Vcl.ComCtrls,
     Data.Win.ADODB,
-    Unity.Enums,
     Unity.Grid,
     Unity.Panel;
 
@@ -72,10 +71,12 @@ type
         procedure CustomerListKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure btnSelectionClick(Sender: TObject);
     strict private
-        var FMultiselect: TStringList;
-        var FCtrlClicked: boolean;
-        var FTrackerGrid: TStringGrid;
-        var FAgeGrid:     TStringGrid;
+        var FMultiselect:   TStringList;
+        var FCtrlClicked:   boolean;
+        var FTrackerGrid:   TStringGrid;
+        var FAgeGrid:       TStringGrid;
+        var FReminderMail : string;
+        var FStatementMail: string;
         procedure GetSendFrom(List: TComboBox);
         procedure GetEmailAddress(Scuid: string);
         procedure SetEmailAddresses(List: TListView);
@@ -83,14 +84,12 @@ type
         procedure ApplyTimings(List: TListView);
         procedure SaveToDb(List: TListView);
     public
-        var FReminderMail : string;
-        var FStatementMail: string;
         property  TrackerGrid: TStringGrid read FTrackerGrid;
         property  AgeGrid:     TStringGrid read FAgeGrid;
     end;
 
 
-    function TrackerForm: TTrackerForm;
+    function TrackerForm(): TTrackerForm;
 
 
 implementation
@@ -101,14 +100,19 @@ implementation
 
 uses
     View.Main,
-    Handler.Sql,
-    DbModel,
+    Handler.Sql{Legacy},
+    Handler.Database{Legacy},
+    DbModel{Legacy},
+    Unity.Enums,
+    Unity.Records,
     Unity.Helpers,
     Unity.Sql,
     Unity.Settings,
     Unity.EventLogger,
     Unity.SessionService,
-    Handler.Database;
+    Async.AddressBook,
+    Async.Utilities,
+    Async.InvoiceTracker;
 
 
 var vTrackerForm: TTrackerForm;
@@ -127,47 +131,31 @@ end;
 procedure TTrackerForm.GetSendFrom(List: TComboBox);
 begin
 
-    var CoCode1:  string;
-    var CoCode2:  string;
-    var CoCode3:  string;
-    var CoCode4:  string;
-
-    // Get Co Codes that are opened (age view snapshot)
-    if MainForm.tcCOCODE1.Caption <> 'n/a' then CoCode1:=MainForm.tcCOCODE1.Caption;
-    if MainForm.tcCOCODE2.Caption <> 'n/a' then CoCode2:=MainForm.tcCOCODE2.Caption;
-    if MainForm.tcCOCODE3.Caption <> 'n/a' then CoCode3:=MainForm.tcCOCODE3.Caption;
-    if MainForm.tcCOCODE4.Caption <> 'n/a' then CoCode4:=MainForm.tcCOCODE4.Caption;
-
-    var Database: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
+    var Utilities: IUtilities:=TUtilities.Create();
+    var EmailList:=TStringList.Create();
     try
-        Database.Columns.Add(TSql.DISTINCT + TCompanyData.SendNoteFrom);
-        Database.CustFilter:=TSql.WHERE +
-                                TCompanyData.CoCode + TSql.EQUAL + QuotedStr(COCODE1) +
-                             TSql._OR +
-                                TCompanyData.CoCode + TSql.EQUAL + QuotedStr(COCODE2) +
-                             TSql._OR +
-                                TCompanyData.CoCode + TSql.EQUAL + QuotedStr(COCODE3) +
-                             TSql._OR +
-                                TCompanyData.CoCode + TSql.EQUAL + QuotedStr(COCODE4);
-        Database.OpenTable(TCompanyData.CompanyData);
-        if not(Database.DataSet.RecordCount = 0) then
-            Database.SqlToSimpleList(List, Database.DataSet)
-                else
-                    THelpers.MsgCall(TAppMessage.Warn, 'Cannot find assigned email address to your organisation. Please contact IT support.');
+
+        EmailList:=Utilities.GetCompanyEmailsAwaited(
+            THelpers.ReturnCoCodesList(
+                MainForm.sgAgeView,
+                MainForm.sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1),
+                True
+            )
+        );
+
     finally
-        Database.Free;
+        EmailList.Free();
+    end;
 
-        if List.Items.Count > 0 then
-        begin
-            ErrorEmailFrom.Visible:=False;
-            List.ItemIndex:=0;
-        end
-        else
-        begin
-            ErrorEmailFrom.Visible:=True;
-            List.Items.Clear;
-        end;
-
+    if List.Items.Count > 0 then
+    begin
+        ErrorEmailFrom.Visible:=False;
+        List.ItemIndex:=0;
+    end
+    else
+    begin
+        ErrorEmailFrom.Visible:=True;
+        List.Items.Clear();
     end;
 
 end;
@@ -175,24 +163,11 @@ end;
 
 procedure TTrackerForm.GetEmailAddress(Scuid: string);
 begin
-
-    var Database: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
-    try
-        Database.Columns.Add(TAddressBook.Emails);
-        Database.Columns.Add(TAddressBook.Estatements);
-        Database.CustFilter:=TSql.WHERE + TAddressBook.Scuid + TSql.EQUAL + Scuid;
-        Database.OpenTable(TAddressBook.AddressBook);
-
-        if Database.DataSet.RecordCount > 0 then
-        begin
-            FReminderMail:=THelpers.OleGetStr(Database.DataSet.Fields[TAddressBook.Emails].Value);
-            FStatementMail:=THelpers.OleGetStr(Database.DataSet.Fields[TAddressBook.Estatements].Value);
-        end;
-
-    finally
-        Database.Free;
-    end;
-
+    var AddressBook: IAddressBook:=TAddressBook.Create();
+    var CustomerDetails: TCustomerDetails;
+    CustomerDetails:=AddressBook.GetCustomerDetailsAwaited(Scuid);
+    FReminderMail :=CustomerDetails.CustMailGen;
+    FStatementMail:=CustomerDetails.CustMailStat;
 end;
 
 
@@ -201,33 +176,38 @@ begin
 
     if List.Items.Count > 0 then
     begin
+
         for var iCNT: integer:=0 to List.Items.Count - 1 do
         begin
+
             GetEmailAddress(List.Items[iCNT].SubItems[1]);
             if not(string.IsNullOrEmpty(FStatementMail)) then List.Items[iCNT].SubItems[4]:=FStatementMail;
             if not(string.IsNullOrEmpty(FReminderMail)) then List.Items[iCNT].SubItems[5]:=FReminderMail;
+
         end;
+
     end;
 
 end;
 
 
-/// <remarks>
-/// Layout file format: "reminder_<team>_<country>_<number>.htm".
-/// Remove last six characters to display in list box.
-/// Note: We use TStringList as a middleman to remove duplicates.
-/// </remarks>
-
 procedure TTrackerForm.GetLayouts(LayoutContainer: TComboBox);
 begin
 
-    var Settings: ISettings:=TSettings.Create;
-    var LayoutLst: TStringList:=TStringList.Create;
+    // -------------------------------------------------------------
+    // Layout file format: "reminder_<team>_<country>_<number>.htm".
+    // Remove last six characters to display in list box.
+    // Note: We use TStringList as a middleman to remove duplicates.
+    // -------------------------------------------------------------
+
+    var Settings: ISettings:=TSettings.Create();
+    var LayoutLst: TStringList:=TStringList.Create();
     var LayoutFld: string:=Settings.DirLayouts;
     try
 
         // Get files from local folder
         try
+
             var SearchRec:  TSearchRec;
             {$WARN SYMBOL_PLATFORM OFF} { faArchives - Windows only }
             if FindFirst(LayoutFld + 'r*.htm', faArchive, SearchRec) = 0 then
@@ -251,7 +231,7 @@ begin
             end;
 
             // Display
-            LayoutContainer.Clear;
+            LayoutContainer.Clear();
             for var iCNT: integer:=0 to LayoutLst.Count - 1 do
                 LayoutContainer.Items.Add(LayoutLst.Strings[iCNT]);
 
@@ -266,7 +246,7 @@ begin
 
     finally
 
-      LayoutLst.Free;
+      LayoutLst.Free();
 
     end;
 
@@ -280,27 +260,28 @@ begin
     if (TextReminder1.Text = '0') or (TextReminder4.Text = '0') then
     begin
         THelpers.MsgCall(Warn, 'Please provide value for Reminder 1 and Legal Action different than zero.');
-        Exit;
+        Exit();
     end;
 
     if (Exp_Rem2_Switch.Checked) and (TextReminder2.Text = '0') then
     begin
         THelpers.MsgCall(Warn, 'Please provide value for Reminder 2 different than zero.');
-        Exit;
+        Exit();
     end;
 
     if (Exp_Rem3_Switch.Checked) and (TextReminder3.Text = '0') then
     begin
         THelpers.MsgCall(Warn, 'Please provide value for Reminder 3 different than zero.');
-        Exit;
+        Exit();
     end;
 
     // Applay only on selected customers
     if FMultiselect.Count > 0 then
     begin
+
         for var iCNT: integer:=0 to FMultiselect.Count - 1 do
         begin
-            var SelItem: integer:=FMultiselect.Strings[iCNT].ToInteger;
+            var SelItem: integer:=FMultiselect.Strings[iCNT].ToInteger();
             List.Items[SelItem].SubItems[3] :=ListEmailFrom.Text;
             List.Items[SelItem].SubItems[6] :=TextReminder0.Text;
             List.Items[SelItem].SubItems[7] :=TextReminder1.Text;
@@ -308,12 +289,15 @@ begin
             List.Items[SelItem].SubItems[9] :=TextReminder3.Text;
             List.Items[SelItem].SubItems[10]:=TextReminder4.Text;
         end;
+
     end
-    // Apply on all listed customers
     else
     begin
+
+        // Apply on all listed customers
         if THelpers.MsgCall(Question2, 'You have not selected any customers, do you want Unity to apply proposed conditions for all listed items?') = mrYes then
         begin
+
             for var iCNT: integer:=0 to List.Items.Count - 1 do
             begin
                 List.Items[iCNT].SubItems[3] :=ListEmailFrom.Text;
@@ -323,7 +307,9 @@ begin
                 List.Items[iCNT].SubItems[9] :=TextReminder3.Text;
                 List.Items[iCNT].SubItems[10]:=TextReminder4.Text;
             end;
+
         end;
+
     end;
 
 end;
@@ -335,9 +321,11 @@ begin
     var Check: integer:=0;
     for var iCNT: integer:=0 to List.Items.Count - 1 do
     begin
+
         // Not found
         if List.Items[iCNT].SubItems[4] = 'Not found' then Inc(Check);
         if List.Items[iCNT].SubItems[5] = 'Not found' then Inc(Check);
+
         // Not set
         if List.Items[iCNT].SubItems[3]  = 'Not set' then Inc(Check);
         if List.Items[iCNT].SubItems[6]  = 'Not set' then Inc(Check);
@@ -345,95 +333,73 @@ begin
         if List.Items[iCNT].SubItems[8]  = 'Not set' then Inc(Check);
         if List.Items[iCNT].SubItems[9]  = 'Not set' then Inc(Check);
         if List.Items[iCNT].SubItems[10] = 'Not set' then Inc(Check);
+
     end;
 
     if Check > 0 then
     begin
-        THelpers.MsgCall(Warn, 'Please make sure you that the list do not contain "not found" or "not set" items.');
-        Exit;
+        THelpers.MsgCall(Warn, 'Please make sure you that the list do not contain items marked as "not found" or "not set".');
+        Exit();
     end;
 
-    var TrackerData: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
-    var TempData: TStringGrid:=TStringGrid.Create(nil);
+    var CallResponse: TCallResponse;
+    var PayLoad: TStringGrid:=TStringGrid.Create(nil);
     try
-        try
-            // Select database columns
-            TrackerData.CleanUp;
-            TrackerData.Columns.Add(TTrackerData.UserAlias);
-            TrackerData.Columns.Add(TTrackerData.Cuid);
-            TrackerData.Columns.Add(TTrackerData.CoCode);
-            TrackerData.Columns.Add(TTrackerData.Branch);
-            TrackerData.Columns.Add(TTrackerData.CustomerName);
-            TrackerData.Columns.Add(TTrackerData.Stamp);
-            TrackerData.Columns.Add(TTrackerData.SendReminder1);
-            TrackerData.Columns.Add(TTrackerData.SendReminder2);
-            TrackerData.Columns.Add(TTrackerData.SendReminder3);
-            TrackerData.Columns.Add(TTrackerData.SendReminder4);
-            TrackerData.Columns.Add(TTrackerData.Sciud);
-            TrackerData.Columns.Add(TTrackerData.ReminderLayout);
-            TrackerData.Columns.Add(TTrackerData.PreStatement);
-            TrackerData.Columns.Add(TTrackerData.SendFrom);
-            TrackerData.Columns.Add(TTrackerData.StatementTo);
-            TrackerData.Columns.Add(TTrackerData.ReminderTo);
 
-            // Put ListView data to StringGrid
-            TempData.RowCount:=List.Items.Count;
-            TempData.ColCount:=TrackerData.Columns.Count;
-            for var iCNT: integer:=0 to List.Items.Count - 1 do
-            begin
-                TempData.Cells[0,  iCNT]:=SessionService.SessionUser;       // user alias
-                TempData.Cells[1,  iCNT]:=List.Items[iCNT].SubItems[0];     // cuid
-                TempData.Cells[2,  iCNT]:=List.Items[iCNT].SubItems[11];    // co code
-                TempData.Cells[3,  iCNT]:=List.Items[iCNT].SubItems[12];    // branch/agent
-                TempData.Cells[4,  iCNT]:=List.Items[iCNT].SubItems[2];     // cust name
-                TempData.Cells[5,  iCNT]:=DateTimeToStr(Now);               // stamp
-                TempData.Cells[6,  iCNT]:=List.Items[iCNT].SubItems[7];     // reminder 1
-                TempData.Cells[7,  iCNT]:=List.Items[iCNT].SubItems[8];     // reminder 2
-                TempData.Cells[8,  iCNT]:=List.Items[iCNT].SubItems[9];     // reminder 3
-                TempData.Cells[9,  iCNT]:=List.Items[iCNT].SubItems[10];    // reminder 4
-                TempData.Cells[10, iCNT]:=List.Items[iCNT].SubItems[1];     // scuid
-                TempData.Cells[11, iCNT]:=ListLayout.Text;                  // layout
-                TempData.Cells[12, iCNT]:=List.Items[iCNT].SubItems[6];     // pre-statement
-                TempData.Cells[13, iCNT]:=List.Items[iCNT].SubItems[3];     // send from
-                TempData.Cells[14, iCNT]:=List.Items[iCNT].SubItems[4];     // statement to
-                TempData.Cells[15, iCNT]:=List.Items[iCNT].SubItems[5];     // reminder to
-            end;
+        // --------------------------------------------------------
+        // Put ListView data to StringGrid to be saved to database.
+        // --------------------------------------------------------
 
-            // Insert data to database
-            if TrackerData.InsertInto(TTrackerData.TrackerData, True, TempData, nil, False) then
-            begin
-                ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: Invoice tracker data updated.');
-                THelpers.MsgCall(Info, 'Invoice Tracker has been updates successfully!');
-            end
-            else
-            begin
-                ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: Invoice tracker error, cannot perform transaction.');
-                THelpers.MsgCall(Error, 'Cannot perform transaction. Please contact IT support.');
-            end;
+        PayLoad.RowCount:=List.Items.Count;
+        PayLoad.ColCount:=16;
 
-        except
-            on E: Exception do
-            begin
-                ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: Error has been thrown [Tracker_SaveToDb]: ' + E.Message);
-                THelpers.MsgCall(Error, E.Message);
-            end;
+        for var iCNT: integer:=0 to List.Items.Count - 1 do
+        begin
+            PayLoad.Cells[0,  iCNT]:=SessionService.SessionUser;     // user alias
+            PayLoad.Cells[1,  iCNT]:=List.Items[iCNT].SubItems[0];   // cuid
+            PayLoad.Cells[2,  iCNT]:=List.Items[iCNT].SubItems[11];  // co code
+            PayLoad.Cells[3,  iCNT]:=List.Items[iCNT].SubItems[12];  // branch/agent
+            PayLoad.Cells[4,  iCNT]:=List.Items[iCNT].SubItems[2];   // cust name
+            PayLoad.Cells[5,  iCNT]:=DateTimeToStr(Now);             // stamp
+            PayLoad.Cells[6,  iCNT]:=List.Items[iCNT].SubItems[7];   // reminder 1
+            PayLoad.Cells[7,  iCNT]:=List.Items[iCNT].SubItems[8];   // reminder 2
+            PayLoad.Cells[8,  iCNT]:=List.Items[iCNT].SubItems[9];   // reminder 3
+            PayLoad.Cells[9,  iCNT]:=List.Items[iCNT].SubItems[10];  // reminder 4
+            PayLoad.Cells[10, iCNT]:=List.Items[iCNT].SubItems[1];   // scuid
+            PayLoad.Cells[11, iCNT]:=ListLayout.Text;                // layout
+            PayLoad.Cells[12, iCNT]:=List.Items[iCNT].SubItems[6];   // pre-statement
+            PayLoad.Cells[13, iCNT]:=List.Items[iCNT].SubItems[3];   // send from
+            PayLoad.Cells[14, iCNT]:=List.Items[iCNT].SubItems[4];   // statement to
+            PayLoad.Cells[15, iCNT]:=List.Items[iCNT].SubItems[5];   // reminder to
         end;
+
+        var InvoiceTracker: IInvoiceTracker:=TInvoiceTracker.Create();
+        CallResponse:=InvoiceTracker.SaveTrackerDataAwaited(PayLoad);
+
     finally
-        TrackerData.Free;
-        TempData.Free;
+        PayLoad.Free();
     end;
+
+    if not CallResponse.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        Exit();
+    end;
+
+    THelpers.MsgCall(TAppMessage.Info, 'The user list has been saved successfully.');
+    ThreadFileLog.Log('[TTrackerForm.SaveToDb]: The user list has been saved successfully.');
 
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------ START UP //
+// ------------------------------------------------------------------------------------------------------------------------------------------------- STARTUP //
 
 
 procedure TTrackerForm.FormCreate(Sender: TObject);
 begin
 
     var lsColumns: TListColumn;
-    FMultiselect:=TStringList.Create;
+    FMultiselect:=TStringList.Create();
 
     // List view initialization
 
@@ -492,16 +458,10 @@ begin
 end;
 
 
-procedure TTrackerForm.FormDestroy(Sender: TObject);
-begin
-    if Assigned(FMultiselect) then FMultiselect.Free;
-end;
-
-
 procedure TTrackerForm.FormShow(Sender: TObject);
 begin
-    ListLayout.Clear;
-    ListEmailFrom.Clear;
+    ListLayout.Clear();
+    ListEmailFrom.Clear();
     ErrorEmailFrom.Visible:=True;
     TextReminder0.Text:='0';
     TextReminder1.Text:='0';
@@ -523,7 +483,13 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------ BUTTONS EVENTS //
+procedure TTrackerForm.FormDestroy(Sender: TObject);
+begin
+    if Assigned(FMultiselect) then FMultiselect.Free();
+end;
+
+
+// -------------------------------------------------------------------------------------------------------------------------------------------- CLICK EVENTS //
 
 
 procedure TTrackerForm.btnApplyClick(Sender: TObject);
@@ -540,7 +506,7 @@ end;
 
 procedure TTrackerForm.btnCancelClick(Sender: TObject);
 begin
-    Close;
+    Close();
 end;
 
 
@@ -561,7 +527,7 @@ end;
 
 procedure TTrackerForm.btnSelectionClick(Sender: TObject);
 begin
-    CustomerList.ClearSelection;
+    CustomerList.ClearSelection();
 end;
 
 
@@ -570,13 +536,14 @@ begin
 
     if not(FCtrlClicked) and (Selected) then
     begin
-        FMultiselect.Clear;
+        FMultiselect.Clear();
         FMultiselect.Add(Item.Index.ToString);
     end
-    else if (FCtrlClicked) and (Selected) then
-        FMultiselect.Add(Item.Index.ToString)
     else
-        FMultiselect.Clear;
+    if (FCtrlClicked) and (Selected) then
+        FMultiselect.Add(Item.Index.ToString)
+            else
+                FMultiselect.Clear();
 
 end;
 
@@ -586,7 +553,7 @@ end;
 
 procedure TTrackerForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-    if Key = Char(VK_ESCAPE) then Close;
+    if Key = Char(VK_ESCAPE) then Close();
 end;
 
 

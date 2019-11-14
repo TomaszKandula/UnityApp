@@ -430,9 +430,6 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------- GETTERS //
-
-
 function TMailer.GetXMailer(): string;
 begin
     Result:=FXMailer;
@@ -485,9 +482,6 @@ function TMailer.GetAttachments(): TList<string>;
 begin
     Result:=FAttachments;
 end;
-
-
-// ------------------------------------------------------------------------------------------------------------------------------------------------- SETTERS //
 
 
 procedure TMailer.SetXMailer(NewValue: string);

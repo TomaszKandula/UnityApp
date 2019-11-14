@@ -128,7 +128,7 @@ end;
 // ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
 
 
-procedure TSendForm.ExecuteMailer;
+procedure TSendForm.ExecuteMailer();
 begin
 
     if String.IsNullOrEmpty(Text_Message.Text) then
@@ -187,7 +187,7 @@ begin
     var Statements: IStatements:=TStatements.Create();
     Statements.SendAccountStatement(MainForm.FAgeDateSel, FPayLoad, SendAccountStatement_Callback);
 
-    Close;
+    Close();
 
 end;
 
@@ -209,7 +209,7 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------ START UP //
+// ------------------------------------------------------------------------------------------------------------------------------------------------- STARTUP //
 
 
 procedure TSendForm.FormCreate(Sender: TObject);
@@ -225,7 +225,7 @@ end;
 
 procedure TSendForm.FormShow(Sender: TObject);
 begin
-    Text_Message.SetFocus;
+    Text_Message.SetFocus();
 end;
 
 
@@ -328,13 +328,13 @@ end;
 
 procedure TSendForm.btnSendEmailClick(Sender: TObject);
 begin
-    ExecuteMailer;
+    ExecuteMailer();
 end;
 
 
 procedure TSendForm.btnCancelClick(Sender: TObject);
 begin
-    Close;
+    Close();
 end;
 
 
@@ -343,37 +343,37 @@ end;
 
 procedure TSendForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-    if Key = Char(VK_ESCAPE) then Close;
+    if Key = Char(VK_ESCAPE) then Close();
 end;
 
 
 procedure TSendForm.Text_SalutKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-    if Key = VK_TAB then Text_Message.SetFocus;
+    if Key = VK_TAB then Text_Message.SetFocus();
 end;
 
 
 procedure TSendForm.Text_MessageKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-    if Key = VK_TAB then cbShowAll.SetFocus;
+    if Key = VK_TAB then cbShowAll.SetFocus();
 end;
 
 
 procedure TSendForm.cbShowAllKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-    if Key = VK_TAB then cbOverdueOnly.SetFocus;
+    if Key = VK_TAB then cbOverdueOnly.SetFocus();
 end;
 
 
 procedure TSendForm.cbOverdueOnlyKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-    if Key = VK_TAB then cbNonOverdue.SetFocus;
+    if Key = VK_TAB then cbNonOverdue.SetFocus();
 end;
 
 
 procedure TSendForm.cbNonOverdueKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-    if Key = VK_TAB then Text_Message.SetFocus;
+    if Key = VK_TAB then Text_Message.SetFocus();
 end;
 
 

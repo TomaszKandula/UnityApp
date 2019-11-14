@@ -107,11 +107,6 @@ uses
     Unity.SessionService;
 
 
-// -----------------------------------------
-// Remove invoice from tracker list.
-// *Change this when SQL is replaced by API.
-// -----------------------------------------
-
 procedure TTracker.DeleteFromTrackerListAsync(CUID: string; Callback: TDeleteFromTrackerList);
 begin
 
@@ -159,11 +154,6 @@ begin
 
 end;
 
-
-// ------------------------------------
-// Refresh invoice tracker list.
-// *Remove when SQL is replaced by API.
-// ------------------------------------
 
 procedure TTracker.RefreshInvoiceTrackerAsync(UserAlias: string; Callback: TRefreshInvoiceTracker);
 begin

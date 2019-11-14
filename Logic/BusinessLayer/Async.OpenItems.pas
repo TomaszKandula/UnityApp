@@ -151,11 +151,6 @@ uses
     Async.Debtors;
 
 
-// ------------------------------------------------
-// Scan SSIS master table for refreshed open items.
-// *Change when SQL is replaced by API.
-// ------------------------------------------------
-
 procedure TOpenItems.ScanOpenItemsAsync(OpenItemsUpdate: string; Callback: TScanOpenItems);
 begin
 
@@ -198,11 +193,6 @@ begin
 
 end;
 
-
-// ------------------------------------
-// Load open items into TStringGrid
-// *Change when SQL is replaced by API.
-// ------------------------------------
 
 procedure TOpenItems.ReadOpenItemsAsync(ActionMode: TLoading; OpenItemsGrid: TStringGrid; SettingsGrid: TStringGrid; Callback: TReadOpenItems);
 begin

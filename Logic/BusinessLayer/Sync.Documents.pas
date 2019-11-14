@@ -714,9 +714,6 @@ uses
     Unity.SessionService;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------ PUBLIC METHODS //
-
-
 constructor TDocument.Create();
 begin
     inherited;
@@ -837,9 +834,6 @@ begin
     Result:=True;
 
 end;
-
-
-// ----------------------------------------------------------------------------------------------------------------------------------------- HELPERS METHODS //
 
 
 procedure TDocument.SaveOutput(FileName: string);
@@ -1076,9 +1070,6 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------- GETTERS //
-
-
 function  TDocument.GetOpenItemsRefs: TFOpenItemsRefs;
 begin
     Result:=FOpenItemsRefs;
@@ -1209,9 +1200,6 @@ function TDocument.GetCommonHTMLRow: string;
 begin
     Result:=FCommonHTMLRow;
 end;
-
-
-// ------------------------------------------------------------------------------------------------------------------------------------------------- SETTERS //
 
 
 procedure TDocument.SetOpenItemsRefs(NewValue: TFOpenItemsRefs);

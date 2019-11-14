@@ -35,10 +35,6 @@ object ReportsForm: TReportsForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
-    ExplicitLeft = 64
-    ExplicitTop = 56
-    ExplicitWidth = 185
-    ExplicitHeight = 41
     object ScrollBox: TScrollBox
       AlignWithMargins = True
       Left = 10
@@ -54,8 +50,6 @@ object ReportsForm: TReportsForm
       BorderStyle = bsNone
       TabOrder = 0
       OnMouseWheel = ScrollBoxMouseWheel
-      ExplicitWidth = 607
-      ExplicitHeight = 550
       object PanelContent: TPanel
         Left = 0
         Top = 0

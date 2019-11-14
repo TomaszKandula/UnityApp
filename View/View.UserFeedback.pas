@@ -48,12 +48,11 @@ type
         procedure FormKeyPress(Sender: TObject; var Key: Char);
     strict private
         function WordCount(const InputStr: string): cardinal;
-    public
         procedure SendFeedbackAsync_Callback(CallResponse: TCallResponse);
     end;
 
 
-    function FeedbackForm: TFeedbackForm;
+    function FeedbackForm(): TFeedbackForm;
 
 
 implementation
@@ -75,7 +74,7 @@ const
 var vFeedbackForm: TFeedbackForm;
 
 
-function FeedbackForm: TFeedbackForm;
+function FeedbackForm(): TFeedbackForm;
 begin
     if not(Assigned(vFeedbackForm)) then Application.CreateForm(TFeedbackForm, vFeedbackForm);
     Result:=vFeedbackForm;
@@ -137,7 +136,7 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------ START UP //
+// ------------------------------------------------------------------------------------------------------------------------------------------------- STARTUP //
 
 
 procedure TFeedbackForm.FormCreate(Sender: TObject);
@@ -146,7 +145,7 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------- BUTTON EVENTS //
+// -------------------------------------------------------------------------------------------------------------------------------------------- CLICK EVENTS //
 
 
 procedure TFeedbackForm.btnSendReportClick(Sender: TObject);
@@ -155,17 +154,17 @@ begin
     if ReportMemo.Text = '' then
     begin
         THelpers.MsgCall(TAppMessage.Warn, 'Cannot send empty report. Please write what feels right and then send.');
-        Exit;
+        Exit();
     end;
 
-    var Utilities: IUtilities:=TUtilities.Create;
+    var Utilities: IUtilities:=TUtilities.Create();
     Utilities.SendFeedbackAsync(ReportMemo.Text, SendFeedbackAsync_Callback);
 
 end;
 
 procedure TFeedbackForm.btnCancelClick(Sender: TObject);
 begin
-    Close;
+    Close();
 end;
 
 
@@ -180,7 +179,7 @@ end;
 
 procedure TFeedbackForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-    if Key = Char(VK_ESCAPE) then Close;
+    if Key = Char(VK_ESCAPE) then Close();
 end;
 
 

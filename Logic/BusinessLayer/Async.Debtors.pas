@@ -139,11 +139,6 @@ uses
     Sync.Documents;
 
 
-// ------------------------------------
-// Make aging report for main view.
-// *Remove when SQL is replaced by API.
-// ------------------------------------
-
 procedure TDebtors.MakeAgeViewSQLAsync(OpenAmount: double; GroupID: string; SourceGrid: TStringGrid; CompanyData: TStringGrid; Callback: TMakeAgeViewSQL);
 begin
 
@@ -182,11 +177,6 @@ begin
 
 end;
 
-
-// ------------------------------------
-// Make aging report to CSV file.
-// *Remove when SQL is replaced by API.
-// ------------------------------------
 
 procedure TDebtors.MakeAgeViewCSVAsync(OpenAmount: double; GroupID: string; SourceGrid: TStringGrid; CompanyData: TStringGrid; Callback: TMakeAgeViewCSV);
 begin
@@ -238,11 +228,6 @@ begin
 
 end;
 
-
-// ------------------------------------
-// Load aging report for main view.
-// *Change when SQL is replaced by API.
-// ------------------------------------
 
 procedure TDebtors.ReadAgeViewAsync(ActionMode: TLoading; SortMode: integer; GroupIdSel: string; AgeDateSel: string; Callback: TReadAgeView);
 begin
@@ -314,10 +299,6 @@ begin
 
 end;
 
-
-// ----------------------
-// Generate aging report.
-// ----------------------
 
 function TDebtors.FMakeAgeView(OSAmount: double; GroupID: string; SourceGrid: TStringGrid; CompanyData: TStringGrid): TALists;
 
@@ -579,10 +560,6 @@ begin
 
 end;
 
-
-// ----------------------------------
-// Transefer 'AgeView' to SQL server.
-// ----------------------------------
 
 procedure TDebtors.FWriteAgeView(DestTable: string; GroupID: string; SourceArray: TALists);
 begin

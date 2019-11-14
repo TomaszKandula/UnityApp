@@ -95,16 +95,16 @@ type
         property  FileName:   string  read FFileName  write FFileName;
         function  InsertMissingInvoice: boolean;
         function  InsertCurrentInvoices(Source: TStringGrid): boolean;
-        function  ValidateFields: cardinal;
-        procedure ClearAll;
-        procedure AddAttachement;
+        function  ValidateFields(): cardinal;
+        procedure ClearAll();
+        procedure AddAttachement();
         function  ReturnCurrencyId(ISO: string): cardinal;
         function  ReturnQueryReasonId(QueryReason: string): cardinal;
         function  SendNotification(LbuEmail: string): boolean;
     end;
 
 
-    function QmsForm: TQmsForm;
+    function QmsForm(): TQmsForm;
 
 
 implementation
@@ -133,7 +133,7 @@ uses
 var vQmsForm: TQmsForm;
 
 
-function QmsForm: TQmsForm;
+function QmsForm(): TQmsForm;
 begin
     if not(Assigned(vQmsForm)) then Application.CreateForm(TQmsForm, vQmsForm);
     Result:=vQmsForm;
@@ -143,11 +143,11 @@ end;
 // ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
 
 
-function TQmsForm.InsertMissingInvoice: boolean;  {refactor / async}
+function TQmsForm.InsertMissingInvoice(): boolean;  {refactor / async}
 begin
 
     Result:=False;
-    if not(IsMissing) then Exit;
+    if not(IsMissing) then Exit();
 
     var Tables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
     try
@@ -199,10 +199,10 @@ begin
         begin
             ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: [QMS] Missing invoice has been logged successfully.');
             THelpers.MsgCall(TAppMessage.Info, 'Missing invoice has been logged successfully.');
-            FLogQueryId:=QueryUid.ToString;
+            FLogQueryId:=QueryUid.ToString();
             Result:=True;
-            CLearAll;
-            Close;
+            CLearAll();
+            Close();
         end
         else
         begin
@@ -212,7 +212,7 @@ begin
         end;
 
     finally
-        Tables.Free;
+        Tables.Free();
     end;
 
 end;
@@ -222,7 +222,7 @@ function TQmsForm.InsertCurrentInvoices(Source: TStringGrid): boolean; {refactor
 begin
 
     Result:=False;
-    if Source = nil then Exit;
+    if Source = nil then Exit();
 
     {$WARN SYMBOL_PLATFORM OFF}
     var UserFormat: TFormatSettings:=TFormatSettings.Create(LOCALE_USER_DEFAULT);
@@ -300,32 +300,33 @@ begin
             TempData.Cells[16, iCNT]:=EditStamp.Text;
             TempData.Cells[17, iCNT]:=QueryUid.ToString;
             Inc(jCNT);
+
         end;
 
         // Send to server
         if Tables.InsertInto(TQmsLog.QmsLog, True, TempData, nil, False) then
         begin
-            ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: [QMS] Provided informatin has been logged successfully.');
+            ThreadFileLog.Log('[InsertCurrentInvoices] Provided informatin has been logged successfully.');
             THelpers.MsgCall(Info, 'Provided information has been logged successfully.');
             Result:=True;
-            FLogQueryId:=QueryUid.ToString;
+            FLogQueryId:=QueryUid.ToString();
             Close;
         end
         else
         begin
             FLogQueryId:=String.Empty;
-            ThreadFileLog.Log('Thread [' + IntToStr(MainThreadID) + ']: [QMS] Cannot log current invoice(s).');
+            ThreadFileLog.Log('[InsertCurrentInvoices] Cannot log current invoice(s).');
             THelpers.MsgCall(Error, 'Cannot log current invoice(s) to database. Please check the log and contact IT support.');
         end;
     finally
-        Tables.Free;
-        TempData.Free;
+        Tables.Free();
+        TempData.Free();
     end;
 
 end;
 
 
-function TQmsForm.ValidateFields: cardinal;
+function TQmsForm.ValidateFields(): cardinal;
 begin
 
     var Checks: integer:=0;
@@ -346,7 +347,7 @@ begin
 end;
 
 
-procedure TQmsForm.ClearAll;
+procedure TQmsForm.ClearAll();
 begin
     EditInvoiceNo.Text:='';
     EditOpenAmount.Text:='';
@@ -360,11 +361,11 @@ begin
 end;
 
 
-procedure TQmsForm.AddAttachement;
+procedure TQmsForm.AddAttachement();
 begin
     if not(String.IsNullOrEmpty(FileName)) then OpenDlgBox.InitialDir:=ExtractFilePath(FileName);
 
-    if OpenDlgBox.Execute then
+    if OpenDlgBox.Execute() then
     begin
         FileName:=OpenDlgBox.FileName;
         THelpers.MsgCall(Info, 'The attachement has been added successfully!');
@@ -385,7 +386,7 @@ begin
     var Tables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
     try
         try
-            Tables.CleanUp;
+            Tables.CleanUp();
             Tables.CustFilter:=TSql.WHERE + TCurrencies.Iso + TSql.EQUAL + QuotedStr(ISO);
             Tables.OpenTable(TCurrencies.Currencies);
             if Tables.DataSet.RecordCount = 1 then
@@ -398,7 +399,7 @@ begin
             end;
         end;
     finally
-        Tables.Free;
+        Tables.Free();
     end;
 
 end;
@@ -424,7 +425,7 @@ begin
             end;
         end;
     finally
-        Tables.Free;
+        Tables.Free();
     end;
 
 end;
@@ -463,12 +464,9 @@ begin
                    LogQueryId + '.';
 
     Mail.Attachments.Add(FileName);
-    Result:=Mail.SendNow;
+    Result:=Mail.SendNow();
 
 end;
-
-
-// --------------------------------------------------------------------------------------------------------------------------------------- MAIN CLASS EVENTS //
 
 
 // ------------------------------------------------------------------------------------------------------------------------------------------------- STARTUP //
@@ -476,13 +474,13 @@ end;
 
 procedure TQmsForm.FormCreate(Sender: TObject);
 begin
-    // Do nothing
+    {Do nothing}
 end;
 
 
 procedure TQmsForm.FormDestroy(Sender: TObject);
 begin
-    // Do nothing
+    {Do nothing}
 end;
 
 
@@ -520,7 +518,7 @@ begin
 
             if IsMissing then
             begin
-                Tables.CleanUp;
+                Tables.CleanUp();
                 Tables.Columns.Add(TCurrencies.Iso);
                 Tables.OpenTable(TCurrencies.Currencies);
                 Tables.SqlToSimpleList(CurrencyList, Tables.DataSet);
@@ -535,7 +533,7 @@ begin
             end;
         end;
     finally
-        Tables.Free;
+        Tables.Free();
     end;
 
     if IsMissing then EditLogType.Text:='Missing' else EditLogType.Text:='Existing';
@@ -556,12 +554,12 @@ begin
 end;
 
 
-// -------------------------------------------------------------------------------------------------------------------------------------------- BUTTON CALLS //
+// --------------------------------------------------------------------------------------------------------------------------------------------- CLICK CALLS //
 
 
 procedure TQmsForm.btnAddAttcahementClick(Sender: TObject);
 begin
-    AddAttachement;
+    AddAttachement();
 end;
 
 
@@ -583,7 +581,7 @@ end;
 
 procedure TQmsForm.btnCancelClick(Sender: TObject);
 begin
-    Close;
+    Close();
 end;
 
 
@@ -604,7 +602,7 @@ begin
     if not(IsMissing) then
         if InsertCurrentInvoices(ActionsForm.OpenItemsGrid) then SendNotification(LbuEmailAddress.Text);
 
-    ClearAll;
+    ClearAll();
     Screen.Cursor:=crDefault;
 
 end;

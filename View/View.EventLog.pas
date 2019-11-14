@@ -40,11 +40,11 @@ type
         procedure FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
     strict private
-        procedure LoadEventLog;
+        procedure LoadEventLog();
     end;
 
 
-    function EventForm: TEventForm;
+    function EventForm(): TEventForm;
 
 
 implementation
@@ -62,7 +62,7 @@ uses
 var vEventForm: TEventForm;
 
 
-function EventForm: TEventForm;
+function EventForm(): TEventForm;
 begin
     if not(Assigned(vEventForm)) then Application.CreateForm(TEventForm, vEventForm);
     Result:=vEventForm;
@@ -72,7 +72,7 @@ end;
 // ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
 
 
-procedure TEventForm.LoadEventLog;
+procedure TEventForm.LoadEventLog();
 begin
 
     try
@@ -96,7 +96,7 @@ end;
 
 procedure TEventForm.FormShow(Sender: TObject);
 begin
-    LoadEventLog;
+    LoadEventLog();
 end;
 
 

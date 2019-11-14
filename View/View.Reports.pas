@@ -70,7 +70,7 @@ type
     end;
 
 
-    function ReportsForm: TReportsForm;
+    function ReportsForm(): TReportsForm;
 
 
 implementation
@@ -91,7 +91,7 @@ var
     VReportsForm: TReportsForm;
 
 
-function ReportsForm: TReportsForm;
+function ReportsForm(): TReportsForm;
 begin
     if not(Assigned(VReportsForm)) then Application.CreateForm(TReportsForm, VReportsForm);
     Result:=VReportsForm;
@@ -109,7 +109,7 @@ end;
 
 procedure TReportsForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
-    //
+    {Do nothing}
 end;
 
 
@@ -122,13 +122,7 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------ MOUSE EVENTS | CLICK //
-
-
-procedure TReportsForm.FormKeyPress(Sender: TObject; var Key: Char);
-begin
-    if Key = Char(VK_ESCAPE) then Close;
-end;
+// -------------------------------------------------------------------------------------------------------------------------------------------- CLICK EVENTS //
 
 
 procedure TReportsForm.Report1OverdueClick(Sender: TObject);
@@ -252,7 +246,7 @@ end;
 procedure TReportsForm.ScrollBoxMouseWheel(Sender: TObject; Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
 begin
 
-    const Level = 10;
+    const Level = 2;
     var ScrollBox: TScrollBox:=TScrollBox(Sender);
     var Sensitivity:=WheelDelta div Level;
 
@@ -263,6 +257,15 @@ begin
     ScrollBox.VertScrollBar.Position:=NewPos;
     Handled:=True;
 
+end;
+
+
+// ----------------------------------------------------------------------------------------------------------------------------------------- KEYBOARD EVENTS //
+
+
+procedure TReportsForm.FormKeyPress(Sender: TObject; var Key: Char);
+begin
+    if Key = Char(VK_ESCAPE) then Close;
 end;
 
 

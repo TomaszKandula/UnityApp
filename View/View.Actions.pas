@@ -1100,57 +1100,54 @@ begin
 end;
 
 
-// -------------------------------------------------------------------------------------------------------------------------------------------- MOUSE EVENTS //
-
-
-// ---------------------------------------------------------------------------------------------------------------------------------- SET FOCUS ON COMPONENT //
+// -------------------------------------------------------------------------------------------------------------------------------- MOUSE EVENTS | SET FOCUS //
 
 
 procedure TActionsForm.Cust_PhoneMouseEnter(Sender: TObject);
 begin
-//    if (Cust_Phone.Enabled) and (Cust_Phone.Visible) then Cust_Phone.SetFocus;
+    if (Cust_Phone.Enabled) and (Cust_Phone.Visible) then Cust_Phone.SetFocus();
 end;
 
 
 procedure TActionsForm.Cust_PersonMouseEnter(Sender: TObject);
 begin
-//    if (Cust_Person.Enabled) and (Cust_Person.Visible) then Cust_Person.SetFocus;
+    if (Cust_Person.Enabled) and (Cust_Person.Visible) then Cust_Person.SetFocus();
 end;
 
 
 procedure TActionsForm.Cust_MailMouseEnter(Sender: TObject);
 begin
-//    if (Cust_Mail.Enabled) and (Cust_Mail.Visible) then Cust_Mail.SetFocus;
+    if (Cust_Mail.Enabled) and (Cust_Mail.Visible) then Cust_Mail.SetFocus();
 end;
 
 
 procedure TActionsForm.Cust_MailGeneralMouseEnter(Sender: TObject);
 begin
-//    if (Cust_MailGeneral.Enabled) and (Cust_MailGeneral.Visible) then Cust_MailGeneral.SetFocus;
+    if (Cust_MailGeneral.Enabled) and (Cust_MailGeneral.Visible) then Cust_MailGeneral.SetFocus();
 end;
 
 
 procedure TActionsForm.OpenItemsGridMouseEnter(Sender: TObject);
 begin
-//    if (OpenItemsGrid.Enabled) and (OpenItemsGrid.Visible) then OpenItemsGrid.SetFocus;
+    if (OpenItemsGrid.Enabled) and (OpenItemsGrid.Visible) then OpenItemsGrid.SetFocus();
 end;
 
 
 procedure TActionsForm.HistoryGridMouseEnter(Sender: TObject);
 begin
-//    if (HistoryGrid.Enabled) and (HistoryGrid.Visible) then HistoryGrid.SetFocus;
+    if (HistoryGrid.Enabled) and (HistoryGrid.Visible) then HistoryGrid.SetFocus();
 end;
 
 
 procedure TActionsForm.DailyComMouseEnter(Sender: TObject);
 begin
-//    if (DailyCom.Enabled) and (DailyCom.Visible) then DailyCom.SetFocus;
+    if (DailyCom.Enabled) and (DailyCom.Visible) then DailyCom.SetFocus();
 end;
 
 
 procedure TActionsForm.GeneralComMouseEnter(Sender: TObject);
 begin
-//    if (GeneralCom.Enabled) and (GeneralCom.Visible) then GeneralCom.SetFocus;
+    if (GeneralCom.Enabled) and (GeneralCom.Visible) then GeneralCom.SetFocus();
 end;
 
 
@@ -1185,7 +1182,7 @@ begin
 end;
 
 
-// ---------------------------------------------------------------------------------------------------------------------------------- MOUSE HOOVER | ACTIONS //
+// -------------------------------------------------------------------------------------------------------------------------------------------- MOUSE HOOVER //
 
 
 procedure TActionsForm.btnBackMouseEnter(Sender: TObject);
@@ -1308,7 +1305,7 @@ begin
 end;
 
 
-// ---------------------------------------------------------------------------------------------------------------------------------- BUTTON CALLS | ACTIONS //
+// -------------------------------------------------------------------------------------------------------------------------------------------- CLICK EVENTS //
 
 
 procedure TActionsForm.btnEditClick(Sender: TObject);
@@ -1409,9 +1406,6 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------ BUTTON CALLS | COPY TO CLIPBOARD //
-
-
 procedure TActionsForm.btnCopyCustNameClick(Sender: TObject);
 begin
     ClipBoard.AsText:=Cust_Name.Caption;
@@ -1440,9 +1434,6 @@ procedure TActionsForm.btnCopyGeneralMailClick(Sender: TObject);
 begin
     Clipboard.AsText:=Cust_MailGeneral.Text;
 end;
-
-
-// -------------------------------------------------------------------------------------------------------------------------------------- BUTTON CALLS | QMS //
 
 
 procedure TActionsForm.btnLogMissingInvClick(Sender: TObject);

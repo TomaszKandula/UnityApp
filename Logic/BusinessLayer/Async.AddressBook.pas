@@ -143,11 +143,6 @@ uses
     DbModel;
 
 
-// ------------------------------------
-// Load Address Book into TStringGrid
-// *Change when SQL is replaced by API.
-// ------------------------------------
-
 procedure TAddressBook.OpenAddressBookAsync(UserAlias: string; Callback: TOpenAddressBook; OptionalCondition: string = '');
 begin
 
@@ -220,11 +215,6 @@ begin
 
 end;
 
-
-// ------------------------------------
-// Update data in Address Book
-// *Change when SQL is replaced by API.
-// ------------------------------------
 
 procedure TAddressBook.UpdateAddressBookAsync(SourceGrid: TStringGrid; UpdateValues: TAddressBookUpdateFields; Callback: TUpdateAddressBook);
 begin
@@ -325,11 +315,6 @@ begin
 
 end;
 
-
-// ------------------------------------
-// Add data to Address Book
-// *Change when SQL is replaced by API.
-// ------------------------------------
 
 procedure TAddressBook.AddToAddressBookAsync(SourceGrid: TStringGrid; Callback: TAddToAddressBook);
 begin

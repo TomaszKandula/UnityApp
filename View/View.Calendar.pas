@@ -60,7 +60,7 @@ type
     end;
 
 
-    function CalendarForm: TCalendarForm;
+    function CalendarForm(): TCalendarForm;
 
 
 implementation
@@ -72,7 +72,7 @@ implementation
 uses
     System.SysUtils,
     View.Main,
-    DbModel,
+    DbModel{Legacy},
     Unity.Chars,
     Unity.Unknown,
     Unity.Helpers,
@@ -85,7 +85,7 @@ uses
 var vCalendarForm: TCalendarForm;
 
 
-function CalendarForm: TCalendarForm;
+function CalendarForm(): TCalendarForm;
 begin
     if not(Assigned(vCalendarForm)) then Application.CreateForm(TCalendarForm, vCalendarForm);
     Result:=vCalendarForm;
@@ -113,13 +113,10 @@ begin
 end;
 
 
-/// <summary>
-/// Set follow-up date and register it in general comment and update age view string grid.
-/// </summary>
-
 procedure TCalendarForm.SetFollowUp(SelectedDate: TDate; SelectedCUID: string; Row: integer);
 begin
 
+    // Set follow-up date and register it in general comment and update age view string grid.
     FGeneralCommentFields.CUID        :=SelectedCUID;
     FGeneralCommentFields.FixedComment:=TUnknown.NULL;
     FGeneralCommentFields.FollowUp    :=DateToStr(SelectedDate);
@@ -172,53 +169,38 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------- BUTTON EVENTS //
+// -------------------------------------------------------------------------------------------------------------------------------------------- CLICK EVENTS //
 
-/// <summary>
-/// Reset all check boxes.
-/// </summary>
 
 procedure TCalendarForm.MyCalendarClick(Sender: TObject);
 begin
+    // Reset all check boxes.
     DaysOne.Checked   :=False;
     DaysThreen.Checked:=False;
     DaysSeven.Checked :=False;
 end;
 
 
-/// <summary>
-/// Set next day.
-/// </summary>
-
 procedure TCalendarForm.DaysOneClick(Sender: TObject);
 begin
+    // Set next day.
     MyCalendar.Date:=MakeMyDay(1);
 end;
 
 
-/// <summary>
-/// Set next three days.
-/// </summary>
-
 procedure TCalendarForm.DaysThreenClick(Sender: TObject);
 begin
+    // Set next three days.
     MyCalendar.Date:=MakeMyDay(3);
 end;
 
 
-/// <summary>
-/// Set next sevenm days.
-/// </summary>
-
 procedure TCalendarForm.DaysSevenClick(Sender: TObject);
 begin
+    // Set next sevenm days.
     MyCalendar.Date:=MakeMyDay(7);
 end;
 
-
-/// <summary>
-/// Confirm selected date.
-/// </summary>
 
 procedure TCalendarForm.MyCalendarDblClick(Sender: TObject);
 begin
@@ -239,7 +221,7 @@ begin
     if FCalendarMode = TCalendar.GetDate then
     begin
         FSelectedDate:=CalendarForm.MyCalendar.Date;
-        Close;
+        Close();
     end;
 
 end;
@@ -250,7 +232,7 @@ end;
 
 procedure TCalendarForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-    if Key = TChars.ESC then Close;
+    if Key = TChars.ESC then Close();
 end;
 
 

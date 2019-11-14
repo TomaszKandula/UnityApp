@@ -137,7 +137,7 @@ type
     end;
 
 
-    function SqlSearchForm: TSqlSearchForm;
+    function SqlSearchForm(): TSqlSearchForm;
 
 
 implementation
@@ -163,14 +163,14 @@ uses
 var vSqlSearchForm: TSqlSearchForm;
 
 
-function SqlSearchForm: TSqlSearchForm;
+function SqlSearchForm(): TSqlSearchForm;
 begin
     if not(Assigned(vSqlSearchForm)) then Application.CreateForm(TSqlSearchForm, vSqlSearchForm);
     Result:=vSqlSearchForm;
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------- CLASS HELPERS //
+// ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
 
 
 procedure TSqlSearchForm.Initialize();
@@ -687,18 +687,18 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------- BUTTONS CALLS //
+// -------------------------------------------------------------------------------------------------------------------------------------------- CLICK EVENTS //
 
 
 procedure TSqlSearchForm.btnSearchClick(Sender: TObject);
 begin
-    PerformSearch;
+    PerformSearch();
 end;
 
 
 procedure TSqlSearchForm.btnCancelClick(Sender: TObject);
 begin
-    Close;
+    Close();
 end;
 
 
@@ -707,7 +707,7 @@ end;
 
 procedure TSqlSearchForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-    if Key = Char(VK_ESCAPE) then Close;
+    if Key = Char(VK_ESCAPE) then Close();
 end;
 
 

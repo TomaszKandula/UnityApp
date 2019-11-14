@@ -54,49 +54,49 @@ type
         procedure FilterListClick(Sender: TObject);
         procedure FilterListClickCheck(Sender: TObject);
     strict private
-        var CheckEvent :  boolean;
+        var CheckEvent:       boolean;
         // Holds values and theirs state
-        var INF7       :  TALists;
-        var INF4       :  TALists;
-        var Gr3        :  TALists;
-        var SalesResp  :  TALists;
-        var PersonResp :  TALists;
-        var CustomerGrp:  TALists;
-        var AccountType:  TALists;
-        var FollowUp   :  TALists;
-        var CoCode     :  TALists;
-        var Agent      :  TALists;
-        var Division   :  TALists;
-        var Free1      :  TALists;
-        var Free2      :  TALists;
-        var Free3      :  TALists;
+        var INF7:             TALists;
+        var INF4:             TALists;
+        var Gr3:              TALists;
+        var SalesResp:        TALists;
+        var PersonResp:       TALists;
+        var CustomerGrp:      TALists;
+        var AccountType:      TALists;
+        var FollowUp:         TALists;
+        var CoCode:           TALists;
+        var Agent:            TALists;
+        var Division:         TALists;
+        var Free1:            TALists;
+        var Free2:            TALists;
+        var Free3:            TALists;
         // Usage counter (how many times column was filtered)
-        var countINF7       : integer;
-        var countINF4       : integer;
-        var countGr3        : integer;
-        var countSalesResp  : integer;
-        var countPersonResp : integer;
+        var countINF7:        integer;
+        var countINF4:        integer;
+        var countGr3:         integer;
+        var countSalesResp:   integer;
+        var countPersonResp:  integer;
         var countCustomerGrp: integer;
         var countAccountType: integer;
-        var countFollowUp   : integer;
-        var countCoCode     : integer;
-        var countAgent      : integer;
-        var countDivision   : integer;
-        var countFree1      : integer;
-        var countFree2      : integer;
-        var countFree3      : integer;
+        var countFollowUp:    integer;
+        var countCoCode:      integer;
+        var countAgent:       integer;
+        var countDivision:    integer;
+        var countFree1:       integer;
+        var countFree2:       integer;
+        var countFree3:       integer;
         // Global filter count
-        var HowManyFlts    : integer;
+        var HowManyFlts:      integer;
     public
-        var FColName   :  string;
-        var FColNumber :  integer;
-        var FGrid      :  TStringGrid;
-        var FOverdue   :  string;
-        var FFilterNum :  TFiltering.TColumns;
-        var InUse      :  boolean;
-        procedure FilterClearAll;
-        procedure FilterSelectCheck;
-        procedure FilterPrep;
+        var FColName:    string;
+        var FColNumber:  integer;
+        var FGrid:       TStringGrid;
+        var FOverdue:    string;
+        var FFilterNum:  TFiltering.TColumns;
+        var InUse:  boolean;
+        procedure FilterClearAll();
+        procedure FilterSelectCheck();
+        procedure FilterPrep();
         procedure FilterCount(IsIncrementing: boolean);
         procedure FilterInit(var FFilter: TALists);
         procedure FilterNow(var FFilter: TALists);
@@ -104,7 +104,7 @@ type
     end;
 
 
-    function FilterForm: TFilterForm;
+    function FilterForm(): TFilterForm;
 
 
 implementation
@@ -118,13 +118,13 @@ uses
     Unity.Chars,
     Unity.Settings,
     Unity.SessionService,
-    DbModel;
+    DbModel{Legacy};
 
 
 var vFilterForm: TFilterForm;
 
 
-function FilterForm: TFilterForm;
+function FilterForm(): TFilterForm;
 begin
     if not(Assigned(vFilterForm)) then Application.CreateForm(TFilterForm, vFilterForm);
     Result:=vFilterForm;
@@ -134,7 +134,7 @@ end;
 // ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
 
 
-procedure TFilterForm.FilterClearAll;
+procedure TFilterForm.FilterClearAll();
 begin
     SetLength(FilterForm.INF7,        1, 2);
     SetLength(FilterForm.INF4,        1, 2);
@@ -169,7 +169,7 @@ begin
 end;
 
 
-procedure TFilterForm.FilterSelectCheck;
+procedure TFilterForm.FilterSelectCheck();
 begin
 
     var Check: integer:=0;
@@ -188,7 +188,7 @@ begin
 end;
 
 
-procedure TFilterForm.FilterPrep;
+procedure TFilterForm.FilterPrep();
 begin
     if (FGrid <> nil) and (not(string.IsNullOrEmpty(FColName))) then
     begin
@@ -261,7 +261,7 @@ procedure TFilterForm.FilterInit(var FFilter: TALists);
 begin
 
     Screen.Cursor:=crHourGlass;
-    FilterList.Items.Clear;
+    FilterList.Items.Clear();
     FilterList.Freeze(True);
 
     // Make unique list of items
@@ -296,7 +296,7 @@ begin
                     FilterList.Items.Add(SL.Strings[iCNT]);
 
             finally
-                SL.Free;
+                SL.Free();
             end;
         end;
 
@@ -321,7 +321,7 @@ begin
 
     finally
         FilterList.Freeze(False);
-        FilterList.Repaint;
+        FilterList.Repaint();
         Screen.Cursor:=crDefault;
     end;
 
@@ -448,22 +448,24 @@ end;
 procedure TFilterForm.FormCreate(Sender: TObject);
 begin
     PanelListItems.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
-    FilterClearAll;
+    FilterClearAll();
 end;
 
 
 procedure TFilterForm.FormActivate(Sender: TObject);
 
-    procedure SetAndQuit;
+    procedure SetAndQuit();
     begin
         btnRemove.Enabled:=True;
         Exit;
     end;
 
 begin
-    FilterPrep;
-    FilterSelectCheck;
+
+    FilterPrep();
+    FilterSelectCheck();
     btnRemove.Enabled:=False;
+
     if (FFilterNum = TFiltering.TColumns.Inf7)              and (countINF7        > 0) then SetAndQuit;
     if (FFilterNum = TFiltering.TColumns.Inf4)              and (countINF4        > 0) then SetAndQuit;
     if (FFilterNum = TFiltering.TColumns.Group3)            and (countGr3         > 0) then SetAndQuit;
@@ -478,10 +480,11 @@ begin
     if (FFilterNum = TFiltering.TColumns.Free1)             and (countFree1       > 0) then SetAndQuit;
     if (FFilterNum = TFiltering.TColumns.Free2)             and (countFree2       > 0) then SetAndQuit;
     if (FFilterNum = TFiltering.TColumns.Free3)             and (countFree3       > 0) then SetAndQuit;
+
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------- BUTTON EVENTS //
+// -------------------------------------------------------------------------------------------------------------------------------------------- CLICK EVENTS //
 
 
 procedure TFilterForm.btnFilterClick(Sender: TObject);
@@ -517,11 +520,11 @@ begin
 
         finally
             FGrid.Freeze(False);
-            FGrid.Repaint;
+            FGrid.Repaint();
             Screen.Cursor:=crDefault;
         end;
 
-        Close;
+        Close();
 
     end;
 
@@ -534,7 +537,7 @@ begin
     if HowManyFlts < 2 then
     begin
         MainForm.Action_RemoveFiltersClick(Self);
-        Close;
+        Close();
     end;
 
     if FColNumber > 0 then
@@ -568,7 +571,7 @@ begin
 
         finally
             FGrid.Freeze(False);
-            FGrid.Repaint;
+            FGrid.Repaint();
             Screen.Cursor:=crDefault;
         end;
 
@@ -634,7 +637,7 @@ end;
 
 procedure TFilterForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-    if Key = TChars.ESC then Close;
+    if Key = TChars.ESC then Close();
 end;
 
 

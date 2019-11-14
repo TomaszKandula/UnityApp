@@ -22,7 +22,8 @@ uses
     Vcl.Grids,
     Vcl.ComCtrls,
     Data.Win.ADODB,
-    Unity.Grid;
+    Unity.Grid,
+    Unity.Records;
 
 
 type
@@ -38,10 +39,14 @@ type
         procedure InvoicesGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
         procedure InvoicesGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
+        procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    strict private
+        var FIsLoaded: boolean;
+        procedure GetInvoiceList_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
     end;
 
 
-    function InvoicesForm: TInvoicesForm;
+    function InvoicesForm(): TInvoicesForm;
 
 
 Implementation
@@ -52,27 +57,61 @@ Implementation
 
 uses
     View.Main,
+    Handler.Sql{Legacy},
+    DbModel{Legacy},
+    Unity.Helpers,
+    Unity.Enums,
     Unity.Common,
     Unity.Chars,
     Unity.Sql,
     Unity.Settings,
     Unity.SessionService,
-    Handler.Sql,
-    DbModel,
-    Unity.Enums;
+    Async.InvoiceTracker;
 
 
 var vInvoicesForm: TInvoicesForm;
 
 
-function InvoicesForm: TInvoicesForm;
+function InvoicesForm(): TInvoicesForm;
 begin
     if not(Assigned(vInvoicesForm)) then Application.CreateForm(TInvoicesForm, vInvoicesForm);
     Result:=vInvoicesForm;
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------ START UP //
+// ----------------------------------------------------------------------------------------------------------------------------------------------- CALLBACKS //
+
+
+procedure TInvoicesForm.GetInvoiceList_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
+begin
+
+    if not CallResponse.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        Exit();
+    end;
+
+    InvoicesGrid.Freeze(True);
+    try
+
+        InvoicesGrid.RowCount:=ReturnedData.RowCount;
+        InvoicesGrid.ColCount:=ReturnedData.ColCount;
+
+        for var iCNT:=0 to ReturnedData.RowCount - 1 do
+            for var jCNT:=0 to ReturnedData.ColCount - 1 do
+                InvoicesGrid.Cells[jCNT, iCNT]:=ReturnedData.Cells[jCNT, iCNT];
+
+        InvoicesGrid.Freeze(False);
+        InvoicesGrid.SetColWidth(40, 10, 400);
+
+    finally
+        InvoicesGrid.Freeze(False);
+    end;
+
+end;
+
+
+// ------------------------------------------------------------------------------------------------------------------------------------------------- STARTUP //
 
 
 procedure TInvoicesForm.FormCreate(Sender: TObject);
@@ -100,27 +139,30 @@ end;
 procedure TInvoicesForm.FormActivate(Sender: TObject);
 begin
 
-    InvoicesGrid.Freeze(True);
+    THelpers.ExecWithDelay(500, procedure
+    begin
 
-    var Tables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
-    try
-        var CUID: string:=MainForm.sgInvoiceTracker.Cells[MainForm.sgInvoiceTracker.ReturnColumn(TTrackerData.Cuid, 1, 1), MainForm.sgInvoiceTracker.Row];
-        Tables.StrSQL:=TSql.SELECT                             +
-                            TTrackerInvoices.InvoiceNo    + TChars.COMMA +
-                            TTrackerInvoices.InvoiceState + TChars.COMMA +
-                            TTrackerInvoices.Stamp        +
-                        TSql.FROM                            +
-                            TTrackerInvoices.TrackerInvoices +
-                        TSql.WHERE                           +
-                            TTrackerInvoices.Cuid            +
-                        TSql.EQUAL                           +
-                            QuotedStr(CUID);
-        Tables.SqlToGrid(InvoicesGrid, Tables.ExecSQL, False, True);
-        InvoicesGrid.Freeze(False);
-    finally
-        Tables.Free;
-    end;
+        if not FIsLoaded then
+        begin
+            var InvoiceTracker: IInvoiceTracker:=TInvoiceTracker.Create();
+            InvoiceTracker.GetInvoiceList(
+                MainForm.sgInvoiceTracker.Cells[MainForm.sgInvoiceTracker.ReturnColumn(TTrackerData.Cuid, 1, 1), MainForm.sgInvoiceTracker.Row],
+                GetInvoiceList_Callback
+            );
+            FIsLoaded:=True;
+        end;
 
+    end);
+
+end;
+
+
+// ------------------------------------------------------------------------------------------------------------------------------------------ CLOSING EVENTS //
+
+
+procedure TInvoicesForm.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+    FIsLoaded:=False;
 end;
 
 

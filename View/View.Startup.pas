@@ -118,42 +118,6 @@ var
     MainAppForm: View.Main.TMainForm;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------- STARTUP //
-
-
-function StartupForm(): TStartupForm;
-begin
-    if not(Assigned(VStartupForm)) then Application.CreateForm(TStartupForm, VStartupForm);
-    Result:=VStartupForm;
-end;
-
-
-procedure TStartupForm.FormCreate(Sender: TObject);
-begin
-    {Do nothing}
-end;
-
-
-procedure TStartupForm.FormDestroy(Sender: TObject);
-begin
-    DestroyThreadFileLog();
-    DestroySessionService();
-end;
-
-
-procedure TStartupForm.FormShow(Sender: TObject);
-begin
-    TextStatus.Caption:='';
-    LabelVersion.Caption:='Version ' + TCore.GetBuildInfoAsString + '.';
-end;
-
-
-procedure TStartupForm.FormActivate(Sender: TObject);
-begin
-    ApplicationStart();
-end;
-
-
 // ----------------------------------------------------------------------------------------------------------------------------------------------- APPERANCE //
 
 
@@ -195,6 +159,42 @@ procedure TStartupForm.LabelHideMouseLeave(Sender: TObject);
 begin
     ShapeHide.Brush.Color:=$FFFFFF;
     LabelHide.Font.Color:=$00EDE6DD;
+end;
+
+
+// ------------------------------------------------------------------------------------------------------------------------------------------------- STARTUP //
+
+
+function StartupForm(): TStartupForm;
+begin
+    if not(Assigned(VStartupForm)) then Application.CreateForm(TStartupForm, VStartupForm);
+    Result:=VStartupForm;
+end;
+
+
+procedure TStartupForm.FormCreate(Sender: TObject);
+begin
+    {Do nothing}
+end;
+
+
+procedure TStartupForm.FormDestroy(Sender: TObject);
+begin
+    DestroyThreadFileLog();
+    DestroySessionService();
+end;
+
+
+procedure TStartupForm.FormShow(Sender: TObject);
+begin
+    TextStatus.Caption:='';
+    LabelVersion.Caption:='Version ' + TCore.GetBuildInfoAsString + '.';
+end;
+
+
+procedure TStartupForm.FormActivate(Sender: TObject);
+begin
+    ApplicationStart();
 end;
 
 
@@ -568,8 +568,6 @@ end;
 
 function TStartupForm.GetUserAccountSync(): boolean;
 begin
-
-    {TODO -oTomek -cReplaceWith : new user account mgt}
 
     Result:=True;
 

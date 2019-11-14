@@ -66,16 +66,16 @@ type
         function  TryToInt(StrInput: string): boolean;
         function  SearchPartialPrepare(ActualRow: integer): string;
         procedure SearchPartialShowAll(ActualRow: integer);
-        procedure SearchPartialNextBreak;
+        procedure SearchPartialNextBreak();
     public
         var FGrid:      TStringGrid;
         var FColName:   string;
         var FColNumber: string;
-        procedure PerformSearch;
+        procedure PerformSearch();
     end;
 
 
-    function GridSearchForm: TGridSearchForm;
+    function GridSearchForm(): TGridSearchForm;
 
 
 implementation
@@ -95,7 +95,7 @@ uses
 var vGridSearchForm: TGridSearchForm;
 
 
-function GridSearchForm: TGridSearchForm;
+function GridSearchForm(): TGridSearchForm;
 begin
     if not(Assigned(vGridSearchForm)) then Application.CreateForm(TGridSearchForm, vGridSearchForm);
     Result:=vGridSearchForm;
@@ -142,7 +142,7 @@ begin
 end;
 
 
-procedure TGridSearchForm.SearchPartialNextBreak;
+procedure TGridSearchForm.SearchPartialNextBreak();
 begin
 
     FIsNext:=True;
@@ -158,7 +158,7 @@ begin
 end;
 
 
-procedure TGridSearchForm.InitSearch;
+procedure TGridSearchForm.InitSearch();
 begin
 
     FCompareValue:='';
@@ -169,7 +169,7 @@ begin
     if (FSearchString = '') or (FSearchString = TChars.SPACE) then
     begin
         THelpers.MsgCall(Warn, 'Cannot search empty string. Please provide with customer name or customer number and try again.');
-        Exit;
+        Exit();
     end;
 
     FIsNumber:=TryToInt(FSearchString);
@@ -181,10 +181,10 @@ begin
 end;
 
 
-procedure TGridSearchForm.PerformSearch;
+procedure TGridSearchForm.PerformSearch();
 begin
 
-    InitSearch;
+    InitSearch();
     FGrid.Freeze(True);
 
     // Search up
@@ -207,7 +207,7 @@ begin
                 // Exit on found given item
                 if not (ShowAll.Checked) then
                 begin
-                    SearchPartialNextBreak;
+                    SearchPartialNextBreak();
                     Break;
                 end;
 
@@ -269,8 +269,8 @@ begin
             FGrid.Row:=FFoundRow;
             FGrid.Col:=FGrid.ReturnColumn(FColName, 1, 1);
         end
-            else
-                THelpers.MsgCall(Info, 'Cannot find specified customer.');
+        else
+        THelpers.MsgCall(Info, 'Cannot find specified customer.');
 
     end
     else
@@ -324,7 +324,7 @@ end;
 
 procedure TGridSearchForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
-    if Key = Char(VK_ESCAPE) then Close;
+    if Key = Char(VK_ESCAPE) then Close();
 end;
 
 
@@ -338,12 +338,12 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------- BUTTON EVENTS //
+// -------------------------------------------------------------------------------------------------------------------------------------------- CLICK EVENTS //
 
 
 procedure TGridSearchForm.btnSearchClick(Sender: TObject);
 begin
-    if (FColName <> '') and (FColNumber <> '') and (FGrid <> nil) then PerformSearch;
+    if (FColName <> '') and (FColNumber <> '') and (FGrid <> nil) then PerformSearch();
 end;
 
 
