@@ -132,20 +132,15 @@ procedure TTrackerForm.GetSendFrom(List: TComboBox);
 begin
 
     var Utilities: IUtilities:=TUtilities.Create();
-    var EmailList:=TStringList.Create();
-    try
-
-        EmailList:=Utilities.GetCompanyEmailsAwaited(
+    List.Items.AddStrings(
+        Utilities.GetCompanyEmailsAwaited(
             THelpers.ReturnCoCodesList(
                 MainForm.sgAgeView,
                 MainForm.sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1),
                 True
             )
-        );
-
-    finally
-        EmailList.Free();
-    end;
+        )
+    );
 
     if List.Items.Count > 0 then
     begin

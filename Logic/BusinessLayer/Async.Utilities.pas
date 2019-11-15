@@ -572,10 +572,13 @@ begin
                 end;
 
                 DataTables.CustFilter:=TSql.WHERE + CoCodeList;
-
                 DataTables.OpenTable(TCompanyData.CompanyData);
 
-                // dataset to stringlist
+                while not DataTables.DataSet.EOF do
+                begin
+                    EmailList.Add(DataTables.DataSet.Fields[0].Value);
+                    DataTables.DataSet.MoveNext;
+                 end;
 
             except
                 on E: Exception do
