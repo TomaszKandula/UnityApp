@@ -97,13 +97,16 @@ type
         procedure FormKeyPress(Sender: TObject; var Key: Char);
         procedure btnDelBeginClick(Sender: TObject);
         procedure btnDelEndClick(Sender: TObject);
+        procedure FormActivate(Sender: TObject);
     strict private
         var FPayLoad: TAccountStatementPayLoad;
         var FItemCount: integer;
+        var FIsDataLoaded:  boolean;
         function  GetEmailAddress(Scuid: string): string;
         procedure SetEmailAddresses(List: TListView);
         procedure UpdateCompanyData(Source: TListView);
         procedure ExecuteMailer();
+        procedure LoadFromGrid();
     public
         property ItemCount: integer read FItemCount write FItemCount;
         procedure SendAccountStatements_Callback(ProcessingItemNo: integer; CallResponse: TCallResponse);
@@ -153,6 +156,76 @@ end;
 // ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
 
 
+procedure TMassMailerForm.LoadFromGrid();
+begin
+
+    var Item: TListItem;
+    CustomerList.Clear();
+
+    if (MainForm.sgAgeView.Selection.Top - MainForm.sgAgeView.Selection.Bottom) = 0 then
+    begin
+
+        // One customer
+        Item:=MassMailerForm.CustomerList.Items.Add;
+        Item.Caption:=IntToStr(MainForm.sgAgeView.Row);
+        Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCustomerName, 1, 1), MainForm.sgAgeView.Row]);
+        Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCustomerNumber, 1, 1), MainForm.sgAgeView.Row]);
+        Item.SubItems.Add('No');
+        Item.SubItems.Add('Not found!');
+        Item.SubItems.Add('Not found!');
+        Item.SubItems.Add('n/a');
+        Item.SubItems.Add('n/a');
+        Item.SubItems.Add('n/a');
+        Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1), MainForm.sgAgeView.Row]);
+        Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fAgent, 1, 1), MainForm.sgAgeView.Row]);
+        Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), MainForm.sgAgeView.Row]);
+        Item.SubItems.Add(
+            MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCustomerNumber, 1, 1), MainForm.sgAgeView.Row] +
+            THelpers.ConvertCoCode(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1), MainForm.sgAgeView.Row], 'F', 3)
+        );
+
+        Item.SubItems.Add('empty');
+
+    end
+    else
+    begin
+
+        // Many customers
+        for var iCNT: integer:=MainForm.sgAgeView.Selection.Top to MainForm.sgAgeView.Selection.Bottom do
+        begin
+
+            if MainForm.sgAgeView.RowHeights[iCNT] <> MainForm.sgAgeView.sgRowHidden then
+            begin
+
+                Item:=MassMailerForm.CustomerList.Items.Add();
+                Item.Caption:=IntToStr(iCNT);
+                Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCustomerName, 1, 1), iCNT]);
+                Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCustomerNumber, 1, 1), iCNT]);
+                Item.SubItems.Add('No');
+                Item.SubItems.Add('Not found!');
+                Item.SubItems.Add('Not found!');
+                Item.SubItems.Add('n/a');
+                Item.SubItems.Add('n/a');
+                Item.SubItems.Add('n/a');
+                Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT]);
+                Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fAgent, 1, 1), iCNT]);
+                Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), iCNT]);
+                Item.SubItems.Add(
+                    MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCustomerNumber, 1, 1), iCNT] +
+                    THelpers.ConvertCoCode(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT], 'F', 3)
+                );
+
+                Item.SubItems.Add('empty');
+
+            end;
+
+        end;
+
+    end;
+
+end;
+
+
 function TMassMailerForm.GetEmailAddress(Scuid: string): string;
 begin
     var AddressBook: IAddressBook:=TAddressBook.Create();
@@ -182,7 +255,7 @@ begin
 end;
 
 
-procedure TMassMailerForm.UpdateCompanyData(Source: TListView); // async / awaited!    utilities
+procedure TMassMailerForm.UpdateCompanyData(Source: TListView); // async / awaited!  utilities
 begin
 
     var Tables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
@@ -425,25 +498,43 @@ end;
 
 procedure TMassMailerForm.FormShow(Sender: TObject);
 begin
+    {Do nothing}
+end;
 
-    // ----------------------------------------------------------------------------------------
-    // Before the form is shown to the user, get all email addresses from database.
-    // This may take some time, so we display busy cursor. We also switch off open items timer,
-    // so it wil not interfere when user sends the data.
-    // ----------------------------------------------------------------------------------------
 
-    Text_Subject.SetFocus();
-    Screen.Cursor:=crSQLWait;
-    THelpers.ExecMessage(False, TMessaging.TWParams.StatusBar, TStatusBar.Processing, MainForm);
+procedure TMassMailerForm.FormActivate(Sender: TObject);
+begin
 
-    SetEmailAddresses(CustomerList);
-    UpdateCompanyData(CustomerList);
+    if not FIsDataLoaded then
+    begin
 
-    Screen.Cursor:=crDefault;
-    THelpers.ExecMessage(False, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
+        Screen.Cursor:=crSQLWait;
+        THelpers.ExecMessage(False, TMessaging.TWParams.StatusBar, TStatusBar.Processing, MainForm);
 
-    MainForm.OILoader.Enabled:=False;
-    ThreadFileLog.Log('[FormShow]: Mass mailer opened, open items loader is now on hold.');
+        THelpers.ExecWithDelay(500, procedure
+        begin
+
+            // ----------------------------------------------------------------------------------------
+            // Before the form is shown to the user, get all email addresses from database.
+            // This may take some time, so we display busy cursor. We also switch off open items timer,
+            // so it wil not interfere when user sends the data.
+            // ----------------------------------------------------------------------------------------
+
+            LoadFromGrid();
+            SetEmailAddresses(CustomerList);
+            UpdateCompanyData(CustomerList);
+
+            MainForm.OILoader.Enabled:=False;
+            ThreadFileLog.Log('[FormShow]: Mass mailer opened, open items loader is now on hold.');
+
+            Text_Subject.SetFocus();
+            FIsDataLoaded:=True;
+            Screen.Cursor:=crDefault;
+            THelpers.ExecMessage(False, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
+
+        end);
+
+    end;
 
 end;
 
@@ -465,6 +556,8 @@ begin
     // so open items will not change during processing.
     // ------------------------------------------------
 
+    FIsDataLoaded:=False;
+    CustomerList.Clear();
     MainForm.OILoader.Enabled:=True;
     ThreadFileLog.Log('[FormClose]: Mass mailer closed, open items loader is now enabled back again.');
 

@@ -3339,83 +3339,16 @@ begin
 end;
 
 
-procedure TMainForm.Action_TrackerClick(Sender: TObject);
-
-    function GetSCUID(position: integer): string;
-    begin
-        var CustNumber: string:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCustomerNumber, 1, 1), position];
-        var CoCode: string:=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1), position];
-        Result:=CustNumber + THelpers.ConvertCoCode(CoCode, 'F', 3);
-    end;
-
+procedure TMainForm.Action_TrackerClick(Sender: TObject); // move to invoice tracker wnd
 begin
 
-    var Item: TListItem;
-    if FIsConnected then
-    begin
-
-        TrackerForm.CustomerList.Clear();
-
-        if (sgAgeView.Selection.Top - sgAgeView.Selection.Bottom) = 0 then
-        begin
-
-            // One customer
-            Item:=TrackerForm.CustomerList.Items.Add;
-            Item.Caption:=IntToStr(sgAgeView.Row);
-            Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.Cuid, 1, 1), sgAgeView.Row]);
-            Item.SubItems.Add(GetSCUID(sgAgeView.Row));
-            Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCustomerName, 1, 1), sgAgeView.Row]);
-            Item.SubItems.Add('Not set');
-            Item.SubItems.Add('Not found!');
-            Item.SubItems.Add('Not found!');
-            Item.SubItems.Add('Not set');
-            Item.SubItems.Add('Not set');
-            Item.SubItems.Add('Not set');
-            Item.SubItems.Add('Not set');
-            Item.SubItems.Add('Not set');
-            Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1), sgAgeView.Row]);
-            Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fAgent, 1, 1), sgAgeView.Row]);
-
-        end
-        else
-        begin
-
-            // Many customers
-            for var iCNT: integer:=sgAgeView.Selection.Top to sgAgeView.Selection.Bottom do
-            begin
-
-                if sgAgeView.RowHeights[iCNT] <> sgAgeView.sgRowHidden then
-                begin
-
-                    Item:=TrackerForm.CustomerList.Items.Add;
-                    Item.Caption:=IntToStr(iCNT);
-                    Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.Cuid, 1, 1), iCNT]);
-                    Item.SubItems.Add(GetSCUID(iCNT));
-                    Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCustomerName, 1, 1), iCNT]);
-                    Item.SubItems.Add('Not set');
-                    Item.SubItems.Add('Not found!');
-                    Item.SubItems.Add('Not found!');
-                    Item.SubItems.Add('Not set');
-                    Item.SubItems.Add('Not set');
-                    Item.SubItems.Add('Not set');
-                    Item.SubItems.Add('Not set');
-                    Item.SubItems.Add('Not set');
-                    Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT]);
-                    Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fAgent, 1, 1), iCNT]);
-
-                end;
-
-            end;
-
-        end;
-
-        THelpers.WndCall(TrackerForm, TWindowState.Modal);
-
-    end
-    else
+    if not FIsConnected then
     begin
         THelpers.MsgCall(TAppMessage.Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+        Exit();
     end;
+
+    THelpers.WndCall(TrackerForm, TWindowState.Modal);
 
 end;
 
@@ -3443,80 +3376,13 @@ end;
 procedure TMainForm.Action_MassMailerClick(Sender: TObject);
 begin
 
-    var Item: TListItem;
-    if FIsConnected then
-    begin
-
-        MassMailerForm.CustomerList.Clear();
-
-        if (sgAgeView.Selection.Top - sgAgeView.Selection.Bottom) = 0 then
-        begin
-
-            // One customer
-            Item:=MassMailerForm.CustomerList.Items.Add;
-            Item.Caption:=IntToStr(sgAgeView.Row);
-            Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCustomerName, 1, 1), sgAgeView.Row]);
-            Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCustomerNumber, 1, 1), sgAgeView.Row]);
-            Item.SubItems.Add('No');
-            Item.SubItems.Add('Not found!');
-            Item.SubItems.Add('Not found!');
-            Item.SubItems.Add('n/a');
-            Item.SubItems.Add('n/a');
-            Item.SubItems.Add('n/a');
-            Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1), sgAgeView.Row]);
-            Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fAgent, 1, 1), sgAgeView.Row]);
-            Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), sgAgeView.Row]);
-            Item.SubItems.Add(
-                sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCustomerNumber, 1, 1), sgAgeView.Row] +
-                THelpers.ConvertCoCode(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1), sgAgeView.Row], 'F', 3)
-            );
-
-            Item.SubItems.Add('empty');
-
-        end
-        else
-        begin
-
-            // Many customers
-            for var iCNT: integer:=sgAgeView.Selection.Top to sgAgeView.Selection.Bottom do
-            begin
-
-                if sgAgeView.RowHeights[iCNT] <> sgAgeView.sgRowHidden then
-                begin
-
-                    Item:=MassMailerForm.CustomerList.Items.Add();
-                    Item.Caption:=IntToStr(iCNT);
-                    Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCustomerName, 1, 1), iCNT]);
-                    Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCustomerNumber, 1, 1), iCNT]);
-                    Item.SubItems.Add('No');
-                    Item.SubItems.Add('Not found!');
-                    Item.SubItems.Add('Not found!');
-                    Item.SubItems.Add('n/a');
-                    Item.SubItems.Add('n/a');
-                    Item.SubItems.Add('n/a');
-                    Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT]);
-                    Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fAgent, 1, 1), iCNT]);
-                    Item.SubItems.Add(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), iCNT]);
-                    Item.SubItems.Add(
-                        sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCustomerNumber, 1, 1), iCNT] +
-                        THelpers.ConvertCoCode(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT], 'F', 3)
-                    );
-
-                    Item.SubItems.Add('empty');
-
-                end;
-
-            end;
-
-        end;
-
-        THelpers.WndCall(MassMailerForm, TWindowState.Modal);
-
-    end
-    else
+    if not FIsConnected then
     begin
         THelpers.MsgCall(TAppMessage.Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+        Exit();
     end;
+
+    THelpers.WndCall(MassMailerForm, TWindowState.Modal);
 
 end;
 

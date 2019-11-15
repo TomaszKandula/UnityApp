@@ -19,6 +19,7 @@ object TrackerForm: TTrackerForm
   Position = poMainFormCenter
   Scaled = False
   OnActivate = FormActivate
+  OnClose = FormClose
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnKeyPress = FormKeyPress

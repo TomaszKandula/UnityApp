@@ -70,6 +70,7 @@ type
         procedure CustomerListKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure CustomerListKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure btnSelectionClick(Sender: TObject);
+        procedure FormClose(Sender: TObject; var Action: TCloseAction);
     strict private
         var FMultiselect:   TStringList;
         var FCtrlClicked:   boolean;
@@ -77,12 +78,15 @@ type
         var FAgeGrid:       TStringGrid;
         var FReminderMail : string;
         var FStatementMail: string;
-        procedure GetSendFrom(List: TComboBox);
+        var FIsDataLoaded:  boolean;
+        procedure ClearAll();
+        procedure GetCompanyEmail(List: TComboBox);
         procedure GetEmailAddress(Scuid: string);
         procedure SetEmailAddresses(List: TListView);
         procedure GetLayouts(LayoutContainer: TComboBox);
         procedure ApplyTimings(List: TListView);
         procedure SaveToDb(List: TListView);
+        procedure LoadFromGrid();
     public
         property  TrackerGrid: TStringGrid read FTrackerGrid;
         property  AgeGrid:     TStringGrid read FAgeGrid;
@@ -128,19 +132,114 @@ end;
 // ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
 
 
-procedure TTrackerForm.GetSendFrom(List: TComboBox);
+procedure TTrackerForm.LoadFromGrid();
+
+    function GetSCUID(position: integer): string;
+    begin
+        var CustNumber: string:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCustomerNumber, 1, 1), position];
+        var CoCode: string:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1), position];
+        Result:=CustNumber + THelpers.ConvertCoCode(CoCode, 'F', 3);
+    end;
+
+begin
+
+    var Item: TListItem;
+    TrackerForm.CustomerList.Clear();
+
+    if (MainForm.sgAgeView.Selection.Top - MainForm.sgAgeView.Selection.Bottom) = 0 then
+    begin
+
+        // One customer
+        Item:=CustomerList.Items.Add;
+        Item.Caption:=IntToStr(MainForm.sgAgeView.Row);
+        Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.Cuid, 1, 1), MainForm.sgAgeView.Row]);
+        Item.SubItems.Add(GetSCUID(MainForm.sgAgeView.Row));
+        Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCustomerName, 1, 1), MainForm.sgAgeView.Row]);
+        Item.SubItems.Add('Not set');
+        Item.SubItems.Add('Not found!');
+        Item.SubItems.Add('Not found!');
+        Item.SubItems.Add('Not set');
+        Item.SubItems.Add('Not set');
+        Item.SubItems.Add('Not set');
+        Item.SubItems.Add('Not set');
+        Item.SubItems.Add('Not set');
+        Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1), MainForm.sgAgeView.Row]);
+        Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fAgent, 1, 1), MainForm.sgAgeView.Row]);
+
+    end
+    else
+    begin
+
+        // Many customers
+        for var iCNT: integer:=MainForm.sgAgeView.Selection.Top to MainForm.sgAgeView.Selection.Bottom do
+        begin
+
+            if MainForm.sgAgeView.RowHeights[iCNT] <> MainForm.sgAgeView.sgRowHidden then
+            begin
+
+                Item:=CustomerList.Items.Add;
+                Item.Caption:=IntToStr(iCNT);
+                Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.Cuid, 1, 1), iCNT]);
+                Item.SubItems.Add(GetSCUID(iCNT));
+                Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCustomerName, 1, 1), iCNT]);
+                Item.SubItems.Add('Not set');
+                Item.SubItems.Add('Not found!');
+                Item.SubItems.Add('Not found!');
+                Item.SubItems.Add('Not set');
+                Item.SubItems.Add('Not set');
+                Item.SubItems.Add('Not set');
+                Item.SubItems.Add('Not set');
+                Item.SubItems.Add('Not set');
+                Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT]);
+                Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fAgent, 1, 1), iCNT]);
+
+            end;
+
+        end;
+
+    end;
+
+end;
+
+
+procedure TTrackerForm.ClearAll();
+begin
+    CustomerList.Clear();
+    ListLayout.Clear();
+    ListEmailFrom.Clear();
+    ErrorEmailFrom.Visible:=True;
+    TextReminder0.Text:='0';
+    TextReminder1.Text:='0';
+    TextReminder2.Text:='0';
+    TextReminder3.Text:='0';
+    TextReminder4.Text:='0';
+    Exp_Rem2_Switch.Checked:=True;
+    Exp_Rem3_Switch.Checked:=True;
+end;
+
+
+procedure TTrackerForm.GetCompanyEmail(List: TComboBox);
 begin
 
     var Utilities: IUtilities:=TUtilities.Create();
-    List.Items.AddStrings(
-        Utilities.GetCompanyEmailsAwaited(
-            THelpers.ReturnCoCodesList(
-                MainForm.sgAgeView,
-                MainForm.sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1),
-                True
-            )
-        )
-    );
+    var EmailList:=TStringList.Create();
+    var CoCodeList:=TStringList.Create();
+    try
+
+        THelpers.ReturnCoCodesList(
+            MainForm.sgAgeView,
+            MainForm.sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1),
+            CoCodeList,
+            True
+        );
+
+        Utilities.GetCompanyEmailsAwaited(CoCodeList, EmailList);
+        List.Items.AddStrings(EmailList);
+
+    finally
+        EmailList.Free();
+        CoCodeList.Free();
+    end;
 
     if List.Items.Count > 0 then
     begin
@@ -393,60 +492,60 @@ end;
 procedure TTrackerForm.FormCreate(Sender: TObject);
 begin
 
+    ClearAll();
+
     var lsColumns: TListColumn;
     FMultiselect:=TStringList.Create();
-
-    // List view initialization
 
     // From debtors view
     lsColumns:=CustomerList.Columns.Add;
     lsColumns.Caption:='LP';
     lsColumns.Width  :=40;
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Cuid'; //0
+    lsColumns.Caption:='Cuid'; {0}
     lsColumns.Width  :=80;
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Scuid';//1
+    lsColumns.Caption:='Scuid'; {1}
     lsColumns.Width  :=80;
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Customer Name';
-    lsColumns.Width  :=150;    //2
+    lsColumns.Caption:='Customer Name'; {2}
+    lsColumns.Width  :=150;
 
     // From address book
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Send from';
-    lsColumns.Width  :=100;    //3
+    lsColumns.Caption:='Send from'; {3}
+    lsColumns.Width  :=100;
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Statement to';
-    lsColumns.Width  :=100;    //4
+    lsColumns.Caption:='Statement to'; {4}
+    lsColumns.Width  :=100;
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Reminder to';
-    lsColumns.Width  :=100;    //5
+    lsColumns.Caption:='Reminder to'; {5}
+    lsColumns.Width  :=100;
 
     // Timings
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Pre-statement';
-    lsColumns.Width  :=100;    //6
+    lsColumns.Caption:='Pre-statement'; {6}
+    lsColumns.Width  :=100;
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Reminder 1';
-    lsColumns.Width  :=100;    //7
+    lsColumns.Caption:='Reminder 1'; {7}
+    lsColumns.Width  :=100;
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Reminder 2';
-    lsColumns.Width  :=100;    //8
+    lsColumns.Caption:='Reminder 2'; {8}
+    lsColumns.Width  :=100;
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Reminder 3';
-    lsColumns.Width  :=100;    //9
+    lsColumns.Caption:='Reminder 3'; {9}
+    lsColumns.Width  :=100;
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Legal Action';
-    lsColumns.Width  :=100;    //10
+    lsColumns.Caption:='Legal Action'; {10}
+    lsColumns.Width  :=100;
 
     // Company details
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Co Code';
-    lsColumns.Width  :=100;    //11
+    lsColumns.Caption:='Co Code'; {11}
+    lsColumns.Width  :=100;
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Agent';
-    lsColumns.Width  :=100;    //12
+    lsColumns.Caption:='Agent'; {12}
+    lsColumns.Width  :=100;
 
     PanelCustomerList.PanelBorders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
 
@@ -455,26 +554,40 @@ end;
 
 procedure TTrackerForm.FormShow(Sender: TObject);
 begin
-    ListLayout.Clear();
-    ListEmailFrom.Clear();
-    ErrorEmailFrom.Visible:=True;
-    TextReminder0.Text:='0';
-    TextReminder1.Text:='0';
-    TextReminder2.Text:='0';
-    TextReminder3.Text:='0';
-    TextReminder4.Text:='0';
-    Exp_Rem2_Switch.Checked:=True;
-    Exp_Rem3_Switch.Checked:=True;
+    {Do nothing}
 end;
 
 
 procedure TTrackerForm.FormActivate(Sender: TObject);
 begin
-    Screen.Cursor:=crSQLWait;
-    GetSendFrom(ListEmailFrom);
-    SetEmailAddresses(CustomerList);
-    GetLayouts(ListLayout);
-    Screen.Cursor:=crDefault;
+
+    if not FIsDataLoaded then
+    begin
+
+        Screen.Cursor:=crSQLWait;
+
+        THelpers.ExecWithDelay(500, procedure
+        begin
+
+            LoadFromGrid();
+            GetCompanyEmail(ListEmailFrom);
+            SetEmailAddresses(CustomerList);
+            GetLayouts(ListLayout);
+
+            Screen.Cursor:=crDefault;
+            FIsDataLoaded:=True;
+
+        end);
+
+    end;
+
+end;
+
+
+procedure TTrackerForm.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+    ClearAll();
+    FIsDataLoaded:=False;
 end;
 
 

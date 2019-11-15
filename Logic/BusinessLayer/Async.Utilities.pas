@@ -122,7 +122,7 @@ type
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function GetCompanyEmailsAwaited(CoCodes: TStringList): TStringList;
+        procedure GetCompanyEmailsAwaited(SourceList: TStringList; var TargetList: TStringList);
 
         /// <summary>
         /// Allow to async. check provided local administrator password.
@@ -200,7 +200,7 @@ type
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function GetCompanyEmailsAwaited(CoCodes: TStringList): TStringList;
+        procedure GetCompanyEmailsAwaited(SourceList: TStringList; var TargetList: TStringList);
 
         /// <summary>
         /// Allow to async. check provided local administrator password.
@@ -544,59 +544,62 @@ begin
 end;
 
 
-function TUtilities.GetCompanyEmailsAwaited(CoCodes: TStringList): TStringList;
+procedure TUtilities.GetCompanyEmailsAwaited(SourceList: TStringList; var TargetList: TStringList);
 begin
 
+    if (not SourceList.Count > 0) or (not Assigned(TargetList)) then Exit();
+
     var EmailList:=TStringList.Create();
-    if CoCodes.Count = 0 then Exit();
+    try
 
-    var NewTask: ITask:=TTask.Create(procedure
-    begin
+        var NewTask: ITask:=TTask.Create(procedure
+        begin
 
-        var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
-        try
-
+            var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
             try
 
-                DataTables.Columns.Add(TSql.DISTINCT + TCompanyData.SendNoteFrom);
+                try
 
-                var CoCodeList: string;
-                for var iCNT:=0 to CoCodes.Count - 1 do
-                begin
+                    DataTables.Columns.Add(TSql.DISTINCT + TCompanyData.SendNoteFrom);
 
-                    if iCNT < (CoCodes.Count - 1) then
-                        CoCodeList:=CoCodeList + TCompanyData.CoCode + TSql.EQUAL + QuotedStr(CoCodes.Strings[iCNT]) + TSql._OR
-                    else
-                        CoCodeList:=CoCodeList + TCompanyData.CoCode + TSql.EQUAL + QuotedStr(CoCodes.Strings[iCNT]);
+                    var CoCodeList: string;
+                    for var iCNT:=0 to SourceList.Count - 1 do
+                    begin
 
+                        if iCNT < (SourceList.Count - 1) then
+                            CoCodeList:=CoCodeList + TCompanyData.CoCode + TSql.EQUAL + QuotedStr(SourceList.Strings[iCNT]) + TSql._OR
+                        else
+                            CoCodeList:=CoCodeList + TCompanyData.CoCode + TSql.EQUAL + QuotedStr(SourceList.Strings[iCNT]);
+
+                    end;
+
+                    DataTables.CustFilter:=TSql.WHERE + CoCodeList;
+                    DataTables.OpenTable(TCompanyData.CompanyData);
+
+                    while not DataTables.DataSet.EOF do
+                    begin
+                        EmailList.Add(DataTables.DataSet.Fields[0].Value);
+                        DataTables.DataSet.MoveNext;
+                     end;
+
+                except
+                    on E: Exception do
+                        ThreadFileLog.Log('[GetCompanyEmailsAwaited]: Cannot execute. Error has been thrown: ' + E.Message);
                 end;
 
-                DataTables.CustFilter:=TSql.WHERE + CoCodeList;
-                DataTables.OpenTable(TCompanyData.CompanyData);
-
-                while not DataTables.DataSet.EOF do
-                begin
-                    EmailList.Add(DataTables.DataSet.Fields[0].Value);
-                    DataTables.DataSet.MoveNext;
-                 end;
-
-            except
-                on E: Exception do
-                    ThreadFileLog.Log('[GetCompanyEmailsAwaited]: Cannot execute. Error has been thrown: ' + E.Message);
-
+            finally
+                DataTables.Free();
             end;
 
-        finally
-            DataTables.Free();
-        end;
+        end);
 
-    end);
+        NewTask.Start();
+        TTask.WaitForAll(NewTask);
+        TargetList.AddStrings(EmailList);
 
-    NewTask.Start();
-    TTask.WaitForAll(NewTask);
-
-    {If under ARC / do not manually release it}
-    Result:=EmailList;
+    finally
+        EmailList.Free();
+    end;
 
 end;
 
