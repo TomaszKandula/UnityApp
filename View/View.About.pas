@@ -24,6 +24,7 @@ uses
     Vcl.StdCtrls,
     Vcl.ExtCtrls,
     Vcl.Buttons,
+    Vcl.ComCtrls,
     Vcl.Imaging.pngimage;
 
 
@@ -72,8 +73,11 @@ type
         procedure FormShow(Sender: TObject);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
         procedure btnCloseClick(Sender: TObject);
+        procedure FormClose(Sender: TObject; var Action: TCloseAction);
     strict private
         function Is64BitOS(): Boolean;
+    public
+        var FSetLastSelection: TTabSheet;
     end;
 
 
@@ -228,6 +232,15 @@ begin
         txt_USG.Caption:=formatfloat('## ###', ((mem_64.ullTotalPhys-mem_64.ullAvailPhys) DIV 1048576)) + ' MB';
     end;
 
+end;
+
+
+// -------------------------------------------------------------------------------------------------------------------------------------------- CLOSE EVENTS //
+
+
+procedure TAboutForm.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+    MainForm.SetActiveTabsheet(FSetLastSelection);
 end;
 
 

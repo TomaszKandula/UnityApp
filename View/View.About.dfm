@@ -18,6 +18,7 @@ object AboutForm: TAboutForm
   PopupMode = pmExplicit
   PopupParent = MainForm.Owner
   Position = poMainFormCenter
+  OnClose = FormClose
   OnCreate = FormCreate
   OnKeyPress = FormKeyPress
   OnShow = FormShow

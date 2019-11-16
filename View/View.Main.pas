@@ -140,8 +140,6 @@ type
         valRISKC: TLabel;
         StatBar_CAP1: TLabel;
         StatBar_TXT1: TLabel;
-        StatBar_CAP2: TLabel;
-        StatBar_TXT2: TLabel;
         TabSheet8: TTabSheet;
         PopupMenu: TPopupMenu;
         Action_HideApp: TMenuItem;
@@ -291,7 +289,6 @@ type
         Action_ShowRegistered: TMenuItem;
         N8: TMenuItem;
         InetTimer: TTimer;
-        StatBar_TXT7: TLabel;
         N9: TMenuItem;
         Action_FilterINF7: TMenuItem;
         N5: TMenuItem;
@@ -370,11 +367,7 @@ type
         Action_ExportCSV: TMenuItem;
         Action_RemoveFilters: TMenuItem;
         Action_Free1: TMenuItem;
-        Separate1: TBevel;
-        Separate2: TBevel;
-        Separate3: TBevel;
-        AppHeader: TPanel;
-        Bevel1: TBevel;
+        AppMenu: TPanel;
         Bevel2: TBevel;
         Bevel3: TBevel;
         PanelOpenItems: TPanel;
@@ -449,7 +442,6 @@ type
         txtSettings: TLabel;
         ChromiumWindow: TChromiumWindow;
         Chromium: TChromium;
-        imgHideBar: TImage;
         PanelControlStatus: TPanel;
         sgControlStatus: TStringGrid;
         Tables: TPageControl;
@@ -533,6 +525,17 @@ type
         LabelValDtLbu: TLabel;
         LbuQueryDesc: TMemo;
         Action_TurnRowHighlight: TMenuItem;
+        AppHeader: TPanel;
+        imgAppMenu: TImage;
+        txtAppName: TLabel;
+        btnInfo: TPanel;
+        imgInfo: TImage;
+        txtInfo: TLabel;
+        btnFeedback: TPanel;
+        imgFeedback: TImage;
+        txtFeedback: TLabel;
+        imgAADUser: TImage;
+        txtAadUser: TLabel;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
@@ -762,10 +765,6 @@ type
         procedure txtQueriesClick(Sender: TObject);
         procedure txtTablesClick(Sender: TObject);
         procedure txtSettingsClick(Sender: TObject);
-        procedure AppHeaderClick(Sender: TObject);
-        procedure imgHideBarClick(Sender: TObject);
-        procedure AppHeaderMouseEnter(Sender: TObject);
-        procedure AppHeaderMouseLeave(Sender: TObject);
         procedure sgControlStatusKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure sgControlStatusMouseEnter(Sender: TObject);
         procedure sgControlStatusMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
@@ -808,6 +807,13 @@ type
         procedure Action_TurnRowHighlightClick(Sender: TObject);
         procedure CommonPopupMenuPopup(Sender: TObject);
         procedure TrayIconClick(Sender: TObject);
+        procedure imgAppMenuClick(Sender: TObject);
+        procedure btnInfoMouseEnter(Sender: TObject);
+        procedure btnInfoMouseLeave(Sender: TObject);
+        procedure txtInfoClick(Sender: TObject);
+        procedure txtFeedbackClick(Sender: TObject);
+        procedure btnFeedbackMouseEnter(Sender: TObject);
+        procedure btnFeedbackMouseLeave(Sender: TObject);
     protected
         procedure CreateParams(var Params: TCreateParams); override;
         procedure WndProc(var msg: TMessage); override;
@@ -859,6 +865,8 @@ type
         var FAbUpdateFields:       TAddressBookUpdateFields;
         var FDailyCommentFields:   TDailyCommentFields;
         var FGeneralCommentFields: TGeneralCommentFields;
+        const AppMenuTextSelected = $006433C9;
+        const AppMenuTextNormal = clGrayText;
         procedure SetPanelBorders;
         procedure SetGridColumnWidths;
         procedure SetGridRowHeights;
@@ -1578,14 +1586,14 @@ begin
 
         TMessaging.TWParams.ConnectionOk:
         begin
-            StatBar_TXT7.Font.Style:=[];
-            StatBar_TXT7.Caption:='Connected with Microsoft SQL Server.';
+//            StatBar_TXT7.Font.Style:=[];
+//            StatBar_TXT7.Caption:='Connected with Microsoft SQL Server.';
         end;
 
         TMessaging.TWParams.ConnectionError:
         begin
-            StatBar_TXT7.Font.Style:=[fsBold];
-            StatBar_TXT7.Caption:='Connection lost, re-connecting...';
+//            StatBar_TXT7.Font.Style:=[fsBold];
+//            StatBar_TXT7.Caption:='Connection lost, re-connecting...';
         end;
 
     end;
@@ -1791,7 +1799,7 @@ begin
     FormatDateTime('hh:mm:ss', Now());
 
     StatBar_TXT1.Caption:=TStatusBar.Ready;
-    StatBar_TXT2.Caption:=SessionService.SessionUser;
+    txtAadUser.Caption:=SessionService.SessionUser;
     StatBar_TXT3.Caption:=DateToStr(Now);
 
     ThreadFileLog.Log('Application version = ' + TCore.GetBuildInfoAsString);
@@ -2613,31 +2621,35 @@ end;
 procedure TMainForm.ResetTabsheetButtons();
 begin
     txtStart.Font.Style       :=[];
-    txtStart.Font.Color       :=clBlack;
+    txtStart.Font.Color       :=AppMenuTextNormal;
     txtReports.Font.Style     :=[];
-    txtReports.Font.Color     :=clBlack;
+    txtReports.Font.Color     :=AppMenuTextNormal;
     txtDebtors.Font.Style     :=[];
-    txtDebtors.Font.Color     :=clBlack;
+    txtDebtors.Font.Color     :=AppMenuTextNormal;
     txtTracker.Font.Style     :=[];
-    txtTracker.Font.Color     :=clBlack;
+    txtTracker.Font.Color     :=AppMenuTextNormal;
     txtAddressBook.Font.Style :=[];
-    txtAddressBook.Font.Color :=clBlack;
+    txtAddressBook.Font.Color :=AppMenuTextNormal;
     txtOpenItems.Font.Style   :=[];
-    txtOpenItems.Font.Color   :=clBlack;
+    txtOpenItems.Font.Color   :=AppMenuTextNormal;
     txtUnidentified.Font.Style:=[];
-    txtUnidentified.Font.Color:=clBlack;
+    txtUnidentified.Font.Color:=AppMenuTextNormal;
     txtQueries.Font.Style     :=[];
-    txtQueries.Font.Color     :=clBlack;
+    txtQueries.Font.Color     :=AppMenuTextNormal;
     txtTables.Font.Style      :=[];
-    txtTables.Font.Color      :=clBlack;
+    txtTables.Font.Color      :=AppMenuTextNormal;
     txtSettings.Font.Style    :=[];
-    txtSettings.Font.Color    :=clBlack;
+    txtSettings.Font.Color    :=AppMenuTextNormal;
+    txtFeedback.Font.Style    :=[];
+    txtFeedback.Font.Color    :=AppMenuTextNormal;
+    txtInfo.Font.Style        :=[];
+    txtInfo.Font.Color        :=AppMenuTextNormal;
 end;
 
 
 procedure TMainForm.SetPanelBorders();
 begin
-    AppHeader.PanelBorders            (clWhite, $00E3B268, clWhite,   clWhite,   clWhite);
+    AppHeader.PanelBorders            ($00E3B268, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
     PanelAgeView.PanelBorders         (clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
     PanelOpenItems.PanelBorders       (clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
     PanelAddressBook.PanelBorders     (clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
@@ -5196,154 +5208,158 @@ end;
 // --------------------------------------------------------------------------------------------------------------- MOUSE EVENTS | HOOVER EFFECT | TEXT COLOR //
 
 
-procedure TMainForm.AppHeaderMouseEnter(Sender: TObject);
-begin
-    if AppHeader.Height = 13 then
-    begin
-        AppHeader.Color:=$00E3B268;
-        AppHeader.PanelBorders($00E3B268, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    end;
-end;
-
-
-procedure TMainForm.AppHeaderMouseLeave(Sender: TObject);
-begin
-    if AppHeader.Height = 13 then
-    begin
-        AppHeader.Color:=clWhite;
-        AppHeader.PanelBorders(clWhite, clWhite, clWhite, clWhite, clWhite);
-    end;
-end;
-
-
 procedure TMainForm.btnStartMouseEnter(Sender: TObject);
 begin
-    txtStart.Font.Color:=$006433C9;
+    txtStart.Font.Color:=AppMenuTextSelected;
 end;
 
 
 procedure TMainForm.btnStartMouseLeave(Sender: TObject);
 begin
     if txtStart.Font.Style <> [fsBold] then
-        txtStart.Font.Color:=0;
+        txtStart.Font.Color:=AppMenuTextNormal;
 end;
 
 
 procedure TMainForm.btnReportsMouseEnter(Sender: TObject);
 begin
-    if btnReports.Height = 32 then
-       txtReports.Font.Color:=$006433C9;
+    txtReports.Font.Color:=AppMenuTextSelected;
 end;
 
 
 procedure TMainForm.btnReportsMouseLeave(Sender: TObject);
 begin
-    if btnReports.Height = 32 then
-        if txtReports.Font.Style <> [fsBold] then
-            txtReports.Font.Color:=0;
+    if txtReports.Font.Style <> [fsBold] then
+        txtReports.Font.Color:=AppMenuTextNormal;
 end;
 
 
 procedure TMainForm.btnDebtorsMouseEnter(Sender: TObject);
 begin
-    txtDebtors.Font.Color:=$006433C9;
+    txtDebtors.Font.Color:=AppMenuTextSelected;
 end;
 
 
 procedure TMainForm.btnDebtorsMouseLeave(Sender: TObject);
 begin
     if txtDebtors.Font.Style <> [fsBold] then
-        txtDebtors.Font.Color:=0;
+        txtDebtors.Font.Color:=AppMenuTextNormal;
 end;
 
 
 procedure TMainForm.btnTrackerMouseEnter(Sender: TObject);
 begin
-    txtTracker.Font.Color:=$006433C9;
+    txtTracker.Font.Color:=AppMenuTextSelected;
 end;
 
 
 procedure TMainForm.btnTrackerMouseLeave(Sender: TObject);
 begin
     if txtTracker.Font.Style <> [fsBold] then
-        txtTracker.Font.Color:=0
+        txtTracker.Font.Color:=AppMenuTextNormal;
 end;
 
 procedure TMainForm.btnAddressBookMouseEnter(Sender: TObject);
 begin
-    txtAddressBook.Font.Color:=$006433C9;
+    txtAddressBook.Font.Color:=AppMenuTextSelected;
 end;
 
 
 procedure TMainForm.btnAddressBookMouseLeave(Sender: TObject);
 begin
     if txtAddressBook.Font.Style <> [fsBold] then
-        txtAddressBook.Font.Color:=0;
+        txtAddressBook.Font.Color:=AppMenuTextNormal;
 end;
 
 
 procedure TMainForm.btnOpenItemsMouseEnter(Sender: TObject);
 begin
-    txtOpenItems.Font.Color:=$006433C9;
+    txtOpenItems.Font.Color:=AppMenuTextSelected;
 end;
 
 
 procedure TMainForm.btnOpenItemsMouseLeave(Sender: TObject);
 begin
     if txtOpenItems.Font.Style <> [fsBold] then
-        txtOpenItems.Font.Color:=0;
+        txtOpenItems.Font.Color:=AppMenuTextNormal;
 end;
 
 
 procedure TMainForm.btnUnidentifiedMouseEnter(Sender: TObject);
 begin
-    txtUnidentified.Font.Color:=$006433C9;
+    txtUnidentified.Font.Color:=AppMenuTextSelected;
 end;
 
 
 procedure TMainForm.btnUnidentifiedMouseLeave(Sender: TObject);
 begin
     if txtUnidentified.Font.Style <> [fsBold] then
-        txtUnidentified.Font.Color:=0;
+        txtUnidentified.Font.Color:=AppMenuTextNormal;
 end;
 
 
 procedure TMainForm.btnQueriesMouseEnter(Sender: TObject);
 begin
-    txtQueries.Font.Color:=$006433C9;
+    txtQueries.Font.Color:=AppMenuTextSelected;
 end;
 
 
 procedure TMainForm.btnQueriesMouseLeave(Sender: TObject);
 begin
     if txtQueries.Font.Style <> [fsBold] then
-        txtQueries.Font.Color:=0;
+        txtQueries.Font.Color:=AppMenuTextNormal;
 end;
 
 
 procedure TMainForm.btnTablesMouseEnter(Sender: TObject);
 begin
-    txtTables.Font.Color:=$006433C9;
+    txtTables.Font.Color:=AppMenuTextSelected;
 end;
 
 
 procedure TMainForm.btnTablesMouseLeave(Sender: TObject);
 begin
     if txtTables.Font.Style <> [fsBold] then
-        txtTables.Font.Color:=0;
+        txtTables.Font.Color:=AppMenuTextNormal;
 end;
 
 
 procedure TMainForm.btnSettingsMouseEnter(Sender: TObject);
 begin
-    txtSettings.Font.Color:=$006433C9;
+    txtSettings.Font.Color:=AppMenuTextSelected;
 end;
 
 
 procedure TMainForm.btnSettingsMouseLeave(Sender: TObject);
 begin
     if txtSettings.Font.Style <> [fsBold] then
-        txtSettings.Font.Color:=0;
+        txtSettings.Font.Color:=AppMenuTextNormal;
+end;
+
+
+procedure TMainForm.btnFeedbackMouseEnter(Sender: TObject);
+begin
+    txtFeedback.Font.Color:=AppMenuTextSelected;
+end;
+
+
+procedure TMainForm.btnFeedbackMouseLeave(Sender: TObject);
+begin
+    if txtFeedback.Font.Style <> [fsBold] then
+        txtFeedback.Font.Color:=AppMenuTextNormal;
+end;
+
+
+procedure TMainForm.btnInfoMouseEnter(Sender: TObject);
+begin
+    txtInfo.Font.Color:=AppMenuTextSelected;
+end;
+
+
+procedure TMainForm.btnInfoMouseLeave(Sender: TObject);
+begin
+    if txtInfo.Font.Style <> [fsBold] then
+        txtInfo.Font.Color:=AppMenuTextNormal;
 end;
 
 
@@ -5962,27 +5978,20 @@ end;
 // -------------------------------------------------------------------------------------------------------------------------------------------- BUTTON CALLS //
 
 
-procedure TMainForm.AppHeaderClick(Sender: TObject);
+procedure TMainForm.imgAppMenuClick(Sender: TObject);
 begin
-    if AppHeader.Height = 13 then
-    begin
-        AppHeader.Height:=57;
-        AppHeader.Cursor:=crDefault;
-        AppHeader.Color:=clWhite;
-        AppHeader.PanelBorders(clWhite, $00E3B268, clWhite, clWhite, clWhite);
-    end;
-end;
 
-
-procedure TMainForm.imgHideBarClick(Sender: TObject);
-begin
-    if AppHeader.Height > 13 then
+    if AppMenu.Width = 170 then
     begin
-        AppHeader.Height:=13;
-        AppHeader.Cursor:=crHandPoint;
-        AppHeader.Color:=clWhite;
-        AppHeader.PanelBorders(clWhite, clWhite, clWhite, clWhite, clWhite);
+        AppMenu.Width:=0;
+        Exit();
     end;
+
+    if AppMenu.Width = 0 then
+    begin
+        AppMenu.Width:=170;
+    end;
+
 end;
 
 
@@ -6047,6 +6056,26 @@ end;
 procedure TMainForm.txtSettingsClick(Sender: TObject);
 begin
     SetActiveTabsheet(TabSheet8);
+end;
+
+
+procedure TMainForm.txtFeedbackClick(Sender: TObject);
+begin
+    FeedbackForm.FSetLastSelection:=MyPages.ActivePage;
+    ResetTabsheetButtons;
+    txtFeedback.Font.Style:=[fsBold];
+    txtFeedback.Font.Color:=$006433C9;
+    THelpers.WndCall(FeedbackForm, TWindowState.Modal);
+end;
+
+
+procedure TMainForm.txtInfoClick(Sender: TObject);
+begin
+    AboutForm.FSetLastSelection:=MyPages.ActivePage;
+    ResetTabsheetButtons;
+    txtInfo.Font.Style:=[fsBold];
+    txtInfo.Font.Color:=$006433C9;
+    THelpers.WndCall(AboutForm, TWindowState.Modal);
 end;
 
 

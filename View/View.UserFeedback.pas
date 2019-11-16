@@ -22,6 +22,7 @@ uses
     Vcl.StdCtrls,
     Vcl.Buttons,
     Vcl.ExtCtrls,
+    Vcl.ComCtrls,
     Unity.Enums,
     Unity.Grid,
     Unity.Panel,
@@ -46,9 +47,12 @@ type
         procedure btnSendReportClick(Sender: TObject);
         procedure btnCancelClick(Sender: TObject);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
+        procedure FormClose(Sender: TObject; var Action: TCloseAction);
     strict private
         function WordCount(const InputStr: string): cardinal;
         procedure SendFeedbackAsync_Callback(CallResponse: TCallResponse);
+    public
+        var FSetLastSelection: TTabSheet;
     end;
 
 
@@ -84,10 +88,6 @@ end;
 // ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
 
 
-/// <summary>
-/// Count words in TMemo component while user is typing.
-/// </summary>
-
 function TFeedbackForm.WordCount(const InputStr: string): cardinal;
 begin
 
@@ -96,6 +96,7 @@ begin
     var TextLength: integer:=Length(InputStr);
     var FindWord:   boolean:=False;
 
+    // Count words in TMemo component while user is typing
     for var iCNT: integer:=1 to TextLength do
     begin
 
@@ -142,6 +143,15 @@ end;
 procedure TFeedbackForm.FormCreate(Sender: TObject);
 begin
     PanelReportMemo.PanelBorders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+end;
+
+
+// -------------------------------------------------------------------------------------------------------------------------------------------- CLOSE EVENTS //
+
+
+procedure TFeedbackForm.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+    MainForm.SetActiveTabsheet(FSetLastSelection);
 end;
 
 

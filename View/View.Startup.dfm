@@ -3260,7 +3260,7 @@ object StartupForm: TStartupForm
       CB0E1C4EA1A81C560B217E124EA08BA521706BAF3C87E203FD1C2C0CBFFFD9}
   end
   object MainText1: TLabel
-    Left = 378
+    Left = 355
     Top = 23
     Width = 110
     Height = 45
@@ -3277,11 +3277,11 @@ object StartupForm: TStartupForm
     Transparent = False
   end
   object MainText2: TLabel
-    Left = 494
+    Left = 471
     Top = 23
-    Width = 113
+    Width = 180
     Height = 45
-    Caption = 'C'#225'diz'
+    Caption = 'Platform'
     Color = 15591133
     Font.Charset = DEFAULT_CHARSET
     Font.Color = 11905689
@@ -3294,11 +3294,11 @@ object StartupForm: TStartupForm
     Transparent = True
   end
   object TextSubtitle: TLabel
-    Left = 402
+    Left = 356
     Top = 74
-    Width = 193
+    Width = 295
     Height = 18
-    Caption = 'for Debt Management'
+    Caption = 'Debtors && Creditors Management'
     Color = 11905689
     Font.Charset = DEFAULT_CHARSET
     Font.Color = 11905689
