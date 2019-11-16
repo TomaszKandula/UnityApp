@@ -118,83 +118,10 @@ var
     MainAppForm: View.Main.TMainForm;
 
 
-// ----------------------------------------------------------------------------------------------------------------------------------------------- APPERANCE //
-
-
-procedure TStartupForm.CreateParams(var Params: TCreateParams);
-begin
-
-    inherited CreateParams(Params);
-
-    with Params do begin
-        Style:=WS_POPUP;
-        WindowClass.style:=WindowClass.style or CS_DROPSHADOW;
-    end;
-
-end;
-
-
-procedure TStartupForm.ShapeBackgroundMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
-begin
-
-    const SC_DRAGMOVE = $F012;
-
-    if Button = mbLeft then
-    begin
-        ReleaseCapture;
-        Perform(WM_SYSCOMMAND, SC_DRAGMOVE, 0);
-    end;
-
-end;
-
-
-procedure TStartupForm.LabelHideMouseEnter(Sender: TObject);
-begin
-    ShapeHide.Brush.Color:=$00EDE6DD;
-    LabelHide.Font.Color:=$FFFFFF;
-end;
-
-
-procedure TStartupForm.LabelHideMouseLeave(Sender: TObject);
-begin
-    ShapeHide.Brush.Color:=$FFFFFF;
-    LabelHide.Font.Color:=$00EDE6DD;
-end;
-
-
-// ------------------------------------------------------------------------------------------------------------------------------------------------- STARTUP //
-
-
 function StartupForm(): TStartupForm;
 begin
     if not(Assigned(VStartupForm)) then Application.CreateForm(TStartupForm, VStartupForm);
     Result:=VStartupForm;
-end;
-
-
-procedure TStartupForm.FormCreate(Sender: TObject);
-begin
-    {Do nothing}
-end;
-
-
-procedure TStartupForm.FormDestroy(Sender: TObject);
-begin
-    DestroyThreadFileLog();
-    DestroySessionService();
-end;
-
-
-procedure TStartupForm.FormShow(Sender: TObject);
-begin
-    TextStatus.Caption:='';
-    LabelVersion.Caption:='Version ' + TCore.GetBuildInfoAsString + '.';
-end;
-
-
-procedure TStartupForm.FormActivate(Sender: TObject);
-begin
-    ApplicationStart();
 end;
 
 
@@ -685,12 +612,88 @@ begin
 end;
 
 
-// -------------------------------------------------------------------------------------------------------------------------------------------------- EVENTS //
+// ----------------------------------------------------------------------------------------------------------------------------------------------- APPERANCE //
+
+
+procedure TStartupForm.CreateParams(var Params: TCreateParams);
+begin
+
+    inherited CreateParams(Params);
+
+    with Params do begin
+        Style:=WS_POPUP;
+        WindowClass.style:=WindowClass.style or CS_DROPSHADOW;
+    end;
+
+end;
+
+
+// ------------------------------------------------------------------------------------------------------------------------------------------------- STARTUP //
+
+
+procedure TStartupForm.FormCreate(Sender: TObject);
+begin
+    {Do nothing}
+end;
+
+
+procedure TStartupForm.FormDestroy(Sender: TObject);
+begin
+    DestroyThreadFileLog();
+    DestroySessionService();
+end;
+
+
+procedure TStartupForm.FormShow(Sender: TObject);
+begin
+    TextStatus.Caption:='';
+    LabelVersion.Caption:='Version ' + TCore.GetBuildInfoAsString + '.';
+end;
+
+
+procedure TStartupForm.FormActivate(Sender: TObject);
+begin
+    ApplicationStart();
+end;
+
+
+// -------------------------------------------------------------------------------------------------------------------------------------------- CLICK EVENTS //
 
 
 procedure TStartupForm.LabelHideClick(Sender: TObject);
 begin
     StartupForm.WindowState:=wsMinimized;
+end;
+
+
+// -------------------------------------------------------------------------------------------------------------------------------------------- MOUSE EVENTS //
+
+
+procedure TStartupForm.ShapeBackgroundMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
+begin
+
+    const SC_DRAGMOVE = $F012;
+
+    if Button = mbLeft then
+    begin
+        ReleaseCapture;
+        Perform(WM_SYSCOMMAND, SC_DRAGMOVE, 0);
+    end;
+
+end;
+
+
+procedure TStartupForm.LabelHideMouseEnter(Sender: TObject);
+begin
+    ShapeHide.Brush.Color:=$00EDE6DD;
+    LabelHide.Font.Color:=$FFFFFF;
+end;
+
+
+procedure TStartupForm.LabelHideMouseLeave(Sender: TObject);
+begin
+    ShapeHide.Brush.Color:=$FFFFFF;
+    LabelHide.Font.Color:=$00EDE6DD;
 end;
 
 

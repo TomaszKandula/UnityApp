@@ -139,6 +139,7 @@ uses
     Unity.Chars,
     Unity.EventLogger,
     Unity.SessionService,
+    Async.Utilities,
     Async.AddressBook,
     Async.Statements;
 
@@ -255,54 +256,40 @@ begin
 end;
 
 
-procedure TMassMailerForm.UpdateCompanyData(Source: TListView); // async / awaited!  utilities
+procedure TMassMailerForm.UpdateCompanyData(Source: TListView);
+
+    function InputText(Text: string): string;
+    begin
+
+        if String.IsNullOrEmpty(Text) then Result:=TUnknown.NotFound
+            else
+        Result:=Text;
+
+    end;
+
 begin
 
-    var Tables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
-    try
+    if Source.Items.Count > 0 then
+    begin
 
-        if Source.Items.Count > 0 then
+        for var iCNT: integer:=0 to Source.Items.Count - 1 do
         begin
 
-            Tables.Columns.Add(TCompanyData.CoName);
-            Tables.Columns.Add(TCompanyData.CoAddress);
-            Tables.Columns.Add(TCompanyData.TelephoneNumbers);
-            Tables.Columns.Add(TCompanyData.SendNoteFrom);
-            Tables.Columns.Add(TCompanyData.BankAccounts);
+            var CoCode: string:=Source.Items[iCNT].SubItems[8];
+            var Branch: string:=Source.Items[iCNT].SubItems[9];
 
-            for var iCNT: integer:=0 to Source.Items.Count - 1 do
-            begin
+            var Utilities: IUtilities:=TUtilities.Create();
+            var CompanyDetails: TCompanyDetails;
+            CompanyDetails:=Utilities.GetCompanyDetailsAwaited(CoCode, Branch);
 
-                var CoCode: string:=Source.Items[iCNT].SubItems[8];
-                var Branch: string:=Source.Items[iCNT].SubItems[9];
+            Source.Items[iCNT].SubItems[5] :=InputText(CompanyDetails.LbuName);
+            Source.Items[iCNT].SubItems[6] :=InputText(CompanyDetails.LbuAddress);
+            Source.Items[iCNT].SubItems[7] :=InputText(CompanyDetails.LbuPhone);
+            Source.Items[iCNT].SubItems[3] :=InputText(CompanyDetails.LbuEmail);
+            Source.Items[iCNT].SubItems[12]:=InputText(CompanyDetails.LbuBanks);
 
-                Tables.ClearSQL();
-                Tables.CustFilter:=TSql.WHERE + TCompanyData.CoCode + TSql.EQUAL + QuotedStr(CoCode) + TSql._AND + TCompanyData.Branch + TSql.EQUAL + QuotedStr(Branch);
-                Tables.OpenTable(TCompanyData.CompanyData);
-
-                // Always add to the lists
-                if Tables.DataSet.RecordCount = 1 then
-                begin
-                    Source.Items[iCNT].SubItems[5] :=THelpers.OleGetStr(Tables.DataSet.Fields[TCompanyData.CoName].Value);
-                    Source.Items[iCNT].SubItems[6] :=THelpers.OleGetStr(Tables.DataSet.Fields[TCompanyData.CoAddress].Value);
-                    Source.Items[iCNT].SubItems[7] :=THelpers.OleGetStr(Tables.DataSet.Fields[TCompanyData.TelephoneNumbers].Value);
-                    Source.Items[iCNT].SubItems[3] :=THelpers.OleGetStr(Tables.DataSet.Fields[TCompanyData.SendNoteFrom].Value);
-                    Source.Items[iCNT].SubItems[12]:=THelpers.OleGetStr(Tables.DataSet.Fields[TCompanyData.BankAccounts].Value);
-                end
-                else
-                begin
-                    Source.Items[iCNT].SubItems[5] :=TUnknown.NotFound;
-                    Source.Items[iCNT].SubItems[6] :=TUnknown.NotFound;
-                    Source.Items[iCNT].SubItems[7] :=TUnknown.NotFound;
-                    Source.Items[iCNT].SubItems[3] :=TUnknown.NotFound;
-                    Source.Items[iCNT].SubItems[12]:=TUnknown.NotFound;
-                end;
-
-            end;
         end;
 
-    finally
-        Tables.Free();
     end;
 
 end;
@@ -315,14 +302,7 @@ begin
     // Execute worker thread to process the listed emails. Show busy window in main thread.
     // ------------------------------------------------------------------------------------
 
-    if
-        (
-            string.IsNullOrEmpty(Text_Subject.Text)
-        )
-    or
-        (
-            string.IsNullOrEmpty(Text_Message.Text)
-        )
+    if (String.IsNullOrEmpty(Text_Subject.Text)) or (String.IsNullOrEmpty(Text_Message.Text))
     then
     begin
         THelpers.MsgCall(Warn, 'Cannot send incomplete form. Please re-check it and try again.');
@@ -443,47 +423,74 @@ begin
 
     var lsColumns: TListColumn;
 
+    // Row number from Age View
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Lp';              // Row number from Age View
+    lsColumns.Caption:='Lp';
     lsColumns.Width  :=40;
+
+    // From Age View (0)
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Customer name';   // From Age View 0
+    lsColumns.Caption:='Customer name';
     lsColumns.Width  :=150;
+
+    // From Age View (1)
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Customer number'; // From Age View 1
+    lsColumns.Caption:='Customer number';
     lsColumns.Width  :=100;
+
+    // Own indicator 4 (2)
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Is sent?';        // Own indicator 4 (2)
+    lsColumns.Caption:='Is sent?';
     lsColumns.Width  :=80;
+
+    // From Company Data 2 (3)
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Send from';       // From Company Data 2 (3)
+    lsColumns.Caption:='Send from';
     lsColumns.Width  :=100;
+
+    // From Address Book 3 (4)
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Send to';         // From Address Book 3 (4)
+    lsColumns.Caption:='Send to';
     lsColumns.Width  :=100;
+
+    // From Company Data (5)
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='LBU name';        // From Company Data 5
+    lsColumns.Caption:='LBU name';
     lsColumns.Width  :=80;
+
+    // From Company Data 6
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='LBU address';     // From Company Data 6
+    lsColumns.Caption:='LBU address';
     lsColumns.Width  :=150;
+
+    // From Compant Data (7)
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='LBU telephone';   // From Compant Data 7
+    lsColumns.Caption:='LBU telephone';
     lsColumns.Width  :=100;
+
+    // From Age View (8)
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='LBU number';      // From Age View 8
+    lsColumns.Caption:='LBU number';
     lsColumns.Width  :=80;
+
+    // From Age View (9)
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='LBU agent';       // From Age View 9
+    lsColumns.Caption:='LBU agent';
     lsColumns.Width  :=80;
+
+    // From Age View (10)
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='CUID';            // From Age View 10
+    lsColumns.Caption:='CUID';
     lsColumns.Width  :=80;
+
+    // Assembled from Age View data (11)
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='SCUID';           // Assembled from Age View data 11
+    lsColumns.Caption:='SCUID';
     lsColumns.Width  :=80;
+
+    // From Company Data (12)
     lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='BanksHtml';       // From Company Data 12
+    lsColumns.Caption:='BanksHtml';
     lsColumns.Width  :=0;
 
     PanelEmailContainer.PanelBorders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
