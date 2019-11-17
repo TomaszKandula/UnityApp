@@ -1,7 +1,8 @@
 object GridSearchForm: TGridSearchForm
   Left = 0
   Top = 0
-  BorderStyle = bsToolWindow
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsSingle
   Caption = 'Unity - Search'
   ClientHeight = 250
   ClientWidth = 398

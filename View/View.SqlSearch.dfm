@@ -1,7 +1,8 @@
 object SqlSearchForm: TSqlSearchForm
   Left = 0
   Top = 0
-  BorderStyle = bsToolWindow
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsSingle
   Caption = 'Unity'
   ClientHeight = 405
   ClientWidth = 683
@@ -34,7 +35,6 @@ object SqlSearchForm: TSqlSearchForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
-    ExplicitHeight = 336
     object SearchBox: TGroupBox
       AlignWithMargins = True
       Left = 10
@@ -48,7 +48,6 @@ object SqlSearchForm: TSqlSearchForm
       Align = alClient
       Caption = 'Search Address Book'
       TabOrder = 0
-      ExplicitHeight = 316
       object Text1: TLabel
         Left = 24
         Top = 59

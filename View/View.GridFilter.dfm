@@ -3,7 +3,7 @@ object FilterForm: TFilterForm
   Left = 0
   Top = 0
   BorderIcons = [biSystemMenu]
-  BorderStyle = bsToolWindow
+  BorderStyle = bsSingle
   Caption = 'Unity'
   ClientHeight = 408
   ClientWidth = 249

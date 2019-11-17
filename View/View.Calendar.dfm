@@ -1,7 +1,8 @@
 object CalendarForm: TCalendarForm
   Left = 0
   Top = 0
-  BorderStyle = bsToolWindow
+  BorderIcons = [biSystemMenu]
+  BorderStyle = bsSingle
   Caption = 'Unity'
   ClientHeight = 354
   ClientWidth = 313

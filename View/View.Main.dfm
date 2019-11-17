@@ -9545,18 +9545,13 @@ object MainForm: TMainForm
     TabOrder = 0
     TabStop = False
     TabWidth = 150
-    ExplicitLeft = 138
-    ExplicitTop = 10
-    ExplicitWidth = 1297
-    ExplicitHeight = 776
     object TabSheet9: TTabSheet
       Caption = 'START'
       DoubleBuffered = False
       Highlighted = True
       ImageIndex = 8
       ParentDoubleBuffered = False
-      ExplicitWidth = 1289
-      ExplicitHeight = 748
+      ExplicitWidth = 1567
       object Shape: TShape
         AlignWithMargins = True
         Left = 17
@@ -9585,11 +9580,9 @@ object MainForm: TMainForm
         Margins.Right = 20
         Margins.Bottom = 20
         Align = alClient
-        Color = clWhite
         TabOrder = 0
         OnAfterCreated = ChromiumWindowAfterCreated
-        ExplicitWidth = 1249
-        ExplicitHeight = 708
+        ExplicitWidth = 1527
       end
     end
     object TabSheet1: TTabSheet
@@ -9601,8 +9594,6 @@ object MainForm: TMainForm
       Font.Style = []
       Highlighted = True
       ParentFont = False
-      ExplicitWidth = 1289
-      ExplicitHeight = 748
       object Header1: TPanel
         Left = 0
         Top = 0
@@ -9611,70 +9602,30 @@ object MainForm: TMainForm
         Align = alTop
         BevelOuter = bvNone
         TabOrder = 0
-        ExplicitWidth = 1289
         object MainPanel1: TPanel
           AlignWithMargins = True
           Left = 17
           Top = 15
-          Width = 1253
+          Width = 1252
           Height = 108
           Margins.Left = 17
           Margins.Top = 15
-          Margins.Right = 0
+          Margins.Right = 17
           Margins.Bottom = 12
-          Align = alLeft
+          Align = alTop
           BevelOuter = bvNone
           TabOrder = 0
+          ExplicitWidth = 1253
           object hShapeSet: TShape
-            Left = 328
-            Top = 17
-            Width = 387
+            Left = 520
+            Top = 19
+            Width = 717
             Height = 88
             Pen.Color = 14922344
-          end
-          object hShapeAct: TShape
-            Left = 724
-            Top = 17
-            Width = 313
-            Height = 88
-            Pen.Color = 14922344
-          end
-          object hShapeGen: TShape
-            Left = 0
-            Top = 17
-            Width = 319
-            Height = 88
-            Pen.Color = 14922344
-          end
-          object tcCOCODE1: TLabel
-            Left = 114
-            Top = 25
-            Width = 20
-            Height = 13
-            Caption = 'n/a'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clBlack
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = [fsBold]
-            ParentFont = False
-          end
-          object tcCURRENCY: TLabel
-            Left = 114
-            Top = 44
-            Width = 20
-            Height = 13
-            Caption = 'n/a'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clBlack
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = [fsBold]
-            ParentFont = False
           end
           object tcTOTAL: TLabel
-            Left = 114
-            Top = 64
+            Left = 1010
+            Top = 33
             Width = 7
             Height = 13
             Caption = '0'
@@ -9685,35 +9636,9 @@ object MainForm: TMainForm
             Font.Style = [fsBold]
             ParentFont = False
           end
-          object Text01: TLabel
-            Left = 15
-            Top = 25
-            Width = 60
-            Height = 13
-            Caption = 'CO Code(s):'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clBlack
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-          end
-          object Text02: TLabel
-            Left = 15
-            Top = 44
-            Width = 82
-            Height = 13
-            Caption = 'Ledger currency:'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clBlack
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-          end
           object Text06: TLabel
-            Left = 15
-            Top = 64
+            Left = 924
+            Top = 33
             Width = 57
             Height = 13
             Caption = 'No of cust.:'
@@ -9725,7 +9650,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object Text10: TLabel
-            Left = 344
+            Left = 536
             Top = 31
             Width = 85
             Height = 13
@@ -9738,7 +9663,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object Text11: TLabel
-            Left = 345
+            Left = 537
             Top = 52
             Width = 84
             Height = 13
@@ -9751,7 +9676,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object Text12: TLabel
-            Left = 345
+            Left = 537
             Top = 73
             Width = 85
             Height = 13
@@ -9764,7 +9689,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object Cap03: TShape
-            Left = 724
+            Left = 1
             Top = 0
             Width = 313
             Height = 19
@@ -9772,30 +9697,15 @@ object MainForm: TMainForm
             Pen.Color = 14922344
           end
           object Cap02: TShape
-            Left = 328
+            Left = 520
             Top = 0
-            Width = 387
+            Width = 717
             Height = 19
             Brush.Color = 14922344
             Pen.Color = 14922344
-          end
-          object Cap01: TShape
-            Left = 0
-            Top = 0
-            Width = 319
-            Height = 19
-            Brush.Color = 14922344
-            Pen.Color = 14922344
-          end
-          object Text31: TLabel
-            Left = 749
-            Top = 67
-            Width = 67
-            Height = 13
-            Caption = 'Cut-Off Date:'
           end
           object valRISKA: TLabel
-            Left = 506
+            Left = 698
             Top = 31
             Width = 7
             Height = 13
@@ -9808,7 +9718,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object valRISKB: TLabel
-            Left = 506
+            Left = 698
             Top = 52
             Width = 7
             Height = 13
@@ -9821,7 +9731,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object valRISKC: TLabel
-            Left = 506
+            Left = 698
             Top = 73
             Width = 7
             Height = 13
@@ -9834,8 +9744,8 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object procRISKA: TLabel
-            Left = 445
-            Top = 31
+            Left = 637
+            Top = 33
             Width = 37
             Height = 13
             Caption = '0,00%'
@@ -9847,7 +9757,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object procRISKB: TLabel
-            Left = 445
+            Left = 637
             Top = 52
             Width = 37
             Height = 13
@@ -9860,7 +9770,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object procRISKC: TLabel
-            Left = 445
+            Left = 637
             Top = 73
             Width = 37
             Height = 13
@@ -9873,8 +9783,8 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object Text36: TLabel
-            Left = 15
-            Top = 82
+            Left = 924
+            Top = 52
             Width = 70
             Height = 13
             Caption = 'Data updated:'
@@ -9886,8 +9796,8 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object DataUpdated: TLabel
-            Left = 114
-            Top = 82
+            Left = 1010
+            Top = 52
             Width = 20
             Height = 13
             Caption = 'n/a'
@@ -9898,8 +9808,137 @@ object MainForm: TMainForm
             Font.Style = [fsBold]
             ParentFont = False
           end
+          object custRISKA: TLabel
+            Left = 803
+            Top = 31
+            Width = 7
+            Height = 13
+            Caption = '0'
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clBlack
+            Font.Height = -11
+            Font.Name = 'Tahoma'
+            Font.Style = [fsBold]
+            ParentFont = False
+          end
+          object custRISKB: TLabel
+            Left = 803
+            Top = 52
+            Width = 7
+            Height = 13
+            Caption = '0'
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clBlack
+            Font.Height = -11
+            Font.Name = 'Tahoma'
+            Font.Style = [fsBold]
+            ParentFont = False
+          end
+          object custRISKC: TLabel
+            Left = 803
+            Top = 73
+            Width = 7
+            Height = 13
+            Caption = '0'
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clBlack
+            Font.Height = -11
+            Font.Name = 'Tahoma'
+            Font.Style = [fsBold]
+            ParentFont = False
+          end
+          object hShapeSorting: TShape
+            Left = 313
+            Top = 19
+            Width = 208
+            Height = 88
+            Pen.Color = 14922344
+          end
+          object btnSortApply: TSpeedButton
+            Left = 372
+            Top = 67
+            Width = 100
+            Height = 30
+            Cursor = crHandPoint
+            Caption = 'Apply'
+            Flat = True
+            Glyph.Data = {
+              F6060000424DF606000000000000360000002800000018000000180000000100
+              180000000000C0060000C40E0000C40E00000000000000000000FFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFBBAFB0CEC5C6FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBBAEB0B4A7A8C8BEBFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBEB3B4
+              B5A8A9C8BEBFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFEFEF2F2F2F3F2
+              F3F3F2F3F3F2F3F3F2F3F3F2F3F3F2F3F3F2F3F3F3F4EFEDEDEEEBEBEEEBECEE
+              EBECF0EDEDF1EEEFBAADAFB7AAABC7BEBEFFFFFFFFFFFFFFFFFFFFFFFFEDECED
+              C7C4C7CAC8CACAC8CACAC8CACAC8CACAC8CACAC8CACAC8CACAC8CACCCBCDBAAE
+              B1B5A8A9B6A9AAB6A9AAB6A9AAB6AAABBBAFB0BCB0B1B7AAABC8BEBFFFFFFFFF
+              FFFFFFFFFFC8C5C8CECCCECFCDCFCFCDCFCFCDCFCFCDCFCFCDCFCFCDCFCFCDCF
+              CFCDCFD0CFD1BFB5B7BBAFB0BCB0B1BCB0B1BCB0B1BCB0B1BCB0B1BCB0B1BCB0
+              B1B7AAABC7BEBFFFFFFFFAFAFAC9C6C9CFCDCFCFCDCFCFCDCFCFCDCFCFCDCFCF
+              CDCFCFCDCFCFCDCFCFCDCFD0CFD1BFB5B7BBAFB0BCB0B1BCB0B1BCB0B1BCB0B1
+              BCB0B1BCB0B1BCB0B1BBAFB0AE9FA0FAFAFAFFFFFFCCCACCCCCACCCECCCECECC
+              CECECCCECECCCECECCCECECCCECECCCECECCCED0CFD1BFB4B7BBAEAFBBAFB0BB
+              AFB0BBAFB0BBAFB0BBAFB0BCB0B1BBAFB0B2A5A6E3DEDFFFFFFFFFFFFFFBFBFB
+              D3D1D3C9C7C9CAC8CACAC8CACAC8CACAC8CACAC8CACAC8CACAC8CACCCACDB9AD
+              B0B4A6A7B4A7A8B4A7A8B4A7A8B7AAABBBB0B1BBAFB0B2A5A6E3DEDFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFAF9F9B8ACADB2A4A6E3DE
+              DFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF1EFEFB2A5A6
+              B2A4A5E3DEDFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFBEBAFE8E87FEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFAD9FA0B1A3A5E3DEDFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFBAB6FF3F34FF3529FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFD2CACAE5E0E1FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFBAB6FF4135FF4237FFDDDBFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBAB6FF4136FF5046FFF2F1FFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBAB6FF4236FF584E
+              FF584EFE4C41FE463BFE463BFE463BFE463BFE473DFF3A24DC371DD3371ED437
+              1ED4371ED4371ED4371ED4371ED4341BD35A45DBF3F1FCFFFFFFFFFFFFBAB6FF
+              4237FF584EFF594FFF584EFF584EFF584EFF584EFF584EFF584EFF5A51FF4B37
+              DF4730D64831D74831D74831D74831D74831D74831D74831D74129D64028D6FF
+              FFFFF4F3FF362AFF584EFF594FFF594FFF594FFF594FFF594FFF594FFF594FFF
+              594FFF5A51FF4C38DF4831D64932D84932D84932D84932D84932D84932D84932
+              D84932D83218D3EDEAFBFFFFFF756DFF4D42FF594FFF594FFF594FFF594FFF59
+              4FFF594FFF594FFF594FFF5A51FF4C38DF4831D64932D84932D84932D84932D8
+              4932D84932D84932D84730D72E14D2FFFFFFFFFFFFFFFFFF766DFF4D42FF594F
+              FF584EFF4C41FF4A3FFF4A3FFF4A3FFF4A3FFF4B42FF3C26DD381ED3381FD438
+              1FD4381FD4381FD4381FD4381FD4381FD42B11D1BBB3F0FFFFFFFFFFFFFFFFFF
+              FFFFFF756DFF4C42FF544AFEDCDAFEDAD8FED6D3FED6D3FED6D3FED6D4FFD3CE
+              F7D3CDF5D3CDF5D3CDF5D3CDF5D3CDF5D3CDF5D2CDF5D0CBF5FDFCFEFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFF766DFF493EFF5F55FFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF766DFF463BFF56
+              4CFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFF867EFE574DFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
+            Spacing = 10
+            OnClick = btnSortApplyClick
+          end
+          object Cap24: TShape
+            Left = 313
+            Top = 0
+            Width = 208
+            Height = 19
+            Brush.Color = 14922344
+            Pen.Color = 14922344
+          end
+          object hShapeAct: TShape
+            Left = 1
+            Top = 19
+            Width = 313
+            Height = 88
+            Pen.Color = 14922344
+          end
           object btnLoadAgeView: TSpeedButton
-            Left = 961
+            Left = 238
             Top = 36
             Width = 59
             Height = 50
@@ -10126,169 +10165,15 @@ object MainForm: TMainForm
               FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
             OnClick = btnLoadAgeViewClick
           end
-          object custRISKA: TLabel
-            Left = 611
-            Top = 31
-            Width = 7
-            Height = 13
-            Caption = '0'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clBlack
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = [fsBold]
-            ParentFont = False
-          end
-          object custRISKB: TLabel
-            Left = 611
-            Top = 52
-            Width = 7
-            Height = 13
-            Caption = '0'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clBlack
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = [fsBold]
-            ParentFont = False
-          end
-          object custRISKC: TLabel
-            Left = 611
-            Top = 73
-            Width = 7
-            Height = 13
-            Caption = '0'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clBlack
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = [fsBold]
-            ParentFont = False
-          end
-          object tcCOCODE2: TLabel
-            Left = 162
-            Top = 25
-            Width = 20
-            Height = 13
-            Caption = 'n/a'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clBlack
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = [fsBold]
-            ParentFont = False
-          end
-          object tcCOCODE3: TLabel
-            Left = 213
-            Top = 25
-            Width = 20
-            Height = 13
-            Caption = 'n/a'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clBlack
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = [fsBold]
-            ParentFont = False
-          end
-          object tcCOCODE4: TLabel
-            Left = 259
-            Top = 25
-            Width = 20
-            Height = 13
-            Caption = 'n/a'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clBlack
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = [fsBold]
-            ParentFont = False
-          end
-          object hShapeSorting: TShape
-            Left = 1045
-            Top = 18
-            Width = 208
-            Height = 87
-            Pen.Color = 14922344
-          end
-          object btnSortApply: TSpeedButton
-            Left = 1104
+          object Text31: TLabel
+            Left = 26
             Top = 67
-            Width = 100
-            Height = 30
-            Cursor = crHandPoint
-            Caption = 'Apply'
-            Flat = True
-            Glyph.Data = {
-              F6060000424DF606000000000000360000002800000018000000180000000100
-              180000000000C0060000C40E0000C40E00000000000000000000FFFFFFFFFFFF
-              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-              FFFFFFFFFFFFFFFFFFFFBBAFB0CEC5C6FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBBAEB0B4A7A8C8BEBFFFFFFFFFFF
-              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBEB3B4
-              B5A8A9C8BEBFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFEFEF2F2F2F3F2
-              F3F3F2F3F3F2F3F3F2F3F3F2F3F3F2F3F3F2F3F3F3F4EFEDEDEEEBEBEEEBECEE
-              EBECF0EDEDF1EEEFBAADAFB7AAABC7BEBEFFFFFFFFFFFFFFFFFFFFFFFFEDECED
-              C7C4C7CAC8CACAC8CACAC8CACAC8CACAC8CACAC8CACAC8CACAC8CACCCBCDBAAE
-              B1B5A8A9B6A9AAB6A9AAB6A9AAB6AAABBBAFB0BCB0B1B7AAABC8BEBFFFFFFFFF
-              FFFFFFFFFFC8C5C8CECCCECFCDCFCFCDCFCFCDCFCFCDCFCFCDCFCFCDCFCFCDCF
-              CFCDCFD0CFD1BFB5B7BBAFB0BCB0B1BCB0B1BCB0B1BCB0B1BCB0B1BCB0B1BCB0
-              B1B7AAABC7BEBFFFFFFFFAFAFAC9C6C9CFCDCFCFCDCFCFCDCFCFCDCFCFCDCFCF
-              CDCFCFCDCFCFCDCFCFCDCFD0CFD1BFB5B7BBAFB0BCB0B1BCB0B1BCB0B1BCB0B1
-              BCB0B1BCB0B1BCB0B1BBAFB0AE9FA0FAFAFAFFFFFFCCCACCCCCACCCECCCECECC
-              CECECCCECECCCECECCCECECCCECECCCECECCCED0CFD1BFB4B7BBAEAFBBAFB0BB
-              AFB0BBAFB0BBAFB0BBAFB0BCB0B1BBAFB0B2A5A6E3DEDFFFFFFFFFFFFFFBFBFB
-              D3D1D3C9C7C9CAC8CACAC8CACAC8CACAC8CACAC8CACAC8CACAC8CACCCACDB9AD
-              B0B4A6A7B4A7A8B4A7A8B4A7A8B7AAABBBB0B1BBAFB0B2A5A6E3DEDFFFFFFFFF
-              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFAF9F9B8ACADB2A4A6E3DE
-              DFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF1EFEFB2A5A6
-              B2A4A5E3DEDFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-              FFFFFFFFBEBAFE8E87FEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-              FFFFAD9FA0B1A3A5E3DEDFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-              FFFFFFFFFFFFFFFFFFBAB6FF3F34FF3529FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-              FFFFFFFFFFFFFFFFFFFFD2CACAE5E0E1FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-              FFFFFFFFFFFFFFFFFFFFFFFFFFFFBAB6FF4135FF4237FFDDDBFFFFFFFFFFFFFF
-              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBAB6FF4136FF5046FFF2F1FFFF
-              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBAB6FF4236FF584E
-              FF584EFE4C41FE463BFE463BFE463BFE463BFE473DFF3A24DC371DD3371ED437
-              1ED4371ED4371ED4371ED4371ED4341BD35A45DBF3F1FCFFFFFFFFFFFFBAB6FF
-              4237FF584EFF594FFF584EFF584EFF584EFF584EFF584EFF584EFF5A51FF4B37
-              DF4730D64831D74831D74831D74831D74831D74831D74831D74129D64028D6FF
-              FFFFF4F3FF362AFF584EFF594FFF594FFF594FFF594FFF594FFF594FFF594FFF
-              594FFF5A51FF4C38DF4831D64932D84932D84932D84932D84932D84932D84932
-              D84932D83218D3EDEAFBFFFFFF756DFF4D42FF594FFF594FFF594FFF594FFF59
-              4FFF594FFF594FFF594FFF5A51FF4C38DF4831D64932D84932D84932D84932D8
-              4932D84932D84932D84730D72E14D2FFFFFFFFFFFFFFFFFF766DFF4D42FF594F
-              FF584EFF4C41FF4A3FFF4A3FFF4A3FFF4A3FFF4B42FF3C26DD381ED3381FD438
-              1FD4381FD4381FD4381FD4381FD4381FD42B11D1BBB3F0FFFFFFFFFFFFFFFFFF
-              FFFFFF756DFF4C42FF544AFEDCDAFEDAD8FED6D3FED6D3FED6D3FED6D4FFD3CE
-              F7D3CDF5D3CDF5D3CDF5D3CDF5D3CDF5D3CDF5D2CDF5D0CBF5FDFCFEFFFFFFFF
-              FFFFFFFFFFFFFFFFFFFFFFFFFFFF766DFF493EFF5F55FFFFFFFFFFFFFFFFFFFF
-              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF766DFF463BFF56
-              4CFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-              FFFFFFFF867EFE574DFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-              FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
-            Spacing = 10
-            OnClick = btnSortApplyClick
-          end
-          object Cap24: TShape
-            Left = 1045
-            Top = 0
-            Width = 208
-            Height = 19
-            Brush.Color = 14922344
-            Pen.Color = 14922344
+            Width = 67
+            Height = 13
+            Caption = 'Cut-Off Date:'
           end
           object GroupListDates: TComboBox
-            Left = 822
+            Left = 99
             Top = 64
             Width = 116
             Height = 22
@@ -10305,7 +10190,7 @@ object MainForm: TMainForm
             OnMouseEnter = GroupListDatesMouseEnter
           end
           object GroupListBox: TComboBox
-            Left = 746
+            Left = 23
             Top = 35
             Width = 192
             Height = 22
@@ -10323,7 +10208,7 @@ object MainForm: TMainForm
             OnSelect = GroupListBoxSelect
           end
           object SortListBox: TComboBox
-            Left = 1069
+            Left = 337
             Top = 35
             Width = 164
             Height = 22
@@ -10353,38 +10238,37 @@ object MainForm: TMainForm
         Align = alBottom
         BevelOuter = bvNone
         TabOrder = 1
-        ExplicitTop = 627
-        ExplicitWidth = 1289
         object BottomPanel1: TPanel
           AlignWithMargins = True
           Left = 17
           Top = 17
-          Width = 1253
-          Height = 92
+          Width = 1252
+          Height = 1253
           Margins.Left = 17
           Margins.Top = 17
-          Margins.Right = 0
+          Margins.Right = 17
           Margins.Bottom = 12
-          Align = alLeft
+          Align = alTop
           BevelOuter = bvNone
           TabOrder = 0
+          ExplicitWidth = 92
           object hShapeAge: TShape
             Left = 1
-            Top = 18
+            Top = 19
             Width = 819
             Height = 71
             Pen.Color = 14922344
           end
           object hShapeTC: TShape
-            Left = 1042
-            Top = 18
+            Left = 1026
+            Top = 19
             Width = 211
             Height = 71
             Pen.Color = 14922344
           end
           object hShapeTR: TShape
-            Left = 827
-            Top = 18
+            Left = 819
+            Top = 19
             Width = 208
             Height = 71
             Pen.Color = 14922344
@@ -10403,7 +10287,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object Text17: TLabel
-            Left = 1058
+            Left = 1042
             Top = 25
             Width = 54
             Height = 13
@@ -10416,7 +10300,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object Text18: TLabel
-            Left = 1057
+            Left = 1041
             Top = 44
             Width = 65
             Height = 13
@@ -10429,7 +10313,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object Text19: TLabel
-            Left = 1058
+            Left = 1042
             Top = 63
             Width = 69
             Height = 13
@@ -10442,7 +10326,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object Text20: TLabel
-            Left = 843
+            Left = 835
             Top = 25
             Width = 43
             Height = 13
@@ -10455,7 +10339,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object Text21: TLabel
-            Left = 843
+            Left = 835
             Top = 44
             Width = 44
             Height = 13
@@ -10468,7 +10352,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object Text22: TLabel
-            Left = 843
+            Left = 835
             Top = 63
             Width = 44
             Height = 13
@@ -10481,7 +10365,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object valDEFAULTED: TLabel
-            Left = 911
+            Left = 903
             Top = 63
             Width = 7
             Height = 13
@@ -10494,7 +10378,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object valExceeders: TLabel
-            Left = 1134
+            Left = 1118
             Top = 25
             Width = 7
             Height = 13
@@ -10507,7 +10391,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object valPASTDUE: TLabel
-            Left = 911
+            Left = 903
             Top = 44
             Width = 7
             Height = 13
@@ -10520,7 +10404,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object valTEXCEES: TLabel
-            Left = 1134
+            Left = 1118
             Top = 44
             Width = 7
             Height = 13
@@ -10533,7 +10417,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object valTLIMITS: TLabel
-            Left = 1134
+            Left = 1118
             Top = 63
             Width = 7
             Height = 13
@@ -10546,7 +10430,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object valTND: TLabel
-            Left = 911
+            Left = 903
             Top = 25
             Width = 7
             Height = 13
@@ -10838,7 +10722,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object Cap06: TShape
-            Left = 1042
+            Left = 1026
             Top = 0
             Width = 211
             Height = 19
@@ -10893,7 +10777,7 @@ object MainForm: TMainForm
             Pen.Color = 14922344
           end
           object Cap07: TShape
-            Left = 827
+            Left = 819
             Top = 0
             Width = 208
             Height = 19
@@ -10915,8 +10799,6 @@ object MainForm: TMainForm
         Align = alClient
         BevelOuter = bvNone
         TabOrder = 2
-        ExplicitWidth = 1255
-        ExplicitHeight = 492
         object sgAgeView: TStringGrid
           AlignWithMargins = True
           Left = 2
@@ -10951,8 +10833,6 @@ object MainForm: TMainForm
           OnMouseEnter = sgAgeViewMouseEnter
           OnMouseWheelDown = sgAgeViewMouseWheelDown
           OnMouseWheelUp = sgAgeViewMouseWheelUp
-          ExplicitWidth = 1251
-          ExplicitHeight = 488
           ColWidths = (
             40
             40
@@ -10993,8 +10873,7 @@ object MainForm: TMainForm
       Caption = 'OPEN ITEMS'
       Highlighted = True
       ImageIndex = 1
-      ExplicitWidth = 1289
-      ExplicitHeight = 748
+      ExplicitWidth = 1567
       object Header2: TPanel
         Left = 0
         Top = 0
@@ -11005,31 +10884,24 @@ object MainForm: TMainForm
         Color = clWhite
         ParentBackground = False
         TabOrder = 0
-        ExplicitWidth = 1289
+        ExplicitWidth = 1567
         object ContentPanel2: TPanel
           AlignWithMargins = True
           Left = 17
           Top = 15
-          Width = 1253
-          Height = 121
+          Width = 1252
+          Height = 1253
           Margins.Left = 17
           Margins.Top = 15
-          Margins.Right = 0
+          Margins.Right = 17
           Margins.Bottom = 14
-          Align = alLeft
+          Align = alTop
           BevelOuter = bvNone
           TabOrder = 0
-          object hShapeSettingsVOI: TShape
-            Left = 135
-            Top = 17
-            Width = 722
-            Height = 104
-            Brush.Style = bsClear
-            Pen.Color = 14922344
-          end
+          ExplicitWidth = 121
           object hShapeActionsVOI: TShape
             Left = 0
-            Top = 17
+            Top = 18
             Width = 128
             Height = 104
             Brush.Style = bsClear
@@ -11065,15 +10937,15 @@ object MainForm: TMainForm
             OnMouseLeave = btnReloadMouseLeave
           end
           object hShapeDetailsVOI: TShape
-            Left = 864
-            Top = 17
+            Left = 127
+            Top = 18
             Width = 385
             Height = 104
             Brush.Style = bsClear
             Pen.Color = 14922344
           end
           object tcInvoices: TLabel
-            Left = 1000
+            Left = 263
             Top = 71
             Width = 7
             Height = 13
@@ -11086,7 +10958,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object tcOpenItems: TLabel
-            Left = 1000
+            Left = 263
             Top = 33
             Width = 7
             Height = 13
@@ -11099,7 +10971,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object tcOSAmt: TLabel
-            Left = 1000
+            Left = 263
             Top = 90
             Width = 7
             Height = 13
@@ -11112,7 +10984,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object tcOverdue: TLabel
-            Left = 1000
+            Left = 263
             Top = 52
             Width = 7
             Height = 13
@@ -11125,8 +10997,8 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object Text54L1: TLabel
-            Left = 68
-            Top = 33
+            Left = 31
+            Top = 71
             Width = 27
             Height = 13
             Caption = 'Force'
@@ -11138,8 +11010,8 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object Text54L2: TLabel
-            Left = 68
-            Top = 46
+            Left = 31
+            Top = 84
             Width = 33
             Height = 13
             Caption = 'Reload'
@@ -11151,7 +11023,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object Text55: TLabel
-            Left = 880
+            Left = 143
             Top = 33
             Width = 70
             Height = 13
@@ -11164,7 +11036,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object Text56: TLabel
-            Left = 880
+            Left = 143
             Top = 71
             Width = 105
             Height = 13
@@ -11177,7 +11049,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object Text57: TLabel
-            Left = 1114
+            Left = 377
             Top = 33
             Width = 85
             Height = 13
@@ -11190,7 +11062,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object Text58: TLabel
-            Left = 880
+            Left = 143
             Top = 90
             Width = 61
             Height = 13
@@ -11210,16 +11082,8 @@ object MainForm: TMainForm
             Brush.Color = 14922344
             Pen.Color = 14922344
           end
-          object Cap11: TShape
-            Left = 135
-            Top = 0
-            Width = 722
-            Height = 19
-            Brush.Color = 14922344
-            Pen.Color = 14922344
-          end
           object Cap12: TShape
-            Left = 864
+            Left = 127
             Top = 0
             Width = 385
             Height = 19
@@ -11227,7 +11091,7 @@ object MainForm: TMainForm
             Pen.Color = 14922344
           end
           object tcUNAmt: TLabel
-            Left = 1114
+            Left = 377
             Top = 90
             Width = 7
             Height = 13
@@ -11240,7 +11104,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object Text70: TLabel
-            Left = 1114
+            Left = 377
             Top = 71
             Width = 99
             Height = 13
@@ -11253,7 +11117,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object Text82: TLabel
-            Left = 880
+            Left = 143
             Top = 52
             Width = 74
             Height = 13
@@ -11266,7 +11130,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object tcOvdAmt: TLabel
-            Left = 1114
+            Left = 377
             Top = 52
             Width = 7
             Height = 13
@@ -11277,233 +11141,6 @@ object MainForm: TMainForm
             Font.Name = 'Tahoma'
             Font.Style = [fsBold]
             ParentFont = False
-          end
-          object btnMakeGroup: TImage
-            Left = 35
-            Top = 75
-            Width = 24
-            Height = 30
-            Cursor = crHandPoint
-            Picture.Data = {
-              0954506E67496D61676589504E470D0A1A0A0000000D49484452000000180000
-              001E0806000000362EDEE5000000017352474200AECE1CE90000000467414D41
-              0000B18F0BFC6105000000097048597300000EC400000EC401952B0E1B000000
-              A74944415478DAEDD2B111C3200C05507900C6A1A4A0E5988412060006F014AC
-              40CF40742CE08414E962909CC277E677BA133CA4630B211C4088520A38E7C3BE
-              AD03DE7BD4E53146608C811062889001630CA494860819E8676AAD43E412D033
-              422E0323E42FC0194206CE62ADFDFC323280996E010B58001270CEA1C10702FB
-              BE7FEB9C3368AD7FD6BDFF7E8094727A3DA5941B4EF0D015CDBEA8B586078E77
-              6601D20458009B17F0FC193B69DE53D10000000049454E44AE426082}
-            OnClick = btnMakeGroupClick
-            OnMouseEnter = btnMakeGroupMouseEnter
-            OnMouseLeave = btnMakeGroupMouseLeave
-          end
-          object Text83L1: TLabel
-            Left = 68
-            Top = 77
-            Width = 25
-            Height = 13
-            Caption = 'Make'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clBlack
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-          end
-          object Text83L2: TLabel
-            Left = 68
-            Top = 90
-            Width = 29
-            Height = 13
-            Caption = 'Group'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = clBlack
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-          end
-          object PanelDetailsGrid: TPanel
-            Left = 136
-            Top = 20
-            Width = 335
-            Height = 100
-            BevelOuter = bvNone
-            TabOrder = 1
-            object Text63: TLabel
-              Left = 16
-              Top = 15
-              Width = 56
-              Height = 13
-              Caption = 'Companies:'
-            end
-            object Text72: TLabel
-              Left = 16
-              Top = 34
-              Width = 48
-              Height = 13
-              Caption = 'Currency:'
-              Font.Charset = DEFAULT_CHARSET
-              Font.Color = clBlack
-              Font.Height = -11
-              Font.Name = 'Tahoma'
-              Font.Style = []
-              ParentFont = False
-            end
-            object Text73: TLabel
-              Left = 16
-              Top = 54
-              Width = 45
-              Height = 13
-              Caption = 'Divisions:'
-              Font.Charset = DEFAULT_CHARSET
-              Font.Color = clBlack
-              Font.Height = -11
-              Font.Name = 'Tahoma'
-              Font.Style = []
-              ParentFont = False
-            end
-            object Text53: TLabel
-              Left = 16
-              Top = 71
-              Width = 38
-              Height = 13
-              Caption = 'Agents:'
-              Font.Charset = DEFAULT_CHARSET
-              Font.Color = clBlack
-              Font.Height = -11
-              Font.Name = 'Tahoma'
-              Font.Style = []
-              ParentFont = False
-            end
-            object sgCompanyData: TStringGrid
-              Left = 113
-              Top = 11
-              Width = 207
-              Height = 79
-              TabStop = False
-              BevelInner = bvNone
-              BevelKind = bkFlat
-              BevelOuter = bvNone
-              Color = clWhite
-              ColCount = 4
-              DefaultColWidth = 50
-              DefaultRowHeight = 18
-              DrawingStyle = gdsGradient
-              FixedColor = clWhite
-              FixedCols = 0
-              RowCount = 4
-              FixedRows = 0
-              GradientEndColor = clWhite
-              Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goDrawFocusSelected, goEditing, goTabs]
-              ScrollBars = ssNone
-              TabOrder = 0
-              OnDrawCell = sgCompanyDataDrawCell
-              OnKeyPress = sgCompanyDataKeyPress
-              OnKeyUp = sgCompanyDataKeyUp
-              ColWidths = (
-                50
-                50
-                50
-                50)
-              RowHeights = (
-                18
-                18
-                18
-                18)
-            end
-          end
-          object PanelGroupName: TPanel
-            Left = 498
-            Top = 25
-            Width = 321
-            Height = 88
-            BevelOuter = bvNone
-            Color = clWhite
-            ParentBackground = False
-            TabOrder = 0
-            object btnMakeGroupAge: TSpeedButton
-              Left = 233
-              Top = 58
-              Width = 73
-              Height = 25
-              Cursor = crHandPoint
-              Caption = 'Run'
-              Enabled = False
-              Flat = True
-              Glyph.Data = {
-                36030000424D3603000000000000360000002800000010000000100000000100
-                18000000000000030000C40E0000C40E00000000000000000000FFFFFFFFFFFF
-                FFFFFFFFFFFFD0F0FA8FDDF435C2ED17BAEB17BAEB35C2ED8FDDF4D0F0FAFFFF
-                FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7AD6F300B1E800B2E810B8EA14
-                B9EA14B9EA0FB8EA00B2E800B1E87AD6F3FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-                28BDEB00B0E716BAEB14B9EA0CB7E917BAEB16BAEB16BAEB16BAEB15BAEB00B0
-                E728BDEBFFFFFFFFFFFFFFFFFF7AD6F300B0E717BAEB12B8EA1EBBEA37C3EC00
-                AFE715BAEB16BAEB16BAEB16BAEB17BAEB00B0E77AD6F3FFFFFFD0F0FA00B1E8
-                15BAEB16BAEB0DB7EA2EC0ECFFFFFF8EDDF500B1E70CB6E917BAEB16BAEB16BA
-                EB15BAEB00B1E8D0F0FA8FDDF500B2E716BAEB16BAEB0DB7EA27BDECFFFFFFFF
-                FFFFC6EDFA16B9E900B2E815BAEB16BAEB16BAEB00B2E78FDDF535C2EC0FB8EA
-                16BAEB16BAEB0DB7EA27BEECFFFFFFFFFFFFFFFFFFFFFFFF69D2F102B2E70EB8
-                EA16BAEB0FB8EA35C2EC17BAEA15B9EB16BAEB16BAEB0DB7EA27BEECFFFFFFFF
-                FFFFFFFFFFFFFFFFFFFFFFDFF5FC1EBCEA10B8EA15B9EB17BAEA17BAEA15B9EB
-                16BAEB16BAEB0DB7EA27BEECFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFDFF5FC1EBC
-                EA10B8EA15BAEB17BAEA35C2EC0FB8EA16BAEB16BAEB0DB7EA27BEECFFFFFFFF
-                FFFFFFFFFFFFFFFF6AD2F102B2E70EB8EA16BAEB0FB8EA35C2EC8FDDF500B2E7
-                16BAEB16BAEB0DB7EA27BDECFFFFFFFFFFFFC6EDFA16B9EA00B2E715BAEB16BA
-                EB16BAEB00B2E78FDDF5D0F0FA00B1E815BAEB16BAEB0DB7EA2EC0ECFFFFFF90
-                DDF500B1E70CB6E917BAEB16BAEB16BAEB15BAEB00B1E8D0F0FAFFFFFF7AD6F3
-                00B0E717BAEB12B8EA1EBBEA37C3EC00AFE715BAEB16BAEB16BAEB16BAEB17BA
-                EB00B0E77AD6F3FFFFFFFFFFFFFFFFFF28BDEB00B0E716BAEB14B9EA0CB7E917
-                BAEB16BAEB16BAEB16BAEB15BAEB00B0E728BDEBFFFFFFFFFFFFFFFFFFFFFFFF
-                FFFFFF7AD6F300B1E800B2E910B8EA14B9EA14B9EA0FB8EA00B2E800B1E87AD6
-                F3FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFD0F0FA8FDDF435C2ED17
-                BAEB17BAEB35C2ED8FDDF4D0F0FAFFFFFFFFFFFFFFFFFFFFFFFF}
-              Spacing = 15
-              OnClick = btnMakeGroupAgeClick
-            end
-            object EditGroupName: TLabeledEdit
-              Left = 14
-              Top = 17
-              Width = 133
-              Height = 21
-              CharCase = ecUpperCase
-              Color = clWhite
-              DoubleBuffered = False
-              EditLabel.Width = 92
-              EditLabel.Height = 13
-              EditLabel.Caption = 'Enter Group Name:'
-              Enabled = False
-              ParentDoubleBuffered = False
-              TabOrder = 0
-              OnKeyPress = EditGroupNameKeyPress
-            end
-            object cbDump: TCheckBox
-              Left = 202
-              Top = 16
-              Width = 104
-              Height = 17
-              Cursor = crHandPoint
-              Caption = 'Dump to CSV only'
-              DoubleBuffered = False
-              Enabled = False
-              ParentDoubleBuffered = False
-              TabOrder = 1
-            end
-            object EditGroupID: TLabeledEdit
-              Left = 14
-              Top = 60
-              Width = 167
-              Height = 21
-              Color = clWhite
-              DoubleBuffered = False
-              EditLabel.Width = 76
-              EditLabel.Height = 13
-              EditLabel.Caption = 'Enter Group ID:'
-              Enabled = False
-              ParentDoubleBuffered = False
-              TabOrder = 2
-            end
           end
         end
       end
@@ -11524,8 +11161,7 @@ object MainForm: TMainForm
         ParentBackground = False
         ParentDoubleBuffered = False
         TabOrder = 1
-        ExplicitWidth = 1255
-        ExplicitHeight = 581
+        ExplicitWidth = 1533
         object ImgLoadingOpenItems: TImage
           AlignWithMargins = True
           Left = 10
@@ -14684,8 +14320,6 @@ object MainForm: TMainForm
           OnMouseEnter = sgOpenItemsMouseEnter
           OnMouseWheelDown = sgOpenItemsMouseWheelDown
           OnMouseWheelUp = sgOpenItemsMouseWheelUp
-          ExplicitWidth = 1251
-          ExplicitHeight = 527
           ColWidths = (
             40
             67
@@ -14736,8 +14370,7 @@ object MainForm: TMainForm
       Caption = 'UNIDENTIFIED'
       Highlighted = True
       ImageIndex = 7
-      ExplicitWidth = 1289
-      ExplicitHeight = 748
+      ExplicitWidth = 1567
       object Header6: TPanel
         Left = 0
         Top = 0
@@ -14748,7 +14381,7 @@ object MainForm: TMainForm
         Color = clWhite
         ParentBackground = False
         TabOrder = 0
-        ExplicitWidth = 1289
+        ExplicitWidth = 1567
         object ContentPanel6: TPanel
           AlignWithMargins = True
           Left = 17
@@ -14795,16 +14428,14 @@ object MainForm: TMainForm
         Color = clWhite
         ParentBackground = False
         TabOrder = 1
-        ExplicitWidth = 1255
-        ExplicitHeight = 613
+        ExplicitWidth = 1533
       end
     end
     object TabSheet3: TTabSheet
       Caption = 'ADDRESS BOOK'
       Highlighted = True
       ImageIndex = 2
-      ExplicitWidth = 1289
-      ExplicitHeight = 748
+      ExplicitWidth = 1567
       object Header3: TPanel
         Left = 0
         Top = 0
@@ -14814,7 +14445,7 @@ object MainForm: TMainForm
         BevelOuter = bvNone
         Color = clWhite
         TabOrder = 0
-        ExplicitWidth = 1289
+        ExplicitWidth = 1567
         object ContentPanel: TPanel
           AlignWithMargins = True
           Left = 17
@@ -15018,8 +14649,7 @@ object MainForm: TMainForm
         ParentBackground = False
         ParentDoubleBuffered = False
         TabOrder = 1
-        ExplicitWidth = 1255
-        ExplicitHeight = 613
+        ExplicitWidth = 1533
         object sgAddressBook: TStringGrid
           AlignWithMargins = True
           Left = 2
@@ -15053,8 +14683,7 @@ object MainForm: TMainForm
           OnMouseEnter = sgAddressBookMouseEnter
           OnMouseWheelDown = sgAddressBookMouseWheelDown
           OnMouseWheelUp = sgAddressBookMouseWheelUp
-          ExplicitWidth = 1251
-          ExplicitHeight = 559
+          ExplicitWidth = 1529
           ColWidths = (
             40
             39
@@ -15077,8 +14706,7 @@ object MainForm: TMainForm
       Highlighted = True
       ImageIndex = 4
       OnShow = TabSheet4Show
-      ExplicitWidth = 1289
-      ExplicitHeight = 748
+      ExplicitWidth = 1567
       object Header4: TPanel
         Left = 0
         Top = 0
@@ -15089,7 +14717,7 @@ object MainForm: TMainForm
         Color = clWhite
         ParentBackground = False
         TabOrder = 0
-        ExplicitWidth = 1289
+        ExplicitWidth = 1567
         object ContentPanel1: TPanel
           AlignWithMargins = True
           Left = 17
@@ -15179,8 +14807,7 @@ object MainForm: TMainForm
         Align = alClient
         BevelOuter = bvNone
         TabOrder = 1
-        ExplicitWidth = 1255
-        ExplicitHeight = 613
+        ExplicitWidth = 1533
         object ImgLoadingInvoiceTracker: TImage
           AlignWithMargins = True
           Left = 10
@@ -18339,8 +17966,7 @@ object MainForm: TMainForm
           OnMouseEnter = sgInvoiceTrackerMouseEnter
           OnMouseWheelDown = sgInvoiceTrackerMouseWheelDown
           OnMouseWheelUp = sgInvoiceTrackerMouseWheelUp
-          ExplicitWidth = 1251
-          ExplicitHeight = 568
+          ExplicitWidth = 1529
           ColWidths = (
             40
             40
@@ -18365,8 +17991,7 @@ object MainForm: TMainForm
       ImageIndex = 8
       OnResize = TabSheet7Resize
       OnShow = TabSheet7Show
-      ExplicitWidth = 1289
-      ExplicitHeight = 748
+      ExplicitWidth = 1567
       object Header7: TPanel
         Left = 0
         Top = 0
@@ -18377,7 +18002,7 @@ object MainForm: TMainForm
         Color = clWhite
         ParentBackground = False
         TabOrder = 0
-        ExplicitWidth = 1289
+        ExplicitWidth = 1567
         object ContentPanel7: TPanel
           Left = 0
           Top = 0
@@ -18472,12 +18097,10 @@ object MainForm: TMainForm
         ActivePage = Page1
         Align = alClient
         TabOrder = 1
-        ExplicitWidth = 1255
-        ExplicitHeight = 613
+        ExplicitWidth = 1533
         object Page1: TTabSheet
           Caption = 'Companies'
-          ExplicitWidth = 1247
-          ExplicitHeight = 585
+          ExplicitWidth = 1525
           object PanelCoCodes: TPanel
             AlignWithMargins = True
             Left = 17
@@ -18491,8 +18114,7 @@ object MainForm: TMainForm
             Align = alClient
             BevelOuter = bvNone
             TabOrder = 0
-            ExplicitWidth = 1213
-            ExplicitHeight = 551
+            ExplicitWidth = 1491
             object sgCoCodes: TStringGrid
               AlignWithMargins = True
               Left = 2
@@ -18518,6 +18140,7 @@ object MainForm: TMainForm
               OnMouseEnter = sgCoCodesMouseEnter
               OnMouseWheelDown = sgCoCodesMouseWheelDown
               OnMouseWheelUp = sgCoCodesMouseWheelUp
+              ExplicitWidth = 1487
               ColWidths = (
                 10
                 76)
@@ -18530,8 +18153,7 @@ object MainForm: TMainForm
         object Page2: TTabSheet
           Caption = 'Payment Terms'
           ImageIndex = 1
-          ExplicitWidth = 1247
-          ExplicitHeight = 585
+          ExplicitWidth = 1525
           object PanelPmtTerms: TPanel
             AlignWithMargins = True
             Left = 17
@@ -18545,8 +18167,7 @@ object MainForm: TMainForm
             Align = alClient
             BevelOuter = bvNone
             TabOrder = 0
-            ExplicitWidth = 1213
-            ExplicitHeight = 551
+            ExplicitWidth = 1491
             object sgPmtTerms: TStringGrid
               AlignWithMargins = True
               Left = 2
@@ -18572,8 +18193,7 @@ object MainForm: TMainForm
               OnMouseEnter = sgPmtTermsMouseEnter
               OnMouseWheelDown = sgPmtTermsMouseWheelDown
               OnMouseWheelUp = sgPmtTermsMouseWheelUp
-              ExplicitWidth = 1209
-              ExplicitHeight = 547
+              ExplicitWidth = 1487
               ColWidths = (
                 10
                 76)
@@ -18586,8 +18206,7 @@ object MainForm: TMainForm
         object Page10: TTabSheet
           Caption = 'Control Status'
           ImageIndex = 9
-          ExplicitWidth = 1247
-          ExplicitHeight = 585
+          ExplicitWidth = 1525
           object PanelControlStatus: TPanel
             AlignWithMargins = True
             Left = 17
@@ -18603,8 +18222,7 @@ object MainForm: TMainForm
             Color = clWhite
             ParentBackground = False
             TabOrder = 0
-            ExplicitWidth = 1213
-            ExplicitHeight = 551
+            ExplicitWidth = 1491
             object sgControlStatus: TStringGrid
               AlignWithMargins = True
               Left = 2
@@ -18630,8 +18248,7 @@ object MainForm: TMainForm
               OnMouseEnter = sgControlStatusMouseEnter
               OnMouseWheelDown = sgControlStatusMouseWheelDown
               OnMouseWheelUp = sgControlStatusMouseWheelUp
-              ExplicitWidth = 1209
-              ExplicitHeight = 547
+              ExplicitWidth = 1487
               ColWidths = (
                 10
                 76)
@@ -18644,8 +18261,7 @@ object MainForm: TMainForm
         object Page3: TTabSheet
           Caption = 'Paid Info'
           ImageIndex = 2
-          ExplicitWidth = 1247
-          ExplicitHeight = 585
+          ExplicitWidth = 1525
           object PanelPaidInfo: TPanel
             AlignWithMargins = True
             Left = 17
@@ -18661,8 +18277,7 @@ object MainForm: TMainForm
             Color = clWhite
             ParentBackground = False
             TabOrder = 0
-            ExplicitWidth = 1213
-            ExplicitHeight = 551
+            ExplicitWidth = 1491
             object sgPaidInfo: TStringGrid
               AlignWithMargins = True
               Left = 2
@@ -18688,8 +18303,7 @@ object MainForm: TMainForm
               OnMouseEnter = sgPaidInfoMouseEnter
               OnMouseWheelDown = sgPaidInfoMouseWheelDown
               OnMouseWheelUp = sgPaidInfoMouseWheelUp
-              ExplicitWidth = 1209
-              ExplicitHeight = 547
+              ExplicitWidth = 1487
               ColWidths = (
                 10
                 76)
@@ -18702,8 +18316,7 @@ object MainForm: TMainForm
         object Page7: TTabSheet
           Caption = 'Person Responsible'
           ImageIndex = 6
-          ExplicitWidth = 1247
-          ExplicitHeight = 585
+          ExplicitWidth = 1525
           object PanelPersonResp: TPanel
             AlignWithMargins = True
             Left = 17
@@ -18717,8 +18330,7 @@ object MainForm: TMainForm
             Align = alClient
             BevelOuter = bvNone
             TabOrder = 0
-            ExplicitWidth = 1213
-            ExplicitHeight = 551
+            ExplicitWidth = 1491
             object sgPersonResp: TStringGrid
               AlignWithMargins = True
               Left = 2
@@ -18744,8 +18356,7 @@ object MainForm: TMainForm
               OnMouseEnter = sgPersonRespMouseEnter
               OnMouseWheelDown = sgPersonRespMouseWheelDown
               OnMouseWheelUp = sgPersonRespMouseWheelUp
-              ExplicitWidth = 1209
-              ExplicitHeight = 547
+              ExplicitWidth = 1487
               ColWidths = (
                 10
                 76)
@@ -18758,8 +18369,7 @@ object MainForm: TMainForm
         object Page6: TTabSheet
           Caption = 'Sales Responsible'
           ImageIndex = 5
-          ExplicitWidth = 1247
-          ExplicitHeight = 585
+          ExplicitWidth = 1525
           object PanelSalesResp: TPanel
             AlignWithMargins = True
             Left = 17
@@ -18773,8 +18383,7 @@ object MainForm: TMainForm
             Align = alClient
             BevelOuter = bvNone
             TabOrder = 0
-            ExplicitWidth = 1213
-            ExplicitHeight = 551
+            ExplicitWidth = 1491
             object sgSalesResp: TStringGrid
               AlignWithMargins = True
               Left = 2
@@ -18800,8 +18409,7 @@ object MainForm: TMainForm
               OnMouseEnter = sgSalesRespMouseEnter
               OnMouseWheelDown = sgSalesRespMouseWheelDown
               OnMouseWheelUp = sgSalesRespMouseWheelUp
-              ExplicitWidth = 1209
-              ExplicitHeight = 547
+              ExplicitWidth = 1487
               ColWidths = (
                 10
                 76)
@@ -18814,8 +18422,7 @@ object MainForm: TMainForm
         object Page9: TTabSheet
           Caption = 'Account Type'
           ImageIndex = 8
-          ExplicitWidth = 1247
-          ExplicitHeight = 585
+          ExplicitWidth = 1525
           object PanelAccountType: TPanel
             AlignWithMargins = True
             Left = 17
@@ -18829,8 +18436,7 @@ object MainForm: TMainForm
             Align = alClient
             BevelOuter = bvNone
             TabOrder = 0
-            ExplicitWidth = 1213
-            ExplicitHeight = 551
+            ExplicitWidth = 1491
             object sgAccountType: TStringGrid
               AlignWithMargins = True
               Left = 2
@@ -18856,8 +18462,7 @@ object MainForm: TMainForm
               OnMouseEnter = sgAccountTypeMouseEnter
               OnMouseWheelDown = sgAccountTypeMouseWheelDown
               OnMouseWheelUp = sgAccountTypeMouseWheelUp
-              ExplicitWidth = 1209
-              ExplicitHeight = 547
+              ExplicitWidth = 1487
               ColWidths = (
                 10
                 76)
@@ -18870,8 +18475,7 @@ object MainForm: TMainForm
         object Page8: TTabSheet
           Caption = 'Customer Group'
           ImageIndex = 7
-          ExplicitWidth = 1247
-          ExplicitHeight = 585
+          ExplicitWidth = 1525
           object PanelCustomerGr: TPanel
             AlignWithMargins = True
             Left = 17
@@ -18885,8 +18489,7 @@ object MainForm: TMainForm
             Align = alClient
             BevelOuter = bvNone
             TabOrder = 0
-            ExplicitWidth = 1213
-            ExplicitHeight = 551
+            ExplicitWidth = 1491
             object sgCustomerGr: TStringGrid
               AlignWithMargins = True
               Left = 2
@@ -18912,8 +18515,7 @@ object MainForm: TMainForm
               OnMouseEnter = sgCustomerGrMouseEnter
               OnMouseWheelDown = sgCustomerGrMouseWheelDown
               OnMouseWheelUp = sgCustomerGrMouseWheelUp
-              ExplicitWidth = 1209
-              ExplicitHeight = 547
+              ExplicitWidth = 1487
               ColWidths = (
                 10
                 76)
@@ -18926,8 +18528,7 @@ object MainForm: TMainForm
         object Page4: TTabSheet
           Caption = 'Person'
           ImageIndex = 3
-          ExplicitWidth = 1247
-          ExplicitHeight = 585
+          ExplicitWidth = 1525
           object PanelPerson: TPanel
             AlignWithMargins = True
             Left = 17
@@ -18943,8 +18544,7 @@ object MainForm: TMainForm
             Color = clWhite
             ParentBackground = False
             TabOrder = 0
-            ExplicitWidth = 1213
-            ExplicitHeight = 551
+            ExplicitWidth = 1491
             object sgPerson: TStringGrid
               AlignWithMargins = True
               Left = 2
@@ -18970,8 +18570,7 @@ object MainForm: TMainForm
               OnMouseEnter = sgPersonMouseEnter
               OnMouseWheelDown = sgPersonMouseWheelDown
               OnMouseWheelUp = sgPersonMouseWheelUp
-              ExplicitWidth = 1209
-              ExplicitHeight = 547
+              ExplicitWidth = 1487
               ColWidths = (
                 10
                 76)
@@ -18984,8 +18583,7 @@ object MainForm: TMainForm
         object Page5: TTabSheet
           Caption = 'Group3'
           ImageIndex = 4
-          ExplicitWidth = 1247
-          ExplicitHeight = 585
+          ExplicitWidth = 1525
           object PanelGroup3: TPanel
             AlignWithMargins = True
             Left = 17
@@ -18999,8 +18597,7 @@ object MainForm: TMainForm
             Align = alClient
             BevelOuter = bvNone
             TabOrder = 0
-            ExplicitWidth = 1213
-            ExplicitHeight = 551
+            ExplicitWidth = 1491
             object sgGroup3: TStringGrid
               AlignWithMargins = True
               Left = 2
@@ -19026,8 +18623,7 @@ object MainForm: TMainForm
               OnMouseEnter = sgGroup3MouseEnter
               OnMouseWheelDown = sgGroup3MouseWheelDown
               OnMouseWheelUp = sgGroup3MouseWheelUp
-              ExplicitWidth = 1209
-              ExplicitHeight = 547
+              ExplicitWidth = 1487
               ColWidths = (
                 10
                 76)
@@ -19044,8 +18640,7 @@ object MainForm: TMainForm
       Highlighted = True
       ImageIndex = 6
       OnShow = TabSheet8Show
-      ExplicitWidth = 1289
-      ExplicitHeight = 748
+      ExplicitWidth = 1567
       object Header8: TPanel
         Left = 0
         Top = 0
@@ -19056,7 +18651,7 @@ object MainForm: TMainForm
         Color = clWhite
         ParentBackground = False
         TabOrder = 0
-        ExplicitWidth = 1289
+        ExplicitWidth = 1567
         object ContentPanel8: TPanel
           AlignWithMargins = True
           Left = 17
@@ -19387,7 +18982,6 @@ object MainForm: TMainForm
         BevelOuter = bvNone
         Color = 15527148
         TabOrder = 1
-        ExplicitHeight = 613
         object PanelSettingsSections: TPanel
           AlignWithMargins = True
           Left = 0
@@ -19403,8 +18997,6 @@ object MainForm: TMainForm
           Color = clWhite
           ParentBackground = False
           TabOrder = 0
-          ExplicitTop = 120
-          ExplicitHeight = 493
           object sgListSection: TStringGrid
             AlignWithMargins = True
             Left = 2
@@ -19436,7 +19028,6 @@ object MainForm: TMainForm
             OnMouseWheelDown = sgListSectionMouseWheelDown
             OnMouseWheelUp = sgListSectionMouseWheelUp
             OnSelectCell = sgListSectionSelectCell
-            ExplicitHeight = 448
             ColWidths = (
               30
               381)
@@ -19460,8 +19051,6 @@ object MainForm: TMainForm
           Color = clWhite
           ParentBackground = False
           TabOrder = 1
-          ExplicitTop = 120
-          ExplicitHeight = 493
           object sgListValue: TStringGrid
             AlignWithMargins = True
             Left = 2
@@ -19491,7 +19080,6 @@ object MainForm: TMainForm
             OnKeyUp = sgListValueKeyUp
             OnMouseWheelDown = sgListValueMouseWheelDown
             OnMouseWheelUp = sgListValueMouseWheelUp
-            ExplicitHeight = 448
             ColWidths = (
               30
               203
@@ -19936,8 +19524,7 @@ object MainForm: TMainForm
       Caption = 'QUERIES'
       ImageIndex = 8
       OnShow = TabSheet5Show
-      ExplicitWidth = 1289
-      ExplicitHeight = 748
+      ExplicitWidth = 1567
       object PanelFSC: TPanel
         AlignWithMargins = True
         Left = 17
@@ -19951,7 +19538,6 @@ object MainForm: TMainForm
         Align = alLeft
         BevelOuter = bvNone
         TabOrder = 0
-        ExplicitHeight = 714
         object Cap62: TShape
           AlignWithMargins = True
           Left = 10
@@ -19982,7 +19568,6 @@ object MainForm: TMainForm
           Align = alClient
           BevelOuter = bvNone
           TabOrder = 0
-          ExplicitHeight = 368
           object sgFSCview: TStringGrid
             AlignWithMargins = True
             Left = 2
@@ -20067,7 +19652,6 @@ object MainForm: TMainForm
           Color = clWhite
           ParentBackground = False
           TabOrder = 1
-          ExplicitTop = 582
           object btnFscApprove: TSpeedButton
             Left = 452
             Top = 31
@@ -20185,7 +19769,6 @@ object MainForm: TMainForm
           Color = clWhite
           ParentBackground = False
           TabOrder = 2
-          ExplicitTop = 437
           object LabelOpAmountFsc: TLabel
             Left = 21
             Top = 7
@@ -20319,7 +19902,6 @@ object MainForm: TMainForm
         Align = alLeft
         BevelOuter = bvNone
         TabOrder = 1
-        ExplicitHeight = 714
         object Cap63: TShape
           AlignWithMargins = True
           Left = 10
@@ -20350,7 +19932,6 @@ object MainForm: TMainForm
           Align = alClient
           BevelOuter = bvNone
           TabOrder = 0
-          ExplicitHeight = 368
           object sgLBUview: TStringGrid
             AlignWithMargins = True
             Left = 2
@@ -20435,7 +20016,6 @@ object MainForm: TMainForm
           Color = clWhite
           ParentBackground = False
           TabOrder = 1
-          ExplicitTop = 582
           object btnLbuUpdate: TSpeedButton
             Left = 452
             Top = 31
@@ -20516,7 +20096,6 @@ object MainForm: TMainForm
           Color = clWhite
           ParentBackground = False
           TabOrder = 2
-          ExplicitTop = 437
           object LabelOpAmountLbu: TLabel
             Left = 21
             Top = 7
@@ -20656,7 +20235,6 @@ object MainForm: TMainForm
     ParentBackground = False
     ParentDoubleBuffered = False
     TabOrder = 1
-    ExplicitWidth = 1445
     object StatBar_CAP1: TLabel
       Left = 17
       Top = 13
@@ -20835,8 +20413,6 @@ object MainForm: TMainForm
       OnClick = txtStartClick
       OnMouseEnter = btnStartMouseEnter
       OnMouseLeave = btnStartMouseLeave
-      ExplicitLeft = 10
-      ExplicitWidth = 111
       object imgStart: TImage
         Left = 0
         Top = 0
@@ -20937,8 +20513,6 @@ object MainForm: TMainForm
       TabOrder = 1
       OnMouseEnter = btnReportsMouseEnter
       OnMouseLeave = btnReportsMouseLeave
-      ExplicitLeft = 10
-      ExplicitWidth = 111
       object imgReports: TImage
         Left = 0
         Top = 0
@@ -21044,8 +20618,6 @@ object MainForm: TMainForm
       OnClick = txtDebtorsClick
       OnMouseEnter = btnDebtorsMouseEnter
       OnMouseLeave = btnDebtorsMouseLeave
-      ExplicitLeft = 10
-      ExplicitWidth = 111
       object imgDebtors: TImage
         Left = 0
         Top = 0
@@ -21151,8 +20723,6 @@ object MainForm: TMainForm
       OnClick = txtAddressBookClick
       OnMouseEnter = btnAddressBookMouseEnter
       OnMouseLeave = btnAddressBookMouseLeave
-      ExplicitLeft = 10
-      ExplicitWidth = 111
       object imgBook: TImage
         Left = 0
         Top = 0
@@ -21258,8 +20828,6 @@ object MainForm: TMainForm
       OnClick = txtOpenItemsClick
       OnMouseEnter = btnOpenItemsMouseEnter
       OnMouseLeave = btnOpenItemsMouseLeave
-      ExplicitLeft = 10
-      ExplicitWidth = 111
       object imgOpenItems: TImage
         Left = 0
         Top = 0
@@ -21365,8 +20933,6 @@ object MainForm: TMainForm
       OnClick = txtQueriesClick
       OnMouseEnter = btnQueriesMouseEnter
       OnMouseLeave = btnQueriesMouseLeave
-      ExplicitLeft = 10
-      ExplicitWidth = 111
       object imgQueries: TImage
         Left = 0
         Top = 0
@@ -21472,8 +21038,6 @@ object MainForm: TMainForm
       OnClick = txtSettingsClick
       OnMouseEnter = btnSettingsMouseEnter
       OnMouseLeave = btnSettingsMouseLeave
-      ExplicitLeft = 10
-      ExplicitWidth = 111
       object imgSettings: TImage
         Left = 0
         Top = 0
@@ -21579,8 +21143,6 @@ object MainForm: TMainForm
       OnClick = txtTablesClick
       OnMouseEnter = btnTablesMouseEnter
       OnMouseLeave = btnTablesMouseLeave
-      ExplicitLeft = 10
-      ExplicitWidth = 111
       object imgTables: TImage
         Left = 0
         Top = 0
@@ -21686,8 +21248,6 @@ object MainForm: TMainForm
       OnClick = txtTrackerClick
       OnMouseEnter = btnTrackerMouseEnter
       OnMouseLeave = btnTrackerMouseLeave
-      ExplicitLeft = 10
-      ExplicitWidth = 111
       object imgTracker: TImage
         Left = 0
         Top = 0
@@ -21793,8 +21353,6 @@ object MainForm: TMainForm
       OnClick = txtUnidentifiedClick
       OnMouseEnter = btnUnidentifiedMouseEnter
       OnMouseLeave = btnUnidentifiedMouseLeave
-      ExplicitLeft = 10
-      ExplicitWidth = 118
       object imgUnidentified: TImage
         Left = 0
         Top = 0
@@ -21900,7 +21458,6 @@ object MainForm: TMainForm
       OnClick = txtInfoClick
       OnMouseEnter = btnInfoMouseEnter
       OnMouseLeave = btnInfoMouseLeave
-      ExplicitTop = 673
       object imgInfo: TImage
         Left = 0
         Top = 0
@@ -22010,7 +21567,6 @@ object MainForm: TMainForm
       OnClick = txtFeedbackClick
       OnMouseEnter = btnFeedbackMouseEnter
       OnMouseLeave = btnFeedbackMouseLeave
-      ExplicitTop = 635
       object imgFeedback: TImage
         Left = 0
         Top = 0
@@ -22118,7 +21674,6 @@ object MainForm: TMainForm
     Color = 14922344
     ParentBackground = False
     TabOrder = 3
-    ExplicitWidth = 1445
     object imgAppMenu: TImage
       AlignWithMargins = True
       Left = 10
@@ -22224,7 +21779,6 @@ object MainForm: TMainForm
       Font.Name = 'Verdana'
       Font.Style = [fsBold]
       ParentFont = False
-      ExplicitTop = 9
       ExplicitHeight = 29
     end
     object imgAADUser: TImage
@@ -22387,8 +21941,6 @@ object MainForm: TMainForm
       Font.Name = 'Tahoma'
       Font.Style = [fsBold]
       ParentFont = False
-      ExplicitLeft = 1345
-      ExplicitTop = 10
       ExplicitHeight = 14
     end
   end

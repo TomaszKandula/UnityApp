@@ -3,7 +3,7 @@ object PhoneListForm: TPhoneListForm
   Top = 0
   BiDiMode = bdLeftToRight
   BorderIcons = [biSystemMenu]
-  BorderStyle = bsToolWindow
+  BorderStyle = bsSingle
   Caption = 'Unity'
   ClientHeight = 272
   ClientWidth = 196

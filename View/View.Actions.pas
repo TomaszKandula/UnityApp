@@ -34,7 +34,8 @@ uses
     Data.Win.ADODB,
     Unity.Arrays,
     Unity.Records,
-    Unity.Grid;
+    Unity.Grid,
+    Unity.Panel;
 
 
 type
@@ -81,10 +82,10 @@ type
         btnCopyCustNumber: TSpeedButton;
         btnCopyPerson: TSpeedButton;
         btnCopyEmail: TSpeedButton;
-    PanelActions: TPanel;
+        PanelActions: TPanel;
         MasterPanel: TPanel;
-    txtFixedText: TLabel;
-    txtTimeDate: TLabel;
+        txtFixedText: TLabel;
+        txtTimeDate: TLabel;
         zText9: TLabel;
         Cust_MailGeneral: TEdit;
         Cust_MailGeneralBack: TShape;
@@ -101,8 +102,7 @@ type
         SepLine2: TBevel;
         SepLine4: TBevel;
         SepLine5: TBevel;
-        SepLine6: TBevel;
-    txtDesc: TLabel;
+        txtDesc: TLabel;
         imgInfo: TImage;
         imgCoverSaveBtn: TImage;
         GroupOpenItems: TGroupBox;
@@ -113,8 +113,8 @@ type
         GroupEmails: TGroupBox;
         cbUserInCopy: TCheckBox;
         cbCtrlStatusOff: TCheckBox;
-    PanelBottom: TPanel;
-    txtItem: TLabel;
+        PanelBottom: TPanel;
+        txtItem: TLabel;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
@@ -180,6 +180,8 @@ type
         procedure btnSaveCustDetailsMouseLeave(Sender: TObject);
         procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure FormClose(Sender: TObject; var Action: TCloseAction);
+        procedure btnEditMouseEnter(Sender: TObject);
+        procedure btnEditMouseLeave(Sender: TObject);
     strict private
         var FHistoryGrid:          boolean;
         var FCUID:                 string;
@@ -326,8 +328,8 @@ begin
     Cust_Number.Caption:=CustNumber;
 
     GetOpenItems(OpenItemsGrid, MainForm.sgOpenItems);
-    ValueOpenAm.Caption:=FormatFloat('#,##0.00', FOpenItemsTotal.OpenAm) + ' ' + MainForm.tcCURRENCY.Caption;
-    ValueAmount.Caption:=FormatFloat('#,##0.00', FOpenItemsTotal.Am) + ' ' + MainForm.tcCURRENCY.Caption;
+    ValueOpenAm.Caption:=FormatFloat('#,##0.00', FOpenItemsTotal.OpenAm) {+ ' ' + MainForm.tcCURRENCY.Caption};
+    ValueAmount.Caption:=FormatFloat('#,##0.00', FOpenItemsTotal.Am) {+ ' ' + MainForm.tcCURRENCY.Caption};
 
 end;
 
@@ -869,6 +871,8 @@ end;
 procedure TActionsForm.FormCreate(Sender: TObject);
 begin
 
+    PanelActions.PanelBorders(clWhite, $00E3B268, clWhite, clWhite, clWhite);
+
     InitializePanels;
     InitializeSpeedButtons;
 
@@ -972,20 +976,20 @@ end;
 
 procedure TActionsForm.HistoryGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
-    HistoryGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
+
+    if gdSelected in State then HistoryGrid.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True)
+        else HistoryGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
+
 end;
 
 
 procedure TActionsForm.OpenItemsGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
 
-    // Skip header
     if ARow = 0 then Exit;
 
-    // Draw selected
     OpenItemsGrid.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True);
 
-    // Draw certain color
     if
         (
             ACol = OpenItemsGrid.ReturnColumn(TOpenitems.OpenCurAm, 1, 1)
@@ -1239,7 +1243,7 @@ end;
 
 procedure TActionsForm.btnLogMissingInvMouseEnter(Sender: TObject);
 begin
-    txtDesc.Caption:='QMS: Log missing invoice.';
+    txtDesc.Caption:='Log to QMS missing invoice (require to fill the invoice details).';
 end;
 
 
@@ -1251,7 +1255,7 @@ end;
 
 procedure TActionsForm.btnLogNowMouseEnter(Sender: TObject);
 begin
-    txtDesc.Caption:='QMS: Log selected invoice(s).';
+    txtDesc.Caption:='Log to QMS selected invoice(s) from the customer open items list.';
 end;
 
 
@@ -1304,6 +1308,18 @@ end;
 
 
 procedure TActionsForm.btnSaveCustDetailsMouseLeave(Sender: TObject);
+begin
+    txtDesc.Caption:='';
+end;
+
+
+procedure TActionsForm.btnEditMouseEnter(Sender: TObject);
+begin
+    txtDesc.Caption:='Edit customer phone list.';
+end;
+
+
+procedure TActionsForm.btnEditMouseLeave(Sender: TObject);
 begin
     txtDesc.Caption:='';
 end;

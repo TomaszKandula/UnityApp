@@ -72,7 +72,7 @@ type
 
 
     TMainForm = class(TForm)
-    TabSheets: TPageControl;
+        TabSheets: TPageControl;
         TabSheet1: TTabSheet;
         TabSheet2: TTabSheet;
         TabSheet3: TTabSheet;
@@ -80,14 +80,8 @@ type
         TabSheet7: TTabSheet;
         Header1: TPanel;
         Footer1: TPanel;
-        hShapeGen: TShape;
-        Text01: TLabel;
-        Text02: TLabel;
         Text06: TLabel;
-        tcCOCODE1: TLabel;
-        tcCURRENCY: TLabel;
         tcTOTAL: TLabel;
-        Cap01: TShape;
         hShapeSet: TShape;
         Cap02: TShape;
         hShapeAge: TShape;
@@ -190,8 +184,6 @@ type
         Header2: TPanel;
         hShapeActionsVOI: TShape;
         Cap10: TShape;
-        hShapeSettingsVOI: TShape;
-        Cap11: TShape;
         hShapeDetailsVOI: TShape;
         Cap12: TShape;
         btnReload: TImage;
@@ -202,7 +194,6 @@ type
         Text64: TLabel;
         Text66: TLabel;
         Text67: TLabel;
-        Text63: TLabel;
         Text55: TLabel;
         Text56: TLabel;
         Text57: TLabel;
@@ -231,13 +222,13 @@ type
         StatBar_TXT4: TLabel;
         StatBar_CAP5: TLabel;
         StatBar_TXT5: TLabel;
-    TimerCurrentTime: TTimer;
-    TimerUpTime: TTimer;
+        TimerCurrentTime: TTimer;
+        TimerUpTime: TTimer;
         txtInfo1: TLabel;
         txtInfo3: TLabel;
         txtInfo2: TLabel;
-    FileCSVExport: TSaveDialog;
-    FileCSVImport: TOpenDialog;
+        FileCSVExport: TSaveDialog;
+        FileCSVImport: TOpenDialog;
         ContentPanel7: TPanel;
         ContentPanel6: TPanel;
         ContentPanel1: TPanel;
@@ -249,9 +240,7 @@ type
         InnerPanel8Left: TPanel;
         tcUNAmt: TLabel;
         Text70: TLabel;
-        Text72: TLabel;
-        Text73: TLabel;
-    TimerCustOpenItems: TTimer;
+        TimerCustOpenItems: TTimer;
         Text82: TLabel;
         tcOvdAmt: TLabel;
         GroupListBox: TComboBox;
@@ -262,33 +251,25 @@ type
         procRISKC: TLabel;
         Text36: TLabel;
         DataUpdated: TLabel;
-        btnMakeGroup: TImage;
-        Text83L1: TLabel;
-        Text83L2: TLabel;
-        Text53: TLabel;
-        PanelGroupName: TPanel;
-        btnMakeGroupAge: TSpeedButton;
-        EditGroupName: TLabeledEdit;
         sgAgeView: TStringGrid;
-        cbDump: TCheckBox;
         sgInvoiceTracker: TStringGrid;
-    PopupAgeView: TPopupMenu;
+        PopupAgeView: TPopupMenu;
         Action_Tracker: TMenuItem;
         Action_PaymentTerm: TMenuItem;
         Action_Person: TMenuItem;
         Label2: TLabel;
         Label3: TLabel;
         Label4: TLabel;
-    PopupTracker: TPopupMenu;
+        PopupTracker: TPopupMenu;
         Action_Remove: TMenuItem;
         Action_ShowMy: TMenuItem;
         Action_ShowAll: TMenuItem;
         Action_LyncCall: TMenuItem;
         TrayIcon: TTrayIcon;
-    TimerInvoiceScanner: TTimer;
+        TimerInvoiceScanner: TTimer;
         Action_ShowRegistered: TMenuItem;
         N8: TMenuItem;
-    TimerConnection: TTimer;
+        TimerConnection: TTimer;
         N9: TMenuItem;
         Action_FilterINF7: TMenuItem;
         N5: TMenuItem;
@@ -306,7 +287,7 @@ type
         Action_AutoColumnSize: TMenuItem;
         SplitLine2: TBevel;
         Action_Search: TMenuItem;
-    PopupBook: TPopupMenu;
+        PopupBook: TPopupMenu;
         Action_Copy: TMenuItem;
         Action_Paste: TMenuItem;
         Action_Cut: TMenuItem;
@@ -317,7 +298,7 @@ type
         Action_ShowMyEntries: TMenuItem;
         Action_ToExce: TMenuItem;
         N13: TMenuItem;
-    FileXLExport: TSaveDialog;
+        FileXLExport: TSaveDialog;
         tR6: TLabel;
         valR6: TLabel;
         procR6: TLabel;
@@ -326,14 +307,12 @@ type
         Action_Overdue: TMenuItem;
         N15: TMenuItem;
         TabSheet9: TTabSheet;
-        sgCompanyData: TStringGrid;
         btnLoadAgeView: TSpeedButton;
-        EditGroupID: TLabeledEdit;
         Action_RowHighlight: TMenuItem;
         Action_Update: TMenuItem;
         Action_Report: TMenuItem;
         N17: TMenuItem;
-    PopupCommonMenu: TPopupMenu;
+        PopupCommonMenu: TPopupMenu;
         Action_AutoColumn: TMenuItem;
         Action_ExportTransactions: TMenuItem;
         Action_SelectAll: TMenuItem;
@@ -341,7 +320,7 @@ type
         Action_CopyToCB: TMenuItem;
         N19: TMenuItem;
         Action_ColumnWidth: TMenuItem;
-    TimerFollowUp: TTimer;
+        TimerFollowUp: TTimer;
         custRISKA: TLabel;
         custRISKB: TLabel;
         custRISKC: TLabel;
@@ -355,12 +334,8 @@ type
         Action_Division_Filter: TMenuItem;
         Action_FollowUp_Filter: TMenuItem;
         Action_GroupFollowUp: TMenuItem;
-        tcCOCODE2: TLabel;
-        tcCOCODE3: TLabel;
-        tcCOCODE4: TLabel;
         Action_INF4_Filter: TMenuItem;
         Action_Gr3_Filter: TMenuItem;
-        PanelDetailsGrid: TPanel;
         Action_HideSummary: TMenuItem;
         Action_ExportCSV: TMenuItem;
         Action_RemoveFilters: TMenuItem;
@@ -608,10 +583,6 @@ type
         procedure sgOpenItemsDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
         procedure TimerCustOpenItemsTimer(Sender: TObject);
         procedure GroupListBoxSelect(Sender: TObject);
-        procedure btnMakeGroupClick(Sender: TObject);
-        procedure btnMakeGroupMouseEnter(Sender: TObject);
-        procedure btnMakeGroupMouseLeave(Sender: TObject);
-        procedure btnMakeGroupAgeClick(Sender: TObject);
         procedure EditGroupNameKeyPress(Sender: TObject; var Key: Char);
         procedure sgAgeViewMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure sgAgeViewMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
@@ -665,9 +636,6 @@ type
         procedure sgAgeViewColumnMoved(Sender: TObject; FromIndex, ToIndex: Integer);
         procedure Action_SearchBookClick(Sender: TObject);
         procedure Action_OverdueClick(Sender: TObject);
-        procedure sgCompanyDataKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-        procedure sgCompanyDataKeyPress(Sender: TObject; var Key: Char);
-        procedure sgCompanyDataDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
         procedure btnLoadAgeViewClick(Sender: TObject);
         procedure Action_RowHighlightClick(Sender: TObject);
         procedure Action_ReportClick(Sender: TObject);
@@ -876,7 +844,6 @@ type
         procedure InitializeScreenSettings;
         function  AddressBookExclusion: boolean;
         procedure ClearAgeSummary();
-        procedure UpdateOpenItemsDetails(var Grid: TStringGrid);
         procedure LoadColumnWidth(var Grid: TStringGrid);
         procedure MapGroup3(var Grid: TStringGrid; var Source: TStringGrid);
         procedure MapTable1(var Grid: TStringGrid; var Source: TStringGrid);
@@ -887,8 +854,6 @@ type
         procedure OpenAddressBook_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
         procedure UpdateAddressBook_Callback(CallResponse: TCallResponse);
         procedure AddToAddressBook_Callback(CallResponse: TCallResponse);
-        procedure MakeAgeViewSQL_Callback(CallResponse: TCallResponse);
-        procedure MakeAgeViewCSV_Callback(CsvContent: TStringList; CallResponse: TCallResponse);
         procedure ReadAgeView_Callback(ActionMode: TLoading; ReturnedData: TStringGrid; CallResponse: TCallResponse);
         procedure ScanOpenItems_Callback(CanMakeAge: boolean; ReadDateTime: string; CallResponse: TCallResponse);
         procedure ReadOpenItems_Callback(ActionMode: TLoading; OpenItemsData: TOpenItemsPayLoad; CallResponse: TCallResponse);
@@ -1107,69 +1072,6 @@ begin
 end;
 
 
-// -------------------------------
-// Async.Debtors callback methods.
-// -------------------------------
-
-procedure TMainForm.MakeAgeViewSQL_Callback(CallResponse: TCallResponse);
-begin
-
-    if not CallResponse.IsSucceeded then
-    begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
-        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
-        THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
-        ThreadFileLog.Log('[MakeAgeViewSQLAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
-        Exit();
-    end;
-
-    // --------------------------------
-    // Load newly generated aging view.
-    // --------------------------------
-
-    THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Loading, MainForm);
-    sgAgeView.Freeze(True);
-
-    var Debtors: IDebtors:=TDebtors.Create;
-    Debtors.ReadAgeViewAsync(TLoading.NullParameter, TSorting.TMode.Ranges, FGroupIdSel, FAgeDateSel, ReadAgeView_Callback);
-    ThreadFileLog.Log('[MakeAgeViewSQLAsync_Callback]: Aging has been generated, loading to AgeView...');
-
-end;
-
-
-procedure TMainForm.MakeAgeViewCSV_Callback(CsvContent: TStringList; CallResponse: TCallResponse);
-begin
-
-    EditGroupName.Enabled:=False;
-    EditGroupID.Enabled:=False;
-    cbDump.Enabled:=False;
-    EditGroupName.Text:='';
-    EditGroupID.Text  :='';
-    cbDump.Checked:=False;
-
-    if not CallResponse.IsSucceeded then
-    begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
-        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
-        THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
-        ThreadFileLog.Log('[MakeAgeViewCSVAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
-        Exit();
-    end;
-
-    // ---------------------------
-    // Put CSV aging data to file.
-    // ---------------------------
-
-    if FileCSVExport.Execute then
-        CsvContent.SaveToFile(FileCSVExport.FileName);
-
-    THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
-    THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
-    ThreadFileLog.Log('[MakeAgeViewCSVAsync_Callback]: Aging has been saved to CSV file.');
-
-end;
-
-
 procedure TMainForm.ReadAgeView_Callback(ActionMode: TLoading; ReturnedData: TStringGrid; CallResponse: TCallResponse);
 begin
 
@@ -1208,10 +1110,8 @@ begin
 
     MainForm.ClearAgeSummary();
     MainForm.ComputeAgeSummary(MainForm.sgAgeView); // make async!
-
     MainForm.ComputeRiskClass(MainForm.sgAgeView);
     MainForm.UpdateAgeSummary();
-    MainForm.UpdateOpenItemsDetails(MainForm.sgCompanyData);
 
     ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Age View summary information updated.');
 
@@ -1237,24 +1137,24 @@ begin
     THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
     ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: VCL unlocked and repainted.');
 
-    // ----------------------------------------------------
-    // Call open items loading after aging is presented.
-    // Do not load open items if age view cannot be loaded.
-    // ----------------------------------------------------
-
-    if ActionMode = TLoading.CallOpenItems then
-    begin
-
-        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Downloading, MainForm);
-        ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Calling method "ReadOpenItemsAsync".');
-
-        MainForm.ClearOpenItemsSummary();
-        MainForm.sgOpenItems.Freeze(True);
-
-        var OpenItems: IOpenItems:=TOpenItems.Create();
-        OpenItems.ReadOpenItemsAsync(TLoading.NullParameter, sgOpenItems, sgCompanyData, ReadOpenItems_Callback);
-
-    end;
+//    // ----------------------------------------------------
+//    // Call open items loading after aging is presented.
+//    // Do not load open items if age view cannot be loaded.
+//    // ----------------------------------------------------
+//
+//    if ActionMode = TLoading.CallOpenItems then
+//    begin
+//
+//        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Downloading, MainForm);
+//        ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Calling method "ReadOpenItemsAsync".');
+//
+//        MainForm.ClearOpenItemsSummary();
+//        MainForm.sgOpenItems.Freeze(True);
+//
+//        var OpenItems: IOpenItems:=TOpenItems.Create();
+//        //OpenItems.ReadOpenItemsAsync(TLoading.NullParameter, sgOpenItems, sgCompanyData, ReadOpenItems_Callback);
+//
+//    end;
 
 end;
 
@@ -1291,7 +1191,7 @@ begin
 
         ThreadFileLog.Log('[ReadOpenItemsAsync_Callback]: Calling method "MakeAgeViewSQLAsync".');
         var OpenItems: IOpenItems:=TOpenItems.Create();
-        OpenItems.ReadOpenItemsAsync(TLoading.CallMakeAge, sgOpenItems, sgCompanyData, ReadOpenItems_Callback);
+        //OpenItems.ReadOpenItemsAsync(TLoading.CallMakeAge, sgOpenItems, sgCompanyData, ReadOpenItems_Callback);
 
     end
     else
@@ -1327,21 +1227,21 @@ begin
     MainForm.sgOpenItems.SetColWidth(10, 20, 400);
     THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
 
-    // -----------------------------------------------------
-    // Make age view from open items and send to SQL Server.
-    // -----------------------------------------------------
-
-    if ActionMode = CallMakeAge then
-    begin
-
-        MainForm.cbDump.Checked:=False;
-        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Generating, MainForm);
-
-        ThreadFileLog.Log('[ReadOpenItemsAsync_Callback]: Calling method "MakeAgeViewSQLAsync".');
-        var Debtors: IDebtors:=TDebtors.Create();
-        Debtors.MakeAgeViewSQLAsync(FOSAmount, FGroupIdSel, sgOpenItems, sgCompanyData, MakeAgeViewSQL_Callback);
-
-    end;
+//    // -----------------------------------------------------
+//    // Make age view from open items and send to SQL Server.
+//    // -----------------------------------------------------
+//
+//    if ActionMode = CallMakeAge then
+//    begin
+//
+//        //MainForm.cbDump.Checked:=False;
+//        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Generating, MainForm);
+//
+//        ThreadFileLog.Log('[ReadOpenItemsAsync_Callback]: Calling method "MakeAgeViewSQLAsync".');
+//        var Debtors: IDebtors:=TDebtors.Create();
+//        Debtors.MakeAgeViewSQLAsync(FOSAmount, FGroupIdSel, sgOpenItems, sgCompanyData, MakeAgeViewSQL_Callback);
+//
+//    end;
 
 end;
 
@@ -1833,7 +1733,7 @@ begin
 
     if FAccessLevel <> TUserAccess.Admin then
     begin
-        sgCompanyData.Enabled:=False;
+        //sgCompanyData.Enabled:=False;
         GroupListDates.Enabled:=False;
     end;
 
@@ -2081,11 +1981,6 @@ end;
 
 procedure TMainForm.ClearAgeSummary();
 begin
-
-    // ------------------------
-    // Clear private variables.
-    // ------------------------
-
     CustAll    :=0;
     ANotDue    :=0;
     ARange1    :=0;
@@ -2104,42 +1999,31 @@ begin
     RCAcount   :=0;
     RCBcount   :=0;
     RCCcount   :=0;
-
-    // ---------------------------
-    // Clear formatted aging data.
-    // ---------------------------
-
-    MainForm.tcCOCODE1.Caption   :='n/a';
-    MainForm.tcCOCODE2.Caption   :='n/a';
-    MainForm.tcCOCODE3.Caption   :='n/a';
-    MainForm.tcCOCODE4.Caption   :='n/a';
-    MainForm.tcCURRENCY.Caption  :='n/a';
-    MainForm.tcTOTAL.Caption     :='0';
-    MainForm.valND.Caption       :='0';
-    MainForm.valR1.Caption       :='0';
-    MainForm.valR2.Caption       :='0';
-    MainForm.valR3.Caption       :='0';
-    MainForm.valR4.Caption       :='0';
-    MainForm.valR5.Caption       :='0';
-    MainForm.valR6.Caption       :='0';
-    MainForm.custRISKA.Caption   :='0';
-    MainForm.custRISKB.Caption   :='0';
-    MainForm.custRISKC.Caption   :='0';
-    MainForm.valTAMT.Caption     :='0';
-    MainForm.procND.Caption      :='0';
-    MainForm.procR1.Caption      :='0';
-    MainForm.procR2.Caption      :='0';
-    MainForm.procR3.Caption      :='0';
-    MainForm.procR4.Caption      :='0';
-    MainForm.procR5.Caption      :='0';
-    MainForm.procR6.Caption      :='0';
-    MainForm.valEXCEEDERS.Caption:='0';
-    MainForm.valTEXCEES.Caption  :='0';
-    MainForm.valTLIMITS.Caption  :='0';
-    MainForm.valTND.Caption      :='0';
-    MainForm.valPASTDUE.Caption  :='0';
-    MainForm.valDEFAULTED.Caption:='0';
-
+    tcTOTAL.Caption     :='0';
+    valND.Caption       :='0';
+    valR1.Caption       :='0';
+    valR2.Caption       :='0';
+    valR3.Caption       :='0';
+    valR4.Caption       :='0';
+    valR5.Caption       :='0';
+    valR6.Caption       :='0';
+    custRISKA.Caption   :='0';
+    custRISKB.Caption   :='0';
+    custRISKC.Caption   :='0';
+    valTAMT.Caption     :='0';
+    procND.Caption      :='0';
+    procR1.Caption      :='0';
+    procR2.Caption      :='0';
+    procR3.Caption      :='0';
+    procR4.Caption      :='0';
+    procR5.Caption      :='0';
+    procR6.Caption      :='0';
+    valEXCEEDERS.Caption:='0';
+    valTEXCEES.Caption  :='0';
+    valTLIMITS.Caption  :='0';
+    valTND.Caption      :='0';
+    valPASTDUE.Caption  :='0';
+    valDEFAULTED.Caption:='0';
 end;
 
 
@@ -2152,25 +2036,25 @@ begin
     // Trade receivables summary.
     // --------------------------
 
-    MainForm.valND.Caption  :=FormatFloat('#,##0.00', ANotDue);
-    MainForm.valR1.Caption  :=FormatFloat('#,##0.00', ARange1);
-    MainForm.valR2.Caption  :=FormatFloat('#,##0.00', ARange2);
-    MainForm.valR3.Caption  :=FormatFloat('#,##0.00', ARange3);
-    MainForm.valR4.Caption  :=FormatFloat('#,##0.00', ARange4);
-    MainForm.valR5.Caption  :=FormatFloat('#,##0.00', ARange5);
-    MainForm.valR6.Caption  :=FormatFloat('#,##0.00', ARange6);
-    MainForm.valTAMT.Caption:=FormatFloat('#,##0.00', Balance);
+    valND.Caption  :=FormatFloat('#,##0.00', ANotDue);
+    valR1.Caption  :=FormatFloat('#,##0.00', ARange1);
+    valR2.Caption  :=FormatFloat('#,##0.00', ARange2);
+    valR3.Caption  :=FormatFloat('#,##0.00', ARange3);
+    valR4.Caption  :=FormatFloat('#,##0.00', ARange4);
+    valR5.Caption  :=FormatFloat('#,##0.00', ARange5);
+    valR6.Caption  :=FormatFloat('#,##0.00', ARange6);
+    valTAMT.Caption:=FormatFloat('#,##0.00', Balance);
 
     if not (Balance = 0) then
     begin
-        MainForm.procND.Caption  :=FormatFloat('0.00', ( (ANotDue / Balance) * 100 )) + '%';
-        MainForm.procR1.Caption  :=FormatFloat('0.00', ( (ARange1 / Balance) * 100 )) + '%';
-        MainForm.procR2.Caption  :=FormatFloat('0.00', ( (ARange2 / Balance) * 100 )) + '%';
-        MainForm.procR3.Caption  :=FormatFloat('0.00', ( (ARange3 / Balance) * 100 )) + '%';
-        MainForm.procR4.Caption  :=FormatFloat('0.00', ( (ARange4 / Balance) * 100 )) + '%';
-        MainForm.procR5.Caption  :=FormatFloat('0.00', ( (ARange5 / Balance) * 100 )) + '%';
-        MainForm.procR6.Caption  :=FormatFloat('0.00', ( (ARange6 / Balance) * 100 )) + '%';
-        MainForm.procTAMT.Caption:=FormatFloat('0.00', ( ( (ANotDue / Balance) +
+        procND.Caption  :=FormatFloat('0.00', ( (ANotDue / Balance) * 100 )) + '%';
+        procR1.Caption  :=FormatFloat('0.00', ( (ARange1 / Balance) * 100 )) + '%';
+        procR2.Caption  :=FormatFloat('0.00', ( (ARange2 / Balance) * 100 )) + '%';
+        procR3.Caption  :=FormatFloat('0.00', ( (ARange3 / Balance) * 100 )) + '%';
+        procR4.Caption  :=FormatFloat('0.00', ( (ARange4 / Balance) * 100 )) + '%';
+        procR5.Caption  :=FormatFloat('0.00', ( (ARange5 / Balance) * 100 )) + '%';
+        procR6.Caption  :=FormatFloat('0.00', ( (ARange6 / Balance) * 100 )) + '%';
+        procTAMT.Caption:=FormatFloat('0.00', ( ( (ANotDue / Balance) +
                                                            (ARange1 / Balance) +
                                                            (ARange2 / Balance) +
                                                            (ARange3 / Balance) +
@@ -2183,23 +2067,23 @@ begin
     // Update risk classes.
     // --------------------
 
-    MainForm.valRISKA.Caption :=FormatFloat('#,##0.00', RCA);
-    MainForm.valRISKB.Caption :=FormatFloat('#,##0.00', RCB);
-    MainForm.valRISKC.Caption :=FormatFloat('#,##0.00', RCC);
-    MainForm.custRISKA.Caption:=IntToStr(RCAcount) + ' customers';
-    MainForm.custRISKB.Caption:=IntToStr(RCBcount) + ' customers';
-    MainForm.custRISKC.Caption:=IntToStr(RCCcount) + ' customers';
+    valRISKA.Caption :=FormatFloat('#,##0.00', RCA);
+    valRISKB.Caption :=FormatFloat('#,##0.00', RCB);
+    valRISKC.Caption :=FormatFloat('#,##0.00', RCC);
+    custRISKA.Caption:=IntToStr(RCAcount) + ' customers';
+    custRISKB.Caption:=IntToStr(RCBcount) + ' customers';
+    custRISKC.Caption:=IntToStr(RCCcount) + ' customers';
 
     // ----------------------------
     // Update exceeders and ranges.
     // ----------------------------
 
-    MainForm.valEXCEEDERS.Caption:=IntToStr(Exceeders);
-    MainForm.valTEXCEES.Caption  :=FormatFloat('#,##0.00', TotalExceed);
-    MainForm.valTLIMITS.Caption  :=FormatFloat('#,##0.00', Limits);
-    MainForm.valTND.Caption      :=MainForm.valND.Caption;
-    MainForm.valPASTDUE.Caption  :=FormatFloat('#,##0.00', (ARange1 + ARange2 + ARange3));
-    MainForm.valDEFAULTED.Caption:=FormatFloat('#,##0.00', (ARange4 + ARange5 + ARange6));
+    valEXCEEDERS.Caption:=IntToStr(Exceeders);
+    valTEXCEES.Caption  :=FormatFloat('#,##0.00', TotalExceed);
+    valTLIMITS.Caption  :=FormatFloat('#,##0.00', Limits);
+    valTND.Caption      :=valND.Caption;
+    valPASTDUE.Caption  :=FormatFloat('#,##0.00', (ARange1 + ARange2 + ARange3));
+    valDEFAULTED.Caption:=FormatFloat('#,##0.00', (ARange4 + ARange5 + ARange6));
 
 end;
 
@@ -2306,53 +2190,6 @@ begin
             inc(RCCcount);
         end;
 
-    end;
-
-end;
-
-
-procedure TMainForm.UpdateOpenItemsDetails(var Grid: TStringGrid);
-begin
-
-    // Clear grid
-    Grid.ClearAll(4, 0, 0, False);
-
-    // Get co codes from selected group (Group ID)
-    MainForm.tcCOCODE1.Caption:=THelpers.GetCoCode(1, MainForm.FGroupIdSel);
-    MainForm.tcCOCODE2.Caption:=THelpers.GetCoCode(2, MainForm.FGroupIdSel);
-    MainForm.tcCOCODE3.Caption:=THelpers.GetCoCode(3, MainForm.FGroupIdSel);
-    MainForm.tcCOCODE4.Caption:=THelpers.GetCoCode(4, MainForm.FGroupIdSel);
-
-    if MainForm.tcCOCODE1.Caption = '0' then
-        MainForm.tcCOCODE1.Font.Color:=clWhite else MainForm.tcCOCODE1.Font.Color:=clBlack;
-
-    if MainForm.tcCOCODE2.Caption = '0' then
-        MainForm.tcCOCODE2.Font.Color:=clWhite else MainForm.tcCOCODE2.Font.Color:=clBlack;
-
-    if MainForm.tcCOCODE3.Caption = '0' then
-        MainForm.tcCOCODE3.Font.Color:=clWhite else MainForm.tcCOCODE3.Font.Color:=clBlack;
-
-    if MainForm.tcCOCODE4.Caption = '0' then
-        MainForm.tcCOCODE4.Font.Color:=clWhite else MainForm.tcCOCODE4.Font.Color:=clBlack;
-
-    Grid.Cells[0, 0]:=MainForm.tcCOCODE1.Caption; THelpers.FindCoData(0, MainForm.sgCompanyData, MainForm.sgCoCodes);
-    Grid.Cells[1, 0]:=MainForm.tcCOCODE2.Caption; THelpers.FindCoData(1, MainForm.sgCompanyData, MainForm.sgCoCodes);
-    Grid.Cells[2, 0]:=MainForm.tcCOCODE3.Caption; THelpers.FindCoData(2, MainForm.sgCompanyData, MainForm.sgCoCodes);
-    Grid.Cells[3, 0]:=MainForm.tcCOCODE4.Caption; THelpers.FindCoData(3, MainForm.sgCompanyData, MainForm.sgCoCodes);
-
-    // There should be always the same currency code for all stacked companies snapshots.
-    var SL: TStringList:=TStringList.Create;
-    try
-        SL.Clear();
-        SL.Sorted:=True;
-        SL.Duplicates:=dupIgnore;
-
-        for var iCNT: integer:=1 to MainForm.sgAgeView.RowCount - 1 do
-            SL.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fLedgerIso, 1, 1), iCNT]);
-
-    finally
-        MainForm.tcCURRENCY.Caption:=SL.Text;
-        SL.Free();
     end;
 
 end;
@@ -2805,7 +2642,7 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------ START UP //
+// ------------------------------------------------------------------------------------------------------------------------------------------------- STARTUP //
 
 
 procedure TMainForm.FormCreate(Sender: TObject);
@@ -2815,11 +2652,12 @@ begin
     StatBar_TXT3.Caption:='';
     StatBar_TXT4.Caption:='';
     StatBar_TXT5.Caption:='';
-    txtAadUser.Caption:='';
+    txtAadUser.Caption  :='';
 
     FAllowClose:=False;
     InitializeScreenSettings;
     SetActiveTabsheet(TabSheet9);
+    Tables.ActivePage:=Page1;
 
 end;
 
@@ -3050,9 +2888,6 @@ begin
 end;
 
 
-// --------------------------------------------------------------------------------------------------------------------------------------------- POPUP MENUS //
-
-
 // ------------------------------------------------------------------------------------------------------------------------------------- COMMON MENU ACTIONS //
 
 
@@ -3066,17 +2901,24 @@ procedure TMainForm.Action_ExportTransactionsClick(Sender: TObject);
 begin
 
     // String grid placed on main view
-    if sgOpenItems.Focused   then sgOpenItems.ExportCSV(FileCSVExport, '|');
-    if sgCoCodes.Focused     then sgCoCodes.ExportCSV(FileCSVExport, '|');
-    if sgPaidInfo.Focused    then sgPaidInfo.ExportCSV(FileCSVExport, '|');
-    if sgPerson.Focused      then sgPerson.ExportCSV(FileCSVExport, '|');
-    if sgGroup3.Focused      then sgGroup3.ExportCSV(FileCSVExport, '|');
-    if sgPmtTerms.Focused    then sgPmtTerms.ExportCSV(FileCSVExport, '|');
-    if sgListValue.Focused   then sgListValue.ExportCSV(FileCSVExport, '|');
-    if sgListSection.Focused then sgListSection.ExportCSV(FileCSVExport, '|');
+    if sgOpenItems.Focused      then sgOpenItems.ExportCSV(FileCSVExport, '|');
+    if sgCoCodes.Focused        then sgCoCodes.ExportCSV(FileCSVExport, '|');
+    if sgPaidInfo.Focused       then sgPaidInfo.ExportCSV(FileCSVExport, '|');
+    if sgPerson.Focused         then sgPerson.ExportCSV(FileCSVExport, '|');
+    if sgGroup3.Focused         then sgGroup3.ExportCSV(FileCSVExport, '|');
+    if sgPmtTerms.Focused       then sgPmtTerms.ExportCSV(FileCSVExport, '|');
+    if sgListValue.Focused      then sgListValue.ExportCSV(FileCSVExport, '|');
+    if sgListSection.Focused    then sgListSection.ExportCSV(FileCSVExport, '|');
+    if sgInvoiceTracker.Focused then sgInvoiceTracker.ExportCSV(FileCSVExport, '|');
+    if sgPersonResp.Focused     then sgPersonResp.ExportCSV(FileCSVExport, '|');
+    if sgSalesResp.Focused      then sgSalesResp.ExportCSV(FileCSVExport, '|');
+    if sgAccountType.Focused    then sgAccountType.ExportCSV(FileCSVExport, '|');
+    if sgCustomerGr.Focused     then sgCustomerGr.ExportCSV(FileCSVExport, '|');
+    if sgControlStatus.Focused  then sgControlStatus.ExportCSV(FileCSVExport, '|');
 
     // String grid placed on action view
     if ActionsForm.OpenItemsGrid.Focused then ActionsForm.OpenItemsGrid.ExportCSV(FileCSVExport, '|');
+    if ActionsForm.HistoryGrid.Focused   then ActionsForm.HistoryGrid.ExportCSV(FileCSVExport, '|');
 
 end;
 
@@ -3085,17 +2927,24 @@ procedure TMainForm.Action_SelectAllClick(Sender: TObject);
 begin
 
     // String grid placed on main view
-    if sgOpenItems.Focused   then sgOpenItems.SelectAll;
-    if sgCoCodes.Focused     then sgCoCodes.SelectAll;
-    if sgPaidInfo.Focused    then sgPaidInfo.SelectAll;
-    if sgPerson.Focused      then sgPerson.SelectAll;
-    if sgGroup3.Focused      then sgGroup3.SelectAll;
-    if sgPmtTerms.Focused    then sgPmtTerms.SelectAll;
-    if sgListValue.Focused   then sgListValue.SelectAll;
-    if sgListSection.Focused then sgListSection.SelectAll;
+    if sgOpenItems.Focused      then sgOpenItems.SelectAll();
+    if sgCoCodes.Focused        then sgCoCodes.SelectAll();
+    if sgPaidInfo.Focused       then sgPaidInfo.SelectAll();
+    if sgPerson.Focused         then sgPerson.SelectAll();
+    if sgGroup3.Focused         then sgGroup3.SelectAll();
+    if sgPmtTerms.Focused       then sgPmtTerms.SelectAll();
+    if sgListValue.Focused      then sgListValue.SelectAll();
+    if sgListSection.Focused    then sgListSection.SelectAll();
+    if sgInvoiceTracker.Focused then sgInvoiceTracker.SelectAll();
+    if sgPersonResp.Focused     then sgPersonResp.SelectAll();
+    if sgSalesResp.Focused      then sgSalesResp.SelectAll();
+    if sgAccountType.Focused    then sgAccountType.SelectAll();
+    if sgCustomerGr.Focused     then sgCustomerGr.SelectAll();
+    if sgControlStatus.Focused  then sgControlStatus.SelectAll();
 
     // String grid placed on action view
-    if ActionsForm.OpenItemsGrid.Focused then ActionsForm.OpenItemsGrid.SelectAll;
+    if ActionsForm.OpenItemsGrid.Focused then ActionsForm.OpenItemsGrid.SelectAll();
+    if ActionsForm.HistoryGrid.Focused   then ActionsForm.HistoryGrid.SelectAll();
 
 end;
 
@@ -3104,17 +2953,24 @@ procedure TMainForm.Action_CopyToCBClick(Sender: TObject);
 begin
 
     // String grid placed on main view
-    if sgOpenItems.Focused   then sgOpenItems.CopyCutPaste(TActions.Copy);
-    if sgCoCodes.Focused     then sgCoCodes.CopyCutPaste(TActions.Copy);
-    if sgPaidInfo.Focused    then sgPaidInfo.CopyCutPaste(TActions.Copy);
-    if sgPerson.Focused      then sgPerson.CopyCutPaste(TActions.Copy);
-    if sgGroup3.Focused      then sgGroup3.CopyCutPaste(TActions.Copy);
-    if sgPmtTerms.Focused    then sgPmtTerms.CopyCutPaste(TActions.Copy);
-    if sgListValue.Focused   then sgListValue.CopyCutPaste(TActions.Copy);
-    if sgListSection.Focused then sgListSection.CopyCutPaste(TActions.Copy);
+    if sgOpenItems.Focused      then sgOpenItems.CopyCutPaste(TActions.Copy);
+    if sgCoCodes.Focused        then sgCoCodes.CopyCutPaste(TActions.Copy);
+    if sgPaidInfo.Focused       then sgPaidInfo.CopyCutPaste(TActions.Copy);
+    if sgPerson.Focused         then sgPerson.CopyCutPaste(TActions.Copy);
+    if sgGroup3.Focused         then sgGroup3.CopyCutPaste(TActions.Copy);
+    if sgPmtTerms.Focused       then sgPmtTerms.CopyCutPaste(TActions.Copy);
+    if sgListValue.Focused      then sgListValue.CopyCutPaste(TActions.Copy);
+    if sgListSection.Focused    then sgListSection.CopyCutPaste(TActions.Copy);
+    if sgInvoiceTracker.Focused then sgInvoiceTracker.CopyCutPaste(TActions.Copy);
+    if sgPersonResp.Focused     then sgPersonResp.CopyCutPaste(TActions.Copy);
+    if sgSalesResp.Focused      then sgSalesResp.CopyCutPaste(TActions.Copy);
+    if sgAccountType.Focused    then sgAccountType.CopyCutPaste(TActions.Copy);
+    if sgCustomerGr.Focused     then sgCustomerGr.CopyCutPaste(TActions.Copy);
+    if sgControlStatus.Focused  then sgControlStatus.CopyCutPaste(TActions.Copy);
 
     // String grid placed on action view
     if ActionsForm.OpenItemsGrid.Focused then ActionsForm.OpenItemsGrid.CopyCutPaste(TActions.Copy);
+    if ActionsForm.HistoryGrid.Focused   then ActionsForm.HistoryGrid.CopyCutPaste(TActions.Copy);
 
 end;
 
@@ -3123,24 +2979,51 @@ procedure TMainForm.Action_AutoColumnClick(Sender: TObject);
 begin
 
     // String grid placed on main view
-    if sgOpenItems.Focused   then sgOpenItems.SetColWidth(10, 20, 400);
-    if sgCoCodes.Focused     then sgCoCodes.SetColWidth(10, 20, 400);
-    if sgPaidInfo.Focused    then sgPaidInfo.SetColWidth(10, 20, 400);
-    if sgPerson.Focused      then sgPerson.SetColWidth(10, 20, 400);
-    if sgGroup3.Focused      then sgGroup3.SetColWidth(10, 20, 400);
-    if sgPmtTerms.Focused    then sgPmtTerms.SetColWidth(10, 20, 400);
-    {if sgListValue.Focused   then sgListValue.SetColWidth(25, 20, 400);}
-    {if sgListSection.Focused then sgListSection.SetColWidth(25, 20, 400);}
+    if sgOpenItems.Focused      then sgOpenItems.SetColWidth(10, 20, 400);
+    if sgCoCodes.Focused        then sgCoCodes.SetColWidth(10, 20, 400);
+    if sgPaidInfo.Focused       then sgPaidInfo.SetColWidth(10, 20, 400);
+    if sgPerson.Focused         then sgPerson.SetColWidth(10, 20, 400);
+    if sgGroup3.Focused         then sgGroup3.SetColWidth(10, 20, 400);
+    if sgPmtTerms.Focused       then sgPmtTerms.SetColWidth(10, 20, 400);
+    {if sgListValue.Focused     then sgListValue.SetColWidth(25, 20, 400);}
+    {if sgListSection.Focused   then sgListSection.SetColWidth(25, 20, 400);}
+    if sgInvoiceTracker.Focused then sgInvoiceTracker.SetColWidth(10, 20, 400);
+    if sgPersonResp.Focused     then sgPersonResp.SetColWidth(10, 20, 400);
+    if sgSalesResp.Focused      then sgSalesResp.SetColWidth(10, 20, 400);
+    if sgAccountType.Focused    then sgAccountType.SetColWidth(10, 20, 400);
+    if sgCustomerGr.Focused     then sgCustomerGr.SetColWidth(10, 20, 400);
+    if sgControlStatus.Focused  then sgControlStatus.SetColWidth(10, 20, 400);
 
     // String grid placed on action view
     if ActionsForm.OpenItemsGrid.Focused then ActionsForm.OpenItemsGrid.SetColWidth(10, 20, 400);
+    if ActionsForm.HistoryGrid.Focused   then ActionsForm.HistoryGrid.SetColWidth(10, 20, 400);
 
 end;
 
 
 procedure TMainForm.Action_TurnRowHighlightClick(Sender: TObject);
 begin
-    THelpers.TurnRowHighlight(ActionsForm.OpenItemsGrid, Action_TurnRowHighlight);
+
+    // String grid placed on main view
+    if sgOpenItems.Focused      then THelpers.TurnRowHighlight(sgOpenItems, Action_TurnRowHighlight);
+    if sgCoCodes.Focused        then THelpers.TurnRowHighlight(sgCoCodes, Action_TurnRowHighlight);
+    if sgPaidInfo.Focused       then THelpers.TurnRowHighlight(sgPaidInfo, Action_TurnRowHighlight);
+    if sgPerson.Focused         then THelpers.TurnRowHighlight(sgPerson, Action_TurnRowHighlight);
+    if sgGroup3.Focused         then THelpers.TurnRowHighlight(sgGroup3, Action_TurnRowHighlight);
+    if sgPmtTerms.Focused       then THelpers.TurnRowHighlight(sgPmtTerms, Action_TurnRowHighlight);
+    {if sgListValue.Focused     then THelpers.TurnRowHighlight(sgListValue, Action_TurnRowHighlight);}
+    {if sgListSection.Focused   then THelpers.TurnRowHighlight(sgListSection, Action_TurnRowHighlight);}
+    if sgInvoiceTracker.Focused then THelpers.TurnRowHighlight(sgInvoiceTracker, Action_TurnRowHighlight);
+    if sgPersonResp.Focused     then THelpers.TurnRowHighlight(sgPersonResp, Action_TurnRowHighlight);
+    if sgSalesResp.Focused      then THelpers.TurnRowHighlight(sgSalesResp, Action_TurnRowHighlight);
+    if sgAccountType.Focused    then THelpers.TurnRowHighlight(sgAccountType, Action_TurnRowHighlight);
+    if sgCustomerGr.Focused     then THelpers.TurnRowHighlight(sgCustomerGr, Action_TurnRowHighlight);
+    if sgControlStatus.Focused  then THelpers.TurnRowHighlight(sgControlStatus, Action_TurnRowHighlight);
+
+    // String grid placed on action view
+    if ActionsForm.OpenItemsGrid.Focused then THelpers.TurnRowHighlight(ActionsForm.OpenItemsGrid, Action_TurnRowHighlight);
+    if ActionsForm.HistoryGrid.Focused   then THelpers.TurnRowHighlight(ActionsForm.HistoryGrid, Action_TurnRowHighlight);
+
 end;
 
 
@@ -4318,12 +4201,6 @@ end;
 // ------------------------------------------------------------------------------------------------------------------------------- STRING GRID ROW SELECTION //
 
 
-procedure TMainForm.sgCompanyDataDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
-begin
-    sgCompanyData.DrawSelected(ARow, ACol, State, Rect, clWhite, clCream, clBlack, clCream, False);
-end;
-
-
 procedure TMainForm.sgAddressBookDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
     sgAddressBook.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True);
@@ -4499,48 +4376,11 @@ begin
 end;
 
 
-
-procedure TMainForm.sgCompanyDataKeyPress(Sender: TObject; var Key: Char);
-begin
-
-    // ------------------------------------------------------------------------------------
-    // Lock rows for editing. We autofill rows 1..3 so user is prevented from manipulation.
-    // Additionally, we allow only digits for CoCode cell.
-    // ------------------------------------------------------------------------------------
-
-    if (sgCompanyData.Row > 0) and (sgCompanyData.Row < 4) then
-        Key:=#0;
-
-    if (sgCompanyData.Row = 0) and (not (CharInSet(Key, ['0'..'9', #8]))) then
-        Key:=#0;
-
-end;
-
-
-procedure TMainForm.sgCompanyDataKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-begin
-
-    // ---------------------------------------------------------------------------------------
-    // Invoke autofill. Find given company code in general table and return assigned currency,
-    // agent and division info.
-    // ---------------------------------------------------------------------------------------
-
-    if sgCompanyData.Col = 0 then THelpers.FindCoData(sgCompanyData.Col, sgCompanyData, sgCoCodes);
-    if sgCompanyData.Col = 1 then THelpers.FindCoData(sgCompanyData.Col, sgCompanyData, sgCoCodes);
-    if sgCompanyData.Col = 2 then THelpers.FindCoData(sgCompanyData.Col, sgCompanyData, sgCoCodes);
-    if sgCompanyData.Col = 3 then THelpers.FindCoData(sgCompanyData.Col, sgCompanyData, sgCoCodes);
-
-end;
-
-
 procedure TMainForm.EditGroupNameKeyPress(Sender: TObject; var Key: Char);
 begin
     if (not (CharInSet(Key, ['A'..'Z', 'a'..'z', '0'..'9', '-', TChars.BACKSPACE]))) then
         Key:=#0;
 end;
-
-
-// ------------------------------------------------------------------------------------------------------------------------------------------ COPY PASTE CUT //
 
 
 procedure TMainForm.sgOpenItemsKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -5759,20 +5599,6 @@ begin
 end;
 
 
-procedure TMainForm.btnMakeGroupMouseEnter(Sender: TObject);
-begin
-    Text83L1.Font.Color:=TCommon.FontColor;
-    Text83L2.Font.Color:=TCommon.FontColor;
-end;
-
-
-procedure TMainForm.btnMakeGroupMouseLeave(Sender: TObject);
-begin
-    Text83L1.Font.Color:=clBlack;
-    Text83L2.Font.Color:=clBlack;
-end;
-
-
 procedure TMainForm.btnOpenABMouseEnter(Sender: TObject);
 begin
     btnOpenAB.Cursor:=crHandPoint;
@@ -6208,99 +6034,13 @@ begin
         MainForm.ClearOpenItemsSummary();
         MainForm.sgOpenItems.Freeze(True);
         var OpenItems: IOpenItems:=TOpenItems.Create();
-        OpenItems.ReadOpenItemsAsync(NullParameter, sgOpenItems, sgCompanyData, ReadOpenItems_Callback);
+        //OpenItems.ReadOpenItemsAsync(NullParameter, sgOpenItems, sgCompanyData, ReadOpenItems_Callback);
     end
     else
     begin
         StatBar_TXT1.Caption:=TStatusBar.Ready;
         ThreadFileLog.Log('[Open Items]: User have no R/W access, process halted.');
     end;
-
-end;
-
-
-procedure TMainForm.btnMakeGroupClick(Sender: TObject);
-
-    procedure FieldsState(IsEnabled: boolean);
-    begin
-
-        EditGroupName.Enabled:=IsEnabled;
-        EditGroupID.Enabled:=IsEnabled;
-        btnMakeGroupAge.Enabled:=IsEnabled;
-
-        if IsEnabled then
-        begin
-            EditGroupName.Text:=FGroupNmSel;
-            EditGroupID.Text:=FGroupIdSel;
-        end
-        else
-        begin
-            EditGroupName.Text:='';
-            EditGroupID.Text:='';
-        end;
-
-    end;
-
-begin
-
-    if not(FIsConnected) then
-    begin
-        THelpers.MsgCall(TAppMessage.Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
-        Exit;
-    end;
-
-    if sgOpenItems.RowCount < 2 then
-        Exit;
-
-    if MainForm.FAccessLevel <> TUserAccess.Admin then
-    begin
-        StatBar_TXT1.Caption:='Insufficient UAC level.';
-        ThreadFileLog.Log('[Make Group]: User have no R/W access, process halted.');
-        Exit();
-    end;
-
-    if cbDump.Enabled then
-    begin
-        cbDump.Enabled:=False;
-        FieldsState(False);
-        Exit();
-    end
-    else
-    begin
-        cbDump.Enabled:=True;
-        FieldsState(True);
-        Exit();
-    end;
-
-end;
-
-
-procedure TMainForm.btnMakeGroupAgeClick(Sender: TObject);
-begin
-
-    if (not(string.IsNullOrEmpty(EditGroupName.Text))) and (not(string.IsNullOrEmpty(EditGroupID.Text))) then
-    begin
-
-        // ----------------------------------------------------
-        // Start thread with no parameters passed to an object.
-        // ----------------------------------------------------
-
-        var SelectedGroupId: string;
-
-        if EditGroupID.Text = FGroupIdSel then SelectedGroupId:=FGroupIdSel
-            else if EditGroupID.Text <> '' then SelectedGroupId:=EditGroupID.Text
-                 else SelectedGroupId:=FGroupIdSel;
-
-        var Debtors: IDebtors:=TDebtors.Create();
-
-        if not MainForm.cbDump.Checked then
-            Debtors.MakeAgeViewSQLAsync(FOSAmount, SelectedGroupId, sgOpenItems, sgCompanyData, MakeAgeViewSQL_Callback)
-        else
-            Debtors.MakeAgeViewCSVAsync(FOSAmount, SelectedGroupId, sgOpenItems, sgCompanyData, MakeAgeViewCSV_Callback);
-
-    end
-    else
-    THelpers.MsgCall(TAppMessage.Warn, 'Please enter group name and try again.' + TChars.CRLF + 'If you will use existing one, then it will be overwritten.');
 
 end;
 
