@@ -38,7 +38,7 @@ object TrackerForm: TTrackerForm
     TabOrder = 0
     object btnOK: TSpeedButton
       Left = 776
-      Top = 10
+      Top = 13
       Width = 75
       Height = 27
       Cursor = crHandPoint
@@ -75,7 +75,7 @@ object TrackerForm: TTrackerForm
     end
     object btnCancel: TSpeedButton
       Left = 864
-      Top = 10
+      Top = 13
       Width = 75
       Height = 27
       Cursor = crHandPoint
@@ -112,7 +112,7 @@ object TrackerForm: TTrackerForm
     end
     object btnApply: TSpeedButton
       Left = 26
-      Top = 10
+      Top = 13
       Width = 111
       Height = 27
       Cursor = crHandPoint
@@ -149,7 +149,7 @@ object TrackerForm: TTrackerForm
     end
     object btnSelection: TSpeedButton
       Left = 180
-      Top = 10
+      Top = 13
       Width = 111
       Height = 27
       Cursor = crHandPoint

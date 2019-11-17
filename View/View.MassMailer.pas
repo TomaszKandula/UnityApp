@@ -531,7 +531,7 @@ begin
             SetEmailAddresses(CustomerList);
             UpdateCompanyData(CustomerList);
 
-            MainForm.OILoader.Enabled:=False;
+            MainForm.TimerCustOpenItems.Enabled:=False;
             ThreadFileLog.Log('[FormShow]: Mass mailer opened, open items loader is now on hold.');
 
             Text_Subject.SetFocus();
@@ -565,7 +565,7 @@ begin
 
     FIsDataLoaded:=False;
     CustomerList.Clear();
-    MainForm.OILoader.Enabled:=True;
+    MainForm.TimerCustOpenItems.Enabled:=True;
     ThreadFileLog.Log('[FormClose]: Mass mailer closed, open items loader is now enabled back again.');
 
 end;

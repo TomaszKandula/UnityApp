@@ -4,7 +4,7 @@ object SendForm: TSendForm
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'Unity'
-  ClientHeight = 683
+  ClientHeight = 691
   ClientWidth = 553
   Color = 15855854
   Font.Charset = DEFAULT_CHARSET
@@ -538,7 +538,7 @@ object SendForm: TSendForm
     Left = 0
     Top = 641
     Width = 553
-    Height = 42
+    Height = 50
     Margins.Left = 0
     Margins.Top = 10
     Margins.Right = 0
@@ -554,9 +554,10 @@ object SendForm: TSendForm
     ParentBackground = False
     ParentFont = False
     TabOrder = 1
+    ExplicitTop = 649
     object Text_Warn: TLabel
       Left = 16
-      Top = 12
+      Top = 18
       Width = 277
       Height = 13
       Caption = '* Account Statement is available in English language only.'
@@ -569,9 +570,9 @@ object SendForm: TSendForm
     end
     object btnCancel: TSpeedButton
       Left = 342
-      Top = 8
+      Top = 12
       Width = 89
-      Height = 25
+      Height = 27
       Cursor = crHandPoint
       Caption = 'Cancel'
       Flat = True
@@ -607,9 +608,9 @@ object SendForm: TSendForm
     end
     object btnSendEmail: TSpeedButton
       Left = 442
-      Top = 8
+      Top = 12
       Width = 89
-      Height = 25
+      Height = 27
       Cursor = crHandPoint
       Caption = 'Send'
       Flat = True

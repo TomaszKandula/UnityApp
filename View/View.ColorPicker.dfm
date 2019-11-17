@@ -31,7 +31,7 @@ object ColorsForm: TColorsForm
     Margins.Right = 5
     Margins.Bottom = 5
     Align = alClient
-    Pen.Color = 14922344
+    Pen.Color = clWhite
     ExplicitTop = -106
     ExplicitWidth = 528
     ExplicitHeight = 459

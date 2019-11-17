@@ -22,9 +22,9 @@ object QmsForm: TQmsForm
   object BottomPanel: TPanel
     AlignWithMargins = True
     Left = 0
-    Top = 602
+    Top = 601
     Width = 551
-    Height = 49
+    Height = 50
     Margins.Left = 0
     Margins.Top = 10
     Margins.Right = 0
@@ -34,8 +34,9 @@ object QmsForm: TQmsForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
+    ExplicitTop = 602
     object btnLog: TSpeedButton
-      Left = 431
+      Left = 441
       Top = 12
       Width = 90
       Height = 27
@@ -72,7 +73,7 @@ object QmsForm: TQmsForm
       OnClick = btnLogClick
     end
     object btnCancel: TSpeedButton
-      Left = 316
+      Left = 318
       Top = 12
       Width = 90
       Height = 27
@@ -114,7 +115,7 @@ object QmsForm: TQmsForm
     Left = 10
     Top = 10
     Width = 531
-    Height = 582
+    Height = 581
     Margins.Left = 10
     Margins.Top = 10
     Margins.Right = 10
@@ -124,12 +125,13 @@ object QmsForm: TQmsForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 1
+    ExplicitHeight = 582
     object MainFrame: TGroupBox
       AlignWithMargins = True
       Left = 10
       Top = 10
       Width = 511
-      Height = 562
+      Height = 561
       Margins.Left = 10
       Margins.Top = 10
       Margins.Right = 10
@@ -137,12 +139,13 @@ object QmsForm: TQmsForm
       Align = alClient
       Caption = 'QMS'
       TabOrder = 0
+      ExplicitHeight = 562
       object MissingInvoiceBox: TGroupBox
         AlignWithMargins = True
         Left = 22
         Top = 35
         Width = 467
-        Height = 335
+        Height = 334
         Margins.Left = 20
         Margins.Top = 20
         Margins.Right = 20
@@ -150,6 +153,7 @@ object QmsForm: TQmsForm
         Align = alClient
         Caption = 'Missing invoice'
         TabOrder = 0
+        ExplicitHeight = 335
         object Currency: TLabel
           Left = 49
           Top = 270
@@ -536,7 +540,7 @@ object QmsForm: TQmsForm
       object StatusPanel: TPanel
         AlignWithMargins = True
         Left = 12
-        Top = 380
+        Top = 379
         Width = 487
         Height = 170
         Margins.Left = 10
@@ -548,6 +552,7 @@ object QmsForm: TQmsForm
         Color = clWhite
         ParentBackground = False
         TabOrder = 1
+        ExplicitTop = 380
         object StatusLabel: TLabel
           Left = 10
           Top = 7

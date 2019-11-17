@@ -9522,7 +9522,7 @@ object MainForm: TMainForm
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
-  object MyPages: TPageControl
+  object TabSheets: TPageControl
     AlignWithMargins = True
     Left = 180
     Top = 60
@@ -9532,7 +9532,7 @@ object MainForm: TMainForm
     Margins.Top = 10
     Margins.Right = 10
     Margins.Bottom = 0
-    ActivePage = TabSheet8
+    ActivePage = TabSheet1
     Align = alClient
     DoubleBuffered = True
     Font.Charset = DEFAULT_CHARSET
@@ -10939,7 +10939,7 @@ object MainForm: TMainForm
           Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goColMoving, goThumbTracking]
           ParentDoubleBuffered = False
           ParentShowHint = False
-          PopupMenu = AgeViewPopup
+          PopupMenu = PopupAgeView
           ShowHint = False
           TabOrder = 0
           OnClick = sgAgeViewClick
@@ -14676,7 +14676,7 @@ object MainForm: TMainForm
           GradientEndColor = 15527148
           Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
           ParentShowHint = False
-          PopupMenu = CommonPopupMenu
+          PopupMenu = PopupCommonMenu
           ShowHint = False
           TabOrder = 0
           OnDrawCell = sgOpenItemsDrawCell
@@ -15042,7 +15042,7 @@ object MainForm: TMainForm
           Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
           ParentDoubleBuffered = False
           ParentShowHint = False
-          PopupMenu = BookPopup
+          PopupMenu = PopupBook
           ShowHint = False
           TabOrder = 0
           OnClick = sgAddressBookClick
@@ -18331,7 +18331,7 @@ object MainForm: TMainForm
           RowCount = 2
           GradientEndColor = 15527148
           Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
-          PopupMenu = TrackerPopup
+          PopupMenu = PopupTracker
           TabOrder = 0
           OnDblClick = sgInvoiceTrackerDblClick
           OnDrawCell = sgInvoiceTrackerDrawCell
@@ -18511,7 +18511,7 @@ object MainForm: TMainForm
               RowCount = 2
               GradientEndColor = 15527148
               Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
-              PopupMenu = CommonPopupMenu
+              PopupMenu = PopupCommonMenu
               TabOrder = 0
               OnDrawCell = sgCoCodesDrawCell
               OnKeyUp = sgCoCodesKeyUp
@@ -18565,7 +18565,7 @@ object MainForm: TMainForm
               RowCount = 2
               GradientEndColor = 15527148
               Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goThumbTracking]
-              PopupMenu = CommonPopupMenu
+              PopupMenu = PopupCommonMenu
               TabOrder = 0
               OnDrawCell = sgPmtTermsDrawCell
               OnKeyUp = sgPmtTermsKeyUp
@@ -18623,7 +18623,7 @@ object MainForm: TMainForm
               RowCount = 2
               GradientEndColor = 15527148
               Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goThumbTracking]
-              PopupMenu = CommonPopupMenu
+              PopupMenu = PopupCommonMenu
               TabOrder = 0
               OnDrawCell = sgControlStatusDrawCell
               OnKeyUp = sgControlStatusKeyUp
@@ -18681,7 +18681,7 @@ object MainForm: TMainForm
               RowCount = 2
               GradientEndColor = 15527148
               Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goThumbTracking]
-              PopupMenu = CommonPopupMenu
+              PopupMenu = PopupCommonMenu
               TabOrder = 0
               OnDrawCell = sgPaidInfoDrawCell
               OnKeyUp = sgPaidInfoKeyUp
@@ -18737,7 +18737,7 @@ object MainForm: TMainForm
               RowCount = 2
               GradientEndColor = 15527148
               Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
-              PopupMenu = CommonPopupMenu
+              PopupMenu = PopupCommonMenu
               TabOrder = 0
               OnDrawCell = sgPersonRespDrawCell
               OnKeyUp = sgPersonRespKeyUp
@@ -18793,7 +18793,7 @@ object MainForm: TMainForm
               RowCount = 2
               GradientEndColor = 15527148
               Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
-              PopupMenu = CommonPopupMenu
+              PopupMenu = PopupCommonMenu
               TabOrder = 0
               OnDrawCell = sgSalesRespDrawCell
               OnKeyUp = sgSalesRespKeyUp
@@ -18849,7 +18849,7 @@ object MainForm: TMainForm
               RowCount = 2
               GradientEndColor = 15527148
               Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
-              PopupMenu = CommonPopupMenu
+              PopupMenu = PopupCommonMenu
               TabOrder = 0
               OnDrawCell = sgAccountTypeDrawCell
               OnKeyUp = sgAccountTypeKeyUp
@@ -18905,7 +18905,7 @@ object MainForm: TMainForm
               RowCount = 2
               GradientEndColor = 15527148
               Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
-              PopupMenu = CommonPopupMenu
+              PopupMenu = PopupCommonMenu
               TabOrder = 0
               OnDrawCell = sgCustomerGrDrawCell
               OnKeyUp = sgCustomerGrKeyUp
@@ -18963,7 +18963,7 @@ object MainForm: TMainForm
               RowCount = 2
               GradientEndColor = 15527148
               Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goThumbTracking]
-              PopupMenu = CommonPopupMenu
+              PopupMenu = PopupCommonMenu
               TabOrder = 0
               OnDrawCell = sgPersonDrawCell
               OnKeyUp = sgPersonKeyUp
@@ -19019,7 +19019,7 @@ object MainForm: TMainForm
               RowCount = 2
               GradientEndColor = 15527148
               Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goThumbTracking]
-              PopupMenu = CommonPopupMenu
+              PopupMenu = PopupCommonMenu
               TabOrder = 0
               OnDrawCell = sgGroup3DrawCell
               OnKeyUp = sgGroup3KeyUp
@@ -19388,428 +19388,12 @@ object MainForm: TMainForm
         Color = 15527148
         TabOrder = 1
         ExplicitHeight = 613
-        object Cap23: TShape
-          AlignWithMargins = True
-          Left = 0
-          Top = 0
-          Width = 1047
-          Height = 19
-          Margins.Left = 0
-          Margins.Top = 0
-          Margins.Right = 0
-          Margins.Bottom = 0
-          Align = alTop
-          Brush.Color = 14922344
-          Pen.Color = 14922344
-          ExplicitWidth = 879
-        end
-        object ShapeList1: TShape
-          AlignWithMargins = True
-          Left = 0
-          Top = 19
-          Width = 1047
-          Height = 81
-          Margins.Left = 0
-          Margins.Top = 0
-          Margins.Right = 0
-          Margins.Bottom = 5
-          Align = alTop
-          Pen.Color = 14922344
-          ExplicitWidth = 1049
-        end
-        object Text41: TLabel
-          Left = 202
-          Top = 69
-          Width = 40
-          Height = 13
-          Caption = 'Add Key'
-        end
-        object Text42: TLabel
-          Left = 274
-          Top = 69
-          Width = 52
-          Height = 13
-          Caption = 'Delete Key'
-        end
-        object Text43: TLabel
-          Left = 389
-          Top = 70
-          Width = 38
-          Height = 13
-          Caption = 'Save All'
-        end
-        object Text44: TLabel
-          Left = 665
-          Top = 35
-          Width = 344
-          Height = 47
-          AutoSize = False
-          Caption = 
-            'Please refer to the manual, inappropiate changes may result in e' +
-            'rrors. Some changes will require application restart.'
-          Font.Charset = DEFAULT_CHARSET
-          Font.Color = clBlack
-          Font.Height = -11
-          Font.Name = 'Tahoma'
-          Font.Style = []
-          ParentFont = False
-          WordWrap = True
-        end
-        object Text48: TLabel
-          Left = 33
-          Top = 69
-          Width = 57
-          Height = 13
-          Caption = 'Add Section'
-        end
-        object Text49: TLabel
-          Left = 109
-          Top = 69
-          Width = 69
-          Height = 13
-          Caption = 'Delete Section'
-        end
-        object imgUpdateValues: TImage
-          Left = 393
-          Top = 35
-          Width = 32
-          Height = 32
-          AutoSize = True
-          Center = True
-          Picture.Data = {
-            0954506E67496D61676589504E470D0A1A0A0000000D49484452000000200000
-            00200806000000737A7AF40000000373424954080808DBE14FE0000000017352
-            474200AECE1CE90000000467414D410000B18F0BFC6105000000097048597300
-            000EC400000EC401952B0E1B0000001974455874536F66747761726500777777
-            2E696E6B73636170652E6F72679BEE3C1A000003624944415478DADD97CB6B13
-            5114C6BFC9CC3495B4A66D6C6C48B5168B0BB1427D75A5AE5C8808BAD28D7F80
-            1BDDF80FE84291AA0BA1E02615175D14448A8A0541A4556851AAAD0FB48FB4F1
-            D59834D3A679CC4CE671C733092ED4A4EDD811D1C30C84CCBDB9BFFB7DE79CDC
-            E154256329B914D6128A924720D88A2AAFCFF15CCE0D804C4682AAC8D8D2B6DB
-            31846B00B96C1A82508596B65DF07A6BFE0E801D368413255C07B0831744B4B6
-            ED5915C41F01F80E612BB1921D7F0C60B5106501B4828285C50460FD385814BD
-            086C08FDF2238A92434195CB2E20D09C70CB4E709CC79902BAAEE167028F8707
-            CF0B8E155A5FBF099E0AF35CB1E0FF03304D1DB9DC92E3853CE4734D6D3DF9CD
-            AD15C0403EFF7B00BE9ABAB503B81DFF2640B9325C29EC5A17A8F9AC19A05223
-            5A29EC3ED1180CFFD274FE4D0B9CC69B4113C929D3D19C0969D83D80BE9E9748
-            CC2CA0D6DF88D3170EC330190C8B51493330F2D276532F18C5B1F77BC690988D
-            02B56A851CD054A41793CE76331440B853C360DF279CB974947A42E97BAB9847
-            0440307481F13C6E760D62EF213FEE47C6CB0358344B270827393872DB82E837
-            30F12E8613E70E2C3BF61E29E05D68C05472C43D0B1EDD92515DA76172F223CE
-            5C24053CA58D946E1415B03F70BC88C8954108493FA6E79FB907F03092437583
-            86E8F4E7552980B80FD1D4F3F200CC3421CB59470043BD1EAC0BE888C5BE1473
-            C036BCB473DB48528195529117AB10E91A82F9A9BA32806168658F58CBC5D35E
-            2F44B2602E1EC7FE63EDE8D8B79916B58A8BB21249F17EFD328ED1A10F28CC08
-            98591C75CF8281EE2564E53C042F433EAB5019D2718CA7E39A6C8219ACA88449
-            2A807283E73998190112F7DE3D80BBD717A1AB645D46C1C61D802A2BF81295B0
-            BDB305DE751E64B279A8AA8AD97709A4A65534D2D95262B3EE01F45F93088021
-            9160387BA31D8FFBDE636C601EC7CF6F419DDF47B9F111E9741AA32FC62151CF
-            08859A102F4CBA0770A72B85826242928093E78318EE8F61EA898CF6532695A4
-            85544A824CEF8FD1680CDCDBAD680A87319777C902DBDFFECB19FA173530BF60
-            E0E06986B1074924C639848E24E9B949EF0E194A6E03F1AFF31027B6A1B97933
-            66D3AFC0E99A6269AAB3922B17DD57FB81B966E4B8349A3AB2E4B786F4122525
-            6FD1C23A183351258A88C79350A70208368490D263F80642578D20CF69876D00
-            00000049454E44AE426082}
-          OnClick = imgUpdateValuesClick
-          OnMouseEnter = imgUpdateValuesMouseEnter
-          OnMouseLeave = imgUpdateValuesMouseLeave
-        end
-        object imgKeyRemove: TImage
-          Left = 287
-          Top = 31
-          Width = 32
-          Height = 32
-          AutoSize = True
-          Picture.Data = {
-            0954506E67496D61676589504E470D0A1A0A0000000D49484452000000200000
-            00200802000000FC18EDA3000000017352474200AECE1CE90000000467414D41
-            0000B18F0BFC6105000000097048597300000EC300000EC301C76FA864000002
-            174944415478DA63FCFFFF3F032D01239D2C686C6C245E4F7D7D3D3916606A23
-            5E70D402EA5840BC9E4C579B6FC776B26B187259B9F30B09116501F1E0D3870F
-            2FAA62FEFFFA0964B348C8F207A5881859612AFBF0E2D98F4B27D89434C9C907
-            4F964CFE7A60139CCBED1428139505E7BE7F74EFEBBE0DDF2F1CE571F0E3B2F3
-            C569019E40CBCECEFE7FEFEAC75533FE7E780311E1D0B31488CA0532BEEC59FB
-            F5D016163169C184524105157C4104B4C031380D4D70FFDA5940415E4E564921
-            2E114E86B7AB667D38B41522C52AA3F4EFCB27A0953C4E013C1E91F0B821C702
-            A8892C4CDA72824CB7CE3E9BD5F6FFD70F88A0604299988D2BB216F22DE0E260
-            D19517FA7966FF8BC513E1167059B8C8A69453C102415E760D29BEF7AB67BCDF
-            B711C805063A33AFC0CFBB57816CFEB04C09B720A22CC015C9CACACABE5E5EEF
-            1774FDBC7616C8655350174CA96264E3F8B064C28F4BC7195958440A3A8534F4
-            0858801F3C9AD6F4FDDC61504C48C90BE7B4F08B4900D91FDFBDFBB0A4EFC7A5
-            9320C1822E483C9363C1B335733FEF58016430F30B0BE7B70BCA29C2A5E076F0
-            B8044B47649063C1FB07775E77E4FEFFF387918D5D24AF0D1E14C8760043EFD7
-            AD8B2265138594D4482B8B80C5DCF32DCB3F6D98C7C0C4044A9156CE589581EC
-            98D70154A350D44172690A2C64BEEE5BCF2AA78696DE31EDF8B8620A8F5BE870
-            AA0F06518533587D306A01410B88D7438E05B40334B7000070EE9EDFFEA0829F
-            0000000049454E44AE426082}
-          OnClick = imgKeyRemoveClick
-          OnMouseEnter = imgKeyRemoveMouseEnter
-          OnMouseLeave = imgKeyRemoveMouseLeave
-        end
-        object imgSectionRemove: TImage
-          Left = 125
-          Top = 31
-          Width = 32
-          Height = 32
-          AutoSize = True
-          Picture.Data = {
-            0954506E67496D61676589504E470D0A1A0A0000000D49484452000000200000
-            00200802000000FC18EDA3000000017352474200AECE1CE90000000467414D41
-            0000B18F0BFC6105000000097048597300000EC300000EC301C76FA864000002
-            174944415478DA63FCFFFF3F032D01239D2C686C6C245E4F7D7D3D3916606A23
-            5E70D402EA5840BC9E4C579B6FC776B26B187259B9F30B09116501F1E0D3870F
-            2FAA62FEFFFA0964B348C8F207A5881859612AFBF0E2D98F4B27D89434C9C907
-            4F964CFE7A60139CCBED1428139505E7BE7F74EFEBBE0DDF2F1CE571F0E3B2F3
-            C569019E40CBCECEFE7FEFEAC75533FE7E780311E1D0B31488CA0532BEEC59FB
-            F5D016163169C184524105157C4104B4C031380D4D70FFDA5940415E4E564921
-            2E114E86B7AB667D38B41522C52AA3F4EFCB27A0953C4E013C1E91F0B821C702
-            A8892C4CDA72824CB7CE3E9BD5F6FFD70F88A0604299988D2BB216F22DE0E260
-            D19517FA7966FF8BC513E1167059B8C8A69453C102415E760D29BEF7AB67BCDF
-            B711C805063A33AFC0CFBB57816CFEB04C09B720A22CC015C9CACACABE5E5EEF
-            1774FDBC7616C8655350174CA96264E3F8B064C28F4BC7195958440A3A8534F4
-            0858801F3C9AD6F4FDDC61504C48C90BE7B4F08B4900D91FDFBDFBB0A4EFC7A5
-            9320C1822E483C9363C1B335733FEF58016430F30B0BE7B70BCA29C2A5E076F0
-            B8044B47649063C1FB07775E77E4FEFFF387918D5D24AF0D1E14C8760043EFD7
-            AD8B2265138594D4482B8B80C5DCF32DCB3F6D98C7C0C4044A9156CE589581EC
-            98D70154A350D44172690A2C64BEEE5BCF2AA78696DE31EDF8B8620A8F5BE870
-            AA0F06518533587D306A01410B88D7438E05B40334B7000070EE9EDFFEA0829F
-            0000000049454E44AE426082}
-          OnClick = imgSectionRemoveClick
-          OnMouseEnter = imgSectionRemoveMouseEnter
-          OnMouseLeave = imgSectionRemoveMouseLeave
-        end
-        object imgSectionAdd: TImage
-          Left = 45
-          Top = 31
-          Width = 32
-          Height = 32
-          AutoSize = True
-          Picture.Data = {
-            0954506E67496D61676589504E470D0A1A0A0000000D49484452000000200000
-            00200802000000FC18EDA3000000017352474200AECE1CE90000000467414D41
-            0000B18F0BFC6105000000097048597300000EC300000EC301C76FA864000000
-            A74944415478DA63FCFFFF3F032D01E330B2A0B1B191786DF5F5F5E45880A98D
-            78C1510BA86301917A18462379085B40A41E86D1481EC21610A98781BC48A611
-            A0BB05DB4FDE9EB6FD06072B7345B09EB1860CB21479618862C1A96B8F1B579C
-            E76267C1341D628163701A9AE0FEB5B3B00A62B1E0C3878FD17D0731DDB2B5C9
-            8F3A16BC7BFF21B6FF100D2D400EA2AA103D43756A071104C02319D30E2A4432
-            2DC0A805036F0100A09125D072BF50420000000049454E44AE426082}
-          OnClick = imgSectionAddClick
-          OnMouseEnter = imgSectionAddMouseEnter
-          OnMouseLeave = imgSectionAddMouseLeave
-        end
-        object imgKeyAdd: TImage
-          Left = 207
-          Top = 31
-          Width = 32
-          Height = 32
-          AutoSize = True
-          Picture.Data = {
-            0954506E67496D61676589504E470D0A1A0A0000000D49484452000000200000
-            00200802000000FC18EDA3000000017352474200AECE1CE90000000467414D41
-            0000B18F0BFC6105000000097048597300000EC300000EC301C76FA864000000
-            A74944415478DA63FCFFFF3F032D01E330B2A0B1B191786DF5F5F5E45880A98D
-            78C1510BA86301917A18462379085B40A41E86D1481EC21610A98781BC48A611
-            A0BB05DB4FDE9EB6FD06072B7345B09EB1860CB21479618862C1A96B8F1B579C
-            E76267C1341D628163701A9AE0FEB5B3B00A62B1E0C3878FD17D0731DDB2B5C9
-            8F3A16BC7BFF21B6FF100D2D400EA2AA103D43756A071104C02319D30E2A4432
-            2DC0A805036F0100A09125D072BF50420000000049454E44AE426082}
-          OnClick = imgKeyAddClick
-          OnMouseEnter = imgKeyAddMouseEnter
-          OnMouseLeave = imgKeyAddMouseLeave
-        end
-        object Text50: TLabel
-          Left = 458
-          Top = 70
-          Width = 46
-          Height = 13
-          Caption = 'Allow edit'
-        end
-        object imgAllowEdit: TImage
-          Left = 464
-          Top = 35
-          Width = 32
-          Height = 32
-          AutoSize = True
-          Center = True
-          Picture.Data = {
-            0954506E67496D61676589504E470D0A1A0A0000000D49484452000000200000
-            0020080300000044A48AC60000000373424954080808DBE14FE0000000097048
-            59730000078B0000078B01868D9B340000001974455874536F66747761726500
-            7777772E696E6B73636170652E6F72679BEE3C1A00000141504C5445FFFFFFED
-            EDDBF2E6D9D65C47D95E4CEFE7DFA34740E2DDCAF1C587DFDFC7E4DFCDE0E0CA
-            A24941EFEBE0A14740AA4E3BE18C25E28A24E28C24E6A554EEEBDFD6594BA547
-            41EFEADED75B4ADCD9CDCDC9C0DC6741D16140E08B26D75A4AAE543BCD5748F2
-            9E25EF9921E18B25EF9B25E18D25A44741F29B22E4DFCFE28D2771716FE1DDCC
-            A34640A34740E18C25E18C26D8D3C0D7D3BF837E7994918CA34740D5D0BBD6C4
-            B0D75A4AD7D2BED7D3BED9C8B6D9D4C0D9D4C1DBD6C3DCCFBDDCD7C5DFDAC8E0
-            DCCAE18C25E18F2CE1DDCBE29536E2D6C6E2DDCCE3AF6FE3B172E3DECDE3DECE
-            E4E0D0E6E2D2E8E1D2E8E4D5E9E4D5E9E5D6EADAC6EAE6D7EAE6D8EBD2ADEBD2
-            AEEBE7D8EBE7D9ECE8D9ECE8DAEDE8DBEEE0CDEEE2C9EEE4D3EEEADCEEEADDEF
-            A439EFE3CBEFE5D0EFEBDEF0A339F0BA6BF29C21F2A73CF2A83DF2A83E10990F
-            FF0000003274524E53000E14191B2024353537383A3F4144454546475B686A7A
-            A0A6A8AFBCC6D7DADDDDDDDEE2E2E8E9E9EAEBECEFF6F7F7F7FAFB5FEF816A00
-            0001274944415478DAADD1414F83301400E0761646501B456224CE8BC6FFE35F
-            34F107EC6E8C170F1E4D4CD47119440F32C03117608CD23AC069BBA5351A7B78
-            A4BC2F7DAFAFD03E03E2BA1916FC16AE012F7A2CD460520E723500A59BA90120
-            834C0D00715335F8162D8802B688DDD3FA4F306D12E103E34F481A60F2279D97
-            92127F03E92B9FD21DB40AB29100F6D1AF4BFC0C12C6A5B4AD35D00E6AB9D089
-            F64F3D20BB0A55801E3A41366A412CCCA1735CF770B1D70B74FCD40222DC02ED
-            2E02BDD65313CF5C59096A54976507FBEF1240BBF40A1EF9D1E4B3C93CE1B3F0
-            80EA6C7EEB442F6FCB6B4E0301F43619F5AAE8792C9903D3EA7CEC27B241CD0D
-            E655F02E964E7296E505B4FAD2519743422C8CA56F41EE996D58E8EBB1B6CD15
-            B0B133A6F5376C22F800F4C99E3371AB48150000000049454E44AE426082}
-          Stretch = True
-          Transparent = True
-          OnClick = imgAllowEditClick
-          OnMouseEnter = imgAllowEditMouseEnter
-          OnMouseLeave = imgAllowEditMouseLeave
-        end
-        object SplitLine1: TBevel
-          Left = 526
-          Top = 25
-          Width = 18
-          Height = 68
-          Shape = bsLeftLine
-        end
-        object SplitLine2: TBevel
-          Left = 354
-          Top = 25
-          Width = 18
-          Height = 68
-          Shape = bsLeftLine
-        end
-        object SplitLine3: TBevel
-          Left = 639
-          Top = 25
-          Width = 18
-          Height = 68
-          Shape = bsLeftLine
-        end
-        object imgEventLog: TImage
-          Left = 569
-          Top = 35
-          Width = 32
-          Height = 32
-          Cursor = crHandPoint
-          AutoSize = True
-          Center = True
-          Picture.Data = {
-            0954506E67496D61676589504E470D0A1A0A0000000D49484452000000200000
-            00200806000000737A7AF40000000473424954080808087C0864880000000173
-            52474200AECE1CE90000000467414D410000B18F0BFC61050000000970485973
-            00000EC400000EC401952B0E1B0000001974455874536F667477617265007777
-            772E696E6B73636170652E6F72679BEE3C1A000003694944415478DABD97CB4F
-            135114C6BF99B6D337A5800A55E20205924A0C8246DD9898E02B8A1B371A57C6
-            C4B8D4850B4DD818162E5DB8D518138D7F0009C11835B27041DC184D5042145B
-            28B405DA4E69673A0FCF1D1E56DA4A67183DDD757ACFF9CDF9BE7BEE2D2715B2
-            BA989D07CF3B602D381456726869DD0F97E031BF7ABB001CC761850012B3D3E8
-            3974064E97FBFF03140A22920B31689A82E8C10153103602C429070F45914C41
-            D80AE07038A0EBBA2908DB01589881A80AC092721C5F7581A6A91500CC84CC03
-            EB00BF216403E26FBBA3028025CCE7B3584CCF5540E8BA863DED9D9B53409256
-            90594E56815E85E88C9E203857FD1D608564A9C8682A16B8DD3E23F1660866C0
-            5A1DF3057640F004EA07584F5A3D749809061068682300BF39008EE3EAC95F89
-            A7FF096809405515C35866215871BFAF017C99192D007028164532550A5C0D5D
-            6B02681AC24DBB2094B9DEA204B54DB5556CDEA6963D6057580260DA5B056205
-            CB8D681A8015CFE596309FF8611A82158B443AE0F3073720AC494010CC505682
-            79675B1DB03B7402088622701A13D40440ADC368CB82FA6AE7045AEFA69C0555
-            86EE6B46D017AA1F40968BC865972C0C220DA1500B9ABD018C2FCDE3553A8E84
-            54004F92A8D489EE702BAE74F4A1AD0CA62A40A924212F662C4DC24878271EC5
-            BFE16B3E033F9D80E42688251941BA172804B84C4097F7F5616077B7FD12049C
-            4E3C8B4F612293A2E24E6854D04310F7FBCFE3E6F84B34D084649069298F5B3D
-            277120DC669F091DD42D51513034F51161A760744FA59DD444E6BBDB7B1A37DE
-            BF40E39A11358290E9BC7978FC526D004529999280196E2C3D8B77CB0BF0ACE5
-            6200612A7A8F00AEBE798A46C16B7CEF25C05CA988A1DEB3D50791985B463219
-            33751E78C06384EE813F4973D71AF86A07FCD48153F8B4380B816AB8499AC793
-            1F0C19AE751DB56F147BE9F74F6293F8425354E0CB2EA7E48373ED514322162E
-            7A3632F31959EAC0F5AE63F679C04DDD7A4DF7C8B1541C5E7ACBF5601012E95D
-            7E4DF1D0F38C5CC0F0E141FB00D8FB6954E6CEE4C486096B0593C641C00F8E5C
-            B47714331946A903A3A918824E36032A2158479274E119EEBF80883F64FF5910
-            A2C2CFE7A6F176318120CD00A63DC3D0E923D3341469C8DDA61910A5196074EE
-            5F1C4601D278A6982788397CA77F4D45554588B6202B3AB8B7077C993CBF009D
-            12609D2328FCD40000000049454E44AE426082}
-          Stretch = True
-          Transparent = True
-          OnClick = imgEventLogClick
-          OnMouseEnter = imgEventLogMouseEnter
-          OnMouseLeave = imgEventLogMouseLeave
-        end
-        object Text51: TLabel
-          Left = 547
-          Top = 70
-          Width = 77
-          Height = 13
-          Caption = 'Open Event Log'
-        end
-        object imgOFF: TImage
-          Left = 15
-          Top = 25
-          Width = 1018
-          Height = 68
-          Cursor = crNo
-          Picture.Data = {
-            0954506E67496D61676589504E470D0A1A0A0000000D49484452000001000000
-            010008060000005C72A8660000001974455874536F6674776172650041646F62
-            6520496D616765526561647971C9653C0000032269545874584D4C3A636F6D2E
-            61646F62652E786D7000000000003C3F787061636B657420626567696E3D22EF
-            BBBF222069643D2257354D304D7043656869487A7265537A4E54637A6B633964
-            223F3E203C783A786D706D65746120786D6C6E733A783D2261646F62653A6E73
-            3A6D6574612F2220783A786D70746B3D2241646F626520584D5020436F726520
-            352E332D633031312036362E3134353636312C20323031322F30322F30362D31
-            343A35363A32372020202020202020223E203C7264663A52444620786D6C6E73
-            3A7264663D22687474703A2F2F7777772E77332E6F72672F313939392F30322F
-            32322D7264662D73796E7461782D6E7323223E203C7264663A44657363726970
-            74696F6E207264663A61626F75743D222220786D6C6E733A786D703D22687474
-            703A2F2F6E732E61646F62652E636F6D2F7861702F312E302F2220786D6C6E73
-            3A786D704D4D3D22687474703A2F2F6E732E61646F62652E636F6D2F7861702F
-            312E302F6D6D2F2220786D6C6E733A73745265663D22687474703A2F2F6E732E
-            61646F62652E636F6D2F7861702F312E302F73547970652F5265736F75726365
-            526566232220786D703A43726561746F72546F6F6C3D2241646F62652050686F
-            746F73686F7020435336202857696E646F7773292220786D704D4D3A496E7374
-            616E636549443D22786D702E6969643A35414244443430413933384131314536
-            393044433837393245303645334533442220786D704D4D3A446F63756D656E74
-            49443D22786D702E6469643A3541424444343042393338413131453639304443
-            383739324530364533453344223E203C786D704D4D3A4465726976656446726F
-            6D2073745265663A696E7374616E636549443D22786D702E6969643A35414244
-            4434303839333841313145363930444338373932453036453345334422207374
-            5265663A646F63756D656E7449443D22786D702E6469643A3541424444343039
-            393338413131453639304443383739324530364533453344222F3E203C2F7264
-            663A4465736372697074696F6E3E203C2F7264663A5244463E203C2F783A786D
-            706D6574613E203C3F787061636B657420656E643D2272223F3E45BB4F010000
-            02FA4944415478DAEDD40101003008C0A0DBFCCD35C82004B3BBFF01492300E8
-            1200840900C204006102803001409800204C00102600081300840900C2040061
-            02803001409800204C00102600081300840900C204006102803001409800204C
-            00102600081300840900C204006102803001409800204C001026000813008409
-            00C204006102803001409800204C00102600081300840900C204006102803001
-            409800204C00102600081300840900C204006102803001409800204C00102600
-            081300840900C204006102803001409800204C00102600081300840900C20400
-            6102803001409800204C00102600081300840900C20400610280300140980020
-            4C00102600081300840900C204006102803001409800204C0010260008130084
-            0900C204006102803001409800204C00102600081300840900C2040061028030
-            01409800204C00102600081300840900C204006102803001409800204C001026
-            00081300840900C204006102803001409800204C00102600081300840900C204
-            006102803001409800204C00102600081300840900C204006102803001409800
-            204C00102600081300840900C204006102803001409800204C00102600081300
-            840900C204006102803001409800204C00102600081300840900C20400610280
-            3001409800204C00102600081300840900C204006102803001409800204C0010
-            2600081300840900C204006102803001409800204C00102600081300840900C2
-            04006102803001409800204C00102600081300840900C2040061028030014098
-            00204C00102600081300840900C204006102803001409800204C001026000813
-            00840900C204006102803001409800204C00102600081300840900C204006102
-            803001409800204C00102600081300840900C204006102803001409800204C00
-            102600081300840900C204006102803001409800204C00102600081300840900
-            C204006102803001409800204C00102600081300840900C20400610280300140
-            9800204C00102600081300840900C20400610280300140980020EC0012FE7E2E
-            04C418B60000000049454E44AE426082}
-          Stretch = True
-          Transparent = True
-        end
         object PanelSettingsSections: TPanel
           AlignWithMargins = True
           Left = 0
-          Top = 110
+          Top = 105
           Width = 356
-          Height = 448
+          Height = 453
           Margins.Left = 0
           Margins.Top = 5
           Margins.Right = 5
@@ -19826,7 +19410,7 @@ object MainForm: TMainForm
             Left = 2
             Top = 2
             Width = 352
-            Height = 444
+            Height = 449
             Margins.Left = 2
             Margins.Top = 2
             Margins.Right = 2
@@ -19841,7 +19425,7 @@ object MainForm: TMainForm
             RowCount = 2
             GradientEndColor = 15527148
             Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
-            PopupMenu = CommonPopupMenu
+            PopupMenu = PopupCommonMenu
             TabOrder = 0
             Visible = False
             OnClick = sgListSectionClick
@@ -19864,9 +19448,9 @@ object MainForm: TMainForm
         object PanelSettingsValues: TPanel
           AlignWithMargins = True
           Left = 366
-          Top = 110
+          Top = 105
           Width = 681
-          Height = 448
+          Height = 453
           Margins.Left = 5
           Margins.Top = 5
           Margins.Right = 0
@@ -19883,7 +19467,7 @@ object MainForm: TMainForm
             Left = 2
             Top = 2
             Width = 677
-            Height = 444
+            Height = 449
             Margins.Left = 2
             Margins.Top = 2
             Margins.Right = 2
@@ -19898,7 +19482,7 @@ object MainForm: TMainForm
             RowCount = 2
             GradientEndColor = 15527148
             Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
-            PopupMenu = CommonPopupMenu
+            PopupMenu = PopupCommonMenu
             TabOrder = 0
             Visible = False
             OnClick = sgListValueClick
@@ -19915,6 +19499,435 @@ object MainForm: TMainForm
             RowHeights = (
               17
               17)
+          end
+        end
+        object PanelSettingsHeader: TPanel
+          AlignWithMargins = True
+          Left = 0
+          Top = 0
+          Width = 1047
+          Height = 100
+          Margins.Left = 0
+          Margins.Top = 0
+          Margins.Right = 0
+          Margins.Bottom = 0
+          Align = alTop
+          BevelOuter = bvNone
+          Caption = 'PanelSettingsHeader'
+          TabOrder = 2
+          object Cap23: TShape
+            AlignWithMargins = True
+            Left = 0
+            Top = 0
+            Width = 1047
+            Height = 19
+            Margins.Left = 0
+            Margins.Top = 0
+            Margins.Right = 0
+            Margins.Bottom = 0
+            Align = alTop
+            Brush.Color = 14922344
+            Pen.Color = 14922344
+            ExplicitWidth = 879
+          end
+          object ShapeList1: TShape
+            AlignWithMargins = True
+            Left = 0
+            Top = 19
+            Width = 1047
+            Height = 81
+            Margins.Left = 0
+            Margins.Top = 0
+            Margins.Right = 0
+            Margins.Bottom = 5
+            Pen.Color = 14922344
+          end
+          object SplitLine1: TBevel
+            Left = 526
+            Top = 25
+            Width = 18
+            Height = 68
+            Shape = bsLeftLine
+          end
+          object SplitLine2: TBevel
+            Left = 354
+            Top = 25
+            Width = 18
+            Height = 68
+            Shape = bsLeftLine
+          end
+          object SplitLine3: TBevel
+            Left = 639
+            Top = 25
+            Width = 18
+            Height = 68
+            Shape = bsLeftLine
+          end
+          object Text41: TLabel
+            Left = 202
+            Top = 69
+            Width = 40
+            Height = 13
+            Caption = 'Add Key'
+          end
+          object Text42: TLabel
+            Left = 274
+            Top = 69
+            Width = 52
+            Height = 13
+            Caption = 'Delete Key'
+          end
+          object Text43: TLabel
+            Left = 389
+            Top = 70
+            Width = 38
+            Height = 13
+            Caption = 'Save All'
+          end
+          object Text44: TLabel
+            Left = 665
+            Top = 35
+            Width = 344
+            Height = 47
+            AutoSize = False
+            Caption = 
+              'Please refer to the manual, inappropiate changes may result in e' +
+              'rrors. Some changes will require application restart.'
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clBlack
+            Font.Height = -11
+            Font.Name = 'Tahoma'
+            Font.Style = []
+            ParentFont = False
+            WordWrap = True
+          end
+          object Text48: TLabel
+            Left = 33
+            Top = 69
+            Width = 57
+            Height = 13
+            Caption = 'Add Section'
+          end
+          object Text49: TLabel
+            Left = 109
+            Top = 69
+            Width = 69
+            Height = 13
+            Caption = 'Delete Section'
+          end
+          object Text50: TLabel
+            Left = 458
+            Top = 70
+            Width = 46
+            Height = 13
+            Caption = 'Allow edit'
+          end
+          object Text51: TLabel
+            Left = 547
+            Top = 70
+            Width = 77
+            Height = 13
+            Caption = 'Open Event Log'
+          end
+          object imgAllowEdit: TImage
+            Left = 464
+            Top = 35
+            Width = 32
+            Height = 32
+            AutoSize = True
+            Center = True
+            Picture.Data = {
+              0954506E67496D61676589504E470D0A1A0A0000000D49484452000000200000
+              0020080300000044A48AC60000000373424954080808DBE14FE0000000097048
+              59730000078B0000078B01868D9B340000001974455874536F66747761726500
+              7777772E696E6B73636170652E6F72679BEE3C1A00000141504C5445FFFFFFED
+              EDDBF2E6D9D65C47D95E4CEFE7DFA34740E2DDCAF1C587DFDFC7E4DFCDE0E0CA
+              A24941EFEBE0A14740AA4E3BE18C25E28A24E28C24E6A554EEEBDFD6594BA547
+              41EFEADED75B4ADCD9CDCDC9C0DC6741D16140E08B26D75A4AAE543BCD5748F2
+              9E25EF9921E18B25EF9B25E18D25A44741F29B22E4DFCFE28D2771716FE1DDCC
+              A34640A34740E18C25E18C26D8D3C0D7D3BF837E7994918CA34740D5D0BBD6C4
+              B0D75A4AD7D2BED7D3BED9C8B6D9D4C0D9D4C1DBD6C3DCCFBDDCD7C5DFDAC8E0
+              DCCAE18C25E18F2CE1DDCBE29536E2D6C6E2DDCCE3AF6FE3B172E3DECDE3DECE
+              E4E0D0E6E2D2E8E1D2E8E4D5E9E4D5E9E5D6EADAC6EAE6D7EAE6D8EBD2ADEBD2
+              AEEBE7D8EBE7D9ECE8D9ECE8DAEDE8DBEEE0CDEEE2C9EEE4D3EEEADCEEEADDEF
+              A439EFE3CBEFE5D0EFEBDEF0A339F0BA6BF29C21F2A73CF2A83DF2A83E10990F
+              FF0000003274524E53000E14191B2024353537383A3F4144454546475B686A7A
+              A0A6A8AFBCC6D7DADDDDDDDEE2E2E8E9E9EAEBECEFF6F7F7F7FAFB5FEF816A00
+              0001274944415478DAADD1414F83301400E0761646501B456224CE8BC6FFE35F
+              34F107EC6E8C170F1E4D4CD47119440F32C03117608CD23AC069BBA5351A7B78
+              A4BC2F7DAFAFD03E03E2BA1916FC16AE012F7A2CD460520E723500A59BA90120
+              834C0D00715335F8162D8802B688DDD3FA4F306D12E103E34F481A60F2279D97
+              92127F03E92B9FD21DB40AB29100F6D1AF4BFC0C12C6A5B4AD35D00E6AB9D089
+              F64F3D20BB0A55801E3A41366A412CCCA1735CF770B1D70B74FCD40222DC02ED
+              2E02BDD65313CF5C59096A54976507FBEF1240BBF40A1EF9D1E4B3C93CE1B3F0
+              80EA6C7EEB442F6FCB6B4E0301F43619F5AAE8792C9903D3EA7CEC27B241CD0D
+              E655F02E964E7296E505B4FAD2519743422C8CA56F41EE996D58E8EBB1B6CD15
+              B0B133A6F5376C22F800F4C99E3371AB48150000000049454E44AE426082}
+            Stretch = True
+            Transparent = True
+            OnClick = imgAllowEditClick
+            OnMouseEnter = imgAllowEditMouseEnter
+            OnMouseLeave = imgAllowEditMouseLeave
+          end
+          object imgEventLog: TImage
+            Left = 569
+            Top = 35
+            Width = 32
+            Height = 32
+            Cursor = crHandPoint
+            AutoSize = True
+            Center = True
+            Picture.Data = {
+              0954506E67496D61676589504E470D0A1A0A0000000D49484452000000200000
+              00200806000000737A7AF40000000473424954080808087C0864880000000173
+              52474200AECE1CE90000000467414D410000B18F0BFC61050000000970485973
+              00000EC400000EC401952B0E1B0000001974455874536F667477617265007777
+              772E696E6B73636170652E6F72679BEE3C1A000003694944415478DABD97CB4F
+              135114C6BF99B6D337A5800A55E20205924A0C8246DD9898E02B8A1B371A57C6
+              C4B8D4850B4DD818162E5DB8D518138D7F0009C11835B27041DC184D5042145B
+              28B405DA4E69673A0FCF1D1E56DA4A67183DDD757ACFF9CDF9BE7BEE2D2715B2
+              BA989D07CF3B602D381456726869DD0F97E031BF7ABB001CC761850012B3D3E8
+              3974064E97FBFF03140A22920B31689A82E8C10153103602C429070F45914C41
+              D80AE07038A0EBBA2908DB01589881A80AC092721C5F7581A6A91500CC84CC03
+              EB00BF216403E26FBBA3028025CCE7B3584CCF5540E8BA863DED9D9B53409256
+              90594E56815E85E88C9E203857FD1D608564A9C8682A16B8DD3E23F1660866C0
+              5A1DF3057640F004EA07584F5A3D749809061068682300BF39008EE3EAC95F89
+              A7FF096809405515C35866215871BFAF017C99192D007028164532550A5C0D5D
+              6B02681AC24DBB2094B9DEA204B54DB5556CDEA6963D6057580260DA5B056205
+              CB8D681A8015CFE596309FF8611A82158B443AE0F3073720AC494010CC505682
+              79675B1DB03B7402088622701A13D40440ADC368CB82FA6AE7045AEFA69C0555
+              86EE6B46D017AA1F40968BC865972C0C220DA1500B9ABD018C2FCDE3553A8E84
+              54004F92A8D489EE702BAE74F4A1AD0CA62A40A924212F662C4DC24878271EC5
+              BFE16B3E033F9D80E42688251941BA172804B84C4097F7F5616077B7FD12049C
+              4E3C8B4F612293A2E24E6854D04310F7FBCFE3E6F84B34D084649069298F5B3D
+              277120DC669F091DD42D51513034F51161A760744FA59DD444E6BBDB7B1A37DE
+              BF40E39A11358290E9BC7978FC526D004529999280196E2C3D8B77CB0BF0ACE5
+              6200612A7A8F00AEBE798A46C16B7CEF25C05CA988A1DEB3D50791985B463219
+              33751E78C06384EE813F4973D71AF86A07FCD48153F8B4380B816AB8499AC793
+              1F0C19AE751DB56F147BE9F74F6293F8425354E0CB2EA7E48373ED514322162E
+              7A3632F31959EAC0F5AE63F679C04DDD7A4DF7C8B1541C5E7ACBF5601012E95D
+              7E4DF1D0F38C5CC0F0E141FB00D8FB6954E6CEE4C486096B0593C641C00F8E5C
+              B47714331946A903A3A918824E36032A2158479274E119EEBF80883F64FF5910
+              A2C2CFE7A6F176318120CD00A63DC3D0E923D3341469C8DDA61910A5196074EE
+              5F1C4601D278A6982788397CA77F4D45554588B6202B3AB8B7077C993CBF009D
+              12609D2328FCD40000000049454E44AE426082}
+            Stretch = True
+            Transparent = True
+            OnClick = imgEventLogClick
+            OnMouseEnter = imgEventLogMouseEnter
+            OnMouseLeave = imgEventLogMouseLeave
+          end
+          object imgKeyAdd: TImage
+            Left = 207
+            Top = 31
+            Width = 32
+            Height = 32
+            AutoSize = True
+            Picture.Data = {
+              0954506E67496D61676589504E470D0A1A0A0000000D49484452000000200000
+              00200802000000FC18EDA3000000017352474200AECE1CE90000000467414D41
+              0000B18F0BFC6105000000097048597300000EC300000EC301C76FA864000000
+              A74944415478DA63FCFFFF3F032D01E330B2A0B1B191786DF5F5F5E45880A98D
+              78C1510BA86301917A18462379085B40A41E86D1481EC21610A98781BC48A611
+              A0BB05DB4FDE9EB6FD06072B7345B09EB1860CB21479618862C1A96B8F1B579C
+              E76267C1341D628163701A9AE0FEB5B3B00A62B1E0C3878FD17D0731DDB2B5C9
+              8F3A16BC7BFF21B6FF100D2D400EA2AA103D43756A071104C02319D30E2A4432
+              2DC0A805036F0100A09125D072BF50420000000049454E44AE426082}
+            OnClick = imgKeyAddClick
+            OnMouseEnter = imgKeyAddMouseEnter
+            OnMouseLeave = imgKeyAddMouseLeave
+          end
+          object imgKeyRemove: TImage
+            Left = 287
+            Top = 31
+            Width = 32
+            Height = 32
+            AutoSize = True
+            Picture.Data = {
+              0954506E67496D61676589504E470D0A1A0A0000000D49484452000000200000
+              00200802000000FC18EDA3000000017352474200AECE1CE90000000467414D41
+              0000B18F0BFC6105000000097048597300000EC300000EC301C76FA864000002
+              174944415478DA63FCFFFF3F032D01239D2C686C6C245E4F7D7D3D3916606A23
+              5E70D402EA5840BC9E4C579B6FC776B26B187259B9F30B09116501F1E0D3870F
+              2FAA62FEFFFA0964B348C8F207A5881859612AFBF0E2D98F4B27D89434C9C907
+              4F964CFE7A60139CCBED1428139505E7BE7F74EFEBBE0DDF2F1CE571F0E3B2F3
+              C569019E40CBCECEFE7FEFEAC75533FE7E780311E1D0B31488CA0532BEEC59FB
+              F5D016163169C184524105157C4104B4C031380D4D70FFDA5940415E4E564921
+              2E114E86B7AB667D38B41522C52AA3F4EFCB27A0953C4E013C1E91F0B821C702
+              A8892C4CDA72824CB7CE3E9BD5F6FFD70F88A0604299988D2BB216F22DE0E260
+              D19517FA7966FF8BC513E1167059B8C8A69453C102415E760D29BEF7AB67BCDF
+              B711C805063A33AFC0CFBB57816CFEB04C09B720A22CC015C9CACACABE5E5EEF
+              1774FDBC7616C8655350174CA96264E3F8B064C28F4BC7195958440A3A8534F4
+              0858801F3C9AD6F4FDDC61504C48C90BE7B4F08B4900D91FDFBDFBB0A4EFC7A5
+              9320C1822E483C9363C1B335733FEF58016430F30B0BE7B70BCA29C2A5E076F0
+              B8044B47649063C1FB07775E77E4FEFFF387918D5D24AF0D1E14C8760043EFD7
+              AD8B2265138594D4482B8B80C5DCF32DCB3F6D98C7C0C4044A9156CE589581EC
+              98D70154A350D44172690A2C64BEEE5BCF2AA78696DE31EDF8B8620A8F5BE870
+              AA0F06518533587D306A01410B88D7438E05B40334B7000070EE9EDFFEA0829F
+              0000000049454E44AE426082}
+            OnClick = imgKeyRemoveClick
+            OnMouseEnter = imgKeyRemoveMouseEnter
+            OnMouseLeave = imgKeyRemoveMouseLeave
+          end
+          object imgSectionAdd: TImage
+            Left = 45
+            Top = 31
+            Width = 32
+            Height = 32
+            AutoSize = True
+            Picture.Data = {
+              0954506E67496D61676589504E470D0A1A0A0000000D49484452000000200000
+              00200802000000FC18EDA3000000017352474200AECE1CE90000000467414D41
+              0000B18F0BFC6105000000097048597300000EC300000EC301C76FA864000000
+              A74944415478DA63FCFFFF3F032D01E330B2A0B1B191786DF5F5F5E45880A98D
+              78C1510BA86301917A18462379085B40A41E86D1481EC21610A98781BC48A611
+              A0BB05DB4FDE9EB6FD06072B7345B09EB1860CB21479618862C1A96B8F1B579C
+              E76267C1341D628163701A9AE0FEB5B3B00A62B1E0C3878FD17D0731DDB2B5C9
+              8F3A16BC7BFF21B6FF100D2D400EA2AA103D43756A071104C02319D30E2A4432
+              2DC0A805036F0100A09125D072BF50420000000049454E44AE426082}
+            OnClick = imgSectionAddClick
+            OnMouseEnter = imgSectionAddMouseEnter
+            OnMouseLeave = imgSectionAddMouseLeave
+          end
+          object imgSectionRemove: TImage
+            Left = 125
+            Top = 31
+            Width = 32
+            Height = 32
+            AutoSize = True
+            Picture.Data = {
+              0954506E67496D61676589504E470D0A1A0A0000000D49484452000000200000
+              00200802000000FC18EDA3000000017352474200AECE1CE90000000467414D41
+              0000B18F0BFC6105000000097048597300000EC300000EC301C76FA864000002
+              174944415478DA63FCFFFF3F032D01239D2C686C6C245E4F7D7D3D3916606A23
+              5E70D402EA5840BC9E4C579B6FC776B26B187259B9F30B09116501F1E0D3870F
+              2FAA62FEFFFA0964B348C8F207A5881859612AFBF0E2D98F4B27D89434C9C907
+              4F964CFE7A60139CCBED1428139505E7BE7F74EFEBBE0DDF2F1CE571F0E3B2F3
+              C569019E40CBCECEFE7FEFEAC75533FE7E780311E1D0B31488CA0532BEEC59FB
+              F5D016163169C184524105157C4104B4C031380D4D70FFDA5940415E4E564921
+              2E114E86B7AB667D38B41522C52AA3F4EFCB27A0953C4E013C1E91F0B821C702
+              A8892C4CDA72824CB7CE3E9BD5F6FFD70F88A0604299988D2BB216F22DE0E260
+              D19517FA7966FF8BC513E1167059B8C8A69453C102415E760D29BEF7AB67BCDF
+              B711C805063A33AFC0CFBB57816CFEB04C09B720A22CC015C9CACACABE5E5EEF
+              1774FDBC7616C8655350174CA96264E3F8B064C28F4BC7195958440A3A8534F4
+              0858801F3C9AD6F4FDDC61504C48C90BE7B4F08B4900D91FDFBDFBB0A4EFC7A5
+              9320C1822E483C9363C1B335733FEF58016430F30B0BE7B70BCA29C2A5E076F0
+              B8044B47649063C1FB07775E77E4FEFFF387918D5D24AF0D1E14C8760043EFD7
+              AD8B2265138594D4482B8B80C5DCF32DCB3F6D98C7C0C4044A9156CE589581EC
+              98D70154A350D44172690A2C64BEEE5BCF2AA78696DE31EDF8B8620A8F5BE870
+              AA0F06518533587D306A01410B88D7438E05B40334B7000070EE9EDFFEA0829F
+              0000000049454E44AE426082}
+            OnClick = imgSectionRemoveClick
+            OnMouseEnter = imgSectionRemoveMouseEnter
+            OnMouseLeave = imgSectionRemoveMouseLeave
+          end
+          object imgUpdateValues: TImage
+            Left = 393
+            Top = 35
+            Width = 32
+            Height = 32
+            AutoSize = True
+            Center = True
+            Picture.Data = {
+              0954506E67496D61676589504E470D0A1A0A0000000D49484452000000200000
+              00200806000000737A7AF40000000373424954080808DBE14FE0000000017352
+              474200AECE1CE90000000467414D410000B18F0BFC6105000000097048597300
+              000EC400000EC401952B0E1B0000001974455874536F66747761726500777777
+              2E696E6B73636170652E6F72679BEE3C1A000003624944415478DADD97CB6B13
+              5114C6BFC9CC3495B4A66D6C6C48B5168B0BB1427D75A5AE5C8808BAD28D7F80
+              1BDDF80FE84291AA0BA1E02615175D14448A8A0541A4556851AAAD0FB48FB4F1
+              D59834D3A679CC4CE671C733092ED4A4EDD811D1C30C84CCBDB9BFFB7DE79CDC
+              E154256329B914D6128A924720D88A2AAFCFF15CCE0D804C4682AAC8D8D2B6DB
+              31846B00B96C1A82508596B65DF07A6BFE0E801D368413255C07B0831744B4B6
+              ED5915C41F01F80E612BB1921D7F0C60B5106501B4828285C50460FD385814BD
+              086C08FDF2238A92434195CB2E20D09C70CB4E709CC79902BAAEE167028F8707
+              CF0B8E155A5FBF099E0AF35CB1E0FF03304D1DB9DC92E3853CE4734D6D3DF9CD
+              AD15C0403EFF7B00BE9ABAB503B81DFF2640B9325C29EC5A17A8F9AC19A05223
+              5A29EC3ED1180CFFD274FE4D0B9CC69B4113C929D3D19C0969D83D80BE9E9748
+              CC2CA0D6DF88D3170EC330190C8B51493330F2D276532F18C5B1F77BC690988D
+              02B56A851CD054A41793CE76331440B853C360DF279CB974947A42E97BAB9847
+              0440307481F13C6E760D62EF213FEE47C6CB0358344B270827393872DB82E837
+              30F12E8613E70E2C3BF61E29E05D68C05472C43D0B1EDD92515DA76172F223CE
+              5C24053CA58D946E1415B03F70BC88C8954108493FA6E79FB907F03092437583
+              86E8F4E7552980B80FD1D4F3F200CC3421CB59470043BD1EAC0BE888C5BE1473
+              C036BCB473DB48528195529117AB10E91A82F9A9BA32806168658F58CBC5D35E
+              2F44B2602E1EC7FE63EDE8D8B79916B58A8BB21249F17EFD328ED1A10F28CC08
+              98591C75CF8281EE2564E53C042F433EAB5019D2718CA7E39A6C8219ACA88449
+              2A807283E73998190112F7DE3D80BBD717A1AB645D46C1C61D802A2BF81295B0
+              BDB305DE751E64B279A8AA8AD97709A4A65534D2D95262B3EE01F45F93088021
+              9160387BA31D8FFBDE636C601EC7CF6F419DDF47B9F111E9741AA32FC62151CF
+              08859A102F4CBA0770A72B85826242928093E78318EE8F61EA898CF6532695A4
+              85544A824CEF8FD1680CDCDBAD680A87319777C902DBDFFECB19FA173530BF60
+              E0E06986B1074924C639848E24E9B949EF0E194A6E03F1AFF31027B6A1B97933
+              66D3AFC0E99A6269AAB3922B17DD57FB81B966E4B8349A3AB2E4B786F4122525
+              6FD1C23A183351258A88C79350A70208368490D263F80642578D20CF69876D00
+              00000049454E44AE426082}
+            OnClick = imgUpdateValuesClick
+            OnMouseEnter = imgUpdateValuesMouseEnter
+            OnMouseLeave = imgUpdateValuesMouseLeave
+          end
+          object imgOFF: TImage
+            Left = 15
+            Top = 25
+            Width = 1018
+            Height = 68
+            Cursor = crNo
+            Picture.Data = {
+              0954506E67496D61676589504E470D0A1A0A0000000D49484452000001000000
+              010008060000005C72A8660000001974455874536F6674776172650041646F62
+              6520496D616765526561647971C9653C0000032269545874584D4C3A636F6D2E
+              61646F62652E786D7000000000003C3F787061636B657420626567696E3D22EF
+              BBBF222069643D2257354D304D7043656869487A7265537A4E54637A6B633964
+              223F3E203C783A786D706D65746120786D6C6E733A783D2261646F62653A6E73
+              3A6D6574612F2220783A786D70746B3D2241646F626520584D5020436F726520
+              352E332D633031312036362E3134353636312C20323031322F30322F30362D31
+              343A35363A32372020202020202020223E203C7264663A52444620786D6C6E73
+              3A7264663D22687474703A2F2F7777772E77332E6F72672F313939392F30322F
+              32322D7264662D73796E7461782D6E7323223E203C7264663A44657363726970
+              74696F6E207264663A61626F75743D222220786D6C6E733A786D703D22687474
+              703A2F2F6E732E61646F62652E636F6D2F7861702F312E302F2220786D6C6E73
+              3A786D704D4D3D22687474703A2F2F6E732E61646F62652E636F6D2F7861702F
+              312E302F6D6D2F2220786D6C6E733A73745265663D22687474703A2F2F6E732E
+              61646F62652E636F6D2F7861702F312E302F73547970652F5265736F75726365
+              526566232220786D703A43726561746F72546F6F6C3D2241646F62652050686F
+              746F73686F7020435336202857696E646F7773292220786D704D4D3A496E7374
+              616E636549443D22786D702E6969643A35414244443430413933384131314536
+              393044433837393245303645334533442220786D704D4D3A446F63756D656E74
+              49443D22786D702E6469643A3541424444343042393338413131453639304443
+              383739324530364533453344223E203C786D704D4D3A4465726976656446726F
+              6D2073745265663A696E7374616E636549443D22786D702E6969643A35414244
+              4434303839333841313145363930444338373932453036453345334422207374
+              5265663A646F63756D656E7449443D22786D702E6469643A3541424444343039
+              393338413131453639304443383739324530364533453344222F3E203C2F7264
+              663A4465736372697074696F6E3E203C2F7264663A5244463E203C2F783A786D
+              706D6574613E203C3F787061636B657420656E643D2272223F3E45BB4F010000
+              02FA4944415478DAEDD40101003008C0A0DBFCCD35C82004B3BBFF01492300E8
+              1200840900C204006102803001409800204C00102600081300840900C2040061
+              02803001409800204C00102600081300840900C204006102803001409800204C
+              00102600081300840900C204006102803001409800204C001026000813008409
+              00C204006102803001409800204C00102600081300840900C204006102803001
+              409800204C00102600081300840900C204006102803001409800204C00102600
+              081300840900C204006102803001409800204C00102600081300840900C20400
+              6102803001409800204C00102600081300840900C20400610280300140980020
+              4C00102600081300840900C204006102803001409800204C0010260008130084
+              0900C204006102803001409800204C00102600081300840900C2040061028030
+              01409800204C00102600081300840900C204006102803001409800204C001026
+              00081300840900C204006102803001409800204C00102600081300840900C204
+              006102803001409800204C00102600081300840900C204006102803001409800
+              204C00102600081300840900C204006102803001409800204C00102600081300
+              840900C204006102803001409800204C00102600081300840900C20400610280
+              3001409800204C00102600081300840900C204006102803001409800204C0010
+              2600081300840900C204006102803001409800204C00102600081300840900C2
+              04006102803001409800204C00102600081300840900C2040061028030014098
+              00204C00102600081300840900C204006102803001409800204C001026000813
+              00840900C204006102803001409800204C00102600081300840900C204006102
+              803001409800204C00102600081300840900C204006102803001409800204C00
+              102600081300840900C204006102803001409800204C00102600081300840900
+              C204006102803001409800204C00102600081300840900C20400610280300140
+              9800204C00102600081300840900C20400610280300140980020EC0012FE7E2E
+              04C418B60000000049454E44AE426082}
+            Stretch = True
+            Transparent = True
           end
         end
       end
@@ -19989,7 +20002,7 @@ object MainForm: TMainForm
             GradientEndColor = 15527148
             Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goDrawFocusSelected, goColSizing, goRowSelect, goThumbTracking]
             ParentShowHint = False
-            PopupMenu = CommonPopupMenu
+            PopupMenu = PopupCommonMenu
             ShowHint = False
             TabOrder = 0
             OnClick = sgFSCviewClick
@@ -20357,7 +20370,7 @@ object MainForm: TMainForm
             GradientEndColor = 15527148
             Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goDrawFocusSelected, goColSizing, goRowSelect, goThumbTracking]
             ParentShowHint = False
-            PopupMenu = CommonPopupMenu
+            PopupMenu = PopupCommonMenu
             ShowHint = False
             TabOrder = 0
             OnClick = sgLBUviewClick
@@ -22552,40 +22565,40 @@ object MainForm: TMainForm
       OnClick = Action_CloseClick
     end
   end
-  object CurrentTime: TTimer
+  object TimerCurrentTime: TTimer
     Enabled = False
-    OnTimer = CurrentTimeTimer
+    OnTimer = TimerCurrentTimeTimer
     Left = 1024
     Top = 512
   end
-  object UpTime: TTimer
+  object TimerUpTime: TTimer
     Enabled = False
-    OnTimer = UpTimeTimer
+    OnTimer = TimerUpTimeTimer
     Left = 968
     Top = 512
   end
-  object CSVExport: TSaveDialog
+  object FileCSVExport: TSaveDialog
     DefaultExt = '*.csv'
     Filter = 'CSV (Delimited)|*.csv'
     Left = 1032
     Top = 448
   end
-  object CSVImport: TOpenDialog
+  object FileCSVImport: TOpenDialog
     DefaultExt = '*.csv'
     Filter = 'CSV (Delimited)|*.csv'
     Left = 1104
     Top = 448
   end
-  object OILoader: TTimer
+  object TimerCustOpenItems: TTimer
     Enabled = False
     Interval = 10000
-    OnTimer = OILoaderTimer
+    OnTimer = TimerCustOpenItemsTimer
     Left = 968
     Top = 576
   end
-  object AgeViewPopup: TPopupMenu
+  object PopupAgeView: TPopupMenu
     MenuAnimation = [maLeftToRight]
-    OnPopup = AgeViewPopupPopup
+    OnPopup = PopupAgeViewPopup
     Left = 1216
     Top = 576
     object Action_LyncCall: TMenuItem
@@ -22616,7 +22629,7 @@ object MainForm: TMainForm
         00BF2900BB1A00BB1B00C02B00C12D00C02B00BC1C00BB1A00BD2000C02B00C1
         2D00C12D00C02C00BE2592E4A500BE2500C02C00C12D00C12D00C12D00C12D00
         C12D00C12D00C12D00C12D00C12D00C12D00C02C00BE2592E4A5}
-      Caption = 'Lync Call'
+      Caption = 'Open in Actions'
       Default = True
       OnClick = Action_LyncCallClick
     end
@@ -22635,63 +22648,6 @@ object MainForm: TMainForm
       Caption = '-'
     end
     object Action_MassMailer: TMenuItem
-      Bitmap.Data = {
-        F6060000424DF606000000000000360000002800000018000000180000000100
-        180000000000C006000000000000000000000000000000000000FFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF808080808080808080808080
-        8080808080808080808080808080808080808080808080808080808080808080
-        80808080808080FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF808080FFFFFF808080FF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFF808080FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF8080
-        80FFFFFF808080FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF808080FFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFF808080FFFFFF808080FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF808080FF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFF808080FFFFFF808080FFFFFFFFFFFF808080
-        808080808080808080808080808080808080FFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFF808080FFFFFFFFFFFF808080808080FFFFFF808080FFFFFF808080FF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFF808080FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF8080
-        80FFFFFF808080FFFFFFFFFFFF80808080808080808080808080808080808080
-        8080FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF808080FFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFF808080FFFFFF808080FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF808080FF
-        FFFFFFFFFF808080808080FFFFFF808080FFFFFF808080FFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFB8824DB882
-        4DFFFFFF808080FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF808080FFFFFF808080FF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFB8824DB8824DFFFFFF808080FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF8080
-        80FFFFFF808080FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF808080FFFFFF808080808080
-        808080FFFFFF808080FFFFFF8080808080808080808080808080808080808080
-        80808080808080808080808080808080808080808080808080808080808080FF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFF808080FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF80808080808080808080
-        8080808080808080808080808080808080808080808080808080808080808080
-        808080808080808080808080FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
       Caption = 'Use Mass Mailer'
       OnClick = Action_MassMailerClick
     end
@@ -23001,7 +22957,7 @@ object MainForm: TMainForm
       OnClick = Action_AutoColumnSizeClick
     end
   end
-  object TrackerPopup: TPopupMenu
+  object PopupTracker: TPopupMenu
     MenuAnimation = [maLeftToRight]
     Left = 1216
     Top = 432
@@ -32567,23 +32523,23 @@ object MainForm: TMainForm
     Left = 1312
     Top = 576
   end
-  object InvoiceScanTimer: TTimer
+  object TimerInvoiceScanner: TTimer
     Enabled = False
     Interval = 900000
-    OnTimer = InvoiceScanTimerTimer
+    OnTimer = TimerInvoiceScannerTimer
     Left = 1104
     Top = 576
   end
-  object InetTimer: TTimer
+  object TimerConnection: TTimer
     Enabled = False
     Interval = 60000
-    OnTimer = InetTimerTimer
+    OnTimer = TimerConnectionTimer
     Left = 1024
     Top = 576
   end
-  object BookPopup: TPopupMenu
+  object PopupBook: TPopupMenu
     MenuAnimation = [maLeftToRight]
-    OnPopup = BookPopupPopup
+    OnPopup = PopupBookPopup
     Left = 1216
     Top = 504
     object Action_Cut: TMenuItem
@@ -32716,15 +32672,15 @@ object MainForm: TMainForm
       OnClick = Action_ColumnWidthClick
     end
   end
-  object XLExport: TSaveDialog
+  object FileXLExport: TSaveDialog
     DefaultExt = '*.xlsx'
     Filter = 'XLSX (Microsoft Excel)|*.xlsx'
     Left = 968
     Top = 448
   end
-  object CommonPopupMenu: TPopupMenu
+  object PopupCommonMenu: TPopupMenu
     MenuAnimation = [maLeftToRight]
-    OnPopup = CommonPopupMenuPopup
+    OnPopup = PopupCommonMenuPopup
     Left = 1312
     Top = 432
     object Action_ExportTransactions: TMenuItem
@@ -32778,10 +32734,10 @@ object MainForm: TMainForm
       OnClick = Action_TurnRowHighlightClick
     end
   end
-  object FollowupPopup: TTimer
+  object TimerFollowUp: TTimer
     Enabled = False
     Interval = 1800000
-    OnTimer = FollowupPopupTimer
+    OnTimer = TimerFollowUpTimer
     Left = 1104
     Top = 512
   end

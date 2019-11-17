@@ -25,9 +25,9 @@ object MassMailerForm: TMassMailerForm
   object PanelBottom: TPanel
     AlignWithMargins = True
     Left = 0
-    Top = 713
+    Top = 705
     Width = 1257
-    Height = 42
+    Height = 50
     Margins.Left = 0
     Margins.Top = 10
     Margins.Right = 0
@@ -43,9 +43,10 @@ object MassMailerForm: TMassMailerForm
     ParentBackground = False
     ParentFont = False
     TabOrder = 2
+    ExplicitTop = 713
     object Text_Warn: TLabel
       Left = 16
-      Top = 12
+      Top = 16
       Width = 258
       Height = 13
       Caption = '* E-mail template is available in English language only.'
@@ -57,10 +58,10 @@ object MassMailerForm: TMassMailerForm
       ParentFont = False
     end
     object btnCancel: TSpeedButton
-      Left = 1042
-      Top = 9
+      Left = 1038
+      Top = 13
       Width = 89
-      Height = 25
+      Height = 27
       Cursor = crHandPoint
       Caption = 'Cancel'
       Flat = True
@@ -96,9 +97,9 @@ object MassMailerForm: TMassMailerForm
     end
     object btnSendEmail: TSpeedButton
       Left = 1142
-      Top = 9
+      Top = 13
       Width = 89
-      Height = 25
+      Height = 27
       Cursor = crHandPoint
       Caption = 'Send'
       Flat = True
@@ -141,7 +142,7 @@ object MassMailerForm: TMassMailerForm
     Left = 710
     Top = 10
     Width = 537
-    Height = 693
+    Height = 685
     Margins.Left = 10
     Margins.Top = 10
     Margins.Right = 10
@@ -151,6 +152,7 @@ object MassMailerForm: TMassMailerForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 1
+    ExplicitHeight = 693
     object Shape_Banks: TShape
       Left = 16
       Top = 461
@@ -686,7 +688,7 @@ object MassMailerForm: TMassMailerForm
     Left = 10
     Top = 10
     Width = 685
-    Height = 693
+    Height = 685
     Margins.Left = 10
     Margins.Top = 10
     Margins.Right = 5
@@ -696,12 +698,13 @@ object MassMailerForm: TMassMailerForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
+    ExplicitHeight = 693
     object PanelEmailContainer: TPanel
       AlignWithMargins = True
       Left = 20
       Top = 20
       Width = 645
-      Height = 653
+      Height = 645
       Margins.Left = 20
       Margins.Top = 20
       Margins.Right = 20
@@ -710,12 +713,13 @@ object MassMailerForm: TMassMailerForm
       BevelOuter = bvNone
       Caption = 'PanelEmailContainer'
       TabOrder = 0
+      ExplicitHeight = 653
       object CustomerList: TListView
         AlignWithMargins = True
         Left = 5
         Top = 5
         Width = 635
-        Height = 643
+        Height = 635
         Margins.Left = 5
         Margins.Top = 5
         Margins.Right = 5
@@ -730,6 +734,7 @@ object MassMailerForm: TMassMailerForm
         TabStop = False
         ViewStyle = vsReport
         OnKeyUp = CustomerListKeyUp
+        ExplicitHeight = 643
       end
     end
   end

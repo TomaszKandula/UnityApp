@@ -35,7 +35,7 @@ type
     TFeedbackForm = class(TForm)
         ReportMemo: TMemo;
         btnSendReport: TSpeedButton;
-        Text2: TLabel;
+    txtWords: TLabel;
         TotalWords: TLabel;
         PanelClient: TPanel;
         PanelReportMemo: TPanel;

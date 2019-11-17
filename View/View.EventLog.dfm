@@ -27,7 +27,7 @@ object EventForm: TEventForm
     Left = 10
     Top = 10
     Width = 1042
-    Height = 638
+    Height = 622
     Margins.Left = 10
     Margins.Top = 10
     Margins.Right = 10
@@ -37,12 +37,13 @@ object EventForm: TEventForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
+    ExplicitHeight = 638
     object PanelEventMemo: TPanel
       AlignWithMargins = True
       Left = 10
       Top = 10
       Width = 1022
-      Height = 618
+      Height = 602
       Margins.Left = 10
       Margins.Top = 10
       Margins.Right = 10
@@ -52,12 +53,13 @@ object EventForm: TEventForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 0
+      ExplicitHeight = 618
       object EventMemo: TMemo
         AlignWithMargins = True
         Left = 2
         Top = 2
         Width = 1018
-        Height = 614
+        Height = 598
         Hint = 'Press F5 to reload'
         Margins.Left = 2
         Margins.Top = 2
@@ -80,15 +82,16 @@ object EventForm: TEventForm
         WantTabs = True
         WordWrap = False
         OnKeyUp = FormKeyUp
+        ExplicitHeight = 614
       end
     end
   end
   object PanelBottom: TPanel
     AlignWithMargins = True
     Left = 0
-    Top = 658
+    Top = 642
     Width = 1062
-    Height = 16
+    Height = 32
     Margins.Left = 0
     Margins.Top = 10
     Margins.Right = 0
@@ -99,10 +102,15 @@ object EventForm: TEventForm
     ParentBackground = False
     TabOrder = 1
     object ImageGrip: TImage
+      AlignWithMargins = True
       Left = 1046
-      Top = 0
+      Top = 16
       Width = 16
       Height = 16
+      Margins.Left = 0
+      Margins.Top = 16
+      Margins.Right = 0
+      Margins.Bottom = 0
       Align = alRight
       AutoSize = True
       Picture.Data = {
@@ -112,7 +120,7 @@ object EventForm: TEventForm
         324944415478DA63FC0F040C1400C6510306D08023478E0CB001F40F0398936D
         6C6CC8F302C506D03F0C703999682F106B000083615F99D1940F550000000049
         454E44AE426082}
-      ExplicitLeft = 675
+      ExplicitTop = 0
     end
   end
 end

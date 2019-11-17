@@ -56,7 +56,6 @@ type
         Cust_Number: TLabel;
         btnAutoStatement: TSpeedButton;
         PanelGrid: TPanel;
-        PanelActions: TPanel;
         PanelHeader: TPanel;
         Cust_Person: TEdit;
         Cust_Mail: TEdit;
@@ -82,10 +81,10 @@ type
         btnCopyCustNumber: TSpeedButton;
         btnCopyPerson: TSpeedButton;
         btnCopyEmail: TSpeedButton;
-        PanelStatusBar: TPanel;
+    PanelActions: TPanel;
         MasterPanel: TPanel;
-        Text: TLabel;
-        SimpleText: TLabel;
+    txtFixedText: TLabel;
+    txtTimeDate: TLabel;
         zText9: TLabel;
         Cust_MailGeneral: TEdit;
         Cust_MailGeneralBack: TShape;
@@ -103,7 +102,7 @@ type
         SepLine4: TBevel;
         SepLine5: TBevel;
         SepLine6: TBevel;
-        ItemDesc: TLabel;
+    txtDesc: TLabel;
         imgInfo: TImage;
         imgCoverSaveBtn: TImage;
         GroupOpenItems: TGroupBox;
@@ -114,6 +113,8 @@ type
         GroupEmails: TGroupBox;
         cbUserInCopy: TCheckBox;
         cbCtrlStatusOff: TCheckBox;
+    PanelBottom: TPanel;
+    txtItem: TLabel;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
@@ -320,7 +321,7 @@ end;
 procedure TActionsForm.UpdateOpenItems();
 begin
 
-    SimpleText.Caption :=MainForm.FOpenItemsUpdate;
+    txtTimeDate.Caption:=MainForm.FOpenItemsUpdate;
     Cust_Name.Caption  :=CustName;
     Cust_Number.Caption:=CustNumber;
 
@@ -889,9 +890,12 @@ begin
     Cust_Phone.Items.Add(TUnknown.NotFound);
     Cust_Phone.ItemIndex:=0;
 
-    ItemDesc.Caption:='';
-    DailyCom.Text   :='';
-    GeneralCom.Text :='';
+    ValueOpenAm.Caption:='';
+    ValueAmount.Caption:='';
+    txtDesc.Caption    :='';
+    DailyCom.Text      :='';
+    GeneralCom.Text    :='';
+    txtTimeDate.Caption:='';
 
 end;
 
@@ -1187,121 +1191,121 @@ end;
 
 procedure TActionsForm.btnBackMouseEnter(Sender: TObject);
 begin
-    ItemDesc.Caption:='Back to previous customer.';
+    txtDesc.Caption:='Back to previous customer.';
 end;
 
 
 procedure TActionsForm.btnBackMouseLeave(Sender: TObject);
 begin
-    ItemDesc.Caption:='';
+    txtDesc.Caption:='';
 end;
 
 
 procedure TActionsForm.btnNextMouseEnter(Sender: TObject);
 begin
-    ItemDesc.Caption:='Load next customer.';
+    txtDesc.Caption:='Load next customer.';
 end;
 
 
 procedure TActionsForm.btnNextMouseLeave(Sender: TObject);
 begin
-    ItemDesc.Caption:='';
+    txtDesc.Caption:='';
 end;
 
 
 procedure TActionsForm.btnSetFollowUpMouseEnter(Sender: TObject);
 begin
-    ItemDesc.Caption:='Add follow-up date.';
+    txtDesc.Caption:='Add follow-up date.';
 end;
 
 
 procedure TActionsForm.btnSetFollowUpMouseLeave(Sender: TObject);
 begin
-    ItemDesc.Caption:='';
+    txtDesc.Caption:='';
 end;
 
 
 procedure TActionsForm.btnClearFollowUpMouseEnter(Sender: TObject);
 begin
-    ItemDesc.Caption:='Remove existing follow-up date.';
+    txtDesc.Caption:='Remove existing follow-up date.';
 end;
 
 
 procedure TActionsForm.btnClearFollowUpMouseLeave(Sender: TObject);
 begin
-    ItemDesc.Caption:='';
+    txtDesc.Caption:='';
 end;
 
 
 procedure TActionsForm.btnLogMissingInvMouseEnter(Sender: TObject);
 begin
-    ItemDesc.Caption:='QMS: Log missing invoice.';
+    txtDesc.Caption:='QMS: Log missing invoice.';
 end;
 
 
 procedure TActionsForm.btnLogMissingInvMouseLeave(Sender: TObject);
 begin
-    ItemDesc.Caption:='';
+    txtDesc.Caption:='';
 end;
 
 
 procedure TActionsForm.btnLogNowMouseEnter(Sender: TObject);
 begin
-    ItemDesc.Caption:='QMS: Log selected invoice(s).';
+    txtDesc.Caption:='QMS: Log selected invoice(s).';
 end;
 
 
 procedure TActionsForm.btnLogNowMouseLeave(Sender: TObject);
 begin
-    ItemDesc.Caption:='';
+    txtDesc.Caption:='';
 end;
 
 
 procedure TActionsForm.btnCustomStatementMouseEnter(Sender: TObject);
 begin
-    ItemDesc.Caption:='Send custom e-mail with account statement.';
+    txtDesc.Caption:='Send custom e-mail with account statement.';
 end;
 
 
 procedure TActionsForm.btnCustomStatementMouseLeave(Sender: TObject);
 begin
-    ItemDesc.Caption:='';
+    txtDesc.Caption:='';
 end;
 
 
 procedure TActionsForm.btnAutoStatementMouseEnter(Sender: TObject);
 begin
-    ItemDesc.Caption:='Send account statement now.';
+    txtDesc.Caption:='Send account statement now.';
 end;
 
 
 procedure TActionsForm.btnAutoStatementMouseLeave(Sender: TObject);
 begin
-    ItemDesc.Caption:='';
+    txtDesc.Caption:='';
 end;
 
 
 procedure TActionsForm.btnCallCustomerMouseEnter(Sender: TObject);
 begin
-    ItemDesc.Caption:='Call customer now.';
+    txtDesc.Caption:='Call customer now.';
 end;
 
 
 procedure TActionsForm.btnCallCustomerMouseLeave(Sender: TObject);
 begin
-    ItemDesc.Caption:='';
+    txtDesc.Caption:='';
 end;
 
 
 procedure TActionsForm.btnSaveCustDetailsMouseEnter(Sender: TObject);
 begin
-    ItemDesc.Caption:='Save changes in customer details.';
+    txtDesc.Caption:='Save changes in customer details.';
 end;
 
 
 procedure TActionsForm.btnSaveCustDetailsMouseLeave(Sender: TObject);
 begin
-    ItemDesc.Caption:='';
+    txtDesc.Caption:='';
 end;
 
 

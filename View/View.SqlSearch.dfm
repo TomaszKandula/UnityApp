@@ -24,7 +24,7 @@ object SqlSearchForm: TSqlSearchForm
     Left = 10
     Top = 10
     Width = 663
-    Height = 336
+    Height = 335
     Margins.Left = 10
     Margins.Top = 10
     Margins.Right = 10
@@ -34,12 +34,13 @@ object SqlSearchForm: TSqlSearchForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
+    ExplicitHeight = 336
     object SearchBox: TGroupBox
       AlignWithMargins = True
       Left = 10
       Top = 10
       Width = 643
-      Height = 316
+      Height = 315
       Margins.Left = 10
       Margins.Top = 10
       Margins.Right = 10
@@ -47,6 +48,7 @@ object SqlSearchForm: TSqlSearchForm
       Align = alClient
       Caption = 'Search Address Book'
       TabOrder = 0
+      ExplicitHeight = 316
       object Text1: TLabel
         Left = 24
         Top = 59
@@ -537,9 +539,9 @@ object SqlSearchForm: TSqlSearchForm
   object PanelBottom: TPanel
     AlignWithMargins = True
     Left = 0
-    Top = 356
+    Top = 355
     Width = 683
-    Height = 49
+    Height = 50
     Margins.Left = 0
     Margins.Top = 10
     Margins.Right = 0
@@ -551,10 +553,10 @@ object SqlSearchForm: TSqlSearchForm
     TabOrder = 1
     object btnSearch: TSpeedButton
       AlignWithMargins = True
-      Left = 553
+      Left = 576
       Top = 12
-      Width = 110
-      Height = 25
+      Width = 87
+      Height = 26
       Cursor = crHandPoint
       Margins.Left = 15
       Margins.Top = 12
@@ -592,15 +594,13 @@ object SqlSearchForm: TSqlSearchForm
         EAE3FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
       Spacing = 10
       OnClick = btnSearchClick
-      ExplicitLeft = 443
-      ExplicitTop = 13
     end
     object btnCancel: TSpeedButton
       AlignWithMargins = True
-      Left = 428
+      Left = 474
       Top = 12
-      Width = 110
-      Height = 25
+      Width = 87
+      Height = 26
       Cursor = crHandPoint
       Margins.Left = 0
       Margins.Top = 12
@@ -638,7 +638,7 @@ object SqlSearchForm: TSqlSearchForm
         FFFFFFFFFFFFFFFFFFFFFFB4B4FF6362FFFFFFFFFFFFFFFFFFFF}
       Spacing = 10
       OnClick = btnCancelClick
-      ExplicitHeight = 27
+      ExplicitLeft = 451
     end
     object txtWarning: TLabel
       Left = 20

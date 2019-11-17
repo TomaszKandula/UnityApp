@@ -72,7 +72,7 @@ type
 
 
     TMainForm = class(TForm)
-        MyPages: TPageControl;
+    TabSheets: TPageControl;
         TabSheet1: TTabSheet;
         TabSheet2: TTabSheet;
         TabSheet3: TTabSheet;
@@ -231,13 +231,13 @@ type
         StatBar_TXT4: TLabel;
         StatBar_CAP5: TLabel;
         StatBar_TXT5: TLabel;
-        CurrentTime: TTimer;
-        UpTime: TTimer;
+    TimerCurrentTime: TTimer;
+    TimerUpTime: TTimer;
         txtInfo1: TLabel;
         txtInfo3: TLabel;
         txtInfo2: TLabel;
-        CSVExport: TSaveDialog;
-        CSVImport: TOpenDialog;
+    FileCSVExport: TSaveDialog;
+    FileCSVImport: TOpenDialog;
         ContentPanel7: TPanel;
         ContentPanel6: TPanel;
         ContentPanel1: TPanel;
@@ -251,7 +251,7 @@ type
         Text70: TLabel;
         Text72: TLabel;
         Text73: TLabel;
-        OILoader: TTimer;
+    TimerCustOpenItems: TTimer;
         Text82: TLabel;
         tcOvdAmt: TLabel;
         GroupListBox: TComboBox;
@@ -272,23 +272,23 @@ type
         sgAgeView: TStringGrid;
         cbDump: TCheckBox;
         sgInvoiceTracker: TStringGrid;
-        AgeViewPopup: TPopupMenu;
+    PopupAgeView: TPopupMenu;
         Action_Tracker: TMenuItem;
         Action_PaymentTerm: TMenuItem;
         Action_Person: TMenuItem;
         Label2: TLabel;
         Label3: TLabel;
         Label4: TLabel;
-        TrackerPopup: TPopupMenu;
+    PopupTracker: TPopupMenu;
         Action_Remove: TMenuItem;
         Action_ShowMy: TMenuItem;
         Action_ShowAll: TMenuItem;
         Action_LyncCall: TMenuItem;
         TrayIcon: TTrayIcon;
-        InvoiceScanTimer: TTimer;
+    TimerInvoiceScanner: TTimer;
         Action_ShowRegistered: TMenuItem;
         N8: TMenuItem;
-        InetTimer: TTimer;
+    TimerConnection: TTimer;
         N9: TMenuItem;
         Action_FilterINF7: TMenuItem;
         N5: TMenuItem;
@@ -306,7 +306,7 @@ type
         Action_AutoColumnSize: TMenuItem;
         SplitLine2: TBevel;
         Action_Search: TMenuItem;
-        BookPopup: TPopupMenu;
+    PopupBook: TPopupMenu;
         Action_Copy: TMenuItem;
         Action_Paste: TMenuItem;
         Action_Cut: TMenuItem;
@@ -317,7 +317,7 @@ type
         Action_ShowMyEntries: TMenuItem;
         Action_ToExce: TMenuItem;
         N13: TMenuItem;
-        XLExport: TSaveDialog;
+    FileXLExport: TSaveDialog;
         tR6: TLabel;
         valR6: TLabel;
         procR6: TLabel;
@@ -333,7 +333,7 @@ type
         Action_Update: TMenuItem;
         Action_Report: TMenuItem;
         N17: TMenuItem;
-        CommonPopupMenu: TPopupMenu;
+    PopupCommonMenu: TPopupMenu;
         Action_AutoColumn: TMenuItem;
         Action_ExportTransactions: TMenuItem;
         Action_SelectAll: TMenuItem;
@@ -341,7 +341,7 @@ type
         Action_CopyToCB: TMenuItem;
         N19: TMenuItem;
         Action_ColumnWidth: TMenuItem;
-        FollowupPopup: TTimer;
+    TimerFollowUp: TTimer;
         custRISKA: TLabel;
         custRISKB: TLabel;
         custRISKC: TLabel;
@@ -366,8 +366,8 @@ type
         Action_RemoveFilters: TMenuItem;
         Action_Free1: TMenuItem;
         AppMenu: TPanel;
-    Bevel1: TBevel;
-    Bevel2: TBevel;
+        Bevel1: TBevel;
+        Bevel2: TBevel;
         PanelOpenItems: TPanel;
         ImgLoadingOpenItems: TImage;
         PanelAddressBook: TPanel;
@@ -534,8 +534,9 @@ type
         txtFeedback: TLabel;
         imgAADUser: TImage;
         txtAadUser: TLabel;
-    Bevel3: TBevel;
-    Bevel4: TBevel;
+        Bevel3: TBevel;
+        Bevel4: TBevel;
+        PanelSettingsHeader: TPanel;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
@@ -580,8 +581,8 @@ type
         procedure sgListValueClick(Sender: TObject);
         procedure sgListSectionClick(Sender: TObject);
         procedure EditPasswordKeyPress(Sender: TObject; var Key: Char);
-        procedure CurrentTimeTimer(Sender: TObject);
-        procedure UpTimeTimer(Sender: TObject);
+        procedure TimerCurrentTimeTimer(Sender: TObject);
+        procedure TimerUpTimeTimer(Sender: TObject);
         procedure sgListSectionMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure sgListSectionMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure sgListValueMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
@@ -605,7 +606,7 @@ type
         procedure sgPersonMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure sgPersonMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure sgOpenItemsDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
-        procedure OILoaderTimer(Sender: TObject);
+        procedure TimerCustOpenItemsTimer(Sender: TObject);
         procedure GroupListBoxSelect(Sender: TObject);
         procedure btnMakeGroupClick(Sender: TObject);
         procedure btnMakeGroupMouseEnter(Sender: TObject);
@@ -624,10 +625,10 @@ type
         procedure Action_ShowAllClick(Sender: TObject);
         procedure TabSheet4Show(Sender: TObject);
         procedure Action_LyncCallClick(Sender: TObject);
-        procedure InvoiceScanTimerTimer(Sender: TObject);
+        procedure TimerInvoiceScannerTimer(Sender: TObject);
         procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure TrayIconDblClick(Sender: TObject);
-        procedure InetTimerTimer(Sender: TObject);
+        procedure TimerConnectionTimer(Sender: TObject);
         procedure Action_CloseClick(Sender: TObject);
         procedure sgAgeViewDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
         procedure sgAgeViewDblClick(Sender: TObject);
@@ -643,7 +644,7 @@ type
         procedure imgAllowEditClick(Sender: TObject);
         procedure sgAddressBookDblClick(Sender: TObject);
         procedure sgAddressBookClick(Sender: TObject);
-        procedure AgeViewPopupPopup(Sender: TObject);
+        procedure PopupAgeViewPopup(Sender: TObject);
         procedure sgCoCodesDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
         procedure sgPaidInfoDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
         procedure sgPmtTermsDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
@@ -656,7 +657,7 @@ type
         procedure Action_CopyClick(Sender: TObject);
         procedure Action_PasteClick(Sender: TObject);
         procedure Action_DelRowClick(Sender: TObject);
-        procedure BookPopupPopup(Sender: TObject);
+        procedure PopupBookPopup(Sender: TObject);
         procedure Action_ShowAsIsClick(Sender: TObject);
         procedure Action_ShowMyEntriesClick(Sender: TObject);
         procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -675,7 +676,7 @@ type
         procedure Action_CopyToCBClick(Sender: TObject);
         procedure Action_AutoColumnClick(Sender: TObject);
         procedure Action_ColumnWidthClick(Sender: TObject);
-        procedure FollowupPopupTimer(Sender: TObject);
+        procedure TimerFollowUpTimer(Sender: TObject);
         procedure Action_FollowUpColorsClick(Sender: TObject);
         procedure imgEventLogClick(Sender: TObject);
         procedure imgEventLogMouseEnter(Sender: TObject);
@@ -805,7 +806,7 @@ type
         procedure btnFscRejectClick(Sender: TObject);
         procedure btnLbuUpdateClick(Sender: TObject);
         procedure Action_TurnRowHighlightClick(Sender: TObject);
-        procedure CommonPopupMenuPopup(Sender: TObject);
+        procedure PopupCommonMenuPopup(Sender: TObject);
         procedure TrayIconClick(Sender: TObject);
         procedure imgAppMenuClick(Sender: TObject);
         procedure btnInfoMouseEnter(Sender: TObject);
@@ -1159,8 +1160,8 @@ begin
     // Put CSV aging data to file.
     // ---------------------------
 
-    if CSVExport.Execute then
-        CsvContent.SaveToFile(CSVExport.FileName);
+    if FileCSVExport.Execute then
+        CsvContent.SaveToFile(FileCSVExport.FileName);
 
     THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
     THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
@@ -1530,10 +1531,10 @@ begin
             begin
 
                 // Check server connection on regular basis
-                if not InetTimer.Enabled then
+                if not TimerConnection.Enabled then
                 begin
-                    InetTimer.Interval:=DataBase.Interval;
-                    InetTimer.Enabled:=True;
+                    TimerConnection.Interval:=DataBase.Interval;
+                    TimerConnection.Enabled:=True;
                 end;
 
             end;
@@ -1743,7 +1744,7 @@ begin
                 // -------------------------------
 
                 SwitchTimers(TurnedOff);
-                InetTimer.Enabled:=False;
+                TimerConnection.Enabled:=False;
                 SessionService.FDbConnect.Connected:=False;
                 SessionService.FDbConnect:=nil;
                 FIsConnected:=False;
@@ -1764,7 +1765,7 @@ begin
                 // Turn on timer responsible for periodic connection check.
                 // --------------------------------------------------------
 
-                InetTimer.Enabled:=True;
+                TimerConnection.Enabled:=True;
                 ThreadFileLog.Log('Windows Message detected: ' + IntToStr(PassMsg.Msg) + ' WM_POWERBROADCAST with PBT_APMRESUMEAUTOMATIC. Windows has resumed after being suspended.');
 
             end;
@@ -1816,16 +1817,16 @@ begin
     ChromiumWindow.ChromiumBrowser.OnBeforePopup:=Chromium_OnBeforePopup;
     if not ChromiumWindow.Initialized then ChromiumWindow.CreateBrowser();
 
-    for var iCNT:=0 to MyPages.PageCount - 1 do MyPages.Pages[iCNT].TabVisible:=False;
-        MyPages.ActivePage:=TabSheet9;
+    for var iCNT:=0 to TabSheets.PageCount - 1 do TabSheets.Pages[iCNT].TabVisible:=False;
+        TabSheets.ActivePage:=TabSheet9;
 
     SetPanelBorders();
     SetGridColumnWidths();
     SetGridRowHeights();
     SetButtonsGlyphs();
 
-    UpTime.Enabled:=True;
-    CurrentTime.Enabled:=True;
+    TimerUpTime.Enabled:=True;
+    TimerCurrentTime.Enabled:=True;
 
     var Queries: IQueries:=TQueries.Create;
     Queries.InitializeQms;
@@ -2061,16 +2062,16 @@ begin
 
         TurnedOn:
         begin
-            InvoiceScanTimer.Enabled:=True;
-            FollowupPopup.Enabled   :=True;
-            OILoader.Enabled        :=True;
+            TimerInvoiceScanner.Enabled:=True;
+            TimerFollowUp.Enabled:=True;
+            TimerCustOpenItems.Enabled:=True;
         end;
 
         TurnedOff:
         begin
-            InvoiceScanTimer.Enabled:=False;
-            FollowupPopup.Enabled   :=False;
-            OILoader.Enabled        :=False;
+            TimerInvoiceScanner.Enabled:=False;
+            TimerFollowUp.Enabled:=False;
+            TimerCustOpenItems.Enabled:=False;
         end;
 
     end;
@@ -2613,7 +2614,7 @@ begin
         txtStart.Font.Color:=$006433C9;
     end;
 
-    MyPages.ActivePage:=TabSheet;
+    TabSheets.ActivePage:=TabSheet;
 
 end;
 
@@ -2724,6 +2725,7 @@ begin
 
     // ---------------------------------------------------------------------------
     // Make sure that the glyph styled buttons have proper transparency color set.
+    // Note: always set transparent color.
     // ---------------------------------------------------------------------------
 
     Action_QuickReporting.Bitmap.Transparent:=True;
@@ -2808,9 +2810,17 @@ end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
+
+    StatBar_TXT1.Caption:='';
+    StatBar_TXT3.Caption:='';
+    StatBar_TXT4.Caption:='';
+    StatBar_TXT5.Caption:='';
+    txtAadUser.Caption:='';
+
     FAllowClose:=False;
     InitializeScreenSettings;
     SetActiveTabsheet(TabSheet9);
+
 end;
 
 
@@ -2966,7 +2976,7 @@ end;
 // -------------------------------------------------------------------------------------------------------------------------------------------------- TIMERS //
 
 
-procedure TMainForm.FollowupPopupTimer(Sender: TObject);
+procedure TMainForm.TimerFollowUpTimer(Sender: TObject);
 begin
 
     // ------------------------------------------------------------
@@ -3006,20 +3016,20 @@ begin
 end;
 
 
-procedure TMainForm.InetTimerTimer(Sender: TObject);
+procedure TMainForm.TimerConnectionTimer(Sender: TObject);
 begin
     var Utilities: IUtilities:=TUtilities.Create();
     Utilities.CheckServerConnAsync(FIsConnected, CheckServerConn_Callback);
 end;
 
 
-procedure TMainForm.InvoiceScanTimerTimer(Sender: TObject);
+procedure TMainForm.TimerInvoiceScannerTimer(Sender: TObject);
 begin
     {Do nothing}
 end;
 
 
-procedure TMainForm.OILoaderTimer(Sender: TObject);
+procedure TMainForm.TimerCustOpenItemsTimer(Sender: TObject);
 begin
     ThreadFileLog.Log('Calling open items scanner...');
     var OpenItems: IOpenItems:=TOpenItems.Create();
@@ -3027,13 +3037,13 @@ begin
 end;
 
 
-procedure TMainForm.CurrentTimeTimer(Sender: TObject);
+procedure TMainForm.TimerCurrentTimeTimer(Sender: TObject);
 begin
     StatBar_TXT4.Caption:=TimeToStr(Now);
 end;
 
 
-procedure TMainForm.UpTimeTimer(Sender: TObject);
+procedure TMainForm.TimerUpTimeTimer(Sender: TObject);
 begin
     var Result: TTime:=Now - FStartTime;
     StatBar_TXT5.Caption:=TimeToStr(Result);
@@ -3046,7 +3056,7 @@ end;
 // ------------------------------------------------------------------------------------------------------------------------------------- COMMON MENU ACTIONS //
 
 
-procedure TMainForm.CommonPopupMenuPopup(Sender: TObject);
+procedure TMainForm.PopupCommonMenuPopup(Sender: TObject);
 begin
     {Do nothing}
 end;
@@ -3056,17 +3066,17 @@ procedure TMainForm.Action_ExportTransactionsClick(Sender: TObject);
 begin
 
     // String grid placed on main view
-    if sgOpenItems.Focused   then sgOpenItems.ExportCSV(CSVExport, '|');
-    if sgCoCodes.Focused     then sgCoCodes.ExportCSV(CSVExport, '|');
-    if sgPaidInfo.Focused    then sgPaidInfo.ExportCSV(CSVExport, '|');
-    if sgPerson.Focused      then sgPerson.ExportCSV(CSVExport, '|');
-    if sgGroup3.Focused      then sgGroup3.ExportCSV(CSVExport, '|');
-    if sgPmtTerms.Focused    then sgPmtTerms.ExportCSV(CSVExport, '|');
-    if sgListValue.Focused   then sgListValue.ExportCSV(CSVExport, '|');
-    if sgListSection.Focused then sgListSection.ExportCSV(CSVExport, '|');
+    if sgOpenItems.Focused   then sgOpenItems.ExportCSV(FileCSVExport, '|');
+    if sgCoCodes.Focused     then sgCoCodes.ExportCSV(FileCSVExport, '|');
+    if sgPaidInfo.Focused    then sgPaidInfo.ExportCSV(FileCSVExport, '|');
+    if sgPerson.Focused      then sgPerson.ExportCSV(FileCSVExport, '|');
+    if sgGroup3.Focused      then sgGroup3.ExportCSV(FileCSVExport, '|');
+    if sgPmtTerms.Focused    then sgPmtTerms.ExportCSV(FileCSVExport, '|');
+    if sgListValue.Focused   then sgListValue.ExportCSV(FileCSVExport, '|');
+    if sgListSection.Focused then sgListSection.ExportCSV(FileCSVExport, '|');
 
     // String grid placed on action view
-    if ActionsForm.OpenItemsGrid.Focused then ActionsForm.OpenItemsGrid.ExportCSV(CSVExport, '|');
+    if ActionsForm.OpenItemsGrid.Focused then ActionsForm.OpenItemsGrid.ExportCSV(FileCSVExport, '|');
 
 end;
 
@@ -3137,7 +3147,7 @@ end;
 // --------------------------------------------------------------------------------------------------------------------------------------- ADDRESS BOOK MENU //
 
 
-procedure TMainForm.BookPopupPopup(Sender: TObject);
+procedure TMainForm.PopupBookPopup(Sender: TObject);
 begin
 
     Action_ShowMyEntries.Caption:='Show ' + UpperCase(SessionService.SessionUser) + ' entries';
@@ -3318,7 +3328,7 @@ end;
 // ------------------------------------------------------------------------------------------------------------------------------------------------ AGE VIEW //
 
 
-procedure TMainForm.AgeViewPopupPopup(Sender: TObject);
+procedure TMainForm.PopupAgeViewPopup(Sender: TObject);
 begin
 
     // Only admins and rw users can use addressbook and invoice tracker
@@ -3761,7 +3771,7 @@ begin
     THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.ExportXLS, MainForm);
 
     var FileName: string;
-    if MainForm.XLExport.Execute then FileName:=MainForm.XLExport.FileName else FileName:='';
+    if MainForm.FileXLExport.Execute then FileName:=MainForm.FileXLExport.FileName else FileName:='';
 
     var Utilities: IUtilities:=TUtilities.Create();
     Utilities.ExcelExportAsync(MainForm.FGroupList[MainForm.GroupListBox.ItemIndex, 0], MainForm.GroupListDates.Text, FileName, ExcelExport_Callback);
@@ -3771,7 +3781,7 @@ end;
 
 procedure TMainForm.Action_ExportCSVClick(Sender: TObject);
 begin
-    sgAgeView.ExportCSV(CSVExport, '|');
+    sgAgeView.ExportCSV(FileCSVExport, '|');
 end;
 
 
@@ -6003,7 +6013,7 @@ end;
 
 procedure TMainForm.txtReportsClick(Sender: TObject);
 begin
-    ReportsForm.FSetLastSelection:=MyPages.ActivePage;
+    ReportsForm.FSetLastSelection:=TabSheets.ActivePage;
     ResetTabsheetButtons;
     txtReports.Font.Style:=[fsBold];
     txtReports.Font.Color:=$006433C9;
@@ -6061,7 +6071,7 @@ end;
 
 procedure TMainForm.txtFeedbackClick(Sender: TObject);
 begin
-    FeedbackForm.FSetLastSelection:=MyPages.ActivePage;
+    FeedbackForm.FSetLastSelection:=TabSheets.ActivePage;
     ResetTabsheetButtons;
     txtFeedback.Font.Style:=[fsBold];
     txtFeedback.Font.Color:=$006433C9;
@@ -6071,7 +6081,7 @@ end;
 
 procedure TMainForm.txtInfoClick(Sender: TObject);
 begin
-    AboutForm.FSetLastSelection:=MyPages.ActivePage;
+    AboutForm.FSetLastSelection:=TabSheets.ActivePage;
     ResetTabsheetButtons;
     txtInfo.Font.Style:=[fsBold];
     txtInfo.Font.Color:=$006433C9;
@@ -6356,7 +6366,7 @@ begin
         Exit();
     end;
 
-    sgAddressBook.ExportCSV(MainForm.CSVExport, '|');
+    sgAddressBook.ExportCSV(MainForm.FileCSVExport, '|');
 
 end;
 

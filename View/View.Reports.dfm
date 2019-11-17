@@ -2,9 +2,10 @@ object ReportsForm: TReportsForm
   Left = 0
   Top = 0
   BorderIcons = [biSystemMenu]
+  BorderStyle = bsSingle
   Caption = 'Available Reports'
-  ClientHeight = 370
-  ClientWidth = 600
+  ClientHeight = 433
+  ClientWidth = 610
   Color = 15855854
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -24,8 +25,8 @@ object ReportsForm: TReportsForm
     AlignWithMargins = True
     Left = 10
     Top = 10
-    Width = 580
-    Height = 350
+    Width = 590
+    Height = 413
     Margins.Left = 10
     Margins.Top = 10
     Margins.Right = 10
@@ -35,12 +36,14 @@ object ReportsForm: TReportsForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
+    ExplicitWidth = 580
+    ExplicitHeight = 350
     object ScrollBox: TScrollBox
       AlignWithMargins = True
       Left = 10
       Top = 10
-      Width = 560
-      Height = 330
+      Width = 570
+      Height = 393
       Margins.Left = 10
       Margins.Top = 10
       Margins.Right = 10
@@ -50,6 +53,8 @@ object ReportsForm: TReportsForm
       BorderStyle = bsNone
       TabOrder = 0
       OnMouseWheel = ScrollBoxMouseWheel
+      ExplicitWidth = 560
+      ExplicitHeight = 330
       object PanelContent: TPanel
         Left = 0
         Top = 0
