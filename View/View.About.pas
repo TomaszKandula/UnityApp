@@ -25,7 +25,8 @@ uses
     Vcl.ExtCtrls,
     Vcl.Buttons,
     Vcl.ComCtrls,
-    Vcl.Imaging.pngimage;
+    Vcl.Imaging.pngimage,
+    Unity.Panel;
 
 
 type
@@ -33,46 +34,43 @@ type
 
     TAboutForm = class(TForm)
         AppMain: TShape;
-        Shape2: TShape;
-        Shape3: TShape;
-        Shape4: TShape;
-        Text12: TLabel;
-        Text13: TLabel;
-        Text03: TLabel;
-        Text05: TLabel;
-        Text07: TLabel;
-        Text08: TLabel;
-        Text10: TLabel;
-        Text11: TLabel;
-        Text06: TLabel;
-        Text01: TLabel;
-        Text02: TLabel;
-        Text04: TLabel;
+        txtCopyright: TLabel;
+        txtLegalNote: TLabel;
+        txtVersion: TLabel;
+        txtEmail: TLabel;
+        txtSupport: TLabel;
+        txtSystem: TLabel;
+        txtTotMem: TLabel;
+        txtMemUse: TLabel;
+        txtLicence: TLabel;
+        txtName1: TLabel;
+        txtName2: TLabel;
         txt_VER: TLabel;
-        txt_EDT: TLabel;
         txt_INQ: TLabel;
         txt_LIC: TLabel;
         txt_ITS: TLabel;
         txt_SYS: TLabel;
         txt_MEM: TLabel;
         txt_USG: TLabel;
-        Text14: TLabel;
+        txtStatus: TLabel;
         txt_STA: TLabel;
-        Text15: TLabel;
+        txtWebsite: TLabel;
         txt_WEB: TLabel;
-        Text16: TLabel;
+        txtDevs: TLabel;
         txt_PRO: TLabel;
-        btnClose: TSpeedButton;
-        Shape1: TShape;
-        Shape5: TShape;
-        Shape6: TShape;
+        shLine2: TShape;
+        shLine3: TShape;
+        txtSubtitle: TLabel;
+        PanelHeader: TPanel;
+        PanelContent: TPanel;
+        shLine1: TShape;
+        PanelFooter: TPanel;
         procedure FormCreate(Sender: TObject);
         procedure txtINQClick(Sender: TObject);
         procedure txtITSClick(Sender: TObject);
         procedure txtWEBClick(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
-        procedure btnCloseClick(Sender: TObject);
         procedure FormClose(Sender: TObject; var Action: TCloseAction);
     strict private
         function Is64BitOS(): Boolean;
@@ -189,6 +187,10 @@ end;
 procedure TAboutForm.FormCreate(Sender: TObject);
 begin
 
+    PanelHeader.PanelBorders(clWhite, $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
+    PanelContent.PanelBorders(clWhite, $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
+    PanelFooter.PanelBorders(clWhite, $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
+
     var Settings: ISettings:=TSettings.Create();
     if FileExists(Settings.PathLicence) then
     begin
@@ -196,7 +198,6 @@ begin
         if Settings.Decode(TAppFiles.Licence, True) then
         begin
             txt_VER.Caption:=TCore.GetBuildInfoAsString;
-            txt_EDT.Caption:=Settings.GetLicenceValue('VERSION', 'Edition');
             txt_LIC.Caption:=Settings.GetLicenceValue('LICENCE', 'Type');
             txt_STA.Caption:=Settings.GetLicenceValue('LICENCE', 'Status');
             txt_INQ.Caption:=Settings.GetLicenceValue('DETAILS', 'Email1');
@@ -254,12 +255,6 @@ end;
 
 
 // -------------------------------------------------------------------------------------------------------------------------------------------- CLICK EVENTS //
-
-
-procedure TAboutForm.btnCloseClick(Sender: TObject);
-begin
-    Close();
-end;
 
 
 procedure TAboutForm.txtINQClick(Sender: TObject);

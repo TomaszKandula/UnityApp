@@ -37,7 +37,6 @@ type
         btnSendReport: TSpeedButton;
         Text2: TLabel;
         TotalWords: TLabel;
-        btnCancel: TSpeedButton;
         PanelClient: TPanel;
         PanelReportMemo: TPanel;
         PanelArea: TPanel;
@@ -45,7 +44,6 @@ type
         procedure FormCreate(Sender: TObject);
         procedure ReportMemoKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure btnSendReportClick(Sender: TObject);
-        procedure btnCancelClick(Sender: TObject);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
         procedure FormClose(Sender: TObject; var Action: TCloseAction);
     strict private
@@ -170,11 +168,6 @@ begin
     var Utilities: IUtilities:=TUtilities.Create();
     Utilities.SendFeedbackAsync(ReportMemo.Text, SendFeedbackAsync_Callback);
 
-end;
-
-procedure TFeedbackForm.btnCancelClick(Sender: TObject);
-begin
-    Close();
 end;
 
 

@@ -25,7 +25,7 @@ object FeedbackForm: TFeedbackForm
     Left = 10
     Top = 10
     Width = 486
-    Height = 396
+    Height = 376
     Margins.Left = 10
     Margins.Top = 10
     Margins.Right = 10
@@ -35,12 +35,13 @@ object FeedbackForm: TFeedbackForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
+    ExplicitHeight = 396
     object PanelArea: TPanel
       AlignWithMargins = True
       Left = 5
       Top = 5
       Width = 476
-      Height = 386
+      Height = 366
       Margins.Left = 5
       Margins.Top = 5
       Margins.Right = 5
@@ -50,6 +51,7 @@ object FeedbackForm: TFeedbackForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 0
+      ExplicitHeight = 386
       object Caption: TLabel
         AlignWithMargins = True
         Left = 5
@@ -61,17 +63,17 @@ object FeedbackForm: TFeedbackForm
         Margins.Right = 5
         Margins.Bottom = 5
         Align = alTop
-        Caption = 'Your message to developer team:'
+        Caption = 'Your message to developers:'
         Color = clWhite
         ParentColor = False
-        ExplicitWidth = 162
+        ExplicitWidth = 156
       end
       object PanelReportMemo: TPanel
         AlignWithMargins = True
         Left = 5
         Top = 28
         Width = 466
-        Height = 353
+        Height = 333
         Margins.Left = 5
         Margins.Top = 5
         Margins.Right = 5
@@ -81,12 +83,13 @@ object FeedbackForm: TFeedbackForm
         Color = clWhite
         ParentBackground = False
         TabOrder = 0
+        ExplicitHeight = 353
         object ReportMemo: TMemo
           AlignWithMargins = True
           Left = 2
           Top = 2
           Width = 462
-          Height = 349
+          Height = 329
           Margins.Left = 2
           Margins.Top = 2
           Margins.Right = 2
@@ -104,6 +107,7 @@ object FeedbackForm: TFeedbackForm
           ScrollBars = ssVertical
           TabOrder = 0
           OnKeyUp = ReportMemoKeyUp
+          ExplicitHeight = 349
         end
       end
     end
@@ -111,9 +115,9 @@ object FeedbackForm: TFeedbackForm
   object PanelBottom: TPanel
     AlignWithMargins = True
     Left = 0
-    Top = 416
+    Top = 396
     Width = 506
-    Height = 40
+    Height = 60
     Margins.Left = 0
     Margins.Top = 5
     Margins.Right = 0
@@ -123,16 +127,17 @@ object FeedbackForm: TFeedbackForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 1
+    ExplicitTop = 416
     object Text2: TLabel
-      Left = 12
-      Top = 14
+      Left = 15
+      Top = 26
       Width = 60
       Height = 13
       Caption = 'Word count:'
     end
     object TotalWords: TLabel
-      Left = 102
-      Top = 14
+      Left = 105
+      Top = 26
       Width = 40
       Height = 13
       Caption = '0 / 1024'
@@ -143,48 +148,11 @@ object FeedbackForm: TFeedbackForm
       Font.Style = []
       ParentFont = False
     end
-    object btnCancel: TSpeedButton
-      Left = 302
-      Top = 8
-      Width = 89
-      Height = 25
-      Cursor = crHandPoint
-      Caption = 'Cancel'
-      Flat = True
-      Glyph.Data = {
-        36030000424D3603000000000000360000002800000010000000100000000100
-        18000000000000030000C40E0000C40E00000000000000000000FFFFFFFFFFFF
-        FFFFFF6362FFB4B4FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFB4B4FF6362
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFCFCFF5A59FF6160FF5251FFABAAFFFFFFFFFF
-        FFFFFFFFFFFFFFFFABAAFF5251FF6160FF5A59FFFCFCFFFFFFFFFFFFFF5A59FF
-        6160FF6564FF6564FF5251FFABAAFFFFFFFFFFFFFFABAAFF5251FF6564FF6564
-        FF6160FF5A59FFFFFFFF6362FF6160FF6564FF6564FF6564FF6564FF5251FFB5
-        B4FFB5B4FF5251FF6564FF6564FF6564FF6564FF6160FF6362FFB4B4FF5251FF
-        6564FF6564FF6564FF6564FF6564FF5B5AFF5B5AFF6564FF6564FF6564FF6564
-        FF6564FF5251FFB4B4FFFFFFFFABAAFF5251FF6564FF6564FF6564FF6564FF65
-        64FF6564FF6564FF6564FF6564FF6564FF5251FFABAAFFFFFFFFFFFFFFFFFFFF
-        ABAAFF5251FF6564FF6564FF6564FF6564FF6564FF6564FF6564FF6564FF5251
-        FFABAAFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFB5B4FF5B5AFF6564FF6564FF65
-        64FF6564FF6564FF6564FF5B5AFFB5B4FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFFB5B4FF5B5AFF6564FF6564FF6564FF6564FF6564FF6564FF5B5AFFB5B4
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFABAAFF5251FF6564FF6564FF6564FF65
-        64FF6564FF6564FF6564FF6564FF5251FFABAAFFFFFFFFFFFFFFFFFFFFABAAFF
-        5251FF6564FF6564FF6564FF6564FF6564FF6564FF6564FF6564FF6564FF6564
-        FF5251FFABAAFFFFFFFFB4B4FF5251FF6564FF6564FF6564FF6564FF6564FF5B
-        5AFF5B5AFF6564FF6564FF6564FF6564FF6564FF5251FFB4B4FF6362FF6160FF
-        6564FF6564FF6564FF6564FF5251FFB5B4FFB5B4FF5251FF6564FF6564FF6564
-        FF6564FF6160FF6362FFFFFFFF5A59FF6160FF6564FF6564FF5251FFABAAFFFF
-        FFFFFFFFFFABAAFF5251FF6564FF6564FF6160FF5A59FFFFFFFFFFFFFFFCFCFF
-        5A59FF6160FF5251FFABAAFFFFFFFFFFFFFFFFFFFFFFFFFFABAAFF5251FF6160
-        FF5A59FFFCFCFFFFFFFFFFFFFFFFFFFFFFFFFF6362FFB4B4FFFFFFFFFFFFFFFF
-        FFFFFFFFFFFFFFFFFFFFFFB4B4FF6362FFFFFFFFFFFFFFFFFFFF}
-      OnClick = btnCancelClick
-    end
     object btnSendReport: TSpeedButton
       Left = 402
-      Top = 8
+      Top = 17
       Width = 89
-      Height = 25
+      Height = 30
       Cursor = crHandPoint
       Caption = 'Send'
       Flat = True

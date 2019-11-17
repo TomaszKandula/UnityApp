@@ -368,8 +368,8 @@ type
         Action_RemoveFilters: TMenuItem;
         Action_Free1: TMenuItem;
         AppMenu: TPanel;
-        Bevel2: TBevel;
-        Bevel3: TBevel;
+    Bevel1: TBevel;
+    Bevel2: TBevel;
         PanelOpenItems: TPanel;
         ImgLoadingOpenItems: TImage;
         PanelAddressBook: TPanel;
@@ -536,6 +536,8 @@ type
         txtFeedback: TLabel;
         imgAADUser: TImage;
         txtAadUser: TLabel;
+    Bevel3: TBevel;
+    Bevel4: TBevel;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
