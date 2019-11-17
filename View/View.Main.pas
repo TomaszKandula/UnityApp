@@ -360,8 +360,6 @@ type
         tcCOCODE4: TLabel;
         Action_INF4_Filter: TMenuItem;
         Action_Gr3_Filter: TMenuItem;
-        TopPanel8: TPanel;
-        RightPanel8: TPanel;
         PanelDetailsGrid: TPanel;
         Action_HideSummary: TMenuItem;
         Action_ExportCSV: TMenuItem;

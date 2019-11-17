@@ -9532,7 +9532,7 @@ object MainForm: TMainForm
     Margins.Top = 10
     Margins.Right = 10
     Margins.Bottom = 0
-    ActivePage = TabSheet1
+    ActivePage = TabSheet8
     Align = alClient
     DoubleBuffered = True
     Font.Charset = DEFAULT_CHARSET
@@ -18518,8 +18518,6 @@ object MainForm: TMainForm
               OnMouseEnter = sgCoCodesMouseEnter
               OnMouseWheelDown = sgCoCodesMouseWheelDown
               OnMouseWheelUp = sgCoCodesMouseWheelUp
-              ExplicitWidth = 1209
-              ExplicitHeight = 547
               ColWidths = (
                 10
                 76)
@@ -19081,23 +19079,23 @@ object MainForm: TMainForm
             Pen.Color = 15790320
           end
           object hShapePass: TShape
-            Left = 491
-            Top = 17
-            Width = 556
+            Left = 498
+            Top = 18
+            Width = 549
             Height = 72
             Brush.Style = bsClear
             Pen.Color = 14922344
           end
           object hShapeCred: TShape
-            Left = 1
-            Top = 17
+            Left = 0
+            Top = 18
             Width = 484
             Height = 72
             Brush.Style = bsClear
             Pen.Color = 14922344
           end
           object Cap21: TShape
-            Left = 1
+            Left = 0
             Top = 0
             Width = 484
             Height = 19
@@ -19105,9 +19103,9 @@ object MainForm: TMainForm
             Pen.Color = 14922344
           end
           object Cap22: TShape
-            Left = 491
+            Left = 498
             Top = 0
-            Width = 556
+            Width = 549
             Height = 19
             Brush.Color = 14922344
             Pen.Color = 14922344
@@ -19141,7 +19139,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object Text37: TLabel
-            Left = 510
+            Left = 514
             Top = 25
             Width = 90
             Height = 13
@@ -19154,7 +19152,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object Text38: TLabel
-            Left = 510
+            Left = 514
             Top = 44
             Width = 74
             Height = 13
@@ -19167,7 +19165,7 @@ object MainForm: TMainForm
             ParentFont = False
           end
           object Text39: TLabel
-            Left = 510
+            Left = 514
             Top = 63
             Width = 90
             Height = 13
@@ -19218,7 +19216,7 @@ object MainForm: TMainForm
             OnClick = btnUnlockClick
           end
           object btnPassUpdate: TSpeedButton
-            Left = 826
+            Left = 830
             Top = 54
             Width = 75
             Height = 25
@@ -19308,7 +19306,7 @@ object MainForm: TMainForm
             OnKeyPress = EditPasswordKeyPress
           end
           object EditNewPasswordConfirmation: TEdit
-            Left = 611
+            Left = 615
             Top = 62
             Width = 201
             Height = 20
@@ -19330,7 +19328,7 @@ object MainForm: TMainForm
             TabOrder = 0
           end
           object EditCurrentPassword: TEdit
-            Left = 611
+            Left = 615
             Top = 24
             Width = 201
             Height = 20
@@ -19352,7 +19350,7 @@ object MainForm: TMainForm
             TabOrder = 1
           end
           object EditNewPassword: TEdit
-            Left = 611
+            Left = 615
             Top = 43
             Width = 201
             Height = 20
@@ -19373,23 +19371,6 @@ object MainForm: TMainForm
             ShowHint = False
             TabOrder = 2
           end
-        end
-        object TopPanel8: TPanel
-          AlignWithMargins = True
-          Left = 1081
-          Top = 15
-          Width = 188
-          Height = 88
-          Margins.Left = 17
-          Margins.Top = 15
-          Margins.Right = 17
-          Margins.Bottom = 15
-          Align = alClient
-          BevelOuter = bvNone
-          Color = clWhite
-          ParentBackground = False
-          TabOrder = 1
-          ExplicitWidth = 191
         end
       end
       object InnerPanel8Left: TPanel
@@ -19416,7 +19397,7 @@ object MainForm: TMainForm
           Margins.Left = 0
           Margins.Top = 0
           Margins.Right = 0
-          Margins.Bottom = 5
+          Margins.Bottom = 0
           Align = alTop
           Brush.Color = 14922344
           Pen.Color = 14922344
@@ -19425,42 +19406,41 @@ object MainForm: TMainForm
         object ShapeList1: TShape
           AlignWithMargins = True
           Left = 0
-          Top = 29
+          Top = 19
           Width = 1047
           Height = 81
           Margins.Left = 0
-          Margins.Top = 5
+          Margins.Top = 0
           Margins.Right = 0
           Margins.Bottom = 5
           Align = alTop
           Pen.Color = 14922344
-          ExplicitTop = 17
-          ExplicitWidth = 879
+          ExplicitWidth = 1049
         end
         object Text41: TLabel
           Left = 202
-          Top = 79
+          Top = 69
           Width = 40
           Height = 13
           Caption = 'Add Key'
         end
         object Text42: TLabel
           Left = 274
-          Top = 79
+          Top = 69
           Width = 52
           Height = 13
           Caption = 'Delete Key'
         end
         object Text43: TLabel
           Left = 389
-          Top = 79
+          Top = 70
           Width = 38
           Height = 13
           Caption = 'Save All'
         end
         object Text44: TLabel
           Left = 665
-          Top = 45
+          Top = 35
           Width = 344
           Height = 47
           AutoSize = False
@@ -19477,21 +19457,21 @@ object MainForm: TMainForm
         end
         object Text48: TLabel
           Left = 33
-          Top = 79
+          Top = 69
           Width = 57
           Height = 13
           Caption = 'Add Section'
         end
         object Text49: TLabel
           Left = 109
-          Top = 79
+          Top = 69
           Width = 69
           Height = 13
           Caption = 'Delete Section'
         end
         object imgUpdateValues: TImage
           Left = 393
-          Top = 45
+          Top = 35
           Width = 32
           Height = 32
           AutoSize = True
@@ -19536,7 +19516,7 @@ object MainForm: TMainForm
         end
         object imgKeyRemove: TImage
           Left = 287
-          Top = 41
+          Top = 31
           Width = 32
           Height = 32
           AutoSize = True
@@ -19568,7 +19548,7 @@ object MainForm: TMainForm
         end
         object imgSectionRemove: TImage
           Left = 125
-          Top = 41
+          Top = 31
           Width = 32
           Height = 32
           AutoSize = True
@@ -19600,7 +19580,7 @@ object MainForm: TMainForm
         end
         object imgSectionAdd: TImage
           Left = 45
-          Top = 41
+          Top = 31
           Width = 32
           Height = 32
           AutoSize = True
@@ -19620,7 +19600,7 @@ object MainForm: TMainForm
         end
         object imgKeyAdd: TImage
           Left = 207
-          Top = 41
+          Top = 31
           Width = 32
           Height = 32
           AutoSize = True
@@ -19640,14 +19620,14 @@ object MainForm: TMainForm
         end
         object Text50: TLabel
           Left = 458
-          Top = 79
+          Top = 70
           Width = 46
           Height = 13
           Caption = 'Allow edit'
         end
         object imgAllowEdit: TImage
           Left = 464
-          Top = 45
+          Top = 35
           Width = 32
           Height = 32
           AutoSize = True
@@ -19687,28 +19667,28 @@ object MainForm: TMainForm
         end
         object SplitLine1: TBevel
           Left = 526
-          Top = 35
+          Top = 25
           Width = 18
           Height = 68
           Shape = bsLeftLine
         end
         object SplitLine2: TBevel
           Left = 354
-          Top = 35
+          Top = 25
           Width = 18
           Height = 68
           Shape = bsLeftLine
         end
         object SplitLine3: TBevel
           Left = 639
-          Top = 35
+          Top = 25
           Width = 18
           Height = 68
           Shape = bsLeftLine
         end
         object imgEventLog: TImage
           Left = 569
-          Top = 45
+          Top = 35
           Width = 32
           Height = 32
           Cursor = crHandPoint
@@ -19756,14 +19736,14 @@ object MainForm: TMainForm
         end
         object Text51: TLabel
           Left = 547
-          Top = 79
+          Top = 70
           Width = 77
           Height = 13
           Caption = 'Open Event Log'
         end
         object imgOFF: TImage
           Left = 15
-          Top = 35
+          Top = 25
           Width = 1018
           Height = 68
           Cursor = crNo
@@ -19827,9 +19807,9 @@ object MainForm: TMainForm
         object PanelSettingsSections: TPanel
           AlignWithMargins = True
           Left = 0
-          Top = 120
+          Top = 110
           Width = 356
-          Height = 438
+          Height = 448
           Margins.Left = 0
           Margins.Top = 5
           Margins.Right = 5
@@ -19839,13 +19819,14 @@ object MainForm: TMainForm
           Color = clWhite
           ParentBackground = False
           TabOrder = 0
+          ExplicitTop = 120
           ExplicitHeight = 493
           object sgListSection: TStringGrid
             AlignWithMargins = True
             Left = 2
             Top = 2
             Width = 352
-            Height = 434
+            Height = 444
             Margins.Left = 2
             Margins.Top = 2
             Margins.Right = 2
@@ -19883,9 +19864,9 @@ object MainForm: TMainForm
         object PanelSettingsValues: TPanel
           AlignWithMargins = True
           Left = 366
-          Top = 120
+          Top = 110
           Width = 681
-          Height = 438
+          Height = 448
           Margins.Left = 5
           Margins.Top = 5
           Margins.Right = 0
@@ -19895,13 +19876,14 @@ object MainForm: TMainForm
           Color = clWhite
           ParentBackground = False
           TabOrder = 1
+          ExplicitTop = 120
           ExplicitHeight = 493
           object sgListValue: TStringGrid
             AlignWithMargins = True
             Left = 2
             Top = 2
             Width = 677
-            Height = 434
+            Height = 444
             Margins.Left = 2
             Margins.Top = 2
             Margins.Right = 2
@@ -19935,24 +19917,6 @@ object MainForm: TMainForm
               17)
           end
         end
-      end
-      object RightPanel8: TPanel
-        AlignWithMargins = True
-        Left = 1081
-        Top = 118
-        Width = 188
-        Height = 560
-        Margins.Left = 0
-        Margins.Top = 0
-        Margins.Right = 17
-        Margins.Bottom = 15
-        Align = alClient
-        BevelOuter = bvNone
-        Color = clWhite
-        ParentBackground = False
-        TabOrder = 2
-        ExplicitWidth = 191
-        ExplicitHeight = 615
       end
     end
     object TabSheet5: TTabSheet
