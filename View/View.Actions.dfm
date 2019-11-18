@@ -36,7 +36,6 @@ object ActionsForm: TActionsForm
     Color = 15855854
     ParentBackground = False
     TabOrder = 0
-    ExplicitHeight = 797
     object PanelGrid: TPanel
       AlignWithMargins = True
       Left = 9
@@ -1586,7 +1585,7 @@ object ActionsForm: TActionsForm
           AlignWithMargins = True
           Left = 10
           Top = 5
-          Width = 91
+          Width = 315
           Height = 16
           Margins.Left = 10
           Margins.Top = 5
@@ -1602,6 +1601,7 @@ object ActionsForm: TActionsForm
           Font.Style = [fsUnderline]
           ParentColor = False
           ParentFont = False
+          ExplicitWidth = 91
         end
         object DailyComBorders: TShape
           AlignWithMargins = True
@@ -1671,7 +1671,7 @@ object ActionsForm: TActionsForm
           AlignWithMargins = True
           Left = 10
           Top = 5
-          Width = 108
+          Width = 315
           Height = 16
           Margins.Left = 10
           Margins.Top = 5
@@ -1687,6 +1687,7 @@ object ActionsForm: TActionsForm
           Font.Style = [fsUnderline]
           ParentColor = False
           ParentFont = False
+          ExplicitWidth = 108
         end
         object GeneralComBorders: TShape
           AlignWithMargins = True
@@ -1755,7 +1756,7 @@ object ActionsForm: TActionsForm
           AlignWithMargins = True
           Left = 10
           Top = 5
-          Width = 134
+          Width = 315
           Height = 16
           Margins.Left = 10
           Margins.Top = 5
@@ -1771,6 +1772,7 @@ object ActionsForm: TActionsForm
           Font.Style = [fsUnderline]
           ParentColor = False
           ParentFont = False
+          ExplicitWidth = 134
         end
         object HistoryGridBorders: TShape
           AlignWithMargins = True
@@ -1857,7 +1859,6 @@ object ActionsForm: TActionsForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 4
-      ExplicitTop = 747
       object txtFixedText: TLabel
         Left = 19
         Top = 18

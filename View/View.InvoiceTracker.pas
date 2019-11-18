@@ -138,7 +138,7 @@ procedure TTrackerForm.LoadFromGrid();
     begin
         var CustNumber: string:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCustomerNumber, 1, 1), position];
         var CoCode: string:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1), position];
-        Result:=CustNumber + THelpers.ConvertCoCode(CoCode, 'F', 3);
+        Result:=CustNumber + THelpers.CoConvert(CoCode);
     end;
 
 begin

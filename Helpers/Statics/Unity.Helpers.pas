@@ -46,15 +46,14 @@ type
         class function  OleGetStr(RecordsetField: variant): string; static;
         class function  CDate(StrDate: string): TDate; static;
         class function  Explode(Text: string; SourceDelim: char): string; static;
-        class function  Implode(Text: TStrings; TargetDelim: char): string; static;
-        class procedure FindCoData(TargetColumn: integer; TargetGrid: TStringGrid; SourceGrid: TStringGrid); static;
-        class function  ConvertCoCode(CoNumber: string; Prefix: string; mode: integer): string; static;
-        class function  GetCoCode(CoPos: integer; GroupId: string): string; static;
+        class function  Implode(Text: TStrings; TargetDelim: char; ItemsHaveQuotes: boolean = False): string; static;
         class procedure QuickSortExt(var A: array of double; var L: array of integer; iLo, iHi: integer; ASC: boolean); static;
         class function  ExportToCSV(SourceArray: TALists; FileName: string = ''): TStringList; static;
         class function  IsVoType(VoType: string): boolean; static;
         class function  ShowReport(ReportNumber: cardinal; CurrentForm: TForm): cardinal; static;
-        class procedure ReturnCoCodesList(var SourceGrid: TStringGrid; const SourceCol: integer; var TargetList: TStringList; HasHeader: boolean = False); static;
+        class procedure ReturnCoCodesList(var SourceGrid: TStringGrid; const SourceCol: integer; var TargetList: TStringList; HasHeader: boolean = False; Prefix: string = ''); static;
+        class function  CoConvert(CoNumber: string): string; static;
+        class function  GetSourceDBName(CoCode: string; Prefix: string): string; static;
     end;
 
 
@@ -196,12 +195,14 @@ begin
 end;
 
 
-/// <summary>
-/// Use this when dealing with database and/or datasets/recordset results, field may be null and thus must be converted into string type.
-/// </summary>
-
 class function THelpers.OleGetStr(RecordsetField: variant): string;
 begin
+
+    // ----------------------------------------------------------------------
+    // Use this when dealing with database and/or datasets/recordset results,
+    // field may be null and thus must be converted into string type.
+    // ----------------------------------------------------------------------
+
     {$D-}
     try
         OleGetStr:=RecordsetField;
@@ -210,6 +211,7 @@ begin
         OleGetStr:=VarToStr(RecordsetField);
     end;
     {$D+}
+
 end;
 
 
@@ -225,122 +227,25 @@ begin
 end;
 
 
-class function THelpers.Implode(Text: TStrings; TargetDelim: char): string;
+class function THelpers.Implode(Text: TStrings; TargetDelim: char; ItemsHaveQuotes: boolean = False): string;
 begin
 
     var Str: string;
+    var Quote: string;
 
-    for var iCNT: integer:=0 to Text.Count do
+    if ItemsHaveQuotes then Quote:='''';
+
+    for var iCNT:=0 to Text.Count - 1 do
     begin
-        if iCNT < Text.Count then
-            Str:=Str + Text.Strings[iCNT] + TargetDelim
+
+        if iCNT < Text.Count - 1 then
+            Str:=Str + Quote + Text.Strings[iCNT] + Quote + TargetDelim
                 else
-                    Str:=Str + Text.Strings[iCNT];
+                    Str:=Str + Quote + Text.Strings[iCNT] + Quote;
+
     end;
 
     Result:=Str;
-
-end;
-
-
-{Legacy}
-class procedure THelpers.FindCoData(TargetColumn: integer; TargetGrid: TStringGrid; SourceGrid: TStringGrid);
-begin
-
-    if SourceGrid.RowCount = 0 then Exit;
-
-    for var iCNT: integer:=1 to SourceGrid.RowCount - 1 do
-    begin
-        if TargetGrid.Cells[TargetColumn, 0] = SourceGrid.Cells[SourceGrid.ReturnColumn(TCompanyData.CoCode, 1, 1), iCNT] then
-        begin
-            TargetGrid.Cells[TargetColumn, 1]:=SourceGrid.Cells[SourceGrid.ReturnColumn(TCompanyData.CoCurrency, 1, 1), iCNT];
-            TargetGrid.Cells[TargetColumn, 2]:=SourceGrid.Cells[SourceGrid.ReturnColumn(TCompanyData.Divisions,  1, 1), iCNT];
-            TargetGrid.Cells[TargetColumn, 3]:=SourceGrid.Cells[SourceGrid.ReturnColumn(TCompanyData.Agents,     1, 1), iCNT];
-            Break;
-        end
-        else
-        begin
-            TargetGrid.Cells[TargetColumn, 1]:=TUnknown.NA;
-            TargetGrid.Cells[TargetColumn, 2]:=TUnknown.NA;
-            TargetGrid.Cells[TargetColumn, 3]:=TUnknown.NA;
-        end;
-    end;
-
-end;
-
-
-{Legacy}
-class function THelpers.ConvertCoCode(CoNumber: string; Prefix: string; mode: integer): string;
-begin
-
-    Result:= '';
-
-    /// <remarks>
-    /// Used only for open items and aging view.
-    /// </remarks>
-
-    // Allow to convert '2020' to 'F2020', etc.
-    if mode = 0 then
-    begin
-        if Length(CoNumber) = 4 then Result:=Prefix + CoNumber;
-        if Length(CoNumber) = 3 then Result:=Prefix + '0'  + CoNumber;
-        if Length(CoNumber) = 2 then Result:=Prefix + '00' + CoNumber;
-    end;
-
-    /// <remarks>
-    /// Used only to build GroupID.
-    /// </remarks>
-
-    // Converts from 2020 to 02020, 340 to 00340 and so on.
-    if mode = 1 then
-    begin
-        if Length(CoNumber) = 4 then Result:='0'   + CoNumber;
-        if Length(CoNumber) = 3 then Result:='00'  + CoNumber;
-        if Length(CoNumber) = 2 then Result:='000' + CoNumber;
-        if Length(CoNumber) = 1 then Result:='00000';
-    end;
-
-    // Converts from 02020 to 2020.
-    if mode = 2 then
-    begin
-        for var iCNT: integer:= 1 to Length(CoNumber) do
-        begin
-            if CoNumber[iCNT] <> '0' then
-            begin
-                Result:=System.Copy(CoNumber, iCNT, MaxInt);
-                Exit;
-            end;
-        end;
-    end;
-
-    // Converts from 2020 to 2020, 340 to 0340... .
-    if mode = 3 then
-    begin
-        if Length(CoNumber) = 4 then Result:=CoNumber;
-        if Length(CoNumber) = 3 then Result:='0'   + CoNumber;
-        if Length(CoNumber) = 2 then Result:='00'  + CoNumber;
-        if Length(CoNumber) = 1 then Result:='000' + CoNumber;
-    end;
-
-end;
-
-
-{Legacy}
-class function THelpers.GetCoCode(CoPos: integer; GroupId: string): string;
-begin
-
-    /// <remarks>
-    /// Return specific CoCode from the given group.
-    /// Group id format: series of 4 groups of 5 digits, i.e.: '020470034000043' must be read as follows:
-    /// 1. 1ST CO CODE: 02047 (2047)
-    /// 2. 2ND CO CODE: 00340 (340)
-    /// 3. 3RD CO CODE: 00043 (43)
-    /// 4. 4TH CO CODE: 00000 (0)
-    /// </remarks>
-    if CoPos = 1 then Result:=(MidStr(GroupId, 1,  5).ToInteger).toString;
-    if CoPos = 2 then Result:=(MidStr(GroupId, 6,  5).ToInteger).toString;
-    if CoPos = 3 then Result:=(MidStr(GroupId, 11, 5).ToInteger).toString;
-    if CoPos = 4 then Result:=(MidStr(GroupId, 16, 5).ToInteger).toString;
 
 end;
 
@@ -480,7 +385,7 @@ begin
 end;
 
 
-class procedure THelpers.ReturnCoCodesList(var SourceGrid: TStringGrid; const SourceCol: integer; var TargetList: TStringList; HasHeader: boolean = False);
+class procedure THelpers.ReturnCoCodesList(var SourceGrid: TStringGrid; const SourceCol: integer; var TargetList: TStringList; HasHeader: boolean = False; Prefix: string = '');
 begin
 
     if (not Assigned(SourceGrid)) or (not Assigned(TargetList)) or (not SourceCol > 0 ) then Exit();
@@ -494,10 +399,34 @@ begin
 
     for var iCNT:=StartRowValue to SourceGrid.RowCount - 1 do
     begin
-        var Data: string:=SourceGrid.Cells[SourceCol, iCNT];
-        if not String.IsNullOrWhitespace(Data) then TargetList.Add(Data);
+
+        var CoCode: string:=SourceGrid.Cells[SourceCol, iCNT];
+
+        if not String.IsNullOrWhiteSpace(Prefix) then
+            CoCode:=CoConvert(CoCode);
+
+        if not String.IsNullOrWhitespace(CoCode) then
+                TargetList.Add(Prefix + CoCode);
+
     end;
 
+end;
+
+
+class function THelpers.CoConvert(CoNumber: string): string;
+begin
+    if Length(CoNumber) = 4 then Result:=CoNumber;
+    if Length(CoNumber) = 3 then Result:='0'   + CoNumber;
+    if Length(CoNumber) = 2 then Result:='00'  + CoNumber;
+    if Length(CoNumber) = 1 then Result:='000' + CoNumber;
+end;
+
+
+class function THelpers.GetSourceDBName(CoCode: string; Prefix: string): string;
+begin
+    if Length(CoCode) = 4 then Result:=Prefix + CoCode;
+    if Length(CoCode) = 3 then Result:=Prefix + '0'  + CoCode;
+    if Length(CoCode) = 2 then Result:=Prefix + '00' + CoCode;
 end;
 
 

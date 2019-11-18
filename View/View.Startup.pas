@@ -352,7 +352,6 @@ begin
         // Setup timers, some of them may be removed after introducing REST API.
         // ---------------------------------------------------------------------
 
-        MainAppForm.TimerInvoiceScanner.Interval:=Settings.GetIntegerValue(TConfigSections.TimersSettings, 'INVOICE_SCANNER', 900000{15 minutes});
         MainAppForm.TimerFollowUp.Interval:=Settings.GetIntegerValue(TConfigSections.TimersSettings, 'FOLLOWUP_CHECKER', 1800000{30 minutes});
         MainAppForm.TimerCustOpenItems.Interval:=Settings.GetIntegerValue(TConfigSections.TimersSettings, 'OI_LOADER', 300000{5 minutes});
 
@@ -503,20 +502,20 @@ begin
 
         try
 
-            UserControl.UserName:=SessionService.SessionUser;
-            MainAppForm.FAccessLevel:=UserControl.GetAccessData(TUserAccess.TTypes.AccessLevel);
-
-            // Quit if username is not found
-            if MainAppForm.FAccessLevel = '' then
-            begin
-                LastErrorMsg:='Cannot find account for user alias ' + UpperCase(SessionService.SessionUser);
-                Result:=False;
-            end else
-            begin
-                MainAppForm.FAccessMode:=UserControl.GetAccessData(TUserAccess.TTypes.AccessMode);
-                UserControl.GetGroupList(MainAppForm.FGroupList);
-                UserControl.GetAgeDates(MainAppForm.FAgeDateList, MainAppForm.FGroupList[0, 0]);
-            end;
+//            UserControl.UserName:=SessionService.SessionUser;
+//            MainAppForm.FAccessLevel:=UserControl.GetAccessData(TUserAccess.TTypes.AccessLevel);
+//
+//            // Quit if username is not found
+//            if MainAppForm.FAccessLevel = '' then
+//            begin
+//                LastErrorMsg:='Cannot find account for user alias ' + UpperCase(SessionService.SessionUser);
+//                Result:=False;
+//            end else
+//            begin
+//                MainAppForm.FAccessMode:=UserControl.GetAccessData(TUserAccess.TTypes.AccessMode);
+//                UserControl.GetGroupList(MainAppForm.FGroupList);
+//                UserControl.GetAgeDates(MainAppForm.FAgeDateList, MainAppForm.FGroupList[0, 0]);
+//            end;
 
         except
             on E: Exception do
@@ -542,16 +541,16 @@ begin
     var Utilities: IUtilities:=TUtilities.Create();
     try
 
-        Utilities.GeneralTablesAsync(TSalesResponsible.SalesResponsible, MainAppForm.sgSalesResp, GeneralTables_Callback);
-        Utilities.GeneralTablesAsync(TPersonResponsible.PersonResponsible, MainAppForm.sgPersonResp, GeneralTables_Callback);
-        Utilities.GeneralTablesAsync(TAccountType.AccountType, MainAppForm.sgAccountType, GeneralTables_Callback);
-        Utilities.GeneralTablesAsync(TCustomerGroup.CustomerGroup, MainAppForm.sgCustomerGr, GeneralTables_Callback);
-        Utilities.GeneralTablesAsync(TGroup3.Group3, MainAppForm.sgGroup3, GeneralTables_Callback);
-        Utilities.GeneralTablesAsync(TCompanyData.CompanyData, MainAppForm.sgCoCodes, GeneralTables_Callback);
-        Utilities.GeneralTablesAsync(TPaymentTerms.PaymentTerms, MainAppForm.sgPmtTerms, GeneralTables_Callback);
-        Utilities.GeneralTablesAsync(TPaidinfo.Paidinfo, MainAppForm.sgPaidInfo, GeneralTables_Callback);
-        Utilities.GeneralTablesAsync(TPerson.Person, MainAppForm.sgPerson, GeneralTables_Callback);
-        Utilities.GeneralTablesAsync(TControlStatus.ControlStatus, MainAppForm.sgControlStatus, GeneralTables_Callback);
+        Utilities.GeneralTablesAsync(TSalesResponsible.SalesResponsible, MainAppForm.sgSalesResp, GeneralTables_Callback, '', '', True);
+        Utilities.GeneralTablesAsync(TPersonResponsible.PersonResponsible, MainAppForm.sgPersonResp, GeneralTables_Callback, '', '', True);
+        Utilities.GeneralTablesAsync(TAccountType.AccountType, MainAppForm.sgAccountType, GeneralTables_Callback, '', '', True);
+        Utilities.GeneralTablesAsync(TCustomerGroup.CustomerGroup, MainAppForm.sgCustomerGr, GeneralTables_Callback, '', '', True);
+        Utilities.GeneralTablesAsync(TGroup3.Group3, MainAppForm.sgGroup3, GeneralTables_Callback, '', '', True);
+        Utilities.GeneralTablesAsync(TCompanyData.CompanyData, MainAppForm.sgCoCodes, GeneralTables_Callback, '', '', True);
+        Utilities.GeneralTablesAsync(TPaymentTerms.PaymentTerms, MainAppForm.sgPmtTerms, GeneralTables_Callback, '', '', True);
+        Utilities.GeneralTablesAsync(TPaidinfo.Paidinfo, MainAppForm.sgPaidInfo, GeneralTables_Callback, '', '', True);
+        Utilities.GeneralTablesAsync(TPerson.Person, MainAppForm.sgPerson, GeneralTables_Callback, '', '', True);
+        Utilities.GeneralTablesAsync(TControlStatus.ControlStatus, MainAppForm.sgControlStatus, GeneralTables_Callback, '', '', True);
 
     except
         on E: Exception do

@@ -182,7 +182,7 @@ begin
         Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), MainForm.sgAgeView.Row]);
         Item.SubItems.Add(
             MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCustomerNumber, 1, 1), MainForm.sgAgeView.Row] +
-            THelpers.ConvertCoCode(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1), MainForm.sgAgeView.Row], 'F', 3)
+            THelpers.CoConvert(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1), MainForm.sgAgeView.Row])
         );
 
         Item.SubItems.Add('empty');
@@ -213,7 +213,7 @@ begin
                 Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), iCNT]);
                 Item.SubItems.Add(
                     MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCustomerNumber, 1, 1), iCNT] +
-                    THelpers.ConvertCoCode(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT], 'F', 3)
+                    THelpers.CoConvert(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT])
                 );
 
                 Item.SubItems.Add('empty');
@@ -371,8 +371,8 @@ begin
     FPayLoad.ControlStatus :=MainForm.sgControlStatus;
     FPayLoad.CtrlStatusRefs:=MainForm.FCtrlStatusRefs;
 
-    var Statements: IStatements:=TStatements.Create();
-    Statements.SendAccountStatements(MainForm.FAgeDateSel, FPayLoad, SendAccountStatements_Callback);
+    //var Statements: IStatements:=TStatements.Create();
+    //Statements.SendAccountStatements(MainForm.FAgeDateSel, FPayLoad, SendAccountStatements_Callback);
 
     // ---------------------
     // Display await window.

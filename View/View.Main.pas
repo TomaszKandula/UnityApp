@@ -243,8 +243,6 @@ type
         TimerCustOpenItems: TTimer;
         Text82: TLabel;
         tcOvdAmt: TLabel;
-        GroupListBox: TComboBox;
-        GroupListDates: TComboBox;
         Text31: TLabel;
         procRISKA: TLabel;
         procRISKB: TLabel;
@@ -266,7 +264,6 @@ type
         Action_ShowAll: TMenuItem;
         Action_LyncCall: TMenuItem;
         TrayIcon: TTrayIcon;
-        TimerInvoiceScanner: TTimer;
         Action_ShowRegistered: TMenuItem;
         N8: TMenuItem;
         TimerConnection: TTimer;
@@ -512,6 +509,7 @@ type
         Bevel3: TBevel;
         Bevel4: TBevel;
         PanelSettingsHeader: TPanel;
+    txtCutOffDate: TLabel;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
@@ -582,7 +580,6 @@ type
         procedure sgPersonMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure sgOpenItemsDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
         procedure TimerCustOpenItemsTimer(Sender: TObject);
-        procedure GroupListBoxSelect(Sender: TObject);
         procedure EditGroupNameKeyPress(Sender: TObject; var Key: Char);
         procedure sgAgeViewMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure sgAgeViewMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
@@ -596,7 +593,6 @@ type
         procedure Action_ShowAllClick(Sender: TObject);
         procedure TabSheet4Show(Sender: TObject);
         procedure Action_LyncCallClick(Sender: TObject);
-        procedure TimerInvoiceScannerTimer(Sender: TObject);
         procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure TrayIconDblClick(Sender: TObject);
         procedure TimerConnectionTimer(Sender: TObject);
@@ -691,8 +687,6 @@ type
         procedure sgAddressBookMouseEnter(Sender: TObject);
         procedure sgOpenItemsMouseEnter(Sender: TObject);
         procedure sgAgeViewMouseEnter(Sender: TObject);
-        procedure GroupListBoxMouseEnter(Sender: TObject);
-        procedure GroupListDatesMouseEnter(Sender: TObject);
         procedure SortListBoxMouseEnter(Sender: TObject);
         procedure sgOpenItemsKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure sgInvoiceTrackerKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -850,38 +844,29 @@ type
         procedure MapTable2(var Grid: TStringGrid; var Source: TStringGrid);
         procedure MapTable3(var Grid: TStringGrid; var Source: TStringGrid);
         procedure MapTable4(var Grid: TStringGrid; var Source: TStringGrid);
-        function GetData(Code: string; Table: string; Entity: string): string; // split into awaited functions (1)
+        function  GetData(Code: string; Table: string; Entity: string): string; // split into awaited functions (1)
         procedure OpenAddressBook_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
         procedure UpdateAddressBook_Callback(CallResponse: TCallResponse);
         procedure AddToAddressBook_Callback(CallResponse: TCallResponse);
         procedure ReadAgeView_Callback(ActionMode: TLoading; ReturnedData: TStringGrid; CallResponse: TCallResponse);
         procedure ScanOpenItems_Callback(CanMakeAge: boolean; ReadDateTime: string; CallResponse: TCallResponse);
-        procedure ReadOpenItems_Callback(ActionMode: TLoading; OpenItemsData: TOpenItemsPayLoad; CallResponse: TCallResponse);
+        procedure ReadOpenItems_Callback(OpenItemsData: TOpenItemsPayLoad; CallResponse: TCallResponse);
         procedure CheckGivenPassword_Callback(CallResponse: TCallResponse);
         procedure SetNewPassword_Callback(CallResponse: TCallResponse);
         procedure CheckServerConn_Callback(IsConnected: boolean; CallResponse: TCallResponse);
         procedure ExcelExport_Callback(CallResponse: TCallResponse);
         procedure RefreshInvoiceTracker_Callback(InvoiceList: TStringGrid; CallResponse: TCallResponse);
         procedure DeleteFromTrackerList_Callback(CallResponse: TCallResponse);
-    public // remove!!!
-        // Legacy code, to be removed [start]
-        var FGroupIdSel:      string;
-        var FGroupNmSel:      string;
-        var FAgeDateSel:      string;
-        var FAccessLevel:     string;
-        var FAccessMode:      string;
-        var FOpenItemsUpdate: string;
-        var FOpenItemsStatus: string;
+    public
+        // Legacy code, to be removed !!! [start]
         var FOSAmount:        double;
         var FIsConnected:     boolean;
         procedure TryInitConnection;
-        // Legacy code, to be removed [end]
-        // replace by callbacks from async methods [start] (3)
         procedure CallbackAwaitForm(PassMsg: TMessage);
         procedure CallbackStatusBar(PassMsg: TMessage);
         procedure CallbackMessageBox(PassMsg: TMessage);
         procedure WndMessagesInternal(PassMsg: TMessage);
-        // replace by callbacks from async methods [end]
+        // Legacy code, to be removed !!! [end]
     public
         var FClass_A:        double;
         var FClass_B:        double;
@@ -892,6 +877,8 @@ type
         var FGridPicture:    TImage;
         var FOpenItemsRefs:  TFOpenItemsRefs;
         var FCtrlStatusRefs: TFCtrlStatusRefs;
+        var FOpenItemsUpdate: string;
+        var FOpenItemsStatus: string;
         procedure SetActiveTabsheet(TabSheet: TTabSheet);
         procedure ResetTabsheetButtons();
         procedure UpdateAgeSummary();
@@ -1112,7 +1099,6 @@ begin
     MainForm.ComputeAgeSummary(MainForm.sgAgeView); // make async!
     MainForm.ComputeRiskClass(MainForm.sgAgeView);
     MainForm.UpdateAgeSummary();
-
     ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Age View summary information updated.');
 
     // ---------------------------------------------------------------
@@ -1127,34 +1113,36 @@ begin
     MainForm.MapTable4(MainForm.sgAgeView, MainForm.sgCustomerGr);
     ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Mapping performed.');
 
-    // -------------------------------------
-    // Unlock the component and repaint VCL.
-    // -------------------------------------
-
     MainForm.LoadColumnWidth(MainForm.sgAgeView);
     MainForm.SwitchTimers(TurnedOn);
     THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
     THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
     ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: VCL unlocked and repainted.');
 
-//    // ----------------------------------------------------
-//    // Call open items loading after aging is presented.
-//    // Do not load open items if age view cannot be loaded.
-//    // ----------------------------------------------------
-//
-//    if ActionMode = TLoading.CallOpenItems then
-//    begin
-//
-//        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Downloading, MainForm);
-//        ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Calling method "ReadOpenItemsAsync".');
-//
-//        MainForm.ClearOpenItemsSummary();
-//        MainForm.sgOpenItems.Freeze(True);
-//
-//        var OpenItems: IOpenItems:=TOpenItems.Create();
-//        //OpenItems.ReadOpenItemsAsync(TLoading.NullParameter, sgOpenItems, sgCompanyData, ReadOpenItems_Callback);
-//
-//    end;
+    THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Downloading, MainForm);
+    ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Calling method "ReadOpenItemsAsync".');
+
+    MainForm.ClearOpenItemsSummary();
+    MainForm.sgOpenItems.Freeze(True);
+
+    var OpenItems: IOpenItems:=TOpenItems.Create();
+    var CoCodeList:=TStringList.Create();
+    try
+
+        THelpers.ReturnCoCodesList(
+            MainForm.sgAgeView,
+            MainForm.sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1),
+            CoCodeList,
+            True,
+            'F'
+        );
+
+        var CodesStringList:=THelpers.Implode(CoCodeList, ',', True);
+        OpenItems.ReadOpenItemsAsync(sgOpenItems, CodesStringList, ReadOpenItems_Callback);
+
+    finally
+        CoCodeList.Free();
+    end;
 
 end;
 
@@ -1163,46 +1151,7 @@ end;
 // Async.OpenItems callback methods.
 // ---------------------------------
 
-procedure TMainForm.ScanOpenItems_Callback(CanMakeAge: boolean; ReadDateTime: string; CallResponse: TCallResponse);
-begin
-
-    if not CallResponse.IsSucceeded then
-    begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
-        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
-        THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
-        ThreadFileLog.Log('[ScanOpenItemsAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
-        Exit();
-    end;
-
-    FOpenItemsUpdate:=ReadDateTime;
-    FOpenItemsStatus:='';
-
-    if CanMakeAge then
-    begin
-
-        // -----------------------------------------------------
-        // Get latest open items and allow to make aging report.
-        // -----------------------------------------------------
-
-        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Downloading, MainForm);
-        ClearOpenItemsSummary();
-        sgOpenItems.Freeze(True);
-
-        ThreadFileLog.Log('[ReadOpenItemsAsync_Callback]: Calling method "MakeAgeViewSQLAsync".');
-        var OpenItems: IOpenItems:=TOpenItems.Create();
-        //OpenItems.ReadOpenItemsAsync(TLoading.CallMakeAge, sgOpenItems, sgCompanyData, ReadOpenItems_Callback);
-
-    end
-    else
-    begin
-        ThreadFileLog.Log('[ScanOpenItemsAsync_Callback]: Open Items check result is "nothing to update".');
-    end;
-
-end;
-
-
-procedure TMainForm.ReadOpenItems_Callback(ActionMode: TLoading; OpenItemsData: TOpenItemsPayLoad; CallResponse: TCallResponse);
+procedure TMainForm.ReadOpenItems_Callback(OpenItemsData: TOpenItemsPayLoad; CallResponse: TCallResponse);
 begin
 
     sgOpenItems.Freeze(False);
@@ -1227,21 +1176,51 @@ begin
     MainForm.sgOpenItems.SetColWidth(10, 20, 400);
     THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
 
-//    // -----------------------------------------------------
-//    // Make age view from open items and send to SQL Server.
-//    // -----------------------------------------------------
-//
-//    if ActionMode = CallMakeAge then
-//    begin
-//
-//        //MainForm.cbDump.Checked:=False;
-//        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Generating, MainForm);
-//
-//        ThreadFileLog.Log('[ReadOpenItemsAsync_Callback]: Calling method "MakeAgeViewSQLAsync".');
-//        var Debtors: IDebtors:=TDebtors.Create();
-//        Debtors.MakeAgeViewSQLAsync(FOSAmount, FGroupIdSel, sgOpenItems, sgCompanyData, MakeAgeViewSQL_Callback);
-//
-//    end;
+end;
+
+
+procedure TMainForm.ScanOpenItems_Callback(CanMakeAge: boolean; ReadDateTime: string; CallResponse: TCallResponse);
+begin
+
+    if not CallResponse.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
+        THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
+        ThreadFileLog.Log('[ScanOpenItemsAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+        Exit();
+    end;
+
+    FOpenItemsUpdate:=ReadDateTime;
+    FOpenItemsStatus:='';
+
+    // -----------------------------------------------------
+    // Get latest open items and allow to make aging report.
+    // -----------------------------------------------------
+
+    THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Downloading, MainForm);
+    ClearOpenItemsSummary();
+    sgOpenItems.Freeze(True);
+
+    ThreadFileLog.Log('[ReadOpenItemsAsync_Callback]: Calling method "ReadOpenItemsAsync".');
+    var OpenItems: IOpenItems:=TOpenItems.Create();
+    var CoCodeList:=TStringList.Create();
+    try
+
+        THelpers.ReturnCoCodesList(
+            MainForm.sgAgeView,
+            MainForm.sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1),
+            CoCodeList,
+            True,
+            'F'
+        );
+
+        var CodesStringList:=THelpers.Implode(CoCodeList, ',', True);
+        OpenItems.ReadOpenItemsAsync(sgOpenItems, CodesStringList, ReadOpenItems_Callback);
+
+    finally
+        CoCodeList.Free();
+    end;
 
 end;
 
@@ -1577,8 +1556,8 @@ begin
     if PassMsg.LParam > 0 then
     begin
 
-        FDailyCommentFields.GroupIdSel   :=FGroupIdSel;
-        FDailyCommentFields.AgeDateSel   :=FAgeDateSel;
+//        FDailyCommentFields.GroupIdSel   :=FGroupIdSel;
+//        FDailyCommentFields.AgeDateSel   :=FAgeDateSel;
         FDailyCommentFields.CUID         :=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), sgAgeView.Row];
         FDailyCommentFields.Email        :=False;
         FDailyCommentFields.CallEvent    :=True;
@@ -1731,14 +1710,14 @@ begin
     var Queries: IQueries:=TQueries.Create;
     Queries.InitializeQms;
 
-    if FAccessLevel <> TUserAccess.Admin then
-    begin
-        //sgCompanyData.Enabled:=False;
-        GroupListDates.Enabled:=False;
-    end;
+//    if FAccessLevel <> TUserAccess.Admin then
+//    begin
+//        //sgCompanyData.Enabled:=False;
+//        //GroupListDates.Enabled:=False;
+//    end;
 
-    GroupListBox.ListToComboBox(FGroupList, 1, TListSelection.First);
-    GroupListDates.ListToComboBox(FAgeDateList, 0, TListSelection.Last);
+    //GroupListBox.ListToComboBox(FGroupList, 1, TListSelection.First);
+    //GroupListDates.ListToComboBox(FAgeDateList, 0, TListSelection.Last);
 
 end;
 
@@ -1758,37 +1737,45 @@ begin
             TThread.Synchronize(nil, procedure
             begin
 
+                var OpenItems: IOpenItems:=TOpenItems.Create();
+
+                FOpenItemsUpdate:=OpenItems.GetDateTimeAwaited(DateTime);
+                FOpenItemsStatus:=OpenItems.GetStatusAwaited(FOpenItemsUpdate);
+
+                DataUpdated.Caption:=FOpenItemsUpdate;
+                txtCutOffDate.Caption:='n/a';
+
                 // Load (async) default age snapshot
-                if not(string.IsNullOrEmpty(GroupListBox.Text)) and not(string.IsNullOrEmpty(GroupListDates.Text)) then
-                begin
-
-                    FGroupIdSel:=FGroupList[GroupListBox.ItemIndex, 0];
-                    FGroupNmSel:=FGroupList[GroupListBox.ItemIndex, 1];
-                    FAgeDateSel:=GroupListDates.Text;
-                    sgAgeView.Enabled:=True;
-
-                    var OpenItems: IOpenItems:=TOpenItems.Create();
-
-                    FOpenItemsUpdate:=OpenItems.GetDateTimeAwaited(DateTime);
-                    FOpenItemsStatus:=OpenItems.GetStatusAwaited(FOpenItemsUpdate);
-
-                    THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Loading, MainForm);
-                    THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Show.ToString, MainForm);
-                    MainForm.ClearAgeSummary();
-
-                    if string.IsNullOrEmpty(FOpenItemsUpdate) then
-                    begin
-                        THelpers.MsgCall(TAppMessage.Warn, 'Cannot find open items in database. Please contact IT support.');
-                        var Debtors: IDebtors:=TDebtors.Create();
-                        Debtors.ReadAgeViewAsync(TLoading.NullParameter, TSorting.TMode.Ranges, FGroupIdSel, FAgeDateSel, ReadAgeView_Callback);
-                    end
-                    else
-                    begin
-                        var Debtors: IDebtors:=TDebtors.Create();
-                        Debtors.ReadAgeViewAsync(TLoading.CallOpenItems, TSorting.TMode.Ranges, FGroupIdSel, FAgeDateSel, ReadAgeView_Callback);
-                    end;
-
-                end;
+//                if not(string.IsNullOrEmpty(GroupListBox.Text)) and not(string.IsNullOrEmpty(GroupListDates.Text)) then
+//                begin
+//
+//                    FGroupIdSel:=FGroupList[GroupListBox.ItemIndex, 0];
+//                    FGroupNmSel:=FGroupList[GroupListBox.ItemIndex, 1];
+//                    FAgeDateSel:=GroupListDates.Text;
+//                    sgAgeView.Enabled:=True;
+//
+//                    var OpenItems: IOpenItems:=TOpenItems.Create();
+//
+//                    FOpenItemsUpdate:=OpenItems.GetDateTimeAwaited(DateTime);
+//                    FOpenItemsStatus:=OpenItems.GetStatusAwaited(FOpenItemsUpdate);
+//
+//                    THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Loading, MainForm);
+//                    THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Show.ToString, MainForm);
+//                    MainForm.ClearAgeSummary();
+//
+//                    if string.IsNullOrEmpty(FOpenItemsUpdate) then
+//                    begin
+//                        THelpers.MsgCall(TAppMessage.Warn, 'Cannot find open items in database. Please contact IT support.');
+//                        var Debtors: IDebtors:=TDebtors.Create();
+//                        Debtors.ReadAgeViewAsync(TLoading.NullParameter, TSorting.TMode.Ranges, FGroupIdSel, FAgeDateSel, ReadAgeView_Callback);
+//                    end
+//                    else
+//                    begin
+//                        var Debtors: IDebtors:=TDebtors.Create();
+//                        Debtors.ReadAgeViewAsync(TLoading.CallOpenItems, TSorting.TMode.Ranges, FGroupIdSel, FAgeDateSel, ReadAgeView_Callback);
+//                    end;
+//
+//                end;
 
             end);
 
@@ -1962,14 +1949,12 @@ begin
 
         TurnedOn:
         begin
-            TimerInvoiceScanner.Enabled:=True;
             TimerFollowUp.Enabled:=True;
             TimerCustOpenItems.Enabled:=True;
         end;
 
         TurnedOff:
         begin
-            TimerInvoiceScanner.Enabled:=False;
             TimerFollowUp.Enabled:=False;
             TimerCustOpenItems.Enabled:=False;
         end;
@@ -2032,10 +2017,6 @@ begin
 
     MainForm.tcTOTAL.Caption:=IntToStr(CustAll);
 
-    // --------------------------
-    // Trade receivables summary.
-    // --------------------------
-
     valND.Caption  :=FormatFloat('#,##0.00', ANotDue);
     valR1.Caption  :=FormatFloat('#,##0.00', ARange1);
     valR2.Caption  :=FormatFloat('#,##0.00', ARange2);
@@ -2063,20 +2044,12 @@ begin
                                                            (ARange6 / Balance) ) * 100 ) ) + '%';
     end;
 
-    // --------------------
-    // Update risk classes.
-    // --------------------
-
     valRISKA.Caption :=FormatFloat('#,##0.00', RCA);
     valRISKB.Caption :=FormatFloat('#,##0.00', RCB);
     valRISKC.Caption :=FormatFloat('#,##0.00', RCC);
     custRISKA.Caption:=IntToStr(RCAcount) + ' customers';
     custRISKB.Caption:=IntToStr(RCBcount) + ' customers';
     custRISKC.Caption:=IntToStr(RCCcount) + ' customers';
-
-    // ----------------------------
-    // Update exceeders and ranges.
-    // ----------------------------
 
     valEXCEEDERS.Caption:=IntToStr(Exceeders);
     valTEXCEES.Caption  :=FormatFloat('#,##0.00', TotalExceed);
@@ -2094,10 +2067,6 @@ begin
     for var iCNT: integer:=1 to Grid.RowCount - 1 do if Grid.RowHeights[iCNT] <> Grid.sgRowHidden then
     begin
 
-        // ---------------------------
-        // Not due and overdue ranges.
-        // ---------------------------
-
         ANotDue:=ANotDue + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fNotDue, 1, 1), iCNT], 0);
         ARange1:=ARange1 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRange1, 1, 1), iCNT], 0);
         ARange2:=ARange2 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRange2, 1, 1), iCNT], 0);
@@ -2106,21 +2075,9 @@ begin
         ARange5:=ARange5 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRange5, 1, 1), iCNT], 0);
         ARange6:=ARange6 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRange6, 1, 1), iCNT], 0);
 
-        // -----------------------------
-        // Total amount, ledger balance.
-        // -----------------------------
-
         Balance:=Balance + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fTotal, 1, 1), iCNT], 0);
 
-        // -------------------------------------------------
-        // Granted limit, sum of all assigned credit limits.
-        // -------------------------------------------------
-
         Limits:=Limits + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCreditLimit, 1, 1), iCNT], 0);
-
-        // ------------------
-        // Compute exceeders.
-        // ------------------
 
         if StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCreditBalance, 1, 1), iCNT], 0) < 0 then
         begin
@@ -2236,7 +2193,7 @@ begin
         )
         and
         (
-            THelpers.ConvertCoCode(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT], 'F', 0) = Source.Cells[Source.ReturnColumn(TPersonResponsible.SourceDBName, 1, 1), jCNT]
+            THelpers.GetSourceDBName(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT], 'F') = Source.Cells[Source.ReturnColumn(TPersonResponsible.SourceDBName, 1, 1), jCNT]
         )
         then
             Grid.Cells[Grid.ReturnColumn(TSnapshots.fPersonResponsible, 1, 1), iCNT]:=Source.Cells[Source.ReturnColumn(TPersonResponsible.ErpCode, 1, 1), jCNT]
@@ -2255,7 +2212,7 @@ begin
         )
         and
         (
-            THelpers.ConvertCoCode(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT], 'F', 0) = Source.Cells[Source.ReturnColumn(TSalesResponsible.SourceDBName, 1, 1), jCNT]
+            THelpers.GetSourceDBName(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT], 'F') = Source.Cells[Source.ReturnColumn(TSalesResponsible.SourceDBName, 1, 1), jCNT]
         )
         then
             Grid.Cells[Grid.ReturnColumn(TSnapshots.fSalesResponsible, 1, 1), iCNT]:=Source.Cells[Source.ReturnColumn(TSalesResponsible.ErpCode, 1, 1), jCNT]
@@ -2274,7 +2231,7 @@ begin
         )
         and
         (
-            THelpers.ConvertCoCode(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT], 'F', 0) = Source.Cells[Source.ReturnColumn(TAccountType.SourceDBName, 1, 1), jCNT]
+            THelpers.GetSourceDBName(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT], 'F') = Source.Cells[Source.ReturnColumn(TAccountType.SourceDBName, 1, 1), jCNT]
         )
         then
             Grid.Cells[Grid.ReturnColumn(TSnapshots.fAccountType, 1, 1), iCNT]:=Source.Cells[Source.ReturnColumn(TAccountType.ErpCode, 1, 1), jCNT]
@@ -2293,7 +2250,7 @@ begin
         )
         and
         (
-            THelpers.ConvertCoCode(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT], 'F', 0) = Source.Cells[Source.ReturnColumn(TCustomerGroup.SourceDBName, 1, 1), jCNT]
+            THelpers.GetSourceDBName(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT], 'F') = Source.Cells[Source.ReturnColumn(TCustomerGroup.SourceDBName, 1, 1), jCNT]
         )
         then
             Grid.Cells[Grid.ReturnColumn(TSnapshots.fCustomerGroup, 1, 1), iCNT]:=Source.Cells[Source.ReturnColumn(TCustomerGroup.ErpCode, 1, 1), jCNT]
@@ -2861,12 +2818,6 @@ begin
 end;
 
 
-procedure TMainForm.TimerInvoiceScannerTimer(Sender: TObject);
-begin
-    {Do nothing}
-end;
-
-
 procedure TMainForm.TimerCustOpenItemsTimer(Sender: TObject);
 begin
     ThreadFileLog.Log('Calling open items scanner...');
@@ -3215,7 +3166,7 @@ procedure TMainForm.PopupAgeViewPopup(Sender: TObject);
 begin
 
     // Only admins and rw users can use addressbook and invoice tracker
-    if FAccessLevel = TUserAccess.ReadOnly then Exit();
+    //if FAccessLevel = TUserAccess.ReadOnly then Exit();
 
     // Enable or disable filter removal
     if FilterForm.InUse then
@@ -3656,8 +3607,8 @@ begin
     var FileName: string;
     if MainForm.FileXLExport.Execute then FileName:=MainForm.FileXLExport.FileName else FileName:='';
 
-    var Utilities: IUtilities:=TUtilities.Create();
-    Utilities.ExcelExportAsync(MainForm.FGroupList[MainForm.GroupListBox.ItemIndex, 0], MainForm.GroupListDates.Text, FileName, ExcelExport_Callback);
+//    var Utilities: IUtilities:=TUtilities.Create();
+//    Utilities.ExcelExportAsync(MainForm.FGroupList[MainForm.GroupListBox.ItemIndex, 0], MainForm.GroupListDates.Text, FileName, ExcelExport_Callback);
 
 end;
 
@@ -3717,28 +3668,28 @@ begin
         Exit();
     end;
 
-    // R/W user can remove item
-    if (MainForm.FAccessLevel = TUserAccess.ReadWrite) and (UpperCase(SessionService.SessionUser) = UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
-        if THelpers.MsgCall(TAppMessage.Question2, 'Are you sure you want to remove selected customer?') = IDYES then
-        begin
-            var Tracker: ITracker:=TTracker.Create();
-            Tracker.DeleteFromTrackerListAsync(sgInvoiceTracker.Cells[sgInvoiceTracker.ReturnColumn(TTrackerData.Cuid, 1, 1), sgInvoiceTracker.Row], DeleteFromTrackerList_Callback);
-        end;
-
-    // R/W user cannot remove other item
-    if (MainForm.FAccessLevel = TUserAccess.ReadWrite) and (UpperCase(SessionService.SessionUser) <> UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
-        THelpers.MsgCall(TAppMessage.Warn, 'You cannot remove someone''s else item.');
-
-    // Administrator can remove any item
-    if (MainForm.FAccessLevel = TUserAccess.Admin) then
-        if THelpers.MsgCall(TAppMessage.Question2, 'Are you sure you want to remove selected customer?') = IDYES then
-        begin
-            var Tracker: ITracker:=TTracker.Create();
-            Tracker.DeleteFromTrackerListAsync(sgInvoiceTracker.Cells[sgInvoiceTracker.ReturnColumn(TTrackerData.Cuid, 1, 1), sgInvoiceTracker.Row], DeleteFromTrackerList_Callback);
-        end;
-
-    // Read only user cannot remove anything
-    if (MainForm.FAccessLevel = TUserAccess.ReadOnly) then THelpers.MsgCall(TAppMessage.Warn, 'You don''t have permission to remove items.');
+//    // R/W user can remove item
+//    if (MainForm.FAccessLevel = TUserAccess.ReadWrite) and (UpperCase(SessionService.SessionUser) = UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
+//        if THelpers.MsgCall(TAppMessage.Question2, 'Are you sure you want to remove selected customer?') = IDYES then
+//        begin
+//            var Tracker: ITracker:=TTracker.Create();
+//            Tracker.DeleteFromTrackerListAsync(sgInvoiceTracker.Cells[sgInvoiceTracker.ReturnColumn(TTrackerData.Cuid, 1, 1), sgInvoiceTracker.Row], DeleteFromTrackerList_Callback);
+//        end;
+//
+//    // R/W user cannot remove other item
+//    if (MainForm.FAccessLevel = TUserAccess.ReadWrite) and (UpperCase(SessionService.SessionUser) <> UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
+//        THelpers.MsgCall(TAppMessage.Warn, 'You cannot remove someone''s else item.');
+//
+//    // Administrator can remove any item
+//    if (MainForm.FAccessLevel = TUserAccess.Admin) then
+//        if THelpers.MsgCall(TAppMessage.Question2, 'Are you sure you want to remove selected customer?') = IDYES then
+//        begin
+//            var Tracker: ITracker:=TTracker.Create();
+//            Tracker.DeleteFromTrackerListAsync(sgInvoiceTracker.Cells[sgInvoiceTracker.ReturnColumn(TTrackerData.Cuid, 1, 1), sgInvoiceTracker.Row], DeleteFromTrackerList_Callback);
+//        end;
+//
+//    // Read only user cannot remove anything
+//    if (MainForm.FAccessLevel = TUserAccess.ReadOnly) then THelpers.MsgCall(TAppMessage.Warn, 'You don''t have permission to remove items.');
 
 end;
 
@@ -3800,38 +3751,6 @@ procedure TMainForm.TrayIconDblClick(Sender: TObject);
 begin
     if not View.Startup.StartupForm.IsAppInitialized then Exit();
     MainForm.Action_ShowAppClick(self);
-end;
-
-
-// ------------------------------------------------------------------------------------------------------------------------- COMPONENT EVENTS | ENTITY GROUP //
-
-
-procedure TMainForm.GroupListBoxSelect(Sender: TObject);
-begin
-
-    if not(FIsConnected) then
-    begin
-        THelpers.MsgCall(TAppMessage.Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
-        Exit();
-    end;
-
-    var UserControl: TUserControl:=TUserControl.Create(SessionService.FDbConnect);
-    try
-
-        UserControl.UserName:=SessionService.SessionUser;
-
-        if not UserControl.GetAgeDates(MainForm.FAgeDateList, MainForm.FGroupList[GroupListBox.ItemIndex, 0]) then
-        begin
-            THelpers.MsgCall(TAppMessage.Error, 'Cannot list age dates for selected group. Please contact IT support.');
-            ThreadFileLog.Log('GetAgeDates returned false. Cannot get list of age dates for selected group (' + FGroupList[GroupListBox.ItemIndex, 0] + ').');
-        end;
-
-        GroupListDates.ListToComboBox(FAgeDateList, 0, TListSelection.Last);
-
-    finally
-        UserControl.Free();
-    end;
-
 end;
 
 
@@ -4942,11 +4861,11 @@ end;
 procedure TMainForm.sgAddressBookKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
 
-    if FAccessLevel = TUserAccess.ReadOnly then
-    begin
-        THelpers.MsgCall(TAppMessage.Warn, 'You don''t have permission to edit Address Book records.');
-        Exit;
-    end;
+//    if FAccessLevel = TUserAccess.ReadOnly then
+//    begin
+//        THelpers.MsgCall(TAppMessage.Warn, 'You don''t have permission to edit Address Book records.');
+//        Exit;
+//    end;
 
     if
         (
@@ -5219,18 +5138,6 @@ end;
 procedure TMainForm.sgAgeViewMouseEnter(Sender: TObject);
 begin
     if (sgAgeView.Enabled) and (sgAgeView.Visible) then sgAgeView.SetFocus();
-end;
-
-
-procedure TMainForm.GroupListBoxMouseEnter(Sender: TObject);
-begin
-    if (GroupListBox.Enabled) and (GroupListBox.Visible) then GroupListBox.SetFocus();
-end;
-
-
-procedure TMainForm.GroupListDatesMouseEnter(Sender: TObject);
-begin
-    if (GroupListDates.Enabled) and (GroupListDates.Visible) then GroupListDates.SetFocus();
 end;
 
 
@@ -5925,34 +5832,34 @@ begin
         Exit();
     end;
 
-    if (not(string.IsNullOrEmpty(GroupListBox.Text))) and (not(string.IsNullOrEmpty(GroupListDates.Text))) then
-    begin
-
-        // Remember user's choice, automation will follow
-        FGroupIdSel:=FGroupList[GroupListBox.ItemIndex, 0];
-        FGroupNmSel:=FGroupList[GroupListBox.ItemIndex, 1];
-        FAgeDateSel:=GroupListDates.Text;
-
-        // Remove filters
-        for var iCNT: integer:=1 to sgAgeView.RowCount - 1 do
-            sgAgeView.RowHeights[iCNT]:=sgAgeView.sgRowHeight;
-
-        FilterForm.FilterClearAll();
-
-        // Turn off all timers
-        MainForm.SwitchTimers(TurnedOff);
-
-        // Load age view for selected group ID
-        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Loading, MainForm);
-        THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Show.ToString, MainForm);
-        MainForm.ClearAgeSummary();
-
-        var Debtors: IDebtors:=TDebtors.Create();
-        Debtors.ReadAgeViewAsync(CallOpenItems, TSorting.TMode.Ranges, FGroupIdSel, FAgeDateSel, ReadAgeView_Callback);
-
-    end
-    else
-    THelpers.MsgCall(TAppMessage.Warn, 'Cannot load selected group.');
+//    if (not(string.IsNullOrEmpty(GroupListBox.Text))) and (not(string.IsNullOrEmpty(GroupListDates.Text))) then
+//    begin
+//
+//        // Remember user's choice, automation will follow
+//        FGroupIdSel:=FGroupList[GroupListBox.ItemIndex, 0];
+//        FGroupNmSel:=FGroupList[GroupListBox.ItemIndex, 1];
+//        FAgeDateSel:=GroupListDates.Text;
+//
+//        // Remove filters
+//        for var iCNT: integer:=1 to sgAgeView.RowCount - 1 do
+//            sgAgeView.RowHeights[iCNT]:=sgAgeView.sgRowHeight;
+//
+//        FilterForm.FilterClearAll();
+//
+//        // Turn off all timers
+//        MainForm.SwitchTimers(TurnedOff);
+//
+//        // Load age view for selected group ID
+//        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Loading, MainForm);
+//        THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Show.ToString, MainForm);
+//        MainForm.ClearAgeSummary();
+//
+//        var Debtors: IDebtors:=TDebtors.Create();
+//        Debtors.ReadAgeViewAsync(CallOpenItems, TSorting.TMode.Ranges, FGroupIdSel, FAgeDateSel, ReadAgeView_Callback);
+//
+//    end
+//    else
+//    THelpers.MsgCall(TAppMessage.Warn, 'Cannot load selected group.');
 
 end;
 
@@ -5985,35 +5892,35 @@ begin
         Exit();
     end;
 
-    if (not(string.IsNullOrEmpty(GroupListBox.Text))) and (not(string.IsNullOrEmpty(GroupListDates.Text))) then
-    begin
-
-        // Remember user's choice, automation will follow
-        FGroupIdSel:=FGroupList[GroupListBox.ItemIndex, 0];
-        FGroupNmSel:=FGroupList[GroupListBox.ItemIndex, 1];
-        FAgeDateSel:=GroupListDates.Text;
-
-        // Remove filters
-        for var iCNT: integer:=1 to sgAgeView.RowCount - 1 do
-            sgAgeView.RowHeights[iCNT]:=sgAgeView.sgRowHeight;
-
-        FilterForm.FilterClearAll();
-
-        // Turn off all timers
-        SwitchTimers(TurnedOff);
-
-        // Load age view for selected group ID
-        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Loading, MainForm);
-        THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Show.ToString, MainForm);
-        ClearAgeSummary();
-        sgAgeView.Freeze(True);
-
-        var Debtors: IDebtors:=TDebtors.Create;
-        Debtors.ReadAgeViewAsync(NullParameter, SortListBox.ItemIndex, FGroupIdSel, FAgeDateSel, ReadAgeView_Callback);
-
-    end
-    else
-    THelpers.MsgCall(TAppMessage.Warn, 'Cannot load selected group.');
+//    if (not(string.IsNullOrEmpty(GroupListBox.Text))) and (not(string.IsNullOrEmpty(GroupListDates.Text))) then
+//    begin
+//
+//        // Remember user's choice, automation will follow
+//        FGroupIdSel:=FGroupList[GroupListBox.ItemIndex, 0];
+//        FGroupNmSel:=FGroupList[GroupListBox.ItemIndex, 1];
+//        FAgeDateSel:=GroupListDates.Text;
+//
+//        // Remove filters
+//        for var iCNT: integer:=1 to sgAgeView.RowCount - 1 do
+//            sgAgeView.RowHeights[iCNT]:=sgAgeView.sgRowHeight;
+//
+//        FilterForm.FilterClearAll();
+//
+//        // Turn off all timers
+//        SwitchTimers(TurnedOff);
+//
+//        // Load age view for selected group ID
+//        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Loading, MainForm);
+//        THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Show.ToString, MainForm);
+//        ClearAgeSummary();
+//        sgAgeView.Freeze(True);
+//
+//        var Debtors: IDebtors:=TDebtors.Create;
+//        Debtors.ReadAgeViewAsync(NullParameter, SortListBox.ItemIndex, FGroupIdSel, FAgeDateSel, ReadAgeView_Callback);
+//
+//    end
+//    else
+//    THelpers.MsgCall(TAppMessage.Warn, 'Cannot load selected group.');
 
 end;
 
@@ -6028,19 +5935,19 @@ begin
     end;
 
     // Only administrator is allowed
-    if MainForm.FAccessLevel = TUserAccess.Admin then
-    begin
-        StatBar_TXT1.Caption :=TStatusBar.Downloading;
-        MainForm.ClearOpenItemsSummary();
-        MainForm.sgOpenItems.Freeze(True);
-        var OpenItems: IOpenItems:=TOpenItems.Create();
-        //OpenItems.ReadOpenItemsAsync(NullParameter, sgOpenItems, sgCompanyData, ReadOpenItems_Callback);
-    end
-    else
-    begin
-        StatBar_TXT1.Caption:=TStatusBar.Ready;
-        ThreadFileLog.Log('[Open Items]: User have no R/W access, process halted.');
-    end;
+//    if MainForm.FAccessLevel = TUserAccess.Admin then
+//    begin
+//        StatBar_TXT1.Caption :=TStatusBar.Downloading;
+//        MainForm.ClearOpenItemsSummary();
+//        MainForm.sgOpenItems.Freeze(True);
+//        var OpenItems: IOpenItems:=TOpenItems.Create();
+//        //OpenItems.ReadOpenItemsAsync(NullParameter, sgOpenItems, sgCompanyData, ReadOpenItems_Callback);
+//    end
+//    else
+//    begin
+//        StatBar_TXT1.Caption:=TStatusBar.Ready;
+//        ThreadFileLog.Log('[Open Items]: User have no R/W access, process halted.');
+//    end;
 
 end;
 

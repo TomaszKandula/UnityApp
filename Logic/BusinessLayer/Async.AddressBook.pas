@@ -340,11 +340,7 @@ begin
 
                     // Build SCUID
                     var SCUID: string:=SourceGrid.Cells[SourceGrid.ReturnColumn(TSnapshots.fCustomerNumber, 1, 1), iCNT] +
-                        THelpers.ConvertCoCode(
-                            SourceGrid.Cells[SourceGrid.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT],
-                            'F',
-                            3
-                        );
+                        THelpers.CoConvert(SourceGrid.Cells[SourceGrid.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT]);
 
                     Book.CleanUp();
                     Book.Columns.Add(DbModel.TAddressBook.Scuid);

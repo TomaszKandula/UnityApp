@@ -2,7 +2,7 @@ program Unity;
 
 
 // ====================================================================== //
-// Application full name:  Unity for Debt Management.                     //
+// Application full name:  Unity Platform.                                //
 // Application shortname:  Unity.                                         //
 // Major version name:     Cadiz.                                         //
 // ---------------------------------------------------------------------- //
@@ -167,9 +167,11 @@ begin
     FormatSettings                  :=RegSettings;
     Application.UpdateFormatSettings:=False;
 
-    // ------------------------------------------
-    // Open settings file and decode its content.
-    // ------------------------------------------
+    // ------------------------------------------------------
+    // Open settings file, decode its content and Initialize
+    // new session service that holds session data throughout
+    // the application lifetime.
+    // ------------------------------------------------------
 
     var Settings: ISettings:=TSettings.Create();
     if not Settings.CheckConfigFile then
@@ -189,11 +191,6 @@ begin
         end;
 
     end;
-
-    // -------------------------------------------------
-    // Initialize new session service that holds session
-    // data throughout the application lifetime.
-    // -------------------------------------------------
 
     Settings.MakeNewSessionId();
     SessionService.InitializeSession(Settings.WinUserName, Settings.NewSessionId, Settings.MakeNewSessionFile(Settings.NewSessionId));

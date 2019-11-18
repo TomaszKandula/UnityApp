@@ -184,8 +184,8 @@ begin
     FPayLoad.IsCtrlStatus  :=ActionsForm.cbCtrlStatusOff.Checked;
     FPayLoad.IsUserInCopy  :=ActionsForm.cbUserInCopy.Checked;
 
-    var Statements: IStatements:=TStatements.Create();
-    Statements.SendAccountStatement(MainForm.FAgeDateSel, FPayLoad, SendAccountStatement_Callback);
+    //var Statements: IStatements:=TStatements.Create();
+    //Statements.SendAccountStatement(MainForm.FAgeDateSel, FPayLoad, SendAccountStatement_Callback);
 
     Close();
 

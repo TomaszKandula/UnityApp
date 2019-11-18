@@ -9551,7 +9551,6 @@ object MainForm: TMainForm
       Highlighted = True
       ImageIndex = 8
       ParentDoubleBuffered = False
-      ExplicitWidth = 1567
       object Shape: TShape
         AlignWithMargins = True
         Left = 17
@@ -9582,7 +9581,6 @@ object MainForm: TMainForm
         Align = alClient
         TabOrder = 0
         OnAfterCreated = ChromiumWindowAfterCreated
-        ExplicitWidth = 1527
       end
     end
     object TabSheet1: TTabSheet
@@ -9615,7 +9613,6 @@ object MainForm: TMainForm
           Align = alTop
           BevelOuter = bvNone
           TabOrder = 0
-          ExplicitWidth = 1253
           object hShapeSet: TShape
             Left = 520
             Top = 19
@@ -10166,46 +10163,24 @@ object MainForm: TMainForm
             OnClick = btnLoadAgeViewClick
           end
           object Text31: TLabel
-            Left = 26
-            Top = 67
+            Left = 924
+            Top = 71
             Width = 67
             Height = 13
             Caption = 'Cut-Off Date:'
           end
-          object GroupListDates: TComboBox
-            Left = 99
-            Top = 64
-            Width = 116
-            Height = 22
-            Cursor = crHandPoint
-            AutoComplete = False
-            BevelInner = bvLowered
-            BevelKind = bkFlat
-            BevelOuter = bvNone
-            Style = csOwnerDrawFixed
-            Color = clWhite
-            Sorted = True
-            TabOrder = 1
-            TabStop = False
-            OnMouseEnter = GroupListDatesMouseEnter
-          end
-          object GroupListBox: TComboBox
-            Left = 23
-            Top = 35
-            Width = 192
-            Height = 22
-            Cursor = crHandPoint
-            AutoComplete = False
-            BevelInner = bvLowered
-            BevelKind = bkFlat
-            BevelOuter = bvNone
-            Style = csOwnerDrawFixed
-            Color = clWhite
-            DropDownCount = 12
-            TabOrder = 0
-            TabStop = False
-            OnMouseEnter = GroupListBoxMouseEnter
-            OnSelect = GroupListBoxSelect
+          object txtCutOffDate: TLabel
+            Left = 1010
+            Top = 71
+            Width = 20
+            Height = 13
+            Caption = 'n/a'
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clBlack
+            Font.Height = -11
+            Font.Name = 'Tahoma'
+            Font.Style = [fsBold]
+            ParentFont = False
           end
           object SortListBox: TComboBox
             Left = 337
@@ -10219,7 +10194,7 @@ object MainForm: TMainForm
             Style = csOwnerDrawFixed
             ItemIndex = 0
             Sorted = True
-            TabOrder = 2
+            TabOrder = 0
             Text = 'All ranges down'
             OnMouseEnter = SortListBoxMouseEnter
             Items.Strings = (
@@ -10251,7 +10226,6 @@ object MainForm: TMainForm
           Align = alTop
           BevelOuter = bvNone
           TabOrder = 0
-          ExplicitWidth = 92
           object hShapeAge: TShape
             Left = 1
             Top = 19
@@ -10873,7 +10847,6 @@ object MainForm: TMainForm
       Caption = 'OPEN ITEMS'
       Highlighted = True
       ImageIndex = 1
-      ExplicitWidth = 1567
       object Header2: TPanel
         Left = 0
         Top = 0
@@ -10884,7 +10857,6 @@ object MainForm: TMainForm
         Color = clWhite
         ParentBackground = False
         TabOrder = 0
-        ExplicitWidth = 1567
         object ContentPanel2: TPanel
           AlignWithMargins = True
           Left = 17
@@ -10898,7 +10870,6 @@ object MainForm: TMainForm
           Align = alTop
           BevelOuter = bvNone
           TabOrder = 0
-          ExplicitWidth = 121
           object hShapeActionsVOI: TShape
             Left = 0
             Top = 18
@@ -11161,7 +11132,6 @@ object MainForm: TMainForm
         ParentBackground = False
         ParentDoubleBuffered = False
         TabOrder = 1
-        ExplicitWidth = 1533
         object ImgLoadingOpenItems: TImage
           AlignWithMargins = True
           Left = 10
@@ -14370,7 +14340,6 @@ object MainForm: TMainForm
       Caption = 'UNIDENTIFIED'
       Highlighted = True
       ImageIndex = 7
-      ExplicitWidth = 1567
       object Header6: TPanel
         Left = 0
         Top = 0
@@ -14381,7 +14350,6 @@ object MainForm: TMainForm
         Color = clWhite
         ParentBackground = False
         TabOrder = 0
-        ExplicitWidth = 1567
         object ContentPanel6: TPanel
           AlignWithMargins = True
           Left = 17
@@ -14428,14 +14396,12 @@ object MainForm: TMainForm
         Color = clWhite
         ParentBackground = False
         TabOrder = 1
-        ExplicitWidth = 1533
       end
     end
     object TabSheet3: TTabSheet
       Caption = 'ADDRESS BOOK'
       Highlighted = True
       ImageIndex = 2
-      ExplicitWidth = 1567
       object Header3: TPanel
         Left = 0
         Top = 0
@@ -14445,7 +14411,6 @@ object MainForm: TMainForm
         BevelOuter = bvNone
         Color = clWhite
         TabOrder = 0
-        ExplicitWidth = 1567
         object ContentPanel: TPanel
           AlignWithMargins = True
           Left = 17
@@ -14649,7 +14614,6 @@ object MainForm: TMainForm
         ParentBackground = False
         ParentDoubleBuffered = False
         TabOrder = 1
-        ExplicitWidth = 1533
         object sgAddressBook: TStringGrid
           AlignWithMargins = True
           Left = 2
@@ -14683,7 +14647,6 @@ object MainForm: TMainForm
           OnMouseEnter = sgAddressBookMouseEnter
           OnMouseWheelDown = sgAddressBookMouseWheelDown
           OnMouseWheelUp = sgAddressBookMouseWheelUp
-          ExplicitWidth = 1529
           ColWidths = (
             40
             39
@@ -14706,7 +14669,6 @@ object MainForm: TMainForm
       Highlighted = True
       ImageIndex = 4
       OnShow = TabSheet4Show
-      ExplicitWidth = 1567
       object Header4: TPanel
         Left = 0
         Top = 0
@@ -14717,7 +14679,6 @@ object MainForm: TMainForm
         Color = clWhite
         ParentBackground = False
         TabOrder = 0
-        ExplicitWidth = 1567
         object ContentPanel1: TPanel
           AlignWithMargins = True
           Left = 17
@@ -14807,7 +14768,6 @@ object MainForm: TMainForm
         Align = alClient
         BevelOuter = bvNone
         TabOrder = 1
-        ExplicitWidth = 1533
         object ImgLoadingInvoiceTracker: TImage
           AlignWithMargins = True
           Left = 10
@@ -17966,7 +17926,6 @@ object MainForm: TMainForm
           OnMouseEnter = sgInvoiceTrackerMouseEnter
           OnMouseWheelDown = sgInvoiceTrackerMouseWheelDown
           OnMouseWheelUp = sgInvoiceTrackerMouseWheelUp
-          ExplicitWidth = 1529
           ColWidths = (
             40
             40
@@ -17991,7 +17950,6 @@ object MainForm: TMainForm
       ImageIndex = 8
       OnResize = TabSheet7Resize
       OnShow = TabSheet7Show
-      ExplicitWidth = 1567
       object Header7: TPanel
         Left = 0
         Top = 0
@@ -18002,7 +17960,6 @@ object MainForm: TMainForm
         Color = clWhite
         ParentBackground = False
         TabOrder = 0
-        ExplicitWidth = 1567
         object ContentPanel7: TPanel
           Left = 0
           Top = 0
@@ -18097,10 +18054,8 @@ object MainForm: TMainForm
         ActivePage = Page1
         Align = alClient
         TabOrder = 1
-        ExplicitWidth = 1533
         object Page1: TTabSheet
           Caption = 'Companies'
-          ExplicitWidth = 1525
           object PanelCoCodes: TPanel
             AlignWithMargins = True
             Left = 17
@@ -18114,7 +18069,6 @@ object MainForm: TMainForm
             Align = alClient
             BevelOuter = bvNone
             TabOrder = 0
-            ExplicitWidth = 1491
             object sgCoCodes: TStringGrid
               AlignWithMargins = True
               Left = 2
@@ -18140,7 +18094,6 @@ object MainForm: TMainForm
               OnMouseEnter = sgCoCodesMouseEnter
               OnMouseWheelDown = sgCoCodesMouseWheelDown
               OnMouseWheelUp = sgCoCodesMouseWheelUp
-              ExplicitWidth = 1487
               ColWidths = (
                 10
                 76)
@@ -18153,7 +18106,6 @@ object MainForm: TMainForm
         object Page2: TTabSheet
           Caption = 'Payment Terms'
           ImageIndex = 1
-          ExplicitWidth = 1525
           object PanelPmtTerms: TPanel
             AlignWithMargins = True
             Left = 17
@@ -18167,7 +18119,6 @@ object MainForm: TMainForm
             Align = alClient
             BevelOuter = bvNone
             TabOrder = 0
-            ExplicitWidth = 1491
             object sgPmtTerms: TStringGrid
               AlignWithMargins = True
               Left = 2
@@ -18193,7 +18144,6 @@ object MainForm: TMainForm
               OnMouseEnter = sgPmtTermsMouseEnter
               OnMouseWheelDown = sgPmtTermsMouseWheelDown
               OnMouseWheelUp = sgPmtTermsMouseWheelUp
-              ExplicitWidth = 1487
               ColWidths = (
                 10
                 76)
@@ -18206,7 +18156,6 @@ object MainForm: TMainForm
         object Page10: TTabSheet
           Caption = 'Control Status'
           ImageIndex = 9
-          ExplicitWidth = 1525
           object PanelControlStatus: TPanel
             AlignWithMargins = True
             Left = 17
@@ -18222,7 +18171,6 @@ object MainForm: TMainForm
             Color = clWhite
             ParentBackground = False
             TabOrder = 0
-            ExplicitWidth = 1491
             object sgControlStatus: TStringGrid
               AlignWithMargins = True
               Left = 2
@@ -18248,7 +18196,6 @@ object MainForm: TMainForm
               OnMouseEnter = sgControlStatusMouseEnter
               OnMouseWheelDown = sgControlStatusMouseWheelDown
               OnMouseWheelUp = sgControlStatusMouseWheelUp
-              ExplicitWidth = 1487
               ColWidths = (
                 10
                 76)
@@ -18261,7 +18208,6 @@ object MainForm: TMainForm
         object Page3: TTabSheet
           Caption = 'Paid Info'
           ImageIndex = 2
-          ExplicitWidth = 1525
           object PanelPaidInfo: TPanel
             AlignWithMargins = True
             Left = 17
@@ -18277,7 +18223,6 @@ object MainForm: TMainForm
             Color = clWhite
             ParentBackground = False
             TabOrder = 0
-            ExplicitWidth = 1491
             object sgPaidInfo: TStringGrid
               AlignWithMargins = True
               Left = 2
@@ -18303,7 +18248,6 @@ object MainForm: TMainForm
               OnMouseEnter = sgPaidInfoMouseEnter
               OnMouseWheelDown = sgPaidInfoMouseWheelDown
               OnMouseWheelUp = sgPaidInfoMouseWheelUp
-              ExplicitWidth = 1487
               ColWidths = (
                 10
                 76)
@@ -18316,7 +18260,6 @@ object MainForm: TMainForm
         object Page7: TTabSheet
           Caption = 'Person Responsible'
           ImageIndex = 6
-          ExplicitWidth = 1525
           object PanelPersonResp: TPanel
             AlignWithMargins = True
             Left = 17
@@ -18330,7 +18273,6 @@ object MainForm: TMainForm
             Align = alClient
             BevelOuter = bvNone
             TabOrder = 0
-            ExplicitWidth = 1491
             object sgPersonResp: TStringGrid
               AlignWithMargins = True
               Left = 2
@@ -18356,7 +18298,6 @@ object MainForm: TMainForm
               OnMouseEnter = sgPersonRespMouseEnter
               OnMouseWheelDown = sgPersonRespMouseWheelDown
               OnMouseWheelUp = sgPersonRespMouseWheelUp
-              ExplicitWidth = 1487
               ColWidths = (
                 10
                 76)
@@ -18369,7 +18310,6 @@ object MainForm: TMainForm
         object Page6: TTabSheet
           Caption = 'Sales Responsible'
           ImageIndex = 5
-          ExplicitWidth = 1525
           object PanelSalesResp: TPanel
             AlignWithMargins = True
             Left = 17
@@ -18383,7 +18323,6 @@ object MainForm: TMainForm
             Align = alClient
             BevelOuter = bvNone
             TabOrder = 0
-            ExplicitWidth = 1491
             object sgSalesResp: TStringGrid
               AlignWithMargins = True
               Left = 2
@@ -18409,7 +18348,6 @@ object MainForm: TMainForm
               OnMouseEnter = sgSalesRespMouseEnter
               OnMouseWheelDown = sgSalesRespMouseWheelDown
               OnMouseWheelUp = sgSalesRespMouseWheelUp
-              ExplicitWidth = 1487
               ColWidths = (
                 10
                 76)
@@ -18422,7 +18360,6 @@ object MainForm: TMainForm
         object Page9: TTabSheet
           Caption = 'Account Type'
           ImageIndex = 8
-          ExplicitWidth = 1525
           object PanelAccountType: TPanel
             AlignWithMargins = True
             Left = 17
@@ -18436,7 +18373,6 @@ object MainForm: TMainForm
             Align = alClient
             BevelOuter = bvNone
             TabOrder = 0
-            ExplicitWidth = 1491
             object sgAccountType: TStringGrid
               AlignWithMargins = True
               Left = 2
@@ -18462,7 +18398,6 @@ object MainForm: TMainForm
               OnMouseEnter = sgAccountTypeMouseEnter
               OnMouseWheelDown = sgAccountTypeMouseWheelDown
               OnMouseWheelUp = sgAccountTypeMouseWheelUp
-              ExplicitWidth = 1487
               ColWidths = (
                 10
                 76)
@@ -18475,7 +18410,6 @@ object MainForm: TMainForm
         object Page8: TTabSheet
           Caption = 'Customer Group'
           ImageIndex = 7
-          ExplicitWidth = 1525
           object PanelCustomerGr: TPanel
             AlignWithMargins = True
             Left = 17
@@ -18489,7 +18423,6 @@ object MainForm: TMainForm
             Align = alClient
             BevelOuter = bvNone
             TabOrder = 0
-            ExplicitWidth = 1491
             object sgCustomerGr: TStringGrid
               AlignWithMargins = True
               Left = 2
@@ -18515,7 +18448,6 @@ object MainForm: TMainForm
               OnMouseEnter = sgCustomerGrMouseEnter
               OnMouseWheelDown = sgCustomerGrMouseWheelDown
               OnMouseWheelUp = sgCustomerGrMouseWheelUp
-              ExplicitWidth = 1487
               ColWidths = (
                 10
                 76)
@@ -18528,7 +18460,6 @@ object MainForm: TMainForm
         object Page4: TTabSheet
           Caption = 'Person'
           ImageIndex = 3
-          ExplicitWidth = 1525
           object PanelPerson: TPanel
             AlignWithMargins = True
             Left = 17
@@ -18544,7 +18475,6 @@ object MainForm: TMainForm
             Color = clWhite
             ParentBackground = False
             TabOrder = 0
-            ExplicitWidth = 1491
             object sgPerson: TStringGrid
               AlignWithMargins = True
               Left = 2
@@ -18570,7 +18500,6 @@ object MainForm: TMainForm
               OnMouseEnter = sgPersonMouseEnter
               OnMouseWheelDown = sgPersonMouseWheelDown
               OnMouseWheelUp = sgPersonMouseWheelUp
-              ExplicitWidth = 1487
               ColWidths = (
                 10
                 76)
@@ -18583,7 +18512,6 @@ object MainForm: TMainForm
         object Page5: TTabSheet
           Caption = 'Group3'
           ImageIndex = 4
-          ExplicitWidth = 1525
           object PanelGroup3: TPanel
             AlignWithMargins = True
             Left = 17
@@ -18597,7 +18525,6 @@ object MainForm: TMainForm
             Align = alClient
             BevelOuter = bvNone
             TabOrder = 0
-            ExplicitWidth = 1491
             object sgGroup3: TStringGrid
               AlignWithMargins = True
               Left = 2
@@ -18623,7 +18550,6 @@ object MainForm: TMainForm
               OnMouseEnter = sgGroup3MouseEnter
               OnMouseWheelDown = sgGroup3MouseWheelDown
               OnMouseWheelUp = sgGroup3MouseWheelUp
-              ExplicitWidth = 1487
               ColWidths = (
                 10
                 76)
@@ -18640,7 +18566,6 @@ object MainForm: TMainForm
       Highlighted = True
       ImageIndex = 6
       OnShow = TabSheet8Show
-      ExplicitWidth = 1567
       object Header8: TPanel
         Left = 0
         Top = 0
@@ -18651,7 +18576,6 @@ object MainForm: TMainForm
         Color = clWhite
         ParentBackground = False
         TabOrder = 0
-        ExplicitWidth = 1567
         object ContentPanel8: TPanel
           AlignWithMargins = True
           Left = 17
@@ -19524,7 +19448,6 @@ object MainForm: TMainForm
       Caption = 'QUERIES'
       ImageIndex = 8
       OnShow = TabSheet5Show
-      ExplicitWidth = 1567
       object PanelFSC: TPanel
         AlignWithMargins = True
         Left = 17
@@ -21947,7 +21870,7 @@ object MainForm: TMainForm
   object PopupMenu: TPopupMenu
     MenuAnimation = [maLeftToRight]
     Left = 1312
-    Top = 506
+    Top = 514
     object Action_ShowApp: TMenuItem
       Caption = 'Show'
       Default = True
@@ -22126,13 +22049,13 @@ object MainForm: TMainForm
   object TimerUpTime: TTimer
     Enabled = False
     OnTimer = TimerUpTimeTimer
-    Left = 968
+    Left = 936
     Top = 512
   end
   object FileCSVExport: TSaveDialog
     DefaultExt = '*.csv'
     Filter = 'CSV (Delimited)|*.csv'
-    Left = 1032
+    Left = 1024
     Top = 448
   end
   object FileCSVImport: TOpenDialog
@@ -22512,7 +22435,7 @@ object MainForm: TMainForm
   object PopupTracker: TPopupMenu
     MenuAnimation = [maLeftToRight]
     Left = 1216
-    Top = 432
+    Top = 448
     object Action_ShowRegistered: TMenuItem
       Bitmap.Data = {
         36030000424D3603000000000000360000002800000010000000100000000100
@@ -32075,25 +31998,18 @@ object MainForm: TMainForm
     Left = 1312
     Top = 576
   end
-  object TimerInvoiceScanner: TTimer
-    Enabled = False
-    Interval = 900000
-    OnTimer = TimerInvoiceScannerTimer
-    Left = 1104
-    Top = 576
-  end
   object TimerConnection: TTimer
     Enabled = False
     Interval = 60000
     OnTimer = TimerConnectionTimer
-    Left = 1024
+    Left = 1064
     Top = 576
   end
   object PopupBook: TPopupMenu
     MenuAnimation = [maLeftToRight]
     OnPopup = PopupBookPopup
     Left = 1216
-    Top = 504
+    Top = 512
     object Action_Cut: TMenuItem
       Bitmap.Data = {
         36030000424D3603000000000000360000002800000010000000100000000100
@@ -32227,14 +32143,14 @@ object MainForm: TMainForm
   object FileXLExport: TSaveDialog
     DefaultExt = '*.xlsx'
     Filter = 'XLSX (Microsoft Excel)|*.xlsx'
-    Left = 968
+    Left = 944
     Top = 448
   end
   object PopupCommonMenu: TPopupMenu
     MenuAnimation = [maLeftToRight]
     OnPopup = PopupCommonMenuPopup
     Left = 1312
-    Top = 432
+    Top = 448
     object Action_ExportTransactions: TMenuItem
       Caption = 'Export to CSV'
       OnClick = Action_ExportTransactionsClick
@@ -32294,7 +32210,7 @@ object MainForm: TMainForm
     Top = 512
   end
   object Chromium: TChromium
-    Left = 967
-    Top = 384
+    Left = 871
+    Top = 448
   end
 end

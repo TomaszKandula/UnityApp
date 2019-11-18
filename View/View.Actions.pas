@@ -346,7 +346,7 @@ end;
 procedure TActionsForm.GetOpenItems(OpenItemsDest: TStringGrid; OpenItemsSrc: TStringGrid);
 begin
 
-    var kCNT: integer:=1;
+    var kCNT:=1;
 
     FOpenItemsTotal.OpenAm   :=0;
     FOpenItemsTotal.Am       :=0;
@@ -366,8 +366,6 @@ begin
     FSrcColumns[9] :=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.ValDt,     1, 1);
     FSrcColumns[10]:=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.Ctrl,      1, 1);
     FSrcColumns[11]:=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.PmtStat,   1, 1);
-
-    // Helper columns
     FSrcColumns[12]:=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.Ad1,       1, 1);
     FSrcColumns[13]:=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.Ad2,       1, 1);
     FSrcColumns[14]:=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.Ad3,       1, 1);
@@ -390,17 +388,20 @@ begin
 
     end;
 
-    // Look for the same "CUID" and put it into source grid
+    var SourceDBName:=THelpers.GetSourceDBName(CoCode, 'F');
     for var iCNT: integer:=1 to OpenItemsSrc.RowCount - 1 do
     begin
 
-        if OpenItemsSrc.Cells[MainForm.sgOpenItems.ReturnColumn(TOpenitems.Cuid, 1, 1), iCNT] = CUID then
+        if
+            (OpenItemsSrc.Cells[MainForm.sgOpenItems.ReturnColumn(TOpenitems.CustNo, 1, 1), iCNT] = CustNumber)
+        and
+            (OpenItemsSrc.Cells[MainForm.sgOpenItems.ReturnColumn(TOpenitems.SourceDBName, 1, 1), iCNT] = SourceDBName)
+        then
         begin
 
             for var jCNT: integer:=Low(FSrcColumns) to High(FSrcColumns) do
                 OpenItemsDest.Cells[jCNT + 1, kCNT]:=OpenItemsSrc.Cells[FSrcColumns[jCNT], iCNT];
 
-            // Aggregate open items
             FOpenItemsTotal.OpenAm   :=FOpenItemsTotal.OpenAm    + (OpenItemsSrc.Cells[FSrcColumns[3], iCNT]).ToDouble;
             FOpenItemsTotal.Am       :=FOpenItemsTotal.Am        + (OpenItemsSrc.Cells[FSrcColumns[4], iCNT]).ToDouble;
             FOpenItemsTotal.OpenCurAm:=FOpenItemsTotal.OpenCurAm + (OpenItemsSrc.Cells[FSrcColumns[5], iCNT]).ToDouble;
@@ -557,10 +558,10 @@ procedure TActionsForm.Initialize();
 begin
     FCUID      :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCuid,          1, 1), MainForm.sgAgeView.Row];
     FCustName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCustomerName,  1, 1), MainForm.sgAgeView.Row];
-    FCustNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCustomerNumber,1, 1), MainForm.sgAgeView.Row];
-    FCoCode    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCoCode,        1, 1), MainForm.sgAgeView.Row];
+    FCustNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCustomerNumber,1, 1), MainForm.sgAgeView.Row]; // important!
+    FCoCode    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCoCode,        1, 1), MainForm.sgAgeView.Row]; // important!
     FBranch    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fAgent,         1, 1), MainForm.sgAgeView.Row];
-    FSCUID     :=CustNumber + THelpers.ConvertCoCode(CoCode, 'F', 3);
+    FSCUID     :=CustNumber + THelpers.CoConvert(CoCode);
 end;
 
 
@@ -734,8 +735,8 @@ end;
 procedure TActionsForm.SaveDailyComment();
 begin
 
-    FDailyCommentFields.GroupIdSel   :=MainForm.FGroupIdSel;
-    FDailyCommentFields.AgeDateSel   :=MainForm.FAgeDateSel;
+//    FDailyCommentFields.GroupIdSel   :=MainForm.FGroupIdSel;
+//    FDailyCommentFields.AgeDateSel   :=MainForm.FAgeDateSel;
     FDailyCommentFields.CUID         :=CUID;
     FDailyCommentFields.Email        :=False;
     FDailyCommentFields.CallEvent    :=False;
@@ -1043,20 +1044,12 @@ end;
 procedure TActionsForm.DailyComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
 
-    if MainForm.FAccessLevel = 'RO' then
-    begin
-        THelpers.MsgCall(Warn, 'You do not have permission to write the comment.');
-        Exit;
-    end;
-
-    // New line
     if ( (Key = VK_RETURN) and (Shift=[ssALT]) ) or ( (Key = VK_RETURN) and (Shift=[ssShift]) ) then
     begin
         DailyCom.Lines.Add(TChars.CRLF);
         Exit;
     end;
 
-    // Save to database
     if ( (Key = VK_RETURN) and (DailyCom.Text <> '') ) then SaveDailyComment();
 
 end;
@@ -1065,20 +1058,12 @@ end;
 procedure TActionsForm.GeneralComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
 
-    if MainForm.FAccessLevel = 'RO' then
-    begin
-        THelpers.MsgCall(Warn, 'You do not have permission to write the comment.');
-        Exit;
-    end;
-
-    // New line
     if ( (Key = VK_RETURN) and (Shift=[ssALT]) ) or ( (Key = VK_RETURN) and (Shift=[ssShift]) ) then
     begin
         GeneralCom.Lines.Add(TChars.CRLF);
         Exit;
     end;
 
-    // Save to database
     if ( (Key = VK_RETURN) and (GeneralCom.Text <> '') ) then SaveGeneralComment();
     
 end;
@@ -1414,8 +1399,8 @@ begin
     FPayLoad.IsCtrlStatus  :=ActionsForm.cbCtrlStatusOff.Checked;
     FPayLoad.IsUserInCopy  :=ActionsForm.cbUserInCopy.Checked;
 
-    var Statements: IStatements:=TStatements.Create();
-    Statements.SendAccountStatement(MainForm.FAgeDateSel, FPayLoad, SendAccountStatement_Callback);
+    //var Statements: IStatements:=TStatements.Create();
+    //Statements.SendAccountStatement(MainForm.FAgeDateSel, FPayLoad, SendAccountStatement_Callback);
 
 end;
 
