@@ -304,7 +304,6 @@ type
         Action_Overdue: TMenuItem;
         N15: TMenuItem;
         TabSheet9: TTabSheet;
-        btnLoadAgeView: TSpeedButton;
         Action_RowHighlight: TMenuItem;
         Action_Update: TMenuItem;
         Action_Report: TMenuItem;
@@ -341,7 +340,6 @@ type
         Bevel1: TBevel;
         Bevel2: TBevel;
         PanelOpenItems: TPanel;
-        ImgLoadingOpenItems: TImage;
         PanelAddressBook: TPanel;
         PanelInvoiceTracker: TPanel;
         ImgLoadingInvoiceTracker: TImage;
@@ -356,8 +354,6 @@ type
         btnPassUpdate: TSpeedButton;
         Action_AddFollowUpGroup: TMenuItem;
         Action_RemoveFollowUps: TMenuItem;
-        Cap24: TShape;
-        hShapeSorting: TShape;
         Action_MassMailer: TMenuItem;
         btnPasswordPreview: TSpeedButton;
         hShapeEye: TShape;
@@ -378,8 +374,6 @@ type
         N16: TMenuItem;
         Action_ShowDetails: TMenuItem;
         Action_QuickReporting: TMenuItem;
-        SortListBox: TComboBox;
-        btnSortApply: TSpeedButton;
         imgStart: TImage;
         btnStart: TPanel;
         txtStart: TLabel;
@@ -509,7 +503,17 @@ type
         Bevel3: TBevel;
         Bevel4: TBevel;
         PanelSettingsHeader: TPanel;
-    txtCutOffDate: TLabel;
+        txtCutOffDate: TLabel;
+    txtRcaAmount: TLabel;
+    txtRcbAmount: TLabel;
+    txtRccAmount: TLabel;
+    txtRcaItems: TLabel;
+    txtRcbItems: TLabel;
+    txtRccItems: TLabel;
+        imgRefreshReport: TImage;
+        imgGetAgingReport: TImage;
+    Label1: TLabel;
+    Label5: TLabel;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
@@ -549,7 +553,6 @@ type
         procedure btnCloseABMouseLeave(Sender: TObject);
         procedure btnExportABMouseEnter(Sender: TObject);
         procedure btnExportABMouseLeave(Sender: TObject);
-        procedure btnReloadClick(Sender: TObject);
         procedure sgListSectionKeyPress(Sender: TObject; var Key: Char);
         procedure sgListValueClick(Sender: TObject);
         procedure sgListSectionClick(Sender: TObject);
@@ -632,7 +635,6 @@ type
         procedure sgAgeViewColumnMoved(Sender: TObject; FromIndex, ToIndex: Integer);
         procedure Action_SearchBookClick(Sender: TObject);
         procedure Action_OverdueClick(Sender: TObject);
-        procedure btnLoadAgeViewClick(Sender: TObject);
         procedure Action_RowHighlightClick(Sender: TObject);
         procedure Action_ReportClick(Sender: TObject);
         procedure Action_ExportTransactionsClick(Sender: TObject);
@@ -677,7 +679,6 @@ type
         procedure Action_Range6Click(Sender: TObject);
         procedure Action_TotalAmountClick(Sender: TObject);
         procedure Action_OverduesClick(Sender: TObject);
-        procedure btnSortApplyClick(Sender: TObject);
         procedure sgCoCodesMouseEnter(Sender: TObject);
         procedure sgPaidInfoMouseEnter(Sender: TObject);
         procedure sgPersonMouseEnter(Sender: TObject);
@@ -687,7 +688,6 @@ type
         procedure sgAddressBookMouseEnter(Sender: TObject);
         procedure sgOpenItemsMouseEnter(Sender: TObject);
         procedure sgAgeViewMouseEnter(Sender: TObject);
-        procedure SortListBoxMouseEnter(Sender: TObject);
         procedure sgOpenItemsKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure sgInvoiceTrackerKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure sgGroup3KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -777,6 +777,8 @@ type
         procedure txtFeedbackClick(Sender: TObject);
         procedure btnFeedbackMouseEnter(Sender: TObject);
         procedure btnFeedbackMouseLeave(Sender: TObject);
+        procedure imgGetAgingReportClick(Sender: TObject);
+        procedure imgRefreshReportClick(Sender: TObject);
     protected
         procedure CreateParams(var Params: TCreateParams); override;
         procedure WndProc(var msg: TMessage); override;
@@ -919,6 +921,7 @@ uses
     View.AwaitScreen,
     View.Startup,
     View.Reports,
+    View.CompanyList,
     Unity.Sql,
     Unity.Messaging,
     Unity.UserAccess,
@@ -935,7 +938,6 @@ uses
     Handler.Sql{legacy},
     DbModel{legacy},
     Handler.Database{legacy},
-    Handler.Account{legacy},
     Unity.EventLogger,
     Unity.Settings,
     Unity.SessionService,
@@ -1239,10 +1241,8 @@ begin
         Exit();
     end;
 
-    // Enable controls
     SetSettingsPanel(False);
 
-    // Populate string grids
     var List: TStringList:=TStringList.Create();
     var Settings: ISettings:=TSettings.Create();
 
@@ -1268,11 +1268,9 @@ begin
         List.Free();
     end;
 
-    // Grids dimensions
     {sgListValue.SetColWidth(25, 30, 400);}
     {sgListSection.SetColWidth(25, 30, 400);}
 
-    // Clear edit box from provided password
     EditPassword.Text:='';
 
 end;
@@ -1456,28 +1454,7 @@ end;
 {remove}
 procedure TMainForm.CallbackStatusBar(PassMsg: TMessage);
 begin
-
-    case PassMsg.WParam of
-
-        TMessaging.TWParams.StatusBar:
-        begin
-            StatBar_TXT1.Caption:=PChar(PassMsg.LParam);
-        end;
-
-        TMessaging.TWParams.ConnectionOk:
-        begin
-//            StatBar_TXT7.Font.Style:=[];
-//            StatBar_TXT7.Caption:='Connected with Microsoft SQL Server.';
-        end;
-
-        TMessaging.TWParams.ConnectionError:
-        begin
-//            StatBar_TXT7.Font.Style:=[fsBold];
-//            StatBar_TXT7.Caption:='Connection lost, re-connecting...';
-        end;
-
-    end;
-
+//
 end;
 
 
@@ -1556,8 +1533,8 @@ begin
     if PassMsg.LParam > 0 then
     begin
 
-//        FDailyCommentFields.GroupIdSel   :=FGroupIdSel;
-//        FDailyCommentFields.AgeDateSel   :=FAgeDateSel;
+        //FDailyCommentFields.GroupIdSel   :=FGroupIdSel;
+        //FDailyCommentFields.AgeDateSel   :=FAgeDateSel;
         FDailyCommentFields.CUID         :=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), sgAgeView.Row];
         FDailyCommentFields.Email        :=False;
         FDailyCommentFields.CallEvent    :=True;
@@ -1709,15 +1686,6 @@ begin
 
     var Queries: IQueries:=TQueries.Create;
     Queries.InitializeQms;
-
-//    if FAccessLevel <> TUserAccess.Admin then
-//    begin
-//        //sgCompanyData.Enabled:=False;
-//        //GroupListDates.Enabled:=False;
-//    end;
-
-    //GroupListBox.ListToComboBox(FGroupList, 1, TListSelection.First);
-    //GroupListDates.ListToComboBox(FAgeDateList, 0, TListSelection.Last);
 
 end;
 
@@ -1879,11 +1847,9 @@ begin
     if IsLocked then
     begin
 
-        // Visibility on
         imgOFF.Visible:=True;
         btnPassUpdate.Enabled:=False;
 
-        // Edit boxes
         EditCurrentPassword.Enabled:=False;
         EditNewPassword.Enabled:=False;
         EditNewPasswordConfirmation.Enabled:=False;
@@ -1892,7 +1858,6 @@ begin
         EditNewPasswordConfirmation.Text:='';
         EditPassword.Text:='';
 
-        // String grids
         sgListSection.ClearAll(2, 0, 0, False);
         sgListValue.ClearAll(2, 0, 0, False);
         sgListSection.Row:=1;
@@ -1909,20 +1874,17 @@ begin
     else
     begin
 
-        // Setup headers
         sgListSection.Cols[0].Text:='Lp';
         sgListSection.Cols[1].Text:='Sections';
         sgListValue.Cols[0].Text  :='Lp';
         sgListValue.Cols[1].Text  :='Key';
         sgListValue.Cols[2].Text  :='Value';
 
-        // Credentials
         btnPassUpdate.Enabled:=True;
         EditCurrentPassword.Enabled:=True;
         EditNewPassword.Enabled:=True;
         EditNewPasswordConfirmation.Enabled:=True;
 
-        // String grids
         sgListSection.Enabled:=True;
         sgListValue.Enabled:=True;
         sgListSectionClick(self);
@@ -1931,7 +1893,6 @@ begin
         sgListSection.Visible:=True;
         sgListValue.Visible:=True;
 
-        // Transparency off
         imgOFF.Visible:=False;
 
         btnUnlock.Caption:='Lock';
@@ -2061,7 +2022,7 @@ begin
 end;
 
 
-procedure TMainForm.ComputeAgeSummary(var Grid: TStringGrid); // make async!
+procedure TMainForm.ComputeAgeSummary(var Grid: TStringGrid); // make async?
 begin
 
     for var iCNT: integer:=1 to Grid.RowCount - 1 do if Grid.RowHeights[iCNT] <> Grid.sgRowHidden then
@@ -3165,9 +3126,6 @@ end;
 procedure TMainForm.PopupAgeViewPopup(Sender: TObject);
 begin
 
-    // Only admins and rw users can use addressbook and invoice tracker
-    //if FAccessLevel = TUserAccess.ReadOnly then Exit();
-
     // Enable or disable filter removal
     if FilterForm.InUse then
         Action_RemoveFilters.Enabled:=True
@@ -3607,8 +3565,8 @@ begin
     var FileName: string;
     if MainForm.FileXLExport.Execute then FileName:=MainForm.FileXLExport.FileName else FileName:='';
 
-//    var Utilities: IUtilities:=TUtilities.Create();
-//    Utilities.ExcelExportAsync(MainForm.FGroupList[MainForm.GroupListBox.ItemIndex, 0], MainForm.GroupListDates.Text, FileName, ExcelExport_Callback);
+    //var Utilities: IUtilities:=TUtilities.Create();
+    //Utilities.ExcelExportAsync(MainForm.FGroupList[MainForm.GroupListBox.ItemIndex, 0], MainForm.GroupListDates.Text, FileName, ExcelExport_Callback);
 
 end;
 
@@ -3661,36 +3619,11 @@ end;
 
 procedure TMainForm.Action_RemoveClick(Sender: TObject);
 begin
-
-    if not(FIsConnected) then
-    begin
-        THelpers.MsgCall(Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
-        Exit();
-    end;
-
-//    // R/W user can remove item
-//    if (MainForm.FAccessLevel = TUserAccess.ReadWrite) and (UpperCase(SessionService.SessionUser) = UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
-//        if THelpers.MsgCall(TAppMessage.Question2, 'Are you sure you want to remove selected customer?') = IDYES then
-//        begin
-//            var Tracker: ITracker:=TTracker.Create();
-//            Tracker.DeleteFromTrackerListAsync(sgInvoiceTracker.Cells[sgInvoiceTracker.ReturnColumn(TTrackerData.Cuid, 1, 1), sgInvoiceTracker.Row], DeleteFromTrackerList_Callback);
-//        end;
-//
-//    // R/W user cannot remove other item
-//    if (MainForm.FAccessLevel = TUserAccess.ReadWrite) and (UpperCase(SessionService.SessionUser) <> UpperCase(sgInvoiceTracker.Cells[1, sgInvoiceTracker.Row])) then
-//        THelpers.MsgCall(TAppMessage.Warn, 'You cannot remove someone''s else item.');
-//
-//    // Administrator can remove any item
-//    if (MainForm.FAccessLevel = TUserAccess.Admin) then
-//        if THelpers.MsgCall(TAppMessage.Question2, 'Are you sure you want to remove selected customer?') = IDYES then
-//        begin
-//            var Tracker: ITracker:=TTracker.Create();
-//            Tracker.DeleteFromTrackerListAsync(sgInvoiceTracker.Cells[sgInvoiceTracker.ReturnColumn(TTrackerData.Cuid, 1, 1), sgInvoiceTracker.Row], DeleteFromTrackerList_Callback);
-//        end;
-//
-//    // Read only user cannot remove anything
-//    if (MainForm.FAccessLevel = TUserAccess.ReadOnly) then THelpers.MsgCall(TAppMessage.Warn, 'You don''t have permission to remove items.');
-
+//    if not(FIsConnected) then
+//    begin
+//        THelpers.MsgCall(Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+//        Exit();
+//    end;
 end;
 
 
@@ -4861,12 +4794,6 @@ end;
 procedure TMainForm.sgAddressBookKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
 
-//    if FAccessLevel = TUserAccess.ReadOnly then
-//    begin
-//        THelpers.MsgCall(TAppMessage.Warn, 'You don''t have permission to edit Address Book records.');
-//        Exit;
-//    end;
-
     if
         (
             Key = VK_F2
@@ -5138,12 +5065,6 @@ end;
 procedure TMainForm.sgAgeViewMouseEnter(Sender: TObject);
 begin
     if (sgAgeView.Enabled) and (sgAgeView.Visible) then sgAgeView.SetFocus();
-end;
-
-
-procedure TMainForm.SortListBoxMouseEnter(Sender: TObject);
-begin
-    if (SortListBox.Enabled) and (SortListBox.Visible) then SortListBox.SetFocus();
 end;
 
 
@@ -5718,7 +5639,7 @@ begin
 end;
 
 
-// -------------------------------------------------------------------------------------------------------------------------------------------- BUTTON CALLS //
+// -------------------------------------------------------------------------------------------------------------------------------------------- CLICK EVENTS //
 
 
 procedure TMainForm.imgAppMenuClick(Sender: TObject);
@@ -5822,133 +5743,15 @@ begin
 end;
 
 
-procedure TMainForm.btnLoadAgeViewClick(Sender: TObject);
+procedure TMainForm.imgGetAgingReportClick(Sender: TObject);
 begin
-
-    // Wait until "Ready" status
-    if not (StatBar_TXT1.Caption = TStatusBar.Ready) then
-    begin
-        THelpers.MsgCall(TAppMessage.Warn, 'Please wait until "Ready" status and try again.');
-        Exit();
-    end;
-
-//    if (not(string.IsNullOrEmpty(GroupListBox.Text))) and (not(string.IsNullOrEmpty(GroupListDates.Text))) then
-//    begin
-//
-//        // Remember user's choice, automation will follow
-//        FGroupIdSel:=FGroupList[GroupListBox.ItemIndex, 0];
-//        FGroupNmSel:=FGroupList[GroupListBox.ItemIndex, 1];
-//        FAgeDateSel:=GroupListDates.Text;
-//
-//        // Remove filters
-//        for var iCNT: integer:=1 to sgAgeView.RowCount - 1 do
-//            sgAgeView.RowHeights[iCNT]:=sgAgeView.sgRowHeight;
-//
-//        FilterForm.FilterClearAll();
-//
-//        // Turn off all timers
-//        MainForm.SwitchTimers(TurnedOff);
-//
-//        // Load age view for selected group ID
-//        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Loading, MainForm);
-//        THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Show.ToString, MainForm);
-//        MainForm.ClearAgeSummary();
-//
-//        var Debtors: IDebtors:=TDebtors.Create();
-//        Debtors.ReadAgeViewAsync(CallOpenItems, TSorting.TMode.Ranges, FGroupIdSel, FAgeDateSel, ReadAgeView_Callback);
-//
-//    end
-//    else
-//    THelpers.MsgCall(TAppMessage.Warn, 'Cannot load selected group.');
-
+    THelpers.WndCall(CompanyListForm, Modal);
 end;
 
 
-procedure TMainForm.btnSortApplyClick(Sender: TObject);
+procedure TMainForm.imgRefreshReportClick(Sender: TObject);
 begin
-
-    if
-        (
-            SortListBox.ItemIndex <> TSorting.TMode.Ranges
-        )
-    and
-        (
-            SortListBox.ItemIndex <> TSorting.TMode.FollowUp
-        )
-    and
-        (
-            SortListBox.ItemIndex <> TSorting.TMode.Total
-        )
-    and
-        (
-            SortListBox.ItemIndex <> TSorting.TMode.Overdue
-        )
-    then
-        Exit();
-
-    if not (StatBar_TXT1.Caption = TStatusBar.Ready) then
-    begin
-        THelpers.MsgCall(TAppMessage.Warn, 'Please wait until "Ready" status and try again.');
-        Exit();
-    end;
-
-//    if (not(string.IsNullOrEmpty(GroupListBox.Text))) and (not(string.IsNullOrEmpty(GroupListDates.Text))) then
-//    begin
 //
-//        // Remember user's choice, automation will follow
-//        FGroupIdSel:=FGroupList[GroupListBox.ItemIndex, 0];
-//        FGroupNmSel:=FGroupList[GroupListBox.ItemIndex, 1];
-//        FAgeDateSel:=GroupListDates.Text;
-//
-//        // Remove filters
-//        for var iCNT: integer:=1 to sgAgeView.RowCount - 1 do
-//            sgAgeView.RowHeights[iCNT]:=sgAgeView.sgRowHeight;
-//
-//        FilterForm.FilterClearAll();
-//
-//        // Turn off all timers
-//        SwitchTimers(TurnedOff);
-//
-//        // Load age view for selected group ID
-//        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Loading, MainForm);
-//        THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Show.ToString, MainForm);
-//        ClearAgeSummary();
-//        sgAgeView.Freeze(True);
-//
-//        var Debtors: IDebtors:=TDebtors.Create;
-//        Debtors.ReadAgeViewAsync(NullParameter, SortListBox.ItemIndex, FGroupIdSel, FAgeDateSel, ReadAgeView_Callback);
-//
-//    end
-//    else
-//    THelpers.MsgCall(TAppMessage.Warn, 'Cannot load selected group.');
-
-end;
-
-
-procedure TMainForm.btnReloadClick(Sender: TObject);
-begin
-
-    if not(FIsConnected) then
-    begin
-        THelpers.MsgCall(TAppMessage.Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
-        Exit();
-    end;
-
-    // Only administrator is allowed
-//    if MainForm.FAccessLevel = TUserAccess.Admin then
-//    begin
-//        StatBar_TXT1.Caption :=TStatusBar.Downloading;
-//        MainForm.ClearOpenItemsSummary();
-//        MainForm.sgOpenItems.Freeze(True);
-//        var OpenItems: IOpenItems:=TOpenItems.Create();
-//        //OpenItems.ReadOpenItemsAsync(NullParameter, sgOpenItems, sgCompanyData, ReadOpenItems_Callback);
-//    end
-//    else
-//    begin
-//        StatBar_TXT1.Caption:=TStatusBar.Ready;
-//        ThreadFileLog.Log('[Open Items]: User have no R/W access, process halted.');
-//    end;
-
 end;
 
 

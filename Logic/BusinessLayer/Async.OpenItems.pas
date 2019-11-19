@@ -133,7 +133,6 @@ implementation
 
 uses
     System.Variants,
-    Handler.Account{legacy},
     Handler.Sql{legacy},
     Handler.Database{legacy},
     DbModel{legacy},

@@ -101,7 +101,6 @@ uses
     Erp.SalesResponsible        in 'Model\Json\RawTables\Erp.SalesResponsible.pas',
     Handler.Sql                 in 'Logic\AccessLayer\Handler.Sql.pas',
     Handler.Database            in 'Logic\AccessLayer\Handler.Database.pas',
-    Handler.Account             in 'Logic\AccessLayer\Handler.Account.pas',
     Handler.Rest                in 'Logic\AccessLayer\Handler.Rest.pas',
     Sync.Mailer                 in 'Logic\BusinessLayer\Sync.Mailer.pas',
     Sync.Documents              in 'Logic\BusinessLayer\Sync.Documents.pas',
@@ -136,7 +135,8 @@ uses
     View.SendStatement          in 'View\View.SendStatement.pas' {SendForm},
     View.Startup                in 'View\View.Startup.pas' {StartupForm},
     View.SqlSearch              in 'View\View.SqlSearch.pas' {SqlSearchForm},
-    View.InvoiceTracker         in 'View\View.InvoiceTracker.pas' {TrackerForm};
+    View.InvoiceTracker         in 'View\View.InvoiceTracker.pas' {TrackerForm},
+	View.CompanyList            in 'View\View.CompanyList.pas' {CompanyListForm};
 
 
 {$R *.res}

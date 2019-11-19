@@ -75,7 +75,6 @@ implementation
 uses
     System.StrUtils,
     Handler.Database{legacy},
-    Handler.Account{legacy},
     Handler.Sql{legacy},
     DbModel{legacy},
     Unity.Helpers,

@@ -70,7 +70,6 @@ type
         procedure ApplicationStart();
         function GetScreenDataSync(): boolean;
         function GetDbConnectionSync(): boolean;
-        function GetUserAccountSync(): boolean;
         function GetGeneralTablesSync(): boolean;
         function GetHtmlLayoutsSync(UrlLayoutPak: string; FileLayoutPak: string; LayoutDir: string): boolean;
         procedure GeneralTables_Callback(CallResponse: TCallResponse);
@@ -108,7 +107,6 @@ uses
     System.Net.HttpClient,
     Handler.Rest,
     Handler.Database,
-    Handler.Account,
     View.Main,
     DbModel;
 
@@ -223,14 +221,15 @@ begin
             ThreadFileLog.Log('Critical error has occured [GetScreenDataSync]: ' + LastErrorMsg);
             THelpers.MsgCall(TAppMessage.Error, 'An error has occured [GetScreenDataSync]: ' + LastErrorMsg + '. Please contact IT support. Application will be closed.');
             ExitAppSync();
-        end else
+        end
+        else
         begin
             ThreadFileLog.Log('Unity has been boot up.');
             ChangeProgressBar(15, 'Initializing... done.', ProgressBar);
         end;
 
         // -----------------------------------------
-        // Establish persistent database connection.
+        // Establish persistent database connection.  // delete when REST is introduced
         // -----------------------------------------
 
         Sleep(250);
@@ -241,29 +240,12 @@ begin
             ThreadFileLog.Log('Critical error has occured [GetDbConnectionSync]: ' + LastErrorMsg);
             THelpers.MsgCall(TAppMessage.Error, 'An error occured [GetDbConnectionSync]: ' + LastErrorMsg + '. Please contact IT support. Application will be closed.');
             ExitAppSync();
-        end else
+        end
+        else
         begin
             SessionService.FDbConnect:=DbConnection;
             ThreadFileLog.Log('Persistant connection with SQL database has been established.');
             ChangeProgressBar(33, 'Connecting to database... done.', ProgressBar);
-        end;
-
-        // ----------------------
-        // Find the user account.
-        // ----------------------
-
-        Sleep(250);
-        ChangeProgressBar(40, 'Getting user account details...', ProgressBar);
-
-        if not GetUserAccountSync() then
-        begin
-            ThreadFileLog.Log('Critical error has occured [GetUserAccountSync]: ' + LastErrorMsg);
-            THelpers.MsgCall(TAppMessage.Error, 'An error occured [GetUserAccountSync]: ' + LastErrorMsg + '. Please contact your administrator. Application will be closed.');
-            ExitAppSync();
-        end else
-        begin
-            ThreadFileLog.Log('User access has been established.');
-            ChangeProgressBar(50, 'Getting user account details... done.', ProgressBar);
         end;
 
         // --------------------------------------
@@ -279,10 +261,22 @@ begin
             ThreadFileLog.Log('Critical error has occured [GetHtmlLayoutsSync]: ' + LastErrorMsg);
             THelpers.MsgCall(TAppMessage.Error, 'An error occured [GetHtmlLayoutsSync]: ' + LastErrorMsg + '. Please contact your administrator. Application will be closed.');
             ExitAppSync();
-        end else
+        end
+        else
         begin
-            ThreadFileLog.Log('Html layouts has been synchronized.');
-            ChangeProgressBar(75, 'Synchronizing email templates... done.', ProgressBar);
+
+            if TCore.UnzippLayouts(Settings.DirLayouts + TCommon.LayoutPak, Settings.DirLayouts) then
+            begin
+                ThreadFileLog.Log('Html layouts has been synchronized.');
+                ChangeProgressBar(75, 'Synchronizing email templates... done.', ProgressBar);
+            end
+            else
+            begin
+                ThreadFileLog.Log('[GetHtmlLayoutsSync]: Cannot unzipp resource file.');
+                THelpers.MsgCall(TAppMessage.Error, 'An error occured [GetHtmlLayoutsSync]: Cannot uznipp resource file. Please contact your administrator. Application will be closed.');
+                ExitAppSync();
+            end;
+
         end;
 
         // -------------------------------
@@ -297,7 +291,8 @@ begin
             ThreadFileLog.Log('Critical error occured [GetGeneralTablesSync]: ' + LastErrorMsg);
             THelpers.MsgCall(TAppMessage.Error, 'An error has occured [GetGeneralTablesSync]: ' + LastErrorMsg + '. Please contact IT support. Application will be closed.');
             ExitAppSync();
-        end else
+        end
+        else
         begin
             ThreadFileLog.Log('General tables has been loaded.');
             ChangeProgressBar(95, 'Loading general tables... done.', ProgressBar);
@@ -409,7 +404,7 @@ begin
         MainAppForm.Cap05.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT05', 'EMPTY'), [fsBold], 'Tahoma', 10, clWhite);
         MainAppForm.Cap06.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT06', 'EMPTY'), [fsBold], 'Tahoma', 10, clWhite);
         MainAppForm.Cap07.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT07', 'EMPTY'), [fsBold], 'Tahoma', 10, clWhite);
-        MainAppForm.Cap24.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT08', 'EMPTY'), [fsBold], 'Tahoma', 10, clWhite);
+        //MainAppForm.Cap24.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT08', 'EMPTY'), [fsBold], 'Tahoma', 10, clWhite);
         MainAppForm.Cap10.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS2TXT01', 'EMPTY'), [fsBold], 'Tahoma', 10, clWhite);
         //MainAppForm.Cap11.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS2TXT02', 'EMPTY'), [fsBold], 'Tahoma', 10, clWhite);
         MainAppForm.Cap12.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS2TXT03', 'EMPTY'), [fsBold], 'Tahoma', 10, clWhite);
@@ -492,47 +487,6 @@ begin
 end;
 
 
-function TStartupForm.GetUserAccountSync(): boolean;
-begin
-
-    Result:=True;
-
-    var UserControl: TUserControl:=TUserControl.Create(SessionService.FDbConnect);
-    try
-
-        try
-
-//            UserControl.UserName:=SessionService.SessionUser;
-//            MainAppForm.FAccessLevel:=UserControl.GetAccessData(TUserAccess.TTypes.AccessLevel);
-//
-//            // Quit if username is not found
-//            if MainAppForm.FAccessLevel = '' then
-//            begin
-//                LastErrorMsg:='Cannot find account for user alias ' + UpperCase(SessionService.SessionUser);
-//                Result:=False;
-//            end else
-//            begin
-//                MainAppForm.FAccessMode:=UserControl.GetAccessData(TUserAccess.TTypes.AccessMode);
-//                UserControl.GetGroupList(MainAppForm.FGroupList);
-//                UserControl.GetAgeDates(MainAppForm.FAgeDateList, MainAppForm.FGroupList[0, 0]);
-//            end;
-
-        except
-            on E: Exception do
-            begin
-                LastErrorMsg:=E.Message;
-                Result:=False;
-            end;
-
-        end;
-
-    finally
-        UserControl.Free();
-    end;
-
-end;
-
-
 function TStartupForm.GetGeneralTablesSync(): boolean;
 begin
 
@@ -581,8 +535,6 @@ begin
             HttpClient.Free();
             FileStream.Free();
         end;
-
-        TCore.UnzippLayouts(FileLayoutPak, LayoutDir);
 
     except
         on E: Exception do

@@ -73,7 +73,6 @@ uses
     View.Main,           // remove!
     View.Actions,        // remove!
     Handler.Database,
-    Handler.Account,
     Unity.Sql,
     Unity.Chars,
     Unity.Helpers,

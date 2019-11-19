@@ -228,7 +228,6 @@ implementation
 
 uses
     Handler.Database{Legacy},
-    Handler.Account{Legacy},
     Handler.Sql{Legacy},
     Unity.Sql,
     Unity.Helpers,

@@ -735,8 +735,8 @@ end;
 procedure TActionsForm.SaveDailyComment();
 begin
 
-//    FDailyCommentFields.GroupIdSel   :=MainForm.FGroupIdSel;
-//    FDailyCommentFields.AgeDateSel   :=MainForm.FAgeDateSel;
+    //FDailyCommentFields.GroupIdSel   :=MainForm.FGroupIdSel;
+    //FDailyCommentFields.AgeDateSel   :=MainForm.FAgeDateSel;
     FDailyCommentFields.CUID         :=CUID;
     FDailyCommentFields.Email        :=False;
     FDailyCommentFields.CallEvent    :=False;

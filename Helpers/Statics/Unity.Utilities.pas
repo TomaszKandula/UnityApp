@@ -200,7 +200,7 @@ begin
             on E: Exception do
             begin
                 LastErrorMsg:='Cannot extract file from resource container. Exception has been thrown: ' + E.Message;
-                Exit;
+                Exit();
             end;
 
         end;
@@ -213,19 +213,20 @@ begin
 
 end;
 
-
+//lekage TMBCS.Encoding
 class function TCore.UnzippLayouts(FileName: string; DestDir: string): boolean;
 begin
 
     Result:=False;
 
-    var ZipRead: TZipFile:=TZipFile.Create;
+    var ZipRead: TZipFile:=TZipFile.Create();
     try
 
         try
+
             ZipRead.Open(FileName, zmRead);
 
-            for var iCNT: integer:=0 to ZipRead.FileCount - 1 do
+            for var iCNT:=0 to ZipRead.FileCount - 1 do
             begin
 
                 var Zipped:   string:=ZipRead.FileName[iCNT];
@@ -256,7 +257,6 @@ class function TCore.LoadFileToStr(const FileName: TFileName): AnsiString;
 begin
 
     var FileStream: TFileStream:=TFileStream.Create(FileName, fmOpenRead or fmShareDenyWrite);
-
     try
 
         if FileStream.Size > 0 then
