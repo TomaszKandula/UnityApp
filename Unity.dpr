@@ -71,9 +71,7 @@ uses
     Unity.Delimiters            in 'Helpers\Statics\Unity.Delimiters.pas',
     Unity.DateTimeFormats       in 'Helpers\Statics\Unity.DateTimeFormats.pas',
     Unity.Messaging             in 'Helpers\Statics\Unity.Messaging.pas',
-    Unity.NCSI                  in 'Helpers\Statics\Unity.NCSI.pas',
     Unity.Qms                   in 'Helpers\Statics\Unity.Qms.pas',
-    Unity.RestAuth              in 'Helpers\Statics\Unity.RestAuth.pas',
     Unity.RiskClass             in 'Helpers\Statics\Unity.RiskClass.pas',
     Unity.StatusBar             in 'Helpers\Statics\Unity.StatusBar.pas',
     Unity.Unknown               in 'Helpers\Statics\Unity.Unknown.pas',
@@ -82,9 +80,6 @@ uses
     Unity.Common                in 'Helpers\Statics\Unity.Common.pas',
     Unity.Sorting               in 'Helpers\Statics\Unity.Sorting.pas',
     Unity.Filtering             in 'Helpers\Statics\Unity.Filtering.pas',
-    Unity.UserAccess            in 'Helpers\Statics\Unity.UserAccess.pas',
-    Unity.UserSid               in 'Helpers\Statics\Unity.UserSid.pas',
-    Unity.Utilities             in 'Helpers\Statics\Unity.Utilities.pas',
     DbModel                     in 'Model\DbModel.pas',
     Customer.AddressBook        in 'Model\Json\RawTables\Customer.AddressBook.pas',
     Customer.ControlStatus      in 'Model\Json\RawTables\Customer.ControlStatus.pas',
@@ -154,7 +149,6 @@ begin
     // --------------------------------
     // Setup application date and time.
     // --------------------------------
-
     RegSettings.CurrencyDecimals    :=4;
     RegSettings.DateSeparator       :='-';
     RegSettings.ShortDateFormat     :='yyyy-mm-dd';
@@ -172,13 +166,12 @@ begin
     // new session service that holds session data throughout
     // the application lifetime.
     // ------------------------------------------------------
-
     var Settings: ISettings:=TSettings.Create();
     if not Settings.CheckConfigFile then
     begin
 
         var LastErrorMsg: string;
-        if TCore.Unpack(10, Settings.PathConfig, false, LastErrorMsg) then Settings.ConfigToMemory()
+        if THelpers.Unpack(10, Settings.PathConfig, false, LastErrorMsg) then Settings.ConfigToMemory()
         else begin
 
             Application.MessageBox(
@@ -200,7 +193,6 @@ begin
     // <see cref="https://www.briskbard.com/index.php?lang=en&pageid=cef"/>
     // GlobalCEFApp is an instance of the TCEFApplication class an it simpliefies the Chromium initialization.
     // -------------------------------------------------------------------------------------------------------
-
     GlobalCEFApp:=TCefApplication.Create();
     var ChromiumExit: boolean:=False;
 
@@ -209,7 +201,6 @@ begin
         // ----------------------------------------------------------------------------------------
         // Do not run Chromium inside Unity application, all HTML rendering should be subprocessed.
         // ----------------------------------------------------------------------------------------
-
         GlobalCEFApp.BrowserSubprocessPath:='SubProcess.exe';
         var PathAppDir: string:=ExtractFileDir(Application.ExeName) + '\';
 
@@ -220,25 +211,21 @@ begin
             // if we have main thread running. If not, we exit the program.
             // Setup framework directory, explicitly to an absolute value. It ensures correct initialization.
             // ---------------------------------------------------------------------------------------------------------------------------
-
             GlobalCEFApp.FrameworkDirPath:=PathAppDir;
 
             // ----------------------------------------------------------------------------------------------
             // Setup resources directory, explicitly to an absolute value. It ensures correct initialization.
             // ----------------------------------------------------------------------------------------------
-
             GlobalCEFApp.ResourcesDirPath:=PathAppDir;
 
             // --------------------------------------------------------------------------------------------
             // Setup locales directory, explicitly to an absolute value. It ensures correct initialization.
             // --------------------------------------------------------------------------------------------
-
             GlobalCEFApp.LocalesDirPath:=PathAppDir + 'locales';
 
             // -----------------------------------------------------------------------------------------------------------------
             // Set the current application directory before loading the CEF3 libraries to avoid "CEF3 binaries missing !" error.
             // -----------------------------------------------------------------------------------------------------------------
-
             GlobalCEFApp.SetCurrentDir:=True;
 
             if not(GlobalCEFApp.StartMainProcess) then

@@ -26,38 +26,36 @@ uses
 type
 
 
+    /// <summary>
+    /// Exposes properties and methods to deal with REST API, to obtain and send/receive data to/from WebApi service.
+    /// </summary>
     IRESTFul = Interface(IInterface)
     ['{3A64616D-26BE-44F8-80C8-F69DE813D439}']
-
-        // --------------------------------
-        // Undisclosed getters and setters.
-        // --------------------------------
-
-        function  GetExecuteError:                  string;
-        function  GetStatusCode:                    integer;
-        function  GetCustomBody:                    string;
-        function  GetContent:                       string;
-        function  GetHeaders:                       string;
-        function  GethttpAuthUsername:              string;
-        function  GethttpAuthPassword:              string;
-        function  GetClientAccept:                  string;
-        function  GetClientAcceptCharset:           string;
-        function  GetClientAllowCookies:            boolean;
-        function  GetClientAutoCreateParams:        boolean;
-        function  GetClientBaseURL:                 string;
-        function  GetClientContentType:             string;
+        function  GetExecuteError: string;
+        function  GetStatusCode: integer;
+        function  GetCustomBody: string;
+        function  GetContent: string;
+        function  GetHeaders: string;
+        function  GethttpAuthUsername: string;
+        function  GethttpAuthPassword: string;
+        function  GetClientAccept: string;
+        function  GetClientAcceptCharset: string;
+        function  GetClientAllowCookies: boolean;
+        function  GetClientAutoCreateParams: boolean;
+        function  GetClientBaseURL: string;
+        function  GetClientContentType: string;
         function  GetClientFallbackCharsetEncoding: string;
-        function  GetClientHandleRedirects:         boolean;
-        function  GetClientRaiseExceptionOn500:     boolean;
-        function  GetClientSynchronizedEvents:      boolean;
-        function  GetClientUserAgent:               string;
-        function  GetRequestAccept:                 string;
-        function  GetRequestAcceptCharset:          string;
-        function  GetRequestAutoCreateParams:       boolean;
-        function  GetRequestHandleRedirects:        boolean;
-        function  GetRequestMethod:                 TRESTRequestMethod;
-        function  GetRequestSynchronizedEvents:     boolean;
-        function  GetRequestTimeout:                integer;
+        function  GetClientHandleRedirects: boolean;
+        function  GetClientRaiseExceptionOn500: boolean;
+        function  GetClientSynchronizedEvents: boolean;
+        function  GetClientUserAgent: string;
+        function  GetRequestAccept: string;
+        function  GetRequestAcceptCharset: string;
+        function  GetRequestAutoCreateParams: boolean;
+        function  GetRequestHandleRedirects: boolean;
+        function  GetRequestMethod: TRESTRequestMethod;
+        function  GetRequestSynchronizedEvents: boolean;
+        function  GetRequestTimeout: integer;
         procedure SetCustomBody(NewValue: string);
         procedure SetClientAccept(NewValue: string);
         procedure SetClientAcceptCharset(NewValue: string);
@@ -77,169 +75,153 @@ type
         procedure SetRequestMethod(NewValue: TRESTRequestMethod);
         procedure SetRequestSynchronizedEvents(NewValue: boolean);
         procedure SetRequestTimeout(NewValue: integer);
-
-        // -------------------
-        // Exposed properties.
-        // -------------------
-
-        property ExecuteError:                  string             read GetExecuteError;
-        property StatusCode:                    integer            read GetStatusCode;
-        property Content:                       string             read GetContent;
-        property Headers:                       string             read GetHeaders;
-        property httpAuthUsername:              string             read GethttpAuthUsername;
-        property httpAuthPassword:              string             read GethttpAuthPassword;
-        property CustomBody:                    string             read GetCustomBody                    write SetCustomBody;
-        property ClientAccept:                  string             read GetClientAccept                  write SetClientAccept;
-        property ClientAcceptCharset:           string             read GetClientAcceptCharset           write SetClientAcceptCharset;
-        property ClientAllowCookies:            boolean            read GetClientAllowCookies            write SetClientAllowCookies;
-        property ClientAutoCreateParams:        boolean            read GetClientAutoCreateParams        write SetClientAutoCreateParams;
-        property ClientBaseURL:                 string             read GetClientBaseURL                 write SetClientBaseURL;
-        property ClientContentType:             string             read GetClientContentType             write SetClientContentType;
-        property ClientFallbackCharsetEncoding: string             read GetClientFallbackCharsetEncoding write SetClientFallbackCharsetEncoding;
-        property ClientHandleRedirects:         boolean            read GetClientHandleRedirects         write SetClientHandleRedirects;
-        property ClientRaiseExceptionOn500:     boolean            read GetClientRaiseExceptionOn500     write SetClientRaiseExceptionOn500;
-        property ClientSynchronizedEvents:      boolean            read GetClientSynchronizedEvents      write SetClientSynchronizedEvents;
-        property ClientUserAgent:               string             read GetClientUserAgent               write SetClientUserAgent;
-        property RequestAccept:                 string             read GetRequestAccept                 write SetRequestAccept;
-        property RequestAcceptCharset:          string             read GetRequestAcceptCharset          write SetRequestAcceptCharset;
-        property RequestAutoCreateParams:       boolean            read GetRequestAutoCreateParams       write SetRequestAutoCreateParams;
-        property RequestHandleRedirects:        boolean            read GetRequestHandleRedirects        write SetRequestHandleRedirects;
-        property RequestMethod:                 TRESTRequestMethod read GetRequestMethod                 write SetRequestMethod;
-        property RequestSynchronizedEvents:     boolean            read GetRequestSynchronizedEvents     write SetRequestSynchronizedEvents;
-        property RequestTimeout:                integer            read GetRequestTimeout                write SetRequestTimeout;
-
-        // ----------------
-        // Exposed methods.
-        // ----------------
-
+        property ExecuteError: string read GetExecuteError;
+        property StatusCode: integer read GetStatusCode;
+        property Content: string read GetContent;
+        property Headers: string read GetHeaders;
+        property httpAuthUsername: string read GethttpAuthUsername;
+        property httpAuthPassword: string read GethttpAuthPassword;
+        property CustomBody: string read GetCustomBody write SetCustomBody;
+        property ClientAccept: string read GetClientAccept write SetClientAccept;
+        property ClientAcceptCharset: string read GetClientAcceptCharset write SetClientAcceptCharset;
+        property ClientAllowCookies: boolean read GetClientAllowCookies write SetClientAllowCookies;
+        property ClientAutoCreateParams: boolean read GetClientAutoCreateParams write SetClientAutoCreateParams;
+        property ClientBaseURL: string read GetClientBaseURL write SetClientBaseURL;
+        property ClientContentType: string read GetClientContentType write SetClientContentType;
+        property ClientFallbackCharsetEncoding: string read GetClientFallbackCharsetEncoding write SetClientFallbackCharsetEncoding;
+        property ClientHandleRedirects: boolean read GetClientHandleRedirects write SetClientHandleRedirects;
+        property ClientRaiseExceptionOn500: boolean read GetClientRaiseExceptionOn500 write SetClientRaiseExceptionOn500;
+        property ClientSynchronizedEvents: boolean read GetClientSynchronizedEvents write SetClientSynchronizedEvents;
+        property ClientUserAgent: string read GetClientUserAgent write SetClientUserAgent;
+        property RequestAccept: string read GetRequestAccept write SetRequestAccept;
+        property RequestAcceptCharset: string read GetRequestAcceptCharset write SetRequestAcceptCharset;
+        property RequestAutoCreateParams: boolean read GetRequestAutoCreateParams write SetRequestAutoCreateParams;
+        property RequestHandleRedirects: boolean read GetRequestHandleRedirects write SetRequestHandleRedirects;
+        property RequestMethod: TRESTRequestMethod read GetRequestMethod write SetRequestMethod;
+        property RequestSynchronizedEvents: boolean read GetRequestSynchronizedEvents write SetRequestSynchronizedEvents;
+        property RequestTimeout: integer read GetRequestTimeout write SetRequestTimeout;
         function  Execute: boolean;
         procedure AddParameter(QueryName: string; ParamValue: string);
         procedure ClearParameters;
-
     end;
 
 
+    /// <summary>
+    /// Simple wrapper for REST Client, REST Response, REST Request and HTTPBasicAuthentication.
+    /// </summary>
     TRESTful = class(TInterfacedObject, IRESTFul)
     private
-
-        var httpAuth:         THTTPBasicAuthenticator;
-        var restClient:       TRESTClient;
-        var restRequest:      TRESTRequest;
-        var restResponse:     TRESTResponse;
-        var queryList:        TList<string>;
-        var paramList:        TList<string>;
-        var FStatusCode:      integer;
+        var httpAuth: THTTPBasicAuthenticator;
+        var restClient: TRESTClient;
+        var restRequest: TRESTRequest;
+        var restResponse: TRESTResponse;
+        var queryList: TList<string>;
+        var paramList: TList<string>;
+        var FStatusCode: integer;
         var FResponseContent: string;
-        var FCustomBody:      string;
-        var FExecuteError:    string;
-
-        // -------------------
-        // Property's getters.
-        // -------------------
-
-        function GetExecuteError:                  string;
-        function GetStatusCode:                    integer;
-        function GetCustomBody:                    string;
-        function GetContent:                       string;
-        function GetHeaders:                       string;
-        function GethttpAuthUsername:              string;
-        function GethttpAuthPassword:              string;
-        function GetClientAccept:                  string;
-        function GetClientAcceptCharset:           string;
-        function GetClientAllowCookies:            boolean;
-        function GetClientAutoCreateParams:        boolean;
-        function GetClientBaseURL:                 string;
-        function GetClientContentType:             string;
+        var FCustomBody: string;
+        var FExecuteError: string;
+        function GetExecuteError: string;
+        function GetStatusCode: integer;
+        function GetCustomBody: string;
+        function GetContent: string;
+        function GetHeaders: string;
+        function GethttpAuthUsername: string;
+        function GethttpAuthPassword: string;
+        function GetClientAccept: string;
+        function GetClientAcceptCharset: string;
+        function GetClientAllowCookies: boolean;
+        function GetClientAutoCreateParams: boolean;
+        function GetClientBaseURL: string;
+        function GetClientContentType: string;
         function GetClientFallbackCharsetEncoding: string;
-        function GetClientHandleRedirects:         boolean;
-        function GetClientRaiseExceptionOn500:     boolean;
-        function GetClientSynchronizedEvents:      boolean;
-        function GetClientUserAgent:               string;
-        function GetRequestAccept:                 string;
-        function GetRequestAcceptCharset:          string;
-        function GetRequestAutoCreateParams:       boolean;
-        function GetRequestHandleRedirects:        boolean;
-        function GetRequestMethod:                 TRESTRequestMethod;
-        function GetRequestSynchronizedEvents:     boolean;
-        function GetRequestTimeout:                integer;
-
-        // -------------------
-        // Property's setters.
-        // -------------------
-
-        procedure SetCustomBody(NewValue:                    string);
-        procedure SetClientAccept(NewValue:                  string);
-        procedure SetClientAcceptCharset(NewValue:           string);
-        procedure SetClientAllowCookies(NewValue:            boolean);
-        procedure SetClientAutoCreateParams(NewValue:        boolean);
-        procedure SetClientBaseURL(NewValue:                 string);
-        procedure SetClientContentType(NewValue:             string);
+        function GetClientHandleRedirects: boolean;
+        function GetClientRaiseExceptionOn500: boolean;
+        function GetClientSynchronizedEvents: boolean;
+        function GetClientUserAgent: string;
+        function GetRequestAccept: string;
+        function GetRequestAcceptCharset: string;
+        function GetRequestAutoCreateParams: boolean;
+        function GetRequestHandleRedirects: boolean;
+        function GetRequestMethod: TRESTRequestMethod;
+        function GetRequestSynchronizedEvents: boolean;
+        function GetRequestTimeout: integer;
+        procedure SetCustomBody(NewValue: string);
+        procedure SetClientAccept(NewValue: string);
+        procedure SetClientAcceptCharset(NewValue: string);
+        procedure SetClientAllowCookies(NewValue: boolean);
+        procedure SetClientAutoCreateParams(NewValue: boolean);
+        procedure SetClientBaseURL(NewValue: string);
+        procedure SetClientContentType(NewValue: string);
         procedure SetClientFallbackCharsetEncoding(NewValue: string);
-        procedure SetClientHandleRedirects(NewValue:         boolean);
-        procedure SetClientRaiseExceptionOn500(NewValue:     boolean);
-        procedure SetClientSynchronizedEvents(NewValue:      boolean);
-        procedure SetClientUserAgent(NewValue:               string);
-        procedure SetRequestAccept(NewValue:                 string);
-        procedure SetRequestAcceptCharset(NewValue:          string);
-        procedure SetRequestAutoCreateParams(NewValue:       boolean);
-        procedure SetRequestHandleRedirects(NewValue:        boolean);
-        procedure SetRequestMethod(NewValue:                 TRESTRequestMethod);
-        procedure SetRequestSynchronizedEvents(NewValue:     boolean);
-        procedure SetRequestTimeout(NewValue:                integer);
-
-        // ----------------------------------
-        // Trimming received response string.
-        // ----------------------------------
-
+        procedure SetClientHandleRedirects(NewValue: boolean);
+        procedure SetClientRaiseExceptionOn500(NewValue: boolean);
+        procedure SetClientSynchronizedEvents(NewValue: boolean);
+        procedure SetClientUserAgent(NewValue: string);
+        procedure SetRequestAccept(NewValue: string);
+        procedure SetRequestAcceptCharset(NewValue: string);
+        procedure SetRequestAutoCreateParams(NewValue: boolean);
+        procedure SetRequestHandleRedirects(NewValue: boolean);
+        procedure SetRequestMethod(NewValue: TRESTRequestMethod);
+        procedure SetRequestSynchronizedEvents(NewValue: boolean);
+        procedure SetRequestTimeout(NewValue: integer);
         procedure TrimContent(var TextStr: string);
-
     public
         constructor Create(UserName: string; Password: string);
         destructor Destroy; override;
-        property ExecuteError:                  string             read GetExecuteError;
-        property StatusCode:                    integer            read GetStatusCode;
-        property Content:                       string             read GetContent;
-        property Headers:                       string             read GetHeaders;
-        property httpAuthUsername:              string             read GethttpAuthUsername;
-        property httpAuthPassword:              string             read GethttpAuthPassword;
-        property CustomBody:                    string             read GetCustomBody                    write SetCustomBody;
-        property ClientAccept:                  string             read GetClientAccept                  write SetClientAccept;
-        property ClientAcceptCharset:           string             read GetClientAcceptCharset           write SetClientAcceptCharset;
-        property ClientAllowCookies:            boolean            read GetClientAllowCookies            write SetClientAllowCookies;
-        property ClientAutoCreateParams:        boolean            read GetClientAutoCreateParams        write SetClientAutoCreateParams;
-        property ClientBaseURL:                 string             read GetClientBaseURL                 write SetClientBaseURL;
-        property ClientContentType:             string             read GetClientContentType             write SetClientContentType;
-        property ClientFallbackCharsetEncoding: string             read GetClientFallbackCharsetEncoding write SetClientFallbackCharsetEncoding;
-        property ClientHandleRedirects:         boolean            read GetClientHandleRedirects         write SetClientHandleRedirects;
-        property ClientRaiseExceptionOn500:     boolean            read GetClientRaiseExceptionOn500     write SetClientRaiseExceptionOn500;
-        property ClientSynchronizedEvents:      boolean            read GetClientSynchronizedEvents      write SetClientSynchronizedEvents;
-        property ClientUserAgent:               string             read GetClientUserAgent               write SetClientUserAgent;
-        property RequestAccept:                 string             read GetRequestAccept                 write SetRequestAccept;
-        property RequestAcceptCharset:          string             read GetRequestAcceptCharset          write SetRequestAcceptCharset;
-        property RequestAutoCreateParams:       boolean            read GetRequestAutoCreateParams       write SetRequestAutoCreateParams;
-        property RequestHandleRedirects:        boolean            read GetRequestHandleRedirects        write SetRequestHandleRedirects;
-        property RequestMethod:                 TRESTRequestMethod read GetRequestMethod                 write SetRequestMethod;
-        property RequestSynchronizedEvents:     boolean            read GetRequestSynchronizedEvents     write SetRequestSynchronizedEvents;
-        property RequestTimeout:                integer            read GetRequestTimeout                write SetRequestTimeout;
+        property ExecuteError: string read GetExecuteError;
+        property StatusCode: integer read GetStatusCode;
+        property Content: string read GetContent;
+        property Headers: string read GetHeaders;
+        property httpAuthUsername: string read GethttpAuthUsername;
+        property httpAuthPassword: string read GethttpAuthPassword;
+        property CustomBody: string read GetCustomBody write SetCustomBody;
+        property ClientAccept: string read GetClientAccept write SetClientAccept;
+        property ClientAcceptCharset: string read GetClientAcceptCharset write SetClientAcceptCharset;
+        property ClientAllowCookies: boolean read GetClientAllowCookies write SetClientAllowCookies;
+        property ClientAutoCreateParams: boolean read GetClientAutoCreateParams write SetClientAutoCreateParams;
+        property ClientBaseURL: string read GetClientBaseURL write SetClientBaseURL;
+        property ClientContentType: string read GetClientContentType write SetClientContentType;
+        property ClientFallbackCharsetEncoding: string read GetClientFallbackCharsetEncoding write SetClientFallbackCharsetEncoding;
+        property ClientHandleRedirects: boolean read GetClientHandleRedirects write SetClientHandleRedirects;
+        property ClientRaiseExceptionOn500: boolean read GetClientRaiseExceptionOn500 write SetClientRaiseExceptionOn500;
+        property ClientSynchronizedEvents: boolean read GetClientSynchronizedEvents write SetClientSynchronizedEvents;
+        property ClientUserAgent: string read GetClientUserAgent write SetClientUserAgent;
+        property RequestAccept: string read GetRequestAccept write SetRequestAccept;
+        property RequestAcceptCharset: string read GetRequestAcceptCharset write SetRequestAcceptCharset;
+        property RequestAutoCreateParams: boolean read GetRequestAutoCreateParams write SetRequestAutoCreateParams;
+        property RequestHandleRedirects: boolean read GetRequestHandleRedirects write SetRequestHandleRedirects;
+        property RequestMethod: TRESTRequestMethod read GetRequestMethod write SetRequestMethod;
+        property RequestSynchronizedEvents: boolean read GetRequestSynchronizedEvents write SetRequestSynchronizedEvents;
+        property RequestTimeout: integer read GetRequestTimeout write SetRequestTimeout;
         function Execute: boolean;
         procedure AddParameter(QueryName: string; ParamValue: string);
         procedure ClearParameters;
     end;
 
 
+    /// <summary>
+    /// Non-interfaced class constant providing fixed settings for REST controller including
+    /// fixed authorisation credentials (used for basic authentication).
+    /// </summary>
+    TRestAuth = class abstract
+    public
+        const apiUserName       = 'your_login';
+        const apiPassword       = 'your_password';
+        const restApiBaseUrl    = 'your_endpoint';
+        const restAccept        = 'application/json, text/plain; q=0.9, text/html;q=0.8,';
+        const restAcceptCharset = 'UTF-8, *;q=0.8';
+        const restContentType   = 'application/json';
+        const restEncoding      = 'UTF-8';
+        const restUserAgent     = 'Cheers RESTClient/1.0';
+    end;
+
+
 implementation
-
-
-uses
-    Unity.RestAuth;
 
 
 // ---------------------------------------------------------------------------------------------------------------------------------------- CREATE & RELEASE //
 
-
-/// <summary>
-/// Initialize and assign objects to handle requests/responses with initial settings.
-/// </summary>
 
 constructor TRESTful.Create(UserName: string; Password: string);
 begin
@@ -253,8 +235,8 @@ begin
     restRequest.Client:=restClient;
     restRequest.Response:=restResponse;
 
-    queryList:=TList<string>.Create;
-    paramList:=TList<string>.Create;
+    queryList:=TList<string>.Create();
+    paramList:=TList<string>.Create();
 
     ClientAccept                 :=TRestAuth.restAccept;
     ClientAcceptCharset          :=TRestAuth.restAcceptCharset;
@@ -280,12 +262,12 @@ end;
 
 destructor TRESTful.Destroy;
 begin
-    queryList.Free;
-    paramList.Free;
-    httpAuth.Free;
-    restClient.Free;
-    restResponse.Free;
-    restRequest.Free;
+    queryList.Free();
+    paramList.Free();
+    httpAuth.Free();
+    restClient.Free();
+    restResponse.Free();
+    restRequest.Free();
     inherited;
 end;
 
@@ -298,10 +280,6 @@ begin
 
     Result:=False;
 
-    // ---------------
-    // GET and DELETE.
-    // ---------------
-
     if (restRequest.Method = TRESTRequestMethod.rmGET) or (restRequest.Method = TRESTRequestMethod.rmDELETE) then
     begin
 
@@ -313,10 +291,6 @@ begin
         end;
 
     end;
-
-    // -------------
-    // POST and PUT.
-    // -------------
 
     if (restRequest.Method = TRESTRequestMethod.rmPOST) or (restRequest.Method = TRESTRequestMethod.rmPUT) then
     begin
@@ -364,11 +338,6 @@ begin
 
                 FResponseContent:=restResponse.Content;
                 FResponseContent:=FResponseContent.Replace('\"','"');
-
-                // -----------------------------------
-                // Remove single leading/ending quote.
-                // -----------------------------------
-
                 TrimContent(FResponseContent);
 
             end;
@@ -415,15 +384,12 @@ end;
 // ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
 
 
-/// <summary>
-/// Replace first and last character (single quote) for empty char.
-/// </summary>
-/// <remarks>
-/// WARNING! JAVA starts counting string characters from zero, while Delphi and Swift count it from one.
-/// </remarks>
-
 procedure TRESTful.TrimContent(var TextStr: string);
 begin
+    // ---------------------------------------------------------
+    // WARNING! JAVA starts couting string characters from zero,
+    // while Delphi and Swift count it from one.
+    // ---------------------------------------------------------
     if TextStr[1] = #34 then TextStr[1]:=#32;
     if TextStr[TextStr.Length - 1] = #34 then TextStr[TextStr.Length - 1]:=#32;
 end;

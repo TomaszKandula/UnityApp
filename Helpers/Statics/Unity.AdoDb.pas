@@ -8,6 +8,8 @@ unit Unity.AdoDb;
 
 interface
 
+// legacy - to be removed!
+
 
 type
 

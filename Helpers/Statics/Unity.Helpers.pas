@@ -11,6 +11,7 @@ interface
 
 uses
     System.Classes,
+    System.SysUtils,
     Winapi.Messages,
     Winapi.Windows,
     Winapi.ShellAPI,
@@ -19,7 +20,6 @@ uses
     Vcl.Menus,
     Vcl.Grids,
     Unity.Enums,
-    Unity.EventLogger,
     Unity.Grid,
     Unity.Arrays;
 
@@ -27,13 +27,22 @@ uses
 type
 
 
-    /// <remarks>
+    /// <summary>
     /// Define custom type for anonymous method to be passed as parameter.
-    /// </remarks>
+    /// </summary>
     TInputMethod = reference to procedure;
 
 
+    /// <summary>
+    ///
+    /// </summary>
     THelpers = class abstract
+    strict private
+        const HEAP_ZERO_MEMORY = $00000008;
+        const SID_REVISION     = 1;
+        class function ConvertSid(Sid: PSID; pszSidText: PChar; var dwBufferLen: DWORD): BOOL; static;
+        class function ObtainTextSid(hToken: THandle; pszSid: PChar; var dwBufferLen: DWORD): BOOL; static;
+        class procedure GetBuildInfo(var V1, V2, V3, V4: word); static;
     public
         const WM_GETINFO = WM_USER + 120;
         const WM_EXTINFO = WM_APP  + 150;
@@ -41,19 +50,25 @@ type
         class procedure ExecMessage(IsPostType: boolean; IntValue: cardinal; TextValue: string; Form: TForm); static;
         class procedure LoadImageFromStream(var Image: TImage; const FileName: string); static;
         class procedure TurnRowHighlight(var Grid: TStringGrid; var MenuItem: TMenuItem); static;
-        class function  WndCall(WinForm: TForm; Mode: TWindowState): integer; static;
-        class function  MsgCall(WndType: TAppMessage; WndText: string): integer; static;
-        class function  OleGetStr(RecordsetField: variant): string; static;
-        class function  CDate(StrDate: string): TDate; static;
-        class function  Explode(Text: string; SourceDelim: char): string; static;
-        class function  Implode(Text: TStrings; TargetDelim: char; ItemsHaveQuotes: boolean = False): string; static;
+        class function WndCall(WinForm: TForm; Mode: TWindowState): integer; static;
+        class function MsgCall(WndType: TAppMessage; WndText: string): integer; static;
+        class function OleGetStr(RecordsetField: variant): string; static;
+        class function CDate(StrDate: string): TDate; static;
+        class function Explode(Text: string; SourceDelim: char): string; static;
+        class function Implode(Text: TStrings; TargetDelim: char; ItemsHaveQuotes: boolean = False): string; static;
         class procedure QuickSortExt(var A: array of double; var L: array of integer; iLo, iHi: integer; ASC: boolean); static;
-        class function  ExportToCSV(SourceArray: TALists; FileName: string = ''): TStringList; static;
-        class function  IsVoType(VoType: string): boolean; static;
-        class function  ShowReport(ReportNumber: cardinal; CurrentForm: TForm): cardinal; static;
+        class function ExportToCSV(SourceArray: TALists; FileName: string = ''): TStringList; static;
+        class function IsVoType(VoType: string): boolean; static;
+        class function ShowReport(ReportNumber: cardinal; CurrentForm: TForm): cardinal; static;
         class procedure ReturnCoCodesList(var SourceGrid: TStringGrid; const SourceCol: integer; var TargetList: TStringList; HasHeader: boolean = False; Prefix: string = ''); static;
-        class function  CoConvert(CoNumber: string): string; static;
-        class function  GetSourceDBName(CoCode: string; Prefix: string): string; static;
+        class function CoConvert(CoNumber: string): string; static;
+        class function GetSourceDBName(CoCode: string; Prefix: string): string; static;
+        class function GetBuildInfoAsString: string; static;
+        class function GetOSVer(CheckForOsName: boolean): string; static;
+        class function Unpack(ItemID: integer; FileName: string; ShouldFileStay: boolean; var LastErrorMsg: string): boolean; static;
+        class function UnzippLayouts(FileName: string; DestDir: string): boolean; static;
+        class function LoadFileToStr(const FileName: TFileName): AnsiString; static;
+        class function GetCurrentUserSid: string; static;
     end;
 
 
@@ -61,9 +76,9 @@ implementation
 
 
 uses
-    System.SysUtils,
     System.StrUtils,
     System.Variants,
+    System.Zip,
     Vcl.Graphics,
     DbModel,
     Unity.DateTimeFormats,
@@ -71,6 +86,139 @@ uses
     Unity.Chars,
     Unity.Common,
     Unity.Settings;
+
+
+class function THelpers.ConvertSid(Sid: PSID; pszSidText: PChar; var dwBufferLen: DWORD): BOOL;
+begin
+
+    Result:=False;
+
+    var dwSidRev: DWORD:=SID_REVISION;
+    if not IsValidSid(Sid) then Exit;
+
+    var psia: PSIDIdentifierAuthority:=GetSidIdentifierAuthority(Sid);
+    var dwSubAuthorities: DWORD:=GetSidSubAuthorityCount(Sid)^;
+    var dwSidSize: DWORD:=(15 + 12 + (12 * dwSubAuthorities) + 1) * SizeOf(Char);
+
+    if (dwBufferLen < dwSidSize) then
+    begin
+        dwBufferLen:=dwSidSize;
+        SetLastError(ERROR_INSUFFICIENT_BUFFER);
+        Exit();
+    end;
+
+    StrFmt(pszSidText, 'S-%u-', [dwSidRev]);
+
+    if (psia.Value[0] <> 0) or (psia.Value[1] <> 0) then
+        StrFmt(pszSidText + StrLen(pszSidText), '0x%.2x%.2x%.2x%.2x%.2x%.2x',
+	        [
+                psia.Value[0],
+                psia.Value[1],
+                psia.Value[2],
+                psia.Value[3],
+                psia.Value[4],
+                psia.Value[5]
+            ])
+    else
+        StrFmt(pszSidText + StrLen(pszSidText), '%u',
+            [
+                DWORD(psia.Value[5])        +
+                DWORD(psia.Value[4] shl 8)  +
+                DWORD(psia.Value[3] shl 16) +
+                DWORD(psia.Value[2] shl 24)
+            ]);
+
+    dwSidSize:=StrLen(pszSidText);
+    for var dwCounter: DWORD:=0 to dwSubAuthorities - 1 do
+    begin
+        StrFmt(pszSidText + dwSidSize, '-%u', [GetSidSubAuthority(Sid, dwCounter)^]);
+        dwSidSize := StrLen(pszSidText);
+    end;
+
+    Result:=True;
+
+end;
+
+
+class function THelpers.ObtainTextSid(hToken: THandle; pszSid: PChar; var dwBufferLen: DWORD): BOOL;
+begin
+
+    Result:=False;
+    var dwReturnLength: DWORD:=0;
+    var dwTokenUserLength: DWORD:=0;
+    var tic: TTokenInformationClass:=TokenUser;
+    var ptu: Pointer:=nil;
+
+    if not GetTokenInformation(hToken, tic, ptu, dwTokenUserLength, dwReturnLength) then
+    begin
+
+        if GetLastError = ERROR_INSUFFICIENT_BUFFER then
+        begin
+
+            ptu:=HeapAlloc(GetProcessHeap, HEAP_ZERO_MEMORY, dwReturnLength);
+
+            if ptu = nil then Exit();
+            dwTokenUserLength:=dwReturnLength;
+            dwReturnLength:=0;
+
+            if not GetTokenInformation(hToken, tic, ptu, dwTokenUserLength, dwReturnLength) then Exit();
+
+        end
+        else
+        begin
+            Exit();
+        end;
+
+    end;
+
+    // Try to convert SID, exit if failed
+    if not ConvertSid((PTokenUser(ptu).User).Sid, pszSid, dwBufferLen) then Exit();
+    if not HeapFree(GetProcessHeap, 0, ptu) then Exit();
+
+    Result:=True;
+
+end;
+
+
+class procedure THelpers.GetBuildInfo(var V1, V2, V3, V4: word);
+begin
+
+    var VerInfoSize:   DWORD;
+    var VerValueSize:  DWORD;
+    var Dummy:         DWORD;
+    var VerInfo:       Pointer;
+    var VerValue:      PVSFixedFileInfo;
+
+    VerInfoSize:=GetFileVersionInfoSize(PChar(ParamStr(0)), Dummy);
+
+    if VerInfoSize > 0 then
+    begin
+
+        GetMem(VerInfo, VerInfoSize);
+        try
+
+            if GetFileVersionInfo(PChar(ParamStr(0)), 0, VerInfoSize, VerInfo) then
+            begin
+
+                VerQueryValue(VerInfo, '\', Pointer(VerValue), VerValueSize);
+
+                with VerValue^ do
+                begin
+                    V1:=dwFileVersionMS shr 16;
+                    V2:=dwFileVersionMS and $FFFF;
+                    V3:=dwFileVersionLS shr 16;
+                    V4:=dwFileVersionLS and $FFFF;
+                end;
+
+            end;
+
+        finally
+            FreeMem(VerInfo, VerInfoSize);
+        end;
+
+    end;
+
+end;
 
 
 class procedure THelpers.ExecWithDelay(Delay: integer; AnonymousMethod: TInputMethod);
@@ -88,7 +236,7 @@ begin
 
         end);
 
-    end).Start;
+    end).Start();
 
 end;
 
@@ -136,8 +284,8 @@ begin
         WIC.LoadFromStream(FS);
         Image.Picture.Assign(WIC);
     finally
-        WIC.Free;
-        FS.Free;
+        WIC.Free();
+        FS.Free();
     end;
 
 end;
@@ -197,12 +345,6 @@ end;
 
 class function THelpers.OleGetStr(RecordsetField: variant): string;
 begin
-
-    // ----------------------------------------------------------------------
-    // Use this when dealing with database and/or datasets/recordset results,
-    // field may be null and thus must be converted into string type.
-    // ----------------------------------------------------------------------
-
     {$D-}
     try
         OleGetStr:=RecordsetField;
@@ -211,7 +353,6 @@ begin
         OleGetStr:=VarToStr(RecordsetField);
     end;
     {$D+}
-
 end;
 
 
@@ -427,6 +568,220 @@ begin
     if Length(CoCode) = 4 then Result:=Prefix + CoCode;
     if Length(CoCode) = 3 then Result:=Prefix + '0'  + CoCode;
     if Length(CoCode) = 2 then Result:=Prefix + '00' + CoCode;
+end;
+
+
+class function THelpers.GetBuildInfoAsString: string;
+begin
+
+    var V1: word;
+    var V2: word;
+    var V3: word;
+    var V4: word;
+
+    GetBuildInfo(V1, V2, V3, V4);
+    Result:=IntToStr(V1) + '.' + IntToStr(V2) + '.' + IntToStr(V3) + '.' + IntToStr(V4);
+
+end;
+
+
+class function THelpers.GetOSVer(CheckForOsName: boolean): string;
+begin
+
+    result:='0';
+
+    if not CheckForOsName then
+    begin
+
+        case Win32MajorVersion of
+
+            4:
+            case Win32MinorVersion of
+                // Windows 95
+                0:  result:='40';
+                // Windows 98
+                10: result:='41';
+                // Windows ME
+                90: result:='49';
+            end;
+
+            5:
+            case Win32MinorVersion of
+                // Windows 2000
+                0: result:='50';
+                // Windows XP
+                1: result:='51';
+            end;
+
+            6:
+            case Win32MinorVersion of
+                // Windows Vista
+                0: result:='60';
+                // Windows 7
+                1: result:='61';
+                // Windows 8
+                2: result:='62';
+                // Windows 8.1
+                3: result:='63';
+            end;
+
+            10:
+            case Win32MinorVersion of
+                // Windows 10
+                0: result:='100';
+            end;
+
+        end;
+
+    end;
+
+    if CheckForOsName then
+    begin
+
+        case Win32MajorVersion of
+
+            4:
+            case Win32MinorVersion of
+                0:  result:='Windows 95';
+                10: result:='Windows 98';
+                90: result:='Windows ME';
+            end;
+
+            5:
+            case Win32MinorVersion of
+                0: result:='Windows 2000';
+                1: result:='Windows XP';
+            end;
+
+            6:
+            case Win32MinorVersion of
+                0: result:='Windows Vista';
+                1: result:='Windows 7';
+                2: result:='Windows 8';
+                3: result:='Windows 8.1';
+            end;
+
+            10:
+            case Win32MinorVersion of
+                0: result:='Windows 10';
+            end;
+
+        end;
+
+    end;
+
+end;
+
+
+class function THelpers.Unpack(ItemID: integer; FileName: string; ShouldFileStay: boolean; var LastErrorMsg: string): boolean;
+begin
+
+    Result:=False;
+
+    var RS: TResourceStream:=TResourceStream.CreateFromID(hInstance, ItemID, RT_RCDATA);
+    try
+
+        RS.Position:=0;
+        if not ShouldFileStay then
+            DeleteFile(PChar(FileName));
+
+        try
+            RS.SaveToFile(FileName);
+
+        except
+            on E: Exception do
+            begin
+                LastErrorMsg:='Cannot extract file from resource container. Exception has been thrown: ' + E.Message;
+                Exit();
+            end;
+
+        end;
+
+        Result:=True;
+
+    finally
+        RS.free;
+    end;
+
+end;
+
+//lekage TMBCSEncoding in System.SysUtils
+class function THelpers.UnzippLayouts(FileName: string; DestDir: string): boolean;
+begin
+
+    var ZipRead:=TZipFile.Create();
+    try
+
+        try
+
+            ZipRead.Open(FileName, zmRead);
+
+            for var iCNT:=0 to ZipRead.FileCount - 1 do
+            begin
+                var Zipped:=ZipRead.FileName[iCNT];
+                var FullPath:=DestDir + Zipped;
+                ZipRead.Extract(iCNT, DestDir, True);
+            end;
+
+            Result:=True;
+
+        except
+            Result:=False;
+
+        end;
+
+    finally
+        ZipRead.Free();
+        DeleteFile(PChar(FileName));
+    end;
+
+end;
+
+
+class function THelpers.LoadFileToStr(const FileName: TFileName): AnsiString;
+begin
+
+    var FileStream: TFileStream:=TFileStream.Create(FileName, fmOpenRead or fmShareDenyWrite);
+    try
+
+        if FileStream.Size > 0 then
+        begin
+            SetLength(Result, FileStream.Size);
+            FileStream.Read(Pointer(Result)^, FileStream.Size);
+        end;
+
+    finally
+        FileStream.Free();
+    end;
+
+end;
+
+
+class function THelpers.GetCurrentUserSid: string;
+type
+    TSidArray = array[0..260] of Char;
+begin
+
+    var hAccessToken: THandle;
+    var bSuccess:     BOOL;
+    var dwBufferLen:  DWORD;
+    var szSid:        TSidArray;
+
+    Result:='';
+    bSuccess:=OpenThreadToken(GetCurrentThread, TOKEN_QUERY, True, hAccessToken);
+
+    if not bSuccess then
+        if GetLastError = ERROR_NO_TOKEN then
+            bSuccess:=OpenProcessToken(GetCurrentProcess, TOKEN_QUERY, hAccessToken);
+
+    if bSuccess then
+    begin
+        ZeroMemory(@szSid, SizeOf(szSid));
+        dwBufferLen:=SizeOf(szSid);
+        if ObtainTextSid(hAccessToken, szSid, dwBufferLen) theN Result:=szSid;
+        CloseHandle(hAccessToken);
+    end;
+
 end;
 
 

@@ -177,9 +177,7 @@
         <DCCReference Include="Helpers\Statics\Unity.Delimiters.pas"/>
         <DCCReference Include="Helpers\Statics\Unity.DateTimeFormats.pas"/>
         <DCCReference Include="Helpers\Statics\Unity.Messaging.pas"/>
-        <DCCReference Include="Helpers\Statics\Unity.NCSI.pas"/>
         <DCCReference Include="Helpers\Statics\Unity.Qms.pas"/>
-        <DCCReference Include="Helpers\Statics\Unity.RestAuth.pas"/>
         <DCCReference Include="Helpers\Statics\Unity.RiskClass.pas"/>
         <DCCReference Include="Helpers\Statics\Unity.StatusBar.pas"/>
         <DCCReference Include="Helpers\Statics\Unity.Unknown.pas"/>
@@ -188,9 +186,6 @@
         <DCCReference Include="Helpers\Statics\Unity.Common.pas"/>
         <DCCReference Include="Helpers\Statics\Unity.Sorting.pas"/>
         <DCCReference Include="Helpers\Statics\Unity.Filtering.pas"/>
-        <DCCReference Include="Helpers\Statics\Unity.UserAccess.pas"/>
-        <DCCReference Include="Helpers\Statics\Unity.UserSid.pas"/>
-        <DCCReference Include="Helpers\Statics\Unity.Utilities.pas"/>
         <DCCReference Include="Model\DbModel.pas"/>
         <DCCReference Include="Model\Json\RawTables\Customer.AddressBook.pas"/>
         <DCCReference Include="Model\Json\RawTables\Customer.ControlStatus.pas"/>

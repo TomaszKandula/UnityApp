@@ -81,7 +81,7 @@ type
         Header1: TPanel;
         Footer1: TPanel;
         Text06: TLabel;
-        tcTOTAL: TLabel;
+    valTotalCustomers: TLabel;
         hShapeSet: TShape;
         Cap02: TShape;
         hShapeAge: TShape;
@@ -93,21 +93,21 @@ type
         tR4: TLabel;
         tR5: TLabel;
         Text08: TLabel;
-        procND: TLabel;
-        procR1: TLabel;
-        procR2: TLabel;
-        procR3: TLabel;
-        procR4: TLabel;
-        procR5: TLabel;
-        valND: TLabel;
-        valR1: TLabel;
-        valR2: TLabel;
-        valR3: TLabel;
-        valR4: TLabel;
-        valR5: TLabel;
+    procNotDue: TLabel;
+    procRange1: TLabel;
+    procRange2: TLabel;
+    procRange3: TLabel;
+    procRange4: TLabel;
+    procRange5: TLabel;
+    amtNotDue: TLabel;
+    amtRange1: TLabel;
+    amtRange2: TLabel;
+    amtRange3: TLabel;
+    amtRange4: TLabel;
+    amtRange5: TLabel;
         tTAMT: TLabel;
-        valTAMT: TLabel;
-        procTAMT: TLabel;
+    amtTotal: TLabel;
+    procTotal: TLabel;
         Text10: TLabel;
         Text11: TLabel;
         Text12: TLabel;
@@ -123,17 +123,17 @@ type
         Text20: TLabel;
         Text21: TLabel;
         Text22: TLabel;
-        valExceeders: TLabel;
-        valTEXCEES: TLabel;
-        valTLIMITS: TLabel;
-        valTND: TLabel;
-        valPASTDUE: TLabel;
-        valDEFAULTED: TLabel;
-        valRISKA: TLabel;
-        valRISKB: TLabel;
-        valRISKC: TLabel;
-        StatBar_CAP1: TLabel;
-        StatBar_TXT1: TLabel;
+    amtExceeders: TLabel;
+    amtCreditExcess: TLabel;
+    amtGrantedLimits: TLabel;
+    amtNotOverdue: TLabel;
+    amtPastDue: TLabel;
+    amtDefaulted: TLabel;
+    amtRiskClassA: TLabel;
+    amtRiskClassB: TLabel;
+    amtRiskClassC: TLabel;
+        txtStatus: TLabel;
+        valStatus: TLabel;
         TabSheet8: TTabSheet;
         PopupMenu: TPopupMenu;
         Action_HideApp: TMenuItem;
@@ -198,10 +198,10 @@ type
         Text56: TLabel;
         Text57: TLabel;
         Text58: TLabel;
-        tcOpenItems: TLabel;
-        tcInvoices: TLabel;
-        tcOSAmt: TLabel;
-        tcOverdue: TLabel;
+    valOpenItems: TLabel;
+    valInvoices: TLabel;
+    amtOutstanding: TLabel;
+    valOverdue: TLabel;
         btnExportAB: TImage;
         Text69: TLabel;
         Header4: TPanel;
@@ -216,12 +216,12 @@ type
         Text54L2: TLabel;
         MainShape6: TPanel;
         AppFooter: TPanel;
-        StatBar_CAP3: TLabel;
-        StatBar_TXT3: TLabel;
-        StatBar_CAP4: TLabel;
-        StatBar_TXT4: TLabel;
-        StatBar_CAP5: TLabel;
-        StatBar_TXT5: TLabel;
+        txtCurrentDate: TLabel;
+        valCurrentDate: TLabel;
+        txtCurrentTime: TLabel;
+        valCurrentTime: TLabel;
+        txtUpTime: TLabel;
+        valUpTime: TLabel;
         TimerCurrentTime: TTimer;
         TimerUpTime: TTimer;
         txtInfo1: TLabel;
@@ -238,17 +238,17 @@ type
         BottomPanel1: TPanel;
         ContentPanel8: TPanel;
         InnerPanel8Left: TPanel;
-        tcUNAmt: TLabel;
+    amtUnallocated: TLabel;
         Text70: TLabel;
         TimerCustOpenItems: TTimer;
         Text82: TLabel;
-        tcOvdAmt: TLabel;
+    amtOverdue: TLabel;
         Text31: TLabel;
-        procRISKA: TLabel;
-        procRISKB: TLabel;
-        procRISKC: TLabel;
+    valRiskClassA: TLabel;
+    valRiskClassB: TLabel;
+    valRiskClassC: TLabel;
         Text36: TLabel;
-        DataUpdated: TLabel;
+    valUpdateStamp: TLabel;
         sgAgeView: TStringGrid;
         sgInvoiceTracker: TStringGrid;
         PopupAgeView: TPopupMenu;
@@ -297,8 +297,8 @@ type
         N13: TMenuItem;
         FileXLExport: TSaveDialog;
         tR6: TLabel;
-        valR6: TLabel;
-        procR6: TLabel;
+    amtRange6: TLabel;
+    procRange6: TLabel;
         N14: TMenuItem;
         Action_SearchBook: TMenuItem;
         Action_Overdue: TMenuItem;
@@ -317,9 +317,9 @@ type
         N19: TMenuItem;
         Action_ColumnWidth: TMenuItem;
         TimerFollowUp: TTimer;
-        custRISKA: TLabel;
-        custRISKB: TLabel;
-        custRISKC: TLabel;
+    itemRiskClassA: TLabel;
+    itemRiskClassB: TLabel;
+    itemRiskClassC: TLabel;
         Action_FollowUpColors: TMenuItem;
         SplitLine3: TBevel;
         imgEventLog: TImage;
@@ -337,8 +337,8 @@ type
         Action_RemoveFilters: TMenuItem;
         Action_Free1: TMenuItem;
         AppMenu: TPanel;
-        Bevel1: TBevel;
-        Bevel2: TBevel;
+    Separator1: TBevel;
+    Separator2: TBevel;
         PanelOpenItems: TPanel;
         PanelAddressBook: TPanel;
         PanelInvoiceTracker: TPanel;
@@ -499,21 +499,21 @@ type
         imgFeedback: TImage;
         txtFeedback: TLabel;
         imgAADUser: TImage;
-        txtAadUser: TLabel;
-        Bevel3: TBevel;
-        Bevel4: TBevel;
+    valAadUser: TLabel;
+    Separator3: TBevel;
+    Separator4: TBevel;
         PanelSettingsHeader: TPanel;
-        txtCutOffDate: TLabel;
-    txtRcaAmount: TLabel;
-    txtRcbAmount: TLabel;
-    txtRccAmount: TLabel;
-    txtRcaItems: TLabel;
-    txtRcbItems: TLabel;
-    txtRccItems: TLabel;
+    valCutOffDate: TLabel;
+        txtRcaAmount: TLabel;
+        txtRcbAmount: TLabel;
+        txtRccAmount: TLabel;
+        txtRcaItems: TLabel;
+        txtRcbItems: TLabel;
+        txtRccItems: TLabel;
         imgRefreshReport: TImage;
         imgGetAgingReport: TImage;
-    Label1: TLabel;
-    Label5: TLabel;
+        Label1: TLabel;
+        Label5: TLabel;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
@@ -779,6 +779,10 @@ type
         procedure btnFeedbackMouseLeave(Sender: TObject);
         procedure imgGetAgingReportClick(Sender: TObject);
         procedure imgRefreshReportClick(Sender: TObject);
+        procedure imgGetAgingReportMouseEnter(Sender: TObject);
+        procedure imgGetAgingReportMouseLeave(Sender: TObject);
+    procedure imgRefreshReportMouseEnter(Sender: TObject);
+    procedure imgRefreshReportMouseLeave(Sender: TObject);
     protected
         procedure CreateParams(var Params: TCreateParams); override;
         procedure WndProc(var msg: TMessage); override;
@@ -832,6 +836,8 @@ type
         var FGeneralCommentFields: TGeneralCommentFields;
         const AppMenuTextSelected = $006433C9;
         const AppMenuTextNormal = clGrayText;
+        const AppButtonTxtNormal = $00555555;
+        const AppButtonTxtSelected = $006433C9;
         procedure SetPanelBorders;
         procedure SetGridColumnWidths;
         procedure SetGridRowHeights;
@@ -839,7 +845,9 @@ type
         procedure SetSettingsPanel(IsLocked: boolean);
         procedure InitializeScreenSettings;
         function  AddressBookExclusion: boolean;
-        procedure ClearAgeSummary();
+        procedure ClearMainViewInfo();
+        procedure ClearAgingSummary();
+        procedure ClearOpenItemsSummary();
         procedure LoadColumnWidth(var Grid: TStringGrid);
         procedure MapGroup3(var Grid: TStringGrid; var Source: TStringGrid);
         procedure MapTable1(var Grid: TStringGrid; var Source: TStringGrid);
@@ -886,7 +894,6 @@ type
         procedure UpdateAgeSummary();
         procedure ComputeAgeSummary(var Grid: TStringGrid);  // make async! (2)
         procedure ComputeRiskClass(var Grid: TStringGrid);
-        procedure ClearOpenItemsSummary();
         procedure InitMainWnd(SessionFile: string);
         procedure SetupMainWnd();
         procedure StartMainWnd();
@@ -924,7 +931,6 @@ uses
     View.CompanyList,
     Unity.Sql,
     Unity.Messaging,
-    Unity.UserAccess,
     Unity.Filtering,
     Unity.Chars,
     Unity.Helpers,
@@ -933,8 +939,6 @@ uses
     Unity.StatusBar,
     Unity.DateTimeFormats,
     Unity.Sorting,
-    Unity.UserSid,
-    Unity.Utilities,
     Handler.Sql{legacy},
     DbModel{legacy},
     Handler.Database{legacy},
@@ -1097,10 +1101,10 @@ begin
     // Update aging information.
     // -------------------------
 
-    MainForm.ClearAgeSummary();
-    MainForm.ComputeAgeSummary(MainForm.sgAgeView); // make async!
-    MainForm.ComputeRiskClass(MainForm.sgAgeView);
-    MainForm.UpdateAgeSummary();
+    ClearAgingSummary();
+    ComputeAgeSummary(MainForm.sgAgeView); // make async!
+    ComputeRiskClass(MainForm.sgAgeView);
+    UpdateAgeSummary();
     ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Age View summary information updated.');
 
     // ---------------------------------------------------------------
@@ -1108,15 +1112,15 @@ begin
     // The helper grid names corresponds to age view columns.
     // ---------------------------------------------------------------
 
-    MainForm.MapGroup3(MainForm.sgAgeView, MainForm.sgGroup3);
-    MainForm.MapTable1(MainForm.sgAgeView, MainForm.sgPersonResp);
-    MainForm.MapTable2(MainForm.sgAgeView, MainForm.sgSalesResp);
-    MainForm.MapTable3(MainForm.sgAgeView, MainForm.sgAccountType);
-    MainForm.MapTable4(MainForm.sgAgeView, MainForm.sgCustomerGr);
+    MapGroup3(MainForm.sgAgeView, MainForm.sgGroup3);
+    MapTable1(MainForm.sgAgeView, MainForm.sgPersonResp);
+    MapTable2(MainForm.sgAgeView, MainForm.sgSalesResp);
+    MapTable3(MainForm.sgAgeView, MainForm.sgAccountType);
+    MapTable4(MainForm.sgAgeView, MainForm.sgCustomerGr);
     ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Mapping performed.');
 
-    MainForm.LoadColumnWidth(MainForm.sgAgeView);
-    MainForm.SwitchTimers(TurnedOn);
+    LoadColumnWidth(MainForm.sgAgeView);
+    SwitchTimers(TurnedOn);
     THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
     THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
     ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: VCL unlocked and repainted.');
@@ -1167,15 +1171,17 @@ begin
         Exit();
     end;
 
-    MainForm.tcOpenItems.Caption:=FormatFloat('### ###',  OpenItemsData.TotalItems);
-    MainForm.tcInvoices.Caption :=FormatFloat('### ###',  OpenItemsData.NumOfInvoices);
-    MainForm.tcOverdue.Caption  :=FormatFloat('### ###',  OpenItemsData.OverdueItems);
-    MainForm.tcOSAmt.Caption    :=FormatFloat('#,##0.00', OpenItemsData.OsAmount);
-    MainForm.tcOvdAmt.Caption   :=FormatFloat('#,##0.00', OpenItemsData.OvdAmount);
-    MainForm.tcUNAmt.Caption    :=FormatFloat('#,##0.00', OpenItemsData.UnallocatedAmt);
-    MainForm.FOSAmount          :=OpenItemsData.OsAmount;
+    valOpenItems.Caption:=FormatFloat('### ###',  OpenItemsData.TotalItems);
+    valInvoices.Caption :=FormatFloat('### ###',  OpenItemsData.NumOfInvoices);
+    valOverdue.Caption  :=FormatFloat('### ###',  OpenItemsData.OverdueItems);
 
-    MainForm.sgOpenItems.SetColWidth(10, 20, 400);
+    amtOutstanding.Caption:=FormatFloat('#,##0.00', OpenItemsData.OsAmount);
+    amtOverdue.Caption    :=FormatFloat('#,##0.00', OpenItemsData.OvdAmount);
+    amtUnallocated.Caption:=FormatFloat('#,##0.00', OpenItemsData.UnallocatedAmt);
+
+    FOSAmount:=OpenItemsData.OsAmount;
+
+    sgOpenItems.SetColWidth(10, 20, 400);
     THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
 
 end;
@@ -1655,12 +1661,12 @@ begin
     FormatDateTime('hh:mm:ss', Now());
     FormatDateTime('hh:mm:ss', Now());
 
-    StatBar_TXT1.Caption:=TStatusBar.Ready;
-    txtAadUser.Caption:=SessionService.SessionUser;
-    StatBar_TXT3.Caption:=DateToStr(Now);
+    valStatus.Caption:=TStatusBar.Ready;
+    valCurrentDate.Caption:=DateToStr(Now);
+    valAadUser.Caption:=SessionService.SessionUser;
 
-    ThreadFileLog.Log('Application version = ' + TCore.GetBuildInfoAsString);
-    ThreadFileLog.Log('User SID = ' + TUserSid.GetCurrentUserSid);
+    ThreadFileLog.Log('Application version = ' + THelpers.GetBuildInfoAsString);
+    ThreadFileLog.Log('User SID = ' + THelpers.GetCurrentUserSid);
 
 end;
 
@@ -1710,8 +1716,8 @@ begin
                 FOpenItemsUpdate:=OpenItems.GetDateTimeAwaited(DateTime);
                 FOpenItemsStatus:=OpenItems.GetStatusAwaited(FOpenItemsUpdate);
 
-                DataUpdated.Caption:=FOpenItemsUpdate;
-                txtCutOffDate.Caption:='n/a';
+                valUpdateStamp.Caption:=FOpenItemsUpdate;
+                valCutOffDate.Caption:='n/a';
 
                 // Load (async) default age snapshot
 //                if not(string.IsNullOrEmpty(GroupListBox.Text)) and not(string.IsNullOrEmpty(GroupListDates.Text)) then
@@ -1925,8 +1931,19 @@ begin
 end;
 
 
-procedure TMainForm.ClearAgeSummary();
+procedure TMainForm.ClearMainViewInfo();
 begin
+    valStatus.Caption     :='';
+    valCurrentDate.Caption:='';
+    valCurrentTime.Caption:='';
+    valUpTime.Caption     :='';
+    valAadUser.Caption    :='';
+end;
+
+
+procedure TMainForm.ClearAgingSummary();
+begin
+
     CustAll    :=0;
     ANotDue    :=0;
     ARange1    :=0;
@@ -1945,58 +1962,89 @@ begin
     RCAcount   :=0;
     RCBcount   :=0;
     RCCcount   :=0;
-    tcTOTAL.Caption     :='0';
-    valND.Caption       :='0';
-    valR1.Caption       :='0';
-    valR2.Caption       :='0';
-    valR3.Caption       :='0';
-    valR4.Caption       :='0';
-    valR5.Caption       :='0';
-    valR6.Caption       :='0';
-    custRISKA.Caption   :='0';
-    custRISKB.Caption   :='0';
-    custRISKC.Caption   :='0';
-    valTAMT.Caption     :='0';
-    procND.Caption      :='0';
-    procR1.Caption      :='0';
-    procR2.Caption      :='0';
-    procR3.Caption      :='0';
-    procR4.Caption      :='0';
-    procR5.Caption      :='0';
-    procR6.Caption      :='0';
-    valEXCEEDERS.Caption:='0';
-    valTEXCEES.Caption  :='0';
-    valTLIMITS.Caption  :='0';
-    valTND.Caption      :='0';
-    valPASTDUE.Caption  :='0';
-    valDEFAULTED.Caption:='0';
+
+    valTotalCustomers.Caption:='0';
+
+    amtTotal.Caption :='0';
+    amtNotDue.Caption:='0';
+    amtRange1.Caption:='0';
+    amtRange2.Caption:='0';
+    amtRange3.Caption:='0';
+    amtRange4.Caption:='0';
+    amtRange5.Caption:='0';
+    amtRange6.Caption:='0';
+
+    procTotal.Caption :='0';
+    procNotDue.Caption:='0';
+    procRange1.Caption:='0';
+    procRange2.Caption:='0';
+    procRange3.Caption:='0';
+    procRange4.Caption:='0';
+    procRange5.Caption:='0';
+    procRange6.Caption:='0';
+
+    amtExceeders.Caption    :='0';
+    amtCreditExcess.Caption :='0';
+    amtGrantedLimits.Caption:='0';
+    amtNotOverdue.Caption   :='0';
+    amtPastDue.Caption      :='0';
+    amtDefaulted.Caption    :='0';
+
+    amtRiskClassA.Caption:='0';
+    amtRiskClassB.Caption:='0';
+    amtRiskClassC.Caption:='0';
+
+    itemRiskClassA.Caption:='0';
+    itemRiskClassB.Caption:='0';
+    itemRiskClassC.Caption:='0';
+
+    procNotDue.Caption   :='0';
+    procRange1.Caption   :='0';
+    procRange2.Caption   :='0';
+    procRange3.Caption   :='0';
+    procRange4.Caption   :='0';
+    procRange5.Caption   :='0';
+    procRange6.Caption   :='0';
+
+end;
+
+
+procedure TMainForm.ClearOpenItemsSummary();
+begin
+    FOSAmount:=0;
+    valOpenItems.Caption:='0';
+    valOverdue.Caption:='0';
+    valInvoices.Caption:='0';
+    amtOverdue.Caption:='0';
+    amtOutstanding.Caption:='0';
+    amtUnallocated.Caption:='0';
 end;
 
 
 procedure TMainForm.UpdateAgeSummary();
 begin
 
-    MainForm.tcTOTAL.Caption:=IntToStr(CustAll);
+    valTotalCustomers.Caption:=IntToStr(CustAll);
 
-    valND.Caption  :=FormatFloat('#,##0.00', ANotDue);
-    valR1.Caption  :=FormatFloat('#,##0.00', ARange1);
-    valR2.Caption  :=FormatFloat('#,##0.00', ARange2);
-    valR3.Caption  :=FormatFloat('#,##0.00', ARange3);
-    valR4.Caption  :=FormatFloat('#,##0.00', ARange4);
-    valR5.Caption  :=FormatFloat('#,##0.00', ARange5);
-    valR6.Caption  :=FormatFloat('#,##0.00', ARange6);
-    valTAMT.Caption:=FormatFloat('#,##0.00', Balance);
+    amtNotDue.Caption:=FormatFloat('#,##0.00', ANotDue);
+    amtRange1.Caption:=FormatFloat('#,##0.00', ARange1);
+    amtRange2.Caption:=FormatFloat('#,##0.00', ARange2);
+    amtRange3.Caption:=FormatFloat('#,##0.00', ARange3);
+    amtRange4.Caption:=FormatFloat('#,##0.00', ARange4);
+    amtRange5.Caption:=FormatFloat('#,##0.00', ARange5);
+    amtRange6.Caption:=FormatFloat('#,##0.00', ARange6);
+    amtTotal.Caption :=FormatFloat('#,##0.00', Balance);
 
     if not (Balance = 0) then
     begin
-        procND.Caption  :=FormatFloat('0.00', ( (ANotDue / Balance) * 100 )) + '%';
-        procR1.Caption  :=FormatFloat('0.00', ( (ARange1 / Balance) * 100 )) + '%';
-        procR2.Caption  :=FormatFloat('0.00', ( (ARange2 / Balance) * 100 )) + '%';
-        procR3.Caption  :=FormatFloat('0.00', ( (ARange3 / Balance) * 100 )) + '%';
-        procR4.Caption  :=FormatFloat('0.00', ( (ARange4 / Balance) * 100 )) + '%';
-        procR5.Caption  :=FormatFloat('0.00', ( (ARange5 / Balance) * 100 )) + '%';
-        procR6.Caption  :=FormatFloat('0.00', ( (ARange6 / Balance) * 100 )) + '%';
-        procTAMT.Caption:=FormatFloat('0.00', ( ( (ANotDue / Balance) +
+        procNotDue.Caption:=FormatFloat('0.00', ( (ANotDue / Balance) * 100 )) + '%';
+        procRange1.Caption:=FormatFloat('0.00', ( (ARange1 / Balance) * 100 )) + '%';
+        procRange2.Caption:=FormatFloat('0.00', ( (ARange2 / Balance) * 100 )) + '%';
+        procRange3.Caption:=FormatFloat('0.00', ( (ARange3 / Balance) * 100 )) + '%';
+        procRange4.Caption:=FormatFloat('0.00', ( (ARange4 / Balance) * 100 )) + '%';
+        procRange5.Caption:=FormatFloat('0.00', ( (ARange5 / Balance) * 100 )) + '%';
+        procRange6.Caption:=FormatFloat('0.00', ( (ARange6 / Balance) * 100 )) + '%';
+        procTotal.Caption :=FormatFloat('0.00', ( ( (ANotDue / Balance) +
                                                            (ARange1 / Balance) +
                                                            (ARange2 / Balance) +
                                                            (ARange3 / Balance) +
@@ -2005,19 +2053,20 @@ begin
                                                            (ARange6 / Balance) ) * 100 ) ) + '%';
     end;
 
-    valRISKA.Caption :=FormatFloat('#,##0.00', RCA);
-    valRISKB.Caption :=FormatFloat('#,##0.00', RCB);
-    valRISKC.Caption :=FormatFloat('#,##0.00', RCC);
-    custRISKA.Caption:=IntToStr(RCAcount) + ' customers';
-    custRISKB.Caption:=IntToStr(RCBcount) + ' customers';
-    custRISKC.Caption:=IntToStr(RCCcount) + ' customers';
+    amtRiskClassA.Caption :=FormatFloat('#,##0.00', RCA);
+    amtRiskClassB.Caption :=FormatFloat('#,##0.00', RCB);
+    amtRiskClassC.Caption :=FormatFloat('#,##0.00', RCC);
 
-    valEXCEEDERS.Caption:=IntToStr(Exceeders);
-    valTEXCEES.Caption  :=FormatFloat('#,##0.00', TotalExceed);
-    valTLIMITS.Caption  :=FormatFloat('#,##0.00', Limits);
-    valTND.Caption      :=valND.Caption;
-    valPASTDUE.Caption  :=FormatFloat('#,##0.00', (ARange1 + ARange2 + ARange3));
-    valDEFAULTED.Caption:=FormatFloat('#,##0.00', (ARange4 + ARange5 + ARange6));
+    itemRiskClassA.Caption:=IntToStr(RCAcount) + ' customers';
+    itemRiskClassB.Caption:=IntToStr(RCBcount) + ' customers';
+    itemRiskClassC.Caption:=IntToStr(RCCcount) + ' customers';
+
+    amtExceeders.Caption    :=IntToStr(Exceeders);
+    amtCreditExcess.Caption :=FormatFloat('#,##0.00', TotalExceed);
+    amtGrantedLimits.Caption:=FormatFloat('#,##0.00', Limits);
+    amtNotOverdue.Caption   :=amtNotDue.Caption;
+    amtPastDue.Caption      :=FormatFloat('#,##0.00', (ARange1 + ARange2 + ARange3));
+    amtDefaulted.Caption    :=FormatFloat('#,##0.00', (ARange4 + ARange5 + ARange6));
 
 end;
 
@@ -2298,18 +2347,6 @@ begin
 end;
 
 
-procedure TMainForm.ClearOpenItemsSummary();
-begin
-    MainForm.FOSAmount          :=0;
-    MainForm.tcOpenItems.Caption:='0';
-    MainForm.tcOverdue.Caption  :='0';
-    MainForm.tcInvoices.Caption :='0';
-    MainForm.tcOSAmt.Caption    :='0';
-    MainForm.tcUNamt.Caption    :='0';
-    MainForm.tcOvdAmt.Caption   :='0';
-end;
-
-
 procedure TMainForm.SetActiveTabsheet(TabSheet: TTabSheet);
 begin
 
@@ -2565,18 +2602,13 @@ end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
-
-    StatBar_TXT1.Caption:='';
-    StatBar_TXT3.Caption:='';
-    StatBar_TXT4.Caption:='';
-    StatBar_TXT5.Caption:='';
-    txtAadUser.Caption  :='';
-
+    ClearMainViewInfo();
+    ClearOpenItemsSummary();
+    ClearAgingSummary();
     FAllowClose:=False;
     InitializeScreenSettings;
     SetActiveTabsheet(TabSheet9);
     Tables.ActivePage:=Page1;
-
 end;
 
 
@@ -2662,7 +2694,7 @@ begin
                     UserLogs.Columns.Add(TUnityEventLogs.AppName);
                     UserLogs.Values.Add(SessionService.SessionUser.ToUpper);
                     UserLogs.Values.Add(Today);
-                    UserLogs.Values.Add(TCore.LoadFileToStr(ThreadFileLog.LogFileName));
+                    UserLogs.Values.Add(THelpers.LoadFileToStr(ThreadFileLog.LogFileName));
                     UserLogs.Values.Add('Unity Cadiz.');
                     UserLogs.InsertInto(TUnityEventLogs.UnityEventLogs, True);
 
@@ -2739,11 +2771,11 @@ begin
     // Count current follow-ups and display in notification baloon.
     // ------------------------------------------------------------
 
-    var Sum: integer:=0;
-    for var iCNT: integer:=1 to sgAgeView.RowCount - 1 do
+    var Sum:=0;
+    for var iCNT:=1 to sgAgeView.RowCount - 1 do
         if
             (
-                THelpers.CDate(sgAgeView.Cells[sgAgeView.ReturnColumn(TGeneralComment.fFollowUp, 1, 1), iCNT]) = THelpers.CDate(StatBar_TXT3.Caption)
+                THelpers.CDate(sgAgeView.Cells[sgAgeView.ReturnColumn(TGeneralComment.fFollowUp, 1, 1), iCNT]) = THelpers.CDate(valCurrentDate.Caption)
             )
         and
         (
@@ -2789,14 +2821,14 @@ end;
 
 procedure TMainForm.TimerCurrentTimeTimer(Sender: TObject);
 begin
-    StatBar_TXT4.Caption:=TimeToStr(Now);
+    valCurrentTime.Caption:=TimeToStr(Now);
 end;
 
 
 procedure TMainForm.TimerUpTimeTimer(Sender: TObject);
 begin
     var Result: TTime:=Now - FStartTime;
-    StatBar_TXT5.Caption:=TimeToStr(Result);
+    valUpTime.Caption:=TimeToStr(Result);
 end;
 
 
@@ -3141,7 +3173,7 @@ begin
     if FIsConnected then
     begin
 
-        if MainForm.StatBar_TXT1.Caption = TStatusBar.Ready then
+        if valStatus.Caption = TStatusBar.Ready then
             THelpers.WndCall(ActionsForm, TWindowState.Modal)
         else
             THelpers.MsgCall(TAppMessage.Warn, 'Wait until "Ready" status and try again.');
@@ -3910,7 +3942,7 @@ begin
             var Settings: ISettings:=TSettings.Create();
 
             // Future days
-            if (ACol = Col12) and (THelpers.CDate(sgAgeView.Cells[ACol, ARow]) > THelpers.CDate(StatBar_TXT3.Caption)) then
+            if (ACol = Col12) and (THelpers.CDate(sgAgeView.Cells[ACol, ARow]) > THelpers.CDate(valCurrentDate.Caption)) then
             begin
                 sgAgeView.Canvas.Brush.Color:=Settings.FutureBColor;
                 sgAgeView.Canvas.Font.Color :=Settings.FutureFColor;
@@ -3919,7 +3951,7 @@ begin
             end;
 
             // Today
-            if (ACol = Col12) and (THelpers.CDate(sgAgeView.Cells[ACol, ARow]) = THelpers.CDate(StatBar_TXT3.Caption)) then
+            if (ACol = Col12) and (THelpers.CDate(sgAgeView.Cells[ACol, ARow]) = THelpers.CDate(valCurrentDate.Caption)) then
             begin
                 sgAgeView.Canvas.Brush.Color:=Settings.TodayBColor;
                 sgAgeView.Canvas.Font.Color :=Settings.TodayFColor;
@@ -3928,7 +3960,7 @@ begin
             end;
 
             // Past days
-            if (ACol = Col12) and (THelpers.CDate(sgAgeView.Cells[ACol, ARow]) < THelpers.CDate(StatBar_TXT3.Caption)) then
+            if (ACol = Col12) and (THelpers.CDate(sgAgeView.Cells[ACol, ARow]) < THelpers.CDate(valCurrentDate.Caption)) then
             begin
                 sgAgeView.Canvas.Brush.Color:=Settings.PastBColor;
                 sgAgeView.Canvas.Font.Color :=Settings.PastFColor;
@@ -5413,171 +5445,173 @@ end;
 // ---------------------------------------------------------------------------------------------------------------------------- MOUSE EVENTS | HOOVER EFFECT //
 
 
+procedure TMainForm.imgGetAgingReportMouseEnter(Sender: TObject);
+begin
+    Label1.Font.Color:=AppButtonTxtSelected;
+end;
+
+
+procedure TMainForm.imgGetAgingReportMouseLeave(Sender: TObject);
+begin
+    Label1.Font.Color:=AppButtonTxtNormal;
+end;
+
+
+procedure TMainForm.imgRefreshReportMouseEnter(Sender: TObject);
+begin
+    Label5.Font.Color:=AppButtonTxtSelected;
+end;
+
+
+procedure TMainForm.imgRefreshReportMouseLeave(Sender: TObject);
+begin
+    Label5.Font.Color:=AppButtonTxtNormal;
+end;
+
+
 procedure TMainForm.btnReloadMouseEnter(Sender: TObject);
 begin
-    Text54L1.Font.Color:=TCommon.FontColor;
-    Text54L2.Font.Color:=TCommon.FontColor;
+    Text54L1.Font.Color:=AppButtonTxtSelected;
+    Text54L2.Font.Color:=AppButtonTxtSelected;
 end;
 
 
 procedure TMainForm.btnReloadMouseLeave(Sender: TObject);
 begin
-    Text54L1.Font.Color:=clBlack;
-    Text54L2.Font.Color:=clBlack;
+    Text54L1.Font.Color:=AppButtonTxtNormal;
+    Text54L2.Font.Color:=AppButtonTxtNormal;
 end;
 
 
 procedure TMainForm.btnOpenABMouseEnter(Sender: TObject);
 begin
-    btnOpenAB.Cursor:=crHandPoint;
-    Text64.Font.Color:=TCommon.FontColor;
+    Text64.Font.Color:=AppButtonTxtSelected;
 end;
 
 
 procedure TMainForm.btnOpenABMouseLeave(Sender: TObject);
 begin
-    btnOpenAB.Cursor:=crDefault;
-    Text64.Font.Color:=clBlack;
+    Text64.Font.Color:=AppButtonTxtNormal;
 end;
 
 
 procedure TMainForm.btnUpdateABMouseEnter(Sender: TObject);
 begin
-    btnUpdateAB.Cursor:=crHandPoint;
-    Text66.Font.Color:=TCommon.FontColor;
+    Text66.Font.Color:=AppButtonTxtSelected;
 end;
 
 
 procedure TMainForm.btnUpdateABMouseLeave(Sender: TObject);
 begin
-    btnUpdateAB.Cursor:=crDefault;
-    Text66.Font.Color:=clBlack;
+    Text66.Font.Color:=AppButtonTxtNormal;
 end;
 
 
 procedure TMainForm.btnCloseABMouseEnter(Sender: TObject);
 begin
-    btnCloseAB.Cursor:=crHandPoint;
-    Text67.Font.Color:=TCommon.FontColor;
+    Text67.Font.Color:=AppButtonTxtSelected;
 end;
 
 
 procedure TMainForm.btnCloseABMouseLeave(Sender: TObject);
 begin
-    btnCloseAB.Cursor:=crDefault;
-    Text67.Font.Color:=clBlack;
+    Text67.Font.Color:=AppButtonTxtNormal;
 end;
 
 
 procedure TMainForm.btnExportABMouseEnter(Sender: TObject);
 begin
-    btnExportAB.Cursor:=crHandPoint;
-    Text69.Font.Color:=TCommon.FontColor;
+    Text69.Font.Color:=AppButtonTxtSelected;
 end;
 
 
 procedure TMainForm.btnExportABMouseLeave(Sender: TObject);
 begin
-    btnExportAB.Cursor:=crDefault;
-    Text69.Font.Color:=clBlack;
+    Text69.Font.Color:=AppButtonTxtNormal;
 end;
 
 
 procedure TMainForm.imgKeyAddMouseEnter(Sender: TObject);
 begin
-    imgKeyAdd.Cursor:=crHandPoint;
-    Text41.Font.Color:=TCommon.FontColor;
+    Text41.Font.Color:=AppButtonTxtSelected;
 end;
 
 
 procedure TMainForm.imgKeyAddMouseLeave(Sender: TObject);
 begin
-    imgKeyAdd.Cursor:=crDefault;
-    Text41.Font.Color:=clBlack;
+    Text41.Font.Color:=AppButtonTxtNormal;
 end;
 
 
 procedure TMainForm.imgKeyRemoveMouseEnter(Sender: TObject);
 begin
-    imgKeyRemove.Cursor:=crHandPoint;
-    Text42.Font.Color:=TCommon.FontColor;
+    Text42.Font.Color:=AppButtonTxtSelected;
 end;
 
 
 procedure TMainForm.imgKeyRemoveMouseLeave(Sender: TObject);
 begin
-    imgKeyRemove.Cursor:=crDefault;
-    Text42.Font.Color:=clBlack;
+    Text42.Font.Color:=AppButtonTxtNormal;
 end;
 
 
 procedure TMainForm.imgUpdateValuesMouseEnter(Sender: TObject);
 begin
-    imgUpdateValues.Cursor:=crHandPoint;
-    Text43.Font.Color:=TCommon.FontColor;
+    Text43.Font.Color:=AppButtonTxtSelected;
 end;
 
 
 procedure TMainForm.imgUpdateValuesMouseLeave(Sender: TObject);
 begin
-    imgUpdateValues.Cursor:=crDefault;
-    Text43.Font.Color:=clBlack;
+    Text43.Font.Color:=AppButtonTxtNormal;
 end;
 
 
 procedure TMainForm.imgSectionAddMouseEnter(Sender: TObject);
 begin
-    imgSectionAdd.Cursor:=crHandPoint;
-    Text48.Font.Color:=TCommon.FontColor;
+    Text48.Font.Color:=AppButtonTxtSelected;
 end;
 
 
 procedure TMainForm.imgSectionAddMouseLeave(Sender: TObject);
 begin
-    imgSectionAdd.Cursor:=crDefault;
-    Text48.Font.Color:=clBlack;
+    Text48.Font.Color:=AppButtonTxtNormal;
 end;
 
 
 procedure TMainForm.imgSectionRemoveMouseEnter(Sender: TObject);
 begin
-    imgSectionRemove.Cursor:=crHandPoint;
-    Text49.Font.Color:=TCommon.FontColor;
+    Text49.Font.Color:=AppButtonTxtSelected;
 end;
 
 
 procedure TMainForm.imgSectionRemoveMouseLeave(Sender: TObject);
 begin
-    imgSectionRemove.Cursor:=crDefault;
-    Text49.Font.Color:=clBlack;
+    Text49.Font.Color:=AppButtonTxtNormal;
 end;
 
 
 procedure TMainForm.imgAllowEditMouseEnter(Sender: TObject);
 begin
-    imgAllowEdit.Cursor:=crHandPoint;
-    Text50.Font.Color:=TCommon.FontColor;
+    Text50.Font.Color:=AppButtonTxtSelected;
 end;
 
 
 procedure TMainForm.imgAllowEditMouseLeave(Sender: TObject);
 begin
-    imgAllowEdit.Cursor:=crDefault;
-    Text50.Font.Color:=clBlack;
+    Text50.Font.Color:=AppButtonTxtNormal;
 end;
 
 
 procedure TMainForm.imgEventLogMouseEnter(Sender: TObject);
 begin
-    imgAllowEdit.Cursor:=crHandPoint;
-    Text51.Font.Color:=TCommon.FontColor;
+    Text51.Font.Color:=AppButtonTxtSelected;
 end;
 
 
 procedure TMainForm.imgEventLogMouseLeave(Sender: TObject);
 begin
-    imgAllowEdit.Cursor:=crDefault;
-    Text51.Font.Color:=clBlack;
+    Text51.Font.Color:=AppButtonTxtNormal;
 end;
 
 

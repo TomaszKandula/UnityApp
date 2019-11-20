@@ -25,7 +25,6 @@ type
         const ReleaseFile:    string    = 'Release.zip';
         const LayoutPak:      string    = 'Layouts.zip';
         const ManifestFile:   string    = 'Unity.manifest';
-        const CurrentMutex:   PWideChar = 'UNITY_10255';
         const ConfigFile:     string    = 'Config.cfg';
     end;
 

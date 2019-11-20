@@ -94,11 +94,8 @@ uses
     Unity.Settings,
     Unity.Helpers,
     Unity.RiskClass,
-    Unity.UserAccess,
     Unity.Sql,
     Unity.Chars,
-    Unity.UserSid,
-    Unity.Utilities,
     Unity.EventLogger,
     Unity.SessionService,
     Async.Utilities,
@@ -185,18 +182,14 @@ begin
 end;
 
 
-/// <summary>
-/// Load settings and update MainForm properties and variables before it gets shown to the user.
-/// Initialize SQL database with persistent connection (this will be replaced by the REST service).
-/// </summary>
-/// <remarks>
-/// We may operate on visual components from worker thread instead of main thread. Although, VCL is not
-/// thread safe we should refrain from doing that, but as long as we do not display visual content and/or
-/// update its visual state, we can safely perform operations on VCLs from worker thread.
-/// </remarks>
-
 procedure TStartupForm.ApplicationStart();
 begin
+
+    // -----------------------------------------------------------------------------------------------------
+    // We may operate on visual components from worker thread instead of main thread. Although, VCL is not
+    // thread safe we should refrain from doing that, but as long as we do not display visual content and/or
+    // update its visual state, we can safely perform operations on VCLs from worker thread.
+    // -----------------------------------------------------------------------------------------------------
 
     if FIsAppInitialized then Exit();
 
@@ -231,7 +224,6 @@ begin
         // -----------------------------------------
         // Establish persistent database connection.  // delete when REST is introduced
         // -----------------------------------------
-
         Sleep(250);
         ChangeProgressBar(20, 'Connecting to database...', ProgressBar);
 
@@ -265,7 +257,7 @@ begin
         else
         begin
 
-            if TCore.UnzippLayouts(Settings.DirLayouts + TCommon.LayoutPak, Settings.DirLayouts) then
+            if THelpers.UnzippLayouts(Settings.DirLayouts + TCommon.LayoutPak, Settings.DirLayouts) then
             begin
                 ThreadFileLog.Log('Html layouts has been synchronized.');
                 ChangeProgressBar(75, 'Synchronizing email templates... done.', ProgressBar);
@@ -333,7 +325,7 @@ begin
         // ---------------------
 
         MainAppForm.Caption:=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'WND_MAIN', TCommon.APPCAPTION);
-        MainAppForm.DataUpdated.Caption:='';
+        MainAppForm.valUpdateStamp.Caption:='';
 
         // ----------------------------------
         // Icon used in main aging view grid.
@@ -357,17 +349,17 @@ begin
         if FormatSettings.DecimalSeparator = ',' then
         begin
 
-            var getRiskClassA:=Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_A_MAX', TRiskClass.A);
-            var getRiskClassB:=Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_B_MAX', TRiskClass.B);
-            var getRiskClassC:=Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_C_MAX', TRiskClass.C);
+            var getRiskClassA:=Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_A_MAX', '0');
+            var getRiskClassB:=Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_B_MAX', '0');
+            var getRiskClassC:=Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_C_MAX', '0');
 
             var RiskClassA:=((getRiskClassA).ToExtended * 100).ToString + '%';
             var RiskClassB:=((getRiskClassB).ToExtended * 100).ToString + '%';
             var RiskClassC:=((getRiskClassC).ToExtended * 100).ToString + '%';
 
-            MainAppForm.procRISKA.Caption:=RiskClassA;
-            MainAppForm.procRISKB.Caption:=RiskClassB;
-            MainAppForm.procRISKC.Caption:=RiskClassC;
+            MainAppForm.valRiskClassA.Caption:=RiskClassA;
+            MainAppForm.valRiskClassB.Caption:=RiskClassB;
+            MainAppForm.valRiskClassC.Caption:=RiskClassC;
 
             MainAppForm.FClass_A:=StrToFloat(getRiskClassA);
             MainAppForm.FClass_B:=StrToFloat(getRiskClassB);
@@ -376,17 +368,17 @@ begin
         end else if FormatSettings.DecimalSeparator = '.' then
         begin
 
-            var getRiskClassA:=Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_A_MAX', TRiskClass.A);
-            var getRiskClassB:=Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_B_MAX', TRiskClass.B);
-            var getRiskClassC:=Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_C_MAX', TRiskClass.C);
+            var getRiskClassA:=Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_A_MAX', '0');
+            var getRiskClassB:=Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_B_MAX', '0');
+            var getRiskClassC:=Settings.GetStringValue(TConfigSections.RiskClassDetails, 'CLASS_C_MAX', '0');
 
             var RiskClassA:=((StringReplace(getRiskClassA, ',', '.', [rfReplaceAll])).ToExtended * 100).ToString + '%';
             var RiskClassB:=((StringReplace(getRiskClassB, ',', '.', [rfReplaceAll])).ToExtended * 100).ToString + '%';
             var RiskClassC:=((StringReplace(getRiskClassC, ',', '.', [rfReplaceAll])).ToExtended * 100).ToString + '%';
 
-            MainAppForm.procRISKA.Caption:=RiskClassA;
-            MainAppForm.procRISKB.Caption:=RiskClassB;
-            MainAppForm.procRISKC.Caption:=RiskClassC;
+            MainAppForm.valRiskClassA.Caption:=RiskClassA;
+            MainAppForm.valRiskClassB.Caption:=RiskClassB;
+            MainAppForm.valRiskClassC.Caption:=RiskClassC;
 
             MainAppForm.FClass_A:=StrToFloat(getRiskClassA.Replace(',','.'));
             MainAppForm.FClass_B:=StrToFloat(getRiskClassB.Replace(',','.'));
@@ -598,7 +590,7 @@ end;
 procedure TStartupForm.FormShow(Sender: TObject);
 begin
     TextStatus.Caption:='';
-    LabelVersion.Caption:='Version ' + TCore.GetBuildInfoAsString + '.';
+    LabelVersion.Caption:='Version ' + THelpers.GetBuildInfoAsString + '.';
 end;
 
 

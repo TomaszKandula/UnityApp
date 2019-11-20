@@ -238,7 +238,6 @@ uses
     Unity.SessionService,
     Unity.Chars,
     Unity.Common,
-    Unity.Utilities,
     Sync.Documents,
     Bcrypt,
     DbModel{Legacy};
@@ -312,7 +311,7 @@ begin
             var Mail: IDocument:=TDocument.Create();
 
             var AppName: string:=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'VALUE', '');
-            var AppVer: string:=TCore.GetBuildInfoAsString;
+            var AppVer: string:=THelpers.GetBuildInfoAsString;
 
             // --------------------------
             // Get and set email details.
