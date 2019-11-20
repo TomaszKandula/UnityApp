@@ -72,7 +72,6 @@ uses
     Unity.DateTimeFormats       in 'Helpers\Statics\Unity.DateTimeFormats.pas',
     Unity.Messaging             in 'Helpers\Statics\Unity.Messaging.pas',
     Unity.Qms                   in 'Helpers\Statics\Unity.Qms.pas',
-    Unity.RiskClass             in 'Helpers\Statics\Unity.RiskClass.pas',
     Unity.StatusBar             in 'Helpers\Statics\Unity.StatusBar.pas',
     Unity.Unknown               in 'Helpers\Statics\Unity.Unknown.pas',
     Unity.Sql                   in 'Helpers\Statics\Unity.Sql.pas',

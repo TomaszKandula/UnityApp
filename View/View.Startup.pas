@@ -93,7 +93,6 @@ uses
     Unity.Common,
     Unity.Settings,
     Unity.Helpers,
-    Unity.RiskClass,
     Unity.Sql,
     Unity.Chars,
     Unity.EventLogger,

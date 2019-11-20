@@ -178,7 +178,6 @@
         <DCCReference Include="Helpers\Statics\Unity.DateTimeFormats.pas"/>
         <DCCReference Include="Helpers\Statics\Unity.Messaging.pas"/>
         <DCCReference Include="Helpers\Statics\Unity.Qms.pas"/>
-        <DCCReference Include="Helpers\Statics\Unity.RiskClass.pas"/>
         <DCCReference Include="Helpers\Statics\Unity.StatusBar.pas"/>
         <DCCReference Include="Helpers\Statics\Unity.Unknown.pas"/>
         <DCCReference Include="Helpers\Statics\Unity.Sql.pas"/>
