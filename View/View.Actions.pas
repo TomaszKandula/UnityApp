@@ -423,7 +423,7 @@ begin
     OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(DbModel.TOpenitems.Cuid,  1, 1)]:=OpenItemsDest.sgRowHidden;
 
     // Sort via payment status
-    OpenItemsDest.MSort(OpenItemsDest.ReturnColumn(TOpenitems.PmtStat, 1, 1), TSorting.TDataType.TInteger, True);
+    OpenItemsDest.MSort(OpenItemsDest.ReturnColumn(TOpenitems.PmtStat, 1, 1), TDataType.TInteger, True);
 
 end;
 

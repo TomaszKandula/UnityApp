@@ -33,9 +33,6 @@ type
     TInputMethod = reference to procedure;
 
 
-    /// <summary>
-    ///
-    /// </summary>
     THelpers = class abstract
     strict private
         const HEAP_ZERO_MEMORY = $00000008;
@@ -47,7 +44,6 @@ type
         const WM_GETINFO = WM_USER + 120;
         const WM_EXTINFO = WM_APP  + 150;
         class procedure ExecWithDelay(Delay: integer; AnonymousMethod: TInputMethod); static;
-        class procedure ExecMessage(IsPostType: boolean; IntValue: cardinal; TextValue: string; Form: TForm); static;
         class procedure LoadImageFromStream(var Image: TImage; const FileName: string); static;
         class procedure TurnRowHighlight(var Grid: TStringGrid; var MenuItem: TMenuItem); static;
         class function WndCall(WinForm: TForm; Mode: TWindowState): integer; static;
@@ -56,7 +52,6 @@ type
         class function CDate(StrDate: string): TDate; static;
         class function Explode(Text: string; SourceDelim: char): string; static;
         class function Implode(Text: TStrings; TargetDelim: char; ItemsHaveQuotes: boolean = False): string; static;
-        class procedure QuickSortExt(var A: array of double; var L: array of integer; iLo, iHi: integer; ASC: boolean); static;
         class function ExportToCSV(SourceArray: TALists; FileName: string = ''): TStringList; static;
         class function IsVoType(VoType: string): boolean; static;
         class function ShowReport(ReportNumber: cardinal; CurrentForm: TForm): cardinal; static;
@@ -241,37 +236,6 @@ begin
 end;
 
 
-class procedure THelpers.ExecMessage(IsPostType: boolean; IntValue: cardinal; TextValue: string; Form: TForm);
-begin
-
-    var IntValueAlt: integer:=0;
-
-    if TryStrToInt(TextValue, IntValueAlt) then
-    begin
-
-        case IsPostType of
-
-            True:  PostMessage(Form.Handle, WM_GETINFO, IntValue, LPARAM(IntValueAlt));
-            False: SendMessage(Form.Handle, WM_GETINFO, IntValue, LPARAM(IntValueAlt));
-
-        end;
-
-    end
-    else
-    begin
-
-        case IsPostType of
-
-            True:  PostMessage(Form.Handle, WM_GETINFO, IntValue, LPARAM(PCHAR(TextValue)));
-            False: SendMessage(Form.Handle, WM_GETINFO, IntValue, LPARAM(PCHAR(TextValue)));
-
-        end;
-
-    end;
-
-end;
-
-
 class procedure THelpers.LoadImageFromStream(var Image: TImage; const FileName: string);
 begin
 
@@ -387,67 +351,6 @@ begin
     end;
 
     Result:=Str;
-
-end;
-
-
-class procedure THelpers.QuickSortExt(var A: array of double; var L: array of integer; iLo, iHi: integer; ASC: boolean);
-{ "A" VARIABLE HOLDS NUMERICAL DATA TO BE SORTED. "L" VARIABLE IS "ASSOCIATED" COLUMN WITH ORIGINAL LIST POSITION. THE SECOND ASSOCIATED COLUMN FOLLOWS }
-{ "A" COLUMN, BUT IT IS NOT SORTED. IT ALLOWS TO ASSIGN SORTED VALUES BACK TO ORIGINAL LIST POSITION AFTER COMPUTATION IS DONE. THIS IS TO BE USED WHEN }
-{ SORTING IS NECESSARY BEFORE APPLAYING COMPUTATION AND AFTER WHICH WE MUST PUT VALUES BACK TO ITS ORIGINAL POSITIONS.                                  }
-var
-    Lo:     integer;
-    Hi:     integer;
-    Pivot:  double;
-    T1:     double;   { FOR SORTING COLUMN    }
-    T2:     integer;  { FOR ASSOCIATED COLUMN }
-begin
-
-    Lo:=iLo;
-    Hi:=iHi;
-    Pivot:=A[(Lo + Hi) div 2];
-
-    repeat
-
-        { ASCENDING }
-        if ASC then
-        begin
-            while A[Lo] < Pivot do Inc(Lo);
-            while A[Hi] > Pivot do Dec(Hi);
-        end;
-
-        { DESCENDING }
-        if not ASC then
-        begin
-            while A[Lo] > Pivot do Inc(Lo);
-            while A[Hi] < Pivot do Dec(Hi);
-        end;
-
-        { MOVING POSITIONS }
-        if Lo <= Hi then
-        begin
-
-            T1:=A[Lo];
-            T2:=L[Lo];
-
-            { SORTING COLUMN }
-            A[Lo]:= A[Hi];
-            A[Hi]:= T1;
-
-            { ASSOCIATED COLUMN }
-            L[Lo]:= L[Hi];
-            L[Hi]:= T2;
-
-            { MOVE NEXT }
-            Inc(Lo);
-            Dec(Hi);
-
-        end;
-
-    until Lo > Hi;
-
-    if Hi > iLo then QuickSortExt(A, L, iLo, Hi, ASC);
-    if Lo < iHi then QuickSortExt(A, L, Lo, iHi, ASC);
 
 end;
 

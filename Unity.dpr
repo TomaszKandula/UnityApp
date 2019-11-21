@@ -70,7 +70,6 @@ uses
     Unity.Chars                 in 'Helpers\Statics\Unity.Chars.pas',
     Unity.Delimiters            in 'Helpers\Statics\Unity.Delimiters.pas',
     Unity.DateTimeFormats       in 'Helpers\Statics\Unity.DateTimeFormats.pas',
-    Unity.Messaging             in 'Helpers\Statics\Unity.Messaging.pas',
     Unity.Qms                   in 'Helpers\Statics\Unity.Qms.pas',
     Unity.StatusBar             in 'Helpers\Statics\Unity.StatusBar.pas',
     Unity.Unknown               in 'Helpers\Statics\Unity.Unknown.pas',
@@ -134,7 +133,6 @@ uses
 
 
 {$R *.res}
-{$R 'binres.res' 'binres.rc'}
 
 
 begin

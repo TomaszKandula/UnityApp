@@ -10,6 +10,7 @@ interface
 
 
 uses
+    Unity.Enums,
     Unity.Grid;
 
 
@@ -17,23 +18,8 @@ type
 
 
     TSorting = class abstract
-
-        type TDataType = class abstract
-            const TString  = 0;
-            const TInteger = 1;
-            const TFloat   = 2;
-        end;
-
-        type TMode = class abstract
-            const Ranges   = 0;
-            const FollowUp = 1;
-            const Total    = 2;
-            const Overdue  = 3;
-        end;
-
         class procedure QuickSort(var A: array of double; var L: array of integer; iLo, iHi: integer; ASC: boolean); static;
-        class procedure MergeSort(Grid: TStringGrid; var Vals: array of integer; sortcol, datatype: integer; ascending: boolean); static;
-
+        class procedure MergeSort(Grid: TStringGrid; var Vals: array of integer; sortcol: integer; datatype: TDataType; ascending: boolean); static;
     end;
 
 
@@ -42,18 +28,18 @@ implementation
 
 uses
     System.SysUtils,
-    Unity.Enums,
     Unity.EventLogger;
 
 
 class procedure TSorting.QuickSort(var A: array of double; var L: array of integer; iLo, iHi: integer; ASC: boolean);
 begin
 
-    /// <remarks>
-    /// 'A' variable holds numerical data to be sorted. 'L' variable is associated column with original list position. The second associated column follows
-    /// 'A' column, but it is not sorted. It allows to assign sorted values back to original list position after computation is done. This is to be used when
-    /// sorting is necessary before applaying computation and after which we must put values back to its original positions.
-    /// </remarks>
+    // ----------------------------------------------------------------------------------------------------------------
+    // 'A' variable holds numerical data to be sorted. 'L' variable is associated column with original list position.
+    // The second associated column follows 'A' column, but it is not sorted. It allows to assign sorted values back to
+    // original list position after computation is done. This is to be used when sorting is necessary before applaying
+    // computation and after which we must put values back to its original positions.
+    // ----------------------------------------------------------------------------------------------------------------
 
     var Lo:    integer;
     var Hi:    integer;
@@ -106,28 +92,20 @@ begin
 end;
 
 
-class procedure TSorting.MergeSort(Grid: TStringGrid; var Vals: array of integer; sortcol, datatype: integer; ascending: boolean);
+class procedure TSorting.MergeSort(Grid: TStringGrid; var Vals: array of integer; sortcol: integer; datatype: TDataType; ascending: boolean);
 
-    /// <remarks>
-    /// Temporary shared local array for integers.
-    /// </remarks>
-
+    // Temporary shared local array for integers.
     var Avals:  array of integer;
 
-    /// <summary>
-    /// Helper nested method for comparision.
-    /// </summary>
-
+    // Helper nested method for comparision.
     function compare(val1, val2: string): integer;
     begin
 
         case datatype of
 
-            // String
-            0: result:=ANSIComparetext(val1, val2);
+            TDataType.TString: result:=ANSIComparetext(val1, val2);
 
-            // Integers
-            1:
+            TDataType.TInteger:
             begin
 
                 var int1: int64:=strtointdef(val1, 0);
@@ -138,8 +116,7 @@ class procedure TSorting.MergeSort(Grid: TStringGrid; var Vals: array of integer
 
             end;
 
-            // Floats (real numbers)
-            2:
+            TDataType.TFloat:
             begin
 
                 var errcode: integer;
@@ -164,10 +141,7 @@ class procedure TSorting.MergeSort(Grid: TStringGrid; var Vals: array of integer
         end;
     end;
 
-    /// <summary>
-    /// Heper nested merge method.
-    /// </summary>
-
+    // Heper nested merge method.
     procedure Merge(ALo, AMid, AHi: integer);
     begin
 
@@ -190,11 +164,11 @@ class procedure TSorting.MergeSort(Grid: TStringGrid; var Vals: array of integer
         j:=AMid + 1;
         k:=ALo;
 
-        /// <remarks>
-        /// Compare upper half to copied version of the lower half and move
-        /// the appropriate value (smallest for ascending, largest for descending) into
-        /// the lower half positions, for equals use 'avals' to preserve original order.
-        /// </remarks>
+        // ----------------------------------------------------------------------------
+        // Compare upper half to copied version of the lower half and move
+        // the appropriate value (smallest for ascending, largest for descending) into
+        // the lower half positions, for equals use 'avals' to preserve original order.
+        // ----------------------------------------------------------------------------
 
         // Execute moving
         while ((k < j) and (j <= AHi)) do
@@ -222,10 +196,7 @@ class procedure TSorting.MergeSort(Grid: TStringGrid; var Vals: array of integer
 
     end;
 
-    /// <summary>
-    /// Recursively split the value into two pieces and merge them back together as we unwind the recursion.
-    /// </summary>
-
+    // Recursively split the value into two pieces and merge them back together as we unwind the recursion.
     procedure PerformMergeSort(ALo, AHi:Integer);
     begin
 

@@ -79,13 +79,12 @@ uses
     DbModel{legacy},
     Unity.Helpers,
     Unity.Settings,
-    Unity.Messaging,
     Unity.StatusBar,
     Unity.Sorting,
     Unity.EventLogger,
     Unity.SessionService,
     Unity.Chars,
-    Unity.Sql,
+    Unity.Sql{Legacy},
     Sync.Documents;
 
 

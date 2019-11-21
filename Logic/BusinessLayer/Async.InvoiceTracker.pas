@@ -88,12 +88,11 @@ implementation
 
 
 uses
-    Handler.Database,
+    Handler.Database{Legacy},
     Unity.Chars,
     Unity.Sql,
     Unity.Helpers,
     Unity.Settings,
-    Unity.Messaging,
     Unity.StatusBar,
     Unity.EventLogger,
     Unity.SessionService,

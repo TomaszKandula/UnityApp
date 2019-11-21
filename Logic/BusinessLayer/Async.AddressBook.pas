@@ -130,16 +130,15 @@ implementation
 
 
 uses
-    Handler.Database,
+    Handler.Database{Legacy},
     Unity.Sql,
     Unity.Helpers,
     Unity.Settings,
-    Unity.Messaging,
     Unity.StatusBar,
     Unity.EventLogger,
     Unity.SessionService,
     Sync.Documents,
-    DbModel;
+    DbModel{Legacy};
 
 
 procedure TAddressBook.OpenAddressBookAsync(UserAlias: string; Callback: TOpenAddressBook; OptionalCondition: string = '');

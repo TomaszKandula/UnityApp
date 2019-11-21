@@ -1585,7 +1585,7 @@ object ActionsForm: TActionsForm
           AlignWithMargins = True
           Left = 10
           Top = 5
-          Width = 315
+          Width = 91
           Height = 16
           Margins.Left = 10
           Margins.Top = 5
@@ -1601,7 +1601,6 @@ object ActionsForm: TActionsForm
           Font.Style = [fsUnderline]
           ParentColor = False
           ParentFont = False
-          ExplicitWidth = 91
         end
         object DailyComBorders: TShape
           AlignWithMargins = True
@@ -1671,7 +1670,7 @@ object ActionsForm: TActionsForm
           AlignWithMargins = True
           Left = 10
           Top = 5
-          Width = 315
+          Width = 108
           Height = 16
           Margins.Left = 10
           Margins.Top = 5
@@ -1687,7 +1686,6 @@ object ActionsForm: TActionsForm
           Font.Style = [fsUnderline]
           ParentColor = False
           ParentFont = False
-          ExplicitWidth = 108
         end
         object GeneralComBorders: TShape
           AlignWithMargins = True
@@ -1756,7 +1754,7 @@ object ActionsForm: TActionsForm
           AlignWithMargins = True
           Left = 10
           Top = 5
-          Width = 315
+          Width = 134
           Height = 16
           Margins.Left = 10
           Margins.Top = 5
@@ -1772,7 +1770,6 @@ object ActionsForm: TActionsForm
           Font.Style = [fsUnderline]
           ParentColor = False
           ParentFont = False
-          ExplicitWidth = 134
         end
         object HistoryGridBorders: TShape
           AlignWithMargins = True

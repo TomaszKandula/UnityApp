@@ -141,17 +141,16 @@ implementation
 
 
 uses
-    Handler.Database,
+    Handler.Database{Legacy},
     Unity.Sql,
     Unity.Chars,
     Unity.Helpers,
     Unity.Unknown,
     Unity.Settings,
-    Unity.Messaging,
     Unity.EventLogger,
     Unity.SessionService,
     Sync.Documents,
-    DbModel;
+    DbModel{Legacy};
 
 
 procedure TComments.FInsertDailyComment(var DailyText: TDataTables; var PayLoad: TDailyCommentFields; var CallResponse: TCallResponse);

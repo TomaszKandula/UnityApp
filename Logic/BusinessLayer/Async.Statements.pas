@@ -109,14 +109,13 @@ implementation
 
 
 uses
-    Handler.Database,
+    Handler.Database{Legacy},
     Unity.Helpers,
     Unity.Settings,
-    Unity.Messaging,
     Unity.EventLogger,
     Sync.Documents,
     Async.Comments,
-    DbModel;
+    DbModel{Legacy};
 
 
 procedure TStatements.SendAccountStatement(AgeDate: string; PayLoad: TAccountStatementPayLoad; Callback: TSendAccountStatement; WaitToComplete: boolean = False);

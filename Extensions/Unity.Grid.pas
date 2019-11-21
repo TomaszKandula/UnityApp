@@ -64,7 +64,7 @@ type
         procedure ColorValues(ARow: integer; ACol: integer; Rect: TRect; NegativeColor: TColor; PositiveColor: TColor);
         procedure SetColWidth(FirstDefault: integer; AddSpace: integer; Limit: integer);
         procedure SetRowHeight(RowHeight, Header: integer);
-	    procedure MSort(const SortCol, datatype: integer; const ascending: boolean);
+	    procedure MSort(const SortCol: integer; const datatype: TDataType; const ascending: boolean);
         procedure AutoThumbSize;
         procedure SaveLayout(ColWidthName: string; ColOrderName: string; ColNames: string; ColPrefix: string);
         function  LoadLayout(var StrCol: string; ColWidthName: string; ColOrderName: string; ColNames: string; ColPrefix: string): boolean;
@@ -93,11 +93,10 @@ uses
     Unity.Chars,
     Unity.StatusBar,
     Unity.Helpers,
-    Unity.Messaging,
-    Unity.Sql,
+    Unity.Sql{Legacy},
     Unity.Sorting,
     Unity.Settings,
-    Handler.Sql;
+    Handler.Sql{Legacy};
 
 
 /// <summary>
@@ -508,7 +507,7 @@ begin
 end;
 
 
-procedure TStringGrid.MSort(const SortCol: integer; const DataType: integer; const Ascending: boolean);
+procedure TStringGrid.MSort(const SortCol: integer; const DataType: TDataType; const Ascending: boolean);
 begin
 
     var List:  TAIntigers;

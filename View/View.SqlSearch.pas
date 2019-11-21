@@ -147,14 +147,14 @@ implementation
 
 
 uses
-    DbModel,
+    DbModel{Legacy},
     View.Main,
-    Unity.Sql,
+    View.AwaitScreen,
+    Unity.Sql{Legacy},
     Unity.Common,
     Unity.Settings,
     Unity.Helpers,
     Unity.Enums,
-    Unity.Messaging,
     Unity.StatusBar,
     Unity.EventLogger,
     Async.AddressBook;
@@ -337,13 +337,13 @@ begin
 
     if (EditName.Enabled) and (string.IsNullOrEmpty(EditName.Text)) then
     begin
-        THelpers.ExecMessage(False, TMessaging.TWParams.MessageWarn, 'Please provide with Customer Name.', MainForm);
+        THelpers.MsgCall(TAppMessage.Warn, 'Please provide with Customer Name.');
         Exit;
     end;
 
     if (EditNumber.Enabled) and (string.IsNullOrEmpty(EditNumber.Text)) then
     begin
-        THelpers.ExecMessage(False, TMessaging.TWParams.MessageWarn, 'Please provide with Customer Number.', MainForm);
+        THelpers.MsgCall(TAppMessage.Warn, 'Please provide with Customer Number.');
         Exit;
     end;
 
@@ -385,7 +385,7 @@ begin
         )
     then
     begin
-        THelpers.ExecMessage(False, TMessaging.TWParams.MessageWarn, 'Please provide with at least one condition.', MainForm);
+        THelpers.MsgCall(TAppMessage.Warn, 'Please provide with at least one condition.');
         Exit;
     end;
 
@@ -424,8 +424,8 @@ begin
     if not CallResponse.IsSucceeded then
     begin
         THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
-        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
-        THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
+        MainForm.UpdateStatusBar(TStatusBar.Ready);
+        AwaitForm.Hide();
         ThreadFileLog.Log('[OpenAddressBookAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
@@ -445,8 +445,8 @@ begin
         MainForm.sgAddressBook.SetColWidth(40, 10, 400);
     end;
 
-    THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
-    THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
+    MainForm.UpdateStatusBar(TStatusBar.Ready);
+    AwaitForm.Hide();
     ThreadFileLog.Log('[OpenAddressBookAsync_Callback]: Address Book has been opened.');
 
 end;

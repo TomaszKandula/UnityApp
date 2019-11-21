@@ -11,6 +11,8 @@ interface
 type
 
 
+    TDataType      = (TString, TInteger, TFloat);
+    TMode          = (Ranges, FollowUp, Total, Overdue);
     TDocType       = (Reminder, Statement, Auto, Manual);
     TDocMode       = (Custom, Defined);
     TBrackets      = (Round, Square, Curly);

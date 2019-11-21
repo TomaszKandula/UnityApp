@@ -231,7 +231,6 @@ uses
     Handler.Sql{Legacy},
     Unity.Sql,
     Unity.Helpers,
-    Unity.Messaging,
     Unity.Settings,
     Unity.StatusBar,
     Unity.EventLogger,

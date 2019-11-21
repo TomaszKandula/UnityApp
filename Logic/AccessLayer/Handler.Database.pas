@@ -17,8 +17,7 @@ uses
     System.StrUtils,
     System.Win.ComObj,
     Vcl.Forms,
-    Data.Win.ADODB,
-    Unity.Settings;
+    Data.Win.ADODB;
 
 
     // legacy code - to be removed after REST is implemented
@@ -60,10 +59,10 @@ implementation
 
 
 uses
+    Unity.Settings,
     Unity.Unknown,
-    Unity.Messaging,
     Unity.Helpers,
-    Unity.AdoDb,
+    Unity.AdoDb{Legacy},
     Unity.EventLogger,
     View.Main;
 
@@ -253,12 +252,12 @@ begin
 
         if ConCheck.Connected then
         begin
-            THelpers.ExecMessage(False, TMessaging.TWParams.ConnectionOk, TUnknown.NULL, MainForm);
+            //THelpers.ExecMessage(False, TMessaging.TWParams.ConnectionOk, TUnknown.NULL, MainForm);
             ConCheck.Close;
         end
         else
         begin
-            THelpers.ExecMessage(False, TMessaging.TWParams.ConnectionError, TUnknown.NULL, MainForm);
+            //THelpers.ExecMessage(False, TMessaging.TWParams.ConnectionError, TUnknown.NULL, MainForm);
         end;
 
         ConCheck.Free;

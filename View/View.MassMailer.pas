@@ -127,12 +127,11 @@ uses
     View.Calendar,
     View.Actions,
     View.AwaitScreen,
-    Handler.Sql,
-    DbModel,
+    Handler.Sql{Legacy},
+    DbModel{Legacy},
     Unity.Enums,
     Unity.Helpers,
     Unity.Settings,
-    Unity.Messaging,
     Unity.Sql,
     Unity.StatusBar,
     Unity.Unknown,
@@ -350,7 +349,7 @@ begin
     // Sort Open Items via Due Date.
     // -----------------------------
 
-    MainForm.sgOpenItems.MSort(MainForm.sgOpenItems.ReturnColumn(TOpenitems.PmtStat, 1 , 1), 2, True);
+    MainForm.sgOpenItems.MSort(MainForm.sgOpenItems.ReturnColumn(TOpenitems.PmtStat, 1 , 1), TDataType.TFloat, True);
 
     // -------------------------------------------------------------------------------------------
     /// Update column references, as they depend on view from SQL which may be changed at runtime.
@@ -389,7 +388,7 @@ end;
 procedure TMassMailerForm.SendAccountStatements_Callback(ProcessingItemNo: integer; CallResponse: TCallResponse);
 begin
 
-    THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
+    AwaitForm.Hide();
 
     if not CallResponse.IsSucceeded then
     begin
@@ -516,7 +515,7 @@ begin
     begin
 
         Screen.Cursor:=crSQLWait;
-        THelpers.ExecMessage(False, TMessaging.TWParams.StatusBar, TStatusBar.Processing, MainForm);
+        MainForm.UpdateStatusBar(TStatusBar.Processing);
 
         THelpers.ExecWithDelay(500, procedure
         begin
@@ -537,7 +536,7 @@ begin
             Text_Subject.SetFocus();
             FIsDataLoaded:=True;
             Screen.Cursor:=crDefault;
-            THelpers.ExecMessage(False, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
+            MainForm.UpdateStatusBar(TStatusBar.Ready);
 
         end);
 

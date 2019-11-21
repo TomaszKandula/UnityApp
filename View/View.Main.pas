@@ -65,7 +65,8 @@ uses
     Unity.Arrays,
     Unity.Enums,
     Unity.Records,
-    Unity.References;
+    Unity.References,
+    Unity.StatusBar;
 
 
 type
@@ -81,7 +82,7 @@ type
         Header1: TPanel;
         Footer1: TPanel;
         Text06: TLabel;
-    valTotalCustomers: TLabel;
+        valTotalCustomers: TLabel;
         hShapeSet: TShape;
         Cap02: TShape;
         hShapeAge: TShape;
@@ -93,21 +94,21 @@ type
         tR4: TLabel;
         tR5: TLabel;
         Text08: TLabel;
-    procNotDue: TLabel;
-    procRange1: TLabel;
-    procRange2: TLabel;
-    procRange3: TLabel;
-    procRange4: TLabel;
-    procRange5: TLabel;
-    amtNotDue: TLabel;
-    amtRange1: TLabel;
-    amtRange2: TLabel;
-    amtRange3: TLabel;
-    amtRange4: TLabel;
-    amtRange5: TLabel;
+        procNotDue: TLabel;
+        procRange1: TLabel;
+        procRange2: TLabel;
+        procRange3: TLabel;
+        procRange4: TLabel;
+        procRange5: TLabel;
+        amtNotDue: TLabel;
+        amtRange1: TLabel;
+        amtRange2: TLabel;
+        amtRange3: TLabel;
+        amtRange4: TLabel;
+        amtRange5: TLabel;
         tTAMT: TLabel;
-    amtTotal: TLabel;
-    procTotal: TLabel;
+        amtTotal: TLabel;
+        procTotal: TLabel;
         Text10: TLabel;
         Text11: TLabel;
         Text12: TLabel;
@@ -123,15 +124,15 @@ type
         Text20: TLabel;
         Text21: TLabel;
         Text22: TLabel;
-    amtExceeders: TLabel;
-    amtCreditExcess: TLabel;
-    amtGrantedLimits: TLabel;
-    amtNotOverdue: TLabel;
-    amtPastDue: TLabel;
-    amtDefaulted: TLabel;
-    amtRiskClassA: TLabel;
-    amtRiskClassB: TLabel;
-    amtRiskClassC: TLabel;
+        amtExceeders: TLabel;
+        amtCreditExcess: TLabel;
+        amtGrantedLimits: TLabel;
+        amtNotOverdue: TLabel;
+        amtPastDue: TLabel;
+        amtDefaulted: TLabel;
+        amtRiskClassA: TLabel;
+        amtRiskClassB: TLabel;
+        amtRiskClassC: TLabel;
         txtStatus: TLabel;
         valStatus: TLabel;
         TabSheet8: TTabSheet;
@@ -198,10 +199,10 @@ type
         Text56: TLabel;
         Text57: TLabel;
         Text58: TLabel;
-    valOpenItems: TLabel;
-    valInvoices: TLabel;
-    amtOutstanding: TLabel;
-    valOverdue: TLabel;
+        valOpenItems: TLabel;
+        valInvoices: TLabel;
+        amtOutstanding: TLabel;
+        valOverdue: TLabel;
         btnExportAB: TImage;
         Text69: TLabel;
         Header4: TPanel;
@@ -238,17 +239,17 @@ type
         BottomPanel1: TPanel;
         ContentPanel8: TPanel;
         InnerPanel8Left: TPanel;
-    amtUnallocated: TLabel;
+        amtUnallocated: TLabel;
         Text70: TLabel;
         TimerCustOpenItems: TTimer;
         Text82: TLabel;
-    amtOverdue: TLabel;
+        amtOverdue: TLabel;
         Text31: TLabel;
-    valRiskClassA: TLabel;
-    valRiskClassB: TLabel;
-    valRiskClassC: TLabel;
+        valRiskClassA: TLabel;
+        valRiskClassB: TLabel;
+        valRiskClassC: TLabel;
         Text36: TLabel;
-    valUpdateStamp: TLabel;
+        valUpdateStamp: TLabel;
         sgAgeView: TStringGrid;
         sgInvoiceTracker: TStringGrid;
         PopupAgeView: TPopupMenu;
@@ -297,8 +298,8 @@ type
         N13: TMenuItem;
         FileXLExport: TSaveDialog;
         tR6: TLabel;
-    amtRange6: TLabel;
-    procRange6: TLabel;
+        amtRange6: TLabel;
+        procRange6: TLabel;
         N14: TMenuItem;
         Action_SearchBook: TMenuItem;
         Action_Overdue: TMenuItem;
@@ -317,9 +318,9 @@ type
         N19: TMenuItem;
         Action_ColumnWidth: TMenuItem;
         TimerFollowUp: TTimer;
-    itemRiskClassA: TLabel;
-    itemRiskClassB: TLabel;
-    itemRiskClassC: TLabel;
+        itemRiskClassA: TLabel;
+        itemRiskClassB: TLabel;
+        itemRiskClassC: TLabel;
         Action_FollowUpColors: TMenuItem;
         SplitLine3: TBevel;
         imgEventLog: TImage;
@@ -337,8 +338,8 @@ type
         Action_RemoveFilters: TMenuItem;
         Action_Free1: TMenuItem;
         AppMenu: TPanel;
-    Separator1: TBevel;
-    Separator2: TBevel;
+        Separator1: TBevel;
+        Separator2: TBevel;
         PanelOpenItems: TPanel;
         PanelAddressBook: TPanel;
         PanelInvoiceTracker: TPanel;
@@ -499,11 +500,11 @@ type
         imgFeedback: TImage;
         txtFeedback: TLabel;
         imgAADUser: TImage;
-    valAadUser: TLabel;
-    Separator3: TBevel;
-    Separator4: TBevel;
+        valAadUser: TLabel;
+        Separator3: TBevel;
+        Separator4: TBevel;
         PanelSettingsHeader: TPanel;
-    valCutOffDate: TLabel;
+        valCutOffDate: TLabel;
         txtRcaAmount: TLabel;
         txtRcbAmount: TLabel;
         txtRccAmount: TLabel;
@@ -514,6 +515,8 @@ type
         imgGetAgingReport: TImage;
         Label1: TLabel;
         Label5: TLabel;
+        btnSearchAb: TImage;
+        Text72: TLabel;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
@@ -781,14 +784,17 @@ type
         procedure imgRefreshReportClick(Sender: TObject);
         procedure imgGetAgingReportMouseEnter(Sender: TObject);
         procedure imgGetAgingReportMouseLeave(Sender: TObject);
-    procedure imgRefreshReportMouseEnter(Sender: TObject);
-    procedure imgRefreshReportMouseLeave(Sender: TObject);
+        procedure imgRefreshReportMouseEnter(Sender: TObject);
+        procedure imgRefreshReportMouseLeave(Sender: TObject);
+        procedure btnSearchAbClick(Sender: TObject);
+        procedure btnSearchAbMouseEnter(Sender: TObject);
+        procedure btnSearchAbMouseLeave(Sender: TObject);
     protected
         procedure CreateParams(var Params: TCreateParams); override;
-        procedure WndProc(var msg: TMessage); override;
-        procedure WndMessagesChromium(PassMsg: TMessage);
-        procedure WndMessagesWindows(PassMsg: TMessage);
-        procedure WndMessagesExternal(PassMsg: TMessage);
+        procedure WndProc(var msg: TMessage); override;   // Windows events
+        procedure WndMessagesChromium(PassMsg: TMessage); // Chromium events
+        procedure WndMessagesWindows(PassMsg: TMessage);  // Process windows close/suspend
+        procedure WndMessagesExternal(PassMsg: TMessage); // Get lync call details
         // --------------------------------------------------------------------------------
         // Chromium component. Do not modify, rather follow Chromium implementation manual.
         // See more: https://github.com/salvadordf/CEF4Delphi.
@@ -811,28 +817,28 @@ type
             var Result: Boolean
         );
     strict private
-        var CustAll:     integer;
-        var ANotDue:     extended;
-        var ARange1:     extended;
-        var ARange2:     extended;
-        var ARange3:     extended;
-        var ARange4:     extended;
-        var ARange5:     extended;
-        var ARange6:     extended;
-        var Balance:     extended;
-        var Limits:      extended;
-        var Exceeders:   integer;
+        var CustAll: integer;
+        var ANotDue: extended;
+        var ARange1: extended;
+        var ARange2: extended;
+        var ARange3: extended;
+        var ARange4: extended;
+        var ARange5: extended;
+        var ARange6: extended;
+        var Balance: extended;
+        var Limits: extended;
+        var Exceeders: integer;
         var TotalExceed: extended;
-        var RCA:         extended;
-        var RCB:         extended;
-        var RCC:         extended;
-        var RCAcount:    cardinal;
-        var RCBcount:    cardinal;
-        var RCCcount:    cardinal;
+        var RCA: extended;
+        var RCB: extended;
+        var RCC: extended;
+        var RCAcount: cardinal;
+        var RCBcount: cardinal;
+        var RCCcount: cardinal;
         var FHadFirstLoad: boolean;
-        var FAllowClose:   boolean;
-        var FAbUpdateFields:       TAddressBookUpdateFields;
-        var FDailyCommentFields:   TDailyCommentFields;
+        var FAllowClose: boolean;
+        var FAbUpdateFields: TAddressBookUpdateFields;
+        var FDailyCommentFields: TDailyCommentFields;
         var FGeneralCommentFields: TGeneralCommentFields;
         const AppMenuTextSelected = $006433C9;
         const AppMenuTextNormal = clGrayText;
@@ -868,24 +874,15 @@ type
         procedure RefreshInvoiceTracker_Callback(InvoiceList: TStringGrid; CallResponse: TCallResponse);
         procedure DeleteFromTrackerList_Callback(CallResponse: TCallResponse);
     public
-        // Legacy code, to be removed !!! [start]
-        var FOSAmount:        double;
-        var FIsConnected:     boolean;
-        procedure TryInitConnection;
-        procedure CallbackAwaitForm(PassMsg: TMessage);
-        procedure CallbackStatusBar(PassMsg: TMessage);
-        procedure CallbackMessageBox(PassMsg: TMessage);
-        procedure WndMessagesInternal(PassMsg: TMessage);
-        // Legacy code, to be removed !!! [end]
-    public
-        var FClass_A:        double;
-        var FClass_B:        double;
-        var FClass_C:        double;
-        var FStartTime:      TTime;
-        var FGroupList:      TALists{Legacy};
-        var FAgeDateList:    TALists;
-        var FGridPicture:    TImage;
-        var FOpenItemsRefs:  TFOpenItemsRefs;
+        var FIsConnected: boolean{Legacy};
+        procedure TryInitConnection{Legacy};
+        var FClass_A: double;
+        var FClass_B: double;
+        var FClass_C: double;
+        var FStartTime: TTime;
+        var FAgeDateList: TALists;
+        var FGridPicture: TImage;
+        var FOpenItemsRefs: TFOpenItemsRefs;
         var FCtrlStatusRefs: TFCtrlStatusRefs;
         var FOpenItemsUpdate: string;
         var FOpenItemsStatus: string;
@@ -900,6 +897,7 @@ type
         procedure UpdateFOpenItemsRefs(SourceGrid: TStringGrid);
         procedure UpdateFControlStatusRefs(SourceGrid: TStringGrid);
         procedure SwitchTimers(State: TAppTimers);
+        procedure UpdateStatusBar(Text: string);
     end;
 
 
@@ -929,14 +927,12 @@ uses
     View.Startup,
     View.Reports,
     View.CompanyList,
-    Unity.Sql,
-    Unity.Messaging,
+    Unity.Sql{Legacy},
     Unity.Filtering,
     Unity.Chars,
     Unity.Helpers,
     Unity.Common,
     Unity.Unknown,
-    Unity.StatusBar,
     Unity.DateTimeFormats,
     Unity.Sorting,
     Handler.Sql{legacy},
@@ -994,8 +990,8 @@ begin
     if not CallResponse.IsSucceeded then
     begin
         THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
-        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
-        THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
+        MainForm.UpdateStatusBar(TStatusBar.Ready);
+        AwaitForm.Hide();
         ThreadFileLog.Log('[OpenAddressBookAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
@@ -1012,8 +1008,8 @@ begin
     sgAddressBook.Freeze(False);
     sgAddressBook.SetColWidth(40, 10, 400);
 
-    THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
-    THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
+    MainForm.UpdateStatusBar(TStatusBar.Ready);
+    AwaitForm.Hide();
     ThreadFileLog.Log('[OpenAddressBookAsync_Callback]: Address Book has been opened.');
 
 end;
@@ -1044,7 +1040,7 @@ end;
 procedure TMainForm.AddToAddressBook_Callback(CallResponse: TCallResponse);
 begin
 
-    THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
+    AwaitForm.Hide();
 
     case CallResponse.IsSucceeded of
 
@@ -1071,8 +1067,8 @@ begin
     if not CallResponse.IsSucceeded then
     begin
         THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
-        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
-        THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
+        MainForm.UpdateStatusBar(TStatusBar.Ready);
+        AwaitForm.Hide();
         ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
@@ -1121,11 +1117,11 @@ begin
 
     LoadColumnWidth(MainForm.sgAgeView);
     SwitchTimers(TurnedOn);
-    THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
-    THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
+    MainForm.UpdateStatusBar(TStatusBar.Ready);
+    AwaitForm.Hide();
     ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: VCL unlocked and repainted.');
 
-    THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Downloading, MainForm);
+    MainForm.UpdateStatusBar(TStatusBar.Downloading);
     ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Calling method "ReadOpenItemsAsync".');
 
     MainForm.ClearOpenItemsSummary();
@@ -1165,24 +1161,21 @@ begin
     if not CallResponse.IsSucceeded then
     begin
         THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
-        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
-        THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
+        MainForm.UpdateStatusBar(TStatusBar.Ready);
+        AwaitForm.Hide();
         ThreadFileLog.Log('[ReadOpenItemsAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
 
-    valOpenItems.Caption:=FormatFloat('### ###',  OpenItemsData.TotalItems);
-    valInvoices.Caption :=FormatFloat('### ###',  OpenItemsData.NumOfInvoices);
-    valOverdue.Caption  :=FormatFloat('### ###',  OpenItemsData.OverdueItems);
-
+    valOpenItems.Caption  :=FormatFloat('### ###',  OpenItemsData.TotalItems);
+    valInvoices.Caption   :=FormatFloat('### ###',  OpenItemsData.NumOfInvoices);
+    valOverdue.Caption    :=FormatFloat('### ###',  OpenItemsData.OverdueItems);
     amtOutstanding.Caption:=FormatFloat('#,##0.00', OpenItemsData.OsAmount);
     amtOverdue.Caption    :=FormatFloat('#,##0.00', OpenItemsData.OvdAmount);
     amtUnallocated.Caption:=FormatFloat('#,##0.00', OpenItemsData.UnallocatedAmt);
 
-    FOSAmount:=OpenItemsData.OsAmount;
-
     sgOpenItems.SetColWidth(10, 20, 400);
-    THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
+    MainForm.UpdateStatusBar(TStatusBar.Ready);
 
 end;
 
@@ -1193,8 +1186,8 @@ begin
     if not CallResponse.IsSucceeded then
     begin
         THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
-        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
-        THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Hide.ToString, MainForm);
+        MainForm.UpdateStatusBar(TStatusBar.Ready);
+        AwaitForm.Hide();
         ThreadFileLog.Log('[ScanOpenItemsAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
@@ -1206,7 +1199,6 @@ begin
     // Get latest open items and allow to make aging report.
     // -----------------------------------------------------
 
-    THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Downloading, MainForm);
     ClearOpenItemsSummary();
     sgOpenItems.Freeze(True);
 
@@ -1225,6 +1217,7 @@ begin
 
         var CodesStringList:=THelpers.Implode(CoCodeList, ',', True);
         OpenItems.ReadOpenItemsAsync(sgOpenItems, CodesStringList, ReadOpenItems_Callback);
+        MainForm.UpdateStatusBar(TStatusBar.Downloading);
 
     finally
         CoCodeList.Free();
@@ -1326,7 +1319,7 @@ end;
 procedure TMainForm.ExcelExport_Callback(CallResponse: TCallResponse);
 begin
 
-    THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Ready, MainForm);
+    MainForm.UpdateStatusBar(TStatusBar.Ready);
 
     if not CallResponse.IsSucceeded then
     begin
@@ -1397,8 +1390,8 @@ end;
 
 // ------------------------------------------------------------------------------------------------------------------------ LEGACY CODE - TO BE REMOVED [START]
 
-{remove}
-procedure TMainForm.TryInitConnection;
+
+procedure TMainForm.TryInitConnection; {remove}
 begin
 
     if not Assigned(SessionService.FDbConnect) then
@@ -1436,58 +1429,6 @@ begin
     finally
         DataBase.Free();
     end;
-
-end;
-
-
-{remove}
-procedure TMainForm.CallbackAwaitForm(PassMsg: TMessage);
-begin
-
-    if PassMsg.WParam = TMessaging.TWParams.AwaitForm then
-    begin
-
-        case PassMsg.LParam of
-            TMessaging.TAwaitForm.Show: AwaitForm.Show();
-            TMessaging.TAwaitForm.Hide: AwaitForm.Close();
-        end;
-
-    end;
-
-end;
-
-
-{remove}
-procedure TMainForm.CallbackStatusBar(PassMsg: TMessage);
-begin
-//
-end;
-
-
-{remove}
-procedure TMainForm.CallbackMessageBox(PassMsg: TMessage);
-begin
-
-    case PassMsg.WParam of
-        TMessaging.TWParams.MessageInfo:      THelpers.MsgCall(TAppMessage.Info,      PChar(PassMsg.LParam));
-        TMessaging.TWParams.MessageWarn:      THelpers.MsgCall(TAppMessage.Warn,      PChar(PassMsg.LParam));
-        TMessaging.TWParams.MessageError:     THelpers.MsgCall(TAppMessage.Error,     PChar(PassMsg.LParam));
-        TMessaging.TWParams.MessageQuestion1: THelpers.MsgCall(TAppMessage.Question1, PChar(PassMsg.LParam));
-        TMessaging.TWParams.MessageQuestion2: THelpers.MsgCall(TAppMessage.Question2, PChar(PassMsg.LParam));
-    end;
-
-end;
-
-{remove}
-procedure TMainForm.WndMessagesInternal(PassMsg: TMessage);
-begin
-
-    if PassMsg.Msg <> THelpers.WM_GETINFO then Exit;
-    OutputDebugString(PChar('WM_GETINFO RECEIVED'));
-
-    CallbackMessageBox(PassMsg);
-    CallbackStatusBar(PassMsg);
-    CallbackAwaitForm(PassMsg);
 
 end;
 
@@ -1610,7 +1551,6 @@ begin
                 SessionService.FDbConnect.Connected:=False;
                 SessionService.FDbConnect:=nil;
                 FIsConnected:=False;
-                THelpers.ExecMessage(False, TMessaging.TWParams.ConnectionError, TUnknown.NULL, MainForm);
                 ThreadFileLog.Log('Windows Message detected: ' + IntToStr(PassMsg.Msg) + ' WM_POWERBROADCAST with PBT_APMSUSPEND. Going into suspension mode, Unity is disconnected from server.');
 
             end;
@@ -1643,7 +1583,6 @@ procedure TMainForm.WndProc(var Msg: TMessage);
 begin
     inherited;
     WndMessagesChromium(Msg);
-    WndMessagesInternal(Msg);
     WndMessagesExternal(Msg);
     WndMessagesWindows(Msg);
 end;
@@ -1931,6 +1870,26 @@ begin
 end;
 
 
+procedure TMainForm.UpdateStatusBar(Text: string);
+begin
+
+    if not GetCurrentThreadId() = MainThreadID then
+    begin
+
+        TThread.Synchronize(nil, procedure
+        begin
+            valStatus.Caption:=Text;
+        end);
+
+    end
+    else
+    begin
+        valStatus.Caption:=Text;
+    end;
+
+end;
+
+
 procedure TMainForm.ClearMainViewInfo();
 begin
     valStatus.Caption     :='';
@@ -2011,7 +1970,6 @@ end;
 
 procedure TMainForm.ClearOpenItemsSummary();
 begin
-    FOSAmount:=0;
     valOpenItems.Caption:='0';
     valOverdue.Caption:='0';
     valInvoices.Caption:='0';
@@ -2128,7 +2086,7 @@ begin
     end;
 
     // Sort via total value
-    THelpers.QuickSortExt(TotalPerItem, ListPosition, Low(TotalPerItem), High(TotalPerItem), False);
+    TSorting.QuickSort(TotalPerItem, ListPosition, Low(TotalPerItem), High(TotalPerItem), False);
 
     // Compute and display RCA
     for var iCNT: integer:=Low(ListPosition) to High(ListPosition) do
@@ -3047,7 +3005,7 @@ begin
         else
         begin
             ThreadFileLog.Log('Cannot delete selected row (rows affected: ' + IntToStr(DataTables.RowsAffected) + ').');
-            THelpers.ExecMessage(False, TMessaging.TWParams.MessageError, 'Cannot delete selected row. Please contact IT support.', Self);
+            THelpers.MsgCall(TAppMessage.Error, 'Cannot delete selected row. Please contact IT support.');
         end;
 
     finally
@@ -3066,8 +3024,8 @@ end;
 procedure TMainForm.Action_ShowAsIsClick(Sender: TObject);
 begin
 
-    THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Processing, MainForm);
-    THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Show.ToString, MainForm);
+    UpdateStatusBar(TStatusBar.Processing);
+    AwaitForm.Show();
 
     var AddressBook: IAddressBook:=TAddressBook.Create();
     AddressBook.OpenAddressBookAsync('', OpenAddressBook_Callback);
@@ -3078,8 +3036,8 @@ end;
 procedure TMainForm.Action_ShowMyEntriesClick(Sender: TObject);
 begin
 
-    THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Processing, MainForm);
-    THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Show.ToString, MainForm);
+    UpdateStatusBar(TStatusBar.Processing);
+    AwaitForm.Show();
 
     var AddressBook: IAddressBook:=TAddressBook.Create();
     AddressBook.OpenAddressBookAsync(SessionService.SessionUser, OpenAddressBook_Callback);
@@ -3592,7 +3550,7 @@ end;
 procedure TMainForm.Action_ToExceClick(Sender: TObject);
 begin
 
-    THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.ExportXLS, MainForm);
+    UpdateStatusBar(TStatusBar.ExportXLS);
 
     var FileName: string;
     if MainForm.FileXLExport.Execute then FileName:=MainForm.FileXLExport.FileName else FileName:='';
@@ -3996,13 +3954,10 @@ begin
             sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
         end;
 
-        /// <remarks>
-        /// Mark customers with picture, if it is registered on Invoice Tracker list.
-        /// We loop through loaded list on another string grid component. Therefore,
-        /// changes in database will not impact age view as long as Tracker List is
-        /// not refreshed.
-        /// </remarks>
-
+        // Mark customers with picture, if it is registered on Invoice Tracker list.
+        // We loop through loaded list on another string grid component. Therefore,
+        // changes in database will not impact age view as long as Tracker List is
+        // not refreshed.
         if ACol = Col14 then
         begin
 
@@ -4022,10 +3977,8 @@ begin
 
     end;
 
-    /// <remarks>
-    /// After all drawing (when cells are not selected) is done, change font only for numeric values. This shoud be executed always last.
-    /// </remarks>
-
+    // After all drawing (when cells are not selected) is done, change font only for numeric values.
+    // This shoud always be executed last.
     if (ACol = Col1)  or (ACol = Col2) or (ACol = Col3) or
        (ACol = Col4)  or (ACol = Col5) or (ACol = Col6) or
        (ACol = Col7)  or (ACol = Col8) or (ACol = Col9) or
@@ -5178,14 +5131,6 @@ begin
 end;
 
 
-// -------------------------------------------------------------------------
-// Change standard behaviour of scroll bars on all string grids.
-// The mouse weel on string grid component controls row selection instead of
-// moving up/down thumb on scroll bar.
-// Below methods introduce mouse weel controlling scroll bar.
-// -------------------------------------------------------------------------
-
-
 // AGE VIEW | WHEEL DOWN
 procedure TMainForm.sgAgeViewMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
@@ -5480,6 +5425,18 @@ procedure TMainForm.btnReloadMouseLeave(Sender: TObject);
 begin
     Text54L1.Font.Color:=AppButtonTxtNormal;
     Text54L2.Font.Color:=AppButtonTxtNormal;
+end;
+
+
+procedure TMainForm.btnSearchAbMouseEnter(Sender: TObject);
+begin
+    Text72.Font.Color:=AppButtonTxtSelected;
+end;
+
+
+procedure TMainForm.btnSearchAbMouseLeave(Sender: TObject);
+begin
+    Text72.Font.Color:=AppButtonTxtNormal;
 end;
 
 
@@ -5796,8 +5753,8 @@ begin
     begin
         sgAddressBook.SetUpdatedRow(0);
 
-        THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Processing, MainForm);
-        THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Show.ToString, MainForm);
+        UpdateStatusBar(TStatusBar.Processing);
+        AwaitForm.Show();
 
         var AddressBook: IAddressBook:=TAddressBook.Create();
         AddressBook.OpenAddressBookAsync('', OpenAddressBook_Callback);
@@ -5838,6 +5795,12 @@ begin
         sgAddressBook.ClearAll(2, 1, 1, True);
     end;
 
+end;
+
+
+procedure TMainForm.btnSearchAbClick(Sender: TObject);
+begin
+    THelpers.WndCall(SqlSearchForm, TWindowState.Modeless);
 end;
 
 
