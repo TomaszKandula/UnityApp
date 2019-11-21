@@ -142,6 +142,14 @@ type
         /// </remarks>
         procedure SetNewPasswordAsync(CurrentPassword: string; NewPassword: string; Callback: TSetNewPassword);
 
+        /// <summary>
+        /// Allow to load async. list of company codes assigned to the current user. There is no separate notification.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        function GetCompanyCodesAwaited(): TStringGrid;
+
     end;
 
 
@@ -219,6 +227,14 @@ type
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
         procedure SetNewPasswordAsync(CurrentPassword: string; NewPassword: string; Callback: TSetNewPassword);
+
+        /// <summary>
+        /// Allow to load async. list of company codes assigned to the current user. There is no separate notification.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        function GetCompanyCodesAwaited(): TStringGrid;
 
     end;
 
@@ -729,6 +745,31 @@ begin
     end);
 
     NewTask.Start();
+
+end;
+
+
+function TUtilities.GetCompanyCodesAwaited(): TStringGrid;
+begin
+
+    var NewResult:=TStringGrid.Create(nil); {This will be removed by ARC, do not free it manually}
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
+        try
+            DataTables.StrSQL:='select distinct CoCode from Customer.CompanyData';
+            DataTables.SqlToGrid(NewResult, DataTables.ExecSQL, False, False);
+        finally
+            DataTables.Free();
+        end;
+
+    end);
+
+    NewTask.Start();
+    TTask.WaitForAll(NewTask);
+    Result:=NewResult;
 
 end;
 

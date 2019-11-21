@@ -17,7 +17,8 @@ uses
     Vcl.StdCtrls,
     Vcl.CheckLst,
     Vcl.Buttons,
-    Vcl.ExtCtrls;
+    Vcl.ExtCtrls,
+    Unity.Grid;
 
 
 type
@@ -37,8 +38,10 @@ type
         procedure FormKeyPress(Sender: TObject; var Key: Char);
         procedure FilterListClick(Sender: TObject);
         procedure FilterListClickCheck(Sender: TObject);
+        procedure FormClose(Sender: TObject; var Action: TCloseAction);
     strict private
         var FCheckEvent: boolean;
+        var FIsDataLoaded: boolean;
     end;
 
 
@@ -52,6 +55,10 @@ implementation
 
 
 uses
+    View.Main,
+    Async.Debtors,
+    Async.Utilities,
+    Unity.Helpers,
     Unity.Chars;
 
 
@@ -70,7 +77,7 @@ end;
 
 procedure TCompanyListForm.FormCreate(Sender: TObject);
 begin
-    {Do nothing}
+    FilterList.Clear();
 end;
 
 
@@ -83,13 +90,43 @@ end;
 procedure TCompanyListForm.FormActivate(Sender: TObject);
 begin
 
-    // Wait 500ms
-    // Get from UnityApi list of company codes with latest age date
-    // Show on the list
+    if not FIsDataLoaded then
+    begin
 
-    // Get user saved selections
-    // Update items
+        Screen.Cursor:=crHourGlass;
 
+        THelpers.ExecWithDelay(500, procedure
+        begin
+
+            FilterList.Clear();
+            var Utilities: IUtilities:=TUtilities.Create();
+            var GetCoCodeList: TStringGrid;
+            try
+
+                GetCoCodeList:=Utilities.GetCompanyCodesAwaited();
+                for var iCNT:=1 {Skip header} to GetCoCodeList.RowCount - 1 do
+                    FilterList.Items.Add(GetCoCodeList.Cells[1{Skip Lp}, iCNT]);
+
+            finally
+                GetCoCodeList.Free();
+            end;
+
+            Screen.Cursor:=crDefault;
+            FIsDataLoaded:=True;
+
+        end);
+
+    end;
+
+end;
+
+
+// ------------------------------------------------------------------------------------------------------------------------------------------------- CLOSING //
+
+
+procedure TCompanyListForm.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+    FIsDataLoaded:=False;
 end;
 
 
@@ -99,7 +136,21 @@ end;
 procedure TCompanyListForm.btnSelectClick(Sender: TObject);
 begin
 
-    // call to api to get aging for selected co codes
+    var SelectedCoCodes: string;
+    var ListEnd:=FilterList.Count - 1;
+
+    for var iCNT:=0 to ListEnd do
+    begin
+
+        if FilterList.Checked[iCNT] = True then
+            SelectedCoCodes:=SelectedCoCodes + FilterList.Items[iCNT] + ','
+
+    end;
+
+    SelectedCoCodes:=SelectedCoCodes.Substring(0, Length(SelectedCoCodes) - 1);
+
+    var Debtors: IDebtors:=TDebtors.Create();
+    Debtors.ReadAgeViewAsync(SelectedCoCodes, 0, MainForm.ReadAgeView_Callback);
 
 end;
 

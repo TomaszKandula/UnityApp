@@ -26,13 +26,11 @@ type
     /// <summary>
     /// Pointer to local record.
     /// </summary>
-
     PLogRequest = ^TLogRequest;
 
     /// <summary>
     /// Local record holding filename and text to be written.
     /// </summary>
-
     TLogRequest = record
         LogText:  string;
         FileName: string;
@@ -43,7 +41,6 @@ type
     /// Supplied text is expanded by date and time signature
     /// for each line.
     /// </summary>
-
     TThreadFileLog = class(TObject)
     private
         var FLogFileName: string;
@@ -54,9 +51,27 @@ type
     public
         constructor Create();
         destructor Destroy(); override;
+
+        /// <summary>
+        ///
+        /// </summary>
         property SessionEventLines: TList<string> read GetSessionEventLines;
+
+        /// <summary>
+        ///
+        /// </summary>
         property LogFileName: string read FLogFileName write FLogFileName;
+
+        /// <summary>
+        /// Local unit method for writing event log file. This method is upon thread queue,
+        /// thus race condition does not apply here.
+        /// </summary>
+        /// <remarks>
+        /// This method is perfectly encapsulated as it is invisible only outside of the module.
+        /// Only module class can access it.
+        /// </remarks>
         procedure Log(Text: string);
+
     end;
 
 
@@ -91,15 +106,6 @@ end;
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------- LOGGER //
 
-
-/// <summary>
-/// Local unit method for writing event log file. This method is upon thread queue,
-/// thus race condition does not apply here.
-/// </summary>
-/// <remarks>
-/// This method is perfectly encapsulated as it is invisible only outside of the module.
-/// Only module class can access it.
-/// </remarks>
 
 procedure LogToFile(const FileName, Text: String);
 begin

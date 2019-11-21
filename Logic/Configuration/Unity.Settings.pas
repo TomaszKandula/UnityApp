@@ -888,9 +888,9 @@ begin
         end;
 
     finally
-        rStream.Free;
-        wStream.Free;
-        hString.Free;
+        rStream.Free();
+        wStream.Free();
+        hString.Free();
     end;
 
 end;

@@ -35,7 +35,7 @@ type
     /// <summary>
     /// Callback signature (delegate) for reading current age report from SQL database.
     /// </summary>
-    TReadAgeView = procedure(ActionMode: TLoading; ReturnedData: TStringGrid; CallResponse: TCallResponse) of object;
+    TReadAgeView = procedure(ReturnedData: TStringGrid; CallResponse: TCallResponse) of object;
 
 
     IDebtors = interface(IInterface)
@@ -48,7 +48,7 @@ type
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
-        procedure ReadAgeViewAsync(ActionMode: TLoading; SortMode: integer; GroupIdSel: string; AgeDateSel: string; Callback: TReadAgeView);
+        procedure ReadAgeViewAsync(SelectedCoCodes: string; SortMode: integer; Callback: TReadAgeView);
 
     end;
 
@@ -64,7 +64,7 @@ type
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
-        procedure ReadAgeViewAsync(ActionMode: TLoading; SortMode: integer; GroupIdSel: string; AgeDateSel: string; Callback: TReadAgeView);
+        procedure ReadAgeViewAsync(SelectedCoCodes: string; SortMode: integer; Callback: TReadAgeView);
 
     end;
 
@@ -88,7 +88,7 @@ uses
     Sync.Documents;
 
 
-procedure TDebtors.ReadAgeViewAsync(ActionMode: TLoading; SortMode: integer; GroupIdSel: string; AgeDateSel: string; Callback: TReadAgeView);
+procedure TDebtors.ReadAgeViewAsync(SelectedCoCodes: string; SortMode: integer; Callback: TReadAgeView);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
@@ -103,7 +103,13 @@ begin
             try
 
                 var StrCol: string;
-                var CheckColumns:=Grid.LoadLayout(StrCol, TConfigSections.ColumnWidthName, TConfigSections.ColumnOrderName, TConfigSections.ColumnNames, TConfigSections.ColumnPrefix);
+                var CheckColumns:=Grid.LoadLayout(
+                    StrCol,
+                    TConfigSections.ColumnWidthName,
+                    TConfigSections.ColumnOrderName,
+                    TConfigSections.ColumnNames,
+                    TConfigSections.ColumnPrefix
+                );
 
                 if not CheckColumns then
                 begin
@@ -115,17 +121,7 @@ begin
                 begin
 
                     DataTables.CmdType:=cmdText;
-                    DataTables.StrSQL:=
-                        TSql.EXECUTE             +
-                        'Customer.AgeViewReport' +
-                        TChars.SPACE             +
-                        QuotedStr(StrCol)        +
-                        TChars.COMMA             +
-                        QuotedStr(GroupIdSel)    +
-                        TChars.COMMA             +
-                        QuotedStr(AgeDateSel)    +
-                        TChars.COMMA             +
-                        QuotedStr(SortMode.ToString);
+                    DataTables.StrSQL:='select ' + StrCol + ' from Customer.Snapshots where	AgeDate = (select max(AgeDate) from Customer.Snapshots) and CoCode in (' + SelectedCoCodes + ')';
 
                     DataTables.SqlToGrid(Grid, DataTables.ExecSQL, False, False);
                     ThreadFileLog.Log('SQL statement applied [' + DataTables.StrSQL + '].');
@@ -148,13 +144,13 @@ begin
 
         TThread.Synchronize(nil, procedure
         begin
-            if Assigned(Callback) then Callback(ActionMode, Grid, CallResponse);
+            if Assigned(Callback) then Callback(Grid, CallResponse);
             if Assigned(Grid) then Grid.Free();
         end);
 
     end);
 
-    NewTask.Start;
+    NewTask.Start();
 
 end;
 

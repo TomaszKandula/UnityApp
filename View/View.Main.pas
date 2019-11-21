@@ -864,7 +864,6 @@ type
         procedure OpenAddressBook_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
         procedure UpdateAddressBook_Callback(CallResponse: TCallResponse);
         procedure AddToAddressBook_Callback(CallResponse: TCallResponse);
-        procedure ReadAgeView_Callback(ActionMode: TLoading; ReturnedData: TStringGrid; CallResponse: TCallResponse);
         procedure ScanOpenItems_Callback(CanMakeAge: boolean; ReadDateTime: string; CallResponse: TCallResponse);
         procedure ReadOpenItems_Callback(OpenItemsData: TOpenItemsPayLoad; CallResponse: TCallResponse);
         procedure CheckGivenPassword_Callback(CallResponse: TCallResponse);
@@ -874,6 +873,7 @@ type
         procedure RefreshInvoiceTracker_Callback(InvoiceList: TStringGrid; CallResponse: TCallResponse);
         procedure DeleteFromTrackerList_Callback(CallResponse: TCallResponse);
     public
+        procedure ReadAgeView_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
         var FIsConnected: boolean{Legacy};
         procedure TryInitConnection{Legacy};
         var FClass_A: double;
@@ -1061,7 +1061,7 @@ begin
 end;
 
 
-procedure TMainForm.ReadAgeView_Callback(ActionMode: TLoading; ReturnedData: TStringGrid; CallResponse: TCallResponse);
+procedure TMainForm.ReadAgeView_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
 begin
 
     if not CallResponse.IsSucceeded then
@@ -1125,26 +1125,26 @@ begin
     ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Calling method "ReadOpenItemsAsync".');
 
     MainForm.ClearOpenItemsSummary();
-    MainForm.sgOpenItems.Freeze(True);
+//    MainForm.sgOpenItems.Freeze(True);
 
-    var OpenItems: IOpenItems:=TOpenItems.Create();
-    var CoCodeList:=TStringList.Create();
-    try
-
-        THelpers.ReturnCoCodesList(
-            MainForm.sgAgeView,
-            MainForm.sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1),
-            CoCodeList,
-            True,
-            'F'
-        );
-
-        var CodesStringList:=THelpers.Implode(CoCodeList, ',', True);
-        OpenItems.ReadOpenItemsAsync(sgOpenItems, CodesStringList, ReadOpenItems_Callback);
-
-    finally
-        CoCodeList.Free();
-    end;
+//    var OpenItems: IOpenItems:=TOpenItems.Create();
+//    var CoCodeList:=TStringList.Create();
+//    try
+//
+//        THelpers.ReturnCoCodesList(
+//            MainForm.sgAgeView,
+//            MainForm.sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1),
+//            CoCodeList,
+//            True,
+//            'F'
+//        );
+//
+//        var CodesStringList:=THelpers.Implode(CoCodeList, ',', True);
+//        OpenItems.ReadOpenItemsAsync(sgOpenItems, CodesStringList, ReadOpenItems_Callback);
+//
+//    finally
+//        CoCodeList.Free();
+//    end;
 
 end;
 

@@ -18,6 +18,7 @@ object CompanyListForm: TCompanyListForm
   PopupMode = pmExplicit
   Position = poMainFormCenter
   OnActivate = FormActivate
+  OnClose = FormClose
   OnCreate = FormCreate
   OnKeyPress = FormKeyPress
   OnShow = FormShow
@@ -38,8 +39,6 @@ object CompanyListForm: TCompanyListForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
-    ExplicitWidth = 239
-    ExplicitHeight = 398
     object btnSelect: TSpeedButton
       AlignWithMargins = True
       Left = 20
@@ -102,8 +101,6 @@ object CompanyListForm: TCompanyListForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 0
-      ExplicitWidth = 229
-      ExplicitHeight = 283
       object FilterList: TCheckListBox
         AlignWithMargins = True
         Left = 2
@@ -157,8 +154,6 @@ object CompanyListForm: TCompanyListForm
         ShowHint = False
         TabOrder = 0
         OnClick = FilterListClick
-        ExplicitWidth = 225
-        ExplicitHeight = 279
       end
     end
     object cbSelectAll: TCheckBox
@@ -178,7 +173,6 @@ object CompanyListForm: TCompanyListForm
       State = cbChecked
       TabOrder = 1
       OnClick = cbSelectAllClick
-      ExplicitWidth = 229
     end
   end
 end
