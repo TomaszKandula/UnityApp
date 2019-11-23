@@ -119,13 +119,10 @@ begin
                 end
                 else
                 begin
-
                     DataTables.CmdType:=cmdText;
-                    DataTables.StrSQL:='select ' + StrCol + ' from Customer.Snapshots where	AgeDate = (select max(AgeDate) from Customer.Snapshots) and CoCode in (' + SelectedCoCodes + ')';
-
+                    DataTables.StrSQL:='exec Customer.AgeViewReportAlt2 ' + StrCol.QuotedString + ',' + SelectedCoCodes.QuotedString;
                     DataTables.SqlToGrid(Grid, DataTables.ExecSQL, False, False);
                     ThreadFileLog.Log('SQL statement applied [' + DataTables.StrSQL + '].');
-
                 end;
 
             except

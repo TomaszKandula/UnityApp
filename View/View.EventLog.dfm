@@ -3,8 +3,8 @@ object EventForm: TEventForm
   Top = 0
   BorderIcons = [biSystemMenu]
   Caption = 'Unity'
-  ClientHeight = 674
-  ClientWidth = 1062
+  ClientHeight = 462
+  ClientWidth = 661
   Color = 15855854
   Constraints.MinHeight = 400
   Constraints.MinWidth = 400
@@ -26,8 +26,8 @@ object EventForm: TEventForm
     AlignWithMargins = True
     Left = 10
     Top = 10
-    Width = 1042
-    Height = 622
+    Width = 641
+    Height = 410
     Margins.Left = 10
     Margins.Top = 10
     Margins.Right = 10
@@ -37,13 +37,14 @@ object EventForm: TEventForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
-    ExplicitHeight = 638
+    ExplicitWidth = 1042
+    ExplicitHeight = 622
     object PanelEventMemo: TPanel
       AlignWithMargins = True
       Left = 10
       Top = 10
-      Width = 1022
-      Height = 602
+      Width = 621
+      Height = 390
       Margins.Left = 10
       Margins.Top = 10
       Margins.Right = 10
@@ -53,13 +54,14 @@ object EventForm: TEventForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 0
-      ExplicitHeight = 618
+      ExplicitWidth = 1022
+      ExplicitHeight = 602
       object EventMemo: TMemo
         AlignWithMargins = True
         Left = 2
         Top = 2
-        Width = 1018
-        Height = 598
+        Width = 617
+        Height = 386
         Hint = 'Press F5 to reload'
         Margins.Left = 2
         Margins.Top = 2
@@ -82,15 +84,16 @@ object EventForm: TEventForm
         WantTabs = True
         WordWrap = False
         OnKeyUp = FormKeyUp
-        ExplicitHeight = 614
+        ExplicitWidth = 1018
+        ExplicitHeight = 598
       end
     end
   end
   object PanelBottom: TPanel
     AlignWithMargins = True
     Left = 0
-    Top = 642
-    Width = 1062
+    Top = 430
+    Width = 661
     Height = 32
     Margins.Left = 0
     Margins.Top = 10
@@ -101,9 +104,11 @@ object EventForm: TEventForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 1
+    ExplicitTop = 642
+    ExplicitWidth = 1062
     object ImageGrip: TImage
       AlignWithMargins = True
-      Left = 1046
+      Left = 645
       Top = 16
       Width = 16
       Height = 16
@@ -120,6 +125,7 @@ object EventForm: TEventForm
         324944415478DA63FC0F040C1400C6510306D08023478E0CB001F40F0398936D
         6C6CC8F302C506D03F0C703999682F106B000083615F99D1940F550000000049
         454E44AE426082}
+      ExplicitLeft = 1046
       ExplicitTop = 0
     end
   end

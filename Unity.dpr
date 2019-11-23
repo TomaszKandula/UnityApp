@@ -188,6 +188,7 @@ begin
     // -------------------------------------------------------------------------------------------------------
     // Initialize Chromium object before Chromium component is created within MainForm.
     // <see cref="https://www.briskbard.com/index.php?lang=en&pageid=cef"/>
+    // <see cref="https://github.com/salvadordf/CEF4Delphi" />
     // GlobalCEFApp is an instance of the TCEFApplication class an it simpliefies the Chromium initialization.
     // -------------------------------------------------------------------------------------------------------
     GlobalCEFApp:=TCefApplication.Create();

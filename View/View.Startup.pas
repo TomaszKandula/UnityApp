@@ -389,25 +389,23 @@ begin
         // Tabsheet captions and aging ranges.
         // -----------------------------------
 
-        //MainAppForm.Cap01.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT01', 'EMPTY'), [fsBold], 'Tahoma', 10, clWhite);
-        MainAppForm.Cap02.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT02', 'EMPTY'), [fsBold], 'Tahoma', 10, clWhite);
-        MainAppForm.Cap03.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT03', 'EMPTY'), [fsBold], 'Tahoma', 10, clWhite);
-        MainAppForm.Cap05.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT05', 'EMPTY'), [fsBold], 'Tahoma', 10, clWhite);
-        MainAppForm.Cap06.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT06', 'EMPTY'), [fsBold], 'Tahoma', 10, clWhite);
-        MainAppForm.Cap07.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT07', 'EMPTY'), [fsBold], 'Tahoma', 10, clWhite);
-        //MainAppForm.Cap24.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS1TXT08', 'EMPTY'), [fsBold], 'Tahoma', 10, clWhite);
-        MainAppForm.Cap10.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS2TXT01', 'EMPTY'), [fsBold], 'Tahoma', 10, clWhite);
-        //MainAppForm.Cap11.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS2TXT02', 'EMPTY'), [fsBold], 'Tahoma', 10, clWhite);
-        MainAppForm.Cap12.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS2TXT03', 'EMPTY'), [fsBold], 'Tahoma', 10, clWhite);
-        MainAppForm.Cap13.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS3TXT01', 'EMPTY'), [fsBold], 'Tahoma', 10, clWhite);
-        MainAppForm.Cap43.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS4TXT01', 'EMPTY'), [fsBold], 'Tahoma', 10, clWhite);
-        MainAppForm.Cap61.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS6TXT01', 'EMPTY'), [fsBold], 'Tahoma', 10, clWhite);
-        MainAppForm.Cap15.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS7TXT01', 'EMPTY'), [fsBold], 'Tahoma', 10, clWhite);
-        MainAppForm.Cap21.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS8TXT01', 'EMPTY'), [fsBold], 'Tahoma', 10, clWhite);
-        MainAppForm.Cap22.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS8TXT02', 'EMPTY'), [fsBold], 'Tahoma', 10, clWhite);
-        MainAppForm.Cap23.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS8TXT03', 'EMPTY'), [fsBold], 'Tahoma', 10, clWhite);
-        MainAppForm.Cap62.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS9TXT01', 'EMPTY'), [fsBold], 'Tahoma', 10, clWhite);
-        MainAppForm.Cap63.ShapeText(10, 1, Settings.GetStringValue(TConfigSections.TabSheetsCaps, 'TS9TXT02', 'EMPTY'), [fsBold], 'Tahoma', 10, clWhite);
+        MainAppForm.ShapeSelectionCap.ShapeText(10, 1, 'SELECTION', [fsBold], 'Tahoma', 10, clWhite);
+        MainAppForm.ShapeRiskClassCap.ShapeText(10, 1, 'RISK CLASS', [fsBold], 'Tahoma', 10, clWhite);
+        MainAppForm.ShapeDetailsCap.ShapeText(10, 1, 'AGING DETAILS', [fsBold], 'Tahoma', 10, clWhite);
+        MainAppForm.ShapeSummaryCap.ShapeText(10, 1, 'SUMMARY', [fsBold], 'Tahoma', 10, clWhite);
+        MainAppForm.ShapeExceedersCap.ShapeText(10, 1, 'CREDIT LIMITS', [fsBold], 'Tahoma', 10, clWhite);
+
+        MainAppForm.Cap10.ShapeText(10, 1, '', [fsBold], 'Tahoma', 10, clWhite);
+        MainAppForm.Cap12.ShapeText(10, 1, '', [fsBold], 'Tahoma', 10, clWhite);
+        MainAppForm.Cap13.ShapeText(10, 1, '', [fsBold], 'Tahoma', 10, clWhite);
+        MainAppForm.Cap43.ShapeText(10, 1, '', [fsBold], 'Tahoma', 10, clWhite);
+        MainAppForm.Cap61.ShapeText(10, 1, '', [fsBold], 'Tahoma', 10, clWhite);
+        MainAppForm.Cap15.ShapeText(10, 1, '', [fsBold], 'Tahoma', 10, clWhite);
+        MainAppForm.Cap21.ShapeText(10, 1, '', [fsBold], 'Tahoma', 10, clWhite);
+        MainAppForm.Cap22.ShapeText(10, 1, '', [fsBold], 'Tahoma', 10, clWhite);
+        MainAppForm.Cap23.ShapeText(10, 1, '', [fsBold], 'Tahoma', 10, clWhite);
+        MainAppForm.Cap62.ShapeText(10, 1, '', [fsBold], 'Tahoma', 10, clWhite);
+        MainAppForm.Cap63.ShapeText(10, 1, '', [fsBold], 'Tahoma', 10, clWhite);
 
         var getRange1A:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE1A','');
         var getRange2A:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE2A','');
@@ -423,15 +421,15 @@ begin
         var getRange5B:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE5B','');
         var getRange6B:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE6B','');
 
-        MainAppForm.tR1.Caption:=getRange1A + ' - ' + getRange1B;
-        MainAppForm.tR2.Caption:=getRange2A + ' - ' + getRange2B;
-        MainAppForm.tR3.Caption:=getRange3A + ' - ' + getRange3B;
-        MainAppForm.tR4.Caption:=getRange4A + ' - ' + getRange4B;
-        MainAppForm.tR5.Caption:=getRange5A + ' - ' + getRange5B;
-        MainAppForm.tR6.Caption:=getRange6A + ' - ' + getRange6B;
+        MainAppForm.txtRange1.Caption:=getRange1A + ' - ' + getRange1B;
+        MainAppForm.txtRange2.Caption:=getRange2A + ' - ' + getRange2B;
+        MainAppForm.txtRange3.Caption:=getRange3A + ' - ' + getRange3B;
+        MainAppForm.txtRange4.Caption:=getRange4A + ' - ' + getRange4B;
+        MainAppForm.txtRange5.Caption:=getRange5A + ' - ' + getRange5B;
+        MainAppForm.txtRange6.Caption:=getRange6A + ' - ' + getRange6B;
 
-        MainAppForm.Text21.Caption:=getRange1A + ' - ' + getRange3B + ':';
-        MainAppForm.Text22.Caption:=getRange4A + ' - ' + getRange6B + ':';
+        MainAppForm.txtPastDue.Caption:=getRange1A + ' - ' + getRange3B + ':';
+        MainAppForm.txtDefaulted.Caption:=getRange4A + ' - ' + getRange6B + ':';
 
     except
         on E: Exception do
@@ -486,16 +484,14 @@ begin
     var Utilities: IUtilities:=TUtilities.Create();
     try
 
+        Utilities.GeneralTablesAsync(TCompanyData.CompanyData, MainAppForm.sgCoCodes, GeneralTables_Callback, '', '', True);
+        Utilities.GeneralTablesAsync(TControlStatus.ControlStatus, MainAppForm.sgControlStatus, GeneralTables_Callback, '', '', True);
+        Utilities.GeneralTablesAsync(TPaidinfo.Paidinfo, MainAppForm.sgPaidInfo, GeneralTables_Callback, '', '', True);
+        Utilities.GeneralTablesAsync(TPaymentTerms.PaymentTerms, MainAppForm.sgPmtTerms, GeneralTables_Callback, '', '', True);
         Utilities.GeneralTablesAsync(TSalesResponsible.SalesResponsible, MainAppForm.sgSalesResp, GeneralTables_Callback, '', '', True);
         Utilities.GeneralTablesAsync(TPersonResponsible.PersonResponsible, MainAppForm.sgPersonResp, GeneralTables_Callback, '', '', True);
         Utilities.GeneralTablesAsync(TAccountType.AccountType, MainAppForm.sgAccountType, GeneralTables_Callback, '', '', True);
         Utilities.GeneralTablesAsync(TCustomerGroup.CustomerGroup, MainAppForm.sgCustomerGr, GeneralTables_Callback, '', '', True);
-        Utilities.GeneralTablesAsync(TGroup3.Group3, MainAppForm.sgGroup3, GeneralTables_Callback, '', '', True);
-        Utilities.GeneralTablesAsync(TCompanyData.CompanyData, MainAppForm.sgCoCodes, GeneralTables_Callback, '', '', True);
-        Utilities.GeneralTablesAsync(TPaymentTerms.PaymentTerms, MainAppForm.sgPmtTerms, GeneralTables_Callback, '', '', True);
-        Utilities.GeneralTablesAsync(TPaidinfo.Paidinfo, MainAppForm.sgPaidInfo, GeneralTables_Callback, '', '', True);
-        Utilities.GeneralTablesAsync(TPerson.Person, MainAppForm.sgPerson, GeneralTables_Callback, '', '', True);
-        Utilities.GeneralTablesAsync(TControlStatus.ControlStatus, MainAppForm.sgControlStatus, GeneralTables_Callback, '', '', True);
 
     except
         on E: Exception do

@@ -3,10 +3,9 @@ object PhoneListForm: TPhoneListForm
   Top = 0
   BiDiMode = bdLeftToRight
   BorderIcons = [biSystemMenu]
-  BorderStyle = bsSingle
   Caption = 'Unity'
-  ClientHeight = 272
-  ClientWidth = 196
+  ClientHeight = 406
+  ClientWidth = 253
   Color = 15855854
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -26,8 +25,8 @@ object PhoneListForm: TPhoneListForm
     AlignWithMargins = True
     Left = 5
     Top = 5
-    Width = 186
-    Height = 262
+    Width = 243
+    Height = 346
     Margins.Left = 5
     Margins.Top = 5
     Margins.Right = 5
@@ -37,65 +36,73 @@ object PhoneListForm: TPhoneListForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
-    object btnCancel: TSpeedButton
+    ExplicitWidth = 212
+    ExplicitHeight = 337
+    object PanelMemo: TPanel
       AlignWithMargins = True
       Left = 10
-      Top = 227
-      Width = 166
-      Height = 25
-      Cursor = crHandPoint
+      Top = 10
+      Width = 223
+      Height = 326
       Margins.Left = 10
-      Margins.Top = 5
+      Margins.Top = 10
       Margins.Right = 10
       Margins.Bottom = 10
-      Align = alBottom
-      Caption = 'Cancel'
-      Flat = True
-      Glyph.Data = {
-        36030000424D3603000000000000360000002800000010000000100000000100
-        18000000000000030000C40E0000C40E00000000000000000000FFFFFFFFFFFF
-        FFFFFFFFFFFFF0F0F58E8EDE5656D33A3ACE3A3ACE5656D38E8EDEF0F0F5FFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7C7CD92020D13333DA3535DA34
-        34DA3434DA3535DA3333DA2020D17C7CD9FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-        5252D32F2FDC3B3BDC2929D84A4ADE7D7DE77D7DE74F4FE03A3ADB3E3EDC2F2F
-        DC5252D3FFFFFFFFFFFFFFFFFF7F7FDE3131DD3939DC4141DEE3E3FAFFFFFFFF
-        FFFFFFFFFFFFFFF93333DB3F3FDD4040DD3131DD7F7FDEFFFFFFF0F0F82626DA
-        3E3EDF4242DFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFC3434D63F3FDF4040DF3434
-        DD4141DF2626DAF0F0F89393E93A3AE02E2EDDE3E3FAFFFFFFFFFFFFFFFFFFFF
-        FFFF4C4CD83C3CE14242E03232DEC6C6F53232DE3A3AE09393E95F5FE33E3EE1
-        5050E4FFFFFFFFFFFFFFFFFFFFFFFF6E6EDC3939E24444E22A2ADED1D1F8FFFF
-        FF5050E43E3EE15E5EE34747E23E3EE38383EDFFFFFFFFFFFFFFFFFF9A9AE434
-        34E34646E43232E1A6A6F2FFFFFFFFFFFF8383ED3E3EE34747E24848E53F3FE4
-        8484ECFFFFFFFFFFFFC7C7ED2F2FE14848E53B3BE37B7BECFFFFFFFFFFFFFFFF
-        FF8484EC3F3FE44848E56363EA4242E65454E4FFFFFFEBEBF53030DF4848E742
-        42E65A5AE9FFFFFFFFFFFFFFFFFFFFFFFF5454E44242E66363EA9898F24242E7
-        3939E7D9D9EE4242E14848E94747E84343E7FFFFFFFFFFFFFFFFFFFFFFFFE3E3
-        F53737E64242E79898F2F2F2FD3333E74C4CEA3E3EE54B4BEA4B4BEA3737E7F5
-        F5FEFFFFFFFFFFFFFFFFFFFFFFFE4B4BE24949EA3333E7F2F2FDFFFFFF8989F2
-        4040EA4E4EEB4E4EEB4040EAE9E9FDFFFFFFFFFFFFFFFFFFE3E3F24D4DE14848
-        EC4040EA8989F2FFFFFFFFFFFFFFFFFF6363EF4242EB4F4FED4C4CED5F5FE087
-        87E58787E55858DF3B3BE84D4DEE4242EB6363EFFFFFFFFFFFFFFFFFFFFFFFFF
-        FFFFFF8B8BF43838EC4848ED4B4BEF4949EF4949EF4B4BEF4848EE3838EC8B8B
-        F4FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF2F2FE9D9DF66B6BF253
-        53F05353F06B6BF29D9DF6F2F2FEFFFFFFFFFFFFFFFFFFFFFFFF}
-      Spacing = 15
-      OnClick = btnCancelClick
-      ExplicitLeft = 52
-      ExplicitTop = 288
-      ExplicitWidth = 110
+      Align = alClient
+      BevelOuter = bvNone
+      Caption = 'PanelMemo'
+      Color = clWhite
+      ParentBackground = False
+      TabOrder = 0
+      ExplicitWidth = 192
+      ExplicitHeight = 268
+      object PhoneList: TMemo
+        AlignWithMargins = True
+        Left = 2
+        Top = 2
+        Width = 219
+        Height = 322
+        Margins.Left = 2
+        Margins.Top = 2
+        Margins.Right = 2
+        Margins.Bottom = 2
+        Align = alClient
+        BorderStyle = bsNone
+        Color = clCream
+        ScrollBars = ssVertical
+        TabOrder = 0
+        ExplicitWidth = 188
+        ExplicitHeight = 264
+      end
     end
+  end
+  object PanelButtons: TPanel
+    AlignWithMargins = True
+    Left = 0
+    Top = 356
+    Width = 253
+    Height = 50
+    Margins.Left = 0
+    Margins.Top = 0
+    Margins.Right = 0
+    Margins.Bottom = 0
+    Align = alBottom
+    BevelOuter = bvNone
+    Color = clWhite
+    ParentBackground = False
+    TabOrder = 1
+    ExplicitTop = 297
+    ExplicitWidth = 222
     object btnSubmit: TSpeedButton
-      AlignWithMargins = True
-      Left = 10
-      Top = 192
-      Width = 166
-      Height = 25
+      Left = 15
+      Top = 13
+      Width = 85
+      Height = 27
       Cursor = crHandPoint
       Margins.Left = 10
       Margins.Top = 5
       Margins.Right = 10
       Margins.Bottom = 5
-      Align = alBottom
       Caption = 'Submit'
       Flat = True
       Glyph.Data = {
@@ -127,41 +134,28 @@ object PhoneListForm: TPhoneListForm
         951538951553A3358DC279EFF6ECFFFFFFFFFFFFFFFFFFFFFFFF}
       Spacing = 15
       OnClick = btnSubmitClick
-      ExplicitTop = 227
-      ExplicitWidth = 241
     end
-    object PanelMemo: TPanel
+    object ImageGrip: TImage
       AlignWithMargins = True
-      Left = 10
-      Top = 10
-      Width = 166
-      Height = 167
-      Margins.Left = 10
-      Margins.Top = 10
-      Margins.Right = 10
-      Margins.Bottom = 10
-      Align = alClient
-      BevelOuter = bvNone
-      Caption = 'PanelMemo'
-      Color = clWhite
-      ParentBackground = False
-      TabOrder = 0
-      object PhoneList: TMemo
-        AlignWithMargins = True
-        Left = 2
-        Top = 2
-        Width = 162
-        Height = 163
-        Margins.Left = 2
-        Margins.Top = 2
-        Margins.Right = 2
-        Margins.Bottom = 2
-        Align = alClient
-        BorderStyle = bsNone
-        Color = clCream
-        ScrollBars = ssVertical
-        TabOrder = 0
-      end
+      Left = 237
+      Top = 34
+      Width = 16
+      Height = 16
+      Margins.Left = 0
+      Margins.Top = 34
+      Margins.Right = 0
+      Margins.Bottom = 0
+      Align = alRight
+      AutoSize = True
+      Picture.Data = {
+        0954506E67496D61676589504E470D0A1A0A0000000D49484452000000100000
+        001008060000001FF3FF61000000017352474200AECE1CE90000000467414D41
+        0000B18F0BFC6105000000097048597300000EC200000EC20115284A80000000
+        324944415478DA63FC0F040C1400C6510306D08023478E0CB001F40F0398936D
+        6C6CC8F302C506D03F0C703999682F106B000083615F99D1940F550000000049
+        454E44AE426082}
+      ExplicitLeft = 1046
+      ExplicitTop = 0
     end
   end
 end

@@ -2,10 +2,9 @@ object FeedbackForm: TFeedbackForm
   Left = 0
   Top = 0
   BorderIcons = [biSystemMenu]
-  BorderStyle = bsSingle
   Caption = 'Unity'
-  ClientHeight = 456
-  ClientWidth = 506
+  ClientHeight = 403
+  ClientWidth = 451
   Color = 15855854
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -24,8 +23,8 @@ object FeedbackForm: TFeedbackForm
     AlignWithMargins = True
     Left = 10
     Top = 10
-    Width = 486
-    Height = 386
+    Width = 431
+    Height = 333
     Margins.Left = 10
     Margins.Top = 10
     Margins.Right = 10
@@ -35,88 +34,113 @@ object FeedbackForm: TFeedbackForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
-    ExplicitHeight = 376
-    object PanelArea: TPanel
+    ExplicitWidth = 486
+    ExplicitHeight = 386
+    object Caption: TLabel
       AlignWithMargins = True
-      Left = 5
-      Top = 5
-      Width = 476
-      Height = 376
-      Margins.Left = 5
-      Margins.Top = 5
-      Margins.Right = 5
+      Left = 10
+      Top = 10
+      Width = 411
+      Height = 13
+      Margins.Left = 10
+      Margins.Top = 10
+      Margins.Right = 10
       Margins.Bottom = 5
+      Align = alTop
+      Caption = 'Your message to developers:'
+      Color = clWhite
+      ParentColor = False
+      ExplicitLeft = 5
+      ExplicitTop = 5
+      ExplicitWidth = 140
+    end
+    object PanelReportMemo: TPanel
+      AlignWithMargins = True
+      Left = 10
+      Top = 38
+      Width = 411
+      Height = 255
+      Margins.Left = 10
+      Margins.Top = 10
+      Margins.Right = 10
+      Margins.Bottom = 10
       Align = alClient
       BevelOuter = bvNone
       Color = clWhite
       ParentBackground = False
       TabOrder = 0
-      ExplicitHeight = 366
-      object Caption: TLabel
+      ExplicitLeft = 5
+      ExplicitTop = 5
+      ExplicitHeight = 290
+      object ReportMemo: TMemo
         AlignWithMargins = True
-        Left = 5
-        Top = 5
-        Width = 466
-        Height = 13
-        Margins.Left = 5
-        Margins.Top = 5
-        Margins.Right = 5
-        Margins.Bottom = 5
-        Align = alTop
-        Caption = 'Your message to developers:'
-        Color = clWhite
-        ParentColor = False
-        ExplicitWidth = 140
-      end
-      object PanelReportMemo: TPanel
-        AlignWithMargins = True
-        Left = 5
-        Top = 28
-        Width = 466
-        Height = 343
-        Margins.Left = 5
-        Margins.Top = 5
-        Margins.Right = 5
-        Margins.Bottom = 5
+        Left = 2
+        Top = 2
+        Width = 407
+        Height = 251
+        Margins.Left = 2
+        Margins.Top = 2
+        Margins.Right = 2
+        Margins.Bottom = 2
         Align = alClient
-        BevelOuter = bvNone
-        Color = clWhite
-        ParentBackground = False
+        BorderStyle = bsNone
+        Color = clCream
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clNavy
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        MaxLength = 255
+        ParentFont = False
+        ScrollBars = ssVertical
         TabOrder = 0
-        ExplicitHeight = 333
-        object ReportMemo: TMemo
-          AlignWithMargins = True
-          Left = 2
-          Top = 2
-          Width = 462
-          Height = 339
-          Margins.Left = 2
-          Margins.Top = 2
-          Margins.Right = 2
-          Margins.Bottom = 2
-          Align = alClient
-          BorderStyle = bsNone
-          Color = clCream
-          Font.Charset = DEFAULT_CHARSET
-          Font.Color = clNavy
-          Font.Height = -11
-          Font.Name = 'Tahoma'
-          Font.Style = []
-          MaxLength = 255
-          ParentFont = False
-          ScrollBars = ssVertical
-          TabOrder = 0
-          OnKeyUp = ReportMemoKeyUp
-          ExplicitHeight = 329
-        end
+        OnKeyUp = ReportMemoKeyUp
+        ExplicitHeight = 286
+      end
+    end
+    object PanelText: TPanel
+      AlignWithMargins = True
+      Left = 0
+      Top = 303
+      Width = 431
+      Height = 30
+      Margins.Left = 0
+      Margins.Top = 0
+      Margins.Right = 0
+      Margins.Bottom = 0
+      Align = alBottom
+      BevelOuter = bvNone
+      Color = clWhite
+      ParentBackground = False
+      TabOrder = 1
+      ExplicitTop = 309
+      object TotalWords: TLabel
+        Left = 94
+        Top = 3
+        Width = 40
+        Height = 13
+        Caption = '0 / 1024'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        ParentFont = False
+      end
+      object txtWords: TLabel
+        Left = 12
+        Top = 3
+        Width = 60
+        Height = 13
+        Caption = 'Word count:'
       end
     end
   end
   object PanelBottom: TPanel
     AlignWithMargins = True
     Left = 0
-    Top = 406
-    Width = 506
+    Top = 353
+    Width = 451
     Height = 50
     Margins.Left = 0
     Margins.Top = 5
@@ -127,31 +151,12 @@ object FeedbackForm: TFeedbackForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 1
-    ExplicitTop = 396
-    object txtWords: TLabel
-      Left = 15
-      Top = 18
-      Width = 60
-      Height = 13
-      Caption = 'Word count:'
-    end
-    object TotalWords: TLabel
-      Left = 105
-      Top = 18
-      Width = 40
-      Height = 13
-      Caption = '0 / 1024'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = []
-      ParentFont = False
-    end
+    ExplicitTop = 406
+    ExplicitWidth = 506
     object btnSendReport: TSpeedButton
-      Left = 402
-      Top = 13
-      Width = 89
+      Left = 22
+      Top = 12
+      Width = 85
       Height = 27
       Cursor = crHandPoint
       Caption = 'Send'
@@ -188,6 +193,29 @@ object FeedbackForm: TFeedbackForm
       ShowHint = True
       Spacing = 10
       OnClick = btnSendReportClick
+    end
+    object ImageGrip: TImage
+      AlignWithMargins = True
+      Left = 435
+      Top = 34
+      Width = 16
+      Height = 16
+      Margins.Left = 0
+      Margins.Top = 34
+      Margins.Right = 0
+      Margins.Bottom = 0
+      Align = alRight
+      AutoSize = True
+      Picture.Data = {
+        0954506E67496D61676589504E470D0A1A0A0000000D49484452000000100000
+        001008060000001FF3FF61000000017352474200AECE1CE90000000467414D41
+        0000B18F0BFC6105000000097048597300000EC200000EC20115284A80000000
+        324944415478DA63FC0F040C1400C6510306D08023478E0CB001F40F0398936D
+        6C6CC8F302C506D03F0C703999682F106B000083615F99D1940F550000000049
+        454E44AE426082}
+      ExplicitLeft = 490
+      ExplicitTop = 35
+      ExplicitHeight = 20
     end
   end
 end

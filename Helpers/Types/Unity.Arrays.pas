@@ -46,13 +46,10 @@ type
 implementation
 
 
-// -------------------------------------------------
-// Usage: TArrayUtils<integer>.Contains(3, [1,2,3]).
-// -------------------------------------------------
-
 class function TArrayUtils<T>.Contains(const x: T; const anArray: array of T): boolean;
 begin
 
+    // Usage: TArrayUtils<integer>.Contains(3, [1,2,3]).
     var y: T;
     var lComparer: IEqualityComparer<T>:=TEqualityComparer<T>.Default;
 

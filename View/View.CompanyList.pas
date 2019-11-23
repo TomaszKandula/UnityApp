@@ -18,7 +18,9 @@ uses
     Vcl.CheckLst,
     Vcl.Buttons,
     Vcl.ExtCtrls,
-    Unity.Grid;
+    Vcl.Imaging.pngimage,
+    Unity.Grid,
+    Unity.Panel;
 
 
 type
@@ -29,16 +31,19 @@ type
         btnSelect: TSpeedButton;
         PanelListItems: TPanel;
         FilterList: TCheckListBox;
-        cbSelectAll: TCheckBox;
+        PanelButtons: TPanel;
+        ImageGrip: TImage;
+        PanelHeader: TPanel;
+        btnRemove: TSpeedButton;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
-        procedure btnSelectClick(Sender: TObject);
-        procedure cbSelectAllClick(Sender: TObject);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
         procedure FilterListClick(Sender: TObject);
         procedure FilterListClickCheck(Sender: TObject);
         procedure FormClose(Sender: TObject; var Action: TCloseAction);
+        procedure btnSelectClick(Sender: TObject);
+        procedure btnRemoveClick(Sender: TObject);
     strict private
         var FCheckEvent: boolean;
         var FIsDataLoaded: boolean;
@@ -59,7 +64,8 @@ uses
     Async.Debtors,
     Async.Utilities,
     Unity.Helpers,
-    Unity.Chars;
+    Unity.Chars,
+    Unity.Enums;
 
 
 var VCompanyListForm: TCompanyListForm;
@@ -77,6 +83,7 @@ end;
 
 procedure TCompanyListForm.FormCreate(Sender: TObject);
 begin
+    PanelListItems.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
     FilterList.Clear();
 end;
 
@@ -100,12 +107,12 @@ begin
 
             FilterList.Clear();
             var Utilities: IUtilities:=TUtilities.Create();
-            var GetCoCodeList: TStringGrid;
+            var GetCoCodeList:=TStringList.Create();
             try
 
-                GetCoCodeList:=Utilities.GetCompanyCodesAwaited();
-                for var iCNT:=1 {Skip header} to GetCoCodeList.RowCount - 1 do
-                    FilterList.Items.Add(GetCoCodeList.Cells[1{Skip Lp}, iCNT]);
+                Utilities.GetCompanyCodesAwaited(GetCoCodeList);
+                for var iCNT:=0 to GetCoCodeList.Count - 1 do
+                    FilterList.Items.Add(GetCoCodeList.Strings[iCNT]);
 
             finally
                 GetCoCodeList.Free();
@@ -126,7 +133,7 @@ end;
 
 procedure TCompanyListForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-    FIsDataLoaded:=False;
+    {FIsDataLoaded:=False;}
 end;
 
 
@@ -134,6 +141,13 @@ end;
 
 
 procedure TCompanyListForm.btnSelectClick(Sender: TObject);
+
+    function GetCoCodeOnly(InputStr: string): string;
+    begin
+        var SeparatorPos:=AnsiPos('-', InputStr);
+        Result:=InputStr.Substring(0, SeparatorPos - 1);
+    end;
+
 begin
 
     var SelectedCoCodes: string;
@@ -143,33 +157,30 @@ begin
     begin
 
         if FilterList.Checked[iCNT] = True then
-            SelectedCoCodes:=SelectedCoCodes + FilterList.Items[iCNT] + ','
+            SelectedCoCodes:=SelectedCoCodes + GetCoCodeOnly(FilterList.Items[iCNT]) + ','
 
     end;
 
-    SelectedCoCodes:=SelectedCoCodes.Substring(0, Length(SelectedCoCodes) - 1);
+    SelectedCoCodes:=SelectedCoCodes.Substring(0, Length(SelectedCoCodes) - 1).Replace(' ','');
 
-    var Debtors: IDebtors:=TDebtors.Create();
-    Debtors.ReadAgeViewAsync(SelectedCoCodes, 0, MainForm.ReadAgeView_Callback);
+    if String.IsNullOrWhiteSpace(SelectedCoCodes) then
+    begin
+        THelpers.MsgCall(TAppMessage.Warn, 'Please select company/companies you want to open.');
+        Exit();
+    end;
+
+    MainForm.LoadAgeReport(SelectedCoCodes);
+    Close();
 
 end;
 
 
-procedure TCompanyListForm.cbSelectAllClick(Sender: TObject);
+procedure TCompanyListForm.btnRemoveClick(Sender: TObject);
 begin
 
-    if cbSelectAll.Checked then
-    begin
-        for var iCNT: integer:=0 to FilterList.Count - 1 do
-            if FilterList.ItemEnabled[iCNT] = True then
-                    FilterList.Checked[iCNT]:=True
-    end
-    else
-    begin
-        for var iCNT: integer:=0 to FilterList.Count - 1 do
-            if FilterList.ItemEnabled[iCNT] = True then
-                FilterList.Checked[iCNT]:=False;
-    end;
+    for var iCNT:=0 to FilterList.Count - 1 do
+        if FilterList.ItemEnabled[iCNT] = True then
+            FilterList.Checked[iCNT]:=False;
 
 end;
 

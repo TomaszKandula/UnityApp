@@ -45,6 +45,9 @@ type
         PanelListItems: TPanel;
         PanelBackground: TPanel;
         btnRemove: TSpeedButton;
+        PanelButtons: TPanel;
+        ImageGrip: TImage;
+        PanelHeader: TPanel;
         procedure FormCreate(Sender: TObject);
         procedure FormActivate(Sender: TObject);
         procedure btnFilterClick(Sender: TObject);

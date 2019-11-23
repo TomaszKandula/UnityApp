@@ -507,7 +507,7 @@ end;
 procedure TActionsForm.GetFirstComment(var Text: TMemo);
 begin
 
-    if not(Text.Visible) then Exit;
+    if not(Text.Visible) then Exit();
     var GetColumn: integer:=HistoryGrid.ReturnColumn(TDailyComment.FixedComment, 1, 1);
     if GetColumn <> -100 then
         Text.Text:=HistoryGrid.Cells[GetColumn, 1{fixed first row}];
@@ -595,14 +595,14 @@ begin
     if not FileExists(Settings.DirApplication + 'LyncCall.exe') then
     begin
         THelpers.MsgCall(Error, TCommon.APPCAPTION + ' cannot find ''lynccall.exe''. Please contact IT support.');
-        Exit;
+        Exit();
     end;
 
     // CHeck if Lync/Skype is running
     if not ActionsForm.GetRunningApps('lync.exe') then
     begin
         THelpers.MsgCall(Error, TCommon.APPCAPTION + ' cannot find running Microsoft Skype/Lync for Business. Please open it and try again.');
-        Exit;
+        Exit();
     end;
 
     // Run Lync with given phone number
@@ -611,12 +611,12 @@ begin
     if ActionsForm.DailyCom.Text = '' then
     begin
         ActionsForm.DailyCom.Text:='Called customer today.';
-        SaveDailyComment;
+        SaveDailyComment();
     end
     else
     begin
         ActionsForm.DailyCom.Text:=ActionsForm.DailyCom.Text + TChars.CRLF + 'Called customer today.';
-        SaveDailyComment;
+        SaveDailyComment();
     end;
 
 end;
@@ -626,6 +626,7 @@ procedure TActionsForm.LoadCustomer(GoNext: boolean);
 
     function CheckRow(iterator: integer): boolean;
     begin
+
         Result:=True;
         if
             (MainForm.sgAgeView.RowHeights[iterator] <> -1)
@@ -636,6 +637,7 @@ procedure TActionsForm.LoadCustomer(GoNext: boolean);
             MainForm.sgAgeView.Row:=iterator;
             Result:=False;
         end;
+
     end;
 
 begin
@@ -942,7 +944,7 @@ begin
             HistoryGrid.AutoThumbSize;
             HistoryGrid.SetColWidth(10, 20, 400);
 
-            GetFirstComment(DailyCom);
+            {GetFirstComment(DailyCom);}
             Screen.Cursor:=crDefault;
             FIsDataLoaded:=True;
 

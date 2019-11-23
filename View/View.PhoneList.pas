@@ -24,7 +24,7 @@ uses
     Vcl.StdCtrls,
     Unity.Enums,
     Unity.Grid,
-    Unity.Panel;
+    Unity.Panel, Vcl.Imaging.pngimage;
 
 
 type
@@ -32,10 +32,11 @@ type
 
     TPhoneListForm = class(TForm)
         PhoneList: TMemo;
-        btnCancel: TSpeedButton;
         PanelPhoneList: TPanel;
         btnSubmit: TSpeedButton;
         PanelMemo: TPanel;
+        PanelButtons: TPanel;
+        ImageGrip: TImage;
         procedure FormCreate(Sender: TObject);
         procedure btnCancelClick(Sender: TObject);
         procedure btnSubmitClick(Sender: TObject);

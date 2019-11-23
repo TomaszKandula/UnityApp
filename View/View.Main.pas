@@ -79,20 +79,20 @@ type
         TabSheet3: TTabSheet;
         TabSheet4: TTabSheet;
         TabSheet7: TTabSheet;
-        Header1: TPanel;
-        Footer1: TPanel;
-        Text06: TLabel;
+        DebtorsHeader: TPanel;
+        DebtorsFooter: TPanel;
+        txtTotalCustomers: TLabel;
         valTotalCustomers: TLabel;
-        hShapeSet: TShape;
-        Cap02: TShape;
-        hShapeAge: TShape;
-        Cap05: TShape;
-        Text09: TLabel;
-        tR1: TLabel;
-        tR2: TLabel;
-        tR3: TLabel;
-        tR4: TLabel;
-        tR5: TLabel;
+        ShapeRiskClassFrm: TShape;
+        ShapeRiskClassCap: TShape;
+        ShapeDetailsFrm: TShape;
+        ShapeDetailsCap: TShape;
+        txtNotDue: TLabel;
+        txtRange1: TLabel;
+        txtRange2: TLabel;
+        txtRange3: TLabel;
+        txtRange4: TLabel;
+        txtRange5: TLabel;
         Text08: TLabel;
         procNotDue: TLabel;
         procRange1: TLabel;
@@ -106,24 +106,24 @@ type
         amtRange3: TLabel;
         amtRange4: TLabel;
         amtRange5: TLabel;
-        tTAMT: TLabel;
+        txtTotal: TLabel;
         amtTotal: TLabel;
         procTotal: TLabel;
-        Text10: TLabel;
-        Text11: TLabel;
-        Text12: TLabel;
-        hShapeAct: TShape;
-        Cap03: TShape;
-        hShapeTC: TShape;
-        Cap06: TShape;
-        Text17: TLabel;
-        Text18: TLabel;
-        Text19: TLabel;
-        hShapeTR: TShape;
-        Cap07: TShape;
-        Text20: TLabel;
-        Text21: TLabel;
-        Text22: TLabel;
+        txtRiskClassA: TLabel;
+        txtRiskClassB: TLabel;
+        txtRiskClassC: TLabel;
+        ShapeSelectionFrm: TShape;
+        ShapeSelectionCap: TShape;
+        ShapeExceedersFrm: TShape;
+        ShapeExceedersCap: TShape;
+        txtExceeders: TLabel;
+        txtCreditExcess: TLabel;
+        txtGrantedLimits: TLabel;
+        ShapeSummaryFrm: TShape;
+        ShapeSummaryCap: TShape;
+        txtNotOverdue: TLabel;
+        txtPastDue: TLabel;
+        txtDefaulted: TLabel;
         amtExceeders: TLabel;
         amtCreditExcess: TLabel;
         amtGrantedLimits: TLabel;
@@ -235,8 +235,8 @@ type
         ContentPanel1: TPanel;
         ContentPanel: TPanel;
         ContentPanel2: TPanel;
-        MainPanel1: TPanel;
-        BottomPanel1: TPanel;
+        MainPanel: TPanel;
+        DebtorsBottomPanel: TPanel;
         ContentPanel8: TPanel;
         InnerPanel8Left: TPanel;
         amtUnallocated: TLabel;
@@ -244,18 +244,16 @@ type
         TimerCustOpenItems: TTimer;
         Text82: TLabel;
         amtOverdue: TLabel;
-        Text31: TLabel;
+        txtCutOffDate: TLabel;
         valRiskClassA: TLabel;
         valRiskClassB: TLabel;
         valRiskClassC: TLabel;
-        Text36: TLabel;
+        txtUpdateStamp: TLabel;
         valUpdateStamp: TLabel;
         sgAgeView: TStringGrid;
         sgInvoiceTracker: TStringGrid;
         PopupAgeView: TPopupMenu;
         Action_Tracker: TMenuItem;
-        Action_PaymentTerm: TMenuItem;
-        Action_Person: TMenuItem;
         Label2: TLabel;
         Label3: TLabel;
         Label4: TLabel;
@@ -279,8 +277,6 @@ type
         SplitLine1: TBevel;
         sgCoCodes: TStringGrid;
         sgPaidInfo: TStringGrid;
-        sgPerson: TStringGrid;
-        sgGroup3: TStringGrid;
         sgPmtTerms: TStringGrid;
         Action_AutoColumnSize: TMenuItem;
         SplitLine2: TBevel;
@@ -297,7 +293,7 @@ type
         Action_ToExce: TMenuItem;
         N13: TMenuItem;
         FileXLExport: TSaveDialog;
-        tR6: TLabel;
+        txtRange6: TLabel;
         amtRange6: TLabel;
         procRange6: TLabel;
         N14: TMenuItem;
@@ -346,9 +342,7 @@ type
         ImgLoadingInvoiceTracker: TImage;
         PanelCoCodes: TPanel;
         PanelPaidInfo: TPanel;
-        PanelPerson: TPanel;
         PanelPmtTerms: TPanel;
-        PanelGroup3: TPanel;
         PanelSettingsSections: TPanel;
         PanelSettingsValues: TPanel;
         btnUnlock: TSpeedButton;
@@ -373,7 +367,6 @@ type
         Action_Free2: TMenuItem;
         Action_ViewOptions: TMenuItem;
         N16: TMenuItem;
-        Action_ShowDetails: TMenuItem;
         Action_QuickReporting: TMenuItem;
         imgStart: TImage;
         btnStart: TPanel;
@@ -413,8 +406,6 @@ type
         Page1: TTabSheet;
         Page2: TTabSheet;
         Page3: TTabSheet;
-        Page4: TTabSheet;
-        Page5: TTabSheet;
         Page6: TTabSheet;
         Page7: TTabSheet;
         Page8: TTabSheet;
@@ -428,8 +419,8 @@ type
         sgAccountType: TStringGrid;
         PanelCustomerGr: TPanel;
         sgCustomerGr: TStringGrid;
-        PanelAgeView: TPanel;
-        Shape: TShape;
+        DebtorsAgeView: TPanel;
+        shapeFrame: TShape;
         Action_Free3: TMenuItem;
         N4: TMenuItem;
         N12: TMenuItem;
@@ -513,10 +504,16 @@ type
         txtRccItems: TLabel;
         imgRefreshReport: TImage;
         imgGetAgingReport: TImage;
-        Label1: TLabel;
-        Label5: TLabel;
+        txtGetAgingReport: TLabel;
+        txtRefreshReport: TLabel;
         btnSearchAb: TImage;
         Text72: TLabel;
+        cbAgeSorting: TComboBox;
+        txtAgeSorting: TLabel;
+        bevelVertSeparator: TBevel;
+        bevelVertLine: TBevel;
+        bevelHorzLine: TBevel;
+        ImageGrip: TImage;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
@@ -578,12 +575,8 @@ type
         procedure sgCoCodesMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure sgPmtTermsMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure sgPmtTermsMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-        procedure sgGroup3MouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-        procedure sgGroup3MouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure sgPaidInfoMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure sgPaidInfoMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-        procedure sgPersonMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-        procedure sgPersonMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure sgOpenItemsDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
         procedure TimerCustOpenItemsTimer(Sender: TObject);
         procedure EditGroupNameKeyPress(Sender: TObject; var Key: Char);
@@ -592,17 +585,15 @@ type
         procedure sgInvoiceTrackerMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure sgInvoiceTrackerMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure Action_TrackerClick(Sender: TObject);
-        procedure Action_PaymentTermClick(Sender: TObject);
-        procedure Action_PersonClick(Sender: TObject);
         procedure Action_RemoveClick(Sender: TObject);
         procedure Action_ShowMyClick(Sender: TObject);
         procedure Action_ShowAllClick(Sender: TObject);
-        procedure TabSheet4Show(Sender: TObject);
         procedure Action_LyncCallClick(Sender: TObject);
+        procedure Action_CloseClick(Sender: TObject);
+        procedure TabSheet4Show(Sender: TObject);
         procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure TrayIconDblClick(Sender: TObject);
         procedure TimerConnectionTimer(Sender: TObject);
-        procedure Action_CloseClick(Sender: TObject);
         procedure sgAgeViewDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
         procedure sgAgeViewDblClick(Sender: TObject);
         procedure Action_ShowRegisteredClick(Sender: TObject);
@@ -621,8 +612,6 @@ type
         procedure sgCoCodesDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
         procedure sgPaidInfoDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
         procedure sgPmtTermsDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
-        procedure sgPersonDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
-        procedure sgGroup3DrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
         procedure Action_AutoColumnSizeClick(Sender: TObject);
         procedure FormDestroy(Sender: TObject);
         procedure Action_SearchClick(Sender: TObject);
@@ -684,17 +673,13 @@ type
         procedure Action_OverduesClick(Sender: TObject);
         procedure sgCoCodesMouseEnter(Sender: TObject);
         procedure sgPaidInfoMouseEnter(Sender: TObject);
-        procedure sgPersonMouseEnter(Sender: TObject);
         procedure sgPmtTermsMouseEnter(Sender: TObject);
-        procedure sgGroup3MouseEnter(Sender: TObject);
         procedure sgInvoiceTrackerMouseEnter(Sender: TObject);
         procedure sgAddressBookMouseEnter(Sender: TObject);
         procedure sgOpenItemsMouseEnter(Sender: TObject);
         procedure sgAgeViewMouseEnter(Sender: TObject);
         procedure sgOpenItemsKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure sgInvoiceTrackerKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-        procedure sgGroup3KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-        procedure sgPersonKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure sgPmtTermsKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure sgPaidInfoKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure sgCoCodesKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -795,10 +780,6 @@ type
         procedure WndMessagesChromium(PassMsg: TMessage); // Chromium events
         procedure WndMessagesWindows(PassMsg: TMessage);  // Process windows close/suspend
         procedure WndMessagesExternal(PassMsg: TMessage); // Get lync call details
-        // --------------------------------------------------------------------------------
-        // Chromium component. Do not modify, rather follow Chromium implementation manual.
-        // See more: https://github.com/salvadordf/CEF4Delphi.
-        // --------------------------------------------------------------------------------
         procedure NotifyMoveOrResizeStarted;
         procedure ChromiumModalLoopOn(PassMsg: TMessage);
         procedure ChromiumModalLoopOff(PassMsg: TMessage);
@@ -855,15 +836,15 @@ type
         procedure ClearAgingSummary();
         procedure ClearOpenItemsSummary();
         procedure LoadColumnWidth(var Grid: TStringGrid);
-        procedure MapGroup3(var Grid: TStringGrid; var Source: TStringGrid);
-        procedure MapTable1(var Grid: TStringGrid; var Source: TStringGrid);
-        procedure MapTable2(var Grid: TStringGrid; var Source: TStringGrid);
-        procedure MapTable3(var Grid: TStringGrid; var Source: TStringGrid);
-        procedure MapTable4(var Grid: TStringGrid; var Source: TStringGrid);
-        function  GetData(Code: string; Table: string; Entity: string): string; // split into awaited functions (1)
+        procedure MapPersonResponsible(var Grid: TStringGrid; var Source: TStringGrid);
+        procedure MapSalesResponsible(var Grid: TStringGrid; var Source: TStringGrid);
+        procedure MapAccountType(var Grid: TStringGrid; var Source: TStringGrid);
+        procedure MapCustomerGroup(var Grid: TStringGrid; var Source: TStringGrid);
+        procedure MapPaymentTerms(var Grid: TStringGrid; var Source: TStringGrid);
         procedure OpenAddressBook_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
         procedure UpdateAddressBook_Callback(CallResponse: TCallResponse);
         procedure AddToAddressBook_Callback(CallResponse: TCallResponse);
+        procedure ReadAgeView_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
         procedure ScanOpenItems_Callback(CanMakeAge: boolean; ReadDateTime: string; CallResponse: TCallResponse);
         procedure ReadOpenItems_Callback(OpenItemsData: TOpenItemsPayLoad; CallResponse: TCallResponse);
         procedure CheckGivenPassword_Callback(CallResponse: TCallResponse);
@@ -873,7 +854,6 @@ type
         procedure RefreshInvoiceTracker_Callback(InvoiceList: TStringGrid; CallResponse: TCallResponse);
         procedure DeleteFromTrackerList_Callback(CallResponse: TCallResponse);
     public
-        procedure ReadAgeView_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
         var FIsConnected: boolean{Legacy};
         procedure TryInitConnection{Legacy};
         var FClass_A: double;
@@ -898,6 +878,7 @@ type
         procedure UpdateFControlStatusRefs(SourceGrid: TStringGrid);
         procedure SwitchTimers(State: TAppTimers);
         procedure UpdateStatusBar(Text: string);
+        procedure LoadAgeReport(SelectedCoCodes: string);
     end;
 
 
@@ -964,16 +945,13 @@ end;
 
 procedure TMainForm.CreateParams(var Params: TCreateParams);
 begin
-
     // --------------------------------------------
     // Assign task bar icon to this form,
     // so it will behave like application MainForm.
     // --------------------------------------------
-
     inherited
     CreateParams(Params);
     Params.ExStyle:=Params.ExStyle or WS_EX_APPWINDOW;
-
 end;
 
 
@@ -1067,39 +1045,34 @@ begin
     if not CallResponse.IsSucceeded then
     begin
         THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
-        MainForm.UpdateStatusBar(TStatusBar.Ready);
+        UpdateStatusBar(TStatusBar.Ready);
         AwaitForm.Hide();
         ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
 
-    // ---------------------
-    // Update age view grid.
-    // ---------------------
-
-    MainForm.sgAgeView.Freeze(True);
+    sgAgeView.Freeze(True);
     try
 
-        MainForm.sgAgeView.SqlColumns:=ReturnedData.SqlColumns;
-        MainForm.sgAgeView.RowCount  :=ReturnedData.RowCount;
-        MainForm.sgAgeView.ColCount  :=ReturnedData.ColCount;
+        sgAgeView.SqlColumns:=ReturnedData.SqlColumns;
+        sgAgeView.RowCount  :=ReturnedData.RowCount;
+        sgAgeView.ColCount  :=ReturnedData.ColCount;
 
         for var iCNT:=0 to ReturnedData.RowCount - 1 do
             for var jCNT:=0 to ReturnedData.ColCount - 1 do
-                MainForm.sgAgeView.Cells[jCNT, iCNT]:=ReturnedData.Cells[jCNT, iCNT];
+                sgAgeView.Cells[jCNT, iCNT]:=ReturnedData.Cells[jCNT, iCNT];
 
     finally
-        MainForm.sgAgeView.Freeze(False);
+        sgAgeView.Freeze(False);
         ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Age View updated.');
     end;
 
     // -------------------------
     // Update aging information.
     // -------------------------
-
     ClearAgingSummary();
-    ComputeAgeSummary(MainForm.sgAgeView); // make async!
-    ComputeRiskClass(MainForm.sgAgeView);
+    ComputeAgeSummary(sgAgeView); // make async!
+    ComputeRiskClass(sgAgeView);
     UpdateAgeSummary();
     ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Age View summary information updated.');
 
@@ -1107,44 +1080,42 @@ begin
     // Get descriptions from helper tables for given age view columns.
     // The helper grid names corresponds to age view columns.
     // ---------------------------------------------------------------
-
-    MapGroup3(MainForm.sgAgeView, MainForm.sgGroup3);
-    MapTable1(MainForm.sgAgeView, MainForm.sgPersonResp);
-    MapTable2(MainForm.sgAgeView, MainForm.sgSalesResp);
-    MapTable3(MainForm.sgAgeView, MainForm.sgAccountType);
-    MapTable4(MainForm.sgAgeView, MainForm.sgCustomerGr);
+    MapSalesResponsible(sgAgeView, sgSalesResp);
+    MapPersonResponsible(sgAgeView, sgPersonResp);
+    MapAccountType(sgAgeView, sgAccountType);
+    MapCustomerGroup(sgAgeView, sgCustomerGr);
+    MapPaymentTerms(sgAgeView, sgPmtTerms);
     ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Mapping performed.');
 
-    LoadColumnWidth(MainForm.sgAgeView);
-    SwitchTimers(TurnedOn);
+    LoadColumnWidth(sgAgeView);
+    //SwitchTimers(TurnedOn);
     MainForm.UpdateStatusBar(TStatusBar.Ready);
     AwaitForm.Hide();
     ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: VCL unlocked and repainted.');
 
+    MainForm.ClearOpenItemsSummary();
+    MainForm.sgOpenItems.Freeze(True);
     MainForm.UpdateStatusBar(TStatusBar.Downloading);
     ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Calling method "ReadOpenItemsAsync".');
 
-    MainForm.ClearOpenItemsSummary();
-//    MainForm.sgOpenItems.Freeze(True);
+    var OpenItems: IOpenItems:=TOpenItems.Create();
+    var CoCodeList:=TStringList.Create();
+    try
 
-//    var OpenItems: IOpenItems:=TOpenItems.Create();
-//    var CoCodeList:=TStringList.Create();
-//    try
-//
-//        THelpers.ReturnCoCodesList(
-//            MainForm.sgAgeView,
-//            MainForm.sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1),
-//            CoCodeList,
-//            True,
-//            'F'
-//        );
-//
-//        var CodesStringList:=THelpers.Implode(CoCodeList, ',', True);
-//        OpenItems.ReadOpenItemsAsync(sgOpenItems, CodesStringList, ReadOpenItems_Callback);
-//
-//    finally
-//        CoCodeList.Free();
-//    end;
+        THelpers.ReturnCoCodesList(
+            sgAgeView,
+            sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1),
+            CoCodeList,
+            True,
+            'F'
+        );
+
+        var CodesStringList:=THelpers.Implode(CoCodeList, ',', True);
+        OpenItems.ReadOpenItemsAsync(sgOpenItems, CodesStringList, ReadOpenItems_Callback);
+
+    finally
+        CoCodeList.Free();
+    end;
 
 end;
 
@@ -1644,51 +1615,17 @@ begin
         var NewTask: ITask:=TTask.Create(procedure
         begin
 
-            // Delay
-            Sleep(1500);
+            Sleep(500);
 
             TThread.Synchronize(nil, procedure
             begin
 
                 var OpenItems: IOpenItems:=TOpenItems.Create();
-
                 FOpenItemsUpdate:=OpenItems.GetDateTimeAwaited(DateTime);
                 FOpenItemsStatus:=OpenItems.GetStatusAwaited(FOpenItemsUpdate);
 
-                valUpdateStamp.Caption:=FOpenItemsUpdate;
+                valUpdateStamp.Caption:=FOpenItemsUpdate.Substring(0, Length(FOpenItemsUpdate) - 3);
                 valCutOffDate.Caption:='n/a';
-
-                // Load (async) default age snapshot
-//                if not(string.IsNullOrEmpty(GroupListBox.Text)) and not(string.IsNullOrEmpty(GroupListDates.Text)) then
-//                begin
-//
-//                    FGroupIdSel:=FGroupList[GroupListBox.ItemIndex, 0];
-//                    FGroupNmSel:=FGroupList[GroupListBox.ItemIndex, 1];
-//                    FAgeDateSel:=GroupListDates.Text;
-//                    sgAgeView.Enabled:=True;
-//
-//                    var OpenItems: IOpenItems:=TOpenItems.Create();
-//
-//                    FOpenItemsUpdate:=OpenItems.GetDateTimeAwaited(DateTime);
-//                    FOpenItemsStatus:=OpenItems.GetStatusAwaited(FOpenItemsUpdate);
-//
-//                    THelpers.ExecMessage(True, TMessaging.TWParams.StatusBar, TStatusBar.Loading, MainForm);
-//                    THelpers.ExecMessage(False, TMessaging.TWParams.AwaitForm, TMessaging.TAwaitForm.Show.ToString, MainForm);
-//                    MainForm.ClearAgeSummary();
-//
-//                    if string.IsNullOrEmpty(FOpenItemsUpdate) then
-//                    begin
-//                        THelpers.MsgCall(TAppMessage.Warn, 'Cannot find open items in database. Please contact IT support.');
-//                        var Debtors: IDebtors:=TDebtors.Create();
-//                        Debtors.ReadAgeViewAsync(TLoading.NullParameter, TSorting.TMode.Ranges, FGroupIdSel, FAgeDateSel, ReadAgeView_Callback);
-//                    end
-//                    else
-//                    begin
-//                        var Debtors: IDebtors:=TDebtors.Create();
-//                        Debtors.ReadAgeViewAsync(TLoading.CallOpenItems, TSorting.TMode.Ranges, FGroupIdSel, FAgeDateSel, ReadAgeView_Callback);
-//                    end;
-//
-//                end;
 
             end);
 
@@ -1705,7 +1642,6 @@ end;
 
 procedure TMainForm.UpdateFOpenItemsRefs(SourceGrid: TStringGrid);
 begin
-
     // -----------------------------------------------------------------------------------------------------------------
     // Get column reference on demand for Open Items string grid. The reason is, despite we do not change columns order
     // at run time programatically, it may be changed on server-side and that will be immediatelly reflected
@@ -1713,12 +1649,9 @@ begin
     // Additional purpose of the code is - to get the columns at once instead using ReturnColumn multiple times in given
     // method, this increase the overall performance of the code and decreases complexity.
     // -----------------------------------------------------------------------------------------------------------------
-
-    // ----------------------------------------------------------------------------------------------------------
     // The nature of open items is that, it changes continuously, but due to ERP database workload during the day
     // we have decided to update the data in Open Items table few times a day (on regular basis).
-    // ----------------------------------------------------------------------------------------------------------
-
+    // -----------------------------------------------------------------------------------------------------------------
     FOpenItemsRefs.CuidCol     :=SourceGrid.ReturnColumn(DbModel.TOpenitems.Cuid,      1, 1);
     FOpenItemsRefs.OpenAmCol   :=SourceGrid.ReturnColumn(DbModel.TOpenitems.OpenAm,    1, 1);
     FOpenItemsRefs.PmtStatCol  :=SourceGrid.ReturnColumn(DbModel.TOpenitems.PmtStat,   1, 1);
@@ -1735,24 +1668,20 @@ begin
     FOpenItemsRefs.PnoCol      :=SourceGrid.ReturnColumn(DbModel.TOpenitems.Pno,       1, 1);
     FOpenItemsRefs.PAreaCol    :=SourceGrid.ReturnColumn(DbModel.TOpenitems.PArea,     1, 1);
     FOpenItemsRefs.Text        :=SourceGrid.ReturnColumn(DbModel.TOpenitems.Txt,       1, 1);
-
 end;
 
 
 procedure TMainForm.UpdateFControlStatusRefs(SourceGrid: TStringGrid);
 begin
-
     // -----------------------------------------------------------------------
     // Get column reference of Control Status table located in General Tables.
     // Similarly to the "UpdateFOpenItemsRefs" method,
     // we use it to decrease level of usage of ReturnColumn method.
     // -----------------------------------------------------------------------
-
     FCtrlStatusRefs.Id         :=SourceGrid.ReturnColumn(TControlStatus.Id,   1, 1);
     FCtrlStatusRefs.Code       :=SourceGrid.ReturnColumn(TControlStatus.Code, 1, 1);
     FCtrlStatusRefs.Text       :=SourceGrid.ReturnColumn(TControlStatus.Text, 1, 1);
     FCtrlStatusRefs.Description:=SourceGrid.ReturnColumn(TControlStatus.Description, 1, 1);
-
 end;
 
 
@@ -1887,6 +1816,13 @@ begin
         valStatus.Caption:=Text;
     end;
 
+end;
+
+
+procedure TMainForm.LoadAgeReport(SelectedCoCodes: string);
+begin
+    var Debtors: IDebtors:=TDebtors.Create();
+    Debtors.ReadAgeViewAsync(SelectedCoCodes, 0, ReadAgeView_Callback);
 end;
 
 
@@ -2131,30 +2067,11 @@ begin
 end;
 
 
-procedure TMainForm.MapGroup3(var Grid: TStringGrid; var Source: TStringGrid);
+procedure TMainForm.MapPersonResponsible(var Grid: TStringGrid; var Source: TStringGrid);
 begin
 
-    for var iCNT: integer:=1 to Grid.RowCount - 1 do
-        for var jCNT: integer:=1 to Source.RowCount - 1 do
-        if
-        (
-            Grid.Cells[Grid.ReturnColumn(TSnapshots.fGroup3, 1, 1), iCNT] = Source.Cells[Source.ReturnColumn(TGroup3.ErpCode, 1, 1), jCNT]
-        )
-        and
-        (
-            Grid.Cells[Grid.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT] = Source.Cells[Source.ReturnColumn(TGroup3.Entity, 1, 1), jCNT]
-        )
-        then
-            Grid.Cells[Grid.ReturnColumn(TSnapshots.fGroup3, 1, 1), iCNT]:=Source.Cells[Source.ReturnColumn(TGroup3.Description, 1, 1), jCNT]
-
-end;
-
-
-procedure TMainForm.MapTable1(var Grid: TStringGrid; var Source: TStringGrid);
-begin
-
-    for var iCNT: integer:=1 to Grid.RowCount - 1 do
-        for var jCNT: integer:=1 to Source.RowCount - 1 do
+    for var iCNT:=1 to Grid.RowCount - 1 do
+        for var jCNT:=1 to Source.RowCount - 1 do
         if
         (
             Grid.Cells[Grid.ReturnColumn(TSnapshots.fPersonResponsible, 1, 1), iCNT] = Source.Cells[Source.ReturnColumn(TPersonResponsible.Id, 1, 1), jCNT]
@@ -2169,11 +2086,11 @@ begin
 end;
 
 
-procedure TMainForm.MapTable2(var Grid: TStringGrid; var Source: TStringGrid);
+procedure TMainForm.MapSalesResponsible(var Grid: TStringGrid; var Source: TStringGrid);
 begin
 
-    for var iCNT: integer:=1 to Grid.RowCount - 1 do
-        for var jCNT: integer:=1 to Source.RowCount - 1 do
+    for var iCNT:=1 to Grid.RowCount - 1 do
+        for var jCNT:=1 to Source.RowCount - 1 do
         if
         (
             Grid.Cells[Grid.ReturnColumn(TSnapshots.fSalesResponsible, 1, 1), iCNT] = Source.Cells[Source.ReturnColumn(TSalesResponsible.Id, 1, 1), jCNT]
@@ -2188,11 +2105,11 @@ begin
 end;
 
 
-procedure TMainForm.MapTable3(var Grid: TStringGrid; var Source: TStringGrid);
+procedure TMainForm.MapAccountType(var Grid: TStringGrid; var Source: TStringGrid);
 begin
 
-    for var iCNT: integer:=1 to Grid.RowCount - 1 do
-        for var jCNT: integer:=1 to Source.RowCount - 1 do
+    for var iCNT:=1 to Grid.RowCount - 1 do
+        for var jCNT:=1 to Source.RowCount - 1 do
         if
         (
             Grid.Cells[Grid.ReturnColumn(TSnapshots.fAccountType, 1, 1), iCNT] = Source.Cells[Source.ReturnColumn(TAccountType.Id, 1, 1), jCNT]
@@ -2207,11 +2124,11 @@ begin
 end;
 
 
-procedure TMainForm.MapTable4(var Grid: TStringGrid; var Source: TStringGrid);
+procedure TMainForm.MapCustomerGroup(var Grid: TStringGrid; var Source: TStringGrid);
 begin
 
-    for var iCNT: integer:=1 to Grid.RowCount - 1 do
-        for var jCNT: integer:=1 to Source.RowCount - 1 do
+    for var iCNT:=1 to Grid.RowCount - 1 do
+        for var jCNT:=1 to Source.RowCount - 1 do
         if
         (
             Grid.Cells[Grid.ReturnColumn(TSnapshots.fCustomerGroup, 1, 1), iCNT] = Source.Cells[Source.ReturnColumn(TCustomerGroup.Id, 1, 1), jCNT]
@@ -2226,81 +2143,21 @@ begin
 end;
 
 
-function TMainForm.GetData(Code: string; Table: string; Entity: string): string; // split into awaited functions
+procedure TMainForm.MapPaymentTerms(var Grid: TStringGrid; var Source: TStringGrid);
 begin
 
-    Result:=TUnknown.Unassigned;
-    var Field: string;
-
-    if (Code = ' ') or (Code = '') or (Entity = ' ') or (Entity = '') then Exit;
-
-    var DataTables:=TDataTables.Create(SessionService.FDbConnect);
-    try
-
-        try
-
-            // -------------
-            // Group3 table.
-            // -------------
-
-            if Table = TGroup3.Group3 then
-            begin
-                Field:=TGroup3.Description;
-                DataTables.CleanUp;
-                DataTables.Columns.Add(Field);
-                DataTables.CustFilter:=TSql.WHERE + TGroup3.ErpCode + TSql.EQUAL + QuotedStr(Code) + TSql._AND + TGroup3.Entity + TSql.EQUAL + QuotedStr(Entity);
-                DataTables.OpenTable(Table);
-            end;
-
-            // ----------------------------------------------
-            // Paid info table (indepenent from entity code).
-            // ----------------------------------------------
-
-            if Table = TPaidinfo.Paidinfo then
-            begin
-                Field:=TPaidinfo.Description;
-                DataTables.CleanUp;
-                DataTables.Columns.Add(Field);
-                DataTables.CustFilter:=TSql.WHERE + TPaidInfo.ErpCode + TSql.EQUAL + QuotedStr(Code);
-                DataTables.OpenTable(Table);
-            end;
-
-            // --------------------
-            // Payment terms table.
-            // --------------------
-
-            if Table = TPaymentTerms.PaymentTerms then
-            begin
-                Field:=TPaymentTerms.Description;
-                DataTables.CleanUp;
-                DataTables.Columns.Add(Field);
-                DataTables.CustFilter:=TSql.WHERE + TPaymentTerms.ErpCode + TSql.EQUAL + QuotedStr(Code) + TSql._AND + TPaymentTerms.Entity + TSql.EQUAL + QuotedStr(Entity);
-                DataTables.OpenTable(Table);
-            end;
-
-            // --------------
-            // Persons table.
-            // --------------
-
-            if Table = TPerson.Person then
-            begin
-                Field:=TPerson.Description;
-                DataTables.CleanUp;
-                DataTables.Columns.Add(Field);
-                DataTables.CustFilter:=TSql.WHERE + TPerson.ErpCode + TSql.EQUAL + QuotedStr(Code) + TSql._AND + TPerson.Entity + TSql.EQUAL + QuotedStr(Entity);
-                DataTables.OpenTable(Table);
-            end;
-
-            if DataTables.DataSet.RecordCount = 1 then
-                Result:=THelpers.OleGetStr(DataTables.DataSet.Fields[Field].Value);
-
-        except
-            Result:='';
-        end;
-
-    finally
-        DataTables.Free();
-    end;
+    for var iCNT:=1 to Grid.RowCount - 1 do
+        for var jCNT:=1 to Source.RowCount - 1 do
+        if
+        (
+            Grid.Cells[Grid.ReturnColumn(TSnapshots.fPaymentTerms, 1, 1), iCNT] = Source.Cells[Source.ReturnColumn(TPaymentTerms.ErpCode, 1, 1), jCNT]
+        )
+        and
+        (
+            Grid.Cells[Grid.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT] = Source.Cells[Source.ReturnColumn(TPaymentTerms.Entity, 1, 1), jCNT]
+        )
+        then
+            Grid.Cells[Grid.ReturnColumn(TSnapshots.fPaymentTerms, 1, 1), iCNT]:=Source.Cells[Source.ReturnColumn(TPaymentTerms.Description, 1, 1), jCNT]
 
 end;
 
@@ -2401,30 +2258,28 @@ end;
 procedure TMainForm.SetPanelBorders();
 begin
     AppHeader.PanelBorders            ($00E3B268, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PanelAgeView.PanelBorders         (clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PanelOpenItems.PanelBorders       (clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PanelAddressBook.PanelBorders     (clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PanelInvoiceTracker.PanelBorders  (clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PanelCoCodes.PanelBorders         (clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PanelControlStatus.PanelBorders   (clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PanelPaidInfo.PanelBorders        (clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PanelPerson.PanelBorders          (clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PanelPmtTerms.PanelBorders        (clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PanelGroup3.PanelBorders          (clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PanelSettingsSections.PanelBorders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PanelSettingsValues.PanelBorders  (clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PanelSalesResp.PanelBorders       (clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PanelPersonResp.PanelBorders      (clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PanelCustomerGr.PanelBorders      (clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PanelAccountType.PanelBorders     (clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PanelFSC.PanelBorders             (clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PanelLBU.PanelBorders             (clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PanelLBUGrid.PanelBorders         (clWhite, $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
-    PanelFSCGrid.PanelBorders         (clWhite, $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
-    PanelFscComment.PanelBorders      (clWhite, $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
-    PanelLbuComment.PanelBorders      (clWhite, $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
-    PanelFscDetails.PanelBorders      (clWhite, $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
-    PanelLbuDetails.PanelBorders      (clWhite, $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
+    DebtorsAgeView.PanelBorders       (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelOpenItems.PanelBorders       (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelAddressBook.PanelBorders     (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelInvoiceTracker.PanelBorders  (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelCoCodes.PanelBorders         (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelControlStatus.PanelBorders   (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelPaidInfo.PanelBorders        (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelPmtTerms.PanelBorders        (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelSettingsSections.PanelBorders(clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelSettingsValues.PanelBorders  (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelSalesResp.PanelBorders       (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelPersonResp.PanelBorders      (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelCustomerGr.PanelBorders      (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelAccountType.PanelBorders     (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelFSC.PanelBorders             (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelLBU.PanelBorders             (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelLBUGrid.PanelBorders         (clWhite,   $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
+    PanelFSCGrid.PanelBorders         (clWhite,   $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
+    PanelFscComment.PanelBorders      (clWhite,   $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
+    PanelLbuComment.PanelBorders      (clWhite,   $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
+    PanelFscDetails.PanelBorders      (clWhite,   $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
+    PanelLbuDetails.PanelBorders      (clWhite,   $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
 end;
 
 
@@ -2438,8 +2293,6 @@ begin
     sgCoCodes.SetColWidth       (10, 30, 400);
     sgControlStatus.SetColWidth (10, 30, 400);
     sgPaidInfo.SetColWidth      (10, 30, 400);
-    sgPerson.SetColWidth        (10, 30, 400);
-    sgGroup3.SetColWidth        (10, 30, 400);
     sgPmtTerms.SetColWidth      (10, 30, 400);
     sgSalesResp.SetColWidth     (10, 20, 400);
     sgPersonResp.SetColWidth    (10, 20, 400);
@@ -2459,8 +2312,6 @@ begin
     sgCoCodes.SetRowHeight       (sgCoCodes.sgRowHeight,        25);
     sgControlStatus.SetRowHeight (sgControlStatus.sgRowHeight,  25);
     sgPaidInfo.SetRowHeight      (sgPaidInfo.sgRowHeight,       25);
-    sgPerson.SetRowHeight        (sgPerson.sgRowHeight,         25);
-    sgGroup3.SetRowHeight        (sgGroup3.sgRowHeight,         25);
     sgPmtTerms.SetRowHeight      (sgPmtTerms.sgRowHeight,       25);
     sgSalesResp.SetRowHeight     (sgSalesResp.sgRowHeight,      25);
     sgPersonResp.SetRowHeight    (sgPersonResp.sgRowHeight,     25);
@@ -2542,7 +2393,6 @@ begin
         // we check whether last saved window position fits the desktop area,
         // and then setup the "Left" property.
         // ------------------------------------------------------------------
-
         if (LastLeftPos > 0) and (LastLeftPos < (Screen.DesktopWidth - MainForm.Width)) then MainForm.Left:=LastLeftPos;
 
     end
@@ -2572,15 +2422,18 @@ end;
 
 procedure TMainForm.FormShow(Sender: TObject);
 begin
-    // Execurte before window is show
     if StartupForm.IsAppInitialized then SetupMainWnd();
 end;
 
 
 procedure TMainForm.FormActivate(Sender: TObject);
 begin
-    // Execute after window is shown
+
+    if MainForm.WindowState = wsMaximized then
+        ImageGrip.Visible:=False else ImageGrip.Visible:=True;
+
     if StartupForm.IsAppInitialized then StartMainWnd();
+
 end;
 
 
@@ -2806,8 +2659,6 @@ begin
     if sgOpenItems.Focused      then sgOpenItems.ExportCSV(FileCSVExport, '|');
     if sgCoCodes.Focused        then sgCoCodes.ExportCSV(FileCSVExport, '|');
     if sgPaidInfo.Focused       then sgPaidInfo.ExportCSV(FileCSVExport, '|');
-    if sgPerson.Focused         then sgPerson.ExportCSV(FileCSVExport, '|');
-    if sgGroup3.Focused         then sgGroup3.ExportCSV(FileCSVExport, '|');
     if sgPmtTerms.Focused       then sgPmtTerms.ExportCSV(FileCSVExport, '|');
     if sgListValue.Focused      then sgListValue.ExportCSV(FileCSVExport, '|');
     if sgListSection.Focused    then sgListSection.ExportCSV(FileCSVExport, '|');
@@ -2832,8 +2683,6 @@ begin
     if sgOpenItems.Focused      then sgOpenItems.SelectAll();
     if sgCoCodes.Focused        then sgCoCodes.SelectAll();
     if sgPaidInfo.Focused       then sgPaidInfo.SelectAll();
-    if sgPerson.Focused         then sgPerson.SelectAll();
-    if sgGroup3.Focused         then sgGroup3.SelectAll();
     if sgPmtTerms.Focused       then sgPmtTerms.SelectAll();
     if sgListValue.Focused      then sgListValue.SelectAll();
     if sgListSection.Focused    then sgListSection.SelectAll();
@@ -2858,8 +2707,6 @@ begin
     if sgOpenItems.Focused      then sgOpenItems.CopyCutPaste(TActions.Copy);
     if sgCoCodes.Focused        then sgCoCodes.CopyCutPaste(TActions.Copy);
     if sgPaidInfo.Focused       then sgPaidInfo.CopyCutPaste(TActions.Copy);
-    if sgPerson.Focused         then sgPerson.CopyCutPaste(TActions.Copy);
-    if sgGroup3.Focused         then sgGroup3.CopyCutPaste(TActions.Copy);
     if sgPmtTerms.Focused       then sgPmtTerms.CopyCutPaste(TActions.Copy);
     if sgListValue.Focused      then sgListValue.CopyCutPaste(TActions.Copy);
     if sgListSection.Focused    then sgListSection.CopyCutPaste(TActions.Copy);
@@ -2884,8 +2731,6 @@ begin
     if sgOpenItems.Focused      then sgOpenItems.SetColWidth(10, 20, 400);
     if sgCoCodes.Focused        then sgCoCodes.SetColWidth(10, 20, 400);
     if sgPaidInfo.Focused       then sgPaidInfo.SetColWidth(10, 20, 400);
-    if sgPerson.Focused         then sgPerson.SetColWidth(10, 20, 400);
-    if sgGroup3.Focused         then sgGroup3.SetColWidth(10, 20, 400);
     if sgPmtTerms.Focused       then sgPmtTerms.SetColWidth(10, 20, 400);
     {if sgListValue.Focused     then sgListValue.SetColWidth(25, 20, 400);}
     {if sgListSection.Focused   then sgListSection.SetColWidth(25, 20, 400);}
@@ -2910,8 +2755,6 @@ begin
     if sgOpenItems.Focused      then THelpers.TurnRowHighlight(sgOpenItems, Action_TurnRowHighlight);
     if sgCoCodes.Focused        then THelpers.TurnRowHighlight(sgCoCodes, Action_TurnRowHighlight);
     if sgPaidInfo.Focused       then THelpers.TurnRowHighlight(sgPaidInfo, Action_TurnRowHighlight);
-    if sgPerson.Focused         then THelpers.TurnRowHighlight(sgPerson, Action_TurnRowHighlight);
-    if sgGroup3.Focused         then THelpers.TurnRowHighlight(sgGroup3, Action_TurnRowHighlight);
     if sgPmtTerms.Focused       then THelpers.TurnRowHighlight(sgPmtTerms, Action_TurnRowHighlight);
     {if sgListValue.Focused     then THelpers.TurnRowHighlight(sgListValue, Action_TurnRowHighlight);}
     {if sgListSection.Focused   then THelpers.TurnRowHighlight(sgListSection, Action_TurnRowHighlight);}
@@ -3503,50 +3346,6 @@ begin
 end;
 
 
-procedure TMainForm.Action_PaymentTermClick(Sender: TObject);
-begin
-
-    THelpers.MsgCall(
-        TAppMessage.Info,
-        'Payment term: ' +
-        MainForm.GetData(
-            sgAgeView.Cells[
-                sgAgeView.ReturnColumn(TSnapshots.fPaymentTerms, 1, 1),
-                sgAgeView.Row
-            ],
-            TPaymentTerms.PaymentTerms,
-            sgAgeView.Cells[
-                sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1),
-                sgAgeView.Row
-            ]
-        )
-    );
-
-end;
-
-
-procedure TMainForm.Action_PersonClick(Sender: TObject);
-begin
-
-    THelpers.MsgCall(
-        TAppMessage.Info,
-       'Person assigned: ' +
-        MainForm.GetData(
-            sgAgeView.Cells[
-                sgAgeView.ReturnColumn(TSnapshots.fPerson, 1, 1),
-                sgAgeView.Row
-            ],
-            TPerson.Person,
-            sgAgeView.Cells[
-                sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1),
-                sgAgeView.Row
-            ]
-        )
-    );
-
-end;
-
-
 procedure TMainForm.Action_ToExceClick(Sender: TObject);
 begin
 
@@ -3572,14 +3371,14 @@ begin
 
     if Action_HideSummary.Checked then
     begin
-        PanelAgeView.Margins.Bottom:=12;
-        Footer1.Visible:=False;
+        DebtorsAgeView.Margins.Bottom:=12;
+        DebtorsFooter.Visible:=False;
         Action_HideSummary.Checked:=False;
     end
     else
     begin
-        PanelAgeView.Margins.Bottom:=0;
-        Footer1.Visible:=True;
+        DebtorsAgeView.Margins.Bottom:=0;
+        DebtorsFooter.Visible:=True;
         Action_HideSummary.Checked:=True;
     end;
 
@@ -4068,18 +3867,6 @@ begin
 end;
 
 
-procedure TMainForm.sgPersonDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
-begin
-    sgPerson.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True);
-end;
-
-
-procedure TMainForm.sgGroup3DrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
-begin
-    sgGroup3.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True);
-end;
-
-
 procedure TMainForm.sgListSectionDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
     sgListSection.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True);
@@ -4252,20 +4039,6 @@ procedure TMainForm.sgPmtTermsKeyUp(Sender: TObject; var Key: Word; Shift: TShif
 begin
     if (Key = 67) and (Shift = [ssCtrl]) then
         sgPmtTerms.CopyCutPaste(TActions.Copy);
-end;
-
-
-procedure TMainForm.sgPersonKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-begin
-    if (Key = 67) and (Shift = [ssCtrl]) then
-        sgPerson.CopyCutPaste(TActions.Copy);
-end;
-
-
-procedure TMainForm.sgGroup3KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-begin
-    if (Key = 67) and (Shift = [ssCtrl]) then
-        sgGroup3.CopyCutPaste(TActions.Copy);
 end;
 
 
@@ -5083,21 +4856,9 @@ begin
 end;
 
 
-procedure TMainForm.sgPersonMouseEnter(Sender: TObject);
-begin
-    if (sgPerson.Enabled) and (sgPerson.Visible) then sgPerson.SetFocus();
-end;
-
-
 procedure TMainForm.sgPmtTermsMouseEnter(Sender: TObject);
 begin
     if (sgPmtTerms.Enabled) and (sgPmtTerms.Visible) then sgPmtTerms.SetFocus();
-end;
-
-
-procedure TMainForm.sgGroup3MouseEnter(Sender: TObject);
-begin
-    if (sgGroup3.Enabled) and (sgGroup3.Visible) then sgGroup3.SetFocus();
 end;
 
 
@@ -5275,38 +5036,6 @@ begin
 end;
 
 
-// GROUP3 | WHEEL DOWN
-procedure TMainForm.sgGroup3MouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-begin
-    Handled:=True;
-    sgGroup3.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
-end;
-
-
-// GROUP3 | WHEEL UP
-procedure TMainForm.sgGroup3MouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-begin
-    Handled:=True;
-    sgGroup3.Perform(WM_VSCROLL, SB_LINEUP, 0);
-end;
-
-
-// PERSON | WHEEL DOWN
-procedure TMainForm.sgPersonMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-begin
-    Handled:=True;
-    sgPerson.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
-end;
-
-
-// PERSON | WHEEL UP
-procedure TMainForm.sgPersonMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-begin
-    Handled:=True;
-    sgPerson.Perform(WM_VSCROLL, SB_LINEUP, 0);
-end;
-
-
 // CONTROL STATUS | WHEEL DOWN
 procedure TMainForm.sgControlStatusMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
@@ -5392,25 +5121,25 @@ end;
 
 procedure TMainForm.imgGetAgingReportMouseEnter(Sender: TObject);
 begin
-    Label1.Font.Color:=AppButtonTxtSelected;
+    txtGetAgingReport.Font.Color:=AppButtonTxtSelected;
 end;
 
 
 procedure TMainForm.imgGetAgingReportMouseLeave(Sender: TObject);
 begin
-    Label1.Font.Color:=AppButtonTxtNormal;
+    txtGetAgingReport.Font.Color:=AppButtonTxtNormal;
 end;
 
 
 procedure TMainForm.imgRefreshReportMouseEnter(Sender: TObject);
 begin
-    Label5.Font.Color:=AppButtonTxtSelected;
+    txtRefreshReport.Font.Color:=AppButtonTxtSelected;
 end;
 
 
 procedure TMainForm.imgRefreshReportMouseLeave(Sender: TObject);
 begin
-    Label5.Font.Color:=AppButtonTxtNormal;
+    txtRefreshReport.Font.Color:=AppButtonTxtNormal;
 end;
 
 

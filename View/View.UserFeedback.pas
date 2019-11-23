@@ -26,7 +26,7 @@ uses
     Unity.Enums,
     Unity.Grid,
     Unity.Panel,
-    Unity.Records;
+    Unity.Records, Vcl.Imaging.pngimage;
 
 
 type
@@ -35,12 +35,13 @@ type
     TFeedbackForm = class(TForm)
         ReportMemo: TMemo;
         btnSendReport: TSpeedButton;
-    txtWords: TLabel;
+        txtWords: TLabel;
         TotalWords: TLabel;
         PanelClient: TPanel;
         PanelReportMemo: TPanel;
-        PanelArea: TPanel;
         PanelBottom: TPanel;
+        ImageGrip: TImage;
+        PanelText: TPanel;
         procedure FormCreate(Sender: TObject);
         procedure ReportMemoKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure btnSendReportClick(Sender: TObject);

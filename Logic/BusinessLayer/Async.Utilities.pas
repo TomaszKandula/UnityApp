@@ -148,7 +148,7 @@ type
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function GetCompanyCodesAwaited(): TStringGrid;
+        procedure GetCompanyCodesAwaited(var SelectedCoCodes: TStringList);
 
     end;
 
@@ -234,7 +234,7 @@ type
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function GetCompanyCodesAwaited(): TStringGrid;
+        procedure GetCompanyCodesAwaited(var SelectedCoCodes: TStringList);
 
     end;
 
@@ -749,27 +749,39 @@ begin
 end;
 
 
-function TUtilities.GetCompanyCodesAwaited(): TStringGrid;
+procedure TUtilities.GetCompanyCodesAwaited(var SelectedCoCodes: TStringList);
 begin
 
-    var NewResult:=TStringGrid.Create(nil); {This will be removed by ARC, do not free it manually}
+    var TempList:=TStringList.Create();
+    try
 
-    var NewTask: ITask:=TTask.Create(procedure
-    begin
+        var NewTask: ITask:=TTask.Create(procedure
+        begin
 
-        var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
-        try
-            DataTables.StrSQL:='select distinct CoCode from Customer.CompanyData';
-            DataTables.SqlToGrid(NewResult, DataTables.ExecSQL, False, False);
-        finally
-            DataTables.Free();
-        end;
+            var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
+            var StringGrid:=TStringGrid.Create(nil);
+            try
 
-    end);
+                DataTables.StrSQL:='select distinct CoCode, CoName from Customer.CompanyData';
+                DataTables.SqlToGrid(StringGrid, DataTables.ExecSQL, False, False);
 
-    NewTask.Start();
-    TTask.WaitForAll(NewTask);
-    Result:=NewResult;
+                for var iCNT:=1{Skip header} to StringGrid.RowCount - 1 do
+                    TempList.Add(StringGrid.Cells[1{CoCode}, iCNT] + ' - ' + StringGrid.Cells[2{CoName}, iCNT]);
+
+            finally
+                DataTables.Free();
+                StringGrid.Free();
+            end;
+
+        end);
+
+        NewTask.Start();
+        TTask.WaitForAll(NewTask);
+        SelectedCoCodes.AddStrings(TempList);
+
+    finally
+        TempList.Free();
+    end;
 
 end;
 
