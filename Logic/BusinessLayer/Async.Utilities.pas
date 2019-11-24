@@ -33,11 +33,6 @@ type
 
 
     /// <summary>
-    /// Callback signature (delegate) for getting results for checking SQL connection.
-    /// </summary>
-    TCheckServerConn = procedure(IsConnected: boolean; CallResponse: TCallResponse) of object;
-
-    /// <summary>
     /// Callback signature (delegate) for getting results from sending user email with feedback message.
     /// </summary>
     TSendUserFeedback = procedure(CallResponse: TCallResponse) of object;
@@ -70,15 +65,6 @@ type
 
     IUtilities = interface(IInterface)
     ['{0B054CF4-86F7-4770-957B-3026BE491B5A}']
-
-        /// <summary>
-        /// Async. checking connection with SQL database.
-        /// Notification is always executed in main thread as long as callback is provided.
-        /// </summary>
-        /// <remarks>
-        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
-        /// </remarks>
-        procedure CheckServerConnAsync(IsConnected: boolean; Callback: TCheckServerConn);
 
         /// <summary>
         /// Async. sending email to CI Team with user feedback.
@@ -164,15 +150,6 @@ type
     TUtilities = class(TInterfacedObject, IUtilities)
     {$TYPEINFO ON}
     public
-
-        /// <summary>
-        /// Async. checking connection with SQL database.
-        /// Notification is always executed in main thread as long as callback is provided.
-        /// </summary>
-        /// <remarks>
-        /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
-        /// </remarks>
-        procedure CheckServerConnAsync(IsConnected: boolean; Callback: TCheckServerConn);
 
         /// <summary>
         /// Async. sending email to CI Team with user feedback.
@@ -261,7 +238,7 @@ implementation
 uses
     Handler.Database{Legacy},
     Handler.Sql{Legacy},
-    Unity.Sql,
+    Unity.Sql{Legacy},
     Unity.Helpers,
     Unity.Settings,
     Unity.StatusBar,
@@ -272,61 +249,6 @@ uses
     Sync.Documents,
     Bcrypt,
     DbModel{Legacy};
-
-
-procedure TUtilities.CheckServerConnAsync(IsConnected: boolean; Callback: TCheckServerConn);
-begin
-
-    var NewTask: ITask:=TTask.Create(procedure
-    begin
-
-        var FIsConnected: boolean;
-        var CallResponse: TCallResponse;
-        try
-
-            var DataBase: TDataBase:=TDataBase.Create(False);
-            try
-
-                if (not(IsConnected)) and (DataBase.Check = 0) then
-                begin
-                    FIsConnected:=True;
-                    CallResponse.IsSucceeded:=True;
-                    CallResponse.LastMessage:='[CheckServerConnAsync]: Connection with SQL Server database has been re-established.';
-                    ThreadFileLog.Log(CallResponse.LastMessage);
-                end;
-
-                if DataBase.Check <> 0 then
-                begin
-                    FIsConnected:=False;
-                    CallResponse.IsSucceeded:=True;
-                    CallResponse.LastMessage:='[CheckServerConnAsync]: Connection with SQL Server database has been lost, waiting to reconnect... .';
-                    ThreadFileLog.Log(CallResponse.LastMessage);
-                end;
-
-            finally
-                DataBase.Free;
-            end;
-
-        except
-            on E: Exception do
-            begin
-                CallResponse.IsSucceeded:=False;
-                CallResponse.LastMessage:='[CheckServerConnAsync]: Cannot execute. Error has been thrown: ' + E.Message;
-                ThreadFileLog.Log(CallResponse.LastMessage);
-            end;
-
-        end;
-
-        TThread.Synchronize(nil, procedure
-        begin
-            if Assigned(Callback) then Callback(FIsConnected, CallResponse);
-        end);
-
-    end);
-
-    NewTask.Start;
-
-end;
 
 
 procedure TUtilities.SendFeedbackAsync(Text: string; Callback: TSendUserFeedback);
@@ -347,7 +269,6 @@ begin
             // --------------------------
             // Get and set email details.
             // --------------------------
-
             if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerNTLM  then
             begin
                 Mail.XMailer:=Settings.GetStringValue(TConfigSections.MailerNTLM, 'FROM',     '');
@@ -370,7 +291,6 @@ begin
             // ----------------------------------
             // Plain text to HTML using template.
             // ----------------------------------
-
             var Transfer: string:=Text;
             Transfer:=StringReplace(Transfer, TChars.CRLF, '<br>', [rfReplaceAll]);
 
@@ -566,8 +486,6 @@ begin
 
     NewTask.Start();
     TTask.WaitForAll(NewTask);
-
-    {If under ARC / do not manually release it}
     Result:=CompanyDetails;
 
 end;

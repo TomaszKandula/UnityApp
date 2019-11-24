@@ -50,10 +50,10 @@ type
         const FBackGreen  = $00ACAC59; //rgb 59ACAC => bgr ACAC59
         var SqlColumns: TALists;
         var UpdatedRowsHolder: TAIntigers;
-        property  HideFocusRect: boolean read FHideFocusRect write FHideFocusRect;
-        property  ToExcelResult: string read FToExcelResult;
-        property  CsvImportResult: string read FCsvImportResult;
-        property  CsvExportResult: string read FCsvExportResult;
+        property HideFocusRect: boolean read FHideFocusRect write FHideFocusRect;
+        property ToExcelResult: string read FToExcelResult;
+        property CsvImportResult: string read FCsvImportResult;
+        property CsvExportResult: string read FCsvExportResult;
         procedure SetUpdatedRow(Row: integer);
         procedure RecordRowsAffected;
         procedure CopyCutPaste(Mode: TActions; FirstColOnly: boolean = False);
@@ -64,6 +64,8 @@ type
         procedure ColorValues(ARow: integer; ACol: integer; Rect: TRect; NegativeColor: TColor; PositiveColor: TColor);
         procedure SetColWidth(FirstDefault: integer; AddSpace: integer; Limit: integer);
         procedure SetRowHeight(RowHeight, Header: integer);
+        procedure HideThisColumns();
+        procedure ShowAllColumns();
 	    procedure MSort(const SortCol: integer; const datatype: TDataType; const ascending: boolean);
         procedure AutoThumbSize;
         procedure SaveLayout(ColWidthName: string; ColOrderName: string; ColNames: string; ColPrefix: string);
@@ -259,8 +261,8 @@ begin
             Selection:=TGridRect(Rect(CLeft, RTop, CLeft + NewCols, NewRows));
 
         finally
-            TempRows.Free;
-            TempCols.Free;
+            TempRows.Free();
+            TempCols.Free();
         end;
 
     end;
@@ -468,8 +470,8 @@ begin
 
     if Row > 0 then
         SetLength(tblArray, RowCount)
-            else
-                Exit;
+    else
+        Exit();
 
     ColWidths[0]:=FirstDefault;
 
@@ -481,15 +483,15 @@ begin
         for var iCNT: integer:=0 to RowCount - 1 do tblArray[iCNT]:=Canvas.TextWidth(Cells[jCNT, iCNT]);
 
         // Return highest value
-        if not (ColWidths[jCNT] = -1) then { Skip hidden columns }
+        if not (ColWidths[jCNT] = -1) then {Skip hidden columns}
         begin
 
             NewWidth:=MaxIntValue(tblArray) + AddSpace;
 
             if NewWidth < Limit then
                 ColWidths[jCNT]:=NewWidth
-                    else
-                        ColWidths[jCNT]:=Limit;
+            else
+                ColWidths[jCNT]:=Limit;
 
         end;
 
@@ -504,6 +506,23 @@ procedure TStringGrid.SetRowHeight(RowHeight: Integer; Header: Integer);
 begin
     DefaultRowHeight:=RowHeight;
     RowHeights[0]:=Header;
+end;
+
+
+procedure TStringGrid.HideThisColumns();
+begin
+    ColWidths[Col]:=-1;
+end;
+
+
+procedure TStringGrid.ShowAllColumns();
+begin
+
+    if goRowSelect in Options then Exit();
+
+    for var iCNT:=1{Skip lp} to ColCount - 1 do
+        if ColWidths[iCNT] = -1 then ColWidths[iCNT]:=100;
+
 end;
 
 

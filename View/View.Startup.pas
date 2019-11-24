@@ -184,12 +184,12 @@ end;
 procedure TStartupForm.ApplicationStart();
 begin
 
-    // -----------------------------------------------------------------------------------------------------
-    // We may operate on visual components from worker thread instead of main thread. Although, VCL is not
-    // thread safe we should refrain from doing that, but as long as we do not display visual content and/or
-    // update its visual state, we can safely perform operations on VCLs from worker thread.
-    // -----------------------------------------------------------------------------------------------------
-
+    // -------------------------------------------------------------------------------
+    // We may operate on visual components from worker thread instead of main thread.
+    // Although, VCL is not thread safe we should refrain from doing that,
+    // but as long as we do not display visual content and/or update its visual state,
+    // we can safely perform operations on VCLs from worker thread.
+    // -------------------------------------------------------------------------------
     if FIsAppInitialized then Exit();
 
     if not Assigned(MainAppForm) then
@@ -204,7 +204,6 @@ begin
         // -------------------------------
         // Get captions from app settings.
         // -------------------------------
-
         Sleep(50);
         ChangeProgressBar(5, 'Initializing...', ProgressBar);
 
@@ -239,41 +238,9 @@ begin
             ChangeProgressBar(33, 'Connecting to database... done.', ProgressBar);
         end;
 
-        // --------------------------------------
-        // Load/Sync all html layouts for emails.
-        // --------------------------------------
-
-        Sleep(250);
-        ChangeProgressBar(66, 'Synchronizing email templates...', ProgressBar);
-
-        var Settings: ISettings:=TSettings.Create();
-        if not GetHtmlLayoutsSync(Settings.UrlLayoutsLst + TCommon.LayoutPak, Settings.DirLayouts + TCommon.LayoutPak, Settings.DirLayouts) then
-        begin
-            ThreadFileLog.Log('Critical error has occured [GetHtmlLayoutsSync]: ' + LastErrorMsg);
-            THelpers.MsgCall(TAppMessage.Error, 'An error occured [GetHtmlLayoutsSync]: ' + LastErrorMsg + '. Please contact your administrator. Application will be closed.');
-            ExitAppSync();
-        end
-        else
-        begin
-
-            if THelpers.UnzippLayouts(Settings.DirLayouts + TCommon.LayoutPak, Settings.DirLayouts) then
-            begin
-                ThreadFileLog.Log('Html layouts has been synchronized.');
-                ChangeProgressBar(75, 'Synchronizing email templates... done.', ProgressBar);
-            end
-            else
-            begin
-                ThreadFileLog.Log('[GetHtmlLayoutsSync]: Cannot unzipp resource file.');
-                THelpers.MsgCall(TAppMessage.Error, 'An error occured [GetHtmlLayoutsSync]: Cannot uznipp resource file. Please contact your administrator. Application will be closed.');
-                ExitAppSync();
-            end;
-
-        end;
-
         // -------------------------------
         // Load all helper general tables.
         // -------------------------------
-
         Sleep(250);
         ChangeProgressBar(85, 'Loading general tables...', ProgressBar);
 
@@ -292,7 +259,6 @@ begin
         // ----------------------------------------
         // Hide startup view and display main view.
         // ----------------------------------------
-
         Sleep(50);
         ChangeProgressBar(100, 'Finalization...', ProgressBar);
 
@@ -322,14 +288,12 @@ begin
         // ---------------------
         // Application captions.
         // ---------------------
-
         MainAppForm.Caption:=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'WND_MAIN', TCommon.APPCAPTION);
         MainAppForm.valUpdateStamp.Caption:='';
 
         // ----------------------------------
         // Icon used in main aging view grid.
         // ----------------------------------
-
         MainAppForm.FGridPicture:=TImage.Create(MainForm);
         MainAppForm.FGridPicture.SetBounds(0, 0, 16, 16);
         THelpers.LoadImageFromStream(View.Main.MainForm.FGridPicture, Settings.GetPathGridImage);
@@ -337,14 +301,12 @@ begin
         // ---------------------------------------------------------------------
         // Setup timers, some of them may be removed after introducing REST API.
         // ---------------------------------------------------------------------
-
         MainAppForm.TimerFollowUp.Interval:=Settings.GetIntegerValue(TConfigSections.TimersSettings, 'FOLLOWUP_CHECKER', 1800000{30 minutes});
         MainAppForm.TimerCustOpenItems.Interval:=Settings.GetIntegerValue(TConfigSections.TimersSettings, 'OI_LOADER', 300000{5 minutes});
 
         // ---------------------------------------------
         // Setup risk classes with proper number format.
         // ---------------------------------------------
-
         if FormatSettings.DecimalSeparator = ',' then
         begin
 
@@ -388,7 +350,6 @@ begin
         // -----------------------------------
         // Tabsheet captions and aging ranges.
         // -----------------------------------
-
         MainAppForm.ShapeSelectionCap.ShapeText(10, 1, 'SELECTION', [fsBold], 'Tahoma', 10, clWhite);
         MainAppForm.ShapeRiskClassCap.ShapeText(10, 1, 'RISK CLASS', [fsBold], 'Tahoma', 10, clWhite);
         MainAppForm.ShapeDetailsCap.ShapeText(10, 1, 'AGING DETAILS', [fsBold], 'Tahoma', 10, clWhite);

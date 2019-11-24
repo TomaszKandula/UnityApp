@@ -132,6 +132,16 @@ type
     end;
 
     /// <summary>
+    /// Carries a group of variables for update ageing summary.
+    /// </summary>
+    TAgingPayLoad = record
+
+
+
+
+    end;
+
+    /// <summary>
     /// Carries a group of variables for update open items summary.
     /// </summary>
     TOpenItemsPayLoad = record

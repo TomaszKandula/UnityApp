@@ -77,6 +77,14 @@ type
         procedure AddToAddressBookAsync(SourceGrid: TStringGrid; Callback: TAddToAddressBook);
 
         /// <summary>
+        /// Allow to asynchronously remove data from Address Book for given Scuid. There is no separate notification.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        function DelFromAddressBookAwaited(Scuid: string): boolean;
+
+        /// <summary>
         /// Load async. address book customer data only for given SCUID. There is no separate notification.
         /// </summary>
         /// <remarks>
@@ -116,6 +124,14 @@ type
         procedure AddToAddressBookAsync(SourceGrid: TStringGrid; Callback: TAddToAddressBook);
 
         /// <summary>
+        /// Allow to asynchronously remove data from Address Book for given Scuid. There is no separate notification.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        function DelFromAddressBookAwaited(Scuid: string): boolean;
+
+        /// <summary>
         /// Load async. address book customer data only for given SCUID. There is no separate notification.
         /// </summary>
         /// <remarks>
@@ -131,7 +147,7 @@ implementation
 
 uses
     Handler.Database{Legacy},
-    Unity.Sql,
+    Unity.Sql{Legacy},
     Unity.Helpers,
     Unity.Settings,
     Unity.StatusBar,
@@ -435,6 +451,47 @@ begin
 end;
 
 
+function TAddressBook.DelFromAddressBookAwaited(Scuid: string): boolean;
+begin
+
+    var NewResult: boolean;
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
+        try
+
+            try
+
+                NewResult:=DataTables.DeleteRecord(
+                    DbModel.TAddressBook.AddressBook,
+                    DbModel.TAddressBook.Scuid,
+                    DataTables.CleanStr(Scuid, False),
+                    True
+                );
+
+            except
+                on E: Exception do
+                begin
+                    ThreadFileLog.Log('[DelFromAddressBookAwaited]: Cannot execute. Error has been thrown: ' + E.Message);
+                end;
+
+            end;
+
+        finally
+            DataTables.Free();
+        end;
+
+    end);
+
+    NewTask.Start();
+    TTask.WaitForAll(NewTask);
+    Result:=NewResult;
+
+end;
+
+
 function TAddressBook.GetCustomerDetailsAwaited(SCUID: string): TCustomerDetails;
 begin
 
@@ -483,8 +540,6 @@ begin
 
     NewTask.Start();
     TTask.WaitForAll(NewTask);
-
-    {If under ARC / do not manually release it}
     Result:=CustomerDetails;
 
 end;

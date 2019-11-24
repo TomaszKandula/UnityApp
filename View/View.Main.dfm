@@ -9532,7 +9532,7 @@ object MainForm: TMainForm
     Margins.Top = 10
     Margins.Right = 10
     Margins.Bottom = 0
-    ActivePage = TabSheet1
+    ActivePage = TabSheet2
     Align = alClient
     DoubleBuffered = True
     Font.Charset = DEFAULT_CHARSET
@@ -10232,19 +10232,6 @@ object MainForm: TMainForm
             ParentColor = False
             ParentFont = False
           end
-          object txtRefreshReport: TLabel
-            Left = 126
-            Top = 82
-            Width = 38
-            Height = 13
-            Caption = 'Refresh'
-            Font.Charset = DEFAULT_CHARSET
-            Font.Color = 5592405
-            Font.Height = -11
-            Font.Name = 'Tahoma'
-            Font.Style = []
-            ParentFont = False
-          end
           object txtAgeSorting: TLabel
             Left = 206
             Top = 34
@@ -10268,7 +10255,7 @@ object MainForm: TMainForm
             Shape = bsLeftLine
           end
           object bevelVertLine: TBevel
-            Left = 271
+            Left = 277
             Top = 73
             Width = 9
             Height = 17
@@ -10276,10 +10263,26 @@ object MainForm: TMainForm
           end
           object bevelHorzLine: TBevel
             Left = 170
-            Top = 90
-            Width = 102
+            Top = 89
+            Width = 108
             Height = 8
             Shape = bsTopLine
+          end
+          object txtRefreshReport: TLabel
+            Left = 126
+            Top = 82
+            Width = 38
+            Height = 13
+            Caption = 'Refresh'
+            Color = clWhite
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = 5592405
+            Font.Height = -11
+            Font.Name = 'Tahoma'
+            Font.Style = []
+            ParentColor = False
+            ParentFont = False
+            Transparent = True
           end
           object cbAgeSorting: TComboBox
             Left = 206
@@ -11103,6 +11106,7 @@ object MainForm: TMainForm
               2831E4BC743F6C29E132C75EC48246D28B99E9A6B17EB0CA46ACCD95085C3196
               076C435AE41710FB3ED47BA99BC74A287530F65566FD3221E136393EDF433420
               F6B5AC86786FBC0BFF1F9B34A02CDB4D541F0000000049454E44AE426082}
+            OnClick = btnReloadClick
             OnMouseEnter = btnReloadMouseEnter
             OnMouseLeave = btnReloadMouseLeave
           end
@@ -15370,7 +15374,7 @@ object MainForm: TMainForm
         Margins.Top = 0
         Margins.Right = 17
         Margins.Bottom = 17
-        ActivePage = Page1
+        ActivePage = Page2
         Align = alClient
         TabOrder = 1
         object Page1: TTabSheet
@@ -19436,7 +19440,7 @@ object MainForm: TMainForm
   object TimerCurrentTime: TTimer
     Enabled = False
     OnTimer = TimerCurrentTimeTimer
-    Left = 1024
+    Left = 1048
     Top = 512
   end
   object TimerUpTime: TTimer
@@ -19461,8 +19465,8 @@ object MainForm: TMainForm
     Enabled = False
     Interval = 10000
     OnTimer = TimerCustOpenItemsTimer
-    Left = 968
-    Top = 576
+    Left = 936
+    Top = 584
   end
   object PopupAgeView: TPopupMenu
     MenuAnimation = [maLeftToRight]
@@ -19573,10 +19577,6 @@ object MainForm: TMainForm
         Caption = 'INF4'
         OnClick = Action_INF4_FilterClick
       end
-      object Action_Gr3_Filter: TMenuItem
-        Caption = 'Group 3'
-        OnClick = Action_Gr3_FilterClick
-      end
       object N24: TMenuItem
         Caption = '-'
       end
@@ -19630,49 +19630,6 @@ object MainForm: TMainForm
         Caption = 'Free 3'
         OnClick = Action_Free3Click
       end
-      object N12: TMenuItem
-        Caption = '-'
-      end
-      object Action_Ranges: TMenuItem
-        Caption = 'Ranges'
-        Enabled = False
-        object Action_Range1: TMenuItem
-          Caption = 'Range1'
-          OnClick = Action_Range1Click
-        end
-        object Action_Range2: TMenuItem
-          Caption = 'Range2'
-          OnClick = Action_Range2Click
-        end
-        object Action_Range3: TMenuItem
-          Caption = 'Range3'
-          OnClick = Action_Range3Click
-        end
-        object Action_Range4: TMenuItem
-          Caption = 'Range4'
-          OnClick = Action_Range4Click
-        end
-        object Action_Range5: TMenuItem
-          Caption = 'Range5'
-          OnClick = Action_Range5Click
-        end
-        object Action_Range6: TMenuItem
-          Caption = 'Range6'
-          OnClick = Action_Range6Click
-        end
-      end
-      object Action_Amounts: TMenuItem
-        Caption = 'Amounts'
-        Enabled = False
-        object Action_TotalAmount: TMenuItem
-          Caption = 'Total Amount'
-          OnClick = Action_TotalAmountClick
-        end
-        object Action_Overdues: TMenuItem
-          Caption = 'Overdue'
-          OnClick = Action_OverduesClick
-        end
-      end
     end
     object Action_RemoveFilters: TMenuItem
       Bitmap.Data = {
@@ -19717,54 +19674,24 @@ object MainForm: TMainForm
       ShortCut = 16454
       OnClick = Action_SearchClick
     end
-    object N5: TMenuItem
-      Caption = '-'
-    end
-    object Action_QuickReporting: TMenuItem
-      Bitmap.Data = {
-        36030000424D3603000000000000360000002800000010000000100000000100
-        18000000000000030000C40E0000C40E00000000000000000000D8D8D8C5C5C5
-        C5C5C5C5C5C5C5C5C5C5C5C5C6C6C6C7C7C7C7C7C7C7C7C7C6C6C6CCCCCCFFFF
-        FFFFFFFFFFFFFFFFFFFFC5C5C5E7E7E7F6F6F6F6F6F6F6F6F6F8F8F8F6F1EEE6
-        E4E3E4E4E4E5E5E5E5E5E5E3E3E2E4E4E4FFFFFFFFFFFFFFFFFFC5C5C5F6F6F6
-        ECECEDE2E2E3E4E4E5DDD9D777AAC3C4E2EFE5E5EAD3D3D4D3D3D4D8D8D9E0E0
-        E0FDFDFDFFFFFFFFFFFFC5C5C5F5F5F5EBEBECE1E1E2E1E1E2FBF3F057C8F5D5
-        9433DCC19CD3D9E4D2D2D4D7D7D8E1E1E1FDFDFDFFFFFFFFFFFFC5C5C5F4F4F4
-        F5F5F5F8F8F8F8F8F8F9FBFFF5D5ADD79432D89937DFC5A1E7EEF7E6E6E6E0E0
-        E0FDFDFDFFFFFFFFFFFFC5C5C5F6F6F5E2E2E3CDCDCFCFCFD1CFCFD1D0D5E0D1
-        BCA1E2A639E5AB3DC8AE8DCAD0DCE2E2E2FDFDFDFFFFFFFFFFFFC5C5C5F4F4F4
-        F5F5F5F8F8F7F8F8F7F8F8F7F8F8F7F9FFFFE9D4B7D89935E4AA3CDEC4A1E1E7
-        F1FDFDFDFFFFFFFFFFFFC5C5C5F5F5F5EBEBECE2E2E3E3E3E4E3E3E4E3E3E4E3
-        E3E4E5EBF4D9C3A8E3A83AE4AB3BD9BE9CFFFFFFFFFFFFFFFFFFC5C5C5F5F5F5
-        EBEBECE1E1E2E2E2E3E2E2E3E2E2E3E2E2E3E2E2E3E3E9F3E0CBAFE1A738E3A9
-        3AECD3AFFFFFFFFFFFFFC5C5C5F4F4F4F5F5F5F8F8F8F8F8F8F8F8F8F8F8F7F4
-        F4F4F4F4F4F4F4F4F6FCFFE7D1B5DEA237D29130F0D4A6FFFFFFC5C5C5F6F6F5
-        E2E2E3CDCDCFCFCFD1CECED1CECED1F5F5F5F3F3F3F3F3F3F3F3F3F5FBFFE8D2
-        B4D8942CD7D0DAB4B5F9C5C5C5F4F4F4F5F5F5F8F8F7F8F8F7F8F8F7F7F7F7F3
-        F3F3F3F3F3F3F3F3F5F5F5F5F5F5F7FBFEFAFAFA3234EA4141E6C5C5C5F5F5F5
-        EBEBECE2E2E3E3E3E4E2E2E4E2E2E3F4F4F4F3F3F3F4F4F4DDDDDDDDDDDDD9D9
-        D9FFFFFFCECEF9D8D8FAC3C3C3F5F5F5EBEBECE1E1E2E2E2E3E2E2E3E2E2E3F4
-        F4F4F4F4F4E3E3E3CBCBCBC6C6C6F9F9F9FFFFFFFFFFFFFFFFFFD3D3D3F2F2F2
-        F4F4F4F4F4F4F4F4F4F4F4F4F4F4F4F3F3F3F4F4F4E4E4E4C4C4C4FBFBFBFFFF
-        FFFFFFFFFFFFFFFFFFFFFFFFFFF6F6F6F2F2F2F3F3F3F3F3F3F3F3F3F3F3F3F3
-        F3F3F4F4F4E4E4E4F9F9F9FFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
-      Caption = 'Quick Reporting'
-      object Action_ToExce: TMenuItem
-        Caption = 'Generate Excel Report'
-        ShortCut = 16467
-        OnClick = Action_ToExceClick
-      end
-      object Action_ExportCSV: TMenuItem
-        Caption = 'Export to CSV'
-        OnClick = Action_ExportCSVClick
-      end
-    end
     object N13: TMenuItem
       Caption = '-'
     end
     object Action_ViewOptions: TMenuItem
       Caption = 'Age View Options'
       OnClick = Action_ViewOptionsClick
+      object Action_ExportCSV: TMenuItem
+        Caption = 'Export to CSV'
+        OnClick = Action_ExportCSVClick
+      end
+      object Action_ToExce: TMenuItem
+        Caption = 'Generate Excel Report'
+        ShortCut = 16467
+        OnClick = Action_ToExceClick
+      end
+      object N5: TMenuItem
+        Caption = '-'
+      end
       object Action_RowHighlight: TMenuItem
         Caption = 'Row highlight'
         OnClick = Action_RowHighlightClick
@@ -19782,8 +19709,22 @@ object MainForm: TMainForm
         OnClick = Action_FollowUpColorsClick
       end
     end
+    object N12: TMenuItem
+      Caption = '-'
+    end
+    object Action_HideThisColumn: TMenuItem
+      Caption = 'Hide this column'
+      OnClick = Action_HideThisColumnClick
+    end
+    object Action_ShowAllColumns: TMenuItem
+      Caption = 'Show all columns'
+      OnClick = Action_ShowAllColumnsClick
+    end
+    object N22: TMenuItem
+      Caption = '-'
+    end
     object Action_AutoColumnSize: TMenuItem
-      Caption = 'Auto column width'
+      Caption = 'Reset column widths'
       OnClick = Action_AutoColumnSizeClick
     end
   end
@@ -29353,13 +29294,6 @@ object MainForm: TMainForm
     Left = 1312
     Top = 576
   end
-  object TimerConnection: TTimer
-    Enabled = False
-    Interval = 60000
-    OnTimer = TimerConnectionTimer
-    Left = 1064
-    Top = 576
-  end
   object PopupBook: TPopupMenu
     MenuAnimation = [maLeftToRight]
     OnPopup = PopupBookPopup
@@ -29561,8 +29495,8 @@ object MainForm: TMainForm
     Enabled = False
     Interval = 1800000
     OnTimer = TimerFollowUpTimer
-    Left = 1104
-    Top = 512
+    Left = 1048
+    Top = 584
   end
   object Chromium: TChromium
     Left = 871

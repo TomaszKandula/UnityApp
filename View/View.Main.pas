@@ -265,10 +265,8 @@ type
         TrayIcon: TTrayIcon;
         Action_ShowRegistered: TMenuItem;
         N8: TMenuItem;
-        TimerConnection: TTimer;
         N9: TMenuItem;
         Action_FilterINF7: TMenuItem;
-        N5: TMenuItem;
         N7: TMenuItem;
         N6: TMenuItem;
         Action_AddToBook: TMenuItem;
@@ -328,7 +326,6 @@ type
         Action_FollowUp_Filter: TMenuItem;
         Action_GroupFollowUp: TMenuItem;
         Action_INF4_Filter: TMenuItem;
-        Action_Gr3_Filter: TMenuItem;
         Action_HideSummary: TMenuItem;
         Action_ExportCSV: TMenuItem;
         Action_RemoveFilters: TMenuItem;
@@ -354,20 +351,9 @@ type
         hShapeEye: TShape;
         N20: TMenuItem;
         N21: TMenuItem;
-        Action_Ranges: TMenuItem;
-        Action_Range1: TMenuItem;
-        Action_Range2: TMenuItem;
-        Action_Range3: TMenuItem;
-        Action_Range4: TMenuItem;
-        Action_Range5: TMenuItem;
-        Action_Range6: TMenuItem;
-        Action_Amounts: TMenuItem;
-        Action_TotalAmount: TMenuItem;
-        Action_Overdues: TMenuItem;
         Action_Free2: TMenuItem;
         Action_ViewOptions: TMenuItem;
         N16: TMenuItem;
-        Action_QuickReporting: TMenuItem;
         imgStart: TImage;
         btnStart: TPanel;
         txtStart: TLabel;
@@ -423,7 +409,6 @@ type
         shapeFrame: TShape;
         Action_Free3: TMenuItem;
         N4: TMenuItem;
-        N12: TMenuItem;
         N23: TMenuItem;
         Action_SalesResp: TMenuItem;
         Action_CustomerGrp: TMenuItem;
@@ -514,6 +499,11 @@ type
         bevelVertLine: TBevel;
         bevelHorzLine: TBevel;
         ImageGrip: TImage;
+        Action_HideThisColumn: TMenuItem;
+        Action_ShowAllColumns: TMenuItem;
+        N12: TMenuItem;
+        N5: TMenuItem;
+        N22: TMenuItem;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
@@ -593,7 +583,6 @@ type
         procedure TabSheet4Show(Sender: TObject);
         procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure TrayIconDblClick(Sender: TObject);
-        procedure TimerConnectionTimer(Sender: TObject);
         procedure sgAgeViewDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
         procedure sgAgeViewDblClick(Sender: TObject);
         procedure Action_ShowRegisteredClick(Sender: TObject);
@@ -645,7 +634,6 @@ type
         procedure Action_Division_FilterClick(Sender: TObject);
         procedure Action_FollowUp_FilterClick(Sender: TObject);
         procedure Action_INF4_FilterClick(Sender: TObject);
-        procedure Action_Gr3_FilterClick(Sender: TObject);
         procedure Action_HideSummaryClick(Sender: TObject);
         procedure Action_ExportCSVClick(Sender: TObject);
         procedure Action_RemoveFiltersClick(Sender: TObject);
@@ -663,14 +651,6 @@ type
         procedure btnPasswordPreviewMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
         procedure btnPasswordPreviewMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
         procedure Action_Free2Click(Sender: TObject);
-        procedure Action_Range1Click(Sender: TObject);
-        procedure Action_Range2Click(Sender: TObject);
-        procedure Action_Range3Click(Sender: TObject);
-        procedure Action_Range4Click(Sender: TObject);
-        procedure Action_Range5Click(Sender: TObject);
-        procedure Action_Range6Click(Sender: TObject);
-        procedure Action_TotalAmountClick(Sender: TObject);
-        procedure Action_OverduesClick(Sender: TObject);
         procedure sgCoCodesMouseEnter(Sender: TObject);
         procedure sgPaidInfoMouseEnter(Sender: TObject);
         procedure sgPmtTermsMouseEnter(Sender: TObject);
@@ -774,6 +754,9 @@ type
         procedure btnSearchAbClick(Sender: TObject);
         procedure btnSearchAbMouseEnter(Sender: TObject);
         procedure btnSearchAbMouseLeave(Sender: TObject);
+        procedure btnReloadClick(Sender: TObject);
+        procedure Action_HideThisColumnClick(Sender: TObject);
+        procedure Action_ShowAllColumnsClick(Sender: TObject);
     protected
         procedure CreateParams(var Params: TCreateParams); override;
         procedure WndProc(var msg: TMessage); override;   // Windows events
@@ -836,11 +819,14 @@ type
         procedure ClearAgingSummary();
         procedure ClearOpenItemsSummary();
         procedure LoadColumnWidth(var Grid: TStringGrid);
+        procedure LoadOpenItems();
+
         procedure MapPersonResponsible(var Grid: TStringGrid; var Source: TStringGrid); // make async?
         procedure MapSalesResponsible(var Grid: TStringGrid; var Source: TStringGrid); // make async?
         procedure MapAccountType(var Grid: TStringGrid; var Source: TStringGrid); // make async?
         procedure MapCustomerGroup(var Grid: TStringGrid; var Source: TStringGrid); // make async?
         procedure MapPaymentTerms(var Grid: TStringGrid; var Source: TStringGrid); // make async?
+
         procedure OpenAddressBook_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
         procedure UpdateAddressBook_Callback(CallResponse: TCallResponse);
         procedure AddToAddressBook_Callback(CallResponse: TCallResponse);
@@ -849,7 +835,6 @@ type
         procedure ReadOpenItems_Callback(OpenItemsData: TOpenItemsPayLoad; CallResponse: TCallResponse);
         procedure CheckGivenPassword_Callback(CallResponse: TCallResponse);
         procedure SetNewPassword_Callback(CallResponse: TCallResponse);
-        procedure CheckServerConn_Callback(IsConnected: boolean; CallResponse: TCallResponse);
         procedure ExcelExport_Callback(CallResponse: TCallResponse);
         procedure RefreshInvoiceTracker_Callback(InvoiceList: TStringGrid; CallResponse: TCallResponse);
         procedure DeleteFromTrackerList_Callback(CallResponse: TCallResponse);
@@ -907,7 +892,6 @@ uses
     View.Startup,
     View.Reports,
     View.CompanyList,
-    Unity.Sql{Legacy},
     Unity.Filtering,
     Unity.Chars,
     Unity.Helpers,
@@ -915,6 +899,7 @@ uses
     Unity.Unknown,
     Unity.DateTimeFormats,
     Unity.Sorting,
+    Unity.Sql{Legacy},
     Handler.Sql{legacy},
     DbModel{legacy},
     Handler.Database{legacy},
@@ -1041,6 +1026,10 @@ begin
 end;
 
 
+// -------------------------------
+// Async.Debtors callback methods.
+// -------------------------------
+
 procedure TMainForm.ReadAgeView_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
 begin
 
@@ -1069,19 +1058,15 @@ begin
         ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Age View updated.');
     end;
 
-    // -------------------------
-    // Update aging information.
-    // -------------------------
     ClearAgingSummary();
+
     ComputeAgeSummary(sgAgeView); // make async!
     ComputeRiskClass(sgAgeView); // make async!
-    UpdateAgeSummary();
+
+    UpdateAgeSummary(); // <-- arg: payload with calc. data
+
     ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Age View summary information updated.');
 
-    // ---------------------------------------------------------------
-    // Get descriptions from helper tables for given age view columns.
-    // The helper grid names corresponds to age view columns.
-    // ---------------------------------------------------------------
     MapSalesResponsible(sgAgeView, sgSalesResp);
     MapPersonResponsible(sgAgeView, sgPersonResp);
     MapAccountType(sgAgeView, sgAccountType);
@@ -1095,30 +1080,10 @@ begin
     AwaitForm.Hide();
     ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: VCL unlocked and repainted.');
 
-    MainForm.ClearOpenItemsSummary();
-    MainForm.sgOpenItems.Freeze(True);
-    MainForm.UpdateStatusBar(TStatusBar.Downloading);
-    ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Calling method "ReadOpenItemsAsync".');
-
-    // to separate method
-    var OpenItems: IOpenItems:=TOpenItems.Create();
-    var CoCodeList:=TStringList.Create();
-    try
-
-        THelpers.ReturnCoCodesList(
-            sgAgeView,
-            sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1),
-            CoCodeList,
-            True,
-            'F'
-        );
-
-        var CodesStringList:=THelpers.Implode(CoCodeList, ',', True);
-        OpenItems.ReadOpenItemsAsync(sgOpenItems, CodesStringList, ReadOpenItems_Callback);
-
-    finally
-        CoCodeList.Free();
-    end;
+    ClearOpenItemsSummary();
+    sgOpenItems.Freeze(True);
+    UpdateStatusBar(TStatusBar.Downloading);
+    LoadOpenItems();
 
 end;
 
@@ -1150,6 +1115,7 @@ begin
 
     sgOpenItems.SetColWidth(10, 20, 400);
     MainForm.UpdateStatusBar(TStatusBar.Ready);
+    ThreadFileLog.Log('[ReadOpenItemsAsync_Callback]: Open items have been loaded successfully.');
 
 end;
 
@@ -1247,24 +1213,6 @@ begin
 end;
 
 
-{remove/legacy}
-procedure TMainForm.CheckServerConn_Callback(IsConnected: boolean; CallResponse: TCallResponse);
-begin
-
-    if not CallResponse.IsSucceeded then
-    begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
-        Exit();
-    end;
-
-    case IsConnected of
-        True:  MainForm.TryInitConnection();
-        False: MainForm.FIsConnected:=False;
-    end;
-
-end;
-
-
 procedure TMainForm.ExcelExport_Callback(CallResponse: TCallResponse);
 begin
 
@@ -1355,13 +1303,6 @@ begin
 
             if DataBase.InitializeConnection(True, SessionService.FDbConnect) then
             begin
-
-                // Check server connection on regular basis
-                if not TimerConnection.Enabled then
-                begin
-                    TimerConnection.Interval:=DataBase.Interval;
-                    TimerConnection.Enabled:=True;
-                end;
 
             end;
 
@@ -1460,10 +1401,12 @@ begin
         // ---------------------------
         // Windows query for shutdown.
         // ---------------------------
-
         WM_QUERYENDSESSION:
         begin
-            ThreadFileLog.Log('Windows Message detected: ' + IntToStr(PassMsg.Msg) + ' WM_QUERYENDSESSION. Windows is going to be shut down. Closing ' + TCommon.AppCaption + '...');
+            ThreadFileLog.Log('[WndMessagesWindows]: Detected ' + IntToStr(PassMsg.Msg)
+                + ' WM_QUERYENDSESSION. Windows is going to be shut down. Closing '
+                + TCommon.AppCaption + '...'
+            );
             FAllowClose:=True;
             PassMsg.Result:=1;
         end;
@@ -1471,55 +1414,42 @@ begin
         // -------------------------
         // Windows is shutting down.
         // -------------------------
-
         WM_ENDSESSION:
         begin
-            ThreadFileLog.Log('Windows Message detected: ' + IntToStr(PassMsg.Msg) + ' WM_ENDSESSION. Windows is shutting down...');
+            ThreadFileLog.Log('[WndMessagesWindows]: Detected ' + IntToStr(PassMsg.Msg) + ' WM_ENDSESSION. Windows is shutting down...');
             FAllowClose:=True;
         end;
 
         // ---------------------------------------------------------
         // Power-management event has occurred (resume or susspend).
         // ---------------------------------------------------------
-
         WM_POWERBROADCAST:
         case PassMsg.WParam of
 
             // -------------------------------
             // System is suspending operation.
             // -------------------------------
-
             PBT_APMSUSPEND:
             begin
-
-                // -------------------------------
-                // Turn off timers and disconnect.
-                // -------------------------------
-
                 SwitchTimers(TurnedOff);
-                TimerConnection.Enabled:=False;
                 SessionService.FDbConnect.Connected:=False;
                 SessionService.FDbConnect:=nil;
                 FIsConnected:=False;
-                ThreadFileLog.Log('Windows Message detected: ' + IntToStr(PassMsg.Msg) + ' WM_POWERBROADCAST with PBT_APMSUSPEND. Going into suspension mode, Unity is disconnected from server.');
-
+                ThreadFileLog.Log('[WndMessagesWindows]: Detected '
+                    + IntToStr(PassMsg.Msg) + ' WM_POWERBROADCAST with PBT_APMSUSPEND. Going into suspension mode, Unity is disconnected from server.'
+                );
             end;
 
             // -----------------------------------------------------------
             // Operation is resuming automatically from a low-power state.
             // This message is sent every time the system resumes.
             // -----------------------------------------------------------
-
             PBT_APMRESUMEAUTOMATIC:
             begin
-
-                // --------------------------------------------------------
-                // Turn on timer responsible for periodic connection check.
-                // --------------------------------------------------------
-
-                TimerConnection.Enabled:=True;
-                ThreadFileLog.Log('Windows Message detected: ' + IntToStr(PassMsg.Msg) + ' WM_POWERBROADCAST with PBT_APMRESUMEAUTOMATIC. Windows has resumed after being suspended.');
-
+                SwitchTimers(TurnedOff);
+                ThreadFileLog.Log('[WndMessagesWindows]: Detected '
+                    + IntToStr(PassMsg.Msg) + ' WM_POWERBROADCAST with PBT_APMRESUMEAUTOMATIC. Windows has resumed after being suspended.'
+                );
             end;
 
         end;
@@ -1568,8 +1498,10 @@ begin
     ChromiumWindow.ChromiumBrowser.OnBeforePopup:=Chromium_OnBeforePopup;
     if not ChromiumWindow.Initialized then ChromiumWindow.CreateBrowser();
 
-    for var iCNT:=0 to TabSheets.PageCount - 1 do TabSheets.Pages[iCNT].TabVisible:=False;
-        TabSheets.ActivePage:=TabSheet9;
+    for var iCNT:=0 to TabSheets.PageCount - 1 do
+        TabSheets.Pages[iCNT].TabVisible:=False;
+
+    TabSheets.ActivePage:=TabSheet9;
 
     SetPanelBorders();
     SetGridColumnWidths();
@@ -1603,6 +1535,11 @@ begin
                 FOpenItemsUpdate:=OpenItems.GetDateTimeAwaited(DateTime);
                 FOpenItemsStatus:=OpenItems.GetStatusAwaited(FOpenItemsUpdate);
 
+                ThreadFileLog.Log(
+                    '[StartMainWnd]: Open items information loaded (FOpenItemsUpdate = ' +
+                    FOpenItemsUpdate + '; FOpenItemsStatus = ' + FOpenItemsStatus + ').'
+                );
+
                 valUpdateStamp.Caption:=FOpenItemsUpdate.Substring(0, Length(FOpenItemsUpdate) - 3);
                 valCutOffDate.Caption:='n/a';
 
@@ -1611,9 +1548,21 @@ begin
                 var SortingOptions:=TStringList.Create();
 
                 try
+
                     Utilities.GetSortingOptionsAwaited(SortingOptions);
                     cbAgeSorting.Items.AddStrings(SortingOptions);
-                    if cbAgeSorting.Items.Count > 0 then cbAgeSorting.ItemIndex:=0;
+
+                    if cbAgeSorting.Items.Count > 0 then
+                    begin
+                        cbAgeSorting.ItemIndex:=0;
+                        ThreadFileLog.Log('[StartMainWnd]: Sorting options for aging report has been loaded.');
+                    end
+                    else
+                    begin
+                        THelpers.MsgCall(TAppMessage.Error, 'No sorting options have been found. Please contact IT Support.');
+                        ThreadFileLog.Log('[StartMainWnd]: No sorting options have been found.');
+                    end;
+
                 finally
                     SortingOptions.Free();
                 end;
@@ -1817,6 +1766,39 @@ begin
 end;
 
 
+procedure TMainForm.LoadOpenItems();
+begin
+
+    var OpenItems: IOpenItems:=TOpenItems.Create();
+    var CoCodeList:=TStringList.Create();
+    try
+
+        THelpers.ReturnCoCodesList(
+            sgAgeView,
+            sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1),
+            CoCodeList,
+            True,
+            'F'
+        );
+
+        if CoCodeList.Count = 0 then
+        begin
+            THelpers.MsgCall(TAppMessage.Warn, 'Please first load aging report for given company and/or companies.');
+            ThreadFileLog.Log('[LoadOpenItems]: No aging report loded while open items requested.');
+            Exit();
+        end;
+
+        var CodesStringList:=THelpers.Implode(CoCodeList, ',', True);
+        ThreadFileLog.Log('[LoadOpenItems]: Calling ReadOpenItemsAsync for CoCodes: ' + CodesStringList + '.');
+        OpenItems.ReadOpenItemsAsync(sgOpenItems, CodesStringList, ReadOpenItems_Callback);
+
+    finally
+        CoCodeList.Free();
+    end;
+
+end;
+
+
 procedure TMainForm.ClearMainViewInfo();
 begin
     valStatus.Caption     :='';
@@ -1942,9 +1924,9 @@ begin
     amtRiskClassB.Caption :=FormatFloat('#,##0.00', RCB);
     amtRiskClassC.Caption :=FormatFloat('#,##0.00', RCC);
 
-    itemRiskClassA.Caption:=IntToStr(RCAcount) + ' customers';
-    itemRiskClassB.Caption:=IntToStr(RCBcount) + ' customers';
-    itemRiskClassC.Caption:=IntToStr(RCCcount) + ' customers';
+    itemRiskClassA.Caption:=IntToStr(RCAcount) + ' cust.';
+    itemRiskClassB.Caption:=IntToStr(RCBcount) + ' cust.';
+    itemRiskClassC.Caption:=IntToStr(RCCcount) + ' cust.';
 
     amtExceeders.Caption    :=IntToStr(Exceeders);
     amtCreditExcess.Caption :=FormatFloat('#,##0.00', TotalExceed);
@@ -2318,8 +2300,6 @@ begin
     // Make sure that the glyph styled buttons have proper transparency color set.
     // Note: always set transparent color.
     // ---------------------------------------------------------------------------
-    Action_QuickReporting.Bitmap.Transparent:=True;
-    Action_QuickReporting.Bitmap.TransparentColor:=clWhite;
     btnLbuUpdate.Glyph.Transparent:=True;
     btnLbuUpdate.Glyph.TransparentColor:=clWhite;
 end;
@@ -2559,7 +2539,6 @@ begin
     // ------------------------------------------------------------
     // Count current follow-ups and display in notification baloon.
     // ------------------------------------------------------------
-
     var Sum:=0;
     for var iCNT:=1 to sgAgeView.RowCount - 1 do
         if
@@ -2593,16 +2572,9 @@ begin
 end;
 
 
-procedure TMainForm.TimerConnectionTimer(Sender: TObject);
-begin
-    var Utilities: IUtilities:=TUtilities.Create();
-    Utilities.CheckServerConnAsync(FIsConnected, CheckServerConn_Callback);
-end;
-
-
 procedure TMainForm.TimerCustOpenItemsTimer(Sender: TObject);
 begin
-    ThreadFileLog.Log('Calling open items scanner...');
+    ThreadFileLog.Log('[TimerCustOpenItemsTimer]: Calling open items scanner...');
     var OpenItems: IOpenItems:=TOpenItems.Create();
     OpenItems.ScanOpenItemsAsync(FOpenItemsUpdate, ScanOpenItems_Callback);
 end;
@@ -2808,29 +2780,22 @@ begin
 end;
 
 
-procedure TMainForm.Action_DelRowClick(Sender: TObject); // make it async!
+procedure TMainForm.Action_DelRowClick(Sender: TObject);
 begin
 
     if THelpers.MsgCall(TAppMessage.Question2, 'Are you sure you want to delete this customer?' + TChars.CRLF + 'This operation cannot be reverted.') = IDNO
         then Exit();
 
-    var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
-    try
+    var AddressBook: IAddressBook:=TAddressBook.Create();
 
-        DataTables.DeleteRecord(DbModel.TAddressBook.AddressBook, DbModel.TAddressBook.Scuid, DataTables.CleanStr(sgAddressBook.Cells[2, sgAddressBook.Row], False), True);
-
-        if DataTables.RowsAffected > 0 then
-        begin
-            sgAddressBook.DeleteRowFrom(1, 1)
-        end
-        else
-        begin
-            ThreadFileLog.Log('Cannot delete selected row (rows affected: ' + IntToStr(DataTables.RowsAffected) + ').');
-            THelpers.MsgCall(TAppMessage.Error, 'Cannot delete selected row. Please contact IT support.');
-        end;
-
-    finally
-        DataTables.Free();
+    if AddressBook.DelFromAddressBookAwaited(sgAddressBook.Cells[2, sgAddressBook.Row]) then
+    begin
+        sgAddressBook.DeleteRowFrom(1, 1)
+    end
+    else
+    begin
+        THelpers.MsgCall(TAppMessage.Error, 'Cannot delete selected row. Please contact IT support.');
+        ThreadFileLog.Log('[Action_DelRowClick]: Cannot delete selected row.');
     end;
 
 end;
@@ -3097,17 +3062,6 @@ begin
 end;
 
 
-// Filter via GROUP 3 (to be removed)
-procedure TMainForm.Action_Gr3_FilterClick(Sender: TObject);
-begin
-    FilterForm.FColName  :=TSnapshots.fGroup3;
-    FilterForm.FOverdue  :=TSnapshots.fOverdue;
-    FilterForm.FGrid     :=MainForm.sgAgeView;
-    FilterForm.FFilterNum:=TFiltering.TColumns.Group3;
-    THelpers.WndCall(FilterForm, TWindowState.Modal);
-end;
-
-
 // Filter via Sales Responsible
 procedure TMainForm.Action_SalesRespClick(Sender: TObject);
 begin
@@ -3229,62 +3183,6 @@ begin
 end;
 
 
-// Filter via OVERDUE
-procedure TMainForm.Action_OverduesClick(Sender: TObject);
-begin
-//
-end;
-
-
-// Filter via TOTAL AMOUNT
-procedure TMainForm.Action_TotalAmountClick(Sender: TObject);
-begin
-//
-end;
-
-
-// Filter via RANGE1
-procedure TMainForm.Action_Range1Click(Sender: TObject);
-begin
-//
-end;
-
-
-// Filter via RANGE2
-procedure TMainForm.Action_Range2Click(Sender: TObject);
-begin
-//
-end;
-
-
-// Filter via RANGE3
-procedure TMainForm.Action_Range3Click(Sender: TObject);
-begin
-//
-end;
-
-
-// Filter via RANGE4
-procedure TMainForm.Action_Range4Click(Sender: TObject);
-begin
-//
-end;
-
-
-// Filter via RANGE5
-procedure TMainForm.Action_Range5Click(Sender: TObject);
-begin
-//
-end;
-
-
-// Filter via RANGE6
-procedure TMainForm.Action_Range6Click(Sender: TObject);
-begin
-//
-end;
-
-
 // Filter via REMOVE ALL FILTERS
 procedure TMainForm.Action_RemoveFiltersClick(Sender: TObject);
 begin
@@ -3360,6 +3258,18 @@ begin
         Action_HideSummary.Checked:=True;
     end;
 
+end;
+
+
+procedure TMainForm.Action_HideThisColumnClick(Sender: TObject);
+begin
+    sgAgeView.HideThisColumns();
+end;
+
+
+procedure TMainForm.Action_ShowAllColumnsClick(Sender: TObject);
+begin
+    sgAgeView.ShowAllColumns();
 end;
 
 
@@ -3466,9 +3376,9 @@ end;
 
 procedure TMainForm.TabSheet5Show(Sender: TObject);
 begin
-    var Queries: IQueries:=TQueries.Create();
-    Queries.UpdateQmsViewFsc(sgFSCview);
-    Queries.UpdateQmsViewLbu(sgLBUview);
+    {var Queries: IQueries:=TQueries.Create();}
+    {Queries.UpdateQmsViewFsc(sgFSCview);}
+    {Queries.UpdateQmsViewLbu(sgLBUview);}
 end;
 
 
@@ -3478,14 +3388,7 @@ end;
 
 procedure TMainForm.TabSheet7Show(Sender: TObject);
 begin
-
-    // --------------------------------------------------------------------------------------
-    // Setup tables height for payment term tabe and paid info table. General table is fixed.
-    // --------------------------------------------------------------------------------------
-
-    sgPmtTerms.Height:=System.Round(0.5 * sgCoCodes.Height);
-    sgPaidInfo.Height:=System.Round(0.5 * sgCoCodes.Height);
-
+    {Do nothing}
 end;
 
 
@@ -3497,14 +3400,13 @@ end;
 
 procedure TMainForm.TabSheet8Show(Sender: TObject);
 begin
-
-    // ------------------------------------------------------------------------------------------------------
-    // Force lock settings panel. This is necessary, when administrator open settings panel
-    // and go to other tab without locking it. That prevents from leaving unlocked settings panel by mistake.
-    // ------------------------------------------------------------------------------------------------------
-
+    // --------------------------------------------------------------
+    // Force lock settings panel. This is necessary,
+    // when administrator open settings panel
+    // and go to other tab without locking it.
+    // That prevents from leaving unlocked settings panel by mistake.
+    // --------------------------------------------------------------
     SetSettingsPanel(True);
-
 end;
 
 
@@ -3548,7 +3450,7 @@ begin
 
             // -------------------------------
             // Copy SQL array to temp array.
-            // Note: Do not use "copy" method.
+            // Note: Do not use "copy" method!
             // -------------------------------
 
             for iCNT:=0 to TmpRows do
@@ -5405,7 +5307,8 @@ end;
 
 procedure TMainForm.txtQueriesClick(Sender: TObject);
 begin
-    SetActiveTabsheet(TabSheet5);
+    {SetActiveTabsheet(TabSheet5);}
+    THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in beta version.');
 end;
 
 
@@ -5438,6 +5341,12 @@ begin
     txtInfo.Font.Style:=[fsBold];
     txtInfo.Font.Color:=$006433C9;
     THelpers.WndCall(AboutForm, TWindowState.Modal);
+end;
+
+
+procedure TMainForm.btnReloadClick(Sender: TObject);
+begin
+    LoadOpenItems();
 end;
 
 

@@ -612,18 +612,17 @@ end;
 class function THelpers.UnzippLayouts(FileName: string; DestDir: string): boolean;
 begin
 
-    var ZipRead:=TZipFile.Create();
+    var ZipFile:=TZipFile.Create();
     try
 
         try
 
-            ZipRead.Open(FileName, zmRead);
+            ZipFile.Open(FileName, zmRead);
 
-            for var iCNT:=0 to ZipRead.FileCount - 1 do
+            for var iCNT:=0 to ZipFile.FileCount - 1 do
             begin
-                var Zipped:=ZipRead.FileName[iCNT];
-                var FullPath:=DestDir + Zipped;
-                ZipRead.Extract(iCNT, DestDir, True);
+                var FullPath:=DestDir + ZipFile.FileName[iCNT];
+                ZipFile.Extract(iCNT, DestDir, True);
             end;
 
             Result:=True;
@@ -634,7 +633,7 @@ begin
         end;
 
     finally
-        ZipRead.Free();
+        ZipFile.Free();
         DeleteFile(PChar(FileName));
     end;
 
