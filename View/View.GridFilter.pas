@@ -517,9 +517,9 @@ begin
             if (FFilterNum = TFiltering.TColumns.Free3)             then FilterNow(Free3);
 
             // Re-compute aging summary
-            MainForm.ComputeAgeSummary(FGrid);
-            MainForm.ComputeRiskClass(FGrid);
-            MainForm.UpdateAgeSummary();
+            //MainForm.ComputeAgeSummary(FGrid);
+            //MainForm.ComputeRiskClass(FGrid);
+            //MainForm.UpdateAgeSummary();
 
         finally
             FGrid.Freeze(False);
@@ -568,9 +568,9 @@ begin
             if (FFilterNum = TFiltering.TColumns.Free3)             then FilterRemove(Free3);
 
             // Re-compute aging summary
-            MainForm.ComputeAgeSummary(FGrid);
-            MainForm.ComputeRiskClass(FGrid);
-            MainForm.UpdateAgeSummary();
+            //MainForm.ComputeAgeSummary(FGrid);
+            //MainForm.ComputeRiskClass(FGrid);
+            //MainForm.UpdateAgeSummary();
 
         finally
             FGrid.Freeze(False);

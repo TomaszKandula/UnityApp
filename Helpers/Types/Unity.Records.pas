@@ -132,13 +132,36 @@ type
     end;
 
     /// <summary>
+    /// Carries a group of variables of Risk Classes.
+    /// </summary>
+    TRiskClassGroup = record
+        Class_A: double;
+        Class_B: double;
+        Class_C: double;
+    end;
+
+    /// <summary>
     /// Carries a group of variables for update ageing summary.
     /// </summary>
     TAgingPayLoad = record
-
-
-
-
+        CustAll:     integer;
+        ANotDue:     extended;
+        ARange1:     extended;
+        ARange2:     extended;
+        ARange3:     extended;
+        ARange4:     extended;
+        ARange5:     extended;
+        ARange6:     extended;
+        Balance:     extended;
+        Limits:      extended;
+        Exceeders:   integer;
+        TotalExceed: extended;
+        RCA:         extended;
+        RCB:         extended;
+        RCC:         extended;
+        RCAcount:    cardinal;
+        RCBcount:    cardinal;
+        RCCcount:    cardinal;
     end;
 
     /// <summary>

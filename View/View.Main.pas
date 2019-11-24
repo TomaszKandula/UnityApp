@@ -781,24 +781,6 @@ type
             var Result: Boolean
         );
     strict private
-        var CustAll: integer;
-        var ANotDue: extended;
-        var ARange1: extended;
-        var ARange2: extended;
-        var ARange3: extended;
-        var ARange4: extended;
-        var ARange5: extended;
-        var ARange6: extended;
-        var Balance: extended;
-        var Limits: extended;
-        var Exceeders: integer;
-        var TotalExceed: extended;
-        var RCA: extended;
-        var RCB: extended;
-        var RCC: extended;
-        var RCAcount: cardinal;
-        var RCBcount: cardinal;
-        var RCCcount: cardinal;
         var FHadFirstLoad: boolean;
         var FAllowClose: boolean;
         var FAbUpdateFields: TAddressBookUpdateFields;
@@ -820,6 +802,7 @@ type
         procedure ClearOpenItemsSummary();
         procedure LoadColumnWidth(var Grid: TStringGrid);
         procedure LoadOpenItems();
+        procedure UpdateAgeSummary(PayLoad: TAgingPayLoad);
 
         procedure MapPersonResponsible(var Grid: TStringGrid; var Source: TStringGrid); // make async?
         procedure MapSalesResponsible(var Grid: TStringGrid; var Source: TStringGrid); // make async?
@@ -830,7 +813,7 @@ type
         procedure OpenAddressBook_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
         procedure UpdateAddressBook_Callback(CallResponse: TCallResponse);
         procedure AddToAddressBook_Callback(CallResponse: TCallResponse);
-        procedure ReadAgeView_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
+        procedure ReadAgeView_Callback(ReturnedData: TStringGrid; PayLoad: TAgingPayLoad; CallResponse: TCallResponse);
         procedure ScanOpenItems_Callback(CanMakeAge: boolean; ReadDateTime: string; CallResponse: TCallResponse);
         procedure ReadOpenItems_Callback(OpenItemsData: TOpenItemsPayLoad; CallResponse: TCallResponse);
         procedure CheckGivenPassword_Callback(CallResponse: TCallResponse);
@@ -841,9 +824,7 @@ type
     public
         var FIsConnected: boolean{Legacy};
         procedure TryInitConnection{Legacy};
-        var FClass_A: double;
-        var FClass_B: double;
-        var FClass_C: double;
+        var FRiskClassGroup: TRiskClassGroup;
         var FStartTime: TTime;
         var FGridPicture: TImage;
         var FOpenItemsRefs: TFOpenItemsRefs;
@@ -852,9 +833,6 @@ type
         var FOpenItemsStatus: string;
         procedure SetActiveTabsheet(TabSheet: TTabSheet);
         procedure ResetTabsheetButtons();
-        procedure UpdateAgeSummary();
-        procedure ComputeAgeSummary(var Grid: TStringGrid);  // make async!
-        procedure ComputeRiskClass(var Grid: TStringGrid); // make async!
         procedure InitMainWnd(SessionFile: string);
         procedure SetupMainWnd();
         procedure StartMainWnd();
@@ -1030,7 +1008,7 @@ end;
 // Async.Debtors callback methods.
 // -------------------------------
 
-procedure TMainForm.ReadAgeView_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
+procedure TMainForm.ReadAgeView_Callback(ReturnedData: TStringGrid; PayLoad: TAgingPayLoad; CallResponse: TCallResponse);
 begin
 
     if not CallResponse.IsSucceeded then
@@ -1054,27 +1032,22 @@ begin
                 sgAgeView.Cells[jCNT, iCNT]:=ReturnedData.Cells[jCNT, iCNT];
 
     finally
+        LoadColumnWidth(sgAgeView);
         sgAgeView.Freeze(False);
         ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Age View updated.');
     end;
 
     ClearAgingSummary();
-
-    ComputeAgeSummary(sgAgeView); // make async!
-    ComputeRiskClass(sgAgeView); // make async!
-
-    UpdateAgeSummary(); // <-- arg: payload with calc. data
-
+    UpdateAgeSummary(PayLoad);
     ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Age View summary information updated.');
 
-    MapSalesResponsible(sgAgeView, sgSalesResp);
-    MapPersonResponsible(sgAgeView, sgPersonResp);
-    MapAccountType(sgAgeView, sgAccountType);
-    MapCustomerGroup(sgAgeView, sgCustomerGr);
-    MapPaymentTerms(sgAgeView, sgPmtTerms);
+    MapSalesResponsible(sgAgeView, sgSalesResp); // async!
+    MapPersonResponsible(sgAgeView, sgPersonResp); // async!
+    MapAccountType(sgAgeView, sgAccountType); // async!
+    MapCustomerGroup(sgAgeView, sgCustomerGr); // async!
+    MapPaymentTerms(sgAgeView, sgPmtTerms); // async!
     ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Mapping performed.');
 
-    LoadColumnWidth(sgAgeView);
     SwitchTimers(TurnedOn);
     MainForm.UpdateStatusBar(TStatusBar.Ready);
     AwaitForm.Hide();
@@ -1762,7 +1735,7 @@ end;
 procedure TMainForm.LoadAgeReport(SelectedCoCodes: string);
 begin
     var Debtors: IDebtors:=TDebtors.Create();
-    Debtors.ReadAgeViewAsync(SelectedCoCodes, cbAgeSorting.Text, ReadAgeView_Callback);
+    Debtors.ReadAgeViewAsync(SelectedCoCodes, cbAgeSorting.Text, FRiskClassGroup, ReadAgeView_Callback);
 end;
 
 
@@ -1811,25 +1784,6 @@ end;
 
 procedure TMainForm.ClearAgingSummary();
 begin
-
-    CustAll    :=0;
-    ANotDue    :=0;
-    ARange1    :=0;
-    ARange2    :=0;
-    ARange3    :=0;
-    ARange4    :=0;
-    ARange5    :=0;
-    ARange6    :=0;
-    Balance    :=0;
-    Limits     :=0;
-    Exceeders  :=0;
-    TotalExceed:=0;
-    RCA        :=0;
-    RCB        :=0;
-    RCC        :=0;
-    RCAcount   :=0;
-    RCBcount   :=0;
-    RCCcount   :=0;
 
     valTotalCustomers.Caption:='0';
 
@@ -1888,143 +1842,52 @@ begin
 end;
 
 
-procedure TMainForm.UpdateAgeSummary();
+procedure TMainForm.UpdateAgeSummary(PayLoad: TAgingPayLoad);
 begin
 
-    valTotalCustomers.Caption:=IntToStr(CustAll);
+    valTotalCustomers.Caption:=IntToStr(PayLoad.CustAll);
 
-    amtNotDue.Caption:=FormatFloat('#,##0.00', ANotDue);
-    amtRange1.Caption:=FormatFloat('#,##0.00', ARange1);
-    amtRange2.Caption:=FormatFloat('#,##0.00', ARange2);
-    amtRange3.Caption:=FormatFloat('#,##0.00', ARange3);
-    amtRange4.Caption:=FormatFloat('#,##0.00', ARange4);
-    amtRange5.Caption:=FormatFloat('#,##0.00', ARange5);
-    amtRange6.Caption:=FormatFloat('#,##0.00', ARange6);
-    amtTotal.Caption :=FormatFloat('#,##0.00', Balance);
+    amtNotDue.Caption:=FormatFloat('#,##0.00', PayLoad.ANotDue);
+    amtRange1.Caption:=FormatFloat('#,##0.00', PayLoad.ARange1);
+    amtRange2.Caption:=FormatFloat('#,##0.00', PayLoad.ARange2);
+    amtRange3.Caption:=FormatFloat('#,##0.00', PayLoad.ARange3);
+    amtRange4.Caption:=FormatFloat('#,##0.00', PayLoad.ARange4);
+    amtRange5.Caption:=FormatFloat('#,##0.00', PayLoad.ARange5);
+    amtRange6.Caption:=FormatFloat('#,##0.00', PayLoad.ARange6);
+    amtTotal.Caption :=FormatFloat('#,##0.00', PayLoad.Balance);
 
-    if not (Balance = 0) then
+    if not (PayLoad.Balance = 0) then
     begin
-        procNotDue.Caption:=FormatFloat('0.00', ( (ANotDue / Balance) * 100 )) + '%';
-        procRange1.Caption:=FormatFloat('0.00', ( (ARange1 / Balance) * 100 )) + '%';
-        procRange2.Caption:=FormatFloat('0.00', ( (ARange2 / Balance) * 100 )) + '%';
-        procRange3.Caption:=FormatFloat('0.00', ( (ARange3 / Balance) * 100 )) + '%';
-        procRange4.Caption:=FormatFloat('0.00', ( (ARange4 / Balance) * 100 )) + '%';
-        procRange5.Caption:=FormatFloat('0.00', ( (ARange5 / Balance) * 100 )) + '%';
-        procRange6.Caption:=FormatFloat('0.00', ( (ARange6 / Balance) * 100 )) + '%';
-        procTotal.Caption :=FormatFloat('0.00', ( ( (ANotDue / Balance) +
-                                                           (ARange1 / Balance) +
-                                                           (ARange2 / Balance) +
-                                                           (ARange3 / Balance) +
-                                                           (ARange4 / Balance) +
-                                                           (ARange5 / Balance) +
-                                                           (ARange6 / Balance) ) * 100 ) ) + '%';
+        procNotDue.Caption:=FormatFloat('0.00', ( (PayLoad.ANotDue / PayLoad.Balance) * 100 )) + '%';
+        procRange1.Caption:=FormatFloat('0.00', ( (PayLoad.ARange1 / PayLoad.Balance) * 100 )) + '%';
+        procRange2.Caption:=FormatFloat('0.00', ( (PayLoad.ARange2 / PayLoad.Balance) * 100 )) + '%';
+        procRange3.Caption:=FormatFloat('0.00', ( (PayLoad.ARange3 / PayLoad.Balance) * 100 )) + '%';
+        procRange4.Caption:=FormatFloat('0.00', ( (PayLoad.ARange4 / PayLoad.Balance) * 100 )) + '%';
+        procRange5.Caption:=FormatFloat('0.00', ( (PayLoad.ARange5 / PayLoad.Balance) * 100 )) + '%';
+        procRange6.Caption:=FormatFloat('0.00', ( (PayLoad.ARange6 / PayLoad.Balance) * 100 )) + '%';
+        procTotal.Caption :=FormatFloat('0.00', ( ( (PayLoad.ANotDue / PayLoad.Balance) +
+                                                           (PayLoad.ARange1 / PayLoad.Balance) +
+                                                           (PayLoad.ARange2 / PayLoad.Balance) +
+                                                           (PayLoad.ARange3 / PayLoad.Balance) +
+                                                           (PayLoad.ARange4 / PayLoad.Balance) +
+                                                           (PayLoad.ARange5 / PayLoad.Balance) +
+                                                           (PayLoad.ARange6 / PayLoad.Balance) ) * 100 ) ) + '%';
     end;
 
-    amtRiskClassA.Caption :=FormatFloat('#,##0.00', RCA);
-    amtRiskClassB.Caption :=FormatFloat('#,##0.00', RCB);
-    amtRiskClassC.Caption :=FormatFloat('#,##0.00', RCC);
+    amtRiskClassA.Caption :=FormatFloat('#,##0.00', PayLoad.RCA);
+    amtRiskClassB.Caption :=FormatFloat('#,##0.00', PayLoad.RCB);
+    amtRiskClassC.Caption :=FormatFloat('#,##0.00', PayLoad.RCC);
 
-    itemRiskClassA.Caption:=IntToStr(RCAcount) + ' cust.';
-    itemRiskClassB.Caption:=IntToStr(RCBcount) + ' cust.';
-    itemRiskClassC.Caption:=IntToStr(RCCcount) + ' cust.';
+    itemRiskClassA.Caption:=IntToStr(PayLoad.RCAcount) + ' cust.';
+    itemRiskClassB.Caption:=IntToStr(PayLoad.RCBcount) + ' cust.';
+    itemRiskClassC.Caption:=IntToStr(PayLoad.RCCcount) + ' cust.';
 
-    amtExceeders.Caption    :=IntToStr(Exceeders);
-    amtCreditExcess.Caption :=FormatFloat('#,##0.00', TotalExceed);
-    amtGrantedLimits.Caption:=FormatFloat('#,##0.00', Limits);
+    amtExceeders.Caption    :=IntToStr(PayLoad.Exceeders);
+    amtCreditExcess.Caption :=FormatFloat('#,##0.00', PayLoad.TotalExceed);
+    amtGrantedLimits.Caption:=FormatFloat('#,##0.00', PayLoad.Limits);
     amtNotOverdue.Caption   :=amtNotDue.Caption;
-    amtPastDue.Caption      :=FormatFloat('#,##0.00', (ARange1 + ARange2 + ARange3));
-    amtDefaulted.Caption    :=FormatFloat('#,##0.00', (ARange4 + ARange5 + ARange6));
-
-end;
-
-
-procedure TMainForm.ComputeAgeSummary(var Grid: TStringGrid); // make async?
-begin
-
-    for var iCNT: integer:=1 to Grid.RowCount - 1 do if Grid.RowHeights[iCNT] <> Grid.sgRowHidden then
-    begin
-
-        ANotDue:=ANotDue + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fNotDue, 1, 1), iCNT], 0);
-        ARange1:=ARange1 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRange1, 1, 1), iCNT], 0);
-        ARange2:=ARange2 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRange2, 1, 1), iCNT], 0);
-        ARange3:=ARange3 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRange3, 1, 1), iCNT], 0);
-        ARange4:=ARange4 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRange4, 1, 1), iCNT], 0);
-        ARange5:=ARange5 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRange5, 1, 1), iCNT], 0);
-        ARange6:=ARange6 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRange6, 1, 1), iCNT], 0);
-
-        Balance:=Balance + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fTotal, 1, 1), iCNT], 0);
-
-        Limits:=Limits + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCreditLimit, 1, 1), iCNT], 0);
-
-        if StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCreditBalance, 1, 1), iCNT], 0) < 0 then
-        begin
-            inc(Exceeders);
-            TotalExceed:=TotalExceed + Abs(StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCreditBalance, 1, 1), iCNT], 0));
-        end;
-
-        inc(CustAll);
-
-    end;
-
-end;
-
-
-procedure TMainForm.ComputeRiskClass(var Grid: TStringGrid); // make async?
-begin
-
-    if Balance = 0 then Exit();
-
-    var TotalPerItem: Unity.Arrays.TADoubles;
-    var ListPosition: Unity.Arrays.TAIntigers;
-    var Count: double:=0;
-    var Rows: integer:=0;
-
-    RCA:=Balance * FClass_A;
-    RCB:=Balance * FClass_B;
-    RCC:=Balance * FClass_C;
-
-    // Move totals and its positions into array
-    for var iCNT: integer:=1 to Grid.RowCount do
-    if Grid.RowHeights[iCNT] <> Grid.sgRowHidden then
-    begin
-        SetLength(ListPosition, Rows + 1);
-        SetLength(TotalPerItem, Rows + 1);
-        ListPosition[Rows]:=iCNT;
-        TotalPerItem[Rows]:=StrToFloatDef((Grid.Cells[Grid.ReturnColumn(TSnapshots.fTotal, 1, 1), iCNT]), 0);
-        inc(Rows);
-    end;
-
-    // Sort via total value
-    TSorting.QuickSort(TotalPerItem, ListPosition, Low(TotalPerItem), High(TotalPerItem), False);
-
-    // Compute and display RCA
-    for var iCNT: integer:=Low(ListPosition) to High(ListPosition) do
-    begin
-
-        Count:=Count + TotalPerItem[iCNT];
-
-        // Risk Class 'A'
-        if Count <= RCA then
-        begin
-            Grid.Cells[Grid.ReturnColumn(TSnapshots.fRiskClass, 1, 1), ListPosition[iCNT]]:='A';
-            inc(RCAcount);
-        end;
-
-        // Risk Class 'B'
-        if (Count > RCA) and (Count <= RCA + RCB) then
-        begin
-            Grid.Cells[Grid.ReturnColumn(TSnapshots.fRiskClass, 1, 1), ListPosition[iCNT]]:='B';
-            inc(RCBcount);
-        end;
-
-        // Risk Class 'C'
-        if Count > RCA + RCB then
-        begin
-            Grid.Cells[Grid.ReturnColumn(TSnapshots.fRiskClass, 1, 1), ListPosition[iCNT]]:='C';
-            inc(RCCcount);
-        end;
-
-    end;
+    amtPastDue.Caption      :=FormatFloat('#,##0.00', (PayLoad.ARange1 + PayLoad.ARange2 + PayLoad.ARange3));
+    amtDefaulted.Caption    :=FormatFloat('#,##0.00', (PayLoad.ARange4 + PayLoad.ARange5 + PayLoad.ARange6));
 
 end;
 
@@ -3195,9 +3058,9 @@ begin
     FilterForm.FilterClearAll();
 
     // Re-compute aging summary
-    MainForm.ComputeAgeSummary(MainForm.sgAgeView);
-    MainForm.ComputeRiskClass(MainForm.sgAgeView);
-    MainForm.UpdateAgeSummary;
+    //MainForm.ComputeAgeSummary(MainForm.sgAgeView);
+    //MainForm.ComputeRiskClass(MainForm.sgAgeView);
+    //MainForm.UpdateAgeSummary;
 
     sgAgeView.Freeze(False);
 

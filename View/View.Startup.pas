@@ -322,9 +322,9 @@ begin
             MainAppForm.valRiskClassB.Caption:=RiskClassB;
             MainAppForm.valRiskClassC.Caption:=RiskClassC;
 
-            MainAppForm.FClass_A:=StrToFloat(getRiskClassA);
-            MainAppForm.FClass_B:=StrToFloat(getRiskClassB);
-            MainAppForm.FClass_C:=StrToFloat(getRiskClassC);
+            MainAppForm.FRiskClassGroup.Class_A:=StrToFloat(getRiskClassA);
+            MainAppForm.FRiskClassGroup.Class_B:=StrToFloat(getRiskClassB);
+            MainAppForm.FRiskClassGroup.Class_C:=StrToFloat(getRiskClassC);
 
         end else if FormatSettings.DecimalSeparator = '.' then
         begin
@@ -341,9 +341,9 @@ begin
             MainAppForm.valRiskClassB.Caption:=RiskClassB;
             MainAppForm.valRiskClassC.Caption:=RiskClassC;
 
-            MainAppForm.FClass_A:=StrToFloat(getRiskClassA.Replace(',','.'));
-            MainAppForm.FClass_B:=StrToFloat(getRiskClassB.Replace(',','.'));
-            MainAppForm.FClass_C:=StrToFloat(getRiskClassC.Replace(',','.'));
+            MainAppForm.FRiskClassGroup.Class_A:=StrToFloat(getRiskClassA.Replace(',','.'));
+            MainAppForm.FRiskClassGroup.Class_B:=StrToFloat(getRiskClassB.Replace(',','.'));
+            MainAppForm.FRiskClassGroup.Class_C:=StrToFloat(getRiskClassC.Replace(',','.'));
 
         end;
 
