@@ -48,7 +48,7 @@ type
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
-        procedure ReadAgeViewAsync(SelectedCoCodes: string; SortMode: integer; Callback: TReadAgeView);
+        procedure ReadAgeViewAsync(SelectedCoCodes: string; SortMode: string; Callback: TReadAgeView);
 
     end;
 
@@ -64,7 +64,7 @@ type
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
-        procedure ReadAgeViewAsync(SelectedCoCodes: string; SortMode: integer; Callback: TReadAgeView);
+        procedure ReadAgeViewAsync(SelectedCoCodes: string; SortMode: string; Callback: TReadAgeView);
 
     end;
 
@@ -88,7 +88,7 @@ uses
     Sync.Documents;
 
 
-procedure TDebtors.ReadAgeViewAsync(SelectedCoCodes: string; SortMode: integer; Callback: TReadAgeView);
+procedure TDebtors.ReadAgeViewAsync(SelectedCoCodes: string; SortMode: string; Callback: TReadAgeView);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
@@ -120,9 +120,12 @@ begin
                 else
                 begin
                     DataTables.CmdType:=cmdText;
-                    DataTables.StrSQL:='exec Customer.AgeViewReportAlt2 ' + StrCol.QuotedString + ',' + SelectedCoCodes.QuotedString;
+                    DataTables.StrSQL:='exec Customer.AgeViewReportAlt2 ' + StrCol.QuotedString + ',' + SelectedCoCodes.QuotedString + ',' + SortMode.QuotedString;
                     DataTables.SqlToGrid(Grid, DataTables.ExecSQL, False, False);
                     ThreadFileLog.Log('SQL statement applied [' + DataTables.StrSQL + '].');
+
+                    // compute
+
                 end;
 
             except

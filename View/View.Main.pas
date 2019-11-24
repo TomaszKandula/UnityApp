@@ -836,11 +836,11 @@ type
         procedure ClearAgingSummary();
         procedure ClearOpenItemsSummary();
         procedure LoadColumnWidth(var Grid: TStringGrid);
-        procedure MapPersonResponsible(var Grid: TStringGrid; var Source: TStringGrid);
-        procedure MapSalesResponsible(var Grid: TStringGrid; var Source: TStringGrid);
-        procedure MapAccountType(var Grid: TStringGrid; var Source: TStringGrid);
-        procedure MapCustomerGroup(var Grid: TStringGrid; var Source: TStringGrid);
-        procedure MapPaymentTerms(var Grid: TStringGrid; var Source: TStringGrid);
+        procedure MapPersonResponsible(var Grid: TStringGrid; var Source: TStringGrid); // make async?
+        procedure MapSalesResponsible(var Grid: TStringGrid; var Source: TStringGrid); // make async?
+        procedure MapAccountType(var Grid: TStringGrid; var Source: TStringGrid); // make async?
+        procedure MapCustomerGroup(var Grid: TStringGrid; var Source: TStringGrid); // make async?
+        procedure MapPaymentTerms(var Grid: TStringGrid; var Source: TStringGrid); // make async?
         procedure OpenAddressBook_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
         procedure UpdateAddressBook_Callback(CallResponse: TCallResponse);
         procedure AddToAddressBook_Callback(CallResponse: TCallResponse);
@@ -860,7 +860,6 @@ type
         var FClass_B: double;
         var FClass_C: double;
         var FStartTime: TTime;
-        var FAgeDateList: TALists;
         var FGridPicture: TImage;
         var FOpenItemsRefs: TFOpenItemsRefs;
         var FCtrlStatusRefs: TFCtrlStatusRefs;
@@ -869,8 +868,8 @@ type
         procedure SetActiveTabsheet(TabSheet: TTabSheet);
         procedure ResetTabsheetButtons();
         procedure UpdateAgeSummary();
-        procedure ComputeAgeSummary(var Grid: TStringGrid);  // make async! (2)
-        procedure ComputeRiskClass(var Grid: TStringGrid);
+        procedure ComputeAgeSummary(var Grid: TStringGrid);  // make async!
+        procedure ComputeRiskClass(var Grid: TStringGrid); // make async!
         procedure InitMainWnd(SessionFile: string);
         procedure SetupMainWnd();
         procedure StartMainWnd();
@@ -975,16 +974,19 @@ begin
     end;
 
     sgAddressBook.Freeze(True);
+    try
 
-    sgAddressBook.RowCount:=ReturnedData.RowCount;
-    sgAddressBook.ColCount:=ReturnedData.ColCount;
+        sgAddressBook.RowCount:=ReturnedData.RowCount;
+        sgAddressBook.ColCount:=ReturnedData.ColCount;
 
-    for var iCNT:=0 to ReturnedData.RowCount - 1 do
-        for var jCNT:=0 to ReturnedData.ColCount - 1 do
-            sgAddressBook.Cells[jCNT, iCNT]:=ReturnedData.Cells[jCNT, iCNT];
+        for var iCNT:=0 to ReturnedData.RowCount - 1 do
+            for var jCNT:=0 to ReturnedData.ColCount - 1 do
+                sgAddressBook.Cells[jCNT, iCNT]:=ReturnedData.Cells[jCNT, iCNT];
 
-    sgAddressBook.Freeze(False);
-    sgAddressBook.SetColWidth(40, 10, 400);
+    finally
+        sgAddressBook.Freeze(False);
+        sgAddressBook.SetColWidth(40, 10, 400);
+    end;
 
     MainForm.UpdateStatusBar(TStatusBar.Ready);
     AwaitForm.Hide();
@@ -1072,7 +1074,7 @@ begin
     // -------------------------
     ClearAgingSummary();
     ComputeAgeSummary(sgAgeView); // make async!
-    ComputeRiskClass(sgAgeView);
+    ComputeRiskClass(sgAgeView); // make async!
     UpdateAgeSummary();
     ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Age View summary information updated.');
 
@@ -1088,7 +1090,7 @@ begin
     ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Mapping performed.');
 
     LoadColumnWidth(sgAgeView);
-    //SwitchTimers(TurnedOn);
+    SwitchTimers(TurnedOn);
     MainForm.UpdateStatusBar(TStatusBar.Ready);
     AwaitForm.Hide();
     ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: VCL unlocked and repainted.');
@@ -1098,6 +1100,7 @@ begin
     MainForm.UpdateStatusBar(TStatusBar.Downloading);
     ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Calling method "ReadOpenItemsAsync".');
 
+    // to separate method
     var OpenItems: IOpenItems:=TOpenItems.Create();
     var CoCodeList:=TStringList.Create();
     try
@@ -1166,33 +1169,7 @@ begin
     FOpenItemsUpdate:=ReadDateTime;
     FOpenItemsStatus:='';
 
-    // -----------------------------------------------------
-    // Get latest open items and allow to make aging report.
-    // -----------------------------------------------------
-
-    ClearOpenItemsSummary();
-    sgOpenItems.Freeze(True);
-
-    ThreadFileLog.Log('[ReadOpenItemsAsync_Callback]: Calling method "ReadOpenItemsAsync".');
-    var OpenItems: IOpenItems:=TOpenItems.Create();
-    var CoCodeList:=TStringList.Create();
-    try
-
-        THelpers.ReturnCoCodesList(
-            MainForm.sgAgeView,
-            MainForm.sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1),
-            CoCodeList,
-            True,
-            'F'
-        );
-
-        var CodesStringList:=THelpers.Implode(CoCodeList, ',', True);
-        OpenItems.ReadOpenItemsAsync(sgOpenItems, CodesStringList, ReadOpenItems_Callback);
-        MainForm.UpdateStatusBar(TStatusBar.Downloading);
-
-    finally
-        CoCodeList.Free();
-    end;
+    //...load latest aging report with open items
 
 end;
 
@@ -1270,6 +1247,7 @@ begin
 end;
 
 
+{remove/legacy}
 procedure TMainForm.CheckServerConn_Callback(IsConnected: boolean; CallResponse: TCallResponse);
 begin
 
@@ -1362,7 +1340,8 @@ end;
 // ------------------------------------------------------------------------------------------------------------------------ LEGACY CODE - TO BE REMOVED [START]
 
 
-procedure TMainForm.TryInitConnection; {remove}
+{remove}
+procedure TMainForm.TryInitConnection;
 begin
 
     if not Assigned(SessionService.FDbConnect) then
@@ -1627,6 +1606,18 @@ begin
                 valUpdateStamp.Caption:=FOpenItemsUpdate.Substring(0, Length(FOpenItemsUpdate) - 3);
                 valCutOffDate.Caption:='n/a';
 
+                cbAgeSorting.Clear();
+                var Utilities: IUtilities:=TUtilities.Create();
+                var SortingOptions:=TStringList.Create();
+
+                try
+                    Utilities.GetSortingOptionsAwaited(SortingOptions);
+                    cbAgeSorting.Items.AddStrings(SortingOptions);
+                    if cbAgeSorting.Items.Count > 0 then cbAgeSorting.ItemIndex:=0;
+                finally
+                    SortingOptions.Free();
+                end;
+
             end);
 
         end);
@@ -1822,7 +1813,7 @@ end;
 procedure TMainForm.LoadAgeReport(SelectedCoCodes: string);
 begin
     var Debtors: IDebtors:=TDebtors.Create();
-    Debtors.ReadAgeViewAsync(SelectedCoCodes, 0, ReadAgeView_Callback);
+    Debtors.ReadAgeViewAsync(SelectedCoCodes, cbAgeSorting.Text, ReadAgeView_Callback);
 end;
 
 
@@ -1996,7 +1987,7 @@ begin
 end;
 
 
-procedure TMainForm.ComputeRiskClass(var Grid: TStringGrid);
+procedure TMainForm.ComputeRiskClass(var Grid: TStringGrid); // make async?
 begin
 
     if Balance = 0 then Exit();
@@ -2323,28 +2314,23 @@ end;
 
 procedure TMainForm.SetButtonsGlyphs();
 begin
-
     // ---------------------------------------------------------------------------
     // Make sure that the glyph styled buttons have proper transparency color set.
     // Note: always set transparent color.
     // ---------------------------------------------------------------------------
-
     Action_QuickReporting.Bitmap.Transparent:=True;
     Action_QuickReporting.Bitmap.TransparentColor:=clWhite;
     btnLbuUpdate.Glyph.Transparent:=True;
     btnLbuUpdate.Glyph.TransparentColor:=clWhite;
-
 end;
 
 
 function TMainForm.AddressBookExclusion(): boolean;
 begin
-
     // ----------------------------------------------------------------------
     // Indicates editable columns. Use it to examin if user should be able to
     // edit selected cell in StrigGrid component.
     // ----------------------------------------------------------------------
-
     if
         (
             sgAddressBook.Col = sgAddressBook.ReturnColumn(DbModel.TAddressBook.Emails, 1, 1)
@@ -2367,7 +2353,6 @@ begin
     else
         // Exclude anything else from editing
         Result:=True;
-
 end;
 
 
@@ -2458,19 +2443,16 @@ end;
 
 procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
-
     // -----------------------------------------------------------------------------------------------------------------------------------
     // Execute when application receives windows message on shutting down the system; or user press key combination of <ALT> + <Y>; or
     // simply clicks close button on application caption bar. Standard behaviour of application on close button is changed to minimisation
     // of the application to system tray (removes icon from taskbar).
     // -----------------------------------------------------------------------------------------------------------------------------------
-
     case FAllowClose of
 
         // ------------------------------------------------
         // Go minimize and hide from taskbar, do not close.
         // ------------------------------------------------
-
         False:
         begin
             CanClose:=False;
@@ -2481,14 +2463,13 @@ begin
         // ---------------------
         // Shutdown application.
         // ---------------------
-
         True:
         begin
 
             SwitchTimers(TAppTimers.TurnedOff);
             ChromiumWindow.CloseBrowser(True);
 
-            var UserLogs: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
+            var UserLogs: TDataTables:=TDataTables.Create(SessionService.FDbConnect); // make async // to utils
             try
 
                 try
@@ -2496,7 +2477,6 @@ begin
                     // ----------------------------------
                     // Update user event log in database.
                     // ----------------------------------
-
                     var Today: string:=FormatDateTime(TDateTimeFormats.DateTimeFormat, Now);
 
                     UserLogs.Columns.Add(TUnityEventLogs.UserAlias);
@@ -2506,13 +2486,12 @@ begin
                     UserLogs.Values.Add(SessionService.SessionUser.ToUpper);
                     UserLogs.Values.Add(Today);
                     UserLogs.Values.Add(THelpers.LoadFileToStr(ThreadFileLog.LogFileName));
-                    UserLogs.Values.Add('Unity Cadiz.');
+                    UserLogs.Values.Add('Unity Platform');
                     UserLogs.InsertInto(TUnityEventLogs.UnityEventLogs, True);
 
                     // -------------------------------------
                     // Save last window position and layout.
                     // -------------------------------------
-
                     if sgAgeView.RowCount > 2 then
                         sgAgeView.SaveLayout(
                             TConfigSections.ColumnWidthName,
@@ -2538,7 +2517,6 @@ begin
                     // --------------------------------------------
                     // Close database connection and allow to quit.
                     // --------------------------------------------
-
                     if Assigned(SessionService.FDbConnect) then
                     begin
                         SessionService.FDbConnect.Close();

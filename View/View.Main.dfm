@@ -10290,15 +10290,7 @@ object MainForm: TMainForm
             BevelInner = bvNone
             Style = csDropDownList
             DropDownCount = 10
-            ItemIndex = 0
             TabOrder = 0
-            Text = 'All ranges down'
-            Items.Strings = (
-              'All ranges down'
-              'Follow-up (Z-A)'
-              'By customer name (A-Z)'
-              'Total amount (Z-A)'
-              'Total overdue (Z-A)')
           end
         end
       end

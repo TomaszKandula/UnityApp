@@ -150,6 +150,14 @@ type
         /// </remarks>
         procedure GetCompanyCodesAwaited(var SelectedCoCodes: TStringList);
 
+        /// <summary>
+        /// Allow to load async. list of sorting options available for aging report. There is no separate notification.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        procedure GetSortingOptionsAwaited(var SortingOptions: TStringList);
+
     end;
 
 
@@ -235,6 +243,14 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         procedure GetCompanyCodesAwaited(var SelectedCoCodes: TStringList);
+
+        /// <summary>
+        /// Allow to load async. list of sorting options available for aging report. There is no separate notification.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        procedure GetSortingOptionsAwaited(var SortingOptions: TStringList);
 
     end;
 
@@ -697,7 +713,6 @@ begin
                 // -----------------------
                 // Check current password.
                 // -----------------------
-
                 var ReHashed: boolean;
                 var Settings: ISettings:=TSettings.Create;
                 var Hash: string:=Settings.GetStringValue(TConfigSections.PasswordSection, 'HASH', '');
@@ -708,7 +723,6 @@ begin
                     // ------------------------------
                     // Setup newly provided password.
                     // ------------------------------
-
                     var HashPasswd: string:=TBcrypt.HashPassword(NewPassword);
 
                     Settings.SetStringValue(TConfigSections.PasswordSection, 'HASH', HashPasswd);
@@ -778,6 +792,43 @@ begin
         NewTask.Start();
         TTask.WaitForAll(NewTask);
         SelectedCoCodes.AddStrings(TempList);
+
+    finally
+        TempList.Free();
+    end;
+
+end;
+
+
+procedure TUtilities.GetSortingOptionsAwaited(var SortingOptions: TStringList);
+begin
+
+    var TempList:=TStringList.Create();
+    try
+
+        var NewTask: ITask:=TTask.Create(procedure
+        begin
+
+            var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
+            var StringGrid:=TStringGrid.Create(nil);
+            try
+
+                DataTables.StrSQL:='select ModeDesc from Customer.SortingOptions';
+                DataTables.SqlToGrid(StringGrid, DataTables.ExecSQL, False, False);
+
+                for var iCNT:=1{Skip header} to StringGrid.RowCount - 1 do
+                    TempList.Add(StringGrid.Cells[1{ModeDesc}, iCNT]);
+
+            finally
+                DataTables.Free();
+                StringGrid.Free();
+            end;
+
+        end);
+
+        NewTask.Start();
+        TTask.WaitForAll(NewTask);
+        SortingOptions.AddStrings(TempList);
 
     finally
         TempList.Free();

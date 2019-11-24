@@ -108,12 +108,10 @@ begin
             FilterList.Clear();
             var Utilities: IUtilities:=TUtilities.Create();
             var GetCoCodeList:=TStringList.Create();
+
             try
-
                 Utilities.GetCompanyCodesAwaited(GetCoCodeList);
-                for var iCNT:=0 to GetCoCodeList.Count - 1 do
-                    FilterList.Items.Add(GetCoCodeList.Strings[iCNT]);
-
+                FilterList.Items.AddStrings(GetCoCodeList);
             finally
                 GetCoCodeList.Free();
             end;
