@@ -34,7 +34,6 @@ object QmsForm: TQmsForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
-    ExplicitTop = 602
     object btnLog: TSpeedButton
       Left = 441
       Top = 12
@@ -125,7 +124,6 @@ object QmsForm: TQmsForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 1
-    ExplicitHeight = 582
     object MainFrame: TGroupBox
       AlignWithMargins = True
       Left = 10
@@ -139,7 +137,6 @@ object QmsForm: TQmsForm
       Align = alClient
       Caption = 'QMS'
       TabOrder = 0
-      ExplicitHeight = 562
       object MissingInvoiceBox: TGroupBox
         AlignWithMargins = True
         Left = 22
@@ -153,7 +150,6 @@ object QmsForm: TQmsForm
         Align = alClient
         Caption = 'Missing invoice'
         TabOrder = 0
-        ExplicitHeight = 335
         object Currency: TLabel
           Left = 49
           Top = 270
@@ -552,7 +548,6 @@ object QmsForm: TQmsForm
         Color = clWhite
         ParentBackground = False
         TabOrder = 1
-        ExplicitTop = 380
         object StatusLabel: TLabel
           Left = 10
           Top = 7

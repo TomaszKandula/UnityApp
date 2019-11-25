@@ -144,6 +144,14 @@ type
         /// </remarks>
         procedure GetSortingOptionsAwaited(var SortingOptions: TStringList);
 
+        /// <summary>
+        /// Allow to write async. user logs to database. There is no separate notification.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        function SaveUserLogsAwaited(): TCallResponse;
+
     end;
 
 
@@ -229,6 +237,14 @@ type
         /// </remarks>
         procedure GetSortingOptionsAwaited(var SortingOptions: TStringList);
 
+        /// <summary>
+        /// Allow to write async. user logs to database. There is no separate notification.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        function SaveUserLogsAwaited(): TCallResponse;
+
     end;
 
 
@@ -246,6 +262,7 @@ uses
     Unity.SessionService,
     Unity.Chars,
     Unity.Common,
+    Unity.DateTimeFormats,
     Sync.Documents,
     Bcrypt,
     DbModel{Legacy};
@@ -751,6 +768,55 @@ begin
     finally
         TempList.Free();
     end;
+
+end;
+
+
+function TUtilities.SaveUserLogsAwaited(): TCallResponse;
+begin
+
+    var NewCallResponse: TCallResponse;
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
+        try
+
+            try
+
+                var Today: string:=FormatDateTime(TDateTimeFormats.DateTimeFormat, Now);
+
+                DataTables.Columns.Add(TUnityEventLogs.UserAlias);
+                DataTables.Columns.Add(TUnityEventLogs.DateTimeStamp);
+                DataTables.Columns.Add(TUnityEventLogs.AppEventLog);
+                DataTables.Columns.Add(TUnityEventLogs.AppName);
+                DataTables.Values.Add(SessionService.SessionUser.ToUpper);
+                DataTables.Values.Add(Today);
+                DataTables.Values.Add(THelpers.LoadFileToStr(ThreadFileLog.LogFileName));
+                DataTables.Values.Add('Unity Platform');
+                DataTables.InsertInto(TUnityEventLogs.UnityEventLogs, True);
+
+                NewCallResponse.IsSucceeded:=True;
+
+            except
+                on E: Exception do
+                begin
+                    NewCallResponse.IsSucceeded:=False;
+                    NewCallResponse.LastMessage:='[SaveUserLogsAwaited]: ' + E.Message;
+                end;
+
+            end;
+
+        finally
+            DataTables.Free();
+        end;
+
+    end);
+
+    NewTask.Start();
+    TTask.WaitForAll(NewTask);
+    Result:=NewCallResponse;
 
 end;
 

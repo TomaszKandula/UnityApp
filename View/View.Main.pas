@@ -148,73 +148,73 @@ type
         N3: TMenuItem;
         TabSheet6: TTabSheet;
         sgOpenItems: TStringGrid;
-        Header3: TPanel;
+    AddressBookHeader: TPanel;
         sgAddressBook: TStringGrid;
-        Header8: TPanel;
+    SettingsHeader: TPanel;
         EditPassword: TEdit;
-        Cap21: TShape;
-        hShapeCred: TShape;
-        Text32: TLabel;
-        Text33: TLabel;
-        hShapePass: TShape;
-        Cap22: TShape;
-        Text37: TLabel;
-        Text38: TLabel;
-        Text39: TLabel;
+    ShapeAdminEntryCap: TShape;
+    ShapeAdminEntryFrm: TShape;
+    txtAdminPassword: TLabel;
+    txtInfoAdmin: TLabel;
+    ShapeAdminPassFrm: TShape;
+    ShapeAdminPassCap: TShape;
+    txtCurrentPassword: TLabel;
+    txtNewPassword: TLabel;
+    txtConfirmPassword: TLabel;
         EditCurrentPassword: TEdit;
         EditNewPassword: TEdit;
         EditNewPasswordConfirmation: TEdit;
-        ShapeList1: TShape;
+    ShapeAppSettingsFrm: TShape;
         imgKeyAdd: TImage;
         imgKeyRemove: TImage;
         imgUpdateValues: TImage;
-        Text41: TLabel;
-        Text42: TLabel;
-        Text43: TLabel;
+    txtKeyAdd: TLabel;
+    txtKeyRemove: TLabel;
+    txtUpdateValues: TLabel;
         sgListValue: TStringGrid;
         sgListSection: TStringGrid;
         imgSectionAdd: TImage;
         imgSectionRemove: TImage;
-        Text48: TLabel;
-        Text49: TLabel;
-        Cap23: TShape;
-        Text44: TLabel;
-        hShapeActionPAB: TShape;
-        Cap13: TShape;
+    txtSectionAdd: TLabel;
+    txtSectionRemove: TLabel;
+    ShapeAppSettingsCap: TShape;
+    txtSettingsWarn: TLabel;
+    ShapeAddressBookFrm: TShape;
+    ShapeAddressBookCap: TShape;
         imgOFF: TImage;
-        Header2: TPanel;
-        hShapeActionsVOI: TShape;
-        Cap10: TShape;
-        hShapeDetailsVOI: TShape;
-        Cap12: TShape;
+        OpenItemsHeader: TPanel;
+        ShapeReloadFrm: TShape;
+        ShapeReloadCap: TShape;
+        ShapeSumsFrm: TShape;
+        ShapeSumsCap: TShape;
         btnReload: TImage;
-        Text54L1: TLabel;
-        btnOpenAB: TImage;
-        btnUpdateAB: TImage;
-        btnCloseAB: TImage;
-        Text64: TLabel;
-        Text66: TLabel;
-        Text67: TLabel;
-        Text55: TLabel;
-        Text56: TLabel;
-        Text57: TLabel;
-        Text58: TLabel;
+        txtReloadBtnA: TLabel;
+    btnOpenAb: TImage;
+    btnUpdateAb: TImage;
+    btnCloseAb: TImage;
+    txtOpenAb: TLabel;
+    txtUpdateAb: TLabel;
+    txtCloseAb: TLabel;
+        txtAllOpenItems: TLabel;
+        txtInvoices: TLabel;
+        txtOverdueItems: TLabel;
+        txtOutstanding: TLabel;
         valOpenItems: TLabel;
         valInvoices: TLabel;
         amtOutstanding: TLabel;
         valOverdue: TLabel;
-        btnExportAB: TImage;
-        Text69: TLabel;
-        Header4: TPanel;
-        hShapeInfoAM: TShape;
-        Cap43: TShape;
+    btnExportAb: TImage;
+    txtExportAb: TLabel;
+    InvoiceTrackerHeader: TPanel;
+    ShapeTrackerInfoFrm: TShape;
+    ShapeTrackerInfoCap: TShape;
         Header6: TPanel;
         ShapeContent6: TShape;
         Cap61: TShape;
-        Header7: TPanel;
-        hShapeInfoGT: TShape;
-        Cap15: TShape;
-        Text54L2: TLabel;
+    GeneralTablesHeader: TPanel;
+    ShapeTablesInfoFrm: TShape;
+    ShapeTablesInfoCap: TShape;
+        txtReloadBtnB: TLabel;
         MainShape6: TPanel;
         AppFooter: TPanel;
         txtCurrentDate: TLabel;
@@ -230,19 +230,19 @@ type
         txtInfo2: TLabel;
         FileCSVExport: TSaveDialog;
         FileCSVImport: TOpenDialog;
-        ContentPanel7: TPanel;
+    GeneralTablesMainPanel: TPanel;
         ContentPanel6: TPanel;
-        ContentPanel1: TPanel;
-        ContentPanel: TPanel;
-        ContentPanel2: TPanel;
-        MainPanel: TPanel;
+    InvoiceTrackerMainPanel: TPanel;
+    AddressBookMainPanel: TPanel;
+        OpenItemsMainPanel: TPanel;
+        DebtorsMainPanel: TPanel;
         DebtorsBottomPanel: TPanel;
-        ContentPanel8: TPanel;
-        InnerPanel8Left: TPanel;
+    SettingsMainPanel: TPanel;
+    SettingsInnerPanel: TPanel;
         amtUnallocated: TLabel;
-        Text70: TLabel;
+        txtUnallocated: TLabel;
         TimerCustOpenItems: TTimer;
-        Text82: TLabel;
+        txtOverdue: TLabel;
         amtOverdue: TLabel;
         txtCutOffDate: TLabel;
         valRiskClassA: TLabel;
@@ -254,9 +254,9 @@ type
         sgInvoiceTracker: TStringGrid;
         PopupAgeView: TPopupMenu;
         Action_Tracker: TMenuItem;
-        Label2: TLabel;
-        Label3: TLabel;
-        Label4: TLabel;
+    InfoLine1: TLabel;
+    InfoLine2: TLabel;
+    InfoLine3: TLabel;
         PopupTracker: TPopupMenu;
         Action_Remove: TMenuItem;
         Action_ShowMy: TMenuItem;
@@ -270,14 +270,14 @@ type
         N7: TMenuItem;
         N6: TMenuItem;
         Action_AddToBook: TMenuItem;
-        Text50: TLabel;
+    txtAllowEdit: TLabel;
         imgAllowEdit: TImage;
-        SplitLine1: TBevel;
+    SplitLine2: TBevel;
         sgCoCodes: TStringGrid;
         sgPaidInfo: TStringGrid;
         sgPmtTerms: TStringGrid;
         Action_AutoColumnSize: TMenuItem;
-        SplitLine2: TBevel;
+    SplitLine1: TBevel;
         Action_Search: TMenuItem;
         PopupBook: TPopupMenu;
         Action_Copy: TMenuItem;
@@ -318,7 +318,7 @@ type
         Action_FollowUpColors: TMenuItem;
         SplitLine3: TBevel;
         imgEventLog: TImage;
-        Text51: TLabel;
+    txtEventLog: TLabel;
         Action_INF7_Filter: TMenuItem;
         Action_CoCode_Filter: TMenuItem;
         Action_Agent_Filter: TMenuItem;
@@ -333,22 +333,21 @@ type
         AppMenu: TPanel;
         Separator1: TBevel;
         Separator2: TBevel;
-        PanelOpenItems: TPanel;
-        PanelAddressBook: TPanel;
-        PanelInvoiceTracker: TPanel;
-        ImgLoadingInvoiceTracker: TImage;
-        PanelCoCodes: TPanel;
-        PanelPaidInfo: TPanel;
-        PanelPmtTerms: TPanel;
-        PanelSettingsSections: TPanel;
-        PanelSettingsValues: TPanel;
+    OpenItemsPanel: TPanel;
+    AddressBookPanel: TPanel;
+    InvoiceTrackerPanel: TPanel;
+    CoCodesPanel: TPanel;
+    PaidInfoPanel: TPanel;
+    PmtTermsPanel: TPanel;
+    SettingsInnerSections: TPanel;
+    SettingsInnerValues: TPanel;
         btnUnlock: TSpeedButton;
         btnPassUpdate: TSpeedButton;
         Action_AddFollowUpGroup: TMenuItem;
         Action_RemoveFollowUps: TMenuItem;
         Action_MassMailer: TMenuItem;
         btnPasswordPreview: TSpeedButton;
-        hShapeEye: TShape;
+    ShapeShowPassword: TShape;
         N20: TMenuItem;
         N21: TMenuItem;
         Action_Free2: TMenuItem;
@@ -386,7 +385,7 @@ type
         txtSettings: TLabel;
         ChromiumWindow: TChromiumWindow;
         Chromium: TChromium;
-        PanelControlStatus: TPanel;
+    ControlStatusPanel: TPanel;
         sgControlStatus: TStringGrid;
         Tables: TPageControl;
         Page1: TTabSheet;
@@ -397,15 +396,15 @@ type
         Page8: TTabSheet;
         Page9: TTabSheet;
         Page10: TTabSheet;
-        PanelPersonResp: TPanel;
+    PersonRespPanel: TPanel;
         sgPersonResp: TStringGrid;
-        PanelSalesResp: TPanel;
+    SalesRespPanel: TPanel;
         sgSalesResp: TStringGrid;
-        PanelAccountType: TPanel;
+    AccountTypePanel: TPanel;
         sgAccountType: TStringGrid;
-        PanelCustomerGr: TPanel;
+    CustomerGrPanel: TPanel;
         sgCustomerGr: TStringGrid;
-        DebtorsAgeView: TPanel;
+    DebtorsPanel: TPanel;
         shapeFrame: TShape;
         Action_Free3: TMenuItem;
         N4: TMenuItem;
@@ -479,7 +478,7 @@ type
         valAadUser: TLabel;
         Separator3: TBevel;
         Separator4: TBevel;
-        PanelSettingsHeader: TPanel;
+    SettingsInnerHeader: TPanel;
         valCutOffDate: TLabel;
         txtRcaAmount: TLabel;
         txtRcbAmount: TLabel;
@@ -492,7 +491,7 @@ type
         txtGetAgingReport: TLabel;
         txtRefreshReport: TLabel;
         btnSearchAb: TImage;
-        Text72: TLabel;
+    txtSearchAb: TLabel;
         cbAgeSorting: TComboBox;
         txtAgeSorting: TLabel;
         bevelVertSeparator: TBevel;
@@ -535,14 +534,14 @@ type
         procedure sgOpenItemsMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure btnReloadMouseEnter(Sender: TObject);
         procedure btnReloadMouseLeave(Sender: TObject);
-        procedure btnOpenABMouseEnter(Sender: TObject);
-        procedure btnOpenABMouseLeave(Sender: TObject);
-        procedure btnUpdateABMouseEnter(Sender: TObject);
-        procedure btnUpdateABMouseLeave(Sender: TObject);
-        procedure btnCloseABMouseEnter(Sender: TObject);
-        procedure btnCloseABMouseLeave(Sender: TObject);
-        procedure btnExportABMouseEnter(Sender: TObject);
-        procedure btnExportABMouseLeave(Sender: TObject);
+        procedure btnOpenAbMouseEnter(Sender: TObject);
+        procedure btnOpenAbMouseLeave(Sender: TObject);
+        procedure btnUpdateAbMouseEnter(Sender: TObject);
+        procedure btnUpdateAbMouseLeave(Sender: TObject);
+        procedure btnCloseAbMouseEnter(Sender: TObject);
+        procedure btnCloseAbMouseLeave(Sender: TObject);
+        procedure btnExportAbMouseEnter(Sender: TObject);
+        procedure btnExportAbMouseLeave(Sender: TObject);
         procedure sgListSectionKeyPress(Sender: TObject; var Key: Char);
         procedure sgListValueClick(Sender: TObject);
         procedure sgListSectionClick(Sender: TObject);
@@ -555,10 +554,10 @@ type
         procedure sgListValueMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure sgListValueKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure sgListSectionKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-        procedure btnCloseABClick(Sender: TObject);
-        procedure btnUpdateABClick(Sender: TObject);
-        procedure btnOpenABClick(Sender: TObject);
-        procedure btnExportABClick(Sender: TObject);
+        procedure btnCloseAbClick(Sender: TObject);
+        procedure btnUpdateAbClick(Sender: TObject);
+        procedure btnOpenAbClick(Sender: TObject);
+        procedure btnExportAbClick(Sender: TObject);
         procedure TabSheet7Show(Sender: TObject);
         procedure TabSheet7Resize(Sender: TObject);
         procedure sgCoCodesMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
@@ -822,8 +821,6 @@ type
         procedure RefreshInvoiceTracker_Callback(InvoiceList: TStringGrid; CallResponse: TCallResponse);
         procedure DeleteFromTrackerList_Callback(CallResponse: TCallResponse);
     public
-        var FIsConnected: boolean{Legacy};
-        procedure TryInitConnection{Legacy};
         var FRiskClassGroup: TRiskClassGroup;
         var FStartTime: TTime;
         var FGridPicture: TImage;
@@ -1032,8 +1029,8 @@ begin
                 sgAgeView.Cells[jCNT, iCNT]:=ReturnedData.Cells[jCNT, iCNT];
 
     finally
-        LoadColumnWidth(sgAgeView);
         sgAgeView.Freeze(False);
+        LoadColumnWidth(sgAgeView);
         ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Age View updated.');
     end;
 
@@ -1041,12 +1038,12 @@ begin
     UpdateAgeSummary(PayLoad);
     ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Age View summary information updated.');
 
-    MapSalesResponsible(sgAgeView, sgSalesResp); // async!
-    MapPersonResponsible(sgAgeView, sgPersonResp); // async!
-    MapAccountType(sgAgeView, sgAccountType); // async!
-    MapCustomerGroup(sgAgeView, sgCustomerGr); // async!
-    MapPaymentTerms(sgAgeView, sgPmtTerms); // async!
-    ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Mapping performed.');
+//    MapSalesResponsible(sgAgeView, sgSalesResp); // async!
+//    MapPersonResponsible(sgAgeView, sgPersonResp); // async!
+//    MapAccountType(sgAgeView, sgAccountType); // async!
+//    MapCustomerGroup(sgAgeView, sgCustomerGr); // async!
+//    MapPaymentTerms(sgAgeView, sgPmtTerms); // async!
+//    ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Mapping performed.');
 
     SwitchTimers(TurnedOn);
     MainForm.UpdateStatusBar(TStatusBar.Ready);
@@ -1258,48 +1255,6 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------ LEGACY CODE - TO BE REMOVED [START]
-
-
-{remove}
-procedure TMainForm.TryInitConnection;
-begin
-
-    if not Assigned(SessionService.FDbConnect) then
-        SessionService.FDbConnect:=TADOConnection.Create(nil);
-
-    var DataBase:=TDataBase.Create(True);
-    try
-
-        if DataBase.Check = 0 then
-        begin
-
-            if DataBase.InitializeConnection(True, SessionService.FDbConnect) then
-            begin
-
-            end;
-
-            ThreadFileLog.Log('[TryInitConnection]: Server connection has been established successfully.');
-            FIsConnected:=True;
-            SwitchTimers(TurnedOn);
-
-        end
-        else
-        begin
-            FIsConnected:=False;
-            SwitchTimers(TurnedOff);
-        end;
-
-    finally
-        DataBase.Free();
-    end;
-
-end;
-
-
-// -------------------------------------------------------------------------------------------------------------------------- LEGACY CODE - TO BE REMOVED [END]
-
-
 // ---------------------------------------------------------------------------------------------------------------------------------------- WINDOWS MESSAGES //
 
 
@@ -1407,7 +1362,6 @@ begin
                 SwitchTimers(TurnedOff);
                 SessionService.FDbConnect.Connected:=False;
                 SessionService.FDbConnect:=nil;
-                FIsConnected:=False;
                 ThreadFileLog.Log('[WndMessagesWindows]: Detected '
                     + IntToStr(PassMsg.Msg) + ' WM_POWERBROADCAST with PBT_APMSUSPEND. Going into suspension mode, Unity is disconnected from server.'
                 );
@@ -1484,8 +1438,8 @@ begin
     TimerUpTime.Enabled:=True;
     TimerCurrentTime.Enabled:=True;
 
-    var Queries: IQueries:=TQueries.Create;
-    Queries.InitializeQms;
+//    var Queries: IQueries:=TQueries.Create;
+//    Queries.InitializeQms;
 
 end;
 
@@ -2094,28 +2048,29 @@ end;
 procedure TMainForm.SetPanelBorders();
 begin
     AppHeader.PanelBorders            ($00E3B268, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    DebtorsAgeView.PanelBorders       (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PanelOpenItems.PanelBorders       (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PanelAddressBook.PanelBorders     (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PanelInvoiceTracker.PanelBorders  (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PanelCoCodes.PanelBorders         (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PanelControlStatus.PanelBorders   (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PanelPaidInfo.PanelBorders        (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PanelPmtTerms.PanelBorders        (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PanelSettingsSections.PanelBorders(clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PanelSettingsValues.PanelBorders  (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PanelSalesResp.PanelBorders       (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PanelPersonResp.PanelBorders      (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PanelCustomerGr.PanelBorders      (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PanelAccountType.PanelBorders     (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PanelFSC.PanelBorders             (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PanelLBU.PanelBorders             (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PanelLBUGrid.PanelBorders         (clWhite,   $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
-    PanelFSCGrid.PanelBorders         (clWhite,   $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
-    PanelFscComment.PanelBorders      (clWhite,   $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
-    PanelLbuComment.PanelBorders      (clWhite,   $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
-    PanelFscDetails.PanelBorders      (clWhite,   $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
-    PanelLbuDetails.PanelBorders      (clWhite,   $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
+    DebtorsPanel.PanelBorders         (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    OpenItemsPanel.PanelBorders       (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    AddressBookPanel.PanelBorders     (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    InvoiceTrackerPanel.PanelBorders  (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    CoCodesPanel.PanelBorders         (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    ControlStatusPanel.PanelBorders   (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PaidInfoPanel.PanelBorders        (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PmtTermspanel.PanelBorders        (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    SalesRespPanel.PanelBorders       (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PersonRespPanel.PanelBorders      (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    CustomerGrPanel.PanelBorders      (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    AccountTypePanel.PanelBorders     (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    SettingsInnerSections.PanelBorders(clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    SettingsInnerValues.PanelBorders  (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+//    PanelFSC.PanelBorders             (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+//    PanelLBU.PanelBorders             (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+//    PanelLBUGrid.PanelBorders         (clWhite,   $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
+//    PanelFSCGrid.PanelBorders         (clWhite,   $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
+//    PanelFscComment.PanelBorders      (clWhite,   $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
+//    PanelLbuComment.PanelBorders      (clWhite,   $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
+//    PanelFscDetails.PanelBorders      (clWhite,   $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
+//    PanelLbuDetails.PanelBorders      (clWhite,   $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
+
 end;
 
 
@@ -2286,16 +2241,14 @@ end;
 
 procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
-    // -----------------------------------------------------------------------------------------------------------------------------------
-    // Execute when application receives windows message on shutting down the system; or user press key combination of <ALT> + <Y>; or
-    // simply clicks close button on application caption bar. Standard behaviour of application on close button is changed to minimisation
-    // of the application to system tray (removes icon from taskbar).
-    // -----------------------------------------------------------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------
+    // Execute when application receives windows message on shutting down the system;
+    // or user press key combination of <ALT> + <Y>; or simply clicks close button on
+    // application caption bar. Standard behaviour of application on close button is
+    // changed to minimisation of the application to system tray (removes icon from taskbar).
+    // --------------------------------------------------------------------------------------
     case FAllowClose of
 
-        // ------------------------------------------------
-        // Go minimize and hide from taskbar, do not close.
-        // ------------------------------------------------
         False:
         begin
             CanClose:=False;
@@ -2303,82 +2256,50 @@ begin
             Hide();
         end;
 
-        // ---------------------
-        // Shutdown application.
-        // ---------------------
         True:
         begin
 
             SwitchTimers(TAppTimers.TurnedOff);
             ChromiumWindow.CloseBrowser(True);
 
-            var UserLogs: TDataTables:=TDataTables.Create(SessionService.FDbConnect); // make async // to utils
-            try
+            var Utilities: IUtilities:=TUtilities.Create();
+            var CallResponse: TCallResponse;
+            CallResponse:=Utilities.SaveUserLogsAwaited();
 
-                try
+            if not CallResponse.IsSucceeded then
+                THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
 
-                    // ----------------------------------
-                    // Update user event log in database.
-                    // ----------------------------------
-                    var Today: string:=FormatDateTime(TDateTimeFormats.DateTimeFormat, Now);
+            if sgAgeView.RowCount > 2 then
+                sgAgeView.SaveLayout(
+                    TConfigSections.ColumnWidthName,
+                    TConfigSections.ColumnOrderName,
+                    TConfigSections.ColumnNames,
+                    TConfigSections.ColumnPrefix
+                );
 
-                    UserLogs.Columns.Add(TUnityEventLogs.UserAlias);
-                    UserLogs.Columns.Add(TUnityEventLogs.DateTimeStamp);
-                    UserLogs.Columns.Add(TUnityEventLogs.AppEventLog);
-                    UserLogs.Columns.Add(TUnityEventLogs.AppName);
-                    UserLogs.Values.Add(SessionService.SessionUser.ToUpper);
-                    UserLogs.Values.Add(Today);
-                    UserLogs.Values.Add(THelpers.LoadFileToStr(ThreadFileLog.LogFileName));
-                    UserLogs.Values.Add('Unity Platform');
-                    UserLogs.InsertInto(TUnityEventLogs.UnityEventLogs, True);
+            var Settings: ISettings:=TSettings.Create;
+            Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_TOP',  MainForm.Top);
+            Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_LEFT', MainForm.Left);
+            Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_WIDTH', MainForm.Width);
+            Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_HEIGHT', MainForm.Height);
 
-                    // -------------------------------------
-                    // Save last window position and layout.
-                    // -------------------------------------
-                    if sgAgeView.RowCount > 2 then
-                        sgAgeView.SaveLayout(
-                            TConfigSections.ColumnWidthName,
-                            TConfigSections.ColumnOrderName,
-                            TConfigSections.ColumnNames,
-                            TConfigSections.ColumnPrefix
-                        );
-
-                    var Settings: ISettings:=TSettings.Create;
-                    Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_TOP',  MainForm.Top);
-                    Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_LEFT', MainForm.Left);
-                    Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_WIDTH', MainForm.Width);
-                    Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_HEIGHT', MainForm.Height);
-
-                    case MainForm.WindowState of
-                        wsNormal:    Settings.SetStringValue(TConfigSections.ApplicationDetails, 'WINDOW_STATE', 'wsNormal');
-                        wsMaximized: Settings.SetStringValue(TConfigSections.ApplicationDetails, 'WINDOW_STATE', 'wsMaximized');
-                        wsMinimized: Settings.SetStringValue(TConfigSections.ApplicationDetails, 'WINDOW_STATE', 'wsMinimized');
-                    end;
-
-                    Settings.Encode(TAppFiles.Configuration);
-
-                    // --------------------------------------------
-                    // Close database connection and allow to quit.
-                    // --------------------------------------------
-                    if Assigned(SessionService.FDbConnect) then
-                    begin
-                        SessionService.FDbConnect.Close();
-                        FreeAndNil(SessionService.FDbConnect);
-                    end;
-
-                    FAllowClose:=False;
-                    CanClose:=not FAllowClose;
-                    StartupForm.Close();
-
-                except on
-                    E: Exception do
-                        THelpers.MsgCall(TAppMessage.Error, 'An error occured during exiting the application. Message: ' + E.Message);
-
-                end;
-
-            finally
-                UserLogs.Free();
+            case MainForm.WindowState of
+                wsNormal:    Settings.SetStringValue(TConfigSections.ApplicationDetails, 'WINDOW_STATE', 'wsNormal');
+                wsMaximized: Settings.SetStringValue(TConfigSections.ApplicationDetails, 'WINDOW_STATE', 'wsMaximized');
+                wsMinimized: Settings.SetStringValue(TConfigSections.ApplicationDetails, 'WINDOW_STATE', 'wsMinimized');
             end;
+
+            Settings.Encode(TAppFiles.Configuration);
+
+            if Assigned(SessionService.FDbConnect) then
+            begin
+                SessionService.FDbConnect.Close();
+                FreeAndNil(SessionService.FDbConnect);
+            end;
+
+            FAllowClose:=False;
+            CanClose:=not FAllowClose;
+            StartupForm.Close();
 
         end;
 
@@ -2609,7 +2530,6 @@ begin
     // ----------------------------------------------------------------------------------
     // Allow to cut/paste the data from cell(s) if selected column is marked for editing.
     // ----------------------------------------------------------------------------------
-
     if AddressBookExclusion then
     begin
         THelpers.MsgCall(TAppMessage.Warn, 'This column is locked for editing.');
@@ -2777,32 +2697,17 @@ end;
 procedure TMainForm.Action_LyncCallClick(Sender: TObject);
 begin
 
-    if FIsConnected then
-    begin
-
-        if valStatus.Caption = TStatusBar.Ready then
-            THelpers.WndCall(ActionsForm, TWindowState.Modal)
-        else
-            THelpers.MsgCall(TAppMessage.Warn, 'Wait until "Ready" status and try again.');
-
-    end
+    if valStatus.Caption = TStatusBar.Ready then
+        THelpers.WndCall(ActionsForm, TWindowState.Modal)
     else
-    THelpers.MsgCall(TAppMessage.Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+        THelpers.MsgCall(TAppMessage.Warn, 'Wait until "Ready" status and try again.');
 
 end;
 
 
 procedure TMainForm.Action_TrackerClick(Sender: TObject); // move to invoice tracker wnd
 begin
-
-    if not FIsConnected then
-    begin
-        THelpers.MsgCall(TAppMessage.Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
-        Exit();
-    end;
-
     THelpers.WndCall(TrackerForm, TWindowState.Modal);
-
 end;
 
 
@@ -2814,29 +2719,14 @@ end;
 
 procedure TMainForm.Action_AddToBookClick(Sender: TObject);
 begin
-
-    if FIsConnected then
-    begin
-        var AddressBook: IAddressBook:=TAddressBook.Create();
-        AddressBook.AddToAddressBookAsync(sgAgeView, AddToAddressBook_Callback);
-    end
-    else
-    THelpers.MsgCall(TAppMessage.Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
-
+    var AddressBook: IAddressBook:=TAddressBook.Create();
+    AddressBook.AddToAddressBookAsync(sgAgeView, AddToAddressBook_Callback);
 end;
 
 
 procedure TMainForm.Action_MassMailerClick(Sender: TObject);
 begin
-
-    if not FIsConnected then
-    begin
-        THelpers.MsgCall(TAppMessage.Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
-        Exit();
-    end;
-
     THelpers.WndCall(MassMailerForm, TWindowState.Modal);
-
 end;
 
 
@@ -3056,12 +2946,6 @@ begin
         sgAgeView.RowHeights[iCNT]:=sgAgeView.sgRowHeight;
 
     FilterForm.FilterClearAll();
-
-    // Re-compute aging summary
-    //MainForm.ComputeAgeSummary(MainForm.sgAgeView);
-    //MainForm.ComputeRiskClass(MainForm.sgAgeView);
-    //MainForm.UpdateAgeSummary;
-
     sgAgeView.Freeze(False);
 
 end;
@@ -3110,13 +2994,13 @@ begin
 
     if Action_HideSummary.Checked then
     begin
-        DebtorsAgeView.Margins.Bottom:=12;
+        DebtorsPanel.Margins.Bottom:=12;
         DebtorsFooter.Visible:=False;
         Action_HideSummary.Checked:=False;
     end
     else
     begin
-        DebtorsAgeView.Margins.Bottom:=0;
+        DebtorsPanel.Margins.Bottom:=0;
         DebtorsFooter.Visible:=True;
         Action_HideSummary.Checked:=True;
     end;
@@ -3159,11 +3043,7 @@ end;
 
 procedure TMainForm.Action_RemoveClick(Sender: TObject);
 begin
-//    if not(FIsConnected) then
-//    begin
-//        THelpers.MsgCall(Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
-//        Exit();
-//    end;
+    {Empty}
 end;
 
 
@@ -3175,29 +3055,15 @@ end;
 
 procedure TMainForm.Action_ShowMyClick(Sender: TObject);
 begin
-
-    if FIsConnected then
-    begin
-        var Tracker: ITracker:=TTracker.Create();
-        Tracker.RefreshInvoiceTrackerAsync(UpperCase(SessionService.SessionUser), RefreshInvoiceTracker_Callback);
-    end
-    else
-    THelpers.MsgCall(TAppMessage.Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
-
+    var Tracker: ITracker:=TTracker.Create();
+    Tracker.RefreshInvoiceTrackerAsync(UpperCase(SessionService.SessionUser), RefreshInvoiceTracker_Callback);
 end;
 
 
 procedure TMainForm.Action_ShowAllClick(Sender: TObject);
 begin
-
-    if FIsConnected then
-    begin
-        var Tracker: ITracker:=TTracker.Create();
-        Tracker.RefreshInvoiceTrackerAsync(EmptyStr, RefreshInvoiceTracker_Callback);
-    end
-    else
-    THelpers.MsgCall(TAppMessage.Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
-
+    var Tracker: ITracker:=TTracker.Create();
+    Tracker.RefreshInvoiceTrackerAsync(EmptyStr, RefreshInvoiceTracker_Callback);
 end;
 
 
@@ -3211,7 +3077,6 @@ begin
     // Show the application form when user double click application
     // icon visible on system tray.
     // ------------------------------------------------------------
-
     if not View.Startup.StartupForm.IsAppInitialized then
         TrayIcon.PopupMenu:=nil
     else
@@ -3239,9 +3104,7 @@ end;
 
 procedure TMainForm.TabSheet5Show(Sender: TObject);
 begin
-    {var Queries: IQueries:=TQueries.Create();}
-    {Queries.UpdateQmsViewFsc(sgFSCview);}
-    {Queries.UpdateQmsViewLbu(sgLBUview);}
+    {Empty}
 end;
 
 
@@ -3298,14 +3161,11 @@ begin
             var SqlRows: integer;
             var TmpRows: integer;
 
-            // Setting up dimensions
-
             // -------------------------------------------------------
             // "High" method returns number of rows counting from zero
             // while "setlength" method setup array counting from one
             // therefore, we need to add one to match dimensions.
             // -------------------------------------------------------
-
             SqlRows:=high(sgAgeView.SqlColumns);
             Inc(SqlRows);
             SetLength(Temp, SqlRows, 2);
@@ -3315,7 +3175,6 @@ begin
             // Copy SQL array to temp array.
             // Note: Do not use "copy" method!
             // -------------------------------
-
             for iCNT:=0 to TmpRows do
                 for jCNT:=0 to 1 do
                     Temp[iCNT, jCNT]:=sgAgeView.SqlColumns[iCNT, jCNT];
@@ -3372,24 +3231,19 @@ end;
 
 procedure TMainForm.sgInvoiceTrackerDblClick(Sender: TObject);
 begin
-    if FIsConnected then
-        THelpers.WndCall(InvoicesForm, TWindowState.Modal)
-    else
-        THelpers.MsgCall(TAppMessage.Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+    THelpers.WndCall(InvoicesForm, TWindowState.Modal)
 end;
 
 
 procedure TMainForm.sgLBUviewClick(Sender: TObject);
 begin
-    var Queries: IQueries:=TQueries.Create();
-    Queries.ShowItemDetails(sgLBUview.Cells[sgLBUview.ReturnColumn(TQmsLog.Id, 1, 1), sgLBUview.Row].ToInteger, False);
+    {Empty}
 end;
 
 
 procedure TMainForm.sgFSCviewClick(Sender: TObject);
 begin
-    var Queries: IQueries:=TQueries.Create();
-    Queries.ShowItemDetails(sgFSCview.Cells[sgFSCview.ReturnColumn(TQmsLog.Id, 1, 1), sgFSCview.Row].ToInteger, True);
+    {Empty}
 end;
 
 
@@ -3544,10 +3398,8 @@ begin
     var Col4: integer:=sgOpenItems.ReturnColumn(DbModel.TOpenitems.Am,       1, 1);
     var Col5: integer:=sgOpenItems.ReturnColumn(DbModel.TOpenitems.PmtStat,  1, 1);
 
-    // Selection
     MainForm.sgOpenItems.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True);
 
-    // Numeric values colors
     if
         (
             ACol = Col1
@@ -3722,13 +3574,11 @@ begin
     // -------------------------------
     // Turn off standard <ALT> + <F4>.
     // -------------------------------
-
     if (Key=VK_F4) and (Shift=[ssALT]) then Key:=0;
 
     // ----------------------------------------
     // Bind close application with <ALT> + <Y>.
     // ----------------------------------------
-
     if (Key=89) and (Shift=[ssALT]) then
     begin
 
@@ -4224,7 +4074,6 @@ begin
     // Allow to edit specific Address Book cells. Once edited, it will be saved to
     // database if user click "Update" button.
     // ---------------------------------------------------------------------------
-
     if
         (
             Key <> VK_LEFT
@@ -4351,14 +4200,14 @@ end;
 procedure TMainForm.sgListSectionKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
 
-    if Text50.Font.Style = [fsBold] then
+    if txtAllowEdit.Font.Style = [fsBold] then  // use private flag!
     begin
         if (Key = 86) and (Shift = [ssCtrl]) then sgListSection.CopyCutPaste(TActions.Paste);
         if (Key = 88) and (Shift = [ssCtrl]) then sgListSection.CopyCutPaste(TActions.Cut);
     end;
 
     if (Key = 67) and (Shift = [ssCtrl]) then sgListSection.CopyCutPaste(TActions.Copy);
-    if (Key = 46) and (Text50.Font.Style = [fsBold]) then sgListSection.DelEsc(TActions.Delete, sgListSection.Col, sgListSection.Row);
+    if (Key = 46) and (txtAllowEdit.Font.Style = [fsBold]) then sgListSection.DelEsc(TActions.Delete, sgListSection.Col, sgListSection.Row);
 
 end;
 
@@ -4378,14 +4227,14 @@ end;
 procedure TMainForm.sgListValueKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
 
-    if Text50.Font.Style = [fsBold] then
+    if txtAllowEdit.Font.Style = [fsBold] then // use private flag!
     begin
         if (Key = 86) and (Shift = [ssCtrl]) then sgListValue.CopyCutPaste(TActions.Paste);
         if (Key = 88) and (Shift = [ssCtrl]) then sgListValue.CopyCutPaste(TActions.Cut);
     end;
 
     if (Key = 67) and (Shift = [ssCtrl]) then sgListValue.CopyCutPaste(TActions.Copy);
-    if (Key = 46) and (Text50.Font.Style = [fsBold]) then sgListValue.DelEsc(TActions.Delete, sgListValue.Col, sgListValue.Row);
+    if (Key = 46) and (txtAllowEdit.Font.Style = [fsBold]) then sgListValue.DelEsc(TActions.Delete, sgListValue.Col, sgListValue.Row);
 
 end;
 
@@ -4888,159 +4737,159 @@ end;
 
 procedure TMainForm.btnReloadMouseEnter(Sender: TObject);
 begin
-    Text54L1.Font.Color:=AppButtonTxtSelected;
-    Text54L2.Font.Color:=AppButtonTxtSelected;
+    txtReloadBtnA.Font.Color:=AppButtonTxtSelected;
+    txtReloadBtnB.Font.Color:=AppButtonTxtSelected;
 end;
 
 
 procedure TMainForm.btnReloadMouseLeave(Sender: TObject);
 begin
-    Text54L1.Font.Color:=AppButtonTxtNormal;
-    Text54L2.Font.Color:=AppButtonTxtNormal;
+    txtReloadBtnA.Font.Color:=AppButtonTxtNormal;
+    txtReloadBtnB.Font.Color:=AppButtonTxtNormal;
 end;
 
 
 procedure TMainForm.btnSearchAbMouseEnter(Sender: TObject);
 begin
-    Text72.Font.Color:=AppButtonTxtSelected;
+    txtSearchAb.Font.Color:=AppButtonTxtSelected;
 end;
 
 
 procedure TMainForm.btnSearchAbMouseLeave(Sender: TObject);
 begin
-    Text72.Font.Color:=AppButtonTxtNormal;
+    txtSearchAb.Font.Color:=AppButtonTxtNormal;
 end;
 
 
-procedure TMainForm.btnOpenABMouseEnter(Sender: TObject);
+procedure TMainForm.btnOpenAbMouseEnter(Sender: TObject);
 begin
-    Text64.Font.Color:=AppButtonTxtSelected;
+    txtOpenAb.Font.Color:=AppButtonTxtSelected;
 end;
 
 
-procedure TMainForm.btnOpenABMouseLeave(Sender: TObject);
+procedure TMainForm.btnOpenAbMouseLeave(Sender: TObject);
 begin
-    Text64.Font.Color:=AppButtonTxtNormal;
+    txtOpenAb.Font.Color:=AppButtonTxtNormal;
 end;
 
 
-procedure TMainForm.btnUpdateABMouseEnter(Sender: TObject);
+procedure TMainForm.btnUpdateAbMouseEnter(Sender: TObject);
 begin
-    Text66.Font.Color:=AppButtonTxtSelected;
+    txtUpdateAb.Font.Color:=AppButtonTxtSelected;
 end;
 
 
-procedure TMainForm.btnUpdateABMouseLeave(Sender: TObject);
+procedure TMainForm.btnUpdateAbMouseLeave(Sender: TObject);
 begin
-    Text66.Font.Color:=AppButtonTxtNormal;
+    txtUpdateAb.Font.Color:=AppButtonTxtNormal;
 end;
 
 
-procedure TMainForm.btnCloseABMouseEnter(Sender: TObject);
+procedure TMainForm.btnCloseAbMouseEnter(Sender: TObject);
 begin
-    Text67.Font.Color:=AppButtonTxtSelected;
+    txtCloseAb.Font.Color:=AppButtonTxtSelected;
 end;
 
 
-procedure TMainForm.btnCloseABMouseLeave(Sender: TObject);
+procedure TMainForm.btnCloseAbMouseLeave(Sender: TObject);
 begin
-    Text67.Font.Color:=AppButtonTxtNormal;
+    txtCloseAb.Font.Color:=AppButtonTxtNormal;
 end;
 
 
-procedure TMainForm.btnExportABMouseEnter(Sender: TObject);
+procedure TMainForm.btnExportAbMouseEnter(Sender: TObject);
 begin
-    Text69.Font.Color:=AppButtonTxtSelected;
+    txtExportAb.Font.Color:=AppButtonTxtSelected;
 end;
 
 
-procedure TMainForm.btnExportABMouseLeave(Sender: TObject);
+procedure TMainForm.btnExportAbMouseLeave(Sender: TObject);
 begin
-    Text69.Font.Color:=AppButtonTxtNormal;
+    txtExportAb.Font.Color:=AppButtonTxtNormal;
 end;
 
 
 procedure TMainForm.imgKeyAddMouseEnter(Sender: TObject);
 begin
-    Text41.Font.Color:=AppButtonTxtSelected;
+    txtKeyAdd.Font.Color:=AppButtonTxtSelected;
 end;
 
 
 procedure TMainForm.imgKeyAddMouseLeave(Sender: TObject);
 begin
-    Text41.Font.Color:=AppButtonTxtNormal;
+    txtKeyAdd.Font.Color:=AppButtonTxtNormal;
 end;
 
 
 procedure TMainForm.imgKeyRemoveMouseEnter(Sender: TObject);
 begin
-    Text42.Font.Color:=AppButtonTxtSelected;
+    txtKeyRemove.Font.Color:=AppButtonTxtSelected;
 end;
 
 
 procedure TMainForm.imgKeyRemoveMouseLeave(Sender: TObject);
 begin
-    Text42.Font.Color:=AppButtonTxtNormal;
+    txtKeyRemove.Font.Color:=AppButtonTxtNormal;
 end;
 
 
 procedure TMainForm.imgUpdateValuesMouseEnter(Sender: TObject);
 begin
-    Text43.Font.Color:=AppButtonTxtSelected;
+    txtUpdateValues.Font.Color:=AppButtonTxtSelected;
 end;
 
 
 procedure TMainForm.imgUpdateValuesMouseLeave(Sender: TObject);
 begin
-    Text43.Font.Color:=AppButtonTxtNormal;
+    txtUpdateValues.Font.Color:=AppButtonTxtNormal;
 end;
 
 
 procedure TMainForm.imgSectionAddMouseEnter(Sender: TObject);
 begin
-    Text48.Font.Color:=AppButtonTxtSelected;
+    txtSectionAdd.Font.Color:=AppButtonTxtSelected;
 end;
 
 
 procedure TMainForm.imgSectionAddMouseLeave(Sender: TObject);
 begin
-    Text48.Font.Color:=AppButtonTxtNormal;
+    txtSectionAdd.Font.Color:=AppButtonTxtNormal;
 end;
 
 
 procedure TMainForm.imgSectionRemoveMouseEnter(Sender: TObject);
 begin
-    Text49.Font.Color:=AppButtonTxtSelected;
+    txtSectionRemove.Font.Color:=AppButtonTxtSelected;
 end;
 
 
 procedure TMainForm.imgSectionRemoveMouseLeave(Sender: TObject);
 begin
-    Text49.Font.Color:=AppButtonTxtNormal;
+    txtSectionRemove.Font.Color:=AppButtonTxtNormal;
 end;
 
 
 procedure TMainForm.imgAllowEditMouseEnter(Sender: TObject);
 begin
-    Text50.Font.Color:=AppButtonTxtSelected;
+    txtAllowEdit.Font.Color:=AppButtonTxtSelected;
 end;
 
 
 procedure TMainForm.imgAllowEditMouseLeave(Sender: TObject);
 begin
-    Text50.Font.Color:=AppButtonTxtNormal;
+    txtAllowEdit.Font.Color:=AppButtonTxtNormal;
 end;
 
 
 procedure TMainForm.imgEventLogMouseEnter(Sender: TObject);
 begin
-    Text51.Font.Color:=AppButtonTxtSelected;
+    txtEventLog.Font.Color:=AppButtonTxtSelected;
 end;
 
 
 procedure TMainForm.imgEventLogMouseLeave(Sender: TObject);
 begin
-    Text51.Font.Color:=AppButtonTxtNormal;
+    txtEventLog.Font.Color:=AppButtonTxtNormal;
 end;
 
 
@@ -5049,41 +4898,31 @@ end;
 
 procedure TMainForm.sgListSectionClick(Sender: TObject);
 begin
-
-    // Images
     imgSectionAdd.Enabled   :=True;
     imgSectionRemove.Enabled:=True;
     imgKeyAdd.Enabled       :=False;
     imgKeyRemove.Enabled    :=False;
     imgUpdateValues.Enabled :=False;
-
-    // Captions
-    Text41.Enabled:=False;
-    Text42.Enabled:=False;
-    Text43.Enabled:=False;
-    Text48.Enabled:=True;
-    Text49.Enabled:=True;
-
+    txtKeyAdd.Enabled       :=False;
+    txtKeyRemove.Enabled    :=False;
+    txtUpdateValues.Enabled :=False;
+    txtSectionAdd.Enabled   :=True;
+    txtSectionRemove.Enabled:=True;
 end;
 
 
 procedure TMainForm.sgListValueClick(Sender: TObject);
 begin
-
-    // Images
     imgSectionAdd.Enabled   :=False;
     imgSectionRemove.Enabled:=False;
     imgKeyAdd.Enabled       :=True;
     imgKeyRemove.Enabled    :=True;
     imgUpdateValues.Enabled :=True;
-
-    // Captions
-    Text41.Enabled:=True;
-    Text42.Enabled:=True;
-    Text43.Enabled:=True;
-    Text48.Enabled:=False;
-    Text49.Enabled:=False;
-
+    txtKeyAdd.Enabled       :=True;
+    txtKeyRemove.Enabled    :=True;
+    txtUpdateValues.Enabled :=True;
+    txtSectionAdd.Enabled   :=False;
+    txtSectionRemove.Enabled:=False;
 end;
 
 
@@ -5164,7 +5003,8 @@ end;
 
 procedure TMainForm.txtUnidentifiedClick(Sender: TObject);
 begin
-    SetActiveTabsheet(TabSheet6);
+    {SetActiveTabsheet(TabSheet6);}
+    THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in beta version.');
 end;
 
 
@@ -5225,27 +5065,17 @@ begin
 end;
 
 
-procedure TMainForm.btnOpenABClick(Sender: TObject);
+procedure TMainForm.btnOpenAbClick(Sender: TObject);
 begin
-
-    if FIsConnected then
-    begin
-        sgAddressBook.SetUpdatedRow(0);
-
-        UpdateStatusBar(TStatusBar.Processing);
-        AwaitForm.Show();
-
-        var AddressBook: IAddressBook:=TAddressBook.Create();
-        AddressBook.OpenAddressBookAsync('', OpenAddressBook_Callback);
-
-    end
-    else
-    THelpers.MsgCall(TAppMessage.Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
-
+    sgAddressBook.SetUpdatedRow(0);
+    UpdateStatusBar(TStatusBar.Processing);
+    AwaitForm.Show();
+    var AddressBook: IAddressBook:=TAddressBook.Create();
+    AddressBook.OpenAddressBookAsync('', OpenAddressBook_Callback);
 end;
 
 
-procedure TMainForm.btnUpdateABClick(Sender: TObject);
+procedure TMainForm.btnUpdateAbClick(Sender: TObject);
 begin
 
     if not(sgAddressBook.Visible) then
@@ -5254,18 +5084,13 @@ begin
         Exit();
     end;
 
-    if FIsConnected then
-    begin
-        var AddressBook: IAddressBook:=TAddressBook.Create();
-        AddressBook.UpdateAddressBookAsync(sgAddressBook, FAbUpdateFields, UpdateAddressBook_Callback);
-    end
-    else
-    THelpers.MsgCall(TAppMessage.Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
+    var AddressBook: IAddressBook:=TAddressBook.Create();
+    AddressBook.UpdateAddressBookAsync(sgAddressBook, FAbUpdateFields, UpdateAddressBook_Callback);
 
 end;
 
 
-procedure TMainForm.btnCloseABClick(Sender: TObject);
+procedure TMainForm.btnCloseAbClick(Sender: TObject);
 begin
 
     if THelpers.MsgCall(TAppMessage.Question2, 'Are you sure you want to close Address Book?') = IDYES then
@@ -5283,7 +5108,7 @@ begin
 end;
 
 
-procedure TMainForm.btnExportABClick(Sender: TObject);
+procedure TMainForm.btnExportAbClick(Sender: TObject);
 begin
 
     if not(sgAddressBook.Visible) then
@@ -5299,46 +5124,19 @@ end;
 
 procedure TMainForm.btnFscApproveClick(Sender: TObject);
 begin
-
-    if String.IsNullOrEmpty(FSCComment.Text) then
-    begin
-        THelpers.MsgCall(TAppMessage.Warn, 'Please provide mandatory comment before accepting/declining selected query.');
-        Exit;
-    end;
-
-    var Queries: IQueries:=TQueries.Create();
-    Queries.ApproveQuery(sgFSCView.Cells[sgFSCView.ReturnColumn(TQmsLog.Id, 1, 1), sgFSCView.Row].ToInteger, True);
-
+    {Empty}
 end;
 
 
 procedure TMainForm.btnFscRejectClick(Sender: TObject);
 begin
-
-    if String.IsNullOrEmpty(FSCComment.Text) then
-    begin
-        THelpers.MsgCall(TAppMessage.Warn, 'Please provide mandatory comment before accepting/declining selected query.');
-        Exit();
-    end;
-
-    var Queries: IQueries:=TQueries.Create();
-    Queries.RejectQuery(sgFSCView.Cells[sgFSCView.ReturnColumn(TQmsLog.Id, 1, 1), sgFSCView.Row].ToInteger, True);
-
+    {Empty}
 end;
 
 
 procedure TMainForm.btnLbuUpdateClick(Sender: TObject);
 begin
-
-    if String.IsNullOrEmpty(LBUComment.Text) then
-    begin
-        THelpers.MsgCall(TAppMessage.Warn, 'Please provide mandatory comment before accepting/declining selected query.');
-        Exit();
-    end;
-
-    var Queries: IQueries:=TQueries.Create();
-    Queries.ApproveQuery(sgLBUView.Cells[sgLBUView.ReturnColumn(TQmsLog.Id, 1, 1), sgLBUView.Row].ToInteger, False);
-
+    {Empty}
 end;
 
 
@@ -5379,17 +5177,17 @@ end;
 procedure TMainForm.imgAllowEditClick(Sender: TObject);
 begin
 
-    if Text50.Font.Style = [fsBold] then
+    if txtAllowEdit.Font.Style = [fsBold] then // use private flag!
     begin
-        sgListSection.Options:=sgListSection.Options - [goEditing];
-        sgListValue.Options  :=sgListValue.Options   - [goEditing];
-        Text50.Font.Style    :=[];
+        sgListSection.Options  :=sgListSection.Options - [goEditing];
+        sgListValue.Options    :=sgListValue.Options   - [goEditing];
+        txtAllowEdit.Font.Style:=[];
     end
     else
     begin
-        sgListSection.Options:=sgListSection.Options + [goEditing];
-        sgListValue.Options  :=sgListValue.Options   + [goEditing];
-        Text50.Font.Style    :=[fsBold];
+        sgListSection.Options  :=sgListSection.Options + [goEditing];
+        sgListValue.Options    :=sgListValue.Options   + [goEditing];
+        txtAllowEdit.Font.Style:=[fsBold];
     end;
 
 end;
@@ -5452,7 +5250,7 @@ begin
         if string.IsNullOrEmpty(sgListValue.Cells[1, iCNT]) then
         begin
             THelpers.MsgCall(TAppMessage.Warn, 'Cannot save. At least one key has no label.');
-            Exit;
+            Exit();
         end;
     end;
 
@@ -5490,7 +5288,7 @@ begin
         if EditNewPassword.Text <> EditNewPasswordConfirmation.Text then
         begin
             THelpers.MsgCall(TAppMessage.Warn, 'New password and its confirmation does not match, please re-type it and try again.');
-            Exit;
+            Exit();
         end;
 
         var Utilities: IUtilities:=TUtilities.Create();
@@ -5511,13 +5309,13 @@ begin
     if btnUnlock.Caption = 'Lock' then
     begin
         SetSettingsPanel(True);
-        Exit;
+        Exit();
     end;
 
     if String.IsNullOrEmpty(EditPassword.Text) then
     begin
         THelpers.MsgCall(TAppMessage.Warn, 'Please provide with password.');
-        Exit;
+        Exit();
     end
     else
     begin

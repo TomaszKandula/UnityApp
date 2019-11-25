@@ -61,7 +61,7 @@ type
         procedure CreateParams(var Params: TCreateParams); override;
     strict private
         var LastErrorMsg: string;
-        var DbConnection: TADOConnection; {for sql server connection check on startup}
+        var DbConnection: TADOConnection; {Legacy}
         var FIsAppInitialized: boolean;
         var FCurrentSessionLog: string;
         procedure AnimateProgressBar(AniFrom: integer; AniTo: integer; ProgressBar: TGauge; Speed: cardinal = 5);
@@ -355,18 +355,14 @@ begin
         MainAppForm.ShapeDetailsCap.ShapeText(10, 1, 'AGING DETAILS', [fsBold], 'Tahoma', 10, clWhite);
         MainAppForm.ShapeSummaryCap.ShapeText(10, 1, 'SUMMARY', [fsBold], 'Tahoma', 10, clWhite);
         MainAppForm.ShapeExceedersCap.ShapeText(10, 1, 'CREDIT LIMITS', [fsBold], 'Tahoma', 10, clWhite);
-
-        MainAppForm.Cap10.ShapeText(10, 1, '', [fsBold], 'Tahoma', 10, clWhite);
-        MainAppForm.Cap12.ShapeText(10, 1, '', [fsBold], 'Tahoma', 10, clWhite);
-        MainAppForm.Cap13.ShapeText(10, 1, '', [fsBold], 'Tahoma', 10, clWhite);
-        MainAppForm.Cap43.ShapeText(10, 1, '', [fsBold], 'Tahoma', 10, clWhite);
-        MainAppForm.Cap61.ShapeText(10, 1, '', [fsBold], 'Tahoma', 10, clWhite);
-        MainAppForm.Cap15.ShapeText(10, 1, '', [fsBold], 'Tahoma', 10, clWhite);
-        MainAppForm.Cap21.ShapeText(10, 1, '', [fsBold], 'Tahoma', 10, clWhite);
-        MainAppForm.Cap22.ShapeText(10, 1, '', [fsBold], 'Tahoma', 10, clWhite);
-        MainAppForm.Cap23.ShapeText(10, 1, '', [fsBold], 'Tahoma', 10, clWhite);
-        MainAppForm.Cap62.ShapeText(10, 1, '', [fsBold], 'Tahoma', 10, clWhite);
-        MainAppForm.Cap63.ShapeText(10, 1, '', [fsBold], 'Tahoma', 10, clWhite);
+        MainAppForm.ShapeReloadCap.ShapeText(10, 1, 'ACTIONS', [fsBold], 'Tahoma', 10, clWhite);
+        MainAppForm.ShapeSumsCap.ShapeText(10, 1, 'SUMMARY', [fsBold], 'Tahoma', 10, clWhite);
+        MainAppForm.ShapeAddressBookCap.ShapeText(10, 1, 'ACTIONS', [fsBold], 'Tahoma', 10, clWhite);
+        MainAppForm.ShapeTrackerInfoCap.ShapeText(10, 1, 'INFO', [fsBold], 'Tahoma', 10, clWhite);
+        MainAppForm.ShapeTablesInfoCap.ShapeText(10, 1, 'INFO', [fsBold], 'Tahoma', 10, clWhite);
+        MainAppForm.ShapeAdminEntryCap.ShapeText(10, 1, 'ADMINISTRATOR PANEL', [fsBold], 'Tahoma', 10, clWhite);
+        MainAppForm.ShapeAdminPassCap.ShapeText(10, 1, 'PASSWORD CHANGE', [fsBold], 'Tahoma', 10, clWhite);
+        MainAppForm.ShapeAppSettingsCap.ShapeText(10, 1, 'APPLICATION SETTINGS', [fsBold], 'Tahoma', 10, clWhite);
 
         var getRange1A:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE1A','');
         var getRange2A:=Settings.GetStringValue(TConfigSections.AgingRanges,'RANGE2A','');
@@ -418,7 +414,6 @@ begin
             if DataBase.Check = 0 then
             begin
                 DataBase.InitializeConnection(False, DbConnection);
-                MainAppForm.FIsConnected:=True;
             end;
 
         finally

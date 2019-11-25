@@ -61,8 +61,8 @@ type
     public
 
         /// <summary>
-        /// Allow to read async. current age report from SQL database. Notification is always executed in main thread
-        /// as long as callback is provided.
+        /// Allow to read async. current age report from database for given CoCodes and sorting option.
+        /// Notification is always executed in main thread as long as callback is provided.
         /// </summary>
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.

@@ -916,12 +916,6 @@ end;
 procedure TActionsForm.FormActivate(Sender: TObject);
 begin
 
-    if not MainForm.FIsConnected then
-    begin
-        THelpers.MsgCall(Error, 'The connection with SQL Server database is lost. Please contact your network administrator.');
-        Close();
-    end;
-
     if not FIsDataLoaded then
     begin
 
@@ -1445,15 +1439,15 @@ end;
 
 procedure TActionsForm.btnLogMissingInvClick(Sender: TObject);
 begin
-    QmsForm.IsMissing:=True;
-    THelpers.WndCall(QmsForm, Modal);
+//    QmsForm.IsMissing:=True;
+//    THelpers.WndCall(QmsForm, Modal);
 end;
 
 
 procedure TActionsForm.btnLogNowClick(Sender: TObject);
 begin
-    QmsForm.IsMissing:=False;
-    THelpers.WndCall(QmsForm, Modal);
+//    QmsForm.IsMissing:=False;
+//    THelpers.WndCall(QmsForm, Modal);
 end;
 
 
