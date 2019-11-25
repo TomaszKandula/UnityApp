@@ -633,27 +633,24 @@ type
     /// This class of constants defines all fields in configuration file.
     /// </summary>
     TConfigSections = class abstract
-        const ApplicationDetails = 'APPLICATION';
         const PasswordSection    = 'PASSWORD';
-        const TabSheetsNames     = 'TABSHEETS_NAMES';
+        const ApplicationDetails = 'APPLICATION';
         const RiskClassDetails   = 'RISK_CLASS_DETAILS';
-        const MailerNTLM         = 'MAILER_NTLM';
-        const MailerBASIC        = 'MAILER_BASIC';
-        const MailerSetup        = 'MAILER_SETUP';
-        const DatabaseSetup      = 'DATABASE_SETTINGS';
+        const MailerNTLM         = 'MAILER_NTLM';{Legacy}
+        const MailerBASIC        = 'MAILER_BASIC';{Legacy}
+        const MailerSetup        = 'MAILER_SETUP';{Legacy}
+        const DatabaseSetup      = 'DATABASE_SETTINGS';{Legacy}
         const InvoiceTypes       = 'INVOICE_TYPES';
         const TabSheetsCaps      = 'TABSHEETS_CAPTIONS';
         const Unallocated        = 'UNALLOCATED_DEFINITION';
         const Layouts            = 'EMAIL_LAYOUTS';
         const TimersSettings     = 'TIMERS_INTERVALS';
         const FollowUpColors     = 'FOLLOWUPS_COLORS';
-        const AgingColumns       = 'AGEVIEW_COLUMNS';
         const AgingRanges        = 'AGEVIEW_BUCKETS';
         const ColumnPrefix       = 'COLUMN';
         const ColumnWidthName    = 'COLUMNWIDTH';
         const ColumnOrderName    = 'COLUMNORDER';
         const ColumnNames        = 'COLUMNNAMES';
-        const RestApi            = 'REST_API';
     end;
 
 

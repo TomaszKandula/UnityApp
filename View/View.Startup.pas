@@ -32,7 +32,7 @@ uses
 type
 
 
-    TStartupForm {representing main application window} = class(TForm)
+    TStartupForm{Representing main application window} = class(TForm)
         MainText2: TLabel;
         ProgressBar: TGauge;
         TextFooterA: TLabel;
@@ -60,8 +60,8 @@ type
     protected
         procedure CreateParams(var Params: TCreateParams); override;
     strict private
-        var LastErrorMsg: string;
         var DbConnection: TADOConnection; {Legacy}
+        var LastErrorMsg: string;
         var FIsAppInitialized: boolean;
         var FCurrentSessionLog: string;
         procedure AnimateProgressBar(AniFrom: integer; AniTo: integer; ProgressBar: TGauge; Speed: cardinal = 5);
@@ -201,9 +201,9 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        // -------------------------------
-        // Get captions from app settings.
-        // -------------------------------
+        // ----------------------------
+        // Upload application settings.
+        // ----------------------------
         Sleep(50);
         ChangeProgressBar(5, 'Initializing...', ProgressBar);
 
@@ -238,6 +238,36 @@ begin
             ChangeProgressBar(33, 'Connecting to database... done.', ProgressBar);
         end;
 
+        // --------------------------------------
+        // Load/Sync all html layouts for emails.
+        // --------------------------------------
+        Sleep(250);
+        ChangeProgressBar(66, 'Synchronizing email templates...', ProgressBar);
+
+        var Settings: ISettings:=TSettings.Create();
+        if not GetHtmlLayoutsSync(Settings.UrlLayoutsLst + TCommon.LayoutPak, Settings.DirLayouts + TCommon.LayoutPak, Settings.DirLayouts) then
+        begin
+            ThreadFileLog.Log('Critical error has occured [GetHtmlLayoutsSync]: ' + LastErrorMsg);
+            THelpers.MsgCall(TAppMessage.Error, 'An error occured [GetHtmlLayoutsSync]: ' + LastErrorMsg + '. Please contact your administrator. Application will be closed.');
+            ExitAppSync();
+        end
+        else
+        begin
+
+            if THelpers.UnzippLayouts(Settings.DirLayouts + TCommon.LayoutPak, Settings.DirLayouts) then
+            begin
+                ThreadFileLog.Log('Html layouts has been synchronized.');
+                ChangeProgressBar(75, 'Synchronizing email templates... done.', ProgressBar);
+            end
+            else
+            begin
+                ThreadFileLog.Log('[GetHtmlLayoutsSync]: Cannot unzipp resource file.');
+                THelpers.MsgCall(TAppMessage.Error, 'An error occured [GetHtmlLayoutsSync]: Cannot uznipp resource file. Please contact your administrator. Application will be closed.');
+                ExitAppSync();
+            end;
+
+        end;
+
         // -------------------------------
         // Load all helper general tables.
         // -------------------------------
@@ -262,7 +292,7 @@ begin
         Sleep(50);
         ChangeProgressBar(100, 'Finalization...', ProgressBar);
 
-        Sleep(1450);
+        Sleep(1500);
         TThread.Synchronize(nil, procedure
         begin
             FIsAppInitialized:=True;

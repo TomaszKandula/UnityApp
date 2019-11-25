@@ -18,10 +18,9 @@ type
         const ExportXLS   = 'Exporting to Excel...';
         const ExportCSV   = 'Exporting to CSV file...';
         const ImportCSV   = 'Importing from CSV file...';
-        const Generating  = 'Generating age view...';
         const Downloading = 'Downloading Open Items...';
         const Loading     = 'Loading Aging Report...';
-        const SQLupdate   = 'Sending to SQL Server...';
+        const Mapping     = 'Mapping table...';
     end;
 
 

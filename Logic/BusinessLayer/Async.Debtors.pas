@@ -50,12 +50,23 @@ type
         /// </remarks>
         procedure ReadAgeViewAsync(SelectedCoCodes: string; SortMode: string; RiskClassGroup: TRiskClassGroup; Callback: TReadAgeView);
 
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        ///
+        /// </remarks>
+        procedure MapTableAwaited(Grid: TStringGrid; Source: TStringGrid; IsPrefixRequired: boolean;
+            const ColTargetPersonResp: integer; const ColSourceId: integer; const ColTargetCoCode: integer;
+            const ColSourceDbName: integer; const ColSourceDesc: integer);
+
     end;
 
 
     TDebtors = class(TInterfacedObject, IDebtors)
     {$TYPEINFO ON}
     strict private
+        function  FComparableDbName(InputString: string; IsPrefixRequired: boolean): string;
         procedure FComputeAgeSummary(var Grid: TStringGrid; var AgingPayLoad: TAgingPayLoad);
         procedure FComputeRiskClass(var Grid: TStringGrid; var AgingPayLoad: TAgingPayLoad; RiskClassGroup: TRiskClassGroup);
     public
@@ -68,6 +79,16 @@ type
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
         procedure ReadAgeViewAsync(SelectedCoCodes: string; SortMode: string; RiskClassGroup: TRiskClassGroup; Callback: TReadAgeView);
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <remarks>
+        ///
+        /// </remarks>
+        procedure MapTableAwaited(Grid: TStringGrid; Source: TStringGrid; IsPrefixRequired: boolean;
+            const ColTargetPersonResp: integer; const ColSourceId: integer; const ColTargetCoCode: integer;
+            const ColSourceDbName: integer; const ColSourceDesc: integer);
 
     end;
 
@@ -160,6 +181,48 @@ begin
     end);
 
     NewTask.Start();
+
+end;
+
+
+procedure TDebtors.MapTableAwaited(Grid: TStringGrid; Source: TStringGrid; IsPrefixRequired: boolean;
+    const ColTargetPersonResp: integer; const ColSourceId: integer; const ColTargetCoCode: integer;
+    const ColSourceDbName: integer; const ColSourceDesc: integer);
+begin
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        for var iCNT:=1 to Grid.RowCount - 1 do
+        begin
+
+            for var jCNT:=1 to Source.RowCount - 1 do
+            begin
+
+                if (Grid.Cells[ColTargetPersonResp, iCNT] = Source.Cells[ColSourceId, jCNT]) and
+                    (FComparableDbName(Grid.Cells[ColTargetCoCode, iCNT], IsPrefixRequired) = Source.Cells[ColSourceDbName, jCNT])
+                then
+                    Grid.Cells[ColTargetPersonResp, iCNT]:=Source.Cells[ColSourceDesc, jCNT];
+
+            end;
+
+        end;
+
+    end);
+
+    NewTask.Start();
+    TTask.WaitForAll(NewTask);
+
+end;
+
+
+function TDebtors.FComparableDbName(InputString: string; IsPrefixRequired: boolean): string;
+begin
+
+    case IsPrefixRequired of
+        True:  Result:=THelpers.GetSourceDBName(InputString, 'F');
+        False: Result:=InputString;
+    end;
 
 end;
 

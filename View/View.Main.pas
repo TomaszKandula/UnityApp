@@ -148,39 +148,39 @@ type
         N3: TMenuItem;
         TabSheet6: TTabSheet;
         sgOpenItems: TStringGrid;
-    AddressBookHeader: TPanel;
+        AddressBookHeader: TPanel;
         sgAddressBook: TStringGrid;
-    SettingsHeader: TPanel;
+        SettingsHeader: TPanel;
         EditPassword: TEdit;
-    ShapeAdminEntryCap: TShape;
-    ShapeAdminEntryFrm: TShape;
-    txtAdminPassword: TLabel;
-    txtInfoAdmin: TLabel;
-    ShapeAdminPassFrm: TShape;
-    ShapeAdminPassCap: TShape;
-    txtCurrentPassword: TLabel;
-    txtNewPassword: TLabel;
-    txtConfirmPassword: TLabel;
+        ShapeAdminEntryCap: TShape;
+        ShapeAdminEntryFrm: TShape;
+        txtAdminPassword: TLabel;
+        txtInfoAdmin: TLabel;
+        ShapeAdminPassFrm: TShape;
+        ShapeAdminPassCap: TShape;
+        txtCurrentPassword: TLabel;
+        txtNewPassword: TLabel;
+        txtConfirmPassword: TLabel;
         EditCurrentPassword: TEdit;
         EditNewPassword: TEdit;
         EditNewPasswordConfirmation: TEdit;
-    ShapeAppSettingsFrm: TShape;
+        ShapeAppSettingsFrm: TShape;
         imgKeyAdd: TImage;
         imgKeyRemove: TImage;
         imgUpdateValues: TImage;
-    txtKeyAdd: TLabel;
-    txtKeyRemove: TLabel;
-    txtUpdateValues: TLabel;
+        txtKeyAdd: TLabel;
+        txtKeyRemove: TLabel;
+        txtUpdateValues: TLabel;
         sgListValue: TStringGrid;
         sgListSection: TStringGrid;
         imgSectionAdd: TImage;
         imgSectionRemove: TImage;
-    txtSectionAdd: TLabel;
-    txtSectionRemove: TLabel;
-    ShapeAppSettingsCap: TShape;
-    txtSettingsWarn: TLabel;
-    ShapeAddressBookFrm: TShape;
-    ShapeAddressBookCap: TShape;
+        txtSectionAdd: TLabel;
+        txtSectionRemove: TLabel;
+        ShapeAppSettingsCap: TShape;
+        txtSettingsWarn: TLabel;
+        ShapeAddressBookFrm: TShape;
+        ShapeAddressBookCap: TShape;
         imgOFF: TImage;
         OpenItemsHeader: TPanel;
         ShapeReloadFrm: TShape;
@@ -189,12 +189,12 @@ type
         ShapeSumsCap: TShape;
         btnReload: TImage;
         txtReloadBtnA: TLabel;
-    btnOpenAb: TImage;
-    btnUpdateAb: TImage;
-    btnCloseAb: TImage;
-    txtOpenAb: TLabel;
-    txtUpdateAb: TLabel;
-    txtCloseAb: TLabel;
+        btnOpenAb: TImage;
+        btnUpdateAb: TImage;
+        btnCloseAb: TImage;
+        txtOpenAb: TLabel;
+        txtUpdateAb: TLabel;
+        txtCloseAb: TLabel;
         txtAllOpenItems: TLabel;
         txtInvoices: TLabel;
         txtOverdueItems: TLabel;
@@ -203,17 +203,17 @@ type
         valInvoices: TLabel;
         amtOutstanding: TLabel;
         valOverdue: TLabel;
-    btnExportAb: TImage;
-    txtExportAb: TLabel;
-    InvoiceTrackerHeader: TPanel;
-    ShapeTrackerInfoFrm: TShape;
-    ShapeTrackerInfoCap: TShape;
+        btnExportAb: TImage;
+        txtExportAb: TLabel;
+        InvoiceTrackerHeader: TPanel;
+        ShapeTrackerInfoFrm: TShape;
+        ShapeTrackerInfoCap: TShape;
         Header6: TPanel;
         ShapeContent6: TShape;
         Cap61: TShape;
-    GeneralTablesHeader: TPanel;
-    ShapeTablesInfoFrm: TShape;
-    ShapeTablesInfoCap: TShape;
+        GeneralTablesHeader: TPanel;
+        ShapeTablesInfoFrm: TShape;
+        ShapeTablesInfoCap: TShape;
         txtReloadBtnB: TLabel;
         MainShape6: TPanel;
         AppFooter: TPanel;
@@ -230,15 +230,15 @@ type
         txtInfo2: TLabel;
         FileCSVExport: TSaveDialog;
         FileCSVImport: TOpenDialog;
-    GeneralTablesMainPanel: TPanel;
+        GeneralTablesMainPanel: TPanel;
         ContentPanel6: TPanel;
-    InvoiceTrackerMainPanel: TPanel;
-    AddressBookMainPanel: TPanel;
+        InvoiceTrackerMainPanel: TPanel;
+        AddressBookMainPanel: TPanel;
         OpenItemsMainPanel: TPanel;
         DebtorsMainPanel: TPanel;
         DebtorsBottomPanel: TPanel;
-    SettingsMainPanel: TPanel;
-    SettingsInnerPanel: TPanel;
+        SettingsMainPanel: TPanel;
+        SettingsInnerPanel: TPanel;
         amtUnallocated: TLabel;
         txtUnallocated: TLabel;
         TimerCustOpenItems: TTimer;
@@ -254,9 +254,9 @@ type
         sgInvoiceTracker: TStringGrid;
         PopupAgeView: TPopupMenu;
         Action_Tracker: TMenuItem;
-    InfoLine1: TLabel;
-    InfoLine2: TLabel;
-    InfoLine3: TLabel;
+        InfoLine1: TLabel;
+        InfoLine2: TLabel;
+        InfoLine3: TLabel;
         PopupTracker: TPopupMenu;
         Action_Remove: TMenuItem;
         Action_ShowMy: TMenuItem;
@@ -270,14 +270,14 @@ type
         N7: TMenuItem;
         N6: TMenuItem;
         Action_AddToBook: TMenuItem;
-    txtAllowEdit: TLabel;
+        txtAllowEdit: TLabel;
         imgAllowEdit: TImage;
-    SplitLine2: TBevel;
+        SplitLine2: TBevel;
         sgCoCodes: TStringGrid;
         sgPaidInfo: TStringGrid;
         sgPmtTerms: TStringGrid;
         Action_AutoColumnSize: TMenuItem;
-    SplitLine1: TBevel;
+        SplitLine1: TBevel;
         Action_Search: TMenuItem;
         PopupBook: TPopupMenu;
         Action_Copy: TMenuItem;
@@ -318,7 +318,7 @@ type
         Action_FollowUpColors: TMenuItem;
         SplitLine3: TBevel;
         imgEventLog: TImage;
-    txtEventLog: TLabel;
+        txtEventLog: TLabel;
         Action_INF7_Filter: TMenuItem;
         Action_CoCode_Filter: TMenuItem;
         Action_Agent_Filter: TMenuItem;
@@ -333,21 +333,21 @@ type
         AppMenu: TPanel;
         Separator1: TBevel;
         Separator2: TBevel;
-    OpenItemsPanel: TPanel;
-    AddressBookPanel: TPanel;
-    InvoiceTrackerPanel: TPanel;
-    CoCodesPanel: TPanel;
-    PaidInfoPanel: TPanel;
-    PmtTermsPanel: TPanel;
-    SettingsInnerSections: TPanel;
-    SettingsInnerValues: TPanel;
+        OpenItemsPanel: TPanel;
+        AddressBookPanel: TPanel;
+        InvoiceTrackerPanel: TPanel;
+        CoCodesPanel: TPanel;
+        PaidInfoPanel: TPanel;
+        PmtTermsPanel: TPanel;
+        SettingsInnerSections: TPanel;
+        SettingsInnerValues: TPanel;
         btnUnlock: TSpeedButton;
         btnPassUpdate: TSpeedButton;
         Action_AddFollowUpGroup: TMenuItem;
         Action_RemoveFollowUps: TMenuItem;
         Action_MassMailer: TMenuItem;
         btnPasswordPreview: TSpeedButton;
-    ShapeShowPassword: TShape;
+        ShapeShowPassword: TShape;
         N20: TMenuItem;
         N21: TMenuItem;
         Action_Free2: TMenuItem;
@@ -385,7 +385,7 @@ type
         txtSettings: TLabel;
         ChromiumWindow: TChromiumWindow;
         Chromium: TChromium;
-    ControlStatusPanel: TPanel;
+        ControlStatusPanel: TPanel;
         sgControlStatus: TStringGrid;
         Tables: TPageControl;
         Page1: TTabSheet;
@@ -396,15 +396,15 @@ type
         Page8: TTabSheet;
         Page9: TTabSheet;
         Page10: TTabSheet;
-    PersonRespPanel: TPanel;
+        PersonRespPanel: TPanel;
         sgPersonResp: TStringGrid;
-    SalesRespPanel: TPanel;
+        SalesRespPanel: TPanel;
         sgSalesResp: TStringGrid;
-    AccountTypePanel: TPanel;
+        AccountTypePanel: TPanel;
         sgAccountType: TStringGrid;
-    CustomerGrPanel: TPanel;
+        CustomerGrPanel: TPanel;
         sgCustomerGr: TStringGrid;
-    DebtorsPanel: TPanel;
+        DebtorsPanel: TPanel;
         shapeFrame: TShape;
         Action_Free3: TMenuItem;
         N4: TMenuItem;
@@ -478,7 +478,7 @@ type
         valAadUser: TLabel;
         Separator3: TBevel;
         Separator4: TBevel;
-    SettingsInnerHeader: TPanel;
+        SettingsInnerHeader: TPanel;
         valCutOffDate: TLabel;
         txtRcaAmount: TLabel;
         txtRcbAmount: TLabel;
@@ -491,7 +491,7 @@ type
         txtGetAgingReport: TLabel;
         txtRefreshReport: TLabel;
         btnSearchAb: TImage;
-    txtSearchAb: TLabel;
+        txtSearchAb: TLabel;
         cbAgeSorting: TComboBox;
         txtAgeSorting: TLabel;
         bevelVertSeparator: TBevel;
@@ -780,6 +780,7 @@ type
             var Result: Boolean
         );
     strict private
+        var FLastCoCodesSelected: string;
         var FHadFirstLoad: boolean;
         var FAllowClose: boolean;
         var FAbUpdateFields: TAddressBookUpdateFields;
@@ -802,13 +803,7 @@ type
         procedure LoadColumnWidth(var Grid: TStringGrid);
         procedure LoadOpenItems();
         procedure UpdateAgeSummary(PayLoad: TAgingPayLoad);
-
-        procedure MapPersonResponsible(var Grid: TStringGrid; var Source: TStringGrid); // make async?
-        procedure MapSalesResponsible(var Grid: TStringGrid; var Source: TStringGrid); // make async?
-        procedure MapAccountType(var Grid: TStringGrid; var Source: TStringGrid); // make async?
-        procedure MapCustomerGroup(var Grid: TStringGrid; var Source: TStringGrid); // make async?
-        procedure MapPaymentTerms(var Grid: TStringGrid; var Source: TStringGrid); // make async?
-
+        procedure AgeViewMapping();
         procedure OpenAddressBook_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
         procedure UpdateAddressBook_Callback(CallResponse: TCallResponse);
         procedure AddToAddressBook_Callback(CallResponse: TCallResponse);
@@ -851,6 +846,7 @@ implementation
 
 
 uses
+    DbModel{Legacy},
     View.GridFilter,
     View.InvoiceTracker,
     View.InvoiceList,
@@ -874,10 +870,6 @@ uses
     Unity.Unknown,
     Unity.DateTimeFormats,
     Unity.Sorting,
-    Unity.Sql{Legacy},
-    Handler.Sql{legacy},
-    DbModel{legacy},
-    Handler.Database{legacy},
     Unity.EventLogger,
     Unity.Settings,
     Unity.SessionService,
@@ -1028,30 +1020,23 @@ begin
             for var jCNT:=0 to ReturnedData.ColCount - 1 do
                 sgAgeView.Cells[jCNT, iCNT]:=ReturnedData.Cells[jCNT, iCNT];
 
+        ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Age View updated.');
+
     finally
         sgAgeView.Freeze(False);
-        LoadColumnWidth(sgAgeView);
-        ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Age View updated.');
+        ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: VCL unlocked and repainted.');
     end;
+
+    LoadColumnWidth(sgAgeView);
 
     ClearAgingSummary();
     UpdateAgeSummary(PayLoad);
     ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Age View summary information updated.');
 
-//    MapSalesResponsible(sgAgeView, sgSalesResp); // async!
-//    MapPersonResponsible(sgAgeView, sgPersonResp); // async!
-//    MapAccountType(sgAgeView, sgAccountType); // async!
-//    MapCustomerGroup(sgAgeView, sgCustomerGr); // async!
-//    MapPaymentTerms(sgAgeView, sgPmtTerms); // async!
-//    ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Mapping performed.');
-
+    AgeViewMapping();
     SwitchTimers(TurnedOn);
-    MainForm.UpdateStatusBar(TStatusBar.Ready);
-    AwaitForm.Hide();
-    ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: VCL unlocked and repainted.');
 
     ClearOpenItemsSummary();
-    sgOpenItems.Freeze(True);
     UpdateStatusBar(TStatusBar.Downloading);
     LoadOpenItems();
 
@@ -1301,7 +1286,7 @@ begin
 
         //FDailyCommentFields.GroupIdSel   :=FGroupIdSel;
         //FDailyCommentFields.AgeDateSel   :=FAgeDateSel;
-        FDailyCommentFields.CUID         :=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), sgAgeView.Row];
+        FDailyCommentFields.CUID         :=sgAgeView.Cells[sgAgeView.ReturnColumn(DbModel.TSnapshots.fCuid, 1, 1), sgAgeView.Row];
         FDailyCommentFields.Email        :=False;
         FDailyCommentFields.CallEvent    :=True;
         FDailyCommentFields.CallDuration :=PassMsg.LParam;
@@ -1689,12 +1674,15 @@ end;
 procedure TMainForm.LoadAgeReport(SelectedCoCodes: string);
 begin
     var Debtors: IDebtors:=TDebtors.Create();
+    FLastCoCodesSelected:=SelectedCoCodes;
     Debtors.ReadAgeViewAsync(SelectedCoCodes, cbAgeSorting.Text, FRiskClassGroup, ReadAgeView_Callback);
 end;
 
 
 procedure TMainForm.LoadOpenItems();
 begin
+
+    sgOpenItems.Freeze(True);
 
     var OpenItems: IOpenItems:=TOpenItems.Create();
     var CoCodeList:=TStringList.Create();
@@ -1846,6 +1834,93 @@ begin
 end;
 
 
+procedure TMainForm.AgeViewMapping();
+begin
+
+    sgAgeView.Freeze(True);
+    sgPersonResp.Freeze(True);
+    sgSalesResp.Freeze(True);
+    sgAccountType.Freeze(True);
+    sgCustomerGr.Freeze(True);
+    sgPmtTerms.Freeze(True);
+
+    UpdateStatusBar(TStatusBar.Mapping);
+    var Debtors: IDebtors:=TDebtors.Create();
+    try
+
+
+        Debtors.MapTableAwaited(
+            sgAgeView,
+            sgPersonResp,
+            True,
+            sgAgeView.ReturnColumn(TSnapshots.fPersonResponsible, 1, 1),
+            sgPersonResp.ReturnColumn(TPersonResponsible.Id, 1, 1),
+            sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1),
+            sgPersonResp.ReturnColumn(TPersonResponsible.SourceDBName, 1, 1),
+            sgPersonResp.ReturnColumn(TPersonResponsible.ErpCode, 1, 1)
+        );
+        ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Mapping has been performed (PersonResponsible).');
+
+        Debtors.MapTableAwaited(
+            sgAgeView,
+            sgSalesResp,
+            True,
+            sgAgeView.ReturnColumn(TSnapshots.fSalesResponsible, 1, 1),
+            sgSalesResp.ReturnColumn(TSalesResponsible.Id, 1, 1),
+            sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1),
+            sgSalesResp.ReturnColumn(TSalesResponsible.SourceDBName, 1, 1),
+            sgSalesResp.ReturnColumn(TSalesResponsible.ErpCode, 1, 1)
+        );
+        ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Mapping has been performed (SalesResponsible).');
+
+        Debtors.MapTableAwaited(
+            sgAgeView,
+            sgAccountType,
+            True,
+            sgAgeView.ReturnColumn(TSnapshots.fAccountType, 1, 1),
+            sgAccountType.ReturnColumn(TAccountType.Id, 1, 1),
+            sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1),
+            sgAccountType.ReturnColumn(TAccountType.SourceDBName, 1, 1),
+            sgAccountType.ReturnColumn(TAccountType.ErpCode, 1, 1)
+        );
+        ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Mapping has been performed (AccountType).');
+
+        Debtors.MapTableAwaited(
+            sgAgeView,
+            sgCustomerGr,
+            True,
+            sgAgeView.ReturnColumn(TSnapshots.fCustomerGroup, 1, 1),
+            sgCustomerGr.ReturnColumn(TCustomerGroup.Id, 1, 1),
+            sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1),
+            sgCustomerGr.ReturnColumn(TCustomerGroup.SourceDBName, 1, 1),
+            sgCustomerGr.ReturnColumn(TCustomerGroup.ErpCode, 1, 1)
+        );
+        ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Mapping has been performed (CustomerGroup).');
+
+        Debtors.MapTableAwaited(
+            sgAgeView,
+            sgPmtTerms,
+            False,
+            sgAgeView.ReturnColumn(TSnapshots.fPaymentTerms, 1, 1),
+            sgPmtTerms.ReturnColumn(TPaymentTerms.ErpCode, 1, 1),
+            sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1),
+            sgPmtTerms.ReturnColumn(TPaymentTerms.Entity, 1, 1),
+            sgPmtTerms.ReturnColumn(TPaymentTerms.Description, 1, 1)
+        );
+        ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Mapping has been performed (PaymentTerms).');
+
+    finally
+        sgAgeView.Freeze(False);
+        sgPersonResp.Freeze(False);
+        sgSalesResp.Freeze(False);
+        sgAccountType.Freeze(False);
+        sgCustomerGr.Freeze(False);
+        sgPmtTerms.Freeze(False);
+    end;
+
+end;
+
+
 procedure TMainForm.LoadColumnWidth(var Grid: TStringGrid);
 begin
 
@@ -1853,101 +1928,6 @@ begin
     for var iCNT: integer:=0 to Grid.ColCount - 1 do
         {OutputDebugString(PChar(Settings.GetStringValue('COLUMNWIDTH', Settings.FindSettingsKey('COLUMNWIDTH', iCNT), '')));}
         Grid.ColWidths[iCNT]:=Settings.GetStringValue('COLUMNWIDTH', Settings.FindSettingsKey('COLUMNWIDTH', iCNT), '').ToInteger();
-
-end;
-
-
-procedure TMainForm.MapPersonResponsible(var Grid: TStringGrid; var Source: TStringGrid);
-begin
-
-    for var iCNT:=1 to Grid.RowCount - 1 do
-        for var jCNT:=1 to Source.RowCount - 1 do
-        if
-        (
-            Grid.Cells[Grid.ReturnColumn(TSnapshots.fPersonResponsible, 1, 1), iCNT] = Source.Cells[Source.ReturnColumn(TPersonResponsible.Id, 1, 1), jCNT]
-        )
-        and
-        (
-            THelpers.GetSourceDBName(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT], 'F') = Source.Cells[Source.ReturnColumn(TPersonResponsible.SourceDBName, 1, 1), jCNT]
-        )
-        then
-            Grid.Cells[Grid.ReturnColumn(TSnapshots.fPersonResponsible, 1, 1), iCNT]:=Source.Cells[Source.ReturnColumn(TPersonResponsible.ErpCode, 1, 1), jCNT]
-
-end;
-
-
-procedure TMainForm.MapSalesResponsible(var Grid: TStringGrid; var Source: TStringGrid);
-begin
-
-    for var iCNT:=1 to Grid.RowCount - 1 do
-        for var jCNT:=1 to Source.RowCount - 1 do
-        if
-        (
-            Grid.Cells[Grid.ReturnColumn(TSnapshots.fSalesResponsible, 1, 1), iCNT] = Source.Cells[Source.ReturnColumn(TSalesResponsible.Id, 1, 1), jCNT]
-        )
-        and
-        (
-            THelpers.GetSourceDBName(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT], 'F') = Source.Cells[Source.ReturnColumn(TSalesResponsible.SourceDBName, 1, 1), jCNT]
-        )
-        then
-            Grid.Cells[Grid.ReturnColumn(TSnapshots.fSalesResponsible, 1, 1), iCNT]:=Source.Cells[Source.ReturnColumn(TSalesResponsible.ErpCode, 1, 1), jCNT]
-
-end;
-
-
-procedure TMainForm.MapAccountType(var Grid: TStringGrid; var Source: TStringGrid);
-begin
-
-    for var iCNT:=1 to Grid.RowCount - 1 do
-        for var jCNT:=1 to Source.RowCount - 1 do
-        if
-        (
-            Grid.Cells[Grid.ReturnColumn(TSnapshots.fAccountType, 1, 1), iCNT] = Source.Cells[Source.ReturnColumn(TAccountType.Id, 1, 1), jCNT]
-        )
-        and
-        (
-            THelpers.GetSourceDBName(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT], 'F') = Source.Cells[Source.ReturnColumn(TAccountType.SourceDBName, 1, 1), jCNT]
-        )
-        then
-            Grid.Cells[Grid.ReturnColumn(TSnapshots.fAccountType, 1, 1), iCNT]:=Source.Cells[Source.ReturnColumn(TAccountType.ErpCode, 1, 1), jCNT]
-
-end;
-
-
-procedure TMainForm.MapCustomerGroup(var Grid: TStringGrid; var Source: TStringGrid);
-begin
-
-    for var iCNT:=1 to Grid.RowCount - 1 do
-        for var jCNT:=1 to Source.RowCount - 1 do
-        if
-        (
-            Grid.Cells[Grid.ReturnColumn(TSnapshots.fCustomerGroup, 1, 1), iCNT] = Source.Cells[Source.ReturnColumn(TCustomerGroup.Id, 1, 1), jCNT]
-        )
-        and
-        (
-            THelpers.GetSourceDBName(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT], 'F') = Source.Cells[Source.ReturnColumn(TCustomerGroup.SourceDBName, 1, 1), jCNT]
-        )
-        then
-            Grid.Cells[Grid.ReturnColumn(TSnapshots.fCustomerGroup, 1, 1), iCNT]:=Source.Cells[Source.ReturnColumn(TCustomerGroup.ErpCode, 1, 1), jCNT]
-
-end;
-
-
-procedure TMainForm.MapPaymentTerms(var Grid: TStringGrid; var Source: TStringGrid);
-begin
-
-    for var iCNT:=1 to Grid.RowCount - 1 do
-        for var jCNT:=1 to Source.RowCount - 1 do
-        if
-        (
-            Grid.Cells[Grid.ReturnColumn(TSnapshots.fPaymentTerms, 1, 1), iCNT] = Source.Cells[Source.ReturnColumn(TPaymentTerms.ErpCode, 1, 1), jCNT]
-        )
-        and
-        (
-            Grid.Cells[Grid.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT] = Source.Cells[Source.ReturnColumn(TPaymentTerms.Entity, 1, 1), jCNT]
-        )
-        then
-            Grid.Cells[Grid.ReturnColumn(TSnapshots.fPaymentTerms, 1, 1), iCNT]:=Source.Cells[Source.ReturnColumn(TPaymentTerms.Description, 1, 1), jCNT]
 
 end;
 
@@ -3671,380 +3651,8 @@ end;
 
 
 procedure TMainForm.sgAgeViewKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);  // REFACTOR !!!
-
-    const
-        ctFree1    = 0;
-        ctFree2    = 1;
-        ctFree3    = 3;
-        ctFollowUp = 2;
-
-    procedure ModifyCell(CUIDRef: integer; ColumnType: integer; Text: string);
-    begin
-
-        case ColumnType of
-
-            ctFree1:
-            begin
-                FGeneralCommentFields.CUID        :=sgAgeView.Cells[CUIDRef, sgAgeView.Row];
-                FGeneralCommentFields.FixedComment:=TUnknown.Null;
-                FGeneralCommentFields.FollowUp    :=TUnknown.Null;
-                FGeneralCommentFields.Free1       :=Text;
-                FGeneralCommentFields.Free2       :=TUnknown.Null;
-                FGeneralCommentFields.Free3       :=TUnknown.Null;
-                FGeneralCommentFields.EventLog    :=True;
-            end;
-
-            ctFree2:
-            begin
-                FGeneralCommentFields.CUID        :=sgAgeView.Cells[CUIDRef, sgAgeView.Row];
-                FGeneralCommentFields.FixedComment:=TUnknown.Null;
-                FGeneralCommentFields.FollowUp    :=TUnknown.Null;
-                FGeneralCommentFields.Free1       :=TUnknown.Null;
-                FGeneralCommentFields.Free2       :=Text;
-                FGeneralCommentFields.Free3       :=TUnknown.Null;
-                FGeneralCommentFields.EventLog    :=True;
-            end;
-
-            ctFree3:
-            begin
-                FGeneralCommentFields.CUID        :=sgAgeView.Cells[CUIDRef, sgAgeView.Row];
-                FGeneralCommentFields.FixedComment:=TUnknown.Null;
-                FGeneralCommentFields.FollowUp    :=TUnknown.Null;
-                FGeneralCommentFields.Free1       :=TUnknown.Null;
-                FGeneralCommentFields.Free2       :=TUnknown.Null;
-                FGeneralCommentFields.Free3       :=Text;
-                FGeneralCommentFields.EventLog    :=True;
-            end;
-
-        end;
-
-        var Comments: IComments:=TComments.Create();
-        Comments.EditGeneralComment(FGeneralCommentFields, nil);
-
-    end;
-
-    procedure QuitEditing();
-    begin
-        sgAgeView.Options:=sgAgeView.Options - [goEditing];
-        sgAgeView.EditorMode:=False;
-    end;
-
-    procedure AllowEditing();
-    begin
-        sgAgeView.Options:=sgAgeView.Options + [goEditing];
-        sgAgeView.EditorMode:=True;
-    end;
-
 begin
-
-    // <CTRL> + <C>
-    if (Key = 67) and (Shift = [ssCtrl]) then
-    begin
-        sgAgeView.CopyCutPaste(TActions.Copy);
-        sgAgeView.UpdatedRowsHolder:=nil;
-        sgAgeView.RecordRowsAffected;
-        Exit();
-    end;
-
-    // Allow editing only free columns
-    if
-        (
-            sgAgeView.Col <> sgAgeView.ReturnColumn(TGeneralComment.Free1, 1, 1)
-        )
-    and
-        (
-            sgAgeView.Col <> sgAgeView.ReturnColumn(TGeneralComment.Free2, 1, 1)
-        )
-    and
-        (
-            sgAgeView.Col <> sgAgeView.ReturnColumn(TGeneralComment.Free3, 1, 1)
-        )
-    then
-        Exit();
-
-    // <CTRL> + <V>
-    if (Key = 86) and (Shift = [ssCtrl]) then
-    begin
-
-        sgAgeView.Freeze(True);
-        Screen.Cursor:=crHourGlass;
-        sgAgeView.CopyCutPaste(TActions.Paste, True);
-        sgAgeView.UpdatedRowsHolder:=nil;
-        sgAgeView.RecordRowsAffected;
-
-        if sgAgeView.UpdatedRowsHolder <> nil then
-        begin
-
-            TThread.CreateAnonymousThread(procedure
-            var
-                iCNT: integer;
-                Data: TDataTables;
-            begin
-
-                Data:=TDataTables.Create(SessionService.FDbConnect);
-                try
-
-                    Data.CmdType:=cmdText;
-                    for iCNT:=Low(sgAgeView.UpdatedRowsHolder) to High(sgAgeView.UpdatedRowsHolder) do
-                    begin
-
-                        if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneralComment.Free1, 1, 1) then
-                        begin
-                            Data.StrSQL:=
-                                TSql.EXECUTE +
-                                    Data.UpsertFreeColumns +
-                                TChars.SPACE +
-                                    QuotedStr(SessionService.SessionUser.ToUpper) +
-                                TChars.COMMA +
-                                    QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), sgAgeView.UpdatedRowsHolder[iCNT]]) +
-                                TChars.COMMA +
-                                    QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TGeneralComment.Free1, 1, 1), sgAgeView.UpdatedRowsHolder[iCNT]]) +
-                                TChars.COMMA +
-                                    QuotedStr(TUnknown.Null) +
-                                TChars.COMMA +
-                                    QuotedStr(TUnknown.Null) +
-                                TChars.COMMA +
-                                    QuotedStr('1');
-                        end;
-
-                        if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneralComment.Free2, 1, 1) then
-                        begin
-                            Data.StrSQL:=
-                                TSql.EXECUTE +
-                                    Data.UpsertFreeColumns +
-                                TChars.SPACE +
-                                    QuotedStr(SessionService.SessionUser.ToUpper) +
-                                TChars.COMMA +
-                                    QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), sgAgeView.UpdatedRowsHolder[iCNT]]) +
-                                TChars.COMMA +
-                                    QuotedStr(TUnknown.Null) +
-                                TChars.COMMA +
-                                    QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TGeneralComment.Free2, 1, 1), sgAgeView.UpdatedRowsHolder[iCNT]]) +
-                                TChars.COMMA +
-                                    QuotedStr(TUnknown.Null) +
-                                TChars.COMMA +
-                                    QuotedStr('2');
-                        end;
-
-                        if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneralComment.Free3, 1, 1) then
-                        begin
-                            Data.StrSQL:=
-                                TSql.EXECUTE +
-                                    Data.UpsertFreeColumns +
-                                TChars.SPACE +
-                                    QuotedStr(SessionService.SessionUser.ToUpper) +
-                                TChars.COMMA +
-                                    QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), sgAgeView.UpdatedRowsHolder[iCNT]]) +
-                                TChars.COMMA +
-                                    QuotedStr(TUnknown.Null) +
-                                TChars.COMMA +
-                                    QuotedStr(TUnknown.Null) +
-                                TChars.COMMA +
-                                    QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TGeneralComment.Free3, 1, 1), sgAgeView.UpdatedRowsHolder[iCNT]]) +
-                                TChars.COMMA +
-                                    QuotedStr('3');
-                        end;
-
-                        Data.ExecSQL;
-
-                    end;
-
-                finally
-                    Data.Free();
-                    sgAgeView.Freeze(False);
-                end;
-
-            end).Start();
-
-        end;
-
-        Screen.Cursor:=crDefault;
-        Exit();
-
-    end;
-
-    // Disallows "keyboard arrows" when inplace editor is enabled
-    if (sgAgeView.EditorMode) and ( (Key = VK_LEFT) or (Key = VK_RIGHT) or (Key = VK_UP) or (Key = VK_DOWN) ) then
-    begin
-        Key:=0;
-        QuitEditing();
-        Exit();
-    end;
-
-    // Allow editing
-    if CharInSet(Char(Key), [#48..#57{A..Z}, #65..#90{a..z}, #97..#122{0..9}]) then
-    begin
-        Key:=0;
-        AllowEditing();
-        Exit();
-    end;
-
-    // Quit editing
-    if Key = VK_ESCAPE then
-    begin
-        Key:=0;
-        QuitEditing();
-        Exit();
-    end;
-
-    // Quit editing and write to database
-    if Key = VK_RETURN then
-    begin
-
-        Key:=0;
-        QuitEditing();
-
-        // Free 1
-        if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneralComment.Free1, 1, 1) then
-            ModifyCell(sgAgeView.ReturnColumn(TSnapshots.Cuid, 1, 1), ctFree1, sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]);
-
-        // Free 2
-        if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneralComment.Free2, 1, 1) then
-            ModifyCell(sgAgeView.ReturnColumn(TSnapshots.Cuid, 1, 1), ctFree2, sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]);
-
-        // Free 3
-        if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneralComment.Free3, 1, 1) then
-            ModifyCell(sgAgeView.ReturnColumn(TSnapshots.Cuid, 1, 1), ctFree3, sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]);
-
-        Exit();
-
-    end;
-
-    // Delete entry from database (only Free1..3 columns)
-    if Key = VK_DELETE then
-    begin
-
-        Key:=0;
-
-        // Mass delete (all selected range)
-        if (sgAgeView.Selection.Bottom - sgAgeView.Selection.Top) > 0 then
-        begin
-
-            sgAgeView.Freeze(True);
-            Screen.Cursor:=crHourGlass;
-
-            TThread.CreateAnonymousThread(procedure
-            var
-                iCNT: integer;
-                Data: TDataTables;
-            begin
-
-                Data:=TDataTables.Create(SessionService.FDbConnect);
-                try
-
-                    Data.CmdType:=cmdText;
-                    for iCNT:=sgAgeView.Selection.Top to sgAgeView.Selection.Bottom do
-                    begin
-
-                        // Skip hidden rows
-                        if sgAgeView.RowHeights[iCNT] <> -1 then
-                        begin
-
-                            if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneralComment.Free1, 1, 1) then
-                            begin
-                                Data.StrSQL:=
-                                    TSql.EXECUTE +
-                                        Data.UpsertFreeColumns +
-                                    TChars.SPACE +
-                                        QuotedStr(SessionService.SessionUser.ToUpper) +
-                                    TChars.COMMA +
-                                        QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), iCNT]) +
-                                    TChars.COMMA +
-                                        QuotedStr(String.Empty) +
-                                    TChars.COMMA +
-                                        QuotedStr(TUnknown.Null) +
-                                    TChars.COMMA +
-                                        QuotedStr(TUnknown.Null) +
-                                    TChars.COMMA +
-                                        QuotedStr('1');
-                                sgAgeView.Cells[sgAgeView.ReturnColumn(TGeneralComment.Free1, 1, 1), iCNT]:='';
-                            end;
-
-                            if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneralComment.Free2, 1, 1) then
-                            begin
-                                Data.StrSQL:=
-                                    TSql.EXECUTE +
-                                        Data.UpsertFreeColumns +
-                                    TChars.SPACE +
-                                        QuotedStr(SessionService.SessionUser.ToUpper) +
-                                    TChars.COMMA +
-                                        QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), iCNT]) +
-                                    TChars.COMMA +
-                                        QuotedStr(TUnknown.Null) +
-                                    TChars.COMMA +
-                                        QuotedStr(String.Empty) +
-                                    TChars.COMMA +
-                                        QuotedStr(TUnknown.Null) +
-                                    TChars.COMMA +
-                                        QuotedStr('2');
-                                sgAgeView.Cells[sgAgeView.ReturnColumn(TGeneralComment.Free2, 1, 1), iCNT]:='';
-                            end;
-
-                            if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneralComment.Free3, 1, 1) then
-                            begin
-                                Data.StrSQL:=
-                                    TSQL.EXECUTE +
-                                        Data.UpsertFreeColumns +
-                                    TChars.SPACE +
-                                        QuotedStr(SessionService.SessionUser.ToUpper) +
-                                    TChars.COMMA +
-                                        QuotedStr(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), iCNT]) +
-                                    TChars.COMMA +
-                                        QuotedStr(TUnknown.Null) +
-                                    TChars.COMMA +
-                                        QuotedStr(TUnknown.Null) +
-                                    TChars.COMMA +
-                                        QuotedStr(String.Empty) +
-                                    TChars.COMMA +
-                                        QuotedStr('3');
-                                sgAgeView.Cells[sgAgeView.ReturnColumn(TGeneralComment.Free3, 1, 1), iCNT]:='';
-                            end;
-
-                        Data.ExecSQL;
-
-                        end;
-
-                    end;
-
-                finally
-                    Data.Free();
-                    sgAgeView.Freeze(False);
-                end;
-
-            end).Start();
-
-            Screen.Cursor:=crDefault;
-            Exit();
-
-        end;
-
-        // Single cell detele
-
-        // Free 1
-        if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneralComment.Free1, 1, 1) then
-        begin
-            ModifyCell(sgAgeView.ReturnColumn(TSnapshots.Cuid, 1, 1), ctFree1, '');
-            sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]:='';
-        end;
-
-        // Free 2
-        if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneralComment.Free2, 1, 1) then
-        begin
-            ModifyCell(sgAgeView.ReturnColumn(TSnapshots.Cuid, 1, 1), ctFree2, '');
-            sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]:='';
-        end;
-
-        // Free 3
-        if sgAgeView.Col = sgAgeView.ReturnColumn(TGeneralComment.Free3, 1, 1) then
-        begin
-            ModifyCell(sgAgeView.ReturnColumn(TSnapshots.Cuid, 1, 1), ctFree3, '');
-            sgAgeView.Cells[sgAgeView.Col, sgAgeView.Row]:='';
-        end;
-
-        Exit();
-
-    end;
-
+    {Empty}
 end;
 
 
@@ -5061,7 +4669,15 @@ end;
 
 procedure TMainForm.imgRefreshReportClick(Sender: TObject);
 begin
-//
+
+    if String.IsNullOrEmpty(FLastCoCodesSelected) then
+    begin
+        THelpers.MsgCall(TAppMessage.Warn, 'No aging report has been uploaded.');
+        Exit();
+    end;
+
+    LoadAgeReport(FLastCoCodesSelected);
+
 end;
 
 

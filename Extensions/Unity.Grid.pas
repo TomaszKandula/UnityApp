@@ -723,14 +723,15 @@ end;
 function TStringGrid.ReturnColumn(ColumnName: string; FixedCol: integer; FixedRow: integer): integer;
 begin
 
-    Result:=-100; // Warning! Out of bound by default
+    // This will cause out of bound warning
+    Result:=-100;
 
     for var iCNT: integer:=FixedCol to ColCount - 1 do
     begin
         if Cells[iCNT, FixedRow - 1] = ColumnName then
         begin
             Result:=iCNT;
-            Exit;
+            Exit();
         end;
     end;
 
