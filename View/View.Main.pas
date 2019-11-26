@@ -1423,9 +1423,6 @@ begin
     TimerUpTime.Enabled:=True;
     TimerCurrentTime.Enabled:=True;
 
-//    var Queries: IQueries:=TQueries.Create;
-//    Queries.InitializeQms;
-
 end;
 
 
@@ -1837,6 +1834,33 @@ end;
 procedure TMainForm.AgeViewMapping();
 begin
 
+    var  CompanyCode:=sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1);
+
+    var  ColPersonResp    :=sgAgeView.ReturnColumn(TSnapshots.fPersonResponsible, 1, 1);
+    var  IdPersonResp     :=sgPersonResp.ReturnColumn(TPersonResponsible.Id, 1, 1);
+    var  DbNamePersonResp :=sgPersonResp.ReturnColumn(TPersonResponsible.SourceDBName, 1, 1);
+    var  ErpCodePersonResp:=sgPersonResp.ReturnColumn(TPersonResponsible.ErpCode, 1, 1);
+
+    var ColSalesResp    :=sgAgeView.ReturnColumn(TSnapshots.fSalesResponsible, 1, 1);
+    var IdSalesResp     :=sgSalesResp.ReturnColumn(TSalesResponsible.Id, 1, 1);
+    var DbNameSalesResp :=sgSalesResp.ReturnColumn(TSalesResponsible.SourceDBName, 1, 1);
+    var ErpCodeSalesResp:=sgSalesResp.ReturnColumn(TSalesResponsible.ErpCode, 1, 1);
+
+    var ColAccountType    :=sgAgeView.ReturnColumn(TSnapshots.fAccountType, 1, 1);
+    var IdAccountType     :=sgAccountType.ReturnColumn(TAccountType.Id, 1, 1);
+    var DbNameAccountType :=sgAccountType.ReturnColumn(TAccountType.SourceDBName, 1, 1);
+    var ErpCodeAccountType:=sgAccountType.ReturnColumn(TAccountType.ErpCode, 1, 1);
+
+    var ColCustomerGroup    :=sgAgeView.ReturnColumn(TSnapshots.fCustomerGroup, 1, 1);
+    var IdCustomerGroup     :=sgCustomerGr.ReturnColumn(TCustomerGroup.Id, 1, 1);
+    var DbNameCustomerGroup :=sgCustomerGr.ReturnColumn(TCustomerGroup.SourceDBName, 1, 1);
+    var ErpCodeCustomerGroup:=sgCustomerGr.ReturnColumn(TCustomerGroup.ErpCode, 1, 1);
+
+    var ColPaymentTerms    :=sgAgeView.ReturnColumn(TSnapshots.fPaymentTerms, 1, 1);
+    var ErpCodePaymentTerms:=sgPmtTerms.ReturnColumn(TPaymentTerms.ErpCode, 1, 1);
+    var EntityPaymentTerms :=sgPmtTerms.ReturnColumn(TPaymentTerms.Entity, 1, 1);
+    var DescPaymentTerms   :=sgPmtTerms.ReturnColumn(TPaymentTerms.Description, 1, 1);
+
     sgAgeView.Freeze(True);
     sgPersonResp.Freeze(True);
     sgSalesResp.Freeze(True);
@@ -1848,65 +1872,19 @@ begin
     var Debtors: IDebtors:=TDebtors.Create();
     try
 
-
-        Debtors.MapTableAwaited(
-            sgAgeView,
-            sgPersonResp,
-            True,
-            sgAgeView.ReturnColumn(TSnapshots.fPersonResponsible, 1, 1),
-            sgPersonResp.ReturnColumn(TPersonResponsible.Id, 1, 1),
-            sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1),
-            sgPersonResp.ReturnColumn(TPersonResponsible.SourceDBName, 1, 1),
-            sgPersonResp.ReturnColumn(TPersonResponsible.ErpCode, 1, 1)
-        );
+        Debtors.MapTableAwaited(sgAgeView, sgPersonResp, True, ColPersonResp, IdPersonResp, CompanyCode, DbNamePersonResp, ErpCodePersonResp);
         ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Mapping has been performed (PersonResponsible).');
 
-        Debtors.MapTableAwaited(
-            sgAgeView,
-            sgSalesResp,
-            True,
-            sgAgeView.ReturnColumn(TSnapshots.fSalesResponsible, 1, 1),
-            sgSalesResp.ReturnColumn(TSalesResponsible.Id, 1, 1),
-            sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1),
-            sgSalesResp.ReturnColumn(TSalesResponsible.SourceDBName, 1, 1),
-            sgSalesResp.ReturnColumn(TSalesResponsible.ErpCode, 1, 1)
-        );
+        Debtors.MapTableAwaited(sgAgeView, sgSalesResp, True, ColSalesResp, IdSalesResp, CompanyCode, DbNameSalesResp, ErpCodeSalesResp);
         ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Mapping has been performed (SalesResponsible).');
 
-        Debtors.MapTableAwaited(
-            sgAgeView,
-            sgAccountType,
-            True,
-            sgAgeView.ReturnColumn(TSnapshots.fAccountType, 1, 1),
-            sgAccountType.ReturnColumn(TAccountType.Id, 1, 1),
-            sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1),
-            sgAccountType.ReturnColumn(TAccountType.SourceDBName, 1, 1),
-            sgAccountType.ReturnColumn(TAccountType.ErpCode, 1, 1)
-        );
+        Debtors.MapTableAwaited(sgAgeView, sgAccountType, True, ColAccountType, IdAccountType, CompanyCode, DbNameAccountType, ErpCodeAccountType);
         ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Mapping has been performed (AccountType).');
 
-        Debtors.MapTableAwaited(
-            sgAgeView,
-            sgCustomerGr,
-            True,
-            sgAgeView.ReturnColumn(TSnapshots.fCustomerGroup, 1, 1),
-            sgCustomerGr.ReturnColumn(TCustomerGroup.Id, 1, 1),
-            sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1),
-            sgCustomerGr.ReturnColumn(TCustomerGroup.SourceDBName, 1, 1),
-            sgCustomerGr.ReturnColumn(TCustomerGroup.ErpCode, 1, 1)
-        );
+        Debtors.MapTableAwaited(sgAgeView, sgCustomerGr, True, ColCustomerGroup, IdCustomerGroup, CompanyCode, DbNameCustomerGroup, ErpCodeCustomerGroup);
         ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Mapping has been performed (CustomerGroup).');
 
-        Debtors.MapTableAwaited(
-            sgAgeView,
-            sgPmtTerms,
-            False,
-            sgAgeView.ReturnColumn(TSnapshots.fPaymentTerms, 1, 1),
-            sgPmtTerms.ReturnColumn(TPaymentTerms.ErpCode, 1, 1),
-            sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1),
-            sgPmtTerms.ReturnColumn(TPaymentTerms.Entity, 1, 1),
-            sgPmtTerms.ReturnColumn(TPaymentTerms.Description, 1, 1)
-        );
+        Debtors.MapTableAwaited(sgAgeView, sgPmtTerms, False, ColPaymentTerms, ErpCodePaymentTerms, CompanyCode, EntityPaymentTerms, DescPaymentTerms);
         ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Mapping has been performed (PaymentTerms).');
 
     finally
@@ -1981,8 +1959,8 @@ begin
 
     if TabSheet = TabSheet8 then
     begin
-            txtSettings.Font.Style:=[fsBold];
-            txtSettings.Font.Color:=$006433C9;
+        txtSettings.Font.Style:=[fsBold];
+        txtSettings.Font.Color:=$006433C9;
     end;
 
     if TabSheet = TabSheet9 then
@@ -2042,15 +2020,6 @@ begin
     AccountTypePanel.PanelBorders     (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
     SettingsInnerSections.PanelBorders(clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
     SettingsInnerValues.PanelBorders  (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-//    PanelFSC.PanelBorders             (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-//    PanelLBU.PanelBorders             (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-//    PanelLBUGrid.PanelBorders         (clWhite,   $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
-//    PanelFSCGrid.PanelBorders         (clWhite,   $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
-//    PanelFscComment.PanelBorders      (clWhite,   $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
-//    PanelLbuComment.PanelBorders      (clWhite,   $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
-//    PanelFscDetails.PanelBorders      (clWhite,   $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
-//    PanelLbuDetails.PanelBorders      (clWhite,   $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
-
 end;
 
 
@@ -2685,7 +2654,7 @@ begin
 end;
 
 
-procedure TMainForm.Action_TrackerClick(Sender: TObject); // move to invoice tracker wnd
+procedure TMainForm.Action_TrackerClick(Sender: TObject);
 begin
     THelpers.WndCall(TrackerForm, TWindowState.Modal);
 end;
@@ -3052,7 +3021,6 @@ end;
 
 procedure TMainForm.TrayIconClick(Sender: TObject);
 begin
-
     // ------------------------------------------------------------
     // Show the application form when user double click application
     // icon visible on system tray.
@@ -3061,7 +3029,6 @@ begin
         TrayIcon.PopupMenu:=nil
     else
         TrayIcon.PopupMenu:=PopupMenu;
-
 end;
 
 

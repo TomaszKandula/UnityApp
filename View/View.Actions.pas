@@ -45,8 +45,6 @@ type
         OpenItemsGrid: TStringGrid;
         DailyCom: TMemo;
         HistoryGrid: TStringGrid;
-        btnCallCustomer: TSpeedButton;
-        btnNext: TSpeedButton;
         GeneralCom: TMemo;
         zText1: TLabel;
         zText2: TLabel;
@@ -55,7 +53,6 @@ type
         zText3: TLabel;
         Cust_Name: TLabel;
         Cust_Number: TLabel;
-        btnAutoStatement: TSpeedButton;
         PanelGrid: TPanel;
         PanelHeader: TPanel;
         Cust_Person: TEdit;
@@ -66,9 +63,6 @@ type
         DailyTitle: TLabel;
         GeneralPanel: TPanel;
         GeneralTitle: TLabel;
-        btnSetFollowUp: TSpeedButton;
-        btnClearFollowUp: TSpeedButton;
-        btnCustomStatement: TSpeedButton;
         Cust_Phone: TComboBox;
         GroupDetails: TGroupBox;
         btnSaveCustDetails: TSpeedButton;
@@ -76,7 +70,6 @@ type
         Cust_PersonBack: TShape;
         Cust_NumberBack: TShape;
         Cust_NameBack: TShape;
-        btnBack: TSpeedButton;
         btnEdit: TSpeedButton;
         btnCopyCustName: TSpeedButton;
         btnCopyCustNumber: TSpeedButton;
@@ -90,8 +83,6 @@ type
         Cust_MailGeneral: TEdit;
         Cust_MailGeneralBack: TShape;
         btnCopyGeneralMail: TSpeedButton;
-        btnLogNow: TSpeedButton;
-        btnLogMissingInv: TSpeedButton;
         HistoryGridBorders: TShape;
         OpenItemsGridBorders: TShape;
         DailyComBorders: TShape;
@@ -115,6 +106,24 @@ type
         cbCtrlStatusOff: TCheckBox;
         PanelBottom: TPanel;
         txtItem: TLabel;
+        btnCallCustomer: TImage;
+        btnAutoStatement: TImage;
+        btnCustomStatement: TImage;
+        btnLogMissingInv: TImage;
+        btnLogNow: TImage;
+        btnClearFollowUp: TImage;
+        btnSetFollowUp: TImage;
+        btnBack: TImage;
+        btnNext: TImage;
+        txtBack: TLabel;
+        txtNext: TLabel;
+        txtSetFollowUp: TLabel;
+        txtClearFollowUp: TLabel;
+        txtLogMissingInv: TLabel;
+        txtLogNow: TLabel;
+        txtCustomStatement: TLabel;
+        txtAutoStatement: TLabel;
+        txtCallCustomer: TLabel;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
@@ -122,30 +131,16 @@ type
         procedure OpenItemsGridMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure OpenItemsGridMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure OpenItemsGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
-        procedure btnNextClick(Sender: TObject);
-        procedure btnAutoStatementClick(Sender: TObject);
         procedure HistoryGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
         procedure HistoryGridMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure HistoryGridMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure HistoryGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
         procedure OpenItemsGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure HistoryGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-        procedure btnCallCustomerClick(Sender: TObject);
         procedure DailyComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure GeneralComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-        procedure btnSetFollowUpClick(Sender: TObject);
-        procedure btnClearFollowUpClick(Sender: TObject);
-        procedure btnCustomStatementClick(Sender: TObject);
         procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
-        procedure btnSaveCustDetailsClick(Sender: TObject);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
-        procedure btnBackClick(Sender: TObject);
-        procedure btnCopyCustNameClick(Sender: TObject);
-        procedure btnCopyCustNumberClick(Sender: TObject);
-        procedure btnCopyPersonClick(Sender: TObject);
-        procedure btnCopyEmailClick(Sender: TObject);
-        procedure btnEditClick(Sender: TObject);
-        procedure btnCopyGeneralMailClick(Sender: TObject);
         procedure Cust_PhoneMouseEnter(Sender: TObject);
         procedure Cust_PersonMouseEnter(Sender: TObject);
         procedure Cust_MailMouseEnter(Sender: TObject);
@@ -156,8 +151,24 @@ type
         procedure GeneralComMouseEnter(Sender: TObject);
         procedure DailyComKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure GeneralComKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure FormClose(Sender: TObject; var Action: TCloseAction);
+        procedure btnCopyCustNameClick(Sender: TObject);
+        procedure btnCopyCustNumberClick(Sender: TObject);
+        procedure btnCopyGeneralMailClick(Sender: TObject);
+        procedure btnCopyEmailClick(Sender: TObject);
+        procedure btnCopyPersonClick(Sender: TObject);
+        procedure btnEditClick(Sender: TObject);
+        procedure btnSaveCustDetailsClick(Sender: TObject);
+        procedure btnBackClick(Sender: TObject);
+        procedure btnNextClick(Sender: TObject);
+        procedure btnSetFollowUpClick(Sender: TObject);
+        procedure btnClearFollowUpClick(Sender: TObject);
         procedure btnLogMissingInvClick(Sender: TObject);
         procedure btnLogNowClick(Sender: TObject);
+        procedure btnCustomStatementClick(Sender: TObject);
+        procedure btnAutoStatementClick(Sender: TObject);
+        procedure btnCallCustomerClick(Sender: TObject);
         procedure btnBackMouseEnter(Sender: TObject);
         procedure btnBackMouseLeave(Sender: TObject);
         procedure btnNextMouseEnter(Sender: TObject);
@@ -176,32 +187,28 @@ type
         procedure btnAutoStatementMouseLeave(Sender: TObject);
         procedure btnCallCustomerMouseEnter(Sender: TObject);
         procedure btnCallCustomerMouseLeave(Sender: TObject);
-        procedure btnSaveCustDetailsMouseEnter(Sender: TObject);
-        procedure btnSaveCustDetailsMouseLeave(Sender: TObject);
-        procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-        procedure FormClose(Sender: TObject; var Action: TCloseAction);
-        procedure btnEditMouseEnter(Sender: TObject);
-        procedure btnEditMouseLeave(Sender: TObject);
     strict private
-        var FHistoryGrid:          boolean;
-        var FCUID:                 string;
-        var FSCUID:                string;
-        var FBranch:               string;
-        var FBanksHtml:            string;
-        var FCoCode:               string;
-        var FCustName:             string;
-        var FCustNumber:           string;
-        var FLbuName:              string;
-        var FLbuAddress:           string;
-        var FLbuPhone:             string;
-        var FLbuSendFrom:          string;
-        var FSrcColumns:           TAIntigers;
-        var FAbUpdateFields:       TAddressBookUpdateFields;
-        var FDailyCommentFields:   TDailyCommentFields;
+        const AppButtonTxtNormal = $00555555;
+        const AppButtonTxtSelected = $006433C9;
+        var FHistoryGrid: boolean;
+        var FCUID: string;
+        var FSCUID: string;
+        var FBranch: string;
+        var FBanksHtml: string;
+        var FCoCode: string;
+        var FCustName: string;
+        var FCustNumber: string;
+        var FLbuName: string;
+        var FLbuAddress: string;
+        var FLbuPhone: string;
+        var FLbuSendFrom: string;
+        var FSrcColumns: TAIntigers;
+        var FAbUpdateFields: TAddressBookUpdateFields;
+        var FDailyCommentFields: TDailyCommentFields;
         var FGeneralCommentFields: TGeneralCommentFields;
-        var FOpenItemsTotal:       TOpenItemsTotal;
-        var FPayLoad:              TAccountStatementPayLoad;
-        var FIsDataLoaded:         boolean;
+        var FOpenItemsTotal: TOpenItemsTotal;
+        var FPayLoad: TAccountStatementPayLoad;
+        var FIsDataLoaded: boolean;
         function  GetRunningApps(SearchName: string): boolean;
         procedure GetOpenItems(OpenItemsDest, OpenItemsSrc: TStringGrid);
         procedure UpdateGeneral(var Text: TMemo);
@@ -227,17 +234,17 @@ type
         procedure EditGeneralComment_Callback(CallResponse: TCallResponse);
         procedure EditDailyComment_Callback(CallResponse: TCallResponse);
     public
-        property CUID:         string read FCUID;
-        property SCUID:        string read FSCUID;
-        property Branch:       string read FBranch;
-        property CoCode:       string read FCoCode;
-        property CustName:     string read FCustName;
-        property CustNumber:   string read FCustNumber;
-        property LbuName:      string read FLbuName;
-        property LbuAddress:   string read FLbuAddress;
-        property LbuPhone:     string read FLbuPhone;
-        property LbuSendFrom:  string read FLbuSendFrom;
-        property BanksHtml:    string read FBanksHtml;
+        property CUID: string read FCUID;
+        property SCUID: string read FSCUID;
+        property Branch: string read FBranch;
+        property CoCode: string read FCoCode;
+        property CustName: string read FCustName;
+        property CustNumber: string read FCustNumber;
+        property LbuName: string read FLbuName;
+        property LbuAddress: string read FLbuAddress;
+        property LbuPhone: string read FLbuPhone;
+        property LbuSendFrom: string read FLbuSendFrom;
+        property BanksHtml: string read FBanksHtml;
     end;
 
 
@@ -769,34 +776,6 @@ begin
     btnEdit.Glyph.TransparentColor:=clWhite;
     btnSaveCustDetails.Glyph.Transparent:=True;
     btnSaveCustDetails.Glyph.TransparentColor:=clWhite;
-    btnBack.Glyph.Transparent:=True;
-    btnBack.Glyph.TransparentColor:=clWhite;
-    btnNext.Glyph.Transparent:=True;
-    btnNext.Glyph.TransparentColor:=clWhite;
-    btnSetFollowUp.Glyph.Transparent:=True;
-    btnSetFollowUp.Glyph.TransparentColor:=clWhite;
-    btnClearFollowUp.Glyph.Transparent:=True;
-    btnClearFollowUp.Glyph.TransparentColor:=clWhite;
-    btnLogNow.Glyph.Transparent:=True;
-    btnLogNow.Glyph.TransparentColor:=clWhite;
-    btnLogMissingInv.Glyph.Transparent:=True;
-    btnLogMissingInv.Glyph.TransparentColor:=clWhite;
-    btnCustomStatement.Glyph.Transparent:=True;
-    btnCustomStatement.Glyph.TransparentColor:=clWhite;
-    btnAutoStatement.Glyph.Transparent:=True;
-    btnAutoStatement.Glyph.TransparentColor:=clWhite;
-    btnCallCustomer.Glyph.Transparent:=True;
-    btnCallCustomer.Glyph.TransparentColor:=clWhite;
-    btnCopyCustName.Glyph.Transparent:=True;
-    btnCopyCustName.Glyph.TransparentColor:=clWhite;
-    btnCopyCustNumber.Glyph.Transparent:=True;
-    btnCopyCustNumber.Glyph.TransparentColor:=clWhite;
-    btnCopyPerson.Glyph.Transparent:=True;
-    btnCopyPerson.Glyph.TransparentColor:=clWhite;
-    btnCopyEmail.Glyph.Transparent:=True;
-    btnCopyEmail.Glyph.TransparentColor:=clWhite;
-    btnCopyGeneralMail.Glyph.Transparent:=True;
-    btnCopyGeneralMail.Glyph.TransparentColor:=clWhite;
 end;
 
 
@@ -1177,148 +1156,128 @@ end;
 procedure TActionsForm.btnBackMouseEnter(Sender: TObject);
 begin
     txtDesc.Caption:='Back to previous customer.';
+    txtBack.Font.Color:=AppButtonTxtSelected;
 end;
 
 
 procedure TActionsForm.btnBackMouseLeave(Sender: TObject);
 begin
     txtDesc.Caption:='';
+    txtBack.Font.Color:=AppButtonTxtNormal;
 end;
 
 
 procedure TActionsForm.btnNextMouseEnter(Sender: TObject);
 begin
     txtDesc.Caption:='Load next customer.';
+    txtNext.Font.Color:=AppButtonTxtSelected;
 end;
-
 
 procedure TActionsForm.btnNextMouseLeave(Sender: TObject);
 begin
     txtDesc.Caption:='';
+    txtNext.Font.Color:=AppButtonTxtNormal;
 end;
 
 
 procedure TActionsForm.btnSetFollowUpMouseEnter(Sender: TObject);
 begin
     txtDesc.Caption:='Add follow-up date.';
+    txtSetFollowUp.Font.Color:=AppButtonTxtSelected;
 end;
-
 
 procedure TActionsForm.btnSetFollowUpMouseLeave(Sender: TObject);
 begin
     txtDesc.Caption:='';
+    txtSetFollowUp.Font.Color:=AppButtonTxtNormal;
 end;
 
 
 procedure TActionsForm.btnClearFollowUpMouseEnter(Sender: TObject);
 begin
     txtDesc.Caption:='Remove existing follow-up date.';
+    txtClearFollowUp.Font.Color:=AppButtonTxtSelected;
 end;
 
 
 procedure TActionsForm.btnClearFollowUpMouseLeave(Sender: TObject);
 begin
     txtDesc.Caption:='';
+    txtClearFollowUp.Font.Color:=AppButtonTxtNormal;
 end;
 
 
 procedure TActionsForm.btnLogMissingInvMouseEnter(Sender: TObject);
 begin
     txtDesc.Caption:='Log to QMS missing invoice (require to fill the invoice details).';
+    txtLogMissingInv.Font.Color:=AppButtonTxtSelected;
 end;
 
 
 procedure TActionsForm.btnLogMissingInvMouseLeave(Sender: TObject);
 begin
     txtDesc.Caption:='';
+    txtLogMissingInv.Font.Color:=AppButtonTxtNormal;
 end;
 
 
 procedure TActionsForm.btnLogNowMouseEnter(Sender: TObject);
 begin
     txtDesc.Caption:='Log to QMS selected invoice(s) from the customer open items list.';
+    txtLogNow.Font.Color:=AppButtonTxtSelected;
 end;
 
 
 procedure TActionsForm.btnLogNowMouseLeave(Sender: TObject);
 begin
     txtDesc.Caption:='';
+    txtLogNow.Font.Color:=AppButtonTxtNormal;
 end;
 
 
 procedure TActionsForm.btnCustomStatementMouseEnter(Sender: TObject);
 begin
-    txtDesc.Caption:='Send custom e-mail with account statement.';
+    txtDesc.Caption:='Send account statement now.';
+    txtCustomStatement.Font.Color:=AppButtonTxtSelected;
 end;
 
 
 procedure TActionsForm.btnCustomStatementMouseLeave(Sender: TObject);
 begin
     txtDesc.Caption:='';
+    txtCustomStatement.Font.Color:=AppButtonTxtNormal;
 end;
 
 
 procedure TActionsForm.btnAutoStatementMouseEnter(Sender: TObject);
 begin
-    txtDesc.Caption:='Send account statement now.';
+    txtDesc.Caption:='Send custom e-mail with account statement.';
+    txtAutoStatement.Font.Color:=AppButtonTxtSelected;
 end;
 
 
 procedure TActionsForm.btnAutoStatementMouseLeave(Sender: TObject);
 begin
     txtDesc.Caption:='';
+    txtAutoStatement.Font.Color:=AppButtonTxtNormal;
 end;
 
 
 procedure TActionsForm.btnCallCustomerMouseEnter(Sender: TObject);
 begin
     txtDesc.Caption:='Call customer now.';
+    txtCallCustomer.Font.Color:=AppButtonTxtSelected;
 end;
 
 
 procedure TActionsForm.btnCallCustomerMouseLeave(Sender: TObject);
 begin
     txtDesc.Caption:='';
-end;
-
-
-procedure TActionsForm.btnSaveCustDetailsMouseEnter(Sender: TObject);
-begin
-    txtDesc.Caption:='Save changes in customer details.';
-end;
-
-
-procedure TActionsForm.btnSaveCustDetailsMouseLeave(Sender: TObject);
-begin
-    txtDesc.Caption:='';
-end;
-
-
-procedure TActionsForm.btnEditMouseEnter(Sender: TObject);
-begin
-    txtDesc.Caption:='Edit customer phone list.';
-end;
-
-
-procedure TActionsForm.btnEditMouseLeave(Sender: TObject);
-begin
-    txtDesc.Caption:='';
+    txtCallCustomer.Font.Color:=AppButtonTxtNormal;
 end;
 
 
 // -------------------------------------------------------------------------------------------------------------------------------------------- CLICK EVENTS //
-
-
-procedure TActionsForm.btnEditClick(Sender: TObject);
-begin
-    THelpers.WndCall(PhoneListForm, TWindowState.Modal);
-end;
-
-
-procedure TActionsForm.btnSaveCustDetailsClick(Sender: TObject);
-begin
-    SaveCustomerDetails();
-end;
 
 
 procedure TActionsForm.btnBackClick(Sender: TObject);
@@ -1343,6 +1302,20 @@ end;
 procedure TActionsForm.btnClearFollowUpClick(Sender: TObject);
 begin
     ClearFollowUp();
+end;
+
+
+procedure TActionsForm.btnLogMissingInvClick(Sender: TObject);
+begin
+    //QmsForm.IsMissing:=True;
+    //THelpers.WndCall(QmsForm, Modal);
+end;
+
+
+procedure TActionsForm.btnLogNowClick(Sender: TObject);
+begin
+    //QmsForm.IsMissing:=False;
+    //THelpers.WndCall(QmsForm, Modal);
 end;
 
 
@@ -1419,9 +1392,9 @@ begin
 end;
 
 
-procedure TActionsForm.btnCopyPersonClick(Sender: TObject);
+procedure TActionsForm.btnCopyGeneralMailClick(Sender: TObject);
 begin
-    ClipBoard.AsText:=Cust_Person.Text;
+    Clipboard.AsText:=Cust_MailGeneral.Text;
 end;
 
 
@@ -1431,23 +1404,21 @@ begin
 end;
 
 
-procedure TActionsForm.btnCopyGeneralMailClick(Sender: TObject);
+procedure TActionsForm.btnCopyPersonClick(Sender: TObject);
 begin
-    Clipboard.AsText:=Cust_MailGeneral.Text;
+    ClipBoard.AsText:=Cust_Person.Text;
 end;
 
 
-procedure TActionsForm.btnLogMissingInvClick(Sender: TObject);
+procedure TActionsForm.btnEditClick(Sender: TObject);
 begin
-//    QmsForm.IsMissing:=True;
-//    THelpers.WndCall(QmsForm, Modal);
+    THelpers.WndCall(PhoneListForm, TWindowState.Modal);
 end;
 
 
-procedure TActionsForm.btnLogNowClick(Sender: TObject);
+procedure TActionsForm.btnSaveCustDetailsClick(Sender: TObject);
 begin
-//    QmsForm.IsMissing:=False;
-//    THelpers.WndCall(QmsForm, Modal);
+    SaveCustomerDetails();
 end;
 
 
