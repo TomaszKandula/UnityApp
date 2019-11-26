@@ -146,7 +146,7 @@ begin
         begin
             var InvoiceTracker: IInvoiceTracker:=TInvoiceTracker.Create();
             InvoiceTracker.GetInvoiceList(
-                MainForm.sgInvoiceTracker.Cells[MainForm.sgInvoiceTracker.ReturnColumn(TTrackerData.Cuid, 1, 1), MainForm.sgInvoiceTracker.Row],
+                MainForm.sgInvoiceTracker.Cells[MainForm.sgInvoiceTracker.GetCol(TTrackerData.Cuid), MainForm.sgInvoiceTracker.Row],
                 GetInvoiceList_Callback
             );
             FIsLoaded:=True;

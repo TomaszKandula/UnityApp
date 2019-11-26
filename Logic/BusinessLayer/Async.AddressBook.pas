@@ -251,16 +251,16 @@ begin
                     for var iCNT: integer:=low(SourceGrid.UpdatedRowsHolder) to high(SourceGrid.UpdatedRowsHolder) do
                     begin
 
-                        Condition:=DbModel.TAddressBook.Scuid + TSql.EQUAL + SourceGrid.Cells[SourceGrid.ReturnColumn(DbModel.TAddressBook.Scuid, 1, 1), SourceGrid.UpdatedRowsHolder[iCNT]];
+                        Condition:=DbModel.TAddressBook.Scuid + TSql.EQUAL + SourceGrid.Cells[SourceGrid.GetCol(DbModel.TAddressBook.Scuid), SourceGrid.UpdatedRowsHolder[iCNT]];
 
                         Book.Columns.Add(DbModel.TAddressBook.Emails);
                         Book.Columns.Add(DbModel.TAddressBook.PhoneNumbers);
                         Book.Columns.Add(DbModel.TAddressBook.Contact);
                         Book.Columns.Add(DbModel.TAddressBook.Estatements);
-                        Book.Values.Add(SourceGrid.Cells[SourceGrid.ReturnColumn(DbModel.TAddressBook.Emails,       1, 1), SourceGrid.UpdatedRowsHolder[iCNT]]);
-                        Book.Values.Add(SourceGrid.Cells[SourceGrid.ReturnColumn(DbModel.TAddressBook.PhoneNumbers, 1, 1), SourceGrid.UpdatedRowsHolder[iCNT]]);
-                        Book.Values.Add(SourceGrid.Cells[SourceGrid.ReturnColumn(DbModel.TAddressBook.Contact,      1, 1), SourceGrid.UpdatedRowsHolder[iCNT]]);
-                        Book.Values.Add(SourceGrid.Cells[SourceGrid.ReturnColumn(DbModel.TAddressBook.Estatements,  1, 1), SourceGrid.UpdatedRowsHolder[iCNT]]);
+                        Book.Values.Add(SourceGrid.Cells[SourceGrid.GetCol(DbModel.TAddressBook.Emails), SourceGrid.UpdatedRowsHolder[iCNT]]);
+                        Book.Values.Add(SourceGrid.Cells[SourceGrid.GetCol(DbModel.TAddressBook.PhoneNumbers), SourceGrid.UpdatedRowsHolder[iCNT]]);
+                        Book.Values.Add(SourceGrid.Cells[SourceGrid.GetCol(DbModel.TAddressBook.Contact), SourceGrid.UpdatedRowsHolder[iCNT]]);
+                        Book.Values.Add(SourceGrid.Cells[SourceGrid.GetCol(DbModel.TAddressBook.Estatements), SourceGrid.UpdatedRowsHolder[iCNT]]);
 
                     end;
 
@@ -353,8 +353,8 @@ begin
                 begin
 
                     // Build SCUID
-                    var SCUID: string:=SourceGrid.Cells[SourceGrid.ReturnColumn(TSnapshots.fCustomerNumber, 1, 1), iCNT] +
-                        THelpers.CoConvert(SourceGrid.Cells[SourceGrid.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT]);
+                    var SCUID: string:=SourceGrid.Cells[SourceGrid.GetCol(TSnapshots.fCustomerNumber), iCNT] +
+                        THelpers.CoConvert(SourceGrid.Cells[SourceGrid.GetCol(TSnapshots.fCoCode), iCNT]);
 
                     Book.CleanUp();
                     Book.Columns.Add(DbModel.TAddressBook.Scuid);
@@ -367,11 +367,11 @@ begin
                         Inc(Check);
                         AddrBook[jCNT,  0]:=UpperCase(SessionService.SessionUser);
                         AddrBook[jCNT,  1]:=SCUID;
-                        AddrBook[jCNT,  2]:=SourceGrid.Cells[SourceGrid.ReturnColumn(DbModel.TSnapshots.fCustomerNumber,1, 1), iCNT];
-                        AddrBook[jCNT,  3]:=SourceGrid.Cells[SourceGrid.ReturnColumn(DbModel.TSnapshots.fCustomerName,  1, 1), iCNT];
-                        AddrBook[jCNT,  8]:=SourceGrid.Cells[SourceGrid.ReturnColumn(DbModel.TSnapshots.fAgent,         1, 1), iCNT];
-                        AddrBook[jCNT,  9]:=SourceGrid.Cells[SourceGrid.ReturnColumn(DbModel.TSnapshots.fDivision,      1, 1), iCNT];
-                        AddrBook[jCNT, 10]:=SourceGrid.Cells[SourceGrid.ReturnColumn(DbModel.TSnapshots.fCoCode,        1, 1), iCNT];
+                        AddrBook[jCNT,  2]:=SourceGrid.Cells[SourceGrid.GetCol(DbModel.TSnapshots.fCustomerNumber), iCNT];
+                        AddrBook[jCNT,  3]:=SourceGrid.Cells[SourceGrid.GetCol(DbModel.TSnapshots.fCustomerName), iCNT];
+                        AddrBook[jCNT,  8]:=SourceGrid.Cells[SourceGrid.GetCol(DbModel.TSnapshots.fAgent), iCNT];
+                        AddrBook[jCNT,  9]:=SourceGrid.Cells[SourceGrid.GetCol(DbModel.TSnapshots.fDivision), iCNT];
+                        AddrBook[jCNT, 10]:=SourceGrid.Cells[SourceGrid.GetCol(DbModel.TSnapshots.fCoCode), iCNT];
                         Inc(jCNT);
                         SetLength(AddrBook, jCNT + 1, 11);
                     end;

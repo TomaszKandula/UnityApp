@@ -174,7 +174,7 @@ begin
 
     FIsNumber:=TryToInt(FSearchString);
     if not CaseSensitive.Checked then FSearchString:=UpperCase(FSearchString) else FSearchString:=FSearchString;
-    if FIsNumber then FSearchColumn:=FGrid.ReturnColumn(FColNumber, 1, 1) else FSearchColumn:=FGrid.ReturnColumn(FColName, 1, 1);
+    if FIsNumber then FSearchColumn:=FGrid.GetCol(FColNumber) else FSearchColumn:=FGrid.GetCol(FColName);
 
     SetLength(FGroupping, 0);
 
@@ -267,7 +267,7 @@ begin
         if not (FFoundRow = 0) then
         begin
             FGrid.Row:=FFoundRow;
-            FGrid.Col:=FGrid.ReturnColumn(FColName, 1, 1);
+            FGrid.Col:=FGrid.GetCol(FColName);
         end
         else
         THelpers.MsgCall(Info, 'Cannot find specified customer.');
@@ -307,7 +307,7 @@ end;
 
 procedure TGridSearchForm.FormCreate(Sender: TObject);
 begin
-    PanelEditSearch.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+    PanelEditSearch.Borders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
     FColName  :='';
     FColNumber:='';
 end;

@@ -361,24 +361,24 @@ begin
     FOpenItemsTotal.CurAm    :=0;
 
     // Get columns numbers from source open items string grid
-    FSrcColumns[0] :=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.InvoNo,    1, 1);
-    FSrcColumns[1] :=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.Txt,       1, 1);
-    FSrcColumns[2] :=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.AddTxt,    1, 1);
-    FSrcColumns[3] :=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.OpenAm,    1, 1);
-    FSrcColumns[4] :=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.Am,        1, 1);
-    FSrcColumns[5] :=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.OpenCurAm, 1, 1);
-    FSrcColumns[6] :=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.CurAm,     1, 1);
-    FSrcColumns[7] :=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.ISO,       1, 1);
-    FSrcColumns[8] :=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.DueDt,     1, 1);
-    FSrcColumns[9] :=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.ValDt,     1, 1);
-    FSrcColumns[10]:=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.Ctrl,      1, 1);
-    FSrcColumns[11]:=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.PmtStat,   1, 1);
-    FSrcColumns[12]:=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.Ad1,       1, 1);
-    FSrcColumns[13]:=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.Ad2,       1, 1);
-    FSrcColumns[14]:=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.Ad3,       1, 1);
-    FSrcColumns[15]:=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.Pno,       1, 1);
-    FSrcColumns[16]:=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.PArea,     1, 1);
-    FSrcColumns[17]:=OpenItemsSrc.ReturnColumn(DbModel.TOpenitems.Cuid,      1, 1);
+    FSrcColumns[0] :=OpenItemsSrc.GetCol(DbModel.TOpenitems.InvoNo);
+    FSrcColumns[1] :=OpenItemsSrc.GetCol(DbModel.TOpenitems.Txt);
+    FSrcColumns[2] :=OpenItemsSrc.GetCol(DbModel.TOpenitems.AddTxt);
+    FSrcColumns[3] :=OpenItemsSrc.GetCol(DbModel.TOpenitems.OpenAm);
+    FSrcColumns[4] :=OpenItemsSrc.GetCol(DbModel.TOpenitems.Am);
+    FSrcColumns[5] :=OpenItemsSrc.GetCol(DbModel.TOpenitems.OpenCurAm);
+    FSrcColumns[6] :=OpenItemsSrc.GetCol(DbModel.TOpenitems.CurAm);
+    FSrcColumns[7] :=OpenItemsSrc.GetCol(DbModel.TOpenitems.ISO);
+    FSrcColumns[8] :=OpenItemsSrc.GetCol(DbModel.TOpenitems.DueDt);
+    FSrcColumns[9] :=OpenItemsSrc.GetCol(DbModel.TOpenitems.ValDt);
+    FSrcColumns[10]:=OpenItemsSrc.GetCol(DbModel.TOpenitems.Ctrl);
+    FSrcColumns[11]:=OpenItemsSrc.GetCol(DbModel.TOpenitems.PmtStat);
+    FSrcColumns[12]:=OpenItemsSrc.GetCol(DbModel.TOpenitems.Ad1);
+    FSrcColumns[13]:=OpenItemsSrc.GetCol(DbModel.TOpenitems.Ad2);
+    FSrcColumns[14]:=OpenItemsSrc.GetCol(DbModel.TOpenitems.Ad3);
+    FSrcColumns[15]:=OpenItemsSrc.GetCol(DbModel.TOpenitems.Pno);
+    FSrcColumns[16]:=OpenItemsSrc.GetCol(DbModel.TOpenitems.PArea);
+    FSrcColumns[17]:=OpenItemsSrc.GetCol(DbModel.TOpenitems.Cuid);
 
     // Get headers
     for var iCNT: integer:=Low(FSrcColumns) to High(FSrcColumns) do
@@ -400,9 +400,9 @@ begin
     begin
 
         if
-            (OpenItemsSrc.Cells[MainForm.sgOpenItems.ReturnColumn(TOpenitems.CustNo, 1, 1), iCNT] = CustNumber)
+            (OpenItemsSrc.Cells[MainForm.sgOpenItems.GetCol(TOpenitems.CustNo), iCNT] = CustNumber)
         and
-            (OpenItemsSrc.Cells[MainForm.sgOpenItems.ReturnColumn(TOpenitems.SourceDBName, 1, 1), iCNT] = SourceDBName)
+            (OpenItemsSrc.Cells[MainForm.sgOpenItems.GetCol(TOpenitems.SourceDBName), iCNT] = SourceDBName)
         then
         begin
 
@@ -422,15 +422,15 @@ begin
     end;
 
     // Hide helpers columns from string grid
-    OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(DbModel.TOpenitems.Ad1,   1, 1)]:=OpenItemsDest.sgRowHidden;
-    OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(DbModel.TOpenitems.Ad2,   1, 1)]:=OpenItemsDest.sgRowHidden;
-    OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(DbModel.TOpenitems.Ad3,   1, 1)]:=OpenItemsDest.sgRowHidden;
-    OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(DbModel.TOpenitems.Pno,   1, 1)]:=OpenItemsDest.sgRowHidden;
-    OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(DbModel.TOpenitems.PArea, 1, 1)]:=OpenItemsDest.sgRowHidden;
-    OpenItemsDest.ColWidths[OpenItemsDest.ReturnColumn(DbModel.TOpenitems.Cuid,  1, 1)]:=OpenItemsDest.sgRowHidden;
+    OpenItemsDest.ColWidths[OpenItemsDest.GetCol(DbModel.TOpenitems.Ad1)]  :=OpenItemsDest.sgRowHidden;
+    OpenItemsDest.ColWidths[OpenItemsDest.GetCol(DbModel.TOpenitems.Ad2)]  :=OpenItemsDest.sgRowHidden;
+    OpenItemsDest.ColWidths[OpenItemsDest.GetCol(DbModel.TOpenitems.Ad3)]  :=OpenItemsDest.sgRowHidden;
+    OpenItemsDest.ColWidths[OpenItemsDest.GetCol(DbModel.TOpenitems.Pno)]  :=OpenItemsDest.sgRowHidden;
+    OpenItemsDest.ColWidths[OpenItemsDest.GetCol(DbModel.TOpenitems.PArea)]:=OpenItemsDest.sgRowHidden;
+    OpenItemsDest.ColWidths[OpenItemsDest.GetCol(DbModel.TOpenitems.Cuid)] :=OpenItemsDest.sgRowHidden;
 
     // Sort via payment status
-    OpenItemsDest.MSort(OpenItemsDest.ReturnColumn(TOpenitems.PmtStat, 1, 1), TDataType.TInteger, True);
+    OpenItemsDest.MSort(OpenItemsDest.GetCol(TOpenitems.PmtStat), TDataType.TInteger, True);
 
 end;
 
@@ -492,7 +492,7 @@ begin
             for var jCNT:=0 to ReturnedGrid.ColCount - 1 do
                 HistoryGrid.Cells[jCNT, iCNT]:=ReturnedGrid.Cells[jCNT, iCNT];
 
-        HistoryGrid.ColWidths[HistoryGrid.ReturnColumn(TDailyComment.FixedComment, 1, 1)]:=HistoryGrid.sgRowHidden;
+        HistoryGrid.ColWidths[HistoryGrid.GetCol(TDailyComment.FixedComment)]:=HistoryGrid.sgRowHidden;
         HistoryGrid.SetColWidth(10, 20, 400);
         FHistoryGrid:=True;
         HistoryGrid.Visible:=FHistoryGrid;
@@ -515,7 +515,7 @@ procedure TActionsForm.GetFirstComment(var Text: TMemo);
 begin
 
     if not(Text.Visible) then Exit();
-    var GetColumn: integer:=HistoryGrid.ReturnColumn(TDailyComment.FixedComment, 1, 1);
+    var GetColumn: integer:=HistoryGrid.GetCol(TDailyComment.FixedComment);
     if GetColumn <> -100 then
         Text.Text:=HistoryGrid.Cells[GetColumn, 1{fixed first row}];
 
@@ -563,12 +563,12 @@ end;
 
 procedure TActionsForm.Initialize();
 begin
-    FCUID      :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCuid,          1, 1), MainForm.sgAgeView.Row];
-    FCustName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCustomerName,  1, 1), MainForm.sgAgeView.Row];
-    FCustNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCustomerNumber,1, 1), MainForm.sgAgeView.Row]; // important!
-    FCoCode    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCoCode,        1, 1), MainForm.sgAgeView.Row]; // important!
-    FBranch    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fAgent,         1, 1), MainForm.sgAgeView.Row];
-    FSCUID     :=CustNumber + THelpers.CoConvert(CoCode);
+    FCUID      :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCuid), MainForm.sgAgeView.Row]; // to be deleted
+    FCustName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerName), MainForm.sgAgeView.Row];
+    FCustNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerNumber), MainForm.sgAgeView.Row]; // important!
+    FCoCode    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCoCode), MainForm.sgAgeView.Row]; // important!
+    FBranch    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fAgent), MainForm.sgAgeView.Row]; // spit into agent and division
+    FSCUID     :=CustNumber + THelpers.CoConvert(CoCode); // to be deleted
 end;
 
 
@@ -597,22 +597,26 @@ end;
 procedure TActionsForm.MakePhoneCall();
 begin
 
-    // Check for 'Lynccall.exe'
+    if String.IsNullOrEmpty(ActionsForm.Cust_Phone.Text) or String.IsNullOrWhiteSpace(ActionsForm.Cust_Phone.Text) then
+    begin
+        THelpers.MsgCall(Warn, 'No phone number has been found. Please provide valid phone number and try again.');
+        Exit();
+    end;
+
     var Settings: ISettings:=TSettings.Create;
+
     if not FileExists(Settings.DirApplication + 'LyncCall.exe') then
     begin
         THelpers.MsgCall(Error, TCommon.APPCAPTION + ' cannot find ''lynccall.exe''. Please contact IT support.');
         Exit();
     end;
 
-    // CHeck if Lync/Skype is running
     if not ActionsForm.GetRunningApps('lync.exe') then
     begin
         THelpers.MsgCall(Error, TCommon.APPCAPTION + ' cannot find running Microsoft Skype/Lync for Business. Please open it and try again.');
         Exit();
     end;
 
-    // Run Lync with given phone number
     ShellExecute(ActionsForm.Handle, 'open', PChar(Settings.DirApplication + 'LyncCall.exe'), PChar(ActionsForm.Cust_Phone.Text), nil, SW_SHOWNORMAL);
 
     if ActionsForm.DailyCom.Text = '' then
@@ -638,7 +642,7 @@ procedure TActionsForm.LoadCustomer(GoNext: boolean);
         if
             (MainForm.sgAgeView.RowHeights[iterator] <> -1)
         and
-            (MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fOverdue, 1, 1), iterator] <> '0')
+            (MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fOverdue), iterator] <> '0')
         then
         begin
             MainForm.sgAgeView.Row:=iterator;
@@ -702,7 +706,7 @@ begin
         var Comments: IComments:=TComments.Create();
         Comments.EditGeneralComment(FGeneralCommentFields, EditGeneralComment_Callback);
 
-        MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneralComment.fFollowUp, 1, 1), MainForm.sgAgeView.Row]:='';
+        MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TGeneralComment.fFollowUp), MainForm.sgAgeView.Row]:='';
 
     end;
 
@@ -853,7 +857,7 @@ end;
 procedure TActionsForm.FormCreate(Sender: TObject);
 begin
 
-    PanelActions.PanelBorders(clWhite, $00E3B268, clWhite, clWhite, clWhite);
+    PanelActions.Borders(clWhite, $00E3B268, clWhite, clWhite, clWhite);
 
     InitializePanels;
     InitializeSpeedButtons;
@@ -968,23 +972,23 @@ begin
 
     if
         (
-            ACol = OpenItemsGrid.ReturnColumn(TOpenitems.OpenCurAm, 1, 1)
+            ACol = OpenItemsGrid.GetCol(TOpenitems.OpenCurAm)
         )
     or
         (
-            ACol = OpenItemsGrid.ReturnColumn(TOpenitems.OpenAm, 1, 1)
+            ACol = OpenItemsGrid.GetCol(TOpenitems.OpenAm)
         )
     or
         (
-            ACol = OpenItemsGrid.ReturnColumn(TOpenitems.CurAm, 1, 1)
+            ACol = OpenItemsGrid.GetCol(TOpenitems.CurAm)
         )
     or
         (
-            ACol = OpenItemsGrid.ReturnColumn(TOpenitems.Am, 1, 1)
+            ACol = OpenItemsGrid.GetCol(TOpenitems.Am)
         )
     or
         (
-            ACol = OpenItemsGrid.ReturnColumn(TOpenitems.PmtStat, 1, 1)
+            ACol = OpenItemsGrid.GetCol(TOpenitems.PmtStat)
         )
     then
     begin
@@ -997,7 +1001,7 @@ end;
 
 procedure TActionsForm.HistoryGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
 begin
-    DailyCom.Text:=HistoryGrid.Cells[HistoryGrid.ReturnColumn(TDailyComment.FixedComment, 1, 1), ARow];
+    DailyCom.Text:=HistoryGrid.Cells[HistoryGrid.GetCol(TDailyComment.FixedComment), ARow];
 end;
 
 

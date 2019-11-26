@@ -195,7 +195,7 @@ procedure TFilterForm.FilterPrep();
 begin
     if (FGrid <> nil) and (not(string.IsNullOrEmpty(FColName))) then
     begin
-        FColNumber:=FGrid.ReturnColumn(FColName, 1, 1);
+        FColNumber:=FGrid.GetCol(FColName);
         if FFilterNum = TFiltering.TColumns.Inf7              then FilterInit(INF7);
         if FFilterNum = TFiltering.TColumns.Inf4              then FilterInit(INF4);
         if FFilterNum = TFiltering.TColumns.Group3            then FilterInit(Gr3);
@@ -393,7 +393,7 @@ begin
                     )
                 and
                     (
-                        FGrid.Cells[FGrid.ReturnColumn(FOverdue, 1, 1), jCNT] = '0'
+                        FGrid.Cells[FGrid.GetCol(FOverdue), jCNT] = '0'
                     )
                 )
                 then
@@ -450,7 +450,7 @@ end;
 
 procedure TFilterForm.FormCreate(Sender: TObject);
 begin
-    PanelListItems.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+    PanelListItems.Borders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
     FilterClearAll();
 end;
 

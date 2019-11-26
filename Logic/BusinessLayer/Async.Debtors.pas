@@ -233,21 +233,21 @@ begin
     for var iCNT:=1 to Grid.RowCount - 1 do {if Grid.RowHeights[iCNT] <> Grid.sgRowHidden then}
     begin
 
-        AgingPayLoad.ANotDue:=AgingPayLoad.ANotDue + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fNotDue, 1, 1), iCNT], 0);
-        AgingPayLoad.ARange1:=AgingPayLoad.ARange1 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRange1, 1, 1), iCNT], 0);
-        AgingPayLoad.ARange2:=AgingPayLoad.ARange2 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRange2, 1, 1), iCNT], 0);
-        AgingPayLoad.ARange3:=AgingPayLoad.ARange3 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRange3, 1, 1), iCNT], 0);
-        AgingPayLoad.ARange4:=AgingPayLoad.ARange4 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRange4, 1, 1), iCNT], 0);
-        AgingPayLoad.ARange5:=AgingPayLoad.ARange5 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRange5, 1, 1), iCNT], 0);
-        AgingPayLoad.ARange6:=AgingPayLoad.ARange6 + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fRange6, 1, 1), iCNT], 0);
+        AgingPayLoad.ANotDue:=AgingPayLoad.ANotDue + StrToFloatDef(Grid.Cells[Grid.GetCol(TSnapshots.fNotDue), iCNT], 0);
+        AgingPayLoad.ARange1:=AgingPayLoad.ARange1 + StrToFloatDef(Grid.Cells[Grid.GetCol(TSnapshots.fRange1), iCNT], 0);
+        AgingPayLoad.ARange2:=AgingPayLoad.ARange2 + StrToFloatDef(Grid.Cells[Grid.GetCol(TSnapshots.fRange2), iCNT], 0);
+        AgingPayLoad.ARange3:=AgingPayLoad.ARange3 + StrToFloatDef(Grid.Cells[Grid.GetCol(TSnapshots.fRange3), iCNT], 0);
+        AgingPayLoad.ARange4:=AgingPayLoad.ARange4 + StrToFloatDef(Grid.Cells[Grid.GetCol(TSnapshots.fRange4), iCNT], 0);
+        AgingPayLoad.ARange5:=AgingPayLoad.ARange5 + StrToFloatDef(Grid.Cells[Grid.GetCol(TSnapshots.fRange5), iCNT], 0);
+        AgingPayLoad.ARange6:=AgingPayLoad.ARange6 + StrToFloatDef(Grid.Cells[Grid.GetCol(TSnapshots.fRange6), iCNT], 0);
 
-        AgingPayLoad.Balance:=AgingPayLoad.Balance + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fTotal, 1, 1), iCNT], 0);
-        AgingPayLoad.Limits:=AgingPayLoad.Limits + StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCreditLimit, 1, 1), iCNT], 0);
+        AgingPayLoad.Balance:=AgingPayLoad.Balance + StrToFloatDef(Grid.Cells[Grid.GetCol(TSnapshots.fTotal), iCNT], 0);
+        AgingPayLoad.Limits:=AgingPayLoad.Limits + StrToFloatDef(Grid.Cells[Grid.GetCol(TSnapshots.fCreditLimit), iCNT], 0);
 
-        if StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCreditBalance, 1, 1), iCNT], 0) < 0 then
+        if StrToFloatDef(Grid.Cells[Grid.GetCol(TSnapshots.fCreditBalance), iCNT], 0) < 0 then
         begin
             inc(AgingPayLoad.Exceeders);
-            AgingPayLoad.TotalExceed:=AgingPayLoad.TotalExceed + Abs(StrToFloatDef(Grid.Cells[Grid.ReturnColumn(TSnapshots.fCreditBalance, 1, 1), iCNT], 0));
+            AgingPayLoad.TotalExceed:=AgingPayLoad.TotalExceed + Abs(StrToFloatDef(Grid.Cells[Grid.GetCol(TSnapshots.fCreditBalance), iCNT], 0));
         end;
 
         inc(AgingPayLoad.CustAll);
@@ -278,7 +278,7 @@ begin
         SetLength(ListPosition, Rows + 1);
         SetLength(TotalPerItem, Rows + 1);
         ListPosition[Rows]:=iCNT;
-        TotalPerItem[Rows]:=StrToFloatDef((Grid.Cells[Grid.ReturnColumn(TSnapshots.fTotal, 1, 1), iCNT]), 0);
+        TotalPerItem[Rows]:=StrToFloatDef((Grid.Cells[Grid.GetCol(TSnapshots.fTotal), iCNT]), 0);
         inc(Rows);
     end;
 
@@ -294,21 +294,21 @@ begin
         // Risk Class 'A'
         if Count <= AgingPayLoad.RCA then
         begin
-            Grid.Cells[Grid.ReturnColumn(TSnapshots.fRiskClass, 1, 1), ListPosition[iCNT]]:='A';
+            Grid.Cells[Grid.GetCol(TSnapshots.fRiskClass), ListPosition[iCNT]]:='A';
             inc(AgingPayLoad.RCAcount);
         end;
 
         // Risk Class 'B'
         if (Count > AgingPayLoad.RCA) and (Count <= AgingPayLoad.RCA + AgingPayLoad.RCB) then
         begin
-            Grid.Cells[Grid.ReturnColumn(TSnapshots.fRiskClass, 1, 1), ListPosition[iCNT]]:='B';
+            Grid.Cells[Grid.GetCol(TSnapshots.fRiskClass), ListPosition[iCNT]]:='B';
             inc(AgingPayLoad.RCBcount);
         end;
 
         // Risk Class 'C'
         if Count > AgingPayLoad.RCA + AgingPayLoad.RCB then
         begin
-            Grid.Cells[Grid.ReturnColumn(TSnapshots.fRiskClass, 1, 1), ListPosition[iCNT]]:='C';
+            Grid.Cells[Grid.GetCol(TSnapshots.fRiskClass), ListPosition[iCNT]]:='C';
             inc(AgingPayLoad.RCCcount);
         end;
 

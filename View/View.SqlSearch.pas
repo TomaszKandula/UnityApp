@@ -149,7 +149,6 @@ implementation
 uses
     DbModel{Legacy},
     View.Main,
-    View.AwaitScreen,
     Unity.Sql{Legacy},
     Unity.Common,
     Unity.Settings,
@@ -179,15 +178,15 @@ begin
     var Settings: ISettings:=TSettings.Create;
     SqlSearchForm.Caption:=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'WND_ABSEARCH', TCommon.APPCAPTION);
 
-    PanelEditNumber.PanelBorders(clWhite, clWhite, $00E3B268, clWhite, clWhite);
-    PanelEditName.PanelBorders(clWhite, clWhite, $00E3B268, clWhite, clWhite);
-    PanelEmail.PanelBorders(clWhite, clWhite, $00E3B268, clWhite, clWhite);
-    PanelEstatement.PanelBorders(clWhite, clWhite, $00E3B268, clWhite, clWhite);
-    PanelPhones.PanelBorders(clWhite, clWhite, $00E3B268, clWhite, clWhite);
-    PanelUserAlias.PanelBorders(clWhite, clWhite, $00E3B268, clWhite, clWhite);
-    PanelCoCode.PanelBorders(clWhite, clWhite, $00E3B268, clWhite, clWhite);
-    PanelAgent.PanelBorders(clWhite, clWhite, $00E3B268, clWhite, clWhite);
-    PanelDivision.PanelBorders(clWhite, clWhite, $00E3B268, clWhite, clWhite);
+    PanelEditNumber.Borders(clWhite, clWhite, $00E3B268, clWhite, clWhite);
+    PanelEditName.Borders(clWhite, clWhite, $00E3B268, clWhite, clWhite);
+    PanelEmail.Borders(clWhite, clWhite, $00E3B268, clWhite, clWhite);
+    PanelEstatement.Borders(clWhite, clWhite, $00E3B268, clWhite, clWhite);
+    PanelPhones.Borders(clWhite, clWhite, $00E3B268, clWhite, clWhite);
+    PanelUserAlias.Borders(clWhite, clWhite, $00E3B268, clWhite, clWhite);
+    PanelCoCode.Borders(clWhite, clWhite, $00E3B268, clWhite, clWhite);
+    PanelAgent.Borders(clWhite, clWhite, $00E3B268, clWhite, clWhite);
+    PanelDivision.Borders(clWhite, clWhite, $00E3B268, clWhite, clWhite);
 
 end;
 
@@ -425,7 +424,6 @@ begin
     begin
         THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
         MainForm.UpdateStatusBar(TStatusBar.Ready);
-        AwaitForm.Hide();
         ThreadFileLog.Log('[OpenAddressBookAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
@@ -446,7 +444,6 @@ begin
     end;
 
     MainForm.UpdateStatusBar(TStatusBar.Ready);
-    AwaitForm.Hide();
     ThreadFileLog.Log('[OpenAddressBookAsync_Callback]: Address Book has been opened.');
 
 end;

@@ -110,7 +110,7 @@ end;
 
 procedure TPhoneListForm.FormCreate(Sender: TObject);
 begin
-    PanelMemo.PanelBorders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelMemo.Borders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
 end;
 
 

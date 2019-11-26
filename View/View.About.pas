@@ -187,9 +187,9 @@ end;
 procedure TAboutForm.FormCreate(Sender: TObject);
 begin
 
-    PanelHeader.PanelBorders(clWhite, $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
-    PanelContent.PanelBorders(clWhite, $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
-    PanelFooter.PanelBorders(clWhite, $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
+    PanelHeader.Borders(clWhite, $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
+    PanelContent.Borders(clWhite, $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
+    PanelFooter.Borders(clWhite, $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
 
     var Settings: ISettings:=TSettings.Create();
     if FileExists(Settings.PathLicence) then

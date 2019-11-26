@@ -18,8 +18,19 @@ type
    TBuffer = Array[1..65521] of byte;
 
 
+/// <summary>
+///
+/// </summary>
 procedure ComputeCRC32(data: pointer; dSize: dWord; var vCRC: dWord);
+
+/// <summary>
+///
+/// </summary>
 function CRC32File(FileName:String): dWord;
+
+/// <summary>
+///
+/// </summary>
 function CRC32FromString(Str: String): dWord;
 
 

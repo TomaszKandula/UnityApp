@@ -16,13 +16,15 @@ type
 
 
     /// <summary>
-    ///
+    /// Extended version of Vcl.StdCtrls.TListView visual component.
     /// </summary>
     TListView = class(Vcl.ComCtrls.TListView)
     published
 
         /// <summary>
-        ///
+        /// Allow to disable component painting. It will not process
+        /// the events and will not repaint it, so it can be operated
+        /// from worker thread safely.
         /// </summary>
         procedure Freeze(PaintWnd: boolean);
 

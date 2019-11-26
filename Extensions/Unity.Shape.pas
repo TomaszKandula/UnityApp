@@ -18,18 +18,41 @@ uses
 type
 
 
+    /// <summary>
+    /// Extended version of Vcl.StdCtrls.TShape visual component.
+    /// </summary>
     TShape = class(Vcl.ExtCtrls.TShape)
     protected
         procedure Paint; override;
         procedure CMFontChanged(var Msg: TMessage); message CM_FONTCHANGED;
         procedure CMTextChanged(var Msg: TMessage); message CM_TEXTCHANGED;
-    published
-        property  Caption;
-        property  Font;
-        procedure ShapeText(Left: integer; Top: integer; StrText: string; Format: TFontStyles; FontName: string; FontSize: integer; FontColor: TColor);
     public
-        var CaptionLeft : integer;
-        var CaptionTop  : integer;
+
+        /// <summary>
+        /// Left position of given text.
+        /// </summary>
+        var CaptionLeft: integer;
+
+        /// <summary>
+        /// Top position of given text.
+        /// </summary>
+        var CaptionTop: integer;
+
+        /// <summary>
+        /// Defines caption text assigned.
+        /// </summary>
+        property Caption;
+
+        /// <summary>
+        /// Defines font to be used for drawing text in caption.
+        /// </summary>
+        property Font;
+
+        /// <summary>
+        /// Draw text inside TShape component.
+        /// </summary>
+        procedure ShapeText(Left: integer; Top: integer; StrText: string; Format: TFontStyles; FontName: string; FontSize: integer; FontColor: TColor);
+
     end;
 
 
@@ -54,33 +77,16 @@ begin
 end;
 
 
-/// <summary>
-/// Paint method with text function.
-/// </summary>
-
 procedure TShape.Paint;
 begin
-
     inherited;
     var R: TRect:=ClientRect;
-
     Canvas.Font.Assign(Font);
-
-    /// <remarks>
-    /// Alternative code:
-    /// </remarks>
-    /// <code>
-    /// DrawText(Canvas.Handle, PChar(Caption), -1, R, DT_VCENTER or DT_LEFT { DT_CENTER } or DT_SINGLELINE);
-    /// </code>
-
+    // Alternative code:
+    // DrawText(Canvas.Handle, PChar(Caption), -1, R, DT_VCENTER or DT_LEFT { DT_CENTER } or DT_SINGLELINE);
     TextOut(Canvas.Handle, CaptionLeft, CaptionTop, PChar(Caption), Length(Caption));
-
 end;
 
-
-/// <summary>
-/// Drwa text inside TShape component. Please note that font is fixed.
-/// </summary>
 
 procedure TShape.ShapeText(Left: integer; Top: integer; StrText: string; Format: TFontStyles; FontName: string; FontSize: integer; FontColor: TColor);
 begin

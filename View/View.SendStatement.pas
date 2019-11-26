@@ -214,7 +214,7 @@ end;
 
 procedure TSendForm.FormCreate(Sender: TObject);
 begin
-    PanelMessage.PanelBorders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelMessage.Borders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
     cbShowAll.Checked:=True;
     cbOverdueOnly.Checked:=False;
     cbNonOverdue.Checked:=False;

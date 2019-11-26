@@ -128,7 +128,7 @@ begin
     var Comments: IComments:=TComments.Create();
     Comments.EditGeneralComment(FGeneralCommentFields, EditGeneralComment_Callback);
 
-    MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneralComment.fFollowUp, 1, 1), Row]:=DateToStr(SelectedDate);
+    MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TGeneralComment.fFollowUp), Row]:=DateToStr(SelectedDate);
 
 end;
 
@@ -155,8 +155,8 @@ end;
 procedure TCalendarForm.FormCreate(Sender: TObject);
 begin
     FSelectedDate:=TDateTimeFormats.NullDate;
-    PanelActions.PanelBorders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PanelCalendar.PanelBorders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelActions.Borders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelCalendar.Borders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
 end;
 
 
@@ -210,7 +210,7 @@ begin
     begin
         SetFollowUp(
             CalendarForm.MyCalendar.Date,
-            MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1),
+            MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCuid),
             MainForm.sgAgeView.Row],
             MainForm.sgAgeView.Row
         );

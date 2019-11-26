@@ -126,7 +126,6 @@ uses
     View.Main,
     View.Calendar,
     View.Actions,
-    View.AwaitScreen,
     Handler.Sql{Legacy},
     DbModel{Legacy},
     Unity.Enums,
@@ -168,20 +167,20 @@ begin
         // One customer
         Item:=MassMailerForm.CustomerList.Items.Add;
         Item.Caption:=IntToStr(MainForm.sgAgeView.Row);
-        Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCustomerName, 1, 1), MainForm.sgAgeView.Row]);
-        Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCustomerNumber, 1, 1), MainForm.sgAgeView.Row]);
+        Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerName), MainForm.sgAgeView.Row]);
+        Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerNumber), MainForm.sgAgeView.Row]);
         Item.SubItems.Add('No');
         Item.SubItems.Add('Not found!');
         Item.SubItems.Add('Not found!');
         Item.SubItems.Add('n/a');
         Item.SubItems.Add('n/a');
         Item.SubItems.Add('n/a');
-        Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1), MainForm.sgAgeView.Row]);
-        Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fAgent, 1, 1), MainForm.sgAgeView.Row]);
-        Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), MainForm.sgAgeView.Row]);
+        Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCoCode), MainForm.sgAgeView.Row]);
+        Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fAgent), MainForm.sgAgeView.Row]);
+        Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCuid), MainForm.sgAgeView.Row]);
         Item.SubItems.Add(
-            MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCustomerNumber, 1, 1), MainForm.sgAgeView.Row] +
-            THelpers.CoConvert(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1), MainForm.sgAgeView.Row])
+            MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerNumber), MainForm.sgAgeView.Row] +
+            THelpers.CoConvert(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCoCode), MainForm.sgAgeView.Row])
         );
 
         Item.SubItems.Add('empty');
@@ -199,20 +198,20 @@ begin
 
                 Item:=MassMailerForm.CustomerList.Items.Add();
                 Item.Caption:=IntToStr(iCNT);
-                Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCustomerName, 1, 1), iCNT]);
-                Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCustomerNumber, 1, 1), iCNT]);
+                Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerName), iCNT]);
+                Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerNumber), iCNT]);
                 Item.SubItems.Add('No');
                 Item.SubItems.Add('Not found!');
                 Item.SubItems.Add('Not found!');
                 Item.SubItems.Add('n/a');
                 Item.SubItems.Add('n/a');
                 Item.SubItems.Add('n/a');
-                Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT]);
-                Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fAgent, 1, 1), iCNT]);
-                Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), iCNT]);
+                Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCoCode), iCNT]);
+                Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fAgent), iCNT]);
+                Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCuid), iCNT]);
                 Item.SubItems.Add(
-                    MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCustomerNumber, 1, 1), iCNT] +
-                    THelpers.CoConvert(MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1), iCNT])
+                    MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerNumber), iCNT] +
+                    THelpers.CoConvert(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCoCode), iCNT])
                 );
 
                 Item.SubItems.Add('empty');
@@ -349,7 +348,7 @@ begin
     // Sort Open Items via Due Date.
     // -----------------------------
 
-    MainForm.sgOpenItems.MSort(MainForm.sgOpenItems.ReturnColumn(TOpenitems.PmtStat, 1 , 1), TDataType.TFloat, True);
+    MainForm.sgOpenItems.MSort(MainForm.sgOpenItems.GetCol(TOpenitems.PmtStat), TDataType.TFloat, True);
 
     // -------------------------------------------------------------------------------------------
     /// Update column references, as they depend on view from SQL which may be changed at runtime.
@@ -373,12 +372,6 @@ begin
     //var Statements: IStatements:=TStatements.Create();
     //Statements.SendAccountStatements(MainForm.FAgeDateSel, FPayLoad, SendAccountStatements_Callback);
 
-    // ---------------------
-    // Display await window.
-    // ---------------------
-
-    THelpers.WndCall(AwaitForm, TWindowState.Modal);
-
 end;
 
 
@@ -387,8 +380,6 @@ end;
 
 procedure TMassMailerForm.SendAccountStatements_Callback(ProcessingItemNo: integer; CallResponse: TCallResponse);
 begin
-
-    AwaitForm.Hide();
 
     if not CallResponse.IsSucceeded then
     begin
@@ -492,9 +483,9 @@ begin
     lsColumns.Caption:='BanksHtml';
     lsColumns.Width  :=0;
 
-    PanelEmailContainer.PanelBorders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PanelSubject.PanelBorders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PanelMessage.PanelBorders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelEmailContainer.Borders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelSubject.Borders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PanelMessage.Borders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
 
     ValBeginDate.Caption:='2010-01-01';
     ValEndDate.Caption:='';

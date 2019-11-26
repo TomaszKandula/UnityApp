@@ -17,20 +17,33 @@ uses
 type
 
 
+    /// <summary>
+    /// Extended version of Vcl.StdCtrls.TEdit visual component.
+    /// </summary>
     TEdit = Class(Vcl.StdCtrls.TEdit)
     public
 
+        /// <summary>
+        /// Parameter holder.
+        /// </summary>
         var FAlignment: TAlignment;
 
+        /// <summary>
+        /// Alignment property allows to set text inside TEdit box.
+        /// </summary>
         property  Alignment: TAlignment read FAlignment write SetAlignment;
 
-
+        /// <summary>
+        /// Setter for FAlignment.
+        /// </summary>
         procedure SetAlignment(value: TAlignment);
 
-
+        /// <summary>
+        /// Override of window parameters that is held in a record (TCreateParams).
+        /// </summary>
         procedure CreateParams(var params: TCreateParams); override;
 
-    end;
+     end;
 
 
 implementation

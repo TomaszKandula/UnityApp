@@ -760,25 +760,14 @@ type
         procedure CreateParams(var Params: TCreateParams); override;
         procedure WndProc(var msg: TMessage); override;   // Windows events
         procedure WndMessagesChromium(PassMsg: TMessage); // Chromium events
-        procedure WndMessagesWindows(PassMsg: TMessage);  // Process windows close/suspend
+        procedure WndMessagesWindows(PassMsg: TMessage);  // Process windows close/suspend events
         procedure WndMessagesExternal(PassMsg: TMessage); // Get lync call details
         procedure NotifyMoveOrResizeStarted;
         procedure ChromiumModalLoopOn(PassMsg: TMessage);
         procedure ChromiumModalLoopOff(PassMsg: TMessage);
-        procedure Chromium_OnBeforePopup(
-            Sender: TObject;
-            const browser: ICefBrowser;
-            const frame: ICefFrame;
-            const targetUrl, targetFrameName: ustring;
-            targetDisposition: TCefWindowOpenDisposition;
-            userGesture: Boolean;
-            const popupFeatures: TCefPopupFeatures;
-            var windowInfo: TCefWindowInfo;
-            var client: ICefClient;
-            var settings: TCefBrowserSettings;
-            var noJavascriptAccess: Boolean;
-            var Result: Boolean
-        );
+        procedure Chromium_OnBeforePopup(Sender: TObject; const browser: ICefBrowser; const frame: ICefFrame; const targetUrl, targetFrameName: ustring;
+            targetDisposition: TCefWindowOpenDisposition; userGesture: Boolean; const popupFeatures: TCefPopupFeatures; var windowInfo: TCefWindowInfo;
+            var client: ICefClient; var settings: TCefBrowserSettings; var noJavascriptAccess: Boolean; var Result: Boolean);
     strict private
         var FLastCoCodesSelected: string;
         var FHadFirstLoad: boolean;
@@ -859,10 +848,10 @@ uses
     View.UserFeedback,
     View.SqlSearch,
     View.MassMailer,
-    View.AwaitScreen,
     View.Startup,
     View.Reports,
     View.CompanyList,
+    View.BusyScreen,
     Unity.Filtering,
     Unity.Chars,
     Unity.Helpers,
@@ -920,7 +909,6 @@ begin
     begin
         THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
         MainForm.UpdateStatusBar(TStatusBar.Ready);
-        AwaitForm.Hide();
         ThreadFileLog.Log('[OpenAddressBookAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
@@ -941,7 +929,6 @@ begin
     end;
 
     MainForm.UpdateStatusBar(TStatusBar.Ready);
-    AwaitForm.Hide();
     ThreadFileLog.Log('[OpenAddressBookAsync_Callback]: Address Book has been opened.');
 
 end;
@@ -971,8 +958,6 @@ end;
 
 procedure TMainForm.AddToAddressBook_Callback(CallResponse: TCallResponse);
 begin
-
-    AwaitForm.Hide();
 
     case CallResponse.IsSucceeded of
 
@@ -1004,7 +989,6 @@ begin
     begin
         THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
         UpdateStatusBar(TStatusBar.Ready);
-        AwaitForm.Hide();
         ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
@@ -1040,6 +1024,8 @@ begin
     UpdateStatusBar(TStatusBar.Downloading);
     LoadOpenItems();
 
+    BusyForm.Close();
+
 end;
 
 
@@ -1056,7 +1042,6 @@ begin
     begin
         THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
         MainForm.UpdateStatusBar(TStatusBar.Ready);
-        AwaitForm.Hide();
         ThreadFileLog.Log('[ReadOpenItemsAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
@@ -1082,7 +1067,6 @@ begin
     begin
         THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
         MainForm.UpdateStatusBar(TStatusBar.Ready);
-        AwaitForm.Hide();
         ThreadFileLog.Log('[ScanOpenItemsAsync_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
         Exit();
     end;
@@ -1286,7 +1270,7 @@ begin
 
         //FDailyCommentFields.GroupIdSel   :=FGroupIdSel;
         //FDailyCommentFields.AgeDateSel   :=FAgeDateSel;
-        FDailyCommentFields.CUID         :=sgAgeView.Cells[sgAgeView.ReturnColumn(DbModel.TSnapshots.fCuid, 1, 1), sgAgeView.Row];
+        FDailyCommentFields.CUID         :=sgAgeView.Cells[sgAgeView.GetCol(DbModel.TSnapshots.fCuid), sgAgeView.Row];
         FDailyCommentFields.Email        :=False;
         FDailyCommentFields.CallEvent    :=True;
         FDailyCommentFields.CallDuration :=PassMsg.LParam;
@@ -1501,22 +1485,22 @@ begin
     // The nature of open items is that, it changes continuously, but due to ERP database workload during the day
     // we have decided to update the data in Open Items table few times a day (on regular basis).
     // -----------------------------------------------------------------------------------------------------------------
-    FOpenItemsRefs.CuidCol     :=SourceGrid.ReturnColumn(DbModel.TOpenitems.Cuid,      1, 1);
-    FOpenItemsRefs.OpenAmCol   :=SourceGrid.ReturnColumn(DbModel.TOpenitems.OpenAm,    1, 1);
-    FOpenItemsRefs.PmtStatCol  :=SourceGrid.ReturnColumn(DbModel.TOpenitems.PmtStat,   1, 1);
-    FOpenItemsRefs.CtrlCol     :=SourceGrid.ReturnColumn(DbModel.TOpenitems.Ctrl,      1, 1);
-    FOpenItemsRefs.InvoNoCol   :=SourceGrid.ReturnColumn(DbModel.TOpenitems.InvoNo,    1, 1);
-    FOpenItemsRefs.ValDtCol    :=SourceGrid.ReturnColumn(DbModel.TOpenitems.ValDt,     1, 1);
-    FOpenItemsRefs.DueDtCol    :=SourceGrid.ReturnColumn(DbModel.TOpenitems.DueDt,     1, 1);
-    FOpenItemsRefs.ISOCol      :=SourceGrid.ReturnColumn(DbModel.TOpenitems.ISO,       1, 1);
-    FOpenItemsRefs.CurAmCol    :=SourceGrid.ReturnColumn(DbModel.TOpenitems.CurAm,     1, 1);
-    FOpenItemsRefs.OpenCurAmCol:=SourceGrid.ReturnColumn(DbModel.TOpenitems.OpenCurAm, 1, 1);
-    FOpenItemsRefs.Ad1Col      :=SourceGrid.ReturnColumn(DbModel.TOpenitems.Ad1,       1, 1);
-    FOpenItemsRefs.Ad2Col      :=SourceGrid.ReturnColumn(DbModel.TOpenitems.Ad2,       1, 1);
-    FOpenItemsRefs.Ad3Col      :=SourceGrid.ReturnColumn(DbModel.TOpenitems.Ad3,       1, 1);
-    FOpenItemsRefs.PnoCol      :=SourceGrid.ReturnColumn(DbModel.TOpenitems.Pno,       1, 1);
-    FOpenItemsRefs.PAreaCol    :=SourceGrid.ReturnColumn(DbModel.TOpenitems.PArea,     1, 1);
-    FOpenItemsRefs.Text        :=SourceGrid.ReturnColumn(DbModel.TOpenitems.Txt,       1, 1);
+    FOpenItemsRefs.CuidCol     :=SourceGrid.GetCol(DbModel.TOpenitems.Cuid);
+    FOpenItemsRefs.OpenAmCol   :=SourceGrid.GetCol(DbModel.TOpenitems.OpenAm);
+    FOpenItemsRefs.PmtStatCol  :=SourceGrid.GetCol(DbModel.TOpenitems.PmtStat);
+    FOpenItemsRefs.CtrlCol     :=SourceGrid.GetCol(DbModel.TOpenitems.Ctrl);
+    FOpenItemsRefs.InvoNoCol   :=SourceGrid.GetCol(DbModel.TOpenitems.InvoNo);
+    FOpenItemsRefs.ValDtCol    :=SourceGrid.GetCol(DbModel.TOpenitems.ValDt);
+    FOpenItemsRefs.DueDtCol    :=SourceGrid.GetCol(DbModel.TOpenitems.DueDt);
+    FOpenItemsRefs.ISOCol      :=SourceGrid.GetCol(DbModel.TOpenitems.ISO);
+    FOpenItemsRefs.CurAmCol    :=SourceGrid.GetCol(DbModel.TOpenitems.CurAm);
+    FOpenItemsRefs.OpenCurAmCol:=SourceGrid.GetCol(DbModel.TOpenitems.OpenCurAm);
+    FOpenItemsRefs.Ad1Col      :=SourceGrid.GetCol(DbModel.TOpenitems.Ad1);
+    FOpenItemsRefs.Ad2Col      :=SourceGrid.GetCol(DbModel.TOpenitems.Ad2);
+    FOpenItemsRefs.Ad3Col      :=SourceGrid.GetCol(DbModel.TOpenitems.Ad3);
+    FOpenItemsRefs.PnoCol      :=SourceGrid.GetCol(DbModel.TOpenitems.Pno);
+    FOpenItemsRefs.PAreaCol    :=SourceGrid.GetCol(DbModel.TOpenitems.PArea);
+    FOpenItemsRefs.Text        :=SourceGrid.GetCol(DbModel.TOpenitems.Txt);
 end;
 
 
@@ -1527,10 +1511,10 @@ begin
     // Similarly to the "UpdateFOpenItemsRefs" method,
     // we use it to decrease level of usage of ReturnColumn method.
     // -----------------------------------------------------------------------
-    FCtrlStatusRefs.Id         :=SourceGrid.ReturnColumn(TControlStatus.Id,   1, 1);
-    FCtrlStatusRefs.Code       :=SourceGrid.ReturnColumn(TControlStatus.Code, 1, 1);
-    FCtrlStatusRefs.Text       :=SourceGrid.ReturnColumn(TControlStatus.Text, 1, 1);
-    FCtrlStatusRefs.Description:=SourceGrid.ReturnColumn(TControlStatus.Description, 1, 1);
+    FCtrlStatusRefs.Id         :=SourceGrid.GetCol(TControlStatus.Id);
+    FCtrlStatusRefs.Code       :=SourceGrid.GetCol(TControlStatus.Code);
+    FCtrlStatusRefs.Text       :=SourceGrid.GetCol(TControlStatus.Text);
+    FCtrlStatusRefs.Description:=SourceGrid.GetCol(TControlStatus.Description);
 end;
 
 
@@ -1670,6 +1654,7 @@ end;
 
 procedure TMainForm.LoadAgeReport(SelectedCoCodes: string);
 begin
+    BusyForm.Show();
     var Debtors: IDebtors:=TDebtors.Create();
     FLastCoCodesSelected:=SelectedCoCodes;
     Debtors.ReadAgeViewAsync(SelectedCoCodes, cbAgeSorting.Text, FRiskClassGroup, ReadAgeView_Callback);
@@ -1687,7 +1672,7 @@ begin
 
         THelpers.ReturnCoCodesList(
             sgAgeView,
-            sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1),
+            sgAgeView.GetCol(TSnapshots.fCoCode),
             CoCodeList,
             True,
             'F'
@@ -1834,32 +1819,32 @@ end;
 procedure TMainForm.AgeViewMapping();
 begin
 
-    var  CompanyCode:=sgAgeView.ReturnColumn(TSnapshots.fCoCode, 1, 1);
+    var  CompanyCode:=sgAgeView.GetCol(TSnapshots.fCoCode);
 
-    var  ColPersonResp    :=sgAgeView.ReturnColumn(TSnapshots.fPersonResponsible, 1, 1);
-    var  IdPersonResp     :=sgPersonResp.ReturnColumn(TPersonResponsible.Id, 1, 1);
-    var  DbNamePersonResp :=sgPersonResp.ReturnColumn(TPersonResponsible.SourceDBName, 1, 1);
-    var  ErpCodePersonResp:=sgPersonResp.ReturnColumn(TPersonResponsible.ErpCode, 1, 1);
+    var  ColPersonResp    :=sgAgeView.GetCol(TSnapshots.fPersonResponsible);
+    var  IdPersonResp     :=sgPersonResp.GetCol(TPersonResponsible.Id);
+    var  DbNamePersonResp :=sgPersonResp.GetCol(TPersonResponsible.SourceDBName);
+    var  ErpCodePersonResp:=sgPersonResp.GetCol(TPersonResponsible.ErpCode);
 
-    var ColSalesResp    :=sgAgeView.ReturnColumn(TSnapshots.fSalesResponsible, 1, 1);
-    var IdSalesResp     :=sgSalesResp.ReturnColumn(TSalesResponsible.Id, 1, 1);
-    var DbNameSalesResp :=sgSalesResp.ReturnColumn(TSalesResponsible.SourceDBName, 1, 1);
-    var ErpCodeSalesResp:=sgSalesResp.ReturnColumn(TSalesResponsible.ErpCode, 1, 1);
+    var ColSalesResp    :=sgAgeView.GetCol(TSnapshots.fSalesResponsible);
+    var IdSalesResp     :=sgSalesResp.GetCol(TSalesResponsible.Id);
+    var DbNameSalesResp :=sgSalesResp.GetCol(TSalesResponsible.SourceDBName);
+    var ErpCodeSalesResp:=sgSalesResp.GetCol(TSalesResponsible.ErpCode);
 
-    var ColAccountType    :=sgAgeView.ReturnColumn(TSnapshots.fAccountType, 1, 1);
-    var IdAccountType     :=sgAccountType.ReturnColumn(TAccountType.Id, 1, 1);
-    var DbNameAccountType :=sgAccountType.ReturnColumn(TAccountType.SourceDBName, 1, 1);
-    var ErpCodeAccountType:=sgAccountType.ReturnColumn(TAccountType.ErpCode, 1, 1);
+    var ColAccountType    :=sgAgeView.GetCol(TSnapshots.fAccountType);
+    var IdAccountType     :=sgAccountType.GetCol(TAccountType.Id);
+    var DbNameAccountType :=sgAccountType.GetCol(TAccountType.SourceDBName);
+    var ErpCodeAccountType:=sgAccountType.GetCol(TAccountType.ErpCode);
 
-    var ColCustomerGroup    :=sgAgeView.ReturnColumn(TSnapshots.fCustomerGroup, 1, 1);
-    var IdCustomerGroup     :=sgCustomerGr.ReturnColumn(TCustomerGroup.Id, 1, 1);
-    var DbNameCustomerGroup :=sgCustomerGr.ReturnColumn(TCustomerGroup.SourceDBName, 1, 1);
-    var ErpCodeCustomerGroup:=sgCustomerGr.ReturnColumn(TCustomerGroup.ErpCode, 1, 1);
+    var ColCustomerGroup    :=sgAgeView.GetCol(TSnapshots.fCustomerGroup);
+    var IdCustomerGroup     :=sgCustomerGr.GetCol(TCustomerGroup.Id);
+    var DbNameCustomerGroup :=sgCustomerGr.GetCol(TCustomerGroup.SourceDBName);
+    var ErpCodeCustomerGroup:=sgCustomerGr.GetCol(TCustomerGroup.ErpCode);
 
-    var ColPaymentTerms    :=sgAgeView.ReturnColumn(TSnapshots.fPaymentTerms, 1, 1);
-    var ErpCodePaymentTerms:=sgPmtTerms.ReturnColumn(TPaymentTerms.ErpCode, 1, 1);
-    var EntityPaymentTerms :=sgPmtTerms.ReturnColumn(TPaymentTerms.Entity, 1, 1);
-    var DescPaymentTerms   :=sgPmtTerms.ReturnColumn(TPaymentTerms.Description, 1, 1);
+    var ColPaymentTerms    :=sgAgeView.GetCol(TSnapshots.fPaymentTerms);
+    var ErpCodePaymentTerms:=sgPmtTerms.GetCol(TPaymentTerms.ErpCode);
+    var EntityPaymentTerms :=sgPmtTerms.GetCol(TPaymentTerms.Entity);
+    var DescPaymentTerms   :=sgPmtTerms.GetCol(TPaymentTerms.Description);
 
     sgAgeView.Freeze(True);
     sgPersonResp.Freeze(True);
@@ -2005,21 +1990,21 @@ end;
 
 procedure TMainForm.SetPanelBorders();
 begin
-    AppHeader.PanelBorders            ($00E3B268, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    DebtorsPanel.PanelBorders         (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    OpenItemsPanel.PanelBorders       (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    AddressBookPanel.PanelBorders     (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    InvoiceTrackerPanel.PanelBorders  (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    CoCodesPanel.PanelBorders         (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    ControlStatusPanel.PanelBorders   (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PaidInfoPanel.PanelBorders        (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PmtTermspanel.PanelBorders        (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    SalesRespPanel.PanelBorders       (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    PersonRespPanel.PanelBorders      (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    CustomerGrPanel.PanelBorders      (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    AccountTypePanel.PanelBorders     (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    SettingsInnerSections.PanelBorders(clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
-    SettingsInnerValues.PanelBorders  (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    AppHeader.Borders            ($00E3B268, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    DebtorsPanel.Borders         (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    OpenItemsPanel.Borders       (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    AddressBookPanel.Borders     (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    InvoiceTrackerPanel.Borders  (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    CoCodesPanel.Borders         (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    ControlStatusPanel.Borders   (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PaidInfoPanel.Borders        (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PmtTermspanel.Borders        (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    SalesRespPanel.Borders       (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    PersonRespPanel.Borders      (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    CustomerGrPanel.Borders      (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    AccountTypePanel.Borders     (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    SettingsInnerSections.Borders(clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
+    SettingsInnerValues.Borders  (clWhite,   $00E3B268, $00E3B268, $00E3B268, $00E3B268);
 end;
 
 
@@ -2080,19 +2065,19 @@ begin
     // ----------------------------------------------------------------------
     if
         (
-            sgAddressBook.Col = sgAddressBook.ReturnColumn(DbModel.TAddressBook.Emails, 1, 1)
+            sgAddressBook.Col = sgAddressBook.GetCol(DbModel.TAddressBook.Emails)
         )
     or
         (
-            sgAddressBook.Col = sgAddressBook.ReturnColumn(DbModel.TAddressBook.PhoneNumbers, 1, 1)
+            sgAddressBook.Col = sgAddressBook.GetCol(DbModel.TAddressBook.PhoneNumbers)
         )
     or
         (
-            sgAddressBook.Col = sgAddressBook.ReturnColumn(DbModel.TAddressBook.Contact, 1, 1)
+            sgAddressBook.Col = sgAddressBook.GetCol(DbModel.TAddressBook.Contact)
         )
     or
         (
-            sgAddressBook.Col = sgAddressBook.ReturnColumn(DbModel.TAddressBook.Estatements, 1, 1)
+            sgAddressBook.Col = sgAddressBook.GetCol(DbModel.TAddressBook.Estatements)
         )
     then
         // Do not exclude above columns from editing
@@ -2276,16 +2261,16 @@ begin
     for var iCNT:=1 to sgAgeView.RowCount - 1 do
         if
             (
-                THelpers.CDate(sgAgeView.Cells[sgAgeView.ReturnColumn(TGeneralComment.fFollowUp, 1, 1), iCNT]) = THelpers.CDate(valCurrentDate.Caption)
+                THelpers.CDate(sgAgeView.Cells[sgAgeView.GetCol(TGeneralComment.fFollowUp), iCNT]) = THelpers.CDate(valCurrentDate.Caption)
             )
         and
         (
            (
-                UpperCase(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fInf7, 1, 1), iCNT]) = UpperCase(SessionService.SessionUser)
+                UpperCase(sgAgeView.Cells[sgAgeView.GetCol(TSnapshots.fInf7), iCNT]) = UpperCase(SessionService.SessionUser)
            )
             or
            (
-                UpperCase(sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fPersonResponsible, 1, 1), iCNT]) = UpperCase(SessionService.SessionUser)
+                UpperCase(sgAgeView.Cells[sgAgeView.GetCol(TSnapshots.fPersonResponsible), iCNT]) = UpperCase(SessionService.SessionUser)
            )
         )
         then
@@ -2541,25 +2526,17 @@ end;
 
 procedure TMainForm.Action_ShowAsIsClick(Sender: TObject);
 begin
-
     UpdateStatusBar(TStatusBar.Processing);
-    AwaitForm.Show();
-
     var AddressBook: IAddressBook:=TAddressBook.Create();
     AddressBook.OpenAddressBookAsync('', OpenAddressBook_Callback);
-
 end;
 
 
 procedure TMainForm.Action_ShowMyEntriesClick(Sender: TObject);
 begin
-
     UpdateStatusBar(TStatusBar.Processing);
-    AwaitForm.Show();
-
     var AddressBook: IAddressBook:=TAddressBook.Create();
     AddressBook.OpenAddressBookAsync(SessionService.SessionUser, OpenAddressBook_Callback);
-
 end;
 
 
@@ -2693,7 +2670,7 @@ begin
         for var iCNT: integer:=sgAgeView.Selection.Top to sgAgeView.Selection.Bottom do
 
             if sgAgeView.RowHeights[iCNT] <> sgAgeView.sgRowHidden then
-                CalendarForm.SetFollowUp(CalendarForm.FSelectedDate, sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), iCNT], iCNT);
+                CalendarForm.SetFollowUp(CalendarForm.FSelectedDate, sgAgeView.Cells[sgAgeView.GetCol(TSnapshots.fCuid), iCNT], iCNT);
 
             ThreadFileLog.Log('GeneralComment table with column FollowUp has been updated with ' + DateToStr(CalendarForm.FSelectedDate) + ' for multiple items.');
 
@@ -2715,7 +2692,7 @@ begin
         if sgAgeView.RowHeights[iCNT] <> sgAgeView.sgRowHidden then
         begin
 
-            FGeneralCommentFields.CUID        :=sgAgeView.Cells[sgAgeView.ReturnColumn(TSnapshots.fCuid, 1, 1), iCNT];
+            FGeneralCommentFields.CUID        :=sgAgeView.Cells[sgAgeView.GetCol(TSnapshots.fCuid), iCNT];
             FGeneralCommentFields.FixedComment:=TUnknown.NULL;
             FGeneralCommentFields.FollowUp    :=TChars.SPACE;
             FGeneralCommentFields.Free1       :=TUnknown.NULL;
@@ -2726,7 +2703,7 @@ begin
             var Comments: IComments:=TComments.Create();
             Comments.EditGeneralComment(FGeneralCommentFields, nil);
 
-            MainForm.sgAgeView.Cells[MainForm.sgAgeView.ReturnColumn(TGeneralComment.fFollowUp, 1, 1), iCNT]:=TChars.SPACE;
+            MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TGeneralComment.fFollowUp), iCNT]:=TChars.SPACE;
 
         end;
 
@@ -3204,22 +3181,22 @@ begin
     if ARow = 0 then Exit;
 
     // Find column numbers for given column name
-    var Col1:  integer:=sgAgeView.ReturnColumn(TSnapshots.fNotDue,        1, 1);
-    var Col2:  integer:=sgAgeView.ReturnColumn(TSnapshots.fRange1,        1, 1);
-    var Col3:  integer:=sgAgeView.ReturnColumn(TSnapshots.fRange2,        1, 1);
-    var Col4:  integer:=sgAgeView.ReturnColumn(TSnapshots.fRange3,        1, 1);
-    var Col5:  integer:=sgAgeView.ReturnColumn(TSnapshots.fRange4,        1, 1);
-    var Col6:  integer:=sgAgeView.ReturnColumn(TSnapshots.fRange5,        1, 1);
-    var Col7:  integer:=sgAgeView.ReturnColumn(TSnapshots.fRange6,        1, 1);
-    var Col8:  integer:=sgAgeView.ReturnColumn(TSnapshots.fOverdue,       1, 1);
-    var Col9:  integer:=sgAgeView.ReturnColumn(TSnapshots.fTotal,         1, 1);
-    var Col10: integer:=sgAgeView.ReturnColumn(TSnapshots.fCreditLimit,   1, 1);
-    var Col11: integer:=sgAgeView.ReturnColumn(TSnapshots.fCreditBalance, 1, 1);
-    var Col12: integer:=sgAgeView.ReturnColumn(TGeneralComment.fFollowUp, 1, 1);
-    var Col13: integer:=sgAgeView.ReturnColumn(TSnapshots.fCuid,          1, 1);
-    var Col14: integer:=sgAgeView.ReturnColumn(TSnapshots.fCustomerName,  1, 1);
-    var Col15: integer:=sgAgeView.ReturnColumn(TSnapshots.fRiskClass,     1, 1);
-    var Col16: integer:=sgInvoiceTracker.ReturnColumn(TTrackerData.Cuid,  1, 1);
+    var Col1:  integer:=sgAgeView.GetCol(TSnapshots.fNotDue);
+    var Col2:  integer:=sgAgeView.GetCol(TSnapshots.fRange1);
+    var Col3:  integer:=sgAgeView.GetCol(TSnapshots.fRange2);
+    var Col4:  integer:=sgAgeView.GetCol(TSnapshots.fRange3);
+    var Col5:  integer:=sgAgeView.GetCol(TSnapshots.fRange4);
+    var Col6:  integer:=sgAgeView.GetCol(TSnapshots.fRange5);
+    var Col7:  integer:=sgAgeView.GetCol(TSnapshots.fRange6);
+    var Col8:  integer:=sgAgeView.GetCol(TSnapshots.fOverdue);
+    var Col9:  integer:=sgAgeView.GetCol(TSnapshots.fTotal);
+    var Col10: integer:=sgAgeView.GetCol(TSnapshots.fCreditLimit);
+    var Col11: integer:=sgAgeView.GetCol(TSnapshots.fCreditBalance);
+    var Col12: integer:=sgAgeView.GetCol(TGeneralComment.fFollowUp);
+    var Col13: integer:=sgAgeView.GetCol(TSnapshots.fCuid);
+    var Col14: integer:=sgAgeView.GetCol(TSnapshots.fCustomerName);
+    var Col15: integer:=sgAgeView.GetCol(TSnapshots.fRiskClass);
+    var Col16: integer:=sgInvoiceTracker.GetCol(TTrackerData.Cuid);
 
     // Draw selected row | skip headers
     sgAgeView.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True);
@@ -3339,11 +3316,11 @@ begin
 
     if ARow = 0 then Exit();
 
-    var Col1: integer:=sgOpenItems.ReturnColumn(DbModel.TOpenitems.OpenCurAm,1, 1);
-    var Col2: integer:=sgOpenItems.ReturnColumn(DbModel.TOpenitems.OpenAm,   1, 1);
-    var Col3: integer:=sgOpenItems.ReturnColumn(DbModel.TOpenitems.CurAm,    1, 1);
-    var Col4: integer:=sgOpenItems.ReturnColumn(DbModel.TOpenitems.Am,       1, 1);
-    var Col5: integer:=sgOpenItems.ReturnColumn(DbModel.TOpenitems.PmtStat,  1, 1);
+    var Col1: integer:=sgOpenItems.GetCol(DbModel.TOpenitems.OpenCurAm);
+    var Col2: integer:=sgOpenItems.GetCol(DbModel.TOpenitems.OpenAm);
+    var Col3: integer:=sgOpenItems.GetCol(DbModel.TOpenitems.CurAm);
+    var Col4: integer:=sgOpenItems.GetCol(DbModel.TOpenitems.Am);
+    var Col5: integer:=sgOpenItems.GetCol(DbModel.TOpenitems.PmtStat);
 
     MainForm.sgOpenItems.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True);
 
@@ -3726,19 +3703,19 @@ begin
     or
         (
             (
-                sgAddressBook.Col = sgAddressBook.ReturnColumn(DbModel.TAddressBook.Emails, 1, 1)
+                sgAddressBook.Col = sgAddressBook.GetCol(DbModel.TAddressBook.Emails)
             )
         or
             (
-                sgAddressBook.Col = sgAddressBook.ReturnColumn(DbModel.TAddressBook.PhoneNumbers, 1, 1)
+                sgAddressBook.Col = sgAddressBook.GetCol(DbModel.TAddressBook.PhoneNumbers)
             )
         or
             (
-                sgAddressBook.Col = sgAddressBook.ReturnColumn(DbModel.TAddressBook.Contact, 1, 1)
+                sgAddressBook.Col = sgAddressBook.GetCol(DbModel.TAddressBook.Contact)
             )
         or
             (
-                sgAddressBook.Col = sgAddressBook.ReturnColumn(DbModel.TAddressBook.Estatements, 1, 1)
+                sgAddressBook.Col = sgAddressBook.GetCol(DbModel.TAddressBook.Estatements)
             )
         )
     and
@@ -4652,7 +4629,6 @@ procedure TMainForm.btnOpenAbClick(Sender: TObject);
 begin
     sgAddressBook.SetUpdatedRow(0);
     UpdateStatusBar(TStatusBar.Processing);
-    AwaitForm.Show();
     var AddressBook: IAddressBook:=TAddressBook.Create();
     AddressBook.OpenAddressBookAsync('', OpenAddressBook_Callback);
 end;

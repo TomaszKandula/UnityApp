@@ -90,7 +90,7 @@ end;
 
 procedure TEventForm.FormCreate(Sender: TObject);
 begin
-    PanelEventMemo.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+    PanelEventMemo.Borders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
 end;
 
 

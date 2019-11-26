@@ -345,9 +345,9 @@ begin
     var Settings: ISettings:=TSettings.Create;
     var VoucherNumber: string:=Settings.GetStringValue(TConfigSections.Unallocated, 'VOUCHER_NUM', '0');
 
-    var VoTpCol   :=InputGrid.ReturnColumn(DbModel.TOpenitems.VoTp, 1, 1);
-    var OpenAmCol :=InputGrid.ReturnColumn(DbModel.TOpenitems.OpenAm, 1, 1);
-    var PmtStatCol:=InputGrid.ReturnColumn(DbModel.TOpenitems.PmtStat, 1, 1);
+    var VoTpCol   :=InputGrid.GetCol(DbModel.TOpenitems.VoTp);
+    var OpenAmCol :=InputGrid.GetCol(DbModel.TOpenitems.OpenAm);
+    var PmtStatCol:=InputGrid.GetCol(DbModel.TOpenitems.PmtStat);
 
     for var iCNT: integer:=1 to InputGrid.RowCount - 1 do
     begin

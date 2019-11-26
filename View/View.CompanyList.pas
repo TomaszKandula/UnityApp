@@ -83,7 +83,7 @@ end;
 
 procedure TCompanyListForm.FormCreate(Sender: TObject);
 begin
-    PanelListItems.PanelBorders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
+    PanelListItems.Borders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
     FilterList.Clear();
 end;
 

@@ -16,21 +16,29 @@ uses
 type
 
 
+    /// <summary>
+    /// Extended version of Vcl.StdCtrls.TPanel visual component.
+    /// </summary>
     TPanel = class(Vcl.ExtCtrls.TPanel)
     protected
         procedure Paint; override;
-    private
-        var PenWidthTop   :  integer;
-        var PenWidthBottom:  integer;
-        var PenWidthLeft  :  integer;
-        var PenWidthRight :  integer;
-        var PenColorTop   :  TColor;
-        var PenColorBottom:  TColor;
-        var PenColorLeft  :  TColor;
-        var PenColorRight :  TColor;
-        var mcBrushColor  :  TColor;
+    strict private
+        var FPenWidthTop:     integer;
+        var FPenWidthBottom:  integer;
+        var FPenWidthLeft:    integer;
+        var FPenWidthRight:   integer;
+        var FPenColorTop:     TColor;
+        var FPenColorBottom:  TColor;
+        var FPenColorLeft:    TColor;
+        var FPenColorRight:   TColor;
+        var FBrushColor:      TColor;
     public
-        procedure PanelBorders(FillColor, TopColor, BottomColor, LeftColor, RightColor: TColor);
+
+        /// <summary>
+        /// Allow to draw border line around panel component.
+        /// </summary>
+        procedure Borders(FillColor, TopColor, BottomColor, LeftColor, RightColor: TColor);
+
     end;
 
 
@@ -48,59 +56,51 @@ begin
 
     inherited;
 
-    /// <remarks>
-    /// None of the given variables can be coloured black.
-    /// </remarks>
-
-    if (mcBrushColor   = $00000000) and
-       (PenColorTop    = $00000000) and
-       (PenColorBottom = $00000000) and
-       (PenColorLeft   = $00000000) and
-       (PenColorRight  = $00000000) then Exit;
+    // None of the given variables can be coloured black.
+    if (FBrushColor = $00000000) and (FPenColorTop = $00000000) and (FPenColorBottom = $00000000)
+        and (FPenColorLeft = $00000000) and (FPenColorRight  = $00000000) then Exit();
 
     // Get dimensions
     var R: TRect:=ClientRect;
 
     // Fill background
-    Canvas.Brush.Color:=mcBrushColor;
+    Canvas.Brush.Color:=FBrushColor;
 
     // Top border
-    Canvas.Pen.Width:=PenWidthTop;
-    Canvas.Pen.Color:=PenColorTop;
-    Canvas.MoveTo(1,           1);
+    Canvas.Pen.Width:=FPenWidthTop;
+    Canvas.Pen.Color:=FPenColorTop;
+    Canvas.MoveTo(1, 1);
     Canvas.LineTo(R.Right - 1, 1);
 
     // Bottom border
-    Canvas.Pen.Width:=PenWidthBottom;
-    Canvas.Pen.Color:=PenColorBottom;
-    Canvas.MoveTo(1,           R.Bottom - 1);
+    Canvas.Pen.Width:=FPenWidthBottom;
+    Canvas.Pen.Color:=FPenColorBottom;
+    Canvas.MoveTo(1, R.Bottom - 1);
     Canvas.LineTo(R.Right - 1, R.Bottom - 1);
 
     // Left border
-    Canvas.Pen.Width:=PenWidthLeft;
-    Canvas.Pen.Color:=PenColorLeft;
-    Canvas.MoveTo(1,            1);
+    Canvas.Pen.Width:=FPenWidthLeft;
+    Canvas.Pen.Color:=FPenColorLeft;
+    Canvas.MoveTo(1, 1);
     Canvas.LineTo(1, R.Bottom - 1);
 
     // Right border
-    Canvas.Pen.Width:=PenWidthRight;
-    Canvas.Pen.Color:=PenColorLeft;
-    Canvas.MoveTo(R.Right - 1,            1);
+    Canvas.Pen.Width:=FPenWidthRight;
+    Canvas.Pen.Color:=FPenColorLeft;
+    Canvas.MoveTo(R.Right - 1, 1);
     Canvas.LineTo(R.Right - 1, R.Bottom - 1);
 
 end;
 
 
-procedure TPanel.PanelBorders(FillColor, TopColor, BottomColor, LeftColor, RightColor: TColor);
+procedure TPanel.Borders(FillColor, TopColor, BottomColor, LeftColor, RightColor: TColor);
 begin
-    // Turn-off styles
-    BorderStyle   :=bsNone;
-    // Assign colors and draw
-    mcBrushColor  :=FillColor;
-    PenColorTop   :=TopColor;
-    PenColorBottom:=BottomColor;
-    PenColorLeft  :=LeftColor;
-    PenColorRight :=RightColor;
+    BorderStyle    :=bsNone;
+    FBrushColor    :=FillColor;
+    FPenColorTop   :=TopColor;
+    FPenColorBottom:=BottomColor;
+    FPenColorLeft  :=LeftColor;
+    FPenColorRight :=RightColor;
 end;
 
 

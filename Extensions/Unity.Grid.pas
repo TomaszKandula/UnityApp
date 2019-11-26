@@ -22,13 +22,13 @@ type
 
 
     /// <summary>
-    ///
+    /// Shorthand (pointer) to TStringGrid necessary for row delete action.
     /// </summary>
     TAbstractGrid = class(Vcl.Grids.TStringGrid);
 
 
     /// <summary>
-    ///
+    /// Extended version of Vcl.StdCtrls.TEdit visual component.
     /// </summary>
     TStringGrid = class(Vcl.Grids.TStringGrid)
     protected
@@ -39,45 +39,185 @@ type
         var FCsvImportResult: string;
         var FCsvExportResult: string;
     public
+        var SqlColumns: TALists;
+        var UpdatedRowsHolder: TAIntigers;
         const sgRowHeight = 19;
         const sgRowHidden = -1;
         const xlWBATWorksheet = -4167;
         const xlWARN_MESSAGE  = 'Invalid class string';
-        const FFontWhite  = $00FFFFFF;
-        const FBackRed    = $008080FF; //rgb FF8080 => bgr 8080FF
-        const FFontBlack  = $00000000;
-        const FBackYellow = $00CCFFFF; //rgb FFFFCC => bgr CCFFFF
-        const FBackGreen  = $00ACAC59; //rgb 59ACAC => bgr ACAC59
-        var SqlColumns: TALists;
-        var UpdatedRowsHolder: TAIntigers;
+        const FFontWhite = $00FFFFFF;
+        const FFontBlack = $00000000;
+        const FBackRed = $008080FF;
+        const FBackYellow = $00CCFFFF;
+        const FBackGreen = $00ACAC59;
+
+        /// <summary>
+        /// Allow to hide rectangle on component when return focus.
+        /// </summary>
         property HideFocusRect: boolean read FHideFocusRect write FHideFocusRect;
+
+        /// <summary>
+        /// Result message of a task executed by ToExcel method.
+        /// </summary>
         property ToExcelResult: string read FToExcelResult;
+
+        /// <summary>
+        /// Result message of a task executed by ImportCSV method.
+        /// </summary>
         property CsvImportResult: string read FCsvImportResult;
+
+        /// <summary>
+        /// Result message of a task executed by ExportCSV method.
+        /// </summary>
         property CsvExportResult: string read FCsvExportResult;
+
+        /// <summary>
+        /// Register rows for update. Keeps row number to be updated, ex. if data is held in string grid popuated from database table,
+        /// then to build SQL batch with update statement, we must take all rows changed by the user and once cell(s) is(are) changed,
+        /// we add row to the register. Later such information can be used to build SQL update expression.
+        /// </summary>
         procedure SetUpdatedRow(Row: integer);
+
+        /// <summary>
+        /// Scans grid and register changed cells.
+        /// </summary>
         procedure RecordRowsAffected;
+
+        /// <summary>
+        /// Allow to either copy from, paste to, or cut data.
+        /// </summary>
         procedure CopyCutPaste(Mode: TActions; FirstColOnly: boolean = False);
+
+        /// <summary>
+        /// Unknown.
+        /// </summary>
         procedure DelEsc(Mode: TActions; pCol, pRow: integer);
+
+        /// <summary>
+        /// Remove al the data from the rows and cols. Reset number of cols and rows to 1.
+        /// </summary>
         procedure ClearAll(dfRows: integer; FixedRows: integer; FixedCols: integer; ZeroCol: boolean);
+
+        /// <summary>
+        /// Alow to remove entire row from the grid.
+        /// </summary>
         procedure DeleteRowFrom(FixedRow: integer; FixedCol: integer);
+
+        /// <summary>
+        /// Defines how to draw grid.
+        /// </summary>
         procedure DrawSelected(ARow: integer; ACol: integer; State: TGridDrawState; Rect: TRect; FontColorSel: TColor; BrushColorSel: TColor; FontColor: TColor; BrushColor: TColor; Headers: boolean);
+
+        /// <summary>
+        /// Defines how to color values (numbers) in grid.
+        /// </summary>
         procedure ColorValues(ARow: integer; ACol: integer; Rect: TRect; NegativeColor: TColor; PositiveColor: TColor);
+
+        /// <summary>
+        /// Sets width of the columns in grid. It takes into account padding and longest text length in row. It requires max col length.
+        /// </summary>
         procedure SetColWidth(FirstDefault: integer; AddSpace: integer; Limit: integer);
+
+        /// <summary>
+        /// Setup appropiate row height.
+        /// </summary>
         procedure SetRowHeight(RowHeight, Header: integer);
+
+        /// <summary>
+        /// Hide currently selected column.
+        /// </summary>
         procedure HideThisColumns();
+
+        /// <summary>
+        /// Setup default column width, this ultimately unhides all hidden columns (width = -1).
+        /// </summary>
         procedure ShowAllColumns();
+
+        /// <summary>
+        /// Merge sort method.
+        /// </summary>
 	    procedure MSort(const SortCol: integer; const datatype: TDataType; const ascending: boolean);
-        procedure AutoThumbSize;
+
+        /// <summary>
+        /// Auto thumb size custom implementation.
+        /// </summary>
+        /// <remarks>
+        /// Do not use it, string grid scrolls are bugged. Instead, use separate scroll component,
+        /// or default string grid scroll behaviour with no auto thumb size.
+        /// </remarks>
+        procedure AutoThumbSize();
+
+        /// <summary>
+        /// String grid column layout. It contains with two headers, one is displayed to the user (column title), and second
+        /// is used to hold original SQL column name, that other can refer and perform SQL queries.
+        /// </summary>
         procedure SaveLayout(ColWidthName: string; ColOrderName: string; ColNames: string; ColPrefix: string);
-        function  LoadLayout(var StrCol: string; ColWidthName: string; ColOrderName: string; ColNames: string; ColPrefix: string): boolean;
-        function  ReturnColumn(ColumnName: string; FixedCol: integer; FixedRow: integer): integer;
+
+        /// <summary>
+        /// Load layout from application settings.
+        /// </summary>
+        /// <remarks>
+        /// ColOrderName and ColWidthName provide the section names for column order and column width.
+        /// both sections must contains equal number of value keys. Each key contain column name used by
+        /// string grid component (age view) that displays data from sql server database, thus column names
+        /// are used to build sql query, this is because we use SQL expressions to obtain initial output
+        /// with filtering and/or sorting etc. Separate filtering to some extend is allowed in string grid
+        /// however, separate sorting is not implemented to restrict user form "playing around"
+        /// therefore, there is one place (server) where there is decided how to display data to the user,
+        /// this is part of automation and standard approach across all users, so the user is forced
+        /// to work certain way, and thus in management view user shall obtain better results, etc.
+        /// </remarks>
+        function LoadLayout(var StrCol: string; ColWidthName: string; ColOrderName: string; ColNames: string; ColPrefix: string): boolean;
+
+        /// <summary>
+        /// Return column namber for given column name. By default it skips first column (Lp) and first row (header).
+        /// Fixed column and row must be explicitly provided if defaults cannot be used.
+        /// </summary>
+        function GetCol(ColumnName: string; FixedCol: integer = 1; FixedRow: integer = 1): integer;
+
+        /// <summary>
+        /// Allow to disable component painting. It will not process
+        /// the events and will not repaint it, so it can be operated
+        /// from worker thread safely.
+        /// </summary>
         procedure Freeze(PaintWnd: boolean);
-        function  ToExcel(ASheetName, AFileName: string; GroupId: string; AgeDate: string; ActiveConn: TADOConnection): boolean;
-        function  ImportCSV(DialogBox: TOpenDialog; Delimiter: string): boolean;
-        function  ExportCSV(DialogBox: TSaveDialog; Delimiter: string): boolean;
-        procedure SelectAll;
-        procedure HideGrids;
-        procedure ShowGrids;
+
+        /// <summary>
+        /// Export string grid content to Microsoft Excel file.
+        /// </summary>
+        /// <remarks>
+        /// User must have installed Microsoft Excel with VBA installed before exporting string grid to excel file.
+        /// otherwise error message "invalid string class" will occur.
+        /// This method should be run in worker thread.
+        /// </remarks>
+        function ToExcel(ASheetName, AFileName: string; GroupId: string; AgeDate: string; ActiveConn: TADOConnection): boolean;
+
+        /// <summary>
+        /// Parse CSV data into grids.
+        /// </summary>
+        function ImportCSV(DialogBox: TOpenDialog; Delimiter: string): boolean;
+
+        /// <summary>
+        /// Convert all data in TStringGrid to CSV file with choosen delimiter. Note, this method is
+        /// executed within main thread, with large dataset it may be more feasible to run it in worker thread.
+        /// </summary>
+        function ExportCSV(DialogBox: TSaveDialog; Delimiter: string): boolean;
+
+        /// <summary>
+        /// Select all rows and columns (except first row which is presumbly a column title).
+        /// </summary>
+        procedure SelectAll();
+
+        /// <summary>
+        /// Hide all grids (along with header grids).
+        /// </summary>
+        procedure HideGrids();
+
+        /// <summary>
+        /// Show all grids (along with header grids).
+        /// </summary>
+        procedure ShowGrids();
+
     end;
 
 
@@ -100,12 +240,6 @@ uses
     Unity.Settings,
     Handler.Sql{Legacy};
 
-
-/// <summary>
-/// Register rows for update. Keeps row number to be updated, eg. if data is held in string grid popuated from database table, then to build SQL batch
-/// with update statement, we must take all rows changed by the user - once cell(s) is(are) changed we add row to the register. Later such information
-/// can be used to build SQL update expression.
-/// </summary>
 
 procedure TStringGrid.SetUpdatedRow(Row: integer);
 begin
@@ -350,7 +484,6 @@ end;
 procedure TStringGrid.DeleteRowFrom(FixedRow: integer; FixedCol: integer);
 begin
 
-    // Disable drawing
     with Self do SendMessage(Handle, WM_SETREDRAW, 0, 0);
 
     // Check for last row.
@@ -370,9 +503,7 @@ begin
         // Reference string grid to abstract string grid
         Selection:=myRect;
 
-        /// <remarks>
-        /// Do not nil or free it.
-        /// </remarks>
+        // Do not assign nil vaue or free it.
         var mySG: TAbstractGrid:=TAbstractGrid(Self);
         mySG.DeleteRow(sRow);
 
@@ -382,13 +513,14 @@ begin
     end
     else
     begin
+
         if RowCount = FixedRow + 1 then
             for var iCNT: integer:=FixedRow to RowCount do
                 for var jCNT: integer:=FixedCol to ColCount do
                     Cells[jCNT, iCNT]:='';
+
     end;
 
-    // Enable drawing
     with Self do
     begin
         SendMessage(Handle, WM_SETREDRAW, 1, 0);
@@ -561,14 +693,6 @@ begin
 end;
 
 
-/// <summary>
-/// Auto thumb size custom implementation.
-/// </summary>
-/// <remarks>
-/// Do not use it, string grid scrolls are bugged. Instead, use separate scroll component,
-/// or default string grid scroll behaviour with no auto thumb size.
-/// </remarks>
-
 procedure TStringGrid.AutoThumbSize;
 begin
 
@@ -606,11 +730,6 @@ begin
 end;
 
 
-/// <summary>
-/// String grid column layout. It contains with two headers, one is displayed to the user (column title), and second
-/// is used to hold original SQL column name, that other can refer and perform SQL queries.
-/// </summary>
-
 procedure TStringGrid.SaveLayout(ColWidthName: string; ColOrderName: string; ColNames: string; ColPrefix: string);
 begin
 
@@ -639,21 +758,6 @@ begin
 
 end;
 
-
-/// <summary>
-/// Load layout from application settings.
-/// </summary>
-/// <remarks>
-/// 'Colordername' and 'colwidthname' provide the section names for column order and column width.
-/// both sections must contains equal number of value keys. Each key contain column name used by
-/// string grid component (age view) that displays data from sql server database, thus column names
-/// are used to build sql query, this is because we use SQL expressions to obtain initial output
-/// with filtering and/or sorting etc. Separate filtering to some extend is allowed in string grid
-/// however, separate sorting is not implemented to restrict user form "playing around"
-/// therefore, there is one place (server) where there is decided how to display data to the user,
-/// this is part of automation and standard approach across all users, so the user is forced
-/// to work certain way, and thus in management view user shall obtain better results, etc.
-/// </remarks>
 
 function TStringGrid.LoadLayout(var StrCol: string; ColWidthName: string; ColOrderName: string; ColNames: string; ColPrefix: string): boolean;
 begin
@@ -720,7 +824,7 @@ begin
 end;
 
 
-function TStringGrid.ReturnColumn(ColumnName: string; FixedCol: integer; FixedRow: integer): integer;
+function TStringGrid.GetCol(ColumnName: string; FixedCol: integer = 1; FixedRow: integer = 1): integer;
 begin
 
     // This will cause out of bound warning
@@ -754,15 +858,6 @@ begin
 
 end;
 
-
-/// <summary>
-/// Export string grid content to Microsoft Excel file.
-/// </summary>
-/// <remarks>
-/// User must have installed Microsoft Excel with VBA installed before exporting string grid to excel file.
-/// otherwise error message "invalid string class" will occur.
-/// This method should be run in worker thread.
-/// </remarks>
 
 function TStringGrid.ToExcel(ASheetName: string; AFileName: string; GroupId: string; AgeDate: string; ActiveConn: TADOConnection): boolean;
 begin
@@ -850,7 +945,6 @@ begin
     var IsError: boolean:=False;
     var Count:   integer:=0;
 
-    // GET THE FILE PATH AND PARSE
     if DialogBox.Execute = True then
     begin
 
@@ -871,10 +965,10 @@ begin
             Transit.StrictDelimiter:=True;
             Transit.Delimiter:=Delimiter[1];
 
-            // Iterate through all rows
             try
                 for var iCNT: integer:= 0 to Data.Count - 1 do
                 begin
+
                     // Split string using given delimiter
                     Transit.DelimitedText:=Data[iCNT];
 
@@ -883,6 +977,7 @@ begin
 
                     Self.Cells[0, iCNT + 1]:=IntToStr((iCNT + 1));
                     Transit.Clear;
+
                 end;
 
                 Result:=True;
@@ -900,8 +995,8 @@ begin
             if not IsError then
                 FCsvImportResult:='Data has been imported successfully!';
 
-            Data.Free;
-            Transit.Free;
+            Data.Free();
+            Transit.Free();
 
         end;
 
@@ -971,10 +1066,6 @@ begin
 end;
 
 
-/// <summary>
-/// Select all rows and columns (except first row which is presumbly a column title).
-/// </summary>
-
 procedure TStringGrid.SelectAll;
 begin
     var GridRect: TGridRect;
@@ -986,10 +1077,6 @@ begin
 end;
 
 
-/// <summary>
-/// Show all grids (along with header grids).
-/// </summary>
-
 procedure TStringGrid.ShowGrids;
 begin
     Self.Options:=Self.Options
@@ -999,10 +1086,6 @@ begin
         + [goHorzLine];
 end;
 
-
-/// <summary>
-/// Hide all grids (along with header grids).
-/// </summary>
 
 procedure TStringGrid.HideGrids;
 begin
