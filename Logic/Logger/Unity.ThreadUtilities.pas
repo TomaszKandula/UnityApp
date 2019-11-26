@@ -29,16 +29,44 @@ type
         FFinalized: Boolean;
         FIOQueue: THandle;
     public
-        constructor Create;
-        destructor  Destroy; override;
-        procedure   Finalize;
-        procedure   Push(Data: Pointer);
-        function    Pop(var Data: Pointer): Boolean;
-        property    Finalized: Boolean read FFinalized;
+
+        /// <summary>
+        /// Create IO Completion Queue.
+        /// </summary>
+        constructor Create();
+
+        /// <summary>
+        /// Destroy Completion Queue.
+        /// </summary>
+        destructor Destroy(); override;
+
+        /// <summary>
+        /// Post a finialize pointer on to the queue.
+        /// </summary>
+        procedure Finalize();
+
+        /// <summary>
+        /// If stack is not finalized, add/push a pointer on to the end of the queue.
+        /// </summary>
+        procedure Push(Data: Pointer);
+
+        /// <summary>
+        /// Pop will return false if the queue is completed.
+        /// </summary>
+        function Pop(var Data: Pointer): Boolean;
+
+        /// <summary>
+        /// Indicates whenever the thread is finilized or not.
+        /// </summary>
+        property Finalized: Boolean read FFinalized;
+
     end;
 
 
-    TThreadExecuteEvent = procedure (Thread: TThread) of object;
+    /// <summary>
+    /// Defines callback method for thread event.
+    /// </summary>
+    TThreadExecuteEvent = procedure(Thread: TThread) of object;
 
 
     TSimpleThread = class(TThread)
@@ -47,7 +75,12 @@ type
     protected
         procedure Execute(); override;
     public
+
+        /// <summary>
+        /// Initialize simple thread and execute thread event.
+        /// </summary>
         constructor Create(CreateSuspended: Boolean; ExecuteEvent: TThreadExecuteEvent; AFreeOnTerminate: Boolean);
+
     end;
 
 
@@ -61,9 +94,22 @@ type
         FHandlePoolEvent: TThreadPoolEvent;
         procedure DoHandleThreadExecute(Thread: TThread);
     public
-        constructor Create( HandlePoolEvent: TThreadPoolEvent; MaxThreads: Integer = 1); virtual;
-        destructor  Destroy; override;
-        procedure   Add(const Data: Pointer);
+
+        /// <summary>
+        /// Initialize thread pool.
+        /// </summary>
+        constructor Create(HandlePoolEvent: TThreadPoolEvent; MaxThreads: Integer = 1); virtual;
+
+        /// <summary>
+        /// Remove from memory.
+        /// </summary>
+        destructor  Destroy(); override;
+
+        /// <summary>
+        /// Add to the given thread to the actual thread pool.
+        /// </summary>
+        procedure Add(const Data: Pointer);
+
     end;
 
 
@@ -73,22 +119,14 @@ implementation
 // -------------------------------------------------------------------------------------------------------------------------------------------- THREAD QUEUE //
 
 
-/// <summary>
-/// Create IO Completion Queue.
-/// </summary>
-
-constructor TThreadQueue.Create;
+constructor TThreadQueue.Create();
 begin
     FIOQueue  :=CreateIOCompletionPort(INVALID_HANDLE_VALUE, 0, 0, 0);
     FFinalized:=False;
 end;
 
 
-/// <summary>
-/// Destroy Completion Queue.
-/// </summary>
-
-destructor TThreadQueue.Destroy;
+destructor TThreadQueue.Destroy();
 begin
     if (FIOQueue <> 0) then
         CloseHandle(FIOQueue);
@@ -96,20 +134,12 @@ begin
 end;
 
 
-/// <summary>
-/// Post a finialize pointer on to the queue.
-/// </summary>
-
-procedure TThreadQueue.Finalize;
+procedure TThreadQueue.Finalize();
 begin
     PostQueuedCompletionStatus(FIOQueue, 0, 0, Pointer($FFFFFFFF));
     FFinalized:=True;
 end;
 
-
-/// <summary>
-/// Pop will return false if the queue is completed.
-/// </summary>
 
 function TThreadQueue.Pop(var Data: Pointer): Boolean;
 begin
@@ -118,30 +148,20 @@ begin
     var A:  Cardinal;
     var OL: POverLapped;
 
-    /// <remarks>
-    /// Remove/Pop the first pointer from the queue or wait.
-    /// </remarks>
-
+    // Remove/Pop the first pointer from the queue or wait.
     if (not FFinalized) then
         GetQueuedCompletionStatus(FIOQueue, A, ULONG_PTR(Data), OL, INFINITE);
 
-    /// <remarks>
-    /// Check if we have finalized the queue for completion.
-    /// </remarks>
-
+    // Check if we have finalized the queue for completion.
     if (FFinalized) or (OL = Pointer($FFFFFFFF)) then
     begin
-        Data  :=nil;
+        Data:=nil;
         Result:=False;
         Finalize;
     end;
 
 end;
 
-
-/// <summary>
-/// If stack is not finalized, add/push a pointer on to the end of the queue.
-/// </summary>
 
 procedure TThreadQueue.Push(Data: Pointer);
 begin
@@ -161,7 +181,7 @@ begin
     inherited Create(CreateSuspended);
 end;
 
-procedure TSimpleThread.Execute;
+procedure TSimpleThread.Execute();
 begin
     if Assigned(FExecuteEvent) then
         FExecuteEvent(Self);
@@ -185,12 +205,16 @@ begin
     FThreads         :=TList.Create;
 
     while FThreads.Count < MaxThreads do
-        FThreads.Add(TSimpleThread.Create(False, DoHandleThreadExecute, False));
+        FThreads.Add(TSimpleThread.Create(
+            False,
+            DoHandleThreadExecute,
+            False
+        ));
 
 end;
 
 
-destructor TThreadPool.Destroy;
+destructor TThreadPool.Destroy();
 begin
 
     FThreadQueue.Finalize;
@@ -217,13 +241,17 @@ procedure TThreadPool.DoHandleThreadExecute(Thread: TThread);
 begin
 
     var Data: Pointer;
+
     while FThreadQueue.Pop(Data) and (not TSimpleThread(Thread).Terminated) do
     begin
+
         try
             FHandlePoolEvent(Data, Thread);
+
         except
             {Do nothing}
         end;
+
     end;
 
 end;

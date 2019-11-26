@@ -20,16 +20,10 @@ uses
     Data.Win.ADODB;
 
 
-    // legacy code - to be removed after REST is implemented
-
-
 type
 
-    /// <summary>
-    /// Base class for handling SQL Server database connection.
-    /// </summary>
 
-    TDataBase = class
+    TDataBase = class {Legacy}
     {$TYPEINFO ON}
     strict private
         var FODBC_Driver:     string;

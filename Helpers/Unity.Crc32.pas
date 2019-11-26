@@ -19,17 +19,17 @@ type
 
 
 /// <summary>
-///
+/// Calculate CRC32 from given data stored in memory.
 /// </summary>
 procedure ComputeCRC32(data: pointer; dSize: dWord; var vCRC: dWord);
 
 /// <summary>
-///
+/// Calculate CRC32 from given data file.
 /// </summary>
 function CRC32File(FileName:String): dWord;
 
 /// <summary>
-///
+/// Calculate CRC32 from given string of data.
 /// </summary>
 function CRC32FromString(Str: String): dWord;
 
@@ -109,7 +109,7 @@ const
 
 
 procedure ComputeCRC32(data: pointer; dSize: dWord; var vCRC: dWord);
-var b: ^byte;
+var b: ^byte; // do not inline it!
 begin
 
     vCRC:=$FFFFFFFF;
@@ -118,7 +118,7 @@ begin
     {$I-}
     for var i: dWord:=0 to dSize - 1 do
     begin
-        vCRC:=(vCRC shr 8)  xor table[b^ xor (vCRC and $000000FF)];
+        vCRC:=(vCRC shr 8) xor table[b^ xor (vCRC and $000000FF)];
         inc(b)
     end;
     {$I+}

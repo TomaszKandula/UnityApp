@@ -22,13 +22,10 @@ uses
     Unity.Enums;
 
 
-    // legacy code - to be removed after REST is implemented, do not modify
-
-
 type
 
 
-    TMSSQL = class
+    TMSSQL = class {Legacy}
     {$TYPEINFO ON}
     private
         var FParamList:    TALists;
@@ -77,11 +74,7 @@ type
     end;
 
 
-    /// <summary>
-    /// Basic CRUD operation handler for database tables.
-    /// </summary>
-
-    TDataTables = class(TMSSQL)
+    TDataTables = class(TMSSQL) {Legacy}
     {$TYPEINFO ON}
     private
         var FConnStr:     string;

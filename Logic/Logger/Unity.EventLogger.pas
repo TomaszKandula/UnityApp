@@ -21,7 +21,9 @@ uses
     System.Generics.Collections,
     Unity.ThreadUtilities;
 
+
 type
+
 
     /// <summary>
     /// Pointer to local record.
@@ -53,12 +55,12 @@ type
         destructor Destroy(); override;
 
         /// <summary>
-        ///
+        /// List of event texts line by line.
         /// </summary>
         property SessionEventLines: TList<string> read GetSessionEventLines;
 
         /// <summary>
-        ///
+        /// Log file name to be write.
         /// </summary>
         property LogFileName: string read FLogFileName write FLogFileName;
 

@@ -12,7 +12,7 @@ interface
 type
 
 
-    TSql = class abstract
+    TSql = class abstract {Legacy}
         const INSERT       = ' INSERT INTO ';
         const VAL          = ' VALUES ';
         const SELECT       = ' SELECT ';

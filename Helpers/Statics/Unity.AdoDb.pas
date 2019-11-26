@@ -8,13 +8,11 @@ unit Unity.AdoDb;
 
 interface
 
-// legacy - to be removed!
-
 
 type
 
 
-    TAdoDb = class abstract
+    TAdoDb = class abstract {Legacy}
         type  TFilters    = (adFilterNone, adFilterPendingRecords, adFilterAffectedRecords, adFilterFetchedRecords, adFilterConflictingRecords);
         const dbOLEDB     = 'OLEDB';
         const dbODBC      = 'ODBC';

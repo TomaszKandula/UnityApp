@@ -12,11 +12,7 @@ interface
 type
 
 
-    /////// LEGACY SECTION - TO BE REMOVED ///////
-
-
-    TFiltering = class abstract
-    {To be removed after new filtering is made}
+    TFiltering = class abstract {Legacy}
         type TColumns = (
             Inf7,
             Inf4,
