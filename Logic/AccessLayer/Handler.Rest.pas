@@ -220,9 +220,6 @@ type
 implementation
 
 
-// ---------------------------------------------------------------------------------------------------------------------------------------- CREATE & RELEASE //
-
-
 constructor TRESTful.Create(UserName: string; Password: string);
 begin
 
@@ -272,9 +269,6 @@ begin
 end;
 
 
-// ----------------------------------------------------------------------------------------------------------------------------------------- EXECUTE METHODS //
-
-
 function TRESTful.Execute: boolean;
 begin
 
@@ -303,7 +297,6 @@ begin
             // This is necessary because WebApi on .NetCore server defines content as string object instead of
             // raw string or POCO.
             // -----------------------------------------------------------------------------------------------
-
             CustomBody:=CustomBody.Replace('"', '\"');
             CustomBody:='"' + CustomBody + '"';
             restRequest.Body.ClearBody;
@@ -335,7 +328,6 @@ begin
                 // content serialized twice (it adds quotes to the start and end of the content), in such case it
                 // requires further treatment on quotes inside string.
                 // -----------------------------------------------------------------------------------------------
-
                 FResponseContent:=restResponse.Content;
                 FResponseContent:=FResponseContent.Replace('\"','"');
                 TrimContent(FResponseContent);
@@ -381,9 +373,6 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
-
-
 procedure TRESTful.TrimContent(var TextStr: string);
 begin
     // ---------------------------------------------------------
@@ -393,9 +382,6 @@ begin
     if TextStr[1] = #34 then TextStr[1]:=#32;
     if TextStr[TextStr.Length - 1] = #34 then TextStr[TextStr.Length - 1]:=#32;
 end;
-
-
-// ------------------------------------------------------------------------------------------------------------------------------------------------- GETTERS //
 
 
 function TRESTful.GetExecuteError: string;
@@ -546,9 +532,6 @@ function TRESTful.GetRequestTimeout: integer;
 begin
     if Assigned(restRequest) then Result:=restRequest.Timeout else Result:=30000 {30 seconds};
 end;
-
-
-// ------------------------------------------------------------------------------------------------------------------------------------------------- SETTERS //
 
 
 procedure TRESTful.SetCustomBody(NewValue: string);

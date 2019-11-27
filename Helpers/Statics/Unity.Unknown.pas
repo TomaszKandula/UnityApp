@@ -12,7 +12,7 @@ interface
 type
 
 
-    TUnknown = class abstract
+    TUnknown = class abstract {Legacy}
         const Null:       string = 'NULL';
         const Unassigned: string = 'Unassigned item.';
         const NA:         string = 'N/A';

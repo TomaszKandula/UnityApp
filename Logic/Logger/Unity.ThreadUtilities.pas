@@ -116,9 +116,6 @@ type
 implementation
 
 
-// -------------------------------------------------------------------------------------------------------------------------------------------- THREAD QUEUE //
-
-
 constructor TThreadQueue.Create();
 begin
     FIOQueue  :=CreateIOCompletionPort(INVALID_HANDLE_VALUE, 0, 0, 0);
@@ -171,9 +168,6 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------- SIMPLE THREAD //
-
-
 constructor TSimpleThread.Create(CreateSuspended: Boolean; ExecuteEvent: TThreadExecuteEvent; AFreeOnTerminate: Boolean);
 begin
     FreeOnTerminate:=AFreeOnTerminate;
@@ -186,9 +180,6 @@ begin
     if Assigned(FExecuteEvent) then
         FExecuteEvent(Self);
 end;
-
-
-// --------------------------------------------------------------------------------------------------------------------------------------------- THREAD POOL //
 
 
 procedure TThreadPool.Add(const Data: Pointer);

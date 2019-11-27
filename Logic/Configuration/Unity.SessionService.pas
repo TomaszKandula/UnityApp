@@ -1,5 +1,9 @@
 unit Unity.SessionService;
 
+// ----------------------------------------------------------------
+// Application session service module. Can be referenced by anyone.
+// Cannot hold references to View or Logic.
+// ----------------------------------------------------------------
 
 interface
 
@@ -54,10 +58,6 @@ begin
 end;
 
 
-
-// ---------------------------------------------------------------------------------------------------------------------------------------- CREATE & RELEASE //
-
-
 constructor TSessionService.Create();
 begin
     {Do nothing}
@@ -69,9 +69,6 @@ begin
     {Do nothing}
     inherited;
 end;
-
-
-// ----------------------------------------------------------------------------------------------------------------------------------- INITIALIZE PROPERTIES //
 
 
 procedure TSessionService.InitializeSession(CurrentUser: string; GenSessionId: string; SessionLog: string);

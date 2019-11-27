@@ -151,10 +151,8 @@ begin
             // Assign source of open items and control statuses alongside
             // with theirs column references.
             // ----------------------------------------------------------
-
             Statement.OpenItems     :=PayLoad.OpenItems;
             Statement.OpenItemsRefs :=PayLoad.OpenItemsRefs;
-
             Statement.ControlStatus :=PayLoad.ControlStatus;
             Statement.CtrlStatusRefs:=PayLoad.CtrlStatusRefs;
 
@@ -165,10 +163,8 @@ begin
             //   - maCustom for customised template.
             // It requires FSalut, FMess and FSubject to be provided.
             // ------------------------------------------------------
-
             if PayLoad.Layout = TDocMode.Defined then
                 Statement.HTMLLayout:=Statement.LoadTemplate(Settings.DirLayouts + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE2', ''), PayLoad.IsCtrlStatus);
-
             if PayLoad.Layout = TDocMode.Custom then
                 Statement.HTMLLayout:=Statement.LoadTemplate(Settings.DirLayouts + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE3', ''), PayLoad.IsCtrlStatus);
 

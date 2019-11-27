@@ -33,6 +33,9 @@ type
     TInputMethod = reference to procedure;
 
 
+    /// <summary>
+    /// Holds various helper methods / shorthands / wrappers.
+    /// </summary>
     THelpers = class abstract
     strict private
         const HEAP_ZERO_MEMORY = $00000008;

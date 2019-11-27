@@ -51,10 +51,10 @@ type
         procedure ReadAgeViewAsync(SelectedCoCodes: string; SortMode: string; RiskClassGroup: TRiskClassGroup; Callback: TReadAgeView);
 
         /// <summary>
-        ///
+        /// Allow to map data between grids. It replaces the target column data for appropiate data in source grid based on given parameters.
         /// </summary>
         /// <remarks>
-        ///
+        /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         procedure MapTableAwaited(Grid: TStringGrid; Source: TStringGrid; IsPrefixRequired: boolean;
             const ColTargetPersonResp: integer; const ColSourceId: integer; const ColTargetCoCode: integer;
@@ -81,10 +81,10 @@ type
         procedure ReadAgeViewAsync(SelectedCoCodes: string; SortMode: string; RiskClassGroup: TRiskClassGroup; Callback: TReadAgeView);
 
         /// <summary>
-        ///
+        /// Allow to map data between grids. It replaces the target column data for appropiate data in source grid based on given parameters.
         /// </summary>
         /// <remarks>
-        ///
+        /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         procedure MapTableAwaited(Grid: TStringGrid; Source: TStringGrid; IsPrefixRequired: boolean;
             const ColTargetPersonResp: integer; const ColSourceId: integer; const ColTargetCoCode: integer;

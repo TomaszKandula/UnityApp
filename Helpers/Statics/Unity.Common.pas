@@ -14,9 +14,9 @@ type
 
     TCommon = class abstract
     public
-        const SelectionColor: integer   = $00E3B268; // rgb D7E4F2 => bgr F2E4D7
-        const FontColor:      integer   = $006433C9; // rgb C93364 => bgr 6433C9
-        const AltColor:       integer   = $00FFDBB7; // rgb B7DBFF => bgr FFDBB7
+        const SelectionColor: integer   = $00E3B268; // RGB: 68B2E3 BGR: E3B268
+        const FontColor:      integer   = $006433C9; // RGB: C93364 BGR: 6433C9
+        const AltColor:       integer   = $00FFDBB7; // RGB: B7DBFF BGR: FFDBB7
         const DecryptKey:     integer   = 429496;
         const AppCaption:     string    = 'Unity';
         const UnityReader:    string    = 'UnityReader.exe';

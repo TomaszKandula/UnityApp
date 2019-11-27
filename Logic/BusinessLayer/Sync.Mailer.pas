@@ -236,32 +236,32 @@ type
     TMailer = class(TInterfacedObject, IMailer)
     {$TYPEINFO ON}
     strict private
-        var FXMailer:     string;
-        var FMailFrom:    string;
-        var FMailTo:      string;
-        var FMailCc:      string;
-        var FMailBcc:     string;
-        var FMailRt:      string;
+        var FXMailer:  string;
+        var FMailFrom: string;
+        var FMailTo: string;
+        var FMailCc: string;
+        var FMailBcc: string;
+        var FMailRt: string;
         var FMailSubject: string;
-        var FMailBody:    string;
+        var FMailBody: string;
         var FAttachments: TList<string>;
-        procedure SetXMailer(NewValue:     string);
-        procedure SetMailFrom(NewValue:    string);
-        procedure SetMailTo(NewValue:      string);
-        procedure SetMailCc(NewValue:      string);
-        procedure SetMailBcc(NewValue:     string);
-        procedure SetMailRt(NewValue:      string);
+        procedure SetXMailer(NewValue: string);
+        procedure SetMailFrom(NewValue: string);
+        procedure SetMailTo(NewValue: string);
+        procedure SetMailCc(NewValue: string);
+        procedure SetMailBcc(NewValue: string);
+        procedure SetMailRt(NewValue: string);
         procedure SetMailSubject(NewValue: string);
-        procedure SetMailBody(NewValue:    string);
+        procedure SetMailBody(NewValue: string);
         procedure SetAttachments(NewValue: TList<string>);
-        function GetXMailer():     string;
-        function GetMailFrom():    string;
-        function GetMailTo():      string;
-        function GetMailCc():      string;
-        function GetMailBcc():     string;
-        function GetMailRt():      string;
+        function GetXMailer(): string;
+        function GetMailFrom(): string;
+        function GetMailTo(): string;
+        function GetMailCc(): string;
+        function GetMailBcc(): string;
+        function GetMailRt(): string;
         function GetMailSubject(): string;
-        function GetMailBody():    string;
+        function GetMailBody(): string;
         function GetAttachments(): TList<string>;
         function SendEmail(OAuth: TAuthTypes): boolean;
     public

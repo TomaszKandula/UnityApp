@@ -505,75 +505,75 @@ type
     TDocument = class(TMailer, IDocument)
     {$TYPEINFO ON}
     strict private
-        var FHTMLStat:        string;
-        var FPos:             integer;
-        var FItems:           integer;
-        var FHTMLTable:       string;
-        var FHTMLTemp:        string;
-        var FHTMLRow:         string;
-        var FHTMLLayout:      string;
-        var FCustName:        string;
-        var FCustAddr:        string;
-        var FLBUName:         string;
-        var FLBUAddress:      string;
-        var FTelephone:       string;
-        var FBankDetails:     string;
+        var FHTMLStat: string;
+        var FPos: integer;
+        var FItems: integer;
+        var FHTMLTable: string;
+        var FHTMLTemp: string;
+        var FHTMLRow: string;
+        var FHTMLLayout: string;
+        var FCustName: string;
+        var FCustAddr: string;
+        var FLBUName: string;
+        var FLBUAddress: string;
+        var FTelephone: string;
+        var FBankDetails: string;
         var FCustMess:        string;
-        var FInvFilter:       TInvoiceFilter;
-        var FBeginWith:       string;
-        var FEndWith:         string;
-        var FCUID:            string;
-        var FExclusions:      TArray<integer>;
+        var FInvFilter: TInvoiceFilter;
+        var FBeginWith: string;
+        var FEndWith: string;
+        var FCUID: string;
+        var FExclusions: TArray<integer>;
         var FCommonHTMLTable: string;
-        var FCommonHTMLRow:   string;
-        var FOpenItems:       TStringGrid;
-        var FOpenItemsRefs:   TFOpenItemsRefs;
-        var FControlStatus:   TStringGrid;
-        var FCtrlStatusRefs:  TFCtrlStatusRefs;
-        procedure SetHTMLTable(NewValue:       string);
-        procedure SetHTMLTemp(NewValue:        string);
-        procedure SetHTMLRow(NewValue:         string);
-        procedure SetHTMLLayout(NewValue:      string);
-        procedure SetCustName(NewValue:        string);
-        procedure SetCustAddr(NewValue:        string);
-        procedure SetLBUName(NewValue:         string);
-        procedure SetLBUAddress(NewValue:      string);
-        procedure SetTelephone(NewValue:       string);
-        procedure SetBankDetails(NewValue:     string);
-        procedure SetCustMess(NewValue:        string);
-        procedure SetInvFilter(NewValue:       TInvoiceFilter);
-        procedure SetBeginWith(NewValue:       string);
-        procedure SetEndWith(NewValue:         string);
-        procedure SetOpenItems(NewValue:       TStringGrid);
-        procedure SetCUID(NewValue:            string);
-        procedure SetExclusions(NewValue:      TArray<integer>);
+        var FCommonHTMLRow: string;
+        var FOpenItems: TStringGrid;
+        var FOpenItemsRefs: TFOpenItemsRefs;
+        var FControlStatus: TStringGrid;
+        var FCtrlStatusRefs: TFCtrlStatusRefs;
+        procedure SetHTMLTable(NewValue: string);
+        procedure SetHTMLTemp(NewValue: string);
+        procedure SetHTMLRow(NewValue: string);
+        procedure SetHTMLLayout(NewValue: string);
+        procedure SetCustName(NewValue: string);
+        procedure SetCustAddr(NewValue: string);
+        procedure SetLBUName(NewValue: string);
+        procedure SetLBUAddress(NewValue: string);
+        procedure SetTelephone(NewValue: string);
+        procedure SetBankDetails(NewValue: string);
+        procedure SetCustMess(NewValue: string);
+        procedure SetInvFilter(NewValue: TInvoiceFilter);
+        procedure SetBeginWith(NewValue: string);
+        procedure SetEndWith(NewValue: string);
+        procedure SetOpenItems(NewValue: TStringGrid);
+        procedure SetCUID(NewValue: string);
+        procedure SetExclusions(NewValue: TArray<integer>);
         procedure SetCommonHTMLTable(NewValue: string);
-        procedure SetCommonHTMLRow(NewValue:   string);
-        procedure SetOpenItemsRefs(NewValue:   TFOpenItemsRefs);
-        procedure SetCtrlStatusRefs(NewValue:  TFCtrlStatusRefs);
-        procedure SetControlStatus(NewValue:   TStringGrid);
-        function  GetHTMLTable:       string;
-        function  GetHTMLTemp:        string;
-        function  GetHTMLRow:         string;
-        function  GetHTMLLayout:      string;
-        function  GetCustName:        string;
-        function  GetCustAddr:        string;
-        function  GetLBUName:         string;
-        function  GetLBUAddress:      string;
-        function  GetTelephone:       string;
-        function  GetBankDetails:     string;
-        function  GetCustMess:        string;
-        function  GetInvFilter:       TInvoiceFilter;
-        function  GetBeginWith:       string;
-        function  GetEndWith:         string;
-        function  GetOpenItems:       TStringGrid;
-        function  GetCUID:            string;
-        function  GetExclusions:      TArray<integer>;
+        procedure SetCommonHTMLRow(NewValue: string);
+        procedure SetOpenItemsRefs(NewValue: TFOpenItemsRefs);
+        procedure SetCtrlStatusRefs(NewValue: TFCtrlStatusRefs);
+        procedure SetControlStatus(NewValue: TStringGrid);
+        function  GetHTMLTable: string;
+        function  GetHTMLTemp: string;
+        function  GetHTMLRow: string;
+        function  GetHTMLLayout: string;
+        function  GetCustName: string;
+        function  GetCustAddr: string;
+        function  GetLBUName: string;
+        function  GetLBUAddress: string;
+        function  GetTelephone: string;
+        function  GetBankDetails: string;
+        function  GetCustMess: string;
+        function  GetInvFilter: TInvoiceFilter;
+        function  GetBeginWith: string;
+        function  GetEndWith: string;
+        function  GetOpenItems: TStringGrid;
+        function  GetCUID: string;
+        function  GetExclusions: TArray<integer>;
         function  GetCommonHTMLTable: string;
-        function  GetCommonHTMLRow:   string;
-        function  GetOpenItemsRefs:   TFOpenItemsRefs;
-        function  GetCtrlStatusRefs:  TFCtrlStatusRefs;
-        function  GetControlStatus:   TStringGrid;
+        function  GetCommonHTMLRow: string;
+        function  GetOpenItemsRefs: TFOpenItemsRefs;
+        function  GetCtrlStatusRefs: TFCtrlStatusRefs;
+        function  GetControlStatus: TStringGrid;
         procedure SaveOutput(FileName: string);
         function  BuildHTML: integer;
         function  StatusCodeToText(TextCode: string; Source: TStringGrid): string;
@@ -691,12 +691,12 @@ type
         function  SendDocument(IsUserInCopy: boolean): boolean;
 
         /// <summary>
-        /// Inherited.
+        /// Inherited from base class.
         /// </summary>
         constructor Create();
 
         /// <summary>
-        /// Inherited.
+        /// Inherited from base class.
         /// </summary>
         destructor Destroy(); override;
 
