@@ -152,7 +152,7 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
+{$REGION 'LOCAL HELPERS'}
 
 
 procedure TMassMailerForm.LoadFromGrid();
@@ -375,7 +375,10 @@ begin
 end;
 
 
-// ----------------------------------------------------------------------------------------------------------------------------------------------- CALLBACKS //
+{$ENDREGION}
+
+
+{$REGION 'CALLBACKS'}
 
 
 procedure TMassMailerForm.SendAccountStatements_Callback(ProcessingItemNo: integer; CallResponse: TCallResponse);
@@ -405,7 +408,10 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------- STARTUP //
+{$ENDREGION}
+
+
+{$REGION 'STARTUP'}
 
 
 procedure TMassMailerForm.FormCreate(Sender: TObject);
@@ -516,7 +522,6 @@ begin
             // This may take some time, so we display busy cursor. We also switch off open items timer,
             // so it wil not interfere when user sends the data.
             // ----------------------------------------------------------------------------------------
-
             LoadFromGrid();
             SetEmailAddresses(CustomerList);
             UpdateCompanyData(CustomerList);
@@ -536,7 +541,23 @@ begin
 end;
 
 
-// -------------------------------------------------------------------------------------------------------------------------------------------- CLOSE EVENTS //
+{$ENDREGION}
+
+
+{$REGION 'MISC. EVENTS'}
+
+
+procedure TMassMailerForm.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+    // ------------------------------------------------
+    // Turn on disabled timer for open items scanner,
+    // so open items will not change during processing.
+    // ------------------------------------------------
+    FIsDataLoaded:=False;
+    CustomerList.Clear();
+    MainForm.TimerCustOpenItems.Enabled:=True;
+    ThreadFileLog.Log('[FormClose]: Mass mailer closed, open items loader is now enabled back again.');
+end;
 
 
 procedure TMassMailerForm.FormDestroy(Sender: TObject);
@@ -545,23 +566,10 @@ begin
 end;
 
 
-procedure TMassMailerForm.FormClose(Sender: TObject; var Action: TCloseAction);
-begin
-
-    // ------------------------------------------------
-    // Turn on disabled timer for open items scanner,
-    // so open items will not change during processing.
-    // ------------------------------------------------
-
-    FIsDataLoaded:=False;
-    CustomerList.Clear();
-    MainForm.TimerCustOpenItems.Enabled:=True;
-    ThreadFileLog.Log('[FormClose]: Mass mailer closed, open items loader is now enabled back again.');
-
-end;
+{$ENDREGION}
 
 
-// -------------------------------------------------------------------------------------------------------------------------------------------- CLICK EVENTS //
+{$REGION 'MOUSE CLICK EVENTS'}
 
 
 procedure TMassMailerForm.btnBeginDateClick(Sender: TObject);
@@ -670,7 +678,10 @@ begin
 end;
 
 
-// ----------------------------------------------------------------------------------------------------------------------------------------- KEYBOARD EVENTS //
+{$ENDREGION}
+
+
+{$REGION 'KEYBOARD EVENTS'}
 
 
 procedure TMassMailerForm.FormKeyPress(Sender: TObject; var Key: Char);
@@ -713,6 +724,9 @@ procedure TMassMailerForm.CustomerListKeyUp(Sender: TObject; var Key: Word; Shif
 begin
     if Key = VK_TAB then Text_Subject.SetFocus();
 end;
+
+
+{$ENDREGION}
 
 
 end.

@@ -169,7 +169,7 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
+{$REGION 'LOCAL HELPERS'}
 
 
 procedure TSqlSearchForm.Initialize();
@@ -346,43 +346,9 @@ begin
         Exit;
     end;
 
-    if
-        (
-            CheckBoxNumber.Checked = False
-        )
-        and
-        (
-            CheckBoxName.Checked = False
-        )
-        and
-        (
-            CheckBoxEmail.Checked = False
-        )
-        and
-        (
-            CheckBoxEstatement.Checked = False
-        )
-        and
-        (
-            CheckBoxPhones.Checked = False
-        )
-        and
-        (
-            CheckBoxUserAlias.Checked = False
-        )
-        and
-        (
-            CheckBoxCoCode.Checked = False
-        )
-        and
-        (
-            CheckBoxAgent.Checked = False
-        )
-        and
-        (
-            CheckBoxDivision.Checked = False
-        )
-    then
+    if (CheckBoxNumber.Checked = False) and (CheckBoxName.Checked = False) and (CheckBoxEmail.Checked = False)
+        and (CheckBoxEstatement.Checked = False) and (CheckBoxPhones.Checked = False) and (CheckBoxUserAlias.Checked = False)
+        and (CheckBoxCoCode.Checked = False) and (CheckBoxAgent.Checked = False) and (CheckBoxDivision.Checked = False) then
     begin
         THelpers.MsgCall(TAppMessage.Warn, 'Please provide with at least one condition.');
         Exit;
@@ -414,7 +380,10 @@ begin
 end;
 
 
-// ----------------------------------------------------------------------------------------------------------------------------------------------- CALLBACKS //
+{$ENDREGION}
+
+
+{$REGION 'CALLBACKS'}
 
 
 procedure TSqlSearchForm.OpenAddressBookAsync_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
@@ -449,7 +418,10 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------- STARTUP //
+{$ENDREGION}
+
+
+{$REGION 'STARTUP'}
 
 
 procedure TSqlSearchForm.FormCreate(Sender: TObject);
@@ -464,12 +436,20 @@ begin
 end;
 
 
-// -------------------------------------------------------------------------------------------------------------------------------------------- MOUSE EVENTS //
+{$ENDREGION}
 
 
-/// <summary>
-/// Change caption from default Equal to Like, to indicate change in search function.
-/// </summary>
+{$REGION 'MISC. EVENTS'}
+
+
+//
+
+
+{$ENDREGION}
+
+
+{$REGION 'MOUSE CLICK EVENTS'}
+
 
 procedure TSqlSearchForm.CheckBoxNameEqualClick(Sender: TObject);
 begin
@@ -506,10 +486,6 @@ begin
                 CheckBoxAliasEqual.Caption:='Equal';
 end;
 
-
-/// <summary>
-/// Change background color on check box change, reset the TEdit.
-/// </summary>
 
 procedure TSqlSearchForm.CheckBoxNumberClick(Sender: TObject);
 begin
@@ -596,10 +572,6 @@ begin
 end;
 
 
-/// <remarks>
-/// Alter another check boxes.
-/// </remarks>
-
 procedure TSqlSearchForm.CheckBoxNameClick(Sender: TObject);
 begin
     if CheckBoxName.Checked then
@@ -684,9 +656,6 @@ begin
 end;
 
 
-// -------------------------------------------------------------------------------------------------------------------------------------------- CLICK EVENTS //
-
-
 procedure TSqlSearchForm.btnSearchClick(Sender: TObject);
 begin
     PerformSearch();
@@ -699,13 +668,19 @@ begin
 end;
 
 
-// ----------------------------------------------------------------------------------------------------------------------------------------- KEYBOARD EVENTS //
+{$ENDREGION}
+
+
+{$REGION 'KEYBOARD EVENTS'}
 
 
 procedure TSqlSearchForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
     if Key = Char(VK_ESCAPE) then Close();
 end;
+
+
+{$ENDREGION}
 
 
 end.

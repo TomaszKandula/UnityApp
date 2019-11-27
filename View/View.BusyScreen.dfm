@@ -34,10 +34,6 @@ object BusyForm: TBusyForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
-    ExplicitLeft = 112
-    ExplicitTop = 88
-    ExplicitWidth = 185
-    ExplicitHeight = 41
     object imgBusy: TImage
       Left = 41
       Top = 40

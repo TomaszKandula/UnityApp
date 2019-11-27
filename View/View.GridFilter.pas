@@ -134,7 +134,7 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
+{$REGION 'LOCAL HELPERS'}
 
 
 procedure TFilterForm.FilterClearAll();
@@ -445,7 +445,10 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------- STARTUP //
+{$ENDREGION}
+
+
+{$REGION 'STARTUP'}
 
 
 procedure TFilterForm.FormCreate(Sender: TObject);
@@ -487,7 +490,10 @@ begin
 end;
 
 
-// -------------------------------------------------------------------------------------------------------------------------------------------- CLICK EVENTS //
+{$ENDREGION}
+
+
+{$REGION 'MOUSE CLICK EVENTS'}
 
 
 procedure TFilterForm.btnFilterClick(Sender: TObject);
@@ -625,13 +631,19 @@ begin
 end;
 
 
-// ----------------------------------------------------------------------------------------------------------------------------------------- KEYBOARD EVENTS //
+{$ENDREGION}
+
+
+{$REGION 'KEYBOARD EVENTS'}
 
 
 procedure TFilterForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
     if Key = TChars.ESC then Close();
 end;
+
+
+{$ENDREGION}
 
 
 end.

@@ -78,7 +78,7 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------- STARTUP //
+{$REGION 'LOCAL HELPERS'}
 
 
 procedure TCompanyListForm.FormCreate(Sender: TObject);
@@ -126,7 +126,10 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------- CLOSING //
+{$ENDREGION}
+
+
+{$REGION 'MISC. EVENTS'}
 
 
 procedure TCompanyListForm.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -135,7 +138,10 @@ begin
 end;
 
 
-// -------------------------------------------------------------------------------------------------------------------------------------------- CLICK EVENTS //
+{$ENDREGION}
+
+
+{$REGION 'MOUSE CLICK EVENTS'}
 
 
 procedure TCompanyListForm.btnSelectClick(Sender: TObject);
@@ -213,13 +219,19 @@ begin
 end;
 
 
-// ---------------------------------------------------------------------------------------------------------------------------------------- KEYBOARDS EVENTS //
+{$ENDREGION}
+
+
+{$REGION 'KEYBOARD EVENTS'}
 
 
 procedure TCompanyListForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
     if Key = TChars.ESC then Close();
 end;
+
+
+{$ENDREGION}
 
 
 end.

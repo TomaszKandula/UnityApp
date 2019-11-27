@@ -57,7 +57,6 @@ Implementation
 
 uses
     View.Main,
-    Handler.Sql{Legacy},
     DbModel{Legacy},
     Unity.Helpers,
     Unity.Enums,
@@ -79,7 +78,7 @@ begin
 end;
 
 
-// ----------------------------------------------------------------------------------------------------------------------------------------------- CALLBACKS //
+{$REGION 'LOCAL HELPERS'}
 
 
 procedure TInvoicesForm.GetInvoiceList_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
@@ -111,7 +110,10 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------- STARTUP //
+{$ENDREGION}
+
+
+{$REGION 'STARTUP'}
 
 
 procedure TInvoicesForm.FormCreate(Sender: TObject);
@@ -157,7 +159,10 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------ CLOSING EVENTS //
+{$ENDREGION}
+
+
+{$REGION 'MISC. EVENTS'}
 
 
 procedure TInvoicesForm.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -166,16 +171,16 @@ begin
 end;
 
 
-// ---------------------------------------------------------------------------------------------------------------------------------------- COMPONENT EVENTS //
-
-
 procedure TInvoicesForm.InvoicesGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
     InvoicesGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
 end;
 
 
-// ----------------------------------------------------------------------------------------------------------------------------------------- KEYBOARD EVENTS //
+{$ENDREGION}
+
+
+{$REGION 'KEYBOARD EVENTS'}
 
 
 procedure TInvoicesForm.InvoicesGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -188,6 +193,9 @@ procedure TInvoicesForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
     if Key = Char(VK_ESCAPE) then Close;
 end;
+
+
+{$ENDREGION}
 
 
 end.

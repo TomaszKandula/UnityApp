@@ -38,8 +38,6 @@ object CompanyListForm: TCompanyListForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
-    ExplicitWidth = 247
-    ExplicitHeight = 393
     object PanelListItems: TPanel
       AlignWithMargins = True
       Left = 10
@@ -55,9 +53,6 @@ object CompanyListForm: TCompanyListForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 0
-      ExplicitTop = 40
-      ExplicitWidth = 227
-      ExplicitHeight = 301
       object FilterList: TCheckListBox
         AlignWithMargins = True
         Left = 2
@@ -110,8 +105,6 @@ object CompanyListForm: TCompanyListForm
         ShowHint = False
         TabOrder = 0
         OnClick = FilterListClick
-        ExplicitWidth = 223
-        ExplicitHeight = 297
       end
     end
     object PanelHeader: TPanel
@@ -188,8 +181,6 @@ object CompanyListForm: TCompanyListForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 1
-    ExplicitTop = 353
-    ExplicitWidth = 250
     object btnSelect: TSpeedButton
       Left = 17
       Top = 12

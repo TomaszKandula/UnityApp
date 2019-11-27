@@ -84,7 +84,7 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
+{$REGION 'LOCAL HELPERS'}
 
 
 function TFeedbackForm.WordCount(const InputStr: string): cardinal;
@@ -119,7 +119,10 @@ begin
 end;
 
 
-// ----------------------------------------------------------------------------------------------------------------------------------------------- CALLBACKS //
+{$ENDREGION}
+
+
+{$REGION 'CALLBACKS'}
 
 
 procedure TFeedbackForm.SendFeedbackAsync_Callback(CallResponse: TCallResponse);
@@ -136,7 +139,10 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------- STARTUP //
+{$ENDREGION}
+
+
+{$REGION 'STARTUP'}
 
 
 procedure TFeedbackForm.FormCreate(Sender: TObject);
@@ -145,7 +151,10 @@ begin
 end;
 
 
-// -------------------------------------------------------------------------------------------------------------------------------------------- CLOSE EVENTS //
+{$ENDREGION}
+
+
+{$REGION 'MISC. EVENTS'}
 
 
 procedure TFeedbackForm.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -154,7 +163,10 @@ begin
 end;
 
 
-// -------------------------------------------------------------------------------------------------------------------------------------------- CLICK EVENTS //
+{$ENDREGION}
+
+
+{$REGION 'MOUSE CLICK EVENTS'}
 
 
 procedure TFeedbackForm.btnSendReportClick(Sender: TObject);
@@ -172,7 +184,10 @@ begin
 end;
 
 
-// ----------------------------------------------------------------------------------------------------------------------------------------- KEYBOARD EVENTS //
+{$ENDREGION}
+
+
+{$REGION 'KEYBOARD EVENTS'}
 
 
 procedure TFeedbackForm.ReportMemoKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -185,6 +200,9 @@ procedure TFeedbackForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
     if Key = Char(VK_ESCAPE) then Close();
 end;
+
+
+{$ENDREGION}
 
 
 end.

@@ -104,8 +104,6 @@ implementation
 
 uses
     View.Main,
-    Handler.Sql{Legacy},
-    Handler.Database{Legacy},
     DbModel{Legacy},
     Unity.Enums,
     Unity.Records,
@@ -129,7 +127,7 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
+{$REGION 'LOCAL HELPERS'}
 
 
 procedure TTrackerForm.LoadFromGrid();
@@ -486,7 +484,10 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------- STARTUP //
+{$ENDREGION}
+
+
+{$REGION 'STARTUP'}
 
 
 procedure TTrackerForm.FormCreate(Sender: TObject);
@@ -584,6 +585,12 @@ begin
 end;
 
 
+{$ENDREGION}
+
+
+{$REGION 'MISC. EVENTS'}
+
+
 procedure TTrackerForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
     ClearAll();
@@ -597,7 +604,10 @@ begin
 end;
 
 
-// -------------------------------------------------------------------------------------------------------------------------------------------- CLICK EVENTS //
+{$ENDREGION}
+
+
+{$REGION 'MOUSE CLICK EVENTS'}
 
 
 procedure TTrackerForm.btnApplyClick(Sender: TObject);
@@ -618,7 +628,10 @@ begin
 end;
 
 
-// -------------------------------------------------------------------------------------------------------------------------------------------- MOUSE EVENTS //
+{$ENDREGION}
+
+
+{$REGION 'MOUSE MOVE EVENTS'}
 
 
 procedure TTrackerForm.CustomerListKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -656,13 +669,19 @@ begin
 end;
 
 
-// ----------------------------------------------------------------------------------------------------------------------------------------- KEYBOARD EVENTS //
+{$ENDREGION}
+
+
+{$REGION 'KEYBOARD EVENTS'}
 
 
 procedure TTrackerForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
     if Key = Char(VK_ESCAPE) then Close();
 end;
+
+
+{$ENDREGION}
 
 
 end.

@@ -34,13 +34,11 @@ object FeedbackForm: TFeedbackForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
-    ExplicitWidth = 486
-    ExplicitHeight = 386
     object Caption: TLabel
       AlignWithMargins = True
       Left = 10
       Top = 10
-      Width = 140
+      Width = 411
       Height = 13
       Margins.Left = 10
       Margins.Top = 10
@@ -50,6 +48,7 @@ object FeedbackForm: TFeedbackForm
       Caption = 'Your message to developers:'
       Color = clWhite
       ParentColor = False
+      ExplicitWidth = 140
     end
     object PanelReportMemo: TPanel
       AlignWithMargins = True
@@ -66,9 +65,6 @@ object FeedbackForm: TFeedbackForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 0
-      ExplicitLeft = 5
-      ExplicitTop = 5
-      ExplicitHeight = 290
       object ReportMemo: TMemo
         AlignWithMargins = True
         Left = 2
@@ -92,7 +88,6 @@ object FeedbackForm: TFeedbackForm
         ScrollBars = ssVertical
         TabOrder = 0
         OnKeyUp = ReportMemoKeyUp
-        ExplicitHeight = 286
       end
     end
     object PanelText: TPanel
@@ -110,7 +105,6 @@ object FeedbackForm: TFeedbackForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 1
-      ExplicitTop = 309
       object TotalWords: TLabel
         Left = 94
         Top = 3
@@ -148,8 +142,6 @@ object FeedbackForm: TFeedbackForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 1
-    ExplicitTop = 406
-    ExplicitWidth = 506
     object btnSendReport: TSpeedButton
       Left = 22
       Top = 12

@@ -78,15 +78,11 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
+{$REGION 'LOCAL HELPERS'}
 
 
 function TPhoneListForm.CheckPhoneList(List: TMemo): boolean;
 begin
-
-    // ------------------------------------------------------------------
-    // Check if given component (TMemo) holds only restricted characters.
-    // ------------------------------------------------------------------
 
     Result:=False;
 
@@ -105,7 +101,10 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------- STARTUP //
+{$ENDREGION}
+
+
+{$REGION 'STARTUP'}
 
 
 procedure TPhoneListForm.FormCreate(Sender: TObject);
@@ -121,7 +120,10 @@ begin
 end;
 
 
-// -------------------------------------------------------------------------------------------------------------------------------------------- CLICK EVENTS //
+{$ENDREGION}
+
+
+{$REGION 'MOUSE CLICK EVENTS'}
 
 
 procedure TPhoneListForm.btnSubmitClick(Sender: TObject);
@@ -151,7 +153,10 @@ begin
 end;
 
 
-// ----------------------------------------------------------------------------------------------------------------------------------------- KEYBOARD EVENTS //
+{$ENDREGION}
+
+
+{$REGION 'KEYBOARD EVENTS'}
 
 
 procedure TPhoneListForm.FormKeyPress(Sender: TObject; var Key: Char);
@@ -160,6 +165,8 @@ begin
 end;
 
 
-end.
+{$ENDREGION}
 
+
+end.
 

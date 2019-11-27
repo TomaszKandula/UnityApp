@@ -98,7 +98,22 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------- STARTUP //
+{$REGION 'STARTUP'}
+
+
+procedure TReportsForm.FormCreate(Sender: TObject);
+begin
+    Report1Overdue.Cursor  :=crHandPoint;
+    Report2Exceeders.Cursor:=crHandPoint;
+    Report3Debtors.Cursor  :=crHandPoint;
+    Report4Status.Cursor   :=crHandPoint;
+end;
+
+
+{$ENDREGION}
+
+
+{$REGION 'MISC. EVENTS'}
 
 
 procedure TReportsForm.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -113,16 +128,10 @@ begin
 end;
 
 
-procedure TReportsForm.FormCreate(Sender: TObject);
-begin
-    Report1Overdue.Cursor  :=crHandPoint;
-    Report2Exceeders.Cursor:=crHandPoint;
-    Report3Debtors.Cursor  :=crHandPoint;
-    Report4Status.Cursor   :=crHandPoint;
-end;
+{$ENDREGION}
 
 
-// -------------------------------------------------------------------------------------------------------------------------------------------- CLICK EVENTS //
+{$REGION 'MOUSE CLICK EVENTS'}
 
 
 procedure TReportsForm.Report1OverdueClick(Sender: TObject);
@@ -181,7 +190,10 @@ begin
 end;
 
 
-// ----------------------------------------------------------------------------------------------------------------------------------- MOUSE EVENTS | HOOVER //
+{$ENDREGION}
+
+
+{$REGION 'MOUSE MOVE EVENTS'}
 
 
 procedure TReportsForm.Report1OverdueMouseEnter(Sender: TObject);
@@ -240,9 +252,6 @@ begin
 end;
 
 
-// -------------------------------------------------------------------------------------------------------------------------- MOUSE EVENTS | SCROLLBOX WHEEL //
-
-
 procedure TReportsForm.ScrollBoxMouseWheel(Sender: TObject; Shift: TShiftState; WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
 begin
 
@@ -260,7 +269,10 @@ begin
 end;
 
 
-// ----------------------------------------------------------------------------------------------------------------------------------------- KEYBOARD EVENTS //
+{$ENDREGION}
+
+
+{$REGION 'KEYBOARD EVENTS'}
 
 
 procedure TReportsForm.FormKeyPress(Sender: TObject; var Key: Char);
@@ -269,4 +281,8 @@ begin
 end;
 
 
+{$ENDREGION}
+
+
 end.
+

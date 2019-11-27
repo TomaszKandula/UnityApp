@@ -125,7 +125,7 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
+{$REGION 'LOCAL HELPERS'}
 
 
 procedure TSendForm.ExecuteMailer();
@@ -192,7 +192,10 @@ begin
 end;
 
 
-// ----------------------------------------------------------------------------------------------------------------------------------------------- CALLBACKS //
+{$ENDREGION}
+
+
+{$REGION 'CALLBACKS'}
 
 
 procedure TSendForm.SendAccountStatement_Callback(ProcessingItemNo: integer; CallResponse: TCallResponse);
@@ -209,7 +212,10 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------- STARTUP //
+{$ENDREGION}
+
+
+{$REGION 'STARTUP'}
 
 
 procedure TSendForm.FormCreate(Sender: TObject);
@@ -229,7 +235,10 @@ begin
 end;
 
 
-// -------------------------------------------------------------------------------------------------------------------------------------------- MOUSE EVENTS //
+{$ENDREGION}
+
+
+{$REGION 'MOUSE CLICK EVENTS'}
 
 
 procedure TSendForm.cbShowAllClick(Sender: TObject);
@@ -338,13 +347,10 @@ begin
 end;
 
 
-// ----------------------------------------------------------------------------------------------------------------------------------------- KEYBOARD EVENTS //
+{$ENDREGION}
 
 
-procedure TSendForm.FormKeyPress(Sender: TObject; var Key: Char);
-begin
-    if Key = Char(VK_ESCAPE) then Close();
-end;
+{$REGION 'KEYBOARD EVENTS'}
 
 
 procedure TSendForm.Text_SalutKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -375,6 +381,15 @@ procedure TSendForm.cbNonOverdueKeyUp(Sender: TObject; var Key: Word; Shift: TSh
 begin
     if Key = VK_TAB then Text_Message.SetFocus();
 end;
+
+
+procedure TSendForm.FormKeyPress(Sender: TObject; var Key: Char);
+begin
+    if Key = Char(VK_ESCAPE) then Close();
+end;
+
+
+{$ENDREGION}
 
 
 end.

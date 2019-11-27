@@ -26,11 +26,6 @@ uses
 
 type
 
-    /// <summary>
-    /// Colors view displays option for colouring follow-up column (String Grid component) that contains
-    /// dates assigned by credit controller. This dates indicates when Credit Controller should get back
-    /// to the customer, etc.
-    /// </summary>
     TColorsForm = class(TForm)
         ColorDialog: TColorDialog;
         AppMain: TShape;
@@ -85,8 +80,7 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------- STARTUP //
-
+{$REGION 'STARTUP'}
 
 
 procedure TColorsForm.FormCreate(Sender: TObject);
@@ -117,7 +111,10 @@ begin
 end;
 
 
-// ---------------------------------------------------------------------------------------------------------------------------------------- COMPONENT EVENTS //
+{$ENDREGION}
+
+
+{$REGION 'MISC. EVENTS'}
 
 
 procedure TColorsForm.ColorList1Select(Sender: TObject);
@@ -144,13 +141,10 @@ begin
 end;
 
 
-procedure TColorsForm.FormKeyPress(Sender: TObject; var Key: Char);
-begin
-    if Key = Char(VK_ESCAPE) then Close();
-end;
+{$ENDREGION}
 
 
-// -------------------------------------------------------------------------------------------------------------------------------------------- CLICK EVENTS //
+{$REGION 'MOUSE CLICK EVENTS'}
 
 
 procedure TColorsForm.btnTodayClick(Sender: TObject);
@@ -193,6 +187,21 @@ begin
     end;
 
 end;
+
+
+{$ENDREGION}
+
+
+{$REGION 'KEYBOARD EVENTS'}
+
+
+procedure TColorsForm.FormKeyPress(Sender: TObject; var Key: Char);
+begin
+    if Key = Char(VK_ESCAPE) then Close();
+end;
+
+
+{$ENDREGION}
 
 
 end.

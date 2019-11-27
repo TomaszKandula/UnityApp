@@ -291,7 +291,7 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
+{$REGION 'LOCAL HELPERS'}
 
 
 function TActionsForm.GetRunningApps(SearchName: string): boolean;
@@ -783,7 +783,10 @@ begin
 end;
 
 
-// ----------------------------------------------------------------------------------------------------------------------------------------------- CALLBACKS //
+{$ENDREGION}
+
+
+{$REGION 'CALLBACKS'}
 
 
 procedure TActionsForm.SendAccountStatement_Callback(ProcessingItemNo: integer; CallResponse: TCallResponse);
@@ -851,7 +854,10 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------- STARTUP //
+{$ENDREGION}
+
+
+{$REGION 'STARTUP'}
 
 
 procedure TActionsForm.FormCreate(Sender: TObject);
@@ -932,6 +938,12 @@ begin
 end;
 
 
+{$ENDREGION}
+
+
+{$REGION 'MISC. EVENTS'}
+
+
 procedure TActionsForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
     FIsDataLoaded:=False;
@@ -951,9 +963,6 @@ begin
 end;
 
 
-// ---------------------------------------------------------------------------------------------------------------------------------------- COMPONENT EVENTS //
-
-
 procedure TActionsForm.HistoryGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
 
@@ -970,27 +979,9 @@ begin
 
     OpenItemsGrid.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True);
 
-    if
-        (
-            ACol = OpenItemsGrid.GetCol(TOpenitems.OpenCurAm)
-        )
-    or
-        (
-            ACol = OpenItemsGrid.GetCol(TOpenitems.OpenAm)
-        )
-    or
-        (
-            ACol = OpenItemsGrid.GetCol(TOpenitems.CurAm)
-        )
-    or
-        (
-            ACol = OpenItemsGrid.GetCol(TOpenitems.Am)
-        )
-    or
-        (
-            ACol = OpenItemsGrid.GetCol(TOpenitems.PmtStat)
-        )
-    then
+    if (ACol = OpenItemsGrid.GetCol(TOpenitems.OpenCurAm)) or (ACol = OpenItemsGrid.GetCol(TOpenitems.OpenAm))
+        or (ACol = OpenItemsGrid.GetCol(TOpenitems.CurAm)) or (ACol = OpenItemsGrid.GetCol(TOpenitems.Am))
+        or (ACol = OpenItemsGrid.GetCol(TOpenitems.PmtStat)) then
     begin
         if gdSelected in State then OpenItemsGrid.ColorValues(ARow, ACol, Rect, clRed, clWhite)
             else OpenItemsGrid.ColorValues(ARow, ACol, Rect, clRed, clBlack);
@@ -1005,283 +996,10 @@ begin
 end;
 
 
-// ----------------------------------------------------------------------------------------------------------------------------------------- KEYBOARD EVENTS //
+{$ENDREGION}
 
 
-procedure TActionsForm.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-begin
-    {if (Key = VK_F5) and (Shift=[ssCtrl]) then}
-end;
-
-
-procedure TActionsForm.FormKeyPress(Sender: TObject; var Key: Char);
-begin
-    if Key = Char(VK_ESCAPE) then Close;
-end;
-
-
-procedure TActionsForm.DailyComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-begin
-
-    if ( (Key = VK_RETURN) and (Shift=[ssALT]) ) or ( (Key = VK_RETURN) and (Shift=[ssShift]) ) then
-    begin
-        DailyCom.Lines.Add(TChars.CRLF);
-        Exit;
-    end;
-
-    if ( (Key = VK_RETURN) and (DailyCom.Text <> '') ) then SaveDailyComment();
-
-end;
-
-
-procedure TActionsForm.GeneralComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-begin
-
-    if ( (Key = VK_RETURN) and (Shift=[ssALT]) ) or ( (Key = VK_RETURN) and (Shift=[ssShift]) ) then
-    begin
-        GeneralCom.Lines.Add(TChars.CRLF);
-        Exit;
-    end;
-
-    if ( (Key = VK_RETURN) and (GeneralCom.Text <> '') ) then SaveGeneralComment();
-    
-end;
-
-
-procedure TActionsForm.OpenItemsGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-begin
-    if (Key = 67) and (Shift = [ssCtrl]) then OpenItemsGrid.CopyCutPaste(TActions.Copy);
-end;
-
-
-procedure TActionsForm.HistoryGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-begin
-    if (Key = 67) and (Shift = [ssCtrl]) then HistoryGrid.CopyCutPaste(TActions.Copy);
-end;
-
-
-procedure TActionsForm.DailyComKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-begin
-    if Key = VK_TAB then GeneralCom.SetFocus();
-end;
-
-
-procedure TActionsForm.GeneralComKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-begin
-    if Key = VK_TAB then DailyCom.SetFocus();
-end;
-
-
-// -------------------------------------------------------------------------------------------------------------------------------- MOUSE EVENTS | SET FOCUS //
-
-
-procedure TActionsForm.Cust_PhoneMouseEnter(Sender: TObject);
-begin
-    if (Cust_Phone.Enabled) and (Cust_Phone.Visible) then Cust_Phone.SetFocus();
-end;
-
-
-procedure TActionsForm.Cust_PersonMouseEnter(Sender: TObject);
-begin
-    if (Cust_Person.Enabled) and (Cust_Person.Visible) then Cust_Person.SetFocus();
-end;
-
-
-procedure TActionsForm.Cust_MailMouseEnter(Sender: TObject);
-begin
-    if (Cust_Mail.Enabled) and (Cust_Mail.Visible) then Cust_Mail.SetFocus();
-end;
-
-
-procedure TActionsForm.Cust_MailGeneralMouseEnter(Sender: TObject);
-begin
-    if (Cust_MailGeneral.Enabled) and (Cust_MailGeneral.Visible) then Cust_MailGeneral.SetFocus();
-end;
-
-
-procedure TActionsForm.OpenItemsGridMouseEnter(Sender: TObject);
-begin
-    if (OpenItemsGrid.Enabled) and (OpenItemsGrid.Visible) then OpenItemsGrid.SetFocus();
-end;
-
-
-procedure TActionsForm.HistoryGridMouseEnter(Sender: TObject);
-begin
-    if (HistoryGrid.Enabled) and (HistoryGrid.Visible) then HistoryGrid.SetFocus();
-end;
-
-
-procedure TActionsForm.DailyComMouseEnter(Sender: TObject);
-begin
-    if (DailyCom.Enabled) and (DailyCom.Visible) then DailyCom.SetFocus();
-end;
-
-
-procedure TActionsForm.GeneralComMouseEnter(Sender: TObject);
-begin
-    if (GeneralCom.Enabled) and (GeneralCom.Visible) then GeneralCom.SetFocus();
-end;
-
-
-// --------------------------------------------------------------------------------------------------------------------------------------- SCROLL BARS MOVES //
-
-
-procedure TActionsForm.OpenItemsGridMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-begin
-    Handled:=True;
-    OpenItemsGrid.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
-end;
-
-
-procedure TActionsForm.OpenItemsGridMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-begin
-    Handled:=True;
-    OpenItemsGrid.Perform(WM_VSCROLL, SB_LINEUP, 0);
-end;
-
-
-procedure TActionsForm.HistoryGridMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-begin
-    Handled:=True;
-    HistoryGrid.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
-end;
-
-
-procedure TActionsForm.HistoryGridMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-begin
-    Handled:=True;
-    HistoryGrid.Perform(WM_VSCROLL, SB_LINEUP, 0);
-end;
-
-
-// -------------------------------------------------------------------------------------------------------------------------------------------- MOUSE HOOVER //
-
-
-procedure TActionsForm.btnBackMouseEnter(Sender: TObject);
-begin
-    txtDesc.Caption:='Back to previous customer.';
-    txtBack.Font.Color:=AppButtonTxtSelected;
-end;
-
-
-procedure TActionsForm.btnBackMouseLeave(Sender: TObject);
-begin
-    txtDesc.Caption:='';
-    txtBack.Font.Color:=AppButtonTxtNormal;
-end;
-
-
-procedure TActionsForm.btnNextMouseEnter(Sender: TObject);
-begin
-    txtDesc.Caption:='Load next customer.';
-    txtNext.Font.Color:=AppButtonTxtSelected;
-end;
-
-procedure TActionsForm.btnNextMouseLeave(Sender: TObject);
-begin
-    txtDesc.Caption:='';
-    txtNext.Font.Color:=AppButtonTxtNormal;
-end;
-
-
-procedure TActionsForm.btnSetFollowUpMouseEnter(Sender: TObject);
-begin
-    txtDesc.Caption:='Add follow-up date.';
-    txtSetFollowUp.Font.Color:=AppButtonTxtSelected;
-end;
-
-procedure TActionsForm.btnSetFollowUpMouseLeave(Sender: TObject);
-begin
-    txtDesc.Caption:='';
-    txtSetFollowUp.Font.Color:=AppButtonTxtNormal;
-end;
-
-
-procedure TActionsForm.btnClearFollowUpMouseEnter(Sender: TObject);
-begin
-    txtDesc.Caption:='Remove existing follow-up date.';
-    txtClearFollowUp.Font.Color:=AppButtonTxtSelected;
-end;
-
-
-procedure TActionsForm.btnClearFollowUpMouseLeave(Sender: TObject);
-begin
-    txtDesc.Caption:='';
-    txtClearFollowUp.Font.Color:=AppButtonTxtNormal;
-end;
-
-
-procedure TActionsForm.btnLogMissingInvMouseEnter(Sender: TObject);
-begin
-    txtDesc.Caption:='Log to QMS missing invoice (require to fill the invoice details).';
-    txtLogMissingInv.Font.Color:=AppButtonTxtSelected;
-end;
-
-
-procedure TActionsForm.btnLogMissingInvMouseLeave(Sender: TObject);
-begin
-    txtDesc.Caption:='';
-    txtLogMissingInv.Font.Color:=AppButtonTxtNormal;
-end;
-
-
-procedure TActionsForm.btnLogNowMouseEnter(Sender: TObject);
-begin
-    txtDesc.Caption:='Log to QMS selected invoice(s) from the customer open items list.';
-    txtLogNow.Font.Color:=AppButtonTxtSelected;
-end;
-
-
-procedure TActionsForm.btnLogNowMouseLeave(Sender: TObject);
-begin
-    txtDesc.Caption:='';
-    txtLogNow.Font.Color:=AppButtonTxtNormal;
-end;
-
-
-procedure TActionsForm.btnCustomStatementMouseEnter(Sender: TObject);
-begin
-    txtDesc.Caption:='Send account statement now.';
-    txtCustomStatement.Font.Color:=AppButtonTxtSelected;
-end;
-
-
-procedure TActionsForm.btnCustomStatementMouseLeave(Sender: TObject);
-begin
-    txtDesc.Caption:='';
-    txtCustomStatement.Font.Color:=AppButtonTxtNormal;
-end;
-
-
-procedure TActionsForm.btnAutoStatementMouseEnter(Sender: TObject);
-begin
-    txtDesc.Caption:='Send custom e-mail with account statement.';
-    txtAutoStatement.Font.Color:=AppButtonTxtSelected;
-end;
-
-
-procedure TActionsForm.btnAutoStatementMouseLeave(Sender: TObject);
-begin
-    txtDesc.Caption:='';
-    txtAutoStatement.Font.Color:=AppButtonTxtNormal;
-end;
-
-
-procedure TActionsForm.btnCallCustomerMouseEnter(Sender: TObject);
-begin
-    txtDesc.Caption:='Call customer now.';
-    txtCallCustomer.Font.Color:=AppButtonTxtSelected;
-end;
-
-
-procedure TActionsForm.btnCallCustomerMouseLeave(Sender: TObject);
-begin
-    txtDesc.Caption:='';
-    txtCallCustomer.Font.Color:=AppButtonTxtNormal;
-end;
-
-
-// -------------------------------------------------------------------------------------------------------------------------------------------- CLICK EVENTS //
+{$REGION 'MOUSE CLICK EVENTS'}
 
 
 procedure TActionsForm.btnBackClick(Sender: TObject);
@@ -1424,6 +1142,285 @@ procedure TActionsForm.btnSaveCustDetailsClick(Sender: TObject);
 begin
     SaveCustomerDetails();
 end;
+
+
+{$ENDREGION}
+
+
+{$REGION 'MOUSE EVENTS'}
+
+
+procedure TActionsForm.Cust_PhoneMouseEnter(Sender: TObject);
+begin
+    if (Cust_Phone.Enabled) and (Cust_Phone.Visible) then Cust_Phone.SetFocus();
+end;
+
+
+procedure TActionsForm.Cust_PersonMouseEnter(Sender: TObject);
+begin
+    if (Cust_Person.Enabled) and (Cust_Person.Visible) then Cust_Person.SetFocus();
+end;
+
+
+procedure TActionsForm.Cust_MailMouseEnter(Sender: TObject);
+begin
+    if (Cust_Mail.Enabled) and (Cust_Mail.Visible) then Cust_Mail.SetFocus();
+end;
+
+
+procedure TActionsForm.Cust_MailGeneralMouseEnter(Sender: TObject);
+begin
+    if (Cust_MailGeneral.Enabled) and (Cust_MailGeneral.Visible) then Cust_MailGeneral.SetFocus();
+end;
+
+
+procedure TActionsForm.OpenItemsGridMouseEnter(Sender: TObject);
+begin
+    if (OpenItemsGrid.Enabled) and (OpenItemsGrid.Visible) then OpenItemsGrid.SetFocus();
+end;
+
+
+procedure TActionsForm.HistoryGridMouseEnter(Sender: TObject);
+begin
+    if (HistoryGrid.Enabled) and (HistoryGrid.Visible) then HistoryGrid.SetFocus();
+end;
+
+
+procedure TActionsForm.DailyComMouseEnter(Sender: TObject);
+begin
+    if (DailyCom.Enabled) and (DailyCom.Visible) then DailyCom.SetFocus();
+end;
+
+
+procedure TActionsForm.GeneralComMouseEnter(Sender: TObject);
+begin
+    if (GeneralCom.Enabled) and (GeneralCom.Visible) then GeneralCom.SetFocus();
+end;
+
+
+procedure TActionsForm.OpenItemsGridMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+begin
+    Handled:=True;
+    OpenItemsGrid.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
+end;
+
+
+procedure TActionsForm.OpenItemsGridMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+begin
+    Handled:=True;
+    OpenItemsGrid.Perform(WM_VSCROLL, SB_LINEUP, 0);
+end;
+
+
+procedure TActionsForm.HistoryGridMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+begin
+    Handled:=True;
+    HistoryGrid.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
+end;
+
+
+procedure TActionsForm.HistoryGridMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+begin
+    Handled:=True;
+    HistoryGrid.Perform(WM_VSCROLL, SB_LINEUP, 0);
+end;
+
+
+procedure TActionsForm.btnBackMouseEnter(Sender: TObject);
+begin
+    txtDesc.Caption:='Back to previous customer.';
+    txtBack.Font.Color:=AppButtonTxtSelected;
+end;
+
+
+procedure TActionsForm.btnBackMouseLeave(Sender: TObject);
+begin
+    txtDesc.Caption:='';
+    txtBack.Font.Color:=AppButtonTxtNormal;
+end;
+
+
+procedure TActionsForm.btnNextMouseEnter(Sender: TObject);
+begin
+    txtDesc.Caption:='Load next customer.';
+    txtNext.Font.Color:=AppButtonTxtSelected;
+end;
+
+procedure TActionsForm.btnNextMouseLeave(Sender: TObject);
+begin
+    txtDesc.Caption:='';
+    txtNext.Font.Color:=AppButtonTxtNormal;
+end;
+
+
+procedure TActionsForm.btnSetFollowUpMouseEnter(Sender: TObject);
+begin
+    txtDesc.Caption:='Add follow-up date.';
+    txtSetFollowUp.Font.Color:=AppButtonTxtSelected;
+end;
+
+procedure TActionsForm.btnSetFollowUpMouseLeave(Sender: TObject);
+begin
+    txtDesc.Caption:='';
+    txtSetFollowUp.Font.Color:=AppButtonTxtNormal;
+end;
+
+
+procedure TActionsForm.btnClearFollowUpMouseEnter(Sender: TObject);
+begin
+    txtDesc.Caption:='Remove existing follow-up date.';
+    txtClearFollowUp.Font.Color:=AppButtonTxtSelected;
+end;
+
+
+procedure TActionsForm.btnClearFollowUpMouseLeave(Sender: TObject);
+begin
+    txtDesc.Caption:='';
+    txtClearFollowUp.Font.Color:=AppButtonTxtNormal;
+end;
+
+
+procedure TActionsForm.btnLogMissingInvMouseEnter(Sender: TObject);
+begin
+    txtDesc.Caption:='Log to QMS missing invoice (require to fill the invoice details).';
+    txtLogMissingInv.Font.Color:=AppButtonTxtSelected;
+end;
+
+
+procedure TActionsForm.btnLogMissingInvMouseLeave(Sender: TObject);
+begin
+    txtDesc.Caption:='';
+    txtLogMissingInv.Font.Color:=AppButtonTxtNormal;
+end;
+
+
+procedure TActionsForm.btnLogNowMouseEnter(Sender: TObject);
+begin
+    txtDesc.Caption:='Log to QMS selected invoice(s) from the customer open items list.';
+    txtLogNow.Font.Color:=AppButtonTxtSelected;
+end;
+
+
+procedure TActionsForm.btnLogNowMouseLeave(Sender: TObject);
+begin
+    txtDesc.Caption:='';
+    txtLogNow.Font.Color:=AppButtonTxtNormal;
+end;
+
+
+procedure TActionsForm.btnCustomStatementMouseEnter(Sender: TObject);
+begin
+    txtDesc.Caption:='Send account statement now.';
+    txtCustomStatement.Font.Color:=AppButtonTxtSelected;
+end;
+
+
+procedure TActionsForm.btnCustomStatementMouseLeave(Sender: TObject);
+begin
+    txtDesc.Caption:='';
+    txtCustomStatement.Font.Color:=AppButtonTxtNormal;
+end;
+
+
+procedure TActionsForm.btnAutoStatementMouseEnter(Sender: TObject);
+begin
+    txtDesc.Caption:='Send custom e-mail with account statement.';
+    txtAutoStatement.Font.Color:=AppButtonTxtSelected;
+end;
+
+
+procedure TActionsForm.btnAutoStatementMouseLeave(Sender: TObject);
+begin
+    txtDesc.Caption:='';
+    txtAutoStatement.Font.Color:=AppButtonTxtNormal;
+end;
+
+
+procedure TActionsForm.btnCallCustomerMouseEnter(Sender: TObject);
+begin
+    txtDesc.Caption:='Call customer now.';
+    txtCallCustomer.Font.Color:=AppButtonTxtSelected;
+end;
+
+
+procedure TActionsForm.btnCallCustomerMouseLeave(Sender: TObject);
+begin
+    txtDesc.Caption:='';
+    txtCallCustomer.Font.Color:=AppButtonTxtNormal;
+end;
+
+
+{$ENDREGION}
+
+
+{$REGION 'KEYBOARD EVENTS'}
+
+
+procedure TActionsForm.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+    {if (Key = VK_F5) and (Shift=[ssCtrl]) then}
+end;
+
+
+procedure TActionsForm.FormKeyPress(Sender: TObject; var Key: Char);
+begin
+    if Key = Char(VK_ESCAPE) then Close;
+end;
+
+
+procedure TActionsForm.DailyComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+
+    if ( (Key = VK_RETURN) and (Shift=[ssALT]) ) or ( (Key = VK_RETURN) and (Shift=[ssShift]) ) then
+    begin
+        DailyCom.Lines.Add(TChars.CRLF);
+        Exit;
+    end;
+
+    if ( (Key = VK_RETURN) and (DailyCom.Text <> '') ) then SaveDailyComment();
+
+end;
+
+
+procedure TActionsForm.GeneralComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+
+    if ( (Key = VK_RETURN) and (Shift=[ssALT]) ) or ( (Key = VK_RETURN) and (Shift=[ssShift]) ) then
+    begin
+        GeneralCom.Lines.Add(TChars.CRLF);
+        Exit;
+    end;
+
+    if ( (Key = VK_RETURN) and (GeneralCom.Text <> '') ) then SaveGeneralComment();
+
+end;
+
+
+procedure TActionsForm.OpenItemsGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+    if (Key = 67) and (Shift = [ssCtrl]) then OpenItemsGrid.CopyCutPaste(TActions.Copy);
+end;
+
+
+procedure TActionsForm.HistoryGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+    if (Key = 67) and (Shift = [ssCtrl]) then HistoryGrid.CopyCutPaste(TActions.Copy);
+end;
+
+
+procedure TActionsForm.DailyComKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+    if Key = VK_TAB then GeneralCom.SetFocus();
+end;
+
+
+procedure TActionsForm.GeneralComKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+    if Key = VK_TAB then DailyCom.SetFocus();
+end;
+
+
+{$ENDREGION}
 
 
 end.

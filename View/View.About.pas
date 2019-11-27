@@ -124,7 +124,7 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
+{$REGION 'LOCAL HELPERS'}
 
 
 function TAboutForm.Is64BitOS(): Boolean;
@@ -181,7 +181,10 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------- STARTUP //
+{$ENDREGION}
+
+
+{$REGION 'STARTUP'}
 
 
 procedure TAboutForm.FormCreate(Sender: TObject);
@@ -236,7 +239,10 @@ begin
 end;
 
 
-// -------------------------------------------------------------------------------------------------------------------------------------------- CLOSE EVENTS //
+{$ENDREGION}
+
+
+{$REGION 'MISC. EVENTS'}
 
 
 procedure TAboutForm.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -245,16 +251,10 @@ begin
 end;
 
 
-// ----------------------------------------------------------------------------------------------------------------------------------------- KEYBOARD EVENTS //
+{$ENDREGION}
 
 
-procedure TAboutForm.FormKeyPress(Sender: TObject; var Key: Char);
-begin
-    if Key = Char(VK_ESCAPE) then Close();
-end;
-
-
-// -------------------------------------------------------------------------------------------------------------------------------------------- CLICK EVENTS //
+{$REGION 'MOUSE EVENTS'}
 
 
 procedure TAboutForm.txtINQClick(Sender: TObject);
@@ -273,6 +273,21 @@ procedure TAboutForm.txtWEBClick(Sender: TObject);
 begin
     ShellExecute(Handle, 'open', PChar(txt_WEB.Caption), nil, nil, SW_SHOWNORMAL);
 end;
+
+
+{$ENDREGION}
+
+
+{$REGION 'KEYBOARD EVENTS'}
+
+
+procedure TAboutForm.FormKeyPress(Sender: TObject; var Key: Char);
+begin
+    if Key = Char(VK_ESCAPE) then Close();
+end;
+
+
+{$ENDREGION}
 
 
 end.

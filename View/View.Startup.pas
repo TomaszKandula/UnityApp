@@ -119,7 +119,7 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
+{$REGION 'LOCAL HELPERS'}
 
 
 procedure TStartupForm.AnimateProgressBar(AniFrom: integer; AniTo: integer; ProgressBar: TGauge; Speed: cardinal = 5);
@@ -521,7 +521,10 @@ begin
 end;
 
 
-// ----------------------------------------------------------------------------------------------------------------------------------------------- CALLBACKS //
+{$ENDREGION}
+
+
+{$REGION 'CALLBACKS'}
 
 
 procedure TStartupForm.GeneralTables_Callback(CallResponse: TCallResponse);
@@ -536,35 +539,15 @@ begin
 end;
 
 
-// ----------------------------------------------------------------------------------------------------------------------------------------------- APPERANCE //
+{$ENDREGION}
 
 
-procedure TStartupForm.CreateParams(var Params: TCreateParams);
-begin
-
-    inherited CreateParams(Params);
-
-    with Params do begin
-        Style:=WS_POPUP;
-        WindowClass.style:=WindowClass.style or CS_DROPSHADOW;
-    end;
-
-end;
-
-
-// ------------------------------------------------------------------------------------------------------------------------------------------------- STARTUP //
+{$REGION 'STARTUP'}
 
 
 procedure TStartupForm.FormCreate(Sender: TObject);
 begin
     {Do nothing}
-end;
-
-
-procedure TStartupForm.FormDestroy(Sender: TObject);
-begin
-    DestroyThreadFileLog();
-    DestroySessionService();
 end;
 
 
@@ -581,7 +564,36 @@ begin
 end;
 
 
-// -------------------------------------------------------------------------------------------------------------------------------------------- CLICK EVENTS //
+{$ENDREGION}
+
+
+{$REGION 'MISC. EVENTS'}
+
+
+procedure TStartupForm.CreateParams(var Params: TCreateParams);
+begin
+
+    inherited CreateParams(Params);
+
+    with Params do begin
+        Style:=WS_POPUP;
+        WindowClass.style:=WindowClass.style or CS_DROPSHADOW;
+    end;
+
+end;
+
+
+procedure TStartupForm.FormDestroy(Sender: TObject);
+begin
+    DestroyThreadFileLog();
+    DestroySessionService();
+end;
+
+
+{$ENDREGION}
+
+
+{$REGION 'MOUSE CLICK EVENTS'}
 
 
 procedure TStartupForm.LabelHideClick(Sender: TObject);
@@ -590,7 +602,10 @@ begin
 end;
 
 
-// -------------------------------------------------------------------------------------------------------------------------------------------- MOUSE EVENTS //
+{$ENDREGION}
+
+
+{$REGION 'MOUSE MOVE EVENTS'}
 
 
 procedure TStartupForm.ShapeBackgroundMouseDown(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
@@ -619,6 +634,9 @@ begin
     ShapeHide.Brush.Color:=$FFFFFF;
     LabelHide.Font.Color:=$00EDE6DD;
 end;
+
+
+{$ENDREGION}
 
 
 end.

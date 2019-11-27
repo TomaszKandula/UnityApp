@@ -36,8 +36,6 @@ object PhoneListForm: TPhoneListForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
-    ExplicitWidth = 212
-    ExplicitHeight = 337
     object PanelMemo: TPanel
       AlignWithMargins = True
       Left = 10
@@ -54,8 +52,6 @@ object PhoneListForm: TPhoneListForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 0
-      ExplicitWidth = 192
-      ExplicitHeight = 268
       object PhoneList: TMemo
         AlignWithMargins = True
         Left = 2
@@ -71,8 +67,6 @@ object PhoneListForm: TPhoneListForm
         Color = clCream
         ScrollBars = ssVertical
         TabOrder = 0
-        ExplicitWidth = 188
-        ExplicitHeight = 264
       end
     end
   end
@@ -91,8 +85,6 @@ object PhoneListForm: TPhoneListForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 1
-    ExplicitTop = 297
-    ExplicitWidth = 222
     object btnSubmit: TSpeedButton
       Left = 15
       Top = 13

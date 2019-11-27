@@ -92,7 +92,7 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
+{$REGION 'LOCAL HELPERS'}
 
 
 function TCalendarForm.IsWeekend(const DT: TDateTime): Boolean;
@@ -133,7 +133,10 @@ begin
 end;
 
 
-// ----------------------------------------------------------------------------------------------------------------------------------------------- CALLBACKS //
+{$ENDREGION}
+
+
+{$REGION 'CALLBACKS'}
 
 
 procedure TCalendarForm.EditGeneralComment_Callback(CallResponse: TCallResponse);
@@ -149,7 +152,10 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------- STARTUP //
+{$ENDREGION}
+
+
+{$REGION 'STARTUP'}
 
 
 procedure TCalendarForm.FormCreate(Sender: TObject);
@@ -169,7 +175,10 @@ begin
 end;
 
 
-// -------------------------------------------------------------------------------------------------------------------------------------------- CLICK EVENTS //
+{$ENDREGION}
+
+
+{$REGION 'MOUSE CLICK EVENTS'}
 
 
 procedure TCalendarForm.MyCalendarClick(Sender: TObject);
@@ -227,13 +236,19 @@ begin
 end;
 
 
-// ----------------------------------------------------------------------------------------------------------------------------------------- KEYBOARD EVENTS //
+{$ENDREGION}
+
+
+{$REGION 'KEYBOARD EVENTS'}
 
 
 procedure TCalendarForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
     if Key = TChars.ESC then Close();
 end;
+
+
+{$ENDREGION}
 
 
 end.

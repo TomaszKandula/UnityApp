@@ -69,7 +69,7 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
+{$REGION 'LOCAL HELPERS'}
 
 
 procedure TEventForm.LoadEventLog();
@@ -85,7 +85,10 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------- STARTUP //
+{$ENDREGION}
+
+
+{$REGION 'STARTUP'}
 
 
 procedure TEventForm.FormCreate(Sender: TObject);
@@ -100,7 +103,10 @@ begin
 end;
 
 
-// ----------------------------------------------------------------------------------------------------------------------------------------- KEYBOARD EVENTS //
+{$ENDREGION}
+
+
+{$REGION 'KEYBOARD EVENTS'}
 
 
 procedure TEventForm.FormKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -117,6 +123,9 @@ procedure TEventForm.FormKeyPress(Sender: TObject; var Key: Char);
 begin
     if Key = Char(VK_ESCAPE) then Close;
 end;
+
+
+{$ENDREGION}
 
 
 end.

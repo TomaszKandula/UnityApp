@@ -102,17 +102,21 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------- HELPERS //
+{$REGION 'LOCAL HELPERS'}
 
 
 function TGridSearchForm.TryToInt(StrInput: string): boolean;
 begin
+
     Result:=True;
+
     try
         StrToInt64(StrInput);
+
     except
         Result:=False;
     end;
+
 end;
 
 
@@ -302,7 +306,10 @@ begin
 end;
 
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------- STARTUP //
+{$ENDREGION}
+
+
+{$REGION 'STARTUP'}
 
 
 procedure TGridSearchForm.FormCreate(Sender: TObject);
@@ -313,7 +320,32 @@ begin
 end;
 
 
-// ----------------------------------------------------------------------------------------------------------------------------------------- KEYBOARD EVENTS //
+{$ENDREGION}
+
+
+{$REGION 'MOUSE CLICK EVENTS'}
+
+
+procedure TGridSearchForm.btnSearchClick(Sender: TObject);
+begin
+    if (FColName <> '') and (FColNumber <> '') and (FGrid <> nil) then PerformSearch();
+end;
+
+
+procedure TGridSearchForm.btnUnhideClick(Sender: TObject);
+begin
+    if (FColName <> '') and (FColNumber <> '') and (FGrid <> nil) then
+    begin
+        MainForm.Action_RemoveFiltersClick(Self);
+        btnUnhide.Enabled:=False;
+    end;
+end;
+
+
+{$ENDREGION}
+
+
+{$REGION 'KEYBOARD EVENTS'}
 
 
 procedure TGridSearchForm.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -338,23 +370,7 @@ begin
 end;
 
 
-// -------------------------------------------------------------------------------------------------------------------------------------------- CLICK EVENTS //
-
-
-procedure TGridSearchForm.btnSearchClick(Sender: TObject);
-begin
-    if (FColName <> '') and (FColNumber <> '') and (FGrid <> nil) then PerformSearch();
-end;
-
-
-procedure TGridSearchForm.btnUnhideClick(Sender: TObject);
-begin
-    if (FColName <> '') and (FColNumber <> '') and (FGrid <> nil) then
-    begin
-        MainForm.Action_RemoveFiltersClick(Self);
-        btnUnhide.Enabled:=False;
-    end;
-end;
+{$ENDREGION}
 
 
 end.

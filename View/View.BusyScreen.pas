@@ -1,5 +1,10 @@
 unit View.BusyScreen;
 
+// --------------------------------------------------------------------------------------
+// This is application view (GUI) that can have direct calls to logic layer interface(s).
+// Calls must carry reference(s) to callback method that is defined same as callback
+// signature (delegate). All views use lazy initialization pattern.
+// --------------------------------------------------------------------------------------
 
 interface
 
@@ -55,6 +60,9 @@ begin
 end;
 
 
+{$REGION 'STARTUP'}
+
+
 procedure TBusyForm.FormCreate(Sender: TObject);
 begin
     Position:=poDesigned; // The form appears positioned on the screen and with the same height and width as it had at design time.
@@ -70,16 +78,31 @@ begin
 end;
 
 
+{$ENDREGION}
+
+
+{$REGION 'MISC. EVENTS'}
+
+
 procedure TBusyForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
     {Do nothing}
 end;
 
 
+{$ENDREGION}
+
+
+{$REGION 'KEYBOARD EVENTS'}
+
+
 procedure TBusyForm.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
     if (Key=VK_F4) and (Shift=[ssALT]) then Key:=0;
 end;
+
+
+{$ENDREGION}
 
 
 end.
