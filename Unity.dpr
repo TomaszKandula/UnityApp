@@ -17,7 +17,7 @@ program Unity;
 // Framework used:         VCL (created by Borland).                      //
 // Win32 API direct calls: Yes.                                           //
 // Require web services:   Yes, cloud based (Azure).                      //
-// Active Directory:       Yes.                                           //
+// Active Directory:       Yes, via web service.                          //
 // Chromium engine:        CEF4Delphi.                                    //
 // ---------------------------------------------------------------------- //
 // Copyright (C) 2016-2019 Tomasz Kandula/DFDS Polska sp. z o.o.          //
@@ -97,6 +97,7 @@ uses
     Handler.Rest                in 'Logic\AccessLayer\Handler.Rest.pas',
     Sync.Mailer                 in 'Logic\BusinessLayer\Sync.Mailer.pas',
     Sync.Documents              in 'Logic\BusinessLayer\Sync.Documents.pas',
+	Async.Accounts              in 'Logic\BusinessLayer\Async.Accounts.pas',
     Async.Utilities             in 'Logic\BusinessLayer\Async.Utilities.pas',
     Async.Tracker               in 'Logic\BusinessLayer\Async.Tracker.pas',
     Async.Queries               in 'Logic\BusinessLayer\Async.Queries.pas',
