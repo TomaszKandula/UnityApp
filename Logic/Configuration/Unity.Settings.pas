@@ -534,7 +534,8 @@ end;
 
 procedure TSettings.MakeNewSessionId();
 begin
-    FLastSessionId:=TGUID.NewGuid.ToString().Replace('{','').Replace('}','').Replace('-','').ToLower();
+    //FLastSessionId:=TGUID.NewGuid.ToString().Replace('{','').Replace('}','').Replace('-','').ToLower();
+    FLastSessionId:=TGUID.NewGuid.ToString().Replace('{','').Replace('}','').ToLower();
 end;
 
 

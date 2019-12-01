@@ -102,9 +102,9 @@ uses
     REST.Types,
     System.Net.HttpClient,
     Handler.Rest,
-    Handler.Database,
+    Handler.Database{Legacy},
     View.Main,
-    DbModel;
+    DbModel{Legacy};
 
 
 var
@@ -219,6 +219,12 @@ begin
             ChangeProgressBar(15, 'Initializing... done.', ProgressBar);
         end;
 
+
+        // ...call REST api/v1/accounts/initiate/
+
+
+
+
         // -----------------------------------------
         // Establish persistent database connection.  // delete when REST is introduced
         // -----------------------------------------
@@ -261,8 +267,8 @@ begin
             end
             else
             begin
-                ThreadFileLog.Log('[GetHtmlLayoutsSync]: Cannot unzipp resource file.');
-                THelpers.MsgCall(TAppMessage.Error, 'An error occured [GetHtmlLayoutsSync]: Cannot uznipp resource file. Please contact your administrator. Application will be closed.');
+                ThreadFileLog.Log('[UnzippLayouts]: Cannot unzipp resource file.');
+                THelpers.MsgCall(TAppMessage.Error, 'An error occured [UnzippLayouts]: Cannot uznipp resource file. Please contact your administrator. Application will be closed.');
                 ExitAppSync();
             end;
 

@@ -26370,4 +26370,10 @@ object MainForm: TMainForm
     Left = 871
     Top = 448
   end
+  object TimerPermitCheck: TTimer
+    Enabled = False
+    OnTimer = TimerPermitCheckTimer
+    Left = 833
+    Top = 515
+  end
 end

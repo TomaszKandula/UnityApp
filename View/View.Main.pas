@@ -503,6 +503,7 @@ type
         N12: TMenuItem;
         N5: TMenuItem;
         N22: TMenuItem;
+        TimerPermitCheck: TTimer;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
@@ -756,6 +757,7 @@ type
         procedure btnReloadClick(Sender: TObject);
         procedure Action_HideThisColumnClick(Sender: TObject);
         procedure Action_ShowAllColumnsClick(Sender: TObject);
+        procedure TimerPermitCheckTimer(Sender: TObject);
     protected
         procedure CreateParams(var Params: TCreateParams); override;
         procedure WndProc(var msg: TMessage); override;   // Windows events
@@ -769,6 +771,9 @@ type
             targetDisposition: TCefWindowOpenDisposition; userGesture: Boolean; const popupFeatures: TCefPopupFeatures; var windowInfo: TCefWindowInfo;
             var client: ICefClient; var settings: TCefBrowserSettings; var noJavascriptAccess: Boolean; var Result: Boolean);
     strict private
+        const FPermitCheckTimeout = 60000;
+        var FPermitCheckTimer: integer;
+        var FIsAppMenuLocked: boolean;
         var FLastCoCodesSelected: string;
         var FHadFirstLoad: boolean;
         var FAllowClose: boolean;
@@ -779,6 +784,8 @@ type
         const AppMenuTextNormal = clGrayText;
         const AppButtonTxtNormal = $00555555;
         const AppButtonTxtSelected = $006433C9;
+        function CanAccessAppMenu(): boolean;
+        procedure PermitCheckInit();
         procedure SetPanelBorders;
         procedure SetGridColumnWidths;
         procedure SetGridRowHeights;
@@ -1335,6 +1342,28 @@ begin
     txtFeedback.Font.Color    :=AppMenuTextNormal;
     txtInfo.Font.Style        :=[];
     txtInfo.Font.Color        :=AppMenuTextNormal;
+end;
+
+
+function TMainForm.CanAccessAppMenu(): boolean;
+begin
+
+    Result:=True;
+
+    if FIsAppMenuLocked then
+    begin
+        THelpers.MsgCall(TAppMessage.Warn, 'You do not have access to this feature. Active Directory validation is not completed.');
+        Result:=False;
+    end;
+
+end;
+
+
+procedure TMainForm.PermitCheckInit();
+begin
+    TimerPermitCheck.Interval:=3000;
+    TimerPermitCheck.Enabled:=True;
+    FPermitCheckTimer:=0;
 end;
 
 
@@ -2114,10 +2143,11 @@ end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
+    FIsAppMenuLocked:=True;
+    FAllowClose:=False;
     ClearMainViewInfo();
     ClearOpenItemsSummary();
     ClearAgingSummary();
-    FAllowClose:=False;
     InitializeScreenSettings;
     SetActiveTabsheet(TabSheet9);
     Tables.ActivePage:=Page1;
@@ -2145,10 +2175,12 @@ procedure TMainForm.ChromiumWindowAfterCreated(Sender: TObject);
 begin
 
     var Settings: ISettings:=TSettings.Create();
-    var URL: string:=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'START_PAGE', 'about:blank');
+    var BaseUrl:=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'START_PAGE', 'about:blank');
+    var Url:=WideString(BaseUrl) + '/?sessiontoken=' + SessionService.SessionId;
 
     try
-        ChromiumWindow.LoadURL(WideString(URL));
+        ChromiumWindow.LoadURL(Url);
+        PermitCheckInit();
     except
         on E: exception do
             ThreadFileLog.Log('[Chromium] Cannot load URL: ' + URL + '. The error has been thrown: ' + E.Message);
@@ -2660,6 +2692,22 @@ begin
         TrayIcon.ShowBalloonHint();
 
     end;
+
+end;
+
+
+procedure TMainForm.TimerPermitCheckTimer(Sender: TObject);
+begin
+
+    Inc(FPermitCheckTimer);
+
+    if FPermitCheckTimer = (FPermitCheckTimeout / TimerPermitCheck.Interval) then
+    begin
+        TimerPermitCheck.Enabled:=False;
+        THelpers.MsgCall(TAppMessage.Error, 'Active Directory user validation check timeout. Access cannot be granted. Please contact IT Support.');
+    end;
+
+    // call api...
 
 end;
 
@@ -3492,6 +3540,7 @@ end;
 
 procedure TMainForm.txtReportsClick(Sender: TObject);
 begin
+    if not CanAccessAppMenu then Exit();
     ReportsForm.FSetLastSelection:=TabSheets.ActivePage;
     ResetTabsheetButtons;
     txtReports.Font.Style:=[fsBold];
@@ -3502,30 +3551,35 @@ end;
 
 procedure TMainForm.txtDebtorsClick(Sender: TObject);
 begin
+    if not CanAccessAppMenu then Exit();
     SetActiveTabsheet(TabSheet1);
 end;
 
 
 procedure TMainForm.txtTrackerClick(Sender: TObject);
 begin
+    if not CanAccessAppMenu then Exit();
     SetActiveTabsheet(TabSheet4);
 end;
 
 
 procedure TMainForm.txtAddressBookClick(Sender: TObject);
 begin
+    if not CanAccessAppMenu then Exit();
     SetActiveTabsheet(TabSheet3);
 end;
 
 
 procedure TMainForm.txtOpenItemsClick(Sender: TObject);
 begin
+    if not CanAccessAppMenu then Exit();
     SetActiveTabsheet(TabSheet2);
 end;
 
 
 procedure TMainForm.txtUnidentifiedClick(Sender: TObject);
 begin
+    if not CanAccessAppMenu then Exit();
     {SetActiveTabsheet(TabSheet6);}
     THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in beta version.');
 end;
@@ -3533,6 +3587,7 @@ end;
 
 procedure TMainForm.txtQueriesClick(Sender: TObject);
 begin
+    if not CanAccessAppMenu then Exit();
     {SetActiveTabsheet(TabSheet5);}
     THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in beta version.');
 end;
@@ -3540,6 +3595,7 @@ end;
 
 procedure TMainForm.txtTablesClick(Sender: TObject);
 begin
+    if not CanAccessAppMenu then Exit();
     SetActiveTabsheet(TabSheet7);
 end;
 
