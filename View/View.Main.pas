@@ -877,6 +877,7 @@ uses
     Async.OpenItems,
     Async.AddressBook,
     Async.Comments,
+    Async.Accounts,
     uCEFApplication;
 
 
@@ -1972,7 +1973,7 @@ begin
 
     valStatus.Caption:=TStatusBar.Ready;
     valCurrentDate.Caption:=DateToStr(Now);
-    valAadUser.Caption:=SessionService.SessionUser;
+    valAadUser.Caption:='Guest';
 
     ThreadFileLog.Log('Application version = ' + THelpers.GetBuildInfoAsString);
     ThreadFileLog.Log('User SID = ' + THelpers.GetCurrentUserSid);
@@ -2676,9 +2677,9 @@ begin
     if
         (THelpers.CDate(sgAgeView.Cells[sgAgeView.GetCol(TGeneralComment.fFollowUp), iCNT]) = THelpers.CDate(valCurrentDate.Caption))
     and
-        ((UpperCase(sgAgeView.Cells[sgAgeView.GetCol(TSnapshots.fInf7), iCNT]) = UpperCase(SessionService.SessionUser))
+        ((UpperCase(sgAgeView.Cells[sgAgeView.GetCol(TSnapshots.fInf7), iCNT]) = UpperCase(SessionService.SessionData.AliasName))
     or
-        (UpperCase(sgAgeView.Cells[sgAgeView.GetCol(TSnapshots.fPersonResponsible), iCNT]) = UpperCase(SessionService.SessionUser)))
+        (UpperCase(sgAgeView.Cells[sgAgeView.GetCol(TSnapshots.fPersonResponsible), iCNT]) = UpperCase(SessionService.SessionData.AliasName)))
     then
         Inc(Sum);
 
@@ -2707,7 +2708,16 @@ begin
         THelpers.MsgCall(TAppMessage.Error, 'Active Directory user validation check timeout. Access cannot be granted. Please contact IT Support.');
     end;
 
-    // call api...
+    var Accounts: IAccounts:=TAccounts.Create();
+    var CallResponse: TCallResponse;
+    CallResponse:=Accounts.CheckAwaited(SessionService.SessionId);
+
+    if CallResponse.IsSucceeded then
+    begin
+        TimerPermitCheck.Enabled:=False;
+        FIsAppMenuLocked:=False;
+        valAadUser.Caption:=SessionService.SessionData.DisplayName;
+    end;
 
 end;
 
@@ -2748,7 +2758,7 @@ end;
 procedure TMainForm.PopupBookPopup(Sender: TObject);
 begin
 
-    Action_ShowMyEntries.Caption:='Show ' + UpperCase(SessionService.SessionUser) + ' entries';
+    Action_ShowMyEntries.Caption:='Show ' + UpperCase(SessionService.SessionData.AliasName) + ' entries';
 
     // Check if user select a range (We allow to delete only one line at the time)
     if (sgAddressBook.Selection.Bottom - sgAddressBook.Selection.Top) > 0 then
@@ -2974,7 +2984,7 @@ procedure TMainForm.Action_ShowMyEntriesClick(Sender: TObject);
 begin
     UpdateStatusBar(TStatusBar.Processing);
     var AddressBook: IAddressBook:=TAddressBook.Create();
-    AddressBook.OpenAddressBookAsync(SessionService.SessionUser, OpenAddressBook_Callback);
+    AddressBook.OpenAddressBookAsync(SessionService.SessionData.AliasName, OpenAddressBook_Callback);
 end;
 
 
@@ -3396,7 +3406,7 @@ end;
 procedure TMainForm.Action_ShowMyClick(Sender: TObject);
 begin
     var Tracker: ITracker:=TTracker.Create();
-    Tracker.RefreshInvoiceTrackerAsync(UpperCase(SessionService.SessionUser), RefreshInvoiceTracker_Callback);
+    Tracker.RefreshInvoiceTrackerAsync(UpperCase(SessionService.SessionData.AliasName), RefreshInvoiceTracker_Callback);
 end;
 
 

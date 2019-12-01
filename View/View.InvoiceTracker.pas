@@ -447,7 +447,7 @@ begin
 
         for var iCNT: integer:=0 to List.Items.Count - 1 do
         begin
-            PayLoad.Cells[0,  iCNT]:=SessionService.SessionUser;     // user alias
+            PayLoad.Cells[0,  iCNT]:=SessionService.SessionData.AliasName;  // user alias
             PayLoad.Cells[1,  iCNT]:=List.Items[iCNT].SubItems[0];   // cuid
             PayLoad.Cells[2,  iCNT]:=List.Items[iCNT].SubItems[11];  // co code
             PayLoad.Cells[3,  iCNT]:=List.Items[iCNT].SubItems[12];  // branch/agent

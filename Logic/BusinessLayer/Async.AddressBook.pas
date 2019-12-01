@@ -365,7 +365,7 @@ begin
                     if Book.DataSet.RecordCount = 0 then
                     begin
                         Inc(Check);
-                        AddrBook[jCNT,  0]:=UpperCase(SessionService.SessionUser);
+                        AddrBook[jCNT,  0]:=UpperCase(SessionService.SessionData.AliasName);
                         AddrBook[jCNT,  1]:=SCUID;
                         AddrBook[jCNT,  2]:=SourceGrid.Cells[SourceGrid.GetCol(DbModel.TSnapshots.fCustomerNumber), iCNT];
                         AddrBook[jCNT,  3]:=SourceGrid.Cells[SourceGrid.GetCol(DbModel.TSnapshots.fCustomerName), iCNT];

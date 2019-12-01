@@ -301,9 +301,9 @@ begin
             end;
 
             Mail.MailFrom   :=Mail.XMailer;
-            Mail.MailCc     :=SessionService.SessionUser + '@' + Settings.GetStringValue(TConfigSections.ApplicationDetails, 'MAIL_DOMAIN', '');
+            Mail.MailCc     :=SessionService.SessionData.EmailAddress;
             Mail.MailBcc    :='';
-            Mail.MailSubject:='Unity - User feedback (' + UpperCase(SessionService.SessionUser) + ')';
+            Mail.MailSubject:='Unity - User feedback (' + UpperCase(SessionService.SessionData.AliasName) + ')';
 
             // ----------------------------------
             // Plain text to HTML using template.
@@ -791,7 +791,7 @@ begin
                 DataTables.Columns.Add(TUnityEventLogs.DateTimeStamp);
                 DataTables.Columns.Add(TUnityEventLogs.AppEventLog);
                 DataTables.Columns.Add(TUnityEventLogs.AppName);
-                DataTables.Values.Add(SessionService.SessionUser.ToUpper);
+                DataTables.Values.Add(SessionService.SessionData.AliasName.ToUpper);
                 DataTables.Values.Add(Today);
                 DataTables.Values.Add(THelpers.LoadFileToStr(ThreadFileLog.LogFileName));
                 DataTables.Values.Add('Unity Platform');

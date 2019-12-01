@@ -11,7 +11,8 @@ interface
 uses
     System.Classes,
     System.SysUtils,
-    Data.Win.ADODB {legacy};
+    Unity.Records,
+    Data.Win.ADODB {Legacy};
 
 
 type
@@ -19,18 +20,19 @@ type
 
     TSessionService = class(TObject)
     {$TYPEINFO ON}
-    private
-        var FSessionUser: string;
+    strict private
         var FSessionId:   string;
         var FSessionLog:  string;
+        var FSessionData: TSessionData;
     public
         constructor Create();
         destructor Destroy(); override;
-        procedure InitializeSession(CurrentUser: string; GenSessionId: string; SessionLog: string);
-        property SessionUser: string read FSessionUser;
-        property SessionId:   string read FSessionId;
-        property SessionLog:  string read FSessionLog;
-        var FDbConnect: TADOConnection; {Temporary holder for sql connection}
+        procedure InitializeSession(GenSessionId: string; SessionLog: string);
+        procedure UpdateUserData(UnityUserId: integer; Department: string; AliasName: string; DisplayName: string; EmailAddress: string);
+        property SessionId:   string       read FSessionId;
+        property SessionLog:  string       read FSessionLog;
+        property SessionData: TSessionData read FSessionData;
+        var FDbConnect: TADOConnection; {Legacy}
     end;
 
 
@@ -71,11 +73,20 @@ begin
 end;
 
 
-procedure TSessionService.InitializeSession(CurrentUser: string; GenSessionId: string; SessionLog: string);
+procedure TSessionService.InitializeSession(GenSessionId: string; SessionLog: string);
 begin
-    FSessionUser:=CurrentUser;
     FSessionId  :=GenSessionId;
     FSessionLog :=SessionLog;
+end;
+
+
+procedure TSessionService.UpdateUserData(UnityUserId: integer; Department: string; AliasName: string; DisplayName: string; EmailAddress: string);
+begin
+    FSessionData.UnityUserId :=UnityUserId;
+    FSessionData.Department  :=Department;
+    FSessionData.AliasName   :=AliasName;
+    FSessionData.DisplayName :=DisplayName;
+    FSessionData.EmailAddress:=EmailAddress;
 end;
 
 

@@ -337,7 +337,7 @@ begin
                 DailyText.Values.Add(DateTimeToStr(Now));
 
                 DailyText.Columns.Add(TDailyComment.UserAlias);
-                DailyText.Values.Add(UpperCase(SessionService.SessionUser));
+                DailyText.Values.Add(UpperCase(SessionService.SessionData.AliasName));
 
                 FUpdateDailyComment(DailyText, PayLoad, Condition, CallResponse);
 
@@ -364,7 +364,7 @@ begin
                 DailyText.Values.Add(DateTimeToStr(Now));
 
                 DailyText.Columns.Add(TDailyComment.UserAlias);
-                DailyText.Values.Add(UpperCase(SessionService.SessionUser));
+                DailyText.Values.Add(UpperCase(SessionService.SessionData.AliasName));
 
                 DailyText.Columns.Add(TDailyComment.DataCheckSum);
                 DailyText.Values.Add(DataCheckSum);
@@ -539,7 +539,7 @@ begin
                 GenText.Values.Add(DateTimeToStr(Now));
 
                 GenText.Columns.Add(TGeneralComment.UserAlias);
-                GenText.Values.Add(UpperCase(SessionService.SessionUser));
+                GenText.Values.Add(UpperCase(SessionService.SessionData.AliasName));
 
                 FUpdateGeneralComment(GenText, PayLoad, Condition, CallResponse);
 
@@ -560,7 +560,7 @@ begin
                 GenText.Values.Add(DateTimeToStr(Now));
 
                 GenText.Columns.Add(TGeneralComment.UserAlias);
-                GenText.Values.Add(UpperCase(SessionService.SessionUser));
+                GenText.Values.Add(UpperCase(SessionService.SessionData.AliasName));
 
                 FInsertGeneralComment(GenText, PayLoad, CallResponse);
 

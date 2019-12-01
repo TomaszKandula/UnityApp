@@ -99,6 +99,7 @@ uses
     Unity.SessionService,
     Async.Utilities,
     Async.Queries,
+    Async.Accounts,
     REST.Types,
     System.Net.HttpClient,
     Handler.Rest,
@@ -201,6 +202,8 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
+        var Settings: ISettings:=TSettings.Create();
+
         // ----------------------------
         // Upload application settings.
         // ----------------------------
@@ -215,15 +218,17 @@ begin
         end
         else
         begin
+
+            // --------------------------------
+            // API call to register session id.
+            // --------------------------------
+            var Accounts: IAccounts:=TAccounts.Create();
+            Accounts.InitiateAwaited(SessionService.SessionId, Settings.WinUserName);
+
             ThreadFileLog.Log('Unity has been boot up.');
             ChangeProgressBar(15, 'Initializing... done.', ProgressBar);
+
         end;
-
-
-        // ...call REST api/v1/accounts/initiate/
-
-
-
 
         // -----------------------------------------
         // Establish persistent database connection.  // delete when REST is introduced
@@ -250,7 +255,6 @@ begin
         Sleep(250);
         ChangeProgressBar(66, 'Synchronizing email templates...', ProgressBar);
 
-        var Settings: ISettings:=TSettings.Create();
         if not GetHtmlLayoutsSync(Settings.UrlLayoutsLst + TCommon.LayoutPak, Settings.DirLayouts + TCommon.LayoutPak, Settings.DirLayouts) then
         begin
             ThreadFileLog.Log('Critical error has occured [GetHtmlLayoutsSync]: ' + LastErrorMsg);

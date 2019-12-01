@@ -206,14 +206,14 @@ type
     /// </summary>
     TRestAuth = class abstract
     public
-        const apiUserName       = 'your_login';
-        const apiPassword       = 'your_password';
-        const restApiBaseUrl    = 'your_endpoint';
+        const apiUserName       = '';
+        const apiPassword       = '';
+        const restApiBaseUrl    = 'https://unityapi.azurewebsites.net/api/v1/';
         const restAccept        = 'application/json, text/plain; q=0.9, text/html;q=0.8,';
         const restAcceptCharset = 'UTF-8, *;q=0.8';
         const restContentType   = 'application/json';
         const restEncoding      = 'UTF-8';
-        const restUserAgent     = 'Cheers RESTClient/1.0';
+        const restUserAgent     = 'Unity RESTClient/1.0';
     end;
 
 
@@ -223,12 +223,16 @@ implementation
 constructor TRESTful.Create(UserName: string; Password: string);
 begin
 
-    httpAuth    :=THTTPBasicAuthenticator.Create(UserName, Password);
     restClient  :=TRESTClient.Create('');
     restResponse:=TRESTResponse.Create(nil);
     restRequest :=TRESTRequest.Create(nil);
 
-    restClient.Authenticator:=httpAuth;
+    if (not String.IsNullOrEmpty(UserName)) and (not String.IsNullOrEmpty(Password)) then
+    begin
+        httpAuth:=THTTPBasicAuthenticator.Create(UserName, Password);
+        restClient.Authenticator:=httpAuth;
+    end;
+
     restRequest.Client:=restClient;
     restRequest.Response:=restResponse;
 
@@ -291,21 +295,12 @@ begin
 
         if not(String.IsNullOrEmpty(CustomBody)) then
         begin
-
-            // -----------------------------------------------------------------------------------------------
-            // Replace single quotes into '\"' and add single quote to begin and end of custom body
-            // This is necessary because WebApi on .NetCore server defines content as string object instead of
-            // raw string or POCO.
-            // -----------------------------------------------------------------------------------------------
-            CustomBody:=CustomBody.Replace('"', '\"');
-            CustomBody:='"' + CustomBody + '"';
             restRequest.Body.ClearBody;
             restRequest.Body.Add(GetCustomBody, TRESTContentType.ctAPPLICATION_JSON);
-
         end
         else
         begin
-            Exit;
+            Exit();
         end;
 
     end;
@@ -376,7 +371,7 @@ end;
 procedure TRESTful.TrimContent(var TextStr: string);
 begin
     // ---------------------------------------------------------
-    // WARNING! JAVA starts couting string characters from zero,
+    // WARNING! Java starts couting string characters from zero,
     // while Delphi and Swift count it from one.
     // ---------------------------------------------------------
     if TextStr[1] = #34 then TextStr[1]:=#32;

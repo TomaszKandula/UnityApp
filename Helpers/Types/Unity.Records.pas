@@ -6,7 +6,7 @@ unit Unity.Records;
 // We use records instead of classes because we only use them to group
 // specific types of data ("variable of variables") to pass where it
 // needs to be passed as a parameter. It acts usually as a payload for
-// both "request to" and "response from".
+// both "request to" and "response from"; but do not overuse records.
 // ---------------------------------------------------------------------
 
 interface
@@ -35,6 +35,17 @@ type
         ErrorNumber:  integer;
         IsSucceeded:  boolean;
         ReturnedCode: integer;
+    end;
+
+    /// <summary>
+    /// Group of variables that carries user data per session (from Active Directory).
+    /// </summary>
+    TSessionData = record
+        UnityUserId:  integer;
+        Department:   string;
+        AliasName:    string;
+        DisplayName:  string;
+        EmailAddress: string;
     end;
 
     /// <summary>

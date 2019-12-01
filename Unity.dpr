@@ -79,19 +79,11 @@ uses
     Unity.Sorting               in 'Helpers\Statics\Unity.Sorting.pas',
     Unity.Filtering             in 'Helpers\Statics\Unity.Filtering.pas',
     DbModel                     in 'Model\DbModel.pas',
-    Customer.AddressBook        in 'Model\Json\RawTables\Customer.AddressBook.pas',
-    Customer.ControlStatus      in 'Model\Json\RawTables\Customer.ControlStatus.pas',
-    Customer.Snapshots          in 'Model\Json\RawTables\Customer.Snapshots.pas',
-    Customer.TrackerData        in 'Model\Json\RawTables\Customer.TrackerData.pas',
-    Customer.TrackerInvoices    in 'Model\Json\RawTables\Customer.TrackerInvoices.pas',
-    Erp.AccountType             in 'Model\Json\RawTables\Erp.AccountType.pas',
-    Erp.CustomerGroup           in 'Model\Json\RawTables\Erp.CustomerGroup.pas',
-    Erp.Group3                  in 'Model\Json\RawTables\Erp.Group3.pas',
-    Erp.PaidInfo                in 'Model\Json\RawTables\Erp.PaidInfo.pas',
-    Erp.PaymentTerms            in 'Model\Json\RawTables\Erp.PaymentTerms.pas',
-    Erp.Person                  in 'Model\Json\RawTables\Erp.Person.pas',
-    Erp.PersonResponsible       in 'Model\Json\RawTables\Erp.PersonResponsible.pas',
-    Erp.SalesResponsible        in 'Model\Json\RawTables\Erp.SalesResponsible.pas',
+	Api.ErrorHandler            in 'Model\Json\Api.ErrorHandler.pas',
+	Api.PostCheckSession        in 'Model\Json\Requests\Api.PostCheckSession.pas',
+	Api.PostNewSession          in 'Model\Json\Requests\Api.PostNewSession.pas',
+	Api.CheckSessionResponse    in 'Model\Json\Responses\Api.CheckSessionResponse.pas',
+	Api.NewSessionResponse      in 'Model\Json\Responses\Api.NewSessionResponse.pas',
     Handler.Sql                 in 'Logic\AccessLayer\Handler.Sql.pas',
     Handler.Database            in 'Logic\AccessLayer\Handler.Database.pas',
     Handler.Rest                in 'Logic\AccessLayer\Handler.Rest.pas',
@@ -184,7 +176,7 @@ begin
     end;
 
     Settings.MakeNewSessionId();
-    SessionService.InitializeSession(Settings.WinUserName, Settings.NewSessionId, Settings.MakeNewSessionFile(Settings.NewSessionId));
+    SessionService.InitializeSession(Settings.NewSessionId, Settings.MakeNewSessionFile(Settings.NewSessionId));
 
     // -------------------------------------------------------------------------------------------------------
     // Initialize Chromium object before Chromium component is created within MainForm.

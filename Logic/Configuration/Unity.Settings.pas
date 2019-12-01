@@ -545,14 +545,13 @@ begin
     // ------------------------------------
     // Create file: <UserAlias>.<GUID>.log.
     // ------------------------------------
-    var EventLog:=FDirSessions + FWinUserName + '.' + SessionId + '.log';
+    var EventLog:=FDirSessions + SessionId.Replace('-','') + '.log';
 
     var FL: TFileStream:=TFileStream.Create(EventLog, fmCreate);
     try
 
         var StrWrite: string:=
-            'User `' + FWinUserName + '` @ ' +
-            DateToStr(Now) + ' (' + TimeToStr(Now) + '). Session signature: ' +
+            'Logged at ' + DateToStr(Now) + ' (' + TimeToStr(Now) + '). Session signature: ' +
             SessionId +
             TChars.CRLF +
             TChars.CRLF;

@@ -819,7 +819,7 @@ begin
 
     var Settings: ISettings:=TSettings.Create();
     case IsUserInCopy of
-        True:  MailBcc:=SessionService.SessionUser + '@' + Settings.GetStringValue(TConfigSections.ApplicationDetails, 'MAIL_DOMAIN', '');
+        True:  MailBcc:=SessionService.SessionData.EmailAddress;
         False: MailBcc:='';
     end;
 
