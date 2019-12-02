@@ -504,6 +504,8 @@ type
         N5: TMenuItem;
         N22: TMenuItem;
         TimerPermitCheck: TTimer;
+        PopupLogin: TPopupMenu;
+        Action_LoginRedeem: TMenuItem;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
@@ -758,6 +760,7 @@ type
         procedure Action_HideThisColumnClick(Sender: TObject);
         procedure Action_ShowAllColumnsClick(Sender: TObject);
         procedure TimerPermitCheckTimer(Sender: TObject);
+        procedure Action_LoginRedeemClick(Sender: TObject);
     protected
         procedure CreateParams(var Params: TCreateParams); override;
         procedure WndProc(var msg: TMessage); override;   // Windows events
@@ -771,7 +774,7 @@ type
             targetDisposition: TCefWindowOpenDisposition; userGesture: Boolean; const popupFeatures: TCefPopupFeatures; var windowInfo: TCefWindowInfo;
             var client: ICefClient; var settings: TCefBrowserSettings; var noJavascriptAccess: Boolean; var Result: Boolean);
     strict private
-        const FPermitCheckTimeout = 60000;
+        const FPermitCheckTimeout = 120000; // 120 sec
         var FPermitCheckTimer: integer;
         var FIsAppMenuLocked: boolean;
         var FLastCoCodesSelected: string;
@@ -785,6 +788,8 @@ type
         const AppButtonTxtNormal = $00555555;
         const AppButtonTxtSelected = $006433C9;
         function CanAccessAppMenu(): boolean;
+        procedure RequestUnityWebWithToken();
+        procedure RedeemAccess();
         procedure PermitCheckInit();
         procedure SetPanelBorders;
         procedure SetGridColumnWidths;
@@ -1360,6 +1365,41 @@ begin
 end;
 
 
+procedure TMainForm.RequestUnityWebWithToken();
+begin
+
+    var Settings: ISettings:=TSettings.Create();
+    var BaseUrl:=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'START_PAGE', '');
+    var Url:=WideString(BaseUrl) + '/?sessiontoken=' + SessionService.SessionId;
+
+    try
+        ChromiumWindow.LoadURL(Url);
+        ThreadFileLog.Log('[RequestUnityWebWithToken]: Requested URL = "' + Url + '".');
+    except
+        on E: exception do
+            ThreadFileLog.Log('[RequestUnityWebWithToken]: Cannot load URL: ' + URL + '. The error has been thrown: ' + E.Message);
+    end;
+
+end;
+
+
+procedure TMainForm.RedeemAccess();
+begin
+
+    var Accounts: IAccounts:=TAccounts.Create();
+    var CallResponse: TCallResponse;
+    CallResponse:=Accounts.CheckAwaited(SessionService.SessionId);
+
+    if CallResponse.IsSucceeded then
+    begin
+        TimerPermitCheck.Enabled:=False;
+        FIsAppMenuLocked:=False;
+        valAadUser.Caption:=SessionService.SessionData.DisplayName;
+    end;
+
+end;
+
+
 procedure TMainForm.PermitCheckInit();
 begin
     TimerPermitCheck.Interval:=3000;
@@ -1442,22 +1482,10 @@ begin
     // Indicates editable columns. Use it to examin if user should be able to
     // edit selected cell in TStrigGrid component.
     // ----------------------------------------------------------------------
-    if
-        (
-            sgAddressBook.Col = sgAddressBook.GetCol(DbModel.TAddressBook.Emails)
-        )
-    or
-        (
-            sgAddressBook.Col = sgAddressBook.GetCol(DbModel.TAddressBook.PhoneNumbers)
-        )
-    or
-        (
-            sgAddressBook.Col = sgAddressBook.GetCol(DbModel.TAddressBook.Contact)
-        )
-    or
-        (
-            sgAddressBook.Col = sgAddressBook.GetCol(DbModel.TAddressBook.Estatements)
-        )
+    if (sgAddressBook.Col = sgAddressBook.GetCol(DbModel.TAddressBook.Emails))
+        or (sgAddressBook.Col = sgAddressBook.GetCol(DbModel.TAddressBook.PhoneNumbers))
+        or (sgAddressBook.Col = sgAddressBook.GetCol(DbModel.TAddressBook.Contact))
+        or (sgAddressBook.Col = sgAddressBook.GetCol(DbModel.TAddressBook.Estatements))
     then
         // Do not exclude above columns from editing
         Result:=False
@@ -2174,19 +2202,8 @@ end;
 
 procedure TMainForm.ChromiumWindowAfterCreated(Sender: TObject);
 begin
-
-    var Settings: ISettings:=TSettings.Create();
-    var BaseUrl:=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'START_PAGE', 'about:blank');
-    var Url:=WideString(BaseUrl) + '/?sessiontoken=' + SessionService.SessionId;
-
-    try
-        ChromiumWindow.LoadURL(Url);
-        PermitCheckInit();
-    except
-        on E: exception do
-            ThreadFileLog.Log('[Chromium] Cannot load URL: ' + URL + '. The error has been thrown: ' + E.Message);
-    end;
-
+    RequestUnityWebWithToken();
+    PermitCheckInit();
 end;
 
 
@@ -2708,16 +2725,7 @@ begin
         THelpers.MsgCall(TAppMessage.Error, 'Active Directory user validation check timeout. Access cannot be granted. Please contact IT Support.');
     end;
 
-    var Accounts: IAccounts:=TAccounts.Create();
-    var CallResponse: TCallResponse;
-    CallResponse:=Accounts.CheckAwaited(SessionService.SessionId);
-
-    if CallResponse.IsSucceeded then
-    begin
-        TimerPermitCheck.Enabled:=False;
-        FIsAppMenuLocked:=False;
-        valAadUser.Caption:=SessionService.SessionData.DisplayName;
-    end;
+    RedeemAccess();
 
 end;
 
@@ -3047,6 +3055,12 @@ end;
 procedure TMainForm.Action_CloseClick(Sender: TObject);
 begin
     {Do nonthing}
+end;
+
+
+procedure TMainForm.Action_LoginRedeemClick(Sender: TObject);
+begin
+    RedeemAccess();
 end;
 
 
@@ -4560,14 +4574,16 @@ end;
 procedure TMainForm.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
 
-    // -------------------------------
+    // Allow to reload web page
+    if (TabSheets.ActivePage = TabSheet9) and (Key=VK_F5) then
+    begin
+        RequestUnityWebWithToken();
+    end;
+
     // Turn off standard <ALT> + <F4>.
-    // -------------------------------
     if (Key=VK_F4) and (Shift=[ssALT]) then Key:=0;
 
-    // ----------------------------------------
     // Bind close application with <ALT> + <Y>.
-    // ----------------------------------------
     if (Key=89) and (Shift=[ssALT]) then
     begin
 

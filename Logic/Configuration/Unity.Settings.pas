@@ -534,7 +534,6 @@ end;
 
 procedure TSettings.MakeNewSessionId();
 begin
-    //FLastSessionId:=TGUID.NewGuid.ToString().Replace('{','').Replace('}','').Replace('-','').ToLower();
     FLastSessionId:=TGUID.NewGuid.ToString().Replace('{','').Replace('}','').ToLower();
 end;
 
@@ -551,7 +550,7 @@ begin
     try
 
         var StrWrite: string:=
-            'Logged at ' + DateToStr(Now) + ' (' + TimeToStr(Now) + '). Session signature: ' +
+            'Started at ' + DateToStr(Now) + ' (' + TimeToStr(Now) + '). Session signature: ' +
             SessionId +
             TChars.CRLF +
             TChars.CRLF;

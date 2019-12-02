@@ -9532,7 +9532,7 @@ object MainForm: TMainForm
     Margins.Top = 10
     Margins.Right = 10
     Margins.Bottom = 0
-    ActivePage = TabSheet1
+    ActivePage = TabSheet9
     Align = alClient
     DoubleBuffered = True
     Font.Charset = DEFAULT_CHARSET
@@ -9551,10 +9551,6 @@ object MainForm: TMainForm
       Highlighted = True
       ImageIndex = 8
       ParentDoubleBuffered = False
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object shapeFrame: TShape
         AlignWithMargins = True
         Left = 17
@@ -9596,6 +9592,10 @@ object MainForm: TMainForm
       Font.Style = []
       Highlighted = True
       ParentFont = False
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object DebtorsHeader: TPanel
         AlignWithMargins = True
         Left = 0
@@ -16039,6 +16039,7 @@ object MainForm: TMainForm
       Top = 7
       Width = 36
       Height = 36
+      Hint = 'Redeem access'
       Margins.Left = 10
       Margins.Top = 7
       Margins.Right = 10
@@ -16046,6 +16047,7 @@ object MainForm: TMainForm
       Align = alRight
       AutoSize = True
       Center = True
+      ParentShowHint = False
       Picture.Data = {
         07544269746D6170660F0000424D660F00000000000036000000280000002400
         0000240000000100180000000000300F0000120B0000120B0000000000000000
@@ -16171,6 +16173,8 @@ object MainForm: TMainForm
         68E3B268E3B268E3B268E3B268E3B268E3B268E3B268E3B268E3B268E3B268E3
         B268E3B268E3B268E3B268E3B268E3B268E3B268E3B268E3B268E3B268E3B268
         E3B268E3B268E3B268E3B268E3B268E3B268}
+      PopupMenu = PopupLogin
+      ShowHint = True
       ExplicitLeft = 1434
       ExplicitTop = 8
     end
@@ -16180,6 +16184,7 @@ object MainForm: TMainForm
       Top = 18
       Width = 73
       Height = 25
+      Hint = 'Redeem access'
       Margins.Left = 0
       Margins.Top = 18
       Margins.Right = 5
@@ -16193,6 +16198,9 @@ object MainForm: TMainForm
       Font.Name = 'Tahoma'
       Font.Style = [fsBold]
       ParentFont = False
+      ParentShowHint = False
+      PopupMenu = PopupLogin
+      ShowHint = True
       ExplicitHeight = 14
     end
   end
@@ -16372,13 +16380,13 @@ object MainForm: TMainForm
   object TimerCurrentTime: TTimer
     Enabled = False
     OnTimer = TimerCurrentTimeTimer
-    Left = 1048
+    Left = 1080
     Top = 512
   end
   object TimerUpTime: TTimer
     Enabled = False
     OnTimer = TimerUpTimeTimer
-    Left = 936
+    Left = 968
     Top = 512
   end
   object FileCSVExport: TSaveDialog
@@ -16397,7 +16405,7 @@ object MainForm: TMainForm
     Enabled = False
     Interval = 10000
     OnTimer = TimerCustOpenItemsTimer
-    Left = 936
+    Left = 968
     Top = 584
   end
   object PopupAgeView: TPopupMenu
@@ -26223,8 +26231,8 @@ object MainForm: TMainForm
     Visible = True
     OnClick = TrayIconClick
     OnDblClick = TrayIconDblClick
-    Left = 1312
-    Top = 576
+    Left = 864
+    Top = 584
   end
   object PopupBook: TPopupMenu
     MenuAnimation = [maLeftToRight]
@@ -26427,7 +26435,7 @@ object MainForm: TMainForm
     Enabled = False
     Interval = 1800000
     OnTimer = TimerFollowUpTimer
-    Left = 1048
+    Left = 1080
     Top = 584
   end
   object Chromium: TChromium
@@ -26437,7 +26445,15 @@ object MainForm: TMainForm
   object TimerPermitCheck: TTimer
     Enabled = False
     OnTimer = TimerPermitCheckTimer
-    Left = 833
+    Left = 865
     Top = 515
+  end
+  object PopupLogin: TPopupMenu
+    Left = 1313
+    Top = 579
+    object Action_LoginRedeem: TMenuItem
+      Caption = 'Redeem access'
+      OnClick = Action_LoginRedeemClick
+    end
   end
 end
