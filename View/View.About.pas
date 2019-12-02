@@ -33,7 +33,6 @@ type
 
 
     TAboutForm = class(TForm)
-        AppMain: TShape;
         txtCopyright: TLabel;
         txtLegalNote: TLabel;
         txtVersion: TLabel;
@@ -45,26 +44,38 @@ type
         txtLicence: TLabel;
         txtName1: TLabel;
         txtName2: TLabel;
-        txt_VER: TLabel;
-        txt_INQ: TLabel;
-        txt_LIC: TLabel;
-        txt_ITS: TLabel;
-        txt_SYS: TLabel;
-        txt_MEM: TLabel;
-        txt_USG: TLabel;
+        valVersion: TLabel;
+        valEmail: TLabel;
+        valLicence: TLabel;
+        valSupport: TLabel;
+        valSystem: TLabel;
+        valTotMem: TLabel;
+        valMemUse: TLabel;
         txtStatus: TLabel;
-        txt_STA: TLabel;
+        valStatus: TLabel;
         txtWebsite: TLabel;
-        txt_WEB: TLabel;
-        txtDevs: TLabel;
-        txt_PRO: TLabel;
-        shLine2: TShape;
-        shLine3: TShape;
+        valWebsite: TLabel;
+        txtDeveloper: TLabel;
+        valDeveloper: TLabel;
         txtSubtitle: TLabel;
         PanelHeader: TPanel;
         PanelContent: TPanel;
-        shLine1: TShape;
         PanelFooter: TPanel;
+        versionGroupBox: TGroupBox;
+        developersGroupBox: TGroupBox;
+        helpGroupBox: TGroupBox;
+        infoGroupBox: TGroupBox;
+        userGroupBox: TGroupBox;
+        txtDisplayName: TLabel;
+        txtDepartment: TLabel;
+        txtUserEmail: TLabel;
+        valDisplayName: TLabel;
+        valUserEmail: TLabel;
+        valDepartment: TLabel;
+        txtUserNumber: TLabel;
+        valUserNumber: TLabel;
+        txtAliasName: TLabel;
+        valAliasName: TLabel;
         procedure FormCreate(Sender: TObject);
         procedure txtINQClick(Sender: TObject);
         procedure txtITSClick(Sender: TObject);
@@ -90,6 +101,7 @@ implementation
 
 uses
     View.Main,
+    Unity.SessionService,
     Unity.Helpers,
     Unity.Enums,
     Unity.Common,
@@ -190,9 +202,9 @@ end;
 procedure TAboutForm.FormCreate(Sender: TObject);
 begin
 
-    PanelHeader.Borders(clWhite, $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
-    PanelContent.Borders(clWhite, $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
-    PanelFooter.Borders(clWhite, $00F1F0EE, $00F1F0EE, $00F1F0EE, $00F1F0EE);
+    PanelHeader.Borders(clWhite,  $00E3B268, clWhite, clWhite, clWhite);
+    PanelContent.Borders(clWhite, clWhite,   clWhite, clWhite, clWhite);
+    PanelFooter.Borders(clWhite,  clWhite,   clWhite, clWhite, clWhite);
 
     var Settings: ISettings:=TSettings.Create();
     if FileExists(Settings.PathLicence) then
@@ -200,13 +212,13 @@ begin
 
         if Settings.Decode(TAppFiles.Licence, True) then
         begin
-            txt_VER.Caption:=THelpers.GetBuildInfoAsString;
-            txt_LIC.Caption:=Settings.GetLicenceValue('LICENCE', 'Type');
-            txt_STA.Caption:=Settings.GetLicenceValue('LICENCE', 'Status');
-            txt_INQ.Caption:=Settings.GetLicenceValue('DETAILS', 'Email1');
-            txt_ITS.Caption:=Settings.GetLicenceValue('DETAILS', 'Email2');
-            txt_WEB.Caption:=Settings.GetLicenceValue('DETAILS', 'WebAddr');
-            txt_PRO.Caption:=Settings.GetLicenceValue('DETAILS', 'Author');
+            valVersion.Caption  :=THelpers.GetBuildInfoAsString;
+            valLicence.Caption  :=Settings.GetLicenceValue('LICENCE', 'Type');
+            valStatus.Caption   :=Settings.GetLicenceValue('LICENCE', 'Status');
+            valEmail.Caption    :=Settings.GetLicenceValue('DETAILS', 'Email1');
+            valSupport.Caption  :=Settings.GetLicenceValue('DETAILS', 'Email2');
+            valWebsite.Caption  :=Settings.GetLicenceValue('DETAILS', 'WebAddr');
+            valDeveloper.Caption:=Settings.GetLicenceValue('DETAILS', 'Author');
         end;
 
     end;
@@ -222,19 +234,25 @@ begin
         var mem_32: TMemoryStatus;
         mem_32.dwLength:=sizeof(mem_32);
         GlobalMemoryStatus(mem_32);
-        txt_SYS.Caption:=THelpers.GetOSVer(True) + ' (32-bit)';
-        txt_MEM.Caption:=formatfloat('## ###', (mem_32.dwTotalPhys DIV 1048576)) + ' MB';
-        txt_USG.Caption:=formatfloat('## ###', ((mem_32.dwTotalPhys-mem_32.dwAvailPhys) DIV 1048576)) + ' MB';
+        valSystem.Caption:=THelpers.GetOSVer(True) + ' (32-bit)';
+        valTotMem.Caption:=formatfloat('## ###', (mem_32.dwTotalPhys DIV 1048576)) + ' MB';
+        valMemUse.Caption:=formatfloat('## ###', ((mem_32.dwTotalPhys-mem_32.dwAvailPhys) DIV 1048576)) + ' MB';
     end
     else
     begin
         var mem_64: TMemoryStatusEx;
         mem_64.dwLength:=sizeof(mem_64);
         GlobalMemoryStatusEx(mem_64);
-        txt_SYS.Caption:=THelpers.GetOSVer(True) + ' (64-bit)';
-        txt_MEM.Caption:=formatfloat('## ###', ((mem_64.ullTotalPhys) DIV 1048576)) + ' MB';
-        txt_USG.Caption:=formatfloat('## ###', ((mem_64.ullTotalPhys-mem_64.ullAvailPhys) DIV 1048576)) + ' MB';
+        valSystem.Caption:=THelpers.GetOSVer(True) + ' (64-bit)';
+        valTotMem.Caption:=formatfloat('## ###', ((mem_64.ullTotalPhys) DIV 1048576)) + ' MB';
+        valMemUse.Caption:=formatfloat('## ###', ((mem_64.ullTotalPhys-mem_64.ullAvailPhys) DIV 1048576)) + ' MB';
     end;
+
+    valDisplayName.Caption:=SessionService.SessionData.DisplayName;
+    valDepartment.Caption :=SessionService.SessionData.Department;
+    valUserEmail.Caption  :=SessionService.SessionData.EmailAddress;
+    valUserNumber.Caption :=SessionService.SessionData.UnityUserId.ToString();
+    valAliasName.Caption  :=SessionService.SessionData.AliasName;
 
 end;
 
@@ -259,19 +277,19 @@ end;
 
 procedure TAboutForm.txtINQClick(Sender: TObject);
 begin
-    ShellExecute(Self.Handle, nil, PChar('mailto: ' + txt_INQ.Caption), nil, nil, SW_NORMAL);
+    ShellExecute(Self.Handle, nil, PChar('mailto: ' + valEmail.Caption), nil, nil, SW_NORMAL);
 end;
 
 
 procedure TAboutForm.txtITSClick(Sender: TObject);
 begin
-    ShellExecute(Self.Handle, nil, PChar('mailto: ' + txt_ITS.Caption), nil, nil, SW_NORMAL);
+    ShellExecute(Self.Handle, nil, PChar('mailto: ' + valSupport.Caption), nil, nil, SW_NORMAL);
 end;
 
 
 procedure TAboutForm.txtWEBClick(Sender: TObject);
 begin
-    ShellExecute(Handle, 'open', PChar(txt_WEB.Caption), nil, nil, SW_SHOWNORMAL);
+    ShellExecute(Handle, 'open', PChar(valWebsite.Caption), nil, nil, SW_SHOWNORMAL);
 end;
 
 

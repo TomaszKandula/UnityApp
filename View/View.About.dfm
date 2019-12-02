@@ -4,8 +4,8 @@ object AboutForm: TAboutForm
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'Unity'
-  ClientHeight = 459
-  ClientWidth = 588
+  ClientHeight = 470
+  ClientWidth = 802
   Color = 15855854
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -24,28 +24,17 @@ object AboutForm: TAboutForm
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
-  object AppMain: TShape
-    AlignWithMargins = True
-    Left = 5
-    Top = 5
-    Width = 578
-    Height = 449
-    Margins.Left = 5
-    Margins.Top = 5
-    Margins.Right = 5
-    Margins.Bottom = 5
-    Align = alClient
-    Pen.Color = clWhite
-    ExplicitLeft = 0
-    ExplicitTop = 35
-    ExplicitWidth = 599
-    ExplicitHeight = 417
-  end
   object PanelHeader: TPanel
-    Left = 16
-    Top = 16
-    Width = 555
+    AlignWithMargins = True
+    Left = 0
+    Top = 0
+    Width = 802
     Height = 78
+    Margins.Left = 0
+    Margins.Top = 0
+    Margins.Right = 0
+    Margins.Bottom = 10
+    Align = alTop
     BevelOuter = bvNone
     Color = clWhite
     ParentBackground = False
@@ -104,250 +93,348 @@ object AboutForm: TAboutForm
     end
   end
   object PanelContent: TPanel
-    Left = 16
-    Top = 100
-    Width = 555
-    Height = 282
+    AlignWithMargins = True
+    Left = 10
+    Top = 88
+    Width = 782
+    Height = 317
+    Margins.Left = 10
+    Margins.Top = 0
+    Margins.Right = 10
+    Margins.Bottom = 0
+    Align = alClient
     BevelOuter = bvNone
     Color = clWhite
     ParentBackground = False
     TabOrder = 1
-    object txtVersion: TLabel
-      Left = 10
+    object versionGroupBox: TGroupBox
+      Left = 14
       Top = 9
-      Width = 39
-      Height = 13
-      Caption = 'Version:'
+      Width = 331
+      Height = 104
+      Caption = 'Version'
+      TabOrder = 0
+      object valLicence: TLabel
+        Left = 80
+        Top = 52
+        Width = 36
+        Height = 13
+        Caption = '{Value}'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        ParentFont = False
+      end
+      object valStatus: TLabel
+        Left = 80
+        Top = 71
+        Width = 36
+        Height = 13
+        Caption = '{value}'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        ParentFont = False
+      end
+      object valVersion: TLabel
+        Left = 80
+        Top = 33
+        Width = 36
+        Height = 13
+        Caption = '{Value}'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        ParentFont = False
+      end
+      object txtLicence: TLabel
+        Left = 24
+        Top = 52
+        Width = 39
+        Height = 13
+        Caption = 'Licence:'
+      end
+      object txtStatus: TLabel
+        Left = 24
+        Top = 71
+        Width = 35
+        Height = 13
+        Caption = 'Status:'
+      end
+      object txtVersion: TLabel
+        Left = 24
+        Top = 33
+        Width = 39
+        Height = 13
+        Caption = 'Version:'
+      end
     end
-    object txtEmail: TLabel
-      Left = 10
-      Top = 136
-      Width = 45
-      Height = 13
-      Caption = 'Inquiries:'
+    object developersGroupBox: TGroupBox
+      Left = 14
+      Top = 119
+      Width = 331
+      Height = 74
+      Caption = 'Programming'
+      TabOrder = 1
+      object valDeveloper: TLabel
+        Left = 120
+        Top = 37
+        Width = 36
+        Height = 13
+        Caption = '{Value}'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        ParentFont = False
+      end
+      object txtDeveloper: TLabel
+        Left = 24
+        Top = 37
+        Width = 78
+        Height = 13
+        Caption = 'Lead developer:'
+      end
     end
-    object txtLicence: TLabel
-      Left = 10
-      Top = 28
-      Width = 39
-      Height = 13
-      Caption = 'Licence:'
+    object helpGroupBox: TGroupBox
+      Left = 14
+      Top = 199
+      Width = 331
+      Height = 105
+      Caption = 'Assistance'
+      TabOrder = 2
+      object valEmail: TLabel
+        Left = 120
+        Top = 57
+        Width = 36
+        Height = 13
+        Cursor = crHandPoint
+        Caption = '{Value}'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = 3938304
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = [fsUnderline]
+        ParentFont = False
+        OnClick = txtINQClick
+      end
+      object valSupport: TLabel
+        Left = 120
+        Top = 76
+        Width = 36
+        Height = 13
+        Cursor = crHandPoint
+        Caption = '{Value}'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = 3938304
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = [fsUnderline]
+        ParentFont = False
+        OnClick = txtITSClick
+      end
+      object valWebsite: TLabel
+        Left = 120
+        Top = 38
+        Width = 36
+        Height = 13
+        Cursor = crHandPoint
+        Caption = '{Value}'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = 3938304
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = [fsUnderline]
+        ParentFont = False
+        OnClick = txtWEBClick
+      end
+      object txtEmail: TLabel
+        Left = 26
+        Top = 57
+        Width = 45
+        Height = 13
+        Caption = 'Inquiries:'
+      end
+      object txtSupport: TLabel
+        Left = 26
+        Top = 76
+        Width = 81
+        Height = 13
+        Caption = 'Local IT support:'
+      end
+      object txtWebsite: TLabel
+        Left = 24
+        Top = 38
+        Width = 43
+        Height = 13
+        Caption = 'Website:'
+      end
     end
-    object txtSupport: TLabel
-      Left = 10
-      Top = 155
-      Width = 81
-      Height = 13
-      Caption = 'Local IT support:'
+    object infoGroupBox: TGroupBox
+      Left = 358
+      Top = 199
+      Width = 411
+      Height = 105
+      Caption = 'System'
+      TabOrder = 3
+      object valTotMem: TLabel
+        Left = 118
+        Top = 37
+        Width = 36
+        Height = 13
+        Caption = '{Value}'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        ParentFont = False
+      end
+      object valSystem: TLabel
+        Left = 118
+        Top = 75
+        Width = 36
+        Height = 13
+        Caption = '{Value}'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        ParentFont = False
+      end
+      object valMemUse: TLabel
+        Left = 118
+        Top = 56
+        Width = 36
+        Height = 13
+        Caption = '{Value}'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        ParentFont = False
+      end
+      object txtMemUse: TLabel
+        Left = 26
+        Top = 56
+        Width = 74
+        Height = 13
+        Caption = 'Memory usage:'
+      end
+      object txtSystem: TLabel
+        Left = 26
+        Top = 75
+        Width = 39
+        Height = 13
+        Caption = 'System:'
+      end
+      object txtTotMem: TLabel
+        Left = 26
+        Top = 37
+        Width = 69
+        Height = 13
+        Caption = 'Total memory:'
+      end
     end
-    object shLine2: TShape
-      Left = 10
-      Top = 121
-      Width = 538
-      Height = 5
-      Brush.Color = 15855854
-      Pen.Style = psClear
-    end
-    object shLine3: TShape
-      Left = 10
-      Top = 202
-      Width = 538
-      Height = 5
-      Brush.Color = 15855854
-      Pen.Style = psClear
-    end
-    object txtSystem: TLabel
-      Left = 10
-      Top = 217
-      Width = 39
-      Height = 13
-      Caption = 'System:'
-    end
-    object txtTotMem: TLabel
-      Left = 10
-      Top = 236
-      Width = 69
-      Height = 13
-      Caption = 'Total memory:'
-    end
-    object txtMemUse: TLabel
-      Left = 10
-      Top = 255
-      Width = 74
-      Height = 13
-      Caption = 'Memory usage:'
-    end
-    object txtStatus: TLabel
-      Left = 10
-      Top = 47
-      Width = 35
-      Height = 13
-      Caption = 'Status:'
-    end
-    object txtWebsite: TLabel
-      Left = 10
-      Top = 174
-      Width = 43
-      Height = 13
-      Caption = 'Website:'
-    end
-    object txtDevs: TLabel
-      Left = 10
-      Top = 93
-      Width = 66
-      Height = 13
-      Caption = 'Programming:'
-    end
-    object txt_INQ: TLabel
-      Left = 121
-      Top = 136
-      Width = 29
-      Height = 13
-      Cursor = crHandPoint
-      Caption = '{INQ}'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = 3938304
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = [fsUnderline]
-      ParentFont = False
-      OnClick = txtINQClick
-    end
-    object txt_ITS: TLabel
-      Left = 120
-      Top = 155
-      Width = 26
-      Height = 13
-      Cursor = crHandPoint
-      Caption = '{ITS}'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = 3938304
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = [fsUnderline]
-      ParentFont = False
-      OnClick = txtITSClick
-    end
-    object txt_LIC: TLabel
-      Left = 120
-      Top = 28
-      Width = 26
-      Height = 13
-      Caption = '{LIC}'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = []
-      ParentFont = False
-    end
-    object txt_MEM: TLabel
-      Left = 120
-      Top = 236
-      Width = 32
-      Height = 13
-      Caption = '{MEM}'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = []
-      ParentFont = False
-    end
-    object txt_PRO: TLabel
-      Left = 121
-      Top = 93
-      Width = 31
-      Height = 13
-      Caption = '{PRO}'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = []
-      ParentFont = False
-    end
-    object txt_STA: TLabel
-      Left = 120
-      Top = 47
-      Width = 29
-      Height = 13
-      Caption = '{STA}'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = []
-      ParentFont = False
-    end
-    object txt_SYS: TLabel
-      Left = 121
-      Top = 217
-      Width = 28
-      Height = 13
-      Caption = '{SYS}'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = []
-      ParentFont = False
-    end
-    object txt_USG: TLabel
-      Left = 120
-      Top = 255
-      Width = 30
-      Height = 13
-      Caption = '{USG}'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = []
-      ParentFont = False
-    end
-    object txt_VER: TLabel
-      Left = 120
+    object userGroupBox: TGroupBox
+      Left = 358
       Top = 9
-      Width = 29
-      Height = 13
-      Caption = '{VER}'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = []
-      ParentFont = False
-    end
-    object txt_WEB: TLabel
-      Left = 121
-      Top = 174
-      Width = 32
-      Height = 13
-      Cursor = crHandPoint
-      Caption = '{WEB}'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = 3938304
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = [fsUnderline]
-      ParentFont = False
-      OnClick = txtWEBClick
-    end
-    object shLine1: TShape
-      Left = 10
-      Top = 75
-      Width = 538
-      Height = 5
-      Brush.Color = 15855854
-      Pen.Style = psClear
+      Width = 411
+      Height = 184
+      Caption = 'User info'
+      TabOrder = 4
+      object txtDisplayName: TLabel
+        Left = 26
+        Top = 33
+        Width = 67
+        Height = 13
+        Caption = 'Display name:'
+      end
+      object txtDepartment: TLabel
+        Left = 26
+        Top = 52
+        Width = 61
+        Height = 13
+        Caption = 'Department:'
+      end
+      object txtUserEmail: TLabel
+        Left = 26
+        Top = 71
+        Width = 69
+        Height = 13
+        Caption = 'Email address:'
+      end
+      object valDisplayName: TLabel
+        Left = 110
+        Top = 33
+        Width = 36
+        Height = 13
+        Caption = '{Value}'
+      end
+      object valUserEmail: TLabel
+        Left = 110
+        Top = 71
+        Width = 36
+        Height = 13
+        Caption = '{Value}'
+      end
+      object valDepartment: TLabel
+        Left = 110
+        Top = 52
+        Width = 36
+        Height = 13
+        Caption = '{Value}'
+      end
+      object txtUserNumber: TLabel
+        Left = 26
+        Top = 90
+        Width = 65
+        Height = 13
+        Caption = 'User number:'
+      end
+      object valUserNumber: TLabel
+        Left = 110
+        Top = 90
+        Width = 36
+        Height = 13
+        Caption = '{Value}'
+      end
+      object txtAliasName: TLabel
+        Left = 26
+        Top = 109
+        Width = 55
+        Height = 13
+        Caption = 'Alias name:'
+      end
+      object valAliasName: TLabel
+        Left = 110
+        Top = 109
+        Width = 36
+        Height = 13
+        Caption = '{Value}'
+      end
     end
   end
   object PanelFooter: TPanel
-    Left = 16
-    Top = 388
-    Width = 555
+    AlignWithMargins = True
+    Left = 0
+    Top = 415
+    Width = 802
     Height = 55
+    Margins.Left = 0
+    Margins.Top = 10
+    Margins.Right = 0
+    Margins.Bottom = 0
+    Align = alBottom
     BevelOuter = bvNone
     Color = clWhite
     ParentBackground = False

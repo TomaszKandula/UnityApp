@@ -15,7 +15,6 @@ program Unity;
 // ---------------------------------------------------------------------- //
 // Target system:          Windows 10 application.                        //
 // Framework used:         VCL (created by Borland).                      //
-// Win32 API direct calls: Yes.                                           //
 // Require web services:   Yes, cloud based (Azure).                      //
 // Active Directory:       Yes, via web service.                          //
 // Chromium engine:        CEF4Delphi.                                    //
@@ -217,7 +216,7 @@ begin
             // -----------------------------------------------------------------
             // Setup Coockies and Cache folders to allow store web browser data.
             // -----------------------------------------------------------------
-            GlobalCEFApp.PersistSessionCookies:=False; // do not store coockies without expiry/validity date!
+            GlobalCEFApp.PersistSessionCookies:=False; // Do not store coockies without expiry/validity date!
             GlobalCEFApp.Cache  :=PathAppDir + 'cache';
             GlobalCEFApp.Cookies:=PathAppDir + 'coockies';
 
@@ -272,7 +271,6 @@ begin
     // re-assigned to it, so it can act as a main window of the Windows
     // application.
     // -------------------------------------------------------------------
-
     StartupForm.SetSessionLog(SessionService.SessionLog);
     StartupForm.Show();
 
