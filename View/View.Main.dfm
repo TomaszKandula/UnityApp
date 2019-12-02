@@ -9592,10 +9592,6 @@ object MainForm: TMainForm
       Font.Style = []
       Highlighted = True
       ParentFont = False
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object DebtorsHeader: TPanel
         AlignWithMargins = True
         Left = 0
@@ -26439,6 +26435,7 @@ object MainForm: TMainForm
     Top = 584
   end
   object Chromium: TChromium
+    OnLoadEnd = ChromiumLoadEnd
     Left = 871
     Top = 448
   end
@@ -26454,6 +26451,13 @@ object MainForm: TMainForm
     object Action_LoginRedeem: TMenuItem
       Caption = 'Redeem access'
       OnClick = Action_LoginRedeemClick
+    end
+    object N25: TMenuItem
+      Caption = '-'
+    end
+    object Action_ClearCoockies: TMenuItem
+      Caption = 'Clear Coockies'
+      OnClick = Action_ClearCoockiesClick
     end
   end
 end

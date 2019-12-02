@@ -20,7 +20,7 @@ type
 
         /// <summary>
         /// Allow to initiate new user session by loggin user data in the database via Unity API.
-        /// This user session entry is later used by other service that based upon Active Directory.
+        /// This user session entry is later used by other service that uses Active Directory.
         /// There is no separate notification.
         /// </summary>
         /// <remarks>
@@ -46,7 +46,7 @@ type
 
         /// <summary>
         /// Allow to initiate new user session by loggin user data in the database via Unity API.
-        /// This user session entry is later used by other service that based upon Active Directory.
+        /// This user session entry is later used by other service that uses Active Directory.
         /// There is no separate notification.
         /// </summary>
         /// <remarks>

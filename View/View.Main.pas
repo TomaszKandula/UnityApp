@@ -506,6 +506,8 @@ type
         TimerPermitCheck: TTimer;
         PopupLogin: TPopupMenu;
         Action_LoginRedeem: TMenuItem;
+        N25: TMenuItem;
+        Action_ClearCoockies: TMenuItem;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
@@ -761,6 +763,8 @@ type
         procedure Action_ShowAllColumnsClick(Sender: TObject);
         procedure TimerPermitCheckTimer(Sender: TObject);
         procedure Action_LoginRedeemClick(Sender: TObject);
+        procedure ChromiumLoadEnd(Sender: TObject; const browser: ICefBrowser; const frame: ICefFrame; httpStatusCode: Integer);
+        procedure Action_ClearCoockiesClick(Sender: TObject);
     protected
         procedure CreateParams(var Params: TCreateParams); override;
         procedure WndProc(var msg: TMessage); override;   // Windows events
@@ -775,6 +779,7 @@ type
             var client: ICefClient; var settings: TCefBrowserSettings; var noJavascriptAccess: Boolean; var Result: Boolean);
     strict private
         const FPermitCheckTimeout = 120000; // 120 sec
+        var FRedeemOnReload: boolean;
         var FPermitCheckTimer: integer;
         var FIsAppMenuLocked: boolean;
         var FLastCoCodesSelected: string;
@@ -789,7 +794,7 @@ type
         const AppButtonTxtSelected = $006433C9;
         function CanAccessAppMenu(): boolean;
         procedure RequestUnityWebWithToken();
-        procedure RedeemAccess();
+        procedure RedeemAccess(ShouldReloadPage: boolean = False);
         procedure PermitCheckInit();
         procedure SetPanelBorders;
         procedure SetGridColumnWidths;
@@ -1383,8 +1388,15 @@ begin
 end;
 
 
-procedure TMainForm.RedeemAccess();
+procedure TMainForm.RedeemAccess(ShouldReloadPage: boolean = False);
 begin
+
+    if ShouldReloadPage then
+    begin
+        FRedeemOnReload:=True;
+        RequestUnityWebWithToken();
+        Exit();
+    end;
 
     var Accounts: IAccounts:=TAccounts.Create();
     var CallResponse: TCallResponse;
@@ -1854,9 +1866,15 @@ begin
 end;
 
 
-procedure TMainForm.ChromiumModalLoopOn(PassMsg: TMessage);
+procedure TMainForm.ChromiumModalLoopOn(PassMsg: TMessage); // sep region
 begin
     if (PassMsg.wParam = 0) and (GlobalCEFApp <> nil) then GlobalCEFApp.OsmodalLoop:=True;
+end;
+
+
+procedure TMainForm.ChromiumLoadEnd(Sender: TObject; const browser: ICefBrowser; const frame: ICefFrame; httpStatusCode: Integer); // sep region
+begin
+    if FRedeemOnReload then RedeemAccess();
 end;
 
 
@@ -3052,6 +3070,13 @@ begin
 end;
 
 
+procedure TMainForm.Action_ClearCoockiesClick(Sender: TObject);
+begin
+    if THelpers.MsgCall(TAppMessage.Question2, 'Do you want to clear stored coockies?') = ID_YES then
+        Chromium.DeleteCookies();
+end;
+
+
 procedure TMainForm.Action_CloseClick(Sender: TObject);
 begin
     {Do nonthing}
@@ -3060,7 +3085,7 @@ end;
 
 procedure TMainForm.Action_LoginRedeemClick(Sender: TObject);
 begin
-    RedeemAccess();
+    RedeemAccess(True);
 end;
 
 
@@ -4573,12 +4598,6 @@ end;
 
 procedure TMainForm.FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-
-    // Allow to reload web page
-    if (TabSheets.ActivePage = TabSheet9) and (Key=VK_F5) then
-    begin
-        RequestUnityWebWithToken();
-    end;
 
     // Turn off standard <ALT> + <F4>.
     if (Key=VK_F4) and (Shift=[ssALT]) then Key:=0;

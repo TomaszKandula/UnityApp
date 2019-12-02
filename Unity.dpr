@@ -214,6 +214,13 @@ begin
             // --------------------------------------------------------------------------------------------
             GlobalCEFApp.LocalesDirPath:=PathAppDir + 'locales';
 
+            // -----------------------------------------------------------------
+            // Setup Coockies and Cache folders to allow store web browser data.
+            // -----------------------------------------------------------------
+            GlobalCEFApp.PersistSessionCookies:=False; // do not store coockies without expiry/validity date!
+            GlobalCEFApp.Cache  :=PathAppDir + 'cache';
+            GlobalCEFApp.Cookies:=PathAppDir + 'coockies';
+
             // -----------------------------------------------------------------------------------------------------------------
             // Set the current application directory before loading the CEF3 libraries to avoid "CEF3 binaries missing !" error.
             // -----------------------------------------------------------------------------------------------------------------
