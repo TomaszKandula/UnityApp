@@ -351,7 +351,7 @@ begin
 end;
 
 
-function TMailer.SendEmail(OAuth: TAuthTypes): boolean;
+function TMailer.SendEmail(OAuth: TAuthTypes): boolean; // remove!
 begin
 
     Result:=False;
@@ -415,7 +415,7 @@ begin
 end;
 
 
-function TMailer.SendNow(): boolean;
+function TMailer.SendNow(): boolean; // replace code with rest request to EWS via our api
 begin
 
     Result:=False;

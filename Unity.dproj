@@ -186,7 +186,6 @@
         <DCCReference Include="Helpers\Statics\Unity.Filtering.pas"/>
         <DCCReference Include="Model\DbModel.pas"/>
         <DCCReference Include="Model\Json\Api.ErrorHandler.pas"/>
-        <DCCReference Include="Model\Json\Requests\Api.PostCheckSession.pas"/>
         <DCCReference Include="Model\Json\Requests\Api.PostNewSession.pas"/>
         <DCCReference Include="Model\Json\Responses\Api.CheckSessionResponse.pas"/>
         <DCCReference Include="Model\Json\Responses\Api.NewSessionResponse.pas"/>

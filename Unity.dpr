@@ -79,7 +79,6 @@ uses
     Unity.Filtering             in 'Helpers\Statics\Unity.Filtering.pas',
     DbModel                     in 'Model\DbModel.pas',
 	Api.ErrorHandler            in 'Model\Json\Api.ErrorHandler.pas',
-	Api.PostCheckSession        in 'Model\Json\Requests\Api.PostCheckSession.pas',
 	Api.PostNewSession          in 'Model\Json\Requests\Api.PostNewSession.pas',
 	Api.CheckSessionResponse    in 'Model\Json\Responses\Api.CheckSessionResponse.pas',
 	Api.NewSessionResponse      in 'Model\Json\Responses\Api.NewSessionResponse.pas',

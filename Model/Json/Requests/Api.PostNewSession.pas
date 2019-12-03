@@ -19,10 +19,8 @@ type
 
 	TPostNewSession = class
 	strict private
-        var FSessionToken: string;
         var FAliasName:    string;
 	public
-        property SessionToken: string read FSessionToken write FSessionToken;
         property AliasName:    string read FAliasName    write FAliasName;
 	end;
 

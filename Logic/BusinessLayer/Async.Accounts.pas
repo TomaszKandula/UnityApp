@@ -75,11 +75,11 @@ uses
     System.Threading,
     REST.Types,
     REST.Json,
+    Unity.EventLogger,
     Unity.SessionService,
     Handler.Rest,
     Api.CheckSessionResponse,
     Api.NewSessionResponse,
-    Api.PostCheckSession,
     Api.PostNewSession;
 
 
@@ -92,13 +92,13 @@ begin
     begin
 
         var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
-        Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'accounts/initiate/';
+        Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'accounts/initiate/' + SessionId;
         Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
+        ThreadFileLog.Log('[InitiateAwaited]: Executing POST ' + Restful.ClientBaseURL);
 
         try
 
             var PostNewSession:=TPostNewSession.Create();
-            PostNewSession.SessionToken:=SessionId;
             PostNewSession.AliasName:=AliasName;
             Restful.CustomBody:=TJson.ObjectToJsonString(PostNewSession);
 
@@ -110,6 +110,8 @@ begin
                 CallResponse.IsSucceeded:=NewSessionResponse.IsSucceeded;
                 CallResponse.LastMessage:=NewSessionResponse.Error.ErrorDesc;
                 CallResponse.ErrorNumber:=NewSessionResponse.Error.ErrorNum;
+
+                ThreadFileLog.Log('[InitiateAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
 
             end
             else
@@ -125,6 +127,7 @@ begin
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
                 CallResponse.IsSucceeded:=False;
+                ThreadFileLog.Log(CallResponse.LastMessage);
 
             end;
 
@@ -133,6 +136,7 @@ begin
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='[InitiateAwaited]: Cannot execute the request. Description: ' + E.Message;
+                ThreadFileLog.Log(CallResponse.LastMessage);
             end;
 
         end;
@@ -155,14 +159,11 @@ begin
     begin
 
         var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
-        Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'accounts/check/';
-        Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
+        Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'accounts/check/' + SessionId;
+        Restful.RequestMethod:=TRESTRequestMethod.rmGET;
+        ThreadFileLog.Log('[CheckAwaited]: Executing GET ' + Restful.ClientBaseURL);
 
         try
-
-            var PostCheckSession:=TPostCheckSession.Create();
-            PostCheckSession.SessionToken:=SessionId;
-            Restful.CustomBody:=TJson.ObjectToJsonString(PostCheckSession);
 
             if (Restful.Execute) and (Restful.StatusCode = 200) then
             begin
@@ -186,6 +187,8 @@ begin
 
                 end;
 
+                ThreadFileLog.Log('[CheckAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+
             end
             else
             begin
@@ -200,6 +203,7 @@ begin
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
                 CallResponse.IsSucceeded:=False;
+                ThreadFileLog.Log(CallResponse.LastMessage);
 
             end;
 
@@ -208,6 +212,7 @@ begin
             begin
                 CallResponse.IsSucceeded:=False;
                 CallResponse.LastMessage:='[CheckAwaited]: Cannot execute the request. Description: ' + E.Message;
+                ThreadFileLog.Log(CallResponse.LastMessage);
             end;
 
         end;
