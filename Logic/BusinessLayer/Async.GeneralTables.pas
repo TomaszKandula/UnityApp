@@ -18,9 +18,6 @@ uses
     System.SyncObjs,
     System.Threading,
     System.Generics.Collections,
-    Vcl.Graphics,
-    Vcl.ComCtrls,
-    Vcl.Dialogs,
     Data.Win.ADODB,
     Data.DB,
     Unity.Grid,
@@ -94,7 +91,7 @@ uses
 
 procedure TGeneralTables.GetTablesAsync(
     TableName: string; DestGrid: TStringGrid; Callback: TGetTables; Columns: string = '';
-    Conditions: string = ''; WaitToComplete: boolean = False); // replace with REST, move to IGeneralTables
+    Conditions: string = ''; WaitToComplete: boolean = False); // replace with REST
 begin
 
     var NewTask: ITask:=TTask.Create(procedure

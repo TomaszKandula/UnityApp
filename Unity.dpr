@@ -82,6 +82,7 @@ uses
 	Api.UserSessionAdd          in 'Model\Json\Requests\Api.UserSessionAdd.pas',
 	Api.UserSessionAdded        in 'Model\Json\Responses\Api.UserSessionAdded.pas',
 	Api.UserSessionChecked      in 'Model\Json\Responses\Api.UserSessionChecked.pas',
+	Api.UserCompanyList         in 'Model\Json\Responses\Api.UserCompanyList.pas',
     Handler.Sql                 in 'Logic\AccessLayer\Handler.Sql.pas',
     Handler.Database            in 'Logic\AccessLayer\Handler.Database.pas',
     Unity.RestWrapper           in 'Logic\AccessLayer\Unity.RestWrapper.pas',

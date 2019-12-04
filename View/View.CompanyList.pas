@@ -1,5 +1,10 @@
 unit View.CompanyList;
 
+// --------------------------------------------------------------------------------------
+// This is application view (GUI) that can have direct calls to logic layer interface(s).
+// Calls must carry reference(s) to callback method that is defined same as callback
+// signature (delegate). All views use lazy initialization pattern.
+// --------------------------------------------------------------------------------------
 
 interface
 
@@ -19,8 +24,8 @@ uses
     Vcl.Buttons,
     Vcl.ExtCtrls,
     Vcl.Imaging.pngimage,
-    Unity.Grid,
-    Unity.Panel;
+    Unity.Panel,
+    Unity.Arrays;
 
 
 type
@@ -38,6 +43,7 @@ type
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
+        procedure FormDestroy(Sender: TObject);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
         procedure FilterListClick(Sender: TObject);
         procedure FilterListClickCheck(Sender: TObject);
@@ -47,6 +53,7 @@ type
     strict private
         var FCheckEvent: boolean;
         var FIsDataLoaded: boolean;
+        var FCompaniesHolder: TALists;
     end;
 
 
@@ -64,8 +71,10 @@ uses
     Async.Debtors,
     Async.Accounts,
     Unity.Helpers,
+    Unity.Grid,
     Unity.Chars,
-    Unity.Enums;
+    Unity.Enums,
+    Unity.Records;
 
 
 var VCompanyListForm: TCompanyListForm;
@@ -85,6 +94,7 @@ procedure TCompanyListForm.FormCreate(Sender: TObject);
 begin
     PanelListItems.Borders(clWhite, clSkyBlue, clSkyBlue, clSkyBlue, clSkyBlue);
     FilterList.Clear();
+    SetLength(FCompaniesHolder, 1, 2);
 end;
 
 
@@ -107,13 +117,14 @@ begin
 
             FilterList.Clear();
             var Accounts: IAccounts:=TAccounts.Create();
-            var GetCoCodeList:=TStringList.Create();
+            var CallResponse: TCallResponse;
 
-            try
-                Accounts.GetUserCompanyListAwaited(GetCoCodeList);
-                FilterList.Items.AddStrings(GetCoCodeList);
-            finally
-                GetCoCodeList.Free();
+            CallResponse:=Accounts.GetUserCompanyListAwaited(FCompaniesHolder);
+
+            if CallResponse.IsSucceeded then for var iCNT:=0 to Length(FCompaniesHolder) - 1 do
+            begin
+                FilterList.Items.Add(FCompaniesHolder[iCNT, 0]);
+                if FCompaniesHolder[iCNT, 1] = '-1' then FilterList.Checked[iCNT]:=True;
             end;
 
             Screen.Cursor:=crDefault;
@@ -134,7 +145,13 @@ end;
 
 procedure TCompanyListForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-    {FIsDataLoaded:=False;}
+    FIsDataLoaded:=False;
+end;
+
+
+procedure TCompanyListForm.FormDestroy(Sender: TObject);
+begin
+    FCompaniesHolder:=nil;
 end;
 
 

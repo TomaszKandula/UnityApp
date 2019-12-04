@@ -18,9 +18,6 @@ uses
     System.SyncObjs,
     System.Threading,
     System.Generics.Collections,
-    Vcl.Graphics,
-    Vcl.ComCtrls,
-    Vcl.Dialogs,
     Data.Win.ADODB,
     Data.DB,
     Unity.Grid,
@@ -60,7 +57,7 @@ type
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        procedure GetUserCompanyListAwaited(var SelectedCoCodes: TStringList);
+        function GetUserCompanyListAwaited(var UserCompanyList: TALists): TCallResponse;
 
         /// <summary>
         /// Allow to load async. list of sorting options available for aging report. There is no separate notification.
@@ -110,7 +107,7 @@ type
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        procedure GetUserCompanyListAwaited(var SelectedCoCodes: TStringList);
+        function GetUserCompanyListAwaited(var UserCompanyList: TALists): TCallResponse;
 
         /// <summary>
         /// Allow to load async. list of sorting options available for aging report. There is no separate notification.
@@ -154,6 +151,7 @@ uses
     Api.UserSessionAdd,
     Api.UserSessionAdded,
     Api.UserSessionChecked,
+    Api.UserCompanyList,
     DbModel{Legacy}; //remove
 
 
@@ -307,39 +305,77 @@ begin
 end;
 
 
-procedure TAccounts.GetUserCompanyListAwaited(var SelectedCoCodes: TStringList); // replace with rest
+function TAccounts.GetUserCompanyListAwaited(var UserCompanyList: TALists): TCallResponse;
 begin
 
-    var TempList:=TStringList.Create();
-    try
+    var CallResponse: TCallResponse;
+    var TempUserCompanyList: TALists;
 
-        var NewTask: ITask:=TTask.Create(procedure
-        begin
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
 
-            var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
-            var StringGrid:=TStringGrid.Create(nil);
-            try
+        var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
+        Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'accounts/' + SessionService.SessionData.UnityUserId.ToString() + '/companies/';
+        Restful.RequestMethod:=TRESTRequestMethod.rmGET;
+        ThreadFileLog.Log('[GetUserCompanyListAwaited]: Executing GET ' + Restful.ClientBaseURL);
 
-                DataTables.StrSQL:='select distinct CoCode, CoName from Customer.CompanyData';
-                DataTables.SqlToGrid(StringGrid, DataTables.ExecSQL, False, False);
+        try
 
-                for var iCNT:=1{Skip header} to StringGrid.RowCount - 1 do
-                    TempList.Add(StringGrid.Cells[1{CoCode}, iCNT] + ' - ' + StringGrid.Cells[2{CoName}, iCNT]);
+            if (Restful.Execute) and (Restful.StatusCode = 200) then
+            begin
 
-            finally
-                DataTables.Free();
-                StringGrid.Free();
+                var UserCompanyList: TUserCompanyList:=TJson.JsonToObject<TUserCompanyList>(Restful.Content);
+                var ItemCount:=Length(UserCompanyList.Companies);
+                SetLength(TempUserCompanyList, ItemCount, 2);
+
+                for var iCNT:=0 to ItemCount - 1 do
+                begin
+                    TempUserCompanyList[iCNT, 0]:=UserCompanyList.Companies[iCNT];
+                    TempUserCompanyList[iCNT, 1]:=UserCompanyList.IsSelected[iCNT].ToString();
+                end;
+
+                CallResponse.IsSucceeded:=True;
+                UserCompanyList.Free();
+                ThreadFileLog.Log('[GetUserCompanyListAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+
+            end
+            else
+            begin
+
+                if not String.IsNullOrEmpty(Restful.ExecuteError) then
+                    CallResponse.LastMessage:='[GetUserCompanyListAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                else
+                    if String.IsNullOrEmpty(Restful.Content) then
+                        CallResponse.LastMessage:='[GetUserCompanyListAwaited]: Invalid server response. Please contact IT Support.'
+                    else
+                        CallResponse.LastMessage:='[GetUserCompanyListAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+
+                CallResponse.ReturnedCode:=Restful.StatusCode;
+                CallResponse.IsSucceeded:=False;
+                ThreadFileLog.Log(CallResponse.LastMessage);
+
             end;
 
-        end);
+        except on
+            E: Exception do
+            begin
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[GetUserCompanyListAwaited]: Cannot execute the request. Description: ' + E.Message;
+                ThreadFileLog.Log(CallResponse.LastMessage);
+            end;
 
-        NewTask.Start();
-        TTask.WaitForAll(NewTask);
-        SelectedCoCodes.AddStrings(TempList);
+        end;
 
-    finally
-        TempList.Free();
-    end;
+    end);
+
+    NewTask.Start();
+    TTask.WaitForAll(NewTask);
+
+    UserCompanyList:=TempUserCompanyList;
+    SetLength(UserCompanyList, Length(TempUserCompanyList), 2);
+    TempUserCompanyList:=nil;
+
+    Result:=CallResponse;
 
 end;
 
