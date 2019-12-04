@@ -33,32 +33,32 @@ type
 
 
     /// <summary>
-    /// Callback signature (delegate) for getting results from sending user email with feedback message.
+    /// Callback signature for getting results from sending user email with feedback message.
     /// </summary>
     TSendUserFeedback = procedure(CallResponse: TCallResponse) of object;
 
     /// <summary>
-    /// Callback signature (delegate) for getting results from exporting data grid to Excel file.
+    /// Callback signature for getting results from exporting data grid to Excel file.
     /// </summary>
     TExcelExport = procedure(CallResponse: TCallResponse) of object;
 
     /// <summary>
-    /// Callback signature (delegate) for getting results from updating general tables.
+    /// Callback signature for getting results from updating general tables.
     /// </summary>
     TGeneralTables = procedure(CallResponse: TCallResponse) of object;
 
     /// <summary>
-    /// Callback signature (delegate) for getting results from query basic company data.
+    /// Callback signature for getting results from query basic company data.
     /// </summary>
     TGetCompanyDetails = procedure(LbuName: string; LbuAddress: string; LbuPhone: string; LbuEmail: string; BanksData: string; CallResponse: TCallResponse) of object;
 
     /// <summary>
-    /// Callback signature (delegate) for getting results from checking supplied local administrator password.
+    /// Callback signature for getting results from checking supplied local administrator password.
     /// </summary>
     TCheckGivenPassword = procedure(CallResponse: TCallResponse) of object;
 
     /// <summary>
-    /// Callback signature (delegate) for getting results from setting new local administrator password.
+    /// Callback signature for getting results from setting new local administrator password.
     /// </summary>
     TSetNewPassword = procedure(CallResponse: TCallResponse) of object;
 
@@ -252,9 +252,9 @@ implementation
 
 
 uses
-    Handler.Database{Legacy},
-    Handler.Sql{Legacy},
-    Unity.Sql{Legacy},
+    Handler.Database{Legacy}, //remove
+    Handler.Sql{Legacy}, //remove
+    Unity.Sql{Legacy}, //remove
     Unity.Helpers,
     Unity.Settings,
     Unity.StatusBar,
@@ -265,10 +265,10 @@ uses
     Unity.DateTimeFormats,
     Sync.Documents,
     Bcrypt,
-    DbModel{Legacy};
+    DbModel{Legacy}; //remove
 
 
-procedure TUtilities.SendFeedbackAsync(Text: string; Callback: TSendUserFeedback);
+procedure TUtilities.SendFeedbackAsync(Text: string; Callback: TSendUserFeedback); // replace with rest and move to Async.Mailer / IMailer
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
@@ -395,7 +395,9 @@ begin
 end;
 
 
-procedure TUtilities.GeneralTablesAsync(TableName: string; DestGrid: TStringGrid; Callback: TGeneralTables; Columns: string = ''; Conditions: string = ''; WaitToComplete: boolean = False);
+procedure TUtilities.GeneralTablesAsync(
+    TableName: string; DestGrid: TStringGrid; Callback: TGeneralTables; Columns: string = '';
+    Conditions: string = ''; WaitToComplete: boolean = False); // replace with REST, move to IGeneralTables
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
@@ -447,7 +449,7 @@ begin
 end;
 
 
-function TUtilities.GetCompanyDetailsAwaited(CoCode: string; Branch: string): TCompanyDetails;
+function TUtilities.GetCompanyDetailsAwaited(CoCode: string; Branch: string): TCompanyDetails; // replace with rest, move to ICompanies
 begin
 
     var CompanyDetails: TCompanyDetails;
@@ -508,7 +510,7 @@ begin
 end;
 
 
-procedure TUtilities.GetCompanyEmailsAwaited(SourceList: TStringList; var TargetList: TStringList);
+procedure TUtilities.GetCompanyEmailsAwaited(SourceList: TStringList; var TargetList: TStringList); // replace with rest, move to ICompanies
 begin
 
     if (not SourceList.Count > 0) or (not Assigned(TargetList)) then Exit();
@@ -698,7 +700,7 @@ begin
 end;
 
 
-procedure TUtilities.GetCompanyCodesAwaited(var SelectedCoCodes: TStringList);
+procedure TUtilities.GetCompanyCodesAwaited(var SelectedCoCodes: TStringList); // replace with rest, move to IAccounts, rename to "user company list"
 begin
 
     var TempList:=TStringList.Create();
@@ -735,7 +737,7 @@ begin
 end;
 
 
-procedure TUtilities.GetSortingOptionsAwaited(var SortingOptions: TStringList);
+procedure TUtilities.GetSortingOptionsAwaited(var SortingOptions: TStringList); // replace with rest, move to IAccounts, rename user sorting option
 begin
 
     var TempList:=TStringList.Create();
@@ -772,7 +774,7 @@ begin
 end;
 
 
-function TUtilities.SaveUserLogsAwaited(): TCallResponse;
+function TUtilities.SaveUserLogsAwaited(): TCallResponse; // replace with rest and move to IAccounts
 begin
 
     var NewCallResponse: TCallResponse;

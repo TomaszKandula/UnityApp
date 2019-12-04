@@ -1,4 +1,4 @@
-unit Api.PostNewSession;
+unit Api.UserSessionAdd;
 
 // -------------------------------------------------
 // JSON model for REST. Can be referenced by anyone.
@@ -17,11 +17,11 @@ uses
 type
 
 
-	TPostNewSession = class
+	TUserSessionAdd = class
 	strict private
-        var FAliasName:    string;
+        var FAliasName: string;
 	public
-        property AliasName:    string read FAliasName    write FAliasName;
+        property AliasName: string read FAliasName write FAliasName;
 	end;
 
 	

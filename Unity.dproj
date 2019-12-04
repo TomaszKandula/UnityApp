@@ -186,12 +186,12 @@
         <DCCReference Include="Helpers\Statics\Unity.Filtering.pas"/>
         <DCCReference Include="Model\DbModel.pas"/>
         <DCCReference Include="Model\Json\Api.ErrorHandler.pas"/>
-        <DCCReference Include="Model\Json\Requests\Api.PostNewSession.pas"/>
-        <DCCReference Include="Model\Json\Responses\Api.CheckSessionResponse.pas"/>
-        <DCCReference Include="Model\Json\Responses\Api.NewSessionResponse.pas"/>
+        <DCCReference Include="Model\Json\Requests\Api.UserSessionAdd.pas"/>
+        <DCCReference Include="Model\Json\Responses\Api.UserSessionAdded.pas"/>
+        <DCCReference Include="Model\Json\Responses\Api.UserSessionChecked.pas"/>
         <DCCReference Include="Logic\AccessLayer\Handler.Sql.pas"/>
         <DCCReference Include="Logic\AccessLayer\Handler.Database.pas"/>
-        <DCCReference Include="Logic\AccessLayer\Handler.Rest.pas"/>
+        <DCCReference Include="Logic\AccessLayer\Unity.RestWrapper.pas"/>
         <DCCReference Include="Logic\BusinessLayer\Sync.Mailer.pas"/>
         <DCCReference Include="Logic\BusinessLayer\Sync.Documents.pas"/>
         <DCCReference Include="Logic\BusinessLayer\Async.Accounts.pas"/>

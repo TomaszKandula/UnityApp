@@ -77,10 +77,10 @@ uses
     REST.Json,
     Unity.EventLogger,
     Unity.SessionService,
-    Handler.Rest,
-    Api.CheckSessionResponse,
-    Api.NewSessionResponse,
-    Api.PostNewSession;
+    Unity.RestWrapper,
+    Api.UserSessionAdd,
+    Api.UserSessionAdded,
+    Api.UserSessionChecked;
 
 
 function TAccounts.InitiateAwaited(SessionId: string; AliasName: string): TCallResponse;
@@ -96,49 +96,55 @@ begin
         Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
         ThreadFileLog.Log('[InitiateAwaited]: Executing POST ' + Restful.ClientBaseURL);
 
+        var UserSessionAdd:=TUserSessionAdd.Create();
         try
 
-            var PostNewSession:=TPostNewSession.Create();
-            PostNewSession.AliasName:=AliasName;
-            Restful.CustomBody:=TJson.ObjectToJsonString(PostNewSession);
+            UserSessionAdd.AliasName:=AliasName;
+            Restful.CustomBody:=TJson.ObjectToJsonString(UserSessionAdd);
+            try
 
-            if (Restful.Execute) and (Restful.StatusCode = 200) then
-            begin
+                if (Restful.Execute) and (Restful.StatusCode = 200) then
+                begin
 
-                var NewSessionResponse: TNewSessionResponse:=TJson.JsonToObject<TNewSessionResponse>(Restful.Content);
+                    var UserSessionAdded: TUserSessionAdded:=TJson.JsonToObject<TUserSessionAdded>(Restful.Content);
 
-                CallResponse.IsSucceeded:=NewSessionResponse.IsSucceeded;
-                CallResponse.LastMessage:=NewSessionResponse.Error.ErrorDesc;
-                CallResponse.ErrorNumber:=NewSessionResponse.Error.ErrorNum;
+                    CallResponse.IsSucceeded:=UserSessionAdded.IsSucceeded;
+                    CallResponse.LastMessage:=UserSessionAdded.Error.ErrorDesc;
+                    CallResponse.ErrorNumber:=UserSessionAdded.Error.ErrorNum;
 
-                ThreadFileLog.Log('[InitiateAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+                    UserSessionAdded.Free();
+                    ThreadFileLog.Log('[InitiateAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
 
-            end
-            else
-            begin
-
-                if not String.IsNullOrEmpty(Restful.ExecuteError) then
-                    CallResponse.LastMessage:='[InitiateAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                end
                 else
-                    if String.IsNullOrEmpty(Restful.Content) then
-                        CallResponse.LastMessage:='[InitiateAwaited]: Invalid server response. Please contact IT Support.'
+                begin
+
+                    if not String.IsNullOrEmpty(Restful.ExecuteError) then
+                        CallResponse.LastMessage:='[InitiateAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
                     else
-                        CallResponse.LastMessage:='[InitiateAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+                        if String.IsNullOrEmpty(Restful.Content) then
+                            CallResponse.LastMessage:='[InitiateAwaited]: Invalid server response. Please contact IT Support.'
+                        else
+                            CallResponse.LastMessage:='[InitiateAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
 
-                CallResponse.ReturnedCode:=Restful.StatusCode;
-                CallResponse.IsSucceeded:=False;
-                ThreadFileLog.Log(CallResponse.LastMessage);
+                    CallResponse.ReturnedCode:=Restful.StatusCode;
+                    CallResponse.IsSucceeded:=False;
+                    ThreadFileLog.Log(CallResponse.LastMessage);
+
+                end;
+
+            except on
+                E: Exception do
+                begin
+                    CallResponse.IsSucceeded:=False;
+                    CallResponse.LastMessage:='[InitiateAwaited]: Cannot execute the request. Description: ' + E.Message;
+                    ThreadFileLog.Log(CallResponse.LastMessage);
+                end;
 
             end;
 
-        except on
-            E: Exception do
-            begin
-                CallResponse.IsSucceeded:=False;
-                CallResponse.LastMessage:='[InitiateAwaited]: Cannot execute the request. Description: ' + E.Message;
-                ThreadFileLog.Log(CallResponse.LastMessage);
-            end;
-
+        finally
+            UserSessionAdd.Free();
         end;
 
     end);
@@ -168,25 +174,26 @@ begin
             if (Restful.Execute) and (Restful.StatusCode = 200) then
             begin
 
-                var CheckSessionResponse: TCheckSessionResponse:=TJson.JsonToObject<TCheckSessionResponse>(Restful.Content);
+                var UserSessionChecked: TUserSessionChecked:=TJson.JsonToObject<TUserSessionChecked>(Restful.Content);
 
-                CallResponse.IsSucceeded:=CheckSessionResponse.IsValidated;
-                CallResponse.LastMessage:=CheckSessionResponse.Error.ErrorDesc;
-                CallResponse.ErrorNumber:=CheckSessionResponse.Error.ErrorNum;
+                CallResponse.IsSucceeded:=UserSessionChecked.IsValidated;
+                CallResponse.LastMessage:=UserSessionChecked.Error.ErrorDesc;
+                CallResponse.ErrorNumber:=UserSessionChecked.Error.ErrorNum;
 
                 if CallResponse.IsSucceeded then
                 begin
 
                     SessionService.UpdateUserData(
-                        CheckSessionResponse.UserId,
-                        CheckSessionResponse.Department,
-                        CheckSessionResponse.AliasName,
-                        CheckSessionResponse.DisplayName,
-                        CheckSessionResponse.EmailAddress
+                        UserSessionChecked.UserId,
+                        UserSessionChecked.Department,
+                        UserSessionChecked.AliasName,
+                        UserSessionChecked.DisplayName,
+                        UserSessionChecked.EmailAddress
                     );
 
                 end;
 
+                UserSessionChecked.Free();
                 ThreadFileLog.Log('[CheckAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
 
             end

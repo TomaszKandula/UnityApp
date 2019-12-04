@@ -102,7 +102,7 @@ uses
     Async.Accounts,
     REST.Types,
     System.Net.HttpClient,
-    Handler.Rest,
+    Unity.RestWrapper,
     Handler.Database{Legacy},
     View.Main,
     DbModel{Legacy};
@@ -231,7 +231,7 @@ begin
         end;
 
         // -----------------------------------------
-        // Establish persistent database connection.  // delete when REST is introduced
+        // Establish persistent database connection.  // delete when REST is introduced in full
         // -----------------------------------------
         Sleep(250);
         ChangeProgressBar(20, 'Connecting to database...', ProgressBar);

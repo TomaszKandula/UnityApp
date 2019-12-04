@@ -1,4 +1,4 @@
-unit Api.CheckSessionResponse;
+unit Api.UserSessionChecked;
 
 // -------------------------------------------------
 // JSON model for REST. Can be referenced by anyone.
@@ -18,7 +18,8 @@ uses
 type
 
 
-	TCheckSessionResponse = class
+	TUserSessionChecked = class
+    {$TYPEINFO ON}
 	strict private
         var FIsValidated:  boolean;
         var FUserId:       integer;
@@ -28,6 +29,7 @@ type
         var FEmailAddress: string;
         var FError:        TErrorHandler;
 	public
+        destructor Destroy(); override;
         property IsValidated:  boolean       read FIsValidated  write FIsValidated;
         property UserId:       integer       read FUserId       write FUserId;
         property Department:   string        read FDepartment   write FDepartment;
@@ -37,8 +39,14 @@ type
         property Error:        TErrorHandler read FError        write FError;
 	end;
 
-	
+
 implementation
+
+
+destructor TUserSessionChecked.Destroy();
+begin
+    if Assigned(FError) then FError.Free();
+end;
 
 
 end.

@@ -1,4 +1,4 @@
-unit Handler.Rest;
+unit Unity.RestWrapper;
 
 // -------------------------------------------------------------
 // Application logic, access layer. Can be referenced by anyone.
@@ -110,7 +110,8 @@ type
     /// Simple wrapper for REST Client, REST Response, REST Request and HTTPBasicAuthentication.
     /// </summary>
     TRESTful = class(TInterfacedObject, IRESTFul)
-    private
+    {$TYPEINFO ON}
+    strict private
         var httpAuth: THTTPBasicAuthenticator;
         var restClient: TRESTClient;
         var restRequest: TRESTRequest;
@@ -261,7 +262,7 @@ begin
 end;
 
 
-destructor TRESTful.Destroy;
+destructor TRESTful.Destroy();
 begin
     queryList.Free();
     paramList.Free();
@@ -273,7 +274,7 @@ begin
 end;
 
 
-function TRESTful.Execute: boolean;
+function TRESTful.Execute(): boolean;
 begin
 
     Result:=False;
@@ -290,7 +291,9 @@ begin
 
     end;
 
-    if (restRequest.Method = TRESTRequestMethod.rmPOST) or (restRequest.Method = TRESTRequestMethod.rmPUT) then
+    if (restRequest.Method = TRESTRequestMethod.rmPOST)
+    or (restRequest.Method = TRESTRequestMethod.rmPUT)
+    or (restRequest.Method = TRESTRequestMethod.rmPATCH) then
     begin
 
         if not(String.IsNullOrEmpty(CustomBody)) then
@@ -307,7 +310,7 @@ begin
 
     try
 
-        restRequest.Execute;
+        restRequest.Execute();
 
         if restResponse.StatusCode > 0 then
         begin
@@ -345,7 +348,7 @@ end;
 procedure TRESTful.AddParameter(QueryName: string; ParamValue: string);
 begin
 
-    if (string.IsNullOrEmpty(QueryName) or string.IsNullOrEmpty(ParamValue)) then Exit;
+    if (string.IsNullOrEmpty(QueryName) or string.IsNullOrEmpty(ParamValue)) then Exit();
 
     if (Assigned(queryList) and Assigned(paramList)) then
     begin
@@ -356,13 +359,13 @@ begin
 end;
 
 
-procedure TRESTful.ClearParameters;
+procedure TRESTful.ClearParameters();
 begin
 
     if (Assigned(queryList) and Assigned(paramList)) then
     begin
-        queryList.Clear;
-        paramList.Clear;
+        queryList.Clear();
+        paramList.Clear();
     end;
 
 end;
