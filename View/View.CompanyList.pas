@@ -163,7 +163,7 @@ end;
 
 procedure TCompanyListForm.btnSelectClick(Sender: TObject);
 
-    function GetCoCodeOnly(InputStr: string): string;
+    function GetCoCodeOnly(InputStr: string): string; // remove when rest impemented for "LoadAgeReport"
     begin
         var SeparatorPos:=AnsiPos('-', InputStr);
         Result:=InputStr.Substring(0, SeparatorPos - 1);
@@ -174,7 +174,7 @@ begin
     var SelectedCoCodes: string;
     var ListEnd:=FilterList.Count - 1;
 
-    for var iCNT:=0 to ListEnd do
+    for var iCNT:=0 to ListEnd do // remove when rest impemented for "LoadAgeReport"
     begin
 
         if FilterList.Checked[iCNT] = True then

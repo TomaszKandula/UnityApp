@@ -125,6 +125,9 @@ type
         /// </remarks>
         function SaveUserLogsAwaited(): TCallResponse;
 
+
+        function
+
     end;
 
 
@@ -372,7 +375,7 @@ begin
     TTask.WaitForAll(NewTask);
 
     UserCompanyList:=TempUserCompanyList;
-    SetLength(UserCompanyList, Length(TempUserCompanyList), 2);
+    SetLength(UserCompanyList, Length(TempUserCompanyList));
     TempUserCompanyList:=nil;
 
     Result:=CallResponse;
@@ -380,7 +383,7 @@ begin
 end;
 
 
-procedure TAccounts.GetUserSortingOptionsAwaited(var SortingOptions: TStringList); // replace with rest
+procedure TAccounts.GetUserSortingOptionsAwaited(var SortingOptions: TStringList); // replace with rest / get
 begin
 
     var TempList:=TStringList.Create();
@@ -417,7 +420,7 @@ begin
 end;
 
 
-function TAccounts.SaveUserLogsAwaited(): TCallResponse; // replace with rest
+function TAccounts.SaveUserLogsAwaited(): TCallResponse; // replace with rest / post
 begin
 
     var NewCallResponse: TCallResponse;
