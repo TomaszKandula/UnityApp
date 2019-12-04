@@ -1,4 +1,4 @@
-unit Api.UserSessionAdd;
+unit Api.UserCompanySelection;
 
 // -------------------------------------------------
 // JSON model for REST. Can be referenced by anyone.
@@ -13,19 +13,19 @@ uses
     Generics.Collections,
     Rest.Json;
 
-	
+
 type
 
 
-	TUserSessionAdd = class
+	TUserCompanySelection = class
     {$TYPEINFO ON}
 	strict private
-        var FAliasName: string;
+        var FSelectedCoCodes: TList<integer>;
 	public
-        property AliasName: string read FAliasName write FAliasName;
+        property SelectedCoCodes: TList<integer> read FSelectedCoCodes write FSelectedCoCodes;
 	end;
 
-	
+
 implementation
 
 

@@ -75,6 +75,14 @@ type
         /// </remarks>
         function SaveUserLogsAwaited(): TCallResponse;
 
+        /// <summary>
+        /// Allow to write async. user choice of comapny codes to load. There is no separate notification.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        function SaveUserCompanyListAwaited(UserCompanyList: TList<integer>): TCallResponse;
+
     end;
 
 
@@ -125,8 +133,13 @@ type
         /// </remarks>
         function SaveUserLogsAwaited(): TCallResponse;
 
-
-        function
+        /// <summary>
+        /// Allow to write async. user choice of comapny codes to load. There is no separate notification.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        function SaveUserCompanyListAwaited(UserCompanyList: TList<integer>): TCallResponse;
 
     end;
 
@@ -155,6 +168,8 @@ uses
     Api.UserSessionAdded,
     Api.UserSessionChecked,
     Api.UserCompanyList,
+    Api.UserCompanySelection,
+    Api.UserCompaniesUpdated,
     DbModel{Legacy}; //remove
 
 
@@ -465,6 +480,76 @@ begin
     NewTask.Start();
     TTask.WaitForAll(NewTask);
     Result:=NewCallResponse;
+
+end;
+
+
+function TAccounts.SaveUserCompanyListAwaited(UserCompanyList: TList<integer>): TCallResponse;
+begin
+
+    var CallResponse: TCallResponse;
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
+        Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'accounts/' + SessionService.SessionData.UnityUserId.ToString() + '/companies/';
+        Restful.RequestMethod:=TRESTRequestMethod.rmPATCH;
+        ThreadFileLog.Log('[SaveUserCompanyListAwaited]: Executing PATCH ' + Restful.ClientBaseURL);
+
+        var UserCompanySelection:=TUserCompanySelection.Create();
+        try
+
+            UserCompanySelection.SelectedCoCodes:=UserCompanyList;
+            Restful.CustomBody:=TJson.ObjectToJsonString(UserCompanySelection);
+            try
+
+                if (Restful.Execute) and (Restful.StatusCode = 200) then
+                begin
+
+                    var UserCompaniesUpdated:=TJson.JsonToObject<TUserCompaniesUpdated>(Restful.Content);
+
+                    CallResponse.IsSucceeded:=UserCompaniesUpdated.IsSucceeded;
+                    UserCompaniesUpdated.Free();
+                    ThreadFileLog.Log('[SaveUserCompanyListAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+
+                end
+                else
+                begin
+
+                    if not String.IsNullOrEmpty(Restful.ExecuteError) then
+                        CallResponse.LastMessage:='[SaveUserCompanyListAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                    else
+                        if String.IsNullOrEmpty(Restful.Content) then
+                            CallResponse.LastMessage:='[SaveUserCompanyListAwaited]: Invalid server response. Please contact IT Support.'
+                        else
+                            CallResponse.LastMessage:='[SaveUserCompanyListAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+
+                    CallResponse.ReturnedCode:=Restful.StatusCode;
+                    CallResponse.IsSucceeded:=False;
+                    ThreadFileLog.Log(CallResponse.LastMessage);
+
+                end;
+
+            except on
+                E: Exception do
+                begin
+                    CallResponse.IsSucceeded:=False;
+                    CallResponse.LastMessage:='[SaveUserCompanyListAwaited]: Cannot execute the request. Description: ' + E.Message;
+                    ThreadFileLog.Log(CallResponse.LastMessage);
+                end;
+
+            end;
+
+        finally
+            UserCompanySelection.Free();
+        end;
+
+    end);
+
+    NewTask.Start();
+    TTask.WaitForAll(NewTask);
+    Result:=CallResponse;
 
 end;
 

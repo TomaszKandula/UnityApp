@@ -67,6 +67,7 @@ implementation
 
 
 uses
+    System.Generics.Collections,
     View.Main,
     Async.Debtors,
     Async.Accounts,
@@ -161,24 +162,29 @@ end;
 {$REGION 'MOUSE CLICK EVENTS'}
 
 
-procedure TCompanyListForm.btnSelectClick(Sender: TObject);
+procedure TCompanyListForm.btnSelectClick(Sender: TObject); // refactor this!
 
-    function GetCoCodeOnly(InputStr: string): string; // remove when rest impemented for "LoadAgeReport"
+    function GetCoCodeOnly(InputStr: string): string;
     begin
         var SeparatorPos:=AnsiPos('-', InputStr);
-        Result:=InputStr.Substring(0, SeparatorPos - 1);
+        Result:=InputStr.Substring(0, SeparatorPos - 1).Replace(' ','');
     end;
 
 begin
 
     var SelectedCoCodes: string;
+    var SelectionList:=TList<integer>.Create();
+
     var ListEnd:=FilterList.Count - 1;
 
     for var iCNT:=0 to ListEnd do // remove when rest impemented for "LoadAgeReport"
     begin
 
         if FilterList.Checked[iCNT] = True then
+        begin
+            SelectionList.Add(GetCoCodeOnly(FilterList.Items[iCNT]).ToInteger);
             SelectedCoCodes:=SelectedCoCodes + GetCoCodeOnly(FilterList.Items[iCNT]) + ','
+        end;
 
     end;
 
@@ -190,7 +196,15 @@ begin
         Exit();
     end;
 
-    // call rest api to save user selection...
+    var Accounts: IAccounts:=TAccounts.Create();
+    var CallResponse: TCallResponse;
+    CallResponse:=Accounts.SaveUserCompanyListAwaited(SelectionList);
+
+    if not CallResponse.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        Exit();
+    end;
 
     MainForm.LoadAgeReport(SelectedCoCodes);
     Close();
