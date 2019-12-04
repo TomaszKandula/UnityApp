@@ -204,6 +204,9 @@
         <DCCReference Include="Logic\BusinessLayer\Async.Comments.pas"/>
         <DCCReference Include="Logic\BusinessLayer\Async.Statements.pas"/>
         <DCCReference Include="Logic\BusinessLayer\Async.InvoiceTracker.pas"/>
+        <DCCReference Include="Logic\BusinessLayer\Async.Companies.pas"/>
+        <DCCReference Include="Logic\BusinessLayer\Async.Mailer.pas"/>
+        <DCCReference Include="Logic\BusinessLayer\Async.GeneralTables.pas"/>
         <DCCReference Include="Logic\Configuration\Unity.Settings.pas"/>
         <DCCReference Include="Logic\Configuration\Unity.SessionService.pas"/>
         <DCCReference Include="Logic\Logger\Unity.ThreadUtilities.pas"/>

@@ -113,7 +113,7 @@ uses
     Unity.EventLogger,
     Unity.SessionService,
     Async.AddressBook,
-    Async.Utilities,
+    Async.Companies,
     Async.InvoiceTracker;
 
 
@@ -219,7 +219,7 @@ end;
 procedure TTrackerForm.GetCompanyEmail(List: TComboBox);
 begin
 
-    var Utilities: IUtilities:=TUtilities.Create();
+    var Companies: ICompanies:=TCompanies.Create();
     var EmailList:=TStringList.Create();
     var CoCodeList:=TStringList.Create();
     try
@@ -231,7 +231,7 @@ begin
             True
         );
 
-        Utilities.GetCompanyEmailsAwaited(CoCodeList, EmailList);
+        Companies.GetCompanyEmailsAwaited(CoCodeList, EmailList);
         List.Items.AddStrings(EmailList);
 
     finally

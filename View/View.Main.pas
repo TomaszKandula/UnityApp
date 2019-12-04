@@ -1400,7 +1400,7 @@ begin
 
     var Accounts: IAccounts:=TAccounts.Create();
     var CallResponse: TCallResponse;
-    CallResponse:=Accounts.CheckAwaited(SessionService.SessionId);
+    CallResponse:=Accounts.CheckSessionAwaited(SessionService.SessionId);
 
     if CallResponse.IsSucceeded then
     begin
@@ -2078,12 +2078,12 @@ begin
                 valCutOffDate.Caption:='n/a';
 
                 cbAgeSorting.Clear();
-                var Utilities: IUtilities:=TUtilities.Create();
+                var Accounts: IAccounts:=TAccounts.Create();
                 var SortingOptions:=TStringList.Create();
 
                 try
 
-                    Utilities.GetSortingOptionsAwaited(SortingOptions);
+                    Accounts.GetUserSortingOptionsAwaited(SortingOptions);
                     cbAgeSorting.Items.AddStrings(SortingOptions);
 
                     if cbAgeSorting.Items.Count > 0 then
@@ -2253,9 +2253,9 @@ begin
             SwitchTimers(TAppTimers.TurnedOff);
             ChromiumWindow.CloseBrowser(True);
 
-            var Utilities: IUtilities:=TUtilities.Create();
+            var Accounts: IAccounts:=TAccounts.Create();
             var CallResponse: TCallResponse;
-            CallResponse:=Utilities.SaveUserLogsAwaited();
+            CallResponse:=Accounts.SaveUserLogsAwaited();
 
             if not CallResponse.IsSucceeded then
                 THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);

@@ -62,7 +62,7 @@ implementation
 uses
     View.Main,
     Async.Debtors,
-    Async.Utilities,
+    Async.Accounts,
     Unity.Helpers,
     Unity.Chars,
     Unity.Enums;
@@ -106,11 +106,11 @@ begin
         begin
 
             FilterList.Clear();
-            var Utilities: IUtilities:=TUtilities.Create();
+            var Accounts: IAccounts:=TAccounts.Create();
             var GetCoCodeList:=TStringList.Create();
 
             try
-                Utilities.GetCompanyCodesAwaited(GetCoCodeList);
+                Accounts.GetUserCompanyListAwaited(GetCoCodeList);
                 FilterList.Items.AddStrings(GetCoCodeList);
             finally
                 GetCoCodeList.Free();

@@ -9,7 +9,24 @@ interface
 
 
 uses
-    Unity.Records;
+    Winapi.Windows,
+    Winapi.Messages,
+    System.SysUtils,
+    System.Classes,
+    System.Diagnostics,
+    System.Win.ComObj,
+    System.SyncObjs,
+    System.Threading,
+    System.Generics.Collections,
+    Vcl.Graphics,
+    Vcl.ComCtrls,
+    Vcl.Dialogs,
+    Data.Win.ADODB,
+    Data.DB,
+    Unity.Grid,
+    Unity.Enums,
+    Unity.Records,
+    Unity.Arrays;
 
 
 type
@@ -26,7 +43,7 @@ type
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function InitiateAwaited(SessionId: string; AliasName: string): TCallResponse;
+        function InitiateSessionAwaited(SessionId: string; AliasName: string): TCallResponse;
 
         /// <summary>
         /// Allow to check if user has been validated by Active Directory. We relay on assigned session token.
@@ -35,7 +52,31 @@ type
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function CheckAwaited(SessionId: string): TCallResponse;
+        function CheckSessionAwaited(SessionId: string): TCallResponse;
+
+        /// <summary>
+        /// Allow to load async. list of company codes assigned to the current user. There is no separate notification.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        procedure GetUserCompanyListAwaited(var SelectedCoCodes: TStringList);
+
+        /// <summary>
+        /// Allow to load async. list of sorting options available for aging report. There is no separate notification.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        procedure GetUserSortingOptionsAwaited(var SortingOptions: TStringList);
+
+        /// <summary>
+        /// Allow to write async. user logs to database. There is no separate notification.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        function SaveUserLogsAwaited(): TCallResponse;
 
     end;
 
@@ -52,7 +93,7 @@ type
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function InitiateAwaited(SessionId: string; AliasName: string): TCallResponse;
+        function InitiateSessionAwaited(SessionId: string; AliasName: string): TCallResponse;
 
         /// <summary>
         /// Allow to check if user has been validated by Active Directory. We relay on assigned session token.
@@ -61,7 +102,31 @@ type
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function CheckAwaited(SessionId: string): TCallResponse;
+        function CheckSessionAwaited(SessionId: string): TCallResponse;
+
+        /// <summary>
+        /// Allow to load async. list of company codes assigned to the current user. There is no separate notification.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        procedure GetUserCompanyListAwaited(var SelectedCoCodes: TStringList);
+
+        /// <summary>
+        /// Allow to load async. list of sorting options available for aging report. There is no separate notification.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        procedure GetUserSortingOptionsAwaited(var SortingOptions: TStringList);
+
+        /// <summary>
+        /// Allow to write async. user logs to database. There is no separate notification.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        function SaveUserLogsAwaited(): TCallResponse;
 
     end;
 
@@ -70,20 +135,29 @@ implementation
 
 
 uses
-    System.SysUtils,
-    System.Classes,
-    System.Threading,
+    Handler.Database{Legacy}, //remove
+    Handler.Sql{Legacy}, //remove
+    Unity.Sql{Legacy}, //remove
+    Unity.Helpers,
+    Unity.Settings,
+    Unity.StatusBar,
+    Unity.Chars,
+    Unity.Common,
+    Sync.Documents,
+    Bcrypt,
     REST.Types,
     REST.Json,
+    Unity.DateTimeFormats,
     Unity.EventLogger,
     Unity.SessionService,
     Unity.RestWrapper,
     Api.UserSessionAdd,
     Api.UserSessionAdded,
-    Api.UserSessionChecked;
+    Api.UserSessionChecked,
+    DbModel{Legacy}; //remove
 
 
-function TAccounts.InitiateAwaited(SessionId: string; AliasName: string): TCallResponse;
+function TAccounts.InitiateSessionAwaited(SessionId: string; AliasName: string): TCallResponse;
 begin
 
     var CallResponse: TCallResponse;
@@ -156,7 +230,7 @@ begin
 end;
 
 
-function TAccounts.CheckAwaited(SessionId: string): TCallResponse;
+function TAccounts.CheckSessionAwaited(SessionId: string): TCallResponse;
 begin
 
     var CallResponse: TCallResponse;
@@ -229,6 +303,129 @@ begin
     NewTask.Start();
     TTask.WaitForAll(NewTask);
     Result:=CallResponse;
+
+end;
+
+
+procedure TAccounts.GetUserCompanyListAwaited(var SelectedCoCodes: TStringList); // replace with rest
+begin
+
+    var TempList:=TStringList.Create();
+    try
+
+        var NewTask: ITask:=TTask.Create(procedure
+        begin
+
+            var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
+            var StringGrid:=TStringGrid.Create(nil);
+            try
+
+                DataTables.StrSQL:='select distinct CoCode, CoName from Customer.CompanyData';
+                DataTables.SqlToGrid(StringGrid, DataTables.ExecSQL, False, False);
+
+                for var iCNT:=1{Skip header} to StringGrid.RowCount - 1 do
+                    TempList.Add(StringGrid.Cells[1{CoCode}, iCNT] + ' - ' + StringGrid.Cells[2{CoName}, iCNT]);
+
+            finally
+                DataTables.Free();
+                StringGrid.Free();
+            end;
+
+        end);
+
+        NewTask.Start();
+        TTask.WaitForAll(NewTask);
+        SelectedCoCodes.AddStrings(TempList);
+
+    finally
+        TempList.Free();
+    end;
+
+end;
+
+
+procedure TAccounts.GetUserSortingOptionsAwaited(var SortingOptions: TStringList); // replace with rest
+begin
+
+    var TempList:=TStringList.Create();
+    try
+
+        var NewTask: ITask:=TTask.Create(procedure
+        begin
+
+            var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
+            var StringGrid:=TStringGrid.Create(nil);
+            try
+
+                DataTables.StrSQL:='select ModeDesc from Customer.SortingOptions';
+                DataTables.SqlToGrid(StringGrid, DataTables.ExecSQL, False, False);
+
+                for var iCNT:=1{Skip header} to StringGrid.RowCount - 1 do
+                    TempList.Add(StringGrid.Cells[1{ModeDesc}, iCNT]);
+
+            finally
+                DataTables.Free();
+                StringGrid.Free();
+            end;
+
+        end);
+
+        NewTask.Start();
+        TTask.WaitForAll(NewTask);
+        SortingOptions.AddStrings(TempList);
+
+    finally
+        TempList.Free();
+    end;
+
+end;
+
+
+function TAccounts.SaveUserLogsAwaited(): TCallResponse; // replace with rest
+begin
+
+    var NewCallResponse: TCallResponse;
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
+        try
+
+            try
+
+                var Today: string:=FormatDateTime(TDateTimeFormats.DateTimeFormat, Now);
+
+                DataTables.Columns.Add(TUnityEventLogs.UserAlias);
+                DataTables.Columns.Add(TUnityEventLogs.DateTimeStamp);
+                DataTables.Columns.Add(TUnityEventLogs.AppEventLog);
+                DataTables.Columns.Add(TUnityEventLogs.AppName);
+                DataTables.Values.Add(SessionService.SessionData.AliasName.ToUpper);
+                DataTables.Values.Add(Today);
+                DataTables.Values.Add(THelpers.LoadFileToStr(ThreadFileLog.LogFileName));
+                DataTables.Values.Add('Unity Platform');
+                DataTables.InsertInto(TUnityEventLogs.UnityEventLogs, True);
+
+                NewCallResponse.IsSucceeded:=True;
+
+            except
+                on E: Exception do
+                begin
+                    NewCallResponse.IsSucceeded:=False;
+                    NewCallResponse.LastMessage:='[SaveUserLogsAwaited]: ' + E.Message;
+                end;
+
+            end;
+
+        finally
+            DataTables.Free();
+        end;
+
+    end);
+
+    NewTask.Start();
+    TTask.WaitForAll(NewTask);
+    Result:=NewCallResponse;
 
 end;
 

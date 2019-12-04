@@ -276,6 +276,7 @@ uses
     Unity.Common,
     Unity.EventLogger,
     Async.Utilities,
+    Async.Companies,
     Async.AddressBook,
     Async.Comments,
     Async.Statements;
@@ -464,9 +465,9 @@ end;
 procedure TActionsForm.UpdateCompanyDetails();
 begin
 
-    var Utilities: IUtilities:=TUtilities.Create();
+    var Companies: ICompanies:=TCompanies.Create();
     var CompanyDetails: TCompanyDetails;
-    CompanyDetails:=Utilities.GetCompanyDetailsAwaited(CoCode, Branch);
+    CompanyDetails:=Companies.GetCompanyDetailsAwaited(CoCode, Branch);
 
     FLbuName    :=CompanyDetails.LbuName;
     FLbuAddress :=CompanyDetails.LbuAddress;

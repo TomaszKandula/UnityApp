@@ -138,6 +138,7 @@ uses
     Unity.EventLogger,
     Unity.SessionService,
     Async.Utilities,
+    Async.Companies,
     Async.AddressBook,
     Async.Statements;
 
@@ -276,9 +277,9 @@ begin
             var CoCode: string:=Source.Items[iCNT].SubItems[8];
             var Branch: string:=Source.Items[iCNT].SubItems[9];
 
-            var Utilities: IUtilities:=TUtilities.Create();
+            var Companies: ICompanies:=TCompanies.Create();
             var CompanyDetails: TCompanyDetails;
-            CompanyDetails:=Utilities.GetCompanyDetailsAwaited(CoCode, Branch);
+            CompanyDetails:=Companies.GetCompanyDetailsAwaited(CoCode, Branch);
 
             Source.Items[iCNT].SubItems[5] :=InputText(CompanyDetails.LbuName);
             Source.Items[iCNT].SubItems[6] :=InputText(CompanyDetails.LbuAddress);

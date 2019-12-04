@@ -38,7 +38,7 @@ object FeedbackForm: TFeedbackForm
       AlignWithMargins = True
       Left = 10
       Top = 10
-      Width = 411
+      Width = 140
       Height = 13
       Margins.Left = 10
       Margins.Top = 10
@@ -48,7 +48,6 @@ object FeedbackForm: TFeedbackForm
       Caption = 'Your message to developers:'
       Color = clWhite
       ParentColor = False
-      ExplicitWidth = 140
     end
     object PanelReportMemo: TPanel
       AlignWithMargins = True

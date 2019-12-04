@@ -89,6 +89,8 @@ implementation
 
 
 uses
+    System.Net.HttpClient,
+    REST.Types,
     Unity.Enums,
     Unity.Common,
     Unity.Settings,
@@ -97,15 +99,13 @@ uses
     Unity.Chars,
     Unity.EventLogger,
     Unity.SessionService,
-    Async.Utilities,
+    Async.GeneralTables,
     Async.Queries,
     Async.Accounts,
-    REST.Types,
-    System.Net.HttpClient,
     Unity.RestWrapper,
     Handler.Database{Legacy},
-    View.Main,
-    DbModel{Legacy};
+    DbModel{Legacy},
+    View.Main;
 
 
 var
@@ -223,7 +223,7 @@ begin
             // API call to register session id.
             // --------------------------------
             var Accounts: IAccounts:=TAccounts.Create();
-            Accounts.InitiateAwaited(SessionService.SessionId, Settings.WinUserName);
+            Accounts.InitiateSessionAwaited(SessionService.SessionId, Settings.WinUserName);
 
             ThreadFileLog.Log('Unity has been boot up.');
             ChangeProgressBar(15, 'Initializing... done.', ProgressBar);
@@ -477,17 +477,17 @@ begin
 
     Result:=True;
 
-    var Utilities: IUtilities:=TUtilities.Create();
+    var GeneralTables: IGeneralTables:=TGeneralTables.Create();
     try
 
-        Utilities.GeneralTablesAsync(TCompanyData.CompanyData, MainAppForm.sgCoCodes, GeneralTables_Callback, '', '', True);
-        Utilities.GeneralTablesAsync(TControlStatus.ControlStatus, MainAppForm.sgControlStatus, GeneralTables_Callback, '', '', True);
-        Utilities.GeneralTablesAsync(TPaidinfo.Paidinfo, MainAppForm.sgPaidInfo, GeneralTables_Callback, '', '', True);
-        Utilities.GeneralTablesAsync(TPaymentTerms.PaymentTerms, MainAppForm.sgPmtTerms, GeneralTables_Callback, '', '', True);
-        Utilities.GeneralTablesAsync(TSalesResponsible.SalesResponsible, MainAppForm.sgSalesResp, GeneralTables_Callback, '', '', True);
-        Utilities.GeneralTablesAsync(TPersonResponsible.PersonResponsible, MainAppForm.sgPersonResp, GeneralTables_Callback, '', '', True);
-        Utilities.GeneralTablesAsync(TAccountType.AccountType, MainAppForm.sgAccountType, GeneralTables_Callback, '', '', True);
-        Utilities.GeneralTablesAsync(TCustomerGroup.CustomerGroup, MainAppForm.sgCustomerGr, GeneralTables_Callback, '', '', True);
+        GeneralTables.GetTablesAsync(TCompanyData.CompanyData, MainAppForm.sgCoCodes, GeneralTables_Callback, '', '', True);
+        GeneralTables.GetTablesAsync(TControlStatus.ControlStatus, MainAppForm.sgControlStatus, GeneralTables_Callback, '', '', True);
+        GeneralTables.GetTablesAsync(TPaidinfo.Paidinfo, MainAppForm.sgPaidInfo, GeneralTables_Callback, '', '', True);
+        GeneralTables.GetTablesAsync(TPaymentTerms.PaymentTerms, MainAppForm.sgPmtTerms, GeneralTables_Callback, '', '', True);
+        GeneralTables.GetTablesAsync(TSalesResponsible.SalesResponsible, MainAppForm.sgSalesResp, GeneralTables_Callback, '', '', True);
+        GeneralTables.GetTablesAsync(TPersonResponsible.PersonResponsible, MainAppForm.sgPersonResp, GeneralTables_Callback, '', '', True);
+        GeneralTables.GetTablesAsync(TAccountType.AccountType, MainAppForm.sgAccountType, GeneralTables_Callback, '', '', True);
+        GeneralTables.GetTablesAsync(TCustomerGroup.CustomerGroup, MainAppForm.sgCustomerGr, GeneralTables_Callback, '', '', True);
 
     except
         on E: Exception do

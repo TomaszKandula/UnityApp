@@ -66,7 +66,7 @@ implementation
 
 uses
     View.Main,
-    Async.Utilities,
+    Async.Mailer,
     Unity.Helpers;
 
 
@@ -178,8 +178,8 @@ begin
         Exit();
     end;
 
-    var Utilities: IUtilities:=TUtilities.Create();
-    Utilities.SendFeedbackAsync(ReportMemo.Text, SendFeedbackAsync_Callback);
+    var Mailer: IMailer:=TMailer.Create();
+    Mailer.SendFeedbackAsync(ReportMemo.Text, SendFeedbackAsync_Callback);
 
 end;
 
