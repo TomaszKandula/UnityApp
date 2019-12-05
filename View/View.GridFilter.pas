@@ -30,8 +30,7 @@ uses
     Unity.ListView,
     Unity.ChkListBox,
     Unity.Panel,
-    Unity.Filtering,
-    Unity.Arrays;
+    Unity.Filtering;
 
     {TODO -oTomek -cGeneral : Redesign this completly}
 
@@ -59,20 +58,20 @@ type
     strict private
         var CheckEvent:       boolean;
         // Holds values and theirs state
-        var INF7:             TALists;
-        var INF4:             TALists;
-        var Gr3:              TALists;
-        var SalesResp:        TALists;
-        var PersonResp:       TALists;
-        var CustomerGrp:      TALists;
-        var AccountType:      TALists;
-        var FollowUp:         TALists;
-        var CoCode:           TALists;
-        var Agent:            TALists;
-        var Division:         TALists;
-        var Free1:            TALists;
-        var Free2:            TALists;
-        var Free3:            TALists;
+        var INF7:             TArray<TArray<string>>;
+        var INF4:             TArray<TArray<string>>;
+        var Gr3:              TArray<TArray<string>>;
+        var SalesResp:        TArray<TArray<string>>;
+        var PersonResp:       TArray<TArray<string>>;
+        var CustomerGrp:      TArray<TArray<string>>;
+        var AccountType:      TArray<TArray<string>>;
+        var FollowUp:         TArray<TArray<string>>;
+        var CoCode:           TArray<TArray<string>>;
+        var Agent:            TArray<TArray<string>>;
+        var Division:         TArray<TArray<string>>;
+        var Free1:            TArray<TArray<string>>;
+        var Free2:            TArray<TArray<string>>;
+        var Free3:            TArray<TArray<string>>;
         // Usage counter (how many times column was filtered)
         var countINF7:        integer;
         var countINF4:        integer;
@@ -101,9 +100,9 @@ type
         procedure FilterSelectCheck();
         procedure FilterPrep();
         procedure FilterCount(IsIncrementing: boolean);
-        procedure FilterInit(var FFilter: TALists);
-        procedure FilterNow(var FFilter: TALists);
-        procedure FilterRemove(var FFilter: TALists);
+        procedure FilterInit(var FFilter: TArray<TArray<string>>);
+        procedure FilterNow(var FFilter: TArray<TArray<string>>);
+        procedure FilterRemove(var FFilter: TArray<TArray<string>>);
     end;
 
 
@@ -260,7 +259,7 @@ begin
 end;
 
 
-procedure TFilterForm.FilterInit(var FFilter: TALists);
+procedure TFilterForm.FilterInit(var FFilter: TArray<TArray<string>>);
 begin
 
     Screen.Cursor:=crHourGlass;
@@ -331,7 +330,7 @@ begin
 end;
 
 
-procedure TFilterForm.FilterNow(var FFilter: TALists);
+procedure TFilterForm.FilterNow(var FFilter: TArray<TArray<string>>);
 begin
 
     // Add to the list state (false or true)
@@ -405,7 +404,7 @@ begin
 end;
 
 
-procedure TFilterForm.FilterRemove(var FFilter: TALists);
+procedure TFilterForm.FilterRemove(var FFilter: TArray<TArray<string>>);
 begin
 
     for var iCNT: integer:=0 to high(FFilter) - 1 do

@@ -1,4 +1,4 @@
-unit Api.UserCompaniesUpdated;
+unit Api.UserSessionLogs;
 
 // -------------------------------------------------------------
 // JSON model for REST. Can be referenced by anyone. Cannot hold
@@ -13,32 +13,26 @@ interface
 
 uses
     Generics.Collections,
-    Rest.Json,
-    Api.ErrorHandler;
+    Rest.Json;
 
 
 type
 
 
-	TUserCompaniesUpdated = class
+	TUserSessionLogs = class
     {$TYPEINFO ON}
 	strict private
-        var FIsSucceeded: boolean;
-        var FError: TErrorHandler;
+        var FUserAlias: string;
+        var FAppEventLog: string;
+        var FAppName: string;
 	public
-        destructor Destroy(); override;
-        property IsSucceeded: boolean       read FIsSucceeded write FIsSucceeded;
-        property Error:       TErrorHandler read FError       write FError;
+        property UserAlias: string read FUserAlias write FUserAlias;
+        property AppEventLog: string read FAppEventLog write FAppEventLog;
+        property AppName: string read FAppName write FAppName;
 	end;
 
 
 implementation
-
-
-destructor TUserCompaniesUpdated.Destroy();
-begin
-    if Assigned(FError) then FError.Free();
-end;
 
 
 end.

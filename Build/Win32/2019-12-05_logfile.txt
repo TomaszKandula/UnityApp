@@ -1,0 +1,10 @@
+2019-12-05 10:41:51.3195 INFO POST api/v1/accounts/initiate/f2722367-54fe-444e-89a0-1c988ee144b5/ | new session token has been registered for `tomek as guest`.
+2019-12-05 10:42:05.1172 INFO PATCH api/v1/accounts/validate/f2722367-54fe-444e-89a0-1c988ee144b5/ | user has been validated as Tomasz Kandula (tokan).
+2019-12-05 10:54:44.1685 INFO POST api/v1/accounts/initiate/c9c7ba5a-4e50-4ff8-91e0-0eb973e04e45/ | new session token has been registered for `tomek as guest`.
+2019-12-05 10:54:56.2301 INFO PATCH api/v1/accounts/validate/c9c7ba5a-4e50-4ff8-91e0-0eb973e04e45/ | user has been validated as Tomasz Kandula (tokan).
+2019-12-05 12:28:28.9586 INFO POST api/v1/accounts/initiate/a1009d98-4b9a-435c-9b93-11b5946ad07f/ | new session token has been registered for `tomek as guest`.
+2019-12-05 12:28:43.4367 INFO PATCH api/v1/accounts/validate/a1009d98-4b9a-435c-9b93-11b5946ad07f/ | user has been validated as Tomasz Kandula (tokan).
+2019-12-05 13:11:07.7989 INFO POST api/v1/accounts/initiate/9f879943-851a-4967-8854-fe348e19ebeb/ | new session token has been registered for `tomek as guest`.
+2019-12-05 13:11:20.5140 INFO PATCH api/v1/accounts/validate/9f879943-851a-4967-8854-fe348e19ebeb/ | user has been validated as Tomasz Kandula (tokan).
+2019-12-05 14:09:04.1890 INFO POST api/v1/accounts/initiate/367c97aa-c819-400e-bc24-6dad509fecf0/ | new session token has been registered for `tomek as guest`.
+2019-12-05 14:09:15.5884 INFO PATCH api/v1/accounts/validate/367c97aa-c819-400e-bc24-6dad509fecf0/ | user has been validated as Tomasz Kandula (tokan).

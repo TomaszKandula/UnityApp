@@ -1,4 +1,4 @@
-unit Api.UserCompaniesUpdated;
+unit Api.UserSessionLogsSaved;
 
 // -------------------------------------------------------------
 // JSON model for REST. Can be referenced by anyone. Cannot hold
@@ -16,26 +16,25 @@ uses
     Rest.Json,
     Api.ErrorHandler;
 
-
 type
 
 
-	TUserCompaniesUpdated = class
+	TUserSessionLogsSaved = class
     {$TYPEINFO ON}
 	strict private
         var FIsSucceeded: boolean;
         var FError: TErrorHandler;
 	public
         destructor Destroy(); override;
-        property IsSucceeded: boolean       read FIsSucceeded write FIsSucceeded;
-        property Error:       TErrorHandler read FError       write FError;
+        property IsSucceeded: boolean read FIsSucceeded write FIsSucceeded;
+        property Error: TErrorHandler read FError write FError;
 	end;
 
 
 implementation
 
 
-destructor TUserCompaniesUpdated.Destroy();
+destructor TUserSessionLogsSaved.Destroy();
 begin
     if Assigned(FError) then FError.Free();
 end;

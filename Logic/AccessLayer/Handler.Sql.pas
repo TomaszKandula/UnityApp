@@ -18,7 +18,6 @@ uses
     Vcl.StdCtrls,
     Data.Win.ADODB,
     Unity.Grid,
-    Unity.Arrays,
     Unity.Enums;
 
 
@@ -28,7 +27,7 @@ type
     TMSSQL = class {Legacy}
     {$TYPEINFO ON}
     private
-        var FParamList:    TALists;
+        var FParamList:    TArray<TArray<string>>;
         var FStrSQL:       string;
         var FADOCon:       TADOConnection;
         var FCmdType:      TCommandType;
@@ -37,7 +36,7 @@ type
     public
         property StrSQL:       string         read FStrSQL        write FStrSQL;
         property CmdType:      TCommandType   read FCmdType       write FCmdType;
-        property ParamList:    TALists        read FParamList;
+        property ParamList:    TArray<TArray<string>>        read FParamList;
         property ADOCon:       TADOConnection read FADOCon;
         property RowsAffected: integer        read FRowsAffected;
         property LastErrorMsg: string         read FLastErrorMsg;
@@ -46,7 +45,7 @@ type
         procedure   ClearSQL;
         function    CleanStr(Text: string; Quoted: boolean): string;
         function    ExecSQL: _Recordset;
-        function    ToSqlInsert(Table: TALists; Grid: TStringGrid; tblName: string; tblColumns: string; HeaderPresent: boolean = True{Option}): string;
+        function    ToSqlInsert(Table: TArray<TArray<string>>; Grid: TStringGrid; tblName: string; tblColumns: string; HeaderPresent: boolean = True{Option}): string;
         function    SqlToGrid(var Grid: TStringGrid; RS: _Recordset; AutoNoCol: boolean; Headers: boolean): boolean;
         function    SqlToSimpleList(var List: TComboBox; RS: _Recordset): boolean;
     const
@@ -94,7 +93,7 @@ type
         function    ColumnsToList(Holder: TStringList; Quoted: TQuotes): string;
         procedure   CleanUp;
         function    OpenTable(TableName: string): boolean;
-        function    InsertInto(TableName: string; IsExplicit: boolean; ExtSourceGrid: TStringGrid = nil{Option}; ExtSourceArray: TALists = nil{Option}; HeaderPresent: boolean = True{Option}): boolean;
+        function    InsertInto(TableName: string; IsExplicit: boolean; ExtSourceGrid: TStringGrid = nil{Option}; ExtSourceArray: TArray<TArray<string>> = nil{Option}; HeaderPresent: boolean = True{Option}): boolean;
         function    UpdateRecord(TableName: string; IsExplicit: boolean; SingleCondition: string = ''{Option}): boolean;
         function    DeleteRecord(TableName: string; KeyName: string; KeyValue: string; IsExplicit: boolean): boolean;
     end;
@@ -211,7 +210,7 @@ end;
 //  column name must not use quotes and names must be delaminated by comma. It uses multi-dimensional array or StringGrid type.
 /// </remarks>
 
-function TMSSQL.ToSqlInsert(Table: TALists; Grid: TStringGrid; tblName: string; tblColumns: string; HeaderPresent: boolean = True{Option}): string;
+function TMSSQL.ToSqlInsert(Table: TArray<TArray<string>>; Grid: TStringGrid; tblName: string; tblColumns: string; HeaderPresent: boolean = True{Option}): string;
 begin
 
     Result:='';
@@ -509,7 +508,7 @@ end;
 ///        transaction, it allows rollback in case of default.
 /// </param>
 
-function TDataTables.InsertInto(TableName: string; IsExplicit: boolean; ExtSourceGrid: TStringGrid = nil; ExtSourceArray: TALists = nil; HeaderPresent: boolean = True): boolean;
+function TDataTables.InsertInto(TableName: string; IsExplicit: boolean; ExtSourceGrid: TStringGrid = nil; ExtSourceArray: TArray<TArray<string>> = nil; HeaderPresent: boolean = True): boolean;
 begin
 
     Result:=False;

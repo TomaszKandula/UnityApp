@@ -1,4 +1,4 @@
-unit Api.UserCompaniesUpdated;
+unit Api.CustSortingOptions;
 
 // -------------------------------------------------------------
 // JSON model for REST. Can be referenced by anyone. Cannot hold
@@ -20,22 +20,22 @@ uses
 type
 
 
-	TUserCompaniesUpdated = class
+	TCustSortingOptions = class
     {$TYPEINFO ON}
 	strict private
-        var FIsSucceeded: boolean;
+        var FSortingOptions: TArray<string>;
         var FError: TErrorHandler;
 	public
         destructor Destroy(); override;
-        property IsSucceeded: boolean       read FIsSucceeded write FIsSucceeded;
-        property Error:       TErrorHandler read FError       write FError;
+        property SortingOptions: TArray<string> read FSortingOptions write FSortingOptions;
+        property Error: TErrorHandler read FError write FError;
 	end;
 
 
 implementation
 
 
-destructor TUserCompaniesUpdated.Destroy();
+destructor TCustSortingOptions.Destroy();
 begin
     if Assigned(FError) then FError.Free();
 end;

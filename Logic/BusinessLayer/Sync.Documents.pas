@@ -19,7 +19,6 @@ uses
     Vcl.StdCtrls,
     Vcl.Grids,
     Unity.Enums,
-    Unity.Arrays,
     Unity.Grid,
     Unity.Records,
     Unity.References,
@@ -709,6 +708,7 @@ implementation
 uses
     Data.Win.ADODB,
     DbModel,
+    Unity.Helpers,
     Unity.Chars,
     Unity.Settings,
     Unity.SessionService;

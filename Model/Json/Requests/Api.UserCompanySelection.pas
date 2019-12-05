@@ -1,10 +1,12 @@
 unit Api.UserCompanySelection;
 
-// -------------------------------------------------
-// JSON model for REST. Can be referenced by anyone.
-// Cannot hold references to View or Logic.
-// Cannot have any implementation other than fields.
-// -------------------------------------------------
+// -------------------------------------------------------------
+// JSON model for REST. Can be referenced by anyone. Cannot hold
+// references to View or Logic. Cannot have any implementation
+// apart from fields/class initialization/release.
+// Note: Do not use TList in model, instead use TArray<T> and
+// use TList.ToArray to pass prepared data to the target model.
+// -------------------------------------------------------------
 
 interface
 
@@ -20,9 +22,9 @@ type
 	TUserCompanySelection = class
     {$TYPEINFO ON}
 	strict private
-        var FSelectedCoCodes: TList<integer>;
+        var FSelectedCoCodes: TArray<integer>;
 	public
-        property SelectedCoCodes: TList<integer> read FSelectedCoCodes write FSelectedCoCodes;
+        property SelectedCoCodes: TArray<integer> read FSelectedCoCodes write FSelectedCoCodes;
 	end;
 
 
@@ -30,3 +32,4 @@ implementation
 
 
 end.
+

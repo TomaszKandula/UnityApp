@@ -14,7 +14,6 @@ uses
     Vcl.Graphics,
     Vcl.Dialogs,
     Data.Win.ADODB,
-    Unity.Arrays,
     Unity.Enums;
 
 
@@ -39,8 +38,8 @@ type
         var FCsvImportResult: string;
         var FCsvExportResult: string;
     public
-        var SqlColumns: TALists;
-        var UpdatedRowsHolder: TAIntigers;
+        var SqlColumns: TArray<TArray<string>>;
+        var UpdatedRowsHolder: TArray<integer>;
         const sgRowHeight = 19;
         const sgRowHidden = -1;
         const xlWBATWorksheet = -4167;
@@ -597,7 +596,7 @@ end;
 procedure TStringGrid.SetColWidth(FirstDefault: integer; AddSpace: integer; Limit: integer);
 begin
 
-    var tblArray: TAIntigers;
+    var tblArray: TArray<integer>;
     var NewWidth: integer;
 
     if Row > 0 then
@@ -661,7 +660,7 @@ end;
 procedure TStringGrid.MSort(const SortCol: integer; const DataType: TDataType; const Ascending: boolean);
 begin
 
-    var List:  TAIntigers;
+    var List:  TArray<integer>;
     var TempGrid: TStringGrid:=TStringGrid.create(nil);
     try
         TempGrid.RowCount :=RowCount;

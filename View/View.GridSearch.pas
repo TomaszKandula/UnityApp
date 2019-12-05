@@ -24,8 +24,7 @@ uses
     Vcl.Buttons,
     Unity.Enums,
     Unity.Grid,
-    Unity.Panel,
-    Unity.Arrays;
+    Unity.Panel;
 
 
 type
@@ -55,7 +54,7 @@ type
     strict private
         var FFoundRow:     integer;
         var FIsNext:       boolean;
-        var FGroupping:    TAIntigers;
+        var FGroupping:    TArray<integer>;
         var FSearchEnd:    integer;
         var FIsNumber:     boolean;
         var FSearchString: string;

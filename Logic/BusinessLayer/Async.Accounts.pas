@@ -9,21 +9,12 @@ interface
 
 
 uses
-    Winapi.Windows,
-    Winapi.Messages,
+    System.NetEncoding,
     System.SysUtils,
     System.Classes,
-    System.Diagnostics,
-    System.Win.ComObj,
-    System.SyncObjs,
     System.Threading,
     System.Generics.Collections,
-    Data.Win.ADODB,
-    Data.DB,
-    Unity.Grid,
-    Unity.Enums,
-    Unity.Records,
-    Unity.Arrays;
+    Unity.Records;
 
 
 type
@@ -57,15 +48,7 @@ type
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function GetUserCompanyListAwaited(var UserCompanyList: TALists): TCallResponse;
-
-        /// <summary>
-        /// Allow to load async. list of sorting options available for aging report. There is no separate notification.
-        /// </summary>
-        /// <remarks>
-        /// This method always awaits for task to be completed and makes no callback to main thread.
-        /// </remarks>
-        procedure GetUserSortingOptionsAwaited(var SortingOptions: TStringList);
+        function GetUserCompanyListAwaited(var UserCompanyList: TArray<TArray<string>>): TCallResponse;
 
         /// <summary>
         /// Allow to write async. user logs to database. There is no separate notification.
@@ -115,15 +98,7 @@ type
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function GetUserCompanyListAwaited(var UserCompanyList: TALists): TCallResponse;
-
-        /// <summary>
-        /// Allow to load async. list of sorting options available for aging report. There is no separate notification.
-        /// </summary>
-        /// <remarks>
-        /// This method always awaits for task to be completed and makes no callback to main thread.
-        /// </remarks>
-        procedure GetUserSortingOptionsAwaited(var SortingOptions: TStringList);
+        function GetUserCompanyListAwaited(var UserCompanyList: TArray<TArray<string>>): TCallResponse;
 
         /// <summary>
         /// Allow to write async. user logs to database. There is no separate notification.
@@ -148,19 +123,9 @@ implementation
 
 
 uses
-    Handler.Database{Legacy}, //remove
-    Handler.Sql{Legacy}, //remove
-    Unity.Sql{Legacy}, //remove
     Unity.Helpers,
-    Unity.Settings,
-    Unity.StatusBar,
-    Unity.Chars,
-    Unity.Common,
-    Sync.Documents,
-    Bcrypt,
     REST.Types,
     REST.Json,
-    Unity.DateTimeFormats,
     Unity.EventLogger,
     Unity.SessionService,
     Unity.RestWrapper,
@@ -170,7 +135,8 @@ uses
     Api.UserCompanyList,
     Api.UserCompanySelection,
     Api.UserCompaniesUpdated,
-    DbModel{Legacy}; //remove
+    Api.UserSessionLogs,
+    Api.UserSessionLogsSaved;
 
 
 function TAccounts.InitiateSessionAwaited(SessionId: string; AliasName: string): TCallResponse;
@@ -323,11 +289,11 @@ begin
 end;
 
 
-function TAccounts.GetUserCompanyListAwaited(var UserCompanyList: TALists): TCallResponse;
+function TAccounts.GetUserCompanyListAwaited(var UserCompanyList: TArray<TArray<string>>): TCallResponse;
 begin
 
     var CallResponse: TCallResponse;
-    var TempUserCompanyList: TALists;
+    var TempUserCompanyList: TArray<TArray<string>>;
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
@@ -388,103 +354,91 @@ begin
 
     NewTask.Start();
     TTask.WaitForAll(NewTask);
-
-    UserCompanyList:=TempUserCompanyList;
-    SetLength(UserCompanyList, Length(TempUserCompanyList));
-    TempUserCompanyList:=nil;
-
+    TArrayUtils<TArray<string>>.Move(TempUserCompanyList, UserCompanyList);
     Result:=CallResponse;
 
 end;
 
 
-procedure TAccounts.GetUserSortingOptionsAwaited(var SortingOptions: TStringList); // replace with rest / get
+function TAccounts.SaveUserLogsAwaited(): TCallResponse;
 begin
 
-    var TempList:=TStringList.Create();
-    try
-
-        var NewTask: ITask:=TTask.Create(procedure
-        begin
-
-            var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
-            var StringGrid:=TStringGrid.Create(nil);
-            try
-
-                DataTables.StrSQL:='select ModeDesc from Customer.SortingOptions';
-                DataTables.SqlToGrid(StringGrid, DataTables.ExecSQL, False, False);
-
-                for var iCNT:=1{Skip header} to StringGrid.RowCount - 1 do
-                    TempList.Add(StringGrid.Cells[1{ModeDesc}, iCNT]);
-
-            finally
-                DataTables.Free();
-                StringGrid.Free();
-            end;
-
-        end);
-
-        NewTask.Start();
-        TTask.WaitForAll(NewTask);
-        SortingOptions.AddStrings(TempList);
-
-    finally
-        TempList.Free();
-    end;
-
-end;
-
-
-function TAccounts.SaveUserLogsAwaited(): TCallResponse; // replace with rest / post
-begin
-
-    var NewCallResponse: TCallResponse;
+    var CallResponse: TCallResponse;
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
+        var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
+        Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'accounts/' + SessionService.SessionData.UnityUserId.ToString() + '/logs/';
+        Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
+        ThreadFileLog.Log('[SaveUserLogsAwaited]: Executing POST ' + Restful.ClientBaseURL);
+
+        var Base64:=TNetEncoding.Create();
+        var UserSessionLogs:=TUserSessionLogs.Create();
         try
 
+            UserSessionLogs.UserAlias  :=SessionService.SessionData.AliasName.ToUpper();
+            UserSessionLogs.AppEventLog:=Base64.Encode(THelpers.LoadFileToStr(ThreadFileLog.LogFileName));
+            UserSessionLogs.AppName    :='Unity Platform';
+
+            Restful.CustomBody:=TJson.ObjectToJsonString(UserSessionLogs);
             try
 
-                var Today: string:=FormatDateTime(TDateTimeFormats.DateTimeFormat, Now);
-
-                DataTables.Columns.Add(TUnityEventLogs.UserAlias);
-                DataTables.Columns.Add(TUnityEventLogs.DateTimeStamp);
-                DataTables.Columns.Add(TUnityEventLogs.AppEventLog);
-                DataTables.Columns.Add(TUnityEventLogs.AppName);
-                DataTables.Values.Add(SessionService.SessionData.AliasName.ToUpper);
-                DataTables.Values.Add(Today);
-                DataTables.Values.Add(THelpers.LoadFileToStr(ThreadFileLog.LogFileName));
-                DataTables.Values.Add('Unity Platform');
-                DataTables.InsertInto(TUnityEventLogs.UnityEventLogs, True);
-
-                NewCallResponse.IsSucceeded:=True;
-
-            except
-                on E: Exception do
+                if (Restful.Execute) and (Restful.StatusCode = 200) then
                 begin
-                    NewCallResponse.IsSucceeded:=False;
-                    NewCallResponse.LastMessage:='[SaveUserLogsAwaited]: ' + E.Message;
+
+                    var UserSessionLogsSaved: TUserSessionLogsSaved:=TJson.JsonToObject<TUserSessionLogsSaved>(Restful.Content);
+
+                    CallResponse.IsSucceeded:=UserSessionLogsSaved.IsSucceeded;
+                    CallResponse.LastMessage:=UserSessionLogsSaved.Error.ErrorDesc;
+                    CallResponse.ErrorNumber:=UserSessionLogsSaved.Error.ErrorNum;
+
+                    UserSessionLogsSaved.Free();
+                    ThreadFileLog.Log('[SaveUserLogsAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+
+                end
+                else
+                begin
+
+                    if not String.IsNullOrEmpty(Restful.ExecuteError) then
+                        CallResponse.LastMessage:='[SaveUserLogsAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                    else
+                        if String.IsNullOrEmpty(Restful.Content) then
+                            CallResponse.LastMessage:='[SaveUserLogsAwaited]: Invalid server response. Please contact IT Support.'
+                        else
+                            CallResponse.LastMessage:='[SaveUserLogsAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+
+                    CallResponse.ReturnedCode:=Restful.StatusCode;
+                    CallResponse.IsSucceeded:=False;
+                    ThreadFileLog.Log(CallResponse.LastMessage);
+
+                end;
+
+            except on
+                E: Exception do
+                begin
+                    CallResponse.IsSucceeded:=False;
+                    CallResponse.LastMessage:='[SaveUserLogsAwaited]: Cannot execute the request. Description: ' + E.Message;
+                    ThreadFileLog.Log(CallResponse.LastMessage);
                 end;
 
             end;
 
         finally
-            DataTables.Free();
+            Base64.Free();
+            UserSessionLogs.Free();
         end;
 
     end);
 
     NewTask.Start();
     TTask.WaitForAll(NewTask);
-    Result:=NewCallResponse;
+    Result:=CallResponse;
 
 end;
 
 
-function TAccounts.SaveUserCompanyListAwaited(UserCompanyList: TList<integer>): TCallResponse;
+function TAccounts.SaveUserCompanyListAwaited(UserCompanyList: TList<integer>): TCallResponse; // meam leak of TList!
 begin
 
     var CallResponse: TCallResponse;
@@ -500,7 +454,7 @@ begin
         var UserCompanySelection:=TUserCompanySelection.Create();
         try
 
-            UserCompanySelection.SelectedCoCodes:=UserCompanyList;
+            UserCompanySelection.SelectedCoCodes:=UserCompanyList.ToArray;
             Restful.CustomBody:=TJson.ObjectToJsonString(UserCompanySelection);
             try
 

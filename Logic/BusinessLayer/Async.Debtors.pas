@@ -25,8 +25,7 @@ uses
     Data.DB,
     Unity.Grid,
     Unity.Enums,
-    Unity.Records,
-    Unity.Arrays;
+    Unity.Records;
 
 
 type
@@ -60,6 +59,14 @@ type
             const ColTargetPersonResp: integer; const ColSourceId: integer; const ColTargetCoCode: integer;
             const ColSourceDbName: integer; const ColSourceDesc: integer);
 
+        /// <summary>
+        /// Allow to load async. list of sorting options available for aging report. There is no separate notification.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        function GetCustSortingOptionsAwaited(var SortingOptions: TStringList): TCallResponse;
+
     end;
 
 
@@ -90,6 +97,14 @@ type
             const ColTargetPersonResp: integer; const ColSourceId: integer; const ColTargetCoCode: integer;
             const ColSourceDbName: integer; const ColSourceDesc: integer);
 
+        /// <summary>
+        /// Allow to load async. list of sorting options available for aging report. There is no separate notification.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        function GetCustSortingOptionsAwaited(var SortingOptions: TStringList): TCallResponse;
+
     end;
 
 
@@ -98,6 +113,8 @@ implementation
 
 uses
     System.StrUtils,
+    REST.Types,
+    REST.Json,
     Handler.Database{legacy},
     Handler.Sql{legacy},
     DbModel{legacy},
@@ -109,6 +126,8 @@ uses
     Unity.SessionService,
     Unity.Chars,
     Unity.Sql{Legacy},
+    Unity.RestWrapper,
+    Api.CustSortingOptions,
     Sync.Documents;
 
 
@@ -216,6 +235,77 @@ begin
 end;
 
 
+function TDebtors.GetCustSortingOptionsAwaited(var SortingOptions: TStringList): TCallResponse;
+begin
+
+    var CallResponse: TCallResponse;
+    var TempList:=TStringList.Create();
+    try
+
+        var NewTask: ITask:=TTask.Create(procedure
+        begin
+
+            var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
+            Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'custsnapshots/options/';
+            Restful.RequestMethod:=TRESTRequestMethod.rmGET;
+            ThreadFileLog.Log('[GetUserSortingOptionsAwaited]: Executing GET ' + Restful.ClientBaseURL);
+
+            try
+
+                if (Restful.Execute) and (Restful.StatusCode = 200) then
+                begin
+
+                    var CustSortingOptions: TCustSortingOptions:=TJson.JsonToObject<TCustSortingOptions>(Restful.Content);
+
+                    for var iCNT:=0 to Length(CustSortingOptions.SortingOptions) - 1 do
+                        TempList.Add(CustSortingOptions.SortingOptions[iCNT]);
+
+                    CallResponse.IsSucceeded:=True;
+                    CustSortingOptions.Free();
+                    ThreadFileLog.Log('[GetUserSortingOptionsAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+
+                end
+                else
+                begin
+
+                    if not String.IsNullOrEmpty(Restful.ExecuteError) then
+                        CallResponse.LastMessage:='[GetUserSortingOptionsAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                    else
+                        if String.IsNullOrEmpty(Restful.Content) then
+                            CallResponse.LastMessage:='[GetUserSortingOptionsAwaited]: Invalid server response. Please contact IT Support.'
+                        else
+                            CallResponse.LastMessage:='[GetUserSortingOptionsAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+
+                    CallResponse.ReturnedCode:=Restful.StatusCode;
+                    CallResponse.IsSucceeded:=False;
+                    ThreadFileLog.Log(CallResponse.LastMessage);
+
+                end;
+
+            except on
+                E: Exception do
+                begin
+                    CallResponse.IsSucceeded:=False;
+                    CallResponse.LastMessage:='[GetUserSortingOptionsAwaited]: Cannot execute the request. Description: ' + E.Message;
+                    ThreadFileLog.Log(CallResponse.LastMessage);
+                end;
+
+            end;
+
+        end);
+
+        NewTask.Start();
+        TTask.WaitForAll(NewTask);
+        SortingOptions.AddStrings(TempList);
+        Result:=CallResponse;
+
+    finally
+        TempList.Free();
+    end;
+
+end;
+
+
 function TDebtors.FComparableDbName(InputString: string; IsPrefixRequired: boolean): string;
 begin
 
@@ -262,8 +352,8 @@ begin
 
     if AgingPayLoad.Balance = 0 then Exit();
 
-    var TotalPerItem: Unity.Arrays.TADoubles;
-    var ListPosition: Unity.Arrays.TAIntigers;
+    var TotalPerItem: TArray<double>;
+    var ListPosition: TArray<integer>;
     var Count: double:=0;
     var Rows: integer:=0;
 

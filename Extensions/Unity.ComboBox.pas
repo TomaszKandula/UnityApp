@@ -10,8 +10,7 @@ interface
 
 uses
     Vcl.StdCtrls,
-    Unity.Enums,
-    Unity.Arrays;
+    Unity.Enums;
 
 
 type
@@ -28,7 +27,7 @@ type
         /// The assumption is that given array holds actual data and combo box show only
         /// one key column to the user.
         /// </summary>
-        procedure ListToComboBox(List: TALists; ColumnNo: cardinal; Position: TListSelection);
+        procedure ListToComboBox(List: TArray<TArray<string>>; ColumnNo: cardinal; Position: TListSelection);
 
     end;
 
@@ -36,7 +35,7 @@ type
 implementation
 
 
-procedure TComboBox.ListToComboBox(List: TALists; ColumnNo: cardinal; Position: TListSelection);
+procedure TComboBox.ListToComboBox(List: TArray<TArray<string>>; ColumnNo: cardinal; Position: TListSelection);
 begin
 
     Self.Clear;

@@ -26,8 +26,7 @@ uses
     Handler.Sql,
     Unity.Grid,
     Unity.Enums,
-    Unity.Records,
-    Unity.Arrays;
+    Unity.Records;
 
 
 type
@@ -338,7 +337,7 @@ begin
 
         var jCNT: integer:=0;
         var Check: cardinal:=0;
-        var AddrBook: TALists;
+        var AddrBook: TArray<TArray<string>>;
         var CallResponse: TCallResponse;
         SetLength(AddrBook, 1, 11);
 

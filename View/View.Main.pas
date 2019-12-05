@@ -62,7 +62,6 @@ uses
     Unity.Shape,
     Unity.Panel,
     Unity.ComboBox,
-    Unity.Arrays,
     Unity.Enums,
     Unity.Records,
     Unity.References,
@@ -778,7 +777,7 @@ type
             targetDisposition: TCefWindowOpenDisposition; userGesture: Boolean; const popupFeatures: TCefPopupFeatures; var windowInfo: TCefWindowInfo;
             var client: ICefClient; var settings: TCefBrowserSettings; var noJavascriptAccess: Boolean; var Result: Boolean);
     strict private
-        const FPermitCheckTimeout = 120000; // 120 sec
+        const FPermitCheckTimeout = 120000;
         var FRedeemOnReload: boolean;
         var FPermitCheckTimer: integer;
         var FIsAppMenuLocked: boolean;
@@ -2078,12 +2077,19 @@ begin
                 valCutOffDate.Caption:='n/a';
 
                 cbAgeSorting.Clear();
-                var Accounts: IAccounts:=TAccounts.Create();
+                var Debtors: IDebtors:=TDebtors.Create();
                 var SortingOptions:=TStringList.Create();
-
                 try
 
-                    Accounts.GetUserSortingOptionsAwaited(SortingOptions);
+                    var CallResponse: TCallResponse;
+                    CallResponse:=Debtors.GetCustSortingOptionsAwaited(SortingOptions);
+
+                    if not CallResponse.IsSucceeded then
+                    begin
+                        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+                        Exit();
+                    end;
+
                     cbAgeSorting.Items.AddStrings(SortingOptions);
 
                     if cbAgeSorting.Items.Count > 0 then
@@ -2308,7 +2314,7 @@ end;
 procedure TMainForm.sgAgeViewColumnMoved(Sender: TObject; FromIndex, ToIndex: Integer);
 begin
 
-    var Temp: TALists;
+    var Temp: TArray<TArray<string>>;
     try
 
         try

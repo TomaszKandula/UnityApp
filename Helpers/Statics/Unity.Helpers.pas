@@ -10,6 +10,7 @@ interface
 
 
 uses
+    System.Generics.Defaults,
     System.Classes,
     System.SysUtils,
     Winapi.Messages,
@@ -20,8 +21,7 @@ uses
     Vcl.Menus,
     Vcl.Grids,
     Unity.Enums,
-    Unity.Grid,
-    Unity.Arrays;
+    Unity.Grid;
 
 
 type
@@ -34,7 +34,18 @@ type
 
 
     /// <summary>
-    /// Holds various helper methods / shorthands / wrappers.
+    /// Helper class exposing function that checks whether an item is contained in an array.
+    /// </summary>
+    TArrayUtils<T> = class abstract
+    public
+        class function Contains(const x: T; const anArray: array of T): boolean; static;
+        class procedure Copy(var FromArray: TArray<T>; var ToArray: TArray<T>); static;
+        class procedure Move(var FromArray: TArray<T>; var ToArray: TArray<T>); static;
+    end;
+
+
+    /// <summary>
+    /// Holds various helper methods, shorthands and wrappers.
     /// </summary>
     THelpers = class abstract
     strict private
@@ -55,7 +66,7 @@ type
         class function CDate(StrDate: string): TDate; static;
         class function Explode(Text: string; SourceDelim: char): string; static;
         class function Implode(Text: TStrings; TargetDelim: char; ItemsHaveQuotes: boolean = False): string; static;
-        class function ExportToCSV(SourceArray: TALists; FileName: string = ''): TStringList; static;
+        class function ExportToCSV(SourceArray: TArray<TArray<string>>; FileName: string = ''): TStringList; static;
         class function IsVoType(VoType: string): boolean; static;
         class function ShowReport(ReportNumber: cardinal; CurrentForm: TForm): cardinal; static;
         class procedure ReturnCoCodesList(var SourceGrid: TStringGrid; const SourceCol: integer; var TargetList: TStringList; HasHeader: boolean = False; Prefix: string = ''); static;
@@ -84,6 +95,37 @@ uses
     Unity.Chars,
     Unity.Common,
     Unity.Settings;
+
+
+class function TArrayUtils<T>.Contains(const x: T; const anArray: array of T): boolean;
+begin
+
+    // Usage: TArrayUtils<integer>.Contains(3, [1,2,3]).
+    var y: T;
+    var lComparer: IEqualityComparer<T>:=TEqualityComparer<T>.Default;
+
+    for y in anArray do
+        if lComparer.Equals(x, y) then
+            Exit(True);
+
+    Exit(False);
+
+end;
+
+
+class procedure TArrayUtils<T>.Copy(var FromArray: TArray<T>; var ToArray: TArray<T>);
+begin
+    ToArray:=FromArray;
+    SetLength(ToArray, Length(FromArray));
+end;
+
+
+class procedure TArrayUtils<T>.Move(var FromArray: TArray<T>; var ToArray: TArray<T>);
+begin
+    ToArray:=FromArray;
+    SetLength(ToArray, Length(FromArray));
+    FromArray:=nil;
+end;
 
 
 class function THelpers.ConvertSid(Sid: PSID; pszSidText: PChar; var dwBufferLen: DWORD): BOOL;
@@ -358,7 +400,7 @@ begin
 end;
 
 
-class function THelpers.ExportToCSV(SourceArray: TALists; FileName: string = ''): TStringList;
+class function THelpers.ExportToCSV(SourceArray: TArray<TArray<string>>; FileName: string = ''): TStringList;
 begin
 
     var TempStr: string;

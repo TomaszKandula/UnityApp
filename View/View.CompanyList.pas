@@ -24,8 +24,7 @@ uses
     Vcl.Buttons,
     Vcl.ExtCtrls,
     Vcl.Imaging.pngimage,
-    Unity.Panel,
-    Unity.Arrays;
+    Unity.Panel;
 
 
 type
@@ -53,7 +52,7 @@ type
     strict private
         var FCheckEvent: boolean;
         var FIsDataLoaded: boolean;
-        var FCompaniesHolder: TALists;
+        var FCompaniesHolder: TArray<TArray<string>>;
     end;
 
 
@@ -177,13 +176,13 @@ begin
 
     var ListEnd:=FilterList.Count - 1;
 
-    for var iCNT:=0 to ListEnd do // remove when rest impemented for "LoadAgeReport"
+    for var iCNT:=0 to ListEnd do
     begin
 
         if FilterList.Checked[iCNT] = True then
         begin
             SelectionList.Add(GetCoCodeOnly(FilterList.Items[iCNT]).ToInteger);
-            SelectedCoCodes:=SelectedCoCodes + GetCoCodeOnly(FilterList.Items[iCNT]) + ','
+            SelectedCoCodes:=SelectedCoCodes + GetCoCodeOnly(FilterList.Items[iCNT]) + ',' // remove when rest impemented for "LoadAgeReport"
         end;
 
     end;

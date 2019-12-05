@@ -32,7 +32,6 @@ uses
     Vcl.Imaging.GIFImg,
     Vcl.Clipbrd,
     Data.Win.ADODB,
-    Unity.Arrays,
     Unity.Records,
     Unity.Grid,
     Unity.Panel;
@@ -202,7 +201,7 @@ type
         var FLbuAddress: string;
         var FLbuPhone: string;
         var FLbuSendFrom: string;
-        var FSrcColumns: TAIntigers;
+        var FSrcColumns: TArray<integer>;
         var FAbUpdateFields: TAddressBookUpdateFields;
         var FDailyCommentFields: TDailyCommentFields;
         var FGeneralCommentFields: TGeneralCommentFields;
