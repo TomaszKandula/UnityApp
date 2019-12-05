@@ -85,7 +85,7 @@ uses
     DbModel{Legacy}; //remove
 
 
-procedure TMailer.SendFeedbackAsync(Text: string; Callback: TSendUserFeedback); // replace with rest
+procedure TMailer.SendFeedbackAsync(Text: string; Callback: TSendUserFeedback); // replace with rest / EWS
 begin
 
     var NewTask: ITask:=TTask.Create(procedure

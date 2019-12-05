@@ -9,10 +9,7 @@ interface
 
 
 uses
-    System.NetEncoding,
-    System.SysUtils,
     System.Classes,
-    System.Threading,
     System.Generics.Collections,
     Unity.Records;
 
@@ -123,9 +120,11 @@ implementation
 
 
 uses
-    Unity.Helpers,
+    System.SysUtils,
+    System.Threading,
     REST.Types,
     REST.Json,
+    Unity.Helpers,
     Unity.EventLogger,
     Unity.SessionService,
     Unity.RestWrapper,
@@ -372,13 +371,15 @@ begin
         Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'accounts/' + SessionService.SessionData.UnityUserId.ToString() + '/logs/';
         Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
         ThreadFileLog.Log('[SaveUserLogsAwaited]: Executing POST ' + Restful.ClientBaseURL);
+        ThreadFileLog.Log('[SaveUserLogsAwaited]: Application shutdown.');
 
-        var Base64:=TNetEncoding.Create();
         var UserSessionLogs:=TUserSessionLogs.Create();
         try
 
+            var StrEventLog:='Session signature: ' + SessionService.SessionId + '<br>' + THelpers.ListToString(ThreadFileLog.SessionEventLines, '<br>');
+
             UserSessionLogs.UserAlias  :=SessionService.SessionData.AliasName.ToUpper();
-            UserSessionLogs.AppEventLog:=Base64.Encode(THelpers.LoadFileToStr(ThreadFileLog.LogFileName));
+            UserSessionLogs.AppEventLog:=StrEventLog;
             UserSessionLogs.AppName    :='Unity Platform';
 
             Restful.CustomBody:=TJson.ObjectToJsonString(UserSessionLogs);
@@ -395,6 +396,7 @@ begin
 
                     UserSessionLogsSaved.Free();
                     ThreadFileLog.Log('[SaveUserLogsAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+                    ThreadFileLog.Log('[SaveUserLogsAwaited]: Application shutdown.');
 
                 end
                 else
@@ -425,7 +427,6 @@ begin
             end;
 
         finally
-            Base64.Free();
             UserSessionLogs.Free();
         end;
 
@@ -438,7 +439,7 @@ begin
 end;
 
 
-function TAccounts.SaveUserCompanyListAwaited(UserCompanyList: TList<integer>): TCallResponse; // meam leak of TList!
+function TAccounts.SaveUserCompanyListAwaited(UserCompanyList: TList<integer>): TCallResponse;
 begin
 
     var CallResponse: TCallResponse;

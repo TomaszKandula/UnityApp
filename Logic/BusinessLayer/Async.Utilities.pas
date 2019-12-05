@@ -9,8 +9,6 @@ interface
 
 
 uses
-    System.SysUtils,
-    System.Classes,
     System.Threading,
     Unity.Records;
 
@@ -105,6 +103,8 @@ implementation
 
 
 uses
+    System.SysUtils,
+    System.Classes,
     Unity.Grid,
     Unity.Enums,
     Unity.Helpers,

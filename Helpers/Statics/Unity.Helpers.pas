@@ -10,6 +10,7 @@ interface
 
 
 uses
+    System.Generics.Collections,
     System.Generics.Defaults,
     System.Classes,
     System.SysUtils,
@@ -50,7 +51,7 @@ type
     THelpers = class abstract
     strict private
         const HEAP_ZERO_MEMORY = $00000008;
-        const SID_REVISION     = 1;
+        const SID_REVISION = 1;
         class function ConvertSid(Sid: PSID; pszSidText: PChar; var dwBufferLen: DWORD): BOOL; static;
         class function ObtainTextSid(hToken: THandle; pszSid: PChar; var dwBufferLen: DWORD): BOOL; static;
         class procedure GetBuildInfo(var V1, V2, V3, V4: word); static;
@@ -66,17 +67,19 @@ type
         class function CDate(StrDate: string): TDate; static;
         class function Explode(Text: string; SourceDelim: char): string; static;
         class function Implode(Text: TStrings; TargetDelim: char; ItemsHaveQuotes: boolean = False): string; static;
+        class function ListToString(Input: TList<string>; TargetDelim: string): string; static;
         class function ExportToCSV(SourceArray: TArray<TArray<string>>; FileName: string = ''): TStringList; static;
         class function IsVoType(VoType: string): boolean; static;
         class function ShowReport(ReportNumber: cardinal; CurrentForm: TForm): cardinal; static;
-        class procedure ReturnCoCodesList(var SourceGrid: TStringGrid; const SourceCol: integer; var TargetList: TStringList; HasHeader: boolean = False; Prefix: string = ''); static;
+        class procedure ReturnCoCodesList(var SourceGrid: TStringGrid; const SourceCol: integer;
+            var TargetList: TStringList; HasHeader: boolean = False; Prefix: string = ''); static;
         class function CoConvert(CoNumber: string): string; static;
         class function GetSourceDBName(CoCode: string; Prefix: string): string; static;
         class function GetBuildInfoAsString: string; static;
         class function GetOSVer(CheckForOsName: boolean): string; static;
         class function Unpack(ItemID: integer; FileName: string; ShouldFileStay: boolean; var LastErrorMsg: string): boolean; static;
         class function UnzippLayouts(FileName: string; DestDir: string): boolean; static;
-        class function LoadFileToStr(const FileName: TFileName): AnsiString; static;
+        class function LoadFileToStr(const FileName: TFileName): string; static;
         class function GetCurrentUserSid: string; static;
     end;
 
@@ -89,7 +92,7 @@ uses
     System.Variants,
     System.Zip,
     Vcl.Graphics,
-    DbModel,
+    DbModel{Legacy},
     Unity.DateTimeFormats,
     Unity.Unknown,
     Unity.Chars,
@@ -284,10 +287,10 @@ end;
 class procedure THelpers.LoadImageFromStream(var Image: TImage; const FileName: string);
 begin
 
-    var FS: TFileStream:=TFileStream.Create(FileName, fmOpenRead);
+    var FS:=TFileStream.Create(FileName, fmOpenRead);
     FS.Position:=0;
 
-    var WIC: TWICImage:=TWICImage.Create;
+    var WIC:=TWICImage.Create();
 
     try
         WIC.LoadFromStream(FS);
@@ -339,7 +342,7 @@ class function THelpers.MsgCall(WndType: TAppMessage; WndText: string): integer;
 begin
 
     Result:=0;
-    if WndText = '' then Exit;
+    if WndText = '' then Exit();
 
     case WndType of
         TAppMessage.Info:      Result:=Application.MessageBox(PChar(WndText), PChar(TCommon.APPCAPTION), MB_OK       + MB_ICONINFORMATION);
@@ -352,7 +355,7 @@ begin
 end;
 
 
-class function THelpers.OleGetStr(RecordsetField: variant): string;
+class function THelpers.OleGetStr(RecordsetField: variant): string; {Legacy}
 begin
     {$D-}
     try
@@ -380,22 +383,34 @@ end;
 class function THelpers.Implode(Text: TStrings; TargetDelim: char; ItemsHaveQuotes: boolean = False): string;
 begin
 
-    var Str: string;
     var Quote: string;
-
     if ItemsHaveQuotes then Quote:='''';
 
     for var iCNT:=0 to Text.Count - 1 do
     begin
 
         if iCNT < Text.Count - 1 then
-            Str:=Str + Quote + Text.Strings[iCNT] + Quote + TargetDelim
-                else
-                    Str:=Str + Quote + Text.Strings[iCNT] + Quote;
+            Result:=Result + Quote + Text.Strings[iCNT] + Quote + TargetDelim
+        else
+            Result:=Result + Quote + Text.Strings[iCNT] + Quote;
 
     end;
 
-    Result:=Str;
+end;
+
+
+class function THelpers.ListToString(Input: TList<string>; TargetDelim: string): string;
+begin
+
+    for var iCNT:=0 to Input.Count - 1 do
+    begin
+
+        if iCNT < Input.Count - 1 then
+            Result:=Result + Input.Items[iCNT] + TargetDelim
+        else
+            Result:=Result + Input.Items[iCNT];
+
+    end;
 
 end;
 
@@ -404,7 +419,7 @@ class function THelpers.ExportToCSV(SourceArray: TArray<TArray<string>>; FileNam
 begin
 
     var TempStr: string;
-    var SL: TStringList:=TStringList.Create;
+    var SL:=TStringList.Create();
     try
 
         SL.Clear;
@@ -425,7 +440,7 @@ begin
 
     finally
         Result:=SL;
-        SL.Free;
+        SL.Free();
     end;
 
 end;
@@ -436,8 +451,8 @@ begin
 
     Result:=False;
 
-    var Settings: ISettings:=TSettings.Create;
-    var tsVAL: TStringList:=TStringList.Create;
+    var Settings: ISettings:=TSettings.Create();
+    var tsVAL:=TStringList.Create();
     try
 
         Settings.GetSectionValues(TConfigSections.InvoiceTypes, tsVAL);
@@ -450,7 +465,7 @@ begin
         end;
 
     finally
-        tsVAL.Free;
+        tsVAL.Free();
     end;
 
 end;
@@ -474,7 +489,8 @@ begin
 end;
 
 
-class procedure THelpers.ReturnCoCodesList(var SourceGrid: TStringGrid; const SourceCol: integer; var TargetList: TStringList; HasHeader: boolean = False; Prefix: string = '');
+class procedure THelpers.ReturnCoCodesList(var SourceGrid: TStringGrid; const SourceCol: integer;
+    var TargetList: TStringList; HasHeader: boolean = False; Prefix: string = '');
 begin
 
     if (not Assigned(SourceGrid)) or (not Assigned(TargetList)) or (not SourceCol > 0 ) then Exit();
@@ -685,10 +701,10 @@ begin
 end;
 
 
-class function THelpers.LoadFileToStr(const FileName: TFileName): AnsiString;
+class function THelpers.LoadFileToStr(const FileName: TFileName): string;
 begin
 
-    var FileStream: TFileStream:=TFileStream.Create(FileName, fmOpenRead or fmShareDenyWrite);
+    var FileStream:=TFileStream.Create(FileName, fmOpenRead or fmShareDenyWrite);
     try
 
         if FileStream.Size > 0 then

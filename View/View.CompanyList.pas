@@ -198,6 +198,7 @@ begin
     var Accounts: IAccounts:=TAccounts.Create();
     var CallResponse: TCallResponse;
     CallResponse:=Accounts.SaveUserCompanyListAwaited(SelectionList);
+    SelectionList.Free();
 
     if not CallResponse.IsSucceeded then
     begin
