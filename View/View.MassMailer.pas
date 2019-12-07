@@ -259,11 +259,10 @@ procedure TMassMailerForm.UpdateCompanyData(Source: TListView);
 
     function InputText(Text: string): string;
     begin
-
-        if String.IsNullOrEmpty(Text) then Result:=TUnknown.NotFound
-            else
-        Result:=Text;
-
+        if String.IsNullOrEmpty(Text) then
+            Result:=TUnknown.NotFound
+        else
+            Result:=Text;
     end;
 
 begin
@@ -277,15 +276,15 @@ begin
             var CoCode: string:=Source.Items[iCNT].SubItems[8];
             var Branch: string:=Source.Items[iCNT].SubItems[9];
 
-            var Companies: ICompanies:=TCompanies.Create();
-            var CompanyDetails: TCompanyDetails;
-            CompanyDetails:=Companies.GetCompanyDetailsAwaited(CoCode, Branch);
-
-            Source.Items[iCNT].SubItems[5] :=InputText(CompanyDetails.LbuName);
-            Source.Items[iCNT].SubItems[6] :=InputText(CompanyDetails.LbuAddress);
-            Source.Items[iCNT].SubItems[7] :=InputText(CompanyDetails.LbuPhone);
-            Source.Items[iCNT].SubItems[3] :=InputText(CompanyDetails.LbuEmail);
-            Source.Items[iCNT].SubItems[12]:=InputText(CompanyDetails.LbuBanks);
+//            var Companies: ICompanies:=TCompanies.Create();
+//            var CompanyDetails: TCompanyDetails;
+//            CompanyDetails:=Companies.GetCompanyDetailsAwaited(CoCode, Branch);
+//
+//            Source.Items[iCNT].SubItems[5] :=InputText(CompanyDetails.LbuName);
+//            Source.Items[iCNT].SubItems[6] :=InputText(CompanyDetails.LbuAddress);
+//            Source.Items[iCNT].SubItems[7] :=InputText(CompanyDetails.LbuPhone);
+//            Source.Items[iCNT].SubItems[3] :=InputText(CompanyDetails.LbuEmail);
+//            Source.Items[iCNT].SubItems[12]:=InputText(CompanyDetails.LbuBanks);
 
         end;
 

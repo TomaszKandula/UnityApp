@@ -464,15 +464,15 @@ end;
 procedure TActionsForm.UpdateCompanyDetails();
 begin
 
-    var Companies: ICompanies:=TCompanies.Create();
-    var CompanyDetails: TCompanyDetails;
-    CompanyDetails:=Companies.GetCompanyDetailsAwaited(CoCode, Branch);
-
-    FLbuName    :=CompanyDetails.LbuName;
-    FLbuAddress :=CompanyDetails.LbuAddress;
-    FLbuPhone   :=CompanyDetails.LbuPhone;
-    FLbuSendFrom:=CompanyDetails.LbuEmail;
-    FBanksHtml  :=CompanyDetails.LbuBanks;
+//    var Companies: ICompanies:=TCompanies.Create();
+//    var CompanyDetails: TCompanyDetails;
+//    CompanyDetails:=Companies.GetCompanyDetailsAwaited(CoCode, Branch);
+//
+//    FLbuName    :=CompanyDetails.LbuName;
+//    FLbuAddress :=CompanyDetails.LbuAddress;
+//    FLbuPhone   :=CompanyDetails.LbuPhone;
+//    FLbuSendFrom:=CompanyDetails.LbuEmail;
+//    FBanksHtml  :=CompanyDetails.LbuBanks;
 
 end;
 

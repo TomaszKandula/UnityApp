@@ -53,6 +53,10 @@ type
         var FCheckEvent: boolean;
         var FIsDataLoaded: boolean;
         var FCompaniesHolder: TArray<TArray<string>>;
+        function GetCoCodeOnly(CompanyName: string): string;
+        procedure RequestAgeReport();
+        procedure ClearCompanyList();
+        procedure CheckItem(var CheckEvent: boolean);
     end;
 
 
@@ -88,6 +92,96 @@ end;
 
 
 {$REGION 'LOCAL HELPERS'}
+
+
+function TCompanyListForm.GetCoCodeOnly(CompanyName: string): string;
+begin
+    var SeparatorPos:=AnsiPos('-', CompanyName);
+    Result:=CompanyName.Substring(0, SeparatorPos - 1).Replace(' ','');
+end;
+
+
+procedure TCompanyListForm.RequestAgeReport();
+begin
+
+    var SelectedCoCodes: string;{Legacy}
+    var SelectionList:=TList<integer>.Create();
+
+    var ListEnd:=FilterList.Count - 1;
+
+    for var iCNT:=0 to ListEnd do
+    begin
+
+        if FilterList.Checked[iCNT] = True then
+        begin
+            SelectionList.Add(GetCoCodeOnly(FilterList.Items[iCNT]).ToInteger);
+            SelectedCoCodes:=SelectedCoCodes + GetCoCodeOnly(FilterList.Items[iCNT]) + ','{Legacy}
+        end;
+
+    end;
+
+    SelectedCoCodes:=SelectedCoCodes.Substring(0, Length(SelectedCoCodes) - 1).Replace(' ','');{Legacy}
+
+    {Legacy}
+    if String.IsNullOrWhiteSpace(SelectedCoCodes) then
+    begin
+        THelpers.MsgCall(TAppMessage.Warn, 'Please select company/companies you want to open.');
+        Exit();
+    end;
+
+    var Accounts: IAccounts:=TAccounts.Create();
+    var CallResponse: TCallResponse;
+    CallResponse:=Accounts.SaveUserCompanyListAwaited(SelectionList);
+    SelectionList.Free();
+
+    if not CallResponse.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        Exit();
+    end;
+
+    MainForm.LoadAgeReport(SelectedCoCodes{Legacy});
+    Close();
+
+ end;
+
+
+procedure TCompanyListForm.ClearCompanyList();
+begin
+    for var iCNT:=0 to FilterList.Count - 1 do
+        if FilterList.ItemEnabled[iCNT] = True then
+            FilterList.Checked[iCNT]:=False;
+end;
+
+
+procedure TCompanyListForm.CheckItem(var CheckEvent: boolean);
+begin
+
+    try
+
+        if not(CheckEvent) then
+        begin
+
+            if FilterList.Checked[FilterList.ItemIndex] then
+                FilterList.Checked[FilterList.ItemIndex]:=False
+            else
+                FilterList.Checked[FilterList.ItemIndex]:=True;
+
+        end;
+
+    except
+        {Do nothing}
+    end;
+
+    CheckEvent:=False;
+
+end;
+
+
+{$ENDREGION}
+
+
+{$REGION 'STARTUP'}
 
 
 procedure TCompanyListForm.FormCreate(Sender: TObject);
@@ -161,88 +255,21 @@ end;
 {$REGION 'MOUSE CLICK EVENTS'}
 
 
-procedure TCompanyListForm.btnSelectClick(Sender: TObject); // refactor this!
-
-    function GetCoCodeOnly(InputStr: string): string;
-    begin
-        var SeparatorPos:=AnsiPos('-', InputStr);
-        Result:=InputStr.Substring(0, SeparatorPos - 1).Replace(' ','');
-    end;
-
+procedure TCompanyListForm.btnSelectClick(Sender: TObject);
 begin
-
-    var SelectedCoCodes: string;
-    var SelectionList:=TList<integer>.Create();
-
-    var ListEnd:=FilterList.Count - 1;
-
-    for var iCNT:=0 to ListEnd do
-    begin
-
-        if FilterList.Checked[iCNT] = True then
-        begin
-            SelectionList.Add(GetCoCodeOnly(FilterList.Items[iCNT]).ToInteger);
-            SelectedCoCodes:=SelectedCoCodes + GetCoCodeOnly(FilterList.Items[iCNT]) + ',' // remove when rest impemented for "LoadAgeReport"
-        end;
-
-    end;
-
-    SelectedCoCodes:=SelectedCoCodes.Substring(0, Length(SelectedCoCodes) - 1).Replace(' ','');
-
-    if String.IsNullOrWhiteSpace(SelectedCoCodes) then
-    begin
-        THelpers.MsgCall(TAppMessage.Warn, 'Please select company/companies you want to open.');
-        Exit();
-    end;
-
-    var Accounts: IAccounts:=TAccounts.Create();
-    var CallResponse: TCallResponse;
-    CallResponse:=Accounts.SaveUserCompanyListAwaited(SelectionList);
-    SelectionList.Free();
-
-    if not CallResponse.IsSucceeded then
-    begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
-        Exit();
-    end;
-
-    MainForm.LoadAgeReport(SelectedCoCodes);
-    Close();
-
+    RequestAgeReport();
 end;
 
 
 procedure TCompanyListForm.btnRemoveClick(Sender: TObject);
 begin
-
-    for var iCNT:=0 to FilterList.Count - 1 do
-        if FilterList.ItemEnabled[iCNT] = True then
-            FilterList.Checked[iCNT]:=False;
-
+    ClearCompanyList();
 end;
 
 
 procedure TCompanyListForm.FilterListClick(Sender: TObject);
 begin
-
-    try
-
-        if not(FCheckEvent) then
-        begin
-
-            if FilterList.Checked[FilterList.ItemIndex] then
-                FilterList.Checked[FilterList.ItemIndex]:=False
-            else
-                FilterList.Checked[FilterList.ItemIndex]:=True;
-
-        end;
-
-    except
-        {Do nothing}
-    end;
-
-    FCheckEvent:=False;
-
+    CheckItem(FCheckEvent);
 end;
 
 
