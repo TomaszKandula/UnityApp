@@ -35,13 +35,14 @@ type
 
 
     /// <summary>
-    /// Helper class exposing function that checks whether an item is contained in an array.
+    /// Generic class exposing helper methods for basic operations on arrays.
     /// </summary>
     TArrayUtils<T> = class abstract
     public
         class function Contains(const x: T; const anArray: array of T): boolean; static;
         class procedure Copy(var FromArray: TArray<T>; var ToArray: TArray<T>); static;
         class procedure Move(var FromArray: TArray<T>; var ToArray: TArray<T>); static;
+        class procedure MoveToList(const FromArray: TArray<T>; var TargetList: TList<T>); static;
     end;
 
 
@@ -128,6 +129,13 @@ begin
     ToArray:=FromArray;
     SetLength(ToArray, Length(FromArray));
     FromArray:=nil;
+end;
+
+
+class procedure TArrayUtils<T>.MoveToList(const FromArray: TArray<T>; var TargetList: TList<T>);
+begin
+    for var iCNT:=0 to Length(FromArray) - 1 do
+        TargetList.Add(FromArray[iCNT]);
 end;
 
 

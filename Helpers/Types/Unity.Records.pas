@@ -16,7 +16,8 @@ uses
     Unity.Enums,
     Unity.Grid,
     Unity.References,
-    Unity.ListView;
+    Unity.ListView,
+    Api.BankDetails;
 
 
 // -----------------------------------
@@ -54,9 +55,9 @@ type
     TCompanyDetails = record
         LbuName:    string;
         LbuAddress: string;
-        LbuPhone:   string;
-        LbuEmail:   string;
-        LbuBanks:   string;
+        LbuPhones:  TArray<string>;
+        LbuEmails:  TArray<string>;
+        LbuBanks:   TArray<TBankDetails>;
     end;
 
     /// <summary>

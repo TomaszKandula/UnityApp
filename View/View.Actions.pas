@@ -461,15 +461,16 @@ begin
 end;
 
 
-procedure TActionsForm.UpdateCompanyDetails();
+procedure TActionsForm.UpdateCompanyDetails(); // !!!!
 begin
 
-//    var Companies: ICompanies:=TCompanies.Create();
-//    var CompanyDetails: TCompanyDetails;
-//    CompanyDetails:=Companies.GetCompanyDetailsAwaited(CoCode, Branch);
-//
-//    FLbuName    :=CompanyDetails.LbuName;
-//    FLbuAddress :=CompanyDetails.LbuAddress;
+    var Companies: ICompanies:=TCompanies.Create();
+    var CompanyDetails: TCompanyDetails;
+    var CallResponse: TCallResponse;
+    CallResponse:=Companies.GetCompanyDetailsAwaited(CoCode, CompanyDetails);
+
+    FLbuName    :=CompanyDetails.LbuName;
+    FLbuAddress :=CompanyDetails.LbuAddress;
 //    FLbuPhone   :=CompanyDetails.LbuPhone;
 //    FLbuSendFrom:=CompanyDetails.LbuEmail;
 //    FBanksHtml  :=CompanyDetails.LbuBanks;

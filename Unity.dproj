@@ -185,6 +185,7 @@
         <DCCReference Include="Helpers\Statics\Unity.Filtering.pas"/>
         <DCCReference Include="Model\DbModel.pas"/>
         <DCCReference Include="Model\Json\Api.ErrorHandler.pas"/>
+        <DCCReference Include="Model\Json\Api.BankDetails.pas"/>
         <DCCReference Include="Model\Json\Requests\Api.UserSessionAdd.pas"/>
         <DCCReference Include="Model\Json\Requests\Api.UserCompanySelection.pas"/>
         <DCCReference Include="Model\Json\Requests\Api.UserSessionLogs.pas"/>
@@ -194,6 +195,7 @@
         <DCCReference Include="Model\Json\Responses\Api.UserCompaniesUpdated.pas"/>
         <DCCReference Include="Model\Json\Responses\Api.CustSortingOptions.pas"/>
         <DCCReference Include="Model\Json\Responses\Api.UserSessionLogsSaved.pas"/>
+        <DCCReference Include="Model\Json\Responses\Api.CompanyData.pas"/>
         <DCCReference Include="Logic\AccessLayer\Handler.Sql.pas"/>
         <DCCReference Include="Logic\AccessLayer\Handler.Database.pas"/>
         <DCCReference Include="Logic\AccessLayer\Unity.RestWrapper.pas"/>

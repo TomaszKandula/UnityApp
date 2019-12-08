@@ -1,4 +1,4 @@
-unit Api.ErrorHandler;
+unit Api.BankDetails;
 
 // -------------------------------------------------------------
 // JSON model for REST. Can be referenced by anyone. Cannot hold
@@ -19,14 +19,18 @@ uses
 type
 
 
-    TErrorHandler = class
+    TBankDetails = class
     {$TYPEINFO ON}
     strict private
-        var FErrorDesc: string;
-        var FErrorNum: integer;
+        var FBankName: string;
+        var FBankAcc:  string;
+        var FBankCode: string;
+        var FBankIso:  string;
     public
-        property ErrorDesc: string  read FErrorDesc write FErrorDesc;
-        property ErrorNum:  integer read FErrorNum  write FErrorNum;
+        property BankName: string read FBankName write FBankName;
+        property BankAcc:  string read FBankAcc  write FBankAcc;
+        property BankCode: string read FBankCode write FBankCode;
+        property BankIso:  string read FBankIso  write FBankIso;
     end;
 
 

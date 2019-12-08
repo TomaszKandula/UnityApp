@@ -25,7 +25,7 @@ type
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function GetCompanyDetailsAwaited(CoCode: string; var CompanyDetails: TCompanyDetails): TCallResponse;
+        function GetCompanyDetailsAwaited(CompanyCode: string; var CompanyDetails: TCompanyDetails): TCallResponse;
 
         /// <summary>
         /// Allow to load async. list of emails for given CoCodes. There is no separate notification.
@@ -48,7 +48,7 @@ type
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function GetCompanyDetailsAwaited(CoCode: string; var CompanyDetails: TCompanyDetails): TCallResponse;
+        function GetCompanyDetailsAwaited(CompanyCode: string; var CompanyDetails: TCompanyDetails): TCallResponse;
 
         /// <summary>
         /// Allow to load async. list of emails for given CoCodes. There is no separate notification.
@@ -67,12 +67,17 @@ implementation
 uses
     System.Threading,
     System.SysUtils,
+    REST.Types,
+    REST.Json,
+    Unity.RestWrapper,
     Unity.Helpers,
     Unity.EventLogger,
-    Unity.SessionService;
+    Unity.SessionService,
+    Api.BankDetails,
+    Api.CompanyData;
 
 
-function TCompanies.GetCompanyDetailsAwaited(CoCode: string; var CompanyDetails: TCompanyDetails): TCallResponse;
+function TCompanies.GetCompanyDetailsAwaited(CompanyCode: string; var CompanyDetails: TCompanyDetails): TCallResponse;
 begin
 
     var ReturnCompanyDetails: TCompanyDetails;
@@ -81,16 +86,51 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
+        var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
+        Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'companies/' + CompanyCode;
+        Restful.RequestMethod:=TRESTRequestMethod.rmGET;
+        ThreadFileLog.Log('[GetCompanyDetailsAwaited]: Executing GET ' + Restful.ClientBaseURL);
+
         try
 
+            if (Restful.Execute) and (Restful.StatusCode = 200) then
+            begin
 
+                var CompanyData: TCompanyData:=TJson.JsonToObject<TCompanyData>(Restful.Content);
 
+                ReturnCompanyDetails.LbuName   :=CompanyData.CompanyName;
+                ReturnCompanyDetails.LbuAddress:=CompanyData.CompanyAddress;
+                ReturnCompanyDetails.LbuPhones :=CompanyData.CompanyPhones;
+                ReturnCompanyDetails.LbuEmails :=CompanyData.CompanyEmails;
+                ReturnCompanyDetails.LbuBanks  :=CompanyData.CompanyBanks;
 
-        except
-            on E: Exception do
+                CallResponse.IsSucceeded:=True;
+                CompanyData.Free();
+                ThreadFileLog.Log('[GetCompanyDetailsAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+
+            end
+            else
+            begin
+
+                if not String.IsNullOrEmpty(Restful.ExecuteError) then
+                    CallResponse.LastMessage:='[GetCompanyDetailsAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                else
+                    if String.IsNullOrEmpty(Restful.Content) then
+                        CallResponse.LastMessage:='[GetCompanyDetailsAwaited]: Invalid server response. Please contact IT Support.'
+                    else
+                        CallResponse.LastMessage:='[GetCompanyDetailsAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+
+                CallResponse.ReturnedCode:=Restful.StatusCode;
+                CallResponse.IsSucceeded:=False;
+                ThreadFileLog.Log(CallResponse.LastMessage);
+
+            end;
+
+        except on
+            E: Exception do
             begin
                 CallResponse.IsSucceeded:=False;
-                CallResponse.LastMessage:='[GetCompanyDetailsAsync]: Cannot execute. Error has been thrown: ' + E.Message;
+                CallResponse.LastMessage:='[GetCompanyDetailsAwaited]: Cannot execute the request. Description: ' + E.Message;
                 ThreadFileLog.Log(CallResponse.LastMessage);
             end;
 
