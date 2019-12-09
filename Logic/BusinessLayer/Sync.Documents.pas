@@ -735,39 +735,41 @@ begin
     // ------------------------------------------------------------------------------
 
     var KeyName: string;
-    var Settings: ISettings:=TSettings.Create;
-    var SL: TStringList:=TStringList.Create;
+    var Settings: ISettings:=TSettings.Create();
+    var SL: TStringList:=TStringList.Create();
     try
 
         // ------------------------
         // Upload table definition.
         // ------------------------
-
         SL.LoadFromFile(FileName);
         Result:=SL.Text;
 
         KeyName:='SERVICE%TBL';
-        if not IsCtrlStatus then KeyName:=KeyName.Replace('%', '1')
-            else KeyName:=KeyName.Replace('%', '2');
+        if not IsCtrlStatus then
+            KeyName:=KeyName.Replace('%', '1')
+        else
+            KeyName:=KeyName.Replace('%', '2');
 
-        var HtmlTablePath: string:=Settings.DirLayouts + Settings.GetStringValue(TConfigSections.Layouts, KeyName, '');
+        var HtmlTablePath:=Settings.DirLayouts + Settings.GetStringValue(TConfigSections.Layouts, KeyName, '');
         SL.LoadFromFile(HtmlTablePath);
         FCommonHTMLTable:=SL.Text;
 
         // ----------------------
         // Upload row definition.
         // ----------------------
-
         KeyName:='SERVICE%ROW';
-        if not IsCtrlStatus then KeyName:=KeyName.Replace('%', '1')
-            else KeyName:=KeyName.Replace('%', '2');
+        if not IsCtrlStatus then
+            KeyName:=KeyName.Replace('%', '1')
+        else
+            KeyName:=KeyName.Replace('%', '2');
 
-        var HtmlRowPath: string:=Settings.DirLayouts + Settings.GetStringValue(TConfigSections.Layouts, KeyName, '');
+        var HtmlRowPath:=Settings.DirLayouts + Settings.GetStringValue(TConfigSections.Layouts, KeyName, '');
         SL.LoadFromFile(HtmlRowPath);
         FCommonHTMLRow:=SL.Text;
 
     finally
-        SL.Free;
+        SL.Free();
     end;
 
 end;
@@ -780,14 +782,12 @@ begin
     // -----------------------------------------------------------------------------
     // Do not send if we have no items (due to selected due date range by the user).
     // -----------------------------------------------------------------------------
-
     Result:=False;
     if BuildHTML = 0 then Exit();
 
     // ---------------------------
     // Put data into placeholders.
     // ---------------------------
-
     FHTMLTable:=StringReplace(FHTMLTable,  '{ROWS}',         FHTMLStat,    [rfReplaceAll]);
     MailBody  :=StringReplace(FHTMLLayout, '{INVOICE_LIST}', FHTMLTable,   [rfReplaceAll]);
     MailBody  :=StringReplace(MailBody,    '{ADDR_DATA}',    CustAddr,     [rfReplaceAll]);
@@ -800,7 +800,6 @@ begin
     // ----------------------------------------------
     // Custom template title (statement or reminder).
     // ----------------------------------------------
-
     case InvFilter of
         TInvoiceFilter.ReminderOvd:    MailBody:=StringReplace(MailBody, '{TITLE}', 'REMINDER',  [rfReplaceAll]);
         TInvoiceFilter.ReminderNonOvd: MailBody:=StringReplace(MailBody, '{TITLE}', 'REMINDER',  [rfReplaceAll]);
@@ -810,13 +809,11 @@ begin
     // ----------------------------------
     // Custom salutation and the message.
     // ----------------------------------
-
     if CustMess <> '' then MailBody:=StringReplace(MailBody, '{TEXT}', CustMess, [rfReplaceAll]);
 
     // ------------------------
     // Put user in carbon copy.
     // ------------------------
-
     var Settings: ISettings:=TSettings.Create();
     case IsUserInCopy of
         True:  MailBcc:=SessionService.SessionData.EmailAddress;
@@ -842,12 +839,12 @@ begin
     // ----------------------------
     // Save the email as HTML file.
     // ----------------------------
-    var SL: TStringList:=TStringList.Create;
+    var SL: TStringList:=TStringList.Create();
     try
         SL.Text:=MailBody;
         SL.SaveToFile(FileName);
     finally
-        SL.Free;
+        SL.Free();
     end;
 
 end;
@@ -879,21 +876,18 @@ begin
     // ------------------------
     // Get outstanding amounts.
     // ------------------------
-
     var CurAmount: string:=SG.Cells[FOpenItemsRefs.CurAmCol, ActualRow];
     var Amount:    string:=SG.Cells[FOpenItemsRefs.OpenCurAmCol, ActualRow];
 
     // ----------------------------------------------
     // Change format number from 1000,00 to 1 000,00.
     // ----------------------------------------------
-
     CurAmount:=FormatFloat('#,##0.00', StrToFloat(CurAmount));
     Amount   :=FormatFloat('#,##0.00', StrToFloat(Amount));
 
-    // --------------
-    // Generate HTML.
-    // --------------
-
+    // -------------------
+    // Generate HTML data.
+    // -------------------
     FHTMLTemp:=HTMLRow;
     FHTMLTemp:=StringReplace(FHTMLTemp, '{INV_NUM}', SG.Cells[FOpenItemsRefs.InvoNoCol, ActualRow], [rfReplaceAll]);
     FHTMLTemp:=StringReplace(FHTMLTemp, '{INV_DAT}', SG.Cells[FOpenItemsRefs.ValDtCol,  ActualRow], [rfReplaceAll]);
@@ -906,7 +900,6 @@ begin
     // Text on the invoice may be very long (but not more than 200 chars),
     // the decision was to put hard limit of 32 chars.
     // -------------------------------------------------------------------
-
     var Text: string:=SG.Cells[FOpenItemsRefs.Text, ActualRow];
     var Code: string:=SG.Cells[FOpenItemsRefs.CtrlCol, ActualRow];
     FHTMLTemp:=StringReplace(FHTMLTemp, '{INV_TXT}', LeftStr(Text, 32), [rfReplaceAll]);
@@ -918,7 +911,7 @@ begin
 end;
 
 
-function TDocument.BuildHTML: integer;
+function TDocument.BuildHTML(): integer;
 begin
 
     // ------------------------------------------------------------------------------------------
@@ -930,7 +923,6 @@ begin
     // string must use local settings and use application settings if further calculation is
     // done on the data.
     // ------------------------------------------------------------------------------------------
-
     var LocalFrmt: TFormatSettings;
     var UnityFrmt: TFormatSettings;
 
@@ -944,7 +936,6 @@ begin
     // number and control statuses different than
     // those defined by FExclusion array.
     // ---------------------------------------------
-
     FPos:=0;
     FItems:=0;
 
@@ -966,7 +957,6 @@ begin
                 // --------------------------------------
                 // Include all items (account statement).
                 // --------------------------------------
-
                 TInvoiceFilter.ShowAllItems:
                 begin
 
@@ -998,7 +988,6 @@ begin
                 // ----------------------------------------------
                 // Include only overdue items (payment reminder).
                 // ----------------------------------------------
-
                 TInvoiceFilter.ReminderOvd:
                 begin
 
@@ -1018,7 +1007,6 @@ begin
                 // --------------------------------------------
                 // Include all items with given due date range.
                 // --------------------------------------------
-
                 TInvoiceFilter.ReminderNonOvd:
                 begin
 
@@ -1048,7 +1036,6 @@ begin
     // -----------------------------
     // Build customer address field.
     // -----------------------------
-
     CustAddr:='<p class="p"><b>' + CustName + '</b><br />' + TChars.CRLF;
 
     var AddrFld1: string:=OpenItems.Cells[FOpenItemsRefs.Ad1Col,   FPos];

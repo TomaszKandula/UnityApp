@@ -173,8 +173,8 @@ begin
     FPayLoad.CustNumber    :=ActionsForm.CustNumber;
     FPayLoad.LBUName       :=ActionsForm.LbuName;
     FPayLoad.LBUAddress    :=ActionsForm.LbuAddress;
-    FPayLoad.Telephone     :=ActionsForm.LbuPhone;
-    FPayLoad.BankDetails   :=ActionsForm.BanksHtml;
+    FPayLoad.Telephone     :=ActionsForm.LbuPhones;
+    FPayLoad.BankDetails   :=ActionsForm.LbuBanksHtml;
     FPayLoad.Series        :=False;
     FPayLoad.ItemNo        :=0;
     FPayLoad.OpenItems     :=ActionsForm.OpenItemsGrid;

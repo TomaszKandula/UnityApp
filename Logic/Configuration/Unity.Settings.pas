@@ -206,9 +206,6 @@ type
         const PasswordSection    = 'PASSWORD';
         const ApplicationDetails = 'APPLICATION';
         const RiskClassDetails   = 'RISK_CLASS_DETAILS';
-        const MailerNTLM         = 'MAILER_NTLM';{Legacy}
-        const MailerBASIC        = 'MAILER_BASIC';{Legacy}
-        const MailerSetup        = 'MAILER_SETUP';{Legacy}
         const DatabaseSetup      = 'DATABASE_SETTINGS';{Legacy}
         const InvoiceTypes       = 'INVOICE_TYPES';
         const TabSheetsCaps      = 'TABSHEETS_CAPTIONS';

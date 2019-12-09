@@ -94,61 +94,61 @@ begin
         var CallResponse: TCallResponse;
         try
 
-            var Settings: ISettings:=TSettings.Create();
-            var Mail: IDocument:=TDocument.Create();
-
-            var AppName: string:=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'VALUE', '');
-            var AppVer: string:=THelpers.GetBuildInfoAsString;
-
-            // --------------------------
-            // Get and set email details.
-            // --------------------------
-            if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerNTLM  then
-            begin
-                Mail.XMailer:=Settings.GetStringValue(TConfigSections.MailerNTLM, 'FROM',     '');
-                Mail.MailTo :=Settings.GetStringValue(TConfigSections.MailerNTLM, 'TO',       '');
-                Mail.MailRt :=Settings.GetStringValue(TConfigSections.MailerNTLM, 'REPLY-TO', '');
-            end;
-
-            if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerBASIC then
-            begin
-                Mail.XMailer:=Settings.GetStringValue(TConfigSections.MailerBASIC, 'FROM',     '');
-                Mail.MailTo :=Settings.GetStringValue(TConfigSections.MailerBASIC, 'TO',       '');
-                Mail.MailRt :=Settings.GetStringValue(TConfigSections.MailerBASIC, 'REPLY-TO', '');
-            end;
-
-            Mail.MailFrom   :=Mail.XMailer;
-            Mail.MailCc     :=SessionService.SessionData.EmailAddress;
-            Mail.MailBcc    :='';
-            Mail.MailSubject:='Unity - User feedback (' + UpperCase(SessionService.SessionData.AliasName) + ')';
-
-            // ----------------------------------
-            // Plain text to HTML using template.
-            // ----------------------------------
-            var Transfer: string:=Text;
-            Transfer:=StringReplace(Transfer, TChars.CRLF, '<br>', [rfReplaceAll]);
-
-            var HTMLBody: string:=Mail.LoadTemplate(Settings.DirLayouts + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE4', ''), False);
-            HTMLBody:=StringReplace(HTMLBody, '{TEXT_HOLER}',  Transfer,       [rfReplaceAll]);
-            HTMLBody:=StringReplace(HTMLBody, '{APPNAME}',     AppName,        [rfReplaceAll]);
-            HTMLBody:=StringReplace(HTMLBody, '{BUILD}',       AppVer,         [rfReplaceAll]);
-            HTMLBody:=StringReplace(HTMLBody, '{REPORT_DATE}', DateToStr(Now), [rfReplaceAll]);
-            HTMLBody:=StringReplace(HTMLBody, '{REPORT_TIME}', TimeToStr(Now), [rfReplaceAll]);
-
-            Mail.MailBody:=HTMLBody;
-
-            if Mail.SendNow then
-            begin
-                CallResponse.IsSucceeded:=True;
-                CallResponse.LastMessage:='[SendFeedbackAsync]: User feedback has been sent.';
-                ThreadFileLog.Log(CallResponse.LastMessage);
-            end
-            else
-            begin
-                CallResponse.IsSucceeded:=False;
-                CallResponse.LastMessage:='[SendFeedbackAsync]: Cannot send email. Please contact IT Support.';
-                ThreadFileLog.Log(CallResponse.LastMessage);
-            end;
+//            var Settings: ISettings:=TSettings.Create();
+//            var Mail: IDocument:=TDocument.Create();
+//
+//            var AppName: string:=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'VALUE', '');
+//            var AppVer: string:=THelpers.GetBuildInfoAsString;
+//
+//            // --------------------------
+//            // Get and set email details.
+//            // --------------------------
+//            if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerNTLM  then
+//            begin
+//                Mail.XMailer:=Settings.GetStringValue(TConfigSections.MailerNTLM, 'FROM',     '');
+//                Mail.MailTo :=Settings.GetStringValue(TConfigSections.MailerNTLM, 'TO',       '');
+//                Mail.MailRt :=Settings.GetStringValue(TConfigSections.MailerNTLM, 'REPLY-TO', '');
+//            end;
+//
+//            if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerBASIC then
+//            begin
+//                Mail.XMailer:=Settings.GetStringValue(TConfigSections.MailerBASIC, 'FROM',     '');
+//                Mail.MailTo :=Settings.GetStringValue(TConfigSections.MailerBASIC, 'TO',       '');
+//                Mail.MailRt :=Settings.GetStringValue(TConfigSections.MailerBASIC, 'REPLY-TO', '');
+//            end;
+//
+//            Mail.MailFrom   :=Mail.XMailer;
+//            Mail.MailCc     :=SessionService.SessionData.EmailAddress;
+//            Mail.MailBcc    :='';
+//            Mail.MailSubject:='Unity - User feedback (' + UpperCase(SessionService.SessionData.AliasName) + ')';
+//
+//            // ----------------------------------
+//            // Plain text to HTML using template.
+//            // ----------------------------------
+//            var Transfer: string:=Text;
+//            Transfer:=StringReplace(Transfer, TChars.CRLF, '<br>', [rfReplaceAll]);
+//
+//            var HTMLBody: string:=Mail.LoadTemplate(Settings.DirLayouts + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE4', ''), False);
+//            HTMLBody:=StringReplace(HTMLBody, '{TEXT_HOLER}',  Transfer,       [rfReplaceAll]);
+//            HTMLBody:=StringReplace(HTMLBody, '{APPNAME}',     AppName,        [rfReplaceAll]);
+//            HTMLBody:=StringReplace(HTMLBody, '{BUILD}',       AppVer,         [rfReplaceAll]);
+//            HTMLBody:=StringReplace(HTMLBody, '{REPORT_DATE}', DateToStr(Now), [rfReplaceAll]);
+//            HTMLBody:=StringReplace(HTMLBody, '{REPORT_TIME}', TimeToStr(Now), [rfReplaceAll]);
+//
+//            Mail.MailBody:=HTMLBody;
+//
+//            if Mail.SendNow then
+//            begin
+//                CallResponse.IsSucceeded:=True;
+//                CallResponse.LastMessage:='[SendFeedbackAsync]: User feedback has been sent.';
+//                ThreadFileLog.Log(CallResponse.LastMessage);
+//            end
+//            else
+//            begin
+//                CallResponse.IsSucceeded:=False;
+//                CallResponse.LastMessage:='[SendFeedbackAsync]: Cannot send email. Please contact IT Support.';
+//                ThreadFileLog.Log(CallResponse.LastMessage);
+//            end;
 
         except
             on E: Exception do

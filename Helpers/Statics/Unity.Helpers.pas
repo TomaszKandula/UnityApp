@@ -40,7 +40,7 @@ type
     TArrayUtils<T> = class abstract
     public
         class function Contains(const x: T; const anArray: array of T): boolean; static;
-        class procedure Copy(var FromArray: TArray<T>; var ToArray: TArray<T>); static;
+        class procedure Copy(const FromArray: TArray<T>; var ToArray: TArray<T>); static;
         class procedure Move(var FromArray: TArray<T>; var ToArray: TArray<T>); static;
         class procedure MoveToList(const FromArray: TArray<T>; var TargetList: TList<T>); static;
     end;
@@ -69,6 +69,7 @@ type
         class function Explode(Text: string; SourceDelim: char): string; static;
         class function Implode(Text: TStrings; TargetDelim: char; ItemsHaveQuotes: boolean = False): string; static;
         class function ListToString(Input: TList<string>; TargetDelim: string): string; static;
+        class function ArrayToString(Input: TArray<string>; TargetDelim: string): string; static;
         class function ExportToCSV(SourceArray: TArray<TArray<string>>; FileName: string = ''): TStringList; static;
         class function IsVoType(VoType: string): boolean; static;
         class function ShowReport(ReportNumber: cardinal; CurrentForm: TForm): cardinal; static;
@@ -117,7 +118,7 @@ begin
 end;
 
 
-class procedure TArrayUtils<T>.Copy(var FromArray: TArray<T>; var ToArray: TArray<T>);
+class procedure TArrayUtils<T>.Copy(const FromArray: TArray<T>; var ToArray: TArray<T>);
 begin
     ToArray:=FromArray;
     SetLength(ToArray, Length(FromArray));
@@ -417,6 +418,22 @@ begin
             Result:=Result + Input.Items[iCNT] + TargetDelim
         else
             Result:=Result + Input.Items[iCNT];
+
+    end;
+
+end;
+
+
+class function THelpers.ArrayToString(Input: TArray<string>; TargetDelim: string): string;
+begin
+
+    for var iCNT:=0 to Length(Input) - 1 do
+    begin
+
+        if iCNT < Length(Input) - 1 then
+            Result:=Result + Input[iCNT] + TargetDelim
+        else
+            Result:=Result + Input[iCNT];
 
     end;
 

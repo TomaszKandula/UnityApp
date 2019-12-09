@@ -1,167 +1,174 @@
 <html>
+<style type='text/css'>
+	body 
+	{
+		background: #FFFFFF;
+        font-family: Verdana;
+        font-size: 9pt;
+    }
 
-<!-- MAIN CONTENT -->
+    .container 
+	{
+        background: #FFFFFF;
+		width: 1000px;
+    }
 
+    .main 
+	{
+		background: #FFFFFF;
+		border: 1px solid #E2E2E2;
+        text-align: left;
+        padding: 15px;
+    }
+
+    .p 
+	{
+        font-family: Verdana;
+        font-size: 9pt;
+		line-height: 18px;
+    }
+
+    /* Logo and address */
+    .header 
+	{
+        padding: 15px;
+        font-family: Verdana;
+        font-size: 9pt;
+    }
+
+    .col0-0 
+	{
+        width: 700px;
+    }
+
+    .col0-1 
+	{
+		text-align: left;
+    }
+
+    .col0-2 
+	{
+        text-align: left;
+		line-height: 18px;
+    }
+
+    .col0-3 
+	{
+        font-size: 16pt;
+        font-style: normal;
+        font-weight: bold;
+        text-align: center;
+		padding: 15px;
+    }
+
+    /* Invoice list table */
+    .data 
+	{
+        padding: 1px;
+        font-size: 9pt;
+        border: 1px solid #E2E2E2;
+        background-color: #E2E2E2;
+    }
+
+    /* Invoice Number */
+	.col1 
+	{
+        width: 150px;
+        border: 1px solid #E2E2E2;
+        background-color: #FFFFFF;
+        text-align: center;
+    }
+
+	/* Invoice Date */
+    .col2 
+	{
+        width: 120px;
+        border: 1px solid #E2E2E2;
+        background-color: #FFFFFF;
+		text-align: center;
+    }
+
+	/* Due Date */
+    .col3 
+	{
+        width: 100px;
+        border: 1px solid #E2E2E2;
+        background-color: #FFFFFF;
+        text-align: center;
+    }
+
+	/* Currency */
+    .col4 
+	{
+		width: 80px;
+        border: 1px solid #E2E2E2;
+        background-color: #FFFFFF;
+        text-align: center;
+    }
+
+	/* Amount */
+    .col5 
+	{
+        width: 120px;
+        border: 1px solid #E2E2E2;
+        background-color: #FFFFFF;
+        text-align: right;
+    }
+
+	/* O/S Amount */
+    .col6 
+	{
+		width: 120px;
+        border: 1px solid #E2E2E2;
+        background-color: #FFFFFF;
+        text-align: right;
+    }
+
+	/* Amount */
+    .col5-h 
+	{
+        width: 120px;
+        border: 1px solid #E2E2E2;
+        background-color: #FFFFFF;
+		text-align: center;
+    }
+
+	/* O/S Amount */
+    .col6-h 
+	{
+        width: 120px;
+        border: 1px solid #E2E2E2;
+        background-color: #FFFFFF;
+        text-align: center;
+    }
+
+	/* Status */
+    .col7 
+	{
+        width: 220px;
+        border: 1px solid #E2E2E2;
+        background-color: #FFFFFF;
+        text-align: center;
+    }
+
+	/* Text */
+    .col8 
+	{
+		width: 250px;
+        border: 1px solid #E2E2E2;
+        background-color: #FFFFFF;
+        text-align: Left;
+    }
+
+    .footer 
+	{
+		font-size: 7pt;
+    }
+</style>
 <body>
-
-    <!-- STYLE -->
-
-    <style type='text/css'>
-
-        /* MAIN SETUP OF THE EMAIL CONTENT */
-        body {
-            background: #FFFFFF;
-            font-family: Verdana;
-            font-size: 9pt;
-        }
-
-        .container {
-            background: #FFFFFF;
-            width: 1000px;
-        }
-
-        .main {
-            background: #FFFFFF;
-            border: 1px solid #E2E2E2;
-            text-align: left;
-            padding: 15px;
-        }
-
-        .p {
-            font-family: Verdana;
-            font-size: 9pt;
-            line-height: 18px;
-        }
-
-        /* HEADER WITH LOGO AND ADDRESS */
-        .header {
-            padding: 15px;
-            font-family: Verdana;
-            font-size: 9pt;
-        }
-
-        .col0-0 {
-            width: 700px;
-        }
-
-        .col0-1 {
-            text-align: left;
-        }
-
-        .col0-2 {
-            text-align: left;
-            line-height: 18px;
-        }
-
-        .col0-3 {
-            font-size: 16pt;
-            font-style: normal;
-            font-weight: bold;
-            text-align: center;
-            padding: 15px;
-        }
-
-        /* INVOICE LIST TABLE */
-        .data {
-            padding: 1px;
-            font-size: 9pt;
-            border: 1px solid #E2E2E2;
-            background-color: #E2E2E2;
-        }
-
-        /* Invoice Number */
-		.col1 {
-            width: 150px;
-            border: 1px solid #E2E2E2;
-            background-color: #FFFFFF;
-            text-align: center;
-        }
-
-		/* Invoice Date */
-        .col2 {
-            width: 120px;
-            border: 1px solid #E2E2E2;
-            background-color: #FFFFFF;
-            text-align: center;
-        }
-
-		/* Due Date */
-        .col3 {
-            width: 100px;
-            border: 1px solid #E2E2E2;
-            background-color: #FFFFFF;
-            text-align: center;
-        }
-
-		/* Currency */
-        .col4 {
-            width: 80px;
-            border: 1px solid #E2E2E2;
-            background-color: #FFFFFF;
-            text-align: center;
-        }
-
-		/* Amount */
-        .col5 {
-            width: 120px;
-            border: 1px solid #E2E2E2;
-            background-color: #FFFFFF;
-            text-align: right;
-        }
-
-		/* O/S Amount */
-        .col6 {
-            width: 120px;
-            border: 1px solid #E2E2E2;
-            background-color: #FFFFFF;
-            text-align: right;
-        }
-
-		/* Amount */
-        .col5-h {
-            width: 120px;
-            border: 1px solid #E2E2E2;
-            background-color: #FFFFFF;
-            text-align: center;
-        }
-
-		/* O/S Amount */
-        .col6-h {
-            width: 120px;
-            border: 1px solid #E2E2E2;
-            background-color: #FFFFFF;
-            text-align: center;
-        }
-
-		/* Status */
-        .col7 {
-            width: 220px;
-            border: 1px solid #E2E2E2;
-            background-color: #FFFFFF;
-            text-align: center;
-        }
-
-		/* Text */
-        .col8 {
-            width: 250px;
-            border: 1px solid #E2E2E2;
-            background-color: #FFFFFF;
-            text-align: Left;
-        }
-
-        /* FOOTER */
-        .footer {
-            font-size: 7pt;
-        }
-
-    </style>
-
     <table class='container'>
         <tr>
             <td class='main'>
-                
-                <!-- LOGO | TITLE | ADDRESS -->
-                
                 <table class='header'>
                     <tr>
                         <td class="col0-0">
@@ -169,7 +176,7 @@
                         </td>
                         <td class="col0-1">
                             <span>&nbsp;</span>
-                            <img src="https://unityinfo.azurewebsites.net/release/dfds_logo.png" alt="DFDS logo">
+                            <img src="https://unityweb.azurewebsites.net/images/dfds_logo_white.png" alt="DFDS logo">
                         </td>
                     </tr>
                     <tr>
@@ -182,31 +189,33 @@
                             &nbsp;
                         </td>
                         <td class="col0-2">
-                            <!-- AUTO GENERATED -->
-                            {NAME_LBU}
-                            {ADDR_LBU}
-                            <!-- AUTO GENERATED -->
+
+<!-- Auto-generated [begin]-->
+{NAME_LBU}
+{ADDR_LBU}
+<!-- Auto-generated [end] -->
+
                         </td>
                     </tr>
                 </table>
 
-                <!-- AUTO GENERATED -->
-                {ADDR_DATA}
-                <!-- AUTO GENERATED -->
+<!-- Auto-generated [begin] -->
+{ADDR_DATA}
+<!-- Auto-generated [end] -->
 
                 <p class="p">Dear Customer,</p>
                 <p class="p">Below, please find current account statement:</p>
 
-                <!-- AUTO GENERATED -->
-                {INVOICE_LIST}
-                <!-- AUTO GENERATED -->
+<!-- Auto-generated [begin] -->
+{INVOICE_LIST}
+<!-- Auto-generated [end] -->
 
                 <p class="p">Please ensure the payment is made no later than the due date of the invoice.</p>
                 <p class="p">Should you have any questions regarding this statement, please do not hesitate to contact us via <b>{EMAIL}</b> <br> or on <b>{TEL}</b>.</p>
 
-                <!-- AUTO GENERATED -->
-                {BANKS}
-                <!-- AUTO GENERATED -->
+<!-- Auto-generated [begin] -->
+{BANKS}
+<!-- Auto-generated [end] -->
 
                 <p class="p">
                     <a href='http://www.dfds.com' target='_blank'>www.dfds.com</a>

@@ -34,7 +34,8 @@ uses
     Data.Win.ADODB,
     Unity.Records,
     Unity.Grid,
-    Unity.Panel;
+    Unity.Panel,
+    Api.BankDetails;
 
 
 type
@@ -123,6 +124,8 @@ type
         txtCustomStatement: TLabel;
         txtAutoStatement: TLabel;
         txtCallCustomer: TLabel;
+        selSendFrom: TComboBox;
+        txtSendFrom: TLabel;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
@@ -186,21 +189,26 @@ type
         procedure btnAutoStatementMouseLeave(Sender: TObject);
         procedure btnCallCustomerMouseEnter(Sender: TObject);
         procedure btnCallCustomerMouseLeave(Sender: TObject);
+        procedure selSendFromSelect(Sender: TObject);
     strict private
+        const HtmlBanks = '<p class="p">{ROWS}</p>';
+        const HtmlRow   = '<b>Bank Details</b>: <br><br> {BANK_NAME} (<b>{ISO}</b> payments) <br> IBAN/Account No: {BANK_ACC} {BIC} <br>';
+        const HtmlBic   = '(BIC: {BIC_NUMBER})';
+        const HtmlEmpty = '<!-- NO BANK ACCOUNT ATTACHED -->';
         const AppButtonTxtNormal = $00555555;
         const AppButtonTxtSelected = $006433C9;
         var FHistoryGrid: boolean;
         var FCUID: string;
         var FSCUID: string;
         var FBranch: string;
-        var FBanksHtml: string;
         var FCoCode: string;
         var FCustName: string;
         var FCustNumber: string;
         var FLbuName: string;
         var FLbuAddress: string;
-        var FLbuPhone: string;
+        var FLbuPhones: string;
         var FLbuSendFrom: string;
+        var FLbuBanksHtml: string;
         var FSrcColumns: TArray<integer>;
         var FAbUpdateFields: TAddressBookUpdateFields;
         var FDailyCommentFields: TDailyCommentFields;
@@ -209,6 +217,7 @@ type
         var FPayLoad: TAccountStatementPayLoad;
         var FIsDataLoaded: boolean;
         function  GetRunningApps(SearchName: string): boolean;
+        function  BankListToHtml(BankDetails: TArray<TBankDetails>): string;
         procedure GetOpenItems(OpenItemsDest, OpenItemsSrc: TStringGrid);
         procedure UpdateGeneral(var Text: TMemo);
         procedure UpdateHistory(var HistoryGrid: TStringGrid);
@@ -241,9 +250,9 @@ type
         property CustNumber: string read FCustNumber;
         property LbuName: string read FLbuName;
         property LbuAddress: string read FLbuAddress;
-        property LbuPhone: string read FLbuPhone;
+        property LbuPhones: string read FLbuPhones;
         property LbuSendFrom: string read FLbuSendFrom;
-        property BanksHtml: string read FBanksHtml;
+        property LbuBanksHtml: string read FLbuBanksHtml;
     end;
 
 
@@ -327,17 +336,49 @@ begin
 end;
 
 
-procedure TActionsForm.UpdateOpenItems();
+function TActionsForm.BankListToHtml(BankDetails: TArray<TBankDetails>): string;
 begin
 
+    Result:=HtmlEmpty;
+    if Length(BankDetails) = 0 then Exit();
+
+    var HtmlLines: string;
+    for var iCNT:=0 to Length(BankDetails) - 1 do
+    begin
+
+        var HtmlLine:=HtmlRow;
+        HtmlLines:=HtmlLines + #13#10 + HtmlLine
+            .Replace('{BANK_NAME}', BankDetails[iCNT].BankName)
+            .Replace('{ISO}',       BankDetails[iCNT].BankIso)
+            .Replace('{BANK_ACC}',  BankDetails[iCNT].BankAcc);
+
+        if not String.IsNullOrEmpty(BankDetails[iCNT].BankCode) then
+        begin
+            var BicLine:=HtmlBic;
+            BicLine:=BicLine.Replace('{BIC_NUMBER}', BankDetails[iCNT].BankCode);
+            HtmlLines:=HtmlLines + #13#10 + HtmlLine.Replace('{BIC}', BicLine);
+        end
+        else
+        begin
+            HtmlLines:=HtmlLines + #13#10 + HtmlLine.Replace('{BIC}', '');
+        end;
+
+    end;
+
+    var HtmlOutput:=HtmlBanks;
+    Result:=HtmlOutput.Replace('{ROWS}', HtmlLines);
+
+end;
+
+
+procedure TActionsForm.UpdateOpenItems();
+begin
     txtTimeDate.Caption:=MainForm.FOpenItemsUpdate;
     Cust_Name.Caption  :=CustName;
     Cust_Number.Caption:=CustNumber;
-
     GetOpenItems(OpenItemsGrid, MainForm.sgOpenItems);
-    ValueOpenAm.Caption:=FormatFloat('#,##0.00', FOpenItemsTotal.OpenAm) {+ ' ' + MainForm.tcCURRENCY.Caption};
-    ValueAmount.Caption:=FormatFloat('#,##0.00', FOpenItemsTotal.Am) {+ ' ' + MainForm.tcCURRENCY.Caption};
-
+    ValueOpenAm.Caption:=FormatFloat('#,##0.00', FOpenItemsTotal.OpenAm);
+    ValueAmount.Caption:=FormatFloat('#,##0.00', FOpenItemsTotal.Am);
 end;
 
 
@@ -461,7 +502,7 @@ begin
 end;
 
 
-procedure TActionsForm.UpdateCompanyDetails(); // !!!!
+procedure TActionsForm.UpdateCompanyDetails();
 begin
 
     var Companies: ICompanies:=TCompanies.Create();
@@ -469,11 +510,22 @@ begin
     var CallResponse: TCallResponse;
     CallResponse:=Companies.GetCompanyDetailsAwaited(CoCode, CompanyDetails);
 
-    FLbuName    :=CompanyDetails.LbuName;
-    FLbuAddress :=CompanyDetails.LbuAddress;
-//    FLbuPhone   :=CompanyDetails.LbuPhone;
-//    FLbuSendFrom:=CompanyDetails.LbuEmail;
-//    FBanksHtml  :=CompanyDetails.LbuBanks;
+    if not CallResponse.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        Exit();
+    end;
+
+    FLbuName:=CompanyDetails.LbuName;
+    FLbuAddress:=CompanyDetails.LbuAddress;
+
+    selSendFrom.Clear();
+    for var iCNT:=0 to Length(CompanyDetails.LbuEmails) - 1 do
+        selSendFrom.Items.Add(CompanyDetails.LbuEmails[iCNT]);
+    if selSendFrom.Items.Count > 0 then selSendFrom.ItemIndex:=0;
+
+    FLbuPhones:=THelpers.ArrayToString(CompanyDetails.LbuPhones, ',');
+    FLbuBanksHtml:=BankListToHtml(CompanyDetails.LbuBanks);
 
 end;
 
@@ -565,10 +617,10 @@ end;
 procedure TActionsForm.Initialize();
 begin
     FCUID      :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCuid), MainForm.sgAgeView.Row]; // to be deleted
-    FCustName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerName), MainForm.sgAgeView.Row];
+    FCustName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerName), MainForm.sgAgeView.Row]; // important!
     FCustNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerNumber), MainForm.sgAgeView.Row]; // important!
     FCoCode    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCoCode), MainForm.sgAgeView.Row]; // important!
-    FBranch    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fAgent), MainForm.sgAgeView.Row]; // spit into agent and division
+    FBranch    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fAgent), MainForm.sgAgeView.Row]; // to be deleted
     FSCUID     :=CustNumber + THelpers.CoConvert(CoCode); // to be deleted
 end;
 
@@ -585,6 +637,7 @@ begin
     Cust_Phone.Clear;
     Cust_Phone.Items.Add(TUnknown.NotFound);
     Cust_Phone.ItemIndex:=0;
+    selSendFrom.Clear();
 
     DailyCom.Text  :='';
     GeneralCom.Text:='';
@@ -656,13 +709,12 @@ begin
 
     Screen.Cursor:=crSQLWait;
 
-    DailyCom.Text   :='';
-    GeneralCom.Text :='';
+    DailyCom.Text  :='';
+    GeneralCom.Text:='';
 
     // -------------------------------------------------
     // Move grid cursor to next item (skip hidden rows).
     // -------------------------------------------------
-
     if GoNext then
         for var iCNT: integer:=(MainForm.sgAgeView.Row - 1) Downto 1 do
             if not CheckRow(iCNT) then Break;
@@ -670,7 +722,6 @@ begin
     // -----------------------------------------------------
     // Move grid cursor to previous item (skip hidden rows).
     // -----------------------------------------------------
-
     if not GoNext then
         for var iCNT: integer:=(MainForm.sgAgeView.Row + 1) to MainForm.sgAgeView.RowCount - 1 do
             if not CheckRow(iCNT) then Break;
@@ -678,7 +729,6 @@ begin
     // --------------------------------
     // Load data for selected customer.
     // --------------------------------
-
     THelpers.ExecWithDelay(250, procedure
     begin
         Initialize();
@@ -997,6 +1047,12 @@ begin
 end;
 
 
+procedure TActionsForm.selSendFromSelect(Sender: TObject);
+begin
+    FLbuSendFrom:=selSendFrom.Text;
+end;
+
+
 {$ENDREGION}
 
 
@@ -1052,20 +1108,18 @@ procedure TActionsForm.btnAutoStatementClick(Sender: TObject);
 begin
 
     if THelpers.MsgCall(Question2, 'Are you absolutely sure you want to send it, right now?') = IDNO
-        then Exit;
+        then Exit();
 
     // ---------------------------------------------------------------------
     // UpdateFOpenItemsRefs and UpdateFCtrStatusRefs must be executed before
     // SendAccountStatement is called.
     // ---------------------------------------------------------------------
-
     MainForm.UpdateFOpenItemsRefs(ActionsForm.OpenItemsGrid);
     MainForm.UpdateFControlStatusRefs(MainForm.sgControlStatus);
 
     // --------------------------------
     // Prepare PayLoad for the request.
     // --------------------------------
-
     FPayLoad.Layout        :=TDocMode.Defined;
     FPayLoad.Subject       :='Account Statement';
     FPayLoad.Mess          :='';
@@ -1080,8 +1134,8 @@ begin
     FPayLoad.CustNumber    :=CustNumber;
     FPayLoad.LBUName       :=LbuName;
     FPayLoad.LBUAddress    :=LbuAddress;
-    FPayLoad.Telephone     :=LbuPhone;
-    FPayLoad.BankDetails   :=BanksHtml;
+    FPayLoad.Telephone     :=LbuPhones;
+    FPayLoad.BankDetails   :=LbuBanksHtml;
     FPayLoad.Series        :=False;
     FPayLoad.ItemNo        :=0;
     FPayLoad.OpenItems     :=ActionsForm.OpenItemsGrid;

@@ -491,7 +491,7 @@ type
         txtRefreshReport: TLabel;
         btnSearchAb: TImage;
         txtSearchAb: TLabel;
-        cbAgeSorting: TComboBox;
+        selAgeSorting: TComboBox;
         txtAgeSorting: TLabel;
         bevelVertSeparator: TBevel;
         bevelVertLine: TBevel;
@@ -1024,7 +1024,7 @@ begin
     BusyForm.Show();
     var Debtors: IDebtors:=TDebtors.Create();
     FLastCoCodesSelected:=SelectedCoCodes;
-    Debtors.ReadAgeViewAsync(SelectedCoCodes, cbAgeSorting.Text, FRiskClassGroup, ReadAgeView_Callback);
+    Debtors.ReadAgeViewAsync(SelectedCoCodes, selAgeSorting.Text, FRiskClassGroup, ReadAgeView_Callback);
 end;
 
 
@@ -2076,7 +2076,7 @@ begin
                 valUpdateStamp.Caption:=FOpenItemsUpdate.Substring(0, Length(FOpenItemsUpdate) - 3);
                 valCutOffDate.Caption:='n/a';
 
-                cbAgeSorting.Clear();
+                selAgeSorting.Clear();
                 var Debtors: IDebtors:=TDebtors.Create();
                 var SortingOptions:=TStringList.Create();
                 try
@@ -2090,11 +2090,11 @@ begin
                         Exit();
                     end;
 
-                    cbAgeSorting.Items.AddStrings(SortingOptions);
+                    selAgeSorting.Items.AddStrings(SortingOptions);
 
-                    if cbAgeSorting.Items.Count > 0 then
+                    if selAgeSorting.Items.Count > 0 then
                     begin
-                        cbAgeSorting.ItemIndex:=0;
+                        selAgeSorting.ItemIndex:=0;
                         ThreadFileLog.Log('[StartMainWnd]: Sorting options for aging report has been loaded.');
                     end
                     else

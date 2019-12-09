@@ -51,6 +51,8 @@ type
 
     /// <summary>
     /// Carries a group of variables to be received back when query by awaited async. task.
+    /// Note: because this record uses array of classes, it has contructor and destructor
+    /// to allow creation of class and its proper release.
     /// </summary>
     TCompanyDetails = record
         LbuName:    string;
@@ -58,6 +60,8 @@ type
         LbuPhones:  TArray<string>;
         LbuEmails:  TArray<string>;
         LbuBanks:   TArray<TBankDetails>;
+        //constructor Create();
+        //destructor Destroy();
     end;
 
     /// <summary>

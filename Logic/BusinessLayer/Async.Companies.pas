@@ -80,7 +80,7 @@ uses
 function TCompanies.GetCompanyDetailsAwaited(CompanyCode: string; var CompanyDetails: TCompanyDetails): TCallResponse;
 begin
 
-    var ReturnCompanyDetails: TCompanyDetails;
+    var CompanyData:=TCompanyData.Create();
     var CallResponse: TCallResponse;
 
     var NewTask: ITask:=TTask.Create(procedure
@@ -95,19 +95,9 @@ begin
 
             if (Restful.Execute) and (Restful.StatusCode = 200) then
             begin
-
-                var CompanyData: TCompanyData:=TJson.JsonToObject<TCompanyData>(Restful.Content);
-
-                ReturnCompanyDetails.LbuName   :=CompanyData.CompanyName;
-                ReturnCompanyDetails.LbuAddress:=CompanyData.CompanyAddress;
-                ReturnCompanyDetails.LbuPhones :=CompanyData.CompanyPhones;
-                ReturnCompanyDetails.LbuEmails :=CompanyData.CompanyEmails;
-                ReturnCompanyDetails.LbuBanks  :=CompanyData.CompanyBanks;
-
+                CompanyData:=TJson.JsonToObject<TCompanyData>(Restful.Content);
                 CallResponse.IsSucceeded:=True;
-                CompanyData.Free();
                 ThreadFileLog.Log('[GetCompanyDetailsAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
-
             end
             else
             begin
@@ -138,11 +128,34 @@ begin
 
     end);
 
-    NewTask.Start();
-    TTask.WaitForAll(NewTask);
+    try
 
-    CompanyDetails:=ReturnCompanyDetails;
-    Result:=CallResponse;
+        NewTask.Start();
+        TTask.WaitForAll(NewTask);
+
+        CompanyDetails.LbuName   :=CompanyData.CompanyName;
+        CompanyDetails.LbuAddress:=CompanyData.CompanyAddress;
+        CompanyDetails.LbuPhones :=CompanyData.CompanyPhones;
+        CompanyDetails.LbuEmails :=CompanyData.CompanyEmails;
+
+        SetLength(CompanyDetails.LbuBanks, Length(CompanyData.CompanyBanks));
+        for var iCNT:=0 to Length(CompanyDetails.LbuBanks) - 1 do
+        begin
+
+            if not Assigned(CompanyDetails.LbuBanks[iCNT]) then
+                CompanyDetails.LbuBanks[iCNT].Create();
+
+            CompanyDetails.LbuBanks[iCNT].BankName:=CompanyData.CompanyBanks[iCNT].BankName;
+            CompanyDetails.LbuBanks[iCNT].BankAcc :=CompanyData.CompanyBanks[iCNT].BankAcc;
+            CompanyDetails.LbuBanks[iCNT].BankCode:=CompanyData.CompanyBanks[iCNT].BankCode;
+            CompanyDetails.LbuBanks[iCNT].BankIso :=CompanyData.CompanyBanks[iCNT].BankIso;
+
+        end;
+
+    finally
+        CompanyData.Free();
+        Result:=CallResponse;
+    end;
 
 end;
 
