@@ -198,10 +198,10 @@ type
         const AppButtonTxtNormal = $00555555;
         const AppButtonTxtSelected = $006433C9;
         var FHistoryGrid: boolean;
-        var FCUID: string;
-        var FSCUID: string;
-        var FBranch: string;
-        var FCoCode: string;
+        var FCUID: string; //delete
+        var FSCUID: string; //delete
+        var FBranch: string; //delete
+        var FCompanyCode: string;
         var FCustName: string;
         var FCustNumber: string;
         var FLbuName: string;
@@ -242,10 +242,10 @@ type
         procedure EditGeneralComment_Callback(CallResponse: TCallResponse);
         procedure EditDailyComment_Callback(CallResponse: TCallResponse);
     public
-        property CUID: string read FCUID;
-        property SCUID: string read FSCUID;
-        property Branch: string read FBranch;
-        property CoCode: string read FCoCode;
+        property CUID: string read FCUID; //delete
+        property SCUID: string read FSCUID; //delete
+        property Branch: string read FBranch; //delete
+        property CompanyCode: string read FCompanyCode;
         property CustName: string read FCustName;
         property CustNumber: string read FCustNumber;
         property LbuName: string read FLbuName;
@@ -266,6 +266,7 @@ implementation
 
 
 uses
+    System.Generics.Collections,
     View.Main,
     View.Queries,
     View.Calendar,
@@ -356,11 +357,11 @@ begin
         begin
             var BicLine:=HtmlBic;
             BicLine:=BicLine.Replace('{BIC_NUMBER}', BankDetails[iCNT].BankCode);
-            HtmlLines:=HtmlLines + #13#10 + HtmlLine.Replace('{BIC}', BicLine);
+            HtmlLines:=HtmlLines.Replace('{BIC}', BicLine);
         end
         else
         begin
-            HtmlLines:=HtmlLines + #13#10 + HtmlLine.Replace('{BIC}', '');
+            HtmlLines:=HtmlLines.Replace('{BIC}', '');
         end;
 
     end;
@@ -436,7 +437,7 @@ begin
 
     end;
 
-    var SourceDBName:=THelpers.GetSourceDBName(CoCode, 'F');
+    var SourceDBName:=THelpers.GetSourceDBName(FCompanyCode, 'F');
     for var iCNT: integer:=1 to OpenItemsSrc.RowCount - 1 do
     begin
 
@@ -506,9 +507,10 @@ procedure TActionsForm.UpdateCompanyDetails();
 begin
 
     var Companies: ICompanies:=TCompanies.Create();
-    var CompanyDetails: TCompanyDetails;
     var CallResponse: TCallResponse;
-    CallResponse:=Companies.GetCompanyDetailsAwaited(CoCode, CompanyDetails);
+    var CompanyDetails: TCompanyDetails;
+
+    CallResponse:=Companies.GetCompanyDetailsAwaited(FCompanyCode, CompanyDetails);
 
     if not CallResponse.IsSucceeded then
     begin
@@ -519,6 +521,7 @@ begin
     FLbuName:=CompanyDetails.LbuName;
     FLbuAddress:=CompanyDetails.LbuAddress;
 
+    // make helper method for array to items
     selSendFrom.Clear();
     for var iCNT:=0 to Length(CompanyDetails.LbuEmails) - 1 do
         selSendFrom.Items.Add(CompanyDetails.LbuEmails[iCNT]);
@@ -526,6 +529,8 @@ begin
 
     FLbuPhones:=THelpers.ArrayToString(CompanyDetails.LbuPhones, ',');
     FLbuBanksHtml:=BankListToHtml(CompanyDetails.LbuBanks);
+
+    CompanyDetails.Dispose();
 
 end;
 
@@ -616,12 +621,12 @@ end;
 
 procedure TActionsForm.Initialize();
 begin
-    FCUID      :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCuid), MainForm.sgAgeView.Row]; // to be deleted
-    FCustName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerName), MainForm.sgAgeView.Row]; // important!
-    FCustNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerNumber), MainForm.sgAgeView.Row]; // important!
-    FCoCode    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCoCode), MainForm.sgAgeView.Row]; // important!
-    FBranch    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fAgent), MainForm.sgAgeView.Row]; // to be deleted
-    FSCUID     :=CustNumber + THelpers.CoConvert(CoCode); // to be deleted
+    FCUID       :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCuid), MainForm.sgAgeView.Row]; // to be deleted
+    FCustName   :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerName), MainForm.sgAgeView.Row];
+    FCustNumber :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerNumber), MainForm.sgAgeView.Row];
+    FCompanyCode:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCoCode), MainForm.sgAgeView.Row];
+    FBranch     :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fAgent), MainForm.sgAgeView.Row]; // to be deleted
+    FSCUID      :=CustNumber + THelpers.CoConvert(FCompanyCode); // to be deleted
 end;
 
 

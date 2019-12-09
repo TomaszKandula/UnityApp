@@ -9,8 +9,10 @@ interface
 
 
 uses
+    System.Generics.Collections,
     System.Classes,
-    Unity.Records;
+    Unity.Records,
+    Api.BankDetails;
 
 
 type
@@ -73,82 +75,85 @@ uses
     Unity.Helpers,
     Unity.EventLogger,
     Unity.SessionService,
-    Api.BankDetails,
     Api.CompanyData;
 
 
 function TCompanies.GetCompanyDetailsAwaited(CompanyCode: string; var CompanyDetails: TCompanyDetails): TCallResponse;
 begin
 
-    var CompanyData:=TCompanyData.Create();
+    var CompanyData: TCompanyData;
     var CallResponse: TCallResponse;
-
-    var NewTask: ITask:=TTask.Create(procedure
-    begin
-
-        var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
-        Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'companies/' + CompanyCode;
-        Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-        ThreadFileLog.Log('[GetCompanyDetailsAwaited]: Executing GET ' + Restful.ClientBaseURL);
-
-        try
-
-            if (Restful.Execute) and (Restful.StatusCode = 200) then
-            begin
-                CompanyData:=TJson.JsonToObject<TCompanyData>(Restful.Content);
-                CallResponse.IsSucceeded:=True;
-                ThreadFileLog.Log('[GetCompanyDetailsAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
-            end
-            else
-            begin
-
-                if not String.IsNullOrEmpty(Restful.ExecuteError) then
-                    CallResponse.LastMessage:='[GetCompanyDetailsAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
-                else
-                    if String.IsNullOrEmpty(Restful.Content) then
-                        CallResponse.LastMessage:='[GetCompanyDetailsAwaited]: Invalid server response. Please contact IT Support.'
-                    else
-                        CallResponse.LastMessage:='[GetCompanyDetailsAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
-
-                CallResponse.ReturnedCode:=Restful.StatusCode;
-                CallResponse.IsSucceeded:=False;
-                ThreadFileLog.Log(CallResponse.LastMessage);
-
-            end;
-
-        except on
-            E: Exception do
-            begin
-                CallResponse.IsSucceeded:=False;
-                CallResponse.LastMessage:='[GetCompanyDetailsAwaited]: Cannot execute the request. Description: ' + E.Message;
-                ThreadFileLog.Log(CallResponse.LastMessage);
-            end;
-
-        end;
-
-    end);
-
     try
+
+        var NewTask: ITask:=TTask.Create(procedure
+        begin
+
+            var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
+            Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'companies/' + CompanyCode;
+            Restful.RequestMethod:=TRESTRequestMethod.rmGET;
+            ThreadFileLog.Log('[GetCompanyDetailsAwaited]: Executing GET ' + Restful.ClientBaseURL);
+
+            try
+
+                if (Restful.Execute) and (Restful.StatusCode = 200) then
+                begin
+                    CompanyData:=TJson.JsonToObject<TCompanyData>(Restful.Content);
+                    CallResponse.IsSucceeded:=True;
+                    ThreadFileLog.Log('[GetCompanyDetailsAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+                end
+                else
+                begin
+
+                    if not String.IsNullOrEmpty(Restful.ExecuteError) then
+                        CallResponse.LastMessage:='[GetCompanyDetailsAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                    else
+                        if String.IsNullOrEmpty(Restful.Content) then
+                            CallResponse.LastMessage:='[GetCompanyDetailsAwaited]: Invalid server response. Please contact IT Support.'
+                        else
+                            CallResponse.LastMessage:='[GetCompanyDetailsAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+
+                    CallResponse.ReturnedCode:=Restful.StatusCode;
+                    CallResponse.IsSucceeded:=False;
+                    ThreadFileLog.Log(CallResponse.LastMessage);
+
+                end;
+
+            except on
+                E: Exception do
+                begin
+                    CallResponse.IsSucceeded:=False;
+                    CallResponse.LastMessage:='[GetCompanyDetailsAwaited]: Cannot execute the request. Description: ' + E.Message;
+                    ThreadFileLog.Log(CallResponse.LastMessage);
+                end;
+
+            end;
+
+        end);
 
         NewTask.Start();
         TTask.WaitForAll(NewTask);
 
-        CompanyDetails.LbuName   :=CompanyData.CompanyName;
-        CompanyDetails.LbuAddress:=CompanyData.CompanyAddress;
-        CompanyDetails.LbuPhones :=CompanyData.CompanyPhones;
-        CompanyDetails.LbuEmails :=CompanyData.CompanyEmails;
-
-        SetLength(CompanyDetails.LbuBanks, Length(CompanyData.CompanyBanks));
-        for var iCNT:=0 to Length(CompanyDetails.LbuBanks) - 1 do
+        if Assigned(CompanyData) then
         begin
 
-            if not Assigned(CompanyDetails.LbuBanks[iCNT]) then
-                CompanyDetails.LbuBanks[iCNT].Create();
+            CompanyDetails.LbuName   :=CompanyData.CompanyName;
+            CompanyDetails.LbuAddress:=CompanyData.CompanyAddress;
+            CompanyDetails.LbuPhones :=CompanyData.CompanyPhones;
+            CompanyDetails.LbuEmails :=CompanyData.CompanyEmails;
 
-            CompanyDetails.LbuBanks[iCNT].BankName:=CompanyData.CompanyBanks[iCNT].BankName;
-            CompanyDetails.LbuBanks[iCNT].BankAcc :=CompanyData.CompanyBanks[iCNT].BankAcc;
-            CompanyDetails.LbuBanks[iCNT].BankCode:=CompanyData.CompanyBanks[iCNT].BankCode;
-            CompanyDetails.LbuBanks[iCNT].BankIso :=CompanyData.CompanyBanks[iCNT].BankIso;
+            SetLength(CompanyDetails.LbuBanks, Length(CompanyData.CompanyBanks));
+            for var iCNT:=0 to Length(CompanyData.CompanyBanks) - 1 do
+            begin
+
+                if not Assigned(CompanyDetails.LbuBanks[iCNT]) then
+                    CompanyDetails.LbuBanks[iCNT]:=TBankDetails.Create();
+
+                CompanyDetails.LbuBanks[iCNT].BankName:=CompanyData.CompanyBanks[iCNT].BankName;
+                CompanyDetails.LbuBanks[iCNT].BankAcc :=CompanyData.CompanyBanks[iCNT].BankAcc;
+                CompanyDetails.LbuBanks[iCNT].BankCode:=CompanyData.CompanyBanks[iCNT].BankCode;
+                CompanyDetails.LbuBanks[iCNT].BankIso :=CompanyData.CompanyBanks[iCNT].BankIso;
+
+            end;
 
         end;
 
