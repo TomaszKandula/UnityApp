@@ -220,12 +220,11 @@ end;
 procedure TTrackerForm.GetCompanyEmail(List: TComboBox);
 begin
 
-    var Companies: ICompanies:=TCompanies.Create();
-
-    var TestArr: TArray<TRegisteredEmails>;
-    var CallResponse: TCallResponse;
-    CallResponse:=Companies.GetCompanyEmailsAwaited(TArray<integer>.Create(450,2020), TestArr);
-
+//    var Companies: ICompanies:=TCompanies.Create();
+//
+//    var TestArr: TArray<TRegisteredEmails>;
+//    var CallResponse: TCallResponse;
+//    CallResponse:=Companies.GetCompanyEmailsAwaited(TArray<integer>.Create(450,2020), TestArr);
 //    var EmailList:=TStringList.Create();
 //    var CoCodeList:=TStringList.Create();
 //    try

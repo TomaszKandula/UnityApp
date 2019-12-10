@@ -39,6 +39,7 @@ implementation
 destructor TUserCompanyList.Destroy();
 begin
     if Assigned(FError) then FError.Free();
+    inherited;
 end;
 
 

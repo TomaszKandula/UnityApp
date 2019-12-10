@@ -20,7 +20,7 @@ type
         var FEmailList: TArray<TRegisteredEmails>;
         var FError:     TErrorHandler;
     public
-        destructor Destroy();
+        destructor Destroy(); override;
         property EmailList: TArray<TRegisteredEmails> read FEmailList write FEmailList;
         property Error:     TErrorHandler             read FError     write FError;
     end;
@@ -33,6 +33,7 @@ destructor TCompanyEmailsList.Destroy();
 begin
     if Assigned(FError) then FError.Free();
     for var RegisteredEmails: TRegisteredEmails in FEmailList do RegisteredEmails.Free();
+    inherited;
 end;
 
 

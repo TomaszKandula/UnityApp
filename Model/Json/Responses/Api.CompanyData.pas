@@ -48,6 +48,7 @@ destructor TCompanyData.Destroy();
 begin
     if Assigned(FError) then FError.Free();
     for var BankDetails: TBankDetails in FCompanyBanks do BankDetails.Free();
+    inherited;
 end;
 
 

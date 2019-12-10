@@ -57,7 +57,7 @@ type
         function GetCompanyDetailsAwaited(CompanyCode: string; var CompanyDetails: TCompanyDetails): TCallResponse;
 
         /// <summary>
-        /// Allow to load async. list of emails for given CoCodes. There is no separate notification.
+        /// Allow to load async. list of primary emails for given Company Codes. There is no separate notification.
         /// </summary>
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.

@@ -504,33 +504,46 @@ end;
 
 
 procedure TActionsForm.UpdateCompanyDetails();
+
+    procedure StrArrayToStrings(Input: TArray<string>; var Output: TStringList);
+    begin
+        for var iCNT:=0 to Length(Input) - 1 do
+            Output.Add(Input[iCNT]);
+    end;
+
 begin
 
     var Companies: ICompanies:=TCompanies.Create();
     var CallResponse: TCallResponse;
     var CompanyDetails: TCompanyDetails;
+    var LbuEmails:=TStringList.Create();
+    try
 
-    CallResponse:=Companies.GetCompanyDetailsAwaited(FCompanyCode, CompanyDetails);
+        CallResponse:=Companies.GetCompanyDetailsAwaited(FCompanyCode, CompanyDetails);
 
-    if not CallResponse.IsSucceeded then
-    begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
-        Exit();
+        if not CallResponse.IsSucceeded then
+        begin
+            THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+            CompanyDetails.Dispose();
+            LbuEmails.Free();
+            Exit();
+        end;
+
+        FLbuName:=CompanyDetails.LbuName;
+        FLbuAddress:=CompanyDetails.LbuAddress;
+
+        FLbuPhones:=THelpers.ArrayToString(CompanyDetails.LbuPhones, ',');
+        FLbuBanksHtml:=BankListToHtml(CompanyDetails.LbuBanks);
+
+        selSendFrom.Clear();
+        StrArrayToStrings(CompanyDetails.LbuEmails, LbuEmails);
+        selSendFrom.Items.AddStrings(LbuEmails);
+        if selSendFrom.Items.Count > 0 then selSendFrom.ItemIndex:=0;
+
+    finally
+        LbuEmails.Free();
+        CompanyDetails.Dispose();
     end;
-
-    FLbuName:=CompanyDetails.LbuName;
-    FLbuAddress:=CompanyDetails.LbuAddress;
-
-    // make helper method for array to items
-    selSendFrom.Clear();
-    for var iCNT:=0 to Length(CompanyDetails.LbuEmails) - 1 do
-        selSendFrom.Items.Add(CompanyDetails.LbuEmails[iCNT]);
-    if selSendFrom.Items.Count > 0 then selSendFrom.ItemIndex:=0;
-
-    FLbuPhones:=THelpers.ArrayToString(CompanyDetails.LbuPhones, ',');
-    FLbuBanksHtml:=BankListToHtml(CompanyDetails.LbuBanks);
-
-    CompanyDetails.Dispose();
 
 end;
 

@@ -37,6 +37,7 @@ implementation
 destructor TUserSessionLogsSaved.Destroy();
 begin
     if Assigned(FError) then FError.Free();
+    inherited;
 end;
 
 

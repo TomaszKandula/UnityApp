@@ -9,19 +9,10 @@ interface
 
 
 uses
-    Winapi.Windows,
-    Winapi.Messages,
     System.SysUtils,
     System.Classes,
-    System.Diagnostics,
-    System.Win.ComObj,
-    System.SyncObjs,
     System.Threading,
     System.Generics.Collections,
-    Data.Win.ADODB,
-    Data.DB,
-    Unity.Grid,
-    Unity.Enums,
     Unity.Records;
 
 
@@ -69,20 +60,10 @@ implementation
 
 
 uses
-    Handler.Database{Legacy}, //remove
-    Handler.Sql{Legacy}, //remove
-    Unity.Sql{Legacy}, //remove
     Unity.Helpers,
     Unity.Settings,
-    Unity.StatusBar,
     Unity.EventLogger,
-    Unity.SessionService,
-    Unity.Chars,
-    Unity.Common,
-    Unity.DateTimeFormats,
-    Sync.Documents,
-    Bcrypt,
-    DbModel{Legacy}; //remove
+    Unity.SessionService;
 
 
 procedure TMailer.SendFeedbackAsync(Text: string; Callback: TSendUserFeedback); // replace with rest / EWS
