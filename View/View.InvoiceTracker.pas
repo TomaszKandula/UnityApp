@@ -219,36 +219,36 @@ end;
 procedure TTrackerForm.GetCompanyEmail(List: TComboBox);
 begin
 
-    var Companies: ICompanies:=TCompanies.Create();
-    var EmailList:=TStringList.Create();
-    var CoCodeList:=TStringList.Create();
-    try
-
-        THelpers.ReturnCoCodesList(
-            MainForm.sgAgeView,
-            MainForm.sgAgeView.GetCol(TSnapshots.fCoCode),
-            CoCodeList,
-            True
-        );
-
-        Companies.GetCompanyEmailsAwaited(CoCodeList, EmailList);
-        List.Items.AddStrings(EmailList);
-
-    finally
-        EmailList.Free();
-        CoCodeList.Free();
-    end;
-
-    if List.Items.Count > 0 then
-    begin
-        ErrorEmailFrom.Visible:=False;
-        List.ItemIndex:=0;
-    end
-    else
-    begin
-        ErrorEmailFrom.Visible:=True;
-        List.Items.Clear();
-    end;
+//    var Companies: ICompanies:=TCompanies.Create();
+//    var EmailList:=TStringList.Create();
+//    var CoCodeList:=TStringList.Create();
+//    try
+//
+//        THelpers.ReturnCoCodesList(
+//            MainForm.sgAgeView,
+//            MainForm.sgAgeView.GetCol(TSnapshots.fCoCode),
+//            CoCodeList,
+//            True
+//        );
+//
+//        Companies.GetCompanyEmailsAwaited(CoCodeList, EmailList);
+//        List.Items.AddStrings(EmailList);
+//
+//    finally
+//        EmailList.Free();
+//        CoCodeList.Free();
+//    end;
+//
+//    if List.Items.Count > 0 then
+//    begin
+//        ErrorEmailFrom.Visible:=False;
+//        List.ItemIndex:=0;
+//    end
+//    else
+//    begin
+//        ErrorEmailFrom.Visible:=True;
+//        List.Items.Clear();
+//    end;
 
 end;
 

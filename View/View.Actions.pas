@@ -1132,7 +1132,7 @@ begin
     FPayLoad.BeginDate     :='';
     FPayLoad.EndDate       :='';
     FPayLoad.OpenItems     :=OpenItemsGrid;
-    FPayLoad.CUID          :=CUID;
+    //FPayLoad.CUID          :=CUID;
     FPayLoad.SendFrom      :=LbuSendFrom;
     FPayLoad.MailTo        :=Cust_Mail.Text;
     FPayLoad.CustName      :=CustName;

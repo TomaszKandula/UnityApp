@@ -166,7 +166,7 @@ begin
     FPayLoad.InvFilter     :=InvFilter;
     FPayLoad.BeginDate     :=ValBeginDate.Caption;
     FPayLoad.EndDate       :=ValEndDate.Caption;
-    FPayLoad.CUID          :=ActionsForm.CUID;
+    //FPayLoad.CUID          :=ActionsForm.CUID;
     FPayLoad.SendFrom      :=ActionsForm.LbuSendFrom;
     FPayLoad.MailTo        :=ActionsForm.Cust_Mail.Text;
     FPayLoad.CustName      :=ActionsForm.CustName;

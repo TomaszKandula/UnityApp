@@ -78,7 +78,7 @@ uses
     Api.CompanyData;
 
 
-function TCompanies.GetCompanyDetailsAwaited(CompanyCode: string; var CompanyDetails: TCompanyDetails): TCallResponse;
+function TCompanies.GetCompanyDetailsAwaited(CompanyCode: string; var CompanyDetails: TCompanyDetails): TCallResponse;//refactor!
 begin
 
     var CompanyData: TCompanyData;
@@ -165,52 +165,27 @@ begin
 end;
 
 
-procedure TCompanies.GetCompanyEmailsAwaited(SourceList: TStringList; var TargetList: TStringList); // replace with rest
+function TCompanies.GetCompanyEmailsAwaited(SourceList: TStringList; var TargetList: TStringList): TCallResponse; // replace with rest
 begin
 
     if (not SourceList.Count > 0) or (not Assigned(TargetList)) then Exit();
 
+    var CallResponse: TCallResponse;
     var EmailList:=TStringList.Create();
     try
 
         var NewTask: ITask:=TTask.Create(procedure
         begin
 
-//            var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
-//            try
-//
-//                try
-//
-//                    DataTables.Columns.Add(TSql.DISTINCT + TCompanyData.SendNoteFrom);
-//
-//                    var CoCodeList: string;
-//                    for var iCNT:=0 to SourceList.Count - 1 do
-//                    begin
-//
-//                        if iCNT < (SourceList.Count - 1) then
-//                            CoCodeList:=CoCodeList + TCompanyData.CoCode + TSql.EQUAL + QuotedStr(SourceList.Strings[iCNT]) + TSql._OR
-//                        else
-//                            CoCodeList:=CoCodeList + TCompanyData.CoCode + TSql.EQUAL + QuotedStr(SourceList.Strings[iCNT]);
-//
-//                    end;
-//
-//                    DataTables.CustFilter:=TSql.WHERE + CoCodeList;
-//                    DataTables.OpenTable(TCompanyData.CompanyData);
-//
-//                    while not DataTables.DataSet.EOF do
-//                    begin
-//                        EmailList.Add(DataTables.DataSet.Fields[0].Value);
-//                        DataTables.DataSet.MoveNext;
-//                     end;
-//
-//                except
-//                    on E: Exception do
-//                        ThreadFileLog.Log('[GetCompanyEmailsAwaited]: Cannot execute. Error has been thrown: ' + E.Message);
-//                end;
-//
-//            finally
-//                DataTables.Free();
-//            end;
+
+
+
+
+
+
+
+
+
 
         end);
 
@@ -220,6 +195,7 @@ begin
 
     finally
         EmailList.Free();
+        Result:=CallResponse;
     end;
 
 end;

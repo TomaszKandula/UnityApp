@@ -296,10 +296,6 @@ end;
 procedure TMassMailerForm.ExecuteMailer();
 begin
 
-    // ------------------------------------------------------------------------------------
-    // Execute worker thread to process the listed emails. Show busy window in main thread.
-    // ------------------------------------------------------------------------------------
-
     if (String.IsNullOrEmpty(Text_Subject.Text)) or (String.IsNullOrEmpty(Text_Message.Text))
     then
     begin
@@ -307,17 +303,9 @@ begin
         Exit();
     end;
 
-    // -----------------------------------------------
-    // Ask user, they may press the button by mistake.
-    // -----------------------------------------------
-
     if THelpers.MsgCall(Question2, 'Are you sure you want to send it now?') = IDNO
         then
             Exit();
-
-    // ------------------
-    // Filtering options.
-    // ------------------
 
     var InvFilter: TInvoiceFilter:=TInvoiceFilter.ShowAllItems;
 
@@ -328,32 +316,24 @@ begin
     // -----------------------------------
     // Get item count for sendable emails.
     // -----------------------------------
-
-    for var iCNT: integer:=0 to CustomerList.Items.Count - 1 do
+    for var iCNT:=0 to CustomerList.Items.Count - 1 do
         if CustomerList.Items[iCNT].SubItems[4] <> 'Not found!' then
             ItemCount:=ItemCount + 1;
 
     // ---------------------------------------
     // Prepare custom message to the customer.
     // ---------------------------------------
-
-    var MessStr: string:=StringReplace(Text_Message.Text, TChars.CRLF, '<br>', [rfReplaceAll]);
+    var MessStr:=StringReplace(Text_Message.Text, TChars.CRLF, '<br>', [rfReplaceAll]);
 
     // -----------------------------------------------------------------------------------------------------
     // We have to always pre-sort Open Items list via Due Date before sending account statement or reminder.
     // This is necessary to ensure that the HTML generator will generate list for the customer.
     // -----------------------------------------------------------------------------------------------------
-
-    // -----------------------------
-    // Sort Open Items via Due Date.
-    // -----------------------------
-
     MainForm.sgOpenItems.MSort(MainForm.sgOpenItems.GetCol(TOpenitems.PmtStat), TDataType.TFloat, True);
 
     // -------------------------------------------------------------------------------------------
     /// Update column references, as they depend on view from SQL which may be changed at runtime.
     // -------------------------------------------------------------------------------------------
-
     MainForm.UpdateFOpenItemsRefs(MainForm.sgOpenItems);
     MainForm.UpdateFControlStatusRefs(MainForm.sgControlStatus);
 
