@@ -32,7 +32,7 @@ uses
 type
 
 
-    TTrackerForm = class(TForm)
+    TTrackerForm = class(TForm) // WARNING! this class has serious logic flaw! Refactor it!
         Label6: TLabel;
         ListEmailFrom: TComboBox;
         TextReminder1: TLabeledEdit;
@@ -114,7 +114,8 @@ uses
     Unity.SessionService,
     Async.AddressBook,
     Async.Companies,
-    Async.InvoiceTracker;
+    Async.InvoiceTracker,
+    Api.RegisteredEmails;
 
 
 var vTrackerForm: TTrackerForm;
@@ -219,7 +220,12 @@ end;
 procedure TTrackerForm.GetCompanyEmail(List: TComboBox);
 begin
 
-//    var Companies: ICompanies:=TCompanies.Create();
+    var Companies: ICompanies:=TCompanies.Create();
+
+    var TestArr: TArray<TRegisteredEmails>;
+    var CallResponse: TCallResponse;
+    CallResponse:=Companies.GetCompanyEmailsAwaited(TArray<integer>.Create(450,2020), TestArr);
+
 //    var EmailList:=TStringList.Create();
 //    var CoCodeList:=TStringList.Create();
 //    try
@@ -238,17 +244,17 @@ begin
 //        EmailList.Free();
 //        CoCodeList.Free();
 //    end;
-//
-//    if List.Items.Count > 0 then
-//    begin
-//        ErrorEmailFrom.Visible:=False;
-//        List.ItemIndex:=0;
-//    end
-//    else
-//    begin
-//        ErrorEmailFrom.Visible:=True;
-//        List.Items.Clear();
-//    end;
+
+    if List.Items.Count > 0 then
+    begin
+        ErrorEmailFrom.Visible:=False;
+        List.ItemIndex:=0;
+    end
+    else
+    begin
+        ErrorEmailFrom.Visible:=True;
+        List.Items.Clear();
+    end;
 
 end;
 
@@ -291,7 +297,6 @@ begin
     // Remove last six characters to display in list box.
     // Note: We use TStringList as a middleman to remove duplicates.
     // -------------------------------------------------------------
-
     var Settings: ISettings:=TSettings.Create();
     var LayoutLst: TStringList:=TStringList.Create();
     var LayoutFld: string:=Settings.DirLayouts;
@@ -441,23 +446,22 @@ begin
         // --------------------------------------------------------
         // Put ListView data to StringGrid to be saved to database.
         // --------------------------------------------------------
-
         PayLoad.RowCount:=List.Items.Count;
         PayLoad.ColCount:=16;
 
         for var iCNT: integer:=0 to List.Items.Count - 1 do
         begin
             PayLoad.Cells[0,  iCNT]:=SessionService.SessionData.AliasName;  // user alias
-            PayLoad.Cells[1,  iCNT]:=List.Items[iCNT].SubItems[0];   // cuid
+            PayLoad.Cells[1,  iCNT]:=List.Items[iCNT].SubItems[0];   // cuid // to be deleted
             PayLoad.Cells[2,  iCNT]:=List.Items[iCNT].SubItems[11];  // co code
-            PayLoad.Cells[3,  iCNT]:=List.Items[iCNT].SubItems[12];  // branch/agent
+            PayLoad.Cells[3,  iCNT]:=List.Items[iCNT].SubItems[12];  // branch/agent // to be deleted
             PayLoad.Cells[4,  iCNT]:=List.Items[iCNT].SubItems[2];   // cust name
             PayLoad.Cells[5,  iCNT]:=DateTimeToStr(Now);             // stamp
             PayLoad.Cells[6,  iCNT]:=List.Items[iCNT].SubItems[7];   // reminder 1
             PayLoad.Cells[7,  iCNT]:=List.Items[iCNT].SubItems[8];   // reminder 2
             PayLoad.Cells[8,  iCNT]:=List.Items[iCNT].SubItems[9];   // reminder 3
             PayLoad.Cells[9,  iCNT]:=List.Items[iCNT].SubItems[10];  // reminder 4
-            PayLoad.Cells[10, iCNT]:=List.Items[iCNT].SubItems[1];   // scuid
+            PayLoad.Cells[10, iCNT]:=List.Items[iCNT].SubItems[1];   // scuid // to be deleted
             PayLoad.Cells[11, iCNT]:=ListLayout.Text;                // layout
             PayLoad.Cells[12, iCNT]:=List.Items[iCNT].SubItems[6];   // pre-statement
             PayLoad.Cells[13, iCNT]:=List.Items[iCNT].SubItems[3];   // send from
