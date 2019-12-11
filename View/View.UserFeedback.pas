@@ -128,13 +128,16 @@ end;
 procedure TFeedbackForm.SendFeedbackAsync_Callback(CallResponse: TCallResponse);
 begin
 
+    PanelClient.Enabled:=True;
+    Screen.Cursor:=crDefault;
+
     if not CallResponse.IsSucceeded then
     begin
         THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
         Exit();
     end;
 
-    THelpers.MsgCall(TAppMessage.Info, 'Report has been sent successfully!');
+    THelpers.MsgCall(TAppMessage.Info, 'Your feedback has been sent successfully!');
 
 end;
 
@@ -177,6 +180,9 @@ begin
         THelpers.MsgCall(TAppMessage.Warn, 'Cannot send empty report. Please write what feels right and then send.');
         Exit();
     end;
+
+    PanelClient.Enabled:=False;
+    Screen.Cursor:=crHourGlass;
 
     var Mailer: IMailer:=TMailer.Create();
     Mailer.SendFeedbackAsync(ReportMemo.Text, SendFeedbackAsync_Callback);

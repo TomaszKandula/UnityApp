@@ -9,10 +9,7 @@ interface
 
 
 uses
-    System.SysUtils,
     System.Classes,
-    System.Threading,
-    System.Generics.Collections,
     Unity.Records;
 
 
@@ -60,13 +57,20 @@ implementation
 
 
 uses
+    System.SysUtils,
+    System.Threading,
+    REST.Types,
+    REST.Json,
+    Unity.RestWrapper,
     Unity.Helpers,
     Unity.Settings,
     Unity.EventLogger,
-    Unity.SessionService;
+    Unity.SessionService,
+    Api.SendEmail,
+    Api.SentEmail;
 
 
-procedure TMailer.SendFeedbackAsync(Text: string; Callback: TSendUserFeedback); // replace with rest / EWS
+procedure TMailer.SendFeedbackAsync(Text: string; Callback: TSendUserFeedback);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
@@ -75,61 +79,61 @@ begin
         var CallResponse: TCallResponse;
         try
 
-//            var Settings: ISettings:=TSettings.Create();
-//            var Mail: IDocument:=TDocument.Create();
-//
-//            var AppName: string:=Settings.GetStringValue(TConfigSections.ApplicationDetails, 'VALUE', '');
-//            var AppVer: string:=THelpers.GetBuildInfoAsString;
-//
-//            // --------------------------
-//            // Get and set email details.
-//            // --------------------------
-//            if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerNTLM  then
-//            begin
-//                Mail.XMailer:=Settings.GetStringValue(TConfigSections.MailerNTLM, 'FROM',     '');
-//                Mail.MailTo :=Settings.GetStringValue(TConfigSections.MailerNTLM, 'TO',       '');
-//                Mail.MailRt :=Settings.GetStringValue(TConfigSections.MailerNTLM, 'REPLY-TO', '');
-//            end;
-//
-//            if Settings.GetStringValue(TConfigSections.MailerSetup, 'ACTIVE', '') = TConfigSections.MailerBASIC then
-//            begin
-//                Mail.XMailer:=Settings.GetStringValue(TConfigSections.MailerBASIC, 'FROM',     '');
-//                Mail.MailTo :=Settings.GetStringValue(TConfigSections.MailerBASIC, 'TO',       '');
-//                Mail.MailRt :=Settings.GetStringValue(TConfigSections.MailerBASIC, 'REPLY-TO', '');
-//            end;
-//
-//            Mail.MailFrom   :=Mail.XMailer;
-//            Mail.MailCc     :=SessionService.SessionData.EmailAddress;
-//            Mail.MailBcc    :='';
-//            Mail.MailSubject:='Unity - User feedback (' + UpperCase(SessionService.SessionData.AliasName) + ')';
-//
-//            // ----------------------------------
-//            // Plain text to HTML using template.
-//            // ----------------------------------
-//            var Transfer: string:=Text;
-//            Transfer:=StringReplace(Transfer, TChars.CRLF, '<br>', [rfReplaceAll]);
-//
-//            var HTMLBody: string:=Mail.LoadTemplate(Settings.DirLayouts + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE4', ''), False);
-//            HTMLBody:=StringReplace(HTMLBody, '{TEXT_HOLER}',  Transfer,       [rfReplaceAll]);
-//            HTMLBody:=StringReplace(HTMLBody, '{APPNAME}',     AppName,        [rfReplaceAll]);
-//            HTMLBody:=StringReplace(HTMLBody, '{BUILD}',       AppVer,         [rfReplaceAll]);
-//            HTMLBody:=StringReplace(HTMLBody, '{REPORT_DATE}', DateToStr(Now), [rfReplaceAll]);
-//            HTMLBody:=StringReplace(HTMLBody, '{REPORT_TIME}', TimeToStr(Now), [rfReplaceAll]);
-//
-//            Mail.MailBody:=HTMLBody;
-//
-//            if Mail.SendNow then
-//            begin
-//                CallResponse.IsSucceeded:=True;
-//                CallResponse.LastMessage:='[SendFeedbackAsync]: User feedback has been sent.';
-//                ThreadFileLog.Log(CallResponse.LastMessage);
-//            end
-//            else
-//            begin
-//                CallResponse.IsSucceeded:=False;
-//                CallResponse.LastMessage:='[SendFeedbackAsync]: Cannot send email. Please contact IT Support.';
-//                ThreadFileLog.Log(CallResponse.LastMessage);
-//            end;
+            var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
+            Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'mailer/send/';
+            Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
+            ThreadFileLog.Log('[InitiateAwaited]: Executing POST ' + Restful.ClientBaseURL);
+
+            var SendEmail:=TSendEmail.Create();
+            try
+
+                var Stamp: TDateTime; Stamp:=Now();
+                var ListTo:=TArray<string>.Create('jakwi@dfds.com'); //!!!
+                var ListCc:=TArray<string>.Create(SessionService.SessionData.EmailAddress);
+
+                SendEmail.UserId   :=SessionService.SessionData.UnityUserId.ToString();
+                SendEmail.AliasName:=SessionService.SessionData.AliasName;
+                SendEmail.From     :='CI.Team.App@dfds.com'; //!!!
+                SendEmail.&To      :=ListTo;
+                SendEmail.Cc       :=ListCc;
+                SendEmail.Subject  :='User feedback (active session token: ' + SessionService.SessionId + ')';
+                SendEmail.HtmlBody :=Text + '<p>--<br>Sent by ' + SendEmail.AliasName + '<br>' + DateTimeToStr(Stamp) + '</p>';
+
+                Restful.CustomBody:=TJson.ObjectToJsonString(SendEmail);
+
+                if (Restful.Execute) and (Restful.StatusCode = 200) then
+                begin
+
+                    var SentEmail: TSentEmail:=TJson.JsonToObject<TSentEmail>(Restful.Content);
+
+                    CallResponse.IsSucceeded:=SentEmail.IsSucceeded;
+                    CallResponse.LastMessage:=SentEmail.Error.ErrorDesc;
+                    CallResponse.ErrorNumber:=SentEmail.Error.ErrorNum;
+
+                    SentEmail.Free();
+                    ThreadFileLog.Log('[SendFeedbackAsync]: Returned status code is ' + Restful.StatusCode.ToString());
+
+                end
+                else
+                begin
+
+                    if not String.IsNullOrEmpty(Restful.ExecuteError) then
+                        CallResponse.LastMessage:='[SendFeedbackAsync]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                    else
+                        if String.IsNullOrEmpty(Restful.Content) then
+                            CallResponse.LastMessage:='[SendFeedbackAsync]: Invalid server response. Please contact IT Support.'
+                        else
+                            CallResponse.LastMessage:='[SendFeedbackAsync]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+
+                    CallResponse.ReturnedCode:=Restful.StatusCode;
+                    CallResponse.IsSucceeded:=False;
+                    ThreadFileLog.Log(CallResponse.LastMessage);
+
+                end;
+
+            finally
+                SendEmail.Free();
+            end;
 
         except
             on E: Exception do
