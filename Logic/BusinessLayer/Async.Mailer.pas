@@ -80,24 +80,28 @@ begin
         try
 
             var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
-            Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'mailer/send/';
+            Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'mailer/feedback/';
             Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
             ThreadFileLog.Log('[InitiateAwaited]: Executing POST ' + Restful.ClientBaseURL);
 
             var SendEmail:=TSendEmail.Create();
             try
 
-                var Stamp: TDateTime; Stamp:=Now();
-                var ListTo:=TArray<string>.Create('jakwi@dfds.com'); //!!!
+                var Settings: ISettings:=TSettings.Create();
+                var SendFrom:=Settings.GetStringValue(TConfigSections.UserFeedback, 'SendFrom', '');
+                var SendTo  :=Settings.GetStringValue(TConfigSections.UserFeedback, 'SendTo', '');
+
+                var ListTo:=TArray<string>.Create(SendTo);
                 var ListCc:=TArray<string>.Create(SessionService.SessionData.EmailAddress);
 
                 SendEmail.UserId   :=SessionService.SessionData.UnityUserId.ToString();
+                SendEmail.SessionId:=SessionService.SessionId;
                 SendEmail.AliasName:=SessionService.SessionData.AliasName;
-                SendEmail.From     :='CI.Team.App@dfds.com'; //!!!
+                SendEmail.From     :=SendFrom;
                 SendEmail.&To      :=ListTo;
                 SendEmail.Cc       :=ListCc;
-                SendEmail.Subject  :='User feedback (active session token: ' + SessionService.SessionId + ')';
-                SendEmail.HtmlBody :=Text + '<p>--<br>Sent by ' + SendEmail.AliasName + '<br>' + DateTimeToStr(Stamp) + '</p>';
+                SendEmail.Subject  :='User feedback (Unity Platform, ver. ' + THelpers.GetBuildInfoAsString + ')';
+                SendEmail.HtmlBody :=Text.Replace(#13#10,'<br>');
 
                 Restful.CustomBody:=TJson.ObjectToJsonString(SendEmail);
 

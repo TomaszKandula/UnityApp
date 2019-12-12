@@ -218,6 +218,7 @@ type
         const ColumnWidthName    = 'COLUMNWIDTH';
         const ColumnOrderName    = 'COLUMNORDER';
         const ColumnNames        = 'COLUMNNAMES';
+        const UserFeedback       = 'USER_FEEDBACK';
     end;
 
 

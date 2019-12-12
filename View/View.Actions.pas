@@ -725,7 +725,7 @@ procedure TActionsForm.LoadCustomer(GoNext: boolean);
 
 begin
 
-    Screen.Cursor:=crSQLWait;
+    Screen.Cursor:=crHourGlass;
 
     DailyCom.Text  :='';
     GeneralCom.Text:='';
@@ -977,7 +977,7 @@ begin
     if not FIsDataLoaded then
     begin
 
-        Screen.Cursor:=crSQLWait;
+        Screen.Cursor:=crHourGlass;
         OpenItemsGrid.Freeze(True);
         HistoryGrid.Freeze(True);
 

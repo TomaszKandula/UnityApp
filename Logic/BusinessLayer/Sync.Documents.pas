@@ -820,9 +820,7 @@ begin
         False: MailBcc:='';
     end;
 
-    XMailer:=MailFrom;
     MailCc :=MailFrom;
-    MailRt :='';
     //Result :=SendNow;
 
     (* DEBUG *)

@@ -170,6 +170,7 @@ begin
     // the application lifetime.
     // ------------------------------------------------------
     var Settings: ISettings:=TSettings.Create();
+    var PathAppDir:=ExtractFileDir(Application.ExeName) + '\';
     if not Settings.CheckConfigFile then
     begin
 
@@ -191,6 +192,16 @@ begin
     Settings.MakeNewSessionId();
     SessionService.InitializeSession(Settings.NewSessionId, Settings.MakeNewSessionFile(Settings.NewSessionId));
 
+    // ----------------------------------------------------------------
+    // Clear cache directory content if previously ordered by the user.
+    // ----------------------------------------------------------------
+    if Settings.GetStringValue(TConfigSections.ApplicationDetails, 'CLEAR_CACHE_AT_STARTUP', '') = 'yes' then
+    begin
+        THelpers.RemoveAllInFolder(PathAppDir + 'cache', '*.*');
+        Settings.SetStringValue(TConfigSections.ApplicationDetails, 'CLEAR_CACHE_AT_STARTUP', 'no');
+        Settings.Encode(TAppFiles.Configuration);
+    end;
+
     // -------------------------------------------------------------------------------------------------------
     // Initialize Chromium object before Chromium component is created within MainForm.
     // <see cref="https://www.briskbard.com/index.php?lang=en&pageid=cef"/>
@@ -206,7 +217,6 @@ begin
         // Do not run Chromium inside Unity application, all HTML rendering should be subprocessed.
         // ----------------------------------------------------------------------------------------
         GlobalCEFApp.BrowserSubprocessPath:='SubProcess.exe';
-        var PathAppDir: string:=ExtractFileDir(Application.ExeName) + '\';
 
         try
 

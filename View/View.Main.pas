@@ -180,7 +180,7 @@ type
         txtSettingsWarn: TLabel;
         ShapeAddressBookFrm: TShape;
         ShapeAddressBookCap: TShape;
-        imgOFF: TImage;
+        imgOFF1: TImage;
         OpenItemsHeader: TPanel;
         ShapeReloadFrm: TShape;
         ShapeReloadCap: TShape;
@@ -265,7 +265,7 @@ type
         Action_ShowRegistered: TMenuItem;
         N8: TMenuItem;
         N9: TMenuItem;
-        Action_FilterINF7: TMenuItem;
+        Action_FilterAgeView: TMenuItem;
         N7: TMenuItem;
         N6: TMenuItem;
         Action_AddToBook: TMenuItem;
@@ -507,6 +507,8 @@ type
         Action_LoginRedeem: TMenuItem;
         N25: TMenuItem;
         Action_ClearCoockies: TMenuItem;
+        Action_ClearCache: TMenuItem;
+        imgOFF2: TImage;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
@@ -764,6 +766,7 @@ type
         procedure Action_LoginRedeemClick(Sender: TObject);
         procedure ChromiumLoadEnd(Sender: TObject; const browser: ICefBrowser; const frame: ICefFrame; httpStatusCode: Integer);
         procedure Action_ClearCoockiesClick(Sender: TObject);
+        procedure Action_ClearCacheClick(Sender: TObject);
     protected
         procedure CreateParams(var Params: TCreateParams); override;
         procedure WndProc(var msg: TMessage); override;   // Windows events
@@ -921,7 +924,8 @@ begin
     if IsLocked then
     begin
 
-        imgOFF.Visible:=True;
+        imgOFF1.Visible:=True;
+        imgOFF2.Visible:=True;
         btnPassUpdate.Enabled:=False;
 
         EditCurrentPassword.Enabled:=False;
@@ -967,7 +971,8 @@ begin
         sgListSection.Visible:=True;
         sgListValue.Visible:=True;
 
-        imgOFF.Visible:=False;
+        imgOFF1.Visible:=False;
+        imgOFF2.Visible:=False;
 
         btnUnlock.Caption:='Lock';
         EditPassword.SetFocus();
@@ -1549,6 +1554,8 @@ end;
 
 procedure TMainForm.OpenAddressBook_Callback(ReturnedData: TStringGrid; CallResponse: TCallResponse);
 begin
+
+    BusyForm.Close();
 
     if not CallResponse.IsSucceeded then
     begin
@@ -2783,7 +2790,37 @@ end;
 
 procedure TMainForm.PopupCommonMenuPopup(Sender: TObject);
 begin
-    {Do nothing}
+
+    if (sgOpenItems.Focused) or (sgAddressBook.Focused) or (sgInvoiceTracker.Focused) then
+    begin
+
+        if (sgOpenItems.RowCount > 0) or (sgAddressBook.RowCount > 0) or (sgInvoiceTracker.RowCount > 0) then
+        begin
+            Action_ExportTransactions.Enabled:=True;
+            Action_SelectAll.Enabled         :=True;
+            Action_CopyToCB.Enabled          :=True;
+            Action_AutoColumn.Enabled        :=True;
+            Action_TurnRowHighlight.Enabled  :=True;
+        end
+        else
+        begin
+            Action_ExportTransactions.Enabled:=False;
+            Action_SelectAll.Enabled         :=False;
+            Action_CopyToCB.Enabled          :=False;
+            Action_AutoColumn.Enabled        :=False;
+            Action_TurnRowHighlight.Enabled  :=False;
+        end;
+
+    end
+    else
+    begin
+        Action_ExportTransactions.Enabled:=True;
+        Action_SelectAll.Enabled         :=True;
+        Action_CopyToCB.Enabled          :=True;
+        Action_AutoColumn.Enabled        :=True;
+        Action_TurnRowHighlight.Enabled  :=True;
+    end;
+
 end;
 
 
@@ -2804,11 +2841,41 @@ end;
 procedure TMainForm.PopupAgeViewPopup(Sender: TObject);
 begin
 
-    // Enable or disable filter removal
-    if FilterForm.InUse then
-        Action_RemoveFilters.Enabled:=True
+    if valTotalCustomers.Caption = '0' then
+    begin
+        Action_LyncCall.Enabled      :=False;
+        Action_Tracker.Enabled       :=False;
+        Action_AddToBook.Enabled     :=False;
+        Action_MassMailer.Enabled    :=False;
+        Action_GroupFollowUp.Enabled :=False;
+        Action_FilterAgeView.Enabled :=False;
+        Action_RemoveFilters.Enabled :=False;
+        Action_Overdue.Enabled       :=False;
+        Action_Search.Enabled        :=False;
+        Action_ViewOptions.Enabled   :=False;
+        Action_HideThisColumn.Enabled:=False;
+        Action_ShowAllColumns.Enabled:=False;
+        Action_AutoColumnSize.Enabled:=False;
+    end
     else
-        Action_RemoveFilters.Enabled:=False;
+    begin
+        Action_LyncCall.Enabled      :=True;
+        Action_Tracker.Enabled       :=True;
+        Action_AddToBook.Enabled     :=True;
+        Action_MassMailer.Enabled    :=True;
+        Action_GroupFollowUp.Enabled :=True;
+        Action_FilterAgeView.Enabled :=True;
+        Action_RemoveFilters.Enabled :=True;
+        Action_Overdue.Enabled       :=True;
+        Action_Search.Enabled        :=True;
+        Action_ViewOptions.Enabled   :=True;
+        Action_HideThisColumn.Enabled:=True;
+        Action_ShowAllColumns.Enabled:=True;
+        Action_AutoColumnSize.Enabled:=True;
+    end;
+
+    if FilterForm.InUse then Action_RemoveFilters.Enabled:=True
+        else Action_RemoveFilters.Enabled:=False;
 
 end;
 
@@ -3073,6 +3140,15 @@ end;
 procedure TMainForm.Action_AboutClick(Sender: TObject);
 begin
     THelpers.WndCall(AboutForm, TWindowState.Modal);
+end;
+
+
+procedure TMainForm.Action_ClearCacheClick(Sender: TObject);
+begin
+    var Settings: ISettings:=TSettings.Create();
+    Settings.SetStringValue(TConfigSections.ApplicationDetails, 'CLEAR_CACHE_AT_STARTUP', 'yes');
+    Settings.Encode(TAppFiles.Configuration);
+    THelpers.MsgCall(TAppMessage.Info, 'The cache will be cleared next time you start the application.');
 end;
 
 
@@ -3493,7 +3569,7 @@ end;
 
 procedure TMainForm.sgAgeViewDblClick(Sender: TObject);
 begin
-    Action_LyncCallClick(Self);
+    if valTotalCustomers.Caption <> '0' then Action_LyncCallClick(Self);
 end;
 
 
@@ -3709,6 +3785,7 @@ end;
 
 procedure TMainForm.btnOpenAbClick(Sender: TObject);
 begin
+    BusyForm.Show();
     sgAddressBook.SetUpdatedRow(0);
     UpdateStatusBar(TStatusBar.Processing);
     var AddressBook: IAddressBook:=TAddressBook.Create();

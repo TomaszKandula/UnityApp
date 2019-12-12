@@ -23,6 +23,7 @@ type
     {$TYPEINFO ON}
 	strict private
         var FUserId:    string;
+        var FSessionId: string;
         var FAliasName: string;
         var FFrom:      string;
         var FTo:        TArray<string>;
@@ -32,6 +33,7 @@ type
         var FHtmlBody:  string;
 	public
         property UserId:    string         read FUserId    write FUserId;
+        property SessionId: string         read FSessionId write FSessionId;
         property AliasName: string         read FAliasName write FAliasName;
         property From:      string         read FFrom      write FFrom;
         property &To:       TArray<string> read FTo        write FTo;

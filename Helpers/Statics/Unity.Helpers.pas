@@ -14,6 +14,7 @@ uses
     System.Generics.Defaults,
     System.Classes,
     System.SysUtils,
+    System.IOUtils,
     Winapi.Messages,
     Winapi.Windows,
     Winapi.ShellAPI,
@@ -44,6 +45,12 @@ type
         class procedure Move(var FromArray: TArray<T>; var ToArray: TArray<T>); static;
         class procedure MoveToList(const FromArray: TArray<T>; var TargetList: TList<T>); static;
     end;
+
+
+    /// <summary>
+    ///
+    /// </summary>
+    TSidArray = array[0..260] of Char;
 
 
     /// <summary>
@@ -83,6 +90,7 @@ type
         class function UnzippLayouts(FileName: string; DestDir: string): boolean; static;
         class function LoadFileToStr(const FileName: TFileName): string; static;
         class function GetCurrentUserSid: string; static;
+        class procedure RemoveAllInFolder(const Path: string; const Pattern: string); static;
     end;
 
 
@@ -689,7 +697,7 @@ begin
         Result:=True;
 
     finally
-        RS.free;
+        RS.Free();
     end;
 
 end;
@@ -746,8 +754,6 @@ end;
 
 
 class function THelpers.GetCurrentUserSid: string;
-type
-    TSidArray = array[0..260] of Char;
 begin
 
     var hAccessToken: THandle;
@@ -768,6 +774,40 @@ begin
         dwBufferLen:=SizeOf(szSid);
         if ObtainTextSid(hAccessToken, szSid, dwBufferLen) theN Result:=szSid;
         CloseHandle(hAccessToken);
+    end;
+
+end;
+
+
+class procedure THelpers.RemoveAllInFolder(const Path: string; const Pattern: string);
+begin
+
+    var Rec: TSearchRec;
+    var BaseDir:=IncludeTrailingPathDelimiter(Path);
+
+    if System.SysUtils.FindFirst(BaseDir + '\' + Pattern, faAnyFile, Rec) = 0 then
+    begin
+
+        try
+
+            repeat
+
+                if (Rec.Attr and faDirectory) = faDirectory then
+                begin
+                    if (Rec.Name <> '.') and (Rec.Name <> '..') then
+                        Winapi.Windows.RemoveDirectory(PChar(BaseDir + '\' + Rec.Name));
+                end
+                else
+                begin
+                    Winapi.Windows.DeleteFile(PChar(BaseDir + '\' + Rec.Name));
+                end;
+
+            until System.SysUtils.FindNext(Rec) <> 0;
+
+        finally
+            System.SysUtils.FindClose(Rec);
+        end;
+
     end;
 
 end;
