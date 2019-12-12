@@ -575,7 +575,7 @@ type
         function  GetControlStatus: TStringGrid;
         procedure SaveOutput(FileName: string);
         function  BuildHTML: integer;
-        function  StatusCodeToText(TextCode: string; Source: TStringGrid): string;
+        function  StatusCodeToDesc(TextCode: string; Source: TStringGrid): string;
         procedure OpenItemsToHtmlTable(var HtmlStatement: string; var SG: TStringGrid; ActualRow: Integer);
     public
 
@@ -689,16 +689,6 @@ type
         /// </summary>
         function  SendDocument(IsUserInCopy: boolean): boolean;
 
-        /// <summary>
-        /// Inherited from base class.
-        /// </summary>
-        constructor Create();
-
-        /// <summary>
-        /// Inherited from base class.
-        /// </summary>
-        destructor Destroy(); override;
-
     end;
 
 
@@ -712,18 +702,6 @@ uses
     Unity.Chars,
     Unity.Settings,
     Unity.SessionService;
-
-
-constructor TDocument.Create();
-begin
-    inherited;
-end;
-
-
-destructor TDocument.Destroy();
-begin
-    inherited;
-end;
 
 
 function TDocument.LoadTemplate(FileName: string; IsCtrlStatus: boolean): string;
@@ -815,12 +793,12 @@ begin
     // Put user in carbon copy.
     // ------------------------
     var Settings: ISettings:=TSettings.Create();
-    case IsUserInCopy of
-        True:  MailBcc:=SessionService.SessionData.EmailAddress;
-        False: MailBcc:='';
-    end;
+//    case IsUserInCopy of
+//        True:  MailBcc:=SessionService.SessionData.EmailAddress;
+//        False: MailBcc:='';
+//    end;
 
-    MailCc :=MailFrom;
+    //MailCc :=MailFrom;
     //Result :=SendNow;
 
     (* DEBUG *)
@@ -834,9 +812,6 @@ end;
 procedure TDocument.SaveOutput(FileName: string);
 begin
 
-    // ----------------------------
-    // Save the email as HTML file.
-    // ----------------------------
     var SL: TStringList:=TStringList.Create();
     try
         SL.Text:=MailBody;
@@ -848,12 +823,9 @@ begin
 end;
 
 
-function TDocument.StatusCodeToText(TextCode: string; Source: TStringGrid): string;
+function TDocument.StatusCodeToDesc(TextCode: string; Source: TStringGrid): string;
 begin
 
-    // ------------------------------------------
-    // Replace status code with text description.
-    // ------------------------------------------
     for var iCNT: integer:=1 to Source.RowCount do
     begin
 
@@ -901,7 +873,7 @@ begin
     var Text: string:=SG.Cells[FOpenItemsRefs.Text, ActualRow];
     var Code: string:=SG.Cells[FOpenItemsRefs.CtrlCol, ActualRow];
     FHTMLTemp:=StringReplace(FHTMLTemp, '{INV_TXT}', LeftStr(Text, 32), [rfReplaceAll]);
-    FHTMLTemp:=StringReplace(FHTMLTemp, '{INV_CRL}', StatusCodeToText(Code, FControlStatus), [rfReplaceAll]);
+    FHTMLTemp:=StringReplace(FHTMLTemp, '{INV_CRL}', StatusCodeToDesc(Code, FControlStatus), [rfReplaceAll]);
 
     HtmlStatement:=HtmlStatement + FHTMLTemp;
     Inc(FItems);

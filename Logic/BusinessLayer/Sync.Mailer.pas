@@ -9,13 +9,9 @@ interface
 
 
 uses
-    System.SysUtils,
     System.Classes,
-    System.StrUtils,
-    System.Variants,
     System.Generics.Collections,
-    Unity.Enums,
-    Unity.Grid;
+    Unity.Records;
 
 
 type
@@ -43,7 +39,7 @@ type
         /// <remarks>
         /// Undisclosed setter under interface.
         /// </remarks>
-        procedure SetMailTo(NewValue: string);
+        procedure SetMailTo(NewValue: TArray<string>);
 
         /// <summary>
         /// Setting new email carbon copy field.
@@ -51,7 +47,7 @@ type
         /// <remarks>
         /// Undisclosed setter under interface.
         /// </remarks>
-        procedure SetMailCc(NewValue: string);
+        procedure SetMailCc(NewValue: TArray<string>);
 
         /// <summary>
         /// Setting new email blind carbon copy field.
@@ -59,7 +55,7 @@ type
         /// <remarks>
         /// Undisclosed setter under interface.
         /// </remarks>
-        procedure SetMailBcc(NewValue: string);
+        procedure SetMailBcc(NewValue: TArray<string>);
 
         /// <summary>
         /// Setting new email subject field.
@@ -78,14 +74,6 @@ type
         procedure SetMailBody(NewValue: string);
 
         /// <summary>
-        /// Setting new list of file paths of the files to be attched to the email.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
-        procedure SetAttachments(NewValue: TList<string>);
-
-        /// <summary>
         /// Returns email "from" field.
         /// </summary>
         /// <remarks>
@@ -99,7 +87,7 @@ type
         /// <remarks>
         /// Undisclosed getter under interface.
         /// </remarks>
-        function GetMailTo(): string;
+        function GetMailTo(): TArray<string>;
 
         /// <summary>
         /// Returns email carbon copy field.
@@ -107,7 +95,7 @@ type
         /// <remarks>
         /// Undisclosed getter under interface.
         /// </remarks>
-        function GetMailCc(): string;
+        function GetMailCc(): TArray<string>;
 
         /// <summary>
         /// Returns email blind carbon copy field.
@@ -115,7 +103,7 @@ type
         /// <remarks>
         /// Undisclosed getter under interface.
         /// </remarks>
-        function GetMailBcc(): string;
+        function GetMailBcc(): TArray<string>;
 
         /// <summary>
         /// returns email subject.
@@ -134,14 +122,6 @@ type
         function GetMailBody(): string;
 
         /// <summary>
-        /// Returns list of the attachements.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed getter under interface.
-        /// </remarks>
-        function GetAttachments(): TList<string>;
-
-        /// <summary>
         /// Addresser (sender) field.
         /// </summary>
         property MailFrom: string read GetMailFrom write SetMailFrom;
@@ -149,17 +129,17 @@ type
         /// <summary>
         /// Addressee field.
         /// </summary>
-        property MailTo: string read GetMailTo write SetMailTo;
+        property MailTo: TArray<string> read GetMailTo write SetMailTo;
 
         /// <summary>
         /// Carbon copy field.
         /// </summary>
-        property MailCc: string read GetMailCc write SetMailCc;
+        property MailCc: TArray<string> read GetMailCc write SetMailCc;
 
         /// <summary>
         /// Blind carbon copy field.
         /// </summary>
-        property MailBcc: string read GetMailBcc write SetMailBcc;
+        property MailBcc: TArray<string> read GetMailBcc write SetMailBcc;
 
         /// <summary>
         /// Subject of the email.
@@ -172,14 +152,9 @@ type
         property MailBody: string read GetMailBody write SetMailBody;
 
         /// <summary>
-        /// List of paths to files to be attached to the email.
-        /// </summary>
-        property Attachments: TList<string> read GetAttachments write SetAttachments;
-
-        /// <summary>
         /// Send email if the settings fields are configured properly.
         /// </summary>
-        function SendNow(): boolean;
+        function SendNowSync(): TCallResponse;
 
     end;
 
@@ -191,27 +166,23 @@ type
     {$TYPEINFO ON}
     strict private
         var FMailFrom: string;
-        var FMailTo: string;
-        var FMailCc: string;
-        var FMailBcc: string;
+        var FMailTo: TArray<string>;
+        var FMailCc: TArray<string>;
+        var FMailBcc: TArray<string>;
         var FMailSubject: string;
         var FMailBody: string;
-        var FAttachments: TList<string>;
         procedure SetMailFrom(NewValue: string);
-        procedure SetMailTo(NewValue: string);
-        procedure SetMailCc(NewValue: string);
-        procedure SetMailBcc(NewValue: string);
+        procedure SetMailTo(NewValue: TArray<string>);
+        procedure SetMailCc(NewValue: TArray<string>);
+        procedure SetMailBcc(NewValue: TArray<string>);
         procedure SetMailSubject(NewValue: string);
         procedure SetMailBody(NewValue: string);
-        procedure SetAttachments(NewValue: TList<string>);
         function GetMailFrom(): string;
-        function GetMailTo(): string;
-        function GetMailCc(): string;
-        function GetMailBcc(): string;
+        function GetMailTo(): TArray<string>;
+        function GetMailCc(): TArray<string>;
+        function GetMailBcc(): TArray<string>;
         function GetMailSubject(): string;
         function GetMailBody(): string;
-        function GetAttachments(): TList<string>;
-        function SendEmail(OAuth: TAuthTypes): boolean;
     public
 
         /// <summary>
@@ -222,17 +193,17 @@ type
         /// <summary>
         /// Addressee field.
         /// </summary>
-        property MailTo: string read GetMailTo write SetMailTo;
+        property MailTo: TArray<string> read GetMailTo write SetMailTo;
 
         /// <summary>
         /// Carbon copy field.
         /// </summary>
-        property MailCc: string read GetMailCc write SetMailCc;
+        property MailCc: TArray<string> read GetMailCc write SetMailCc;
 
         /// <summary>
         /// Blind carbon copy field.
         /// </summary>
-        property MailBcc: string read GetMailBcc write SetMailBcc;
+        property MailBcc: TArray<string> read GetMailBcc write SetMailBcc;
 
         /// <summary>
         /// Subject of the email.
@@ -245,24 +216,9 @@ type
         property MailBody: string read GetMailBody write SetMailBody;
 
         /// <summary>
-        /// List of paths to files to be attached to the email.
-        /// </summary>
-        property Attachments: TList<string> read GetAttachments write SetAttachments;
-
-        /// <summary>
         /// Send email used configured fields.
         /// </summary>
-        function SendNow(): boolean;
-
-        /// <summary>
-        /// Create TList for FAttachements when class is instantiated.
-        /// </summary>
-        constructor Create();
-
-        /// <summary>
-        /// Release FAttachments.
-        /// </summary>
-        destructor Destroy(); override;
+        function SendNowSync(): TCallResponse;
 
     end;
 
@@ -271,37 +227,88 @@ implementation
 
 
 uses
+    System.SysUtils,
+    REST.Types,
+    REST.Json,
+    Unity.RestWrapper,
     Unity.Settings,
-    Unity.EventLogger;
+    Unity.EventLogger,
+    Unity.SessionService,
+    Api.SendEmail,
+    Api.SentEmail;
 
 
-constructor TMailer.Create();
-begin
-     FAttachments:=TList<string>.Create();
-end;
-
-
-destructor TMailer.Destroy();
-begin
-    if Assigned(FAttachments) then FAttachments.Free();
-end;
-
-
-function TMailer.SendEmail(OAuth: TAuthTypes): boolean;
+function TMailer.SendNowSync(): TCallResponse;
 begin
 
-    Result:=False;
+    var CallResponse: TCallResponse;
+    try
 
-end;
+        var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
+        Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'mailer/send/';
+        Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
+        ThreadFileLog.Log('[SendNowSync]: Executing POST ' + Restful.ClientBaseURL);
 
+        var SendEmail:=TSendEmail.Create();
+        try
 
-function TMailer.SendNow(): boolean; // replace code with rest request to EWS via our api
-begin
+            SendEmail.UserId   :=SessionService.SessionData.UnityUserId.ToString();
+            SendEmail.SessionId:=SessionService.SessionId;
+            SendEmail.AliasName:=SessionService.SessionData.AliasName;
+            SendEmail.From     :=FMailFrom;
+            SendEmail.&To      :=FMailTo;
+            SendEmail.Cc       :=FMailCc;
+            SendEmail.Bcc      :=FMailBcc;
+            SendEmail.Subject  :=MailSubject;
+            SendEmail.HtmlBody :=MailBody;
 
-    Result:=False;
+            Restful.CustomBody:=TJson.ObjectToJsonString(SendEmail);
 
+            if (Restful.Execute) and (Restful.StatusCode = 200) then
+            begin
 
+                var SentEmail: TSentEmail:=TJson.JsonToObject<TSentEmail>(Restful.Content);
 
+                CallResponse.IsSucceeded:=SentEmail.IsSucceeded;
+                CallResponse.LastMessage:=SentEmail.Error.ErrorDesc;
+                CallResponse.ErrorNumber:=SentEmail.Error.ErrorNum;
+
+                SentEmail.Free();
+                ThreadFileLog.Log('[SendNowSync]: Returned status code is ' + Restful.StatusCode.ToString());
+
+            end
+            else
+            begin
+
+                if not String.IsNullOrEmpty(Restful.ExecuteError) then
+                    CallResponse.LastMessage:='[SendNowSync]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                else
+                    if String.IsNullOrEmpty(Restful.Content) then
+                        CallResponse.LastMessage:='[SendNowSync]: Invalid server response. Please contact IT Support.'
+                    else
+                        CallResponse.LastMessage:='[SendNowSync]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+
+                CallResponse.ReturnedCode:=Restful.StatusCode;
+                CallResponse.IsSucceeded:=False;
+                ThreadFileLog.Log(CallResponse.LastMessage);
+
+            end;
+
+        finally
+            SendEmail.Free();
+        end;
+
+    except
+        on E: Exception do
+        begin
+            CallResponse.IsSucceeded:=False;
+            CallResponse.LastMessage:='[SendNowSync]: Cannot execute. Error has been thrown: ' + E.Message;
+            ThreadFileLog.Log(CallResponse.LastMessage);
+        end;
+
+    end;
+
+    Result:=CallResponse;
 
 end;
 
@@ -312,19 +319,19 @@ begin
 end;
 
 
-function TMailer.GetMailTo(): string;
+function TMailer.GetMailTo(): TArray<string>;
 begin
     Result:=FMailTo;
 end;
 
 
-function TMailer.GetMailCc(): string;
+function TMailer.GetMailCc(): TArray<string>;
 begin
     Result:=FMailCc;
 end;
 
 
-function TMailer.GetMailBcc(): string;
+function TMailer.GetMailBcc(): TArray<string>;
 begin
     Result:=FMailBcc;
 end;
@@ -342,31 +349,25 @@ begin
 end;
 
 
-function TMailer.GetAttachments(): TList<string>;
-begin
-    Result:=FAttachments;
-end;
-
-
 procedure TMailer.SetMailFrom(NewValue: string);
 begin
     FMailFrom:=NewValue;
 end;
 
 
-procedure TMailer.SetMailTo(NewValue: string);
+procedure TMailer.SetMailTo(NewValue: TArray<string>);
 begin
     FMailTo:=NewValue;
 end;
 
 
-procedure TMailer.SetMailCc(NewValue: string);
+procedure TMailer.SetMailCc(NewValue: TArray<string>);
 begin
     FMailCc:=NewValue;
 end;
 
 
-procedure TMailer.SetMailBcc(NewValue: string);
+procedure TMailer.SetMailBcc(NewValue: TArray<string>);
 begin
     FMailBcc:=NewValue;
 end;
@@ -381,12 +382,6 @@ end;
 procedure TMailer.SetMailBody(NewValue: string);
 begin
     FMailBody:=NewValue;
-end;
-
-
-procedure TMailer.SetAttachments(NewValue: TList<string>);
-begin
-    FAttachments:=NewValue;
 end;
 
 

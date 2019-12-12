@@ -135,7 +135,7 @@ begin
 
             Statement.CUID       :=PayLoad.CUID;
             Statement.MailFrom   :=PayLoad.SendFrom;
-            Statement.MailTo     :=PayLoad.MailTo;
+            //Statement.MailTo     :=PayLoad.MailTo;
             Statement.CustName   :=PayLoad.CustName;
             Statement.LBUName    :=PayLoad.LBUName;
             Statement.LBUAddress :=PayLoad.LBUAddress;

@@ -767,6 +767,7 @@ type
         procedure ChromiumLoadEnd(Sender: TObject; const browser: ICefBrowser; const frame: ICefFrame; httpStatusCode: Integer);
         procedure Action_ClearCoockiesClick(Sender: TObject);
         procedure Action_ClearCacheClick(Sender: TObject);
+        procedure PopupTrackerPopup(Sender: TObject);
     protected
         procedure CreateParams(var Params: TCreateParams); override;
         procedure WndProc(var msg: TMessage); override;   // Windows events
@@ -2371,10 +2372,8 @@ begin
         end;
 
     finally
-
         sgAgeView.SaveLayout(TConfigSections.ColumnWidthName, TConfigSections.ColumnOrderName, TConfigSections.ColumnNames, TConfigSections.ColumnPrefix);
-        Temp:=nil;
-
+        SetLength(Temp, 0);
     end;
 
 end;
@@ -2791,34 +2790,40 @@ end;
 procedure TMainForm.PopupCommonMenuPopup(Sender: TObject);
 begin
 
-    if (sgOpenItems.Focused) or (sgAddressBook.Focused) or (sgInvoiceTracker.Focused) then
-    begin
+    Action_ExportTransactions.Enabled:=True;
+    Action_SelectAll.Enabled         :=True;
+    Action_CopyToCB.Enabled          :=True;
+    Action_AutoColumn.Enabled        :=True;
+    Action_TurnRowHighlight.Enabled  :=True;
 
-        if (sgOpenItems.RowCount > 0) or (sgAddressBook.RowCount > 0) or (sgInvoiceTracker.RowCount > 0) then
-        begin
-            Action_ExportTransactions.Enabled:=True;
-            Action_SelectAll.Enabled         :=True;
-            Action_CopyToCB.Enabled          :=True;
-            Action_AutoColumn.Enabled        :=True;
-            Action_TurnRowHighlight.Enabled  :=True;
-        end
-        else
-        begin
-            Action_ExportTransactions.Enabled:=False;
-            Action_SelectAll.Enabled         :=False;
-            Action_CopyToCB.Enabled          :=False;
-            Action_AutoColumn.Enabled        :=False;
-            Action_TurnRowHighlight.Enabled  :=False;
-        end;
-
-    end
-    else
+    if (sgOpenItems.Focused) and (sgOpenItems.RowCount < 3) then
     begin
-        Action_ExportTransactions.Enabled:=True;
-        Action_SelectAll.Enabled         :=True;
-        Action_CopyToCB.Enabled          :=True;
-        Action_AutoColumn.Enabled        :=True;
-        Action_TurnRowHighlight.Enabled  :=True;
+        Action_ExportTransactions.Enabled:=False;
+        Action_SelectAll.Enabled         :=False;
+        Action_CopyToCB.Enabled          :=False;
+        Action_AutoColumn.Enabled        :=False;
+        Action_TurnRowHighlight.Enabled  :=False;
+    end;
+
+end;
+
+
+procedure TMainForm.PopupTrackerPopup(Sender: TObject);
+begin
+
+    Action_ShowRegistered.Enabled:=True;
+    Action_ShowMy.Enabled        :=True;
+    Action_ShowAll.Enabled       :=True;
+    Action_Update.Enabled        :=True;
+    Action_Remove.Enabled        :=True;
+
+    if sgInvoiceTracker.RowCount < 3 then
+    begin
+        Action_ShowRegistered.Enabled:=False;
+        Action_ShowMy.Enabled        :=False;
+        Action_ShowAll.Enabled       :=False;
+        Action_Update.Enabled        :=False;
+        Action_Remove.Enabled        :=False;
     end;
 
 end;
@@ -2829,11 +2834,30 @@ begin
 
     Action_ShowMyEntries.Caption:='Show ' + UpperCase(SessionService.SessionData.AliasName) + ' entries';
 
-    // Check if user select a range (We allow to delete only one line at the time)
-    if (sgAddressBook.Selection.Bottom - sgAddressBook.Selection.Top) > 0 then
-        Action_DelRow.Enabled:=False
-    else
-        Action_DelRow.Enabled:=True;
+    Action_Cut.Enabled          :=True;
+    Action_Copy.Enabled         :=True;
+    Action_Paste.Enabled        :=True;
+    Action_DelRow.Enabled       :=True;
+    Action_SearchBook.Enabled   :=True;
+    Action_ShowAsIs.Enabled     :=True;
+    Action_ShowMyEntries.Enabled:=True;
+    Action_ColumnWidth.Enabled  :=True;
+
+    // Check if user select a range (we allow to delete only one line at the time)
+    if (sgAddressBook.Selection.Bottom - sgAddressBook.Selection.Top) > 0 then Action_DelRow.Enabled:=False
+        else Action_DelRow.Enabled:=True;
+
+    if sgAddressBook.RowCount < 3 then
+    begin
+        Action_Cut.Enabled          :=False;
+        Action_Copy.Enabled         :=False;
+        Action_Paste.Enabled        :=False;
+        Action_DelRow.Enabled       :=False;
+        Action_SearchBook.Enabled   :=False;
+        Action_ShowAsIs.Enabled     :=False;
+        Action_ShowMyEntries.Enabled:=False;
+        Action_ColumnWidth.Enabled  :=False;
+    end;
 
 end;
 
