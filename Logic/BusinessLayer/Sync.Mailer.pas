@@ -18,149 +18,36 @@ type
 
 
     /// <summary>
-    /// This interface exposes methods and properties allowing to send an email via REST API.
-    /// It is recommended to use this method in asynchronous call, so the main thread is not
-    /// blocked.
+    /// Exposes synchronous method with list of properties that allows to setup and send an email via REST API.
+    /// It is recommended to use this method in asynchronous call, so the main thread is not blocked.
     /// </summary>
     IMailer = Interface(IInterface)
     ['{3D803B98-BE4F-49A4-A2B5-7F323772E5B4}']
-
-        /// <summary>
-        /// Setting new email "from" field.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         procedure SetMailFrom(NewValue: string);
-
-        /// <summary>
-        /// Setting new email "to" field.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         procedure SetMailTo(NewValue: TArray<string>);
-
-        /// <summary>
-        /// Setting new email carbon copy field.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         procedure SetMailCc(NewValue: TArray<string>);
-
-        /// <summary>
-        /// Setting new email blind carbon copy field.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         procedure SetMailBcc(NewValue: TArray<string>);
-
-        /// <summary>
-        /// Setting new email subject field.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         procedure SetMailSubject(NewValue: string);
-
-        /// <summary>
-        /// Setting new email body field.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         procedure SetMailBody(NewValue: string);
-
-        /// <summary>
-        /// Returns email "from" field.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed getter under interface.
-        /// </remarks>
         function GetMailFrom(): string;
-
-        /// <summary>
-        /// Returns email "to" field.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed getter under interface.
-        /// </remarks>
         function GetMailTo(): TArray<string>;
-
-        /// <summary>
-        /// Returns email carbon copy field.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed getter under interface.
-        /// </remarks>
         function GetMailCc(): TArray<string>;
-
-        /// <summary>
-        /// Returns email blind carbon copy field.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed getter under interface.
-        /// </remarks>
         function GetMailBcc(): TArray<string>;
-
-        /// <summary>
-        /// returns email subject.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed getter under interface.
-        /// </remarks>
         function GetMailSubject(): string;
-
-        /// <summary>
-        /// Returns email body.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed getter under interface.
-        /// </remarks>
         function GetMailBody(): string;
-
-        /// <summary>
-        /// Addresser (sender) field.
-        /// </summary>
         property MailFrom: string read GetMailFrom write SetMailFrom;
-
-        /// <summary>
-        /// Addressee field.
-        /// </summary>
         property MailTo: TArray<string> read GetMailTo write SetMailTo;
-
-        /// <summary>
-        /// Carbon copy field.
-        /// </summary>
         property MailCc: TArray<string> read GetMailCc write SetMailCc;
-
-        /// <summary>
-        /// Blind carbon copy field.
-        /// </summary>
         property MailBcc: TArray<string> read GetMailBcc write SetMailBcc;
-
-        /// <summary>
-        /// Subject of the email.
-        /// </summary>
         property MailSubject: string read GetMailSubject write SetMailSubject;
-
-        /// <summary>
-        /// Body content of the email.
-        /// </summary>
         property MailBody: string read GetMailBody write SetMailBody;
-
-        /// <summary>
-        /// Send email if the settings fields are configured properly.
-        /// </summary>
         function SendNowSync(): TCallResponse;
-
     end;
 
 
     /// <summary>
-    /// This class exposes methods and properties allowing to configure fields and send email via CDOSYS using basic auth or NTLM.
+    /// Exposes method with list of properties that allows to configure fields and send email via REST API.
+    /// Do not use direct implementation.
     /// </summary>
     TMailer = class(TInterfacedObject, IMailer)
     {$TYPEINFO ON}
@@ -184,42 +71,13 @@ type
         function GetMailSubject(): string;
         function GetMailBody(): string;
     public
-
-        /// <summary>
-        /// Addresser (sender) field.
-        /// </summary>
         property MailFrom: string read GetMailFrom write SetMailFrom;
-
-        /// <summary>
-        /// Addressee field.
-        /// </summary>
         property MailTo: TArray<string> read GetMailTo write SetMailTo;
-
-        /// <summary>
-        /// Carbon copy field.
-        /// </summary>
         property MailCc: TArray<string> read GetMailCc write SetMailCc;
-
-        /// <summary>
-        /// Blind carbon copy field.
-        /// </summary>
         property MailBcc: TArray<string> read GetMailBcc write SetMailBcc;
-
-        /// <summary>
-        /// Subject of the email.
-        /// </summary>
         property MailSubject: string read GetMailSubject write SetMailSubject;
-
-        /// <summary>
-        /// Body content of the email.
-        /// </summary>
         property MailBody: string read GetMailBody write SetMailBody;
-
-        /// <summary>
-        /// Send email used configured fields.
-        /// </summary>
         function SendNowSync(): TCallResponse;
-
     end;
 
 
@@ -241,16 +99,17 @@ uses
 function TMailer.SendNowSync(): TCallResponse;
 begin
 
+    var SendEmail:=TSendEmail.Create();
+    var SentEmail: TSentEmail;
     var CallResponse: TCallResponse;
     try
 
-        var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
-        Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'mailer/send/';
-        Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
-        ThreadFileLog.Log('[SendNowSync]: Executing POST ' + Restful.ClientBaseURL);
-
-        var SendEmail:=TSendEmail.Create();
         try
+
+            var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
+            Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'mailer/send/';
+            Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
+            ThreadFileLog.Log('[SendNowSync]: Executing POST ' + Restful.ClientBaseURL);
 
             SendEmail.UserId   :=SessionService.SessionData.UnityUserId.ToString();
             SendEmail.SessionId:=SessionService.SessionId;
@@ -267,13 +126,12 @@ begin
             if (Restful.Execute) and (Restful.StatusCode = 200) then
             begin
 
-                var SentEmail: TSentEmail:=TJson.JsonToObject<TSentEmail>(Restful.Content);
+                SentEmail:=TJson.JsonToObject<TSentEmail>(Restful.Content);
 
                 CallResponse.IsSucceeded:=SentEmail.IsSucceeded;
                 CallResponse.LastMessage:=SentEmail.Error.ErrorDesc;
                 CallResponse.ErrorNumber:=SentEmail.Error.ErrorNum;
 
-                SentEmail.Free();
                 ThreadFileLog.Log('[SendNowSync]: Returned status code is ' + Restful.StatusCode.ToString());
 
             end
@@ -294,18 +152,19 @@ begin
 
             end;
 
-        finally
-            SendEmail.Free();
+        except
+            on E: Exception do
+            begin
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[SendNowSync]: Cannot execute. Error has been thrown: ' + E.Message;
+                ThreadFileLog.Log(CallResponse.LastMessage);
+            end;
+
         end;
 
-    except
-        on E: Exception do
-        begin
-            CallResponse.IsSucceeded:=False;
-            CallResponse.LastMessage:='[SendNowSync]: Cannot execute. Error has been thrown: ' + E.Message;
-            ThreadFileLog.Log(CallResponse.LastMessage);
-        end;
-
+    finally
+        SentEmail.Free();
+        SendEmail.Free();
     end;
 
     Result:=CallResponse;

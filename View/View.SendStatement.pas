@@ -25,7 +25,8 @@ uses
     Vcl.Imaging.pngimage,
     Unity.Grid,
     Unity.Panel,
-    Unity.Records;
+    Unity.Records,
+    Unity.References;
 
 
 type
@@ -87,9 +88,10 @@ type
         procedure btnDelBeginClick(Sender: TObject);
         procedure btnDelEndClick(Sender: TObject);
     strict private
+        var OpenItemsRefs: TFOpenItemsRefs;
+        var CtrlStatusRefs: TFCtrlStatusRefs;
         var FPayLoad: TAccountStatementPayLoad;
         procedure ExecuteMailer();
-    public
         procedure SendAccountStatement_Callback(ProcessingItemNo: integer; CallResponse: TCallResponse);
     end;
 
@@ -107,7 +109,6 @@ uses
     View.Main,
     View.Calendar,
     View.Actions,
-    DbModel,
     Unity.Enums,
     Unity.Chars,
     Unity.Helpers,
@@ -137,8 +138,7 @@ begin
         Exit();
     end;
 
-    if THelpers.MsgCall(Question2, 'Are you absolutely sure you want to send it, right now?') = IDNO then
-        Exit();
+    if THelpers.MsgCall(Question2, 'Do you want to send it, right now?') = IDNO then Exit();
 
     var InvFilter: TInvoiceFilter:=TInvoiceFilter.ShowAllItems;
 
@@ -146,29 +146,24 @@ begin
     if cbOverdueOnly.Checked then InvFilter:=TInvoiceFilter.ReminderOvd;
     if cbNonOverdue.Checked  then InvFilter:=TInvoiceFilter.ReminderNonOvd;
 
-    var TempStr: string:=StringReplace(Text_Message.Text, TChars.CRLF, '<br>', [rfReplaceAll]);
+    var TempStr:=StringReplace(Text_Message.Text, TChars.CRLF, '<br>', [rfReplaceAll]);
 
     // ----------------------------------------------------------------------
     // UpdateFOpenItemsRefs and UpdateFCtrlStatusRefs must be executed before
     // SendAccountStatement is called.
     // ----------------------------------------------------------------------
-
-    MainForm.UpdateFOpenItemsRefs(ActionsForm.OpenItemsGrid);
-    MainForm.UpdateFControlStatusRefs(MainForm.sgControlStatus);
-
-    // --------------------------------
-    // Prepare PayLoad for the request.
-    // --------------------------------
+    THelpers.UpdateFOpenItemsRefs(ActionsForm.OpenItemsGrid, OpenItemsRefs);
+    THelpers.UpdateFControlStatusRefs(MainForm.sgControlStatus, CtrlStatusRefs);
 
     FPayLoad.Layout        :=TDocMode.Custom;
     FPayLoad.Subject       :='Account Statement';
-    FPayLoad.Mess          :=TempStr;
+    FPayLoad.Message       :=TempStr;
     FPayLoad.InvFilter     :=InvFilter;
     FPayLoad.BeginDate     :=ValBeginDate.Caption;
     FPayLoad.EndDate       :=ValEndDate.Caption;
-    //FPayLoad.CUID          :=ActionsForm.CUID;
     FPayLoad.SendFrom      :=ActionsForm.LbuSendFrom;
-    FPayLoad.MailTo        :=ActionsForm.Cust_Mail.Text;
+    FPayLoad.MailTo        :=TArray<string>.Create(ActionsForm.Cust_Mail.Text);
+    FPayLoad.CoCode        :=THelpers.GetSourceDBName(ActionsForm.CompanyCode, 'F');
     FPayLoad.CustName      :=ActionsForm.CustName;
     FPayLoad.CustNumber    :=ActionsForm.CustNumber;
     FPayLoad.LBUName       :=ActionsForm.LbuName;
@@ -178,14 +173,14 @@ begin
     FPayLoad.Series        :=False;
     FPayLoad.ItemNo        :=0;
     FPayLoad.OpenItems     :=ActionsForm.OpenItemsGrid;
-    FPayLoad.OpenItemsRefs :=MainForm.FOpenItemsRefs;
+    FPayLoad.OpenItemsRefs :=OpenItemsRefs;
     FPayLoad.ControlStatus :=MainForm.sgControlStatus;
-    FPayLoad.CtrlStatusRefs:=MainForm.FCtrlStatusRefs;
+    FPayLoad.CtrlStatusRefs:=CtrlStatusRefs;
     FPayLoad.IsCtrlStatus  :=ActionsForm.cbCtrlStatusOff.Checked;
     FPayLoad.IsUserInCopy  :=ActionsForm.cbUserInCopy.Checked;
 
-    //var Statements: IStatements:=TStatements.Create();
-    //Statements.SendAccountStatement(MainForm.FAgeDateSel, FPayLoad, SendAccountStatement_Callback);
+    var Statements: IStatements:=TStatements.Create();
+    Statements.SendAccountStatement('', FPayLoad, SendAccountStatement_Callback); // no age date!
 
     Close();
 
@@ -251,14 +246,8 @@ begin
         ImgCover.Visible:=True;
     end;
 
-    if
-        not(cbShowAll.Checked)
-    and
-        not(cbOverdueOnly.Checked)
-    and
-        not(cbNonOverdue.Checked)
-    then
-        cbShowAll.Checked:=True;
+    if not(cbShowAll.Checked) and not(cbOverdueOnly.Checked) and not(cbNonOverdue.Checked)
+        then cbShowAll.Checked:=True;
 
 end;
 
@@ -273,14 +262,8 @@ begin
         ImgCover.Visible:=True;
     end;
 
-    if
-        not(cbShowAll.Checked)
-    and
-        not(cbOverdueOnly.Checked)
-    and
-        not(cbNonOverdue.Checked)
-    then
-        cbOverdueOnly.Checked:=True;
+    if not(cbShowAll.Checked) and not(cbOverdueOnly.Checked) and not(cbNonOverdue.Checked)
+        then cbOverdueOnly.Checked:=True;
 
 end;
 
@@ -295,14 +278,8 @@ begin
         ImgCover.Visible:=False;
     end;
 
-    if
-        not(cbShowAll.Checked)
-    and
-        not(cbOverdueOnly.Checked)
-    and
-        not(cbNonOverdue.Checked)
-    then
-        cbNonOverdue.Checked:=True;
+    if not(cbShowAll.Checked) and not(cbOverdueOnly.Checked) and not(cbNonOverdue.Checked)
+        then cbNonOverdue.Checked:=True;
 
 end;
 

@@ -10,14 +10,8 @@ interface
 
 uses
     Winapi.Windows,
-    Winapi.Messages,
-    System.SysUtils,
     System.Classes,
-    System.StrUtils,
-    System.Variants,
     System.Generics.Collections,
-    Vcl.StdCtrls,
-    Vcl.Grids,
     Unity.Enums,
     Unity.Grid,
     Unity.Records,
@@ -29,478 +23,88 @@ type
 
 
     /// <summary>
-    /// This interface provides methods and properties for setting up and sending new document (account statement or reminder)
+    /// Provides methods and properties for setting up and sending new document (account statement or reminder)
     /// using HTML layout with defined tables for invoice list.
     /// </summary>
     IDocument = Interface(IMailer)
     ['{C3D66D48-891B-438B-9EB6-F53B62E2FCAD}']
-
-        /// <summary>
-        /// Setup new HTML table.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         procedure SetHTMLTable(NewValue: string);
-
-        /// <summary>
-        /// Setup new HTML document template.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         procedure SetHTMLTemp(NewValue: string);
-
-        /// <summary>
-        /// Setup new HTML row definition for HTML table row.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         procedure SetHTMLRow(NewValue: string);
-
-        /// <summary>
-        /// Setup new HTML layout from local file.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         procedure SetHTMLLayout(NewValue: string);
-
-        /// <summary>
-        /// Setup new customer name.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         procedure SetCustName(NewValue: string);
-
-        /// <summary>
-        /// Setup new customer address.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         procedure SetCustAddr(NewValue: string);
-
-        /// <summary>
-        /// Setup new LBU (Local Business Unit) name.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         procedure SetLBUName(NewValue: string);
-
-        /// <summary>
-        /// Setup new LBU (Local Business Unit) address.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         procedure SetLBUAddress(NewValue: string);
-
-        /// <summary>
-        /// Setup new Company telephone number.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         procedure SetTelephone(NewValue: string);
-
-        /// <summary>
-        /// Setup new company bank account number with SWIFT/BIC/SORT CODE.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         procedure SetBankDetails(NewValue: string);
-
-        /// <summary>
-        /// Setup new custom message to the end-customer.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
-        procedure SetCustMess(NewValue: string);
-
-        /// <summary>
-        /// Setup new document type based on invoices that should be included, example:
-        /// if all invoices are presented, document becomes an account statement.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
+        procedure SetCustMessage(NewValue: string);
         procedure SetInvFilter(NewValue: TInvoiceFilter);
-
-        /// <summary>
-        /// Setup new starting date for due date of the invoice (filtering purposes).
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         procedure SetBeginWith(NewValue: string);
-
-        /// <summary>
-        /// Setup new ending date for due date of the invoice (filtering purposes).
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         procedure SetEndWith(NewValue: string);
-
-        /// <summary>
-        /// Setup new open items list.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         procedure SetOpenItems(NewValue: TStringGrid);
-
-        /// <summary>
-        /// Setup new CUID - customer unique identifier.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
-        procedure SetCUID(NewValue: string);
-
-        /// <summary>
-        /// Setup new list of invoices control statuses that should be excluded from placing onto document.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
+        procedure SetCoCode(NewValue: string);
+        procedure SetCustNumber(NewValue: string);
         procedure SetExclusions(NewValue: TArray<integer>);
-
-        /// <summary>
-        /// Setup new common part of the HTML table.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         procedure SetCommonHTMLTable(NewValue: string);
-
-        /// <summary>
-        /// Setup new common part of the HTML table row.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         procedure SetCommonHTMLRow(NewValue: string);
-
-        /// <summary>
-        /// Setup new open items column references (source).
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         procedure SetOpenItemsRefs(NewValue: TFOpenItemsRefs);
-
-        /// <summary>
-        /// Setup new control status column references (source).
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         procedure SetCtrlStatusRefs(NewValue: TFCtrlStatusRefs);
-
-        /// <summary>
-        /// Setup new source of control status data.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         procedure SetControlStatus(NewValue: TStringGrid);
-
-        /// <summary>
-        /// Returns HTML table.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         function GetHTMLTable(): string;
-
-        /// <summary>
-        /// Returns HTML templarte.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         function GetHTMLTemp(): string;
-
-        /// <summary>
-        /// Returns HTML table row.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         function GetHTMLRow(): string;
-
-        /// <summary>
-        /// Returns HTML layout loaded from file.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         function GetHTMLLayout(): string;
-
-        /// <summary>
-        /// Returns customer name.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         function GetCustName(): string;
-
-        /// <summary>
-        /// Returns customer address.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         function GetCustAddr(): string;
-
-        /// <summary>
-        /// Returns LBU (Local Business Unit) name.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         function GetLBUName(): string;
-
-        /// <summary>
-        /// Returns LBU (Local Business Unit) address.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         function GetLBUAddress(): string;
-
-        /// <summary>
-        /// Returns Company telephone number.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         function GetTelephone(): string;
-
-        /// <summary>
-        /// Get company bank account with SWIFT/BIC/SORT CODE numbers.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         function GetBankDetails(): string;
-
-        /// <summary>
-        /// Get setup custom message to the customer.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
-        function GetCustMess(): string;
-
-        /// <summary>
-        /// Get document type based on invoice selection.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
+        function GetCustMessage(): string;
         function GetInvFilter(): TInvoiceFilter;
-
-        /// <summary>
-        /// Get starting date for invoice due date filter.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         function GetBeginWith(): string;
-
-        /// <summary>
-        /// Get ending date for invoice due date filter.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         function GetEndWith(): string;
-
-        /// <summary>
-        /// Get open items (invoice list).
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         function GetOpenItems(): TStringGrid;
-
-        /// <summary>
-        /// Get customer unique identifier.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
-        function GetCUID(): string;
-
-        /// <summary>
-        /// Get setup control status numbers that defines excluded invoices from document.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
+        function GetCoCode: string;
+        function GetCustNumber: string;
         function GetExclusions(): TArray<integer>;
-
-        /// <summary>
-        /// Get common HTML table part.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         function GetCommonHTMLTable(): string;
-
-        /// <summary>
-        /// Get common HTML table row part.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         function GetCommonHTMLRow(): string;
-
-        /// <summary>
-        /// Get open items column references.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         function GetOpenItemsRefs(): TFOpenItemsRefs;
-
-        /// <summary>
-        /// get control statuses column references.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         function GetCtrlStatusRefs(): TFCtrlStatusRefs;
-
-        /// <summary>
-        /// Get control statuses list.
-        /// </summary>
-        /// <remarks>
-        /// Undisclosed setter under interface.
-        /// </remarks>
         function GetControlStatus: TStringGrid;
-
-        /// <summary>
-        /// HTML table holder.
-        /// </summary>
         property HTMLTable: string read GetHTMLTable;
-
-        /// <summary>
-        /// HTML template holder.
-        /// </summary>
         property HTMLTemp: string read GetHTMLTemp;
-
-        /// <summary>
-        /// HTML table row holder.
-        /// </summary>
         property HTMLRow: string read GetHTMLRow;
-
-        /// <summary>
-        /// Open items holder.
-        /// </summary>
         property OpenItems: TStringGrid read GetOpenItems write SetOpenItems;
-
-        /// <summary>
-        /// Open items column references holder.
-        /// </summary>
         property OpenItemsRefs: TFOpenItemsRefs read GetOpenItemsRefs write SetOpenItemsRefs;
-
-        /// <summary>
-        /// Control status holder.
-        /// </summary>
         property ControlStatus: TStringGrid read GetControlStatus write SetControlStatus;
-
-        /// <summary>
-        /// Control status column references holder.
-        /// </summary>
         property CtrlStatusRefs: TFCtrlStatusRefs read GetCtrlStatusRefs write SetCtrlStatusRefs;
-
-        /// <summary>
-        /// HTML layout holder loaded from file.
-        /// </summary>
         property HTMLLayout: string read GetHTMLLayout write SetHTMLLayout;
-
-        /// <summary>
-        /// Customer name.
-        /// </summary>
         property CustName: string read GetCustName write SetCustName;
-
-        /// <summary>
-        /// Customer address.
-        /// </summary>
         property CustAddr: string read GetCustAddr write SetCustAddr;
-
-        /// <summary>
-        /// LBU (Local Business Unit) name.
-        /// </summary>
         property LBUName: string read GetLBUName write SetLBUName;
-
-        /// <summary>
-        /// LBU (Local Business Unit) address.
-        /// </summary>
         property LBUAddress: string read GetLBUAddress write SetLBUAddress;
-
-        /// <summary>
-        /// Company telephone holder.
-        /// </summary>
         property Telephone: string read GetTelephone write SetTelephone;
-
-        /// <summary>
-        /// Company bank details that includes SWIFT/BIC/SORT CODE.
-        /// </summary>
         property BankDetails: string read GetBankDetails write SetBankDetails;
-
-        /// <summary>
-        /// Custom message to a customer.
-        /// </summary>
-        property CustMess: string read GetCustMess write SetCustMess;
-
-        /// <summary>
-        /// Document type based on invoice selection (ex. all invoices implies account statement, overdue invoices makes reminder).
-        /// </summary>
+        property CustMessage: string read GetCustMessage write SetCustMessage;
         property InvFilter: TInvoiceFilter read GetInvFilter write SetInvFilter;
-
-        /// <summary>
-        /// Starting date for invoice due date filter.
-        /// </summary>
         property BeginWith: string read GetBeginWith write SetBeginWith;
-
-        /// <summary>
-        /// Ending date for invoice due date filter.
-        /// </summary>
         property EndWith: string read GetEndWith write SetEndWith;
-
-        /// <summary>
-        /// Customer unique identifier.
-        /// </summary>
-        property CUID: string read GetCUID write SetCUID;
-
-        /// <summary>
-        /// List of excluded invoices based on control status value.
-        /// </summary>
+        property CoCode: string read GetCoCode write SetCoCode;
+        property CustNumber: string read GetCustNumber write SetCustNumber;
         property Exclusions: TArray<integer> read GetExclusions write SetExclusions;
-
-        /// <summary>
-        /// Allow to load HTML template from the file. It can return HTML layout with or without control status column.
-        /// </summary>
         function LoadTemplate(FileName: string; IsCtrlStatus: boolean): string;
-
-        /// <summary>
-        /// Method that allows to send document via email.
-        /// </summary>
         function SendDocument(IsUserInCopy: boolean): boolean;
-
     end;
 
 
+    /// <summary>
+    /// Provides methods and properties for setting up and sending new document (account statement or reminder)
+    /// using HTML layout with defined tables for invoice list.
+    /// Do not use direct implementation.
+    /// </summary>
     TDocument = class(TMailer, IDocument)
     {$TYPEINFO ON}
     strict private
@@ -517,11 +121,12 @@ type
         var FLBUAddress: string;
         var FTelephone: string;
         var FBankDetails: string;
-        var FCustMess:        string;
+        var FCustMessage: string;
         var FInvFilter: TInvoiceFilter;
         var FBeginWith: string;
         var FEndWith: string;
-        var FCUID: string;
+        var FCoCode: string;
+        var FCustNumber: string;
         var FExclusions: TArray<integer>;
         var FCommonHTMLTable: string;
         var FCommonHTMLRow: string;
@@ -539,156 +144,70 @@ type
         procedure SetLBUAddress(NewValue: string);
         procedure SetTelephone(NewValue: string);
         procedure SetBankDetails(NewValue: string);
-        procedure SetCustMess(NewValue: string);
+        procedure SetCustMessage(NewValue: string);
         procedure SetInvFilter(NewValue: TInvoiceFilter);
         procedure SetBeginWith(NewValue: string);
         procedure SetEndWith(NewValue: string);
         procedure SetOpenItems(NewValue: TStringGrid);
-        procedure SetCUID(NewValue: string);
+        procedure SetCoCode(NewValue: string);
+        procedure SetCustNumber(NewValue: string);
         procedure SetExclusions(NewValue: TArray<integer>);
         procedure SetCommonHTMLTable(NewValue: string);
         procedure SetCommonHTMLRow(NewValue: string);
         procedure SetOpenItemsRefs(NewValue: TFOpenItemsRefs);
         procedure SetCtrlStatusRefs(NewValue: TFCtrlStatusRefs);
         procedure SetControlStatus(NewValue: TStringGrid);
-        function  GetHTMLTable: string;
-        function  GetHTMLTemp: string;
-        function  GetHTMLRow: string;
-        function  GetHTMLLayout: string;
-        function  GetCustName: string;
-        function  GetCustAddr: string;
-        function  GetLBUName: string;
-        function  GetLBUAddress: string;
-        function  GetTelephone: string;
-        function  GetBankDetails: string;
-        function  GetCustMess: string;
-        function  GetInvFilter: TInvoiceFilter;
-        function  GetBeginWith: string;
-        function  GetEndWith: string;
-        function  GetOpenItems: TStringGrid;
-        function  GetCUID: string;
-        function  GetExclusions: TArray<integer>;
-        function  GetCommonHTMLTable: string;
-        function  GetCommonHTMLRow: string;
-        function  GetOpenItemsRefs: TFOpenItemsRefs;
-        function  GetCtrlStatusRefs: TFCtrlStatusRefs;
-        function  GetControlStatus: TStringGrid;
+        function  GetHTMLTable(): string;
+        function  GetHTMLTemp(): string;
+        function  GetHTMLRow(): string;
+        function  GetHTMLLayout(): string;
+        function  GetCustName(): string;
+        function  GetCustAddr(): string;
+        function  GetLBUName(): string;
+        function  GetLBUAddress(): string;
+        function  GetTelephone(): string;
+        function  GetBankDetails(): string;
+        function  GetCustMessage(): string;
+        function  GetInvFilter(): TInvoiceFilter;
+        function  GetBeginWith(): string;
+        function  GetEndWith(): string;
+        function  GetOpenItems(): TStringGrid;
+        function  GetCoCode(): string;
+        function  GetCustNumber(): string;
+        function  GetExclusions(): TArray<integer>;
+        function  GetCommonHTMLTable(): string;
+        function  GetCommonHTMLRow(): string;
+        function  GetOpenItemsRefs(): TFOpenItemsRefs;
+        function  GetCtrlStatusRefs(): TFCtrlStatusRefs;
+        function  GetControlStatus(): TStringGrid;
         procedure SaveOutput(FileName: string);
-        function  BuildHTML: integer;
+        function  BuildHTML(): integer;
         function  StatusCodeToDesc(TextCode: string; Source: TStringGrid): string;
         procedure OpenItemsToHtmlTable(var HtmlStatement: string; var SG: TStringGrid; ActualRow: Integer);
     public
-
-        /// <summary>
-        /// HTML table holder.
-        /// </summary>
         property HTMLTable: string read GetHTMLTable;
-
-        /// <summary>
-        /// HTML template holder.
-        /// </summary>
         property HTMLTemp: string read GetHTMLTemp;
-
-        /// <summary>
-        /// HTML table row holder.
-        /// </summary>
         property HTMLRow: string read GetHTMLRow;
-
-        /// <summary>
-        /// Open items holder.
-        /// </summary>
         property OpenItems: TStringGrid read GetOpenItems write SetOpenItems;
-
-        /// <summary>
-        /// Open items column references holder.
-        /// </summary>
         property OpenItemsRefs: TFOpenItemsRefs read GetOpenItemsRefs write SetOpenItemsRefs;
-
-        /// <summary>
-        /// Control status holder.
-        /// </summary>
         property ControlStatus: TStringGrid read GetControlStatus write SetControlStatus;
-
-        /// <summary>
-        /// Control status column references holder.
-        /// </summary>
         property CtrlStatusRefs: TFCtrlStatusRefs read GetCtrlStatusRefs write SetCtrlStatusRefs;
-
-        /// <summary>
-        /// HTML layout holder loaded from file.
-        /// </summary>
         property HTMLLayout: string read GetHTMLLayout write SetHTMLLayout;
-
-        /// <summary>
-        /// Customer name.
-        /// </summary>
         property CustName: string read GetCustName write SetCustName;
-
-        /// <summary>
-        /// Customer address.
-        /// </summary>
         property CustAddr: string read GetCustAddr write SetCustAddr;
-
-        /// <summary>
-        /// LBU (Local Business Unit) name.
-        /// </summary>
         property LBUName: string read GetLBUName write SetLBUName;
-
-        /// <summary>
-        /// LBU (Local Business Unit) address.
-        /// </summary>
         property LBUAddress: string read GetLBUAddress write SetLBUAddress;
-
-        /// <summary>
-        /// Company telephone holder.
-        /// </summary>
         property Telephone: string read GetTelephone write SetTelephone;
-
-        /// <summary>
-        /// Company bank details that includes SWIFT/BIC/SORT CODE.
-        /// </summary>
         property BankDetails: string read GetBankDetails write SetBankDetails;
-
-        /// <summary>
-        /// Custom message to a customer.
-        /// </summary>
-        property CustMess: string read GetCustMess write SetCustMess;
-
-        /// <summary>
-        /// Document type based on invoice selection (ex. all invoices implies account statement, overdue invoices makes reminder).
-        /// </summary>
+        property CustMessage: string read GetCustMessage write SetCustMessage;
         property InvFilter: TInvoiceFilter read GetInvFilter write SetInvFilter;
-
-        /// <summary>
-        /// Starting date for invoice due date filter.
-        /// </summary>
         property BeginWith: string read GetBeginWith write SetBeginWith;
-
-        /// <summary>
-        /// Ending date for invoice due date filter.
-        /// </summary>
         property EndWith: string read GetEndWith write SetEndWith;
-
-        /// <summary>
-        /// Customer unique identifier.
-        /// </summary>
-        property CUID: string read GetCUID write SetCUID;
-
-        /// <summary>
-        /// List of excluded invoices based on control status value.
-        /// </summary>
+        property CoCode: string read GetCoCode write SetCoCode;
+        property CustNumber: string read GetCustNumber write SetCustNumber;
         property Exclusions: TArray<integer> read GetExclusions write SetExclusions;
-
-        /// <summary>
-        /// Allow to load HTML template from the file. It can return HTML layout with or without control status column.
-        /// </summary>
-        function  LoadTemplate(FileName: string; IsCtrlStatus: boolean): string;
-
-        /// <summary>
-        /// Method that allows to send document via email.
-        /// </summary>
-        function  SendDocument(IsUserInCopy: boolean): boolean;
-
+        function LoadTemplate(FileName: string; IsCtrlStatus: boolean): string;
+        function SendDocument(IsUserInCopy: boolean): boolean;
     end;
 
 
@@ -696,8 +215,8 @@ implementation
 
 
 uses
-    Data.Win.ADODB,
-    DbModel,
+    System.SysUtils,
+    System.StrUtils,
     Unity.Helpers,
     Unity.Chars,
     Unity.Settings,
@@ -711,17 +230,16 @@ begin
     // Template is made out of two files that defines HTML table and single row.
     // Note: we have two different tables, with Control Status column and without it.
     // ------------------------------------------------------------------------------
-
     var KeyName: string;
     var Settings: ISettings:=TSettings.Create();
-    var SL: TStringList:=TStringList.Create();
+    var StringList: TStringList:=TStringList.Create();
     try
 
         // ------------------------
         // Upload table definition.
         // ------------------------
-        SL.LoadFromFile(FileName);
-        Result:=SL.Text;
+        StringList.LoadFromFile(FileName);
+        Result:=StringList.Text;
 
         KeyName:='SERVICE%TBL';
         if not IsCtrlStatus then
@@ -730,8 +248,8 @@ begin
             KeyName:=KeyName.Replace('%', '2');
 
         var HtmlTablePath:=Settings.DirLayouts + Settings.GetStringValue(TConfigSections.Layouts, KeyName, '');
-        SL.LoadFromFile(HtmlTablePath);
-        FCommonHTMLTable:=SL.Text;
+        StringList.LoadFromFile(HtmlTablePath);
+        FCommonHTMLTable:=StringList.Text;
 
         // ----------------------
         // Upload row definition.
@@ -743,29 +261,22 @@ begin
             KeyName:=KeyName.Replace('%', '2');
 
         var HtmlRowPath:=Settings.DirLayouts + Settings.GetStringValue(TConfigSections.Layouts, KeyName, '');
-        SL.LoadFromFile(HtmlRowPath);
-        FCommonHTMLRow:=SL.Text;
+        StringList.LoadFromFile(HtmlRowPath);
+        FCommonHTMLRow:=StringList.Text;
 
     finally
-        SL.Free();
+        StringList.Free();
     end;
 
 end;
 
 
 function TDocument.SendDocument(IsUserInCopy: boolean): boolean;
-var RAND: integer; (* DEBUG *)
 begin
 
-    // -----------------------------------------------------------------------------
-    // Do not send if we have no items (due to selected due date range by the user).
-    // -----------------------------------------------------------------------------
     Result:=False;
     if BuildHTML = 0 then Exit();
 
-    // ---------------------------
-    // Put data into placeholders.
-    // ---------------------------
     FHTMLTable:=StringReplace(FHTMLTable,  '{ROWS}',         FHTMLStat,    [rfReplaceAll]);
     MailBody  :=StringReplace(FHTMLLayout, '{INVOICE_LIST}', FHTMLTable,   [rfReplaceAll]);
     MailBody  :=StringReplace(MailBody,    '{ADDR_DATA}',    CustAddr,     [rfReplaceAll]);
@@ -775,36 +286,24 @@ begin
     MailBody  :=StringReplace(MailBody,    '{EMAIL}',        MailFrom,     [rfReplaceAll]);
     MailBody  :=StringReplace(MailBody,    '{TEL}',          Telephone,    [rfReplaceAll]);
 
-    // ----------------------------------------------
-    // Custom template title (statement or reminder).
-    // ----------------------------------------------
     case InvFilter of
         TInvoiceFilter.ReminderOvd:    MailBody:=StringReplace(MailBody, '{TITLE}', 'REMINDER',  [rfReplaceAll]);
         TInvoiceFilter.ReminderNonOvd: MailBody:=StringReplace(MailBody, '{TITLE}', 'REMINDER',  [rfReplaceAll]);
         TInvoiceFilter.ShowAllItems:   MailBody:=StringReplace(MailBody, '{TITLE}', 'STATEMENT', [rfReplaceAll]);
     end;
 
-    // ----------------------------------
-    // Custom salutation and the message.
-    // ----------------------------------
-    if CustMess <> '' then MailBody:=StringReplace(MailBody, '{TEXT}', CustMess, [rfReplaceAll]);
+    if CustMessage <> '' then MailBody:=StringReplace(MailBody, '{TEXT}', CustMessage, [rfReplaceAll]);
 
-    // ------------------------
-    // Put user in carbon copy.
-    // ------------------------
     var Settings: ISettings:=TSettings.Create();
-//    case IsUserInCopy of
-//        True:  MailBcc:=SessionService.SessionData.EmailAddress;
-//        False: MailBcc:='';
-//    end;
 
-    //MailCc :=MailFrom;
-    //Result :=SendNow;
+    case IsUserInCopy of
+        True:  MailBcc:=TArray<string>.Create(SessionService.SessionData.EmailAddress);
+        False: MailBcc:=TArray<string>.Create();
+    end;
 
-    (* DEBUG *)
-    RAND:=Random(100000);
-    SaveOutput('I:\Temp\TestEmails\' + IntToStr(RAND) + '.html');
-    Result:=True;
+    var CallResponse: TCallResponse;
+    CallResponse:=SendNowSync();
+    Result:=CallResponse.IsSucceeded;
 
 end;
 
@@ -812,12 +311,12 @@ end;
 procedure TDocument.SaveOutput(FileName: string);
 begin
 
-    var SL: TStringList:=TStringList.Create();
+    var StringList: TStringList:=TStringList.Create();
     try
-        SL.Text:=MailBody;
-        SL.SaveToFile(FileName);
+        StringList.Text:=MailBody;
+        StringList.SaveToFile(FileName);
     finally
-        SL.Free();
+        StringList.Free();
     end;
 
 end;
@@ -826,7 +325,7 @@ end;
 function TDocument.StatusCodeToDesc(TextCode: string; Source: TStringGrid): string;
 begin
 
-    for var iCNT: integer:=1 to Source.RowCount do
+    for var iCNT:=1 to Source.RowCount do
     begin
 
         if Source.Cells[FCtrlStatusRefs.Code, iCNT] = TextCode then
@@ -843,21 +342,12 @@ end;
 procedure TDocument.OpenItemsToHtmlTable(var HtmlStatement: string; var SG: TStringGrid; ActualRow: Integer);
 begin
 
-    // ------------------------
-    // Get outstanding amounts.
-    // ------------------------
     var CurAmount: string:=SG.Cells[FOpenItemsRefs.CurAmCol, ActualRow];
     var Amount:    string:=SG.Cells[FOpenItemsRefs.OpenCurAmCol, ActualRow];
 
-    // ----------------------------------------------
-    // Change format number from 1000,00 to 1 000,00.
-    // ----------------------------------------------
     CurAmount:=FormatFloat('#,##0.00', StrToFloat(CurAmount));
     Amount   :=FormatFloat('#,##0.00', StrToFloat(Amount));
 
-    // -------------------
-    // Generate HTML data.
-    // -------------------
     FHTMLTemp:=HTMLRow;
     FHTMLTemp:=StringReplace(FHTMLTemp, '{INV_NUM}', SG.Cells[FOpenItemsRefs.InvoNoCol, ActualRow], [rfReplaceAll]);
     FHTMLTemp:=StringReplace(FHTMLTemp, '{INV_DAT}', SG.Cells[FOpenItemsRefs.ValDtCol,  ActualRow], [rfReplaceAll]);
@@ -868,7 +358,7 @@ begin
 
     // -------------------------------------------------------------------
     // Text on the invoice may be very long (but not more than 200 chars),
-    // the decision was to put hard limit of 32 chars.
+    // the manager's decision was to put hard limit of 32 chars.
     // -------------------------------------------------------------------
     var Text: string:=SG.Cells[FOpenItemsRefs.Text, ActualRow];
     var Code: string:=SG.Cells[FOpenItemsRefs.CtrlCol, ActualRow];
@@ -901,11 +391,6 @@ begin
     {$WARN SYMBOL_PLATFORM ON}
     UnityFrmt:=FormatSettings;
 
-    // ---------------------------------------------
-    // Build HTML with all open items for given CUID
-    // number and control statuses different than
-    // those defined by FExclusion array.
-    // ---------------------------------------------
     FPos:=0;
     FItems:=0;
 
@@ -917,7 +402,9 @@ begin
 
         var CtrlStatus: integer:=(OpenItems.Cells[FOpenItemsRefs.CtrlCol, iCNT]).ToInteger();
 
-        if (OpenItems.Cells[FOpenItemsRefs.CuidCol, iCNT] = CUID) and (not TArrayUtils<integer>.Contains(CtrlStatus, FExclusions)) then
+        if (OpenItems.Cells[FOpenItemsRefs.CoCodeCol, iCNT] = CoCode) and
+        (OpenItems.Cells[FOpenItemsRefs.CustNumCol, iCNT] = CustNumber) and
+        (not TArrayUtils<integer>.Contains(CtrlStatus, FExclusions)) then
         begin
 
             if FPos = 0 then FPos:=iCNT;
@@ -1003,9 +490,6 @@ begin
 
     end;
 
-    // -----------------------------
-    // Build customer address field.
-    // -----------------------------
     CustAddr:='<p class="p"><b>' + CustName + '</b><br />' + TChars.CRLF;
 
     var AddrFld1: string:=OpenItems.Cells[FOpenItemsRefs.Ad1Col,   FPos];
@@ -1105,9 +589,9 @@ begin
 end;
 
 
-function TDocument.GetCustMess: string;
+function TDocument.GetCustMessage: string;
 begin
-    Result:=FCustMess;
+    Result:=FCustMessage;
 end;
 
 
@@ -1135,9 +619,15 @@ begin
 end;
 
 
-function TDocument.GetCUID: string;
+function TDocument.GetCoCode: string;
 begin
-    Result:=FCUID;
+    Result:=FCoCode;
+end;
+
+
+function TDocument.GetCustNumber: string;
+begin
+    Result:=FCustNumber;
 end;
 
 
@@ -1237,9 +727,9 @@ begin
 end;
 
 
-procedure TDocument.SetCustMess(NewValue: string);
+procedure TDocument.SetCustMessage(NewValue: string);
 begin
-    FCustMess:=NewValue;
+    FCustMessage:=NewValue;
 end;
 
 
@@ -1267,9 +757,15 @@ begin
 end;
 
 
-procedure TDocument.SetCUID(NewValue: string);
+procedure TDocument.SetCoCode(NewValue: string);
 begin
-    FCUID:=NewValue;
+    FCoCode:=NewValue;
+end;
+
+
+procedure TDocument.SetCustNumber(NewValue: string);
+begin
+    FCustNumber:=NewValue;
 end;
 
 

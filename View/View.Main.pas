@@ -828,8 +828,6 @@ type
         var FRiskClassGroup: TRiskClassGroup;
         var FStartTime: TTime;
         var FGridPicture: TImage;
-        var FOpenItemsRefs: TFOpenItemsRefs;
-        var FCtrlStatusRefs: TFCtrlStatusRefs;
         var FOpenItemsUpdate: string;
         var FOpenItemsStatus: string;
         procedure SetActiveTabsheet(TabSheet: TTabSheet);
@@ -837,8 +835,6 @@ type
         procedure InitMainWnd(SessionFile: string);
         procedure SetupMainWnd();
         procedure StartMainWnd();
-        procedure UpdateFOpenItemsRefs(SourceGrid: TStringGrid);
-        procedure UpdateFControlStatusRefs(SourceGrid: TStringGrid);
         procedure SwitchTimers(State: TAppTimers);
         procedure UpdateStatusBar(Text: string);
         procedure LoadAgeReport(SelectedCoCodes: string);
@@ -1914,22 +1910,22 @@ begin
     if PassMsg.LParam > 0 then
     begin
 
-        //FDailyCommentFields.GroupIdSel   :=FGroupIdSel;
-        //FDailyCommentFields.AgeDateSel   :=FAgeDateSel;
-        FDailyCommentFields.CUID         :=sgAgeView.Cells[sgAgeView.GetCol(DbModel.TSnapshots.fCuid), sgAgeView.Row];
-        FDailyCommentFields.Email        :=False;
-        FDailyCommentFields.CallEvent    :=True;
-        FDailyCommentFields.CallDuration :=PassMsg.LParam;
-        FDailyCommentFields.Comment      :='';
-        FDailyCommentFields.EmailReminder:=False;
-        FDailyCommentFields.EmailAutoStat:=False;
-        FDailyCommentFields.EmailManuStat:=False;
-        FDailyCommentFields.EventLog     :=True;
-        FDailyCommentFields.UpdateGrid   :=True;
-        FDailyCommentFields.ExtendComment:=False;
-
-        var Comments: IComments:=TComments.Create();
-        Comments.EditDailyComment(FDailyCommentFields, nil);
+//        FDailyCommentFields.GroupIdSel   :=FGroupIdSel;
+//        FDailyCommentFields.AgeDateSel   :=FAgeDateSel;
+//        FDailyCommentFields.CUID         :=sgAgeView.Cells[sgAgeView.GetCol(DbModel.TSnapshots.fCuid), sgAgeView.Row];
+//        FDailyCommentFields.Email        :=False;
+//        FDailyCommentFields.CallEvent    :=True;
+//        FDailyCommentFields.CallDuration :=PassMsg.LParam;
+//        FDailyCommentFields.Comment      :='';
+//        FDailyCommentFields.EmailReminder:=False;
+//        FDailyCommentFields.EmailAutoStat:=False;
+//        FDailyCommentFields.EmailManuStat:=False;
+//        FDailyCommentFields.EventLog     :=True;
+//        FDailyCommentFields.UpdateGrid   :=True;
+//        FDailyCommentFields.ExtendComment:=False;
+//
+//        var Comments: IComments:=TComments.Create();
+//        Comments.EditDailyComment(FDailyCommentFields, nil);
 
     end;
 
@@ -2127,81 +2123,6 @@ begin
 end;
 
 
-procedure TMainForm.UpdateFOpenItemsRefs(SourceGrid: TStringGrid);  //helper
-begin
-    // ---------------------------------------------------------------------------
-    // Get column reference on demand for Open Items string grid. The reason is,
-    // despite we do not change columns order at run time programatically, it
-    // may be changed on server-side and that will be immediatelly reflected in
-    // Open Items string grid that serves the user and the application as the
-    // source of data. Additional purpose of the code is - to get the columns
-    // at once instead using ReturnColumn multiple times in given method,
-    // this increase the overall performance of the code and decreases complexity.
-    // ---------------------------------------------------------------------------
-    // The nature of open items is that, it changes continuously, but due to ERP
-    // database workload during the day we have decided to update the data in
-    // Open Items table few times a day (on regular basis).
-    // ---------------------------------------------------------------------------
-    FOpenItemsRefs.CuidCol     :=SourceGrid.GetCol(DbModel.TOpenitems.Cuid);
-    FOpenItemsRefs.OpenAmCol   :=SourceGrid.GetCol(DbModel.TOpenitems.OpenAm);
-    FOpenItemsRefs.PmtStatCol  :=SourceGrid.GetCol(DbModel.TOpenitems.PmtStat);
-    FOpenItemsRefs.CtrlCol     :=SourceGrid.GetCol(DbModel.TOpenitems.Ctrl);
-    FOpenItemsRefs.InvoNoCol   :=SourceGrid.GetCol(DbModel.TOpenitems.InvoNo);
-    FOpenItemsRefs.ValDtCol    :=SourceGrid.GetCol(DbModel.TOpenitems.ValDt);
-    FOpenItemsRefs.DueDtCol    :=SourceGrid.GetCol(DbModel.TOpenitems.DueDt);
-    FOpenItemsRefs.ISOCol      :=SourceGrid.GetCol(DbModel.TOpenitems.ISO);
-    FOpenItemsRefs.CurAmCol    :=SourceGrid.GetCol(DbModel.TOpenitems.CurAm);
-    FOpenItemsRefs.OpenCurAmCol:=SourceGrid.GetCol(DbModel.TOpenitems.OpenCurAm);
-    FOpenItemsRefs.Ad1Col      :=SourceGrid.GetCol(DbModel.TOpenitems.Ad1);
-    FOpenItemsRefs.Ad2Col      :=SourceGrid.GetCol(DbModel.TOpenitems.Ad2);
-    FOpenItemsRefs.Ad3Col      :=SourceGrid.GetCol(DbModel.TOpenitems.Ad3);
-    FOpenItemsRefs.PnoCol      :=SourceGrid.GetCol(DbModel.TOpenitems.Pno);
-    FOpenItemsRefs.PAreaCol    :=SourceGrid.GetCol(DbModel.TOpenitems.PArea);
-    FOpenItemsRefs.Text        :=SourceGrid.GetCol(DbModel.TOpenitems.Txt);
-end;
-
-
-procedure TMainForm.UpdateFControlStatusRefs(SourceGrid: TStringGrid);  //helper
-begin
-    // -----------------------------------------------------------------------
-    // Get column reference of Control Status table located in General Tables.
-    // Similarly to the "UpdateFOpenItemsRefs" method,
-    // we use it to decrease level of usage of ReturnColumn method.
-    // -----------------------------------------------------------------------
-    FCtrlStatusRefs.Id         :=SourceGrid.GetCol(TControlStatus.Id);
-    FCtrlStatusRefs.Code       :=SourceGrid.GetCol(TControlStatus.Code);
-    FCtrlStatusRefs.Text       :=SourceGrid.GetCol(TControlStatus.Text);
-    FCtrlStatusRefs.Description:=SourceGrid.GetCol(TControlStatus.Description);
-end;
-
-
-procedure TMainForm.Chromium_OnBeforePopup(Sender: TObject; //misc event
-    const browser: ICefBrowser;
-    const frame: ICefFrame;
-    const targetUrl, targetFrameName: ustring;
-    targetDisposition: TCefWindowOpenDisposition;
-    userGesture: Boolean;
-    const popupFeatures: TCefPopupFeatures;
-    var windowInfo: TCefWindowInfo;
-    var client: ICefClient;
-    var settings: TCefBrowserSettings;
-    var noJavascriptAccess: Boolean;
-    var Result: Boolean);
-begin
-
-    // Execute on "before popup" - ignore tab sheets and pop-ups.
-    Result:=(
-                targetDisposition in
-                [
-                    WOD_NEW_FOREGROUND_TAB,
-                    WOD_NEW_BACKGROUND_TAB,
-                    WOD_NEW_POPUP,
-                    WOD_NEW_WINDOW
-                ]
-            );
-end;
-
-
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
     FIsAppMenuLocked:=True;
@@ -2243,6 +2164,34 @@ end;
 
 
 {$REGION 'MISC. EVENTS'}
+
+
+procedure TMainForm.Chromium_OnBeforePopup(Sender: TObject;
+    const browser: ICefBrowser;
+    const frame: ICefFrame;
+    const targetUrl, targetFrameName: ustring;
+    targetDisposition: TCefWindowOpenDisposition;
+    userGesture: Boolean;
+    const popupFeatures: TCefPopupFeatures;
+    var windowInfo: TCefWindowInfo;
+    var client: ICefClient;
+    var settings: TCefBrowserSettings;
+    var noJavascriptAccess: Boolean;
+    var Result: Boolean);
+begin
+
+    // Execute on "before popup" - ignore tab sheets and pop-ups.
+    Result:=(
+                targetDisposition in
+                [
+                    WOD_NEW_FOREGROUND_TAB,
+                    WOD_NEW_BACKGROUND_TAB,
+                    WOD_NEW_POPUP,
+                    WOD_NEW_WINDOW
+                ]
+            );
+end;
+
 
 procedure TMainForm.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
 begin
@@ -3267,16 +3216,16 @@ begin
         if sgAgeView.RowHeights[iCNT] <> sgAgeView.sgRowHidden then
         begin
 
-            FGeneralCommentFields.CUID        :=sgAgeView.Cells[sgAgeView.GetCol(TSnapshots.fCuid), iCNT];
-            FGeneralCommentFields.FixedComment:=TUnknown.NULL;
-            FGeneralCommentFields.FollowUp    :=TChars.SPACE;
-            FGeneralCommentFields.Free1       :=TUnknown.NULL;
-            FGeneralCommentFields.Free2       :=TUnknown.NULL;
-            FGeneralCommentFields.Free3       :=TUnknown.NULL;
-            FGeneralCommentFields.EventLog    :=False;
-
-            var Comments: IComments:=TComments.Create();
-            Comments.EditGeneralComment(FGeneralCommentFields, nil);
+//            FGeneralCommentFields.CUID        :=sgAgeView.Cells[sgAgeView.GetCol(TSnapshots.fCuid), iCNT];
+//            FGeneralCommentFields.FixedComment:=TUnknown.NULL;
+//            FGeneralCommentFields.FollowUp    :=TChars.SPACE;
+//            FGeneralCommentFields.Free1       :=TUnknown.NULL;
+//            FGeneralCommentFields.Free2       :=TUnknown.NULL;
+//            FGeneralCommentFields.Free3       :=TUnknown.NULL;
+//            FGeneralCommentFields.EventLog    :=False;
+//
+//            var Comments: IComments:=TComments.Create();
+//            Comments.EditGeneralComment(FGeneralCommentFields, nil);
 
             MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TGeneralComment.fFollowUp), iCNT]:=TChars.SPACE;
 

@@ -35,6 +35,7 @@ uses
     Unity.Records,
     Unity.Grid,
     Unity.Panel,
+    Unity.References,
     Api.BankDetails;
 
 
@@ -198,9 +199,6 @@ type
         const AppButtonTxtNormal = $00555555;
         const AppButtonTxtSelected = $006433C9;
         var FHistoryGrid: boolean;
-        var FCUID: string; //delete
-        var FSCUID: string; //delete
-        var FBranch: string; //delete
         var FCompanyCode: string;
         var FCustName: string;
         var FCustNumber: string;
@@ -216,6 +214,8 @@ type
         var FOpenItemsTotal: TOpenItemsTotal;
         var FPayLoad: TAccountStatementPayLoad;
         var FIsDataLoaded: boolean;
+        var OpenItemsRefs: TFOpenItemsRefs;
+        var CtrlStatusRefs: TFCtrlStatusRefs;
         function  GetRunningApps(SearchName: string): boolean;
         function  BankListToHtml(BankDetails: TArray<TBankDetails>): string;
         procedure GetOpenItems(OpenItemsDest, OpenItemsSrc: TStringGrid);
@@ -242,9 +242,6 @@ type
         procedure EditGeneralComment_Callback(CallResponse: TCallResponse);
         procedure EditDailyComment_Callback(CallResponse: TCallResponse);
     public
-        property CUID: string read FCUID; //delete
-        property SCUID: string read FSCUID; //delete
-        property Branch: string read FBranch; //delete
         property CompanyCode: string read FCompanyCode;
         property CustName: string read FCustName;
         property CustNumber: string read FCustNumber;
@@ -420,7 +417,8 @@ begin
     FSrcColumns[14]:=OpenItemsSrc.GetCol(DbModel.TOpenitems.Ad3);
     FSrcColumns[15]:=OpenItemsSrc.GetCol(DbModel.TOpenitems.Pno);
     FSrcColumns[16]:=OpenItemsSrc.GetCol(DbModel.TOpenitems.PArea);
-    FSrcColumns[17]:=OpenItemsSrc.GetCol(DbModel.TOpenitems.Cuid);
+    FSrcColumns[17]:=OpenItemsSrc.GetCol(DbModel.TOpenitems.SourceDBName);
+    FSrcColumns[18]:=OpenItemsSrc.GetCol(DbModel.TOpenitems.CustNo);
 
     // Get headers
     for var iCNT: integer:=Low(FSrcColumns) to High(FSrcColumns) do
@@ -464,12 +462,13 @@ begin
     end;
 
     // Hide helpers columns from string grid
-    OpenItemsDest.ColWidths[OpenItemsDest.GetCol(DbModel.TOpenitems.Ad1)]  :=OpenItemsDest.sgRowHidden;
-    OpenItemsDest.ColWidths[OpenItemsDest.GetCol(DbModel.TOpenitems.Ad2)]  :=OpenItemsDest.sgRowHidden;
-    OpenItemsDest.ColWidths[OpenItemsDest.GetCol(DbModel.TOpenitems.Ad3)]  :=OpenItemsDest.sgRowHidden;
-    OpenItemsDest.ColWidths[OpenItemsDest.GetCol(DbModel.TOpenitems.Pno)]  :=OpenItemsDest.sgRowHidden;
-    OpenItemsDest.ColWidths[OpenItemsDest.GetCol(DbModel.TOpenitems.PArea)]:=OpenItemsDest.sgRowHidden;
-    OpenItemsDest.ColWidths[OpenItemsDest.GetCol(DbModel.TOpenitems.Cuid)] :=OpenItemsDest.sgRowHidden;
+    OpenItemsDest.ColWidths[OpenItemsDest.GetCol(DbModel.TOpenitems.Ad1)]         :=OpenItemsDest.sgRowHidden;
+    OpenItemsDest.ColWidths[OpenItemsDest.GetCol(DbModel.TOpenitems.Ad2)]         :=OpenItemsDest.sgRowHidden;
+    OpenItemsDest.ColWidths[OpenItemsDest.GetCol(DbModel.TOpenitems.Ad3)]         :=OpenItemsDest.sgRowHidden;
+    OpenItemsDest.ColWidths[OpenItemsDest.GetCol(DbModel.TOpenitems.Pno)]         :=OpenItemsDest.sgRowHidden;
+    OpenItemsDest.ColWidths[OpenItemsDest.GetCol(DbModel.TOpenitems.PArea)]       :=OpenItemsDest.sgRowHidden;
+    OpenItemsDest.ColWidths[OpenItemsDest.GetCol(DbModel.TOpenitems.CustNo)]      :=OpenItemsDest.sgRowHidden;
+    OpenItemsDest.ColWidths[OpenItemsDest.GetCol(DbModel.TOpenitems.SourceDBName)]:=OpenItemsDest.sgRowHidden;
 
     // Sort via payment status
     OpenItemsDest.MSort(OpenItemsDest.GetCol(TOpenitems.PmtStat), TDataType.TInteger, True);
@@ -480,25 +479,25 @@ end;
 procedure TActionsForm.UpdateCustDetails();
 begin
 
-    var AddressBook: IAddressBook:=TAddressBook.Create();
-    var CustomerDetails: TCustomerDetails;
-    CustomerDetails:=AddressBook.GetCustomerDetailsAwaited(SCUID);
-
-    var Phones: string;
-
-    Cust_Person.Text     :=CustomerDetails.CustPerson;
-    Cust_MailGeneral.Text:=CustomerDetails.CustMailGen;
-    Cust_Mail.Text       :=CustomerDetails.CustMailStat;
-    Phones               :=CustomerDetails.CustPhones;
-
-    if (Phones <> '') or (Phones <> ' ') then
-    begin
-        Cust_Phone.Clear();
-        Cust_Phone.Items.Text:=THelpers.Explode(Phones, TDelimiters.Semicolon);
-        Cust_Phone.ItemIndex:=0;
-    end;
-
-    SetControls();
+//    var AddressBook: IAddressBook:=TAddressBook.Create();
+//    var CustomerDetails: TCustomerDetails;
+//    CustomerDetails:=AddressBook.GetCustomerDetailsAwaited(SCUID);
+//
+//    var Phones: string;
+//
+//    Cust_Person.Text     :=CustomerDetails.CustPerson;
+//    Cust_MailGeneral.Text:=CustomerDetails.CustMailGen;
+//    Cust_Mail.Text       :=CustomerDetails.CustMailStat;
+//    Phones               :=CustomerDetails.CustPhones;
+//
+//    if (Phones <> '') or (Phones <> ' ') then
+//    begin
+//        Cust_Phone.Clear();
+//        Cust_Phone.Items.Text:=THelpers.Explode(Phones, TDelimiters.Semicolon);
+//        Cust_Phone.ItemIndex:=0;
+//    end;
+//
+//    SetControls();
 
 end;
 
@@ -538,7 +537,11 @@ begin
         selSendFrom.Clear();
         StrArrayToStrings(CompanyDetails.LbuEmails, LbuEmails);
         selSendFrom.Items.AddStrings(LbuEmails);
-        if selSendFrom.Items.Count > 0 then selSendFrom.ItemIndex:=0;
+        if selSendFrom.Items.Count > 0 then
+        begin
+            selSendFrom.ItemIndex:=0;
+            FLbuSendFrom:=selSendFrom.Text;
+        end;
 
     finally
         LbuEmails.Free();
@@ -551,34 +554,34 @@ end;
 procedure TActionsForm.UpdateHistory(var HistoryGrid: TStringGrid);
 begin
 
-    var Comments: IComments:=TComments.Create();
-    var ReturnedGrid:=Comments.GetDailyCommentsAwaited(CUID);
-    try
-
-        HistoryGrid.SqlColumns:=ReturnedGrid.SqlColumns;
-        HistoryGrid.RowCount  :=ReturnedGrid.RowCount;
-        HistoryGrid.ColCount  :=ReturnedGrid.ColCount;
-
-        for var iCNT:=0 to ReturnedGrid.RowCount - 1 do
-            for var jCNT:=0 to ReturnedGrid.ColCount - 1 do
-                HistoryGrid.Cells[jCNT, iCNT]:=ReturnedGrid.Cells[jCNT, iCNT];
-
-        HistoryGrid.ColWidths[HistoryGrid.GetCol(TDailyComment.FixedComment)]:=HistoryGrid.sgRowHidden;
-        HistoryGrid.SetColWidth(10, 20, 400);
-        FHistoryGrid:=True;
-        HistoryGrid.Visible:=FHistoryGrid;
-
-    finally
-        if Assigned(ReturnedGrid) then ReturnedGrid.Free();
-    end;
+//    var Comments: IComments:=TComments.Create();
+//    var ReturnedGrid:=Comments.GetDailyCommentsAwaited(CUID);
+//    try
+//
+//        HistoryGrid.SqlColumns:=ReturnedGrid.SqlColumns;
+//        HistoryGrid.RowCount  :=ReturnedGrid.RowCount;
+//        HistoryGrid.ColCount  :=ReturnedGrid.ColCount;
+//
+//        for var iCNT:=0 to ReturnedGrid.RowCount - 1 do
+//            for var jCNT:=0 to ReturnedGrid.ColCount - 1 do
+//                HistoryGrid.Cells[jCNT, iCNT]:=ReturnedGrid.Cells[jCNT, iCNT];
+//
+//        HistoryGrid.ColWidths[HistoryGrid.GetCol(TDailyComment.FixedComment)]:=HistoryGrid.sgRowHidden;
+//        HistoryGrid.SetColWidth(10, 20, 400);
+//        FHistoryGrid:=True;
+//        HistoryGrid.Visible:=FHistoryGrid;
+//
+//    finally
+//        if Assigned(ReturnedGrid) then ReturnedGrid.Free();
+//    end;
 
 end;
 
 
 procedure TActionsForm.UpdateGeneral(var Text: TMemo);
 begin
-    var Comments: IComments:=TComments.Create();
-    Text.Text:=Comments.GetGeneralCommentAwaited(CUID);
+//    var Comments: IComments:=TComments.Create();
+//    Text.Text:=Comments.GetGeneralCommentAwaited(CUID);
 end;
 
 
@@ -634,12 +637,9 @@ end;
 
 procedure TActionsForm.Initialize();
 begin
-    FCUID       :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCuid), MainForm.sgAgeView.Row]; // to be deleted
     FCustName   :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerName), MainForm.sgAgeView.Row];
     FCustNumber :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerNumber), MainForm.sgAgeView.Row];
     FCompanyCode:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCoCode), MainForm.sgAgeView.Row];
-    FBranch     :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fAgent), MainForm.sgAgeView.Row]; // to be deleted
-    FSCUID      :=CustNumber + THelpers.CoConvert(FCompanyCode); // to be deleted
 end;
 
 
@@ -764,18 +764,18 @@ begin
     if THelpers.MsgCall(Question2, 'Are you sure you want to clear this follow up?') = ID_YES then
     begin
 
-        FGeneralCommentFields.CUID        :=CUID;
-        FGeneralCommentFields.FixedComment:=TUnknown.NULL;
-        FGeneralCommentFields.FollowUp    :=TChars.SPACE;
-        FGeneralCommentFields.Free1       :=TUnknown.NULL;
-        FGeneralCommentFields.Free2       :=TUnknown.NULL;
-        FGeneralCommentFields.Free3       :=TUnknown.NULL;
-        FGeneralCommentFields.EventLog    :=True;
-
-        var Comments: IComments:=TComments.Create();
-        Comments.EditGeneralComment(FGeneralCommentFields, EditGeneralComment_Callback);
-
-        MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TGeneralComment.fFollowUp), MainForm.sgAgeView.Row]:='';
+//        FGeneralCommentFields.CUID        :=CUID;
+//        FGeneralCommentFields.FixedComment:=TUnknown.NULL;
+//        FGeneralCommentFields.FollowUp    :=TChars.SPACE;
+//        FGeneralCommentFields.Free1       :=TUnknown.NULL;
+//        FGeneralCommentFields.Free2       :=TUnknown.NULL;
+//        FGeneralCommentFields.Free3       :=TUnknown.NULL;
+//        FGeneralCommentFields.EventLog    :=True;
+//
+//        var Comments: IComments:=TComments.Create();
+//        Comments.EditGeneralComment(FGeneralCommentFields, EditGeneralComment_Callback);
+//
+//        MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TGeneralComment.fFollowUp), MainForm.sgAgeView.Row]:='';
 
     end;
 
@@ -785,14 +785,14 @@ end;
 procedure TActionsForm.SaveCustomerDetails();
 begin
 
-    FAbUpdateFields.Scuid     :=SCUID;
-    FAbUpdateFields.Contact   :=Cust_Person.Text;
-    FAbUpdateFields.Email     :=Cust_MailGeneral.Text;
-    FAbUpdateFields.Estatement:=Cust_Mail.Text;
-    FAbUpdateFields.Phones    :=THelpers.Implode(Cust_Phone.Items, TDelimiters.Semicolon);
-
-    var AddressBook: IAddressBook:=TAddressBook.Create();
-    AddressBook.UpdateAddressBookAsync(nil, FAbUpdateFields, UpdateAddressBook_Callback);
+//    FAbUpdateFields.Scuid     :=SCUID;
+//    FAbUpdateFields.Contact   :=Cust_Person.Text;
+//    FAbUpdateFields.Email     :=Cust_MailGeneral.Text;
+//    FAbUpdateFields.Estatement:=Cust_Mail.Text;
+//    FAbUpdateFields.Phones    :=THelpers.Implode(Cust_Phone.Items, TDelimiters.Semicolon);
+//
+//    var AddressBook: IAddressBook:=TAddressBook.Create();
+//    AddressBook.UpdateAddressBookAsync(nil, FAbUpdateFields, UpdateAddressBook_Callback);
 
 end;
 
@@ -800,16 +800,16 @@ end;
 procedure TActionsForm.SaveGeneralComment();
 begin
 
-    FGeneralCommentFields.CUID        :=CUID;
-    FGeneralCommentFields.FixedComment:=GeneralCom.Text;
-    FGeneralCommentFields.FollowUp    :=TUnknown.NULL;
-    FGeneralCommentFields.Free1       :=TUnknown.NULL;
-    FGeneralCommentFields.Free2       :=TUnknown.NULL;
-    FGeneralCommentFields.Free3       :=TUnknown.NULL;
-    FGeneralCommentFields.EventLog    :=True;
-
-    var Comments: IComments:=TComments.Create();
-    Comments.EditGeneralComment(FGeneralCommentFields, EditGeneralComment_Callback);
+//    FGeneralCommentFields.CUID        :=CUID;
+//    FGeneralCommentFields.FixedComment:=GeneralCom.Text;
+//    FGeneralCommentFields.FollowUp    :=TUnknown.NULL;
+//    FGeneralCommentFields.Free1       :=TUnknown.NULL;
+//    FGeneralCommentFields.Free2       :=TUnknown.NULL;
+//    FGeneralCommentFields.Free3       :=TUnknown.NULL;
+//    FGeneralCommentFields.EventLog    :=True;
+//
+//    var Comments: IComments:=TComments.Create();
+//    Comments.EditGeneralComment(FGeneralCommentFields, EditGeneralComment_Callback);
 
 end;
 
@@ -817,22 +817,22 @@ end;
 procedure TActionsForm.SaveDailyComment();
 begin
 
-    //FDailyCommentFields.GroupIdSel   :=MainForm.FGroupIdSel;
-    //FDailyCommentFields.AgeDateSel   :=MainForm.FAgeDateSel;
-    FDailyCommentFields.CUID         :=CUID;
-    FDailyCommentFields.Email        :=False;
-    FDailyCommentFields.CallEvent    :=False;
-    FDailyCommentFields.CallDuration :=0;
-    FDailyCommentFields.Comment      :=DailyCom.Text;
-    FDailyCommentFields.EmailReminder:=False;
-    FDailyCommentFields.EmailAutoStat:=False;
-    FDailyCommentFields.EmailManuStat:=False;
-    FDailyCommentFields.EventLog     :=True;
-    FDailyCommentFields.UpdateGrid   :=True;
-    FDailyCommentFields.ExtendComment:=False;
-
-    var Comments: IComments:=TComments.Create();
-    Comments.EditDailyComment(FDailyCommentFields, EditDailyComment_Callback);
+//    FDailyCommentFields.GroupIdSel   :=MainForm.FGroupIdSel;
+//    FDailyCommentFields.AgeDateSel   :=MainForm.FAgeDateSel;
+//    FDailyCommentFields.CUID         :=CUID;
+//    FDailyCommentFields.Email        :=False;
+//    FDailyCommentFields.CallEvent    :=False;
+//    FDailyCommentFields.CallDuration :=0;
+//    FDailyCommentFields.Comment      :=DailyCom.Text;
+//    FDailyCommentFields.EmailReminder:=False;
+//    FDailyCommentFields.EmailAutoStat:=False;
+//    FDailyCommentFields.EmailManuStat:=False;
+//    FDailyCommentFields.EventLog     :=True;
+//    FDailyCommentFields.UpdateGrid   :=True;
+//    FDailyCommentFields.ExtendComment:=False;
+//
+//    var Comments: IComments:=TComments.Create();
+//    Comments.EditDailyComment(FDailyCommentFields, EditDailyComment_Callback);
 
 end;
 
@@ -937,8 +937,8 @@ begin
     InitializePanels;
     InitializeSpeedButtons;
 
-    SetLength(FSrcColumns, 19);
-    OpenItemsGrid.ColCount:=19;
+    SetLength(FSrcColumns, 20);
+    OpenItemsGrid.ColCount:=20;
     OpenItemsGrid.SetRowHeight(OpenItemsGrid.sgRowHeight, 25);
 
     HistoryGrid.ColCount:=11;
@@ -1132,24 +1132,23 @@ begin
     // UpdateFOpenItemsRefs and UpdateFCtrStatusRefs must be executed before
     // SendAccountStatement is called.
     // ---------------------------------------------------------------------
-    MainForm.UpdateFOpenItemsRefs(ActionsForm.OpenItemsGrid);
-    MainForm.UpdateFControlStatusRefs(MainForm.sgControlStatus);
+    THelpers.UpdateFOpenItemsRefs(ActionsForm.OpenItemsGrid, OpenItemsRefs);
+    THelpers.UpdateFControlStatusRefs(MainForm.sgControlStatus, CtrlStatusRefs);
 
     // --------------------------------
     // Prepare PayLoad for the request.
     // --------------------------------
     FPayLoad.Layout        :=TDocMode.Defined;
     FPayLoad.Subject       :='Account Statement';
-    FPayLoad.Mess          :='';
+    FPayLoad.Message       :='';
     FPayLoad.InvFilter     :=TInvoiceFilter.ShowAllItems;
     FPayLoad.BeginDate     :='';
     FPayLoad.EndDate       :='';
-    FPayLoad.OpenItems     :=OpenItemsGrid;
-    //FPayLoad.CUID          :=CUID;
     FPayLoad.SendFrom      :=LbuSendFrom;
-    FPayLoad.MailTo        :=Cust_Mail.Text;
-    FPayLoad.CustName      :=CustName;
+    FPayLoad.MailTo        :=TArray<string>.Create(Cust_Mail.Text);
+    FPayLoad.CoCode        :=THelpers.GetSourceDBName(CompanyCode, 'F');
     FPayLoad.CustNumber    :=CustNumber;
+    FPayLoad.CustName      :=CustName;
     FPayLoad.LBUName       :=LbuName;
     FPayLoad.LBUAddress    :=LbuAddress;
     FPayLoad.Telephone     :=LbuPhones;
@@ -1157,14 +1156,14 @@ begin
     FPayLoad.Series        :=False;
     FPayLoad.ItemNo        :=0;
     FPayLoad.OpenItems     :=ActionsForm.OpenItemsGrid;
-    FPayLoad.OpenItemsRefs :=MainForm.FOpenItemsRefs;
+    FPayLoad.OpenItemsRefs :=OpenItemsRefs;
     FPayLoad.ControlStatus :=MainForm.sgControlStatus;
-    FPayLoad.CtrlStatusRefs:=MainForm.FCtrlStatusRefs;
+    FPayLoad.CtrlStatusRefs:=CtrlStatusRefs;
     FPayLoad.IsCtrlStatus  :=ActionsForm.cbCtrlStatusOff.Checked;
     FPayLoad.IsUserInCopy  :=ActionsForm.cbUserInCopy.Checked;
 
-    //var Statements: IStatements:=TStatements.Create();
-    //Statements.SendAccountStatement(MainForm.FAgeDateSel, FPayLoad, SendAccountStatement_Callback);
+    var Statements: IStatements:=TStatements.Create();
+    Statements.SendAccountStatement('', FPayLoad, SendAccountStatement_Callback); // no age date!
 
 end;
 

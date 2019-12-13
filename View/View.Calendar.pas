@@ -117,18 +117,18 @@ procedure TCalendarForm.SetFollowUp(SelectedDate: TDate; SelectedCUID: string; R
 begin
 
     // Set follow-up date and register it in general comment and update age view string grid.
-    FGeneralCommentFields.CUID        :=SelectedCUID;
-    FGeneralCommentFields.FixedComment:=TUnknown.NULL;
-    FGeneralCommentFields.FollowUp    :=DateToStr(SelectedDate);
-    FGeneralCommentFields.Free1       :=TUnknown.NULL;
-    FGeneralCommentFields.Free2       :=TUnknown.NULL;
-    FGeneralCommentFields.Free3       :=TUnknown.NULL;
-    FGeneralCommentFields.EventLog    :=False;
-
-    var Comments: IComments:=TComments.Create();
-    Comments.EditGeneralComment(FGeneralCommentFields, EditGeneralComment_Callback);
-
-    MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TGeneralComment.fFollowUp), Row]:=DateToStr(SelectedDate);
+//    FGeneralCommentFields.CUID        :=SelectedCUID;
+//    FGeneralCommentFields.FixedComment:=TUnknown.NULL;
+//    FGeneralCommentFields.FollowUp    :=DateToStr(SelectedDate);
+//    FGeneralCommentFields.Free1       :=TUnknown.NULL;
+//    FGeneralCommentFields.Free2       :=TUnknown.NULL;
+//    FGeneralCommentFields.Free3       :=TUnknown.NULL;
+//    FGeneralCommentFields.EventLog    :=False;
+//
+//    var Comments: IComments:=TComments.Create();
+//    Comments.EditGeneralComment(FGeneralCommentFields, EditGeneralComment_Callback);
+//
+//    MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TGeneralComment.fFollowUp), Row]:=DateToStr(SelectedDate);
 
 end;
 

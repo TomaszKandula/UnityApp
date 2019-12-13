@@ -23,7 +23,8 @@ uses
     Vcl.Menus,
     Vcl.Grids,
     Unity.Enums,
-    Unity.Grid;
+    Unity.Grid,
+    Unity.References;
 
 
 type
@@ -91,6 +92,8 @@ type
         class function LoadFileToStr(const FileName: TFileName): string; static;
         class function GetCurrentUserSid: string; static;
         class procedure RemoveAllInFolder(const Path: string; const Pattern: string); static;
+        class procedure UpdateFOpenItemsRefs(SourceGrid: TStringGrid; var OpenItemsRefs: TFOpenItemsRefs); static;
+        class procedure UpdateFControlStatusRefs(SourceGrid: TStringGrid; var CtrlStatusRefs: TFCtrlStatusRefs); static;
     end;
 
 
@@ -810,6 +813,55 @@ begin
 
     end;
 
+end;
+
+
+class procedure THelpers.UpdateFOpenItemsRefs(SourceGrid: TStringGrid; var OpenItemsRefs: TFOpenItemsRefs);
+begin
+    // ---------------------------------------------------------------------------
+    // Get column reference on demand for Open Items string grid. The reason is,
+    // despite we do not change columns order at run time programatically, it
+    // may be changed on server-side and that will be immediatelly reflected in
+    // Open Items string grid that serves the user and the application as the
+    // source of data. Additional purpose of the code is - to get the columns
+    // at once instead using ReturnColumn multiple times in given method,
+    // this increase the overall performance of the code and decreases complexity.
+    // ---------------------------------------------------------------------------
+    // The nature of open items is that, it changes continuously, but due to ERP
+    // database workload during the day we have decided to update the data in
+    // Open Items table few times a day (on regular basis).
+    // ---------------------------------------------------------------------------
+    OpenItemsRefs.CoCodeCol   :=SourceGrid.GetCol(DbModel.TOpenitems.SourceDBName);
+    OpenItemsRefs.CustNumCol  :=SourceGrid.GetCol(DbModel.TOpenitems.CustNo);
+    OpenItemsRefs.OpenAmCol   :=SourceGrid.GetCol(DbModel.TOpenitems.OpenAm);
+    OpenItemsRefs.PmtStatCol  :=SourceGrid.GetCol(DbModel.TOpenitems.PmtStat);
+    OpenItemsRefs.CtrlCol     :=SourceGrid.GetCol(DbModel.TOpenitems.Ctrl);
+    OpenItemsRefs.InvoNoCol   :=SourceGrid.GetCol(DbModel.TOpenitems.InvoNo);
+    OpenItemsRefs.ValDtCol    :=SourceGrid.GetCol(DbModel.TOpenitems.ValDt);
+    OpenItemsRefs.DueDtCol    :=SourceGrid.GetCol(DbModel.TOpenitems.DueDt);
+    OpenItemsRefs.ISOCol      :=SourceGrid.GetCol(DbModel.TOpenitems.ISO);
+    OpenItemsRefs.CurAmCol    :=SourceGrid.GetCol(DbModel.TOpenitems.CurAm);
+    OpenItemsRefs.OpenCurAmCol:=SourceGrid.GetCol(DbModel.TOpenitems.OpenCurAm);
+    OpenItemsRefs.Ad1Col      :=SourceGrid.GetCol(DbModel.TOpenitems.Ad1);
+    OpenItemsRefs.Ad2Col      :=SourceGrid.GetCol(DbModel.TOpenitems.Ad2);
+    OpenItemsRefs.Ad3Col      :=SourceGrid.GetCol(DbModel.TOpenitems.Ad3);
+    OpenItemsRefs.PnoCol      :=SourceGrid.GetCol(DbModel.TOpenitems.Pno);
+    OpenItemsRefs.PAreaCol    :=SourceGrid.GetCol(DbModel.TOpenitems.PArea);
+    OpenItemsRefs.Text        :=SourceGrid.GetCol(DbModel.TOpenitems.Txt);
+end;
+
+
+class procedure THelpers.UpdateFControlStatusRefs(SourceGrid: TStringGrid; var CtrlStatusRefs: TFCtrlStatusRefs);
+begin
+    // -----------------------------------------------------------------------
+    // Get column reference of Control Status table located in General Tables.
+    // Similarly to the "UpdateFOpenItemsRefs" method,
+    // we use it to decrease level of usage of ReturnColumn method.
+    // -----------------------------------------------------------------------
+    CtrlStatusRefs.Id         :=SourceGrid.GetCol(TControlStatus.Id);
+    CtrlStatusRefs.Code       :=SourceGrid.GetCol(TControlStatus.Code);
+    CtrlStatusRefs.Text       :=SourceGrid.GetCol(TControlStatus.Text);
+    CtrlStatusRefs.Description:=SourceGrid.GetCol(TControlStatus.Description);
 end;
 
 

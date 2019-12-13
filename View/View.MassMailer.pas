@@ -27,7 +27,8 @@ uses
     Unity.Grid,
     Unity.Panel,
     Unity.ListView,
-    Unity.Records;
+    Unity.Records,
+    Unity.References;
 
 
 type
@@ -99,6 +100,8 @@ type
         procedure btnDelEndClick(Sender: TObject);
         procedure FormActivate(Sender: TObject);
     strict private
+        var OpenItemsRefs: TFOpenItemsRefs;
+        var CtrlStatusRefs: TFCtrlStatusRefs;
         var FPayLoad: TAccountStatementPayLoad;
         var FItemCount: integer;
         var FIsDataLoaded:  boolean;
@@ -334,23 +337,23 @@ begin
     // -------------------------------------------------------------------------------------------
     /// Update column references, as they depend on view from SQL which may be changed at runtime.
     // -------------------------------------------------------------------------------------------
-    MainForm.UpdateFOpenItemsRefs(MainForm.sgOpenItems);
-    MainForm.UpdateFControlStatusRefs(MainForm.sgControlStatus);
+    THelpers.UpdateFOpenItemsRefs(MainForm.sgOpenItems, OpenItemsRefs);
+    THelpers.UpdateFControlStatusRefs(MainForm.sgControlStatus, CtrlStatusRefs);
 
     FPayLoad.Layout        :=TDocMode.Defined;
     FPayLoad.Subject       :=Text_Subject.Text;
-    FPayLoad.Mess          :=MessStr;
+    FPayLoad.Message       :=MessStr;
     FPayLoad.InvFilter     :=InvFilter;
     FPayLoad.BeginDate     :=ValBeginDate.Caption;
     FPayLoad.EndDate       :=ValEndDate.Caption;
     FPayLoad.MailerList    :=MassMailerForm.CustomerList;
     FPayLoad.OpenItems     :=MainForm.sgOpenItems;
-    FPayLoad.OpenItemsRefs :=MainForm.FOpenItemsRefs;
+    FPayLoad.OpenItemsRefs :=OpenItemsRefs;
     FPayLoad.ControlStatus :=MainForm.sgControlStatus;
-    FPayLoad.CtrlStatusRefs:=MainForm.FCtrlStatusRefs;
+    FPayLoad.CtrlStatusRefs:=CtrlStatusRefs;
 
-    //var Statements: IStatements:=TStatements.Create();
-    //Statements.SendAccountStatements(MainForm.FAgeDateSel, FPayLoad, SendAccountStatements_Callback);
+    var Statements: IStatements:=TStatements.Create();
+    Statements.SendAccountStatements('', FPayLoad, SendAccountStatements_Callback); // no age date!
 
 end;
 

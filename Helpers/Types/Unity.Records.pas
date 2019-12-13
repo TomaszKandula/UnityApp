@@ -86,31 +86,38 @@ type
     /// Carries a group of variables for update in DailyComments table.
     /// </summary>
     TDailyCommentFields = record
-        GroupIdSel:     string;
-        AgeDateSel:     string;
-        CUID:           string;
-        Email:          boolean;
-        CallEvent:      boolean;
-        CallDuration:   integer;
-        Comment:        string;
-        EmailReminder:  boolean;
-        EmailAutoStat:  boolean;
-        EmailManuStat:  boolean;
-        EventLog:       boolean;
-        UpdateGrid:     boolean;
-        ExtendComment:  boolean;
+        // Database fields
+        CompanyCode:          string;
+        CustomerNumber:       string;
+        AgeDate:              string;
+        CallEvent:            boolean;
+        CallDuration:         integer;
+        FixedStatementsSent:  boolean;
+        CustomStatementsSent: boolean;
+        FixedRemindersSent:   boolean;
+        CustomRemindersSent:  boolean;
+        UserComment:          string;
+        UserAlias:            string;
+        // Additional information
+        EventLog:             boolean;
+        UpdateGrid:           boolean;
+        ExtendComment:        boolean;
     end;
 
     /// <summary>
     /// Carries a group of variables for update in GeneralComment table.
     /// </summary>
     TGeneralCommentFields = record
-        CUID:         string;
-        FixedComment: string;
-        FollowUp:     string;
-        Free1:        string;
-        Free2:        string;
-        Free3:        string;
+        // Database fields
+        CompanyCode:    string;
+        CustomerNumber: string;
+        FollowUp:       string;
+        Free1:          string;
+        Free2:          string;
+        Free3:          string;
+        UserComment:    string;
+        UserAlias:      string;
+        // Additional information
         EventLog:     boolean;
     end;
 
@@ -120,19 +127,20 @@ type
     TAccountStatementPayLoad = record
         Layout:         TDocMode;
         Subject:        string;
-        Mess:           string;
+        &Message:       string;
         InvFilter:      TInvoiceFilter;
         BeginDate:      string;
         EndDate:        string;
-        CUID:           string;
         SendFrom:       string;
-        MailTo:         string;
-        CustName:       string;
+        MailTo:         TArray<string>;
+        CoCode:         string;
         CustNumber:     string;
+        CustName:       string;
         LBUName:        string;
         LBUAddress:     string;
         Telephone:      string;
         BankDetails:    string;
+        Exclusions:     TArray<integer>;
         Series:         boolean;
         ItemNo:         integer;
         MailerList:     TListView;

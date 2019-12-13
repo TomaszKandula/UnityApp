@@ -33,7 +33,8 @@ type
         Ad3Col:       integer;
         PnoCol:       integer;
         PAreaCol:     integer;
-        CuidCol:      integer;
+        CoCodeCol:    integer;
+        CustNumCol:   integer;
         OpenAmCol:    integer;
         PmtStatCol:   integer;
         CtrlCol:      integer;

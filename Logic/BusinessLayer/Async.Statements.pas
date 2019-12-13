@@ -9,21 +9,11 @@ interface
 
 
 uses
-    Winapi.Windows,
-    Winapi.Messages,
     System.SysUtils,
     System.Classes,
-    System.Diagnostics,
-    System.Win.ComObj,
     System.SyncObjs,
     System.Threading,
     System.Generics.Collections,
-    Vcl.Graphics,
-    Vcl.ComCtrls,
-    Vcl.Dialogs,
-    Data.Win.ADODB,
-    Data.DB,
-    Handler.Sql,
     Unity.Grid,
     Unity.Enums,
     Unity.Records;
@@ -108,13 +98,11 @@ implementation
 
 
 uses
-    Handler.Database{Legacy},
     Unity.Helpers,
     Unity.Settings,
     Unity.EventLogger,
     Sync.Documents,
-    Async.Comments,
-    DbModel{Legacy};
+    Async.Comments;
 
 
 procedure TStatements.SendAccountStatement(AgeDate: string; PayLoad: TAccountStatementPayLoad; Callback: TSendAccountStatement; WaitToComplete: boolean = False);
@@ -130,18 +118,19 @@ begin
             var Settings: ISettings:=TSettings.Create();
             var Statement: IDocument:=TDocument.Create();
 
-            Statement.Exclusions:=TArray<Integer>.Create(514, 9999); // Warning! Data should be taken from database.
+            Statement.Exclusions:=TArray<Integer>.Create(514, 9999);
             Statement.MailSubject:=PayLoad.Subject + ' - ' + PayLoad.CustName + ' - ' + PayLoad.CustNumber;
 
-            Statement.CUID       :=PayLoad.CUID;
             Statement.MailFrom   :=PayLoad.SendFrom;
-            //Statement.MailTo     :=PayLoad.MailTo;
+            Statement.MailTo     :=PayLoad.MailTo;
+            Statement.CoCode     :=PayLoad.CoCode;
+            Statement.CustNumber :=PayLoad.CustNumber;
             Statement.CustName   :=PayLoad.CustName;
             Statement.LBUName    :=PayLoad.LBUName;
             Statement.LBUAddress :=PayLoad.LBUAddress;
             Statement.Telephone  :=PayLoad.Telephone;
             Statement.BankDetails:=PayLoad.BankDetails;
-            Statement.CustMess   :=PayLoad.Mess;
+            Statement.CustMessage:=PayLoad.Message;
             Statement.InvFilter  :=PayLoad.InvFilter;
             Statement.BeginWith  :=PayLoad.BeginDate;
             Statement.EndWith    :=PayLoad.EndDate;
@@ -163,24 +152,31 @@ begin
             // It requires FSalut, FMess and FSubject to be provided.
             // ------------------------------------------------------
             if PayLoad.Layout = TDocMode.Defined then
-                Statement.HTMLLayout:=Statement.LoadTemplate(Settings.DirLayouts + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE2', ''), PayLoad.IsCtrlStatus);
+                Statement.HTMLLayout:=Statement.LoadTemplate(
+                    Settings.DirLayouts + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE2', ''),
+                    PayLoad.IsCtrlStatus
+                );
+
             if PayLoad.Layout = TDocMode.Custom then
-                Statement.HTMLLayout:=Statement.LoadTemplate(Settings.DirLayouts + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE3', ''), PayLoad.IsCtrlStatus);
+                Statement.HTMLLayout:=Statement.LoadTemplate(
+                    Settings.DirLayouts + Settings.GetStringValue(TConfigSections.Layouts, 'SINGLE3', ''),
+                    PayLoad.IsCtrlStatus
+                );
 
             if Statement.SendDocument(PayLoad.IsUserInCopy) then
             begin
 
-                var FDailyCommentFields: TDailyCommentFields;
-                FDailyCommentFields.CUID         :=PayLoad.CUID;
-                FDailyCommentFields.Email        :=False;
-                FDailyCommentFields.CallEvent    :=False;
-                FDailyCommentFields.CallDuration :=0;
-                FDailyCommentFields.Comment      :='New communication has been sent to the customer.';
-                FDailyCommentFields.UpdateGrid   :=not PayLoad.Series;
-                FDailyCommentFields.EmailReminder:=False;
-                FDailyCommentFields.EventLog     :=False;
-                FDailyCommentFields.ExtendComment:=True;
-                FDailyCommentFields.AgeDateSel   :=AgeDate;
+//                var FDailyCommentFields: TDailyCommentFields;
+//                FDailyCommentFields.CUID         :=PayLoad.CUID;
+//                FDailyCommentFields.Email        :=False;
+//                FDailyCommentFields.CallEvent    :=False;
+//                FDailyCommentFields.CallDuration :=0;
+//                FDailyCommentFields.Comment      :='New communication has been sent to the customer.';
+//                FDailyCommentFields.UpdateGrid   :=not PayLoad.Series;
+//                FDailyCommentFields.EmailReminder:=False;
+//                FDailyCommentFields.EventLog     :=False;
+//                FDailyCommentFields.ExtendComment:=True;
+//                FDailyCommentFields.AgeDateSel   :=AgeDate;
 
                 // ----------------------------------------------------------------------
                 // Register sent email either as manual statement or automatic statement.
@@ -189,22 +185,22 @@ begin
                 if PayLoad.Layout = TDocMode.Defined then
                 begin
 
-                    FDailyCommentFields.EmailAutoStat:=True;
-                    FDailyCommentFields.EmailManuStat:=False;
-
-                    var Comments: IComments:=TComments.Create();
-                    Comments.EditDailyComment(FDailyCommentFields, nil);
+//                    FDailyCommentFields.EmailAutoStat:=True;
+//                    FDailyCommentFields.EmailManuStat:=False;
+//
+//                    var Comments: IComments:=TComments.Create();
+//                    Comments.EditDailyComment(FDailyCommentFields, nil);
 
                 end;
 
                 if PayLoad.Layout = TDocMode.Custom then
                 begin
 
-                    FDailyCommentFields.EmailAutoStat:=False;
-                    FDailyCommentFields.EmailManuStat:=True;
-
-                    var Comments: IComments:=TComments.Create();
-                    Comments.EditDailyComment(FDailyCommentFields, nil);
+//                    FDailyCommentFields.EmailAutoStat:=False;
+//                    FDailyCommentFields.EmailManuStat:=True;
+//
+//                    var Comments: IComments:=TComments.Create();
+//                    Comments.EditDailyComment(FDailyCommentFields, nil);
 
                 end;
 
@@ -212,7 +208,6 @@ begin
                 // We send either single email (customized by the user) or
                 // executed by mass mailer (multiple emails).
                 // -------------------------------------------------------
-
                 case PayLoad.Series of
 
                     True:
@@ -279,9 +274,9 @@ begin
                 if PayLoad.MailerList.Items[iCNT].SubItems[4] <> 'Not found!' then
                 begin
 
-                    PayLoad.CUID       :=PayLoad.MailerList.Items[iCNT].SubItems[10]; // cuid
+                    //PayLoad.CUID       :=PayLoad.MailerList.Items[iCNT].SubItems[10]; // cuid
                     PayLoad.SendFrom   :=PayLoad.MailerList.Items[iCNT].SubItems[3];  // send from
-                    PayLoad.MailTo     :=PayLoad.MailerList.Items[iCNT].SubItems[4];  // send to
+                    PayLoad.MailTo     :=TArray<string>.Create(PayLoad.MailerList.Items[iCNT].SubItems[4]);  // send to
                     PayLoad.CustName   :=PayLoad.MailerList.Items[iCNT].SubItems[0];  // cust name
                     PayLoad.CustNumber :=PayLoad.MailerList.Items[iCNT].SubItems[1];  // cust number
                     PayLoad.LBUName    :=PayLoad.MailerList.Items[iCNT].SubItems[5];  // lbu name
