@@ -50,19 +50,20 @@ type
     end;
 
     /// <summary>
-    /// Carries a group of variables to be received back when query by awaited async. task.
+    /// Carries a group of variables to be received back when queried by awaited async. task.
     /// </summary>
     TCompanyDetails = record
         LbuName:    string;
         LbuAddress: string;
         LbuPhones:  TArray<string>;
         LbuEmails:  TArray<string>;
+        Exclusions: TArray<integer>;
         LbuBanks:   TArray<TBankDetails>;
         procedure Dispose();
     end;
 
     /// <summary>
-    /// Carries a group of variables to be received back when query by awaited async. task.
+    /// Carries a group of variables to be received back when queried by awaited async. task.
     /// </summary>
     TCustomerDetails = record
         CustPerson:   string;

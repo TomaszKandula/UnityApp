@@ -28,6 +28,7 @@ type
         var FCompanyAddress: string;
         var FCompanyEmails:  TArray<string>;
         var FCompanyPhones:  TArray<string>;
+        var FExclusions:     TArray<integer>;
         var FCompanyBanks:   TArray<TBankDetails>;
         var FError:          TErrorHandler;
     public
@@ -36,6 +37,7 @@ type
         property CompanyAddress: string               read FCompanyAddress write FCompanyAddress;
         property CompanyEmails:  TArray<string>       read FCompanyEmails  write FCompanyEmails;
         property CompanyPhones:  TArray<string>       read FCompanyPhones  write FCompanyPhones;
+        property Exclusions:     TArray<integer>      read FExclusions     write FExclusions;
         property CompanyBanks:   TArray<TBankDetails> read FCompanyBanks   write FCompanyBanks;
         property Error:          TErrorHandler        read FError          write FError;
     end;

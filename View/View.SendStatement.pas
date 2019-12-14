@@ -170,6 +170,7 @@ begin
     FPayLoad.LBUAddress    :=ActionsForm.LbuAddress;
     FPayLoad.Telephone     :=ActionsForm.LbuPhones;
     FPayLoad.BankDetails   :=ActionsForm.LbuBanksHtml;
+    FPayLoad.Exclusions    :=ActionsForm.Exclusions;
     FPayLoad.Series        :=False;
     FPayLoad.ItemNo        :=0;
     FPayLoad.OpenItems     :=ActionsForm.OpenItemsGrid;

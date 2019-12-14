@@ -143,6 +143,7 @@ begin
         CompanyDetails.LbuAddress:=CompanyData.CompanyAddress;
         CompanyDetails.LbuPhones :=CompanyData.CompanyPhones;
         CompanyDetails.LbuEmails :=CompanyData.CompanyEmails;
+        CompanyDetails.Exclusions:=CompanyData.Exclusions;
         FSetCompanyDetails(CompanyData.CompanyBanks, CompanyDetails.LbuBanks);
 
     finally

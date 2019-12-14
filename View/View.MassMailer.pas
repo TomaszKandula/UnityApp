@@ -306,9 +306,7 @@ begin
         Exit();
     end;
 
-    if THelpers.MsgCall(Question2, 'Are you sure you want to send it now?') = IDNO
-        then
-            Exit();
+    if THelpers.MsgCall(Question2, 'Do you want to send it now?') = IDNO then Exit();
 
     var InvFilter: TInvoiceFilter:=TInvoiceFilter.ShowAllItems;
 

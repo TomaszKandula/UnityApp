@@ -207,6 +207,7 @@ type
         var FLbuPhones: string;
         var FLbuSendFrom: string;
         var FLbuBanksHtml: string;
+        var FExclusions: TArray<integer>;
         var FSrcColumns: TArray<integer>;
         var FAbUpdateFields: TAddressBookUpdateFields;
         var FDailyCommentFields: TDailyCommentFields;
@@ -218,6 +219,7 @@ type
         var CtrlStatusRefs: TFCtrlStatusRefs;
         function  GetRunningApps(SearchName: string): boolean;
         function  BankListToHtml(BankDetails: TArray<TBankDetails>): string;
+        procedure StrArrayToStrings(Input: TArray<string>; var Output: TStringList);
         procedure GetOpenItems(OpenItemsDest, OpenItemsSrc: TStringGrid);
         procedure UpdateGeneral(var Text: TMemo);
         procedure UpdateHistory(var HistoryGrid: TStringGrid);
@@ -250,6 +252,7 @@ type
         property LbuPhones: string read FLbuPhones;
         property LbuSendFrom: string read FLbuSendFrom;
         property LbuBanksHtml: string read FLbuBanksHtml;
+        property Exclusions: TArray<integer> read FExclusions;
     end;
 
 
@@ -366,6 +369,12 @@ begin
     var HtmlOutput:=HtmlBanks;
     Result:=HtmlOutput.Replace('{ROWS}', HtmlLines);
 
+end;
+
+
+procedure TActionsForm.StrArrayToStrings(Input: TArray<string>; var Output: TStringList);
+begin
+    for var iCNT:=0 to Length(Input) - 1 do Output.Add(Input[iCNT]);
 end;
 
 
@@ -503,18 +512,12 @@ end;
 
 
 procedure TActionsForm.UpdateCompanyDetails();
-
-    procedure StrArrayToStrings(Input: TArray<string>; var Output: TStringList);
-    begin
-        for var iCNT:=0 to Length(Input) - 1 do
-            Output.Add(Input[iCNT]);
-    end;
-
 begin
 
-    var Companies: ICompanies:=TCompanies.Create();
     var CallResponse: TCallResponse;
     var CompanyDetails: TCompanyDetails;
+
+    var Companies: ICompanies:=TCompanies.Create();
     var LbuEmails:=TStringList.Create();
     try
 
@@ -528,10 +531,11 @@ begin
             Exit();
         end;
 
-        FLbuName:=CompanyDetails.LbuName;
+        FLbuName   :=CompanyDetails.LbuName;
         FLbuAddress:=CompanyDetails.LbuAddress;
+        FExclusions:=CompanyDetails.Exclusions;
 
-        FLbuPhones:=THelpers.ArrayToString(CompanyDetails.LbuPhones, ',');
+        FLbuPhones   :=THelpers.ArrayToString(CompanyDetails.LbuPhones, ',');
         FLbuBanksHtml:=BankListToHtml(CompanyDetails.LbuBanks);
 
         selSendFrom.Clear();
@@ -1125,8 +1129,7 @@ end;
 procedure TActionsForm.btnAutoStatementClick(Sender: TObject);
 begin
 
-    if THelpers.MsgCall(Question2, 'Are you absolutely sure you want to send it, right now?') = IDNO
-        then Exit();
+    if THelpers.MsgCall(Question2, 'Do you want to send it, right now?') = IDNO then Exit();
 
     // ---------------------------------------------------------------------
     // UpdateFOpenItemsRefs and UpdateFCtrStatusRefs must be executed before
@@ -1135,9 +1138,6 @@ begin
     THelpers.UpdateFOpenItemsRefs(ActionsForm.OpenItemsGrid, OpenItemsRefs);
     THelpers.UpdateFControlStatusRefs(MainForm.sgControlStatus, CtrlStatusRefs);
 
-    // --------------------------------
-    // Prepare PayLoad for the request.
-    // --------------------------------
     FPayLoad.Layout        :=TDocMode.Defined;
     FPayLoad.Subject       :='Account Statement';
     FPayLoad.Message       :='';
@@ -1153,6 +1153,7 @@ begin
     FPayLoad.LBUAddress    :=LbuAddress;
     FPayLoad.Telephone     :=LbuPhones;
     FPayLoad.BankDetails   :=LbuBanksHtml;
+    FPayLoad.Exclusions    :=Exclusions;
     FPayLoad.Series        :=False;
     FPayLoad.ItemNo        :=0;
     FPayLoad.OpenItems     :=ActionsForm.OpenItemsGrid;

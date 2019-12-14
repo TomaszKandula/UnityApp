@@ -118,27 +118,21 @@ begin
             var Settings: ISettings:=TSettings.Create();
             var Statement: IDocument:=TDocument.Create();
 
-            Statement.Exclusions:=TArray<Integer>.Create(514, 9999);
-            Statement.MailSubject:=PayLoad.Subject + ' - ' + PayLoad.CustName + ' - ' + PayLoad.CustNumber;
-
-            Statement.MailFrom   :=PayLoad.SendFrom;
-            Statement.MailTo     :=PayLoad.MailTo;
-            Statement.CoCode     :=PayLoad.CoCode;
-            Statement.CustNumber :=PayLoad.CustNumber;
-            Statement.CustName   :=PayLoad.CustName;
-            Statement.LBUName    :=PayLoad.LBUName;
-            Statement.LBUAddress :=PayLoad.LBUAddress;
-            Statement.Telephone  :=PayLoad.Telephone;
-            Statement.BankDetails:=PayLoad.BankDetails;
-            Statement.CustMessage:=PayLoad.Message;
-            Statement.InvFilter  :=PayLoad.InvFilter;
-            Statement.BeginWith  :=PayLoad.BeginDate;
-            Statement.EndWith    :=PayLoad.EndDate;
-
-            // ----------------------------------------------------------
-            // Assign source of open items and control statuses alongside
-            // with theirs column references.
-            // ----------------------------------------------------------
+            Statement.MailSubject   :=PayLoad.Subject + ' - ' + PayLoad.CustName + ' - ' + PayLoad.CustNumber;
+            Statement.Exclusions    :=PayLoad.Exclusions;
+            Statement.MailFrom      :=PayLoad.SendFrom;
+            Statement.MailTo        :=PayLoad.MailTo;
+            Statement.CoCode        :=PayLoad.CoCode;
+            Statement.CustNumber    :=PayLoad.CustNumber;
+            Statement.CustName      :=PayLoad.CustName;
+            Statement.LBUName       :=PayLoad.LBUName;
+            Statement.LBUAddress    :=PayLoad.LBUAddress;
+            Statement.Telephone     :=PayLoad.Telephone;
+            Statement.BankDetails   :=PayLoad.BankDetails;
+            Statement.CustMessage   :=PayLoad.Message;
+            Statement.InvFilter     :=PayLoad.InvFilter;
+            Statement.BeginWith     :=PayLoad.BeginDate;
+            Statement.EndWith       :=PayLoad.EndDate;
             Statement.OpenItems     :=PayLoad.OpenItems;
             Statement.OpenItemsRefs :=PayLoad.OpenItemsRefs;
             Statement.ControlStatus :=PayLoad.ControlStatus;

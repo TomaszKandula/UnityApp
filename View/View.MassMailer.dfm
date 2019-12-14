@@ -43,7 +43,6 @@ object MassMailerForm: TMassMailerForm
     ParentBackground = False
     ParentFont = False
     TabOrder = 2
-    ExplicitTop = 705
     object Text_Warn: TLabel
       Left = 16
       Top = 16
@@ -182,7 +181,6 @@ object MassMailerForm: TMassMailerForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 1
-    ExplicitHeight = 685
     object Shape_Banks: TShape
       Left = 16
       Top = 461
@@ -760,7 +758,6 @@ object MassMailerForm: TMassMailerForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
-    ExplicitHeight = 685
     object PanelEmailContainer: TPanel
       AlignWithMargins = True
       Left = 20
@@ -775,7 +772,6 @@ object MassMailerForm: TMassMailerForm
       BevelOuter = bvNone
       Caption = 'PanelEmailContainer'
       TabOrder = 0
-      ExplicitHeight = 645
       object CustomerList: TListView
         AlignWithMargins = True
         Left = 5
@@ -796,7 +792,6 @@ object MassMailerForm: TMassMailerForm
         TabStop = False
         ViewStyle = vsReport
         OnKeyUp = CustomerListKeyUp
-        ExplicitHeight = 635
       end
     end
   end
