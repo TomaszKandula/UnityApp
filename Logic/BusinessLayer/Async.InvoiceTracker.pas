@@ -32,7 +32,7 @@ type
 
 
     /// <summary>
-    /// Callback signature (delegate) for getting invoice list.
+    /// Callback signature for getting invoice list.
     /// </summary>
     TGetInvoiceList = procedure(ReturnedData: TStringGrid; CallResponse: TCallResponse) of object;
 

@@ -23,12 +23,12 @@ type
 
 
     /// <summary>
-    /// Callback signature (delegate) for returning information from sending single account statement.
+    /// Callback signature for returning information from sending single account statement.
     /// </summary>
     TSendAccountStatement = procedure(ProcessingItemNo: integer; CallResponse: TCallResponse) of object;
 
     /// <summary>
-    /// Callback signature (delegate) for returning information from sending many account statements.
+    /// Callback signature for returning information from sending many account statements.
     /// </summary>
     TSendAccountStatements = procedure(ProcessingItemNo: integer; CallResponse: TCallResponse) of object;
 

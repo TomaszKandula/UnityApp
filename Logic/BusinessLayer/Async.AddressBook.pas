@@ -33,17 +33,17 @@ type
 
 
     /// <summary>
-    /// Callback signature (delegate) for getting results of address book open action.
+    /// Callback signature for getting results of address book open action.
     /// </summary>
     TOpenAddressBook = procedure(ReturnedData: TStringGrid; CallResponse: TCallResponse) of object;
 
     /// <summary>
-    /// Callback signature (delegate) for getting results of address book update action.
+    /// Callback signature for getting results of address book update action.
     /// </summary>
     TUpdateAddressBook = procedure(CallResponse: TCallResponse) of object;
 
     /// <summary>
-    /// Callback signature (delegate) for getting results of address book insert action.
+    /// Callback signature for getting results of address book insert action.
     /// </summary>
     TAddToAddressBook = procedure(CallResponse: TCallResponse) of object;
 

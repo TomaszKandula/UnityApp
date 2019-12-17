@@ -33,12 +33,12 @@ type
 
 
     /// <summary>
-    /// Callback signature (delegate) for returning reloaded data from invoice tracker database table.
+    /// Callback signature for returning reloaded data from invoice tracker database table.
     /// </summary>
     TRefreshInvoiceTracker = procedure(InvoiceList: TStringGrid; CallResponse: TCallResponse) of object;
 
     /// <summary>
-    /// Callback signature (delegate) for removing item from invoice tracker database table.
+    /// Callback signature for removing item from invoice tracker database table.
     /// </summary>
     TDeleteFromTrackerList = procedure(CallResponse: TCallResponse) of object;
 

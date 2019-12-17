@@ -16,12 +16,14 @@ uses
     Rest.Json,
     Api.ErrorHandler;
 
+
 type
 
 
 	TUserGeneralComment = class
     {$TYPEINFO ON}
 	strict private
+        var FCommentId:   integer;
         var FFollowUp:    string;
         var FFree1:       string;
         var FFree2:       string;
@@ -31,6 +33,7 @@ type
         var FError:       TErrorHandler;
 	public
         destructor Destroy(); override;
+        property CommentId:   integer       read FCommentId   write FCommentId;
         property FollowUp:    string        read FFollowUp    write FFollowUp;
         property Free1:       string        read FFree1       write FFree1;
         property Free2:       string        read FFree2       write FFree2;

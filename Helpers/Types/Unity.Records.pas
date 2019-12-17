@@ -75,7 +75,7 @@ type
     /// <summary>
     /// Carries a group of variables to be updated in AddressBook table.
     /// </summary>
-    TAddressBookUpdateFields = record//?
+    TAddressBookUpdateFields = record
         Scuid:      string;
         Phones:     string;
         Contact:    string;
@@ -86,8 +86,9 @@ type
     /// <summary>
     /// Carries a group of variables for update in DailyComments table.
     /// </summary>
-    TDailyCommentFields = record//?
+    TDailyCommentFields = record
         // Database fields
+        CommentId:            integer;
         CompanyCode:          string;
         CustomerNumber:       string;
         AgeDate:              string;
@@ -108,8 +109,8 @@ type
     /// <summary>
     /// Carries a group of variables for update in GeneralComment table.
     /// </summary>
-    TGeneralCommentFields = record//?
-        // Database fields
+    TGeneralCommentFields = record
+        CommentId:      integer;
         CompanyCode:    string;
         CustomerNumber: string;
         FollowUp:       string;
@@ -118,8 +119,6 @@ type
         Free3:          string;
         UserComment:    string;
         UserAlias:      string;
-        // Additional information
-        EventLog:     boolean;
     end;
 
     /// <summary>

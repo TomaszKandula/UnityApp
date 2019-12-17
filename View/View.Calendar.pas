@@ -49,7 +49,7 @@ type
         procedure MyCalendarClick(Sender: TObject);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
     strict private
-        //var FGeneralCommentFields: TGeneralCommentFields;
+        var FGeneralCommentFields: TGeneralCommentFields;
         function MakeMyDay(Increment: integer): TDate;
         function IsWeekend(const DT: TDateTime): Boolean;
         procedure EditGeneralComment_Callback(CallResponse: TCallResponse);
@@ -73,6 +73,7 @@ uses
     System.SysUtils,
     View.Main,
     DbModel{Legacy},
+    Unity.SessionService,
     Unity.Chars,
     Unity.Unknown,
     Unity.Helpers,
@@ -116,19 +117,19 @@ end;
 procedure TCalendarForm.SetFollowUp(SelectedDate: TDate; SelectedCUID: string; Row: integer);
 begin
 
-    // Set follow-up date and register it in general comment and update age view string grid.
-//    FGeneralCommentFields.CUID        :=SelectedCUID;
-//    FGeneralCommentFields.FixedComment:=TUnknown.NULL;
-//    FGeneralCommentFields.FollowUp    :=DateToStr(SelectedDate);
-//    FGeneralCommentFields.Free1       :=TUnknown.NULL;
-//    FGeneralCommentFields.Free2       :=TUnknown.NULL;
-//    FGeneralCommentFields.Free3       :=TUnknown.NULL;
-//    FGeneralCommentFields.EventLog    :=False;
-//
-//    var Comments: IComments:=TComments.Create();
-//    Comments.EditGeneralComment(FGeneralCommentFields, EditGeneralComment_Callback);
-//
-//    MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TGeneralComment.fFollowUp), Row]:=DateToStr(SelectedDate);
+    FGeneralCommentFields.CompanyCode   :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCoCode), Row];
+    FGeneralCommentFields.CustomerNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerNumber), Row];
+    FGeneralCommentFields.FollowUp      :=DateToStr(SelectedDate);
+    FGeneralCommentFields.Free1         :=String.Empty;
+    FGeneralCommentFields.Free2         :=String.Empty;
+    FGeneralCommentFields.Free3         :=String.Empty;
+    FGeneralCommentFields.UserComment   :=String.Empty;
+    FGeneralCommentFields.UserAlias     :=SessionService.SessionData.AliasName;
+
+    var Comments: IComments:=TComments.Create();
+    Comments.EditGeneralComment(FGeneralCommentFields, EditGeneralComment_Callback);
+
+    MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TGeneralComment.fFollowUp), Row]:=DateToStr(SelectedDate);
 
 end;
 

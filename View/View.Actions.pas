@@ -211,7 +211,7 @@ type
         var FSrcColumns: TArray<integer>;
         //var FAbUpdateFields: TAddressBookUpdateFields;
         //var FDailyCommentFields: TDailyCommentFields;
-        //var FGeneralCommentFields: TGeneralCommentFields;
+        var FGeneralCommentFields: TGeneralCommentFields;
         var FOpenItemsTotal: TOpenItemsTotal;
         var FPayLoad: TAccountStatementPayLoad;
         var FIsDataLoaded: boolean;
@@ -288,8 +288,7 @@ uses
     Async.Companies,
     Async.AddressBook,
     Async.Comments,
-    Async.Statements,
-    Api.UserGeneralComment;
+    Async.Statements;
 
 
 var vActionsForm: TActionsForm;
@@ -587,23 +586,18 @@ procedure TActionsForm.UpdateGeneral(var Text: TMemo);
 begin
 
     var CallResponse: TCallResponse;
+    var UserGeneralComment: TGeneralCommentFields;
     var Comments: IComments:=TComments.Create();
-    var UserGeneralComment:=TUserGeneralComment.Create();
-    try
 
-        CallResponse:=Comments.GetGeneralCommentAwaited(
-            CompanyCode.ToInteger(),
-            CustNumber.ToInteger(),
-            SessionService.SessionData.AliasName,
-            UserGeneralComment
-        );
+    CallResponse:=Comments.GetGeneralCommentAwaited(
+        CompanyCode.ToInteger(),
+        CustNumber.ToInteger(),
+        SessionService.SessionData.AliasName,
+        UserGeneralComment
+    );
 
-        if CallResponse.IsSucceeded then
-            Text.Text:=UserGeneralComment.UserComment;
-
-    finally
-        UserGeneralComment.Free();
-    end;
+    if CallResponse.IsSucceeded then
+        Text.Text:=UserGeneralComment.UserComment;
 
 end;
 
@@ -784,18 +778,19 @@ begin
     if THelpers.MsgCall(Question2, 'Are you sure you want to clear this follow up?') = ID_YES then
     begin
 
-//        FGeneralCommentFields.CUID        :=CUID;
-//        FGeneralCommentFields.FixedComment:=TUnknown.NULL;
-//        FGeneralCommentFields.FollowUp    :=TChars.SPACE;
-//        FGeneralCommentFields.Free1       :=TUnknown.NULL;
-//        FGeneralCommentFields.Free2       :=TUnknown.NULL;
-//        FGeneralCommentFields.Free3       :=TUnknown.NULL;
-//        FGeneralCommentFields.EventLog    :=True;
-//
-//        var Comments: IComments:=TComments.Create();
-//        Comments.EditGeneralComment(FGeneralCommentFields, EditGeneralComment_Callback);
-//
-//        MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TGeneralComment.fFollowUp), MainForm.sgAgeView.Row]:='';
+        FGeneralCommentFields.CompanyCode   :=CompanyCode;
+        FGeneralCommentFields.CustomerNumber:=CustNumber;
+        FGeneralCommentFields.FollowUp      :=' ';
+        FGeneralCommentFields.Free1         :=String.Empty;
+        FGeneralCommentFields.Free2         :=String.Empty;
+        FGeneralCommentFields.Free3         :=String.Empty;
+        FGeneralCommentFields.UserComment   :=String.Empty;
+        FGeneralCommentFields.UserAlias     :=SessionService.SessionData.AliasName;
+
+        var Comments: IComments:=TComments.Create();
+        Comments.EditGeneralComment(FGeneralCommentFields, EditGeneralComment_Callback);
+
+        MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TGeneralComment.fFollowUp), MainForm.sgAgeView.Row]:='';
 
     end;
 
@@ -820,16 +815,17 @@ end;
 procedure TActionsForm.SaveGeneralComment();
 begin
 
-//    FGeneralCommentFields.CUID        :=CUID;
-//    FGeneralCommentFields.FixedComment:=GeneralCom.Text;
-//    FGeneralCommentFields.FollowUp    :=TUnknown.NULL;
-//    FGeneralCommentFields.Free1       :=TUnknown.NULL;
-//    FGeneralCommentFields.Free2       :=TUnknown.NULL;
-//    FGeneralCommentFields.Free3       :=TUnknown.NULL;
-//    FGeneralCommentFields.EventLog    :=True;
-//
-//    var Comments: IComments:=TComments.Create();
-//    Comments.EditGeneralComment(FGeneralCommentFields, EditGeneralComment_Callback);
+    FGeneralCommentFields.CompanyCode   :=CompanyCode;
+    FGeneralCommentFields.CustomerNumber:=CustNumber;
+    FGeneralCommentFields.FollowUp      :=String.Empty;
+    FGeneralCommentFields.Free1         :=String.Empty;
+    FGeneralCommentFields.Free2         :=String.Empty;
+    FGeneralCommentFields.Free3         :=String.Empty;
+    FGeneralCommentFields.UserComment   :=GeneralCom.Text;
+    FGeneralCommentFields.UserAlias     :=SessionService.SessionData.AliasName;
+
+    var Comments: IComments:=TComments.Create();
+    Comments.EditGeneralComment(FGeneralCommentFields, EditGeneralComment_Callback);
 
 end;
 

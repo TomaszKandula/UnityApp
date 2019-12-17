@@ -33,12 +33,12 @@ type
 
 
     /// <summary>
-    /// Callback signature (delegate) for scanning SSIS master table to check if open items have been updated.
+    /// Callback signature for scanning SSIS master table to check if open items have been updated.
     /// </summary>
     TScanOpenItems = procedure(CanMakeAge: boolean; ReadDateTime: string; CallResponse: TCallResponse) of object;
 
     /// <summary>
-    /// Callback signature (delegate) for reading open items. Payload returned contains summary data from loaded invoices.
+    /// Callback signature for reading open items. Payload returned contains summary data from loaded invoices.
     /// </summary>
     TReadOpenItems = procedure(OpenItemsData: TOpenItemsPayLoad; CallResponse: TCallResponse) of object;
 

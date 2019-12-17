@@ -32,7 +32,7 @@ type
 
 
     /// <summary>
-    /// Callback signature (delegate) for reading current age report from SQL database.
+    /// Callback signature for reading current age report from SQL database.
     /// </summary>
     TReadAgeView = procedure(ReturnedData: TStringGrid; PayLoad: TAgingPayLoad; CallResponse: TCallResponse) of object;
 
