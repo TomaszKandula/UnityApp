@@ -62,7 +62,7 @@ type
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function GetGeneralCommentAwaited(CompanyCode: integer; CustNumber: integer; UserAlias: string; var Output: TUserGeneralComment): TCallResponse;
+        function GetGeneralCommentAwaited(CompanyCode: integer; CustNumber: integer; UserAlias: string; var Output: TGeneralCommentFields): TCallResponse;
 
         /// <summary>
         /// Allow to async. retrieve daily comments for given customer (via CUID number). There is no separate notification.
@@ -105,7 +105,7 @@ type
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function GetGeneralCommentAwaited(CompanyCode: integer; CustNumber: integer; UserAlias: string; var Output: TUserGeneralComment): TCallResponse;
+        function GetGeneralCommentAwaited(CompanyCode: integer; CustNumber: integer; UserAlias: string; var Output: TGeneralCommentFields): TCallResponse;
 
         /// <summary>
         /// Allow to async. retrieve daily comments for given customer (via CUID number). There is no separate notification.
@@ -145,12 +145,12 @@ begin
 end;
 
 
-function TComments.GetGeneralCommentAwaited(CompanyCode: integer; CustNumber: integer; UserAlias: string; var Output: TUserGeneralComment): TCallResponse;
+function TComments.GetGeneralCommentAwaited(CompanyCode: integer; CustNumber: integer; UserAlias: string; var Output: TGeneralCommentFields): TCallResponse;
 begin
 
     var CallResponse: TCallResponse;
-    var TempOutput:=TUserGeneralComment.Create();
-    try
+//    var TempOutput:=TUserGeneralComment.Create();
+//    try
 
         var NewTask: ITask:=TTask.Create(procedure
         begin
@@ -172,24 +172,43 @@ begin
                 if (Restful.Execute) and (Restful.StatusCode = 200) then
                 begin
 
-                    var UserGeneralComment:=TUserGeneralComment.Create();
-                    UserGeneralComment:=TJson.JsonToObject<TUserGeneralComment>(Restful.Content);
-                    UserGeneralComment.Free();
+                    Output:=TJson.JsonToObject<TUserGeneralComment>(Restful.Content);
+                    CallResponse.IsSucceeded:=Output.IsSucceeded;
+                    ThreadFileLog.Log('[GetGeneralCommentAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
 
-                    CallResponse.IsSucceeded:=TempOutput.IsSucceeded;
+//                    var UserGeneralComment: TUserGeneralComment:=TJson.JsonToObject<TUserGeneralComment>(Restful.Content);
+//                    try
+//
+//                        if not Assigned(TempOutput.Error) then
+//                            TempOutput.Error:=TErrorHandler.Create();
+//
+//                        TempOutput.FollowUp       :=UserGeneralComment.FollowUp;
+//                        TempOutput.Free1          :=UserGeneralComment.Free1;
+//                        TempOutput.Free2          :=UserGeneralComment.Free2;
+//                        TempOutput.Free3          :=UserGeneralComment.Free3;
+//                        TempOutput.UserComment    :=UserGeneralComment.UserComment;
+//                        TempOutput.IsSucceeded    :=UserGeneralComment.IsSucceeded;
+//                        TempOutput.Error.ErrorDesc:=UserGeneralComment.Error.ErrorDesc;
+//                        TempOutput.Error.ErrorNum :=UserGeneralComment.Error.ErrorNum;
+//
+//                        CallResponse.IsSucceeded:=UserGeneralComment.IsSucceeded;
+//                        ThreadFileLog.Log('[GetGeneralCommentAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+//
+//                    finally
+//                        UserGeneralComment.Free();
+//                    end;
 
-                    ThreadFileLog.Log('[GetUserCompanyListAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
                 end
                 else
                 begin
 
                     if not String.IsNullOrEmpty(Restful.ExecuteError) then
-                        CallResponse.LastMessage:='[GetUserCompanyListAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                        CallResponse.LastMessage:='[GetGeneralCommentAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
                     else
                         if String.IsNullOrEmpty(Restful.Content) then
-                            CallResponse.LastMessage:='[GetUserCompanyListAwaited]: Invalid server response. Please contact IT Support.'
+                            CallResponse.LastMessage:='[GetGeneralCommentAwaited]: Invalid server response. Please contact IT Support.'
                         else
-                            CallResponse.LastMessage:='[GetUserCompanyListAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+                            CallResponse.LastMessage:='[GetGeneralCommentAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
 
                     CallResponse.ReturnedCode:=Restful.StatusCode;
                     CallResponse.IsSucceeded:=False;
@@ -201,7 +220,7 @@ begin
                 E: Exception do
                 begin
                     CallResponse.IsSucceeded:=False;
-                    CallResponse.LastMessage:='[GetUserCompanyListAwaited]: Cannot execute the request. Description: ' + E.Message;
+                    CallResponse.LastMessage:='[GetGeneralCommentAwaited]: Cannot execute the request. Description: ' + E.Message;
                     ThreadFileLog.Log(CallResponse.LastMessage);
                 end;
 
@@ -212,22 +231,22 @@ begin
         NewTask.Start();
         TTask.WaitForAll(NewTask);
 
-        //if not Assigned(Output.Error) then
-        //    Output.Error:=TErrorHandler.Create();
+//        if not Assigned(Output.Error) then
+//            Output.Error:=TErrorHandler.Create();
+//
+//        Output.FollowUp       :=TempOutput.FollowUp;
+//        Output.Free1          :=TempOutput.Free1;
+//        Output.Free2          :=TempOutput.Free2;
+//        Output.Free3          :=TempOutput.Free3;
+//        Output.UserComment    :=TempOutput.UserComment;
+//        Output.IsSucceeded    :=TempOutput.IsSucceeded;
+//        Output.Error.ErrorDesc:=TempOutput.Error.ErrorDesc;
+//        Output.Error.ErrorNum :=TempOutput.Error.ErrorNum;
 
-        Output.FollowUp       :=TempOutput.FollowUp;
-        Output.Free1          :=TempOutput.Free1;
-        Output.Free2          :=TempOutput.Free2;
-        Output.Free3          :=TempOutput.Free3;
-        Output.UserComment    :=TempOutput.UserComment;
-        Output.IsSucceeded    :=TempOutput.IsSucceeded;
-        //Output.Error.ErrorDesc:=TempOutput.Error.ErrorDesc;
-        //Output.Error.ErrorNum :=TempOutput.Error.ErrorNum;
-
-    finally
-        TempOutput.Free();
+//    finally
+//        TempOutput.Free();
         Result:=CallResponse;
-    end;
+//    end;
 
 end;
 
