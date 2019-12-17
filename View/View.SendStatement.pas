@@ -148,12 +148,8 @@ begin
 
     var TempStr:=StringReplace(Text_Message.Text, TChars.CRLF, '<br>', [rfReplaceAll]);
 
-    // ----------------------------------------------------------------------
-    // UpdateFOpenItemsRefs and UpdateFCtrlStatusRefs must be executed before
-    // SendAccountStatement is called.
-    // ----------------------------------------------------------------------
-    THelpers.UpdateFOpenItemsRefs(ActionsForm.OpenItemsGrid, OpenItemsRefs);
-    THelpers.UpdateFControlStatusRefs(MainForm.sgControlStatus, CtrlStatusRefs);
+    OpenItemsRefs.InitWith(ActionsForm.OpenItemsGrid);
+    CtrlStatusRefs.InitWith(MainForm.sgControlStatus);
 
     FPayLoad.Layout        :=TDocMode.Custom;
     FPayLoad.Subject       :='Account Statement';

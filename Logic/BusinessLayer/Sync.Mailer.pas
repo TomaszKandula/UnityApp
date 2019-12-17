@@ -99,18 +99,17 @@ uses
 function TMailer.SendNowSync(): TCallResponse;
 begin
 
-    var SendEmail:=TSendEmail.Create();
-    var SentEmail: TSentEmail;
+
     var CallResponse: TCallResponse;
     try
 
+        var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
+        Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'mailer/send/';
+        Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
+        ThreadFileLog.Log('[SendNowSync]: Executing POST ' + Restful.ClientBaseURL);
+
+        var SendEmail:=TSendEmail.Create();
         try
-
-            var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
-            Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'mailer/send/';
-            Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
-            ThreadFileLog.Log('[SendNowSync]: Executing POST ' + Restful.ClientBaseURL);
-
             SendEmail.UserId   :=SessionService.SessionData.UnityUserId.ToString();
             SendEmail.SessionId:=SessionService.SessionId;
             SendEmail.AliasName:=SessionService.SessionData.AliasName;
@@ -120,51 +119,50 @@ begin
             SendEmail.Bcc      :=FMailBcc;
             SendEmail.Subject  :=MailSubject;
             SendEmail.HtmlBody :=MailBody;
+            Restful.CustomBody :=TJson.ObjectToJsonString(SendEmail);
+        finally
+            SendEmail.Free();
+        end;
 
-            Restful.CustomBody:=TJson.ObjectToJsonString(SendEmail);
+        if (Restful.Execute) and (Restful.StatusCode = 200) then
+        begin
 
-            if (Restful.Execute) and (Restful.StatusCode = 200) then
-            begin
-
-                SentEmail:=TJson.JsonToObject<TSentEmail>(Restful.Content);
-
+            var SentEmail: TSentEmail:=TJson.JsonToObject<TSentEmail>(Restful.Content);
+            try
                 CallResponse.IsSucceeded:=SentEmail.IsSucceeded;
                 CallResponse.LastMessage:=SentEmail.Error.ErrorDesc;
                 CallResponse.ErrorNumber:=SentEmail.Error.ErrorNum;
-
                 ThreadFileLog.Log('[SendNowSync]: Returned status code is ' + Restful.StatusCode.ToString());
+            finally
+                SentEmail.Free();
+            end;
 
-            end
+        end
+        else
+        begin
+
+            if not String.IsNullOrEmpty(Restful.ExecuteError) then
+                CallResponse.LastMessage:='[SendNowSync]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
             else
-            begin
-
-                if not String.IsNullOrEmpty(Restful.ExecuteError) then
-                    CallResponse.LastMessage:='[SendNowSync]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                if String.IsNullOrEmpty(Restful.Content) then
+                    CallResponse.LastMessage:='[SendNowSync]: Invalid server response. Please contact IT Support.'
                 else
-                    if String.IsNullOrEmpty(Restful.Content) then
-                        CallResponse.LastMessage:='[SendNowSync]: Invalid server response. Please contact IT Support.'
-                    else
-                        CallResponse.LastMessage:='[SendNowSync]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+                    CallResponse.LastMessage:='[SendNowSync]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
 
-                CallResponse.ReturnedCode:=Restful.StatusCode;
-                CallResponse.IsSucceeded:=False;
-                ThreadFileLog.Log(CallResponse.LastMessage);
-
-            end;
-
-        except
-            on E: Exception do
-            begin
-                CallResponse.IsSucceeded:=False;
-                CallResponse.LastMessage:='[SendNowSync]: Cannot execute. Error has been thrown: ' + E.Message;
-                ThreadFileLog.Log(CallResponse.LastMessage);
-            end;
+            CallResponse.ReturnedCode:=Restful.StatusCode;
+            CallResponse.IsSucceeded:=False;
+            ThreadFileLog.Log(CallResponse.LastMessage);
 
         end;
 
-    finally
-        SentEmail.Free();
-        SendEmail.Free();
+    except
+        on E: Exception do
+        begin
+            CallResponse.IsSucceeded:=False;
+            CallResponse.LastMessage:='[SendNowSync]: Cannot execute. Error has been thrown: ' + E.Message;
+            ThreadFileLog.Log(CallResponse.LastMessage);
+        end;
+
     end;
 
     Result:=CallResponse;

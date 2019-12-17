@@ -332,11 +332,8 @@ begin
     // -----------------------------------------------------------------------------------------------------
     MainForm.sgOpenItems.MSort(MainForm.sgOpenItems.GetCol(TOpenitems.PmtStat), TDataType.TFloat, True);
 
-    // -------------------------------------------------------------------------------------------
-    /// Update column references, as they depend on view from SQL which may be changed at runtime.
-    // -------------------------------------------------------------------------------------------
-    THelpers.UpdateFOpenItemsRefs(MainForm.sgOpenItems, OpenItemsRefs);
-    THelpers.UpdateFControlStatusRefs(MainForm.sgControlStatus, CtrlStatusRefs);
+    OpenItemsRefs.InitWith(MainForm.sgOpenItems);
+    CtrlStatusRefs.InitWith(MainForm.sgControlStatus);
 
     FPayLoad.Layout        :=TDocMode.Defined;
     FPayLoad.Subject       :=Text_Subject.Text;

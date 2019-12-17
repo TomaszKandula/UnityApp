@@ -198,7 +198,7 @@ type
         const HtmlEmpty = '<!-- NO BANK ACCOUNT ATTACHED -->';
         const AppButtonTxtNormal = $00555555;
         const AppButtonTxtSelected = $006433C9;
-        var FHistoryGrid: boolean;
+        //var FHistoryGrid: boolean;
         var FCompanyCode: string;
         var FCustName: string;
         var FCustNumber: string;
@@ -209,9 +209,9 @@ type
         var FLbuBanksHtml: string;
         var FExclusions: TArray<integer>;
         var FSrcColumns: TArray<integer>;
-        var FAbUpdateFields: TAddressBookUpdateFields;
-        var FDailyCommentFields: TDailyCommentFields;
-        var FGeneralCommentFields: TGeneralCommentFields;
+        //var FAbUpdateFields: TAddressBookUpdateFields;
+        //var FDailyCommentFields: TDailyCommentFields;
+        //var FGeneralCommentFields: TGeneralCommentFields;
         var FOpenItemsTotal: TOpenItemsTotal;
         var FPayLoad: TAccountStatementPayLoad;
         var FIsDataLoaded: boolean;
@@ -288,7 +288,9 @@ uses
     Async.Companies,
     Async.AddressBook,
     Async.Comments,
-    Async.Statements;
+    Async.Statements,
+    Api.UserGeneralComment,
+    Api.ErrorHandler;
 
 
 var vActionsForm: TActionsForm;
@@ -584,19 +586,34 @@ end;
 
 procedure TActionsForm.UpdateGeneral(var Text: TMemo);
 begin
-//    var Comments: IComments:=TComments.Create();
-//    Text.Text:=Comments.GetGeneralCommentAwaited(CUID);
+
+    var CallResponse: TCallResponse;
+    var Comments: IComments:=TComments.Create();
+    var UserGeneralComment:=TUserGeneralComment.Create();
+    try
+
+        CallResponse:=Comments.GetGeneralCommentAwaited(
+            CompanyCode.ToInteger(),
+            CustNumber.ToInteger(),
+            SessionService.SessionData.AliasName,
+            UserGeneralComment
+        );
+
+        if CallResponse.IsSucceeded then
+            Text.Text:=UserGeneralComment.UserComment;
+
+    finally
+        UserGeneralComment.Free();
+    end;
+
 end;
 
 
 procedure TActionsForm.GetFirstComment(var Text: TMemo);
 begin
-
-    if not(Text.Visible) then Exit();
-    var GetColumn: integer:=HistoryGrid.GetCol(TDailyComment.FixedComment);
-    if GetColumn <> -100 then
-        Text.Text:=HistoryGrid.Cells[GetColumn, 1{fixed first row}];
-
+//    if not(Text.Visible) then Exit();
+//    var GetColumn:=HistoryGrid.GetCol(TDailyComment.FixedComment);
+//    if GetColumn <> -100 then Text.Text:=HistoryGrid.Cells[GetColumn, 1];
 end;
 
 
@@ -1000,7 +1017,7 @@ begin
             HistoryGrid.AutoThumbSize;
             HistoryGrid.SetColWidth(10, 20, 400);
 
-            {GetFirstComment(DailyCom);}
+            GetFirstComment(DailyCom);
             Screen.Cursor:=crDefault;
             FIsDataLoaded:=True;
 
@@ -1131,12 +1148,8 @@ begin
 
     if THelpers.MsgCall(Question2, 'Do you want to send it, right now?') = IDNO then Exit();
 
-    // ---------------------------------------------------------------------
-    // UpdateFOpenItemsRefs and UpdateFCtrStatusRefs must be executed before
-    // SendAccountStatement is called.
-    // ---------------------------------------------------------------------
-    THelpers.UpdateFOpenItemsRefs(ActionsForm.OpenItemsGrid, OpenItemsRefs);
-    THelpers.UpdateFControlStatusRefs(MainForm.sgControlStatus, CtrlStatusRefs);
+    OpenItemsRefs.InitWith(ActionsForm.OpenItemsGrid);
+    CtrlStatusRefs.InitWith(MainForm.sgControlStatus);
 
     FPayLoad.Layout        :=TDocMode.Defined;
     FPayLoad.Subject       :='Account Statement';

@@ -29,6 +29,7 @@ type
         var FAliasName:    string;
         var FDisplayName:  string;
         var FEmailAddress: string;
+        var FIsSucceeded:  boolean;
         var FError:        TErrorHandler;
 	public
         destructor Destroy(); override;
@@ -38,6 +39,7 @@ type
         property AliasName:    string        read FAliasName    write FAliasName;
         property DisplayName:  string        read FDisplayName  write FDisplayName;
         property EmailAddress: string        read FEmailAddress write FEmailAddress;
+        property IsSucceeded:  boolean       read FIsSucceeded  write FIsSucceeded;
         property Error:        TErrorHandler read FError        write FError;
 	end;
 

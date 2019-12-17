@@ -30,6 +30,7 @@ type
         var FCompanyPhones:  TArray<string>;
         var FExclusions:     TArray<integer>;
         var FCompanyBanks:   TArray<TBankDetails>;
+        var FIsSucceeded:    boolean;
         var FError:          TErrorHandler;
     public
         destructor Destroy(); override;
@@ -39,6 +40,7 @@ type
         property CompanyPhones:  TArray<string>       read FCompanyPhones  write FCompanyPhones;
         property Exclusions:     TArray<integer>      read FExclusions     write FExclusions;
         property CompanyBanks:   TArray<TBankDetails> read FCompanyBanks   write FCompanyBanks;
+        property IsSucceeded:    boolean              read FIsSucceeded    write FIsSucceeded;
         property Error:          TErrorHandler        read FError          write FError;
     end;
 

@@ -246,7 +246,7 @@ begin
         begin
 
             var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
-            Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'custsnapshots/options/';
+            Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'snapshots/options/';
             Restful.RequestMethod:=TRESTRequestMethod.rmGET;
             ThreadFileLog.Log('[GetUserSortingOptionsAwaited]: Executing GET ' + Restful.ClientBaseURL);
 

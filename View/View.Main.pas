@@ -789,8 +789,8 @@ type
         var FHadFirstLoad: boolean;
         var FAllowClose: boolean;
         var FAbUpdateFields: TAddressBookUpdateFields;
-        var FDailyCommentFields: TDailyCommentFields;
-        var FGeneralCommentFields: TGeneralCommentFields;
+        //var FDailyCommentFields: TDailyCommentFields;
+        //var FGeneralCommentFields: TGeneralCommentFields;
         const AppMenuTextSelected = $006433C9;
         const AppMenuTextNormal = clGrayText;
         const AppButtonTxtNormal = $00555555;

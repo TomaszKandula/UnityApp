@@ -75,7 +75,7 @@ type
     /// <summary>
     /// Carries a group of variables to be updated in AddressBook table.
     /// </summary>
-    TAddressBookUpdateFields = record
+    TAddressBookUpdateFields = record//?
         Scuid:      string;
         Phones:     string;
         Contact:    string;
@@ -86,7 +86,7 @@ type
     /// <summary>
     /// Carries a group of variables for update in DailyComments table.
     /// </summary>
-    TDailyCommentFields = record
+    TDailyCommentFields = record//?
         // Database fields
         CompanyCode:          string;
         CustomerNumber:       string;
@@ -108,7 +108,7 @@ type
     /// <summary>
     /// Carries a group of variables for update in GeneralComment table.
     /// </summary>
-    TGeneralCommentFields = record
+    TGeneralCommentFields = record//?
         // Database fields
         CompanyCode:    string;
         CustomerNumber: string;

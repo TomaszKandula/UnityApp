@@ -17,12 +17,14 @@ type
     TCompanyEmailsList = class
     {$TYPEINFO ON}
     strict private
-        var FEmailList: TArray<TRegisteredEmails>;
-        var FError:     TErrorHandler;
+        var FEmailList:   TArray<TRegisteredEmails>;
+        var FIsSucceeded: boolean;
+        var FError:       TErrorHandler;
     public
         destructor Destroy(); override;
-        property EmailList: TArray<TRegisteredEmails> read FEmailList write FEmailList;
-        property Error:     TErrorHandler             read FError     write FError;
+        property EmailList:   TArray<TRegisteredEmails> read FEmailList   write FEmailList;
+        property IsSucceeded: boolean                   read FIsSucceeded write FIsSucceeded;
+        property Error:       TErrorHandler             read FError       write FError;
     end;
 
 

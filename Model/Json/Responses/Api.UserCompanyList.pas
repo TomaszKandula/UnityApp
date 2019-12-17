@@ -22,14 +22,16 @@ type
 	TUserCompanyList = class
     {$TYPEINFO ON}
 	strict private
-        var FCompanies:  TArray<string>;
-        var FIsSelected: TArray<boolean>;
-        var FError:      TErrorHandler;
+        var FCompanies:   TArray<string>;
+        var FIsSelected:  TArray<boolean>;
+        var FIsSucceeded: boolean;
+        var FError:       TErrorHandler;
 	public
         destructor Destroy(); override;
-        property Companies:  TArray<string>  read FCompanies  write FCompanies;
-        property IsSelected: TArray<boolean> read FIsSelected write FIsSelected;
-        property Error:      TErrorHandler   read FError      write FError;
+        property Companies:   TArray<string>  read FCompanies   write FCompanies;
+        property IsSelected:  TArray<boolean> read FIsSelected  write FIsSelected;
+        property IsSucceeded: boolean         read FIsSucceeded write FIsSucceeded;
+        property Error:       TErrorHandler   read FError       write FError;
 	end;
 
 

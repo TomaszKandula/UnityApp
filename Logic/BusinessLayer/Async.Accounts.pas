@@ -152,7 +152,6 @@ begin
         ThreadFileLog.Log('[InitiateAwaited]: Executing POST ' + Restful.ClientBaseURL);
 
         var UserSessionAdd:=TUserSessionAdd.Create();
-        var UserSessionAdded: TUserSessionAdded;
         try
 
             UserSessionAdd.AliasName:=AliasName;
@@ -162,13 +161,15 @@ begin
                 if (Restful.Execute) and (Restful.StatusCode = 200) then
                 begin
 
-                    UserSessionAdded:=TJson.JsonToObject<TUserSessionAdded>(Restful.Content);
-
-                    CallResponse.IsSucceeded:=UserSessionAdded.IsSucceeded;
-                    CallResponse.LastMessage:=UserSessionAdded.Error.ErrorDesc;
-                    CallResponse.ErrorNumber:=UserSessionAdded.Error.ErrorNum;
-
-                    ThreadFileLog.Log('[InitiateAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+                    var UserSessionAdded: TUserSessionAdded:=TJson.JsonToObject<TUserSessionAdded>(Restful.Content);
+                    try
+                        CallResponse.IsSucceeded:=UserSessionAdded.IsSucceeded;
+                        CallResponse.LastMessage:=UserSessionAdded.Error.ErrorDesc;
+                        CallResponse.ErrorNumber:=UserSessionAdded.Error.ErrorNum;
+                        ThreadFileLog.Log('[InitiateAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+                    finally
+                        UserSessionAdded.Free();
+                    end;
 
                 end
                 else
@@ -199,7 +200,6 @@ begin
             end;
 
         finally
-            UserSessionAdded.Free();
             UserSessionAdd.Free();
         end;
 
@@ -225,15 +225,13 @@ begin
         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
         ThreadFileLog.Log('[CheckAwaited]: Executing GET ' + Restful.ClientBaseURL);
 
-        var UserSessionChecked: TUserSessionChecked;
         try
 
-            try
+            if (Restful.Execute) and (Restful.StatusCode = 200) then
+            begin
 
-                if (Restful.Execute) and (Restful.StatusCode = 200) then
-                begin
-
-                    UserSessionChecked:=TJson.JsonToObject<TUserSessionChecked>(Restful.Content);
+                var UserSessionChecked: TUserSessionChecked:=TJson.JsonToObject<TUserSessionChecked>(Restful.Content);
+                try
 
                     CallResponse.IsSucceeded:=UserSessionChecked.IsValidated;
                     CallResponse.LastMessage:=UserSessionChecked.Error.ErrorDesc;
@@ -254,36 +252,36 @@ begin
 
                     ThreadFileLog.Log('[CheckAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
 
-                end
+                finally
+                    UserSessionChecked.Free();
+                end;
+
+            end
+            else
+            begin
+
+                if not String.IsNullOrEmpty(Restful.ExecuteError) then
+                    CallResponse.LastMessage:='[CheckAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
                 else
-                begin
-
-                    if not String.IsNullOrEmpty(Restful.ExecuteError) then
-                        CallResponse.LastMessage:='[CheckAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                    if String.IsNullOrEmpty(Restful.Content) then
+                        CallResponse.LastMessage:='[CheckAwaited]: Invalid server response. Please contact IT Support.'
                     else
-                        if String.IsNullOrEmpty(Restful.Content) then
-                            CallResponse.LastMessage:='[CheckAwaited]: Invalid server response. Please contact IT Support.'
-                        else
-                            CallResponse.LastMessage:='[CheckAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+                        CallResponse.LastMessage:='[CheckAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
 
-                    CallResponse.ReturnedCode:=Restful.StatusCode;
-                    CallResponse.IsSucceeded:=False;
-                    ThreadFileLog.Log(CallResponse.LastMessage);
-
-                end;
-
-            except on
-                E: Exception do
-                begin
-                    CallResponse.IsSucceeded:=False;
-                    CallResponse.LastMessage:='[CheckAwaited]: Cannot execute the request. Description: ' + E.Message;
-                    ThreadFileLog.Log(CallResponse.LastMessage);
-                end;
+                CallResponse.ReturnedCode:=Restful.StatusCode;
+                CallResponse.IsSucceeded:=False;
+                ThreadFileLog.Log(CallResponse.LastMessage);
 
             end;
 
-        finally
-            UserSessionChecked.Free();
+        except on
+            E: Exception do
+            begin
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[CheckAwaited]: Cannot execute the request. Description: ' + E.Message;
+                ThreadFileLog.Log(CallResponse.LastMessage);
+            end;
+
         end;
 
     end);
@@ -309,15 +307,15 @@ begin
         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
         ThreadFileLog.Log('[GetUserCompanyListAwaited]: Executing GET ' + Restful.ClientBaseURL);
 
-        var UserCompanyList: TUserCompanyList;
         try
 
-            try
+            if (Restful.Execute) and (Restful.StatusCode = 200) then
+            begin
 
-                if (Restful.Execute) and (Restful.StatusCode = 200) then
-                begin
 
-                    UserCompanyList:=TJson.JsonToObject<TUserCompanyList>(Restful.Content);
+                var UserCompanyList:=TJson.JsonToObject<TUserCompanyList>(Restful.Content);
+                try
+
                     var ItemCount:=Length(UserCompanyList.Companies);
                     SetLength(TempUserCompanyList, ItemCount, 2);
 
@@ -330,36 +328,36 @@ begin
                     CallResponse.IsSucceeded:=True;
                     ThreadFileLog.Log('[GetUserCompanyListAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
 
-                end
+                finally
+                    UserCompanyList.Free();
+                end;
+
+            end
+            else
+            begin
+
+                if not String.IsNullOrEmpty(Restful.ExecuteError) then
+                    CallResponse.LastMessage:='[GetUserCompanyListAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
                 else
-                begin
-
-                    if not String.IsNullOrEmpty(Restful.ExecuteError) then
-                        CallResponse.LastMessage:='[GetUserCompanyListAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                    if String.IsNullOrEmpty(Restful.Content) then
+                        CallResponse.LastMessage:='[GetUserCompanyListAwaited]: Invalid server response. Please contact IT Support.'
                     else
-                        if String.IsNullOrEmpty(Restful.Content) then
-                            CallResponse.LastMessage:='[GetUserCompanyListAwaited]: Invalid server response. Please contact IT Support.'
-                        else
-                            CallResponse.LastMessage:='[GetUserCompanyListAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+                        CallResponse.LastMessage:='[GetUserCompanyListAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
 
-                    CallResponse.ReturnedCode:=Restful.StatusCode;
-                    CallResponse.IsSucceeded:=False;
-                    ThreadFileLog.Log(CallResponse.LastMessage);
-
-                end;
-
-            except on
-                E: Exception do
-                begin
-                    CallResponse.IsSucceeded:=False;
-                    CallResponse.LastMessage:='[GetUserCompanyListAwaited]: Cannot execute the request. Description: ' + E.Message;
-                    ThreadFileLog.Log(CallResponse.LastMessage);
-                end;
+                CallResponse.ReturnedCode:=Restful.StatusCode;
+                CallResponse.IsSucceeded:=False;
+                ThreadFileLog.Log(CallResponse.LastMessage);
 
             end;
 
-        finally
-            UserCompanyList.Free();
+        except on
+            E: Exception do
+            begin
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[GetUserCompanyListAwaited]: Cannot execute the request. Description: ' + E.Message;
+                ThreadFileLog.Log(CallResponse.LastMessage);
+            end;
+
         end;
 
     end);
@@ -387,7 +385,6 @@ begin
         ThreadFileLog.Log('[SaveUserLogsAwaited]: Application shutdown.');
 
         var UserSessionLogs:=TUserSessionLogs.Create();
-        var UserSessionLogsSaved: TUserSessionLogsSaved;
         try
 
             var StrEventLog:='Session signature: ' + SessionService.SessionId + '<br>' + THelpers.ListToString(ThreadFileLog.SessionEventLines, '<br>');
@@ -402,14 +399,16 @@ begin
                 if (Restful.Execute) and (Restful.StatusCode = 200) then
                 begin
 
-                    UserSessionLogsSaved:=TJson.JsonToObject<TUserSessionLogsSaved>(Restful.Content);
-
-                    CallResponse.IsSucceeded:=UserSessionLogsSaved.IsSucceeded;
-                    CallResponse.LastMessage:=UserSessionLogsSaved.Error.ErrorDesc;
-                    CallResponse.ErrorNumber:=UserSessionLogsSaved.Error.ErrorNum;
-
-                    ThreadFileLog.Log('[SaveUserLogsAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
-                    ThreadFileLog.Log('[SaveUserLogsAwaited]: Application shutdown.');
+                    var UserSessionLogsSaved:=TJson.JsonToObject<TUserSessionLogsSaved>(Restful.Content);
+                    try
+                        CallResponse.IsSucceeded:=UserSessionLogsSaved.IsSucceeded;
+                        CallResponse.LastMessage:=UserSessionLogsSaved.Error.ErrorDesc;
+                        CallResponse.ErrorNumber:=UserSessionLogsSaved.Error.ErrorNum;
+                        ThreadFileLog.Log('[SaveUserLogsAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+                        ThreadFileLog.Log('[SaveUserLogsAwaited]: Application shutdown.');
+                    finally
+                        UserSessionLogsSaved.Free();
+                    end;
 
                 end
                 else
@@ -440,7 +439,6 @@ begin
             end;
 
         finally
-            UserSessionLogsSaved.Free();
             UserSessionLogs.Free();
         end;
 
@@ -477,10 +475,12 @@ begin
                 begin
 
                     var UserCompaniesUpdated:=TJson.JsonToObject<TUserCompaniesUpdated>(Restful.Content);
-
-                    CallResponse.IsSucceeded:=UserCompaniesUpdated.IsSucceeded;
-                    UserCompaniesUpdated.Free();
-                    ThreadFileLog.Log('[SaveUserCompanyListAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+                    try
+                        CallResponse.IsSucceeded:=UserCompaniesUpdated.IsSucceeded;
+                        ThreadFileLog.Log('[SaveUserCompanyListAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+                    finally
+                        UserCompaniesUpdated.Free();
+                    end;
 
                 end
                 else

@@ -24,11 +24,13 @@ type
     {$TYPEINFO ON}
 	strict private
         var FSortingOptions: TArray<string>;
-        var FError: TErrorHandler;
+        var FIsSucceeded:    boolean;
+        var FError:          TErrorHandler;
 	public
         destructor Destroy(); override;
         property SortingOptions: TArray<string> read FSortingOptions write FSortingOptions;
-        property Error: TErrorHandler read FError write FError;
+        property IsSucceeded:    boolean        read FIsSucceeded    write FIsSucceeded;
+        property Error:          TErrorHandler  read FError          write FError;
 	end;
 
 

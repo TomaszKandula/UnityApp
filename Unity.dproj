@@ -192,6 +192,8 @@
         <DCCReference Include="Model\Json\Requests\Api.UserCompanySelection.pas"/>
         <DCCReference Include="Model\Json\Requests\Api.UserSessionLogs.pas"/>
         <DCCReference Include="Model\Json\Requests\Api.SendEmail.pas"/>
+        <DCCReference Include="Model\Json\Requests\Api.UserGeneralCommentAdd.pas"/>
+        <DCCReference Include="Model\Json\Requests\Api.UserGeneralCommentUpdate.pas"/>
         <DCCReference Include="Model\Json\Responses\Api.UserSessionAdded.pas"/>
         <DCCReference Include="Model\Json\Responses\Api.UserSessionChecked.pas"/>
         <DCCReference Include="Model\Json\Responses\Api.UserCompanyList.pas"/>
@@ -201,6 +203,9 @@
         <DCCReference Include="Model\Json\Responses\Api.CompanyData.pas"/>
         <DCCReference Include="Model\Json\Responses\Api.CompanyEmailsList.pas"/>
         <DCCReference Include="Model\Json\Responses\Api.SentEmail.pas"/>
+        <DCCReference Include="Model\Json\Responses\Api.UserGeneralCommentAdded.pas"/>
+        <DCCReference Include="Model\Json\Responses\Api.UserGeneralCommentUpdated.pas"/>
+        <DCCReference Include="Model\Json\Responses\Api.UserGeneralComment.pas"/>
         <DCCReference Include="Logic\AccessLayer\Handler.Sql.pas"/>
         <DCCReference Include="Logic\AccessLayer\Handler.Database.pas"/>
         <DCCReference Include="Logic\AccessLayer\Unity.RestWrapper.pas"/>

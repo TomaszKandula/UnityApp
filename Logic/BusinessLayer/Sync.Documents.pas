@@ -342,8 +342,8 @@ end;
 procedure TDocument.OpenItemsToHtmlTable(var HtmlStatement: string; var SG: TStringGrid; ActualRow: Integer);
 begin
 
-    var CurAmount: string:=SG.Cells[FOpenItemsRefs.CurAmCol, ActualRow];
-    var Amount:    string:=SG.Cells[FOpenItemsRefs.OpenCurAmCol, ActualRow];
+    var CurAmount:=SG.Cells[FOpenItemsRefs.CurAmCol, ActualRow];
+    var Amount   :=SG.Cells[FOpenItemsRefs.OpenCurAmCol, ActualRow];
 
     CurAmount:=FormatFloat('#,##0.00', StrToFloat(CurAmount));
     Amount   :=FormatFloat('#,##0.00', StrToFloat(Amount));
@@ -360,8 +360,8 @@ begin
     // Text on the invoice may be very long (but not more than 200 chars),
     // the manager's decision was to put hard limit of 32 chars.
     // -------------------------------------------------------------------
-    var Text: string:=SG.Cells[FOpenItemsRefs.Text, ActualRow];
-    var Code: string:=SG.Cells[FOpenItemsRefs.CtrlCol, ActualRow];
+    var Text:=SG.Cells[FOpenItemsRefs.Text, ActualRow];
+    var Code:=SG.Cells[FOpenItemsRefs.CtrlCol, ActualRow];
     FHTMLTemp:=StringReplace(FHTMLTemp, '{INV_TXT}', LeftStr(Text, 32), [rfReplaceAll]);
     FHTMLTemp:=StringReplace(FHTMLTemp, '{INV_CRL}', StatusCodeToDesc(Code, FControlStatus), [rfReplaceAll]);
 
@@ -492,11 +492,11 @@ begin
 
     CustAddr:='<p class="p"><b>' + CustName + '</b><br />' + TChars.CRLF;
 
-    var AddrFld1: string:=OpenItems.Cells[FOpenItemsRefs.Ad1Col,   FPos];
-    var AddrFld2: string:=OpenItems.Cells[FOpenItemsRefs.Ad2Col,   FPos];
-    var AddrFld3: string:=OpenItems.Cells[FOpenItemsRefs.Ad3Col,   FPos];
-    var PoCode:   string:=OpenItems.Cells[FOpenItemsRefs.PnoCol,   FPos];
-    var PoArea:   string:=OpenItems.Cells[FOpenItemsRefs.PAreaCol, FPos];
+    var AddrFld1:=OpenItems.Cells[FOpenItemsRefs.Ad1Col,   FPos];
+    var AddrFld2:=OpenItems.Cells[FOpenItemsRefs.Ad2Col,   FPos];
+    var AddrFld3:=OpenItems.Cells[FOpenItemsRefs.Ad3Col,   FPos];
+    var PoCode  :=OpenItems.Cells[FOpenItemsRefs.PnoCol,   FPos];
+    var PoArea  :=OpenItems.Cells[FOpenItemsRefs.PAreaCol, FPos];
 
     if not String.IsNullOrWhiteSpace(AddrFld1) then CustAddr:=CustAddr + AddrFld1 + '<br />' + TChars.CRLF;
     if not String.IsNullOrWhiteSpace(AddrFld2) then CustAddr:=CustAddr + AddrFld2 + '<br />' + TChars.CRLF;

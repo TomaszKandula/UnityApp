@@ -49,7 +49,7 @@ type
         procedure MyCalendarClick(Sender: TObject);
         procedure FormKeyPress(Sender: TObject; var Key: Char);
     strict private
-        var FGeneralCommentFields: TGeneralCommentFields;
+        //var FGeneralCommentFields: TGeneralCommentFields;
         function MakeMyDay(Increment: integer): TDate;
         function IsWeekend(const DT: TDateTime): Boolean;
         procedure EditGeneralComment_Callback(CallResponse: TCallResponse);

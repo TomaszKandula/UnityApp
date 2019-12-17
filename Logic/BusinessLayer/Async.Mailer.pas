@@ -84,15 +84,15 @@ begin
             Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
             ThreadFileLog.Log('[InitiateAwaited]: Executing POST ' + Restful.ClientBaseURL);
 
+            var Settings: ISettings:=TSettings.Create();
+            var SendFrom:=Settings.GetStringValue(TConfigSections.UserFeedback, 'SendFrom', '');
+            var SendTo  :=Settings.GetStringValue(TConfigSections.UserFeedback, 'SendTo', '');
+
+            var ListTo:=TArray<string>.Create(SendTo);
+            var ListCc:=TArray<string>.Create(SessionService.SessionData.EmailAddress);
+
             var SendEmail:=TSendEmail.Create();
             try
-
-                var Settings: ISettings:=TSettings.Create();
-                var SendFrom:=Settings.GetStringValue(TConfigSections.UserFeedback, 'SendFrom', '');
-                var SendTo  :=Settings.GetStringValue(TConfigSections.UserFeedback, 'SendTo', '');
-
-                var ListTo:=TArray<string>.Create(SendTo);
-                var ListCc:=TArray<string>.Create(SessionService.SessionData.EmailAddress);
 
                 SendEmail.UserId   :=SessionService.SessionData.UnityUserId.ToString();
                 SendEmail.SessionId:=SessionService.SessionId;
@@ -105,38 +105,39 @@ begin
 
                 Restful.CustomBody:=TJson.ObjectToJsonString(SendEmail);
 
-                if (Restful.Execute) and (Restful.StatusCode = 200) then
-                begin
+            finally
 
-                    var SentEmail: TSentEmail:=TJson.JsonToObject<TSentEmail>(Restful.Content);
+            end;
 
+            if (Restful.Execute) and (Restful.StatusCode = 200) then
+            begin
+
+                var SentEmail: TSentEmail:=TJson.JsonToObject<TSentEmail>(Restful.Content);
+                try
                     CallResponse.IsSucceeded:=SentEmail.IsSucceeded;
                     CallResponse.LastMessage:=SentEmail.Error.ErrorDesc;
                     CallResponse.ErrorNumber:=SentEmail.Error.ErrorNum;
-
-                    SentEmail.Free();
                     ThreadFileLog.Log('[SendFeedbackAsync]: Returned status code is ' + Restful.StatusCode.ToString());
-
-                end
-                else
-                begin
-
-                    if not String.IsNullOrEmpty(Restful.ExecuteError) then
-                        CallResponse.LastMessage:='[SendFeedbackAsync]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
-                    else
-                        if String.IsNullOrEmpty(Restful.Content) then
-                            CallResponse.LastMessage:='[SendFeedbackAsync]: Invalid server response. Please contact IT Support.'
-                        else
-                            CallResponse.LastMessage:='[SendFeedbackAsync]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
-
-                    CallResponse.ReturnedCode:=Restful.StatusCode;
-                    CallResponse.IsSucceeded:=False;
-                    ThreadFileLog.Log(CallResponse.LastMessage);
-
+                finally
+                    SentEmail.Free();
                 end;
 
-            finally
-                SendEmail.Free();
+            end
+            else
+            begin
+
+                if not String.IsNullOrEmpty(Restful.ExecuteError) then
+                    CallResponse.LastMessage:='[SendFeedbackAsync]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                else
+                    if String.IsNullOrEmpty(Restful.Content) then
+                        CallResponse.LastMessage:='[SendFeedbackAsync]: Invalid server response. Please contact IT Support.'
+                    else
+                        CallResponse.LastMessage:='[SendFeedbackAsync]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+
+                CallResponse.ReturnedCode:=Restful.StatusCode;
+                CallResponse.IsSucceeded:=False;
+                ThreadFileLog.Log(CallResponse.LastMessage);
+
             end;
 
         except
@@ -156,7 +157,7 @@ begin
 
     end);
 
-    NewTask.Start;
+    NewTask.Start();
 
 end;
 
