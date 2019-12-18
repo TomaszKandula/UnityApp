@@ -23,21 +23,21 @@ type
     {$TYPEINFO ON}
     strict private
         var FCommentId:            integer;
-        var FCallEvent:            boolean;
+        var FCallEvent:            integer;
         var FCallDuration:         integer;
-        var FFixedStatementsSent:  boolean;
-        var FCustomStatementsSent: boolean;
-        var FFixedRemindersSent:   boolean;
-        var FCustomRemindersSent:  boolean;
+        var FFixedStatementsSent:  integer;
+        var FCustomStatementsSent: integer;
+        var FFixedRemindersSent:   integer;
+        var FCustomRemindersSent:  integer;
         var FUserComment:          string;
     public
         property CommentId:            integer read FCommentId            write FCommentId;
-        property CallEvent:            boolean read FCallEvent            write FCallEvent;
+        property CallEvent:            integer read FCallEvent            write FCallEvent;
         property CallDuration:         integer read FCallDuration         write FCallDuration;
-        property FixedStatementsSent:  boolean read FFixedStatementsSent  write FFixedStatementsSent;
-        property CustomStatementsSent: boolean read FCustomStatementsSent write FCustomStatementsSent;
-        property FixedRemindersSent:   boolean read FFixedRemindersSent   write FFixedRemindersSent;
-        property CustomRemindersSent:  boolean read FCustomRemindersSent  write FCustomRemindersSent;
+        property FixedStatementsSent:  integer read FFixedStatementsSent  write FFixedStatementsSent;
+        property CustomStatementsSent: integer read FCustomStatementsSent write FCustomStatementsSent;
+        property FixedRemindersSent:   integer read FFixedRemindersSent   write FFixedRemindersSent;
+        property CustomRemindersSent:  integer read FCustomRemindersSent  write FCustomRemindersSent;
         property UserComment:          string  read FUserComment          write FUserComment;
     end;
 

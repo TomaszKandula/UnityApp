@@ -44,7 +44,7 @@ type
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
-        procedure EditDailyComment(PayLoad: TDailyCommentField; Callback: TEditDailyComment = nil);
+        procedure EditDailyComment(PayLoad: TDailyCommentFields; Callback: TEditDailyComment = nil);
 
         /// <summary>
         /// Allow to async. update general comment (either insert or update). Requires to pass database table fields as payload.
@@ -69,7 +69,7 @@ type
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function GetDailyCommentsAwaited(CompanyCode: integer; CustNumber: integer; UserAlias: string; var Output: TDailyCommentFields): TCallResponse;
+        function GetDailyCommentsAwaited(CompanyCode: integer; CustNumber: integer; UserAlias: string; var Output: TArray<TDailyCommentFields>): TCallResponse;
 
     end;
 
@@ -86,7 +86,7 @@ type
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// Note: this method defines callback as nil be default.
         /// </remarks>
-        procedure EditDailyComment(PayLoad: TDailyCommentField; Callback: TEditDailyComment = nil);
+        procedure EditDailyComment(PayLoad: TDailyCommentFields; Callback: TEditDailyComment = nil);
 
         /// <summary>
         /// Allow to async. update general comment (either insert or update). Requires to pass database table fields as payload.
@@ -112,7 +112,7 @@ type
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function GetDailyCommentsAwaited(CompanyCode: integer; CustNumber: integer; UserAlias: string; var Output: TDailyCommentFields): TCallResponse;
+        function GetDailyCommentsAwaited(CompanyCode: integer; CustNumber: integer; UserAlias: string; var Output: TArray<TDailyCommentFields>): TCallResponse;
 
     end;
 
@@ -141,24 +141,8 @@ uses
     Api.UserDailyCommentUpdated;
 
 
-procedure TComments.EditDailyComment(PayLoad: TDailyCommentField; Callback: TEditDailyComment = nil);
+procedure TComments.EditDailyComment(PayLoad: TDailyCommentFields; Callback: TEditDailyComment = nil);
 begin
-
-    var QueryData: TDailyCommentFields;
-    var CallResponse:=GetDailyCommentsAwaited(
-        PayLoad.CompanyCode.ToInteger(),
-        PayLoad.CustomerNumber.ToInteger(),
-        PayLoad.UserAlias,
-        QueryData
-    );
-
-    var ShouldUpdate: boolean;
-    case CallResponse.ErrorNumber of
-
-        0:    ShouldUpdate:=True;
-        1016: ShouldUpdate:=False;
-
-    end;
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
@@ -173,7 +157,7 @@ begin
             + PayLoad.UserAlias
             + '/';
 
-        if ShouldUpdate then
+        if PayLoad.CommentId > 0 then
         begin
 
             Restful.RequestMethod:=TRESTRequestMethod.rmPATCH;
@@ -182,13 +166,14 @@ begin
             var UserDailyCommentUpdate:=TUserDailyCommentUpdate.Create();
             try
 
-                if not String.IsNullOrEmpty(PayLoad.CallEvent)            then UserDailyCommentUpdate.CallEvent           :=PayLoad.CallEvent;
-                if not String.IsNullOrEmpty(PayLoad.CallDuration)         then UserDailyCommentUpdate.CallDuration        :=PayLoad.CallDuration;
-                if not String.IsNullOrEmpty(PayLoad.FixedStatementsSent)  then UserDailyCommentUpdate.FixedStatementsSent :=PayLoad.FixedStatementsSent;
-                if not String.IsNullOrEmpty(PayLoad.CustomStatementsSent) then UserDailyCommentUpdate.CustomStatementsSent:=PayLoad.CustomStatementsSent;
-                if not String.IsNullOrEmpty(PayLoad.FixedRemindersSent)   then UserDailyCommentUpdate.FixedRemindersSent  :=PayLoad.FixedRemindersSent;
-                if not String.IsNullOrEmpty(PayLoad.CustomRemindersSent)  then UserDailyCommentUpdate.CustomRemindersSent :=PayLoad.CustomRemindersSent;
-                if not String.IsNullOrEmpty(PayLoad.UserComment)          then UserDailyCommentUpdate.UserComment         :=PayLoad.UserComment;
+                UserDailyCommentUpdate.CallEvent           :=PayLoad.CallEvent;
+                UserDailyCommentUpdate.CallDuration        :=PayLoad.CallDuration;
+                UserDailyCommentUpdate.FixedStatementsSent :=PayLoad.FixedStatementsSent;
+                UserDailyCommentUpdate.CustomStatementsSent:=PayLoad.CustomStatementsSent;
+                UserDailyCommentUpdate.FixedRemindersSent  :=PayLoad.FixedRemindersSent;
+                UserDailyCommentUpdate.CustomRemindersSent :=PayLoad.CustomRemindersSent;
+                UserDailyCommentUpdate.UserComment         :=PayLoad.UserComment;
+                UserDailyCommentUpdate.CommentId           :=PayLoad.CommentId;
 
                 Restful.CustomBody:=TJson.ObjectToJsonString(UserDailyCommentUpdate);
 
@@ -206,27 +191,91 @@ begin
             var UserDailyCommentAdd:=TUserDailyCommentAdd.Create();
             try
 
-                if not String.IsNullOrEmpty(PayLoad.CallEvent)            then UserDailyCommentUpdate.CallEvent           :=PayLoad.CallEvent;
-                if not String.IsNullOrEmpty(PayLoad.CallDuration)         then UserDailyCommentUpdate.CallDuration        :=PayLoad.CallDuration;
-                if not String.IsNullOrEmpty(PayLoad.FixedStatementsSent)  then UserDailyCommentUpdate.FixedStatementsSent :=PayLoad.FixedStatementsSent;
-                if not String.IsNullOrEmpty(PayLoad.CustomStatementsSent) then UserDailyCommentUpdate.CustomStatementsSent:=PayLoad.CustomStatementsSent;
-                if not String.IsNullOrEmpty(PayLoad.FixedRemindersSent)   then UserDailyCommentUpdate.FixedRemindersSent  :=PayLoad.FixedRemindersSent;
-                if not String.IsNullOrEmpty(PayLoad.CustomRemindersSent)  then UserDailyCommentUpdate.CustomRemindersSent :=PayLoad.CustomRemindersSent;
+                UserDailyCommentAdd.CallEvent           :=PayLoad.CallEvent;
+                UserDailyCommentAdd.CallDuration        :=PayLoad.CallDuration;
+                UserDailyCommentAdd.FixedStatementsSent :=PayLoad.FixedStatementsSent;
+                UserDailyCommentAdd.CustomStatementsSent:=PayLoad.CustomStatementsSent;
+                UserDailyCommentAdd.FixedRemindersSent  :=PayLoad.FixedRemindersSent;
+                UserDailyCommentAdd.CustomRemindersSent :=PayLoad.CustomRemindersSent;
+                UserDailyCommentAdd.AgeDate             :=PayLoad.AgeDate;
+                UserDailyCommentAdd.UserComment         :=PayLoad.UserComment;
 
-                UserDailyCommentUpdate.AgeDate:=PayLoad.AgeDate;
-                UserDailyCommentUpdate.UserComment:=PayLoad.UserComment;
-                Restful.CustomBody:=TJson.ObjectToJsonString(UserGeneralCommentAdd);
+                Restful.CustomBody:=TJson.ObjectToJsonString(UserDailyCommentAdd);
 
             finally
-                UserGeneralCommentAdd.Free();
+                UserDailyCommentAdd.Free();
             end;
 
         end;
 
+        var CallResponse: TCallResponse;
+        try
 
+            if (Restful.Execute) and (Restful.StatusCode = 200) then
+            begin
 
+                if not PayLoad.CommentId = 0 then
+                begin
 
+                    var UserDailyCommentUpdated:=TJson.JsonToObject<TUserDailyCommentUpdated>(Restful.Content);
+                    try
+                        CallResponse.IsSucceeded:=UserDailyCommentUpdated.IsSucceeded;
+                        CallResponse.LastMessage:=UserDailyCommentUpdated.Error.ErrorDesc;
+                        CallResponse.ErrorNumber:=UserDailyCommentUpdated.Error.ErrorNum;
+                    finally
+                        UserDailyCommentUpdated.Free();
+                    end;
 
+                end
+                else
+                begin
+
+                    var UserDailyCommentAdded:=TJson.JsonToObject<TUserDailyCommentAdded>(Restful.Content);
+                    try
+                        CallResponse.IsSucceeded:=UserDailyCommentAdded.IsSucceeded;
+                        CallResponse.LastMessage:=UserDailyCommentAdded.Error.ErrorDesc;
+                        CallResponse.ErrorNumber:=UserDailyCommentAdded.Error.ErrorNum;
+                    finally
+                        UserDailyCommentAdded.Free();
+                    end;
+
+                end;
+
+                CallResponse.ReturnedCode:=Restful.StatusCode;
+                ThreadFileLog.Log('[EditGeneralComment]: Returned status code is ' + Restful.StatusCode.ToString());
+
+            end
+            else
+            begin
+
+                if not String.IsNullOrEmpty(Restful.ExecuteError) then
+                    CallResponse.LastMessage:='[EditGeneralComment]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                else
+                    if String.IsNullOrEmpty(Restful.Content) then
+                        CallResponse.LastMessage:='[EditGeneralComment]: Invalid server response. Please contact IT Support.'
+                    else
+                        CallResponse.LastMessage:='[EditGeneralComment]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+
+                CallResponse.ReturnedCode:=Restful.StatusCode;
+                CallResponse.IsSucceeded:=False;
+                ThreadFileLog.Log(CallResponse.LastMessage);
+
+            end;
+
+        except on
+            E: Exception do
+            begin
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[EditGeneralComment]: Cannot execute the request. Description: ' + E.Message;
+                ThreadFileLog.Log(CallResponse.LastMessage);
+            end;
+
+        end;
+
+        TThread.Synchronize(nil, procedure
+        begin
+            if Assigned(Callback) then Callback(CallResponse);
+        end);
 
     end);
 
@@ -474,11 +523,11 @@ begin
 end;
 
 
-function TComments.GetDailyCommentsAwaited(CompanyCode: integer; CustNumber: integer; UserAlias: string; var Output: TDailyCommentFields): TCallResponse;
+function TComments.GetDailyCommentsAwaited(CompanyCode: integer; CustNumber: integer; UserAlias: string; var Output: TArray<TDailyCommentFields>): TCallResponse;
 begin
 
     var CallResponse: TCallResponse;
-    var TempComments: TDailyCommentFields;
+    var TempComments:=TArray<TDailyCommentFields>.Create();
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
@@ -503,20 +552,24 @@ begin
                 var UserDailyCommentsList:=TJson.JsonToObject<TUserDailyCommentsList>(Restful.Content);
                 try
 
-                    // Assign only selected fields
-                    TempComments.CommentId           :=UserDailyCommentsList.CommentId;
-                    TempComments.CompanyCode         :=UserDailyCommentsList.CompanyCode;
-                    TempComments.CustomerNumber      :=UserDailyCommentsList.CustomerNumber;
-                    TempComments.AgeDate             :=UserDailyCommentsList.AgeDate;
-                    TempComments.CallEvent           :=UserDailyCommentsList.CallEvent;
-                    TempComments.CallDuration        :=UserDailyCommentsList.CallDuration;
-                    TempComments.FixedStatementsSent :=UserDailyCommentsList.FixedStatementsSent;
-                    TempComments.CustomStatementsSent:=UserDailyCommentsList.CustomStatementsSent;
-                    TempComments.FixedRemindersSent  :=UserDailyCommentsList.FixedRemindersSent;
-                    TempComments.CustomRemindersSent :=UserDailyCommentsList.CustomRemindersSent;
-                    TempComments.UserComment         :=UserDailyCommentsList.UserComment;
-                    TempComments.UserAlias           :=UserDailyCommentsList.UserAlias;
-                    TempComments.EntryDateTime       :=UserDailyCommentsList.EntryDateTime;
+                    SetLength(TempComments, Length(UserDailyCommentsList.CommentId));
+
+                    for var iCNT:=0 to Length(UserDailyCommentsList.CommentId) - 1 do
+                    begin
+                        TempComments[iCNT].CommentId           :=UserDailyCommentsList.CommentId[iCNT];
+                        TempComments[iCNT].CompanyCode         :=UserDailyCommentsList.CompanyCode[iCNT];
+                        TempComments[iCNT].CustomerNumber      :=UserDailyCommentsList.CustomerNumber[iCNT];
+                        TempComments[iCNT].AgeDate             :=UserDailyCommentsList.AgeDate[iCNT];
+                        TempComments[iCNT].CallEvent           :=UserDailyCommentsList.CallEvent[iCNT];
+                        TempComments[iCNT].CallDuration        :=UserDailyCommentsList.CallDuration[iCNT];
+                        TempComments[iCNT].FixedStatementsSent :=UserDailyCommentsList.FixedStatementsSent[iCNT];
+                        TempComments[iCNT].CustomStatementsSent:=UserDailyCommentsList.CustomStatementsSent[iCNT];
+                        TempComments[iCNT].FixedRemindersSent  :=UserDailyCommentsList.FixedRemindersSent[iCNT];
+                        TempComments[iCNT].CustomRemindersSent :=UserDailyCommentsList.CustomRemindersSent[iCNT];
+                        TempComments[iCNT].UserComment         :=UserDailyCommentsList.UserComment[iCNT];
+                        TempComments[iCNT].UserAlias           :=UserDailyCommentsList.UserAlias[iCNT];
+                        TempComments[iCNT].EntryDateTime       :=UserDailyCommentsList.EntryDateTime[iCNT];
+                    end;
 
                     CallResponse.IsSucceeded:=UserDailyCommentsList.IsSucceeded;
                     CallResponse.LastMessage:=UserDailyCommentsList.Error.ErrorDesc;
@@ -559,7 +612,7 @@ begin
 
     NewTask.Start();
     TTask.WaitForAll(NewTask);
-    Output:=TempComments;
+    TArrayUtils<TDailyCommentFields>.Copy(TempComments, Output);
     Result:=CallResponse;
 
 end;

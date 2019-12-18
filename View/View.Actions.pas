@@ -126,6 +126,7 @@ type
         txtCallCustomer: TLabel;
         selSendFrom: TComboBox;
         txtSendFrom: TLabel;
+    btnAddComment: TSpeedButton;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
@@ -190,6 +191,7 @@ type
         procedure btnCallCustomerMouseEnter(Sender: TObject);
         procedure btnCallCustomerMouseLeave(Sender: TObject);
         procedure selSendFromSelect(Sender: TObject);
+    procedure btnAddCommentClick(Sender: TObject);
     strict private
         const HtmlBanks = '<p class="p">{ROWS}</p>';
         const HtmlRow   = '<b>Bank Details</b>: <br><br> {BANK_NAME} (<b>{ISO}</b> payments) <br> IBAN/Account No: {BANK_ACC} {BIC} <br>';
@@ -554,7 +556,7 @@ procedure TActionsForm.UpdateDaily(var DailyComments: TStringGrid);
 begin
 
     var Comments: IComments:=TComments.Create();
-    var LDailyCommentFields: TDailyCommentFields;
+    var LDailyCommentFields: TArray<TDailyCommentFields>;
     var CallResponse:=Comments.GetDailyCommentsAwaited(
         CompanyCode.ToInteger(),
         CustNumber.ToInteger(),
@@ -562,7 +564,7 @@ begin
         LDailyCommentFields
     );
 
-    var TotalRows:=Length(LDailyCommentFields.CommentId);
+    var TotalRows:=Length(LDailyCommentFields);
     if TotalRows > 0 then
     begin
 
@@ -570,11 +572,11 @@ begin
 
         for var iCNT:=1{Skip header} to TotalRows do
         begin
-            DailyComments.Cells[1, iCNT]:=LDailyCommentFields.CommentId[iCNT - 1].ToString();
-            DailyComments.Cells[2, iCNT]:=LDailyCommentFields.EntryDateTime[iCNT - 1];
-            DailyComments.Cells[3, iCNT]:=LDailyCommentFields.AgeDate[iCNT - 1];
-            DailyComments.Cells[4, iCNT]:=LDailyCommentFields.UserComment[iCNT - 1];
-            DailyComments.Cells[5, iCNT]:=LDailyCommentFields.UserAlias[iCNT - 1];
+            DailyComments.Cells[1, iCNT]:=LDailyCommentFields[iCNT - 1].CommentId.ToString();
+            DailyComments.Cells[2, iCNT]:=LDailyCommentFields[iCNT - 1].EntryDateTime;
+            DailyComments.Cells[3, iCNT]:=LDailyCommentFields[iCNT - 1].AgeDate;
+            DailyComments.Cells[4, iCNT]:=LDailyCommentFields[iCNT - 1].UserComment;
+            DailyComments.Cells[5, iCNT]:=LDailyCommentFields[iCNT - 1].UserAlias;
         end;
 
         DailyComments.SetColWidth(10, 20, 400);
@@ -771,6 +773,7 @@ begin
         Initialize();
         UpdateOpenItems();
         UpdateData();
+        GetFirstComment(DailyCom);
         Screen.Cursor:=crDefault;
     end);
 
@@ -840,22 +843,25 @@ end;
 procedure TActionsForm.SaveDailyComment();
 begin
 
-//    FDailyCommentFields.GroupIdSel   :=MainForm.FGroupIdSel;
-//    FDailyCommentFields.AgeDateSel   :=MainForm.FAgeDateSel;
-//    FDailyCommentFields.CUID         :=CUID;
-//    FDailyCommentFields.Email        :=False;
-//    FDailyCommentFields.CallEvent    :=False;
-//    FDailyCommentFields.CallDuration :=0;
-//    FDailyCommentFields.Comment      :=DailyCom.Text;
-//    FDailyCommentFields.EmailReminder:=False;
-//    FDailyCommentFields.EmailAutoStat:=False;
-//    FDailyCommentFields.EmailManuStat:=False;
-//    FDailyCommentFields.EventLog     :=True;
-//    FDailyCommentFields.UpdateGrid   :=True;
-//    FDailyCommentFields.ExtendComment:=False;
-//
-//    var Comments: IComments:=TComments.Create();
-//    Comments.EditDailyComment(FDailyCommentFields, EditDailyComment_Callback);
+    var GetId:=DailyComGrid.Cells[1, DailyComGrid.Row];
+    if GetId = '' then Exit();
+
+    var LDailyCommentFields: TDailyCommentFields;
+    LDailyCommentFields.CommentId           :=GetId.ToInteger();
+    LDailyCommentFields.CompanyCode         :=CompanyCode;
+    LDailyCommentFields.CustomerNumber      :=CustNumber;
+    LDailyCommentFields.AgeDate             :='2019-12-15'; // get age date!
+    LDailyCommentFields.CallEvent           :=0;
+    LDailyCommentFields.CallDuration        :=0;
+    LDailyCommentFields.FixedStatementsSent :=0;
+    LDailyCommentFields.CustomStatementsSent:=0;
+    LDailyCommentFields.FixedRemindersSent  :=0;
+    LDailyCommentFields.CustomRemindersSent :=0;
+    LDailyCommentFields.UserComment         :=DailyCom.Text;
+    LDailyCommentFields.UserAlias           :=SessionService.SessionData.AliasName;
+
+    var Comments: IComments:=TComments.Create();
+    Comments.EditDailyComment(LDailyCommentFields, EditDailyComment_Callback);
 
 end;
 
@@ -933,15 +939,15 @@ end;
 procedure TActionsForm.EditDailyComment_Callback(CallResponse: TCallResponse);
 begin
 
-//    if not CallResponse.IsSucceeded then
-//    begin
-//        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
-//        ThreadFileLog.Log('[EditDailyComment_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
-//        Exit();
-//    end;
-//
-//    UpdateHistory(HistoryGrid);
-//    ThreadFileLog.Log('[EditDailyComment_Callback]: Calling "UpdateHistory".');
+    if not CallResponse.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        ThreadFileLog.Log('[EditDailyComment_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+        Exit();
+    end;
+
+    UpdateDaily(DailyComGrid);
+    ActionsForm.DailyCom.Text:=DailyComGrid.Cells[DailyComGrid.GetCol(TDailyComment.UserComment), DailyComGrid.Row];
 
 end;
 
@@ -1239,6 +1245,29 @@ end;
 procedure TActionsForm.btnSaveCustDetailsClick(Sender: TObject);
 begin
     SaveCustomerDetails();
+end;
+
+
+procedure TActionsForm.btnAddCommentClick(Sender: TObject);
+begin
+
+    var LDailyCommentFields: TDailyCommentFields;
+    LDailyCommentFields.CommentId           :=0;
+    LDailyCommentFields.CompanyCode         :=CompanyCode;
+    LDailyCommentFields.CustomerNumber      :=CustNumber;
+    LDailyCommentFields.AgeDate             :='2019-12-15'; // get age date!
+    LDailyCommentFields.CallEvent           :=0;
+    LDailyCommentFields.CallDuration        :=0;
+    LDailyCommentFields.FixedStatementsSent :=0;
+    LDailyCommentFields.CustomStatementsSent:=0;
+    LDailyCommentFields.FixedRemindersSent  :=0;
+    LDailyCommentFields.CustomRemindersSent :=0;
+    LDailyCommentFields.UserComment         :='New action...';
+    LDailyCommentFields.UserAlias           :=SessionService.SessionData.AliasName;
+
+    var Comments: IComments:=TComments.Create();
+    Comments.EditDailyComment(LDailyCommentFields, EditDailyComment_Callback);
+
 end;
 
 

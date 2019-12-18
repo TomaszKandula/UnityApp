@@ -85,49 +85,27 @@ type
     end;
 
     /// <summary>
-    /// Carries a group of variables for update user comment in DailyComments table.
+    /// Carries a group of variables for DailyComments table.
     /// Note: we use lists.
     /// </summary>
-    TDailyCommentField = record
+    TDailyCommentFields = record
         CommentId:            integer;
         CompanyCode:          string;
         CustomerNumber:       string;
         AgeDate:              string;
-        CallEvent:            boolean;
+        CallEvent:            integer;
         CallDuration:         integer;
-        FixedStatementsSent:  boolean;
-        CustomStatementsSent: boolean;
-        FixedRemindersSent:   boolean;
-        CustomRemindersSent:  boolean;
+        FixedStatementsSent:  integer;
+        CustomStatementsSent: integer;
+        FixedRemindersSent:   integer;
+        CustomRemindersSent:  integer;
         UserComment:          string;
         UserAlias:            string;
         EntryDateTime:        string;
     end;
 
     /// <summary>
-    /// Carries a group of variables to get user comments from DailyComments table.
-    /// Note: we use lists.
-    /// </summary>
-    TDailyCommentFields = record
-        CommentId:            TArray<integer>;
-        CompanyCode:          TArray<string>;
-        CustomerNumber:       TArray<string>;
-        AgeDate:              TArray<string>;
-        CallEvent:            TArray<boolean>;
-        CallDuration:         TArray<integer>;
-        FixedStatementsSent:  TArray<boolean>;
-        CustomStatementsSent: TArray<boolean>;
-        FixedRemindersSent:   TArray<boolean>;
-        CustomRemindersSent:  TArray<boolean>;
-        UserComment:          TArray<string>;
-        UserAlias:            TArray<string>;
-        EntryDateTime:        TArray<string>;
-        // Additional information
-        ExtendComment:        boolean;
-    end;
-
-    /// <summary>
-    /// Carries a group of variables for update in GeneralComment table.
+    /// Carries a group of variables for GeneralComment table.
     /// </summary>
     TGeneralCommentFields = record
         CommentId:      integer;

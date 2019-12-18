@@ -160,44 +160,6 @@ begin
             if Statement.SendDocument(PayLoad.IsUserInCopy) then
             begin
 
-//                var FDailyCommentFields: TDailyCommentFields;
-//                FDailyCommentFields.CUID         :=PayLoad.CUID;
-//                FDailyCommentFields.Email        :=False;
-//                FDailyCommentFields.CallEvent    :=False;
-//                FDailyCommentFields.CallDuration :=0;
-//                FDailyCommentFields.Comment      :='New communication has been sent to the customer.';
-//                FDailyCommentFields.UpdateGrid   :=not PayLoad.Series;
-//                FDailyCommentFields.EmailReminder:=False;
-//                FDailyCommentFields.EventLog     :=False;
-//                FDailyCommentFields.ExtendComment:=True;
-//                FDailyCommentFields.AgeDateSel   :=AgeDate;
-
-                // ----------------------------------------------------------------------
-                // Register sent email either as manual statement or automatic statement.
-                // ----------------------------------------------------------------------
-
-                if PayLoad.Layout = TDocMode.Defined then
-                begin
-
-//                    FDailyCommentFields.EmailAutoStat:=True;
-//                    FDailyCommentFields.EmailManuStat:=False;
-//
-//                    var Comments: IComments:=TComments.Create();
-//                    Comments.EditDailyComment(FDailyCommentFields, nil);
-
-                end;
-
-                if PayLoad.Layout = TDocMode.Custom then
-                begin
-
-//                    FDailyCommentFields.EmailAutoStat:=False;
-//                    FDailyCommentFields.EmailManuStat:=True;
-//
-//                    var Comments: IComments:=TComments.Create();
-//                    Comments.EditDailyComment(FDailyCommentFields, nil);
-
-                end;
-
                 // -------------------------------------------------------
                 // We send either single email (customized by the user) or
                 // executed by mass mailer (multiple emails).
