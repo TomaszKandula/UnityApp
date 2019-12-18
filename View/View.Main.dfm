@@ -9596,10 +9596,6 @@ object MainForm: TMainForm
       Font.Style = []
       Highlighted = True
       ParentFont = False
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object DebtorsHeader: TPanel
         AlignWithMargins = True
         Left = 0

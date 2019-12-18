@@ -89,7 +89,7 @@ type
         const Email         = 'Email';
         const CallEvent     = 'CallEvent';
         const CallDuration  = 'CallDuration';
-        const FixedComment  = 'FixedComment';
+        const UserComment  = 'UserComment';
         const EmailReminder = 'EmailReminder';
         const EmailAutoStat = 'EmailAutoStat';
         const EmailManuStat = 'EmailManuStat';

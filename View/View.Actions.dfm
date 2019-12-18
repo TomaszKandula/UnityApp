@@ -1948,7 +1948,7 @@ object ActionsForm: TActionsForm
           ExplicitWidth = 65
           ExplicitHeight = 65
         end
-        object HistoryGrid: TStringGrid
+        object DailyComGrid: TStringGrid
           AlignWithMargins = True
           Left = 12
           Top = 38
@@ -1977,12 +1977,12 @@ object ActionsForm: TActionsForm
           ShowHint = True
           TabOrder = 0
           Visible = False
-          OnDrawCell = HistoryGridDrawCell
-          OnKeyDown = HistoryGridKeyDown
-          OnMouseEnter = HistoryGridMouseEnter
-          OnMouseWheelDown = HistoryGridMouseWheelDown
-          OnMouseWheelUp = HistoryGridMouseWheelUp
-          OnSelectCell = HistoryGridSelectCell
+          OnDrawCell = DailyComGridDrawCell
+          OnKeyDown = DailyComGridKeyDown
+          OnMouseEnter = DailyComGridMouseEnter
+          OnMouseWheelDown = DailyComGridMouseWheelDown
+          OnMouseWheelUp = DailyComGridMouseWheelUp
+          OnSelectCell = DailyComGridSelectCell
           ColWidths = (
             10
             10

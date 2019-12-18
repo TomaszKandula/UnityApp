@@ -44,7 +44,7 @@ type
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
-        procedure EditDailyComment(PayLoad: TDailyCommentFields; Callback: TEditDailyComment = nil);
+        procedure EditDailyComment(PayLoad: TDailyCommentField; Callback: TEditDailyComment = nil);
 
         /// <summary>
         /// Allow to async. update general comment (either insert or update). Requires to pass database table fields as payload.
@@ -69,7 +69,7 @@ type
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function GetDailyCommentsAwaited(CompanyCode: integer; CustNumber: integer; UserAlias: string): TCallResponse;
+        function GetDailyCommentsAwaited(CompanyCode: integer; CustNumber: integer; UserAlias: string; var Output: TDailyCommentFields): TCallResponse;
 
     end;
 
@@ -86,7 +86,7 @@ type
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// Note: this method defines callback as nil be default.
         /// </remarks>
-        procedure EditDailyComment(PayLoad: TDailyCommentFields; Callback: TEditDailyComment = nil);
+        procedure EditDailyComment(PayLoad: TDailyCommentField; Callback: TEditDailyComment = nil);
 
         /// <summary>
         /// Allow to async. update general comment (either insert or update). Requires to pass database table fields as payload.
@@ -112,7 +112,7 @@ type
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function GetDailyCommentsAwaited(CompanyCode: integer; CustNumber: integer; UserAlias: string): TCallResponse;
+        function GetDailyCommentsAwaited(CompanyCode: integer; CustNumber: integer; UserAlias: string; var Output: TDailyCommentFields): TCallResponse;
 
     end;
 
@@ -133,11 +133,104 @@ uses
     Api.UserGeneralCommentAdd,
     Api.UserGeneralCommentUpdate,
     Api.UserGeneralCommentAdded,
-    Api.UserGeneralCommentUpdated;
+    Api.UserGeneralCommentUpdated,
+    Api.UserDailyCommentsList,
+    Api.UserDailyCommentAdd,
+    Api.UserDailyCommentAdded,
+    Api.UserDailyCommentUpdate,
+    Api.UserDailyCommentUpdated;
 
 
-procedure TComments.EditDailyComment(PayLoad: TDailyCommentFields; Callback: TEditDailyComment = nil);
+procedure TComments.EditDailyComment(PayLoad: TDailyCommentField; Callback: TEditDailyComment = nil);
 begin
+
+    var QueryData: TDailyCommentFields;
+    var CallResponse:=GetDailyCommentsAwaited(
+        PayLoad.CompanyCode.ToInteger(),
+        PayLoad.CustomerNumber.ToInteger(),
+        PayLoad.UserAlias,
+        QueryData
+    );
+
+    var ShouldUpdate: boolean;
+    case CallResponse.ErrorNumber of
+
+        0:    ShouldUpdate:=True;
+        1016: ShouldUpdate:=False;
+
+    end;
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
+        Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl
+            + 'dailycommentaries/'
+            + PayLoad.CompanyCode
+            + '/'
+            + PayLoad.CustomerNumber
+            + '/comment/'
+            + PayLoad.UserAlias
+            + '/';
+
+        if ShouldUpdate then
+        begin
+
+            Restful.RequestMethod:=TRESTRequestMethod.rmPATCH;
+            ThreadFileLog.Log('[EditGeneralComment]: Executing PATCH ' + Restful.ClientBaseURL);
+
+            var UserDailyCommentUpdate:=TUserDailyCommentUpdate.Create();
+            try
+
+                if not String.IsNullOrEmpty(PayLoad.CallEvent)            then UserDailyCommentUpdate.CallEvent           :=PayLoad.CallEvent;
+                if not String.IsNullOrEmpty(PayLoad.CallDuration)         then UserDailyCommentUpdate.CallDuration        :=PayLoad.CallDuration;
+                if not String.IsNullOrEmpty(PayLoad.FixedStatementsSent)  then UserDailyCommentUpdate.FixedStatementsSent :=PayLoad.FixedStatementsSent;
+                if not String.IsNullOrEmpty(PayLoad.CustomStatementsSent) then UserDailyCommentUpdate.CustomStatementsSent:=PayLoad.CustomStatementsSent;
+                if not String.IsNullOrEmpty(PayLoad.FixedRemindersSent)   then UserDailyCommentUpdate.FixedRemindersSent  :=PayLoad.FixedRemindersSent;
+                if not String.IsNullOrEmpty(PayLoad.CustomRemindersSent)  then UserDailyCommentUpdate.CustomRemindersSent :=PayLoad.CustomRemindersSent;
+                if not String.IsNullOrEmpty(PayLoad.UserComment)          then UserDailyCommentUpdate.UserComment         :=PayLoad.UserComment;
+
+                Restful.CustomBody:=TJson.ObjectToJsonString(UserDailyCommentUpdate);
+
+            finally
+                UserDailyCommentUpdate.Free();
+            end;
+
+        end
+        else
+        begin
+
+            Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
+            ThreadFileLog.Log('[EditGeneralComment]: Executing POST ' + Restful.ClientBaseURL);
+
+            var UserDailyCommentAdd:=TUserDailyCommentAdd.Create();
+            try
+
+                if not String.IsNullOrEmpty(PayLoad.CallEvent)            then UserDailyCommentUpdate.CallEvent           :=PayLoad.CallEvent;
+                if not String.IsNullOrEmpty(PayLoad.CallDuration)         then UserDailyCommentUpdate.CallDuration        :=PayLoad.CallDuration;
+                if not String.IsNullOrEmpty(PayLoad.FixedStatementsSent)  then UserDailyCommentUpdate.FixedStatementsSent :=PayLoad.FixedStatementsSent;
+                if not String.IsNullOrEmpty(PayLoad.CustomStatementsSent) then UserDailyCommentUpdate.CustomStatementsSent:=PayLoad.CustomStatementsSent;
+                if not String.IsNullOrEmpty(PayLoad.FixedRemindersSent)   then UserDailyCommentUpdate.FixedRemindersSent  :=PayLoad.FixedRemindersSent;
+                if not String.IsNullOrEmpty(PayLoad.CustomRemindersSent)  then UserDailyCommentUpdate.CustomRemindersSent :=PayLoad.CustomRemindersSent;
+
+                UserDailyCommentUpdate.AgeDate:=PayLoad.AgeDate;
+                UserDailyCommentUpdate.UserComment:=PayLoad.UserComment;
+                Restful.CustomBody:=TJson.ObjectToJsonString(UserGeneralCommentAdd);
+
+            finally
+                UserGeneralCommentAdd.Free();
+            end;
+
+        end;
+
+
+
+
+
+
+    end);
+
+    NewTask.Start();
 
 end;
 
@@ -381,11 +474,92 @@ begin
 end;
 
 
-function TComments.GetDailyCommentsAwaited(CompanyCode: integer; CustNumber: integer; UserAlias: string): TCallResponse;
+function TComments.GetDailyCommentsAwaited(CompanyCode: integer; CustNumber: integer; UserAlias: string; var Output: TDailyCommentFields): TCallResponse;
 begin
 
     var CallResponse: TCallResponse;
+    var TempComments: TDailyCommentFields;
 
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
+        Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl
+            + 'dailycommentaries/'
+            + CompanyCode.ToString()
+            + '/'
+            + CustNumber.ToString()
+            + '/comments/'
+            + UserAlias
+            + '/';
+        Restful.RequestMethod:=TRESTRequestMethod.rmGET;
+        ThreadFileLog.Log('[GetDailyCommentsAwaited]: Executing GET ' + Restful.ClientBaseURL);
+
+        try
+
+            if (Restful.Execute) and (Restful.StatusCode = 200) then
+            begin
+
+                var UserDailyCommentsList:=TJson.JsonToObject<TUserDailyCommentsList>(Restful.Content);
+                try
+
+                    // Assign only selected fields
+                    TempComments.CommentId           :=UserDailyCommentsList.CommentId;
+                    TempComments.CompanyCode         :=UserDailyCommentsList.CompanyCode;
+                    TempComments.CustomerNumber      :=UserDailyCommentsList.CustomerNumber;
+                    TempComments.AgeDate             :=UserDailyCommentsList.AgeDate;
+                    TempComments.CallEvent           :=UserDailyCommentsList.CallEvent;
+                    TempComments.CallDuration        :=UserDailyCommentsList.CallDuration;
+                    TempComments.FixedStatementsSent :=UserDailyCommentsList.FixedStatementsSent;
+                    TempComments.CustomStatementsSent:=UserDailyCommentsList.CustomStatementsSent;
+                    TempComments.FixedRemindersSent  :=UserDailyCommentsList.FixedRemindersSent;
+                    TempComments.CustomRemindersSent :=UserDailyCommentsList.CustomRemindersSent;
+                    TempComments.UserComment         :=UserDailyCommentsList.UserComment;
+                    TempComments.UserAlias           :=UserDailyCommentsList.UserAlias;
+                    TempComments.EntryDateTime       :=UserDailyCommentsList.EntryDateTime;
+
+                    CallResponse.IsSucceeded:=UserDailyCommentsList.IsSucceeded;
+                    CallResponse.LastMessage:=UserDailyCommentsList.Error.ErrorDesc;
+                    CallResponse.ErrorNumber:=UserDailyCommentsList.Error.ErrorNum;
+                    ThreadFileLog.Log('[GetDailyCommentsAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+
+                finally
+                    UserDailyCommentsList.Free();
+                end;
+
+            end
+            else
+            begin
+
+                if not String.IsNullOrEmpty(Restful.ExecuteError) then
+                    CallResponse.LastMessage:='[GetDailyCommentsAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                else
+                    if String.IsNullOrEmpty(Restful.Content) then
+                        CallResponse.LastMessage:='[GetDailyCommentsAwaited]: Invalid server response. Please contact IT Support.'
+                    else
+                        CallResponse.LastMessage:='[GetDailyCommentsAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+
+                CallResponse.ReturnedCode:=Restful.StatusCode;
+                CallResponse.IsSucceeded:=False;
+                ThreadFileLog.Log(CallResponse.LastMessage);
+
+            end;
+
+        except on
+            E: Exception do
+            begin
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[GetDailyCommentsAwaited]: Cannot execute the request. Description: ' + E.Message;
+                ThreadFileLog.Log(CallResponse.LastMessage);
+            end;
+
+        end;
+
+    end);
+
+    NewTask.Start();
+    TTask.WaitForAll(NewTask);
+    Output:=TempComments;
     Result:=CallResponse;
 
 end;

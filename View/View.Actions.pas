@@ -31,7 +31,6 @@ uses
     Vcl.ImgList,
     Vcl.Imaging.GIFImg,
     Vcl.Clipbrd,
-    Data.Win.ADODB,
     Unity.Records,
     Unity.Grid,
     Unity.Panel,
@@ -45,7 +44,7 @@ type
     TActionsForm = class(TForm)
         OpenItemsGrid: TStringGrid;
         DailyCom: TMemo;
-        HistoryGrid: TStringGrid;
+        DailyComGrid: TStringGrid;
         GeneralCom: TMemo;
         zText1: TLabel;
         zText2: TLabel;
@@ -134,12 +133,12 @@ type
         procedure OpenItemsGridMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure OpenItemsGridMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure OpenItemsGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
-        procedure HistoryGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
-        procedure HistoryGridMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-        procedure HistoryGridMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
-        procedure HistoryGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+        procedure DailyComGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
+        procedure DailyComGridMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+        procedure DailyComGridMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+        procedure DailyComGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
         procedure OpenItemsGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-        procedure HistoryGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure DailyComGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure DailyComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure GeneralComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
@@ -149,7 +148,7 @@ type
         procedure Cust_MailMouseEnter(Sender: TObject);
         procedure Cust_MailGeneralMouseEnter(Sender: TObject);
         procedure OpenItemsGridMouseEnter(Sender: TObject);
-        procedure HistoryGridMouseEnter(Sender: TObject);
+        procedure DailyComGridMouseEnter(Sender: TObject);
         procedure DailyComMouseEnter(Sender: TObject);
         procedure GeneralComMouseEnter(Sender: TObject);
         procedure DailyComKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -198,7 +197,6 @@ type
         const HtmlEmpty = '<!-- NO BANK ACCOUNT ATTACHED -->';
         const AppButtonTxtNormal = $00555555;
         const AppButtonTxtSelected = $006433C9;
-        //var FHistoryGrid: boolean;
         var FCompanyCode: string;
         var FCustName: string;
         var FCustNumber: string;
@@ -209,9 +207,6 @@ type
         var FLbuBanksHtml: string;
         var FExclusions: TArray<integer>;
         var FSrcColumns: TArray<integer>;
-        //var FAbUpdateFields: TAddressBookUpdateFields;
-        //var FDailyCommentFields: TDailyCommentFields;
-        var FGeneralCommentFields: TGeneralCommentFields;
         var FOpenItemsTotal: TOpenItemsTotal;
         var FPayLoad: TAccountStatementPayLoad;
         var FIsDataLoaded: boolean;
@@ -222,7 +217,7 @@ type
         procedure StrArrayToStrings(Input: TArray<string>; var Output: TStringList);
         procedure GetOpenItems(OpenItemsDest, OpenItemsSrc: TStringGrid);
         procedure UpdateGeneral(var Text: TMemo);
-        procedure UpdateHistory(var HistoryGrid: TStringGrid);
+        procedure UpdateDaily(var DailyComments: TStringGrid);
         procedure GetFirstComment(var Text: TMemo);
         procedure UpdateCustDetails();
         procedure UpdateCompanyDetails();
@@ -391,7 +386,7 @@ end;
 
 procedure TActionsForm.UpdateData();
 begin
-    UpdateHistory(HistoryGrid);
+    UpdateDaily(DailyComGrid);
     UpdateGeneral(GeneralCom);
     UpdateCustDetails();
     UpdateCompanyDetails();
@@ -555,29 +550,40 @@ begin
 end;
 
 
-procedure TActionsForm.UpdateHistory(var HistoryGrid: TStringGrid);
+procedure TActionsForm.UpdateDaily(var DailyComments: TStringGrid);
 begin
 
-//    var Comments: IComments:=TComments.Create();
-//    var ReturnedGrid:=Comments.GetDailyCommentsAwaited(CUID);
-//    try
-//
-//        HistoryGrid.SqlColumns:=ReturnedGrid.SqlColumns;
-//        HistoryGrid.RowCount  :=ReturnedGrid.RowCount;
-//        HistoryGrid.ColCount  :=ReturnedGrid.ColCount;
-//
-//        for var iCNT:=0 to ReturnedGrid.RowCount - 1 do
-//            for var jCNT:=0 to ReturnedGrid.ColCount - 1 do
-//                HistoryGrid.Cells[jCNT, iCNT]:=ReturnedGrid.Cells[jCNT, iCNT];
-//
-//        HistoryGrid.ColWidths[HistoryGrid.GetCol(TDailyComment.FixedComment)]:=HistoryGrid.sgRowHidden;
-//        HistoryGrid.SetColWidth(10, 20, 400);
-//        FHistoryGrid:=True;
-//        HistoryGrid.Visible:=FHistoryGrid;
-//
-//    finally
-//        if Assigned(ReturnedGrid) then ReturnedGrid.Free();
-//    end;
+    var Comments: IComments:=TComments.Create();
+    var LDailyCommentFields: TDailyCommentFields;
+    var CallResponse:=Comments.GetDailyCommentsAwaited(
+        CompanyCode.ToInteger(),
+        CustNumber.ToInteger(),
+        SessionService.SessionData.AliasName,
+        LDailyCommentFields
+    );
+
+    var TotalRows:=Length(LDailyCommentFields.CommentId);
+    if TotalRows > 0 then
+    begin
+
+        DailyComments.RowCount:=TotalRows + 1;
+
+        for var iCNT:=1{Skip header} to TotalRows do
+        begin
+            DailyComments.Cells[1, iCNT]:=LDailyCommentFields.CommentId[iCNT - 1].ToString();
+            DailyComments.Cells[2, iCNT]:=LDailyCommentFields.EntryDateTime[iCNT - 1];
+            DailyComments.Cells[3, iCNT]:=LDailyCommentFields.AgeDate[iCNT - 1];
+            DailyComments.Cells[4, iCNT]:=LDailyCommentFields.UserComment[iCNT - 1];
+            DailyComments.Cells[5, iCNT]:=LDailyCommentFields.UserAlias[iCNT - 1];
+        end;
+
+        DailyComments.SetColWidth(10, 20, 400);
+
+    end
+    else
+    begin
+        DailyComments.ClearAll(2, 1, 1, True);
+    end;
 
 end;
 
@@ -586,27 +592,26 @@ procedure TActionsForm.UpdateGeneral(var Text: TMemo);
 begin
 
     var CallResponse: TCallResponse;
-    var UserGeneralComment: TGeneralCommentFields;
+    var LGeneralComment: TGeneralCommentFields;
     var Comments: IComments:=TComments.Create();
 
     CallResponse:=Comments.GetGeneralCommentAwaited(
         CompanyCode.ToInteger(),
         CustNumber.ToInteger(),
         SessionService.SessionData.AliasName,
-        UserGeneralComment
+        LGeneralComment
     );
 
     if CallResponse.IsSucceeded then
-        Text.Text:=UserGeneralComment.UserComment;
+        Text.Text:=LGeneralComment.UserComment;
 
 end;
 
 
 procedure TActionsForm.GetFirstComment(var Text: TMemo);
 begin
-//    if not(Text.Visible) then Exit();
-//    var GetColumn:=HistoryGrid.GetCol(TDailyComment.FixedComment);
-//    if GetColumn <> -100 then Text.Text:=HistoryGrid.Cells[GetColumn, 1];
+    var GetColumn:=DailyComGrid.GetCol(TDailyComment.UserComment);
+    if GetColumn <> -100 then Text.Text:=DailyComGrid.Cells[GetColumn, 1];
 end;
 
 
@@ -674,7 +679,7 @@ begin
     DailyCom.Text  :='';
     GeneralCom.Text:='';
 
-    HistoryGrid.ClearAll(2, 1, 1, True);
+    DailyComGrid.ClearAll(2, 1, 1, True);
     OpenItemsGrid.ClearAll(2, 1, 1, True);
 
 end;
@@ -721,17 +726,17 @@ end;
 
 procedure TActionsForm.LoadCustomer(GoNext: boolean);
 
-    function CheckRow(iterator: integer): boolean;
+    function CheckRow(Iterator: integer): boolean;
     begin
 
         Result:=True;
         if
-            (MainForm.sgAgeView.RowHeights[iterator] <> -1)
+            (MainForm.sgAgeView.RowHeights[Iterator] <> -1)
         and
-            (MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fOverdue), iterator] <> '0')
+            (MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fOverdue), Iterator] <> '0')
         then
         begin
-            MainForm.sgAgeView.Row:=iterator;
+            MainForm.sgAgeView.Row:=Iterator;
             Result:=False;
         end;
 
@@ -748,14 +753,14 @@ begin
     // Move grid cursor to next item (skip hidden rows).
     // -------------------------------------------------
     if GoNext then
-        for var iCNT: integer:=(MainForm.sgAgeView.Row - 1) Downto 1 do
+        for var iCNT:=(MainForm.sgAgeView.Row - 1) Downto 1 do
             if not CheckRow(iCNT) then Break;
 
     // -----------------------------------------------------
     // Move grid cursor to previous item (skip hidden rows).
     // -----------------------------------------------------
     if not GoNext then
-        for var iCNT: integer:=(MainForm.sgAgeView.Row + 1) to MainForm.sgAgeView.RowCount - 1 do
+        for var iCNT:=(MainForm.sgAgeView.Row + 1) to MainForm.sgAgeView.RowCount - 1 do
             if not CheckRow(iCNT) then Break;
 
     // --------------------------------
@@ -778,17 +783,18 @@ begin
     if THelpers.MsgCall(Question2, 'Are you sure you want to clear this follow up?') = ID_YES then
     begin
 
-        FGeneralCommentFields.CompanyCode   :=CompanyCode;
-        FGeneralCommentFields.CustomerNumber:=CustNumber;
-        FGeneralCommentFields.FollowUp      :=' ';
-        FGeneralCommentFields.Free1         :=String.Empty;
-        FGeneralCommentFields.Free2         :=String.Empty;
-        FGeneralCommentFields.Free3         :=String.Empty;
-        FGeneralCommentFields.UserComment   :=String.Empty;
-        FGeneralCommentFields.UserAlias     :=SessionService.SessionData.AliasName;
+        var LGeneralCommentFields: TGeneralCommentFields;
+        LGeneralCommentFields.CompanyCode   :=CompanyCode;
+        LGeneralCommentFields.CustomerNumber:=CustNumber;
+        LGeneralCommentFields.FollowUp      :=' ';
+        LGeneralCommentFields.Free1         :=String.Empty;
+        LGeneralCommentFields.Free2         :=String.Empty;
+        LGeneralCommentFields.Free3         :=String.Empty;
+        LGeneralCommentFields.UserComment   :=String.Empty;
+        LGeneralCommentFields.UserAlias     :=SessionService.SessionData.AliasName;
 
         var Comments: IComments:=TComments.Create();
-        Comments.EditGeneralComment(FGeneralCommentFields, EditGeneralComment_Callback);
+        Comments.EditGeneralComment(LGeneralCommentFields, EditGeneralComment_Callback);
 
         MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TGeneralComment.fFollowUp), MainForm.sgAgeView.Row]:='';
 
@@ -815,17 +821,18 @@ end;
 procedure TActionsForm.SaveGeneralComment();
 begin
 
-    FGeneralCommentFields.CompanyCode   :=CompanyCode;
-    FGeneralCommentFields.CustomerNumber:=CustNumber;
-    FGeneralCommentFields.FollowUp      :=String.Empty;
-    FGeneralCommentFields.Free1         :=String.Empty;
-    FGeneralCommentFields.Free2         :=String.Empty;
-    FGeneralCommentFields.Free3         :=String.Empty;
-    FGeneralCommentFields.UserComment   :=GeneralCom.Text;
-    FGeneralCommentFields.UserAlias     :=SessionService.SessionData.AliasName;
+    var LGeneralCommentFields: TGeneralCommentFields;
+    LGeneralCommentFields.CompanyCode   :=CompanyCode;
+    LGeneralCommentFields.CustomerNumber:=CustNumber;
+    LGeneralCommentFields.FollowUp      :=String.Empty;
+    LGeneralCommentFields.Free1         :=String.Empty;
+    LGeneralCommentFields.Free2         :=String.Empty;
+    LGeneralCommentFields.Free3         :=String.Empty;
+    LGeneralCommentFields.UserComment   :=GeneralCom.Text;
+    LGeneralCommentFields.UserAlias     :=SessionService.SessionData.AliasName;
 
     var Comments: IComments:=TComments.Create();
-    Comments.EditGeneralComment(FGeneralCommentFields, EditGeneralComment_Callback);
+    Comments.EditGeneralComment(LGeneralCommentFields, EditGeneralComment_Callback);
 
 end;
 
@@ -926,15 +933,15 @@ end;
 procedure TActionsForm.EditDailyComment_Callback(CallResponse: TCallResponse);
 begin
 
-    if not CallResponse.IsSucceeded then
-    begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
-        ThreadFileLog.Log('[EditDailyComment_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
-        Exit();
-    end;
-
-    UpdateHistory(HistoryGrid);
-    ThreadFileLog.Log('[EditDailyComment_Callback]: Calling "UpdateHistory".');
+//    if not CallResponse.IsSucceeded then
+//    begin
+//        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+//        ThreadFileLog.Log('[EditDailyComment_Callback]: Error has been thrown "' + CallResponse.LastMessage + '".');
+//        Exit();
+//    end;
+//
+//    UpdateHistory(HistoryGrid);
+//    ThreadFileLog.Log('[EditDailyComment_Callback]: Calling "UpdateHistory".');
 
 end;
 
@@ -957,9 +964,9 @@ begin
     OpenItemsGrid.ColCount:=20;
     OpenItemsGrid.SetRowHeight(OpenItemsGrid.sgRowHeight, 25);
 
-    HistoryGrid.ColCount:=11;
-    HistoryGrid.SetRowHeight(OpenItemsGrid.sgRowHeight, 25);
-    HistoryGrid.Visible:=False;
+    DailyComGrid.ColCount:=11;
+    DailyComGrid.SetRowHeight(OpenItemsGrid.sgRowHeight, 25);
+    DailyComGrid.Visible:=True;
 
     Cust_Name.Caption    :=TUnknown.NotFound;
     Cust_Number.Caption  :=TUnknown.NotFound;
@@ -995,7 +1002,7 @@ begin
 
         Screen.Cursor:=crHourGlass;
         OpenItemsGrid.Freeze(True);
-        HistoryGrid.Freeze(True);
+        DailyComGrid.Freeze(True);
 
         THelpers.ExecWithDelay(500, procedure
         begin
@@ -1008,9 +1015,19 @@ begin
             OpenItemsGrid.AutoThumbSize;
             OpenItemsGrid.SetColWidth(10, 20, 400);
 
-            HistoryGrid.Freeze(False);
-            HistoryGrid.AutoThumbSize;
-            HistoryGrid.SetColWidth(10, 20, 400);
+            DailyComGrid.RowCount:=2;
+            DailyComGrid.ColCount:=6;
+            DailyComGrid.Cells[1, 0]:='CommentId';
+            DailyComGrid.ColWidths[1]:=-1;
+            DailyComGrid.Cells[2, 0]:='EntryDateTime';
+            DailyComGrid.Cells[3, 0]:='AgeDate';
+            DailyComGrid.Cells[4, 0]:='UserComment';
+            DailyComGrid.ColWidths[4]:=-1;
+            DailyComGrid.Cells[5, 0]:='UserAlias';
+
+            DailyComGrid.Freeze(False);
+            DailyComGrid.AutoThumbSize;
+            DailyComGrid.SetColWidth(10, 20, 400);
 
             GetFirstComment(DailyCom);
             Screen.Cursor:=crDefault;
@@ -1048,11 +1065,11 @@ begin
 end;
 
 
-procedure TActionsForm.HistoryGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+procedure TActionsForm.DailyComGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
 
-    if gdSelected in State then HistoryGrid.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True)
-        else HistoryGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
+    if gdSelected in State then DailyComGrid.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True)
+        else DailyComGrid.DrawSelected(ARow, ACol, State, Rect, clBlack, TCommon.SelectionColor, clBlack, clWhite, True);
 
 end;
 
@@ -1075,9 +1092,9 @@ begin
 end;
 
 
-procedure TActionsForm.HistoryGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
+procedure TActionsForm.DailyComGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
 begin
-    DailyCom.Text:=HistoryGrid.Cells[HistoryGrid.GetCol(TDailyComment.FixedComment), ARow];
+    DailyCom.Text:=DailyComGrid.Cells[DailyComGrid.GetCol(TDailyComment.UserComment), ARow];
 end;
 
 
@@ -1261,9 +1278,9 @@ begin
 end;
 
 
-procedure TActionsForm.HistoryGridMouseEnter(Sender: TObject);
+procedure TActionsForm.DailyComGridMouseEnter(Sender: TObject);
 begin
-    if (HistoryGrid.Enabled) and (HistoryGrid.Visible) then HistoryGrid.SetFocus();
+    if (DailyComGrid.Enabled) and (DailyComGrid.Visible) then DailyComGrid.SetFocus();
 end;
 
 
@@ -1293,17 +1310,17 @@ begin
 end;
 
 
-procedure TActionsForm.HistoryGridMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+procedure TActionsForm.DailyComGridMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
     Handled:=True;
-    HistoryGrid.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
+    DailyComGrid.Perform(WM_VSCROLL, SB_LINEDOWN, 0);
 end;
 
 
-procedure TActionsForm.HistoryGridMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
+procedure TActionsForm.DailyComGridMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
 begin
     Handled:=True;
-    HistoryGrid.Perform(WM_VSCROLL, SB_LINEUP, 0);
+    DailyComGrid.Perform(WM_VSCROLL, SB_LINEUP, 0);
 end;
 
 
@@ -1483,9 +1500,9 @@ begin
 end;
 
 
-procedure TActionsForm.HistoryGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+procedure TActionsForm.DailyComGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-    if (Key = 67) and (Shift = [ssCtrl]) then HistoryGrid.CopyCutPaste(TActions.Copy);
+    if (Key = 67) and (Shift = [ssCtrl]) then DailyComGrid.CopyCutPaste(TActions.Copy);
 end;
 
 

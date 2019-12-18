@@ -10,6 +10,7 @@ interface
 
 
 uses
+    System.Rtti,
     System.Generics.Collections,
     System.Generics.Defaults,
     System.Classes,
@@ -47,6 +48,14 @@ type
         class procedure MoveToList(const FromArray: TArray<T>; var TargetList: TList<T>); static;
     end;
 
+
+    /// <summary>
+    ///
+    /// </summary>
+    TRecordUtils<T: record> = class abstract
+    public
+        class function GetFields(const Struct: T): TList<string>; static;
+    end;
 
     /// <summary>
     ///
@@ -808,6 +817,32 @@ begin
         finally
             System.SysUtils.FindClose(Rec);
         end;
+
+    end;
+
+end;
+
+
+class function TRecordUtils<T>.GetFields(const Struct: T): TList<string>;
+begin
+
+    var RttiContext: TRttiContext;
+    var RttiType:    TRttiType;
+    var RttiField:   TRttiField;
+
+    try
+
+        RttiContext:=TRttiContext.Create();
+        Result:=TList<string>.Create();
+
+        for RttiField in RttiContext.GetType(TypeInfo(T)).GetFields do
+        begin
+            RttiType:=RttiField.FieldType;
+            Result.Add(RttiType.Name);
+        end;
+
+    except
+        on E: Exception do
 
     end;
 

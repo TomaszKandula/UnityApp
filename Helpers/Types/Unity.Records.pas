@@ -27,6 +27,7 @@ uses
 
 type
 
+
     /// <summary>
     /// Group of variables that carries last response that have been returned after processing
     /// given requested. Returned Code field is present for failed REST calls (status code returned).
@@ -84,10 +85,10 @@ type
     end;
 
     /// <summary>
-    /// Carries a group of variables for update in DailyComments table.
+    /// Carries a group of variables for update user comment in DailyComments table.
+    /// Note: we use lists.
     /// </summary>
-    TDailyCommentFields = record
-        // Database fields
+    TDailyCommentField = record
         CommentId:            integer;
         CompanyCode:          string;
         CustomerNumber:       string;
@@ -100,9 +101,28 @@ type
         CustomRemindersSent:  boolean;
         UserComment:          string;
         UserAlias:            string;
+        EntryDateTime:        string;
+    end;
+
+    /// <summary>
+    /// Carries a group of variables to get user comments from DailyComments table.
+    /// Note: we use lists.
+    /// </summary>
+    TDailyCommentFields = record
+        CommentId:            TArray<integer>;
+        CompanyCode:          TArray<string>;
+        CustomerNumber:       TArray<string>;
+        AgeDate:              TArray<string>;
+        CallEvent:            TArray<boolean>;
+        CallDuration:         TArray<integer>;
+        FixedStatementsSent:  TArray<boolean>;
+        CustomStatementsSent: TArray<boolean>;
+        FixedRemindersSent:   TArray<boolean>;
+        CustomRemindersSent:  TArray<boolean>;
+        UserComment:          TArray<string>;
+        UserAlias:            TArray<string>;
+        EntryDateTime:        TArray<string>;
         // Additional information
-        EventLog:             boolean;
-        UpdateGrid:           boolean;
         ExtendComment:        boolean;
     end;
 

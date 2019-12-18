@@ -2877,7 +2877,7 @@ begin
 
     // String grid placed on action view
     if ActionsForm.OpenItemsGrid.Focused then ActionsForm.OpenItemsGrid.ExportCSV(FileCSVExport, '|');
-    if ActionsForm.HistoryGrid.Focused   then ActionsForm.HistoryGrid.ExportCSV(FileCSVExport, '|');
+    if ActionsForm.DailyComGrid.Focused  then ActionsForm.DailyComGrid.ExportCSV(FileCSVExport, '|');
 
 end;
 
@@ -2901,7 +2901,7 @@ begin
 
     // String grid placed on action view
     if ActionsForm.OpenItemsGrid.Focused then ActionsForm.OpenItemsGrid.SelectAll();
-    if ActionsForm.HistoryGrid.Focused   then ActionsForm.HistoryGrid.SelectAll();
+    if ActionsForm.DailyComGrid.Focused  then ActionsForm.DailyComGrid.SelectAll();
 
 end;
 
@@ -2925,7 +2925,7 @@ begin
 
     // String grid placed on action view
     if ActionsForm.OpenItemsGrid.Focused then ActionsForm.OpenItemsGrid.CopyCutPaste(TActions.Copy);
-    if ActionsForm.HistoryGrid.Focused   then ActionsForm.HistoryGrid.CopyCutPaste(TActions.Copy);
+    if ActionsForm.DailyComGrid.Focused  then ActionsForm.DailyComGrid.CopyCutPaste(TActions.Copy);
 
 end;
 
@@ -2949,7 +2949,7 @@ begin
 
     // String grid placed on action view
     if ActionsForm.OpenItemsGrid.Focused then ActionsForm.OpenItemsGrid.SetColWidth(10, 20, 400);
-    if ActionsForm.HistoryGrid.Focused   then ActionsForm.HistoryGrid.SetColWidth(10, 20, 400);
+    if ActionsForm.DailyComGrid.Focused  then ActionsForm.DailyComGrid.SetColWidth(10, 20, 400);
 
 end;
 
@@ -2973,7 +2973,7 @@ begin
 
     // String grid placed on action view
     if ActionsForm.OpenItemsGrid.Focused then THelpers.TurnRowHighlight(ActionsForm.OpenItemsGrid, Action_TurnRowHighlight);
-    if ActionsForm.HistoryGrid.Focused   then THelpers.TurnRowHighlight(ActionsForm.HistoryGrid, Action_TurnRowHighlight);
+    if ActionsForm.DailyComGrid.Focused  then THelpers.TurnRowHighlight(ActionsForm.DailyComGrid, Action_TurnRowHighlight);
 
 end;
 
