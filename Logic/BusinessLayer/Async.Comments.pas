@@ -64,6 +64,15 @@ type
         function GetGeneralCommentAwaited(CompanyCode: integer; CustNumber: integer; UserAlias: string; var Output: TGeneralCommentFields): TCallResponse;
 
         /// <summary>
+        /// Allow to async. check ig daily comment exists for given company code, customer number and user alias and age date.
+        /// Note: there is no separate notification.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        function CheckDailyCommentAwaited(CompanyCode: integer; CustNumber: integer; AgeDate: string; var DailyCommentExists: TDailyCommentExists): TCallResponse;
+
+        /// <summary>
         /// Allow to async. retrieve daily comments for given company code, customer number and user alias. There is no separate notification.
         /// </summary>
         /// <remarks>
@@ -107,6 +116,15 @@ type
         function GetGeneralCommentAwaited(CompanyCode: integer; CustNumber: integer; UserAlias: string; var Output: TGeneralCommentFields): TCallResponse;
 
         /// <summary>
+        /// Allow to async. check ig daily comment exists for given company code, customer number and user alias and age date.
+        /// Note: there is no separate notification.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        function CheckDailyCommentAwaited(CompanyCode: integer; CustNumber: integer; AgeDate: string; var DailyCommentExists: TDailyCommentExists): TCallResponse;
+
+        /// <summary>
         /// Allow to async. retrieve daily comments for given company code, customer number and user alias. There is no separate notification.
         /// </summary>
         /// <remarks>
@@ -138,7 +156,8 @@ uses
     Api.UserDailyCommentAdd,
     Api.UserDailyCommentAdded,
     Api.UserDailyCommentUpdate,
-    Api.UserDailyCommentUpdated;
+    Api.UserDailyCommentUpdated,
+    Api.UserDailyCommentCheck;
 
 
 procedure TComments.EditDailyComment(PayLoad: TDailyCommentFields; Callback: TEditDailyComment = nil);
@@ -150,9 +169,9 @@ begin
         var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
         Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl
             + 'dailycommentaries/'
-            + PayLoad.CompanyCode
+            + PayLoad.CompanyCode.ToString()
             + '/'
-            + PayLoad.CustomerNumber
+            + PayLoad.CustomerNumber.ToString()
             + '/comment/'
             + PayLoad.UserAlias
             + '/';
@@ -289,8 +308,8 @@ begin
 
     var QueryData: TGeneralCommentFields;
     var CallResponse:=GetGeneralCommentAwaited(
-        PayLoad.CompanyCode.ToInteger(),
-        PayLoad.CustomerNumber.ToInteger(),
+        PayLoad.CompanyCode,
+        PayLoad.CustomerNumber,
         PayLoad.UserAlias,
         QueryData
     );
@@ -311,9 +330,9 @@ begin
         var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
         Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl
             + 'generalcommentaries/'
-            + PayLoad.CompanyCode
+            + PayLoad.CompanyCode.ToString()
             + '/'
-            + PayLoad.CustomerNumber
+            + PayLoad.CustomerNumber.ToString()
             + '/comment/'
             + PayLoad.UserAlias
             + '/';
@@ -523,6 +542,81 @@ begin
 end;
 
 
+function TComments.CheckDailyCommentAwaited(CompanyCode: integer; CustNumber: integer; AgeDate: string; var DailyCommentExists: TDailyCommentExists): TCallResponse;
+begin
+
+    var CallResponse: TCallResponse;
+    var CommentExists: TDailyCommentExists;
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
+        Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl
+            + 'dailycommentaries/'
+            + CompanyCode.ToString()
+            + '/'
+            + CustNumber.ToString()
+            + '/check/'
+            + AgeDate
+            + '/';
+        Restful.RequestMethod:=TRESTRequestMethod.rmGET;
+        ThreadFileLog.Log('[CheckDailyCommentAwaited]: Executing GET ' + Restful.ClientBaseURL);
+
+        try
+
+            if (Restful.Execute) and (Restful.StatusCode = 200) then
+            begin
+
+                var UserDailyCommentCheck:=TJson.JsonToObject<TUserDailyCommentCheck>(Restful.Content);
+                try
+                    CommentExists.DoesCommentExists:=UserDailyCommentCheck.DoesCommentExists;
+                    CommentExists.CommentId:=UserDailyCommentCheck.CommentId;
+                    CallResponse.IsSucceeded:=UserDailyCommentCheck.IsSucceeded;
+                    CallResponse.LastMessage:=UserDailyCommentCheck.Error.ErrorDesc;
+                    CallResponse.ErrorNumber:=UserDailyCommentCheck.Error.ErrorNum;
+                finally
+                    UserDailyCommentCheck.Free();
+                end;
+
+            end
+            else
+            begin
+
+                if not String.IsNullOrEmpty(Restful.ExecuteError) then
+                    CallResponse.LastMessage:='[CheckDailyCommentAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                else
+                    if String.IsNullOrEmpty(Restful.Content) then
+                        CallResponse.LastMessage:='[CheckDailyCommentAwaited]: Invalid server response. Please contact IT Support.'
+                    else
+                        CallResponse.LastMessage:='[CheckDailyCommentAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+
+                CallResponse.ReturnedCode:=Restful.StatusCode;
+                CallResponse.IsSucceeded:=False;
+                ThreadFileLog.Log(CallResponse.LastMessage);
+
+            end;
+
+        except on
+            E: Exception do
+            begin
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[CheckDailyCommentAwaited]: Cannot execute the request. Description: ' + E.Message;
+                ThreadFileLog.Log(CallResponse.LastMessage);
+            end;
+
+        end;
+
+    end);
+
+    NewTask.Start();
+    TTask.WaitForAll(NewTask);
+    DailyCommentExists:=CommentExists;
+    Result:=CallResponse;
+
+end;
+
+
 function TComments.GetDailyCommentsAwaited(CompanyCode: integer; CustNumber: integer; UserAlias: string; var Output: TArray<TDailyCommentFields>): TCallResponse;
 begin
 
@@ -557,7 +651,7 @@ begin
                     for var iCNT:=0 to Length(UserDailyCommentsList.CommentId) - 1 do
                     begin
                         TempComments[iCNT].CommentId           :=UserDailyCommentsList.CommentId[iCNT];
-                        TempComments[iCNT].CompanyCode         :=UserDailyCommentsList.CompanyCode[iCNT];
+                        TempComments[iCNT].SourceDBName        :=UserDailyCommentsList.SourceDBName[iCNT];
                         TempComments[iCNT].CustomerNumber      :=UserDailyCommentsList.CustomerNumber[iCNT];
                         TempComments[iCNT].AgeDate             :=UserDailyCommentsList.AgeDate[iCNT];
                         TempComments[iCNT].CallEvent           :=UserDailyCommentsList.CallEvent[iCNT];

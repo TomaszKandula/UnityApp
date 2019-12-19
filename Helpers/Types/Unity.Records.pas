@@ -76,7 +76,7 @@ type
     /// <summary>
     /// Carries a group of variables to be updated in AddressBook table.
     /// </summary>
-    TAddressBookUpdateFields = record
+    TAddressBookUpdateFields = record  //!!!
         Scuid:      string;
         Phones:     string;
         Contact:    string;
@@ -85,13 +85,22 @@ type
     end;
 
     /// <summary>
-    /// Carries a group of variables for DailyComments table.
+    /// Carries a group of variables for DailyComments table operations.
     /// Note: we use lists.
+    /// </summary>
+    TDailyCommentExists = record
+        DoesCommentExists: boolean;
+        CommentId:         integer;
+    end;
+
+    /// <summary>
+    /// Carries a group of variables for DailyComments table operations.
     /// </summary>
     TDailyCommentFields = record
         CommentId:            integer;
-        CompanyCode:          string;
-        CustomerNumber:       string;
+        CompanyCode:          integer;
+        SourceDBName:         string;
+        CustomerNumber:       integer;
         AgeDate:              string;
         CallEvent:            integer;
         CallDuration:         integer;
@@ -109,8 +118,9 @@ type
     /// </summary>
     TGeneralCommentFields = record
         CommentId:      integer;
-        CompanyCode:    string;
-        CustomerNumber: string;
+        CompanyCode:    integer;
+        SourceDBName:   string;
+        CustomerNumber: integer;
         FollowUp:       string;
         Free1:          string;
         Free2:          string;
@@ -131,8 +141,8 @@ type
         EndDate:        string;
         SendFrom:       string;
         MailTo:         TArray<string>;
-        CoCode:         string;
-        CustNumber:     string;
+        SourceDBName:   string;
+        CustNumber:     integer;
         CustName:       string;
         LBUName:        string;
         LBUAddress:     string;

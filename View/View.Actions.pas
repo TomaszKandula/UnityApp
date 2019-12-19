@@ -191,7 +191,7 @@ type
         procedure btnCallCustomerMouseEnter(Sender: TObject);
         procedure btnCallCustomerMouseLeave(Sender: TObject);
         procedure selSendFromSelect(Sender: TObject);
-    procedure btnAddCommentClick(Sender: TObject);
+        procedure btnAddCommentClick(Sender: TObject);
     strict private
         const HtmlBanks = '<p class="p">{ROWS}</p>';
         const HtmlRow   = '<b>Bank Details</b>: <br><br> {BANK_NAME} (<b>{ISO}</b> payments) <br> IBAN/Account No: {BANK_ACC} {BIC} <br>';
@@ -199,9 +199,10 @@ type
         const HtmlEmpty = '<!-- NO BANK ACCOUNT ATTACHED -->';
         const AppButtonTxtNormal = $00555555;
         const AppButtonTxtSelected = $006433C9;
-        var FCompanyCode: string;
+        var FSourceDBName: string;
+        var FCompanyCode: integer;
         var FCustName: string;
-        var FCustNumber: string;
+        var FCustNumber: integer;
         var FLbuName: string;
         var FLbuAddress: string;
         var FLbuPhones: string;
@@ -241,9 +242,10 @@ type
         procedure EditGeneralComment_Callback(CallResponse: TCallResponse);
         procedure EditDailyComment_Callback(CallResponse: TCallResponse);
     public
-        property CompanyCode: string read FCompanyCode;
+        property SourceDBName: string read FSourceDBName;
+        property CompanyCode: integer read FCompanyCode;
         property CustName: string read FCustName;
-        property CustNumber: string read FCustNumber;
+        property CustNumber: integer read FCustNumber;
         property LbuName: string read FLbuName;
         property LbuAddress: string read FLbuAddress;
         property LbuPhones: string read FLbuPhones;
@@ -379,7 +381,7 @@ procedure TActionsForm.UpdateOpenItems();
 begin
     txtTimeDate.Caption:=MainForm.FOpenItemsUpdate;
     Cust_Name.Caption  :=CustName;
-    Cust_Number.Caption:=CustNumber;
+    Cust_Number.Caption:=CustNumber.ToString();
     GetOpenItems(OpenItemsGrid, MainForm.sgOpenItems);
     ValueOpenAm.Caption:=FormatFloat('#,##0.00', FOpenItemsTotal.OpenAm);
     ValueAmount.Caption:=FormatFloat('#,##0.00', FOpenItemsTotal.Am);
@@ -441,12 +443,11 @@ begin
 
     end;
 
-    var SourceDBName:=THelpers.GetSourceDBName(FCompanyCode, 'F');
     for var iCNT: integer:=1 to OpenItemsSrc.RowCount - 1 do
     begin
 
         if
-            (OpenItemsSrc.Cells[MainForm.sgOpenItems.GetCol(TOpenitems.CustNo), iCNT] = CustNumber)
+            (OpenItemsSrc.Cells[MainForm.sgOpenItems.GetCol(TOpenitems.CustNo), iCNT] = CustNumber.ToString())
         and
             (OpenItemsSrc.Cells[MainForm.sgOpenItems.GetCol(TOpenitems.SourceDBName), iCNT] = SourceDBName)
         then
@@ -558,8 +559,8 @@ begin
     var Comments: IComments:=TComments.Create();
     var LDailyCommentFields: TArray<TDailyCommentFields>;
     var CallResponse:=Comments.GetDailyCommentsAwaited(
-        CompanyCode.ToInteger(),
-        CustNumber.ToInteger(),
+        CompanyCode,
+        CustNumber,
         SessionService.SessionData.AliasName,
         LDailyCommentFields
     );
@@ -598,8 +599,8 @@ begin
     var Comments: IComments:=TComments.Create();
 
     CallResponse:=Comments.GetGeneralCommentAwaited(
-        CompanyCode.ToInteger(),
-        CustNumber.ToInteger(),
+        CompanyCode,
+        CustNumber,
         SessionService.SessionData.AliasName,
         LGeneralComment
     );
@@ -658,9 +659,10 @@ end;
 
 procedure TActionsForm.Initialize();
 begin
-    FCustName   :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerName), MainForm.sgAgeView.Row];
-    FCustNumber :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerNumber), MainForm.sgAgeView.Row];
-    FCompanyCode:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCoCode), MainForm.sgAgeView.Row];
+    FCustName    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerName), MainForm.sgAgeView.Row];
+    FCustNumber  :=(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerNumber), MainForm.sgAgeView.Row]).ToInteger();
+    FCompanyCode :=(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCoCode), MainForm.sgAgeView.Row]).ToInteger();
+    FSourceDBName:=THelpers.GetSourceDBName(FCompanyCode.ToString(), 'F');
 end;
 
 
@@ -1177,7 +1179,7 @@ begin
     FPayLoad.EndDate       :='';
     FPayLoad.SendFrom      :=LbuSendFrom;
     FPayLoad.MailTo        :=TArray<string>.Create(Cust_Mail.Text);
-    FPayLoad.CoCode        :=THelpers.GetSourceDBName(CompanyCode, 'F');
+    FPayLoad.SourceDBName  :=SourceDBName;
     FPayLoad.CustNumber    :=CustNumber;
     FPayLoad.CustName      :=CustName;
     FPayLoad.LBUName       :=LbuName;

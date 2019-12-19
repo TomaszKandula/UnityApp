@@ -28,7 +28,7 @@ type
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function GetCompanyDetailsAwaited(CompanyCode: string; var CompanyDetails: TCompanyDetails): TCallResponse;
+        function GetCompanyDetailsAwaited(CompanyCode: integer; var CompanyDetails: TCompanyDetails): TCallResponse;
 
         /// <summary>
         /// Allow to load async. list of emails for given CoCodes. There is no separate notification.
@@ -54,7 +54,7 @@ type
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function GetCompanyDetailsAwaited(CompanyCode: string; var CompanyDetails: TCompanyDetails): TCallResponse;
+        function GetCompanyDetailsAwaited(CompanyCode: integer; var CompanyDetails: TCompanyDetails): TCallResponse;
 
         /// <summary>
         /// Allow to load async. list of primary emails for given Company Codes. There is no separate notification.
@@ -84,7 +84,7 @@ uses
     Api.CompanyEmailsList;
 
 
-function TCompanies.GetCompanyDetailsAwaited(CompanyCode: string; var CompanyDetails: TCompanyDetails): TCallResponse;
+function TCompanies.GetCompanyDetailsAwaited(CompanyCode: integer; var CompanyDetails: TCompanyDetails): TCallResponse;
 begin
 
     var CallResponse: TCallResponse;
@@ -95,7 +95,7 @@ begin
         begin
 
             var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
-            Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'companies/' + CompanyCode;
+            Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'companies/' + CompanyCode.ToString();
             Restful.RequestMethod:=TRESTRequestMethod.rmGET;
             ThreadFileLog.Log('[GetCompanyDetailsAwaited]: Executing GET ' + Restful.ClientBaseURL);
 

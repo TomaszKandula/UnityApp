@@ -10,12 +10,6 @@ interface
 
 uses
     System.SysUtils,
-    System.Classes,
-    System.SyncObjs,
-    System.Threading,
-    System.Generics.Collections,
-    Unity.Grid,
-    Unity.Enums,
     Unity.Records;
 
 
@@ -98,6 +92,10 @@ implementation
 
 
 uses
+    System.Classes,
+    System.Threading,
+    System.Generics.Collections,
+    Unity.Enums,
     Unity.Helpers,
     Unity.Settings,
     Unity.EventLogger,
@@ -118,11 +116,11 @@ begin
             var Settings: ISettings:=TSettings.Create();
             var Statement: IDocument:=TDocument.Create();
 
-            Statement.MailSubject   :=PayLoad.Subject + ' - ' + PayLoad.CustName + ' - ' + PayLoad.CustNumber;
+            Statement.MailSubject   :=PayLoad.Subject + ' - ' + PayLoad.CustName + ' - ' + PayLoad.CustNumber.ToString();
             Statement.Exclusions    :=PayLoad.Exclusions;
             Statement.MailFrom      :=PayLoad.SendFrom;
             Statement.MailTo        :=PayLoad.MailTo;
-            Statement.CoCode        :=PayLoad.CoCode;
+            Statement.SourceDBName  :=PayLoad.SourceDBName;
             Statement.CustNumber    :=PayLoad.CustNumber;
             Statement.CustName      :=PayLoad.CustName;
             Statement.LBUName       :=PayLoad.LBUName;
@@ -159,6 +157,9 @@ begin
 
             if Statement.SendDocument(PayLoad.IsUserInCopy) then
             begin
+
+                // save statement details in history table
+                // ...
 
                 // -------------------------------------------------------
                 // We send either single email (customized by the user) or
@@ -230,16 +231,16 @@ begin
                 if PayLoad.MailerList.Items[iCNT].SubItems[4] <> 'Not found!' then
                 begin
 
-                    //PayLoad.CUID       :=PayLoad.MailerList.Items[iCNT].SubItems[10]; // cuid
-                    PayLoad.SendFrom   :=PayLoad.MailerList.Items[iCNT].SubItems[3];  // send from
-                    PayLoad.MailTo     :=TArray<string>.Create(PayLoad.MailerList.Items[iCNT].SubItems[4]);  // send to
-                    PayLoad.CustName   :=PayLoad.MailerList.Items[iCNT].SubItems[0];  // cust name
-                    PayLoad.CustNumber :=PayLoad.MailerList.Items[iCNT].SubItems[1];  // cust number
-                    PayLoad.LBUName    :=PayLoad.MailerList.Items[iCNT].SubItems[5];  // lbu name
-                    PayLoad.LBUAddress :=PayLoad.MailerList.Items[iCNT].SubItems[6];  // lbu address
-                    PayLoad.Telephone  :=PayLoad.MailerList.Items[iCNT].SubItems[7];  // lbu phone
-                    PayLoad.BankDetails:=PayLoad.MailerList.Items[iCNT].SubItems[12]; // bank html
-                    PayLoad.ItemNo     :=iCNT;
+//                    PayLoad.CUID       :=PayLoad.MailerList.Items[iCNT].SubItems[10]; // cuid
+//                    PayLoad.SendFrom   :=PayLoad.MailerList.Items[iCNT].SubItems[3];  // send from
+//                    PayLoad.MailTo     :=TArray<string>.Create(PayLoad.MailerList.Items[iCNT].SubItems[4]);  // send to
+//                    PayLoad.CustName   :=PayLoad.MailerList.Items[iCNT].SubItems[0];  // cust name
+//                    PayLoad.CustNumber :=PayLoad.MailerList.Items[iCNT].SubItems[1];  // cust number
+//                    PayLoad.LBUName    :=PayLoad.MailerList.Items[iCNT].SubItems[5];  // lbu name
+//                    PayLoad.LBUAddress :=PayLoad.MailerList.Items[iCNT].SubItems[6];  // lbu address
+//                    PayLoad.Telephone  :=PayLoad.MailerList.Items[iCNT].SubItems[7];  // lbu phone
+//                    PayLoad.BankDetails:=PayLoad.MailerList.Items[iCNT].SubItems[12]; // bank html
+//                    PayLoad.ItemNo     :=iCNT;
 
                     SendAccountStatement(AgeDate, PayLoad, Callback, True);
 

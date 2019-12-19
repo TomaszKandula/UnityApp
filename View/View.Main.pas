@@ -789,8 +789,6 @@ type
         var FHadFirstLoad: boolean;
         var FAllowClose: boolean;
         var FAbUpdateFields: TAddressBookUpdateFields;
-        //var FDailyCommentFields: TDailyCommentFields;
-        //var FGeneralCommentFields: TGeneralCommentFields;
         const AppMenuTextSelected = $006433C9;
         const AppMenuTextNormal = clGrayText;
         const AppButtonTxtNormal = $00555555;
@@ -1910,22 +1908,32 @@ begin
     if PassMsg.LParam > 0 then
     begin
 
-//        FDailyCommentFields.GroupIdSel   :=FGroupIdSel;
-//        FDailyCommentFields.AgeDateSel   :=FAgeDateSel;
-//        FDailyCommentFields.CUID         :=sgAgeView.Cells[sgAgeView.GetCol(DbModel.TSnapshots.fCuid), sgAgeView.Row];
-//        FDailyCommentFields.Email        :=False;
-//        FDailyCommentFields.CallEvent    :=True;
-//        FDailyCommentFields.CallDuration :=PassMsg.LParam;
-//        FDailyCommentFields.Comment      :='';
-//        FDailyCommentFields.EmailReminder:=False;
-//        FDailyCommentFields.EmailAutoStat:=False;
-//        FDailyCommentFields.EmailManuStat:=False;
-//        FDailyCommentFields.EventLog     :=True;
-//        FDailyCommentFields.UpdateGrid   :=True;
-//        FDailyCommentFields.ExtendComment:=False;
+//        var Comments: IComments:=TComments.Create();
+//        var Check: boolean;
+//        var CallResponse: TCallResponse;
+//        CallResponse:=Comments.CheckDailyCommentAwaited(
+//            480,
+//            1017002361,
+//            '2019-12-17',
+//            Check
+//        );
+//
+//        var LDailyCommentFields: TDailyCommentFields;
+//        LDailyCommentFields.CommentId           :=0; //?
+//        LDailyCommentFields.CompanyCode         :=(sgAgeView.Cells[sgAgeView.GetCol(DbModel.TSnapshots.fCoCode), sgAgeView.Row]).ToInteger();
+//        LDailyCommentFields.CustomerNumber      :=(sgAgeView.Cells[sgAgeView.GetCol(DbModel.TSnapshots.fCustomerNumber), sgAgeView.Row]).ToInteger();
+//        LDailyCommentFields.AgeDate             :='2019-12-15'; // get age date!
+//        LDailyCommentFields.CallDuration        :=PassMsg.LParam;
+//        LDailyCommentFields.CallEvent           :=1;
+//        LDailyCommentFields.FixedStatementsSent :=0;
+//        LDailyCommentFields.CustomStatementsSent:=0;
+//        LDailyCommentFields.FixedRemindersSent  :=0;
+//        LDailyCommentFields.CustomRemindersSent :=0;
+//        LDailyCommentFields.UserComment         :=String.Empty;
+//        LDailyCommentFields.UserAlias           :=SessionService.SessionData.AliasName;
 //
 //        var Comments: IComments:=TComments.Create();
-//        Comments.EditDailyComment(FDailyCommentFields, nil);
+//        Comments.EditDailyComment(LDailyCommentFields, nil);
 
     end;
 
@@ -3216,16 +3224,18 @@ begin
         if sgAgeView.RowHeights[iCNT] <> sgAgeView.sgRowHidden then
         begin
 
-//            FGeneralCommentFields.CUID        :=sgAgeView.Cells[sgAgeView.GetCol(TSnapshots.fCuid), iCNT];
-//            FGeneralCommentFields.FixedComment:=TUnknown.NULL;
-//            FGeneralCommentFields.FollowUp    :=TChars.SPACE;
-//            FGeneralCommentFields.Free1       :=TUnknown.NULL;
-//            FGeneralCommentFields.Free2       :=TUnknown.NULL;
-//            FGeneralCommentFields.Free3       :=TUnknown.NULL;
-//            FGeneralCommentFields.EventLog    :=False;
-//
-//            var Comments: IComments:=TComments.Create();
-//            Comments.EditGeneralComment(FGeneralCommentFields, nil);
+            var LGeneralCommentFields: TGeneralCommentFields;
+            LGeneralCommentFields.CompanyCode   :=(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCoCode), iCNT]).ToInteger();
+            LGeneralCommentFields.CustomerNumber:=(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerNumber), iCNT]).ToInteger();
+            LGeneralCommentFields.FollowUp      :=' ';
+            LGeneralCommentFields.Free1         :=String.Empty;
+            LGeneralCommentFields.Free2         :=String.Empty;
+            LGeneralCommentFields.Free3         :=String.Empty;
+            LGeneralCommentFields.UserComment   :=String.Empty;
+            LGeneralCommentFields.UserAlias     :=SessionService.SessionData.AliasName;
+
+            var Comments: IComments:=TComments.Create();
+            Comments.EditGeneralComment(LGeneralCommentFields, nil{EditGeneralComment_Callback});
 
             MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TGeneralComment.fFollowUp), iCNT]:=TChars.SPACE;
 

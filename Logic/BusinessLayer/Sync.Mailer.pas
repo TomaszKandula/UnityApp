@@ -96,7 +96,7 @@ uses
     Api.SentEmail;
 
 
-function TMailer.SendNowSync(): TCallResponse;
+function TMailer.SendNowSync(ReportedAggrAmount: double = 0; ReportedAgeDate: string = ''): TCallResponse;
 begin
 
 

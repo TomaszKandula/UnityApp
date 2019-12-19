@@ -13,7 +13,8 @@ interface
 
 uses
     Generics.Collections,
-    Rest.Json;
+    Rest.Json,
+    Api.StatementData;
 
 
 type

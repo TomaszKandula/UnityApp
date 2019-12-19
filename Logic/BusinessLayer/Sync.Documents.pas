@@ -43,8 +43,8 @@ type
         procedure SetBeginWith(NewValue: string);
         procedure SetEndWith(NewValue: string);
         procedure SetOpenItems(NewValue: TStringGrid);
-        procedure SetCoCode(NewValue: string);
-        procedure SetCustNumber(NewValue: string);
+        procedure SetSourceDBName(NewValue: string);
+        procedure SetCustNumber(NewValue: integer);
         procedure SetExclusions(NewValue: TArray<integer>);
         procedure SetCommonHTMLTable(NewValue: string);
         procedure SetCommonHTMLRow(NewValue: string);
@@ -66,8 +66,8 @@ type
         function GetBeginWith(): string;
         function GetEndWith(): string;
         function GetOpenItems(): TStringGrid;
-        function GetCoCode: string;
-        function GetCustNumber: string;
+        function GetSourceDBName: string;
+        function GetCustNumber: integer;
         function GetExclusions(): TArray<integer>;
         function GetCommonHTMLTable(): string;
         function GetCommonHTMLRow(): string;
@@ -92,8 +92,8 @@ type
         property InvFilter: TInvoiceFilter read GetInvFilter write SetInvFilter;
         property BeginWith: string read GetBeginWith write SetBeginWith;
         property EndWith: string read GetEndWith write SetEndWith;
-        property CoCode: string read GetCoCode write SetCoCode;
-        property CustNumber: string read GetCustNumber write SetCustNumber;
+        property SourceDBName: string read GetSourceDBName write SetSourceDBName;
+        property CustNumber: integer read GetCustNumber write SetCustNumber;
         property Exclusions: TArray<integer> read GetExclusions write SetExclusions;
         function LoadTemplate(FileName: string; IsCtrlStatus: boolean): string;
         function SendDocument(IsUserInCopy: boolean): boolean;
@@ -125,8 +125,8 @@ type
         var FInvFilter: TInvoiceFilter;
         var FBeginWith: string;
         var FEndWith: string;
-        var FCoCode: string;
-        var FCustNumber: string;
+        var FSourceDBName: string;
+        var FCustNumber: integer;
         var FExclusions: TArray<integer>;
         var FCommonHTMLTable: string;
         var FCommonHTMLRow: string;
@@ -134,6 +134,7 @@ type
         var FOpenItemsRefs: TFOpenItemsRefs;
         var FControlStatus: TStringGrid;
         var FCtrlStatusRefs: TFCtrlStatusRefs;
+        var FTotalAmountAggr: double;
         procedure SetHTMLTable(NewValue: string);
         procedure SetHTMLTemp(NewValue: string);
         procedure SetHTMLRow(NewValue: string);
@@ -149,8 +150,8 @@ type
         procedure SetBeginWith(NewValue: string);
         procedure SetEndWith(NewValue: string);
         procedure SetOpenItems(NewValue: TStringGrid);
-        procedure SetCoCode(NewValue: string);
-        procedure SetCustNumber(NewValue: string);
+        procedure SetSourceDBName(NewValue: string);
+        procedure SetCustNumber(NewValue: integer);
         procedure SetExclusions(NewValue: TArray<integer>);
         procedure SetCommonHTMLTable(NewValue: string);
         procedure SetCommonHTMLRow(NewValue: string);
@@ -172,8 +173,8 @@ type
         function  GetBeginWith(): string;
         function  GetEndWith(): string;
         function  GetOpenItems(): TStringGrid;
-        function  GetCoCode(): string;
-        function  GetCustNumber(): string;
+        function  GetSourceDBName(): string;
+        function  GetCustNumber(): integer;
         function  GetExclusions(): TArray<integer>;
         function  GetCommonHTMLTable(): string;
         function  GetCommonHTMLRow(): string;
@@ -203,8 +204,8 @@ type
         property InvFilter: TInvoiceFilter read GetInvFilter write SetInvFilter;
         property BeginWith: string read GetBeginWith write SetBeginWith;
         property EndWith: string read GetEndWith write SetEndWith;
-        property CoCode: string read GetCoCode write SetCoCode;
-        property CustNumber: string read GetCustNumber write SetCustNumber;
+        property SourceDBName: string read GetSourceDBName write SetSourceDBName;
+        property CustNumber: integer read GetCustNumber write SetCustNumber;
         property Exclusions: TArray<integer> read GetExclusions write SetExclusions;
         function LoadTemplate(FileName: string; IsCtrlStatus: boolean): string;
         function SendDocument(IsUserInCopy: boolean): boolean;
@@ -402,8 +403,8 @@ begin
 
         var CtrlStatus: integer:=(OpenItems.Cells[FOpenItemsRefs.CtrlCol, iCNT]).ToInteger();
 
-        if (OpenItems.Cells[FOpenItemsRefs.CoCodeCol, iCNT] = CoCode) and
-        (OpenItems.Cells[FOpenItemsRefs.CustNumCol, iCNT] = CustNumber) and
+        if (OpenItems.Cells[FOpenItemsRefs.CoCodeCol, iCNT] = SourceDBName) and
+        (OpenItems.Cells[FOpenItemsRefs.CustNumCol, iCNT] = CustNumber.ToString()) and
         (not TArrayUtils<integer>.Contains(CtrlStatus, FExclusions)) then
         begin
 
@@ -619,13 +620,13 @@ begin
 end;
 
 
-function TDocument.GetCoCode: string;
+function TDocument.GetSourceDBName: string;
 begin
-    Result:=FCoCode;
+    Result:=FSourceDBName;
 end;
 
 
-function TDocument.GetCustNumber: string;
+function TDocument.GetCustNumber: integer;
 begin
     Result:=FCustNumber;
 end;
@@ -757,13 +758,13 @@ begin
 end;
 
 
-procedure TDocument.SetCoCode(NewValue: string);
+procedure TDocument.SetSourceDBName(NewValue: string);
 begin
-    FCoCode:=NewValue;
+    FSourceDBName:=NewValue;
 end;
 
 
-procedure TDocument.SetCustNumber(NewValue: string);
+procedure TDocument.SetCustNumber(NewValue: integer);
 begin
     FCustNumber:=NewValue;
 end;

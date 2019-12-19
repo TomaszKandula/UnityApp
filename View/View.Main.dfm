@@ -16081,7 +16081,7 @@ object MainForm: TMainForm
       Left = 52
       Top = 10
       Width = 195
-      Height = 29
+      Height = 33
       Margins.Left = 0
       Margins.Top = 10
       Margins.Right = 0
@@ -16094,6 +16094,7 @@ object MainForm: TMainForm
       Font.Name = 'Verdana'
       Font.Style = [fsBold]
       ParentFont = False
+      ExplicitHeight = 29
     end
     object imgAADUser: TImage
       AlignWithMargins = True
@@ -16245,7 +16246,7 @@ object MainForm: TMainForm
       Left = 1350
       Top = 18
       Width = 73
-      Height = 14
+      Height = 25
       Hint = 'Redeem access'
       Margins.Left = 0
       Margins.Top = 18
@@ -16263,6 +16264,7 @@ object MainForm: TMainForm
       ParentShowHint = False
       PopupMenu = PopupLogin
       ShowHint = True
+      ExplicitHeight = 14
     end
   end
   object PopupMenu: TPopupMenu

@@ -24,8 +24,8 @@ type
     {$TYPEINFO ON}
     strict private
         var FCommentId:            TArray<integer>;
-        var FCompanyCode:          TArray<string>;
-        var FCustomerNumber:       TArray<string>;
+        var FSourceDBName:         TArray<string>;
+        var FCustomerNumber:       TArray<integer>;
         var FAgeDate:              TArray<string>;
         var FCallEvent:            TArray<integer>;
         var FCallDuration:         TArray<integer>;
@@ -41,8 +41,8 @@ type
     public
         destructor Destroy(); override;
         property CommentId:            TArray<integer> read FCommentId            write FCommentId;
-        property CompanyCode:          TArray<string>  read FCompanyCode          write FCompanyCode;
-        property CustomerNumber:       TArray<string>  read FCustomerNumber       write FCustomerNumber;
+        property SourceDBName:         TArray<string>  read FSourceDBName         write FSourceDBName;
+        property CustomerNumber:       TArray<integer> read FCustomerNumber       write FCustomerNumber;
         property AgeDate:              TArray<string>  read FAgeDate              write FAgeDate;
         property CallEvent:            TArray<integer> read FCallEvent            write FCallEvent;
         property CallDuration:         TArray<integer> read FCallDuration         write FCallDuration;

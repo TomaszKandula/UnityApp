@@ -159,7 +159,7 @@ begin
     FPayLoad.EndDate       :=ValEndDate.Caption;
     FPayLoad.SendFrom      :=ActionsForm.LbuSendFrom;
     FPayLoad.MailTo        :=TArray<string>.Create(ActionsForm.Cust_Mail.Text);
-    FPayLoad.CoCode        :=THelpers.GetSourceDBName(ActionsForm.CompanyCode, 'F');
+    FPayLoad.SourceDBName  :=ActionsForm.SourceDBName;
     FPayLoad.CustName      :=ActionsForm.CustName;
     FPayLoad.CustNumber    :=ActionsForm.CustNumber;
     FPayLoad.LBUName       :=ActionsForm.LbuName;

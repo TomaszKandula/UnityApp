@@ -117,8 +117,8 @@ end;
 procedure TCalendarForm.SetFollowUp(SelectedDate: TDate; SelectedCUID: string; Row: integer);
 begin
 
-    FGeneralCommentFields.CompanyCode   :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCoCode), Row];
-    FGeneralCommentFields.CustomerNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerNumber), Row];
+    FGeneralCommentFields.CompanyCode   :=(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCoCode), Row]).ToInteger();
+    FGeneralCommentFields.CustomerNumber:=(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerNumber), Row]).ToInteger();
     FGeneralCommentFields.FollowUp      :=DateToStr(SelectedDate);
     FGeneralCommentFields.Free1         :=String.Empty;
     FGeneralCommentFields.Free2         :=String.Empty;
