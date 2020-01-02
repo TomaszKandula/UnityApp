@@ -39,7 +39,6 @@ type
 
     IInvoiceTracker = interface(IInterface)
     ['{7C1248FC-8FD2-4D71-BC6E-11B605E1CC4B}']
-
         /// <summary>
         /// Load async. list of invoices recorded for given CUID and return it via given callback method
         /// that is always executed in main thread.
@@ -48,7 +47,6 @@ type
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
         procedure GetInvoiceList(CUID: string; Callback: TGetInvoiceList);
-
         /// <summary>
         /// Save async. tracker data for given pay laod (list provided in TStringGrid). There is no separate notification.
         /// </summary>
@@ -56,13 +54,11 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function SaveTrackerDataAwaited(PayLoad: TStringGrid): TCallResponse;
-
     end;
 
 
     TInvoiceTracker = class(TInterfacedObject, IInvoiceTracker)
     {$TYPEINFO ON}
-
         /// <summary>
         /// Load async. list of invoices recorded for given CUID and return it via given callback method
         /// that is always executed in main thread.
@@ -71,7 +67,6 @@ type
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
         procedure GetInvoiceList(CUID: string; Callback: TGetInvoiceList);
-
         /// <summary>
         /// Save async. tracker data for given pay laod (list provided in TStringGrid). There is no separate notification.
         /// </summary>
@@ -79,7 +74,6 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function SaveTrackerDataAwaited(PayLoad: TStringGrid): TCallResponse;
-
     end;
 
 
@@ -88,14 +82,12 @@ implementation
 
 uses
     Handler.Database{Legacy},
-    Unity.Chars,
-    Unity.Sql,
     Unity.Helpers,
     Unity.Settings,
-    Unity.StatusBar,
+    Unity.Constants,
     Unity.EventLogger,
     Unity.SessionService,
-    Sync.Documents,
+    Sync.Document,
     Handler.Sql{Legacy},
     DbModel{Legacy};
 

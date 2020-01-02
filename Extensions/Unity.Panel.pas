@@ -33,12 +33,10 @@ type
         var FPenColorRight:   TColor;
         var FBrushColor:      TColor;
     public
-
         /// <summary>
         /// Allow to draw border line around panel component.
         /// </summary>
         procedure Borders(FillColor, TopColor, BottomColor, LeftColor, RightColor: TColor);
-
     end;
 
 

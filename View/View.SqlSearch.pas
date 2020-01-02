@@ -149,12 +149,10 @@ implementation
 uses
     DbModel{Legacy},
     View.Main,
-    Unity.Sql{Legacy},
-    Unity.Common,
+    Unity.Constants,
     Unity.Settings,
     Unity.Helpers,
     Unity.Enums,
-    Unity.StatusBar,
     Unity.EventLogger,
     Async.AddressBook;
 

@@ -49,94 +49,76 @@ type
         const FBackRed = $008080FF;
         const FBackYellow = $00CCFFFF;
         const FBackGreen = $00ACAC59;
-
         /// <summary>
         /// Allow to hide rectangle on component when return focus.
         /// </summary>
         property HideFocusRect: boolean read FHideFocusRect write FHideFocusRect;
-
         /// <summary>
         /// Result message of a task executed by ToExcel method.
         /// </summary>
         property ToExcelResult: string read FToExcelResult;
-
         /// <summary>
         /// Result message of a task executed by ImportCSV method.
         /// </summary>
         property CsvImportResult: string read FCsvImportResult;
-
         /// <summary>
         /// Result message of a task executed by ExportCSV method.
         /// </summary>
         property CsvExportResult: string read FCsvExportResult;
-
         /// <summary>
         /// Register rows for update. Keeps row number to be updated, ex. if data is held in string grid popuated from database table,
         /// then to build SQL batch with update statement, we must take all rows changed by the user and once cell(s) is(are) changed,
         /// we add row to the register. Later such information can be used to build SQL update expression.
         /// </summary>
         procedure SetUpdatedRow(Row: integer);
-
         /// <summary>
         /// Scans grid and register changed cells.
         /// </summary>
         procedure RecordRowsAffected;
-
         /// <summary>
         /// Allow to either copy from, paste to, or cut data.
         /// </summary>
         procedure CopyCutPaste(Mode: TActions; FirstColOnly: boolean = False);
-
         /// <summary>
         /// Unknown.
         /// </summary>
         procedure DelEsc(Mode: TActions; pCol, pRow: integer);
-
         /// <summary>
         /// Remove al the data from the rows and cols. Reset number of cols and rows to 1.
         /// </summary>
         procedure ClearAll(dfRows: integer; FixedRows: integer; FixedCols: integer; ZeroCol: boolean);
-
         /// <summary>
         /// Alow to remove entire row from the grid.
         /// </summary>
         procedure DeleteRowFrom(FixedRow: integer; FixedCol: integer);
-
         /// <summary>
         /// Defines how to draw grid.
         /// </summary>
         procedure DrawSelected(ARow: integer; ACol: integer; State: TGridDrawState; Rect: TRect; FontColorSel: TColor; BrushColorSel: TColor; FontColor: TColor; BrushColor: TColor; Headers: boolean);
-
         /// <summary>
         /// Defines how to color values (numbers) in grid.
         /// </summary>
         procedure ColorValues(ARow: integer; ACol: integer; Rect: TRect; NegativeColor: TColor; PositiveColor: TColor);
-
         /// <summary>
         /// Sets width of the columns in grid. It takes into account padding and longest text length in row. It requires max col length.
         /// </summary>
         procedure SetColWidth(FirstDefault: integer; AddSpace: integer; Limit: integer);
-
         /// <summary>
         /// Setup appropiate row height.
         /// </summary>
         procedure SetRowHeight(RowHeight, Header: integer);
-
         /// <summary>
         /// Hide currently selected column.
         /// </summary>
         procedure HideThisColumns();
-
         /// <summary>
         /// Setup default column width, this ultimately unhides all hidden columns (width = -1).
         /// </summary>
         procedure ShowAllColumns();
-
         /// <summary>
         /// Merge sort method.
         /// </summary>
 	    procedure MSort(const SortCol: integer; const datatype: TDataType; const ascending: boolean);
-
         /// <summary>
         /// Auto thumb size custom implementation.
         /// </summary>
@@ -145,13 +127,11 @@ type
         /// or default string grid scroll behaviour with no auto thumb size.
         /// </remarks>
         procedure AutoThumbSize();
-
         /// <summary>
         /// String grid column layout. It contains with two headers, one is displayed to the user (column title), and second
         /// is used to hold original SQL column name, that other can refer and perform SQL queries.
         /// </summary>
         procedure SaveLayout(ColWidthName: string; ColOrderName: string; ColNames: string; ColPrefix: string);
-
         /// <summary>
         /// Load layout from application settings.
         /// </summary>
@@ -167,20 +147,17 @@ type
         /// to work certain way, and thus in management view user shall obtain better results, etc.
         /// </remarks>
         function LoadLayout(var StrCol: string; ColWidthName: string; ColOrderName: string; ColNames: string; ColPrefix: string): boolean;
-
         /// <summary>
         /// Return column namber for given column name. By default it skips first column (Lp) and first row (header).
         /// Fixed column and row must be explicitly provided if defaults cannot be used.
         /// </summary>
         function GetCol(ColumnName: string; FixedCol: integer = 1; FixedRow: integer = 1): integer;
-
         /// <summary>
         /// Allow to disable component painting. It will not process
         /// the events and will not repaint it, so it can be operated
         /// from worker thread safely.
         /// </summary>
         procedure Freeze(PaintWnd: boolean);
-
         /// <summary>
         /// Export string grid content to Microsoft Excel file.
         /// </summary>
@@ -190,33 +167,27 @@ type
         /// This method should be run in worker thread.
         /// </remarks>
         function ToExcel(ASheetName, AFileName: string; GroupId: string; AgeDate: string; ActiveConn: TADOConnection): boolean;
-
         /// <summary>
         /// Parse CSV data into grids.
         /// </summary>
         function ImportCSV(DialogBox: TOpenDialog; Delimiter: string): boolean;
-
         /// <summary>
         /// Convert all data in TStringGrid to CSV file with choosen delimiter. Note, this method is
         /// executed within main thread, with large dataset it may be more feasible to run it in worker thread.
         /// </summary>
         function ExportCSV(DialogBox: TSaveDialog; Delimiter: string): boolean;
-
         /// <summary>
         /// Select all rows and columns (except first row which is presumbly a column title).
         /// </summary>
         procedure SelectAll();
-
         /// <summary>
         /// Hide all grids (along with header grids).
         /// </summary>
         procedure HideGrids();
-
         /// <summary>
         /// Show all grids (along with header grids).
         /// </summary>
         procedure ShowGrids();
-
     end;
 
 
@@ -231,10 +202,8 @@ uses
     System.Variants,
     Winapi.Messages,
     Vcl.Clipbrd,
-    Unity.Chars,
-    Unity.StatusBar,
+    Unity.Constants,
     Unity.Helpers,
-    Unity.Sql{Legacy},
     Unity.Sorting,
     Unity.Settings,
     Handler.Sql{Legacy};

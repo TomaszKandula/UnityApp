@@ -20,12 +20,10 @@ type
     /// Callback signature for getting results from exporting data grid to Excel file.
     /// </summary>
     TExcelExport = procedure(CallResponse: TCallResponse) of object;
-
     /// <summary>
     /// Callback signature for getting results from checking supplied local administrator password.
     /// </summary>
     TCheckGivenPassword = procedure(CallResponse: TCallResponse) of object;
-
     /// <summary>
     /// Callback signature for getting results from setting new local administrator password.
     /// </summary>
@@ -34,7 +32,6 @@ type
 
     IUtilities = interface(IInterface)
     ['{0B054CF4-86F7-4770-957B-3026BE491B5A}']
-
         /// <summary>
         /// Allow to async. export data grid to Excel file. Requires installed Microsopft Excel 2013 or higher.
         /// Notification is always executed in main thread as long as callback is provided.
@@ -43,7 +40,6 @@ type
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
         procedure ExcelExportAsync(GroupId: string; AgeDate: string; FileName: string; Callback: TExcelExport);
-
         /// <summary>
         /// Allow to async. check provided local administrator password.
         /// Notification is always executed in main thread as long as callback is provided.
@@ -52,7 +48,6 @@ type
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
         procedure CheckGivenPasswordAsync(Password: string; Callback: TCheckGivenPassword);
-
         /// <summary>
         /// Allow to async. setup newly provided local administrator password that works only for given program installed on local machine.
         /// Notification is always executed in main thread as long as callback is provided.
@@ -61,14 +56,12 @@ type
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
         procedure SetNewPasswordAsync(CurrentPassword: string; NewPassword: string; Callback: TSetNewPassword);
-
     end;
 
 
     TUtilities = class(TInterfacedObject, IUtilities)
     {$TYPEINFO ON}
     public
-
         /// <summary>
         /// Allow to async. export data grid to Excel file. Requires installed Microsopft Excel 2013 or higher.
         /// Notification is always executed in main thread as long as callback is provided.
@@ -77,7 +70,6 @@ type
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
         procedure ExcelExportAsync(GroupId: string; AgeDate: string; FileName: string; Callback: TExcelExport);
-
         /// <summary>
         /// Allow to async. check provided local administrator password.
         /// Notification is always executed in main thread as long as callback is provided.
@@ -86,7 +78,6 @@ type
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
         procedure CheckGivenPasswordAsync(Password: string; Callback: TCheckGivenPassword);
-
         /// <summary>
         /// Allow to async. setup newly provided local administrator password that works only for given program installed on local machine.
         /// Notification is always executed in main thread as long as callback is provided.
@@ -95,7 +86,6 @@ type
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
         procedure SetNewPasswordAsync(CurrentPassword: string; NewPassword: string; Callback: TSetNewPassword);
-
     end;
 
 

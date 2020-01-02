@@ -36,7 +36,6 @@ type
 
     IGeneralTables = interface(IInterface)
     ['{C96D4BF6-9BB3-47EB-B081-A07417E07014}']
-
         /// <summary>
         /// Allow to async. load general tables to provided TStringGrids. This method can be executed without waiting to complete
         /// the task, thus allowing parallel execution.
@@ -46,14 +45,12 @@ type
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
         procedure GetTablesAsync(TableName: string; DestGrid: TStringGrid; Callback: TGetTables; Columns: string = ''; Conditions: string = ''; WaitToComplete: boolean = False);
-
     end;
 
 
     TGeneralTables = class(TInterfacedObject, IGeneralTables)
     {$TYPEINFO ON}
     public
-
         /// <summary>
         /// Allow to async. load general tables to provided TStringGrids. This method can be executed without waiting to complete
         /// the task, thus allowing parallel execution.
@@ -64,7 +61,6 @@ type
         /// </remarks>
         procedure GetTablesAsync(TableName: string; DestGrid: TStringGrid; Callback: TGetTables; Columns: string = '';
             Conditions: string = ''; WaitToComplete: boolean = False);
-
     end;
 
 
@@ -74,16 +70,12 @@ implementation
 uses
     Handler.Database{Legacy}, //remove
     Handler.Sql{Legacy}, //remove
-    Unity.Sql{Legacy}, //remove
     Unity.Helpers,
     Unity.Settings,
-    Unity.StatusBar,
     Unity.EventLogger,
     Unity.SessionService,
-    Unity.Chars,
-    Unity.Common,
-    Unity.DateTimeFormats,
-    Sync.Documents,
+    Unity.Constants,
+    Sync.Document,
     Bcrypt,
     DbModel{Legacy}; //remove
 

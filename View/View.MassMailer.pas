@@ -102,7 +102,7 @@ type
     strict private
         var OpenItemsRefs: TFOpenItemsRefs;
         var CtrlStatusRefs: TFCtrlStatusRefs;
-        var FPayLoad: TAccountStatementPayLoad;
+        var FPayLoad: TAccDocumentPayLoad;
         var FItemCount: integer;
         var FIsDataLoaded:  boolean;
         function  GetEmailAddress(Scuid: string): string;
@@ -112,7 +112,7 @@ type
         procedure LoadFromGrid();
     public
         property ItemCount: integer read FItemCount write FItemCount;
-        procedure SendAccountStatements_Callback(ProcessingItemNo: integer; CallResponse: TCallResponse);
+        procedure SendAccDocumentAsyncs_Callback(ProcessingItemNo: integer; CallResponse: TCallResponse);
     end;
 
 
@@ -134,16 +134,13 @@ uses
     Unity.Enums,
     Unity.Helpers,
     Unity.Settings,
-    Unity.Sql,
-    Unity.StatusBar,
-    Unity.Unknown,
-    Unity.Chars,
+    Unity.Constants,
     Unity.EventLogger,
     Unity.SessionService,
     Async.Utilities,
     Async.Companies,
     Async.AddressBook,
-    Async.Statements;
+    Async.Documents;
 
 
 var vMassMailerForm: TMassMailerForm;
@@ -347,8 +344,9 @@ begin
     FPayLoad.ControlStatus :=MainForm.sgControlStatus;
     FPayLoad.CtrlStatusRefs:=CtrlStatusRefs;
 
-    var Statements: IStatements:=TStatements.Create();
-    Statements.SendAccountStatements('', FPayLoad, SendAccountStatements_Callback); // no age date!
+    Screen.Cursor:=crHourGlass;
+    var Documents: IDocuments:=TDocuments.Create();
+    Documents.SendAccDocumentsAsync('2020-01-02', FPayLoad, SendAccDocumentAsyncs_Callback); // dummy age date!
 
 end;
 
@@ -359,8 +357,10 @@ end;
 {$REGION 'CALLBACKS'}
 
 
-procedure TMassMailerForm.SendAccountStatements_Callback(ProcessingItemNo: integer; CallResponse: TCallResponse);
+procedure TMassMailerForm.SendAccDocumentAsyncs_Callback(ProcessingItemNo: integer; CallResponse: TCallResponse);
 begin
+
+    Screen.Cursor:=crDefault;
 
     if not CallResponse.IsSucceeded then
     begin

@@ -38,7 +38,6 @@ type
         IsSucceeded:  boolean;
         ReturnedCode: integer;
     end;
-
     /// <summary>
     /// Group of variables that carries user data per session (from Active Directory).
     /// </summary>
@@ -49,7 +48,6 @@ type
         DisplayName:  string;
         EmailAddress: string;
     end;
-
     /// <summary>
     /// Carries a group of variables to be received back when queried by awaited async. task.
     /// </summary>
@@ -62,7 +60,6 @@ type
         LbuBanks:   TArray<TBankDetails>;
         procedure Dispose();
     end;
-
     /// <summary>
     /// Carries a group of variables to be received back when queried by awaited async. task.
     /// </summary>
@@ -72,7 +69,6 @@ type
         CustMailStat: string;
         CustPhones:   string;
     end;
-
     /// <summary>
     /// Carries a group of variables to be updated in AddressBook table.
     /// </summary>
@@ -83,16 +79,24 @@ type
         Estatement: string;
         Email:      string;
     end;
-
+    /// <summary>
+    /// Carries a group of variables that holds details of sent document to be posted in database history table.
+    /// </summary>
+    TSentDocument = record
+        CompanyCode:        string;
+        ReportedCustomer:   integer;
+        ReportedAggrAmount: double;
+        ReportedAgeDate:    string;
+        PreservedEmail:     string;
+        DocumentType:       string;
+    end;
     /// <summary>
     /// Carries a group of variables for DailyComments table operations.
-    /// Note: we use lists.
     /// </summary>
     TDailyCommentExists = record
         DoesCommentExists: boolean;
         CommentId:         integer;
     end;
-
     /// <summary>
     /// Carries a group of variables for DailyComments table operations.
     /// </summary>
@@ -112,7 +116,6 @@ type
         UserAlias:            string;
         EntryDateTime:        string;
     end;
-
     /// <summary>
     /// Carries a group of variables for GeneralComment table.
     /// </summary>
@@ -128,11 +131,10 @@ type
         UserComment:    string;
         UserAlias:      string;
     end;
-
     /// <summary>
     /// Carries a group of variables with information necessary to process emails with current account statement(s).
     /// </summary>
-    TAccountStatementPayLoad = record
+    TAccDocumentPayLoad = record
         Layout:         TDocMode;
         Subject:        string;
         &Message:       string;
@@ -159,7 +161,6 @@ type
         IsCtrlStatus:   boolean;
         IsUserInCopy:   boolean;
     end;
-
     /// <summary>
     /// Carries a group of variables of Risk Classes.
     /// </summary>
@@ -168,7 +169,6 @@ type
         Class_B: double;
         Class_C: double;
     end;
-
     /// <summary>
     /// Carries a group of variables for update ageing summary.
     /// </summary>
@@ -192,7 +192,6 @@ type
         RCBcount:    cardinal;
         RCCcount:    cardinal;
     end;
-
     /// <summary>
     /// Carries a group of variables for update open items summary.
     /// </summary>
@@ -204,7 +203,6 @@ type
         OvdAmount:      double;
         UnallocatedAmt: double;
     end;
-
     /// <summary>
     /// Carries a group of variables for open items summary with ledger currency and other currency.
     /// </summary>

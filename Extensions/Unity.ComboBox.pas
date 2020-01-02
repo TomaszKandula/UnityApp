@@ -21,14 +21,12 @@ type
     /// </summary>
     TComboBox = class(Vcl.StdCtrls.TComboBox)
     public
-
         /// <summary>
         /// Simple wrapper of a method that puts data from two dimensional string array into combo box.
         /// The assumption is that given array holds actual data and combo box show only
         /// one key column to the user.
         /// </summary>
         procedure ListToComboBox(List: TArray<TArray<string>>; ColumnNo: cardinal; Position: TListSelection);
-
     end;
 
 

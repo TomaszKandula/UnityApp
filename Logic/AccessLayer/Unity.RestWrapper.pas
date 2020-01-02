@@ -31,31 +31,31 @@ type
     /// </summary>
     IRESTFul = Interface(IInterface)
     ['{3A64616D-26BE-44F8-80C8-F69DE813D439}']
-        function  GetExecuteError: string;
-        function  GetStatusCode: integer;
-        function  GetCustomBody: string;
-        function  GetContent: string;
-        function  GetHeaders: string;
-        function  GethttpAuthUsername: string;
-        function  GethttpAuthPassword: string;
-        function  GetClientAccept: string;
-        function  GetClientAcceptCharset: string;
-        function  GetClientAllowCookies: boolean;
-        function  GetClientAutoCreateParams: boolean;
-        function  GetClientBaseURL: string;
-        function  GetClientContentType: string;
-        function  GetClientFallbackCharsetEncoding: string;
-        function  GetClientHandleRedirects: boolean;
-        function  GetClientRaiseExceptionOn500: boolean;
-        function  GetClientSynchronizedEvents: boolean;
-        function  GetClientUserAgent: string;
-        function  GetRequestAccept: string;
-        function  GetRequestAcceptCharset: string;
-        function  GetRequestAutoCreateParams: boolean;
-        function  GetRequestHandleRedirects: boolean;
-        function  GetRequestMethod: TRESTRequestMethod;
-        function  GetRequestSynchronizedEvents: boolean;
-        function  GetRequestTimeout: integer;
+        function  GetExecuteError(): string;
+        function  GetStatusCode(): integer;
+        function  GetCustomBody(): string;
+        function  GetContent(): string;
+        function  GetHeaders(): string;
+        function  GethttpAuthUsername(): string;
+        function  GethttpAuthPassword(): string;
+        function  GetClientAccept(): string;
+        function  GetClientAcceptCharset(): string;
+        function  GetClientAllowCookies(): boolean;
+        function  GetClientAutoCreateParams(): boolean;
+        function  GetClientBaseURL(): string;
+        function  GetClientContentType(): string;
+        function  GetClientFallbackCharsetEncoding(): string;
+        function  GetClientHandleRedirects(): boolean;
+        function  GetClientRaiseExceptionOn500(): boolean;
+        function  GetClientSynchronizedEvents(): boolean;
+        function  GetClientUserAgent(): string;
+        function  GetRequestAccept(): string;
+        function  GetRequestAcceptCharset(): string;
+        function  GetRequestAutoCreateParams(): boolean;
+        function  GetRequestHandleRedirects(): boolean;
+        function  GetRequestMethod(): TRESTRequestMethod;
+        function  GetRequestSynchronizedEvents(): boolean;
+        function  GetRequestTimeout(): integer;
         procedure SetCustomBody(NewValue: string);
         procedure SetClientAccept(NewValue: string);
         procedure SetClientAcceptCharset(NewValue: string);
@@ -122,31 +122,31 @@ type
         var FResponseContent: string;
         var FCustomBody: string;
         var FExecuteError: string;
-        function GetExecuteError: string;
-        function GetStatusCode: integer;
-        function GetCustomBody: string;
-        function GetContent: string;
-        function GetHeaders: string;
-        function GethttpAuthUsername: string;
-        function GethttpAuthPassword: string;
-        function GetClientAccept: string;
-        function GetClientAcceptCharset: string;
-        function GetClientAllowCookies: boolean;
-        function GetClientAutoCreateParams: boolean;
-        function GetClientBaseURL: string;
-        function GetClientContentType: string;
-        function GetClientFallbackCharsetEncoding: string;
-        function GetClientHandleRedirects: boolean;
-        function GetClientRaiseExceptionOn500: boolean;
-        function GetClientSynchronizedEvents: boolean;
-        function GetClientUserAgent: string;
-        function GetRequestAccept: string;
-        function GetRequestAcceptCharset: string;
-        function GetRequestAutoCreateParams: boolean;
-        function GetRequestHandleRedirects: boolean;
-        function GetRequestMethod: TRESTRequestMethod;
-        function GetRequestSynchronizedEvents: boolean;
-        function GetRequestTimeout: integer;
+        function GetExecuteError(): string;
+        function GetStatusCode(): integer;
+        function GetCustomBody(): string;
+        function GetContent(): string;
+        function GetHeaders(): string;
+        function GethttpAuthUsername(): string;
+        function GethttpAuthPassword(): string;
+        function GetClientAccept(): string;
+        function GetClientAcceptCharset(): string;
+        function GetClientAllowCookies(): boolean;
+        function GetClientAutoCreateParams(): boolean;
+        function GetClientBaseURL(): string;
+        function GetClientContentType(): string;
+        function GetClientFallbackCharsetEncoding(): string;
+        function GetClientHandleRedirects(): boolean;
+        function GetClientRaiseExceptionOn500(): boolean;
+        function GetClientSynchronizedEvents(): boolean;
+        function GetClientUserAgent(): string;
+        function GetRequestAccept(): string;
+        function GetRequestAcceptCharset(): string;
+        function GetRequestAutoCreateParams(): boolean;
+        function GetRequestHandleRedirects(): boolean;
+        function GetRequestMethod(): TRESTRequestMethod;
+        function GetRequestSynchronizedEvents(): boolean;
+        function GetRequestTimeout(): integer;
         procedure SetCustomBody(NewValue: string);
         procedure SetClientAccept(NewValue: string);
         procedure SetClientAcceptCharset(NewValue: string);
@@ -382,151 +382,151 @@ begin
 end;
 
 
-function TRESTful.GetExecuteError: string;
+function TRESTful.GetExecuteError(): string;
 begin
     Result:=FExecuteError;
 end;
 
 
-function TRESTful.GetStatusCode: integer;
+function TRESTful.GetStatusCode(): integer;
 begin
     Result:=FStatusCode;
 end;
 
 
-function TRESTful.GetCustomBody: string;
+function TRESTful.GetCustomBody(): string;
 begin
     Result:=FCustomBody;
 end;
 
 
-function TRESTful.GetContent: string;
+function TRESTful.GetContent(): string;
 begin
     Result:=FResponseContent;
 end;
 
 
-function TRESTful.GetHeaders: string;
+function TRESTful.GetHeaders(): string;
 begin
     if Assigned(restResponse) then Result:=restResponse.Headers.Text;
 end;
 
 
-function TRESTful.GethttpAuthUsername: string;
+function TRESTful.GethttpAuthUsername(): string;
 begin
     if Assigned(httpAuth) then Result:=httpAuth.Username;
 end;
 
 
-function TRESTful.GethttpAuthPassword: string;
+function TRESTful.GethttpAuthPassword(): string;
 begin
     if Assigned(httpAuth) then Result:=httpAuth.Password;
 end;
 
 
-function TRESTful.GetClientAccept: string;
+function TRESTful.GetClientAccept(): string;
 begin
     if Assigned(restClient) then Result:=restClient.Accept;
 end;
 
 
-function TRESTful.GetClientAcceptCharset: string;
+function TRESTful.GetClientAcceptCharset(): string;
 begin
     if Assigned(restClient) then Result:=restClient.AcceptCharset;
 end;
 
 
-function TRESTful.GetClientAllowCookies: boolean;
+function TRESTful.GetClientAllowCookies(): boolean;
 begin
     if Assigned(restClient) then Result:=restClient.AllowCookies else Result:=False;
 end;
 
 
-function TRESTful.GetClientAutoCreateParams: boolean;
+function TRESTful.GetClientAutoCreateParams(): boolean;
 begin
     if Assigned(restClient) then Result:=restClient.AutoCreateParams else Result:=False;
 end;
 
 
-function TRESTful.GetClientBaseURL: string;
+function TRESTful.GetClientBaseURL(): string;
 begin
     if Assigned(restClient) then Result:=restClient.BaseURL;
 end;
 
 
-function TRESTful.GetClientContentType: string;
+function TRESTful.GetClientContentType(): string;
 begin
     if Assigned(restClient) then restClient.ContentType;
 end;
 
 
-function TRESTful.GetClientFallbackCharsetEncoding: string;
+function TRESTful.GetClientFallbackCharsetEncoding(): string;
 begin
     if Assigned(restClient) then Result:=restClient.FallbackCharsetEncoding;
 end;
 
 
-function TRESTful.GetClientHandleRedirects: boolean;
+function TRESTful.GetClientHandleRedirects(): boolean;
 begin
     if Assigned(restClient) then Result:=restClient.HandleRedirects else Result:=False;
 end;
 
 
-function TRESTful.GetClientRaiseExceptionOn500: boolean;
+function TRESTful.GetClientRaiseExceptionOn500(): boolean;
 begin
     if Assigned(restClient) then Result:=restClient.RaiseExceptionOn500 else Result:=False;
 end;
 
 
-function TRESTful.GetClientSynchronizedEvents: boolean;
+function TRESTful.GetClientSynchronizedEvents(): boolean;
 begin
     if Assigned(restClient) then Result:=restClient.SynchronizedEvents else Result:=False;
 end;
 
 
-function TRESTful.GetClientUserAgent: string;
+function TRESTful.GetClientUserAgent(): string;
 begin
     if Assigned(restClient) then Result:=restClient.UserAgent;
 end;
 
 
-function TRESTful.GetRequestAccept: string;
+function TRESTful.GetRequestAccept(): string;
 begin
     if Assigned(restRequest) then Result:=restRequest.Accept;
 end;
 
 
-function TRESTful.GetRequestAcceptCharset: string;
+function TRESTful.GetRequestAcceptCharset(): string;
 begin
     if Assigned(restRequest) then Result:=restRequest.AcceptCharset;
 end;
 
 
-function TRESTful.GetRequestAutoCreateParams: boolean;
+function TRESTful.GetRequestAutoCreateParams(): boolean;
 begin
     if Assigned(restRequest) then Result:=restRequest.AutoCreateParams else Result:=False;
 end;
 
 
-function TRESTful.GetRequestHandleRedirects: boolean;
+function TRESTful.GetRequestHandleRedirects(): boolean;
 begin
     if Assigned(restRequest) then Result:=restRequest.HandleRedirects else Result:=False;
 end;
 
 
-function TRESTful.GetRequestMethod: TRESTRequestMethod;
+function TRESTful.GetRequestMethod(): TRESTRequestMethod;
 begin
     if Assigned(restRequest) then Result:=restRequest.Method else Result:=TRESTRequestMethod.rmGET;
 end;
 
 
-function TRESTful.GetRequestSynchronizedEvents: boolean;
+function TRESTful.GetRequestSynchronizedEvents(): boolean;
 begin
     if Assigned(restRequest) then Result:=restRequest.SynchronizedEvents else Result:=False;
 end;
 
 
-function TRESTful.GetRequestTimeout: integer;
+function TRESTful.GetRequestTimeout(): integer;
 begin
     if Assigned(restRequest) then Result:=restRequest.Timeout else Result:=30000 {30 seconds};
 end;

@@ -27,27 +27,22 @@ type
         procedure CMFontChanged(var Msg: TMessage); message CM_FONTCHANGED;
         procedure CMTextChanged(var Msg: TMessage); message CM_TEXTCHANGED;
     public
-
         /// <summary>
         /// Left position of given text.
         /// </summary>
         var CaptionLeft: integer;
-
         /// <summary>
         /// Top position of given text.
         /// </summary>
         var CaptionTop: integer;
-
         /// <summary>
         /// Defines caption text assigned.
         /// </summary>
         property Caption;
-
         /// <summary>
         /// Defines font to be used for drawing text in caption.
         /// </summary>
         property Font;
-
         /// <summary>
         /// Draw text inside TShape component.
         /// </summary>

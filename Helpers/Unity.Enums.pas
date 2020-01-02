@@ -12,6 +12,11 @@ type
 
 
     /// <summary>
+    /// Indicates age view sorting column.
+    /// </summary>
+    TColumns = (Inf7, Inf4, CoCode, Agent, Division, Follow, Group3, Free1, Free2, Free3, SalesResponsible, PersonResponsible, CustomerGroup, AccountType);
+
+    /// <summary>
     /// Used by sorting methods to indicate data type to be sorted.
     /// </summary>
     TDataType = (TString, TInteger, TFloat);

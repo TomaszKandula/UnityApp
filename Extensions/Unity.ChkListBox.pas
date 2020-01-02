@@ -20,12 +20,10 @@ type
     /// </summary>
     TCheckListBox = class(Vcl.CheckLst.TCheckListBox)
     published
-
         /// <summary>
         /// Allow to freeze component during heavy duty task, or when we do not want to show control during updating.
         /// </summary>
         procedure Freeze(PaintWnd: boolean);
-
     end;
 
 

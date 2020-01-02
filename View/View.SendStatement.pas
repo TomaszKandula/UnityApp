@@ -90,9 +90,9 @@ type
     strict private
         var OpenItemsRefs: TFOpenItemsRefs;
         var CtrlStatusRefs: TFCtrlStatusRefs;
-        var FPayLoad: TAccountStatementPayLoad;
+        var FPayLoad: TAccDocumentPayLoad;
         procedure ExecuteMailer();
-        procedure SendAccountStatement_Callback(ProcessingItemNo: integer; CallResponse: TCallResponse);
+        procedure SendAccDocumentAsync_Callback(ProcessingItemNo: integer; CallResponse: TCallResponse);
     end;
 
 
@@ -110,10 +110,10 @@ uses
     View.Calendar,
     View.Actions,
     Unity.Enums,
-    Unity.Chars,
+    Unity.Constants,
     Unity.Helpers,
     Unity.Settings,
-    Async.Statements;
+    Async.Documents;
 
 
 var vSendForm: TSendForm;
@@ -176,8 +176,9 @@ begin
     FPayLoad.IsCtrlStatus  :=ActionsForm.cbCtrlStatusOff.Checked;
     FPayLoad.IsUserInCopy  :=ActionsForm.cbUserInCopy.Checked;
 
-    var Statements: IStatements:=TStatements.Create();
-    Statements.SendAccountStatement('', FPayLoad, SendAccountStatement_Callback); // no age date!
+    Screen.Cursor:=crHourGlass;
+    var Documents: IDocuments:=TDocuments.Create();
+    Documents.SendAccDocumentAsync('2020-01-02', FPayLoad, SendAccDocumentAsync_Callback); // dummy age date!
 
     Close();
 
@@ -190,8 +191,10 @@ end;
 {$REGION 'CALLBACKS'}
 
 
-procedure TSendForm.SendAccountStatement_Callback(ProcessingItemNo: integer; CallResponse: TCallResponse);
+procedure TSendForm.SendAccDocumentAsync_Callback(ProcessingItemNo: integer; CallResponse: TCallResponse);
 begin
+
+    Screen.Cursor:=crDefault;
 
     if not CallResponse.IsSucceeded then
     begin

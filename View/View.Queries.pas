@@ -117,14 +117,11 @@ uses
     View.Main,
     View.Actions,
     View.Calendar,
-    Sync.Documents,
+    Sync.Document,
     DbModel{Legacy},
-    Unity.Sql{Legacy},
-    Unity.Qms,
-    Unity.Chars,
+    Unity.Constants,
     Unity.Helpers,
     Unity.Settings,
-    Unity.DateTimeFormats,
     Unity.EventLogger,
     Unity.SessionService,
     Handler.Sql{Legacy};
@@ -567,7 +564,7 @@ procedure TQmsForm.btnAddDueDateClick(Sender: TObject);
 begin
     CalendarForm.FCalendarMode:=TCalendar.GetDate;
     THelpers.WndCall(CalendarForm, TWindowState.Modal);
-    if CalendarForm.FSelectedDate <> TDateTimeFormats.NullDate then EditDueDate.Text:=DateToStr(CalendarForm.FSelectedDate);
+    if CalendarForm.FSelectedDate <> TDtFormat.NullDate then EditDueDate.Text:=DateToStr(CalendarForm.FSelectedDate);
 end;
 
 
@@ -575,7 +572,7 @@ procedure TQmsForm.btnAddValDateClick(Sender: TObject);
 begin
     CalendarForm.FCalendarMode:=TCalendar.GetDate;
     THelpers.WndCall(CalendarForm, Modal);
-    if CalendarForm.FSelectedDate <> TDateTimeFormats.NullDate then EditValDate.Text:=DateToStr(CalendarForm.FSelectedDate);
+    if CalendarForm.FSelectedDate <> TDtFormat.NullDate then EditValDate.Text:=DateToStr(CalendarForm.FSelectedDate);
 end;
 
 

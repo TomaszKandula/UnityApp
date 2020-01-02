@@ -86,7 +86,7 @@ implementation
 
 uses
     View.Main,
-    Unity.DateTimeFormats;
+    Unity.Constants;
 
 
 var
@@ -164,8 +164,8 @@ procedure TThreadFileLog.Log(Text: string);
 begin
 
     var GetDateTime: TDateTime:=Now;
-    var CurrentDate: string:=FormatDateTime(TDateTimeFormats.DateFormat, GetDateTime);
-    var CurrentTime: string:=FormatDateTime(TDateTimeFormats.TimeFormat, GetDateTime);
+    var CurrentDate: string:=FormatDateTime(TDtFormat.DateFormat, GetDateTime);
+    var CurrentTime: string:=FormatDateTime(TDtFormat.TimeFormat, GetDateTime);
     var TextToLog:   string:='#' + CurrentDate + ' (' + CurrentTime + '): ' + Text;
 
     var Request: PLogRequest;

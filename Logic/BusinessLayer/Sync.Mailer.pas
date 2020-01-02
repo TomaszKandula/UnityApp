@@ -96,9 +96,8 @@ uses
     Api.SentEmail;
 
 
-function TMailer.SendNowSync(ReportedAggrAmount: double = 0; ReportedAgeDate: string = ''): TCallResponse;
+function TMailer.SendNowSync(): TCallResponse;
 begin
-
 
     var CallResponse: TCallResponse;
     try

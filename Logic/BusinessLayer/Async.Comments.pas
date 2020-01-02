@@ -22,12 +22,10 @@ type
     /// Callback signature for updating (insert/update actions) daily comment.
     /// </summary>
     TEditDailyComment = procedure(CallResponse: TCallResponse) of object;
-
     /// <summary>
     /// Callback signature for updating (insert/update actions) general comment.
     /// </summary>
     TEditGeneralComment = procedure(CallResponse: TCallResponse) of object;
-
     /// <summary>
     /// Callback signature for getting results for daily comments list.
     /// </summary>
@@ -36,16 +34,16 @@ type
 
     IComments = interface(IInterface)
     ['{1B3127BB-EC78-4177-A286-C138E02709D3}']
-
         /// <summary>
-        /// Allow to async. update daily comment (either insert or update). Requires to pass database table fields as payload.
+        /// Allow to async. update daily comment (either insert or update). Requires to pass database table fields as payload with comment id
+        /// parameter for update. If comment id is not supplied (assumes id = 0), then POST method is called. Please note that only non-existing
+        /// comment can be added for given customer number, age date and company code.
         /// Notification is always executed in main thread as long as callback is provided.
         /// </summary>
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
         procedure EditDailyComment(PayLoad: TDailyCommentFields; Callback: TEditDailyComment = nil);
-
         /// <summary>
         /// Allow to async. update general comment (either insert or update). Requires to pass database table fields as payload.
         /// Notification is always executed in main thread as long as callback is provided.
@@ -54,7 +52,6 @@ type
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
         procedure EditGeneralComment(PayLoad: TGeneralCommentFields; Callback: TEditGeneralComment = nil);
-
         /// <summary>
         /// Allow to async. retrive general comment for given company code, customer number and user alias. There is no separate notification.
         /// </summary>
@@ -62,7 +59,6 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function GetGeneralCommentAwaited(CompanyCode: integer; CustNumber: integer; UserAlias: string; var Output: TGeneralCommentFields): TCallResponse;
-
         /// <summary>
         /// Allow to async. check ig daily comment exists for given company code, customer number and user alias and age date.
         /// Note: there is no separate notification.
@@ -71,7 +67,6 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function CheckDailyCommentAwaited(CompanyCode: integer; CustNumber: integer; AgeDate: string; var DailyCommentExists: TDailyCommentExists): TCallResponse;
-
         /// <summary>
         /// Allow to async. retrieve daily comments for given company code, customer number and user alias. There is no separate notification.
         /// </summary>
@@ -79,16 +74,16 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function GetDailyCommentsAwaited(CompanyCode: integer; CustNumber: integer; UserAlias: string; var Output: TArray<TDailyCommentFields>): TCallResponse;
-
     end;
 
 
     TComments = class(TInterfacedObject, IComments)
     {$TYPEINFO ON}
     public
-
         /// <summary>
-        /// Allow to async. update daily comment (either insert or update). Requires to pass database table fields as payload.
+        /// Allow to async. update daily comment (either insert or update). Requires to pass database table fields as payload and comment id
+        /// parameter for update. If comment id is not supplied (assumes id = 0), then POST method is called. Please note that only non-existing
+        /// comment can be added for given customer number, age date and company code.
         /// Notification is always executed in main thread as long as callback is provided.
         /// </summary>
         /// <remarks>
@@ -96,7 +91,6 @@ type
         /// Note: this method defines callback as nil be default.
         /// </remarks>
         procedure EditDailyComment(PayLoad: TDailyCommentFields; Callback: TEditDailyComment = nil);
-
         /// <summary>
         /// Allow to async. update general comment (either insert or update). Requires to pass database table fields as payload.
         /// Notification is always executed in main thread as long as callback is provided.
@@ -106,7 +100,6 @@ type
         /// Note: this method defines callback as nil be default.
         /// </remarks>
         procedure EditGeneralComment(PayLoad: TGeneralCommentFields; Callback: TEditGeneralComment = nil);
-
         /// <summary>
         /// Allow to async. retrive general comment for given company code, customer number and user alias. There is no separate notification.
         /// </summary>
@@ -114,7 +107,6 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function GetGeneralCommentAwaited(CompanyCode: integer; CustNumber: integer; UserAlias: string; var Output: TGeneralCommentFields): TCallResponse;
-
         /// <summary>
         /// Allow to async. check ig daily comment exists for given company code, customer number and user alias and age date.
         /// Note: there is no separate notification.
@@ -123,7 +115,6 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function CheckDailyCommentAwaited(CompanyCode: integer; CustNumber: integer; AgeDate: string; var DailyCommentExists: TDailyCommentExists): TCallResponse;
-
         /// <summary>
         /// Allow to async. retrieve daily comments for given company code, customer number and user alias. There is no separate notification.
         /// </summary>
@@ -131,7 +122,6 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function GetDailyCommentsAwaited(CompanyCode: integer; CustNumber: integer; UserAlias: string; var Output: TArray<TDailyCommentFields>): TCallResponse;
-
     end;
 
 
@@ -143,10 +133,10 @@ uses
     System.Threading,
     REST.Types,
     REST.Json,
+    Unity.RestWrapper,
     Unity.Helpers,
     Unity.EventLogger,
     Unity.SessionService,
-    Unity.RestWrapper,
     Api.UserGeneralComment,
     Api.UserGeneralCommentAdd,
     Api.UserGeneralCommentUpdate,

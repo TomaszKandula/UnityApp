@@ -36,7 +36,6 @@ type
     /// Callback signature for scanning SSIS master table to check if open items have been updated.
     /// </summary>
     TScanOpenItems = procedure(CanMakeAge: boolean; ReadDateTime: string; CallResponse: TCallResponse) of object;
-
     /// <summary>
     /// Callback signature for reading open items. Payload returned contains summary data from loaded invoices.
     /// </summary>
@@ -45,7 +44,6 @@ type
 
     IOpenItems = interface(IInterface)
     ['{CD6AC138-D2A4-4C6B-A3F1-07F904BA44B1}']
-
         /// <summary>
         /// Returns latest open items date and time of SSIS data extract (query SSIS master database table).
         /// </summary>
@@ -53,7 +51,6 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function GetDateTimeAwaited(Return: TCalendar): string;
-
         /// <summary>
         /// Returns status code from SSIS master table for given date and time stamp.
         /// </summary>
@@ -61,7 +58,6 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function GetStatusAwaited(DateTime: string): string;
-
         /// <summary>
         /// Allow to async. check SSIS master table to check if open items have been updated.
         /// Notification is always executed in main thread as long as callback is provided.
@@ -70,7 +66,6 @@ type
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
         procedure ScanOpenItemsAsync(OpenItemsUpdate: string; Callback: TScanOpenItems);
-
         /// <summary>
         /// Allow to async. load current open items from SQL database.
         /// Notification is always executed in main thread as long as callback is provided.
@@ -79,7 +74,6 @@ type
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
         procedure ReadOpenItemsAsync(OpenItemsGrid: TStringGrid; CoCodeList: string; Callback: TReadOpenItems);
-
     end;
 
 
@@ -89,7 +83,6 @@ type
         function  FLoadToGrid(OpenItemsGrid: TStringGrid; CoCodeList: string): boolean;
         procedure FCalculateOpenItems(var InputGrid: TStringGrid; var OutputData: TOpenItemsPayLoad);
     public
-
         /// <summary>
         /// Returns latest open items date and time of SSIS data extract (query SSIS master database table).
         /// </summary>
@@ -97,7 +90,6 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function GetDateTimeAwaited(Return: TCalendar): string;
-
         /// <summary>
         /// Returns status code from SSIS master table for given date and time stamp.
         /// </summary>
@@ -105,7 +97,6 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function GetStatusAwaited(DateTime: string): string;
-
         /// <summary>
         /// Allow to async. check SSIS master table to check if open items have been updated.
         /// Notification is always executed in main thread as long as callback is provided.
@@ -114,7 +105,6 @@ type
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
         procedure ScanOpenItemsAsync(OpenItemsUpdate: string; Callback: TScanOpenItems);
-
         /// <summary>
         /// Allow to async. load current open items from SQL database.
         /// Notification is always executed in main thread as long as callback is provided.
@@ -123,7 +113,6 @@ type
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
         procedure ReadOpenItemsAsync(OpenItemsGrid: TStringGrid; CoCodeList: string; Callback: TReadOpenItems);
-
     end;
 
 
@@ -137,14 +126,10 @@ uses
     DbModel{legacy},
     Unity.Settings,
     Unity.Helpers,
-    Unity.StatusBar,
     Unity.EventLogger,
     Unity.SessionService,
-    Unity.Sql{Legacy},
-    Unity.Chars,
-    Unity.DateTimeFormats,
-    Unity.Unknown,
-    Sync.Documents,
+    Unity.Constants,
+    Sync.Document,
     Async.Debtors;
 
 
@@ -262,9 +247,9 @@ begin
 
                     case Return of
 
-                        TCalendar.TimeOnly: NewResult:=FormatDateTime(TDateTimeFormats.TimeFormat, VarToDateTime(Value));
-                        TCalendar.DateOnly: NewResult:=FormatDateTime(TDateTimeFormats.DateFormat, VarToDateTime(Value));
-                        TCalendar.DateTime: NewResult:=FormatDateTime(TDateTimeFormats.DateTimeFormat, VarToDateTime(Value));
+                        TCalendar.TimeOnly: NewResult:=FormatDateTime(TDtFormat.TimeFormat, VarToDateTime(Value));
+                        TCalendar.DateOnly: NewResult:=FormatDateTime(TDtFormat.DateFormat, VarToDateTime(Value));
+                        TCalendar.DateTime: NewResult:=FormatDateTime(TDtFormat.DateTimeFormat, VarToDateTime(Value));
 
                     end;
 

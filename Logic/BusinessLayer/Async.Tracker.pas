@@ -36,7 +36,6 @@ type
     /// Callback signature for returning reloaded data from invoice tracker database table.
     /// </summary>
     TRefreshInvoiceTracker = procedure(InvoiceList: TStringGrid; CallResponse: TCallResponse) of object;
-
     /// <summary>
     /// Callback signature for removing item from invoice tracker database table.
     /// </summary>
@@ -45,7 +44,6 @@ type
 
     ITracker = interface(IInterface)
     ['{1EE8D593-A574-4265-B3CE-1A03CFB9B0B9}']
-
         /// <summary>
         /// Allow to async. re-load listed customers on invoice tracker database table.
         /// Callback provides returned data for visual component. Notification is always
@@ -55,7 +53,6 @@ type
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
         procedure RefreshInvoiceTrackerAsync(UserAlias: string; Callback: TRefreshInvoiceTracker);
-
         /// <summary>
         /// Allow to async. remove given item from invoice tracker database table.
         /// Notification is always executed in main thread as long as callback is provided.
@@ -64,14 +61,12 @@ type
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
         procedure DeleteFromTrackerListAsync(CUID: string; Callback: TDeleteFromTrackerList);
-
     end;
 
 
     TTracker = class(TInterfacedObject, ITracker)
     {$TYPEINFO ON}
     public
-
         /// <summary>
         /// Allow to async. re-load listed customers on invoice tracker database table.
         /// Callback provides returned data for visual component. Notification is always
@@ -81,7 +76,6 @@ type
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
         procedure RefreshInvoiceTrackerAsync(UserAlias: string; Callback: TRefreshInvoiceTracker);
-
         /// <summary>
         /// Allow to async. remove given item from invoice tracker database table.
         /// Notification is always executed in main thread as long as callback is provided.
@@ -98,9 +92,9 @@ implementation
 
 
 uses
-    Handler.Database,
-    DbModel,
-    Unity.Sql,
+    Handler.Database{Legacy},
+    DbModel{Legacy},
+    Unity.Constants,
     Unity.Settings,
     Unity.EventLogger,
     Unity.SessionService;

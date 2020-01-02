@@ -39,7 +39,6 @@ type
 
     IDebtors = interface(IInterface)
     ['{194FE2BE-386E-499E-93FB-0299DA53A70A}']
-
         /// <summary>
         /// Allow to read async. current age report from SQL database. Notification is always executed in main thread
         /// as long as callback is provided.
@@ -48,7 +47,6 @@ type
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
         procedure ReadAgeViewAsync(SelectedCoCodes: string; SortMode: string; RiskClassGroup: TRiskClassGroup; Callback: TReadAgeView);
-
         /// <summary>
         /// Allow to map data between grids. It replaces the target column data for appropiate data in source grid based on given parameters.
         /// </summary>
@@ -58,7 +56,6 @@ type
         procedure MapTableAwaited(Grid: TStringGrid; Source: TStringGrid; IsPrefixRequired: boolean;
             const ColTargetPersonResp: integer; const ColSourceId: integer; const ColTargetCoCode: integer;
             const ColSourceDbName: integer; const ColSourceDesc: integer);
-
         /// <summary>
         /// Allow to load async. list of sorting options available for aging report. There is no separate notification.
         /// </summary>
@@ -66,7 +63,6 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function GetCustSortingOptionsAwaited(var SortingOptions: TStringList): TCallResponse;
-
     end;
 
 
@@ -77,7 +73,6 @@ type
         procedure FComputeAgeSummary(var Grid: TStringGrid; var AgingPayLoad: TAgingPayLoad);
         procedure FComputeRiskClass(var Grid: TStringGrid; var AgingPayLoad: TAgingPayLoad; RiskClassGroup: TRiskClassGroup);
     public
-
         /// <summary>
         /// Allow to read async. current age report from database for given CoCodes and sorting option.
         /// Notification is always executed in main thread as long as callback is provided.
@@ -86,7 +81,6 @@ type
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
         procedure ReadAgeViewAsync(SelectedCoCodes: string; SortMode: string; RiskClassGroup: TRiskClassGroup; Callback: TReadAgeView);
-
         /// <summary>
         /// Allow to map data between grids. It replaces the target column data for appropiate data in source grid based on given parameters.
         /// </summary>
@@ -96,7 +90,6 @@ type
         procedure MapTableAwaited(Grid: TStringGrid; Source: TStringGrid; IsPrefixRequired: boolean;
             const ColTargetPersonResp: integer; const ColSourceId: integer; const ColTargetCoCode: integer;
             const ColSourceDbName: integer; const ColSourceDesc: integer);
-
         /// <summary>
         /// Allow to load async. list of sorting options available for aging report. There is no separate notification.
         /// </summary>
@@ -104,7 +97,6 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function GetCustSortingOptionsAwaited(var SortingOptions: TStringList): TCallResponse;
-
     end;
 
 
@@ -120,15 +112,13 @@ uses
     DbModel{legacy},
     Unity.Helpers,
     Unity.Settings,
-    Unity.StatusBar,
     Unity.Sorting,
     Unity.EventLogger,
     Unity.SessionService,
-    Unity.Chars,
-    Unity.Sql{Legacy},
+    Unity.Constants,
     Unity.RestWrapper,
     Api.CustSortingOptions,
-    Sync.Documents;
+    Sync.Document;
 
 
 procedure TDebtors.ReadAgeViewAsync(SelectedCoCodes: string; SortMode: string; RiskClassGroup: TRiskClassGroup; Callback: TReadAgeView);

@@ -19,7 +19,6 @@ type
 
     IAccounts = interface(IInterface)
     ['{4BA4CF2E-B8BD-4029-B358-93D1A344DAF3}']
-
         /// <summary>
         /// Allow to initiate new user session by loggin user data in the database via Unity API.
         /// This user session entry is later used by other service that uses Active Directory.
@@ -29,7 +28,6 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function InitiateSessionAwaited(SessionId: string; AliasName: string): TCallResponse;
-
         /// <summary>
         /// Allow to check if user has been validated by Active Directory. We relay on assigned session token.
         /// There is no separate notification.
@@ -38,7 +36,6 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function CheckSessionAwaited(SessionId: string): TCallResponse;
-
         /// <summary>
         /// Allow to load async. list of company codes assigned to the current user. There is no separate notification.
         /// </summary>
@@ -46,7 +43,6 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function GetUserCompanyListAwaited(var CompanyList: TArray<TArray<string>>): TCallResponse;
-
         /// <summary>
         /// Allow to write async. user logs to database. There is no separate notification.
         /// </summary>
@@ -54,7 +50,6 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function SaveUserLogsAwaited(): TCallResponse;
-
         /// <summary>
         /// Allow to write async. user choice of comapny codes to load. There is no separate notification.
         /// </summary>
@@ -62,14 +57,12 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function SaveUserCompanyListAwaited(UserSelection: TList<integer>): TCallResponse;
-
     end;
 
 
     TAccounts = class(TInterfacedObject, IAccounts)
     {$TYPEINFO ON}
     public
-
         /// <summary>
         /// Allow to initiate new user session by loggin user data in the database via Unity API.
         /// This user session entry is later used by other service that uses Active Directory.
@@ -79,7 +72,6 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function InitiateSessionAwaited(SessionId: string; AliasName: string): TCallResponse;
-
         /// <summary>
         /// Allow to check if user has been validated by Active Directory. We relay on assigned session token.
         /// There is no separate notification.
@@ -88,7 +80,6 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function CheckSessionAwaited(SessionId: string): TCallResponse;
-
         /// <summary>
         /// Allow to load async. list of company codes assigned to the current user. There is no separate notification.
         /// </summary>
@@ -96,7 +87,6 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function GetUserCompanyListAwaited(var CompanyList: TArray<TArray<string>>): TCallResponse;
-
         /// <summary>
         /// Allow to write async. user logs to database. There is no separate notification.
         /// </summary>
@@ -104,7 +94,6 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function SaveUserLogsAwaited(): TCallResponse;
-
         /// <summary>
         /// Allow to write async. user choice of comapny codes to load. There is no separate notification.
         /// </summary>
@@ -112,7 +101,6 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function SaveUserCompanyListAwaited(UserSelection: TList<integer>): TCallResponse;
-
     end;
 
 

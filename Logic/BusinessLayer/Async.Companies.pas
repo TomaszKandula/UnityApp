@@ -21,7 +21,6 @@ type
 
     ICompanies = interface(IInterface)
     ['{E7616759-7564-44A4-BEEF-BDD220040E1E}']
-
         /// <summary>
         /// Allow to load async. some company data like name, address, phone etc. There is no separate notification.
         /// </summary>
@@ -29,7 +28,6 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function GetCompanyDetailsAwaited(CompanyCode: integer; var CompanyDetails: TCompanyDetails): TCallResponse;
-
         /// <summary>
         /// Allow to load async. list of emails for given CoCodes. There is no separate notification.
         /// </summary>
@@ -37,7 +35,6 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function GetCompanyEmailsAwaited(SourceList: TArray<integer>; var TargetList: TArray<TRegisteredEmails>): TCallResponse;
-
     end;
 
 
@@ -47,7 +44,6 @@ type
         procedure FSetCompanyDetails(Source: TArray<TBankDetails>; var Target: TArray<TBankDetails>);
         procedure FSetCompanyEmails(Source: TArray<TRegisteredEmails>; var Target: TArray<TRegisteredEmails>);
     public
-
         /// <summary>
         /// Allow to load async. some company data like name, address, phone etc. There is no separate notification.
         /// </summary>
@@ -55,7 +51,6 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function GetCompanyDetailsAwaited(CompanyCode: integer; var CompanyDetails: TCompanyDetails): TCallResponse;
-
         /// <summary>
         /// Allow to load async. list of primary emails for given Company Codes. There is no separate notification.
         /// </summary>
@@ -63,7 +58,6 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function GetCompanyEmailsAwaited(SourceList: TArray<integer>; var TargetList: TArray<TRegisteredEmails>): TCallResponse;
-
     end;
 
 

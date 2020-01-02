@@ -126,7 +126,7 @@ type
         txtCallCustomer: TLabel;
         selSendFrom: TComboBox;
         txtSendFrom: TLabel;
-    btnAddComment: TSpeedButton;
+        btnAddComment: TSpeedButton;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
@@ -211,7 +211,7 @@ type
         var FExclusions: TArray<integer>;
         var FSrcColumns: TArray<integer>;
         var FOpenItemsTotal: TOpenItemsTotal;
-        var FPayLoad: TAccountStatementPayLoad;
+        var FPayLoad: TAccDocumentPayLoad;
         var FIsDataLoaded: boolean;
         var OpenItemsRefs: TFOpenItemsRefs;
         var CtrlStatusRefs: TFCtrlStatusRefs;
@@ -237,7 +237,7 @@ type
         procedure SaveCustomerDetails();
         procedure SaveGeneralComment();
         procedure SaveDailyComment();
-        procedure SendAccountStatement_Callback(ProcessingItemNo: integer; CallResponse: TCallResponse);
+        procedure SendAccDocumentAsync_Callback(ProcessingItemNo: integer; CallResponse: TCallResponse);
         procedure UpdateAddressBook_Callback(CallResponse: TCallResponse);
         procedure EditGeneralComment_Callback(CallResponse: TCallResponse);
         procedure EditDailyComment_Callback(CallResponse: TCallResponse);
@@ -272,22 +272,19 @@ uses
     View.SendStatement,
     View.PhoneList,
     DbModel{Legacy},
-    Sync.Documents,
+    Sync.Document,
     Unity.Settings,
     Unity.SessionService,
-    Unity.Chars,
+    Unity.Constants,
     Unity.Helpers,
     Unity.Enums,
     Unity.Sorting,
-    Unity.Delimiters,
-    Unity.Unknown,
-    Unity.Common,
     Unity.EventLogger,
     Async.Utilities,
     Async.Companies,
     Async.AddressBook,
     Async.Comments,
-    Async.Statements;
+    Async.Documents;
 
 
 var vActionsForm: TActionsForm;
@@ -889,8 +886,10 @@ end;
 {$REGION 'CALLBACKS'}
 
 
-procedure TActionsForm.SendAccountStatement_Callback(ProcessingItemNo: integer; CallResponse: TCallResponse);
+procedure TActionsForm.SendAccDocumentAsync_Callback(ProcessingItemNo: integer; CallResponse: TCallResponse);
 begin
+
+    Screen.Cursor:=crDefault;
 
     if not CallResponse.IsSucceeded then
     begin
@@ -1085,7 +1084,7 @@ end;
 procedure TActionsForm.OpenItemsGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 begin
 
-    if ARow = 0 then Exit;
+    if ARow = 0 then Exit();
 
     OpenItemsGrid.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True);
 
@@ -1196,8 +1195,9 @@ begin
     FPayLoad.IsCtrlStatus  :=ActionsForm.cbCtrlStatusOff.Checked;
     FPayLoad.IsUserInCopy  :=ActionsForm.cbUserInCopy.Checked;
 
-    var Statements: IStatements:=TStatements.Create();
-    Statements.SendAccountStatement('', FPayLoad, SendAccountStatement_Callback); // no age date!
+    Screen.Cursor:=crHourGlass;
+    var Documents: IDocuments:=TDocuments.Create();
+    Documents.SendAccDocumentAsync('2020-01-02', FPayLoad, SendAccDocumentAsync_Callback); // dummy age date!
 
 end;
 
@@ -1439,7 +1439,7 @@ end;
 
 procedure TActionsForm.btnCustomStatementMouseEnter(Sender: TObject);
 begin
-    txtDesc.Caption:='Send account statement now.';
+    txtDesc.Caption:='Send custom e-mail with account statement.';
     txtCustomStatement.Font.Color:=AppButtonTxtSelected;
 end;
 
@@ -1453,7 +1453,7 @@ end;
 
 procedure TActionsForm.btnAutoStatementMouseEnter(Sender: TObject);
 begin
-    txtDesc.Caption:='Send custom e-mail with account statement.';
+    txtDesc.Caption:='Send account statement now.';
     txtAutoStatement.Font.Color:=AppButtonTxtSelected;
 end;
 

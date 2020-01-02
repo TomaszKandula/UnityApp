@@ -1,4 +1,4 @@
-unit Sync.Documents;
+unit Sync.Document;
 
 // -------------------------------------------------------
 // Application logic (business layer). Anyone can call it.
@@ -51,6 +51,8 @@ type
         procedure SetOpenItemsRefs(NewValue: TFOpenItemsRefs);
         procedure SetCtrlStatusRefs(NewValue: TFCtrlStatusRefs);
         procedure SetControlStatus(NewValue: TStringGrid);
+        function  GetDocumentType(): string;
+        function GetTotalAmountAggr(): double;
         function GetHTMLTable(): string;
         function GetHTMLTemp(): string;
         function GetHTMLRow(): string;
@@ -77,6 +79,8 @@ type
         property HTMLTable: string read GetHTMLTable;
         property HTMLTemp: string read GetHTMLTemp;
         property HTMLRow: string read GetHTMLRow;
+        property DocumentType: string read GetDocumentType;
+        property TotalAmountAggr: double read GetTotalAmountAggr;
         property OpenItems: TStringGrid read GetOpenItems write SetOpenItems;
         property OpenItemsRefs: TFOpenItemsRefs read GetOpenItemsRefs write SetOpenItemsRefs;
         property ControlStatus: TStringGrid read GetControlStatus write SetControlStatus;
@@ -135,6 +139,7 @@ type
         var FControlStatus: TStringGrid;
         var FCtrlStatusRefs: TFCtrlStatusRefs;
         var FTotalAmountAggr: double;
+        var FDocumentType: string;
         procedure SetHTMLTable(NewValue: string);
         procedure SetHTMLTemp(NewValue: string);
         procedure SetHTMLRow(NewValue: string);
@@ -158,6 +163,8 @@ type
         procedure SetOpenItemsRefs(NewValue: TFOpenItemsRefs);
         procedure SetCtrlStatusRefs(NewValue: TFCtrlStatusRefs);
         procedure SetControlStatus(NewValue: TStringGrid);
+        function  GetDocumentType(): string;
+        function  GetTotalAmountAggr(): double;
         function  GetHTMLTable(): string;
         function  GetHTMLTemp(): string;
         function  GetHTMLRow(): string;
@@ -186,9 +193,11 @@ type
         function  StatusCodeToDesc(TextCode: string; Source: TStringGrid): string;
         procedure OpenItemsToHtmlTable(var HtmlStatement: string; var SG: TStringGrid; ActualRow: Integer);
     public
+        property DocumentType: string read GetDocumentType;
         property HTMLTable: string read GetHTMLTable;
         property HTMLTemp: string read GetHTMLTemp;
         property HTMLRow: string read GetHTMLRow;
+        property TotalAmountAggr: double read GetTotalAmountAggr;
         property OpenItems: TStringGrid read GetOpenItems write SetOpenItems;
         property OpenItemsRefs: TFOpenItemsRefs read GetOpenItemsRefs write SetOpenItemsRefs;
         property ControlStatus: TStringGrid read GetControlStatus write SetControlStatus;
@@ -219,7 +228,7 @@ uses
     System.SysUtils,
     System.StrUtils,
     Unity.Helpers,
-    Unity.Chars,
+    Unity.Constants,
     Unity.Settings,
     Unity.SessionService;
 
@@ -288,9 +297,25 @@ begin
     MailBody  :=StringReplace(MailBody,    '{TEL}',          Telephone,    [rfReplaceAll]);
 
     case InvFilter of
-        TInvoiceFilter.ReminderOvd:    MailBody:=StringReplace(MailBody, '{TITLE}', 'REMINDER',  [rfReplaceAll]);
-        TInvoiceFilter.ReminderNonOvd: MailBody:=StringReplace(MailBody, '{TITLE}', 'REMINDER',  [rfReplaceAll]);
-        TInvoiceFilter.ShowAllItems:   MailBody:=StringReplace(MailBody, '{TITLE}', 'STATEMENT', [rfReplaceAll]);
+
+        TInvoiceFilter.ReminderOvd:
+        begin
+            MailBody:=StringReplace(MailBody, '{TITLE}', 'REMINDER',  [rfReplaceAll]);
+            FDocumentType:='Reminder';
+        end;
+
+        TInvoiceFilter.ReminderNonOvd:
+        begin
+            MailBody:=StringReplace(MailBody, '{TITLE}', 'REMINDER',  [rfReplaceAll]);
+            FDocumentType:='Reminder';
+        end;
+
+        TInvoiceFilter.ShowAllItems:
+        begin
+            MailBody:=StringReplace(MailBody, '{TITLE}', 'STATEMENT', [rfReplaceAll]);
+            FDocumentType:='Statement';
+        end;
+
     end;
 
     if CustMessage <> '' then MailBody:=StringReplace(MailBody, '{TEXT}', CustMessage, [rfReplaceAll]);
@@ -346,6 +371,8 @@ begin
     var CurAmount:=SG.Cells[FOpenItemsRefs.CurAmCol, ActualRow];
     var Amount   :=SG.Cells[FOpenItemsRefs.OpenCurAmCol, ActualRow];
 
+    FTotalAmountAggr:=FTotalAmountAggr + Amount.ToDouble();
+
     CurAmount:=FormatFloat('#,##0.00', StrToFloat(CurAmount));
     Amount   :=FormatFloat('#,##0.00', StrToFloat(Amount));
 
@@ -394,6 +421,7 @@ begin
 
     FPos:=0;
     FItems:=0;
+    FTotalAmountAggr:=0;
 
     FHTMLTable:=FCommonHTMLTable;
     FHTMLRow  :=FCommonHTMLRow;
@@ -512,139 +540,151 @@ begin
 end;
 
 
-function  TDocument.GetOpenItemsRefs: TFOpenItemsRefs;
+function TDocument.GetOpenItemsRefs(): TFOpenItemsRefs;
 begin
     Result:=FOpenItemsRefs;
 end;
 
 
-function  TDocument.GetCtrlStatusRefs: TFCtrlStatusRefs;
+function TDocument.GetCtrlStatusRefs(): TFCtrlStatusRefs;
 begin
     Result:=FCtrlStatusRefs;
 end;
 
 
-function TDocument.GetControlStatus: TStringGrid;
+function TDocument.GetControlStatus(): TStringGrid;
 begin
     Result:=FControlStatus;
 end;
 
 
-function TDocument.GetHTMLTable: string;
+function TDocument.GetDocumentType(): string;
+begin
+    Result:=FDocumentType;
+end;
+
+
+function TDocument.GetTotalAmountAggr(): double;
+begin
+    Result:=FTotalAmountAggr;
+end;
+
+
+function TDocument.GetHTMLTable(): string;
 begin
     Result:=FHTMLTable;
 end;
 
 
-function TDocument.GetHTMLTemp: string;
+function TDocument.GetHTMLTemp(): string;
 begin
     Result:=FHTMLTemp;
 end;
 
 
-function TDocument.GetHTMLRow: string;
+function TDocument.GetHTMLRow(): string;
 begin
     Result:=FHTMLRow;
 end;
 
 
-function TDocument.GetHTMLLayout: string;
+function TDocument.GetHTMLLayout(): string;
 begin
     Result:=FHTMLLayout;
 end;
 
 
-function TDocument.GetCustName: string;
+function TDocument.GetCustName(): string;
 begin
     Result:=FCustName;
 end;
 
 
-function TDocument.GetCustAddr: string;
+function TDocument.GetCustAddr(): string;
 begin
     Result:=FCustAddr;
 end;
 
 
-function TDocument.GetLBUName: string;
+function TDocument.GetLBUName(): string;
 begin
     Result:=FLBUName;
 end;
 
 
-function TDocument.GetLBUAddress: string;
+function TDocument.GetLBUAddress(): string;
 begin
     Result:=FLBUAddress;
 end;
 
 
-function TDocument.GetTelephone: string;
+function TDocument.GetTelephone(): string;
 begin
     Result:=FTelephone;
 end;
 
 
-function TDocument.GetBankDetails: string;
+function TDocument.GetBankDetails(): string;
 begin
     Result:=FBankDetails;
 end;
 
 
-function TDocument.GetCustMessage: string;
+function TDocument.GetCustMessage(): string;
 begin
     Result:=FCustMessage;
 end;
 
 
-function TDocument.GetInvFilter: TInvoiceFilter;
+function TDocument.GetInvFilter(): TInvoiceFilter;
 begin
     Result:=FInvFilter;
 end;
 
 
-function TDocument.GetBeginWith: string;
+function TDocument.GetBeginWith(): string;
 begin
     Result:=FBeginWith;
 end;
 
 
-function TDocument.GetEndWith: string;
+function TDocument.GetEndWith(): string;
 begin
     Result:=FEndWith;
 end;
 
 
-function TDocument.GetOpenItems: TStringGrid;
+function TDocument.GetOpenItems(): TStringGrid;
 begin
     Result:=FOpenItems;
 end;
 
 
-function TDocument.GetSourceDBName: string;
+function TDocument.GetSourceDBName(): string;
 begin
     Result:=FSourceDBName;
 end;
 
 
-function TDocument.GetCustNumber: integer;
+function TDocument.GetCustNumber(): integer;
 begin
     Result:=FCustNumber;
 end;
 
 
-function TDocument.GetExclusions: TArray<integer>;
+function TDocument.GetExclusions(): TArray<integer>;
 begin
     Result:=FExclusions;
 end;
 
 
-function TDocument.GetCommonHTMLTable: string;
+function TDocument.GetCommonHTMLTable(): string;
 begin
     Result:=FCommonHTMLTable;
 end;
 
 
-function TDocument.GetCommonHTMLRow: string;
+function TDocument.GetCommonHTMLRow(): string;
 begin
     Result:=FCommonHTMLRow;
 end;

@@ -59,7 +59,7 @@ implementation
 uses
     View.Main,
     View.Actions,
-    Unity.Chars,
+    Unity.Constants,
     Unity.Helpers,
     Unity.Settings;
 

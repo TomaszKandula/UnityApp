@@ -13,7 +13,7 @@ interface
 
 
 uses
-    DbModel,
+    DbModel{Legacy},
     Unity.Grid;
 
 

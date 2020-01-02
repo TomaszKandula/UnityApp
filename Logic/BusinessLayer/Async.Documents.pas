@@ -1,4 +1,4 @@
-unit Async.Statements;
+unit Async.Documents;
 
 // -------------------------------------------------------
 // Application logic (business layer). Anyone can call it.
@@ -19,19 +19,17 @@ type
     /// <summary>
     /// Callback signature for returning information from sending single account statement.
     /// </summary>
-    TSendAccountStatement = procedure(ProcessingItemNo: integer; CallResponse: TCallResponse) of object;
-
+    TSendAccDocument = procedure(ProcessingItemNo: integer; CallResponse: TCallResponse) of object;
     /// <summary>
     /// Callback signature for returning information from sending many account statements.
     /// </summary>
-    TSendAccountStatements = procedure(ProcessingItemNo: integer; CallResponse: TCallResponse) of object;
+    TSendAccDocuments = procedure(ProcessingItemNo: integer; CallResponse: TCallResponse) of object;
 
 
-    IStatements = interface(IInterface)
+    IDocuments = interface(IInterface)
     ['{14BBF3F3-945A-4A61-94BA-6A2EE10530A2}']
-
         /// <summary>
-        /// Allow to async. send single account statemnent. It requires to pass payload with invoice data. Note that method
+        /// Allow to async. send single account statemnent/reminder. It requires to pass payload with invoice data. Note that method
         /// can be executed async. without waiting to complete the task, thus it can be executed many times in parallel.
         /// Notification is always executed in main thread as long as callback is provided.
         /// Please note that the AgeDate is required argument, this is the age report date that user put comment for.
@@ -40,10 +38,9 @@ type
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// It is not recommended to use nil in this method.
         /// </remarks>
-        procedure SendAccountStatement(AgeDate: string; PayLoad: TAccountStatementPayLoad; Callback: TSendAccountStatement; WaitToComplete: boolean = False);
-
+        procedure SendAccDocumentAsync(AgeDate: string; PayLoad: TAccDocumentPayLoad; Callback: TSendAccDocument; WaitToComplete: boolean = False);
         /// <summary>
-        /// Allow to async. send many account statemnents. It requires to pass payload with invoice data. It uses SendAccountStatement
+        /// Allow to async. send many account statemnents/reminders. It requires to pass payload with invoice data. It uses SendAccountStatement
         /// method so it can be also executed async. without waiting to complete the task, thus it allows parallel execution.
         /// Notification is always executed in main thread as long as callback is provided.
         /// Please note that the AgeDate is required argument, this is the age report date that user put comment for.
@@ -52,17 +49,23 @@ type
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// It is not recommended to use nil in this method.
         /// </remarks>
-        procedure SendAccountStatements(AgeDate: string; PayLoad: TAccountStatementPayLoad; Callback: TSendAccountStatements);
-
+        procedure SendAccDocumentsAsync(AgeDate: string; PayLoad: TAccDocumentPayLoad; Callback: TSendAccDocuments);
+        /// <summary>
+        /// Allow to async. post newly sent document (statement/reminder) in the database history table. It requires to pass payload with document details.
+        /// There is no separate notification.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        function LogSentDocumentAwaited(PayLoad: TSentDocument): TCallResponse;
     end;
 
 
-    TStatements = class(TInterfacedObject, IStatements)
+    TDocuments = class(TInterfacedObject, IDocuments)
     {$TYPEINFO ON}
     public
-
         /// <summary>
-        /// Allow to async. send single account statemnent. It requires to pass payload with invoice data. Note that method
+        /// Allow to async. send single account statemnent/reminder. It requires to pass payload with invoice data. Note that method
         /// can be executed async. without waiting to complete the task, thus it can be executed many times in parallel.
         /// Notification is always executed in main thread as long as callback is provided.
         /// Please note that the AgeDate is required argument, this is the age report date that user put comment for.
@@ -71,10 +74,9 @@ type
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// It is not recommended to use nil in this method.
         /// </remarks>
-        procedure SendAccountStatement(AgeDate: string; PayLoad: TAccountStatementPayLoad; Callback: TSendAccountStatement; WaitToComplete: boolean = False);
-
+        procedure SendAccDocumentAsync(AgeDate: string; PayLoad: TAccDocumentPayLoad; Callback: TSendAccDocument; WaitToComplete: boolean = False);
         /// <summary>
-        /// Allow to async. send many account statemnents. It requires to pass payload with invoice data. It uses SendAccountStatement
+        /// Allow to async. send many account statemnents/reminders. It requires to pass payload with invoice data. It uses SendAccountStatement
         /// method so it can be also executed async. without waiting to complete the task, thus it allows parallel execution.
         /// Notification is always executed in main thread as long as callback is provided.
         /// Please note that the AgeDate is required argument, this is the age report date that user put comment for.
@@ -83,8 +85,15 @@ type
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// It is not recommended to use nil in this method.
         /// </remarks>
-        procedure SendAccountStatements(AgeDate: string; PayLoad: TAccountStatementPayLoad; Callback: TSendAccountStatements);
-
+        procedure SendAccDocumentsAsync(AgeDate: string; PayLoad: TAccDocumentPayLoad; Callback: TSendAccDocuments);
+        /// <summary>
+        /// Allow to async. post newly sent document (statement/reminder) in the database history table. It requires to pass payload with document details.
+        /// There is no separate notification.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        function LogSentDocumentAwaited(PayLoad: TSentDocument): TCallResponse;
     end;
 
 
@@ -95,15 +104,21 @@ uses
     System.Classes,
     System.Threading,
     System.Generics.Collections,
+    REST.Types,
+    REST.Json,
+    Unity.RestWrapper,
     Unity.Enums,
     Unity.Helpers,
     Unity.Settings,
     Unity.EventLogger,
-    Sync.Documents,
+    Unity.SessionService,
+    Api.LogSentDocument,
+    Api.LoggedSentDocument,
+    Sync.Document,
     Async.Comments;
 
 
-procedure TStatements.SendAccountStatement(AgeDate: string; PayLoad: TAccountStatementPayLoad; Callback: TSendAccountStatement; WaitToComplete: boolean = False);
+procedure TDocuments.SendAccDocumentAsync(AgeDate: string; PayLoad: TAccDocumentPayLoad; Callback: TSendAccDocument; WaitToComplete: boolean = False);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
@@ -158,8 +173,48 @@ begin
             if Statement.SendDocument(PayLoad.IsUserInCopy) then
             begin
 
-                // save statement details in history table
-                // ...
+                // -----------------------------------------------
+                // Save sent document into database history table.
+                // -----------------------------------------------
+                var CompanyCode:  string:=THelpers.DbNameToCoCode(PayLoad.SourceDBName);
+                var DocumentData: TSentDocument;
+                DocumentData.CompanyCode       :=CompanyCode;
+                DocumentData.ReportedCustomer  :=PayLoad.CustNumber;
+                DocumentData.ReportedAggrAmount:=Statement.TotalAmountAggr;
+                DocumentData.ReportedAgeDate   :=AgeDate;
+                DocumentData.PreservedEmail    :=Statement.MailBody;
+                DocumentData.DocumentType      :=Statement.DocumentType;
+
+                LogSentDocumentAwaited(DocumentData);
+
+                // ------------------------------------------
+                // Add daily comment to reflect taken action.
+                // ------------------------------------------
+                var Comments: IComments:=TComments.Create();
+                var DailyCommentExists: TDailyCommentExists;
+                Comments.CheckDailyCommentAwaited(
+                    CompanyCode.ToInteger(),
+                    PayLoad.CustNumber,
+                    AgeDate,
+                    DailyCommentExists
+                );
+
+                var LocalPayLoad: TDailyCommentFields;
+                LocalPayLoad.CommentId:=DailyCommentExists.CommentId;
+                LocalPayLoad.CompanyCode:=CompanyCode.ToInteger();
+                LocalPayLoad.SourceDBName:=PayLoad.SourceDBName;
+                LocalPayLoad.CustomerNumber:=PayLoad.CustNumber;
+                LocalPayLoad.AgeDate:=AgeDate;
+                LocalPayLoad.CallEvent:=0;
+                LocalPayLoad.CallDuration:=0;
+                LocalPayLoad.FixedStatementsSent:=0;
+                LocalPayLoad.CustomStatementsSent:=0;
+                LocalPayLoad.FixedRemindersSent:=0;
+                LocalPayLoad.CustomRemindersSent:=0;
+                LocalPayLoad.UserComment:='New communication has been sent.';
+                LocalPayLoad.UserAlias:=SessionService.SessionData.AliasName;
+
+                Comments.EditDailyComment(LocalPayLoad);
 
                 // -------------------------------------------------------
                 // We send either single email (customized by the user) or
@@ -213,7 +268,7 @@ begin
 end;
 
 
-procedure TStatements.SendAccountStatements(AgeDate: string; PayLoad: TAccountStatementPayLoad; Callback: TSendAccountStatements);
+procedure TDocuments.SendAccDocumentsAsync(AgeDate: string; PayLoad: TAccDocumentPayLoad; Callback: TSendAccDocuments);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
@@ -242,7 +297,7 @@ begin
 //                    PayLoad.BankDetails:=PayLoad.MailerList.Items[iCNT].SubItems[12]; // bank html
 //                    PayLoad.ItemNo     :=iCNT;
 
-                    SendAccountStatement(AgeDate, PayLoad, Callback, True);
+                    SendAccDocumentAsync(AgeDate, PayLoad, Callback, True);
 
                 end;
 
@@ -270,6 +325,92 @@ begin
     end);
 
     NewTask.Start();
+
+end;
+
+
+function TDocuments.LogSentDocumentAwaited(PayLoad: TSentDocument): TCallResponse;
+begin
+
+    var CallResponse: TCallResponse;
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
+        Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl
+            + 'documents/'
+            + PayLoad.CompanyCode
+            + '/'
+            + PayLoad.DocumentType;
+        Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
+        ThreadFileLog.Log('[LogSentDocumentAwaited]: Executing POST ' + Restful.ClientBaseURL);
+
+        var LogSentDocument:=TLogSentDocument.Create();
+        try
+
+            LogSentDocument.UserAlias         :=SessionService.SessionData.AliasName;
+            LogSentDocument.ReportedCustomer  :=PayLoad.ReportedCustomer;
+            LogSentDocument.ReportedAggrAmount:=PayLoad.ReportedAggrAmount;
+            LogSentDocument.ReportedAgeDate   :=PayLoad.ReportedAgeDate;
+            LogSentDocument.PreservedEmail    :=PayLoad.PreservedEmail;
+            LogSentDocument.DocumentType      :=PayLoad.DocumentType;
+
+            Restful.CustomBody:=TJson.ObjectToJsonString(LogSentDocument);
+
+        finally
+            LogSentDocument.Free();
+        end;
+
+        try
+
+            if (Restful.Execute) and (Restful.StatusCode = 200) then
+            begin
+
+                var LoggedSentDocument:=TJson.JsonToObject<TLoggedSentDocument>(Restful.Content);
+                try
+
+                    CallResponse.IsSucceeded:=LoggedSentDocument.IsSucceeded;
+                    CallResponse.ReturnedCode:=Restful.StatusCode;
+                    ThreadFileLog.Log('[LogSentDocumentAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+
+                finally
+                    LoggedSentDocument.Free();
+                end;
+
+            end
+            else
+            begin
+
+                if not String.IsNullOrEmpty(Restful.ExecuteError) then
+                    CallResponse.LastMessage:='[LogSentDocumentAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                else
+                    if String.IsNullOrEmpty(Restful.Content) then
+                        CallResponse.LastMessage:='[LogSentDocumentAwaited]: Invalid server response. Please contact IT Support.'
+                    else
+                        CallResponse.LastMessage:='[LogSentDocumentAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+
+                CallResponse.ReturnedCode:=Restful.StatusCode;
+                CallResponse.IsSucceeded:=False;
+                ThreadFileLog.Log(CallResponse.LastMessage);
+
+            end;
+
+        except on
+            E: Exception do
+            begin
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[LogSentDocumentAwaited]: Cannot execute the request. Description: ' + E.Message;
+                ThreadFileLog.Log(CallResponse.LastMessage);
+            end;
+
+        end;
+
+    end);
+
+    NewTask.Start();
+    TTask.WaitForAll(NewTask);
+    Result:=CallResponse;
 
 end;
 

@@ -30,7 +30,7 @@ uses
     Unity.ListView,
     Unity.ChkListBox,
     Unity.Panel,
-    Unity.Filtering;
+    Unity.Enums;
 
     {TODO -oTomek -cGeneral : Redesign this completly}
 
@@ -94,7 +94,7 @@ type
         var FColNumber:  integer;
         var FGrid:       TStringGrid;
         var FOverdue:    string;
-        var FFilterNum:  TFiltering.TColumns;
+        var FFilterNum:  TColumns;
         var InUse:  boolean;
         procedure FilterClearAll();
         procedure FilterSelectCheck();
@@ -117,7 +117,7 @@ implementation
 
 uses
     View.Main,
-    Unity.Chars,
+    Unity.Constants,
     Unity.Settings,
     Unity.SessionService,
     DbModel{Legacy};
@@ -195,20 +195,20 @@ begin
     if (FGrid <> nil) and (not(string.IsNullOrEmpty(FColName))) then
     begin
         FColNumber:=FGrid.GetCol(FColName);
-        if FFilterNum = TFiltering.TColumns.Inf7              then FilterInit(INF7);
-        if FFilterNum = TFiltering.TColumns.Inf4              then FilterInit(INF4);
-        if FFilterNum = TFiltering.TColumns.Group3            then FilterInit(Gr3);
-        if FFilterNum = TFiltering.TColumns.SalesResponsible  then FilterInit(SalesResp);
-        if FFilterNum = TFiltering.TColumns.PersonResponsible then FilterInit(PersonResp);
-        if FFilterNum = TFiltering.TColumns.CustomerGroup     then FilterInit(CustomerGrp);
-        if FFilterNum = TFiltering.TColumns.AccountType       then FilterInit(AccountType);
-        if FFilterNum = TFiltering.TColumns.Follow            then FilterInit(FollowUp);
-        if FFilterNum = TFiltering.TColumns.CoCode            then FilterInit(CoCode);
-        if FFilterNum = TFiltering.TColumns.Agent             then FilterInit(Agent);
-        if FFilterNum = TFiltering.TColumns.Division          then FilterInit(Division);
-        if FFilterNum = TFiltering.TColumns.Free1             then FilterInit(Free1);
-        if FFilterNum = TFiltering.TColumns.Free2             then FilterInit(Free2);
-        if FFilterNum = TFiltering.TColumns.Free3             then FilterInit(Free3);
+        if FFilterNum = TColumns.Inf7              then FilterInit(INF7);
+        if FFilterNum = TColumns.Inf4              then FilterInit(INF4);
+        if FFilterNum = TColumns.Group3            then FilterInit(Gr3);
+        if FFilterNum = TColumns.SalesResponsible  then FilterInit(SalesResp);
+        if FFilterNum = TColumns.PersonResponsible then FilterInit(PersonResp);
+        if FFilterNum = TColumns.CustomerGroup     then FilterInit(CustomerGrp);
+        if FFilterNum = TColumns.AccountType       then FilterInit(AccountType);
+        if FFilterNum = TColumns.Follow            then FilterInit(FollowUp);
+        if FFilterNum = TColumns.CoCode            then FilterInit(CoCode);
+        if FFilterNum = TColumns.Agent             then FilterInit(Agent);
+        if FFilterNum = TColumns.Division          then FilterInit(Division);
+        if FFilterNum = TColumns.Free1             then FilterInit(Free1);
+        if FFilterNum = TColumns.Free2             then FilterInit(Free2);
+        if FFilterNum = TColumns.Free3             then FilterInit(Free3);
     end;
 end;
 
@@ -218,37 +218,37 @@ begin
 
     if IsIncrementing then
     begin
-        if (FFilterNum = TFiltering.TColumns.Inf7)              and (countINF7        = 0) then Inc(countINF7);
-        if (FFilterNum = TFiltering.TColumns.Inf4)              and (countINF4        = 0) then Inc(countINF4);
-        if (FFilterNum = TFiltering.TColumns.Group3)            and (countGr3         = 0) then Inc(countGr3);
-        if (FFilterNum = TFiltering.TColumns.SalesResponsible)  and (countSalesResp   = 0) then Inc(countSalesResp);
-        if (FFilterNum = TFiltering.TColumns.PersonResponsible) and (countPersonResp  = 0) then Inc(countPersonResp);
-        if (FFilterNum = TFiltering.TColumns.CustomerGroup)     and (countCustomerGrp = 0) then Inc(countCustomerGrp);
-        if (FFilterNum = TFiltering.TColumns.AccountType)       and (countAccountType = 0) then Inc(countAccountType);
-        if (FFilterNum = TFiltering.TColumns.Follow)            and (countFollowUp    = 0) then Inc(countFollowUp);
-        if (FFilterNum = TFiltering.TColumns.CoCode)            and (countCoCode      = 0) then Inc(countCoCode);
-        if (FFilterNum = TFiltering.TColumns.Agent)             and (countAgent       = 0) then Inc(countAgent);
-        if (FFilterNum = TFiltering.TColumns.Division)          and (countDivision    = 0) then Inc(countDivision);
-        if (FFilterNum = TFiltering.TColumns.Free1)             and (countFree1       = 0) then Inc(countFree1);
-        if (FFilterNum = TFiltering.TColumns.Free2)             and (countFree2       = 0) then Inc(countFree2);
-        if (FFilterNum = TFiltering.TColumns.Free3)             and (countFree3       = 0) then Inc(countFree3);
+        if (FFilterNum = TColumns.Inf7)              and (countINF7        = 0) then Inc(countINF7);
+        if (FFilterNum = TColumns.Inf4)              and (countINF4        = 0) then Inc(countINF4);
+        if (FFilterNum = TColumns.Group3)            and (countGr3         = 0) then Inc(countGr3);
+        if (FFilterNum = TColumns.SalesResponsible)  and (countSalesResp   = 0) then Inc(countSalesResp);
+        if (FFilterNum = TColumns.PersonResponsible) and (countPersonResp  = 0) then Inc(countPersonResp);
+        if (FFilterNum = TColumns.CustomerGroup)     and (countCustomerGrp = 0) then Inc(countCustomerGrp);
+        if (FFilterNum = TColumns.AccountType)       and (countAccountType = 0) then Inc(countAccountType);
+        if (FFilterNum = TColumns.Follow)            and (countFollowUp    = 0) then Inc(countFollowUp);
+        if (FFilterNum = TColumns.CoCode)            and (countCoCode      = 0) then Inc(countCoCode);
+        if (FFilterNum = TColumns.Agent)             and (countAgent       = 0) then Inc(countAgent);
+        if (FFilterNum = TColumns.Division)          and (countDivision    = 0) then Inc(countDivision);
+        if (FFilterNum = TColumns.Free1)             and (countFree1       = 0) then Inc(countFree1);
+        if (FFilterNum = TColumns.Free2)             and (countFree2       = 0) then Inc(countFree2);
+        if (FFilterNum = TColumns.Free3)             and (countFree3       = 0) then Inc(countFree3);
     end
     else
     begin
-        if (FFilterNum = TFiltering.TColumns.Inf7)              and (countINF7        > 0) then Dec(countINF7);
-        if (FFilterNum = TFiltering.TColumns.Inf4)              and (countINF4        > 0) then Dec(countINF4);
-        if (FFilterNum = TFiltering.TColumns.Group3)            and (countGr3         > 0) then Dec(countGr3);
-        if (FFilterNum = TFiltering.TColumns.SalesResponsible)  and (countSalesResp   > 0) then Dec(countSalesResp);
-        if (FFilterNum = TFiltering.TColumns.PersonResponsible) and (countPersonResp  > 0) then Dec(countPersonResp);
-        if (FFilterNum = TFiltering.TColumns.CustomerGroup)     and (countCustomerGrp > 0) then Dec(countCustomerGrp);
-        if (FFilterNum = TFiltering.TColumns.AccountType)       and (countAccountType > 0) then Dec(countAccountType);
-        if (FFilterNum = TFiltering.TColumns.Follow)            and (countFollowUp    > 0) then Dec(countFollowUp);
-        if (FFilterNum = TFiltering.TColumns.CoCode)            and (countCoCode      > 0) then Dec(countCoCode);
-        if (FFilterNum = TFiltering.TColumns.Agent)             and (countAgent       > 0) then Dec(countAgent);
-        if (FFilterNum = TFiltering.TColumns.Division)          and (countDivision    > 0) then Dec(countDivision);
-        if (FFilterNum = TFiltering.TColumns.Free1)             and (countFree1       > 0) then Dec(countFree1);
-        if (FFilterNum = TFiltering.TColumns.Free2)             and (countFree2       > 0) then Dec(countFree2);
-        if (FFilterNum = TFiltering.TColumns.Free3)             and (countFree3       > 0) then Dec(countFree3);
+        if (FFilterNum = TColumns.Inf7)              and (countINF7        > 0) then Dec(countINF7);
+        if (FFilterNum = TColumns.Inf4)              and (countINF4        > 0) then Dec(countINF4);
+        if (FFilterNum = TColumns.Group3)            and (countGr3         > 0) then Dec(countGr3);
+        if (FFilterNum = TColumns.SalesResponsible)  and (countSalesResp   > 0) then Dec(countSalesResp);
+        if (FFilterNum = TColumns.PersonResponsible) and (countPersonResp  > 0) then Dec(countPersonResp);
+        if (FFilterNum = TColumns.CustomerGroup)     and (countCustomerGrp > 0) then Dec(countCustomerGrp);
+        if (FFilterNum = TColumns.AccountType)       and (countAccountType > 0) then Dec(countAccountType);
+        if (FFilterNum = TColumns.Follow)            and (countFollowUp    > 0) then Dec(countFollowUp);
+        if (FFilterNum = TColumns.CoCode)            and (countCoCode      > 0) then Dec(countCoCode);
+        if (FFilterNum = TColumns.Agent)             and (countAgent       > 0) then Dec(countAgent);
+        if (FFilterNum = TColumns.Division)          and (countDivision    > 0) then Dec(countDivision);
+        if (FFilterNum = TColumns.Free1)             and (countFree1       > 0) then Dec(countFree1);
+        if (FFilterNum = TColumns.Free2)             and (countFree2       > 0) then Dec(countFree2);
+        if (FFilterNum = TColumns.Free3)             and (countFree3       > 0) then Dec(countFree3);
     end;
 
     HowManyFlts:=countINF7 + countINF4 + countGr3 +
@@ -462,7 +462,7 @@ procedure TFilterForm.FormActivate(Sender: TObject);
     procedure SetAndQuit();
     begin
         btnRemove.Enabled:=True;
-        Exit;
+        Exit();
     end;
 
 begin
@@ -471,20 +471,20 @@ begin
     FilterSelectCheck();
     btnRemove.Enabled:=False;
 
-    if (FFilterNum = TFiltering.TColumns.Inf7)              and (countINF7        > 0) then SetAndQuit;
-    if (FFilterNum = TFiltering.TColumns.Inf4)              and (countINF4        > 0) then SetAndQuit;
-    if (FFilterNum = TFiltering.TColumns.Group3)            and (countGr3         > 0) then SetAndQuit;
-    if (FFilterNum = TFiltering.TColumns.SalesResponsible)  and (countSalesResp   > 0) then SetAndQuit;
-    if (FFilterNum = TFiltering.TColumns.PersonResponsible) and (countPersonResp  > 0) then SetAndQuit;
-    if (FFilterNum = TFiltering.TColumns.CustomerGroup)     and (countCustomerGrp > 0) then SetAndQuit;
-    if (FFilterNum = TFiltering.TColumns.AccountType)       and (countAccountType > 0) then SetAndQuit;
-    if (FFilterNum = TFiltering.TColumns.Follow)            and (countFollowUp    > 0) then SetAndQuit;
-    if (FFilterNum = TFiltering.TColumns.CoCode)            and (countCoCode      > 0) then SetAndQuit;
-    if (FFilterNum = TFiltering.TColumns.Agent)             and (countAgent       > 0) then SetAndQuit;
-    if (FFilterNum = TFiltering.TColumns.Division)          and (countDivision    > 0) then SetAndQuit;
-    if (FFilterNum = TFiltering.TColumns.Free1)             and (countFree1       > 0) then SetAndQuit;
-    if (FFilterNum = TFiltering.TColumns.Free2)             and (countFree2       > 0) then SetAndQuit;
-    if (FFilterNum = TFiltering.TColumns.Free3)             and (countFree3       > 0) then SetAndQuit;
+    if (FFilterNum = TColumns.Inf7)              and (countINF7        > 0) then SetAndQuit;
+    if (FFilterNum = TColumns.Inf4)              and (countINF4        > 0) then SetAndQuit;
+    if (FFilterNum = TColumns.Group3)            and (countGr3         > 0) then SetAndQuit;
+    if (FFilterNum = TColumns.SalesResponsible)  and (countSalesResp   > 0) then SetAndQuit;
+    if (FFilterNum = TColumns.PersonResponsible) and (countPersonResp  > 0) then SetAndQuit;
+    if (FFilterNum = TColumns.CustomerGroup)     and (countCustomerGrp > 0) then SetAndQuit;
+    if (FFilterNum = TColumns.AccountType)       and (countAccountType > 0) then SetAndQuit;
+    if (FFilterNum = TColumns.Follow)            and (countFollowUp    > 0) then SetAndQuit;
+    if (FFilterNum = TColumns.CoCode)            and (countCoCode      > 0) then SetAndQuit;
+    if (FFilterNum = TColumns.Agent)             and (countAgent       > 0) then SetAndQuit;
+    if (FFilterNum = TColumns.Division)          and (countDivision    > 0) then SetAndQuit;
+    if (FFilterNum = TColumns.Free1)             and (countFree1       > 0) then SetAndQuit;
+    if (FFilterNum = TColumns.Free2)             and (countFree2       > 0) then SetAndQuit;
+    if (FFilterNum = TColumns.Free3)             and (countFree3       > 0) then SetAndQuit;
 
 end;
 
@@ -506,20 +506,20 @@ begin
             FGrid.Freeze(True);
 
             // Filter
-            if (FFilterNum = TFiltering.TColumns.Inf7)              then FilterNow(INF7);
-            if (FFilterNum = TFiltering.TColumns.Inf4)              then FilterNow(INF4);
-            if (FFilterNum = TFiltering.TColumns.Group3)            then FilterNow(Gr3);
-            if (FFilterNum = TFiltering.TColumns.SalesResponsible)  then FilterNow(SalesResp);
-            if (FFilterNum = TFiltering.TColumns.PersonResponsible) then FilterNow(PersonResp);
-            if (FFilterNum = TFiltering.TColumns.CustomerGroup)     then FilterNow(CustomerGrp);
-            if (FFilterNum = TFiltering.TColumns.AccountType)       then FilterNow(AccountType);
-            if (FFilterNum = TFiltering.TColumns.Follow)            then FilterNow(FollowUp);
-            if (FFilterNum = TFiltering.TColumns.CoCode)            then FilterNow(CoCode);
-            if (FFilterNum = TFiltering.TColumns.Agent)             then FilterNow(Agent);
-            if (FFilterNum = TFiltering.TColumns.Division)          then FilterNow(Division);
-            if (FFilterNum = TFiltering.TColumns.Free1)             then FilterNow(Free1);
-            if (FFilterNum = TFiltering.TColumns.Free2)             then FilterNow(Free2);
-            if (FFilterNum = TFiltering.TColumns.Free3)             then FilterNow(Free3);
+            if (FFilterNum = TColumns.Inf7)              then FilterNow(INF7);
+            if (FFilterNum = TColumns.Inf4)              then FilterNow(INF4);
+            if (FFilterNum = TColumns.Group3)            then FilterNow(Gr3);
+            if (FFilterNum = TColumns.SalesResponsible)  then FilterNow(SalesResp);
+            if (FFilterNum = TColumns.PersonResponsible) then FilterNow(PersonResp);
+            if (FFilterNum = TColumns.CustomerGroup)     then FilterNow(CustomerGrp);
+            if (FFilterNum = TColumns.AccountType)       then FilterNow(AccountType);
+            if (FFilterNum = TColumns.Follow)            then FilterNow(FollowUp);
+            if (FFilterNum = TColumns.CoCode)            then FilterNow(CoCode);
+            if (FFilterNum = TColumns.Agent)             then FilterNow(Agent);
+            if (FFilterNum = TColumns.Division)          then FilterNow(Division);
+            if (FFilterNum = TColumns.Free1)             then FilterNow(Free1);
+            if (FFilterNum = TColumns.Free2)             then FilterNow(Free2);
+            if (FFilterNum = TColumns.Free3)             then FilterNow(Free3);
 
         finally
             FGrid.Freeze(False);
@@ -552,20 +552,20 @@ begin
             FGrid.Freeze(True);
 
             // Unfilter
-            if (FFilterNum = TFiltering.TColumns.Inf7)              then FilterRemove(INF7);
-            if (FFilterNum = TFiltering.TColumns.Inf4)              then FilterRemove(INF4);
-            if (FFilterNum = TFiltering.TColumns.Group3)            then FilterRemove(Gr3);
-            if (FFilterNum = TFiltering.TColumns.SalesResponsible)  then FilterRemove(SalesResp);
-            if (FFilterNum = TFiltering.TColumns.PersonResponsible) then FilterRemove(PersonResp);
-            if (FFilterNum = TFiltering.TColumns.CustomerGroup)     then FilterRemove(CustomerGrp);
-            if (FFilterNum = TFiltering.TColumns.AccountType)       then FilterRemove(AccountType);
-            if (FFilterNum = TFiltering.TColumns.Follow)            then FilterRemove(FollowUp);
-            if (FFilterNum = TFiltering.TColumns.CoCode)            then FilterRemove(CoCode);
-            if (FFilterNum = TFiltering.TColumns.Agent)             then FilterRemove(Agent);
-            if (FFilterNum = TFiltering.TColumns.Division)          then FilterRemove(Division);
-            if (FFilterNum = TFiltering.TColumns.Free1)             then FilterRemove(Free1);
-            if (FFilterNum = TFiltering.TColumns.Free2)             then FilterRemove(Free2);
-            if (FFilterNum = TFiltering.TColumns.Free3)             then FilterRemove(Free3);
+            if (FFilterNum = TColumns.Inf7)              then FilterRemove(INF7);
+            if (FFilterNum = TColumns.Inf4)              then FilterRemove(INF4);
+            if (FFilterNum = TColumns.Group3)            then FilterRemove(Gr3);
+            if (FFilterNum = TColumns.SalesResponsible)  then FilterRemove(SalesResp);
+            if (FFilterNum = TColumns.PersonResponsible) then FilterRemove(PersonResp);
+            if (FFilterNum = TColumns.CustomerGroup)     then FilterRemove(CustomerGrp);
+            if (FFilterNum = TColumns.AccountType)       then FilterRemove(AccountType);
+            if (FFilterNum = TColumns.Follow)            then FilterRemove(FollowUp);
+            if (FFilterNum = TColumns.CoCode)            then FilterRemove(CoCode);
+            if (FFilterNum = TColumns.Agent)             then FilterRemove(Agent);
+            if (FFilterNum = TColumns.Division)          then FilterRemove(Division);
+            if (FFilterNum = TColumns.Free1)             then FilterRemove(Free1);
+            if (FFilterNum = TColumns.Free2)             then FilterRemove(Free2);
+            if (FFilterNum = TColumns.Free3)             then FilterRemove(Free3);
 
         finally
             FGrid.Freeze(False);

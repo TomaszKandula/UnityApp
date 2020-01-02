@@ -92,6 +92,7 @@ type
         class function ShowReport(ReportNumber: cardinal; CurrentForm: TForm): cardinal; static;
         class procedure ReturnCoCodesList(var SourceGrid: TStringGrid; const SourceCol: integer;
             var TargetList: TStringList; HasHeader: boolean = False; Prefix: string = ''); static;
+        class function DbNameToCoCode(SourceDBName: string): string; static;
         class function CoConvert(CoNumber: string): string; static;
         class function GetSourceDBName(CoCode: string; Prefix: string): string; static;
         class function GetBuildInfoAsString: string; static;
@@ -113,10 +114,7 @@ uses
     System.Zip,
     Vcl.Graphics,
     DbModel{Legacy},
-    Unity.DateTimeFormats,
-    Unity.Unknown,
-    Unity.Chars,
-    Unity.Common,
+    Unity.Constants,
     Unity.Settings;
 
 
@@ -397,7 +395,7 @@ end;
 
 class function THelpers.CDate(StrDate: string): TDate;
 begin
-    Result:=StrToDateDef(StrDate, TDateTimeFormats.NullDate);
+    Result:=StrToDateDef(StrDate, TDtFormat.NullDate);
 end;
 
 
@@ -558,6 +556,15 @@ begin
 
     end;
 
+end;
+
+
+class function THelpers.DbNameToCoCode(SourceDBName: string): string;
+begin
+    if String.IsNullOrWhitespace(SourceDBName) then Exit();
+    if SourceDBName.Contains('F')   then Result:=SourceDBName.Replace('F', '');
+    if SourceDBName.Contains('F0')  then Result:=SourceDBName.Replace('F0', '');
+    if SourceDBName.Contains('F00') then Result:=SourceDBName.Replace('F00', '');
 end;
 
 

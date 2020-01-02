@@ -36,12 +36,10 @@ type
     /// Callback signature for getting results of address book open action.
     /// </summary>
     TOpenAddressBook = procedure(ReturnedData: TStringGrid; CallResponse: TCallResponse) of object;
-
     /// <summary>
     /// Callback signature for getting results of address book update action.
     /// </summary>
     TUpdateAddressBook = procedure(CallResponse: TCallResponse) of object;
-
     /// <summary>
     /// Callback signature for getting results of address book insert action.
     /// </summary>
@@ -50,7 +48,6 @@ type
 
     IAddressBook = interface(IInterface)
     ['{56D68733-5DF0-4D44-9A66-69CB5DE587E4}']
-
         /// <summary>
         /// Load async. address book content and return it via given callback method that is always executed in main thread.
         /// </summary>
@@ -58,7 +55,6 @@ type
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
         procedure OpenAddressBookAsync(UserAlias: string; Callback: TOpenAddressBook; OptionalCondition: string = '');
-
         /// <summary>
         /// Update async. address book content and notify via given callback method that is always executed in main thread.
         /// </summary>
@@ -66,7 +62,6 @@ type
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
         procedure UpdateAddressBookAsync(SourceGrid: TStringGrid; UpdateValues: TAddressBookUpdateFields; Callback: TUpdateAddressBook);
-
         /// <summary>
         /// Insert async. address book new data and notify via given callback method that is always executed in main thread.
         /// </summary>
@@ -74,7 +69,6 @@ type
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
         procedure AddToAddressBookAsync(SourceGrid: TStringGrid; Callback: TAddToAddressBook);
-
         /// <summary>
         /// Allow to asynchronously remove data from Address Book for given Scuid. There is no separate notification.
         /// </summary>
@@ -82,7 +76,6 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function DelFromAddressBookAwaited(Scuid: string): boolean;
-
         /// <summary>
         /// Load async. address book customer data only for given SCUID. There is no separate notification.
         /// </summary>
@@ -90,14 +83,12 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function GetCustomerDetailsAwaited(SCUID: string): TCustomerDetails;
-
     end;
 
 
     TAddressBook = class(TInterfacedObject, IAddressBook)
     {$TYPEINFO ON}
     public
-
         /// <summary>
         /// Load async. address book content and return it via given callback method that is always executed in main thread.
         /// </summary>
@@ -105,7 +96,6 @@ type
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
         procedure OpenAddressBookAsync(UserAlias: string; Callback: TOpenAddressBook; OptionalCondition: string = '');
-
         /// <summary>
         /// Update async. address book content and notify via given callback method that is always executed in main thread.
         /// </summary>
@@ -113,7 +103,6 @@ type
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
         procedure UpdateAddressBookAsync(SourceGrid: TStringGrid; UpdateValues: TAddressBookUpdateFields; Callback: TUpdateAddressBook);
-
         /// <summary>
         /// Insert async. address book new data and notify via given callback method that is always executed in main thread.
         /// </summary>
@@ -121,7 +110,6 @@ type
         /// Provide nil for Callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
         procedure AddToAddressBookAsync(SourceGrid: TStringGrid; Callback: TAddToAddressBook);
-
         /// <summary>
         /// Allow to asynchronously remove data from Address Book for given Scuid. There is no separate notification.
         /// </summary>
@@ -129,7 +117,6 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function DelFromAddressBookAwaited(Scuid: string): boolean;
-
         /// <summary>
         /// Load async. address book customer data only for given SCUID. There is no separate notification.
         /// </summary>
@@ -137,7 +124,6 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function GetCustomerDetailsAwaited(SCUID: string): TCustomerDetails;
-
     end;
 
 
@@ -146,13 +132,12 @@ implementation
 
 uses
     Handler.Database{Legacy},
-    Unity.Sql{Legacy},
+    Unity.Constants,
     Unity.Helpers,
     Unity.Settings,
-    Unity.StatusBar,
     Unity.EventLogger,
     Unity.SessionService,
-    Sync.Documents,
+    Sync.Document,
     DbModel{Legacy};
 
 

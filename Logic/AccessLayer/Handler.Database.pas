@@ -54,9 +54,8 @@ implementation
 
 uses
     Unity.Settings,
-    Unity.Unknown,
+    Unity.Constants,
     Unity.Helpers,
-    Unity.AdoDb{Legacy},
     Unity.EventLogger,
     View.Main;
 

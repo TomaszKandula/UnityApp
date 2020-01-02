@@ -3348,7 +3348,7 @@ object StartupForm: TStartupForm
     Margins.Right = 15
     Margins.Bottom = 5
     Caption = 
-      'Copyright '#169' 2016 - 2019 DFDS Polska Sp. z o.o. All rights reserv' +
+      'Copyright '#169' 2017 - 2020 DFDS Polska Sp. z o.o. All rights reserv' +
       'ed.'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clBlack

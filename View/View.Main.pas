@@ -64,8 +64,7 @@ uses
     Unity.ComboBox,
     Unity.Enums,
     Unity.Records,
-    Unity.References,
-    Unity.StatusBar;
+    Unity.References;
 
 
 type
@@ -866,17 +865,13 @@ uses
     View.Reports,
     View.CompanyList,
     View.BusyScreen,
-    Unity.Filtering,
-    Unity.Chars,
+    Unity.Constants,
     Unity.Helpers,
-    Unity.Common,
-    Unity.Unknown,
-    Unity.DateTimeFormats,
     Unity.Sorting,
     Unity.EventLogger,
     Unity.Settings,
     Unity.SessionService,
-    Sync.Documents,
+    Sync.Document,
     Async.Utilities,
     Async.Tracker,
     Async.Queries,
@@ -3196,7 +3191,7 @@ begin
     THelpers.WndCall(CalendarForm, TWindowState.Modal);
 
     // If selected more than one customer, assign given date to selected customers
-    if CalendarForm.FSelectedDate <> TDateTimeFormats.NullDate then
+    if CalendarForm.FSelectedDate <> TDtFormat.NullDate then
     begin
 
         for var iCNT: integer:=sgAgeView.Selection.Top to sgAgeView.Selection.Bottom do
@@ -3256,7 +3251,7 @@ begin
     FilterForm.FColName  :=TSnapshots.fInf7;
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
-    FilterForm.FFilterNum:=TFiltering.TColumns.Inf7;
+    FilterForm.FFilterNum:=TColumns.Inf7;
     THelpers.WndCall(FilterForm, TWindowState.Modal);
 end;
 
@@ -3267,7 +3262,7 @@ begin
     FilterForm.FColName  :=TSnapshots.fInf4;
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
-    FilterForm.FFilterNum:=TFiltering.TColumns.Inf4;
+    FilterForm.FFilterNum:=TColumns.Inf4;
     THelpers.WndCall(FilterForm, TWindowState.Modal);
 end;
 
@@ -3278,7 +3273,7 @@ begin
     FilterForm.FColName  :=TSnapshots.fSalesResponsible;
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
-    FilterForm.FFilterNum:=TFiltering.TColumns.SalesResponsible;
+    FilterForm.FFilterNum:=TColumns.SalesResponsible;
     THelpers.WndCall(FilterForm, TWindowState.Modal);
 end;
 
@@ -3289,7 +3284,7 @@ begin
     FilterForm.FColName  :=TSnapshots.fPersonResponsible;
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
-    FilterForm.FFilterNum:=TFiltering.TColumns.PersonResponsible;
+    FilterForm.FFilterNum:=TColumns.PersonResponsible;
     THelpers.WndCall(FilterForm, TWindowState.Modal);
 end;
 
@@ -3300,7 +3295,7 @@ begin
     FilterForm.FColName  :=TSnapshots.fCustomerGroup;
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
-    FilterForm.FFilterNum:=TFiltering.TColumns.CustomerGroup;
+    FilterForm.FFilterNum:=TColumns.CustomerGroup;
     THelpers.WndCall(FilterForm, TWindowState.Modal);
 end;
 
@@ -3311,7 +3306,7 @@ begin
     FilterForm.FColName  :=TSnapshots.fAccountType;
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
-    FilterForm.FFilterNum:=TFiltering.TColumns.AccountType;
+    FilterForm.FFilterNum:=TColumns.AccountType;
     THelpers.WndCall(FilterForm, TWindowState.Modal);
 end;
 
@@ -3322,7 +3317,7 @@ begin
     FilterForm.FColName  :=TGeneralComment.fFollowUp;
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
-    FilterForm.FFilterNum:=TFiltering.TColumns.Follow;
+    FilterForm.FFilterNum:=TColumns.Follow;
     THelpers.WndCall(FilterForm, TWindowState.Modal);
 end;
 
@@ -3333,7 +3328,7 @@ begin
     FilterForm.FColName  :=TSnapshots.fCoCode;
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
-    FilterForm.FFilterNum:=TFiltering.TColumns.CoCode;
+    FilterForm.FFilterNum:=TColumns.CoCode;
     THelpers.WndCall(FilterForm, TWindowState.Modal);
 end;
 
@@ -3344,7 +3339,7 @@ begin
     FilterForm.FColName  :=TSnapshots.fAgent;
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
-    FilterForm.FFilterNum:=TFiltering.TColumns.Agent;
+    FilterForm.FFilterNum:=TColumns.Agent;
     THelpers.WndCall(FilterForm, TWindowState.Modal);
 end;
 
@@ -3355,7 +3350,7 @@ begin
     FilterForm.FColName  :=TSnapshots.fDivision;
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
-    FilterForm.FFilterNum:=TFiltering.TColumns.Division;
+    FilterForm.FFilterNum:=TColumns.Division;
     THelpers.WndCall(FilterForm, TWindowState.Modal);
 end;
 
@@ -3366,7 +3361,7 @@ begin
     FilterForm.FColName  :=TGeneralComment.Free1;
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
-    FilterForm.FFilterNum:=TFiltering.TColumns.Free1;
+    FilterForm.FFilterNum:=TColumns.Free1;
     THelpers.WndCall(FilterForm, TWindowState.Modal);
 end;
 
@@ -3377,7 +3372,7 @@ begin
     FilterForm.FColName  :=TGeneralComment.Free2;
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
-    FilterForm.FFilterNum:=TFiltering.TColumns.Free2;
+    FilterForm.FFilterNum:=TColumns.Free2;
     THelpers.WndCall(FilterForm, TWindowState.Modal);
 end;
 
@@ -3388,7 +3383,7 @@ begin
     FilterForm.FColName  :=TGeneralComment.Free3;
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
-    FilterForm.FFilterNum:=TFiltering.TColumns.Free3;
+    FilterForm.FFilterNum:=TColumns.Free3;
     THelpers.WndCall(FilterForm, TWindowState.Modal);
 end;
 

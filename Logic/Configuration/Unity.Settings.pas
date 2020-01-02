@@ -227,10 +227,7 @@ implementation
 
 uses
     Unity.Crc32,
-    Unity.Common,
-    Unity.Unknown,
-    Unity.Chars,
-    Unity.DateTimeFormats;
+    Unity.Constants;
 
 
 constructor TSettings.Create();
@@ -585,13 +582,13 @@ end;
 function TSettings.GetReleaseDateTime: TDateTime;
 begin
 
-    Result:=TDateTimeFormats.NullDate;
+    Result:=TDtFormat.NullDate;
 
     // ----------------------------------------------------
     // Get update time and date registered in setting file.
     // ----------------------------------------------------
     if Assigned(FTMIG) then
-        Result:=StrToDateTimeDef(FTMIG.ReadString(TConfigSections.ApplicationDetails, 'UPDATE_DATETIME', ''), TDateTimeFormats.NullDate);
+        Result:=StrToDateTimeDef(FTMIG.ReadString(TConfigSections.ApplicationDetails, 'UPDATE_DATETIME', ''), TDtFormat.NullDate);
 
 end;
 
@@ -600,9 +597,9 @@ function TSettings.GetTodayFColor: TColor;
 begin
     Result:=0;
     if not(Assigned(FTMIG)) then
-        Exit
-            else
-                Result:=FTMIG.ReadInteger(TConfigSections.FollowUpColors, 'TODAY_FCOLOR', 0);
+        Exit()
+    else
+        Result:=FTMIG.ReadInteger(TConfigSections.FollowUpColors, 'TODAY_FCOLOR', 0);
 end;
 
 
@@ -610,9 +607,9 @@ function TSettings.GetTodayBColor: TColor;
 begin
     Result:=0;
     if not(Assigned(FTMIG)) then
-        Exit
-            else
-                Result:=FTMIG.ReadInteger(TConfigSections.FollowUpColors, 'TODAY_BCOLOR', 0);
+        Exit()
+    else
+        Result:=FTMIG.ReadInteger(TConfigSections.FollowUpColors, 'TODAY_BCOLOR', 0);
 end;
 
 
@@ -620,9 +617,9 @@ function TSettings.GetPastFColor: TColor;
 begin
     Result:=0;
     if not(Assigned(FTMIG)) then
-        Exit
-            else
-                Result:=FTMIG.ReadInteger(TConfigSections.FollowUpColors, 'PAST_FCOLOR', 0);
+        Exit()
+    else
+        Result:=FTMIG.ReadInteger(TConfigSections.FollowUpColors, 'PAST_FCOLOR', 0);
 end;
 
 
@@ -630,9 +627,9 @@ function TSettings.GetPastBColor: TColor;
 begin
     Result:=0;
     if not(Assigned(FTMIG)) then
-        Exit
-            else
-                Result:=FTMIG.ReadInteger(TConfigSections.FollowUpColors, 'PAST_BCOLOR', 0);
+        Exit()
+    else
+        Result:=FTMIG.ReadInteger(TConfigSections.FollowUpColors, 'PAST_BCOLOR', 0);
 end;
 
 
@@ -640,9 +637,9 @@ function TSettings.GetFutureFColor: TColor;
 begin
     Result:=0;
     if not(Assigned(FTMIG)) then
-        Exit
-            else
-                Result:=FTMIG.ReadInteger(TConfigSections.FollowUpColors, 'FUTURE_FCOLOR', 0);
+        Exit()
+    else
+        Result:=FTMIG.ReadInteger(TConfigSections.FollowUpColors, 'FUTURE_FCOLOR', 0);
 end;
 
 
@@ -650,91 +647,91 @@ function TSettings.GetFutureBColor: TColor;
 begin
     Result:=0;
     if not(Assigned(FTMIG)) then
-        Exit
-            else
-                Result:=FTMIG.ReadInteger(TConfigSections.FollowUpColors, 'FUTURE_BCOLOR', 0);
+        Exit()
+    else
+        Result:=FTMIG.ReadInteger(TConfigSections.FollowUpColors, 'FUTURE_BCOLOR', 0);
 end;
 
 
-function TSettings.GetWinUserName: string;
+function TSettings.GetWinUserName(): string;
 begin
     Result:=FWinUserName;
 end;
 
 
-function TSettings.GetPathGridImage: string;
+function TSettings.GetPathGridImage(): string;
 begin
     Result:=FPathGridImage;
 end;
 
 
-function TSettings.GetPathEventLog: string;
+function TSettings.GetPathEventLog(): string;
 begin
     Result:=FPathEventLog;
 end;
 
 
-function TSettings.GetPathConfig: string;
+function TSettings.GetPathConfig(): string;
 begin
     Result:=FPathConfig;
 end;
 
 
-function TSettings.GetPathLicence: string;
+function TSettings.GetPathLicence(): string;
 begin
     Result:=FPathLicence;
 end;
 
 
-function TSettings.GetDirApplication: string;
+function TSettings.GetDirApplication(): string;
 begin
     Result:=FDirApplication;
 end;
 
 
-function TSettings.GetDirLayouts: string;
+function TSettings.GetDirLayouts(): string;
 begin
     Result:=FDirLayouts;
 end;
 
 
-function TSettings.GetDirPackage: string;
+function TSettings.GetDirPackage(): string;
 begin
     Result:=FDirPackage;
 end;
 
 
-function TSettings.GetDirWinTemp: string;
+function TSettings.GetDirWinTemp(): string;
 begin
     Result:=FDirWinTemp;
 end;
 
 
-function TSettings.GetNewSessionId: string;
+function TSettings.GetNewSessionId(): string;
 begin
     Result:=FLastSessionId;
 end;
 
 
-function TSettings.GetUrlReleasePak: string;
+function TSettings.GetUrlReleasePak(): string;
 begin
     Result:=FUrlReleasePak;
 end;
 
 
-function TSettings.GetUrlReleaseMan: string;
+function TSettings.GetUrlReleaseMan(): string;
 begin
     Result:=FUrlReleaseMan;
 end;
 
 
-function TSettings.GetUrlLayoutsLst: string;
+function TSettings.GetUrlLayoutsLst(): string;
 begin
     Result:=FUrlLayoutsLst;
 end;
 
 
-function TSettings.ConfigFileOK: boolean;
+function TSettings.ConfigFileOK(): boolean;
 begin
     Result:=FConfigFileOK;
 end;
@@ -743,9 +740,6 @@ end;
 procedure TSettings.SetReleaseNumber(NewRelease: cardinal);
 begin
 
-    // ------------------------------------
-    // Set release number in settings file.
-    // ------------------------------------
     if Assigned(FTMIG) then
     begin
         FTMIG.WriteInteger(TConfigSections.ApplicationDetails, 'RELEASE_NUMBER', NewRelease);
@@ -758,9 +752,6 @@ end;
 procedure TSettings.SetReleaseDateTime(NewDateTime: TDateTime);
 begin
 
-    // -----------------------------
-    // Set new update time and date.
-    // -----------------------------
     if Assigned(FTMIG) then
     begin
         FTMIG.WriteString(TConfigSections.ApplicationDetails, 'UPDATE_DATETIME', DateTimeToStr(NewDateTime));
@@ -772,7 +763,7 @@ end;
 
 procedure TSettings.SetTodayFColor(NewColor: TColor);
 begin
-    if not(Assigned(FTMIG)) then Exit;
+    if not(Assigned(FTMIG)) then Exit();
     FTMIG.WriteInteger(TConfigSections.FollowUpColors, 'TODAY_FCOLOR', NewColor);
     Encode(Configuration);
 end;
@@ -780,7 +771,7 @@ end;
 
 procedure TSettings.SetTodayBColor(NewColor: TColor);
 begin
-    if not(Assigned(FTMIG)) then Exit;
+    if not(Assigned(FTMIG)) then Exit();
     FTMIG.WriteInteger(TConfigSections.FollowUpColors, 'TODAY_BCOLOR', NewColor);
     Encode(Configuration);
 end;
@@ -788,7 +779,7 @@ end;
 
 procedure TSettings.SetPastFColor(NewColor: TColor);
 begin
-    if not(Assigned(FTMIG)) then Exit;
+    if not(Assigned(FTMIG)) then Exit();
     FTMIG.WriteInteger(TConfigSections.FollowUpColors, 'PAST_FCOLOR', NewColor);
     Encode(Configuration);
 end;
@@ -796,7 +787,7 @@ end;
 
 procedure TSettings.SetPastBColor(NewColor: TColor);
 begin
-    if not(Assigned(FTMIG)) then Exit;
+    if not(Assigned(FTMIG)) then Exit();
     FTMIG.WriteInteger(TConfigSections.FollowUpColors, 'PAST_BCOLOR', NewColor);
     Encode(Configuration);
 end;
@@ -804,7 +795,7 @@ end;
 
 procedure TSettings.SetFutureFColor(NewColor: TColor);
 begin
-    if not(Assigned(FTMIG)) then Exit;
+    if not(Assigned(FTMIG)) then Exit();
     FTMIG.WriteInteger(TConfigSections.FollowUpColors, 'FUTURE_FCOLOR', NewColor);
     Encode(Configuration);
 end;
@@ -812,7 +803,7 @@ end;
 
 procedure TSettings.SetFutureBColor(NewColor: TColor);
 begin
-    if not(Assigned(FTMIG)) then Exit;
+    if not(Assigned(FTMIG)) then Exit();
     FTMIG.WriteInteger(TConfigSections.FollowUpColors, 'FUTURE_BCOLOR', NewColor);
     Encode(Configuration);
 end;

@@ -86,7 +86,7 @@ implementation
 uses
     View.Main,
     View.GridFilter,
-    Unity.Chars,
+    Unity.Constants,
     Unity.Helpers,
     Unity.Settings;
 
