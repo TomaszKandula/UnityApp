@@ -173,9 +173,6 @@ begin
             if Statement.SendDocument(PayLoad.IsUserInCopy) then
             begin
 
-                // -----------------------------------------------
-                // Save sent document into database history table.
-                // -----------------------------------------------
                 var CompanyCode:  string:=THelpers.DbNameToCoCode(PayLoad.SourceDBName);
                 var DocumentData: TSentDocument;
                 DocumentData.CompanyCode       :=CompanyCode;
@@ -187,34 +184,8 @@ begin
 
                 LogSentDocumentAwaited(DocumentData);
 
-                // ------------------------------------------
-                // Add daily comment to reflect taken action.
-                // ------------------------------------------
                 var Comments: IComments:=TComments.Create();
-                var DailyCommentExists: TDailyCommentExists;
-                Comments.CheckDailyCommentAwaited(
-                    CompanyCode.ToInteger(),
-                    PayLoad.CustNumber,
-                    AgeDate,
-                    DailyCommentExists
-                );
-
-                var LocalPayLoad: TDailyCommentFields;
-                LocalPayLoad.CommentId:=DailyCommentExists.CommentId;
-                LocalPayLoad.CompanyCode:=CompanyCode.ToInteger();
-                LocalPayLoad.SourceDBName:=PayLoad.SourceDBName;
-                LocalPayLoad.CustomerNumber:=PayLoad.CustNumber;
-                LocalPayLoad.AgeDate:=AgeDate;
-                LocalPayLoad.CallEvent:=0;
-                LocalPayLoad.CallDuration:=0;
-                LocalPayLoad.FixedStatementsSent:=0;
-                LocalPayLoad.CustomStatementsSent:=0;
-                LocalPayLoad.FixedRemindersSent:=0;
-                LocalPayLoad.CustomRemindersSent:=0;
-                LocalPayLoad.UserComment:='New communication has been sent.';
-                LocalPayLoad.UserAlias:=SessionService.SessionData.AliasName;
-
-                Comments.EditDailyComment(LocalPayLoad);
+                Comments.UpdateDailyCommentAwaited(CompanyCode.ToInteger(), PayLoad.CustNumber, AgeDate);
 
                 // -------------------------------------------------------
                 // We send either single email (customized by the user) or

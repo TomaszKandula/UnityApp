@@ -5,7 +5,7 @@ unit Unity.References;
 // Can be referenced by anyone. Cannot hold references to View or Logic.
 // We use records instead of classes because we only use them to group
 // specific types of data ("variable of variables") to pass where it
-// needs to be passed as a parameter. It acts usually as a pay load for
+// needs to be passed as a parameter. It acts usually as a payload for
 // both "request to" and "response from"; but do not overuse records.
 // ---------------------------------------------------------------------
 

@@ -781,6 +781,7 @@ type
             var client: ICefClient; var settings: TCefBrowserSettings; var noJavascriptAccess: Boolean; var Result: Boolean);
     strict private
         const FPermitCheckTimeout = 120000;
+        var FLoadedAgeDate: string;
         var FRedeemOnReload: boolean;
         var FPermitCheckTimer: integer;
         var FIsAppMenuLocked: boolean;
@@ -835,6 +836,7 @@ type
         procedure SwitchTimers(State: TAppTimers);
         procedure UpdateStatusBar(Text: string);
         procedure LoadAgeReport(SelectedCoCodes: string);
+        property LoadedAgeDate: string read FLoadedAgeDate;
     end;
 
 
@@ -1020,6 +1022,10 @@ begin
     var Debtors: IDebtors:=TDebtors.Create();
     FLastCoCodesSelected:=SelectedCoCodes;
     Debtors.ReadAgeViewAsync(SelectedCoCodes, selAgeSorting.Text, FRiskClassGroup, ReadAgeView_Callback);
+
+    //dummy!!!
+    FLoadedAgeDate:='2020-01-03';
+
 end;
 
 
@@ -3230,7 +3236,7 @@ begin
             LGeneralCommentFields.UserAlias     :=SessionService.SessionData.AliasName;
 
             var Comments: IComments:=TComments.Create();
-            Comments.EditGeneralComment(LGeneralCommentFields, nil{EditGeneralComment_Callback});
+            Comments.EditGeneralCommentAsync(LGeneralCommentFields, nil{EditGeneralComment_Callback});
 
             MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TGeneralComment.fFollowUp), iCNT]:=TChars.SPACE;
 

@@ -164,60 +164,36 @@ begin
 
     if (MainForm.sgAgeView.Selection.Top - MainForm.sgAgeView.Selection.Bottom) = 0 then
     begin
+        THelpers.MsgCall(TAppMessage.Warn, 'Please select more than one customer.');
+        Exit();
+    end;
 
-        // One customer
-        Item:=MassMailerForm.CustomerList.Items.Add;
-        Item.Caption:=IntToStr(MainForm.sgAgeView.Row);
-        Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerName), MainForm.sgAgeView.Row]);
-        Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerNumber), MainForm.sgAgeView.Row]);
-        Item.SubItems.Add('No');
-        Item.SubItems.Add('Not found!');
-        Item.SubItems.Add('Not found!');
-        Item.SubItems.Add('n/a');
-        Item.SubItems.Add('n/a');
-        Item.SubItems.Add('n/a');
-        Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCoCode), MainForm.sgAgeView.Row]);
-        Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fAgent), MainForm.sgAgeView.Row]);
-        Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCuid), MainForm.sgAgeView.Row]);
-        Item.SubItems.Add(
-            MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerNumber), MainForm.sgAgeView.Row] +
-            THelpers.CoConvert(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCoCode), MainForm.sgAgeView.Row])
-        );
-
-        Item.SubItems.Add('empty');
-
-    end
-    else
+    // Many customers
+    for var iCNT: integer:=MainForm.sgAgeView.Selection.Top to MainForm.sgAgeView.Selection.Bottom do
     begin
 
-        // Many customers
-        for var iCNT: integer:=MainForm.sgAgeView.Selection.Top to MainForm.sgAgeView.Selection.Bottom do
+        if MainForm.sgAgeView.RowHeights[iCNT] <> MainForm.sgAgeView.sgRowHidden then
         begin
 
-            if MainForm.sgAgeView.RowHeights[iCNT] <> MainForm.sgAgeView.sgRowHidden then
-            begin
+            Item:=MassMailerForm.CustomerList.Items.Add();
+            Item.Caption:=IntToStr(iCNT);
+            Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerName), iCNT]);
+            Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerNumber), iCNT]);
+            Item.SubItems.Add('No');
+            Item.SubItems.Add('Not found!');
+            Item.SubItems.Add('Not found!');
+            Item.SubItems.Add('n/a');
+            Item.SubItems.Add('n/a');
+            Item.SubItems.Add('n/a');
+            Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCoCode), iCNT]);
+            Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fAgent), iCNT]);
+            Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCuid), iCNT]);
+            Item.SubItems.Add(
+                MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerNumber), iCNT] +
+                THelpers.CoConvert(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCoCode), iCNT])
+            );
 
-                Item:=MassMailerForm.CustomerList.Items.Add();
-                Item.Caption:=IntToStr(iCNT);
-                Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerName), iCNT]);
-                Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerNumber), iCNT]);
-                Item.SubItems.Add('No');
-                Item.SubItems.Add('Not found!');
-                Item.SubItems.Add('Not found!');
-                Item.SubItems.Add('n/a');
-                Item.SubItems.Add('n/a');
-                Item.SubItems.Add('n/a');
-                Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCoCode), iCNT]);
-                Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fAgent), iCNT]);
-                Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCuid), iCNT]);
-                Item.SubItems.Add(
-                    MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerNumber), iCNT] +
-                    THelpers.CoConvert(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCoCode), iCNT])
-                );
-
-                Item.SubItems.Add('empty');
-
-            end;
+            Item.SubItems.Add('empty');
 
         end;
 
@@ -346,7 +322,7 @@ begin
 
     Screen.Cursor:=crHourGlass;
     var Documents: IDocuments:=TDocuments.Create();
-    Documents.SendAccDocumentsAsync('2020-01-02', FPayLoad, SendAccDocumentAsyncs_Callback); // dummy age date!
+    Documents.SendAccDocumentsAsync(MainForm.LoadedAgeDate, FPayLoad, SendAccDocumentAsyncs_Callback);
 
 end;
 
@@ -489,7 +465,7 @@ begin
     if not FIsDataLoaded then
     begin
 
-        Screen.Cursor:=crSQLWait;
+        Screen.Cursor:=crHourGlass;
         MainForm.UpdateStatusBar(TStatusBar.Processing);
 
         THelpers.ExecWithDelay(500, procedure
@@ -505,7 +481,7 @@ begin
             UpdateCompanyData(CustomerList);
 
             MainForm.TimerCustOpenItems.Enabled:=False;
-            ThreadFileLog.Log('[FormShow]: Mass mailer opened, open items loader is now on hold.');
+            ThreadFileLog.Log('[TMassMailerForm.FormActivate]: Mass mailer opened, open items loader is now on hold.');
 
             Text_Subject.SetFocus();
             FIsDataLoaded:=True;
@@ -534,7 +510,7 @@ begin
     FIsDataLoaded:=False;
     CustomerList.Clear();
     MainForm.TimerCustOpenItems.Enabled:=True;
-    ThreadFileLog.Log('[FormClose]: Mass mailer closed, open items loader is now enabled back again.');
+    ThreadFileLog.Log('[TMassMailerForm.FormClose]: Mass mailer closed, open items loader is now enabled back again.');
 end;
 
 

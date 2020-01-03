@@ -125,7 +125,7 @@ begin
     FGeneralCommentFields.UserAlias     :=SessionService.SessionData.AliasName;
 
     var Comments: IComments:=TComments.Create();
-    Comments.EditGeneralComment(FGeneralCommentFields, EditGeneralComment_Callback);
+    Comments.EditGeneralCommentAsync(FGeneralCommentFields, EditGeneralComment_Callback);
 
     MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TGeneralComment.fFollowUp), Row]:=DateToStr(SelectedDate);
 

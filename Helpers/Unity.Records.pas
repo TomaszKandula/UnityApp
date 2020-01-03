@@ -69,6 +69,8 @@ type
         CustMailStat: string;
         CustPhones:   string;
     end;
+
+
     /// <summary>
     /// Carries a group of variables to be updated in AddressBook table.
     /// </summary>
@@ -79,6 +81,8 @@ type
         Estatement: string;
         Email:      string;
     end;
+
+
     /// <summary>
     /// Carries a group of variables that holds details of sent document to be posted in database history table.
     /// </summary>
@@ -96,6 +100,7 @@ type
     TDailyCommentExists = record
         DoesCommentExists: boolean;
         CommentId:         integer;
+        UserComment:       string;
     end;
     /// <summary>
     /// Carries a group of variables for DailyComments table operations.

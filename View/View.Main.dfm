@@ -9532,7 +9532,7 @@ object MainForm: TMainForm
     Margins.Top = 10
     Margins.Right = 10
     Margins.Bottom = 0
-    ActivePage = TabSheet1
+    ActivePage = TabSheet3
     Align = alClient
     DoubleBuffered = True
     Font.Charset = DEFAULT_CHARSET
@@ -11486,10 +11486,6 @@ object MainForm: TMainForm
       Caption = 'Address Book'
       Highlighted = True
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object AddressBookHeader: TPanel
         Left = 0
         Top = 0

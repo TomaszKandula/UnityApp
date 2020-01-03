@@ -25,12 +25,14 @@ type
 	strict private
         var FDoesCommentExists: boolean;
         var FCommentId:         integer;
+        var FUserComment:       string;
         var FIsSucceeded:       boolean;
         var FError:             TErrorHandler;
 	public
         destructor Destroy(); override;
         property DoesCommentExists: boolean       read FDoesCommentExists write FDoesCommentExists;
         property CommentId:         integer       read FCommentId         write FCommentId;
+        property UserComment:       string        read FUserComment       write FUserComment;
         property IsSucceeded:       boolean       read FIsSucceeded       write FIsSucceeded;
         property Error:             TErrorHandler read FError             write FError;
 	end;
@@ -47,3 +49,4 @@ end;
 
 
 end.
+

@@ -178,7 +178,7 @@ begin
 
     Screen.Cursor:=crHourGlass;
     var Documents: IDocuments:=TDocuments.Create();
-    Documents.SendAccDocumentAsync('2020-01-02', FPayLoad, SendAccDocumentAsync_Callback); // dummy age date!
+    Documents.SendAccDocumentAsync(MainForm.LoadedAgeDate, FPayLoad, SendAccDocumentAsync_Callback);
 
     Close();
 

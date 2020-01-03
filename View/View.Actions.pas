@@ -215,6 +215,8 @@ type
         var FIsDataLoaded: boolean;
         var OpenItemsRefs: TFOpenItemsRefs;
         var CtrlStatusRefs: TFCtrlStatusRefs;
+        function  FormatDateStr(DateStr: string): string;
+        function  FormatDateTimeStr(DateTimeStr: string): string;
         function  GetRunningApps(SearchName: string): boolean;
         function  BankListToHtml(BankDetails: TArray<TBankDetails>): string;
         procedure StrArrayToStrings(Input: TArray<string>; var Output: TStringList);
@@ -298,6 +300,26 @@ end;
 
 
 {$REGION 'LOCAL HELPERS'}
+
+
+function TActionsForm.FormatDateStr(DateStr: string): string;
+begin
+    if String.IsNullOrEmpty(DateStr) then Exit();
+    // Expected: 2019-12-15T00:00:00
+    var TempStr:=DateStr.Split(['T']);
+    Result:=TempStr[0];
+end;
+
+
+function TActionsForm.FormatDateTimeStr(DateTimeStr: string): string;
+begin
+    if String.IsNullOrEmpty(DateTimeStr) then Exit();
+    // Expected: 2019-12-18T23:32:04.137
+    var TempStr:=DateTimeStr.Split(['T']);
+    var TempTime:=TempStr[1];
+    var NewTime:=TempTime.Split(['.']);
+    Result:=TempStr[0] + ' ' + NewTime[0];
+end;
 
 
 function TActionsForm.GetRunningApps(SearchName: string): boolean;
@@ -571,8 +593,8 @@ begin
         for var iCNT:=1{Skip header} to TotalRows do
         begin
             DailyComments.Cells[1, iCNT]:=LDailyCommentFields[iCNT - 1].CommentId.ToString();
-            DailyComments.Cells[2, iCNT]:=LDailyCommentFields[iCNT - 1].EntryDateTime;
-            DailyComments.Cells[3, iCNT]:=LDailyCommentFields[iCNT - 1].AgeDate;
+            DailyComments.Cells[2, iCNT]:=FormatDateTimeStr(LDailyCommentFields[iCNT - 1].EntryDateTime);
+            DailyComments.Cells[3, iCNT]:=FormatDateStr(LDailyCommentFields[iCNT - 1].AgeDate);
             DailyComments.Cells[4, iCNT]:=LDailyCommentFields[iCNT - 1].UserComment;
             DailyComments.Cells[5, iCNT]:=LDailyCommentFields[iCNT - 1].UserAlias;
         end;
@@ -796,7 +818,7 @@ begin
         LGeneralCommentFields.UserAlias     :=SessionService.SessionData.AliasName;
 
         var Comments: IComments:=TComments.Create();
-        Comments.EditGeneralComment(LGeneralCommentFields, EditGeneralComment_Callback);
+        Comments.EditGeneralCommentAsync(LGeneralCommentFields, EditGeneralComment_Callback);
 
         MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TGeneralComment.fFollowUp), MainForm.sgAgeView.Row]:='';
 
@@ -834,7 +856,7 @@ begin
     LGeneralCommentFields.UserAlias     :=SessionService.SessionData.AliasName;
 
     var Comments: IComments:=TComments.Create();
-    Comments.EditGeneralComment(LGeneralCommentFields, EditGeneralComment_Callback);
+    Comments.EditGeneralCommentAsync(LGeneralCommentFields, EditGeneralComment_Callback);
 
 end;
 
@@ -849,7 +871,7 @@ begin
     LDailyCommentFields.CommentId           :=GetId.ToInteger();
     LDailyCommentFields.CompanyCode         :=CompanyCode;
     LDailyCommentFields.CustomerNumber      :=CustNumber;
-    LDailyCommentFields.AgeDate             :='2019-12-15'; // get age date!
+    LDailyCommentFields.AgeDate             :=MainForm.LoadedAgeDate;
     LDailyCommentFields.CallEvent           :=0;
     LDailyCommentFields.CallDuration        :=0;
     LDailyCommentFields.FixedStatementsSent :=0;
@@ -860,7 +882,7 @@ begin
     LDailyCommentFields.UserAlias           :=SessionService.SessionData.AliasName;
 
     var Comments: IComments:=TComments.Create();
-    Comments.EditDailyComment(LDailyCommentFields, EditDailyComment_Callback);
+    Comments.EditDailyCommentAsync(LDailyCommentFields, EditDailyComment_Callback);
 
 end;
 
@@ -898,6 +920,7 @@ begin
     end;
 
     THelpers.MsgCall(TAppMessage.Info, CallResponse.LastMessage);
+    UpdateDaily(DailyComGrid);
 
 end;
 
@@ -1197,7 +1220,7 @@ begin
 
     Screen.Cursor:=crHourGlass;
     var Documents: IDocuments:=TDocuments.Create();
-    Documents.SendAccDocumentAsync('2020-01-02', FPayLoad, SendAccDocumentAsync_Callback); // dummy age date!
+    Documents.SendAccDocumentAsync(MainForm.LoadedAgeDate, FPayLoad, SendAccDocumentAsync_Callback);
 
 end;
 
@@ -1257,7 +1280,7 @@ begin
     LDailyCommentFields.CommentId           :=0;
     LDailyCommentFields.CompanyCode         :=CompanyCode;
     LDailyCommentFields.CustomerNumber      :=CustNumber;
-    LDailyCommentFields.AgeDate             :='2019-12-15'; // get age date!
+    LDailyCommentFields.AgeDate             :=MainForm.LoadedAgeDate;
     LDailyCommentFields.CallEvent           :=0;
     LDailyCommentFields.CallDuration        :=0;
     LDailyCommentFields.FixedStatementsSent :=0;
@@ -1268,7 +1291,7 @@ begin
     LDailyCommentFields.UserAlias           :=SessionService.SessionData.AliasName;
 
     var Comments: IComments:=TComments.Create();
-    Comments.EditDailyComment(LDailyCommentFields, EditDailyComment_Callback);
+    Comments.EditDailyCommentAsync(LDailyCommentFields, EditDailyComment_Callback);
 
 end;
 

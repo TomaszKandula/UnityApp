@@ -54,7 +54,7 @@ type
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
-        procedure OpenAddressBookAsync(UserAlias: string; Callback: TOpenAddressBook; OptionalCondition: string = '');
+        procedure OpenAddressBookAsync(UserAlias: string; Callback: TOpenAddressBook);
         /// <summary>
         /// Update async. address book content and notify via given callback method that is always executed in main thread.
         /// </summary>
@@ -95,7 +95,7 @@ type
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
-        procedure OpenAddressBookAsync(UserAlias: string; Callback: TOpenAddressBook; OptionalCondition: string = '');
+        procedure OpenAddressBookAsync(UserAlias: string; Callback: TOpenAddressBook);
         /// <summary>
         /// Update async. address book content and notify via given callback method that is always executed in main thread.
         /// </summary>
@@ -141,71 +141,16 @@ uses
     DbModel{Legacy};
 
 
-procedure TAddressBook.OpenAddressBookAsync(UserAlias: string; Callback: TOpenAddressBook; OptionalCondition: string = '');
+procedure TAddressBook.OpenAddressBookAsync(UserAlias: string; Callback: TOpenAddressBook);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var CallResponse: TCallResponse;
-        var ReturnedData:=TStringGrid.Create(nil);
-        var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
-        try
 
-            try
 
-                DataTables.Columns.Add(DbModel.TAddressBook.UserAlias);
-                DataTables.Columns.Add(DbModel.TAddressBook.Scuid);
-                DataTables.Columns.Add(DbModel.TAddressBook.CustomerNumber);
-                DataTables.Columns.Add(DbModel.TAddressBook.CustomerName);
-                DataTables.Columns.Add(DbModel.TAddressBook.Emails);
-                DataTables.Columns.Add(DbModel.TAddressBook.Estatements);
-                DataTables.Columns.Add(DbModel.TAddressBook.PhoneNumbers);
-                DataTables.Columns.Add(DbModel.TAddressBook.Contact);
-                DataTables.Columns.Add(DbModel.TAddressBook.CoCode);
-                DataTables.Columns.Add(DbModel.TAddressBook.Agent);
-                DataTables.Columns.Add(DbModel.TAddressBook.Division);
 
-                if String.IsNullOrEmpty(UserAlias) and not(String.IsNullOrEmpty(OptionalCondition)) then
-                    DataTables.CustFilter:=TSql.WHERE + OptionalCondition;
 
-                if not(String.IsNullOrEmpty(UserAlias)) and String.IsNullOrEmpty(OptionalCondition) then
-                    DataTables.CustFilter:=TSql.WHERE + DbModel.TAddressBook.UserAlias + TSql.EQUAL + QuotedStr(UserAlias);
-
-                if not(String.IsNullOrEmpty(UserAlias)) and not(String.IsNullOrEmpty(OptionalCondition)) then
-                    DataTables.CustFilter:=TSql.WHERE + DbModel.TAddressBook.UserAlias + TSql.EQUAL + QuotedStr(UserAlias) + TSql._AND + OptionalCondition;
-
-                DataTables.OpenTable(DbModel.TAddressBook.AddressBook);
-
-                if not(DataTables.SqlToGrid(ReturnedData, DataTables.DataSet, True, True)) then
-                begin
-                    CallResponse.IsSucceeded:=False;
-                    CallResponse.LastMessage:='No results found in the database.';
-                end
-                else
-                begin
-                    CallResponse.IsSucceeded:=True;
-                end;
-
-            except
-                on E: Exception do
-                begin
-                    CallResponse.LastMessage:='Cannot execute. Error has been thrown: ' + E.Message;
-                    CallResponse.IsSucceeded:=False;
-                    ThreadFileLog.Log('[OpenAddressBookAsync]: Cannot execute. Error has been thrown: ' + E.Message);
-                end;
-
-            end;
-
-        finally
-            DataTables.Free();
-        end;
-
-        TThread.Synchronize(nil, procedure
-        begin
-            if Assigned(Callback) then Callback(ReturnedData, CallResponse);
-            if Assigned(ReturnedData) then ReturnedData.Free();
-        end);
 
     end);
 

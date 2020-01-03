@@ -43,7 +43,7 @@ type
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
-        procedure EditDailyComment(PayLoad: TDailyCommentFields; Callback: TEditDailyComment = nil);
+        procedure EditDailyCommentAsync(PayLoad: TDailyCommentFields; Callback: TEditDailyComment = nil);
         /// <summary>
         /// Allow to async. update general comment (either insert or update). Requires to pass database table fields as payload.
         /// Notification is always executed in main thread as long as callback is provided.
@@ -51,7 +51,7 @@ type
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
-        procedure EditGeneralComment(PayLoad: TGeneralCommentFields; Callback: TEditGeneralComment = nil);
+        procedure EditGeneralCommentAsync(PayLoad: TGeneralCommentFields; Callback: TEditGeneralComment = nil);
         /// <summary>
         /// Allow to async. retrive general comment for given company code, customer number and user alias. There is no separate notification.
         /// </summary>
@@ -74,6 +74,14 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function GetDailyCommentsAwaited(CompanyCode: integer; CustNumber: integer; UserAlias: string; var Output: TArray<TDailyCommentFields>): TCallResponse;
+        /// <summary>
+        /// Allow to async. update daily comment for given company code, customer number and age date. Unlike EditDailyComment, it will not perform insertion
+        /// if comment does not exists. Note that there is no separate notification.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        function UpdateDailyCommentAwaited(CompanyCode: integer; CustNumber: integer; AgeDate: string): TCallResponse;
     end;
 
 
@@ -90,7 +98,7 @@ type
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// Note: this method defines callback as nil be default.
         /// </remarks>
-        procedure EditDailyComment(PayLoad: TDailyCommentFields; Callback: TEditDailyComment = nil);
+        procedure EditDailyCommentAsync(PayLoad: TDailyCommentFields; Callback: TEditDailyComment = nil);
         /// <summary>
         /// Allow to async. update general comment (either insert or update). Requires to pass database table fields as payload.
         /// Notification is always executed in main thread as long as callback is provided.
@@ -99,7 +107,7 @@ type
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// Note: this method defines callback as nil be default.
         /// </remarks>
-        procedure EditGeneralComment(PayLoad: TGeneralCommentFields; Callback: TEditGeneralComment = nil);
+        procedure EditGeneralCommentAsync(PayLoad: TGeneralCommentFields; Callback: TEditGeneralComment = nil);
         /// <summary>
         /// Allow to async. retrive general comment for given company code, customer number and user alias. There is no separate notification.
         /// </summary>
@@ -122,6 +130,14 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function GetDailyCommentsAwaited(CompanyCode: integer; CustNumber: integer; UserAlias: string; var Output: TArray<TDailyCommentFields>): TCallResponse;
+        /// <summary>
+        /// Allow to async. update daily comment for given company code, customer number and age date. Unlike EditDailyComment, it will not perform insertion
+        /// if comment does not exists. Note that there is no separate notification.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        function UpdateDailyCommentAwaited(CompanyCode: integer; CustNumber: integer; AgeDate: string): TCallResponse;
     end;
 
 
@@ -150,7 +166,7 @@ uses
     Api.UserDailyCommentCheck;
 
 
-procedure TComments.EditDailyComment(PayLoad: TDailyCommentFields; Callback: TEditDailyComment = nil);
+procedure TComments.EditDailyCommentAsync(PayLoad: TDailyCommentFields; Callback: TEditDailyComment = nil);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
@@ -293,7 +309,7 @@ begin
 end;
 
 
-procedure TComments.EditGeneralComment(PayLoad: TGeneralCommentFields; Callback: TEditGeneralComment = nil);
+procedure TComments.EditGeneralCommentAsync(PayLoad: TGeneralCommentFields; Callback: TEditGeneralComment = nil);
 begin
 
     var QueryData: TGeneralCommentFields;
@@ -561,6 +577,7 @@ begin
                 var UserDailyCommentCheck:=TJson.JsonToObject<TUserDailyCommentCheck>(Restful.Content);
                 try
                     CommentExists.DoesCommentExists:=UserDailyCommentCheck.DoesCommentExists;
+                    CommentExists.UserComment:=UserDailyCommentCheck.UserComment;
                     CommentExists.CommentId:=UserDailyCommentCheck.CommentId;
                     CallResponse.IsSucceeded:=UserDailyCommentCheck.IsSucceeded;
                     CallResponse.LastMessage:=UserDailyCommentCheck.Error.ErrorDesc;
@@ -697,6 +714,60 @@ begin
     NewTask.Start();
     TTask.WaitForAll(NewTask);
     TArrayUtils<TDailyCommentFields>.Copy(TempComments, Output);
+    Result:=CallResponse;
+
+end;
+
+
+function TComments.UpdateDailyCommentAwaited(CompanyCode: integer; CustNumber: integer; AgeDate: string): TCallResponse;
+begin
+
+    var CallResponse: TCallResponse;
+    try
+
+        var DailyCommentExists: TDailyCommentExists;
+        CheckDailyCommentAwaited(
+            CompanyCode,
+            CustNumber,
+            AgeDate,
+            DailyCommentExists
+        );
+
+        var LocalPayLoad: TDailyCommentFields;
+        var ExtendedComment: string;
+
+        if not String.IsNullOrWhiteSpace(DailyCommentExists.UserComment) then
+            ExtendedComment:=DailyCommentExists.UserComment + #13#10 + 'New communication has been sent.'
+        else
+            ExtendedComment:='New communication has been sent.';
+
+        LocalPayLoad.CommentId           :=DailyCommentExists.CommentId;
+        LocalPayLoad.CompanyCode         :=CompanyCode;
+        LocalPayLoad.SourceDBName        :=THelpers.GetSourceDBName(CompanyCode.ToString, 'F');
+        LocalPayLoad.CustomerNumber      :=CustNumber;
+        LocalPayLoad.AgeDate             :=AgeDate;
+        LocalPayLoad.CallEvent           :=0;
+        LocalPayLoad.CallDuration        :=0;
+        LocalPayLoad.FixedStatementsSent :=0;
+        LocalPayLoad.CustomStatementsSent:=0;
+        LocalPayLoad.FixedRemindersSent  :=0;
+        LocalPayLoad.CustomRemindersSent :=0;
+        LocalPayLoad.UserComment         :=ExtendedComment;
+        LocalPayLoad.UserAlias           :=SessionService.SessionData.AliasName;
+
+        EditDailyCommentAsync(LocalPayLoad);
+        CallResponse.IsSucceeded:=True;
+
+    except
+        on E: Exception do
+        begin
+            CallResponse.IsSucceeded:=False;
+            CallResponse.LastMessage:='[UpdateDailyCommentAwaited]: Cannot execute the request. Description: ' + E.Message;
+            ThreadFileLog.Log(CallResponse.LastMessage);
+        end;
+
+    end;
+
     Result:=CallResponse;
 
 end;
