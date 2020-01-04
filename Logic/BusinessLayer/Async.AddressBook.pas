@@ -11,12 +11,10 @@ interface
 uses
     Winapi.Windows,
     Winapi.Messages,
-    System.SysUtils,
     System.Classes,
     System.Diagnostics,
     System.Win.ComObj,
     System.SyncObjs,
-    System.Threading,
     System.Generics.Collections,
     Vcl.Graphics,
     Vcl.ComCtrls,
@@ -132,11 +130,17 @@ implementation
 
 uses
     Handler.Database{Legacy},
+    System.SysUtils,
+    System.Threading,
+    REST.Types,
+    REST.Json,
+    Unity.RestWrapper,
     Unity.Constants,
     Unity.Helpers,
     Unity.Settings,
     Unity.EventLogger,
     Unity.SessionService,
+    Api.AddressBookList,
     Sync.Document,
     DbModel{Legacy};
 
@@ -147,10 +151,88 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
+        var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
+        Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'addressbook/';
 
+        Restful.RequestMethod:=TRESTRequestMethod.rmGET;
+        ThreadFileLog.Log('[OpenAddressBookAsync]: Executing GET ' + Restful.ClientBaseURL);
 
+        var CallResponse: TCallResponse;
+        var ReturnedData:=TStringGrid.Create(nil);
+        try
 
+            if (Restful.Execute) and (Restful.StatusCode = 200) then
+            begin
 
+                var AddressBookList:=TJson.JsonToObject<TAddressBookList>(Restful.Content);
+                try
+
+                    ReturnedData.RowCount:=Length(AddressBookList.Id) + 1{Header};
+                    ReturnedData.ColCount:=8;
+
+                    // Setup headers
+                    ReturnedData.Cells[0, 0]:='Id';
+                    ReturnedData.Cells[1, 0]:='SourceDbName';
+                    ReturnedData.Cells[2, 0]:='CustomerNumber';
+                    ReturnedData.Cells[3, 0]:='CustomerName';
+                    ReturnedData.Cells[4, 0]:='ContactPerson';
+                    ReturnedData.Cells[5, 0]:='RegularEmails';
+                    ReturnedData.Cells[6, 0]:='StatementEmails';
+                    ReturnedData.Cells[7, 0]:='PhoneNumbers';
+
+                    for var iCNT:=1 to ReturnedData.RowCount - 1 do
+                    begin
+                        ReturnedData.Cells[0, iCNT]:=AddressBookList.Id[iCNT - 1].ToString();
+                        ReturnedData.Cells[1, iCNT]:=AddressBookList.SourceDbName[iCNT - 1];
+                        ReturnedData.Cells[2, iCNT]:=AddressBookList.CustomerNumber[iCNT - 1].ToString();
+                        ReturnedData.Cells[3, iCNT]:=AddressBookList.CustomerName[iCNT - 1];
+                        ReturnedData.Cells[4, iCNT]:=AddressBookList.ContactPerson[iCNT - 1];
+                        ReturnedData.Cells[5, iCNT]:=AddressBookList.RegularEmails[iCNT - 1];
+                        ReturnedData.Cells[6, iCNT]:=AddressBookList.StatementEmails[iCNT - 1];
+                        ReturnedData.Cells[7, iCNT]:=AddressBookList.PhoneNumbers[iCNT - 1];
+                    end;
+
+                    CallResponse.IsSucceeded:=True;
+                    CallResponse.ReturnedCode:=Restful.StatusCode;
+                    ThreadFileLog.Log('[OpenAddressBookAsync]: Returned status code is ' + Restful.StatusCode.ToString());
+
+                finally
+                    AddressBookList.Free();
+                end;
+
+            end
+            else
+            begin
+
+                if not String.IsNullOrEmpty(Restful.ExecuteError) then
+                    CallResponse.LastMessage:='[OpenAddressBookAsync]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                else
+                    if String.IsNullOrEmpty(Restful.Content) then
+                        CallResponse.LastMessage:='[OpenAddressBookAsync]: Invalid server response. Please contact IT Support.'
+                    else
+                        CallResponse.LastMessage:='[OpenAddressBookAsync]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+
+                CallResponse.ReturnedCode:=Restful.StatusCode;
+                CallResponse.IsSucceeded:=False;
+                ThreadFileLog.Log(CallResponse.LastMessage);
+
+            end;
+
+        except on
+            E: Exception do
+            begin
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[OpenAddressBookAsync]: Cannot execute the request. Description: ' + E.Message;
+                ThreadFileLog.Log(CallResponse.LastMessage);
+            end;
+
+        end;
+
+        TThread.Synchronize(nil, procedure
+        begin
+            if Assigned(Callback) then Callback(ReturnedData, CallResponse);
+            if Assigned(ReturnedData) then ReturnedData.Free();
+        end);
 
     end);
 

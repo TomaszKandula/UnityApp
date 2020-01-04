@@ -372,8 +372,8 @@ begin
 
     OutputDebugString(PChar(Conditions));
 
-    var AddressBook: IAddressBook:=TAddressBook.Create();
-    AddressBook.OpenAddressBookAsync('', OpenAddressBookAsync_Callback, Conditions);
+    //var AddressBook: IAddressBook:=TAddressBook.Create();
+    //AddressBook.OpenAddressBookAsync('', OpenAddressBookAsync_Callback, Conditions);
 
 end;
 

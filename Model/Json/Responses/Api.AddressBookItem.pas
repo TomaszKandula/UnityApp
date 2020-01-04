@@ -24,7 +24,7 @@ type
     {$TYPEINFO ON}
     strict private
         var FSourceDbName:    string;
-        var FCustomerNumber:  integer;
+        var FCustomerNumber:  Int64;
         var FCustomerName:    string;
         var FContactPerson:   string;
         var FRegularEmails:   string;
@@ -35,7 +35,7 @@ type
     public
         destructor Destroy(); override;
         property SourceDbName:    string        read FSourceDbName    write FSourceDbName;
-        property CustomerNumber:  integer       read FCustomerNumber  write FCustomerNumber;
+        property CustomerNumber:  Int64         read FCustomerNumber  write FCustomerNumber;
         property CustomerName:    string        read FCustomerName    write FCustomerName;
         property ContactPerson:   string        read FContactPerson   write FContactPerson;
         property RegularEmails:   string        read FRegularEmails   write FRegularEmails;

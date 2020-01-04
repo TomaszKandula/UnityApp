@@ -9,18 +9,11 @@ interface
 
 
 uses
-    System.SysUtils,
-    System.Types,
-    System.UITypes,
     System.Classes,
-    System.Variants,
     System.Generics.Collections,
     REST.Types,
-    REST.Consts,
-    REST.Json,
-    REST.Client,
     REST.Authenticator.Basic,
-    IPPeerClient;
+    REST.Client;
 
 
 type
@@ -31,31 +24,31 @@ type
     /// </summary>
     IRESTFul = Interface(IInterface)
     ['{3A64616D-26BE-44F8-80C8-F69DE813D439}']
-        function  GetExecuteError(): string;
-        function  GetStatusCode(): integer;
-        function  GetCustomBody(): string;
-        function  GetContent(): string;
-        function  GetHeaders(): string;
-        function  GethttpAuthUsername(): string;
-        function  GethttpAuthPassword(): string;
-        function  GetClientAccept(): string;
-        function  GetClientAcceptCharset(): string;
-        function  GetClientAllowCookies(): boolean;
-        function  GetClientAutoCreateParams(): boolean;
-        function  GetClientBaseURL(): string;
-        function  GetClientContentType(): string;
-        function  GetClientFallbackCharsetEncoding(): string;
-        function  GetClientHandleRedirects(): boolean;
-        function  GetClientRaiseExceptionOn500(): boolean;
-        function  GetClientSynchronizedEvents(): boolean;
-        function  GetClientUserAgent(): string;
-        function  GetRequestAccept(): string;
-        function  GetRequestAcceptCharset(): string;
-        function  GetRequestAutoCreateParams(): boolean;
-        function  GetRequestHandleRedirects(): boolean;
-        function  GetRequestMethod(): TRESTRequestMethod;
-        function  GetRequestSynchronizedEvents(): boolean;
-        function  GetRequestTimeout(): integer;
+        function GetExecuteError(): string;
+        function GetStatusCode(): integer;
+        function GetCustomBody(): string;
+        function GetContent(): string;
+        function GetHeaders(): string;
+        function GethttpAuthUsername(): string;
+        function GethttpAuthPassword(): string;
+        function GetClientAccept(): string;
+        function GetClientAcceptCharset(): string;
+        function GetClientAllowCookies(): boolean;
+        function GetClientAutoCreateParams(): boolean;
+        function GetClientBaseURL(): string;
+        function GetClientContentType(): string;
+        function GetClientFallbackCharsetEncoding(): string;
+        function GetClientHandleRedirects(): boolean;
+        function GetClientRaiseExceptionOn500(): boolean;
+        function GetClientSynchronizedEvents(): boolean;
+        function GetClientUserAgent(): string;
+        function GetRequestAccept(): string;
+        function GetRequestAcceptCharset(): string;
+        function GetRequestAutoCreateParams(): boolean;
+        function GetRequestHandleRedirects(): boolean;
+        function GetRequestMethod(): TRESTRequestMethod;
+        function GetRequestSynchronizedEvents(): boolean;
+        function GetRequestTimeout(): integer;
         procedure SetCustomBody(NewValue: string);
         procedure SetClientAccept(NewValue: string);
         procedure SetClientAcceptCharset(NewValue: string);
@@ -100,7 +93,7 @@ type
         property RequestMethod: TRESTRequestMethod read GetRequestMethod write SetRequestMethod;
         property RequestSynchronizedEvents: boolean read GetRequestSynchronizedEvents write SetRequestSynchronizedEvents;
         property RequestTimeout: integer read GetRequestTimeout write SetRequestTimeout;
-        function  Execute: boolean;
+        function Execute: boolean;
         procedure AddParameter(QueryName: string; ParamValue: string);
         procedure ClearParameters;
     end;
@@ -213,12 +206,15 @@ type
         const restAccept        = 'application/json, text/plain; q=0.9, text/html;q=0.8,';
         const restAcceptCharset = 'UTF-8, *;q=0.8';
         const restContentType   = 'application/json';
-        const restEncoding      = 'UTF-8';
         const restUserAgent     = 'Unity RESTClient/1.0';
     end;
 
 
 implementation
+
+
+uses
+    System.SysUtils;
 
 
 constructor TRESTful.Create(UserName: string; Password: string);
@@ -246,7 +242,6 @@ begin
     ClientAutoCreateParams       :=True;
     ClientBaseURL                :=TRestAuth.restApiBaseUrl;
     ClientContentType            :=TRestAuth.restContentType;
-    ClientFallbackCharsetEncoding:=TRestAuth.restEncoding;
     ClientHandleRedirects        :=True;
     ClientRaiseExceptionOn500    :=True;
     ClientSynchronizedEvents     :=True;

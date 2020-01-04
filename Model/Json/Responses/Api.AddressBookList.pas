@@ -25,7 +25,7 @@ type
     strict private
         var FId:              TArray<integer>;
         var FSourceDbName:    TArray<string>;
-        var FCustomerNumber:  TArray<integer>;
+        var FCustomerNumber:  TArray<Int64>;
         var FCustomerName:    TArray<string>;
         var FContactPerson:   TArray<string>;
         var FRegularEmails:   TArray<string>;
@@ -37,7 +37,7 @@ type
         destructor Destroy(); override;
         property Id:              TArray<integer> read FId              write FId;
         property SourceDbName:    TArray<string>  read FSourceDbName    write FSourceDbName;
-        property CustomerNumber:  TArray<integer> read FCustomerNumber  write FCustomerNumber;
+        property CustomerNumber:  TArray<Int64>   read FCustomerNumber  write FCustomerNumber;
         property CustomerName:    TArray<string>  read FCustomerName    write FCustomerName;
         property ContactPerson:   TArray<string>  read FContactPerson   write FContactPerson;
         property RegularEmails:   TArray<string>  read FRegularEmails   write FRegularEmails;
