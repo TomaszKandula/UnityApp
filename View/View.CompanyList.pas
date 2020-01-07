@@ -105,8 +105,6 @@ procedure TCompanyListForm.RequestAgeReport();
 begin
 
     var SelectedCoCodes: string;{Legacy}
-    var SelectionList:=TList<integer>.Create();
-
     var ListEnd:=FilterList.Count - 1;
 
     for var iCNT:=0 to ListEnd do
@@ -114,7 +112,7 @@ begin
 
         if FilterList.Checked[iCNT] = True then
         begin
-            SelectionList.Add(GetCoCodeOnly(FilterList.Items[iCNT]).ToInteger);
+            MainForm.LoadedCompanies.Add(GetCoCodeOnly(FilterList.Items[iCNT]));
             SelectedCoCodes:=SelectedCoCodes + GetCoCodeOnly(FilterList.Items[iCNT]) + ','{Legacy}
         end;
 
@@ -131,8 +129,7 @@ begin
 
     var Accounts: IAccounts:=TAccounts.Create();
     var CallResponse: TCallResponse;
-    CallResponse:=Accounts.SaveUserCompanyListAwaited(SelectionList);
-    SelectionList.Free();
+    CallResponse:=Accounts.SaveUserCompanyListAwaited(MainForm.LoadedCompanies);
 
     if not CallResponse.IsSucceeded then
     begin

@@ -27,6 +27,7 @@ uses
     System.Win.ComObj,
     System.UITypes,
     System.ImageList,
+    System.Generics.Collections,
     Vcl.Graphics,
     Vcl.Controls,
     Vcl.Forms,
@@ -283,9 +284,6 @@ type
         Action_Cut: TMenuItem;
         Action_DelRow: TMenuItem;
         N10: TMenuItem;
-        N11: TMenuItem;
-        Action_ShowAsIs: TMenuItem;
-        Action_ShowMyEntries: TMenuItem;
         Action_ToExce: TMenuItem;
         N13: TMenuItem;
         FileXLExport: TSaveDialog;
@@ -508,6 +506,10 @@ type
         Action_ClearCoockies: TMenuItem;
         Action_ClearCache: TMenuItem;
         imgOFF2: TImage;
+        BevelSepLine: TBevel;
+        txtInfoLine1: TLabel;
+        txtInfoLine2: TLabel;
+        txtInfoLine3: TLabel;
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
@@ -613,8 +615,6 @@ type
         procedure Action_PasteClick(Sender: TObject);
         procedure Action_DelRowClick(Sender: TObject);
         procedure PopupBookPopup(Sender: TObject);
-        procedure Action_ShowAsIsClick(Sender: TObject);
-        procedure Action_ShowMyEntriesClick(Sender: TObject);
         procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
         procedure Action_ToExceClick(Sender: TObject);
         procedure sgAgeViewColumnMoved(Sender: TObject; FromIndex, ToIndex: Integer);
@@ -781,6 +781,7 @@ type
             var client: ICefClient; var settings: TCefBrowserSettings; var noJavascriptAccess: Boolean; var Result: Boolean);
     strict private
         const FPermitCheckTimeout = 120000;
+        var FLoadedCompanies: TList<string>;
         var FLoadedAgeDate: string;
         var FRedeemOnReload: boolean;
         var FPermitCheckTimer: integer;
@@ -788,7 +789,7 @@ type
         var FLastCoCodesSelected: string;
         var FHadFirstLoad: boolean;
         var FAllowClose: boolean;
-        var FAbUpdateFields: TAddressBookUpdateFields;
+        //var FAbUpdateFields: TAddressBookUpdateFields;
         const AppMenuTextSelected = $006433C9;
         const AppMenuTextNormal = clGrayText;
         const AppButtonTxtNormal = $00555555;
@@ -835,8 +836,9 @@ type
         procedure StartMainWnd();
         procedure SwitchTimers(State: TAppTimers);
         procedure UpdateStatusBar(Text: string);
-        procedure LoadAgeReport(SelectedCoCodes: string);
+        procedure LoadAgeReport(SelectedCoCodes: string{Legacy argument/to be deleted});
         property LoadedAgeDate: string read FLoadedAgeDate;
+        property LoadedCompanies: TList<string> read FLoadedCompanies;
     end;
 
 
@@ -1573,7 +1575,8 @@ begin
 
     finally
         sgAddressBook.Freeze(False);
-        sgAddressBook.SetColWidth(40, 10, 400);
+        sgAddressBook.SetColWidth(10, 20, 400);
+        sgAddressBook.ColWidths[1]:=-1;
     end;
 
     MainForm.UpdateStatusBar(TStatusBar.Ready);
@@ -2134,6 +2137,7 @@ end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
+    FLoadedCompanies:=TList<string>.Create();
     FIsAppMenuLocked:=True;
     FAllowClose:=False;
     ClearMainViewInfo();
@@ -2260,6 +2264,9 @@ begin
                 FreeAndNil(SessionService.FDbConnect);
             end;
 
+            if Assigned(FLoadedCompanies) then
+                FLoadedCompanies.Free();
+
             FAllowClose:=False;
             CanClose:=not FAllowClose;
             StartupForm.Close();
@@ -2330,7 +2337,12 @@ begin
         end;
 
     finally
-        sgAgeView.SaveLayout(TConfigSections.ColumnWidthName, TConfigSections.ColumnOrderName, TConfigSections.ColumnNames, TConfigSections.ColumnPrefix);
+        sgAgeView.SaveLayout(
+            TConfigSections.ColumnWidthName,
+            TConfigSections.ColumnOrderName,
+            TConfigSections.ColumnNames,
+            TConfigSections.ColumnPrefix
+        );
         SetLength(Temp, 0);
     end;
 
@@ -2790,15 +2802,11 @@ end;
 procedure TMainForm.PopupBookPopup(Sender: TObject);
 begin
 
-    Action_ShowMyEntries.Caption:='Show ' + UpperCase(SessionService.SessionData.AliasName) + ' entries';
-
     Action_Cut.Enabled          :=True;
     Action_Copy.Enabled         :=True;
     Action_Paste.Enabled        :=True;
     Action_DelRow.Enabled       :=True;
     Action_SearchBook.Enabled   :=True;
-    Action_ShowAsIs.Enabled     :=True;
-    Action_ShowMyEntries.Enabled:=True;
     Action_ColumnWidth.Enabled  :=True;
 
     // Check if user select a range (we allow to delete only one line at the time)
@@ -2812,8 +2820,6 @@ begin
         Action_Paste.Enabled        :=False;
         Action_DelRow.Enabled       :=False;
         Action_SearchBook.Enabled   :=False;
-        Action_ShowAsIs.Enabled     :=False;
-        Action_ShowMyEntries.Enabled:=False;
         Action_ColumnWidth.Enabled  :=False;
     end;
 
@@ -3028,44 +3034,27 @@ end;
 
 procedure TMainForm.Action_DelRowClick(Sender: TObject);
 begin
-
-    if THelpers.MsgCall(TAppMessage.Question2, 'Are you sure you want to delete this customer?' + TChars.CRLF + 'This operation cannot be reverted.') = IDNO
-        then Exit();
-
-    var AddressBook: IAddressBook:=TAddressBook.Create();
-
-    if AddressBook.DelFromAddressBookAwaited(sgAddressBook.Cells[2, sgAddressBook.Row]) then
-    begin
-        sgAddressBook.DeleteRowFrom(1, 1)
-    end
-    else
-    begin
-        THelpers.MsgCall(TAppMessage.Error, 'Cannot delete selected row. Please contact IT support.');
-        ThreadFileLog.Log('[Action_DelRowClick]: Cannot delete selected row.');
-    end;
-
+    THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in beta version.');
+//    if THelpers.MsgCall(TAppMessage.Question2, 'Are you sure you want to delete this customer?' + TChars.CRLF + 'This operation cannot be reverted.') = IDNO
+//        then Exit();
+//
+//    var AddressBook: IAddressBook:=TAddressBook.Create();
+//
+//    if AddressBook.DelFromAddressBookAwaited(sgAddressBook.Cells[2, sgAddressBook.Row]) then
+//    begin
+//        sgAddressBook.DeleteRowFrom(1, 1)
+//    end
+//    else
+//    begin
+//        THelpers.MsgCall(TAppMessage.Error, 'Cannot delete selected row. Please contact IT support.');
+//        ThreadFileLog.Log('[Action_DelRowClick]: Cannot delete selected row.');
+//    end;
 end;
 
 
 procedure TMainForm.Action_SearchBookClick(Sender: TObject);
 begin
-    THelpers.WndCall(SqlSearchForm, TWindowState.Modeless);
-end;
-
-
-procedure TMainForm.Action_ShowAsIsClick(Sender: TObject);
-begin
-    UpdateStatusBar(TStatusBar.Processing);
-    var AddressBook: IAddressBook:=TAddressBook.Create();
-    AddressBook.OpenAddressBookAsync('', OpenAddressBook_Callback);
-end;
-
-
-procedure TMainForm.Action_ShowMyEntriesClick(Sender: TObject);
-begin
-    UpdateStatusBar(TStatusBar.Processing);
-    var AddressBook: IAddressBook:=TAddressBook.Create();
-    AddressBook.OpenAddressBookAsync(SessionService.SessionData.AliasName, OpenAddressBook_Callback);
+    THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in beta version.');
 end;
 
 
@@ -3185,7 +3174,15 @@ end;
 
 procedure TMainForm.Action_MassMailerClick(Sender: TObject);
 begin
+
+    if (sgAgeView.Selection.Top - sgAgeView.Selection.Bottom) = 0 then
+    begin
+        THelpers.MsgCall(TAppMessage.Warn, 'Please select more than one customer.');
+        Exit();
+    end;
+
     THelpers.WndCall(MassMailerForm, TWindowState.Modal);
+
 end;
 
 
@@ -3773,21 +3770,21 @@ begin
     sgAddressBook.SetUpdatedRow(0);
     UpdateStatusBar(TStatusBar.Processing);
     var AddressBook: IAddressBook:=TAddressBook.Create();
-    AddressBook.OpenAddressBookAsync('', OpenAddressBook_Callback);
+    AddressBook.OpenAddressBookAsync('', OpenAddressBook_Callback, LoadedCompanies);
 end;
 
 
 procedure TMainForm.btnUpdateAbClick(Sender: TObject);
 begin
 
-    if not(sgAddressBook.Visible) then
-    begin
-        THelpers.MsgCall(TAppMessage.Warn, 'Please open Address Book first.');
-        Exit();
-    end;
-
-    var AddressBook: IAddressBook:=TAddressBook.Create();
-    AddressBook.UpdateAddressBookAsync(sgAddressBook, FAbUpdateFields, UpdateAddressBook_Callback);
+//    if not(sgAddressBook.Visible) then
+//    begin
+//        THelpers.MsgCall(TAppMessage.Warn, 'Please open Address Book first.');
+//        Exit();
+//    end;
+//
+//    var AddressBook: IAddressBook:=TAddressBook.Create();
+//    AddressBook.UpdateAddressBookAsync(sgAddressBook, FAbUpdateFields, UpdateAddressBook_Callback);
 
 end;
 

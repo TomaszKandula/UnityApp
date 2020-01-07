@@ -85,7 +85,6 @@ implementation
 
 
 uses
-    View.Main,
     Unity.Constants;
 
 

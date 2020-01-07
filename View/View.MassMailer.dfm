@@ -761,23 +761,25 @@ object MassMailerForm: TMassMailerForm
     object PanelEmailContainer: TPanel
       AlignWithMargins = True
       Left = 20
-      Top = 20
+      Top = 130
       Width = 645
-      Height = 658
+      Height = 548
       Margins.Left = 20
-      Margins.Top = 20
+      Margins.Top = 130
       Margins.Right = 20
       Margins.Bottom = 20
       Align = alClient
       BevelOuter = bvNone
       Caption = 'PanelEmailContainer'
       TabOrder = 0
+      ExplicitTop = 100
+      ExplicitHeight = 578
       object CustomerList: TListView
         AlignWithMargins = True
         Left = 5
         Top = 5
         Width = 635
-        Height = 648
+        Height = 538
         Margins.Left = 5
         Margins.Top = 5
         Margins.Right = 5
@@ -792,6 +794,98 @@ object MassMailerForm: TMassMailerForm
         TabStop = False
         ViewStyle = vsReport
         OnKeyUp = CustomerListKeyUp
+        ExplicitHeight = 648
+      end
+    end
+    object GroupEmails: TGroupBox
+      Left = 25
+      Top = 20
+      Width = 640
+      Height = 88
+      Caption = 'E-mails'
+      TabOrder = 1
+      object txtSendFrom: TLabel
+        Left = 200
+        Top = 29
+        Width = 53
+        Height = 13
+        Caption = 'Send from:'
+      end
+      object btnApply: TSpeedButton
+        Left = 538
+        Top = 34
+        Width = 87
+        Height = 27
+        Cursor = crHandPoint
+        Caption = 'Apply'
+        Flat = True
+        Glyph.Data = {
+          36030000424D3603000000000000360000002800000010000000100000000100
+          18000000000000030000C40E0000C40E00000000000000000000FFFFFFFFFFFF
+          FFFFFFFFFFFFEEF6EB8CC17752A33437941437941452A2338BC177EEF6EBFFFF
+          FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF78B7611B85002E8F0934931137
+          94143794143493112E8F091B850077B65FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+          4DA02D288C03379414379414288C03349311389515389515389515379414298D
+          034B9F2BFFFFFFFFFFFFFFFFFF79B761288C03389515379414208800D1E6CB3F
+          991F349311389515389515389515389515298D0377B65FFFFFFFEFF6EC1B8500
+          3794143895152B8E066BB053FFFFFFA6D098298D033895153895153895153895
+          153794141B8500EEF5EB8DC2792E8F093895152F900B3B9619FFFFFFFFFFFFFF
+          FFFF268B003694133895153895153895153895152E8F098BC17753A335349310
+          2E9009399518FFFFFFFFFFFFF6FAF5FFFFFF98C887298D033895153895153895
+          1538951534931152A23338951532910E5DA942FFFFFFFFFFFFEDF5EB479D29FF
+          FFFFFFFFFF2B8E07359311389515389515389515379414379414389515349311
+          3D981CFFFFFFFFFFFF3C971B198400ECF5EAFFFFFFD2E7CC1A85003794143895
+          1538951537941437941454A33634931031910D4B9F2D3C971B31910D31910C5D
+          A841FFFFFFFFFFFFA5CF971C860037941438951534931152A2348DC2792D8F09
+          389515349310359311389515379514218800C7E1BFFFFFFFFFFFFFB7D9AC1C86
+          003493112E8F098CC177F0F7ED1B850037941438951538951538951538951536
+          9413238900EFF6EDFFFFFFFFFFFFF4F9F3419A20198400EEF6EBFFFFFF7AB863
+          288C02389515389515389515389515389515359311228900C9E2C1FFFFFFEEF6
+          ED23890077B65FFFFFFFFFFFFFFFFFFF4EA12F288C0237941438951538951538
+          951538951536941320880078B7621D86004A9E2AFFFFFFFFFFFFFFFFFFFFFFFF
+          FFFFFF7AB8631B85002D8F093493103794143794143493102E8F0914810078B7
+          60FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0F7ED8DC27954A33638
+          951538951553A3358DC279EFF6ECFFFFFFFFFFFFFFFFFFFFFFFF}
+      end
+      object cbUserInCopy: TCheckBox
+        Left = 24
+        Top = 29
+        Width = 145
+        Height = 17
+        Caption = 'Include me in the copy'
+        Color = clWhite
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = 5592405
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        ParentColor = False
+        ParentFont = False
+        TabOrder = 0
+      end
+      object cbCtrlStatusOff: TCheckBox
+        Left = 24
+        Top = 52
+        Width = 145
+        Height = 17
+        Caption = 'Hide control status column'
+        Color = clWhite
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clWindowText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        ParentColor = False
+        ParentFont = False
+        TabOrder = 1
+      end
+      object selSendFrom: TComboBox
+        Left = 199
+        Top = 48
+        Width = 130
+        Height = 21
+        Style = csDropDownList
+        TabOrder = 2
       end
     end
   end

@@ -20,7 +20,7 @@ type
 
 
     /// <summary>
-    /// Exposes properties and methods to deal with REST API, to obtain and send/receive data to/from WebApi service.
+    /// Exposes properties and methods that allows easy utilisation of WebApi service throught REST.
     /// </summary>
     IRESTFul = Interface(IInterface)
     ['{3A64616D-26BE-44F8-80C8-F69DE813D439}']
@@ -100,7 +100,7 @@ type
 
 
     /// <summary>
-    /// Simple wrapper for REST Client, REST Response, REST Request and HTTPBasicAuthentication.
+    /// Implementation of simple wrapper around REST Client, REST Response, REST Request and HTTPBasicAuthentication classes.
     /// </summary>
     TRESTful = class(TInterfacedObject, IRESTFul)
     {$TYPEINFO ON}

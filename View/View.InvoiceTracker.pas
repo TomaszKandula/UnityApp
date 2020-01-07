@@ -32,7 +32,7 @@ uses
 type
 
 
-    TTrackerForm = class(TForm) // WARNING! this class has serious logic flaw! Refactor it!
+    TTrackerForm = class(TForm)//do not use it until refactored completly!
         Label6: TLabel;
         ListEmailFrom: TComboBox;
         TextReminder1: TLabeledEdit;
@@ -260,11 +260,11 @@ end;
 
 procedure TTrackerForm.GetEmailAddress(Scuid: string);
 begin
-    var AddressBook: IAddressBook:=TAddressBook.Create();
-    var CustomerDetails: TCustomerDetails;
-    CustomerDetails:=AddressBook.GetCustomerDetailsAwaited(Scuid);
-    FReminderMail :=CustomerDetails.CustMailGen;
-    FStatementMail:=CustomerDetails.CustMailStat;
+//    var AddressBook: IAddressBook:=TAddressBook.Create();
+//    var CustomerDetails: TCustomerDetails;
+//    CustomerDetails:=AddressBook.GetCustomerDetailsAwaited(Scuid);
+//    FReminderMail :=CustomerDetails.CustMailGen;
+//    FStatementMail:=CustomerDetails.CustMailStat;
 end;
 
 

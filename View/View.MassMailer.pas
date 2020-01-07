@@ -78,6 +78,12 @@ type
         ImgCover: TImage;
         btnDelBegin: TSpeedButton;
         btnDelEnd: TSpeedButton;
+        GroupEmails: TGroupBox;
+        txtSendFrom: TLabel;
+        cbUserInCopy: TCheckBox;
+        cbCtrlStatusOff: TCheckBox;
+        selSendFrom: TComboBox;
+        btnApply: TSpeedButton;
         procedure FormCreate(Sender: TObject);
         procedure FormDestroy(Sender: TObject);
         procedure FormShow(Sender: TObject);
@@ -129,7 +135,6 @@ uses
     View.Main,
     View.Calendar,
     View.Actions,
-    Handler.Sql{Legacy},
     DbModel{Legacy},
     Unity.Enums,
     Unity.Helpers,
@@ -162,14 +167,7 @@ begin
     var Item: TListItem;
     CustomerList.Clear();
 
-    if (MainForm.sgAgeView.Selection.Top - MainForm.sgAgeView.Selection.Bottom) = 0 then
-    begin
-        THelpers.MsgCall(TAppMessage.Warn, 'Please select more than one customer.');
-        Exit();
-    end;
-
-    // Many customers
-    for var iCNT: integer:=MainForm.sgAgeView.Selection.Top to MainForm.sgAgeView.Selection.Bottom do
+    for var iCNT:=MainForm.sgAgeView.Selection.Top to MainForm.sgAgeView.Selection.Bottom do
     begin
 
         if MainForm.sgAgeView.RowHeights[iCNT] <> MainForm.sgAgeView.sgRowHidden then
@@ -177,22 +175,13 @@ begin
 
             Item:=MassMailerForm.CustomerList.Items.Add();
             Item.Caption:=IntToStr(iCNT);
-            Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerName), iCNT]);
+
             Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerNumber), iCNT]);
+            Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerName), iCNT]);
             Item.SubItems.Add('No');
             Item.SubItems.Add('Not found!');
             Item.SubItems.Add('Not found!');
-            Item.SubItems.Add('n/a');
-            Item.SubItems.Add('n/a');
-            Item.SubItems.Add('n/a');
             Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCoCode), iCNT]);
-            Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fAgent), iCNT]);
-            Item.SubItems.Add(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCuid), iCNT]);
-            Item.SubItems.Add(
-                MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerNumber), iCNT] +
-                THelpers.CoConvert(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCoCode), iCNT])
-            );
-
             Item.SubItems.Add('empty');
 
         end;
@@ -204,54 +193,49 @@ end;
 
 function TMassMailerForm.GetEmailAddress(Scuid: string): string;
 begin
-    var AddressBook: IAddressBook:=TAddressBook.Create();
-    var CustomerDetails: TCustomerDetails;
-    CustomerDetails:=AddressBook.GetCustomerDetailsAwaited(Scuid);
-    Result:=CustomerDetails.CustMailStat;
+//    var AddressBook: IAddressBook:=TAddressBook.Create();
+//    var CustomerDetails: TCustomerDetails;
+//    CustomerDetails:=AddressBook.GetCustomerDetailsAwaited(Scuid);
+//    Result:=CustomerDetails.CustMailStat;
 end;
 
 
 procedure TMassMailerForm.SetEmailAddresses(List: TListView);
 begin
-
-    var EmailAddress: string;
-
-    if List.Items.Count > 0 then
-    begin
-        for var iCNT: integer:=0 to List.Items.Count - 1 do
-        begin
-            EmailAddress:=GetEmailAddress(List.Items[iCNT].SubItems[11]);
-
-            if not(string.IsNullOrEmpty(EmailAddress)) then
-                List.Items[iCNT].SubItems[4]:=EmailAddress
-
-        end;
-    end;
-
+//    var EmailAddress: string;
+//
+//    if List.Items.Count > 0 then
+//    begin
+//        for var iCNT: integer:=0 to List.Items.Count - 1 do
+//        begin
+//            EmailAddress:=GetEmailAddress(List.Items[iCNT].SubItems[11]);
+//
+//            if not(string.IsNullOrEmpty(EmailAddress)) then
+//                List.Items[iCNT].SubItems[4]:=EmailAddress
+//
+//        end;
+//    end;
 end;
 
 
 procedure TMassMailerForm.UpdateCompanyData(Source: TListView);
-
-    function InputText(Text: string): string;
-    begin
-        if String.IsNullOrEmpty(Text) then
-            Result:=TUnknown.NotFound
-        else
-            Result:=Text;
-    end;
-
+//    function InputText(Text: string): string;
+//    begin
+//        if String.IsNullOrEmpty(Text) then
+//            Result:=TUnknown.NotFound
+//        else
+//            Result:=Text;
+//    end;
 begin
-
-    if Source.Items.Count > 0 then
-    begin
-
-        for var iCNT: integer:=0 to Source.Items.Count - 1 do
-        begin
-
-            var CoCode: string:=Source.Items[iCNT].SubItems[8];
-            var Branch: string:=Source.Items[iCNT].SubItems[9];
-
+//    if Source.Items.Count > 0 then
+//    begin
+//
+//        for var iCNT: integer:=0 to Source.Items.Count - 1 do
+//        begin
+//
+//            var CoCode: string:=Source.Items[iCNT].SubItems[8];
+//            var Branch: string:=Source.Items[iCNT].SubItems[9];
+//
 //            var Companies: ICompanies:=TCompanies.Create();
 //            var CompanyDetails: TCompanyDetails;
 //            CompanyDetails:=Companies.GetCompanyDetailsAwaited(CoCode, Branch);
@@ -261,11 +245,10 @@ begin
 //            Source.Items[iCNT].SubItems[7] :=InputText(CompanyDetails.LbuPhone);
 //            Source.Items[iCNT].SubItems[3] :=InputText(CompanyDetails.LbuEmail);
 //            Source.Items[iCNT].SubItems[12]:=InputText(CompanyDetails.LbuBanks);
-
-        end;
-
-    end;
-
+//
+//        end;
+//
+//    end;
 end;
 
 
@@ -373,75 +356,25 @@ begin
 
     var lsColumns: TListColumn;
 
-    // Row number from Age View
-    lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Lp';
-    lsColumns.Width  :=40;
+    for var iCNT:=0 to 7 do
+    begin
 
-    // From Age View (0)
-    lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Customer name';
-    lsColumns.Width  :=150;
+        lsColumns:=CustomerList.Columns.Add;
 
-    // From Age View (1)
-    lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Customer number';
-    lsColumns.Width  :=100;
+        case iCNT of
+            0: lsColumns.Caption:='Lp';
+            1: lsColumns.Caption:='Customer number';
+            2: lsColumns.Caption:='Customer name';
+            3: lsColumns.Caption:='Is sent?';
+            4: lsColumns.Caption:='Send from';
+            5: lsColumns.Caption:='Send to';
+            6: lsColumns.Caption:='SourceDbName';
+            7: lsColumns.Caption:='BanksHtml';
+        end;
 
-    // Own indicator 4 (2)
-    lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Is sent?';
-    lsColumns.Width  :=80;
+    end;
 
-    // From Company Data 2 (3)
-    lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Send from';
-    lsColumns.Width  :=100;
-
-    // From Address Book 3 (4)
-    lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='Send to';
-    lsColumns.Width  :=100;
-
-    // From Company Data (5)
-    lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='LBU name';
-    lsColumns.Width  :=80;
-
-    // From Company Data 6
-    lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='LBU address';
-    lsColumns.Width  :=150;
-
-    // From Compant Data (7)
-    lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='LBU telephone';
-    lsColumns.Width  :=100;
-
-    // From Age View (8)
-    lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='LBU number';
-    lsColumns.Width  :=80;
-
-    // From Age View (9)
-    lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='LBU agent';
-    lsColumns.Width  :=80;
-
-    // From Age View (10)
-    lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='CUID';
-    lsColumns.Width  :=80;
-
-    // Assembled from Age View data (11)
-    lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='SCUID';
-    lsColumns.Width  :=80;
-
-    // From Company Data (12)
-    lsColumns:=CustomerList.Columns.Add;
-    lsColumns.Caption:='BanksHtml';
-    lsColumns.Width  :=0;
+    lsColumns.AutoSize:=True;
 
     PanelEmailContainer.Borders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
     PanelSubject.Borders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
@@ -477,7 +410,7 @@ begin
             // so it wil not interfere when user sends the data.
             // ----------------------------------------------------------------------------------------
             LoadFromGrid();
-            SetEmailAddresses(CustomerList);
+            //SetEmailAddresses(CustomerList);
             UpdateCompanyData(CustomerList);
 
             MainForm.TimerCustOpenItems.Enabled:=False;

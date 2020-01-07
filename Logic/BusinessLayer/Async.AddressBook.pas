@@ -9,19 +9,8 @@ interface
 
 
 uses
-    Winapi.Windows,
-    Winapi.Messages,
     System.Classes,
-    System.Diagnostics,
-    System.Win.ComObj,
-    System.SyncObjs,
     System.Generics.Collections,
-    Vcl.Graphics,
-    Vcl.ComCtrls,
-    Vcl.Dialogs,
-    Data.Win.ADODB,
-    Data.DB,
-    Handler.Sql,
     Unity.Grid,
     Unity.Enums,
     Unity.Records;
@@ -52,35 +41,35 @@ type
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
-        procedure OpenAddressBookAsync(UserAlias: string; Callback: TOpenAddressBook);
+        procedure OpenAddressBookAsync(UserAlias: string; Callback: TOpenAddressBook; LoadedCompanies: TList<string> = nil);
         /// <summary>
         /// Update async. address book content and notify via given callback method that is always executed in main thread.
         /// </summary>
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
-        procedure UpdateAddressBookAsync(SourceGrid: TStringGrid; UpdateValues: TAddressBookUpdateFields; Callback: TUpdateAddressBook);
+        procedure UpdateAddressBookAsync(SourceGrid: TStringGrid; UpdateValues: TCustomerDetails; Callback: TUpdateAddressBook);//not implemented
         /// <summary>
         /// Insert async. address book new data and notify via given callback method that is always executed in main thread.
         /// </summary>
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
-        procedure AddToAddressBookAsync(SourceGrid: TStringGrid; Callback: TAddToAddressBook);
+        procedure AddToAddressBookAsync(SourceGrid: TStringGrid; Callback: TAddToAddressBook);//not implemented
         /// <summary>
         /// Allow to asynchronously remove data from Address Book for given Scuid. There is no separate notification.
         /// </summary>
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function DelFromAddressBookAwaited(Scuid: string): boolean;
+        function DelFromAddressBookAwaited(Id: integer): TCallResponse;//not implemented
         /// <summary>
         /// Load async. address book customer data only for given SCUID. There is no separate notification.
         /// </summary>
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function GetCustomerDetailsAwaited(SCUID: string): TCustomerDetails;
+        function GetCustomerDetailsAwaited(CustNumber: Int64; SourceDBName: string; var CustDetails: TCustomerDetails): TCallResponse;
     end;
 
 
@@ -93,14 +82,14 @@ type
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
-        procedure OpenAddressBookAsync(UserAlias: string; Callback: TOpenAddressBook);
+        procedure OpenAddressBookAsync(UserAlias: string; Callback: TOpenAddressBook; LoadedCompanies: TList<string> = nil);
         /// <summary>
         /// Update async. address book content and notify via given callback method that is always executed in main thread.
         /// </summary>
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
-        procedure UpdateAddressBookAsync(SourceGrid: TStringGrid; UpdateValues: TAddressBookUpdateFields; Callback: TUpdateAddressBook);
+        procedure UpdateAddressBookAsync(SourceGrid: TStringGrid; UpdateValues: TCustomerDetails; Callback: TUpdateAddressBook);
         /// <summary>
         /// Insert async. address book new data and notify via given callback method that is always executed in main thread.
         /// </summary>
@@ -114,14 +103,14 @@ type
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function DelFromAddressBookAwaited(Scuid: string): boolean;
+        function DelFromAddressBookAwaited(Id: integer): TCallResponse;
         /// <summary>
         /// Load async. address book customer data only for given SCUID. There is no separate notification.
         /// </summary>
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function GetCustomerDetailsAwaited(SCUID: string): TCustomerDetails;
+        function GetCustomerDetailsAwaited(CustNumber: Int64; SourceDBName: string; var CustDetails: TCustomerDetails): TCallResponse;
     end;
 
 
@@ -129,7 +118,6 @@ implementation
 
 
 uses
-    Handler.Database{Legacy},
     System.SysUtils,
     System.Threading,
     REST.Types,
@@ -140,22 +128,42 @@ uses
     Unity.Settings,
     Unity.EventLogger,
     Unity.SessionService,
+    Api.UserCompanySelection,
     Api.AddressBookList,
-    Sync.Document,
-    DbModel{Legacy};
+    Api.AddressBookItem,
+    Sync.Document;
 
 
-procedure TAddressBook.OpenAddressBookAsync(UserAlias: string; Callback: TOpenAddressBook);
+procedure TAddressBook.OpenAddressBookAsync(UserAlias: string; Callback: TOpenAddressBook; LoadedCompanies: TList<string> = nil);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
         var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
-        Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'addressbook/';
 
-        Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-        ThreadFileLog.Log('[OpenAddressBookAsync]: Executing GET ' + Restful.ClientBaseURL);
+        if LoadedCompanies.Count > 0 then
+        begin
+
+            Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'addressbook/selection/';
+            Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
+            ThreadFileLog.Log('[OpenAddressBookAsync]: Executing POST ' + Restful.ClientBaseURL);
+
+            var UserCompanySelection:=TUserCompanySelection.Create();
+            try
+                UserCompanySelection.SelectedCoCodes:=LoadedCompanies.ToArray();
+                Restful.CustomBody:=TJson.ObjectToJsonString(UserCompanySelection);
+            finally
+                UserCompanySelection.Free();
+            end;
+
+        end
+        else
+        begin
+            Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'addressbook/';
+            Restful.RequestMethod:=TRESTRequestMethod.rmGET;
+            ThreadFileLog.Log('[OpenAddressBookAsync]: Executing GET ' + Restful.ClientBaseURL);
+        end;
 
         var CallResponse: TCallResponse;
         var ReturnedData:=TStringGrid.Create(nil);
@@ -168,28 +176,29 @@ begin
                 try
 
                     ReturnedData.RowCount:=Length(AddressBookList.Id) + 1{Header};
-                    ReturnedData.ColCount:=8;
+                    ReturnedData.ColCount:=9;
 
                     // Setup headers
-                    ReturnedData.Cells[0, 0]:='Id';
-                    ReturnedData.Cells[1, 0]:='SourceDbName';
-                    ReturnedData.Cells[2, 0]:='CustomerNumber';
-                    ReturnedData.Cells[3, 0]:='CustomerName';
-                    ReturnedData.Cells[4, 0]:='ContactPerson';
-                    ReturnedData.Cells[5, 0]:='RegularEmails';
-                    ReturnedData.Cells[6, 0]:='StatementEmails';
-                    ReturnedData.Cells[7, 0]:='PhoneNumbers';
+                    ReturnedData.Cells[0, 0]:='';//unused lp column
+                    ReturnedData.Cells[1, 0]:='Id';//hidden column
+                    ReturnedData.Cells[2, 0]:='SourceDbName';
+                    ReturnedData.Cells[3, 0]:='CustomerNumber';
+                    ReturnedData.Cells[4, 0]:='CustomerName';
+                    ReturnedData.Cells[5, 0]:='ContactPerson';
+                    ReturnedData.Cells[6, 0]:='RegularEmails';
+                    ReturnedData.Cells[7, 0]:='StatementEmails';
+                    ReturnedData.Cells[8, 0]:='PhoneNumbers';
 
                     for var iCNT:=1 to ReturnedData.RowCount - 1 do
                     begin
-                        ReturnedData.Cells[0, iCNT]:=AddressBookList.Id[iCNT - 1].ToString();
-                        ReturnedData.Cells[1, iCNT]:=AddressBookList.SourceDbName[iCNT - 1];
-                        ReturnedData.Cells[2, iCNT]:=AddressBookList.CustomerNumber[iCNT - 1].ToString();
-                        ReturnedData.Cells[3, iCNT]:=AddressBookList.CustomerName[iCNT - 1];
-                        ReturnedData.Cells[4, iCNT]:=AddressBookList.ContactPerson[iCNT - 1];
-                        ReturnedData.Cells[5, iCNT]:=AddressBookList.RegularEmails[iCNT - 1];
-                        ReturnedData.Cells[6, iCNT]:=AddressBookList.StatementEmails[iCNT - 1];
-                        ReturnedData.Cells[7, iCNT]:=AddressBookList.PhoneNumbers[iCNT - 1];
+                        ReturnedData.Cells[1, iCNT]:=AddressBookList.Id[iCNT - 1].ToString();
+                        ReturnedData.Cells[2, iCNT]:=AddressBookList.SourceDbName[iCNT - 1];
+                        ReturnedData.Cells[3, iCNT]:=AddressBookList.CustomerNumber[iCNT - 1].ToString();
+                        ReturnedData.Cells[4, iCNT]:=AddressBookList.CustomerName[iCNT - 1];
+                        ReturnedData.Cells[5, iCNT]:=AddressBookList.ContactPerson[iCNT - 1];
+                        ReturnedData.Cells[6, iCNT]:=AddressBookList.RegularEmails[iCNT - 1];
+                        ReturnedData.Cells[7, iCNT]:=AddressBookList.StatementEmails[iCNT - 1];
+                        ReturnedData.Cells[8, iCNT]:=AddressBookList.PhoneNumbers[iCNT - 1];
                     end;
 
                     CallResponse.IsSucceeded:=True;
@@ -241,102 +250,10 @@ begin
 end;
 
 
-procedure TAddressBook.UpdateAddressBookAsync(SourceGrid: TStringGrid; UpdateValues: TAddressBookUpdateFields; Callback: TUpdateAddressBook);
+procedure TAddressBook.UpdateAddressBookAsync(SourceGrid: TStringGrid; UpdateValues: TCustomerDetails; Callback: TUpdateAddressBook);
 begin
 
-    var NewTask: ITask:=TTask.Create(procedure
-    begin
-
-        var CallResponse: TCallResponse;
-        var Book: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
-        try
-
-            // Update from Address Book String Grid
-            var Condition: string;
-            if SourceGrid <> nil then
-            begin
-
-                if SourceGrid.UpdatedRowsHolder <> nil then
-                begin
-
-                    for var iCNT: integer:=low(SourceGrid.UpdatedRowsHolder) to high(SourceGrid.UpdatedRowsHolder) do
-                    begin
-
-                        Condition:=DbModel.TAddressBook.Scuid + TSql.EQUAL + SourceGrid.Cells[SourceGrid.GetCol(DbModel.TAddressBook.Scuid), SourceGrid.UpdatedRowsHolder[iCNT]];
-
-                        Book.Columns.Add(DbModel.TAddressBook.Emails);
-                        Book.Columns.Add(DbModel.TAddressBook.PhoneNumbers);
-                        Book.Columns.Add(DbModel.TAddressBook.Contact);
-                        Book.Columns.Add(DbModel.TAddressBook.Estatements);
-                        Book.Values.Add(SourceGrid.Cells[SourceGrid.GetCol(DbModel.TAddressBook.Emails), SourceGrid.UpdatedRowsHolder[iCNT]]);
-                        Book.Values.Add(SourceGrid.Cells[SourceGrid.GetCol(DbModel.TAddressBook.PhoneNumbers), SourceGrid.UpdatedRowsHolder[iCNT]]);
-                        Book.Values.Add(SourceGrid.Cells[SourceGrid.GetCol(DbModel.TAddressBook.Contact), SourceGrid.UpdatedRowsHolder[iCNT]]);
-                        Book.Values.Add(SourceGrid.Cells[SourceGrid.GetCol(DbModel.TAddressBook.Estatements), SourceGrid.UpdatedRowsHolder[iCNT]]);
-
-                    end;
-
-                    // Success
-                    if Book.UpdateRecord(DbModel.TAddressBook.AddressBook, True, Condition) then
-                    begin
-                        SourceGrid.SetUpdatedRow(0);
-                        CallResponse.IsSucceeded:=True;
-                        CallResponse.LastMessage:='Address Book has been updated succesfully!';
-                    end
-                    else
-                    begin
-                        CallResponse.IsSucceeded:=False;
-                        CallResponse.LastMessage:='Cannot update Address Book. Please contact IT support.';
-                    end;
-
-                end
-                else
-                begin
-                    CallResponse.IsSucceeded:=False;
-                    CallResponse.LastMessage:='Cannot update nothing. Please make changes first and try again.';
-                end;
-
-            end;
-
-            // Update from Action Log View
-            if SourceGrid = nil then
-            begin
-
-                Condition:=DbModel.TAddressBook.Scuid + TSql.EQUAL + QuotedStr(UpdateValues.Scuid);
-
-                Book.Columns.Add(DbModel.TAddressBook.PhoneNumbers);
-                Book.Columns.Add(DbModel.TAddressBook.Contact);
-                Book.Columns.Add(DbModel.TAddressBook.Estatements);
-                Book.Columns.Add(DbModel.TAddressBook.Emails);
-                Book.Values.Add(UpdateValues.Phones);
-                Book.Values.Add(UpdateValues.Contact);
-                Book.Values.Add(UpdateValues.Estatement);
-                Book.Values.Add(UpdateValues.Email);
-
-                if Book.UpdateRecord(DbModel.TAddressBook.AddressBook, True, Condition) then
-                begin
-                    CallResponse.IsSucceeded:=True;
-                    CallResponse.LastMessage:='Address Book has been updated succesfully!';
-                end
-                else
-                begin
-                    CallResponse.IsSucceeded:=False;
-                    CallResponse.LastMessage:='Cannot update Address Book. Please contact IT support.';
-                end;
-
-            end;
-
-        finally
-            Book.Free();
-        end;
-
-        TThread.Synchronize(nil, procedure
-        begin
-            if Assigned(Callback) then Callback(CallResponse);
-        end);
-
-    end);
-
-    NewTask.Start();
+    //...
 
 end;
 
@@ -344,214 +261,94 @@ end;
 procedure TAddressBook.AddToAddressBookAsync(SourceGrid: TStringGrid; Callback: TAddToAddressBook);
 begin
 
+    //...
+
+end;
+
+
+function TAddressBook.DelFromAddressBookAwaited(Id: integer): TCallResponse;
+begin
+
+    //...
+
+end;
+
+
+function TAddressBook.GetCustomerDetailsAwaited(CustNumber: Int64; SourceDBName: string; var CustDetails: TCustomerDetails): TCallResponse;
+begin
+
+    var LCustDetails: TCustomerDetails;
+    var CallResponse: TCallResponse;
+
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var jCNT: integer:=0;
-        var Check: cardinal:=0;
-        var AddrBook: TArray<TArray<string>>;
-        var CallResponse: TCallResponse;
-        SetLength(AddrBook, 1, 11);
+        var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
 
-        // Get data from String Grid
-        var Book: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
+        Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl
+            + 'addressbook/'
+            + THelpers.DbNameToCoCode(SourceDBName)
+            + '/'
+            + CustNumber.ToString()
+            + '/';
+        Restful.RequestMethod:=TRESTRequestMethod.rmGET;
+        ThreadFileLog.Log('[GetCustomerDetailsAwaited]: Executing GET ' + Restful.ClientBaseURL);
+
         try
 
-            for var iCNT: integer:=SourceGrid.Selection.Top to SourceGrid.Selection.Bottom do
+            if (Restful.Execute) and (Restful.StatusCode = 200) then
             begin
 
-                if SourceGrid.RowHeights[iCNT] <> SourceGrid.sgRowHidden then
-                begin
-
-                    // Build SCUID
-                    var SCUID: string:=SourceGrid.Cells[SourceGrid.GetCol(TSnapshots.fCustomerNumber), iCNT] +
-                        THelpers.CoConvert(SourceGrid.Cells[SourceGrid.GetCol(TSnapshots.fCoCode), iCNT]);
-
-                    Book.CleanUp();
-                    Book.Columns.Add(DbModel.TAddressBook.Scuid);
-                    Book.CustFilter:=TSql.WHERE + DbModel.TAddressBook.Scuid + TSql.EQUAL + QuotedStr(SCUID);
-                    Book.OpenTable(DbModel.TAddressBook.AddressBook);
-
-                    // Add to array if not exists
-                    if Book.DataSet.RecordCount = 0 then
-                    begin
-                        Inc(Check);
-                        AddrBook[jCNT,  0]:=UpperCase(SessionService.SessionData.AliasName);
-                        AddrBook[jCNT,  1]:=SCUID;
-                        AddrBook[jCNT,  2]:=SourceGrid.Cells[SourceGrid.GetCol(DbModel.TSnapshots.fCustomerNumber), iCNT];
-                        AddrBook[jCNT,  3]:=SourceGrid.Cells[SourceGrid.GetCol(DbModel.TSnapshots.fCustomerName), iCNT];
-                        AddrBook[jCNT,  8]:=SourceGrid.Cells[SourceGrid.GetCol(DbModel.TSnapshots.fAgent), iCNT];
-                        AddrBook[jCNT,  9]:=SourceGrid.Cells[SourceGrid.GetCol(DbModel.TSnapshots.fDivision), iCNT];
-                        AddrBook[jCNT, 10]:=SourceGrid.Cells[SourceGrid.GetCol(DbModel.TSnapshots.fCoCode), iCNT];
-                        Inc(jCNT);
-                        SetLength(AddrBook, jCNT + 1, 11);
-                    end;
-
-                end;
-
-            end;
-
-        finally
-            Book.Free();
-        end;
-
-        // Send to database
-        if Check > 0 then
-        begin
-
-            Book:=TDataTables.Create(SessionService.FDbConnect);
-            try
-
-                Book.Columns.Add(DbModel.TAddressBook.UserAlias);
-                Book.Columns.Add(DbModel.TAddressBook.Scuid);
-                Book.Columns.Add(DbModel.TAddressBook.CustomerNumber);
-                Book.Columns.Add(DbModel.TAddressBook.CustomerName);
-                Book.Columns.Add(DbModel.TAddressBook.Emails);
-                Book.Columns.Add(DbModel.TAddressBook.PhoneNumbers);
-                Book.Columns.Add(DbModel.TAddressBook.Contact);
-                Book.Columns.Add(DbModel.TAddressBook.Estatements);
-                Book.Columns.Add(DbModel.TAddressBook.Agent);
-                Book.Columns.Add(DbModel.TAddressBook.Division);
-                Book.Columns.Add(DbModel.TAddressBook.CoCode);
-
+                var AddressBookItem:=TJson.JsonToObject<TAddressBookItem>(Restful.Content);
                 try
 
-                    Book.InsertInto(DbModel.TAddressBook.AddressBook, True, nil, AddrBook);
+                    LCustDetails.ContactPerson  :=AddressBookItem.ContactPerson;
+                    LCustDetails.RegularEmails  :=AddressBookItem.RegularEmails;
+                    LCustDetails.StatementEmails:=AddressBookItem.StatementEmails;
+                    LCustDetails.PhoneNumbers   :=AddressBookItem.PhoneNumbers;
 
-                    if Book.RowsAffected > 0 then
-                    begin
-                        CallResponse.IsSucceeded:=True;
-                        CallResponse.LastMessage:='Address Book has been successfully populated by selected item(s).';
-                    end
+                    CallResponse.IsSucceeded:=True;
+                    CallResponse.ReturnedCode:=Restful.StatusCode;
+                    ThreadFileLog.Log('[GetCustomerDetailsAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+
+                finally
+                    AddressBookItem.Free();
+                end;
+
+            end
+            else
+            begin
+
+                if not String.IsNullOrEmpty(Restful.ExecuteError) then
+                    CallResponse.LastMessage:='[GetCustomerDetailsAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                else
+                    if String.IsNullOrEmpty(Restful.Content) then
+                        CallResponse.LastMessage:='[GetCustomerDetailsAwaited]: Invalid server response. Please contact IT Support.'
                     else
-                    begin
-                        CallResponse.IsSucceeded:=False;
-                        CallResponse.LastMessage:='Cannot update Address Book. Please contact IT support.';
-                    end;
+                        CallResponse.LastMessage:='[GetCustomerDetailsAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
 
-                except
-                    on E: Exception do
-                    begin
-                        CallResponse.IsSucceeded:=False;
-                        CallResponse.LastMessage:='Cannot save selected item(s). Exception has been thrown: ' + E.Message;
-                        ThreadFileLog.Log('[AddToAddressBookAsync]: Cannot write Address Book item(s) into database. Error: ' + E.Message);
-                    end;
-
-                end;
-
-            finally
-                Book.Free();
-            end;
-
-        end
-        else
-        begin
-            CallResponse.IsSucceeded:=True;
-            CallResponse.LastMessage:='Selected customers are already in Address Book.';
-        end;
-
-        TThread.Synchronize(nil, procedure
-        begin
-            if Assigned(Callback) then Callback(CallResponse);
-        end);
-
-    end);
-
-    NewTask.Start();
-
-end;
-
-
-function TAddressBook.DelFromAddressBookAwaited(Scuid: string): boolean;
-begin
-
-    var NewResult: boolean;
-
-    var NewTask: ITask:=TTask.Create(procedure
-    begin
-
-        var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
-        try
-
-            try
-
-                NewResult:=DataTables.DeleteRecord(
-                    DbModel.TAddressBook.AddressBook,
-                    DbModel.TAddressBook.Scuid,
-                    DataTables.CleanStr(Scuid, False),
-                    True
-                );
-
-            except
-                on E: Exception do
-                begin
-                    ThreadFileLog.Log('[DelFromAddressBookAwaited]: Cannot execute. Error has been thrown: ' + E.Message);
-                end;
+                CallResponse.ReturnedCode:=Restful.StatusCode;
+                CallResponse.IsSucceeded:=False;
+                ThreadFileLog.Log(CallResponse.LastMessage);
 
             end;
 
-        finally
-            DataTables.Free();
+        except on
+            E: Exception do
+            begin
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[GetCustomerDetailsAwaited]: Cannot execute the request. Description: ' + E.Message;
+                ThreadFileLog.Log(CallResponse.LastMessage);
+            end;
+
         end;
 
     end);
 
     NewTask.Start();
     TTask.WaitForAll(NewTask);
-    Result:=NewResult;
-
-end;
-
-
-function TAddressBook.GetCustomerDetailsAwaited(SCUID: string): TCustomerDetails;
-begin
-
-    var CustomerDetails: TCustomerDetails;
-    var NewTask: ITask:=TTask.Create(procedure
-    begin
-
-        var CallResponse: TCallResponse;
-        var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
-        try
-
-            try
-
-                DataTables.Columns.Add(DbModel.TAddressBook.Contact);
-                DataTables.Columns.Add(DbModel.TAddressBook.Emails);
-                DataTables.Columns.Add(DbModel.TAddressBook.Estatements);
-                DataTables.Columns.Add(DbModel.TAddressBook.PhoneNumbers);
-                DataTables.CustFilter:=TSql.WHERE + DbModel.TAddressBook.Scuid + TSql.EQUAL + QuotedStr(SCUID);
-                DataTables.OpenTable(DbModel.TAddressBook.AddressBook);
-
-                if DataTables.DataSet.RecordCount = 1 then
-                begin
-                    CustomerDetails.CustPerson  :=THelpers.OleGetStr(DataTables.DataSet.Fields[DbModel.TAddressBook.Contact].Value);
-                    CustomerDetails.CustMailGen :=THelpers.OleGetStr(DataTables.DataSet.Fields[DbModel.TAddressBook.Emails].Value);
-                    CustomerDetails.CustMailStat:=THelpers.OleGetStr(DataTables.DataSet.Fields[DbModel.TAddressBook.Estatements].Value);
-                    CustomerDetails.CustPhones  :=THelpers.OleGetStr(DataTables.DataSet.Fields[DbModel.TAddressBook.PhoneNumbers].Value);
-                end;
-
-                CallResponse.IsSucceeded:=True;
-
-            except
-                on E: Exception do
-                begin
-                    CallResponse.LastMessage:='Cannot execute. Error has been thrown: ' + E.Message;
-                    CallResponse.IsSucceeded:=False;
-                    ThreadFileLog.Log('[GetCustomerDetailsAsync]: Cannot execute. Error has been thrown: ' + E.Message);
-                end;
-
-            end;
-
-        finally
-            DataTables.Free();
-        end;
-
-    end);
-
-    NewTask.Start();
-    TTask.WaitForAll(NewTask);
-    Result:=CustomerDetails;
+    CustDetails:=LCustDetails;
+    Result:=CallResponse;
 
 end;
 

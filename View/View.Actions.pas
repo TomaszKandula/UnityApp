@@ -193,16 +193,16 @@ type
         procedure selSendFromSelect(Sender: TObject);
         procedure btnAddCommentClick(Sender: TObject);
     strict private
-        const HtmlBanks = '<p class="p">{ROWS}</p>';
-        const HtmlRow   = '<b>Bank Details</b>: <br><br> {BANK_NAME} (<b>{ISO}</b> payments) <br> IBAN/Account No: {BANK_ACC} {BIC} <br>';
-        const HtmlBic   = '(BIC: {BIC_NUMBER})';
-        const HtmlEmpty = '<!-- NO BANK ACCOUNT ATTACHED -->';
+        const HtmlBanks = '<p class="p">{ROWS}</p>';//to helper
+        const HtmlRow   = '<b>Bank Details</b>: <br><br> {BANK_NAME} (<b>{ISO}</b> payments) <br> IBAN/Account No: {BANK_ACC} {BIC} <br>';//to helper
+        const HtmlBic   = '(BIC: {BIC_NUMBER})';//to helper
+        const HtmlEmpty = '<!-- NO BANK ACCOUNT ATTACHED -->';//to helper
         const AppButtonTxtNormal = $00555555;
         const AppButtonTxtSelected = $006433C9;
         var FSourceDBName: string;
         var FCompanyCode: integer;
         var FCustName: string;
-        var FCustNumber: integer;
+        var FCustNumber: Int64;
         var FLbuName: string;
         var FLbuAddress: string;
         var FLbuPhones: string;
@@ -215,11 +215,11 @@ type
         var FIsDataLoaded: boolean;
         var OpenItemsRefs: TFOpenItemsRefs;
         var CtrlStatusRefs: TFCtrlStatusRefs;
-        function  FormatDateStr(DateStr: string): string;
-        function  FormatDateTimeStr(DateTimeStr: string): string;
+        function  FormatDateStr(DateStr: string): string;//to helper
+        function  FormatDateTimeStr(DateTimeStr: string): string;//to helper
         function  GetRunningApps(SearchName: string): boolean;
-        function  BankListToHtml(BankDetails: TArray<TBankDetails>): string;
-        procedure StrArrayToStrings(Input: TArray<string>; var Output: TStringList);
+        function  BankListToHtml(BankDetails: TArray<TBankDetails>): string;//to helper
+        procedure StrArrayToStrings(Input: TArray<string>; var Output: TStringList);//to helper
         procedure GetOpenItems(OpenItemsDest, OpenItemsSrc: TStringGrid);
         procedure UpdateGeneral(var Text: TMemo);
         procedure UpdateDaily(var DailyComments: TStringGrid);
@@ -247,7 +247,7 @@ type
         property SourceDBName: string read FSourceDBName;
         property CompanyCode: integer read FCompanyCode;
         property CustName: string read FCustName;
-        property CustNumber: integer read FCustNumber;
+        property CustNumber: Int64 read FCustNumber;
         property LbuName: string read FLbuName;
         property LbuAddress: string read FLbuAddress;
         property LbuPhones: string read FLbuPhones;
@@ -302,7 +302,7 @@ end;
 {$REGION 'LOCAL HELPERS'}
 
 
-function TActionsForm.FormatDateStr(DateStr: string): string;
+function TActionsForm.FormatDateStr(DateStr: string): string;//to helper
 begin
     if String.IsNullOrEmpty(DateStr) then Exit();
     // Expected: 2019-12-15T00:00:00
@@ -311,7 +311,7 @@ begin
 end;
 
 
-function TActionsForm.FormatDateTimeStr(DateTimeStr: string): string;
+function TActionsForm.FormatDateTimeStr(DateTimeStr: string): string;//to helper
 begin
     if String.IsNullOrEmpty(DateTimeStr) then Exit();
     // Expected: 2019-12-18T23:32:04.137
@@ -355,7 +355,7 @@ begin
 end;
 
 
-function TActionsForm.BankListToHtml(BankDetails: TArray<TBankDetails>): string;
+function TActionsForm.BankListToHtml(BankDetails: TArray<TBankDetails>): string;//to helper
 begin
 
     Result:=HtmlEmpty;
@@ -390,7 +390,7 @@ begin
 end;
 
 
-procedure TActionsForm.StrArrayToStrings(Input: TArray<string>; var Output: TStringList);
+procedure TActionsForm.StrArrayToStrings(Input: TArray<string>; var Output: TStringList);//to helper
 begin
     for var iCNT:=0 to Length(Input) - 1 do Output.Add(Input[iCNT]);
 end;
@@ -505,25 +505,32 @@ end;
 procedure TActionsForm.UpdateCustDetails();
 begin
 
-//    var AddressBook: IAddressBook:=TAddressBook.Create();
-//    var CustomerDetails: TCustomerDetails;
-//    CustomerDetails:=AddressBook.GetCustomerDetailsAwaited(SCUID);
-//
-//    var Phones: string;
-//
-//    Cust_Person.Text     :=CustomerDetails.CustPerson;
-//    Cust_MailGeneral.Text:=CustomerDetails.CustMailGen;
-//    Cust_Mail.Text       :=CustomerDetails.CustMailStat;
-//    Phones               :=CustomerDetails.CustPhones;
-//
-//    if (Phones <> '') or (Phones <> ' ') then
-//    begin
-//        Cust_Phone.Clear();
-//        Cust_Phone.Items.Text:=THelpers.Explode(Phones, TDelimiters.Semicolon);
-//        Cust_Phone.ItemIndex:=0;
-//    end;
-//
-//    SetControls();
+    var AddressBook: IAddressBook:=TAddressBook.Create();
+    var CustomerDetails: TCustomerDetails;
+    var CallResponse: TCallResponse;
+    CallResponse:=AddressBook.GetCustomerDetailsAwaited(CustNumber, SourceDBName, CustomerDetails);
+
+    if not CallResponse.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        Exit();
+    end;
+
+    var Phones: string;
+
+    Cust_Person.Text     :=CustomerDetails.ContactPerson;
+    Cust_MailGeneral.Text:=CustomerDetails.RegularEmails;
+    Cust_Mail.Text       :=CustomerDetails.StatementEmails;
+    Phones               :=CustomerDetails.PhoneNumbers;
+
+    if (Phones <> '') or (Phones <> ' ') then
+    begin
+        Cust_Phone.Clear();
+        Cust_Phone.Items.Text:=THelpers.Explode(Phones, TDelimiters.Semicolon);
+        Cust_Phone.ItemIndex:=0;
+    end;
+
+    SetControls();
 
 end;
 
@@ -829,16 +836,13 @@ end;
 
 procedure TActionsForm.SaveCustomerDetails();
 begin
-
 //    FAbUpdateFields.Scuid     :=SCUID;
 //    FAbUpdateFields.Contact   :=Cust_Person.Text;
 //    FAbUpdateFields.Email     :=Cust_MailGeneral.Text;
 //    FAbUpdateFields.Estatement:=Cust_Mail.Text;
 //    FAbUpdateFields.Phones    :=THelpers.Implode(Cust_Phone.Items, TDelimiters.Semicolon);
-//
 //    var AddressBook: IAddressBook:=TAddressBook.Create();
 //    AddressBook.UpdateAddressBookAsync(nil, FAbUpdateFields, UpdateAddressBook_Callback);
-
 end;
 
 

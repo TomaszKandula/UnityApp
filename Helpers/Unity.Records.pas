@@ -61,28 +61,14 @@ type
         procedure Dispose();
     end;
     /// <summary>
-    /// Carries a group of variables to be received back when queried by awaited async. task.
+    /// Carries a group of variables to be received back when awaited async. task is done.
     /// </summary>
     TCustomerDetails = record
-        CustPerson:   string;
-        CustMailGen:  string;
-        CustMailStat: string;
-        CustPhones:   string;
+        ContactPerson:   string;
+        RegularEmails:   string;
+        StatementEmails: string;
+        PhoneNumbers:    string;
     end;
-
-
-    /// <summary>
-    /// Carries a group of variables to be updated in AddressBook table.
-    /// </summary>
-    TAddressBookUpdateFields = record  //!!!
-        Scuid:      string;
-        Phones:     string;
-        Contact:    string;
-        Estatement: string;
-        Email:      string;
-    end;
-
-
     /// <summary>
     /// Carries a group of variables that holds details of sent document to be posted in database history table.
     /// </summary>

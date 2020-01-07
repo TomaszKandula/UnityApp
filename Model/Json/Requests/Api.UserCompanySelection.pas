@@ -22,9 +22,9 @@ type
 	TUserCompanySelection = class
     {$TYPEINFO ON}
 	strict private
-        var FSelectedCoCodes: TArray<integer>;
+        var FSelectedCoCodes: TArray<string>;
 	public
-        property SelectedCoCodes: TArray<integer> read FSelectedCoCodes write FSelectedCoCodes;
+        property SelectedCoCodes: TArray<string> read FSelectedCoCodes write FSelectedCoCodes;
 	end;
 
 

@@ -56,7 +56,7 @@ type
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function SaveUserCompanyListAwaited(UserSelection: TList<integer>): TCallResponse;
+        function SaveUserCompanyListAwaited(UserSelection: TList<string>): TCallResponse;
     end;
 
 
@@ -100,7 +100,7 @@ type
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function SaveUserCompanyListAwaited(UserSelection: TList<integer>): TCallResponse;
+        function SaveUserCompanyListAwaited(UserSelection: TList<string>): TCallResponse;
     end;
 
 
@@ -439,7 +439,7 @@ begin
 end;
 
 
-function TAccounts.SaveUserCompanyListAwaited(UserSelection: TList<integer>): TCallResponse;
+function TAccounts.SaveUserCompanyListAwaited(UserSelection: TList<string>): TCallResponse;
 begin
 
     var CallResponse: TCallResponse;
