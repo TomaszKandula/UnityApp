@@ -37,18 +37,6 @@ type
         btnSendEmail: TSpeedButton;
         Text_Custom_Message: TLabel;
         Text_Message: TMemo;
-        Shape_Customer: TShape;
-        Shape_Invoices: TShape;
-        Shape_Business: TShape;
-        Shape_Terms: TShape;
-        Shape_Banks: TShape;
-        Shape_Footer: TShape;
-        Text_Business: TLabel;
-        Text_Customer: TLabel;
-        Text_Invoices: TLabel;
-        Text_Footer: TLabel;
-        Text_Banks: TLabel;
-        Text_Terms: TLabel;
         Text_Warn: TLabel;
         cbShowAll: TCheckBox;
         PanelMessage: TPanel;

@@ -107,6 +107,7 @@ begin
     var SelectedCoCodes: string;{Legacy}
     var ListEnd:=FilterList.Count - 1;
 
+    MainForm.LoadedCompanies.Clear();
     for var iCNT:=0 to ListEnd do
     begin
 

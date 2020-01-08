@@ -42,25 +42,13 @@ type
         btnCancel: TSpeedButton;
         btnSendEmail: TSpeedButton;
         PanelClient: TPanel;
-        Shape_Banks: TShape;
-        Shape_Business: TShape;
-        Shape_Customer: TShape;
-        Shape_Footer: TShape;
-        Shape_Invoices: TShape;
-        Shape_Terms: TShape;
-        Text_Banks: TLabel;
-        Text_Business: TLabel;
-        Text_Customer: TLabel;
-        Text_Footer: TLabel;
-        Text_Invoices: TLabel;
-        Text_Terms: TLabel;
-        Text2: TLabel;
+        TextMessage: TLabel;
         PanelMessage: TPanel;
         Text_Message: TMemo;
         PanelList: TPanel;
         CustomerList: TListView;
         PanelSubject: TPanel;
-        Text3: TLabel;
+        TextSubject: TLabel;
         PanelEmailContainer: TPanel;
         Text_Subject: TEdit;
         PanelOption: TPanel;
@@ -81,11 +69,15 @@ type
         btnDelBegin: TSpeedButton;
         btnDelEnd: TSpeedButton;
         GroupEmails: TGroupBox;
-        txtSendFrom: TLabel;
+        txtCompany: TLabel;
         cbUserInCopy: TCheckBox;
         cbCtrlStatusOff: TCheckBox;
-        selSendFrom: TComboBox;
+        selCompany: TComboBox;
         btnApply: TSpeedButton;
+        lstLbuEmails: TListBox;
+        grSettings: TGroupBox;
+        shapeLbuEmails: TShape;
+        cbMergeList: TCheckBox;
         procedure FormCreate(Sender: TObject);
         procedure FormDestroy(Sender: TObject);
         procedure FormShow(Sender: TObject);
@@ -107,6 +99,8 @@ type
         procedure btnDelBeginClick(Sender: TObject);
         procedure btnDelEndClick(Sender: TObject);
         procedure FormActivate(Sender: TObject);
+        procedure btnApplyClick(Sender: TObject);
+        procedure selCompanySelect(Sender: TObject);
     strict private
         var OpenItemsRefs: TFOpenItemsRefs;
         var CtrlStatusRefs: TFCtrlStatusRefs;
@@ -114,15 +108,19 @@ type
         var FItemCount: integer;
         var FIsDataLoaded:  boolean;
         var FBanksHtml: TArray<TArray<string>>;
+        var FLbuEmails: TArray<TArray<string>>;
         const FLargestSubitemTxt = -1;
         const FSizeOfTxtInHeader = -2;
         procedure ListViewAutoFit(List: TListView; const AutoFit: integer);
-        function  GetEmailAddress(SourceDbName: string; CustNumber: string; Source: TStringGrid): string;
-        procedure SetEmailAddresses(List: TListView);
+        function GetEmailAddress(SourceDbName: string; CustNumber: string; Source: TStringGrid): string;
         procedure GetCompanyDetails(LoadedCompanies: TList<string>);
         procedure SetCompanyBanks(var TargetList: TListView; SourceArray: TArray<TArray<string>>);
-        procedure ExecuteMailer();
+        procedure SetEmailAddresses(List: TListView);
+        procedure SetLbuEmails(var LbuEmailsList: TListBox; SelectedCompany: string; Source: TArray<TArray<string>>);
+        procedure SetLbuCompanies(var LbuCompanyList: TComboBox; Source: TArray<TArray<string>>);
         procedure LoadFromGrid();
+        procedure ExecuteMailer();
+
     public
         property ItemCount: integer read FItemCount write FItemCount;
         procedure SendAccDocumentsAsync_Callback(ProcessingItemNo: integer; CallResponse: TCallResponse);
@@ -167,39 +165,6 @@ end;
 {$REGION 'LOCAL HELPERS'}
 
 
-procedure TMassMailerForm.LoadFromGrid();
-begin
-
-    var Item: TListItem;
-    CustomerList.Clear();
-
-    for var iCNT:=MainForm.sgAgeView.Selection.Top to MainForm.sgAgeView.Selection.Bottom do
-    begin
-
-        if MainForm.sgAgeView.RowHeights[iCNT] <> MainForm.sgAgeView.sgRowHidden then
-        begin
-
-            var LCustomerNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerNumber), iCNT];
-            var LCustomerName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerName), iCNT];
-            var LSourceDbName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCoCode), iCNT];
-
-            Item:=MassMailerForm.CustomerList.Items.Add();
-            Item.Caption:=IntToStr(iCNT);
-            Item.SubItems.Add(LCustomerNumber);
-            Item.SubItems.Add(LCustomerName);
-            Item.SubItems.Add('No');
-            Item.SubItems.Add('Not found!');
-            Item.SubItems.Add('Not found!');
-            Item.SubItems.Add(LSourceDbName);
-            Item.SubItems.Add('empty');
-
-        end;
-
-    end;
-
-end;
-
-
 procedure TMassMailerForm.ListViewAutoFit(List: TListView; const AutoFit: integer);
 begin
 
@@ -224,6 +189,64 @@ begin
         begin
             Result:=Source.Cells[Source.GetCol('RegularEmails'), iCNT];
             Exit();
+        end;
+
+    end;
+
+end;
+
+
+procedure TMassMailerForm.GetCompanyDetails(LoadedCompanies: TList<string>);
+begin
+
+    var Companies: ICompanies:=TCompanies.Create();
+    var CompanyDetails: TCompanyDetails;
+    var CallResponse: TCallResponse;
+
+    SetLength(FBanksHtml, LoadedCompanies.Count, 2);
+    for var iCNT:=0 to LoadedCompanies.Count - 1 do
+    begin
+
+        CallResponse:=Companies.GetCompanyDetailsAwaited(LoadedCompanies[iCNT].ToInteger(), CompanyDetails);
+
+        if CallResponse.IsSucceeded then
+        begin
+
+            FBanksHtml[iCNT, 0]:=LoadedCompanies[iCNT];
+            FBanksHtml[iCNT, 1]:=THelpers.BankListToHtml(CompanyDetails.LbuBanks);
+
+            var PreservedLen:=Length(FLbuEmails);
+            SetLength(FLbuEmails, PreservedLen + Length(CompanyDetails.LbuEmails), 2);
+            for var jCNT:=0 to Length(CompanyDetails.LbuEmails) - 1 do
+            begin
+                FLbuEmails[jCNT + PreservedLen, 0]:=LoadedCompanies[iCNT];
+                FLbuEmails[jCNT + PreservedLen, 1]:=CompanyDetails.LbuEmails[jCNT];
+            end;
+
+        end;
+
+        CompanyDetails.Dispose();
+
+    end;
+
+end;
+
+
+procedure TMassMailerForm.SetCompanyBanks(var TargetList: TListView; SourceArray: TArray<TArray<string>>);
+begin
+
+    for var iCNT:=0 to TargetList.Items.Count - 1 do
+    begin
+
+        for var jCNT:=0 to Length(SourceArray) - 1 do
+        begin
+
+            var listSourceDbName:=SourceArray[jCNT, 0];
+            var compSourceDbName:=TargetList.Items[iCNT].SubItems[5];
+
+            if listSourceDbName = compSourceDbName then
+                TargetList.Items[iCNT].SubItems[6]{BanksHtml}:=SourceArray[jCNT, 1{BanksHtml}];
+
         end;
 
     end;
@@ -256,57 +279,67 @@ begin
 end;
 
 
-procedure TMassMailerForm.GetCompanyDetails(LoadedCompanies: TList<string>);
+procedure TMassMailerForm.SetLbuEmails(var LbuEmailsList: TListBox; SelectedCompany: string; Source: TArray<TArray<string>>);
 begin
 
-    var Companies: ICompanies:=TCompanies.Create();
-    var CompanyDetails: TCompanyDetails;
-    var CallResponse: TCallResponse;
+    LbuEmailsList.Clear();
 
-    SetLength(FBanksHtml, LoadedCompanies.Count, 2);
-    for var iCNT:=0 to LoadedCompanies.Count - 1 do
-    begin
+    for var iCNT:=0 to Length(Source) - 1 do
+        if Source[iCNT, 0] = SelectedCompany then
+            LbuEmailsList.Items.Add(Source[iCNT, 1]);
 
-        CallResponse:=Companies.GetCompanyDetailsAwaited(LoadedCompanies[iCNT].ToInteger(), CompanyDetails);
+end;
 
-        if CallResponse.IsSucceeded then
-        begin
 
-            FBanksHtml[iCNT, 0]:=LoadedCompanies[iCNT];
-            FBanksHtml[iCNT, 1]:=THelpers.BankListToHtml(CompanyDetails.LbuBanks);
+procedure TMassMailerForm.SetLbuCompanies(var LbuCompanyList: TComboBox; Source: TArray<TArray<string>>);
+begin
 
-            var LbuEmails:=TStringList.Create();
-            try
-                THelpers.StrArrayToStrings(CompanyDetails.LbuEmails, LbuEmails);
-                selSendFrom.Items.AddStrings(LbuEmails);
-                if selSendFrom.Items.Count > 0 then selSendFrom.ItemIndex:=0;
-            finally
-                LbuEmails.Free();
-            end;
+    var NoDuplicates:=TStringList.Create();
+    try
 
-        end;
+        NoDuplicates.Sorted:=True;
+        NoDuplicates.Duplicates:=dupIgnore;
 
-        CompanyDetails.Dispose();
+        for var iCNT:=0 to Length(Source) - 1 do
+            NoDuplicates.Add(Source[iCNT, 0]);
 
+        LbuCompanyList.Clear();
+        LbuCompanyList.Items.AddStrings(NoDuplicates);
+
+        if LbuCompanyList.Items.Count > 0 then LbuCompanyList.ItemIndex:=0;
+
+    finally
+        NoDuplicates.Free();
     end;
 
 end;
 
 
-procedure TMassMailerForm.SetCompanyBanks(var TargetList: TListView; SourceArray: TArray<TArray<string>>);
+procedure TMassMailerForm.LoadFromGrid();
 begin
 
-    for var iCNT:=0 to TargetList.Items.Count - 1 do
+    var Item: TListItem;
+    CustomerList.Clear();
+
+    for var iCNT:=MainForm.sgAgeView.Selection.Top to MainForm.sgAgeView.Selection.Bottom do
     begin
 
-        for var jCNT:=0 to Length(SourceArray) - 1 do
+        if MainForm.sgAgeView.RowHeights[iCNT] <> MainForm.sgAgeView.sgRowHidden then
         begin
 
-            var listSourceDbName:=SourceArray[jCNT, 0];
-            var compSourceDbName:=TargetList.Items[iCNT].SubItems[5];
+            var LCustomerNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerNumber), iCNT];
+            var LCustomerName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerName), iCNT];
+            var LSourceDbName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCoCode), iCNT];
 
-            if listSourceDbName = compSourceDbName then
-                TargetList.Items[iCNT].SubItems[6]{BanksHtml}:=SourceArray[jCNT, 1{BanksHtml}];
+            Item:=MassMailerForm.CustomerList.Items.Add();
+            Item.Caption:=IntToStr(iCNT);
+            Item.SubItems.Add(LCustomerNumber);
+            Item.SubItems.Add(LCustomerName);
+            Item.SubItems.Add('No');
+            Item.SubItems.Add('Not found!');
+            Item.SubItems.Add('Not found!');
+            Item.SubItems.Add(LSourceDbName);
+            Item.SubItems.Add('empty');
 
         end;
 
@@ -437,12 +470,13 @@ begin
     end;
 
     lsColumns.AutoSize:=True;
+    CustomerList.Column[7].Width:=0;
 
     PanelEmailContainer.Borders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
     PanelSubject.Borders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
     PanelMessage.Borders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
 
-    SetLength(FBanksHtml, 1, 2);
+    lstLbuEmails.Clear();
     ValBeginDate.Caption:='2010-01-01';
     ValEndDate.Caption:='';
 
@@ -451,7 +485,8 @@ end;
 
 procedure TMassMailerForm.FormShow(Sender: TObject);
 begin
-    SetLength(FBanksHtml, 1, 2);
+    SetLength(FBanksHtml, 0, 2);
+    SetLength(FLbuEmails, 0, 2);
 end;
 
 
@@ -472,6 +507,7 @@ begin
             GetCompanyDetails(MainForm.LoadedCompanies);
             SetCompanyBanks(CustomerList, FBanksHtml);
             ListViewAutoFit(CustomerList, FSizeOfTxtInHeader);
+            SetLbuCompanies(selCompany, FLbuEmails);
 
             MainForm.TimerCustOpenItems.Enabled:=False;
             ThreadFileLog.Log('[TMassMailerForm.FormActivate]: Mass mailer has been opened, open items loader is on hold.');
@@ -517,6 +553,18 @@ end;
 
 
 {$REGION 'MOUSE CLICK EVENTS'}
+
+
+procedure TMassMailerForm.selCompanySelect(Sender: TObject);
+begin
+    SetLbuEmails(lstLbuEmails, (Sender as TComboBox).Items[(Sender as TComboBox).ItemIndex], FLbuEmails);
+end;
+
+
+procedure TMassMailerForm.btnApplyClick(Sender: TObject);
+begin
+    //
+end;
 
 
 procedure TMassMailerForm.btnBeginDateClick(Sender: TObject);

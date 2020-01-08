@@ -3790,16 +3790,9 @@ end;
 
 procedure TMainForm.btnUpdateAbClick(Sender: TObject);
 begin
-
-//    if not(sgAddressBook.Visible) then
-//    begin
-//        THelpers.MsgCall(TAppMessage.Warn, 'Please open Address Book first.');
-//        Exit();
-//    end;
-//
-//    var AddressBook: IAddressBook:=TAddressBook.Create();
-//    AddressBook.UpdateAddressBookAsync(sgAddressBook, FAbUpdateFields, UpdateAddressBook_Callback);
-
+    {var AddressBook: IAddressBook:=TAddressBook.Create();}
+    {AddressBook.UpdateAddressBookAsync(sgAddressBook, FAbUpdateFields, UpdateAddressBook_Callback);}
+    THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in beta version.');
 end;
 
 
@@ -3818,7 +3811,8 @@ end;
 
 procedure TMainForm.btnSearchAbClick(Sender: TObject);
 begin
-    THelpers.WndCall(SqlSearchForm, TWindowState.Modeless);
+    {THelpers.WndCall(SqlSearchForm, TWindowState.Modeless);}
+    THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in beta version.');
 end;
 
 

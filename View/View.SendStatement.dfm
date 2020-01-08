@@ -4,7 +4,7 @@ object SendForm: TSendForm
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'Unity'
-  ClientHeight = 691
+  ClientHeight = 523
   ClientWidth = 553
   Color = 15855854
   Font.Charset = DEFAULT_CHARSET
@@ -25,7 +25,7 @@ object SendForm: TSendForm
     Left = 10
     Top = 10
     Width = 533
-    Height = 621
+    Height = 453
     Margins.Left = 10
     Margins.Top = 10
     Margins.Right = 10
@@ -35,154 +35,48 @@ object SendForm: TSendForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
-    object Shape_Banks: TShape
-      Left = 16
-      Top = 388
-      Width = 505
-      Height = 26
-      Pen.Color = clMedGray
-      Pen.Style = psDot
-    end
-    object Shape_Business: TShape
-      Left = 16
-      Top = 14
-      Width = 505
-      Height = 26
-      Pen.Color = clMedGray
-      Pen.Style = psDot
-    end
-    object Shape_Customer: TShape
-      Left = 16
-      Top = 54
-      Width = 505
-      Height = 26
-      Pen.Color = clMedGray
-      Pen.Style = psDot
-    end
-    object Shape_Footer: TShape
-      Left = 16
-      Top = 428
-      Width = 505
-      Height = 26
-      Pen.Color = clMedGray
-      Pen.Style = psDot
-    end
-    object Shape_Invoices: TShape
-      Left = 16
-      Top = 308
-      Width = 505
-      Height = 26
-      Pen.Color = clMedGray
-      Pen.Style = psDot
-    end
-    object Shape_Terms: TShape
-      Left = 16
-      Top = 348
-      Width = 505
-      Height = 26
-      Pen.Color = clMedGray
-      Pen.Style = psDot
-    end
-    object Text_Banks: TLabel
-      Left = 22
-      Top = 394
-      Width = 151
-      Height = 13
-      Caption = 'BANK ACCOUNTS (IF GIVEN)'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clGray
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
-    end
-    object Text_Business: TLabel
-      Left = 437
-      Top = 20
-      Width = 76
-      Height = 13
-      Caption = 'LBU ADDRESS'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clGray
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
-    end
-    object Text_Customer: TLabel
-      Left = 22
-      Top = 60
-      Width = 116
-      Height = 13
-      Caption = 'CUSTOMER ADDRESS'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clGray
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
-    end
-    object Text_Footer: TLabel
-      Left = 22
-      Top = 434
-      Width = 43
-      Height = 13
-      Caption = 'FOOTER'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clGray
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
-    end
-    object Text_Invoices: TLabel
-      Left = 22
-      Top = 313
-      Width = 73
-      Height = 13
-      Caption = 'INVOICE LIST'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clGray
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
-    end
-    object Text_Terms: TLabel
-      Left = 22
-      Top = 354
-      Width = 93
-      Height = 13
-      Caption = 'PAYMENT TERMS'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clGray
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
-    end
+    ExplicitHeight = 621
     object Text_Custom_Message: TLabel
-      Left = 18
-      Top = 99
-      Width = 85
+      AlignWithMargins = True
+      Left = 20
+      Top = 10
+      Width = 493
       Height = 13
+      Margins.Left = 20
+      Margins.Top = 10
+      Margins.Right = 20
+      Margins.Bottom = 10
+      Align = alTop
       Caption = 'Custom message:'
+      ExplicitLeft = 22
+      ExplicitTop = 19
+      ExplicitWidth = 85
     end
     object PanelMessage: TPanel
-      Left = 16
-      Top = 118
-      Width = 505
-      Height = 171
+      AlignWithMargins = True
+      Left = 15
+      Top = 33
+      Width = 503
+      Height = 248
+      Margins.Left = 15
+      Margins.Top = 0
+      Margins.Right = 15
+      Margins.Bottom = 0
+      Align = alClient
       BevelOuter = bvNone
       Color = clWhite
       ParentBackground = False
       TabOrder = 0
+      ExplicitLeft = 20
+      ExplicitTop = 38
+      ExplicitWidth = 505
+      ExplicitHeight = 243
       object Text_Message: TMemo
         AlignWithMargins = True
         Left = 2
         Top = 2
-        Width = 501
-        Height = 167
+        Width = 499
+        Height = 244
         Margins.Left = 2
         Margins.Top = 2
         Margins.Right = 2
@@ -201,15 +95,26 @@ object SendForm: TSendForm
         ScrollBars = ssVertical
         TabOrder = 0
         OnKeyUp = Text_MessageKeyUp
+        ExplicitWidth = 501
+        ExplicitHeight = 167
       end
     end
     object PanelOption: TPanel
-      Left = 6
-      Top = 460
-      Width = 525
+      AlignWithMargins = True
+      Left = 5
+      Top = 291
+      Width = 523
       Height = 157
+      Margins.Left = 5
+      Margins.Top = 10
+      Margins.Right = 5
+      Margins.Bottom = 5
+      Align = alBottom
       BevelOuter = bvNone
       TabOrder = 1
+      ExplicitLeft = 6
+      ExplicitTop = 287
+      ExplicitWidth = 525
       object Shape_Dates: TShape
         AlignWithMargins = True
         Left = 240
@@ -228,7 +133,7 @@ object SendForm: TSendForm
         AlignWithMargins = True
         Left = 10
         Top = 10
-        Width = 505
+        Width = 503
         Height = 137
         Margins.Left = 10
         Margins.Top = 10
@@ -239,6 +144,7 @@ object SendForm: TSendForm
         Pen.Color = clMedGray
         Pen.Style = psDot
         ExplicitTop = 26
+        ExplicitWidth = 505
         ExplicitHeight = 453
       end
       object Text_Options: TLabel
@@ -568,7 +474,7 @@ object SendForm: TSendForm
   object PanelBottom: TPanel
     AlignWithMargins = True
     Left = 0
-    Top = 641
+    Top = 473
     Width = 553
     Height = 50
     Margins.Left = 0
@@ -586,6 +492,7 @@ object SendForm: TSendForm
     ParentBackground = False
     ParentFont = False
     TabOrder = 1
+    ExplicitTop = 641
     object Text_Warn: TLabel
       Left = 16
       Top = 18

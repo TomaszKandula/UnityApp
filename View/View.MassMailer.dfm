@@ -4,8 +4,8 @@ object MassMailerForm: TMassMailerForm
   BorderIcons = [biSystemMenu]
   BorderStyle = bsSingle
   Caption = 'Unity'
-  ClientHeight = 768
-  ClientWidth = 1257
+  ClientHeight = 648
+  ClientWidth = 1187
   Color = 15855854
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -25,8 +25,8 @@ object MassMailerForm: TMassMailerForm
   object PanelBottom: TPanel
     AlignWithMargins = True
     Left = 0
-    Top = 718
-    Width = 1257
+    Top = 598
+    Width = 1187
     Height = 50
     Margins.Left = 0
     Margins.Top = 10
@@ -43,21 +43,10 @@ object MassMailerForm: TMassMailerForm
     ParentBackground = False
     ParentFont = False
     TabOrder = 2
-    object Text_Warn: TLabel
-      Left = 16
-      Top = 16
-      Width = 258
-      Height = 13
-      Caption = '* E-mail template is available in English language only.'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clBlack
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = []
-      ParentFont = False
-    end
+    ExplicitTop = 718
+    ExplicitWidth = 1257
     object btnCancel: TSpeedButton
-      Left = 1038
+      Left = 974
       Top = 13
       Width = 89
       Height = 27
@@ -95,7 +84,7 @@ object MassMailerForm: TMassMailerForm
       OnClick = btnCancelClick
     end
     object btnSendEmail: TSpeedButton
-      Left = 1142
+      Left = 1082
       Top = 13
       Width = 89
       Height = 27
@@ -165,13 +154,51 @@ object MassMailerForm: TMassMailerForm
       Spacing = 10
       OnClick = btnSendEmailClick
     end
+    object btnApply: TSpeedButton
+      Left = 35
+      Top = 13
+      Width = 118
+      Height = 27
+      Cursor = crHandPoint
+      Caption = 'Apply settings'
+      Flat = True
+      Glyph.Data = {
+        36030000424D3603000000000000360000002800000010000000100000000100
+        18000000000000030000C40E0000C40E00000000000000000000FFFFFFFFFFFF
+        FFFFFFFFFFFFEEF6EB8CC17752A33437941437941452A2338BC177EEF6EBFFFF
+        FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF78B7611B85002E8F0934931137
+        94143794143493112E8F091B850077B65FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+        4DA02D288C03379414379414288C03349311389515389515389515379414298D
+        034B9F2BFFFFFFFFFFFFFFFFFF79B761288C03389515379414208800D1E6CB3F
+        991F349311389515389515389515389515298D0377B65FFFFFFFEFF6EC1B8500
+        3794143895152B8E066BB053FFFFFFA6D098298D033895153895153895153895
+        153794141B8500EEF5EB8DC2792E8F093895152F900B3B9619FFFFFFFFFFFFFF
+        FFFF268B003694133895153895153895153895152E8F098BC17753A335349310
+        2E9009399518FFFFFFFFFFFFF6FAF5FFFFFF98C887298D033895153895153895
+        1538951534931152A23338951532910E5DA942FFFFFFFFFFFFEDF5EB479D29FF
+        FFFFFFFFFF2B8E07359311389515389515389515379414379414389515349311
+        3D981CFFFFFFFFFFFF3C971B198400ECF5EAFFFFFFD2E7CC1A85003794143895
+        1538951537941437941454A33634931031910D4B9F2D3C971B31910D31910C5D
+        A841FFFFFFFFFFFFA5CF971C860037941438951534931152A2348DC2792D8F09
+        389515349310359311389515379514218800C7E1BFFFFFFFFFFFFFB7D9AC1C86
+        003493112E8F098CC177F0F7ED1B850037941438951538951538951538951536
+        9413238900EFF6EDFFFFFFFFFFFFF4F9F3419A20198400EEF6EBFFFFFF7AB863
+        288C02389515389515389515389515389515359311228900C9E2C1FFFFFFEEF6
+        ED23890077B65FFFFFFFFFFFFFFFFFFF4EA12F288C0237941438951538951538
+        951538951536941320880078B7621D86004A9E2AFFFFFFFFFFFFFFFFFFFFFFFF
+        FFFFFF7AB8631B85002D8F093493103794143794143493102E8F0914810078B7
+        60FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0F7ED8DC27954A33638
+        951538951553A3358DC279EFF6ECFFFFFFFFFFFFFFFFFFFFFFFF}
+      Spacing = 10
+      OnClick = btnApplyClick
+    end
   end
   object PanelClient: TPanel
     AlignWithMargins = True
-    Left = 710
+    Left = 640
     Top = 10
     Width = 537
-    Height = 698
+    Height = 578
     Margins.Left = 10
     Margins.Top = 10
     Margins.Right = 10
@@ -181,161 +208,65 @@ object MassMailerForm: TMassMailerForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 1
-    object Shape_Banks: TShape
-      Left = 16
-      Top = 461
-      Width = 505
-      Height = 26
-      Pen.Color = clMedGray
-      Pen.Style = psDot
-    end
-    object Shape_Business: TShape
-      Left = 16
-      Top = 14
-      Width = 505
-      Height = 26
-      Pen.Color = clMedGray
-      Pen.Style = psDot
-    end
-    object Shape_Customer: TShape
-      Left = 16
-      Top = 54
-      Width = 505
-      Height = 26
-      Pen.Color = clMedGray
-      Pen.Style = psDot
-    end
-    object Shape_Footer: TShape
-      Left = 16
-      Top = 501
-      Width = 505
-      Height = 26
-      Pen.Color = clMedGray
-      Pen.Style = psDot
-    end
-    object Shape_Invoices: TShape
-      Left = 16
-      Top = 381
-      Width = 505
-      Height = 26
-      Pen.Color = clMedGray
-      Pen.Style = psDot
-    end
-    object Shape_Terms: TShape
-      Left = 16
-      Top = 421
-      Width = 505
-      Height = 26
-      Pen.Color = clMedGray
-      Pen.Style = psDot
-    end
-    object Text_Banks: TLabel
-      Left = 22
-      Top = 467
-      Width = 151
+    ExplicitLeft = 710
+    ExplicitHeight = 698
+    object TextMessage: TLabel
+      AlignWithMargins = True
+      Left = 20
+      Top = 68
+      Width = 497
       Height = 13
-      Caption = 'BANK ACCOUNTS (IF GIVEN)'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clGray
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
-    end
-    object Text_Business: TLabel
-      Left = 437
-      Top = 20
-      Width = 76
-      Height = 13
-      Caption = 'LBU ADDRESS'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clGray
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
-    end
-    object Text_Customer: TLabel
-      Left = 22
-      Top = 60
-      Width = 116
-      Height = 13
-      Caption = 'CUSTOMER ADDRESS'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clGray
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
-    end
-    object Text_Footer: TLabel
-      Left = 22
-      Top = 507
-      Width = 43
-      Height = 13
-      Caption = 'FOOTER'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clGray
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
-    end
-    object Text_Invoices: TLabel
-      Left = 22
-      Top = 386
-      Width = 73
-      Height = 13
-      Caption = 'INVOICE LIST'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clGray
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
-    end
-    object Text_Terms: TLabel
-      Left = 22
-      Top = 427
-      Width = 93
-      Height = 13
-      Caption = 'PAYMENT TERMS'
-      Font.Charset = DEFAULT_CHARSET
-      Font.Color = clGray
-      Font.Height = -11
-      Font.Name = 'Tahoma'
-      Font.Style = [fsBold]
-      ParentFont = False
-    end
-    object Text2: TLabel
-      Left = 18
-      Top = 143
-      Width = 85
-      Height = 13
+      Margins.Left = 20
+      Margins.Top = 0
+      Margins.Right = 20
+      Margins.Bottom = 10
+      Align = alTop
       Caption = 'Custom message:'
+      ExplicitLeft = 18
+      ExplicitTop = 70
+      ExplicitWidth = 85
     end
-    object Text3: TLabel
-      Left = 18
-      Top = 93
-      Width = 78
+    object TextSubject: TLabel
+      AlignWithMargins = True
+      Left = 20
+      Top = 10
+      Width = 497
       Height = 13
+      Margins.Left = 20
+      Margins.Top = 10
+      Margins.Right = 20
+      Margins.Bottom = 10
+      Align = alTop
       Caption = 'Custom subject:'
+      ExplicitLeft = 18
+      ExplicitTop = 20
+      ExplicitWidth = 78
     end
     object PanelMessage: TPanel
-      Left = 16
-      Top = 162
-      Width = 505
-      Height = 201
+      AlignWithMargins = True
+      Left = 15
+      Top = 91
+      Width = 507
+      Height = 315
+      Margins.Left = 15
+      Margins.Top = 0
+      Margins.Right = 15
+      Margins.Bottom = 0
+      Align = alClient
       BevelOuter = bvNone
       Color = clWhite
       ParentBackground = False
       TabOrder = 1
+      ExplicitLeft = 16
+      ExplicitTop = 89
+      ExplicitWidth = 505
+      ExplicitHeight = 320
       object Text_Message: TMemo
         AlignWithMargins = True
         Left = 2
         Top = 2
-        Width = 501
-        Height = 197
+        Width = 503
+        Height = 311
         Margins.Left = 2
         Margins.Top = 2
         Margins.Right = 2
@@ -354,22 +285,39 @@ object MassMailerForm: TMassMailerForm
         ScrollBars = ssVertical
         TabOrder = 0
         OnKeyUp = Text_MessageKeyUp
+        ExplicitWidth = 501
+        ExplicitHeight = 197
       end
     end
     object PanelSubject: TPanel
-      Left = 16
-      Top = 112
-      Width = 505
+      AlignWithMargins = True
+      Left = 15
+      Top = 33
+      Width = 507
       Height = 25
+      Margins.Left = 15
+      Margins.Top = 0
+      Margins.Right = 15
+      Margins.Bottom = 10
+      Align = alTop
       BevelOuter = bvNone
       Color = clWhite
       ParentBackground = False
       TabOrder = 0
+      ExplicitLeft = 16
+      ExplicitTop = 39
+      ExplicitWidth = 505
       object Text_Subject: TEdit
+        AlignWithMargins = True
         Left = 2
-        Top = 4
-        Width = 501
-        Height = 20
+        Top = 2
+        Width = 503
+        Height = 21
+        Margins.Left = 2
+        Margins.Top = 2
+        Margins.Right = 2
+        Margins.Bottom = 2
+        Align = alClient
         BorderStyle = bsNone
         Color = clCream
         Font.Charset = DEFAULT_CHARSET
@@ -380,20 +328,32 @@ object MassMailerForm: TMassMailerForm
         ParentFont = False
         TabOrder = 0
         OnKeyUp = Text_SubjectKeyUp
+        ExplicitTop = 4
+        ExplicitWidth = 501
+        ExplicitHeight = 20
       end
     end
     object PanelOption: TPanel
-      Left = 6
-      Top = 533
-      Width = 525
+      AlignWithMargins = True
+      Left = 5
+      Top = 416
+      Width = 527
       Height = 157
+      Margins.Left = 5
+      Margins.Top = 10
+      Margins.Right = 5
+      Margins.Bottom = 5
+      Align = alBottom
       BevelOuter = bvNone
       TabOrder = 2
+      ExplicitLeft = 6
+      ExplicitTop = 415
+      ExplicitWidth = 525
       object Shape_Options: TShape
         AlignWithMargins = True
         Left = 10
         Top = 10
-        Width = 505
+        Width = 507
         Height = 137
         Margins.Left = 10
         Margins.Top = 10
@@ -403,6 +363,7 @@ object MassMailerForm: TMassMailerForm
         Brush.Style = bsClear
         Pen.Color = clMedGray
         Pen.Style = psDot
+        ExplicitWidth = 505
         ExplicitHeight = 127
       end
       object Shape_Dates: TShape
@@ -747,8 +708,8 @@ object MassMailerForm: TMassMailerForm
     AlignWithMargins = True
     Left = 10
     Top = 10
-    Width = 685
-    Height = 698
+    Width = 615
+    Height = 578
     Margins.Left = 10
     Margins.Top = 10
     Margins.Right = 5
@@ -758,14 +719,16 @@ object MassMailerForm: TMassMailerForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
+    ExplicitWidth = 685
+    ExplicitHeight = 698
     object PanelEmailContainer: TPanel
       AlignWithMargins = True
       Left = 20
-      Top = 130
-      Width = 645
-      Height = 548
+      Top = 221
+      Width = 575
+      Height = 337
       Margins.Left = 20
-      Margins.Top = 130
+      Margins.Top = 20
       Margins.Right = 20
       Margins.Bottom = 20
       Align = alClient
@@ -773,13 +736,14 @@ object MassMailerForm: TMassMailerForm
       Caption = 'PanelEmailContainer'
       TabOrder = 0
       ExplicitTop = 100
+      ExplicitWidth = 645
       ExplicitHeight = 578
       object CustomerList: TListView
         AlignWithMargins = True
         Left = 5
         Top = 5
-        Width = 635
-        Height = 538
+        Width = 565
+        Height = 327
         Margins.Left = 5
         Margins.Top = 5
         Margins.Right = 5
@@ -794,101 +758,135 @@ object MassMailerForm: TMassMailerForm
         TabStop = False
         ViewStyle = vsReport
         OnKeyUp = CustomerListKeyUp
+        ExplicitWidth = 635
         ExplicitHeight = 648
       end
     end
     object GroupEmails: TGroupBox
+      AlignWithMargins = True
       Left = 20
       Top = 20
-      Width = 645
-      Height = 88
+      Width = 575
+      Height = 181
+      Margins.Left = 20
+      Margins.Top = 20
+      Margins.Right = 20
+      Margins.Bottom = 0
+      Align = alTop
       Caption = 'E-mails'
       TabOrder = 1
-      object txtSendFrom: TLabel
-        Left = 200
-        Top = 29
-        Width = 53
+      object txtCompany: TLabel
+        Left = 27
+        Top = 40
+        Width = 49
         Height = 13
-        Caption = 'Send from:'
+        Caption = 'Company:'
       end
-      object btnApply: TSpeedButton
-        Left = 538
-        Top = 34
-        Width = 87
-        Height = 27
-        Cursor = crHandPoint
-        Caption = 'Apply'
-        Flat = True
-        Glyph.Data = {
-          36030000424D3603000000000000360000002800000010000000100000000100
-          18000000000000030000C40E0000C40E00000000000000000000FFFFFFFFFFFF
-          FFFFFFFFFFFFEEF6EB8CC17752A33437941437941452A2338BC177EEF6EBFFFF
-          FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF78B7611B85002E8F0934931137
-          94143794143493112E8F091B850077B65FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
-          4DA02D288C03379414379414288C03349311389515389515389515379414298D
-          034B9F2BFFFFFFFFFFFFFFFFFF79B761288C03389515379414208800D1E6CB3F
-          991F349311389515389515389515389515298D0377B65FFFFFFFEFF6EC1B8500
-          3794143895152B8E066BB053FFFFFFA6D098298D033895153895153895153895
-          153794141B8500EEF5EB8DC2792E8F093895152F900B3B9619FFFFFFFFFFFFFF
-          FFFF268B003694133895153895153895153895152E8F098BC17753A335349310
-          2E9009399518FFFFFFFFFFFFF6FAF5FFFFFF98C887298D033895153895153895
-          1538951534931152A23338951532910E5DA942FFFFFFFFFFFFEDF5EB479D29FF
-          FFFFFFFFFF2B8E07359311389515389515389515379414379414389515349311
-          3D981CFFFFFFFFFFFF3C971B198400ECF5EAFFFFFFD2E7CC1A85003794143895
-          1538951537941437941454A33634931031910D4B9F2D3C971B31910D31910C5D
-          A841FFFFFFFFFFFFA5CF971C860037941438951534931152A2348DC2792D8F09
-          389515349310359311389515379514218800C7E1BFFFFFFFFFFFFFB7D9AC1C86
-          003493112E8F098CC177F0F7ED1B850037941438951538951538951538951536
-          9413238900EFF6EDFFFFFFFFFFFFF4F9F3419A20198400EEF6EBFFFFFF7AB863
-          288C02389515389515389515389515389515359311228900C9E2C1FFFFFFEEF6
-          ED23890077B65FFFFFFFFFFFFFFFFFFF4EA12F288C0237941438951538951538
-          951538951536941320880078B7621D86004A9E2AFFFFFFFFFFFFFFFFFFFFFFFF
-          FFFFFF7AB8631B85002D8F093493103794143794143493102E8F0914810078B7
-          60FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0F7ED8DC27954A33638
-          951538951553A3358DC279EFF6ECFFFFFFFFFFFFFFFFFFFFFFFF}
-      end
-      object cbUserInCopy: TCheckBox
+      object shapeLbuEmails: TShape
         Left = 24
-        Top = 29
-        Width = 145
-        Height = 17
-        Cursor = crHandPoint
-        Caption = 'Include me in the copy'
-        Color = clWhite
+        Top = 70
+        Width = 220
+        Height = 75
+        Pen.Color = 14474460
+      end
+      object Text_Warn: TLabel
+        Left = 24
+        Top = 151
+        Width = 258
+        Height = 13
+        Caption = '* E-mail template is available in English language only.'
         Font.Charset = DEFAULT_CHARSET
-        Font.Color = 5592405
+        Font.Color = clGray
         Font.Height = -11
         Font.Name = 'Tahoma'
         Font.Style = []
-        ParentColor = False
         ParentFont = False
-        TabOrder = 0
       end
-      object cbCtrlStatusOff: TCheckBox
-        Left = 24
-        Top = 52
-        Width = 145
-        Height = 17
-        Cursor = crHandPoint
-        Caption = 'Hide control status column'
-        Color = clWhite
-        Font.Charset = DEFAULT_CHARSET
-        Font.Color = clWindowText
-        Font.Height = -11
-        Font.Name = 'Tahoma'
-        Font.Style = []
-        ParentColor = False
-        ParentFont = False
-        TabOrder = 1
-      end
-      object selSendFrom: TComboBox
-        Left = 199
-        Top = 48
-        Width = 130
+      object selCompany: TComboBox
+        Left = 88
+        Top = 37
+        Width = 156
         Height = 21
         Cursor = crHandPoint
         Style = csDropDownList
+        TabOrder = 0
+        OnSelect = selCompanySelect
+      end
+      object lstLbuEmails: TListBox
+        Left = 27
+        Top = 74
+        Width = 214
+        Height = 67
+        Style = lbOwnerDrawFixed
+        BorderStyle = bsNone
+        Items.Strings = (
+          'A'
+          'B'
+          'C'
+          'D'
+          'E'
+          'F')
+        Sorted = True
+        TabOrder = 1
+      end
+      object grSettings: TGroupBox
+        Left = 288
+        Top = 34
+        Width = 241
+        Height = 111
+        Caption = 'Global settings'
         TabOrder = 2
+        object cbCtrlStatusOff: TCheckBox
+          Left = 24
+          Top = 54
+          Width = 145
+          Height = 17
+          Cursor = crHandPoint
+          Caption = 'Hide control status column'
+          Color = clWhite
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'Tahoma'
+          Font.Style = []
+          ParentColor = False
+          ParentFont = False
+          TabOrder = 0
+        end
+        object cbUserInCopy: TCheckBox
+          Left = 24
+          Top = 31
+          Width = 145
+          Height = 17
+          Cursor = crHandPoint
+          Caption = 'Include me in the copy'
+          Color = clWhite
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = 5592405
+          Font.Height = -11
+          Font.Name = 'Tahoma'
+          Font.Style = []
+          ParentColor = False
+          ParentFont = False
+          TabOrder = 1
+        end
+        object cbMergeList: TCheckBox
+          Left = 24
+          Top = 77
+          Width = 145
+          Height = 17
+          Cursor = crHandPoint
+          Caption = 'Merge emails into one'
+          Color = clWhite
+          Font.Charset = DEFAULT_CHARSET
+          Font.Color = clWindowText
+          Font.Height = -11
+          Font.Name = 'Tahoma'
+          Font.Style = []
+          ParentColor = False
+          ParentFont = False
+          TabOrder = 2
+        end
       end
     end
   end
