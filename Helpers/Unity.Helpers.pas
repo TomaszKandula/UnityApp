@@ -25,7 +25,8 @@ uses
     Vcl.Grids,
     Unity.Enums,
     Unity.Grid,
-    Unity.References;
+    Unity.References,
+    Api.BankDetails;
 
 
 type
@@ -36,9 +37,13 @@ type
     /// </summary>
     TInputMethod = reference to procedure;
 
+    /// <summary>
+    /// Array definition for SID number calculation. Note that it has 261 characters.
+    /// </summary>
+    TSidArray = array[0..260] of Char;
 
     /// <summary>
-    /// Generic class exposing helper methods for basic operations on arrays.
+    /// Generic class exposing helper methods for some basic operations on arrays.
     /// </summary>
     TArrayUtils<T> = class abstract
     public
@@ -48,9 +53,8 @@ type
         class procedure MoveToList(const FromArray: TArray<T>; var TargetList: TList<T>); static;
     end;
 
-
     /// <summary>
-    ///
+    /// Record helper that returns field name.
     /// </summary>
     TRecordUtils<T: record> = class abstract
     public
@@ -58,24 +62,24 @@ type
     end;
 
     /// <summary>
-    ///
-    /// </summary>
-    TSidArray = array[0..260] of Char;
-
-
-    /// <summary>
     /// Holds various helper methods, shorthands and wrappers.
     /// </summary>
     THelpers = class abstract
     strict private
+        const HtmlBanks = '<p class="p">{ROWS}</p>';
+        const HtmlRow   = '<b>Bank Details</b>: <br><br> {BANK_NAME} (<b>{ISO}</b> payments) <br> IBAN/Account No: {BANK_ACC} {BIC} <br>';
+        const HtmlBic   = '(BIC: {BIC_NUMBER})';
+        const HtmlEmpty = '<!-- NO BANK ACCOUNT ATTACHED -->';
         const HEAP_ZERO_MEMORY = $00000008;
         const SID_REVISION = 1;
         class function ConvertSid(Sid: PSID; pszSidText: PChar; var dwBufferLen: DWORD): BOOL; static;
         class function ObtainTextSid(hToken: THandle; pszSid: PChar; var dwBufferLen: DWORD): BOOL; static;
         class procedure GetBuildInfo(var V1, V2, V3, V4: word); static;
     public
+        /// <summary>For Windows internal messaging between objects.</summary>
         const WM_GETINFO = WM_USER + 120;
-        const WM_EXTINFO = WM_APP  + 150;
+        /// <summary>For Windows external messaging between different applications.</summary>
+        const WM_EXTINFO = WM_APP + 150;
         class procedure ExecWithDelay(Delay: integer; AnonymousMethod: TInputMethod); static;
         class procedure LoadImageFromStream(var Image: TImage; const FileName: string); static;
         class procedure TurnRowHighlight(var Grid: TStringGrid; var MenuItem: TMenuItem); static;
@@ -90,8 +94,7 @@ type
         class function ExportToCSV(SourceArray: TArray<TArray<string>>; FileName: string = ''): TStringList; static;
         class function IsVoType(VoType: string): boolean; static;
         class function ShowReport(ReportNumber: cardinal; CurrentForm: TForm): cardinal; static;
-        class procedure ReturnCoCodesList(var SourceGrid: TStringGrid; const SourceCol: integer;
-            var TargetList: TStringList; HasHeader: boolean = False; Prefix: string = ''); static;
+        class procedure ReturnCoCodesList(var SourceGrid: TStringGrid; const SourceCol: integer; var TargetList: TStringList; HasHeader: boolean = False; Prefix: string = ''); static;
         class function DbNameToCoCode(SourceDBName: string): string; static;
         class function CoConvert(CoNumber: string): string; static;
         class function GetSourceDBName(CoCode: string; Prefix: string): string; static;
@@ -102,6 +105,10 @@ type
         class function LoadFileToStr(const FileName: TFileName): string; static;
         class function GetCurrentUserSid: string; static;
         class procedure RemoveAllInFolder(const Path: string; const Pattern: string); static;
+        class function FormatDateStr(DateStr: string): string; static;
+        class function FormatDateTimeStr(DateTimeStr: string): string; static;
+        class function BankListToHtml(BankDetails: TArray<TBankDetails>): string; static;
+        class procedure StrArrayToStrings(Input: TArray<string>; var Output: TStringList); static;
     end;
 
 
@@ -153,6 +160,32 @@ class procedure TArrayUtils<T>.MoveToList(const FromArray: TArray<T>; var Target
 begin
     for var iCNT:=0 to Length(FromArray) - 1 do
         TargetList.Add(FromArray[iCNT]);
+end;
+
+
+class function TRecordUtils<T>.GetFields(const Struct: T): TList<string>;
+begin
+
+    var RttiContext: TRttiContext;
+    var RttiType:    TRttiType;
+    var RttiField:   TRttiField;
+
+    try
+
+        RttiContext:=TRttiContext.Create();
+        Result:=TList<string>.Create();
+
+        for RttiField in RttiContext.GetType(TypeInfo(T)).GetFields do
+        begin
+            RttiType:=RttiField.FieldType;
+            Result.Add(RttiType.Name);
+        end;
+
+    except
+        on E: Exception do
+
+    end;
+
 end;
 
 
@@ -830,29 +863,64 @@ begin
 end;
 
 
-class function TRecordUtils<T>.GetFields(const Struct: T): TList<string>;
+class function THelpers.FormatDateStr(DateStr: string): string;
+begin
+    if String.IsNullOrEmpty(DateStr) then Exit();
+    // Expected: 2019-12-15T00:00:00
+    var TempStr:=DateStr.Split(['T']);
+    Result:=TempStr[0];
+end;
+
+
+class function THelpers.FormatDateTimeStr(DateTimeStr: string): string;
+begin
+    if String.IsNullOrEmpty(DateTimeStr) then Exit();
+    // Expected: 2019-12-18T23:32:04.137
+    var TempStr:=DateTimeStr.Split(['T']);
+    var TempTime:=TempStr[1];
+    var NewTime:=TempTime.Split(['.']);
+    Result:=TempStr[0] + ' ' + NewTime[0];
+end;
+
+
+class function THelpers.BankListToHtml(BankDetails: TArray<TBankDetails>): string;
 begin
 
-    var RttiContext: TRttiContext;
-    var RttiType:    TRttiType;
-    var RttiField:   TRttiField;
+    Result:=HtmlEmpty;
+    if Length(BankDetails) = 0 then Exit();
 
-    try
+    var HtmlLines: string;
+    for var iCNT:=0 to Length(BankDetails) - 1 do
+    begin
 
-        RttiContext:=TRttiContext.Create();
-        Result:=TList<string>.Create();
+        var HtmlLine:=HtmlRow;
+        HtmlLines:=HtmlLines + #13#10 + HtmlLine
+            .Replace('{BANK_NAME}', BankDetails[iCNT].BankName)
+            .Replace('{ISO}',       BankDetails[iCNT].BankIso)
+            .Replace('{BANK_ACC}',  BankDetails[iCNT].BankAcc);
 
-        for RttiField in RttiContext.GetType(TypeInfo(T)).GetFields do
+        if not String.IsNullOrEmpty(BankDetails[iCNT].BankCode) then
         begin
-            RttiType:=RttiField.FieldType;
-            Result.Add(RttiType.Name);
+            var BicLine:=HtmlBic;
+            BicLine:=BicLine.Replace('{BIC_NUMBER}', BankDetails[iCNT].BankCode);
+            HtmlLines:=HtmlLines.Replace('{BIC}', BicLine);
+        end
+        else
+        begin
+            HtmlLines:=HtmlLines.Replace('{BIC}', '');
         end;
-
-    except
-        on E: Exception do
 
     end;
 
+    var HtmlOutput:=HtmlBanks;
+    Result:=HtmlOutput.Replace('{ROWS}', HtmlLines);
+
+end;
+
+
+class procedure THelpers.StrArrayToStrings(Input: TArray<string>; var Output: TStringList);
+begin
+    for var iCNT:=0 to Length(Input) - 1 do Output.Add(Input[iCNT]);
 end;
 
 

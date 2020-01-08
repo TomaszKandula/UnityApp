@@ -789,7 +789,7 @@ type
         var FLastCoCodesSelected: string;
         var FHadFirstLoad: boolean;
         var FAllowClose: boolean;
-        //var FAbUpdateFields: TAddressBookUpdateFields;
+        var FIsAddressBookOpened: boolean;
         const AppMenuTextSelected = $006433C9;
         const AppMenuTextNormal = clGrayText;
         const AppButtonTxtNormal = $00555555;
@@ -1579,6 +1579,7 @@ begin
         sgAddressBook.ColWidths[1]:=-1;
     end;
 
+    FIsAddressBookOpened:=True;
     MainForm.UpdateStatusBar(TStatusBar.Ready);
     ThreadFileLog.Log('[OpenAddressBookAsync_Callback]: Address Book has been opened.');
 
@@ -1670,6 +1671,10 @@ begin
     ClearOpenItemsSummary();
     UpdateStatusBar(TStatusBar.Downloading);
     LoadOpenItems();
+
+    sgAddressBook.SetUpdatedRow(0);
+    var AddressBook: IAddressBook:=TAddressBook.Create();
+    AddressBook.OpenAddressBookAsync('', OpenAddressBook_Callback, LoadedCompanies);
 
     BusyForm.Close();
 
@@ -3155,7 +3160,8 @@ end;
 
 procedure TMainForm.Action_TrackerClick(Sender: TObject);
 begin
-    THelpers.WndCall(TrackerForm, TWindowState.Modal);
+    {THelpers.WndCall(TrackerForm, TWindowState.Modal);}
+    THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in beta version.');
 end;
 
 
@@ -3167,8 +3173,9 @@ end;
 
 procedure TMainForm.Action_AddToBookClick(Sender: TObject);
 begin
-    var AddressBook: IAddressBook:=TAddressBook.Create();
-    AddressBook.AddToAddressBookAsync(sgAgeView, AddToAddressBook_Callback);
+    {var AddressBook: IAddressBook:=TAddressBook.Create();}
+    {AddressBook.AddToAddressBookAsync(sgAgeView, AddToAddressBook_Callback);}
+    THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in beta version.');
 end;
 
 
@@ -3178,6 +3185,12 @@ begin
     if (sgAgeView.Selection.Top - sgAgeView.Selection.Bottom) = 0 then
     begin
         THelpers.MsgCall(TAppMessage.Warn, 'Please select more than one customer.');
+        Exit();
+    end;
+
+    if not FIsAddressBookOpened then
+    begin
+        THelpers.MsgCall(TAppMessage.Warn, 'Please make sure Address Book is currently opened.');
         Exit();
     end;
 
@@ -3671,7 +3684,8 @@ end;
 procedure TMainForm.txtTrackerClick(Sender: TObject);
 begin
     if not CanAccessAppMenu then Exit();
-    SetActiveTabsheet(TabSheet4);
+    {SetActiveTabsheet(TabSheet4);}
+    THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in beta version.');
 end;
 
 
@@ -3796,6 +3810,7 @@ begin
     begin
         sgAddressBook.SetUpdatedRow(0);
         sgAddressBook.ClearAll(2, 1, 1, True);
+        FIsAddressBookOpened:=False;
     end;
 
 end;

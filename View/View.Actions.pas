@@ -34,8 +34,7 @@ uses
     Unity.Records,
     Unity.Grid,
     Unity.Panel,
-    Unity.References,
-    Api.BankDetails;
+    Unity.References;
 
 
 type
@@ -193,10 +192,6 @@ type
         procedure selSendFromSelect(Sender: TObject);
         procedure btnAddCommentClick(Sender: TObject);
     strict private
-        const HtmlBanks = '<p class="p">{ROWS}</p>';//to helper
-        const HtmlRow   = '<b>Bank Details</b>: <br><br> {BANK_NAME} (<b>{ISO}</b> payments) <br> IBAN/Account No: {BANK_ACC} {BIC} <br>';//to helper
-        const HtmlBic   = '(BIC: {BIC_NUMBER})';//to helper
-        const HtmlEmpty = '<!-- NO BANK ACCOUNT ATTACHED -->';//to helper
         const AppButtonTxtNormal = $00555555;
         const AppButtonTxtSelected = $006433C9;
         var FSourceDBName: string;
@@ -215,11 +210,7 @@ type
         var FIsDataLoaded: boolean;
         var OpenItemsRefs: TFOpenItemsRefs;
         var CtrlStatusRefs: TFCtrlStatusRefs;
-        function  FormatDateStr(DateStr: string): string;//to helper
-        function  FormatDateTimeStr(DateTimeStr: string): string;//to helper
         function  GetRunningApps(SearchName: string): boolean;
-        function  BankListToHtml(BankDetails: TArray<TBankDetails>): string;//to helper
-        procedure StrArrayToStrings(Input: TArray<string>; var Output: TStringList);//to helper
         procedure GetOpenItems(OpenItemsDest, OpenItemsSrc: TStringGrid);
         procedure UpdateGeneral(var Text: TMemo);
         procedure UpdateDaily(var DailyComments: TStringGrid);
@@ -302,26 +293,6 @@ end;
 {$REGION 'LOCAL HELPERS'}
 
 
-function TActionsForm.FormatDateStr(DateStr: string): string;//to helper
-begin
-    if String.IsNullOrEmpty(DateStr) then Exit();
-    // Expected: 2019-12-15T00:00:00
-    var TempStr:=DateStr.Split(['T']);
-    Result:=TempStr[0];
-end;
-
-
-function TActionsForm.FormatDateTimeStr(DateTimeStr: string): string;//to helper
-begin
-    if String.IsNullOrEmpty(DateTimeStr) then Exit();
-    // Expected: 2019-12-18T23:32:04.137
-    var TempStr:=DateTimeStr.Split(['T']);
-    var TempTime:=TempStr[1];
-    var NewTime:=TempTime.Split(['.']);
-    Result:=TempStr[0] + ' ' + NewTime[0];
-end;
-
-
 function TActionsForm.GetRunningApps(SearchName: string): boolean;
 begin
 
@@ -352,47 +323,6 @@ begin
         CloseHandle(Snap);
     end;
 
-end;
-
-
-function TActionsForm.BankListToHtml(BankDetails: TArray<TBankDetails>): string;//to helper
-begin
-
-    Result:=HtmlEmpty;
-    if Length(BankDetails) = 0 then Exit();
-
-    var HtmlLines: string;
-    for var iCNT:=0 to Length(BankDetails) - 1 do
-    begin
-
-        var HtmlLine:=HtmlRow;
-        HtmlLines:=HtmlLines + #13#10 + HtmlLine
-            .Replace('{BANK_NAME}', BankDetails[iCNT].BankName)
-            .Replace('{ISO}',       BankDetails[iCNT].BankIso)
-            .Replace('{BANK_ACC}',  BankDetails[iCNT].BankAcc);
-
-        if not String.IsNullOrEmpty(BankDetails[iCNT].BankCode) then
-        begin
-            var BicLine:=HtmlBic;
-            BicLine:=BicLine.Replace('{BIC_NUMBER}', BankDetails[iCNT].BankCode);
-            HtmlLines:=HtmlLines.Replace('{BIC}', BicLine);
-        end
-        else
-        begin
-            HtmlLines:=HtmlLines.Replace('{BIC}', '');
-        end;
-
-    end;
-
-    var HtmlOutput:=HtmlBanks;
-    Result:=HtmlOutput.Replace('{ROWS}', HtmlLines);
-
-end;
-
-
-procedure TActionsForm.StrArrayToStrings(Input: TArray<string>; var Output: TStringList);//to helper
-begin
-    for var iCNT:=0 to Length(Input) - 1 do Output.Add(Input[iCNT]);
 end;
 
 
@@ -560,10 +490,10 @@ begin
         FExclusions:=CompanyDetails.Exclusions;
 
         FLbuPhones   :=THelpers.ArrayToString(CompanyDetails.LbuPhones, ',');
-        FLbuBanksHtml:=BankListToHtml(CompanyDetails.LbuBanks);
+        FLbuBanksHtml:=THelpers.BankListToHtml(CompanyDetails.LbuBanks);
 
         selSendFrom.Clear();
-        StrArrayToStrings(CompanyDetails.LbuEmails, LbuEmails);
+        THelpers.StrArrayToStrings(CompanyDetails.LbuEmails, LbuEmails);
         selSendFrom.Items.AddStrings(LbuEmails);
         if selSendFrom.Items.Count > 0 then
         begin
@@ -600,8 +530,8 @@ begin
         for var iCNT:=1{Skip header} to TotalRows do
         begin
             DailyComments.Cells[1, iCNT]:=LDailyCommentFields[iCNT - 1].CommentId.ToString();
-            DailyComments.Cells[2, iCNT]:=FormatDateTimeStr(LDailyCommentFields[iCNT - 1].EntryDateTime);
-            DailyComments.Cells[3, iCNT]:=FormatDateStr(LDailyCommentFields[iCNT - 1].AgeDate);
+            DailyComments.Cells[2, iCNT]:=THelpers.FormatDateTimeStr(LDailyCommentFields[iCNT - 1].EntryDateTime);
+            DailyComments.Cells[3, iCNT]:=THelpers.FormatDateStr(LDailyCommentFields[iCNT - 1].AgeDate);
             DailyComments.Cells[4, iCNT]:=LDailyCommentFields[iCNT - 1].UserComment;
             DailyComments.Cells[5, iCNT]:=LDailyCommentFields[iCNT - 1].UserAlias;
         end;

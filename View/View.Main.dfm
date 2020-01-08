@@ -11959,7 +11959,7 @@ object MainForm: TMainForm
             Width = 250
             Height = 13
             AutoSize = False
-            Caption = 'selection made, it will load the whole collection.'
+            Caption = 'selection made, the whole collection. will be loaded.'
             Font.Charset = DEFAULT_CHARSET
             Font.Color = 5592405
             Font.Height = -11

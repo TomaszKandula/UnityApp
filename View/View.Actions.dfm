@@ -1670,6 +1670,7 @@ object ActionsForm: TActionsForm
             Top = 29
             Width = 145
             Height = 17
+            Cursor = crHandPoint
             Caption = 'Include me in the copy'
             Color = clWhite
             Font.Charset = DEFAULT_CHARSET
@@ -1686,6 +1687,7 @@ object ActionsForm: TActionsForm
             Top = 52
             Width = 145
             Height = 17
+            Cursor = crHandPoint
             Caption = 'Hide control status column'
             Color = clWhite
             Font.Charset = DEFAULT_CHARSET
@@ -1702,6 +1704,7 @@ object ActionsForm: TActionsForm
             Top = 48
             Width = 130
             Height = 21
+            Cursor = crHandPoint
             Style = csDropDownList
             TabOrder = 2
             OnSelect = selSendFromSelect
