@@ -773,7 +773,7 @@ object MassMailerForm: TMassMailerForm
       Margins.Right = 20
       Margins.Bottom = 0
       Align = alTop
-      Caption = 'E-mails'
+      Caption = 'E-mail settings'
       TabOrder = 1
       object txtCompany: TLabel
         Left = 27
@@ -878,6 +878,7 @@ object MassMailerForm: TMassMailerForm
           Cursor = crHandPoint
           Caption = 'Merge emails into one'
           Color = clWhite
+          Enabled = False
           Font.Charset = DEFAULT_CHARSET
           Font.Color = clWindowText
           Font.Height = -11

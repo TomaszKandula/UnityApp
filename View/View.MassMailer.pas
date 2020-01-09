@@ -336,7 +336,7 @@ begin
             Item.SubItems.Add(LCustomerNumber);
             Item.SubItems.Add(LCustomerName);
             Item.SubItems.Add('No');
-            Item.SubItems.Add('Not found!');
+            Item.SubItems.Add('Not set!');
             Item.SubItems.Add('Not found!');
             Item.SubItems.Add(LSourceDbName);
             Item.SubItems.Add('empty');
@@ -563,7 +563,17 @@ end;
 
 procedure TMassMailerForm.btnApplyClick(Sender: TObject);
 begin
-    //
+
+    if CustomerList.Items.Count = 0 then Exit();
+
+    for var iCNT:=0 to CustomerList.Items.Count - 1 do
+    begin
+
+        if CustomerList.Items[iCNT].SubItems[5]{SourceDbName} = selCompany.Text then
+            CustomerList.Items[iCNT].SubItems[3]{SentFrom}:=lstLbuEmails.Items[lstLbuEmails.ItemIndex];
+
+    end;
+
 end;
 
 
