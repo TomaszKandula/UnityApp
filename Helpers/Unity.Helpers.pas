@@ -90,7 +90,8 @@ type
         class function Explode(Text: string; SourceDelim: char): string; static;
         class function Implode(Text: TStrings; TargetDelim: char; ItemsHaveQuotes: boolean = False): string; static;
         class function ListToString(Input: TList<string>; TargetDelim: string): string; static;
-        class function ArrayToString(Input: TArray<string>; TargetDelim: string): string; static;
+        class function ArrayStrToString(Input: TArray<string>; TargetDelim: string): string; static;
+        class function ArrayIntToString(Input: TArray<integer>; TargetDelim: string): string; static;
         class function ExportToCSV(SourceArray: TArray<TArray<string>>; FileName: string = ''): TStringList; static;
         class function IsVoType(VoType: string): boolean; static;
         class function ShowReport(ReportNumber: cardinal; CurrentForm: TForm): cardinal; static;
@@ -109,6 +110,7 @@ type
         class function FormatDateTimeStr(DateTimeStr: string): string; static;
         class function BankListToHtml(BankDetails: TArray<TBankDetails>): string; static;
         class procedure StrArrayToStrings(Input: TArray<string>; var Output: TStringList); static;
+        class function StringToArrayInt(Input: string; SourceDelim: char): TArray<integer>; static;
     end;
 
 
@@ -473,7 +475,7 @@ begin
 end;
 
 
-class function THelpers.ArrayToString(Input: TArray<string>; TargetDelim: string): string;
+class function THelpers.ArrayStrToString(Input: TArray<string>; TargetDelim: string): string;
 begin
 
     for var iCNT:=0 to Length(Input) - 1 do
@@ -483,6 +485,22 @@ begin
             Result:=Result + Input[iCNT] + TargetDelim
         else
             Result:=Result + Input[iCNT];
+
+    end;
+
+end;
+
+
+class function THelpers.ArrayIntToString(Input: TArray<integer>; TargetDelim: string): string;
+begin
+
+    for var iCNT:=0 to Length(Input) - 1 do
+    begin
+
+        if iCNT < Length(Input) - 1 then
+            Result:=Result + Input[iCNT].ToString() + TargetDelim
+        else
+            Result:=Result + Input[iCNT].ToString();
 
     end;
 
@@ -921,6 +939,34 @@ end;
 class procedure THelpers.StrArrayToStrings(Input: TArray<string>; var Output: TStringList);
 begin
     for var iCNT:=0 to Length(Input) - 1 do Output.Add(Input[iCNT]);
+end;
+
+
+class function THelpers.StringToArrayInt(Input: string; SourceDelim: char): TArray<integer>;
+begin
+
+    var SL:=TStringList.Create();
+    try
+
+        Result:=TArray<integer>.Create();
+        try
+
+            SL.Delimiter:=SourceDelim;
+            SL.DelimitedText:=Input;
+
+            SetLength(Result, SL.Count);
+
+            for var iCNT:=0 to SL.Count - 1 do
+                Result[iCNT]:=SL.Strings[iCNT].ToInteger();
+
+        except
+            SetLength(Result, 0);
+        end;
+
+    finally
+        SL.Free();
+    end;
+
 end;
 
 

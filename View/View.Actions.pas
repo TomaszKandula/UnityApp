@@ -489,7 +489,7 @@ begin
         FLbuAddress:=CompanyDetails.LbuAddress;
         FExclusions:=CompanyDetails.Exclusions;
 
-        FLbuPhones   :=THelpers.ArrayToString(CompanyDetails.LbuPhones, ',');
+        FLbuPhones   :=THelpers.ArrayStrToString(CompanyDetails.LbuPhones, ';');
         FLbuBanksHtml:=THelpers.BankListToHtml(CompanyDetails.LbuBanks);
 
         selSendFrom.Clear();

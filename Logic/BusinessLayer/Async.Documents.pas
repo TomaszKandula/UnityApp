@@ -132,15 +132,15 @@ begin
             var Statement: IDocument:=TDocument.Create();
 
             Statement.MailSubject   :=PayLoad.Subject + ' - ' + PayLoad.CustName + ' - ' + PayLoad.CustNumber.ToString();
-            Statement.Exclusions    :=PayLoad.Exclusions;    //
+            Statement.Exclusions    :=PayLoad.Exclusions;
             Statement.MailFrom      :=PayLoad.SendFrom;
-            Statement.MailTo        :=PayLoad.MailTo;
+            Statement.MailTo        :=TArray<string>.Create('tokan@dfds.com'); //PayLoad.MailTo;
             Statement.SourceDBName  :=PayLoad.SourceDBName;
             Statement.CustNumber    :=PayLoad.CustNumber;
             Statement.CustName      :=PayLoad.CustName;
-            Statement.LBUName       :=PayLoad.LBUName;       //
-            Statement.LBUAddress    :=PayLoad.LBUAddress;    //
-            Statement.Telephone     :=PayLoad.Telephone;     //
+            Statement.LBUName       :=PayLoad.LBUName;
+            Statement.LBUAddress    :=PayLoad.LBUAddress;
+            Statement.Telephone     :=PayLoad.Telephone;
             Statement.BankDetails   :=PayLoad.BankDetails;
             Statement.CustMessage   :=PayLoad.Message;
             Statement.InvFilter     :=PayLoad.InvFilter;
@@ -266,7 +266,7 @@ begin
                     PayLoad.LBUName     :=PayLoad.MailerList.Items[iCNT].SubItems[7];
                     PayLoad.LBUAddress  :=PayLoad.MailerList.Items[iCNT].SubItems[8];
                     PayLoad.Telephone   :=PayLoad.MailerList.Items[iCNT].SubItems[9];
-                    //PayLoad.Exclusions  :=TArray<integer>.Create(PayLoad.MailerList.Items[iCNT].SubItems[10].ToInteger());//string to array of integers!
+                    PayLoad.Exclusions  :=THelpers.StringToArrayInt(PayLoad.MailerList.Items[iCNT].SubItems[10], ';');
                     PayLoad.ItemNo      :=iCNT;
 
                     SendAccDocumentAsync(AgeDate, PayLoad, Callback, True);

@@ -107,14 +107,14 @@ type
         var FPayLoad: TAccDocumentPayLoad;
         var FItemCount: integer;
         var FIsDataLoaded:  boolean;
-        var FBanksHtml: TArray<TArray<string>>;
         var FLbuEmails: TArray<TArray<string>>;
+        var FCompanyDetails: TArray<TArray<string>>;
         const FLargestSubitemTxt = -1;
         const FSizeOfTxtInHeader = -2;
         procedure ListViewAutoFit(List: TListView; const AutoFit: integer);
         function GetEmailAddress(SourceDbName: string; CustNumber: string; Source: TStringGrid): string;
         procedure GetCompanyDetails(LoadedCompanies: TList<string>);
-        procedure SetCompanyBanks(var TargetList: TListView; SourceArray: TArray<TArray<string>>);
+        procedure SetCompanyDetails(var TargetList: TListView; SourceArray: TArray<TArray<string>>);
         procedure SetEmailAddresses(List: TListView);
         procedure SetLbuEmails(var LbuEmailsList: TListBox; SelectedCompany: string; Source: TArray<TArray<string>>);
         procedure SetLbuCompanies(var LbuCompanyList: TComboBox; Source: TArray<TArray<string>>);
@@ -167,7 +167,7 @@ end;
 procedure TMassMailerForm.ListViewAutoFit(List: TListView; const AutoFit: integer);
 begin
 
-    for var iCNT:=0 to List.Columns.Count - 1 do if iCNT <> 7{BanksHtml} then
+    for var iCNT:=0 to List.Columns.Count - 1 do if iCNT < 7 then
         List.Column[iCNT].Width:=AutoFit else List.Column[iCNT].Width:=0;
 
 end;
@@ -202,7 +202,7 @@ begin
     var CompanyDetails: TCompanyDetails;
     var CallResponse: TCallResponse;
 
-    SetLength(FBanksHtml, LoadedCompanies.Count, 2);
+    SetLength(FCompanyDetails, LoadedCompanies.Count, 6);
     for var iCNT:=0 to LoadedCompanies.Count - 1 do
     begin
 
@@ -211,8 +211,16 @@ begin
         if CallResponse.IsSucceeded then
         begin
 
-            FBanksHtml[iCNT, 0]:=LoadedCompanies[iCNT];
-            FBanksHtml[iCNT, 1]:=THelpers.BankListToHtml(CompanyDetails.LbuBanks);
+            var LbuPhones:=THelpers.ArrayStrToString(CompanyDetails.LbuPhones, ';');
+            var Exclusions:=THelpers.ArrayIntToString(CompanyDetails.Exclusions, ';');
+            var LbuBanks:=THelpers.BankListToHtml(CompanyDetails.LbuBanks);
+
+            FCompanyDetails[iCNT, 0]:=LoadedCompanies[iCNT];
+            FCompanyDetails[iCNT, 1]:=CompanyDetails.LbuName;
+            FCompanyDetails[iCNT, 2]:=CompanyDetails.LbuAddress;
+            FCompanyDetails[iCNT, 3]:=LbuPhones;
+            FCompanyDetails[iCNT, 4]:=LbuBanks;
+            FCompanyDetails[iCNT, 5]:=Exclusions;
 
             var PreservedLen:=Length(FLbuEmails);
             SetLength(FLbuEmails, PreservedLen + Length(CompanyDetails.LbuEmails), 2);
@@ -231,7 +239,7 @@ begin
 end;
 
 
-procedure TMassMailerForm.SetCompanyBanks(var TargetList: TListView; SourceArray: TArray<TArray<string>>);
+procedure TMassMailerForm.SetCompanyDetails(var TargetList: TListView; SourceArray: TArray<TArray<string>>);
 begin
 
     for var iCNT:=0 to TargetList.Items.Count - 1 do
@@ -244,7 +252,13 @@ begin
             var compSourceDbName:=TargetList.Items[iCNT].SubItems[5];
 
             if listSourceDbName = compSourceDbName then
-                TargetList.Items[iCNT].SubItems[6]{BanksHtml}:=SourceArray[jCNT, 1{BanksHtml}];
+            begin
+                TargetList.Items[iCNT].SubItems[7]{LbuName}    :=SourceArray[jCNT, 1{LbuName}];
+                TargetList.Items[iCNT].SubItems[8]{LbuAddress} :=SourceArray[jCNT, 2{LbuAddress}];
+                TargetList.Items[iCNT].SubItems[9]{LbuPhones}  :=SourceArray[jCNT, 3{LbuPhones}];
+                TargetList.Items[iCNT].SubItems[10]{Exclusions}:=SourceArray[jCNT, 5{Exclusions}];
+                TargetList.Items[iCNT].SubItems[6]{BanksHtml}  :=SourceArray[jCNT, 4{BanksHtml}];
+            end;
 
         end;
 
@@ -330,6 +344,7 @@ begin
             var LCustomerName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerName), iCNT];
             var LSourceDbName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCoCode), iCNT];
 
+            // Visible fields
             Item:=MassMailerForm.CustomerList.Items.Add();
             Item.Caption:=IntToStr(iCNT);
             Item.SubItems.Add(LCustomerNumber);
@@ -338,12 +353,13 @@ begin
             Item.SubItems.Add('Not set!');
             Item.SubItems.Add('Not found!');
             Item.SubItems.Add(LSourceDbName);
-            Item.SubItems.Add('empty');
 
-            Item.SubItems.Add('');
-            Item.SubItems.Add('');
-            Item.SubItems.Add('');
-            Item.SubItems.Add('');
+            // Hidden fields
+            Item.SubItems.Add('empty');
+            Item.SubItems.Add('empty');
+            Item.SubItems.Add('empty');
+            Item.SubItems.Add('empty');
+            Item.SubItems.Add('empty');
 
         end;
 
@@ -452,7 +468,7 @@ begin
 
     var lsColumns: TListColumn;
 
-    for var iCNT:=0 to 7 do
+    for var iCNT:=0 to 11 do
     begin
 
         lsColumns:=CustomerList.Columns.Add;
@@ -478,6 +494,10 @@ begin
 
     lsColumns.AutoSize:=True;
     CustomerList.Column[7].Width:=0;
+    CustomerList.Column[8].Width:=0;
+    CustomerList.Column[9].Width:=0;
+    CustomerList.Column[10].Width:=0;
+    CustomerList.Column[11].Width:=0;
 
     PanelEmailContainer.Borders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
     PanelSubject.Borders(clWhite, $00E3B268, $00E3B268, $00E3B268, $00E3B268);
@@ -492,8 +512,8 @@ end;
 
 procedure TMassMailerForm.FormShow(Sender: TObject);
 begin
-    SetLength(FBanksHtml, 0, 2);
     SetLength(FLbuEmails, 0, 2);
+    SetLength(FCompanyDetails, 0, 6);
 end;
 
 
@@ -512,7 +532,7 @@ begin
             LoadFromGrid();
             SetEmailAddresses(CustomerList);
             GetCompanyDetails(MainForm.LoadedCompanies);
-            SetCompanyBanks(CustomerList, FBanksHtml);
+            SetCompanyDetails(CustomerList, FCompanyDetails);
             ListViewAutoFit(CustomerList, FSizeOfTxtInHeader);
             SetLbuCompanies(selCompany, FLbuEmails);
 
