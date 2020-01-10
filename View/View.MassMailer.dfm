@@ -778,9 +778,9 @@ object MassMailerForm: TMassMailerForm
       object txtCompany: TLabel
         Left = 27
         Top = 40
-        Width = 49
+        Width = 82
         Height = 13
-        Caption = 'Company:'
+        Caption = 'Source DB name:'
       end
       object shapeLbuEmails: TShape
         Left = 24
@@ -803,9 +803,9 @@ object MassMailerForm: TMassMailerForm
         ParentFont = False
       end
       object selCompany: TComboBox
-        Left = 88
+        Left = 128
         Top = 37
-        Width = 156
+        Width = 116
         Height = 21
         Cursor = crHandPoint
         Style = csDropDownList

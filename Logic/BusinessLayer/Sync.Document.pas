@@ -426,10 +426,10 @@ begin
     FHTMLTable:=FCommonHTMLTable;
     FHTMLRow  :=FCommonHTMLRow;
 
-    for var iCNT: integer:=1 to OpenItems.RowCount - 1 do
+    for var iCNT:=1 to OpenItems.RowCount - 1 do
     begin
 
-        var CtrlStatus: integer:=(OpenItems.Cells[FOpenItemsRefs.CtrlCol, iCNT]).ToInteger();
+        var CtrlStatus:=(OpenItems.Cells[FOpenItemsRefs.CtrlCol, iCNT]).ToInteger();
 
         if (OpenItems.Cells[FOpenItemsRefs.CoCodeCol, iCNT] = SourceDBName) and
         (OpenItems.Cells[FOpenItemsRefs.CustNumCol, iCNT] = CustNumber.ToString()) and

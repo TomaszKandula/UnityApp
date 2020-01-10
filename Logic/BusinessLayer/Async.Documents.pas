@@ -134,7 +134,7 @@ begin
             Statement.MailSubject   :=PayLoad.Subject + ' - ' + PayLoad.CustName + ' - ' + PayLoad.CustNumber.ToString();
             Statement.Exclusions    :=PayLoad.Exclusions;
             Statement.MailFrom      :=PayLoad.SendFrom;
-            Statement.MailTo        :=TArray<string>.Create('tokan@dfds.com'); //PayLoad.MailTo;
+            Statement.MailTo        :=PayLoad.MailTo;
             Statement.SourceDBName  :=PayLoad.SourceDBName;
             Statement.CustNumber    :=PayLoad.CustNumber;
             Statement.CustName      :=PayLoad.CustName;

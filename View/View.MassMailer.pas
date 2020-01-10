@@ -136,6 +136,7 @@ implementation
 
 
 uses
+    View.BusyScreen,
     View.Main,
     View.Calendar,
     View.Actions,
@@ -211,11 +212,11 @@ begin
         if CallResponse.IsSucceeded then
         begin
 
-            var LbuPhones:=THelpers.ArrayStrToString(CompanyDetails.LbuPhones, ';');
+            var LbuPhones :=THelpers.ArrayStrToString(CompanyDetails.LbuPhones, ';');
             var Exclusions:=THelpers.ArrayIntToString(CompanyDetails.Exclusions, ';');
-            var LbuBanks:=THelpers.BankListToHtml(CompanyDetails.LbuBanks);
+            var LbuBanks  :=THelpers.BankListToHtml(CompanyDetails.LbuBanks);
 
-            FCompanyDetails[iCNT, 0]:=LoadedCompanies[iCNT];
+            FCompanyDetails[iCNT, 0]:=THelpers.GetSourceDBName(LoadedCompanies[iCNT], 'F');
             FCompanyDetails[iCNT, 1]:=CompanyDetails.LbuName;
             FCompanyDetails[iCNT, 2]:=CompanyDetails.LbuAddress;
             FCompanyDetails[iCNT, 3]:=LbuPhones;
@@ -226,7 +227,7 @@ begin
             SetLength(FLbuEmails, PreservedLen + Length(CompanyDetails.LbuEmails), 2);
             for var jCNT:=0 to Length(CompanyDetails.LbuEmails) - 1 do
             begin
-                FLbuEmails[jCNT + PreservedLen, 0]:=LoadedCompanies[iCNT];
+                FLbuEmails[jCNT + PreservedLen, 0]:=THelpers.GetSourceDBName(LoadedCompanies[iCNT], 'F');
                 FLbuEmails[jCNT + PreservedLen, 1]:=CompanyDetails.LbuEmails[jCNT];
             end;
 
@@ -342,7 +343,7 @@ begin
 
             var LCustomerNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerNumber), iCNT];
             var LCustomerName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerName), iCNT];
-            var LSourceDbName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCoCode), iCNT];
+            var LSourceDbName  :=THelpers.GetSourceDBName(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCoCode), iCNT], 'F');
 
             // Visible fields
             Item:=MassMailerForm.CustomerList.Items.Add();
@@ -403,7 +404,7 @@ begin
     OpenItemsRefs.InitWith(MainForm.sgOpenItems);
     CtrlStatusRefs.InitWith(MainForm.sgControlStatus);
 
-    FPayLoad.Layout        :=TDocMode.Defined;
+    FPayLoad.Layout        :=TDocMode.Custom;
     FPayLoad.Subject       :=Text_Subject.Text;
     FPayLoad.Message       :=MessStr;
     FPayLoad.InvFilter     :=InvFilter;
@@ -414,8 +415,13 @@ begin
     FPayLoad.OpenItemsRefs :=OpenItemsRefs;
     FPayLoad.ControlStatus :=MainForm.sgControlStatus;
     FPayLoad.CtrlStatusRefs:=CtrlStatusRefs;
+    FPayLoad.IsCtrlStatus  :=cbCtrlStatusOff.Checked;
+    FPayLoad.IsUserInCopy  :=cbUserInCopy.Checked;
 
     Screen.Cursor:=crHourGlass;
+    MainForm.UpdateStatusBar(TStatusBar.Processing);
+    BusyForm.Show();
+
     var Documents: IDocuments:=TDocuments.Create();
     Documents.SendAccDocumentsAsync(MainForm.LoadedAgeDate, FPayLoad, SendAccDocumentsAsync_Callback);
 
@@ -429,12 +435,19 @@ end;
 
 
 procedure TMassMailerForm.SendAccDocumentsAsync_Callback(ProcessingItemNo: integer; CallResponse: TCallResponse);
-begin
 
-    Screen.Cursor:=crDefault;
+    procedure ActivityProgressOff();
+    begin
+        Screen.Cursor:=crDefault;
+        MainForm.UpdateStatusBar(TStatusBar.Ready);
+        BusyForm.Close();
+    end;
+
+begin
 
     if not CallResponse.IsSucceeded then
     begin
+        ActivityProgressOff();
         THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
         Exit();
     end;
@@ -451,6 +464,7 @@ begin
     end
     else if CallResponse.LastMessage = 'Processed.' then
     begin
+        ActivityProgressOff();
         THelpers.MsgCall(TAppMessage.Info, 'All listed items have been processed.');
     end;
 
