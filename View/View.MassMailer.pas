@@ -120,7 +120,6 @@ type
         procedure SetLbuCompanies(var LbuCompanyList: TComboBox; Source: TArray<TArray<string>>);
         procedure LoadFromGrid();
         procedure ExecuteMailer();
-
     public
         property ItemCount: integer read FItemCount write FItemCount;
         procedure SendAccDocumentsAsync_Callback(ProcessingItemNo: integer; CallResponse: TCallResponse);
@@ -341,6 +340,11 @@ begin
             Item.SubItems.Add(LSourceDbName);
             Item.SubItems.Add('empty');
 
+            Item.SubItems.Add('');
+            Item.SubItems.Add('');
+            Item.SubItems.Add('');
+            Item.SubItems.Add('');
+
         end;
 
     end;
@@ -372,9 +376,6 @@ begin
         if CustomerList.Items[iCNT].SubItems[4] <> 'Not found!' then
             ItemCount:=ItemCount + 1;
 
-    // ---------------------------------------
-    // Prepare custom message to the customer.
-    // ---------------------------------------
     var MessStr:=StringReplace(Text_Message.Text, TChars.CRLF, '<br>', [rfReplaceAll]);
 
     // -----------------------------------------------------------------------------------------------------
@@ -457,14 +458,20 @@ begin
         lsColumns:=CustomerList.Columns.Add;
 
         case iCNT of
-            0: lsColumns.Caption:='Lp';
-            1: lsColumns.Caption:='Customer number';
-            2: lsColumns.Caption:='Customer name';
-            3: lsColumns.Caption:='Is sent?';
-            4: lsColumns.Caption:='Send from';
-            5: lsColumns.Caption:='Send to';
-            6: lsColumns.Caption:='SourceDbName';
-            7: lsColumns.Caption:='BanksHtml';
+            // Visible fields
+            0:  lsColumns.Caption:='Lp';
+            1:  lsColumns.Caption:='Customer number';
+            2:  lsColumns.Caption:='Customer name';
+            3:  lsColumns.Caption:='Is sent?';
+            4:  lsColumns.Caption:='Send from';
+            5:  lsColumns.Caption:='Send to';
+            6:  lsColumns.Caption:='Source';
+            // Hidden (helper) fields
+            7:  lsColumns.Caption:='BanksHtml';
+            8:  lsColumns.Caption:='LbuName';
+            9:  lsColumns.Caption:='LbuAddress';
+            10: lsColumns.Caption:='LbuPhone';
+            11: lsColumns.Caption:='Exclusions';
         end;
 
     end;

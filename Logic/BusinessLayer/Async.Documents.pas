@@ -132,15 +132,15 @@ begin
             var Statement: IDocument:=TDocument.Create();
 
             Statement.MailSubject   :=PayLoad.Subject + ' - ' + PayLoad.CustName + ' - ' + PayLoad.CustNumber.ToString();
-            Statement.Exclusions    :=PayLoad.Exclusions;
+            Statement.Exclusions    :=PayLoad.Exclusions;    //
             Statement.MailFrom      :=PayLoad.SendFrom;
             Statement.MailTo        :=PayLoad.MailTo;
             Statement.SourceDBName  :=PayLoad.SourceDBName;
             Statement.CustNumber    :=PayLoad.CustNumber;
             Statement.CustName      :=PayLoad.CustName;
-            Statement.LBUName       :=PayLoad.LBUName;
-            Statement.LBUAddress    :=PayLoad.LBUAddress;
-            Statement.Telephone     :=PayLoad.Telephone;
+            Statement.LBUName       :=PayLoad.LBUName;       //
+            Statement.LBUAddress    :=PayLoad.LBUAddress;    //
+            Statement.Telephone     :=PayLoad.Telephone;     //
             Statement.BankDetails   :=PayLoad.BankDetails;
             Statement.CustMessage   :=PayLoad.Message;
             Statement.InvFilter     :=PayLoad.InvFilter;
@@ -251,22 +251,23 @@ begin
         var CallResponse: TCallResponse;
         try
 
-            for var iCNT: integer:=0 to PayLoad.MailerList.Items.Count - 1 do
+            for var iCNT:=0 to PayLoad.MailerList.Items.Count - 1 do
             begin
 
                 if PayLoad.MailerList.Items[iCNT].SubItems[4] <> 'Not found!' then
                 begin
 
-//                    PayLoad.CUID       :=PayLoad.MailerList.Items[iCNT].SubItems[10]; // cuid
-//                    PayLoad.SendFrom   :=PayLoad.MailerList.Items[iCNT].SubItems[3];  // send from
-//                    PayLoad.MailTo     :=TArray<string>.Create(PayLoad.MailerList.Items[iCNT].SubItems[4]);  // send to
-//                    PayLoad.CustName   :=PayLoad.MailerList.Items[iCNT].SubItems[0];  // cust name
-//                    PayLoad.CustNumber :=PayLoad.MailerList.Items[iCNT].SubItems[1];  // cust number
-//                    PayLoad.LBUName    :=PayLoad.MailerList.Items[iCNT].SubItems[5];  // lbu name
-//                    PayLoad.LBUAddress :=PayLoad.MailerList.Items[iCNT].SubItems[6];  // lbu address
-//                    PayLoad.Telephone  :=PayLoad.MailerList.Items[iCNT].SubItems[7];  // lbu phone
-//                    PayLoad.BankDetails:=PayLoad.MailerList.Items[iCNT].SubItems[12]; // bank html
-//                    PayLoad.ItemNo     :=iCNT;
+                    PayLoad.CustNumber  :=(PayLoad.MailerList.Items[iCNT].SubItems[0]).ToInteger();
+                    PayLoad.CustName    :=PayLoad.MailerList.Items[iCNT].SubItems[1];
+                    PayLoad.SendFrom    :=PayLoad.MailerList.Items[iCNT].SubItems[3];
+                    PayLoad.MailTo      :=TArray<string>.Create(PayLoad.MailerList.Items[iCNT].SubItems[4]);
+                    PayLoad.SourceDBName:=PayLoad.MailerList.Items[iCNT].SubItems[5];
+                    PayLoad.BankDetails :=PayLoad.MailerList.Items[iCNT].SubItems[6];
+                    PayLoad.LBUName     :=PayLoad.MailerList.Items[iCNT].SubItems[7];
+                    PayLoad.LBUAddress  :=PayLoad.MailerList.Items[iCNT].SubItems[8];
+                    PayLoad.Telephone   :=PayLoad.MailerList.Items[iCNT].SubItems[9];
+                    //PayLoad.Exclusions  :=TArray<integer>.Create(PayLoad.MailerList.Items[iCNT].SubItems[10].ToInteger());//string to array of integers!
+                    PayLoad.ItemNo      :=iCNT;
 
                     SendAccDocumentAsync(AgeDate, PayLoad, Callback, True);
 

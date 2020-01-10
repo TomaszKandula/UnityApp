@@ -766,13 +766,7 @@ end;
 
 procedure TActionsForm.SaveCustomerDetails();
 begin
-//    FAbUpdateFields.Scuid     :=SCUID;
-//    FAbUpdateFields.Contact   :=Cust_Person.Text;
-//    FAbUpdateFields.Email     :=Cust_MailGeneral.Text;
-//    FAbUpdateFields.Estatement:=Cust_Mail.Text;
-//    FAbUpdateFields.Phones    :=THelpers.Implode(Cust_Phone.Items, TDelimiters.Semicolon);
-//    var AddressBook: IAddressBook:=TAddressBook.Create();
-//    AddressBook.UpdateAddressBookAsync(nil, FAbUpdateFields, UpdateAddressBook_Callback);
+    //
 end;
 
 
