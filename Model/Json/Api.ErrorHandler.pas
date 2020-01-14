@@ -25,6 +25,9 @@ type
         var FErrorDesc: string;
         var FErrorNum: integer;
     public
+        const _ErrorDesc = 'ErrorDesc';
+        const _ErrorNum  = 'ErrorNum';
+    published
         property ErrorDesc: string  read FErrorDesc write FErrorDesc;
         property ErrorNum:  integer read FErrorNum  write FErrorNum;
     end;

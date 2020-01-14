@@ -27,7 +27,11 @@ type
         var FIsSucceeded:    boolean;
         var FError:          TErrorHandler;
 	public
+        const _SortingOptions = 'SortingOptions';
+        const _IsSucceeded    = 'IsSucceeded';
+        const _Error          = 'Error';
         destructor Destroy(); override;
+    published
         property SortingOptions: TArray<string> read FSortingOptions write FSortingOptions;
         property IsSucceeded:    boolean        read FIsSucceeded    write FIsSucceeded;
         property Error:          TErrorHandler  read FError          write FError;

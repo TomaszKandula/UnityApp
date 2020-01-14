@@ -22,13 +22,17 @@ type
 	TUserSessionLogs = class
     {$TYPEINFO ON}
 	strict private
-        var FUserAlias: string;
+        var FUserAlias:   string;
         var FAppEventLog: string;
-        var FAppName: string;
-	public
-        property UserAlias: string read FUserAlias write FUserAlias;
+        var FAppName:     string;
+    public
+        const _UserAlias   = 'UserAlias';
+        const _AppEventLog = 'AppEventLog';
+        const _AppName     = 'AppName';
+	published
+        property UserAlias:   string read FUserAlias   write FUserAlias;
         property AppEventLog: string read FAppEventLog write FAppEventLog;
-        property AppName: string read FAppName write FAppName;
+        property AppName:     string read FAppName     write FAppName;
 	end;
 
 

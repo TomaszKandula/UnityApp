@@ -27,6 +27,11 @@ type
         var FBankCode: string;
         var FBankIso:  string;
     public
+        const _BankName = 'BankName';
+        const _BankAcc  = 'BankAcc';
+        const _BankCode = 'BankCode';
+        const _BankIso  = 'BankIso';
+    published
         property BankName: string read FBankName write FBankName;
         property BankAcc:  string read FBankAcc  write FBankAcc;
         property BankCode: string read FBankCode write FBankCode;

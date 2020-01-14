@@ -27,12 +27,18 @@ type
         var FFree2:       string;
         var FFree3:       string;
         var FUserComment: string;
-	public
-        property FollowUp:    string        read FFollowUp    write FFollowUp;
-        property Free1:       string        read FFree1       write FFree1;
-        property Free2:       string        read FFree2       write FFree2;
-        property Free3:       string        read FFree3       write FFree3;
-        property UserComment: string        read FUserComment write FUserComment;
+    public
+        const _FollowUp    = 'FollowUp';
+        const _Free1       = 'Free1';
+        const _Free2       = 'Free2';
+        const _Free3       = 'Free3';
+        const _UserComment = 'UserComment';
+	published
+        property FollowUp:    string read FFollowUp    write FFollowUp;
+        property Free1:       string read FFree1       write FFree1;
+        property Free2:       string read FFree2       write FFree2;
+        property Free3:       string read FFree3       write FFree3;
+        property UserComment: string read FUserComment write FUserComment;
 	end;
 
 

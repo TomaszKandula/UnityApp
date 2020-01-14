@@ -27,7 +27,12 @@ type
         var FIsSucceeded: boolean;
         var FError:       TErrorHandler;
 	public
+        const _Companies   = 'Companies';
+        const _IsSelected  = 'IsSelected';
+        const _IsSucceeded = 'IsSucceeded';
+        const _Error       = 'Error';
         destructor Destroy(); override;
+    published
         property Companies:   TArray<string>  read FCompanies   write FCompanies;
         property IsSelected:  TArray<boolean> read FIsSelected  write FIsSelected;
         property IsSucceeded: boolean         read FIsSucceeded write FIsSucceeded;

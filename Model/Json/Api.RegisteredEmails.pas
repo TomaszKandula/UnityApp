@@ -25,6 +25,9 @@ type
         var FCompanyCode:  integer;
         var FCompanyEmail: string;
     public
+        const _CompanyCode  = 'CompanyCode';
+        const _CompanyEmail = 'CompanyEmail';
+    published
         property CompanyCode:  integer read FCompanyCode  write FCompanyCode;
         property CompanyEmail: string  read FCompanyEmail write FCompanyEmail;
     end;
@@ -34,3 +37,4 @@ implementation
 
 
 end.
+

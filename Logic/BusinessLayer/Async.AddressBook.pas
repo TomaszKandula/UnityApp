@@ -180,14 +180,14 @@ begin
 
                     // Setup headers
                     ReturnedData.Cells[0, 0]:='';//unused lp column
-                    ReturnedData.Cells[1, 0]:='Id';//hidden column
-                    ReturnedData.Cells[2, 0]:='SourceDbName';
-                    ReturnedData.Cells[3, 0]:='CustomerNumber';
-                    ReturnedData.Cells[4, 0]:='CustomerName';
-                    ReturnedData.Cells[5, 0]:='ContactPerson';
-                    ReturnedData.Cells[6, 0]:='RegularEmails';
-                    ReturnedData.Cells[7, 0]:='StatementEmails';
-                    ReturnedData.Cells[8, 0]:='PhoneNumbers';
+                    ReturnedData.Cells[1, 0]:=AddressBookList._Id;//hidden column
+                    ReturnedData.Cells[2, 0]:=AddressBookList._SourceDbName;
+                    ReturnedData.Cells[3, 0]:=AddressBookList._CustomerNumber;
+                    ReturnedData.Cells[4, 0]:=AddressBookList._CustomerName;
+                    ReturnedData.Cells[5, 0]:=AddressBookList._ContactPerson;
+                    ReturnedData.Cells[6, 0]:=AddressBookList._RegularEmails;
+                    ReturnedData.Cells[7, 0]:=AddressBookList._StatementEmails;
+                    ReturnedData.Cells[8, 0]:=AddressBookList._PhoneNumbers;
 
                     for var iCNT:=1 to ReturnedData.RowCount - 1 do
                     begin

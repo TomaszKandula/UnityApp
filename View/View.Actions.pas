@@ -277,7 +277,8 @@ uses
     Async.Companies,
     Async.AddressBook,
     Async.Comments,
-    Async.Documents;
+    Async.Documents,
+    Api.UserDailyCommentsList;
 
 
 var vActionsForm: TActionsForm;
@@ -529,11 +530,19 @@ begin
 
         for var iCNT:=1{Skip header} to TotalRows do
         begin
-            DailyComments.Cells[1, iCNT]:=LDailyCommentFields[iCNT - 1].CommentId.ToString();
-            DailyComments.Cells[2, iCNT]:=THelpers.FormatDateTimeStr(LDailyCommentFields[iCNT - 1].EntryDateTime);
-            DailyComments.Cells[3, iCNT]:=THelpers.FormatDateStr(LDailyCommentFields[iCNT - 1].AgeDate);
-            DailyComments.Cells[4, iCNT]:=LDailyCommentFields[iCNT - 1].UserComment;
-            DailyComments.Cells[5, iCNT]:=LDailyCommentFields[iCNT - 1].UserAlias;
+
+            var Col1:=DailyComments.GetCol(TUserDailyCommentsList._CommentId);
+            var Col2:=DailyComments.GetCol(TUserDailyCommentsList._EntryDateTime);
+            var Col3:=DailyComments.GetCol(TUserDailyCommentsList._AgeDate);
+            var Col4:=DailyComments.GetCol(TUserDailyCommentsList._UserComment);
+            var Col5:=DailyComments.GetCol(TUserDailyCommentsList._UserAlias);
+
+            DailyComments.Cells[Col1, iCNT]:=LDailyCommentFields[iCNT - 1].CommentId.ToString();
+            DailyComments.Cells[Col2, iCNT]:=THelpers.FormatDateTimeStr(LDailyCommentFields[iCNT - 1].EntryDateTime);
+            DailyComments.Cells[Col3, iCNT]:=THelpers.FormatDateStr(LDailyCommentFields[iCNT - 1].AgeDate);
+            DailyComments.Cells[Col4, iCNT]:=LDailyCommentFields[iCNT - 1].UserComment;
+            DailyComments.Cells[Col5, iCNT]:=LDailyCommentFields[iCNT - 1].UserAlias;
+
         end;
 
         DailyComments.SetColWidth(10, 20, 400);
@@ -969,23 +978,23 @@ begin
         THelpers.ExecWithDelay(500, procedure
         begin
 
-            Initialize();
-            UpdateOpenItems();
-            UpdateData();
-
             OpenItemsGrid.Freeze(False);
             OpenItemsGrid.AutoThumbSize;
             OpenItemsGrid.SetColWidth(10, 20, 400);
 
             DailyComGrid.RowCount:=2;
             DailyComGrid.ColCount:=6;
-            DailyComGrid.Cells[1, 0]:='CommentId';
+            DailyComGrid.Cells[1, 0]:=TUserDailyCommentsList._CommentId;
             DailyComGrid.ColWidths[1]:=-1;
-            DailyComGrid.Cells[2, 0]:='EntryDateTime';
-            DailyComGrid.Cells[3, 0]:='AgeDate';
-            DailyComGrid.Cells[4, 0]:='UserComment';
+            DailyComGrid.Cells[2, 0]:=TUserDailyCommentsList._EntryDateTime;
+            DailyComGrid.Cells[3, 0]:=TUserDailyCommentsList._AgeDate;
+            DailyComGrid.Cells[4, 0]:=TUserDailyCommentsList._UserComment;
             DailyComGrid.ColWidths[4]:=-1;
-            DailyComGrid.Cells[5, 0]:='UserAlias';
+            DailyComGrid.Cells[5, 0]:=TUserDailyCommentsList._UserAlias;
+
+            Initialize();
+            UpdateOpenItems();
+            UpdateData();
 
             DailyComGrid.Freeze(False);
             DailyComGrid.AutoThumbSize;

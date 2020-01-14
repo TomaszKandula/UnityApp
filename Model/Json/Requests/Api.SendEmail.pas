@@ -32,7 +32,17 @@ type
         var FBcc:       TArray<string>;
         var FSubject:   string;
         var FHtmlBody:  string;
-	public
+    public
+        const _UserId    = 'UserId';
+        const _SessionId = 'SessionId';
+        const _AliasName = 'AliasName';
+        const _From      = 'From';
+        const _To        = 'To';
+        const _Cc        = 'Cc';
+        const _Bcc       = 'Bcc';
+        const _Subject   = 'Subject';
+        const _HtmlBody  = 'HtmlBody';
+	published
         property UserId:    string         read FUserId    write FUserId;
         property SessionId: string         read FSessionId write FSessionId;
         property AliasName: string         read FAliasName write FAliasName;

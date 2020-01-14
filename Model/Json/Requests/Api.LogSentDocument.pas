@@ -28,7 +28,14 @@ type
         var FReportedAgeDate:    string;
         var FPreservedEmail:     string;
         var FDocumentType:       string;
-	public
+    published
+        const _UserAlias          = 'UserAlias';
+        const _ReportedCustomer   = 'ReportedCustomer';
+        const _ReportedAggrAmount = 'ReportedAggrAmount';
+        const _ReportedAgeDate    = 'ReportedAgeDate';
+        const _PreservedEmail     = 'PreservedEmail';
+        const _DocumentType       = 'DocumentType';
+	published
         property UserAlias:          string  read FUserAlias          write FUserAlias;
         property ReportedCustomer:   integer read FReportedCustomer   write FReportedCustomer;
         property ReportedAggrAmount: double  read FReportedAggrAmount write FReportedAggrAmount;
@@ -42,3 +49,4 @@ implementation
 
 
 end.
+

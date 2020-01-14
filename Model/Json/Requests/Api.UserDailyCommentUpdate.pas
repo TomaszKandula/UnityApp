@@ -31,6 +31,15 @@ type
         var FCustomRemindersSent:  integer;
         var FUserComment:          string;
     public
+        const _CommentId            = 'CommentId';
+        const _CallEvent            = 'CallEvent';
+        const _CallDuration         = 'CallDuration';
+        const _FixedStatementsSent  = 'FixedStatementsSent';
+        const _CustomStatementsSent = 'CustomStatementsSent';
+        const _FixedRemindersSent   = 'FixedRemindersSent';
+        const _CustomRemindersSent  = 'CustomRemindersSent';
+        const _UserComment          = 'UserComment';
+    published
         property CommentId:            integer read FCommentId            write FCommentId;
         property CallEvent:            integer read FCallEvent            write FCallEvent;
         property CallDuration:         integer read FCallDuration         write FCallDuration;

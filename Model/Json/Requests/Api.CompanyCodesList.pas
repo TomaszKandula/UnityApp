@@ -24,6 +24,8 @@ type
     strict private
         var FCompanyCodes: TArray<integer>;
     public
+        const _CompanyCodes = 'CompanyCodes';
+    published
         property CompanyCodes: TArray<integer> read FCompanyCodes write FCompanyCodes;
     end;
 
@@ -32,3 +34,4 @@ implementation
 
 
 end.
+

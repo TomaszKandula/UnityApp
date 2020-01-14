@@ -34,7 +34,18 @@ type
         var FIsSucceeded:     boolean;
         var FError:           TErrorHandler;
     public
+        const _Id              = 'Id';
+        const _SourceDbName    = 'SourceDbName';
+        const _CustomerNumber  = 'CustomerNumber';
+        const _CustomerName    = 'CustomerName';
+        const _ContactPerson   = 'ContactPerson';
+        const _RegularEmails   = 'RegularEmails';
+        const _StatementEmails = 'StatementEmails';
+        const _PhoneNumbers    = 'PhoneNumbers';
+        const _IsSucceeded     = 'IsSucceeded';
+        const _Error           = 'Error';
         destructor Destroy(); override;
+    published
         property Id:              TArray<integer> read FId              write FId;
         property SourceDbName:    TArray<string>  read FSourceDbName    write FSourceDbName;
         property CustomerNumber:  TArray<Int64>   read FCustomerNumber  write FCustomerNumber;

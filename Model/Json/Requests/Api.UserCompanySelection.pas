@@ -23,7 +23,9 @@ type
     {$TYPEINFO ON}
 	strict private
         var FSelectedCoCodes: TArray<string>;
-	public
+    public
+        const _SelectedCoCodes = 'SelectedCoCodes';
+	published
         property SelectedCoCodes: TArray<string> read FSelectedCoCodes write FSelectedCoCodes;
 	end;
 

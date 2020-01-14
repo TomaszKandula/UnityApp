@@ -32,7 +32,16 @@ type
         var FIsSucceeded:  boolean;
         var FError:        TErrorHandler;
 	public
+        const _IsValidated  = 'IsValidated';
+        const _UserId       = 'UserId';
+        const _Department   = 'Department';
+        const _AliasName    = 'AliasName';
+        const _DisplayName  = 'DisplayName';
+        const _EmailAddress = 'EmailAddress';
+        const _IsSucceeded  = 'IsSucceeded';
+        const _Error        = 'Error';
         destructor Destroy(); override;
+    published
         property IsValidated:  boolean       read FIsValidated  write FIsValidated;
         property UserId:       integer       read FUserId       write FUserId;
         property Department:   string        read FDepartment   write FDepartment;

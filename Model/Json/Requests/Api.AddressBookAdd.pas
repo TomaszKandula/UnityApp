@@ -30,13 +30,21 @@ type
         var FStatementEmails: string;
         var FPhoneNumbers:    string;
     public
-        property SourceDbName:    string        read FSourceDbName    write FSourceDbName;
-        property CustomerNumber:  integer       read FCustomerNumber  write FCustomerNumber;
-        property CustomerName:    string        read FCustomerName    write FCustomerName;
-        property ContactPerson:   string        read FContactPerson   write FContactPerson;
-        property RegularEmails:   string        read FRegularEmails   write FRegularEmails;
-        property StatementEmails: string        read FStatementEmails write FStatementEmails;
-        property PhoneNumbers:    string        read FPhoneNumbers    write FPhoneNumbers;
+        const _SourceDbName    = 'SourceDbName';
+        const _CustomerNumber  = 'CustomerNumber';
+        const _CustomerName    = 'CustomerName';
+        const _ContactPerson   = 'ContactPerson';
+        const _RegularEmails   = 'RegularEmails';
+        const _StatementEmails = 'StatementEmails';
+        const _PhoneNumbers    = 'PhoneNumbers';
+    published
+        property SourceDbName:    string  read FSourceDbName    write FSourceDbName;
+        property CustomerNumber:  integer read FCustomerNumber  write FCustomerNumber;
+        property CustomerName:    string  read FCustomerName    write FCustomerName;
+        property ContactPerson:   string  read FContactPerson   write FContactPerson;
+        property RegularEmails:   string  read FRegularEmails   write FRegularEmails;
+        property StatementEmails: string  read FStatementEmails write FStatementEmails;
+        property PhoneNumbers:    string  read FPhoneNumbers    write FPhoneNumbers;
     end;
 
 
@@ -44,3 +52,4 @@ implementation
 
 
 end.
+

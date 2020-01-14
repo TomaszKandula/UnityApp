@@ -25,6 +25,9 @@ type
         var FUserRating: integer;
         var FComment:    string;
     public
+        const _UserRating = 'UserRating';
+        const _Comment    = 'Comment';
+    published
         property UserRating: integer read FUserRating write FUserRating;
         property Comment:    string  read FComment    write FComment;
     end;

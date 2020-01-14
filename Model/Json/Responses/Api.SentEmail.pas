@@ -26,7 +26,10 @@ type
         var FIsSucceeded: boolean;
         var FError:       TErrorHandler;
 	public
+        const _IsSucceeded = 'IsSucceeded';
+        const _Error       = 'Error';
         destructor Destroy(); override;
+    published
         property IsSucceeded: boolean       read FIsSucceeded write FIsSucceeded;
         property Error:       TErrorHandler read FError       write FError;
 	end;

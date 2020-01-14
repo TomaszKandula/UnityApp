@@ -32,7 +32,16 @@ type
         var FIsSucceeded: boolean;
         var FError:       TErrorHandler;
 	public
+        const _CommentId   = 'CommentId';
+        const _FollowUp    = 'FollowUp';
+        const _Free1       = 'Free1';
+        const _Free2       = 'Free2';
+        const _Free3       = 'Free3';
+        const _UserComment = 'UserComment';
+        const _IsSucceeded = 'IsSucceeded';
+        const _Error       = 'Error';
         destructor Destroy(); override;
+    published
         property CommentId:   integer       read FCommentId   write FCommentId;
         property FollowUp:    string        read FFollowUp    write FFollowUp;
         property Free1:       string        read FFree1       write FFree1;

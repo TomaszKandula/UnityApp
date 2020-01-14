@@ -33,7 +33,16 @@ type
         var FIsSucceeded:    boolean;
         var FError:          TErrorHandler;
     public
+        const _CompanyName    = 'CompanyName';
+        const _CompanyAddress = 'CompanyAddress';
+        const _CompanyEmails  = 'CompanyEmails';
+        const _CompanyPhones  = 'CompanyPhones';
+        const _Exclusions     = 'Exclusions';
+        const _CompanyBanks   = 'CompanyBanks';
+        const _IsSucceeded    = 'IsSucceeded';
+        const _Error          = 'Error';
         destructor Destroy(); override;
+    published
         property CompanyName:    string               read FCompanyName    write FCompanyName;
         property CompanyAddress: string               read FCompanyAddress write FCompanyAddress;
         property CompanyEmails:  TArray<string>       read FCompanyEmails  write FCompanyEmails;

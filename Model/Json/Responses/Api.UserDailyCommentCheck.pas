@@ -29,7 +29,13 @@ type
         var FIsSucceeded:       boolean;
         var FError:             TErrorHandler;
 	public
+        const _DoesCommentExists = 'DoesCommentExists';
+        const _CommentId         = 'CommentId';
+        const _UserComment       = 'UserComment';
+        const _IsSucceeded       = 'IsSucceeded';
+        const _Error             = 'Error';
         destructor Destroy(); override;
+    published
         property DoesCommentExists: boolean       read FDoesCommentExists write FDoesCommentExists;
         property CommentId:         integer       read FCommentId         write FCommentId;
         property UserComment:       string        read FUserComment       write FUserComment;

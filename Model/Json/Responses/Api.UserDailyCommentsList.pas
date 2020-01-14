@@ -39,7 +39,23 @@ type
         var FIsSucceeded:          boolean;
         var FError:                TErrorHandler;
     public
+        const _CommentId            = 'CommentId';
+        const _SourceDBName         = 'SourceDBName';
+        const _CustomerNumber       = 'CustomerNumber';
+        const _AgeDate              = 'AgeDate';
+        const _CallEvent            = 'CallEvent';
+        const _CallDuration         = 'CallDuration';
+        const _FixedStatementsSent  = 'FixedStatementsSent';
+        const _CustomStatementsSent = 'CustomStatementsSent';
+        const _FixedRemindersSent   = 'FixedRemindersSent';
+        const _CustomRemindersSent  = 'CustomRemindersSent';
+        const _UserComment          = 'UserComment';
+        const _UserAlias            = 'UserAlias';
+        const _EntryDateTime        = 'EntryDateTime';
+        const _IsSucceeded          = 'IsSucceeded';
+        const _Error                = 'Error';
         destructor Destroy(); override;
+    published
         property CommentId:            TArray<integer> read FCommentId            write FCommentId;
         property SourceDBName:         TArray<string>  read FSourceDBName         write FSourceDBName;
         property CustomerNumber:       TArray<integer> read FCustomerNumber       write FCustomerNumber;
