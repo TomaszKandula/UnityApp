@@ -72,6 +72,18 @@ type
 
 
     TMainForm = class(TForm)
+    published
+        btnRating: TPanel;
+        imgRating: TImage;
+        txtRating: TLabel;
+        ShapeFollowsFrm: TShape;
+        ShapeFollowsCap: TShape;
+        txtFollowsToday: TLabel;
+        txtFollowsPast: TLabel;
+        txtFollowsNext: TLabel;
+        valFollowsToday: TLabel;
+        valFollowsPast: TLabel;
+        valFollowsNext: TLabel;
         TabSheets: TPageControl;
         TabSheet1: TTabSheet;
         TabSheet2: TTabSheet;
@@ -549,6 +561,9 @@ type
         procedure btnCloseAbMouseLeave(Sender: TObject);
         procedure btnExportAbMouseEnter(Sender: TObject);
         procedure btnExportAbMouseLeave(Sender: TObject);
+        procedure btnRatingClick(Sender: TObject);
+        procedure btnRatingMouseEnter(Sender: TObject);
+        procedure btnRatingMouseLeave(Sender: TObject);
         procedure sgListSectionKeyPress(Sender: TObject; var Key: Char);
         procedure sgListValueClick(Sender: TObject);
         procedure sgListSectionClick(Sender: TObject);
@@ -790,6 +805,9 @@ type
         var FHadFirstLoad: boolean;
         var FAllowClose: boolean;
         var FIsAddressBookOpened: boolean;
+        var FFollowsToday: integer;
+        var FFollowsPast: integer;
+        var FFollowsNext: integer;
         const AppMenuTextSelected = $006433C9;
         const AppMenuTextNormal = clGrayText;
         const AppButtonTxtNormal = $00555555;
@@ -829,6 +847,7 @@ type
         var FGridPicture: TImage;
         var FOpenItemsUpdate: string;
         var FOpenItemsStatus: string;
+        procedure UpdateFollowUps(Source: TStringGrid; Col: integer);
         procedure SetActiveTabsheet(TabSheet: TTabSheet);
         procedure ResetTabsheetButtons();
         procedure InitMainWnd(SessionFile: string);
@@ -839,6 +858,9 @@ type
         procedure LoadAgeReport(SelectedCoCodes: string{Legacy argument/to be deleted});
         property LoadedAgeDate: string read FLoadedAgeDate;
         property LoadedCompanies: TList<string> read FLoadedCompanies;
+        property FollowsToday: integer read FFollowsToday;
+        property FollowsPast: integer read FFollowsPast;
+        property FollowsNext: integer read FFollowsNext;
     end;
 
 
@@ -869,6 +891,7 @@ uses
     View.Reports,
     View.CompanyList,
     View.BusyScreen,
+    View.RateApp,
     Unity.Constants,
     Unity.Helpers,
     Unity.Sorting,
@@ -1355,6 +1378,44 @@ begin
     txtFeedback.Font.Color    :=AppMenuTextNormal;
     txtInfo.Font.Style        :=[];
     txtInfo.Font.Color        :=AppMenuTextNormal;
+    txtRating.Font.Style      :=[];
+    txtRating.Font.Color      :=AppMenuTextNormal;
+end;
+
+
+procedure TMainForm.UpdateFollowUps(Source: TStringGrid; Col: integer);
+begin
+
+    FFollowsToday:=0;
+    FFollowsNext :=0;
+    FFollowsPast :=0;
+
+    for var iCNT:=0 to Source.RowCount - 1 do
+    begin
+
+        if not String.IsNullOrWhitespace(Source.Cells[Col, iCNT]) then
+        begin
+
+            // Today follow-ups
+            if THelpers.CDate(Source.Cells[Col, iCNT]) = THelpers.CDate(valCurrentDate.Caption) then
+                Inc(FFollowsToday);
+
+            // Future follow-ups
+            if THelpers.CDate(Source.Cells[Col, iCNT]) > THelpers.CDate(valCurrentDate.Caption) then
+                Inc(FFollowsNext);
+
+            // Past follow-ups
+            if THelpers.CDate(Source.Cells[Col, iCNT]) < THelpers.CDate(valCurrentDate.Caption) then
+                Inc(FFollowsPast);
+
+        end;
+
+    end;
+
+    valFollowsToday.Caption:=FFollowsToday.ToString();
+    valFollowsNext.Caption :=FFollowsNext.ToString();
+    valFollowsPast.Caption :=FFollowsPast.ToString();
+
 end;
 
 
@@ -1676,6 +1737,7 @@ begin
     var AddressBook: IAddressBook:=TAddressBook.Create();
     AddressBook.OpenAddressBookAsync('', OpenAddressBook_Callback, LoadedCompanies);
 
+    UpdateFollowUps(sgAgeView, sgAgeView.GetCol(TGeneralComment.fFollowUp));
     BusyForm.Close();
 
 end;
@@ -1917,32 +1979,39 @@ begin
     if PassMsg.LParam > 0 then
     begin
 
-//        var Comments: IComments:=TComments.Create();
-//        var Check: boolean;
-//        var CallResponse: TCallResponse;
-//        CallResponse:=Comments.CheckDailyCommentAwaited(
-//            480,
-//            1017002361,
-//            '2019-12-17',
-//            Check
-//        );
-//
-//        var LDailyCommentFields: TDailyCommentFields;
-//        LDailyCommentFields.CommentId           :=0; //?
-//        LDailyCommentFields.CompanyCode         :=(sgAgeView.Cells[sgAgeView.GetCol(DbModel.TSnapshots.fCoCode), sgAgeView.Row]).ToInteger();
-//        LDailyCommentFields.CustomerNumber      :=(sgAgeView.Cells[sgAgeView.GetCol(DbModel.TSnapshots.fCustomerNumber), sgAgeView.Row]).ToInteger();
-//        LDailyCommentFields.AgeDate             :='2019-12-15'; // get age date!
-//        LDailyCommentFields.CallDuration        :=PassMsg.LParam;
-//        LDailyCommentFields.CallEvent           :=1;
-//        LDailyCommentFields.FixedStatementsSent :=0;
-//        LDailyCommentFields.CustomStatementsSent:=0;
-//        LDailyCommentFields.FixedRemindersSent  :=0;
-//        LDailyCommentFields.CustomRemindersSent :=0;
-//        LDailyCommentFields.UserComment         :=String.Empty;
-//        LDailyCommentFields.UserAlias           :=SessionService.SessionData.AliasName;
-//
-//        var Comments: IComments:=TComments.Create();
-//        Comments.EditDailyComment(LDailyCommentFields, nil);
+        var CoCode:=(sgAgeView.Cells[sgAgeView.GetCol(DbModel.TSnapshots.fCoCode), sgAgeView.Row]).ToInteger();
+        var CustNumber:=(sgAgeView.Cells[sgAgeView.GetCol(DbModel.TSnapshots.fCustomerNumber), sgAgeView.Row]).ToInteger();
+
+        var Comments: IComments:=TComments.Create();
+        var DailyCommentExists: TDailyCommentExists;
+        var CallResponse: TCallResponse;
+        CallResponse:=Comments.CheckDailyCommentAwaited(
+            CoCode,
+            CustNumber,
+            LoadedAgeDate,
+            DailyCommentExists
+        );
+
+        var NewComment:=DailyCommentExists.UserComment;
+        if String.IsNullOrWhitespace(NewComment) then
+            NewComment:='Called customer today.' else
+                NewComment:=NewComment + '#13#10' + 'Called customer today.';
+
+        var LDailyCommentFields: TDailyCommentFields;
+        LDailyCommentFields.CommentId           :=DailyCommentExists.CommentId;
+        LDailyCommentFields.CompanyCode         :=CoCode;
+        LDailyCommentFields.CustomerNumber      :=CustNumber;
+        LDailyCommentFields.AgeDate             :=LoadedAgeDate;
+        LDailyCommentFields.CallDuration        :=PassMsg.LParam;
+        LDailyCommentFields.CallEvent           :=1;
+        LDailyCommentFields.FixedStatementsSent :=0;
+        LDailyCommentFields.CustomStatementsSent:=0;
+        LDailyCommentFields.FixedRemindersSent  :=0;
+        LDailyCommentFields.CustomRemindersSent :=0;
+        LDailyCommentFields.UserComment         :=NewComment;
+        LDailyCommentFields.UserAlias           :=SessionService.SessionData.AliasName;
+
+        Comments.EditDailyCommentAsync(LDailyCommentFields, nil);
 
     end;
 
@@ -2450,22 +2519,22 @@ begin
     if ARow = 0 then Exit;
 
     // Find column numbers for given column name
-    var Col1:  integer:=sgAgeView.GetCol(TSnapshots.fNotDue);
-    var Col2:  integer:=sgAgeView.GetCol(TSnapshots.fRange1);
-    var Col3:  integer:=sgAgeView.GetCol(TSnapshots.fRange2);
-    var Col4:  integer:=sgAgeView.GetCol(TSnapshots.fRange3);
-    var Col5:  integer:=sgAgeView.GetCol(TSnapshots.fRange4);
-    var Col6:  integer:=sgAgeView.GetCol(TSnapshots.fRange5);
-    var Col7:  integer:=sgAgeView.GetCol(TSnapshots.fRange6);
-    var Col8:  integer:=sgAgeView.GetCol(TSnapshots.fOverdue);
-    var Col9:  integer:=sgAgeView.GetCol(TSnapshots.fTotal);
-    var Col10: integer:=sgAgeView.GetCol(TSnapshots.fCreditLimit);
-    var Col11: integer:=sgAgeView.GetCol(TSnapshots.fCreditBalance);
-    var Col12: integer:=sgAgeView.GetCol(TGeneralComment.fFollowUp);
-    var Col13: integer:=sgAgeView.GetCol(TSnapshots.fCuid);
-    var Col14: integer:=sgAgeView.GetCol(TSnapshots.fCustomerName);
-    var Col15: integer:=sgAgeView.GetCol(TSnapshots.fRiskClass);
-    var Col16: integer:=sgInvoiceTracker.GetCol(TTrackerData.Cuid);
+    var Col1 :=sgAgeView.GetCol(TSnapshots.fNotDue);
+    var Col2 :=sgAgeView.GetCol(TSnapshots.fRange1);
+    var Col3 :=sgAgeView.GetCol(TSnapshots.fRange2);
+    var Col4 :=sgAgeView.GetCol(TSnapshots.fRange3);
+    var Col5 :=sgAgeView.GetCol(TSnapshots.fRange4);
+    var Col6 :=sgAgeView.GetCol(TSnapshots.fRange5);
+    var Col7 :=sgAgeView.GetCol(TSnapshots.fRange6);
+    var Col8 :=sgAgeView.GetCol(TSnapshots.fOverdue);
+    var Col9 :=sgAgeView.GetCol(TSnapshots.fTotal);
+    var Col10:=sgAgeView.GetCol(TSnapshots.fCreditLimit);
+    var Col11:=sgAgeView.GetCol(TSnapshots.fCreditBalance);
+    var Col12:=sgAgeView.GetCol(TGeneralComment.fFollowUp);
+    var Col13:=sgAgeView.GetCol(TSnapshots.fCuid);
+    var Col14:=sgAgeView.GetCol(TSnapshots.fCustomerName);
+    var Col15:=sgAgeView.GetCol(TSnapshots.fRiskClass);
+    var Col16:=sgInvoiceTracker.GetCol(TTrackerData.Cuid);
 
     // Draw selected row | skip headers
     sgAgeView.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True);
@@ -2514,6 +2583,7 @@ begin
                 sgAgeView.Canvas.FillRect(Rect);
                 sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
             end;
+
         end;
 
         // Highlight risk class "A"
@@ -2550,8 +2620,8 @@ begin
         if ACol = Col14 then
         begin
 
-            var Width: integer:=sgAgeView.ColWidths[Col14];
-            var AgeViewCUID: string:=sgAgeView.Cells[Col13, ARow];
+            var Width:=sgAgeView.ColWidths[Col14];
+            var AgeViewCUID:=sgAgeView.Cells[Col13, ARow];
 
             for var iCNT: integer:=1 to sgInvoiceTracker.RowCount - 1 do
             begin
@@ -3210,10 +3280,10 @@ begin
     if CalendarForm.FSelectedDate <> TDtFormat.NullDate then
     begin
 
-        for var iCNT: integer:=sgAgeView.Selection.Top to sgAgeView.Selection.Bottom do
+        for var iCNT:=sgAgeView.Selection.Top to sgAgeView.Selection.Bottom do
 
             if sgAgeView.RowHeights[iCNT] <> sgAgeView.sgRowHidden then
-                CalendarForm.SetFollowUp(CalendarForm.FSelectedDate, sgAgeView.Cells[sgAgeView.GetCol(TSnapshots.fCuid), iCNT], iCNT);
+                CalendarForm.SetFollowUp(CalendarForm.FSelectedDate, iCNT);
 
             ThreadFileLog.Log('GeneralComment table with column FollowUp has been updated with ' + DateToStr(CalendarForm.FSelectedDate) + ' for multiple items.');
 
@@ -3254,6 +3324,7 @@ begin
 
     end;
 
+    MainForm.UpdateFollowUps(MainForm.sgAgeView, MainForm.sgAgeView.GetCol(TGeneralComment.fFollowUp));
     ThreadFileLog.Log('GeneralComment table with column FollowUp has been updated with removal for multiple items.');
 
     Screen.Cursor:=crDefault;
@@ -3732,6 +3803,16 @@ begin
 end;
 
 
+procedure TMainForm.btnRatingClick(Sender: TObject);
+begin
+    RateForm.FSetLastSelection:=TabSheets.ActivePage;
+    ResetTabsheetButtons;
+    txtRating.Font.Style:=[fsBold];
+    txtRating.Font.Color:=$006433C9;
+    THelpers.WndCall(RateForm, TWindowState.Modal);
+end;
+
+
 procedure TMainForm.txtFeedbackClick(Sender: TObject);
 begin
     FeedbackForm.FSetLastSelection:=TabSheets.ActivePage;
@@ -4156,6 +4237,19 @@ procedure TMainForm.btnSettingsMouseLeave(Sender: TObject);
 begin
     if txtSettings.Font.Style <> [fsBold] then
         txtSettings.Font.Color:=AppMenuTextNormal;
+end;
+
+
+procedure TMainForm.btnRatingMouseEnter(Sender: TObject);
+begin
+    txtRating.Font.Color:=AppMenuTextSelected;
+end;
+
+
+procedure TMainForm.btnRatingMouseLeave(Sender: TObject);
+begin
+    if txtRating.Font.Style <> [fsBold] then
+        txtRating.Font.Color:=AppMenuTextNormal;
 end;
 
 

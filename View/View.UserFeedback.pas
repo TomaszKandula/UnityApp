@@ -23,10 +23,10 @@ uses
     Vcl.Buttons,
     Vcl.ExtCtrls,
     Vcl.ComCtrls,
+    Vcl.Imaging.pngimage,
     Unity.Enums,
-    Unity.Grid,
     Unity.Panel,
-    Unity.Records, Vcl.Imaging.pngimage;
+    Unity.Records;
 
 
 type
@@ -43,12 +43,11 @@ type
         ImageGrip: TImage;
         PanelText: TPanel;
         procedure FormCreate(Sender: TObject);
+        procedure FormClose(Sender: TObject; var Action: TCloseAction);
+        procedure FormKeyPress(Sender: TObject; var Key: Char);
         procedure ReportMemoKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure btnSendReportClick(Sender: TObject);
-        procedure FormKeyPress(Sender: TObject; var Key: Char);
-        procedure FormClose(Sender: TObject; var Action: TCloseAction);
     strict private
-        function WordCount(const InputStr: string): cardinal;
         procedure SendFeedbackAsync_Callback(CallResponse: TCallResponse);
     public
         var FSetLastSelection: TTabSheet;
@@ -70,10 +69,6 @@ uses
     Unity.Helpers;
 
 
-const
-    ToSkip = [#0..#32, '.', ',', ';', '[', ']', '(', ')', '{', '}'];
-
-
 var vFeedbackForm: TFeedbackForm;
 
 
@@ -82,44 +77,6 @@ begin
     if not(Assigned(vFeedbackForm)) then Application.CreateForm(TFeedbackForm, vFeedbackForm);
     Result:=vFeedbackForm;
 end;
-
-
-{$REGION 'LOCAL HELPERS'}
-
-
-function TFeedbackForm.WordCount(const InputStr: string): cardinal;
-begin
-
-    Result:=0;
-
-    var TextLength: integer:=Length(InputStr);
-    var FindWord:   boolean:=False;
-
-    // Count words in TMemo component while user is typing
-    for var iCNT: integer:=1 to TextLength do
-    begin
-
-        if not (CharInSet(InputStr[iCNT], ToSkip)) then
-        begin
-
-            if not FindWord then
-            begin
-                FindWord:=True;
-                Inc(Result);
-            end;
-
-        end
-        else
-        begin
-            FindWord:=False;
-        end;
-
-    end;
-
-end;
-
-
-{$ENDREGION}
 
 
 {$REGION 'CALLBACKS'}
@@ -198,7 +155,7 @@ end;
 
 procedure TFeedbackForm.ReportMemoKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-    TotalWords.Caption:=IntToStr(WordCount(ReportMemo.Text)) + ' / ' + IntToStr(ReportMemo.MaxLength);
+    TotalWords.Caption:=IntToStr(THelpers.WordCount(ReportMemo.Text)) + ' / ' + IntToStr(ReportMemo.MaxLength);
 end;
 
 

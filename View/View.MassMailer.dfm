@@ -43,8 +43,6 @@ object MassMailerForm: TMassMailerForm
     ParentBackground = False
     ParentFont = False
     TabOrder = 2
-    ExplicitTop = 718
-    ExplicitWidth = 1257
     object btnCancel: TSpeedButton
       Left = 974
       Top = 13
@@ -208,8 +206,6 @@ object MassMailerForm: TMassMailerForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 1
-    ExplicitLeft = 710
-    ExplicitHeight = 698
     object TextMessage: TLabel
       AlignWithMargins = True
       Left = 20
@@ -222,8 +218,6 @@ object MassMailerForm: TMassMailerForm
       Margins.Bottom = 10
       Align = alTop
       Caption = 'Custom message:'
-      ExplicitLeft = 18
-      ExplicitTop = 70
       ExplicitWidth = 85
     end
     object TextSubject: TLabel
@@ -238,8 +232,6 @@ object MassMailerForm: TMassMailerForm
       Margins.Bottom = 10
       Align = alTop
       Caption = 'Custom subject:'
-      ExplicitLeft = 18
-      ExplicitTop = 20
       ExplicitWidth = 78
     end
     object PanelMessage: TPanel
@@ -257,10 +249,6 @@ object MassMailerForm: TMassMailerForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 1
-      ExplicitLeft = 16
-      ExplicitTop = 89
-      ExplicitWidth = 505
-      ExplicitHeight = 320
       object Text_Message: TMemo
         AlignWithMargins = True
         Left = 2
@@ -285,8 +273,6 @@ object MassMailerForm: TMassMailerForm
         ScrollBars = ssVertical
         TabOrder = 0
         OnKeyUp = Text_MessageKeyUp
-        ExplicitWidth = 501
-        ExplicitHeight = 197
       end
     end
     object PanelSubject: TPanel
@@ -304,9 +290,6 @@ object MassMailerForm: TMassMailerForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 0
-      ExplicitLeft = 16
-      ExplicitTop = 39
-      ExplicitWidth = 505
       object Text_Subject: TEdit
         AlignWithMargins = True
         Left = 2
@@ -328,9 +311,6 @@ object MassMailerForm: TMassMailerForm
         ParentFont = False
         TabOrder = 0
         OnKeyUp = Text_SubjectKeyUp
-        ExplicitTop = 4
-        ExplicitWidth = 501
-        ExplicitHeight = 20
       end
     end
     object PanelOption: TPanel
@@ -346,9 +326,6 @@ object MassMailerForm: TMassMailerForm
       Align = alBottom
       BevelOuter = bvNone
       TabOrder = 2
-      ExplicitLeft = 6
-      ExplicitTop = 415
-      ExplicitWidth = 525
       object Shape_Options: TShape
         AlignWithMargins = True
         Left = 10
@@ -719,8 +696,6 @@ object MassMailerForm: TMassMailerForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
-    ExplicitWidth = 685
-    ExplicitHeight = 698
     object PanelEmailContainer: TPanel
       AlignWithMargins = True
       Left = 20
@@ -735,9 +710,6 @@ object MassMailerForm: TMassMailerForm
       BevelOuter = bvNone
       Caption = 'PanelEmailContainer'
       TabOrder = 0
-      ExplicitTop = 100
-      ExplicitWidth = 645
-      ExplicitHeight = 578
       object CustomerList: TListView
         AlignWithMargins = True
         Left = 5
@@ -758,8 +730,6 @@ object MassMailerForm: TMassMailerForm
         TabStop = False
         ViewStyle = vsReport
         OnKeyUp = CustomerListKeyUp
-        ExplicitWidth = 635
-        ExplicitHeight = 648
       end
     end
     object GroupEmails: TGroupBox

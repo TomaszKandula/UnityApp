@@ -1,6 +1,5 @@
 program Unity;
 
-
 // ====================================================================== //
 // Application full name:  Unity Platform.                                //
 // Application shortname:  Unity.                                         //
@@ -33,7 +32,6 @@ program Unity;
 // ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR  //
 // OTHER DEALINGS IN THE SOFTWARE.                                        //
 // ====================================================================== //
-
 
 {$SetPEFlags $0020}
 
@@ -86,6 +84,8 @@ uses
 	Api.UserSessionAdded          in 'Model\Json\Responses\Api.UserSessionAdded.pas',
 	Api.UserSessionChecked        in 'Model\Json\Responses\Api.UserSessionChecked.pas',
 	Api.UserCompanyList           in 'Model\Json\Responses\Api.UserCompanyList.pas',
+	Api.UserRatingAdd             in 'Model\Json\Requests\Api.UserRatingAdd.pas',
+	Api.UserRatingUpdate          in 'Model\Json\Requests\Api.UserRatingUpdate.pas',
 	Api.UserCompaniesUpdated      in 'Model\Json\Responses\Api.UserCompaniesUpdated.pas',
 	Api.CustSortingOptions        in 'Model\Json\Responses\Api.CustSortingOptions.pas',
 	Api.UserSessionLogsSaved      in 'Model\Json\Responses\Api.UserSessionLogsSaved.pas',
@@ -104,6 +104,9 @@ uses
 	Api.AddressBookItem           in 'Model\Json\Responses\Api.AddressBookItem.pas',
 	Api.AddressBookAdded          in 'Model\Json\Responses\Api.AddressBookAdded.pas',
 	Api.AddressBookItemDel        in 'Model\Json\Responses\Api.AddressBookItemDel.pas',
+	Api.UserRating                in 'Model\Json\Responses\Api.UserRating.pas',
+	Api.UserRatingAdded           in 'Model\Json\Responses\Api.UserRatingAdded.pas',
+	Api.UserRatingUpdated         in 'Model\Json\Responses\Api.UserRatingUpdated.pas',
     Handler.Sql                   in 'Logic\AccessLayer\Handler.Sql.pas',
     Handler.Database              in 'Logic\AccessLayer\Handler.Database.pas',
     Unity.RestWrapper             in 'Logic\AccessLayer\Unity.RestWrapper.pas',
@@ -145,7 +148,8 @@ uses
     View.Startup                  in 'View\View.Startup.pas' {StartupForm},
     View.SqlSearch                in 'View\View.SqlSearch.pas' {SqlSearchForm},
     View.InvoiceTracker           in 'View\View.InvoiceTracker.pas' {TrackerForm},
-	View.CompanyList              in 'View\View.CompanyList.pas' {CompanyListForm};
+	View.CompanyList              in 'View\View.CompanyList.pas' {CompanyListForm},
+    View.RateApp                  in 'View\View.RateApp.pas' {RateForm};
 
 
 {$R *.res}

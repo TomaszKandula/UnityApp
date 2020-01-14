@@ -9532,7 +9532,7 @@ object MainForm: TMainForm
     Margins.Top = 10
     Margins.Right = 10
     Margins.Bottom = 0
-    ActivePage = TabSheet3
+    ActivePage = TabSheet1
     Align = alClient
     DoubleBuffered = True
     Font.Charset = DEFAULT_CHARSET
@@ -9618,6 +9618,13 @@ object MainForm: TMainForm
           Align = alTop
           BevelOuter = bvNone
           TabOrder = 0
+          object ShapeFollowsFrm: TShape
+            Left = 1064
+            Top = 19
+            Width = 188
+            Height = 88
+            Pen.Color = 14922344
+          end
           object ShapeSelectionFrm: TShape
             Left = 1
             Top = 19
@@ -9628,7 +9635,7 @@ object MainForm: TMainForm
           object ShapeRiskClassFrm: TShape
             Left = 616
             Top = 19
-            Width = 636
+            Width = 449
             Height = 88
             Pen.Color = 14922344
           end
@@ -9708,7 +9715,7 @@ object MainForm: TMainForm
           object ShapeRiskClassCap: TShape
             Left = 616
             Top = 0
-            Width = 636
+            Width = 449
             Height = 19
             Brush.Color = 14922344
             Pen.Color = 14922344
@@ -10283,6 +10290,74 @@ object MainForm: TMainForm
             ParentColor = False
             ParentFont = False
             Transparent = True
+          end
+          object txtFollowsToday: TLabel
+            Left = 1088
+            Top = 34
+            Width = 34
+            Height = 13
+            Caption = 'Today:'
+          end
+          object txtFollowsPast: TLabel
+            Left = 1088
+            Top = 55
+            Width = 25
+            Height = 13
+            Caption = 'Past:'
+          end
+          object txtFollowsNext: TLabel
+            Left = 1088
+            Top = 76
+            Width = 27
+            Height = 13
+            Caption = 'Next:'
+          end
+          object valFollowsToday: TLabel
+            Left = 1136
+            Top = 34
+            Width = 45
+            Height = 13
+            Caption = '{Value}'
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -11
+            Font.Name = 'Tahoma'
+            Font.Style = [fsBold]
+            ParentFont = False
+          end
+          object valFollowsPast: TLabel
+            Left = 1136
+            Top = 55
+            Width = 45
+            Height = 13
+            Caption = '{Value}'
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -11
+            Font.Name = 'Tahoma'
+            Font.Style = [fsBold]
+            ParentFont = False
+          end
+          object valFollowsNext: TLabel
+            Left = 1136
+            Top = 76
+            Width = 45
+            Height = 13
+            Caption = '{Value}'
+            Font.Charset = DEFAULT_CHARSET
+            Font.Color = clWindowText
+            Font.Height = -11
+            Font.Name = 'Tahoma'
+            Font.Style = [fsBold]
+            ParentFont = False
+          end
+          object ShapeFollowsCap: TShape
+            Left = 1064
+            Top = 0
+            Width = 188
+            Height = 19
+            Brush.Color = 14922344
+            Pen.Color = 14922344
           end
           object selAgeSorting: TComboBox
             Left = 206
@@ -15857,7 +15932,7 @@ object MainForm: TMainForm
       Height = 24
       Cursor = crHandPoint
       Margins.Left = 14
-      Margins.Top = 0
+      Margins.Top = 7
       Margins.Right = 7
       Margins.Bottom = 7
       Align = alBottom
@@ -15956,6 +16031,116 @@ object MainForm: TMainForm
         OnClick = txtFeedbackClick
         OnMouseEnter = btnFeedbackMouseEnter
         OnMouseLeave = btnFeedbackMouseLeave
+      end
+    end
+    object btnRating: TPanel
+      AlignWithMargins = True
+      Left = 14
+      Top = 611
+      Width = 149
+      Height = 24
+      Cursor = crHandPoint
+      Margins.Left = 14
+      Margins.Top = 0
+      Margins.Right = 7
+      Margins.Bottom = 7
+      Align = alBottom
+      BevelOuter = bvNone
+      Color = clWhite
+      TabOrder = 12
+      OnClick = btnRatingClick
+      OnMouseEnter = btnRatingMouseEnter
+      OnMouseLeave = btnRatingMouseLeave
+      ExplicitTop = 649
+      object imgRating: TImage
+        Left = 0
+        Top = 0
+        Width = 24
+        Height = 24
+        Cursor = crHandPoint
+        Align = alLeft
+        Center = True
+        Picture.Data = {
+          07544269746D6170F6060000424DF60600000000000036000000280000001800
+          0000180000000100180000000000C0060000D8010000D8010000000000000000
+          0000FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF9FAFEE6E8FBBDC3F48390EC
+          6977E55364E25364E26977E58390ECBDC3F4E6E8FBF9FAFEFFFFFFFFFFFFFFFF
+          FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFEFFD7DBF898A0F15E
+          6EE44A5CE0495BE0495BE0495BE0495BE0495BE0495BE04A5CE05E6EE498A0F1
+          D7DBF8FEFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFDFDFFBCC2
+          F45F6FE44A5CE0495BE0495BE0495BE0495BE0495BE0495BE0495BE0495BE049
+          5BE0495BE04A5CE05F6FE4BCC2F4FDFDFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+          FDFDFFB9BDF95364E1495BE0495BE0495BE0495BE0495BE0495BE0495BE0495B
+          E0495BE0495BE0495BE0495BE0495BE0495BE05364E1B9BDF9FDFDFFFFFFFFFF
+          FFFFFFFFFFFEFEFFBBC2F45263E1495BE0495BE0495BE0495BE0495BE0495BE0
+          495BE0495BE0495BE0495BE0495BE0495BE0495BE0495BE0495BE0495BE05263
+          E1BBC2F4FEFEFFFFFFFFFFFFFFD8DBFA5F6FE4495BE0495BE0495BE0495BE04D
+          6CE44D6CE4495BE0495BE0495BE0495BE0495BE0495BE04C69E34C69E3495BE0
+          495BE0495BE0495BE05F6FE4D8DBFAFFFFFFFAFAFF98A0F24A5CE0495BE0495B
+          E0495BE0495BE04F75E760C7FA58A1F14E6FE54A5EE1495DE14C6CE45297ED57
+          B8F44D72E6495BE0495BE0495BE0495BE04A5CE098A0F2FAFAFFE6E8FB5E6EE4
+          495BE0495BE0495BE0495BE0495BE04C68E45FC4F962D4FC5FC5F9579DF05194
+          ED57B6F458C3F656B6F44B67E3495BE0495BE0495BE0495BE0495BE05E6EE4E6
+          E8FBBDC3F44A5CE0495BE0495BE0495BE0495BE0495BE0495DE05DBBF762D4FC
+          62D4FC62D3FC58C2F658C3F658C3F656AEF2495DE0495BE0495BE0495BE0495B
+          E0495BE04A5CE0BDC3F48390EC495BE0495BE0495BE0495BE0495BE0495BE049
+          5BE05AA8F262D4FC62D4FC62D4FC58C3F658C3F658C3F6539DEE495BE0495BE0
+          495BE0495BE0495BE0495BE0495BE08390EC6877E5495BE0495BE0495BE0495B
+          E0495BE0495BE04D6BE45CB6F662D4FC62D4FC62D4FC58C3F658C3F658C3F655
+          AAF14B69E3495BE0495BE0495BE0495BE0495BE0495BE06877E55364E2495BE0
+          495BE0495BE0495BE0495BE04B64E25BAEF462D2FC62D4FC62D4FC62D4FC58C3
+          F658C3F658C3F658C2F654A2EF4A63E2495BE0495BE0495BE0495BE0495BE053
+          64E25364E2495BE0495BE0495BE0495BE04B66E25BB0F462D4FC62D4FC62D4FC
+          62D4FC62D4FC58C3F658C3F658C3F658C3F658C3F654A3EF4A64E2495BE0495B
+          E0495BE0495BE05364E26877E5495BE0495BE0495BE04A5CE15282E95AACF35D
+          B8F65FC3F861CFFB62D4FC62D4FC58C3F658C3F658BFF556B5F455ABF153A0EF
+          4F7CE84A5CE1495BE0495BE0495BE06877E58390EC495BE0495BE0495BE0495B
+          E04A5EE14A62E24B66E24C69E34E76E75EBFF862D4FC58C3F655B1F34C73E54B
+          67E34A64E24A61E1495DE1495BE0495BE0495BE0495BE08390ECBDC3F44A5CE0
+          495BE0495BE0495BE0495BE0495BE0495BE0495BE0495DE15698EF62D3FC58C2
+          F65190EC495DE0495BE0495BE0495BE0495BE0495BE0495BE0495BE04A5CE0BD
+          C3F4E6E8FB5E6EE4495BE0495BE0495BE0495BE0495BE0495BE0495BE0495BE0
+          4E71E660C7F957B7F44D6EE5495BE0495BE0495BE0495BE0495BE0495BE0495B
+          E0495BE05E6EE4E6E8FBFAFAFF98A0F24A5CE0495BE0495BE0495BE0495BE049
+          5BE0495BE0495BE0495CE0579FF05296ED495CE0495BE0495BE0495BE0495BE0
+          495BE0495BE0495BE04A5CE098A0F2FAFAFFFFFFFFD8DBFA5F6FE4495BE0495B
+          E0495BE0495BE0495BE0495BE0495BE0495BE04C66E34C65E3495BE0495BE049
+          5BE0495BE0495BE0495BE0495BE0495BE05F6FE4D8DBFAFFFFFFFFFFFFFEFEFF
+          BBC2F45263E1495BE0495BE0495BE0495BE0495BE0495BE0495BE0495BE0495B
+          E0495BE0495BE0495BE0495BE0495BE0495BE0495BE05263E1BBC2F4FEFEFFFF
+          FFFFFFFFFFFFFFFFFDFDFFB9BDF95364E1495BE0495BE0495BE0495BE0495BE0
+          495BE0495BE0495BE0495BE0495BE0495BE0495BE0495BE0495BE05364E1B9BD
+          F9FDFDFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFDFDFFBCC2F45F6FE44A5CE049
+          5BE0495BE0495BE0495BE0495BE0495BE0495BE0495BE0495BE0495BE04A5CE0
+          5F6FE4BCC2F4FDFDFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFE
+          FFD7DBF898A0F15E6EE44A5CE0495BE0495BE0495BE0495BE0495BE0495BE04A
+          5CE05E6EE498A0F1D7DBF8FEFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+          FFFFFFFFFFFFFFFFFFFFFFFFF9FAFEE6E8FBBDC3F48390EC6977E55364E25364
+          E26977E58390ECBDC3F4E6E8FBF9FAFEFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
+          FFFF}
+        Transparent = True
+        OnClick = btnRatingClick
+        OnMouseEnter = btnRatingMouseEnter
+        OnMouseLeave = btnRatingMouseLeave
+        ExplicitLeft = 16
+        ExplicitTop = 8
+      end
+      object txtRating: TLabel
+        Left = 30
+        Top = 5
+        Width = 67
+        Height = 13
+        Cursor = crHandPoint
+        Caption = 'Rate the app!'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = clGrayText
+        Font.Height = -11
+        Font.Name = 'Tahoma'
+        Font.Style = []
+        ParentFont = False
+        OnClick = btnRatingClick
+        OnMouseEnter = btnRatingMouseEnter
+        OnMouseLeave = btnRatingMouseLeave
       end
     end
   end

@@ -79,28 +79,28 @@ type
         shapeLbuEmails: TShape;
         cbMergeList: TCheckBox;
         procedure FormCreate(Sender: TObject);
-        procedure FormDestroy(Sender: TObject);
         procedure FormShow(Sender: TObject);
+        procedure FormActivate(Sender: TObject);
+        procedure FormDestroy(Sender: TObject);
         procedure FormClose(Sender: TObject; var Action: TCloseAction);
         procedure btnCancelClick(Sender: TObject);
         procedure btnSendEmailClick(Sender: TObject);
+        procedure btnBeginDateClick(Sender: TObject);
+        procedure btnEndDateClick(Sender: TObject);
+        procedure btnDelBeginClick(Sender: TObject);
+        procedure btnDelEndClick(Sender: TObject);
+        procedure btnApplyClick(Sender: TObject);
         procedure Text_SubjectKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure Text_MessageKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure cbShowAllKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure cbOverdueOnlyKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure cbNonOverdueKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-        procedure btnBeginDateClick(Sender: TObject);
-        procedure btnEndDateClick(Sender: TObject);
         procedure cbShowAllClick(Sender: TObject);
         procedure cbOverdueOnlyClick(Sender: TObject);
         procedure cbNonOverdueClick(Sender: TObject);
         procedure CustomerListKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-        procedure FormKeyPress(Sender: TObject; var Key: Char);
-        procedure btnDelBeginClick(Sender: TObject);
-        procedure btnDelEndClick(Sender: TObject);
-        procedure FormActivate(Sender: TObject);
-        procedure btnApplyClick(Sender: TObject);
         procedure selCompanySelect(Sender: TObject);
+        procedure FormKeyPress(Sender: TObject; var Key: Char);
     strict private
         var OpenItemsRefs: TFOpenItemsRefs;
         var CtrlStatusRefs: TFCtrlStatusRefs;
@@ -506,7 +506,6 @@ begin
 
     end;
 
-    lsColumns.AutoSize:=True;
     CustomerList.Column[7].Width:=0;
     CustomerList.Column[8].Width:=0;
     CustomerList.Column[9].Width:=0;
@@ -580,7 +579,7 @@ begin
     FIsDataLoaded:=False;
     CustomerList.Clear();
     MainForm.TimerCustOpenItems.Enabled:=True;
-    ThreadFileLog.Log('[TMassMailerForm.FormClose]: Mass mailer has been closed, open items loader is enabled.');
+    ThreadFileLog.Log('[TMassMailerForm.FormClose]: Mass mailer has been closed, open items loader is resumed.');
 end;
 
 
@@ -604,6 +603,12 @@ end;
 
 procedure TMassMailerForm.btnApplyClick(Sender: TObject);
 begin
+
+    if lstLbuEmails.ItemIndex < 0 then
+    begin
+        THelpers.MsgCall(TAppMessage.Warn, 'Please select e-mail address you want to apply.');
+        Exit();
+    end;
 
     if CustomerList.Items.Count = 0 then Exit();
 

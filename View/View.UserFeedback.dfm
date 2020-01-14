@@ -83,7 +83,7 @@ object FeedbackForm: TFeedbackForm
         Font.Height = -11
         Font.Name = 'Tahoma'
         Font.Style = []
-        MaxLength = 255
+        MaxLength = 1024
         ParentFont = False
         ScrollBars = ssVertical
         TabOrder = 0

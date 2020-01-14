@@ -129,32 +129,32 @@ type
         procedure FormCreate(Sender: TObject);
         procedure FormShow(Sender: TObject);
         procedure FormActivate(Sender: TObject);
+        procedure FormClose(Sender: TObject; var Action: TCloseAction);
         procedure FormDestroy(Sender: TObject);
+        procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+        procedure FormKeyPress(Sender: TObject; var Key: Char);
         procedure OpenItemsGridMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure OpenItemsGridMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure OpenItemsGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
+        procedure OpenItemsGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure OpenItemsGridMouseEnter(Sender: TObject);
         procedure DailyComGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
         procedure DailyComGridMouseWheelDown(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure DailyComGridMouseWheelUp(Sender: TObject; Shift: TShiftState; MousePos: TPoint; var Handled: Boolean);
         procedure DailyComGridDrawCell(Sender: TObject; ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
-        procedure OpenItemsGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure DailyComGridKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure DailyComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+        procedure DailyComGridMouseEnter(Sender: TObject);
+        procedure DailyComMouseEnter(Sender: TObject);
+        procedure DailyComKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure GeneralComKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-        procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
-        procedure FormKeyPress(Sender: TObject; var Key: Char);
+        procedure GeneralComMouseEnter(Sender: TObject);
+        procedure GeneralComKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
         procedure Cust_PhoneMouseEnter(Sender: TObject);
         procedure Cust_PersonMouseEnter(Sender: TObject);
         procedure Cust_MailMouseEnter(Sender: TObject);
         procedure Cust_MailGeneralMouseEnter(Sender: TObject);
-        procedure OpenItemsGridMouseEnter(Sender: TObject);
-        procedure DailyComGridMouseEnter(Sender: TObject);
-        procedure DailyComMouseEnter(Sender: TObject);
-        procedure GeneralComMouseEnter(Sender: TObject);
-        procedure DailyComKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-        procedure GeneralComKeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-        procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
-        procedure FormClose(Sender: TObject; var Action: TCloseAction);
         procedure btnCopyCustNameClick(Sender: TObject);
         procedure btnCopyCustNumberClick(Sender: TObject);
         procedure btnCopyGeneralMailClick(Sender: TObject);
@@ -189,8 +189,8 @@ type
         procedure btnAutoStatementMouseLeave(Sender: TObject);
         procedure btnCallCustomerMouseEnter(Sender: TObject);
         procedure btnCallCustomerMouseLeave(Sender: TObject);
-        procedure selSendFromSelect(Sender: TObject);
         procedure btnAddCommentClick(Sender: TObject);
+        procedure selSendFromSelect(Sender: TObject);
     strict private
         const AppButtonTxtNormal = $00555555;
         const AppButtonTxtSelected = $006433C9;
@@ -758,6 +758,7 @@ begin
         Comments.EditGeneralCommentAsync(LGeneralCommentFields, EditGeneralComment_Callback);
 
         MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TGeneralComment.fFollowUp), MainForm.sgAgeView.Row]:='';
+        MainForm.UpdateFollowUps(MainForm.sgAgeView, MainForm.sgAgeView.GetCol(TGeneralComment.fFollowUp));
 
     end;
 
@@ -962,6 +963,9 @@ begin
         OpenItemsGrid.Freeze(True);
         DailyComGrid.Freeze(True);
 
+        MainForm.TimerCustOpenItems.Enabled:=False;
+        ThreadFileLog.Log('[TActionsForm.FormActivate]: Action view has been opened, open items loader is on hold.');
+
         THelpers.ExecWithDelay(500, procedure
         begin
 
@@ -1007,6 +1011,8 @@ end;
 procedure TActionsForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
     FIsDataLoaded:=False;
+    MainForm.TimerCustOpenItems.Enabled:=True;
+    ThreadFileLog.Log('[TActionsForm.FormActivate]: Action view has been closed, open items loader is resumed.');
 end;
 
 
@@ -1097,6 +1103,7 @@ procedure TActionsForm.btnLogMissingInvClick(Sender: TObject);
 begin
     //QmsForm.IsMissing:=True;
     //THelpers.WndCall(QmsForm, Modal);
+    THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in beta version.');
 end;
 
 
@@ -1104,6 +1111,7 @@ procedure TActionsForm.btnLogNowClick(Sender: TObject);
 begin
     //QmsForm.IsMissing:=False;
     //THelpers.WndCall(QmsForm, Modal);
+    THelpers.MsgCall(TAppMessage.Warn, 'This feature is disabled in beta version.');
 end;
 
 

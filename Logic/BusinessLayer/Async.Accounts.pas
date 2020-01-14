@@ -57,6 +57,13 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function SaveUserCompanyListAwaited(UserSelection: TList<string>): TCallResponse;
+        /// <summary>
+        /// Allow to load async. user rating with optional comment. There is no separate notification.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        function GetUserRatingAwaited(var Rating: TRating): TCallResponse;
     end;
 
 
@@ -101,6 +108,13 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         function SaveUserCompanyListAwaited(UserSelection: TList<string>): TCallResponse;
+        /// <summary>
+        /// Allow to load async. user rating with optional comment. There is no separate notification.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        function GetUserRatingAwaited(var Rating: TRating): TCallResponse;
     end;
 
 
@@ -123,7 +137,8 @@ uses
     Api.UserCompanySelection,
     Api.UserCompaniesUpdated,
     Api.UserSessionLogs,
-    Api.UserSessionLogsSaved;
+    Api.UserSessionLogsSaved,
+    Api.UserRating;
 
 
 function TAccounts.InitiateSessionAwaited(SessionId: string; AliasName: string): TCallResponse;
@@ -506,6 +521,80 @@ begin
 
     NewTask.Start();
     TTask.WaitForAll(NewTask);
+    Result:=CallResponse;
+
+end;
+
+
+function TAccounts.GetUserRatingAwaited(var Rating: TRating): TCallResponse;
+begin
+
+    var CallResponse: TCallResponse;
+    var TempRating: TRating;
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
+        Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'accounts/' + SessionService.SessionData.UnityUserId.ToString() + '/rating/';
+        Restful.RequestMethod:=TRESTRequestMethod.rmGET;
+        ThreadFileLog.Log('[GetUserRatingAwaited]: Executing GET ' + Restful.ClientBaseURL);
+
+        try
+
+            if (Restful.Execute) and (Restful.StatusCode = 200) then
+            begin
+
+                var Response:=TJson.JsonToObject<TUserRating>(Restful.Content);
+                try
+
+                    TempRating.UserRating:=Response.Rating;
+                    TempRating.UserComment:=Response.Comment;
+
+                    CallResponse.IsSucceeded :=Response.IsSucceeded;
+                    CallResponse.ErrorNumber :=Response.Error.ErrorNum;
+                    CallResponse.LastMessage :=Response.Error.ErrorDesc;
+                    CallResponse.ReturnedCode:=Restful.StatusCode;
+
+                    ThreadFileLog.Log('[GetUserRatingAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+
+                finally
+                    Response.Free();
+                end;
+
+            end
+            else
+            begin
+
+                if not String.IsNullOrEmpty(Restful.ExecuteError) then
+                    CallResponse.LastMessage:='[GetUserRatingAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                else
+                    if String.IsNullOrEmpty(Restful.Content) then
+                        CallResponse.LastMessage:='[GetUserRatingAwaited]: Invalid server response. Please contact IT Support.'
+                    else
+                        CallResponse.LastMessage:='[GetUserRatingAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+
+                CallResponse.ReturnedCode:=Restful.StatusCode;
+                CallResponse.IsSucceeded:=False;
+                ThreadFileLog.Log(CallResponse.LastMessage);
+
+            end;
+
+        except on
+            E: Exception do
+            begin
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[GetUserRatingAwaited]: Cannot execute the request. Description: ' + E.Message;
+                ThreadFileLog.Log(CallResponse.LastMessage);
+            end;
+
+        end;
+
+    end);
+
+    NewTask.Start();
+    TTask.WaitForAll(NewTask);
+    Rating:=TempRating;
     Result:=CallResponse;
 
 end;

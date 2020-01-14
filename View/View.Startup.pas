@@ -390,6 +390,7 @@ begin
         // -----------------------------------
         MainAppForm.ShapeSelectionCap.ShapeText(10, 1, 'SELECTION', [fsBold], 'Tahoma', 10, clWhite);
         MainAppForm.ShapeRiskClassCap.ShapeText(10, 1, 'RISK CLASS', [fsBold], 'Tahoma', 10, clWhite);
+        MainAppForm.ShapeFollowsCap.ShapeText(10, 1, 'FOLLOW-UPS', [fsBold], 'Tahoma', 10, clWhite);
         MainAppForm.ShapeDetailsCap.ShapeText(10, 1, 'AGING DETAILS', [fsBold], 'Tahoma', 10, clWhite);
         MainAppForm.ShapeSummaryCap.ShapeText(10, 1, 'SUMMARY', [fsBold], 'Tahoma', 10, clWhite);
         MainAppForm.ShapeExceedersCap.ShapeText(10, 1, 'CREDIT LIMITS', [fsBold], 'Tahoma', 10, clWhite);

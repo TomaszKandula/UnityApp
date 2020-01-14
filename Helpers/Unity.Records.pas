@@ -39,6 +39,13 @@ type
         ReturnedCode: integer;
     end;
     /// <summary>
+    /// Group of variables that carries user rating with optional comment.
+    /// </summary>
+    TRating = record
+        UserRating: integer;
+        UserComment: string;
+    end;
+    /// <summary>
     /// Group of variables that carries user data per session (from Active Directory).
     /// </summary>
     TSessionData = record

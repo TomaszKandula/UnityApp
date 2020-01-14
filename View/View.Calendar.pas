@@ -56,7 +56,7 @@ type
     public
         var FCalendarMode: TCalendar;
         var FSelectedDate: TDateTime;
-        procedure SetFollowUp(SelectedDate: TDate; SelectedCUID: string; Row: integer);
+        procedure SetFollowUp(SelectedDate: TDate; Row: integer);
     end;
 
 
@@ -112,7 +112,7 @@ begin
 end;
 
 
-procedure TCalendarForm.SetFollowUp(SelectedDate: TDate; SelectedCUID: string; Row: integer);
+procedure TCalendarForm.SetFollowUp(SelectedDate: TDate; Row: integer);
 begin
 
     FGeneralCommentFields.CompanyCode   :=(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCoCode), Row]).ToInteger();
@@ -128,6 +128,7 @@ begin
     Comments.EditGeneralCommentAsync(FGeneralCommentFields, EditGeneralComment_Callback);
 
     MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TGeneralComment.fFollowUp), Row]:=DateToStr(SelectedDate);
+    MainForm.UpdateFollowUps(MainForm.sgAgeView, MainForm.sgAgeView.GetCol(TGeneralComment.fFollowUp));
 
 end;
 
@@ -216,12 +217,7 @@ begin
     // Put selected date into database
     if FCalendarMode = TCalendar.DateToDB then
     begin
-        SetFollowUp(
-            CalendarForm.MyCalendar.Date,
-            MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCuid),
-            MainForm.sgAgeView.Row],
-            MainForm.sgAgeView.Row
-        );
+        SetFollowUp(CalendarForm.MyCalendar.Date, MainForm.sgAgeView.Row);
         Close;
     end;
 

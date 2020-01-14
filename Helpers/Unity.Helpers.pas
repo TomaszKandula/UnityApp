@@ -72,6 +72,7 @@ type
         const HtmlEmpty = '<!-- NO BANK ACCOUNT ATTACHED -->';
         const HEAP_ZERO_MEMORY = $00000008;
         const SID_REVISION = 1;
+        const ToSkip = [#0..#32, '.', ',', ';', '[', ']', '(', ')', '{', '}'];
         class function ConvertSid(Sid: PSID; pszSidText: PChar; var dwBufferLen: DWORD): BOOL; static;
         class function ObtainTextSid(hToken: THandle; pszSid: PChar; var dwBufferLen: DWORD): BOOL; static;
         class procedure GetBuildInfo(var V1, V2, V3, V4: word); static;
@@ -111,6 +112,7 @@ type
         class function BankListToHtml(BankDetails: TArray<TBankDetails>): string; static;
         class procedure StrArrayToStrings(Input: TArray<string>; var Output: TStringList); static;
         class function StringToArrayInt(Input: string; SourceDelim: char): TArray<integer>; static;
+        class function WordCount(const InputStr: string): cardinal; static;
     end;
 
 
@@ -965,6 +967,38 @@ begin
 
     finally
         SL.Free();
+    end;
+
+end;
+
+
+class function THelpers.WordCount(const InputStr: string): cardinal;
+begin
+
+    Result:=0;
+
+    var TextLength: integer:=Length(InputStr);
+    var FindWord:   boolean:=False;
+
+    // Count words in TMemo component while user is typing
+    for var iCNT:=1 to TextLength do
+    begin
+
+        if not (CharInSet(InputStr[iCNT], ToSkip)) then
+        begin
+
+            if not FindWord then
+            begin
+                FindWord:=True;
+                Inc(Result);
+            end;
+
+        end
+        else
+        begin
+            FindWord:=False;
+        end;
+
     end;
 
 end;
