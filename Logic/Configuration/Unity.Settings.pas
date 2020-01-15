@@ -9,17 +9,9 @@ interface
 
 
 uses
-    Winapi.Windows,
-    Winapi.Messages,
-    Winapi.ShellAPI,
-    System.StrUtils,
-    System.SysUtils,
     System.Classes,
     System.INIFiles,
-    Data.Win.ADODB,
-    Vcl.Forms,
     Vcl.Graphics,
-    Unity.EventLogger,
     Unity.Enums;
 
 
@@ -49,7 +41,6 @@ type
         function GetFutureFColor(): TColor;
         function GetFutureBColor(): TColor;
         function GetWinUserName(): string;
-        function GetPathGridImage(): string;
         function GetPathEventLog(): string;
         function GetPathConfig(): string;
         function GetPathLicence(): string;
@@ -64,7 +55,6 @@ type
         function GetUrlLayoutsLst(): string;
         function ConfigFileOK(): boolean;
         property WinUserName: string read GetWinUserName;
-        property PathGridImage: string read GetPathGridImage;
         property PathEventLog: string read GetPathEventLog;
         property PathConfig: string read GetPathConfig;
         property PathLicence: string read GetPathLicence;
@@ -115,7 +105,6 @@ type
         var FTMIL: TMemIniFile;
         var FLastSessionId: string;
         var FWinUserName: string;
-        var FPathGridImage: string;
         var FPathEventLog: string;
         var FPathConfig: string;
         var FPathLicence: string;
@@ -146,7 +135,6 @@ type
         procedure SetFutureFColor(NewColor: TColor);
         procedure SetFutureBColor(NewColor: TColor);
         function GetWinUserName(): string;
-        function GetPathGridImage(): string;
         function GetPathEventLog(): string;
         function GetPathConfig(): string;
         function GetPathLicence(): string;
@@ -180,7 +168,6 @@ type
         procedure MakeNewSessionId();
         function MakeNewSessionFile(SessionId: string): string;
         property WinUserName: string read GetWinUserName;
-        property PathGridImage: string read GetPathGridImage;
         property PathEventLog: string read GetPathEventLog;
         property PathConfig: string read GetPathConfig;
         property PathLicence: string read GetPathLicence;
@@ -231,8 +218,11 @@ implementation
 
 
 uses
+    System.SysUtils,
+    Vcl.Forms,
     Unity.Crc32,
-    Unity.Constants;
+    Unity.Constants,
+    Unity.EventLogger;
 
 
 constructor TSettings.Create();
@@ -250,7 +240,6 @@ begin
     FDirAssets     :=FDirApplication + 'assets\';
     FPathConfig    :=FDirApplication + TCommon.ConfigFile;
     FPathLicence   :=FDirApplication + TCommon.LicenceFile;
-    FPathGridImage :=FDirApplication + TCommon.GridImgFile;
 
     if FileExists(FPathConfig) then ConfigToMemory() else FConfigFileOK:=False;
 
@@ -665,10 +654,10 @@ begin
 end;
 
 
-function TSettings.GetPathGridImage(): string;
-begin
-    Result:=FPathGridImage;
-end;
+//function TSettings.GetPathGridImage(): string;
+//begin
+//    Result:=FPathGridImage;
+//end;
 
 
 function TSettings.GetPathEventLog(): string;

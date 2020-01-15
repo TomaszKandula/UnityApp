@@ -17,6 +17,17 @@ uses
 type
 
 
+    /// <summary>
+    /// Callback signature for inserting new user rating.
+    /// </summary>
+    TSubmitRating = procedure(CallResponse: TCallResponse) of object;
+
+    /// <summary>
+    /// Callback signature for updating existing user rating.
+    /// </summary>
+    TUpdateRating = procedure(CallResponse: TCallResponse) of object;
+
+
     IAccounts = interface(IInterface)
     ['{4BA4CF2E-B8BD-4029-B358-93D1A344DAF3}']
         /// <summary>
@@ -63,7 +74,23 @@ type
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function GetUserRatingAwaited(var Rating: TRating): TCallResponse;
+        function LoadRatingAwaited(var Rating: TRating): TCallResponse;
+        /// <summary>
+        /// Allow to write async. user rating with optional comment.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        procedure SubmitRatingAsync(Rating: TRating; Callback: TSubmitRating);
+        /// <summary>
+        /// Allow to re-write async. user rating with optional comment.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        procedure UpdateRatingAsync(Rating: TRating; Callback: TUpdateRating);
     end;
 
 
@@ -114,7 +141,23 @@ type
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function GetUserRatingAwaited(var Rating: TRating): TCallResponse;
+        function LoadRatingAwaited(var Rating: TRating): TCallResponse;
+        /// <summary>
+        /// Allow to write async. user rating with optional comment.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        procedure SubmitRatingAsync(Rating: TRating; Callback: TSubmitRating);
+        /// <summary>
+        /// Allow to re-write async. user rating with optional comment.
+        /// Notification is always executed in main thread as long as callback is provided.
+        /// </summary>
+        /// <remarks>
+        /// This method always awaits for task to be completed and makes no callback to main thread.
+        /// </remarks>
+        procedure UpdateRatingAsync(Rating: TRating; Callback: TUpdateRating);
     end;
 
 
@@ -138,7 +181,11 @@ uses
     Api.UserCompaniesUpdated,
     Api.UserSessionLogs,
     Api.UserSessionLogsSaved,
-    Api.UserRating;
+    Api.UserRating,
+    Api.UserRatingAdd,
+    Api.UserRatingAdded,
+    Api.UserRatingUpdate,
+    Api.UserRatingUpdated;
 
 
 function TAccounts.InitiateSessionAwaited(SessionId: string; AliasName: string): TCallResponse;
@@ -526,7 +573,7 @@ begin
 end;
 
 
-function TAccounts.GetUserRatingAwaited(var Rating: TRating): TCallResponse;
+function TAccounts.LoadRatingAwaited(var Rating: TRating): TCallResponse;
 begin
 
     var CallResponse: TCallResponse;
@@ -545,21 +592,21 @@ begin
             if (Restful.Execute) and (Restful.StatusCode = 200) then
             begin
 
-                var Response:=TJson.JsonToObject<TUserRating>(Restful.Content);
+                var UserRating:=TJson.JsonToObject<TUserRating>(Restful.Content);
                 try
 
-                    TempRating.UserRating:=Response.Rating;
-                    TempRating.UserComment:=Response.Comment;
+                    TempRating.UserRating:=UserRating.Rating;
+                    TempRating.UserComment:=UserRating.Comment;
 
-                    CallResponse.IsSucceeded :=Response.IsSucceeded;
-                    CallResponse.ErrorNumber :=Response.Error.ErrorNum;
-                    CallResponse.LastMessage :=Response.Error.ErrorDesc;
+                    CallResponse.IsSucceeded :=UserRating.IsSucceeded;
+                    CallResponse.ErrorNumber :=UserRating.Error.ErrorNum;
+                    CallResponse.LastMessage :=UserRating.Error.ErrorDesc;
                     CallResponse.ReturnedCode:=Restful.StatusCode;
 
                     ThreadFileLog.Log('[GetUserRatingAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
 
                 finally
-                    Response.Free();
+                    UserRating.Free();
                 end;
 
             end
@@ -596,6 +643,170 @@ begin
     TTask.WaitForAll(NewTask);
     Rating:=TempRating;
     Result:=CallResponse;
+
+end;
+
+
+procedure TAccounts.SubmitRatingAsync(Rating: TRating; Callback: TSubmitRating);
+begin
+
+    var CallResponse: TCallResponse;
+    var TempRating:=Rating;
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
+        Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'accounts/' + SessionService.SessionData.UnityUserId.ToString() + '/rating/';
+        Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
+        ThreadFileLog.Log('[SubmitRatingAwaited]: Executing POST ' + Restful.ClientBaseURL);
+
+        var UserRatingAdd:=TUserRatingAdd.Create();
+        try
+            UserRatingAdd.UserRating:=TempRating.UserRating;
+            UserRatingAdd.Comment   :=TempRating.UserComment;
+            Restful.CustomBody      :=TJson.ObjectToJsonString(UserRatingAdd);
+        finally
+            UserRatingAdd.Free();
+        end;
+
+        try
+
+            if (Restful.Execute) and (Restful.StatusCode = 200) then
+            begin
+
+                var UserRatingAdded:=TJson.JsonToObject<TUserRatingAdded>(Restful.Content);
+                try
+
+                    CallResponse.IsSucceeded :=UserRatingAdded.IsSucceeded;
+                    CallResponse.ErrorNumber :=UserRatingAdded.Error.ErrorNum;
+                    CallResponse.LastMessage :=UserRatingAdded.Error.ErrorDesc;
+                    CallResponse.ReturnedCode:=Restful.StatusCode;
+
+                    ThreadFileLog.Log('[SubmitRatingAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+
+                finally
+                    UserRatingAdded.Free();
+                end;
+
+            end
+            else
+            begin
+
+                if not String.IsNullOrEmpty(Restful.ExecuteError) then
+                    CallResponse.LastMessage:='[SubmitRatingAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                else
+                    if String.IsNullOrEmpty(Restful.Content) then
+                        CallResponse.LastMessage:='[SubmitRatingAwaited]: Invalid server response. Please contact IT Support.'
+                    else
+                        CallResponse.LastMessage:='[SubmitRatingAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+
+                CallResponse.ReturnedCode:=Restful.StatusCode;
+                CallResponse.IsSucceeded:=False;
+                ThreadFileLog.Log(CallResponse.LastMessage);
+
+            end;
+
+        except on
+            E: Exception do
+            begin
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[SubmitRatingAwaited]: Cannot execute the request. Description: ' + E.Message;
+                ThreadFileLog.Log(CallResponse.LastMessage);
+            end;
+
+        end;
+
+        TThread.Synchronize(nil, procedure
+        begin
+            if Assigned(Callback) then Callback(CallResponse);
+        end);
+
+    end);
+
+    NewTask.Start();
+
+end;
+
+
+procedure TAccounts.UpdateRatingAsync(Rating: TRating; Callback: TUpdateRating);
+begin
+
+    var CallResponse: TCallResponse;
+    var TempRating:=Rating;
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
+        Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'accounts/' + SessionService.SessionData.UnityUserId.ToString() + '/rating/';
+        Restful.RequestMethod:=TRESTRequestMethod.rmPATCH;
+        ThreadFileLog.Log('[SubmitRatingAwaited]: Executing PATCH ' + Restful.ClientBaseURL);
+
+        var UserRatingUpdate:=TUserRatingUpdate.Create();
+        try
+            UserRatingUpdate.UserRating:=TempRating.UserRating;
+            UserRatingUpdate.Comment   :=TempRating.UserComment;
+            Restful.CustomBody         :=TJson.ObjectToJsonString(UserRatingUpdate);
+        finally
+            UserRatingUpdate.Free();
+        end;
+
+        try
+
+            if (Restful.Execute) and (Restful.StatusCode = 200) then
+            begin
+
+                var UserRatingUpdated:=TJson.JsonToObject<TUserRatingUpdated>(Restful.Content);
+                try
+
+                    CallResponse.IsSucceeded :=UserRatingUpdated.IsSucceeded;
+                    CallResponse.ErrorNumber :=UserRatingUpdated.Error.ErrorNum;
+                    CallResponse.LastMessage :=UserRatingUpdated.Error.ErrorDesc;
+                    CallResponse.ReturnedCode:=Restful.StatusCode;
+
+                    ThreadFileLog.Log('[SubmitRatingAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+
+                finally
+                    UserRatingUpdated.Free();
+                end;
+
+            end
+            else
+            begin
+
+                if not String.IsNullOrEmpty(Restful.ExecuteError) then
+                    CallResponse.LastMessage:='[SubmitRatingAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                else
+                    if String.IsNullOrEmpty(Restful.Content) then
+                        CallResponse.LastMessage:='[SubmitRatingAwaited]: Invalid server response. Please contact IT Support.'
+                    else
+                        CallResponse.LastMessage:='[SubmitRatingAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+
+                CallResponse.ReturnedCode:=Restful.StatusCode;
+                CallResponse.IsSucceeded:=False;
+                ThreadFileLog.Log(CallResponse.LastMessage);
+
+            end;
+
+        except on
+            E: Exception do
+            begin
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[SubmitRatingAwaited]: Cannot execute the request. Description: ' + E.Message;
+                ThreadFileLog.Log(CallResponse.LastMessage);
+            end;
+
+        end;
+
+        TThread.Synchronize(nil, procedure
+        begin
+            if Assigned(Callback) then Callback(CallResponse);
+        end);
+
+    end);
+
+    NewTask.Start();
 
 end;
 

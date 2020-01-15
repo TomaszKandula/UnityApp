@@ -28,8 +28,8 @@ type
     public
         const _IsSucceeded = 'IsSucceeded';
         const _Error       = 'Error';
-    published
         destructor Destroy(); override;
+    published
         property IsSucceeded: boolean       read FIsSucceeded write FIsSucceeded;
         property Error:       TErrorHandler read FError       write FError;
     end;

@@ -32,7 +32,7 @@ type
         const _Comment     ='Comment';
         const _IsSucceeded ='IsSucceeded';
         const _Error       ='Error';
-        destructor Destroy();
+        destructor Destroy(); override;
     published
         property Rating:      integer       read FRating      write FRating;
         property Comment:     string        read FComment     write FComment;

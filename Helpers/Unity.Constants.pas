@@ -84,7 +84,6 @@ type
         const AppCaption:     string    = 'Unity';
         const UnityReader:    string    = 'UnityReader.exe';
         const LicenceFile:    string    = 'Unity.lic';
-        const GridImgFile:    string    = 'Unity.img';
         const ReleaseFile:    string    = 'Release.zip';
         const LayoutPak:      string    = 'Layouts.zip';
         const ManifestFile:   string    = 'Unity.manifest';
@@ -131,3 +130,4 @@ implementation
 
 
 end.
+

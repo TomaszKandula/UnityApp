@@ -72,6 +72,10 @@ type
         var FIsAppRated: boolean;
         var FIsDataLoaded: boolean;
         procedure SetRatingStars(RatingNumber: integer);
+        procedure InsertRating();
+        procedure UpdateRating();
+        procedure SubmitRatingAsync_Callback(CallResponse: TCallResponse);
+        procedure UpdateRatingAsync_Callback(CallResponse: TCallResponse);
     public
         var FSetLastSelection: TTabSheet;
     end;
@@ -171,13 +175,80 @@ begin
 end;
 
 
+procedure TRateForm.InsertRating();
+begin
+
+    Screen.Cursor:=crHourGlass;
+    ReportMemo.Enabled:=False;
+    btnSendRating.Enabled:=False;
+
+    var Accounts: IAccounts:=TAccounts.Create();
+    var UserRating: TRating;
+
+    UserRating.UserRating:=FSelectedRating;
+    UserRating.UserComment:=ReportMemo.Text;
+    Accounts.SubmitRatingAsync(UserRating, SubmitRatingAsync_Callback);
+
+end;
+
+
+procedure TRateForm.UpdateRating();
+begin
+
+    Screen.Cursor:=crHourGlass;
+    ReportMemo.Enabled:=False;
+    btnSendRating.Enabled:=False;
+
+    var Accounts: IAccounts:=TAccounts.Create();
+    var UserRating: TRating;
+
+    UserRating.UserRating:=FSelectedRating;
+    UserRating.UserComment:=ReportMemo.Text;
+    Accounts.UpdateRatingAsync(UserRating, UpdateRatingAsync_Callback);
+
+end;
+
+
 {$ENDREGION}
 
 
 {$REGION 'CALLBACKS'}
 
 
-//...
+procedure TRateForm.SubmitRatingAsync_Callback(CallResponse: TCallResponse);
+begin
+
+    Screen.Cursor:=crDefault;
+    ReportMemo.Enabled:=True;
+    btnSendRating.Enabled:=True;
+
+    if not CallResponse.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        Exit();
+    end;
+
+    THelpers.MsgCall(TAppMessage.Info, 'Your rating has been submitted. Thank you!');
+
+end;
+
+
+procedure TRateForm.UpdateRatingAsync_Callback(CallResponse: TCallResponse);
+begin
+
+    Screen.Cursor:=crDefault;
+    ReportMemo.Enabled:=True;
+    btnSendRating.Enabled:=True;
+
+    if not CallResponse.IsSucceeded then
+    begin
+        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+        Exit();
+    end;
+
+    THelpers.MsgCall(TAppMessage.Info, 'Your rating has been updated.');
+
+end;
 
 
 {$ENDREGION}
@@ -212,7 +283,7 @@ begin
             var Accounts: IAccounts:=TAccounts.Create();
             var CallResponse: TCallResponse;
             var Rating: TRating;
-            CallResponse:=Accounts.GetUserRatingAwaited(Rating);
+            CallResponse:=Accounts.LoadRatingAwaited(Rating);
 
             if CallResponse.IsSucceeded then
             begin
@@ -241,6 +312,7 @@ end;
 procedure TRateForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
     FIsDataLoaded:=False;
+    FIsAppRated:=False;
     FSelectedRating:=0;
     ReportMemo.Text:=String.Empty;
     MainForm.SetActiveTabsheet(FSetLastSelection);
@@ -262,8 +334,8 @@ begin
         Exit();
     end;
 
-    if FIsAppRated then //...call "update"
-    else //...call "new"
+    if FIsAppRated then THelpers.ExecWithDelay(300, UpdateRating)
+        else THelpers.ExecWithDelay(300, InsertRating);
 
 end;
 
@@ -387,3 +459,4 @@ end;
 
 
 end.
+

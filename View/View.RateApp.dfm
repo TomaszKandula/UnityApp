@@ -36,8 +36,6 @@ object RateForm: TRateForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 0
-    ExplicitTop = 278
-    ExplicitWidth = 451
     object btnSendRating: TSpeedButton
       Left = 484
       Top = 12
@@ -95,8 +93,6 @@ object RateForm: TRateForm
     Color = clWhite
     ParentBackground = False
     TabOrder = 1
-    ExplicitWidth = 431
-    ExplicitHeight = 333
     object txtCaption: TLabel
       AlignWithMargins = True
       Left = 10
@@ -118,7 +114,6 @@ object RateForm: TRateForm
       Font.Style = []
       ParentColor = False
       ParentFont = False
-      ExplicitTop = 10
       ExplicitWidth = 279
     end
     object txtComment: TLabel
@@ -139,8 +134,6 @@ object RateForm: TRateForm
       Font.Name = 'Tahoma'
       Font.Style = []
       ParentFont = False
-      ExplicitLeft = 3
-      ExplicitTop = 3
       ExplicitWidth = 98
     end
     object PanelReportMemo: TPanel
@@ -158,8 +151,6 @@ object RateForm: TRateForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 0
-      ExplicitTop = 216
-      ExplicitWidth = 549
       object ReportMemo: TMemo
         AlignWithMargins = True
         Left = 2
@@ -183,8 +174,6 @@ object RateForm: TRateForm
         ScrollBars = ssVertical
         TabOrder = 0
         OnKeyUp = ReportMemoKeyUp
-        ExplicitWidth = 407
-        ExplicitHeight = 251
       end
     end
     object PanelText: TPanel
@@ -202,8 +191,6 @@ object RateForm: TRateForm
       Color = clWhite
       ParentBackground = False
       TabOrder = 1
-      ExplicitTop = 303
-      ExplicitWidth = 431
       object txtWords: TLabel
         Left = 12
         Top = 3
@@ -238,9 +225,6 @@ object RateForm: TRateForm
       Align = alClient
       BevelOuter = bvNone
       TabOrder = 2
-      ExplicitTop = 57
-      ExplicitWidth = 549
-      ExplicitHeight = 85
       object Image1: TImage
         AlignWithMargins = True
         Left = 145
