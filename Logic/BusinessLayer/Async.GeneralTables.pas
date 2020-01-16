@@ -126,7 +126,7 @@ type
         /// </remarks>
         procedure GetControlStatusAsync(var TargetGrid: TStringGrid; Callback: TGetTables; WaitToComplete: boolean = False);
         /// <summary>
-        /// Allow to load async. Customer.PaidInfo table to provided TStringGrids. This method can be executed without
+        /// Allow to load async. Common.PaidInfo table to provided TStringGrids. This method can be executed without
         /// waiting to complete the task, thus allowing parallel execution.
         /// Notification is always executed in main thread as long as callback is provided.
         /// </summary>
