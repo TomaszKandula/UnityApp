@@ -178,15 +178,16 @@ end;
 procedure TRateForm.InsertRating();
 begin
 
-    Screen.Cursor:=crHourGlass;
-    ReportMemo.Enabled:=False;
-    btnSendRating.Enabled:=False;
-
     var Accounts: IAccounts:=TAccounts.Create();
     var UserRating: TRating;
 
     UserRating.UserRating:=FSelectedRating;
     UserRating.UserComment:=ReportMemo.Text;
+
+    Screen.Cursor:=crHourGlass;
+    ReportMemo.Enabled:=False;
+    btnSendRating.Enabled:=False;
+
     Accounts.SubmitRatingAsync(UserRating, SubmitRatingAsync_Callback);
 
 end;
@@ -195,15 +196,16 @@ end;
 procedure TRateForm.UpdateRating();
 begin
 
-    Screen.Cursor:=crHourGlass;
-    ReportMemo.Enabled:=False;
-    btnSendRating.Enabled:=False;
-
     var Accounts: IAccounts:=TAccounts.Create();
     var UserRating: TRating;
 
     UserRating.UserRating:=FSelectedRating;
     UserRating.UserComment:=ReportMemo.Text;
+
+    Screen.Cursor:=crHourGlass;
+    ReportMemo.Enabled:=False;
+    btnSendRating.Enabled:=False;
+
     Accounts.UpdateRatingAsync(UserRating, UpdateRatingAsync_Callback);
 
 end;
@@ -314,6 +316,8 @@ begin
     FIsDataLoaded:=False;
     FIsAppRated:=False;
     FSelectedRating:=0;
+    btnSendRating.Enabled:=True;
+    ReportMemo.Enabled:=True;
     ReportMemo.Text:=String.Empty;
     MainForm.SetActiveTabsheet(FSetLastSelection);
 end;

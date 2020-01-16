@@ -585,7 +585,7 @@ begin
         var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
         Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'accounts/' + SessionService.SessionData.UnityUserId.ToString() + '/rating/';
         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
-        ThreadFileLog.Log('[GetUserRatingAwaited]: Executing GET ' + Restful.ClientBaseURL);
+        ThreadFileLog.Log('[LoadRatingAwaited]: Executing GET ' + Restful.ClientBaseURL);
 
         try
 
@@ -603,7 +603,7 @@ begin
                     CallResponse.LastMessage :=UserRating.Error.ErrorDesc;
                     CallResponse.ReturnedCode:=Restful.StatusCode;
 
-                    ThreadFileLog.Log('[GetUserRatingAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+                    ThreadFileLog.Log('[LoadRatingAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
 
                 finally
                     UserRating.Free();
@@ -614,12 +614,12 @@ begin
             begin
 
                 if not String.IsNullOrEmpty(Restful.ExecuteError) then
-                    CallResponse.LastMessage:='[GetUserRatingAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                    CallResponse.LastMessage:='[LoadRatingAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
                 else
                     if String.IsNullOrEmpty(Restful.Content) then
-                        CallResponse.LastMessage:='[GetUserRatingAwaited]: Invalid server response. Please contact IT Support.'
+                        CallResponse.LastMessage:='[LoadRatingAwaited]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[GetUserRatingAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+                        CallResponse.LastMessage:='[LoadRatingAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
                 CallResponse.IsSucceeded:=False;
@@ -631,7 +631,7 @@ begin
             E: Exception do
             begin
                 CallResponse.IsSucceeded:=False;
-                CallResponse.LastMessage:='[GetUserRatingAwaited]: Cannot execute the request. Description: ' + E.Message;
+                CallResponse.LastMessage:='[LoadRatingAwaited]: Cannot execute the request. Description: ' + E.Message;
                 ThreadFileLog.Log(CallResponse.LastMessage);
             end;
 
@@ -651,7 +651,6 @@ procedure TAccounts.SubmitRatingAsync(Rating: TRating; Callback: TSubmitRating);
 begin
 
     var CallResponse: TCallResponse;
-    var TempRating:=Rating;
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
@@ -659,12 +658,12 @@ begin
         var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
         Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'accounts/' + SessionService.SessionData.UnityUserId.ToString() + '/rating/';
         Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
-        ThreadFileLog.Log('[SubmitRatingAwaited]: Executing POST ' + Restful.ClientBaseURL);
+        ThreadFileLog.Log('[SubmitRatingAsync]: Executing POST ' + Restful.ClientBaseURL);
 
         var UserRatingAdd:=TUserRatingAdd.Create();
         try
-            UserRatingAdd.UserRating:=TempRating.UserRating;
-            UserRatingAdd.Comment   :=TempRating.UserComment;
+            UserRatingAdd.UserRating:=Rating.UserRating;
+            UserRatingAdd.Comment   :=Rating.UserComment;
             Restful.CustomBody      :=TJson.ObjectToJsonString(UserRatingAdd);
         finally
             UserRatingAdd.Free();
@@ -683,7 +682,7 @@ begin
                     CallResponse.LastMessage :=UserRatingAdded.Error.ErrorDesc;
                     CallResponse.ReturnedCode:=Restful.StatusCode;
 
-                    ThreadFileLog.Log('[SubmitRatingAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+                    ThreadFileLog.Log('[SubmitRatingAsync]: Returned status code is ' + Restful.StatusCode.ToString());
 
                 finally
                     UserRatingAdded.Free();
@@ -694,12 +693,12 @@ begin
             begin
 
                 if not String.IsNullOrEmpty(Restful.ExecuteError) then
-                    CallResponse.LastMessage:='[SubmitRatingAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                    CallResponse.LastMessage:='[SubmitRatingAsync]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
                 else
                     if String.IsNullOrEmpty(Restful.Content) then
-                        CallResponse.LastMessage:='[SubmitRatingAwaited]: Invalid server response. Please contact IT Support.'
+                        CallResponse.LastMessage:='[SubmitRatingAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[SubmitRatingAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+                        CallResponse.LastMessage:='[SubmitRatingAsync]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
                 CallResponse.IsSucceeded:=False;
@@ -711,7 +710,7 @@ begin
             E: Exception do
             begin
                 CallResponse.IsSucceeded:=False;
-                CallResponse.LastMessage:='[SubmitRatingAwaited]: Cannot execute the request. Description: ' + E.Message;
+                CallResponse.LastMessage:='[SubmitRatingAsync]: Cannot execute the request. Description: ' + E.Message;
                 ThreadFileLog.Log(CallResponse.LastMessage);
             end;
 
@@ -733,7 +732,6 @@ procedure TAccounts.UpdateRatingAsync(Rating: TRating; Callback: TUpdateRating);
 begin
 
     var CallResponse: TCallResponse;
-    var TempRating:=Rating;
 
     var NewTask: ITask:=TTask.Create(procedure
     begin
@@ -741,12 +739,12 @@ begin
         var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
         Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'accounts/' + SessionService.SessionData.UnityUserId.ToString() + '/rating/';
         Restful.RequestMethod:=TRESTRequestMethod.rmPATCH;
-        ThreadFileLog.Log('[SubmitRatingAwaited]: Executing PATCH ' + Restful.ClientBaseURL);
+        ThreadFileLog.Log('[UpdateRatingAsync]: Executing PATCH ' + Restful.ClientBaseURL);
 
         var UserRatingUpdate:=TUserRatingUpdate.Create();
         try
-            UserRatingUpdate.UserRating:=TempRating.UserRating;
-            UserRatingUpdate.Comment   :=TempRating.UserComment;
+            UserRatingUpdate.UserRating:=Rating.UserRating;
+            UserRatingUpdate.Comment   :=Rating.UserComment;
             Restful.CustomBody         :=TJson.ObjectToJsonString(UserRatingUpdate);
         finally
             UserRatingUpdate.Free();
@@ -765,7 +763,7 @@ begin
                     CallResponse.LastMessage :=UserRatingUpdated.Error.ErrorDesc;
                     CallResponse.ReturnedCode:=Restful.StatusCode;
 
-                    ThreadFileLog.Log('[SubmitRatingAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+                    ThreadFileLog.Log('[UpdateRatingAsync]: Returned status code is ' + Restful.StatusCode.ToString());
 
                 finally
                     UserRatingUpdated.Free();
@@ -776,12 +774,12 @@ begin
             begin
 
                 if not String.IsNullOrEmpty(Restful.ExecuteError) then
-                    CallResponse.LastMessage:='[SubmitRatingAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                    CallResponse.LastMessage:='[UpdateRatingAsync]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
                 else
                     if String.IsNullOrEmpty(Restful.Content) then
-                        CallResponse.LastMessage:='[SubmitRatingAwaited]: Invalid server response. Please contact IT Support.'
+                        CallResponse.LastMessage:='[UpdateRatingAsync]: Invalid server response. Please contact IT Support.'
                     else
-                        CallResponse.LastMessage:='[SubmitRatingAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+                        CallResponse.LastMessage:='[UpdateRatingAsync]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
 
                 CallResponse.ReturnedCode:=Restful.StatusCode;
                 CallResponse.IsSucceeded:=False;
@@ -793,7 +791,7 @@ begin
             E: Exception do
             begin
                 CallResponse.IsSucceeded:=False;
-                CallResponse.LastMessage:='[SubmitRatingAwaited]: Cannot execute the request. Description: ' + E.Message;
+                CallResponse.LastMessage:='[UpdateRatingAsync]: Cannot execute the request. Description: ' + E.Message;
                 ThreadFileLog.Log(CallResponse.LastMessage);
             end;
 

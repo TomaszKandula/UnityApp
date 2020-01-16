@@ -195,6 +195,7 @@ type
     /// This class of constants defines all fields in configuration file.
     /// </summary>
     TConfigSections = class abstract
+        // Use Section.Key schema
         const PasswordSection    = 'PASSWORD';
         const ApplicationDetails = 'APPLICATION';
         const RiskClassDetails   = 'RISK_CLASS_DETAILS';

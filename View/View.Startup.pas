@@ -479,14 +479,14 @@ begin
     var GeneralTables: IGeneralTables:=TGeneralTables.Create();
     try
 
-        GeneralTables.GetTablesAsync(TCompanyData.CompanyData, MainAppForm.sgCoCodes, GeneralTables_Callback, '', '', True);
-        GeneralTables.GetTablesAsync(TControlStatus.ControlStatus, MainAppForm.sgControlStatus, GeneralTables_Callback, '', '', True);
-        GeneralTables.GetTablesAsync(TPaidinfo.Paidinfo, MainAppForm.sgPaidInfo, GeneralTables_Callback, '', '', True);
-        GeneralTables.GetTablesAsync(TPaymentTerms.PaymentTerms, MainAppForm.sgPmtTerms, GeneralTables_Callback, '', '', True);
-        GeneralTables.GetTablesAsync(TSalesResponsible.SalesResponsible, MainAppForm.sgSalesResp, GeneralTables_Callback, '', '', True);
-        GeneralTables.GetTablesAsync(TPersonResponsible.PersonResponsible, MainAppForm.sgPersonResp, GeneralTables_Callback, '', '', True);
-        GeneralTables.GetTablesAsync(TAccountType.AccountType, MainAppForm.sgAccountType, GeneralTables_Callback, '', '', True);
-        GeneralTables.GetTablesAsync(TCustomerGroup.CustomerGroup, MainAppForm.sgCustomerGr, GeneralTables_Callback, '', '', True);
+//        GeneralTables.GetTablesAsync(TCompanyData.CompanyData, MainAppForm.sgCoCodes, GeneralTables_Callback, '', '', True);
+//        GeneralTables.GetTablesAsync(TControlStatus.ControlStatus, MainAppForm.sgControlStatus, GeneralTables_Callback, '', '', True);
+//        GeneralTables.GetTablesAsync(TPaidinfo.Paidinfo, MainAppForm.sgPaidInfo, GeneralTables_Callback, '', '', True);
+//        GeneralTables.GetTablesAsync(TPaymentTerms.PaymentTerms, MainAppForm.sgPmtTerms, GeneralTables_Callback, '', '', True);
+//        GeneralTables.GetTablesAsync(TSalesResponsible.SalesResponsible, MainAppForm.sgSalesResp, GeneralTables_Callback, '', '', True);
+//        GeneralTables.GetTablesAsync(TPersonResponsible.PersonResponsible, MainAppForm.sgPersonResp, GeneralTables_Callback, '', '', True);
+//        GeneralTables.GetTablesAsync(TAccountType.AccountType, MainAppForm.sgAccountType, GeneralTables_Callback, '', '', True);
+//        GeneralTables.GetTablesAsync(TCustomerGroup.CustomerGroup, MainAppForm.sgCustomerGr, GeneralTables_Callback, '', '', True);
 
     except
         on E: Exception do

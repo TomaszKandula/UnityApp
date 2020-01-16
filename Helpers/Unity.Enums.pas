@@ -17,29 +17,19 @@ type
     TColumns = (Inf7, Inf4, CoCode, Agent, Division, Follow, Group3, Free1, Free2, Free3, SalesResponsible, PersonResponsible, CustomerGroup, AccountType);
 
     /// <summary>
-    /// Used by sorting methods to indicate data type to be sorted.
+    /// Defines data type to be sorted.
     /// </summary>
     TDataType = (TString, TInteger, TFloat);
 
     /// <summary>
-    /// Used to indicate document type to be sent to the customer.
+    /// Indicates document type to be sent to the customer.
     /// </summary>
     TDocType = (Reminder, Statement, Auto, Manual);
 
     /// <summary>
-    /// Used to indicate whether the document uses default template or it is customized by the user.
+    /// Indicates whether the document uses default template or it is customized by the user.
     /// </summary>
     TDocMode = (Custom, Defined);
-
-    /// <summary>
-    /// Defines type of brackets in SQL generator methods.
-    /// </summary>
-    TBrackets = (Round, Square, Curly);
-
-    /// <summary>
-    /// Defines whether the quotes shall be used or not in SQL builder methods.
-    /// </summary>
-    TQuotes = (Enabled, Disabled);
 
     /// <summary>
     /// Defines action type to be executed after user chooses the date from calendar.
@@ -62,7 +52,7 @@ type
     TInvoiceFilter = (ReminderOvd, ReminderNonOvd, ShowAllItems);
 
     /// <summary>
-    /// Indicates what application file type to be encoded/decoded.
+    /// Application file type for encoding/decoding.
     /// </summary>
     TAppFiles = (Configuration, Licence);
 
@@ -72,7 +62,7 @@ type
     TAppTimers = (TurnedOn, TurnedOff);
 
     /// <summary>
-    /// Indicates type of icon on message box and button combinations.
+    /// States type of the icon on message box and button combinations.
     /// </summary>
     TAppMessage = (Info{OK}, Warn{OK}, Error{OK}, Question1{OK}, Question2{YES_NO});
 
@@ -81,15 +71,11 @@ type
     /// </summary>
     TListSelection = (First, Last);
 
-    /// <summary>
-    /// CDOSYS authentication types.
-    /// </summary>
+    // to be removed
     TAuthTypes = (cdoAnonymous, cdoBasic, cdoNTLM);{Legacy}
-
-    /// <summary>
-    /// Used to indicate authorisation scheme in CDOSYS.
-    /// </summary>
     TAuthUsing = (cdoNone, cdoSendUsingPickup, cdoSendUsingPort, cdoSendUsingExchange);{Legacy}
+    TQuotes = (Enabled, Disabled);{Legacy}
+    TBrackets = (Round, Square, Curly);{legacy}
 
 
 implementation
