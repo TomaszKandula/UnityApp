@@ -179,7 +179,7 @@ begin
                     ReturnedData.ColCount:=9;
 
                     // Setup headers
-                    ReturnedData.Cells[0, 0]:='';//unused lp column
+                    ReturnedData.Cells[0, 0]:='';//empty lp column
                     ReturnedData.Cells[1, 0]:=AddressBookList._Id;//hidden column
                     ReturnedData.Cells[2, 0]:=AddressBookList._SourceDbName;
                     ReturnedData.Cells[3, 0]:=AddressBookList._CustomerNumber;

@@ -33,6 +33,7 @@ type
         function GethttpAuthPassword(): string;
         function GetClientAccept(): string;
         function GetClientAcceptCharset(): string;
+        function GetClientAcceptEncoding(): string;
         function GetClientAllowCookies(): boolean;
         function GetClientAutoCreateParams(): boolean;
         function GetClientBaseURL(): string;
@@ -52,6 +53,7 @@ type
         procedure SetCustomBody(NewValue: string);
         procedure SetClientAccept(NewValue: string);
         procedure SetClientAcceptCharset(NewValue: string);
+        procedure SetClientAcceptEncoding(NewValue: string);
         procedure SetClientAllowCookies(NewValue: boolean);
         procedure SetClientAutoCreateParams(NewValue: boolean);
         procedure SetClientBaseURL(NewValue: string);
@@ -77,6 +79,7 @@ type
         property CustomBody: string read GetCustomBody write SetCustomBody;
         property ClientAccept: string read GetClientAccept write SetClientAccept;
         property ClientAcceptCharset: string read GetClientAcceptCharset write SetClientAcceptCharset;
+        property ClientAcceptEncoding: string read GetClientAcceptEncoding write SetClientAcceptEncoding;
         property ClientAllowCookies: boolean read GetClientAllowCookies write SetClientAllowCookies;
         property ClientAutoCreateParams: boolean read GetClientAutoCreateParams write SetClientAutoCreateParams;
         property ClientBaseURL: string read GetClientBaseURL write SetClientBaseURL;
@@ -124,6 +127,7 @@ type
         function GethttpAuthPassword(): string;
         function GetClientAccept(): string;
         function GetClientAcceptCharset(): string;
+        function GetClientAcceptEncoding(): string;
         function GetClientAllowCookies(): boolean;
         function GetClientAutoCreateParams(): boolean;
         function GetClientBaseURL(): string;
@@ -143,6 +147,7 @@ type
         procedure SetCustomBody(NewValue: string);
         procedure SetClientAccept(NewValue: string);
         procedure SetClientAcceptCharset(NewValue: string);
+        procedure SetClientAcceptEncoding(NewValue: string);
         procedure SetClientAllowCookies(NewValue: boolean);
         procedure SetClientAutoCreateParams(NewValue: boolean);
         procedure SetClientBaseURL(NewValue: string);
@@ -172,6 +177,7 @@ type
         property CustomBody: string read GetCustomBody write SetCustomBody;
         property ClientAccept: string read GetClientAccept write SetClientAccept;
         property ClientAcceptCharset: string read GetClientAcceptCharset write SetClientAcceptCharset;
+        property ClientAcceptEncoding: string read GetClientAcceptEncoding write SetClientAcceptEncoding;
         property ClientAllowCookies: boolean read GetClientAllowCookies write SetClientAllowCookies;
         property ClientAutoCreateParams: boolean read GetClientAutoCreateParams write SetClientAutoCreateParams;
         property ClientBaseURL: string read GetClientBaseURL write SetClientBaseURL;
@@ -200,13 +206,14 @@ type
     /// </summary>
     TRestAuth = class abstract
     public
-        const apiUserName       = '';
-        const apiPassword       = '';
-        const restApiBaseUrl    = 'https://unityapi.azurewebsites.net/api/v1/';
-        const restAccept        = 'application/json, text/plain; q=0.9, text/html;q=0.8,';
-        const restAcceptCharset = 'UTF-8, *;q=0.8';
-        const restContentType   = 'application/json';
-        const restUserAgent     = 'Unity RESTClient/1.0';
+        const apiUserName        = '';
+        const apiPassword        = '';
+        const restApiBaseUrl     = 'https://unityapi.azurewebsites.net/api/v1/';
+        const restAccept         = 'application/json, text/plain; q=0.9, text/html;q=0.8,';
+        const restAcceptCharset  = 'UTF-8, *;q=0.8';
+        const restAcceptEncoding = 'gzip, deflate';
+        const restContentType    = 'application/json';
+        const restUserAgent      = 'Unity Platform RESTClient/1.0';
     end;
 
 
@@ -236,17 +243,17 @@ begin
     queryList:=TList<string>.Create();
     paramList:=TList<string>.Create();
 
-    ClientAccept                 :=TRestAuth.restAccept;
-    ClientAcceptCharset          :=TRestAuth.restAcceptCharset;
-    ClientAllowCookies           :=True;
-    ClientAutoCreateParams       :=True;
-    ClientBaseURL                :=TRestAuth.restApiBaseUrl;
-    ClientContentType            :=TRestAuth.restContentType;
-    ClientHandleRedirects        :=True;
-    ClientRaiseExceptionOn500    :=True;
-    ClientSynchronizedEvents     :=True;
-    ClientUserAgent              :=TRestAuth.restUserAgent;
-
+    ClientAccept             :=TRestAuth.restAccept;
+    ClientAcceptCharset      :=TRestAuth.restAcceptCharset;
+    ClientAcceptEncoding     :=TRestAuth.restAcceptEncoding;
+    ClientAllowCookies       :=True;
+    ClientAutoCreateParams   :=True;
+    ClientBaseURL            :=TRestAuth.restApiBaseUrl;
+    ClientContentType        :=TRestAuth.restContentType;
+    ClientHandleRedirects    :=True;
+    ClientRaiseExceptionOn500:=True;
+    ClientSynchronizedEvents :=True;
+    ClientUserAgent          :=TRestAuth.restUserAgent;
     RequestAccept            :=restClient.Accept;
     RequestAcceptCharset     :=restClient.AcceptCharset;
     RequestAutoCreateParams  :=restClient.AutoCreateParams;
@@ -431,6 +438,12 @@ begin
 end;
 
 
+function TRESTful.GetClientAcceptEncoding(): string;
+begin
+    if Assigned(restClient) then Result:=restClient.AcceptEncoding;
+end;
+
+
 function TRESTful.GetClientAllowCookies(): boolean;
 begin
     if Assigned(restClient) then Result:=restClient.AllowCookies else Result:=False;
@@ -542,6 +555,12 @@ end;
 procedure TRESTful.SetClientAcceptCharset(NewValue: string);
 begin
     if Assigned(restClient) then restClient.AcceptCharset:=NewValue;
+end;
+
+
+procedure TRESTful.SetClientAcceptEncoding(NewValue: string);
+begin
+    if Assigned(restClient) then restClient.AcceptEncoding:=NewValue;
 end;
 
 

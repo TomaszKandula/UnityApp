@@ -782,6 +782,14 @@ type
         procedure Action_ClearCoockiesClick(Sender: TObject);
         procedure Action_ClearCacheClick(Sender: TObject);
         procedure PopupTrackerPopup(Sender: TObject);
+        procedure Page1Show(Sender: TObject);
+        procedure Page2Show(Sender: TObject);
+        procedure Page3Show(Sender: TObject);
+        procedure Page6Show(Sender: TObject);
+        procedure Page7Show(Sender: TObject);
+        procedure Page8Show(Sender: TObject);
+        procedure Page9Show(Sender: TObject);
+        procedure Page10Show(Sender: TObject);
     protected
         procedure CreateParams(var Params: TCreateParams); override;
         procedure WndProc(var msg: TMessage); override;   // Windows events
@@ -796,6 +804,10 @@ type
             var client: ICefClient; var settings: TCefBrowserSettings; var noJavascriptAccess: Boolean; var Result: Boolean);
     strict private
         const FPermitCheckTimeout = 120000;
+        const AppMenuTextSelected = $006433C9;
+        const AppMenuTextNormal = clGrayText;
+        const AppButtonTxtNormal = $00555555;
+        const AppButtonTxtSelected = $006433C9;
         var FLoadedCompanies: TList<string>;
         var FLoadedAgeDate: string;
         var FRedeemOnReload: boolean;
@@ -808,10 +820,6 @@ type
         var FFollowsToday: integer;
         var FFollowsPast: integer;
         var FFollowsNext: integer;
-        const AppMenuTextSelected = $006433C9;
-        const AppMenuTextNormal = clGrayText;
-        const AppButtonTxtNormal = $00555555;
-        const AppButtonTxtSelected = $006433C9;
         function CanAccessAppMenu(): boolean;
         procedure RequestUnityWebWithToken();
         procedure RedeemAccess(ShouldReloadPage: boolean = False);
@@ -907,7 +915,16 @@ uses
     Async.AddressBook,
     Async.Comments,
     Async.Accounts,
-    uCEFApplication;
+    Async.GeneralTables,
+    uCEFApplication,
+    Api.ReturnCompanies,
+    Api.ReturnAccountType,
+    Api.ReturnPaidInfo,
+    Api.ReturnControlStatus,
+    Api.ReturnPersonResponsible,
+    Api.ReturnSalesResponsible,
+    Api.ReturnPaymentTerms,
+    Api.ReturnCustomerGroup;
 
 
 var VMainForm: TMainForm;
@@ -1215,29 +1232,29 @@ begin
     var  CompanyCode:=sgAgeView.GetCol(TSnapshots.fCoCode);
 
     var  ColPersonResp    :=sgAgeView.GetCol(TSnapshots.fPersonResponsible);
-    var  IdPersonResp     :=sgPersonResp.GetCol(TPersonResponsible.Id);
-    var  DbNamePersonResp :=sgPersonResp.GetCol(TPersonResponsible.SourceDBName);
-    var  ErpCodePersonResp:=sgPersonResp.GetCol(TPersonResponsible.ErpCode);
+    var  IdPersonResp     :=sgPersonResp.GetCol(TReturnPersonResponsible._Id);
+    var  DbNamePersonResp :=sgPersonResp.GetCol(TReturnPersonResponsible._SourceDbName);
+    var  ErpCodePersonResp:=sgPersonResp.GetCol(TReturnPersonResponsible._ErpCode);
 
     var ColSalesResp    :=sgAgeView.GetCol(TSnapshots.fSalesResponsible);
-    var IdSalesResp     :=sgSalesResp.GetCol(TSalesResponsible.Id);
-    var DbNameSalesResp :=sgSalesResp.GetCol(TSalesResponsible.SourceDBName);
-    var ErpCodeSalesResp:=sgSalesResp.GetCol(TSalesResponsible.ErpCode);
+    var IdSalesResp     :=sgSalesResp.GetCol(TReturnSalesResponsible._Id);
+    var DbNameSalesResp :=sgSalesResp.GetCol(TReturnSalesResponsible._SourceDbName);
+    var ErpCodeSalesResp:=sgSalesResp.GetCol(TReturnSalesResponsible._ErpCode);
 
     var ColAccountType    :=sgAgeView.GetCol(TSnapshots.fAccountType);
-    var IdAccountType     :=sgAccountType.GetCol(TAccountType.Id);
-    var DbNameAccountType :=sgAccountType.GetCol(TAccountType.SourceDBName);
-    var ErpCodeAccountType:=sgAccountType.GetCol(TAccountType.ErpCode);
+    var IdAccountType     :=sgAccountType.GetCol(TReturnAccountType._Id);
+    var DbNameAccountType :=sgAccountType.GetCol(TReturnAccountType._SourceDbName);
+    var ErpCodeAccountType:=sgAccountType.GetCol(TReturnAccountType._ErpCode);
 
     var ColCustomerGroup    :=sgAgeView.GetCol(TSnapshots.fCustomerGroup);
-    var IdCustomerGroup     :=sgCustomerGr.GetCol(TCustomerGroup.Id);
-    var DbNameCustomerGroup :=sgCustomerGr.GetCol(TCustomerGroup.SourceDBName);
-    var ErpCodeCustomerGroup:=sgCustomerGr.GetCol(TCustomerGroup.ErpCode);
+    var IdCustomerGroup     :=sgCustomerGr.GetCol(TReturnCustomerGroup._Id);
+    var DbNameCustomerGroup :=sgCustomerGr.GetCol(TReturnCustomerGroup._SourceDbName);
+    var ErpCodeCustomerGroup:=sgCustomerGr.GetCol(TReturnCustomerGroup._ErpCode);
 
     var ColPaymentTerms    :=sgAgeView.GetCol(TSnapshots.fPaymentTerms);
-    var ErpCodePaymentTerms:=sgPmtTerms.GetCol(TPaymentTerms.ErpCode);
-    var EntityPaymentTerms :=sgPmtTerms.GetCol(TPaymentTerms.Entity);
-    var DescPaymentTerms   :=sgPmtTerms.GetCol(TPaymentTerms.Description);
+    var ErpCodePaymentTerms:=sgPmtTerms.GetCol(TReturnPaymentTerms._ErpCode);
+    var EntityPaymentTerms :=sgPmtTerms.GetCol(TReturnPaymentTerms._Entity);
+    var DescPaymentTerms   :=sgPmtTerms.GetCol(TReturnPaymentTerms._Description);
 
     sgAgeView.Freeze(True);
     sgPersonResp.Freeze(True);
@@ -2490,7 +2507,7 @@ end;
 
 procedure TMainForm.TabSheet7Show(Sender: TObject);
 begin
-    {Do nothing}
+    {SetGridColumnWidths();}
 end;
 
 
@@ -2503,6 +2520,54 @@ end;
 procedure TMainForm.TabSheet8Show(Sender: TObject);
 begin
     SetSettingsPanel(True);
+end;
+
+
+procedure TMainForm.Page1Show(Sender: TObject);
+begin
+    {Empty}
+end;
+
+
+procedure TMainForm.Page2Show(Sender: TObject);
+begin
+    {Empty}
+end;
+
+
+procedure TMainForm.Page3Show(Sender: TObject);
+begin
+    {Empty}
+end;
+
+
+procedure TMainForm.Page6Show(Sender: TObject);
+begin
+    {Empty}
+end;
+
+
+procedure TMainForm.Page7Show(Sender: TObject);
+begin
+    {Empty}
+end;
+
+
+procedure TMainForm.Page8Show(Sender: TObject);
+begin
+    {Empty}
+end;
+
+
+procedure TMainForm.Page9Show(Sender: TObject);
+begin
+    {Empty}
+end;
+
+
+procedure TMainForm.Page10Show(Sender: TObject);
+begin
+    {Empty}
 end;
 
 

@@ -46,7 +46,7 @@ type
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
-        procedure ReadAgeViewAsync(SelectedCoCodes: string; SortMode: string; RiskClassGroup: TRiskClassGroup; Callback: TReadAgeView);
+        procedure ReadAgeViewAsync(SelectedCoCodes: string; SortMode: string; RiskClassGroup: TRiskClassGroup; Callback: TReadAgeView);//oldsql
         /// <summary>
         /// Allow to map data between grids. It replaces the target column data for appropiate data in source grid based on given parameters.
         /// </summary>
@@ -54,7 +54,7 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         procedure MapTableAwaited(Grid: TStringGrid; Source: TStringGrid; IsPrefixRequired: boolean;
-            const ColTargetPersonResp: integer; const ColSourceId: integer; const ColTargetCoCode: integer;
+            const ColTargetName: integer; const ColSourceId: integer; const ColTargetCoCode: integer;
             const ColSourceDbName: integer; const ColSourceDesc: integer);
         /// <summary>
         /// Allow to load async. list of sorting options available for aging report. There is no separate notification.
@@ -80,7 +80,7 @@ type
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
-        procedure ReadAgeViewAsync(SelectedCoCodes: string; SortMode: string; RiskClassGroup: TRiskClassGroup; Callback: TReadAgeView);
+        procedure ReadAgeViewAsync(SelectedCoCodes: string; SortMode: string; RiskClassGroup: TRiskClassGroup; Callback: TReadAgeView);//oldsql
         /// <summary>
         /// Allow to map data between grids. It replaces the target column data for appropiate data in source grid based on given parameters.
         /// </summary>
@@ -88,7 +88,7 @@ type
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
         procedure MapTableAwaited(Grid: TStringGrid; Source: TStringGrid; IsPrefixRequired: boolean;
-            const ColTargetPersonResp: integer; const ColSourceId: integer; const ColTargetCoCode: integer;
+            const ColTargetName: integer; const ColSourceId: integer; const ColTargetCoCode: integer;
             const ColSourceDbName: integer; const ColSourceDesc: integer);
         /// <summary>
         /// Allow to load async. list of sorting options available for aging report. There is no separate notification.
@@ -195,7 +195,7 @@ end;
 
 
 procedure TDebtors.MapTableAwaited(Grid: TStringGrid; Source: TStringGrid; IsPrefixRequired: boolean;
-    const ColTargetPersonResp: integer; const ColSourceId: integer; const ColTargetCoCode: integer;
+    const ColTargetName: integer; const ColSourceId: integer; const ColTargetCoCode: integer;
     const ColSourceDbName: integer; const ColSourceDesc: integer);
 begin
 
@@ -208,10 +208,15 @@ begin
             for var jCNT:=1 to Source.RowCount - 1 do
             begin
 
-                if (Grid.Cells[ColTargetPersonResp, iCNT] = Source.Cells[ColSourceId, jCNT]) and
-                    (FComparableDbName(Grid.Cells[ColTargetCoCode, iCNT], IsPrefixRequired) = Source.Cells[ColSourceDbName, jCNT])
+                var TargetName:=Grid.Cells[ColTargetName, iCNT];
+                var SourceName:=Source.Cells[ColSourceId, jCNT];
+
+                var TargetCoCode:=Grid.Cells[ColTargetCoCode, iCNT];
+                var SourceDbName:=Source.Cells[ColSourceDbName, jCNT];
+
+                if (TargetName = SourceName) and (FComparableDbName(TargetCoCode, IsPrefixRequired) = SourceDbName)
                 then
-                    Grid.Cells[ColTargetPersonResp, iCNT]:=Source.Cells[ColSourceDesc, jCNT];
+                    Grid.Cells[ColTargetName, iCNT]:=Source.Cells[ColSourceDesc, jCNT];
 
             end;
 

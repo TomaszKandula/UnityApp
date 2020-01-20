@@ -218,7 +218,7 @@ begin
         begin
 
             // --------------------------------
-            // API call to register session id.
+            // API call to register session ID.
             // --------------------------------
             var Accounts: IAccounts:=TAccounts.Create();
             Accounts.InitiateSessionAwaited(SessionService.SessionId, Settings.WinUserName);
@@ -276,11 +276,11 @@ begin
 
         end;
 
-        // -------------------------------
-        // Load all helper general tables.
-        // -------------------------------
+        // -------------------------
+        // General tables API calls.
+        // -------------------------
         Sleep(250);
-        ChangeProgressBar(85, 'Loading general tables...', ProgressBar);
+        ChangeProgressBar(85, 'Calling general tables loaders...', ProgressBar);
 
         if not GetGeneralTablesSync() then
         begin
@@ -290,8 +290,8 @@ begin
         end
         else
         begin
-            ThreadFileLog.Log('General tables has been loaded.');
-            ChangeProgressBar(95, 'Loading general tables... done.', ProgressBar);
+            ThreadFileLog.Log('Calling general tables loaders.');
+            ChangeProgressBar(95, 'Calling general tables loaders... executed.', ProgressBar);
         end;
 
         // ----------------------------------------
@@ -306,6 +306,7 @@ begin
             FIsAppInitialized:=True;
             AnimateWindow(StartupForm.Handle, 750, AW_BLEND or AW_HIDE);
             MainAppForm.Show();
+            ThreadFileLog.Log('[GUI]: Main form has been called.');
         end);
 
     end);
@@ -478,16 +479,14 @@ begin
 
     var GeneralTables: IGeneralTables:=TGeneralTables.Create();
     try
-
-//        GeneralTables.GetTablesAsync(TCompanyData.CompanyData, MainAppForm.sgCoCodes, GeneralTables_Callback, '', '', True);
-//        GeneralTables.GetTablesAsync(TControlStatus.ControlStatus, MainAppForm.sgControlStatus, GeneralTables_Callback, '', '', True);
-//        GeneralTables.GetTablesAsync(TPaidinfo.Paidinfo, MainAppForm.sgPaidInfo, GeneralTables_Callback, '', '', True);
-//        GeneralTables.GetTablesAsync(TPaymentTerms.PaymentTerms, MainAppForm.sgPmtTerms, GeneralTables_Callback, '', '', True);
-//        GeneralTables.GetTablesAsync(TSalesResponsible.SalesResponsible, MainAppForm.sgSalesResp, GeneralTables_Callback, '', '', True);
-//        GeneralTables.GetTablesAsync(TPersonResponsible.PersonResponsible, MainAppForm.sgPersonResp, GeneralTables_Callback, '', '', True);
-//        GeneralTables.GetTablesAsync(TAccountType.AccountType, MainAppForm.sgAccountType, GeneralTables_Callback, '', '', True);
-//        GeneralTables.GetTablesAsync(TCustomerGroup.CustomerGroup, MainAppForm.sgCustomerGr, GeneralTables_Callback, '', '', True);
-
+        GeneralTables.GetCompaniesAsync(MainAppForm.sgCoCodes, nil);
+        GeneralTables.GetControlStatusAsync(MainAppForm.sgControlStatus, nil);
+        GeneralTables.GetPaidInfoAsync(MainAppForm.sgPaidInfo, nil);
+        GeneralTables.GetPaymentTermsAsync(MainAppForm.sgPmtTerms, nil);
+        GeneralTables.GetSalesResponsibleAsync(MainAppForm.sgSalesResp, nil);
+        GeneralTables.GetPersonResponsibleAsync(MainAppForm.sgPersonResp, nil);
+        GeneralTables.GetAccountTypeAsync(MainAppForm.sgAccountType, nil);
+        GeneralTables.GetCustomerGroupAsync(MainAppForm.sgCustomerGr, nil);
     except
         on E: Exception do
         begin
