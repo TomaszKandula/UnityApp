@@ -809,6 +809,7 @@ type
         const AppButtonTxtNormal = $00555555;
         const AppButtonTxtSelected = $006433C9;
         var FLoadedCompanies: TList<string>;
+        var FLoadedCompaniesF: TList<string>;
         var FLoadedAgeDate: string;
         var FRedeemOnReload: boolean;
         var FPermitCheckTimer: integer;
@@ -866,6 +867,7 @@ type
         procedure LoadAgeReport(SelectedCoCodes: string{Legacy argument/to be deleted});
         property LoadedAgeDate: string read FLoadedAgeDate;
         property LoadedCompanies: TList<string> read FLoadedCompanies;
+        property LoadedCompaniesF: TList<string> read FLoadedCompaniesF;
         property FollowsToday: integer read FFollowsToday;
         property FollowsPast: integer read FFollowsPast;
         property FollowsNext: integer read FFollowsNext;
@@ -893,7 +895,6 @@ uses
     View.ColorPicker,
     View.EventLog,
     View.UserFeedback,
-    View.SqlSearch,
     View.MassMailer,
     View.Startup,
     View.Reports,
@@ -924,7 +925,9 @@ uses
     Api.ReturnPersonResponsible,
     Api.ReturnSalesResponsible,
     Api.ReturnPaymentTerms,
-    Api.ReturnCustomerGroup;
+    Api.ReturnCustomerGroup,
+    Api.ReturnOpenItems,
+    Api.AddressBookList;
 
 
 var VMainForm: TMainForm;
@@ -1077,7 +1080,7 @@ begin
     sgOpenItems.Freeze(True);
     var OpenItems: IOpenItems:=TOpenItems.Create();
 
-    if LoadedCompanies.Count = 0 then
+    if LoadedCompaniesF.Count = 0 then
     begin
         THelpers.MsgCall(TAppMessage.Warn, 'Please first load aging report for given company and/or companies.');
         ThreadFileLog.Log('[LoadOpenItems]: No aging report loded while open items requested.');
@@ -1085,7 +1088,7 @@ begin
     end;
 
     ThreadFileLog.Log('[LoadOpenItems]: Calling ReadOpenItemsAsync for given company list.');
-    OpenItems.ReadOpenItemsAsync(sgOpenItems, LoadedCompanies, ReadOpenItems_Callback);
+    OpenItems.ReadOpenItemsAsync(sgOpenItems, LoadedCompaniesF, ReadOpenItems_Callback);
 
 end;
 
@@ -1558,10 +1561,10 @@ begin
     // Indicates editable columns. Use it to examin if user should be able to
     // edit selected cell in TStrigGrid component.
     // ----------------------------------------------------------------------
-    if (sgAddressBook.Col = sgAddressBook.GetCol(DbModel.TAddressBook.Emails))
-        or (sgAddressBook.Col = sgAddressBook.GetCol(DbModel.TAddressBook.PhoneNumbers))
-        or (sgAddressBook.Col = sgAddressBook.GetCol(DbModel.TAddressBook.Contact))
-        or (sgAddressBook.Col = sgAddressBook.GetCol(DbModel.TAddressBook.Estatements))
+    if (sgAddressBook.Col = sgAddressBook.GetCol(TAddressBookList._StatementEmails))
+        or (sgAddressBook.Col = sgAddressBook.GetCol(TAddressBookList._PhoneNumbers))
+        or (sgAddressBook.Col = sgAddressBook.GetCol(TAddressBookList._ContactPerson))
+        or (sgAddressBook.Col = sgAddressBook.GetCol(TAddressBookList._RegularEmails))
     then
         // Do not exclude above columns from editing
         Result:=False
@@ -1738,7 +1741,7 @@ begin
     var AddressBook: IAddressBook:=TAddressBook.Create();
     AddressBook.OpenAddressBookAsync('', OpenAddressBook_Callback, LoadedCompanies);
 
-    UpdateFollowUps(sgAgeView, sgAgeView.GetCol(TGeneralComment.fFollowUp));
+    UpdateFollowUps(sgAgeView, sgAgeView.GetCol(TSnapshots.fFollowUp));
     BusyForm.Close();
 
 end;
@@ -2220,6 +2223,7 @@ end;
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
     FLoadedCompanies:=TList<string>.Create();
+    FLoadedCompaniesF:=TList<string>.Create();
     FIsAppMenuLocked:=True;
     FAllowClose:=False;
     ClearMainViewInfo();
@@ -2586,11 +2590,9 @@ begin
     var Col9 :=sgAgeView.GetCol(TSnapshots.fTotal);
     var Col10:=sgAgeView.GetCol(TSnapshots.fCreditLimit);
     var Col11:=sgAgeView.GetCol(TSnapshots.fCreditBalance);
-    var Col12:=sgAgeView.GetCol(TGeneralComment.fFollowUp);
-    var Col13:=sgAgeView.GetCol(TSnapshots.fCuid);
+    var Col12:=sgAgeView.GetCol(TSnapshots.fFollowUp);
     var Col14:=sgAgeView.GetCol(TSnapshots.fCustomerName);
     var Col15:=sgAgeView.GetCol(TSnapshots.fRiskClass);
-    var Col16:=sgInvoiceTracker.GetCol(TTrackerData.Cuid);
 
     // Draw selected row | skip headers
     sgAgeView.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True);
@@ -2669,27 +2671,6 @@ begin
             sgAgeView.Canvas.TextOut(Rect.Left + 3, Rect.Top + 3, sgAgeView.Cells[ACol, ARow]);
         end;
 
-        // Mark customers with picture, if it is registered on Invoice Tracker list.
-        // We loop through loaded list on another string grid component. Therefore,
-        // changes in database will not impact age view as long as Tracker List is
-        // not refreshed.
-        if ACol = Col14 then
-        begin
-
-            var Width:=sgAgeView.ColWidths[Col14];
-            var AgeViewCUID:=sgAgeView.Cells[Col13, ARow];
-
-            for var iCNT: integer:=1 to sgInvoiceTracker.RowCount - 1 do
-            begin
-                if AgeViewCUID = sgInvoiceTracker.Cells[Col16, iCNT] then
-                begin
-                    sgAgeView.Canvas.Draw(Rect.Left + Width - 32, Rect.Top, FGridPicture.Picture.Graphic);
-                    Break;
-                end;
-            end;
-
-        end;
-
     end;
 
     // After all drawing (when cells are not selected) is done, change font only for numeric values.
@@ -2708,11 +2689,11 @@ begin
 
     if ARow = 0 then Exit();
 
-    var Col1: integer:=sgOpenItems.GetCol(DbModel.TOpenitems.OpenCurAm);
-    var Col2: integer:=sgOpenItems.GetCol(DbModel.TOpenitems.OpenAm);
-    var Col3: integer:=sgOpenItems.GetCol(DbModel.TOpenitems.CurAm);
-    var Col4: integer:=sgOpenItems.GetCol(DbModel.TOpenitems.Am);
-    var Col5: integer:=sgOpenItems.GetCol(DbModel.TOpenitems.PmtStat);
+    var Col1: integer:=sgOpenItems.GetCol(TReturnOpenItems._OpenCurAmount);
+    var Col2: integer:=sgOpenItems.GetCol(TReturnOpenItems._OpenAmount);
+    var Col3: integer:=sgOpenItems.GetCol(TReturnOpenItems._CurAmount);
+    var Col4: integer:=sgOpenItems.GetCol(TReturnOpenItems._Amount);
+    var Col5: integer:=sgOpenItems.GetCol(TReturnOpenItems._PmtStatus);
 
     MainForm.sgOpenItems.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True);
 
@@ -2823,7 +2804,7 @@ begin
     var Sum:=0;
     for var iCNT:=1 to sgAgeView.RowCount - 1 do
     if
-        (THelpers.CDate(sgAgeView.Cells[sgAgeView.GetCol(TGeneralComment.fFollowUp), iCNT]) = THelpers.CDate(valCurrentDate.Caption))
+        (THelpers.CDate(sgAgeView.Cells[sgAgeView.GetCol(TSnapshots.fFollowUp), iCNT]) = THelpers.CDate(valCurrentDate.Caption))
     and
         ((UpperCase(sgAgeView.Cells[sgAgeView.GetCol(TSnapshots.fInf7), iCNT]) = UpperCase(SessionService.SessionData.AliasName))
     or
@@ -3374,13 +3355,13 @@ begin
             var Comments: IComments:=TComments.Create();
             Comments.EditGeneralCommentAsync(LGeneralCommentFields, nil{EditGeneralComment_Callback});
 
-            MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TGeneralComment.fFollowUp), iCNT]:=TChars.SPACE;
+            MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fFollowUp), iCNT]:=TChars.SPACE;
 
         end;
 
     end;
 
-    MainForm.UpdateFollowUps(MainForm.sgAgeView, MainForm.sgAgeView.GetCol(TGeneralComment.fFollowUp));
+    MainForm.UpdateFollowUps(MainForm.sgAgeView, MainForm.sgAgeView.GetCol(TSnapshots.fFollowUp));
     ThreadFileLog.Log('GeneralComment table with column FollowUp has been updated with removal for multiple items.');
 
     Screen.Cursor:=crDefault;
@@ -3457,7 +3438,7 @@ end;
 // Filter via FOLLOW UP
 procedure TMainForm.Action_FollowUp_FilterClick(Sender: TObject);
 begin
-    FilterForm.FColName  :=TGeneralComment.fFollowUp;
+    FilterForm.FColName  :=TSnapshots.fFollowUp;
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TColumns.Follow;
@@ -3501,7 +3482,7 @@ end;
 // Filter via FREE 1
 procedure TMainForm.Action_Free1Click(Sender: TObject);
 begin
-    FilterForm.FColName  :=TGeneralComment.Free1;
+    FilterForm.FColName  :=TSnapshots.fFree1;
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TColumns.Free1;
@@ -3512,7 +3493,7 @@ end;
 // Filter via FREE 2
 procedure TMainForm.Action_Free2Click(Sender: TObject);
 begin
-    FilterForm.FColName  :=TGeneralComment.Free2;
+    FilterForm.FColName  :=TSnapshots.fFree2;
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TColumns.Free2;
@@ -3523,7 +3504,7 @@ end;
 // Filter via FREE 3
 procedure TMainForm.Action_Free3Click(Sender: TObject);
 begin
-    FilterForm.FColName  :=TGeneralComment.Free3;
+    FilterForm.FColName  :=TSnapshots.fFree3;
     FilterForm.FOverdue  :=TSnapshots.fOverdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TColumns.Free3;
@@ -4978,10 +4959,10 @@ procedure TMainForm.sgAddressBookKeyUp(Sender: TObject; var Key: Word; Shift: TS
 begin
 
     if (Key = VK_F2)
-        or ((sgAddressBook.Col = sgAddressBook.GetCol(DbModel.TAddressBook.Emails))
-        or (sgAddressBook.Col = sgAddressBook.GetCol(DbModel.TAddressBook.PhoneNumbers))
-        or (sgAddressBook.Col = sgAddressBook.GetCol(DbModel.TAddressBook.Contact))
-        or (sgAddressBook.Col = sgAddressBook.GetCol(DbModel.TAddressBook.Estatements)))
+        or ((sgAddressBook.Col = sgAddressBook.GetCol(TAddressBookList._RegularEmails))
+        or (sgAddressBook.Col = sgAddressBook.GetCol(TAddressBookList._PhoneNumbers))
+        or (sgAddressBook.Col = sgAddressBook.GetCol(TAddressBookList._ContactPerson))
+        or (sgAddressBook.Col = sgAddressBook.GetCol(TAddressBookList._StatementEmails)))
         and (Key <> VK_RETURN)
     then
         sgAddressBook.Options:=sgAddressBook.Options + [goEditing];

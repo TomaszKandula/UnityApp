@@ -57,7 +57,6 @@ Implementation
 
 uses
     View.Main,
-    DbModel{Legacy},
     Unity.Helpers,
     Unity.Enums,
     Unity.Constants,
@@ -144,11 +143,7 @@ begin
 
         if not FIsLoaded then
         begin
-            var InvoiceTracker: IInvoiceTracker:=TInvoiceTracker.Create();
-            InvoiceTracker.GetInvoiceList(
-                MainForm.sgInvoiceTracker.Cells[MainForm.sgInvoiceTracker.GetCol(TTrackerData.Cuid), MainForm.sgInvoiceTracker.Row],
-                GetInvoiceList_Callback
-            );
+            //...
             FIsLoaded:=True;
         end;
 

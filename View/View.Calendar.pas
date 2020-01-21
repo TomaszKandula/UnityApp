@@ -72,13 +72,13 @@ implementation
 uses
     System.SysUtils,
     View.Main,
-    DbModel{Legacy},
     Unity.SessionService,
     Unity.Constants,
     Unity.Helpers,
     Unity.EventLogger,
     Unity.Settings,
-    Async.Comments;
+    Async.Comments,
+    DbModel{Legacy};
 
 
 var vCalendarForm: TCalendarForm;
@@ -127,8 +127,8 @@ begin
     var Comments: IComments:=TComments.Create();
     Comments.EditGeneralCommentAsync(FGeneralCommentFields, EditGeneralComment_Callback);
 
-    MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TGeneralComment.fFollowUp), Row]:=DateToStr(SelectedDate);
-    MainForm.UpdateFollowUps(MainForm.sgAgeView, MainForm.sgAgeView.GetCol(TGeneralComment.fFollowUp));
+    MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(DbModel.TSnapshots.fFollowUp), Row]:=DateToStr(SelectedDate);
+    MainForm.UpdateFollowUps(MainForm.sgAgeView, MainForm.sgAgeView.GetCol(DbModel.TSnapshots.fFollowUp));
 
 end;
 

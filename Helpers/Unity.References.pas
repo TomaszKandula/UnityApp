@@ -13,7 +13,6 @@ interface
 
 
 uses
-    DbModel{Legacy},
     Unity.Grid;
 
 
@@ -73,6 +72,11 @@ type
 implementation
 
 
+uses
+    Api.ReturnControlStatus,
+    Api.ReturnOpenItems;
+
+
 procedure TFOpenItemsRefs.InitWith(SourceGrid: TStringGrid);
 begin
     // ---------------------------------------------------------------------------
@@ -88,23 +92,23 @@ begin
     // database workload during the day we have decided to update the data in
     // Open Items table few times a day (on regular basis).
     // ---------------------------------------------------------------------------
-    CoCodeCol   :=SourceGrid.GetCol(DbModel.TOpenitems.SourceDBName);
-    CustNumCol  :=SourceGrid.GetCol(DbModel.TOpenitems.CustNo);
-    OpenAmCol   :=SourceGrid.GetCol(DbModel.TOpenitems.OpenAm);
-    PmtStatCol  :=SourceGrid.GetCol(DbModel.TOpenitems.PmtStat);
-    CtrlCol     :=SourceGrid.GetCol(DbModel.TOpenitems.Ctrl);
-    InvoNoCol   :=SourceGrid.GetCol(DbModel.TOpenitems.InvoNo);
-    ValDtCol    :=SourceGrid.GetCol(DbModel.TOpenitems.ValDt);
-    DueDtCol    :=SourceGrid.GetCol(DbModel.TOpenitems.DueDt);
-    ISOCol      :=SourceGrid.GetCol(DbModel.TOpenitems.ISO);
-    CurAmCol    :=SourceGrid.GetCol(DbModel.TOpenitems.CurAm);
-    OpenCurAmCol:=SourceGrid.GetCol(DbModel.TOpenitems.OpenCurAm);
-    Ad1Col      :=SourceGrid.GetCol(DbModel.TOpenitems.Ad1);
-    Ad2Col      :=SourceGrid.GetCol(DbModel.TOpenitems.Ad2);
-    Ad3Col      :=SourceGrid.GetCol(DbModel.TOpenitems.Ad3);
-    PnoCol      :=SourceGrid.GetCol(DbModel.TOpenitems.Pno);
-    PAreaCol    :=SourceGrid.GetCol(DbModel.TOpenitems.PArea);
-    Text        :=SourceGrid.GetCol(DbModel.TOpenitems.Txt);
+    CoCodeCol   :=SourceGrid.GetCol(TReturnOpenItems._SourceDbName);
+    CustNumCol  :=SourceGrid.GetCol(TReturnOpenItems._CustNumber);
+    OpenAmCol   :=SourceGrid.GetCol(TReturnOpenItems._OpenAmount);
+    PmtStatCol  :=SourceGrid.GetCol(TReturnOpenItems._PmtStatus);
+    CtrlCol     :=SourceGrid.GetCol(TReturnOpenItems._ControlStatus);
+    InvoNoCol   :=SourceGrid.GetCol(TReturnOpenItems._InvoiceNumber);
+    ValDtCol    :=SourceGrid.GetCol(TReturnOpenItems._ValueDate);
+    DueDtCol    :=SourceGrid.GetCol(TReturnOpenItems._DueDate);
+    ISOCol      :=SourceGrid.GetCol(TReturnOpenItems._Iso);
+    CurAmCol    :=SourceGrid.GetCol(TReturnOpenItems._CurAmount);
+    OpenCurAmCol:=SourceGrid.GetCol(TReturnOpenItems._OpenCurAmount);
+    Ad1Col      :=SourceGrid.GetCol(TReturnOpenItems._Address1);
+    Ad2Col      :=SourceGrid.GetCol(TReturnOpenItems._Address2);
+    Ad3Col      :=SourceGrid.GetCol(TReturnOpenItems._Address3);
+    PnoCol      :=SourceGrid.GetCol(TReturnOpenItems._PostalNumber);
+    PAreaCol    :=SourceGrid.GetCol(TReturnOpenItems._PostalArea);
+    Text        :=SourceGrid.GetCol(TReturnOpenItems._Text);
 end;
 
 
@@ -115,10 +119,10 @@ begin
     // Similarly to the "UpdateFOpenItemsRefs" method,
     // we use it to decrease level of usage of ReturnColumn method.
     // -----------------------------------------------------------------------
-    Id         :=SourceGrid.GetCol(TControlStatus.Id);
-    Code       :=SourceGrid.GetCol(TControlStatus.Code);
-    Text       :=SourceGrid.GetCol(TControlStatus.Text);
-    Description:=SourceGrid.GetCol(TControlStatus.Description);
+    Id         :=SourceGrid.GetCol(TReturnControlStatus._Id);
+    Code       :=SourceGrid.GetCol(TReturnControlStatus._Code);
+    Text       :=SourceGrid.GetCol(TReturnControlStatus._Text);
+    Description:=SourceGrid.GetCol(TReturnControlStatus._Description);
 end;
 
 

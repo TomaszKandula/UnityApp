@@ -198,7 +198,7 @@ begin
 
             var OpenItemsResponse: TCallResponse;
             OpenItemsResponse:=GetSSISDataAwaited(TCalendar.DateTime, ReadDateTime, ReadStatus);
-            ReadStatus:=THelpers.FormatDateTime(ReadStatus, TCalendar.DateTime);
+            ReadDateTime:=THelpers.FormatDateTime(ReadDateTime, TCalendar.DateTime);
 
             if ( StrToDateTime(OpenItemsUpdate) < StrToDateTime(ReadDateTime) )
                 and ( ReadStatus = 'Completed' ) then CanGetAging:=True;
@@ -262,9 +262,6 @@ begin
 end;
 
 
-// --------------------------------------------------------------------------------------------------------------------------------------------------------- //
-
-
 function TOpenItems.FLoadToGrid(OpenItemsGrid: TStringGrid; LoadedCompanies: TList<string>): TCallResponse;
 begin
 
@@ -279,8 +276,7 @@ begin
         var UserCompanySelection:=TUserCompanySelection.Create();
         try
             UserCompanySelection.SelectedCoCodes:=LoadedCompanies.ToArray();
-            //Restful.CustomBody:=TJson.ObjectToJsonString(UserCompanySelection);
-            Restful.CustomBody:='{"SelectedCoCodes":["F0450"]}';
+            Restful.CustomBody:=TJson.ObjectToJsonString(UserCompanySelection);
         finally
             UserCompanySelection.Free();
         end;
@@ -299,12 +295,12 @@ begin
                 OpenItemsGrid.Cells[1, 0]:=ReturnOpenItems._SourceDbName;
                 OpenItemsGrid.Cells[2, 0]:=ReturnOpenItems._CustNumber;
                 OpenItemsGrid.Cells[3, 0]:=ReturnOpenItems._VoucherType;
-                OpenItemsGrid.Cells[4, 0]:=ReturnOpenItems._OpenCurAm;
-                OpenItemsGrid.Cells[5, 0]:=ReturnOpenItems._OpenAm;
+                OpenItemsGrid.Cells[4, 0]:=ReturnOpenItems._OpenCurAmount;
+                OpenItemsGrid.Cells[5, 0]:=ReturnOpenItems._OpenAmount;
                 OpenItemsGrid.Cells[6, 0]:=ReturnOpenItems._CustName;
                 OpenItemsGrid.Cells[7, 0]:=ReturnOpenItems._Iso;
-                OpenItemsGrid.Cells[8, 0]:=ReturnOpenItems._CurAm;
-                OpenItemsGrid.Cells[9, 0]:=ReturnOpenItems._Am;
+                OpenItemsGrid.Cells[8, 0]:=ReturnOpenItems._CurAmount;
+                OpenItemsGrid.Cells[9, 0]:=ReturnOpenItems._Amount;
                 OpenItemsGrid.Cells[10,0]:=ReturnOpenItems._InvoiceNumber;
                 OpenItemsGrid.Cells[11,0]:=ReturnOpenItems._DueDate;
                 OpenItemsGrid.Cells[12,0]:=ReturnOpenItems._Inf4;
@@ -338,12 +334,12 @@ begin
                     OpenItemsGrid.Cells[1, iCNT]:=ReturnOpenItems.SourceDbName[iCNT - 1];
                     OpenItemsGrid.Cells[2, iCNT]:=ReturnOpenItems.CustNumber[iCNT - 1].ToString();
                     OpenItemsGrid.Cells[3, iCNT]:=ReturnOpenItems.VoucherType[iCNT - 1].ToString();
-                    OpenItemsGrid.Cells[4, iCNT]:=ReturnOpenItems.OpenCurAm[iCNT - 1].ToString();
-                    OpenItemsGrid.Cells[5, iCNT]:=ReturnOpenItems.OpenAm[iCNT - 1].ToString();
+                    OpenItemsGrid.Cells[4, iCNT]:=ReturnOpenItems.OpenCurAmount[iCNT - 1].ToString();
+                    OpenItemsGrid.Cells[5, iCNT]:=ReturnOpenItems.OpenAmount[iCNT - 1].ToString();
                     OpenItemsGrid.Cells[6, iCNT]:=ReturnOpenItems.CustName[iCNT - 1];
                     OpenItemsGrid.Cells[7, iCNT]:=ReturnOpenItems.Iso[iCNT - 1];
-                    OpenItemsGrid.Cells[8, iCNT]:=ReturnOpenItems.CurAm[iCNT - 1].ToString();
-                    OpenItemsGrid.Cells[9, iCNT]:=ReturnOpenItems.Am[iCNT - 1].ToString();
+                    OpenItemsGrid.Cells[8, iCNT]:=ReturnOpenItems.CurAmount[iCNT - 1].ToString();
+                    OpenItemsGrid.Cells[9, iCNT]:=ReturnOpenItems.Amount[iCNT - 1].ToString();
                     OpenItemsGrid.Cells[10,iCNT]:=ReturnOpenItems.InvoiceNumber[iCNT - 1];
                     OpenItemsGrid.Cells[11,iCNT]:=ReturnOpenItems.DueDate[iCNT - 1];
                     OpenItemsGrid.Cells[12,iCNT]:=ReturnOpenItems.Inf4[iCNT - 1];
@@ -420,9 +416,9 @@ begin
     var Settings: ISettings:=TSettings.Create;
     var VoucherNumber:=Settings.GetStringValue(TConfigSections.Unallocated, 'VOUCHER_NUM', '0');
 
-    var VoTpCol   :=InputGrid.GetCol(DbModel.TOpenitems.VoTp);
-    var OpenAmCol :=InputGrid.GetCol(DbModel.TOpenitems.OpenAm);
-    var PmtStatCol:=InputGrid.GetCol(DbModel.TOpenitems.PmtStat);
+    var VoTpCol   :=InputGrid.GetCol(TReturnOpenItems._VoucherType);
+    var OpenAmCol :=InputGrid.GetCol(TReturnOpenItems._OpenAmount);
+    var PmtStatCol:=InputGrid.GetCol(TReturnOpenItems._PmtStatus);
 
     for var iCNT:=1 to InputGrid.RowCount - 1 do
     begin

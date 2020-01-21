@@ -9,20 +9,8 @@ interface
 
 
 uses
-    Winapi.Windows,
-    Winapi.Messages,
     System.SysUtils,
     System.Classes,
-    System.Diagnostics,
-    System.Win.ComObj,
-    System.SyncObjs,
-    System.Threading,
-    System.Generics.Collections,
-    Vcl.Graphics,
-    Vcl.ComCtrls,
-    Vcl.Dialogs,
-    Data.Win.ADODB,
-    Data.DB,
     Unity.Grid,
     Unity.Enums,
     Unity.Records;
@@ -81,142 +69,22 @@ implementation
 
 
 uses
-    Handler.Database{Legacy},
     Unity.Helpers,
     Unity.Settings,
     Unity.Constants,
     Unity.EventLogger,
-    Unity.SessionService,
-    Sync.Document,
-    Handler.Sql{Legacy},
-    DbModel{Legacy};
+    Unity.SessionService;
 
 
 procedure TInvoiceTracker.GetInvoiceList(CUID: string; Callback: TGetInvoiceList);
 begin
-
-    var NewTask: ITask:=TTask.Create(procedure
-    begin
-
-        var CallResponse: TCallResponse;
-        var ReturnedData:=TStringGrid.Create(nil);
-        var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
-        try
-
-            try
-
-                DataTables.StrSQL:=TSql.SELECT                           +
-                                        TTrackerInvoices.InvoiceNo       + TChars.COMMA +
-                                        TTrackerInvoices.InvoiceState    + TChars.COMMA +
-                                        TTrackerInvoices.Stamp           +
-                                    TSql.FROM                            +
-                                        TTrackerInvoices.TrackerInvoices +
-                                    TSql.WHERE                           +
-                                        TTrackerInvoices.Cuid            +
-                                    TSql.EQUAL                           +
-                                        QuotedStr(CUID);
-
-                if not(DataTables.SqlToGrid(ReturnedData, DataTables.ExecSQL, False, True)) then
-                begin
-                    CallResponse.IsSucceeded:=False;
-                    CallResponse.LastMessage:='No results found in the database.';
-                end
-                else
-                begin
-                    CallResponse.IsSucceeded:=True;
-                end;
-
-            except
-                on E: Exception do
-                begin
-                    CallResponse.IsSucceeded:=False;
-                    CallResponse.LastMessage:='Cannot execute. Error has been thrown: ' + E.Message;
-                    ThreadFileLog.Log('[GetInvoiceList]: Cannot execute. Error has been thrown: ' + E.Message);
-                end;
-
-            end;
-
-        finally
-            DataTables.Free();
-        end;
-
-        TThread.Synchronize(nil, procedure
-        begin
-            if Assigned(Callback) then Callback(ReturnedData, CallResponse);
-            if Assigned(ReturnedData) then ReturnedData.Free();
-        end);
-
-    end);
-
-    NewTask.Start();
-
 end;
 
 
 function TInvoiceTracker.SaveTrackerDataAwaited(PayLoad: TStringGrid): TCallResponse;
 begin
-
     var NewResult: TCallResponse;
-    var NewTask: ITask:=TTask.Create(procedure
-    begin
-
-        var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
-        try
-
-            try
-
-                if Assigned(PayLoad) then
-                begin
-
-                    DataTables.Columns.Add(TTrackerData.UserAlias);
-                    DataTables.Columns.Add(TTrackerData.Cuid);
-                    DataTables.Columns.Add(TTrackerData.CoCode);
-                    DataTables.Columns.Add(TTrackerData.Branch);
-                    DataTables.Columns.Add(TTrackerData.CustomerName);
-                    DataTables.Columns.Add(TTrackerData.Stamp);
-                    DataTables.Columns.Add(TTrackerData.SendReminder1);
-                    DataTables.Columns.Add(TTrackerData.SendReminder2);
-                    DataTables.Columns.Add(TTrackerData.SendReminder3);
-                    DataTables.Columns.Add(TTrackerData.SendReminder4);
-                    DataTables.Columns.Add(TTrackerData.Sciud);
-                    DataTables.Columns.Add(TTrackerData.ReminderLayout);
-                    DataTables.Columns.Add(TTrackerData.PreStatement);
-                    DataTables.Columns.Add(TTrackerData.SendFrom);
-                    DataTables.Columns.Add(TTrackerData.StatementTo);
-                    DataTables.Columns.Add(TTrackerData.ReminderTo);
-
-                    NewResult.IsSucceeded:=DataTables.InsertInto(TTrackerData.TrackerData, True, PayLoad, nil, False);
-
-                end
-                else
-                begin
-                    NewResult.IsSucceeded:=False;
-                    NewResult.LastMessage:='Cannot save tracker data to database. Please contact IT Support.';
-                    ThreadFileLog.Log('[SaveTrackerDataAwaited]: Unexpected error. Cannot save tracker data to database.');
-                end;
-
-            except
-                on E: Exception do
-                begin
-                    NewResult.IsSucceeded:=False;
-                    NewResult.LastMessage:='[SaveTrackerDataAwaited]: Cannot execute. Error has been thrown: ' + E.Message;
-                    ThreadFileLog.Log(NewResult.LastMessage);
-                end;
-
-            end;
-
-        finally
-            DataTables.Free();
-        end;
-
-    end);
-
-    NewTask.Start();
-    TTask.WaitForAll(NewTask);
-
-    {If under ARC / do not manually release it}
     Result:=NewResult;
-
 end;
 
 

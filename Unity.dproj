@@ -299,9 +299,6 @@
         <DCCReference Include="View\View.Startup.pas">
             <Form>StartupForm</Form>
         </DCCReference>
-        <DCCReference Include="View\View.SqlSearch.pas">
-            <Form>SqlSearchForm</Form>
-        </DCCReference>
         <DCCReference Include="View\View.InvoiceTracker.pas">
             <Form>TrackerForm</Form>
         </DCCReference>

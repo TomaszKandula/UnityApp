@@ -140,7 +140,6 @@ uses
     View.Main,
     View.Calendar,
     View.Actions,
-    DbModel{Legacy},
     Unity.Helpers,
     Unity.Settings,
     Unity.Constants,
@@ -149,7 +148,9 @@ uses
     Async.Utilities,
     Async.Companies,
     Async.AddressBook,
-    Async.Documents;
+    Async.Documents,
+    Api.ReturnOpenItems,
+    DbModel{Legacy};
 
 
 var vMassMailerForm: TMassMailerForm;
@@ -399,7 +400,7 @@ begin
     // We have to always pre-sort Open Items list via Due Date before sending account statement or reminder.
     // This is necessary to ensure that the HTML generator will generate list for the customer.
     // -----------------------------------------------------------------------------------------------------
-    MainForm.sgOpenItems.MSort(MainForm.sgOpenItems.GetCol(TOpenitems.PmtStat), TDataType.TFloat, True);
+    MainForm.sgOpenItems.MSort(MainForm.sgOpenItems.GetCol(TReturnOpenItems._PmtStatus), TDataType.TFloat, True);
 
     OpenItemsRefs.InitWith(MainForm.sgOpenItems);
     CtrlStatusRefs.InitWith(MainForm.sgControlStatus);

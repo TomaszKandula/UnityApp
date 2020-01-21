@@ -156,7 +156,6 @@ uses
     View.Queries in 'View\View.Queries.pas' {QmsForm},
     View.SendStatement in 'View\View.SendStatement.pas' {SendForm},
     View.Startup in 'View\View.Startup.pas' {StartupForm},
-    View.SqlSearch in 'View\View.SqlSearch.pas' {SqlSearchForm},
     View.InvoiceTracker in 'View\View.InvoiceTracker.pas' {TrackerForm},
     View.CompanyList in 'View\View.CompanyList.pas' {CompanyListForm},
     View.RateApp in 'View\View.RateApp.pas' {RateForm};

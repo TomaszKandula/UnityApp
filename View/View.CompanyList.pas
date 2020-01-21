@@ -108,12 +108,15 @@ begin
     var ListEnd:=FilterList.Count - 1;
 
     MainForm.LoadedCompanies.Clear();
+    MainForm.LoadedCompaniesF.Clear();{Temp}
     for var iCNT:=0 to ListEnd do
     begin
 
         if FilterList.Checked[iCNT] = True then
         begin
-            MainForm.LoadedCompanies.Add(GetCoCodeOnly(FilterList.Items[iCNT]));
+            var CoCode:=GetCoCodeOnly(FilterList.Items[iCNT]);
+            MainForm.LoadedCompanies.Add(CoCode);
+            MainForm.LoadedCompaniesF.Add(THelpers.GetSourceDBName(CoCode, 'F'));{Temp}
             SelectedCoCodes:=SelectedCoCodes + GetCoCodeOnly(FilterList.Items[iCNT]) + ','{Legacy}
         end;
 

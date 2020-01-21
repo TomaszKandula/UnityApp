@@ -264,8 +264,6 @@ uses
     View.Calendar,
     View.SendStatement,
     View.PhoneList,
-    DbModel{Legacy},
-    Sync.Document,
     Unity.Settings,
     Unity.SessionService,
     Unity.Constants,
@@ -273,12 +271,15 @@ uses
     Unity.Enums,
     Unity.Sorting,
     Unity.EventLogger,
+    Sync.Document,
     Async.Utilities,
     Async.Companies,
     Async.AddressBook,
     Async.Comments,
     Async.Documents,
-    Api.UserDailyCommentsList;
+    Api.ReturnOpenItems,
+    Api.UserDailyCommentsList,
+    DbModel{Legacy};
 
 
 var vActionsForm: TActionsForm;
@@ -305,20 +306,26 @@ begin
 
     if Snap <> 0 then
     begin
+
         if Process32First(Snap, PE) then
         begin
+
             var FileName: string:=string(PE.szExeFile);
 
             // Go item by item  and stop if matched
             while Process32Next(Snap, PE) do
             begin
+
                 FileName:=string(PE.szExeFile);
+
                 if LowerCase(FileName) = LowerCase(SearchName) then
                 begin
                     Result:=True;
                     Break;
                 end;
+
             end;
+
         end;
 
         CloseHandle(Snap);
@@ -358,48 +365,48 @@ begin
     FOpenItemsTotal.CurAm    :=0;
 
     // Get columns numbers from source open items string grid
-    FSrcColumns[0] :=OpenItemsSrc.GetCol(DbModel.TOpenitems.InvoNo);
-    FSrcColumns[1] :=OpenItemsSrc.GetCol(DbModel.TOpenitems.Txt);
-    FSrcColumns[2] :=OpenItemsSrc.GetCol(DbModel.TOpenitems.AddTxt);
-    FSrcColumns[3] :=OpenItemsSrc.GetCol(DbModel.TOpenitems.OpenAm);
-    FSrcColumns[4] :=OpenItemsSrc.GetCol(DbModel.TOpenitems.Am);
-    FSrcColumns[5] :=OpenItemsSrc.GetCol(DbModel.TOpenitems.OpenCurAm);
-    FSrcColumns[6] :=OpenItemsSrc.GetCol(DbModel.TOpenitems.CurAm);
-    FSrcColumns[7] :=OpenItemsSrc.GetCol(DbModel.TOpenitems.ISO);
-    FSrcColumns[8] :=OpenItemsSrc.GetCol(DbModel.TOpenitems.DueDt);
-    FSrcColumns[9] :=OpenItemsSrc.GetCol(DbModel.TOpenitems.ValDt);
-    FSrcColumns[10]:=OpenItemsSrc.GetCol(DbModel.TOpenitems.Ctrl);
-    FSrcColumns[11]:=OpenItemsSrc.GetCol(DbModel.TOpenitems.PmtStat);
-    FSrcColumns[12]:=OpenItemsSrc.GetCol(DbModel.TOpenitems.Ad1);
-    FSrcColumns[13]:=OpenItemsSrc.GetCol(DbModel.TOpenitems.Ad2);
-    FSrcColumns[14]:=OpenItemsSrc.GetCol(DbModel.TOpenitems.Ad3);
-    FSrcColumns[15]:=OpenItemsSrc.GetCol(DbModel.TOpenitems.Pno);
-    FSrcColumns[16]:=OpenItemsSrc.GetCol(DbModel.TOpenitems.PArea);
-    FSrcColumns[17]:=OpenItemsSrc.GetCol(DbModel.TOpenitems.SourceDBName);
-    FSrcColumns[18]:=OpenItemsSrc.GetCol(DbModel.TOpenitems.CustNo);
+    FSrcColumns[0] :=OpenItemsSrc.GetCol(TReturnOpenItems._InvoiceNumber);
+    FSrcColumns[1] :=OpenItemsSrc.GetCol(TReturnOpenItems._Text);
+    FSrcColumns[2] :=OpenItemsSrc.GetCol(TReturnOpenItems._AdditionalText);
+    FSrcColumns[3] :=OpenItemsSrc.GetCol(TReturnOpenItems._OpenAmount);
+    FSrcColumns[4] :=OpenItemsSrc.GetCol(TReturnOpenItems._Amount);
+    FSrcColumns[5] :=OpenItemsSrc.GetCol(TReturnOpenItems._OpenCurAmount);
+    FSrcColumns[6] :=OpenItemsSrc.GetCol(TReturnOpenItems._CurAmount);
+    FSrcColumns[7] :=OpenItemsSrc.GetCol(TReturnOpenItems._Iso);
+    FSrcColumns[8] :=OpenItemsSrc.GetCol(TReturnOpenItems._DueDate);
+    FSrcColumns[9] :=OpenItemsSrc.GetCol(TReturnOpenItems._ValueDate);
+    FSrcColumns[10]:=OpenItemsSrc.GetCol(TReturnOpenItems._ControlStatus);
+    FSrcColumns[11]:=OpenItemsSrc.GetCol(TReturnOpenItems._PmtStatus);
+    FSrcColumns[12]:=OpenItemsSrc.GetCol(TReturnOpenItems._Address1);
+    FSrcColumns[13]:=OpenItemsSrc.GetCol(TReturnOpenItems._Address2);
+    FSrcColumns[14]:=OpenItemsSrc.GetCol(TReturnOpenItems._Address3);
+    FSrcColumns[15]:=OpenItemsSrc.GetCol(TReturnOpenItems._PostalNumber);
+    FSrcColumns[16]:=OpenItemsSrc.GetCol(TReturnOpenItems._PostalArea);
+    FSrcColumns[17]:=OpenItemsSrc.GetCol(TReturnOpenItems._SourceDbName);
+    FSrcColumns[18]:=OpenItemsSrc.GetCol(TReturnOpenItems._CustNumber);
 
     // Get headers
-    for var iCNT: integer:=Low(FSrcColumns) to High(FSrcColumns) do
+    for var iCNT:=Low(FSrcColumns) to High(FSrcColumns) do
     begin
 
         if FSrcColumns[iCNT] = -100 then
         begin
             THelpers.MsgCall(Warn, 'There are no open items loaded. Please reload it or wait untill auto-load is complete and try again.');
             Close;
-            Exit;
+            Exit();
         end;
 
         OpenItemsDest.Cells[iCNT + 1, 0]:=OpenItemsSrc.Cells[FSrcColumns[iCNT], 0];
 
     end;
 
-    for var iCNT: integer:=1 to OpenItemsSrc.RowCount - 1 do
+    for var iCNT:=1 to OpenItemsSrc.RowCount - 1 do
     begin
 
         if
-            (OpenItemsSrc.Cells[MainForm.sgOpenItems.GetCol(TOpenitems.CustNo), iCNT] = CustNumber.ToString())
+            (OpenItemsSrc.Cells[MainForm.sgOpenItems.GetCol(TReturnOpenItems._CustNumber), iCNT] = CustNumber.ToString())
         and
-            (OpenItemsSrc.Cells[MainForm.sgOpenItems.GetCol(TOpenitems.SourceDBName), iCNT] = SourceDBName)
+            (OpenItemsSrc.Cells[MainForm.sgOpenItems.GetCol(TReturnOpenItems._SourceDbName), iCNT] = SourceDBName)
         then
         begin
 
@@ -419,16 +426,16 @@ begin
     end;
 
     // Hide helpers columns from string grid
-    OpenItemsDest.ColWidths[OpenItemsDest.GetCol(DbModel.TOpenitems.Ad1)]         :=OpenItemsDest.sgRowHidden;
-    OpenItemsDest.ColWidths[OpenItemsDest.GetCol(DbModel.TOpenitems.Ad2)]         :=OpenItemsDest.sgRowHidden;
-    OpenItemsDest.ColWidths[OpenItemsDest.GetCol(DbModel.TOpenitems.Ad3)]         :=OpenItemsDest.sgRowHidden;
-    OpenItemsDest.ColWidths[OpenItemsDest.GetCol(DbModel.TOpenitems.Pno)]         :=OpenItemsDest.sgRowHidden;
-    OpenItemsDest.ColWidths[OpenItemsDest.GetCol(DbModel.TOpenitems.PArea)]       :=OpenItemsDest.sgRowHidden;
-    OpenItemsDest.ColWidths[OpenItemsDest.GetCol(DbModel.TOpenitems.CustNo)]      :=OpenItemsDest.sgRowHidden;
-    OpenItemsDest.ColWidths[OpenItemsDest.GetCol(DbModel.TOpenitems.SourceDBName)]:=OpenItemsDest.sgRowHidden;
+    OpenItemsDest.ColWidths[OpenItemsDest.GetCol(TReturnOpenItems._Address1)]    :=OpenItemsDest.sgRowHidden;
+    OpenItemsDest.ColWidths[OpenItemsDest.GetCol(TReturnOpenItems._Address2)]    :=OpenItemsDest.sgRowHidden;
+    OpenItemsDest.ColWidths[OpenItemsDest.GetCol(TReturnOpenItems._Address3)]    :=OpenItemsDest.sgRowHidden;
+    OpenItemsDest.ColWidths[OpenItemsDest.GetCol(TReturnOpenItems._PostalNumber)]:=OpenItemsDest.sgRowHidden;
+    OpenItemsDest.ColWidths[OpenItemsDest.GetCol(TReturnOpenItems._PostalArea)]  :=OpenItemsDest.sgRowHidden;
+    OpenItemsDest.ColWidths[OpenItemsDest.GetCol(TReturnOpenItems._CustNumber)]  :=OpenItemsDest.sgRowHidden;
+    OpenItemsDest.ColWidths[OpenItemsDest.GetCol(TReturnOpenItems._SourceDbName)]:=OpenItemsDest.sgRowHidden;
 
     // Sort via payment status
-    OpenItemsDest.MSort(OpenItemsDest.GetCol(TOpenitems.PmtStat), TDataType.TInteger, True);
+    OpenItemsDest.MSort(OpenItemsDest.GetCol(TReturnOpenItems._PmtStatus), TDataType.TInteger, True);
 
 end;
 
@@ -578,7 +585,7 @@ end;
 
 procedure TActionsForm.GetFirstComment(var Text: TMemo);
 begin
-    var GetColumn:=DailyComGrid.GetCol(TDailyComment.UserComment);
+    var GetColumn:=DailyComGrid.GetCol(TUserDailyCommentsList._UserComment);
     if GetColumn <> -100 then Text.Text:=DailyComGrid.Cells[GetColumn, 1];
 end;
 
@@ -624,9 +631,9 @@ end;
 
 procedure TActionsForm.Initialize();
 begin
-    FCustName    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerName), MainForm.sgAgeView.Row];
-    FCustNumber  :=(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerNumber), MainForm.sgAgeView.Row]).ToInteger();
-    FCompanyCode :=(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCoCode), MainForm.sgAgeView.Row]).ToInteger();
+    FCustName    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(DbModel.TSnapshots.fCustomerName), MainForm.sgAgeView.Row];
+    FCustNumber  :=(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(DbModel.TSnapshots.fCustomerNumber), MainForm.sgAgeView.Row]).ToInteger();
+    FCompanyCode :=(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(DbModel.TSnapshots.fCoCode), MainForm.sgAgeView.Row]).ToInteger();
     FSourceDBName:=THelpers.GetSourceDBName(FCompanyCode.ToString(), 'F');
 end;
 
@@ -766,8 +773,8 @@ begin
         var Comments: IComments:=TComments.Create();
         Comments.EditGeneralCommentAsync(LGeneralCommentFields, EditGeneralComment_Callback);
 
-        MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TGeneralComment.fFollowUp), MainForm.sgAgeView.Row]:='';
-        MainForm.UpdateFollowUps(MainForm.sgAgeView, MainForm.sgAgeView.GetCol(TGeneralComment.fFollowUp));
+        MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(DbModel.TSnapshots.fFollowUp), MainForm.sgAgeView.Row]:='';
+        MainForm.UpdateFollowUps(MainForm.sgAgeView, MainForm.sgAgeView.GetCol(DbModel.TSnapshots.fFollowUp));
 
     end;
 
@@ -909,7 +916,7 @@ begin
     end;
 
     UpdateDaily(DailyComGrid);
-    ActionsForm.DailyCom.Text:=DailyComGrid.Cells[DailyComGrid.GetCol(TDailyComment.UserComment), DailyComGrid.Row];
+    ActionsForm.DailyCom.Text:=DailyComGrid.Cells[DailyComGrid.GetCol(TUserDailyCommentsList._UserComment), DailyComGrid.Row];
 
 end;
 
@@ -1054,9 +1061,9 @@ begin
 
     OpenItemsGrid.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True);
 
-    if (ACol = OpenItemsGrid.GetCol(TOpenitems.OpenCurAm)) or (ACol = OpenItemsGrid.GetCol(TOpenitems.OpenAm))
-        or (ACol = OpenItemsGrid.GetCol(TOpenitems.CurAm)) or (ACol = OpenItemsGrid.GetCol(TOpenitems.Am))
-        or (ACol = OpenItemsGrid.GetCol(TOpenitems.PmtStat)) then
+    if (ACol = OpenItemsGrid.GetCol(TReturnOpenItems._OpenCurAmount)) or (ACol = OpenItemsGrid.GetCol(TReturnOpenItems._OpenAmount))
+        or (ACol = OpenItemsGrid.GetCol(TReturnOpenItems._CurAmount)) or (ACol = OpenItemsGrid.GetCol(TReturnOpenItems._Amount))
+        or (ACol = OpenItemsGrid.GetCol(TReturnOpenItems._PmtStatus)) then
     begin
         if gdSelected in State then OpenItemsGrid.ColorValues(ARow, ACol, Rect, clRed, clWhite)
             else OpenItemsGrid.ColorValues(ARow, ACol, Rect, clRed, clBlack);
@@ -1067,7 +1074,7 @@ end;
 
 procedure TActionsForm.DailyComGridSelectCell(Sender: TObject; ACol, ARow: Integer; var CanSelect: Boolean);
 begin
-    DailyCom.Text:=DailyComGrid.Cells[DailyComGrid.GetCol(TDailyComment.UserComment), ARow];
+    DailyCom.Text:=DailyComGrid.Cells[DailyComGrid.GetCol(TUserDailyCommentsList._UserComment), ARow];
 end;
 
 
