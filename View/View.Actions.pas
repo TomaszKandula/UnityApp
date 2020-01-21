@@ -538,8 +538,8 @@ begin
             var Col5:=DailyComments.GetCol(TUserDailyCommentsList._UserAlias);
 
             DailyComments.Cells[Col1, iCNT]:=LDailyCommentFields[iCNT - 1].CommentId.ToString();
-            DailyComments.Cells[Col2, iCNT]:=THelpers.FormatDateTimeStr(LDailyCommentFields[iCNT - 1].EntryDateTime);
-            DailyComments.Cells[Col3, iCNT]:=THelpers.FormatDateStr(LDailyCommentFields[iCNT - 1].AgeDate);
+            DailyComments.Cells[Col2, iCNT]:=THelpers.FormatDateTime(LDailyCommentFields[iCNT - 1].EntryDateTime, TCalendar.DateTime);
+            DailyComments.Cells[Col3, iCNT]:=THelpers.FormatDateTime(LDailyCommentFields[iCNT - 1].AgeDate, TCalendar.DateOnly);
             DailyComments.Cells[Col4, iCNT]:=LDailyCommentFields[iCNT - 1].UserComment;
             DailyComments.Cells[Col5, iCNT]:=LDailyCommentFields[iCNT - 1].UserAlias;
 

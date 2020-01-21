@@ -107,8 +107,7 @@ type
         class function LoadFileToStr(const FileName: TFileName): string; static;
         class function GetCurrentUserSid: string; static;
         class procedure RemoveAllInFolder(const Path: string; const Pattern: string); static;
-        class function FormatDateStr(DateStr: string): string; static;
-        class function FormatDateTimeStr(DateTimeStr: string): string; static;
+        class function FormatDateTime(InputDateTime: string; Returns: TCalendar): string; static;
         class function BankListToHtml(BankDetails: TArray<TBankDetails>): string; static;
         class procedure StrArrayToStrings(Input: TArray<string>; var Output: TStringList); static;
         class function StringToArrayInt(Input: string; SourceDelim: char): TArray<integer>; static;
@@ -883,23 +882,22 @@ begin
 end;
 
 
-class function THelpers.FormatDateStr(DateStr: string): string;
+class function THelpers.FormatDateTime(InputDateTime: string; Returns: TCalendar): string;
 begin
-    if String.IsNullOrEmpty(DateStr) then Exit();
-    // Expected: 2019-12-15T00:00:00
-    var TempStr:=DateStr.Split(['T']);
-    Result:=TempStr[0];
-end;
 
+    if String.IsNullOrEmpty(InputDateTime) then Exit();
 
-class function THelpers.FormatDateTimeStr(DateTimeStr: string): string;
-begin
-    if String.IsNullOrEmpty(DateTimeStr) then Exit();
-    // Expected: 2019-12-18T23:32:04.137
-    var TempStr:=DateTimeStr.Split(['T']);
+    // Expected format: 2019-12-18T23:32:04.137
+    var TempStr:=InputDateTime.Split(['T']);
     var TempTime:=TempStr[1];
     var NewTime:=TempTime.Split(['.']);
-    Result:=TempStr[0] + ' ' + NewTime[0];
+
+    case Returns of
+        TCalendar.TimeOnly: Result:=NewTime[0];
+        TCalendar.DateOnly: Result:=TempStr[0];
+        TCalendar.DateTime: Result:=TempStr[0] + ' ' + NewTime[0];
+    end;
+
 end;
 
 

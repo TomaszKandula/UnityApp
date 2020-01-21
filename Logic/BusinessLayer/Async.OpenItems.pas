@@ -9,21 +9,8 @@ interface
 
 
 uses
-    Winapi.Windows,
-    Winapi.Messages,
-    System.SysUtils,
-    System.StrUtils,
-    System.Classes,
-    System.Diagnostics,
-    System.Win.ComObj,
-    System.SyncObjs,
-    System.Threading,
     System.Generics.Collections,
-    Vcl.Graphics,
-    Vcl.ComCtrls,
-    Vcl.Dialogs,
-    Data.Win.ADODB,
-    Data.DB,
+    System.Classes,
     Unity.Grid,
     Unity.Enums,
     Unity.Records;
@@ -45,19 +32,12 @@ type
     IOpenItems = interface(IInterface)
     ['{CD6AC138-D2A4-4C6B-A3F1-07F904BA44B1}']
         /// <summary>
-        /// Returns latest open items date and time of SSIS data extract (query SSIS master database table).
+        /// Returns date and time of the SSIS package transfer from SSIS master database table alongside with transfer status.
         /// </summary>
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function GetDateTimeAwaited(Return: TCalendar): string;
-        /// <summary>
-        /// Returns status code from SSIS master table for given date and time stamp.
-        /// </summary>
-        /// <remarks>
-        /// This method always awaits for task to be completed and makes no callback to main thread.
-        /// </remarks>
-        function GetStatusAwaited(DateTime: string): string;
+        function GetSSISDataAwaited(DateTimeOption: TCalendar; var DateTime: string; var Status: string): TCallResponse;
         /// <summary>
         /// Allow to async. check SSIS master table to check if open items have been updated.
         /// Notification is always executed in main thread as long as callback is provided.
@@ -73,32 +53,25 @@ type
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
-        procedure ReadOpenItemsAsync(OpenItemsGrid: TStringGrid; CoCodeList: string; Callback: TReadOpenItems);
+        procedure ReadOpenItemsAsync(OpenItemsGrid: TStringGrid; LoadedCompanies: TList<string>; Callback: TReadOpenItems);
     end;
 
 
     TOpenItems = class(TInterfacedObject, IOpenItems)
     {$TYPEINFO ON}
     strict private
-        function  FLoadToGrid(OpenItemsGrid: TStringGrid; CoCodeList: string): boolean;
+        function  FLoadToGrid(OpenItemsGrid: TStringGrid; LoadedCompanies: TList<string>): TCallResponse;
         procedure FCalculateOpenItems(var InputGrid: TStringGrid; var OutputData: TOpenItemsPayLoad);
     public
         /// <summary>
-        /// Returns latest open items date and time of SSIS data extract (query SSIS master database table).
+        /// Returns date and time of the SSIS package transfer from SSIS master database table alongside with transfer status.
         /// </summary>
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function GetDateTimeAwaited(Return: TCalendar): string;
+        function GetSSISDataAwaited(DateTimeOption: TCalendar; var DateTime: string; var Status: string): TCallResponse;
         /// <summary>
-        /// Returns status code from SSIS master table for given date and time stamp.
-        /// </summary>
-        /// <remarks>
-        /// This method always awaits for task to be completed and makes no callback to main thread.
-        /// </remarks>
-        function GetStatusAwaited(DateTime: string): string;
-        /// <summary>
-        /// Allow to async. check SSIS master table to check if open items have been updated.
+        /// Allow to async. query SSIS master table to check if open items have been updated.
         /// Notification is always executed in main thread as long as callback is provided.
         /// </summary>
         /// <remarks>
@@ -112,7 +85,7 @@ type
         /// <remarks>
         /// Provide nil for callback parameter if you want to execute async. method without returning any results to main thread.
         /// </remarks>
-        procedure ReadOpenItemsAsync(OpenItemsGrid: TStringGrid; CoCodeList: string; Callback: TReadOpenItems);
+        procedure ReadOpenItemsAsync(OpenItemsGrid: TStringGrid; LoadedCompanies: TList<string>; Callback: TReadOpenItems);
     end;
 
 
@@ -120,17 +93,94 @@ implementation
 
 
 uses
-    System.Variants,
-    Handler.Sql{legacy},
-    Handler.Database{legacy},
-    DbModel{legacy},
+    System.Threading,
+    System.SysUtils,
+    REST.Types,
+    REST.Json,
+    Unity.RestWrapper,
     Unity.Settings,
     Unity.Helpers,
     Unity.EventLogger,
     Unity.SessionService,
-    Unity.Constants,
-    Sync.Document,
-    Async.Debtors;
+    Api.UserCompanySelection,
+    Api.ReturnSsisData,
+    Api.ReturnOpenItems,
+    DbModel{Legacy};
+
+
+function TOpenItems.GetSSISDataAwaited(DateTimeOption: TCalendar; var DateTime: string; var Status: string): TCallResponse;
+begin
+
+    var CallResponse: TCallResponse;
+    var GotDateTime: string;
+    var GotStatus: string;
+
+    var NewTask: ITask:=TTask.Create(procedure
+    begin
+
+        var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
+        Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'openitems/customers/ssis/';
+        Restful.RequestMethod:=TRESTRequestMethod.rmGET;
+        ThreadFileLog.Log('[GetSSISDataAwaited]: Executing GET ' + Restful.ClientBaseURL);
+
+        try
+
+            if (Restful.Execute) and (Restful.StatusCode = 200) then
+            begin
+
+                var ReturnSsisData:=TJson.JsonToObject<TReturnSsisData>(Restful.Content);
+                try
+
+                    GotDateTime:=ReturnSsisData.CustExtractDt;
+                    GotStatus:=ReturnSsisData.StatusCode;
+                    CallResponse.LastMessage:=ReturnSsisData.Error.ErrorDesc;
+                    CallResponse.ErrorNumber:=ReturnSsisData.Error.ErrorNum;
+
+                    CallResponse.IsSucceeded:=True;
+                    ThreadFileLog.Log('[GetSSISDataAwaited]: Returned status code is ' + Restful.StatusCode.ToString());
+
+                finally
+                    ReturnSsisData.Free();
+                end;
+
+            end
+            else
+            begin
+
+                if not String.IsNullOrEmpty(Restful.ExecuteError) then
+                    CallResponse.LastMessage:='[GetSSISDataAwaited]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+                else
+                    if String.IsNullOrEmpty(Restful.Content) then
+                        CallResponse.LastMessage:='[GetSSISDataAwaited]: Invalid server response. Please contact IT Support.'
+                    else
+                        CallResponse.LastMessage:='[GetSSISDataAwaited]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+
+                CallResponse.ReturnedCode:=Restful.StatusCode;
+                CallResponse.IsSucceeded:=False;
+                ThreadFileLog.Log(CallResponse.LastMessage);
+
+            end;
+
+        except on
+            E: Exception do
+            begin
+                CallResponse.IsSucceeded:=False;
+                CallResponse.LastMessage:='[GetSSISDataAwaited]: Cannot execute the request. Description: ' + E.Message;
+                ThreadFileLog.Log(CallResponse.LastMessage);
+            end;
+
+        end;
+
+    end);
+
+    NewTask.Start();
+    TTask.WaitForAll(NewTask);
+
+    Result  :=CallResponse;
+    DateTime:=GotDateTime;
+    Status  :=GotStatus;
+
+end;
 
 
 procedure TOpenItems.ScanOpenItemsAsync(OpenItemsUpdate: string; Callback: TScanOpenItems);
@@ -142,15 +192,16 @@ begin
         var ReadStatus: string;
         var ReadDateTime: string;
         var CallResponse: TCallResponse;
-        var CanMakeAge: boolean:=False;
+        var CanGetAging: boolean:=False;
 
         try
 
-            ReadDateTime:=GetDateTimeAwaited(DateTime);
-            ReadStatus:=GetStatusAwaited(ReadDateTime);
+            var OpenItemsResponse: TCallResponse;
+            OpenItemsResponse:=GetSSISDataAwaited(TCalendar.DateTime, ReadDateTime, ReadStatus);
+            ReadStatus:=THelpers.FormatDateTime(ReadStatus, TCalendar.DateTime);
 
             if ( StrToDateTime(OpenItemsUpdate) < StrToDateTime(ReadDateTime) )
-                and ( ReadStatus = 'Completed' ) then CanMakeAge:=True;
+                and ( ReadStatus = 'Completed' ) then CanGetAging:=True;
 
             CallResponse.IsSucceeded:=True;
 
@@ -166,7 +217,7 @@ begin
 
         TThread.Synchronize(nil, procedure
         begin
-            if Assigned(Callback) then Callback(CanMakeAge, ReadDateTime, CallResponse);
+            if Assigned(Callback) then Callback(CanGetAging, ReadDateTime, CallResponse);
         end);
 
     end);
@@ -176,7 +227,7 @@ begin
 end;
 
 
-procedure TOpenItems.ReadOpenItemsAsync(OpenItemsGrid: TStringGrid; CoCodeList: string; Callback: TReadOpenItems);
+procedure TOpenItems.ReadOpenItemsAsync(OpenItemsGrid: TStringGrid; LoadedCompanies: TList<string>; Callback: TReadOpenItems);
 begin
 
     var NewTask: ITask:=TTask.Create(procedure
@@ -186,11 +237,9 @@ begin
         var OpenItemsData: TOpenItemsPayLoad;
 
         try
-
-            FLoadToGrid(OpenItemsGrid, CoCodeList);
+            FLoadToGrid(OpenItemsGrid, LoadedCompanies);
             FCalculateOpenItems(OpenItemsGrid, OpenItemsData);
             CallResponse.IsSucceeded:=True;
-
         except
             on E: Exception do
             begin
@@ -216,109 +265,151 @@ end;
 // --------------------------------------------------------------------------------------------------------------------------------------------------------- //
 
 
-function TOpenItems.GetDateTimeAwaited(Return: TCalendar): string;
+function TOpenItems.FLoadToGrid(OpenItemsGrid: TStringGrid; LoadedCompanies: TList<string>): TCallResponse;
 begin
 
-    var NewResult: string;
+    var CallResponse: TCallResponse;
+    var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
+    Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'openitems/customers/';
+    Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
+    ThreadFileLog.Log('[FLoadToGrid]: Executing POST ' + Restful.ClientBaseURL);
 
-    var NewTask: ITask:=TTask.Create(procedure
-    begin
-
-        var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
-        try
-
-            DataTables.Columns.Add
-            (
-                TSql.MAX +
-                    DataTables.BracketStr(TSSISMaster.StartDateTime, TBrackets.Round) +
-                TSql._AS +
-                    QuotedStr(TSSISMaster.StartDateTime)
-            );
-
-            DataTables.OpenTable(TSSISMaster.SSISMaster);
-
-            if (not (DataTables.DataSet = nil)) and (DataTables.DataSet.RecordCount = 1) then
-            begin
-
-                var Value: string:=VarToStr(DataTables.DataSet.Fields.Item[TSSISMaster.StartDateTime].Value);
-
-                if Value <> '' then
-                begin
-
-                    case Return of
-
-                        TCalendar.TimeOnly: NewResult:=FormatDateTime(TDtFormat.TimeFormat, VarToDateTime(Value));
-                        TCalendar.DateOnly: NewResult:=FormatDateTime(TDtFormat.DateFormat, VarToDateTime(Value));
-                        TCalendar.DateTime: NewResult:=FormatDateTime(TDtFormat.DateTimeFormat, VarToDateTime(Value));
-
-                    end;
-
-                end;
-
-            end;
-
-        finally
-            DataTables.Free();
-        end;
-
-    end);
-
-    NewTask.Start();
-    TTask.WaitForAll(NewTask);
-    Result:=NewResult;
-
-end;
-
-
-function TOpenItems.GetStatusAwaited(DateTime: string): string;
-begin
-
-    var NewResult: string;
-
-    var NewTask: ITask:=TTask.Create(procedure
-    begin
-
-        var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
-        try
-
-            DataTables.CleanUp();
-            DataTables.Columns.Add(TSSISMaster.StatusCode);
-            DataTables.CustFilter:=TSql.WHERE + TSSISMaster.StartDateTime + TSql.EQUAL + QuotedStr(DateTime);
-            DataTables.OpenTable(TSSISMaster.SSISMaster);
-
-            if (not (DataTables.DataSet = nil)) and (DataTables.DataSet.RecordCount = 1) then
-                NewResult:=VarToStr(DataTables.DataSet.Fields.Item[TSSISMaster.StatusCode].Value);
-
-        finally
-            DataTables.Free();
-        end;
-
-    end);
-
-    NewTask.Start();
-    TTask.WaitForAll(NewTask);
-    Result:=NewResult;
-
-end;
-
-
-function TOpenItems.FLoadToGrid(OpenItemsGrid: TStringGrid; CoCodeList: string): boolean;
-begin
-
-    var Settings:  ISettings:=TSettings.Create;
-    var DataTables: TDataTables:=TDataTables.Create(SessionService.FDbConnect);
     try
 
-        DataTables.CmdType:=cmdText;
-        DataTables.StrSQL:=TSql.EXECUTE + 'Customer.QueryOpenItemsAlt2' + TChars.SPACE +
-            QuotedStr(GetDateTimeAwaited(DateOnly))                     + TChars.COMMA +
-            QuotedStr(CoCodeList);
+        var UserCompanySelection:=TUserCompanySelection.Create();
+        try
+            UserCompanySelection.SelectedCoCodes:=LoadedCompanies.ToArray();
+            //Restful.CustomBody:=TJson.ObjectToJsonString(UserCompanySelection);
+            Restful.CustomBody:='{"SelectedCoCodes":["F0450"]}';
+        finally
+            UserCompanySelection.Free();
+        end;
 
-        Result:=DataTables.SqlToGrid(OpenItemsGrid, DataTables.ExecSQL, False, True);
+        if (Restful.Execute) and (Restful.StatusCode = 200) then
+        begin
 
-    finally
-        DataTables.Free();
+            var ReturnOpenItems:=TJson.JsonToObject<TReturnOpenItems>(Restful.Content);
+            try
+
+                var RowCount:=Length(ReturnOpenItems.SourceDbName);
+                OpenItemsGrid.RowCount:=RowCount;
+                OpenItemsGrid.ColCount:=37;
+
+                OpenItemsGrid.Cells[0, 0]:='';
+                OpenItemsGrid.Cells[1, 0]:=ReturnOpenItems._SourceDbName;
+                OpenItemsGrid.Cells[2, 0]:=ReturnOpenItems._CustNumber;
+                OpenItemsGrid.Cells[3, 0]:=ReturnOpenItems._VoucherType;
+                OpenItemsGrid.Cells[4, 0]:=ReturnOpenItems._OpenCurAm;
+                OpenItemsGrid.Cells[5, 0]:=ReturnOpenItems._OpenAm;
+                OpenItemsGrid.Cells[6, 0]:=ReturnOpenItems._CustName;
+                OpenItemsGrid.Cells[7, 0]:=ReturnOpenItems._Iso;
+                OpenItemsGrid.Cells[8, 0]:=ReturnOpenItems._CurAm;
+                OpenItemsGrid.Cells[9, 0]:=ReturnOpenItems._Am;
+                OpenItemsGrid.Cells[10,0]:=ReturnOpenItems._InvoiceNumber;
+                OpenItemsGrid.Cells[11,0]:=ReturnOpenItems._DueDate;
+                OpenItemsGrid.Cells[12,0]:=ReturnOpenItems._Inf4;
+                OpenItemsGrid.Cells[13,0]:=ReturnOpenItems._Inf7;
+                OpenItemsGrid.Cells[14,0]:=ReturnOpenItems._CreditLimit;
+                OpenItemsGrid.Cells[15,0]:=ReturnOpenItems._Country;
+                OpenItemsGrid.Cells[16,0]:=ReturnOpenItems._PmtTerms;
+                OpenItemsGrid.Cells[17,0]:=ReturnOpenItems._PmtStatus;
+                OpenItemsGrid.Cells[18,0]:=ReturnOpenItems._Agent;
+                OpenItemsGrid.Cells[19,0]:=ReturnOpenItems._ControlStatus;
+                OpenItemsGrid.Cells[20,0]:=ReturnOpenItems._Address1;
+                OpenItemsGrid.Cells[21,0]:=ReturnOpenItems._Address2;
+                OpenItemsGrid.Cells[22,0]:=ReturnOpenItems._Address3;
+                OpenItemsGrid.Cells[23,0]:=ReturnOpenItems._PostalNumber;
+                OpenItemsGrid.Cells[24,0]:=ReturnOpenItems._PostalArea;
+                OpenItemsGrid.Cells[25,0]:=ReturnOpenItems._GenAccNumber;
+                OpenItemsGrid.Cells[26,0]:=ReturnOpenItems._ValueDate;
+                OpenItemsGrid.Cells[27,0]:=ReturnOpenItems._Division;
+                OpenItemsGrid.Cells[28,0]:=ReturnOpenItems._Text;
+                OpenItemsGrid.Cells[29,0]:=ReturnOpenItems._DirectDebit;
+                OpenItemsGrid.Cells[30,0]:=ReturnOpenItems._AdditionalText;
+                OpenItemsGrid.Cells[31,0]:=ReturnOpenItems._SalesResponsible;
+                OpenItemsGrid.Cells[32,0]:=ReturnOpenItems._CustomerGroup;
+                OpenItemsGrid.Cells[33,0]:=ReturnOpenItems._PersonResponsible;
+                OpenItemsGrid.Cells[34,0]:=ReturnOpenItems._AccountType;
+                OpenItemsGrid.Cells[35,0]:=ReturnOpenItems._VoucherNumber;
+                OpenItemsGrid.Cells[36,0]:=ReturnOpenItems._VoucherDate;
+
+                for var iCNT:=1{Skip header} to RowCount do
+                begin
+                    OpenItemsGrid.Cells[1, iCNT]:=ReturnOpenItems.SourceDbName[iCNT - 1];
+                    OpenItemsGrid.Cells[2, iCNT]:=ReturnOpenItems.CustNumber[iCNT - 1].ToString();
+                    OpenItemsGrid.Cells[3, iCNT]:=ReturnOpenItems.VoucherType[iCNT - 1].ToString();
+                    OpenItemsGrid.Cells[4, iCNT]:=ReturnOpenItems.OpenCurAm[iCNT - 1].ToString();
+                    OpenItemsGrid.Cells[5, iCNT]:=ReturnOpenItems.OpenAm[iCNT - 1].ToString();
+                    OpenItemsGrid.Cells[6, iCNT]:=ReturnOpenItems.CustName[iCNT - 1];
+                    OpenItemsGrid.Cells[7, iCNT]:=ReturnOpenItems.Iso[iCNT - 1];
+                    OpenItemsGrid.Cells[8, iCNT]:=ReturnOpenItems.CurAm[iCNT - 1].ToString();
+                    OpenItemsGrid.Cells[9, iCNT]:=ReturnOpenItems.Am[iCNT - 1].ToString();
+                    OpenItemsGrid.Cells[10,iCNT]:=ReturnOpenItems.InvoiceNumber[iCNT - 1];
+                    OpenItemsGrid.Cells[11,iCNT]:=ReturnOpenItems.DueDate[iCNT - 1];
+                    OpenItemsGrid.Cells[12,iCNT]:=ReturnOpenItems.Inf4[iCNT - 1];
+                    OpenItemsGrid.Cells[13,iCNT]:=ReturnOpenItems.Inf7[iCNT - 1];
+                    OpenItemsGrid.Cells[14,iCNT]:=ReturnOpenItems.CreditLimit[iCNT - 1].ToString();
+                    OpenItemsGrid.Cells[15,iCNT]:=ReturnOpenItems.Country[iCNT - 1].ToString();
+                    OpenItemsGrid.Cells[16,iCNT]:=ReturnOpenItems.PmtTerms[iCNT - 1].ToString();
+                    OpenItemsGrid.Cells[17,iCNT]:=ReturnOpenItems.PmtStatus[iCNT - 1].ToString();
+                    OpenItemsGrid.Cells[18,iCNT]:=ReturnOpenItems.Agent[iCNT - 1];
+                    OpenItemsGrid.Cells[19,iCNT]:=ReturnOpenItems.ControlStatus[iCNT - 1].ToString();
+                    OpenItemsGrid.Cells[20,iCNT]:=ReturnOpenItems.Address1[iCNT - 1];
+                    OpenItemsGrid.Cells[21,iCNT]:=ReturnOpenItems.Address2[iCNT - 1];
+                    OpenItemsGrid.Cells[22,iCNT]:=ReturnOpenItems.Address3[iCNT - 1];
+                    OpenItemsGrid.Cells[23,iCNT]:=ReturnOpenItems.PostalNumber[iCNT - 1];
+                    OpenItemsGrid.Cells[24,iCNT]:=ReturnOpenItems.PostalArea[iCNT - 1];
+                    OpenItemsGrid.Cells[25,iCNT]:=ReturnOpenItems.GenAccNumber[iCNT - 1].ToString();
+                    OpenItemsGrid.Cells[26,iCNT]:=ReturnOpenItems.ValueDate[iCNT - 1];
+                    OpenItemsGrid.Cells[27,iCNT]:=ReturnOpenItems.Division[iCNT - 1].ToString();
+                    OpenItemsGrid.Cells[28,iCNT]:=ReturnOpenItems.Text[iCNT - 1];
+                    OpenItemsGrid.Cells[29,iCNT]:=ReturnOpenItems.DirectDebit[iCNT - 1];
+                    OpenItemsGrid.Cells[30,iCNT]:=ReturnOpenItems.AdditionalText[iCNT - 1];
+                    OpenItemsGrid.Cells[31,iCNT]:=ReturnOpenItems.SalesResponsible[iCNT - 1];
+                    OpenItemsGrid.Cells[32,iCNT]:=ReturnOpenItems.CustomerGroup[iCNT - 1];
+                    OpenItemsGrid.Cells[33,iCNT]:=ReturnOpenItems.PersonResponsible[iCNT - 1];
+                    OpenItemsGrid.Cells[34,iCNT]:=ReturnOpenItems.AccountType[iCNT - 1];
+                    OpenItemsGrid.Cells[35,iCNT]:=ReturnOpenItems.VoucherNumber[iCNT - 1].ToString();
+                    OpenItemsGrid.Cells[36,iCNT]:=ReturnOpenItems.VoucherDate[iCNT - 1];
+                end;
+
+                CallResponse.IsSucceeded:=True;
+                CallResponse.ReturnedCode:=Restful.StatusCode;
+                ThreadFileLog.Log('[FLoadToGrid]: Returned status code is ' + Restful.StatusCode.ToString());
+
+            finally
+                ReturnOpenItems.Free();
+            end;
+
+        end
+        else
+        begin
+
+            if not String.IsNullOrEmpty(Restful.ExecuteError) then
+                CallResponse.LastMessage:='[FLoadToGrid]: Critical error. Please contact IT Support. Description: ' + Restful.ExecuteError
+            else
+                if String.IsNullOrEmpty(Restful.Content) then
+                    CallResponse.LastMessage:='[FLoadToGrid]: Invalid server response. Please contact IT Support.'
+                else
+                    CallResponse.LastMessage:='[FLoadToGrid]: An error has occured. Please contact IT Support. Description: ' + Restful.Content;
+
+            CallResponse.ReturnedCode:=Restful.StatusCode;
+            CallResponse.IsSucceeded:=False;
+            ThreadFileLog.Log(CallResponse.LastMessage);
+
+        end;
+
+    except on
+        E: Exception do
+        begin
+            CallResponse.IsSucceeded:=False;
+            CallResponse.LastMessage:='[FLoadToGrid]: Cannot execute the request. Description: ' + E.Message;
+            ThreadFileLog.Log(CallResponse.LastMessage);
+        end;
+
     end;
+
+    Result:=CallResponse;
 
 end;
 
@@ -327,13 +418,13 @@ procedure TOpenItems.FCalculateOpenItems(var InputGrid: TStringGrid; var OutputD
 begin
 
     var Settings: ISettings:=TSettings.Create;
-    var VoucherNumber: string:=Settings.GetStringValue(TConfigSections.Unallocated, 'VOUCHER_NUM', '0');
+    var VoucherNumber:=Settings.GetStringValue(TConfigSections.Unallocated, 'VOUCHER_NUM', '0');
 
     var VoTpCol   :=InputGrid.GetCol(DbModel.TOpenitems.VoTp);
     var OpenAmCol :=InputGrid.GetCol(DbModel.TOpenitems.OpenAm);
     var PmtStatCol:=InputGrid.GetCol(DbModel.TOpenitems.PmtStat);
 
-    for var iCNT: integer:=1 to InputGrid.RowCount - 1 do
+    for var iCNT:=1 to InputGrid.RowCount - 1 do
     begin
 
         var InvoiceAmt: double:=StrToFloatDef(InputGrid.Cells[OpenAmCol, iCNT], 0);

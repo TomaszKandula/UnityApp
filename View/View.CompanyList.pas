@@ -138,7 +138,7 @@ begin
         Exit();
     end;
 
-    MainForm.LoadAgeReport(SelectedCoCodes{Legacy});
+    MainForm.LoadAgeReport(SelectedCoCodes{Legacy/make paramless});
     Close();
 
  end;

@@ -1075,33 +1075,17 @@ procedure TMainForm.LoadOpenItems();
 begin
 
     sgOpenItems.Freeze(True);
-
     var OpenItems: IOpenItems:=TOpenItems.Create();
-    var CoCodeList:=TStringList.Create();
-    try
 
-        THelpers.ReturnCoCodesList(
-            sgAgeView,
-            sgAgeView.GetCol(TSnapshots.fCoCode),
-            CoCodeList,
-            True,
-            'F'
-        );
-
-        if CoCodeList.Count = 0 then
-        begin
-            THelpers.MsgCall(TAppMessage.Warn, 'Please first load aging report for given company and/or companies.');
-            ThreadFileLog.Log('[LoadOpenItems]: No aging report loded while open items requested.');
-            Exit();
-        end;
-
-        var CodesStringList:=THelpers.Implode(CoCodeList, ',', True);
-        ThreadFileLog.Log('[LoadOpenItems]: Calling ReadOpenItemsAsync for CoCodes: ' + CodesStringList + '.');
-        OpenItems.ReadOpenItemsAsync(sgOpenItems, CodesStringList, ReadOpenItems_Callback);
-
-    finally
-        CoCodeList.Free();
+    if LoadedCompanies.Count = 0 then
+    begin
+        THelpers.MsgCall(TAppMessage.Warn, 'Please first load aging report for given company and/or companies.');
+        ThreadFileLog.Log('[LoadOpenItems]: No aging report loded while open items requested.');
+        Exit();
     end;
+
+    ThreadFileLog.Log('[LoadOpenItems]: Calling ReadOpenItemsAsync for given company list.');
+    OpenItems.ReadOpenItemsAsync(sgOpenItems, LoadedCompanies, ReadOpenItems_Callback);
 
 end;
 
@@ -2172,8 +2156,15 @@ begin
             begin
 
                 var OpenItems: IOpenItems:=TOpenItems.Create();
-                FOpenItemsUpdate:=OpenItems.GetDateTimeAwaited(DateTime);
-                FOpenItemsStatus:=OpenItems.GetStatusAwaited(FOpenItemsUpdate);
+                var OpenItemsResponse: TCallResponse;
+                OpenItemsResponse:=OpenItems.GetSSISDataAwaited(TCalendar.DateTime, FOpenItemsUpdate, FOpenItemsStatus);
+                FOpenItemsUpdate:=THelpers.FormatDateTime(FOpenItemsUpdate, TCalendar.DateTime);
+
+                if not OpenItemsResponse.IsSucceeded then
+                begin
+                    THelpers.MsgCall(TAppMessage.Error, OpenItemsResponse.LastMessage);
+                    Exit();
+                end;
 
                 ThreadFileLog.Log(
                     '[StartMainWnd]: Open items information loaded (FOpenItemsUpdate = ' +
@@ -2188,12 +2179,12 @@ begin
                 var SortingOptions:=TStringList.Create();
                 try
 
-                    var CallResponse: TCallResponse;
-                    CallResponse:=Debtors.GetCustSortingOptionsAwaited(SortingOptions);
+                    var DebtorsResponse: TCallResponse;
+                    DebtorsResponse:=Debtors.GetCustSortingOptionsAwaited(SortingOptions);
 
-                    if not CallResponse.IsSucceeded then
+                    if not DebtorsResponse.IsSucceeded then
                     begin
-                        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
+                        THelpers.MsgCall(TAppMessage.Error, DebtorsResponse.LastMessage);
                         Exit();
                     end;
 

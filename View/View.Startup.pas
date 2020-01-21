@@ -72,7 +72,6 @@ type
         function GetDbConnectionSync(): boolean;
         function GetGeneralTablesSync(): boolean;
         function GetHtmlLayoutsSync(UrlLayoutPak: string; FileLayoutPak: string; LayoutDir: string): boolean;
-        procedure GeneralTables_Callback(CallResponse: TCallResponse);
     public
         property IsAppInitialized: boolean read FIsAppInitialized;
         procedure SetSessionLog(SessionEventLog: string);
@@ -524,24 +523,6 @@ begin
             Result:=False;
         end;
 
-    end;
-
-end;
-
-
-{$ENDREGION}
-
-
-{$REGION 'CALLBACKS'}
-
-
-procedure TStartupForm.GeneralTables_Callback(CallResponse: TCallResponse);
-begin
-
-    if not CallResponse.IsSucceeded then
-    begin
-        THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
-        Exit();
     end;
 
 end;

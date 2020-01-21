@@ -263,16 +263,16 @@ begin
                     TargetGrid.RowCount:=RowCount;
                     TargetGrid.ColCount:=15;
 
-                    TargetGrid.Cells[0, 0] :='';
-                    TargetGrid.Cells[1, 0] :=ReturnCompanies._SourceDbName;
-                    TargetGrid.Cells[2, 0] :=ReturnCompanies._CompanyCode;
-                    TargetGrid.Cells[3, 0] :=ReturnCompanies._CompanyName;
-                    TargetGrid.Cells[4, 0] :=ReturnCompanies._CompanyAddress;
-                    TargetGrid.Cells[5, 0] :=ReturnCompanies._CompanyVat;
-                    TargetGrid.Cells[6, 0] :=ReturnCompanies._CompanyDuns;
-                    TargetGrid.Cells[7, 0] :=ReturnCompanies._CompanyRate;
-                    TargetGrid.Cells[8, 0] :=ReturnCompanies._KpiOvdTarget;
-                    TargetGrid.Cells[9, 0] :=ReturnCompanies._KpiUnallTarget;
+                    TargetGrid.Cells[0, 0]:='';
+                    TargetGrid.Cells[1, 0]:=ReturnCompanies._SourceDbName;
+                    TargetGrid.Cells[2, 0]:=ReturnCompanies._CompanyCode;
+                    TargetGrid.Cells[3, 0]:=ReturnCompanies._CompanyName;
+                    TargetGrid.Cells[4, 0]:=ReturnCompanies._CompanyAddress;
+                    TargetGrid.Cells[5, 0]:=ReturnCompanies._CompanyVat;
+                    TargetGrid.Cells[6, 0]:=ReturnCompanies._CompanyDuns;
+                    TargetGrid.Cells[7, 0]:=ReturnCompanies._CompanyRate;
+                    TargetGrid.Cells[8, 0]:=ReturnCompanies._KpiOvdTarget;
+                    TargetGrid.Cells[9, 0]:=ReturnCompanies._KpiUnallTarget;
                     TargetGrid.Cells[10,0]:=ReturnCompanies._StatBeforeRem;
                     TargetGrid.Cells[11,0]:=ReturnCompanies._LbuType;
                     TargetGrid.Cells[12,0]:=ReturnCompanies._Currency;
@@ -281,20 +281,20 @@ begin
 
                     for var iCNT:=1{Skip header} to RowCount do
                     begin
-                        TargetGrid.Cells[1, iCNT] :=ReturnCompanies.SourceDbName[iCNT - 1];
-                        TargetGrid.Cells[2, iCNT] :=ReturnCompanies.CompanyCode[iCNT - 1].ToString();
-                        TargetGrid.Cells[3, iCNT] :=ReturnCompanies.CompanyName[iCNT - 1];
-                        TargetGrid.Cells[4, iCNT] :=ReturnCompanies.CompanyAddress[iCNT - 1];
-                        TargetGrid.Cells[5, iCNT] :=ReturnCompanies.CompanyVat[iCNT - 1];
-                        TargetGrid.Cells[6, iCNT] :=ReturnCompanies.CompanyDuns[iCNT - 1].ToString();
-                        TargetGrid.Cells[7, iCNT] :=ReturnCompanies.CompanyRate[iCNT - 1].ToString();
-                        TargetGrid.Cells[8, iCNT] :=ReturnCompanies.KpiOvdTarget[iCNT - 1].ToString();
-                        TargetGrid.Cells[9, iCNT] :=ReturnCompanies.KpiUnallTarget[iCNT - 1].ToString();
-                        TargetGrid.Cells[10, iCNT]:=ReturnCompanies.StatBeforeRem[iCNT - 1].ToString();
-                        TargetGrid.Cells[11, iCNT]:=ReturnCompanies.LbuType[iCNT - 1];
-                        TargetGrid.Cells[12, iCNT]:=ReturnCompanies.Currency[iCNT - 1];
-                        TargetGrid.Cells[13, iCNT]:=ReturnCompanies.City[iCNT - 1];
-                        TargetGrid.Cells[14, iCNT]:=ReturnCompanies.Country[iCNT - 1];
+                        TargetGrid.Cells[1, iCNT]:=ReturnCompanies.SourceDbName[iCNT - 1];
+                        TargetGrid.Cells[2, iCNT]:=ReturnCompanies.CompanyCode[iCNT - 1].ToString();
+                        TargetGrid.Cells[3, iCNT]:=ReturnCompanies.CompanyName[iCNT - 1];
+                        TargetGrid.Cells[4, iCNT]:=ReturnCompanies.CompanyAddress[iCNT - 1];
+                        TargetGrid.Cells[5, iCNT]:=ReturnCompanies.CompanyVat[iCNT - 1];
+                        TargetGrid.Cells[6, iCNT]:=ReturnCompanies.CompanyDuns[iCNT - 1].ToString();
+                        TargetGrid.Cells[7, iCNT]:=ReturnCompanies.CompanyRate[iCNT - 1].ToString();
+                        TargetGrid.Cells[8, iCNT]:=ReturnCompanies.KpiOvdTarget[iCNT - 1].ToString();
+                        TargetGrid.Cells[9, iCNT]:=ReturnCompanies.KpiUnallTarget[iCNT - 1].ToString();
+                        TargetGrid.Cells[10,iCNT]:=ReturnCompanies.StatBeforeRem[iCNT - 1].ToString();
+                        TargetGrid.Cells[11,iCNT]:=ReturnCompanies.LbuType[iCNT - 1];
+                        TargetGrid.Cells[12,iCNT]:=ReturnCompanies.Currency[iCNT - 1];
+                        TargetGrid.Cells[13,iCNT]:=ReturnCompanies.City[iCNT - 1];
+                        TargetGrid.Cells[14,iCNT]:=ReturnCompanies.Country[iCNT - 1];
                     end;
 
                     CallResponse.IsSucceeded:=True;
