@@ -206,14 +206,9 @@ type
     /// </summary>
     TRestAuth = class abstract
     public
-        const apiUserName        = '';
-        const apiPassword        = '';
-        const restApiBaseUrl     = 'https://unityapi.azurewebsites.net/api/v1/';
-        const restAccept         = 'application/json, text/plain; q=0.9, text/html;q=0.8,';
-        const restAcceptCharset  = 'UTF-8, *;q=0.8';
-        const restAcceptEncoding = 'gzip, deflate';
-        const restContentType    = 'application/json';
-        const restUserAgent      = 'Unity Platform RESTClient/1.0';
+        const apiUserName    = '';
+        const apiPassword    = '';
+        const restApiBaseUrl = 'https://unityapi.azurewebsites.net/api/v1/';
     end;
 
 
@@ -243,23 +238,23 @@ begin
     queryList:=TList<string>.Create();
     paramList:=TList<string>.Create();
 
-    ClientAccept             :=TRestAuth.restAccept;
-    ClientAcceptCharset      :=TRestAuth.restAcceptCharset;
-    ClientAcceptEncoding     :=TRestAuth.restAcceptEncoding;
+    ClientAccept             :='application/json, text/plain; q=0.9, text/html;q=0.8,';
+    ClientAcceptCharset      :='UTF-8, *;q=0.8';
+    ClientAcceptEncoding     :='gzip, deflate';
     ClientAllowCookies       :=True;
     ClientAutoCreateParams   :=True;
     ClientBaseURL            :=TRestAuth.restApiBaseUrl;
-    ClientContentType        :=TRestAuth.restContentType;
+    ClientContentType        :='application/json';
     ClientHandleRedirects    :=True;
     ClientRaiseExceptionOn500:=True;
     ClientSynchronizedEvents :=True;
-    ClientUserAgent          :=TRestAuth.restUserAgent;
+    ClientUserAgent          :='Unity Platform RESTClient/1.0';
     RequestAccept            :=restClient.Accept;
     RequestAcceptCharset     :=restClient.AcceptCharset;
     RequestAutoCreateParams  :=restClient.AutoCreateParams;
     RequestHandleRedirects   :=True;
     RequestSynchronizedEvents:=False;
-    RequestTimeout           :=30000;
+    RequestTimeout           :=120000;
 
 end;
 

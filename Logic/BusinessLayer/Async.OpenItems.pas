@@ -341,7 +341,7 @@ begin
                     OpenItemsGrid.Cells[8, iCNT]:=ReturnOpenItems.CurAmount[iCNT - 1].ToString();
                     OpenItemsGrid.Cells[9, iCNT]:=ReturnOpenItems.Amount[iCNT - 1].ToString();
                     OpenItemsGrid.Cells[10,iCNT]:=ReturnOpenItems.InvoiceNumber[iCNT - 1];
-                    OpenItemsGrid.Cells[11,iCNT]:=ReturnOpenItems.DueDate[iCNT - 1];
+                    OpenItemsGrid.Cells[11,iCNT]:=THelpers.FormatDateTime(ReturnOpenItems.DueDate[iCNT - 1], TCalendar.DateOnly);
                     OpenItemsGrid.Cells[12,iCNT]:=ReturnOpenItems.Inf4[iCNT - 1];
                     OpenItemsGrid.Cells[13,iCNT]:=ReturnOpenItems.Inf7[iCNT - 1];
                     OpenItemsGrid.Cells[14,iCNT]:=ReturnOpenItems.CreditLimit[iCNT - 1].ToString();
@@ -356,7 +356,7 @@ begin
                     OpenItemsGrid.Cells[23,iCNT]:=ReturnOpenItems.PostalNumber[iCNT - 1];
                     OpenItemsGrid.Cells[24,iCNT]:=ReturnOpenItems.PostalArea[iCNT - 1];
                     OpenItemsGrid.Cells[25,iCNT]:=ReturnOpenItems.GenAccNumber[iCNT - 1].ToString();
-                    OpenItemsGrid.Cells[26,iCNT]:=ReturnOpenItems.ValueDate[iCNT - 1];
+                    OpenItemsGrid.Cells[26,iCNT]:=THelpers.FormatDateTime(ReturnOpenItems.ValueDate[iCNT - 1], TCalendar.DateOnly);
                     OpenItemsGrid.Cells[27,iCNT]:=ReturnOpenItems.Division[iCNT - 1].ToString();
                     OpenItemsGrid.Cells[28,iCNT]:=ReturnOpenItems.Text[iCNT - 1];
                     OpenItemsGrid.Cells[29,iCNT]:=ReturnOpenItems.DirectDebit[iCNT - 1];
@@ -366,7 +366,7 @@ begin
                     OpenItemsGrid.Cells[33,iCNT]:=ReturnOpenItems.PersonResponsible[iCNT - 1];
                     OpenItemsGrid.Cells[34,iCNT]:=ReturnOpenItems.AccountType[iCNT - 1];
                     OpenItemsGrid.Cells[35,iCNT]:=ReturnOpenItems.VoucherNumber[iCNT - 1].ToString();
-                    OpenItemsGrid.Cells[36,iCNT]:=ReturnOpenItems.VoucherDate[iCNT - 1];
+                    OpenItemsGrid.Cells[36,iCNT]:=THelpers.FormatDateTime(ReturnOpenItems.VoucherDate[iCNT - 1], TCalendar.DateOnly);
                 end;
 
                 CallResponse.IsSucceeded:=True;
@@ -434,7 +434,7 @@ begin
             OutputData.OvdAmount:=OutputData.OvdAmount + StrToFloatDef(InputGrid.Cells[OpenAmCol, iCNT], 0);
         end;
 
-        if (StrToFloat(InputGrid.Cells[OpenAmCol, iCNT]) < 0) and (InputGrid.Cells[VoTpCol, iCNT] = VoucherNumber) then
+        if (StrToFloatDef(InputGrid.Cells[OpenAmCol, iCNT], 0) < 0) and (InputGrid.Cells[VoTpCol, iCNT] = VoucherNumber) then
             OutputData.UnallocatedAmt:=OutputData.UnallocatedAmt + StrToFloatDef(InputGrid.Cells[OpenAmCol, iCNT], 0);
 
     end;

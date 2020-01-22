@@ -9532,7 +9532,7 @@ object MainForm: TMainForm
     Margins.Top = 10
     Margins.Right = 10
     Margins.Bottom = 0
-    ActivePage = TabSheet7
+    ActivePage = TabSheet1
     Align = alClient
     DoubleBuffered = True
     Font.Charset = DEFAULT_CHARSET
@@ -9551,10 +9551,6 @@ object MainForm: TMainForm
       Highlighted = True
       ImageIndex = 8
       ParentDoubleBuffered = False
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object shapeFrame: TShape
         AlignWithMargins = True
         Left = 17
@@ -11018,10 +11014,6 @@ object MainForm: TMainForm
       Caption = 'Open Items'
       Highlighted = True
       ImageIndex = 1
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object OpenItemsHeader: TPanel
         AlignWithMargins = True
         Left = 0
@@ -11435,7 +11427,7 @@ object MainForm: TMainForm
           DefaultRowHeight = 17
           RowCount = 2
           GradientEndColor = 15527148
-          Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
+          Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goColMoving, goThumbTracking]
           ParentShowHint = False
           PopupMenu = PopupCommonMenu
           ShowHint = False
@@ -11495,10 +11487,6 @@ object MainForm: TMainForm
       Caption = 'Unidientified'
       Highlighted = True
       ImageIndex = 7
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object Header6: TPanel
         Left = 0
         Top = 0
@@ -11561,10 +11549,6 @@ object MainForm: TMainForm
       Caption = 'Address Book'
       Highlighted = True
       ImageIndex = 2
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object AddressBookHeader: TPanel
         Left = 0
         Top = 0
@@ -12132,10 +12116,6 @@ object MainForm: TMainForm
       Highlighted = True
       ImageIndex = 4
       OnShow = TabSheet4Show
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object InvoiceTrackerHeader: TPanel
         Left = 0
         Top = 0
@@ -12807,10 +12787,6 @@ object MainForm: TMainForm
       Highlighted = True
       ImageIndex = 6
       OnShow = TabSheet8Show
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object SettingsHeader: TPanel
         Left = 0
         Top = 0
@@ -13804,10 +13780,6 @@ object MainForm: TMainForm
       Caption = 'Queries'
       ImageIndex = 8
       OnShow = TabSheet5Show
-      ExplicitLeft = 0
-      ExplicitTop = 0
-      ExplicitWidth = 0
-      ExplicitHeight = 0
       object PanelFSC: TPanel
         AlignWithMargins = True
         Left = 17

@@ -1149,6 +1149,10 @@ begin
     procRange5.Caption   :='0';
     procRange6.Caption   :='0';
 
+    valFollowsToday.Caption:='0';
+    valFollowsPast.Caption :='0';
+    valFollowsNext.Caption :='0';
+
 end;
 
 
