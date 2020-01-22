@@ -985,10 +985,6 @@ begin
         THelpers.ExecWithDelay(500, procedure
         begin
 
-            OpenItemsGrid.Freeze(False);
-            OpenItemsGrid.AutoThumbSize;
-            OpenItemsGrid.SetColWidth(10, 20, 400);
-
             DailyComGrid.RowCount:=2;
             DailyComGrid.ColCount:=6;
             DailyComGrid.Cells[1, 0]:=TUserDailyCommentsList._CommentId;
@@ -1006,6 +1002,10 @@ begin
             DailyComGrid.Freeze(False);
             DailyComGrid.AutoThumbSize;
             DailyComGrid.SetColWidth(10, 20, 400);
+
+            OpenItemsGrid.Freeze(False);
+            OpenItemsGrid.AutoThumbSize;
+            OpenItemsGrid.SetColWidth(10, 20, 400);
 
             GetFirstComment(DailyCom);
             Screen.Cursor:=crDefault;

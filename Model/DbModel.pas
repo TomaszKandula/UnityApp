@@ -55,7 +55,6 @@ type
         const CustomerGroup     = 'CustomerGroup';
         const PersonResponsible = 'PersonResponsible';
         const AccountType       = 'AccountType';
-
         const fCustomerName      = 'Customer Name';
         const fCustomerNumber    = 'Customer Number';
         const fNotDue            = 'Not Due';

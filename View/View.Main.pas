@@ -1789,9 +1789,8 @@ begin
         Exit();
     end;
 
-    FOpenItemsUpdate:=ReadDateTime;
-    FOpenItemsStatus:='';
-
+    //FOpenItemsUpdate:=ReadDateTime;
+    //FOpenItemsStatus:='';
     //...load latest aging report with open items
 
 end;
