@@ -115,7 +115,7 @@ begin
 
             var Temp: TStringGrid:=TStringGrid.Create(nil);
             try
-                Temp.ToExcel('Age Report', FileName, GroupId, AgeDate, SessionService.FDbConnect);
+                Temp.ToExcel('Age Report', FileName, GroupId, AgeDate);
             finally
                 Temp.Free;
             end;

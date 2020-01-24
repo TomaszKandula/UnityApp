@@ -128,26 +128,6 @@ type
         /// </remarks>
         procedure AutoThumbSize();
         /// <summary>
-        /// String grid column layout. It contains with two headers, one is displayed to the user (column title), and second
-        /// is used to hold original SQL column name, that other can refer and perform SQL queries.
-        /// </summary>
-        procedure SaveLayout(ColWidthName: string; ColOrderName: string; ColNames: string; ColPrefix: string);
-        /// <summary>
-        /// Load layout from application settings.
-        /// </summary>
-        /// <remarks>
-        /// ColOrderName and ColWidthName provide the section names for column order and column width.
-        /// both sections must contains equal number of value keys. Each key contain column name used by
-        /// string grid component (age view) that displays data from sql server database, thus column names
-        /// are used to build sql query, this is because we use SQL expressions to obtain initial output
-        /// with filtering and/or sorting etc. Separate filtering to some extend is allowed in string grid
-        /// however, separate sorting is not implemented to restrict user form "playing around"
-        /// therefore, there is one place (server) where there is decided how to display data to the user,
-        /// this is part of automation and standard approach across all users, so the user is forced
-        /// to work certain way, and thus in management view user shall obtain better results, etc.
-        /// </remarks>
-        function LoadLayout(var StrCol: string; ColWidthName: string; ColOrderName: string; ColNames: string; ColPrefix: string): boolean;
-        /// <summary>
         /// Return column namber for given column name. By default it skips first column (Lp) and first row (header).
         /// Fixed column and row must be explicitly provided if defaults cannot be used.
         /// </summary>
@@ -166,7 +146,7 @@ type
         /// otherwise error message "invalid string class" will occur.
         /// This method should be run in worker thread.
         /// </remarks>
-        function ToExcel(ASheetName, AFileName: string; GroupId: string; AgeDate: string; ActiveConn: TADOConnection): boolean;
+        function ToExcel(ASheetName, AFileName: string; GroupId: string; AgeDate: string): boolean;
         /// <summary>
         /// Parse CSV data into grids.
         /// </summary>
@@ -205,8 +185,7 @@ uses
     Unity.Constants,
     Unity.Helpers,
     Unity.Sorting,
-    Unity.Settings,
-    Handler.Sql{Legacy};
+    Unity.Settings;
 
 
 procedure TStringGrid.SetUpdatedRow(Row: integer);
@@ -698,100 +677,6 @@ begin
 end;
 
 
-procedure TStringGrid.SaveLayout(ColWidthName: string; ColOrderName: string; ColNames: string; ColPrefix: string);
-begin
-
-    var Settings: ISettings:=TSettings.Create;
-
-    // Column width
-    for var iCNT: integer:=0 to Self.ColCount - 1 do
-    begin
-        if iCNT = 0 then Settings.SetIntegerValue(ColWidthName, ColPrefix + IntToStr(iCNT), 10);
-        if iCNT > 0 then Settings.SetIntegerValue(ColWidthName, ColPrefix + IntToStr(iCNT), Self.ColWidths[iCNT]);
-    end;
-
-    // SQL column name
-    for var iCNT: integer:=0 to Self.ColCount - 1 do
-        Settings.SetStringValue(ColOrderName, ColPrefix + IntToStr(iCNT), Self.SqlColumns[iCNT, 0]);
-
-    // Column title
-    for var iCNT: integer:=0 to Self.ColCount - 1 do
-    begin
-        if iCNT = 0 then Settings.SetStringValue(ColNames, ColPrefix + IntToStr(iCNT), '');
-        if iCNT > 0 then Settings.SetStringValue(ColNames, ColPrefix + IntToStr(iCNT), Self.SqlColumns[iCNT, 1]);
-    end;
-
-    // Encode
-    Settings.Encode(TAppFiles.Configuration);
-
-end;
-
-
-function TStringGrid.LoadLayout(var StrCol: string; ColWidthName: string; ColOrderName: string; ColNames: string; ColPrefix: string): boolean;
-begin
-
-    // Check number of keys in given section
-    var ColOrderSec: TStringList:=TStringList.Create;
-    var ColWidthSec: TStringList:=TStringList.Create;
-    var ColNamesSec: TStringList:=TStringList.Create;
-    var Settings: ISettings:=TSettings.Create;
-    try
-
-        try
-
-            Settings.GetSection(ColWidthName, ColWidthSec);
-            Settings.GetSection(ColOrderName, ColOrderSec);
-            Settings.GetSection(ColNames, ColNamesSec);
-
-            if (ColWidthSec.Count = ColOrderSec.Count) and (ColWidthSec.Count = ColNamesSec.Count) then
-            begin
-
-                Self.ColCount:=ColWidthSec.Count;
-                SetLength(Self.SqlColumns, Self.ColCount, 2);
-
-                for var iCNT: integer:=0 to Self.ColCount - 1 do
-                begin
-
-                    // Skip first column as it holds empty column (by design, we do not display ID in first column, etc.)
-                    if iCNT > 0 then
-                    begin
-
-                        if iCNT < (Self.ColCount - 1) then
-                            StrCol:=StrCol + Settings.GetStringValue(ColOrderName, ColPrefix + IntToStr(iCNT), '') + ','
-                        else
-                            StrCol:=StrCol + Settings.GetStringValue(ColOrderName, ColPrefix + IntToStr(iCNT), '') + ' ';
-
-                        // Store SQL column name and user friendly column name (column title) into helper array
-                        Self.SqlColumns[iCNT, 0]:=Settings.GetStringValue(ColOrderName, ColPrefix + IntToStr(iCNT), '');
-                        Self.SqlColumns[iCNT, 1]:=Settings.GetStringValue(ColNames, ColPrefix + IntToStr(iCNT), '');
-
-                        // Display only column title
-                        Self.Cells[iCNT, 0]:=Settings.GetStringValue(ColNames, ColPrefix + IntToStr(iCNT), '');
-
-                    end;
-
-                    // Assign saved width
-                    Self.ColWidths[iCNT]:=Settings.GetIntegerValue(ColWidthName, ColPrefix + IntToStr(iCNT), 100);
-
-                end;
-
-            end;
-
-            Result:=True;
-
-        except
-            Result:=False;
-        end;
-
-    finally
-        ColWidthSec.Free;
-        ColOrderSec.Free;
-        ColNamesSec.Free;
-    end;
-
-end;
-
-
 function TStringGrid.GetCol(ColumnName: string; FixedCol: integer = 1; FixedRow: integer = 1): integer;
 begin
 
@@ -827,79 +712,79 @@ begin
 end;
 
 
-function TStringGrid.ToExcel(ASheetName: string; AFileName: string; GroupId: string; AgeDate: string; ActiveConn: TADOConnection): boolean;
+function TStringGrid.ToExcel(ASheetName: string; AFileName: string; GroupId: string; AgeDate: string): boolean;
 begin
 
     Result:=False;
 
-    var DataTables: TDataTables:=TDataTables.Create(ActiveConn);
-    try
-        DataTables.StrSQL:=TSql.EXECUTE + DataTables.AgeViewExport + TChars.SPACE + QuotedStr(GroupId) + TChars.COMMA + QuotedStr(AgeDate);
-        DataTables.SqlToGrid(Self, DataTables.ExecSQL, False, True);
-    finally
-        DataTables.Free;
-    end;
-
-    // Initiate Excel application
-    try
-
-        var XLApp: OLEVariant:=CreateOleObject('Excel.Application');
-        var Sheet: OLEVariant;
-
-        try
-
-            XLApp.Visible:=False;
-            XLApp.Caption:='Unity For Debt Management - Data Export';
-            XLApp.DisplayAlerts:=False;
-            XLApp.Workbooks.Add(xlWBatWorkSheet);
-
-            Sheet:=XLApp.Workbooks[1].WorkSheets[1];
-            Sheet.Name:=ASheetName;
-
-            /// <remarks>Offsets cannot be less than one.</remarks>
-            var RowOffset: integer:=1;
-            var ColOffset: integer:=1;
-
-            // To Excel sheet
-            for var Col: integer:=0 to Self.ColCount - 1 do
-                for var Row: integer:=0 to Self.RowCount - 1 do
-                    // We mitt first string grid column
-                    Sheet.Cells[Row + RowOffset, Col + ColOffset]:=Self.Cells[Col + 1, Row];
-
-            // Simple formatting (this can be extended
-            for var Col: integer:=0 to Self.ColCount - 1 do Sheet.Columns[Col + ColOffset].ColumnWidth:=15;
-            for var Row: integer:=0 to Self.RowCount - 1 do Sheet.Rows[Row + RowOffset].RowHeight:=15;
-
-            // Save to file
-            XLApp.Workbooks[1].SaveAs(AFileName);
-            Result:=True;
-
-        finally
-
-            if not VarIsEmpty(XLApp) then
-            begin
-
-                XLApp.DisplayAlerts:=False;
-                XLApp.Quit;
-                XLAPP:=Unassigned;
-                Sheet:=Unassigned;
-
-                if Result then
-                    FToExcelResult:='The data has been successfully transferred to Excel.';
-
-            end;
-        end;
-
-    except
-        on E: Exception do
-        begin
-            if E.Message = xlWARN_MESSAGE then
-                FToExcelResult:='The data cannot be exported because Microsoft Excel cannot be found.'
-            else
-                FToExcelResult:='The data cannot be exported, error message has been thrown: ' + E.Message;
-        end;
-
-    end;
+//    var DataTables: TDataTables:=TDataTables.Create(ActiveConn);
+//    try
+//        DataTables.StrSQL:=TSql.EXECUTE + DataTables.AgeViewExport + TChars.SPACE + QuotedStr(GroupId) + TChars.COMMA + QuotedStr(AgeDate);
+//        DataTables.SqlToGrid(Self, DataTables.ExecSQL, False, True);
+//    finally
+//        DataTables.Free;
+//    end;
+//
+//    // Initiate Excel application
+//    try
+//
+//        var XLApp: OLEVariant:=CreateOleObject('Excel.Application');
+//        var Sheet: OLEVariant;
+//
+//        try
+//
+//            XLApp.Visible:=False;
+//            XLApp.Caption:='Unity For Debt Management - Data Export';
+//            XLApp.DisplayAlerts:=False;
+//            XLApp.Workbooks.Add(xlWBatWorkSheet);
+//
+//            Sheet:=XLApp.Workbooks[1].WorkSheets[1];
+//            Sheet.Name:=ASheetName;
+//
+//            /// <remarks>Offsets cannot be less than one.</remarks>
+//            var RowOffset: integer:=1;
+//            var ColOffset: integer:=1;
+//
+//            // To Excel sheet
+//            for var Col: integer:=0 to Self.ColCount - 1 do
+//                for var Row: integer:=0 to Self.RowCount - 1 do
+//                    // We mitt first string grid column
+//                    Sheet.Cells[Row + RowOffset, Col + ColOffset]:=Self.Cells[Col + 1, Row];
+//
+//            // Simple formatting (this can be extended
+//            for var Col: integer:=0 to Self.ColCount - 1 do Sheet.Columns[Col + ColOffset].ColumnWidth:=15;
+//            for var Row: integer:=0 to Self.RowCount - 1 do Sheet.Rows[Row + RowOffset].RowHeight:=15;
+//
+//            // Save to file
+//            XLApp.Workbooks[1].SaveAs(AFileName);
+//            Result:=True;
+//
+//        finally
+//
+//            if not VarIsEmpty(XLApp) then
+//            begin
+//
+//                XLApp.DisplayAlerts:=False;
+//                XLApp.Quit;
+//                XLAPP:=Unassigned;
+//                Sheet:=Unassigned;
+//
+//                if Result then
+//                    FToExcelResult:='The data has been successfully transferred to Excel.';
+//
+//            end;
+//        end;
+//
+//    except
+//        on E: Exception do
+//        begin
+//            if E.Message = xlWARN_MESSAGE then
+//                FToExcelResult:='The data cannot be exported because Microsoft Excel cannot be found.'
+//            else
+//                FToExcelResult:='The data cannot be exported, error message has been thrown: ' + E.Message;
+//        end;
+//
+//    end;
 
 end;
 

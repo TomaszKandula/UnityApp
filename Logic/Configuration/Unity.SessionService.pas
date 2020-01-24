@@ -11,8 +11,7 @@ interface
 uses
     System.Classes,
     System.SysUtils,
-    Unity.Records,
-    Data.Win.ADODB {Legacy};
+    Unity.Records;
 
 
 type
@@ -32,7 +31,6 @@ type
         property SessionId:   string       read FSessionId;
         property SessionLog:  string       read FSessionLog;
         property SessionData: TSessionData read FSessionData;
-        var FDbConnect: TADOConnection; {Legacy}
     end;
 
 

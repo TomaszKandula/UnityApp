@@ -329,8 +329,6 @@ type
         txtEventLog: TLabel;
         Action_INF7_Filter: TMenuItem;
         Action_CoCode_Filter: TMenuItem;
-        Action_Agent_Filter: TMenuItem;
-        Action_Division_Filter: TMenuItem;
         Action_FollowUp_Filter: TMenuItem;
         Action_GroupFollowUp: TMenuItem;
         Action_INF4_Filter: TMenuItem;
@@ -649,8 +647,6 @@ type
         procedure imgEventLogMouseLeave(Sender: TObject);
         procedure Action_INF7_FilterClick(Sender: TObject);
         procedure Action_CoCode_FilterClick(Sender: TObject);
-        procedure Action_Agent_FilterClick(Sender: TObject);
-        procedure Action_Division_FilterClick(Sender: TObject);
         procedure Action_FollowUp_FilterClick(Sender: TObject);
         procedure Action_INF4_FilterClick(Sender: TObject);
         procedure Action_HideSummaryClick(Sender: TObject);
@@ -809,7 +805,6 @@ type
         const AppButtonTxtNormal = $00555555;
         const AppButtonTxtSelected = $006433C9;
         var FLoadedCompanies: TList<string>;
-        var FLoadedCompaniesF: TList<string>;
         var FLoadedAgeDate: string;
         var FRedeemOnReload: boolean;
         var FPermitCheckTimer: integer;
@@ -835,7 +830,6 @@ type
         procedure ClearMainViewInfo();
         procedure ClearAgingSummary();
         procedure ClearOpenItemsSummary();
-        procedure LoadColumnWidth(var Grid: TStringGrid);
         procedure LoadOpenItems();
         procedure UpdateAgeSummary(PayLoad: TAgingPayLoad);
         procedure AgeViewMapping();
@@ -864,10 +858,9 @@ type
         procedure StartMainWnd();
         procedure SwitchTimers(State: TAppTimers);
         procedure UpdateStatusBar(Text: string);
-        procedure LoadAgeReport(SelectedCoCodes: string{Legacy argument/to be deleted});
+        procedure LoadAgeReport();
         property LoadedAgeDate: string read FLoadedAgeDate;
         property LoadedCompanies: TList<string> read FLoadedCompanies;
-        property LoadedCompaniesF: TList<string> read FLoadedCompaniesF;
         property FollowsToday: integer read FFollowsToday;
         property FollowsPast: integer read FFollowsPast;
         property FollowsNext: integer read FFollowsNext;
@@ -884,7 +877,6 @@ implementation
 
 
 uses
-    DbModel{Legacy},
     View.GridFilter,
     View.InvoiceTracker,
     View.InvoiceList,
@@ -927,7 +919,8 @@ uses
     Api.ReturnPaymentTerms,
     Api.ReturnCustomerGroup,
     Api.ReturnOpenItems,
-    Api.AddressBookList;
+    Api.AddressBookList,
+    Api.ReturnCustSnapshots;
 
 
 var VMainForm: TMainForm;
@@ -1061,12 +1054,12 @@ begin
 end;
 
 
-procedure TMainForm.LoadAgeReport(SelectedCoCodes: string);
+procedure TMainForm.LoadAgeReport();
 begin
+
     BusyForm.Show();
     var Debtors: IDebtors:=TDebtors.Create();
-    FLastCoCodesSelected:=SelectedCoCodes;
-    Debtors.ReadAgeViewAsync(SelectedCoCodes, selAgeSorting.Text, FRiskClassGroup, ReadAgeView_Callback);
+    Debtors.ReadAgeViewAsync(LoadedCompanies, selAgeSorting.Text, FRiskClassGroup, ReadAgeView_Callback);
 
     //dummy!!!
     FLoadedAgeDate:='2020-01-03';
@@ -1080,7 +1073,7 @@ begin
     sgOpenItems.Freeze(True);
     var OpenItems: IOpenItems:=TOpenItems.Create();
 
-    if LoadedCompaniesF.Count = 0 then
+    if LoadedCompanies.Count = 0 then
     begin
         THelpers.MsgCall(TAppMessage.Warn, 'Please first load aging report for given company and/or companies.');
         ThreadFileLog.Log('[LoadOpenItems]: No aging report loded while open items requested.');
@@ -1088,7 +1081,7 @@ begin
     end;
 
     ThreadFileLog.Log('[LoadOpenItems]: Calling ReadOpenItemsAsync for given company list.');
-    OpenItems.ReadOpenItemsAsync(sgOpenItems, LoadedCompaniesF, ReadOpenItems_Callback);
+    OpenItems.ReadOpenItemsAsync(sgOpenItems, LoadedCompanies, ReadOpenItems_Callback);
 
 end;
 
@@ -1141,13 +1134,13 @@ begin
     itemRiskClassB.Caption:='0';
     itemRiskClassC.Caption:='0';
 
-    procNotDue.Caption   :='0';
-    procRange1.Caption   :='0';
-    procRange2.Caption   :='0';
-    procRange3.Caption   :='0';
-    procRange4.Caption   :='0';
-    procRange5.Caption   :='0';
-    procRange6.Caption   :='0';
+    procNotDue.Caption:='0';
+    procRange1.Caption:='0';
+    procRange2.Caption:='0';
+    procRange3.Caption:='0';
+    procRange4.Caption:='0';
+    procRange5.Caption:='0';
+    procRange6.Caption:='0';
 
     valFollowsToday.Caption:='0';
     valFollowsPast.Caption :='0';
@@ -1220,29 +1213,31 @@ end;
 procedure TMainForm.AgeViewMapping();
 begin
 
-    var  CompanyCode:=sgAgeView.GetCol(TSnapshots.fCoCode);
+    Exit();
 
-    var  ColPersonResp    :=sgAgeView.GetCol(TSnapshots.fPersonResponsible);
+    var  CompanyCode:=sgAgeView.GetCol(TReturnCustSnapshots._SourceDbName);
+
+    var  ColPersonResp    :=sgAgeView.GetCol(TReturnCustSnapshots._PersonResponsible);
     var  IdPersonResp     :=sgPersonResp.GetCol(TReturnPersonResponsible._Id);
     var  DbNamePersonResp :=sgPersonResp.GetCol(TReturnPersonResponsible._SourceDbName);
     var  ErpCodePersonResp:=sgPersonResp.GetCol(TReturnPersonResponsible._ErpCode);
 
-    var ColSalesResp    :=sgAgeView.GetCol(TSnapshots.fSalesResponsible);
+    var ColSalesResp    :=sgAgeView.GetCol(TReturnCustSnapshots._SalesResponsible);
     var IdSalesResp     :=sgSalesResp.GetCol(TReturnSalesResponsible._Id);
     var DbNameSalesResp :=sgSalesResp.GetCol(TReturnSalesResponsible._SourceDbName);
     var ErpCodeSalesResp:=sgSalesResp.GetCol(TReturnSalesResponsible._ErpCode);
 
-    var ColAccountType    :=sgAgeView.GetCol(TSnapshots.fAccountType);
+    var ColAccountType    :=sgAgeView.GetCol(TReturnCustSnapshots._AccountType);
     var IdAccountType     :=sgAccountType.GetCol(TReturnAccountType._Id);
     var DbNameAccountType :=sgAccountType.GetCol(TReturnAccountType._SourceDbName);
     var ErpCodeAccountType:=sgAccountType.GetCol(TReturnAccountType._ErpCode);
 
-    var ColCustomerGroup    :=sgAgeView.GetCol(TSnapshots.fCustomerGroup);
+    var ColCustomerGroup    :=sgAgeView.GetCol(TReturnCustSnapshots._CustomerGroup);
     var IdCustomerGroup     :=sgCustomerGr.GetCol(TReturnCustomerGroup._Id);
     var DbNameCustomerGroup :=sgCustomerGr.GetCol(TReturnCustomerGroup._SourceDbName);
     var ErpCodeCustomerGroup:=sgCustomerGr.GetCol(TReturnCustomerGroup._ErpCode);
 
-    var ColPaymentTerms    :=sgAgeView.GetCol(TSnapshots.fPaymentTerms);
+    var ColPaymentTerms    :=sgAgeView.GetCol(TReturnCustSnapshots._PaymentTerms);
     var ErpCodePaymentTerms:=sgPmtTerms.GetCol(TReturnPaymentTerms._ErpCode);
     var EntityPaymentTerms :=sgPmtTerms.GetCol(TReturnPaymentTerms._Entity);
     var DescPaymentTerms   :=sgPmtTerms.GetCol(TReturnPaymentTerms._Description);
@@ -1281,17 +1276,6 @@ begin
         sgCustomerGr.Freeze(False);
         sgPmtTerms.Freeze(False);
     end;
-
-end;
-
-
-procedure TMainForm.LoadColumnWidth(var Grid: TStringGrid);
-begin
-
-    var Settings: ISettings:=TSettings.Create();
-    for var iCNT: integer:=0 to Grid.ColCount - 1 do
-        {OutputDebugString(PChar(Settings.GetStringValue('COLUMNWIDTH', Settings.FindSettingsKey('COLUMNWIDTH', iCNT), '')));}
-        Grid.ColWidths[iCNT]:=Settings.GetStringValue('COLUMNWIDTH', Settings.FindSettingsKey('COLUMNWIDTH', iCNT), '').ToInteger();
 
 end;
 
@@ -1728,7 +1712,7 @@ begin
         ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: VCL unlocked and repainted.');
     end;
 
-    LoadColumnWidth(sgAgeView);
+    sgAgeView.SetColWidth(10, 20, 400);
 
     ClearAgingSummary();
     UpdateAgeSummary(PayLoad);
@@ -1745,7 +1729,7 @@ begin
     var AddressBook: IAddressBook:=TAddressBook.Create();
     AddressBook.OpenAddressBookAsync('', OpenAddressBook_Callback, LoadedCompanies);
 
-    UpdateFollowUps(sgAgeView, sgAgeView.GetCol(TSnapshots.fFollowUp));
+    UpdateFollowUps(sgAgeView, sgAgeView.GetCol(TReturnCustSnapshots._FollowUp));
     BusyForm.Close();
 
 end;
@@ -1945,7 +1929,7 @@ begin
 end;
 
 
-procedure TMainForm.ChromiumModalLoopOn(PassMsg: TMessage); // sep region
+procedure TMainForm.ChromiumModalLoopOn(PassMsg: TMessage);
 begin
     if (PassMsg.wParam = 0) and (GlobalCEFApp <> nil) then GlobalCEFApp.OsmodalLoop:=True;
 end;
@@ -1986,8 +1970,8 @@ begin
     if PassMsg.LParam > 0 then
     begin
 
-        var CoCode:=(sgAgeView.Cells[sgAgeView.GetCol(DbModel.TSnapshots.fCoCode), sgAgeView.Row]).ToInteger();
-        var CustNumber:=(sgAgeView.Cells[sgAgeView.GetCol(DbModel.TSnapshots.fCustomerNumber), sgAgeView.Row]).ToInteger();
+        var CoCode:=(sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._SourceDbName), sgAgeView.Row]).ToInteger();
+        var CustNumber:=(sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._CustomerNumber), sgAgeView.Row]).ToInteger();
 
         var Comments: IComments:=TComments.Create();
         var DailyCommentExists: TDailyCommentExists;
@@ -2064,8 +2048,6 @@ begin
             PBT_APMSUSPEND:
             begin
                 SwitchTimers(TurnedOff);
-                SessionService.FDbConnect.Connected:=False;
-                SessionService.FDbConnect:=nil;
                 ThreadFileLog.Log('[WndMessagesWindows]: Detected '
                     + IntToStr(PassMsg.Msg) + ' WM_POWERBROADCAST with PBT_APMSUSPEND. Going into suspension mode, Unity is disconnected from server.'
                 );
@@ -2226,7 +2208,6 @@ end;
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
     FLoadedCompanies:=TList<string>.Create();
-    FLoadedCompaniesF:=TList<string>.Create();
     FIsAppMenuLocked:=True;
     FAllowClose:=False;
     ClearMainViewInfo();
@@ -2325,14 +2306,6 @@ begin
             if not CallResponse.IsSucceeded then
                 THelpers.MsgCall(TAppMessage.Error, CallResponse.LastMessage);
 
-            if sgAgeView.RowCount > 2 then
-                sgAgeView.SaveLayout(
-                    TConfigSections.ColumnWidthName,
-                    TConfigSections.ColumnOrderName,
-                    TConfigSections.ColumnNames,
-                    TConfigSections.ColumnPrefix
-                );
-
             var Settings: ISettings:=TSettings.Create;
             Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_TOP',  MainForm.Top);
             Settings.SetIntegerValue(TConfigSections.ApplicationDetails, 'WINDOW_LEFT', MainForm.Left);
@@ -2346,12 +2319,6 @@ begin
             end;
 
             Settings.Encode(TAppFiles.Configuration);
-
-            if Assigned(SessionService.FDbConnect) then
-            begin
-                SessionService.FDbConnect.Close();
-                FreeAndNil(SessionService.FDbConnect);
-            end;
 
             if Assigned(FLoadedCompanies) then
                 FLoadedCompanies.Free();
@@ -2426,12 +2393,6 @@ begin
         end;
 
     finally
-        sgAgeView.SaveLayout(
-            TConfigSections.ColumnWidthName,
-            TConfigSections.ColumnOrderName,
-            TConfigSections.ColumnNames,
-            TConfigSections.ColumnPrefix
-        );
         SetLength(Temp, 0);
     end;
 
@@ -2582,20 +2543,20 @@ begin
     if ARow = 0 then Exit;
 
     // Find column numbers for given column name
-    var Col1 :=sgAgeView.GetCol(TSnapshots.fNotDue);
-    var Col2 :=sgAgeView.GetCol(TSnapshots.fRange1);
-    var Col3 :=sgAgeView.GetCol(TSnapshots.fRange2);
-    var Col4 :=sgAgeView.GetCol(TSnapshots.fRange3);
-    var Col5 :=sgAgeView.GetCol(TSnapshots.fRange4);
-    var Col6 :=sgAgeView.GetCol(TSnapshots.fRange5);
-    var Col7 :=sgAgeView.GetCol(TSnapshots.fRange6);
-    var Col8 :=sgAgeView.GetCol(TSnapshots.fOverdue);
-    var Col9 :=sgAgeView.GetCol(TSnapshots.fTotal);
-    var Col10:=sgAgeView.GetCol(TSnapshots.fCreditLimit);
-    var Col11:=sgAgeView.GetCol(TSnapshots.fCreditBalance);
-    var Col12:=sgAgeView.GetCol(TSnapshots.fFollowUp);
-    var Col14:=sgAgeView.GetCol(TSnapshots.fCustomerName);
-    var Col15:=sgAgeView.GetCol(TSnapshots.fRiskClass);
+    var Col1 :=sgAgeView.GetCol(TReturnCustSnapshots._NotDue);
+    var Col2 :=sgAgeView.GetCol(TReturnCustSnapshots._Range1);
+    var Col3 :=sgAgeView.GetCol(TReturnCustSnapshots._Range2);
+    var Col4 :=sgAgeView.GetCol(TReturnCustSnapshots._Range3);
+    var Col5 :=sgAgeView.GetCol(TReturnCustSnapshots._Range4);
+    var Col6 :=sgAgeView.GetCol(TReturnCustSnapshots._Range5);
+    var Col7 :=sgAgeView.GetCol(TReturnCustSnapshots._Range6);
+    var Col8 :=sgAgeView.GetCol(TReturnCustSnapshots._Overdue);
+    var Col9 :=sgAgeView.GetCol(TReturnCustSnapshots._Total);
+    var Col10:=sgAgeView.GetCol(TReturnCustSnapshots._CreditLimit);
+    var Col11:=sgAgeView.GetCol(TReturnCustSnapshots._CreditBalance);
+    var Col12:=sgAgeView.GetCol(TReturnCustSnapshots._FollowUp);
+    var Col14:=sgAgeView.GetCol(TReturnCustSnapshots._CustomerName);
+    var Col15:=sgAgeView.GetCol('Risk Class');
 
     // Draw selected row | skip headers
     sgAgeView.DrawSelected(ARow, ACol, State, Rect, clWhite, TCommon.SelectionColor, clBlack, clWhite, True);
@@ -2807,11 +2768,11 @@ begin
     var Sum:=0;
     for var iCNT:=1 to sgAgeView.RowCount - 1 do
     if
-        (THelpers.CDate(sgAgeView.Cells[sgAgeView.GetCol(TSnapshots.fFollowUp), iCNT]) = THelpers.CDate(valCurrentDate.Caption))
+        (THelpers.CDate(sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._FollowUp), iCNT]) = THelpers.CDate(valCurrentDate.Caption))
     and
-        ((UpperCase(sgAgeView.Cells[sgAgeView.GetCol(TSnapshots.fInf7), iCNT]) = UpperCase(SessionService.SessionData.AliasName))
+        ((UpperCase(sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._Inf7), iCNT]) = UpperCase(SessionService.SessionData.AliasName))
     or
-        (UpperCase(sgAgeView.Cells[sgAgeView.GetCol(TSnapshots.fPersonResponsible), iCNT]) = UpperCase(SessionService.SessionData.AliasName)))
+        (UpperCase(sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._PersonResponsible), iCNT]) = UpperCase(SessionService.SessionData.AliasName)))
     then
         Inc(Sum);
 
@@ -3346,8 +3307,8 @@ begin
         begin
 
             var LGeneralCommentFields: TGeneralCommentFields;
-            LGeneralCommentFields.CompanyCode   :=(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCoCode), iCNT]).ToInteger();
-            LGeneralCommentFields.CustomerNumber:=(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerNumber), iCNT]).ToInteger();
+            LGeneralCommentFields.CompanyCode   :=(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._SourceDbName), iCNT]).ToInteger();
+            LGeneralCommentFields.CustomerNumber:=(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._CustomerNumber), iCNT]).ToInteger();
             LGeneralCommentFields.FollowUp      :=' ';
             LGeneralCommentFields.Free1         :=String.Empty;
             LGeneralCommentFields.Free2         :=String.Empty;
@@ -3358,13 +3319,13 @@ begin
             var Comments: IComments:=TComments.Create();
             Comments.EditGeneralCommentAsync(LGeneralCommentFields, nil{EditGeneralComment_Callback});
 
-            MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fFollowUp), iCNT]:=TChars.SPACE;
+            MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._FollowUp), iCNT]:=TChars.SPACE;
 
         end;
 
     end;
 
-    MainForm.UpdateFollowUps(MainForm.sgAgeView, MainForm.sgAgeView.GetCol(TSnapshots.fFollowUp));
+    MainForm.UpdateFollowUps(MainForm.sgAgeView, MainForm.sgAgeView.GetCol(TReturnCustSnapshots._FollowUp));
     ThreadFileLog.Log('GeneralComment table with column FollowUp has been updated with removal for multiple items.');
 
     Screen.Cursor:=crDefault;
@@ -3375,8 +3336,8 @@ end;
 // Filter via INF7 (to be removed)
 procedure TMainForm.Action_INF7_FilterClick(Sender: TObject);
 begin
-    FilterForm.FColName  :=TSnapshots.fInf7;
-    FilterForm.FOverdue  :=TSnapshots.fOverdue;
+    FilterForm.FColName  :=TReturnCustSnapshots._Inf7;
+    FilterForm.FOverdue  :=TReturnCustSnapshots._Overdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TColumns.Inf7;
     THelpers.WndCall(FilterForm, TWindowState.Modal);
@@ -3386,8 +3347,8 @@ end;
 // Filter via INF4 (to be removed)
 procedure TMainForm.Action_INF4_FilterClick(Sender: TObject);
 begin
-    FilterForm.FColName  :=TSnapshots.fInf4;
-    FilterForm.FOverdue  :=TSnapshots.fOverdue;
+    FilterForm.FColName  :=TReturnCustSnapshots._Inf4;
+    FilterForm.FOverdue  :=TReturnCustSnapshots._Overdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TColumns.Inf4;
     THelpers.WndCall(FilterForm, TWindowState.Modal);
@@ -3397,8 +3358,8 @@ end;
 // Filter via Sales Responsible
 procedure TMainForm.Action_SalesRespClick(Sender: TObject);
 begin
-    FilterForm.FColName  :=TSnapshots.fSalesResponsible;
-    FilterForm.FOverdue  :=TSnapshots.fOverdue;
+    FilterForm.FColName  :=TReturnCustSnapshots._SalesResponsible;
+    FilterForm.FOverdue  :=TReturnCustSnapshots._Overdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TColumns.SalesResponsible;
     THelpers.WndCall(FilterForm, TWindowState.Modal);
@@ -3408,8 +3369,8 @@ end;
 // Filter vi Person Responsible
 procedure TMainForm.Action_PersonRespClick(Sender: TObject);
 begin
-    FilterForm.FColName  :=TSnapshots.fPersonResponsible;
-    FilterForm.FOverdue  :=TSnapshots.fOverdue;
+    FilterForm.FColName  :=TReturnCustSnapshots._PersonResponsible;
+    FilterForm.FOverdue  :=TReturnCustSnapshots._Overdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TColumns.PersonResponsible;
     THelpers.WndCall(FilterForm, TWindowState.Modal);
@@ -3419,8 +3380,8 @@ end;
 // Filter via Customer Group
 procedure TMainForm.Action_CustomerGrpClick(Sender: TObject);
 begin
-    FilterForm.FColName  :=TSnapshots.fCustomerGroup;
-    FilterForm.FOverdue  :=TSnapshots.fOverdue;
+    FilterForm.FColName  :=TReturnCustSnapshots._CustomerGroup;
+    FilterForm.FOverdue  :=TReturnCustSnapshots._Overdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TColumns.CustomerGroup;
     THelpers.WndCall(FilterForm, TWindowState.Modal);
@@ -3430,8 +3391,8 @@ end;
 // Filter via Account Type
 procedure TMainForm.Action_AccountTypeClick(Sender: TObject);
 begin
-    FilterForm.FColName  :=TSnapshots.fAccountType;
-    FilterForm.FOverdue  :=TSnapshots.fOverdue;
+    FilterForm.FColName  :=TReturnCustSnapshots._AccountType;
+    FilterForm.FOverdue  :=TReturnCustSnapshots._Overdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TColumns.AccountType;
     THelpers.WndCall(FilterForm, TWindowState.Modal);
@@ -3441,8 +3402,8 @@ end;
 // Filter via FOLLOW UP
 procedure TMainForm.Action_FollowUp_FilterClick(Sender: TObject);
 begin
-    FilterForm.FColName  :=TSnapshots.fFollowUp;
-    FilterForm.FOverdue  :=TSnapshots.fOverdue;
+    FilterForm.FColName  :=TReturnCustSnapshots._FollowUp;
+    FilterForm.FOverdue  :=TReturnCustSnapshots._Overdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TColumns.Follow;
     THelpers.WndCall(FilterForm, TWindowState.Modal);
@@ -3452,32 +3413,10 @@ end;
 // Filter via COCODE
 procedure TMainForm.Action_CoCode_FilterClick(Sender: TObject);
 begin
-    FilterForm.FColName  :=TSnapshots.fCoCode;
-    FilterForm.FOverdue  :=TSnapshots.fOverdue;
+    FilterForm.FColName  :=TReturnCustSnapshots._SourceDbName;
+    FilterForm.FOverdue  :=TReturnCustSnapshots._Overdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TColumns.CoCode;
-    THelpers.WndCall(FilterForm, TWindowState.Modal);
-end;
-
-
-// Filter via AGENT
-procedure TMainForm.Action_Agent_FilterClick(Sender: TObject);
-begin
-    FilterForm.FColName  :=TSnapshots.fAgent;
-    FilterForm.FOverdue  :=TSnapshots.fOverdue;
-    FilterForm.FGrid     :=MainForm.sgAgeView;
-    FilterForm.FFilterNum:=TColumns.Agent;
-    THelpers.WndCall(FilterForm, TWindowState.Modal);
-end;
-
-
-// Filter via DIVISION
-procedure TMainForm.Action_Division_FilterClick(Sender: TObject);
-begin
-    FilterForm.FColName  :=TSnapshots.fDivision;
-    FilterForm.FOverdue  :=TSnapshots.fOverdue;
-    FilterForm.FGrid     :=MainForm.sgAgeView;
-    FilterForm.FFilterNum:=TColumns.Division;
     THelpers.WndCall(FilterForm, TWindowState.Modal);
 end;
 
@@ -3485,8 +3424,8 @@ end;
 // Filter via FREE 1
 procedure TMainForm.Action_Free1Click(Sender: TObject);
 begin
-    FilterForm.FColName  :=TSnapshots.fFree1;
-    FilterForm.FOverdue  :=TSnapshots.fOverdue;
+    FilterForm.FColName  :=TReturnCustSnapshots._Free1;
+    FilterForm.FOverdue  :=TReturnCustSnapshots._Overdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TColumns.Free1;
     THelpers.WndCall(FilterForm, TWindowState.Modal);
@@ -3496,8 +3435,8 @@ end;
 // Filter via FREE 2
 procedure TMainForm.Action_Free2Click(Sender: TObject);
 begin
-    FilterForm.FColName  :=TSnapshots.fFree2;
-    FilterForm.FOverdue  :=TSnapshots.fOverdue;
+    FilterForm.FColName  :=TReturnCustSnapshots._Free2;
+    FilterForm.FOverdue  :=TReturnCustSnapshots._Overdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TColumns.Free2;
     THelpers.WndCall(FilterForm, TWindowState.Modal);
@@ -3507,8 +3446,8 @@ end;
 // Filter via FREE 3
 procedure TMainForm.Action_Free3Click(Sender: TObject);
 begin
-    FilterForm.FColName  :=TSnapshots.fFree3;
-    FilterForm.FOverdue  :=TSnapshots.fOverdue;
+    FilterForm.FColName  :=TReturnCustSnapshots._Free3;
+    FilterForm.FOverdue  :=TReturnCustSnapshots._Overdue;
     FilterForm.FGrid     :=MainForm.sgAgeView;
     FilterForm.FFilterNum:=TColumns.Free3;
     THelpers.WndCall(FilterForm, TWindowState.Modal);
@@ -3542,8 +3481,8 @@ end;
 procedure TMainForm.Action_SearchClick(Sender: TObject);
 begin
     GridSearchForm.FGrid     :=MainForm.sgAgeView;
-    GridSearchForm.FColName  :=TSnapshots.fCustomerName;
-    GridSearchForm.FColNumber:=TSnapshots.fCustomerNumber;
+    GridSearchForm.FColName  :=TReturnCustSnapshots._CustomerName;
+    GridSearchForm.FColNumber:=TReturnCustSnapshots._CustomerNumber;
     THelpers.WndCall(GridSearchForm, TWindowState.Modeless);
 end;
 
@@ -3894,7 +3833,7 @@ begin
         Exit();
     end;
 
-    LoadAgeReport(FLastCoCodesSelected);
+    LoadAgeReport();
 
 end;
 

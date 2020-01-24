@@ -21,9 +21,6 @@ uses
     Vcl.Graphics,
     Vcl.ComCtrls,
     Vcl.Dialogs,
-    Data.Win.ADODB,
-    Data.DB,
-    Handler.Sql,
     Unity.Grid,
     Unity.Enums,
     Unity.Records;

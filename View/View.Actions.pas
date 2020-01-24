@@ -279,7 +279,7 @@ uses
     Async.Documents,
     Api.ReturnOpenItems,
     Api.UserDailyCommentsList,
-    DbModel{Legacy};
+    Api.ReturnCustSnapshots;
 
 
 var vActionsForm: TActionsForm;
@@ -631,9 +631,9 @@ end;
 
 procedure TActionsForm.Initialize();
 begin
-    FCustName    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(DbModel.TSnapshots.fCustomerName), MainForm.sgAgeView.Row];
-    FCustNumber  :=(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(DbModel.TSnapshots.fCustomerNumber), MainForm.sgAgeView.Row]).ToInteger();
-    FCompanyCode :=(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(DbModel.TSnapshots.fCoCode), MainForm.sgAgeView.Row]).ToInteger();
+    FCustName    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._CustomerName), MainForm.sgAgeView.Row];
+    FCustNumber  :=(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._CustomerNumber), MainForm.sgAgeView.Row]).ToInteger();
+    FCompanyCode :=(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._SourceDbName), MainForm.sgAgeView.Row]).ToInteger();
     FSourceDBName:=THelpers.GetSourceDBName(FCompanyCode.ToString(), 'F');
 end;
 
@@ -709,7 +709,7 @@ procedure TActionsForm.LoadCustomer(GoNext: boolean);
         if
             (MainForm.sgAgeView.RowHeights[Iterator] <> -1)
         and
-            (MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fOverdue), Iterator] <> '0')
+            (MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._Overdue), Iterator] <> '0')
         then
         begin
             MainForm.sgAgeView.Row:=Iterator;
@@ -773,8 +773,8 @@ begin
         var Comments: IComments:=TComments.Create();
         Comments.EditGeneralCommentAsync(LGeneralCommentFields, EditGeneralComment_Callback);
 
-        MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(DbModel.TSnapshots.fFollowUp), MainForm.sgAgeView.Row]:='';
-        MainForm.UpdateFollowUps(MainForm.sgAgeView, MainForm.sgAgeView.GetCol(DbModel.TSnapshots.fFollowUp));
+        MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._FollowUp), MainForm.sgAgeView.Row]:='';
+        MainForm.UpdateFollowUps(MainForm.sgAgeView, MainForm.sgAgeView.GetCol(TReturnCustSnapshots._FollowUp));
 
     end;
 

@@ -60,7 +60,6 @@ type
     protected
         procedure CreateParams(var Params: TCreateParams); override;
     strict private
-        var DbConnection: TADOConnection; {Legacy}
         var LastErrorMsg: string;
         var FIsAppInitialized: boolean;
         var FCurrentSessionLog: string;
@@ -69,7 +68,6 @@ type
         procedure ExitAppSync();
         procedure ApplicationStart();
         function GetScreenDataSync(): boolean;
-        function GetDbConnectionSync(): boolean;
         function GetGeneralTablesSync(): boolean;
         function GetHtmlLayoutsSync(UrlLayoutPak: string; FileLayoutPak: string; LayoutDir: string): boolean;
     public
@@ -90,6 +88,7 @@ implementation
 uses
     System.Net.HttpClient,
     REST.Types,
+    Unity.RestWrapper,
     Unity.Enums,
     Unity.Constants,
     Unity.Settings,
@@ -99,9 +98,6 @@ uses
     Async.GeneralTables,
     Async.Queries,
     Async.Accounts,
-    Unity.RestWrapper,
-    Handler.Database{Legacy},
-    DbModel{Legacy},
     View.Main;
 
 
@@ -225,25 +221,6 @@ begin
             ThreadFileLog.Log('Unity has been boot up.');
             ChangeProgressBar(15, 'Initializing... done.', ProgressBar);
 
-        end;
-
-        // -----------------------------------------
-        // Establish persistent database connection.  // delete when REST is introduced in full
-        // -----------------------------------------
-        Sleep(250);
-        ChangeProgressBar(20, 'Connecting to database...', ProgressBar);
-
-        if not GetDbConnectionSync() then
-        begin
-            ThreadFileLog.Log('Critical error has occured [GetDbConnectionSync]: ' + LastErrorMsg);
-            THelpers.MsgCall(TAppMessage.Error, 'An error occured [GetDbConnectionSync]: ' + LastErrorMsg + '. Please contact IT support. Application will be closed.');
-            ExitAppSync();
-        end
-        else
-        begin
-            SessionService.FDbConnect:=DbConnection;
-            ThreadFileLog.Log('Persistant connection with SQL database has been established.');
-            ChangeProgressBar(33, 'Connecting to database... done.', ProgressBar);
         end;
 
         // --------------------------------------
@@ -426,38 +403,6 @@ begin
 
         MainAppForm.txtPastDue.Caption:=getRange1A + ' - ' + getRange3B + ':';
         MainAppForm.txtDefaulted.Caption:=getRange4A + ' - ' + getRange6B + ':';
-
-    except
-        on E: Exception do
-        begin
-            LastErrorMsg:=E.Message;
-            Result:=False;
-        end;
-
-    end;
-
-end;
-
-
-function TStartupForm.GetDbConnectionSync(): boolean;
-begin
-
-    Result:=True;
-
-    try
-
-        DbConnection:=TADOConnection.Create(nil);
-        var DataBase:=TDataBase.Create(False);
-        try
-
-            if DataBase.Check = 0 then
-            begin
-                DataBase.InitializeConnection(False, DbConnection);
-            end;
-
-        finally
-            DataBase.Free();
-        end;
 
     except
         on E: Exception do

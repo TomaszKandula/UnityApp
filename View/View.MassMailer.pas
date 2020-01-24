@@ -150,7 +150,7 @@ uses
     Async.AddressBook,
     Async.Documents,
     Api.ReturnOpenItems,
-    DbModel{Legacy};
+    Api.ReturnCustSnapshots;
 
 
 var vMassMailerForm: TMassMailerForm;
@@ -342,9 +342,9 @@ begin
         if MainForm.sgAgeView.RowHeights[iCNT] <> MainForm.sgAgeView.sgRowHidden then
         begin
 
-            var LCustomerNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerNumber), iCNT];
-            var LCustomerName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerName), iCNT];
-            var LSourceDbName  :=THelpers.GetSourceDBName(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCoCode), iCNT], 'F');
+            var LCustomerNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._CustomerNumber), iCNT];
+            var LCustomerName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._CustomerName), iCNT];
+            var LSourceDbName  :=THelpers.GetSourceDBName(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._SourceDbName), iCNT], 'F');
 
             // Visible fields
             Item:=MassMailerForm.CustomerList.Items.Add();

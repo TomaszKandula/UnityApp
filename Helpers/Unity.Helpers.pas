@@ -123,7 +123,6 @@ uses
     System.Variants,
     System.Zip,
     Vcl.Graphics,
-    DbModel{Legacy},
     Unity.Constants,
     Unity.Settings;
 

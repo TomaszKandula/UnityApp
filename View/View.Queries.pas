@@ -118,13 +118,11 @@ uses
     View.Actions,
     View.Calendar,
     Sync.Document,
-    DbModel{Legacy},
     Unity.Constants,
     Unity.Helpers,
     Unity.Settings,
     Unity.EventLogger,
-    Unity.SessionService,
-    Handler.Sql{Legacy};
+    Unity.SessionService;
 
 
 var vQmsForm: TQmsForm;

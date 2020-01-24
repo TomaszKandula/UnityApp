@@ -10959,7 +10959,7 @@ object MainForm: TMainForm
           DoubleBuffered = True
           RowCount = 2
           GradientEndColor = clGradientInactiveCaption
-          Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goColMoving, goThumbTracking]
+          Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goDrawFocusSelected, goColSizing, goThumbTracking]
           ParentDoubleBuffered = False
           ParentShowHint = False
           PopupMenu = PopupAgeView
@@ -16749,15 +16749,15 @@ object MainForm: TMainForm
         72727272727272FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF
         FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF}
       Caption = 'Filter Age View'
-      object Action_INF7_Filter: TMenuItem
-        Caption = 'INF7'
-        OnClick = Action_INF7_FilterClick
+      object Action_CoCode_Filter: TMenuItem
+        Caption = 'Source DB name'
+        OnClick = Action_CoCode_FilterClick
       end
-      object Action_INF4_Filter: TMenuItem
-        Caption = 'INF4'
-        OnClick = Action_INF4_FilterClick
+      object Action_FollowUp_Filter: TMenuItem
+        Caption = 'Follow Up'
+        OnClick = Action_FollowUp_FilterClick
       end
-      object N24: TMenuItem
+      object N4: TMenuItem
         Caption = '-'
       end
       object Action_SalesResp: TMenuItem
@@ -16779,25 +16779,6 @@ object MainForm: TMainForm
       object N23: TMenuItem
         Caption = '-'
       end
-      object Action_FollowUp_Filter: TMenuItem
-        Caption = 'Follow Up'
-        OnClick = Action_FollowUp_FilterClick
-      end
-      object Action_CoCode_Filter: TMenuItem
-        Caption = 'Co Code'
-        OnClick = Action_CoCode_FilterClick
-      end
-      object Action_Agent_Filter: TMenuItem
-        Caption = 'Agent'
-        OnClick = Action_Agent_FilterClick
-      end
-      object Action_Division_Filter: TMenuItem
-        Caption = 'Division'
-        OnClick = Action_Division_FilterClick
-      end
-      object N4: TMenuItem
-        Caption = '-'
-      end
       object Action_Free1: TMenuItem
         Caption = 'Free 1'
         OnClick = Action_Free1Click
@@ -16809,6 +16790,17 @@ object MainForm: TMainForm
       object Action_Free3: TMenuItem
         Caption = 'Free 3'
         OnClick = Action_Free3Click
+      end
+      object N24: TMenuItem
+        Caption = '-'
+      end
+      object Action_INF4_Filter: TMenuItem
+        Caption = 'INF4'
+        OnClick = Action_INF4_FilterClick
+      end
+      object Action_INF7_Filter: TMenuItem
+        Caption = 'Group3'
+        OnClick = Action_INF7_FilterClick
       end
     end
     object Action_RemoveFilters: TMenuItem

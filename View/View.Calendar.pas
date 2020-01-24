@@ -78,7 +78,7 @@ uses
     Unity.EventLogger,
     Unity.Settings,
     Async.Comments,
-    DbModel{Legacy};
+    Api.ReturnCustSnapshots;
 
 
 var vCalendarForm: TCalendarForm;
@@ -115,8 +115,8 @@ end;
 procedure TCalendarForm.SetFollowUp(SelectedDate: TDate; Row: integer);
 begin
 
-    FGeneralCommentFields.CompanyCode   :=(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCoCode), Row]).ToInteger();
-    FGeneralCommentFields.CustomerNumber:=(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TSnapshots.fCustomerNumber), Row]).ToInteger();
+    FGeneralCommentFields.CompanyCode   :=(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._SourceDbName), Row]).ToInteger();
+    FGeneralCommentFields.CustomerNumber:=(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._CustomerNumber), Row]).ToInteger();
     FGeneralCommentFields.FollowUp      :=DateToStr(SelectedDate);
     FGeneralCommentFields.Free1         :=String.Empty;
     FGeneralCommentFields.Free2         :=String.Empty;
@@ -127,8 +127,8 @@ begin
     var Comments: IComments:=TComments.Create();
     Comments.EditGeneralCommentAsync(FGeneralCommentFields, EditGeneralComment_Callback);
 
-    MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(DbModel.TSnapshots.fFollowUp), Row]:=DateToStr(SelectedDate);
-    MainForm.UpdateFollowUps(MainForm.sgAgeView, MainForm.sgAgeView.GetCol(DbModel.TSnapshots.fFollowUp));
+    MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._FollowUp), Row]:=DateToStr(SelectedDate);
+    MainForm.UpdateFollowUps(MainForm.sgAgeView, MainForm.sgAgeView.GetCol(TReturnCustSnapshots._FollowUp));
 
 end;
 

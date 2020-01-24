@@ -119,8 +119,7 @@ uses
     View.Main,
     Unity.Constants,
     Unity.Settings,
-    Unity.SessionService,
-    DbModel{Legacy};
+    Unity.SessionService;
 
 
 var vFilterForm: TFilterForm;

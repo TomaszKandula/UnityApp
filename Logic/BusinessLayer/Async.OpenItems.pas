@@ -104,8 +104,7 @@ uses
     Unity.SessionService,
     Api.UserCompanySelection,
     Api.ReturnSsisData,
-    Api.ReturnOpenItems,
-    DbModel{Legacy};
+    Api.ReturnOpenItems;
 
 
 function TOpenItems.GetSSISDataAwaited(DateTimeOption: TCalendar; var DateTime: string; var Status: string): TCallResponse;
