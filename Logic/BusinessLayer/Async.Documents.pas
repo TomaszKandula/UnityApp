@@ -173,9 +173,8 @@ begin
             if Statement.SendDocument(PayLoad.IsUserInCopy) then
             begin
 
-                var CompanyCode:  string:=THelpers.DbNameToCoCode(PayLoad.SourceDBName);
                 var DocumentData: TSentDocument;
-                DocumentData.CompanyCode       :=CompanyCode;
+                DocumentData.SourceDBName      :=PayLoad.SourceDBName;
                 DocumentData.ReportedCustomer  :=PayLoad.CustNumber;
                 DocumentData.ReportedAggrAmount:=Statement.TotalAmountAggr;
                 DocumentData.ReportedAgeDate   :=AgeDate;
@@ -185,7 +184,7 @@ begin
                 LogSentDocumentAwaited(DocumentData);
 
                 var Comments: IComments:=TComments.Create();
-                Comments.UpdateDailyCommentAwaited(CompanyCode.ToInteger(), PayLoad.CustNumber, AgeDate);
+                Comments.UpdateDailyCommentAwaited(PayLoad.SourceDBName, PayLoad.CustNumber, AgeDate);
 
                 // -------------------------------------------------------
                 // We send either single email (customized by the user) or
@@ -312,7 +311,7 @@ begin
         var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
         Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl
             + 'documents/'
-            + PayLoad.CompanyCode
+            + PayLoad.SourceDBName
             + '/'
             + PayLoad.DocumentType;
         Restful.RequestMethod:=TRESTRequestMethod.rmPOST;

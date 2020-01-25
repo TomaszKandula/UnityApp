@@ -195,7 +195,6 @@ type
         const AppButtonTxtNormal = $00555555;
         const AppButtonTxtSelected = $006433C9;
         var FSourceDBName: string;
-        var FCompanyCode: integer;
         var FCustName: string;
         var FCustNumber: Int64;
         var FLbuName: string;
@@ -236,7 +235,6 @@ type
         procedure EditDailyComment_Callback(CallResponse: TCallResponse);
     public
         property SourceDBName: string read FSourceDBName;
-        property CompanyCode: integer read FCompanyCode;
         property CustName: string read FCustName;
         property CustNumber: Int64 read FCustNumber;
         property LbuName: string read FLbuName;
@@ -483,7 +481,7 @@ begin
     var LbuEmails:=TStringList.Create();
     try
 
-        CallResponse:=Companies.GetCompanyDetailsAwaited(FCompanyCode, CompanyDetails);
+        CallResponse:=Companies.GetCompanyDetailsAwaited(SourceDBName, CompanyDetails);
 
         if not CallResponse.IsSucceeded then
         begin
@@ -523,7 +521,7 @@ begin
     var Comments: IComments:=TComments.Create();
     var LDailyCommentFields: TArray<TDailyCommentFields>;
     var CallResponse:=Comments.GetDailyCommentsAwaited(
-        CompanyCode,
+        SourceDBName,
         CustNumber,
         SessionService.SessionData.AliasName,
         LDailyCommentFields
@@ -571,7 +569,7 @@ begin
     var Comments: IComments:=TComments.Create();
 
     CallResponse:=Comments.GetGeneralCommentAwaited(
-        CompanyCode,
+        SourceDBName,
         CustNumber,
         SessionService.SessionData.AliasName,
         LGeneralComment
@@ -633,8 +631,7 @@ procedure TActionsForm.Initialize();
 begin
     FCustName    :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._CustomerName), MainForm.sgAgeView.Row];
     FCustNumber  :=(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._CustomerNumber), MainForm.sgAgeView.Row]).ToInteger();
-    FCompanyCode :=(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._SourceDbName), MainForm.sgAgeView.Row]).ToInteger();
-    FSourceDBName:=THelpers.GetSourceDBName(FCompanyCode.ToString(), 'F');
+    FSourceDBName:=(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._SourceDbName), MainForm.sgAgeView.Row]);
 end;
 
 
@@ -761,7 +758,7 @@ begin
     begin
 
         var LGeneralCommentFields: TGeneralCommentFields;
-        LGeneralCommentFields.CompanyCode   :=CompanyCode;
+        LGeneralCommentFields.SourceDBName  :=SourceDBName;
         LGeneralCommentFields.CustomerNumber:=CustNumber;
         LGeneralCommentFields.FollowUp      :=' ';
         LGeneralCommentFields.Free1         :=String.Empty;
@@ -791,7 +788,7 @@ procedure TActionsForm.SaveGeneralComment();
 begin
 
     var LGeneralCommentFields: TGeneralCommentFields;
-    LGeneralCommentFields.CompanyCode   :=CompanyCode;
+    LGeneralCommentFields.SourceDBName  :=SourceDBName;
     LGeneralCommentFields.CustomerNumber:=CustNumber;
     LGeneralCommentFields.FollowUp      :=String.Empty;
     LGeneralCommentFields.Free1         :=String.Empty;
@@ -814,7 +811,7 @@ begin
 
     var LDailyCommentFields: TDailyCommentFields;
     LDailyCommentFields.CommentId           :=GetId.ToInteger();
-    LDailyCommentFields.CompanyCode         :=CompanyCode;
+    LDailyCommentFields.SourceDBName        :=SourceDBName;
     LDailyCommentFields.CustomerNumber      :=CustNumber;
     LDailyCommentFields.AgeDate             :=MainForm.LoadedAgeDate;
     LDailyCommentFields.CallEvent           :=0;
@@ -1230,7 +1227,7 @@ begin
 
     var LDailyCommentFields: TDailyCommentFields;
     LDailyCommentFields.CommentId           :=0;
-    LDailyCommentFields.CompanyCode         :=CompanyCode;
+    LDailyCommentFields.SourceDBName        :=SourceDBName;
     LDailyCommentFields.CustomerNumber      :=CustNumber;
     LDailyCommentFields.AgeDate             :=MainForm.LoadedAgeDate;
     LDailyCommentFields.CallEvent           :=0;

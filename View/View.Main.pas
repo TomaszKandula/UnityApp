@@ -645,7 +645,6 @@ type
         procedure imgEventLogClick(Sender: TObject);
         procedure imgEventLogMouseEnter(Sender: TObject);
         procedure imgEventLogMouseLeave(Sender: TObject);
-        procedure Action_INF7_FilterClick(Sender: TObject);
         procedure Action_CoCode_FilterClick(Sender: TObject);
         procedure Action_FollowUp_FilterClick(Sender: TObject);
         procedure Action_INF4_FilterClick(Sender: TObject);
@@ -1713,6 +1712,7 @@ begin
     end;
 
     sgAgeView.SetColWidth(10, 20, 400);
+    FLoadedAgeDate:=PayLoad.AgeDate;
 
     ClearAgingSummary();
     UpdateAgeSummary(PayLoad);
@@ -1970,14 +1970,14 @@ begin
     if PassMsg.LParam > 0 then
     begin
 
-        var CoCode:=(sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._SourceDbName), sgAgeView.Row]).ToInteger();
+        var SourceDBName:=(sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._SourceDbName), sgAgeView.Row]);
         var CustNumber:=(sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._CustomerNumber), sgAgeView.Row]).ToInteger();
 
         var Comments: IComments:=TComments.Create();
         var DailyCommentExists: TDailyCommentExists;
         var CallResponse: TCallResponse;
         CallResponse:=Comments.CheckDailyCommentAwaited(
-            CoCode,
+            SourceDBName,
             CustNumber,
             LoadedAgeDate,
             DailyCommentExists
@@ -1990,7 +1990,7 @@ begin
 
         var LDailyCommentFields: TDailyCommentFields;
         LDailyCommentFields.CommentId           :=DailyCommentExists.CommentId;
-        LDailyCommentFields.CompanyCode         :=CoCode;
+        LDailyCommentFields.SourceDBName        :=SourceDBName;
         LDailyCommentFields.CustomerNumber      :=CustNumber;
         LDailyCommentFields.AgeDate             :=LoadedAgeDate;
         LDailyCommentFields.CallDuration        :=PassMsg.LParam;
@@ -2770,9 +2770,7 @@ begin
     if
         (THelpers.CDate(sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._FollowUp), iCNT]) = THelpers.CDate(valCurrentDate.Caption))
     and
-        ((UpperCase(sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._Inf7), iCNT]) = UpperCase(SessionService.SessionData.AliasName))
-    or
-        (UpperCase(sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._PersonResponsible), iCNT]) = UpperCase(SessionService.SessionData.AliasName)))
+        (UpperCase(sgAgeView.Cells[sgAgeView.GetCol(TReturnCustSnapshots._PersonResponsible), iCNT]) = UpperCase(SessionService.SessionData.AliasName))
     then
         Inc(Sum);
 
@@ -3307,7 +3305,7 @@ begin
         begin
 
             var LGeneralCommentFields: TGeneralCommentFields;
-            LGeneralCommentFields.CompanyCode   :=(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._SourceDbName), iCNT]).ToInteger();
+            LGeneralCommentFields.SourceDBName  :=(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._SourceDbName), iCNT]);
             LGeneralCommentFields.CustomerNumber:=(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._CustomerNumber), iCNT]).ToInteger();
             LGeneralCommentFields.FollowUp      :=' ';
             LGeneralCommentFields.Free1         :=String.Empty;
@@ -3330,17 +3328,6 @@ begin
 
     Screen.Cursor:=crDefault;
 
-end;
-
-
-// Filter via INF7 (to be removed)
-procedure TMainForm.Action_INF7_FilterClick(Sender: TObject);
-begin
-    FilterForm.FColName  :=TReturnCustSnapshots._Inf7;
-    FilterForm.FOverdue  :=TReturnCustSnapshots._Overdue;
-    FilterForm.FGrid     :=MainForm.sgAgeView;
-    FilterForm.FFilterNum:=TColumns.Inf7;
-    THelpers.WndCall(FilterForm, TWindowState.Modal);
 end;
 
 

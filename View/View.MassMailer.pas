@@ -208,7 +208,7 @@ begin
     for var iCNT:=0 to LoadedCompanies.Count - 1 do
     begin
 
-        CallResponse:=Companies.GetCompanyDetailsAwaited(LoadedCompanies[iCNT].ToInteger(), CompanyDetails);
+        CallResponse:=Companies.GetCompanyDetailsAwaited(LoadedCompanies[iCNT], CompanyDetails);
 
         if CallResponse.IsSucceeded then
         begin

@@ -80,7 +80,7 @@ type
     /// Carries a group of variables that holds details of sent document to be posted in database history table.
     /// </summary>
     TSentDocument = record
-        CompanyCode:        string;
+        SourceDBName:       string;
         ReportedCustomer:   integer;
         ReportedAggrAmount: double;
         ReportedAgeDate:    string;
@@ -100,7 +100,6 @@ type
     /// </summary>
     TDailyCommentFields = record
         CommentId:            integer;
-        CompanyCode:          integer;
         SourceDBName:         string;
         CustomerNumber:       integer;
         AgeDate:              string;
@@ -119,7 +118,6 @@ type
     /// </summary>
     TGeneralCommentFields = record
         CommentId:      integer;
-        CompanyCode:    integer;
         SourceDBName:   string;
         CustomerNumber: integer;
         FollowUp:       string;
@@ -171,6 +169,7 @@ type
     /// Carries a group of variables for update ageing summary.
     /// </summary>
     TAgingPayLoad = record
+        AgeDate:     string;
         CustAll:     integer;
         ANotDue:     extended;
         ARange1:     extended;

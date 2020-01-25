@@ -27,14 +27,14 @@ type
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function GetCompanyDetailsAwaited(CompanyCode: integer; var CompanyDetails: TCompanyDetails): TCallResponse;
+        function GetCompanyDetailsAwaited(SourceDBName: string; var CompanyDetails: TCompanyDetails): TCallResponse;
         /// <summary>
         /// Allow to load async. list of emails for given CoCodes. There is no separate notification.
         /// </summary>
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function GetCompanyEmailsAwaited(SourceList: TArray<integer>; var TargetList: TArray<TRegisteredEmails>): TCallResponse;
+        function GetCompanyEmailsAwaited(SourceList: TArray<string>; var TargetList: TArray<TRegisteredEmails>): TCallResponse;
     end;
 
 
@@ -50,14 +50,14 @@ type
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function GetCompanyDetailsAwaited(CompanyCode: integer; var CompanyDetails: TCompanyDetails): TCallResponse;
+        function GetCompanyDetailsAwaited(SourceDBName: string; var CompanyDetails: TCompanyDetails): TCallResponse;
         /// <summary>
         /// Allow to load async. list of primary email(s) for given Company Codes. There is no separate notification.
         /// </summary>
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function GetCompanyEmailsAwaited(SourceList: TArray<integer>; var TargetList: TArray<TRegisteredEmails>): TCallResponse;
+        function GetCompanyEmailsAwaited(SourceList: TArray<string>; var TargetList: TArray<TRegisteredEmails>): TCallResponse;
     end;
 
 
@@ -78,7 +78,7 @@ uses
     Api.CompanyEmailsList;
 
 
-function TCompanies.GetCompanyDetailsAwaited(CompanyCode: integer; var CompanyDetails: TCompanyDetails): TCallResponse;
+function TCompanies.GetCompanyDetailsAwaited(SourceDBName: string; var CompanyDetails: TCompanyDetails): TCallResponse;
 begin
 
     var CallResponse: TCallResponse;
@@ -89,7 +89,7 @@ begin
         begin
 
             var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
-            Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'companies/' + CompanyCode.ToString();
+            Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'companies/' + SourceDBName;
             Restful.RequestMethod:=TRESTRequestMethod.rmGET;
             ThreadFileLog.Log('[GetCompanyDetailsAwaited]: Executing GET ' + Restful.ClientBaseURL);
 
@@ -148,7 +148,7 @@ begin
 end;
 
 
-function TCompanies.GetCompanyEmailsAwaited(SourceList: TArray<integer>; var TargetList: TArray<TRegisteredEmails>): TCallResponse;
+function TCompanies.GetCompanyEmailsAwaited(SourceList: TArray<string>; var TargetList: TArray<TRegisteredEmails>): TCallResponse;
 begin
 
     var CallResponse: TCallResponse;
@@ -166,7 +166,7 @@ begin
             try
 
                 var CompanyCodesList:=TCompanyCodesList.Create();
-                CompanyCodesList.CompanyCodes:=SourceList;
+                CompanyCodesList.SourceDBName:=SourceList;
                 Restful.CustomBody:=TJson.ObjectToJsonString(CompanyCodesList);
 
                 if (Restful.Execute) and (Restful.StatusCode = 200) then

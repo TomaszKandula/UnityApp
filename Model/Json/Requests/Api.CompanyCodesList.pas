@@ -22,11 +22,11 @@ type
     TCompanyCodesList = class
     {$TYPEINFO ON}
     strict private
-        var FCompanyCodes: TArray<integer>;
+        var FSourceDBName: TArray<string>;
     public
-        const _CompanyCodes = 'CompanyCodes';
+        const _SourceDBName = 'SourceDBName';
     published
-        property CompanyCodes: TArray<integer> read FCompanyCodes write FCompanyCodes;
+        property SourceDBName: TArray<string> read FSourceDBName write FSourceDBName;
     end;
 
 

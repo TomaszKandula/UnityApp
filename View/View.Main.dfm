@@ -16800,7 +16800,7 @@ object MainForm: TMainForm
       end
       object Action_INF7_Filter: TMenuItem
         Caption = 'Group3'
-        OnClick = Action_INF7_FilterClick
+        Enabled = False
       end
     end
     object Action_RemoveFilters: TMenuItem

@@ -18,7 +18,7 @@ program Unity;
 // Active Directory:       Yes, via web service.                          //
 // Chromium engine:        CEF4Delphi.                                    //
 // ---------------------------------------------------------------------- //
-// Copyright (C) 2016-2019 Tomasz Kandula/DFDS Polska sp. z o.o.          //
+// Copyright (C) 2017-2020 Tomasz Kandula/DFDS Polska sp. z o.o.          //
 // All rights reserved.                                                   //
 // ====================================================================== //
 // *Delphi language in version 10.3.x uses inline variables               //
@@ -307,7 +307,7 @@ begin
     Application.Title:=TCommon.AppCaption;
     Application.MainFormOnTaskbar:=True;
 
-    // -------------------------------------------------------------------
+    // ------------------------------------------------------------------
     // Call startup view to display splash screen and process loading of
     // various assets and/or data (including database supporting tables).
     // It will automatically handle main user window.
@@ -315,7 +315,7 @@ begin
     // therefore the user main form (View.Main) must have taskbar icon
     // re-assigned to it, so it can act as a main window of the Windows
     // application.
-    // -------------------------------------------------------------------
+    // ------------------------------------------------------------------
     StartupForm.SetSessionLog(SessionService.SessionLog);
     StartupForm.Show();
 

@@ -40,8 +40,6 @@ type
         var FSourceDbName:      TArray<string>;
         var FLedgerIso:         TArray<string>;
         var FInf4:              TArray<string>;
-        var FInf7:              TArray<string>;
-        var FPerson:            TArray<string>;
         var FGroup3:            TArray<string>;
         var FSalesResponsible:  TArray<string>;
         var FCustomerGroup:     TArray<string>;
@@ -73,8 +71,6 @@ type
         const _SourceDbName      = 'SourceDbName';
         const _LedgerIso         = 'Ledger Iso';
         const _Inf4              = 'Inf4';
-        const _Inf7              = 'Inf7';
-        const _Person            = 'Person';
         const _Group3            = 'Group3';
         const _SalesResponsible  = 'Sales Responsible';
         const _CustomerGroup     = 'Customer Group';
@@ -107,8 +103,6 @@ type
         property SourceDbName:      TArray<string>  read FSourceDbName      write FSourceDbName;
         property LedgerIso:         TArray<string>  read FLedgerIso         write FLedgerIso;
         property Inf4:              TArray<string>  read FInf4              write FInf4;
-        property Inf7:              TArray<string>  read FInf7              write FInf7;
-        property Person:            TArray<string>  read FPerson            write FPerson;
         property Group3:            TArray<string>  read FGroup3            write FGroup3;
         property SalesResponsible:  TArray<string>  read FSalesResponsible  write FSalesResponsible;
         property CustomerGroup:     TArray<string>  read FCustomerGroup     write FCustomerGroup;

@@ -58,7 +58,7 @@ type
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function GetGeneralCommentAwaited(CompanyCode: integer; CustNumber: integer; UserAlias: string; var Output: TGeneralCommentFields): TCallResponse;
+        function GetGeneralCommentAwaited(SourceDBName: string; CustNumber: integer; UserAlias: string; var Output: TGeneralCommentFields): TCallResponse;
         /// <summary>
         /// Allow to async. check ig daily comment exists for given company code, customer number and user alias and age date.
         /// Note: there is no separate notification.
@@ -66,14 +66,14 @@ type
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function CheckDailyCommentAwaited(CompanyCode: integer; CustNumber: integer; AgeDate: string; var DailyCommentExists: TDailyCommentExists): TCallResponse;
+        function CheckDailyCommentAwaited(SourceDBName: string; CustNumber: integer; AgeDate: string; var DailyCommentExists: TDailyCommentExists): TCallResponse;
         /// <summary>
         /// Allow to async. retrieve daily comments for given company code, customer number and user alias. There is no separate notification.
         /// </summary>
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function GetDailyCommentsAwaited(CompanyCode: integer; CustNumber: integer; UserAlias: string; var Output: TArray<TDailyCommentFields>): TCallResponse;
+        function GetDailyCommentsAwaited(SourceDBName: string; CustNumber: integer; UserAlias: string; var Output: TArray<TDailyCommentFields>): TCallResponse;
         /// <summary>
         /// Allow to async. update daily comment for given company code, customer number and age date. Unlike EditDailyComment, it will not perform insertion
         /// if comment does not exists. Note that there is no separate notification.
@@ -81,7 +81,7 @@ type
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function UpdateDailyCommentAwaited(CompanyCode: integer; CustNumber: integer; AgeDate: string): TCallResponse;
+        function UpdateDailyCommentAwaited(SourceDBName: string; CustNumber: integer; AgeDate: string): TCallResponse;
     end;
 
 
@@ -114,7 +114,7 @@ type
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function GetGeneralCommentAwaited(CompanyCode: integer; CustNumber: integer; UserAlias: string; var Output: TGeneralCommentFields): TCallResponse;
+        function GetGeneralCommentAwaited(SourceDBName: string; CustNumber: integer; UserAlias: string; var Output: TGeneralCommentFields): TCallResponse;
         /// <summary>
         /// Allow to async. check ig daily comment exists for given company code, customer number and user alias and age date.
         /// Note: there is no separate notification.
@@ -122,14 +122,14 @@ type
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function CheckDailyCommentAwaited(CompanyCode: integer; CustNumber: integer; AgeDate: string; var DailyCommentExists: TDailyCommentExists): TCallResponse;
+        function CheckDailyCommentAwaited(SourceDBName: string; CustNumber: integer; AgeDate: string; var DailyCommentExists: TDailyCommentExists): TCallResponse;
         /// <summary>
         /// Allow to async. retrieve daily comments for given company code, customer number and user alias. There is no separate notification.
         /// </summary>
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function GetDailyCommentsAwaited(CompanyCode: integer; CustNumber: integer; UserAlias: string; var Output: TArray<TDailyCommentFields>): TCallResponse;
+        function GetDailyCommentsAwaited(SourceDBName: string; CustNumber: integer; UserAlias: string; var Output: TArray<TDailyCommentFields>): TCallResponse;
         /// <summary>
         /// Allow to async. update daily comment for given company code, customer number and age date. Unlike EditDailyComment, it will not perform insertion
         /// if comment does not exists. Note that there is no separate notification.
@@ -137,7 +137,7 @@ type
         /// <remarks>
         /// This method always awaits for task to be completed and makes no callback to main thread.
         /// </remarks>
-        function UpdateDailyCommentAwaited(CompanyCode: integer; CustNumber: integer; AgeDate: string): TCallResponse;
+        function UpdateDailyCommentAwaited(SourceDBName: string; CustNumber: integer; AgeDate: string): TCallResponse;
     end;
 
 
@@ -175,7 +175,7 @@ begin
         var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
         Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl
             + 'dailycommentaries/'
-            + PayLoad.CompanyCode.ToString()
+            + PayLoad.SourceDBName
             + '/'
             + PayLoad.CustomerNumber.ToString()
             + '/comment/'
@@ -314,7 +314,7 @@ begin
 
     var QueryData: TGeneralCommentFields;
     var CallResponse:=GetGeneralCommentAwaited(
-        PayLoad.CompanyCode,
+        PayLoad.SourceDBName,
         PayLoad.CustomerNumber,
         PayLoad.UserAlias,
         QueryData
@@ -336,7 +336,7 @@ begin
         var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
         Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl
             + 'generalcommentaries/'
-            + PayLoad.CompanyCode.ToString()
+            + PayLoad.SourceDBName
             + '/'
             + PayLoad.CustomerNumber.ToString()
             + '/comment/'
@@ -465,7 +465,7 @@ begin
 end;
 
 
-function TComments.GetGeneralCommentAwaited(CompanyCode: integer; CustNumber: integer; UserAlias: string; var Output: TGeneralCommentFields): TCallResponse;
+function TComments.GetGeneralCommentAwaited(SourceDBName: string; CustNumber: integer; UserAlias: string; var Output: TGeneralCommentFields): TCallResponse;
 begin
 
     var CallResponse: TCallResponse;
@@ -477,7 +477,7 @@ begin
         var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
         Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl
             + 'generalcommentaries/'
-            + CompanyCode.ToString()
+            + SourceDBName
             + '/'
             + CustNumber.ToString()
             + '/comment/'
@@ -548,7 +548,7 @@ begin
 end;
 
 
-function TComments.CheckDailyCommentAwaited(CompanyCode: integer; CustNumber: integer; AgeDate: string; var DailyCommentExists: TDailyCommentExists): TCallResponse;
+function TComments.CheckDailyCommentAwaited(SourceDBName: string; CustNumber: integer; AgeDate: string; var DailyCommentExists: TDailyCommentExists): TCallResponse;
 begin
 
     var CallResponse: TCallResponse;
@@ -560,7 +560,7 @@ begin
         var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
         Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl
             + 'dailycommentaries/'
-            + CompanyCode.ToString()
+            + SourceDBName
             + '/'
             + CustNumber.ToString()
             + '/check/'
@@ -624,7 +624,7 @@ begin
 end;
 
 
-function TComments.GetDailyCommentsAwaited(CompanyCode: integer; CustNumber: integer; UserAlias: string; var Output: TArray<TDailyCommentFields>): TCallResponse;
+function TComments.GetDailyCommentsAwaited(SourceDBName: string; CustNumber: integer; UserAlias: string; var Output: TArray<TDailyCommentFields>): TCallResponse;
 begin
 
     var CallResponse: TCallResponse;
@@ -636,7 +636,7 @@ begin
         var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
         Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl
             + 'dailycommentaries/'
-            + CompanyCode.ToString()
+            + SourceDBName
             + '/'
             + CustNumber.ToString()
             + '/comments/'
@@ -719,7 +719,7 @@ begin
 end;
 
 
-function TComments.UpdateDailyCommentAwaited(CompanyCode: integer; CustNumber: integer; AgeDate: string): TCallResponse;
+function TComments.UpdateDailyCommentAwaited(SourceDBName: string; CustNumber: integer; AgeDate: string): TCallResponse;
 begin
 
     var CallResponse: TCallResponse;
@@ -727,7 +727,7 @@ begin
 
         var DailyCommentExists: TDailyCommentExists;
         CheckDailyCommentAwaited(
-            CompanyCode,
+            SourceDBName,
             CustNumber,
             AgeDate,
             DailyCommentExists
@@ -742,8 +742,7 @@ begin
             ExtendedComment:='New communication has been sent.';
 
         LocalPayLoad.CommentId           :=DailyCommentExists.CommentId;
-        LocalPayLoad.CompanyCode         :=CompanyCode;
-        LocalPayLoad.SourceDBName        :=THelpers.GetSourceDBName(CompanyCode.ToString, 'F');
+        LocalPayLoad.SourceDBName        :=SourceDBName;
         LocalPayLoad.CustomerNumber      :=CustNumber;
         LocalPayLoad.AgeDate             :=AgeDate;
         LocalPayLoad.CallEvent           :=0;
