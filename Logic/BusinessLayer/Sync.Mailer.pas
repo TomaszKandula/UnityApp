@@ -102,7 +102,7 @@ begin
     var CallResponse: TCallResponse;
     try
 
-        var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
+        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
         Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'mailer/send/';
         Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
         ThreadFileLog.Log('[SendNowSync]: Executing POST ' + Restful.ClientBaseURL);

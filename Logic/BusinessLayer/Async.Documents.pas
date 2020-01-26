@@ -308,7 +308,7 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
+        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
         Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl
             + 'documents/'
             + PayLoad.SourceDBName

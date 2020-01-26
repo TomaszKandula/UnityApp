@@ -117,7 +117,7 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
+        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
         Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'openitems/customers/ssis/';
         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
         ThreadFileLog.Log('[GetSSISDataAwaited]: Executing GET ' + Restful.ClientBaseURL);
@@ -265,7 +265,7 @@ function TOpenItems.FLoadToGrid(OpenItemsGrid: TStringGrid; LoadedCompanies: TLi
 begin
 
     var CallResponse: TCallResponse;
-    var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
+    var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
     Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'openitems/customers/';
     Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
     ThreadFileLog.Log('[FLoadToGrid]: Executing POST ' + Restful.ClientBaseURL);

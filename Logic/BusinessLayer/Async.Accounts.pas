@@ -196,7 +196,7 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
+        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
         Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'accounts/initiate/' + SessionId;
         Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
         ThreadFileLog.Log('[InitiateAwaited]: Executing POST ' + Restful.ClientBaseURL);
@@ -270,7 +270,7 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
+        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
         Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'accounts/check/' + SessionId;
         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
         ThreadFileLog.Log('[CheckAwaited]: Executing GET ' + Restful.ClientBaseURL);
@@ -352,7 +352,7 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
+        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
         Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'accounts/' + SessionService.SessionData.UnityUserId.ToString() + '/companies/';
         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
         ThreadFileLog.Log('[GetUserCompanyListAwaited]: Executing GET ' + Restful.ClientBaseURL);
@@ -428,7 +428,7 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
+        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
         Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'accounts/' + SessionService.SessionData.UnityUserId.ToString() + '/logs/';
         Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
         ThreadFileLog.Log('[SaveUserLogsAwaited]: Executing POST ' + Restful.ClientBaseURL);
@@ -509,7 +509,7 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
+        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
         Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'accounts/' + SessionService.SessionData.UnityUserId.ToString() + '/companies/';
         Restful.RequestMethod:=TRESTRequestMethod.rmPATCH;
         ThreadFileLog.Log('[SaveUserCompanyListAwaited]: Executing PATCH ' + Restful.ClientBaseURL);
@@ -582,7 +582,7 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
+        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
         Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'accounts/' + SessionService.SessionData.UnityUserId.ToString() + '/rating/';
         Restful.RequestMethod:=TRESTRequestMethod.rmGET;
         ThreadFileLog.Log('[LoadRatingAwaited]: Executing GET ' + Restful.ClientBaseURL);
@@ -655,7 +655,7 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
+        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
         Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'accounts/' + SessionService.SessionData.UnityUserId.ToString() + '/rating/';
         Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
         ThreadFileLog.Log('[SubmitRatingAsync]: Executing POST ' + Restful.ClientBaseURL);
@@ -736,7 +736,7 @@ begin
     var NewTask: ITask:=TTask.Create(procedure
     begin
 
-        var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
+        var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
         Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'accounts/' + SessionService.SessionData.UnityUserId.ToString() + '/rating/';
         Restful.RequestMethod:=TRESTRequestMethod.rmPATCH;
         ThreadFileLog.Log('[UpdateRatingAsync]: Executing PATCH ' + Restful.ClientBaseURL);

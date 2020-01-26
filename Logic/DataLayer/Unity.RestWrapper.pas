@@ -12,7 +12,6 @@ uses
     System.Classes,
     System.Generics.Collections,
     REST.Types,
-    REST.Authenticator.Basic,
     REST.Client;
 
 
@@ -29,8 +28,6 @@ type
         function GetCustomBody(): string;
         function GetContent(): string;
         function GetHeaders(): string;
-        function GethttpAuthUsername(): string;
-        function GethttpAuthPassword(): string;
         function GetClientAccept(): string;
         function GetClientAcceptCharset(): string;
         function GetClientAcceptEncoding(): string;
@@ -74,8 +71,6 @@ type
         property StatusCode: integer read GetStatusCode;
         property Content: string read GetContent;
         property Headers: string read GetHeaders;
-        property httpAuthUsername: string read GethttpAuthUsername;
-        property httpAuthPassword: string read GethttpAuthPassword;
         property CustomBody: string read GetCustomBody write SetCustomBody;
         property ClientAccept: string read GetClientAccept write SetClientAccept;
         property ClientAcceptCharset: string read GetClientAcceptCharset write SetClientAcceptCharset;
@@ -108,7 +103,6 @@ type
     TRESTful = class(TInterfacedObject, IRESTFul)
     {$TYPEINFO ON}
     strict private
-        var httpAuth: THTTPBasicAuthenticator;
         var restClient: TRESTClient;
         var restRequest: TRESTRequest;
         var restResponse: TRESTResponse;
@@ -123,8 +117,6 @@ type
         function GetCustomBody(): string;
         function GetContent(): string;
         function GetHeaders(): string;
-        function GethttpAuthUsername(): string;
-        function GethttpAuthPassword(): string;
         function GetClientAccept(): string;
         function GetClientAcceptCharset(): string;
         function GetClientAcceptEncoding(): string;
@@ -166,14 +158,12 @@ type
         procedure SetRequestTimeout(NewValue: integer);
         procedure TrimContent(var TextStr: string);
     public
-        constructor Create(UserName: string; Password: string);
+        constructor Create(AccessToken: string = '');
         destructor Destroy; override;
         property ExecuteError: string read GetExecuteError;
         property StatusCode: integer read GetStatusCode;
         property Content: string read GetContent;
         property Headers: string read GetHeaders;
-        property httpAuthUsername: string read GethttpAuthUsername;
-        property httpAuthPassword: string read GethttpAuthPassword;
         property CustomBody: string read GetCustomBody write SetCustomBody;
         property ClientAccept: string read GetClientAccept write SetClientAccept;
         property ClientAcceptCharset: string read GetClientAcceptCharset write SetClientAcceptCharset;
@@ -202,12 +192,12 @@ type
 
     /// <summary>
     /// Non-interfaced class constant providing fixed settings for REST controller including
-    /// fixed authorisation credentials (used for basic authentication).
+    /// fixed client credentials data.
     /// </summary>
     TRestAuth = class abstract
     public
-        const apiUserName    = '';
-        const apiPassword    = '';
+        const ClientId       = '1001';
+        const ClientSecret   = '30adc06a61bd';
         const restApiBaseUrl = 'https://unityapi.azurewebsites.net/api/v1/';
     end;
 
@@ -219,18 +209,15 @@ uses
     System.SysUtils;
 
 
-constructor TRESTful.Create(UserName: string; Password: string);
+constructor TRESTful.Create(AccessToken: string = '');
 begin
 
     restClient  :=TRESTClient.Create('');
     restResponse:=TRESTResponse.Create(nil);
     restRequest :=TRESTRequest.Create(nil);
 
-    if (not String.IsNullOrEmpty(UserName)) and (not String.IsNullOrEmpty(Password)) then
-    begin
-        httpAuth:=THTTPBasicAuthenticator.Create(UserName, Password);
-        restClient.Authenticator:=httpAuth;
-    end;
+    if not String.IsNullOrEmpty(AccessToken) then
+        restClient.SetHTTPHeader('Authorization:','Bearer ' + AccessToken);
 
     restRequest.Client:=restClient;
     restRequest.Response:=restResponse;
@@ -263,7 +250,6 @@ destructor TRESTful.Destroy();
 begin
     queryList.Free();
     paramList.Free();
-    httpAuth.Free();
     restClient.Free();
     restResponse.Free();
     restRequest.Free();
@@ -406,18 +392,6 @@ end;
 function TRESTful.GetHeaders(): string;
 begin
     if Assigned(restResponse) then Result:=restResponse.Headers.Text;
-end;
-
-
-function TRESTful.GethttpAuthUsername(): string;
-begin
-    if Assigned(httpAuth) then Result:=httpAuth.Username;
-end;
-
-
-function TRESTful.GethttpAuthPassword(): string;
-begin
-    if Assigned(httpAuth) then Result:=httpAuth.Password;
 end;
 
 

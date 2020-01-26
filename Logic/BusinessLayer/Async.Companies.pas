@@ -88,7 +88,7 @@ begin
         var NewTask: ITask:=TTask.Create(procedure
         begin
 
-            var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
+            var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
             Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'companies/' + SourceDBName;
             Restful.RequestMethod:=TRESTRequestMethod.rmGET;
             ThreadFileLog.Log('[GetCompanyDetailsAwaited]: Executing GET ' + Restful.ClientBaseURL);
@@ -158,7 +158,7 @@ begin
         var NewTask: ITask:=TTask.Create(procedure
         begin
 
-            var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
+            var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
             Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'companies/return/emails/';
             Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
             ThreadFileLog.Log('[GetCompanyEmailsAwaited]: Executing POST ' + Restful.ClientBaseURL);

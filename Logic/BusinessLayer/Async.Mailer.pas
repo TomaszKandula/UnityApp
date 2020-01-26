@@ -75,7 +75,7 @@ begin
         var CallResponse: TCallResponse;
         try
 
-            var Restful: IRESTful:=TRESTful.Create(TRestAuth.apiUserName, TRestAuth.apiPassword);
+            var Restful: IRESTful:=TRESTful.Create(SessionService.AccessToken);
             Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl + 'mailer/feedback/';
             Restful.RequestMethod:=TRESTRequestMethod.rmPOST;
             ThreadFileLog.Log('[InitiateAwaited]: Executing POST ' + Restful.ClientBaseURL);
