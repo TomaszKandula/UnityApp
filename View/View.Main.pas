@@ -47,12 +47,6 @@ uses
     Vcl.OleCtrls,
     Vcl.Imaging.GIFImg,
     Vcl.ImgList,
-    Data.DB,
-    Data.Win.ADODB,
-    Data.Bind.Components,
-    Data.Bind.ObjectScope,
-    IPPeerClient,
-    SHDocVw,
     uCEFChromium,
     uCEFWindowParent,
     uCEFChromiumWindow,
@@ -808,7 +802,6 @@ type
         var FRedeemOnReload: boolean;
         var FPermitCheckTimer: integer;
         var FIsAppMenuLocked: boolean;
-        var FLastCoCodesSelected: string;
         var FHadFirstLoad: boolean;
         var FAllowClose: boolean;
         var FIsAddressBookOpened: boolean;
@@ -1055,14 +1048,9 @@ end;
 
 procedure TMainForm.LoadAgeReport();
 begin
-
     BusyForm.Show();
     var Debtors: IDebtors:=TDebtors.Create();
     Debtors.ReadAgeViewAsync(LoadedCompanies, selAgeSorting.Text, FRiskClassGroup, ReadAgeView_Callback);
-
-    //dummy!!!
-    FLoadedAgeDate:='2020-01-03';
-
 end;
 
 
@@ -1212,9 +1200,7 @@ end;
 procedure TMainForm.AgeViewMapping();
 begin
 
-    Exit();
-
-    var  CompanyCode:=sgAgeView.GetCol(TReturnCustSnapshots._SourceDbName);
+    var  ColSourceDbName:=sgAgeView.GetCol(TReturnCustSnapshots._SourceDbName);
 
     var  ColPersonResp    :=sgAgeView.GetCol(TReturnCustSnapshots._PersonResponsible);
     var  IdPersonResp     :=sgPersonResp.GetCol(TReturnPersonResponsible._Id);
@@ -1241,40 +1227,23 @@ begin
     var EntityPaymentTerms :=sgPmtTerms.GetCol(TReturnPaymentTerms._Entity);
     var DescPaymentTerms   :=sgPmtTerms.GetCol(TReturnPaymentTerms._Description);
 
-    sgAgeView.Freeze(True);
-    sgPersonResp.Freeze(True);
-    sgSalesResp.Freeze(True);
-    sgAccountType.Freeze(True);
-    sgCustomerGr.Freeze(True);
-    sgPmtTerms.Freeze(True);
-
     UpdateStatusBar(TStatusBar.Mapping);
     var Debtors: IDebtors:=TDebtors.Create();
-    try
 
-        Debtors.MapTableAwaited(sgAgeView, sgPersonResp, True, ColPersonResp, IdPersonResp, CompanyCode, DbNamePersonResp, ErpCodePersonResp);
-        ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Mapping has been performed (PersonResponsible).');
+    Debtors.MapTableAsync(sgAgeView, sgPersonResp, False, ColPersonResp, IdPersonResp, ColSourceDbName, DbNamePersonResp, ErpCodePersonResp);
+    ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Mapping has been performed (PersonResponsible).');
 
-        Debtors.MapTableAwaited(sgAgeView, sgSalesResp, True, ColSalesResp, IdSalesResp, CompanyCode, DbNameSalesResp, ErpCodeSalesResp);
-        ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Mapping has been performed (SalesResponsible).');
+    Debtors.MapTableAsync(sgAgeView, sgSalesResp, False, ColSalesResp, IdSalesResp, ColSourceDbName, DbNameSalesResp, ErpCodeSalesResp);
+    ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Mapping has been performed (SalesResponsible).');
 
-        Debtors.MapTableAwaited(sgAgeView, sgAccountType, True, ColAccountType, IdAccountType, CompanyCode, DbNameAccountType, ErpCodeAccountType);
-        ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Mapping has been performed (AccountType).');
+    Debtors.MapTableAsync(sgAgeView, sgAccountType, False, ColAccountType, IdAccountType, ColSourceDbName, DbNameAccountType, ErpCodeAccountType);
+    ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Mapping has been performed (AccountType).');
 
-        Debtors.MapTableAwaited(sgAgeView, sgCustomerGr, True, ColCustomerGroup, IdCustomerGroup, CompanyCode, DbNameCustomerGroup, ErpCodeCustomerGroup);
-        ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Mapping has been performed (CustomerGroup).');
+    Debtors.MapTableAsync(sgAgeView, sgCustomerGr, False, ColCustomerGroup, IdCustomerGroup, ColSourceDbName, DbNameCustomerGroup, ErpCodeCustomerGroup);
+    ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Mapping has been performed (CustomerGroup).');
 
-        Debtors.MapTableAwaited(sgAgeView, sgPmtTerms, False, ColPaymentTerms, ErpCodePaymentTerms, CompanyCode, EntityPaymentTerms, DescPaymentTerms);
-        ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Mapping has been performed (PaymentTerms).');
-
-    finally
-        sgAgeView.Freeze(False);
-        sgPersonResp.Freeze(False);
-        sgSalesResp.Freeze(False);
-        sgAccountType.Freeze(False);
-        sgCustomerGr.Freeze(False);
-        sgPmtTerms.Freeze(False);
-    end;
+    Debtors.MapTableAsync(sgAgeView, sgPmtTerms, False, ColPaymentTerms, ErpCodePaymentTerms, ColSourceDbName, EntityPaymentTerms, DescPaymentTerms);
+    ThreadFileLog.Log('[ReadAgeViewAsync_Callback]: Mapping has been performed (PaymentTerms).');
 
 end;
 
@@ -1712,7 +1681,8 @@ begin
     end;
 
     sgAgeView.SetColWidth(10, 20, 400);
-    FLoadedAgeDate:=PayLoad.AgeDate;
+    FLoadedAgeDate:=THelpers.FormatDateTime(PayLoad.AgeDate, TCalendar.DateOnly);
+    valCutOffDate.Caption:=FLoadedAgeDate;
 
     ClearAgingSummary();
     UpdateAgeSummary(PayLoad);
@@ -3814,7 +3784,7 @@ end;
 procedure TMainForm.imgRefreshReportClick(Sender: TObject);
 begin
 
-    if String.IsNullOrEmpty(FLastCoCodesSelected) then
+    if FLoadedCompanies.Count = 0 then
     begin
         THelpers.MsgCall(TAppMessage.Warn, 'No aging report has been uploaded.');
         Exit();

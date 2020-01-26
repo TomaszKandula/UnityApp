@@ -130,8 +130,7 @@ uses
     Unity.SessionService,
     Api.UserCompanySelection,
     Api.AddressBookList,
-    Api.AddressBookItem,
-    Sync.Document;
+    Api.AddressBookItem;
 
 
 procedure TAddressBook.OpenAddressBookAsync(UserAlias: string; Callback: TOpenAddressBook; LoadedCompanies: TList<string> = nil);
@@ -287,7 +286,7 @@ begin
 
         Restful.ClientBaseURL:=TRestAuth.restApiBaseUrl
             + 'addressbook/'
-            + THelpers.DbNameToCoCode(SourceDBName)
+            + SourceDBName
             + '/'
             + CustNumber.ToString()
             + '/';

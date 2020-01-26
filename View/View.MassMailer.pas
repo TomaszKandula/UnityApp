@@ -178,8 +178,6 @@ end;
 function TMassMailerForm.GetEmailAddress(SourceDbName: string; CustNumber: string; Source: TStringGrid): string;
 begin
 
-    if not SourceDbName.Contains('F') then SourceDbName:=THelpers.GetSourceDBName(SourceDbName, 'F');
-
     for var iCNT:=0 to Source.RowCount - 1 do
     begin
 
@@ -217,7 +215,7 @@ begin
             var Exclusions:=THelpers.ArrayIntToString(CompanyDetails.Exclusions, ';');
             var LbuBanks  :=THelpers.BankListToHtml(CompanyDetails.LbuBanks);
 
-            FCompanyDetails[iCNT, 0]:=THelpers.GetSourceDBName(LoadedCompanies[iCNT], 'F');
+            FCompanyDetails[iCNT, 0]:=LoadedCompanies[iCNT];
             FCompanyDetails[iCNT, 1]:=CompanyDetails.LbuName;
             FCompanyDetails[iCNT, 2]:=CompanyDetails.LbuAddress;
             FCompanyDetails[iCNT, 3]:=LbuPhones;
@@ -228,7 +226,7 @@ begin
             SetLength(FLbuEmails, PreservedLen + Length(CompanyDetails.LbuEmails), 2);
             for var jCNT:=0 to Length(CompanyDetails.LbuEmails) - 1 do
             begin
-                FLbuEmails[jCNT + PreservedLen, 0]:=THelpers.GetSourceDBName(LoadedCompanies[iCNT], 'F');
+                FLbuEmails[jCNT + PreservedLen, 0]:=LoadedCompanies[iCNT];
                 FLbuEmails[jCNT + PreservedLen, 1]:=CompanyDetails.LbuEmails[jCNT];
             end;
 
@@ -344,7 +342,7 @@ begin
 
             var LCustomerNumber:=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._CustomerNumber), iCNT];
             var LCustomerName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._CustomerName), iCNT];
-            var LSourceDbName  :=THelpers.GetSourceDBName(MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._SourceDbName), iCNT], 'F');
+            var LSourceDbName  :=MainForm.sgAgeView.Cells[MainForm.sgAgeView.GetCol(TReturnCustSnapshots._SourceDbName), iCNT];
 
             // Visible fields
             Item:=MassMailerForm.CustomerList.Items.Add();

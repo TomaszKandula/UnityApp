@@ -80,6 +80,7 @@ uses
     Api.UserDailyCommentUpdate in 'Model\Json\Requests\Api.UserDailyCommentUpdate.pas',
     Api.LogSentDocument in 'Model\Json\Requests\Api.LogSentDocument.pas',
     Api.AddressBookAdd in 'Model\Json\Requests\Api.AddressBookAdd.pas',
+    Api.UserCustSnapshotList in 'Model\Json\Requests\Api.UserCustSnapshotList.pas',
     Api.UserSessionAdded in 'Model\Json\Responses\Api.UserSessionAdded.pas',
     Api.UserSessionChecked in 'Model\Json\Responses\Api.UserSessionChecked.pas',
     Api.UserCompanyList in 'Model\Json\Responses\Api.UserCompanyList.pas',
